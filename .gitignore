@@ -4,8 +4,10 @@
 .Ruserdata
 *.Rproj
 .DS_Store
-data-raw/downloads/
 calibration/output/chains/
-# raw downloads are reproducible from data-raw/download_data.R + MANIFEST.csv
+# Raw downloads are reproducible from data-raw/download_data.R; the MANIFEST
+# (URL + access date + SHA-256 + citation) IS tracked as the provenance record.
+# NB: must exclude the directory's *contents*, not the directory itself --
+# git cannot re-include a file whose parent directory is excluded.
 data-raw/downloads/*
 !data-raw/downloads/MANIFEST.csv
