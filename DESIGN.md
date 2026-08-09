@@ -176,11 +176,14 @@ processed `.rds` in `data/`.
 | Dataset | Coverage obtained | Role | Source |
 |---|---|---|---|
 | Mauna Loa monthly CO₂ | 1958–2026, n=821 | dense NH target | NOAA GML `co2_mm_mlo.csv` |
-| South Pole flask CO₂ | **1975**–2025, n=583 | dense SH target | NOAA GML CCGG flask |
+| **South Pole monthly CO₂** | **1957–2024, n=711** | **dense SH target** | **Scripps CO₂ Program** (`data-raw/manual/`) |
+| South Pole flask CO₂ | 1975–2025, n=583 | independent cross-check | NOAA GML CCGG flask |
 | Law Dome CO₂ spline + samples | 154–1996 CE | pre-1958 target, spinup anchor | Rubino et al. 2019 (NOAA/WDS 25830) |
 | Law Dome δ¹³C spline + samples | 1020–1993 CE | pre-1990 Suess target | Rubino et al. 2019 |
 | Zonal Δ¹⁴C, monthly, 5 zones | 1941.2–2019.4, n=4689 | bomb-era target, both hemispheres | Hua et al. 2022 via `SoilR::Hua2021` |
-| δ¹³C flasks MLO + SPO | **1990–2014** | modern Suess partition target | NOAA GML / INSTAAR SIL |
+| **South Pole monthly δ¹³C** | **1977–2024, n=528** | **modern Suess partition target** | **Scripps CO₂ Program** (`data-raw/manual/`) |
+| δ¹³C flasks MLO + SPO | 1990–2014 (MLO), 1993–2014 (SPO) | NH target + cross-check | NOAA GML / INSTAAR SIL |
+| South Pole Δ¹⁴C | 1999–2007, n=81 | **validation only** (feeds Hua SHZone1-2) | Scripps CO₂ Program (`data-raw/manual/`) |
 | GCB global budget | 1959–2024 | sink partition constraint | GCB 2025 (Friedlingstein et al. 2026) |
 | GCB historical budget | 1750–2024 | prescribed fossil + LUC forcing | GCB 2025 |
 | GMST | 1850–2024 | Q10 + SST solubility forcing | IGCC (local, standing convention) |
@@ -188,14 +191,22 @@ processed `.rds` in `data/`.
 | RCMIP SSP emissions | 1750–2500, 5 markers | app future scenarios | RCMIP v5.1.0 (local) |
 | Ocean bomb-¹⁴C inventory | *not yet acquired* | optional integral constraint | GLODAP-era estimates |
 
-**Coverage caveats discovered at acquisition (see CHANGELOG 2026-08-09):**
-- **South Pole CO₂ starts 1975, not 1957.** The Scripps SPO record (1957+) is currently
-  unreachable — `scrippsco2.ucsd.edu` returns 404 for *all* asset paths, including ones
-  still indexed by search engines. The SH constraint before 1975 therefore rests on Law
-  Dome plus the SH Δ¹⁴C zones (which do cover 1941+). Revisit Scripps later.
-- **Flask δ¹³C is 1990–2014 only** in the NOAA monthly product — no modern δ¹³C after 2014
-  and none before 1990. Law Dome covers to 1993. The Suess constraint is therefore weaker
-  than planned and its 2014+ gap must not be mistaken for model-data agreement.
+**Coverage notes (see CHANGELOG 2026-08-09):**
+- **The Scripps gaps are CLOSED.** `scrippsco2.ucsd.edu` is still 404 site-wide, but Marcus
+  supplied the South Pole files directly; they live in `data-raw/manual/` and are **tracked
+  in git** precisely because `download_data.R` cannot regenerate them. SH CO₂ now runs from
+  1957-06 (covering the whole bomb era) and SH δ¹³C from 1977-03 to 2024 (closing the
+  post-2014 hole). NOAA's SPO records are retained as independent cross-checks.
+- **Only column 5 of the Scripps monthly files is a real observation.** Columns 7–10 are
+  fit / seasonally-adjusted / gap-filled reconstructions. Reading a filled column would
+  invent ~100 monthly "observations" — including every sparse 1950s month — and understate
+  uncertainty. The parser takes column 5 and keeps the NaNs.
+- **Inter-network scale offset is real and measured.** Over 543 months where both networks
+  report at South Pole, Scripps − NOAA = **−0.134 ± 0.262 ppm**. Because MLO comes from
+  NOAA and SPO from Scripps, that offset sits directly inside the MLO−SPO gradient, which
+  is a primary constraint on τ_ex — it is 3–8 % of the gradient. **Open item:** either
+  obtain the Scripps *Mauna Loa* records so both stations share the 2012 SIO manometric
+  scale, or carry a calibrated network-offset nuisance parameter.
 - **Pre-bomb tree-ring ¹⁴C not separately acquired** — Hua's compilation already starts
   1941 and includes the pre-bomb Suess decline, which covers the intended role.
 
@@ -283,10 +294,15 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
 7. **Sinks** (GCB 2025, 2015–2024 mean): **ocean 3.22 GtC/yr, land 2.36 GtC/yr** — model
    must land within GCB stated uncertainty.
 8. **δ¹³C Suess:** preindustrial **−6.469 ‰** (Law Dome spline, 1745–1755 mean) →
-   **−8.429 ‰** (MLO flask, 2014). Preindustrial CO₂ from the same source is
-   **276.88 ppm** (1745–1755 mean) — this is the spinup target.
-9. **MLO − SPO gradient** by decade: **1.70 (1970s) → 2.08 → 2.39 → 2.74 → 3.77 →
-   4.36 ppm (2020s partial)**. Together with the bomb-spike lag this pins τ_ex.
+   **−8.580 ‰** (Scripps SPO, 2024); the shorter NOAA MLO record runs −7.842 ‰ (1990) →
+   −8.429 ‰ (2014). Preindustrial CO₂ from the same Law Dome source is **276.88 ppm**
+   (1745–1755 mean) — this is the spinup target.
+9. **MLO − SPO gradient** by decade (paired months, n in brackets): **0.04 [9] (1950s) →
+   1.05 [75] → 1.65 [113] → 2.31 [117] → 2.61 [118] → 3.09 [115] → 3.83 [117] →
+   4.38 ppm [45] (2020s partial)**. The gradient grows from ≈0 at the start of the record
+   to 4.4 ppm today, tracking cumulative NH fossil emissions — with the bomb-spike NH→SH
+   lag this is the main constraint on τ_ex, and it is a headline app figure in its own
+   right. The 1950s entry rests on 9 paired months (MLO starts 1958-03): indicative only.
 10. **Natural ocean Δ¹⁴C profile:** deep-ocean depletion in the observed range (free check).
 11. **Suspicious-uniformity screen** on all residual series (all-same-sign or
     exactly-linear residuals = bug signal, per standing discipline).

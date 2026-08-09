@@ -124,3 +124,51 @@ identically; `tests/run_tests.R` as the suite entry point.
   therefore *predicts* the Δ¹⁴C spike rather than fitting it, keeping ¹⁴C as an
   independent check and preserving the app's isotope narrative. Outstanding dependency:
   a citable annual atmospheric-test-yield series.
+
+## 2026-08-09 (cont.) — Scripps South Pole records supplied; both gaps closed
+
+Marcus supplied the four Scripps South Pole files by hand (the website is still 404
+site-wide). They live in **`data-raw/manual/`** and are **committed to git** — unlike
+`data-raw/downloads/`, they cannot be regenerated, so losing them loses the data.
+`data-raw/manual/README.md` records contents, citation, and the column trap.
+
+**Both previously-flagged gaps are closed:**
+- **SH CO₂ now 1957-06 → 2024** (n=711 real monthly values) instead of NOAA's 1975+
+  (n=583). This recovers the entire bomb era on the SH side.
+- **SH δ¹³C now 1977-03 → 2024** (n=528) instead of NOAA's 1993–2014 (n=258). The
+  post-2014 hole is gone and the record extends 16 years further back.
+- NOAA's SPO CO₂ and δ¹³C are retained as **independent cross-checks**, not extra
+  likelihood terms.
+
+**Column trap, documented in code and README.** The Scripps monthly files have 10 columns;
+**only column 5 is a real observation** — columns 7–10 are fit, seasonally-adjusted and
+gap-filled reconstructions that are fully populated even where nothing was measured (the
+1957 row has CO₂ = NaN but fit = filled = 312.74). Parsing a filled column would have
+invented ~100 monthly "observations", including all but 11 of the 36 months in the 1950s,
+and would have understated calibration uncertainty. The parser takes column 5 and keeps
+the NaNs.
+
+**Scripps SPO Δ¹⁴C (1999–2007, n=81) is VALIDATION ONLY, not a likelihood term.** Its
+range (51.9–97.9 ‰) sits on top of Hua et al.'s SHZone1-2 over the same window
+(53–95.9 ‰) because this station is one of the records feeding that compilation. Using
+both would double-count the same measurements. Saved to
+`data/obs_d14c_spo_validation.rds` for checking the zonal aggregation independently.
+
+**New finding — inter-network scale offset.** Over 543 months where both networks report
+at South Pole, **Scripps − NOAA = −0.134 ± 0.262 ppm** (2012 SIO manometric vs WMO scale).
+Because MLO is NOAA and SPO is Scripps, this offset lands directly inside the MLO−SPO
+gradient — 3–8 % of a gradient that is a primary constraint on τ_ex. **Open item:** obtain
+Scripps *Mauna Loa* records so both stations share one scale, or carry a calibrated
+network-offset nuisance parameter. Not silently absorbed.
+
+**Updated data-derived benchmark — the interhemispheric gradient now spans the full
+record:** 0.04 ppm [9 paired months] (1950s) → 1.05 [75] → 1.65 [113] → 2.31 [117] →
+2.61 [118] → 3.09 [115] → 3.83 [117] → 4.38 [45] (2020s partial). It grows from
+essentially zero at the start of the record to 4.4 ppm today, tracking cumulative NH
+fossil emissions. Earlier decades shifted modestly versus the NOAA-based numbers (1970s
+1.70 → 1.65, 2000s 2.74 → 3.09) — mostly different month sampling rather than the scale
+offset, so the paired-month estimate above is the reliable one. δ¹³C Suess trajectory
+is now −6.469 ‰ (preindustrial) → −8.580 ‰ (2024).
+
+The `daily_flask_co2_isotopes_spo.csv` file (daily CO₂, CH₄, CO, ¹³C, ¹⁸O, ¹⁴C) is
+retained as provenance but unused in v1, which is a monthly model.

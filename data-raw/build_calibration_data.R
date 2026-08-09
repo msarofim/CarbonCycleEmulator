@@ -12,8 +12,9 @@
 
 suppressWarnings(suppressMessages(library(data.table)))
 
-DL   <- "data-raw/downloads"
-OUT  <- "data"
+DL     <- "data-raw/downloads"   # reproducible by download_data.R
+MANUAL <- "data-raw/manual"      # hand-supplied, tracked in git (Scripps site is down)
+OUT    <- "data"
 dir.create(OUT, showWarnings = FALSE, recursive = TRUE)
 
 # ---- named constants (labels and filters derive from these) ----------
@@ -37,23 +38,55 @@ mlo[sdev    %in% MISSING_NOAA_CO2, sdev    := NA_real_]
 mlo[unc     %in% MISSING_NOAA_CO2, unc     := NA_real_]
 mlo[, station := "MLO"][, hemisphere := "NH"]
 
-spo <- fread(file.path(DL, "co2_spo_surface-flask_1_ccgg_month.txt"),
-             skip = "SPO", header = FALSE,
-             col.names = c("site", "year", "month", "co2_ppm"))
-spo[, `:=`(station = "SPO", hemisphere = "SH",
-           decimal_date = year + (month - 0.5) / 12,
-           co2_deseas = NA_real_, sdev = NA_real_, unc = NA_real_)]
-spo[, site := NULL]
+spo_noaa <- fread(file.path(DL, "co2_spo_surface-flask_1_ccgg_month.txt"),
+                  skip = "SPO", header = FALSE,
+                  col.names = c("site", "year", "month", "co2_ppm"))
+spo_noaa[, `:=`(station = "SPO_NOAA", hemisphere = "SH",
+                decimal_date = year + (month - 0.5) / 12,
+                co2_deseas = NA_real_, sdev = NA_real_, unc = NA_real_)]
+spo_noaa[, site := NULL]
 
-co2_obs <- rbind(
-  mlo[, .(station, hemisphere, year, month, decimal_date, co2_ppm, co2_deseas, sdev, unc)],
-  spo[, .(station, hemisphere, year, month, decimal_date, co2_ppm, co2_deseas, sdev, unc)]
-)
+# --- Scripps South Pole (PRIMARY SH target) --------------------------
+# 10-column Scripps monthly format. COLUMN 5 IS THE ONLY REAL OBSERVATION:
+# columns 7-10 are fit / seasonally-adjusted / GAP-FILLED reconstructions.
+# Reading a filled column here would silently invent ~100 monthly "observations"
+# (and every one of the sparse 1950s months), so col 5 it is, NaN and all.
+read_scripps_monthly <- function(path, value_name) {
+  ln  <- readLines(path)
+  hdr <- grep("^ *Yr, *Mn,", ln)[1]
+  d <- fread(text = paste(ln[(hdr + 3):length(ln)], collapse = "\n"), header = FALSE,
+             na.strings = c("NaN", "NA", ""))
+  setnames(d, 1:5, c("year", "month", "excel_date", "decimal_date", value_name))
+  d[, 1:5, with = FALSE]
+}
+
+spo_sio <- read_scripps_monthly(file.path(MANUAL, "monthly_merge_co2_spo.csv"), "co2_ppm")
+spo_sio[, `:=`(station = "SPO", hemisphere = "SH",
+               co2_deseas = NA_real_, sdev = NA_real_, unc = NA_real_)]
+
+keep <- c("station", "hemisphere", "year", "month", "decimal_date",
+          "co2_ppm", "co2_deseas", "sdev", "unc")
+co2_obs <- rbind(mlo[, ..keep], spo_sio[, ..keep], spo_noaa[, ..keep])
 co2_obs <- co2_obs[!is.na(co2_ppm)]
 saveRDS(co2_obs, file.path(OUT, "obs_co2_monthly.rds"))
-cat(sprintf("[1] instrumental CO2: MLO %d-%d (n=%d), SPO %d-%d (n=%d)\n",
-            min(mlo$year), max(mlo$year), nrow(co2_obs[station == "MLO"]),
-            min(spo$year), max(spo$year), nrow(co2_obs[station == "SPO"])))
+
+for (st in c("MLO", "SPO", "SPO_NOAA")) {
+  s <- co2_obs[station == st]
+  cat(sprintf("[1] CO2 %-8s %d-%d  n=%d%s\n", st, min(s$year), max(s$year), nrow(s),
+              if (st == "SPO_NOAA") "   (cross-check only; SPO = Scripps is primary)" else ""))
+}
+
+# --- inter-network offset at the SAME station -------------------------
+# MLO comes from NOAA GML (WMO scale) but SPO from Scripps (2012 SIO manometric
+# scale). The MLO-SPO gradient is a primary constraint on interhemispheric
+# exchange time, so any scale offset between the networks propagates straight
+# into tau_ex. Measuring it at South Pole, where both networks report, isolates
+# the network difference from any real gradient.
+ov <- merge(co2_obs[station == "SPO",      .(year, month, sio  = co2_ppm)],
+            co2_obs[station == "SPO_NOAA", .(year, month, noaa = co2_ppm)],
+            by = c("year", "month"))
+cat(sprintf("    Scripps - NOAA at SPO over %d overlapping months (%d-%d): mean %+.3f ppm, sd %.3f\n",
+            nrow(ov), min(ov$year), max(ov$year), mean(ov$sio - ov$noaa), sd(ov$sio - ov$noaa)))
 
 # =====================================================================
 # 2. Law Dome ice core / firn — spline composite + raw samples
@@ -82,20 +115,42 @@ cat(sprintf("[2] Law Dome: CO2 spline %.0f-%.0f CE (n=%d); d13C spline %.0f-%.0f
 # =====================================================================
 # 3. Modern d13C (NOAA/INSTAAR flask)
 # =====================================================================
-d13c_list <- lapply(c("mlo", "spo"), function(stn) {
+d13c_noaa <- rbindlist(lapply(c("mlo", "spo"), function(stn) {
   f <- file.path(DL, sprintf("co2c13_%s_surface-flask_1_sil_month.txt", stn))
   d <- fread(f, skip = toupper(stn), header = FALSE,
              col.names = c("site", "year", "month", "d13c"))
-  d[, .(station = toupper(stn),
+  d[, .(station = paste0(toupper(stn), "_NOAA"),
         hemisphere = ifelse(stn == "mlo", "NH", "SH"),
         year, month, decimal_date = year + (month - 0.5) / 12, d13c)]
-})
-d13c_obs <- rbindlist(d13c_list)
+}))
+
+# Scripps South Pole d13C — PRIMARY SH isotope target. Same column-5-only rule.
+spo_d13c <- read_scripps_monthly(file.path(MANUAL, "monthly_flask_c13_spo.csv"), "d13c")
+spo_d13c <- spo_d13c[!is.na(d13c),
+                     .(station = "SPO", hemisphere = "SH", year, month, decimal_date, d13c)]
+
+d13c_obs <- rbind(spo_d13c, d13c_noaa)[!is.na(d13c)]
 saveRDS(d13c_obs, file.path(OUT, "obs_d13c_monthly.rds"))
-cat(sprintf("[3] flask d13C: MLO %d-%d, SPO %d-%d (n=%d)\n",
-            min(d13c_obs[station == "MLO"]$year), max(d13c_obs[station == "MLO"]$year),
-            min(d13c_obs[station == "SPO"]$year), max(d13c_obs[station == "SPO"]$year),
-            nrow(d13c_obs)))
+for (st in unique(d13c_obs$station)) {
+  s <- d13c_obs[station == st]
+  cat(sprintf("[3] d13C %-10s %d-%d  n=%d%s\n", st, min(s$year), max(s$year), nrow(s),
+              if (grepl("NOAA", st)) "  (cross-check / NH)" else "  (PRIMARY SH target)"))
+}
+
+# Scripps SPO D14C: 1999-2007 station record. NOT added to the likelihood --
+# this station feeds Hua et al.'s SHZone1-2 compilation, so using both would
+# double-count the same measurements. Stored for independent validation of the
+# zonal aggregation.
+c14_spo <- fread(file.path(MANUAL, "intermittent_flask_c14_spo.csv"), header = FALSE,
+                 col.names = c("date_str", "d14c"))
+c14_spo[, date := as.Date(date_str, format = "%d-%b-%y")]
+c14_spo[, `:=`(year = as.integer(format(date, "%Y")),
+               month = as.integer(format(date, "%m")))]
+c14_spo[, decimal_date := year + (month - 0.5) / 12]
+saveRDS(c14_spo[, .(station = "SPO", year, month, decimal_date, d14c)],
+        file.path(OUT, "obs_d14c_spo_validation.rds"))
+cat(sprintf("[3b] Scripps SPO D14C %d-%d n=%d -- VALIDATION ONLY (overlaps Hua SHZone1-2)\n",
+            min(c14_spo$year), max(c14_spo$year), nrow(c14_spo)))
 
 # =====================================================================
 # 4. Delta14C — Hua et al. 2022 zonal compilation
@@ -216,10 +271,13 @@ print(amp[decade >= 1960])
 # -- MLO minus SPO gradient
 grad <- merge(co2_obs[station == "MLO", .(year, month, mlo = co2_ppm)],
               co2_obs[station == "SPO", .(year, month, spo = co2_ppm)],
-              by = c("year", "month"))
-grad_dec <- grad[, .(gradient_ppm = mean(mlo - spo)), by = .(decade = (year %/% 10) * 10)]
-cat("\nMLO - SPO annual-mean gradient by decade (ppm):\n")
+              by = c("year", "month"))   # SPO = Scripps, now back to 1957
+grad_dec <- grad[, .(gradient_ppm = mean(mlo - spo), n_months = .N),
+                 by = .(decade = (year %/% 10) * 10)]
+cat("\nMLO - SPO annual-mean gradient by decade (ppm), with paired-month counts:\n")
 print(grad_dec[order(decade)])
+cat("  (the 1950s figure rests on a handful of paired months -- MLO starts 1958-03 --\n")
+cat("   so treat it as indicative, not as a decadal mean on par with the others.)\n")
 
 # -- bomb 14C peak and decline, per zone
 cat("\nDelta14C bomb peak by zone:\n")
@@ -246,11 +304,12 @@ cat(sprintf("\nSinks, last 10 yr (%d-%d), GtC/yr:  ocean %.2f   land %.2f\n",
             min(rec$year), max(rec$year), mean(rec$ocean_sink), mean(rec$land_sink)))
 
 # -- modern d13C
-cat(sprintf("\nd13C MLO: %.3f permil (%d) -> %.3f permil (%d)\n",
-            d13c_obs[station == "MLO"][which.min(decimal_date)]$d13c,
-            d13c_obs[station == "MLO"][which.min(decimal_date)]$year,
-            d13c_obs[station == "MLO"][which.max(decimal_date)]$d13c,
-            d13c_obs[station == "MLO"][which.max(decimal_date)]$year))
+for (st in c("SPO", "MLO_NOAA")) {
+  s <- d13c_obs[station == st]
+  cat(sprintf("\nd13C %-9s %.3f permil (%d) -> %.3f permil (%d)\n", st,
+              s[which.min(decimal_date)]$d13c, s[which.min(decimal_date)]$year,
+              s[which.max(decimal_date)]$d13c, s[which.max(decimal_date)]$year))
+}
 
 cat("\n=== processed inputs written to data/ ===\n")
 print(data.table(file = list.files(OUT, pattern = "\\.rds$"),

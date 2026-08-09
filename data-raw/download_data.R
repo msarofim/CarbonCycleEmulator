@@ -212,6 +212,10 @@ write.csv(man, file.path(DL_DIR, "MANIFEST.csv"), row.names = FALSE)
 
 cat(sprintf("\n=== %d datasets acquired; manifest -> %s ===\n",
             nrow(man), file.path(DL_DIR, "MANIFEST.csv")))
+cat("\nNOTE: the Scripps South Pole records are NOT downloadable (scrippsco2.ucsd.edu\n")
+cat("      is 404 site-wide). They were supplied by hand and are TRACKED IN GIT under\n")
+cat("      data-raw/manual/ -- see the README there. Do not delete that directory.\n")
+
 cat("\nStill OUTSTANDING (see CHANGELOG):\n")
 cat("  - bomb 14C production history (atmospheric nuclear test yields)\n")
 cat("  - optional: ocean bomb-14C inventory integral constraint\n")
