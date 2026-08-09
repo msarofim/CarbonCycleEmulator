@@ -64,3 +64,49 @@ grows 1.70 → 4.36 ppm (1970s → 2020s).
 
 **Still outstanding:** bomb ¹⁴C production history (atmospheric test-yield series) and the
 optional ocean bomb-¹⁴C inventory constraint.
+
+## 2026-08-09 (later still) — Carbonate chemistry module
+
+`R/carbonate.R` + `data-raw/build_carbonate_tables.R` + `tests/testthat/test-carbonate.R`.
+
+**Approach:** dissociation constants are NOT hand-copied from papers. `seacarb` (a
+maintained, cited implementation) is queried over the model's temperature range and
+polynomials in T are fitted to ln K0/K1/K2/Kb/Kw. seacarb is the cited authority; the
+fitted coefficients are a reproducible derivative; the test suite gates the fast solver
+against seacarb's full system. The solver itself is a closed-form carbonate-alkalinity
+quadratic seed plus Newton refinement — pure arithmetic, so it ports to Rcpp unchanged.
+
+**Final accuracy vs seacarb:** pCO₂ to **2.2e-5** relative, Revelle factor to **1.3e-6**,
+over DIC 1900–2400 µmol/kg × T 10–30 °C. Test tolerances set at 1e-4 (≈5× and ≈75×
+headroom) so a real regression trips them.
+
+**Three bugs found and fixed by the seacarb gate — each would have survived a plausibility
+check.** Recorded because all three are the "looks fine, is wrong" class:
+
+1. **Missing OH⁻ in the alkalinity balance → −4.5 % in pCO₂.** The water term is only
+   ~0.25 % of total alkalinity, but pCO₂ amplifies an alkalinity error by roughly the
+   Revelle factor (~10×). Do not "simplify" it away.
+2. **[CO2*]/K0 is fugacity fCO₂, not partial pressure pCO₂** — a systematic −0.30 to
+   −0.38 % bias, temperature-dependent. Fixed by storing an effective
+   K0_eff = K0 × φ(T), with φ = 0.99572 (2 °C) … 0.99717 (35 °C) taken from seacarb.
+   This one matters because it biases the air–sea gradient and hence the ocean sink in
+   one direction at all times.
+3. **Polynomial fits in raw T are badly conditioned** once T⁵ ~ 5e7; fitting in centred,
+   scaled x = (T−T₀)/Ts improved K0/K1/K2/Kb from ~1e-7 to ~1e-9. The scaling is stored
+   with the coefficients, and evaluation always applies it.
+
+**Not a bug — a wrong test.** The Revelle factor is *not* monotonic in DIC all the way up:
+it peaks near DIC ≈ 2250 µmol/kg (at ALK 2300) and falls beyond, because carbonate ion is
+nearly exhausted at pH ~7.1. seacarb reproduces the turnover identically, so the assertion
+was corrected to the DIC < ALK range the model actually visits, rather than the code.
+
+**Kw carries a documented tolerance waiver.** seacarb's own Kw output has a ~1.7e-3
+oscillatory wiggle (largest at 2–12 °C) that is unchanged by raising the polynomial degree
+to 10 or by using the physical (1/T, lnT, T) basis — i.e. upstream numerical noise, not a
+fitting failure. Kw is therefore allowed 5e-3 while the others are held to 1e-6, and the
+waiver is gated by a test that perturbs Kw by a full tolerance width and requires the pCO₂
+response to stay under 1e-4.
+
+**Also added:** `R/paths.R` (`ccx_root`/`ccx_path`) so scripts, testthat (which runs from
+`tests/testthat/`) and the Shiny app (which will run from `app/`) all resolve `data/`
+identically; `tests/run_tests.R` as the suite entry point.
