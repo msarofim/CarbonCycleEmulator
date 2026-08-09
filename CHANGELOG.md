@@ -110,3 +110,17 @@ response to stay under 1e-4.
 **Also added:** `R/paths.R` (`ccx_root`/`ccx_path`) so scripts, testthat (which runs from
 `tests/testthat/`) and the Shiny app (which will run from `app/`) all resolve `data/`
 identically; `tests/run_tests.R` as the suite entry point.
+
+## 2026-08-09 (cont.) — Three flagged choices resolved by Marcus
+
+- **ENSO index = Niño 3.4 (1948+)**, anomalized against a 1991–2020 climatology. One
+  homogeneous product covering the whole dense-CO₂ era, no splice. MEIv2 stays in `data/`
+  as a sensitivity option. (MEI.ext retirement made the original plan impossible.)
+- **Δ¹⁴C zone → hemisphere aggregation = AREA-WEIGHTED**, with the zone latitude
+  boundaries to be read out of Hua et al. (2022) rather than assumed. Note the tropical
+  zone boundaries follow the ITCZ and migrate seasonally — the weighting scheme must state
+  how it handles that (fixed annual-mean boundaries is the intended simplification).
+- **Bomb ¹⁴C = prescribed yield-history SHAPE with calibrated total P_bomb.** The model
+  therefore *predicts* the Δ¹⁴C spike rather than fitting it, keeping ¹⁴C as an
+  independent check and preserving the app's isotope narrative. Outstanding dependency:
+  a citable annual atmospheric-test-yield series.
