@@ -20,3 +20,47 @@ Project log: what was done, what was tried and abandoned, and why.
   parameters to communicate), Python-calibrate/R-port (port-parity risk), Julia+Shiny
   bridge (deployment fragility on shinyapps.io), user-drawn emissions (deferred).
 - DESIGN.md written; awaiting Marcus sign-off before any model code.
+
+## 2026-08-09 (later) — Design approved; data layer built
+
+Marcus took the defaults on all four open questions (§9): GCB land sink as a soft
+constraint, joint-calibrated seasonal harmonics, reuse of RCMIP SSP CSVs, Rcpp core
+permitted with a bit-parity test.
+
+**Acquired 14 datasets** (`data-raw/download_data.R` → `MANIFEST.csv` with URL, access
+date, SHA-256, citation; parsed by `data-raw/build_calibration_data.R` → `data/*.rds`).
+
+**Source substitutions forced by upstream availability — all flagged, none silent:**
+
+- **Scripps CO₂ Program is unreachable.** Every `scrippsco2.ucsd.edu/assets/...` path
+  returns 404 (tested with and without a browser user-agent; search engines still index
+  the old URLs). Consequences: South Pole CO₂ comes from the NOAA CCGG flask record and
+  therefore **starts 1975 instead of 1957**, and Scripps δ¹³C (1977+) is unavailable.
+  *Not treated as fixed* — revisit; the 1957–1975 SH gap is a real loss for the bomb era.
+- **δ¹³C is thinner than planned.** NOAA/INSTAAR monthly flask δ¹³C runs **1990–2014
+  only** (MLO; SPO 1993–2014). With Law Dome ending 1993 there is no δ¹³C constraint
+  after 2014. The Suess sink-partition constraint is correspondingly weaker; the post-2014
+  gap must not be read as agreement.
+- **MEI.ext has been retired by NOAA PSL** (404), so the planned MEIv2 + MEI.ext splice is
+  impossible. Both MEIv2 (1979+) and Niño 3.4 (1948+, anomalized against a 1991–2020
+  climatology) were acquired. **Choice of which drives the ENSO term is deferred to
+  Marcus** — Niño 3.4 is the only option covering the full dense-CO₂ era in one product.
+- **Law Dome δ¹³C lives in a separate NCEI file** (`law2018d13c-co2.txt`), and the spline
+  composite (`law2018splines.txt`) provides smooth annual CO₂ (154–1996 CE) and δ¹³C
+  (1020–1993 CE) series — better pre-instrumental targets than the raw sample list.
+  Parser gotcha: that file has **two different columns both named `age_CO2`** (CO₂ and
+  δ¹³C splines are on different time axes), so it must be parsed positionally.
+- **Hua et al. (2022) Δ¹⁴C obtained via `SoilR::Hua2021`** — the package ships the paper's
+  Supplementary Material 2 (5 zones, monthly mean + sd, 1941–2019), which avoids a
+  publisher-supplementary download and fits the R-end-to-end constraint.
+
+**Sanity-gate targets are now data-derived, replacing recalled values in DESIGN.md §6.**
+Where they differ from the working values written at design time, the data wins:
+NH Zone 1 bomb peak is **944.6 ‰ at 1963.625** (design said "order 1000 ‰"); post-peak
+e-folding **15.4 yr** (design said ~16); airborne fraction **0.431** over 1959–2024
+(design said "mid-0.40s"); preindustrial CO₂ **276.88 ppm** and δ¹³C **−6.469 ‰**.
+MLO seasonal amplitude grows 5.95 → 6.86 ppm (1960s → 2010s), and the MLO−SPO gradient
+grows 1.70 → 4.36 ppm (1970s → 2020s).
+
+**Still outstanding:** bomb ¹⁴C production history (atmospheric test-yield series) and the
+optional ocean bomb-¹⁴C inventory constraint.

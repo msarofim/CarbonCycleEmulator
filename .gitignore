@@ -6,3 +6,6 @@
 .DS_Store
 data-raw/downloads/
 calibration/output/chains/
+# raw downloads are reproducible from data-raw/download_data.R + MANIFEST.csv
+data-raw/downloads/*
+!data-raw/downloads/MANIFEST.csv

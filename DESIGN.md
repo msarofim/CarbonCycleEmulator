@@ -169,18 +169,35 @@ d M_atm[h]/dt =
 All downloads scripted in `data-raw/` with URL + access date + checksum; processed inputs
 saved as versioned `.rds` in `data/`.
 
-| Dataset | Role | Source (to be pinned in data-raw) |
-|---|---|---|
-| Mauna Loa monthly CO₂ (1958+) | dense NH target | NOAA GML co2_mm_mlo (or Scripps — pick one, document) |
-| South Pole monthly CO₂ (1957+) | dense SH target | Scripps SPO record |
-| Law Dome ice core + firn CO₂ | sparse 1750–1960 target | Rubino et al. 2019 dataset |
-| Zonal atmospheric Δ¹⁴C, monthly 1950–2019 | bomb-era target, both hemispheres | Hua et al. 2022 compilation (NH zones averaged for N box; SH zones for S box) |
-| Pre-bomb atmospheric ¹⁴C (Suess decline) | 1900–1950 target | tree-ring records / IntCal20 |
-| δ¹³C flasks MLO + SPO (1977+) | Suess partition target | Scripps CO₂ program |
-| δ¹³C ice/firn | sparse pre-1977 target | Rubino et al. 2019 |
-| GCB annual ocean sink + uncertainty (1959+) | partition constraint | GCB latest release tables |
-| GCB annual land sink | *soft* partition constraint (§5.2) | GCB latest release tables |
-| Ocean bomb-¹⁴C inventory (single epoch) | optional integral constraint | GLODAP-era estimates (Key et al. 2004 / Peacock 2004) [VERIFY] |
+**ACQUIRED 2026-08-09** — 14 datasets, provenance (URL, access date, SHA-256, citation) in
+`data-raw/downloads/MANIFEST.csv`; parsers in `data-raw/build_calibration_data.R`;
+processed `.rds` in `data/`.
+
+| Dataset | Coverage obtained | Role | Source |
+|---|---|---|---|
+| Mauna Loa monthly CO₂ | 1958–2026, n=821 | dense NH target | NOAA GML `co2_mm_mlo.csv` |
+| South Pole flask CO₂ | **1975**–2025, n=583 | dense SH target | NOAA GML CCGG flask |
+| Law Dome CO₂ spline + samples | 154–1996 CE | pre-1958 target, spinup anchor | Rubino et al. 2019 (NOAA/WDS 25830) |
+| Law Dome δ¹³C spline + samples | 1020–1993 CE | pre-1990 Suess target | Rubino et al. 2019 |
+| Zonal Δ¹⁴C, monthly, 5 zones | 1941.2–2019.4, n=4689 | bomb-era target, both hemispheres | Hua et al. 2022 via `SoilR::Hua2021` |
+| δ¹³C flasks MLO + SPO | **1990–2014** | modern Suess partition target | NOAA GML / INSTAAR SIL |
+| GCB global budget | 1959–2024 | sink partition constraint | GCB 2025 (Friedlingstein et al. 2026) |
+| GCB historical budget | 1750–2024 | prescribed fossil + LUC forcing | GCB 2025 |
+| GMST | 1850–2024 | Q10 + SST solubility forcing | IGCC (local, standing convention) |
+| Niño 3.4 / MEIv2 | 1948–2026 / 1979–2026 | ENSO term | NOAA PSL |
+| RCMIP SSP emissions | 1750–2500, 5 markers | app future scenarios | RCMIP v5.1.0 (local) |
+| Ocean bomb-¹⁴C inventory | *not yet acquired* | optional integral constraint | GLODAP-era estimates |
+
+**Coverage caveats discovered at acquisition (see CHANGELOG 2026-08-09):**
+- **South Pole CO₂ starts 1975, not 1957.** The Scripps SPO record (1957+) is currently
+  unreachable — `scrippsco2.ucsd.edu` returns 404 for *all* asset paths, including ones
+  still indexed by search engines. The SH constraint before 1975 therefore rests on Law
+  Dome plus the SH Δ¹⁴C zones (which do cover 1941+). Revisit Scripps later.
+- **Flask δ¹³C is 1990–2014 only** in the NOAA monthly product — no modern δ¹³C after 2014
+  and none before 1990. Law Dome covers to 1993. The Suess constraint is therefore weaker
+  than planned and its 2014+ gap must not be mistaken for model-data agreement.
+- **Pre-bomb tree-ring ¹⁴C not separately acquired** — Hua's compilation already starts
+  1941 and includes the pre-bomb Suess decline, which covers the intended role.
 
 **Representation error:** MLO ≈ NH free troposphere, SPO ≈ SH — comparing station records
 to hemispheric-mean boxes incurs representation error, absorbed by the calibrated error
@@ -240,8 +257,9 @@ Rcpp with a bit-parity test against the R reference implementation (both stay in
 
 ## 6. Sanity gates (all must pass before headline claims)
 
-Adapted from the standing climate-modeling checklist; numbers below are *expectations to
-be replaced by values read from the actual datasets*, not memory:
+Adapted from the standing climate-modeling checklist. **Targets 4–8 below were computed
+from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
+2026-08-09) — they are data-derived, not recalled. Re-running that script regenerates them.
 
 1. **Conservation:** closed-budget carbon constant to ~1e-10 relative (¹²C, ¹³C; ¹⁴C
    closes including decay + production).
@@ -249,15 +267,28 @@ be replaced by values read from the actual datasets*, not memory:
 3. **Pulse tests (paired):** zero-pulse bit-identical to baseline; sign-flip antisymmetric
    in the linear regime; 2× pulse ≈ 2× response at small size, with departure explained by
    Revelle curvature, not bugs.
-4. **Airborne fraction** ≈ mid-0.40s, roughly flat over recent decades (vs GCB).
-5. **Bomb curve:** NH tropospheric Δ¹⁴C peak location/height (~1963–64, order 1000 ‰) and
-   post-peak e-folding (~16 yr [VERIFY]) vs Hua data; NH−SH gap closing timescale.
-6. **Seasonal cycle:** MLO amplitude ~6–7 ppm peak-to-peak, SPO ~1 ppm and phase-shifted
-   [VERIFY from data]; amplitude *growth* qualitatively present.
-7. **Sinks:** recent-decade land and ocean sinks within GCB stated uncertainty.
-8. **δ¹³C Suess:** ~−6.4 ‰ → ~−8.5 ‰ trajectory [VERIFY from data].
-9. **Natural ocean Δ¹⁴C profile:** deep-ocean depletion in the observed range (free check).
-10. **Suspicious-uniformity screen** on all residual series (all-same-sign or
+4. **Airborne fraction** (GCB 2025): **0.431 over 1959–2024**; by decade 0.35 (1960s),
+   0.43 (1970s), 0.47 (1980s), 0.38 (1990s), 0.42 (2000s), 0.45 (2010s), 0.50 (2020s
+   partial). Roughly flat with substantial decadal variability — the model must not be
+   *smoother* than this.
+5. **Bomb curve** (Hua et al. 2022): NH Zone 1 peak **944.6 ‰ at 1963.625**; Zone 2
+   905.3 ‰ (1963.625); Zone 3 731.4 ‰ (1964.708); SH Zone 1-2 **660.1 ‰ at 1965.542**;
+   SH Zone 3 667.0 ‰ (1964.958). NH Zone 1 post-peak e-folding **15.4 yr**
+   (log-linear fit over Δ¹⁴C > 20 ‰). The ~1.9 yr NH→SH peak lag and the ~285 ‰
+   peak-height difference are the interhemispheric-exchange constraint.
+6. **Seasonal cycle** (MLO, peak-to-trough of the mean seasonal cycle by decade):
+   **5.95 (1960s) → 6.17 → 6.40 → 6.42 → 6.38 → 6.86 (2010s) → 6.66 ppm (2020s partial)**.
+   Amplitude growth of ~15 % across the record is a *fertilization* signature the model
+   must produce, not prescribe.
+7. **Sinks** (GCB 2025, 2015–2024 mean): **ocean 3.22 GtC/yr, land 2.36 GtC/yr** — model
+   must land within GCB stated uncertainty.
+8. **δ¹³C Suess:** preindustrial **−6.469 ‰** (Law Dome spline, 1745–1755 mean) →
+   **−8.429 ‰** (MLO flask, 2014). Preindustrial CO₂ from the same source is
+   **276.88 ppm** (1745–1755 mean) — this is the spinup target.
+9. **MLO − SPO gradient** by decade: **1.70 (1970s) → 2.08 → 2.39 → 2.74 → 3.77 →
+   4.36 ppm (2020s partial)**. Together with the bomb-spike lag this pins τ_ex.
+10. **Natural ocean Δ¹⁴C profile:** deep-ocean depletion in the observed range (free check).
+11. **Suspicious-uniformity screen** on all residual series (all-same-sign or
     exactly-linear residuals = bug signal, per standing discipline).
 
 ## 7. Shiny app design
