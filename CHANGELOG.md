@@ -649,3 +649,22 @@ record the likelihood scores against. Awaiting direction.
 survives as `ccx_bomb_c14_annual_SUPERSEDED()` purely so the size of the correction stays
 reproducible. Test suite unchanged at 174 pass / 0 fail / 2 skip (seacarb absent) —
 verified equal on HEAD before and after.
+
+### Bomb window admitted to the likelihood
+
+`LIK_USE_BOMB_WINDOW` FALSE → **TRUE**. It was excluded only because the shape was a
+placeholder carrying 90 % of the likelihood information; that reason is gone. DESIGN.md
+§6 gained an explicit warning not to gate on the Hua **Zone 1** numbers — the model has
+one area-weighted hemispheric box, so the comparable benchmark is the weighted aggregate
+(NH 853.2 ‰ @ 1963.708), and using Zone 1 flattered the old shape, whose 996.9 ‰ peak
+exceeded every observed zone.
+
+DESIGN.md's bomb-source spec called for injection "through the τ_strat delay kernel",
+which was never implemented. The Table 2 fit **is** that kernel, measured rather than
+parameterised — so this closes the spec rather than departing from it, and adds no
+parameter.
+
+Carried caveat, recorded at the switch: at uncalibrated defaults the modelled NH peak is
+still +0.75 yr late, and the Part A/B join step sits inside the admitted window. Both bear
+on `tau_ex` and the ocean-uptake parameters; treat posterior shifts in those as suspect
+until the join is resolved.

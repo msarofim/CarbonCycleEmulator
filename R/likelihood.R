@@ -42,16 +42,22 @@ LIK_CO2_REP_ERR    <- 1.0            # ppm, station-vs-hemispheric-box
 LIK_D13C_REP_ERR   <- 0.05           # permil
 LIK_LAND_SINK_INFLATE <- 3.0         # multiplier on GCB land-sink sigma (Q1)
 
-# BOMB-WINDOW D14C IS EXCLUDED BY DEFAULT. A likelihood decomposition at the
-# default parameters showed the two D14C streams contributing -165,214 of a
-# -183,666 total -- 90 % of ALL the information -- while the bomb 14C injection
-# SHAPE is still the documented placeholder in ccx_bomb_c14_annual(). Calibrating
-# against it would let a placeholder drive essentially the entire posterior, and
-# would launder that placeholder into every parameter. Pre-bomb (IntCal20) and
-# post-recovery D14C are retained, so 14C still constrains ventilation through
-# the Suess decline and the post-peak decay; only the peak itself is dropped.
-# SET TO FALSE once UNSCEAR annual test yields are digitised (see DATA.md 8).
-LIK_USE_BOMB_WINDOW <- FALSE
+# BOMB-WINDOW D14C IS NOW INCLUDED (2026-08-10). It was excluded while the
+# injection shape was a placeholder: a likelihood decomposition at the default
+# parameters showed the two D14C streams contributing -165,214 of a -183,666
+# total -- 90 % of ALL the information -- so calibrating against the peak would
+# have let a placeholder drive essentially the entire posterior and laundered it
+# into every parameter.
+#
+# That shape is now a measured stratosphere->troposphere delivery function built
+# from Tans (1981) SCOPE 16 Tables 1-2 (DATA.md 9), so the window is admitted.
+#
+# CAVEAT that rides with it: at uncalibrated defaults the modelled NH peak is
+# still +0.75 yr late against the area-weighted observed aggregate, and a 4.5x
+# one-month step survives at the Part A / Part B join in 1963.04 -- inside this
+# window. Both push on tau_ex and the ocean-uptake parameters. Treat any
+# posterior shift in those specifically as suspect until the join is resolved.
+LIK_USE_BOMB_WINDOW <- TRUE
 LIK_BOMB_EXCLUDE    <- c(1950, 1975)   # window dropped when the switch is FALSE
 
 # Law Dome stated errors are ANALYTICAL only (~0.02-1 ppm) and exclude gas-age

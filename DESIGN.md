@@ -130,13 +130,17 @@ d M_atm[h]/dt =
   - **Natural production:** constant cosmogenic source balancing whole-model decay at
     spinup (solar-cycle modulation is v2). Spinup yields the natural Δ¹⁴C depth profile —
     deep-ocean Δ¹⁴C ≈ −150 to −200 ‰ [VERIFY] is a free check we get for nothing.
-  - **Bomb source:** prescribed test-yield time history shape, total production P_bomb
-    [CAL]. **Prior now sourced:** Naegler & Levin (2006), *Closing the global radiocarbon
+  - **Bomb source: SHAPE RESOLVED 2026-08-10** (see DATA.md §9). Total production P_bomb
+    [CAL] keeps its sourced prior: Naegler & Levin (2006), *Closing the global radiocarbon
     budget 1945–2005*, JGR 111, doi:10.1029/2005JD006758, give total bomb ¹⁴C production
     1945–1980 as **99.3–104.9 kmol** (598–632 × 10²⁶ atoms). Injected into the NH (and a
-    small SH share [VERIFY]) troposphere through the τ_strat delay kernel.
-    **Still outstanding: the time SHAPE** — an annual atmospheric test-yield series
-    (UNSCEAR 2000 Report Annex C is the standard compilation).
+    small SH share [VERIFY]) troposphere.
+    **No test-yield series and no τ_strat parameter are needed.** This model has no
+    stratospheric box, so what it wants is delivery, not production — and the delay kernel
+    this line originally specified is *measured* rather than parameterised: two
+    exponentials fitted to the Tans (1981) / Telegadas (1971) stratospheric ¹⁴C inventory,
+    **39.97 kmol at τ = 1.00 yr** and **27.75 kmol at τ = 10.15 yr**. UNSCEAR 2000 Annex C
+    is no longer required.
   - **Fossil fuel:** ¹⁴C-free by definition → Suess dilution emerges.
   - **Nuclear-industry source: IN v1** (promoted from the v2 backlog 2026-08-10 after a
     magnitude check overturned the "small" assumption). Prescribed from the Laemmel et al.
@@ -309,6 +313,14 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    SH Zone 3 667.0 ‰ (1964.958). NH Zone 1 post-peak e-folding **15.4 yr**
    (log-linear fit over Δ¹⁴C > 20 ‰). The ~1.9 yr NH→SH peak lag and the ~285 ‰
    peak-height difference are the interhemispheric-exchange constraint.
+
+   **Do not gate the model on the Zone 1 numbers.** The model carries one
+   *area-weighted hemispheric* box, so its `d14c_NH` is not comparable to a single
+   high-latitude zone — Zone 1 peaks earlier and ~110 ‰ higher than the hemispheric
+   aggregate. The comparable benchmark, computed from the same `obs_d14c_zonal.rds` with
+   `ccx_zone_weights()`, is **NH 853.2 ‰ at 1963.708, SH 659.4 ‰ at 1965.042, NH→SH lag
+   1.33 yr**. Using the Zone 1 gate instead flattered the superseded bomb shape, whose
+   996.9 ‰ peak in fact exceeded *every* observed zone.
 6. **Seasonal cycle** (MLO, peak-to-trough of the mean seasonal cycle by decade):
    **5.95 (1960s) → 6.17 → 6.40 → 6.42 → 6.38 → 6.86 (2010s) → 6.66 ppm (2020s partial)**.
    Amplitude growth of ~15 % across the record is a *fertilization* signature the model
