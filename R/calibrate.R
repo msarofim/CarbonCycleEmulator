@@ -45,15 +45,24 @@ CCX_PARAM_TABLE <- list(
   # dependence remains -- see DATA.md 8.
   bomb_total  = list(tr = "log",   init = 102,
                      prior = function(x) dlnorm(x, log(102), 0.10, log = TRUE)),
-  # error model
+  # ---- error model ---------------------------------------------------
+  # These are MODEL-STRUCTURAL error at ANNUAL scale, added in quadrature to the
+  # fixed representation terms in likelihood.R. They cannot collapse the way
+  # sigma_co2 did at the 2026-08-10 mode (0.0744 ppm): with independent errors
+  # the maximum-likelihood sigma is just the residual RMS. The collapse needed
+  # the AR(1) term, which is retired -- see likelihood.R design note 1.
   sigma_co2   = list(tr = "log",   init = 1.5,
                      prior = function(x) dlnorm(x, log(1.5), 0.7, log = TRUE)),
   sigma_d13c  = list(tr = "log",   init = 0.1,
                      prior = function(x) dlnorm(x, log(0.1), 0.7, log = TRUE)),
   sigma_d14c  = list(tr = "log",   init = 5,
-                     prior = function(x) dlnorm(x, log(5), 0.7, log = TRUE)),
-  rho         = list(tr = "logit", lo = 0, hi = 0.999,   init = 0.9,
-                     prior = function(x) dbeta(x / 0.999, 8, 2, log = TRUE))
+                     prior = function(x) dlnorm(x, log(5), 0.7, log = TRUE))
+  # `rho` RETIRED 2026-08-11. It was the AR(1) autocorrelation shared across
+  # MLO/SPO CO2 and d13C. It railed at its 0.998 bound, driving the effective
+  # sample size of 812 MLO monthly observations down to 0.8 and letting a
+  # +50 ppm level bias cost 13.7 log-units. Anything reading a saved fit from
+  # before this date will find 18 parameters where there are now 17; those
+  # outputs are quarantined under calibration/output/quarantine/.
 )
 
 CCX_PARAM_NAMES <- names(CCX_PARAM_TABLE)
@@ -133,7 +142,7 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     r <- tryCatch(ccx_run_fast(sp, F), error = function(e) NULL)
     if (is.null(r) || anyNA(r$out$co2_NH)) return(-Inf)
 
-    err <- list(rho = pv$rho, sigma_co2 = pv$sigma_co2,
+    err <- list(sigma_co2 = pv$sigma_co2,
                 sigma_d13c = pv$sigma_d13c, sigma_d14c = pv$sigma_d14c)
     ll <- ccx_loglik(r$out, obs, err)
     if (verbose) cat(sprintf("  ll %.1f  prior %.1f\n", ll, lp))

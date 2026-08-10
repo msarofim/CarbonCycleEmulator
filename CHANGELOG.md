@@ -820,3 +820,85 @@ Suite **208 / 0 / 2** (was 174 / 0 / 2; the 2 skips are still seacarb).
 **Still blocked:** the AR(1) error-model pathology (§4 of the handoff) — a methodological
 choice for Marcus. Nothing is re-run until that is settled, since re-running mode-find on the
 current likelihood would just find the same `q10` = 0.28 with a slightly higher `kz`.
+
+## 2026-08-11 (later) — Blocker 2 CLEARED: AR(1) retired for annual + explicit seasonal
+
+Marcus's call among four options: **annual means with independent errors, plus the seasonal
+cycle restored as an explicit statistic**. Rejected alternatives: capping `rho` at 0.90 (the
+cap becomes the answer — an analyst-chosen effective sample size wearing a fitted parameter's
+clothes); adding explicit per-stream bias parameters (4+ more parameters on an 18-parameter
+problem whose Hessian condition number is already 2.4e6, and `rho` would still rail);
+continuous-time AR(1) `rho^dt` (fixes the irregular-sampling defect but leaves the level-bias
+loophole unchanged in kind).
+
+**What the AR(1) was actually costing**, measured at the 2026-08-10 mode on MLO CO₂:
+
+| ρ | n_eff (of 812 monthly) | log-units lost to a +50 ppm bias |
+|---|---|---|
+| 0.998 (the mode) | **0.8** | **13.7** |
+| 0.95 | 20.8 | 3,390.7 |
+| 0 (independent) | 812 | 1,274,217.9 |
+| annual means, σ = 2 ppm | 69 | 27,461.7 |
+
+67 years of the Keeling curve carried the weight of **less than one independent observation**.
+The residuals really are that autocorrelated — measured lag-1 **0.998** at MLO, **0.9998** at
+SPO — so AR(1) was describing them faithfully. That is the point: they are model *discrepancy*,
+not noise, and AR(1) reclassified discrepancy as free noise. δ¹³C had it worse — `sigma_d13c`
+collapsed to 0.007 ‰, giving those streams *positive* log-likelihood (+766, +1025).
+
+**Two further defects found while measuring it**, either fatal alone: the AR(1) was applied on
+**observation index, not time**, so SPO's 16-month gap counted as a 1-month step; and a single
+`rho` was shared across four series of quite different sampling density.
+
+**What replaced it.** `ccx_year_harmonic()` fits, per calendar year,
+`v ~ 1 + (t − midyear) + sin(2πφ) + cos(2πφ)`. Its intercept is a deseasonalised, detrended
+annual level; its sin/cos coefficients are the seasonal statistic. **The same estimator runs on
+model and observations**, so neither NOAA's deseasonalisation nor the model's seasonal shape has
+to be trusted separately. The level is immune to partial month coverage — gated on synthetic
+data where a naive mean of Apr–Dec is biased 0.20 ppm and of Jul–Dec 0.5+ ppm, while the
+harmonic recovers the truth to 1e-9.
+
+Scored terms fell **4,713 → 632**. `rho` is retired; 18 parameters → **17**.
+
+**Δ¹⁴C went annual too, as a consequence, not an afterthought.** The Hua et al. (2022) zonal
+record is a *smoothed monthly compilation* fitted to sparser discrete samples, so its 939
+monthly values per hemisphere were never 939 independent measurements. Leaving them monthly
+while thinning CO₂ would have relocated the swamping rather than removed it. Monthly errors are
+**not** reduced by √n on averaging — the dominant term is systematic representation error. The
+model side now uses its own annual **mean** rather than a mid-year sample; during the bomb rise
+the two differ by several ‰.
+
+**Tried and rejected mid-implementation:** scoring the seasonal cycle as the multi-year *mean*
+harmonic (4 terms total). It made the seasonal cycle weaker than its own side effect — moving
+`seas_amp_NH` from 20 to 24 GtC/yr cost 1.2 log-units on the seasonal term but 6 on the CO₂
+*level* term, because a larger seasonal cycle rectifies against the log CO₂-fertilisation term
+and shifts the annual mean. The amplitude would have been set by its rectification side-effect.
+Per-year scoring (~50 term pairs per station) restores the intended ordering: the seasonal term
+now moves 62 log-units over that same amplitude change against the level term's 6.
+
+**Performance regression caught and fixed.** The first implementation called `ccx_year_harmonic()`
+(a `qr.solve` and a data.frame per year) on four model series inside the MCMC loop, taking the
+posterior evaluation **0.046 s → 0.718 s** — 40 hours for a production run. The model, unlike the
+observations, is on an exact monthly grid, so every full year shares one design matrix and the
+reduction is a single 4×12 by 12×N product. Back to **0.046 s**. `test-likelihood.R` gates the
+fast path against the general estimator so the two cannot drift.
+
+`ccx_loglik(..., by_stream = TRUE)` now returns the 12-stream decomposition — a single number
+cannot show which constraint a fit is paying for. At uncalibrated defaults:
+
+```
+co2_level_MLO -8138.2  co2_level_SPO -6909.8  co2_seasonal_MLO -1024.6  co2_seasonal_SPO -107.9
+co2_icecore   -1589.2  d13c_level_MLO -511.8  d13c_level_SPO    -294.2  d14c_NH        -3079.5
+d14c_SH       -3515.4  d14c_intcal    -674.1  gcb_ocean_sink     -17.4  gcb_land_sink   -126.2
+```
+
+New gate `tests/testthat/test-likelihood.R`: estimator correctness, partial-coverage immunity,
+fast-path equality, and **regression tests for the specific historical failure** — a +50 ppm bias
+must cost > 10,000 log-units (it cost 13.7), `sigma_co2`'s profile must have an interior maximum
+(it collapsed to 0.0744 ppm), and the seasonal term must have interior optima in both amplitude
+and phase. Suite **264 / 0 / 2**.
+
+Pre-fix calibration outputs quarantined to
+`calibration/output/quarantine/20260811_ar1_pathology_and_solver_wall/` with a README. They carry
+18 parameters against the current 17, so loading one and feeding `u_mode` to a current
+`ccx_make_logpost()` would silently misalign every parameter.
