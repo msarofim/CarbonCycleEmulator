@@ -1,3 +1,32 @@
-start: log-post at hand-set init = -96328.2
+start: log-post at hand-set init = -84837.5
        pilot best (for reference) = -6469.0
-restart  1: log-post =      -9369.6  (gain 86958.6238)  evals 20001
+restart  1: log-post =      -8759.8  (gain 76077.7133)  evals 9243
+restart  2: log-post =      -8740.3  (gain    19.4831)  evals 25594
+restart  3: log-post =      -8740.1  (gain     0.2026)  evals 36971
+restart  4: log-post =      -8739.9  (gain     0.2339)  evals 48812
+restart  5: log-post =      -8739.8  (gain     0.1118)  evals 59859
+restart  6: log-post =      -8739.7  (gain     0.0292)  evals 74482
+restart  7: log-post =      -8739.6  (gain     0.1168)  evals 83755
+restart  8: log-post =      -8739.5  (gain     0.0863)  evals 95496
+restart  9: log-post =      -8739.5  (gain     0.0498)  evals 105341
+restart 10: log-post =      -8739.5  (gain     0.0400)  evals 114718
+restart 11: log-post =      -8739.4  (gain     0.0694)  evals 122283
+restart 12: log-post =      -8739.4  (gain     0.0242)  evals 134200
+BFGS polish: log-post = -8736.6 (gain 2.7821)
+hessian: central differences, 18 parameters
+Laplace covariance: NOT positive-definite at this point -- mode is not a clean interior optimum (see saved Hessian)
+
+mode log-post = -8736.6  (gain over init 76100.9, over pilot best -2267.6)
+elapsed 103.3 min, 135585 posterior evaluations (0.046 s/eval)
+
+mode, natural scale:
+         beta           q10           k_w          h_ml            kz 
+       0.1961        0.2802      273.1705      152.3510   175789.9269 
+       tau_ex   npp_frac_NH   seas_amp_NH   seas_amp_SH seas_phase_NH 
+       1.3261        0.6876       17.4020        3.9565        4.0255 
+seas_phase_SH    gamma_enso      tau_soil    bomb_total     sigma_co2 
+      10.8328        0.0004       36.9607       98.5575        0.0744 
+   sigma_d13c    sigma_d14c           rho 
+       0.0071        8.1275        0.9981 
+
+wrote calibration/output/mode_fit_bombwin.rds

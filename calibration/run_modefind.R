@@ -23,7 +23,15 @@ MODE_MAXIT       <- 20000   # Nelder-Mead default 500 is far too small for 18 pa
 MODE_RESTARTS    <- 12      # consecutive restarts; stops early on convergence
 MODE_TOL         <- 1e-4    # stop when a restart gains less than this in log-post
 MODE_PENALTY     <- 1e6     # finite stand-in for -Inf so optim can navigate
-MODE_HESS_EPS    <- 1e-3    # step on the unconstrained scale for the Hessian
+MODE_HESS_EPS    <- 3e-4    # step on the unconstrained scale for the Hessian.
+                            # 1e-3 WAS TOO LARGE and produced a non-PD Hessian:
+                            # at the bomb-window mode, stepping log(kz) by 1e-3
+                            # costs 49,000 log-units and 1e-2 leaves the feasible
+                            # region, so the central difference returned -4.9e10
+                            # where the true second derivative is -41.3. Always
+                            # confirm with calibration/recompute_hessian.R, which
+                            # sweeps the step and checks curvature is stable
+                            # before trusting the covariance.
 MODE_OUT         <- file.path("calibration", "output", "mode_fit.rds")
 PILOT_BEST_LP    <- -6469   # best log-posterior seen in the pilot, for reference
 
@@ -108,7 +116,7 @@ if (ok_pd) {
   Cor <- Sigma / outer(sdv, sdv)
   ev  <- eigen(Sigma, symmetric = TRUE)
   cat(sprintf("Laplace covariance: PD, condition number %.3g\n",
-              max(ev$values) / min(ev$values)))
+              max(abs(ev$values)) / min(abs(ev$values))))
 } else {
   Cor <- NULL; ev <- NULL; sdv <- NULL
   cat("Laplace covariance: NOT positive-definite at this point -- ",

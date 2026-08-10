@@ -718,3 +718,45 @@ behaviour remains an independent test. Recorded as a caveat rather than papered 
 Smoothing window (`CCX_BOMB_SMOOTH`) is immaterial: 3, 5, 9 months agree to <1 %.
 λ moved 0.1687 → 0.1996 /yr; the independent gross-air-sea check is 0.1495 /yr, now 75 % of
 it (was 89 %), a more plausible ocean/biosphere split. Tests unchanged: 174 / 0 / 2.
+
+## 2026-08-10 (session B close) — Mode found; posterior is pathological; production run BLOCKED
+
+Mode-finding works: +81,718 log-units on the pre-bomb-window likelihood, beating the
+original pilot's best on restart 1 — that pilot never left burn-in, as suspected. On the
+final likelihood, init −84,837.5 → mode −8,736.6 (103 min, 135,585 evals @ 0.046 s).
+
+**But the previous handoff's diagnosis was wrong.** It said the failed pilot was "a
+too-short-chain and bad-starting-point problem, not evidence of a broken posterior." It is
+evidence of a broken posterior.
+
+- **My bug first:** `MODE_HESS_EPS = 1e-3` produced a non-PD Hessian with entries like
+  −5.4e61. Stepping `log(kz)` by 1e-3 costs 49,000 log-units; the true second derivative at
+  1e-4 is −41.3. Now 3e-4, with `calibration/recompute_hessian.R` sweeping the step and
+  checking curvature stability before any covariance is trusted. Also fixed a
+  condition-number print taking max/min of negative eigenvalues.
+- **Suspected ridge REFUTED.** With a valid Hessian the strongest correlations are
+  `beta`↔`q10` (+0.817) and `k_w`↔`bomb_total` (+0.813), not the guessed
+  `k_w`/`h_ml`/`kz`. Condition number ~2.4e6; `h_ml` is the least-constrained parameter.
+- **Re-pilot from the mode:** acceptance `0.000, 0.000, 0.205, 0.187`, worst R̂ 9.672.
+  All four chains start at `lp = -Inf` even at 0.5 posterior-sd dispersion. Chains 3–4
+  reached ~0.2 only because from `-Inf` the first finite proposal is always accepted.
+- **Root cause:** the mode's `kz = 175,790` is within ~1 % of a hard feasibility boundary
+  whose posterior sd is ~20 %. The `-Inf` is **solver failure, not zero probability** —
+  the spinup is fine (`prod_c14` ≈ 333 throughout); `ccx_run_fast()` returns NAs in
+  `co2_NH` above kz ≈ 177,000 and the `anyNA` guard converts that to `-Inf`. The optimiser
+  maximised into a numerical wall. **The posterior is silently truncated by numerics.**
+- **The mode is not physically credible:** `q10` = 0.280 (−7.9σ, and Q10 < 1 means
+  respiration falls with warming), `kz` +6.3σ, `sigma_co2` = 0.074 ppm (−4.3σ),
+  `k_w` −4.3σ, `rho` railed at 0.998.
+- **Probable cause — the AR(1) error model.** As `rho`→1 the innovation becomes
+  `(r_t − r_{t−1})/sd`, so optimal `sd` collapses to the RMS of residual *increments*, not
+  the level. Profiles confirm genuine interior maxima, not runaway: `rho` prefers 0.998
+  over 0.90 by **3,916 log-units**; `sigma_co2` peaks at 0.074 ppm. The AR(1) term absorbs
+  systematic mismatch as correlated noise, removing the penalty on bias — which also
+  explains why the −118 ‰ bomb-window bias survives untouched.
+
+**PRODUCTION MCMC IS BLOCKED** pending (1) a real fix for the solver limit — an `-Inf`
+meaning "the integrator broke" must not serve as a prior bound — and (2) a decision on the
+AR(1)/σ error model, which is a methodological choice for Marcus, not one to pick silently.
+
+Handoff: `notes/handoff_2026-08-10b_bomb14c_and_sampler.md`.

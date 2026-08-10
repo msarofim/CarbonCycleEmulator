@@ -23,7 +23,7 @@ MODE_MAXIT       <- 20000   # Nelder-Mead default 500 is far too small for 18 pa
 MODE_RESTARTS    <- 12      # consecutive restarts; stops early on convergence
 MODE_TOL         <- 1e-4    # stop when a restart gains less than this in log-post
 MODE_PENALTY     <- 1e6     # finite stand-in for -Inf so optim can navigate
-MODE_HESS_EPS    <- 1e-3    # step on the unconstrained scale for the Hessian
+MODE_HESS_EPS    <- 3e-4    # see run_modefind.R: 1e-3 gave a non-PD Hessian
 MODE_OUT         <- file.path("calibration", "output", "mode_fit_bombwin.rds")
 PILOT_BEST_LP    <- -6469   # pilot best on the PRE-bomb-window likelihood; not
                             # comparable to this run, printed only as a marker
@@ -109,7 +109,7 @@ if (ok_pd) {
   Cor <- Sigma / outer(sdv, sdv)
   ev  <- eigen(Sigma, symmetric = TRUE)
   cat(sprintf("Laplace covariance: PD, condition number %.3g\n",
-              max(ev$values) / min(ev$values)))
+              max(abs(ev$values)) / min(abs(ev$values))))
 } else {
   Cor <- NULL; ev <- NULL; sdv <- NULL
   cat("Laplace covariance: NOT positive-definite at this point -- ",
