@@ -15,7 +15,17 @@ SSPs, stylized pathways, and matched pulse/baseline experiments.
 **Audience:** people with an introductory environmental-science background (think
 undergraduate environmental studies).
 
-**Status:** design phase. See [DESIGN.md](DESIGN.md) for the full specification and
-[CHANGELOG.md](CHANGELOG.md) for the project log.
+**Status:** model core built and running end-to-end on uncalibrated defaults; calibration
+and app pending.
+
+| Document | Contents |
+|---|---|
+| [DESIGN.md](DESIGN.md) | model specification, calibration design, sanity gates |
+| [DATA.md](DATA.md) | every data source, its traps, and the code that assembles it |
+| [CHANGELOG.md](CHANGELOG.md) | decision log, including what was tried and abandoned |
+
+```bash
+Rscript data-raw/download_data.R && Rscript data-raw/build_carbonate_tables.R && Rscript data-raw/build_calibration_data.R && Rscript tests/run_tests.R
+```
 
 **Author:** Marcus C. Sarofim (NYU Marron Institute)

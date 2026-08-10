@@ -383,3 +383,60 @@ Nothing in the spinup targets it — it falls out of Kz, ocean geometry and deca
 Spinup residuals: |dC/dt| 6.3e-09 GtC/yr, |dC13/dt| 8.9e-16, |dC14/dt| 6.6e-14; CO₂, δ¹³C
 and Δ¹⁴C reproduce their targets to 1e-6. Integrating the spinup state forward 50 yr moves
 CO₂ by <1e-4 relative and Δ¹⁴C by <0.05 ‰.
+
+## 2026-08-10 — Forcing assembly, first end-to-end run, and DATA.md
+
+`R/forcing.R`, `tests/testthat/test-forcing.R`, and **[DATA.md](DATA.md)** — a single
+document covering every source, its traps, and the code that assembles it.
+Suite: **167 passing**.
+
+### Two conservation bugs in the forcing assembly, both silent
+
+Annual→monthly interpolation must preserve annual totals: emissions drive cumulative
+carbon, so an interpolation that changes annual sums changes the answer while looking
+perfectly smooth.
+
+1. **Splining the bomb-¹⁴C series inflated its prescribed total by 4.3 %.** A natural
+   spline undershoots either side of the sharp 1962 peak; clipping those negatives back to
+   zero *adds* mass. Fixed with a `method = "constant"` (piecewise-constant, exactly
+   conserving, cannot undershoot) branch, now used for all sharply peaked non-negative
+   sources. The underlying data are annual anyway, so smoothing was never justified.
+2. **Masking source records with decimal time dropped the entire final year of each.**
+   Month-centred `t` for year Y runs Y.04…Y.96, all of which satisfy `t > Y`. Cost another
+   0.28 % of the bomb total, and silently truncated the last year of nuclear ¹⁴C. Masks now
+   compare integer years.
+
+Both are gated: cumulative fossil emissions must match GCB to 1e-10, and the bomb total
+must be set by its citable prior rather than by the provisional shape (tested at three
+different totals, since a shape that set the amplitude would pass a single-value test).
+
+### First full historical run, 1750–2024
+
+Runs end to end in 20 s. With **uncalibrated** default parameters:
+
+| Quantity | Model | Observed |
+|---|---|---|
+| CO₂ 2024 | 464 ppm | 421 |
+| Airborne fraction 1959–2024 | 0.519 | 0.431 |
+| Ocean / land sink 2015–24 | 2.82 / 1.97 GtC/yr | 3.22 / 2.36 |
+| δ¹³C 2024 NH | −9.30 ‰ | −8.70 |
+| Δ¹⁴C peak | +998 ‰ at 1963.0 | +945 ‰ at 1963.6 |
+| Δ¹⁴C 2019 NH | +14 ‰ | ~+5 |
+
+Every discrepancy points the **same direction** and reduces to one cause: sinks too weak →
+airborne fraction too high → CO₂ too high → δ¹³C too depleted (extra fossil carbon left
+airborne). That internal consistency is the reassuring part — CO₂ high *with* δ¹³C
+enriched would indicate a bug rather than a parameter miss. β, k_w and Kz are guesses.
+
+The Δ¹⁴C bomb peak landing within 5 % of observed in both height and timing is encouraging
+given the provisional shape, but **must not be read as validation** — the shape is a
+placeholder and the amplitude comes from the Naegler & Levin prior.
+
+### DATA.md
+
+Documents the three-stage pipeline (acquire → parse → assemble), all calibration targets,
+all forcings, the cross-checks that compare independent datasets, every assembly decision
+as a named constant, the outstanding gaps, and licences. Records the traps found so far:
+the Scripps column-5 rule, per-file missing-value markers, duplicate `age_CO2` columns,
+non-constant inter-network offsets, the seasonal-aliasing rule for the gradient, the three
+distinct ¹⁴C time constants, and why MLO flask data cannot replace the in-situ record.
