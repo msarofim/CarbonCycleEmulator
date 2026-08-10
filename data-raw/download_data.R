@@ -173,6 +173,39 @@ record("d14c_hua", hua_file,
              "1941-2019. NH box target = NHZone1/2/3; SH box target = SHZone1-2 + SHZone3."))
 
 # ---------------------------------------------------------------------
+# 6b. Nuclear-industry gaseous 14C emissions (Zenodo, CC-BY-4.0)
+# ---------------------------------------------------------------------
+# NOT the bomb source -- this is routine reactor + reprocessing release. It was
+# originally slated for the v2 backlog as "small", but a magnitude check
+# (CHANGELOG 2026-08-10) showed it reaches ~11 % of the modern observed D14C
+# tendency, so it is a v1 term. Units are GBq of 14C.
+cat("[6b] Nuclear-industry 14C emissions (Laemmel et al., Zenodo 15034663)\n")
+
+NUC_DIR <- file.path(DL_DIR, "nuclear14c")
+dir.create(NUC_DIR, showWarnings = FALSE, recursive = TRUE)
+nuc_files <- c(
+  "NFRP_14C_annual_emissions_1950_2023.csv",
+  "Other_countries_NPP_14C_annual_emissions_1983_2023.csv",
+  "USA_NPP_14C_annual_emissions_2010_2023.csv",
+  "Canada_NPP_14C_annual_emissions_1985_2023.csv",
+  "Germany_NPP_14C_annual_emissions_1976_2023.csv",
+  "France_NPP_14C_annual_emissions_2005_2023.csv",
+  "China_NPP_14C_annual_emissions_2013_2023.csv",
+  "South_Korea_NPP_14C_annual_emissions_1998_2023.csv",
+  "Switzerland_NPP_14C_annual_emissions_1990_2023.csv"
+)
+for (nf in nuc_files) {
+  dest <- file.path("nuclear14c", nf)
+  fetch(paste0("nuc_", sub("_14C.*", "", nf)),
+        sprintf("https://zenodo.org/records/15034663/files/%s?download=1", nf),
+        dest,
+        paste("Laemmel T, Knaack T, Heckel A, Wenger A, Szidat S (2025).",
+              "Compilation of nuclear industry's gaseous radiocarbon emissions",
+              "from 1950 to 2023. Zenodo, doi:10.5281/zenodo.15034663. CC-BY-4.0."),
+        "GBq 14C; semicolon-delimited; NPP = power plants, NFRP = fuel reprocessing")
+}
+
+# ---------------------------------------------------------------------
 # 7. Local provenance — files reused from sibling projects (not downloaded)
 # ---------------------------------------------------------------------
 cat("[7] Local inputs copied from sibling repos\n")

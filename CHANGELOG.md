@@ -225,3 +225,41 @@ indicative only.
 
 δ¹³C Suess trajectory is now two-hemisphere on one isotope scale: −6.469 ‰ (preindustrial,
 Law Dome) → −8.700 ‰ (MLO 2024) / −8.580 ‰ (SPO 2024).
+
+## 2026-08-10 — Nuclear-industry ¹⁴C source PROMOTED to v1 (assumption overturned)
+
+Marcus proposed the Bristol/Zenodo compilation of nuclear-industry gaseous ¹⁴C emissions.
+It is **not** the bomb source — it covers routine reactor and reprocessing releases — but
+checking it against the v1 spec overturned an assumption I had written there.
+
+DESIGN.md §3.5 previously said "Nuclear-industry ¹⁴C source: omitted in v1 (small), v2".
+That "small" was never verified. It is wrong in the way that matters.
+
+**Magnitude check.** Summing the annual files (GBq → mol via λ = ln2/5700 yr;
+1 GBq = 4.309e-4 mol ¹⁴C): total industry release is **1.165 kmol**, i.e. **1.14 % of the
+~102 kmol bomb production** — which is what makes "small" superficially plausible. But the
+*time profiles are opposite*. Industry releases grow monotonically —
+0.20 → 1.10 → 4.12 → 8.08 → 17.51 → 25.62 → **42.47 mol/yr** by the 2010s — while the bomb
+spike decays and is absorbed.
+
+Against a 2010s atmospheric inventory of **86.1 kmol ¹⁴C** (880 GtC at R_std = 1.176e-12 —
+note this is comparable to total bomb production, consistent with the bomb roughly doubling
+atmospheric ¹⁴C at its ~+900 ‰ peak), 42.5 mol/yr is **+0.49 ‰/yr**. The observed NHZone1
+trend over 2005–2019 is **−4.30 ‰/yr**. So the industry source is **~11 % of the modern
+observed tendency** — far too large to drop from a model whose whole point is to reproduce
+the Δ¹⁴C record.
+
+Two bounding caveats push opposite ways: +0.49 ‰/yr is an **upper** bound (assumes all
+released ¹⁴C stays airborne; it actually partitions into ocean and land), while the
+emissions sum is a **lower** bound (coverage gaps — USA only 2010–2023, France NPP 2005+).
+11 % is the right order of magnitude, not a precise number.
+
+Emissions are almost entirely Northern Hemisphere, so this term also projects onto the
+NH−SH Δ¹⁴C difference — the same signal that constrains τ_ex. Added to
+`download_data.R` (9 annual files, CC-BY-4.0, doi:10.5281/zenodo.15034663).
+
+**Bomb-source prior now sourced.** Naegler & Levin (2006), *Closing the global radiocarbon
+budget 1945–2005*, JGR 111, doi:10.1029/2005JD006758: total bomb ¹⁴C production 1945–1980
+= **99.3–104.9 kmol** (598–632 × 10²⁶ atoms). That fixes the prior on the calibrated
+P_bomb. **Still outstanding: the time SHAPE** — an annual atmospheric test-yield series
+(UNSCEAR 2000 Annex C is the standard compilation).

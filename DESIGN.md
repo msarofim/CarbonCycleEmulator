@@ -131,10 +131,26 @@ d M_atm[h]/dt =
     spinup (solar-cycle modulation is v2). Spinup yields the natural Δ¹⁴C depth profile —
     deep-ocean Δ¹⁴C ≈ −150 to −200 ‰ [VERIFY] is a free check we get for nothing.
   - **Bomb source:** prescribed test-yield time history shape, total production P_bomb
-    [CAL] with prior from Naegler & Levin (2006) [VERIFY], injected into the NH (and small
-    SH share [VERIFY]) troposphere through the τ_strat delay kernel.
+    [CAL]. **Prior now sourced:** Naegler & Levin (2006), *Closing the global radiocarbon
+    budget 1945–2005*, JGR 111, doi:10.1029/2005JD006758, give total bomb ¹⁴C production
+    1945–1980 as **99.3–104.9 kmol** (598–632 × 10²⁶ atoms). Injected into the NH (and a
+    small SH share [VERIFY]) troposphere through the τ_strat delay kernel.
+    **Still outstanding: the time SHAPE** — an annual atmospheric test-yield series
+    (UNSCEAR 2000 Report Annex C is the standard compilation).
   - **Fossil fuel:** ¹⁴C-free by definition → Suess dilution emerges.
-  - Nuclear-industry ¹⁴C source: omitted in v1 (small), v2 (§10).
+  - **Nuclear-industry source: IN v1** (promoted from the v2 backlog 2026-08-10 after a
+    magnitude check overturned the "small" assumption). Prescribed from the Laemmel et al.
+    (2025) compilation of reactor + reprocessing gaseous ¹⁴C releases, 1950–2023, in GBq.
+    Cumulatively it is only ~1.1 % of bomb production, but its time profile is the
+    *opposite* of the bomb's: releases **grow** from 0.20 mol ¹⁴C/yr (1950s) to
+    42.5 mol/yr (2010s) while the bomb spike decays away. Against a 2010s atmospheric
+    inventory of 86.1 kmol ¹⁴C, 42.5 mol/yr is **+0.49 ‰/yr**, versus an observed NH
+    trend of **−4.30 ‰/yr** — i.e. **~11 % of the modern tendency**. Emissions are almost
+    entirely NH, so the term also projects onto the NH−SH Δ¹⁴C difference.
+    Bounding caveats point opposite ways: +0.49 ‰/yr is an upper bound (it assumes all
+    released ¹⁴C stays airborne, whereas it partitions into ocean and land), while the
+    emissions total is a lower bound (file coverage is incomplete — USA only 2010–2023,
+    France NPP only 2005+). 11 % is the right order, not a precise figure.
 
 ### 3.6 Forcings (all prescribed, monthly-interpolated)
 
@@ -383,7 +399,7 @@ provenance stamps; commit per unit of work; quarantine-don't-delete for bugged o
 
 ## 10. v2 backlog (explicitly out of v1)
 
-Solar-modulated cosmogenic ¹⁴C production; nuclear-industry ¹⁴C source; explicit
+Solar-modulated cosmogenic ¹⁴C production; explicit
 stratosphere boxes (if τ_strat kernel proves inadequate); volcanic/Pinatubo diffuse-light
 term; time-varying fossil δ¹³C fuel mix; ocean advective overturning loop; user-drawn
 emissions in the app; N₂O/CH₄; permafrost.
