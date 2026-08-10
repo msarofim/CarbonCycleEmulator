@@ -108,6 +108,16 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
 
   # --- flux helper: emit once, apply twice, opposite signs ------------
   # `alpha13` is the 13C fractionation factor on this flux (1 = none).
+  #
+  # GROSS, NOT NET. Isotopes are carried at the SOURCE box's ratio, so an
+  # interface represented only by its NET carbon flux transfers no isotope at
+  # all when that net is zero -- which is exactly the preindustrial state. Air-sea
+  # gross exchange is ~80 GtC/yr each way against a ~2 GtC/yr net, and it is the
+  # gross exchange that equilibrates 13C and 14C. Representing only the net made
+  # the preindustrial isotope operator singular (caught by ccx_spinup, 2026-08-10).
+  # So every bidirectional interface is emitted as TWO one-way gross fluxes.
+  # A signed net flux is still fine where the process really is one-way at a time
+  # (seasonal NEP, ENSO), and add_flux handles the sign by swapping the source.
   add_flux <- function(from, to, F_C, alpha13 = 1) {
     if (F_C == 0) return(invisible(NULL))
     # ratios taken from the SOURCE box; for a negative flux the source is `to`
@@ -122,6 +132,20 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     dy[to,   "C13"] <<- dy[to,   "C13"] + f13
     dy[from, "C14"] <<- dy[from, "C14"] - f14
     dy[to,   "C14"] <<- dy[to,   "C14"] + f14
+    invisible(NULL)
+  }
+
+  # --- diffusion acts on EACH TRACER's own gradient -------------------
+  # Not on the net carbon flux times a ratio: 13C and 14C diffuse down their own
+  # concentration gradients, which is what builds the deep-ocean 14C depletion
+  # even where the net carbon flux vanishes. Antisymmetric, so still exactly
+  # conservative for every tracer.
+  add_diffusion <- function(a, b, dz_a, dz_b, dz_mid) {
+    for (tr in CCX_TRACERS) {
+      F_t <- p$kz * (y[a, tr] / dz_a - y[b, tr] / dz_b) / dz_mid
+      dy[a, tr] <<- dy[a, tr] - F_t
+      dy[b, tr] <<- dy[b, tr] + F_t
+    }
     invisible(NULL)
   }
 
@@ -168,17 +192,17 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     k      <- carb_constants(sst)
     pco2_ml <- pco2_from_dic(dic_ml, ccx_const("ALK_SURFACE"), sst, k = k)
     pco2_at <- chi                                                  # ppm ~ uatm at 1 atm
-    F_as <- aux$asx[[h]] * p$k_w * k$K0 * (pco2_at - pco2_ml)
-    add_flux(iatm, iml, F_as, alpha13 = aux$alpha_as)
+    # GROSS both ways (see add_flux header): invasion and evasion separately.
+    gx <- aux$asx[[h]] * p$k_w * k$K0
+    add_flux(iatm, iml, gx * pco2_at, alpha13 = aux$alpha_as_down)   # invasion
+    add_flux(iml, iatm, gx * pco2_ml, alpha13 = aux$alpha_as_up)     # evasion
 
     # ---- ocean interior diffusion -----------------------------------
     # F = Kz (C_k/dz_k - C_k+1/dz_k+1) / dz_mid  -- area cancels, exactly
     # conservative, and each flux is applied to both layers by add_flux.
     col <- c(iml, ioc)
     for (kk in seq_len(grid$nl)) {
-      a <- col[kk]; b <- col[kk + 1]
-      F_d <- p$kz * (y[a, "C"] / grid$dz[kk] - y[b, "C"] / grid$dz[kk + 1]) / aux$dz_mid[kk]
-      add_flux(a, b, F_d)
+      add_diffusion(col[kk], col[kk + 1], grid$dz[kk], grid$dz[kk + 1], aux$dz_mid[kk])
     }
 
     # ---- prescribed emissions ---------------------------------------
@@ -188,8 +212,12 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
   }
 
   # ---- interhemispheric atmospheric exchange -------------------------
+  # Gross both ways, for the same reason as air-sea: the NH-SH isotope gradient
+  # (the bomb-spike propagation signal) is set by gross exchange, not by the
+  # small net flux.
   iN <- aux$idx$NH$atm; iS <- aux$idx$SH$atm
-  add_flux(iN, iS, (y[iN, "C"] - y[iS, "C"]) / p$tau_ex)
+  add_flux(iN, iS, y[iN, "C"] / p$tau_ex)
+  add_flux(iS, iN, y[iS, "C"] / p$tau_ex)
 
   # ---- 14C sources (mol/yr -> GtC-equivalent units) and decay ---------
   # A mol of pure 14C carries R14_STD^-1 times as much "C14 signal" as a mol of
@@ -238,7 +266,11 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
       A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC")),
     dz_mid = (grid$dz[-length(grid$dz)] + grid$dz[-1]) / 2,
     alpha_photo = 1 - 18 / 1000,     # provisional, see constants.R note
-    alpha_as    = 1 -  2 / 1000,     # provisional
+    # air-sea 13C fractionation differs by direction: kinetic on invasion,
+    # equilibrium on evasion. With gross fluxes both must be carried separately
+    # -- a single "net" alpha cannot represent the two-way exchange.
+    alpha_as_down = 1 -  2 / 1000,   # provisional, kinetic (atm -> ocean)
+    alpha_as_up   = 1 - 10 / 1000,   # provisional, equilibrium (ocean -> atm)
     d13c_foss   = -28,               # provisional
     d13c_bio    = -25,               # provisional
     enso_share  = list(NH = 0.5, SH = 0.5),

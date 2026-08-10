@@ -51,7 +51,10 @@ test_that("provisional constants are reported, not silently used", {
   expect_true(is.character(prov))
   # This is a LEDGER, not a pass/fail: it records which constants still need
   # sourcing. Update the expected set deliberately when one is retired.
-  expect_setequal(prov, c("D14C_PI", "OCEAN_AREA_NH", "OCEAN_AREA_SH", "OCEAN_DEPTH",
+  # D14C_PI was RETIRED from this list on 2026-08-10 (IntCal20 supplied +2.16
+  # per mil, replacing a 0-by-construction placeholder). The ledger failing on a
+  # retirement is the intended behaviour -- it forces the update to be deliberate.
+  expect_setequal(prov, c("OCEAN_AREA_NH", "OCEAN_AREA_SH", "OCEAN_DEPTH",
                           "ALK_SURFACE", "RHO_SEAWATER", "NPP_GLOBAL_PI",
                           "SST_PCO2_SENSITIVITY"))
 })

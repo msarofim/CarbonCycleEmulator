@@ -216,6 +216,37 @@ cat(sprintf("[4] Hua D14C: %d zones, %.2f-%.2f, n=%d\n",
 cat("    NOTE: NH/SH box aggregation weights across zones are a FLAGGED choice\n")
 cat("          (zone areas differ); all 5 zones stored, weighting deferred to the likelihood.\n")
 
+# --- IntCal20 pre-bomb atmospheric Delta14C ---------------------------
+# Hua et al. starts 1941, which leaves 1750-1941 -- the whole pre-bomb Suess
+# decline -- unconstrained. IntCal20 (tree rings) covers it. Conversion from
+# the published conventional radiocarbon age uses BOTH reporting constants:
+#   F14C = exp(-C14age / 8033)      8033 = Libby mean life, the AGE convention
+#   D14C = 1000 (F14C exp(calBP/8267) - 1)   8267 = 5730-yr mean life, the
+#                                            Stuiver-Polach D14C convention
+# NEITHER is the model's decay constant, which uses the true 5700-yr half-life.
+# All three coexist correctly; conflating them is a classic 14C error.
+if (requireNamespace("rintcal", quietly = TRUE)) {
+  ic <- as.data.frame(rintcal::ccurve(cc = 1))
+  names(ic)[1:3] <- c("calBP", "C14BP", "err")
+  ic <- as.data.table(ic)
+  ic[, year_CE := 1950 - calBP]
+  ic[, F14C := exp(-C14BP / 8033)]
+  ic[, d14c := 1000 * (F14C * exp(calBP / 8267) - 1)]
+  intcal <- ic[year_CE >= 1700 & year_CE <= 1950, .(year = year_CE, d14c, err)]
+  saveRDS(intcal, file.path(OUT, "obs_d14c_intcal20.rds"))
+  cat(sprintf("[4b] IntCal20 pre-bomb D14C: %d-%d, n=%d; 1750 = %+.2f permil\n",
+              min(intcal$year), max(intcal$year), nrow(intcal),
+              intcal[year == 1750, d14c]))
+  # cross-check against Hua over the overlap -- independent datasets
+  ovh <- merge(d14c_obs[zone == "NHZone1" & decimal_date < 1951,
+                        .(year = floor(decimal_date), h = d14c)][, .(h = mean(h)), by = year],
+               intcal[, .(year, i = d14c)], by = "year")
+  cat(sprintf("     cross-check vs Hua NHZone1 over %d overlapping yr: mean |diff| = %.2f permil\n",
+              nrow(ovh), mean(abs(ovh$h - ovh$i))))
+} else {
+  warning("rintcal not installed; IntCal20 pre-bomb D14C target skipped")
+}
+
 # =====================================================================
 # 5. Global Carbon Budget
 # =====================================================================

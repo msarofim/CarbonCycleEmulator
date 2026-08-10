@@ -89,15 +89,14 @@ CCX_CONSTANTS <- list(
     source = "Law Dome d13C spline (Rubino et al. 2019), 1745-1755 mean."),
 
   D14C_PI = list(
-    value = 0.0, units = "per mil",
-    status = "provisional",
-    source = paste("SET BY CONSTRUCTION, not measured. True 1750 atmospheric Delta14C was",
-                   "a few per mil positive (IntCal). Natural 14C production is tuned to",
-                   "reproduce this value at spinup, so the model's 14C is effectively",
-                   "'relative to 1750'. Immaterial against the +945 per mil bomb peak, but",
-                   "it does shift the pre-bomb Suess decline target by the same few per mil.",
-                   "FLAGGED: replace with an IntCal-derived 1750 value if the pre-bomb",
-                   "Suess fit matters.")),
+    value = 2.16, units = "per mil",
+    status = "data",
+    source = paste("IntCal20 (Reimer et al. 2020) at 1750 CE, via the rintcal package;",
+                   "converted from conventional 14C age with F14C = exp(-age/8033) and",
+                   "Delta14C = 1000(F14C exp(calBP/8267) - 1). Replaces an earlier",
+                   "0-by-construction placeholder, which was wrong by this full 2.16 per mil",
+                   "-- ~8 % of the 26.6 per mil pre-bomb Suess decline it has to reproduce.",
+                   "Validated against Hua et al. (2022) over 1941-1950: mean |diff| 0.90 per mil.")),
 
   # ---- ocean geometry -------------------------------------------------
   OCEAN_AREA_NH = list(

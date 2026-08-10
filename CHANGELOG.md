@@ -322,3 +322,64 @@ per stage, and `add_flux()` is a closure using `<<-`.
 surface alkalinity, seawater density, preindustrial NPP, the SST–pCO₂ sensitivity (which
 must be checked for double-counting against the carbonate module's own T dependence), and
 the 1750 Δ¹⁴C, which is currently **set to 0 by construction** rather than measured.
+
+## 2026-08-10 — Natural ¹⁴C production, IntCal20 background, and a gross-flux physics fix
+
+Marcus asked whether a natural ¹⁴C source and background rate were needed. Both yes, and
+answering it exposed a structural bug in the derivative. Suite: **138 passing**.
+
+### Natural production is not optional
+
+Unbalanced decay (λ = 1.216e-4/yr) drifts atmospheric Δ¹⁴C by **−24.0 ‰ over 200 yr** and
+**−41.7 ‰ over 350 yr**. The pre-bomb Suess decline the model must reproduce is
+**−26.6 ‰** (IntCal20, 1750→1950). Without a cosmogenic source the artefact is *larger
+than the signal*.
+
+**It is solved for, not prescribed.** `ccx_spinup()` finds the production rate that holds
+atmospheric Δ¹⁴C at its 1750 value in steady state, given the model's own inventory and
+ventilation. The canonical cosmogenic estimate (~2.04 atoms/cm²/s ≈ 545 mol ¹⁴C/yr) is
+therefore an **independent validation**, not an input. Derived value: **360 mol/yr,
+ratio 0.66**. Consistent with the model's ocean inventory (32,827 GtC) sitting ~14 % below
+the canonical ~38,000 GtC, plus the published spread in production (1.6–2.5 atoms/cm²/s).
+A factor-2 miss would have meant a units bug; 0.66 does not. Gated at 0.5–2.0.
+
+### Background level: IntCal20 replaces a placeholder
+
+`D14C_PI` was **0 by construction**. IntCal20 (via `rintcal`) gives **+2.16 ‰ at 1750** —
+the placeholder was wrong by ~8 % of the whole pre-bomb decline it has to reproduce.
+IntCal20 also supplies a **1700–1950 pre-bomb Δ¹⁴C target**, covering the 1750–1941 window
+Hua et al. leaves empty. Conversion uses both reporting constants — F14C = exp(−age/8033)
+(Libby mean life, age convention) and Δ¹⁴C = 1000(F14C·exp(calBP/8267) − 1) (5730-yr mean
+life, Stuiver–Polach convention) — **neither of which is the model's decay constant**,
+which uses the true 5700-yr half-life. All three coexist correctly; conflating them is a
+classic ¹⁴C error, so it is spelled out in the parser.
+
+**Independent cross-check:** IntCal20 vs Hua NHZone1 over their 1941–1950 overlap agree to
+**0.90 ‰ mean absolute difference** — tree rings vs atmospheric compilation.
+
+### Physics bug: isotopes need GROSS fluxes, not net
+
+The spinup's isotope operator came out **exactly singular**. Cause: isotopes were carried
+at the source box's ratio on the **net** carbon flux, and at equilibrium the net fluxes are
+zero — so no isotope crossed any interface. Physically wrong: air–sea gross exchange is
+~80 GtC/yr each way against a ~2 GtC/yr net, and it is the *gross* exchange that
+equilibrates ¹³C and ¹⁴C. Fixed by:
+
+- **air–sea** emitted as two one-way gross fluxes (invasion and evasion), which also
+  required splitting the ¹³C fractionation into a kinetic factor on invasion and an
+  equilibrium factor on evasion — a single "net" α cannot represent two-way exchange;
+- **interhemispheric exchange** likewise gross both ways (this is what carries the
+  bomb-spike NH→SH propagation signal);
+- **ocean diffusion** applied to each tracer on **its own gradient**, not to the net carbon
+  flux times a ratio — this is what builds deep-ocean ¹⁴C depletion where net flux vanishes.
+
+Conservation was unaffected (all gates still exact); the rewrite is antisymmetric per tracer.
+
+### Free check that passed
+
+Deep-ocean Δ¹⁴C emerges at **−194.7 ‰** against observations of roughly −150 to −200 ‰.
+Nothing in the spinup targets it — it falls out of Kz, ocean geometry and decay. Now gated.
+
+Spinup residuals: |dC/dt| 6.3e-09 GtC/yr, |dC13/dt| 8.9e-16, |dC14/dt| 6.6e-14; CO₂, δ¹³C
+and Δ¹⁴C reproduce their targets to 1e-6. Integrating the spinup state forward 50 yr moves
+CO₂ by <1e-4 relative and Δ¹⁴C by <0.05 ‰.
