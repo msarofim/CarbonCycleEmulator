@@ -172,3 +172,56 @@ is now −6.469 ‰ (preindustrial) → −8.580 ‰ (2024).
 
 The `daily_flask_co2_isotopes_spo.csv` file (daily CO₂, CH₄, CO, ¹³C, ¹⁸O, ¹⁴C) is
 retained as provenance but unused in v1, which is a monthly model.
+
+## 2026-08-10 — Scripps Mauna Loa records added; both stations on one scale
+
+Marcus supplied the MLO counterparts. There is no MLO "merge" file — MLO has a genuine
+**in-situ continuous** record (`monthly_in_situ_co2_mlo.csv`, 1958–2026, n=812 real), which
+is better than a merge; SPO is flask-dominated, hence its merge product. Also added:
+`monthly_flask_c13_mlo.csv` (1980–2024, n=532), `monthly_flask_co2_mlo.csv` (cross-check),
+`intermittent_flask_c14_mlo.csv` (2001–2007, validation only — feeds Hua's NH zones).
+
+**Both stations now sit on the 2012 SIO manometric scale (CO₂) and the Scripps isotope
+scale (δ¹³C).** NOAA records are retained as cross-checks, not extra likelihood terms.
+
+**Parser trap:** missing-value markers differ *between Scripps files*. The merge and flask
+files use `NaN`; `monthly_in_situ_co2_mlo.csv` uses **−99.99**. Left unhandled, −99.99
+sails through as a real observation and poisons every mean it touches. Both are handled.
+
+### Finding 1 — the inter-network offset is NOT a constant
+
+Measured where both networks report: Scripps − NOAA = **−0.201 ± 0.217 ppm** at MLO
+(n=812) and **−0.134 ± 0.262 ppm** at SPO (n=543). By decade, though, the MLO offset runs
+0.000, 0.000, +0.04, −0.36, −0.31, −0.38, −0.17, −0.29 ppm — it **wanders by ~0.3 ppm**,
+so no single constant corrects it. SPO behaves similarly (+0.25, −0.22, −0.24, −0.28,
+−0.06, +0.06).
+
+The exact **0.000 ± 0.002 ppm for 1958–1969** is itself informative: NOAA's early MLO
+product *is* the Scripps record, so those years were never an independent cross-check.
+Worth remembering before treating NOAA-vs-Scripps agreement as corroboration anywhere.
+
+Using Scripps for both stations removes the mixed-network bias (which would have been
++0.134 ppm on the gradient). What remains is a ~0.07 ppm genuine disagreement between
+networks about the gradient — absorbed by the error model as uncertainty, not corrected.
+
+### Finding 2 — my own gradient benchmark was aliasing the seasonal cycle (BUG, FIXED)
+
+The MLO−SPO gradient was being computed from **raw** monthly means over whatever months
+happened to be paired. MLO has a ~6 ppm seasonal cycle against SPO's ~1 ppm, so uneven
+month coverage injects seasonality straight into the "gradient". The 1950s were the
+extreme case: 8 paired months, 5 of them Aug/Sep (MLO's seasonal minimum), producing a
+spurious **negative** gradient of −0.30 ppm — physically backwards, and it had already
+been written into DESIGN.md §6 as a data-derived target.
+
+Fixed by computing the gradient from the **seasonally adjusted** column both Scripps
+products ship. Effect by decade (raw − adjusted): 1950s **−0.77**, 1960s +0.20,
+2020s +0.13, and ≤0.03 ppm for every well-covered decade — i.e. concentrated exactly where
+coverage is sparse, as the diagnosis predicted.
+
+**Corrected benchmark, seasonally adjusted, both stations on the Scripps scale:**
+0.47 [8 paired months] (1950s) → 0.85 [75] → 1.66 [113] → 1.96 [117] → 2.32 [118] →
+2.72 [115] → 3.66 [117] → 3.97 ppm [45] (2020s partial). The 1950s entry remains
+indicative only.
+
+δ¹³C Suess trajectory is now two-hemisphere on one isotope scale: −6.469 ‰ (preindustrial,
+Law Dome) → −8.700 ‰ (MLO 2024) / −8.580 ‰ (SPO 2024).

@@ -11,8 +11,12 @@ header (flask archives dated 19-Apr-2024 and 21-Feb-2025).
 
 | File | Contents | Used for |
 |---|---|---|
-| `monthly_merge_co2_spo.csv` | South Pole monthly CO2 (ppm), flask + sporadic in situ 1960–63, 1957-06 → 2024-12 | **Primary SH CO2 target** (replaces the NOAA 1975+ flask record) |
-| `monthly_flask_c13_spo.csv` | South Pole monthly d13C (per mil), Scripps isotope scale, 1977-03 → 2024-12 | **Primary SH d13C target** (replaces NOAA 1993–2014) |
+| `monthly_in_situ_co2_mlo.csv` | Mauna Loa monthly CO2 (ppm), **in-situ continuous**, 1958–2026, n=812 real | **Primary NH CO2 target** |
+| `monthly_merge_co2_spo.csv` | South Pole monthly CO2 (ppm), flask + sporadic in situ 1960–63, 1957-06 → 2024-12, n=711 real | **Primary SH CO2 target** |
+| `monthly_flask_c13_mlo.csv` | Mauna Loa monthly d13C (per mil), Scripps isotope scale, 1980–2024, n=532 | **Primary NH d13C target** |
+| `monthly_flask_c13_spo.csv` | South Pole monthly d13C (per mil), Scripps isotope scale, 1977-03 → 2024-12, n=528 | **Primary SH d13C target** |
+| `monthly_flask_co2_mlo.csv` | Mauna Loa monthly CO2 from flasks, 1960–2025 | Cross-check on the in-situ record |
+| `intermittent_flask_c14_mlo.csv` | Mauna Loa D14C, 2001-08 → 2007-12, n=79, no header | **Cross-check only** — feeds Hua's NH zones |
 | `intermittent_flask_c14_spo.csv` | South Pole D14C (per mil), 1999-02 → 2007-12, 80 samples, no header | **Cross-check only** — overlaps Hua et al. SHZone1-2, which already ingests this station. Using both would double-count. |
 | `daily_flask_co2_isotopes_spo.csv` | Daily flask CO2, CH4, CO, 13C, 18O, 14C with sample-count/flag columns | Not used in v1 (monthly model); retained as provenance |
 | `daily_flask_co2_isotopes_mlo.csv` | Daily flask, Mauna Loa: CO2 1960-03→2024-04 (n=2617), d13C 1978-06→2022-11 (n=1914), **14C 2001-08→2007-12 (n=79)** | MLO D14C = validation only; CO2/d13C NOT used as monthly targets (see below) |
