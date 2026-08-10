@@ -77,8 +77,12 @@ test_that("bomb 14C total is set by the prior, not by the provisional shape", {
 })
 
 test_that("SSP scenarios assemble and diverge from each other", {
-  a <- ccx_build_forcing("ssp126", c(2000, 2100), prod_c14 = 360)
-  b <- ccx_build_forcing("ssp585", c(2000, 2100), prod_c14 = 360)
+  # suppressWarnings: this checks the EMISSIONS columns, and ccx_build_forcing()
+  # rightly warns that it is holding GMST flat past 2024 (use ccx_run_coupled()
+  # for a real future climate). Warning about the column this test does not look
+  # at is correct behaviour, not something to silence at source.
+  a <- suppressWarnings(ccx_build_forcing("ssp126", c(2000, 2100), prod_c14 = 360))
+  b <- suppressWarnings(ccx_build_forcing("ssp585", c(2000, 2100), prod_c14 = 360))
   e2100a <- sum(a$e_foss_NH[a$year == 2100] + a$e_foss_SH[a$year == 2100]) / 12
   e2100b <- sum(b$e_foss_NH[b$year == 2100] + b$e_foss_SH[b$year == 2100]) / 12
   expect_lt(e2100a, e2100b)     # ssp126 must be below ssp585 in 2100

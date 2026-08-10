@@ -902,3 +902,76 @@ Pre-fix calibration outputs quarantined to
 `calibration/output/quarantine/20260811_ar1_pathology_and_solver_wall/` with a README. They carry
 18 parameters against the current 17, so loading one and feeding `u_mode` to a current
 `ccx_make_logpost()` would silently misalign every parameter.
+
+## 2026-08-11 (later still) — Future temperature comes from FaIR
+
+Marcus's call for the app's Futures tab: **use FaIR to estimate future temperatures.**
+
+**The bug this fixes.** `ccx_build_forcing()` interpolated GMST with `rule = 2`, so past
+IGCC's 2024 end it held the last observed value **flat**. An SSP5-8.5 run to 2100 sat at
++1.53 °C throughout, with the q10 respiration and ocean-solubility feedbacks silently
+switched off. It now warns, and `ccx_run_coupled()` supersedes it for any future run.
+
+**Structure.** CarbonCycleEmulator stays R-only with no FaIR dependency (its CLAUDE.md makes
+that a hard rule), so FaIR runs offline in FaIRtoFrEDI and crosses the repo boundary as a
+provenance-stamped CSV set: `FaIRtoFrEDI/run_fair_ssps_for_ccx.py` →
+`data-raw/downloads/fair_v145_ssp/` (FaIR 2.2.4 calib1.4.5, 841 configs, ensemble mean,
+1750–2500, 5 SSPs, 73 s total).
+
+**Why more than a prescribed GMST path.** The tab has to answer "what does a 100 GtC pulse
+do", on scenarios FaIR was never run on. A prescribed temperature path cannot respond to a
+pulse — it would show a pulse changing CO₂ while leaving the climate untouched, the exact
+misconception the tab exists to dispel. So temperature is rebuilt from **our own** CO₂:
+
+```
+erf_total = erf_co2(CO2 from this model) + erf_nonco2(scenario, prescribed from FaIR)
+T         = impulse_response(erf_total)
+```
+
+The non-CO₂ half — aerosols, CH₄, N₂O, ozone, volcanic, solar — stays prescribed, because
+this model has none of it. That is ~1.1 of SSP2-4.5's 4.7 W/m² at 2100 and the app must say
+plainly that the user is changing CO₂ only.
+
+| fit | result |
+|---|---|
+| CO₂ → ERF, quadratic in ln(CO₂/CO₂_PI), no intercept | rmse **0.029**, max 0.132 W/m²; **F₂ₓ = 3.85 W/m²** |
+| ERF → T, 3-timescale impulse response | q = 0.160 / 0.328 / 0.354 K/(W/m²), d = **1.56 / 14.2 / 261 yr**; ECS-equivalent **3.24 K** |
+| vs FaIR GMST, per scenario | rmse 0.028–0.036 °C; **rmse ≥2050 only 0.010–0.030 °C** |
+
+**Tried and rejected — twice, both my errors, both caught by the gate:**
+
+1. **Interpolating the pooled (CO₂, erf_co2) pairs** instead of fitting. Wrong twice over.
+   The pairs are ensemble means over 841 configs with differing CO₂ forcing scale factors, so
+   mean(erf_co2) ≠ f(mean(CO₂)) and the cloud has real width (0.025 W/m² at 900 ppm). And
+   CO₂ is **not monotone in time** — SSP1-1.9 and SSP1-2.6 peak and decline — so sorting by
+   CO₂ interleaves the rising and falling limbs, giving **334 descending steps, worst −0.147
+   W/m²**, which `monoH.FC` cannot repair because it is monotone only for monotone *input*.
+   The residual printed at the time was **0.000, and that diagnostic was vacuous**: a spline
+   through every point interpolates by construction and can never show scatter. The real test
+   is cross-scenario spread at matched CO₂ (0.025 W/m²), now a separate gate.
+2. **A pure log law** (degree 1): rmse 0.078 vs 0.024 W/m², F₂ₓ 4.003 vs 3.889. The quadratic
+   term is Meinshausen et al. (2020)'s band correction and is not optional. Degrees 3–4 buy
+   nothing (0.0233, 0.0231).
+
+**Outer-loop coupling, not an in-loop climate module.** CO₂ → T → carbon cycle is closed
+inside `ccx_run_coupled()` by iterating whole runs — converges in **6 passes, ~0.17 s** —
+rather than porting a climate module into `ccx_core.cpp` and rebuilding the parity gate for
+it. **The feedback is not negligible:** SSP5-8.5 at 2100 is **+111 ppm and +0.32 °C** coupled
+versus a single uncoupled pass.
+
+Uncalibrated CO₂ at 2100 runs above FaIR's own (SSP2-4.5: 620 vs 530 ppm; SSP5-8.5: 1126 vs
+960), consistent with the model reading ~27 ppm high over the historical record at defaults.
+Recheck after calibration. Note separately that FaIR's *emissions-driven* SSP CO₂ is itself
+well below the SSP database's concentration projections (~530 vs ~600 ppm for SSP2-4.5 at
+2100) — flagged, not explained, and not something this project needs to resolve.
+
+`ccx_build_forcing()` gains an `emissions=` override (the route stylised pathways and pulses
+take; annual totals still conserved exactly through the monthly interpolation). New gate
+`tests/testthat/test-climate.R`: IRF-vs-FaIR skill, CO₂→ERF residual **and** the
+concentration-alone check, a future run must actually warm (the regression test for the flat
+extrapolation), the historical splice must reproduce IGCC to 1e-10, and the carbon-climate
+feedback must be measurably engaged. Suite **298 / 0 / 2**.
+
+The IRF's single worst year is **1817**, after Tambora, where a 1-year box cannot track a
+−5 W/m² one-year volcanic spike (max |err| 0.192 °C, identical across scenarios because 1817
+is shared history). Bounded by the gate rather than pretended away.

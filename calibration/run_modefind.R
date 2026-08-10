@@ -1,10 +1,20 @@
 # =====================================================================
 # run_modefind.R -- locate the posterior mode before sampling.
 #
-# The pilot MCMC (calibration/run_pilot.R) started 18 correlated parameters at
+# The pilot MCMC (calibration/run_pilot.R) started the correlated parameters at
 # hand-set defaults ~87,000 log-units below the mode and was still climbing at
 # the last iteration: worst R-hat 4.53, min ESS 4, acceptance 0.045-0.063.
 # That is transient burn-in, not sampling. Handoff 2026-08-10 sec.4 fix 1.
+#
+# 2026-08-11: this now runs against the REBUILT posterior -- 17 parameters, not
+# 18 (rho retired), annual values with independent errors plus an explicit
+# seasonal statistic, and an integrator whose substep count is chosen from the
+# diffusion stability criterion rather than fixed at 4. Every earlier mode is
+# quarantined under calibration/output/quarantine/ and is NOT comparable: the
+# likelihood it maximised is a different function.
+#
+# The single mode-finding driver. calibration/run_modefind_bombwin.R was a
+# near-duplicate differing only in its output filename and was folded in here.
 #
 # This script does NOT sample. It (a) finds the mode by derivative-free
 # restarts, (b) takes a numerical Hessian there, and (c) reports the curvature
@@ -33,7 +43,11 @@ MODE_HESS_EPS    <- 3e-4    # step on the unconstrained scale for the Hessian.
                             # sweeps the step and checks curvature is stable
                             # before trusting the covariance.
 MODE_OUT         <- file.path("calibration", "output", "mode_fit.rds")
-PILOT_BEST_LP    <- -6469   # best log-posterior seen in the pilot, for reference
+# Physical plausibility markers, printed next to the mode. These are NOT
+# constraints -- the prior already carries that -- they exist because the
+# 2026-08-10 mode was accepted for a day before anyone noticed q10 = 0.28 means
+# respiration FALLS with warming. Anything flagged here needs an explanation.
+MODE_FLAG_SIGMA  <- 3.0     # prior-sd distance at which a parameter is flagged
 
 set.seed(MODE_SEED)
 dir.create(dirname(MODE_OUT), showWarnings = FALSE, recursive = TRUE)
@@ -54,7 +68,8 @@ neg_lp <- function(u) {
 u0 <- ccx_init_unc()
 lp0 <- lp_fun(u0)
 cat(sprintf("start: log-post at hand-set init = %.1f\n", lp0))
-cat(sprintf("       pilot best (for reference) = %.1f\n", PILOT_BEST_LP))
+cat(sprintf("       %d parameters: %s\n", length(CCX_PARAM_NAMES),
+            paste(CCX_PARAM_NAMES, collapse = ", ")))
 
 t0 <- Sys.time()
 
@@ -91,6 +106,41 @@ if (!is.null(pol) && pol$value < best) {
 names(u) <- CCX_PARAM_NAMES
 lp_mode <- -best
 
+# ---- (b2) physical-plausibility screen ------------------------------
+# Report how far each parameter sits in its own prior's tail, and report the
+# substep count the integrator needed, so a mode pressed against the stability
+# criterion is visible rather than inferred later from a failed pilot.
+pm <- ccx_unc_to_par(u)
+prior_z <- function(n) {
+  s <- CCX_PARAM_TABLE[[n]]; x <- pm[[n]]
+  # numerical quantile position of x under the prior, expressed in normal sds
+  g <- s$prior
+  lo <- x / 1e3; hi <- x * 1e3
+  if (s$tr == "logit") { lo <- s$lo + 1e-9; hi <- s$hi - 1e-9 }
+  xs <- seq(lo, hi, length.out = 4001)
+  d <- exp(vapply(xs, function(z) g(z), numeric(1)))
+  d[!is.finite(d)] <- 0
+  if (sum(d) <= 0) return(NA_real_)
+  cdf <- cumsum(d) / sum(d)
+  qnorm(min(max(approx(xs, cdf, xout = x, rule = 2)$y, 1e-12), 1 - 1e-12))
+}
+zs <- vapply(CCX_PARAM_NAMES, function(n) tryCatch(prior_z(n), error = function(e) NA_real_),
+             numeric(1))
+flag <- which(abs(zs) > MODE_FLAG_SIGMA)
+cat("\nprior-tail position of the mode (normal sds; |z| > ", MODE_FLAG_SIGMA,
+    " flagged):\n", sep = "")
+print(round(zs, 2))
+if (length(flag)) {
+  cat("*** FLAGGED, needs an explanation before this mode is used: ",
+      paste(CCX_PARAM_NAMES[flag], collapse = ", "), "\n")
+} else {
+  cat("no parameter beyond ", MODE_FLAG_SIGMA, " prior sds\n", sep = "")
+}
+p_mode <- ccx_default_params()
+for (n in intersect(names(p_mode), CCX_PARAM_NAMES)) p_mode[[n]] <- pm[[n]]
+cat(sprintf("integrator substeps needed at the mode: %d (floor %d) -- kz = %.0f\n",
+            ccx_substeps_for(p_mode), CCX_SUBSTEPS_MIN, pm$kz))
+
 # ---- (c) numerical Hessian at the mode ------------------------------
 # Central differences on the unconstrained scale. -H^-1 is the Laplace
 # covariance; its correlation matrix is the direct test of the suspected
@@ -124,8 +174,8 @@ if (ok_pd) {
 }
 
 el <- as.numeric(difftime(Sys.time(), t0, units = "mins"))
-cat(sprintf("\nmode log-post = %.1f  (gain over init %.1f, over pilot best %.1f)\n",
-            lp_mode, lp_mode - lp0, lp_mode - PILOT_BEST_LP))
+cat(sprintf("\nmode log-post = %.1f  (gain over init %.1f)\n",
+            lp_mode, lp_mode - lp0))
 cat(sprintf("elapsed %.1f min, %d posterior evaluations (%.3f s/eval)\n",
             el, n_eval, el * 60 / n_eval))
 
@@ -136,6 +186,7 @@ out <- list(u_mode = u, par_mode = ccx_unc_to_par(u), logpost = lp_mode,
             logpost_init = lp0, hessian = H, cov = Sigma, cor = Cor,
             sd_unc = sdv, eigen = ev, pd = ok_pd, trace = trace,
             n_eval = n_eval, minutes = el, seed = MODE_SEED,
-            param_names = CCX_PARAM_NAMES)
+            param_names = CCX_PARAM_NAMES, prior_z = zs,
+            substeps = ccx_substeps_for(p_mode))
 saveRDS(out, MODE_OUT)
 cat("\nwrote ", MODE_OUT, "\n", sep = "")

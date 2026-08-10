@@ -3,7 +3,7 @@
 # validated step size, without repeating the 100-minute optimisation.
 #
 # WHY: run_modefind.R used a single MODE_HESS_EPS = 1e-3 on the unconstrained
-# scale for all 18 parameters. At the bomb-window mode that is far too large:
+# scale for all parameters. At the bomb-window mode that is far too large:
 # stepping log(kz) by 1e-3 costs 49,000 log-units and by 1e-2 leaves the
 # feasible region entirely, so the central difference returned -4.9e10 and the
 # Laplace covariance came out non-positive-definite. At 1e-4 the same second
@@ -20,7 +20,7 @@ ccx_load_cpp()
 
 args <- commandArgs(trailingOnly = TRUE)
 HESS_MODE_FILE <- if (length(args)) args[1] else
-  file.path("calibration", "output", "mode_fit_bombwin.rds")
+  file.path("calibration", "output", "mode_fit.rds")
 HESS_EPS_GRID  <- c(3e-5, 1e-4, 3e-4)   # candidate unconstrained steps
 HESS_STABLE_TOL<- 0.25                  # max relative spread in the diagonal
                                         # across the grid for a step to count

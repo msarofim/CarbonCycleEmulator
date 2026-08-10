@@ -169,18 +169,32 @@ ccx_bomb_c14_annual_SUPERSEDED <- function(total_kmol = 102, years = 1945:1980) 
 #' @param years    integer range c(first, last)
 #' @param prod_c14 cosmogenic 14C production (mol/yr) -- from ccx_spinup()
 #' @param bomb_total_kmol total bomb 14C production, 1945-1980
+#' @param emissions optional data.frame(year, fossil_GtC, luc_GtC) REPLACING the
+#'   scenario's emissions entirely. This is how the app's stylised pathways
+#'   ("linear to zero by 2060", "+2 %/yr") and its pulse experiments are built:
+#'   the caller assembles the annual series and everything downstream --
+#'   hemispheric split, monthly interpolation, annual-total conservation -- is
+#'   applied identically to a custom path and to an SSP. `scenario` still names
+#'   the run for labelling and still selects the non-CO2 climate background.
 #' @return data.frame, one row per month, with everything ccx_deriv() needs
 ccx_build_forcing <- function(scenario = "historical",
                               years = c(1750, 2024),
                               prod_c14 = NA_real_,
-                              bomb_total_kmol = 102) {
+                              bomb_total_kmol = 102,
+                              emissions = NULL) {
 
   yrs <- seq(years[1], years[2])
   n   <- length(yrs) * 12
   t   <- rep(yrs, each = 12) + (seq_len(12) - 0.5) / 12
 
   # ---- emissions ----------------------------------------------------
-  if (identical(scenario, "historical")) {
+  if (!is.null(emissions)) {
+    e <- as.data.frame(emissions)
+    need <- c("year", "fossil_GtC", "luc_GtC")
+    if (!all(need %in% names(e)))
+      stop("`emissions` needs columns: ", paste(need, collapse = ", "))
+    src <- paste("caller-supplied emissions,", scenario)
+  } else if (identical(scenario, "historical")) {
     e <- readRDS(ccx_path("data", "forcing_emissions_historical.rds"))
     e <- as.data.frame(e)
     src <- "GCB 2025 historical budget"
@@ -195,10 +209,23 @@ ccx_build_forcing <- function(scenario = "historical",
   luc  <- ccx_annual_to_monthly(e$year, e$luc_GtC,    yrs)
 
   # ---- temperature: IGCC, zero before its record starts --------------
+  # AFTER the record ends this HOLDS THE LAST OBSERVED VALUE FLAT. That is a
+  # placeholder, not a projection: an SSP5-8.5 run to 2100 built here sits at
+  # the 2024 temperature throughout, silently, which suppresses the q10
+  # respiration and ocean-solubility feedbacks entirely. Anything running past
+  # the observational record must go through ccx_run_coupled() (R/climate.R),
+  # which computes temperature from the model's own CO2 and overwrites this
+  # column. The warning fires once per build so the placeholder cannot be used
+  # by accident.
   g <- as.data.frame(readRDS(ccx_path("data", "forcing_gmst.rds")))
   gm <- ccx_annual_to_monthly(g$year, g$gmst_anom, yrs)
   yv <- rep(yrs, each = 12)          # integer year of each month
   gm[yv < min(g$year)] <- FORC_GMST_PRE1850
+  if (max(yrs) > max(g$year))
+    warning(sprintf(paste0("GMST observations end %d; years %d-%d are held FLAT ",
+                           "at the last observed value. Use ccx_run_coupled() ",
+                           "for an interactive climate."),
+                    max(g$year), max(g$year) + 1L, max(yrs)), call. = FALSE)
 
   # ---- ENSO: Nino 3.4 anomaly, zero before 1948 ----------------------
   en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
