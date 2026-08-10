@@ -85,7 +85,16 @@ ccx_default_params <- function() {
     seas_amp_NH = 12,     # GtC/yr, seasonal NEP amplitude
     seas_amp_SH = 2,
     seas_phase_NH = 3.5,  # month of peak uptake
-    seas_phase_SH = 9.5
+    seas_phase_SH = 9.5,
+    # ---- mechanism switch, NOT a calibrated parameter -----------------
+    # FROZEN REVELLE. 0 = normal carbonate chemistry. 1 = the ocean's buffer
+    # factor is held at its preindustrial value instead of rising as the ocean
+    # takes up carbon. This is the counterfactual DESIGN section 7 tab 3 asks
+    # for, and it cannot be expressed as a parameter change, because Revelle
+    # saturation is an emergent property of the carbonate system rather than a
+    # coefficient anywhere. Temperature-dependent SOLUBILITY (K0) is deliberately
+    # left alone, so the switch isolates the buffer effect and nothing else.
+    revelle_frozen = 0
   )
 }
 
@@ -190,7 +199,14 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     sst    <- aux$sst[[h]] + p$sst_scale * forc$gmst
     dic_ml <- y[iml, "C"] * aux$mol_per_GtC / aux$ml_mass_kg[[h]]   # mol/kg
     k      <- carb_constants(sst)
-    pco2_ml <- pco2_from_dic(dic_ml, ccx_const("ALK_SURFACE"), sst, k = k)
+    pco2_ml <- if (isTRUE(p$revelle_frozen > 0)) {
+      # Buffer factor pinned at its preindustrial value: pCO2 responds to DIC
+      # linearly, with the slope the ocean HAD in 1750 and never loses. The
+      # ocean therefore keeps absorbing at its preindustrial efficiency.
+      aux$pco2_0[[h]] * (1 + aux$revelle0[[h]] * (dic_ml - aux$dic0[[h]]) / aux$dic0[[h]])
+    } else {
+      pco2_from_dic(dic_ml, ccx_const("ALK_SURFACE"), sst, k = k)
+    }
     pco2_at <- chi                                                  # ppm ~ uatm at 1 atm
     # GROSS both ways (see add_flux header): invasion and evasion separately.
     gx <- aux$asx[[h]] * p$k_w * k$K0
@@ -252,6 +268,15 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   npp0 <- list(NH = ccx_const("NPP_GLOBAL_PI") * p$npp_frac_NH,
                SH = ccx_const("NPP_GLOBAL_PI") * (1 - p$npp_frac_NH))
 
+  # Preindustrial mixed-layer reference, for the frozen-Revelle switch. Computed
+  # unconditionally (it costs two uniroot solves once per spinup) so the two code
+  # paths cannot diverge in what they consider "preindustrial".
+  sst_l <- list(NH = p$sst_NH, SH = p$sst_SH)
+  alk   <- ccx_const("ALK_SURFACE")
+  dic0  <- lapply(sst_l, function(T) ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk, T))
+  rev0  <- lapply(HEMIS, function(h) revelle_factor(dic0[[h]], alk, sst_l[[h]]))
+  names(rev0) <- HEMIS
+
   list(
     idx = idx,
     # each hemisphere holds half the atmosphere, so ppm per hemisphere uses half
@@ -273,6 +298,9 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     alpha_as_up   = 1 - 10 / 1000,   # provisional, equilibrium (ocean -> atm)
     d13c_foss   = -28,               # provisional
     d13c_bio    = -25,               # provisional
+    dic0        = dic0,
+    revelle0    = rev0,
+    pco2_0      = list(NH = ccx_const("CO2_PI_PPM"), SH = ccx_const("CO2_PI_PPM")),
     enso_share  = list(NH = 0.5, SH = 0.5),
     bomb_share_NH = 0.9,
     nuc_share_NH  = 0.95,

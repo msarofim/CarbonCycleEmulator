@@ -51,6 +51,64 @@ test_that("multi-decade trajectories agree to roundoff", {
   expect_lt(max(abs(rR$state - rC$state)) / max(abs(rR$state)), 1e-13)
 })
 
+test_that("parity holds with the frozen-Revelle switch engaged", {
+  skip_if_no_cpp()
+  # A mechanism switch adds a SECOND code path through the air-sea term, in both
+  # implementations. The default parity tests exercise only the first, so a
+  # porting error on the frozen branch would be invisible to them.
+  p <- pf$p; p$revelle_frozen <- 1
+  sp <- ccx_spinup(p)
+  forc <- list(e_foss = list(NH = 8, SH = 0.4), e_luc = list(NH = 0.6, SH = 0.5),
+               gmst = 1.1, enso = 0.7, c14_bomb = 1200, c14_nuclear = 40,
+               c14_cosmo = sp$prod_c14)
+  dR <- ccx_deriv(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
+  dC <- ccx_deriv_fast(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
+  expect_lt(max(abs(dR - dC)) / max(abs(dR)), 1e-15)
+
+  F  <- ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14)
+  rR <- ccx_run(sp, F)
+  rC <- ccx_run_fast(sp, F)
+  expect_lt(max(abs(rR$out$co2_NH - rC$out$co2_NH)) / max(abs(rR$out$co2_NH)), 1e-13)
+  expect_lt(max(abs(rR$state - rC$state)) / max(abs(rR$state)), 1e-13)
+})
+
+test_that("frozen Revelle does what it claims, and only that", {
+  skip_if_no_cpp()
+  p_on  <- pf$p
+  p_off <- pf$p; p_off$revelle_frozen <- 1
+  sp_on  <- ccx_spinup(p_on)
+  sp_off <- ccx_spinup(p_off)
+
+  # The preindustrial buffer factor is an EMERGENT check on the carbonate
+  # system, not a tuned input: observed surface-ocean Revelle factors run ~8-10.
+  expect_gt(sp_on$aux$revelle0$NH, 7); expect_lt(sp_on$aux$revelle0$NH, 11)
+  expect_gt(sp_on$aux$revelle0$SH, 7); expect_lt(sp_on$aux$revelle0$SH, 11)
+
+  F <- suppressWarnings(
+    ccx_build_forcing("ssp245", c(1750, 2100), prod_c14 = sp_on$prod_c14))
+  a <- ccx_run_fast(sp_on, F)$out
+  b <- ccx_run_fast(sp_off, F)$out
+
+  # 1850: the buffer has barely moved, so the two paths must still agree
+  i0 <- which.min(abs(F$t - 1850.5))
+  expect_lt(abs(a$co2_NH[i0] - b$co2_NH[i0]), 0.1)
+
+  # 2100: frozen buffer -> the ocean never loses efficiency -> MORE ocean carbon
+  # and LESS airborne CO2. The sign is the whole pedagogical point; if it ever
+  # flips, the switch is telling students the opposite of the physics.
+  i <- which.min(abs(F$t - 2100.5))
+  expect_lt(b$co2_NH[i], a$co2_NH[i])
+  expect_gt(b$ocean_C[i], a$ocean_C[i])
+  expect_gt(a$co2_NH[i] - b$co2_NH[i], 10)      # measured ~46 ppm
+
+  # carbon is still conserved on the frozen path
+  Fz <- ccx_build_forcing("historical", c(1800, 1900), prod_c14 = 0)
+  Fz$e_foss_NH <- 0; Fz$e_foss_SH <- 0; Fz$e_luc_NH <- 0; Fz$e_luc_SH <- 0
+  Fz$c14_bomb <- 0; Fz$c14_nuclear <- 0
+  r <- ccx_run_fast(sp_off, Fz)
+  expect_lt(abs(sum(r$state[, "C"]) / sum(sp_off$y[, "C"]) - 1), 1e-12)
+})
+
 test_that("the C++ core conserves carbon exactly, independently of R", {
   skip_if_no_cpp()
   # The conservation property must hold in the port on its own terms, not only

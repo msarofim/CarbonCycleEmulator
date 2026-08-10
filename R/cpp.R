@@ -38,6 +38,9 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     sst = c(aux$sst$NH, aux$sst$SH),
     dz = grid$dz, dz_mid = aux$dz_mid,
     enso_share = c(aux$enso_share$NH, aux$enso_share$SH),
+    dic0 = c(aux$dic0$NH, aux$dic0$SH),
+    revelle0 = c(aux$revelle0$NH, aux$revelle0$SH),
+    pco2_0 = c(aux$pco2_0$NH, aux$pco2_0$SH),
     alpha_photo = aux$alpha_photo,
     alpha_as_down = aux$alpha_as_down, alpha_as_up = aux$alpha_as_up,
     d13c_foss = aux$d13c_foss, d13c_bio = aux$d13c_bio,
@@ -54,9 +57,10 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
 #' Parameters in the flat form the C++ unpacks (gamma_enso defaults to 0)
 ccx_cpp_par <- function(p) {
   if (is.null(p$gamma_enso)) p$gamma_enso <- 0
+  if (is.null(p$revelle_frozen)) p$revelle_frozen <- 0
   p[c("beta", "q10", "tau_veg", "tau_soil", "k_w", "kz", "tau_ex",
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
-      "seas_phase_NH", "seas_phase_SH")]
+      "seas_phase_NH", "seas_phase_SH", "revelle_frozen")]
 }
 
 #' Forcing table -> the 9-column matrix the C++ expects, in its column order

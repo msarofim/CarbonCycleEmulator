@@ -48,6 +48,7 @@ struct Aux {
   double dz[NL + 1], dz_mid[NL];
   double alpha_photo, alpha_as_down, alpha_as_up;
   double d13c_foss, d13c_bio, enso_share[2];
+  double dic0[2], revelle0[2], pco2_0[2];   // preindustrial mixed-layer reference
   double bomb_share_NH, nuc_share_NH;
   double R13, R14STD, lambda, alk;
   // carbonate polynomial coefficients (degree 6 -> 7 coefficients each)
@@ -60,6 +61,7 @@ struct Par {
   double beta, q10, tau_veg, tau_soil, k_w, kz, tau_ex;
   double sst_scale, gamma_enso;
   double seas_amp[2], seas_phase[2];
+  double revelle_frozen;                    // mechanism switch, 0 or 1
 };
 
 // ---- carbonate: mirrors R/carbonate.R -------------------------------
@@ -75,6 +77,14 @@ inline double eval_lnK(const double* co, double x) {
   double xp = 1.0;
   for (int i = 1; i <= 6; ++i) { xp *= x; out += co[i] * xp; }
   return std::exp(out);
+}
+
+// Solubility alone. The frozen-Revelle path still needs K0 for the gas-transfer
+// prefactor -- the switch freezes the BUFFER chemistry, not the temperature
+// dependence of solubility -- but must not run the Newton solve, whose whole
+// point is the buffering it is meant to bypass.
+inline double K0_only(double T, const Aux& A) {
+  return eval_lnK(A.cK0, (T - A.t_centre) / A.t_scale);
 }
 
 // Returns pCO2 (uatm) and, via K0out, the effective K0 the caller needs.
@@ -177,8 +187,14 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // air-sea, gross both ways
     const double sst = A.sst[hi] + P.sst_scale * gmst;
     const double dic_ml = y[IX(iml, C)] * A.mol_per_GtC / A.ml_mass_kg[hi];
-    double K0;
-    const double pco2_ml = pco2_from_dic_cpp(dic_ml, A.alk, sst, A, &K0);
+    double K0, pco2_ml;
+    if (P.revelle_frozen > 0.0) {
+      K0 = K0_only(sst, A);
+      pco2_ml = A.pco2_0[hi] * (1.0 + A.revelle0[hi]
+                                * (dic_ml - A.dic0[hi]) / A.dic0[hi]);
+    } else {
+      pco2_ml = pco2_from_dic_cpp(dic_ml, A.alk, sst, A, &K0);
+    }
     const double gx = A.asx[hi] * P.k_w * K0;
     add_flux(iatm, iml, gx * chi,     A.alpha_as_down);
     add_flux(iml, iatm, gx * pco2_ml, A.alpha_as_up);
@@ -228,6 +244,9 @@ static Aux unpack_aux(const List& a) {
   v = a["dz"];         for (int i = 0; i <= NL; ++i) A.dz[i] = v[i];
   v = a["dz_mid"];     for (int i = 0; i < NL; ++i)  A.dz_mid[i] = v[i];
   v = a["enso_share"]; A.enso_share[0] = v[0]; A.enso_share[1] = v[1];
+  v = a["dic0"];       A.dic0[0] = v[0];       A.dic0[1] = v[1];
+  v = a["revelle0"];   A.revelle0[0] = v[0];   A.revelle0[1] = v[1];
+  v = a["pco2_0"];     A.pco2_0[0] = v[0];     A.pco2_0[1] = v[1];
   A.alpha_photo = a["alpha_photo"];
   A.alpha_as_down = a["alpha_as_down"]; A.alpha_as_up = a["alpha_as_up"];
   A.d13c_foss = a["d13c_foss"]; A.d13c_bio = a["d13c_bio"];
@@ -251,6 +270,7 @@ static Par unpack_par(const List& p) {
   P.sst_scale = p["sst_scale"]; P.gamma_enso = p["gamma_enso"];
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];
+  P.revelle_frozen = p["revelle_frozen"];
   return P;
 }
 
