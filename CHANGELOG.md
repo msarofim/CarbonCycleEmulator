@@ -263,3 +263,62 @@ budget 1945–2005*, JGR 111, doi:10.1029/2005JD006758: total bomb ¹⁴C produc
 = **99.3–104.9 kmol** (598–632 × 10²⁶ atoms). That fixes the prior on the calibrated
 P_bomb. **Still outstanding: the time SHAPE** — an annual atmospheric test-yield series
 (UNSCEAR 2000 Annex C is the standard compilation).
+
+## 2026-08-10 — Model core: 84-state box model, conservation gates, mutation testing
+
+`R/model.R` (two-hemisphere, monthly, ¹²C/¹³C/¹⁴C), `R/constants.R` (provenance-tagged
+constants), `tests/testthat/test-conservation.R`, `tests/testthat/test-constants.R`.
+Suite: **120 passing**.
+
+**Conservation by construction, not by accuracy.** Every internal transfer is emitted once
+by `add_flux()` and applied with opposite sign to its two boxes, so total carbon has zero
+derivative at every RK stage and is conserved to roundoff at *any* step size. Measured:
+**2.2e-16** relative drift over a 100-year integration, and identical at 1, 4 and 16
+substeps per month — a step-size-*dependent* conservation error would prove the flux form
+was broken.
+
+**Tracer scaling.** ¹⁴C is carried as C × (R14/R14_STD), i.e. "GtC carrying standard ¹⁴C
+content", so Δ¹⁴C = 1000·(C14/C − 1) falls out directly and state values stay O(1–1000)
+rather than O(1e-12). ¹³C carries fractionation on every flux; **¹⁴C deliberately does
+not**, because Δ¹⁴C is fractionation-corrected by convention and C14/C *is* that corrected
+ratio. Both facts are stated in the file header — the ¹⁴C one is easy to "fix" into a bug.
+
+### Mutation testing found an inert gate (and a real bug)
+
+The suite passed on first run, so the gates were deliberately attacked by mutating the
+source and checking the tests fail. Against a 1e-10 threshold and a 2.2e-16 baseline:
+
+| Mutant | Drift | Result |
+|---|---|---|
+| One-sided diffusive flux | 3.9e-01 | caught |
+| Receiver flux +1 % | 3.6e-02 | caught |
+| Receiver flux +0.001 % | 3.5e-05 | caught |
+| ¹⁴C decay with Libby 5568 yr | **identical to baseline** | **MISSED** |
+
+The flux gates are extremely sensitive — a 0.001 % asymmetry lands eleven orders above
+threshold. But the ¹⁴C decay gate was **inert**, and the reason was a genuine bug:
+`LAMBDA_C14` was written as the literal `log(2)/5700` while being *labelled* "derived" from
+`T_HALF_C14`. It was an independent copy, so changing the half-life left the decay rate
+untouched. `MOL_C14_PER_GBq` had the same flaw.
+
+Fixed by defining `.T_HALF_C14`, `.M_C`, `.SEC_PER_YR`, `.AVOGADRO` once at the top and
+referencing them — the constants-file analogue of the standing "labels derive from named
+constants" rule. The Libby mutant now produces 1.4e-04 against a 4.7e-10 baseline, and
+`test-constants.R` asserts each derivation directly so the decoupling cannot return.
+
+**Lesson recorded:** a passing suite says nothing about whether the gates can fail. Mutate
+before trusting.
+
+### Performance: pure R is 527× off target, as expected
+
+A 350-year monthly run (4,200 months, 67,200 derivative evaluations) takes **26.4 s**
+against the 50 ms target. Pure R stays as the readable *reference implementation*; the
+production core goes to Rcpp under the approved Q4 default, with a bit-parity test against
+this reference. Known R-side overheads to remove in the port: `ccx_const()` does a string
+lookup per flux per stage, `carb_constants()` re-evaluates five polynomials per hemisphere
+per stage, and `add_flux()` is a closure using `<<-`.
+
+**Still provisional (8 constants, ledgered in `test-constants.R`):** ocean areas and depth,
+surface alkalinity, seawater density, preindustrial NPP, the SST–pCO₂ sensitivity (which
+must be checked for double-counting against the carbonate module's own T dependence), and
+the 1750 Δ¹⁴C, which is currently **set to 0 by construction** rather than measured.
