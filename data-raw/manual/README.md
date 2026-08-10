@@ -14,7 +14,8 @@ header (flask archives dated 19-Apr-2024 and 21-Feb-2025).
 | `monthly_merge_co2_spo.csv` | South Pole monthly CO2 (ppm), flask + sporadic in situ 1960–63, 1957-06 → 2024-12 | **Primary SH CO2 target** (replaces the NOAA 1975+ flask record) |
 | `monthly_flask_c13_spo.csv` | South Pole monthly d13C (per mil), Scripps isotope scale, 1977-03 → 2024-12 | **Primary SH d13C target** (replaces NOAA 1993–2014) |
 | `intermittent_flask_c14_spo.csv` | South Pole D14C (per mil), 1999-02 → 2007-12, 80 samples, no header | **Cross-check only** — overlaps Hua et al. SHZone1-2, which already ingests this station. Using both would double-count. |
-| `daily_flask_co2_isotopes_spo.csv` | Daily flask CO2, CH4, CO, 13C, 18O, 14C with sample-count/flag columns | Not used in v1 (monthly model); retained as provenance and as a future higher-resolution source |
+| `daily_flask_co2_isotopes_spo.csv` | Daily flask CO2, CH4, CO, 13C, 18O, 14C with sample-count/flag columns | Not used in v1 (monthly model); retained as provenance |
+| `daily_flask_co2_isotopes_mlo.csv` | Daily flask, Mauna Loa: CO2 1960-03→2024-04 (n=2617), d13C 1978-06→2022-11 (n=1914), **14C 2001-08→2007-12 (n=79)** | MLO D14C = validation only; CO2/d13C NOT used as monthly targets (see below) |
 
 ## Column trap
 
@@ -25,6 +26,18 @@ fabricate observations and understate uncertainty. Coverage of real column-5 val
 
 - CO2: 711 of 816 monthly slots real; the 1950s decade is only 11 of 36.
 - d13C: 528 of 576 monthly slots real.
+
+## Why the MLO daily flask file is NOT used for monthly CO2
+
+Mauna Loa flask sampling averages ~3.5 samples/month, and MLO has strong seasonal and
+synoptic variability. Monthly means built from those flasks differ from the NOAA monthly
+record with a scatter of sd 2.5-4.7 ppm, and the mean offset is not even sign-stable
+(+0.239 ppm over all months, -0.218 ppm restricted to months with >=4 flasks). It is
+therefore useless for detecting the ~0.1 ppm inter-network scale offset, and noisy as a
+calibration target. South Pole is the opposite case -- so clean and stable that a
+flask-based monthly product has sd 0.262 ppm against NOAA.
+
+**MLO monthly CO2 needs the in-situ continuous record**, i.e. `monthly_merge_co2_mlo.csv`.
 
 ## Citation
 
