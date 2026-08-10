@@ -281,6 +281,86 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
 }
 
 # ---------------------------------------------------------------------
+# Integrator stability control
+# ---------------------------------------------------------------------
+# WHY THIS EXISTS. Interior diffusion is integrated EXPLICITLY, so it carries a
+# hard step-size stability limit: above some kz the RK4 update diverges, the run
+# fills with NaN, and every caller that guards on `anyNA` turns that into -Inf.
+# In the calibration that -Inf was silently doing duty as a prior bound -- the
+# 2026-08-10 mode sat within ~1 % of it, so the posterior was being truncated by
+# the integrator rather than by the data (handoff 2026-08-10b section 4).
+#
+# The limit is not a mystery, it is the textbook one. Measured NA thresholds
+# match the eigenvalue prediction below to 0.1-1 % across h_ml and substeps:
+#
+#   h_ml 75, substeps  4 : empirical 155,319  vs analytic 155,366  (1.000)
+#   h_ml 75, substeps  8 : empirical 310,694  vs analytic 310,732  (1.000)
+#   h_ml 75, substeps 16 : empirical 621,433  vs analytic 621,464  (1.000)
+#   h_ml 30, substeps  4 : empirical  92,896  vs analytic  93,754  (0.991)
+#   h_ml 200, substeps 4 : empirical 178,231  vs analytic 177,409  (1.005)
+#
+# So the fix is to CHOOSE the substep count from the criterion instead of
+# hard-coding 4 and hoping. At every ordinary parameter value the answer is
+# still 4 -- kz has to exceed ~155,000 m2/yr (+6.2 sigma on its prior) before
+# the count moves -- so no existing result changes. See test-stability.R.
+#
+# AIR-SEA IS NOT COVERED BY THIS CRITERION, deliberately. Gas exchange can
+# dominate the Jacobian at low kz (measured up to 15x the diffusion eigenvalue
+# at k_w = 6000, h_ml = 30), but in ABSOLUTE terms it stays ~13x below the RK4
+# budget there and would need k_w ~ 80,000 (+11 sigma) to bind. Rather than add
+# a second closed form whose Revelle-driven growth along the trajectory (up to
+# 3.9x, measured on SSP5-8.5 to 2100) would need its own fudge factor, the
+# air-sea corner is caught by the NA-retry escalation in ccx_run_fast().
+
+# |h*lambda| stability limit of classical RK4 on the negative real axis: the
+# largest z > 0 with |1 - z + z^2/2 - z^3/6 + z^4/24| <= 1.
+CCX_RK4_STAB_LIMIT <- 2.785293563405
+CCX_STAB_SAFETY    <- 0.85   # margin against the limit; empirical/analytic
+                             # agreement above is ~1 %, so this is generous
+CCX_SUBSTEPS_MIN   <- 4L     # the historical value; never go below it
+CCX_SUBSTEPS_MAX   <- 256L   # backstop, so a pathological draw cannot hang
+
+#' Largest |eigenvalue| of the explicit interior-diffusion operator
+#'
+#' The operator is tridiagonal and non-symmetric as written, but similar to a
+#' symmetric matrix under D^(1/2) . D^(-1/2) with D = diag(dz), so its spectrum
+#' is real and non-positive. Symmetrising first means `eigen` returns exactly
+#' real values instead of real values with 1e-17 imaginary parts.
+#'
+#' Linear in kz and independent of the state, so this is exact for the whole
+#' trajectory, not an estimate at one point.
+ccx_diffusion_eigmax <- function(kz, grid) {
+  dz  <- grid$dz
+  dzm <- (dz[-length(dz)] + dz[-1]) / 2
+  n   <- length(dz)
+  A   <- matrix(0, n, n)
+  for (k in seq_len(n - 1)) {
+    a <- kz / (dz[k]     * dzm[k])    # out of layer k, into layer k+1
+    b <- kz / (dz[k + 1] * dzm[k])    # out of layer k+1, into layer k
+    A[k,     k]     <- A[k,     k]     - a
+    A[k,     k + 1] <- A[k,     k + 1] + b
+    A[k + 1, k]     <- A[k + 1, k]     + a
+    A[k + 1, k + 1] <- A[k + 1, k + 1] - b
+  }
+  s <- sqrt(dz)
+  S <- A * outer(1 / s, s)            # D^(-1/2) A D^(1/2), symmetric
+  max(abs(eigen((S + t(S)) / 2, symmetric = TRUE, only.values = TRUE)$values))
+}
+
+#' Substeps needed to keep the explicit diffusion term stable over one step
+#' @param dt master step, years (1/12 for the monthly integrator)
+ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
+  lam <- ccx_diffusion_eigmax(p$kz, grid)
+  need <- dt * lam / (CCX_STAB_SAFETY * CCX_RK4_STAB_LIMIT)
+  as.integer(min(max(CCX_SUBSTEPS_MIN, ceiling(need)), CCX_SUBSTEPS_MAX))
+}
+
+#' Resolve a user-supplied `substeps` argument, which may be the string "auto"
+ccx_resolve_substeps <- function(substeps, p, grid, dt = 1 / 12) {
+  if (identical(substeps, "auto")) ccx_substeps_for(p, grid, dt) else as.integer(substeps)
+}
+
+# ---------------------------------------------------------------------
 # Integrator
 # ---------------------------------------------------------------------
 #' Classical RK4 over one month, with substeps.

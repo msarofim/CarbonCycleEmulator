@@ -124,6 +124,12 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     F <- base_forcing
     F$c14_cosmo <- sp$prod_c14
     F$c14_bomb  <- base_forcing$c14_bomb * (pv$bomb_total / BOMB_REF)
+    # ccx_run_fast() defaults to substeps = "auto" and escalates on NA, so this
+    # -Inf now means the MODEL failed, not that the integrator hit its explicit-
+    # diffusion stability limit. Until 2026-08-11 it meant the latter, and the
+    # mode-finder maximised straight into it: kz = 175,790 sat ~1 % below the
+    # fixed-substep wall at ~155,000-178,000 (h_ml-dependent), so the posterior
+    # was truncated by numerics wearing a prior's clothes. See test-stability.R.
     r <- tryCatch(ccx_run_fast(sp, F), error = function(e) NULL)
     if (is.null(r) || anyNA(r$out$co2_NH)) return(-Inf)
 

@@ -760,3 +760,63 @@ meaning "the integrator broke" must not serve as a prior bound — and (2) a dec
 AR(1)/σ error model, which is a methodological choice for Marcus, not one to pick silently.
 
 Handoff: `notes/handoff_2026-08-10b_bomb14c_and_sampler.md`.
+
+## 2026-08-11 — Blocker 1 CLEARED: the solver wall is diagnosed, controlled, and gated
+
+Marcus's call on the app: **fix the §5 blockers before building the Shiny app**, so the app
+runs on a physically credible parameter set rather than on uncalibrated defaults (which read
+**467.8 ppm NH at 2024 against ~424 observed**) or on the discredited 2026-08-10 mode.
+
+**The `-Inf` wall was the textbook RK4 explicit-diffusion stability limit — nothing else.**
+Interior diffusion is integrated explicitly, so a fixed substep count caps `kz`. Predicting
+the cap from the largest eigenvalue of the discrete diffusion operator and comparing against
+bisection on the actual NA threshold:
+
+| h_ml (m) | substeps | empirical NA threshold | analytic | ratio |
+|---|---|---|---|---|
+| 75 | 4 | 155,319 | 155,366 | 1.000 |
+| 75 | 8 | 310,694 | 310,732 | 1.000 |
+| 75 | 16 | 621,433 | 621,464 | 1.000 |
+| 30 | 4 | 92,896 | 93,754 | 0.991 |
+| 200 | 4 | 178,231 | 177,409 | 1.005 |
+
+Agreement to 0.1–1 % across both `h_ml` and `substeps`, and the eigenvalue is exactly linear
+in `kz` and independent of the state — so this is a closed form for the whole trajectory, not
+an estimate at one point.
+
+**Fix:** `ccx_substeps_for()` chooses the substep count from that criterion
+(`CCX_RK4_STAB_LIMIT` 2.7853, `CCX_STAB_SAFETY` 0.85, floored at `CCX_SUBSTEPS_MIN` = 4L).
+`ccx_run()` and `ccx_run_fast()` now default to `substeps = "auto"`.
+
+**This changes no existing result.** `kz` must clear ~155,000 m²/yr — **+6.2σ on its
+lnorm(log 4000, 0.6) prior** — before the count moves off 4. Gated: `ccx_substeps_for()`
+returns 4 across the prior's central 99.99 % at `h_ml` ∈ {30, 75, 200}.
+
+**Air-sea gas exchange is deliberately NOT in the criterion.** It can dominate the Jacobian
+at low `kz` (measured up to 15× the diffusion eigenvalue at `k_w` = 6000, `h_ml` = 30) but in
+absolute terms stays ~13× below the RK4 budget there, and would need `k_w` ≈ 80,000 (+11σ) to
+bind. Adding a second closed form would have meant carrying a fudge factor for its
+Revelle-driven growth along the trajectory (measured up to 3.9× from 1750 to 2100 on
+SSP5-8.5). Instead `ccx_run_fast()` escalates: on NA it doubles the substeps and retries up to
+`CCX_SUBSTEPS_MAX` = 256L. An `-Inf` from the posterior now means the model failed, not that
+the integrator broke.
+
+**Also considered and set aside:** (a) simply raising the fixed count to 8 or 16 — moves the
+wall instead of removing it, and doubles or quadruples MCMC cost at every draw for a case that
+almost never arises; (b) an implicit/operator-split diffusion step — numerically the right
+answer, but it breaks the "emit each flux once, apply antisymmetrically" structure that makes
+conservation exact at any step size, and would need the C++ parity gate rebuilt; (c) bounding
+the `kz` prior below the limit — that is the disease, not the cure: a numerics-derived bound
+masquerading as a prior is exactly what went wrong.
+
+New gate `tests/testthat/test-stability.R` (34 assertions), including a **mutation test**: with
+the controller forced back to the old fixed 4 and the retry disabled, `kz` ∈ {175,790, 4e5,
+1e6} must all still produce NA. Without it the "no NAs" test could pass for the trivial reason
+that the cases were never unstable. Also asserts accuracy, not just stability: doubling the
+substeps beyond the controller's choice moves CO₂ by < 1e-6 relative.
+
+Suite **208 / 0 / 2** (was 174 / 0 / 2; the 2 skips are still seacarb).
+
+**Still blocked:** the AR(1) error-model pathology (§4 of the handoff) — a methodological
+choice for Marcus. Nothing is re-run until that is settled, since re-running mode-find on the
+current likelihood would just find the same `q10` = 0.28 with a slightly higher `kz`.

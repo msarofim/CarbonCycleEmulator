@@ -66,18 +66,36 @@ ccx_cpp_forcing <- function(F) {
 }
 
 #' Run the model using the C++ core. Same signature and return shape as ccx_run().
-ccx_run_fast <- function(spin, F, substeps = 4L) {
+#'
+#' @param substeps RK4 substeps per month, or "auto" (default) for the smallest
+#'   count that keeps the explicit diffusion term stable -- see the stability
+#'   section of R/model.R. "auto" resolves to 4 at every ordinary parameter
+#'   value, so this default does not change any existing result.
+#' @param retry_na if the run still produces NAs (the air-sea corner, which the
+#'   diffusion criterion deliberately does not cover), double the substep count
+#'   and try again, up to CCX_SUBSTEPS_MAX. A NA that survives that is a real
+#'   model failure, not an integrator artefact -- which is the whole point: a
+#'   caller's `anyNA` -> -Inf guard must not double as a prior bound.
+ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
   ccx_load_cpp()
-  res <- .ccx_cpp_env$ccx_run_cpp(
-    spin$y, ccx_cpp_par(spin$params), ccx_cpp_forcing(F), F$t,
-    ccx_cpp_aux(spin$aux, spin$grid), as.integer(substeps))
-  out <- as.data.frame(res$out)
-  names(out) <- c("co2_NH", "co2_SH", "d13c_NH", "d13c_SH",
-                  "d14c_NH", "d14c_SH", "ocean_C", "land_C")
-  out <- cbind(t = F$t, out)
-  state <- res$state
-  dimnames(state) <- list(ccx_box_names(spin$grid$nl), CCX_TRACERS)
-  list(state = state, out = out)
+  ss <- ccx_resolve_substeps(substeps, spin$params, spin$grid)
+  one <- function(nsub) {
+    res <- .ccx_cpp_env$ccx_run_cpp(
+      spin$y, ccx_cpp_par(spin$params), ccx_cpp_forcing(F), F$t,
+      ccx_cpp_aux(spin$aux, spin$grid), as.integer(nsub))
+    out <- as.data.frame(res$out)
+    names(out) <- c("co2_NH", "co2_SH", "d13c_NH", "d13c_SH",
+                    "d14c_NH", "d14c_SH", "ocean_C", "land_C")
+    state <- res$state
+    dimnames(state) <- list(ccx_box_names(spin$grid$nl), CCX_TRACERS)
+    list(state = state, out = cbind(t = F$t, out), substeps = as.integer(nsub))
+  }
+  r <- one(ss)
+  while (retry_na && anyNA(r$out) && ss < CCX_SUBSTEPS_MAX) {
+    ss <- min(2L * ss, CCX_SUBSTEPS_MAX)
+    r  <- one(ss)
+  }
+  r
 }
 
 #' Single derivative via the C++ core (used by the parity gate)

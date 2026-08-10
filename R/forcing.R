@@ -253,9 +253,14 @@ ccx_forcing_at <- function(F, i) {
 
 # ---------------------------------------------------------------------
 #' Run the model forward over an assembled forcing table
+#'
+#' @param substeps RK4 substeps per month, or "auto" to pick the smallest count
+#'   that keeps the explicit diffusion term stable (see ccx_substeps_for()).
+#'   "auto" resolves to CCX_SUBSTEPS_MIN = 4 at every ordinary parameter value.
 #' @return list(state = final state, out = data.frame of monthly diagnostics)
-ccx_run <- function(spin, F, substeps = 4L) {
+ccx_run <- function(spin, F, substeps = "auto") {
   y <- spin$y; aux <- spin$aux; grid <- spin$grid; p <- spin$params
+  substeps <- ccx_resolve_substeps(substeps, p, grid)
   n <- nrow(F)
   atmN <- aux$idx$NH$atm; atmS <- aux$idx$SH$atm
   ocean <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$ml, aux$idx[[h]]$oc)))
