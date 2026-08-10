@@ -51,3 +51,27 @@ biosphere and oceans from 1978 to 2000. I. Global aspects*, SIO Reference Series
 No. 01-06, Scripps Institution of Oceanography. Data: R. F. Keeling and S. J. Walker,
 Scripps CO2 Program. d13C is on the Scripps isotope scale (Lueker et al. 2020);
 CO2 is on the 2012 SIO manometric mole fraction scale.
+
+---
+
+## Added 2026-08-10 — Tans (1981) bomb ¹⁴C tables
+
+Transcribed from the PDF text layer of
+`https://scope.dge.carnegiescience.edu/SCOPE_16/SCOPE_16_1.4.5_Tans_131-157.pdf`
+(Tans, P.P., "A Compilation of Bomb 14C Data for Use in Global Carbon Model
+Calculations", in Bolin, B. (ed.) *Carbon Cycle Modelling*, SCOPE 16, Wiley,
+pp. 131–157). Reference supplied by Marcus. **No figure digitising** — both are
+printed tables and both extracted cleanly with `pdftotext -layout`.
+
+| File | Contents | Used for |
+|---|---|---|
+| `tans1981_scope16_table2_stratospheric_inventory.csv` | Table 2, p. 136: stratospheric excess ¹⁴C inventory, quarterly Dec 62 – Aug 66 + Jul 69, 10²⁶ atoms (after Telegadas 1971) | **The bomb source function.** Tans p.133: input to the troposphere = the stratospheric decrease |
+| `tans1981_scope16_table1_tropospheric_d14c.csv` | Table 1, p. 136: tropospheric Δ¹⁴C, NH / SH / global, December 1954–1977 | Pre-1963 time shape; independent check on the Hua zonal aggregate |
+
+Both feed `data-raw/build_bomb_c14_source.R` → `data/forcing_bomb_c14.rds`. The
+derivation, its two judgement calls and its residual caveats are in **DATA.md §9**.
+
+Two transcription traps are recorded in the file headers: Table 2's ninth quarter
+label renders as `0/64-11/64` in the text layer (it is 9/64–11/64), and Table 1's
+values are **total** tropospheric Δ¹⁴C, not bomb excess, despite its caption — the
+Dec-1954 SH value of −30 ‰ is the Suess-depleted pre-bomb level.

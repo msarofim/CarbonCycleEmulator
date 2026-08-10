@@ -1,0 +1,46 @@
+# Tans, P.P. (1981) "A Compilation of Bomb 14C Data for Use in Global Carbon
+# Model Calculations", in: Bolin, B. (ed.) Carbon Cycle Modelling, SCOPE 16,
+# Wiley, pp. 131-157. TABLE 2, p. 136: "Excess 14C inventory in stratosphere in
+# units of 10^26 atoms (After Telegadas 1971)".
+#
+# Source PDF: https://scope.dge.carnegiescience.edu/SCOPE_16/SCOPE_16_1.4.5_Tans_131-157.pdf
+# Underlying data: Telegadas, K. (1971), from aircraft and balloon sampling.
+# Transcribed 2026-08-10 from the PDF text layer (pdftotext -layout).
+#
+# WHY THIS TABLE IS THE BOMB SOURCE FUNCTION: Tans, p. 133 -- the input of bomb
+# 14C into the troposphere is equal to the stratospheric decrease. The model's
+# atmosphere is a single well-mixed troposphere per hemisphere (R/model.R) with
+# no stratospheric box, so the strat->trop flux, NOT the production rate, is
+# what belongs in forc$c14_bomb.
+#
+# TRANSCRIPTION NOTE: the PDF text layer renders the ninth row's quarter label
+# as "0/64-11/64". It is 9/64-11/64 -- the series is otherwise an unbroken
+# sequence of calendar quarters and no other quarter is missing.
+#
+# CAVEATS stated by Tans himself (p. 133):
+#  - Telegadas' aircraft data appear on average ~20% too high against
+#    ground-based CO2 collections and against Ergin et al. (1970).
+#  - The 12/62-2/63 value is "much too low": flights soon after testing ceased
+#    missed 14C at high latitude. Treat 356 as a FLOOR on the peak burden.
+#  - Telegadas' stratosphere is 1.02e18 kg of a 5.2e18 kg atmosphere.
+#  - French and Chinese atmospheric tests after 1963 add production that the
+#    "input = stratospheric decrease" identity does not capture.
+#
+# t_mid is the mid-point of the quarter in decimal years.
+quarter,t_mid,inventory_1e26_atoms
+12/62-2/63,1963.042,356
+3/63-5/63,1963.292,349
+6/63-8/63,1963.542,301
+9/63-11/63,1963.792,272
+12/63-2/64,1964.042,255
+3/64-5/64,1964.292,225
+6/64-8/64,1964.542,183
+9/64-11/64,1964.792,170
+12/64-2/65,1965.042,170
+3/65-5/65,1965.292,156
+6/65-8/65,1965.542,151
+9/65-11/65,1965.792,144
+12/65-2/66,1966.042,146
+3/66-5/66,1966.292,131
+6/66-8/66,1966.542,128
+7/69,1969.542,86

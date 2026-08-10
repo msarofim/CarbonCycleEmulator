@@ -588,3 +588,64 @@ mode-find with `optim()` and start chains dispersed around the mode; then 50k ×
 Hessian-scaled proposal. Gate production on R̂ < 1.05 **and** ESS ≥ 400.
 
 Handoff note written at `notes/handoff_2026-08-10_calibration.md`.
+
+## 2026-08-10 (later) — Bomb ¹⁴C source replaced: it was a physics error, not just a gap
+
+Marcus supplied two references (Graven et al. 2017 GMD 10:4405; Tans 1981 SCOPE 16
+pp. 131–157). Neither is the UNSCEAR 2000 Annex C yield table that §8 of DATA.md said was
+needed — and it turned out not to be needed at all.
+
+**What the placeholder actually got wrong.** `R/model.R` gives each hemisphere one
+well-mixed troposphere and **no stratospheric box**, so `forc$c14_bomb` is a *delivery*
+rate. The placeholder was shaped like *production*: 54.0 % of all bomb ¹⁴C in 1961–62 and
+2.2 % in 1963, delivered with no stratospheric residence. Telegadas' measurements (Tans
+Table 2) say 56–60 % of the Naegler & Levin total was still **in the stratosphere** in
+Dec 62 – Feb 63 and that 1963 was the largest delivery year. So this was a mistimed
+forcing, not merely an uncited one.
+
+**What was built.** `data-raw/build_bomb_c14_source.R` → `data/forcing_bomb_c14.rds`,
+monthly, unit integral. Part A (≥1963.04): two exponentials fitted to Table 2, separating
+into **39.97 kmol at τ = 1.00 yr** and **27.75 kmol at τ = 10.15 yr** (RMSE 1.2 kmol / 15
+points); the analytic derivative is the delivery flux and is positive by construction.
+Part B (<1963.04): the fit leaves 34.28 kmol already delivered, which pins the pre-1963
+integral with no yield inventory; its shape comes from Table 1's tropospheric inventory
+plus first-order removal `λ·N14`, with λ solved in closed form to close that budget.
+
+**The check that makes Part B credible.** Uptake is 39 % of pre-1963 delivery, far too
+large to drop. Budget closure gives λ = 0.1687 /yr (5.93 yr); gross air-sea exchange
+alone, from Tans' own 19 mol/m²/yr, gives 0.1495 /yr (6.69 yr) — 89 % of it, biosphere as
+the remainder. Two independent routes to 13 %.
+
+**Effect.** Benchmarked against the *area-weighted hemispheric* observations
+(`ccx_zone_weights()`), not the DESIGN §6 Zone-1 gate, which is not comparable to the
+model's `d14c_NH`. Observed NH 853.2 ‰ @ 1963.708, SH 659.4 ‰ @ 1965.042, lag 1.33 yr.
+New shape: NH +0.75 yr, SH +0.58 yr, lag 1.17. Old: NH −0.67 yr, SH **−1.42 yr**, lag
+0.58. NH timing error is a wash in magnitude; **SH timing and the interhemispheric lag
+are decisively better**, and DESIGN §6 names that lag as the `tau_ex` constraint. The old
+peak (996.9 ‰) also exceeded every observed zone including Zone 1.
+
+**Tried and rejected along the way.**
+- *Graven 2017 as the bomb source* — it is an observation product, not a source term, and
+  at 3 zones / annual it is coarser than the Hua et al. 2022 record already in
+  `obs_d14c_zonal.rds`. Kept only as a δ¹³C cross-check back to 1850.
+- *Raw quarterly differencing of Table 2* — gives 16.8 kmol for 1963 against the fit's
+  27.7, because it inherits the Dec 62 – Feb 63 point that Tans explicitly calls "much too
+  low". Superseded by the two-exponential fit, which extrapolates that burden upward
+  (59.12 → 67.72 kmol). Keeping the low point instead worsens NH peak timing (+1.00 vs
+  +0.75 yr), so Tans' advice and the data agree.
+- *`hyman` spline for the pre-1963 buildup* — rejects the 1959–1960 tie in Table 1.
+  Replaced with `monoH.FC`, which is also the non-overshooting choice that DATA.md §6
+  demands for this series.
+- *Pre-bomb Suess baseline* — varying it −30 → −20 ‰ moves NH peak timing not at all and
+  amplitude 0.5 %. Immaterial; left at the Table 1 SH Dec-54 value.
+
+**Left open.** A 4.5× one-month step survives at the Part A / Part B join. A steep rise
+there is real (autumn-1962 tests descending in spring 1963) but a *step* is an artifact of
+Part B resting on December-only anchors. Monthly pre-1963 Δ¹⁴C exists in
+`obs_d14c_zonal.rds` and would remove it — at the cost of deriving the forcing from the
+record the likelihood scores against. Awaiting direction.
+
+`ccx_bomb_c14_annual()` is now the annual aggregate of the monthly series; the placeholder
+survives as `ccx_bomb_c14_annual_SUPERSEDED()` purely so the size of the correction stays
+reproducible. Test suite unchanged at 174 pass / 0 fail / 2 skip (seacarb absent) —
+verified equal on HEAD before and after.

@@ -1,0 +1,43 @@
+# Tans, P.P. (1981) "A Compilation of Bomb 14C Data for Use in Global Carbon
+# Model Calculations", in: Bolin, B. (ed.) Carbon Cycle Modelling, SCOPE 16,
+# Wiley, pp. 131-157. TABLE 1, p. 136: "Tropospheric bomb D14C values (permil)
+# proposed for global carbon model intercomparisons".
+#
+# Source PDF: https://scope.dge.carnegiescience.edu/SCOPE_16/SCOPE_16_1.4.5_Tans_131-157.pdf
+# Transcribed 2026-08-10 from the PDF text layer (pdftotext -layout), values
+# checked against the rendered table. No digitising of figures involved.
+#
+# All values are DECEMBER of the stated year (the table's first row is labelled
+# "December 54" and subsequent rows carry the year alone).
+#
+# CAUTION: despite the caption these are TOTAL tropospheric D14C, not bomb
+# excess -- the Dec-1954 SH value of -30 permil is the Suess-depleted
+# pre-bomb level, not a bomb signal. Subtract a pre-bomb baseline before
+# interpreting them as bomb excess.
+#
+# SH and global stop in 1974; NH continues to 1977.
+year,d14c_NH,d14c_SH,d14c_global
+1954,0,-30,-15
+1955,30,0,15
+1956,60,20,40
+1957,110,80,95
+1958,180,140,160
+1959,240,210,225
+1960,230,220,225
+1961,280,230,255
+1962,420,280,350
+1963,860,490,675
+1964,820,680,750
+1965,750,640,695
+1966,680,630,655
+1967,630,590,610
+1968,590,560,575
+1969,570,530,550
+1970,550,500,525
+1971,520,490,505
+1972,480,460,470
+1973,450,420,435
+1974,420,400,410
+1975,390,NA,NA
+1976,350,NA,NA
+1977,330,NA,NA

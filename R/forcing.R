@@ -90,7 +90,43 @@ ccx_nuclear_c14_annual <- function(dir = ccx_path("data-raw", "downloads", "nucl
 }
 
 # ---------------------------------------------------------------------
-#' Bomb 14C production, annual, mol 14C/yr
+#' Bomb 14C DELIVERY to the troposphere, monthly, mol 14C/yr
+#'
+#' Reads the measured input function built by
+#' data-raw/build_bomb_c14_source.R from Tans (1981) SCOPE 16 Tables 1 and 2.
+#'
+#' NOT a production rate. The model's atmosphere is a single well-mixed
+#' troposphere per hemisphere with no stratospheric box (R/model.R), so what
+#' belongs here is the stratosphere->troposphere flux. Tans (p.133): the input
+#' of bomb 14C into the troposphere equals the stratospheric decrease. Feeding
+#' a production series into this slot delivers the 1961-62 tests to the
+#' troposphere about a year early -- see the superseded shape below.
+#'
+#' The stored series is normalised to unit integral, so `total_kmol` alone sets
+#' the magnitude and the calibrated bomb_total (Naegler & Levin 2006 prior)
+#' continues to carry it.
+ccx_bomb_c14_monthly <- function(total_kmol = 102) {
+  b <- readRDS(ccx_path("data", "forcing_bomb_c14.rds"))
+  data.frame(year = b$year, month = b$month,
+             mol_per_yr = b$shape_per_yr * total_kmol * 1000)
+}
+
+#' Annual aggregate of the monthly delivery -- diagnostics and back-compat
+ccx_bomb_c14_annual <- function(total_kmol = 102, years = 1945:1980) {
+  b <- ccx_bomb_c14_monthly(total_kmol)
+  a <- tapply(b$mol_per_yr, b$year, mean)
+  out <- data.frame(year = years, mol_per_yr = 0)
+  i <- match(as.character(years), names(a))
+  out$mol_per_yr[!is.na(i)] <- as.numeric(a)[i[!is.na(i)]]
+  out
+}
+
+# ---------------------------------------------------------------------
+#' SUPERSEDED 2026-08-10 -- the provisional production-shaped placeholder.
+#'
+#' Kept only so the size of the correction can be reproduced. It put 54.0 % of
+#' all bomb 14C into 1961-62 and 2.2 % into 1963; the measured input function
+#' puts 13.2 % into 1961-62 and 27.2 % into 1963. Do not wire this back in.
 #'
 #' *** PROVISIONAL SHAPE -- see DATA.md "Outstanding data gaps". ***
 #'
@@ -107,7 +143,7 @@ ccx_nuclear_c14_annual <- function(dir = ccx_path("data-raw", "downloads", "nucl
 #' NORMALISED to unit integral, so `total_kmol` alone sets the magnitude and the
 #' placeholder cannot silently set the amplitude. Do not report bomb-era 14C
 #' results on this shape.
-ccx_bomb_c14_annual <- function(total_kmol = 102, years = 1945:1980) {
+ccx_bomb_c14_annual_SUPERSEDED <- function(total_kmol = 102, years = 1945:1980) {
   # relative annual atmospheric test activity -- PROVISIONAL
   shape <- c(
     `1945` = 0.2, `1946` = 0.3, `1947` = 0.0, `1948` = 0.4, `1949` = 0.2,
@@ -183,9 +219,15 @@ ccx_build_forcing <- function(scenario = "historical",
   # method="constant": the bomb series is sharply peaked and must stay
   # non-negative, and its underlying data are annual anyway. See the note in
   # ccx_annual_to_monthly() -- splining then clipping inflated the total 4.3 %.
-  bomb <- ccx_bomb_c14_annual(bomb_total_kmol)
-  c14_bomb <- ccx_annual_to_monthly(bomb$year, bomb$mol_per_yr, yrs, method = "constant")
-  c14_bomb[yv < min(bomb$year) | yv > max(bomb$year)] <- 0
+  # The bomb source is now NATIVELY MONTHLY (data/forcing_bomb_c14.rds, built by
+  # data-raw/build_bomb_c14_source.R from Tans 1981 Tables 1-2), so it is placed
+  # on the axis by month rather than round-tripped through an annual series.
+  # ccx_annual_to_monthly() is still the right tool for genuinely annual inputs.
+  bomb <- ccx_bomb_c14_monthly(bomb_total_kmol)
+  key  <- yv * 12L + rep(seq_len(12), length(yrs))
+  c14_bomb <- rep(0, n)
+  m <- match(key, bomb$year * 12L + bomb$month)
+  c14_bomb[!is.na(m)] <- bomb$mol_per_yr[m[!is.na(m)]]
 
   data.frame(
     t = t, year = rep(yrs, each = 12), month = rep(seq_len(12), length(yrs)),
