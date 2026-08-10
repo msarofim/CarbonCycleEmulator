@@ -563,3 +563,28 @@ since atmospheric growth is already pinned by the CO₂ series; land sink at 3×
 σ per Marcus's Q1 default; station-vs-box representation error on CO₂ and δ¹³C.
 Parameters are sampled on transformed scales with the **Jacobian applied explicitly** —
 omitting it silently reshapes every prior.
+
+## 2026-08-10 — Pilot MCMC: NOT converged (the pilot doing its job)
+
+1500 iters × 4 chains, seed 2026, 4.4 min → `calibration/output/pilot_fit.rds`.
+
+| Diagnostic | Value | Target |
+|---|---|---|
+| worst R̂ | **4.53** | < 1.05 |
+| min ESS (bulk) | **4** of 3000 draws | ≥ 400 |
+| acceptance | 0.045–0.063 | ~0.234 |
+| log-posterior | −93,775 → −6,727 (best −6,469) | — |
+
+The chains gained ~87,000 log-units and were **still climbing at the last iteration** —
+they are in transient burn-in, not sampling the posterior. **No posterior numbers from
+this run are usable**, and none are recorded anywhere. This is a too-short-chain and
+bad-start problem, not evidence of a broken posterior: the likelihood decomposition and
+single-parameter scans both show sensible, well-scaled responses.
+
+Fix order for the next session (detail in `notes/handoff_2026-08-10_calibration.md` §4):
+mode-find with `optim()` and start chains dispersed around the mode; then 50k × 4 chains
+(~3.2 h at 0.058 s/eval); if acceptance stays ~5 % after that, the ocean-uptake parameters
+(`k_w`, `h_ml`, `kz`) are probably on a narrow ridge and want reparameterisation or a
+Hessian-scaled proposal. Gate production on R̂ < 1.05 **and** ESS ≥ 400.
+
+Handoff note written at `notes/handoff_2026-08-10_calibration.md`.
