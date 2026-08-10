@@ -668,3 +668,53 @@ Carried caveat, recorded at the switch: at uncalibrated defaults the modelled NH
 still +0.75 yr late, and the Part A/B join step sits inside the admitted window. Both bear
 on `tau_ex` and the ocean-uptake parameters; treat posterior shifts in those as suspect
 until the join is resolved.
+
+## 2026-08-10 (later still) — Sub-annual bomb shape from observed Δ¹⁴C; two metric traps caught
+
+Marcus: *"If we don't have the raw sub-annual emission data, then I'm okay using the
+observed concentration data to get the sub-annual pattern to supplement the annual emission
+data."* Implemented, and applied more broadly than first scoped once the data were checked.
+
+**Table 2's quarterly resolution is illusory.** Its quarter-on-quarter releases are
+`7, 48, 29, 17, 30, 42, 13, 0, 14, 5, 7, −2, 15, 3` units. Telegadas reports inventories
+to ~3 figures, so everything below ~15 is rounding — including a **`0`, because "170" is
+printed twice in succession**, which produced three months of exactly zero delivery. Annual
+sums (101 / 85 / 24) are far above that floor. So the interval totals are now annual
+throughout and the concentration record supplies sub-annual shape everywhere, rather than
+only before 1963.
+
+**Trap 1 — suspicious uniformity was real, but not where I first looked.** The modelled NH
+peak sat at exactly 1964.625 in all nine runs of a `k_w`/`kz`/`h_ml`/`tau_ex` sweep spanning
+2–4×, while amplitude and interhemispheric lag both responded strongly. That pointed at the
+zero-delivery notch — but removing the notch did not move the peak, so the hypothesis was
+wrong.
+
+**Trap 2 — the metric, not the model.** The observed NH aggregate is **double-peaked**:
+850.3 ‰ @ 1963.625, dipping to 741.9, then 832.6 @ 1964.625. The two maxima differ by 2 %,
+so `which.max()` flips between lobes and manufactured a "+0.92 yr timing error" that no
+parameter could move *because it was not a timing error*. The model reproduces the
+double-peak structure and picks the other lobe. Peak timing is now explicitly disowned as a
+score in DATA.md §9; the metrics are debiased scatter and correlation over 1962–1972,
+because a constant level offset is exactly what `bomb_total` and the uptake parameters
+absorb.
+
+**Result on those metrics** (uncalibrated defaults, area-weighted hemispheric obs):
+
+| Bomb source | debiased sd NH | debiased sd SH | corr NH |
+|---|---|---|---|
+| Measured input function, concentration sub-annual shape | **34.5 ‰** | **36.1 ‰** | **0.970** |
+| Two-exponential fit, no concentration input | 48.0 ‰ | 39.5 ‰ | 0.951 |
+| Superseded placeholder | 233.4 ‰ | 186.1 ‰ | **0.121** |
+
+The placeholder correlated with the observed bomb transient at **0.12**. The earlier
+two-exponential version is superseded: fitting a smooth decay to Table 2 destroyed the
+Apr–Jul release maximum that appears in *both* 1963 and 1964 (48 and 42 units, the two
+largest quarterly releases) — the spring stratosphere-troposphere intrusion.
+
+**Also rejected:** using the observed record for the annual totals as well. Keeping the
+totals from Tans confines the circularity to within-year timescales, so annual and longer
+behaviour remains an independent test. Recorded as a caveat rather than papered over.
+
+Smoothing window (`CCX_BOMB_SMOOTH`) is immaterial: 3, 5, 9 months agree to <1 %.
+λ moved 0.1687 → 0.1996 /yr; the independent gross-air-sea check is 0.1495 /yr, now 75 % of
+it (was 89 %), a more plausible ocean/biosphere split. Tests unchanged: 174 / 0 / 2.

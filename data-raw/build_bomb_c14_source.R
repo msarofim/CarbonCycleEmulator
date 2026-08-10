@@ -1,44 +1,51 @@
 # =====================================================================
 # build_bomb_c14_source.R -- derive the bomb 14C input function to the
-# TROPOSPHERE from Tans (1981) SCOPE 16 Tables 1 and 2.
+# TROPOSPHERE from Tans (1981) SCOPE 16 Tables 1 and 2, with sub-annual
+# structure supplied by the observed Delta14C record where -- and only where --
+# the inventory data are not themselves sub-annual.
 #
 # Run from repo root:  Rscript data-raw/build_bomb_c14_source.R
 #
 # WHY THIS EXISTS
 # ---------------
-# The model's atmosphere is a single well-mixed troposphere per hemisphere
-# (R/model.R) with no stratospheric box. forc$c14_bomb is therefore a DELIVERY
-# rate to the troposphere, not a production rate. The superseded placeholder in
-# ccx_bomb_c14_annual() was shaped like production: it put 54.0 % of all bomb
-# 14C into 1961-62 and 2.2 % into 1963. Telegadas' measurements say 56-60 % of
-# the Naegler & Levin total was still IN THE STRATOSPHERE in Dec 62 - Feb 63,
-# and that 1963 was the largest single year of delivery to the troposphere.
-# The placeholder is mistimed by roughly a year, in the direction that matters:
-# DESIGN sec.6 gates the observed tropospheric D14C peak at 1963.625.
+# R/model.R gives each hemisphere one well-mixed troposphere and NO
+# stratospheric box, so forc$c14_bomb is a DELIVERY rate to the troposphere,
+# not a production rate. The superseded placeholder was shaped like production
+# -- 54.0 % of all bomb 14C in 1961-62, 2.2 % in 1963 -- which delivers the big
+# test series with no stratospheric residence at all. Telegadas' measurements
+# say 56-60 % of the Naegler & Levin total was still IN THE STRATOSPHERE in
+# Dec 62 - Feb 63, and that 1963 was the largest delivery year.
 #
-# METHOD (the "hybrid measured input function", Marcus 2026-08-10)
-# ---------------------------------------------------------------
-# Part A, 1963.04 onward -- DIRECT. Tans p.133: "The input of bomb 14C into the
-#   troposphere is then simply equal to the stratospheric decrease." Two
-#   decaying exponentials are fitted to the Table 2 stratospheric inventory
-#   (two reservoirs; the raw differences already show a fast early and a slow
-#   late timescale). The analytic derivative is the delivery flux: positive by
-#   construction, so the one non-monotone pair in the raw table
-#   (9/65-11/65 -> 12/65-2/66, which Tans himself dismisses as insignificant
-#   seasonality) cannot produce a negative source.
+# THE GOVERNING PRINCIPLE (Marcus 2026-08-10)
+# -------------------------------------------
+# Inventory data set the TOTALS. Observed concentration supplies the SUB-ANNUAL
+# PATTERN only where no sub-annual inventory exists. This confines any
+# circularity with the likelihood to within-interval timescales; every
+# interval total comes from Tans' independent compilation.
 #
-# Part B, pre-1963 -- BUDGET-CLOSED. The Table 2 fit gives the burden still
-#   aloft at 1963.04; the rest of the Naegler & Levin total must already have
-#   reached the troposphere. That fixes the pre-1963 delivery INTEGRAL with no
-#   test-yield inventory. Its TIME SHAPE comes from the tropospheric 14C
-#   inventory implied by Tans Table 1, plus a first-order removal term
-#   lambda*N14 for ocean and biosphere uptake -- uptake is about HALF of
-#   pre-1963 delivery, so it cannot be dropped. lambda is not tuned: it is the
-#   unique value closing the measured budget, in closed form. It is then
-#   checked against an INDEPENDENT gross-air-sea-flux estimate built from Tans'
-#   own 19 mol/m2/yr (Broecker et al. 1978).
+# Interval totals, in order of preference:
+#   1963.04-1966.54  Table 2 QUARTERLY stratospheric decrease. Genuinely
+#                    sub-annual inventory data -- used directly, no
+#                    concentration input needed at this timescale. These
+#                    quarters carry the spring stratosphere-troposphere
+#                    intrusion (7 / 48 / 29 units released in the first three
+#                    quarters of 1963), which an earlier smooth two-exponential
+#                    fit destroyed by forcing the flux to peak at Dec-62.
+#   1966.54-1969.54  one Table 2 interval (128 -> 86).
+#   pre-1963.04      ANNUAL totals from Table 1 plus budget closure (below).
+#   post-1969.54     exponential tail fitted to the late Table 2 points.
 #
-# UNSCEAR 2000 Annex C is NOT required by this construction.
+# Budget closure for the pre-1963 total: the Table 2 series says how much was
+# still aloft at 1963.04; the rest of the Naegler & Levin total must already
+# have reached the troposphere. No test-yield inventory is needed, so UNSCEAR
+# 2000 Annex C is NOT required by this construction.
+#
+# Within pre-1963 years, and within each Table 2 interval, the shape comes from
+# g(t) = dN14/dt + lambda*N14 evaluated on the OBSERVED monthly Delta14C
+# (Hua et al. 2022, area-weighted to hemispheres) -- the tropospheric 14C
+# inventory plus its removal, i.e. the delivery implied by the concentration
+# record. Only its SHAPE is used; each interval is rescaled to the inventory
+# total.
 #
 # Output: data/forcing_bomb_c14.rds -- monthly, unit-integral shape.
 # =====================================================================
@@ -57,196 +64,262 @@ BOMB_TOTAL_REF_KMOL <- 102      # Naegler & Levin (2006) central, 1945-1980.
                                 # Only sets the pre/post-1963 SPLIT; the model
                                 # rescales the unit-integral shape by the
                                 # calibrated bomb_total.
-# The two judgement calls in this derivation are exposed as environment
-# overrides so their effect can be measured rather than argued about:
-#   CCX_BOMB_DROP_FIRST=0  CCX_BOMB_PREBOMB=-25  Rscript data-raw/build_bomb_c14_source.R
+# The judgement calls are environment-overridable so they can be measured:
+#   CCX_BOMB_DROP_FIRST=0 CCX_BOMB_PREBOMB=-25 Rscript data-raw/build_bomb_c14_source.R
 BOMB_T2_DROP_FIRST  <- as.logical(as.integer(Sys.getenv("CCX_BOMB_DROP_FIRST", "1")))
-                                # Tans p.133 says the 12/62-2/63 value is "much
-                                # too low" (early flights missed high-latitude
-                                # 14C). Excluded from the fit; the fitted curve
-                                # extrapolates the true t0 burden upward.
+                                # Tans p.133 calls the 12/62-2/63 inventory
+                                # "much too low" (early flights missed
+                                # high-latitude 14C). When TRUE its value is
+                                # replaced by a backward extrapolation of the
+                                # tail fit, raising the t0 burden.
 BOMB_PREBOMB_D14C   <- as.numeric(Sys.getenv("CCX_BOMB_PREBOMB", "-30"))
                                 # permil. Suess-depleted pre-bomb level, taken
                                 # as the Dec-1954 SH value of Tans Table 1 (the
                                 # SH had no detectable bomb signal then).
 BOMB_EXCESS_ZERO_YR <- 1952.0   # bomb excess anchored to zero here: pre-1952
                                 # atmospheric tests were small fission devices
-                                # with negligible 14C yield relative to the
-                                # 1952 (Ivy Mike) and later thermonuclear tests.
+                                # with negligible 14C yield next to the 1952
+                                # (Ivy Mike) and later thermonuclear tests.
 BOMB_SERIES_END_YR  <- 1980     # matches the range the forcing builder and
                                 # tests/testthat/test-forcing.R assume.
+BOMB_TAIL_FIT_FROM  <- 1965.0   # late Table 2 points used for the post-1969
+                                # exponential tail
 BOMB_STRAT_AIR_KG   <- 1.02e18  # Telegadas' stratosphere, quoted by Tans p.133
 BOMB_TOTAL_AIR_KG   <- 5.20e18  # ... out of this total atmospheric mass
 BOMB_M_AIR_KG_MOL   <- 28.96e-3 # mean molar mass of dry air
 BOMB_GROSS_AS_FLUX  <- 19       # mol CO2 /m2/yr, Broecker et al. (1978), the
                                 # value Tans himself used (p.134)
+BOMB_SHAPE_FLOOR    <- 1e-6     # relative floor so a rescaled interval whose
+                                # concentration-implied shape is entirely
+                                # non-positive still receives its total
+BOMB_SHAPE_SMOOTH_M <- as.integer(Sys.getenv("CCX_BOMB_SMOOTH", "5"))
+                                # centred moving average, months, applied to the
+                                # concentration-implied shape BEFORE the interval
+                                # rescale (which still enforces exact totals).
+                                # Observed atmospheric D14C carries a seasonal
+                                # cycle from BOTH the spring stratospheric
+                                # intrusion -- a real feature of the source, to
+                                # be kept -- and seasonal biosphere/ocean
+                                # exchange, which R/model.R already simulates and
+                                # which would be DOUBLE-COUNTED if it entered the
+                                # source. Unsmoothed, g swung 23.8 -> 39.2 -> 12.8
+                                # kmol/yr in successive months of 1963. A 5-month
+                                # average retains ~75 % of a 12-month cycle
+                                # (sin(5*pi/12)/(5*sin(pi/12))) so the spring
+                                # maximum survives, while damping the higher
+                                # frequencies that differentiation amplifies.
 NA_AVOGADRO         <- 6.02214076e23
 
 cat("\n=== build_bomb_c14_source.R ===\n")
-cat("Source: Tans (1981) SCOPE 16 pp.131-157, Tables 1 and 2\n")
+cat("Totals from Tans (1981) SCOPE 16 Tables 1-2; sub-annual shape from observed D14C\n")
 cat(sprintf("Reference total: %.0f kmol (Naegler & Levin 2006)\n\n", BOMB_TOTAL_REF_KMOL))
 
+MONTH_DT <- 1 / 12
+mt <- seq(BOMB_EXCESS_ZERO_YR + MONTH_DT / 2, BOMB_SERIES_END_YR + 11.5 / 12, by = MONTH_DT)
+
 # =====================================================================
-# Part A -- stratospheric inventory -> delivery flux
+# 1. Observed monthly Delta14C -> the concentration-implied delivery shape
+# =====================================================================
+d14 <- as.data.frame(readRDS(file.path(OUT, "obs_d14c_zonal.rds")))
+zw  <- ccx_zone_weights()
+agg_hemi <- function(wts) {
+  s <- d14[d14$zone %in% names(wts), c("decimal_date", "zone", "d14c")]
+  wide <- reshape(s, idvar = "decimal_date", timevar = "zone", direction = "wide")
+  zn <- sub("d14c\\.", "", names(wide)[-1])
+  M <- as.matrix(wide[, -1, drop = FALSE]); ww <- wts[zn] / sum(wts[zn])
+  ok <- complete.cases(M)
+  data.frame(t = wide$decimal_date[ok], x = as.numeric(M[ok, , drop = FALSE] %*% ww))
+}
+NHo <- agg_hemi(zw$NH); SHo <- agg_hemi(zw$SH)
+tt  <- sort(intersect(NHo$t, SHo$t))
+glob_obs <- 0.5 * (NHo$x[match(tt, NHo$t)] + SHo$x[match(tt, SHo$t)])   # equal-area hemispheres
+d14c_ex <- stats::approx(tt, glob_obs, xout = mt, rule = 2)$y - BOMB_PREBOMB_D14C
+d14c_ex[d14c_ex < 0] <- 0
+d14c_ex[mt < BOMB_EXCESS_ZERO_YR] <- 0
+
+# tropospheric 14C inventory on Telegadas' troposphere, ice-core CO2 spline
+co2s <- as.data.frame(readRDS(file.path(OUT, "obs_icecore.rds"))$co2_spline)
+chi  <- stats::approx(co2s$year, co2s$co2_ppm, xout = mt, rule = 2)$y
+mol_air_trop <- (BOMB_TOTAL_AIR_KG - BOMB_STRAT_AIR_KG) / BOMB_M_AIR_KG_MOL
+N14 <- (d14c_ex / 1000) * (mol_air_trop * chi * 1e-6) * ccx_const("R14_STD") / 1000  # kmol
+
+# =====================================================================
+# 2. Table 2 -> released-to-date, and the interval totals
 # =====================================================================
 t2 <- read.csv(BOMB_T2_FILE, comment.char = "#")
 t2$kmol <- t2$inventory_1e26_atoms * 1e26 / NA_AVOGADRO / 1000
 t0 <- t2$t_mid[1]
 
-fit_rows <- if (BOMB_T2_DROP_FIRST) seq(2, nrow(t2)) else seq_len(nrow(t2))
-cat(sprintf("Part A: fitting 2 exponentials to %d of %d Table 2 points%s\n",
-            length(fit_rows), nrow(t2),
-            if (BOMB_T2_DROP_FIRST) " (12/62-2/63 excluded, Tans p.133)" else ""))
-
-# I(t) = A1 exp(-(t-t0)/tau1) + A2 exp(-(t-t0)/tau2); positive params via log.
-sse <- function(th) {
-  A1 <- exp(th[1]); tau1 <- exp(th[2]); A2 <- exp(th[3]); tau2 <- exp(th[4])
-  pred <- A1 * exp(-(t2$t_mid[fit_rows] - t0) / tau1) +
-          A2 * exp(-(t2$t_mid[fit_rows] - t0) / tau2)
-  sum((pred - t2$kmol[fit_rows])^2)
+# Exponential fit to the LATE points, used for (a) the post-1969 tail and
+# (b) back-extrapolating the known-low first point when BOMB_T2_DROP_FIRST.
+lateR <- t2$t_mid >= BOMB_TAIL_FIT_FROM
+lf <- lm(log(t2$kmol[lateR]) ~ t2$t_mid[lateR])
+tau_tail <- -1 / coef(lf)[2]
+inv2 <- t2$kmol
+if (BOMB_T2_DROP_FIRST) {
+  # Replace, do not delete: the t0 burden is what sets the pre/post-1963 split.
+  # The first three quarters (356, 349, 301) imply almost no release in
+  # Dec62-Feb63 followed by a large one, which is the known undercount; the
+  # 2nd point is retained and the 1st is raised to preserve monotonicity with
+  # the quarter-on-quarter release rate that follows it.
+  rel_next <- t2$kmol[2] - t2$kmol[3]                # kmol released in Mar-May 63
+  inv2[1] <- t2$kmol[2] + rel_next                   # assume a comparable release before it
 }
-best <- NULL
-for (s1 in c(0.3, 0.5, 0.7)) for (s2 in c(1.0, 2.0)) for (s3 in c(5, 10, 20)) {
-  th0 <- c(log(59 * s1), log(s2), log(59 * (1 - s1)), log(s3))
-  f <- tryCatch(optim(th0, sse, method = "Nelder-Mead",
-                      control = list(maxit = 20000, reltol = 1e-14)),
-                error = function(e) NULL)
-  if (!is.null(f) && (is.null(best) || f$value < best$value)) best <- f
-}
-A1 <- exp(best$par[1]); tau1 <- exp(best$par[2])
-A2 <- exp(best$par[3]); tau2 <- exp(best$par[4])
-# order so component 1 is the fast one
-if (tau1 > tau2) { tmp <- c(A1, tau1); A1 <- A2; tau1 <- tau2; A2 <- tmp[1]; tau2 <- tmp[2] }
-I_t0 <- A1 + A2
-rmse <- sqrt(best$value / length(fit_rows))
+I_t0 <- inv2[1]
+cat(sprintf("Table 2: t0 = %.3f, burden %.2f kmol", t0, I_t0))
+cat(if (BOMB_T2_DROP_FIRST)
+      sprintf(" (raw %.2f raised per Tans p.133 'much too low')\n", t2$kmol[1]) else "\n")
+cat(sprintf("  late-point tail: tau = %.2f yr (fit from %.0f)\n", tau_tail, BOMB_TAIL_FIT_FROM))
 
-cat(sprintf("  fast reservoir: %6.2f kmol, tau = %5.2f yr\n", A1, tau1))
-cat(sprintf("  slow reservoir: %6.2f kmol, tau = %5.2f yr\n", A2, tau2))
-cat(sprintf("  burden at t0=%.3f: %.2f kmol (raw Table 2 first point %.2f, a known floor)\n",
-            t0, I_t0, t2$kmol[1]))
-cat(sprintf("  fit RMSE %.3f kmol over %d points\n", rmse, length(fit_rows)))
-
-strat_flux <- function(t) {                       # kmol/yr into the troposphere
-  ifelse(t < t0, 0, A1 / tau1 * exp(-(t - t0) / tau1) + A2 / tau2 * exp(-(t - t0) / tau2))
-}
-
-# =====================================================================
-# Part B -- Table 1 tropospheric inventory + budget-closed removal
-# =====================================================================
-t1 <- read.csv(BOMB_T1_FILE, comment.char = "#")
-t1$t <- t1$year + 11.5 / 12          # all values are December
-
-D_pre <- BOMB_TOTAL_REF_KMOL - I_t0  # kmol delivered to troposphere before t0
-cat(sprintf("\nPart B: budget closure -> %.2f kmol delivered pre-%.2f (%.0f %% of total)\n",
+# Cumulative released; enforce non-decreasing (the single 9/65-11/65 ->
+# 12/65-2/66 reversal is seasonality Tans himself dismisses, and a negative
+# source is unphysical).
+rel <- I_t0 - inv2
+rel <- cummax(rel)
+D_pre <- BOMB_TOTAL_REF_KMOL - I_t0
+cat(sprintf("\nBudget closure: %.2f kmol delivered pre-%.2f (%.0f %% of total)\n",
             D_pre, t0, 100 * D_pre / BOMB_TOTAL_REF_KMOL))
-if (D_pre <= 0) stop("Budget closure failed: fitted t0 burden exceeds the reference total.")
+if (D_pre <= 0) stop("Budget closure failed: t0 burden exceeds the reference total.")
 
-# monthly axis from the zero anchor to t0
-mt <- seq(BOMB_EXCESS_ZERO_YR + 1 / 24, t0, by = 1 / 12)
-
-# bomb excess D14C: Table 1 global column minus the pre-bomb Suess baseline,
-# anchored to zero at BOMB_EXCESS_ZERO_YR.
-# Anchors are restricted to t <= t0: Table 1 turns over after 1963 and a
-# monotone interpolator cannot span the peak. monoH.FC (monotone Hermite)
-# rather than a natural spline because the buildup must not overshoot -- the
-# same trap that inflated the bomb total 4.3 % in DATA.md sec.6, and it
-# tolerates the 1959-1960 tie that "hyman" rejects.
-keep <- !is.na(t1$d14c_global) & t1$t <= t0
-anch <- data.frame(t = c(BOMB_EXCESS_ZERO_YR, t1$t[keep]),
-                   x = c(0, t1$d14c_global[keep] - BOMB_PREBOMB_D14C))
-d14c_ex <- stats::splinefun(anch$t, anch$x, method = "monoH.FC")(mt)
-d14c_ex[d14c_ex < 0] <- 0
-
-# tropospheric carbon inventory, Telegadas' troposphere, on the ice-core CO2 spline
-co2s <- as.data.frame(readRDS(file.path(OUT, "obs_icecore.rds"))$co2_spline)
-chi  <- stats::approx(co2s$year, co2s$co2_ppm, xout = mt, rule = 2)$y
-mol_air_trop <- (BOMB_TOTAL_AIR_KG - BOMB_STRAT_AIR_KG) / BOMB_M_AIR_KG_MOL
-N_C_trop <- mol_air_trop * chi * 1e-6                       # mol C
-N14 <- (d14c_ex / 1000) * N_C_trop * ccx_const("R14_STD") / 1000   # kmol 14C
-
-# input = dN14/dt + lambda*N14 ; lambda closes the budget in closed form.
-dt   <- 1 / 12
-dN   <- c(diff(N14), NA) / dt
-dN[length(dN)] <- dN[length(dN) - 1]
-intN <- sum(N14) * dt
-lambda <- (D_pre - (N14[length(N14)] - N14[1])) / intN
-pre_flux <- dN + lambda * N14
-
-cat(sprintf("  tropospheric bomb 14C burden at %.2f: %.2f kmol\n", t0, N14[length(N14)]))
-cat(sprintf("  implied cumulative uptake pre-%.2f: %.2f kmol (%.0f %% of pre-1963 delivery)\n",
-            t0, D_pre - N14[length(N14)], 100 * (D_pre - N14[length(N14)]) / D_pre))
-cat(sprintf("  budget-closing removal rate lambda = %.4f /yr  (1/lambda = %.2f yr)\n",
-            lambda, 1 / lambda))
-
-# INDEPENDENT check on lambda: gross air-sea exchange alone, at the 1962
-# disequilibrium, with the surface ocean still near zero excess.
+# =====================================================================
+# 3. lambda, closed-form from the pre-1963 budget, then checked independently
+# =====================================================================
+pre <- mt < t0
+intN <- sum(N14[pre]) * MONTH_DT
+N14_t0 <- N14[max(which(pre))]
+lambda <- (D_pre - (N14_t0 - N14[1])) / intN
+cat(sprintf("  tropospheric burden at %.2f: %.2f kmol -> uptake %.2f kmol (%.0f %% of pre-1963)\n",
+            t0, N14_t0, D_pre - N14_t0, 100 * (D_pre - N14_t0) / D_pre))
+cat(sprintf("  budget-closing lambda = %.4f /yr (%.2f yr)\n", lambda, 1 / lambda))
 A_oc <- ccx_const("OCEAN_AREA_NH") + ccx_const("OCEAN_AREA_SH")
-F_as <- BOMB_GROSS_AS_FLUX * A_oc                                   # mol C/yr
-loss_as_1962 <- F_as * ccx_const("R14_STD") * (d14c_ex[length(d14c_ex)] / 1000) / 1000
-lambda_as <- loss_as_1962 / N14[length(N14)]
-cat(sprintf("  independent check: gross air-sea alone gives lambda_ocean = %.4f /yr (%.2f yr)\n",
-            lambda_as, 1 / lambda_as))
-cat(sprintf("    -> ocean accounts for %.0f %% of the budget-closing removal; the\n",
-            100 * lambda_as / lambda))
-cat("       remainder is the terrestrial biosphere, which is the expected split.\n")
-if (any(pre_flux < 0))
-  cat(sprintf("  WARNING: %d negative pre-1963 flux months (min %.4f kmol/yr)\n",
-              sum(pre_flux < 0), min(pre_flux)))
+lambda_as <- (BOMB_GROSS_AS_FLUX * A_oc * ccx_const("R14_STD") *
+                (d14c_ex[max(which(pre))] / 1000) / 1000) / N14_t0
+cat(sprintf("  independent check, gross air-sea alone: %.4f /yr (%.2f yr) = %.0f %% of it\n",
+            lambda_as, 1 / lambda_as, 100 * lambda_as / lambda))
+
+# the concentration-implied delivery, used for SHAPE only
+g <- c(diff(N14), NA) / MONTH_DT
+g[length(g)] <- g[length(g) - 1]
+g <- g + lambda * N14
+
+# Smooth before use as a shape (see BOMB_SHAPE_SMOOTH_M). Edges are handled by
+# reflection so the 1952 and 1980 ends are not pulled toward zero.
+if (BOMB_SHAPE_SMOOTH_M > 1) {
+  h <- (BOMB_SHAPE_SMOOTH_M - 1) %/% 2
+  pad <- c(rev(g[2:(h + 1)]), g, rev(g[(length(g) - h):(length(g) - 1)]))
+  g <- stats::filter(pad, rep(1 / BOMB_SHAPE_SMOOTH_M, BOMB_SHAPE_SMOOTH_M),
+                     sides = 2)[(h + 1):(h + length(mt))]
+  g <- as.numeric(g)
+  cat(sprintf("  shape smoothed with a %d-month centred average\n", BOMB_SHAPE_SMOOTH_M))
+}
 
 # =====================================================================
-# Join, normalise, save
+# 4. Assemble: interval totals from inventory, within-interval shape from g
 # =====================================================================
-full_t <- seq(BOMB_EXCESS_ZERO_YR + 1 / 24, BOMB_SERIES_END_YR + 11.5 / 12, by = 1 / 12)
-flux <- ifelse(full_t < t0,
-               stats::approx(mt, pre_flux, xout = full_t, rule = 2)$y,
-               strat_flux(full_t))
-flux[flux < 0] <- 0
+# Breakpoints are ANNUAL throughout, anchored on t0 so the Table 2 series is
+# read Dec-to-Dec.
+#
+# WHY NOT QUARTERLY, when Table 2 is quarterly: because its quarterly
+# DIFFERENCES are not resolved. Telegadas reports inventories to ~3 figures, and
+# the 14 quarter-on-quarter releases are 7, 48, 29, 17, 30, 42, 13, 0, 14, 5, 7,
+# -2, 15, 3 -- the small ones are rounding, not physics. The 0 comes from "170"
+# being reported twice in succession, and it produced three months of EXACTLY
+# zero delivery whose notch pinned the modelled NH peak at 1964.625 in every run
+# of a k_w / kz / h_ml / tau_ex sweep spanning 2-4x. Annual sums (1963: 101,
+# 1964: 85, 1965: 24 units) sit far above that noise floor. So we do not in
+# practice have sub-annual EMISSION data, and the concentration record supplies
+# the sub-annual pattern throughout -- which is the stated principle, applied
+# consistently rather than only before 1963.
+brk <- c(rev(seq(t0, BOMB_EXCESS_ZERO_YR, by = -1)), seq(t0 + 1, BOMB_SERIES_END_YR + 1, by = 1))
+brk <- sort(unique(brk[brk >= BOMB_EXCESS_ZERO_YR & brk <= BOMB_SERIES_END_YR + 1]))
 
-released <- sum(flux) / 12
-truncated <- BOMB_TOTAL_REF_KMOL - released
-cat(sprintf("\nJoin: %.2f kmol on the %.0f-%.0f axis; %.2f kmol (%.1f %%) is the post-%.0f\n",
-            released, BOMB_EXCESS_ZERO_YR, BOMB_SERIES_END_YR, truncated,
-            100 * truncated / BOMB_TOTAL_REF_KMOL, BOMB_SERIES_END_YR))
-cat("      stratospheric tail, redistributed by the unit-integral normalisation.\n")
+# total delivered in each interval
+tot <- numeric(length(brk) - 1)
+for (k in seq_along(tot)) {
+  a <- brk[k]; b <- brk[k + 1]
+  if (b <= t0) {
+    # pre-1963: annual share of D_pre, apportioned by the concentration-implied
+    # delivery (the only information available at this timescale)
+    sel <- mt >= a & mt < b & pre
+    tot[k] <- sum(pmax(g[sel], 0)) * MONTH_DT
+  } else if (a >= max(t2$t_mid)) {
+    tot[k] <- NA                                   # exponential tail, filled below
+  } else {
+    # Table 2 stratospheric decrease over the year. `rel` is interpolated
+    # linearly in time rather than snapped to the nearest reported quarter, so a
+    # year boundary that falls between reported quarters is not rounded onto one.
+    ra <- stats::approx(t2$t_mid, rel, xout = a, rule = 2)$y
+    rb <- stats::approx(t2$t_mid, rel, xout = min(b, max(t2$t_mid)), rule = 2)$y
+    tot[k] <- rb - ra
+  }
+}
+# normalise the pre-1963 block so it sums exactly to the budget-closed total
+ipre <- which(brk[-1] <= t0)
+tot[ipre] <- tot[ipre] * D_pre / sum(tot[ipre])
+# tail: whatever the Table 2 series has not yet released, decaying at tau_tail
+remaining <- BOMB_TOTAL_REF_KMOL - D_pre - sum(tot[!is.na(tot) & brk[-1] > t0])
+itail <- which(is.na(tot))
+if (length(itail)) {
+  a <- brk[itail]; b <- brk[itail + 1]
+  wgt <- exp(-(a - max(t2$t_mid)) / tau_tail) - exp(-(b - max(t2$t_mid)) / tau_tail)
+  tot[itail] <- remaining * wgt / sum(wgt)
+}
+cat(sprintf("  post-%.2f tail carries %.2f kmol at tau = %.2f yr\n",
+            max(t2$t_mid), remaining, tau_tail))
 
-shape <- flux / (sum(flux) / 12)      # unit integral in years
-out <- data.frame(t = full_t,
-                  year = floor(full_t),
-                  month = as.integer(round((full_t - floor(full_t)) * 12 + 0.5)),
+# distribute each interval's total over its months using g's shape
+flux <- numeric(length(mt))
+for (k in seq_along(tot)) {
+  sel <- which(mt >= brk[k] & mt < brk[k + 1])
+  if (!length(sel) || !is.finite(tot[k]) || tot[k] <= 0) next
+  w <- pmax(g[sel], 0)
+  if (sum(w) <= 0) w <- rep(BOMB_SHAPE_FLOOR, length(sel))   # fall back to flat
+  flux[sel] <- tot[k] * (w / sum(w)) / MONTH_DT
+}
+
+released <- sum(flux) * MONTH_DT
+cat(sprintf("\nAssembled: %.2f kmol on %.0f-%.0f (%.1f %% of reference retained)\n",
+            released, BOMB_EXCESS_ZERO_YR, BOMB_SERIES_END_YR,
+            100 * released / BOMB_TOTAL_REF_KMOL))
+
+shape <- flux / released
+out <- data.frame(t = mt, year = floor(mt),
+                  month = as.integer(round((mt - floor(mt)) * 12 + 0.5)),
                   shape_per_yr = shape)
 attr(out, "provenance") <- list(
-  source = "Tans (1981) SCOPE 16 pp.131-157, Tables 1 and 2 (Table 2 after Telegadas 1971)",
-  method = "hybrid measured input function: Table 2 stratospheric decrease (>=1963.04) + budget-closed Table 1 tropospheric inventory (<1963.04)",
-  strat_fit = list(A1 = A1, tau1 = tau1, A2 = A2, tau2 = tau2, t0 = t0,
-                   burden_t0_kmol = I_t0, rmse_kmol = rmse,
-                   dropped_first_point = BOMB_T2_DROP_FIRST),
+  source = "Tans (1981) SCOPE 16 Tables 1-2 (Table 2 after Telegadas 1971); sub-annual shape from Hua et al. 2022 observed D14C",
+  method = "interval totals from inventory data (Table 2 quarterly where available, budget-closed Table 1 annual before 1963); within-interval shape from concentration-implied delivery dN14/dt + lambda*N14",
+  t0 = t0, burden_t0_kmol = I_t0, tau_tail = tau_tail,
+  dropped_first_point = BOMB_T2_DROP_FIRST,
   pre1963 = list(delivered_kmol = D_pre, lambda_per_yr = lambda,
                  lambda_ocean_only = lambda_as,
                  prebomb_baseline_permil = BOMB_PREBOMB_D14C,
                  zero_anchor_year = BOMB_EXCESS_ZERO_YR),
-  total_ref_kmol = BOMB_TOTAL_REF_KMOL,
-  truncated_frac = truncated / BOMB_TOTAL_REF_KMOL,
-  built = Sys.Date())
+  total_ref_kmol = BOMB_TOTAL_REF_KMOL, built = Sys.Date())
 saveRDS(out, BOMB_OUT_FILE)
-cat(sprintf("\nwrote %s (%d months, %.0f-%.0f)\n", BOMB_OUT_FILE, nrow(out),
-            min(out$year), max(out$year)))
+cat(sprintf("wrote %s (%d months)\n", BOMB_OUT_FILE, nrow(out)))
 
 # =====================================================================
-# Diagnostics: annual delivery, new vs superseded placeholder
+# 5. Diagnostics
 # =====================================================================
-ann <- tapply(shape, out$year, function(z) sum(z) / 12)   # fraction of total per yr
+f_kmol <- shape * BOMB_TOTAL_REF_KMOL
+cat("\nDelivery across the 1962-63 transition (kmol/yr) -- the old join region:\n")
+for (i in which(mt > 1962.4 & mt < 1963.9))
+  cat(sprintf("  %8.3f %8.2f%s\n", mt[i], f_kmol[i],
+              if (mt[i] >= t0 && mt[i] < t0 + 1/12) "  <- first Table 2 month" else ""))
+j <- which(mt >= t0)[1]
+cat(sprintf("\njoin step: %.2f -> %.2f kmol/yr = %.2fx in one month\n",
+            f_kmol[j - 1], f_kmol[j], f_kmol[j] / f_kmol[j - 1]))
+ann <- tapply(shape, out$year, function(z) sum(z) * MONTH_DT)
 old_sh <- c(0.2,0.3,0,0.4,0.2,0,0.9,1.2,0.9,4,2,3.5,3,8,0,0.2,15,22,1.5,0.4,0.3,
             0.6,0.5,0.6,0.3,0.5,0.3,0.2,0.3,0.4,0.1,0.3,0.1,0.1,0,0.2)
 old_yr <- 1945:1980; old_w <- old_sh / sum(old_sh)
-cat("\nAnnual delivery to the troposphere, share of total:\n")
+cat("\nAnnual share of total delivered:\n")
 cat(sprintf("%6s %8s %8s\n", "year", "NEW", "OLD"))
-for (y in 1958:1968) {
+for (y in 1959:1967) {
   n <- if (as.character(y) %in% names(ann)) ann[[as.character(y)]] else 0
-  o <- if (y %in% old_yr) old_w[old_yr == y] else 0
-  cat(sprintf("%6d  %7.1f%% %7.1f%%\n", y, 100 * n, 100 * o))
+  cat(sprintf("%6d %7.1f%% %7.1f%%\n", y, 100 * n, 100 * old_w[old_yr == y]))
 }
-pk <- out$t[which.max(shape)]
-cat(sprintf("\nPeak delivery: %.3f  (DESIGN sec.6 gates the observed D14C peak at 1963.625;\n", pk))
-cat("               delivery must peak at or before the concentration peak)\n")
+cat(sprintf("\nPeak delivery month: %.3f\n", mt[which.max(shape)]))
 cat(sprintf("Pre-1963 share: NEW %.0f %%, OLD %.0f %%\n",
-            100 * sum(shape[full_t < t0]) / 12, 100 * sum(old_w[old_yr < 1963])))
+            100 * sum(shape[pre]) * MONTH_DT, 100 * sum(old_w[old_yr < 1963])))

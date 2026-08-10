@@ -255,44 +255,80 @@ delivery.
 
 ### The construction (`data-raw/build_bomb_c14_source.R`)
 
-- **Part A, ≥1963.04 — direct.** Two exponentials fitted to Table 2. They separate
-  cleanly into **39.97 kmol at τ = 1.00 yr** (lower stratosphere) and **27.75 kmol at
-  τ = 10.15 yr**, RMSE 1.2 kmol over 15 points. The analytic derivative is the delivery
-  flux — positive by construction, so the one non-monotone pair in the raw table (which
-  Tans himself dismisses as insignificant seasonality) cannot make a negative source.
-- **Part B, <1963.04 — budget-closed.** The fit puts 67.72 kmol still aloft at 1963.04,
-  so 34.28 kmol (34 %) had already reached the troposphere. That fixes the pre-1963
-  *integral* with no test-yield inventory at all. Its *shape* comes from the tropospheric
-  ¹⁴C inventory implied by Table 1 plus a first-order removal term `λ·N14`.
+**Governing principle (Marcus, 2026-08-10):** inventory data set the TOTALS; the observed
+Δ¹⁴C record supplies the SUB-ANNUAL PATTERN only where no sub-annual inventory exists.
+This confines any circularity with the likelihood to within-year timescales — every
+interval total comes from Tans' independent compilation.
 
-**Uptake is not a small correction** here — of the 34.28 kmol delivered before 1963, only
-20.93 kmol was still airborne, so 39 % had already gone to ocean and biosphere. λ is not
-tuned: it is the unique value closing the measured budget, in closed form.
+- **Interval totals, annual.** From 1963.04 on, each year's total is the Table 2
+  stratospheric decrease. Before that, the totals come from budget closure: the Table 2
+  series says 65.92 kmol was still aloft at 1963.04, so the remaining **36.08 kmol (35 %)
+  of the Naegler & Levin total had already reached the troposphere**. That pins the
+  pre-1963 integral with no test-yield inventory at all. Past the last Table 2 point the
+  remainder decays at the τ = 6.87 yr fitted to its late points.
 
-**Independent check on λ.** Budget closure gives **λ = 0.1687 /yr (5.93 yr)**. Gross
+- **Why annual and not quarterly, when Table 2 *is* quarterly.** Its quarterly
+  *differences* are not resolved. Telegadas reports inventories to ~3 figures, and the 14
+  quarter-on-quarter releases come out as `7, 48, 29, 17, 30, 42, 13, 0, 14, 5, 7, −2, 15,
+  3` — the small ones are rounding. The `0` arises because "170" is reported twice in
+  succession, and it produced **three months of exactly zero delivery**; that notch pinned
+  the modelled NH peak in every run of a `k_w`/`kz`/`h_ml`/`tau_ex` sweep spanning 2–4×.
+  Annual sums (1963: 101, 1964: 85, 1965: 24 units) sit far above the noise floor. So we
+  do not in practice have sub-annual *emission* data, and the concentration record supplies
+  the sub-annual pattern throughout.
+
+- **Within-interval shape.** `g(t) = dN14/dt + λ·N14` evaluated on observed monthly Δ¹⁴C
+  (Hua et al. 2022, area-weighted to hemispheres) — the tropospheric ¹⁴C inventory plus its
+  removal, i.e. the delivery the concentration record implies. Only its *shape* is used;
+  each interval is rescaled to its inventory total.
+
+- **Smoothing (`CCX_BOMB_SMOOTH`, default 5 months).** Observed Δ¹⁴C carries a seasonal
+  cycle from *both* the spring stratospheric intrusion — a real feature of the source — and
+  seasonal biosphere/ocean exchange, which `R/model.R` already simulates and which would be
+  **double-counted** if it entered the source. Unsmoothed, `g` swung 23.8 → 39.2 → 12.8
+  kmol/yr in successive months of 1963. A 5-month average retains ~75 % of a 12-month cycle
+  so the spring maximum survives. The window is immaterial to results: 3, 5 and 9 months
+  agree to <1 %.
+
+**Uptake is not a small correction.** Of the 36.08 kmol delivered before 1963, only 21.57
+kmol was still airborne — 40 % had already gone to ocean and biosphere. λ is not tuned: it
+is the unique value closing the measured budget, in closed form.
+
+**Independent check on λ.** Budget closure gives **λ = 0.1996 /yr (5.01 yr)**. Gross
 air-sea exchange alone, built from Tans' own 19 mol/m²/yr (Broecker et al. 1978) at the
-1962 disequilibrium, gives **0.1495 /yr (6.69 yr)** — 89 % of it, with the terrestrial
-biosphere as the remainder. Two independent routes agreeing to 13 % is the main evidence
-that the budget-closure step is sound.
+1962 disequilibrium, gives **0.1495 /yr (6.69 yr)** — 75 % of it, with the terrestrial
+biosphere as the remainder. Two independent routes agreeing to 25 %, with the right sign
+and a plausible ocean/land split, is the main evidence that the budget-closure step is
+sound.
 
 ### Effect, against the model's own comparison basis
 
 The DESIGN §6 bomb gate (944.6 ‰ at 1963.625) is **Hua NH Zone 1**, which is *not*
 comparable to the model's area-weighted hemispheric `d14c_NH`. The correct benchmark,
 computed with `ccx_zone_weights()` from `obs_d14c_zonal.rds`, is **NH 853.2 ‰ @ 1963.708,
-SH 659.4 ‰ @ 1965.042, NH→SH lag 1.33 yr**. At uncalibrated defaults:
+SH 659.4 ‰ @ 1965.042**.
 
-| | NH peak | SH peak | NH→SH lag |
+**Do not score this with peak timing.** The observed NH aggregate is **double-peaked** —
+850.3 ‰ at 1963.625, dipping to 741.9 ‰ at 1964.125, then 832.6 ‰ at 1964.625. The two
+maxima differ by 2 %, so `which.max()` flips between them under trivial perturbations and
+manufactured an apparent "+0.92 yr timing error" that no parameter could move. The model
+reproduces the double-peak structure and merely picks the other lobe.
+
+Score it instead on **debiased scatter and correlation** over 1962–1972. A constant level
+offset is precisely what `bomb_total` and the uptake parameters absorb during calibration,
+so removing the mean is the fair comparison of *shape*:
+
+| Bomb source | debiased sd, NH | debiased sd, SH | corr with obs, NH |
 |---|---|---|---|
-| Observed (area-weighted) | 853.2 ‰ @ 1963.708 | 659.4 ‰ @ 1965.042 | **1.33 yr** |
-| NEW — Tans measured input | 741.5 @ 1964.458 (**+0.75 yr**) | 565.1 @ 1965.625 (**+0.58 yr**) | **1.17 yr** |
-| OLD — provisional placeholder | 996.9 @ 1963.042 (−0.67 yr) | 656.4 @ 1963.625 (**−1.42 yr**) | **0.58 yr** |
+| **Measured input function (current)** | **34.5 ‰** | **36.1 ‰** | **0.970** |
+| Two-exponential fit, no concentration input | 48.0 ‰ | 39.5 ‰ | 0.951 |
+| Superseded placeholder | 233.4 ‰ | 186.1 ‰ | **0.121** |
 
-The NH timing error is comparable in magnitude and opposite in sign. The decisive
-improvements are **SH timing** (−1.42 → +0.58 yr) and the **interhemispheric lag**
-(0.58 → 1.17 yr against 1.33 observed) — and DESIGN §6 names that lag as *the*
-interhemispheric-exchange constraint, so the old shape was biasing `tau_ex` directly.
-The old peak of 996.9 ‰ also exceeded every observed zone, including Zone 1.
+The placeholder correlates with the observed bomb transient at **0.12** — it carried
+essentially no information about the event it was supposed to represent.
+
+A **−118 ‰ mean bias** remains at uncalibrated defaults. That is a level, not a shape,
+and is left for calibration.
 
 ### Judgement calls, and how much they matter
 
@@ -305,16 +341,17 @@ Both are exposed as environment overrides so they can be measured, not argued:
 
 ### Residual caveats
 
-- **A 4.5× one-month step remains at the Part A / Part B join (1963.04).** A steep rise
-  there is real — the autumn-1962 tests descended in spring 1963 — but a *step* is an
-  artifact of Part B resting on December-only anchors, which cannot represent
-  within-1962 acceleration. Monthly pre-1963 Δ¹⁴C exists in `obs_d14c_zonal.rds` and
-  would remove it, at the cost of deriving the forcing from the same record the
-  likelihood scores against. **Not resolved — awaiting direction.**
+- The Part A/Part B join step is down from **4.5× to 1.6×** in one month, and what remains
+  is defensible as real acceleration (the autumn-1962 tests descending in spring 1963)
+  rather than a method switch.
 - Tans' own caveats carry over: Telegadas' aircraft data may run ~20 % high; the
-  Dec 62–Feb 63 point is a floor; French and Chinese tests after 1963 add production the
-  "input = stratospheric decrease" identity does not capture.
-- 5.9 % of the reference total is the post-1980 stratospheric tail, redistributed by the
-  unit-integral normalisation rather than modelled.
+  Dec 62 – Feb 63 point is a floor (it is raised, not dropped, since it sets the pre/post
+  split); French and Chinese tests after 1963 add production the "input = stratospheric
+  decrease" identity does not capture.
+- The sub-annual pattern is derived from the same Δ¹⁴C record the likelihood scores
+  against. **Annual and longer timescales are independent** — those totals are Tans' — but
+  within-year structure is not, so the bomb window cannot be treated as a fully independent
+  test of sub-annual ocean exchange.
+- A −118 ‰ mean bias survives at uncalibrated defaults; it is a level, not a shape.
 - `bomb_total` remains a **calibrated** parameter with the Naegler & Levin prior; the
   stored series is normalised to unit integral, so it still cannot set the amplitude.
