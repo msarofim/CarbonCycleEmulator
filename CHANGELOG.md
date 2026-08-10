@@ -440,3 +440,51 @@ as a named constant, the outstanding gaps, and licences. Records the traps found
 the Scripps column-5 rule, per-file missing-value markers, duplicate `age_CO2` columns,
 non-constant inter-network offsets, the seasonal-aliasing rule for the gradient, the three
 distinct ¹⁴C time constants, and why MLO flask data cannot replace the in-situ record.
+
+## 2026-08-10 — Rcpp production core: 479× speedup, parity gated and mutation-tested
+
+`src/ccx_core.cpp` + `R/cpp.R` + `tests/testthat/test-parity.R`. Suite: **177 passing**.
+
+**Performance.** A full 1750–2024 monthly run drops from **26.4 s to 0.019 s** — 479×,
+and comfortably inside the 50 ms budget that keeps a 1e5-evaluation MCMC under ~1.5 h.
+R/model.R remains the reference implementation; the C++ is a port, and any physics change
+must be made in both.
+
+**"Bit-parity" was optimistic — the honest number is roundoff.** The two implementations
+are NOT bit-identical. Measured over an 81-year integration (15,552 derivative
+evaluations): CO₂ agrees to **8.3e-16 relative**, δ¹³C to 7.8e-13 ‰, Δ¹⁴C to 1.1e-12 ‰,
+final state to 2.8e-13 absolute against state values of ~5.5e3.
+
+The irreducible source is **catastrophic cancellation in deep-ocean ¹⁴C tendencies**, where
+the diffusive flux and decay very nearly cancel: an ulp there is unbounded in *relative*
+terms while staying ~1e-16 absolute. Tried and rejected: switching the carbonate polynomial
+from an incremental `xp *= x` to `std::pow(x, i)` to match R's `x^i` exactly — this changed
+the disagreement **not at all** (2.842e-13 either way), so the ulp difference is elsewhere,
+and the incremental form was kept for being ~15 % faster. The gate therefore uses
+scale-relative tolerances rather than per-cell relative ones, since a cell whose value is
+1e-16 has meaningless relative error.
+
+**The parity gate is mutation-tested,** because a tolerance chosen for roundoff must be
+shown to still catch real porting errors:
+
+| Mutant | CO₂ rel | δ¹³C abs | Δ¹⁴C abs | |
+|---|---|---|---|---|
+| (unmutated) | 8.3e-16 | 7.8e-13 | 1.1e-12 | passes, correctly |
+| P1 wrong hemisphere on nuclear ¹⁴C share | 8.3e-16 | 7.8e-13 | **3.3e-01** | caught |
+| P2 dropped ¹³C equilibrium fractionation on evasion | 8.3e-16 | **5.9e+00** | 1.1e-12 | caught |
+| P3 off-by-one in ocean diffusion index | **5.0e+00** | 6.4e+00 | 9.0e+02 | caught |
+| P4 one Newton iteration instead of six | **3.1e-02** | 1.2e-01 | 3.0e+01 | caught |
+
+Real porting errors land 10–15 orders of magnitude above the roundoff floor.
+
+**A flaw in my own mutation harness, worth recording.** The first pass scored mutants on
+CO₂ and Δ¹⁴C only, and reported P2 as MISSED. P2 perturbs the ocean→atmosphere ¹³C
+fractionation and therefore shows up *only* in δ¹³C — which the real test file does check,
+but my harness did not. The lesson is the same one as the earlier inert-gate finding: a
+mutation test is only as good as the observables it scores. Each of P1/P2/P3 is caught by a
+*different* tracer, so all three must be scored.
+
+**Also gated independently of R:** the C++ core conserves carbon to 1e-12 over a century on
+its own terms (not merely by inheritance from the reference), and the runtime budget itself
+is asserted, so a future slowdown fails the suite rather than being discovered during
+calibration.

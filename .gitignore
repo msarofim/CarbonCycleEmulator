@@ -11,3 +11,5 @@ calibration/output/chains/
 # git cannot re-include a file whose parent directory is excluded.
 data-raw/downloads/*
 !data-raw/downloads/MANIFEST.csv
+src/*.o
+src/*.so
