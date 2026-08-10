@@ -488,3 +488,78 @@ mutation test is only as good as the observables it scores. Each of P1/P2/P3 is 
 its own terms (not merely by inheritance from the reference), and the runtime budget itself
 is asserted, so a future slowdown fails the suite rather than being discovered during
 calibration.
+
+## 2026-08-10 — Calibration machinery; two findings that changed the design
+
+`R/likelihood.R`, `R/calibrate.R`, `calibration/run_pilot.R`. 18 parameters,
+0.058 s per posterior evaluation (spinup + 275-yr run + likelihood).
+
+### Finding 1 — Δ¹⁴C zone→hemisphere weighting is NOT immaterial
+
+Marcus chose area-weighted aggregation (2026-08-09) with the boundaries to be read from
+Hua et al. (2022) rather than assumed. Reading them: the zones are **not latitude bands**.
+Boundaries follow the polar jet and the tropical low-pressure belt, move seasonally, and
+differ by longitude — in some regions the Equator is used, in others the mean DJF TLPB
+position. The paper explicitly calls for more sites to pin them down.
+
+Measured spread of the NH aggregate across defensible schemes:
+
+| Scheme | bomb peak | max diff vs Hua-2013 bands | post-1970 |
+|---|---|---|---|
+| area, 40/15 bands | 853.2 ‰ | — | — |
+| area, 47/20 bands | 829.9 ‰ | 25.7 ‰ | 3.9 ‰ |
+| equal weights | 834.4 ‰ | 20.8 ‰ | 4.2 ‰ |
+| NHZone1 alone | 944.6 ‰ | 94.3 ‰ | 20.9 ‰ |
+
+Hua's own reported sd is 0.5–6.7 ‰, so the weighting spread during the bomb peak is
+**4–50× the measurement uncertainty** — precisely where the bomb constraint operates. It
+is therefore added in quadrature as representation error (25 ‰ in 1955–1970, 4 ‰
+elsewhere) rather than ignored.
+
+### Finding 2 — a likelihood decomposition stopped a placeholder from driving the posterior
+
+Decomposing the log-likelihood at the default parameters:
+
+| stream | n | logLik | share |
+|---|---|---|---|
+| Δ¹⁴C NH + SH | 1875 | −165,214 | **90 %** |
+| CO₂ ice core | 255 | −14,551 | 8 % |
+| CO₂ MLO + SPO | 1523 | −4,234 | 2 % |
+| everything else | ~400 | ~−800 | <1 % |
+
+Δ¹⁴C carried **90 % of all the information while the bomb injection shape is still a
+placeholder**. Calibrating in that state would have laundered a provisional input into
+every parameter, and nothing in the output would have looked wrong. Three changes:
+
+- **Bomb-window Δ¹⁴C (1950–1975) excluded by default** (`LIK_USE_BOMB_WINDOW = FALSE`),
+  with a message printed whenever it is dropped. Pre-bomb IntCal20 and post-recovery Δ¹⁴C
+  are kept, so ¹⁴C still constrains ventilation through the Suess decline and post-peak
+  decay.
+- **Total bomb production `bomb_total` is now a calibrated parameter** with the citable
+  Naegler & Levin (2006) prior (99.3–104.9 kmol, entered as lognormal σ=0.10). This was
+  always the design's intent, and it lets shape error be partly absorbed into magnitude
+  so post-peak Δ¹⁴C remains usable rather than being discarded. **Residual shape
+  dependence remains** — see DATA.md §8.
+- **Ice-core error inflated** by 4 ppm in quadrature. Law Dome's stated errors are
+  analytical only (~0.02–1 ppm) and exclude gas-age, firn-smoothing and
+  model-vs-ice representation error; uninflated, 255 samples at ~9σ contributed 8 % of the
+  total from the sparsest, least direct record in the set. Its contribution fell
+  −14,551 → −1,589.
+
+### Data-layer bug found while wiring the likelihood
+
+`fread(skip = "SampleID")` on the Law Dome sample files matched the NOAA
+**variable-description block** (`## SampleID<tab>Sample ID, ...`) tens of lines above the
+real header, parsing comment text as data: 334 rows of junk in `V1..V14`. It had been
+latent since the first build because the benchmarks use the splines and nothing read the
+samples until now. Fixed by anchoring on `^SampleID`; now yields 321 CO₂ and 105 δ¹³C
+samples with their proper columns.
+
+### Design notes carried in the likelihood
+
+AR(1) residuals on the dense CO₂ and δ¹³C series with calibrated ρ (1500 monthly points
+against 18 parameters are not independent); GCB sinks as a **partition** constraint only,
+since atmospheric growth is already pinned by the CO₂ series; land sink at 3× inflated
+σ per Marcus's Q1 default; station-vs-box representation error on CO₂ and δ¹³C.
+Parameters are sampled on transformed scales with the **Jacobian applied explicitly** —
+omitting it silently reshapes every prior.

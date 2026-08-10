@@ -140,8 +140,22 @@ spl_raw   <- as.data.table(read.table(
 co2_spline  <- spl_raw[, .(year = V1,  co2_ppm = V2)][!is.na(co2_ppm)]
 d13c_spline <- spl_raw[, .(year = V10, d13c    = V11)][!is.na(d13c)]
 
-ice_co2  <- fread(file.path(DL, "law2018co2.txt"), skip = "SampleID", fill = TRUE)
-ice_d13c <- fread(file.path(DL, "law2018d13c-co2.txt"), skip = "SampleID", fill = TRUE)
+# Parse from the line that BEGINS with "SampleID". Using skip="SampleID" matches
+# the NOAA variable-description block ("## SampleID<tab>Sample ID, ...") tens of
+# lines earlier, which parses the comment text as data and yields 334 rows of
+# junk in V1..V14. That went unnoticed until the likelihood first used these
+# samples, because the benchmarks use the splines.
+read_law_samples <- function(path) {
+  ln  <- readLines(path)
+  hdr <- grep("^SampleID", ln)[1]
+  d <- fread(text = paste(ln[hdr:length(ln)], collapse = "\n"),
+             sep = "\t", header = TRUE, fill = TRUE)
+  d[!is.na(d[[3]])]
+}
+ice_co2  <- read_law_samples(file.path(DL, "law2018co2.txt"))
+ice_d13c <- read_law_samples(file.path(DL, "law2018d13c-co2.txt"))
+cat(sprintf("    ice-core samples: CO2 n=%d (%s), d13C n=%d\n",
+            nrow(ice_co2), paste(names(ice_co2), collapse=","), nrow(ice_d13c)))
 
 saveRDS(list(co2_spline = co2_spline, d13c_spline = d13c_spline,
              co2_samples = ice_co2, d13c_samples = ice_d13c),
