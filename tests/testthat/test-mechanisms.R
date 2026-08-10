@@ -1,0 +1,133 @@
+# =====================================================================
+# Gate: every counterfactual switch does something, does the right thing, and
+# does not quietly do more than it says.
+#
+# A switch that silently did nothing would look exactly like a switch that
+# worked, in the app. Undergraduates would draw a conclusion from it. So each
+# one is checked for (a) a measurable effect, and (b) the SIGN of that effect,
+# because a switch pointing the wrong way teaches the opposite of the physics.
+# =====================================================================
+
+skip_if_no_cpp <- function() {
+  skip_if_not_installed("Rcpp")
+  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
+  if (!ok) skip("C++ core failed to compile")
+}
+
+mech_run <- function(off = character(), years = c(1750, 2100), scen = "ssp245") {
+  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  F0 <- suppressWarnings(ccx_build_forcing(scen, years, prod_c14 = 0))
+  m <- ccx_apply_mechanisms(p, F0, off)
+  sp <- ccx_spinup(m$p)
+  F <- m$F; F$c14_cosmo <- sp$prod_c14
+  ccx_run_fast(sp, F)$out
+}
+
+test_that("every switch is wired up and changes the answer", {
+  skip_if_no_cpp()
+  base <- mech_run()
+  i <- nrow(base)
+  for (nm in names(CCX_MECHANISMS)) {
+    alt <- mech_run(nm)
+    expect_gt(abs(alt$co2_NH[i] - base$co2_NH[i]), 0.5,
+              label = sprintf("switch '%s' must move CO2 at 2100", nm))
+  }
+})
+
+test_that("each switch moves CO2 in the physically correct direction", {
+  skip_if_no_cpp()
+  base <- mech_run()
+  i <- nrow(base)
+  co2 <- function(off) mech_run(off)$co2_NH[i]
+
+  # No land sink -> carbon that plants would have taken stays airborne -> MORE
+  expect_gt(co2("fertilisation"), base$co2_NH[i])
+  # No ocean sink -> same argument
+  expect_gt(co2("ocean_sink"), base$co2_NH[i])
+  # No warming feedback -> the warming-driven RELEASE of carbon is removed -> LESS
+  expect_lt(co2("warming_feedback"), base$co2_NH[i])
+  # Frozen buffer -> ocean never saturates -> keeps absorbing -> LESS
+  expect_lt(co2("revelle"), base$co2_NH[i])
+
+  # NOT asserted: that switching off the ocean raises CO2 more than switching
+  # off the land. Measured at defaults it is the other way (126 vs 184 ppm), and
+  # neither ordering is a law -- removing one sink raises CO2, which partly
+  # INCREASES the other, so these counterfactual differences are not sink sizes.
+  # The sink sizes themselves are measured in the test below.
+})
+
+test_that("both sinks take up carbon, and the stocks say how much", {
+  skip_if_no_cpp()
+  # The honest version of "which sink is bigger": read the stocks, do not infer
+  # it from a counterfactual difference.
+  base <- mech_run()
+  i <- nrow(base)
+  ocean_gain <- base$ocean_C[i] - base$ocean_C[1]
+  land_gain  <- base$land_C[i]  - base$land_C[1]
+  expect_gt(ocean_gain, 0)
+  expect_gt(land_gain, 0)
+  # both should be a substantial fraction of cumulative emissions, neither
+  # negligible nor larger than the total ever emitted
+  expect_gt(ocean_gain, 100)
+  expect_gt(land_gain, 50)
+})
+
+test_that("switching off the ocean really removes the ocean sink", {
+  skip_if_no_cpp()
+  base <- mech_run(); alt <- mech_run("ocean_sink")
+  i <- nrow(base)
+  gain_base <- base$ocean_C[i] - base$ocean_C[1]
+  gain_alt  <- alt$ocean_C[i]  - alt$ocean_C[1]
+  expect_gt(gain_base, 100)                   # the ocean normally takes a lot
+  expect_lt(abs(gain_alt), 0.02 * gain_base)  # and essentially none with it off
+})
+
+test_that("ENSO affects variability but not the trend", {
+  skip_if_no_cpp()
+  base <- mech_run(); alt <- mech_run("enso")
+  k <- base$t >= 1960 & base$t <= 2020
+  # detrended scatter must fall
+  dt <- function(x, tt) stats::residuals(stats::lm(x ~ poly(tt, 3)))
+  expect_lt(stats::sd(dt(alt$co2_NH[k], alt$t[k])),
+            stats::sd(dt(base$co2_NH[k], base$t[k])))
+  # but the endpoint should barely move: ENSO's annual mean is near zero
+  i <- nrow(base)
+  expect_lt(abs(alt$co2_NH[i] - base$co2_NH[i]), 15)
+})
+
+test_that("the warming switch removes only the carbon cycle's response", {
+  skip_if_no_cpp()
+  # It must act on q10 and sst_scale, and leave the temperature forcing itself
+  # untouched -- so the app can still show a warming world whose carbon cycle
+  # is not reacting to it.
+  p <- ccx_default_params()
+  F <- suppressWarnings(ccx_build_forcing("ssp245", c(1750, 2100), prod_c14 = 0))
+  m <- ccx_apply_mechanisms(p, F, "warming_feedback")
+  expect_equal(m$p$q10, 1)
+  expect_equal(m$p$sst_scale, 0)
+  expect_identical(m$F$gmst, F$gmst)
+})
+
+test_that("switches compose, and unknown names are refused", {
+  skip_if_no_cpp()
+  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  F <- suppressWarnings(ccx_build_forcing("ssp245", c(1750, 2100), prod_c14 = 0))
+  m <- ccx_apply_mechanisms(p, F, c("fertilisation", "revelle"))
+  expect_equal(m$p$beta, 0)
+  expect_equal(m$p$revelle_frozen, 1)
+  expect_length(m$caveats, 2)
+  expect_error(ccx_apply_mechanisms(p, F, "no_such_switch"), "unknown mechanism")
+})
+
+test_that("every switch carries user-facing copy", {
+  for (nm in names(CCX_MECHANISMS)) {
+    m <- CCX_MECHANISMS[[nm]]
+    for (fld in c("label", "blurb", "caveat")) {
+      expect_true(is.character(m[[fld]]) && nzchar(m[[fld]]),
+                  info = sprintf("%s$%s", nm, fld))
+    }
+  }
+  ch <- ccx_mechanism_choices()
+  expect_equal(length(ch), length(CCX_MECHANISMS))
+  expect_true(all(nzchar(names(ch))))
+})

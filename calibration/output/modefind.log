@@ -4,3 +4,5 @@ restart  1: log-post =      -2419.8  (gain 23579.2661)  evals 16778
 restart  2: log-post =      -2386.6  (gain    33.2089)  evals 31430
 restart  3: log-post =      -2385.0  (gain     1.6108)  evals 37252
 restart  4: log-post =      -2378.9  (gain     6.1019)  evals 56537
+restart  5: log-post =      -2376.6  (gain     2.2878)  evals 67330
+restart  6: log-post =      -2369.8  (gain     6.7635)  evals 82216

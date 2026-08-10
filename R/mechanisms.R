@@ -1,0 +1,93 @@
+# =====================================================================
+# mechanisms.R -- the counterfactual switches behind the app's "What if...?" tab.
+#
+# Each switch turns ONE mechanism off. They live here, not in the app, for two
+# reasons: they are statements about the model rather than about the interface,
+# and they need testing (a switch that silently does nothing, or that turns off
+# more than it claims, would be a plausible-looking lie told to students).
+#
+# WHAT IS DELIBERATELY NOT HERE. DESIGN section 7 lists six toggles, including
+# "no CO2 fertilization" and "no land sink" as separate items. In THIS model they
+# are the same switch: the land takes up carbon because NPP rises with CO2
+# (beta), and there is no other land-uptake mechanism to remove. Offering them as
+# two controls would imply a distinction the model does not have. They are merged,
+# and the app says so.
+# =====================================================================
+
+# Each entry: what the user sees, what it does, and the caveat it carries.
+# `apply` receives (p, F) -- parameters and the assembled forcing table -- and
+# returns both, so a switch can act on either.
+CCX_MECHANISMS <- list(
+  fertilisation = list(
+    label = "CO₂ fertilisation (the land sink)",
+    blurb = paste("Plants grow faster when there is more CO₂ in the air, and",
+                  "that extra growth is what pulls carbon into the land. Switch",
+                  "it off and the land stops taking up carbon."),
+    caveat = paste("In this model CO₂ fertilisation IS the land sink — there",
+                   "is no separate land-uptake mechanism to remove."),
+    apply = function(p, F) { p$beta <- 0; list(p = p, F = F) }
+  ),
+  warming_feedback = list(
+    label = "Warming's effect on the carbon cycle",
+    blurb = paste("A warmer world respires soil carbon faster and holds less CO₂",
+                  "in seawater, so warming pushes carbon back into the air.",
+                  "Switch it off and the carbon cycle stops noticing the warming."),
+    caveat = paste("The climate still warms — only the carbon cycle's RESPONSE",
+                   "to it is removed, so the two effects can be told apart."),
+    apply = function(p, F) { p$q10 <- 1; p$sst_scale <- 0; list(p = p, F = F) }
+  ),
+  enso = list(
+    label = "El Niño / La Niña",
+    blurb = paste("ENSO moves carbon in and out of tropical land year by year.",
+                  "It is why the Keeling curve wobbles around its trend.",
+                  "Switch it off and the wobbles go."),
+    caveat = "Affects year-to-year variability, not the long-term trend.",
+    apply = function(p, F) { p$gamma_enso <- 0; list(p = p, F = F) }
+  ),
+  ocean_sink = list(
+    label = "The ocean sink",
+    blurb = paste("The ocean has absorbed roughly a quarter of all our CO₂.",
+                  "Switch it off and that carbon stays in the air."),
+    caveat = paste("This closes the air-sea interface completely, which also stops",
+                   "the ocean exchanging ¹³C and ¹⁴C. The isotope panels are",
+                   "not meaningful with this switch on."),
+    apply = function(p, F) { p$k_w <- OCEAN_OFF_K_W; list(p = p, F = F) }
+  ),
+  revelle = list(
+    label = "Revelle buffering (ocean saturation)",
+    blurb = paste("Seawater gets progressively worse at absorbing CO₂ the more",
+                  "it has already absorbed. Freeze that at its 1750 value and",
+                  "the ocean never tires."),
+    caveat = paste("Temperature-dependent solubility is left alone, so this",
+                   "isolates the chemistry of buffering and nothing else."),
+    apply = function(p, F) { p$revelle_frozen <- 1; list(p = p, F = F) }
+  )
+)
+
+# Gas transfer velocity standing in for "no ocean sink". Not zero: zero would
+# make the preindustrial isotope operator singular and the spinup would fail to
+# solve (the same singularity documented in model.R's add_flux header, which is
+# why every bidirectional interface is emitted as gross fluxes). Small enough
+# that the ocean takes up ~nothing on a century timescale.
+OCEAN_OFF_K_W <- 1e-3
+
+#' Apply a set of mechanism switches
+#' @param off character vector of names from CCX_MECHANISMS to switch OFF
+#' @return list(p = parameters, F = forcing, caveats = character vector)
+ccx_apply_mechanisms <- function(p, F, off = character()) {
+  bad <- setdiff(off, names(CCX_MECHANISMS))
+  if (length(bad)) stop("unknown mechanism(s): ", paste(bad, collapse = ", "))
+  cav <- character()
+  for (nm in off) {
+    r <- CCX_MECHANISMS[[nm]]$apply(p, F)
+    p <- r$p; F <- r$F
+    cav <- c(cav, CCX_MECHANISMS[[nm]]$caveat)
+  }
+  list(p = p, F = F, caveats = cav)
+}
+
+#' Named list of switch labels, for building UI controls
+ccx_mechanism_choices <- function() {
+  stats::setNames(names(CCX_MECHANISMS),
+                  vapply(CCX_MECHANISMS, `[[`, character(1), "label"))
+}
