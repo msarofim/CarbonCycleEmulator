@@ -47,6 +47,11 @@ test_that("multi-decade trajectories agree to roundoff", {
   # stocks
   expect_lt(max(abs(rR$out$ocean_C - rC$out$ocean_C)) / max(abs(rR$out$ocean_C)), 1e-13)
   expect_lt(max(abs(rR$out$land_C  - rC$out$land_C))  / max(abs(rR$out$land_C)),  1e-13)
+  # 14C inventories: a separate accumulation in each implementation, and the
+  # ocean excess-14C likelihood term reads them, so they get their own gate
+  # rather than riding on the D14C ratios above.
+  for (cc in c("ocean_C14", "land_C14", "atm_C14"))
+    expect_lt(max(abs(rR$out[[cc]] - rC$out[[cc]])) / max(abs(rR$out[[cc]])), 1e-13)
   # and the final state as a whole
   expect_lt(max(abs(rR$state - rC$state)) / max(abs(rR$state)), 1e-13)
 })

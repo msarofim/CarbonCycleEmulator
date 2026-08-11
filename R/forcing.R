@@ -293,10 +293,18 @@ ccx_run <- function(spin, F, substeps = "auto") {
   ocean <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$ml, aux$idx[[h]]$oc)))
   land  <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$veg, aux$idx[[h]]$soil)))
 
+  atm   <- c(atmN, atmS)
+  # 14C reservoir inventories, in STATE units ("GtC carrying standard 14C
+  # content"). Carried alongside the carbon stocks because the ocean excess-14C
+  # constraint (likelihood.R) is an INVENTORY at two reference years, which
+  # cannot be reconstructed from the atmospheric D14C series. Converted to kmol
+  # by the likelihood, not here -- the model core does not own that convention.
   out <- data.frame(t = F$t, co2_NH = NA_real_, co2_SH = NA_real_,
                     d13c_NH = NA_real_, d13c_SH = NA_real_,
                     d14c_NH = NA_real_, d14c_SH = NA_real_,
-                    ocean_C = NA_real_, land_C = NA_real_)
+                    ocean_C = NA_real_, land_C = NA_real_,
+                    ocean_C14 = NA_real_, land_C14 = NA_real_,
+                    atm_C14 = NA_real_)
   gpp <- ccx_const("GtC_PER_PPM") / 2
   for (i in seq_len(n)) {
     out$co2_NH[i]  <- y[atmN, "C"] / gpp
@@ -307,6 +315,9 @@ ccx_run <- function(spin, F, substeps = "auto") {
     out$d14c_SH[i] <- 1000 * (y[atmS, "C14"] / y[atmS, "C"] - 1)
     out$ocean_C[i] <- sum(y[ocean, "C"])
     out$land_C[i]  <- sum(y[land, "C"])
+    out$ocean_C14[i] <- sum(y[ocean, "C14"])
+    out$land_C14[i]  <- sum(y[land,  "C14"])
+    out$atm_C14[i]   <- sum(y[atm,   "C14"])
     y <- ccx_step_rk4(y, F$t[i], 1 / 12, p, ccx_forcing_at(F, i), grid, aux, substeps)
   }
   list(state = y, out = out)

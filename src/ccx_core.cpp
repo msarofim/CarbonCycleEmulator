@@ -296,7 +296,13 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
   std::vector<double> y(NS), k1(NS), k2(NS), k3(NS), k4(NS), tmp(NS);
   for (int i = 0; i < NS; ++i) y[i] = y0[i];
 
-  NumericMatrix out(n, 8);   // co2 NH/SH, d13c NH/SH, d14c NH/SH, ocean C, land C
+  // co2 NH/SH, d13c NH/SH, d14c NH/SH, ocean C, land C, then the three 14C
+  // reservoir inventories in STATE units ("GtC carrying standard 14C content").
+  // They are emitted raw rather than in kmol because the core has no business
+  // knowing an inventory convention; likelihood.R converts with a named
+  // constant. Needed by the ocean excess-14C constraint, which is an inventory
+  // at two reference years and so cannot be reconstructed from D14C alone.
+  NumericMatrix out(n, 11);
   const double gpp = A.gtc_per_ppm_hemi;
 
   std::vector<double> f(9);
@@ -307,13 +313,17 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
     out(i, 3) = 1000.0 * (y[IX(14, C13)] / (y[IX(14, C)] * A.R13) - 1.0);
     out(i, 4) = 1000.0 * (y[IX(0, C14)] / y[IX(0, C)] - 1.0);
     out(i, 5) = 1000.0 * (y[IX(14, C14)] / y[IX(14, C)] - 1.0);
-    double oc = 0.0, ld = 0.0;
+    double oc = 0.0, ld = 0.0, oc14 = 0.0, ld14 = 0.0, at14 = 0.0;
     for (int hi = 0; hi < 2; ++hi) {
       const int base = hi * 14;
       ld += y[IX(base + 1, C)] + y[IX(base + 2, C)];
       for (int kk = 3; kk < 14; ++kk) oc += y[IX(base + kk, C)];
+      at14 += y[IX(base, C14)];
+      ld14 += y[IX(base + 1, C14)] + y[IX(base + 2, C14)];
+      for (int kk = 3; kk < 14; ++kk) oc14 += y[IX(base + kk, C14)];
     }
     out(i, 6) = oc; out(i, 7) = ld;
+    out(i, 8) = oc14; out(i, 9) = ld14; out(i, 10) = at14;
 
     for (int j = 0; j < 9; ++j) f[j] = forcing(i, j);
 

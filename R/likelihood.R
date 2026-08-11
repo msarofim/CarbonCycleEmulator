@@ -75,6 +75,14 @@
 #
 # 4. STATION-VS-BOX REPRESENTATION ERROR. MLO is not the NH mean and SPO is not
 #    the SH mean. A fixed representation term is added to the CO2 error model.
+#
+# 5. THE OCEAN EXCESS-14C INVENTORY IS A CONSTRAINT THE D14C SERIES CANNOT GIVE.
+#    Added 2026-08-11. Every other 14C term here is atmospheric, so the ocean's
+#    ventilation is only ever inferred from how fast the atmosphere loses its
+#    bomb spike -- and that can be bought with a larger bomb source instead of a
+#    faster sink. Naegler & Levin (2006) give an observation-based ocean
+#    inventory at two reference years, which prices the sink directly. See the
+#    LIK_EXCESS_C14_* block for the definition traps, which are the whole story.
 # =====================================================================
 
 # ---- named constants -------------------------------------------------
@@ -141,6 +149,65 @@ LIK_BOMB_EXCLUDE    <- c(1950, 1975)   # window dropped when the switch is FALSE
 LIK_ICE_REP_ERR <- 4.0               # ppm, added in quadrature
 LIK_GCB_OCEAN_SD   <- 0.4            # GtC/yr, GCB stated ocean-sink uncertainty
 LIK_GCB_LAND_SD    <- 0.9            # GtC/yr, GCB stated land-sink uncertainty
+
+# ---- ocean excess-14C inventory (2026-08-11; DATA.md 10) -------------
+# Naegler & Levin (2006), Tables 2 and 4: the excess (= total minus natural)
+# radiocarbon inventory of the ocean at the GEOSECS (1975) and WOCE (1995)
+# reference years. This is the first constraint in the likelihood that prices
+# the ocean 14C SINK directly rather than through the atmosphere's decline.
+#
+# THREE DEFINITION QUESTIONS, all measured rather than assumed
+# (calibration/diag_excess_c14.R reproduces every number below):
+#
+# (a) WHAT IS "NATURAL"? The observational excess is total minus a
+#     pre-anthropogenic natural component. The model's counterpart is the run
+#     minus its own 1750 steady state, and the run's FIRST ROW *is* that steady
+#     state by construction -- so the baseline is free, with no counterfactual
+#     run and no doubling of the MCMC cost. Measured against the alternative (a
+#     full no-fossil / no-LUC / no-bomb / no-nuclear counterfactual carrying the
+#     observed GMST and ENSO) the two differ by 0.27 kmol at 1975 and 0.58 at
+#     1995 -- under 1 % of the excess, against a ~16 kmol observational spread.
+#     A counterfactual with the climate forcing also removed reproduces the
+#     spinup state to 0.003 kmol, which is the fixed point behaving as it must.
+#
+# (b) BOMB-ONLY OR TOTAL? N&L's Table 4 model partition sums EXACTLY to their
+#     cumulative bomb input at both years, i.e. it is a paired bomb-only
+#     difference. Their observational estimates are not: Peacock and Key
+#     separate natural from excess without being able to separate bomb from
+#     Suess, and Mouchet (2013) puts the CO2 increase and the air-sea CO2 flux
+#     at ~10 % each of the 1990 ocean bomb inventory. For the OCEAN the choice
+#     turns out not to matter: the paired bomb-only difference is 72.6 / 94.3
+#     kmol against 75.9 / 95.4 for total-minus-natural, a 1-4 % gap. (For the
+#     LAND it matters a great deal -- see the LUC note in DATA.md 10.)
+#
+# (c) IS OUR kmol THE SAME kmol? Checked on the one row where N&L have real
+#     observations. Rebuilding the ATMOSPHERIC excess from the CO2 and D14C
+#     observations under this convention gives 37.3 kmol (1975) and 25.6 (1995)
+#     against their troposphere-plus-stratosphere 35.6 and 22.2: agreement to
+#     4.8 % and 15.3 %. That is the basis for LIK_EXCESS_C14_REP_FRAC below --
+#     it is a measured definitional/representation error, not a chosen one.
+LIK_USE_EXCESS_C14 <- TRUE
+# WHICH observational target. The two sets differ by far more than the model
+# does between definitions, so this switch matters more than anything above:
+#   "table4_obs_range"  48.6 +/- 7.9 (1975), 51.4 +/- 7.6 (1995). The full
+#                       Peacock-to-Key span corrected for missing ocean areas.
+#   "table2_peacock"    43.9 +/- 4.3, 56.5 +/- 2.5. One method with its stated
+#                       uncertainty -- roughly 3x tighter, and it implies a much
+#                       steeper 1975->1995 uptake.
+# DEFAULT IS THE WIDE ONE. The span between the two published reconstructions is
+# method spread, not measurement noise, and adopting one of them as if the other
+# did not exist would put ~130 log-units of leverage on a choice of paper.
+# FLAGGED FOR MARCUS -- see CHANGELOG 2026-08-11.
+LIK_EXCESS_C14_TARGET <- "table4_obs_range"
+# The run's first row is the preindustrial steady state only if the run starts
+# here. The term is SKIPPED, not silently mis-baselined, if it does not; the
+# standard pipeline is gated by test-likelihood.R to make sure it is present.
+LIK_EXCESS_C14_BASE_YEAR <- 1750
+# Shared definitional/representation error, as a fraction of the target. Applied
+# as a RANK-ONE common term across the two years rather than in quadrature per
+# year, because it is a method bias: it moves 1975 and 1995 together, and
+# treating it as independent would claim twice the information it carries.
+LIK_EXCESS_C14_REP_FRAC <- 0.10
 
 #' Hemisphere-area weights for the Hua zones
 ccx_zone_weights <- function(nh_bounds = LIK_ZONE_BOUNDS_NH,
@@ -213,6 +280,38 @@ ccx_annual_mean <- function(t, v, sd, min_n = 1L) {
              n     = n)[n >= min_n, ]
 }
 
+# ---------------------------------------------------------------------
+#' Model 14C state units -> kmol 14C
+#'
+#' The state carries 14C as "GtC carrying standard 14C content" (model.R
+#' header), so a mole of it is a mole of carbon times the absolute standard
+#' ratio. Derived from the constants, never re-typed as a literal -- the same
+#' discipline constants.R enforces on LAMBDA_C14.
+ccx_c14_kmol <- function(x)
+  x * ccx_const("MOL_C_PER_GtC") * ccx_const("R14_STD") / 1000
+
+#' Build the ocean excess-14C target, with its covariance already inverted
+#'
+#' Covariance is diag(half_width^2) + rep rep', i.e. per-year observational
+#' spread plus ONE shared method bias (design note 5, LIK_EXCESS_C14_REP_FRAC).
+#' Inverted here because it depends only on the observations, and inverting a
+#' 2x2 inside the MCMC loop for no reason is how 46 ms becomes 718 ms.
+#'
+#' @return NULL if the dataset is absent or names an unknown target set, so a
+#'   missing optional file cannot take the whole posterior down with it.
+ccx_excess_c14_target <- function(exc, which = LIK_EXCESS_C14_TARGET,
+                                  rep_frac = LIK_EXCESS_C14_REP_FRAC) {
+  if (is.null(exc) || is.null(exc$targets) || is.null(exc$targets[[which]])) return(NULL)
+  d <- as.data.frame(exc$targets[[which]])
+  d <- d[order(d$year), ]
+  rep <- rep_frac * d$centre
+  S   <- diag(d$half_width^2, nrow = nrow(d)) + outer(rep, rep)
+  list(year = d$year, centre = d$centre, half_width = d$half_width, rep = rep,
+       Sigma = S, prec = solve(S),
+       logdet = as.numeric(determinant(S, logarithm = TRUE)$modulus),
+       target = which, note = d$note)
+}
+
 #' Pre-assemble every observation into the form the likelihood needs.
 #' Done ONCE, outside the MCMC loop.
 ccx_prepare_obs <- function() {
@@ -222,6 +321,8 @@ ccx_prepare_obs <- function() {
   ice  <- readRDS(ccx_path("data", "obs_icecore.rds"))
   gcb  <- readRDS(ccx_path("data", "gcb_budget.rds"))$budget
   ic20 <- tryCatch(as.data.frame(readRDS(ccx_path("data", "obs_d14c_intcal20.rds"))),
+                   error = function(e) NULL)
+  exc  <- tryCatch(readRDS(ccx_path("data", "obs_excess_c14.rds")),
                    error = function(e) NULL)
 
   # primary stations only -- the NOAA records are cross-checks, not targets
@@ -282,7 +383,8 @@ ccx_prepare_obs <- function() {
   list(co2 = co2, d13 = d13, d14_nh = d14_nh, d14_sh = d14_sh,
        ice = ico, gcb = gcb, intcal = ic20, weights = w,
        co2_ann = co2_ann, d13_ann = d13_ann, co2_seas = co2_seas,
-       d14_nh_ann = d14_nh_ann, d14_sh_ann = d14_sh_ann)
+       d14_nh_ann = d14_nh_ann, d14_sh_ann = d14_sh_ann,
+       excess_c14_all = exc, excess_c14 = ccx_excess_c14_target(exc))
 }
 
 #' SUPERSEDED 2026-08-11 -- the AR(1) residual model. Do not wire this back in.
@@ -445,6 +547,28 @@ ccx_loglik <- function(out, obs, err, by_stream = FALSE) {
     mod <- interp("d14c_NH", ic$year + 0.5)
     add("d14c_intcal", sum(stats::dnorm(ic$d14c, mod,
                            sqrt(ic$err^2 + LIK_D14C_REP_OTHER^2), log = TRUE)))
+  }
+
+  # ---- ocean excess 14C inventory (design note 5) ---------------------
+  # The only term that prices the ocean 14C sink directly. Excess is measured
+  # against the run's OWN first row, which is the 1750 steady state by
+  # construction -- so this costs no extra integration.
+  if (LIK_USE_EXCESS_C14 && !is.null(obs$excess_c14) &&
+      !is.null(out$ocean_C14)) {
+    e   <- obs$excess_c14
+    yrv <- floor(out$t + 1e-9)
+    # Refuse to score rather than mis-baseline: if the run does not start at the
+    # spinup year, out$ocean_C14[1] is not the natural inventory. by_stream then
+    # shows the term ABSENT, which is visible; a wrong baseline would not be.
+    if (yrv[1] == LIK_EXCESS_C14_BASE_YEAR && all(e$year %in% yrv)) {
+      # annual mean of the reference year, matching how every other stream is
+      # scored; the ocean inventory has no seasonal cycle worth resolving.
+      m <- vapply(e$year, function(y) mean(out$ocean_C14[yrv == y]), numeric(1))
+      r <- ccx_c14_kmol(m - out$ocean_C14[1]) - e$centre
+      add("excess_c14_ocean",
+          -0.5 * (drop(crossprod(r, e$prec %*% r)) + e$logdet +
+                    length(r) * log(2 * pi)))
+    }
   }
 
   # ---- GCB sinks: PARTITION only -------------------------------------

@@ -168,6 +168,68 @@ test_that("rho is gone and the parameter vector is self-consistent", {
     expect_equal(back[[n]], CCX_PARAM_TABLE[[n]]$init, tolerance = 1e-10, info = n)
 })
 
+# ---- 4. the ocean excess-14C inventory constraint ---------------------
+
+test_that("the ocean excess-14C term is PRESENT in the standard pipeline", {
+  skip_if_no_cpp()
+  # The term skips itself if the run does not start at the spinup year, which is
+  # the right behaviour but also a silent way to lose a constraint. This asserts
+  # that under the configuration the calibration actually uses, it is scored.
+  f <- lik_fixture()
+  parts <- ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE)
+  expect_true("excess_c14_ocean" %in% names(parts))
+  expect_true(is.finite(parts[["excess_c14_ocean"]]))
+  expect_equal(f$obs$excess_c14$target, LIK_EXCESS_C14_TARGET)
+})
+
+test_that("the excess-14C term refuses to score off a wrong baseline", {
+  skip_if_no_cpp()
+  # Started at 1900, out$ocean_C14[1] is not the natural inventory. Scoring it
+  # anyway would compare a 150-year-old excess to a 1750 one and quietly reward
+  # whatever parameters happened to shrink the difference.
+  obs <- ccx_prepare_obs()
+  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  sp <- ccx_spinup(p)
+  F  <- ccx_build_forcing("historical", c(1900, 2024), prod_c14 = sp$prod_c14)
+  parts <- ccx_loglik(ccx_run_fast(sp, F)$out, obs,
+                      list(sigma_co2 = 1.5, sigma_d13c = 0.1, sigma_d14c = 5),
+                      by_stream = TRUE)
+  expect_false("excess_c14_ocean" %in% names(parts))
+})
+
+test_that("the excess-14C term bites: it is monotone in bomb_total", {
+  skip_if_no_cpp()
+  # The constraint exists to price the ocean sink independently of the
+  # atmospheric decline. A term that did not move with the size of the bomb
+  # source would be decoration.
+  obs <- ccx_prepare_obs()
+  err <- list(sigma_co2 = 1.5, sigma_d13c = 0.1, sigma_d14c = 5)
+  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  sp <- ccx_spinup(p)
+  term <- function(bt) {
+    F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14,
+                           bomb_total_kmol = bt)
+    ccx_loglik(ccx_run_fast(sp, F)$out, obs, err,
+               by_stream = TRUE)[["excess_c14_ocean"]]
+  }
+  # 102 kmol is the citable Naegler & Levin total; 151 is where the 2026-08-11
+  # mode sat. The observationally-constrained ocean must prefer the former.
+  expect_gt(term(102), term(151))
+  expect_gt(term(102), term(60))          # and it is not simply "smaller is better"
+})
+
+test_that("the shared method error is rank one, not per-year quadrature", {
+  # Independent quadrature would claim more information than two estimates from
+  # overlapping reconstructions carry. The off-diagonal is the whole point.
+  e <- ccx_excess_c14_target(readRDS(ccx_path("data", "obs_excess_c14.rds")))
+  expect_gt(e$Sigma[1, 2], 0)
+  expect_equal(e$Sigma[1, 2], e$rep[1] * e$rep[2], tolerance = 1e-12)
+  expect_equal(diag(e$Sigma), e$half_width^2 + e$rep^2, tolerance = 1e-12)
+  # a correlated pair penalises a COMMON offset less than an opposing one
+  quad <- function(r) drop(crossprod(r, e$prec %*% r))
+  expect_lt(quad(c(10, 10)), quad(c(10, -10)))
+})
+
 test_that("by_stream decomposes exactly into the total", {
   skip_if_no_cpp()
   f <- lik_fixture()

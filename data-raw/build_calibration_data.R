@@ -340,7 +340,51 @@ cat(sprintf("[7] SSPs: %s; %d-%d (GtC/yr)\n", paste(ssp_keep, collapse = " "),
             min(ssp_out$year), max(ssp_out$year)))
 
 # =====================================================================
-# 8. EMPIRICAL BENCHMARKS (computed here; these replace DESIGN.md [VERIFY]
+# 8. Excess radiocarbon budget (Naegler & Levin 2006) -- DATA.md 10
+#
+# Hand-transcribed from the paywalled paper, so it lives in data-raw/manual/
+# and is tracked in git. Parsed here rather than read directly by the
+# likelihood, for the same reason as every other target: no number enters the
+# model from a script that is not the data pipeline.
+#
+# Only the OBSERVATION-BASED rows are promoted to a calibration target. The
+# Table 4 model columns (their GRACE simulation) are kept for reporting, and
+# their BIOSPHERE row is deliberately excluded from `targets` -- N&L state that
+# no observational estimate of the global biospheric excess exists.
+# =====================================================================
+# read.csv with comment.char, as for the Tans SCOPE 16 tables: these
+# hand-transcribed files carry their citation as a leading comment block, which
+# fread cannot skip.
+nl <- as.data.table(read.csv(file.path(MANUAL, "naegler_levin_2006_budget.csv"),
+                             comment.char = "#"))
+# TWO candidate ocean target sets are emitted, because which one to score
+# against is a live methodological choice and they differ by a lot -- see
+# likelihood.R's LIK_EXCESS_C14_TARGET. The likelihood picks by name; it does
+# not get to invent numbers.
+#   table4_obs_range  the Table 4 "observed" row: the full Peacock-to-Key span,
+#                     corrected for missing ocean areas. WIDE.
+#   table2_peacock    the Table 2 Peacock multitracer estimate with N&L's own
+#                     correction and its stated uncertainty. TIGHT, and its
+#                     1975 and 1995 values imply a much steeper ocean uptake.
+nl_ocean_target <- function(src) {
+  d <- nl[source == src & quantity == "ocean"]
+  d[, `:=`(centre     = fifelse(is.na(kmol_14c), (kmol_lo + kmol_hi) / 2, kmol_14c),
+           half_width = (kmol_hi - kmol_lo) / 2)]
+  d[, .(year, quantity, lo = kmol_lo, hi = kmol_hi, centre, half_width, source, note)]
+}
+nl_targets <- list(table4_obs_range = nl_ocean_target("naegler_levin_2006_t4_OBS"),
+                   table2_peacock   = nl_ocean_target("naegler_levin_2006_t2_peacock_corr"))
+saveRDS(list(all = nl, targets = nl_targets), file.path(OUT, "obs_excess_c14.rds"))
+cat(sprintf("[8] N&L 2006 excess 14C: %d rows; ocean target sets:\n", nrow(nl)))
+for (nm in names(nl_targets)) {
+  tt <- nl_targets[[nm]]
+  cat(sprintf("      %-18s %s\n", nm,
+              paste(sprintf("%d: %.1f +/- %.1f kmol", tt$year, tt$centre, tt$half_width),
+                    collapse = "   ")))
+}
+
+# =====================================================================
+# 9. EMPIRICAL BENCHMARKS (computed here; these replace DESIGN.md [VERIFY]
 #    placeholders for anything that can be read off the data)
 # =====================================================================
 cat("\n=== EMPIRICAL BENCHMARKS (from data, this access date) ===\n")

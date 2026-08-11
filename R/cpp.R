@@ -89,7 +89,8 @@ ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
       ccx_cpp_aux(spin$aux, spin$grid), as.integer(nsub))
     out <- as.data.frame(res$out)
     names(out) <- c("co2_NH", "co2_SH", "d13c_NH", "d13c_SH",
-                    "d14c_NH", "d14c_SH", "ocean_C", "land_C")
+                    "d14c_NH", "d14c_SH", "ocean_C", "land_C",
+                    "ocean_C14", "land_C14", "atm_C14")
     state <- res$state
     dimnames(state) <- list(ccx_box_names(spin$grid$nl), CCX_TRACERS)
     list(state = state, out = cbind(t = F$t, out), substeps = as.integer(nsub))
