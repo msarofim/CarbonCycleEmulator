@@ -378,23 +378,64 @@ GPP/NPP question actually lands — not in the fast autotrophic-respiration loop
 magnitude is second-order, but in the *pool turnover* that sets how much bomb ¹⁴C the land
 absorbs. It should be freed and calibrated rather than assumed.
 
-### (e) The ocean bomb-¹⁴C inventory — BLOCKED on literature access
+### (e) The ocean bomb-¹⁴C inventory — ACQUIRED, and it settles `bomb_total`
 
-The model says **110.0 kmol in the ocean by 2024** (72 % of surviving bomb ¹⁴C). The observed
-value could not be sourced: Naegler & Levin 2006 (AGU) returns HTTP 402, and the abstract of
-Mouchet (2013), *Radiocarbon* **55**(3):1580–1594, doi:10.1017/S0033822200048505 — "The Ocean
-Bomb Radiocarbon Inventory Revisited" — carries no numbers.
+Marcus supplied Naegler & Levin (2006), *JGR* **111**, D12311, doi:10.1029/2005JD006758,
+plus the Mouchet reviewer response to Dentith et al. (Biogeosciences bg-2019-365). Numbers
+transcribed to **`data-raw/manual/naegler_levin_2006_budget.csv`** (paywalled, so it lives in
+`data-raw/manual/` and is tracked in git, same as the Scripps files).
 
-**A caution that came out of that abstract anyway:** *"large discrepancies exist among
-data-based estimates and model reconstructions of the ocean bomb radiocarbon inventory"*, and
-observation-based estimates that lack information about CO₂ invasion are **underestimates**
-(supporting Naegler 2009). So this check is less sharp than hoped — the target itself has
-method spread of order 10 % or more, and any constraint built from it must carry that.
+**Definition, which matters:** the observational "excess" is total minus NATURAL, so it carries
+the bomb addition AND the Suess / CO₂-invasion terms. It is *not* a paired bomb-only
+difference. Mouchet (2013) puts the CO₂ increase and the air-sea CO₂ flux at ~10 % each of the
+1990 ocean bomb inventory. Both definitions were computed; the comparison below uses the
+matching one (full run minus a no-fossil/no-LUC/no-bomb/no-nuclear counterfactual).
 
-**What is needed:** the ocean bomb ¹⁴C inventory at a stated epoch, in 10²⁶ atoms / kmol / mol,
-with its uncertainty, and ideally the ocean/biosphere/atmosphere partition from Naegler &
-Levin 2006. Marcus has offered institutional access — same route as the Scripps files, which
-are hand-supplied and tracked in git because `download_data.R` cannot regenerate them.
+**Ocean excess ¹⁴C inventory, kmol:**
+
+| | model @ bomb_total 151.2 (fitted) | model @ 102 (citable) | **observed** |
+|---|---|---|---|
+| 1975 (GEOSECS) | **75.8** | 52.1 | 40.7–56.5 (Peacock-corr. 43.9 ± 4.3) |
+| 1995 (WOCE) | **94.9** | 64.2 | 43.8–59.0 (Peacock-corr. 56.5 ± 2.5) |
+
+**At the fitted `bomb_total` the model puts 60–115 % more ¹⁴C into the ocean than observed.
+This independently falsifies `bomb_total` = 151 kmol** using a constraint that was never in the
+likelihood. At the citable 102 the ocean lands just above the top of the observed range —
+roughly consistent. This is the "optional ocean bomb-¹⁴C inventory constraint" DESIGN §6/§10
+listed and never acquired. **It should now go into the likelihood.**
+
+**Full partition at 1995 (Table 4, YANG scenario), kmol:**
+
+| reservoir | N&L model | N&L observed | ours @ 151 | ours @ 102 |
+|---|---|---|---|---|
+| troposphere (+strat) | 17.5 (+4.7) | 17 ± 1 | 25.4 | 20.7 |
+| **biosphere** | **18.9** | *none exists* | **58.3** | **44.2** |
+| ocean | 60.0 | 43.8–59.0 | 95.4 | 64.4 |
+| total input | 101.1 | — | 151.2 | 102 |
+
+**Read the land row carefully.** Our land holds 2–3× their biosphere, but N&L state plainly
+that *"no attempt has been made to estimate the total excess radiocarbon inventory of the
+global terrestrial biosphere based on observations"*, that simulated biospheric inventories
+*"depend strongly on model parameters such as turnover times, NPP, pool sizes"*, and that they
+themselves *"possibly underestimate"* theirs — noting that such a deficit then gets reassigned
+to their ocean. **So this row is model-vs-model and is suggestive, not decisive.** It is
+consistent with §6.4(d)'s `tau_veg` tension but does not prove it.
+
+Sensitivity at the citable bomb total (land bomb ¹⁴C at 1995, kmol): `tau_veg` 3 → 35.2,
+10 → 44.2, 40 → 61.3; `tau_soil` 8 → 36.0, 15 → 44.1, 60 → 62.5. **No setting of either brings
+our land near 18.9 while keeping the CO₂ fit** — at `tau_veg` = 3 the land is still 35.2 and
+CO₂ rms has already blown out to 11.98 ppm. That is the two-pool land structure binding, not a
+parameter: N&L's biosphere has **four pools (leaves, twigs, wood, + soil) and 2200 PgC**,
+which lets a fast pool exchange ¹⁴C while a slow pool stores carbon. Ours cannot separate them.
+
+**One more thing the reviewer response settles, in our favour.** Mouchet's central critique of
+Dentith et al. is that carrying ¹⁴C as a *ratio* (DI¹⁴C/DI¹²C) *"implicitly assumes that local
+air-sea CO₂ disequilibrium remains constant with time"* and is therefore *"not fit for
+addressing bomb radiocarbon at a time of major change in atmospheric CO₂"*. **Our model is on
+the correct side of this**: `R/model.R` carries ¹²C and ¹⁴C as separate masses and the air-sea
+¹⁴C flux is the gross carbon flux times the *source box's* ratio — the OCMIP-2 formulation
+Mouchet argues for. Worth recording, because "carry the ratio" is the obvious simplification
+someone would later propose as a tidy-up.
 
 ## 7. What to do next, in order
 
@@ -404,23 +445,29 @@ ventilation — the thing ¹⁴C is in the model *for* — is not believable.
 
 **Both cheap checks are now done (§6.4).** Revised order:
 
-1. **Re-open the bomb delivery SHAPE.** §6.4(c) says `bomb_total`'s +4.6σ is a source problem,
+1. **Add the ocean excess-¹⁴C inventory to the likelihood** (§6.4(e)). It is acquired,
+   observationally grounded, and it independently falsifies `bomb_total` = 151. Two numbers at
+   1975 and 1995 with stated ranges — cheap to add, and it is the constraint that stops the fit
+   buying an atmospheric curve with a physically impossible ocean. Do this FIRST; it changes
+   what every subsequent diagnosis is fitting against.
+2. **Re-open the bomb delivery SHAPE.** §6.4(c) says `bomb_total`'s +4.6σ is a source problem,
    not a sink one — the model cannot match the observed Δ¹⁴C curve at any total. Start with the
-   Part A/B join at 1963.04 that 2026-08-10 left unresolved. This is the single highest-value
-   item and it is independent of the ocean work.
-2. **Free `tau_veg`** into `CCX_PARAM_TABLE` (§6.4(d)). It is an uncalibrated constant sitting
+   Part A/B join at 1963.04 that 2026-08-10 left unresolved.
+3. **Free `tau_veg`** into `CCX_PARAM_TABLE` (§6.4(d)), and consider whether the two-pool land
+   can survive at all: §6.4(e) shows no (`tau_veg`, `tau_soil`) keeps both the CO₂ fit and a
+   defensible land ¹⁴C inventory. A third, fast pool is the obvious minimal change. It is an uncalibrated constant sitting
    directly on a CO₂-vs-¹⁴C tension. Cheap; do it before anything structural, so the structural
    diagnosis is not absorbing an avoidable parameter error.
-3. **Decide on the ocean structure.** §6.4(b) confirms one `kz` cannot serve both timescales.
+4. **Decide on the ocean structure.** §6.4(b) confirms one `kz` cannot serve both timescales.
    The options are an explicit advective overturning loop (already in DESIGN §10's v2 backlog)
    or a second ventilation timescale. This is a design decision for Marcus, not a fix.
-4. **Address the ocean carbon inventory** (the biological pump, or at minimum a prescribed
+5. **Address the ocean carbon inventory** (the biological pump, or at minimum a prescribed
    DIC-vs-depth profile). Watch whether ¹⁴C production moves from 382 toward 545. Note this
    also touches the provisional `OCEAN_DEPTH` / `ALK_SURFACE` constants.
-5. **Only then** the GPP/autotrophic-respiration loop (§6.2), if a shape misfit survives. It is
+6. **Only then** the GPP/autotrophic-respiration loop (§6.2), if a shape misfit survives. It is
    a cheap addition — a fast two-way land exchange with a lag parameter — but doing it before
    the bomb-shape work risks tuning it to absorb a source error.
-6. **Then** production MCMC: 50k × 4, gate on **R̂ < 1.05 AND ESS ≥ 400**. At 0.046 s/eval that
+7. **Then** production MCMC: 50k × 4, gate on **R̂ < 1.05 AND ESS ≥ 400**. At 0.046 s/eval that
    is ~2.6 h. The app picks up `calibration/output/posterior_draws.rds` automatically and
    switches its banner to "calibrated posterior".
 

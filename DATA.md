@@ -206,7 +206,7 @@ spread in production (1.6–2.5 atoms/cm²/s). A factor-2 miss would indicate a 
 | Gap | Impact | What would close it |
 |---|---|---|
 | ~~**Bomb ¹⁴C time shape**~~ | **CLOSED 2026-08-10** without UNSCEAR — see §9. | — |
-| Ocean bomb-¹⁴C inventory | Optional integral constraint on ventilation | GLODAP-era estimates (Key et al. 2004 / Peacock 2004) |
+| ~~Ocean bomb-¹⁴C inventory~~ | **ACQUIRED 2026-08-11** — see below | — |
 | 7 provisional constants | Ocean areas and depth, surface alkalinity, seawater density, preindustrial NPP, SST–pCO₂ sensitivity | Cited sources. **The SST–pCO₂ sensitivity additionally risks double-counting** the carbonate module's own temperature dependence — check before applying |
 | Scripps site unreachable | `scrippsco2.ucsd.edu` returns 404 on every asset path; the files in `data-raw/manual/` are irreplaceable and therefore tracked in git | Site restoration, or an alternative mirror |
 
@@ -355,3 +355,33 @@ Both are exposed as environment overrides so they can be measured, not argued:
 - A −118 ‰ mean bias survives at uncalibrated defaults; it is a level, not a shape.
 - `bomb_total` remains a **calibrated** parameter with the Naegler & Levin prior; the
   stored series is normalised to unit integral, so it still cannot set the amplitude.
+
+
+## 10. Excess radiocarbon budget — Naegler & Levin (2006)
+
+**Acquired 2026-08-11.** `data-raw/manual/naegler_levin_2006_budget.csv`, transcribed from
+Naegler, T., and I. Levin (2006), *Closing the global radiocarbon budget 1945–2005*,
+J. Geophys. Res. **111**, D12311, doi:10.1029/2005JD006758 — Table 2 (observation-based ocean
+inventories) and Table 4 (full reservoir partition at 1975 and 1995). PDF supplied by Marcus;
+paywalled, so `download_data.R` cannot regenerate it and the file lives in `data-raw/manual/`
+and is tracked in git, exactly as the Scripps records are.
+
+This closes the "optional ocean bomb-¹⁴C inventory constraint" that DESIGN §6 and §10 listed as
+*not yet acquired*.
+
+**Trap — the definition of "excess".** These inventories are *total minus natural*, so they
+carry the bomb addition **and** the Suess / CO₂-invasion terms together. They are NOT
+comparable to a paired bomb-only model difference. Mouchet (2013), *Radiocarbon*
+**55**(3):1580–1594, doi:10.1017/S0033822200048505, puts the CO₂ increase and the air-sea CO₂
+flux at **~10 % each** of the 1990 ocean bomb inventory. Compare against a full-run-minus-
+natural-counterfactual, not against a bomb on/off difference.
+
+**Second trap — the biosphere row is not an observation.** N&L state that *no* observation-based
+estimate of the global biospheric excess ¹⁴C inventory exists, that simulated values *"depend
+strongly on model parameters such as turnover times, NPP, pool sizes"*, and that theirs is
+possibly an underestimate whose deficit would be reassigned to their ocean. Treat Table 4's
+biosphere column as a model intercomparison point, never as a target.
+
+**Reference values (kmol ¹⁴C):** ocean 40.7–56.5 at GEOSECS (1975) and 43.8–59.0 at WOCE (1995);
+troposphere 27 ± 1 and 17 ± 1; total bomb production 1945–1980 99.3–104.9 (already the
+`bomb_total` prior).

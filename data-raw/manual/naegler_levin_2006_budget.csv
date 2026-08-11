@@ -1,0 +1,33 @@
+# Excess (bomb + Suess) radiocarbon budget, kmol 14C.
+# Source: Naegler, T., and I. Levin (2006), Closing the global radiocarbon budget
+#   1945-2005, J. Geophys. Res., 111, D12311, doi:10.1029/2005JD006758.
+#   Table 2 (observation-based ocean inventories) and Table 4 (full partition).
+# PDF supplied by Marcus 2026-08-11 (paywalled; download_data.R cannot regenerate
+#   this, same situation as the Scripps files -- hence data-raw/manual/ and git).
+# NOTE ON DEFINITION: "excess" = total minus NATURAL, so it carries the bomb
+#   addition AND the Suess / CO2-invasion terms. It is NOT a paired bomb-only
+#   difference. Mouchet (2013, Radiocarbon 55(3):1580-1594,
+#   doi:10.1017/S0033822200048505) puts the CO2 increase and the air-sea CO2 flux
+#   at ~10% each of the 1990 ocean bomb inventory.
+# reference years: GEOSECS midpoint Jan 1975, WOCE midpoint Jan 1995.
+source,quantity,year,kmol_14c,kmol_lo,kmol_hi,note
+naegler_levin_2006_t4_YANG,total_input,1975,99.2,NA,NA,GRACE model YANG scenario
+naegler_levin_2006_t4_YANG,total_input,1995,101.1,NA,NA,GRACE model YANG scenario
+naegler_levin_2006_t4_YANG,stratosphere,1975,8.6,NA,NA,model
+naegler_levin_2006_t4_YANG,stratosphere,1995,4.7,NA,NA,model
+naegler_levin_2006_t4_YANG,troposphere,1975,26.8,NA,NA,model
+naegler_levin_2006_t4_YANG,troposphere,1995,17.5,NA,NA,model
+naegler_levin_2006_t4_YANG,biosphere,1975,21.7,NA,NA,model; NO observational estimate exists
+naegler_levin_2006_t4_YANG,biosphere,1995,18.9,NA,NA,model; NO observational estimate exists
+naegler_levin_2006_t4_YANG,ocean,1975,42.1,NA,NA,model
+naegler_levin_2006_t4_YANG,ocean,1995,60.0,NA,NA,model
+naegler_levin_2006_t4_scenarios,ocean,1975,NA,40.7,44.9,range across YANG/YANGM5/RATH/RATHM5
+naegler_levin_2006_t4_scenarios,ocean,1995,NA,58.1,63.6,range across YANG/YANGM5/RATH/RATHM5
+naegler_levin_2006_t4_OBS,troposphere,1975,27.0,26.0,28.0,observed
+naegler_levin_2006_t4_OBS,troposphere,1995,17.0,16.0,18.0,observed
+naegler_levin_2006_t4_OBS,ocean,1975,NA,40.7,56.5,Peacock + Key corrected for missing ocean areas
+naegler_levin_2006_t4_OBS,ocean,1995,NA,43.8,59.0,Peacock + Key corrected for missing ocean areas
+naegler_levin_2006_t2_peacock_corr,ocean,1975,43.9,39.6,48.2,multitracer correlation; corrected by Naegler et al 2006
+naegler_levin_2006_t2_peacock_corr,ocean,1995,56.5,54.0,59.0,corrected by Naegler et al 2006
+naegler_levin_2006_t2_key_corr,ocean,1995,59.0,50.7,67.3,Key et al 2004 corrected by Naegler et al 2006
+naegler_levin_2006_abstract,bomb_production_1945_1980,NA,NA,99.3,104.9,total bomb 14C production; the existing bomb_total prior
