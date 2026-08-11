@@ -975,3 +975,51 @@ feedback must be measurably engaged. Suite **298 / 0 / 2**.
 The IRF's single worst year is **1817**, after Tambora, where a 1-year box cannot track a
 −5 W/m² one-year volcanic spike (max |err| 0.192 °C, identical across scenarios because 1817
 is shared history). Bounded by the gate rather than pretended away.
+
+## 2026-08-11 (evening) — Recalibrated on the fixed posterior; CO₂ now fits, ¹⁴C does not
+
+Mode-find re-run on the 17-parameter annual/seasonal posterior with the stability controller
+in place: **126 min, 164,635 evaluations at 0.046 s/eval, init −25,999 → mode −2,359.3.**
+`calibration/output/mode_fit.rds`.
+
+**Both blockers are demonstrably gone.**
+
+| | 2026-08-10 mode | 2026-08-11 mode |
+|---|---|---|
+| `q10` | **0.280** (Q10 < 1: respiration *falls* with warming) | **4.14** |
+| `kz` | 175,790 — ~1 % from the solver wall | **8,354**, substeps needed = 4 (the floor) |
+| `sigma_co2` | 0.0744 ppm (collapsed) | 0.301 ppm |
+| Hessian condition number | 2.4e6 | **8.29e4** |
+| MLO CO₂ annual residual | mean +6.6, rms 13.6 ppm | **mean −0.15, rms 0.99 ppm** |
+
+**The CO₂ side now fits well.** CO₂ at 2024 is **422.2 ppm against ~424 observed** (uncalibrated
+defaults gave 467.8). Ocean sink 2014–23 **3.26 vs GCB 3.19** GtC/yr; land sink 2.98 vs 2.47
+(high, but inside the deliberately inflated land-sink uncertainty).
+
+**The ¹⁴C side does not, and the new plausibility screen caught it.** `run_modefind.R` now
+reports each parameter's position in its own prior's tail and flags |z| > 3. Three fired:
+
+| flagged | mode | z | reading |
+|---|---|---|---|
+| `bomb_total` | **151.2 kmol** | **+4.60σ** | prior is lnorm(log 102, 0.10) from Naegler & Levin's citable 99.3–104.9 kmol. The fit wants **48 % more bomb ¹⁴C than was produced.** |
+| `sigma_d14c` | 45.8 ‰ | +3.01σ | the Δ¹⁴C error term inflating to absorb a poor fit |
+| `q10` | 4.14 | +3.46σ | right sign at last, but well above the ~1.5–2.5 usually quoted for soil respiration |
+
+Δ¹⁴C residuals: NH rms **47 ‰** overall, **69 ‰ inside the 1960–70 bomb window**, against a
+bomb-window mean bias of only −5.3 ‰. So inflating `bomb_total` has fixed the LEVEL and left the
+SHAPE wrong — which is the failure mode the 2026-08-10 handoff §2 predicted ("treat any
+posterior shift in those specifically as suspect until the join is resolved").
+
+Two independent diagnostics point the same way and are almost certainly the same defect:
+
+- **Natural ¹⁴C production solves to 382 mol/yr against the canonical ~545** (ratio 0.70) — and
+  this is the free validation the spinup was built to provide (see spinup.R's header).
+- **Deep-ocean Δ¹⁴C is −104 ‰ against an observed −150 to −200 ‰** — the deep ocean is too well
+  ventilated, consistent with `kz` sitting at +1.45σ and `h_ml` at a thin 37.7 m.
+
+**PRODUCTION MCMC NOT LAUNCHED.** Sampling for 2.6 h around a mode whose bomb source is 48 %
+above a tightly-constrained citable prior would produce a posterior whose ¹⁴C-derived quantities
+— which is to say the ocean ventilation timescale, the thing ¹⁴C is in the model *for* — are not
+believable. Flagged for Marcus rather than resolved: the candidates are the residual bomb-shape
+problem at the Part A/B join, the ¹⁴C bookkeeping between production and inventory, and the ocean
+grid, and choosing among them is a modelling decision.

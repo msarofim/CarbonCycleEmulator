@@ -6,3 +6,39 @@ restart  3: log-post =      -2385.0  (gain     1.6108)  evals 37252
 restart  4: log-post =      -2378.9  (gain     6.1019)  evals 56537
 restart  5: log-post =      -2376.6  (gain     2.2878)  evals 67330
 restart  6: log-post =      -2369.8  (gain     6.7635)  evals 82216
+restart  7: log-post =      -2362.5  (gain     7.2620)  evals 102218
+restart  8: log-post =      -2361.3  (gain     1.2707)  evals 114707
+restart  9: log-post =      -2360.9  (gain     0.3574)  evals 130464
+restart 10: log-post =      -2360.3  (gain     0.6096)  evals 144977
+restart 11: log-post =      -2359.8  (gain     0.4496)  evals 155896
+restart 12: log-post =      -2359.8  (gain     0.0400)  evals 163719
+BFGS polish: log-post = -2359.3 (gain 0.5456)
+
+prior-tail position of the mode (normal sds; |z| > 3 flagged):
+         beta           q10           k_w          h_ml            kz 
+         0.23          3.46          2.01         -1.69          1.45 
+       tau_ex   npp_frac_NH   seas_amp_NH   seas_amp_SH seas_phase_NH 
+        -0.83          1.49          0.93          1.05         -0.43 
+seas_phase_SH    gamma_enso      tau_soil    bomb_total     sigma_co2 
+         1.32         -0.28         -0.77          4.60         -2.13 
+   sigma_d13c    sigma_d14c 
+        -0.79          3.01 
+*** FLAGGED, needs an explanation before this mode is used:  q10, bomb_total, sigma_d14c 
+integrator substeps needed at the mode: 4 (floor 4) -- kz = 8354
+hessian: central differences, 17 parameters
+Laplace covariance: PD, condition number 8.29e+04
+
+mode log-post = -2359.3  (gain over init 23639.8)
+elapsed 126.4 min, 164635 posterior evaluations (0.046 s/eval)
+
+mode, natural scale:
+         beta           q10           k_w          h_ml            kz 
+       0.8863        4.1431     2950.4836       37.6821     8354.1385 
+       tau_ex   npp_frac_NH   seas_amp_NH   seas_amp_SH seas_phase_NH 
+       0.9422        0.7726       18.4322        4.1422        3.9946 
+seas_phase_SH    gamma_enso      tau_soil    bomb_total     sigma_co2 
+      10.8870        0.8453       15.1387      151.2454        0.3011 
+   sigma_d13c    sigma_d14c 
+       0.0511       45.8402 
+
+wrote calibration/output/mode_fit.rds
