@@ -291,26 +291,110 @@ and a single diffusive column can only produce one intermediate value.
 
 **The sharp version of the hypothesis: a single `kz` is being asked to serve two processes that
 are different in the real ocean.** Bomb-¹⁴C penetration is decadal, thermocline, surface-
-intensified. Natural deep ¹⁴C age is millennial and set by overturning. The fit resolved the
-conflict in favour of the bomb window — which now carries most of the likelihood weight — and
-left the deep ocean too young. That predicts exactly the symptom we have: the thermocline
-over-ventilates, the atmosphere loses bomb ¹⁴C too fast, and the fit compensates by injecting
-**48 % more bomb ¹⁴C than was produced**.
-
-Consistent with this: `h_ml` sits at a thin **37.7 m** and `kz` at **+1.45σ**.
-
-Where the bomb ¹⁴C ends up by 2024, paired (with-source minus without):
-
-| | kmol |
-|---|---|
-| atmosphere | 12.5 |
-| land | 30.3 |
-| **ocean** | **110.0** |
-| total surviving | 152.8 (source 151.2; the rest decayed) |
-
-**72 % of surviving bomb ¹⁴C is in the ocean.**
+intensified. Natural deep ¹⁴C age is millennial and set by overturning. **This was tested and
+is CONFIRMED** — see §6.4.
 
 ---
+
+## 6.4 THE CHEAP CHECKS, RUN (2026-08-11)
+
+`calibration/profile_kz_ventilation.R` was written for a full conditional profile but is too
+slow to be the first tool (~28 min per `kz`; 16 free parameters × 3 Nelder-Mead restarts).
+Two cheaper experiments answered the question. Both are in scratch, results below.
+
+### (a) The ventilation map — no fitting required
+
+Deep-ocean Δ¹⁴C at spinup is a function of the ventilation parameters alone, so it can be
+mapped directly. Over `kz` ∈ [250, 16000] × `h_ml` ∈ [30, 200]:
+
+- **Deep Δ¹⁴C depends on `kz` essentially alone.** `h_ml` moves it < 5 ‰ across its whole range.
+- **The observed −150 to −200 ‰ is reached at `kz` ≈ 3000–4000** (−202 and −166). The mode's
+  `kz` = 8354 gives −104. **The fit put `kz` roughly 2× above the deep-ocean-matching value.**
+- **Ocean carbon is 32,827 GtC at EVERY cell** — invariant to both parameters. This settles
+  §6.3(a)/(b): the inventory shortfall is structural (uniform DIC from the zero-flux condition
+  of pure diffusion, i.e. no biological pump) and **no ventilation retune can touch it**.
+  The ¹⁴C production ratio never exceeds 0.72 anywhere on the map.
+
+### (b) The trade-off — CONFIRMS the single-`kz` conflict
+
+At each fixed `kz`, re-optimising the parameters that can compensate
+(`k_w`, `h_ml`, `bomb_total`, `sigma_d14c`, `sigma_co2`, `beta`, `q10`):
+
+| kz | logpost | deep Δ¹⁴C | prod/canon | **bomb_total** | bomb-win rms | CO₂ rms |
+|---|---|---|---|---|---|---|
+| 2000 | −2649.2 | −268.0 | 0.62 | **153.1** | 126.6 | 0.99 |
+| 3000 | −2516.9 | −202.1 | 0.65 | **154.1** | 94.4 | 0.98 |
+| 4000 | −2448.8 | −165.7 | 0.67 | **153.9** | 80.8 | 0.99 |
+| 6000 | −2383.1 | −127.1 | 0.69 | **151.7** | 68.2 | 0.98 |
+| 8354 *(mode)* | −2359.3 | −104.2 | 0.70 | **151.2** | 69.1 | 0.99 |
+
+**Deep Δ¹⁴C and the bomb window improve at opposite ends of `kz`.** Buying the observed deep
+ocean costs **~90 log-units** and takes bomb-window rms from 69 to 81–94 ‰. One diffusivity
+cannot serve both the decadal transient and the millennial age. **The fix is structural — an
+advective term or a second ventilation timescale — not a retune.**
+
+Note also that `k_w` swings 6808 → 3348 across the table: the optimiser trades surface exchange
+against deep mixing to hold total ocean bomb uptake roughly fixed, because that is what the
+observed atmospheric decline requires.
+
+### (c) CORRECTION to §6.3 — `bomb_total` is NOT driven by ventilation
+
+**My earlier claim that over-ventilation causes the 48 % bomb inflation is wrong.**
+`bomb_total` sits at **151–154 kmol at every `kz` in the table**, including `kz` = 2000 where
+the ocean is far less ventilated. Ventilation does not explain it.
+
+Pinning `bomb_total` at the citable 102 kmol and re-optimising everything else:
+
+| | bomb_total | NH peak Δ¹⁴C | bomb-win rms | ocean/land/atm bomb ¹⁴C |
+|---|---|---|---|---|
+| mode (free) | 151.2 | **960.9 ‰** | 69.1 | 110.0 / 30.3 / 12.5 kmol |
+| pinned at 102 | 102.0 | **638.3 ‰** | 191.9 | 74.4 / 20.2 / 8.6 kmol |
+| **observed** | 99.3–104.9 | **853.2 ‰** | — | — |
+
+**The model OVERSHOOTS the observed peak by 108 ‰ at its fitted total, and UNDERSHOOTS by
+215 ‰ at the correct total.** It cannot match the observed curve at any bomb total. The fit
+chooses to overshoot the peak in order to fit the rest of the decline; pinning the correct
+total costs **116 log-units** and triples the bomb-window rms.
+
+That is the signature of a **wrong delivery time-shape**, not a wrong sink — and it is exactly
+the caveat left open on 2026-08-10: *"a 4.5× one-month step survives at the Part A/B join in
+1963.04 — inside this window"*. The bomb source is now the prime suspect for `bomb_total`,
+independently of everything the ocean is doing.
+
+### (d) The land: `tau_veg` is an uncalibrated constant sitting on a real tension
+
+`tau_veg` is **fixed at 10 yr and is not in `CCX_PARAM_TABLE`**. It is not innocuous:
+
+| tau_veg | bomb-win rms | CO₂ rms | land bomb ¹⁴C |
+|---|---|---|---|
+| 3 yr | **59.5** | **11.98 ppm** | 22.0 kmol |
+| 5 yr | 62.4 | 7.98 | 24.5 |
+| **10 yr (assumed)** | 69.1 | **0.99** | 30.3 |
+| 20 yr | 76.6 | 10.68 | 40.5 |
+| 40 yr | 83.2 | 21.86 | 53.7 |
+
+**The vegetation turnover CO₂ wants is not the one ¹⁴C wants.** This is where Marcus's
+GPP/NPP question actually lands — not in the fast autotrophic-respiration loop of §6.2, whose
+magnitude is second-order, but in the *pool turnover* that sets how much bomb ¹⁴C the land
+absorbs. It should be freed and calibrated rather than assumed.
+
+### (e) The ocean bomb-¹⁴C inventory — BLOCKED on literature access
+
+The model says **110.0 kmol in the ocean by 2024** (72 % of surviving bomb ¹⁴C). The observed
+value could not be sourced: Naegler & Levin 2006 (AGU) returns HTTP 402, and the abstract of
+Mouchet (2013), *Radiocarbon* **55**(3):1580–1594, doi:10.1017/S0033822200048505 — "The Ocean
+Bomb Radiocarbon Inventory Revisited" — carries no numbers.
+
+**A caution that came out of that abstract anyway:** *"large discrepancies exist among
+data-based estimates and model reconstructions of the ocean bomb radiocarbon inventory"*, and
+observation-based estimates that lack information about CO₂ invasion are **underestimates**
+(supporting Naegler 2009). So this check is less sharp than hoped — the target itself has
+method spread of order 10 % or more, and any constraint built from it must carry that.
+
+**What is needed:** the ocean bomb ¹⁴C inventory at a stated epoch, in 10²⁶ atoms / kmol / mol,
+with its uncertainty, and ideally the ocean/biosphere/atmosphere partition from Naegler &
+Levin 2006. Marcus has offered institutional access — same route as the Scripps files, which
+are hand-supplied and tracked in git because `download_data.R` cannot regenerate them.
 
 ## 7. What to do next, in order
 
@@ -318,24 +402,25 @@ Where the bomb ¹⁴C ends up by 2024, paired (with-source minus without):
 48 % above a tightly-constrained citable prior gives a posterior whose ¹⁴C-derived ocean
 ventilation — the thing ¹⁴C is in the model *for* — is not believable.
 
-1. **Get the observed ocean bomb-¹⁴C inventory (GLODAP / Naegler & Levin 2006) into the repo.**
-   This is the single most discriminating measurement and it is already on the open-items list
-   from 2026-08-10. The model says **110 kmol in the ocean by 2024**. If the observed inventory
-   is materially lower, the over-ventilation hypothesis is confirmed directly and `bomb_total`'s
-   inflation is revealed as compensation. Cheap, decisive, and it settles §6.3 without any
-   modelling change.
-2. **Promote deep-ocean Δ¹⁴C from a free check to a likelihood constraint** and refit. If `kz`
-   is forced down to fit it and the bomb window and `bomb_total` get *worse*, the single-`kz`
-   conflict is confirmed and the fix is structural — an advective term, or a second ventilation
-   timescale — not a retuning. This is the test that distinguishes "wrong parameters" from
-   "wrong model", which is exactly what is in doubt.
-3. **Address the ocean carbon inventory** (the biological pump, or at minimum a prescribed
+**Both cheap checks are now done (§6.4).** Revised order:
+
+1. **Re-open the bomb delivery SHAPE.** §6.4(c) says `bomb_total`'s +4.6σ is a source problem,
+   not a sink one — the model cannot match the observed Δ¹⁴C curve at any total. Start with the
+   Part A/B join at 1963.04 that 2026-08-10 left unresolved. This is the single highest-value
+   item and it is independent of the ocean work.
+2. **Free `tau_veg`** into `CCX_PARAM_TABLE` (§6.4(d)). It is an uncalibrated constant sitting
+   directly on a CO₂-vs-¹⁴C tension. Cheap; do it before anything structural, so the structural
+   diagnosis is not absorbing an avoidable parameter error.
+3. **Decide on the ocean structure.** §6.4(b) confirms one `kz` cannot serve both timescales.
+   The options are an explicit advective overturning loop (already in DESIGN §10's v2 backlog)
+   or a second ventilation timescale. This is a design decision for Marcus, not a fix.
+4. **Address the ocean carbon inventory** (the biological pump, or at minimum a prescribed
    DIC-vs-depth profile). Watch whether ¹⁴C production moves from 382 toward 545. Note this
    also touches the provisional `OCEAN_DEPTH` / `ALK_SURFACE` constants.
-4. **Only then** the GPP/autotrophic-respiration loop (§6.2), if a shape misfit survives. It is
+5. **Only then** the GPP/autotrophic-respiration loop (§6.2), if a shape misfit survives. It is
    a cheap addition — a fast two-way land exchange with a lag parameter — but doing it before
-   the ocean work risks tuning it to absorb an ocean error.
-5. **Then** production MCMC: 50k × 4, gate on **R̂ < 1.05 AND ESS ≥ 400**. At 0.046 s/eval that
+   the bomb-shape work risks tuning it to absorb a source error.
+6. **Then** production MCMC: 50k × 4, gate on **R̂ < 1.05 AND ESS ≥ 400**. At 0.046 s/eval that
    is ~2.6 h. The app picks up `calibration/output/posterior_draws.rds` automatically and
    switches its banner to "calibrated posterior".
 

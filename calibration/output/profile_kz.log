@@ -1,0 +1,5 @@
+profiling kz over 500, 1000, 2000, 4000, 8354, 16000, 32000
+mode is kz = 8354, logpost -2359.3
+
+kz    500 | logpost   -2835.2 | deep D14C  -635.7 | prod   240 (0.44x) | bomb_total  111.9 | bombwin rms  42.1 | CO2 rms  0.99 | ocean bomb  32.0 kmol | 21.4 min
+kz   1000 | logpost   -2728.6 | deep D14C  -471.1 | prod   288 (0.53x) | bomb_total  115.6 | bombwin rms  46.3 | CO2 rms  0.99 | ocean bomb  39.2 kmol | 19.0 min
