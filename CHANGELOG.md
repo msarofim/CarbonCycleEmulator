@@ -1274,3 +1274,68 @@ Handoff §7 steps 2 and 3 swap places, and step 6 is no longer optional. The lan
 third fast pool, or an explicit GPP/autotrophic-respiration loop — is now the highest-value work,
 and it is what freeing `tau_veg` was always standing in for. Test suite unchanged at
 **384 pass / 0 fail / 2 skip**; this session added a diagnostic and no model or likelihood code.
+
+## 2026-08-12 (night) — LUC debits the vegetation box; the model becomes carbon-conservative
+
+Marcus' decision on the open item from §5 of the 2026-08-12 handoff: **debit the vegetation
+box** — "physically cleanest, but changes the land carbon trajectory and so the CO₂ fit."
+Branch `luc-veg-debit`, **not merged**: two guard tests fail (below).
+
+`R/model.R:226` and `src/ccx_core.cpp` — land-use change stops being an `add_source()` and
+becomes `add_flux(iveg, iatm, e_luc)`. Fossil carbon stays a source: geology *is* outside the
+modelled system. LUC never was.
+
+`d13c_bio` (−25 ‰, "provisional") is **removed from both cores and from `ccx_cpp_par()`**:
+`add_flux` carries the vegetation box's own emergent ¹³C ratio, so the prescribed value has no
+remaining use. Clearing a forest does not fractionate, so `alpha13 = 1`. Historical `e_luc` is
+strictly positive (min 0.68, max 2.41 GtC/yr over 3300 months), so the transfer never reverses;
+a comment records that a negative scenario value would transfer at the atmosphere's ratio
+*without* the photosynthetic fractionation it should carry.
+
+**The model is now carbon-conservative, and was not before.** Total carbon change 1750→2024 is
+**503.79 GtC against 504.67 GtC of cumulative fossil input — residual −0.88 GtC** (0.2 %, a
+one-step `cumsum` alignment). Previously the same run created **321.6 GtC** of land-use carbon
+out of nothing, alongside the ~28 kmol of ¹⁴C.
+
+### It costs the old mode everything, and that is recoverable
+
+The pre-change mode scores **−2374.1 → −56,349.7**, almost all of it `co2_level_MLO` (−26,748)
+and `co2_level_SPO` (−24,664). CO₂ at 2020 falls from a good fit to **372.8 ppm against ~414
+observed**. The mechanism is second-order and expected: the atmosphere receives the same LUC
+carbon either way, but the vegetation box now *pays* for it, so litterfall and heterotrophic
+respiration both fall while `npp0` does not — the land becomes a far stronger net sink.
+
+A 1-D scan over `beta` with everything else held at the stale mode:
+
+| `beta` | CO₂ @2020 | logpost | land C 2024 |
+|---|---|---|---|
+| 0.00 | 449.9 | −27,048.8 | 1363 |
+| 0.10 | 436.1 | −11,981.8 | 1414 |
+| 0.20 | 424.1 | **−6,216.3** | 1459 |
+| 0.30 | **413.7** | −6,617.8 | 1499 |
+| 0.40 | 404.6 | −11,095.4 | 1533 |
+| 0.883 (mode) | 372.8 | −56,349.7 | 1656 |
+
+**This is the fix removing an implausible parameter, not breaking a good one.** The old mode
+needed `beta = 0.883` — far above the literature range for the log formulation — precisely
+because 321.6 GtC of phantom carbon had to be absorbed by *something*. With the leak closed,
+β ≈ 0.25–0.30 reproduces CO₂ @2020 to ~0.3 ppm, and everything else in the vector is still tuned
+for the old bookkeeping. A full mode-find has not been run.
+
+### Two guard tests fail, and they are right to
+
+`test-likelihood.R:114` and `:117` ("a CO₂ level bias is expensive") assert that a +1 ppm bias
+costs > 100 log-units; `cost(1)` is now **−534.6**, i.e. +1 ppm *improves* the fit. The fixture
+uses `ccx_default_params()`, whose `beta = 0.40` now leaves CO₂ ~12 ppm low. **The tests are
+detecting a stale default parameter set, not a likelihood loophole** — the AR(1) pathology they
+were written to catch has not returned. Per the standing rule they have **not** been modified or
+skipped. Resolving them means re-centring `ccx_default_params()` on the new bookkeeping, which is
+a decision, not a fix. Suite: **382 pass / 2 fail / 2 skip**.
+
+### An inconsistency this exposes
+
+The debit removes vegetation *carbon* but not vegetation *productive capacity*: `npp` is
+`npp0 * (1 + beta ln(chi/chi0))`, so clearing a forest does not reduce NPP and the land
+over-recovers. Options are to tie NPP to the veg stock (`npp0 * veg/veg0 * ...`), or to accept it
+and let `beta` absorb it — which is what the scan above is doing. **Not resolved**; it should be
+settled as part of the land restructure, which changes the pool layout anyway.

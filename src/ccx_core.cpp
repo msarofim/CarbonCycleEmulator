@@ -47,7 +47,7 @@ struct Aux {
   double npp0[2], ml_mass_kg[2], asx[2], sst[2];
   double dz[NL + 1], dz_mid[NL];
   double alpha_photo, alpha_as_down, alpha_as_up;
-  double d13c_foss, d13c_bio, enso_share[2];
+  double d13c_foss, enso_share[2];
   double dic0[2], revelle0[2], pco2_0[2];   // preindustrial mixed-layer reference
   double bomb_share_NH, nuc_share_NH;
   double R13, R14STD, lambda, alk;
@@ -211,11 +211,12 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       }
     }
 
-    // prescribed emissions
-    const double cveg = y[IX(iveg, C)] > 1e-30 ? y[IX(iveg, C)] : 1e-30;
+    // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
+    // external to the modelled system; land-use change is not, so it is a
+    // TRANSFER out of the vegetation box (which carries veg's own 13C/14C
+    // ratios) rather than an external source that created 14C ex nihilo.
     add_source(iatm, f[hi], A.d13c_foss, -1000.0);
-    add_source(iatm, f[2 + hi], A.d13c_bio,
-               1000.0 * (y[IX(iveg, C14)] / cveg - 1.0));
+    add_flux(iveg, iatm, f[2 + hi], 1.0);
   }
 
   // interhemispheric, gross both ways
@@ -249,7 +250,7 @@ static Aux unpack_aux(const List& a) {
   v = a["pco2_0"];     A.pco2_0[0] = v[0];     A.pco2_0[1] = v[1];
   A.alpha_photo = a["alpha_photo"];
   A.alpha_as_down = a["alpha_as_down"]; A.alpha_as_up = a["alpha_as_up"];
-  A.d13c_foss = a["d13c_foss"]; A.d13c_bio = a["d13c_bio"];
+  A.d13c_foss = a["d13c_foss"];
   A.bomb_share_NH = a["bomb_share_NH"]; A.nuc_share_NH = a["nuc_share_NH"];
   A.R13 = a["R13"]; A.R14STD = a["R14STD"]; A.lambda = a["lambda"]; A.alk = a["alk"];
   v = a["cK0"]; for (int i = 0; i < 7; ++i) A.cK0[i] = v[i];

@@ -222,9 +222,20 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     }
 
     # ---- prescribed emissions ---------------------------------------
-    add_source(iatm, forc$e_foss[[h]], aux$d13c_foss, -1000)   # fossil: 14C-free
-    add_source(iatm, forc$e_luc[[h]],  aux$d13c_bio,
-               1000 * (y[iveg, "C14"] / max(y[iveg, "C"], 1e-30) - 1))
+    # Fossil carbon comes from OUTSIDE the modelled system (geology), so it is a
+    # true external source, and it is 14C-free.
+    add_source(iatm, forc$e_foss[[h]], aux$d13c_foss, -1000)
+    # Land-use change does NOT: it moves carbon that is already in the modelled
+    # biosphere. Emitting it with add_source() while leaving the vegetation box
+    # intact created carbon AND 14C ex nihilo -- ~28 kmol of 14C by 1995, 14-16 %
+    # of the system excess (diag_excess_c14.R [2], 2026-08-12). As a transfer it
+    # is conservative by construction, and add_flux carries veg's OWN 13C and 14C
+    # ratios, so the prescribed `d13c_bio` is no longer needed: clearing a forest
+    # does not fractionate, hence alpha13 = 1 (the default).
+    # NOTE: historical e_luc is strictly positive. Should a scenario ever supply a
+    # negative (net-regrowth) value, add_flux swaps the source correctly but the
+    # uptake would not carry the photosynthetic fractionation it should.
+    add_flux(iveg, iatm, forc$e_luc[[h]])
   }
 
   # ---- interhemispheric atmospheric exchange -------------------------
@@ -297,7 +308,9 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     alpha_as_down = 1 -  2 / 1000,   # provisional, kinetic (atm -> ocean)
     alpha_as_up   = 1 - 10 / 1000,   # provisional, equilibrium (ocean -> atm)
     d13c_foss   = -28,               # provisional
-    d13c_bio    = -25,               # provisional
+    # d13c_bio removed 2026-08-12: LUC is now a transfer out of the vegetation
+    # box, which carries its own emergent 13C ratio, so no prescribed value is
+    # needed. Fossil carbon still needs one -- geology is outside the model.
     dic0        = dic0,
     revelle0    = rev0,
     pco2_0      = list(NH = ccx_const("CO2_PI_PPM"), SH = ccx_const("CO2_PI_PPM")),

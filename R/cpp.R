@@ -43,7 +43,7 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     pco2_0 = c(aux$pco2_0$NH, aux$pco2_0$SH),
     alpha_photo = aux$alpha_photo,
     alpha_as_down = aux$alpha_as_down, alpha_as_up = aux$alpha_as_up,
-    d13c_foss = aux$d13c_foss, d13c_bio = aux$d13c_bio,
+    d13c_foss = aux$d13c_foss,
     bomb_share_NH = aux$bomb_share_NH, nuc_share_NH = aux$nuc_share_NH,
     R13 = ccx_const("R13_VPDB"), R14STD = ccx_const("R14_STD"),
     lambda = ccx_const("LAMBDA_C14"), alk = ccx_const("ALK_SURFACE"),
