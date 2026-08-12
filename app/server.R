@@ -247,7 +247,8 @@ function(input, output, session) {
       seas_amp_SH = "Southern seasonal amplitude",
       seas_phase_NH = "Northern seasonal timing",
       seas_phase_SH = "Southern seasonal timing",
-      gamma_enso = "ENSO carbon sensitivity", tau_soil = "Soil turnover time",
+      gamma_enso = "ENSO carbon sensitivity",
+      tau_soil_fast = "Responsive soil turnover time",
       bomb_total = "Total bomb ¹⁴C released",
       sigma_co2 = "CO₂ mismatch allowance", sigma_d13c = "δ¹³C mismatch allowance",
       sigma_d14c = "Δ¹⁴C mismatch allowance")
@@ -255,7 +256,7 @@ function(input, output, session) {
               tau_ex = "yr", npp_frac_NH = "—", seas_amp_NH = "GtC/yr",
               seas_amp_SH = "GtC/yr", seas_phase_NH = "month",
               seas_phase_SH = "month", gamma_enso = "GtC/yr per index unit",
-              tau_soil = "yr", bomb_total = "kmol", sigma_co2 = "ppm",
+              tau_soil_fast = "yr", bomb_total = "kmol", sigma_co2 = "ppm",
               sigma_d13c = "‰", sigma_d14c = "‰")
     v <- vapply(nm, function(n) {
       x <- APP_PARAMS[[n]]

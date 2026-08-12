@@ -291,7 +291,7 @@ ccx_run <- function(spin, F, substeps = "auto") {
   n <- nrow(F)
   atmN <- aux$idx$NH$atm; atmS <- aux$idx$SH$atm
   ocean <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$ml, aux$idx[[h]]$oc)))
-  land  <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$veg, aux$idx[[h]]$soil)))
+  land  <- unlist(lapply(HEMIS, function(h) aux$idx[[h]]$land))
 
   atm   <- c(atmN, atmS)
   # 14C reservoir inventories, in STATE units ("GtC carrying standard 14C

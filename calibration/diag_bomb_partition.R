@@ -22,11 +22,19 @@
 # N&L's Table 4 model partition sums exactly to their cumulative bomb input,
 # i.e. theirs is a paired difference too (established in diag_excess_c14.R [3]).
 #
-# CAVEAT carried from diag_excess_c14.R [2]: land-use-change emissions inject
-# 14C ex nihilo into the ATMOSPHERE at the vegetation box's own ratio. The
-# paired part of that leak is measured in [C] below, because it inflates the
-# model's atmospheric number -- so any atmospheric DEFICIT reported here is a
-# lower bound on the true one.
+# ANSWERED, 2026-08-12. It is a partition error, and it is now CLOSED. The
+# biosphere ran 51-58 % long and the troposphere 40-44 % short at both years;
+# the four-pool land (R/model.R) leaves the biosphere at +0 % / +10 %. What
+# survives is the delivery error alone, ~6-7 %, which was always the ceiling on
+# what a re-shaped source could repair. The shape work in the handoff was, as
+# this script suspected, misdirected until the partition was fixed.
+#
+# STALE CAVEAT, REMOVED. Earlier versions warned that land-use-change emissions
+# injected 14C ex nihilo into the atmosphere, so the atmospheric deficit was a
+# lower bound. That leak was fixed in commit 98c1783 -- LUC is now a transfer
+# out of a vegetation pool and is conservative by construction. [C] still
+# measures the flux, because it still moves 14C between the rows of [A], but it
+# is no longer an error term.
 #
 # Run from the repo root:  Rscript calibration/diag_bomb_partition.R
 # =====================================================================
@@ -46,7 +54,7 @@ PART_MODE_FILE   <- file.path("calibration", "output", "mode_fit.rds")
 PART_NL_SOURCE   <- "naegler_levin_2006_t4_YANG"   # their model partition
 PART_NL_OBS_TROP <- "naegler_levin_2006_t4_OBS"    # the one observed row
 PART_NL_OBS_OCN  <- "naegler_levin_2006_t2_peacock_corr"
-PART_LUC_CORE    <- "reference"        # the LUC-leak measurement needs the veg
+PART_LUC_CORE    <- "reference"        # the LUC flux measurement needs the wood
                                        # box's own 14C ratio, which the fast
                                        # core does not export; the R reference
                                        # core is stepped by hand in [C].
@@ -153,25 +161,37 @@ for (y in PART_REF_YEARS) {
               y, o_b$land_C[i], NL_BIOSPHERE_PGC,
               100 * (o_b$land_C[i] / NL_BIOSPHERE_PGC - 1)))
 }
-cat(sprintf("  model land is a SERIAL cascade atm -> veg (tau_veg %.0f yr)"       , p$tau_veg))
-cat(sprintf(" -> soil (tau_soil %.0f yr) -> atm,\n", p$tau_soil))
-cat("  with NO fast autotrophic-respiration return: every atom taken up by NPP\n")
-cat(sprintf("  is locked for tau_veg + tau_soil = %.0f yr before it can come back.\n",
-            p$tau_veg + p$tau_soil))
+cat("  model land is FOUR pools (2026-08-12), the structure the 51-58 % biosphere\n")
+cat("  excess above forced -- one responsive soil pool could not hold N&L's carbon\n")
+cat("  and their 14C at the same time (diag_land_topology.R):\n")
+cat(sprintf("    leaf %.0f%% of NPP @ %.0f yr | wood %.0f%% @ %.0f yr\n",
+            100 * p$npp_leaf_frac, p$tau_leaf,
+            100 * (1 - p$npp_leaf_frac), p$tau_wood))
+cat(sprintf("    soil %.0f%% of litter @ %.0f yr | %.0f%% @ %.0f yr (passive)\n",
+            100 * (1 - p$litter_slow_frac), p$tau_soil_fast,
+            100 * p$litter_slow_frac, p$tau_soil_slow))
+cat("  Fast pools cycle the bomb 14C straight back; the passive pool holds carbon\n")
+cat("  while barely seeing the bomb. That separation is what closes the partition.\n")
 
 # =====================================================================
-# [C] How much of the atmospheric number is the LUC 14C leak?
+# [C] How much 14C does LUC move from the land to the atmosphere?
 # =====================================================================
-# The leak enters the ATMOSPHERE, so it inflates the model's atmospheric
-# inventory and the [A] deficit is a lower bound. Its PAIRED size is
-#   int e_luc * (r_veg[bomb] - r_veg[no bomb]) dt,
-# which needs the vegetation box's own ratio -- exported by neither core, so
-# the R reference core is stepped by hand here.
-cat("\n=== [C] the paired part of the LUC 14C leak (inflates the atmosphere) ===\n")
+# THIS IS NO LONGER A LEAK. It was one until commit 98c1783, when LUC was an
+# add_source() into the atmosphere with the vegetation box left intact, so the
+# 14C came from nowhere. It is now a TRANSFER out of the wood pool and is
+# conservative by construction. What is measured here is therefore a real
+# internal flux, not an error -- but it still moves 14C from the biosphere row
+# of [A] into the troposphere row, so its size is worth carrying. Its PAIRED
+# part is
+#   int e_luc * (r_wood[bomb] - r_wood[no bomb]) dt,
+# which needs the wood box's own ratio -- exported by neither core, so the R
+# reference core is stepped by hand here.
+cat("\n=== [C] 14C carried out of the wood pool by LUC (a transfer, not a leak) ===\n")
 luc_c14_cum <- function(F) {
   y <- sp$y; aux <- sp$aux; grid <- sp$grid; pp <- sp$params
   substeps <- ccx_resolve_substeps("auto", pp, grid)
-  ivegN <- aux$idx$NH$veg; ivegS <- aux$idx$SH$veg
+  # LUC debits the WOOD pool (2026-08-12), so it is wood's ratio that rides out
+  ivegN <- aux$idx$NH$wood; ivegS <- aux$idx$SH$wood
   dt <- 1 / 12
   cum <- numeric(nrow(F)); acc <- 0
   for (i in seq_len(nrow(F))) {
@@ -191,14 +211,17 @@ for (y in PART_REF_YEARS) {
   d <- part[[as.character(y)]]
   cat(sprintf("  %d  total LUC-injected %6.2f kmol, of which PAIRED %5.2f kmol\n",
               y, ccx_c14_kmol(lb[i]), paired))
-  cat(sprintf("        -> atmospheric deficit %+.2f would be %+.2f without it\n",
+  cat(sprintf("        -> troposphere row %+.2f would be %+.2f without it\n",
               d["atm"], d["atm"] - paired))
 }
 
 cat("\n=== bottom line ===\n")
-cat("  Both errors are real, and they are an order of magnitude apart. The model\n")
-cat("  has delivered ~7-8 % more than N&L by each reference year -- a genuine but\n")
-cat("  small timing error, the most a re-shaped source could ever repair. Inside\n")
-cat("  that budget the troposphere is 40-44 % short and the biosphere 51-58 % long,\n")
-cat("  in the SAME direction at both years, twenty years apart. Re-timing the\n")
-cat("  delivery moves 14C between years; it cannot move it between reservoirs.\n")
+cat("  THE PARTITION ERROR IS CLOSED. It was the reason this script existed: a\n")
+cat("  biosphere 51-58 % long and a troposphere 40-44 % short, in the same\n")
+cat("  direction at both reference years, which no re-timing of the source could\n")
+cat("  reach. The four-pool land (2026-08-12) leaves the biosphere at +0 % / +10 %.\n")
+cat("  WHAT REMAINS IS THE DELIVERY ERROR, and only that: the model has delivered\n")
+cat("  ~6-7 % more than N&L by each reference year. That was always the ceiling on\n")
+cat("  what a re-shaped source could repair, and it is now the whole residual.\n")
+cat("  Numbers above are at ccx_default_params(): the four-pool land has NOT been\n")
+cat("  calibrated, so read the partition, not the absolute level.\n")

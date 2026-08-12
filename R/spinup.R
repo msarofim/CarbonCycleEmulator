@@ -49,10 +49,21 @@ ccx_spinup <- function(p = ccx_default_params(),
     i <- aux$idx[[h]]
     y[i$atm, "C"] <- chi0 * aux$gtc_per_ppm_hemi
 
-    # land: dC_veg/dt = NPP - C_veg/tau_veg = 0 ; dC_soil/dt = C_veg/tau_veg - C_soil/tau_soil = 0
+    # LAND, four pools. Each is filled at its own share of NPP and drains at its
+    # own turnover, so every fixed point is share * NPP * tau:
+    #   leaf      npp_leaf_frac * NPP,            drains in tau_leaf
+    #   wood      (1 - npp_leaf_frac) * NPP,      drains in tau_wood
+    # total litter is then NPP again (both vegetation pools are at steady state),
+    # split by litter_slow_frac between the two soil pools:
+    #   soil_fast (1 - litter_slow_frac) * NPP,   drains in tau_soil_fast
+    #   soil_slow litter_slow_frac * NPP,         drains in tau_soil_slow
+    # aux$veg0 (model.R) must keep matching leaf + wood here EXACTLY, or the
+    # capacity term makes this state stop being a fixed point of the derivative.
     npp0 <- aux$npp0[[h]]
-    y[i$veg,  "C"] <- npp0 * p$tau_veg
-    y[i$soil, "C"] <- npp0 * p$tau_soil
+    y[i$leaf, "C"] <- npp0 * p$npp_leaf_frac * p$tau_leaf
+    y[i$wood, "C"] <- npp0 * (1 - p$npp_leaf_frac) * p$tau_wood
+    y[i$soil_fast, "C"] <- npp0 * (1 - p$litter_slow_frac) * p$tau_soil_fast
+    y[i$soil_slow, "C"] <- npp0 * p$litter_slow_frac * p$tau_soil_slow
 
     # ocean: mixed layer in Henry equilibrium with the atmosphere; the interior
     # is at uniform CONCENTRATION, so C_k scales with layer thickness (this is
@@ -132,7 +143,11 @@ ccx_spinup <- function(p = ccx_default_params(),
       d14c_deep_ocean   = 1000 * (sum(y[deep_idx, "C14"]) / sum(y[deep_idx, "C"]) - 1),
       ocean_C_GtC       = sum(y[ocean_idx, "C"]),
       land_C_GtC        = sum(y[unlist(lapply(HEMIS, function(h)
-                            c(aux$idx[[h]]$veg, aux$idx[[h]]$soil))), "C"]),
+                            aux$idx[[h]]$land)), "C"]),
+      veg_C_GtC         = sum(y[unlist(lapply(HEMIS, function(h)
+                            c(aux$idx[[h]]$leaf, aux$idx[[h]]$wood))), "C"]),
+      soil_slow_C_GtC   = sum(y[unlist(lapply(HEMIS, function(h)
+                            aux$idx[[h]]$soil_slow)), "C"]),
       prod_c14_mol_yr   = prod,
       prod_canonical    = P_canon,
       prod_ratio        = prod / P_canon
@@ -156,7 +171,8 @@ ccx_report_spinup <- function(s) {
   cat(sprintf("  deep-ocean D14C      %+.1f permil  (free check: obs ~ -150 to -200)\n",
               d$d14c_deep_ocean))
   cat(sprintf("  ocean carbon         %.0f GtC\n", d$ocean_C_GtC))
-  cat(sprintf("  land carbon          %.0f GtC\n", d$land_C_GtC))
+  cat(sprintf("  land carbon          %.0f GtC  (vegetation %.0f, passive soil %.0f)\n",
+              d$land_C_GtC, d$veg_C_GtC, d$soil_slow_C_GtC))
   cat(sprintf("  natural 14C prod     %.0f mol/yr   vs canonical %.0f  (ratio %.2f)\n",
               d$prod_c14_mol_yr, d$prod_canonical, d$prod_ratio))
   invisible(d)

@@ -64,7 +64,22 @@ ccx_cpp_par <- function(p) {
   # reach the C++ with a missing name -- which unpacks as garbage, not an error.
   if (is.null(p$npp_veg_frac)) p$npp_veg_frac <- 0
   if (is.null(p$ra_ratio)) p$ra_ratio <- 0
-  p[c("beta", "q10", "tau_veg", "tau_soil", "k_w", "kz", "tau_ex",
+  # The four-pool land REPLACED tau_veg/tau_soil, so an older parameter list
+  # reaches here with the wrong names entirely. That is a structural mismatch,
+  # not a missing default -- fail loudly rather than silently substituting a
+  # land the caller did not ask for.
+  need <- c("npp_leaf_frac", "tau_leaf", "tau_wood",
+            "litter_slow_frac", "tau_soil_fast", "tau_soil_slow")
+  miss <- need[!need %in% names(p)]
+  if (length(miss)) {
+    extra <- if (any(c("tau_veg", "tau_soil") %in% names(p)))
+      " (it carries tau_veg/tau_soil: a PRE-4-POOL parameter list)" else ""
+    stop("parameter list is missing the land structure: ",
+         paste(miss, collapse = ", "), extra)
+  }
+  p[c("beta", "q10", "k_w", "kz", "tau_ex",
+      "npp_leaf_frac", "tau_leaf", "tau_wood",
+      "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
       "npp_veg_frac", "ra_ratio",
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH", "revelle_frozen")]

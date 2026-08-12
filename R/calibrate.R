@@ -35,8 +35,18 @@ CCX_PARAM_TABLE <- list(
                      prior = function(x) dunif(x, 0, 12, log = TRUE)),
   gamma_enso  = list(tr = "id",    init = 0.5,
                      prior = function(x) dnorm(x, 0, 2, log = TRUE)),
-  tau_soil    = list(tr = "log",   init = 25,
-                     prior = function(x) dlnorm(x, log(25), 0.5, log = TRUE)),
+  # LAND TURNOVER: exactly ONE degree of freedom, as before. `tau_soil` (init
+  # 25) was the single calibrated land timescale under the two-pool land; its
+  # direct analogue under the four-pool land is the RESPONSIVE soil pool, which
+  # is what sets the decadal land-sink response. The other five land-structure
+  # parameters (npp_leaf_frac, tau_leaf, tau_wood, litter_slow_frac,
+  # tau_soil_slow) are held FIXED because the layout was chosen against the
+  # Naegler & Levin bomb-14C partition (diag_land_topology.R), and letting the
+  # calibration move it would let a CO2 fit undo the partition fix that motivated
+  # the restructure. THIS IS A CHOICE, not a derivation -- widening it to the
+  # full layout is a decision for a later pass, and it would change the posterior.
+  tau_soil_fast = list(tr = "log", init = 2,
+                     prior = function(x) dlnorm(x, log(2), 0.5, log = TRUE)),
   # Total bomb 14C production, kmol, 1945-1980. Calibrated (as DESIGN intended),
   # with a CITABLE prior: Naegler & Levin (2006) give 99.3-104.9 kmol. Treating
   # it as free lets error in the still-provisional injection SHAPE be partly

@@ -2,10 +2,26 @@
 # model.R — two-hemisphere, monthly, 12C/13C/14C box carbon cycle model
 #
 # BOXES, per hemisphere h in {NH, SH}:
-#   atm            1  well-mixed troposphere
-#   veg, soil      2  effective responsive land pools
-#   ml + interior 11  ocean column: mixed layer + NL diffusive layers
-# = 14 boxes/hemisphere x 2 = 28; x 3 tracers = 84 states.
+#   atm                              1  well-mixed troposphere
+#   leaf, wood, soil_fast, soil_slow 4  land pools (see LAND STRUCTURE below)
+#   ml + interior                   11  ocean column: mixed layer + NL layers
+# = 16 boxes/hemisphere x 2 = 32; x 3 tracers = 96 states.
+#
+# LAND STRUCTURE. Four pools, not two, because two CANNOT hold the observed
+# carbon stock and the observed bomb-14C inventory at the same time. Naegler &
+# Levin (2006) Table 4 put 21.7 kmol of bomb 14C in a 2200 PgC biosphere at
+# 1975; a single vegetation pool of 600 GtC turning over in 10 yr holds ~20 kmol
+# by itself, so no soil layout underneath it can help, and re-tuning tau_soil
+# alone trades pool size against inventory without ever meeting both
+# (diag_land_structure.R [4], diag_land_topology.R [2], 2026-08-12).
+#
+#   atm --NPP--> leaf (tau ~1 yr)  --.
+#            \-> wood (tau ~20 yr) --+--litter--> soil_fast (tau ~2 yr)  --Rh--> atm
+#                                    \                soil_slow (tau ~500 yr) --Rh-> atm
+#
+# Fast pools cycle the bomb 14C straight back; the large passive soil pool holds
+# carbon while barely seeing the bomb. That separation is the whole point of the
+# structure -- collapsing any pair of pools reinstates the defect.
 #
 # TRACERS. All three are carried as MASSES so the budget is linear:
 #   C    total carbon, GtC
@@ -33,10 +49,15 @@ HEMIS      <- c("NH", "SH")
 # ---------------------------------------------------------------------
 # State layout
 # ---------------------------------------------------------------------
-#' Names of the 28 boxes, in state order
+#' Land pool names, in state order. The C++ core hard-codes this order and this
+#' count as a stride (src/ccx_core.cpp), so it is a structural constant, not a
+#' presentational one.
+CCX_LAND_POOLS <- c("leaf", "wood", "soil_fast", "soil_slow")
+
+#' Names of the 32 boxes, in state order
 ccx_box_names <- function(nl = N_INTERIOR) {
   unlist(lapply(HEMIS, function(h)
-    c(paste0(h, "_atm"), paste0(h, "_veg"), paste0(h, "_soil"),
+    c(paste0(h, "_atm"), paste0(h, "_", CCX_LAND_POOLS),
       paste0(h, "_ml"), paste0(h, "_oc", seq_len(nl)))))
 }
 
@@ -72,8 +93,24 @@ ccx_default_params <- function() {
   list(
     beta      = 0.40,     # CO2 fertilization, NPP = NPP0 (1 + beta ln(chi/chi0))
     q10       = 2.0,      # heterotrophic respiration temperature sensitivity
-    tau_veg   = 10,       # yr, vegetation turnover
-    tau_soil  = 25,       # yr, responsive soil turnover
+    # ---- land pool structure ------------------------------------------
+    # Defaults chosen by diag_land_topology.R [3], the layout of lowest misfit
+    # against BOTH of Naegler & Levin's biosphere targets at once -- 2200 PgC of
+    # carbon and 21.7 / 18.9 kmol of bomb 14C at 1975 / 1995. It lands at
+    # 2130 GtC and 21.2 / 17.4 kmol, 5.2 % RMS, with pool sizes that are
+    # independently defensible: vegetation 516 GtC, responsive soil 114 GtC,
+    # passive soil 1500 GtC. The scan surface is FLAT (0.60/30/0.04 and
+    # 0.70/40/0.04 both sit near 6 %), so these are a defensible centre and not
+    # a knife-edge optimum -- do not treat them as fitted values.
+    npp_leaf_frac = 0.60, # share of NPP allocated to leaves and fine roots;
+                          # the rest goes to wood
+    tau_leaf  = 1,        # yr, leaf and fine-root turnover
+    tau_wood  = 20,       # yr, woody biomass turnover
+    litter_slow_frac = 0.05,  # share of total litter entering the PASSIVE soil
+                          # pool; the rest enters the responsive one
+    tau_soil_fast = 2,    # yr, responsive soil turnover
+    tau_soil_slow = 500,  # yr, passive soil turnover -- long enough that the
+                          # pool holds carbon without seeing the bomb spike
     npp_veg_frac = 0.5,   # phi: fraction of NPP that scales with the standing
                           # vegetation stock (the rest is stock-independent), so
                           # that clearing a forest costs capacity and not only
@@ -177,8 +214,10 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
 
   for (hi in seq_along(HEMIS)) {
     h    <- HEMIS[hi]
-    iatm <- aux$idx[[h]]$atm; iveg <- aux$idx[[h]]$veg
-    isol <- aux$idx[[h]]$soil; iml <- aux$idx[[h]]$ml
+    iatm <- aux$idx[[h]]$atm
+    ilef <- aux$idx[[h]]$leaf; iwod <- aux$idx[[h]]$wood
+    isf  <- aux$idx[[h]]$soil_fast; iss <- aux$idx[[h]]$soil_slow
+    iml  <- aux$idx[[h]]$ml
     ioc  <- aux$idx[[h]]$oc
 
     chi <- y[iatm, "C"] / aux$gtc_per_ppm_hemi          # ppm in this hemisphere
@@ -194,17 +233,27 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     # to it. It is NOT partial for stability.
     #
     # A DECOUPLED STABILITY ARGUMENT FOR phi < 1/f WAS WRONG, and the correction
-    # is worth keeping. Spinup sets veg0 = npp0 * tau_veg exactly (spinup.R:54),
-    # so growth and litter loss are both linear in veg with equal coefficients at
-    # chi = chi0, and the veg coefficient is (phi*f - 1)/tau_veg with
-    # f = 1 + beta ln(chi/chi0). That predicts divergence for phi*f > 1. It does
-    # not happen: diag_land_structure.R [1] runs phi up to 1.10 (phi*f = 1.25)
-    # and every case is stable, because chi is NOT exogenous -- a growing veg
-    # pool draws CO2 down, which lowers f, which is a negative feedback the
-    # fixed-chi algebra omits. CO2 at 2024 falls monotonically 413.7 -> 322.2 ppm
-    # across that scan, which is the feedback doing the work.
+    # is worth keeping. Under the previous SINGLE vegetation pool, spinup set
+    # veg0 = npp0 * tau_veg exactly, so the veg coefficient was (phi*f - 1)/tau_veg
+    # and the algebra predicted divergence for phi*f > 1. It did not happen:
+    # diag_land_structure.R [1] ran phi up to 1.10 (phi*f = 1.25) and every case
+    # was stable, because chi is NOT exogenous -- a growing vegetation pool draws
+    # CO2 down, which lowers f, a negative feedback the fixed-chi algebra omits.
+    # With TWO vegetation pools the decoupled coefficient on wood is
+    #   (1 - npp_leaf_frac) * f * phi / (npp_leaf_frac * tau_leaf
+    #                                    + (1 - npp_leaf_frac) * tau_wood)
+    #   - 1 / tau_wood,
+    # i.e. the same shape and the same order of magnitude, and the same CO2
+    # feedback still sits underneath it.
     # Do not reinstate a hard phi bound without re-running that diagnostic.
-    capacity <- (1 - p$npp_veg_frac) + p$npp_veg_frac * y[iveg, "C"] / aux$veg0[[h]]
+    #
+    # CAPACITY IS KEYED ON TOTAL STANDING VEGETATION, leaf plus wood, against the
+    # same total at spinup. Keying it on wood alone would make the fast leaf pool
+    # invisible to the feedback; keying it on leaf alone would make LUC -- which
+    # debits wood -- cost no capacity at all, which is the thing the term exists
+    # to prevent.
+    veg_C <- y[ilef, "C"] + y[iwod, "C"]
+    capacity <- (1 - p$npp_veg_frac) + p$npp_veg_frac * veg_C / aux$veg0[[h]]
     npp <- aux$npp0[[h]] * capacity * (1 + p$beta * log(max(chi, 1e-6) / aux$chi0))
 
     # GROSS PHOTOSYNTHESIS AND AUTOTROPHIC RESPIRATION. `ra_ratio` is Ra/NPP, so
@@ -224,30 +273,58 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     # source box's ratio, i.e. the second case -- so ra_ratio is the fraction of
     # GPP that genuinely cycles THROUGH the vegetation pool, and Marcus' two
     # regimes are its endpoints (0 = null loop, literature Ra/NPP = upper bound).
-    # Leaf growth-and-decay is NOT this flux: it is already the veg -> soil ->
+    # Leaf growth-and-decay is NOT this flux: it is already the leaf -> soil ->
     # atm cascade below, lagged rather than equilibrating.
     #
-    # Default 0 reproduces the previous model exactly. The value is for the 14C
+    # APPLIED PER VEGETATION POOL, at each pool's own share of NPP, so the
+    # returning carbon carries the ratio of the pool it actually came from.
+    # Routing the whole loop through one pool would let wood's lagged ratio leak
+    # into a flux that is physically leaf-dominated.
+    #
+    # Default 0 reproduces a model with no gross loop. The value is for the 14C
     # data to choose, not for this file to assume.
-    ra <- npp * p$ra_ratio
-    add_flux(iatm, iveg, npp + ra, alpha13 = aux$alpha_photo)   # GPP
-    add_flux(iveg, iatm, ra)                                    # Ra, at veg's ratio
+    npp_leaf <- npp * p$npp_leaf_frac
+    npp_wood <- npp * (1 - p$npp_leaf_frac)
+    ra_leaf  <- npp_leaf * p$ra_ratio
+    ra_wood  <- npp_wood * p$ra_ratio
+    add_flux(iatm, ilef, npp_leaf + ra_leaf, alpha13 = aux$alpha_photo)  # GPP, leaf
+    add_flux(ilef, iatm, ra_leaf)                                        # Ra, at leaf's ratio
+    add_flux(iatm, iwod, npp_wood + ra_wood, alpha13 = aux$alpha_photo)  # GPP, wood
+    add_flux(iwod, iatm, ra_wood)                                        # Ra, at wood's ratio
 
-    litter <- y[iveg, "C"] / p$tau_veg
-    add_flux(iveg, isol, litter)
+    # LITTER. Both vegetation pools shed into the SAME two soil pools, split by
+    # litter_slow_frac. The split is applied to each source separately rather
+    # than to a pooled total, because the two sources carry different 14C ratios
+    # and pooling them first would average those ratios before the split.
+    lit_leaf <- y[ilef, "C"] / p$tau_leaf
+    lit_wood <- y[iwod, "C"] / p$tau_wood
+    add_flux(ilef, isf, lit_leaf * (1 - p$litter_slow_frac))
+    add_flux(ilef, iss, lit_leaf * p$litter_slow_frac)
+    add_flux(iwod, isf, lit_wood * (1 - p$litter_slow_frac))
+    add_flux(iwod, iss, lit_wood * p$litter_slow_frac)
 
-    rh <- (y[isol, "C"] / p$tau_soil) * p$q10^(forc$gmst / 10)
-    add_flux(isol, iatm, rh)
+    # HETEROTROPHIC RESPIRATION, both soil pools, same q10. The passive pool's
+    # temperature sensitivity is not separately identified by anything the model
+    # is calibrated against, so it shares the parameter rather than inventing a
+    # second one that the data cannot constrain.
+    q10f <- p$q10^(forc$gmst / 10)
+    add_flux(isf, iatm, (y[isf, "C"] / p$tau_soil_fast) * q10f)
+    add_flux(iss, iatm, (y[iss, "C"] / p$tau_soil_slow) * q10f)
 
     # ---- seasonal NEP: zero annual integral, amplitude scales with NPP
+    # Routed through the LEAF pool: the seasonal drawdown is foliage growth and
+    # senescence, which is what that pool is.
     amp   <- if (h == "NH") p$seas_amp_NH else p$seas_amp_SH
     phase <- if (h == "NH") p$seas_phase_NH else p$seas_phase_SH
     seas  <- amp * sin(2 * pi * (t - phase / 12)) * (npp / aux$npp0[[h]])
-    add_flux(iatm, iveg, seas, alpha13 = aux$alpha_photo)
+    add_flux(iatm, ilef, seas, alpha13 = aux$alpha_photo)
 
     # ---- ENSO: land -> atmosphere anomaly (El Nino = source) ---------
+    # Out of the RESPONSIVE soil pool. The interannual anomaly is drought and
+    # fire-driven respiration of recently fixed carbon, not a draw on the
+    # millennial passive pool.
     if (aux$enso_share[[h]] != 0) {
-      add_flux(isol, iatm, p$gamma_enso * forc$enso * aux$enso_share[[h]])
+      add_flux(isf, iatm, p$gamma_enso * forc$enso * aux$enso_share[[h]])
     }
 
     # ---- air-sea ----------------------------------------------------
@@ -284,13 +361,19 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     # biosphere. Emitting it with add_source() while leaving the vegetation box
     # intact created carbon AND 14C ex nihilo -- ~28 kmol of 14C by 1995, 14-16 %
     # of the system excess (diag_excess_c14.R [2], 2026-08-12). As a transfer it
-    # is conservative by construction, and add_flux carries veg's OWN 13C and 14C
-    # ratios, so the prescribed `d13c_bio` is no longer needed: clearing a forest
-    # does not fractionate, hence alpha13 = 1 (the default).
+    # is conservative by construction, and add_flux carries the source pool's OWN
+    # 13C and 14C ratios, so the prescribed `d13c_bio` is no longer needed:
+    # clearing a forest does not fractionate, hence alpha13 = 1 (the default).
+    #
+    # IT COMES OUT OF WOOD (Marcus 2026-08-12). Deforestation removes standing
+    # woody biomass, so that is the pool that should pay -- and it is the pool
+    # whose 14C ratio the emitted carbon should carry, which is more lagged than
+    # the leaf pool's. Debiting leaf, or debiting both pro rata, would let the
+    # fast pool absorb clearing it does not physically suffer.
     # NOTE: historical e_luc is strictly positive. Should a scenario ever supply a
     # negative (net-regrowth) value, add_flux swaps the source correctly but the
     # uptake would not carry the photosynthetic fractionation it should.
-    add_flux(iveg, iatm, forc$e_luc[[h]])
+    add_flux(iwod, iatm, forc$e_luc[[h]])
   }
 
   # ---- interhemispheric atmospheric exchange -------------------------
@@ -322,12 +405,17 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
 # ---------------------------------------------------------------------
 ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   bn  <- ccx_box_names(grid$nl)
-  idx <- lapply(HEMIS, function(h) list(
-    atm  = which(bn == paste0(h, "_atm")),
-    veg  = which(bn == paste0(h, "_veg")),
-    soil = which(bn == paste0(h, "_soil")),
-    ml   = which(bn == paste0(h, "_ml")),
-    oc   = which(bn %in% paste0(h, "_oc", seq_len(grid$nl)))))
+  idx <- lapply(HEMIS, function(h) {
+    v <- list(
+      atm  = which(bn == paste0(h, "_atm")),
+      ml   = which(bn == paste0(h, "_ml")),
+      oc   = which(bn %in% paste0(h, "_oc", seq_len(grid$nl))))
+    for (pool in CCX_LAND_POOLS) v[[pool]] <- which(bn == paste0(h, "_", pool))
+    # every land index in state order, for the callers that want the land as a
+    # whole (spinup diagnostics, forcing.R's budget split)
+    v$land <- unlist(v[CCX_LAND_POOLS], use.names = FALSE)
+    v
+  })
   names(idx) <- HEMIS
 
   a_oc <- list(NH = ccx_const("OCEAN_AREA_NH"), SH = ccx_const("OCEAN_AREA_SH"))
@@ -350,10 +438,12 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     chi0        = ccx_const("CO2_PI_PPM"),
     mol_per_GtC = ccx_const("MOL_C_PER_GtC"),
     npp0        = npp0,
-    # preindustrial standing vegetation, the reference for the NPP capacity
-    # term. Must match ccx_spinup()'s land fixed point (spinup.R:54) exactly,
-    # or the spinup state stops being a fixed point of the derivative.
-    veg0        = lapply(npp0, function(n) n * p$tau_veg),
+    # preindustrial standing vegetation, LEAF PLUS WOOD, the reference for the
+    # NPP capacity term. Must match ccx_spinup()'s land fixed point exactly, or
+    # the spinup state stops being a fixed point of the derivative.
+    veg0        = lapply(npp0, function(n)
+                    n * (p$npp_leaf_frac * p$tau_leaf +
+                         (1 - p$npp_leaf_frac) * p$tau_wood)),
     sst         = list(NH = p$sst_NH, SH = p$sst_SH),
     ml_mass_kg  = lapply(a_oc, function(A) A * grid$h_ml * ccx_const("RHO_SEAWATER")),
     # air-sea prefactor: A [m2] * K0 [mol/(kg atm)] * rho [kg/m3] -> GtC/(yr uatm)

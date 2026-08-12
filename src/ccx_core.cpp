@@ -35,8 +35,12 @@
 #include <cmath>
 using namespace Rcpp;
 
-static const int NB = 28;          // boxes
+// Box layout, per hemisphere, in state order -- MUST match ccx_box_names():
+//   0 atm | 1 leaf | 2 wood | 3 soil_fast | 4 soil_slow | 5 ml | 6..15 interior
+static const int NPH = 16;         // boxes per hemisphere (the stride)
+static const int NB = 2 * NPH;     // boxes
 static const int NL = 10;          // ocean interior layers
+static const int IML = 5;          // mixed layer, relative to the hemisphere base
 static const int C = 0, C13 = 1, C14 = 2;
 
 // state is column-major [box + NB*tracer], matching R's matrix layout
@@ -58,7 +62,9 @@ struct Aux {
 };
 
 struct Par {
-  double beta, q10, tau_veg, tau_soil, k_w, kz, tau_ex;
+  double beta, q10, k_w, kz, tau_ex;
+  double npp_leaf_frac, tau_leaf, tau_wood;
+  double litter_slow_frac, tau_soil_fast, tau_soil_slow;
   double npp_veg_frac, ra_ratio;
   double sst_scale, gamma_enso;
   double seas_amp[2], seas_phase[2];
@@ -162,34 +168,51 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   const double gmst = f[4], enso = f[5];
 
   for (int hi = 0; hi < 2; ++hi) {
-    const int base = hi * 14;
-    const int iatm = base, iveg = base + 1, isol = base + 2, iml = base + 3;
+    const int base = hi * NPH;
+    const int iatm = base, ilef = base + 1, iwod = base + 2;
+    const int isf = base + 3, iss = base + 4, iml = base + IML;
 
     const double chi = y[IX(iatm, C)] / A.gtc_per_ppm_hemi;
 
-    // land -- see R/model.R for what npp_veg_frac and ra_ratio mean, including
-    // why the decoupled phi < 1/f stability bound does NOT hold (the CO2
-    // feedback stabilises it). Association order mirrors the R exactly (parity).
+    // land, four pools -- see R/model.R for the structure and for what
+    // npp_veg_frac and ra_ratio mean, including why the decoupled phi < 1/f
+    // stability bound does NOT hold (the CO2 feedback stabilises it).
+    // Association order mirrors the R exactly (parity).
     const double chi_safe = (chi > 1e-6) ? chi : 1e-6;
+    const double veg_C = y[IX(ilef, C)] + y[IX(iwod, C)];
     const double capacity = (1.0 - P.npp_veg_frac)
-                            + P.npp_veg_frac * y[IX(iveg, C)] / A.veg0[hi];
+                            + P.npp_veg_frac * veg_C / A.veg0[hi];
     const double npp = A.npp0[hi] * capacity * (1.0 + P.beta * std::log(chi_safe / A.chi0));
-    const double ra = npp * P.ra_ratio;
-    add_flux(iatm, iveg, npp + ra, A.alpha_photo);   // GPP
-    add_flux(iveg, iatm, ra, 1.0);                   // Ra, at veg's own ratio
 
-    const double litter = y[IX(iveg, C)] / P.tau_veg;
-    add_flux(iveg, isol, litter, 1.0);
+    const double npp_leaf = npp * P.npp_leaf_frac;
+    const double npp_wood = npp * (1.0 - P.npp_leaf_frac);
+    const double ra_leaf = npp_leaf * P.ra_ratio;
+    const double ra_wood = npp_wood * P.ra_ratio;
+    add_flux(iatm, ilef, npp_leaf + ra_leaf, A.alpha_photo);   // GPP, leaf
+    add_flux(ilef, iatm, ra_leaf, 1.0);                        // Ra, at leaf's ratio
+    add_flux(iatm, iwod, npp_wood + ra_wood, A.alpha_photo);   // GPP, wood
+    add_flux(iwod, iatm, ra_wood, 1.0);                        // Ra, at wood's ratio
 
-    const double rh = (y[IX(isol, C)] / P.tau_soil) * std::pow(P.q10, gmst / 10.0);
-    add_flux(isol, iatm, rh, 1.0);
+    // litter, split per SOURCE pool (the two carry different 14C ratios, so
+    // pooling before the split would average them -- see R/model.R)
+    const double lit_leaf = y[IX(ilef, C)] / P.tau_leaf;
+    const double lit_wood = y[IX(iwod, C)] / P.tau_wood;
+    add_flux(ilef, isf, lit_leaf * (1.0 - P.litter_slow_frac), 1.0);
+    add_flux(ilef, iss, lit_leaf * P.litter_slow_frac, 1.0);
+    add_flux(iwod, isf, lit_wood * (1.0 - P.litter_slow_frac), 1.0);
+    add_flux(iwod, iss, lit_wood * P.litter_slow_frac, 1.0);
 
+    const double q10f = std::pow(P.q10, gmst / 10.0);
+    add_flux(isf, iatm, (y[IX(isf, C)] / P.tau_soil_fast) * q10f, 1.0);
+    add_flux(iss, iatm, (y[IX(iss, C)] / P.tau_soil_slow) * q10f, 1.0);
+
+    // seasonal NEP through the leaf pool; ENSO out of the responsive soil pool
     const double seas = P.seas_amp[hi] * std::sin(2.0 * M_PI * (t - P.seas_phase[hi] / 12.0))
                         * (npp / A.npp0[hi]);
-    add_flux(iatm, iveg, seas, A.alpha_photo);
+    add_flux(iatm, ilef, seas, A.alpha_photo);
 
     if (A.enso_share[hi] != 0.0)
-      add_flux(isol, iatm, P.gamma_enso * enso * A.enso_share[hi], 1.0);
+      add_flux(isf, iatm, P.gamma_enso * enso * A.enso_share[hi], 1.0);
 
     // air-sea, gross both ways
     const double sst = A.sst[hi] + P.sst_scale * gmst;
@@ -208,8 +231,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 
     // interior diffusion, per tracer on its own gradient
     for (int kk = 0; kk < NL; ++kk) {
-      const int a = (kk == 0) ? iml : (base + 3 + kk);
-      const int b = base + 4 + kk;
+      const int a = base + IML + kk;
+      const int b = base + IML + kk + 1;
       for (int tr = 0; tr < 3; ++tr) {
         const double Ft = P.kz * (y[IX(a, tr)] / A.dz[kk] - y[IX(b, tr)] / A.dz[kk + 1])
                           / A.dz_mid[kk];
@@ -220,21 +243,21 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
     // external to the modelled system; land-use change is not, so it is a
-    // TRANSFER out of the vegetation box (which carries veg's own 13C/14C
-    // ratios) rather than an external source that created 14C ex nihilo.
+    // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
+    // rather than an external source that created 14C ex nihilo.
     add_source(iatm, f[hi], A.d13c_foss, -1000.0);
-    add_flux(iveg, iatm, f[2 + hi], 1.0);
+    add_flux(iwod, iatm, f[2 + hi], 1.0);
   }
 
   // interhemispheric, gross both ways
-  add_flux(0, 14, y[IX(0, C)] / P.tau_ex, 1.0);
-  add_flux(14, 0, y[IX(14, C)] / P.tau_ex, 1.0);
+  add_flux(0, NPH, y[IX(0, C)] / P.tau_ex, 1.0);
+  add_flux(NPH, 0, y[IX(NPH, C)] / P.tau_ex, 1.0);
 
   // 14C sources and decay
   const double c14_to_state = 1.0 / (A.mol_per_GtC * A.R14STD);
-  dy[IX(0, C14)]  += (f[6] * A.bomb_share_NH + f[7] * A.nuc_share_NH
+  dy[IX(0, C14)]   += (f[6] * A.bomb_share_NH + f[7] * A.nuc_share_NH
                       + f[8] * 0.5) * c14_to_state;
-  dy[IX(14, C14)] += (f[6] * (1.0 - A.bomb_share_NH) + f[7] * (1.0 - A.nuc_share_NH)
+  dy[IX(NPH, C14)] += (f[6] * (1.0 - A.bomb_share_NH) + f[7] * (1.0 - A.nuc_share_NH)
                       + f[8] * 0.5) * c14_to_state;
   for (int i = 0; i < NB; ++i) dy[IX(i, C14)] -= A.lambda * y[IX(i, C14)];
 }
@@ -274,7 +297,10 @@ static Aux unpack_aux(const List& a) {
 static Par unpack_par(const List& p) {
   Par P;
   P.beta = p["beta"]; P.q10 = p["q10"];
-  P.tau_veg = p["tau_veg"]; P.tau_soil = p["tau_soil"];
+  P.npp_leaf_frac = p["npp_leaf_frac"];
+  P.tau_leaf = p["tau_leaf"]; P.tau_wood = p["tau_wood"];
+  P.litter_slow_frac = p["litter_slow_frac"];
+  P.tau_soil_fast = p["tau_soil_fast"]; P.tau_soil_slow = p["tau_soil_slow"];
   P.npp_veg_frac = p["npp_veg_frac"]; P.ra_ratio = p["ra_ratio"];
   P.k_w = p["k_w"]; P.kz = p["kz"]; P.tau_ex = p["tau_ex"];
   P.sst_scale = p["sst_scale"]; P.gamma_enso = p["gamma_enso"];
@@ -318,19 +344,23 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
   std::vector<double> f(9);
   for (int i = 0; i < n; ++i) {
     out(i, 0) = y[IX(0, C)] / gpp;
-    out(i, 1) = y[IX(14, C)] / gpp;
+    out(i, 1) = y[IX(NPH, C)] / gpp;
     out(i, 2) = 1000.0 * (y[IX(0, C13)] / (y[IX(0, C)] * A.R13) - 1.0);
-    out(i, 3) = 1000.0 * (y[IX(14, C13)] / (y[IX(14, C)] * A.R13) - 1.0);
+    out(i, 3) = 1000.0 * (y[IX(NPH, C13)] / (y[IX(NPH, C)] * A.R13) - 1.0);
     out(i, 4) = 1000.0 * (y[IX(0, C14)] / y[IX(0, C)] - 1.0);
-    out(i, 5) = 1000.0 * (y[IX(14, C14)] / y[IX(14, C)] - 1.0);
+    out(i, 5) = 1000.0 * (y[IX(NPH, C14)] / y[IX(NPH, C)] - 1.0);
     double oc = 0.0, ld = 0.0, oc14 = 0.0, ld14 = 0.0, at14 = 0.0;
     for (int hi = 0; hi < 2; ++hi) {
-      const int base = hi * 14;
-      ld += y[IX(base + 1, C)] + y[IX(base + 2, C)];
-      for (int kk = 3; kk < 14; ++kk) oc += y[IX(base + kk, C)];
+      const int base = hi * NPH;
       at14 += y[IX(base, C14)];
-      ld14 += y[IX(base + 1, C14)] + y[IX(base + 2, C14)];
-      for (int kk = 3; kk < 14; ++kk) oc14 += y[IX(base + kk, C14)];
+      for (int kk = 1; kk < IML; ++kk) {          // the four land pools
+        ld   += y[IX(base + kk, C)];
+        ld14 += y[IX(base + kk, C14)];
+      }
+      for (int kk = IML; kk < NPH; ++kk) {        // mixed layer + interior
+        oc   += y[IX(base + kk, C)];
+        oc14 += y[IX(base + kk, C14)];
+      }
     }
     out(i, 6) = oc; out(i, 7) = ld;
     out(i, 8) = oc14; out(i, 9) = ld14; out(i, 10) = at14;

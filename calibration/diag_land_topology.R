@@ -167,11 +167,19 @@ cat(sprintf("peak excess Delta14C   model %+.0f / %+.0f permil (NH/SH)   obs %+.
 # ---------------------------------------------------------------------
 # [1] Validate the emulator against the full model, current topology
 # ---------------------------------------------------------------------
-cat("=== [1] emulator vs full model, CURRENT topology (veg tau 10 -> soil tau 25) ===\n")
+cat("=== [1] emulator vs full model, on the CURRENT land parameters ===\n")
 npp0    <- sp$aux$npp0
-topo_now <- ccx_topo("current 2-pool",
-                     veg  = list(list(share = 1, tau = p$tau_veg)),
-                     soil = list(list(share = 1, tau = p$tau_soil)))
+# Derived from ccx_default_params(), not restated, so this validation cannot go
+# stale against a land structure that has moved underneath it.
+topo_now <- ccx_topo(
+  "current",
+  veg  = list(list(share = p$npp_leaf_frac,     tau = p$tau_leaf),
+              list(share = 1 - p$npp_leaf_frac, tau = p$tau_wood)),
+  soil = list(list(share = 1 - p$litter_slow_frac, tau = p$tau_soil_fast),
+              list(share = p$litter_slow_frac,     tau = p$tau_soil_slow)))
+cat(sprintf("  leaf %.2f @ %.0f yr | wood %.2f @ %.0f yr | soil %.2f @ %.0f yr + %.2f @ %.0f yr\n",
+            p$npp_leaf_frac, p$tau_leaf, 1 - p$npp_leaf_frac, p$tau_wood,
+            1 - p$litter_slow_frac, p$tau_soil_fast, p$litter_slow_frac, p$tau_soil_slow))
 em_now  <- topo_excess_c14(topo_now, npp0, drv_model)
 ok <- TRUE
 cat(sprintf("  %6s %12s %12s %9s %14s %14s\n",
@@ -183,7 +191,8 @@ for (y in TOPO_REF_YEARS) {
   rel  <- emu / full - 1
   ok   <- ok && abs(rel) <= TOPO_VALID_TOL
   cat(sprintf("  %6d %12.2f %12.2f %+8.1f %% %14.0f %14.0f\n",
-              y, full, emu, 100 * rel, o_b$land_C[i], topo_land_C(topo_now, 60)))
+              y, full, emu, 100 * rel, o_b$land_C[i],
+              topo_land_C(topo_now, ccx_const("NPP_GLOBAL_PI"))))
 }
 cat(sprintf("  -> %s at %.0f %% tolerance.\n",
             if (ok) "VALIDATED" else "FAILED -- do not use the scan below", 100 * TOPO_VALID_TOL))

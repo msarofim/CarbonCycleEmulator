@@ -22,8 +22,10 @@ test_state <- function(p = ccx_default_params()) {
   for (h in HEMIS) {
     i <- aux$idx[[h]]
     y[i$atm,  "C"] <- 300
-    y[i$veg,  "C"] <- 250
-    y[i$soil, "C"] <- 700
+    y[i$leaf, "C"] <- 30
+    y[i$wood, "C"] <- 220
+    y[i$soil_fast, "C"] <- 100
+    y[i$soil_slow, "C"] <- 600
     y[i$ml,   "C"] <- 400
     y[i$oc,   "C"] <- 1500 * grid$dz[-1] / sum(grid$dz[-1])
   }
@@ -75,7 +77,8 @@ test_that("14C decays at exactly the right rate with transport switched off", {
   # Isolate decay: no transport (kz=0, k_w=0, tau_ex=Inf, no land turnover)
   p <- ccx_default_params()
   p$kz <- 0; p$k_w <- 0; p$tau_ex <- 1e12; p$beta <- 0
-  p$tau_veg <- 1e12; p$tau_soil <- 1e12; p$gamma_enso <- 0
+  p$tau_leaf <- 1e12; p$tau_wood <- 1e12
+  p$tau_soil_fast <- 1e12; p$tau_soil_slow <- 1e12; p$gamma_enso <- 0
   p$seas_amp_NH <- 0; p$seas_amp_SH <- 0
   s <- test_state(p)
   y <- s$y; t <- 1900
