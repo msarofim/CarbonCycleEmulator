@@ -1522,3 +1522,50 @@ longer exist. `R/cpp.R` now errors on a pre-four-pool parameter list rather than
 substituting a land the caller did not ask for.
 
 Suite: **380 pass / 4 fail / 2 skip** — same count as the parent, different set.
+
+### Would a stratospheric layer help? — and a framing question it exposed
+
+`calibration/diag_stratosphere.R`, written to answer that, turned up something larger.
+
+**As a DELAY, no.** A one-way stratospheric reservoir of residence τ convolves the source with
+an exponential. No single τ reconciles the delivered sum at both reference years: the 1995
+column barely moves at any τ (+5.6 % from τ 0.5 to 3), because the source is over by 1980 and a
+one-way reservoir has emptied fifteen years later. τ ≈ 3 fixes 1975 exactly and does nothing for
+1995. **N&L's own stratosphere is not a delay line either** — holding 4.7 kmol in 1995 from
+8.6 kmol in 1975 needs τ ≈ **33 yr** against ~1–2 yr observed exchange, and their
+stratosphere/troposphere ratio *falls* 0.321 → 0.269, relaxing toward a **mass** ratio. It is a
+co-equilibrating reservoir carrying its share of the excess.
+
+**The framing question.** `diag_bomb_partition.R` compares the model's atmosphere box to N&L's
+troposphere alone, and removes their stratosphere from their total, because the bomb source is a
+delivery *rate to the troposphere*. **That argument is about timing; it says nothing about
+mass.** The box carries `GtC_PER_PPM = 2.124` — the whole atmosphere — while `likelihood.R` fits
+its Δ¹⁴C to surface stations. Its *inventory* is whole-atmosphere mass × tropospheric Δ¹⁴C, so
+the like-for-like target is troposphere **plus** stratosphere:
+
+| | A (current) | B (proposed) |
+|---|---|---|
+| atmosphere 1975 | +16.9 % | −11.5 % |
+| atmosphere 1995 | −9.1 % | −28.3 % |
+| SUM 1975 | +7.2 % | **−2.1 %** |
+| SUM 1995 | +5.6 % | **+0.7 %** |
+
+**Under B the budget closes** — the SUM error collapses to the model's own input excess over N&L
+(+2.8 % / +0.9 %; the model runs at 102 kmol against their decay-corrected 99.2 / 101.1). That is
+what a model which conserves ¹⁴C and is given a prescribed input *must* do, and a "+6–7 %
+delivery error" was never physically sensible for one — its apparent existence is what has been
+sending sessions after the bomb source shape. **Not changed; flagged for decision**, because B
+over-corrects at 1975 (N&L's stratosphere really was more enriched than their troposphere then).
+Reporting both framings and scoring on neither is probably right.
+
+**If B holds, the residual is a different defect**: atmosphere short (−11 / −28 %), ocean long
+(+4.7 / +8.6 %), biosphere fine. Too much bomb ¹⁴C into the ocean — a ventilation problem.
+
+**Which is also the real case FOR a stratospheric box**, from the other side: the model must
+satisfy *tropospheric* Δ¹⁴C observations with a box holding *whole-atmosphere* carbon, so during
+the spike it cannot hold the atmosphere's true inventory and the surplus is pushed into the
+ocean. Splitting the box lets the troposphere match observations while the stratosphere holds the
+enriched remainder — which predicts exactly that signature. It would **not** touch γ_L, the ocean
+carbon inventory, or the ¹⁴C production shortfall (a stratosphere adds <1 % of system inventory
+against a ~34 % gap). **Cost:** NB 32 → 34, *and* the bomb source rebuilt as an injection rate
+rather than a delivery rate, or the delay is double-counted. A package, not a box.

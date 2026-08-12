@@ -1,2 +1,4 @@
 start: log-post at hand-set init = -4530.7
        17 parameters: beta, q10, k_w, h_ml, kz, tau_ex, npp_frac_NH, seas_amp_NH, seas_amp_SH, seas_phase_NH, seas_phase_SH, gamma_enso, tau_soil_fast, bomb_total, sigma_co2, sigma_d13c, sigma_d14c
+restart  1: log-post =      -2388.8  (gain  2141.8766)  evals 11718
+restart  2: log-post =      -2331.2  (gain    57.6236)  evals 30156
