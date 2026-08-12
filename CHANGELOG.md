@@ -1660,3 +1660,87 @@ over 140 years via BGC−COU; ours is land carbon at 2100, q10 = 2 vs q10 = 1, c
 over GMST at 2100. Different protocol and different warming path. The comparison is fair as
 "this model's *total* carbon-climate feedback vs C4MIP's", because q10 is the only such pathway
 the model has — but it is not a protocol-matched number and should not be presented as one.
+
+## 2026-08-12 (later still, ii) — Ocean scoping: the ¹⁴C "production shortfall" is arithmetic, not a defect
+
+Mode-independent findings from scoping the ocean-ventilation item while the mode-find runs.
+Recorded now, separately from the ventilation scoping itself, because these do **not** depend on
+the new mode and one of them **corrects a claim already standing in this file**.
+
+### `prod_c14` is DERIVED, not fitted — the "34 % shortfall" mis-frames a diagnostic
+
+The queue carries "¹⁴C production **359** vs ~545 mol/yr — note it got *worse* with the new land,
+382 → 359, and is unexplained" as a large open defect. Measured at the 1750 steady state:
+
+```
+total 14C inventory   2955 kmol
+implied decay         359.3 mol/yr
+model prod_c14        359.3 mol/yr
+balance (decay/prod)  1.0000
+```
+
+**The model conserves ¹⁴C exactly.** `prod_c14` is whatever balances decay of the model's own
+carbon inventory at its own Δ¹⁴C distribution — it is a *readout of the inventory*, not an
+independent quantity that can be short. Scoring it against a cosmogenic production estimate
+compares two different things.
+
+**And 382 → 359 is the fix working, not a regression.** The four-pool land holds less ¹⁴C, so the
+inventory it must sustain is smaller. Reporting that as "it got worse" inverted the sign of the
+result.
+
+**Where the gap actually goes.** At 32,827 GtC ocean + 2,130 land + 589 atm = 35,546 GtC total.
+Raising the ocean to a realistic ~38,000 GtC gives ~40,700 GtC and **~410 mol/yr**, closing about
+a third of the gap (approximate: it assumes the added carbon enters at the current mean Δ¹⁴C,
+whereas a biological pump would add it *more* depleted, so the true figure is a little lower).
+Reaching 535 mol/yr would require a total inventory of **52,930 GtC, ~1.3× the real world** — so
+the residual is not something this model can absorb by fixing its ocean.
+
+**NOT CLOSED, and deliberately not.** The residual is a discrepancy between the carbon-inventory
+route and the cosmogenic-production route, and published production estimates span roughly
+1.6–2.5 atoms cm⁻² s⁻¹ (≈430–670 mol/yr). **Where the ~545 target came from has NOT been
+verified** — that provenance check is what would settle whether there is anything left to explain.
+Until then: item (h)'s production line is *mostly arithmetic*, not "large and unexplained", but it
+is not resolved.
+
+(Checked in passing and found correct: `T_HALF_C14` = 5700 ± 30 yr, the Cambridge-revised value
+used by IntCal and Hua et al. 2022, with `LAMBDA_C14` properly derived from it.)
+
+### Uniform DIC is EXPECTED, and is a different gap from the ventilation one
+
+"DIC exactly uniform with depth" is listed alongside the ocean carbon deficit as an anomaly. A
+pure-diffusion ocean with no biological pump and surface-only sources **must** homogenise at
+steady state — the uniformity is the *signature of the missing soft-tissue/carbonate pump*, which
+is also what makes the inventory ~16 % low. That is a **different missing structure** from the
+missing advection behind the ventilation item, and the two should not be merged into one "the
+ocean is too simple" task: they have different fixes and only one of them is gated on the mode.
+
+### State of the ventilation machinery (facts, not conclusions)
+
+- `R/model.R`'s interior transport is `add_diffusion` and **nothing else** — there is no advective
+  or overturning term. A single `kz` carries the whole column. (`tau_ex` is interhemispheric
+  *atmospheric* exchange, not ocean.) Grid: mixed layer `h_ml` over `N_INTERIOR` geometrically
+  graded layers, `growth = 1.4`.
+- `calibration/profile_kz_ventilation.R` already asks the right question and states its own
+  falsification criterion. It is **2 of 7 grid points complete**, those two on the superseded
+  two-pool land, and the results are in the quarantine at
+  `20260812_luc_debit_and_2pool_land/profile_kz.log`:
+
+  | kz | deep Δ¹⁴C | ocean bomb | bomb_total | bombwin rms |
+  |---|---|---|---|---|
+  | 500 | −635.7 ‰ | 32.0 kmol | 111.9 | 42.1 |
+  | 1000 | −471.1 ‰ | 39.2 kmol | 115.6 | 46.3 |
+  | 8354 (old mode) | −115 ‰ | — | 151 | — |
+  | *observed* | *−150 to −200* | | *99.3–104.9* | |
+
+- **It is hard-gated on the mode**: line 51 does `readRDS(.../mode_fit.rds)` unconditionally and
+  errors without it, and `PROF_KZ_GRID` is centred on the *old* mode's kz = 8354. Re-running it
+  before the new mode lands answers a superseded question at ~2.5 h of cost.
+- Two cautions for whoever runs it: the bomb-window RMS is **non-monotonic** in kz (42.1 at 500,
+  46.3 at 1000), so the grid is not a smooth single-optimum curve; and the profile is a
+  **conditional maximum, not a marginal** — the script says so, and it must not be quoted as a
+  likelihood.
+
+The mode-dependent half of the ocean scoping — whether one `kz` can serve both the decadal bomb
+penetration and the millennial deep age, and therefore whether the fix is a retune or a second
+ventilation pathway — is deliberately **not** written down yet. It turns on the new mode's `kz`,
+and at defaults the deep ocean is already −194.7 ‰, inside the observed range.
