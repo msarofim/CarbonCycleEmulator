@@ -385,3 +385,27 @@ biosphere column as a model intercomparison point, never as a target.
 **Reference values (kmol ¹⁴C):** ocean 40.7–56.5 at GEOSECS (1975) and 43.8–59.0 at WOCE (1995);
 troposphere 27 ± 1 and 17 ± 1; total bomb production 1945–1980 99.3–104.9 (already the
 `bomb_total` prior).
+
+**Parsed 2026-08-11** by `data-raw/build_calibration_data.R` §8 into `data/obs_excess_c14.rds`,
+which stores **two** candidate ocean target sets — `table4_obs_range` (the full Peacock-to-Key
+span; the default) and `table2_peacock` (one method, ~3× tighter). `LIK_EXCESS_C14_TARGET` picks
+by name. The choice is worth ~130 log-units and is **flagged, not settled** — see CHANGELOG
+2026-08-11 (night).
+
+**Third trap — our excess is not their excess unless the model's own ¹⁴C budget closes, and it
+does not.** N&L's Table 4 model partition sums *exactly* to their cumulative bomb input at both
+years, so it is a paired bomb-only difference. Ours, summed the same way, **exceeds the bomb
+input by 23.9 kmol at 1975 and 28.3 at 1995**. The cause is in `R/model.R`, not in the data:
+land-use-change emissions are emitted with `add_source()` at the **vegetation box's own ¹⁴C
+ratio** while the vegetation box is not debited, so 273 GtC of LUC carbon at Δ¹⁴C = +221 ‰ is a
+¹⁴C *source*. (Fossil carbon is emitted at Δ¹⁴C = −1000 and correctly carries none.) The ocean
+row survives this — bomb-only and total-minus-natural differ by 1–4 % there — but the **land row
+does not**, and the 2026-08-11 "our land holds 2–3× their biosphere" reading is corrected to
+~1.6× on the paired definition. `calibration/diag_excess_c14.R` reproduces all of it.
+
+**Units cross-check, done rather than assumed.** The troposphere row is the only one where N&L's
+number and ours meet with no model in between. Rebuilding the atmospheric excess from the CO₂ and
+Δ¹⁴C observations alone gives 37.3 kmol (1975) and 25.6 (1995) against their troposphere +
+stratosphere 35.6 and 21.7 — **+4.8 % and +18.0 %**, which is what
+`LIK_EXCESS_C14_REP_FRAC = 0.15` carries. Note their stratosphere is a *model* value, so part of
+the 1995 gap may be theirs rather than ours.

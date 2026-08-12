@@ -183,9 +183,13 @@ LIK_GCB_LAND_SD    <- 0.9            # GtC/yr, GCB stated land-sink uncertainty
 # (c) IS OUR kmol THE SAME kmol? Checked on the one row where N&L have real
 #     observations. Rebuilding the ATMOSPHERIC excess from the CO2 and D14C
 #     observations under this convention gives 37.3 kmol (1975) and 25.6 (1995)
-#     against their troposphere-plus-stratosphere 35.6 and 22.2: agreement to
-#     4.8 % and 15.3 %. That is the basis for LIK_EXCESS_C14_REP_FRAC below --
+#     against their troposphere-plus-stratosphere 35.6 and 21.7: agreement to
+#     +4.8 % and +18.0 %. That is the basis for LIK_EXCESS_C14_REP_FRAC below --
 #     it is a measured definitional/representation error, not a chosen one.
+#     The check is one-sided in one respect: their stratosphere is a MODEL value
+#     (only the troposphere row is observed), so part of the 1995 gap could be
+#     their stratosphere rather than our convention. That is a reason to carry
+#     the spread as uncertainty, not a reason to discount it.
 LIK_USE_EXCESS_C14 <- TRUE
 # WHICH observational target. The two sets differ by far more than the model
 # does between definitions, so this switch matters more than anything above:
@@ -207,7 +211,10 @@ LIK_EXCESS_C14_BASE_YEAR <- 1750
 # as a RANK-ONE common term across the two years rather than in quadrature per
 # year, because it is a method bias: it moves 1975 and 1995 together, and
 # treating it as independent would claim twice the information it carries.
-LIK_EXCESS_C14_REP_FRAC <- 0.10
+# Set to cover the measured +4.8 % / +18.0 % spread of note (c) -- above their
+# midpoint, deliberately, because only two comparisons exist and one of the two
+# is against a modelled stratosphere.
+LIK_EXCESS_C14_REP_FRAC <- 0.15
 
 #' Hemisphere-area weights for the Hua zones
 ccx_zone_weights <- function(nh_bounds = LIK_ZONE_BOUNDS_NH,

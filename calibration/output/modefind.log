@@ -1,44 +1,44 @@
-start: log-post at hand-set init = -25999.0
+start: log-post at hand-set init = -26005.8
        17 parameters: beta, q10, k_w, h_ml, kz, tau_ex, npp_frac_NH, seas_amp_NH, seas_amp_SH, seas_phase_NH, seas_phase_SH, gamma_enso, tau_soil, bomb_total, sigma_co2, sigma_d13c, sigma_d14c
-restart  1: log-post =      -2419.8  (gain 23579.2661)  evals 16778
-restart  2: log-post =      -2386.6  (gain    33.2089)  evals 31430
-restart  3: log-post =      -2385.0  (gain     1.6108)  evals 37252
-restart  4: log-post =      -2378.9  (gain     6.1019)  evals 56537
-restart  5: log-post =      -2376.6  (gain     2.2878)  evals 67330
-restart  6: log-post =      -2369.8  (gain     6.7635)  evals 82216
-restart  7: log-post =      -2362.5  (gain     7.2620)  evals 102218
-restart  8: log-post =      -2361.3  (gain     1.2707)  evals 114707
-restart  9: log-post =      -2360.9  (gain     0.3574)  evals 130464
-restart 10: log-post =      -2360.3  (gain     0.6096)  evals 144977
-restart 11: log-post =      -2359.8  (gain     0.4496)  evals 155896
-restart 12: log-post =      -2359.8  (gain     0.0400)  evals 163719
-BFGS polish: log-post = -2359.3 (gain 0.5456)
+restart  1: log-post =      -2396.7  (gain 23609.0560)  evals 19304
+restart  2: log-post =      -2382.5  (gain    14.2595)  evals 30676
+restart  3: log-post =      -2377.7  (gain     4.7291)  evals 49766
+restart  4: log-post =      -2376.5  (gain     1.2632)  evals 65616
+restart  5: log-post =      -2374.6  (gain     1.8470)  evals 82220
+restart  6: log-post =      -2374.5  (gain     0.1463)  evals 91867
+restart  7: log-post =      -2374.2  (gain     0.3104)  evals 106795
+restart  8: log-post =      -2374.1  (gain     0.0431)  evals 115775
+restart  9: log-post =      -2374.1  (gain     0.0117)  evals 129062
+restart 10: log-post =      -2374.1  (gain     0.0240)  evals 136097
+restart 11: log-post =      -2374.1  (gain     0.0061)  evals 144146
+restart 12: log-post =      -2374.1  (gain     0.0019)  evals 150634
+BFGS polish: log-post = -2374.1 (gain 0.0074)
 
 prior-tail position of the mode (normal sds; |z| > 3 flagged):
          beta           q10           k_w          h_ml            kz 
-         0.23          3.46          2.01         -1.69          1.45 
+         0.22          3.41          1.98         -1.71          1.43 
        tau_ex   npp_frac_NH   seas_amp_NH   seas_amp_SH seas_phase_NH 
-        -0.83          1.49          0.93          1.05         -0.43 
+        -0.79          1.51          0.93          1.04         -0.43 
 seas_phase_SH    gamma_enso      tau_soil    bomb_total     sigma_co2 
-         1.32         -0.28         -0.77          4.60         -2.13 
+         1.32         -0.28         -0.74          4.54         -2.14 
    sigma_d13c    sigma_d14c 
-        -0.79          3.01 
+        -0.75          3.01 
 *** FLAGGED, needs an explanation before this mode is used:  q10, bomb_total, sigma_d14c 
-integrator substeps needed at the mode: 4 (floor 4) -- kz = 8354
+integrator substeps needed at the mode: 4 (floor 4) -- kz = 8267
 hessian: central differences, 17 parameters
-Laplace covariance: PD, condition number 8.29e+04
+Laplace covariance: PD, condition number 7.69e+04
 
-mode log-post = -2359.3  (gain over init 23639.8)
-elapsed 126.4 min, 164635 posterior evaluations (0.046 s/eval)
+mode log-post = -2374.1  (gain over init 23631.7)
+elapsed 118.8 min, 151536 posterior evaluations (0.047 s/eval)
 
 mode, natural scale:
          beta           q10           k_w          h_ml            kz 
-       0.8863        4.1431     2950.4836       37.6821     8354.1385 
+       0.8833        4.0933     2920.5743       37.3240     8266.5917 
        tau_ex   npp_frac_NH   seas_amp_NH   seas_amp_SH seas_phase_NH 
-       0.9422        0.7726       18.4322        4.1422        3.9946 
+       0.9521        0.7737       18.4149        4.1143        3.9911 
 seas_phase_SH    gamma_enso      tau_soil    bomb_total     sigma_co2 
-      10.8870        0.8453       15.1387      151.2454        0.3011 
+      10.8747        0.8410       15.3996      149.8143        0.2992 
    sigma_d13c    sigma_d14c 
-       0.0511       45.8402 
+       0.0527       45.8574 
 
 wrote calibration/output/mode_fit.rds

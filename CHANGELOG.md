@@ -1023,3 +1023,98 @@ above a tightly-constrained citable prior would produce a posterior whose ¹⁴C
 believable. Flagged for Marcus rather than resolved: the candidates are the residual bomb-shape
 problem at the Part A/B join, the ¹⁴C bookkeeping between production and inventory, and the ocean
 grid, and choosing among them is a modelling decision.
+
+## 2026-08-11 (night) — The ocean excess-¹⁴C constraint, and a ¹⁴C source nobody declared
+
+Handoff §7 step 1: put the Naegler & Levin (2006) ocean inventory into the likelihood, because
+every other ¹⁴C term is atmospheric and an atmospheric decline can be bought with a bigger bomb
+source instead of a faster sink. Done — and validating the definition first turned up a
+separate defect that changes one of 2026-08-11's conclusions.
+
+### The constraint
+
+`data-raw/build_calibration_data.R` now parses `data-raw/manual/naegler_levin_2006_budget.csv`
+into `data/obs_excess_c14.rds`; `ccx_loglik()` gains `excess_c14_ocean`. Both cores emit
+`ocean_C14` / `land_C14` / `atm_C14` (state units — kmol is the likelihood's business), gated by
+`test-parity.R`. Tests **371 → 384 pass**, 0 fail, 2 skip.
+
+**The natural baseline is free.** The run's first row *is* the 1750 steady state by
+construction, so no counterfactual run is needed and the posterior evaluation stays at
+**0.046 s**. Measured against the expensive alternative — a full no-fossil/no-LUC/no-bomb/
+no-nuclear counterfactual carrying the observed GMST and ENSO — the two differ by **0.27 kmol
+(1975) and 0.58 (1995)**, under 1 % of the excess against a ~16 kmol observational spread.
+Removing the climate forcing as well reproduces the spinup state to 0.003 kmol, which is the
+fixed point behaving as it must.
+
+**The units were checked before the term was trusted**, on the one row where N&L have real
+observations. Rebuilding the *atmospheric* excess from the CO₂ and Δ¹⁴C observations alone under
+our convention gives **37.3 kmol (1975) and 25.6 (1995)** against their troposphere-plus-
+stratosphere **35.6 and 21.7**: **+4.8 % and +18.0 %**. That measured spread — not a chosen
+number — sets `LIK_EXCESS_C14_REP_FRAC = 0.15`, carried as a **rank-one shared method bias**
+across the two years rather than per-year quadrature, because two estimates from overlapping
+reconstructions do not carry twice the information. (An earlier working note put the 1995 figure
+at 15.3 %; that was arithmetic on the wrong denominator. 18.0 % is correct, and the fraction was
+raised from 0.10 to 0.15 to cover it.)
+
+### The finding: land-use-change emissions inject ¹⁴C ex nihilo
+
+Excess ¹⁴C can only come from the prescribed sources minus decay, so the reservoir excesses must
+sum to the cumulative bomb input. **Ours do not.** From `dE/dt = sources − λE`, with no
+assumption about where the extra comes from:
+
+| | excess | declared sources | decay | **undeclared** |
+|---|---|---|---|---|
+| 1975 | 167.85 | 144.38 | −0.45 | **+23.93 kmol (14.3 %)** |
+| 1995 | 178.84 | 151.45 | −0.88 | **+28.27 kmol (15.8 %)** |
+
+**Cause:** `R/model.R` emits LUC with `add_source()` at the **vegetation box's own ¹⁴C ratio**
+while the vegetation box is not debited — 273 GtC of LUC carbon at a land Δ¹⁴C of +221 ‰ is a
+real ¹⁴C source. Fossil carbon is emitted at Δ¹⁴C = −1000 and correctly carries none. Two
+independent estimates agree: the closure residual above, and integrating the LUC flux against the
+run's own vegetation ratio (24.0 / 27.9 kmol).
+
+Whether this is a bug or a defensible consequence of LUC being exogenous to two *responsive*
+land pools is **a modelling decision for Marcus, not resolved here.** The physical objection is
+that the real ¹⁴C leaving a cleared forest was taken up from the atmosphere earlier and is
+already in the bomb budget, so injecting it again double-counts.
+
+**What it does and does not contaminate**, from `calibration/diag_excess_c14.R` §3:
+
+- **The ocean is barely affected.** Paired bomb-only 72.6 / 94.3 kmol against total-minus-natural
+  75.9 / 95.4 — a 1–4 % gap, far inside the observational spread. The ocean constraint stands.
+- **The land is affected a great deal, and this CORRECTS 2026-08-11 §6.4(e).** At the citable
+  102 kmol our land excess is 43.8 kmol under total-minus-natural but **29.6 kmol** paired
+  against N&L's 18.9 — so "our land holds 2–3× their biosphere" becomes **~1.6×**. Still high,
+  and still consistent with the `tau_veg` tension, but not the dramatic gap it looked like.
+
+### Size of the effect — real, not decisive
+
+At the quarantined mode's `bomb_total` = 151.2 the term scores **−15.10**; at the citable 102 it
+scores **−7.26**. That is **~7.8 log-units** in favour of the citable total, against the **116
+log-units** it costs to pin `bomb_total` at 102 (§6.4(c)). **The constraint sharpens the
+diagnosis; it does not resolve it.** The bomb delivery *shape* remains the thing to fix, exactly
+as the handoff ordered it — step 1 has not made step 2 unnecessary.
+
+### FLAGGED FOR MARCUS — the target set is worth ~130 log-units
+
+Two published observational reconstructions, and choosing between them dwarfs everything above:
+
+| set | 1975 | 1995 | term at `bomb_total` 151.2 |
+|---|---|---|---|
+| **`table4_obs_range`** (default) | 48.6 ± 7.9 | 51.4 ± 7.6 | −15.1 |
+| `table2_peacock` | 43.9 ± 4.3 | 56.5 ± 2.5 | ≈ −149 |
+
+Both are stored in `data/obs_excess_c14.rds`; `LIK_EXCESS_C14_TARGET` picks by name. **The wide
+one is the default** on the grounds that the span between two published reconstructions is method
+spread, not measurement noise, and adopting one of them as if the other did not exist would put
+that much leverage on a choice of paper. If Marcus prefers the tight set, the mode-find must be
+re-run — and `bomb_total` would then be driven hard toward the citable value by this term alone,
+which is a *result* only if the target is believed.
+
+### State
+
+`calibration/output/mode_fit.rds` and its log are **quarantined** to
+`calibration/output/quarantine/20260811b_pre_excess_c14/` with a README: the parameter vector is
+still a fine starting point, but its **logpost −2359.3 must not be quoted** (the same vector
+scores −2378.6 under the current posterior) and its Hessian is of the old posterior. A mode-find
+against the new posterior is running.
