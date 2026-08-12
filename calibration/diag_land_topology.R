@@ -312,4 +312,72 @@ cat(sprintf("  -> land C %.0f, %.2f / %.2f kmol (%.1f %%)\n",
             best$v[1], best$v[2], best$v[3], 100 * best$mis))
 cat(sprintf("  target: land C %.0f, %.2f / %.2f kmol\n", TOPO_NL_BIO_PGC, nl_bio[1], nl_bio[2]))
 cat("  The emulator runs -3 to -6 % LOW against the full model ([1]), so a layout\n")
-cat("  landing a few per cent BELOW target here is the one to build.\n")
+cat("  landing a few per cent BELOW target here is the one to build.\n\n")
+
+# ---------------------------------------------------------------------
+# [4] What the 14C constraint costs the carbon-climate feedback
+# ---------------------------------------------------------------------
+# The four-pool land closed the partition but weakened the land carbon-climate
+# feedback: gamma_L fell from -57.6 to -19.6 GtC/K on coupled SSP5-8.5 (measured
+# as the land-carbon difference at 2100 between q10 = 2 and q10 = 1, over the
+# GMST at 2100). Two tests record it -- test-climate.R:122 and, via the same
+# small responsive pool, test-mechanisms.R:32.
+#
+# WHY. Only the soil pools respire with q10, and a q10 anomaly can only move
+# carbon a pool can actually release on the horizon in question. Pool j
+# contributes C_j * (1 - exp(-H/tau_j)) over H years, so tau 2 counts in full
+# and tau 500 counts ~18 %. Call that RESPONDING CARBON. The two-pool land had
+# ~1470 GtC of it, the four-pool land ~390 -- a factor 3.8, against the factor
+# 2.9 in gamma_L. The metric explains the loss, so it is the right thing to
+# scan against.
+#
+# THE QUESTION THIS ANSWERS: can an INTERMEDIATE soil pool (tau ~30-100 yr) buy
+# the feedback back without re-breaking the partition? Total soil carbon is held
+# fixed as the intermediate pool grows, so the comparison is at constant stock.
+TOPO_HORIZON     <- 100     # yr, the horizon "responding carbon" is defined on
+TOPO_MID_TAU     <- c(30, 60, 100)
+TOPO_MID_SHARE   <- c(0.05, 0.10, 0.15)
+TOPO_SOIL_TARGET <- 1684    # GtC, soil stock held fixed across the scan
+                            # (= TOPO_NL_BIO_PGC - the vegetation the layout implies)
+
+topo_responding <- function(pools, npp = ccx_const("NPP_GLOBAL_PI"), H = TOPO_HORIZON)
+  sum(vapply(pools, function(z) z$share * npp * z$tau * (1 - exp(-H / z$tau)), 0))
+
+cat("=== [4] can an intermediate soil pool buy the feedback back? ===\n")
+cat(sprintf("  responding carbon = sum_j C_j (1 - exp(-%d/tau_j)), soil pools only\n",
+            TOPO_HORIZON))
+cat(sprintf("  %6s %7s %7s %8s %8s %8s %10s\n",
+            "tauMid", "midFrc", "slowFrc", "land C", "k1975", "k1995", "respondC"))
+veg_now <- topo_now$veg
+npp_g   <- ccx_const("NPP_GLOBAL_PI")
+for (tm in TOPO_MID_TAU) for (mf in TOPO_MID_SHARE) {
+  # slow share chosen so the SOIL stock stays at TOPO_SOIL_TARGET
+  sf <- max(0.005, (TOPO_SOIL_TARGET - npp_g * mf * tm -
+                      npp_g * (1 - mf) * TOPO_FAST_TAU) / (npp_g * TOPO_SLOW_TAU))
+  soil <- list(list(share = 1 - mf - sf, tau = TOPO_FAST_TAU),
+               list(share = mf, tau = tm),
+               list(share = sf, tau = TOPO_SLOW_TAU))
+  v <- scan_one(ccx_topo("mid", veg_now, soil), drv_obs)
+  cat(sprintf("  %6.0f %7.3f %7.3f %8.0f %8.2f %8.2f %10.0f\n",
+              tm, mf, sf, v[1], v[2], v[3], topo_responding(soil)))
+}
+soil_now <- topo_now$soil
+v_now <- scan_one(topo_now, drv_obs)
+cat(sprintf("  %6s %7s %7s %8.0f %8.2f %8.2f %10.0f   <- current four-pool\n",
+            "-", "-", "-", topo_land_C(topo_now, npp_g), v_now[2], v_now[3],
+            topo_responding(soil_now)))
+cat(sprintf("  %6s %7s %7s %8.0f %8.2f %8.2f %10.0f   <- N&L target / old two-pool\n",
+            "-", "-", "-", TOPO_NL_BIO_PGC, nl_bio[1], nl_bio[2],
+            topo_responding(list(list(share = 1, tau = 25)))))
+cat("\n  NO. The trade is roughly +0.7 kmol at 1975 -- 3 % of the target -- per\n")
+cat("  +100 GtC of responding carbon. Doubling responding carbon (390 -> ~730)\n")
+cat("  still leaves it at half the two-pool value while pushing 1975 from exact\n")
+cat("  to +13 %. Restoring the old feedback through soil would cost the partition\n")
+cat("  outright. THE BOMB 14C BOUNDS THE SOIL-RESPIRATION CARBON-CLIMATE FEEDBACK\n")
+cat("  FROM ABOVE, and that is a result, not a defect.\n\n")
+cat("  THE ESCAPE THIS MODEL DOES NOT HAVE: the model's only carbon-climate\n")
+cat("  feedback is q10 on heterotrophic respiration. Real land models get a large\n")
+cat("  share of gamma_L from productivity decline and disturbance -- a temperature\n")
+cat("  dependence of NPP, which this model lacks entirely. If gamma_L needs to be\n")
+cat("  larger, that is where it should come from; enlarging the responsive soil\n")
+cat("  pool is the one route the 14C has closed.\n")

@@ -1426,3 +1426,99 @@ capacity factor at `min(veg/veg0, 1)` so clearing costs capacity while growth do
 Not implemented: at defaults the land pool stays *above* veg0 all century, so the clamp would be
 inert historically, and whether it bites depends on a calibrated β. It needs deciding together
 with the multi-pool land, not before it.
+
+---
+
+## 2026-08-12 (later) — Four-pool land: the ¹⁴C partition error is closed
+
+### The prescribed fix was wrong, and an offline tool caught it before the rebuild
+
+The previous entry sent the next step to "split the single responsive soil pool into fast
+and slow". `calibration/diag_land_topology.R` was written to choose a pool layout *before*
+restructuring the state vector — it integrates a candidate topology's bomb-¹⁴C inventory
+directly from an atmospheric Δ¹⁴C history, at ~1 ms per candidate, with no core rebuild.
+It validates against the full model on the live land parameters first (**−0.9 % / −0.6 %**
+at 1975 / 1995 on the four-pool land; −6.5 % / −3.1 % on the two-pool one it replaced).
+
+**A soil-only split cannot work.** Its best is 30.0 / 19.5 kmol on 2214 GtC against N&L's
+21.7 / 18.9 on 2200 — 1995 right, **1975 38 % high**. The reason is arithmetic: a single
+600 GtC vegetation pool at `tau_veg` 10 already holds ~20 kmol at 1975, essentially N&L's
+entire biosphere, so *no soil layout beneath it can help*. **The vegetation had to be split
+too.** Driven by the OBSERVED atmosphere, not the model's own — the model's troposphere was
+40–44 % short *because* its land took too much, so designing against it would have
+understated how inert the land must be.
+
+### The structure
+
+`leaf` (60 % of NPP, τ 1 yr) → `wood` (τ 20 yr) → litter split 95/5 → `soil_fast` (τ 2 yr)
+and `soil_slow` (τ 500 yr). NB 28 → 32. Vegetation 516 GtC, responsive soil 114, passive
+soil 1500, total 2130 — every pool independently defensible, on a **flat** misfit surface
+(0.60/30/0.04 and 0.70/40/0.04 both ~6 %), so these are a defensible centre, not a fit.
+
+Routing, all stated in the derivative: capacity keys on leaf+wood; the Ra loop runs per
+vegetation pool at each pool's own ratio; litter is split **per source pool** so the two
+¹⁴C ratios are not averaged before the split; seasonal NEP through leaf; ENSO out of
+`soil_fast`; **LUC debits wood** (Marcus 2026-08-12). Calibration keeps exactly one land
+degree of freedom — `tau_soil_fast` replaces `tau_soil`; the other five are held fixed so
+a CO₂ fit cannot undo the partition fix. *That is a choice, and it will need revisiting.*
+
+### Result
+
+Paired bomb-only at `bomb_total` 102, vs Naegler & Levin Table 4:
+
+| | before (2-pool, at the mode fit) | after (4-pool, at defaults) | N&L |
+|---|---|---|---|
+| biosphere 1975 | 32.80 (+51 %) | **21.73 (+0 %)** | 21.70 |
+| biosphere 1995 | 29.88 (+58 %) | **20.83 (+10 %)** | 18.90 |
+| troposphere 1975 | 16.13 (−40 %) | 31.34 (+17 %) | 26.80 |
+| troposphere 1995 | 9.82 (−44 %) | 15.91 (−9 %) | 17.50 |
+| SUM delivered | +8 % / +7 % | +7 % / +6 % | — |
+
+**The 40–58 % partition error is gone.** What remains is the delivery error alone, which
+was always the ceiling on what a re-shaped source could repair. The four-pool land is
+**not calibrated** — read the partition, not the level.
+
+### φ resolved itself
+
+`test-pulse.R:112/113` — the Joos airborne-fraction benchmark that φ = 0.5 broke — **now
+pass unmodified.** The capacity term's runaway (more veg → more NPP → more veg) was an
+artefact of a single 600 GtC vegetation pool with a 10-yr turnover; with the fast leaf pool
+carrying most of NPP, the positive loop no longer over-drains the pulse. No clamp needed,
+and φ stays at 0.5. The open decision from the previous entry is **closed by the
+restructure**, not by a decision.
+
+### What it cost, measured rather than argued
+
+γ_L, the land carbon-climate feedback, **fell from −57.6 to −19.6 GtC/K** (land carbon at
+2100, q10 = 2 vs q10 = 1, on coupled SSP5-8.5, over GMST at 2100; measured in both models,
+like for like). Two tests record it, neither modified: `test-climate.R:122` (feedback
+0.091 °C, bound 0.1) and `test-mechanisms.R:32` (ENSO switch moves CO₂ 0.28 ppm, bound 0.5).
+
+Both trace to one number. Only soil respires with q10, and a q10 anomaly can only move
+carbon a pool can release on the horizon in question — *responding carbon*,
+Σ C_j (1 − e^(−100/τ_j)). The two-pool land had ~1470 GtC of it, the four-pool land ~390.
+Factor 3.8, against factor 2.9 in γ_L: the metric explains the loss.
+
+**An intermediate soil pool (τ 30–100 yr) was tried offline and does not rescue it**
+(`diag_land_topology.R` [4], soil stock held fixed). The trade is ~+0.7 kmol at 1975 — 3 %
+of the target — per +100 GtC of responding carbon. Doubling responding carbon to ~730 still
+leaves it at half the two-pool value while pushing 1975 from exact to +13 %.
+**The bomb ¹⁴C bounds the soil-respiration carbon-climate feedback from above.**
+
+**The escape this model does not have.** Its only carbon-climate feedback is q10 on
+heterotrophic respiration. Real land models draw much of γ_L from productivity decline and
+disturbance — a temperature dependence of NPP, which this model lacks entirely. If γ_L
+needs to be larger, that is where it should come from; the soil route is the one the ¹⁴C
+has closed. (γ_L ≈ −20 is at the low edge of what I recall of CMIP6 C4MIP values, roughly
+−34 ± 20 GtC/K from Arora et al. 2020 — **recollection, not verified against the paper**;
+`gamma_enso`, by contrast, is a *calibrated* parameter with room to absorb its own test.)
+
+### Quarantine
+
+`calibration/output/quarantine/20260812_luc_debit_and_2pool_land/` — `mode_fit.rds`,
+`profile_bomb_total.rds` and the run logs, with a README. They were fitted to a model that
+created 321.6 GtC and ~28 kmol of ¹⁴C from nothing, **and** to a land whose parameters no
+longer exist. `R/cpp.R` now errors on a pre-four-pool parameter list rather than silently
+substituting a land the caller did not ask for.
+
+Suite: **380 pass / 4 fail / 2 skip** — same count as the parent, different set.
