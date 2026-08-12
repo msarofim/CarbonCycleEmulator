@@ -1,0 +1,4 @@
+profiling bomb_total over 102, 120, 135, 150, 165 kmol, under table4_obs_range and table2_peacock
+current mode: bomb_total 149.8, logpost -2374.1 (target 'table4_obs_range')
+
+--- target 'table4_obs_range': 1975 48.6 +/- 7.9   1995 51.4 +/- 7.6 ---

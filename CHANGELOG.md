@@ -1118,3 +1118,37 @@ which is a *result* only if the target is believed.
 still a fine starting point, but its **logpost −2359.3 must not be quoted** (the same vector
 scores −2378.6 under the current posterior) and its Hessian is of the old posterior. A mode-find
 against the new posterior is running.
+
+### Recalibrated with the constraint in — and it does not move `bomb_total`
+
+Mode-find against the new posterior: **118.8 min, 151,536 evaluations at 0.047 s/eval,
+−26,005.8 → −2,374.1.** `calibration/output/mode_fit.rds`.
+
+| | pre-constraint mode | post-constraint mode |
+|---|---|---|
+| `bomb_total` | 151.25 (+4.60σ) | **149.81 (+4.54σ)** |
+| `k_w` | 2950 | 2921 |
+| `kz` | 8354 | 8267 |
+| `q10` | 4.143 (+3.41σ) | 4.093 |
+| `sigma_d14c` | 45.84 (+3.01σ) | 45.86 |
+| ocean excess ¹⁴C @1975 / @1995 | 76.9 / 95.7 | **75.8 / 94.3** kmol |
+| MLO CO₂ annual rms | 0.986 ppm | 0.983 |
+| bomb-window Δ¹⁴C rms | 69.1 ‰ | 67.9 |
+| Hessian condition number | 8.29e4 | 7.69e4 |
+
+**Every parameter moved by about 1 %.** The same three flags fire (`q10`, `bomb_total`,
+`sigma_d14c`). The fit simply **pays** the ocean-inventory penalty — `excess_c14_ocean` sits at
+−14.55 at the mode, against observed targets of 48.6 ± 7.9 and 51.4 ± 7.6 that it misses by
++27 and +43 kmol — rather than give up any of the atmospheric fit.
+
+That is a **clean negative result, and it is worth more than a positive one would have been.**
+The constraint was added on the hypothesis that ¹⁴C's ocean sink was underdetermined because
+every term was atmospheric. It is not underdetermined; it is *contradicted*. The model cannot
+simultaneously match the atmospheric Δ¹⁴C decline and the observed ocean inventory, at any
+`bomb_total` — which is the ocean-side twin of §6.4(c)'s atmospheric-side finding that it cannot
+match the observed Δ¹⁴C curve at any `bomb_total` either. **Two independent constraints now say
+the same thing about the same defect**, and neither is a parameter problem.
+
+`calibration/profile_bomb_total.R` was written to close the remaining loophole — whether the
+failure to bite is the *width* of the wide target set or something structural — by profiling
+`bomb_total` under both target sets with everything else re-optimised at each point.
