@@ -1,0 +1,2 @@
+start: log-post at hand-set init = -4530.7
+       17 parameters: beta, q10, k_w, h_ml, kz, tau_ex, npp_frac_NH, seas_amp_NH, seas_amp_SH, seas_phase_NH, seas_phase_SH, gamma_enso, tau_soil_fast, bomb_total, sigma_co2, sigma_d13c, sigma_d14c
