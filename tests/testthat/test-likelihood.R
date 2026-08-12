@@ -159,7 +159,26 @@ test_that("the seasonal statistic constrains amplitude and phase", {
 
 test_that("rho is gone and the parameter vector is self-consistent", {
   expect_false("rho" %in% CCX_PARAM_NAMES)
-  expect_length(CCX_PARAM_NAMES, 17L)
+  # 17 -> 16 on 2026-08-12 (Marcus): the land layout is STRUCTURE, not calibrated.
+  # A bare count only records the change; these two assertions GUARD the decisions,
+  # because both were made after a mode fit walked straight through them.
+  expect_length(CCX_PARAM_NAMES, 16L)
+
+  # DECISION 1: the whole land layout is fixed. A free tau_soil_fast reached
+  # +3.61 sigma and put the biosphere bomb-14C back to +50 %/+64 %, undoing the
+  # four-pool restructure. Nothing in the likelihood scores the partition, so the
+  # freeze is the only thing holding it.
+  for (n in c("tau_soil_fast", "tau_soil_slow", "tau_leaf", "tau_wood",
+              "npp_leaf_frac", "litter_slow_frac"))
+    expect_false(n %in% CCX_PARAM_NAMES, info = n)
+
+  # DECISION 2: kz is BOUNDED to the range that keeps deep-ocean D14C inside the
+  # observed -150 to -200. Unbounded it ran to 10,686 (deep -129.9). The bounds are
+  # bisected values, so assert the transform is actually a bounded one -- a silent
+  # revert to tr = "log" would restore the runaway with no other visible symptom.
+  expect_identical(CCX_PARAM_TABLE$kz$tr, "logit")
+  expect_gte(CCX_PARAM_TABLE$kz$lo, 3830)
+  expect_lte(CCX_PARAM_TABLE$kz$hi, 6200)
   # round-trip through the unconstrained transform
   u <- ccx_init_unc()
   expect_named(u, CCX_PARAM_NAMES)

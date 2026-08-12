@@ -30,7 +30,14 @@ ccx_load_cpp()
 # ---- labels derive from constants (project rule) --------------------
 MODE_SEED        <- 2026
 MODE_MAXIT       <- 20000   # Nelder-Mead default 500 is far too small for 18 par
-MODE_RESTARTS    <- 12      # consecutive restarts; stops early on convergence
+MODE_RESTARTS    <- 20      # consecutive restarts; stops early on convergence.
+                            # RAISED 12 -> 20 on 2026-08-12: the 17-parameter run
+                            # hit the cap of 12 while STILL GAINING 1.3-1.8 log-
+                            # units per restart, and the BFGS polish then gained a
+                            # further 9.7 -- i.e. Nelder-Mead was stalling on a
+                            # collapsed simplex, not sitting at the optimum, and
+                            # the cap silently truncated a live climb. Costs
+                            # nothing when MODE_TOL is reached first.
 MODE_TOL         <- 1e-4    # stop when a restart gains less than this in log-post
 MODE_PENALTY     <- 1e6     # finite stand-in for -Inf so optim can navigate
 MODE_HESS_EPS    <- 3e-4    # step on the unconstrained scale for the Hessian.

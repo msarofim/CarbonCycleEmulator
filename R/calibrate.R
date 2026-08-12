@@ -22,8 +22,26 @@ CCX_PARAM_TABLE <- list(
                      prior = function(x) dlnorm(x, log(1500), 0.4, log = TRUE)),
   h_ml        = list(tr = "logit", lo = 30,  hi = 200,   init = 75,
                      prior = function(x) dunif(x, 30, 200, log = TRUE)),
-  kz          = list(tr = "log",   init = 4000,
-                     prior = function(x) dlnorm(x, log(4000), 0.6, log = TRUE)),
+  # OCEAN VENTILATION, BOUNDED (2026-08-12, Marcus). kz was log-transformed with
+  # a lognormal prior and no bound; the 17-parameter mode ran it to 10,686, which
+  # puts the deep ocean at -129.9 permil against an observed -150 to -200. One
+  # diffusivity has to serve both the decadal bomb-14C penetration and the
+  # millennial deep age, and unbounded the bomb window wins.
+  #
+  # The deep age is the more teachable quantity ("the deep ocean has not seen the
+  # surface for centuries"), so kz is bounded to the range that keeps it inside the
+  # observed bracket and the bomb window absorbs the cost. MEASURED, not assumed:
+  # the kz -> deep-D14C relation is essentially univariate -- h_ml moves it under
+  # 1.5 permil across h_ml 39.7-100 -- so a bound on kz alone is sufficient.
+  # Bisected at the default parameters:
+  #   kz 3828.8 -> -200.00 permil  |  kz 5000 -> -170.1  |  kz 6200.7 -> -150.00
+  # Bounds rounded INWARD to [3830, 6200], which lands at -199.96 / -150.01, i.e.
+  # inside the bracket at both ends. init 5000 (bracket centre is 5015).
+  # Deliberately NOT a point value: kz also drives ocean CO2 uptake, and pinning it
+  # would push all of that onto k_w and h_ml. Re-bisect if OCEAN_DEPTH, the grid,
+  # or the observed bracket changes -- these are measured numbers, not settings.
+  kz          = list(tr = "logit", lo = 3830, hi = 6200, init = 5000,
+                     prior = function(x) dunif(x, 3830, 6200, log = TRUE)),
   tau_ex      = list(tr = "log",   init = 1.3,
                      prior = function(x) dlnorm(x, log(1.3), 0.25, log = TRUE)),
   npp_frac_NH = list(tr = "logit", lo = 0.4, hi = 0.8,   init = 0.60,
@@ -38,18 +56,26 @@ CCX_PARAM_TABLE <- list(
                      prior = function(x) dunif(x, 0, 12, log = TRUE)),
   gamma_enso  = list(tr = "id",    init = 0.5,
                      prior = function(x) dnorm(x, 0, 2, log = TRUE)),
-  # LAND TURNOVER: exactly ONE degree of freedom, as before. `tau_soil` (init
-  # 25) was the single calibrated land timescale under the two-pool land; its
-  # direct analogue under the four-pool land is the RESPONSIVE soil pool, which
-  # is what sets the decadal land-sink response. The other five land-structure
-  # parameters (npp_leaf_frac, tau_leaf, tau_wood, litter_slow_frac,
-  # tau_soil_slow) are held FIXED because the layout was chosen against the
-  # Naegler & Levin bomb-14C partition (diag_land_topology.R), and letting the
-  # calibration move it would let a CO2 fit undo the partition fix that motivated
-  # the restructure. THIS IS A CHOICE, not a derivation -- widening it to the
-  # full layout is a decision for a later pass, and it would change the posterior.
-  tau_soil_fast = list(tr = "log", init = 2,
-                     prior = function(x) dlnorm(x, log(2), 0.5, log = TRUE)),
+  # LAND TURNOVER: ZERO degrees of freedom (2026-08-12, Marcus). The whole land
+  # layout -- npp_leaf_frac, tau_leaf, tau_wood, litter_slow_frac, tau_soil_fast,
+  # tau_soil_slow -- is now FIXED at its structural values in ccx_default_params().
+  #
+  # `tau_soil_fast` used to be the one calibrated land timescale, and the comment
+  # here used to argue that freezing the OTHER five was enough to stop "a CO2 fit
+  # undoing the partition fix that motivated the restructure". That prediction was
+  # correct and the mitigation was insufficient: one DOF was enough. The
+  # 17-parameter mode drove tau_soil_fast to 11.16 yr (+3.61 sigma, FLAGGED by
+  # run_modefind.R's own screen) and put the biosphere bomb-14C back to +50 % /
+  # +64 % -- i.e. all the way back to the two-pool land's defect. Quarantined at
+  # calibration/output/quarantine/20260812b_free_tau_soil_fast_unbounded_kz/.
+  #
+  # WHY IT ESCAPED: Naegler & Levin's biosphere row has NO observational estimate,
+  # so there is no 14C-partition term in the likelihood. Nothing scores the thing
+  # the four-pool land was built to fix. Rather than add a model-vs-model target,
+  # the layout is treated as STRUCTURE. For a model whose job is communication,
+  # citable turnover times a reader can look up beat a fitted value at +3.6 sigma
+  # that nobody can defend -- and the partition stays a demonstrated property
+  # instead of something that degrades under calibration.
   # Total bomb 14C production, kmol, 1945-1980. Calibrated (as DESIGN intended),
   # with a CITABLE prior: Naegler & Levin (2006) give 99.3-104.9 kmol. Treating
   # it as free lets error in the still-provisional injection SHAPE be partly

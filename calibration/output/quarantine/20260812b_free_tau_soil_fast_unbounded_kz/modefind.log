@@ -1,0 +1,44 @@
+start: log-post at hand-set init = -4530.7
+       17 parameters: beta, q10, k_w, h_ml, kz, tau_ex, npp_frac_NH, seas_amp_NH, seas_amp_SH, seas_phase_NH, seas_phase_SH, gamma_enso, tau_soil_fast, bomb_total, sigma_co2, sigma_d13c, sigma_d14c
+restart  1: log-post =      -2388.8  (gain  2141.8766)  evals 11718
+restart  2: log-post =      -2331.2  (gain    57.6236)  evals 30156
+restart  3: log-post =      -2314.5  (gain    16.7340)  evals 46970
+restart  4: log-post =      -2312.7  (gain     1.7184)  evals 66972
+restart  5: log-post =      -2312.0  (gain     0.7331)  evals 77497
+restart  6: log-post =      -2311.0  (gain     1.0284)  evals 94163
+restart  7: log-post =      -2310.1  (gain     0.8576)  evals 111428
+restart  8: log-post =      -2308.4  (gain     1.7241)  evals 129751
+restart  9: log-post =      -2306.7  (gain     1.6812)  evals 145938
+restart 10: log-post =      -2304.9  (gain     1.8476)  evals 163157
+restart 11: log-post =      -2303.6  (gain     1.2926)  evals 171997
+restart 12: log-post =      -2303.3  (gain     0.2931)  evals 180983
+BFGS polish: log-post = -2293.5 (gain 9.7376)
+
+prior-tail position of the mode (normal sds; |z| > 3 flagged):
+         beta           q10           k_w          h_ml            kz 
+        -1.14         -1.67         -0.46         -1.58          1.85 
+       tau_ex   npp_frac_NH   seas_amp_NH   seas_amp_SH seas_phase_NH 
+        -1.31         -1.49          1.31          1.34         -0.44 
+seas_phase_SH    gamma_enso tau_soil_fast    bomb_total     sigma_co2 
+         1.39          0.07          3.61          2.19         -2.52 
+   sigma_d13c    sigma_d14c 
+         2.44          0.33 
+*** FLAGGED, needs an explanation before this mode is used:  tau_soil_fast 
+integrator substeps needed at the mode: 4 (floor 4) -- kz = 10686
+hessian: central differences, 17 parameters
+Laplace covariance: PD, condition number 2.2e+05
+
+mode log-post = -2293.5  (gain over init 2237.1)
+elapsed 178.2 min, 182833 posterior evaluations (0.058 s/eval)
+
+mode, natural scale:
+         beta           q10           k_w          h_ml            kz 
+       0.1908        1.1844     1109.2312       39.6905    10686.4650 
+       tau_ex   npp_frac_NH   seas_amp_NH   seas_amp_SH seas_phase_NH 
+       0.8406        0.4274       23.1225        5.3466        3.9712 
+seas_phase_SH    gamma_enso tau_soil_fast    bomb_total     sigma_co2 
+      11.0129        1.1992       11.1631      109.7275        0.2292 
+   sigma_d13c    sigma_d14c 
+       0.5399        5.5523 
+
+wrote calibration/output/mode_fit.rds

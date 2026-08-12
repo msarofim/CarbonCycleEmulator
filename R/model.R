@@ -132,7 +132,13 @@ ccx_default_params <- function() {
                           # isotopes only; the net carbon flux is NPP regardless.
     k_w       = 1500,     # m/yr, gas transfer velocity
     h_ml      = 75,       # m, mixed-layer depth
-    kz        = 4000,     # m2/yr, interior eddy diffusivity
+    kz        = 5000,     # m2/yr, interior eddy diffusivity. RE-CENTRED
+                          # 2026-08-12 from 4000, to the centre of the range that
+                          # puts deep-ocean D14C inside the observed -150 to -200
+                          # (4000 sat at the -195 edge; 5000 gives -170). MUST
+                          # track CCX_PARAM_TABLE$kz's init and [lo, hi] -- see
+                          # the derivation in that entry. Default-parameter 14C
+                          # numbers computed before this date are at kz 4000.
     tau_ex    = 1.3,      # yr, interhemispheric atmospheric exchange
     sst_NH    = 18,       # degC, hemispheric-mean SST (inside the K1/K2 fit range)
     sst_SH    = 16,
