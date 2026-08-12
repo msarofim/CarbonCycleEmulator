@@ -71,8 +71,16 @@ app_params <- local({
   p$gamma_enso <- CCX_PARAM_TABLE$gamma_enso$init
   src <- "uncalibrated defaults"
   status <- "provisional"
-  detail <- paste("Hand-set starting values, not fitted to anything. The model",
-                  "reads about 27 ppm high against the observed CO₂ record.")
+  # NO HARDCODED BIAS NUMBER. This string used to claim "about 27 ppm high",
+  # which by 2026-08-12 was wrong in SIGN as well as magnitude -- it had been
+  # written once and never re-derived while the LUC debit and the four-pool land
+  # moved the model underneath it. A label that states a computed quantity has to
+  # be computed, or it decays into a confident falsehood. The direction and size
+  # of the residual is exactly what the app's own CO2 panel shows the user.
+  detail <- paste("Hand-set starting values, not fitted to anything. β is set to",
+                  "the 1-D posterior optimum with every other parameter at its",
+                  "starting value, so the CO₂ curve is close but not calibrated;",
+                  "compare it against the observations shown alongside it.")
   if (file.exists(mode_file)) {
     md <- tryCatch(readRDS(mode_file), error = function(e) NULL)
     if (!is.null(md) && identical(md$param_names, CCX_PARAM_NAMES)) {

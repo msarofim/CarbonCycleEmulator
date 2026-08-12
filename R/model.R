@@ -91,7 +91,17 @@ ccx_ocean_grid <- function(h_ml, total_depth = ccx_const("OCEAN_DEPTH"),
 #' here; everything structural lives in constants.R.
 ccx_default_params <- function() {
   list(
-    beta      = 0.40,     # CO2 fertilization, NPP = NPP0 (1 + beta ln(chi/chi0))
+    # CO2 fertilization, NPP = NPP0 (1 + beta ln(chi/chi0)).
+    # RE-CENTRED 2026-08-12 from 0.40 to 0.38, the 1-D optimum of the REAL
+    # log-posterior with every other parameter at its CCX_PARAM_TABLE init
+    # (-4560.2 -> -4530.6). Set by the objective the model is scored on, not by
+    # eyeballing CO2 in one year -- though the two agree here, both landing near
+    # 415 ppm at 2020. The move is small because the four-pool land already
+    # absorbed most of what the LUC debit had displaced; the ~12 ppm low bias
+    # recorded in handoff 2026-08-12b came from the two-pool land and is gone.
+    # This is a DEFAULT, i.e. an app and test fixture. beta is calibrated, so
+    # the mode-find is what actually sets it -- see R/calibrate.R.
+    beta      = 0.38,
     q10       = 2.0,      # heterotrophic respiration temperature sensitivity
     # ---- land pool structure ------------------------------------------
     # Defaults chosen by diag_land_topology.R [3], the layout of lowest misfit
