@@ -1152,3 +1152,48 @@ the same thing about the same defect**, and neither is a parameter problem.
 `calibration/profile_bomb_total.R` was written to close the remaining loophole — whether the
 failure to bite is the *width* of the wide target set or something structural — by profiling
 `bomb_total` under both target sets with everything else re-optimised at each point.
+
+### The `bomb_total` profile: the target-set choice dissolves, and the constraint cannot win
+
+`calibration/profile_bomb_total.R`, 91.7 min, `bomb_total` ∈ {102, 120, 135, 150, 165} kmol with
+every other parameter re-optimised at each point, under **both** target sets.
+
+| `bomb_total` | logpost | ocean term | ocean excess 1975/1995 | bomb-window Δ¹⁴C rms | MLO CO₂ rms |
+|---|---|---|---|---|---|
+| 102 | −2483.1 | −7.21 | 52.7 / 64.4 | **190.6 ‰** | 0.98 |
+| 120 | −2433.7 | −8.93 | 60.8 / 75.4 | 119.9 | 0.99 |
+| 135 | −2393.0 | −11.24 | 67.8 / 84.7 | 74.7 | 0.99 |
+| **150** | **−2374.1** | −14.60 | 75.9 / 94.4 | **68.1** | 0.98 |
+| 165 | −2393.4 | −19.07 | 85.0 / 104.3 | 90.6 | 0.96 |
+
+(`table4_obs_range`; the `table2_peacock` column is within 1.3 log-units at every point.)
+
+**Both target sets choose `bomb_total` = 150.** The flagged choice was flagged on the wrong
+grounds: the earlier "~130 log-units" estimate for it assumed **per-year quadrature**, and the
+term does not use per-year quadrature. Once the shared method error is modelled as the rank-one
+common term it is — which is the correct structure, since the model overshoots **both** years in
+the same direction — the two sets differ by **0.7 log-units at the mode**, not 130.
+
+`calibration/diag_excess_c14_leverage.R` locates the real lever. The bar to clear is **116.4
+log-units** (what the rest of the likelihood pays to move 150 → 102, almost all of it the bomb
+window: **68.1 → 190.6 ‰**):
+
+| `LIK_EXCESS_C14_REP_FRAC` | `table4_obs_range` | `table2_peacock` |
+|---|---|---|
+| 0.00 | 20.4 | **135.4** ← clears |
+| 0.02 | 19.7 | 108.7 |
+| 0.05 | 16.9 | 53.3 |
+| 0.10 | 11.3 | 18.9 |
+| **0.15 (in use)** | **7.4** | 9.1 |
+| 0.20 | 5.1 | 5.3 |
+
+**One corner of this table flips the answer: the tight target with essentially zero method
+error.** Even 2 % of shared bias closes it. And what that corner buys is not a model that fits
+both — it is the ocean inventory purchased at 190 ‰ of atmospheric bomb-window misfit. Choosing
+it would be choosing which observation to disbelieve, not resolving anything.
+
+**Conclusion: no admissible setting of this constraint resolves the ¹⁴C problem.** It either does
+nothing (any plausible shared method error) or it trades one 14C misfit for another. Handoff §7
+steps 2 and 4 — the bomb delivery shape at the 1963.04 Part A/B join, and the single ventilation
+timescale — are where the resolution has to come from. Step 1 is complete and its answer is
+that step 1 was never going to be enough.

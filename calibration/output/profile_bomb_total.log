@@ -2,3 +2,21 @@ profiling bomb_total over 102, 120, 135, 150, 165 kmol, under table4_obs_range a
 current mode: bomb_total 149.8, logpost -2374.1 (target 'table4_obs_range')
 
 --- target 'table4_obs_range': 1975 48.6 +/- 7.9   1995 51.4 +/- 7.6 ---
+  bt   102  lp   -2483.1  exc_term    -7.21  ocean   52.7/  64.4  deep -106.2  bombRMS 190.6  CO2rms  0.98  (10.1 min)
+  bt   120  lp   -2433.7  exc_term    -8.93  ocean   60.8/  75.4  deep -107.1  bombRMS 119.9  CO2rms  0.99  (12.6 min)
+  bt   135  lp   -2393.0  exc_term   -11.24  ocean   67.8/  84.7  deep -106.1  bombRMS  74.7  CO2rms  0.99  (9.7 min)
+  bt   150  lp   -2374.1  exc_term   -14.60  ocean   75.9/  94.4  deep -105.0  bombRMS  68.1  CO2rms  0.98  (3.8 min)
+  bt   165  lp   -2393.4  exc_term   -19.07  ocean   85.0/ 104.3  deep -103.5  bombRMS  90.6  CO2rms  0.96  (12.3 min)
+
+--- target 'table2_peacock': 1975 43.9 +/- 4.3   1995 56.5 +/- 2.5 ---
+  bt   102  lp   -2481.8  exc_term    -6.19  ocean   52.7/  64.7  deep -106.7  bombRMS 190.8  CO2rms  0.99  (8.8 min)
+  bt   120  lp   -2433.0  exc_term    -8.15  ocean   60.8/  75.7  deep -106.4  bombRMS 119.5  CO2rms  1.00  (8.1 min)
+  bt   135  lp   -2392.5  exc_term   -10.86  ocean   67.5/  84.5  deep -106.3  bombRMS  73.2  CO2rms  0.98  (11.4 min)
+  bt   150  lp   -2374.8  exc_term   -15.26  ocean   75.8/  94.3  deep -105.2  bombRMS  68.2  CO2rms  0.98  (3.4 min)
+  bt   165  lp   -2395.3  exc_term   -21.17  ocean   84.9/ 104.1  deep -103.4  bombRMS  93.3  CO2rms  0.96  (11.5 min)
+
+total 91.7 min; wrote calibration/output/profile_bomb_total.rds
+
+best under 'table4_obs_range': bomb_total 150 (logpost -2374.1)
+
+best under 'table2_peacock': bomb_total 150 (logpost -2374.8)
