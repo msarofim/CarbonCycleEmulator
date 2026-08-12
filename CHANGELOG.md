@@ -1569,3 +1569,94 @@ enriched remainder — which predicts exactly that signature. It would **not** t
 carbon inventory, or the ¹⁴C production shortfall (a stratosphere adds <1 % of system inventory
 against a ~34 % gap). **Cost:** NB 32 → 34, *and* the bomb source rebuilt as an injection rate
 rather than a delivery rate, or the delay is double-counted. A package, not a box.
+
+## 2026-08-12 (later still) — The framing question is settled: it is neither A nor B, and the ¹⁴C budget closes
+
+The previous entry left the atmospheric comparison as an A-vs-B decision and recommended
+"reporting both framings and scoring on neither." That was the right instinct and the wrong
+resolution: **there is a third framing that is actually like-for-like, and it is computable
+rather than a matter of taste.**
+
+**The argument.** `R/model.R`'s atmosphere is one box carrying `GtC_PER_PPM` = *whole*-atmosphere
+carbon, while `likelihood.R` fits its Δ¹⁴C to `obs_d14c_zonal` = *surface* stations, i.e.
+tropospheric air. Its excess-¹⁴C inventory is therefore whole-atmosphere **mass** at a
+tropospheric **ratio**. So:
+
+- **A** (vs N&L troposphere alone) is wrong by the entire stratospheric mass.
+- **B** (vs troposphere + stratosphere) credits the box with an enrichment a single well-mixed
+  box cannot carry.
+- **C** (vs N&L troposphere scaled to whole-atmosphere mass) is the like-for-like target, and
+  removes from their total only the stratosphere's *enrichment excess over its mass share*.
+
+**The mass ratio is read from N&L's own model, not assumed.** Their Figure 2 (p. 4) puts the
+GRACE tropopause at **9 km poleward of 30°, 15 km equatorward** — which is what "22 boxes, six in
+the troposphere, 16 in the stratosphere" over six latitude bands means. With the US Standard
+Atmosphere at those altitudes, the troposphere is **78.8 %** of atmospheric mass and the
+strat/trop mass ratio is **0.2686**. Computed in `diag_bomb_partition.R` from named constants,
+not hardcoded.
+
+**An independent check that it is right.** N&L's own stratosphere/troposphere ¹⁴C ratio falls
+0.321 (1975) → **0.269** (1995) — landing on the derived mass ratio 0.2686 to three decimals. By
+1995 their stratosphere carries exactly its mass share of the excess, so **B and C coincide at
+1995** and diverge only at the spike. This confirms both the Figure-2 reading and the physical
+claim (from `diag_stratosphere.R`) that the stratosphere is a co-equilibrating reservoir, not a
+delay line.
+
+**Result, four-pool land at defaults, `bomb_total` = 102:**
+
+| | 1975 | 1995 |
+|---|---|---|
+| atmosphere | −7.7 % | −28.2 % |
+| biosphere | −0.3 % | +9.6 % |
+| ocean | +4.8 % | +8.6 % |
+| **SUM** | **−0.7 %** | **+0.7 %** |
+
+**The budget closes to within ±1 % at both years.** The "+6–7 % delivery error" that sent two
+handoffs after the bomb source shape **does not exist** — it was the artefact of scoring a
+whole-atmosphere box against a tropospheric target. There is nothing for a re-shaped source to
+repair, and `data-raw/build_bomb_c14_source.R` does not need reopening on these grounds.
+
+**What the residual actually is:** atmosphere **short** (−8 % / −28 %), ocean **long**
+(+5 % / +9 %), biosphere fine. Too much bomb ¹⁴C in the ocean — a **ventilation** problem. The
+1995 atmospheric shortfall is the robust number; the 1975 one is sensitive to the tropopause
+assumption (−0.6 % to −8.8 % across strat mass fractions 0.15–0.22) and should not be quoted
+alone. This is exactly the signature the stratospheric-box mechanism predicts, so that item is
+real — but it sits behind the ocean work, not in front of it.
+
+Also noted: the script's own header had claimed the atmosphere "is compared to
+troposphere+stratosphere" while the code compared to troposphere **alone**. The prose was closer
+to right than the code and neither was exact — a comment that had drifted from its own function.
+
+### γ_L against C4MIP — the recollection was wrong, and it changes the conclusion
+
+The previous entry flagged that "γ_L ≈ −20 is at the low edge of CMIP6" rested on an
+**unverified recollection** of "~−34 ± 20 GtC/K, Arora et al. 2020" and was worth ten minutes.
+Checked, against two independent sources ([Biogeosciences 17:4173](https://bg.copernicus.org/articles/17/4173/2020/)
+and [OSTI 1695755](https://www.osti.gov/pages/biblio/1695755), both quoting the abstract verbatim):
+
+> γ_L = **−45.1 ± 50.6 PgC °C⁻¹**, γ_O = −17.2 ± 5.0 PgC °C⁻¹ (11 CMIP6 models, 1pctCO2 to
+> 4×CO₂, BGC−COU approach)
+
+The recollection was wrong on the central value (−45.1, not −34) and wrong on the spread by
+**2.5×** (±50.6, not ±20). The spread is the consequential error:
+
+| | γ_L | distance from CMIP6 mean |
+|---|---|---|
+| two-pool land | −57.6 GtC/K | −0.25 σ |
+| **four-pool land** | **−19.6 GtC/K** | **+0.50 σ** |
+
+**Both sit inside ±1 σ.** So the four-pool land's weaker γ_L is *not* an outlier against C4MIP,
+and §7's "at the low edge" framing was an artefact of the misremembered spread. The honest
+statement is that CMIP6 does not constrain γ_L tightly enough to call this a regression **or** a
+correction — the bomb-¹⁴C constraint is the more informative one.
+
+**Consequence for the queue:** temperature-dependent NPP is no longer motivated by a C4MIP
+comparison. It remains a genuine structural gap (this model's only carbon-climate pathway is q10
+on heterotrophic respiration), but it is a modelling choice, not a defect to be fixed under
+deadline.
+
+**Caveat on comparability, stated because it is not innocuous:** Arora's γ_L is 1pctCO2-to-4×CO₂
+over 140 years via BGC−COU; ours is land carbon at 2100, q10 = 2 vs q10 = 1, coupled SSP5-8.5,
+over GMST at 2100. Different protocol and different warming path. The comparison is fair as
+"this model's *total* carbon-climate feedback vs C4MIP's", because q10 is the only such pathway
+the model has — but it is not a protocol-matched number and should not be presented as one.

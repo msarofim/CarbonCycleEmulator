@@ -24,10 +24,19 @@
 #
 # ANSWERED, 2026-08-12. It is a partition error, and it is now CLOSED. The
 # biosphere ran 51-58 % long and the troposphere 40-44 % short at both years;
-# the four-pool land (R/model.R) leaves the biosphere at +0 % / +10 %. What
-# survives is the delivery error alone, ~6-7 %, which was always the ceiling on
-# what a re-shaped source could repair. The shape work in the handoff was, as
-# this script suspected, misdirected until the partition was fixed.
+# the four-pool land (R/model.R) leaves the biosphere at +0 % / +10 %.
+#
+# AND THE RESIDUAL "DELIVERY ERROR" WAS A FRAMING ARTEFACT (2026-08-12, later).
+# What appeared to survive -- a ~6-7 % SUM excess -- came from scoring a
+# whole-atmosphere box against N&L's TROPOSPHERE alone. Under the mass-
+# consistent framing (see PART_STRAT_TROP_MASS below) the budget CLOSES to
+# within the model's own input excess, which is what a model that conserves 14C
+# and is handed a prescribed input must do. There is no delivery error and
+# nothing for a re-shaped bomb source to repair.
+#
+# NB the header of this script had said "its atmosphere is one box, so it is
+# compared to troposphere+stratosphere" while the code compared to troposphere
+# ALONE. The prose was closer to right than the code; neither was exact.
 #
 # STALE CAVEAT, REMOVED. Earlier versions warned that land-use-change emissions
 # injected 14C ex nihilo into the atmosphere, so the atmospheric deficit was a
@@ -58,6 +67,40 @@ PART_LUC_CORE    <- "reference"        # the LUC flux measurement needs the wood
                                        # box's own 14C ratio, which the fast
                                        # core does not export; the R reference
                                        # core is stepped by hand in [C].
+
+# ---- THE ATMOSPHERIC FRAMING (2026-08-12) ---------------------------
+# R/model.R's atmosphere is ONE box carrying GtC_PER_PPM (R/constants.R) =
+# WHOLE-atmosphere carbon, while likelihood.R fits its D14C to obs_d14c_zonal
+# = SURFACE stations, i.e. TROPOSPHERIC air. Its excess-14C inventory is
+# therefore whole-atmosphere MASS at a TROPOSPHERIC ratio, and neither obvious
+# target is like-for-like:
+#   A  vs N&L troposphere alone         -- wrong by the entire stratospheric MASS
+#   B  vs N&L troposphere+stratosphere  -- credits the model with an enrichment
+#                                          a single well-mixed box cannot carry
+#   C  vs N&L troposphere scaled to whole-atmosphere mass   <-- like-for-like
+# C removes from the total only the stratosphere's ENRICHMENT excess over its
+# mass share, not its whole inventory. All three are printed; C is the score.
+#
+# The earlier argument for A -- "the bomb source is a delivery RATE to the
+# troposphere, so the stratospheric residence is already inside it" -- is about
+# TIMING and says nothing about MASS. It was wrong to draw a mass boundary from
+# it, and it is what produced the spurious "+6-7 % delivery error".
+PART_TROPOPAUSE_LAT  <- 30             # deg; GRACE steps 9 km -> 15 km here
+PART_TROPOPAUSE_HPA  <- c(extratropical = 308.0, tropical = 121.1)
+PART_SURFACE_HPA     <- 1013.25
+# Pressures are US Standard Atmosphere 1976 at GRACE's OWN tropopause altitudes
+# (9 km poleward of 30 deg, 15 km equatorward), read off Naegler & Levin (2006)
+# Figure 2 -- 22 atmospheric boxes, "six in the troposphere, 16 in the
+# stratosphere", six latitude bands at 30/60 deg. The model's atmosphere spans
+# the whole column, so the ratio below is strat-and-above over troposphere.
+#
+# COMPUTED, never hardcoded (project rule: numbers describing a result get
+# computed). Global area fraction equatorward of lat L is sin(L).
+PART_AREA_TROPICS    <- sin(PART_TROPOPAUSE_LAT * pi / 180)
+PART_F_TROPOSPHERE   <-
+  (1 - PART_AREA_TROPICS) * (1 - PART_TROPOPAUSE_HPA[["extratropical"]] / PART_SURFACE_HPA) +
+       PART_AREA_TROPICS  * (1 - PART_TROPOPAUSE_HPA[["tropical"]]      / PART_SURFACE_HPA)
+PART_STRAT_TROP_MASS <- (1 - PART_F_TROPOSPHERE) / PART_F_TROPOSPHERE
 
 cat("\n=== diag_bomb_partition.R ===\n")
 cat(sprintf("Partition of the bomb 14C budget at bomb_total = %.0f kmol\n",
@@ -99,15 +142,24 @@ nl_val <- function(src, q, y, col = "kmol_14c") {
 }
 
 cat("=== [A] where the bomb 14C sits, paired bomb-only, kmol ===\n")
-# COMPARE LIKE WITH LIKE. R/model.R has no stratospheric box, and the bomb
-# source is a DELIVERY RATE to the troposphere (data-raw/build_bomb_c14_source.R
-# header) -- the stratospheric residence is already inside the source. So the
-# model's atmosphere box is a TROPOSPHERE, and the honest comparison is against
-# N&L's troposphere alone, with their stratosphere removed from the total too.
-# Scoring it against troposphere+stratosphere would credit the model for 14C it
-# has, by construction, already delivered, and would flatter the deficit.
-cat("    model atm box = TROPOSPHERE (the source already carries the stratospheric\n")
-cat("    delay), so N&L's stratosphere is removed from their atmosphere AND their total\n\n")
+cat(sprintf("    model atm box = WHOLE-atmosphere mass at a TROPOSPHERIC ratio, so N&L's\n"))
+cat(sprintf("    troposphere is scaled by the GRACE strat/trop MASS ratio %.4f\n",
+            PART_STRAT_TROP_MASS))
+cat(sprintf("    (tropopause %.0f hPa poleward of %d deg / %.0f hPa equatorward;\n",
+            PART_TROPOPAUSE_HPA[["extratropical"]], PART_TROPOPAUSE_LAT,
+            PART_TROPOPAUSE_HPA[["tropical"]]))
+cat(sprintf("     troposphere = %.1f %% of atmospheric mass)\n", 100 * PART_F_TROPOSPHERE))
+# INDEPENDENT CHECK on that ratio, and on the physics behind framing C: by 1995
+# N&L's own stratosphere should have relaxed to carrying its MASS share of the
+# excess, so their strat/trop 14C ratio should land on the mass ratio above.
+part_nl_ratio <- vapply(PART_REF_YEARS, function(y)
+  nl_val(PART_NL_SOURCE, "stratosphere", y) / nl_val(PART_NL_SOURCE, "troposphere", y),
+  numeric(1))
+cat(sprintf("    check -- N&L strat/trop 14C ratio %.3f (%d) -> %.3f (%d) against a mass\n",
+            part_nl_ratio[1], PART_REF_YEARS[1], part_nl_ratio[2], PART_REF_YEARS[2]))
+cat(sprintf("    ratio of %.3f: the %d column CONFIRMS the reading, and the %d column is\n",
+            PART_STRAT_TROP_MASS, PART_REF_YEARS[2], PART_REF_YEARS[1]))
+cat("    the spike, when the real stratosphere was genuinely enriched.\n\n")
 part <- list()
 for (y in PART_REF_YEARS) {
   i <- row_at(o_b, y)
@@ -116,27 +168,47 @@ for (y in PART_REF_YEARS) {
   m_ocn <- ccx_c14_kmol(o_b$ocean_C14[i] - o_n$ocean_C14[i])
   m_sum <- m_atm + m_lnd + m_ocn
 
-  n_atm   <- nl_val(PART_NL_SOURCE, "troposphere",  y)
+  n_trop  <- nl_val(PART_NL_SOURCE, "troposphere",  y)
   n_strat <- nl_val(PART_NL_SOURCE, "stratosphere", y)
   n_lnd   <- nl_val(PART_NL_SOURCE, "biosphere",    y)
   n_ocn   <- nl_val(PART_NL_SOURCE, "ocean",        y)
-  n_sum   <- nl_val(PART_NL_SOURCE, "total_input",  y) - n_strat   # = delivered
+  n_tot   <- nl_val(PART_NL_SOURCE, "total_input",  y)
+
+  # the three framings; C is the score (see the constants block)
+  tgt_atm <- c(A = n_trop,
+               B = n_trop + n_strat,
+               C = n_trop * (1 + PART_STRAT_TROP_MASS))
+  tgt_sum <- c(A = n_tot - n_strat,
+               B = n_tot,
+               C = n_tot - (n_strat - n_trop * PART_STRAT_TROP_MASS))
+  n_atm <- tgt_atm[["C"]]; n_sum <- tgt_sum[["C"]]
 
   cat(sprintf("  --- %d ---\n", y))
   cat(sprintf("  %-16s %8s %8s %9s %9s\n", "reservoir", "MODEL", "N&L", "diff", "rel"))
   show <- function(lab, m, n) cat(sprintf("  %-16s %8.2f %8.2f %+9.2f %+8.0f %%\n",
                                           lab, m, n, m - n, 100 * (m / n - 1)))
-  show("troposphere", m_atm, n_atm)
-  show("biosphere",   m_lnd, n_lnd)
-  show("ocean",       m_ocn, n_ocn)
-  show("SUM delivered", m_sum, n_sum)
+  show("atmosphere",   m_atm, n_atm)
+  show("biosphere",    m_lnd, n_lnd)
+  show("ocean",        m_ocn, n_ocn)
+  show("SUM",          m_sum, n_sum)
   cat(sprintf("  observational brackets: troposphere %.1f-%.1f, ocean %.1f-%.1f\n",
               nl_val(PART_NL_OBS_TROP, "troposphere", y, "kmol_lo"),
               nl_val(PART_NL_OBS_TROP, "troposphere", y, "kmol_hi"),
               nl_val(PART_NL_OBS_OCN,  "ocean", y, "kmol_lo"),
               nl_val(PART_NL_OBS_OCN,  "ocean", y, "kmol_hi")))
-  cat(sprintf("  N&L still aloft (stratosphere): %.1f kmol -- the model has delivered it\n\n",
-              n_strat))
+  # the framing is reported, not assumed: A and B bracket C, and the SUM row is
+  # the one that decides whether there is a delivery error at all.
+  cat("  framing sensitivity (C is the score):\n")
+  fl <- c(A = "vs troposphere alone   ", B = "vs trop + stratosphere ",
+          C = "vs trop x whole-atm    ")
+  for (k in names(fl))
+    cat(sprintf("    %s %s  atm %7.2f (%+6.1f %%)   SUM %7.2f (%+6.1f %%)\n",
+                k, fl[[k]], tgt_atm[[k]], 100 * (m_atm / tgt_atm[[k]] - 1),
+                tgt_sum[[k]], 100 * (m_sum / tgt_sum[[k]] - 1)))
+  cat(sprintf("  N&L stratosphere %.1f kmol, of which %.1f is its MASS share and %.1f is\n",
+              n_strat, n_trop * PART_STRAT_TROP_MASS,
+              n_strat - n_trop * PART_STRAT_TROP_MASS))
+  cat("  enrichment a single well-mixed box cannot represent.\n\n")
   part[[as.character(y)]] <- c(atm = m_atm - n_atm, land = m_lnd - n_lnd,
                                ocean = m_ocn - n_ocn, sum = m_sum - n_sum)
 }
@@ -144,9 +216,12 @@ for (y in PART_REF_YEARS) {
 cat("  A DELIVERY error moves the SUM; a PARTITION error moves the rows within it:\n")
 for (y in PART_REF_YEARS) {
   d <- part[[as.character(y)]]
-  cat(sprintf("    %d  sum %+6.2f kmol of delivery, against trop %+6.2f / bio %+6.2f / ocn %+6.2f\n",
+  cat(sprintf("    %d  sum %+6.2f kmol of delivery, against atm %+6.2f / bio %+6.2f / ocn %+6.2f\n",
               y, d["sum"], d["atm"], d["land"], d["ocean"]))
 }
+cat("  The model runs at bomb_total = ", PART_BOMB_TOTAL,
+    " kmol against N&L's decay-corrected input, so a\n", sep = "")
+cat("  SUM residual of that size is the input difference, NOT a delivery error.\n")
 
 # =====================================================================
 # [B] Is the land pool the wrong SIZE, or the wrong SHAPE?
