@@ -1339,3 +1339,90 @@ The debit removes vegetation *carbon* but not vegetation *productive capacity*: 
 over-recovers. Options are to tie NPP to the veg stock (`npp0 * veg/veg0 * ...`), or to accept it
 and let `beta` absorb it — which is what the scan above is doing. **Not resolved**; it should be
 settled as part of the land restructure, which changes the pool layout anyway.
+
+## 2026-08-12 (night, later) — NPP capacity tie and a GPP loop; two predictions falsified
+
+Marcus: tie NPP to the veg stock; and on GPP — *"leaf growth and decay will release the same
+amount of isotopes back that it absorbs, whereas other components of GPP will be more like the
+ocean where exchanging CO₂ back and forth leads to equilibrating isotopes faster than the net
+CO₂ flux."* Both implemented in both cores; parity holds at 4.5e-13 on CO₂.
+
+- **`npp_veg_frac` (φ)** — `NPP = npp0 · [(1−φ) + φ·veg/veg0] · (1 + β ln(χ/χ₀))`. Default 0.5.
+- **`ra_ratio`** — `GPP = NPP·(1+ra_ratio)` down, `Ra = NPP·ra_ratio` back up at **veg's own
+  ratio**. Default **0**, which reproduces the previous model exactly. Marcus' distinction is
+  exactly what the parameter means: respiring carbon fixed days ago returns the *atmosphere's*
+  ratio and is a null loop; respiring from the pool returns the *pool's* ratio and is the
+  ocean-gross-exchange analogue. `add_flux` takes the source box's ratio, i.e. the second case,
+  so `ra_ratio` is the fraction of GPP that genuinely cycles **through the pool** — his two
+  regimes are its endpoints. Leaf growth-and-decay is not this flux; it is the existing
+  veg → soil → atm cascade, lagged rather than equilibrating.
+
+`calibration/diag_land_structure.R` tests three claims. **Two of my three predictions were wrong.**
+
+### ✗ "φ cannot be 1" — falsified
+
+The decoupled algebra says the veg coefficient is `(φ·f − 1)/tau_veg`, so `φ·f > 1` diverges.
+It does not. φ up to **1.10 (φ·f = 1.25) is stable**, because **χ is not exogenous**: a growing
+veg pool draws CO₂ down, which lowers `f`. CO₂ @2024 falls monotonically 413.7 → 322.2 ppm across
+the scan — that column *is* the feedback. The false bound has been removed from the comments in
+both cores; the diagnostic is kept live so it is not reinstated from algebra.
+
+### ✓ `ra_ratio` is isotopes-only — confirmed
+
+`max|ΔCO₂| ≤ 2.3e-13 ppm` and `max|Δland C| ≤ 9.1e-13 GtC` across `ra_ratio` ∈ [0, 1.5], while
+Δ¹⁴C moves. The net carbon flux is NPP by construction and the implementation honours it.
+
+### ✗ "the GPP loop shrinks the biosphere's bomb ¹⁴C" — falsified, and Marcus' caution was right
+
+| `ra_ratio` | trop 1975 | bio 1975 | trop 1995 | bio 1995 |
+|---|---|---|---|---|
+| 0.00 | 21.04 | 39.74 | 11.02 | 42.55 |
+| 0.50 | 20.68 | 42.47 | 11.76 | 42.43 |
+| 1.50 | 21.09 | **44.12** | 12.30 | 42.26 |
+
+The biosphere **rises** at 1975 and the troposphere barely moves. In 1975 the atmosphere is still
+far above natural, so a *lagging* veg pool is still catching up and holds **less** than
+equilibrium; equilibrating harder closes that gap upward. **Equilibrating faster is the wrong
+lever while the source is still elevated.** `ra_ratio` is correct physics and stays, defaulted to
+0 — it is simply not what closes the partition gap.
+
+### What does set the land's bomb ¹⁴C: it is multi-pool or nothing
+
+N&L: 21.7 / 18.9 kmol on a **2200 PgC** biosphere = **0.986 / 0.859 kmol per 100 GtC**.
+
+| tau_veg | tau_soil | bio 1975 | bio 1995 | land C 1975 | kmol/100 GtC |
+|---|---|---|---|---|---|
+| 10 | 25 | 39.74 | 42.55 | 2095 | 1.897 |
+| 10 | 3 | 30.49 | 23.69 | 786 | 3.880 |
+| 3 | 3 | 19.69 | 11.53 | 367 | 5.363 |
+| 20 | 50 | 42.52 | 52.01 | 4184 | **1.016** |
+
+The excess is strongly **sub-linear** in pool size — a bigger, slower pool dilutes the bomb signal
+faster than it accumulates it. N&L's ratio is reached only at a pool **twice theirs**. Matching
+their absolute inventory (tau 3/3) needs a pool **six times too small**. **One responsive soil
+pool cannot match their carbon stock and their ¹⁴C inventory simultaneously** — which is the
+signature of a multi-pool biosphere: fast pools cycle the bomb ¹⁴C, a large slow pool holds carbon
+while barely seeing it. That is the structural change the partition finding actually implies.
+
+### φ = 0.5 breaks the airborne fraction, and this is a physical benchmark
+
+`test-pulse.R:112/113` ("the airborne fraction is in the right ballpark", against recalled
+Joos et al. 2013 IRF values 0.59 / 0.41 at 20 / 100 yr) now **fails**: 0.402 and 0.243.
+
+| φ | AF @20 yr | AF @100 yr |
+|---|---|---|
+| **0.00** | **0.597** | **0.423** |
+| 0.25 | 0.517 | 0.344 |
+| 0.50 | 0.402 | 0.243 |
+
+**φ = 0 reproduces Joos almost exactly.** The capacity term is doing two jobs at once and only one
+was wanted: it makes clearing reduce productivity (wanted), but it *also* amplifies CO₂
+fertilisation on the way up (more veg → more NPP → more veg), and that positive feedback is what
+over-drains the pulse. Suite: **380 pass / 4 fail / 2 skip** — the two likelihood fixtures from
+the LUC commit, plus these two. Not modified, not skipped, per the standing rule.
+
+**Unresolved, for Marcus.** Separating the two jobs is the obvious move — e.g. clamping the
+capacity factor at `min(veg/veg0, 1)` so clearing costs capacity while growth does not add it.
+Not implemented: at defaults the land pool stays *above* veg0 all century, so the clamp would be
+inert historically, and whether it bites depends on a calibrated β. It needs deciding together
+with the multi-pool land, not before it.

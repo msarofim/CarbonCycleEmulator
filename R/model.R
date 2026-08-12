@@ -74,6 +74,15 @@ ccx_default_params <- function() {
     q10       = 2.0,      # heterotrophic respiration temperature sensitivity
     tau_veg   = 10,       # yr, vegetation turnover
     tau_soil  = 25,       # yr, responsive soil turnover
+    npp_veg_frac = 0.5,   # phi: fraction of NPP that scales with the standing
+                          # vegetation stock (the rest is stock-independent), so
+                          # that clearing a forest costs capacity and not only
+                          # carbon. Sub-linear because leaf area saturates with
+                          # biomass. Stable well past 1 -- see the derivative.
+    ra_ratio  = 0,        # Ra/NPP routed THROUGH the vegetation pool, i.e. the
+                          # equilibrating part of GPP. 0 = no gross loop, which
+                          # reproduces the pre-2026-08-12 model exactly. Affects
+                          # isotopes only; the net carbon flux is NPP regardless.
     k_w       = 1500,     # m/yr, gas transfer velocity
     h_ml      = 75,       # m, mixed-layer depth
     kz        = 4000,     # m2/yr, interior eddy diffusivity
@@ -175,8 +184,54 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     chi <- y[iatm, "C"] / aux$gtc_per_ppm_hemi          # ppm in this hemisphere
 
     # ---- land -------------------------------------------------------
-    npp <- aux$npp0[[h]] * (1 + p$beta * log(max(chi, 1e-6) / aux$chi0))
-    add_flux(iatm, iveg, npp, alpha13 = aux$alpha_photo)
+    # PRODUCTIVE CAPACITY. NPP scales partly with the standing vegetation stock,
+    # so clearing a forest reduces what the land can fix. Without this the
+    # land-use debit (see the emissions block) removes veg CARBON but not veg
+    # CAPACITY, and the land over-recovers.
+    #
+    # `npp_veg_frac` (phi) is PARTIAL because leaf area saturates with biomass,
+    # so productivity is sub-linear in standing stock rather than proportional
+    # to it. It is NOT partial for stability.
+    #
+    # A DECOUPLED STABILITY ARGUMENT FOR phi < 1/f WAS WRONG, and the correction
+    # is worth keeping. Spinup sets veg0 = npp0 * tau_veg exactly (spinup.R:54),
+    # so growth and litter loss are both linear in veg with equal coefficients at
+    # chi = chi0, and the veg coefficient is (phi*f - 1)/tau_veg with
+    # f = 1 + beta ln(chi/chi0). That predicts divergence for phi*f > 1. It does
+    # not happen: diag_land_structure.R [1] runs phi up to 1.10 (phi*f = 1.25)
+    # and every case is stable, because chi is NOT exogenous -- a growing veg
+    # pool draws CO2 down, which lowers f, which is a negative feedback the
+    # fixed-chi algebra omits. CO2 at 2024 falls monotonically 413.7 -> 322.2 ppm
+    # across that scan, which is the feedback doing the work.
+    # Do not reinstate a hard phi bound without re-running that diagnostic.
+    capacity <- (1 - p$npp_veg_frac) + p$npp_veg_frac * y[iveg, "C"] / aux$veg0[[h]]
+    npp <- aux$npp0[[h]] * capacity * (1 + p$beta * log(max(chi, 1e-6) / aux$chi0))
+
+    # GROSS PHOTOSYNTHESIS AND AUTOTROPHIC RESPIRATION. `ra_ratio` is Ra/NPP, so
+    # GPP = NPP * (1 + ra_ratio) down and Ra = NPP * ra_ratio back up. The NET
+    # atm->veg carbon flux is exactly NPP either way, so the CARBON budget is
+    # untouched by this parameter -- and so is the 13C steady state, since at
+    # equilibrium r_veg = r_atm * alpha_photo makes the net 13C flux npp * r_atm *
+    # alpha again. What it changes is the GROSS isotope exchange, which is what
+    # sets how fast veg equilibrates with the atmosphere.
+    #
+    # WHAT ra_ratio MEANS, and why it is not simply Ra/NPP from the literature
+    # (Marcus 2026-08-12): GPP is not one thing. Respiration of carbon fixed days
+    # ago still carries the ATMOSPHERE's ratio, so returning it is a null loop
+    # that equilibrates nothing. Respiration drawing on the plant's stored carbon
+    # carries the POOL's ratio, and that is the ocean-gross-exchange analogue
+    # which equilibrates isotopes faster than the net flux. add_flux takes the
+    # source box's ratio, i.e. the second case -- so ra_ratio is the fraction of
+    # GPP that genuinely cycles THROUGH the vegetation pool, and Marcus' two
+    # regimes are its endpoints (0 = null loop, literature Ra/NPP = upper bound).
+    # Leaf growth-and-decay is NOT this flux: it is already the veg -> soil ->
+    # atm cascade below, lagged rather than equilibrating.
+    #
+    # Default 0 reproduces the previous model exactly. The value is for the 14C
+    # data to choose, not for this file to assume.
+    ra <- npp * p$ra_ratio
+    add_flux(iatm, iveg, npp + ra, alpha13 = aux$alpha_photo)   # GPP
+    add_flux(iveg, iatm, ra)                                    # Ra, at veg's ratio
 
     litter <- y[iveg, "C"] / p$tau_veg
     add_flux(iveg, isol, litter)
@@ -295,6 +350,10 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     chi0        = ccx_const("CO2_PI_PPM"),
     mol_per_GtC = ccx_const("MOL_C_PER_GtC"),
     npp0        = npp0,
+    # preindustrial standing vegetation, the reference for the NPP capacity
+    # term. Must match ccx_spinup()'s land fixed point (spinup.R:54) exactly,
+    # or the spinup state stops being a fixed point of the derivative.
+    veg0        = lapply(npp0, function(n) n * p$tau_veg),
     sst         = list(NH = p$sst_NH, SH = p$sst_SH),
     ml_mass_kg  = lapply(a_oc, function(A) A * grid$h_ml * ccx_const("RHO_SEAWATER")),
     # air-sea prefactor: A [m2] * K0 [mol/(kg atm)] * rho [kg/m3] -> GtC/(yr uatm)

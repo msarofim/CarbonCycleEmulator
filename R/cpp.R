@@ -33,6 +33,7 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     gtc_per_ppm_hemi = aux$gtc_per_ppm_hemi,
     chi0 = aux$chi0, mol_per_GtC = aux$mol_per_GtC,
     npp0 = c(aux$npp0$NH, aux$npp0$SH),
+    veg0 = c(aux$veg0$NH, aux$veg0$SH),
     ml_mass_kg = c(aux$ml_mass_kg$NH, aux$ml_mass_kg$SH),
     asx = c(aux$asx$NH, aux$asx$SH),
     sst = c(aux$sst$NH, aux$sst$SH),
@@ -58,7 +59,13 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
 ccx_cpp_par <- function(p) {
   if (is.null(p$gamma_enso)) p$gamma_enso <- 0
   if (is.null(p$revelle_frozen)) p$revelle_frozen <- 0
+  # Land-structure parameters added 2026-08-12. Defaulted here as well as in
+  # ccx_default_params() so that a hand-built or older parameter list cannot
+  # reach the C++ with a missing name -- which unpacks as garbage, not an error.
+  if (is.null(p$npp_veg_frac)) p$npp_veg_frac <- 0
+  if (is.null(p$ra_ratio)) p$ra_ratio <- 0
   p[c("beta", "q10", "tau_veg", "tau_soil", "k_w", "kz", "tau_ex",
+      "npp_veg_frac", "ra_ratio",
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH", "revelle_frozen")]
 }

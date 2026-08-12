@@ -44,7 +44,7 @@ inline int IX(int box, int tr) { return box + NB * tr; }
 
 struct Aux {
   double gtc_per_ppm_hemi, chi0, mol_per_GtC;
-  double npp0[2], ml_mass_kg[2], asx[2], sst[2];
+  double npp0[2], veg0[2], ml_mass_kg[2], asx[2], sst[2];
   double dz[NL + 1], dz_mid[NL];
   double alpha_photo, alpha_as_down, alpha_as_up;
   double d13c_foss, enso_share[2];
@@ -59,6 +59,7 @@ struct Aux {
 
 struct Par {
   double beta, q10, tau_veg, tau_soil, k_w, kz, tau_ex;
+  double npp_veg_frac, ra_ratio;
   double sst_scale, gamma_enso;
   double seas_amp[2], seas_phase[2];
   double revelle_frozen;                    // mechanism switch, 0 or 1
@@ -166,10 +167,16 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 
     const double chi = y[IX(iatm, C)] / A.gtc_per_ppm_hemi;
 
-    // land
+    // land -- see R/model.R for what npp_veg_frac and ra_ratio mean, including
+    // why the decoupled phi < 1/f stability bound does NOT hold (the CO2
+    // feedback stabilises it). Association order mirrors the R exactly (parity).
     const double chi_safe = (chi > 1e-6) ? chi : 1e-6;
-    const double npp = A.npp0[hi] * (1.0 + P.beta * std::log(chi_safe / A.chi0));
-    add_flux(iatm, iveg, npp, A.alpha_photo);
+    const double capacity = (1.0 - P.npp_veg_frac)
+                            + P.npp_veg_frac * y[IX(iveg, C)] / A.veg0[hi];
+    const double npp = A.npp0[hi] * capacity * (1.0 + P.beta * std::log(chi_safe / A.chi0));
+    const double ra = npp * P.ra_ratio;
+    add_flux(iatm, iveg, npp + ra, A.alpha_photo);   // GPP
+    add_flux(iveg, iatm, ra, 1.0);                   // Ra, at veg's own ratio
 
     const double litter = y[IX(iveg, C)] / P.tau_veg;
     add_flux(iveg, isol, litter, 1.0);
@@ -239,6 +246,7 @@ static Aux unpack_aux(const List& a) {
   A.chi0 = a["chi0"]; A.mol_per_GtC = a["mol_per_GtC"];
   NumericVector v;
   v = a["npp0"];       A.npp0[0] = v[0];       A.npp0[1] = v[1];
+  v = a["veg0"];       A.veg0[0] = v[0];       A.veg0[1] = v[1];
   v = a["ml_mass_kg"]; A.ml_mass_kg[0] = v[0]; A.ml_mass_kg[1] = v[1];
   v = a["asx"];        A.asx[0] = v[0];        A.asx[1] = v[1];
   v = a["sst"];        A.sst[0] = v[0];        A.sst[1] = v[1];
@@ -267,6 +275,7 @@ static Par unpack_par(const List& p) {
   Par P;
   P.beta = p["beta"]; P.q10 = p["q10"];
   P.tau_veg = p["tau_veg"]; P.tau_soil = p["tau_soil"];
+  P.npp_veg_frac = p["npp_veg_frac"]; P.ra_ratio = p["ra_ratio"];
   P.k_w = p["k_w"]; P.kz = p["kz"]; P.tau_ex = p["tau_ex"];
   P.sst_scale = p["sst_scale"]; P.gamma_enso = p["gamma_enso"];
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
