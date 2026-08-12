@@ -1197,3 +1197,80 @@ nothing (any plausible shared method error) or it trades one 14C misfit for anot
 steps 2 and 4 — the bomb delivery shape at the 1963.04 Part A/B join, and the single ventilation
 timescale — are where the resolution has to come from. Step 1 is complete and its answer is
 that step 1 was never going to be enough.
+
+## 2026-08-12 (later) — The ¹⁴C defect is a PARTITION error, not a delivery-shape error
+
+Handoff §7 sent this session to the bomb delivery shape, "starting at the Part A / Part B join
+at 1963.04, where a 4.5× one-month step survives."
+
+**That entry point is stale.** The join step was already reduced **4.5× → 1.59×** on 2026-08-10
+by the sub-annual rebuild, and both `DATA.md` §9 and `notes/handoff_2026-08-10b` record what
+remains as *defensible real acceleration* (the autumn-1962 tests descending in spring 1963), not
+a method artefact. `Rscript data-raw/build_bomb_c14_source.R` prints `join step: 16.38 → 26.05
+kmol/yr = 1.59x in one month`. The 4.5× was carried forward through two handoffs after the thing
+it described had been fixed.
+
+So the shape question was re-opened on its merits instead, with a new diagnostic.
+
+### `calibration/diag_bomb_partition.R` — the same budget, split three ways
+
+N&L Table 4 partitions their cumulative bomb input across stratosphere / troposphere /
+biosphere / ocean at 1975 and 1995. Run at **their own citable total (102 kmol)** our model
+receives the same input, so the partition is a like-for-like test that is **independent of
+`bomb_total`**: not how much ¹⁴C there is, but where it went.
+
+**Compared like with like.** `R/model.R` has no stratospheric box and the bomb source is a
+*delivery rate to the troposphere* — the stratospheric residence is already inside the source.
+So the model's atmosphere box is a **troposphere**, and N&L's stratosphere is removed from their
+atmosphere *and from their total*. Scoring against troposphere+stratosphere instead would credit
+the model for ¹⁴C it has by construction already delivered, and would inflate the deficit from
+−40 % to −54 %.
+
+Paired bomb-only, kmol:
+
+| | model 1975 | N&L 1975 | | model 1995 | N&L 1995 | |
+|---|---|---|---|---|---|---|
+| troposphere | 16.13 | 26.80 | **−40 %** | 9.82 | 17.50 | **−44 %** |
+| biosphere | 32.80 | 21.70 | **+51 %** | 29.88 | 18.90 | **+58 %** |
+| ocean | 48.73 | 42.10 | +16 % | 63.34 | 60.00 | +6 % |
+| SUM delivered | 97.67 | 90.60 | +8 % | 103.04 | 96.40 | +7 % |
+
+Observational brackets bound the two rows that have them: troposphere 26.0–28.0 and 16.0–18.0;
+ocean 39.6–48.2 and 54.0–59.0 (Peacock, N&L-corrected). The model's troposphere is outside its
+bracket at both years; its ocean is inside at both.
+
+**Two errors, an order of magnitude apart.** The **sum** is +7–8 % — a real delivery-timing
+error, and the *most* a re-shaped source could ever repair. Inside that budget the troposphere
+is 40–44 % short and the biosphere 51–58 % long, **in the same direction at both reference
+years, twenty years apart**. Re-timing the delivery moves ¹⁴C between years; it cannot move it
+between reservoirs. This is why `bomb_total` sits at +4.5σ: the fit is buying atmospheric Δ¹⁴C
+it cannot otherwise have, and paying for it in the ocean-inventory term (2026-08-11).
+
+### The land is the wrong shape, not the wrong size
+
+Model land carbon is **1678 GtC (1975) / 1721 (1995) against N&L's 2200 PgC biosphere, −22 to
+−24 %** — a *smaller* pool holding *51–58 % more* bomb ¹⁴C. Capacity is not the defect; residence
+structure is. `R/model.R:177-185` is a strictly serial cascade atm → veg (`tau_veg` 10 yr) → soil
+(`tau_soil` 15 yr) → atm with **no fast autotrophic-respiration return**: every atom taken up by
+NPP is locked for the full 25 yr before it can come back. The real biosphere returns roughly half
+of GPP within the year. N&L's has four pools.
+
+This is the same defect the `tau_veg` sweep already saw from the other side and did not name:
+3 yr gives bomb rms 59.5 but CO₂ rms 11.98; 10 yr gives 69.1 and 0.99. A single serial chain has
+to serve the decadal ¹⁴C transient and the centennial CO₂ uptake with one timescale — structurally
+the same bind as one `kz` serving the bomb transient and the deep age (2026-08-11 §6.4(b)).
+
+### The LUC ¹⁴C leak does not contaminate this
+
+Measured, not assumed, in `[C]`: the leak's **paired** part is **0.52 kmol (1975) / 1.22 (1995)**
+against a total injection of 23.84 / 27.70. It enters the atmosphere, so removing it would widen
+the tropospheric deficit to −11.19 / −8.91 — the conclusion survives either resolution of the
+open decision, and the partition test did not need to wait on it. (The *unpaired* total still
+matters for §5's inventory comparison; nothing there changes.)
+
+### Consequence for the plan
+
+Handoff §7 steps 2 and 3 swap places, and step 6 is no longer optional. The land structure — a
+third fast pool, or an explicit GPP/autotrophic-respiration loop — is now the highest-value work,
+and it is what freeing `tau_veg` was always standing in for. Test suite unchanged at
+**384 pass / 0 fail / 2 skip**; this session added a diagnostic and no model or likelihood code.
