@@ -5,7 +5,7 @@ Supersedes `handoff_2026-08-12b_partition_and_land_structure.md`. Its §7 step 1
 (§3), its §7 step 2 (φ) is **closed by the restructure, not by a decision** (§5), and its §7
 step 3 is **done** (§6).
 
-**Branch.** `luc-veg-debit` = `6f6a1d3`, **still NOT merged**. Suite **380 pass / 4 fail /
+**Branch.** `luc-veg-debit` = `85ef079`, **still NOT merged**. Suite **380 pass / 4 fail /
 2 skip** — same count as before, **different set** (§8).
 
 ---
@@ -340,7 +340,8 @@ None of the four has been modified or skipped, per the standing rule.
 | `e236fba` | Four-pool land: the bomb-14C partition error is closed |
 | `16d2bb2` | diag_land_topology [4] + CHANGELOG: the 14C bounds the soil carbon-climate feedback |
 | `1703f2a` | Re-centre beta to 0.38, and stop hardcoding the app's CO2 bias |
-| `6f6a1d3` | Port diag_land_structure to the four-pool land; handoff 2026-08-12c |
+| `f924412` | Port diag_land_structure to the four-pool land; handoff 2026-08-12c |
+| `85ef079` | diag_stratosphere: the delivery error may be a framing artefact, not a defect |
 
 New diagnostics, all runnable from the repo root:
 `calibration/diag_land_topology.R`, `calibration/diag_stratosphere.R`.
