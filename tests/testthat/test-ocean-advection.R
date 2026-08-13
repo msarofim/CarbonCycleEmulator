@@ -1,6 +1,13 @@
 # =====================================================================
-# Gate: the ocean overturning term (`w_up`, added 2026-08-13) is OFF by default
-# and correct when on.
+# Gate: the ocean overturning terms (`w_up`, `w_out_NH`, `w_out_SH`, added
+# 2026-08-13) are OFF by default and correct when on.
+#
+# TWO CONFIGURATIONS, differing in which limb is non-local:
+#   `w_up`   distributed upwelling with a non-local SINKING limb (ml -> bottom):
+#            the classical upwelling-diffusion column.
+#   `w_out`  a non-local UPWELLING limb (bottom -> ml, a Southern Ocean outcrop)
+#            with a distributed descent. Per hemisphere.
+# The last two tests hold the symmetry that ties them at the atmosphere.
 #
 # WHY THIS FILE EXISTS AT ALL, given that the mechanism is not adopted.
 # diag_ocean_upwelling.R measured it and the answer was "possible, cheap, and it
@@ -113,4 +120,61 @@ test_that("R and C++ agree with overturning on", {
   dC <- ccx_deriv_fast(s$y, 1960, p, frc, s$grid, s$aux)
   for (tr in CCX_TRACERS)
     expect_lt(max(abs(dR[, tr] - dC[, tr])), 1e-9 * max(abs(dR[, tr])) + 1e-12)
+})
+
+test_that("reversing the circulation leaves the ATMOSPHERE invariant, not the deep ocean", {
+  skip_if_no_cpp()
+  # The symmetry measured 2026-08-13 and proved in diag_ocean_upwelling.R part 9.
+  # `w_up` (distributed up, non-local sinking) and `w_out` (non-local upwelling,
+  # distributed descent) are the same closed loop run in opposite directions, so
+  # their transport operators are related by A_out = D A_up^T D^-1 with
+  # D = diag(dz). A transpose preserves diagonal elements of the propagator, and
+  # the mixed layer is the ONLY box coupling the ocean to the rest of the model
+  # (air-sea acts at `iml` and nowhere else) -- so every observable outside the
+  # column is invariant, while the interior is not.
+  #
+  # This is held as a test because it is the load-bearing reason the mechanism
+  # was not adopted: it makes the negative result GENERAL (no rerouting of a
+  # closed vertical loop can change what the atmosphere sees) rather than a
+  # property of one parameterisation. If a future edit breaks the tie, either
+  # the operator symmetry is gone or something has started coupling the interior
+  # to the atmosphere directly -- both worth knowing about immediately.
+  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  a <- run_w(0); stopifnot(!anyNA(a$run$out))
+  up  <- run_w(W_TEST)
+  pp  <- p; pp$w_out_NH <- W_TEST; pp$w_out_SH <- W_TEST
+  s   <- ccx_spinup(pp)
+  F   <- ccx_build_forcing("historical", YRS, prod_c14 = s$prod_c14)
+  out <- ccx_run_fast(s, F)
+
+  # the atmosphere, the land and the ocean TOTALS are tied
+  expect_equal(as.matrix(out$out), as.matrix(up$run$out), tolerance = 1e-8)
+  # and the mechanism is doing something -- against no advection at all
+  expect_false(isTRUE(all.equal(out$out$d13c_NH, a$run$out$d13c_NH)))
+  # but the INTERIOR is not tied: the outcrop keeps the deep ocean OLDER, i.e.
+  # MORE negative in Delta14C -- it never injects modern surface water into the
+  # bottom box, where the classic-UD sinking limb does exactly that.
+  expect_lt(s$diagnostics$d14c_deep_ocean - up$spin$diagnostics$d14c_deep_ocean, -5)
+})
+
+test_that("the operator symmetry itself holds: A_out = D A_up^T D^-1", {
+  # Stated on the operators rather than on a run, so a failure says WHICH of the
+  # two limbs was mis-wired instead of only that some output moved.
+  g <- ccx_ocean_grid(75); n <- g$nl + 1; dz <- g$dz; w <- W_TEST
+  A_up <- A_out <- matrix(0, n, n)
+  for (k in seq_len(g$nl)) {
+    A_up[k, k + 1] <- A_up[k, k + 1] + w / dz[k + 1]
+    A_up[k + 1, k + 1] <- A_up[k + 1, k + 1] - w / dz[k + 1]
+    A_out[k + 1, k] <- A_out[k + 1, k] + w / dz[k]
+    A_out[k, k] <- A_out[k, k] - w / dz[k]
+  }
+  A_up[n, 1] <- A_up[n, 1] + w / dz[1]; A_up[1, 1] <- A_up[1, 1] - w / dz[1]
+  A_out[1, n] <- A_out[1, n] + w / dz[n]; A_out[n, n] <- A_out[n, n] - w / dz[n]
+  D <- diag(dz)
+  expect_lt(max(abs(A_out - D %*% t(A_up) %*% solve(D))), 1e-15)
+  # both conserve mass and both hold a uniform column as a fixed point
+  expect_lt(max(abs(colSums(A_up))), 1e-15)
+  expect_lt(max(abs(colSums(A_out))), 1e-15)
+  expect_lt(max(abs(A_up %*% dz)), 1e-12)
+  expect_lt(max(abs(A_out %*% dz)), 1e-12)
 })

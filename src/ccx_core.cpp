@@ -64,7 +64,7 @@ struct Aux {
 };
 
 struct Par {
-  double beta, q10, k_w, kz, w_up, tau_ex;
+  double beta, q10, k_w, kz, w_up, w_out[2], tau_ex;
   double npp_leaf_frac, tau_leaf, tau_wood;
   double litter_slow_frac, tau_soil_fast, tau_soil_slow;
   double npp_veg_frac, ra_ratio;
@@ -259,6 +259,20 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       add_flux(iml, base + IML + NL, P.w_up * y[IX(iml, C)] / A.dz[0], 1.0);
     }
 
+    // outcropping: the non-local limb runs UPWARD -- deep box to mixed layer in
+    // one step, with a distributed descending return. NOT a relabelling of
+    // w_up; see R/model.R for why which limb is non-local decides both what
+    // arrives at the surface and what happens to the deep 14C age.
+    if (P.w_out[hi] > 0.0) {
+      const int ideep = base + IML + NL;
+      add_flux(ideep, iml, P.w_out[hi] * y[IX(ideep, C)] / A.dz[NL], 1.0);
+      for (int kk = 0; kk < NL; ++kk) {
+        const int a = base + IML + kk;
+        const int b = base + IML + kk + 1;
+        add_flux(a, b, P.w_out[hi] * y[IX(a, C)] / A.dz[kk], 1.0);
+      }
+    }
+
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
     // external to the modelled system; land-use change is not, so it is a
     // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
@@ -320,6 +334,7 @@ static Par unpack_par(const List& p) {
   P.tau_soil_fast = p["tau_soil_fast"]; P.tau_soil_slow = p["tau_soil_slow"];
   P.npp_veg_frac = p["npp_veg_frac"]; P.ra_ratio = p["ra_ratio"];
   P.k_w = p["k_w"]; P.kz = p["kz"]; P.w_up = p["w_up"]; P.tau_ex = p["tau_ex"];
+  P.w_out[0] = p["w_out_NH"]; P.w_out[1] = p["w_out_SH"];
   P.sst_scale = p["sst_scale"]; P.gamma_enso = p["gamma_enso"];
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];

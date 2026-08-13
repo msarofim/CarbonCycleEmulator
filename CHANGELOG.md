@@ -1954,3 +1954,57 @@ not the product of the global means. That is a second surface box — the outcro
 structure DESIGN §2 rejected — and a bigger decision than a diagnostic can take.
 
 Suite **418 pass / 4 fail / 2 skip** — the same four failures, plus 18 new guards.
+
+## 2026-08-13 (later still, cont.) — The other configuration: deep water straight to the surface
+
+Marcus asked for the mechanism the previous entry did **not** test: deep water reaching the
+surface *without passing through the intermediate layers*, as a Southern Ocean outcrop. The
+entry above built the mirror image — its non-local limb runs **downward** (ml → bottom),
+with a layer-by-layer ascent. So the ask was a different operator, and in the way that
+matters: under `w_up` the water arriving at the mixed layer comes from `oc1`, which is
+diffusively slaved to it (an ml→oc1 δ¹³C gap of only 0.167 ‰), while an outcrop delivers
+bottom water at the full preindustrial contrast.
+
+**Built** as `w_out_NH` / `w_out_SH` (m/yr, per hemisphere — the real outcrop is a Southern
+Ocean feature and the two ocean columns exchange only through the atmosphere). Both default
+0, both absent from `CCX_PARAM_TABLE`.
+
+**It ties the first configuration exactly, and that is the finding.** At equal `w` the two
+give identical CO₂, δ¹³C, Δ¹⁴C, ocean and land carbon — to **~1e-10**, at every `kz` from
+10 to 5000. Not similar: *tied*. They are the same closed loop traversed in opposite
+directions, so their transport operators satisfy
+
+> **A_out = D · A_upᵀ · D⁻¹**,  D = diag(dz)  — verified to **1.7e-18**
+
+and interior diffusion is self-adjoint in the same weighting (**2.2e-16**), so it does not
+break the relation. A transpose preserves the *diagonal* elements of the propagator, and
+**the mixed layer is the only box through which the ocean touches the rest of the model** —
+air-sea exchange acts at `iml` and nowhere else. So the atmosphere sees the column
+exclusively through an ml→ml response that is invariant under reversing the circulation:
+`|ml→ml difference|` = **4e-17** over 100 yr, against a largest difference anywhere in the
+propagator of **0.27**.
+
+**This is what makes the negative result general.** It is no longer "one advection scheme
+failed" but "no reversal or rerouting of a closed vertical loop can change what the
+atmosphere sees". Only something that changes the **mixed layer's own budget** can: a second
+surface box, or the air-sea flux itself. The direct check agrees — with `kz` bisected to
+hold the deep age, the outcrop makes δ¹³C **worse** (+0.548 → +0.608 at 4 m/yr SH-only),
+exactly as the classic UD did (+0.628 at 1 m/yr).
+
+**A correction to the previous entry's "one number".** The 10.5 yr equilibration vs 18.8 yr
+flush ratio bounds how *fast* the mixed layer is renewed, not how much good the renewal
+does; those come apart when the arriving water is very different from the ml. Renewing with
+fully preindustrial water would leave the ml at τ_flush/(τ_flush + τ_eq) = **0.64** of full
+equilibrium at 4 m/yr — a 36 % cut. So that argument alone did **not** rule out a non-local
+deep-to-surface path; the operator symmetry is what rules it out.
+
+**The off-diagonals are not tied, and there the outcrop is the better-behaved one.** At
+4 m/yr the deep ocean sits at **−108 ‰** (both hemispheres) or **−135 ‰** (SH only) against
+**−100 ‰** for classic UD, because the descending limb has to traverse the whole column
+(~depth/w years) instead of injecting modern surface water into the bottom box directly —
+and in the preindustrial steady state the water then ages monotonically downward, the
+observed sense of the profile rather than its inverse. None of that reaches the atmosphere.
+An SH-only outcrop also leaves the MLO−SPO δ¹³C gradient essentially untouched
+(−0.226 ‰ vs −0.218 ‰ at `w_out_SH` = 4, against an observed −0.074 ‰ over 1993–2014).
+
+Suite **426 pass / 4 fail / 2 skip** — the same four failures, plus 8 more guards.

@@ -38,10 +38,41 @@
 # anchor is independent and exact: DU_SV_REF Sv spread over this model's ocean
 # area is DU_W_FOR_SV_REF m/yr, printed below.
 #
+# TWO CONFIGURATIONS ARE TESTED, because which limb is non-local is the whole
+# question (Marcus, 2026-08-13):
+#   `w_up`                  distributed upwelling, non-local SINKING (ml -> bottom)
+#   `w_out_NH`/`w_out_SH`   non-local UPWELLING (bottom -> ml, a Southern Ocean
+#                           outcrop), distributed descent
+# Parts 1-5 are the first, parts 6-9 the second. Part 9 proves they tie.
+#
 # ---------------------------------------------------------------------
-# RESULT (2026-08-13): POSSIBLE, CHEAP, AND IT DOES NOT HELP. The mechanism is
-# NOT adopted -- `w_up` stays 0 in ccx_default_params() and out of
-# CCX_PARAM_TABLE. Three measurements, in the order that settles it:
+# RESULT (2026-08-13): POSSIBLE, CHEAP, AND IT DOES NOT HELP -- in EITHER
+# configuration, and the second one provably. The mechanism is NOT adopted:
+# `w_up`, `w_out_NH` and `w_out_SH` all stay 0 in ccx_default_params() and out of
+# CCX_PARAM_TABLE. Four measurements, in the order that settles it:
+#
+# 0. THE TWO CONFIGURATIONS ARE EXACTLY TIED AT THE ATMOSPHERE (part 9). Not
+#    similar -- identical to ~1e-10 in CO2, d13C, D14C, ocean and land carbon, at
+#    every kz from 10 to 5000. They are the same closed loop run in opposite
+#    directions, so their transport operators satisfy A_out = D A_up^T D^-1 with
+#    D = diag(dz) (verified to 1.7e-18), and diffusion is self-adjoint in the
+#    same weighting (2.2e-16), so it does not break the relation. A transpose
+#    preserves diagonal elements of the propagator, and the mixed layer is the
+#    ONLY box through which the ocean touches the rest of the model -- air-sea
+#    exchange acts at `iml` and nowhere else. So the atmosphere sees the column
+#    exclusively through an ml-to-ml response that is invariant under reversing
+#    the circulation: |ml->ml difference| = 4e-17 over 100 yr, against a largest
+#    difference anywhere in the propagator of 0.27.
+#    THE OFF-DIAGONALS ARE NOT TIED, which is why the deep-ocean age does differ
+#    and why the outcrop version is the better-behaved one there (at 4 m/yr:
+#    -108 permil both-hemispheres, -135 SH-only, against -100 for classic UD).
+#    This is what makes the negative result GENERAL rather than one failed
+#    parameterisation: no reversal or rerouting of a closed vertical loop can
+#    change what the atmosphere sees. Only something that changes the MIXED
+#    LAYER'S OWN budget can -- a second surface box, or the air-sea flux itself.
+#
+# The remaining three are stated for `w_up`; by (0) they hold for the outcrop
+# configuration too, and parts 6-8 confirm it directly:
 #
 # 1. IT IS A SECOND KNOB ON THE SAME TRADE, not a new axis (part 3). Both kz and
 #    w_up buy d13C damping by making the deep ocean younger, and per permil of
@@ -64,6 +95,12 @@
 #    yr). Flushing at 4 m/yr through 75 m takes 18.8 yr -- 1.8x too slow. The
 #    crossover is w_up ~ 7 m/yr, i.e. ~80 Sv, about 4x the real overturning.
 #    A global-mean overturning cannot outrun air-sea exchange. It is not close.
+#    CAVEAT ON THIS ARGUMENT, since it was overstated once: the ratio bounds how
+#    fast the ml is renewed, NOT how much good the renewal does, and those come
+#    apart when the arriving water is very different from the ml. Renewing with
+#    FULLY preindustrial water leaves the ml at tau_flush/(tau_flush + tau_eq) of
+#    full equilibrium = 0.64 at 4 m/yr, a 36 % cut -- so this argument alone does
+#    NOT rule out a non-local deep-to-surface path. Item 0 is what rules it out.
 #
 # 3. THE MECHANISM DOES WORK, AND STILL LOSES (part 4). At w_up 4 / kz 1000 the
 #    upwelled water genuinely arrives old -- the ml-to-oc1 d13C gap widens 0.167
@@ -103,6 +140,7 @@ DU_D14C_WIN   <- c(2000, 2019)   # Delta14C window (Hua ends 2019)
 DU_W_GRID     <- c(0, 0.5, 1, 2, 4, 6, 8)      # m/yr
 DU_KZ_SEARCH  <- c(50, 8000)     # bisection bracket for the compensated kz
 DU_DEEP_OBS   <- c(-150, -200)   # observed deep-ocean D14C bracket (CCX_PARAM_TABLE$kz)
+DU_D13_BOTH_WIN <- c(1993, 2014) # window where BOTH MLO and SPO d13C obs exist
 DU_SV_REF     <- 20              # Sv, for the overturning arithmetic anchor
 DU_SEC_PER_YR <- 365.25 * 86400
 
@@ -316,3 +354,151 @@ for (w in DU_W_GRID[DU_W_GRID > 0]) {
 }
 cat(sprintf("a flush/equil ratio above 1 means the atmosphere wins: the ml\n"))
 cat(sprintf("re-equilibrates faster than overturning can renew it.\n"))
+cat("BUT this ratio is only half the story -- it says how FAST the ml is renewed,\n")
+cat("not how DIFFERENT the arriving water is. Under w_up the arriving water is\n")
+cat("oc1, only 0.167 permil from the ml, so a slow flush of nearly-identical\n")
+cat("water does nothing. Parts 6-8 renew the ml from the BOTTOM box instead.\n")
+
+# =====================================================================
+# PARTS 6-8: THE OTHER CONFIGURATION (Marcus 2026-08-13)
+#
+# `w_out_NH` / `w_out_SH`: deep box -> mixed layer in ONE step, with the return
+# flow distributed down through every interface. The mirror image of w_up, and
+# the two differ in both directions:
+#   * what arrives at the surface is bottom water carrying the FULL
+#     preindustrial contrast, not oc1 water that is diffusively slaved to the ml;
+#   * the descending limb has to traverse the whole column (~depth/w years), so
+#     the anthropogenic signal never reaches the bottom box over the industrial
+#     period -- where w_up injected it there directly.
+# Per hemisphere, because the real outcrop is a Southern Ocean feature.
+#
+# The steady-state prediction, for reference: renewing the ml with FULLY
+# preindustrial water at 1/tau_flush against air-sea relaxation at 1/tau_eq
+# leaves the ml at tau_flush / (tau_flush + tau_eq) of full equilibrium. At
+# 4 m/yr that is 18.8 / 29.3 = 0.64, i.e. a 36 % cut in ml depletion -- so the
+# part-5 timescale argument does NOT rule this configuration out.
+# =====================================================================
+cat("\n== PART 6: outcropping -- deep water reaching the surface in one step ==\n")
+DU_OUT_GRID <- c(0, 0.5, 1, 2, 4, 8)
+hdr()
+for (w in DU_OUT_GRID) {
+  p <- p0; p$w_out_SH <- w
+  m <- du_metrics(p)
+  if (is.null(m)) { cat(sprintf("%-6g   run failed (NA)\n", w)); next }
+  row(w, p$kz, m, if (w == 0) "   <- current model" else "   SH only")
+}
+for (w in DU_OUT_GRID[DU_OUT_GRID > 0]) {
+  p <- p0; p$w_out_SH <- w; p$w_out_NH <- w
+  m <- du_metrics(p)
+  if (is.null(m)) next
+  row(w, p$kz, m, "   both hemispheres")
+}
+
+cat(sprintf("\n== PART 7: outcropping with kz bisected to hold deep D14C at %+.1f ==\n",
+            DEEP_TARGET))
+hdr()
+for (w in DU_OUT_GRID) {
+  p <- p0; p$w_out_SH <- w
+  kz <- if (w == 0) p0$kz else du_kz_for_deep(p, DEEP_TARGET)
+  if (is.na(kz)) {
+    cat(sprintf("%-6g       - | deep age unreachable within kz [%g, %g]\n",
+                w, DU_KZ_SEARCH[1], DU_KZ_SEARCH[2]))
+    next
+  }
+  p$kz <- kz
+  m <- du_metrics(p)
+  if (is.null(m)) { cat(sprintf("%-6g %7.0f | run failed (NA)\n", w, kz)); next }
+  row(w, kz, m, if (w == 0) "   <- current model" else "   SH only")
+}
+
+# ---- PART 8: an SH-only mechanism is a claim about the GRADIENT -----
+# The model is scored at MLO and SPO separately. A southern-hemisphere outcrop
+# that fixes the global level by breaking the north-south difference has not
+# fixed anything, so the two stations are reported separately, over the window
+# where SPO d13C observations actually exist (they end in 2014).
+cat("\n== PART 8: does an SH-only outcrop break the MLO-SPO gradient? ==\n")
+cat(sprintf("   d13C biases over %d-%d, where SPO observations exist\n",
+            DU_D13_BOTH_WIN[1], DU_D13_BOTH_WIN[2]))
+cat(sprintf("%-6s %-8s %7s | %8s %8s %10s | %9s\n",
+            "w_out", "hemis", "kz", "MLO", "SPO", "MLO-SPO", "obs MLO-SPO"))
+du_stations <- function(p) {
+  s <- ccx_spinup(p)
+  F <- base_forcing; F$c14_cosmo <- s$prod_c14
+  out <- ccx_run_fast(s, F)$out
+  if (anyNA(out$co2_NH)) return(NULL)
+  ms <- ccx_model_stats(out, obs)
+  st <- function(stn) {
+    o <- obs$d13_ann[[stn]]; m <- ms$d13[[stn]]
+    k <- match(o$year, m$year)
+    g <- !is.na(k) & o$year >= DU_D13_BOTH_WIN[1] & o$year <= DU_D13_BOTH_WIN[2]
+    c(bias = mean(o$level[g] - m$level[k[g]]),
+      obs = mean(o$level[g]), mod = mean(m$level[k[g]]))
+  }
+  list(MLO = st("MLO"), SPO = st("SPO"))
+}
+for (cfg in list(list(0, "-", 0, 0), list(4, "SH only", 0, 4),
+                 list(4, "both", 4, 4), list(8, "SH only", 0, 8))) {
+  p <- p0; p$w_out_NH <- cfg[[3]]; p$w_out_SH <- cfg[[4]]
+  v <- du_stations(p)
+  if (is.null(v)) next
+  cat(sprintf("%-6g %-8s %7g | %+8.3f %+8.3f %+10.3f | %+9.3f\n",
+              cfg[[1]], cfg[[2]], p$kz, v$MLO[["bias"]], v$SPO[["bias"]],
+              v$MLO[["mod"]] - v$SPO[["mod"]], v$MLO[["obs"]] - v$SPO[["obs"]]))
+}
+
+# ---- PART 9: WHY the two configurations tie, exactly ----------------
+# Parts 6-7 do not merely come out similar to parts 1-2 -- at equal w the
+# atmosphere is identical to ~1e-10, at every kz from 10 to 5000. That is a
+# symmetry, not a coincidence, and it is worth stating exactly because it closes
+# off a whole family of alternatives rather than one of them:
+#
+#   The two circulations are the SAME closed loop traversed in opposite
+#   directions, so their transport operators are related by
+#       A_out = D A_up^T D^-1,    D = diag(dz)
+#   a similarity transform of the TRANSPOSE. Interior diffusion satisfies
+#   K = D K^T D^-1 in the same weighting, so it does not break the relation.
+#   A transpose preserves DIAGONAL elements of every matrix power, hence of the
+#   propagator: (exp A_out t)[ml,ml] = (exp A_up t)[ml,ml] exactly.
+#
+#   And the mixed layer is the ONLY box through which the ocean touches the rest
+#   of the model -- air-sea exchange acts at `iml` and nowhere else. So the
+#   atmosphere, the land and the sink partition see the column exclusively
+#   through its ml-to-ml response, which is invariant. The OFF-diagonal
+#   elements are not invariant, which is why the interior profile and the
+#   deep-ocean age do differ.
+#
+# CONSEQUENCE, and it is the answer to "would a more direct deep-to-surface
+# path help?": no reversal or rerouting of a closed vertical loop can change
+# what the atmosphere sees. Only something that changes the MIXED LAYER's own
+# budget can -- a second surface box, or the air-sea flux itself.
+cat("\n== PART 9: the two configurations are exactly tied, and here is why ==\n")
+gg <- ccx_ocean_grid(p0$h_ml); nn <- gg$nl + 1; dzv <- gg$dz; WW <- 4
+A_up <- A_out <- KK <- matrix(0, nn, nn)
+for (k in seq_len(gg$nl)) {
+  A_up[k, k + 1] <- A_up[k, k + 1] + WW / dzv[k + 1]
+  A_up[k + 1, k + 1] <- A_up[k + 1, k + 1] - WW / dzv[k + 1]
+  A_out[k + 1, k] <- A_out[k + 1, k] + WW / dzv[k]
+  A_out[k, k] <- A_out[k, k] - WW / dzv[k]
+}
+A_up[nn, 1] <- A_up[nn, 1] + WW / dzv[1]; A_up[1, 1] <- A_up[1, 1] - WW / dzv[1]
+A_out[1, nn] <- A_out[1, nn] + WW / dzv[nn]
+A_out[nn, nn] <- A_out[nn, nn] - WW / dzv[nn]
+dzm <- (dzv[-nn] + dzv[-1]) / 2
+for (k in seq_len(nn - 1)) {
+  a <- p0$kz / (dzv[k] * dzm[k]); b <- p0$kz / (dzv[k + 1] * dzm[k])
+  KK[k, k] <- KK[k, k] - a; KK[k, k + 1] <- KK[k, k + 1] + b
+  KK[k + 1, k] <- KK[k + 1, k] + a; KK[k + 1, k + 1] <- KK[k + 1, k + 1] - b
+}
+D <- diag(dzv); Di <- solve(D)
+cat(sprintf("max |A_out - D A_up^T D^-1| = %.2e  (operator scale %.2e)\n",
+            max(abs(A_out - D %*% t(A_up) %*% Di)), max(abs(A_up))))
+cat(sprintf("max |K     - D K^T     D^-1| = %.2e  (diffusion does not break it)\n",
+            max(abs(KK - D %*% t(KK) %*% Di))))
+if (requireNamespace("Matrix", quietly = TRUE)) {
+  E1 <- as.matrix(Matrix::expm((A_up + KK) * 100))
+  E2 <- as.matrix(Matrix::expm((A_out + KK) * 100))
+  cat(sprintf("100-yr propagator: |ml->ml difference| %.2e ; largest difference anywhere %.2e\n",
+              abs(E1[1, 1] - E2[1, 1]), max(abs(E1 - E2))))
+  cat(sprintf("                   |deep->ml difference| %.2e  <- the interior is NOT tied\n",
+              abs(E1[nn, 1] - E2[nn, 1])))
+}

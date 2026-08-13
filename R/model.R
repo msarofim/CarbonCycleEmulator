@@ -139,6 +139,18 @@ ccx_default_params <- function() {
     # becomes a calibrated parameter, a fixed structural value, or stays off is
     # a decision for DESIGN.md section 10, NOT for this default.
     w_up      = 0,
+    # OUTCROPPING, m/yr, PER HEMISPHERE (Marcus 2026-08-13). The OTHER way to
+    # make the column non-diffusive, and the one that matches where the real
+    # ocean does it: deep water reaches the surface in ONE step -- a Southern
+    # Ocean outcrop -- and the return path is distributed downward. `w_up` above
+    # is the mirror image of this (distributed up, non-local down), and the two
+    # are NOT interchangeable: see the block in ccx_deriv(). Per hemisphere
+    # because the outcrop is a Southern Ocean feature and the two ocean columns
+    # are otherwise independent -- an SH-only value is a testable claim about
+    # the MLO-SPO gradient, which the likelihood already scores.
+    # Both 0 = the pure-diffusion ocean, exactly.
+    w_out_NH  = 0,
+    w_out_SH  = 0,
     kz        = 5000,     # m2/yr, interior eddy diffusivity. RE-CENTRED
                           # 2026-08-12 from 4000, to the centre of the range that
                           # puts deep-ocean D14C inside the observed -150 to -200
@@ -416,6 +428,40 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
       add_flux(iml, col[grid$nl + 1], p$w_up * y[iml, "C"] / grid$dz[1])  # sinking
     }
 
+    # ---- ocean outcropping: the non-local limb runs UPWARD ------------
+    # THE MIRROR IMAGE OF `w_up`, AND NOT A RELABELLING OF IT. Here the deep box
+    # ventilates to the mixed layer in ONE step, and the compensating flow
+    # descends through every interface. Which limb is the non-local one decides
+    # everything, in both directions:
+    #
+    #   WHAT ARRIVES AT THE SURFACE. Under `w_up` the mixed layer is renewed from
+    #   the layer directly beneath it -- and that layer is diffusively slaved to
+    #   the mixed layer (kz/(dz dz_mid) ~ 1.5/yr at kz 5000), so the water
+    #   arriving is already loaded and carries almost no disequilibrium
+    #   (measured: an ml-to-oc1 d13C gap of 0.167 permil). Here the arriving
+    #   water comes from the bottom box, which the anthropogenic signal has not
+    #   reached, so it carries the FULL preindustrial contrast.
+    #
+    #   WHAT HAPPENS TO THE DEEP OCEAN. Under `w_up` the sinking limb injects
+    #   modern surface water straight into the bottom box, which destroys the
+    #   deep 14C age within decades (-170 -> -100 permil at 4 m/yr). Here the
+    #   descending limb has to traverse the whole column, ~depth/w_out years, so
+    #   over the industrial period the bottom box never sees the perturbation --
+    #   and in the preindustrial steady state the water ages monotonically
+    #   downward, which is the observed sense of the profile rather than its
+    #   inverse.
+    #
+    # PER HEMISPHERE, because the real outcrop is a Southern Ocean feature and
+    # the two ocean columns exchange only through the atmosphere.
+    w_out <- if (h == "NH") p$w_out_NH else p$w_out_SH
+    if (isTRUE(w_out > 0)) {
+      ideep <- col[grid$nl + 1]
+      add_flux(ideep, iml, w_out * y[ideep, "C"] / grid$dz[grid$nl + 1])  # outcrop
+      for (kk in seq_len(grid$nl)) {                       # distributed return
+        add_flux(col[kk], col[kk + 1], w_out * y[col[kk], "C"] / grid$dz[kk])
+      }
+    }
+
     # ---- prescribed emissions ---------------------------------------
     # Fossil carbon comes from OUTSIDE the modelled system (geology), so it is a
     # true external source, and it is 14C-free.
@@ -627,14 +673,16 @@ ccx_diffusion_eigmax <- function(kz, grid) {
 #' Returns exactly 0 at w_up = 0, so a pure-diffusion run resolves to the same
 #' substep count it always did.
 ccx_advection_eigbound <- function(w_up, grid) {
-  if (is.null(w_up) || w_up <= 0) return(0)
-  2 * max(w_up / grid$dz)
+  w <- max(c(0, unlist(w_up)), na.rm = TRUE)   # the fastest limb in either hemisphere
+  if (w <= 0) return(0)
+  2 * max(w / grid$dz)
 }
 
 #' Substeps needed to keep the explicit interior transport stable over one step
 #' @param dt master step, years (1/12 for the monthly integrator)
 ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
-  lam <- ccx_diffusion_eigmax(p$kz, grid) + ccx_advection_eigbound(p$w_up, grid)
+  lam <- ccx_diffusion_eigmax(p$kz, grid) +
+    ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), grid)
   need <- dt * lam / (CCX_STAB_SAFETY * CCX_RK4_STAB_LIMIT)
   as.integer(min(max(CCX_SUBSTEPS_MIN, ceiling(need)), CCX_SUBSTEPS_MAX))
 }
