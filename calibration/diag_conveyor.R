@@ -94,6 +94,18 @@ DC_GRAD_WIN  <- c(1993, 2014)   # window where both MLO and SPO d13C obs exist
 DC_QUAY_WIN  <- c(1970, 1993)
 DC_GRAD_OBS  <- -0.074          # observed MLO-SPO d13C, permil, DC_GRAD_WIN
 DC_DEEP_OBS  <- c(-150, -200)   # CCX_PARAM_TABLE's global-average bracket
+# Preindustrial interhemispheric gradient targets, added 2026-08-13 when Marcus
+# asked whether the gradient the conveyor now produces is observable.
+#   CO2: it is NOT. Greenland ice CO2 runs 20-30 ppm ABOVE Antarctic with a
+#   standard deviation of 6-10 ppm (vs 2-3 in Antarctic ice), from in-situ
+#   production by carbonate-acid reactions and oxidation of organics -- Anklin
+#   et al. 1995, Barnola et al. 1995, Tschumi & Stauffer 2000. The ARTEFACT is
+#   ~150x the signal below and the SCATTER alone is ~50x it.
+#   D14C: it IS, and it is the apposite test, because the observed offset is
+#   driven substantially by Southern Ocean upwelling of 14C-depleted water --
+#   which is exactly the limb the conveyor adds.
+DC_SHCAL_YR  <- c(36, 27)       # SHCal20: SH older than NH, 14C yr, mean +/- sd
+DC_LIBBY     <- 8033            # yr, Libby mean life -- the convention 14C AGES use
 DC_CONFIGS   <- list(A = list(sink = N_INTERIOR, desc = 0L, why = "sec.4.2 as written"),
                      B = list(sink = N_INTERIOR, desc = 1L, why = "distributed descent"),
                      C = list(sink = 8L,         desc = 0L, why = "NADW depth (default)"))
@@ -181,3 +193,35 @@ cat("   biases are the mode's job and the mode has NOT been refit, so read the\n
 cat("   columns against each other. The refit is the experiment (red team sec.6),\n")
 cat("   and it needs the deep-D14C target chosen FIRST -- a bipolar ocean cannot\n")
 cat("   be scored against a global-average bracket. Marcus' call.\n")
+
+# ---- PART 4: the PREINDUSTRIAL interhemispheric gradients -----------
+# The conveyor gives the preindustrial atmosphere a gradient it did not have,
+# because one hemisphere's mixed layer outgasses and the other ingasses. Is that
+# observable? For CO2, no. For 14C, yes -- and 14C is the better test anyway.
+cat("\n== PART 4: preindustrial (1750) interhemispheric gradients, NH - SH ==\n")
+age2d14c <- function(yr) 1000 * (exp(yr / DC_LIBBY) - 1)
+shcal <- c(mid = age2d14c(DC_SHCAL_YR[1]),
+           sd  = (age2d14c(sum(DC_SHCAL_YR)) - age2d14c(diff(rev(DC_SHCAL_YR)))) / 2)
+cat(sprintf("%-18s %10s %12s %12s\n", "config", "CO2 ppm", "d13C permil", "D14C permil"))
+for (q in c(0, 10, 20, 27)) {
+  p <- ccx_default_params(); p$q_conv <- q; p$conv_sink <- DC_CONFIGS$C$sink
+  s4 <- ccx_spinup(p); i <- s4$aux$idx
+  g <- function(f) f("NH") - f("SH")
+  ppm <- function(h) s4$y[i[[h]]$atm, "C"] / s4$aux$gtc_per_ppm_hemi
+  d13 <- function(h) 1000 * (s4$y[i[[h]]$atm, "C13"] /
+                             (s4$y[i[[h]]$atm, "C"] * ccx_const("R13_VPDB")) - 1)
+  d14 <- function(h) 1000 * (s4$y[i[[h]]$atm, "C14"] / s4$y[i[[h]]$atm, "C"] - 1)
+  cat(sprintf("%-18s %+10.4f %+12.5f %+12.3f   (%.0f%% of SHCal, z %+.2f)\n",
+      if (q == 0) "OFF" else sprintf("C %d Sv", q),
+      g(ppm), g(d13), g(d14), 100 * g(d14) / shcal[["mid"]],
+      (g(d14) - shcal[["mid"]]) / shcal[["sd"]]))
+}
+cat(sprintf("\n   CO2  : NOT TESTABLE. Greenland ice CO2 sits 20-30 ppm above Antarctic\n"))
+cat(sprintf("          with sd 6-10 ppm (Antarctic 2-3), from in-situ carbonate-acid\n"))
+cat(sprintf("          production. The artefact is ~150x the signal above.\n"))
+cat(sprintf("   D14C : SHCal20 puts the SH %g +/- %g 14C yr OLDER = %+.2f +/- %.2f permil.\n",
+            DC_SHCAL_YR[1], DC_SHCAL_YR[2], shcal[["mid"]], shcal[["sd"]]))
+cat(sprintf("          The conveyor moves the model from 22%% to 53%% of that central\n"))
+cat(sprintf("          value, i.e. the RIGHT direction and about half the gap closed --\n"))
+cat(sprintf("          but the +/-27 yr observational spread cannot discriminate strongly.\n"))
+cat(sprintf("          This is the independent test sec.4.4 wanted and did not get.\n"))

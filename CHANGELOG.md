@@ -2240,3 +2240,29 @@ this evidence the fourth is already in trouble.
 
 Suite **462 pass / 4 fail / 2 skip** — the same four pre-existing failures, +36 assertions.
 `CCX_PARAM_TABLE` untouched; `sigma_d13c` still open and still blocking.
+
+**Preindustrial interhemispheric gradient — is it observable?** (Marcus asked, 2026-08-13.)
+The conveyor gives the preindustrial atmosphere a gradient it did not have: **+0.149 ppm
+CO₂** and **+2.40 ‰ Δ¹⁴C** at 20 Sv (both exactly 0 and +1.00 ‰ with it off).
+
+- **CO₂, Greenland vs Antarctic ice: NO, and not marginally.** Greenland ice CO₂ runs
+  **20–30 ppm above** the Antarctic composite with a standard deviation of **6–10 ppm**
+  (Antarctic 2–3), from **in-situ production** by carbonate–acid reactions and oxidation of
+  organics on Greenland's much higher carbonate load (~0.4 ± 0.2 µmol/L). Anklin et al.
+  1995; Barnola et al. 1995; Tschumi & Stauffer 2000. **The artefact is ~150× the predicted
+  signal and the scatter alone ~50×.** Antarctic cores are the reliable CO₂ record
+  *precisely because* Greenland's are not, so no ice-core pair constrains this.
+- **Δ¹⁴C: YES, and it is the apposite test.** **SHCal20 puts the SH 36 ± 27 ¹⁴C yr older**
+  than the NH = **+4.49 ± 3.38 ‰** on the Libby mean life. The model goes from **+1.00 ‰
+  (22 % of central, z −1.04)** to **+2.40 ‰ (53 %, z −0.62)**. Right direction, about half
+  the gap closed — and it matters more than the arithmetic suggests, because the observed
+  offset is driven substantially by **Southern Ocean upwelling of ¹⁴C-depleted water**,
+  exactly the limb the conveyor adds. Honest limit: ±27 yr is too wide to discriminate
+  strongly, and OFF is also inside 1 σ. **This is the independent, already-observed test
+  §4.4 wanted and did not get** — a third candidate likelihood term for Marcus.
+- **One unverified lead, flagged not adopted:** a search result attributed to a CanESM1
+  preindustrial control states the preindustrial CO₂ gradient was **reversed** from today's
+  (SH higher). If true our +0.149 ppm has the wrong **sign**. From a model paper via a
+  search snippet, not observations, and not read. Check before the sign is ever quoted.
+
+Handoff: `notes/handoff_2026-08-13c_conveyor_built.md`.
