@@ -1744,3 +1744,104 @@ The mode-dependent half of the ocean scoping — whether one `kz` can serve both
 penetration and the millennial deep age, and therefore whether the fix is a retune or a second
 ventilation pathway — is deliberately **not** written down yet. It turns on the new mode's `kz`,
 and at defaults the deep ocean is already −194.7 ‰, inside the observed range.
+
+## 2026-08-13 — δ¹³C: the fossil source is fixed, the Suess overshoot is structural, and step 1's premise was backwards
+
+Handoff 12d §0 laid out three steps and said to do them in order. Step 1 — fix the
+three σ's — rested on a stated mechanism: the fit loosens `sigma_d13c` to escape "the
+one term that would discipline the land sink", so tightening it would discipline `q10`.
+That mechanism was argued, not measured. Pricing it before spending a 4 h refit turned
+up a different model.
+
+### The measurement that inverted it
+
+`calibration/diag_q10_stream_direction.R` scans `q10` with everything else held, at
+fixed σ's, and reports `ccx_loglik(by_stream = TRUE)`. Relative to `q10 = 2.0`, moving
+to `q10 = 0.2`:
+
+| stream | at defaults | at the 16-par mode's other parameters |
+|---|---|---|
+| `d13c_level_MLO` | **+254.4** | **+345.8** |
+| `d13c_level_SPO` | **+157.6** | **+293.5** |
+| `co2_level_MLO` | −1533.6 | +1169.8 |
+
+**δ¹³C pushes `q10` DOWN at both parameter vectors.** Tightening `sigma_d13c` from the
+mode's 0.44 to the prior median 0.1 does not discipline the land sink — it *strengthens*
+the force driving the inversion. Step 1 is still worth running; its prediction is
+inverted.
+
+### Why δ¹³C wants a bigger land sink
+
+`calibration/diag_d13c_suess.R`. The δ¹³C residual is neither scatter nor a constant
+offset: obs − model grows monotonically from ~0 ‰ in 1850 to **+0.58 ‰ by 2020** at MLO
+(+0.43 at SPO), with 0.07 ‰ of year-to-year scatter around it. The model reproduces the
+*shape* of the Suess decline and overshoots its *magnitude* by ~30 %. Photosynthesis
+discriminates against ¹³C, so a bigger land sink is what relieves a too-depleted
+atmosphere — hence the pull on `q10`.
+
+### The fossil source: fixed, and worth 3 % of the bias
+
+Sensitivity of the 2015–2024 MLO bias to every provisional ¹³C constant put the fossil
+source far ahead of the rest: −28 → −24 ‰ takes it +0.577 → +0.048 with the CO₂ bias
+unmoved at +2.33 ppm, where `alpha_photo`, `alpha_as_up` and `alpha_as_down` move it
+0.014–0.035 ‰ per ‰. Two concrete defects in the shipped −28, both pushing the same way:
+
+- GCB's `fossil` column is fossil-fuel-**and-industry**, so ~4–5 % of it is **cement** —
+  calcined limestone at ~0 ‰, not fuel at −28.
+- the value was **constant** across 1750–2024, but the fuel mix ran from all-coal (~−24)
+  to gas-inclusive (gas ~−44).
+
+Now built per year from GCB 2025's own by-fuel split (`data-raw/build_calibration_data.R`
+[5b]) with citable endmembers — coal −24, oil −26.5, gas −44, cement 0 (Graven, Keeling
+& Rogelj 2020; Tans 1981 / Andres et al. 2000 via Bush, Pataki & Ehleringer 2007) — and
+carried on the **forcing table**, since it is no longer an invariant. The series runs
+**−24.0 (1850) → −28.3 (2024)**, landing on both ends of the −28 to −24 ‰ envelope
+Graven et al. state for the global fossil-plus-cement signature.
+
+**It moved the bias 0.577 → 0.561 ‰. Three per cent.** Emission weighting is why: the
+early years where the old constant was most wrong carry almost no emissions. The
+correction is right and it stays — it was wrong twice over — but the prediction that it
+would explain the overshoot was **falsified**, and the sensitivity scan that motivated it
+was measuring a counterfactual (the whole history at −24) that the real fuel mix cannot
+deliver.
+
+### What else was tried and closed
+
+- **Sink partition** (diag [3]). Closing the δ¹³C bias needs a **~72 % land share**
+  (β ≈ 0.9) against GCB's 42 %; that costs **+40 ppm** of CO₂ and a 4.7 GtC/yr land sink
+  against GCB's 2.4. δ¹³C and CO₂ cannot both be satisfied by any partition this model
+  can reach.
+- **Weak isotopic disequilibrium damping** (diag [4]). `ra_ratio`, the gross land loop,
+  is the ideal lever — it changes gross exchange while leaving net carbon untouched. It
+  moves the bias **0.10 ‰ across its whole plausible range**, and Δ¹⁴C, which is the right
+  constraint on gross exchange, goes **+2.7 → −14.6 ‰** over the same range and forbids
+  the large values.
+
+### Where that leaves it
+
+The model over-depletes atmospheric δ¹³C by ~0.55 ‰ and none of the source signature, the
+fractionation constants, the reachable sink partition, or the gross land exchange
+accounts for it. **This is the structural misfit 12d §7 inferred from the whack-a-mole
+pattern, now located**: the calibration's only remaining way to relieve δ¹³C is to
+manufacture land sink, which is what `q10` → 0.169 is doing. Untested candidate: the
+ocean-side disequilibrium, in a pure-diffusion ocean with no biological pump whose DIC
+inventory is ~16 % low (§ 12d.4).
+
+**Consequence for step 1, flagged rather than resolved:** Marcus chose the prior medians
+(1.5 / 0.1 / 5), partly on my statement that 0.1 ‰ would become the *honest* σ_d13c once
+the fossil source was fixed — the residual's year-to-year scatter is only 0.07 ‰. That
+premise is now false: the 0.55 ‰ bias survives, so σ_d13c = 0.1 fixes ~450 log-units of
+weight onto a residual the model structurally cannot remove.
+
+### Mechanics
+
+The forcing table gains a 10th column. `R/cpp.R` states `CCX_FORCING_COLS` as the
+positional contract with `src/ccx_core.cpp` (which reads `f[9]`), since a reorder there is
+silent garbage rather than an error. `ccx_forcing_d13c_foss()` returns 0 for a hand-built
+zero-emission forcing (the spinup's, the conservation tests') and **errors** for one that
+carries emissions without a signature, rather than defaulting to a number nobody chose.
+
+Suite **400 pass / 4 fail / 2 skip** — the same four failures as 12d, plus 12 new guard
+assertions. One of those guards exists because the fossil sensitivity scan in diag [2]
+went **inert** the moment `d13c_foss` left `aux`: it reported six identical rows while
+looking live, until it was rewritten to override the forcing column.
