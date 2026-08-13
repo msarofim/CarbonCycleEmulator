@@ -2008,3 +2008,83 @@ An SH-only outcrop also leaves the MLO−SPO δ¹³C gradient essentially untouc
 (−0.226 ‰ vs −0.218 ‰ at `w_out_SH` = 4, against an observed −0.074 ‰ over 1993–2014).
 
 Suite **426 pass / 4 fail / 2 skip** — the same four failures, plus 8 more guards.
+
+## 2026-08-13 (later still, cont.) — The oceanic Suess effect, measured at last: the mixed layer is right and the atmosphere is not
+
+Handoff 13b §6 left one lead open: *"the oceanic-Suess lead is still unverified. Model ml
+declines 1.619 ‰ over 1750–2024 vs the atmosphere's 2.834 (ratio 0.57); my recollection of
+the observed ratio is 0.35–0.45. No source in DATA.md, none in ClaudeDocs/Papers. If it
+holds it is independent evidence for §4 [the conveyor]."* Marcus (2026-08-13) chose to
+verify this **before** deciding whether to build the conveyor. **The lead does not hold,
+and it fails in the direction that matters.**
+
+**Two observational anchors acquired** (`DATA.md` §2b, `data-raw/download_data.R` [6b],
+`build_calibration_data.R` [8b] → `data/obs_oceanic_suess.rds`):
+
+- **Quay et al. 2003** (GBC 17(1):1004): global mean surface DIC δ¹³C fell
+  **0.16 ± 0.02 ‰/decade** between the 1970s and 1990s. Has an error bar, and is
+  independent of the atmospheric δ¹³C target the model already fits.
+- **Eide et al. 2017** (GBC 31:492–514; data PANGAEA 871993, CC-BY): the gridded full
+  ¹³C Suess effect. Reduced here to an area-weighted depth profile — **0.916 ‰ at 0 m,
+  0.782 ‰ over 0–75 m**, preindustrial → GLODAPv1.1 era.
+
+**The recollected ratio was wrong in both value and sign.** Measured, the observed ocean/
+atmosphere ratio is **0.56** (cumulative, Eide) to **0.71** (rate, Quay); the model's is
+**0.53–0.55**. The real ocean tracks the atmosphere *at least as closely* as the model's
+does, not less closely. **Retracted as evidence for the conveyor.**
+
+**And the ratio was the wrong statistic — it hid which limb is broken.** Split:
+
+| | mixed layer | atmosphere |
+|---|---|---|
+| default params (`h_ml` 75 m) | **0.156 ‰/dec vs Quay's 0.160 ± 0.020 (−0.2 σ)** | **+25 % too fast** |
+| posterior mode (`h_ml` 179 m) | 0.145 (−0.8 σ) | +21 % too fast |
+
+The ml result is **window-insensitive** (0.153–0.160 across six plausible Quay windows) and
+the atmospheric result **reproduces against Scripps flask** as well as Law Dome (model
+0.291 ‰/dec over 1980–2014 against MLO 0.256 / SPO 0.233), so it is not an ice-core
+smoothing artefact. Cumulatively the ml is +17 % too depleted at 75 m; the mode's +54 % at
+179 m is **not a fair test** — a well-mixed 179 m box against a depth-average crossing the
+real thermocline is not apples to apples, and is one more sign the fitted `h_ml` is not a
+mixed-layer depth.
+
+**The model's ocean takes up ¹³C at the observed rate. The δ¹³C misfit is not the ocean
+failing to absorb the depleted signal.**
+
+**Consequence for the conveyor, computed before building it** (`diag_oceanic_suess.R`
+part 4). §4.3's mechanism *is* a reduction in ml depletion — the ml sits at
+τ_flush/(τ_flush + τ_eq) of full equilibrium. Applying that factor to a ml Suess rate that
+is already correct:
+
+| Sv | equilibrium fraction | ml rate after | vs Quay |
+|---|---|---|---|
+| 15 | NH 0.70, SH 0.77 | 0.115 ‰/dec | **−2.2 σ** |
+| 27 | NH 0.57, SH 0.65 | 0.095 ‰/dec | **−3.2 σ** |
+
+**The conveyor pays for the atmosphere with the one ocean quantity that is currently
+correct.** Both figures are conservative: the neglected feedback (a less depleted
+atmosphere gives the ml less signal to follow) pushes the same way. The deep-age benefit is
+not in question — the diagnostic reproduces §4.3's 1536 yr transit at 27 Sv exactly, an
+independent check that the two scripts share constants.
+
+**The caveat that keeps this honest, stated because it cuts both ways.** An atmosphere
+declining 25 % too fast, driving a mixed layer that lands *exactly* on the observed rate,
+implies the model's air–sea ¹³C transfer is ~20 % too **weak**: the ml looks right partly
+through compensating errors, not because ocean ¹³C physics is verified. So "the ocean is
+right" describes the model as it stands, not a proof. What survives regardless is the
+**scoring** consequence — from here, any change that lowers the ml Suess rate makes the
+model worse against a real measurement with a real error bar, and **until now nothing in
+the likelihood would have noticed**.
+
+**Verified, not assumed, about the Eide product:** above 200 m its field is the 200 m
+back-calculation **plus a spatially constant depth offset** (level-to-level differences
+have sd exactly 0; their method builds the shallow field from the 200 m estimate plus
+coral/sclerosponge surface records). The global mean is usable; **the NH/SH contrast above
+200 m is inherited and must not be used to score a hemispheric gradient.** The build
+re-asserts this on every rebuild rather than trusting the comment.
+
+**Open, and Marcus' call:** promote Quay's rate to a likelihood term. It is the only new
+constraint here with a stated uncertainty, it is independent of the atmospheric δ¹³C
+target, and it pins the air–sea partition that `q10` has been free to trade against.
+**`sigma_d13c` remains unset and still blocking; this does not change the 0.45 ‰ argument**
+(it removes a hoped-for route to shrinking the gap rather than shrinking it).

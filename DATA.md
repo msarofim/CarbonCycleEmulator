@@ -65,6 +65,34 @@ double-count the same measurements):
 | NOAA/INSTAAR MLO + SPO δ¹³C (1990–2014) | independent network |
 | Scripps MLO flask CO₂ | flask vs in-situ at the same station |
 | Scripps MLO + SPO Δ¹⁴C (1999–2007) | **these stations feed Hua's zonal compilation** |
+| **Oceanic ¹³C Suess effect** — Quay et al. 2003 rate + Eide et al. 2017 field | **Not a target YET, and that is a live decision, not a convention** — see below |
+
+### 2b. The oceanic ¹³C Suess effect (added 2026-08-13)
+
+Atmospheric δ¹³C is a likelihood target; **the ocean's own δ¹³C decline never
+was**, so ocean-side ¹³C uptake has been running unscored and the model could
+hit the atmospheric target with the wrong air–sea partition. Two anchors now
+close that hole (`calibration/diag_oceanic_suess.R`, built by
+`build_calibration_data.R` [8b] → `data/obs_oceanic_suess.rds`):
+
+| Anchor | Value | Role |
+|---|---|---|
+| **Quay et al. 2003**, GBC 17(1):1004, doi:10.1029/2001GB001817 | **0.16 ± 0.02 ‰/decade**, global mean surface DIC, 1970s vs 1990s | has a stated uncertainty and is independent of the atmospheric target → **the candidate likelihood term** |
+| **Eide et al. 2017**, GBC 31:492–514, doi:10.1002/2016GB005472; data doi:10.1594/PANGAEA.871993 (CC-BY-3.0) | **0.916 ‰ at 0 m**, 0.782 ‰ over 0–75 m, area-weighted, preindustrial → GLODAPv1.1 era | cumulative cross-check; reduced to a 33-level depth profile, the 17 MB NetCDF is not committed |
+
+**Caveat on Eide, verified at build and re-asserted on every rebuild:** above
+200 m the field is the 200 m back-calculation **plus a spatially constant depth
+offset** (level-to-level differences have sd exactly 0 — their method builds the
+shallow field by combining the 200 m estimate with coral/sclerosponge surface
+records). **The global mean is usable; the NH/SH contrast above 200 m is
+inherited from the 200 m level and must not be used to score a hemispheric
+gradient.**
+
+**What they say:** the model's mixed layer declines at **0.156 ‰/decade against
+Quay's 0.160 ± 0.020** (−0.2 σ, and window-insensitive), while its
+**atmosphere declines 21–25 % too fast** against both Law Dome and Scripps
+flask. The ocean is not the δ¹³C problem. Promoting Quay to a likelihood term is
+a **methodological choice awaiting Marcus' call**.
 
 ---
 

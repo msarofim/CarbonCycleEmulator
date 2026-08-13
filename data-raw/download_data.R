@@ -219,6 +219,33 @@ for (nf in nuc_files) {
 }
 
 # ---------------------------------------------------------------------
+# 6b. Oceanic 13C Suess effect — the CROSS-CHECK on ocean 13C uptake
+# ---------------------------------------------------------------------
+# Added 2026-08-13. The model's atmospheric d13C is a likelihood target; the
+# OCEAN's own d13C decline never was, so ocean-side 13C uptake has been running
+# unscored. This is the observational field that scores it. See DATA.md sec.2
+# and calibration/diag_oceanic_suess.R.
+#
+# 17 MB, 1x1 degree x 33 WOA standard depth levels, NetCDF classic. Reduced to
+# an area-weighted depth profile by build_calibration_data.R [8]; only the
+# profile is committed.
+cat("[6b] Eide et al. 2017 oceanic 13C Suess effect climatology\n")
+
+fetch("eide_c13_suess",
+      paste0("https://store.pangaea.de/Publications/EideM-etal_2017/",
+             "C13_Climatology_13CSuessEffect.nc"),
+      "eide2017_c13_suess_effect.nc",
+      paste("Eide M, Olsen A, Ninnemann US, Eldevik T (2017). A global estimate of the",
+            "full oceanic 13C Suess effect since the preindustrial.",
+            "Global Biogeochem. Cycles 31:492-514, doi:10.1002/2016GB005472.",
+            "Dataset: doi:10.1594/PANGAEA.871993, CC-BY-3.0."),
+      paste("Full 13C Suess effect, preindustrial -> GLODAPv1.1 era (1990s).",
+            "CAVEAT: above 200 m the field is the 200 m back-calculation plus a",
+            "SPATIALLY CONSTANT depth offset (verified, sd exactly 0), so its",
+            "horizontal pattern above 200 m carries no independent information --",
+            "use the global mean, not the hemispheric contrast."))
+
+# ---------------------------------------------------------------------
 # 7. Local provenance — files reused from sibling projects (not downloaded)
 # ---------------------------------------------------------------------
 cat("[7] Local inputs copied from sibling repos\n")

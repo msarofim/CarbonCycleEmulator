@@ -437,6 +437,84 @@ for (nm in names(nl_targets)) {
 }
 
 # =====================================================================
+# 8b. Oceanic 13C Suess effect -- the ocean-side cross-check on 13C uptake
+#
+# Added 2026-08-13. Until now NOTHING scored the model's OCEAN d13C: the
+# atmospheric d13C target constrains what is left in the air, and the model can
+# hit it with the wrong air-sea partition. These are the two observational
+# anchors on the ocean's own decline.
+#
+# [a] Eide et al. 2017 gridded field, reduced HERE to an area-weighted depth
+#     profile (cos-latitude weights over finite cells). The 17 MB NetCDF is not
+#     committed; the 33-row profile is.
+#
+#     CAVEAT, verified not assumed: above 200 m the Eide field is the 200 m
+#     back-calculation plus a depth offset that is constant over every ocean
+#     cell (level-to-level differences have sd EXACTLY 0). Their method builds
+#     the <200 m field by combining the 200 m estimate with coral/sclerosponge
+#     surface records, so the shallow horizontal pattern is inherited, not
+#     measured. USE THE GLOBAL MEAN; the NH/SH split above 200 m is an artefact
+#     of the construction and must not be used to score a hemispheric gradient.
+#
+# [b] Quay et al. 2003's global mean SURFACE rate, which is a genuinely
+#     independent measurement (GEOSECS-era vs WOCE-era DIC d13C) and carries a
+#     stated uncertainty, so it is the one that can be scored as a likelihood
+#     term. Hand-entered with its citation, same convention as N&L above.
+# =====================================================================
+suess_nc <- file.path(DL, "eide2017_c13_suess_effect.nc")
+if (requireNamespace("ncdf4", quietly = TRUE) && file.exists(suess_nc)) {
+  nc  <- ncdf4::nc_open(suess_nc)
+  se  <- ncdf4::ncvar_get(nc, "c13_se")
+  lon <- ncdf4::ncvar_get(nc, "lon")
+  lat <- ncdf4::ncvar_get(nc, "lat")
+  dep <- ncdf4::ncvar_get(nc, "depth")
+  ncdf4::nc_close(nc)
+
+  W  <- matrix(rep(cos(lat * pi / 180), each = length(lon)), nrow = length(lon))
+  hemi <- function(sel) matrix(rep(sel, each = length(lon)), nrow = length(lon))
+  wmean <- function(x, mask) { g <- is.finite(x) & mask; sum(x[g] * W[g]) / sum(W[g]) }
+
+  suess_prof <- data.table(
+    depth  = dep,
+    global = sapply(seq_along(dep), function(k) wmean(se[, , k], TRUE)),
+    NH     = sapply(seq_along(dep), function(k) wmean(se[, , k], hemi(lat > 0))),
+    SH     = sapply(seq_along(dep), function(k) wmean(se[, , k], hemi(lat < 0))),
+    ncell  = sapply(seq_along(dep), function(k) sum(is.finite(se[, , k]))))
+
+  # Re-verify the constant-offset caveat on every build rather than trusting the
+  # comment: if a future dataset version fixes it, this flag must change.
+  shallow <- which(dep <= 200)
+  off_sd  <- max(sapply(head(shallow, -1),
+                        function(k) stats::sd(se[, , k] - se[, , k + 1], na.rm = TRUE)))
+
+  suess <- list(
+    eide_profile = suess_prof,
+    eide_meta = list(
+      constant_offset_above_200m = isTRUE(off_sd < 1e-12),
+      max_level_diff_sd          = off_sd,
+      reference_period = "preindustrial -> GLODAPv1.1 era (1990s; nominal 1995)",
+      citation = paste("Eide M, Olsen A, Ninnemann US, Eldevik T (2017),",
+                       "Global Biogeochem. Cycles 31:492-514,",
+                       "doi:10.1002/2016GB005472; data doi:10.1594/PANGAEA.871993")),
+    quay2003 = list(
+      rate_permil_per_decade = 0.16, sd = 0.02, window = c(1970, 1993),
+      scope = "global mean surface ocean DIC d13C, 1970s vs 1990s",
+      citation = paste("Quay P, Sonnerup R, Westby T, Stutsman J, McNichol A (2003),",
+                       "Global Biogeochem. Cycles 17(1):1004,",
+                       "doi:10.1029/2001GB001817")))
+  saveRDS(suess, file.path(OUT, "obs_oceanic_suess.rds"))
+  cat(sprintf(paste0("[8b] oceanic Suess: Eide 0 m global %.3f permil, 0-75 m %.3f;",
+                     " constant-offset-above-200m = %s\n"),
+              suess_prof$global[1],
+              mean(approx(suess_prof$depth, suess_prof$global,
+                          seq(0, 75, length.out = 2001), rule = 2)$y),
+              suess$eide_meta$constant_offset_above_200m))
+} else {
+  warning("[8b] oceanic Suess SKIPPED: needs the ncdf4 package and the Eide NetCDF ",
+          "(run data-raw/download_data.R)")
+}
+
+# =====================================================================
 # 9. EMPIRICAL BENCHMARKS (computed here; these replace DESIGN.md [VERIFY]
 #    placeholders for anything that can be read off the data)
 # =====================================================================
