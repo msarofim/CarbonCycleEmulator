@@ -2176,3 +2176,67 @@ is ~20 % too weak. That is in tension with τ_eq = C_ml/F_gross = 10.5 yr (NH) /
 which is the textbook mixed-layer ¹³C equilibration timescale — isotopes ride the gross flux
 unbuffered, so this is one of the model's better-grounded numbers. If τ_eq is right the
 20 % lives elsewhere, most likely `h_ml`. Left open; the refit is what separates them.
+
+## 2026-08-13 (later still, cont.) — The conveyor built and measured: the ml-Suess objection is dead, §4.4's own prediction fails
+
+Marcus approved the red team's recommendation (build C, B as comparison, A as intermediate).
+Built, tested, and measured. `R/model.R`, `src/ccx_core.cpp`, `R/spinup.R`,
+`tests/testthat/test-conveyor.R`, `calibration/diag_conveyor.R`.
+
+**§4.2's spinup claim is wrong, and it would have been invisible.** The handoff states
+`ccx_spinup()` "needed no change at all" because a uniform ocean is still an exact fixed
+point. **True within a column, false between them:** the two columns sit at different DIC
+(SST 18 vs 16 °C → 2.03786 vs 2.05570 mol/m³), so the interhemispheric limbs see a real
+gradient and converge 0.135 GtC/yr into the NH at 20 Sv. Skipping the solve leaves a
+1.35e-01 residual and **−0.915 ‰ of spurious δ¹³C drift** over a zero-emission 1750–2024
+run — nearly **twice** the entire misfit the conveyor was proposed to fix. Diagnosed, not
+guessed: `sst_NH = sst_SH = 17` returns both to their conveyor-off values exactly. An
+ocean-only solve was tried first and was *also* wrong — pinning both atmospheres at 278 ppm
+left 0.1226 GtC/yr in the two atmosphere boxes, because the conveyor makes one hemisphere
+outgas and the other ingas and the preindustrial atmosphere must carry a small gradient.
+`ccx_c12_steady_conveyor()` is a Newton on the **full state** using `ccx_deriv()` itself as
+the residual, global CO₂ pinned and the split free. Residual 1e-13, drift 0, R/C++ parity
+exact. **Physically this also means the conveyor is not the pure isotope operator between
+columns that it is within one — it is a crude solubility pump.**
+
+**The reverse-conveyor gate passes.** Reversed, the atmosphere differs (0.15 ppm CO₂,
+1.8 ‰ Δ¹⁴C) and the deep ages **swap**: forward NH −113 / SH −157, reversed NH −159 /
+SH −120; conveyor off they are equal (−170.8 / −169.5). Read off an **integrated** run —
+the conveyor touches no atmospheric box directly, so a derivative-level assertion could
+never fail, which is how the first version of the gate was written and why it "tied".
+
+**The red team's ml-Suess objection was wrong by 4×, in the way the red team said it might
+be.** It estimated −3.2 σ against Quay while flagging that as an upper bound because a
+falling `kz` pushes back. Measured at fixed `kz`: 0.156 → **0.147 at 20 Sv (−0.6 σ)**. And
+once `kz` falls the rate goes the **other way and overshoots from above** — 0.185 at
+kz 2000, 0.212 at kz 1000, 0.237 at kz 500. **`kz` is now squeezed from both sides** (deep
+age wants it small, ml Suess wants it large), which is a better position than the
+degenerate ridge that was predicted.
+
+**The structural win is real: the deep ocean goes bipolar.** Off, both hemispheres are the
+same age. On (C, 20 Sv): kz 5000 → NH −113 / SH −157; **kz 2000 → NH −159 / SH −223**;
+kz 1000 → NH −214 / SH −277. That is the observed sense (young ventilated end, old far
+end). **But `CCX_PARAM_TABLE`'s [−150, −200] bracket is a global-average target derived on
+a single-column ocean and is the wrong yardstick for a bipolar one** — the deep-Δ¹⁴C target
+must be chosen *before* the refit, not after seeing this table. **Flagged for Marcus, not
+resolved.**
+
+**Two results against the proposal:**
+
+1. **§4.4's falsifiable prediction FAILS.** It states the conveyor should shrink the NH−SH
+   δ¹³C gradient and that "if the gradient does not shrink, the mechanism is not doing what
+   this section says." MLO−SPO goes **−0.218 → −0.221 (20 Sv) → −0.223 (27 Sv)** — very
+   slightly the *wrong* way, against an observed −0.074. Falling `kz` recovers only −0.215.
+2. **`kz` cannot actually fall far**, which was the strongest argument for building at all.
+   Dropping it degrades both remaining constraints: δ¹³C bias +0.500 → +0.678 (kz 2000) →
+   +0.820 (kz 1000), CO₂ bias +5.4 → −5.8 → −12.5 ppm. At *fixed* kz the conveyor helps
+   δ¹³C (+0.548 → +0.500 at 20 Sv, +0.483 at 27 Sv) — real, and about a **third** of §4.3's
+   hoped 0.15–0.25 ‰.
+
+**None of this is a verdict.** Every parameter except `q_conv` and `kz` is frozen at its
+default; `k_w`, `h_ml`, `beta` and `q10` are all free to absorb some of it. **The refit is
+the experiment** and the red team's four advance predictions are still the scorecard — on
+this evidence the fourth is already in trouble.
+
+Suite **462 pass / 4 fail / 2 skip** — the same four pre-existing failures, +36 assertions.
+`CCX_PARAM_TABLE` untouched; `sigma_d13c` still open and still blocking.
