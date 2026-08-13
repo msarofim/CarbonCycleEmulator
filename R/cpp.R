@@ -63,6 +63,10 @@ ccx_cpp_par <- function(p) {
   # reach the C++ with a missing name -- which unpacks as garbage, not an error.
   if (is.null(p$npp_veg_frac)) p$npp_veg_frac <- 0
   if (is.null(p$ra_ratio)) p$ra_ratio <- 0
+  # Ocean overturning added 2026-08-13, default OFF. Same reasoning as above: a
+  # parameter list built before that date must reach the core as the
+  # pure-diffusion model it was written for, not as garbage.
+  if (is.null(p$w_up)) p$w_up <- 0
   # The four-pool land REPLACED tau_veg/tau_soil, so an older parameter list
   # reaches here with the wrong names entirely. That is a structural mismatch,
   # not a missing default -- fail loudly rather than silently substituting a
@@ -76,7 +80,7 @@ ccx_cpp_par <- function(p) {
     stop("parameter list is missing the land structure: ",
          paste(miss, collapse = ", "), extra)
   }
-  p[c("beta", "q10", "k_w", "kz", "tau_ex",
+  p[c("beta", "q10", "k_w", "kz", "w_up", "tau_ex",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
       "npp_veg_frac", "ra_ratio",

@@ -1886,3 +1886,71 @@ DESIGN §2 rejected HILDA as "too many parameters to communicate" and 12d §10 l
 advection among the deliberate omissions — so this is a **known, chosen limitation now
 priced in per mil**, not a new defect. That is the right thing for a communications model
 to be able to say about itself.
+
+## 2026-08-13 (later still) — The ventilation term, built and measured: it does not help
+
+The previous entry ended with a suggestion: "the cheapest structural candidate is not full
+HILDA but a single prescribed upwelling velocity through the column (one parameter, one
+number a reader can be told). Nothing here has costed that." **It is now costed.** The
+mechanism was built, gated, and scanned — and the answer is that it is a second knob on
+the trade `kz` already makes, not the missing process.
+
+**Built** (`w_up`, m/yr, `R/model.R` + `src/ccx_core.cpp`): the classical
+upwelling–diffusion column — water rises through every interface at `w_up` and returns
+from the mixed layer to the bottom box in one step (Hoffert et al. 1980; Harvey &
+Schneider 1985). One parameter. It cost ~30 lines each side and **nothing else**: the
+advective limbs go through `add_flux`, so conservation is structural; a uniform column is
+still an exact fixed point, so `ccx_spinup()`'s analytic ¹²C equilibrium and both isotope
+solves stand unchanged; and at physical values the substep controller does not move
+(the added Gershgorin bound `ccx_advection_eigbound()` is exactly 0 at `w_up` = 0).
+
+**`w_up` is 0 in `ccx_default_params()` and absent from `CCX_PARAM_TABLE`.** The
+pure-diffusion model is reproduced *exactly*, and `test-ocean-advection.R` holds that —
+with a mutation test, because an inert mechanism would pass the inertness gate trivially.
+
+**Measured** (`calibration/diag_ocean_upwelling.R`). Both knobs buy δ¹³C damping by making
+the deep ocean younger; per ‰ of deep-ocean Δ¹⁴C spent, upwelling is **worse**:
+
+| axis | ‰ of δ¹³C bias per ‰ of deep Δ¹⁴C |
+|---|---|
+| `kz` (w_up 0, kz 3830 → 6200) | **−0.00220** |
+| `w_up` (kz 5000, 0 → 2) | −0.00107 (0.5×) |
+| `w_up` (kz 500, 0 → 2) | −0.00052 (0.2×) |
+
+Over the whole (`w_up`, `kz`) surface, the best δ¹³C bias among cells whose deep ocean is
+still inside the observed −150/−200 ‰ bracket is **+0.501 ‰, at `w_up` = 0**. Holding the
+deep age fixed by bisecting `kz`, adding upwelling makes δ¹³C **worse**: +0.548 → +0.628
+at `w_up` = 1 (the compensating `kz` falls 5000 → 3062 and stops burying the depleted
+carbon faster than the upwelling limb removes it). At `w_up` ≥ 2 the deep age is
+unreachable at *any* `kz` — the sinking limb alone over-ventilates the bottom box.
+
+**Why, in one number.** For upwelling to hold the mixed layer out of isotopic equilibrium
+it has to flush it faster than the atmosphere re-equilibrates it. Measured at defaults:
+gross air-sea exchange **27.1 GtC/yr** against a **284 GtC** NH mixed layer = **10.5 yr**
+(the textbook ~10 yr). Flushing at 4 m/yr through 75 m takes **18.8 yr — 1.8× too slow**;
+the crossover is `w_up` ≈ 7 m/yr, ~80 Sv, about **4× the real overturning** (20 Sv over
+this model's ocean area is 1.75 m/yr). A global-mean overturning cannot outrun air-sea
+exchange, and it is not close.
+
+**The mechanism works and still loses, which is the actual finding.** At `w_up` 4 /
+`kz` 1000 the upwelled water genuinely arrives old — the ml→oc1 δ¹³C gap widens 0.167 →
+0.584 ‰ — and the mixed layer still ends up *more* depleted (−1.910 vs −1.619 ‰) than with
+no upwelling at all, because the `kz` that lets the advective signal survive is the same
+`kz` that was burying the depletion. **No purely vertical rearrangement can decouple "the
+surface stays undepleted" from "the deep stays old" in a single column. They are the same
+transport.** That retires "just add advection" with a measurement rather than a judgment,
+and it means the ventilation caveat in the previous entry stands as written.
+
+**Where it points instead, untested and needing a citation first.** The model's mixed
+layer declines **1.619 ‰** over 1750–2024 against an atmospheric **2.834 ‰**, a ratio of
+**0.57**. My *recollection* of the observed oceanic Suess effect is a surface-DIC decline
+of ~0.6–0.9 ‰ against the atmosphere's ~1.9, a ratio near 0.35–0.45 — i.e. the model's
+surface ocean would be tracking the atmosphere about twice as closely as the real one
+does. **That number is unverified** (nothing in DATA.md, nothing in the local Papers
+folder; Quay et al. and Eide et al. 2017 are where to look). If it survives checking, the
+gap is not a transport term at all but the single well-mixed surface box: the real ocean
+keeps its disequilibrium with *horizontal* structure, and a global mean of a product is
+not the product of the global means. That is a second surface box — the outcrop/HILDA
+structure DESIGN §2 rejected — and a bigger decision than a diagnostic can take.
+
+Suite **418 pass / 4 fail / 2 skip** — the same four failures, plus 18 new guards.

@@ -132,6 +132,13 @@ ccx_default_params <- function() {
                           # isotopes only; the net carbon flux is NPP regardless.
     k_w       = 1500,     # m/yr, gas transfer velocity
     h_ml      = 75,       # m, mixed-layer depth
+    # OVERTURNING, m/yr. 0 = the pure-diffusion ocean, reproduced EXACTLY (no
+    # flux is emitted at all), which is what every result before 2026-08-13 was
+    # computed on. See the "ocean overturning" block in ccx_deriv() for what a
+    # non-zero value does and why it is not a second diffusivity. Whether this
+    # becomes a calibrated parameter, a fixed structural value, or stays off is
+    # a decision for DESIGN.md section 10, NOT for this default.
+    w_up      = 0,
     kz        = 5000,     # m2/yr, interior eddy diffusivity. RE-CENTRED
                           # 2026-08-12 from 4000, to the centre of the range that
                           # puts deep-ocean D14C inside the observed -150 to -200
@@ -369,6 +376,46 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
       add_diffusion(col[kk], col[kk + 1], grid$dz[kk], grid$dz[kk + 1], aux$dz_mid[kk])
     }
 
+    # ---- ocean overturning (advective, NOT a second diffusivity) -----
+    # Water upwells through EVERY interface at the same velocity w_up and
+    # returns from the mixed layer to the bottom box in one step ("polar
+    # sinking"). That is the classical upwelling-diffusion column
+    # (Hoffert et al. 1980; Harvey & Schneider 1985), and it is ONE parameter.
+    #
+    # WHY IT IS NOT DIFFUSION. Diffusion is local and symmetric: it can only
+    # smear a surface signal downward through adjacent layers, so the water in
+    # contact with the atmosphere is always water that has already been partly
+    # loaded. Advection is directional and NON-LOCAL: the upwelling limb
+    # continually presents water that left the surface ~depth/w_up years ago and
+    # is therefore still isotopically preindustrial, while the sinking limb
+    # removes loaded surface water to the bottom without passing it through the
+    # layers in between. It is the renewal RATE of the surface reservoir that
+    # this changes, not its size -- which is exactly the axis diag_d13c_levers.R
+    # found the model short on (h_ml, the size axis, moves the d13C bias 0.085
+    # permil across 30-200 m; k_w, the rate axis, needs 2.7x Wanninkhof).
+    #
+    # CARRIED AT THE SOURCE BOX'S RATIO, unfractionated, because this is bulk
+    # water transport: it moves DIC and both isotopes together. add_flux does
+    # exactly that, so the transport is conservative by the same construction as
+    # every other flux here.
+    #
+    # VOLUME IS CONSERVED: every interface carries the same volume flux
+    # w_up * A upward, and the pipe returns w_up * A from the mixed layer to the
+    # bottom. So a column at UNIFORM CONCENTRATION is still an exact fixed point
+    # -- which is what lets ccx_spinup()'s analytic 12C equilibrium stand
+    # unchanged (see its ocean block).
+    #
+    # w_up = 0 emits nothing, so the pure-diffusion model is bit-reproduced.
+    # `isTRUE`, not `>`, so a parameter list built before 2026-08-13 (no w_up at
+    # all) is the pure-diffusion model rather than an error -- the same
+    # convention `revelle_frozen` uses above.
+    if (isTRUE(p$w_up > 0)) {
+      for (kk in seq_len(grid$nl)) {                       # upwelling limb
+        add_flux(col[kk + 1], col[kk], p$w_up * y[col[kk + 1], "C"] / grid$dz[kk + 1])
+      }
+      add_flux(iml, col[grid$nl + 1], p$w_up * y[iml, "C"] / grid$dz[1])  # sinking
+    }
+
     # ---- prescribed emissions ---------------------------------------
     # Fossil carbon comes from OUTSIDE the modelled system (geology), so it is a
     # true external source, and it is 14C-free.
@@ -568,10 +615,26 @@ ccx_diffusion_eigmax <- function(kz, grid) {
   max(abs(eigen((S + t(S)) / 2, symmetric = TRUE, only.values = TRUE)$values))
 }
 
-#' Substeps needed to keep the explicit diffusion term stable over one step
+#' Upper bound on the |eigenvalue| of the explicit OVERTURNING operator
+#'
+#' The advection operator is not symmetrisable the way diffusion is (the polar
+#' sinking limb is a non-local ml -> bottom entry), so this is a Gershgorin
+#' BOUND rather than the spectrum: every row's diagonal is -w/dz_k and its
+#' off-diagonal mass is at most the same, giving 2 * max_k(w / dz_k). Bounding
+#' rather than solving is the conservative direction -- it can only ask for more
+#' substeps than strictly needed.
+#'
+#' Returns exactly 0 at w_up = 0, so a pure-diffusion run resolves to the same
+#' substep count it always did.
+ccx_advection_eigbound <- function(w_up, grid) {
+  if (is.null(w_up) || w_up <= 0) return(0)
+  2 * max(w_up / grid$dz)
+}
+
+#' Substeps needed to keep the explicit interior transport stable over one step
 #' @param dt master step, years (1/12 for the monthly integrator)
 ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
-  lam <- ccx_diffusion_eigmax(p$kz, grid)
+  lam <- ccx_diffusion_eigmax(p$kz, grid) + ccx_advection_eigbound(p$w_up, grid)
   need <- dt * lam / (CCX_STAB_SAFETY * CCX_RK4_STAB_LIMIT)
   as.integer(min(max(CCX_SUBSTEPS_MIN, ceiling(need)), CCX_SUBSTEPS_MAX))
 }

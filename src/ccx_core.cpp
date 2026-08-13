@@ -64,7 +64,7 @@ struct Aux {
 };
 
 struct Par {
-  double beta, q10, k_w, kz, tau_ex;
+  double beta, q10, k_w, kz, w_up, tau_ex;
   double npp_leaf_frac, tau_leaf, tau_wood;
   double litter_slow_frac, tau_soil_fast, tau_soil_slow;
   double npp_veg_frac, ra_ratio;
@@ -245,6 +245,20 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       }
     }
 
+    // overturning: uniform upwelling through every interface plus a polar
+    // sinking limb from the mixed layer straight to the bottom box. Bulk water
+    // transport, so it goes through add_flux at the source box's ratio -- see
+    // R/model.R for why this is not a second diffusivity. w_up = 0 emits
+    // nothing, reproducing the pure-diffusion column exactly.
+    if (P.w_up > 0.0) {
+      for (int kk = 0; kk < NL; ++kk) {
+        const int a = base + IML + kk;
+        const int b = base + IML + kk + 1;
+        add_flux(b, a, P.w_up * y[IX(b, C)] / A.dz[kk + 1], 1.0);
+      }
+      add_flux(iml, base + IML + NL, P.w_up * y[IX(iml, C)] / A.dz[0], 1.0);
+    }
+
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
     // external to the modelled system; land-use change is not, so it is a
     // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
@@ -305,7 +319,7 @@ static Par unpack_par(const List& p) {
   P.litter_slow_frac = p["litter_slow_frac"];
   P.tau_soil_fast = p["tau_soil_fast"]; P.tau_soil_slow = p["tau_soil_slow"];
   P.npp_veg_frac = p["npp_veg_frac"]; P.ra_ratio = p["ra_ratio"];
-  P.k_w = p["k_w"]; P.kz = p["kz"]; P.tau_ex = p["tau_ex"];
+  P.k_w = p["k_w"]; P.kz = p["kz"]; P.w_up = p["w_up"]; P.tau_ex = p["tau_ex"];
   P.sst_scale = p["sst_scale"]; P.gamma_enso = p["gamma_enso"];
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];

@@ -68,6 +68,12 @@ ccx_spinup <- function(p = ccx_default_params(),
     # ocean: mixed layer in Henry equilibrium with the atmosphere; the interior
     # is at uniform CONCENTRATION, so C_k scales with layer thickness (this is
     # exactly the zero-flux condition of the diffusion discretisation).
+    # STILL EXACT WITH OVERTURNING ON (w_up > 0): the upwelling limb carries
+    # w_up * A * conc across every interface and the sinking limb returns the
+    # same volume flux at the same concentration, so a uniform column has zero
+    # advective tendency too. The 13C/14C solves need no change either -- they
+    # invert whatever linear operator ccx_deriv() presents. test-ocean-advection.R
+    # holds both statements.
     dic <- ccx_dic_for_pco2(chi0, ccx_const("ALK_SURFACE"), aux$sst[[h]])
     y[i$ml, "C"] <- dic * aux$ml_mass_kg[[h]] / aux$mol_per_GtC
     conc <- y[i$ml, "C"] / grid$dz[1]
