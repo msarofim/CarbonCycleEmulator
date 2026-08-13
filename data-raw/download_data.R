@@ -131,6 +131,29 @@ fetch("gcb_hist",
       "Friedlingstein P, et al. (2026), GCB 2025 historical budget sheet (as above).",
       "1750-2024 GtC/yr; source of prescribed fossil + LUC emissions forcing")
 
+# PRE-1850 LAND-USE EMISSIONS (2026-08-13). GCB's LUC column is EMPTY before
+# 1850 -- verified in gcb2025_historical_budget.csv itself, the fossil column
+# starts 1750 and the LUC column does not. Until this file was added,
+# ccx_annual_to_monthly()'s approx(rule = 2) silently held the 1850 value flat
+# backwards, INVENTING 74.1 GtC of land-use emissions across 1750-1849 (23 % of
+# all the LUC the model burns) that nobody chose and no source supports. See
+# calibration/diag_pre1850_luc.R, which scores the alternatives against the Law
+# Dome ice core.
+#
+# OSCAR v3.1's E_luc runs from 1701 and is the series behind Gasser et al.
+# (2020)'s headline 206 +/- 57 PgC for 1750-2018; the file reproduces that
+# exactly (27.5 pre-1850 + 178.9 post = 206.4). It is CC-BY with a DOI, which
+# the bare paper number is not.
+fetch("oscar_eluc",
+      "https://zenodo.org/records/7313542/files/OSCAR_contribution_to_GCB2020.xlsx",
+      "oscar_gcb2020_eluc.xlsx",
+      paste("Gasser T, Crepin L, Quilcaille Y, Houghton RA, Ciais P, Obersteiner M (2020).",
+            "Historical CO2 emissions from land use and land cover change and their",
+            "uncertainty. Biogeosciences 17:4075-4101. doi:10.5194/bg-17-4075-2020.",
+            "Data: OSCAR contribution to the Global Carbon Budget 2020,",
+            "doi:10.5281/zenodo.7313542 (CC-BY-4.0)."),
+      "1701-2018 PgC/yr E_luc; used ONLY for the pre-1850 back-extension, scaled to GCB's level")
+
 # The by-fuel split is what makes the fossil source d13C time-varying. The
 # budget sheets above give only the TOTAL fossil column, which is fossil fuel
 # AND INDUSTRY -- cement included. Cement carbon is limestone at d13C ~ 0 permil

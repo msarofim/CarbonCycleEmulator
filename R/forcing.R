@@ -205,6 +205,24 @@ ccx_build_forcing <- function(scenario = "historical",
     e <- data.frame(year = ssp$year, fossil_GtC = ssp$fossil_GtC, luc_GtC = ssp$luc_GtC)
     src <- paste("RCMIP v5.1.0", scenario)
   }
+  # NA GUARD (2026-08-13). ccx_annual_to_monthly() strips NAs and then
+  # approx(rule = 2) holds the nearest value flat across the gap. That is the
+  # right behaviour for a short trailing gap and a SILENT FABRICATION for a long
+  # leading one: GCB supplies no LUC before 1850, and the flat hold invented
+  # 74.1 GtC across 1750-1849 -- 23 % of the model's land-use carbon -- with no
+  # warning anywhere. The gap is now filled from a source at build time
+  # (data-raw/build_calibration_data.R [5a]); this guard exists so the next
+  # dataset with a hole cannot repeat it quietly.
+  for (nm in c("fossil_GtC", "luc_GtC")) {
+    gap <- e$year[is.na(e[[nm]]) & e$year >= min(yrs) & e$year <= max(yrs)]
+    if (length(gap))
+      warning(sprintf(paste0("%s is NA for %d year(s) in %d-%d (%d-%d); those years ",
+                             "will be filled by HOLDING the nearest value flat. ",
+                             "Supply a sourced series or set them to zero -- do not ",
+                             "let approx(rule = 2) choose."),
+                      nm, length(gap), min(yrs), max(yrs), min(gap), max(gap)),
+              call. = FALSE)
+  }
   foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs)
   luc  <- ccx_annual_to_monthly(e$year, e$luc_GtC,    yrs)
 

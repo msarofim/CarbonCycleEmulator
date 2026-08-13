@@ -11,6 +11,7 @@
 # =====================================================================
 
 suppressWarnings(suppressMessages(library(data.table)))
+suppressWarnings(suppressMessages(library(readxl)))  # OSCAR pre-1850 LUC, block [5a]
 
 DL     <- "data-raw/downloads"   # reproducible by download_data.R
 MANUAL <- "data-raw/manual"      # hand-supplied, tracked in git (Scripps site is down)
@@ -276,6 +277,59 @@ cat(sprintf("[5] GCB 2025: budget %d-%d, historical %d-%d (GtC/yr)\n",
 # ---- prescribed historical emissions forcing -------------------------
 emis_hist <- gcb_hist[, .(year, fossil_GtC = fossil, luc_GtC = luc)]
 emis_hist <- emis_hist[!is.na(fossil_GtC) | !is.na(luc_GtC)]
+
+# ---- [5a] PRE-1850 LAND-USE EMISSIONS, SOURCED (2026-08-13) ----------
+# GCB's fossil column starts 1750; its LUC column starts 1850 and is NA before.
+# Until this block existed, ccx_annual_to_monthly()'s approx(rule = 2) held the
+# 1850 value (0.741 GtC/yr) FLAT backwards to 1750, inventing 74.1 GtC of
+# land-use emissions -- 23 % of all the LUC the model burns -- that nobody chose.
+# GMST's identical flat-hold at least warns on every build; this one was silent.
+#
+# THE REPLACEMENT: OSCAR v3.1's E_luc (Gasser et al. 2020), which runs from 1701
+# and gives 27.5 PgC over 1750-1849 against 178.9 over 1850-2018 -- reproducing
+# that paper's headline 206 +/- 57 PgC for 1750-2018 exactly, which is the check
+# that the right column was read.
+#
+# IT IS SCALED, NOT SPLICED RAW, and that is a methodological choice worth
+# stating. OSCAR's 1850-2018 total (178.9) sits 34 % BELOW GCB 2025's (239.8)
+# because they are different products -- GCB averages three bookkeeping models
+# including BLUE, OSCAR is observationally constrained and on the low side.
+# Grafting OSCAR's ABSOLUTE pre-1850 values onto a GCB post-1850 series would
+# put a 61 % step at the join (OSCAR 0.459 at 1849 against GCB 0.741 at 1850).
+# So OSCAR supplies the SHAPE and the pre/post SHARE, rescaled by the ratio of
+# the two products over an 1850-1900 overlap window -- the window ADJACENT to the
+# splice, chosen for continuity there rather than for agreement in the mean.
+# Ratio 1.518; result 41.8 GtC. (The whole-record 1850-2018 ratio is 1.341 and
+# would give 36.9 GtC; the difference between the two windows, ~5 GtC, is an
+# honest measure of how much this construction is worth arguing about.)
+#
+# SCORED, NOT ASSERTED (calibration/diag_pre1850_luc.R, against the Law Dome
+# ice core over 1750-1850, at default parameters):
+#     option              cum GtC   RMSE     bias
+#     flat-hold (old)        74.1   2.48   +1.58
+#     OSCAR absolute         27.5   2.77   -1.80
+#     OSCAR scaled  <-- this 41.8   2.00   -0.90
+#     zero                    0.0   4.50   -3.53
+# Zero is EXCLUDED by the data: pre-1850 land-use emissions are not negligible
+# and Law Dome says so. The scaled option has the best RMSE and is the only one
+# with a citation. NOTE the diagnostic's other finding, which this does not fix:
+# every option undershoots Law Dome by ~6.5 ppm at 1900, so there is a separate
+# 19th-century deficit that the pre-1850 LUC choice does not touch.
+PRE1850_OVERLAP <- 1850:1900   # window the OSCAR->GCB level ratio is taken over
+oscar <- as.data.table(readxl::read_excel(
+  file.path(DL, "oscar_gcb2020_eluc.xlsx"), sheet = "Global"))
+os_scale <- emis_hist[year %in% PRE1850_OVERLAP, sum(luc_GtC)] /
+            oscar[year %in% PRE1850_OVERLAP, sum(E_luc)]
+pre <- oscar[year >= min(emis_hist$year) & year < min(emis_hist[!is.na(luc_GtC), year]),
+             .(year, luc_new = E_luc * os_scale)]
+emis_hist[pre, luc_GtC := i.luc_new, on = "year"]
+if (anyNA(emis_hist$luc_GtC))
+  stop("[5a] pre-1850 LUC still NA after the OSCAR splice -- check coverage")
+cat(sprintf(paste0("[5a] pre-1850 LUC: OSCAR v3.1 x %.3f (level ratio over %d-%d) -> ",
+                   "%.1f GtC for %d-%d, replacing %.1f GtC of rule=2 flat-hold\n"),
+            os_scale, min(PRE1850_OVERLAP), max(PRE1850_OVERLAP),
+            pre[, sum(luc_new)], min(pre$year), max(pre$year),
+            nrow(pre) * emis_hist[year == 1850, luc_GtC]))
 
 # ---- [5b] TIME-VARYING d13C OF THE FOSSIL SOURCE ---------------------
 # ADDED 2026-08-12. The model used a single d13c_foss = -28 permil for

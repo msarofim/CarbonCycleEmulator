@@ -101,13 +101,68 @@ a **methodological choice awaiting Marcus' call**.
 | Forcing | Coverage | Units into the model | Source |
 |---|---|---|---|
 | Fossil CO₂ | 1750–2024 | GtC/yr | GCB 2025 historical budget |
-| Land-use change CO₂ | 1750–2024 | GtC/yr | GCB 2025 bookkeeping |
+| Land-use change CO₂ | 1750–2024 | GtC/yr | GCB 2025 bookkeeping **1850–2024**; **1750–1849 from OSCAR v3.1 rescaled to GCB's level** (§4a) |
 | Future emissions | 1750–2500, 5 SSP markers | GtC/yr | RCMIP v5.1.0 (`Mt CO2/yr` ÷ 1000 ÷ 3.664) |
 | GMST anomaly | 1850–2024 | °C | IGCC (standing obs convention) |
 | ENSO (Niño 3.4) | 1948–2026 | SST anomaly, 1991–2020 base | NOAA PSL |
 | Nuclear-industry ¹⁴C | 1950–2023, 22 countries | GBq/yr → mol ¹⁴C/yr | Laemmel et al. 2025, doi:10.5281/zenodo.15034663 |
 | Bomb ¹⁴C | 1952–1980, monthly | mol ¹⁴C/yr **delivered to the troposphere** | Tans 1981 SCOPE 16 Tables 1–2 (Table 2 after Telegadas 1971), via `data-raw/build_bomb_c14_source.R`; total still from Naegler & Levin 2006 |
 | Cosmogenic ¹⁴C | all | mol ¹⁴C/yr | **solved by the spinup**, not prescribed (§7) |
+
+---
+
+### 3a. Pre-1850 land-use emissions (added 2026-08-13)
+
+**GCB's LUC column is empty before 1850.** Its fossil column starts 1750; the land-use
+column does not — verified in `gcb2025_historical_budget.csv` itself, not assumed. Until
+2026-08-13, `ccx_annual_to_monthly()` stripped the NAs and `approx(rule = 2)` held the 1850
+value (0.741 GtC/yr) flat backwards, **inventing 74.1 GtC across 1750–1849 — 23 % of all
+the land-use carbon the model burns.** Nobody chose it, nothing warned, and it is the same
+flat-hold pattern that GMST announces loudly on every build.
+
+**Replacement:** OSCAR v3.1's `E_luc`, which runs from 1701.
+Gasser T, Crepin L, Quilcaille Y, Houghton RA, Ciais P, Obersteiner M (2020), *Historical
+CO₂ emissions from land use and land cover change and their uncertainty*, **Biogeosciences
+17:4075–4101, doi:10.5194/bg-17-4075-2020**; data **doi:10.5281/zenodo.7313542**, CC-BY-4.0,
+`data-raw/downloads/oscar_gcb2020_eluc.xlsx`. The file gives **27.5 PgC (1750–1849)** and
+**178.9 (1850–2018)**, reproducing that paper's headline **206 ± 57 PgC** for 1750–2018
+exactly — the check that the right column was read.
+
+**It is rescaled, not spliced raw, and that is a methodological choice.** OSCAR's 1850–2018
+total sits **34 % below GCB 2025's 239.8 GtC** because they are different products (GCB
+averages three bookkeeping models including BLUE; OSCAR is observationally constrained and
+low). Grafting OSCAR's absolute values on would put a **62 % step** at the join
+(0.459 → 0.741 GtC/yr). So OSCAR supplies the **shape and the pre/post share**, rescaled by
+the GCB/OSCAR ratio over an **1850–1900** overlap — the window *adjacent to* the splice,
+chosen for continuity there. Ratio **1.518**, result **41.8 GtC**, splice step **6 %**.
+(The whole-record 1850–2018 ratio is 1.341 and would give 36.9 GtC; that ~5 GtC spread is an
+honest measure of how much the construction is worth arguing about.)
+
+**Scored against the Law Dome ice core**, 1750–1850, at default parameters
+(`calibration/diag_pre1850_luc.R`):
+
+| option | cum GtC | RMSE ppm | bias ppm |
+|---|---|---|---|
+| flat-hold (old) | 74.1 | 2.48 | +1.58 |
+| OSCAR absolute | 27.5 | 2.77 | −1.80 |
+| **OSCAR scaled — adopted** | **41.8** | **2.00** | **−0.90** |
+| zero | 0.0 | 4.50 | −3.53 |
+
+**Zero is excluded by the data** — pre-1850 land-use emissions are not negligible and the
+ice core says so. The flat-hold was not absurd (second best): it is roughly the right
+*integral* spread over the wrong *shape*, too big too early, overshooting Law Dome by
++3.8 ppm at 1775 where the adopted series is +1.0.
+
+**What this does NOT fix, recorded so it is not mistaken for something it does:** every
+option undershoots Law Dome by **~6.5 ppm at 1900**, and none reproduces the full
+18th-century rise (Law Dome +8.44 ppm 1750→1850; best option +5.10). There is a separate
+19th-century deficit, larger than this entire question, untouched by the choice.
+
+**Consequence:** the historical forcing changed, so `calibration/output/mode_fit.rds`
+**predates it and is stale.**
+
+`ccx_build_forcing()` now **warns** if any emissions column is NA inside the requested
+window, so the next dataset with a hole cannot repeat this quietly.
 
 ---
 
