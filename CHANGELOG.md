@@ -2099,3 +2099,80 @@ carbon out of the ml, pushing its depletion back **up**. **So −3.2 σ is an up
 the damage, not a prediction.** What the pre-check establishes is the **sign**, and the
 fact that the trade is now scoreable at all — not the size of the miss. Only the run
 settles that, which is why this is **a gate to run the conveyor against, not a veto**.
+
+## 2026-08-13 (later still, cont.) — Conveyor APPROVED; configuration red team finds §4.3 divided by the wrong volume
+
+Marcus approved building the conveyor and asked for a red-team review of the available
+configurations through four lenses (ocean / atmosphere / isotope / reduced-complexity),
+explicitly including the refit: *"once it is in properly, the other constants might all
+shuffle around into a new equilibrium and I would like to test that."* Review in
+`notes/redteam_2026-08-13_conveyor_configurations.md`; arithmetic folded into
+`calibration/scoping_conveyor_arithmetic.R` so every number regenerates.
+
+**§4.3's headline arithmetic divides by a volume the §4.2 plumbing does not traverse.** It
+uses `V_deep` = the whole sub-mixed-layer ocean (1.309e18 m³); under §4.2's own four limbs
+the water path is NH bottom → SH bottom → up the SH column → SH ml → NH ml =
+**9.13e17 m³, 70 %**. **NH `oc1`–`oc9`, 30 % of the deep ocean, receives no advective flux
+at all.**
+
+**Correcting that and §4.3's own source-water caveat, the two errors nearly cancel:**
+
+| basis | Sv for deep Δ¹⁴C = −170 ‰ |
+|---|---|
+| `V_deep`, no source correction (§4.3's headline) | 27.1 |
+| `V_deep`, source −51.2 ‰ (§4.3's own hedge) | 37.7 |
+| `V_path`, no source correction | 18.9 |
+| **`V_path`, source −51.2 ‰ — the honest number** | **26.3** |
+
+So the headline survives but **§4.3's hedge ("moves the −170 point to ~37 Sv") is too
+pessimistic by 11 Sv**. The conveyor's strongest selling point is in better shape than the
+handoff thought.
+
+**But 27 Sv is far above the AMOC that actually has an error bar** — RAPID 26°N gives
+**16.9 ± 1.2 Sv** (2004–2020). At 16.9 Sv on the real path the deep goes to **−230 ‰**,
+outside the model's own [−150, −200] bracket. **The "27 Sv reproduces −170 ‰ from transit
+alone" headline is retired**; the claim that survives is a **joint (Q, `kz`)** result —
+transit sets the floor, diffusion mixes back the other way. Weaker, true, and still a large
+improvement on bounding `kz` until the deep age came out right.
+
+**The strongest case for building is not δ¹³C — it is `kz`.** At 5000 m²/yr it is **~9× the
+measured thermocline diapycnal diffusivity**: Ledwell's NATRE tracer release gives
+(1.7 ± 0.2) × 10⁻⁵ m² s⁻¹ = 536 m²/yr. A conveyor is what lets `kz` become an eddy
+diffusivity instead of a fiction.
+
+**Verified and consequential: the preindustrial column is EXACTLY uniform in DIC**
+(2.0379 mol/m³ at all 11 levels, spread 2e-14 %). Advection is therefore a **pure isotope
+operator** preindustrially — which is the clean decoupling on offer, and equally means it
+**cannot** fix the ~14 % low ocean carbon inventory and **is not a biological pump**. The
+limb is not small either: **20.8 GtC/yr at 27 Sv against 27.1 GtC/yr of gross air–sea
+exchange.**
+
+**Configurations.** A (§4.2 as written) is rejected as a final answer: sinking NH ml
+straight to `oc10` leaves `oc1`–`oc9` on `kz` alone, so once `kz` falls the NH gets young
+bottom water under anomalously old mid-depth water — an inversion the Atlantic does not
+have — and it plumbs a limb named "NADW" to AABW depth. **Recommended: build C (sink to
+NADW depth, `oc8`/`oc9`), with B (distributed descent) as the cheap comparison and A as the
+intermediate they are diffed against; F (build nothing) stays the scored baseline.** D
+(two-cell NADW+AABW) and E (second surface box / HILDA-lite) deferred.
+
+**The refit is the point, and it needs prerequisites.** `kz`'s [3830, 6200] bracket **must
+be deleted, not carried across** (12d §6 derives it on the pure-diffusion column), so the
+honest accounting is *one parameter added and one constraint removed*. Q and `kz` are a
+degenerate pair — both ventilate — so the deep-Δ¹⁴C likelihood term (12d §0 step 2) is now
+a **prerequisite**, with Quay's ml Suess rate as the second leg. **Four predictions stated
+in advance so they cannot be retrofitted:** `kz` falls toward 500–2000; `h_ml` falls from
+179 m (currently 88 % of the way up its [30, 200] bound); `tau_ex` rises as the ocean takes
+over part of the interhemispheric transport; MLO−SPO δ¹³C shrinks from −0.218 ‰ toward the
+observed −0.074 ‰ **and may overshoot past zero**. *If `kz` does not fall and `h_ml` does
+not come down, the conveyor is not doing the job it was proposed to do, whatever happens to
+the log-posterior.*
+
+**Cost corrected: 2–3 days, not §4.2's half a day** — the plumbing is half a day, but the
+per-hemisphere deep diagnostic, the reverse-conveyor gate, the new likelihood terms, the
+`kz` re-derivation and **~4 h per `run_modefind.R` refit × 4 refits** are not.
+
+**One self-correction folded in.** `diag_oceanic_suess.R` inferred that air–sea ¹³C transfer
+is ~20 % too weak. That is in tension with τ_eq = C_ml/F_gross = 10.5 yr (NH) / 10.0 (SH),
+which is the textbook mixed-layer ¹³C equilibration timescale — isotopes ride the gross flux
+unbuffered, so this is one of the model's better-grounded numbers. If τ_eq is right the
+20 % lives elsewhere, most likely `h_ml`. Left open; the refit is what separates them.
