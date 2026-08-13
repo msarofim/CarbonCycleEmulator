@@ -2496,3 +2496,75 @@ called correctly sized, and a pump injects surface-¹⁴C carbon into the deep n
 making it *younger* and working against the deep-age constraint — **magnitude unmeasured.**
 Pedagogically it passes the test the conveyor failed: one famous sentence, and it explains
 the 50× ocean:atmosphere stock ratio the app already displays.
+
+## 2026-08-13 (g) — The 1900 deficit diagnosed: land-use carbon has an airborne fraction of ZERO
+
+`calibration/diag_1900_deficit.R`. Discharges handoff 13e §0.4 — "a NEW, UNDIAGNOSED
+MISFIT ... larger than the question that surfaced it and nobody has looked at it."
+
+**It is not a 19th-century problem and it is not about the 19th century.** The model
+undershoots Law Dome by ~6.5 ppm at 1900 because **land-use emissions have an airborne
+fraction of 0.002 at 100 years**: the land takes back every tonne deforestation releases.
+
+**THE CLUE WAS INSIDE `diag_pre1850_luc.R`'s OWN TABLE AND WAS READ PAST.** Four pre-1850
+LUC options spanning **0 → 74.1 GtC** of cumulative emissions land within **0.38 ppm** of
+each other at 1900, having been **6.09 ppm** apart at 1850. Fifty years erased 94 % of a
+74 GtC forcing difference, against the model's own 50-yr point IRF of 0.397. Suspicious
+uniformity, per the standing rule, is a code path until disproven — and it was.
+
+**THE MECHANISM.** LUC is a transfer out of the wood pool (`98c1783`, 2026-08-12, and
+right on its own terms: `add_source()` created ¹⁴C ex nihilo). But wood has a restoring
+fixed point, so what deforestation removes, the model **regrows**:
+
+```
+d(δW)/dt = φ(1−f)·npp0/veg0 · δW − δW/tau_wood
+         = 0.5·0.4/8.6 − 1/20 = −0.0267 /yr   →   37.4 yr
+```
+
+**MEASURED, NOT ARGUED** (§3, and it depends on no historical forcing, no observation and
+no fit): 100 GtC in 1760, zero-emission background, GMST and ENSO frozen, control flat to
++0.027 ppm over 275 yr.
+
+| airborne fraction at lag | 10 | 25 | 50 | 100 | 150 |
+|---|---|---|---|---|---|
+| external source | 0.605 | 0.445 | 0.337 | **0.262** | 0.226 |
+| wood transfer | 0.577 | 0.260 | 0.072 | **0.002** | −0.003 |
+
+**A fossil emission is permanent in this model; an LUC emission is a transient the land
+takes back in full.** GCB reports E_LUC and S_LAND as separate terms (`gcb_budget.rds`
+carries them as separate columns) and the model's β-fertilisation uptake is the analogue of
+S_LAND — so regrowing what E_LUC removed adds a second, unbudgeted land sink on top of the
+one already parameterised. Whatever share of regrowth E_LUC does or does not net out,
+**full recovery to the preindustrial stock is not defensible: converted land is farmed.**
+
+**IT IS A REGRESSION, dated.** `98c1783` landed 2026-08-12; the deficit was noticed
+2026-08-13 and mis-attributed to the pre-1850 LUC question, which cannot touch it.
+
+**HOW BIG, over the whole record** (default parameters, LUC routed as an external source
+being mass-exact and isotopically meaningless, which is all §2/§5 read off it):
+
+| | 1900 | 1930 | 1960 | 1990 | 2010 | 2024 |
+|---|---|---|---|---|---|---|
+| shipped (LUC = transfer) | −6.51 | −9.08 | −4.01 | −5.65 | −5.37 | −6.02 |
+| LUC permanent | +1.62 | +3.22 | +13.44 | +19.02 | +24.29 | +27.44 |
+
+**The regrowth path accounts for 125 % of the 1900 deficit — handled permanently the model
+OVERSHOOTS — so this is not a missing source.** Cumulative land 1750–2024: model **+29.4
+GtC** against GCB 2025's **−57.4**. *The model's land is a net **sink** where the budget
+says net **source**.*
+
+**AND IT IS INSIDE THE LIKELIHOOD.** Scanning β at fixed everything-else against the CO₂
+record (Law Dome then MLO, 1850–2024): the transfer path prefers **β = 0.30**, a permanent
+LUC prefers **β = 0.70**. **The treatment biases β down by ~2.3×.** Stated with its limit:
+`mode_fit.rds` has β = 0.088, *below* even the 0.30 the transfer path prefers, so the LUC
+defect is a **contributing** bias and not the whole story — the other 15 parameters and the
+δ¹³C/¹⁴C streams are not in a 1-D scan. **Do not read §6 as attributing the mode.**
+
+**NOT FIXED HERE, and deliberately.** The fix is not reversion — the ¹⁴C-ex-nihilo reason
+for the transfer stands. It is to make the **debit permanent**, which means the land's
+equilibrium stock must fall as land is converted: a structural change to a model the expert
+panel just called correctly sized, and therefore Marcus'. Options and costs are in
+`notes/handoff_2026-08-13f_luc_regrowth_double_count.md`.
+
+**Sharpens `mode_fit.rds` is stale from "the forcing moved" to "the forcing moved AND the
+model gives land-use carbon away".** A refit before this is settled would fit the defect.
