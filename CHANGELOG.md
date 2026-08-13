@@ -2088,3 +2088,14 @@ constraint here with a stated uncertainty, it is independent of the atmospheric 
 target, and it pins the air–sea partition that `q10` has been free to trade against.
 **`sigma_d13c` remains unset and still blocking; this does not change the 0.45 ‰ argument**
 (it removes a hoped-for route to shrinking the gap rather than shrinking it).
+
+**Where the conveyor pre-check is weak, said plainly.** It applies §4.3's own equilibrium
+fraction to the *current* ml rate, which treats the pre-conveyor mixed layer as if it were
+at full isotopic equilibrium — §4.3 derives its "37 % cut" the same way, so the two are
+consistent, but both ignore that the model **already** ventilates the ml diffusively. The
+offsetting term is real and points the other way: §4.5 step 3 expects `kz` to fall a long
+way once a conveyor carries the ventilation, and a smaller `kz` exports less depleted
+carbon out of the ml, pushing its depletion back **up**. **So −3.2 σ is an upper bound on
+the damage, not a prediction.** What the pre-check establishes is the **sign**, and the
+fact that the trade is now scoreable at all — not the size of the miss. Only the run
+settles that, which is why this is **a gate to run the conveyor against, not a veto**.

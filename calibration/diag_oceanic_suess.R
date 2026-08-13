@@ -48,8 +48,20 @@
 #     Suess rate that is ALREADY at the observed value, that lands at
 #     0.095 permil/decade against Quay's 0.160 +/- 0.020 -- a 3.2 sd miss. Even
 #     15 Sv misses by 2.2 sd. The neglected feedback (a less depleted
-#     atmosphere gives the ml less signal to follow) pushes the SAME way, so
-#     these are conservative.
+#     atmosphere gives the ml less signal to follow) pushes the SAME way.
+#
+#     WHERE THIS PRE-CHECK IS WEAK, said plainly. It applies sec.4.3's own
+#     equilibrium fraction to the CURRENT ml rate, which treats the
+#     pre-conveyor ml as if it were at full isotopic equilibrium -- sec.4.3
+#     derives its "37 % cut" the same way, so the two are consistent, but both
+#     ignore that the model ALREADY ventilates the ml diffusively. The
+#     offsetting term is real and points the other way: sec.4.5 step 3 expects
+#     `kz` to fall a long way once a conveyor carries the ventilation, and a
+#     smaller `kz` exports less depleted carbon out of the ml, pushing its
+#     depletion back UP. So -3.2 sd is an upper bound on the damage, not a
+#     prediction. What the pre-check establishes is the SIGN and the fact that
+#     the trade is now scoreable at all -- not the exact size of the miss.
+#     Only the run settles that, which is why this is a gate and not a veto.
 #
 #     THE CONVEYOR PAYS FOR THE ATMOSPHERE WITH THE ONE OCEAN QUANTITY THAT IS
 #     CURRENTLY CORRECT. That does not by itself kill it -- see the compensating
@@ -236,8 +248,11 @@ cat(sprintf("   deep transit at %g Sv = %.0f yr (the sec.4.3 headline), which is
             DOS_CONVEYOR_SV[2], V_deep / (DOS_CONVEYOR_SV[2] * 1e6 * DOS_SEC_PER_YR)))
 cat("   in question here -- the deep age is what the conveyor BUYS. The cost is\n")
 cat("   above, and it is charged to a quantity that currently matches observation.\n")
-cat("   CONSERVATIVE: a less depleted atmosphere gives the ml less signal to\n")
-cat("   follow, pushing the same way. Neither number includes that feedback.\n")
+cat("   PUSHING THE SAME WAY: a less depleted atmosphere gives the ml less signal\n")
+cat("   to follow. PUSHING THE OTHER WAY: sec.4.5 step 3 expects kz to fall once a\n")
+cat("   conveyor carries the ventilation, and a smaller kz exports less depleted\n")
+cat("   carbon out of the ml. So these are an UPPER BOUND on the damage, not a\n")
+cat("   prediction -- this is a gate to run the conveyor against, not a veto.\n")
 
 cat("\n== VERDICT ==\n")
 cat("   The handoff 13b sec.6 oceanic-Suess lead is RETRACTED: observed ratio is\n")
