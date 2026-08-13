@@ -24,7 +24,7 @@ test_that("single derivative agrees to roundoff", {
   sp <- ccx_spinup(pf$p)
   forc <- list(e_foss = list(NH = 8, SH = 0.4), e_luc = list(NH = 0.6, SH = 0.5),
                gmst = 1.1, enso = 0.7, c14_bomb = 1200, c14_nuclear = 40,
-               c14_cosmo = sp$prod_c14)
+               c14_cosmo = sp$prod_c14, d13c_foss = -27.6)
   dR <- ccx_deriv(sp$y, 1980.5, pf$p, forc, sp$grid, sp$aux)
   dC <- ccx_deriv_fast(sp$y, 1980.5, pf$p, forc, sp$grid, sp$aux)
   # Scale-relative: per-cell relative error is meaningless for cells whose value
@@ -65,7 +65,7 @@ test_that("parity holds with the frozen-Revelle switch engaged", {
   sp <- ccx_spinup(p)
   forc <- list(e_foss = list(NH = 8, SH = 0.4), e_luc = list(NH = 0.6, SH = 0.5),
                gmst = 1.1, enso = 0.7, c14_bomb = 1200, c14_nuclear = 40,
-               c14_cosmo = sp$prod_c14)
+               c14_cosmo = sp$prod_c14, d13c_foss = -27.6)
   dR <- ccx_deriv(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
   dC <- ccx_deriv_fast(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
   expect_lt(max(abs(dR - dC)) / max(abs(dR)), 1e-15)

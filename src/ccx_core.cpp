@@ -51,7 +51,9 @@ struct Aux {
   double npp0[2], veg0[2], ml_mass_kg[2], asx[2], sst[2];
   double dz[NL + 1], dz_mid[NL];
   double alpha_photo, alpha_as_down, alpha_as_up;
-  double d13c_foss, enso_share[2];
+  // d13c_foss MOVED to the forcing (2026-08-12): the fossil source d13C is
+  // time-varying, so it is no longer an invariant.
+  double enso_share[2];
   double dic0[2], revelle0[2], pco2_0[2];   // preindustrial mixed-layer reference
   double bomb_share_NH, nuc_share_NH;
   double R13, R14STD, lambda, alk;
@@ -164,8 +166,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   };
 
   // forcing layout: e_foss_NH, e_foss_SH, e_luc_NH, e_luc_SH, gmst, enso,
-  //                 c14_bomb, c14_nuclear, c14_cosmo
-  const double gmst = f[4], enso = f[5];
+  //                 c14_bomb, c14_nuclear, c14_cosmo, d13c_foss
+  // Must stay in step with CCX_FORCING_COLS in R/cpp.R -- indexed by position,
+  // so a mismatch is silent garbage. test-parity.R is the gate.
+  const double gmst = f[4], enso = f[5], d13c_foss = f[9];
 
   for (int hi = 0; hi < 2; ++hi) {
     const int base = hi * NPH;
@@ -245,7 +249,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // external to the modelled system; land-use change is not, so it is a
     // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
     // rather than an external source that created 14C ex nihilo.
-    add_source(iatm, f[hi], A.d13c_foss, -1000.0);
+    add_source(iatm, f[hi], d13c_foss, -1000.0);
     add_flux(iwod, iatm, f[2 + hi], 1.0);
   }
 
@@ -281,7 +285,6 @@ static Aux unpack_aux(const List& a) {
   v = a["pco2_0"];     A.pco2_0[0] = v[0];     A.pco2_0[1] = v[1];
   A.alpha_photo = a["alpha_photo"];
   A.alpha_as_down = a["alpha_as_down"]; A.alpha_as_up = a["alpha_as_up"];
-  A.d13c_foss = a["d13c_foss"];
   A.bomb_share_NH = a["bomb_share_NH"]; A.nuc_share_NH = a["nuc_share_NH"];
   A.R13 = a["R13"]; A.R14STD = a["R14STD"]; A.lambda = a["lambda"]; A.alk = a["alk"];
   v = a["cK0"]; for (int i = 0; i < 7; ++i) A.cK0[i] = v[i];
@@ -320,7 +323,7 @@ NumericMatrix ccx_deriv_cpp(NumericMatrix y, double t, List p, NumericVector f, 
 }
 
 // ---- exported: full integration -------------------------------------
-// forcing is an n x 9 matrix, one row per month, columns in the order given in
+// forcing is an n x 10 matrix, one row per month, columns in the order given in
 // deriv() above.
 // [[Rcpp::export]]
 List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
@@ -341,7 +344,7 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
   NumericMatrix out(n, 11);
   const double gpp = A.gtc_per_ppm_hemi;
 
-  std::vector<double> f(9);
+  std::vector<double> f(10);
   for (int i = 0; i < n; ++i) {
     out(i, 0) = y[IX(0, C)] / gpp;
     out(i, 1) = y[IX(NPH, C)] / gpp;
@@ -365,7 +368,7 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
     out(i, 6) = oc; out(i, 7) = ld;
     out(i, 8) = oc14; out(i, 9) = ld14; out(i, 10) = at14;
 
-    for (int j = 0; j < 9; ++j) f[j] = forcing(i, j);
+    for (int j = 0; j < 10; ++j) f[j] = forcing(i, j);
 
     // RK4 with substeps, ordered exactly as ccx_step_rk4() in R
     double tt = times[i];

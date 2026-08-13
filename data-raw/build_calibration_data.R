@@ -276,7 +276,60 @@ cat(sprintf("[5] GCB 2025: budget %d-%d, historical %d-%d (GtC/yr)\n",
 # ---- prescribed historical emissions forcing -------------------------
 emis_hist <- gcb_hist[, .(year, fossil_GtC = fossil, luc_GtC = luc)]
 emis_hist <- emis_hist[!is.na(fossil_GtC) | !is.na(luc_GtC)]
+
+# ---- [5b] TIME-VARYING d13C OF THE FOSSIL SOURCE ---------------------
+# ADDED 2026-08-12. The model used a single d13c_foss = -28 permil for
+# 1750-2024. calibration/diag_d13c_suess.R measured what that costs: the
+# atmospheric Suess decline came out ~30 % too steep, obs - model growing
+# monotonically to +0.58 permil at MLO by 2020, and that too-depleted
+# atmosphere is relieved by a larger land sink -- so it was actively pushing
+# q10 below 1 (calibration/diag_q10_stream_direction.R).
+#
+# -28 is wrong in two ways, both in the same direction:
+#   (a) `fossil` above is GCB's fossil-fuel-AND-INDUSTRY column, which includes
+#       CEMENT. Cement CO2 is calcined limestone, d13C ~ 0 permil, not fuel.
+#   (b) the fuel mix moved. 1850 emissions are essentially pure coal (~-24);
+#       gas (~-44) is a post-1900 addition. One modern-mix value applied to the
+#       whole industrial period over-depletes cumulatively -- which is exactly
+#       the growing-residual signature.
+#
+# So the signature is rebuilt as an emission-weighted mean of per-fuel
+# endmembers, using GCB's own by-fuel split. Cross-check on the result:
+# Graven et al. (2020) state the global fossil-plus-cement average "has been
+# -28 permil to -24 permil", shifting more negative as gas displaces coal.
+D13C_COAL   <- -24.0   # permil. Graven, Keeling & Rogelj (2020), GBC 34,
+D13C_OIL    <- -26.5   # e2019GB006170: coal ~-24, gas ~-44, cement ~0 (calcined
+D13C_GAS    <- -44.0   # carbonate). The oil value is the global modal crude-
+D13C_CEMENT <-   0.0   # petroleum estimate of Tans (1981) / Andres, Marland,
+D13C_FLARE  <- -44.0   # Boden & Bischof (2000), as quoted by Bush, Pataki &
+D13C_OTHER  <- -24.0   # Ehleringer (2007), Appl. Geochem. 22:715-723.
+# Flaring is vented/burned associated gas -> the gas endmember. "Other"
+# (non-cement industrial process emissions) is put on the coal endmember; it is
+# under 1.2 % of the total in every year, so the choice cannot matter.
+# Pre-1850 is not covered by the by-fuel sheet. Emissions there are essentially
+# pure coal and under 0.4 % of the cumulative total, so the FIRST YEAR's value
+# is held back rather than extrapolated.
+foss_fuel <- fread(file.path(DL, "gcb2025_fossil_emissions_by_fuel.csv"),
+                   skip = "Year")
+setnames(foss_fuel, c("year", "fossil_excl_carbonation", "coal", "oil", "gas",
+                      "cement", "flaring", "other", "per_capita"))
+foss_fuel[, d13c_foss := (coal * D13C_COAL + oil * D13C_OIL + gas * D13C_GAS +
+                          cement * D13C_CEMENT + flaring * D13C_FLARE +
+                          other * D13C_OTHER) /
+                         (coal + oil + gas + cement + flaring + other)]
+d13c_foss_hist <- foss_fuel[is.finite(d13c_foss), .(year, d13c_foss)]
+emis_hist <- merge(emis_hist, d13c_foss_hist, by = "year", all.x = TRUE)
+setorder(emis_hist, year)
+# back-fill pre-1850, forward-fill any trailing gap; both are held, not trended
+emis_hist[, d13c_foss := nafill(nafill(d13c_foss, "locf"), "nocb")]
 saveRDS(emis_hist, file.path(OUT, "forcing_emissions_historical.rds"))
+cat(sprintf("[5b] fossil source d13C: %.2f permil (%d, %.0f %% coal) -> %.2f (%d, %.0f %% coal, %.0f %% gas, %.1f %% cement)\n",
+            d13c_foss_hist$d13c_foss[1], d13c_foss_hist$year[1],
+            100 * foss_fuel[1, coal / (coal + oil + gas + cement + flaring + other)],
+            d13c_foss_hist$d13c_foss[.N], d13c_foss_hist$year[.N],
+            100 * foss_fuel[.N, coal / (coal + oil + gas + cement + flaring + other)],
+            100 * foss_fuel[.N, gas  / (coal + oil + gas + cement + flaring + other)],
+            100 * foss_fuel[.N, cement / (coal + oil + gas + cement + flaring + other)]))
 
 # =====================================================================
 # 6. GMST (IGCC) and ENSO

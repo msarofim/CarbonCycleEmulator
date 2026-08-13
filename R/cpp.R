@@ -44,7 +44,6 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     pco2_0 = c(aux$pco2_0$NH, aux$pco2_0$SH),
     alpha_photo = aux$alpha_photo,
     alpha_as_down = aux$alpha_as_down, alpha_as_up = aux$alpha_as_up,
-    d13c_foss = aux$d13c_foss,
     bomb_share_NH = aux$bomb_share_NH, nuc_share_NH = aux$nuc_share_NH,
     R13 = ccx_const("R13_VPDB"), R14STD = ccx_const("R14_STD"),
     lambda = ccx_const("LAMBDA_C14"), alk = ccx_const("ALK_SURFACE"),
@@ -85,10 +84,21 @@ ccx_cpp_par <- function(p) {
       "seas_phase_NH", "seas_phase_SH", "revelle_frozen")]
 }
 
-#' Forcing table -> the 9-column matrix the C++ expects, in its column order
+#' Forcing table -> the matrix the C++ expects, in its column order
+# Column ORDER is the contract with src/ccx_core.cpp, which indexes f[] by
+# position. Adding, removing or reordering a name here requires the same edit
+# there; a mismatch is silent garbage, not an error, so both sides state the
+# layout and test-parity.R runs them against each other.
+CCX_FORCING_COLS <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
+                      "gmst", "enso", "c14_bomb", "c14_nuclear", "c14_cosmo",
+                      "d13c_foss")
+
 ccx_cpp_forcing <- function(F) {
-  as.matrix(F[, c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
-                  "gmst", "enso", "c14_bomb", "c14_nuclear", "c14_cosmo")])
+  miss <- setdiff(CCX_FORCING_COLS, names(F))
+  if (length(miss))
+    stop("forcing table is missing column(s): ", paste(miss, collapse = ", "),
+         ". Build it with ccx_build_forcing().")
+  as.matrix(F[, CCX_FORCING_COLS])
 }
 
 #' Run the model using the C++ core. Same signature and return shape as ccx_run().
@@ -129,7 +139,8 @@ ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
 ccx_deriv_fast <- function(y, t, p, forc, grid, aux) {
   ccx_load_cpp()
   f <- c(forc$e_foss$NH, forc$e_foss$SH, forc$e_luc$NH, forc$e_luc$SH,
-         forc$gmst, forc$enso, forc$c14_bomb, forc$c14_nuclear, forc$c14_cosmo)
+         forc$gmst, forc$enso, forc$c14_bomb, forc$c14_nuclear, forc$c14_cosmo,
+         ccx_forcing_d13c_foss(forc))
   d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, ccx_cpp_par(p), f, ccx_cpp_aux(aux, grid))
   dimnames(d) <- dimnames(y)
   d

@@ -372,7 +372,13 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     # ---- prescribed emissions ---------------------------------------
     # Fossil carbon comes from OUTSIDE the modelled system (geology), so it is a
     # true external source, and it is 14C-free.
-    add_source(iatm, forc$e_foss[[h]], aux$d13c_foss, -1000)
+    #
+    # Its d13C is TIME-VARYING (2026-08-12) and arrives on the forcing table,
+    # not in `aux`: the emission-weighted fuel mix moved from ~-24 permil in
+    # 1850 (all coal) to ~-28 today (gas and cement in the total). Holding it at
+    # a single modern value made the Suess decline ~30 % too steep -- see
+    # calibration/diag_d13c_suess.R and forcing.R's note.
+    add_source(iatm, forc$e_foss[[h]], ccx_forcing_d13c_foss(forc), -1000)
     # Land-use change does NOT: it moves carbon that is already in the modelled
     # biosphere. Emitting it with add_source() while leaving the vegetation box
     # intact created carbon AND 14C ex nihilo -- ~28 kmol of 14C by 1995, 14-16 %
@@ -472,7 +478,16 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # -- a single "net" alpha cannot represent the two-way exchange.
     alpha_as_down = 1 -  2 / 1000,   # provisional, kinetic (atm -> ocean)
     alpha_as_up   = 1 - 10 / 1000,   # provisional, equilibrium (ocean -> atm)
-    d13c_foss   = -28,               # provisional
+    # d13c_foss MOVED TO THE FORCING TABLE 2026-08-12. It was a single -28
+    # permil here, applied from 1750 to 2024. That is not one value: the
+    # emission-weighted fuel mix ran from ~-24 permil (1850, essentially all
+    # coal) to ~-28 (today, gas and ~0 permil cement carbon in the total), and
+    # holding the modern end fixed across the whole industrial period made the
+    # modelled Suess decline ~30 % too steep -- obs - model growing to +0.58
+    # permil at MLO by 2020. It is now built per year in
+    # data-raw/build_calibration_data.R [5b] and carried on the forcing.
+    # See calibration/diag_d13c_suess.R.
+    #
     # d13c_bio removed 2026-08-12: LUC is now a transfer out of the vegetation
     # box, which carries its own emergent 13C ratio, so no prescribed value is
     # needed. Fossil carbon still needs one -- geology is outside the model.

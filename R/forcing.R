@@ -208,6 +208,25 @@ ccx_build_forcing <- function(scenario = "historical",
   foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs)
   luc  <- ccx_annual_to_monthly(e$year, e$luc_GtC,    yrs)
 
+  # ---- d13C of the fossil source, TIME-VARYING (2026-08-12) ----------
+  # Built in data-raw/build_calibration_data.R [5b] from GCB's own by-fuel
+  # split: -24.0 permil in 1850 (essentially pure coal) to -28.3 by 2024 as gas
+  # displaced coal and cement (limestone, ~0 permil) entered the total. It
+  # replaces a single -28 applied to the whole industrial period, which made the
+  # modelled Suess decline ~30 % too steep -- see calibration/diag_d13c_suess.R.
+  #
+  # Only the historical table carries the column. SSPs and caller-supplied
+  # pathways do not: the future fuel mix is a scenario property nobody has
+  # supplied, so the last historical value is HELD FLAT, the same placeholder
+  # convention the GMST column uses below. d13C is not scored past 2024, so this
+  # affects reported d13C only, never the carbon budget.
+  if (!is.null(e$d13c_foss)) {
+    d13c_foss <- ccx_annual_to_monthly(e$year, e$d13c_foss, yrs, method = "constant")
+  } else {
+    h <- as.data.frame(readRDS(ccx_path("data", "forcing_emissions_historical.rds")))
+    d13c_foss <- ccx_annual_to_monthly(h$year, h$d13c_foss, yrs, method = "constant")
+  }
+
   # ---- temperature: IGCC, zero before its record starts --------------
   # AFTER the record ends this HOLDS THE LAST OBSERVED VALUE FLAT. That is a
   # placeholder, not a projection: an SSP5-8.5 run to 2100 built here sits at
@@ -262,18 +281,36 @@ ccx_build_forcing <- function(scenario = "historical",
     e_foss_SH = foss * (1 - FORC_FOSS_NH_SHARE),
     e_luc_NH  = luc  * FORC_LUC_NH_SHARE,
     e_luc_SH  = luc  * (1 - FORC_LUC_NH_SHARE),
-    gmst = gm, enso = enso,
+    gmst = gm, enso = enso, d13c_foss = d13c_foss,
     c14_bomb = c14_bomb, c14_nuclear = c14_nuc,
     c14_cosmo = rep(prod_c14, n),
     stringsAsFactors = FALSE
   )
 }
 
+#' Resolve the fossil-source d13C of a forcing, including hand-built ones
+#'
+#' ccx_build_forcing() always supplies `d13c_foss`, but several callers assemble
+#' a forcing list literally -- ccx_spinup()'s zero forcing and the conservation
+#' tests' closed system -- and those carry no emissions at all, so the value
+#' would multiply a zero flux.
+#'
+#' Rather than default silently (which would let a REAL run missing the column
+#' pick a number nobody chose), this returns 0 only when there is genuinely no
+#' fossil flux to label, and errors otherwise.
+ccx_forcing_d13c_foss <- function(forc) {
+  if (!is.null(forc$d13c_foss)) return(forc$d13c_foss)
+  if (any(unlist(forc$e_foss) != 0))
+    stop("forcing carries fossil emissions but no `d13c_foss`; ",
+         "build it with ccx_build_forcing()")
+  0
+}
+
 #' Extract one month's forcing in the shape ccx_deriv() expects
 ccx_forcing_at <- function(F, i) {
   list(e_foss = list(NH = F$e_foss_NH[i], SH = F$e_foss_SH[i]),
        e_luc  = list(NH = F$e_luc_NH[i],  SH = F$e_luc_SH[i]),
-       gmst = F$gmst[i], enso = F$enso[i],
+       gmst = F$gmst[i], enso = F$enso[i], d13c_foss = F$d13c_foss[i],
        c14_bomb = F$c14_bomb[i], c14_nuclear = F$c14_nuclear[i],
        c14_cosmo = F$c14_cosmo[i])
 }

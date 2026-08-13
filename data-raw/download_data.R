@@ -131,6 +131,19 @@ fetch("gcb_hist",
       "Friedlingstein P, et al. (2026), GCB 2025 historical budget sheet (as above).",
       "1750-2024 GtC/yr; source of prescribed fossil + LUC emissions forcing")
 
+# The by-fuel split is what makes the fossil source d13C time-varying. The
+# budget sheets above give only the TOTAL fossil column, which is fossil fuel
+# AND INDUSTRY -- cement included. Cement carbon is limestone at d13C ~ 0 permil
+# and coal, oil and gas are ~ -24, -26.5 and -44, so a single constant applied
+# to the total is wrong twice over (see data-raw/build_calibration_data.R [3b]).
+fetch("gcb_fossil_by_fuel",
+      paste0("https://openclimatedata.github.io/global-carbon-budget/data/",
+             "global-carbon-budget-2025-fossil-emissions.csv"),
+      "gcb2025_fossil_emissions_by_fuel.csv",
+      paste("Friedlingstein P, et al. (2026), GCB 2025 'Fossil Emissions by Category'",
+            "sheet (as above)."),
+      "1850-2024 GtC/yr by fuel: Coal, Oil, Gas, Cement.emission, Flaring, Other")
+
 # ---------------------------------------------------------------------
 # 5. ENSO index
 # ---------------------------------------------------------------------

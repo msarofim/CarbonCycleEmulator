@@ -1,39 +1,59 @@
 # =====================================================================
-# diag_d13c_suess.R -- the model's 13C Suess decline is too steep, and the
-# fossil source d13C is the lever that owns it.
+# diag_d13c_suess.R -- the model's 13C Suess decline is ~30 % too steep, and
+# nothing available can close it. This is a STRUCTURAL finding, not a bug list.
 #
 # FOUND 2026-08-12 while pricing handoff 12d sec.0 step 1. The d13C residual is
-# not scatter and it is not a constant offset: obs - model grows monotonically
-# from ~0 permil in 1850 to +0.58 by 2020 at MLO (+0.43 at SPO), with only
-# 0.07 permil of year-to-year scatter around it. The model reproduces the SHAPE
-# of the Suess decline and overshoots its MAGNITUDE by ~30 %.
+# neither scatter nor a constant offset: obs - model grows monotonically from
+# ~0 permil in 1850 to +0.58 by 2020 at MLO (+0.43 at SPO), with 0.07 permil of
+# year-to-year scatter around it. The model reproduces the SHAPE of the Suess
+# decline and overshoots its MAGNITUDE.
 #
 # Why it matters beyond d13C itself: a too-depleted atmosphere is relieved by a
 # LARGER land sink (photosynthesis discriminates against 13C), so the d13C term
-# pushes q10 DOWN -- it is a contributor to the q10 inversion, not a cure for it.
-# diag_q10_stream_direction.R measures that direction.
+# pushes q10 DOWN -- it is a CONTRIBUTOR to the q10 inversion, not a cure for
+# it. diag_q10_stream_direction.R measures that direction.
 #
-# [1] residual structure in time, against Law Dome (pre-1980) and Scripps.
-# [2] sensitivity of the 2015-2024 bias to each PROVISIONAL 13C constant in
-#     ccx_prepare(), with the CO2 bias carried alongside so a "fix" that moves
-#     the carbon budget is visible.
+# WHAT THIS SCRIPT ESTABLISHES, in order:
 #
-# RESULT of [2]: d13c_foss owns the bias almost entirely. -28 -> -24 permil
-# takes MLO from +0.577 to +0.048 and SPO from +0.425 to -0.052, while the CO2
-# bias does not move at all (+2.33 ppm throughout). The three fractionation
-# factors move it only 0.014-0.035 permil per permil -- an order of magnitude
-# weaker. So this is a d13C-only lever, orthogonal to the carbon budget.
+# [1] The residual's structure in time (Law Dome pre-1980, Scripps after).
 #
-# TWO CONCRETE DEFECTS IN d13c_foss = -28, both pushing the same way:
-#   (a) `fossil_GtC` is GCB's fossil-fuel-AND-INDUSTRY column, which INCLUDES
-#       cement. Cement carbon comes from limestone at d13C ~ 0 permil, not from
-#       fuel at -28, and it is ~4-5 % of the total.
-#   (b) the value is CONSTANT over 1750-2024, but the fuel mix is not: coal
-#       (~-24 permil) dominated early and gas (~-44) is a modern addition, so a
-#       single modern-mix value applied to the whole industrial period
-#       over-depletes cumulatively -- which is exactly the growing-residual
-#       signature [1] shows.
-# Neither is settled here; this diagnostic prices them. See CHANGELOG.
+# [2] Sensitivity to each PROVISIONAL 13C constant, CO2 bias carried alongside
+#     so a "fix" that moves the carbon budget is visible. The fossil source
+#     signature is the only strong lever: -28 -> -24 permil takes MLO +0.577 ->
+#     +0.048 with CO2 unmoved, where the three fractionation factors move it
+#     0.014-0.035 permil per permil. That motivated the fossil-source fix below,
+#     and is why the atmosphere's d13C is worth trusting as a partition signal.
+#
+#     THE FOSSIL-SOURCE FIX IS DONE AND IT WAS NEARLY WORTHLESS. d13c_foss was a
+#     single -28 permil for 1750-2024, wrong twice over: GCB's `fossil` column is
+#     fossil-fuel-AND-INDUSTRY, so ~4-5 % of it is cement (calcined limestone,
+#     ~0 permil), and the fuel mix ran from all-coal (~-24) to gas-inclusive
+#     (~-44 for the gas share). It is now built per year from GCB's own by-fuel
+#     split (data-raw/build_calibration_data.R [5b]), running -24.0 in 1850 to
+#     -28.3 in 2024 -- inside the -28 to -24 envelope Graven et al. (2020) state
+#     for the global fossil-plus-cement signature.
+#     It moved the 2015-2024 MLO bias 0.577 -> 0.561, i.e. 3 % of it. The reason
+#     is emission weighting: the years where the old constant was most wrong
+#     carry almost no emissions. The correction is right and stays; the
+#     over-depletion is not the source signature.
+#
+# [3] Is it the SINK PARTITION? Closing the d13C bias needs a ~72 % land share
+#     (beta ~0.9) against GCB's 42 %, which puts CO2 40 ppm high and the land
+#     sink at 4.7 GtC/yr against GCB's 2.4. d13C and CO2 cannot both be
+#     satisfied by any partition this model can reach.
+#
+# [4] Is it weak isotopic DISEQUILIBRIUM DAMPING? `ra_ratio`, the gross land
+#     loop, moves the bias 0.10 permil across its whole plausible range while
+#     leaving net carbon untouched -- and D14C (the right constraint on gross
+#     exchange) goes +2.7 to -14.6 permil across the same range, forbidding the
+#     large values. Not it either.
+#
+# WHAT IS LEFT: the model over-depletes by ~0.55 permil and none of the source
+# signature, the fractionation constants, the reachable sink partition, or the
+# gross land exchange accounts for it. The calibration's only remaining way to
+# relieve it is to manufacture land sink -- which is what q10 -> 0.17 is doing.
+# Untested candidate: the ocean-side disequilibrium, in a pure-diffusion ocean
+# with no biological pump whose DIC inventory is ~16 % low.
 # =====================================================================
 
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
@@ -54,9 +74,13 @@ obs <- ccx_prepare_obs()
 base_forcing <- ccx_build_forcing("historical", DS_YEARS, prod_c14 = 0,
                                   bomb_total_kmol = DS_BOMB_REF)
 
-ds_run <- function(p) {
+# d13c_foss moved from `aux` to the FORCING TABLE on 2026-08-12, so overriding
+# it here means overwriting a column -- wrapping ccx_prepare() no longer reaches
+# it, and a scan written that way reports six identical rows while looking live.
+ds_run <- function(p, d13c_foss = NULL) {
   s <- ccx_spinup(p)
   F <- base_forcing; F$c14_cosmo <- s$prod_c14
+  if (!is.null(d13c_foss)) F$d13c_foss <- d13c_foss
   list(out = ccx_run_fast(s, F)$out, spinup = s)
 }
 
@@ -105,14 +129,14 @@ cat(sprintf("\n[2] SENSITIVITY OF THE %d-%d BIAS TO EACH PROVISIONAL 13C CONSTAN
             DS_BIAS_WIN[1], DS_BIAS_WIN[2]))
 ds_prepare_orig <- ccx_prepare
 
-ds_bias <- function(mods = list(), label = "") {
+ds_bias <- function(mods = list(), label = "", d13c_foss = NULL) {
   assign("ccx_prepare", function(p, ...) {
     a <- ds_prepare_orig(p, ...)
     for (n in names(mods)) a[[n]] <- mods[[n]]
     a
   }, envir = globalenv())
   on.exit(assign("ccx_prepare", ds_prepare_orig, envir = globalenv()))
-  ms <- ccx_model_stats(ds_run(ccx_default_params())$out, obs)
+  ms <- ccx_model_stats(ds_run(ccx_default_params(), d13c_foss)$out, obs)
   win <- function(o, m, col) {
     k <- match(o$year, m$year)
     g <- !is.na(k) & o$year >= DS_BIAS_WIN[1] & o$year <= DS_BIAS_WIN[2]
@@ -135,6 +159,81 @@ for (e in DS_ASUP_GRID)
 cat("\n  -- air-sea invasion alpha_as_down (kinetic) --\n")
 for (e in DS_ASDN_GRID)
   ds_bias(list(alpha_as_down = 1 - e / 1000), sprintf("alpha_as_down = -%d permil", e))
-cat("\n  -- fossil source d13c_foss --\n")
+cat("\n  -- fossil source d13c_foss, held CONSTANT at each value --\n")
+cat("     (the shipped model no longer has a constant here; the series it does\n")
+cat("      use lands at the 'as shipped' row above)\n")
 for (d in DS_FOSS_GRID)
-  ds_bias(list(d13c_foss = d), sprintf("d13c_foss     = %d permil", d))
+  ds_bias(label = sprintf("d13c_foss     = %d permil", d), d13c_foss = d)
+
+# ---------------------------------------------------------------------
+# [3] IS IT THE SINK PARTITION? The land sink discriminates (-18 permil), the
+# ocean sink barely does, so a partition that is too ocean-heavy gives the right
+# total CO2 and a too-depleted atmosphere. This is precisely what d13C exists to
+# detect, so it is the first suspect once the source signature is ruled out.
+#
+# RESULT: closing the d13C bias needs a ~72 % land share (beta ~0.9), against
+# GCB's 42 % -- and it puts CO2 40 ppm high and the land sink at 4.7 GtC/yr
+# against GCB's 2.4. d13C and CO2 CANNOT both be satisfied by any partition this
+# model can reach. That is the structural misfit, located.
+cat("\n[3] d13C BIAS vs LAND-SINK SHARE (scanning beta at the default q10)\n")
+DS_BETA_GRID <- c(0.2, 0.38, 0.6, 0.9, 1.2)
+gcb <- as.data.frame(obs$gcb)
+ds_partition <- function(out) {
+  yr  <- floor(out$t + 1e-9)
+  ann <- stats::aggregate(cbind(ocean_C, land_C) ~ yr, data = out, FUN = mean)
+  ann <- ann[order(ann$yr), ]
+  k   <- ann$yr[-1] >= DS_BIAS_WIN[1]
+  c(land = mean(diff(ann$land_C)[k]), ocean = mean(diff(ann$ocean_C)[k]))
+}
+g <- gcb$year >= DS_BIAS_WIN[1] & gcb$year <= DS_BIAS_WIN[2]
+cat(sprintf("    GCB %d-%d observed: land %.2f  ocean %.2f  (land share %.0f %%)\n",
+            DS_BIAS_WIN[1], DS_BIAS_WIN[2], mean(gcb$land_sink[g]),
+            mean(gcb$ocean_sink[g]),
+            100 * mean(gcb$land_sink[g]) /
+              (mean(gcb$land_sink[g]) + mean(gcb$ocean_sink[g]))))
+for (b in DS_BETA_GRID) {
+  p <- ccx_default_params(); p$beta <- b
+  out <- ds_run(p)$out
+  ms  <- ccx_model_stats(out, obs)
+  s   <- ds_partition(out)
+  win <- function(o, m, col) {
+    k <- match(o$year, m$year)
+    gg <- !is.na(k) & o$year >= DS_BIAS_WIN[1] & o$year <= DS_BIAS_WIN[2]
+    mean(o[[col]][gg] - m$level[k[gg]])
+  }
+  cat(sprintf("    beta %.2f  land %.2f ocean %.2f (share %2.0f %%)  d13C %+.3f  CO2 %+6.2f ppm\n",
+              b, s[["land"]], s[["ocean"]],
+              100 * s[["land"]] / (s[["land"]] + s[["ocean"]]),
+              win(obs$d13_ann$MLO, ms$d13$MLO, "level"),
+              win(obs$co2_ann$MLO, ms$co2$MLO, "level")))
+}
+
+# ---------------------------------------------------------------------
+# [4] IS IT WEAK ISOTOPIC DISEQUILIBRIUM DAMPING? A declining atmospheric d13C
+# is buffered by gross two-way exchange with reservoirs still carrying older,
+# less depleted carbon. `ra_ratio` sets the gross land loop (Ra routed through
+# the vegetation pool) and ships at 0 -- GPP = NPP ~60 GtC/yr against a real
+# ~120 -- while leaving the NET carbon flux untouched. If the overshoot were
+# weak damping, this is the lever that closes it for free.
+#
+# RESULT: it does not. Across its whole plausible range it moves the bias
+# 0.10 permil, and it is not free -- D14C goes +2.7 to -14.6 permil, so 14C
+# (the right constraint on gross exchange) forbids the large values anyway.
+cat("\n[4] d13C BIAS vs THE GROSS LAND LOOP (ra_ratio; NET carbon flux unchanged)\n")
+DS_RA_GRID <- c(0, 0.25, 0.5, 1.0, 1.5, 2.0)
+for (r in DS_RA_GRID) {
+  p <- ccx_default_params(); p$ra_ratio <- r
+  out <- ds_run(p)$out
+  ms  <- ccx_model_stats(out, obs)
+  win <- function(o, m, col) {
+    k <- match(o$year, m$year)
+    gg <- !is.na(k) & o$year >= DS_BIAS_WIN[1] & o$year <= DS_BIAS_WIN[2]
+    mean(o[[col]][gg] - m$level[k[gg]])
+  }
+  o14 <- obs$d14_nh_ann; k14 <- match(o14$year, ms$d14$NH$year)
+  g14 <- !is.na(k14) & o14$year >= 2000
+  cat(sprintf("    ra_ratio %.2f  d13C %+.3f  CO2 %+.2f ppm  D14C(NH, 2000+) %+7.2f permil\n",
+              r, win(obs$d13_ann$MLO, ms$d13$MLO, "level"),
+              win(obs$co2_ann$MLO, ms$co2$MLO, "level"),
+              mean(o14$value[g14] - ms$d14$NH$mean[k14[g14]])))
+}
