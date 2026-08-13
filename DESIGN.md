@@ -346,6 +346,29 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
 10. **Natural ocean Δ¹⁴C profile:** deep-ocean depletion in the observed range (free check).
 11. **Suspicious-uniformity screen** on all residual series (all-same-sign or
     exactly-linear residuals = bug signal, per standing discipline).
+12. **CO₂ pulse response (IRF)** — **added 2026-08-13**, and it closes a hole: gates 1–11
+    score sinks, seasonality, the bomb curve and the interhemispheric gradient, but
+    **nothing scored the pulse response**, which is the quantity the app's flagship
+    "How long does it last?" panel reports. Benchmark: **Joos et al. (2013)**, *Carbon
+    dioxide and climate impulse response functions…*, ACP 13:2793–2825,
+    doi:10.5194/acp-13-2793-2013 — 15 models + 3 ensembles, PD100 protocol (100 GtC onto a
+    background **held** at 389 ppm; compatible emissions diagnosed).
+    **Time-integrated IRF must lie inside Joos Table 4's 5–95 % range**:
+    **12.2–16.3 yr (TH 20), 24.0–36.6 (50), 39.5–65.2 (100)**; multi-model best estimates
+    14.2 / 30.3 / 52.4. Point IRF from the Table 5 fit
+    (a₀ 0.2173; aᵢ 0.2240/0.2824/0.2763; τᵢ 394.4/36.54/4.304 yr) is
+    0.596 / 0.487 / 0.409 / 0.322 at 20 / 50 / 100 / 300 yr.
+    **Secondary, and a Revelle check rather than a tuning target:** Joos §4.4.1 gives
+    integrated IRF at TH 100 of **34–47 yr on a preindustrial background against 45–62 on
+    present-day**; the model must reproduce the **PI < PD ordering**.
+    `calibration/diag_joos_irf.R` (~40 s). **Status at default parameters: inside the range
+    at all three horizons (12.6 / 26.2 / 43.6), but below the best estimate at every one,
+    and below the point-IRF mean throughout (0.313 vs 0.409 at 100 yr).** The model is on
+    the low side of the literature — which is the *conservative* direction for the app's
+    argument and must be stated as such, not discovered by a reader.
+    **The background protocol is not a detail:** held-vs-decaying is worth 2 yr of
+    integrated IRF and PI-vs-PD is worth 7, both larger than any structural question
+    currently open (see the expert-panel note, §2).
 
 ## 7. Shiny app design
 
