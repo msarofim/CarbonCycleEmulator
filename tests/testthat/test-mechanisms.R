@@ -34,6 +34,28 @@ test_that("every switch is wired up and changes the answer", {
   }
 })
 
+test_that("the emissions switch removes the rise, and dwarfs the warming feedback", {
+  # THE TAB-6 COMPARISON, pinned. The argument that temperature drives the rise
+  # is answered by two counterfactuals side by side, and it only works if BOTH
+  # exist: turn the carbon cycle's response to warming off and the trend barely
+  # moves; turn EMISSIONS off and it disappears. If these two ever came within
+  # a factor of a few of each other, the lesson would be wrong.
+  skip_if_no_cpp()
+  hist <- c(1750, 2024)
+  co2 <- function(off) {
+    o <- mech_run(off, years = hist, scen = "historical")
+    (o$co2_NH[nrow(o)] + o$co2_SH[nrow(o)]) / 2
+  }
+  base <- co2(character())
+  pi_co2 <- ccx_const("CO2_PI_PPM")
+  no_emis <- co2("emissions")
+  no_warm <- co2("warming_feedback")
+  expect_lt(no_emis, base - 100)                       # the rise goes
+  expect_lt(abs(no_emis - pi_co2), 20)                 # back near preindustrial
+  expect_lt(abs(no_warm - base), 30)                   # the trend barely moves
+  expect_gt(abs(no_emis - base), 5 * abs(no_warm - base))
+})
+
 test_that("each switch moves CO2 in the physically correct direction", {
   skip_if_no_cpp()
   base <- mech_run()

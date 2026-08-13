@@ -2349,3 +2349,110 @@ mode, not a new finding.
 **Verdict: the model is at the right complexity and the risk now is drift upward.** The
 highest-value remaining work is an output layer, a two-line switch, a provenance fix and two
 tabs of existing material — **none of them adds a box or a parameter.**
+
+## 2026-08-13 (e) — Marcus' four directives from the expert panel
+
+All four of the panel's blocking items answered. **Suite 490 pass / 4 fail / 2 skip** — the
+same four pre-existing failures throughout.
+
+### 1. The flux trace (R1) — approved and built
+
+`ccx_run(fluxes = TRUE)` now returns the gross and net fluxes `add_flux()` was discarding.
+The recorder is a **tap inside `ccx_deriv`'s own** `add_flux`/`add_source`/`add_diffusion`,
+not a second derivation: `test-fluxes.R` asserts the recorded per-box carbon equals
+`dy[, "C"]` **exactly**, which is the completeness check *and* a free extra conservation
+check on the core. Edges are classified by the **reservoir type of their endpoints**, so a
+flux added later is captured automatically; explicit labels exist only for the three cases
+where one endpoint pair carries two processes (seasonal NEP vs GPP, land-use vs autotrophic
+respiration, ENSO vs heterotrophic). `ccx_run_fast()` — the C++ core the sampler calls — is
+untouched and `fluxes` defaults `FALSE`.
+
+**The app's box diagram now carries the numbers** (R6): ~72 GtC/yr photosynthesis and
+~95/93 each way air–sea against ~11 of emissions, and land boxes that admit to four pools.
+
+**And it corrected a number in a deliverable.** τ_turn = M_atm ÷ gross outflux = **4.69 yr
+at 1750, 5.32 by 2024** — not the 4.32 yr the panel note and `diag_pedagogy.R` reported
+from a one-month label slope. Seasonal NEP is a real atm→leaf flux that integrates to zero
+annually, so it is excluded from the gross outflux: right for the annual mean, wrong for a
+January finite difference, which the January drawdown biases fast. **Tested, not argued** —
+with seasonality off the two independent routes agree to **0.2 %** (4.700 vs 4.692).
+
+**Also:** `gamma_enso = 0` added to `ccx_default_params()`. It was **absent**, so
+`ccx_deriv()` died with "argument is of length zero" on default parameters while
+`ccx_cpp_par()` silently substituted 0 — an **R-vs-C++ divergence about what the defaults
+mean**, which is what the bit-parity rule exists to prevent. 0 is behaviour-preserving; the
+table's init of 0.5 would have silently changed every existing default-parameter result.
+
+### 2. Pre-1850 land-use emissions (R3) — sourced
+
+GCB's LUC column is **empty before 1850**; `approx(rule = 2)` held the 1850 value flat
+backwards, **inventing 74.1 GtC** — 23 % of the model's land-use carbon. Replaced with
+**OSCAR v3.1** (Gasser et al. 2020, *Biogeosciences* 17:4075, doi:10.5194/bg-17-4075-2020;
+data doi:10.5281/zenodo.7313542, CC-BY), which runs from 1701 and reproduces that paper's
+headline **206 ± 57 PgC** exactly — the check that the right column was read.
+
+**Rescaled, not spliced raw:** OSCAR's 1850–2018 total is 34 % below GCB's, so grafting its
+absolute values on would put a **62 % step** at the join. OSCAR supplies the shape and the
+pre/post share, rescaled over an 1850–1900 overlap adjacent to the splice. **41.8 GtC, 6 %
+step.** Scored against Law Dome 1750–1850 (`diag_pre1850_luc.R`): adopted **2.00** ppm RMSE,
+flat-hold 2.48, OSCAR absolute 2.77, **zero 4.50 — zero is excluded by the data**. The
+flat-hold was not absurd, just the right integral over the wrong shape (too big too early:
++3.8 ppm at 1775 against the adopted series' +1.0).
+
+**Two things it does NOT fix:** every option is **~6.5 ppm low at 1900** and none reproduces
+the full 18th-century rise — a separate 19th-century deficit, larger than this question.
+And **`mode_fit.rds` now predates the forcing and is stale.**
+`ccx_build_forcing()` warns on any NA emissions year inside the window so this cannot recur.
+
+### 3. Joos et al. 2013 (R7) — DESIGN §6 gate 12, and future pulses
+
+Marcus supplied the paper. **Two answers, pointing different ways, both reported:** the
+**point** IRF is below the multi-model mean at every horizon (0.313 vs **0.409** at 100 yr —
+so the recollection recorded as an unverified test was right about Joos), but the
+**time-integrated** IRF, the quantity Joos actually puts ranges on, is **inside the 5–95 %
+range at 20, 50 and 100 yr** (12.6 / 26.2 / 43.6 against 12.2–16.3 / 24.0–36.6 / 39.5–65.2).
+**The honest headline is the second with the first as caveat** — the panel note's flat
+"decays too fast" overstated it. The model is on the **low side of the literature but within
+it**, which is the *conservative* direction for the app's argument.
+
+It also reproduces Joos's **PI < PD ordering** (39.2 vs 46.3 yr against his 34–47 / 45–62) —
+a Revelle result — and on **coupled** SSP backgrounds IRF@100 rises monotonically
+**0.342 (ssp126) → 0.512 (ssp585)**, with IRF@20 of 0.62–0.71 against Joos's "~70 % within
+two decades in every scenario".
+
+**Three method failures, recorded because two looked correct.** An online controller for
+Joos's diagnosed compatible emissions needs `ccx_deriv` in the stepping loop (~60k pure-R
+calls per run). A **Newton step on the monthly drift diverges to 2e34 ppm** — the response
+operator is lower-triangular, not diagonal, so per-month correction compounds; a
+least-squares solve on a relaxation-exponential basis holds the background to 0.26 % in
+0.3 s (**a polynomial basis must not be added back — ill-conditioned, diverges**). And the
+**SSP emissions table is decadal**, so adding the pulse to the 2050 row delivered **1000 GtC
+for a nominal 100**, giving an IRF of 6.9 — impossible by inspection, since an IRF cannot
+exceed 1. Densified to annual; delivered mass now asserted. Separately, `sprintf()` with a
+zero-length argument returns `character(0)` and `cat()` prints nothing, so a mistyped field
+name dropped an entire table **silently with exit status 0**. Guarded.
+
+### 4. The two tabs (R4/R5) — specced, with Marcus' framing
+
+**"Concentrate on the positive learning and not on the debunking"** (Marcus). So DESIGN §7
+gains **tab 5 "How long does it last?"** (two curves from one model; the observed bomb
+spike beside the observed Keeling curve; the background slider) and **tab 6 "What drives
+CO₂?"** (the correlation, then detrended, then the two counterfactuals, closing on δ¹³C's
+sign). The fallacious arguments are a **short signposting appendix inside "Under the hood"**
+(§7a), not a tab — *published claim → published response → which panel bears on it*, naming
+arguments rather than characterising people. Essenhigh (2009) `doi:10.1021/ef800581r` with
+**Cawley (2011)** `doi:10.1021/ef200914u`; Harde (2017) `doi:10.1016/j.gloplacha.2017.02.009`
+with **Köhler et al. (2018)** `doi:10.1016/j.gloplacha.2017.09.015`; Salby and Spencer as
+non-peer-reviewed links. All four DOIs verified against Crossref, not recalled.
+**Cawley (2011) is the anchor for tab 5** — its whole point is that a short residence time
+and a long adjustment time are both consequences of the same model, which is exactly what
+the paired ¹⁴C-label and mass pulses show here. **Spencer's is the subtle one**: not wrong
+arithmetic but a **fixed-equilibrium assumption**, and the model's equilibrium point is not
+a parameter — it emerges from carbonate chemistry, which the "frozen Revelle" switch already
+isolates. **DESIGN §1 gains the fifth goal.** Tab implementation is NOT done; the appendix
+wording is Marcus' call.
+
+**R2 built:** a **"no emissions"** switch — every existing switch turned off a *sink*, none
+the *source*. Over 1750–2024 it gives **−134 ppm** (back to 285, essentially preindustrial)
+against the warming feedback's **−10 ppm**. That contrast is the whole of tab 6 and it is
+now pinned by a test.

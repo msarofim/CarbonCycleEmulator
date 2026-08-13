@@ -22,6 +22,17 @@ Scientific goals, in order:
    the bomb-Δ¹⁴C spike and its decay, and the NH→SH bomb-spike propagation.
 3. Match Global Carbon Budget (GCB) land/ocean sink partitioning within stated uncertainty.
 4. Provide a defensible pulse-response (IRF) mode for pulse-vs-baseline pedagogy.
+5. **Teach the two quantities people most often merge (added 2026-08-13, Marcus).**
+   The project's original motivation was never written into this list, and it is a
+   specification, not a mood: the app should leave a user able to distinguish
+   **(a) turnover time from adjustment time**, and **(b) what makes CO₂ *wobble* from what
+   makes it *rise*.** Both are things this model is unusually well placed to teach, because
+   it produces both halves of each pair from one run — ¹⁴C gives the turnover time
+   (~4.7 yr) while a mass pulse gives the adjustment time, and the ENSO term reproduces the
+   real interannual temperature–CO₂ correlation while the emissions drive the trend.
+   **The framing is positive: the app teaches the distinction, it does not campaign against
+   people who miss it** (Marcus, 2026-08-13). §7 tabs 4 and 5, with §7a as a short
+   signposting appendix.
 
 ## 2. Locked decisions (Marcus, 2026-08-09)
 
@@ -389,14 +400,67 @@ Tabs (working names, undergrad-facing):
 4. **Isotope fingerprints** — δ¹³C Suess panel and Δ¹⁴C bomb panel ("how we know it's
    fossil carbon"); bomb-spike NH→SH propagation animation; Suess dilution vs nuclear-test
    history overlay.
-5. **Futures** — scenario picker: **SSPs** (SSP1-1.9, SSP1-2.6, SSP2-4.5, SSP3-7.0,
+5. **How long does it last?** *(added 2026-08-13; this is the tab the project exists for)*
+   Teaches turnover vs adjustment, positively and from measurements. Three panels:
+   - **Two curves, one model.** A 100 GtC mass pulse and a pure ¹⁴C *label* pulse released
+     from the same state with the same parameters. Takeaway: *both are true; they answer
+     different questions.* Readouts: **turnover ~4.7 yr** ("how long an average molecule
+     stays") beside **adjustment** ("how long the added amount stays" — ~26 % airborne at
+     100 yr). Numbers from `calibration/diag_pedagogy.R`.
+   - **It already happened.** The observed bomb-¹⁴C spike beside the observed Keeling
+     curve — *measurements, not model*: the label went away in decades, the CO₂ did not.
+   - **It depends on the world you put it in.** Background slider (preindustrial / today /
+     SSP): the same pulse lasts longer in a fuller ocean. This is Revelle buffering made
+     visible, and it is the largest single sensitivity in the whole model (§6 gate 12).
+   Uses the flux trace (`R/fluxes.R`) for the turnover readout.
+
+6. **What drives CO₂?** *(added 2026-08-13)* Teaches attribution by letting the user take
+   the machine apart, in a fixed order so the lesson lands:
+   *(i)* the interannual wobble and its correlation with temperature — **real, r ≈ 0.93 on
+   growth rate, and the model reproduces it**; *(ii)* the same series with both trends
+   removed — **r ≈ 0.58, and it is ENSO**; *(iii)* switch the carbon cycle's response to
+   warming off — the trend barely moves; *(iv)* switch emissions off — the trend goes.
+   Closes on δ¹³C: a warming-driven release would move δ¹³C by **+0.04 ‰** (ocean limb
+   *up*), against an observed **−1.77 ‰**. Needs **a new "no emissions" switch in
+   `CCX_MECHANISMS`** (two lines; the list currently lets a user turn off every *sink* but
+   not the *source*).
+
+7. **Futures** — scenario picker: **SSPs** (SSP1-1.9, SSP1-2.6, SSP2-4.5, SSP3-7.0,
    SSP5-8.5) and **stylized** (constant-today, linear-to-zero-by-year-X slider, ±r %/yr),
    plus **pulse lab**: choose background scenario, pulse size (default 100 GtC? — sized so
    effects are visible; final size TBD) and year → paired baseline/pulse runs, showing the
    pulse-decay curve, "how much is left after N years", and how the answer *depends on the
    background* (Revelle saturation). This is the pulse-matched-with-baseline requirement.
-6. **Under the hood** — box diagram with live fluxes, parameter table with posterior
+8. **Under the hood** — box diagram **with its arrows labelled by the model's own flux
+   trace** (`R/fluxes.R`; ~70 GtC/yr photosynthesis and ~95 each way air–sea against ~11 of
+   emissions — the arrows *are* the residence-time lesson), parameter table with posterior
    ranges, data sources, model caveats, link to repo.
+
+### 7a. "Claims you may meet" — a short signposting appendix, NOT a tab of its own
+
+**Marcus, 2026-08-13: keep the app on the positive learning; a brief summary of the
+arguments, with links, can sit at the end.** So this is an appendix inside tab 8, not a
+sixth headline tab, and it is written as *published claim → published response → which
+panel of this app bears on it*. It names arguments and their sources; it does not
+characterise the people making them. **The wording is Marcus' call before this ships.**
+
+| claim, as published | published response | panel |
+|---|---|---|
+| Essenhigh RE (2009), *Potential Dependence of Global Warming on the Residence Time…*, **Energy & Fuels 23:2773–2784, doi:10.1021/ef800581r** — a 5–15 yr residence time means the rise is not anthropogenic | **Cawley GC (2011), Energy & Fuels 25:5503–5513, doi:10.1021/ef200914u** — shows the *same one-box model* yields residence ≈4 yr **and** adjustment ≈74 yr simultaneously | tab 5 |
+| Harde H (2017), *Scrutinizing the carbon cycle and CO₂ residence time in the atmosphere*, **Global and Planetary Change 152:19–26, doi:10.1016/j.gloplacha.2017.02.009** — ~4 yr residence time, ~4.3 % of today's CO₂ anthropogenic | **Köhler P et al. (2018), GPC 164:67–71, doi:10.1016/j.gloplacha.2017.09.015** — a single-reservoir equation cannot represent the carbon cycle; two reservoirs solved simultaneously is the minimum | tabs 5, 6 |
+| Salby M — presentations arguing the rise is temperature-driven (no peer-reviewed version; see e.g. judithcurry.com/2016/08/10/murry-salbys-latest-presentation/) | — | tab 6 |
+| Spencer R — blog CO₂ budget regressions (drroyspencer.com/2023/04/co2-budget-model-update-through-2022-humans-keep-emitting-nature-keeps-removing/) | — | tab 6 |
+
+**Cawley (2011) is the anchor for tab 5 and should be cited there**: its whole point is that
+a short residence time and a long adjustment time are not in tension but are *both
+consequences of the same model* — which is exactly what this model's paired ¹⁴C-label and
+mass pulses show, independently and with a real ocean underneath.
+
+**Spencer's is the subtle one and deserves its own sentence** (Marcus, 2026-08-13): the
+regression is not wrong arithmetic, it is a **fixed-equilibrium assumption** — treating the
+level nature relaxes toward as constant, when it *rises as carbon is added*. The app can
+show this directly, because the model's equilibrium point is not a parameter: it emerges
+from carbonate chemistry, and the "frozen Revelle" switch already isolates it.
 
 Uncertainty display: posterior ribbons on historical + preset scenarios (precomputed);
 central line only for live interactions, with a note.

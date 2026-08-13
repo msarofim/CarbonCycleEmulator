@@ -6,6 +6,12 @@
 # and they need testing (a switch that silently does nothing, or that turns off
 # more than it claims, would be a plausible-looking lie told to students).
 #
+# THE SOURCE SWITCH WAS MISSING UNTIL 2026-08-13. Every switch here turned off a
+# SINK; none turned off the SOURCE, which is the single most-wanted
+# counterfactual in the whole "what drives CO2?" argument (DESIGN sec.7 tab 6):
+# turn the warming feedback off and the trend barely moves; turn EMISSIONS off
+# and it disappears. Without both halves the comparison is unmakeable.
+#
 # WHAT IS DELIBERATELY NOT HERE. DESIGN section 7 lists six toggles, including
 # "no CO2 fertilization" and "no land sink" as separate items. In THIS model they
 # are the same switch: the land takes up carbon because NPP rises with CO2
@@ -52,6 +58,22 @@ CCX_MECHANISMS <- list(
                    "the ocean exchanging ¹³C and ¹⁴C. The isotope panels are",
                    "not meaningful with this switch on."),
     apply = function(p, F) { p$k_w <- OCEAN_OFF_K_W; list(p = p, F = F) }
+  ),
+  emissions = list(
+    label = "Our emissions",
+    blurb = paste("Everything people put into the air: burning coal, oil and gas,",
+                  "making cement, and clearing land. Switch it off and the model",
+                  "runs the same 270 years with nature alone."),
+    caveat = paste("Nature's own carbon cycle keeps running, including its",
+                   "response to the observed warming \u2014 so what is left is",
+                   "what temperature and El Ni\u00f1o do on their own."),
+    # Zeroing the forcing columns rather than a parameter: emissions are
+    # PRESCRIBED, so there is no coefficient to set to zero. LUC goes too --
+    # it is an emission (a wood -> atmosphere transfer), not a natural flux.
+    apply = function(p, F) {
+      for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH")) F[[cc]] <- 0
+      list(p = p, F = F)
+    }
   ),
   revelle = list(
     label = "Revelle buffering (ocean saturation)",

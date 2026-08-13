@@ -261,7 +261,9 @@ are one existing toggle (`warming_feedback`) and one trivial new one.**
 **Recommendation R2: add a "no emissions" counterfactual to `CCX_MECHANISMS`.** It is the
 single most-requested counterfactual in this entire argument, it is two lines, and its
 absence is conspicuous — the switch list currently lets a user turn off every *sink* but
-not the *source*.
+not the *source*. **BUILT 2026-08-13d**, and it lands the lesson in two numbers: over
+1750–2024, emissions off gives **−134 ppm** (back to 285, essentially preindustrial) while
+the warming feedback off gives **−10 ppm**. Pinned by a test.
 
 **A caveat the atmosphere lens insists on.** The +1 K experiment (§1b) holds temperature
 fixed *by fiat* with emissions at zero — it is a sensitivity, not a history. The honest
@@ -466,13 +468,28 @@ turns out to be right.
 **Blocking decisions for Marcus, in priority order for the stated goal:**
 
 1. ~~**R1 (flux output)**~~ — **approved by Marcus 2026-08-13 and BUILT.**
-2. **R4 + R5 (the two missing tabs) — approve the scope?** This is where the project's
-   stated purpose actually lives, and DESIGN §7 currently does not contain it. **DESIGN §1's
-   goal list should gain a fifth entry naming the two fallacies**, so the spec matches the
-   motivation.
-3. **R3 (pre-1850 LUC) — which way?** Cite it, zero it, or ramp it. A methodological choice,
-   so per standing discipline it is flagged and not resolved here.
-4. **R7 — should the pulse IRF become a gate?** Requires reading Joos et al. 2013 first.
+2. ~~**R4 + R5 (the two missing tabs)**~~ — **approved 2026-08-13 and SPECCED**, with
+   Marcus' steer: *concentrate on the positive learning, not the debunking.* So they are
+   **"How long does it last?"** and **"What drives CO₂?"** (DESIGN §7 tabs 5–6), and the
+   fallacious arguments are a short **signposting appendix inside "Under the hood"**
+   (§7a) rather than a tab of their own — published claim → published response → which
+   panel bears on it. DESIGN §1 has gained the fifth goal. **Implementation of the tabs
+   themselves is not done.**
+3. ~~**R3 (pre-1850 LUC)**~~ — **RESOLVED 2026-08-13d.** OSCAR v3.1 (Gasser et al. 2020,
+   doi:10.5194/bg-17-4075-2020) rescaled to GCB's level over an 1850–1900 overlap:
+   **41.8 GtC replaces the 74.1 the flat-hold invented.** Scored against Law Dome
+   (RMSE 2.00 vs 2.48 for the flat-hold, 4.50 for zero — **zero is excluded by the data**).
+   Two things fell out: a **~6.5 ppm 1900 deficit shared by every option**, untouched by
+   this choice; and **`mode_fit.rds` is now stale**, since the historical forcing changed.
+4. ~~**R7 — should the pulse IRF become a gate?**~~ — **YES, and it is now DESIGN §6 gate
+   12.** Marcus supplied the paper. **My recollection of "~0.4 at year 100" was right about
+   Joos (0.409) but the conclusion drawn from it was too strong.** Point IRF: the model is
+   below the multi-model mean at every horizon (0.313 at 100 yr). But the **time-integrated**
+   IRF — the quantity Joos actually puts ranges on — is **inside the 5–95 % range at 20, 50
+   and 100 yr** (12.6 / 26.2 / 43.6 against 12.2–16.3 / 24.0–36.6 / 39.5–65.2). *The model
+   is on the low side of the literature but within it* — the conservative direction for the
+   app's argument. It also reproduces Joos's PI < PD ordering, and on coupled SSP
+   backgrounds IRF@100 rises monotonically 0.342 → 0.512.
 5. **The three ocean decisions (`sigma_d13c`, deep-Δ¹⁴C target, conveyor) — unchanged and
    still open.** This panel takes no position on them beyond §2's measurement that **they
    are not blocking the app**, and endorses handoff 13c §0.1: **do not block σ on the
