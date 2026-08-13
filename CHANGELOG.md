@@ -2266,3 +2266,86 @@ CO₂** and **+2.40 ‰ Δ¹⁴C** at 20 Sv (both exactly 0 and +1.00 ‰ with i
   search snippet, not observations, and not read. Check before the sign is ever quoted.
 
 Handoff: `notes/handoff_2026-08-13c_conveyor_built.md`.
+
+## 2026-08-13 (d) — Expert panel: model structure against the PEDAGOGICAL spec
+
+Marcus asked for a **carbon-cycle expert** added to the ocean / atmosphere / ecosystem /
+isotope / pedagogical / reduced-complexity lenses, to settle the best model structure given
+the goal of matching monthly CO₂ and isotopes *understandably* — motivated by the "**5-year
+CO₂ residence time**" and "**CO₂ correlates with temperature**" arguments. **That motivation
+had never been written down as a specification**; DESIGN §1's four goals do not contain it.
+This session treats the two fallacies as design requirements and measures the model against
+them. Panel: `notes/expertpanel_2026-08-13_structure_for_pedagogy.md`; every number
+reproduced by `calibration/diag_pedagogy.R` (~3 s), which carries its results in its header.
+
+**The structure the two fallacies demand is already built.** From one spinup, one parameter
+set, two paired perturbations — a **100 GtC mass pulse** and a pure **¹⁴C label pulse**:
+
+| yr | mass airborne | label remaining |
+|---|---|---|
+| 1 | 0.893 | 0.811 |
+| 10 | 0.604 | 0.292 |
+| 100 | **0.262** | **0.058** |
+| 300 | 0.171 | 0.029 |
+
+**Instantaneous label decay time 4.32 yr** — *the model hands you the sceptic's own number,
+computed correctly, as a property of gross exchange* — against a mass 1/e of **40.3 yr** and
+a **4.5× gap at 100 yr**. The gross-flux architecture that does this exists **because the
+isotopes forced it** (`model.R:278`, the singular preindustrial isotope operator, 2026-08-10).
+
+**Temperature → CO₂ is real, right-signed, and an order of magnitude too small.** +1 K held
+with zero emissions gives **+5.19 ppm @10 yr, +10.74 @300 yr** ≈ **10.7 ppm/K**; against the
+model's own 1.20 K of 1960–2023 warming that is **12.9 of the 102.5 ppm rise — 13 %**.
+**The isotopes decide it by sign:** splitting the +1 K response at 300 yr, the solubility
+limb (ocean outgassing) moves δ¹³C **+0.0354 ‰ — UP**, the land limb −0.0760, both −0.0410,
+against an observed/model **−1.773 ‰**. *"The warm ocean is outgassing it" predicts δ¹³C
+rising; it falls, by 1.77 ‰, and even the right-signed land limb is 43× too small.* Model
+ocean is a **net sink**: +172.6 GtC cumulative, +2.60 GtC/yr over 2015–2024.
+
+**The model reproduces the sceptic's headline statistic.** cor(CO₂ **growth rate**, GMST) =
+**+0.930** over 1960–2023 while 100 % of its trend is emissions-driven; detrend both and
+r = **0.582** — the genuine ENSO link, which explains wobbles, not the rise.
+
+**The ocean-structure debate is nearly irrelevant to any of this.** Conveyor C at 20 Sv with
+`kz` 2000 moves AF@100 **0.262 → 0.284**; choosing a **2024 background** instead of
+preindustrial moves it **further, to 0.298** (turnover 7.13 → 9.25 yr). **A control the app
+already exposes outweighs the whole conveyor question.** Decide the conveyor on
+oceanography — but **it is not blocking the app**, and the panel endorses handoff 13c §0.1
+that `sigma_d13c` must not be blocked on it either.
+
+**The one structural gap that does matter: `ccx_run()` emits no fluxes.** It returns stocks
+and ratios only; `add_flux()` computes the gross fluxes and discards them. So the central
+pedagogical quantity (τ_turn = M_atm / F_gross) is not computable from model output — above
+it had to be recovered *indirectly* from a label-pulse slope — and the "Under the hood" box
+diagram (`app/server.R:213`) draws **six unlabelled arrows**. **R1: an opt-in flux trace.**
+No physics changes and the conservation test gains a free extra check.
+
+**Two defects found while measuring.**
+- **74.1 GtC of pre-1850 LUC emissions are invented, silently.** GCB's LUC is `NA` for
+  **1750–1849**; `ccx_annual_to_monthly()`'s `approx(rule = 2)` holds the 1850 value flat
+  backwards. The forcing carries **321.6 GtC of LUC against 247.5 in the source — 23 % is
+  extrapolation.** Not a conservation error (LUC is a veg→atm transfer) and a nonzero
+  pre-1850 flux is defensible; **the objection is that nobody chose it** — GMST's identical
+  flat-hold warns on every build and `d13c_foss`'s carries a justifying comment. **R3,
+  flagged as a methodological choice for Marcus, not resolved.**
+- The box diagram says **"Vegetation / Soil"** against a **four-pool** land model
+  (`model.R:80`, since 2026-08-12) — labels-vs-structure drift. **R6.**
+
+**Also recommended:** **R2** a "no emissions" counterfactual (the switch list lets a user
+turn off every *sink* but not the *source*); **R4/R5** the two tabs the project's stated
+purpose actually lives in — *"How long does it last?"* and *"Does temperature cause CO₂?"* —
+neither of which exists in DESIGN §7; **R7** adopt the Joos et al. (2013) CO₂ IRF as a §6
+sanity gate, because **nothing in the eleven gates scores the pulse response**, which is the
+quantity the app's flagship tab reports. *(The model's AF@100 on a 2024 background is 0.298;
+my recollection of the multi-model IRF is ~0.4, which would make this pulse decay too fast —
+**stated as a test to run, not a finding**, and the paper has not been checked.)*
+
+**Everything here is at `ccx_default_params()`, not the posterior mode** (`h_ml` 179 m,
+`kz` 6031, both pushing toward more uptake and a shorter adjustment time). **The
+pedagogical curves must be recomputed at the mode before anything ships.** Ocean uptake at
+defaults is 2.60 GtC/yr against GCB's 3.22 — 19 % low, a known consequence of not using the
+mode, not a new finding.
+
+**Verdict: the model is at the right complexity and the risk now is drift upward.** The
+highest-value remaining work is an output layer, a two-line switch, a provenance fix and two
+tabs of existing material — **none of them adds a box or a parameter.**
