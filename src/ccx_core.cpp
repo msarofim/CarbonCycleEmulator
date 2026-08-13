@@ -60,11 +60,21 @@ struct Aux {
   // carbonate polynomial coefficients (degree 6 -> 7 coefficients each)
   double cK0[7], cK1[7], cK2[7], cKb[7], cKw[7];
   double t_centre, t_scale, boron;
+  double a_oc[2];          // ocean area per hemisphere; the conveyor's
+                           // interhemispheric limbs are the only fluxes where
+                           // it does not cancel between source and sink
   int carb_iter;
 };
 
 struct Par {
   double beta, q10, k_w, kz, w_up, w_out[2], tau_ex;
+  // THE CONVEYOR (2026-08-13). q_conv in Sv; 0 emits nothing, so the
+  // pure-diffusion column is bit-reproduced. conv_sink is the interior layer
+  // the sinking limb feeds (1..NL), conv_descent 0 = non-local plume / 1 =
+  // distributed, conv_reverse 1 = run the cell backwards (wiring gate only).
+  // Mirrors R/model.R's ccx_conveyor_geom(); the two must agree exactly.
+  double q_conv;
+  int conv_sink, conv_descent, conv_reverse;
   double npp_leaf_frac, tau_leaf, tau_wood;
   double litter_slow_frac, tau_soil_fast, tau_soil_slow;
   double npp_veg_frac, ra_ratio;
@@ -72,6 +82,9 @@ struct Par {
   double seas_amp[2], seas_phase[2];
   double revelle_frozen;                    // mechanism switch, 0 or 1
 };
+
+// 1 Sv = 1e6 m3/s. Must equal R/model.R's CCX_SV_TO_M3YR bit for bit.
+static const double SV_TO_M3YR = 1e6 * 365.25 * 86400.0;
 
 // ---- carbonate: mirrors R/carbonate.R -------------------------------
 inline double eval_lnK(const double* co, double x) {
@@ -273,6 +286,28 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       }
     }
 
+    // THE CONVEYOR, within-column limb. The two interhemispheric limbs are
+    // emitted after this loop, next to tau_ex -- see there and R/model.R.
+    if (P.q_conv > 0.0) {
+      const int  s_sink = P.conv_sink;
+      const int  h_down = (P.conv_reverse == 1) ? 1 : 0;
+      const double w    = P.q_conv * SV_TO_M3YR / A.a_oc[hi];
+      if (hi == h_down) {
+        if (P.conv_descent == 1) {
+          for (int kk = 0; kk < s_sink; ++kk)
+            add_flux(base + IML + kk, base + IML + kk + 1,
+                     w * y[IX(base + IML + kk, C)] / A.dz[kk], 1.0);
+        } else {
+          add_flux(iml, base + IML + s_sink,
+                   w * y[IX(iml, C)] / A.dz[0], 1.0);
+        }
+      } else {
+        for (int kk = 0; kk < s_sink; ++kk)
+          add_flux(base + IML + kk + 1, base + IML + kk,
+                   w * y[IX(base + IML + kk + 1, C)] / A.dz[kk + 1], 1.0);
+      }
+    }
+
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
     // external to the modelled system; land-use change is not, so it is a
     // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
@@ -284,6 +319,24 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   // interhemispheric, gross both ways
   add_flux(0, NPH, y[IX(0, C)] / P.tau_ex, 1.0);
   add_flux(NPH, 0, y[IX(NPH, C)] / P.tau_ex, 1.0);
+
+  // THE CONVEYOR, interhemispheric limbs: the deep limb from the sinking
+  // hemisphere's sink layer to the other's, and the surface return. Emitted
+  // here because the per-hemisphere loop above can only see one column.
+  if (P.q_conv > 0.0) {
+    const int s_sink = P.conv_sink;
+    const int h_down = (P.conv_reverse == 1) ? 1 : 0;
+    const int h_up   = 1 - h_down;
+    const double Q   = P.q_conv * SV_TO_M3YR;
+    const int deep_dn = h_down * NPH + IML + s_sink;
+    const int deep_up = h_up   * NPH + IML + s_sink;
+    add_flux(deep_dn, deep_up,
+             Q * y[IX(deep_dn, C)] / (A.a_oc[h_down] * A.dz[s_sink]), 1.0);
+    const int ml_dn = h_down * NPH + IML;
+    const int ml_up = h_up   * NPH + IML;
+    add_flux(ml_up, ml_dn,
+             Q * y[IX(ml_up, C)] / (A.a_oc[h_up] * A.dz[0]), 1.0);
+  }
 
   // 14C sources and decay
   const double c14_to_state = 1.0 / (A.mol_per_GtC * A.R14STD);
@@ -320,6 +373,7 @@ static Aux unpack_aux(const List& a) {
   v = a["cK2"]; for (int i = 0; i < 7; ++i) A.cK2[i] = v[i];
   v = a["cKb"]; for (int i = 0; i < 7; ++i) A.cKb[i] = v[i];
   v = a["cKw"]; for (int i = 0; i < 7; ++i) A.cKw[i] = v[i];
+  v = a["a_oc"];       A.a_oc[0] = v[0];       A.a_oc[1] = v[1];
   A.t_centre = a["t_centre"]; A.t_scale = a["t_scale"]; A.boron = a["boron"];
   A.carb_iter = a["carb_iter"];
   return A;
@@ -335,6 +389,9 @@ static Par unpack_par(const List& p) {
   P.npp_veg_frac = p["npp_veg_frac"]; P.ra_ratio = p["ra_ratio"];
   P.k_w = p["k_w"]; P.kz = p["kz"]; P.w_up = p["w_up"]; P.tau_ex = p["tau_ex"];
   P.w_out[0] = p["w_out_NH"]; P.w_out[1] = p["w_out_SH"];
+  P.q_conv = p["q_conv"];
+  P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];
+  P.conv_reverse = p["conv_reverse"];
   P.sst_scale = p["sst_scale"]; P.gamma_enso = p["gamma_enso"];
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];

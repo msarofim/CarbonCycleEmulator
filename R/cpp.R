@@ -38,6 +38,7 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     asx = c(aux$asx$NH, aux$asx$SH),
     sst = c(aux$sst$NH, aux$sst$SH),
     dz = grid$dz, dz_mid = aux$dz_mid,
+    a_oc = c(aux$a_oc$NH, aux$a_oc$SH),
     enso_share = c(aux$enso_share$NH, aux$enso_share$SH),
     dic0 = c(aux$dic0$NH, aux$dic0$SH),
     revelle0 = c(aux$revelle0$NH, aux$revelle0$SH),
@@ -69,6 +70,15 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$w_up)) p$w_up <- 0
   if (is.null(p$w_out_NH)) p$w_out_NH <- 0
   if (is.null(p$w_out_SH)) p$w_out_SH <- 0
+  # The conveyor, added 2026-08-13, same reasoning again. NOTE the structural
+  # switches must reach the C++ as INTEGERS -- unpack_par reads them into int.
+  if (is.null(p$q_conv)) p$q_conv <- 0
+  if (is.null(p$conv_sink)) p$conv_sink <- N_INTERIOR
+  if (is.null(p$conv_descent)) p$conv_descent <- 0L
+  if (is.null(p$conv_reverse)) p$conv_reverse <- 0L
+  p$conv_sink <- as.integer(p$conv_sink)
+  p$conv_descent <- as.integer(p$conv_descent)
+  p$conv_reverse <- as.integer(p$conv_reverse)
   # The four-pool land REPLACED tau_veg/tau_soil, so an older parameter list
   # reaches here with the wrong names entirely. That is a structural mismatch,
   # not a missing default -- fail loudly rather than silently substituting a
@@ -83,6 +93,7 @@ ccx_cpp_par <- function(p) {
          paste(miss, collapse = ", "), extra)
   }
   p[c("beta", "q10", "k_w", "kz", "w_up", "w_out_NH", "w_out_SH", "tau_ex",
+      "q_conv", "conv_sink", "conv_descent", "conv_reverse",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
       "npp_veg_frac", "ra_ratio",

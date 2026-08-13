@@ -28,6 +28,88 @@ ccx_dic_for_pco2 <- function(pco2_target, alk, sst) {
   uniroot(f, interval = c(1000e-6, 2600e-6), tol = 1e-12)$root
 }
 
+# ---------------------------------------------------------------------
+#' 12C steady state when the CONVEYOR is on. FULL STATE, not the ocean alone.
+#'
+#' WHY THIS EXISTS, AND WHY THE ANALYTIC EQUILIBRIUM IS NOT ENOUGH.
+#' Handoff 2026-08-13b sec.4.2 asserts that the conveyor leaves `ccx_spinup()`
+#' untouched, on the grounds that every box gains Q and loses Q so a
+#' uniform-concentration ocean is still an exact fixed point. **That is true
+#' within a column and false between them.** The two columns are NOT at the same
+#' concentration: SST 18 vs 16 degC gives preindustrial DIC 2.03786 vs 2.05570
+#' mol/m3, a 0.87 % difference, so the interhemispheric limbs -- the first
+#' ocean-ocean coupling in the model -- see a real gradient and converge
+#' 0.135 GtC/yr into the NH at 20 Sv.
+#'
+#' MEASURED CONSEQUENCE of skipping this solve: the spinup residual goes from
+#' 6.3e-09 to 1.35e-01 GtC/yr, and over a zero-emission 1750-2024 run the
+#' atmospheric d13C DRIFTS -0.915 permil against -0.036 with the conveyor off.
+#' That artefact is nearly twice the entire d13C misfit the conveyor was
+#' proposed to fix. DIAGNOSED, not guessed: setting sst_NH = sst_SH = 17 returns
+#' both the residual (5.15e-09) and the drift (-0.0362) to their conveyor-off
+#' values exactly.
+#'
+#' Note what this also means physically: between columns the conveyor is NOT the
+#' pure isotope operator it is within one. It carries carbon from the colder,
+#' DIC-richer hemisphere to the warmer one -- a crude solubility pump the model
+#' did not previously have.
+#'
+#' WHY THE FULL STATE AND NOT JUST THE OCEAN. An ocean-only solve with both
+#' atmospheres pinned at chi0 was tried first and left exactly 0.1226 GtC/yr
+#' sitting in the two atmosphere boxes, equal and opposite. That is not an
+#' error to squash: the conveyor makes one hemisphere's mixed layer OUTGAS and
+#' the other INGAS, so the preindustrial atmosphere must carry a small
+#' interhemispheric gradient for tau_ex to move the difference back. Pinning
+#' both hemispheres at chi0 forbids the very thing that has to move. The land is
+#' in the solve for the same reason -- its analytic fixed point is conditional on
+#' chi, and chi is no longer identical in the two hemispheres.
+#'
+#' So: Newton on every box's carbon, with a finite-difference Jacobian, using
+#' ccx_deriv() ITSELF as the residual so the solve cannot disagree with the
+#' model it is solving. GLOBAL preindustrial CO2 is the pin; the split is free.
+#' Started from the analytic equilibrium, which is within ~1 %.
+#' The 13C/14C solves downstream need no change: they invert whatever linear
+#' operator the carbon field presents, exactly as before.
+ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
+                                    tol = 1e-9, maxit = 30L) {
+  boxes <- seq_len(nrow(y))
+  atm   <- c(aux$idx$NH$atm, aux$idx$SH$atm)
+  # Global preindustrial CO2 is the physical pin. The interhemispheric SPLIT is
+  # not pinned -- it is what has to move, and forbidding it is what left the
+  # 0.1226 GtC/yr residual sitting in the two atmosphere boxes.
+  c_atm_target <- chi0 * aux$gtc_per_ppm_hemi * length(atm)
+
+  resid <- function(cv) {
+    yy <- y; yy[, "C"] <- cv
+    r  <- ccx_deriv(yy, 1750, p0, forc, grid, aux)[, "C"]
+    # The operator conserves carbon, so the steady-state system is rank
+    # deficient by one. Trade one equation for the pin; the dropped row is then
+    # implied by the other 31 plus conservation.
+    r[atm[1]] <- sum(cv[atm]) - c_atm_target
+    r
+  }
+
+  cv <- y[, "C"]
+  for (it in seq_len(maxit)) {
+    r <- resid(cv)
+    if (max(abs(r)) < tol) break
+    J <- matrix(0, length(boxes), length(boxes))
+    for (j in boxes) {
+      dh <- max(1e-7 * abs(cv[j]), 1e-8)
+      cp <- cv; cp[j] <- cp[j] + dh
+      J[, j] <- (resid(cp) - r) / dh
+    }
+    step <- tryCatch(solve(J, -r), error = function(e) NULL)
+    if (is.null(step)) stop("conveyor 12C spinup: singular Jacobian")
+    cv <- cv + step
+  }
+  fin <- max(abs(resid(cv)))
+  if (fin >= tol)
+    warning(sprintf("conveyor 12C spinup did not converge: |resid| = %.3e", fin))
+  y[, "C"] <- cv
+  y
+}
+
 #' Preindustrial steady state
 #'
 #' @param p     parameter list
@@ -74,6 +156,14 @@ ccx_spinup <- function(p = ccx_default_params(),
     # advective tendency too. The 13C/14C solves need no change either -- they
     # invert whatever linear operator ccx_deriv() presents. test-ocean-advection.R
     # holds both statements.
+    #
+    # NOT EXACT WITH THE CONVEYOR ON, and this is the one place the two differ.
+    # w_up and w_out are WITHIN-column, where uniformity holds. The conveyor
+    # couples the two columns, and they sit at DIFFERENT concentrations (SST 18
+    # vs 16 degC -> DIC 2.03786 vs 2.05570 mol/m3). So the block below is only a
+    # starting guess and ccx_ocean_c12_steady() finishes the job -- see its
+    # header for the measured consequence of skipping it (-0.915 permil of
+    # spurious d13C drift).
     dic <- ccx_dic_for_pco2(chi0, ccx_const("ALK_SURFACE"), aux$sst[[h]])
     y[i$ml, "C"] <- dic * aux$ml_mass_kg[[h]] / aux$mol_per_GtC
     conc <- y[i$ml, "C"] / grid$dz[1]
@@ -88,6 +178,14 @@ ccx_spinup <- function(p = ccx_default_params(),
   p0 <- p; p0$gamma_enso <- 0
   # seasonal term integrates to zero over a year; evaluate the annual-mean state
   p0$seas_amp_NH <- 0; p0$seas_amp_SH <- 0
+
+  # Finish the 12C state when the conveyor couples the two columns. The analytic
+  # equilibrium above is only a starting guess then -- see the function header.
+  # No-op when the conveyor is off, so every pre-2026-08-13 result is
+  # bit-reproduced, and it is placed HERE because it must use the same p0 and
+  # zero forcing the residual diagnostic is measured with.
+  if (!is.null(ccx_conveyor_geom(p, grid)))
+    y <- ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0))
 
   nb <- nrow(y)
 
@@ -147,6 +245,18 @@ ccx_spinup <- function(p = ccx_default_params(),
       d13c_atm          = d13c_atm,
       d14c_atm          = d14c_atm,
       d14c_deep_ocean   = 1000 * (sum(y[deep_idx, "C14"]) / sum(y[deep_idx, "C"]) - 1),
+      # SPLIT PER HEMISPHERE 2026-08-13, before the conveyor was wired up. The
+      # combined figure above averages BOTH columns' bottom three layers, which
+      # is meaningless under a conveyor: the ventilated end should come out
+      # YOUNG and the far end OLD -- the observed young-North-Atlantic /
+      # old-deep-Pacific pattern, and a structural improvement on anything the
+      # model has managed. Reading the average would hide exactly the signal the
+      # reverse-conveyor gate is testing for. The combined value is kept because
+      # every pre-conveyor result and the kz bracket were derived from it.
+      d14c_deep_by_hemi = vapply(HEMIS, function(h) {
+        k <- tail(aux$idx[[h]]$oc, 3)
+        1000 * (sum(y[k, "C14"]) / sum(y[k, "C"]) - 1)
+      }, numeric(1)),
       ocean_C_GtC       = sum(y[ocean_idx, "C"]),
       land_C_GtC        = sum(y[unlist(lapply(HEMIS, function(h)
                             aux$idx[[h]]$land)), "C"]),
@@ -176,6 +286,9 @@ ccx_report_spinup <- function(s) {
               d$d14c_atm, ccx_const("D14C_PI")))
   cat(sprintf("  deep-ocean D14C      %+.1f permil  (free check: obs ~ -150 to -200)\n",
               d$d14c_deep_ocean))
+  cat(sprintf("    by hemisphere      NH %+.1f   SH %+.1f  (equal without a conveyor;\n",
+              d$d14c_deep_by_hemi[["NH"]], d$d14c_deep_by_hemi[["SH"]]))
+  cat("                         under one, expect the ventilated end YOUNG)\n")
   cat(sprintf("  ocean carbon         %.0f GtC\n", d$ocean_C_GtC))
   cat(sprintf("  land carbon          %.0f GtC  (vegetation %.0f, passive soil %.0f)\n",
               d$land_C_GtC, d$veg_C_GtC, d$soil_slow_C_GtC))

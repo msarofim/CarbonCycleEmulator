@@ -46,6 +46,31 @@
 N_INTERIOR <- 10L      # ocean interior layers below the mixed layer
 HEMIS      <- c("NH", "SH")
 
+# 1 Sv = 1e6 m3/s. The conveyor is parameterised by VOLUME flux because the two
+# hemispheres have different ocean areas -- see ccx_default_params()$q_conv.
+CCX_SV_TO_M3YR <- 1e6 * 365.25 * 86400
+
+# ---------------------------------------------------------------------
+#' Resolve the conveyor geometry from the parameters, or NULL if it is off.
+#'
+#' ONE function so that ccx_deriv(), ccx_advection_eigbound() and the C++ core
+#' cannot disagree about which layer sinks, which way round the cell runs, or
+#' how fast each hemisphere's limb moves. `q_conv` <= 0 (or absent, for a
+#' parameter list built before 2026-08-13) returns NULL and nothing is emitted.
+ccx_conveyor_geom <- function(p, grid) {
+  q <- if (is.null(p$q_conv)) 0 else p$q_conv
+  if (!isTRUE(q > 0)) return(NULL)
+  s <- if (is.null(p$conv_sink)) grid$nl else as.integer(p$conv_sink)
+  if (is.na(s) || s < 1L || s > grid$nl)
+    stop("conv_sink must be an interior layer index in 1..", grid$nl, ", got ", s)
+  rev <- isTRUE(!is.null(p$conv_reverse) && as.integer(p$conv_reverse) == 1L)
+  list(Q    = q * CCX_SV_TO_M3YR,       # m3/yr
+       s    = s,                         # interior layer the sinking limb feeds
+       distributed = isTRUE(!is.null(p$conv_descent) && as.integer(p$conv_descent) == 1L),
+       down = if (rev) "SH" else "NH",   # hemisphere whose mixed layer sinks
+       up   = if (rev) "NH" else "SH")   # hemisphere that upwells
+}
+
 # ---------------------------------------------------------------------
 # State layout
 # ---------------------------------------------------------------------
@@ -151,6 +176,54 @@ ccx_default_params <- function() {
     # Both 0 = the pure-diffusion ocean, exactly.
     w_out_NH  = 0,
     w_out_SH  = 0,
+    # ---- THE CONVEYOR (Marcus 2026-08-13, built after the configuration red
+    # team in notes/redteam_2026-08-13_conveyor_configurations.md) ----------
+    # NH sinking -> deep interhemispheric flow -> SH upwelling -> surface
+    # return. THE FIRST OCEAN-OCEAN COUPLING IN THE MODEL: the two columns were
+    # otherwise independent, and the only interhemispheric term was atmospheric.
+    #
+    # WHY IT IS NOT A THIRD `w_up`. Handoff 2026-08-13b sec.2 proved that
+    # reversing or rerouting a CLOSED vertical loop is invisible to the
+    # atmosphere (A_out = D A_up^T D^-1, verified to 1.7e-18), because a
+    # transpose preserves diagonal elements and the mixed layer is the only box
+    # through which the ocean touches anything else. The conveyor breaks BOTH
+    # premises: each column becomes OPEN (net throughflow sustained by the
+    # interhemispheric limbs), and the ocean touches the atmosphere at TWO
+    # boxes. A transpose SWAPS off-diagonals, so NH->SH and SH->NH responses
+    # exchange rather than being preserved -- the conveyor is distinguishable
+    # from its own reverse, which is the free decisive wiring check in
+    # tests/test-conveyor.R.
+    #
+    # PARAMETERISED BY VOLUME FLUX, NOT VELOCITY. The hemispheres have different
+    # ocean areas (1.55e14 vs 2.06e14 m2), so one velocity would not conserve
+    # volume across the basin. Each box gains Q and loses Q, so a
+    # uniform-concentration ocean is STILL an exact fixed point and
+    # ccx_spinup()'s analytic 12C equilibrium stands untouched.
+    q_conv    = 0,        # Sv. 0 = off, and NOTHING is emitted, so the
+                          # pure-diffusion model is bit-reproduced.
+    # ---- structural switches, NOT calibrated parameters -----------------
+    # (same standing as `revelle_frozen` below: they select a mechanism, they do
+    # not tune one. The three red-team configurations are points in this pair.)
+    #
+    #   Config A  conv_sink = N_INTERIOR, conv_descent = 0   handoff 13b sec.4.2
+    #   Config B  conv_sink = N_INTERIOR, conv_descent = 1   distributed descent
+    #   Config C  conv_sink = 8,          conv_descent = 0   sink to NADW depth
+    #
+    # DEFAULT IS C, the red team's recommendation. A sinks the NH mixed layer
+    # straight to the bottom box, which leaves NH oc1..oc9 -- 30 % of the deep
+    # ocean -- with no advective flux at all; once `kz` falls (which is the
+    # point of the exercise) that produces young bottom water under anomalously
+    # old mid-depth water, an inversion the Atlantic does not have. It also
+    # plumbs a limb named "NADW" to the depth of AABW, which forms at the other
+    # end of the world. Layer 8 spans 1314-1861 m at h_ml = 75, which is NADW.
+    conv_sink    = 8L,    # interior layer receiving the NH sinking limb (1..nl)
+    conv_descent = 0L,    # 0 = non-local plume (NADW forms in a narrow region
+                          # and sinks fast), 1 = distributed layer-by-layer
+    conv_reverse = 0L,    # 1 = run the whole cell BACKWARDS (SH sinking, NH
+                          # upwelling). Exists ONLY for the wiring gate: by the
+                          # sec.2 theorem it MUST give a different atmosphere,
+                          # and if it ties, the loop has been accidentally
+                          # closed within a column. Never a physical setting.
     kz        = 5000,     # m2/yr, interior eddy diffusivity. RE-CENTRED
                           # 2026-08-12 from 4000, to the centre of the range that
                           # puts deep-ocean D14C inside the observed -150 to -200
@@ -246,6 +319,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     dy[box, "C14"] <<- dy[box, "C14"] + F_C * (1 + d14c / 1000)
     invisible(NULL)
   }
+
+  # Resolved ONCE: the within-column limbs below and the interhemispheric limbs
+  # after the loop must agree about which layer sinks and which way the cell
+  # runs, and re-deriving it in two places is how they would drift apart.
+  cg <- ccx_conveyor_geom(p, grid)
 
   for (hi in seq_along(HEMIS)) {
     h    <- HEMIS[hi]
@@ -462,6 +540,39 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
       }
     }
 
+    # ---- THE CONVEYOR: the two WITHIN-COLUMN limbs -------------------
+    # The other two limbs are interhemispheric and are emitted OUTSIDE this
+    # loop, next to tau_ex -- see there. Splitting them is not cosmetic: the
+    # two ocean columns are indexed per hemisphere and only the code outside
+    # this loop can see both at once.
+    #
+    # The effective velocity is Q / A_h, so the SAME volume flux gives the
+    # smaller-area NH the faster limb. That asymmetry is the mechanism, not an
+    # artefact: it is why the conveyor is predicted to shrink the NH-SH d13C
+    # gradient (handoff 13b sec.4.4), which the likelihood already scores.
+    if (!is.null(cg)) {
+      w <- cg$Q / aux$a_oc[[h]]
+      if (h == cg$down) {
+        # SINKING. Non-local by default: NADW forms in a narrow region and sinks
+        # fast, so the plume does not equilibrate with the layers it passes.
+        # `conv_descent = 1` spreads it layer by layer instead (Config B), which
+        # removes the advectively dead interior Config A leaves behind.
+        if (cg$distributed) {
+          for (kk in seq_len(cg$s))
+            add_flux(col[kk], col[kk + 1], w * y[col[kk], "C"] / grid$dz[kk])
+        } else {
+          add_flux(iml, col[cg$s + 1], w * y[iml, "C"] / grid$dz[1])
+        }
+      } else {
+        # UPWELLING, always broad and distributed -- the return limb of the real
+        # cell is slow and spread over the whole basin. Runs from the sink layer
+        # to the mixed layer; layers BELOW it are left to diffusion, which is
+        # the abyss Config C deliberately does not ventilate.
+        for (kk in seq_len(cg$s))
+          add_flux(col[kk + 1], col[kk], w * y[col[kk + 1], "C"] / grid$dz[kk + 1])
+      }
+    }
+
     # ---- prescribed emissions ---------------------------------------
     # Fossil carbon comes from OUTSIDE the modelled system (geology), so it is a
     # true external source, and it is 14C-free.
@@ -498,6 +609,31 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
   iN <- aux$idx$NH$atm; iS <- aux$idx$SH$atm
   add_flux(iN, iS, y[iN, "C"] / p$tau_ex)
   add_flux(iS, iN, y[iS, "C"] / p$tau_ex)
+
+  # ---- THE CONVEYOR: the two INTERHEMISPHERIC limbs ------------------
+  # Emitted here, not in the hemisphere loop, because they are the first
+  # ocean-ocean coupling in the model and the loop can only see one column.
+  #
+  # Note what these two limbs do to the sec.2 symmetry argument. The deep limb
+  # exports the sinking hemisphere's water to the OTHER hemisphere's interior,
+  # where no diffusive path returns it -- that is what makes each column an OPEN
+  # system, and it is why the outcrop configuration tied classic upwelling while
+  # this does not. The surface return then gives the ocean a SECOND box in
+  # contact with an atmosphere. Both premises of the theorem are gone, so
+  # reversing the cell must change what the atmosphere sees; test-conveyor.R
+  # asserts exactly that, and a TIE means the wiring is wrong.
+  #
+  # Concentration is per unit VOLUME here, hence the division by area as well as
+  # thickness -- unlike the within-column limbs, where the hemisphere's area
+  # cancels between the two boxes.
+  if (!is.null(cg)) {
+    i_deep_dn <- aux$idx[[cg$down]]$oc[cg$s]
+    i_deep_up <- aux$idx[[cg$up]]$oc[cg$s]
+    add_flux(i_deep_dn, i_deep_up,
+             cg$Q * y[i_deep_dn, "C"] / (aux$a_oc[[cg$down]] * grid$dz[cg$s + 1]))
+    add_flux(aux$idx[[cg$up]]$ml, aux$idx[[cg$down]]$ml,
+             cg$Q * y[aux$idx[[cg$up]]$ml, "C"] / (aux$a_oc[[cg$up]] * grid$dz[1]))
+  }
 
   # ---- 14C sources (mol/yr -> GtC-equivalent units) and decay ---------
   # A mol of pure 14C carries R14_STD^-1 times as much "C14 signal" as a mol of
@@ -590,6 +726,10 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     enso_share  = list(NH = 0.5, SH = 0.5),
     bomb_share_NH = 0.9,
     nuc_share_NH  = 0.95,
+    # Ocean areas, needed by the conveyor's interhemispheric limbs: those are
+    # the only fluxes in the model where the hemisphere's area does NOT cancel
+    # between source and sink, so they need a true per-volume concentration.
+    a_oc = a_oc,
     grid = grid
   )
 }
@@ -672,8 +812,19 @@ ccx_diffusion_eigmax <- function(kz, grid) {
 #'
 #' Returns exactly 0 at w_up = 0, so a pure-diffusion run resolves to the same
 #' substep count it always did.
-ccx_advection_eigbound <- function(w_up, grid) {
+ccx_advection_eigbound <- function(w_up, grid, p = NULL) {
   w <- max(c(0, unlist(w_up)), na.rm = TRUE)   # the fastest limb in either hemisphere
+  # The conveyor's limbs are volume fluxes, so each hemisphere sees Q / A_h and
+  # the SMALLER-area hemisphere sets the bound. Folded in here rather than given
+  # its own bound because it is the same Courant-type constraint on the same
+  # boxes -- and because a stability check that silently ignored a first-order
+  # advective term (20.8 GtC/yr at 27 Sv, against 27.1 GtC/yr of gross air-sea
+  # exchange) would be worse than no check.
+  cg <- if (is.null(p)) NULL else ccx_conveyor_geom(p, grid)
+  if (!is.null(cg)) {
+    a_min <- min(ccx_const("OCEAN_AREA_NH"), ccx_const("OCEAN_AREA_SH"))
+    w <- max(w, cg$Q / a_min)
+  }
   if (w <= 0) return(0)
   2 * max(w / grid$dz)
 }
@@ -682,7 +833,7 @@ ccx_advection_eigbound <- function(w_up, grid) {
 #' @param dt master step, years (1/12 for the monthly integrator)
 ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
   lam <- ccx_diffusion_eigmax(p$kz, grid) +
-    ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), grid)
+    ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), grid, p)
   need <- dt * lam / (CCX_STAB_SAFETY * CCX_RK4_STAB_LIMIT)
   as.integer(min(max(CCX_SUBSTEPS_MIN, ceiling(need)), CCX_SUBSTEPS_MAX))
 }
