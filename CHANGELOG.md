@@ -1845,3 +1845,44 @@ Suite **400 pass / 4 fail / 2 skip** — the same four failures as 12d, plus 12 
 assertions. One of those guards exists because the fossil sensitivity scan in diag [2]
 went **inert** the moment `d13c_foss` left `aux`: it reported six identical rows while
 looking live, until it was rewritten to override the forcing column.
+
+## 2026-08-13 (later) — The δ¹³C overshoot is the price of the pure-diffusion ocean
+
+`calibration/diag_d13c_levers.R` scans the two families the previous entry left untested
+— the ocean (`k_w`, `h_ml`, `kz`) and the land **lag** (`tau_wood`, `tau_soil_slow`,
+`litter_slow_frac`, `npp_veg_frac`, i.e. the *age* of returning carbon rather than the
+gross magnitude `ra_ratio` already covered). Every row carries the CO₂ bias, the Δ¹⁴C bias
+and the land-sink share, because a lever that closes δ¹³C by breaking those has closed
+nothing.
+
+**`k_w` is the only lever not paid for elsewhere:**
+
+| k_w | δ¹³C bias | CO₂ bias | Δ¹⁴C bias | land share |
+|---|---|---|---|---|
+| 1500 (default) | +0.548 | +2.33 | +2.65 | 46 % |
+| 2500 | +0.259 | +3.63 | +4.59 | 46 % |
+| **4000** | **+0.075** | +4.38 | +1.52 | 45 % |
+| 6000 | −0.034 | +4.81 | −1.62 | 45 % |
+
+`h_ml` moves the bias 0.085 ‰ across 30–200 m. Every land-lag knob that helps costs
+15–50 ‰ of Δ¹⁴C (`tau_wood` 150 → +43.8 ‰; `litter_slow_frac` 0.5 → +51.5 ‰).
+
+**And 4000 is not available.** 1500 m/yr *is* the Wanninkhof global-mean CO₂ transfer
+velocity the prior is centred on (DESIGN.md line 102; ~16.5 cm/hr = 1450 m/yr), so 4000
+is 2.7× it, **+2.45 σ**.
+
+**The reading.** The model needs more gross exchange than a real piston velocity delivers
+because its ocean cannot *maintain* the isotopic disequilibrium. The real ocean does that
+by circulation: upwelling continually presents water last in contact with a preindustrial
+atmosphere, so the return flux stays isotopically old. A diffusive column has no
+upwelling — it smears the Suess signal downward, the water at the surface is already
+partly loaded, and the return flux is too depleted. Raising `k_w` fakes it by talking
+faster to a reservoir that is too equilibrated; raising `kz` fakes it by burying the
+signal, at +13 ppm and +22 ‰ Δ¹⁴C by `kz` = 10,000.
+
+**This is the same missing term ¹⁴C already found.** 12d §2 closed the ¹⁴C budget with the
+residual "atmosphere short / ocean long ⇒ **ventilation**". Two isotopes, one gap.
+DESIGN §2 rejected HILDA as "too many parameters to communicate" and 12d §10 lists ocean
+advection among the deliberate omissions — so this is a **known, chosen limitation now
+priced in per mil**, not a new defect. That is the right thing for a communications model
+to be able to say about itself.
