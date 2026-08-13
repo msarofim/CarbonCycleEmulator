@@ -322,7 +322,7 @@ ccx_forcing_at <- function(F, i) {
 #'   that keeps the explicit diffusion term stable (see ccx_substeps_for()).
 #'   "auto" resolves to CCX_SUBSTEPS_MIN = 4 at every ordinary parameter value.
 #' @return list(state = final state, out = data.frame of monthly diagnostics)
-ccx_run <- function(spin, F, substeps = "auto") {
+ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
   y <- spin$y; aux <- spin$aux; grid <- spin$grid; p <- spin$params
   substeps <- ccx_resolve_substeps(substeps, p, grid)
   n <- nrow(F)
@@ -343,7 +343,13 @@ ccx_run <- function(spin, F, substeps = "auto") {
                     ocean_C14 = NA_real_, land_C14 = NA_real_,
                     atm_C14 = NA_real_)
   gpp <- ccx_const("GtC_PER_PPM") / 2
+  # Flux trace (R/fluxes.R): OPT-IN, and evaluated at each month's OPENING state
+  # rather than inside the RK4 substeps. It is a diagnostic; the substep-mean
+  # would differ only by within-month curvature, and paying for it on every
+  # likelihood evaluation would be the wrong trade entirely.
+  ystore <- if (fluxes) vector("list", n) else NULL
   for (i in seq_len(n)) {
+    if (fluxes) ystore[[i]] <- y
     out$co2_NH[i]  <- y[atmN, "C"] / gpp
     out$co2_SH[i]  <- y[atmS, "C"] / gpp
     out$d13c_NH[i] <- 1000 * (y[atmN, "C13"] / (y[atmN, "C"] * ccx_const("R13_VPDB")) - 1)
@@ -357,5 +363,7 @@ ccx_run <- function(spin, F, substeps = "auto") {
     out$atm_C14[i]   <- sum(y[atm,   "C14"])
     y <- ccx_step_rk4(y, F$t[i], 1 / 12, p, ccx_forcing_at(F, i), grid, aux, substeps)
   }
-  list(state = y, out = out)
+  res <- list(state = y, out = out)
+  if (fluxes) res$fluxes <- ccx_flux_trace(ystore, F, p, grid, aux)
+  res
 }

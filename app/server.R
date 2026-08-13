@@ -210,30 +210,61 @@ function(input, output, session) {
   })
 
   # ---- 6. Under the hood ---------------------------------------------
+  # The box diagram. ARROWS CARRY THEIR FLUXES (2026-08-13): unlabelled arrows
+  # were the single biggest pedagogical gap in the app -- the entire
+  # "CO2 only lasts 5 years" lesson is that photosynthesis and air-sea exchange
+  # are ~70 and ~95 GtC/yr while emissions are ~11 and the net imbalance ~5, and
+  # an arrow without a number cannot say that. Numbers come from APP_FLUX_NOW
+  # (R/fluxes.R), i.e. from the model's own tap, not from a table typed here.
   output$h_diagram <- renderPlot({
+    fx <- APP_FLUX_NOW
     boxes <- data.frame(
       x = c(2, 1, 3, 5, 5), y = c(4, 2.4, 2.4, 3.0, 1.2),
-      lab = c("Atmosphere", "Vegetation", "Soil", "Ocean\nmixed layer",
-              "Deep ocean\n(10 layers)"),
+      lab = c("Atmosphere", "Vegetation\n(leaves + wood)", "Soil\n(fast + slow)",
+              "Ocean\nmixed layer", "Deep ocean\n(10 layers)"),
       col = c(PAL[["atm"]], PAL[["land"]], PAL[["land"]],
               PAL[["ocean"]], PAL[["ocean"]]))
     stock <- APP_HIST$out[nrow(APP_HIST$out), ]
+    # x/xend/yend and the flux each segment carries, kept in ONE table so a
+    # moved arrow cannot end up with another arrow's number.
     arrows_df <- data.frame(
-      x = c(2, 1, 3, 2.6, 5, 5), xend = c(1, 3, 2, 4.6, 2.6, 5),
-      y = c(3.7, 2.4, 2.7, 3.9, 3.3, 2.6), yend = c(2.8, 2.4, 3.7, 3.2, 4.1, 1.7))
+      x    = c(2,   1,   3,   2.6, 5,   5,   2.0),
+      xend = c(1,   3,   2,   4.6, 2.6, 5,   2.0),
+      y    = c(3.7, 2.4, 2.7, 3.75, 3.15, 2.6, 4.7),
+      yend = c(2.8, 2.4, 3.7, 3.05, 4.05, 1.7, 4.3),
+      val  = c(fx$gpp, fx$litter, fx$rh + fx$luc, fx$as_down, fx$as_up,
+               fx$ml_int, fx$foss),
+      hj   = c(1.15, 0.5, -0.1, 0.5, 0.5, -0.3, -0.2),
+      vj   = c(0.5,  -0.6, 0.5, 1.5, -1.0, 0.5, 0.5),
+      nm   = c("photosynthesis", "litterfall", "respiration", "air to sea",
+               "sea to air", "to the deep", "fossil fuels"))
+    arrows_df$lab <- sprintf("%.0f\n%s", arrows_df$val, arrows_df$nm)
     ggplot() +
       geom_segment(data = arrows_df, aes(x, y, xend = xend, yend = yend),
                    arrow = arrow(length = unit(0.16, "cm"), type = "closed"),
                    colour = "grey45", linewidth = 0.5) +
+      geom_text(data = arrows_df,
+                aes((x + xend) / 2, (y + yend) / 2, label = lab,
+                    hjust = hj, vjust = vj),
+                size = 2.9, colour = "grey20", lineheight = 0.9) +
       geom_label(data = boxes, aes(x, y, label = lab, fill = I(col)),
-                 colour = "white", fontface = "bold", size = 3.6,
+                 colour = "white", fontface = "bold", size = 3.4,
                  label.padding = unit(0.4, "lines"), label.r = unit(0.15, "lines")) +
-      annotate("text", x = 3, y = 0.4, size = 3.3, colour = "grey35",
-               label = sprintf(paste("Today: atmosphere %s, land %s, ocean %s.",
-                                     "Each box exists twice — once per hemisphere."),
+      annotate("text", x = 3.1, y = 0.70, size = 3.1, colour = "grey35",
+               lineheight = 1.05,
+               label = sprintf(paste0("Arrows are flows in GtC per year (%d). Stocks today: ",
+                                      "atmosphere %s, land %s, ocean %s.\n",
+                                      "Each box exists twice \u2014 once per hemisphere."),
+                               fx$year,
                                fmt_gtc(stock$co2_global * ccx_const("GtC_PER_PPM")),
                                fmt_gtc(stock$land_C), fmt_gtc(stock$ocean_C))) +
-      xlim(0.2, 6) + ylim(0, 4.6) + theme_void()
+      annotate("text", x = 3.1, y = 0.18, size = 3.2, colour = "grey20",
+               fontface = "bold", lineheight = 1.05,
+               label = sprintf(paste0("Photosynthesis and the sea move %.0f GtC a year in and out of the air, ",
+                                      "so an average CO\u2082 molecule\nstays only ~%.1f years. ",
+                                      "The ADDED carbon still takes centuries to go."),
+                               fx$atm_out, fx$tau_turn)) +
+      xlim(0.1, 6.1) + ylim(0, 4.9) + theme_void()
   })
 
   output$h_params <- renderTable({

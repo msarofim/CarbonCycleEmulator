@@ -240,6 +240,18 @@ ccx_default_params <- function() {
     seas_amp_SH = 2,
     seas_phase_NH = 3.5,  # month of peak uptake
     seas_phase_SH = 9.5,
+    # ENSO COEFFICIENT: 0, NOT the CCX_PARAM_TABLE init of 0.5, and this is a
+    # deliberate asymmetry with beta/q10/kz (which do take their table inits).
+    # Until 2026-08-13d it was ABSENT here, so ccx_deriv() -- which multiplies it
+    # straight into add_flux -- died with "argument is of length zero" on default
+    # parameters, while ccx_cpp_par() silently substituted 0. That is an R-vs-C++
+    # divergence about what ccx_default_params() MEANS, which is precisely what
+    # the bit-parity rule exists to prevent, and it cost three debugging cycles
+    # (handoff 2026-08-13c sec.7 records the first). 0 is the behaviour-preserving
+    # value: it is what every ccx_run_fast() call on default parameters has been
+    # using all along. Setting it to the table's 0.5 would silently change every
+    # existing default-parameter result.
+    gamma_enso = 0,
     # ---- mechanism switch, NOT a calibrated parameter -----------------
     # FROZEN REVELLE. 0 = normal carbonate chemistry. 1 = the ocean's buffer
     # factor is held at its preindustrial value instead of rising as the ocean
@@ -265,9 +277,36 @@ ccx_default_params <- function() {
 #'               enso (index), c14_bomb, c14_nuclear, c14_cosmo (mol 14C/yr)
 #' @param grid   ocean grid from ccx_ocean_grid()
 #' @param aux    precomputed invariants from ccx_prepare()
-ccx_deriv <- function(y, t, p, forc, grid, aux) {
+ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   dy <- y * 0
   nb <- nrow(y)
+
+  # --- optional flux tap (R/fluxes.R) ---------------------------------
+  # OFF by default and behind a single branch inside add_flux/add_source, so
+  # the integrated model is untouched. When on, it accumulates BOTH the named
+  # channels and a per-box carbon net -- the second exists so test-fluxes.R can
+  # assert the recorded edges reproduce dy[, "C"] exactly, which is what makes
+  # the trace provably the same fluxes the model integrates rather than a
+  # parallel derivation of them.
+  if (record) {
+    .fx  <- ccx_flux_zero()
+    .net <- numeric(nb)
+    .cls <- ccx_flux_boxclass(aux, nb)
+    .atmN <- aux$idx$NH$atm
+  }
+  .rec <- function(from, to, F_C, lab) {
+    cs <- ccx_flux_channel(from, to, lab, .cls, .atmN)
+    if (is.null(cs))
+      stop("ccx_deriv(record): unclassified flux ", from, " -> ", to,
+           " -- add a rule to ccx_flux_channel()")
+    # int_exch is a GROSS magnitude: the interior has no single "downward" once
+    # the conveyor's deep interhemispheric limb exists, so summing signed values
+    # would report a near-cancelling number that means nothing.
+    .fx[[cs$ch]] <<- .fx[[cs$ch]] + if (cs$ch == "int_exch") abs(F_C) else cs$sign * F_C
+    if (from > 0L) .net[from] <<- .net[from] - F_C
+    .net[to] <<- .net[to] + F_C
+    invisible(NULL)
+  }
 
   # --- flux helper: emit once, apply twice, opposite signs ------------
   # `alpha13` is the 13C fractionation factor on this flux (1 = none).
@@ -281,8 +320,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
   # So every bidirectional interface is emitted as TWO one-way gross fluxes.
   # A signed net flux is still fine where the process really is one-way at a time
   # (seasonal NEP, ENSO), and add_flux handles the sign by swapping the source.
-  add_flux <- function(from, to, F_C, alpha13 = 1) {
+  add_flux <- function(from, to, F_C, alpha13 = 1, lab = NULL) {
     if (F_C == 0) return(invisible(NULL))
+    if (record) .rec(from, to, F_C, lab)
     # ratios taken from the SOURCE box; for a negative flux the source is `to`
     src <- if (F_C > 0) from else to
     r13 <- if (y[src, "C"] > 0) y[src, "C13"] / y[src, "C"] else 0
@@ -306,6 +346,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
   add_diffusion <- function(a, b, dz_a, dz_b, dz_mid) {
     for (tr in CCX_TRACERS) {
       F_t <- p$kz * (y[a, tr] / dz_a - y[b, tr] / dz_b) / dz_mid
+      if (record && tr == "C" && F_t != 0) .rec(a, b, F_t, NULL)
       dy[a, tr] <<- dy[a, tr] - F_t
       dy[b, tr] <<- dy[b, tr] + F_t
     }
@@ -314,6 +355,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
 
   # --- external source: enters one box, no counterpart ----------------
   add_source <- function(box, F_C, d13c, d14c) {
+    if (record && F_C != 0) .rec(0L, box, F_C, NULL)
     dy[box, "C"]   <<- dy[box, "C"]   + F_C
     dy[box, "C13"] <<- dy[box, "C13"] + F_C * ccx_const("R13_VPDB") * (1 + d13c / 1000)
     dy[box, "C14"] <<- dy[box, "C14"] + F_C * (1 + d14c / 1000)
@@ -430,14 +472,15 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     amp   <- if (h == "NH") p$seas_amp_NH else p$seas_amp_SH
     phase <- if (h == "NH") p$seas_phase_NH else p$seas_phase_SH
     seas  <- amp * sin(2 * pi * (t - phase / 12)) * (npp / aux$npp0[[h]])
-    add_flux(iatm, ilef, seas, alpha13 = aux$alpha_photo)
+    add_flux(iatm, ilef, seas, alpha13 = aux$alpha_photo, lab = "seas")
 
     # ---- ENSO: land -> atmosphere anomaly (El Nino = source) ---------
     # Out of the RESPONSIVE soil pool. The interannual anomaly is drought and
     # fire-driven respiration of recently fixed carbon, not a draw on the
     # millennial passive pool.
     if (aux$enso_share[[h]] != 0) {
-      add_flux(isf, iatm, p$gamma_enso * forc$enso * aux$enso_share[[h]])
+      add_flux(isf, iatm, p$gamma_enso * forc$enso * aux$enso_share[[h]],
+               lab = "enso")
     }
 
     # ---- air-sea ----------------------------------------------------
@@ -599,7 +642,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
     # NOTE: historical e_luc is strictly positive. Should a scenario ever supply a
     # negative (net-regrowth) value, add_flux swaps the source correctly but the
     # uptake would not carry the photosynthetic fractionation it should.
-    add_flux(iwod, iatm, forc$e_luc[[h]])
+    add_flux(iwod, iatm, forc$e_luc[[h]], lab = "luc")
   }
 
   # ---- interhemispheric atmospheric exchange -------------------------
@@ -648,6 +691,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux) {
 
   dy[, "C14"] <- dy[, "C14"] - ccx_const("LAMBDA_C14") * y[, "C14"]
 
+  if (record) attr(dy, "fluxes") <- list(channels = .fx, boxnet = .net)
   dy
 }
 

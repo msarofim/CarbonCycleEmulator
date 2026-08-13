@@ -121,6 +121,17 @@ app_hist <- local({
 })
 APP_HIST <- app_hist
 
+# Annual flux trace for the box diagram and the turnover-time readout. Computed
+# once at startup on the pure-R path (ccx_run_fast has no flux tap: the trace is
+# a diagnostic and the C++ core is the thing the sampler calls). ~2 s, and it is
+# the only place the app learns that photosynthesis is ~70 GtC/yr against ~11
+# GtC/yr of emissions -- which is the whole residence-time lesson.
+APP_FLUX <- local({
+  F <- ccx_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
+  ccx_flux_annual(ccx_run(APP_SPIN, F, fluxes = TRUE)$fluxes)
+})
+APP_FLUX_NOW <- APP_FLUX[nrow(APP_FLUX), ]
+
 APP_GCB <- as.data.frame(readRDS(file.path(CCX_ROOT, "data", "gcb_budget.rds"))$budget)
 APP_EMIS_HIST <- as.data.frame(
   readRDS(file.path(CCX_ROOT, "data", "forcing_emissions_historical.rds")))

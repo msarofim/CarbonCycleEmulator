@@ -25,7 +25,7 @@ this session (provenance in §9), not recalled.
 1. **The structure the two fallacies demand is already built, and it is not the structure
    currently under debate.** The model already refutes both, quantitatively, today. §1.
 
-2. **The model produces the "5-year residence time" number itself — 4.3 yr — and in the
+2. **The model produces the "5-year residence time" number itself — 4.69 yr — and in the
    same run shows 26 % of a mass pulse still airborne after a century.** Turnover and
    adjustment differ by **4.5× at 100 yr** in one model, one state, one parameter set.
    That is not an analogy for the fallacy; it is the fallacy, executed and dissected. §1.
@@ -84,8 +84,13 @@ perturbation can be launched from the identical state with identical parameters:
 | 100 | **0.262** | **0.058** |
 | 300 | 0.171 | 0.029 |
 
-- **Instantaneous label decay time = 4.3 yr.** The model *hands you the sceptic's own
-  number*, correctly, as a property of gross exchange.
+- **Turnover time = 4.69 yr at 1750, 5.32 by 2024** (M_atm ÷ gross outflux, read off the
+  flux trace added under R1). The model *hands you the sceptic's own number*, correctly, as
+  a property of gross exchange — and shows it is not even a constant.
+  *(An earlier draft of this note said 4.32 yr, from a one-month label slope. That estimator
+  is contaminated by the January seasonal drawdown, which is excluded from the gross outflux
+  because it integrates to zero annually. With seasonality off the two routes agree to 0.2 %
+  — 4.700 vs 4.692 — which is now a test, `test-fluxes.R`.)*
 - **Label 1/e = 7.1 yr; mass 1/e = 40.3 yr; at 100 yr the ratio is 4.5×** and still widening.
 - The label curve is not a fitted convenience — it is the same gross air–sea and gross
   GPP/respiration loops that `add_flux()` already emits *because the isotopes forced it to*
@@ -183,10 +188,13 @@ stocks, ratios and two ¹⁴C inventories. It emits **no flux**. Consequences:
   immediately.
 
 **Recommendation R1 (highest value, low cost): emit an optional flux trace.** A
-`fluxes = TRUE` argument to `ccx_run()`/`ccx_run_fast()` that returns the gross and net
-fluxes `add_flux()` already computes, at annual resolution to keep it small. It changes no
-physics, breaks no result, and is gated by the existing conservation test — the fluxes must
-sum to the stock changes, which is a *free additional check on the model core.*
+`fluxes = TRUE` argument to `ccx_run()` returning the gross and net fluxes `add_flux()`
+already computes. It changes no physics, breaks no result, and the recorded fluxes must sum
+to the stock changes — a *free additional check on the model core.*
+**BUILT 2026-08-13d** (`R/fluxes.R`, `tests/testthat/test-fluxes.R`, 20 assertions): the
+recorder is a tap inside `add_flux`/`add_source`/`add_diffusion`, edges are classified by
+reservoir type so future fluxes are captured automatically, and `boxnet == dy[, "C"]`
+exactly. `ccx_run_fast()` (the C++ core the sampler calls) is deliberately untouched.
 
 ---
 
@@ -376,7 +384,11 @@ not too much more" model must be **fully inspectable**, and unlabelled arrows on
 diagram (§1c) fail that. So does the diagram's **"Vegetation / Soil"** caption against a
 four-pool land model (`model.R:80`) — a labels-vs-structure drift of exactly the class the
 standing rule exists to prevent. **R6: fix the diagram's labels and put numbers on its
-arrows** (blocked on R1).
+arrows** (blocked on R1). **DONE 2026-08-13d** — every arrow now carries its flux from
+`APP_FLUX_NOW`, and the land boxes read "Vegetation (leaves + wood)" / "Soil (fast + slow)".
+The diagram's closing line is now the lesson itself: *photosynthesis and the sea move
+167 GtC a year in and out of the air, so an average CO₂ molecule stays only ~5.3 years — the
+added carbon still takes centuries to go.*
 
 **On complexity, the lens' actual verdict.** The audience test is not "how many boxes" but
 **"how many sentences to explain a mechanism a student must believe."** By that test: gross
@@ -453,8 +465,7 @@ turns out to be right.
 
 **Blocking decisions for Marcus, in priority order for the stated goal:**
 
-1. **R1 (flux output) — approve?** Everything pedagogical downstream depends on it, it
-   changes no physics, and it adds a free conservation check.
+1. ~~**R1 (flux output)**~~ — **approved by Marcus 2026-08-13 and BUILT.**
 2. **R4 + R5 (the two missing tabs) — approve the scope?** This is where the project's
    stated purpose actually lives, and DESIGN §7 currently does not contain it. **DESIGN §1's
    goal list should gain a fifth entry naming the two fallacies**, so the spec matches the
@@ -484,9 +495,9 @@ All measured this session against branch `luc-veg-debit` at `4c10d93`, reproduce
 - **Mass pulse** = 100 GtC added to the atmosphere *at the atmosphere's own isotopic ratios*,
   so it is a mass perturbation and not simultaneously a label perturbation.
 - **Label pulse** = atmospheric ¹⁴C × 1.10, no mass change.
-- **Turnover time 4.32 yr** is the one-month decay rate of the label anomaly (4.48 yr at 3
-  months, 4.78 yr fitted over the first year — the spread is the curve's own curvature, and
-  the instantaneous value is the one that corresponds to M_atm/F_gross).
+- **Turnover time 4.69 yr (1750) / 5.32 yr (2024)** is M_atm ÷ (photosynthesis + air-to-sea
+  invasion), from the flux trace, which is the definition. The one-month label slope reads
+  4.32 yr and is *not* a clean estimator of it — see §1a.
 - **Historical run** 1750–2024 with full forcing; correlations on annual means 1960–2023
   against IGCC GMST; "detrended" = residuals of a cubic in year, both series.
 - **Conveyor row** = Config C (`conv_sink` 8, `conv_descent` 0), `q_conv` 20 Sv, `kz` 2000 —

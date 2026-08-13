@@ -20,10 +20,23 @@
 #      100           0.262              0.058     <-- 4.5x apart
 #      300           0.171              0.029
 #
-#     Instantaneous label decay time 4.32 yr (1 month), 4.48 (3 months), 4.78
-#     (1-yr fit). Label 1/e = 7.13 yr; mass 1/e = 40.3 yr.
-#     THE 4.3 YR IS THE QUOTED "RESIDENCE TIME", COMPUTED CORRECTLY, AS A
-#     PROPERTY OF GROSS EXCHANGE. It is the right answer to the wrong question.
+#     Label 1/e = 7.13 yr; mass 1/e = 40.3 yr.
+#
+#     THE TURNOVER TIME ITSELF IS NOW READ OFF THE FLUX TRACE (R/fluxes.R,
+#     added 2026-08-13d), not off the label slope: tau_turn = M_atm / (gross
+#     flux out) = 4.69 yr at 1750, rising to 5.32 by 2024 as the atmosphere
+#     fills faster than the gross fluxes grow. THAT IS THE QUOTED "5-YEAR
+#     RESIDENCE TIME", COMPUTED CORRECTLY -- the right answer to the wrong
+#     question.
+#
+#     A ONE-MONTH LABEL SLOPE IS *NOT* A CLEAN ESTIMATOR OF IT, and this
+#     supersedes the 4.32 yr this file reported on 2026-08-13. Seasonal NEP is a
+#     real atm->leaf flux that integrates to zero annually, so it is excluded
+#     from atm_out -- correctly for the annual mean, wrongly for a January
+#     finite difference, which the January seasonal drawdown then biases FAST.
+#     Tested, not assumed (test-fluxes.R): with seasonality off the label slope
+#     gives 4.700 against the trace's 4.692, agreeing to 0.2 %; with it on the
+#     same slope reads 4.32. Part 1b prints both.
 #
 # [2] THE OCEAN-STRUCTURE DEBATE IS NEARLY IRRELEVANT TO THIS. Conveyor C at
 #     20 Sv with kz 2000 moves AF@100 from 0.262 to 0.284. Choosing a 2024
@@ -140,6 +153,10 @@ efold <- function(cv, v) stats::approx(v, cv$yrs, xout = exp(-1))$y
 # =====================================================================
 p0 <- ccx_default_params()
 cv <- ped_curves(p0)
+# The flux trace is read off the FULL HISTORICAL forcing, so both ends of the
+# industrial period are visible: the turnover time is not a constant, it LENGTHENS
+# as the atmosphere fills faster than the gross fluxes grow.
+Fh_all <- ccx_build_forcing("historical", PED_HIST, prod_c14 = cv$spin$prod_c14)
 cat(sprintf("\n[control] drift over %d yr: CO2 %+.4f ppm, d14C %+.4f permil\n",
             PED_Y1 - PED_Y0,
             tail(cv$ctl$co2_NH, 1) - cv$ctl$co2_NH[1],
@@ -149,14 +166,26 @@ cat("\n=== 1. TURNOVER vs ADJUSTMENT (one state, one parameter set) ===\n")
 cat(sprintf("%6s  %14s  %16s\n", "yr", "mass airborne", "label remaining"))
 for (y in PED_HORIZONS)
   cat(sprintf("%6.0f  %14.4f  %16.4f\n", y, at(cv, cv$af, y), at(cv, cv$lab, y)))
-cat(sprintf("\n  instantaneous label decay time: %.2f yr (1 mo), %.2f (3 mo), %.2f (1 yr fit)\n",
-            -(1 / 12) / log(cv$lab[2] / cv$lab[1]),
-            -(3 / 12) / log(cv$lab[4] / cv$lab[1]),
-            -1 / log(cv$lab[13] / cv$lab[1])))
-cat(sprintf("  <-- THIS IS THE QUOTED \"5-YEAR RESIDENCE TIME\", COMPUTED CORRECTLY.\n"))
 cat(sprintf("  1/e crossing: label %.2f yr, mass %.1f yr; ratio at 100 yr = %.1fx\n",
             efold(cv, cv$lab), efold(cv, cv$af),
             at(cv, cv$af, 100) / at(cv, cv$lab, 100)))
+
+# ---- 1b. THE TURNOVER TIME, from the flux trace (the authoritative route) ----
+# tau_turn = M_atm / (gross flux out of the atmosphere), computed inside the
+# model by R/fluxes.R rather than inferred from a decay slope.
+flx <- ccx_flux_annual(ccx_run(cv$spin, Fh_all, fluxes = TRUE)$fluxes)
+cat("\n=== 1b. TURNOVER TIME FROM THE FLUX TRACE ===\n")
+cat(sprintf("  1750: gross out %.1f GtC/yr -> tau_turn %.2f yr   <-- THE \"5-YEAR\" NUMBER\n",
+            flx$atm_out[1], flx$tau_turn[1]))
+k <- nrow(flx)
+cat(sprintf("  %d: gross out %.1f GtC/yr -> tau_turn %.2f yr\n",
+            flx$year[k], flx$atm_out[k], flx$tau_turn[k]))
+cat(sprintf("  photosynthesis %.1f + air-to-sea %.1f GtC/yr, against fossil emissions %.1f\n",
+            flx$gpp[k], flx$as_down[k], flx$foss[k]))
+cat("  A ONE-MONTH LABEL SLOPE IS NOT THIS NUMBER: seasonal NEP is excluded from\n")
+cat(sprintf("  atm_out (it integrates to zero annually), so a January launch reads %.2f yr.\n",
+            -(1 / 12) / log(cv$lab[2] / cv$lab[1])))
+cat("  test-fluxes.R pins both: seasonality off, the two routes agree to 0.2 %.\n")
 
 # =====================================================================
 # 2. HOW MUCH OF THIS DOES THE OCEAN-STRUCTURE DEBATE MOVE?
