@@ -34,6 +34,7 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     chi0 = aux$chi0, mol_per_GtC = aux$mol_per_GtC,
     npp0 = c(aux$npp0$NH, aux$npp0$SH),
     veg0 = c(aux$veg0$NH, aux$veg0$SH),
+    land0 = c(aux$land0$NH, aux$land0$SH),
     ml_mass_kg = c(aux$ml_mass_kg$NH, aux$ml_mass_kg$SH),
     asx = c(aux$asx$NH, aux$asx$SH),
     sst = c(aux$sst$NH, aux$sst$SH),
@@ -67,6 +68,13 @@ ccx_cpp_par <- function(p) {
   # Ocean overturning added 2026-08-13, default OFF. Same reasoning as above: a
   # parameter list built before that date must reach the core as the
   # pure-diffusion model it was written for, not as garbage.
+  # Land-use permanence, added 2026-08-13. UNLIKE the switches above this does
+  # NOT default to the old behaviour: a parameter list built before the fix is a
+  # list built against a bug (land-use carbon with an airborne fraction of 0.002
+  # at 100 years), so it defaults to the SAME named constant ccx_default_params()
+  # uses. If the two ever disagree, the C++ core silently runs a different model
+  # from the R one -- which is exactly what gamma_enso did.
+  if (is.null(p$f_luc_perm)) p$f_luc_perm <- CCX_F_LUC_PERM_DEFAULT
   if (is.null(p$w_up)) p$w_up <- 0
   if (is.null(p$w_out_NH)) p$w_out_NH <- 0
   if (is.null(p$w_out_SH)) p$w_out_SH <- 0
@@ -96,7 +104,7 @@ ccx_cpp_par <- function(p) {
       "q_conv", "conv_sink", "conv_descent", "conv_reverse",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
-      "npp_veg_frac", "ra_ratio",
+      "npp_veg_frac", "ra_ratio", "f_luc_perm",
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH", "revelle_frozen")]
 }
@@ -108,7 +116,7 @@ ccx_cpp_par <- function(p) {
 # layout and test-parity.R runs them against each other.
 CCX_FORCING_COLS <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                       "gmst", "enso", "c14_bomb", "c14_nuclear", "c14_cosmo",
-                      "d13c_foss")
+                      "d13c_foss", "cum_luc_NH", "cum_luc_SH")
 
 ccx_cpp_forcing <- function(F) {
   miss <- setdiff(CCX_FORCING_COLS, names(F))
@@ -155,9 +163,10 @@ ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
 #' Single derivative via the C++ core (used by the parity gate)
 ccx_deriv_fast <- function(y, t, p, forc, grid, aux) {
   ccx_load_cpp()
+  cl <- ccx_forcing_cum_luc(forc)
   f <- c(forc$e_foss$NH, forc$e_foss$SH, forc$e_luc$NH, forc$e_luc$SH,
          forc$gmst, forc$enso, forc$c14_bomb, forc$c14_nuclear, forc$c14_cosmo,
-         ccx_forcing_d13c_foss(forc))
+         ccx_forcing_d13c_foss(forc), cl$NH, cl$SH)
   d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, ccx_cpp_par(p), f, ccx_cpp_aux(aux, grid))
   dimnames(d) <- dimnames(y)
   d

@@ -43,12 +43,21 @@ static const int NL = 10;          // ocean interior layers
 static const int IML = 5;          // mixed layer, relative to the hemisphere base
 static const int C = 0, C13 = 1, C14 = 2;
 
+// Forcing columns, and the ceiling on the cleared fraction. BOTH are duplicated
+// on the R side -- CCX_FORCING_COLS in R/cpp.R and CCX_LUC_CLEARED_MAX in
+// R/model.R -- because the two implementations are independent by design. A
+// disagreement in the column count is caught by ccx_cpp_forcing()'s name check;
+// a disagreement in the ceiling is NOT caught by anything, so if one moves the
+// other must move in the same commit.
+static const int N_FORCING = 12;
+static const double LUC_CLEARED_MAX = 0.9;
+
 // state is column-major [box + NB*tracer], matching R's matrix layout
 inline int IX(int box, int tr) { return box + NB * tr; }
 
 struct Aux {
   double gtc_per_ppm_hemi, chi0, mol_per_GtC;
-  double npp0[2], veg0[2], ml_mass_kg[2], asx[2], sst[2];
+  double npp0[2], veg0[2], land0[2], ml_mass_kg[2], asx[2], sst[2];
   double dz[NL + 1], dz_mid[NL];
   double alpha_photo, alpha_as_down, alpha_as_up;
   // d13c_foss MOVED to the forcing (2026-08-12): the fossil source d13C is
@@ -78,6 +87,10 @@ struct Par {
   double npp_leaf_frac, tau_leaf, tau_wood;
   double litter_slow_frac, tau_soil_fast, tau_soil_slow;
   double npp_veg_frac, ra_ratio;
+  // Land-use permanence (2026-08-13). Scales the cleared fraction; see the
+  // "converted land" block in ccx_deriv() (R/model.R) for the mechanism and
+  // CCX_F_LUC_PERM_DEFAULT for why 1 rather than 0 is the default.
+  double f_luc_perm;
   double sst_scale, gamma_enso;
   double seas_amp[2], seas_phase[2];
   double revelle_frozen;                    // mechanism switch, 0 or 1
@@ -179,7 +192,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   };
 
   // forcing layout: e_foss_NH, e_foss_SH, e_luc_NH, e_luc_SH, gmst, enso,
-  //                 c14_bomb, c14_nuclear, c14_cosmo, d13c_foss
+  //                 c14_bomb, c14_nuclear, c14_cosmo, d13c_foss,
+  //                 cum_luc_NH, cum_luc_SH
   // Must stay in step with CCX_FORCING_COLS in R/cpp.R -- indexed by position,
   // so a mismatch is silent garbage. test-parity.R is the gate.
   const double gmst = f[4], enso = f[5], d13c_foss = f[9];
@@ -196,10 +210,22 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // stability bound does NOT hold (the CO2 feedback stabilises it).
     // Association order mirrors the R exactly (parity).
     const double chi_safe = (chi > 1e-6) ? chi : 1e-6;
+
+    // CONVERTED LAND (2026-08-13). Cumulative land-use carbon shrinks the
+    // land's equilibrium, so the debit stops being regrown. Mirrors the
+    // "converted land" block in R/model.R exactly -- including that the
+    // denominator is land0 (all four pools) and not veg0, and that the
+    // seasonal term below keeps the UNCLEARED npp0. CCX_LUC_CLEARED_MAX.
+    const double cleared_raw = P.f_luc_perm * f[10 + hi] / A.land0[hi];
+    const double cleared = (cleared_raw < LUC_CLEARED_MAX) ? cleared_raw
+                                                          : LUC_CLEARED_MAX;
+    const double npp0_h = A.npp0[hi] * (1.0 - cleared);
+    const double veg0_h = A.veg0[hi] * (1.0 - cleared);
+
     const double veg_C = y[IX(ilef, C)] + y[IX(iwod, C)];
     const double capacity = (1.0 - P.npp_veg_frac)
-                            + P.npp_veg_frac * veg_C / A.veg0[hi];
-    const double npp = A.npp0[hi] * capacity * (1.0 + P.beta * std::log(chi_safe / A.chi0));
+                            + P.npp_veg_frac * veg_C / veg0_h;
+    const double npp = npp0_h * capacity * (1.0 + P.beta * std::log(chi_safe / A.chi0));
 
     const double npp_leaf = npp * P.npp_leaf_frac;
     const double npp_wood = npp * (1.0 - P.npp_leaf_frac);
@@ -355,6 +381,7 @@ static Aux unpack_aux(const List& a) {
   NumericVector v;
   v = a["npp0"];       A.npp0[0] = v[0];       A.npp0[1] = v[1];
   v = a["veg0"];       A.veg0[0] = v[0];       A.veg0[1] = v[1];
+  v = a["land0"];      A.land0[0] = v[0];      A.land0[1] = v[1];
   v = a["ml_mass_kg"]; A.ml_mass_kg[0] = v[0]; A.ml_mass_kg[1] = v[1];
   v = a["asx"];        A.asx[0] = v[0];        A.asx[1] = v[1];
   v = a["sst"];        A.sst[0] = v[0];        A.sst[1] = v[1];
@@ -387,6 +414,7 @@ static Par unpack_par(const List& p) {
   P.litter_slow_frac = p["litter_slow_frac"];
   P.tau_soil_fast = p["tau_soil_fast"]; P.tau_soil_slow = p["tau_soil_slow"];
   P.npp_veg_frac = p["npp_veg_frac"]; P.ra_ratio = p["ra_ratio"];
+  P.f_luc_perm = p["f_luc_perm"];
   P.k_w = p["k_w"]; P.kz = p["kz"]; P.w_up = p["w_up"]; P.tau_ex = p["tau_ex"];
   P.w_out[0] = p["w_out_NH"]; P.w_out[1] = p["w_out_SH"];
   P.q_conv = p["q_conv"];
@@ -430,7 +458,7 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
   NumericMatrix out(n, 11);
   const double gpp = A.gtc_per_ppm_hemi;
 
-  std::vector<double> f(10);
+  std::vector<double> f(N_FORCING);
   for (int i = 0; i < n; ++i) {
     out(i, 0) = y[IX(0, C)] / gpp;
     out(i, 1) = y[IX(NPH, C)] / gpp;
@@ -454,7 +482,7 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
     out(i, 6) = oc; out(i, 7) = ld;
     out(i, 8) = oc14; out(i, 9) = ld14; out(i, 10) = at14;
 
-    for (int j = 0; j < 10; ++j) f[j] = forcing(i, j);
+    for (int j = 0; j < N_FORCING; ++j) f[j] = forcing(i, j);
 
     // RK4 with substeps, ordered exactly as ccx_step_rk4() in R
     double tt = times[i];

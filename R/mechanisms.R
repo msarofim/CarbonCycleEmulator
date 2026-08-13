@@ -70,8 +70,17 @@ CCX_MECHANISMS <- list(
     # Zeroing the forcing columns rather than a parameter: emissions are
     # PRESCRIBED, so there is no coefficient to set to zero. LUC goes too --
     # it is an emission (a wood -> atmosphere transfer), not a natural flux.
+    #
+    # AND THE CUMULATIVE WITH IT (2026-08-13). cum_luc shrinks the land's
+    # equilibrium (the converted-land term in ccx_deriv()), so zeroing only the
+    # FLUX would answer a different question from the one the switch asks: not
+    # "what if we had never emitted" but "what if we stopped emitting from a
+    # biosphere we had already cleared", which would leave the land relaxing
+    # toward a smaller equilibrium and release ~290 GtC that the counterfactual
+    # never took. The switch says "nature alone", so the forest is standing.
     apply = function(p, F) {
-      for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH")) F[[cc]] <- 0
+      for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
+                   "cum_luc_NH", "cum_luc_SH")) F[[cc]] <- 0
       list(p = p, F = F)
     }
   ),

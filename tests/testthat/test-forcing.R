@@ -111,7 +111,11 @@ test_that("fossil-source d13C is time-varying and tracks the fuel mix", {
 
 test_that("the C++ forcing column contract is positional and complete", {
   expect_identical(CCX_FORCING_COLS[10], "d13c_foss")
-  expect_length(CCX_FORCING_COLS, 10L)
+  # cum_luc APPENDED 2026-08-13 (the converted-land term). Appended rather than
+  # inserted so every existing position is untouched; src/ccx_core.cpp's
+  # N_FORCING must match this length.
+  expect_identical(CCX_FORCING_COLS[11:12], c("cum_luc_NH", "cum_luc_SH"))
+  expect_length(CCX_FORCING_COLS, 12L)
   F <- ccx_build_forcing("historical", c(1900, 1910), prod_c14 = 0)
   expect_identical(colnames(ccx_cpp_forcing(F)), CCX_FORCING_COLS)
   expect_error(ccx_cpp_forcing(F[, setdiff(names(F), "d13c_foss")]),

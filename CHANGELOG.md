@@ -2568,3 +2568,85 @@ panel just called correctly sized, and therefore Marcus'. Options and costs are 
 
 **Sharpens `mode_fit.rds` is stale from "the forcing moved" to "the forcing moved AND the
 model gives land-use carbon away".** A refit before this is settled would fit the defect.
+
+## 2026-08-13 (h) — The converted-land term: the land-use debit is made permanent
+
+Marcus chose **route A** from `notes/handoff_2026-08-13f` §4. DESIGN §3.3 gains the
+converted-land term; `calibration/diag_1900_deficit.R` is rewritten around it;
+`tests/testthat/test-luc-permanence.R` is the gate. **Suite 505 pass / 2 fail / 2 skip**,
+up from 490 / 4 — and *which* two stopped failing is a finding in itself (below).
+
+**THE TERM.** Cumulative land-use carbon defines a cleared fraction
+`c(t) = f_luc_perm · cumLUC(t) / land0`; NPP₀ and veg₀ are both scaled by `(1 − c)`.
+
+**`land0` IS TOTAL LAND CARBON, ALL FOUR POOLS — NOT `veg0`, AND THE DIFFERENCE IS THE
+WHOLE POINT.** Scaling NPP₀ scales every pool's equilibrium, so the land's equilibrium
+carbon falls by `c · land0`. Setting `c = cumLUC / land0` makes that fall equal what
+deforestation removed — the debit is permanent *by construction*, with `f_luc_perm = 1` as
+the mass-consistent point rather than a fitted one. Using `veg0` would shrink the
+equilibrium by a quarter of what was taken and the land would re-absorb the rest.
+
+**MEASURED, and the fix is not tuned to any of it:**
+
+| airborne fraction at lag | 10 | 25 | 50 | 100 | 150 | 264 |
+|---|---|---|---|---|---|---|
+| fossil | 0.605 | 0.445 | 0.337 | **0.262** | 0.226 | 0.180 |
+| LUC, `f_luc_perm = 0` (the bug) | 0.577 | 0.260 | 0.072 | **0.002** | −0.003 | −0.001 |
+| LUC, shipped | 0.646 | 0.362 | 0.193 | **0.130** | 0.127 | 0.131 |
+
+**THE INDEPENDENT CHECK NOBODY AIMED AT.** Cumulative land 1750–2024 goes **+29.4 →
+−53.6 GtC** against GCB 2025's **−57.4**, and the ocean **+169.1 → +202.2** against
+**+209.8**. The fix was derived from the pulse argument and the budget's own column layout;
+that it lands the *partition* on GCB is a result, not a target.
+
+**WHY ~50 % AND NOT 100 %, tested rather than argued.** The debit lands on wood (37 yr)
+while the equilibrium reduction is pro rata, 70 % of it in a 500-yr passive soil. Predicted
+consequence: shorten that pool and the ratio should go to 1. **At `tau_soil_slow = 20` it
+is 1.02 at 100 yr and 1.01 at 150 and 264.** Confirmed. Closing the remainder means
+debiting the pools **pro rata**, which trades against the 2026-08-12 call that the emitted
+carbon carries wood's lagged ¹⁴C — **an open decision for Marcus, recorded, not taken.**
+
+**TWO SUITE FAILURES WERE NEVER A STALE FIXTURE.** `test-likelihood.R:114/117` ("a CO₂
+level bias is expensive") were written off as an AR(1)-era leftover in handoffs 12d, 13,
+13b, 13c and 13e. They now pass, and the link is **causal, not coincidental**: at
+`f_luc_perm = 0` the test's own quantity is `cost(+1 ppm) = −183.1` — adding a positive
+bias *improved* the fit, because the model was systematically low — and at `f_luc_perm = 1`
+it is **+534.5**. The suite had been reporting this bug since the day it landed and the
+report was relabelled five times. *A failing test you have explained away is still data.*
+
+**WHAT THIS COSTS.** At the default β = 0.38 the model now runs **+17.5 ppm high at 2024**,
+because that default was centred against the bug. The CO₂ record's preferred β on a 1-D
+scan moves **0.30 → 0.50**. And δ¹³C moves the **wrong** way: the 1900→2020 Suess decline
+goes −2.209 → −2.366 ‰, **7.1 % faster**, against a model already ~25 % too fast. Both
+arms keep LUC as a wood transfer, so unlike 13f §3's proxy this comparison is isotopically
+clean. **The 13b/13c ocean conclusions must be re-measured on the fixed model.**
+
+**Three things the change caught on its way in, all real:**
+
+1. **`quiet_forcing()` in `test-conveyor.R` zeroed the LUC *flux* and not the LUC *stock*,**
+   which asks the model to relax a pristine spinup toward a smaller land — a genuine drift
+   the conveyor tests would have read as a conveyor failure. Zeroing only the flux is not
+   "quiet".
+2. **The `emissions` mechanism switch had the same hole**, and it is worse there because it
+   is user-facing: "what if we had never emitted" would have left the land relaxing toward
+   an equilibrium shrunk by ~290 GtC of clearing the counterfactual never did. Fixed in
+   `R/mechanisms.R`; `test-mechanisms.R:54` was the gate that caught it.
+3. **A window that starts mid-record no longer begins at a fixed point.** `ccx_spinup()`
+   supplies preindustrial land; a run starting in 1900 hands it a land already shrunk by
+   88 GtC of clearing. `ccx_build_forcing()` now **warns** (`FORC_LUC_PRE_WARN`). Honest
+   rather than silent — but it means windowed drivers carry a start-up transient, and the
+   48 warnings in a suite run are all real ones.
+
+**Layout contracts touched, both stated on both sides:** `CCX_FORCING_COLS` gains
+`cum_luc_NH`/`cum_luc_SH` **appended** (10 → 12, `N_FORCING` in `src/ccx_core.cpp`), and
+`CCX_LUC_CLEARED_MAX` is duplicated as `LUC_CLEARED_MAX` in the C++ because the two
+implementations are independent by design — *nothing catches a disagreement in that one,
+so if one moves the other must move in the same commit.* The parity fixtures now carry a
+**non-zero** `cum_luc`, because at zero the new term collapses to `(1 − 0)` and the gate
+would be inert — cf. "mutation-test your gates".
+
+**`ccx_spinup()` is untouched and every pre-2026-08-13 spinup result is bit-identical:**
+the spinup's zero forcing has no LUC flux, so `ccx_forcing_cum_luc()` returns zero and the
+cleared fraction is zero. A forcing that carries LUC emissions and *no* `cum_luc` is an
+**error**, not a zero-default — defaulting it would restore the bug through a code path
+nobody chose.

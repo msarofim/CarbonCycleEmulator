@@ -113,6 +113,7 @@ test_that("R and C++ agree with overturning on", {
   F <- ccx_build_forcing("historical", c(1960, 1961), prod_c14 = s$prod_c14)
   frc <- list(e_foss = list(NH = F$e_foss_NH[1], SH = F$e_foss_SH[1]),
               e_luc  = list(NH = F$e_luc_NH[1],  SH = F$e_luc_SH[1]),
+                cum_luc = list(NH = F$cum_luc_NH[1], SH = F$cum_luc_SH[1]),
               gmst = F$gmst[1], enso = F$enso[1], c14_bomb = F$c14_bomb[1],
               c14_nuclear = F$c14_nuclear[1], c14_cosmo = F$c14_cosmo[1],
               d13c_foss = F$d13c_foss[1])

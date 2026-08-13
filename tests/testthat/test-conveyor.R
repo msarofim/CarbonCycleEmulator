@@ -64,6 +64,12 @@ conv_p <- function(q = 0, cfg = CONFIGS$C, reverse = 0L) {
 quiet_forcing <- function(s, years = CONV_YRS) {
   F <- ccx_build_forcing("historical", years, prod_c14 = 0, bomb_total_kmol = 0)
   F$e_foss_NH <- 0; F$e_foss_SH <- 0; F$e_luc_NH <- 0; F$e_luc_SH <- 0
+  # THE CUMULATIVE TOO, and this is not bookkeeping. cum_luc shrinks the land's
+  # equilibrium (the converted-land term, 2026-08-13), so a forcing with zero
+  # LUC FLUX and a non-zero LUC STOCK asks the model to relax a pristine spinup
+  # state toward a smaller land -- a real drift, which this helper's callers
+  # would read as a conveyor failure. Zeroing only the flux is not "quiet".
+  F$cum_luc_NH <- 0; F$cum_luc_SH <- 0
   F$gmst <- 0; F$enso <- 0; F$c14_bomb <- 0; F$c14_nuclear <- 0
   F$c14_cosmo <- s$prod_c14
   F
@@ -169,6 +175,7 @@ test_that("R and C++ agree with the conveyor on, in every config", {
     F <- ccx_build_forcing("historical", c(1960, 1961), prod_c14 = s$prod_c14)
     frc <- list(e_foss = list(NH = F$e_foss_NH[1], SH = F$e_foss_SH[1]),
                 e_luc  = list(NH = F$e_luc_NH[1],  SH = F$e_luc_SH[1]),
+                cum_luc = list(NH = F$cum_luc_NH[1], SH = F$cum_luc_SH[1]),
                 gmst = F$gmst[1], enso = F$enso[1], c14_bomb = F$c14_bomb[1],
                 c14_nuclear = F$c14_nuclear[1], c14_cosmo = F$c14_cosmo[1],
                 d13c_foss = F$d13c_foss[1])

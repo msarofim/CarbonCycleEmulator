@@ -24,6 +24,14 @@ FORC_NUC_NH_SHARE  <- 0.95   # nuclear-industry 14C: the 22 reporting countries
 FORC_BOMB_NH_SHARE <- 0.90   # atmospheric weapons tests were overwhelmingly NH.
 FORC_GMST_PRE1850  <- 0      # IGCC starts 1850; earlier GMST anomaly set to 0
                              # (the model's own baseline is the 1750 spinup).
+FORC_LUC_PRE_WARN  <- 5      # GtC of pre-window land-use carbon above which a
+                             # windowed run is warned that ccx_spinup()'s
+                             # preindustrial land is no longer its fixed point.
+FORC_LAND0_NOMINAL <- 2130   # GtC, total preindustrial land carbon at the
+                             # default parameters (diag_land_topology.R [3]).
+                             # PRESENTATIONAL -- used only to express the
+                             # warning above as a percentage. aux$land0 is the
+                             # value the model actually integrates.
 FORC_ENSO_PRE1948  <- 0      # Nino 3.4 starts 1948; no ENSO term before that.
                              # A DISCONTINUITY IN CONSTRAINT, not in physics:
                              # pre-1948 residuals lack an ENSO explanation.
@@ -226,6 +234,45 @@ ccx_build_forcing <- function(scenario = "historical",
   foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs)
   luc  <- ccx_annual_to_monthly(e$year, e$luc_GtC,    yrs)
 
+  # ---- CUMULATIVE land-use carbon (2026-08-13) -----------------------
+  # Drives the converted-land term in ccx_deriv(): the land's equilibrium
+  # carbon falls with the carbon land-use change has taken. See
+  # calibration/diag_1900_deficit.R for why it exists.
+  #
+  # ACCUMULATED FROM THE START OF THE EMISSIONS RECORD, NOT FROM THE START OF
+  # THE REQUESTED WINDOW. A run that begins in 1900 is a run on land that two
+  # centuries of clearing have already shrunk; restarting the integral at the
+  # window would hand it a pristine biosphere and quietly make every short-window
+  # run a different model from the long one. The pre-window part is integrated
+  # off the ANNUAL series directly, so it does not depend on the monthly grid.
+  #
+  # A caller-supplied `emissions` table that itself starts at the window start
+  # cannot express pre-window clearing, and nothing here can invent it -- that
+  # is a property of the input, and the idealised-pulse diagnostics rely on it
+  # (they supply a zero-emission record and get a cleared fraction of zero).
+  e_pre    <- e$year < min(yrs)
+  luc_pre  <- if (any(e_pre)) sum(e$luc_GtC[e_pre], na.rm = TRUE) else 0
+  cum_luc  <- luc_pre + cumsum(luc) / 12          # GtC/yr on a monthly grid
+
+  # A WINDOW THAT STARTS MID-RECORD NO LONGER BEGINS AT A FIXED POINT, and it is
+  # worth saying out loud. ccx_spinup() returns PREINDUSTRIAL land stocks with a
+  # cleared fraction of zero; a run starting in 1900 hands those stocks a land
+  # whose equilibrium has already shrunk by a century and a half of clearing, so
+  # the land relaxes toward the smaller equilibrium and the run carries a
+  # transient that is not in the emissions. That is honest -- the model is
+  # saying you cannot start it mid-history from a pristine biosphere -- but
+  # before 2026-08-13 it did not arise at all, so a caller reusing an old
+  # windowed driver deserves to be told rather than to find a drift.
+  if (luc_pre > FORC_LUC_PRE_WARN)
+    warning(sprintf(paste0("window starts at %d with %.1f GtC of land-use carbon ",
+                           "already emitted, so the land's equilibrium is %.1f %% ",
+                           "below preindustrial at the first step while ccx_spinup() ",
+                           "supplies preindustrial stocks. Expect a start-up ",
+                           "transient. Start at the beginning of the emissions ",
+                           "record, or spin up against the cleared land yourself."),
+                    min(yrs), luc_pre, 100 * luc_pre / FORC_LAND0_NOMINAL),
+            call. = FALSE)
+
   # ---- d13C of the fossil source, TIME-VARYING (2026-08-12) ----------
   # Built in data-raw/build_calibration_data.R [5b] from GCB's own by-fuel
   # split: -24.0 permil in 1850 (essentially pure coal) to -28.3 by 2024 as gas
@@ -299,6 +346,8 @@ ccx_build_forcing <- function(scenario = "historical",
     e_foss_SH = foss * (1 - FORC_FOSS_NH_SHARE),
     e_luc_NH  = luc  * FORC_LUC_NH_SHARE,
     e_luc_SH  = luc  * (1 - FORC_LUC_NH_SHARE),
+    cum_luc_NH = cum_luc * FORC_LUC_NH_SHARE,
+    cum_luc_SH = cum_luc * (1 - FORC_LUC_NH_SHARE),
     gmst = gm, enso = enso, d13c_foss = d13c_foss,
     c14_bomb = c14_bomb, c14_nuclear = c14_nuc,
     c14_cosmo = rep(prod_c14, n),
@@ -324,10 +373,30 @@ ccx_forcing_d13c_foss <- function(forc) {
   0
 }
 
+#' Resolve the cumulative land-use carbon of a forcing, including hand-built ones
+#'
+#' Same contract, and the same reason, as ccx_forcing_d13c_foss() above: the
+#' spinup's zero forcing and the conservation tests' closed system are assembled
+#' literally and carry no emissions, so there is genuinely nothing to accumulate.
+#'
+#' A forcing that DOES carry land-use emissions and no `cum_luc` is a different
+#' matter and errors. Defaulting it to zero there would silently restore the
+#' pre-2026-08-13 model -- land-use carbon with an airborne fraction of 0.002 at
+#' 100 years -- through a code path nobody chose, which is precisely the failure
+#' this project keeps finding.
+ccx_forcing_cum_luc <- function(forc) {
+  if (!is.null(forc$cum_luc)) return(forc$cum_luc)
+  if (any(unlist(forc$e_luc) != 0))
+    stop("forcing carries land-use emissions but no `cum_luc`; ",
+         "build it with ccx_build_forcing()")
+  list(NH = 0, SH = 0)
+}
+
 #' Extract one month's forcing in the shape ccx_deriv() expects
 ccx_forcing_at <- function(F, i) {
   list(e_foss = list(NH = F$e_foss_NH[i], SH = F$e_foss_SH[i]),
        e_luc  = list(NH = F$e_luc_NH[i],  SH = F$e_luc_SH[i]),
+       cum_luc = list(NH = F$cum_luc_NH[i], SH = F$cum_luc_SH[i]),
        gmst = F$gmst[i], enso = F$enso[i], d13c_foss = F$d13c_foss[i],
        c14_bomb = F$c14_bomb[i], c14_nuclear = F$c14_nuclear[i],
        c14_cosmo = F$c14_cosmo[i])

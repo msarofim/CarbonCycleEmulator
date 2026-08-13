@@ -79,6 +79,22 @@ ccx_conveyor_geom <- function(p, grid) {
 #' presentational one.
 CCX_LAND_POOLS <- c("leaf", "wood", "soil_fast", "soil_slow")
 
+#' Land-use permanence: the default, and the ceiling on how much land the model
+#' will let cumulative land-use change clear.
+#'
+#' 1 = the land's equilibrium carbon falls by exactly the carbon that land-use
+#' change removed. Stated as a named constant because BOTH ccx_default_params()
+#' and ccx_cpp_par()'s fallback must use it -- if they disagreed, a hand-built
+#' parameter list would silently run a different model through the C++ core than
+#' through the R one, which is exactly the divergence gamma_enso produced.
+#'
+#' The ceiling is a numerical guard, not physics: at f_luc_perm = 1 the shipped
+#' historical forcing reaches a cleared fraction of ~0.14 by 2024, nowhere near
+#' it. It exists so a runaway scenario or a sampled f_luc_perm cannot drive the
+#' land's productive capacity to zero or negative inside an RK4 substep.
+CCX_F_LUC_PERM_DEFAULT <- 1
+CCX_LUC_CLEARED_MAX    <- 0.9
+
 #' Names of the 32 boxes, in state order
 ccx_box_names <- function(nl = N_INTERIOR) {
   unlist(lapply(HEMIS, function(h)
@@ -155,6 +171,14 @@ ccx_default_params <- function() {
                           # equilibrating part of GPP. 0 = no gross loop, which
                           # reproduces the pre-2026-08-12 model exactly. Affects
                           # isotopes only; the net carbon flux is NPP regardless.
+    # LAND-USE PERMANENCE, added 2026-08-13. See the "converted land" block in
+    # ccx_deriv() for the mechanism. 1 = the land's equilibrium carbon falls by
+    # EXACTLY the carbon land-use change removed, i.e. the debit is permanent;
+    # 0 reproduces the 2026-08-12--13 model, in which land-use emissions had an
+    # airborne fraction of 0.002 at 100 years (calibration/diag_1900_deficit.R).
+    # It is NOT a fudge factor with a convenient value: 1 is the mass-consistent
+    # point, and it is the default for that reason rather than by fit.
+    f_luc_perm = CCX_F_LUC_PERM_DEFAULT,
     k_w       = 1500,     # m/yr, gas transfer velocity
     h_ml      = 75,       # m, mixed-layer depth
     # OVERTURNING, m/yr. 0 = the pure-diffusion ocean, reproduced EXACTLY (no
@@ -407,9 +431,43 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # invisible to the feedback; keying it on leaf alone would make LUC -- which
     # debits wood -- cost no capacity at all, which is the thing the term exists
     # to prevent.
+    # CONVERTED LAND. `npp_veg_frac` above makes clearing cost capacity only
+    # while the vegetation stock is DOWN -- and the stock comes back, because
+    # the pools relax to a fixed point that does not know a forest became a
+    # field. Measured: land-use emissions had an airborne fraction of 0.002 at
+    # 100 years, against 0.262 for a fossil emission on the same background
+    # (calibration/diag_1900_deficit.R, 2026-08-13). The land took back every
+    # tonne deforestation released, which is the regrowth GCB's NET E_LUC has
+    # already subtracted, applied a second time.
+    #
+    # So the FIXED POINT itself has to move. Cumulative land-use carbon defines
+    # a cleared fraction, and npp0 -- which sets every land pool's equilibrium
+    # -- is scaled by what is left. `veg0` is scaled with it so the capacity
+    # term keeps measuring the remaining vegetation against the equilibrium of
+    # the remaining LAND, not against a forest that no longer exists; without
+    # that, capacity would read the debited stock as a deficit and drive NPP up
+    # exactly when the land has less of it.
+    #
+    # WHY THE DENOMINATOR IS `land0` AND NOT `veg0`: see the aux note. It is
+    # what makes the debit permanent in TOTAL rather than by a quarter.
+    #
+    # WHAT THIS DOES *NOT* CLAIM. The debit still comes out of wood alone
+    # (Marcus 2026-08-12: deforestation removes standing woody biomass, and the
+    # emitted carbon should carry that pool's lagged 14C), while the
+    # equilibrium falls across all four pools pro rata. So wood is left BELOW
+    # its new equilibrium and the soils ABOVE theirs, and the internal
+    # redistribution that follows is a real deforestation legacy -- fast
+    # regrowth against slow passive-soil drainage -- not an artefact. It nets
+    # to zero in total carbon by construction; its TIMING is a model claim and
+    # is what test-luc-permanence.R measures rather than assumes.
+    cleared <- min(p$f_luc_perm * ccx_forcing_cum_luc(forc)[[h]] / aux$land0[[h]],
+                   CCX_LUC_CLEARED_MAX)
+    npp0_h  <- aux$npp0[[h]] * (1 - cleared)
+    veg0_h  <- aux$veg0[[h]] * (1 - cleared)
+
     veg_C <- y[ilef, "C"] + y[iwod, "C"]
-    capacity <- (1 - p$npp_veg_frac) + p$npp_veg_frac * veg_C / aux$veg0[[h]]
-    npp <- aux$npp0[[h]] * capacity * (1 + p$beta * log(max(chi, 1e-6) / aux$chi0))
+    capacity <- (1 - p$npp_veg_frac) + p$npp_veg_frac * veg_C / veg0_h
+    npp <- npp0_h * capacity * (1 + p$beta * log(max(chi, 1e-6) / aux$chi0))
 
     # GROSS PHOTOSYNTHESIS AND AUTOTROPHIC RESPIRATION. `ra_ratio` is Ra/NPP, so
     # GPP = NPP * (1 + ra_ratio) down and Ra = NPP * ra_ratio back up. The NET
@@ -471,6 +529,10 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # senescence, which is what that pool is.
     amp   <- if (h == "NH") p$seas_amp_NH else p$seas_amp_SH
     phase <- if (h == "NH") p$seas_phase_NH else p$seas_phase_SH
+    # DENOMINATOR IS THE UNCLEARED npp0, deliberately. The seasonal amplitude
+    # tracks how much the land is fixing, so clearing land must SHRINK it;
+    # dividing by the cleared npp0_h would hold the ratio near 1 and keep a
+    # forest's seasonal cycle on a field.
     seas  <- amp * sin(2 * pi * (t - phase / 12)) * (npp / aux$npp0[[h]])
     add_flux(iatm, ilef, seas, alpha13 = aux$alpha_photo, lab = "seas")
 
@@ -739,6 +801,21 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     veg0        = lapply(npp0, function(n)
                     n * (p$npp_leaf_frac * p$tau_leaf +
                          (1 - p$npp_leaf_frac) * p$tau_wood)),
+    # TOTAL preindustrial land carbon -- all FOUR pools, not just vegetation.
+    # This is the denominator of the cleared fraction (see the "converted land"
+    # block in ccx_deriv()), and it has to be the total for the debit to come
+    # out permanent: scaling npp0 by (1 - c) scales EVERY land pool's
+    # equilibrium by (1 - c), so the land's equilibrium carbon falls by
+    # c * land0. Setting c = cumLUC / land0 makes that fall equal the carbon
+    # land-use change actually removed. Using veg0 here instead would shrink the
+    # equilibrium by only a quarter of what was taken and the land would
+    # re-absorb the rest.
+    # Must match ccx_spinup()'s land fixed point exactly, same as veg0.
+    land0       = lapply(npp0, function(n)
+                    n * (p$npp_leaf_frac * p$tau_leaf +
+                         (1 - p$npp_leaf_frac) * p$tau_wood +
+                         (1 - p$litter_slow_frac) * p$tau_soil_fast +
+                         p$litter_slow_frac * p$tau_soil_slow)),
     sst         = list(NH = p$sst_NH, SH = p$sst_SH),
     ml_mass_kg  = lapply(a_oc, function(A) A * grid$h_ml * ccx_const("RHO_SEAWATER")),
     # air-sea prefactor: A [m2] * K0 [mol/(kg atm)] * rho [kg/m3] -> GtC/(yr uatm)

@@ -105,7 +105,28 @@ d M_atm[h]/dt =
   source), split between hemispheres by fixed tropical-land share [VERIFY]. γ_MEI, L_MEI
   [CAL]. Pinatubo 1992–93 is a *documented residual* in v1 (§10).
 - **Land-use change:** prescribed GCB bookkeeping flux E_LUC(t) added to the atmosphere and
-  decremented from C_veg (carries biospheric isotopic signature).
+  decremented from C_wood (carries that pool's own isotopic signature — a transfer, not a
+  source, so no ¹⁴C is created; Marcus 2026-08-12).
+- **Converted land — the debit is PERMANENT (added 2026-08-13).** Cumulative land-use
+  carbon defines a cleared fraction `c(t) = f_luc_perm · cumLUC(t) / land0`, where `land0`
+  is *total* preindustrial land carbon (all four pools). NPP₀ and veg₀ are both scaled by
+  `(1 − c)`, so every land pool's equilibrium falls and the land's equilibrium carbon drops
+  by exactly the carbon land-use change removed.
+  **Why the spec needs this:** without it the debited pool relaxes back to a fixed point
+  that does not know a forest became a field, and **land-use emissions had an airborne
+  fraction of 0.002 at 100 years** against 0.262 for a fossil emission — the model regrew
+  what GCB's *net* E_LUC has already subtracted, adding a second, unbudgeted land sink on
+  top of the β-fertilization one that stands for S_LAND. Measured in
+  `calibration/diag_1900_deficit.R`; gated by `tests/testthat/test-luc-permanence.R`.
+  `f_luc_perm = 1` (the mass-consistent point) is the default and is **not** in
+  `CCX_PARAM_TABLE`; `f_luc_perm = 0` reproduces the 2026-08-12–13 behaviour and exists so
+  the regression stays measurable.
+  **Known residual, measured not assumed:** the debit lands on wood (37 yr) while the
+  equilibrium reduction is pro rata across pools, 70 % of it in a 500-yr passive soil. So
+  the LUC airborne fraction is ~0.5× the fossil one at 100 yr, rising afterwards, and is
+  exactly 1× in the infinite-time limit (verified at `tau_soil_slow = 20`). Closing the
+  remainder means debiting the pools *pro rata*, which trades against the 2026-08-12 call
+  that the emitted carbon carries wood's lagged ¹⁴C — **an open decision, not a defect.**
 
 ### 3.4 Ocean (per hemisphere column)
 

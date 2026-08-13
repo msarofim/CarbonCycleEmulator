@@ -22,7 +22,10 @@ pf <- local({
 test_that("single derivative agrees to roundoff", {
   skip_if_no_cpp()
   sp <- ccx_spinup(pf$p)
+  # cum_luc is deliberately NON-ZERO: at zero the converted-land term collapses
+  # to (1 - 0) and a porting error in it would be invisible to this gate.
   forc <- list(e_foss = list(NH = 8, SH = 0.4), e_luc = list(NH = 0.6, SH = 0.5),
+               cum_luc = list(NH = 120, SH = 80),
                gmst = 1.1, enso = 0.7, c14_bomb = 1200, c14_nuclear = 40,
                c14_cosmo = sp$prod_c14, d13c_foss = -27.6)
   dR <- ccx_deriv(sp$y, 1980.5, pf$p, forc, sp$grid, sp$aux)
@@ -63,7 +66,10 @@ test_that("parity holds with the frozen-Revelle switch engaged", {
   # porting error on the frozen branch would be invisible to them.
   p <- pf$p; p$revelle_frozen <- 1
   sp <- ccx_spinup(p)
+  # cum_luc is deliberately NON-ZERO: at zero the converted-land term collapses
+  # to (1 - 0) and a porting error in it would be invisible to this gate.
   forc <- list(e_foss = list(NH = 8, SH = 0.4), e_luc = list(NH = 0.6, SH = 0.5),
+               cum_luc = list(NH = 120, SH = 80),
                gmst = 1.1, enso = 0.7, c14_bomb = 1200, c14_nuclear = 40,
                c14_cosmo = sp$prod_c14, d13c_foss = -27.6)
   dR <- ccx_deriv(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
