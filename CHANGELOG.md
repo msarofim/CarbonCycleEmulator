@@ -2456,3 +2456,43 @@ wording is Marcus' call.
 the *source*. Over 1750–2024 it gives **−134 ppm** (back to 285, essentially preindustrial)
 against the warming feedback's **−10 ppm**. That contrast is the whole of tab 6 and it is
 now pinned by a test.
+
+## 2026-08-13 (f) — Handoff, and the ocean's missing vertical structure
+
+`notes/handoff_2026-08-13e_marcus_directives.md`.
+
+**Measured while answering Marcus' question about a biological pump, and it is a finding in
+its own right:** at the preindustrial spinup the ocean's **DIC is exactly uniform at
+1986.3 µmol/kg and δ¹³C exactly uniform at +1.560 ‰ through all eleven layers**. Only Δ¹⁴C
+has a vertical gradient (−51 → −187 ‰), because that one is built by decay plus diffusion
+and needs no biology. **1986 µmol/kg is a realistic *surface* value applied to 3700 m of
+ocean.**
+
+Total ocean carbon 32,827 GtC; to reach the canonical ~38,000 the model would need a
+volume-weighted mean DIC of **2299 µmol/kg**. **So the ~14 % inventory deficit and the
+missing vertical DIC gradient are the same number, and that number is the soft-tissue
+pump.** *(The 2299 is the model's own arithmetic. Observed deep DIC/δ¹³C values quoted in
+the handoff are recollection — GLODAPv2 is the source to pull before any of it is scored.)*
+
+**New and previously unlisted: the model's deep ocean is ~1–1.5 ‰ too enriched in DIC
+δ¹³C** — in the tracer this project has spent a fortnight fighting, and nothing has ever
+scored it.
+
+**The structural consequence bounds what a pump could do here.** The interior carries **no
+carbonate chemistry** (`pco2_from_dic()` is called only for the mixed layer), and in steady
+state the mixed layer's DIC is **chemistry-pinned** by ALK, SST and the spinup's pCO₂
+target. So a pump cannot change surface DIC, cannot change the Revelle factor, and cannot
+change the IRF to first order — it changes the interior, and the interior reaches the
+atmosphere only through what ventilation brings back up. **A pump alone is mostly
+bookkeeping; a pump plus a return path is a mechanism.**
+
+**Why it is nonetheless the most interesting option on the table:** the observed
+surface-to-deep DIC and δ¹³C gradients are **currently exactly zero in the model and
+therefore entirely unused as constraints**. A pump turns both into observables, and because
+a pump's gradient is set by **export ÷ ventilation**, they constrain ventilation directly —
+which is what handoff 13c §5 says the refit needs and cannot get, **without requiring the
+deep-Δ¹⁴C target to be settled first.** Costs: +2 parameters on a model the panel just
+called correctly sized, and a pump injects surface-¹⁴C carbon into the deep non-locally,
+making it *younger* and working against the deep-age constraint — **magnitude unmeasured.**
+Pedagogically it passes the test the conveyor failed: one famous sentence, and it explains
+the 50× ocean:atmosphere stock ratio the app already displays.
