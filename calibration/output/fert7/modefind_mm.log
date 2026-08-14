@@ -1,2 +1,52 @@
 start: log-post at hand-set init = -3774.0
        18 parameters: beta_max, fert_k, q10, k_w, h_ml, kz, tau_ex, npp_frac_NH, seas_amp_NH, seas_amp_SH, seas_phase_NH, seas_phase_SH, gamma_enso, bomb_total, luc_scale, sigma_co2, sigma_d13c, sigma_d14c
+restart  1: log-post =      -2241.9  (gain  1532.1173)  evals 19775
+restart  2: log-post =      -2228.5  (gain    13.4369)  evals 37908
+restart  3: log-post =      -2227.5  (gain     0.9801)  evals 56965
+restart  4: log-post =      -2227.1  (gain     0.3796)  evals 67444
+restart  5: log-post =      -2226.4  (gain     0.7254)  evals 84663
+restart  6: log-post =      -2225.8  (gain     0.5883)  evals 104664
+restart  7: log-post =      -2225.8  (gain     0.0329)  evals 118571
+restart  8: log-post =      -2225.5  (gain     0.2327)  evals 134050
+restart  9: log-post =      -2225.4  (gain     0.1129)  evals 146393
+restart 10: log-post =      -2224.6  (gain     0.8015)  evals 166394
+restart 11: log-post =      -2223.7  (gain     0.9448)  evals 177919
+restart 12: log-post =      -2223.4  (gain     0.3034)  evals 193782
+restart 13: log-post =      -2223.3  (gain     0.0273)  evals 202777
+restart 14: log-post =      -2223.0  (gain     0.3527)  evals 211726
+restart 15: log-post =      -2222.7  (gain     0.3199)  evals 227171
+restart 16: log-post =      -2222.4  (gain     0.2196)  evals 239204
+restart 17: log-post =      -2222.4  (gain     0.0673)  evals 250749
+restart 18: log-post =      -2222.3  (gain     0.1154)  evals 265336
+restart 19: log-post =      -2222.2  (gain     0.0959)  evals 276003
+restart 20: log-post =      -2222.1  (gain     0.0882)  evals 290010
+BFGS polish: log-post = -2221.3 (gain 0.8156)
+
+prior-tail position of the mode (normal sds; |z| > 3 flagged):
+     beta_max        fert_k           q10           k_w          h_ml 
+        -0.96         -1.49          0.69          0.54          1.31 
+           kz        tau_ex   npp_frac_NH   seas_amp_NH   seas_amp_SH 
+         1.82         -1.48         -0.99          1.04          1.18 
+seas_phase_NH seas_phase_SH    gamma_enso    bomb_total     luc_scale 
+        -0.43          1.42         -0.63          2.50          0.46 
+    sigma_co2    sigma_d13c    sigma_d14c 
+        -2.56          1.86          0.32 
+no parameter beyond 3 prior sds
+integrator substeps needed at the mode: 4 (floor 4) -- kz = 6119
+hessian: central differences, 18 parameters
+Laplace covariance: PD, condition number 6.8e+05
+
+mode log-post = -2221.3  (gain over init 1552.8)
+elapsed 293.6 min, 291832 posterior evaluations (0.060 s/eval)
+
+mode, natural scale:
+     beta_max        fert_k           q10           k_w          h_ml 
+       0.5087      153.1047        2.0983     1648.1167      183.9524 
+           kz        tau_ex   npp_frac_NH   seas_amp_NH   seas_amp_SH 
+    6119.2467        0.8070        0.4639       19.6559        4.6447 
+seas_phase_NH seas_phase_SH    gamma_enso    bomb_total     luc_scale 
+       4.0045       11.0699        0.5552      113.9679        1.0049 
+    sigma_co2    sigma_d13c    sigma_d14c 
+       0.2234        0.3357        5.5379 
+
+wrote calibration/output/mode_fit.rds

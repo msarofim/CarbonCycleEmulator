@@ -3663,3 +3663,79 @@ point, not a posterior, and does **not** discharge item 8.
 `DESIGN.md` §6 **gate 7** now carries a measured status line (**still failing**: land +2.28σ,
 ocean −1.52σ, down from +4.57σ / −2.13σ) with the gross-vs-net trap named and a note that
 `luc_scale` does *not* close the remainder under the saturating form.
+
+## 2026-08-14 (cont.) — THE MAP MODE UNDER THE SATURATING FORM: gates 7 AND 12 both pass, for the first time
+
+`calibration/run_modefind.R`, 18 parameters, 293.6 min / 291,832 posterior evaluations at
+0.060 s each. **Log-post −3774.0 → −2221.3, a gain of 1552.8** — of which 1532 came in the
+first restart, since the hand-set start carried two brand-new parameters against an objective
+that had also gained the deep-Δ¹⁴C term and the corrected GCB land term. Hessian
+positive-definite, condition number 6.8e5. **No parameter beyond 3 prior sds.** Written to
+the canonical `calibration/output/mode_fit.rds`; the app now reports "posterior mode / single
+best fit" instead of uncalibrated defaults.
+
+### The headline: the review's two failing hard gates both pass
+
+| | review §0 (β 0.75) | MM default (`fert_k` 120) | **MAP mode** |
+|---|---|---|---|
+| **gate 7** land | **+4.57σ** | +2.28σ | **+1.54σ** (3.13 GtC/yr) |
+| **gate 7** ocean | −2.13σ | −1.52σ | **−0.35σ** (3.08) |
+| **gate 12** Joos IRF | **10.4/19.9/31.2 FAIL×3** | 12.4/25.6/41.9 | **12.6/26.0/43.0 INSIDE×3** |
+| Revelle lesson | **−0.113 REVERSED** | +0.566 | **+0.515 HOLDS** |
+
+**Gate 7 has never passed before.** DESIGN §6 opens "all must pass before headline claims";
+on this evidence the two that were blocking do.
+
+Paired sanity suite at the mode (per the `climate-modeling` discipline): **zero-pulse
+max|ΔCO₂| = exactly 0**; sign-flip +19.78 / −18.71 ppm at +100 yr (correctly asymmetric);
+halving ratio **0.4931** against 0.5 (correctly sublinear — larger pulses see a stiffer
+Revelle factor).
+
+### The fertilisation pair barely moved where it counts
+
+`beta_max` 0.4913 → **0.5087**, `fert_k` 120 → **153.1**. `fert_k` moved 28 % — past the ~150
+gate-12 cap measured on the *design-target locus* — **but the gate did not break, and the
+reason is the point of the whole form change.** `beta_max` moved with it, so the marginal
+slope at 388 ppm went 0.0662 → **0.0669**, essentially unchanged and still well under the
+0.077 ceiling. The fit slid *along* the decoupled direction the log form does not have. The
+apparent likelihood-vs-gate tension recorded at the flip was an artefact of scanning a
+one-parameter locus.
+
+### THREE THINGS THAT MUST NOT BE BURIED
+
+**1. `sigma_co2` collapses to its prior tail (0.223, z −2.56) — and the cause is not the AR(1)
+pathology.** The MLO residual RMS at the mode is **0.642 ppm**, so RMS/`sigma_co2` = 2.88,
+which reads like the collapse this repo has history with. It is not: the likelihood uses
+`sqrt(sigma_co2² + LIK_CO2_REP_ERR²)` and **`LIK_CO2_REP_ERR` is fixed at 1.0 ppm**, so the
+effective sd is 1.025 — *larger* than the residual it is explaining. **The model now fits the
+CO₂ record better than the assumed station-vs-hemispheric-box representation error**, leaving
+`sigma_co2` nothing to do. That 1.0 ppm constant is now the binding term in the objective's
+highest-leverage stream and needs re-deriving, not the free parameter. (δ¹³C is healthy by
+comparison: RMS 0.383 against `sigma_d13c` 0.336, ratio 1.14.)
+
+**2. Both ocean-uptake parameters are pressed against their bounds, and that points at the
+pump.** `kz` = **6119**, which is **96.6 %** of the way to its bracket's upper bound; `h_ml` =
+**184.0 m**, **90.6 %** of the way up a uniform [30, 200] prior and far deeper than any
+plausible global-mean mixed layer. The deep-Δ¹⁴C term is being overridden to get there — the
+bottom box lands at −157.8 ‰, **z +1.70** against its own target. So the ocean is being forced
+to absorb more carbon by whatever means the parameters allow, which is exactly the signature
+review §4.2's pre-registered pump test predicts. **The `kz` bracket Marcus retained this
+morning is now demonstrably load-bearing**: without it this mode would have run `kz` away
+again.
+
+**3. `luc_scale` = 1.0049 — it does not move.** The parameter added this morning to give
+E_LUC its own uncertainty sits *on* its prior median. Under the saturating form the fit does
+not want it, which confirms from the fit side what §5 of `diag_fert_saturating.R` measured
+by hand: **MM and `luc_scale` are redundant, and MM won.** The handoff's β 0.55 / `luc_scale`
+0.70 settlement is now doubly superseded. `luc_scale` should be kept (it costs nothing and it
+prices a real input uncertainty) but it should stop being described as the lever that closes
+the sink partition.
+
+### Still outstanding, and the mode sharpens one of them
+
+`seas_amp_NH` fits to **19.66** GtC/yr against a default of 12 — a 64 % move, in the stream
+where an 8 % shift is worth 101 log-units. Item **5c** (sourced monthly seasonality for both
+emission inputs) is confounded with this parameter and remains the blocker with teeth.
+**This is a MAP point, not a posterior**, and items 5, 5b and 5c would each invalidate one —
+so it does not discharge item 8. `bomb_total` fits to 113.97 (z +2.50), the highest-tail
+parameter in the vector, and is worth watching when a posterior does exist.
