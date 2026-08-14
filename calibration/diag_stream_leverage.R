@@ -16,8 +16,15 @@
 # difference of the LEVEL, so a stream sitting at its own optimum shows
 # small numbers by construction. Both signed halves are reported.
 #
-# The GCB land-sink term is scored BOTH as shipped and CORRECTED
-# (mod_ld + E_LUC), because the shipped one compares net to gross.
+# HISTORY, because the numbers in the 2026-08-14 review were taken from the
+# FIRST version of this file: it then scored the GCB land-sink term twice, "as
+# shipped" and "CORRECTED (mod_ld + E_LUC)", because the shipped term compared
+# the model's NET land flux to GCB's GROSS sink. That defect is now fixed in
+# ccx_loglik() itself, so the hand-rolled duplicate is gone and `gcb_land_sink`
+# below IS the corrected term. Its leverage also grew, because LIK_GCB_LAND_SD
+# was corrected 0.9 -> 0.5 at the same time to match GCB 2025's own stated
+# uncertainty. Review numbers quoted as "corrected" (7.3 log-units on beta) are
+# at the OLD sigma; expect ~1.8x that here.
 # =====================================================================
 
 
@@ -42,36 +49,13 @@ pl_run <- function(p) {
   ccx_run_fast(s, F)$out
 }
 
-# E_LUC, annual, to build the corrected gross land sink
-PL_ELUC <- local({
-  em <- as.data.frame(readRDS(ccx_path("data", "forcing_emissions_historical.rds")))
-  stats::setNames(em$luc_GtC, em$year)
-})
-
-# the corrected gcb_land_sink term, recomputed outside ccx_loglik
-pl_land_term <- function(out) {
-  yr  <- floor(out$t + 1e-9)
-  ann <- stats::aggregate(cbind(land_C) ~ yr, data = out, FUN = mean)
-  ann <- ann[order(ann$yr), ]
-  g   <- merge(as.data.frame(obs$gcb)[, c("year", "land_sink")], ann,
-               by.x = "year", by.y = "yr")
-  g   <- g[order(g$year), ]
-  net <- c(NA, diff(g$land_C))
-  el  <- PL_ELUC[as.character(g$year)]
-  k   <- !is.na(net) & !is.na(el)
-  sdv <- LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE
-  c(shipped   = sum(stats::dnorm(g$land_sink[k], net[k], sdv, log = TRUE)),
-    corrected = sum(stats::dnorm(g$land_sink[k], net[k] + el[k], sdv, log = TRUE)))
-}
-
 pl_score <- function(p) {
   out <- pl_run(p)
   err <- list(sigma_co2 = p$sigma_co2, sigma_d13c = p$sigma_d13c,
               sigma_d14c = p$sigma_d14c)
-  s <- ccx_loglik(out, obs, err, by_stream = TRUE)
-  lt <- pl_land_term(out)
-  s[["gcb_land_sink_CORRECTED"]] <- lt[["corrected"]]
-  s
+  # luc = NULL is correct here: this probe does not vary luc_scale, so the
+  # model's land-use flux IS GCB's column (verified bit-identical 1959-2024).
+  ccx_loglik(out, obs, err, by_stream = TRUE)
 }
 
 # ---- error-model defaults: the table's init, since ccx_default_params()
@@ -102,8 +86,7 @@ PL_PERT <- list(
 base <- pl_score(pd)
 cat("\n== base logL by stream, at ccx_default_params() ==\n")
 print(round(base, 1))
-cat(sprintf("\nTOTAL (as shipped, excl. the CORRECTED duplicate) = %.1f\n",
-            sum(base[names(base) != "gcb_land_sink_CORRECTED"])))
+cat(sprintf("\nTOTAL = %.1f\n", sum(base)))
 
 res <- list()
 for (nm in names(PL_PERT)) {

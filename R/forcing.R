@@ -184,12 +184,24 @@ ccx_bomb_c14_annual_SUPERSEDED <- function(total_kmol = 102, years = 1945:1980) 
 #'   hemispheric split, monthly interpolation, annual-total conservation -- is
 #'   applied identically to a custom path and to an SSP. `scenario` still names
 #'   the run for labelling and still selects the non-CO2 climate background.
+#' @param luc_scale multiplier on the land-use emission series (added 2026-08-14).
+#'   E_LUC is the least certain input in the table -- GCB 2025 states +/-0.7
+#'   GtC/yr on it (LIK_GCB_LUC_SD), and GCB's own 1850-2018 total is 34 % above
+#'   OSCAR v3.1's for the identical period (DATA.md sec.3a). Prescribing it exact
+#'   forced that uncertainty onto `beta`, which absorbed ~30 ppm of it. This is
+#'   the knob that lets it be a calibrated quantity instead; see
+#'   CCX_PARAM_TABLE$luc_scale for the prior and its receipts.
+#'   Applied to the ANNUAL series before interpolation, so the monthly flux, the
+#'   in-window cumulative AND the pre-window `luc_pre` all scale together --
+#'   which is what makes the equivalent post-hoc column rescale used inside
+#'   ccx_make_logpost() exact (gated by test-luc-scale.R).
 #' @return data.frame, one row per month, with everything ccx_deriv() needs
 ccx_build_forcing <- function(scenario = "historical",
                               years = c(1750, 2024),
                               prod_c14 = NA_real_,
                               bomb_total_kmol = 102,
-                              emissions = NULL) {
+                              emissions = NULL,
+                              luc_scale = 1) {
 
   yrs <- seq(years[1], years[2])
   n   <- length(yrs) * 12
@@ -231,6 +243,15 @@ ccx_build_forcing <- function(scenario = "historical",
                       nm, length(gap), min(yrs), max(yrs), min(gap), max(gap)),
               call. = FALSE)
   }
+  # LAND-USE UNCERTAINTY, applied on the ANNUAL series (see @param luc_scale).
+  # Deliberately here and not on the monthly columns: `luc_pre` below integrates
+  # the annual series OUTSIDE the window, so scaling later would leave the
+  # pre-window cumulative unscaled and the converted-land term would see a
+  # cleared fraction inconsistent with the flux -- a silent partial application.
+  if (!is.finite(luc_scale) || luc_scale < 0)
+    stop("luc_scale must be a finite non-negative multiplier; got ", luc_scale)
+  if (luc_scale != 1) e$luc_GtC <- e$luc_GtC * luc_scale
+
   foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs)
   luc  <- ccx_annual_to_monthly(e$year, e$luc_GtC,    yrs)
 
@@ -340,7 +361,7 @@ ccx_build_forcing <- function(scenario = "historical",
   m <- match(key, bomb$year * 12L + bomb$month)
   c14_bomb[!is.na(m)] <- bomb$mol_per_yr[m[!is.na(m)]]
 
-  data.frame(
+  out <- data.frame(
     t = t, year = rep(yrs, each = 12), month = rep(seq_len(12), length(yrs)),
     e_foss_NH = foss * FORC_FOSS_NH_SHARE,
     e_foss_SH = foss * (1 - FORC_FOSS_NH_SHARE),
@@ -353,6 +374,24 @@ ccx_build_forcing <- function(scenario = "historical",
     c14_cosmo = rep(prod_c14, n),
     stringsAsFactors = FALSE
   )
+  # Stamped so a forcing carries its own provenance: the sink terms in
+  # ccx_loglik() need the MODEL's land-use flux, not GCB's, and a run whose LUC
+  # was scaled must not be scored against an unscaled one. Project convention --
+  # emit the basis, do not make the caller remember it.
+  attr(out, "luc_scale") <- luc_scale
+  out
+}
+
+#' The model's own annual land-use emission, as ccx_loglik() wants it
+#'
+#' The gross-sink reconstruction needs E_LUC as the MODEL burned it, which is
+#' `luc_scale` times GCB's. Derived from the forcing rather than re-read from
+#' GCB, so a scaled run cannot be scored against an unscaled flux.
+#' @param forc a forcing from ccx_build_forcing() (or one column-rescaled from it)
+#' @return data.frame(year, eluc) in GtC/yr
+ccx_forcing_eluc_annual <- function(forc) {
+  tot <- forc$e_luc_NH + forc$e_luc_SH
+  stats::aggregate(list(eluc = tot), by = list(year = forc$year), FUN = mean)
 }
 
 #' Resolve the fossil-source d13C of a forcing, including hand-built ones

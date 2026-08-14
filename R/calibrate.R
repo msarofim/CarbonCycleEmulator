@@ -88,6 +88,39 @@ CCX_PARAM_TABLE <- list(
   # dependence remains -- see DATA.md 8.
   bomb_total  = list(tr = "log",   init = 102,
                      prior = function(x) dlnorm(x, log(102), 0.10, log = TRUE)),
+  # ---- INPUT UNCERTAINTY: the land-use emission scale (2026-08-14) ----
+  # WHY IT EXISTS. E_LUC was prescribed EXACT while being the least certain
+  # input in the forcing table, so its uncertainty had nowhere to go except into
+  # `beta`. Measured (calibration/diag_luc_scale.R): the model's largest
+  # structural misfit -- ~30 ppm of CO2 level against GCB's sink partition --
+  # is SMALLER THAN E_LUC'S OWN STATED UNCERTAINTY, and closing it with beta
+  # instead costs DESIGN sec.6 gate 7 (sinks, +2.5 / -2.1 sigma) and gate 12
+  # (Joos IRF, failing at all three horizons). A parameter with an honest prior
+  # is the anti-overfit move here: it stops physics absorbing an input error.
+  #
+  # THE PRIOR, and it has two INDEPENDENT receipts that agree:
+  #  (1) OSCAR v3.1's own cumulative uncertainty, 206 +/- 57 PgC for 1750-2018
+  #      (Gasser et al. 2020, Biogeosciences 17:4075, doi:10.5194/bg-17-4075-2020,
+  #      DATA.md sec.3a) -> 57/206 = 27.7 % fractional 1 sigma.
+  #  (2) the GCB-vs-OSCAR product spread over the IDENTICAL 1850-2018 window,
+  #      239.8 vs 178.9 GtC (DATA.md sec.3a) -> ratio 0.746, |ln| = 0.293.
+  # Both land on ~0.28, from different arguments -- one a stated uncertainty,
+  # one an observed disagreement between products. sdlog = 0.28 therefore puts
+  # OSCAR's central estimate at ~1 sigma below GCB's, which is the honest
+  # statement of what is known.
+  #
+  # CENTRED AT 1, i.e. on GCB, because GCB is the standing convention for this
+  # repo's emissions and a prior centred anywhere else would be a silent
+  # re-basing. GCB's ANNUAL +/-0.7 GtC/yr (LIK_GCB_LUC_SD) against a 2015-2024
+  # mean of 1.372 is 51 % -- deliberately NOT used as the width: that is the
+  # uncertainty of a single year's flux, only partly correlated across years, so
+  # it is an upper bound on the cumulative fraction rather than an estimate of it.
+  #
+  # NOT a free-for-all: it scales one sourced series, it cannot change its SHAPE,
+  # and the pre-1850 / post-1850 segments (different provenance, DATA.md sec.3a)
+  # move together. Splitting them is a later question, flagged not taken.
+  luc_scale   = list(tr = "log",   init = 1.0,
+                     prior = function(x) dlnorm(x, log(1.0), 0.28, log = TRUE)),
   # ---- error model ---------------------------------------------------
   # These are MODEL-STRUCTURAL error at ANNUAL scale, added in quadrature to the
   # fixed representation terms in likelihood.R. They cannot collapse the way
@@ -154,6 +187,14 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
   BOMB_REF <- 102
   base_forcing <- ccx_build_forcing("historical", years, prod_c14 = 0,
                                     bomb_total_kmol = BOMB_REF)
+  # Land-use is rescaled per draw as a COLUMN multiply rather than by rebuilding
+  # the forcing, which would cost more than the model run. Exact, because
+  # ccx_build_forcing() applies luc_scale to the annual series and every
+  # downstream LUC quantity -- monthly flux, in-window cumulative, and the
+  # pre-window `luc_pre` folded into it -- is linear in that series.
+  # test-luc-scale.R gates the two paths against each other so they cannot drift.
+  LUC_COLS  <- c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH")
+  ELUC_BASE <- ccx_forcing_eluc_annual(base_forcing)
 
   function(u) {
     names(u) <- CCX_PARAM_NAMES
@@ -176,6 +217,10 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     F <- base_forcing
     F$c14_cosmo <- sp$prod_c14
     F$c14_bomb  <- base_forcing$c14_bomb * (pv$bomb_total / BOMB_REF)
+    for (cc in LUC_COLS) F[[cc]] <- base_forcing[[cc]] * pv$luc_scale
+    attr(F, "luc_scale") <- pv$luc_scale
+    eluc <- ELUC_BASE
+    eluc$eluc <- eluc$eluc * pv$luc_scale
     # ccx_run_fast() defaults to substeps = "auto" and escalates on NA, so this
     # -Inf now means the MODEL failed, not that the integrator hit its explicit-
     # diffusion stability limit. Until 2026-08-11 it meant the latter, and the
@@ -187,7 +232,10 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
 
     err <- list(sigma_co2 = pv$sigma_co2,
                 sigma_d13c = pv$sigma_d13c, sigma_d14c = pv$sigma_d14c)
-    ll <- ccx_loglik(r$out, obs, err)
+    # `luc` is the MODEL's own land-use flux, so the gross-sink reconstruction
+    # in the gcb_land_sink term follows luc_scale instead of silently reverting
+    # to GCB's unscaled column.
+    ll <- ccx_loglik(r$out, obs, err, luc = eluc)
     if (verbose) cat(sprintf("  ll %.1f  prior %.1f\n", ll, lp))
     if (!is.finite(ll)) return(-Inf)
     lp + ll

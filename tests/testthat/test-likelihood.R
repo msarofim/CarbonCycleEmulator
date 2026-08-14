@@ -160,9 +160,24 @@ test_that("the seasonal statistic constrains amplitude and phase", {
 test_that("rho is gone and the parameter vector is self-consistent", {
   expect_false("rho" %in% CCX_PARAM_NAMES)
   # 17 -> 16 on 2026-08-12 (Marcus): the land layout is STRUCTURE, not calibrated.
-  # A bare count only records the change; these two assertions GUARD the decisions,
-  # because both were made after a mode fit walked straight through them.
-  expect_length(CCX_PARAM_NAMES, 16L)
+  # 16 -> 17 on 2026-08-14: `luc_scale`, the land-use INPUT-uncertainty parameter.
+  # A bare count only records the change; the assertions below GUARD the decisions,
+  # because all three were made after a mode fit walked straight through them.
+  #
+  # This assertion did its job -- it is the tripwire that flagged the 17th
+  # parameter, and the addition is recorded here rather than the count being
+  # quietly bumped. `luc_scale` is the OPPOSITE of the freeing that decision 1
+  # forbids: it gives a prescribed INPUT its own stated uncertainty (GCB 2025's
+  # +/-0.7 GtC/yr; OSCAR's 206 +/- 57 PgC) so that uncertainty stops being
+  # absorbed by `beta`, which was paying ~30 ppm of it at the cost of two of
+  # DESIGN sec.6's hard gates. See CCX_PARAM_TABLE$luc_scale and
+  # calibration/diag_luc_scale.R.
+  expect_length(CCX_PARAM_NAMES, 17L)
+  expect_true("luc_scale" %in% CCX_PARAM_NAMES)
+  # ...and it must stay an INPUT scale, never a model parameter: nothing may
+  # inject it into ccx_default_params(), where it would silently rescale every
+  # diagnostic that does not know about it.
+  expect_false("luc_scale" %in% names(ccx_default_params()))
 
   # DECISION 1: the whole land layout is fixed. A free tau_soil_fast reached
   # +3.61 sigma and put the biosphere bomb-14C back to +50 %/+64 %, undoing the

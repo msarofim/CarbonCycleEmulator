@@ -147,8 +147,28 @@ LIK_BOMB_EXCLUDE    <- c(1950, 1975)   # window dropped when the switch is FALSE
 # uninflated, 255 ice samples at ~9 sigma each contributed -14,551 -- 8 % of the
 # total from the sparsest, least direct record in the set.
 LIK_ICE_REP_ERR <- 4.0               # ppm, added in quadrature
-LIK_GCB_OCEAN_SD   <- 0.4            # GtC/yr, GCB stated ocean-sink uncertainty
-LIK_GCB_LAND_SD    <- 0.9            # GtC/yr, GCB stated land-sink uncertainty
+# GCB 2025's OWN stated 1-sigma uncertainties, quoted verbatim from the header
+# of data-raw/downloads/gcb2025_global_budget.csv (MANIFEST.csv carries the URL,
+# access date and SHA-256; Friedlingstein et al. 2025, doi:10.18160/GCP-2025):
+#   "All uncertainties represent +/- 1 sigma error"
+#   "The ocean sink (uncertainty of +/-0.4 GtC/yr on average)"
+#   "The land sink (uncertainty of +/-0.5 GtC/yr on average)"
+#   "Emissions from land-use change (uncertainty of +/-0.7 GtC/yr)"
+#   "fossil fuel combustion and industrial processes (uncertainty of +/-5%)"
+# LIK_GCB_LAND_SD was 0.9 from this term's creation until 2026-08-14, described
+# in this file as "GCB stated land-sink uncertainty" while GCB states 0.5, with
+# no provenance anywhere in the repo for the 0.9. Corrected to the cited value.
+# This makes the term 1.8x stronger, which is a CHANGE TO THE OBJECTIVE and is
+# recorded as such in CHANGELOG -- it is a constant tracking its source, not a
+# reweighting. The soft-constraint POLICY is separate and unchanged: DESIGN sec.9
+# Q1's inflation multiplier still rides on top (LIK_LAND_SINK_INFLATE).
+LIK_GCB_OCEAN_SD   <- 0.4            # GtC/yr, GCB 2025 stated ocean-sink 1 sigma
+LIK_GCB_LAND_SD    <- 0.5            # GtC/yr, GCB 2025 stated land-sink 1 sigma
+# GCB 2025 stated 1 sigma on E_LUC, GtC/yr. Not used in the likelihood -- it is
+# the receipt behind the luc_scale prior in calibrate.R, kept beside its
+# siblings so the four numbers stay together and traceable to one header.
+LIK_GCB_LUC_SD     <- 0.7            # GtC/yr
+LIK_GCB_FOSS_FRAC  <- 0.05           # fraction, 1 sigma
 
 # ---- ocean excess-14C inventory (2026-08-11; DATA.md 10) -------------
 # Naegler & Levin (2006), Tables 2 and 4: the excess (= total minus natural)
@@ -481,10 +501,13 @@ ccx_model_stats <- function(out, obs) {
 #' @param out  data.frame from ccx_run_fast()$out
 #' @param obs  from ccx_prepare_obs()
 #' @param err  list(sigma_co2, sigma_d13c, sigma_d14c)
+#' @param luc  data.frame(year, eluc) -- the MODEL's own annual land-use flux,
+#'   needed to turn its net land flux into the gross sink GCB reports. NULL uses
+#'   GCB's own column, which is correct whenever luc_scale = 1.
 #' @param by_stream if TRUE return the per-stream contributions instead of the
 #'   total. Used by the calibration report and by the app's diagnostics panel;
 #'   a single number cannot show which constraint a fit is actually paying for.
-ccx_loglik <- function(out, obs, err, by_stream = FALSE) {
+ccx_loglik <- function(out, obs, err, luc = NULL, by_stream = FALSE) {
   parts <- c()
   add <- function(name, v) parts[[name]] <<- (if (is.null(parts[[name]])) 0 else parts[[name]]) + v
   interp <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
@@ -579,21 +602,65 @@ ccx_loglik <- function(out, obs, err, by_stream = FALSE) {
   }
 
   # ---- GCB sinks: PARTITION only -------------------------------------
-  # Annual sink = -d(stock)/dt from the model, compared to GCB.
-  yr <- floor(out$t)
-  ann <- stats::aggregate(cbind(ocean_C, land_C) ~ yr, data = out, FUN = mean)
-  g <- merge(obs$gcb[, c("year", "ocean_sink", "land_sink")], ann,
-             by.x = "year", by.y = "yr")
-  if (nrow(g) > 2) {
-    g <- g[order(g$year), ]
-    mod_oc <- c(NA, diff(g$ocean_C))
-    mod_ld <- c(NA, diff(g$land_C))
-    k <- !is.na(mod_oc)
-    add("gcb_ocean_sink",
-        sum(stats::dnorm(g$ocean_sink[k], mod_oc[k], LIK_GCB_OCEAN_SD, log = TRUE)))
-    add("gcb_land_sink",
-        sum(stats::dnorm(g$land_sink[k], mod_ld[k],
-                         LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE, log = TRUE)))
+  # TWO TRAPS, both live from this term's creation, both fixed 2026-08-14.
+  #
+  # (a) NET vs GROSS -- the one that mattered. GCB's `land_sink` column is
+  #     S_LAND, the residual sink ALONE. The model's d(land_C)/dt is that sink
+  #     MINUS the land-use flux also removed from the pools. The two were nearly
+  #     the same quantity while land-use carbon was being regrown and are not
+  #     now: comparing them asked the model to over-absorb by exactly E_LUC
+  #     (~1.37 GtC/yr recently) and INVERTED the term's pull on beta. As shipped
+  #     it wanted beta to RISE, bottoming near 0.85; corrected, its own optimum
+  #     is beta ~ 0.39 and it resists rising beta. Nothing caught it for months
+  #     because the wrong sign pushed the same way as the CO2 streams.
+  #     Same trap as the one fixed in the diagnostics at cc3abd5, but inside the
+  #     objective the MCMC optimises.
+  #     The gross sink must be reconstructed with the MODEL'S OWN land-use flux,
+  #     which is luc_scale times GCB's -- hence the `luc` argument. Its NULL
+  #     default is GCB's own column, bit-identical to the forcing at
+  #     luc_scale = 1 (verified 1959-2024, max |diff| = 0), so every existing
+  #     caller stays correct without knowing about the argument.
+  #     `gcb_ocean_sink` has no E_LUC analogue and was never affected.
+  #
+  # (b) YEAR ALIGNMENT. The previous code diffed ANNUAL MEANS of the stock,
+  #     which is the flux over [mid-year y-1, mid-year y] -- half a year off
+  #     from the calendar-year flux GCB reports. Worth ~0.015 GtC/yr of bias
+  #     against a sigma of 0.4-1.5, i.e. nothing; but it ALIASES exactly the
+  #     interannual variability a partition constraint exists to use. The stock
+  #     is now interpolated to calendar-year BOUNDARIES and differenced.
+  yrs <- sort(unique(floor(out$t + 1e-9)))
+  bnd <- c(yrs, max(yrs) + 1L)
+  if (length(bnd) > 2) {
+    # Linear, with linear EXTRAPOLATION at the two ends. On a monthly grid the
+    # first and last year boundary fall half a month outside the run, and
+    # approx(rule = 2) would hold the stock flat across that gap and silently
+    # under-count the first and last year's flux. Half a month of a 3 GtC/yr
+    # sink is 0.13 GtC -- small, but it would land entirely on the two end
+    # years rather than spread out, which is the shape of a bug.
+    tt <- out$t; n <- length(tt)
+    stock_at <- function(v) {
+      y  <- stats::approx(tt, v, xout = bnd)$y
+      lo <- bnd < tt[1]; hi <- bnd > tt[n]
+      if (any(lo)) y[lo] <- v[1] + (bnd[lo] - tt[1]) * (v[2] - v[1]) / (tt[2] - tt[1])
+      if (any(hi)) y[hi] <- v[n] + (bnd[hi] - tt[n]) * (v[n] - v[n - 1]) /
+                                     (tt[n] - tt[n - 1])
+      y
+    }
+    flux <- data.frame(year  = utils::head(bnd, -1),
+                       ocean = diff(stock_at(out$ocean_C)),
+                       land  = diff(stock_at(out$land_C)))
+    if (is.null(luc))
+      luc <- data.frame(year = obs$gcb$year, eluc = obs$gcb$luc)
+    g <- merge(as.data.frame(obs$gcb)[, c("year", "ocean_sink", "land_sink")],
+               flux, by = "year")
+    g <- merge(g, luc, by = "year")
+    if (nrow(g) > 2) {
+      add("gcb_ocean_sink",
+          sum(stats::dnorm(g$ocean_sink, g$ocean, LIK_GCB_OCEAN_SD, log = TRUE)))
+      add("gcb_land_sink",
+          sum(stats::dnorm(g$land_sink, g$land + g$eluc,
+                           LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE, log = TRUE)))
+    }
   }
   if (by_stream) return(unlist(parts))
   ll <- sum(unlist(parts))

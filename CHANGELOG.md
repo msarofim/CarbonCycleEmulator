@@ -3016,3 +3016,122 @@ claim is currently uncorroborated at the shipped default.
 re-running `diag_recentre_beta.R` at the current defaults (it was last written at β 0.60 /
 wood-only). Every number in the review is at `gamma_enso` = 0, which is
 `ccx_default_params()` and is **not** what `app/global.R:71` runs.
+
+## 2026-08-14 (later still) — PRIORITY 1 + 3: the objective is fixed, and land-use uncertainty is a parameter instead of a burden on beta
+
+Works items 1 and 3 of the architecture review's ordering. **Suite: 11 fail, the same 11
+as before** (see the correction below) plus 34 new passing assertions.
+
+### The objective (review item 1)
+
+Three fixes in `R/likelihood.R`, all in the GCB-sink block:
+
+1. **NET vs GROSS — the bug.** The model's `d(land_C)/dt` is net of E_LUC; GCB's
+   `land_sink` column is the gross residual sink. The term is now reconstructed as
+   `net + E_LUC`, using the **model's own** land-use flux (a new `luc` argument), not
+   GCB's — otherwise a `luc_scale`-scaled run would be scored against an unscaled flux.
+   NULL keeps GCB's column, which is **bit-identical to the forcing at scale 1**
+   (verified 1959–2024, max |diff| = 0), so every existing caller stays correct.
+2. **YEAR ALIGNMENT.** The old code diffed annual MEANS of the stock — the flux over
+   [mid-year *y*−1, mid-year *y*], half a year off from GCB's calendar-year flux. Stocks
+   are now interpolated to calendar-year **boundaries**, with linear extrapolation at the
+   two ends (the monthly grid puts the first and last boundary half a month outside the
+   run; `rule = 2` would hold flat and under-count the end years).
+3. **`LIK_GCB_LAND_SD` 0.9 → 0.5.** It was labelled "GCB stated land-sink uncertainty"
+   with **no provenance anywhere in the repo**, while GCB 2025's own header states ±0.5.
+   Corrected to the cited value, with the whole uncertainty block now quoted verbatim
+   from `data-raw/downloads/gcb2025_global_budget.csv` (ocean ±0.4, land ±0.5, E_LUC
+   ±0.7 GtC/yr, fossil ±5 %, all 1σ). This is a **change to the objective** and is
+   recorded as one — a constant tracking its source, not a reweighting. DESIGN §9 Q1's
+   inflation multiplier is untouched and still rides on top.
+
+**Effect, measured.** `gcb_land_sink` leverage on β: **2.0 → 24.3** log-units per
+one-prior-sd step (12×, from the sign fix plus the σ correction) — now comparable to
+`gcb_ocean_sink`'s 35.6, which is the right relationship. Still 1,565 : 24 against CO₂,
+so the review's headline stands: **fixing this was necessary and did not fix the model.**
+
+**And gate 7 is worse than the review said.** Against GCB's *stated* 0.5 rather than the
+uncited 0.9, the shipped default's land sink is **+4.4σ**, not +2.5σ. Ocean unchanged at
+−2.1σ.
+
+**A counter-intuitive fact, pinned in `test-luc-scale.R` so nobody "fixes" it back:** at
+β 0.75 the **buggy NET comparison scores BETTER** than the correct gross one (−97.3 vs
+−122.0), because the model over-absorbs (gross sink 4.57 against GCB's 2.36). **The bug
+was flattering the high-β model**, which is exactly why nothing objected as β rose.
+
+### Land-use input uncertainty (review item 3)
+
+**`luc_scale` is now the 17th calibrated parameter** — `ccx_build_forcing(luc_scale=)`
+applied to the **annual** series (so the monthly flux, the in-window cumulative and the
+pre-window `luc_pre` all scale together; scaling monthly columns alone would leave the
+converted-land term's cleared fraction inconsistent with the flux). Inside
+`ccx_make_logpost()` it is an equivalent column multiply for speed, gated against the
+rebuild path by `test-luc-scale.R`.
+
+**The prior has two independent receipts that agree — lognormal, median 1, sdlog 0.28:**
+- OSCAR v3.1's own cumulative uncertainty, **206 ± 57 PgC (1750–2018)** → 27.7 %;
+- the **GCB-vs-OSCAR product spread over the identical 1850–2018 window**, 239.8 vs
+  178.9 GtC → ratio 0.746, |ln| = 0.293.
+
+One is a stated uncertainty, one an observed disagreement between products; both land on
+~0.28, which puts OSCAR's central estimate at ~1σ below GCB's. Centred at 1 (= GCB, the
+standing convention) so the prior is not a silent re-basing. GCB's **annual** ±0.7 GtC/yr
+(51 % of a 1.372 mean) is deliberately *not* the width — that is a single year's flux,
+only partly correlated across years, so an upper bound on the cumulative fraction.
+
+### The pre-registered prediction: MET, but conditionally, and the condition matters
+
+Review §3.3 predicted, before the code existed: *with `luc_scale` free, β falls to
+0.40–0.55 and `luc_scale` settles at 0.6–0.8.* `calibration/diag_beta_luc_profile.R`,
+a 2-D slice of the **full** log-posterior (priors and Jacobians included):
+
+| σ_d13c | argmax β | argmax `luc_scale` | cum LUC | CO₂ bias | land | ocean |
+|---|---|---|---|---|---|---|
+| 0.10 (table init) | 0.70 | 0.90 | 260 GtC | +3.53 ppm | +3.8σ | −2.0σ |
+| **0.44 (mode_fit)** | **0.55** | **0.70** | **203 GtC** | **−0.40 ppm** | +2.0σ | −1.6σ |
+| 5.00 (muted) | 0.55 | 0.70 | 203 GtC | −0.40 ppm | +2.0σ | −1.6σ |
+| *any, `luc_scale` pinned at 1* | **0.75** | — | 289 GtC | +3.34 | +4.4σ | −2.1σ |
+
+**The first run REFUTED the prediction** (β 0.70) and is left in the file's header rather
+than deleted. The refutation was conditional on σ_d13c = 0.10: at that width δ¹³C
+contributes ~740 log-units in favour of high β, far more than the `luc_scale` prior can
+resist — and δ¹³C is the one stream carrying a known unclosed ~0.53 ‰ **structural**
+misfit, so σ = 0.10 asserts that misfit is measurement noise. At 0.44 (what `mode_fit`
+chose) and at 5.00 the answer is **identical**, so 0.10 is the outlier, not 0.44.
+
+**Three things this establishes.** (i) The (β, `luc_scale`) ridge is real and steep — the
+objective does use the input uncertainty rather than ignoring it. (ii) With LUC pinned,
+β = 0.75 at **every** σ_d13c: pinning the input is what made the high β look robust.
+(iii) The settlement's cumulative LUC of **203 GtC lands on OSCAR's central 206** without
+being told to — the prior only supplied a width.
+
+**Not oversold.** β 0.55 is still above gate 12's ≈0.50 ceiling and the Pulse Lab's ≈0.53,
+and the land sink is still +2.0σ high. `luc_scale` gets most of the way and **does not
+remove the need for review item 7, the saturating fertilisation form.** And a 2-D slice at
+the other 15 parameters' inits bounds the answer; it does not decide it.
+
+**It also means Marcus' 2026-08-14 "leave `sigma_d13c` free" decision is now load-bearing
+on β**, which it was not when taken — free, the sampler picks ~0.44 and the prediction
+holds; pinned at the table's 0.10 it does not. That is review item 6, now with a number.
+
+### Corrections to the record
+
+- **The pre-change suite was 11 failures, not 10.** `test-pulse.R:113` was already
+  failing; handoff 13i §A1's text listed it and §A5's summary list did not, and the "10"
+  propagated from there. Verified by running the suite on the stashed pre-change tree.
+- `test-likelihood.R:165` (the parameter count) is the **only** newly-failing test and it
+  is the tripwire doing its job. Updated to 17 **with the reason written in**, plus two
+  new guards: `luc_scale` must be in `CCX_PARAM_NAMES` and must **never** appear in
+  `ccx_default_params()`, where it would silently rescale every diagnostic that does not
+  know about it.
+- `calibration/diag_stream_leverage.R` no longer carries its hand-rolled "CORRECTED" land
+  term — `ccx_loglik()` is now correct. Review numbers quoted as "corrected" (7.3 on β)
+  are at the old σ = 0.9; the file now reports 24.3.
+
+### Still open, and deliberately not done here
+
+Fossil emissions carry GCB's stated **±5 %** (≈±25 GtC ≈ ±12 ppm cumulative) and are still
+prescribed exact. A `foss_scale` is the obvious sibling of `luc_scale`, but the two are
+strongly degenerate against a CO₂ record that mostly constrains their **sum**, and adding
+a second emission scalar without measuring that degeneracy first is precisely what this
+project's discipline forbids. Flagged, with the arithmetic, not taken.
