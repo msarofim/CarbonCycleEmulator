@@ -186,11 +186,19 @@ ccx_default_params <- function() {
     # than the grid. THAT is why the default can be set while sigma_d13c is
     # still undecided (handoff 13h sec.2.1c) -- measured, not assumed.
     #
-    # Land sink at 0.60 is 2.62 GtC/yr against GCB 2015-2024's 2.36, and the
-    # ocean 2.52 against 3.22: the CO2 record is matched by a land sink that is
-    # too strong and an ocean that is too weak. Recorded here because it is the
-    # residual PHASE 3 (the biological pump) is aimed at, and it is visible in
-    # the default parameter set, not only at a mode.
+    # WHAT IT COSTS, and it is not small. GCB's `land_sink` is the RESIDUAL sink
+    # alone; the model's mean(diff(land_C)) is the NET land flux, sink MINUS
+    # E_LUC. Comparing them directly is a unit trap this repo has fallen into
+    # before (see diag_d13c_partition_refit's note). Like for like, 2015-2024:
+    #   beta 0.38  gross land sink 2.74 (GCB 2.36, +16 %)  ocean 2.87 (GCB 3.22)
+    #   beta 0.60  gross land sink 3.99 (GCB 2.36, +69 %)  ocean 2.52 (GCB 3.22)
+    # So the beta that matches the CO2 RECORD makes the sink PARTITION worse:
+    # the land takes up 69 % more than GCB attributes to it and the ocean 22 %
+    # less. Cumulatively 1750-2024 the same tension reads as land +21.7 GtC
+    # against GCB's -57.4. That conflict is NOT resolvable by beta -- it is the
+    # residual PHASE 3 (the biological pump) is aimed at -- and it is the reason
+    # this default is a fixture chosen by ONE criterion, stated, not a claim
+    # that the model's carbon partition is right.
     #
     # This is a DEFAULT, i.e. an app and test fixture. beta is calibrated, so
     # the mode-find is what actually sets it -- see R/calibrate.R.

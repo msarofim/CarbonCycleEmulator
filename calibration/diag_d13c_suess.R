@@ -178,12 +178,23 @@ for (d in DS_FOSS_GRID)
 cat("\n[3] d13C BIAS vs LAND-SINK SHARE (scanning beta at the default q10)\n")
 DS_BETA_GRID <- c(0.2, 0.38, 0.6, 0.9, 1.2)
 gcb <- as.data.frame(obs$gcb)
+# UNITS, fixed 2026-08-13. This returned mean(diff(land_C)) and compared it to
+# GCB's `land_sink`. Those are different quantities: diff(land_C) is the NET
+# land flux (sink MINUS E_LUC) and GCB's column is the residual sink alone. They
+# were nearly the same while land-use carbon was being regrown and stopped being
+# so at 404d66d -- the same trap diag_d13c_partition_refit.R records. The gross
+# sink, which is what GCB's column means, is diff(land_C) + E_LUC.
+DS_ELUC <- local({
+  em <- as.data.frame(readRDS(ccx_path("data", "forcing_emissions_historical.rds")))
+  mean(em$luc_GtC[em$year >= DS_BIAS_WIN[1] & em$year <= DS_BIAS_WIN[2]])
+})
 ds_partition <- function(out) {
   yr  <- floor(out$t + 1e-9)
   ann <- stats::aggregate(cbind(ocean_C, land_C) ~ yr, data = out, FUN = mean)
   ann <- ann[order(ann$yr), ]
   k   <- ann$yr[-1] >= DS_BIAS_WIN[1]
-  c(land = mean(diff(ann$land_C)[k]), ocean = mean(diff(ann$ocean_C)[k]))
+  c(land = mean(diff(ann$land_C)[k]) + DS_ELUC,
+    ocean = mean(diff(ann$ocean_C)[k]))
 }
 g <- gcb$year >= DS_BIAS_WIN[1] & gcb$year <= DS_BIAS_WIN[2]
 cat(sprintf("    GCB %d-%d observed: land %.2f  ocean %.2f  (land share %.0f %%)\n",
@@ -201,7 +212,7 @@ for (b in DS_BETA_GRID) {
     gg <- !is.na(k) & o$year >= DS_BIAS_WIN[1] & o$year <= DS_BIAS_WIN[2]
     mean(o[[col]][gg] - m$level[k[gg]])
   }
-  cat(sprintf("    beta %.2f  land %.2f ocean %.2f (share %2.0f %%)  d13C %+.3f  CO2 %+6.2f ppm\n",
+  cat(sprintf("    beta %.2f  gross land %.2f ocean %.2f (share %2.0f %%)  d13C %+.3f  CO2 %+6.2f ppm\n",
               b, s[["land"]], s[["ocean"]],
               100 * s[["land"]] / (s[["land"]] + s[["ocean"]]),
               win(obs$d13_ann$MLO, ms$d13$MLO, "level"),

@@ -210,7 +210,12 @@ gcbo <- as.data.frame(obs$gcb)
 gk   <- gcbo$year >= 2015 & gcbo$year <= 2024
 cat(sprintf("    GCB 2015-2024 mean sinks: land %.2f  ocean %.2f GtC/yr\n",
             mean(gcbo$land_sink[gk]), mean(gcbo$ocean_sink[gk])))
-cat("\n    debit        beta   CO2 bias   cum land   cum ocean   land sink  ocean sink\n")
+cat("\n    'gross land' = mean(diff(land_C)) + E_LUC. GCB's land_sink is the RESIDUAL\n")
+cat("    sink alone while diff(land_C) is the NET land flux (sink minus E_LUC);\n")
+cat("    comparing those two directly is a unit trap this repo has hit before.\n")
+cat("\n    debit        beta   CO2 bias   cum land   cum ocean  gross land  ocean sink\n")
+lp_em <- as.data.frame(readRDS(ccx_path("data", "forcing_emissions_historical.rds")))
+LP_ELUC <- mean(lp_em$luc_GtC[lp_em$year >= 2015 & lp_em$year <= 2024])
 for (nm in names(LP_WOOD)) for (b in LP_BETA_GRID) {
   pw <- ccx_default_params(); pw$f_luc_wood <- LP_WOOD[[nm]]; pw$beta <- b
   sw <- ccx_spinup(pw)
@@ -227,7 +232,7 @@ for (nm in names(LP_WOOD)) for (b in LP_BETA_GRID) {
   cat(sprintf("    %-12s %.2f  %+8.2f  %+9.1f  %+10.1f  %9.2f  %10.2f\n", nm, b,
               mean(ob$level[gg] - ms$co2$MLO$level[kk[gg]]),
               o$land_C[nrow(o)] - o$land_C[1], o$ocean_C[nrow(o)] - o$ocean_C[1],
-              mean(diff(ann$land_C)[kw]), mean(diff(ann$ocean_C)[kw])))
+              mean(diff(ann$land_C)[kw]) + LP_ELUC, mean(diff(ann$ocean_C)[kw])))
 }
 cat("\n    READ IT AS: which beta zeroes the CO2 bias, and what that beta does to\n")
 cat("    the two budget quantities GCB reports independently of the CO2 record.\n")

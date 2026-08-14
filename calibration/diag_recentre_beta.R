@@ -67,14 +67,26 @@ rb_bias <- function(o, m, col = "level") {
   mean(o[[col]][g] - m$level[k[g]])
 }
 
-# annual-mean sink fluxes, GtC/yr, over RB_BIAS_WIN -- same estimator as
-# diag_d13c_suess.R [3] so the two are directly comparable
+# annual-mean sink fluxes, GtC/yr, over RB_BIAS_WIN.
+#
+# UNITS TRAP, and it is one this repo has already fallen into once: GCB's
+# `land_sink` column is the RESIDUAL sink alone, while mean(diff(land_C)) is the
+# NET land flux -- that sink MINUS E_LUC. The two were nearly the same quantity
+# while land-use carbon was being regrown and are not now. The gross sink, which
+# is what GCB's column means, is diff(land_C) + E_LUC, and that is what is
+# returned as `land`. `land_net` is kept alongside because it is the quantity
+# the cumulative-vs-GCB comparison uses.
+RB_ELUC <- local({
+  em <- as.data.frame(readRDS(ccx_path("data", "forcing_emissions_historical.rds")))
+  mean(em$luc_GtC[em$year >= RB_BIAS_WIN[1] & em$year <= RB_BIAS_WIN[2]])
+})
 rb_partition <- function(out) {
   yr  <- floor(out$t + 1e-9)
   ann <- stats::aggregate(cbind(ocean_C, land_C) ~ yr, data = out, FUN = mean)
   ann <- ann[order(ann$yr), ]
   k   <- ann$yr[-1] >= RB_BIAS_WIN[1]
-  c(land = mean(diff(ann$land_C)[k]), ocean = mean(diff(ann$ocean_C)[k]))
+  net <- mean(diff(ann$land_C)[k])
+  c(land = net + RB_ELUC, land_net = net, ocean = mean(diff(ann$ocean_C)[k]))
 }
 
 # linear interpolation of the beta at which `y` crosses zero, on a grid that
@@ -112,7 +124,7 @@ for (b in RB_BETA_GRID) {
   row <- list(beta = b,
               co2  = rb_bias(obs$co2_ann$MLO, ms$co2$MLO),
               d13  = rb_bias(obs$d13_ann$MLO, ms$d13$MLO),
-              land = s[["land"]], ocean = s[["ocean"]])
+              land = s[["land"]], land_net = s[["land_net"]], ocean = s[["ocean"]])
   for (en in names(RB_ERR_SETS)) {
     ll <- ccx_loglik(out, obs, RB_ERR_SETS[[en]], by_stream = TRUE)
     for (fn in names(RB_FAMILY))
@@ -120,7 +132,7 @@ for (b in RB_BETA_GRID) {
     row[[paste0(en, "|TOTAL")]] <- sum(ll)
   }
   res[[length(res) + 1]] <- row
-  cat(sprintf("  beta %.2f  CO2 bias %+7.2f ppm  d13C bias %+6.3f permil  land %5.2f  ocean %5.2f\n",
+  cat(sprintf("  beta %.2f  CO2 bias %+7.2f ppm  d13C bias %+6.3f permil  gross land %5.2f  ocean %5.2f\n",
               b, row$co2, row$d13, row$land, row$ocean))
 }
 # check.names = FALSE: the column names carry a "|" separator, and make.names()
