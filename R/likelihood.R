@@ -236,6 +236,95 @@ LIK_EXCESS_C14_BASE_YEAR <- 1750
 # is against a modelled stratosphere.
 LIK_EXCESS_C14_REP_FRAC <- 0.15
 
+# ---- deep-ocean D14C (2026-08-14; GLODAPv2.2023) ---------------------
+# The second term that prices the ocean 14C sink directly, and the FIRST that
+# prices ocean VENTILATION rather than inventory. Until now nothing but d13C
+# constrained `kz`, which is why it carries a hard bracket (calibrate.R).
+#
+# WHAT IT SCORES: the model's BOTTOM BOX (2627-3700 m at h_ml 75) against the
+# cos(lat)-and-thickness-weighted GLODAPv2.2023 mean over the same depth range.
+# NOT `d14c_deep_ocean`, which is the bottom THREE boxes (1313.6-3700 m) and
+# runs 13-20 permil enriched -- see the note in spinup.R. The steady state is
+# scored rather than a transient value because the bottom box moves 0.04 permil
+# between 1750 and 2024 (measured, diag_deep_d14c_term.R), i.e. the layer is
+# effectively pre-bomb and modern bottle data is a fair target for it.
+#
+# THE SIGMA IS A DECISION, NOT A MEASUREMENT, and it decides the kz question
+# outright. 13i sec.A3 assumed GLODAPv2 would "supply a real spatial spread for
+# the sigma". It supplies the spread; THE SPREAD IS NOT THE SIGMA. A one-box
+# model is scored against the volume-weighted MEAN, whose uncertainty is the
+# spread divided by an EFFECTIVE sample size -- and deep water masses are
+# basin-coherent, so n_eff is of order tens, not the 3,592 filled cells.
+# Measured against the kz runaway (kz -> 10,686, bottom box -120.9 permil):
+#
+#   sigma 3.0  permil  measurement error alone            18.1 sigma  HOLDS kz
+#   sigma 10.3 permil  SE of the weighted mean, n_eff 20   5.3        HOLDS kz
+#   sigma 20.5 permil  SE of the weighted mean, n_eff 5    2.7        HOLDS kz
+#   sigma 45.9 permil  full spatial spread, n_eff 1        1.2        does NOT
+#
+# (Those z-scores are on the BOTTOM BOX. The handoff's 6.1 sigma for n_eff = 20
+# was computed on the 3-box average against the 1-box target -- the same layer
+# mismatch corrected here. The decision survives it: 5.3 still holds kz.)
+#
+# MARCUS 2026-08-14 CHOSE n_eff = 20, and with it chose to KEEP the kz bracket.
+# The reasoning that made that non-obvious: the incumbent bracket [3830, 6200]
+# is itself a hard box on this same quantity -- bottom box -220.4 to -163.5, a
+# half-width of 28.4 permil -- i.e. TIGHTER than every sigma candidate but the
+# most aggressive, so deleting it in favour of an "honest" likelihood term would
+# LOOSEN the constraint, not tighten it. The bracket stays until a refit shows
+# this term holding kz without it.
+#
+# THE TWO DISAGREE ABOUT WHERE INSIDE THE BRACKET kz BELONGS, and that is the
+# term's actual content. The bracket is centred at -191.9 permil, 16.7 below the
+# observation; this term's own optimum is kz = 5525 (bottom box -175.3, z 0.00)
+# against the shipped default 5000 (-186.4, z -1.08), and it puts the bracket's
+# lower end at -4.40. So it pushes kz UP within the bracket rather than out of
+# it. Do not read that as a licence to re-centre kz by hand -- it is one stream
+# among many and the refit is what weighs it.
+#
+# NOT inflated for model representation error. The build script anticipated
+# doing so; 10.3 is the bare SE and inflating it silently would move a number
+# Marcus chose. If representation error is wanted it belongs in this constant,
+# visibly.
+LIK_D14C_DEEP_NEFF <- 20             # effective sample size for the deep mean
+# Mask the North Atlantic (lat > 40N) out of the observed mean? Deep water forms
+# there, so it is the one place below 2000 m carrying appreciable bomb 14C, and
+# the model's bottom box is a global preindustrial mean. Masking moves the
+# target -175.3 -> -178.2 permil, i.e. 0.28 sigma -- small enough that the
+# UNMASKED global mean is used (it is the like-for-like global quantity) and
+# large enough to be worth stating rather than burying.
+LIK_D14C_DEEP_MASK_NATL <- FALSE
+LIK_USE_D14C_DEEP <- TRUE
+
+#' Deep-ocean D14C target, with the sigma resolved from LIK_D14C_DEEP_NEFF.
+#'
+#' Reads the GLODAPv2 build product and DERIVES the sigma rather than carrying a
+#' second copy of it, so changing `LIK_D14C_DEEP_NEFF` cannot leave a stale
+#' literal behind. Cached: the file is small but the likelihood is in the MCMC
+#' inner loop through ccx_prepare_obs(), and re-reading an rds per call is how
+#' a term with 3 numbers in it becomes a profiling entry.
+#'
+#' @return list(target, sd, sd_spread, n_eff, layer, masked) or NULL if the
+#'   dataset is absent -- a missing optional file must not take the posterior
+#'   down with it, and by_stream then shows the term ABSENT, which is visible.
+ccx_deep_d14c_target <- local({
+  cache <- NULL
+  function(n_eff = LIK_D14C_DEEP_NEFF, mask_natl = LIK_D14C_DEEP_MASK_NATL) {
+    key <- paste(n_eff, mask_natl)
+    if (!is.null(cache) && identical(attr(cache, "key"), key)) return(cache)
+    g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_deep.rds")),
+                  error = function(e) NULL)
+    if (is.null(g) || is.null(g$d14c)) return(NULL)
+    d <- if (mask_natl) g$d14c$deep_no_natl else g$d14c$deep
+    out <- list(target = d$vw, sd = d$sd_w / sqrt(n_eff), sd_spread = d$sd_w,
+                n_eff = n_eff, layer = g$model_layer, masked = mask_natl,
+                n_cells = d$n_cells, source = g$source)
+    attr(out, "key") <- key
+    cache <<- out
+    out
+  }
+})
+
 #' Hemisphere-area weights for the Hua zones
 ccx_zone_weights <- function(nh_bounds = LIK_ZONE_BOUNDS_NH,
                              sh_bounds = LIK_ZONE_BOUNDS_SH) {
@@ -504,10 +593,22 @@ ccx_model_stats <- function(out, obs) {
 #' @param luc  data.frame(year, eluc) -- the MODEL's own annual land-use flux,
 #'   needed to turn its net land flux into the gross sink GCB reports. NULL uses
 #'   GCB's own column, which is correct whenever luc_scale = 1.
+#' @param deep scalar, the model's BOTTOM-BOX D14C in permil, i.e.
+#'   `ccx_spinup(p)$diagnostics$d14c_bottom_box`. It is a steady-state quantity
+#'   and is not recoverable from `out`, so it has to be handed in. NULL skips
+#'   the term, which then shows as ABSENT under `by_stream` rather than as a
+#'   silent zero. Do NOT pass `d14c_deep_ocean` here -- that is the bottom THREE
+#'   boxes and a different layer from the target (see LIK_D14C_DEEP_NEFF).
 #' @param by_stream if TRUE return the per-stream contributions instead of the
 #'   total. Used by the calibration report and by the app's diagnostics panel;
 #'   a single number cannot show which constraint a fit is actually paying for.
-ccx_loglik <- function(out, obs, err, luc = NULL, by_stream = FALSE) {
+#'
+#' POSITIONAL-ARGUMENT HAZARD, second instance. `luc` was inserted before
+#' `by_stream` on 2026-08-14 and `deep` now sits after it. Every caller in the
+#' repo passes `by_stream =` by name, so nothing breaks -- but a positional 5th
+#' argument means `by_stream` and a positional 4th means `luc`. Name them.
+ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
+                       by_stream = FALSE) {
   parts <- c()
   add <- function(name, v) parts[[name]] <<- (if (is.null(parts[[name]])) 0 else parts[[name]]) + v
   interp <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
@@ -599,6 +700,16 @@ ccx_loglik <- function(out, obs, err, luc = NULL, by_stream = FALSE) {
           -0.5 * (drop(crossprod(r, e$prec %*% r)) + e$logdet +
                     length(r) * log(2 * pi)))
     }
+  }
+
+  # ---- deep-ocean D14C, GLODAPv2 (see LIK_D14C_DEEP_NEFF) -------------
+  # One scalar, one Gaussian. The only term in the objective that prices ocean
+  # VENTILATION; everything else touching kz does so through d13C.
+  if (LIK_USE_D14C_DEEP && !is.null(deep) && is.finite(deep)) {
+    tg <- ccx_deep_d14c_target()
+    if (!is.null(tg))
+      add("d14c_deep_ocean",
+          stats::dnorm(tg$target, deep, tg$sd, log = TRUE))
   }
 
   # ---- GCB sinks: PARTITION only -------------------------------------

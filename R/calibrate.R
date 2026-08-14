@@ -44,6 +44,24 @@ CCX_PARAM_TABLE <- list(
   # Deliberately NOT a point value: kz also drives ocean CO2 uptake, and pinning it
   # would push all of that onto k_w and h_ml. Re-bisect if OCEAN_DEPTH, the grid,
   # or the observed bracket changes -- these are measured numbers, not settings.
+  #
+  # RETAINED 2026-08-14, DELIBERATELY, alongside the new `d14c_deep_ocean`
+  # likelihood term. 13i sec.A3 planned to delete this bracket once GLODAPv2
+  # supplied a sourced sigma; the measurement INVERTED that plan. Expressed on
+  # the bottom box -- the layer the term actually scores -- this bracket is a
+  # hard box of half-width 28.4 permil, tighter than every sigma candidate but
+  # the most aggressive, so deleting it would LOOSEN kz rather than tighten it.
+  # Marcus re-took the decision on those numbers: keep the bracket, add the term
+  # at n_eff = 20. Delete it only after a refit shows the term holding kz alone.
+  #
+  # TWO CAVEATS ON THE BISECTION ABOVE. It was done on `d14c_deep_ocean` = the
+  # bottom THREE boxes (1313.6-3700 m), and the "-150 to -200" bracket it was
+  # bisected against was an uncited recollection. GLODAPv2 has since confirmed
+  # the recollection (2627-3700 m: -175.3, within 0.3 of that bracket's
+  # midpoint) but on the BOTTOM BOX, where these same bounds give -220.4 to
+  # -163.5. So the bracket is centred 16.7 permil BELOW the sourced target and
+  # the new term pushes kz up inside it (own optimum 5525). Both facts are live;
+  # neither is a reason to move the bounds by hand ahead of the refit.
   kz          = list(tr = "logit", lo = 3830, hi = 6200, init = 5000,
                      prior = function(x) dunif(x, 3830, 6200, log = TRUE)),
   tau_ex      = list(tr = "log",   init = 1.3,
@@ -235,7 +253,11 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # `luc` is the MODEL's own land-use flux, so the gross-sink reconstruction
     # in the gcb_land_sink term follows luc_scale instead of silently reverting
     # to GCB's unscaled column.
-    ll <- ccx_loglik(r$out, obs, err, luc = eluc)
+    # `deep` is the BOTTOM-BOX D14C of this draw's spinup -- free, since the
+    # spinup has already run, and the layer moves 0.04 permil over the transient
+    # so the steady state is the right thing to score (see LIK_D14C_DEEP_NEFF).
+    ll <- ccx_loglik(r$out, obs, err, luc = eluc,
+                     deep = sp$diagnostics$d14c_bottom_box)
     if (verbose) cat(sprintf("  ll %.1f  prior %.1f\n", ll, lp))
     if (!is.finite(ll)) return(-Inf)
     lp + ll

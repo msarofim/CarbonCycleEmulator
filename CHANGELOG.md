@@ -3297,3 +3297,107 @@ review §4.2 still gates whether it is a mechanism or bookkeeping.
 "observed ~1–1.5 ‰". Volume-weighted over the model's own layers it is **0.861 ‰** — right
 order, high by ~30 %. The model is +1.14 ‰ too enriched at depth and +0.28 ‰ at the surface,
 so it is wrong in offset *and* in having no structure at all.
+
+## 2026-08-14 (cont.) — DECISION 1 TAKEN: the deep-Δ¹⁴C term lands at σ = 10.3 ‰, the kz bracket STAYS, and the layer was mismatched
+
+**Marcus took all three of the queued decisions on the recommended options:**
+
+| | decision | taken |
+|---|---|---|
+| 1 | deep-Δ¹⁴C σ | **10.3 ‰** = spread ÷ √(n_eff = 20); **KEEP the kz bracket** |
+| 2 | β default | **defer until item 7 lands** — no change, 0.75 still ships and still fails gates 7 and 12 |
+| 3 | `sigma_d13c` | **stays free** — no change |
+
+Only decision 1 is code. Decisions 2 and 3 are recorded no-ops, deliberately: the review's
+headline is unmoved and nothing about the failing gates has been quietly improved.
+
+### The term
+
+`d14c_deep_ocean`, one scalar and one Gaussian, in `ccx_loglik()` behind a new `deep`
+argument (`NULL` → the term is **ABSENT** under `by_stream`, not a silent zero). It is the
+first term in the objective that prices ocean **ventilation**; until now nothing but δ¹³C
+touched `kz`, which is why `kz` carries a hard bracket at all.
+
+σ is **derived** from `LIK_D14C_DEEP_NEFF`, not typed twice — `ccx_deep_d14c_target()`
+reads the GLODAPv2 build product and divides. A test asserts n_eff = 1 reproduces the raw
+spread, so the constant cannot drift away from the number the likelihood uses.
+
+### The bug this found: the target and the diagnostic were DIFFERENT LAYERS
+
+`data-raw/build_glodap_deep_targets.R` measured GLODAPv2 over **2627–3700 m** and asserted
+in its header that `diagnostics$d14c_deep_by_hemi` *is* that layer. **It is not.** That
+diagnostic takes `tail(aux$idx[[h]]$oc, 3)` — the bottom **three** interior boxes,
+**1313.6–3700 m** — which is better ventilated and runs 13.5–20.4 ‰ enriched across the kz
+bracket (kz 5000: −170.1 against the bottom box's −186.4).
+
+Scoring the 2627–3700 m target against the 3-box average would have been a ~1.6 σ layer
+mismatch baked permanently into the objective. `diagnostics$d14c_bottom_box` (and
+`d14c_bottom_by_hemi`) added to `R/spinup.R` for the term; the 3-box diagnostics are
+**unchanged**, because the kz bracket and every pre-2026-08-14 result were derived from
+them. The build script's header claim is corrected in place, not deleted.
+
+**Consequence to carry:** handoff 2026-08-14b §4.1's "runaway at 6.1 σ" is the mismatched
+pairing. Like for like it is **5.3 σ**. *The decision survives the correction* — 5.3 still
+holds kz, and the verdict column of the σ table is identical either way — which is the only
+reason this is a footnote rather than a re-take.
+
+### Two things measured rather than assumed
+
+- **Scoring the spinup steady state against 1972–2021 bottle data is legitimate.** The
+  bottom box moves **+0.012 to +0.100 ‰** between 1750 and 2024 across the bracket, i.e.
+  under 0.01 σ — the layer is effectively pre-bomb. So the term costs no transient
+  integration. (The 3-box slab drifts up to **+2.49 ‰**, 25× more: a second reason the two
+  layers are not swappable.)
+- **The term is univariate in kz**, to the same standard `calibrate.R`'s bracket note
+  claimed for the 3-box quantity. Across the *whole* `h_ml` prior [30, 200] the bottom box
+  moves 5.3 ‰ (0.52 σ) and the layer's own top moves 50 m on a ~1070 m box, against the
+  57 ‰ the kz bracket spans.
+
+### Why the bracket stays — and where the term and the bracket disagree
+
+Expressed on the bottom box, the incumbent bracket [3830, 6200] maps to [−220.4, −163.5] ‰:
+a hard box of half-width **28.4 ‰**, tighter than every σ candidate but the most aggressive.
+**Deleting it in favour of an "honest" likelihood term would LOOSEN kz, not tighten it** —
+the inversion of 13i §A3's plan, and the reason decision 1 had to be re-taken.
+
+But the bracket is centred at −191.9 ‰, **16.7 ‰ below** the sourced target. So:
+
+| | kz | bottom box | z |
+|---|---|---|---|
+| bracket lower end | 3830 | −220.4 | **−4.40** |
+| shipped default | 5000 | −186.4 | −1.08 |
+| **term's own optimum** | **5525** | −175.3 | 0.00 |
+| bracket upper end | 6200 | −163.5 | +1.15 |
+| unbounded 17-par mode | 10686 | −120.9 | **+5.30** |
+
+The term pushes kz **up inside** the bracket. That is one stream's preference at 9.0
+log-units end-to-end — against the CO₂ streams' 1,565 per prior-sd step — so it is *not* a
+counterweight to the CO₂ level; it acts on a parameter the CO₂ streams barely touch.
+**kz is not re-centred by hand. The refit weighs it.**
+
+### Methodological choice flagged, not buried
+
+`LIK_D14C_DEEP_MASK_NATL = FALSE`. Masking the North Atlantic (the one place below 2000 m
+with appreciable bomb ¹⁴C) moves the target −175.3 → −178.2 ‰ = 0.28 σ. The unmasked global
+mean is used because the model's bottom box is a global quantity; the switch exists so the
+alternative is one edit away rather than a re-derivation.
+
+σ is also **not** inflated for model representation error, which the build script had
+anticipated doing. 10.3 is the bare SE Marcus chose; inflating it silently would move his
+number. If representation error is wanted it belongs in that constant, visibly.
+
+### Files
+
+`R/likelihood.R` (constants, `ccx_deep_d14c_target()`, the term, the `deep` argument),
+`R/spinup.R` (`d14c_bottom_box`, report line with live z), `R/calibrate.R` (passes
+`sp$diagnostics$d14c_bottom_box`; the kz bracket note now records why it was retained),
+`data-raw/build_glodap_deep_targets.R` (header correction),
+`calibration/diag_deep_d14c_term.R` (**new** — reproduces every number above),
+`tests/testthat/test-likelihood.R` (4 new tests; 3 guard the decision, 1 the arithmetic).
+
+**Suite still 11 failing, the same 11.** No new failures.
+
+**Second positional-argument hazard.** `ccx_loglik()` now reads
+`(out, obs, err, luc, deep, by_stream)`. Every caller in the repo passes `by_stream =` by
+name so nothing broke, but a positional 5th argument now means `by_stream` and a positional
+4th means `luc`. Name them.

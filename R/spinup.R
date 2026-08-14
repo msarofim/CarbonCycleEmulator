@@ -231,6 +231,7 @@ ccx_spinup <- function(p = ccx_default_params(),
                         (sum(y[atm_idx, "C"]) * ccx_const("R13_VPDB")) - 1)
   ocean_idx <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$ml, aux$idx[[h]]$oc)))
   deep_idx  <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 3)))
+  bot_idx   <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 1)))
 
   # canonical cosmogenic production, for comparison ONLY
   P_canon <- 2.04 * (5.1e14 * 1e4) * 365.25 * 86400 / 6.02214076e23
@@ -255,6 +256,31 @@ ccx_spinup <- function(p = ccx_default_params(),
       # every pre-conveyor result and the kz bracket were derived from it.
       d14c_deep_by_hemi = vapply(HEMIS, function(h) {
         k <- tail(aux$idx[[h]]$oc, 3)
+        1000 * (sum(y[k, "C14"]) / sum(y[k, "C"]) - 1)
+      }, numeric(1)),
+      # THE BOTTOM BOX ALONE, added 2026-08-14 -- and it is a DIFFERENT LAYER
+      # from the two above, which is why it exists.
+      #
+      # At h_ml 75 the 11-box column puts box 11 at 2627.2-3700 m, and that is
+      # the layer data-raw/build_glodap_deep_targets.R measured GLODAPv2 over.
+      # `d14c_deep_ocean` and `d14c_deep_by_hemi` average the bottom THREE
+      # interior boxes, i.e. 1313.6-3700 m -- a genuinely shallower and better
+      # ventilated slab. The two are 13-20 permil apart across the kz bracket
+      # (kz 5000: -186.4 here against -170.1 there), so scoring the GLODAP
+      # 2627-3700 m mean against the 3-box average would be a layer mismatch of
+      # ~1.6 sigma. The build script's header asserted they were the same layer;
+      # they are not, and that claim is corrected there.
+      #
+      # The transient run moves this by 0.04 permil between 1750 and 2024 at
+      # default kz (measured, calibration/diag_deep_d14c_term.R), so the
+      # preindustrial steady state IS the right thing to score modern bottle
+      # data against and no transient integration is needed for it.
+      #
+      # The two older diagnostics are kept unchanged: every pre-2026-08-14
+      # result and the kz bracket itself were derived from them.
+      d14c_bottom_box   = 1000 * (sum(y[bot_idx, "C14"]) / sum(y[bot_idx, "C"]) - 1),
+      d14c_bottom_by_hemi = vapply(HEMIS, function(h) {
+        k <- tail(aux$idx[[h]]$oc, 1)
         1000 * (sum(y[k, "C14"]) / sum(y[k, "C"]) - 1)
       }, numeric(1)),
       ocean_C_GtC       = sum(y[ocean_idx, "C"]),
@@ -284,11 +310,20 @@ ccx_report_spinup <- function(s) {
               d$d13c_atm, ccx_const("D13C_PI")))
   cat(sprintf("  atmospheric D14C     %+.3f permil (target %+.3f)\n",
               d$d14c_atm, ccx_const("D14C_PI")))
-  cat(sprintf("  deep-ocean D14C      %+.1f permil  (free check: obs ~ -150 to -200)\n",
+  cat(sprintf("  deep-ocean D14C      %+.1f permil  (bottom 3 boxes, 1314-3700 m)\n",
               d$d14c_deep_ocean))
   cat(sprintf("    by hemisphere      NH %+.1f   SH %+.1f  (equal without a conveyor;\n",
               d$d14c_deep_by_hemi[["NH"]], d$d14c_deep_by_hemi[["SH"]]))
   cat("                         under one, expect the ventilated end YOUNG)\n")
+  tg <- ccx_deep_d14c_target()
+  if (is.null(tg)) {
+    cat(sprintf("  bottom-box D14C      %+.1f permil  (2627-3700 m; GLODAP target ABSENT)\n",
+                d$d14c_bottom_box))
+  } else {
+    cat(sprintf("  bottom-box D14C      %+.1f permil  (2627-3700 m; GLODAPv2 %+.1f +/- %.1f = %+.2f sigma)\n",
+                d$d14c_bottom_box, tg$target, tg$sd,
+                (d$d14c_bottom_box - tg$target) / tg$sd))
+  }
   cat(sprintf("  ocean carbon         %.0f GtC\n", d$ocean_C_GtC))
   cat(sprintf("  land carbon          %.0f GtC  (vegetation %.0f, passive soil %.0f)\n",
               d$land_C_GtC, d$veg_C_GtC, d$soil_slow_C_GtC))

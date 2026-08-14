@@ -271,3 +271,78 @@ test_that("by_stream decomposes exactly into the total", {
   expect_equal(sum(parts), ccx_loglik(f$out, f$obs, f$err), tolerance = 1e-9)
   expect_true(all(is.finite(parts)))
 })
+
+# ---- 5. the deep-ocean D14C term (2026-08-14) ------------------------
+# Marcus' decision 1 chose sigma = spread / sqrt(n_eff = 20) and, on the same
+# numbers, chose to KEEP the kz bracket. Three of the four tests below guard
+# that decision rather than the arithmetic, because the arithmetic is easy and
+# the decision is what a later session would undo by accident.
+
+test_that("the deep-D14C sigma DERIVES from n_eff, with no second literal", {
+  tg <- ccx_deep_d14c_target()
+  skip_if(is.null(tg), "GLODAPv2 build product absent")
+  # the whole point of computing it: changing LIK_D14C_DEEP_NEFF cannot leave a
+  # stale sigma behind, because there is nowhere for one to hide.
+  expect_equal(tg$sd, tg$sd_spread / sqrt(tg$n_eff), tolerance = 1e-12)
+  expect_equal(ccx_deep_d14c_target(n_eff = 1)$sd, tg$sd_spread, tolerance = 1e-12)
+  expect_equal(tg$n_eff, LIK_D14C_DEEP_NEFF)
+  # THE SPREAD IS NOT THE SIGMA -- 13i sec.A3's assumption, inverted by the data.
+  expect_gt(tg$sd_spread, 4 * tg$sd)
+})
+
+test_that("the term scores the BOTTOM BOX, not the 3-box 'deep' average", {
+  # The target is a volume-weighted GLODAPv2 mean over 2627-3700 m. The older
+  # `d14c_deep_ocean` diagnostic is 1313.6-3700 m. They are NOT interchangeable
+  # and this test exists because they were interchanged once already.
+  tg <- ccx_deep_d14c_target()
+  skip_if(is.null(tg), "GLODAPv2 build product absent")
+  expect_equal(unname(tg$layer[["bottom"]]), ccx_const("OCEAN_DEPTH"))
+  d <- ccx_spinup(ccx_default_params())$diagnostics
+  expect_true(is.finite(d$d14c_bottom_box))
+  # the 3-box slab is materially enriched; if these ever converge the grid has
+  # changed and the target's depth range has to be rebuilt with it.
+  expect_gt(d$d14c_deep_ocean - d$d14c_bottom_box, 10)
+  # the bottom box is the deeper, older water
+  expect_lt(d$d14c_bottom_box, d$d14c_deep_ocean)
+})
+
+test_that("the term HOLDS kz at the chosen sigma -- decision 1's whole basis", {
+  tg <- ccx_deep_d14c_target()
+  skip_if(is.null(tg), "GLODAPv2 build product absent")
+  # The 17-parameter unbounded mode ran kz to 10,686. If this term cannot reject
+  # that on its own, deleting the kz bracket (13i sec.A3's original plan) leaves
+  # the deep ocean unconstrained. Measured: 5.3 sigma at n_eff = 20.
+  p <- ccx_default_params(); p$kz <- 10686
+  runaway <- ccx_spinup(p)$diagnostics$d14c_bottom_box
+  expect_gt(abs(runaway - tg$target) / tg$sd, 2)
+  # ...and the converse, which is why the bracket was NOT deleted: expressed on
+  # this same quantity the bracket is a hard box TIGHTER than the sigma allows,
+  # so deleting it would loosen kz rather than tighten it.
+  lo <- ccx_spinup(within(ccx_default_params(), kz <- 3830))$diagnostics$d14c_bottom_box
+  hi <- ccx_spinup(within(ccx_default_params(), kz <- 6200))$diagnostics$d14c_bottom_box
+  expect_lt((hi - lo) / 2, 3 * tg$sd)
+})
+
+test_that("the deep term is absent without `deep`, Gaussian with it", {
+  skip_if_no_cpp()
+  skip_if(is.null(ccx_deep_d14c_target()), "GLODAPv2 build product absent")
+  f <- lik_fixture()
+  bare <- ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE)
+  # ABSENT, not a silent zero: a missing steady-state value must be visible.
+  expect_false("d14c_deep_ocean" %in% names(bare))
+  tg <- ccx_deep_d14c_target()
+  with_deep <- function(v) ccx_loglik(f$out, f$obs, f$err, deep = v, by_stream = TRUE)
+  parts <- with_deep(tg$target)
+  expect_true("d14c_deep_ocean" %in% names(parts))
+  # at the target the term is the Gaussian normalisation alone
+  expect_equal(unname(parts[["d14c_deep_ocean"]]),
+               stats::dnorm(0, 0, tg$sd, log = TRUE), tolerance = 1e-10)
+  # quadratic: a 2-sigma miss costs 4x a 1-sigma miss
+  cost <- function(z) parts[["d14c_deep_ocean"]] -
+    with_deep(tg$target + z * tg$sd)[["d14c_deep_ocean"]]
+  expect_equal(cost(2), 4 * cost(1), tolerance = 1e-8)
+  expect_equal(cost(1), 0.5, tolerance = 1e-8)
+  # and by_stream still decomposes exactly into the total
+  expect_equal(sum(parts),
+               ccx_loglik(f$out, f$obs, f$err, deep = tg$target), tolerance = 1e-9)
+})

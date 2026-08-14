@@ -26,11 +26,22 @@
 # doi:10.5194/essd-16-2047-2024. Provenance in data-raw/downloads/MANIFEST.csv.
 #
 # THE MODEL'S "DEEP" IS A SPECIFIC LAYER, NOT A MOOD. ccx_ocean_grid(75) puts
-# the bottom of an 11-box column at 2627.2-3700 m (midpoint 3163.6), and
-# `diagnostics$d14c_deep_by_hemi` -- the quantity the kz bracket was bisected on
-# -- IS that layer. So the comparable observation is a volume-weighted mean over
-# 2627-3700 m, and that is the headline row. Other thresholds are reported so
-# the choice is visible rather than buried.
+# the bottom of an 11-box column at 2627.2-3700 m (midpoint 3163.6), so the
+# comparable observation is a volume-weighted mean over 2627-3700 m, and that is
+# the headline row. Other thresholds are reported so the choice is visible
+# rather than buried.
+#
+# CORRECTION 2026-08-14, made the same day: the sentence here originally added
+# that `diagnostics$d14c_deep_by_hemi` -- the quantity the kz bracket was
+# bisected on -- IS that layer. IT IS NOT. That diagnostic takes
+# tail(aux$idx[[h]]$oc, 3), the bottom THREE interior boxes = 1313.6-3700 m,
+# which runs 13-20 permil enriched across the kz bracket (kz 5000: -170.1
+# against the bottom box's -186.4). Scoring this file's 2627-3700 m target
+# against it would have been a ~1.6 sigma layer mismatch, and it is where the
+# handoff's "runaway at 6.1 sigma" came from -- like for like it is 5.3.
+# `diagnostics$d14c_bottom_box` was added to R/spinup.R for this target; the
+# 3-box diagnostics are unchanged because the bracket and every earlier result
+# were derived from them.
 #
 # THREE METHODOLOGICAL CHOICES, none of them silently resolved:
 #  1. WEIGHTING. GLODAP bottles are not spatially uniform (the Atlantic is
