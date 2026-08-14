@@ -3135,3 +3135,108 @@ prescribed exact. A `foss_scale` is the obvious sibling of `luc_scale`, but the 
 strongly degenerate against a CO₂ record that mostly constrains their **sum**, and adding
 a second emission scalar without measuring that degeneracy first is precisely what this
 project's discipline forbids. Flagged, with the arithmetic, not taken.
+
+## 2026-08-14 (cont.) — emission inputs: degeneracy measured, the LUC hemispheric share is TIME-VARYING, and the omitted input seasonality is NOT negligible
+
+Three diagnostics, no model changes. `diag_emission_scale_degeneracy.R`,
+`diag_emission_split_and_season.R`.
+
+### `foss_scale` — identifiable, but low value. NOT added.
+
+The two emission scales are **not degenerate**, and the discriminator is the one predicted
+before the run: **Δ¹⁴C**. Walking along the iso-carbon line (fossil × 504.7 + LUC × 289.3 =
+const) at β 0.75, foss +0.08 / LUC −0.14 costs **82 log-units**, of which Δ¹⁴C supplies
+−104 (NH −61, SH −43) and the ice core −51, partly offset by CO₂ level +45. Fossil carbon
+is ¹⁴C-free by definition; land-use carbon carries the vegetation pool's own ¹⁴C. δ¹³C
+contributes almost nothing (−4), as expected — the two source signatures are similar.
+
+**But the identification is ~10–20× weaker ALONG the iso-carbon direction than across it**
+(hundreds vs thousands of log-units), so a `foss_scale` would be strongly anti-correlated
+with `luc_scale`. And GCB's fossil prior is ±5 % = **25 GtC** against LUC's ±28 % = **81
+GtC**, so the fossil prior admits **3.2× less** carbon movement and would dominate its own
+posterior. **Verdict: add `foss_scale` only if the refit drives `luc_scale` to a prior
+edge** — that is the signal that total-emission error is being forced entirely onto LUC.
+Noted: at β 0.55 the grid argmax sits at foss_scale 0.95, exactly −1σ of GCB's ±5 %; at
+β 0.75 it sits at 1.00. Confounded with β, so not evidence on its own.
+
+### The land-use hemispheric share is TIME-VARYING, and the constant 0.55 is wrong at BOTH ENDS
+
+From OSCAR v3.1's **Regional** sheet — the same sourced file `DATA.md` §3a already uses,
+11 regions, 1701–2018, whose 1750–2018 total reproduces the paper's 206 PgC headline.
+Within-region NH fractions are geographic judgements, not sourced, so everything is carried
+as a bracket:
+
+| period | E_luc GtC | NH lo | **NH central** | NH hi | model uses |
+|---|---|---|---|---|---|
+| 1750–1849 | 27.5 | 0.797 | **0.838** | 0.880 | 0.55 |
+| 1850–1899 | 30.4 | 0.719 | **0.766** | 0.812 | 0.55 |
+| 1900–1949 | 57.2 | 0.600 | **0.668** | 0.735 | 0.55 |
+| 1950–1989 | 54.6 | 0.428 | **0.527** | 0.627 | 0.55 |
+| 1990–2018 | 36.8 | 0.267 | **0.398** | 0.528 | 0.55 |
+| **1750–2018** | **206.4** | 0.539 | **0.620** | 0.700 | 0.55 |
+
+**The share falls monotonically ~0.84 → ~0.40** as clearing moves from temperate NH
+(North America, Europe, FSU, China) to the tropics (Latin America, Sub-Saharan Africa,
+Indonesia). **The conclusion survives the whole bracket:** before 1950 even the LOW bracket
+is ≥ 0.60, and after 1990 even the HIGH bracket is ≤ 0.53. So the model puts **too much
+early land-use carbon in the SH (~23 GtC over 1750–1949) and too much modern land-use
+carbon in the NH (~5 GtC since 1990)**. A constant cannot represent this, whatever value
+it takes.
+
+### ...and the objective cannot see it, which is review §2.3 made concrete
+
+| | MLO−SPO CO₂ grad | δ¹³C grad | Δ logL |
+|---|---|---|---|
+| **observed** (gate 9, 2020s / 13i) | **3.97 ppm** | **−0.074 ‰** | — |
+| as shipped (0.95 / 0.55) | 5.06 | −0.240 | — |
+| LUC NH share 0.40 | 4.66 | −0.223 | **+33.4** |
+| LUC NH share 0.70 | 5.46 | −0.258 | −40.1 |
+| fossil NH share 0.90 | 4.46 | −0.213 | **+3.1** |
+| fossil NH share 0.97 | 5.30 | −0.251 | −2.0 |
+
+**The fossil share moves the CO₂ gradient by 0.84 ppm across 0.90→0.97 — most of the
+model's 1.09 ppm gradient error — for 5.1 log-units of objective.** The share is
+effectively unconstrained by the likelihood while strongly controlling an observable that
+is badly wrong. That is the missing gradient term (review item 5), priced.
+
+**And it answers review §3.4's question negatively:** the provisional shares are **NOT** the
+cause of the δ¹³C gradient miss. Across the whole plausible range the modelled δ¹³C
+gradient moves only −0.213 to −0.258 against an observed −0.074. The 3× error is
+structural, and this line of enquiry is now closed rather than left open.
+
+### The omitted emission seasonality is NOT negligible — it biases the fitted NEP amplitude by ~8 %
+
+Neither input carries any seasonal cycle (DESIGN §3.6, "smooth annual→monthly"). Bounding
+test — amplitudes deliberately **not** sourced, phases from tropical burning (NH dry season
+Dec–Feb, SH Aug–Oct) and NH winter heating:
+
+| imposed | MLO p-p | Δ p-p | Δ seasonal logL |
+|---|---|---|---|
+| LUC A = 0.3 | 4.553 | +0.084 | **+67.0** |
+| LUC A = 0.6 | 4.637 | +0.169 | **+130.1** |
+| *LUC A = 0.6, NH phase Jul (control)* | 4.329 | −0.140 | **−39.9** |
+| fossil A = 0.06 | 4.588 | +0.120 | +61.3 |
+| fossil A = 0.10 | 4.668 | +0.200 | +100.3 |
+| **both (LUC 0.6, fossil 0.10)** | 4.838 | **+0.369** | **+225.8** |
+
+**The headline: +0.369 ppm of omitted input seasonality is almost exactly what moving
+`seas_amp_NH` from 12 to 13 GtC/yr does (+0.373 ppm).** So an omitted input seasonality of
+plausible size is absorbed one-for-one by the single free NEP amplitude, **biasing it high
+by ~8 %** — a physical signal reassigned to the wrong mechanism, which is overfitting in
+its precise sense, in the highest-leverage stream in the whole objective.
+
+**The phase control is what makes this more than "any extra variance helps":** flipping the
+NH land-use peak from January to July turns +130 into **−40**. The gain is phase-specific,
+not amplitude-generic.
+
+**Honest confound, stated:** at default parameters the model's MLO peak-to-peak is 4.47 ppm
+against gate 6's observed 6.86 (2010s), so the seasonal term rewards almost any correctly
+phased amplitude. `seas_amp_NH` is calibrated and would rise to close that gap — which is
+exactly the mechanism of the bias: it rises to cover an amplitude deficit that partly
+belongs to the inputs.
+
+**What this needs: a sourced monthly product for each input** — GFED for biomass burning
+(the seasonal part of E_LUC), and a monthly fossil product for the NH winter cycle. Until
+then the amplitudes above are a bound, not an estimate. **This is a new item for the
+review's ordering**, and on the numbers it belongs alongside item 5 (the gradient terms):
+both are about the model being scored on the wrong statistic.
