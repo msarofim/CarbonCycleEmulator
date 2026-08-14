@@ -75,8 +75,18 @@ struct Aux {
   int carb_iter;
 };
 
+// FERTILISATION FORM. Mirrors CCX_FERT_LOG / CCX_FERT_MM in R/model.R; the two
+// must agree exactly or test-parity.R fails, which is the point.
+#define FERT_LOG 0
+#define FERT_MM  1
+
 struct Par {
   double beta, q10, k_w, kz, w_up, w_out[2], tau_ex;
+  // CO2 fertilisation form and the saturating pair. `fert_form` selects which
+  // of beta / (beta_max, fert_k) is live; the other is inert. See the long note
+  // above CCX_FERT_FORM_DEFAULT in R/model.R for why a second form exists.
+  int fert_form;
+  double beta_max, fert_k;
   // THE CONVEYOR (2026-08-13). q_conv in Sv; 0 emits nothing, so the
   // pure-diffusion column is bit-reproduced. conv_sink is the interior layer
   // the sinking limb feeds (1..NL), conv_descent 0 = non-local plume / 1 =
@@ -232,7 +242,18 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     const double veg_C = y[IX(ilef, C)] + y[IX(iwod, C)];
     const double capacity = (1.0 - P.npp_veg_frac)
                             + P.npp_veg_frac * veg_C / veg0_h;
-    const double npp = npp0_h * capacity * (1.0 + P.beta * std::log(chi_safe / A.chi0));
+    // The ONLY other copy of ccx_fert_factor(); test-parity.R gates them.
+    double fert;
+    if (P.fert_form == FERT_LOG) {
+      fert = 1.0 + P.beta * std::log(chi_safe / A.chi0);
+    } else {
+      const double d = chi - A.chi0;
+      const double kk = (P.fert_k > 1e-6) ? P.fert_k : 1e-6;
+      const double den = (kk + d > 1e-6) ? (kk + d) : 1e-6;
+      fert = 1.0 + P.beta_max * d / den;
+      if (fert < 0.0) fert = 0.0;
+    }
+    const double npp = npp0_h * capacity * fert;
 
     const double npp_leaf = npp * P.npp_leaf_frac;
     const double npp_wood = npp * (1.0 - P.npp_leaf_frac);
@@ -431,6 +452,8 @@ static Aux unpack_aux(const List& a) {
 static Par unpack_par(const List& p) {
   Par P;
   P.beta = p["beta"]; P.q10 = p["q10"];
+  P.fert_form = p["fert_form"];
+  P.beta_max = p["beta_max"]; P.fert_k = p["fert_k"];
   P.npp_leaf_frac = p["npp_leaf_frac"];
   P.tau_leaf = p["tau_leaf"]; P.tau_wood = p["tau_wood"];
   P.litter_slow_frac = p["litter_slow_frac"];

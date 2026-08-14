@@ -149,6 +149,82 @@ CCX_LUC_CLEARED_MAX    <- 0.9
 #' third option nobody has costed. Logged, not built.
 CCX_F_LUC_WOOD_DEFAULT <- 0
 
+# ---------------------------------------------------------------------
+# CO2 fertilisation: the functional FORM
+# ---------------------------------------------------------------------
+#' Fertilisation form codes. Structural, like `revelle_frozen` and the conveyor
+#' geometry: they select a mechanism, they do not tune one.
+CCX_FERT_LOG <- 0L    # NPP = NPP0 (1 + beta ln(chi/chi0))       -- the incumbent
+CCX_FERT_MM  <- 1L    # NPP = NPP0 (1 + beta_max dchi/(K + dchi)) -- saturating
+
+#' WHY A SECOND FORM EXISTS (review 2026-08-14 sec.4.1, item 7).
+#'
+#' The log form has ONE parameter controlling TWO things the data want to set
+#' independently:
+#'   * the INTEGRAL -- cumulative historical land uptake, which the CO2 record
+#'     and GCB's land sink both bear on;
+#'   * the DERIVATIVE at today's CO2, dNPP/dchi = beta NPP0 / chi, which is what
+#'     a PULSE sees, and therefore what DESIGN sec.6 gate 12 (Joos IRF) and the
+#'     Pulse Lab's Revelle lesson both bear on.
+#' The ratio between them is fixed by the functional form; beta only slides
+#' along it. At beta 0.75, chi 388: 0.75 * 60 / 388 = 0.116 GtC/yr/ppm, where
+#' gate 12 passes only at 0.062-0.077. TWO INDEPENDENT CRITERIA -- a 15-model
+#' literature benchmark (Joos et al. 2013, via diag_joos_beta_scan.R) and the
+#' app's own pedagogical claim -- put the same ceiling on beta at ~0.50, and
+#' neither was used to set it. That is a structural failure, not a tuning miss.
+#'
+#' MICHAELIS-MENTEN, and not merely "something that saturates". Photosynthetic
+#' carboxylation is an enzyme reaction, and enzyme reactions saturate in exactly
+#' this shape -- so the replacement is the one form whose one-sentence
+#' explanation an undergraduate already has ("Rubisco can only work so fast").
+#' A bounded exponential would also decouple integral from derivative, but it
+#' saturates far harder in the tail and has no comparable story.
+#'
+#' THE PARAMETERS ARE BOTH READABLE, which matters for a teaching model:
+#'   beta_max  the fractional NPP enhancement at INFINITE CO2 (asymptote - 1)
+#'   fert_k    the CO2 increment ABOVE PREINDUSTRIAL, in ppm, at which HALF of
+#'             beta_max is realised
+#'
+#' NOT A LIMIT OF THE LOG FORM. As fert_k -> Inf with beta_max/fert_k fixed, MM
+#' goes LINEAR, not logarithmic. So `beta` does not map onto (beta_max, fert_k)
+#' by any substitution, and a fit under one form is not a fit under the other.
+#' Both parameter sets are carried; `fert_form` selects which is live and the
+#' other is INERT (gated by test-fertilisation.R in both directions).
+#'
+#' DEFAULT IS STILL THE LOG FORM. Marcus deferred the beta default to this item
+#' (decision 2, 2026-08-14) and has not yet been shown the fitted numbers, so
+#' flipping the default here would resolve his decision for him. Nothing about
+#' the two failing gates has moved: this commit adds the mechanism and the
+#' diagnostic that prices it.
+CCX_FERT_FORM_DEFAULT <- CCX_FERT_LOG
+
+#' The fertilisation multiplier on NPP0, as a function of atmospheric CO2.
+#'
+#' Factored out of ccx_deriv() so that diagnostics, the app and the design-target
+#' arithmetic all read the SAME function the model integrates, rather than a
+#' re-typed copy of it. `src/ccx_core.cpp` carries the only other copy and
+#' test-parity.R gates the two against each other.
+#'
+#' @param chi atmospheric CO2, ppm (vectorised)
+#' @param p   parameter list; uses `fert_form` and then either `beta` or
+#'   (`beta_max`, `fert_k`)
+#' @param chi0 preindustrial CO2, ppm -- `aux$chi0` inside the model
+ccx_fert_factor <- function(chi, p, chi0 = ccx_const("CO2_PI_PPM")) {
+  form <- if (is.null(p$fert_form)) CCX_FERT_FORM_DEFAULT else as.integer(p$fert_form)
+  if (form == CCX_FERT_LOG)
+    return(1 + p$beta * log(pmax(chi, 1e-6) / chi0))
+  # MM. The denominator is floored because dchi -> -fert_k is a pole: it sits at
+  # chi = chi0 - fert_k, ~106 ppm at the provisional default, which no scenario
+  # reaches but a sampler or an app slider could. Below the pole NPP would flip
+  # sign, so the factor is floored at 0 as well -- NPP cannot be negative, and
+  # a hard floor fails visibly where an unguarded pole fails as a fitted value.
+  # (The log path is left EXACTLY as it was, pole and all, so this commit cannot
+  # move a single existing number.)
+  d  <- chi - chi0
+  kk <- max(p$fert_k, 1e-6)
+  pmax(1 + p$beta_max * d / pmax(kk + d, 1e-6), 0)
+}
+
 #' Pro-rata shares of the four land pools, by preindustrial equilibrium stock.
 #'
 #' These are exactly the terms `aux$land0` sums, normalised -- so a debit split
@@ -244,6 +320,32 @@ ccx_default_params <- function() {
     # beta is calibrated; the mode-find is what actually sets it. See
     # R/calibrate.R.
     beta      = 0.75,
+    # ---- the saturating alternative (2026-08-14, review item 7) --------
+    # INERT AT THE DEFAULT. fert_form = CCX_FERT_LOG, so beta above is live and
+    # the two below do nothing; test-fertilisation.R gates that in both
+    # directions, because an inert parameter that quietly becomes live is how
+    # `luc_scale` would have gone wrong if it had been put in this list.
+    #
+    # PROVISIONAL VALUES, and they are ARITHMETIC, NOT A FIT. They are the pair
+    # that solves review sec.4.1's design target exactly:
+    #   (a) match the log form at beta 0.70's NPP enhancement at 388 ppm
+    #       (0.70 ln(388/276.88) = 0.2363), so the historical INTEGRAL is
+    #       preserved -- that is what the CO2 record and GCB's land sink buy;
+    #   (b) hold dNPP/dchi at 388 ppm at or below the beta-0.50 value
+    #       0.5 * 60/388 = 0.0773 GtC/yr/ppm, which is what gate 12 and the
+    #       Revelle lesson buy.
+    # (a) fixes beta_max given fert_k; (b) then caps fert_k at 171. fert_k 140
+    # is taken with deliberate margin -- at the cap the marginal slope EQUALS
+    # beta 0.50's, and the Joos scan puts beta 0.50's 20-yr IRF exactly on the
+    # 5th percentile. beta_max follows from (a) at that fert_k.
+    #
+    # THE FIT IS WHAT SHOULD SET THESE. calibration/diag_fert_saturating.R
+    # scans the (beta_max, fert_k) plane against the full log-posterior AND all
+    # four DESIGN gates; these two numbers are a defensible starting point, not
+    # its answer. Do not quote them as calibrated.
+    fert_form = CCX_FERT_FORM_DEFAULT,
+    beta_max  = 0.5338,   # fractional NPP enhancement at infinite CO2
+    fert_k    = 140,      # ppm above preindustrial for half of beta_max
     q10       = 2.0,      # heterotrophic respiration temperature sensitivity
     # ---- land pool structure ------------------------------------------
     # Defaults chosen by diag_land_topology.R [3], the layout of lowest misfit
@@ -572,7 +674,10 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 
     veg_C <- y[ilef, "C"] + y[iwod, "C"]
     capacity <- (1 - p$npp_veg_frac) + p$npp_veg_frac * veg_C / veg0_h
-    npp <- npp0_h * capacity * (1 + p$beta * log(max(chi, 1e-6) / aux$chi0))
+    # FERTILISATION -- the form is selected by p$fert_form, and the ONE
+    # implementation lives in ccx_fert_factor() so this line and the C++ core
+    # cannot drift apart from the diagnostics that price them.
+    npp <- npp0_h * capacity * ccx_fert_factor(chi, p, aux$chi0)
 
     # GROSS PHOTOSYNTHESIS AND AUTOTROPHIC RESPIRATION. `ra_ratio` is Ra/NPP, so
     # GPP = NPP * (1 + ra_ratio) down and Ra = NPP * ra_ratio back up. The NET

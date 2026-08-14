@@ -1,0 +1,32 @@
+
+########## diag_joos_beta_scan: MM, beta_max = 0.4913, fert_k = 120 ##########
+########## marginal dNPP/dchi at 388 ppm = 0.0662 GtC/yr/ppm (log-equivalent beta 0.428) ##########
+    background held to 1.133 ppm of 387.82 (0.29 %); mean diagnosed emission 1.37 GtC/yr
+
+=== 1. BACKGROUND CHECK (Joos run 1: CO2 held constant) ===
+  target 387.82 ppm; max deviation over 300 yr: 1.133 ppm (0.29 %)
+  Joos's PD100 background is 389 ppm; this model's is 388 ppm at 2010.
+
+=== 2. POINT IRF vs JOOS TABLE 5 (multi-model mean) ===
+      yr   this model      Joos T5       diff
+      20        0.520        0.596     -0.077
+      50        0.378        0.487     -0.109
+     100        0.292        0.409     -0.117
+     300        0.207        0.322     -0.115
+
+=== 3. TIME-INTEGRATED IRF vs JOOS TABLE 4 (yr) ===
+    TH   this model    Joos best        Joos 5-95 %  verdict
+    20         12.4         14.2     12.2 - 16.3     inside
+    50         25.6         30.3     24.0 - 36.6     inside
+   100         41.9         52.4     39.5 - 65.2     inside
+
+=== 4. THE BACKGROUND PROTOCOL IS NOT A DETAIL ===
+case                         IRF@20  IRF@100  IRF@300 |   int IRF @100
+PD, background HELD           0.561    0.297    0.208 |           44.7
+PD, background decaying       0.530    0.244    0.173 |           40.3
+PI, background HELD           0.315    0.152    0.107 |           25.6
+PI, background decaying       0.316    0.154    0.115 |           25.6
+  Joos sec.4.4.1, integrated IRF at TH=100 across 10 models:
+    preindustrial background 34-47 yr ; present-day 45-62 yr
+  The PI-lower-than-PD ordering is Joos's own and the model must reproduce
+  the SIGN of it: a fuller ocean buffers less, so a pulse lasts longer.

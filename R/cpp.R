@@ -65,6 +65,16 @@ ccx_cpp_par <- function(p) {
   # reach the C++ with a missing name -- which unpacks as garbage, not an error.
   if (is.null(p$npp_veg_frac)) p$npp_veg_frac <- 0
   if (is.null(p$ra_ratio)) p$ra_ratio <- 0
+  # Fertilisation form, added 2026-08-14. Defaults to the SAME named constant
+  # ccx_default_params() uses -- and that constant is the LOG form, so a
+  # parameter list built before today reaches the core as the model it was
+  # written for. beta_max / fert_k are inert under FERT_LOG but must still be
+  # present and finite: unpack_par reads them unconditionally, and a missing
+  # name unpacks as garbage rather than as an error.
+  if (is.null(p$fert_form)) p$fert_form <- CCX_FERT_FORM_DEFAULT
+  p$fert_form <- as.integer(p$fert_form)
+  if (is.null(p$beta_max)) p$beta_max <- 0
+  if (is.null(p$fert_k)) p$fert_k <- 1
   # Ocean overturning added 2026-08-13, default OFF. Same reasoning as above: a
   # parameter list built before that date must reach the core as the
   # pure-diffusion model it was written for, not as garbage.
@@ -103,7 +113,8 @@ ccx_cpp_par <- function(p) {
     stop("parameter list is missing the land structure: ",
          paste(miss, collapse = ", "), extra)
   }
-  p[c("beta", "q10", "k_w", "kz", "w_up", "w_out_NH", "w_out_SH", "tau_ex",
+  p[c("beta", "fert_form", "beta_max", "fert_k",
+      "q10", "k_w", "kz", "w_up", "w_out_NH", "w_out_SH", "tau_ex",
       "q_conv", "conv_sink", "conv_descent", "conv_reverse",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",

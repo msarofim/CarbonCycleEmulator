@@ -3401,3 +3401,105 @@ number. If representation error is wanted it belongs in that constant, visibly.
 `(out, obs, err, luc, deep, by_stream)`. Every caller in the repo passes `by_stream =` by
 name so nothing broke, but a positional 5th argument now means `by_stream` and a positional
 4th means `luc`. Name them.
+
+## 2026-08-14 (cont.) — REVIEW ITEM 7: the saturating fertilisation form is BUILT, and it does what the log form provably cannot
+
+**Status: mechanism built, gates measured, DEFAULT NOT MOVED.** `fert_form` still
+selects `CCX_FERT_LOG` and `beta` is still 0.75, so nothing in the repo has changed value.
+Marcus deferred the β default *to* this item (decision 2), and flipping it here would resolve
+his decision for him — the numbers are below and the decision is his.
+
+### The defect, restated as arithmetic
+
+`NPP = NPP₀(1 + β ln(χ/χ₀))` locks the **enhancement** at today's CO₂ and the **slope** at
+today's CO₂ into a fixed ratio (χ/χ₀), so β slides along it and cannot move one without the
+other. The CO₂ record wants β 0.75; Joos gate 12 and the Revelle lesson both want ≤ 0.50.
+
+### The replacement
+
+Michaelis–Menten, `CCX_FERT_MM`: `NPP = NPP₀(1 + β_max·Δχ/(K + Δχ))`, Δχ = χ − χ₀, with
+`beta_max` = fractional enhancement at infinite CO₂ and `fert_k` = the CO₂ increment above
+preindustrial delivering half of it. Chosen over a bounded exponential because carboxylation
+*is* an enzyme reaction, so the saturation has a one-sentence undergraduate explanation.
+
+**Not a limit of the log form.** As `fert_k → ∞` MM goes *linear*, not logarithmic, so `beta`
+does not map onto (`beta_max`, `fert_k`) by any substitution and a fit under one form is not
+a fit under the other.
+
+### The decoupling, measured on the design-target locus
+
+Fixing `beta_max` by criterion (a) — match log β 0.70's enhancement at 388 ppm — and sweeping
+`fert_k`:
+
+| | enh@388 | slope@388 | ratio@1998 |
+|---|---|---|---|
+| log β 0.50 | 0.169 | 0.0773 | 1.99 |
+| log β 0.75 (shipped) | 0.253 | **0.1160** | **2.48** |
+| MM K=60 | 0.236 | 0.0447 | 1.35 |
+| MM K=120 | 0.236 | 0.0662 | 1.46 |
+| MM K=300 | 0.236 | 0.0931 | 1.74 |
+
+The log rows move enhancement and slope **together**; the MM rows hold enhancement fixed
+while the slope varies **2.1×**. Criterion (b) — slope ≤ β 0.50's 0.0773 — caps `fert_k` at
+**171**; criterion (c) is met with room at every K.
+
+### The gates, all four, at the shortlist
+
+| case | loglik | CO₂ bias | z_land | z_ocean | gate 12 (Joos IRF 20/50/100) | Revelle lesson |
+|---|---|---|---|---|---|---|
+| **log β 0.75 (shipped)** | −3793 | **+3.34** | **+4.57** | −2.13 | **10.4/19.9/31.2 FAIL ×3** | **−0.113 REVERSED** |
+| log β 0.50 | −9790 | −20.9 | +1.71 | −1.11 | 12.2/25.0/41.1 on the floor | +0.078 holds |
+| MM K=100 | −3847 | +0.52 | +2.03 | −1.46 | — | +0.590 HOLDS |
+| **MM K=120** | **−3760** | **+0.14** | **+2.28** | −1.52 | **12.4/25.6/41.9 INSIDE ×3** | **+0.566 HOLDS** |
+| MM K=140 | −3725 | −0.12 | +2.50 | −1.57 | 12.2/25.0/40.8 inside, on the floor | +0.540 HOLDS |
+| MM K=171 | **−3720** | −0.40 | +2.76 | −1.64 | 12.0/24.3/**39.4 FAIL** @20 & @100 | +0.498 HOLDS |
+
+(Joos Table 4 5–95 %: 12.2–16.3 / 24.0–36.6 / 39.5–65.2. z on GCB's stated σ: land 0.5,
+ocean 0.4.)
+
+**MM K=120 beats the shipped default on the log-likelihood (−3760 vs −3793) while cutting the
+CO₂ bias from +3.34 to +0.14 ppm, halving the land-sink miss (4.57σ → 2.28σ), passing gate 12
+at all three horizons with margin, and restoring the Revelle lesson from −0.113 to +0.566.**
+No value of β can do any two of those at once — that is the structural claim, discharged.
+
+Gate 12 caps `fert_k` at ≈150 on the criterion-(a) locus, so the likelihood's own preference
+(K 171) is just outside it. **That residual tension is real and is what the refit must settle.**
+
+### Two things that came out NEGATIVE, recorded as such
+
+- **`luc_scale` does NOT stack with this.** The obvious move — MM to fix the pulse, `luc_scale`
+  to close gate 7 — makes things worse: at `luc_scale` 0.70 the CO₂ bias goes +0.14 → **+15.5
+  ppm** and z_land gets *worse* (2.28 → 2.46). With the fertilisation parameters held there is
+  no β left to relax, so the CO₂ bias absorbs the whole change. The two levers are partially
+  **redundant** — MM at `luc_scale` = 1 already delivers the near-zero CO₂ bias `luc_scale` was
+  introduced to buy. **The handoff's β 0.55 / `luc_scale` 0.70 settlement does not carry over
+  to this form**; item 8's joint refit is what decides between them.
+- **Matching the enhancement at 388 ppm does NOT match the historical integral.** The two forms
+  cross at 388 by construction and disagree on both sides (MM is more responsive below, less
+  above), and `cum_land` is not independent of `co2_bias` anyway. The integral is bought
+  *through* the CO₂ record, so `co2_bias`/loglik are the columns that price it. The shortlist
+  is built on those, not on `cum_land`.
+
+### Flagged, not resolved
+
+The high-background airborne fraction MM produces is **large and unbenchmarked** — 0.78 at
++100 yr on SSP5-8.5 (~1998 ppm) against the log form's 0.10. Gate 12 and Joos et al. (2013)
+are both at a ~389 ppm background, so nothing in the literature set scores this. What the form
+asserts is that at ~7× preindustrial CO₂ the land sink is close to saturated. That is a **model
+claim at the far end of the app's own slider**, not a fitted result — but the log form's answer
+there is not a safe fallback: it says the same pulse nearly vanishes in 100 years, which is
+worse and in the direction that flatters the scenario.
+
+### Files
+
+`R/model.R` (`CCX_FERT_LOG`/`CCX_FERT_MM`, `CCX_FERT_FORM_DEFAULT`, `ccx_fert_factor()`,
+three new params, the `ccx_deriv()` call site), `src/ccx_core.cpp` (the only other copy of the
+factor), `R/cpp.R` (packing + defaults for pre-today parameter lists),
+`calibration/diag_fert_saturating.R` (**new** — the locus, historical runs, gate 7, the
+`luc_scale` negative result), `calibration/diag_fert_pulse_gates.R` (**new** — the Revelle
+lesson), `calibration/diag_joos_beta_scan.R` (`CCX_FERT_*` env vars),
+`tests/testthat/test-fertilisation.R` (**new**, 25 assertions).
+
+**Suite still 11 failing, the same 11** — the default did not move, so nothing could. The five
+`test-pulse.R` failures are exactly what the MM form fixes, and they will keep failing until
+the default flips. **Leave them failing until then.**

@@ -146,6 +146,23 @@ JOOS_PD100_100 <- c(45, 62)
 
 p0 <- ccx_default_params()
 p0$beta <- as.numeric(Sys.getenv("CCX_JOOS_BETA", unset = as.character(p0$beta)))
+# SATURATING FORM (2026-08-14, review item 7). The gate this file measures is
+# precisely the one the log form cannot pass at the beta the CO2 record wants,
+# so the replacement form has to be scoreable HERE or the item is unfinished.
+# Env-var override, same convention as CCX_JOOS_BETA:
+#   CCX_FERT_FORM=1 CCX_FERT_BETA_MAX=0.5338 CCX_FERT_K=140 Rscript ...
+# Unset -> ccx_default_params(), i.e. the log form, i.e. every earlier number in
+# this file's header stands unchanged.
+p0$fert_form <- as.integer(Sys.getenv("CCX_FERT_FORM", unset = as.character(p0$fert_form)))
+p0$beta_max  <- as.numeric(Sys.getenv("CCX_FERT_BETA_MAX", unset = as.character(p0$beta_max)))
+p0$fert_k    <- as.numeric(Sys.getenv("CCX_FERT_K", unset = as.character(p0$fert_k)))
+if (p0$fert_form == CCX_FERT_MM) {
+  cat(sprintf("\n########## diag_joos_beta_scan: MM, beta_max = %.4f, fert_k = %.0f ##########\n",
+              p0$beta_max, p0$fert_k))
+  cat(sprintf("########## marginal dNPP/dchi at 388 ppm = %.4f GtC/yr/ppm (log-equivalent beta %.3f) ##########\n",
+              60 * p0$beta_max * p0$fert_k / (p0$fert_k + 388 - ccx_const("CO2_PI_PPM"))^2,
+              60 * p0$beta_max * p0$fert_k / (p0$fert_k + 388 - ccx_const("CO2_PI_PPM"))^2 * 388 / 60))
+} else
 cat(sprintf("\n########## diag_joos_beta_scan: beta = %.3f ##########\n", p0$beta))
 spin <- ccx_spinup(p0)
 
