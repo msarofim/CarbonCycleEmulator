@@ -2650,3 +2650,75 @@ the spinup's zero forcing has no LUC flux, so `ccx_forcing_cum_luc()` returns ze
 cleared fraction is zero. A forcing that carries LUC emissions and *no* `cum_luc` is an
 **error**, not a zero-default — defaulting it would restore the bug through a code path
 nobody chose.
+
+## 2026-08-13 (i) — Answering "is there a path forward?": the q10 inversion was the LUC bug
+
+Two diagnostics, both written to answer Marcus' question, and one of them **overturns an
+attribution this repo has carried since 2026-08-12**.
+
+### `diag_d13c_partition_refit.R` — the obvious hope, tested and FAILED
+
+`diag_d13c_suess.R` §3's verdict — "δ¹³C and CO₂ cannot both be satisfied by any partition
+this model can reach" — was computed on the model whose land had the **wrong sign**
+(+29.4 GtC where GCB says −57.4). It had to be re-run. **It survives.**
+
+| | β that zeroes δ¹³C | β that zeroes CO₂ | gap |
+|---|---|---|---|
+| `f_luc_perm = 0` | 0.93 | 0.36 | **0.57** |
+| `f_luc_perm = 1` | 1.18 | 0.59 | **0.59** |
+
+Both crossings move up by ~0.24; **the gap does not close.** The converted-land term does
+not relieve the δ¹³C misfit, and no one should expect it to. Recorded as a **measured
+negative** so the hope is not re-formed later.
+
+*A unit trap this file fixes:* §3 compared `mean(diff(land_C))` with GCB's `land_sink`.
+Those were nearly the same quantity while LUC was being regrown and are **not** now —
+`diff(land_C)` is the net land flux (sink *minus* LUC), GCB's `land_sink` is the residual
+sink alone. The gross sink is `diff(land_C) + LUC`, and that is what the share uses here.
+
+### `diag_which_stream_pays.R` — and this one is the finding
+
+`diag_d13c_suess.R` states: "the calibration's only remaining way to relieve [the δ¹³C
+bias] is to manufacture land sink — which is what q10 → 0.17 is doing." That is an
+attribution, and it had never been measured. A (β, q10) slice at the mode, scoring each
+stream separately via `ccx_loglik(by_stream = TRUE)`:
+
+| stream | optimum, `f_luc_perm = 0` | optimum, `f_luc_perm = 1` |
+|---|---|---|
+| CO₂ | β 0.10, q10 0.20 | β 0.50, **q10 1.50** |
+| δ¹³C | β 0.70, q10 0.50 | β 0.90, q10 0.20 |
+| Δ¹⁴C | β 0.30, q10 2.50 | β 0.70, q10 2.50 |
+| **total** | **β 0.10, q10 0.20** | **β 0.50, q10 1.50** |
+| `mode_fit.rds` (fitted on `f_luc_perm = 0`) | β 0.088, q10 0.169 | |
+
+**δ¹³C is not what drives q10 down.** At the mode's own `sigma_d13c` = 0.44 ‰ its surface
+is flat to **~3 log-units** across the entire q10 range, while CO₂'s falls **3200**. CO₂ is
+the sharp stream in q10 — and on the fixed model it wants **q10 = 1.5 and β = 0.50, both
+defensible**. Cost of moving to β 0.5 / q10 2.0: CO₂ 39.9 log-units, δ¹³C 2.8, Δ¹⁴C 0.2.
+
+**The control is what makes it an attribution.** On the buggy model the same slice puts the
+total optimum at the grid **corner** (0.10, 0.20) — at or beyond the edge — reproducing
+`mode_fit.rds`'s (0.088, 0.169). **The q10 inversion was the land-use regrowth bug forcing
+a compensating low-β/low-q10 pair.** With the land illegitimately absorbing every tonne of
+LUC carbon, the sampler had to kill the other land sink (β) and then invert the soil
+temperature response (q10 < 1 makes respiration *fall* as soil warms — the wrong sign) to
+recover the CO₂ trajectory.
+
+**Bounded, not settled:** the other 14 parameters are held at values themselves fitted to
+the bug. The refit decides it. Two claims deliberately *not* made: no comparison of this
+model's β to C4MIP's (different quantity — `reference_arora2020_c4mip_gamma` is γ_L), and
+q10's indefensibility is argued from its **sign**, which needs no citation.
+
+### What still does not match, and where that points
+
+At the slice optimum the model's 2015–2024 **land sink is 3.41 GtC/yr against GCB's 2.36,
+and its ocean sink 2.99 against 3.22.** Land too strong, ocean too weak — and the ocean is
+the reservoir with the known structural deficiency (inventory ~14 % low, **no vertical DIC
+or δ¹³C gradient at all**, `kz` 9× Ledwell's NATRE value). That is where the biological
+pump case now lives, and it is a stronger case than before: those two gradients are
+**exactly zero** in the model and therefore entirely unused as constraints, so any pump
+improves two measured mismatches — and its gradient is set by export ÷ ventilation, which
+constrains ventilation **without** first settling the deep-Δ¹⁴C target.
+
+**The pump's effect on atmospheric δ¹³C remains sign-unknown** (13e §7 said so; nothing
+here changes it). Do not adopt it expecting the δ¹³C misfit to close.
