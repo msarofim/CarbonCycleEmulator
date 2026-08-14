@@ -110,11 +110,44 @@ CCX_LUC_CLEARED_MAX    <- 0.9
 #' Measured consequence: the 100-yr airborne fraction of a land-use pulse is
 #' about HALF a fossil pulse's at f_luc_wood = 1 (calibration/diag_luc_prorata.R).
 #'
-#' EXISTS AS A SWITCH, NOT A DECISION. Handoff 13h sec.2.1b makes the choice
-#' Marcus', on measured numbers, and the default is the incumbent so that adding
-#' the switch changes no result. See also CCX_F_LUC_PERM_DEFAULT's note on why a
-#' default must be stated once and shared with ccx_cpp_par().
-CCX_F_LUC_WOOD_DEFAULT <- 1
+#' DECIDED 2026-08-13: PRO RATA (0). Marcus delegated this one on the grounds of
+#' physical realism; the three reasons, in the order they carry weight:
+#'
+#' 1. It is the mass-consistent partner to the term it lives with. The
+#'    converted-land term says a fraction c of the land is no longer forest and
+#'    lowers ALL FOUR pools' equilibria by c. Clearing a fraction of the land
+#'    physically removes that fraction of what is on AND in it -- the wood and
+#'    the soil carbon under it. Taking the whole debit from wood removes
+#'    c * land0 of carbon from a pool that holds 22.5 % of it, which leaves the
+#'    surviving land's wood depleted against its own unchanged per-area
+#'    equilibrium. Nothing physical does that.
+#' 2. E_LUC IS ALREADY TIMING-RESOLVED. GCB's bookkeeping models track the slow
+#'    post-clearing soil-carbon decline explicitly, so a given year's E_LUC is a
+#'    mixture of fast vegetation loss and legacy soil loss from clearing decades
+#'    earlier. The model does not need to re-impose a vegetation-only timing on
+#'    a flux that already carries the real one; it needs to take the carbon from
+#'    where the bookkeeping took it, which integrated over the legacy is close to
+#'    stock-weighted.
+#' 3. Wood-only leaves a weakened version of the bug 404d66d was written to fix.
+#'    Measured: the LUC/fossil airborne-fraction ratio is 0.50 at 100 yr under
+#'    wood-only and 1.02 under pro rata, at every horizon 50-200 yr. Half of
+#'    each land-use tonne still comes back.
+#'
+#' WHAT IT GIVES UP, stated because it is a real cost and not a small one: the
+#' 2026-08-12 call that the emitted carbon carries WOOD's lagged 14C. Pro rata
+#' it carries a stock-weighted mixture the 500-yr soil dominates, and at 2024
+#' the debit's own D14C goes +57.1 -> -10.1 permil -- in the bomb era it flips
+#' from bomb-enriched to depleted. That is defensible for a flux that includes
+#' legacy soil respiration, and it is a prediction the 14C streams can score.
+#'
+#' THE CAVEAT THIS DOES NOT SOLVE, and it is reason 2's limit. For a SINGLE
+#' clearing event the debit should be fast out of vegetation and slow out of
+#' soil; pro rata takes 70 % of it out of a 500-yr pool instantaneously. That is
+#' wrong for the app's "what if we cleared X" scenario even though it is right
+#' for the historical E_LUC record. A timing-resolved debit -- fast from veg,
+#' slow from soil, with the split a function of years since clearing -- is the
+#' third option nobody has costed. Logged, not built.
+CCX_F_LUC_WOOD_DEFAULT <- 0
 
 #' Pro-rata shares of the four land pools, by preindustrial equilibrium stock.
 #'
@@ -169,40 +202,48 @@ ccx_ocean_grid <- function(h_ml, total_depth = ccx_const("OCEAN_DEPTH"),
 ccx_default_params <- function() {
   list(
     # CO2 fertilization, NPP = NPP0 (1 + beta ln(chi/chi0)).
-    # RE-CENTRED 2026-08-13 from 0.38 to 0.60 on the converted-land model.
-    # 0.38 was set on 2026-08-12 as the 1-D log-posterior optimum of the model
-    # that PRECEDED 404d66d, in which land-use emissions had an airborne
-    # fraction of 0.002 -- i.e. it was centred against the bug, and on the
-    # shipped model it leaves CO2 20.0 ppm high over 2015-2024.
+    # RE-CENTRED TWICE ON 2026-08-13, and the second move is the one that
+    # stands. 0.38 was set on 2026-08-12 as the 1-D log-posterior optimum of the
+    # model that PRECEDED 404d66d, in which land-use emissions had an airborne
+    # fraction of 0.002 -- i.e. against the bug. On the converted-land model
+    # with the wood-only debit that criterion gave 0.60; the debit then went
+    # PRO RATA (see CCX_F_LUC_WOOD_DEFAULT), which lowers CO2 again, and the
+    # same criterion now gives 0.75.
     #
-    # 0.60 is not one criterion's answer, it is where four of them agree
-    # (calibration/diag_recentre_beta.R, 0.05 grid, q10 at its default 2.0):
-    #   zero of the 2015-2024 MLO CO2 bias                    0.591
-    #   CO2 stream's own 1-D optimum (level+seasonal+icecore)  0.597-0.599
-    #   full 1-D log-posterior at mode_fit's sigmas            0.597
-    #   full 1-D log-posterior at the CCX_PARAM_TABLE sigmas   0.617
-    # The last is the only one that differs, and it differs by 0.02: at
-    # sigma_d13c = 0.44 permil the d13C stream moves the joint optimum by less
-    # than the grid. THAT is why the default can be set while sigma_d13c is
-    # still undecided (handoff 13h sec.2.1c) -- measured, not assumed.
+    # Measured (calibration/diag_recentre_beta.R, 0.05 grid, q10 at 2.0), at
+    # f_luc_wood = 0:
+    #   CO2 stream's own 1-D optimum (level+seasonal+icecore)  0.753-0.757
+    #   full 1-D log-posterior at mode_fit's sigmas            0.753
+    #   full 1-D log-posterior at the CCX_PARAM_TABLE sigmas   0.770
+    #   zero of the 2015-2024 MLO CO2 bias                     0.712
+    # THE SPREAD WIDENED. Under the wood-only debit all four agreed to 0.006;
+    # under pro rata the decade-level criterion sits 0.04 below the three
+    # whole-record ones. The default tracks the 1-D log-posterior optimum, which
+    # is the criterion it has always tracked, and the three whole-record numbers
+    # cluster at ~0.755 -- so 0.75. The 2015-2024 level bias there is +3.3 ppm.
+    #
+    # sigma_d13c is left FREE (Marcus 2026-08-13) and moves this by 0.017, less
+    # than the grid, so the default does not depend on how the refit sets it.
     #
     # WHAT IT COSTS, and it is not small. GCB's `land_sink` is the RESIDUAL sink
     # alone; the model's mean(diff(land_C)) is the NET land flux, sink MINUS
     # E_LUC. Comparing them directly is a unit trap this repo has fallen into
-    # before (see diag_d13c_partition_refit's note). Like for like, 2015-2024:
-    #   beta 0.38  gross land sink 2.74 (GCB 2.36, +16 %)  ocean 2.87 (GCB 3.22)
-    #   beta 0.60  gross land sink 3.99 (GCB 2.36, +69 %)  ocean 2.52 (GCB 3.22)
-    # So the beta that matches the CO2 RECORD makes the sink PARTITION worse:
-    # the land takes up 69 % more than GCB attributes to it and the ocean 22 %
-    # less. Cumulatively 1750-2024 the same tension reads as land +21.7 GtC
-    # against GCB's -57.4. That conflict is NOT resolvable by beta -- it is the
-    # residual PHASE 3 (the biological pump) is aimed at -- and it is the reason
-    # this default is a fixture chosen by ONE criterion, stated, not a claim
-    # that the model's carbon partition is right.
+    # before (see diag_d13c_partition_refit's note). Like for like, 2015-2024,
+    # against GCB's gross land 2.36 and ocean 3.22 GtC/yr:
+    #   f_luc_wood 1, beta 0.60   gross land 3.99 (+69 %)   ocean 2.52 (-22 %)
+    #   f_luc_wood 0, beta 0.75   gross land 4.57 (+94 %)   ocean 2.38 (-26 %)
+    # So the beta that matches the CO2 RECORD makes the sink PARTITION worse,
+    # and pro rata makes it worse still -- pro rata lowers CO2, which buys a
+    # higher beta, which buys more land sink. IT IS NOT RESOLVABLE BY beta OR BY
+    # THE DEBIT: diag_luc_prorata.R sec.5 measures that matching GCB's
+    # cumulative land costs ~21 ppm of CO2 bias under BOTH debits. It is the
+    # residual PHASE 3, the biological pump, is aimed at.
     #
-    # This is a DEFAULT, i.e. an app and test fixture. beta is calibrated, so
-    # the mode-find is what actually sets it -- see R/calibrate.R.
-    beta      = 0.60,
+    # This is a DEFAULT, i.e. an app and test fixture chosen by ONE stated
+    # criterion -- not a claim that the model's carbon partition is right.
+    # beta is calibrated; the mode-find is what actually sets it. See
+    # R/calibrate.R.
+    beta      = 0.75,
     q10       = 2.0,      # heterotrophic respiration temperature sensitivity
     # ---- land pool structure ------------------------------------------
     # Defaults chosen by diag_land_topology.R [3], the layout of lowest misfit

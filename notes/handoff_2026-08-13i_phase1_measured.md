@@ -246,3 +246,93 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > pre-registered prediction in 13h §3.1 (β 0.088 → ~0.5, q10 0.169 → ~1.5) is unchanged
 > and still the point of the refit; note that the 1-D CO₂-consistent β is now measured at
 > **0.591**, so the prediction's "~0.5" is if anything conservative.
+
+---
+
+# ADDENDUM, 2026-08-14 — Marcus' decisions, and a CORRECTION to §4
+
+## A1. CORRECTION: it was TEN failing tests at β 0.60, not six
+
+§4 above says six. **That was a bad grep on my part** — `test-pulse.R:83, 100, 101, 113`
+were in the same suite output and I did not read past the first hundred lines. The β
+re-centring broke the **Pulse Lab** too, and that is the most consequential of the ten
+because it is a claim the app teaches.
+
+**`test-pulse.R:100/101` — "the airborne fraction depends on the background — Revelle
+saturation". It REVERSES.** An identical 100 GtC pulse at 2050, read at 2150:
+
+| β | ssp119 frac | ssp585 frac | hi − lo | test wants > +0.05 |
+|---|---|---|---|---|
+| 0.38 | 0.336 | 0.540 | **+0.204** | pass |
+| 0.50 | 0.283 | 0.368 | **+0.085** | pass |
+| 0.60 | 0.248 | 0.237 | **−0.011** | FAIL |
+| 0.75 | 0.209 | 0.100 | **−0.109** | FAIL |
+
+**The LUC debit is irrelevant to this** — wood-only and pro rata agree to three decimals at
+every β. It is purely β.
+
+**Mechanism, and it is a model limitation rather than a threshold problem.** `NPP = NPP0(1 +
+β ln(χ/χ0))` has **no saturation**. On SSP5-8.5 the model passes 1998 ppm, where
+`ln(1998/278) = 1.97`, so NPP runs at **2.48× preindustrial at β 0.75** (1.75× at 0.38).
+That unsaturated land sink overwhelms the ocean's Revelle buffer and flips the sign of the
+background dependence. So above β ≈ 0.53 **the Pulse Lab teaches the opposite of the lesson
+it is written to teach.**
+
+This is a real constraint on the β default that none of the four calibration criteria sees,
+and it deserves to be weighed against them. Two ways out, neither taken:
+- keep the default at a β where the app's claim survives (≲ 0.53), and accept a CO₂ bias;
+- give the fertilisation a saturating form, which is a **model-structure** change and
+  therefore PHASE-3-class work, not a fixture tweak.
+
+*A methods note on how this was nearly missed twice.* A first attempt to scan β by
+monkey-patching `ccx_default_params()` and calling `test_file()` returned **byte-identical
+numbers at β 0.38, 0.50, 0.55 and 0.60** — the override never reached the tests. That is
+the "suspicious uniformity ≈ bug signal" rule doing its job; the standalone probe
+(`probe_revelle.R`, agreeing with the test to 0.01 at β 0.75) is what the table above uses.
+
+## A2. Decisions taken
+
+| | decision | outcome |
+|---|---|---|
+| 1 | `kz` bracket | **delete + add a deep-Δ¹⁴C likelihood term** — *BLOCKED, see A3* |
+| 2 | LUC debit | **delegated to me on physical realism → PRO RATA**, `f_luc_wood` default 1 → 0. Reasoning written out at `CCX_F_LUC_WOOD_DEFAULT`. |
+| 3 | `sigma_d13c` | **left free**, as now. No code change. |
+| 4 | the failing-test re-derivations | **none written.** All left failing. |
+
+The pro-rata switch forced a second β re-centring: **0.60 → 0.75**, by the 1-D
+log-posterior optimum (the criterion the default has always tracked). Under pro rata the
+four criteria spread more than they did under wood-only — 0.712 (decade CO₂ bias) against
+0.753–0.770 (the three whole-record ones) — and the default follows the cluster. **Note
+this sits well above A1's ≈0.53 ceiling.**
+
+## A3. THE kz DECISION IS BLOCKED ON PROVENANCE, and it should not be forced
+
+The chosen option needs the `[−150, −200] ‰` deep-Δ¹⁴C target to become a likelihood term
+with a central value and an error bar. **That range is uncited.** It appears once in the
+repo, in `DATA.md` §5, as *"roughly −150 to −200 ‰"* — no paper, no dataset, no access
+date. Project hard rule 2 forbids using an uncited value in code, and a term in the
+**objective function** is a far stronger use than the bound it replaces.
+
+**Do not delete the bracket until the term exists**, because bare deletion is the option
+that was measured and rejected (kz → 10,686, deep Δ¹⁴C −112.7 ‰).
+
+**The source to pull is GLODAPv2** — natural/pre-bomb Δ¹⁴C, volume-weighted below the
+mixed layer, which gives both a central value and a real spatial spread for the σ. 13h
+§4.3 already names GLODAPv2 as the pull needed for PHASE 3's deep DIC and δ¹³C targets, so
+**one data-raw pull serves both**, and doing it before the refit rather than after is the
+cheaper ordering.
+
+## A4. State at the end of this addendum
+
+- `f_luc_wood` default **0** (pro rata); `beta` default **0.75**; `CCX_PARAM_TABLE$beta$init`
+  tracks it.
+- `test-parity.R:57` was **my own bug** — it compared the pro-rata derivative against
+  `pf$p`, which became the same thing when the default flipped. Fixed to compare against an
+  explicit `f_luc_wood = 1`. That is a correction to a test written this session, not a
+  weakening of an inherited one.
+- `test-luc-permanence.R:104` (`f_luc_perm = 0 reproduces the pre-2026-08-13 behaviour`)
+  now fails: reproducing that behaviour needs **both** `f_luc_perm = 0` **and**
+  `f_luc_wood = 1`, and the test only sets the first. Left failing, per decision 4 —
+  but it is a one-line fixture correction whenever that decision is revisited.
+- `test-luc-permanence.R:88` fails at 0.189 against a > 0.2 threshold on the FOSSIL
+  reference arm — i.e. the gate's own control, moved by β, not by the debit.

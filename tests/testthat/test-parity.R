@@ -51,9 +51,12 @@ test_that("the pro-rata land-use debit agrees to roundoff", {
   dR <- ccx_deriv(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
   dC <- ccx_deriv_fast(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
   expect_lt(max(abs(dR - dC)) / max(abs(dR)), 1e-15)
-  # and it must actually be a different model from the default, or the test
-  # above would be passing for the wrong reason
-  dW <- ccx_deriv(sp$y, 1980.5, pf$p, forc, sp$grid, sp$aux)
+  # and it must actually be a different model from the WOOD-ONLY one, or the
+  # test above would be passing for the wrong reason. Stated as an explicit
+  # f_luc_wood = 1, NOT as `pf$p`: the default moved 1 -> 0 on 2026-08-13 and a
+  # comparison against the default silently became a comparison with itself.
+  pw <- pf$p; pw$f_luc_wood <- 1
+  dW <- ccx_deriv(sp$y, 1980.5, pw, forc, sp$grid, sp$aux)
   expect_gt(max(abs(dR - dW)), 1e-6)
   # the pro-rata weights sum to 1: the debit is a split, not a leak
   expect_equal(sum(ccx_luc_pool_shares(p)), 1, tolerance = 1e-12)
