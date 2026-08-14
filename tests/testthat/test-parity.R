@@ -35,6 +35,30 @@ test_that("single derivative agrees to roundoff", {
   expect_lt(max(abs(dR - dC)) / max(abs(dR)), 1e-15)
 })
 
+test_that("the pro-rata land-use debit agrees to roundoff", {
+  skip_if_no_cpp()
+  # f_luc_wood < 1 is a SECOND code path in both cores (R/model.R's emissions
+  # block, ccx_core.cpp's), and the default 1 never reaches it -- so the gate
+  # above cannot see a porting error in it. The weights are re-derived from the
+  # six land parameters on each side rather than shared, precisely so that this
+  # test is the thing that catches a disagreement.
+  p <- pf$p; p$f_luc_wood <- 0
+  sp <- ccx_spinup(p)
+  forc <- list(e_foss = list(NH = 8, SH = 0.4), e_luc = list(NH = 0.6, SH = 0.5),
+               cum_luc = list(NH = 120, SH = 80),
+               gmst = 1.1, enso = 0.7, c14_bomb = 1200, c14_nuclear = 40,
+               c14_cosmo = sp$prod_c14, d13c_foss = -27.6)
+  dR <- ccx_deriv(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
+  dC <- ccx_deriv_fast(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
+  expect_lt(max(abs(dR - dC)) / max(abs(dR)), 1e-15)
+  # and it must actually be a different model from the default, or the test
+  # above would be passing for the wrong reason
+  dW <- ccx_deriv(sp$y, 1980.5, pf$p, forc, sp$grid, sp$aux)
+  expect_gt(max(abs(dR - dW)), 1e-6)
+  # the pro-rata weights sum to 1: the debit is a split, not a leak
+  expect_equal(sum(ccx_luc_pool_shares(p)), 1, tolerance = 1e-12)
+})
+
 test_that("multi-decade trajectories agree to roundoff", {
   skip_if_no_cpp()
   sp <- ccx_spinup(pf$p)

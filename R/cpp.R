@@ -75,6 +75,9 @@ ccx_cpp_par <- function(p) {
   # uses. If the two ever disagree, the C++ core silently runs a different model
   # from the R one -- which is exactly what gamma_enso did.
   if (is.null(p$f_luc_perm)) p$f_luc_perm <- CCX_F_LUC_PERM_DEFAULT
+  # WHERE the debit comes from. Unlike f_luc_perm this default IS the old
+  # behaviour, because f_luc_wood = 1 is the incumbent decision, not a bug.
+  if (is.null(p$f_luc_wood)) p$f_luc_wood <- CCX_F_LUC_WOOD_DEFAULT
   if (is.null(p$w_up)) p$w_up <- 0
   if (is.null(p$w_out_NH)) p$w_out_NH <- 0
   if (is.null(p$w_out_SH)) p$w_out_SH <- 0
@@ -104,7 +107,7 @@ ccx_cpp_par <- function(p) {
       "q_conv", "conv_sink", "conv_descent", "conv_reverse",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
-      "npp_veg_frac", "ra_ratio", "f_luc_perm",
+      "npp_veg_frac", "ra_ratio", "f_luc_perm", "f_luc_wood",
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH", "revelle_frozen")]
 }

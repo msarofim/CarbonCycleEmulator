@@ -95,6 +95,42 @@ CCX_LAND_POOLS <- c("leaf", "wood", "soil_fast", "soil_slow")
 CCX_F_LUC_PERM_DEFAULT <- 1
 CCX_LUC_CLEARED_MAX    <- 0.9
 
+#' WHERE the land-use debit comes from: the share taken out of the WOOD pool.
+#'
+#' 1 = wood alone, which is Marcus' 2026-08-12 call and the shipped behaviour --
+#' deforestation removes standing woody biomass, and the emitted carbon should
+#' carry that pool's lagged 14C. 0 = split PRO RATA across all four land pools
+#' by their preindustrial equilibrium shares, which is the split that leaves
+#' every pool exactly at its new (cleared) equilibrium.
+#'
+#' The two differ because scaling npp0 by (1 - c) lowers every pool's
+#' equilibrium pro rata while a wood-only debit lands entirely on a 37-yr pool:
+#' wood is left BELOW its new equilibrium and the soils ABOVE theirs, and the
+#' redistribution that follows re-releases part of the debit on soil timescales.
+#' Measured consequence: the 100-yr airborne fraction of a land-use pulse is
+#' about HALF a fossil pulse's at f_luc_wood = 1 (calibration/diag_luc_prorata.R).
+#'
+#' EXISTS AS A SWITCH, NOT A DECISION. Handoff 13h sec.2.1b makes the choice
+#' Marcus', on measured numbers, and the default is the incumbent so that adding
+#' the switch changes no result. See also CCX_F_LUC_PERM_DEFAULT's note on why a
+#' default must be stated once and shared with ccx_cpp_par().
+CCX_F_LUC_WOOD_DEFAULT <- 1
+
+#' Pro-rata shares of the four land pools, by preindustrial equilibrium stock.
+#'
+#' These are exactly the terms `aux$land0` sums, normalised -- so a debit split
+#' on them removes carbon in the same proportion as scaling npp0 by (1 - c)
+#' lowers the equilibrium. Derived from the parameters rather than stored, so a
+#' land-structure change cannot leave a stale weight vector behind.
+#' Order: leaf, wood, soil_fast, soil_slow (= CCX_LAND_POOLS).
+ccx_luc_pool_shares <- function(p) {
+  w <- c(p$npp_leaf_frac * p$tau_leaf,
+         (1 - p$npp_leaf_frac) * p$tau_wood,
+         (1 - p$litter_slow_frac) * p$tau_soil_fast,
+         p$litter_slow_frac * p$tau_soil_slow)
+  w / sum(w)
+}
+
 #' Names of the 32 boxes, in state order
 ccx_box_names <- function(nl = N_INTERIOR) {
   unlist(lapply(HEMIS, function(h)
@@ -195,6 +231,10 @@ ccx_default_params <- function() {
     # It is NOT a fudge factor with a convenient value: 1 is the mass-consistent
     # point, and it is the default for that reason rather than by fit.
     f_luc_perm = CCX_F_LUC_PERM_DEFAULT,
+    # WHERE the debit comes from, added 2026-08-13 as a switch with the
+    # incumbent as its default -- see CCX_F_LUC_WOOD_DEFAULT. 1 = wood alone
+    # (shipped), 0 = pro rata across the four pools.
+    f_luc_wood = CCX_F_LUC_WOOD_DEFAULT,
     k_w       = 1500,     # m/yr, gas transfer velocity
     h_ml      = 75,       # m, mixed-layer depth
     # OVERTURNING, m/yr. 0 = the pure-diffusion ocean, reproduced EXACTLY (no
@@ -712,15 +752,35 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # 13C and 14C ratios, so the prescribed `d13c_bio` is no longer needed:
     # clearing a forest does not fractionate, hence alpha13 = 1 (the default).
     #
-    # IT COMES OUT OF WOOD (Marcus 2026-08-12). Deforestation removes standing
-    # woody biomass, so that is the pool that should pay -- and it is the pool
-    # whose 14C ratio the emitted carbon should carry, which is more lagged than
-    # the leaf pool's. Debiting leaf, or debiting both pro rata, would let the
-    # fast pool absorb clearing it does not physically suffer.
+    # IT COMES OUT OF WOOD (Marcus 2026-08-12) at the default f_luc_wood = 1.
+    # Deforestation removes standing woody biomass, so that is the pool that
+    # should pay -- and it is the pool whose 14C ratio the emitted carbon should
+    # carry, which is more lagged than the leaf pool's. Debiting leaf, or
+    # debiting both pro rata, would let the fast pool absorb clearing it does
+    # not physically suffer.
+    #
+    # AT f_luc_wood < 1 the remainder is split PRO RATA over the four pools by
+    # ccx_luc_pool_shares(), which is the split that leaves every pool at its
+    # new cleared equilibrium and so makes the debit permanent on the pools'
+    # own timescales rather than only in total. It costs the 14C argument above:
+    # the emitted carbon then carries a stock-weighted mixture dominated by the
+    # slow soil. Handoff 13h sec.2.1b; measured in calibration/diag_luc_prorata.R.
+    #
     # NOTE: historical e_luc is strictly positive. Should a scenario ever supply a
     # negative (net-regrowth) value, add_flux swaps the source correctly but the
     # uptake would not carry the photosynthetic fractionation it should.
-    add_flux(iwod, iatm, forc$e_luc[[h]], lab = "luc")
+    if (p$f_luc_wood >= 1) {
+      add_flux(iwod, iatm, forc$e_luc[[h]], lab = "luc")
+    } else {
+      sh   <- ccx_luc_pool_shares(p)
+      pool <- c(ilef, iwod, isf, iss)
+      # wood's own share is (1 - f) * sh[2] from the pro-rata part PLUS all of
+      # the f-weighted part; the others get only their (1 - f) pro-rata share.
+      wts  <- (1 - p$f_luc_wood) * sh
+      wts[2] <- wts[2] + p$f_luc_wood
+      for (k in seq_along(pool))
+        add_flux(pool[k], iatm, forc$e_luc[[h]] * wts[k], lab = "luc")
+    }
   }
 
   # ---- interhemispheric atmospheric exchange -------------------------

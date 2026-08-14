@@ -91,6 +91,13 @@ struct Par {
   // "converted land" block in ccx_deriv() (R/model.R) for the mechanism and
   // CCX_F_LUC_PERM_DEFAULT for why 1 rather than 0 is the default.
   double f_luc_perm;
+  // WHERE the land-use debit comes from (2026-08-13). 1 = wood alone, the
+  // shipped behaviour; below 1 the remainder is split pro rata across the four
+  // land pools by their preindustrial equilibrium shares. Must reproduce
+  // ccx_luc_pool_shares() in R/model.R exactly -- the weights are derived from
+  // the same six land parameters in both, deliberately, so neither side can
+  // carry a stale vector.
+  double f_luc_wood;
   double sst_scale, gamma_enso;
   double seas_amp[2], seas_phase[2];
   double revelle_frozen;                    // mechanism switch, 0 or 1
@@ -339,7 +346,22 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
     // rather than an external source that created 14C ex nihilo.
     add_source(iatm, f[hi], d13c_foss, -1000.0);
-    add_flux(iwod, iatm, f[2 + hi], 1.0);
+    if (P.f_luc_wood >= 1.0) {
+      add_flux(iwod, iatm, f[2 + hi], 1.0);
+    } else {
+      // pro-rata weights = the four terms A.land0 sums, normalised
+      double w4[4] = {P.npp_leaf_frac * P.tau_leaf,
+                      (1.0 - P.npp_leaf_frac) * P.tau_wood,
+                      (1.0 - P.litter_slow_frac) * P.tau_soil_fast,
+                      P.litter_slow_frac * P.tau_soil_slow};
+      const double wsum = w4[0] + w4[1] + w4[2] + w4[3];
+      const int pool[4] = {ilef, iwod, isf, iss};
+      for (int k = 0; k < 4; ++k) {
+        double wk = (1.0 - P.f_luc_wood) * w4[k] / wsum;
+        if (k == 1) wk += P.f_luc_wood;
+        add_flux(pool[k], iatm, f[2 + hi] * wk, 1.0);
+      }
+    }
   }
 
   // interhemispheric, gross both ways
@@ -414,7 +436,7 @@ static Par unpack_par(const List& p) {
   P.litter_slow_frac = p["litter_slow_frac"];
   P.tau_soil_fast = p["tau_soil_fast"]; P.tau_soil_slow = p["tau_soil_slow"];
   P.npp_veg_frac = p["npp_veg_frac"]; P.ra_ratio = p["ra_ratio"];
-  P.f_luc_perm = p["f_luc_perm"];
+  P.f_luc_perm = p["f_luc_perm"]; P.f_luc_wood = p["f_luc_wood"];
   P.k_w = p["k_w"]; P.kz = p["kz"]; P.w_up = p["w_up"]; P.tau_ex = p["tau_ex"];
   P.w_out[0] = p["w_out_NH"]; P.w_out[1] = p["w_out_SH"];
   P.q_conv = p["q_conv"];
