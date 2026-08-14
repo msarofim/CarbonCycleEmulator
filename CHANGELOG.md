@@ -2814,3 +2814,51 @@ carbon-climate loop gain, and the header's ~111 ppm / ~0.3 °C was never met.
 `test-mechanisms.R:32` — the ENSO switch is weak on the level *and* on the right statistic:
 growth-rate sd 0.584 vs observed 0.712 at `gamma_enso` 0.5, matching at γ ≈ 1.5–2
 (`mode_fit` chose 0.927), with the posterior nearly flat 0.5 → 1.0.
+
+## 2026-08-14 — Marcus' decisions; pro rata adopted; and the Pulse Lab reversal
+
+Decisions: `kz` → delete the bracket **and** add a deep-Δ¹⁴C likelihood term (**blocked**,
+below); `sigma_d13c` → **left free**; the failing-test re-derivations → **none written**;
+the LUC debit → **delegated on physical realism**.
+
+**LUC debit: PRO RATA.** `f_luc_wood` default 1 → 0. Reasoning in full at
+`CCX_F_LUC_WOOD_DEFAULT`: it is the mass-consistent partner to the converted-land term
+(which already lowers all four pools' equilibria); GCB's E_LUC is **already timing-resolved**
+and carries legacy soil loss, so the model must not re-impose a vegetation-only timing on
+it; and wood-only leaves half of each land-use tonne coming back (AF ratio 0.50 vs 1.02).
+It gives up the wood-¹⁴C call. Caveat logged not built: a **single** clearing event should
+be fast out of vegetation and slow out of soil, and pro rata takes 70 % out of a 500-yr
+pool instantly — right for the historical E_LUC record, wrong for the app's "what if we
+cleared X". That forced a second β re-centring, **0.60 → 0.75**.
+
+### CORRECTION: the β re-centring left TEN failing tests, not six
+
+The 2026-08-13 (j) entry says six. Bad grep — `test-pulse.R:83/100/101/113` were in the
+same output. **`:100/:101` is the consequential one: the Pulse Lab's Revelle-saturation
+claim REVERSES.** 100 GtC at 2050, airborne fraction at 2150, ssp585 − ssp119:
+
+| β | 0.38 | 0.50 | 0.60 | 0.75 |
+|---|---|---|---|---|
+| hi − lo | **+0.204** | **+0.085** | **−0.011** | **−0.109** |
+
+The LUC debit is irrelevant to it — both debits agree to three decimals at every β.
+**Mechanism, and it is a model limitation not a threshold problem:**
+`NPP = NPP0(1 + β ln(χ/χ0))` has **no saturation**, so on SSP5-8.5 at 1998 ppm the land
+runs at **2.48× preindustrial NPP** at β 0.75 (1.75× at 0.38). That sink overwhelms the
+ocean's buffer and flips the sign. **Above β ≈ 0.53 the Pulse Lab teaches the opposite of
+its own lesson**, and none of the four calibration criteria sees this. Either the default
+stays below ~0.53 and accepts a CO₂ bias, or the fertilisation gets a saturating form —
+which is model structure, i.e. PHASE-3-class work.
+
+*Nearly missed twice:* scanning β by monkey-patching `ccx_default_params()` and calling
+`test_file()` returned **byte-identical numbers at β 0.38/0.50/0.55/0.60** — the override
+never reached the tests. Suspicious uniformity as a bug signal, working.
+
+### The `kz` decision is BLOCKED on provenance, deliberately not implemented
+
+The `[−150, −200] ‰` target appears **once** in the repo, in `DATA.md` §5, as *"roughly
+−150 to −200"* — no paper, no dataset, no access date. Hard rule 2 forbids an uncited
+value in code, and a term in the **objective** is a stronger use than the bound it
+replaces. **The bracket is therefore NOT deleted**, since bare deletion is the
+measured-and-rejected option (kz → 10,686, deep Δ¹⁴C −112.7 ‰). **GLODAPv2 unblocks it**,
+and 13h §4.3 already needs the same pull for PHASE 3's deep DIC and δ¹³C targets.

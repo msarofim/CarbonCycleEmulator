@@ -1,9 +1,10 @@
 # Handoff — CarbonCycleEmulator, 2026-08-13 (i)
 
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, branch `luc-veg-debit`
-at **`cc3abd5`** (still **not merged**; tagged `checkpoint/pre-phase1-2026-08-13` at the
-pre-session state). Suite **6 fail** — up from 2, three of them caused deliberately and
-**left failing on purpose**; see §4.
+at **`ea7c70b`** (still **not merged**; tagged `checkpoint/pre-phase1-2026-08-13` at the
+pre-session state). Suite **10 fail** — up from 2, all of the new ones caused deliberately
+by fixture changes and **left failing on purpose**; see §4 and **the ADDENDUM's §A1, which
+corrects §4's count from six to ten and is the more important half of this note**.
 
 **This works handoff 13h's PHASE 1 and stops where 13h says it must stop.** Every
 blocking item is now MEASURED. **Nothing in PHASE 2 has been started, and it should not
@@ -336,3 +337,20 @@ cheaper ordering.
   but it is a one-line fixture correction whenever that decision is revisited.
 - `test-luc-permanence.R:88` fails at 0.189 against a > 0.2 threshold on the FOSSIL
   reference arm — i.e. the gate's own control, moved by β, not by the debit.
+
+## A5. Final suite state (10 fail), and what each is
+
+```
+test-climate.R:121, :122        carbon-climate loop gain, weakened further by beta 0.75
+test-likelihood.R:114           CO2-bias cost, fixture-dependent (curvature unchanged)
+test-luc-permanence.R:88        the FOSSIL reference arm, 0.189 vs > 0.2 -- moved by beta
+test-luc-permanence.R:104       needs f_luc_perm = 0 AND f_luc_wood = 1; sets only the first
+test-mechanisms.R:32            ENSO switch, weak on the level and on growth-rate sd
+test-pulse.R:83, :100, :101, :112   THE PULSE LAB -- see A1; :100/:101 is the reversed lesson
+```
+
+`test-likelihood.R:117` and `:135` now PASS again at beta 0.75, and `test-parity.R:57` is
+fixed. Nothing else was edited.
+
+**Reading order for whoever picks this up: A1 first.** The Pulse Lab reversal is the only
+one of the ten that is a statement about the model rather than about a fixture.
