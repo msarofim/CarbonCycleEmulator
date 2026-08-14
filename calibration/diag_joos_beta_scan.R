@@ -145,7 +145,14 @@ JOOS_PI100_100 <- c(34, 47)
 JOOS_PD100_100 <- c(45, 62)
 
 p0 <- ccx_default_params()
-p0$beta <- as.numeric(Sys.getenv("CCX_JOOS_BETA", unset = as.character(p0$beta)))
+# CCX_JOOS_BETA IMPLIES THE LOG FORM. `beta` is inert under the CCX_FERT_MM
+# default (2026-08-14), so asking for a beta and getting the MM answer back --
+# identically, for every beta -- is the failure mode this branch prevents. An
+# explicit CCX_FERT_FORM below still wins.
+if (nzchar(Sys.getenv("CCX_JOOS_BETA"))) {
+  p0$fert_form <- CCX_FERT_LOG
+  p0$beta <- as.numeric(Sys.getenv("CCX_JOOS_BETA"))
+}
 # SATURATING FORM (2026-08-14, review item 7). The gate this file measures is
 # precisely the one the log form cannot pass at the beta the CO2 record wants,
 # so the replacement form has to be scoreable HERE or the item is unfinished.

@@ -146,8 +146,10 @@ fs_case <- function(p, label) {
 
 cat("--- 2. historical runs: the log references ---------------------\n")
 ref <- do.call(rbind, lapply(FS_BETA_REFS, function(b) {
-  p <- ccx_default_params(); p$beta <- b
-  fs_case(p, sprintf("log beta %.2f%s", b, if (b == 0.75) " (SHIPPED)" else ""))
+  # PIN. The default is CCX_FERT_MM since 2026-08-14, under which `beta` is
+  # inert; without this the "log" rows would silently be MM rows.
+  p <- ccx_default_params(); p$fert_form <- CCX_FERT_LOG; p$beta <- b
+  fs_case(p, sprintf("log beta %.2f%s", b, if (b == 0.75) " (superseded)" else ""))
 }))
 print(format(ref, digits = 4), row.names = FALSE)
 
@@ -155,7 +157,8 @@ cat("\n--- 2b. historical runs: the MM locus --------------------------\n")
 mm <- do.call(rbind, lapply(FS_K_GRID, function(K) {
   p <- ccx_default_params()
   p$fert_form <- CCX_FERT_MM; p$fert_k <- K; p$beta_max <- fs_bmax(K)
-  fs_case(p, sprintf("MM K=%3.0f bmax=%.3f", K, fs_bmax(K)))
+  fs_case(p, sprintf("MM K=%3.0f bmax=%.3f%s", K, fs_bmax(K),
+                     if (K == 120) " (SHIPPED)" else ""))
 }))
 print(format(mm, digits = 4), row.names = FALSE)
 

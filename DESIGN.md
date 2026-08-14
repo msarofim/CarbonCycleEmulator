@@ -375,7 +375,16 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
      gradient), the 1960s by +0.20 and the 2020s by +0.13, while well-covered decades move
      ≤0.03 ppm. Always compute this from the seasonally adjusted series.
    - The 1950s entry rests on 8 paired months: indicative only.
-10. **Natural ocean Δ¹⁴C profile:** deep-ocean depletion in the observed range (free check).
+10. **Natural ocean Δ¹⁴C profile:** deep-ocean depletion in the observed range. **No longer
+    a free check — sourced and scored since 2026-08-14.** GLODAPv2.2023 over the model's own
+    bottom box (2627–3700 m), cos(lat)-and-thickness weighted: **−175.3 ‰**, σ **10.3 ‰**
+    (= the 45.9 ‰ spatial spread ÷ √n_eff, n_eff = 20 — deep water masses are basin-coherent,
+    so the spread is *not* the sigma). It is likelihood stream `d14c_deep_ocean`. Score
+    `diagnostics$d14c_bottom_box`, **not** `d14c_deep_ocean`/`d14c_deep_by_hemi`, which are
+    the bottom *three* boxes (1314–3700 m) and run 13–20 ‰ enriched. The `kz` bracket is
+    retained alongside it: on this same quantity the bracket is a hard box of half-width
+    28.4 ‰, tighter than the σ, so deleting it would loosen `kz` rather than tighten it.
+    `calibration/diag_deep_d14c_term.R`.
 11. **Suspicious-uniformity screen** on all residual series (all-same-sign or
     exactly-linear residuals = bug signal, per standing discipline).
 12. **CO₂ pulse response (IRF)** — **added 2026-08-13**, and it closes a hole: gates 1–11
@@ -393,11 +402,20 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     **Secondary, and a Revelle check rather than a tuning target:** Joos §4.4.1 gives
     integrated IRF at TH 100 of **34–47 yr on a preindustrial background against 45–62 on
     present-day**; the model must reproduce the **PI < PD ordering**.
-    `calibration/diag_joos_irf.R` (~40 s). **Status at default parameters: inside the range
-    at all three horizons (12.6 / 26.2 / 43.6), but below the best estimate at every one,
-    and below the point-IRF mean throughout (0.313 vs 0.409 at 100 yr).** The model is on
-    the low side of the literature — which is the *conservative* direction for the app's
-    argument and must be stated as such, not discovered by a reader.
+    `calibration/diag_joos_irf.R` (~40 s). **Status at default parameters (2026-08-14, the
+    saturating fertilisation form at `fert_k` 120 / `beta_max` 0.4913): PASSES — 12.4 / 25.6
+    / 41.9 yr, inside at all three horizons with margin.** Still below the best estimate at
+    every one, so the model remains on the low side of the literature — the *conservative*
+    direction for the app's argument, which must be stated rather than discovered by a reader.
+
+    **History, because this gate's recorded status was stale twice and that is what made the
+    failure invisible.** The 12.6 / 26.2 / 43.6 recorded here until 2026-08-14 was measured at
+    β 0.38, two re-centrings before the default reached β 0.75 — at which the gate FAILED at
+    all three horizons (10.4 / 19.9 / 31.2), undetected, because the status line was never
+    re-measured. `calibration/diag_joos_beta_scan.R` established that the log form passes only
+    at β ≲ 0.50 while the CO₂ record wants 0.75, which is the structural defect review §4.1
+    diagnosed and item 7 fixed by replacing the functional form. **Re-measure this line
+    whenever a fertilisation default moves; it is not a description, it is a measurement.**
     **The background protocol is not a detail:** held-vs-decaying is worth 2 yr of
     integrated IRF and PI-vs-PD is worth 7, both larger than any structural question
     currently open (see the expert-panel note, §2).

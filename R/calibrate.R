@@ -11,15 +11,37 @@
 # ---- parameter table -------------------------------------------------
 # transform: "log" (positive), "logit" (bounded by lo/hi), "id" (unbounded)
 CCX_PARAM_TABLE <- list(
-  # init tracks ccx_default_params()$beta -- re-centred 0.38 -> 0.75 on
-  # 2026-08-13 (0.60 on the converted-land model with the wood-only debit, then
-  # 0.75 once the debit went pro rata). By the 1-D log-posterior optimum, the
-  # criterion this default has always tracked; calibration/diag_recentre_beta.R,
-  # with the reasoning written out at ccx_default_params()$beta. NB the
-  # transform here is LOGIT on [0, 1.5], not log; a profile that assumes log
-  # silently scans plogis(log(beta)) * 1.5 instead.
-  beta        = list(tr = "logit", lo = 0.0,  hi = 1.5,  init = 0.75,
-                     prior = function(x) dunif(x, 0, 1.5, log = TRUE)),
+  # ---- CO2 fertilisation ---------------------------------------------
+  # `beta` LEFT THE TABLE on 2026-08-14 when fert_form flipped to CCX_FERT_MM.
+  # It is not merely renamed: MM is NOT a reparameterisation of the log form (as
+  # fert_k -> Inf, MM goes LINEAR, not logarithmic), so no substitution carries
+  # a beta posterior across. Any beta posterior in calibration/output/ is a
+  # posterior for a DIFFERENT MODEL and must not be spliced into a new chain.
+  # The entry is reproducible from git if the log form is ever refitted:
+  #   beta = list(tr = "logit", lo = 0, hi = 1.5, init = 0.75,
+  #               prior = function(x) dunif(x, 0, 1.5, log = TRUE))
+  #
+  # BOTH PRIORS ARE DELIBERATELY WIDE AND UNINFORMATIVE, for the same reason the
+  # beta prior was: nothing in the literature set pins either quantity at the
+  # ECOSYSTEM scale (leaf-level Rubisco kinetics do not transfer, and FACE
+  # experiments and CMIP6 models disagree by more than any prior width would
+  # encode). The data in the objective are what should set them, and the four
+  # DESIGN gates are what should audit the answer -- NOT a prior standing in for
+  # evidence nobody has cited. If a sourced ecosystem-scale constraint on either
+  # is ever found, it belongs here with its citation.
+  #
+  # beta_max: asymptotic fractional NPP enhancement. Upper bound 3.0 is a hard
+  # implausibility bound (NPP quadrupling at infinite CO2), not a belief; the
+  # init is ccx_default_params()$beta_max.
+  beta_max    = list(tr = "logit", lo = 0.0,  hi = 3.0,  init = 0.4913,
+                     prior = function(x) dunif(x, 0, 3.0, log = TRUE)),
+  # fert_k: ppm above preindustrial delivering half of beta_max. LOGIT on
+  # [20, 2000], not log: the upper end is where MM has gone effectively linear
+  # over the whole observed range and the form degenerates into the log form's
+  # problem, so it is a real boundary rather than a scale. The lower end keeps
+  # the pole (chi = chi0 - fert_k) far below any reachable CO2.
+  fert_k      = list(tr = "logit", lo = 20,   hi = 2000, init = 120,
+                     prior = function(x) dunif(x, 20, 2000, log = TRUE)),
   q10         = list(tr = "log",   init = 2.0,
                      prior = function(x) dlnorm(x, log(2.0), 0.25, log = TRUE)),
   k_w         = list(tr = "log",   init = 1500,

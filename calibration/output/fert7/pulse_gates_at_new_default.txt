@@ -1,0 +1,49 @@
+=====================================================================
+PULSE GATES for the fertilisation form -- 100 GtC at 2050, read at +100 yr
+=====================================================================
+
+The claim under test: an identical pulse must persist LONGER on the
+ssp585 background than on ssp119. test-pulse.R:101 wants diff > 0.05.
+
+                          case bg_lo_ppm bg_hi_ppm frac_lo frac_hi     diff
+                 log beta 0.50     319.4    1161.3  0.2843  0.3624  0.07814
+    log beta 0.75 (superseded)     308.2     836.3  0.2084  0.0954 -0.11298
+           MM K=100 bmax=0.449     302.6    1488.4  0.2118  0.8019  0.59005
+ MM K=120 bmax=0.491 (SHIPPED)     303.8    1455.2  0.2133  0.7794  0.56609
+           MM K=140 bmax=0.534     304.7    1422.5  0.2144  0.7549  0.54050
+           MM K=171 bmax=0.600     305.7    1373.2  0.2157  0.7136  0.49797
+  verdict
+    HOLDS
+ REVERSED
+    HOLDS
+    HOLDS
+    HOLDS
+    HOLDS
+
+  READ THE MAGNITUDE WITH CARE, not just the sign. The sign is the gate
+  and it is decisively restored. The high-background airborne fraction the
+  saturating form produces is LARGE and is NOT benchmarked against anything:
+  DESIGN gate 12 and Joos et al. (2013) are both at a ~389 ppm background,
+  not the ~1161 ppm ssp585 reaches. What the saturating form asserts is that
+  at 7x preindustrial CO2 the land sink is close to saturated, so a pulse has
+  nowhere to go but the atmosphere. That is the physics being adopted, and it
+  is a MODEL CLAIM at the far end of the app's slider rather than a fitted
+  result. The log form's answer there is not a safe fallback -- it says the
+  same pulse nearly VANISHES in 100 years, which is worse and in the
+  direction that flatters the scenario.
+
+--- gate 12 (Joos IRF), measured separately ---------------------
+  diag_joos_beta_scan.R takes the same env vars:
+    CCX_FERT_FORM=1 CCX_FERT_BETA_MAX=<bmax> CCX_FERT_K=<K> \
+      Rscript calibration/diag_joos_beta_scan.R
+  Measured 2026-08-14, integrated IRF at TH 20/50/100 yr against Joos
+  Table 4's 5-95 % of 12.2-16.3 / 24.0-36.6 / 39.5-65.2:
+
+    log beta 0.75 (superseded) 10.4 / 19.9 / 31.2 FAIL x3
+    log beta 0.50            12.2 / 25.0 / 41.1   inside, TH20 on the floor
+    MM K=120 bmax=0.491      12.4 / 25.6 / 41.9   INSIDE x3 -- SHIPPED
+    MM K=140 bmax=0.534      12.2 / 25.0 / 40.8   inside, TH20 on the floor
+    MM K=171 bmax=0.600      12.0 / 24.3 / 39.4   FAIL at TH20 and TH100
+
+  So gate 12 caps fert_k at roughly 150 on the criterion-(a) locus, and
+  K=120 is the shortlist entry that passes it with room rather than on it.

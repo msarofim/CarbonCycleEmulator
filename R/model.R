@@ -191,12 +191,33 @@ CCX_FERT_MM  <- 1L    # NPP = NPP0 (1 + beta_max dchi/(K + dchi)) -- saturating
 #' Both parameter sets are carried; `fert_form` selects which is live and the
 #' other is INERT (gated by test-fertilisation.R in both directions).
 #'
-#' DEFAULT IS STILL THE LOG FORM. Marcus deferred the beta default to this item
-#' (decision 2, 2026-08-14) and has not yet been shown the fitted numbers, so
-#' flipping the default here would resolve his decision for him. Nothing about
-#' the two failing gates has moved: this commit adds the mechanism and the
-#' diagnostic that prices it.
-CCX_FERT_FORM_DEFAULT <- CCX_FERT_LOG
+#' DEFAULT FLIPPED TO MM ON 2026-08-14 (Marcus), and it is the resolution of his
+#' deferred decision 2 -- "flip the default to MM". The log form is kept, not
+#' deleted, because every result in this repo before today was produced under it
+#' and the switch is what makes those reproducible.
+#'
+#' WHAT THE FLIP BOUGHT, at fert_k 120 / beta_max 0.4913 against the log form at
+#' the beta 0.75 it replaced (calibration/diag_fert_saturating.R,
+#' diag_fert_pulse_gates.R, diag_joos_beta_scan.R):
+#'
+#'                        loglik   CO2 bias   land sink   Joos IRF 20/50/100
+#'   log beta 0.75         -3793     +3.34      +4.57 sd   10.4/19.9/31.2 FAIL x3
+#'   MM K=120 bmax 0.4913  -3760     +0.14      +2.28 sd   12.4/25.6/41.9 INSIDE x3
+#'
+#'   Revelle lesson (ssp585 - ssp119 airborne fraction at +100 yr):
+#'   log 0.75  -0.113 REVERSED   ->   MM K=120  +0.566 HOLDS
+#'
+#' It is BETTER ON THE LIKELIHOOD as well as on the gates, which is the part
+#' that makes it a structural fix rather than a trade: no value of beta could
+#' buy any two of those at once, because the log form's enhancement and slope
+#' are locked in a fixed ratio chi/chi0.
+#'
+#' WHAT IT DID NOT FIX. Gate 7 still misses -- the land sink is +2.28 sd against
+#' GCB, down from +4.57 but still outside. And gate 12 caps fert_k near 150
+#' while the log-posterior's own preference on this locus is 171, so the
+#' likelihood and the pulse gate still pull apart, just far less. THE REFIT IS
+#' WHAT SETTLES THAT; these are a default, not a calibration.
+CCX_FERT_FORM_DEFAULT <- CCX_FERT_MM
 
 #' The fertilisation multiplier on NPP0, as a function of atmospheric CO2.
 #'
@@ -277,6 +298,20 @@ ccx_ocean_grid <- function(h_ml, total_depth = ccx_const("OCEAN_DEPTH"),
 #' here; everything structural lives in constants.R.
 ccx_default_params <- function() {
   list(
+    # ---- CO2 fertilisation --------------------------------------------
+    # `beta` IS NO LONGER LIVE AT THE DEFAULT. fert_form flipped to CCX_FERT_MM
+    # on 2026-08-14 (Marcus), so the parameters that act are beta_max and
+    # fert_k below, and this whole block is the history of the parameter they
+    # replaced. It is KEPT, not deleted: every result in this repo before
+    # 2026-08-14 was produced under the log form at one of these values, and
+    # `p$fert_form <- CCX_FERT_LOG` is what reproduces them.
+    #
+    # WHY IT WAS REPLACED, in one line: no value of beta can satisfy both the
+    # CO2 record (which wants 0.75) and DESIGN gate 12 plus the Revelle lesson
+    # (which independently want <= 0.50), because the log form locks the
+    # enhancement at today's CO2 and the slope at today's CO2 into the fixed
+    # ratio chi/chi0. See the note above CCX_FERT_FORM_DEFAULT.
+    #
     # CO2 fertilization, NPP = NPP0 (1 + beta ln(chi/chi0)).
     # RE-CENTRED TWICE ON 2026-08-13, and the second move is the one that
     # stands. 0.38 was set on 2026-08-12 as the 1-D log-posterior optimum of the
@@ -320,32 +355,44 @@ ccx_default_params <- function() {
     # beta is calibrated; the mode-find is what actually sets it. See
     # R/calibrate.R.
     beta      = 0.75,
-    # ---- the saturating alternative (2026-08-14, review item 7) --------
-    # INERT AT THE DEFAULT. fert_form = CCX_FERT_LOG, so beta above is live and
-    # the two below do nothing; test-fertilisation.R gates that in both
-    # directions, because an inert parameter that quietly becomes live is how
-    # `luc_scale` would have gone wrong if it had been put in this list.
+    # ---- the LIVE fertilisation parameters (2026-08-14, review item 7) -
+    # fert_form = CCX_FERT_MM, so these two act and `beta` above does not;
+    # test-fertilisation.R gates that in both directions, because a parameter
+    # that quietly becomes live (or quietly stops being live) is the failure
+    # mode this switch creates.
     #
-    # PROVISIONAL VALUES, and they are ARITHMETIC, NOT A FIT. They are the pair
-    # that solves review sec.4.1's design target exactly:
+    # ARITHMETIC, NOT A FIT -- and that is the one caveat on the flip. They are
+    # the pair that solves review sec.4.1's design target exactly:
     #   (a) match the log form at beta 0.70's NPP enhancement at 388 ppm
     #       (0.70 ln(388/276.88) = 0.2363), so the historical INTEGRAL is
     #       preserved -- that is what the CO2 record and GCB's land sink buy;
     #   (b) hold dNPP/dchi at 388 ppm at or below the beta-0.50 value
     #       0.5 * 60/388 = 0.0773 GtC/yr/ppm, which is what gate 12 and the
     #       Revelle lesson buy.
-    # (a) fixes beta_max given fert_k; (b) then caps fert_k at 171. fert_k 140
-    # is taken with deliberate margin -- at the cap the marginal slope EQUALS
-    # beta 0.50's, and the Joos scan puts beta 0.50's 20-yr IRF exactly on the
-    # 5th percentile. beta_max follows from (a) at that fert_k.
+    # (a) fixes beta_max given fert_k; (b) then caps fert_k at 171.
     #
-    # THE FIT IS WHAT SHOULD SET THESE. calibration/diag_fert_saturating.R
-    # scans the (beta_max, fert_k) plane against the full log-posterior AND all
-    # four DESIGN gates; these two numbers are a defensible starting point, not
-    # its answer. Do not quote them as calibrated.
+    # fert_k 120 IS THE CHOSEN VALUE and the reason is gate 12, not the target
+    # arithmetic. Measured on the criterion-(a) locus (diag_joos_beta_scan.R,
+    # integrated IRF at TH 20/50/100 against Joos Table 4's 12.2-16.3 /
+    # 24.0-36.6 / 39.5-65.2):
+    #
+    #   K=120  12.4 / 25.6 / 41.9   INSIDE all three, with margin
+    #   K=140  12.2 / 25.0 / 40.8   inside, but TH20 sits ON the 5th percentile
+    #   K=171  12.0 / 24.3 / 39.4   FAILS at TH20 and TH100
+    #
+    # So gate 12 caps fert_k near 150 -- BELOW the log-posterior's own optimum
+    # on this locus, which is K=171 (loglik -3720 against K=120's -3760). The
+    # gate and the likelihood still pull apart; K=120 takes the gate, because
+    # DESIGN sec.6 opens "all must pass before headline claims" and a default
+    # that ships a failing hard gate is what item 7 existed to end.
+    #
+    # THE FIT IS WHAT SHOULD SET THESE, and it has not run yet. These are a
+    # DEFAULT chosen by one stated criterion, exactly as beta was; they are not
+    # calibrated and must not be quoted as such. CCX_PARAM_TABLE now carries
+    # both, so the refit will move them.
     fert_form = CCX_FERT_FORM_DEFAULT,
-    beta_max  = 0.5338,   # fractional NPP enhancement at infinite CO2
-    fert_k    = 140,      # ppm above preindustrial for half of beta_max
+    beta_max  = 0.4913,   # fractional NPP enhancement at infinite CO2
+    fert_k    = 120,      # ppm above preindustrial for half of beta_max
     q10       = 2.0,      # heterotrophic respiration temperature sensitivity
     # ---- land pool structure ------------------------------------------
     # Defaults chosen by diag_land_topology.R [3], the layout of lowest misfit

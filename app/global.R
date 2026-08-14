@@ -77,10 +77,18 @@ app_params <- local({
   # moved the model underneath it. A label that states a computed quantity has to
   # be computed, or it decays into a confident falsehood. The direction and size
   # of the residual is exactly what the app's own CO2 panel shows the user.
-  detail <- paste("Hand-set starting values, not fitted to anything. β is set to",
-                  "the 1-D posterior optimum with every other parameter at its",
-                  "starting value, so the CO₂ curve is close but not calibrated;",
-                  "compare it against the observations shown alongside it.")
+  # RE-WRITTEN 2026-08-14 with the flip to the saturating fertilisation form.
+  # The old text described β as "set to the 1-D posterior optimum", which is now
+  # false twice over: β is not the live fertilisation parameter, and the live
+  # pair was set by DESIGN gate 12 rather than by any posterior. Same failure the
+  # deleted "about 27 ppm high" string had -- a label stating a computed quantity
+  # that stopped being computed.
+  detail <- paste("Hand-set starting values, not fitted to anything. CO₂",
+                  "fertilisation is set to the pair that passes the pulse-response",
+                  "gate (Joos et al. 2013) while matching the historical CO₂",
+                  "record, with every other parameter at its starting value — so",
+                  "the CO₂ curve is close but not calibrated. Compare it against",
+                  "the observations shown alongside it.")
   if (file.exists(mode_file)) {
     md <- tryCatch(readRDS(mode_file), error = function(e) NULL)
     if (!is.null(md) && identical(md$param_names, CCX_PARAM_NAMES)) {

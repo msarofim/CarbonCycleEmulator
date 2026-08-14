@@ -172,8 +172,21 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # absorbed by `beta`, which was paying ~30 ppm of it at the cost of two of
   # DESIGN sec.6's hard gates. See CCX_PARAM_TABLE$luc_scale and
   # calibration/diag_luc_scale.R.
-  expect_length(CCX_PARAM_NAMES, 17L)
+  #
+  # 17 -> 18 on 2026-08-14 (later): the fertilisation FORM changed. `beta` LEFT
+  # the table and `beta_max` + `fert_k` entered it, so the count moved by one
+  # while the fertilisation block moved from one parameter to two. This is NOT a
+  # reparameterisation -- as fert_k -> Inf, MM goes LINEAR, not logarithmic, so
+  # no substitution carries a `beta` posterior across and any pre-flip posterior
+  # in calibration/output/ belongs to a DIFFERENT MODEL. The assertions below
+  # guard exactly that, because splicing one in is the plausible mistake.
+  expect_length(CCX_PARAM_NAMES, 18L)
   expect_true("luc_scale" %in% CCX_PARAM_NAMES)
+  expect_true(all(c("beta_max", "fert_k") %in% CCX_PARAM_NAMES))
+  expect_false("beta" %in% CCX_PARAM_NAMES)
+  # ...but `beta` must stay in ccx_default_params(), because CCX_FERT_LOG is
+  # what reproduces every pre-flip result and it needs a value to run.
+  expect_true("beta" %in% names(ccx_default_params()))
   # ...and it must stay an INPUT scale, never a model parameter: nothing may
   # inject it into ccx_default_params(), where it would silently rescale every
   # diagnostic that does not know about it.

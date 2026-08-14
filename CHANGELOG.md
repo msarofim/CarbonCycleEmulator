@@ -3503,3 +3503,98 @@ lesson), `calibration/diag_joos_beta_scan.R` (`CCX_FERT_*` env vars),
 **Suite still 11 failing, the same 11** — the default did not move, so nothing could. The five
 `test-pulse.R` failures are exactly what the MM form fixes, and they will keep failing until
 the default flips. **Leave them failing until then.**
+
+## 2026-08-14 (cont.) — DECISION 2 TAKEN: the default IS the saturating form, `fert_k` 120 — and the flip caught three silent-inertness bugs
+
+Marcus: *"Flip the default to MM."* `CCX_FERT_FORM_DEFAULT = CCX_FERT_MM`,
+`beta_max` 0.4913, `fert_k` 120. This resolves the deferred β default: **`beta` is no longer
+a live parameter and has left `CCX_PARAM_TABLE`** (17 → 18 parameters; `beta_max` + `fert_k`
+in, `beta` out). The log form is **kept, not deleted** — `p$fert_form <- CCX_FERT_LOG`
+reproduces every pre-flip result, and that is what makes the β-era record reproducible.
+
+**The criterion was gate 12, not the likelihood.** `fert_k` 120 passes Joos at all three
+horizons with margin (12.4/25.6/41.9); the log-posterior's own optimum on the design-target
+locus is `fert_k` 171, which *fails* at TH20 and TH100. DESIGN §6 opens "all must pass before
+headline claims", so the gate wins. **That is a choice and it is stated as one** — the gate
+and the likelihood still pull apart, and the refit is what settles it.
+
+### What the suite says: 11 failing → 8
+
+**Six resolved by the flip**, and they are the ones that mattered:
+
+- `test-climate.R:121, :122` — carbon-climate feedback, weakened by β 0.75. Now pass.
+- `test-pulse.R:83, :100, :101, :112` — **the Pulse Lab**. `:100`/`:101` are the Revelle
+  lesson, which was teaching the *opposite* of what the tab says (−0.113); it is now +0.566.
+
+**Three genuinely new**, all one cause: the model now fits the CO₂ record so much better that
+fixtures asserting "a bias is expensive" no longer start from an unbiased model. Measured on
+the MLO annual record, model vs obs: **residual RMS 3.04 → 0.99 ppm**, mean residual
+−1.49 → +0.80.
+
+- `test-likelihood.R:114, :117` — `cost(1)` is now **−69.4**: shifting the model up 1 ppm
+  moves it *toward* the observations. The AR(1)-pathology content these guard is intact and
+  emphatic — `cost(50)` = **61,206** against the 10,000 threshold.
+- `test-luc-scale.R:125` — wants the gross-vs-net gap > 10, gets 8.6. **That test's own
+  comment predicted this**: the gap is large *because the model over-absorbs* (gross land
+  4.57 vs GCB 2.36), and under MM it is 3.50, so the gap shrinks. "Do not fix this test by
+  asserting gross beats net; that holds only for a model whose sink is right."
+- `test-likelihood.R:135` — the `sigma_co2` profile peaks near the residual RMS, which moved
+  3.04 → 0.99, so the bracketing sigmas are stale.
+
+**NONE OF THE FOUR WAS EDITED TO PASS.** They are stale fixtures on an improved model, but
+that is a judgement, and re-baselining a failing assertion is exactly how a real regression
+gets absorbed. **Flagged for Marcus; left failing.**
+
+### THREE SILENT-INERTNESS BUGS, all the same shape
+
+Flipping the default made `beta` inert, and **every caller that set `beta` without setting
+`fert_form` silently became a no-op.** All three were caught by *suspicious uniformity* —
+identical rows where there should have been a spread — not by anything failing loudly.
+
+1. **`R/mechanisms.R` — the app's "CO₂ fertilisation (the land sink)" switch.** `p$beta <- 0`
+   moved CO₂ at 2100 by **exactly 0.00 ppm** while still rendering as a live control.
+   `test-mechanisms.R`'s "every switch is wired up and CHANGES the answer" caught it. Now
+   zeroes **both** `beta` and `beta_max`, which is correct under either form and cannot go
+   stale at the next flip.
+2. **`calibration/diag_fert_pulse_gates.R`** — its own log-form reference rows printed the MM
+   answer to three decimals for every β. Caught by three identical rows.
+3. **`calibration/diag_joos_beta_scan.R`** — `CCX_JOOS_BETA=0.50` would have returned the MM
+   answer. It now implies `CCX_FERT_LOG`.
+
+**Nine legacy diagnostics are pinned to `CCX_FERT_LOG`** (`diag_recentre_beta`,
+`diag_beta_luc_profile`, `diag_luc_scale`, `diag_luc_prorata`, `diag_d13c_suess`,
+`diag_d13c_partition_refit`, `diag_emission_scale_degeneracy`, `diag_1900_deficit`,
+`diag_which_stream_pays`) with a comment saying why. They reproduce their recorded numbers
+exactly — verified: `diag_fert_saturating.R`'s log-reference rows are bit-identical pre- and
+post-flip. **The pin does not make them current**: anything there that fed a live decision
+must be re-run under the saturating form.
+
+### Quarantined
+
+`calibration/output/mode_fit.rds` → `calibration/output/quarantine/20260814_pre_mm_fertilisation/`
+with a README. Not a bug — a **model-structure change**. It is a 17-parameter posterior for a
+model that no longer exists, and **no substitution carries it across** (MM → linear, not
+logarithmic, as `fert_k → ∞`). `app/global.R`'s `identical(md$param_names, CCX_PARAM_NAMES)`
+guard already rejected it; the quarantine stops anything else splicing it. The app now
+correctly reports "uncalibrated defaults". **There is no canonical replacement until item 8
+runs.**
+
+### Also updated
+
+- **`DESIGN.md` §6 gate 12 status** — was `12.6 / 26.2 / 43.6`, measured at **β 0.38, two
+  re-centrings stale**, which is *why the failure at β 0.75 stayed invisible*. Now the
+  measured pass, with the history written in and an instruction to re-measure on any
+  fertilisation default change. **§6 gate 10** is no longer a "free check": it is the sourced
+  GLODAPv2 term from earlier today.
+- **`app/server.R`** — parameter labels for `beta_max` ("CO₂ fertilisation, maximum boost")
+  and `fert_k` ("CO₂ needed for half that boost").
+- **`app/global.R`** — the uncalibrated-defaults blurb said "β is set to the 1-D posterior
+  optimum", false twice over now. Same failure mode as the deleted "about 27 ppm high" string.
+
+### Priors, and why they are wide
+
+Both new entries are uniform: `beta_max` on [0, 3.0], `fert_k` on [20, 2000]. **Nothing in
+the literature set pins either at the ECOSYSTEM scale** — leaf-level Rubisco kinetics do not
+transfer, and FACE experiments and CMIP6 models disagree by more than any prior width would
+encode. The bounds are implausibility limits, not beliefs. If a sourced ecosystem-scale
+constraint is ever found it belongs there with its citation.

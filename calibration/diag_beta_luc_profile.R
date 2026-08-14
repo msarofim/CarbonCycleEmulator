@@ -28,6 +28,25 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
+# ---- PINNED TO THE LOG FERTILISATION FORM (2026-08-14) --------------
+# This diagnostic was written against NPP = NPP0(1 + beta ln(chi/chi0)) and
+# every number in its header is a LOG-FORM number. On 2026-08-14 the default
+# flipped to CCX_FERT_MM, under which `beta` is INERT -- so without this pin the
+# file would still run, still print a beta column, and silently report the same
+# MM answer for every beta. (That is not hypothetical: it happened to
+# diag_fert_pulse_gates.R and to the app's fertilisation switch on the day of
+# the flip, and identical rows are what caught both.)
+#
+# The pin makes this file reproduce its recorded numbers exactly. It does NOT
+# make them current: the shipped model is now the saturating form, and anything
+# here that fed a live decision must be re-run under it.
+local({
+  .orig <- ccx_default_params
+  assign("ccx_default_params", function() {
+    p <- .orig(); p$fert_form <- CCX_FERT_LOG; p
+  }, envir = globalenv())
+})
+
 BL_YEARS  <- c(1750, 2024)
 BL_BETAS  <- seq(0.30, 0.90, by = 0.05)
 BL_SCALES <- c(0.50, 0.60, 0.70, 0.80, 0.90, 1.00, 1.10)

@@ -270,7 +270,13 @@ function(input, output, session) {
   output$h_params <- renderTable({
     nm <- CCX_PARAM_NAMES
     desc <- c(
-      beta = "CO₂ fertilisation strength", q10 = "Soil respiration warming response",
+      # beta left CCX_PARAM_NAMES on 2026-08-14 with the flip to the saturating
+      # fertilisation form; its label is kept so the log form still renders if
+      # anyone runs the app against a pre-flip posterior.
+      beta = "CO₂ fertilisation strength",
+      beta_max = "CO₂ fertilisation, maximum boost",
+      fert_k = "CO₂ needed for half that boost",
+      q10 = "Soil respiration warming response",
       k_w = "Air-sea gas transfer speed", h_ml = "Ocean mixed-layer depth",
       kz = "Deep-ocean mixing rate", tau_ex = "Interhemispheric mixing time",
       npp_frac_NH = "Northern share of plant growth",
@@ -283,7 +289,8 @@ function(input, output, session) {
       bomb_total = "Total bomb ¹⁴C released",
       sigma_co2 = "CO₂ mismatch allowance", sigma_d13c = "δ¹³C mismatch allowance",
       sigma_d14c = "Δ¹⁴C mismatch allowance")
-    unit <- c(beta = "—", q10 = "—", k_w = "m/yr", h_ml = "m", kz = "m²/yr",
+    unit <- c(beta = "—", beta_max = "—", fert_k = "ppm above preindustrial",
+              q10 = "—", k_w = "m/yr", h_ml = "m", kz = "m²/yr",
               tau_ex = "yr", npp_frac_NH = "—", seas_amp_NH = "GtC/yr",
               seas_amp_SH = "GtC/yr", seas_phase_NH = "month",
               seas_phase_SH = "month", gamma_enso = "GtC/yr per index unit",

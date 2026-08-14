@@ -90,14 +90,20 @@ cat(sprintf("%s background than on %s. test-pulse.R:101 wants diff > %.2f.\n\n",
 
 res <- list()
 for (b in FP_BETA_REFS) {
-  p <- ccx_default_params(); p$gamma_enso <- 0.5; p$beta <- b
+  # `fert_form <- CCX_FERT_LOG` IS LOAD-BEARING. The default is CCX_FERT_MM since
+  # 2026-08-14, under which `beta` is inert -- omitting this line made all three
+  # reference rows print the MM answer, identical to three decimal places. That
+  # suspicious uniformity is what caught it; do not remove the pin.
+  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p$fert_form <- CCX_FERT_LOG; p$beta <- b
   res[[length(res) + 1]] <- fp_lesson(p, sprintf("log beta %.2f%s", b,
-                                                 if (b == 0.75) " (SHIPPED)" else ""))
+                                                 if (b == 0.75) " (superseded)" else ""))
 }
 for (K in FP_K_GRID) {
   p <- ccx_default_params(); p$gamma_enso <- 0.5
   p$fert_form <- CCX_FERT_MM; p$fert_k <- K; p$beta_max <- fp_bmax(K)
-  res[[length(res) + 1]] <- fp_lesson(p, sprintf("MM K=%3.0f bmax=%.3f", K, fp_bmax(K)))
+  res[[length(res) + 1]] <- fp_lesson(p, sprintf("MM K=%3.0f bmax=%.3f%s", K, fp_bmax(K),
+                                                 if (K == 120) " (SHIPPED)" else ""))
 }
 res <- do.call(rbind, res)
 print(format(res, digits = 4), row.names = FALSE)
@@ -121,9 +127,9 @@ cat("    CCX_FERT_FORM=1 CCX_FERT_BETA_MAX=<bmax> CCX_FERT_K=<K> \\\n")
 cat("      Rscript calibration/diag_joos_beta_scan.R\n")
 cat("  Measured 2026-08-14, integrated IRF at TH 20/50/100 yr against Joos\n")
 cat("  Table 4's 5-95 % of 12.2-16.3 / 24.0-36.6 / 39.5-65.2:\n\n")
-cat("    log beta 0.75 (SHIPPED)  10.4 / 19.9 / 31.2   FAIL x3\n")
+cat("    log beta 0.75 (superseded) 10.4 / 19.9 / 31.2 FAIL x3\n")
 cat("    log beta 0.50            12.2 / 25.0 / 41.1   inside, TH20 on the floor\n")
-cat("    MM K=120 bmax=0.491      12.4 / 25.6 / 41.9   INSIDE x3, with margin\n")
+cat("    MM K=120 bmax=0.491      12.4 / 25.6 / 41.9   INSIDE x3 -- SHIPPED\n")
 cat("    MM K=140 bmax=0.534      12.2 / 25.0 / 40.8   inside, TH20 on the floor\n")
 cat("    MM K=171 bmax=0.600      12.0 / 24.3 / 39.4   FAIL at TH20 and TH100\n\n")
 cat("  So gate 12 caps fert_k at roughly 150 on the criterion-(a) locus, and\n")

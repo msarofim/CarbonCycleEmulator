@@ -31,7 +31,14 @@ CCX_MECHANISMS <- list(
                   "it off and the land stops taking up carbon."),
     caveat = paste("In this model CO₂ fertilisation IS the land sink — there",
                    "is no separate land-uptake mechanism to remove."),
-    apply = function(p, F) { p$beta <- 0; list(p = p, F = F) }
+    # MUST ZERO WHICHEVER PARAMETER IS LIVE. This read `p$beta <- 0` until
+    # 2026-08-14, and the flip to CCX_FERT_MM turned it into a NO-OP -- the
+    # switch moved CO2 at 2100 by exactly 0.00 ppm while still rendering as an
+    # active control in the app. test-mechanisms.R caught it, which is what that
+    # "every switch is wired up and CHANGES the answer" assertion is for.
+    # Zeroing BOTH is deliberate: it is correct under either form and cannot go
+    # stale the next time the default moves.
+    apply = function(p, F) { p$beta <- 0; p$beta_max <- 0; list(p = p, F = F) }
   ),
   warming_feedback = list(
     label = "Warming's effect on the carbon cycle",
