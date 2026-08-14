@@ -11,10 +11,12 @@
 # ---- parameter table -------------------------------------------------
 # transform: "log" (positive), "logit" (bounded by lo/hi), "id" (unbounded)
 CCX_PARAM_TABLE <- list(
-  # init tracks ccx_default_params()$beta -- re-centred to the 1-D posterior
-  # optimum 2026-08-12. NB the transform here is LOGIT on [0, 1.5], not log;
-  # a profile that assumes log silently scans plogis(log(beta)) * 1.5 instead.
-  beta        = list(tr = "logit", lo = 0.0,  hi = 1.5,  init = 0.38,
+  # init tracks ccx_default_params()$beta -- re-centred 0.38 -> 0.60 on
+  # 2026-08-13, on the converted-land model and by four criteria that agree to
+  # within 0.02 (calibration/diag_recentre_beta.R; the reasoning is written out
+  # at ccx_default_params()$beta). NB the transform here is LOGIT on [0, 1.5],
+  # not log; a profile that assumes log silently scans plogis(log(beta)) * 1.5.
+  beta        = list(tr = "logit", lo = 0.0,  hi = 1.5,  init = 0.60,
                      prior = function(x) dunif(x, 0, 1.5, log = TRUE)),
   q10         = list(tr = "log",   init = 2.0,
                      prior = function(x) dlnorm(x, log(2.0), 0.25, log = TRUE)),

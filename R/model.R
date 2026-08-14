@@ -133,16 +133,32 @@ ccx_ocean_grid <- function(h_ml, total_depth = ccx_const("OCEAN_DEPTH"),
 ccx_default_params <- function() {
   list(
     # CO2 fertilization, NPP = NPP0 (1 + beta ln(chi/chi0)).
-    # RE-CENTRED 2026-08-12 from 0.40 to 0.38, the 1-D optimum of the REAL
-    # log-posterior with every other parameter at its CCX_PARAM_TABLE init
-    # (-4560.2 -> -4530.6). Set by the objective the model is scored on, not by
-    # eyeballing CO2 in one year -- though the two agree here, both landing near
-    # 415 ppm at 2020. The move is small because the four-pool land already
-    # absorbed most of what the LUC debit had displaced; the ~12 ppm low bias
-    # recorded in handoff 2026-08-12b came from the two-pool land and is gone.
+    # RE-CENTRED 2026-08-13 from 0.38 to 0.60 on the converted-land model.
+    # 0.38 was set on 2026-08-12 as the 1-D log-posterior optimum of the model
+    # that PRECEDED 404d66d, in which land-use emissions had an airborne
+    # fraction of 0.002 -- i.e. it was centred against the bug, and on the
+    # shipped model it leaves CO2 20.0 ppm high over 2015-2024.
+    #
+    # 0.60 is not one criterion's answer, it is where four of them agree
+    # (calibration/diag_recentre_beta.R, 0.05 grid, q10 at its default 2.0):
+    #   zero of the 2015-2024 MLO CO2 bias                    0.591
+    #   CO2 stream's own 1-D optimum (level+seasonal+icecore)  0.597-0.599
+    #   full 1-D log-posterior at mode_fit's sigmas            0.597
+    #   full 1-D log-posterior at the CCX_PARAM_TABLE sigmas   0.617
+    # The last is the only one that differs, and it differs by 0.02: at
+    # sigma_d13c = 0.44 permil the d13C stream moves the joint optimum by less
+    # than the grid. THAT is why the default can be set while sigma_d13c is
+    # still undecided (handoff 13h sec.2.1c) -- measured, not assumed.
+    #
+    # Land sink at 0.60 is 2.62 GtC/yr against GCB 2015-2024's 2.36, and the
+    # ocean 2.52 against 3.22: the CO2 record is matched by a land sink that is
+    # too strong and an ocean that is too weak. Recorded here because it is the
+    # residual PHASE 3 (the biological pump) is aimed at, and it is visible in
+    # the default parameter set, not only at a mode.
+    #
     # This is a DEFAULT, i.e. an app and test fixture. beta is calibrated, so
     # the mode-find is what actually sets it -- see R/calibrate.R.
-    beta      = 0.38,
+    beta      = 0.60,
     q10       = 2.0,      # heterotrophic respiration temperature sensitivity
     # ---- land pool structure ------------------------------------------
     # Defaults chosen by diag_land_topology.R [3], the layout of lowest misfit
