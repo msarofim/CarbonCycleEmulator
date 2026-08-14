@@ -358,7 +358,16 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    Amplitude growth of ~15 % across the record is a *fertilization* signature the model
    must produce, not prescribe.
 7. **Sinks** (GCB 2025, 2015–2024 mean): **ocean 3.22 GtC/yr, land 2.36 GtC/yr** — model
-   must land within GCB stated uncertainty.
+   must land within GCB stated uncertainty (GCB 2025 stated 1σ: land ±0.5, ocean ±0.4).
+   **Status at default parameters (2026-08-14, saturating form at `fert_k` 120): STILL
+   FAILING, land +2.28σ (3.50 GtC/yr), ocean −1.52σ (2.61).** Down from +4.57σ / −2.13σ
+   under the log form at β 0.75, so the flip halved the land miss without closing it.
+   The land sink is compared GROSS — the model's d(land_C)/dt **plus E_LUC** — because
+   GCB's `land_sink` column is the residual sink alone; conflating the two inverted this
+   term's pull on fertilisation for months (see `R/likelihood.R`, the GCB block).
+   `calibration/diag_fert_saturating.R` §3. **Re-measure on any fertilisation or
+   `luc_scale` default change.** Note `luc_scale` does NOT close the remaining gap under
+   the saturating form — it makes it slightly worse while blowing up the CO₂ bias.
 8. **δ¹³C Suess:** preindustrial **−6.469 ‰** (Law Dome spline, 1745–1755 mean) →
    **−8.700 ‰** (Scripps MLO, 2024) / **−8.580 ‰** (Scripps SPO, 2024); MLO starts
    −7.600 ‰ (1980), SPO −7.490 ‰ (1977). Preindustrial CO₂ from the same Law Dome source

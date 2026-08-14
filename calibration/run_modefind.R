@@ -13,6 +13,23 @@
 # quarantined under calibration/output/quarantine/ and is NOT comparable: the
 # likelihood it maximised is a different function.
 #
+# 2026-08-14: BACK TO 18, and the composition changed twice on one day, so the
+# count alone is misleading. `luc_scale` was ADDED (16 -> 17), then the
+# fertilisation FORM changed: `beta` LEFT and `beta_max` + `fert_k` entered
+# (17 -> 18). The objective also gained the GLODAPv2 `d14c_deep_ocean` term and
+# had its GCB land-sink term corrected from net-vs-gross. So the 2026-08-12 mode
+# is quarantined under 20260814_pre_mm_fertilisation/ for the SAME reason as its
+# predecessors -- the likelihood it maximised is a different function, and MM is
+# not a reparameterisation of the log form, so nothing carries across.
+#
+# WHAT THIS RUN IS FOR, and what it is not. It is a MAP point, not a posterior:
+# it gives the app a calibrated point instead of hand-set defaults, and it
+# answers the one question the flip left open -- where (beta_max, fert_k) sit
+# under the FULL objective, given that DESIGN gate 12 caps fert_k near 150 while
+# the 1-D likelihood on the design-target locus preferred 171. It does NOT
+# discharge item 8. Items 5, 5b and 5c are still outstanding and each would
+# invalidate a posterior; see the ordering note in the handoff.
+#
 # The single mode-finding driver. calibration/run_modefind_bombwin.R was a
 # near-duplicate differing only in its output filename and was folded in here.
 #

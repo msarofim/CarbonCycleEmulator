@@ -220,8 +220,19 @@ LIK_USE_EXCESS_C14 <- TRUE
 #                       steeper 1975->1995 uptake.
 # DEFAULT IS THE WIDE ONE. The span between the two published reconstructions is
 # method spread, not measurement noise, and adopting one of them as if the other
-# did not exist would put ~130 log-units of leverage on a choice of paper.
+# did not exist would put leverage on a choice of paper rather than on data.
 # FLAGGED FOR MARCUS -- see CHANGELOG 2026-08-11.
+#
+# THE "~130 LOG-UNITS" THAT USED TO BE ASSERTED HERE DOES NOT REPRODUCE, and it
+# had no receipt anywhere in the repo. Measured 2026-08-14 at the current
+# default and swept across bomb_total 80-130 kmol, the two target sets differ by
+# 0.7-1.4 log-units, not 130 -- because the model's own excess inventory sits
+# between them and both terms are weak there (-6 to -10). The DIRECTION of the
+# argument survives (table2_peacock is ~3x tighter, so it constrains harder as a
+# fit moves away from it) but the MAGNITUDE was pattern-matched, not measured.
+# Either produce a receipt on whichever axis gives 130, or drop the number. The
+# practical consequence is that this decision is CHEAPER than the review's
+# ordering assumed: it is not a blocker on the refit.
 LIK_EXCESS_C14_TARGET <- "table4_obs_range"
 # The run's first row is the preindustrial steady state only if the run starts
 # here. The term is SKIPPED, not silently mis-baselined, if it does not; the

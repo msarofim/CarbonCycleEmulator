@@ -3598,3 +3598,68 @@ the literature set pins either at the ECOSYSTEM scale** — leaf-level Rubisco k
 transfer, and FACE experiments and CMIP6 models disagree by more than any prior width would
 encode. The bounds are implausibility limits, not beliefs. If a sourced ecosystem-scale
 constraint is ever found it belongs there with its citation.
+
+## 2026-08-14 (cont.) — REFIT READINESS: item 8 is NOT unblocked, and two of the blockers got priced
+
+Marcus asked to move to the refit "if that is the logical next step". **It is not**, and the
+reasoning is measured rather than asserted. Handoff §6 blocks item 8 on items 2, 5, 5b, 5c, 6
+and 7. **2 and 7 are now cleared.** The rest:
+
+| blocker | priced | verdict |
+|---|---|---|
+| **5c** — omitted monthly seasonality in the emission inputs | **101 log-units** | **REAL. Blocks.** |
+| **5 + 5b** — interhemispheric-gradient terms + time-varying LUC share | 5.1 log-units *today* | **Blocks, but only as a pair** |
+| **6** — `LIK_EXCESS_C14_TARGET` | **0.7–1.4 log-units** | **NOT a blocker** — see below |
+
+### 5c has teeth, and they are sharp
+
+Measured directly: moving `seas_amp_NH` from 12 → 13 GtC/yr — an **8.3 %** change, which is
+exactly the bias the handoff measured omitted LUC + fossil seasonality to induce — moves the
+objective by **+101.1 log-units**, of which `co2_seasonal_MLO` supplies **+131.5**. So the
+one free NEP amplitude absorbs the missing input seasonality one-for-one, in the objective's
+most sharply-curved stream. **A refit today would bake an ~8 % input error into a fitted
+parameter**, which is the same error class `luc_scale` was created to fix. The objective also
+already *prefers* 13 to 12 by 101 log-units, so the fit will move `seas_amp_NH` up while the
+input correction would move it back down — the two are directly confounded.
+
+### 5 and 5b block only as a pair, and 5 is what makes 5b matter
+
+The objective still barely sees the interhemispheric gradient — 5.1 log-units for 0.84 ppm.
+So fixing the LUC hemispheric share alone (5b) changes essentially nothing in a fit, and the
+review was right that it must land *with* 5. But **5 adds a stream**, and adding a stream
+after a fit invalidates the fit. Either both before the refit, or both after — not split.
+
+### 6 is CHEAPER than the ordering assumed, and a repo claim did not survive checking
+
+`R/likelihood.R` asserted that choosing between the two published excess-¹⁴C reconstructions
+"would put **~130 log-units** of leverage on a choice of paper". **That number has no receipt
+anywhere in the repo and does not reproduce.** Measured at the current default and swept
+across `bomb_total` 80–130 kmol, `table4_obs_range` and `table2_peacock` differ by
+**0.7–1.4 log-units** — the model's own excess inventory sits between them and both terms are
+weak there (−6 to −10). The *direction* survives (`table2_peacock` is ~3× tighter and would
+constrain harder as a fit moved away from it); the *magnitude* was pattern-matched. The
+comment now says so and asks for a receipt or a correction. **Practical consequence: item 6's
+remaining half is not a blocker on the refit.** `sigma_d13c` was already decided (stays free).
+
+### What IS worth running now, and is running
+
+A **MAP mode-find** — `calibration/run_modefind.R`, regenerating the canonical
+`calibration/output/mode_fit.rds` the flip quarantined. Cheap relative to MCMC (~0.060 s per
+posterior evaluation), and it answers the one question the flip left open: **where do
+(`beta_max`, `fert_k`) sit under the FULL objective**, given that gate 12 caps `fert_k` near
+150 while the 1-D likelihood on the design-target locus preferred 171. It is explicitly a
+point, not a posterior, and does **not** discharge item 8.
+
+### Recommended ordering
+
+1. the mode-find (running) — gives the app a calibrated point and settles the `fert_k` tension
+2. **5c** — sourced monthly seasonality for both emission inputs (GFED + a monthly fossil
+   product). The only blocker measured to bias a fitted parameter today.
+3. **5 + 5b together** — the gradient terms and the time-varying LUC hemispheric share
+4. **8** — the refit, ~2 h wall-clock on 4 parallel chains at 0.060 s/eval
+
+### Also
+
+`DESIGN.md` §6 **gate 7** now carries a measured status line (**still failing**: land +2.28σ,
+ocean −1.52σ, down from +4.57σ / −2.13σ) with the gross-vs-net trap named and a note that
+`luc_scale` does *not* close the remainder under the saturating form.
