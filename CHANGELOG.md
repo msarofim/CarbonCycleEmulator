@@ -2897,3 +2897,122 @@ anyway, and it belongs in front of the review rather than quietly applied. **Fix
 refit.** Second-order and also review material: even corrected the term moves ~9 log-units
 across β 0.38→0.75 against the CO₂ streams' ~12,000, so the partition constraint is nearly
 decorative. `gcb_ocean_sink` has no E_LUC analogue and is unaffected.
+
+## 2026-08-14 (later) — THE ARCHITECTURE REVIEW: two DESIGN hard gates are failing, and the objective's weighting is why
+
+`notes/review_2026-08-14_architecture.md`. Discharges §2 of
+`handoff_2026-08-14_step_back_architecture_review.md` — a written review of targets,
+inputs, components and whether the assembled model works. **No model code, no fixtures
+and no defaults were changed.** Three diagnostics added; everything below is measured.
+
+**HEADLINE — the shipped default fails two of DESIGN §6's own hard gates.**
+
+| gate | target | at `ccx_default_params()` (β 0.75) | |
+|---|---|---|---|
+| **7 — sinks 2015–2024** | land 2.36 ± 0.9, ocean 3.22 ± 0.4 GtC/yr | **4.57 / 2.38** | **+2.5σ / −2.1σ** |
+| **12 — Joos IRF, TH 20/50/100** | 12.2–16.3 / 24.0–36.6 / 39.5–65.2 yr | **10.4 / 19.9 / 31.2** | **FAIL ×3** |
+
+Gate 12's recorded status in DESIGN ("inside at all three, 12.6/26.2/43.6") was measured
+at β 0.38 and is **stale**. `diag_joos_beta_scan.R` puts the gate's ceiling at **β ≈ 0.50**
+— which independently agrees with the Pulse Lab's Revelle ceiling of ≈0.53 (13i §A1).
+Neither criterion was used to set the default, which tracks the CO₂ record alone.
+
+**WHY — measured, `diag_stream_leverage.R`.** A stream's weight is its LEVERAGE (log-units
+per one-prior-sd parameter step), not its logL LEVEL. Across a step in β: CO₂ streams
+1,565, ice core 118, `gcb_ocean_sink` 36, `gcb_land_sink` **2.0** (7.3 corrected). The
+partition constraint loses **40 : 1**, so the sampler always buys CO₂ level with land sink.
+Both β re-centrings did exactly that, correctly following the objective as written.
+
+Four further findings from the same matrix:
+- **`excess_c14_ocean` failed at its stated job.** Design note 5 added it so `bomb_total`
+  could not absorb ventilation error. It has **0.8** log-units of leverage on `bomb_total`
+  against the atmospheric Δ¹⁴C streams' **1,247**. Outvoted 1,500 : 1; the loophole is open.
+- **A large level with no leverage is a constant offset.** `d14c_intcal` carries −670 of
+  logL and **2.8** of leverage. Never quote a stream's level as evidence of its weight.
+- **`q10` is decided by δ¹³C** — the one stream with a known unclosed 0.53 ‰ misfit. The two
+  CO₂ station terms oppose and cancel (+7.2 / −6.9); δ¹³C supplies 31 of ~70 available
+  log-units, pulling `q10` down. This is the `q10` → 0.169 pathology seen directly, and it
+  confirms `diag_which_stream_pays.R`'s hypothesis with a cleaner instrument.
+- **Free σ let a misfitting stream de-weight itself.** Three σ are calibrated, every other
+  stream's is fixed. A +0.7 log-sd move in `sigma_d13c` GAINS the δ¹³C streams 510 log-units.
+- **τ_ex is set by the seasonal cycle, not by the gradient.** DESIGN §6 gate 9 says the
+  MLO−SPO gradient is "the main constraint on τ_ex". There is **no gradient term in
+  `ccx_loglik()`**; 66 % of τ_ex's leverage comes from `co2_seasonal_*`.
+
+**§1's `gcb_land_sink` net-vs-gross defect — CONFIRMED and PRICED.** Real, and it must be
+fixed because the objective is wrong — but at 7.3 log-units corrected against CO₂'s 1,565
+it **will change essentially nothing about the fit**. Do not mistake its landing for having
+addressed the weighting. A second, smaller defect found alongside it: both sink terms
+compare `diff()` of ANNUAL-MEAN stocks to GCB's CALENDAR-YEAR flux — a half-year offset,
+negligible in bias, but it aliases exactly the interannual variability a partition
+constraint is supposed to use. Same three lines.
+
+**THE CHEAPEST FIX IS AN INPUT, NOT A PARAMETER — `diag_luc_scale.R`.** `E_LUC` is
+prescribed exact while `DATA.md` §3a already records GCB 2025 at 239.8 GtC (1850–2018)
+against OSCAR v3.1's 178.9 for the same period — a **34 % product spread** — and OSCAR's
+own headline is **206 ± 57 PgC** = ±27 ppm. The model's largest structural misfit (13i §2's
+"CO₂ level vs GCB budget", ~30 ppm) is **smaller than one input's stated uncertainty.**
+At matched CO₂ bias:
+
+| | β 0.75, LUC × 1.00 (shipped) | β 0.50, LUC × 0.65 (= 188 GtC) |
+|---|---|---|
+| CO₂ level | +3.3 ppm | −2.6 ppm |
+| gate 7 land / ocean | **4.57 (+2.5σ)** / **2.38 (−2.1σ)** | 3.06 (+0.8σ) / 2.63 (−1.5σ) |
+| gate 12 Joos | **FAIL ×3** | inside ×3 |
+| Pulse Lab Revelle | **reversed** | holds |
+| δ¹³C bias | +0.382 | +0.542 |
+
+The LUC route wins on four criteria and **loses on δ¹³C by 0.16 ‰** — stated because it is
+the one place the shipped default is better. 188 GtC sits inside OSCAR's published 206 ± 57.
+**Not adopted as a fixture:** a uniform scale is crude, GCB's own E_LUC uncertainty has not
+been pulled from source (rule 2), and this is a measurement of what is available.
+
+**FERTILISATION IS THE BINDING STRUCTURAL DEFECT, with the arithmetic stated.**
+`NPP = NPP₀(1 + β ln(χ/χ₀))` has one parameter controlling both the INTEGRAL (historical
+uptake) and the DERIVATIVE at today's CO₂ (`β·NPP₀/χ` = 0.116 GtC/yr/ppm at β 0.75, against
+the 0.062–0.077 the Joos gate needs). The data want a large integral and a small derivative;
+the log form fixes their ratio. **A two-parameter saturating form is required**, to an
+explicit design target: β ≈ 0.7's integral with β ≈ 0.5's marginal slope at 388 ppm.
+Corroboration that this is a model defect and not a threshold problem: on the SSP protocol
+the model leaves **9.6 %** of an ssp585 pulse airborne at 100 yr where Joos's Bern3D-LPJ has
+RCP8.5 above 80 % at year 1000. Same cause as the Pulse Lab reversal.
+
+**THE OCEAN IS RE-MOTIVATED AND NOW FALSIFIABLE.** At the β 0.50 / LUC 0.65 settlement the
+ocean sink is the ONLY remaining gate miss (2.63 vs 3.22, −1.5σ) — a better case for the
+pump than 13h §4.3 had. **Pre-registered before it is adopted on sink grounds:** build it,
+measure the 2015–2024 ocean sink and surface DIC. > 0.1 GtC/yr toward 3.22 = mechanism;
+otherwise 13h §4.3's "mostly bookkeeping" stands and it ships on pedagogy alone (where it
+passes the one-sentence test and the conveyor fails).
+
+**Components left alone, with reasons:** 4 land pools (free none — 13i priced one free
+timescale at +3.6σ and nothing scores the ¹⁴C partition it would break); `ra_ratio` = 0
+(no stream could identify it); temperature × ENSO interaction (`gamma_enso`'s max leverage
+anywhere is 16.3); conveyor off (fails its own falsification test and the one-sentence test).
+
+**ORDERING.** 1 fix §1 + the half-year alignment → 2 re-take β against DESIGN's gates
+(Marcus') → 3 `luc_scale` as a 17th parameter → 4 GLODAPv2 (unblocks the `kz` decision AND
+the pump's targets, one pull) → 5 gradient terms → 6 re-take the free-σ and
+`LIK_EXCESS_C14_TARGET` decisions on the leverage evidence → 7 saturating fertilisation →
+8 THEN the refit (~18 params) → 9 pump. **Do NOT** hand-tune stream weights, delete the
+decorative terms, free land turnover, delete the `kz` bracket bare, or adopt LUC × 0.65.
+
+**Failing tests:** `test-pulse.R:83/:100/:101/:112` now have EXTERNAL corroboration (the
+Joos scan reproduces the defect at the same β). They are the model reporting a real failure
+— leave them failing until the fertilisation form changes. **Add gate 12 to the suite**: it
+is a hard gate whose only implementation is a diagnostic nobody runs, which is how its
+status went stale across two β moves.
+
+**Proposed DESIGN amendments written out but deliberately NOT applied** (review §8) — each
+encodes a choice that is Marcus'. Includes a proposed **gate 13, stream-leverage screen**:
+no calibrated parameter may be decided by a stream carrying a known unclosed structural
+misfit. That is the general form of the `q10`/δ¹³C finding and would have caught it.
+
+**Not re-measured, flagged as stale:** `diag_pedagogy.R`'s turnover-vs-adjustment numbers
+(4.69 yr against a 40.3 yr mass 1/e) predate both β moves exactly as the Joos gate did, and
+the mass 1/e time is precisely what §4.1 shows moving with β. The app's headline pedagogical
+claim is currently uncorroborated at the shipped default.
+
+**Non-obvious state:** `calibration/output/recentre_beta_scan.rds` was OVERWRITTEN by
+re-running `diag_recentre_beta.R` at the current defaults (it was last written at β 0.60 /
+wood-only). Every number in the review is at `gamma_enso` = 0, which is
+`ccx_default_params()` and is **not** what `app/global.R:71` runs.
