@@ -3240,3 +3240,60 @@ belongs to the inputs.
 then the amplitudes above are a bound, not an estimate. **This is a new item for the
 review's ordering**, and on the numbers it belongs alongside item 5 (the gradient terms):
 both are about the model being scored on the wrong statistic.
+
+## 2026-08-14 (cont.) — GLODAPv2 pulled (review item 4): the deep targets are sourced, and the σ turns out to BE the kz decision
+
+`data-raw/build_glodap_deep_targets.R`, MANIFEST key `glodap_v2_2023`. GLODAPv2.2023
+Merged Master File (110 MB zipped / 853 MB), glodap.info, doi:10.25921/z7hc-v261;
+Lauvset et al. 2024, ESSD 16:2047, doi:10.5194/essd-16-2047-2024. 50,634 bottles carry
+δ¹³C or Δ¹⁴C; 42,331 / 37,511 / 37,394 usable (flag 2) for Δ¹⁴C / δ¹³C / TCO₂.
+
+**The model's "deep" is a specific layer, not a mood.** `ccx_ocean_grid(75)` puts the
+bottom box at **2627.2–3700 m**, and `diagnostics$d14c_deep_by_hemi` — the quantity the kz
+bracket was bisected on — *is* that layer. Observations are binned 5°×10°×250 m and the
+cells weighted by cos(lat), because GLODAP over-samples the Atlantic relative to its volume.
+
+| quantity, 2627–3700 m, volume-weighted | model | observed | spread |
+|---|---|---|---|
+| **Δ¹⁴C** | (kz-dependent) | **−175.3 ‰** (N-Atl cut −178.2) | ±45.9 |
+| **δ¹³C** | **+1.560 ‰ UNIFORM** | **+0.424 ‰** | ±0.3 |
+| **DIC** | **1986.3 µmol/kg UNIFORM** | **2273.1 µmol/kg** | ±53.9 |
+
+**[a] The uncited bracket was RIGHT, and now has a source.** DATA.md §5's "roughly −150 to
+−200 ‰" has a midpoint of −175, which is **within 0.3 ‰ of the measurement**. The recalled
+number was good; it simply had no receipt. It has one now.
+
+**[b] But the pull does NOT unblock the kz decision — it relocates it into σ.** 13i §A3
+assumed GLODAP would supply "a real spatial spread for the sigma". It supplies the spread;
+**the spread is not the sigma.** A one-box model is scored against the volume-weighted
+*mean*, whose uncertainty is the spread ÷ an effective sample size — and deep water masses
+are basin-coherent, so n_eff is of order tens, not the 3,592 cells. Measured against the
+runaway that bare deletion produces (kz → 10,686, deep Δ¹⁴C −112.7 ‰):
+
+| candidate σ | ‰ | runaway sits at | verdict |
+|---|---|---|---|
+| measurement error alone | 3.0 | 20.9σ | HOLDS kz |
+| SE of the weighted mean, n_eff = 20 | 10.3 | 6.1σ | HOLDS kz |
+| SE of the weighted mean, n_eff = 5 | 20.5 | 3.0σ | HOLDS kz |
+| **full spatial spread (n_eff = 1)** | **45.9** | **1.4σ** | **DOES NOT HOLD kz** |
+
+**And note what that means for the incumbent bracket:** [3830, 6200] is effectively a HARD
+±25 ‰ box, **tighter than every candidate except the most aggressive n_eff**. Deleting it
+in favour of an "honest" term would *loosen* the constraint, not tighten it. That inverts
+the framing 13i §A3 was working under. **The σ is a methodological choice about
+representation error and it is Marcus'** — it is now the whole of decision 1.
+
+**[c] The pump's targets are quantified, and they are large.** The model's interior is
+uniform in both tracers: the observed surface→deep DIC gradient is **+233 µmol/kg**
+(2040 → 2273) against the model's **exactly 0**, and the observed δ¹³C gradient is
+**−0.861 ‰** (surface +1.285 → deep +0.424) against the model's **0, at a uniform +1.560**.
+The model's deep DIC is **12.6 % below** observed, which independently reproduces 13e §6's
+"~14 % ocean inventory deficit" from a completely different measurement. Both observed
+gradients are the signature a biological pump produces, so 13h §4.3's pump case now has
+quantified targets rather than a direction — and the pre-registered ocean-sink test from
+review §4.2 still gates whether it is a mechanism or bookkeeping.
+
+**Correction to the repo's recollection:** the interior δ¹³C gradient was recorded as
+"observed ~1–1.5 ‰". Volume-weighted over the model's own layers it is **0.861 ‰** — right
+order, high by ~30 %. The model is +1.14 ‰ too enriched at depth and +0.28 ‰ at the surface,
+so it is wrong in offset *and* in having no structure at all.
