@@ -2722,3 +2722,95 @@ constrains ventilation **without** first settling the deep-Δ¹⁴C target.
 
 **The pump's effect on atmospheric δ¹³C remains sign-unknown** (13e §7 said so; nothing
 here changes it). Do not adopt it expecting the δ¹³C misfit to close.
+
+## 2026-08-13 (j) — PHASE 1 of the sequenced plan: measured, and two of its own claims withdrawn
+
+Works handoff 13h's PHASE 1 and stops where 13h says to stop. Full record in
+`notes/handoff_2026-08-13i_phase1_measured.md`.
+
+### `beta` re-centred 0.38 → 0.60, and it is not one criterion's answer
+
+0.38 was set 2026-08-12 as the 1-D log-posterior optimum of the model that **preceded**
+`404d66d` — i.e. against the bug. On the shipped model it leaves CO₂ 20.0 ppm high.
+Four criteria agree to within 0.02 (`diag_recentre_beta.R`): CO₂-bias zero **0.591**,
+CO₂ stream's own optimum **0.597–0.599**, full posterior at `mode_fit`'s σ **0.597**, at
+the table's σ **0.617**. That last row is the useful one — the answer barely moves when
+`sigma_d13c` moves 0.44 → 0.10, so the default could be set with that decision still open.
+
+### WITHDRAWN: "the converted-land fix makes δ¹³C 7.1 % worse"
+
+13h §2.2d measured it at a **stale β**. Like for like, at each model's own CO₂-consistent
+β, the 2015-2024 MLO δ¹³C bias goes **+0.580 (pre-fix, β 0.358) → +0.529 (post, β 0.591)**.
+The fix **improved** the δ¹³C misfit by 0.05 ‰. And `diag_conveyor.R`'s deep-Δ¹⁴C columns
+are **bit-identical** across the fix, so the 13b/13c ocean conclusions were never at risk.
+Re-measured at β 0.60 the ocean is *better* than 13c recorded: mixed-layer Suess
+**0.153 (−0.4 sd vs Quay)**, atmosphere **+18 %** rather than +25–30 %.
+
+### NEW STRUCTURAL MISFIT: the CO₂ record vs the GCB budget
+
+`diag_luc_prorata.R` §5. Against GCB 2015-2024 (gross land 2.36, ocean 3.22 GtC/yr):
+
+| debit | β | CO₂ bias | cum land 1750-2024 | gross land | ocean |
+|---|---|---|---|---|---|
+| wood only | 0.38 | −20.0 ppm | −52.2 (GCB −57.4) | 2.74 | 2.87 |
+| wood only | **0.60** | **+0.8 ppm** | **+21.7** | **3.99 (+69 %)** | 2.52 (−22 %) |
+| pro rata | 0.38 | −35.0 ppm | −108.8 | 2.36 | 3.00 |
+| pro rata | 0.70 | −1.0 ppm | +11.1 | 4.31 | 2.45 |
+
+**Matching GCB's cumulative land costs ~21 ppm under BOTH debits** — the debit choice moves
+where β sits on the line, it does not relieve the line. Size explained, not hand-waved:
+the model closes its own budget exactly (E_foss 504.7 = Δatm 303.8 + Δland 21.7 + Δocean
+178.3, residual 0.9 GtC) while GCB's own table carries **+35.6 GtC of cumulative imbalance
+over 1959-2024 alone**. *Provenance flag: the −57.4 / +209.8 GtC figures come from
+`404d66d`'s commit message and cannot be recomputed here — `obs_gcb.rds` starts in 1959.*
+
+### `f_luc_wood`: the pro-rata debit, built as a switch and measured
+
+Default 1 = the shipped wood-only behaviour, bit-identical, with its own parity gate (the
+default never reaches the new branch, so the existing gate could not see it).
+
+| LUC airborne fraction ÷ fossil's | 50 yr | 100 yr | 150 yr | 200 yr |
+|---|---|---|---|---|
+| wood only | 0.549 | 0.496 | 0.569 | 0.647 |
+| **pro rata** | **1.025** | **1.024** | **1.023** | **1.024** |
+
+Cost: the emitted carbon stops carrying wood's ¹⁴C. At 2024 the debit's Δ¹⁴C goes
+**+57.1 → −10.1 ‰** — in the bomb era it flips from enriched to depleted. Pool equilibrium
+shares are leaf 1.7 / wood 22.5 / soil_fast 5.4 / **soil_slow 70.4 %**.
+*Correction:* the debit does **not** land on "wood (37 yr)" as 13h §2.1b and `404d66d`'s
+message say — `tau_wood` is **20 yr**, and 35.5 yr is `land0/npp0`, the whole land's bulk
+turnover. The two were conflated.
+
+### The `kz` bracket: 13h §2.1a's *reason* does not survive, and the bound is not binding
+
+13h §2.1a deletes `[3830, 6200]` as "conditional on the pure-diffusion column" — but PHASE
+2 is conveyor-OFF, i.e. that exact column, which is the same fact 13h §3.2 relies on.
+What survives is 12d §8's different reason (the bound leaks), whose prescription is a
+**likelihood term**, not a bare deletion. Measured (`diag_kz_bracket.R`): the bracket
+**re-bisects to [3828.9, 6201.0]**, unmoved by `404d66d` or the β change; the leak is
+**+7.0 to +8.1 ‰** uniformly, re-bisecting to [3601, 5703] at `mode_fit`'s vector; and the
+1-D log-posterior in kz has an **interior maximum at 5000** under both candidate σ_d13c.
+Bare deletion is priced: kz 10,686 gives deep Δ¹⁴C **−112.7 ‰**. There is still no
+deep-Δ¹⁴C term in `R/likelihood.R`.
+
+### A units trap that was live in a shipped diagnostic
+
+`mean(diff(land_C))` is the **net** land flux (sink − E_LUC); GCB's `land_sink` is the
+**gross** residual sink. Nearly the same quantity while land-use carbon was being regrown,
+and not since `404d66d`. Fixed in `diag_d13c_suess.R` §3 (still live there), the two new
+diagnostics, and the `beta` comment. **It changed a conclusion:** at β 0.60 the land sink
+is +69 % against GCB, not the +11 % first written.
+
+### Six failing tests, three new, all deliberately left failing
+
+Re-derived rather than labelled, per "carry the evidence, not the label":
+`test-likelihood.R:114/117` — the fixture's 12.65 ppm bias is gone, not the property; the
+symmetric curvature `(cost(+1)+cost(−1))/2` is **+26.40 at both β** and `cost(+50)` is
+64,439, so the AR(1) loophole is still shut. Station CO₂ residuals went **RMS 13.28 → 1.09
+ppm**, and they are structured, not noise (+0.036 / +0.051 ppm/yr trends, p 3e-14 / 4e-20).
+`test-likelihood.R:135` — at RMS 1.09 the ML σ_co2 is ≈ 0.4, so the hard-coded "sane" 5 is
+no longer sane. `test-climate.R:121` joins `:122` as one phenomenon: higher β damps the
+carbon-climate loop gain, and the header's ~111 ppm / ~0.3 °C was never met.
+`test-mechanisms.R:32` — the ENSO switch is weak on the level *and* on the right statistic:
+growth-rate sd 0.584 vs observed 0.712 at `gamma_enso` 0.5, matching at γ ≈ 1.5–2
+(`mode_fit` chose 0.927), with the posterior nearly flat 0.5 → 1.0.
