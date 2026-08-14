@@ -2862,3 +2862,38 @@ value in code, and a term in the **objective** is a stronger use than the bound 
 replaces. **The bracket is therefore NOT deleted**, since bare deletion is the
 measured-and-rejected option (kz → 10,686, deep Δ¹⁴C −112.7 ‰). **GLODAPv2 unblocks it**,
 and 13h §4.3 already needs the same pull for PHASE 3's deep DIC and δ¹³C targets.
+
+## 2026-08-14 (b) — Stop before PHASE 2: a step-back architecture review is queued
+
+Marcus called a halt before the conveyor-OFF refit. `notes/handoff_2026-08-14_step_back_architecture_review.md`
+sets the terms of reference: **targets** (what are we asking the model to reproduce, and are
+the stream weights defensible), **inputs** (fossil, LUC, bomb/nuclear/cosmogenic ¹⁴C, ENSO,
+GMST — and the four provisional hemispheric shares), **components** (how many land pools;
+how land and LUC interact; pump vs conveyor vs neither; how fertilisation is handled; how
+temperature and ENSO interact; gross vs net exchange for each), and **whether the assembled
+thing works** — pulse lifetime, expected to be the weakest test, and pedagogy. The
+inventories in it are verified against the code; the questions are deliberately unanswered.
+13h §§3–4 stay on the shelf, unchanged, until the review says whether they are still right.
+
+### FOUND WHILE TAKING INVENTORY, NOT FIXED: `gcb_land_sink` compares net to gross
+
+`R/likelihood.R` scores `diff(land_C)` — the model's **NET** land flux, sink minus E_LUC —
+against GCB's **GROSS** residual sink. This is the same trap fixed in the diagnostics at
+`cc3abd5`, but **inside the objective the MCMC will optimise**: the model is asked to
+over-absorb by exactly E_LUC (~1.37 GtC/yr recently).
+
+| β | as shipped | corrected (`mod_ld + E_LUC`) | mean model−GCB, net | gross |
+|---|---|---|---|---|
+| 0.38 | −139.6 | **−125.7** | −1.75 | **−0.07** |
+| 0.75 | −127.6 | −134.9 | −0.31 | +1.37 |
+| 0.85 | **−127.8** | −139.6 | −0.00 | +1.68 |
+
+**The bug inverts the term's pull.** As shipped it wants β to *rise*, bottoming near 0.85;
+corrected, its own optimum is β ≈ 0.39 and it *resists* rising β. It went unnoticed because
+it was pushing the same way as the CO₂ streams. It is a bug, not a choice — the only choice
+attached is the σ (`0.9 × 3.0 = 2.7` GtC/yr, traceable to `DESIGN.md` §9 Q1). **Left
+unfixed deliberately**: the fix changes what the model is fitted to, the refit is blocked
+anyway, and it belongs in front of the review rather than quietly applied. **Fix before any
+refit.** Second-order and also review material: even corrected the term moves ~9 log-units
+across β 0.38→0.75 against the CO₂ streams' ~12,000, so the partition constraint is nearly
+decorative. `gcb_ocean_sink` has no E_LUC analogue and is unaffected.
