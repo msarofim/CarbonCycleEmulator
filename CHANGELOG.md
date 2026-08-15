@@ -3968,3 +3968,40 @@ as anything computed after today. The canonical path is **empty** until item 8 r
 
 **Suite still 8 failing, the same 8.** The parameter-count tripwire fired as designed and was
 recorded; no new failures.
+
+### Later the same day — three of the four flagged tests, RE-EXPRESSED not re-baselined
+
+Marcus took all three. Each repair replaced a hard-coded fixture with a **derived** quantity,
+and each was mutation-tested. **Suite 8 → 4 failing, 695 passing.**
+
+| test | was | now |
+|---|---|---|
+| `test-likelihood.R` CO₂-bias | `cost(1) > 100` measured **from zero** | cost measured **from the fitted offset**; the guard is the **curvature**, A > 10 log-units/ppm² (AR(1) pathology was ~0.0055, so a ~1800× margin) |
+| `test-likelihood.R` σ_co2 profile | collapsed value must lose to a hand-picked σ = 5 | the profile optimum, as an **effective sd**, within 1.5× the **measured residual RMS** |
+| `test-luc-scale.R` gross-vs-net | `abs(gross − net) > 10` | the **closed-form E_LUC displacement**, asserted to 1e-8, plus a materiality check |
+
+**Every one had gone stale for the same reason: the model improved.** The CO₂-bias test was
+measuring the model's own level bias rather than the price of a bias (MLO residual mean is now
++0.97 ppm, so a +1 ppm shift is an *improvement* and "cost(1)" is −68), and it broke twice as
+the level fit got better. σ = 5 stopped being a sane comparator once the residual RMS fell to
+~1.13 against a *fixed* `LIK_CO2_REP_ERR` of 1.0 — and handoff §4.1 had already established
+that σ_co2 → 0 is the **correct** inference here, not the AR(1) pathology it resembles. The
+gross-vs-net gap is large *because the model over-absorbs*, so it shrinks as the sink improves
+(4.57 → 3.50 → 3.48 GtC/yr): that test used a symptom of the old bug as a proxy for the fix and
+would have failed **harder** the more the refit succeeded.
+
+**Mutation tests.** Reverting `gcb_land_sink` to the NET comparison → 2 failures in
+`test-luc-scale.R`. Inflating the CO₂-level sd 30× (the AR(1) loophole in effect) → 3 failures
+in `test-likelihood.R`. Both gates have teeth.
+
+**The 4 that remain were never flagged for Marcus and are untouched:** `test-luc-permanence.R`
+(the fossil reference arm; and a case needing `f_luc_wood = 1` that sets only `f_luc_perm`),
+`test-mechanisms.R` (ENSO switch weak, 0.30 vs > 0.5), `test-pulse.R` (ssp119 airborne
+fraction, an *unbenchmarked* ballpark check on a declining background while the
+protocol-matched gate 12 passes).
+
+### The refit is HELD
+
+Item 8 is structurally unblocked by 5 + 5b. **Marcus held it** pending the `sigma_co2` decision
+(unidentified, pinned at a boundary, "fix it or drop it, do not sample it"). ~6–7 h at 20
+parameters and 0.083 s/eval. `calibration/output/mode_fit.rds` stays **empty** until it runs.

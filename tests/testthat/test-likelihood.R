@@ -103,36 +103,99 @@ lik_fixture <- function() {
 
 test_that("a CO2 level bias is expensive", {
   skip_if_no_cpp()
+  # RE-EXPRESSED 2026-08-15 (Marcus), NOT re-baselined. The old form asserted
+  # cost(1) > 100 measured from a ZERO shift, i.e. it assumed the fixture model
+  # starts unbiased. It no longer does, in the good direction: the MLO annual
+  # residual mean is +0.97 ppm (obs above model), so shifting the model UP by
+  # 1 ppm moves it TOWARD the observations and "cost(1)" is -68. The assertion
+  # was measuring the model's level bias, not the price of a bias -- and it
+  # broke twice as the level fit IMPROVED (RMS 3.04 -> 0.99 -> 1.13 across the
+  # MM flip and item 5b), which is the signature of a fixture, not a guard.
+  #
+  # What the test is actually for: under the retired AR(1) scheme at rho =
+  # 0.998 a +50 ppm bias cost 13.7 log-units IN TOTAL. The property that must
+  # hold is that the objective has real CURVATURE in the level, wherever its
+  # optimum happens to sit. So the cost is measured FROM THE FITTED OFFSET and
+  # the guard is on the curvature, which is scale-free and cannot go stale.
   f <- lik_fixture()
-  base <- ccx_loglik(f$out, f$obs, f$err)
-  cost <- function(b) {
+  shift <- function(b) {
     o <- f$out; o$co2_NH <- o$co2_NH + b; o$co2_SH <- o$co2_SH + b
-    base - ccx_loglik(o, f$obs, f$err)
+    ccx_loglik(o, f$obs, f$err)
   }
-  # Under AR(1) at rho = 0.998 a +50 ppm bias cost 13.7 log-units IN TOTAL.
-  # Anything of that order here means the loophole is back.
-  expect_gt(cost(1), 100)
+  # The uniform-shift profile is quadratic to numerical precision (the level
+  # terms are Gaussian in it), so fit it rather than search: A is the total
+  # level precision in log-units per ppm^2 and -B/2A is the fitted offset.
+  bb  <- c(-4, -2, -1, 0, 1, 2, 4)
+  ll  <- vapply(bb, shift, numeric(1))
+  cf  <- stats::coef(stats::lm(I(ll - ll[bb == 0]) ~ 0 + bb + I(bb^2)))
+  A   <- -cf[["I(bb^2)"]]          # curvature, log-units per ppm^2
+  b0  <- cf[["bb"]] / (2 * A)      # fitted uniform offset, ppm
+  # the quadratic must actually describe the profile, or A means nothing
+  expect_gt(summary(stats::lm(I(ll - ll[bb == 0]) ~ 0 + bb + I(bb^2)))$r.squared, 0.999)
+
+  # THE GUARD. Under AR(1) a 50 ppm bias cost 13.7 log-units in total, i.e. a
+  # curvature of ~0.0055. Requiring A > 10 is a ~1800x margin over that
+  # pathology while sitting a factor ~2.6 below the measured value (26.4), so
+  # it has room for the model to keep improving without going stale.
+  expect_gt(A, 10)
+  # the objective locates the level rather than being flat in it
+  expect_lt(abs(b0), 3)
+  # ...and the direct AR(1) comparator, now measured from the optimum
+  cost <- function(b) shift(b0) - shift(b0 + b)
   expect_gt(cost(50), 10000)
-  # and monotone in the size of the bias
+  expect_gt(cost(-50), 10000)
+  # monotone in the DISTANCE from the optimum, in both directions
   expect_true(all(diff(vapply(c(0, 1, 5, 20, 50), cost, numeric(1))) > 0))
+  expect_true(all(diff(vapply(c(0, -1, -5, -20, -50), cost, numeric(1))) > 0))
 })
 
 test_that("sigma_co2 cannot collapse: its profile peaks near the residual RMS", {
   skip_if_no_cpp()
+  # RE-EXPRESSED 2026-08-15 (Marcus). The interior-maximum assertions below
+  # still PASS and are unchanged. What failed was the last line, which compared
+  # the AR(1)-collapsed 0.0744 against a hand-picked "sane" sigma of 5 -- and 5
+  # is no longer sane. The likelihood uses sqrt(sigma_co2^2 + LIK_CO2_REP_ERR^2)
+  # with LIK_CO2_REP_ERR fixed at 1.0 ppm, so sigma 0.0744 gives an EFFECTIVE sd
+  # of 1.003 against a residual RMS of ~1.13, while sigma 5 gives 5.1. The
+  # collapsed value legitimately beats 5 because the model now fits better than
+  # a comparator chosen when it did not.
+  #
+  # AND THAT MATTERS BEYOND THIS TEST: handoff 2026-08-15 section 4.1 measured
+  # that sigma_co2 -> 0 is the CORRECT inference here, not the AR(1) pathology
+  # it resembles, precisely because the fixed 1.0 ppm constant already exceeds
+  # the residual it explains. So the property to assert is NOT "small sigma is
+  # bad" -- it is that the profile's optimum lands where the DATA put it. That
+  # is derived from the residual, so it cannot go stale.
   f <- lik_fixture()
   grid <- c(0.05, 0.2, 1, 2, 5, 15, 40, 100)
   ll <- vapply(grid, function(s) {
     e <- f$err; e$sigma_co2 <- s; ccx_loglik(f$out, f$obs, e)
   }, numeric(1))
-  # interior maximum -- not at either end, and in particular not at ~0, which is
-  # where the AR(1) scheme drove it (0.0744 ppm at the 2026-08-10 mode)
+  # interior maximum -- not at either end, and in particular not railed at the
+  # top, which is the flat-likelihood failure the AR(1) scheme's mirror image
   best <- which.max(ll)
   expect_gt(best, 1L)
   expect_lt(best, length(grid))
-  # and the collapsed value must be strictly worse than a sane one
-  e0 <- f$err; e0$sigma_co2 <- 0.0744
-  e1 <- f$err; e1$sigma_co2 <- 5
-  expect_lt(ccx_loglik(f$out, f$obs, e0), ccx_loglik(f$out, f$obs, e1))
+
+  # The pooled annual level residual, over BOTH stations, since sigma_co2 enters
+  # both level terms. Measured here rather than stored.
+  ms <- ccx_model_stats(f$out, f$obs)
+  res <- unlist(lapply(c("MLO", "SPO"), function(st) {
+    o <- f$obs$co2_ann[[st]]; m <- ms$co2[[st]]
+    k <- match(o$year, m$year); g <- !is.na(k)
+    o$level[g] - m$level[k[g]]
+  }))
+  rms <- sqrt(mean(res^2))
+  # The profile's optimum, on a fine grid, expressed as the EFFECTIVE sd the
+  # likelihood actually uses. It must sit within a factor of 1.5 of the residual
+  # the model leaves -- which is the whole content of "peaks near the RMS".
+  fine <- exp(seq(log(0.01), log(50), length.out = 400))
+  llf  <- vapply(fine, function(s) {
+    e <- f$err; e$sigma_co2 <- s; ccx_loglik(f$out, f$obs, e)
+  }, numeric(1))
+  eff <- sqrt(fine[which.max(llf)]^2 + LIK_CO2_REP_ERR^2)
+  expect_gt(eff, rms / 1.5)
+  expect_lt(eff, rms * 1.5)
 })
 
 test_that("the seasonal statistic constrains amplitude and phase", {

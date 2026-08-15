@@ -111,16 +111,41 @@ test_that("the land term compares GROSS to GROSS", {
   # order -122 is the tight check; a relative one would have been meaningless.
   expect_lt(abs(parts[["gcb_land_sink"]] - ref), 1)
 
-  # ...and it must be a long way from the NET comparison, which is what the bug
-  # scored. NOTE THE DIRECTION, because it is counter-intuitive and it is the
-  # whole point: at the current default the NET (buggy) comparison scores
-  # BETTER -- -97.3 against -122.0 -- because the model over-absorbs, its gross
-  # sink being 4.57 GtC/yr against GCB's 2.36. The bug was FLATTERING the
-  # high-beta model, which is exactly why nothing objected to beta rising. Do
-  # not "fix" this test by asserting gross beats net; that holds only for a
-  # model whose sink is right, and asserting it would re-introduce the bug the
-  # day the model improved.
+  # ...and it must be the GROSS comparison and not the NET one, which is what
+  # the bug scored. NOTE THE DIRECTION, because it is counter-intuitive: at the
+  # current default the NET (buggy) comparison scores BETTER -- because the
+  # model over-absorbs, its gross sink being 3.48 GtC/yr against GCB's 2.36.
+  # The bug was FLATTERING the over-absorbing model, which is exactly why
+  # nothing objected to beta rising. Do not "fix" this by asserting gross beats
+  # net; that holds only for a model whose sink is right, and asserting it would
+  # re-introduce the bug the day the model improved.
   net <- sum(stats::dnorm(g$land_sink, g$land,
                           LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE, log = TRUE))
-  expect_gt(abs(parts[["gcb_land_sink"]] - net), 10)
+
+  # RE-EXPRESSED 2026-08-15 (Marcus), NOT re-baselined. The old assertion was
+  # abs(gross - net) > 10 log-units, and it had started to fail at 8.5. Its own
+  # comment above predicted why: THE GAP IS LARGE BECAUSE THE MODEL
+  # OVER-ABSORBS, so it SHRINKS as the sink improves -- 4.57 -> 3.50 (the MM
+  # flip) -> 3.48 GtC/yr. A fixed threshold on that quantity uses a symptom of
+  # the old bug as a proxy for the fix and fails harder the more the refit
+  # succeeds. Lowering it would bake the same trap in at a new number.
+  #
+  # The scale-free statement is available in closed form. Both terms are
+  # Gaussian with the same sd, differing only by the E_LUC shift in the mean, so
+  #     gross - net = -(1/(2 s^2)) * sum( eluc^2 - 2 * eluc * (land_sink - land) )
+  # exactly. Asserting THAT verifies the term really is the net term displaced
+  # by the model's own land-use flux -- which is precisely the property the
+  # net-vs-gross bug destroyed -- and it stays true at any sink strength.
+  # Both sides are built from THIS test's `g$land`, not from ccx_loglik()'s own
+  # end-extrapolated one: mixing the two leaves the 0.18 log-units of boundary
+  # difference the tolerance above exists to absorb, and an exact identity has
+  # no room for it. `parts` is tied to `ref` by that assertion; `ref` is tied to
+  # `net` by this one.
+  s   <- LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE
+  amt <- -(1 / (2 * s^2)) * sum(g$eluc^2 - 2 * g$eluc * (g$land_sink - g$land))
+  expect_equal(ref - net, amt, tolerance = 1e-8)
+  # ...and the displacement must be MATERIAL, or the identity above is vacuous:
+  # a term accidentally handed a zero E_LUC would satisfy it trivially.
+  expect_gt(mean(abs(g$eluc)), 0.5)          # GtC/yr, GCB-scale land-use flux
+  expect_gt(abs(ref - net), 1)
 })
