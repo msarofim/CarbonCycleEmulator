@@ -1,0 +1,100 @@
+
+
+=== PART 1. THE OBSERVED GRADIENT, THROUGH THE LIKELIHOOD'S OWN ESTIMATOR ===
+CO2  gradient: 59 paired years, 1962-2023
+d13C gradient: 43 paired years, 1980-2023
+
+  decade annual-est     n yr     gate 9       diff
+   1960s       0.87        5       0.85      +0.02
+   1970s       1.64       10       1.66      -0.02
+   1980s       1.96       10       1.96      -0.00
+   1990s       2.31       10       2.32      -0.01
+   2000s       2.73       10       2.72      +0.01
+   2010s       3.65       10       3.66      -0.01
+   2020s       3.96        4       3.97      -0.01
+
+gate-9 decades the ANNUAL estimator drops entirely: 1950s
+That is the right behaviour, not a loss: gate 9's own note says the 1950s
+entry rests on 8 paired MONTHS. ccx_year_harmonic()'s 9-month minimum
+refuses to call that a year, so the term never sees it.
+
+
+=== PART 2. THE OBSERVATIONAL ERROR ON THE GRADIENT -- MEASURED, NOT ASSUMED ===
+co-located records, monthly:
+MLO            vs MLO_NOAA        n= 189  mean  +0.000  RMS  0.002 ppm   <- NOT two measurements
+MLO            vs MLO_SIO_FLASK   n= 702  mean  -0.055  RMS  0.394 ppm
+MLO_NOAA       vs MLO_SIO_FLASK   n= 100  mean  +0.039  RMS  0.589 ppm
+SPO            vs SPO_NOAA        NO OVERLAPPING MONTHS
+
+GRADIENT, network vs network: n=45 years, mean -0.1613, sd 0.1588, RMS 0.2251 ppm
+The MEAN is a systematic scale/selection offset between the programmes and
+the SD is their year-to-year disagreement. A gradient sigma below the RMS
+would be asserting the observations resolve something they do not.
+
+
+=== PART 3. IS THE MODEL'S MISS AN OFFSET OR A SCALING? ===
+at DEFAULT parameters:
+CO2 gradient (ppm), 59 paired years 1962-2023
+  mean model +3.326   mean obs +2.425   mean miss +0.900
+  obs ~ a + b*model :  a = -0.386 [-0.577, -0.195]   b = +0.845 [+0.791, +0.900]   R2 0.944
+  obs ~ b*model     :  b = +0.740,  residual RMS 0.247
+  VERDICT: a=0 REJECTED at 95%, b=1 REJECTED at 95%  ->  BOTH -- offset AND scaling
+
+d13C gradient (permil), 43 paired years 1980-2023
+  mean model -0.198   mean obs -0.067   mean miss -0.131
+  obs ~ a + b*model :  a = +0.099 [+0.057, +0.142]   b = +0.838 [+0.626, +1.050]   R2 0.609
+  obs ~ b*model     :  b = +0.347,  residual RMS 0.024
+  VERDICT: a=0 REJECTED at 95%, b=1 ADMISSIBLE at 95%  ->  CONSTANT OFFSET (representation-like)
+
+at the MAP MODE, on the 5b (time-varying-share) forcing  -- NOTE: the mode was FITTED under the constant share; see below
+
+CO2 gradient (ppm), 59 paired years 1962-2023
+  mean model +2.428   mean obs +2.425   mean miss +0.002
+  obs ~ a + b*model :  a = -0.549 [-0.762, -0.335]   b = +1.225 [+1.141, +1.309]   R2 0.937
+  obs ~ b*model     :  b = +1.018,  residual RMS 0.279
+  VERDICT: a=0 REJECTED at 95%, b=1 REJECTED at 95%  ->  BOTH -- offset AND scaling
+
+d13C gradient (permil), 43 paired years 1980-2023
+  mean model -0.149   mean obs -0.067   mean miss -0.082
+  obs ~ a + b*model :  a = +0.107 [+0.061, +0.153]   b = +1.165 [+0.860, +1.470]   R2 0.592
+  obs ~ b*model     :  b = +0.461,  residual RMS 0.024
+  VERDICT: a=0 REJECTED at 95%, b=1 ADMISSIBLE at 95%  ->  CONSTANT OFFSET (representation-like)
+
+at the MAP MODE, on the forcing it was ACTUALLY FITTED TO (constant share):
+CO2 gradient (ppm), 59 paired years 1962-2023
+  mean model +2.534   mean obs +2.425   mean miss +0.109
+  obs ~ a + b*model :  a = -0.457 [-0.663, -0.250]   b = +1.137 [+1.059, +1.215]   R2 0.937
+  obs ~ b*model     :  b = +0.973,  residual RMS 0.267
+  VERDICT: a=0 REJECTED at 95%, b=1 REJECTED at 95%  ->  BOTH -- offset AND scaling
+
+d13C gradient (permil), 43 paired years 1980-2023
+  mean model -0.154   mean obs -0.067   mean miss -0.087
+  obs ~ a + b*model :  a = +0.104 [+0.062, +0.146]   b = +1.111 [+0.839, +1.382]   R2 0.624
+  obs ~ b*model     :  b = +0.448,  residual RMS 0.024
+  VERDICT: a=0 REJECTED at 95%, b=1 ADMISSIBLE at 95%  ->  CONSTANT OFFSET (representation-like)
+
+
+=== PART 4. WHAT THE OBJECTIVE ALREADY IMPLIES FOR THE GRADIENT ===
+sigma_co2 basis              station sd implied grad sd model miss / sd
+prior-ish 1.5                     1.803        2.550           0.51
+MAP mode 0.223                    1.025        1.449           0.89
+
+model-minus-obs gradient over 2015-2024 at defaults: +1.291 ppm
+A miss smaller than its own implied error bar is why nothing has ever
+objected to it -- review sec.2.3's point, now with the post-5b number.
+
+
+=== PART 5. LEVERAGE PER PRIOR SD -- IS THE TERM WORTH ADDING AT ALL? ===
+observed 2015-2024 gradient 3.740 ppm; baseline model 5.031 (miss +1.291)
+
+                                    grad ppm d existing    s=0.20   s=0.35   s=0.50   s=1.00
+tau_ex -1 prior sd (1.012)             3.931     -207.2    +591.0   +193.0    +94.6    +23.6
+tau_ex +1 prior sd (1.669)             6.432      104.5   -1969.9   -643.2   -315.2    -78.8
+fossil NH share 0.9201 (EDGAR)         4.670       -1.5    +290.7    +94.9    +46.5    +11.6
+LUC NH share -> lo bracket             4.219      -23.7    +584.4   +190.8    +93.5    +23.4
+LUC NH share -> hi bracket             5.033      -66.4     +11.5     +3.8     +1.8     +0.5
+
+'d existing' is what the CURRENT objective sees. The sigma columns are what
+the gradient term WOULD add. Where the two have opposite signs, the term is
+supplying information the objective does not have -- which is the case for
+adding it. Where they agree, it is re-weighting information already there.
