@@ -22,14 +22,19 @@
 # that changes and w == 1 is the incumbent. The switch exists so that "what does
 # the seasonality buy?" is one flag rather than a git checkout.
 FORC_USE_EMIS_SEASONALITY <- TRUE
-FORC_FOSS_NH_SHARE <- 0.95   # fossil CO2 emitted in the NH. PROVISIONAL --
-                             # and now MEASURED at 0.9201 by the EDGAR v4.3.2
+FORC_FOSS_NH_SHARE <- 0.9201 # fossil CO2 emitted in the NH. MEASURED (Marcus,
+                             # 2026-08-15, review item 5) by the EDGAR v4.3.2
                              # country aggregation in
-                             # data-raw/extract_emission_seasonality.py. NOT
-                             # changed here: it is a separate constant feeding
-                             # the interhemispheric gradient (review item 5),
-                             # worth 0.84 ppm of MLO-SPO for 5.1 log-units, and
-                             # moving it is that item's decision, not this one.
+                             # data-raw/extract_emission_seasonality.py --
+                             # Crippa et al. 2020, Sci Data 7:121. Supersedes a
+                             # 0.95 that had carried a "PROVISIONAL" comment
+                             # since it was written. It moves the modelled
+                             # 2015-24 MLO-SPO gradient 5.03 -> 4.67 ppm toward
+                             # the observed 3.74, the new gradient term prefers
+                             # it by +95 log-units, and the rest of the
+                             # objective is essentially indifferent (-1.5) --
+                             # a bias correction, the same shape as 5b and 5c.
+                             # 0.95 is recoverable by setting this constant.
 # TIME-VARYING LAND-USE HEMISPHERIC SHARE (2026-08-15, review item 5b). TRUE
 # uses the OSCAR-sourced per-year series in data/forcing_luc_nh_share.rds; FALSE
 # falls back to the constant below and reproduces every result produced before

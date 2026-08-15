@@ -172,7 +172,40 @@ CCX_PARAM_TABLE <- list(
   sigma_d13c  = list(tr = "log",   init = 0.1,
                      prior = function(x) dlnorm(x, log(0.1), 0.7, log = TRUE)),
   sigma_d14c  = list(tr = "log",   init = 5,
-                     prior = function(x) dlnorm(x, log(5), 0.7, log = TRUE))
+                     prior = function(x) dlnorm(x, log(5), 0.7, log = TRUE)),
+
+  # ---- interhemispheric-gradient offsets (2026-08-15, review item 5) --
+  # NUISANCE PARAMETERS, and the point of them is what they STOP happening.
+  # The model's NH-box-minus-SH-box is not the quantity MLO minus SPO measures
+  # (R/likelihood.R, the LIK_GRAD_* block). Fixing that offset at zero would
+  # push a measured, physically expected representation constant onto tau_ex and
+  # the hemispheric shares -- i.e. would report as a calibrated exchange time
+  # what is really a station's latitude. Same argument, and the same idiom, as
+  # `luc_scale` absorbing E_LUC uncertainty instead of letting `fert_k` claim it.
+  #
+  # BOTH PRIORS ARE CENTRED AT ZERO. They are shrinkage priors, not measurements
+  # dressed as priors: centring them on the measured offsets would tell the
+  # model the answer and then congratulate it for agreeing.
+  #
+  # grad_off_co2, sd 0.5 ppm. Chosen so the MEASURED intercepts (-0.386 at
+  # defaults, -0.549 at the MAP mode; calibration/diag_gradient_terms.R part 3)
+  # sit near 1 sd, while absorbing the whole 1.29 ppm recent miss would cost
+  # 2.6 sd. That is the intended dial: the prior admits a representation
+  # constant and resists a model error wearing its clothes.
+  #
+  # grad_off_d13c, sd 0.15 permil -- DELIBERATELY LOOSER IN RELATIVE TERMS, and
+  # not for the same reason. The CO2 offset is 19 % of its gradient, which the
+  # station-latitude argument predicts; the same fraction applied to d13C
+  # predicts 0.013 permil against a measured 0.10. Eight times over. So this one
+  # is absorbing the repo's known STRUCTURAL d13C misfit, the term's own
+  # measurement said its slope is indistinguishable from 1, and pretending
+  # otherwise with a tight prior would just move the misfit somewhere less
+  # visible. A wide prior here is the honest statement that the d13C gradient
+  # contributes SHAPE and not level.
+  grad_off_co2  = list(tr = "id", init = 0,
+                       prior = function(x) dnorm(x, 0, 0.5,  log = TRUE)),
+  grad_off_d13c = list(tr = "id", init = 0,
+                       prior = function(x) dnorm(x, 0, 0.15, log = TRUE))
   # `rho` RETIRED 2026-08-11. It was the AR(1) autocorrelation shared across
   # MLO/SPO CO2 and d13C. It railed at its 0.998 bound, driving the effective
   # sample size of 812 MLO monthly observations down to 0.8 and letting a
@@ -271,7 +304,15 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     if (is.null(r) || anyNA(r$out$co2_NH)) return(-Inf)
 
     err <- list(sigma_co2 = pv$sigma_co2,
-                sigma_d13c = pv$sigma_d13c, sigma_d14c = pv$sigma_d14c)
+                sigma_d13c = pv$sigma_d13c, sigma_d14c = pv$sigma_d14c,
+                # The gradient offsets ride in `err` because that is the channel
+                # for likelihood-side parameters (the sigmas already do). Their
+                # ABSENCE skips the gradient terms rather than zeroing them --
+                # see the LIK_GRAD_* block -- so this line is what turns them on
+                # for the objective while leaving every legacy diagnostic
+                # visibly, rather than silently, without them.
+                grad_off_co2 = pv$grad_off_co2,
+                grad_off_d13c = pv$grad_off_d13c)
     # `luc` is the MODEL's own land-use flux, so the gross-sink reconstruction
     # in the gcb_land_sink term follows luc_scale instead of silently reverting
     # to GCB's unscaled column.

@@ -3839,3 +3839,132 @@ the measurement is now waiting for it.
 (**new**, 41 assertions), `MANIFEST.csv`, `.gitignore`.
 
 **Suite still 8 failing, the same 8.** No new failures.
+
+---
+
+## 2026-08-15 (later) — ITEMS 5b AND 5: the hemispheric shares are sourced, and the gradient is finally in the objective
+
+Review items **5b** and **5** landed together, in that order, because 5 is the only thing
+that can score 5b. With 5c already done on the same day, the review ordering now has
+**items 1–5c and 7 discharged** and item 8 (the refit) unblocked on everything except the
+four test failures still waiting on Marcus.
+
+### 5b — the land-use hemispheric share (`98f0457`)
+
+`FORC_LUC_NH_SHARE = 0.55` had carried a "provisional" comment since it was written and is
+wrong at **both** ends. OSCAR v3.1's *Regional* sheet — the same workbook DATA.md §3a already
+uses for the pre-1850 E_LUC segment, whose 1750–2018 total reproduces the paper's 206 PgC
+headline — gives a flux-weighted NH share of **0.838 (1750–1849) → 0.398 (1990–2018)** as
+clearing moved from temperate NH forests to the tropics. Against the constant that is
+**+31 GtC** of cumulative land-use carbon misplaced by 1959.
+
+The within-region NH fractions are geographic judgements, not data, so the product ships a
+lo/central/hi bracket — and **the direction survives all of it**: pre-1950 even the low end is
+≥ 0.60, post-1990 even the high end is ≤ 0.53. The two ends do not overlap under any
+admissible judgement, which is what makes *"no constant works"* a measurement. 0.55 is not
+even the flux-weighted mean (0.620).
+
+Three properties that could each have been silently wrong, all gated by
+`test-luc-nh-share.R` (22 assertions), two of them mutation-tested:
+
+- **One share per calendar year, held, not interpolated to months** — keeps
+  `mean_year(luc_NH) = share(y)·mean_year(luc)` exact and puts the only discontinuity on the
+  year boundary, where the per-year harmonic estimator cannot alias it into the seasonal
+  statistic.
+- **The pre-window cumulative takes its own flux-weighted share.** A run from 1900 splits
+  ~58 GtC of prior clearing on the pre-1900 share (~0.79), not the window's (~0.49). Getting
+  this wrong misplaces ~14 GtC of converted land and **nothing else in the suite would see
+  it** — the flux still conserves.
+- **Outside 1750–2018 the end value is held**, stated as extrapolation: every SSP run splits
+  on a frozen 2018 share. Extrapolating the decline forward runs it negative before 2260.
+
+`FORC_USE_LUC_NH_SHARE_TS = FALSE` reproduces every earlier result, max |diff| **exactly 0**
+across every numeric column of both a full-record and a windowed forcing.
+
+**What it bought, and what it did not.** Gradient 5.26 → 5.03 ppm (obs 3.97). δ¹³C gradient
+barely moved (−0.245 → −0.238 vs −0.074), **confirming the shares are not the cause of that
+3× miss** — that lead is dead. **Log-posterior DOWN 17.2**, almost all in `co2_seasonal_MLO`.
+A bias correction, not a fit improvement, exactly as 5c was.
+
+### 5 — the measurement first (`abf8e3b`), then the terms
+
+`calibration/diag_gradient_terms.R` measured the five things the σ depends on before anything
+was written, because **the σ is the decision**:
+
+1. **The likelihood's own estimator reproduces gate 9** to ≤ 0.02 ppm on every decade it
+   covers, and drops the 1950s entry (8 paired months, "indicative only" by gate 9's own
+   note). No new estimator; design note 1b's same-machinery-both-sides property preserved.
+2. **Observational floor ~0.23 ppm, measured** — Scripps vs NOAA disagree by 0.225 ppm RMS on
+   the annual gradient. And it is a *lower* bound: handoff 15 §4.1's flag is **confirmed**,
+   `MLO` and `MLO_NOAA` agree to **0.002 ppm RMS over 189 months** — one series under two
+   names. So 0.225 is the two SPO records alone. For δ¹³C the floor is 0.0152 ‰ and *that* one
+   is a genuine two-station two-network comparison (the records share no month timestamps).
+3. **The miss is not one thing, and the two species differ.** CO₂: intercept **and** slope
+   rejected — a stable −0.45 ± 0.10 ppm offset (the sign and size a station-below-the-source-
+   region argument predicts) *plus* a real shape error whose sign changes across the record
+   (b = 0.845 at defaults, 1.14–1.23 at the mode). δ¹³C: **b = 1 admissible in all four fits**,
+   only the +0.10 ‰ intercept rejected — a pure offset, and **8× larger** than scaling CO₂'s
+   19 % predicts, so it is absorbing the known structural δ¹³C misfit rather than a
+   representation constant.
+4. **The double count is second-order.** The two station levels imply a gradient sd of 1.45 ppm
+   (2.55 at σ_co2 = 1.5); a term at 0.35 outweighs that ~17× in variance. **Adding** a term is
+   correct; rotating the (MLO, SPO) pair would rewrite the two highest-leverage streams to fix
+   something that is not binding.
+5. **The leverage is large and points the other way** — +193/−643 log-units per prior sd of
+   τ_ex at σ = 0.35, against τ_ex's whole prior leverage of ~350, and **opposite in sign** to
+   what the rest of the objective wants (−207/+105).
+
+**Marcus's three decisions, all taken on those numbers:** level + offset parameter for CO₂;
+same treatment for δ¹³C; and move `FORC_FOSS_NH_SHARE` 0.95 → **0.9201** (measured, EDGAR
+v4.3.2) — the gradient term prefers it by +95 log-units and the rest of the objective is
+indifferent (−1.5).
+
+**Shipped.** Streams `co2_gradient` and `d13c_gradient`; parameters **18 → 20**
+(`grad_off_co2` N(0, 0.5) ppm, `grad_off_d13c` N(0, 0.15 ‰), both **shrinkage priors centred
+at zero** — centring them on the measured offsets would tell the model the answer and then
+credit it for agreeing). σ = the measured model-vs-obs scatter about a constant offset,
+floored by the observations' own precision: **0.35 ppm / 0.025 ‰**. Both terms start near
+χ²/dof ≈ 0.6.
+
+**The offsets ride in `err`, and their ABSENCE skips the terms** rather than defaulting to
+zero — the same contract `deep` uses. A zero offset is not a neutral default: it asserts the
+box gradient *is* the station gradient, which the measurement rejects at 95 %. Every
+diagnostic written before today therefore shows the streams as ABSENT under `by_stream`,
+which is visible, instead of scoring them wrong.
+
+**Effect.** τ_ex's constraint is now dominated by the gradient (+366/−950 log-units per prior
+sd) and it pulls **opposite** to everything else (−208/+107). DESIGN's decade-old claim that
+gate 9 constrains τ_ex is true for the first time.
+
+### Tried and NOT done
+
+- **Rotating (MLO, SPO) → (mean, gradient).** Statistically the cleanest answer to double
+  counting, and rejected on measurement: the overlap is second-order (§4 above), so the
+  rotation would rewrite the objective's two highest-leverage streams to fix something that is
+  not binding.
+- **Interpolating the land-use share smoothly to months.** Would cost the exact annual
+  identity and buy nothing — the share moves ~0.0016/yr, so the calendar-year step is
+  ~0.003 GtC/yr and, being *on* the year boundary, cannot alias into the seasonal statistic.
+- **Making `FORC_FOSS_NH_SHARE` a calibrated parameter.** Offered and declined: it would
+  correlate hard with the land-use share and τ_ex, and the sampler already has an r = −0.907
+  pair to manage.
+- **Centring the offset priors on the measured intercepts.** That is a measurement wearing a
+  prior's clothes. Both are centred at zero and the prior *widths* were chosen so the measured
+  values sit near 1 sd.
+
+### Quarantined
+
+`calibration/output/mode_fit.rds` → `calibration/output/quarantine/20260815_pre_gradient_terms/`
+with a README. Not a bug — the 18-parameter mode belongs to a model with a different input
+(5b) and an objective with two fewer streams, and its log-posterior is **not on the same scale**
+as anything computed after today. The canonical path is **empty** until item 8 runs.
+
+**Files:** `R/likelihood.R`, `R/calibrate.R`, `R/forcing.R`, `DATA.md` (§6, new §6a),
+`DESIGN.md` (gate 9), `data-raw/build_luc_nh_share.R` (**new**),
+`data/forcing_luc_nh_share.rds` (**new**), `calibration/diag_gradient_terms.R` (**new**),
+`calibration/output/gradient/` (**new**), `tests/testthat/test-luc-nh-share.R` (**new**, 22),
+`tests/testthat/test-gradient.R` (**new**, 28), `tests/testthat/test-likelihood.R`
+(the 18 → 20 tripwire, recorded not bumped, per that test's own convention).
+
+**Suite still 8 failing, the same 8.** The parameter-count tripwire fired as designed and was
+recorded; no new failures.

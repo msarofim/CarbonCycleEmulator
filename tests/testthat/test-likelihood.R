@@ -180,7 +180,34 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # no substitution carries a `beta` posterior across and any pre-flip posterior
   # in calibration/output/ belongs to a DIFFERENT MODEL. The assertions below
   # guard exactly that, because splicing one in is the plausible mistake.
-  expect_length(CCX_PARAM_NAMES, 18L)
+  #
+  # 18 -> 20 on 2026-08-15 (review item 5): `grad_off_co2` and `grad_off_d13c`,
+  # the interhemispheric-gradient representation offsets. Recorded here rather
+  # than bumped, and they are the SAME KIND of addition as `luc_scale` -- they
+  # give a prescribed comparison its own stated uncertainty so that uncertainty
+  # stops being absorbed by a physical parameter. A two-box model's
+  # NH-box-minus-SH-box is not what MLO minus SPO measures; MLO sits south of
+  # the northern source region, and the offset is measured at -0.45 +/- 0.10 ppm
+  # with the sign that argument predicts. Fixed at zero it would have gone onto
+  # `tau_ex` and the hemispheric shares and been reported as a calibrated
+  # exchange time. See CCX_PARAM_TABLE$grad_off_co2 and
+  # calibration/diag_gradient_terms.R part 3.
+  #
+  # NOTE the d13C one is NOT the same animal despite the matching name: its
+  # offset is 8x larger than the station-latitude argument predicts, so it is
+  # absorbing the known structural d13C misfit and its prior is deliberately
+  # wide. That distinction is asserted below.
+  expect_length(CCX_PARAM_NAMES, 20L)
+  expect_true(all(c("grad_off_co2", "grad_off_d13c") %in% CCX_PARAM_NAMES))
+  # both are shrinkage priors CENTRED AT ZERO -- centring them on the measured
+  # offsets would tell the model the answer and then credit it for agreeing
+  expect_equal(CCX_PARAM_TABLE$grad_off_co2$init,  0)
+  expect_equal(CCX_PARAM_TABLE$grad_off_d13c$init, 0)
+  for (n in c("grad_off_co2", "grad_off_d13c")) {
+    pr <- CCX_PARAM_TABLE[[n]]$prior
+    expect_equal(pr(0.3), pr(-0.3), tolerance = 1e-12)   # symmetric about 0
+    expect_gt(pr(0), pr(0.3))                            # and peaked there
+  }
   expect_true("luc_scale" %in% CCX_PARAM_NAMES)
   expect_true(all(c("beta_max", "fert_k") %in% CCX_PARAM_NAMES))
   expect_false("beta" %in% CCX_PARAM_NAMES)

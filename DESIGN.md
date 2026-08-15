@@ -384,6 +384,48 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
      gradient), the 1960s by +0.20 and the 2020s by +0.13, while well-covered decades move
      ≤0.03 ppm. Always compute this from the seasonally adjusted series.
    - The 1950s entry rests on 8 paired months: indicative only.
+
+   **No longer a free check — SCORED since 2026-08-15 (review item 5).** Likelihood streams
+   `co2_gradient` and `d13c_gradient`, on the annual paired MLO−SPO differences of
+   `ccx_year_harmonic()` levels. The estimator question is settled by measurement, not
+   assertion: those decadal means reproduce the table above to **≤ 0.02 ppm** on every decade
+   it covers, and the 9-month annual minimum drops the 1950s entry outright — which is what
+   this gate's own note asks for. Both traps above are therefore handled by construction, not
+   by a special case. `calibration/diag_gradient_terms.R` part 1.
+
+   **Each term carries a calibrated offset, and that is the load-bearing decision.** A two-box
+   model's NH-box − SH-box is *not* what MLO − SPO measures: MLO sits at 19.5 °N, south of the
+   northern source region, so the station gradient must come out **smaller** than the box
+   gradient. Measured by regressing obs ~ a + b·model, the intercept is **−0.39 ppm** at
+   defaults and **−0.55** at the 18-parameter mode — stable, rejected from zero at 95 %, and
+   with the sign the physics predicts. Scoring the level against a fixed zero offset would push
+   that representation constant onto **τ_ex** and the hemispheric shares and report it as a
+   calibrated exchange time. Parameters `grad_off_co2` (prior N(0, 0.5) ppm) and
+   `grad_off_d13c` (N(0, 0.15 ‰)) estimate it instead — the same move `luc_scale` makes for
+   E_LUC uncertainty.
+
+   **σ = the measured model-vs-obs scatter about a constant offset, floored by the
+   observations' own precision.** CO₂ **0.35 ppm** (scatter 0.27–0.28; floor: Scripps vs NOAA
+   disagree by 0.225 ppm RMS on the annual gradient, itself a *lower* bound because `MLO` and
+   `MLO_NOAA` in this repo are one series under two names at 0.002 ppm RMS). δ¹³C **0.025 ‰**
+   (scatter 0.0196–0.0198; floor 0.0152, and that one *is* a genuine two-station two-network
+   comparison). `test-gradient.R` recomputes both floors from the data and fails if either σ is
+   tightened below them.
+
+   **The two species are NOT the same finding.** For CO₂ both the intercept and the slope are
+   rejected — a representation offset *plus* a real shape error (b = 0.845 at defaults,
+   1.14–1.23 at the mode, i.e. the miss changes sign across the record). For δ¹³C **b = 1 is
+   admissible in all four fits** and only the +0.10 ‰ intercept is rejected: a pure offset. And
+   it is 8× larger than the station-latitude argument predicts (which gives 0.013 ‰ by scaling
+   CO₂'s 19 %), so `grad_off_d13c` is absorbing the **structural** δ¹³C misfit, not a
+   representation constant — the δ¹³C gradient term contributes *shape*, not level. Do not read
+   a fitted `grad_off_d13c` as a representation estimate.
+
+   **Status:** the term supplies information the rest of the objective did not have — per prior
+   sd of τ_ex it is worth **+193 / −643 log-units** at σ = 0.35, against τ_ex's whole prior
+   leverage of ~350, and **with the opposite sign** to what the rest of the objective wanted
+   (−207 / +105). DESIGN's claim that this gate constrains τ_ex is true for the first time.
+   **Re-measure the gradient on any change to the hemispheric shares, τ_ex, or σ_co2.**
 10. **Natural ocean Δ¹⁴C profile:** deep-ocean depletion in the observed range. **No longer
     a free check — sourced and scored since 2026-08-14.** GLODAPv2.2023 over the model's own
     bottom box (2627–3700 m), cos(lat)-and-thickness weighted: **−175.3 ‰**, σ **10.3 ‰**

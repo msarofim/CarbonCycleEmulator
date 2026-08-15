@@ -100,6 +100,57 @@ LIK_CO2_REP_ERR    <- 1.0            # ppm, station-vs-hemispheric-box
 LIK_D13C_REP_ERR   <- 0.05           # permil
 LIK_LAND_SINK_INFLATE <- 3.0         # multiplier on GCB land-sink sigma (Q1)
 
+# ---- INTERHEMISPHERIC GRADIENT (2026-08-15, review item 5) -----------
+# DESIGN sec.6 gate 9 has said since it was written that the MLO-SPO gradient is
+# "the main constraint on tau_ex". It was not in the objective at all: MLO and
+# SPO were scored as two independent levels, which prices their difference only
+# implicitly, at an effective sd of 1.45 ppm (2.55 at sigma_co2 = 1.5) against a
+# model miss that never exceeded 1.3. Nothing had ever objected to it because
+# nothing could. 66 % of tau_ex's leverage came instead from the seasonal
+# harmonics -- the interhemispheric exchange time was being set by the shape of
+# the Keeling sawtooth.
+#
+# THE REASON THIS TERM CARRIES AN OFFSET PARAMETER. A two-box model's
+# NH-box-minus-SH-box is NOT the quantity MLO minus SPO measures. MLO sits at
+# 19.5 N, south of the northern mid-latitude source region, so the station
+# gradient MUST come out smaller than the box gradient. Regressing
+# obs ~ a + b*model over the paired years (calibration/diag_gradient_terms.R
+# part 3) measures a = -0.39 (defaults) / -0.55 (MAP mode) ppm, stable across
+# both and rejected from zero at 95 %, with the sign the physics predicts.
+# Scoring the LEVEL against a fixed zero offset would force the model to absorb
+# that representation constant into tau_ex and the hemispheric shares -- which
+# is the "bound the observable, not the parameter" failure this project keeps
+# finding. The offsets are therefore ESTIMATED (CCX_PARAM_TABLE$grad_off_*),
+# the same move `luc_scale` makes for E_LUC uncertainty.
+LIK_USE_GRADIENT <- TRUE
+# Sigmas: THE MEASURED MODEL-VS-OBS SCATTER ABOUT A CONSTANT OFFSET, FLOORED BY
+# THE OBSERVATIONS' OWN PRECISION. Neither is a round number chosen for feel.
+#   CO2  -- scatter 0.272 (defaults) / 0.283 (mode) ppm. Observational floor:
+#           Scripps and NOAA disagree about the annual gradient by 0.225 ppm
+#           RMS, and that is a LOWER bound because `MLO` and `MLO_NOAA` in this
+#           dataset are one series under two names (0.002 ppm RMS over 189
+#           months) -- so 0.225 is the two SPO records alone, and doubling it in
+#           quadrature for a comparable MLO term gives 0.318. Take 0.35.
+#   d13C -- scatter 0.0196 / 0.0198 permil, floor 0.0152 (and THAT one is a
+#           genuine two-station two-network comparison: the Scripps and NOAA
+#           d13C records share no month timestamps at all). Take 0.025.
+# Both terms therefore start near chi2/dof ~ 0.6: informative, not overfit, and
+# not asserting the model resolves more than the data do.
+LIK_GRAD_CO2_SD    <- 0.35           # ppm
+LIK_GRAD_D13C_SD   <- 0.025          # permil
+# The window is the paired record itself; no extra restriction. CO2 gives 59
+# years (1962-2023) and d13C 43 (1980-2023) once ccx_year_harmonic()'s 9-month
+# minimum has dropped the partial years -- including gate 9's 1950s entry, which
+# rests on 8 paired MONTHS and which gate 9's own note calls indicative only.
+#
+# DOUBLE COUNTING, MEASURED AND ACCEPTED. These terms score information the two
+# station-level terms already contain. The size of the overlap decides whether
+# the honest form is an added term or a rotation of the (MLO, SPO) pair, and it
+# was measured: the pair implies a gradient sd of 1.45 ppm, so a term at 0.35
+# outweighs it ~17x in variance. The overlap is second-order and adding a term
+# is correct; a rotation would rewrite the two highest-leverage streams to fix
+# something that is not binding. Re-measure if sigma_co2 or LIK_CO2_REP_ERR move.
+
 # ---- annual reduction and the seasonal statistic (2026-08-11) --------
 # A calendar year needs this many months for its harmonic fit (4 parameters:
 # level, within-year trend, sin, cos). 9 leaves MLO 67 of 69 years and SPO 60
@@ -507,9 +558,36 @@ ccx_prepare_obs <- function() {
   d14_nh_ann <- ccx_annual_mean(d14_nh$t, d14_nh$d14c, d14_nh$sd)
   d14_sh_ann <- ccx_annual_mean(d14_sh$t, d14_sh$d14c, d14_sh$sd)
 
+  # ---- INTERHEMISPHERIC GRADIENT (2026-08-15, review item 5) ---------
+  # Built from the SAME per-year levels the level terms score, differenced on
+  # the years where both stations have one. Nothing new is estimated: the
+  # gradient is a function of statistics that already exist, which is what makes
+  # the term nearly free and what keeps design note 1b's property that model and
+  # observations pass through identical machinery.
+  #
+  # This also disposes of gate 9's first trap without a special case. Gate 9
+  # warns that seasonal adjustment is "mandatory, not cosmetic" -- MLO's ~6 ppm
+  # cycle against SPO's ~1 ppm means uneven month coverage aliases seasonality
+  # into the difference, shifting the 1950s by -0.77 ppm to a spurious NEGATIVE
+  # gradient. ccx_year_harmonic()'s level is already seasonally adjusted and
+  # already de-trended within the year, so differencing two of them is the
+  # adjusted quantity by construction. Verified: the decadal means of this
+  # series match gate 9's table to <= 0.02 ppm on every decade it covers
+  # (calibration/diag_gradient_terms.R part 1).
+  ccx_pair_grad <- function(a, b) {
+    if (is.null(a) || is.null(b) || !nrow(a) || !nrow(b))
+      return(data.frame(year = integer(0), grad = numeric(0)))
+    m <- merge(a[, c("year", "level")], b[, c("year", "level")],
+               by = "year", suffixes = c("_n", "_s"))
+    data.frame(year = m$year, grad = m$level_n - m$level_s)
+  }
+  co2_grad  <- ccx_pair_grad(co2_ann$MLO, co2_ann$SPO)
+  d13c_grad <- ccx_pair_grad(d13_ann$MLO, d13_ann$SPO)
+
   list(co2 = co2, d13 = d13, d14_nh = d14_nh, d14_sh = d14_sh,
        ice = ico, gcb = gcb, intcal = ic20, weights = w,
        co2_ann = co2_ann, d13_ann = d13_ann, co2_seas = co2_seas,
+       co2_grad = co2_grad, d13c_grad = d13c_grad,
        d14_nh_ann = d14_nh_ann, d14_sh_ann = d14_sh_ann,
        excess_c14_all = exc, excess_c14 = ccx_excess_c14_target(exc))
 }
@@ -668,6 +746,51 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     sd <- sqrt(err$sigma_d13c^2 + LIK_D13C_REP_ERR^2)
     add(paste0("d13c_level_", st),
         sum(stats::dnorm(o$level[good], m$level[k[good]], sd, log = TRUE)))
+  }
+
+  # ---- INTERHEMISPHERIC GRADIENT (2026-08-15, review item 5) ---------
+  # The term DESIGN gate 9 has always claimed and the objective never had.
+  #
+  #     obs_grad(y) ~ N(model_grad(y) + off, sigma)
+  #
+  # `off` is a CALIBRATED offset, not a fitted-away residual -- see the block on
+  # LIK_GRAD_CO2_SD for why a two-box model's box gradient is not the station
+  # gradient and what happens if that is scored as zero.
+  #
+  # THE OFFSET IS SUPPLIED THROUGH `err`, AND ITS ABSENCE SKIPS THE TERM rather
+  # than defaulting it to zero. Same contract as `deep`: a caller that has not
+  # been updated (every diagnostic written before this date passes only the
+  # three sigmas) sees the stream ABSENT under by_stream, which is visible in
+  # the report. A silent zero offset would be a wrong answer that looked like a
+  # right one, and would put the whole -0.45 ppm representation constant onto
+  # tau_ex without anything saying so.
+  #
+  # THE TWO OFFSETS DO NOT MEAN THE SAME THING, and the code should not pretend
+  # they do. For CO2 the fractional offset is 0.45/2.43 = 19 % of the gradient,
+  # which is what a station-below-the-source-region argument predicts. Applying
+  # that same fraction to d13C predicts 0.013 permil; the measured d13C offset
+  # is 0.10, EIGHT TIMES larger. So `grad_off_d13c` is absorbing the known
+  # STRUCTURAL d13C misfit (the Suess overshoot, project note
+  # d13c_suess_overshoot_structural), not a representation constant -- which is
+  # exactly why its measurement said b = 1 is admissible and why its prior is
+  # wide. In effect the d13C gradient term is a SHAPE term. Stated here so no
+  # one later reads a fitted grad_off_d13c as a representation estimate.
+  if (LIK_USE_GRADIENT) {
+    for (sp in list(list(nm = "co2",  obs_g = obs$co2_grad,  mod = ms$co2,
+                         off = err$grad_off_co2,  sd = LIK_GRAD_CO2_SD),
+                    list(nm = "d13c", obs_g = obs$d13c_grad, mod = ms$d13,
+                         off = err$grad_off_d13c, sd = LIK_GRAD_D13C_SD))) {
+      if (is.null(sp$off) || !is.finite(sp$off)) next
+      A <- sp$mod$MLO; B <- sp$mod$SPO
+      if (is.null(A) || is.null(B) || is.null(sp$obs_g) || !nrow(sp$obs_g)) next
+      mg <- A$level[match(sp$obs_g$year, A$year)] -
+            B$level[match(sp$obs_g$year, B$year)]
+      good <- is.finite(mg)
+      if (!any(good)) next
+      add(paste0(sp$nm, "_gradient"),
+          sum(stats::dnorm(sp$obs_g$grad[good], mg[good] + sp$off, sp$sd,
+                           log = TRUE)))
+    }
   }
 
   # ---- D14C annual means, with representation error -------------------
