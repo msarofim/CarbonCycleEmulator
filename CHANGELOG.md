@@ -4005,3 +4005,71 @@ protocol-matched gate 12 passes).
 Item 8 is structurally unblocked by 5 + 5b. **Marcus held it** pending the `sigma_co2` decision
 (unidentified, pinned at a boundary, "fix it or drop it, do not sample it"). ~6–7 h at 20
 parameters and 0.083 s/eval. `calibration/output/mode_fit.rds` stays **empty** until it runs.
+
+## 2026-08-15 (later still) — ITEM 6b MEASURED: the case against `sigma_co2` largely does not hold
+
+`calibration/diag_sigma_co2.R` (new, ~1 min, output `calibration/output/sigma_co2/`). **No code
+changed.** This is the measurement the `sigma_co2` decision was waiting on, and it was run
+before touching the parameter because the previous two handoffs asserted a pathology from a
+single number (σ_co2 = 0.223 at the MAP mode, z ≈ −2.6) without testing the claims that number
+was taken to imply.
+
+**The analytic frame, first, because it reorganises everything.** The CO₂ level terms use
+sd = √(σ_co2² + `LIK_CO2_REP_ERR`²) with the constant fixed at 1.0 ppm. Writing v = σ² + c²,
+the ML solution is v = R² for pooled residual mean-square R², so **σ*² = R² − c² — which has no
+real solution whenever the pooled residual RMS falls below 1.0.** "Pinned at a boundary" is
+therefore not a property of `sigma_co2`; it is a statement about R.
+
+**And R is not one number.** The repo straddles the threshold:
+
+| parameter point | R_MLO | R_SPO | R_pool | interior optimum? |
+|---|---|---|---|---|
+| `ccx_default_params()` | 1.127 | 1.750 | **1.454** | **YES**, σ* = 1.056 |
+| pre-gradient MAP mode | 0.650 | 0.571 | **0.614** | NO — likelihood monotone decreasing |
+
+The same model at two points in its own parameter space sits on opposite sides. That is also
+why `test-likelihood.R`'s interior-maximum assertions still pass: its fixture is on the other
+side. The margin at the mode is **0.789 ppm** of additional sustained bias — well inside an
+MCMC chain's early excursions.
+
+**Three of the four stated grounds are refuted:**
+
+- **"Pinned at a boundary."** Not in the coordinates the sampler uses. `sigma_co2` is
+  log-transformed; σ → 0 is u → −∞ and the lognormal prior closes it off smoothly. The
+  posterior mode is **interior and unimodal on the log scale at both points** (0.226 at the
+  mode, 1.072 at defaults). There is no edge to be pinned against.
+- **"Will hurt covariance conditioning."** Measured from the stored Laplace correlation:
+  **max |r| = 0.043** (with `luc_scale`), against a worst pair of **0.907** (`luc_scale`–`fert_k`)
+  in the same matrix. `sigma_co2` is very nearly orthogonal to every other parameter.
+- **"Unidentified."** The data tighten it **2.08×** relative to prior at the mode and **5.79×**
+  at defaults. It ranks 4th of 18 by posterior width (0.324 unconstrained) — behind
+  `npp_frac_NH` (1.318), `h_ml` (0.984) and `kz` (0.978), none of which is proposed for removal.
+
+**One objection survives, and it is a different one — none of the handoffs made it.**
+`sigma_co2` is a free error scale on the stream that already outvotes the partition terms 40:1,
+which makes it **self-weighting**: the better CO₂ is fitted, the smaller σ goes, and the louder
+the CO₂ stream becomes. Measured across the two points, as R fell 1.454 → 0.614 the effective
+sd fell 1.4659 → 1.0251, i.e. the CO₂ level stream got **2.04× louder in variance terms**.
+Positive feedback on the dominant constraint, in the direction that worsens the imbalance the
+whole review is about. Nothing in the objective asked for it.
+
+**What each option costs**, in the only currency that matters (the effective sd *is* the stream
+weight):
+
+| option | σ_co2 | effective sd | weight vs free | implied gradient sd | vs `LIK_GRAD_CO2_SD` |
+|---|---|---|---|---|---|
+| DROP (fix at 0) | 0.000 | 1.0000 | 1.05× | 1.414 | 16.3× |
+| FIX at the MAP value | 0.223 | 1.0246 | 1.00× | 1.449 | 17.1× |
+| FIX at the prior median | 1.500 | 1.8028 | 0.32× | 2.550 | 53.1× |
+
+The first two are within 5 % of each other and of the status quo, so the `LIK_GRAD_*` "re-measure
+if σ_co2 moves" condition is satisfied either way — the ~17× that justified *adding* a gradient
+term rather than *rotating* the (MLO, SPO) pair survives at 16.3×. The prior-median option is a
+real 3× re-weighting and is not a null choice.
+
+**Stated cost of fixing it, since it is not zero:** the free σ is also the only adaptive valve on
+the CO₂ level stream, and part 2 shows chains will cross back into R > 1.0 where a fixed σ prices
+a bad CO₂ fit at full volume with no give.
+
+**Decision goes to Marcus** (stream weighting, per the standing rule that weighting choices are
+never resolved silently). The refit stays HELD.

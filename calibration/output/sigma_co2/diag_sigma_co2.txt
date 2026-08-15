@@ -1,0 +1,126 @@
+
+
+=== PART 1. R, THE POOLED RESIDUAL -- AND WHICH SIDE OF c IT FALLS ===
+LIK_CO2_REP_ERR = c = 1.000 ppm (fixed)
+
+parameter point                                         R_MLO    R_SPO   R_pool   interior optimum?
+ccx_default_params()                                    1.127    1.750    1.454   YES, sigma* = 1.056
+pre-gradient MAP mode's parameters (18-par, quarantined)    0.650    0.571    0.614   NO -- likelihood monotone decreasing
+
+The SAME model, at two points in its own parameter space, sits on OPPOSITE
+sides of the threshold. Whether sigma_co2 has an interior maximum is not a
+property of the parameter; it is a property of how well the run fits CO2.
+
+
+=== PART 2. HOW FAR IS THE THRESHOLD? THE BIAS THAT WOULD RE-IDENTIFY IT ===
+ccx_default_params()                                 R = 1.454  ->  needs +0.000 ppm more sustained bias
+pre-gradient MAP mode's parameters (18-par, quarantined) R = 0.614  ->  needs +0.789 ppm more sustained bias
+
+That is the margin. It is not large: a few tenths of a ppm of CO2 level
+bias is well inside the excursions an MCMC chain makes in its early phase
+and inside the ~30 ppm structural misfit this repo has been chasing.
+
+
+=== PART 3. IS THERE A BOUNDARY? THE PROFILE ON BOTH SCALES ===
+
+ccx_default_params()
+  likelihood-only optimum   sigma = 1.058  (grid edge? no)
+  posterior optimum         sigma = 1.072   effective sd = 1.4659 ppm
+  posterior on log scale    mean 0.052, sd 0.121   vs prior sd 0.700  ->  tightened 5.79x
+  log-post drop from the optimum to sigma = 0.01: 48.4 log-units
+  is the posterior mode at a grid edge? NO -- interior, unimodal on the sampling scale
+
+pre-gradient MAP mode's parameters (18-par, quarantined)
+  likelihood-only optimum   sigma = 0.010  (grid edge? YES, at the LOW edge)
+  posterior optimum         sigma = 0.226   effective sd = 1.0251 ppm
+  posterior on log scale    mean -1.568, sd 0.336   vs prior sd 0.700  ->  tightened 2.08x
+  log-post drop from the optimum to sigma = 0.01: 20.0 log-units
+  is the posterior mode at a grid edge? NO -- interior, unimodal on the sampling scale
+
+The likelihood alone runs to the low edge whenever R < c (part 1). The
+POSTERIOR does not: on the log scale the prior closes it off smoothly and
+the mode is interior. There is no boundary in the coordinates the sampler
+uses -- which is what the mixing claim was about.
+
+
+=== PART 4. THE CONDITIONING CLAIM, MEASURED ===
+posterior correlation of sigma_co2 with every other parameter,
+from the stored Laplace covariance at the pre-gradient mode:
+
+       fert_k           q10   npp_frac_NH   seas_amp_SH    sigma_d13c 
+       -0.022        -0.012        -0.010        -0.008        -0.007 
+          k_w        tau_ex      beta_max   seas_amp_NH    sigma_d14c 
+       -0.005        -0.002         0.000         0.000         0.001 
+seas_phase_SH            kz seas_phase_NH          h_ml    bomb_total 
+        0.002         0.002         0.003         0.005         0.006 
+   gamma_enso     luc_scale 
+        0.019         0.043 
+
+  max |r| = 0.043 (luc_scale)
+  for comparison, the worst pair in the same matrix: |r| = 0.907
+
+posterior sd on the unconstrained scale, ALL parameters, worst first:
+  npp_frac_NH          h_ml            kz     sigma_co2    gamma_enso 
+        1.318         0.984         0.978         0.324         0.221 
+          q10        fert_k seas_phase_SH    sigma_d14c    sigma_d13c 
+        0.169         0.162         0.110         0.109         0.083 
+       tau_ex      beta_max     luc_scale   seas_amp_SH   seas_amp_NH 
+        0.074         0.068         0.050         0.048         0.031 
+          k_w seas_phase_NH    bomb_total 
+        0.022         0.012         0.008 
+
+  sigma_co2 ranks 4 of 18 by posterior width.
+
+
+=== PART 5. WHAT EACH OPTION COSTS THE OBJECTIVE ===
+option                        sigma_co2   effective sd   weight vs free
+DROP (fix at 0)                   0.000         1.0000            1.05x
+FIX at the MAP value              0.223         1.0246            1.00x
+FIX at the prior median           1.500         1.8028            0.32x
+
+and the same three, scored -- CO2 level streams and the total:
+
+ccx_default_params()
+  option                      co2_lvl_MLO  co2_lvl_SPO     TOTAL ll
+  DROP (fix at 0)                  -102.5       -144.5      -3201.6
+  FIX at the MAP value             -102.2       -141.7      -3198.4
+  FIX at the prior median          -112.4       -116.8      -3183.8
+
+pre-gradient MAP mode's parameters (18-par, quarantined)
+  option                      co2_lvl_MLO  co2_lvl_SPO     TOTAL ll
+  DROP (fix at 0)                   -74.6        -63.8      -2269.7
+  FIX at the MAP value              -75.5        -64.8      -2271.6
+  FIX at the prior median          -103.8        -92.0      -2327.0
+
+
+
+=== PART 6. THE KNOCK-ON LIK_GRAD_* ASKS FOR ===
+option                       effective sd    implied grad sd variance ratio
+DROP (fix at 0)                    1.0000              1.414          16.3x
+FIX at the MAP value               1.0246              1.449          17.1x
+FIX at the prior median            1.8028              2.550          53.1x
+
+LIK_GRAD_CO2_SD = 0.350 ppm. The added term outweighs the implicit one
+by the ratio above; handoff 2026-08-15b sec.3.1 recorded ~17x as the basis for
+adding rather than rotating. Anything still well above ~1 leaves that intact.
+
+
+=== PART 7. THE ONE ARGUMENT THAT SURVIVES: THE STREAM SETS ITS OWN VOLUME ===
+parameter point                                          R_pool   effective sd
+ccx_default_params()                                      1.454         1.4659
+pre-gradient MAP mode's parameters (18-par, quarantined)      0.614         1.0251
+
+As the fit improved (R 1.454 -> 0.614), the CO2 level stream got
+2.04x LOUDER in variance terms (effective sd 1.4659 -> 1.0251).
+Nothing in the objective asked for that; it is what a free sigma does.
+Fixing sigma_co2 removes the feedback. It does NOT re-weight the stream
+much at the current fit (part 5: 1.05x), but it stops the weight
+moving with the residual on future refits.
+
+THE COST OF FIXING IT, stated plainly: the free sigma is also the only
+adaptive valve on the CO2 level stream. Part 2 measured the margin at the
+mode as 0.789 ppm -- MCMC excursions will cross it -- and where they do,
+a fixed sigma prices a bad CO2 fit at full volume with no give.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/sigma_co2/diag_sigma_co2.rds
