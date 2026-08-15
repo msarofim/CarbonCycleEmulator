@@ -1,0 +1,146 @@
+
+
+=== PART 1. THE TWO CHANNELS HAVE OPPOSITE SIGNS -- READ OFF THE GRID ALONE ===
+     h    dz_int1    dz_mid0   capacity rel  conductance rel
+    50       52.3       51.1          0.67x            1.24x
+    75       51.9       63.5          1.00x            1.00x
+   100       51.6       75.8          1.33x            0.84x
+   140       51.0       95.5          1.87x            0.66x
+   184       50.4      117.2          2.45x            0.54x
+   220       49.8      134.9          2.93x            0.47x
+
+Deepening the mixed layer RAISES capacity and LOWERS export conductance.
+So a fit that IMPROVES with depth cannot be buying export -- the export
+channel is moving against it. That is the whole logic of parts 2 and 3.
+
+
+=== PART 2 & 3. THE PREFERENCE, AND WHERE THE CARBON ACTUALLY GOES ===
+
+
+##################  at ccx_default_params()  ##################
+
+CONSISTENT grids only. log-likelihood relative to h = 75 m.
+dC_ml / dC_int = anthropogenic carbon anomaly, GtC, 1750 -> 2024.
+
+     h    d_total d_total_nd     sink     deep   dz_mid0     dC_ml    dC_int      ML %
+    50       86.9       87.0    2.522   -187.1      51.1     15.08    158.30      8.7
+    75        0.0        0.0    2.566   -186.3      63.5     22.48    153.85     12.8
+   100     -126.4     -126.5    2.611   -185.6      75.8     29.79    149.55     16.6
+   140     -415.2     -415.4    2.684   -184.3      95.5     41.28    142.97     22.4
+   184     -857.9     -858.2    2.766   -182.9     117.2     53.62    136.14     28.3
+   220    -1316.6    -1316.9    2.833   -181.8     134.9     63.47    130.86     32.7
+
+--- 75 m -> 184 m ---
+  fit           -857.9 log-units
+  ocean sink    2.566 -> 2.766 GtC/yr  (+0.199)
+  dz_mid0       63.5 -> 117.2 m  -> interface conductance x0.54  [EXPORT, WRONG WAY]
+  ML capacity   x2.45  [CAPACITY, RIGHT WAY]
+  extra C in ML       +31.13 GtC
+  extra C in interior -17.71 GtC
+  VERDICT: CAPACITY -- the extra uptake is STORED IN THE MIXED LAYER and the interior gets LESS
+
+
+##################  at the pre-gradient MAP mode's OTHER parameters (h_ml overridden)  ##################
+
+CONSISTENT grids only. log-likelihood relative to h = 75 m.
+dC_ml / dC_int = anthropogenic carbon anomaly, GtC, 1750 -> 2024.
+
+     h    d_total d_total_nd     sink     deep   dz_mid0     dC_ml    dC_int      ML %
+    50     -208.5     -208.6    2.825   -161.4      51.1     15.51    183.62      7.8
+    75        0.0        0.0    2.868   -160.8      63.5     23.13    178.92     11.4
+   100      169.0      169.1    2.913   -160.1      75.8     30.66    174.35     15.0
+   140      352.7      353.0    2.984   -159.0      95.5     42.51    167.33     20.3
+   184      425.9      426.3    3.063   -157.8     117.2     55.25    159.99     25.7
+   220      382.7      383.3    3.128   -156.9     134.9     65.44    154.29     29.8
+
+--- 75 m -> 184 m ---
+  fit           +425.9 log-units
+  ocean sink    2.868 -> 3.063 GtC/yr  (+0.194)
+  dz_mid0       63.5 -> 117.2 m  -> interface conductance x0.54  [EXPORT, WRONG WAY]
+  ML capacity   x2.45  [CAPACITY, RIGHT WAY]
+  extra C in ML       +32.12 GtC
+  extra C in interior -18.92 GtC
+  VERDICT: CAPACITY -- the extra uptake is STORED IN THE MIXED LAYER and the interior gets LESS
+
+
+=== PART 4. kz IS THE PURE EXPORT KNOB -- CAN IT SUBSTITUTE? ===
+Laplace correlation at the mode: r(h_ml, kz) = -0.211  -- weak, i.e. they are NOT strong substitutes
+kz at the mode = 6119, bracket [3830, 6200] -- 96.6 % of the way up
+
+log-likelihood relative to (h = 75, this row's kz). BEST h per row marked *.
+kz factors run PAST the calibration bracket on purpose: if the answer
+changed only outside it, the bracket would be creating the result.
+
+ kz factor        kz      h=50      h=75     h=100     h=140     h=184     h=220   best
+      0.5x      3060   -1033.2       0.0     975.8    2398.7    3742.1    4656.2   220 m
+      0.7x      4283    -585.7       0.0     537.3    1286.4    1940.1    2335.9   220 m
+      1.0x      6119    -208.5       0.0     169.0     352.7     425.9     382.7   184 m
+      1.4x      8567      65.4       0.0     -97.2    -320.4    -664.2   -1022.5   50 m  (kz past bracket)
+      2.0x     12238     277.5       0.0    -301.8    -835.5   -1494.6   -2089.5   50 m  (kz past bracket)
+      3.0x     18358     430.5       0.0    -447.6   -1198.8   -2074.0   -2827.1   50 m  (kz past bracket)
+
+Preferred depth across a 6x range of the pure export knob: 220, 220, 184, 50, 50, 50
+VERDICT: the preferred depth MOVES with kz -- export is at least part of it
+
+
+=== PART 5. THE TWO TESTS DISAGREE -- WHICH CONSTRAINT IS DRIVING THE FLIP? ===
+configuration                  sink     deep     dC_ml    dC_int
+mode (kz x1.0, h 184)         3.063   -157.8     55.25    159.99
+deeper kz  (x1.4, h 184)      3.369   -129.4     52.52    183.41
+pump-like  (x1.4, h  50)      3.158   -132.1     14.72    207.04
+
+per-stream change from the mode, biggest movers first:
+
+  deeper kz  (x1.4, h 184)   (total -829.0)
+    d13c_gradient                  +4.2
+    d13c_level_MLO                 +4.0
+    d13c_level_SPO                 +3.2
+    co2_gradient                   +2.4
+    gcb_land_sink                  +1.3
+    co2_seasonal_MLO               +1.1
+    gcb_ocean_sink                 -8.3
+    d14c_deep_ocean                -8.6
+    d14c_NH                       -34.4
+    co2_icecore                   -34.9
+    d14c_SH                       -46.2
+    co2_level_SPO                -323.5
+    co2_level_MLO                -388.5
+
+  pump-like  (x1.4, h  50)   (total -99.3)
+    gcb_ocean_sink                 +3.8
+    d13c_gradient                  +1.2
+    d13c_level_MLO                 +1.2
+    d14c_SH                        -1.3
+    d14c_deep_ocean                -7.4
+    co2_icecore                    -9.6
+    co2_level_SPO                 -21.4
+    d14c_NH                       -31.7
+    co2_level_MLO                 -36.5
+
+deep-D14C target -175.3 permil, sigma 10.3 (n_eff 20, layer 2627-3700 m)
+configuration                    deep        z
+mode (kz x1.0, h 184)          -157.8     1.70
+deeper kz  (x1.4, h 184)       -129.4     4.47
+pump-like  (x1.4, h  50)       -132.1     4.21
+
+THE BINDING CONSTRAINT ON THE EXPORT ROUTE. The model is ALREADY on the
+under-depleted side of this target at the mode, and buying export with
+kz moves it FURTHER that way -- because diffusion ventilates 14C in
+proportion to the carbon it moves. That is what a pump does NOT do: it
+exports carbon as sinking particles and remineralises it at depth,
+raising deep DIC without mixing surface water down. So the pump is not
+merely another export knob -- it is the only one that can add uptake
+WITHOUT paying this term. Item 9's case is better motivated than the
+h_ml decomposition alone suggests.
+
+AMENDMENT TO ITEM 9'S PRE-REGISTERED TEST. handoff 2026-08-15 sec.4.2
+set it as: does h_ml relax below ~163 m and kz off the top of its
+bracket, while the ocean sink holds near 3.1? Part 4 shows h_ml DOES
+relax once export is available, so that clause is now measured-
+plausible rather than speculative -- but it is not sufficient. ADD A
+THIRD CLAUSE: does deep D14C move TOWARD the target rather than away?
+That is the clause the kz route fails, and so the one the pump must
+beat to be an improvement rather than a re-arrangement.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/h_ml_roles/diag_h_ml_roles.rds

@@ -4128,3 +4128,66 @@ free σ_add for CO₂. Both corrections are dated in place, with §5.1's draft t
 unmaintained and `R/likelihood.R` / `CCX_PARAM_TABLE` named as authoritative. Gate 9's standing
 "re-measure on any change to … σ_co2" instruction now names `LIK_CO2_REP_ERR` and records the
 re-measurement it asked for.
+
+## 2026-08-15 (later still, part 3) — ITEM 9's PREREQUISITE: h_ml is a capacity-side workaround for an export deficit, and the pump case gets STRONGER
+
+`calibration/diag_h_ml_roles.R` (new, ~3 min, output `calibration/output/h_ml_roles/`). **No
+model code changed.** Run before the refit at Marcus's direction: handoff §4.2 listed a cheap
+h_ml test as item 9's prerequisite, and if it motivated a pump that would be a *structural*
+change, throwing away any mode found first.
+
+### The first design was invalid, and is quarantined rather than deleted
+
+Handoff §4.2 proposed "hold the mixed-layer carbon inventory fixed while varying its depth". The
+first implementation did that by driving `aux$ml_mass_kg` (capacity) and `grid$dz[0]` (geometry)
+at **different** depths. **That is not a decomposition.** The two are encodings of one
+quantity — the core reads the chemistry's concentration as `y_ml/ml_mass_kg` and the diffusion's
+as `y_ml/dz[0]` — so making them disagree makes "mixed-layer concentration" mean two different
+things inside one timestep.
+
+It announced itself: at h = 184 m the arms gave BOTH **+425.9**, CAPACITY **−26,203.8**, EXPORT
+**−29,035.3** — an **interaction of +55,665 against an effect of +426**. Diagnosed rather than
+interpreted, and the sign pattern confirms the artefact exactly (CAPACITY arm over-ventilates:
+deep Δ¹⁴C −216, sink 4.84; EXPORT arm under-ventilates: deep −133, sink 1.53). Post-mortem in
+`calibration/output/quarantine/20260815_h_ml_inconsistent_grid_arms/README.md`. A second, smaller
+defect in the same file: the deep-Δ¹⁴C confound control filtered on `d14c_deep` when the stream
+is **`d14c_deep_ocean`**, so it was a silent no-op — caught only because the diagnostic printed
+both columns and they were identical everywhere. **A `ccx_spinup(grid=)` argument added to
+support the invalid design was reverted**; leaving API surface whose only known use is refuted
+invites its reuse.
+
+### The replacement uses only consistent grids, and the two pre-registered tests DISAGREED
+
+| step | result |
+|---|---|
+| **1. signs, off the grid alone** | 75 → 184 m: ML capacity **×2.45**, ML→interior conductance **×0.54**. The two channels have *opposite* signs, which is what makes them separable without surgery. |
+| **2–3. where the carbon goes** | +32 GtC extra in the **mixed layer**, **−19 GtC** in the interior. Ocean sink 2.87 → 3.06. → **CAPACITY signature** |
+| **4. kz, the pure export knob** | preferred depth across a 6× kz range: 220, 220, **184**, 50, 50, 50 m. At kz ×1.4 the model wants a **50 m** mixed layer. → **EXPORT signature** |
+
+**Both are true at different levels, and the reconciliation is the finding:** what the objective
+is short of is ocean **uptake**; h_ml = 184 m is a **capacity-side workaround for an export
+deficit**, reached for because `kz` is bracket-limited (96.6 % of the way up). So h_ml is not
+evidence against the pump — it is a symptom of the same shortage. The Laplace r(h_ml, kz) =
+**−0.211** is consistent: they substitute, weakly, in exactly this way.
+
+### Why kz cannot simply be freed — and why that is the pump's case
+
+Diffusion ventilates ¹⁴C in proportion to the carbon it moves. Buying uptake with kz drives the
+deep-Δ¹⁴C term from **z +1.70 → +4.47**, away from a target (−175.3 ± 10.3 ‰) the model already
+misses on the under-depleted side; at kz ×1.4 the CO₂ level streams lose 712 log-units between
+them (over-absorption, sink 3.37). **A biological pump exports carbon as sinking particles and
+remineralises it at depth — adding uptake without mixing surface water down.** No knob currently
+in the model can do that. **The pump case comes out of this stronger than handoff §4.2 had it,
+not weaker.**
+
+### Item 9's pre-registered test is AMENDED
+
+It was: *does h_ml relax below ~163 m and kz off the top of its bracket, while the ocean sink
+holds near 3.1?* Part 4 makes the h_ml clause **measured-plausible** rather than speculative —
+but it is not sufficient. **Third clause added: does deep Δ¹⁴C move TOWARD −175.3 rather than
+away?** That is the clause the kz route fails, and therefore the one the pump must beat to be an
+improvement rather than a re-arrangement. Recorded in the diagnostic's own output, not only here.
+
+**Still standing:** the conveyor is still NO (falsified twice in-repo). The `kz` bracket is still
+load-bearing — this run is further evidence, since without it the fit would buy uptake by
+wrecking deep Δ¹⁴C.
