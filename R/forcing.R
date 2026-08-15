@@ -30,8 +30,19 @@ FORC_FOSS_NH_SHARE <- 0.95   # fossil CO2 emitted in the NH. PROVISIONAL --
                              # the interhemispheric gradient (review item 5),
                              # worth 0.84 ppm of MLO-SPO for 5.1 log-units, and
                              # moving it is that item's decision, not this one.
+# TIME-VARYING LAND-USE HEMISPHERIC SHARE (2026-08-15, review item 5b). TRUE
+# uses the OSCAR-sourced per-year series in data/forcing_luc_nh_share.rds; FALSE
+# falls back to the constant below and reproduces every result produced before
+# this date, bit for bit. Same switch discipline as FORC_USE_EMIS_SEASONALITY.
+FORC_USE_LUC_NH_SHARE_TS <- TRUE
 FORC_LUC_NH_SHARE  <- 0.55   # land-use change is far more tropical/SH-weighted
-                             # than fossil. PROVISIONAL -- see DATA.md.
+                             # than fossil. THE FALLBACK, not the default, since
+                             # 2026-08-15: measured against OSCAR's regional
+                             # E_LUC the true share falls 0.84 -> 0.40 across the
+                             # record and a constant is wrong at BOTH ends (0.55
+                             # is not even the flux-weighted mean, which is
+                             # 0.620). Retained because it is what every result
+                             # before 2026-08-15 was produced under.
 FORC_NUC_NH_SHARE  <- 0.95   # nuclear-industry 14C: the 22 reporting countries
                              # are overwhelmingly NH. PROVISIONAL.
 FORC_BOMB_NH_SHARE <- 0.90   # atmospheric weapons tests were overwhelmingly NH.
@@ -66,6 +77,51 @@ ccx_emission_seasonality <- local({
     v
   }
 })
+
+#' Sourced time-varying NH share of E_LUC, cached.
+#'
+#' @return the list written by data-raw/build_luc_nh_share.R, or NULL if the
+#'   product is absent -- a missing optional file must degrade to the constant
+#'   rather than take the forcing down, exactly as the seasonality product does.
+ccx_luc_nh_share_product <- local({
+  cache <- NULL
+  function() {
+    if (!is.null(cache)) return(cache)
+    v <- tryCatch(readRDS(ccx_path("data", "forcing_luc_nh_share.rds")),
+                  error = function(e) NULL)
+    if (!is.null(v)) cache <<- v
+    v
+  }
+})
+
+#' NH share of E_LUC for a set of calendar years
+#'
+#' The share is a per-year SCALAR applied to the whole of that calendar year, not
+#' interpolated to months. Deliberate: the product is annual, and a calendar-year
+#' step keeps `mean_year(luc_NH) == share(y) * mean_year(luc)` EXACT (which
+#' test-luc-nh-share.R asserts) while placing the only discontinuity precisely on
+#' the year boundary, where the per-year harmonic estimator cannot alias it into
+#' the seasonal statistic. The step is ~0.003 GtC/yr -- the share moves ~0.0016
+#' per year against an E_LUC of ~1.7 GtC/yr -- so smooth interpolation would buy
+#' nothing and would cost the exact identity.
+#'
+#' OUTSIDE 1750-2018 THE END VALUE IS HELD, and that is an extrapolation, not a
+#' measurement: every SSP run therefore splits its land-use emissions on a frozen
+#' 2018 share (~0.385). Stated here because the alternative -- extrapolating the
+#' 1750-2018 decline forward -- would run the NH share negative before 2260.
+#'
+#' @param yrs   calendar years wanted
+#' @param which "share" (central), "share_lo" or "share_hi" -- the bracket ends
+#'   exist so a sensitivity is one argument away, per the standing discipline.
+#' @return numeric vector, one share per year; the constant FORC_LUC_NH_SHARE
+#'   recycled if the switch is off or the product is missing.
+ccx_luc_nh_share <- function(yrs, which = c("share", "share_lo", "share_hi")) {
+  which <- match.arg(which)
+  p <- if (FORC_USE_LUC_NH_SHARE_TS) ccx_luc_nh_share_product() else NULL
+  if (is.null(p)) return(rep(FORC_LUC_NH_SHARE, length(yrs)))
+  s <- p$share
+  stats::approx(s$year, s[[which]], xout = yrs, rule = 2)$y
+}
 
 #' Impose a 12-month weight on a monthly series, CONSERVING every annual mean.
 #'
@@ -330,18 +386,30 @@ ccx_build_forcing <- function(scenario = "historical",
   # loss, which have no comparable seasonal cycle. Applying the raw fire shape
   # to all of E_LUC would overstate the correction ~4.6x, in the direction that
   # would LOOK like a bigger fix. Fossil is not damped: all of it is combustion.
+  # ---- HEMISPHERIC SPLIT OF E_LUC (2026-08-15, review item 5b) --------
+  # The land-use share is TIME-VARYING and always has been; only the model's
+  # representation of it was constant. Clearing moved from temperate NH forests
+  # to the tropics over the industrial period, so OSCAR's regional E_LUC gives an
+  # NH share falling 0.84 (1750s) -> 0.385 (2010s). Against the old constant 0.55
+  # that is ~23 GtC of early land-use carbon emitted into the wrong hemisphere
+  # and ~5 GtC of modern carbon into the wrong one the other way, and it is
+  # exactly the kind of error the interhemispheric gradient sees.
+  # One share per calendar year, held across that year -- see ccx_luc_nh_share().
+  luc_sh_y <- ccx_luc_nh_share(yrs)
+  luc_sh_m <- rep(luc_sh_y, each = 12)
+
   sea <- ccx_emission_seasonality()
   if (FORC_USE_EMIS_SEASONALITY && !is.null(sea)) {
     damp <- function(w) 1 + sea$f_fire * (w - 1)
     foss_NH <- ccx_seasonalise(foss * FORC_FOSS_NH_SHARE,       yrs, sea$weights$fossil_NH)
     foss_SH <- ccx_seasonalise(foss * (1 - FORC_FOSS_NH_SHARE), yrs, sea$weights$fossil_SH)
-    luc_NH  <- ccx_seasonalise(luc  * FORC_LUC_NH_SHARE,        yrs, damp(sea$weights$luc_NH))
-    luc_SH  <- ccx_seasonalise(luc  * (1 - FORC_LUC_NH_SHARE),  yrs, damp(sea$weights$luc_SH))
+    luc_NH  <- ccx_seasonalise(luc  * luc_sh_m,                 yrs, damp(sea$weights$luc_NH))
+    luc_SH  <- ccx_seasonalise(luc  * (1 - luc_sh_m),           yrs, damp(sea$weights$luc_SH))
   } else {
     foss_NH <- foss * FORC_FOSS_NH_SHARE
     foss_SH <- foss * (1 - FORC_FOSS_NH_SHARE)
-    luc_NH  <- luc  * FORC_LUC_NH_SHARE
-    luc_SH  <- luc  * (1 - FORC_LUC_NH_SHARE)
+    luc_NH  <- luc  * luc_sh_m
+    luc_SH  <- luc  * (1 - luc_sh_m)
   }
 
   # ---- CUMULATIVE land-use carbon (2026-08-13) -----------------------
@@ -369,8 +437,22 @@ ccx_build_forcing <- function(scenario = "historical",
   # term reads cum_luc every month -- so splitting the global series would hand
   # it a cleared fraction inconsistent with the flux it is paired with. Same
   # trap `luc_scale` had to avoid, one level down.
-  cum_luc_NH <- luc_pre * FORC_LUC_NH_SHARE       + cumsum(luc_NH) / 12
-  cum_luc_SH <- luc_pre * (1 - FORC_LUC_NH_SHARE) + cumsum(luc_SH) / 12
+  #
+  # THE PRE-WINDOW PART TAKES ITS OWN FLUX-WEIGHTED SHARE (2026-08-15, item 5b),
+  # not the window's and not a constant. This is where a time-varying share bites
+  # hardest: a run starting in 1900 has ~58 GtC of pre-window clearing that went
+  # ~0.79 NH, while the same run's in-window flux averages ~0.49. Splitting the
+  # pre-window carbon on either the constant 0.55 or on the window's own share
+  # would misplace ~14 GtC of converted land. A weighted mean of a share weighted
+  # by a flux that can be negative is undefined, so the denominator is guarded
+  # and falls back to the unweighted mean of the same years.
+  luc_pre_sh <- if (any(e_pre)) {
+    w <- e$luc_GtC[e_pre]; w[!is.finite(w)] <- 0
+    s <- ccx_luc_nh_share(e$year[e_pre])
+    if (sum(w) > 0) sum(s * w) / sum(w) else mean(s)
+  } else FORC_LUC_NH_SHARE
+  cum_luc_NH <- luc_pre * luc_pre_sh       + cumsum(luc_NH) / 12
+  cum_luc_SH <- luc_pre * (1 - luc_pre_sh) + cumsum(luc_SH) / 12
 
   # A WINDOW THAT STARTS MID-RECORD NO LONGER BEGINS AT A FIXED POINT, and it is
   # worth saying out loud. ccx_spinup() returns PREINDUSTRIAL land stocks with a
@@ -476,6 +558,15 @@ ccx_build_forcing <- function(scenario = "historical",
   # was scaled must not be scored against an unscaled one. Project convention --
   # emit the basis, do not make the caller remember it.
   attr(out, "luc_scale") <- luc_scale
+  # Same reason, for the hemispheric split: a forcing built under the sourced
+  # time-varying share and one built under the constant are different inputs, and
+  # a diagnostic comparing them must be able to say which it has rather than
+  # infer it from the date on the file.
+  attr(out, "luc_nh_share") <- if (FORC_USE_LUC_NH_SHARE_TS &&
+                                   !is.null(ccx_luc_nh_share_product()))
+    sprintf("OSCAR time-varying (%.3f-%.3f over %d-%d)",
+            min(luc_sh_y), max(luc_sh_y), min(yrs), max(yrs))
+  else sprintf("constant %.2f", FORC_LUC_NH_SHARE)
   out
 }
 

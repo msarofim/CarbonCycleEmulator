@@ -238,12 +238,68 @@ All are declared as named constants at the top of the file, not buried in the co
 
 | Decision | Value | Status |
 |---|---|---|
-| Fossil emissions NH share | 0.95 | **provisional** |
-| Land-use change NH share | 0.55 | **provisional** — LUC is far more tropical/SH-weighted than fossil |
+| Fossil emissions NH share | 0.95 | **provisional, and now MEASURED at 0.9201** by the EDGAR v4.3.2 country aggregation (`data-raw/extract_emission_seasonality.py`). Not changed: moving it is worth 0.84 ppm of MLO−SPO for 5.1 log-units and belongs to review item 5's decision, not to the build that measured it |
+| Land-use change NH share | **time-varying, 0.88 → 0.35** | **SOURCED 2026-08-15 (review item 5b)**, `data/forcing_luc_nh_share.rds`, built by `data-raw/build_luc_nh_share.R` from OSCAR v3.1's *Regional* sheet. Supersedes the constant 0.55, which is retained as `FORC_LUC_NH_SHARE` only as the `FORC_USE_LUC_NH_SHARE_TS = FALSE` fallback. See §6a |
 | Nuclear ¹⁴C NH share | 0.95 | **provisional** — the 22 reporting countries are overwhelmingly NH |
 | Bomb ¹⁴C NH share | 0.90 | **provisional** |
 | GMST before 1850 | 0 | IGCC starts 1850; the model's baseline is its own 1750 spinup |
 | ENSO before 1948 | 0 | Niño 3.4 starts 1948. A discontinuity in *constraint*, not physics: pre-1948 residuals have no ENSO explanation available |
+
+### 6a. The land-use hemispheric share is time-varying (2026-08-15)
+
+**Source.** OSCAR v3.1 bookkeeping E_LUC, *Regional* sheet of
+`data-raw/downloads/oscar_gcb2020_eluc.xlsx` — the same workbook §3a already uses for the
+pre-1850 E_LUC segment. Gasser T, et al. (2020), *Historical CO₂ emissions from land use and
+land cover change and their uncertainty*, Biogeosciences 17:4075–4101,
+doi:10.5194/bg-17-4075-2020. Its 1750–2018 regional total is **206.4 PgC**, reproducing the
+paper's 206 PgC headline — the check that the right column of the right sheet is being read,
+and a hard `stop()` in the build script.
+
+**What is sourced and what is not.** The *regional* E_LUC series is sourced. The NH fraction
+*within* each straddling region is **not** — OSCAR's regions are political aggregates, not
+hemispheres — so those fractions are geographic judgements carried as a **lo/central/hi
+bracket**, and every year of the product ships all three.
+
+| period | E_LUC (GtC) | NH lo | NH central | NH hi |
+|---|---|---|---|---|
+| 1750–1849 | 27.5 | 0.797 | **0.838** | 0.880 |
+| 1850–1899 | 30.4 | 0.719 | **0.766** | 0.812 |
+| 1900–1949 | 57.2 | 0.600 | **0.668** | 0.735 |
+| 1950–1989 | 54.6 | 0.428 | **0.527** | 0.627 |
+| 1990–2018 | 36.8 | 0.267 | **0.398** | 0.528 |
+| 1750–2018 | 206.4 | 0.539 | **0.620** | 0.700 |
+
+**The direction survives the whole bracket.** Pre-1950 even the *low* end is ≥ 0.60;
+post-1990 even the *high* end is ≤ 0.53. The two ends do not overlap under any admissible
+judgement, which is what makes *"no constant can represent this"* a measurement rather than a
+preference — and note that 0.55 is not even the flux-weighted mean, which is **0.620**.
+Against the retired constant, the time-varying share moves **+31 GtC** of cumulative
+land-use carbon into the northern box by 1959 and leaves **+20 GtC** there by 2024.
+
+**Three properties, all gated by `tests/testthat/test-luc-nh-share.R`:**
+
+- **One share per calendar year, held across that year** — not interpolated to months. This
+  keeps `mean_year(luc_NH) == share(y) · mean_year(luc)` exact, and puts the only
+  discontinuity precisely on the year boundary where the per-year harmonic estimator cannot
+  alias it into the seasonal statistic. The step is ~0.003 GtC/yr.
+- **The pre-window cumulative takes its own flux-weighted share.** A run starting in 1900
+  splits ~58 GtC of prior clearing on the pre-1900 share (~0.79), not on the window's
+  (~0.49). Using either the window's share or the old constant would misplace ~14 GtC of
+  converted land, and *nothing else in the suite would see it* — the flux would still
+  conserve.
+- **Outside 1750–2018 the end value is held**, and that is an extrapolation, not a
+  measurement: every SSP run therefore splits its land-use emissions on a frozen 2018 share
+  of ~0.385. The alternative — extrapolating the observed decline forward — runs the NH
+  share negative before 2260.
+
+**What it buys, and what it does not.** At default parameters it moves the modelled 2015–24
+MLO−SPO CO₂ gradient from **5.26 → 5.03 ppm** against an observed **3.97**, i.e. it closes
+about a fifth of the model's error in the right direction; the δ¹³C gradient barely moves
+(−0.245 → −0.238 ‰ against an observed −0.074), confirming that the *provisional shares are
+not the cause of the 3× δ¹³C gradient miss*. **The log-posterior goes DOWN by 17.2**, almost
+all of it in `co2_seasonal_MLO`. That is expected and is the same shape as item 5c: it is a
+**bias correction, not a fit improvement**, and until review item 5's gradient terms exist
+*nothing in the objective can see the quantity it fixes*.
 
 **Annual → monthly interpolation must conserve annual totals.** Emissions drive cumulative
 carbon, so an interpolation that quietly changes annual sums changes the answer while
