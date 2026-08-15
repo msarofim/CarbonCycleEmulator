@@ -299,6 +299,25 @@ fractionation constants, ocean areas/depth/layering, SST-anomaly scaling of GMST
 - Monthly CO₂ (MLO, SPO): Gaussian with σ² = σ_instr² + σ_add², **AR(1) residual model**
   (ρ calibrated) so months don't masquerade as independent — otherwise the dense CO₂ series
   would swamp everything and overtighten posteriors.
+
+  > **SUPERSEDED — this bullet describes neither the estimator nor the error model in use.**
+  > `R/likelihood.R` and `CCX_PARAM_TABLE` are authoritative; §5.1's "draft — ~16" table is
+  > likewise a design-stage sketch and is not maintained. Two corrections, both dated:
+  > **(a) 2026-08-11 — ρ RETIRED, and the series are no longer scored monthly.** The AR(1)
+  > model was correct arithmetic on a wrong premise: as ρ→1 the fitted σ collapses to the RMS
+  > of residual *increments* and the level goes unpenalised (σ_co2 fell to 0.074 ppm while a
+  > +50 ppm level bias cost 13.7 log-units). It was also applied on observation *index*, so a
+  > 16-month SPO gap counted as one step. Replaced by an **annual reduction** — per-station,
+  > per-year level/trend/first-harmonic via `ccx_year_harmonic()` — scored with **independent**
+  > Gaussian errors, with the discarded seasonal cycle restored as its own explicit stream.
+  > That, not ρ, is what stops months masquerading as independent.
+  > **(b) 2026-08-15 — σ_add RETIRED for CO₂ (review item 6b).** There is no free error scale
+  > on the CO₂ level stream. Its sd is the single fixed constant `LIK_CO2_REP_ERR` = 1.0 ppm.
+  > A free scale on the stream that outvotes the partition terms 40:1 is self-weighting — the
+  > better CO₂ fitted, the louder CO₂ got — and that feedback, not the identifiability claims
+  > that were made and did not survive measurement, is why it went. `sigma_d13c` and
+  > `sigma_d14c` remain free; the argument is specific to the dominant stream.
+  > See `calibration/diag_sigma_co2.R` and the 2026-08-15 CHANGELOG entries.
 - Ice core, Δ¹⁴C, δ¹³C: Gaussian at native (sparser) resolution.
 - **GCB sinks — double-counting caution:** atmospheric growth is already constrained by the
   CO₂ series, so GCB sink series add *partition* information, not growth information. Use
@@ -425,7 +444,12 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    sd of τ_ex it is worth **+193 / −643 log-units** at σ = 0.35, against τ_ex's whole prior
    leverage of ~350, and **with the opposite sign** to what the rest of the objective wanted
    (−207 / +105). DESIGN's claim that this gate constrains τ_ex is true for the first time.
-   **Re-measure the gradient on any change to the hemispheric shares, τ_ex, or σ_co2.**
+   **Re-measure the gradient on any change to the hemispheric shares, τ_ex, or `LIK_CO2_REP_ERR`.**
+   *(σ_co2 was the third item until 2026-08-15, when it was retired; the re-measurement it
+   called for was done at that point — the implied gradient sd goes 1.449 → 1.414 ppm and the
+   double-count ratio 17.1× → 16.3×, so **adding** a term rather than **rotating** (MLO, SPO)
+   remains correct. `LIK_CO2_REP_ERR` is now the only input to that ratio, and
+   `test-gradient.R` case 6 gates it.)*
 10. **Natural ocean Δ¹⁴C profile:** deep-ocean depletion in the observed range. **No longer
     a free check — sourced and scored since 2026-08-14.** GLODAPv2.2023 over the model's own
     bottom box (2627–3700 m), cos(lat)-and-thickness weighted: **−175.3 ‰**, σ **10.3 ‰**

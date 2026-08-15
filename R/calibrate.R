@@ -167,8 +167,48 @@ CCX_PARAM_TABLE <- list(
   # sigma_co2 did at the 2026-08-10 mode (0.0744 ppm): with independent errors
   # the maximum-likelihood sigma is just the residual RMS. The collapse needed
   # the AR(1) term, which is retired -- see likelihood.R design note 1.
-  sigma_co2   = list(tr = "log",   init = 1.5,
-                     prior = function(x) dlnorm(x, log(1.5), 0.7, log = TRUE)),
+  #
+  # `sigma_co2` RETIRED 2026-08-15 (Marcus, review item 6b). The CO2 level sd is
+  # now LIK_CO2_REP_ERR alone, 1.0 ppm, which is the half of the old quadrature
+  # that has a receipt. 20 parameters -> 19.
+  #
+  # THE STATED GROUNDS FOR RETIRING IT WERE MEASURED AND DID NOT HOLD, and this
+  # is recorded here so no one re-derives the wrong reason from the two handoffs
+  # that asserted them (calibration/diag_sigma_co2.R):
+  #   * "pinned at a boundary" -- not on the scale the sampler uses. sigma_co2
+  #     was log-transformed, so sigma -> 0 is u -> -Inf and the lognormal prior
+  #     closes it off smoothly; the posterior mode was INTERIOR and unimodal at
+  #     both points tested. The apparent edge was an artefact of natural units.
+  #   * "will hurt covariance conditioning" -- max |r| with any other parameter
+  #     was 0.043, against 0.907 for the worst pair in the same Laplace matrix.
+  #     It was very nearly orthogonal to everything.
+  #   * "unidentified" -- the data tightened it 2.08x vs prior at the mode and
+  #     5.79x at defaults; 4th of 18 by posterior width, behind npp_frac_NH,
+  #     h_ml and kz, none of which is proposed for removal.
+  # The underlying analytic fact is real but is a statement about the RESIDUAL,
+  # not about the parameter: sd = sqrt(s^2 + c^2) gives s* = sqrt(R^2 - c^2), so
+  # there is no interior optimum whenever the pooled residual RMS R < c. The
+  # repo straddles that threshold (R = 1.454 at defaults, 0.614 at the mode).
+  #
+  # THE REASON IT WAS ACTUALLY RETIRED. A free error scale on the stream that
+  # already outvotes the partition terms 40:1 is SELF-WEIGHTING: the better the
+  # model fitted CO2, the smaller sigma went, and the LOUDER the CO2 stream
+  # became -- 2.04x in variance terms across the two points measured. Positive
+  # feedback on the dominant constraint, in the direction that worsens the
+  # imbalance the 2026-08-14 review is about. Fixing it costs 1.05x of weight
+  # at the current fit and stops the weight tracking the residual thereafter.
+  #
+  # WHAT WAS GIVEN UP, since it is not nothing: the free sigma was the only
+  # adaptive valve on the CO2 level stream, and the margin at the mode is only
+  # 0.789 ppm of extra bias, so chains WILL cross back into R > 1.0 where a
+  # fixed sd prices a bad CO2 fit at full volume with no give. If the refit
+  # shows that biting -- CO2 level dominating the trace, or the chain unable to
+  # leave a bad-CO2 region -- this is the first thing to look at.
+  #
+  # `sigma_d13c` and `sigma_d14c` are DELIBERATELY LEFT FREE. The self-weighting
+  # argument is specific to the dominant stream; a free scale on a minor stream
+  # is a robustness valve rather than a feedback loop, and sigma_d13c's freedom
+  # was a separate decision taken 2026-08-15 (handoff sec.1, decision 3).
   sigma_d13c  = list(tr = "log",   init = 0.1,
                      prior = function(x) dlnorm(x, log(0.1), 0.7, log = TRUE)),
   sigma_d14c  = list(tr = "log",   init = 5,
@@ -303,8 +343,11 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     r <- tryCatch(ccx_run_fast(sp, F), error = function(e) NULL)
     if (is.null(r) || anyNA(r$out$co2_NH)) return(-Inf)
 
-    err <- list(sigma_co2 = pv$sigma_co2,
-                sigma_d13c = pv$sigma_d13c, sigma_d14c = pv$sigma_d14c,
+    # NOTE THE ABSENCE OF sigma_co2. Retired 2026-08-15; ccx_loglik() still
+    # honours the field if it is supplied, so the objective omits it EXPLICITLY
+    # rather than passing a zero -- passing 0 would give the same number today
+    # and would silently reacquire the old branch if the contract ever changed.
+    err <- list(sigma_d13c = pv$sigma_d13c, sigma_d14c = pv$sigma_d14c,
                 # The gradient offsets ride in `err` because that is the channel
                 # for likelihood-side parameters (the sigmas already do). Their
                 # ABSENCE skips the gradient terms rather than zeroing them --

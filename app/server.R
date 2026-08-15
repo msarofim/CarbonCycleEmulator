@@ -287,6 +287,10 @@ function(input, output, session) {
       gamma_enso = "ENSO carbon sensitivity",
       tau_soil_fast = "Responsive soil turnover time",
       bomb_total = "Total bomb ¹⁴C released",
+      # sigma_co2 left CCX_PARAM_NAMES on 2026-08-15 (review item 6b); the CO2
+      # level sd is now the fixed LIK_CO2_REP_ERR. Label kept on the same
+      # grounds as beta's above -- inert unless a pre-retirement posterior is
+      # loaded, and the global.R name guard rejects those anyway.
       sigma_co2 = "CO₂ mismatch allowance", sigma_d13c = "δ¹³C mismatch allowance",
       sigma_d14c = "Δ¹⁴C mismatch allowance")
     unit <- c(beta = "—", beta_max = "—", fert_k = "ppm above preindustrial",

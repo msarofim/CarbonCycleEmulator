@@ -151,6 +151,11 @@ test_that("a CO2 level bias is expensive", {
 
 test_that("sigma_co2 cannot collapse: its profile peaks near the residual RMS", {
   skip_if_no_cpp()
+  # SCOPE NOTE 2026-08-15 (item 6b): `sigma_co2` is RETIRED from
+  # CCX_PARAM_TABLE. This test is unchanged and still passes -- it now gates
+  # the LEGACY branch of ccx_loglik(), which every pre-retirement diagnostic
+  # relies on and which must keep reproducing its old numbers. The contract for
+  # the branch the OBJECTIVE now takes is gated separately, below.
   # RE-EXPRESSED 2026-08-15 (Marcus). The interior-maximum assertions below
   # still PASS and are unchanged. What failed was the last line, which compared
   # the AR(1)-collapsed 0.0744 against a hand-picked "sane" sigma of 5 -- and 5
@@ -196,6 +201,82 @@ test_that("sigma_co2 cannot collapse: its profile peaks near the residual RMS", 
   eff <- sqrt(fine[which.max(llf)]^2 + LIK_CO2_REP_ERR^2)
   expect_gt(eff, rms / 1.5)
   expect_lt(eff, rms * 1.5)
+})
+
+# ---- 3b. the retirement of sigma_co2 (2026-08-15, review item 6b) ----
+# The CO2 level sd is now LIK_CO2_REP_ERR alone. Three things have to hold and
+# they are separable, so they are separate tests: the new branch must be the
+# constant EXACTLY (not approximately, and not some other constant), the legacy
+# branch must still reproduce, and the retirement must have HARDENED the stream
+# rather than loosened it -- the direction matters, because loosening the
+# loudest stream in a 40:1 objective would be a silent re-weighting.
+
+.lik_co2_level_ll <- function(f, sd) {
+  # The CO2 level terms, recomputed from the residual with an explicit sd.
+  # Derived here rather than stored, so it cannot go stale against the model.
+  ms <- ccx_model_stats(f$out, f$obs)
+  sum(vapply(c("MLO", "SPO"), function(st) {
+    o <- f$obs$co2_ann[[st]]; m <- ms$co2[[st]]
+    k <- match(o$year, m$year); g <- !is.na(k)
+    sum(stats::dnorm(o$level[g], m$level[k[g]], sd, log = TRUE))
+  }, numeric(1)))
+}
+
+.lik_co2_level_parts <- function(f, err) {
+  ps <- ccx_loglik(f$out, f$obs, err, by_stream = TRUE)
+  ps[["co2_level_MLO"]] + ps[["co2_level_SPO"]]
+}
+
+test_that("with sigma_co2 absent the CO2 level sd is exactly LIK_CO2_REP_ERR", {
+  skip_if_no_cpp()
+  f <- lik_fixture()
+  e <- f$err; e$sigma_co2 <- NULL
+  expect_equal(.lik_co2_level_parts(f, e),
+               .lik_co2_level_ll(f, LIK_CO2_REP_ERR), tolerance = 1e-10)
+  # and it is not silently equivalent to some OTHER plausible constant --
+  # a guard that reads the intended value rather than merely a self-consistent one
+  expect_false(isTRUE(all.equal(.lik_co2_level_parts(f, e),
+                                .lik_co2_level_ll(f, 2 * LIK_CO2_REP_ERR))))
+  # sigma_co2 = 0 is the same arithmetic, which is why R/calibrate.R omits the
+  # field rather than passing a zero: the two must agree TODAY so that a future
+  # change to the contract shows up as a difference instead of a silent revert.
+  e0 <- f$err; e0$sigma_co2 <- 0
+  expect_equal(.lik_co2_level_parts(f, e0), .lik_co2_level_parts(f, e),
+               tolerance = 1e-12)
+})
+
+test_that("supplying sigma_co2 still reproduces the pre-retirement quadrature", {
+  skip_if_no_cpp()
+  f <- lik_fixture()
+  for (s in c(0.223, 1.5, 5)) {
+    e <- f$err; e$sigma_co2 <- s
+    expect_equal(.lik_co2_level_parts(f, e),
+                 .lik_co2_level_ll(f, sqrt(s^2 + LIK_CO2_REP_ERR^2)),
+                 tolerance = 1e-10)
+  }
+})
+
+test_that("retiring sigma_co2 hardened the CO2 level stream, and only slightly", {
+  skip_if_no_cpp()
+  f <- lik_fixture()
+  e <- f$err; e$sigma_co2 <- NULL
+  now <- .lik_co2_level_parts(f, e)
+  # DIRECTION: any positive sigma_co2 is a LOOSER sd, so the retired form must
+  # score every residual set at least as tightly. Strict, because the fixture
+  # has a non-zero residual.
+  for (s in c(0.223, 1.5)) {
+    eo <- f$err; eo$sigma_co2 <- s
+    expect_lt(now, .lik_co2_level_parts(f, eo))
+  }
+  # MAGNITUDE: against the value the last mode actually chose, the weight change
+  # is the variance ratio of the two sds, and it must stay small -- this is the
+  # assertion that the retirement was not a stream re-weighting in disguise.
+  SIGMA_AT_LAST_MODE <- 0.223          # calibration/diag_sigma_co2.R part 5
+  wt <- (sqrt(SIGMA_AT_LAST_MODE^2 + LIK_CO2_REP_ERR^2) / LIK_CO2_REP_ERR)^2
+  expect_lt(wt, 1.10)
+  # and the parameter is genuinely gone from the objective
+  expect_false("sigma_co2" %in% CCX_PARAM_NAMES)
+  expect_true(all(c("sigma_d13c", "sigma_d14c") %in% CCX_PARAM_NAMES))
 })
 
 test_that("the seasonal statistic constrains amplitude and phase", {
@@ -260,7 +341,20 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # offset is 8x larger than the station-latitude argument predicts, so it is
   # absorbing the known structural d13C misfit and its prior is deliberately
   # wide. That distinction is asserted below.
-  expect_length(CCX_PARAM_NAMES, 20L)
+  #
+  # 20 -> 19 on 2026-08-15 (review item 6b, Marcus): `sigma_co2` RETIRED. The
+  # CO2 level sd is now LIK_CO2_REP_ERR alone -- the half of the old quadrature
+  # that has a receipt (co-located MLO programmes disagree 0.39-0.59 ppm RMS).
+  # RECORDED, NOT MERELY BUMPED, and the reason matters because it is NOT the
+  # one the handoffs gave: the "boundary-pinned / unidentified / bad
+  # conditioning" case was measured and failed on all three counts
+  # (calibration/diag_sigma_co2.R). What it was retired for is that a free error
+  # scale on the stream that already outvotes the partition terms 40:1 is
+  # SELF-WEIGHTING -- the better CO2 fitted, the louder CO2 got, 2.04x across
+  # the two points measured. The weight change from fixing it is 1.05x, which
+  # is asserted separately so this ledger cannot absorb a re-weighting.
+  expect_length(CCX_PARAM_NAMES, 19L)
+  expect_false("sigma_co2" %in% CCX_PARAM_NAMES)
   expect_true(all(c("grad_off_co2", "grad_off_d13c") %in% CCX_PARAM_NAMES))
   # both are shrinkage priors CENTRED AT ZERO -- centring them on the measured
   # offsets would tell the model the answer and then credit it for agreeing

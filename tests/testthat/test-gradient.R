@@ -186,3 +186,24 @@ test_that("5. the term constrains tau_ex, and not in the direction the rest does
   # makes these agree, the term has stopped doing its job.
   expect_lt(d_grad * d_other, 0)
 })
+
+# ---------------------------------------------------------------------
+test_that("6. the double count stays second-order, so ADD-a-term still beats ROTATE", {
+  # ADDED 2026-08-15 with the retirement of sigma_co2 (review item 6b), because
+  # the LIK_GRAD_* block's standing instruction is "re-measure if sigma_co2 or
+  # LIK_CO2_REP_ERR move" and one of them just did.
+  #
+  # The two station levels price their difference implicitly at sd*sqrt(2). The
+  # decision to ADD a gradient term rather than ROTATE (MLO, SPO) -> (mean,
+  # gradient) rested on the added term outweighing that implicit one by enough
+  # for the overlap to be second-order (~17x in variance, handoff 2026-08-15b
+  # sec.3.1). With sigma_co2 gone, LIK_CO2_REP_ERR is the ONLY input to the
+  # implicit sd -- so this is now a pure constants check and cannot go stale
+  # against the model. It fails if anyone lowers LIK_CO2_REP_ERR or loosens
+  # LIK_GRAD_CO2_SD far enough to make the rotation the honest form again.
+  implied <- LIK_CO2_REP_ERR * sqrt(2)
+  ratio   <- (implied / LIK_GRAD_CO2_SD)^2
+  expect_gt(ratio, 4)          # second-order overlap; below this, re-open the
+                               # rotation question rather than adjusting a sigma
+  expect_equal(ratio, 16.3, tolerance = 0.05)   # the value recorded on retirement
+})

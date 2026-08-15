@@ -4073,3 +4073,58 @@ a bad CO₂ fit at full volume with no give.
 
 **Decision goes to Marcus** (stream weighting, per the standing rule that weighting choices are
 never resolved silently). The refit stays HELD.
+
+## 2026-08-15 (later still, part 2) — ITEM 6b TAKEN: `sigma_co2` retired, 20 → 19 parameters
+
+**Marcus's call on the measurement above: fix at 0.** The CO₂ level sd is now
+`LIK_CO2_REP_ERR` = 1.0 ppm alone — the half of the old √(σ_co2² + c²) that has a receipt
+(co-located independent programmes at MLO disagree by 0.39–0.59 ppm RMS, n = 702 months). **The
+refit remains HELD**; item 6b is discharged, so item 8 is now unblocked on the objective side.
+
+**The reason is recorded in three places (`R/calibrate.R`, `R/likelihood.R`,
+`test-likelihood.R`'s parameter ledger) because it is NOT the reason the two prior handoffs
+gave.** Those grounds — boundary-pinned, unidentified, bad for covariance conditioning — were
+measured and failed on all three counts. What retired it is that a free error scale on the
+stream that already outvotes the partition terms 40:1 is **self-weighting**: as the pooled
+residual fell 1.454 → 0.614 ppm the effective sd fell 1.4659 → 1.0251, making the CO₂ level
+stream **2.04× louder**. Positive feedback on the dominant constraint.
+
+**Changes.**
+
+- `CCX_PARAM_TABLE$sigma_co2` removed; `ccx_make_logpost()` omits the field **explicitly**
+  rather than passing a zero — the two are identical arithmetic today, so passing 0 would let a
+  future contract change silently revert to the old branch.
+- `ccx_loglik()` gains a two-branch contract on the CO₂ level sd: **absent → `LIK_CO2_REP_ERR`**
+  (the objective), **present → the old quadrature** (legacy parity). The absence being the *new*
+  behaviour inverts this repo's usual absence-skips-a-stream idiom, deliberately: an updated
+  caller says so by dropping the field, and a stale one keeps its old weight instead of being
+  silently re-weighted. **Verified: `diag_sigma_co2.R` reproduces bit-for-bit across the change.**
+- `LIK_CO2_REP_ERR`'s comment now carries its receipt and states that it is **conservative, not
+  tight** — χ²/dof ≈ 0.38 against the last mode's residual. Lowering it would give the loudest
+  stream *more* leverage and is flagged as a stream-weight change, not taken.
+- Objective re-checked end to end: 19 parameters, finite log-posterior at init (−4057.94).
+
+**What was given up, stated because it is not nothing:** the free σ was the only adaptive valve
+on the CO₂ level stream, and the margin at the mode is 0.789 ppm of extra bias, so chains *will*
+cross into R > 1.0 where a fixed sd prices a bad CO₂ fit at full volume. If the refit shows that
+biting — CO₂ level dominating the trace, or a chain unable to leave a bad-CO₂ region — this is
+the first thing to look at. Recorded in `R/calibrate.R` next to the retirement.
+
+**Tests: +5 assertions blocks, all three mutation-tested, suite still 4 failing (unchanged).**
+
+| new gate | asserts |
+|---|---|
+| `test-likelihood.R` absent-σ contract | the sd is **exactly** `LIK_CO2_REP_ERR`, is *not* some other constant, and σ_co2 = 0 agrees to 1e-12 |
+| `test-likelihood.R` legacy parity | σ_co2 ∈ {0.223, 1.5, 5} still reproduces √(s² + c²) |
+| `test-likelihood.R` direction + magnitude | retirement **hardened** the stream (strict, both σ), weight change < 1.10×, and `sigma_co2` is gone from `CCX_PARAM_NAMES` |
+| `test-gradient.R` case 6 | the double-count ratio, **re-measured** at 16.3× — a pure constants check now that `LIK_CO2_REP_ERR` is its only input |
+
+**Mutations, all caught:** loosening the absence branch to 1.5× → 4 failures; dropping the
+quadrature from the legacy branch → 5; lowering `LIK_CO2_REP_ERR` to 0.4 → 2 in `test-gradient.R`.
+The parameter-ledger test fired on the count as designed and was **recorded, not merely bumped**.
+
+**DESIGN.md §5.2 corrected.** It still described the AR(1) model retired on 2026-08-11 *and* a
+free σ_add for CO₂. Both corrections are dated in place, with §5.1's draft table marked
+unmaintained and `R/likelihood.R` / `CCX_PARAM_TABLE` named as authoritative. Gate 9's standing
+"re-measure on any change to … σ_co2" instruction now names `LIK_CO2_REP_ERR` and records the
+re-measurement it asked for.

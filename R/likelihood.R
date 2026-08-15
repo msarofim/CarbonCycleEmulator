@@ -96,6 +96,22 @@ LIK_ZONE_BOUNDS_SH <- c(15)          # degrees S, SH3/SH1-2 split
 LIK_D14C_REP_BOMB  <- 25             # permil, 1955-1970 (weighting spread)
 LIK_D14C_REP_OTHER <- 4              # permil, elsewhere
 LIK_D14C_BOMB_WIN  <- c(1955, 1970)
+# THE WHOLE sd OF THE CO2 LEVEL STREAM, since 2026-08-15 (review item 6b).
+# It was the fixed half of sqrt(sigma_co2^2 + LIK_CO2_REP_ERR^2); `sigma_co2`
+# is retired (R/calibrate.R) and this constant now stands alone.
+#
+# ITS RECEIPT, which is why it was the half that survived: co-located
+# INDEPENDENT programmes at Mauna Loa -- NOAA in-situ against SIO flask,
+# n = 702 months -- disagree by 0.39-0.59 ppm RMS. That is a floor on
+# measurement error alone, and a station-vs-hemispheric-BOX term must exceed
+# it. 1.0 ppm is a plausible value for that quantity, measured on 2026-08-15
+# (handoff sec.4.1). The retired `sigma_co2` had no comparable receipt.
+#
+# IT IS CONSERVATIVE, NOT TIGHT. The pooled annual level residual at the last
+# mode is 0.614 ppm, so chi2/dof ~ 0.38: this stream is scored SOFTER than the
+# fit it achieves. Lowering the constant would give the loudest stream in the
+# objective MORE leverage and is a stream-WEIGHT change, not housekeeping --
+# flagged in calibration/diag_sigma_co2.R and deliberately not taken.
 LIK_CO2_REP_ERR    <- 1.0            # ppm, station-vs-hemispheric-box
 LIK_D13C_REP_ERR   <- 0.05           # permil
 LIK_LAND_SINK_INFLATE <- 3.0         # multiplier on GCB land-sink sigma (Q1)
@@ -104,7 +120,8 @@ LIK_LAND_SINK_INFLATE <- 3.0         # multiplier on GCB land-sink sigma (Q1)
 # DESIGN sec.6 gate 9 has said since it was written that the MLO-SPO gradient is
 # "the main constraint on tau_ex". It was not in the objective at all: MLO and
 # SPO were scored as two independent levels, which prices their difference only
-# implicitly, at an effective sd of 1.45 ppm (2.55 at sigma_co2 = 1.5) against a
+# implicitly, at an effective sd of 1.41 ppm (1.45 before `sigma_co2` was
+# retired on 2026-08-15; 2.55 at the old free sigma's prior median) against a
 # model miss that never exceeded 1.3. Nothing had ever objected to it because
 # nothing could. 66 % of tau_ex's leverage came instead from the seasonal
 # harmonics -- the interhemispheric exchange time was being set by the shape of
@@ -149,7 +166,12 @@ LIK_GRAD_D13C_SD   <- 0.025          # permil
 # was measured: the pair implies a gradient sd of 1.45 ppm, so a term at 0.35
 # outweighs it ~17x in variance. The overlap is second-order and adding a term
 # is correct; a rotation would rewrite the two highest-leverage streams to fix
-# something that is not binding. Re-measure if sigma_co2 or LIK_CO2_REP_ERR move.
+# something that is not binding.
+# RE-MEASURED 2026-08-15 on the retirement of `sigma_co2`, which was the one
+# thing that could move this: the implied gradient sd goes 1.449 -> 1.414 ppm
+# and the ratio 17.1x -> 16.3x. The conclusion is unchanged. Re-measure again
+# if LIK_CO2_REP_ERR moves -- it is now the only input to it
+# (calibration/diag_sigma_co2.R part 6).
 
 # ---- annual reduction and the seasonal statistic (2026-08-11) --------
 # A calendar year needs this many months for its harmonic fit (4 parameters:
@@ -678,7 +700,11 @@ ccx_model_stats <- function(out, obs) {
 #'
 #' @param out  data.frame from ccx_run_fast()$out
 #' @param obs  from ccx_prepare_obs()
-#' @param err  list(sigma_co2, sigma_d13c, sigma_d14c)
+#' @param err  list(sigma_d13c, sigma_d14c, grad_off_co2, grad_off_d13c).
+#'   `sigma_co2` is RETIRED but still honoured if supplied -- see the CO2 level
+#'   block for the two branches. The gradient offsets are NOT optional in the
+#'   same sense: their absence SKIPS both gradient streams (LIK_GRAD_* block),
+#'   so check `by_stream` for ABSENT streams before quoting a total.
 #' @param luc  data.frame(year, eluc) -- the MODEL's own annual land-use flux,
 #'   needed to turn its net land flux into the gross sink GCB reports. NULL uses
 #'   GCB's own column, which is correct whenever luc_scale = 1.
@@ -704,15 +730,37 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   ms <- ccx_model_stats(out, obs)
 
   # ---- CO2 annual level, independent ---------------------------------
-  # sigma_co2 is model-structural error at ANNUAL scale; LIK_CO2_REP_ERR is the
-  # fixed station-vs-box term. Neither is divided by sqrt(months): both are
-  # systematic within a year (design note 1c).
+  # LIK_CO2_REP_ERR is the fixed station-vs-box term and, since item 6b, the
+  # whole sd. It is not divided by sqrt(months): it is systematic within a year
+  # (design note 1c).
+  #
+  # `sigma_co2` RETIRED 2026-08-15 -- and it is kept REACHABLE here, under the
+  # absence contract, for exactly one reason: every diagnostic and test written
+  # before today passes it, and their numbers have to keep reproducing.
+  #   err$sigma_co2 ABSENT  -> sd = LIK_CO2_REP_ERR          (the objective)
+  #   err$sigma_co2 PRESENT -> sd = sqrt(s^2 + REP^2)        (legacy parity)
+  # The absence is the NEW behaviour rather than the old, which inverts this
+  # repo's usual absence-skips-a-stream idiom. That is deliberate: a caller
+  # that has been updated says so by dropping the field, and one that has not
+  # keeps its old weight instead of being silently re-weighted. Nothing here
+  # can be read as a stream weight without checking which branch it took.
+  #
+  # WHY IT WAS RETIRED, in one line, because the reason is not the one the
+  # earlier handoffs gave: it is a free error scale on the stream that already
+  # outvotes the partition terms 40:1, so the better CO2 was fitted the LOUDER
+  # the CO2 stream became (2.04x across the two points measured). Positive
+  # feedback on the dominant constraint. The stated grounds -- boundary-pinned,
+  # unidentified, bad for conditioning -- were measured and did NOT hold
+  # (max |r| with any other parameter 0.043; posterior interior and unimodal on
+  # the sampling scale; tightened 2.08-5.79x vs prior). See
+  # calibration/diag_sigma_co2.R and the 2026-08-15 CHANGELOG entry.
   for (st in c("MLO", "SPO")) {
     o <- obs$co2_ann[[st]]; m <- ms$co2[[st]]
     if (is.null(o) || !nrow(o)) next
     k <- match(o$year, m$year)
     good <- !is.na(k)
-    sd <- sqrt(err$sigma_co2^2 + LIK_CO2_REP_ERR^2)
+    sd <- if (is.null(err$sigma_co2)) LIK_CO2_REP_ERR
+          else sqrt(err$sigma_co2^2 + LIK_CO2_REP_ERR^2)
     add(paste0("co2_level_", st),
         sum(stats::dnorm(o$level[good], m$level[k[good]], sd, log = TRUE)))
   }
