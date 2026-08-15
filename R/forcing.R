@@ -16,7 +16,20 @@
 # =====================================================================
 
 # ---- named constants: every split and gap rule is declared here -----
-FORC_FOSS_NH_SHARE <- 0.95   # fossil CO2 emitted in the NH. PROVISIONAL.
+# WITHIN-YEAR EMISSION SEASONALITY (2026-08-15, review item 5c). TRUE applies
+# the sourced hemispheric monthly climatologies; FALSE reproduces every result
+# produced before this date, bit for bit, because the weights are the only thing
+# that changes and w == 1 is the incumbent. The switch exists so that "what does
+# the seasonality buy?" is one flag rather than a git checkout.
+FORC_USE_EMIS_SEASONALITY <- TRUE
+FORC_FOSS_NH_SHARE <- 0.95   # fossil CO2 emitted in the NH. PROVISIONAL --
+                             # and now MEASURED at 0.9201 by the EDGAR v4.3.2
+                             # country aggregation in
+                             # data-raw/extract_emission_seasonality.py. NOT
+                             # changed here: it is a separate constant feeding
+                             # the interhemispheric gradient (review item 5),
+                             # worth 0.84 ppm of MLO-SPO for 5.1 log-units, and
+                             # moving it is that item's decision, not this one.
 FORC_LUC_NH_SHARE  <- 0.55   # land-use change is far more tropical/SH-weighted
                              # than fossil. PROVISIONAL -- see DATA.md.
 FORC_NUC_NH_SHARE  <- 0.95   # nuclear-industry 14C: the 22 reporting countries
@@ -37,6 +50,48 @@ FORC_ENSO_PRE1948  <- 0      # Nino 3.4 starts 1948; no ENSO term before that.
                              # pre-1948 residuals lack an ENSO explanation.
 
 # ---------------------------------------------------------------------
+#' Sourced hemispheric monthly emission seasonality, cached.
+#'
+#' @return the list written by data-raw/build_emission_seasonality.R, or NULL if
+#'   the product is absent -- a missing optional file must degrade to the
+#'   no-seasonality model rather than take the forcing down. ccx_build_forcing()
+#'   then behaves exactly as it did before 2026-08-15.
+ccx_emission_seasonality <- local({
+  cache <- NULL
+  function() {
+    if (!is.null(cache)) return(cache)
+    v <- tryCatch(readRDS(ccx_path("data", "forcing_emission_seasonality.rds")),
+                  error = function(e) NULL)
+    if (!is.null(v)) cache <<- v
+    v
+  }
+})
+
+#' Impose a 12-month weight on a monthly series, CONSERVING every annual mean.
+#'
+#' Seasonality redistributes emissions within a year; it must not create or
+#' destroy any. Multiplying by the weight does both, because the underlying
+#' series is not flat within a year -- so each calendar year is rescaled back to
+#' its own pre-weighting mean afterwards. That rescale is what makes the change
+#' provably annual-total-neutral, which test-emission-seasonality.R asserts to
+#' machine precision against the unweighted series.
+#'
+#' A year whose emissions are exactly zero rescales by 1 rather than 0/0.
+#'
+#' @param v monthly series, 12 values per year, month-major
+#' @param yrs the calendar years v spans
+#' @param w 12 weights; mean(w) == 1 is the no-seasonality case
+ccx_seasonalise <- function(v, yrs, w) {
+  stopifnot(length(w) == 12L, length(v) == 12L * length(yrs))
+  yv  <- rep(yrs, each = 12)
+  out <- v * w[rep(seq_len(12), length(yrs))]
+  tgt <- tapply(v, yv, mean)
+  got <- tapply(out, yv, mean)
+  sc  <- as.numeric((tgt / got)[as.character(yv)])
+  sc[!is.finite(sc)] <- 1
+  out * sc
+}
+
 #' Interpolate an annual series to monthly, preserving annual means exactly
 #'
 #' Smooth (natural spline through year midpoints) then additively corrected so
@@ -255,6 +310,40 @@ ccx_build_forcing <- function(scenario = "historical",
   foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs)
   luc  <- ccx_annual_to_monthly(e$year, e$luc_GtC,    yrs)
 
+  # ---- WITHIN-YEAR SEASONALITY (2026-08-15, review item 5c) ----------
+  # Until now both emission inputs reached the model with NO seasonal cycle:
+  # ccx_annual_to_monthly() interpolates the annual TREND smoothly and leaves
+  # every month of a year within a whisker of its annual mean. Real fossil
+  # emissions peak in NH January (heating) and real land-use fire peaks in the
+  # dry season of whichever hemisphere is burning. The model's ONE free NEP
+  # amplitude absorbed the difference -- seas_amp_NH is the objective's most
+  # sharply curved parameter, and it fits to 19.66 GtC/yr against a default
+  # of 12.
+  #
+  # Weights are hemispheric monthly climatologies from GFED4.1s (fire) and
+  # EDGAR v4.3.2 (fossil); see data-raw/build_emission_seasonality.R for the
+  # sources, the periods and the DEFO+PEAT choice.
+  #
+  # THE LAND-USE WEIGHT IS DAMPED BY f_fire, and that is the load-bearing
+  # decision: only 21.6 % of GCB's E_LUC is fire (0.367 of 1.699 GtC/yr,
+  # 2001-2016). The other 78 % is wood harvest, product decay and soil-carbon
+  # loss, which have no comparable seasonal cycle. Applying the raw fire shape
+  # to all of E_LUC would overstate the correction ~4.6x, in the direction that
+  # would LOOK like a bigger fix. Fossil is not damped: all of it is combustion.
+  sea <- ccx_emission_seasonality()
+  if (FORC_USE_EMIS_SEASONALITY && !is.null(sea)) {
+    damp <- function(w) 1 + sea$f_fire * (w - 1)
+    foss_NH <- ccx_seasonalise(foss * FORC_FOSS_NH_SHARE,       yrs, sea$weights$fossil_NH)
+    foss_SH <- ccx_seasonalise(foss * (1 - FORC_FOSS_NH_SHARE), yrs, sea$weights$fossil_SH)
+    luc_NH  <- ccx_seasonalise(luc  * FORC_LUC_NH_SHARE,        yrs, damp(sea$weights$luc_NH))
+    luc_SH  <- ccx_seasonalise(luc  * (1 - FORC_LUC_NH_SHARE),  yrs, damp(sea$weights$luc_SH))
+  } else {
+    foss_NH <- foss * FORC_FOSS_NH_SHARE
+    foss_SH <- foss * (1 - FORC_FOSS_NH_SHARE)
+    luc_NH  <- luc  * FORC_LUC_NH_SHARE
+    luc_SH  <- luc  * (1 - FORC_LUC_NH_SHARE)
+  }
+
   # ---- CUMULATIVE land-use carbon (2026-08-13) -----------------------
   # Drives the converted-land term in ccx_deriv(): the land's equilibrium
   # carbon falls with the carbon land-use change has taken. See
@@ -274,6 +363,14 @@ ccx_build_forcing <- function(scenario = "historical",
   e_pre    <- e$year < min(yrs)
   luc_pre  <- if (any(e_pre)) sum(e$luc_GtC[e_pre], na.rm = TRUE) else 0
   cum_luc  <- luc_pre + cumsum(luc) / 12          # GtC/yr on a monthly grid
+  # PER HEMISPHERE, integrating the SEASONALISED flux rather than splitting the
+  # global cumulative. The two agree exactly at every year BOUNDARY (seasonality
+  # conserves annual totals) but differ WITHIN a year, and the converted-land
+  # term reads cum_luc every month -- so splitting the global series would hand
+  # it a cleared fraction inconsistent with the flux it is paired with. Same
+  # trap `luc_scale` had to avoid, one level down.
+  cum_luc_NH <- luc_pre * FORC_LUC_NH_SHARE       + cumsum(luc_NH) / 12
+  cum_luc_SH <- luc_pre * (1 - FORC_LUC_NH_SHARE) + cumsum(luc_SH) / 12
 
   # A WINDOW THAT STARTS MID-RECORD NO LONGER BEGINS AT A FIXED POINT, and it is
   # worth saying out loud. ccx_spinup() returns PREINDUSTRIAL land stocks with a
@@ -363,12 +460,12 @@ ccx_build_forcing <- function(scenario = "historical",
 
   out <- data.frame(
     t = t, year = rep(yrs, each = 12), month = rep(seq_len(12), length(yrs)),
-    e_foss_NH = foss * FORC_FOSS_NH_SHARE,
-    e_foss_SH = foss * (1 - FORC_FOSS_NH_SHARE),
-    e_luc_NH  = luc  * FORC_LUC_NH_SHARE,
-    e_luc_SH  = luc  * (1 - FORC_LUC_NH_SHARE),
-    cum_luc_NH = cum_luc * FORC_LUC_NH_SHARE,
-    cum_luc_SH = cum_luc * (1 - FORC_LUC_NH_SHARE),
+    e_foss_NH = foss_NH,
+    e_foss_SH = foss_SH,
+    e_luc_NH  = luc_NH,
+    e_luc_SH  = luc_SH,
+    cum_luc_NH = cum_luc_NH,
+    cum_luc_SH = cum_luc_SH,
     gmst = gm, enso = enso, d13c_foss = d13c_foss,
     c14_bomb = c14_bomb, c14_nuclear = c14_nuc,
     c14_cosmo = rep(prod_c14, n),

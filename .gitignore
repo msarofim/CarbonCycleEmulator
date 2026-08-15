@@ -11,5 +11,12 @@ calibration/output/chains/
 # git cannot re-include a file whose parent directory is excluded.
 data-raw/downloads/*
 !data-raw/downloads/MANIFEST.csv
+# ...and the two SMALL extracts from the bulk seasonality inputs (review item
+# 5c). They are ~30 KB together and they are what lets a fresh clone run
+# data-raw/build_emission_seasonality.R WITHOUT re-downloading 1.2 GB of GFED
+# hdf5 and a 26 MB EDGAR xlsx. The bulk inputs stay ignored; the extraction step
+# that produces these is data-raw/extract_emission_seasonality.py.
+!data-raw/downloads/seasonality_fire.csv
+!data-raw/downloads/seasonality_fossil.csv
 src/*.o
 src/*.so

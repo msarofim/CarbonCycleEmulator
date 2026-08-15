@@ -3739,3 +3739,103 @@ emission inputs) is confounded with this parameter and remains the blocker with 
 **This is a MAP point, not a posterior**, and items 5, 5b and 5c would each invalidate one —
 so it does not discharge item 8. `bomb_total` fits to 113.97 (z +2.50), the highest-tail
 parameter in the vector, and is worth watching when a posterior does exist.
+
+## 2026-08-15 — ITEM 5c: the emission inputs now carry sourced monthly seasonality
+
+Both emission inputs reached the model with **no within-year cycle at all** —
+`ccx_annual_to_monthly()` interpolates the annual *trend* smoothly and leaves every month
+within a whisker of its annual mean. Real fossil emissions peak in NH January and real
+land-use fire peaks in the burning hemisphere's dry season, and the model's single free NEP
+amplitude was absorbing the difference.
+
+### Sources
+
+| | dataset | citation |
+|---|---|---|
+| **fire** | GFED4.1s, monthly 0.25°, **2001–2016** | van der Werf et al. 2017, ESSD 9:697–720, doi:10.5194/essd-9-697-2017 |
+| **fossil** | EDGAR v4.3.2 monthly, by country × IPCC sector, 1970–2012 | Crippa et al. 2020, Sci Data 7:121, doi:10.1038/s41597-020-0462-2 |
+
+Both in `MANIFEST.csv`. The bulk inputs (1.2 GB of GFED HDF5, a 26 MB EDGAR xlsx) are
+gitignored; `data-raw/extract_emission_seasonality.py` reduces them to two ~30 KB CSVs which
+**are** committed, so a fresh clone can rebuild without re-downloading.
+
+GFED beta years (2017+) are excluded — the product's own header says they are extrapolated
+and "not suitable for trend analyses". 2001 is the start of the MODIS record it is built on.
+
+### The weights, and the phase checks that make them falsifiable
+
+| | J | F | M | A | M | J | J | A | S | O | N | D |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| fossil NH | **1.29** | 1.12 | 1.06 | 0.93 | 0.87 | 0.86 | 0.88 | 0.87 | 0.89 | 0.97 | 1.05 | 1.21 |
+| fossil SH | 0.94 | 0.95 | 0.93 | 0.95 | 0.98 | 1.07 | **1.21** | 1.05 | 1.04 | 0.99 | 0.95 | 0.94 |
+| LUC fire NH | 1.84 | 1.90 | **3.15** | 1.29 | 0.74 | 0.66 | 0.75 | 0.63 | 0.13 | 0.10 | 0.16 | 0.64 |
+| LUC fire SH | 0.02 | 0.02 | 0.03 | 0.02 | 0.21 | 0.57 | 0.87 | 3.26 | **5.03** | 1.64 | 0.25 | 0.07 |
+
+Fossil NH peaks in January and fossil SH in July — **opposed, because the driver is winter
+heating**. LUC fire SH peaks in September — the southern-Africa / Amazon / Indonesia dry
+season. Both are asserted in `test-emission-seasonality.R`, because a sign or index error
+sails straight past a conservation test.
+
+### THE LOAD-BEARING DECISION: E_LUC is not fire
+
+GFED's deforestation-and-peat carbon is **0.367 PgC/yr** (2001–2016) against GCB's E_LUC of
+**1.699 GtC/yr** — so **only 21.6 % of E_LUC burns**. The rest is wood harvest, product decay
+and soil-carbon loss, with no comparable cycle. The land-use weight is therefore **damped**:
+
+> `w_eff(m) = 1 + f_fire · (w_fire(m) − 1)`, with `f_fire = 0.216` **measured, not assumed**
+
+Applying the raw fire shape to all of E_LUC would have overstated the correction by ~4.6× —
+**in the direction that looks like success**, since a bigger input seasonality pulls
+`seas_amp_NH` further and would read as a bigger fix. Fossil is *not* damped: all of it is
+combustion. `f_fire = 0` reduces exactly to the incumbent model, which is what makes the
+change auditable. Savanna and agricultural-waste burning are excluded on purpose — they are
+recurring cycles whose regrowth returns the carbon, not land-use *change*.
+
+### What it bought
+
+At the MAP mode's other parameters, profiling `seas_amp_NH`:
+
+| | `seas_amp_NH` | log-post |
+|---|---|---|
+| seasonality OFF | **19.66** GtC/yr | −2194.0 |
+| seasonality ON | **18.65** | −2195.3 |
+
+**−1.01 GtC/yr, −5.1 %**, in the predicted direction. (The OFF value reproduces the
+mode-find's fitted 19.66 exactly — an independent check that the profile machinery and the
+MCMC agree.) The handoff's bounding test predicted ≤8 %; the sourced version comes in at
+5.1 %, which is right, because that bound used an undamped "plausible size" and the measured
+`f_fire` is 0.216.
+
+**BE CLEAR ABOUT WHAT THIS IS: a bias correction, not a fit improvement.** The log-posterior
+is **1.3 units WORSE** at the new optimum. The model fitted the seasonal cycle slightly better
+when it could pour all the seasonality into one free parameter. The value of the change is
+that `seas_amp_NH` now means what its name says — biosphere NEP amplitude — instead of
+"biosphere NEP plus whatever the inputs should have contributed". Anyone hoping 5c would raise
+the log-posterior should stop expecting that.
+
+### Conservation
+
+Seasonality redistributes within a year and must create nothing. `ccx_seasonalise()`
+multiplies by the weight and then rescales each calendar year back to its own pre-weighting
+mean. Measured: **max |Δ annual total| = 1.8e-15 GtC/yr** (fossil), 4.4e-16 (LUC), and the
+final cumulative land-use carbon matches to 6.8e-13 GtC. `cum_luc` is now integrated **per
+hemisphere from the seasonalised flux** rather than split from a global series — the two agree
+at every year boundary but not within a year, and the converted-land term reads it monthly.
+
+### Bonus finding, for item 5
+
+The EDGAR country aggregation measures the **NH share of fossil CO₂ at 0.9201**, against
+`FORC_FOSS_NH_SHARE = 0.95`, which has carried a "PROVISIONAL" comment since it was written.
+**Not changed here** — it feeds the interhemispheric gradient (item 5), where the handoff
+prices 0.90 → 0.97 at 0.84 ppm of MLO−SPO for 5.1 log-units. That is item 5's decision, and
+the measurement is now waiting for it.
+
+### Files
+
+`R/forcing.R` (`FORC_USE_EMIS_SEASONALITY`, `ccx_emission_seasonality()`,
+`ccx_seasonalise()`, per-hemisphere `cum_luc`), `data-raw/extract_emission_seasonality.py`
+(**new**), `data-raw/build_emission_seasonality.R` (**new**),
+`data/forcing_emission_seasonality.rds` (**new**), `tests/testthat/test-emission-seasonality.R`
+(**new**, 41 assertions), `MANIFEST.csv`, `.gitignore`.
+
+**Suite still 8 failing, the same 8.** No new failures.
