@@ -145,6 +145,80 @@ d M_atm[h]/dt =
 - Total ocean DIC inventory at spinup should land near the ~38,000 GtC canonical figure
   [VERIFY]; reported in the app as a stock.
 
+### 3.4a Candidate ocean structures — the open list (added 2026-08-15, Marcus)
+
+The v1 ocean is a **single constant-`kz` diffusive column per hemisphere**. Four structural
+candidates are on the table for closing the ocean-uptake / deep-Δ¹⁴C tension. They are listed
+together because they compete for the same explanatory job and should be **scored against the
+same observables**, not adopted one at a time on mechanism plausibility. Two of them
+(**A**, **B**) were added on 2026-08-15 at Marcus' instruction.
+
+**The discriminating observables.** Every candidate is scored on the same five rows, three of
+which are handoff 2026-08-15c §3.4's amended item-9 clauses:
+
+| row | in the objective? |
+|---|---|
+| ocean sink → ~3.1 GtC/yr (clause 2) | yes, `gcb_ocean_sink` |
+| deep Δ¹⁴C → −175.3 ± 10.3 ‰ (clause 3) | yes, `d14c_deep_ocean` |
+| `h_ml` relaxes below ~163 m (clause 1) | indirectly |
+| preindustrial vertical **DIC** gradient → +245 µmol/kg | **no** — model is exactly 0 |
+| preindustrial vertical **δ¹³C** gradient → −0.94 ‰ | **no** — model is uniform +1.560 |
+
+The last two rows are the ones **only a biological pump can move**, and they are not yet
+scored by the likelihood. That asymmetry is itself a finding: the candidate with the most
+distinctive signature is the one the objective is currently blind to.
+
+**A. Depth-dependent `K_z`** — *the literature's answer to exactly this tension, and the
+cheapest thing on the list.* `K(z) = kz · f(z)` with a single decay scale. **One extra
+parameter, no new state, no new fluxes, no isotope-fractionation decisions**, and the
+existing per-interface diffusion loop already accepts a coefficient vector. The classic
+box-diffusion result is that a *constant* `K` cannot reproduce natural Δ¹⁴C (a 10²–10³ yr
+constraint) and bomb Δ¹⁴C (a decadal one) simultaneously, and that the fix is a `K` that
+**decreases with depth** — Siegenthaler & Joos (1992), *Tellus B* 44:186, doi:10.3402/tellusb.v44i3.15441;
+Siegenthaler (1983), *JGR* 88:3599, doi:10.1029/JC088iC06p03599. That is a restatement of the
+repo's own measured problem: `kz` buys uptake and pays for it in deep Δ¹⁴C
+(handoff 15c §3.3). This is also the degree of freedom `h_ml` = 184 m is counterfeiting —
+a deep mixed layer *is* a crude "high `K` near the surface".
+**Passes the §2 pedagogy constraint** in one sentence ("the ocean stirs vigorously near the
+surface and sluggishly in the abyss"), which is why it is listed ahead of B.
+
+**B. High-latitude / outcrop conduit** — a direct surface↔interior path that bypasses the
+diffusive column, which is where the real ocean actually ventilates. Two forms, at very
+different cost:
+  - **B1, within-column (BUILT, off).** `w_out_NH` / `w_out_SH` already exist in
+    `ccx_default_params()` and default to 0; the pure-diffusion model is bit-reproduced when
+    they are. Freeing them is a **parameter** decision, not a structural one, and an SH-only
+    value is a testable claim about the MLO−SPO gradient the likelihood already scores.
+    **This should be tried before B2.**
+  - **B2, HILDA proper.** A separate two-box high-latitude reservoir alongside the
+    low-latitude diffusive column (Siegenthaler & Joos 1992; isotope budgets in Joos & Bruno
+    1998, *GBC* 12:277, doi:10.1029/98GB00746). HILDA is the closest published relative of
+    what this model is trying to be — it carries ¹³C and ¹⁴C and does A and B together.
+    **It was considered and set aside at project inception** (§2, CHANGELOG 2026-08-09) on
+    *pedagogy* grounds — "too many parameters to communicate" — **not on physics.** That
+    rejection still stands unless the audience constraint is revisited; re-listing it here
+    records that its physical case has since strengthened, not that the decision has changed.
+
+**C. Biological pump.** The only candidate that can move the DIC and δ¹³C gradient rows.
+Measured at zero fitted parameters in `calibration/diag_dic_gradient.R` — see that file's
+header for what each of its three channels does, and §6 there for the clause scoring. Two
+scoping facts came out of it that any design must answer: the export required to hold the
+observed DIC gradient at `kz` = 5000 is **~2.6× the literature global POC export**, and a
+**soft-tissue-only** pump that matches the DIC gradient necessarily **overshoots δ¹³C**,
+because roughly half the observed DIC gradient is carbonate-pump carbon carrying no
+depletion — and a carbonate limb also moves alkalinity, which this model holds fixed at
+`ALK_SURFACE`.
+
+**D. Conveyor.** **Built, off, and not to be shipped.** Falsified twice in-repo; see §4.3 of
+`notes/review_2026-08-14_architecture.md`. Listed only so it is not re-proposed.
+
+**Note that A and C are not alternatives.** A 2.6× export excess and a `kz` **9× Ledwell's
+NATRE thermocline diffusivity** — (1.7 ± 0.2) × 10⁻⁵ m² s⁻¹ = 536 m² yr⁻¹, the repo's own
+sourced figure (`notes/redteam_2026-08-13_conveyor_configurations.md` §1) — are the same
+observation seen twice: an *effective* diffusivity tuned to emulate three-dimensional
+advective transport also spuriously destroys *gradients*, so a pump inside this column has to
+work several times harder than the real one does. A lets C be built at a defensible export.
+
 ### 3.5 Isotopes
 
 - **¹²C** is the bulk tracer (¹²C+¹³C treated as total C for mass budget; ¹³C tracked as
@@ -616,3 +690,8 @@ Solar-modulated cosmogenic ¹⁴C production; explicit
 stratosphere boxes (if τ_strat kernel proves inadequate); volcanic/Pinatubo diffuse-light
 term; time-varying fossil δ¹³C fuel mix; ocean advective overturning loop; user-drawn
 emissions in the app; N₂O/CH₄; permafrost.
+
+**Ocean structural candidates have moved OUT of this backlog and into §3.4a** (2026-08-15),
+where they are listed together with the observables that discriminate them. HILDA's
+separate high-latitude column (§3.4a B2) remains out of v1 on the §2 *pedagogy* constraint,
+which is a live decision and not a physics verdict.

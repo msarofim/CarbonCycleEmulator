@@ -4191,3 +4191,112 @@ improvement rather than a re-arrangement. Recorded in the diagnostic's own outpu
 **Still standing:** the conveyor is still NO (falsified twice in-repo). The `kz` bracket is still
 load-bearing — this run is further evidence, since without it the fit would buy uptake by
 wrecking deep Δ¹⁴C.
+
+---
+
+## 2026-08-15 (later still, part 4) — THE DIC-GRADIENT DIAGNOSTIC: all three of item 9's clauses PASS, and the uptake argument for the pump is dead
+
+`calibration/diag_dic_gradient.R` (new, ~15 min, output `calibration/output/dic_gradient/`).
+**No model file was touched** — the pump is a shim over `ccx_deriv()` in the diagnostic's own
+environment, with **zero fitted parameters**: the export field is *solved* as the source that
+makes GLODAPv2's own observed DIC profile an exact steady state of the model's own diffusion
+operator. No Martin curve is chosen; no export magnitude is fitted.
+
+Also: **`kz(z)` depth-dependence and the high-latitude outcrop were added to the candidate list**
+(Marcus 2026-08-15). They now live in **DESIGN.md §3.4a** together with the pump and the
+conveyor, and with the five observables that discriminate them. §10's v2 backlog points there.
+
+### Two of my own predictions were measured and FAILED. Both are recorded, not dropped.
+
+1. **The Revelle/capacity channel does not exist.** I proposed this diagnostic on the argument
+   that the missing gradient means preindustrial *surface* DIC is too high, hence the buffer
+   factor is too high, hence the mixed layer absorbs too little. **Measured:** the model's ML is
+   1986.3 µmol/kg; GLODAPv2's 0–75 m volume-weighted mean is 2028.9 µmol/kg **modern**, i.e.
+   ≈1979 preindustrial once ~50 µmol/kg of anthropogenic carbon is allowed for. The model's
+   surface is right to ~7 µmol/kg. **The entire 244.7 µmol/kg deficit is interior.**
+2. **The pump makes deep Δ¹⁴C MORE depleted, not less.** I argued the opposite — that sinking
+   particles carry the mixed layer's young (−51 ‰) ratio down and dilute the deep. Wrong: the
+   pumped carbon is delivered young but leaves only by the same slow diffusive return, so deep
+   inventory rises ~12 % while the ventilation flux rises much less, mean age goes up, and decay
+   beats the injection value. **The residence-time channel dominates the injection-value channel.**
+   This flips the sign of clause 3 between operating points and is why part 6 scores at the mode.
+
+### The pre-registered prediction, and it came out EXACT
+
+Stated before part 3 ran: the interior is a passive tracer with no chemistry and diffusion is
+linear in concentration, so a static background DIC profile superposes on the anthropogenic
+perturbation and cannot change how it propagates. **Therefore a nutrient-limited (constant-mass)
+pump must change the ocean sink by exactly zero.**
+
+**Measured: +0.000000 GtC/yr.** Only a DIC-limited export moves it, and only by **+0.130 GtC/yr**
+at 22.0 GtC/yr of export. **The "pump supplies the export deficit" argument of handoff 15c §3.3
+is therefore wrong as stated** — in this model the pump is not an uptake mechanism at all. What
+it moves is the isotopes and the background state, and — via the *background state* changing
+which `h_ml` the objective wants — it moves `h_ml`.
+
+### All three of item 9's amended clauses PASS, at the mode, at zero fitted parameters
+
+At the pre-gradient MAP mode's other parameters, each arm at its own best depth:
+
+| | pump OFF | pump ON |
+|---|---|---|
+| `h_ml` | 184 m | **100 m** |
+| logL | −2269.7 | −2283.4 |
+| ocean sink | 3.063 | 3.052 GtC/yr |
+| deep Δ¹⁴C | −157.8 (z **+1.70**) | −164.2 (z **+1.08**) |
+
+- **CLAUSE 1 PASS** — `h_ml` relaxes 184 → 100 m. The pump *does* supply what `h_ml` was faking.
+- **CLAUSE 2 PASS** — the sink holds at 3.05 against 3.06, i.e. the same sink at a physical
+  mixed-layer depth instead of an unphysical one.
+- **CLAUSE 3 PASS** — deep Δ¹⁴C moves **toward** −175.3, z +1.70 → +1.08.
+- **Cost: −13.7 log-units with nothing refitted.** The largest single loss channel is atmospheric
+  Δ¹⁴C (−30/−31 NH/SH), and `bomb_total` — the free parameter that absorbs exactly that — is held
+  fixed here. −13.7 across a 19-parameter objective is plausibly refit-recoverable; it is **not**
+  a measurement that the pump is worse.
+
+**At `ccx_default_params()` clause 3 FAILS instead (z −1.08 → −1.52), and this is not a
+contradiction.** At defaults `kz` is low and the model is already *over*-depleted, so more
+depletion is a loss; at the mode `kz` sits 96.6 % up its bracket and the model is *under*-depleted,
+which is the miss 15c §3.3 is about. Scoring clause 3 at defaults would have returned the opposite
+verdict for a reason with nothing to do with the pump. **Both are printed; they are not averaged.**
+
+### Two scoping facts that any pump design must now answer
+
+1. **The implied export is 22.0 GtC/yr — 2.6× the literature global POC export (5–12 GtC/yr).**
+   The export needed is set by how fast the model's diffusion *destroys* the gradient, i.e. by
+   `kz`, and `kz` = 5000 is **9× Ledwell's NATRE 536 m²/yr**. An effective diffusivity tuned to
+   emulate 3-D advective *transport* also spuriously destroys *gradients*, so a pump inside this
+   column must work several times harder than the real one does. **This is the same observation
+   as the NATRE ratio, seen twice — and it is why depth-dependent `K_z` (§3.4a A) and the pump
+   are complements, not alternatives.**
+2. **A soft-tissue-only pump cannot fit the DIC and δ¹³C gradients at once, and this is
+   arithmetic.** Mixing 244.7 µmol/kg of organic carbon at ε = −20 ‰ predicts a −2.153 ‰
+   depletion against an observed −0.938 ‰: an overshoot of **2.3×**, and arm N measured **2.3×**.
+   No single ε removes it. The implied two-component split (CaCO₃ at +2 ‰) is **≈45 % soft-tissue
+   / 55 % carbonate** — order-of-magnitude only, since it also absorbs preformed-δ¹³C and air-sea
+   disequilibrium structure a two-box contrast cannot separate. **A carbonate limb also moves
+   alkalinity, which this model holds fixed at `ALK_SURFACE`** — a second structural commitment
+   hiding behind the first.
+
+### Controls and gates, because the shim is new code
+
+- **PARITY GATE**: `dg_spinup()` (a near-verbatim copy of `ccx_spinup()` with the full-state
+  Newton solve made unconditional) reproduces `ccx_spinup()` to **6.5e-07 GtC** over 96 states
+  and **4.1e-08 mol/yr** on `prod_c14` with the pump off. It `stop()`s above 1e-6.
+- **FRACTIONATION CONTROL (arm N0)**: with ε = 0 the deep δ¹³C does not move from +1.560 at all —
+  unfractionated particles deliver surface-*enriched* carbon. Printed beside arm N so the one
+  structural choice in the file is visible rather than assumed.
+- The observed profile's slight mid-depth maximum (1314–1861 m is ~3 µmol/kg above the bottom)
+  makes two boxes per hemisphere need a **negative** source, which is not remineralisation.
+  **Reported with magnitudes (min S ≈ −0.14 GtC/yr), not smoothed away.**
+- **Free validations, neither in the objective and both flagged as such:** ocean inventory
+  32,827 → 36,467 GtC (canonical ~38,000) and natural ¹⁴C production 0.672 → 0.736 of canonical.
+
+### What this does NOT settle
+
+The C++ core does not know about the pump — every run here goes through the R reference
+integrator, which is why it costs ~15 min. Porting is a *shipping* decision and this file exists
+to inform it, not to pre-empt it. Nothing was refitted; the −13.7 is a fixed-parameter number.
+And §3.4a's candidates A and B1 (`w_out_NH`/`w_out_SH`, already built and defaulting to 0) have
+**not** been run against the same five rows — that comparison is the obvious next step and would
+cost far less than the pump.

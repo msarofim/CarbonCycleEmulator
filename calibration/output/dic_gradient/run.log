@@ -1,0 +1,232 @@
+
+
+=== PART 1. GLODAPv2.2023 ON THE MODEL'S OWN 11 LAYERS ===
+  k       layer m   n_DIC   DIC obs   DIC raw   DIC mod    n_d13  d13C obs  D14C obs
+  0          0-75    4679    2028.9    2045.2    1986.3     4668     1.344      52.2
+  1        75-127    2161    2091.7    2098.4    1986.3     2255     0.986      45.2
+  2       127-200    2308    2129.5    2134.5    1986.3     2367     0.762      33.9
+  3       200-301    2679    2157.3    2158.8    1986.3     2744     0.649      13.9
+  4       301-444    2452    2182.5    2184.9    1986.3     2643     0.594     -15.3
+  5       444-643    2990    2204.5    2204.0    1986.3     3109     0.529     -51.2
+  6       643-923    3543    2237.9    2233.1    1986.3     3694     0.441     -99.0
+  7      923-1314    3640    2265.6    2256.4    1986.3     3868     0.340    -142.3
+  8     1314-1861    3269    2276.9    2267.2    1986.3     3316     0.301    -165.0
+  9     1861-2627    3211    2275.7    2261.4    1986.3     3010     0.357    -175.3
+ 10     2627-3700    3346    2273.6    2262.5    1986.3     3089     0.406    -177.8
+
+observed DIC gradient, surface layer -> bottom layer: +244.7 umol/kg
+model    DIC gradient:                                +0.0 umol/kg
+observed d13C gradient:                               -0.938 permil
+model    d13C gradient:                               +0.000 permil (UNIFORM)
+
+TWO THINGS TO READ OFF THIS TABLE BEFORE ANYTHING IS RUN:
+  * the model's SURFACE DIC is right. 1986.3 against an observed 2028.9
+    that carries ~50 umol/kg of anthropogenic carbon. The whole deficit is
+    in the interior -- see this file's header on the dead hypothesis.
+  * the DIC gradient is a THERMOCLINE feature, not an abyssal one: by
+    923-1314 m the observations are already within ~8 umol/kg of the
+    bottom. A pump that only fills the abyss would not reproduce it.
+  * the observed SURFACE D14C is +52 permil, which is BOMB-CONTAMINATED
+    and is NOT a preindustrial target. The model's -51 is not a misfit.
+    Only the DEEP D14C row is used as a target, as it already is.
+
+
+=== PART 2. THE IMPLIED EXPORT FLUX -- A FREE VALIDATION ===
+kz = 5000 m2/yr (the default; the MAP mode sits 96.6 % up its bracket, HIGHER)
+
+hemi   export GtC/yr  neg boxes      min S
+NH             9.44          2    -0.1078
+SH            12.55          2    -0.1433
+TOTAL         21.99
+
+literature global POC export at ~100 m: 5-12 GtC/yr
+implied / literature midpoint:          2.6x
+
+WHAT THIS NUMBER MEANS, AND IT IS A STRUCTURAL FINDING IN ITS OWN RIGHT.
+The export required is set by how fast the model's diffusion DESTROYS the
+gradient, i.e. by kz. A one-dimensional column has to use an EFFECTIVE kz
+that stands in for three-dimensional advective ventilation, and 5000 m2/yr
+is 9x Ledwell's NATRE thermocline diapycnal diffusivity, (1.7 +/- 0.2)e-5
+m2/s = 536 m2/yr -- the repo's own sourced figure (redteam 2026-08-13 sec.1).
+An effective diffusivity tuned to emulate TRANSPORT also spuriously
+destroys GRADIENTS -- so in this model a pump must work several times
+harder than the real one does. Read the ratio above with that in mind:
+if it is well above 1, the gradient is telling us something about kz and
+the column structure, not only about the missing biology.
+
+NOTE: some boxes need a NEGATIVE source, i.e. removal at depth. That is
+ not interpretable as remineralisation. It comes from the observed
+ profile's slight mid-depth maximum (1314-1861 m is ~3 umol/kg above the
+ bottom). Reported, not smoothed away; the magnitudes are printed above.
+
+PARITY GATE (pump OFF): max|dg_spinup - ccx_spinup| = 6.494e-07 GtC over 96 states
+                        |d prod_c14| = 4.053e-08 mol/yr
+                        PASS -- the copy is the shipped spinup.
+
+
+=== PART 3. THE ARMS -- pre-registered prediction: arm N's SINK IS UNCHANGED ===
+  OFF   reference                 32 s
+  N     nutrient-ltd, eps-20      33 s
+  D     DIC-limited,  eps-20      32 s
+  N0    nutrient-ltd, eps  0      32 s
+  D12   DIC-limited,  x1.2        31 s
+
+arm                            export      sink   deep14      z14   deep13      z13   deepDIC
+OFF   reference                   0.0    2.5663   -186.3    -1.08    1.560   +14.06    1996.3
+N     nutrient-ltd, eps-20       22.0    2.5663   -190.8    -1.52   -0.628   -12.59    2241.0
+D     DIC-limited,  eps-20       22.0    2.6959   -190.8    -1.52   -0.628   -12.59    2241.0
+N0    nutrient-ltd, eps  0       22.0    2.5663   -190.8    -1.52    1.560   +14.06    2241.0
+D12   DIC-limited,  x1.2         26.4    2.7212   -191.7    -1.60   -1.009   -17.24    2289.9
+GLODAPv2 target                                   -175.3             0.406             2273.6
+  sigma (n_eff = 20)                                10.3             0.082               13.6
+
+arm                               logL    d logL    oceanC prodratio  dCml/dCint
+OFF   reference                -3201.6      +0.0     32827     0.672  22.5/153.8
+N     nutrient-ltd, eps-20     -3268.6     -67.0     36467     0.736  22.5/153.8
+D     DIC-limited,  eps-20     -3595.3    -393.7     36467     0.736  22.0/163.0
+N0    nutrient-ltd, eps  0     -3268.6     -66.9     36467     0.736  22.5/153.8
+D12   DIC-limited,  x1.2       -3706.1    -504.5     37195     0.749  21.9/164.8
+
+--- THE PRE-REGISTERED PREDICTION, SCORED ---
+arm N sink change: +0.000000 GtC/yr (predicted EXACTLY ZERO)
+VERDICT: CONFIRMED -- a constant-mass pump adds NO uptake. Channel 1 is off.
+arm D sink change: +0.1296 GtC/yr -- channel 1's whole size, at 22.0 GtC/yr export
+arm N0 (no fractionation) deep d13C 1.560 vs arm N's -0.628, observed 0.406
+  -- the control for the one structural choice in this file. Without the
+     photosynthetic fractionation the pump moves deep d13C the WRONG WAY,
+     because unfractionated particles deliver SURFACE-enriched carbon.
+
+per-stream change from OFF, biggest movers first:
+
+  N     nutrient-ltd, eps-20   (total -67.0)
+    d13c_level_MLO                   +3.6
+    d13c_level_SPO                   +2.4
+    d14c_NH                         -33.1
+    d14c_SH                         -38.3
+
+  D     DIC-limited,  eps-20   (total -393.7)
+    gcb_ocean_sink                  +13.9
+    d13c_level_MLO                   +3.6
+    d13c_level_SPO                   +2.5
+    co2_gradient                     -1.3
+    d13c_gradient                    -2.4
+    co2_seasonal_MLO                 -4.5
+    co2_icecore                     -13.9
+    d14c_NH                         -30.0
+    d14c_SH                         -31.1
+    co2_level_MLO                  -142.0
+    co2_level_SPO                  -188.2
+
+  N0    nutrient-ltd, eps  0   (total -66.9)
+    d13c_level_MLO                   +3.6
+    d13c_level_SPO                   +2.5
+    d14c_NH                         -33.1
+    d14c_SH                         -38.3
+
+  D12   DIC-limited,  x1.2   (total -504.5)
+    gcb_ocean_sink                  +16.2
+    d13c_level_MLO                   +4.3
+    d13c_level_SPO                   +3.0
+    gcb_land_sink                    +1.0
+    co2_gradient                     -1.6
+    d13c_gradient                    -2.8
+    co2_seasonal_MLO                 -5.3
+    co2_icecore                     -16.9
+    d14c_NH                         -38.4
+    d14c_SH                         -40.0
+    co2_level_MLO                  -183.9
+    co2_level_SPO                  -238.4
+
+
+=== PART 4. THE h_ml PROFILE, PUMP OFF vs PUMP ON ===
+handoff 15c sec.3.4 clause 1: does h_ml relax below ~163 m once the missing
+mechanism is available? Run at the pre-gradient MAP mode's OTHER parameters,
+which is where h_ml = 184 m came from, with h_ml overridden. The export
+field is RE-SOLVED at every depth -- the grid changes, so the field must.
+
+arm            metric      h=50      h=75     h=100     h=140     h=184     h=220   best h
+pump OFF     logL abs   -2904.1   -2695.6   -2526.6   -2342.8   -2269.7   -2312.8   184 m
+            deep D14C    -161.4    -160.8    -160.1    -159.0    -157.8    -156.9
+             z vs obs     +1.35     +1.41     +1.48     +1.58     +1.70     +1.79
+                 sink     2.825     2.868     2.913     2.984     3.063     3.128
+
+pump D       logL abs   -2388.8   -2321.3   -2283.4   -2284.1   -2383.7   -2541.5   100 m
+            deep D14C    -165.9    -165.1    -164.2    -163.0    -161.6    -160.4
+             z vs obs     +0.91     +0.99     +1.08     +1.20     +1.33     +1.45
+                 sink     2.981     3.017     3.052     3.114     3.183     3.239
+
+pump ON minus pump OFF, at each depth (positive = the pump is better):
+   h = 50      +515.3
+   h = 75      +374.3
+   h = 100     +243.2
+   h = 140      +58.7
+   h = 184     -114.0
+   h = 220     -228.7
+
+best OFF: h = 184 m, logL -2269.7     best ON: h = 100 m, logL -2283.4
+AT EACH ARM'S OWN BEST DEPTH the pump is worth -13.7 log-units,
+WITH NOTHING REFITTED. Read that against the per-stream table in part 3:
+the largest single loss channel is atmospheric D14C, and `bomb_total` --
+the free parameter that absorbs exactly that -- is HELD FIXED here.
+
+preferred depth: pump OFF 184 m -> pump ON 100 m
+CLAUSE 1: PASSES -- h_ml relaxes below 163 m with the pump available
+
+
+=== PART 5. CAN ONE SOFT-TISSUE PUMP FIT BOTH OBSERVED GRADIENTS AT ONCE? ===
+observed  dDIC +244.7 umol/kg,  d(d13C) -0.938 permil
+all-organic prediction at eps = -20 permil: d(d13C) = -2.153 permil
+i.e. a pure soft-tissue pump matching the DIC gradient overshoots
+d13C by 2.3x.  Arm N measured 2.3x -- the two agree, so the
+overshoot is ARITHMETIC and no choice of a single epsilon removes it.
+
+two-component split implied by the observations (CaCO3 at +2.0 permil):
+   soft-tissue  +111.0 umol/kg   (45 %)
+   carbonate    +133.7 umol/kg   (55 %)
+
+CONSEQUENCE FOR THE DESIGN. A pump that fits the DIC gradient AND the
+d13C gradient needs TWO components, not one -- and the carbonate limb
+also moves alkalinity, which this model holds FIXED at ALK_SURFACE. That
+is a second structural commitment hiding behind the first. It is a
+scoping fact for handoff 15c sec.5's design sign-off, not a defect here.
+CAVEAT, stated rather than buried: this split also absorbs preformed-d13C
+and air-sea-disequilibrium structure that a two-box surface/deep contrast
+cannot separate, and the observed surface d13C is Suess-depleted while the
+deep is much less so. Treat the percentages as an order, not a partition.
+
+
+=== PART 6. SCORING THE THREE CLAUSES -- AT THE MODE ===
+                  pump OFF, best h          pump ON, best h
+h_ml                           184                      100
+logL                       -2269.7                  -2283.4
+ocean sink                   3.063                    3.052
+deep D14C                   -157.8                   -164.2
+  z vs obs                   +1.70                    +1.08
+
+CLAUSE 1  h_ml relaxes below 163 m      PASS  (184 -> 100 m)
+CLAUSE 2  ocean sink holds near 3.1     PASS  (3.063 -> 3.052 GtC/yr)
+CLAUSE 3  deep D14C moves TOWARD target PASS  (z +1.70 -> +1.08)
+
+cost, nothing refitted:                -13.7 log-units
+
+--- the same three clauses AT DEFAULTS, which give a DIFFERENT answer ---
+clause 2 sink:      2.5663 -> 2.6959 GtC/yr   PASS
+clause 3 deep D14C: z -1.08 -> -1.52            FAIL -- AWAY
+The clause-3 disagreement is NOT a contradiction and must not be averaged:
+at defaults kz is low and the model is ALREADY over-depleted, so more
+depletion is a loss; at the mode kz is 96.6 % up its bracket and the model
+is under-depleted, so the same change is a gain. The mode is the operating
+point the pump was proposed for, and the mode's verdict is the one that
+answers handoff 15c sec.3.4.
+
+
+=== FREE VALIDATIONS -- neither of these is in the objective ===
+quantity                               pump OFF      pump ON  canonical
+ocean carbon inventory, GtC               32827        36467    ~38,000
+natural 14C production / canonical        0.672        0.736       1.00
+Both move TOWARD their independent benchmarks. They are reported because
+they are free, and flagged because they are NOT scored -- do not quote them
+as if the likelihood had rewarded them.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/dic_gradient/diag_dic_gradient.rds
