@@ -4573,3 +4573,58 @@ on a structural decision in a way it was not when it was chosen; **(2)** whether
 `kz` = 6404 outside the [3830, 6200] bracket is a blocker or a re-derivation — and note the
 coupling, since option 2 makes that question *harder* by removing the term's ability to stand in
 for the bracket.
+
+---
+
+## 2026-08-16 (later still) — MARCUS: the DIC and δ¹³C gradient terms go into the next round
+
+Decision taken. Design, traps and ordering consequence in
+`notes/handoff_2026-08-16_candidates_neff_and_gradient_terms.md` §4. Nothing implemented yet —
+two sub-decisions block it (below).
+
+**Why it is the right call.** Two of the five discriminating rows were not in the objective, and
+they are the two only a pump can move. The refit could therefore never arbitrate the pump *no
+matter how long it ran*, and `diag_dic_gradient.R`'s pump had zero fitted parameters precisely
+because there was nothing to fit them against. **These terms are what make a fittable pump
+possible.** Sanctioned direction: the architecture review's rule is add missing constraints,
+not reweight existing ones.
+
+**Their leverage on the current 19 parameters is EXACTLY ZERO — measured, not assumed.**
+Perturbing each of `beta_max, fert_k, q10, k_w, h_ml, kz, tau_ex, npp_frac_NH, seas_amp_*,
+gamma_enso, sst_scale` by 10 % moves the deep-box DIC and δ¹³C by ≤ **5.3e-12**. Baseline deep
+DIC **1996.2555 µmol/kg**, deep δ¹³C **1.55953 ‰**, both parameter-independent (ML value set by
+carbonate equilibrium at fixed `ALK_SURFACE` and SST; interior uniform by conservation).
+Consequences: **no posterior distortion and no parameter hijacking**; logL shifts by a constant
+**~384 log-units** (deep DIC z −23.0, penalty 264; deep δ¹³C z +15.5, penalty 120) and becomes
+incomparable with every prior run; and **the zero-leverage property must be GATED**, because the
+pump breaks it on purpose.
+
+**The ordering conclusion that follows:** the terms are unfittable until a pump exists, so
+**add the terms AND build the pump in the same round, then refit once against the complete
+objective.** Terms-first is harmless but useless; pump-first fits the pump against an objective
+blind to its two signature rows — the exact failure the terms are being added to prevent.
+
+**GRADIENTS, not levels, and δ¹³C is the reason.** The model's surface DIC is *right*
+(1986.3 vs a GLODAP 0–75 m mean of 2028.9 modern ≈ 1979 preindustrial), so level and gradient
+are ~7 µmol/kg apart there. But the model's uniform ocean δ¹³C is **+1.560 ‰** against a
+preindustrial surface nearer **+2.0 ‰** — a ~0.4 ‰ *level* offset owed to air–sea fractionation
+constants and the preindustrial atmospheric value, nothing to do with the pump. A level term
+would conflate that with the pump signal; a gradient term is immune.
+
+**THE TRAP, unresolved:** the observed surface is anthropogenically contaminated in both fields
+(~+50 µmol/kg Cant; Suess-depleted δ¹³C), so the raw modern gradients — **+244.7 µmol/kg** and
+**−0.938 ‰** — are LOWER BOUNDS and bias *against* the pump. Three options: raw-and-documented;
+corrected (**`data-raw/downloads/eide2017_c13_suess_effect.nc` is already in the repo** and is
+exactly the δ¹³C correction; DIC needs a Cant estimate we do not carry); or score the transient
+2010s gradient against the modern observation. **Target definition, Marcus'.**
+
+**Two sub-decisions block implementation:** the target definition above, and per-field `n_eff`
+(measured for Δ¹⁴C, not for DIC/δ¹³C; `sd_w` is 53.9 µmol/kg and 0.327 ‰;
+`diag_deep_d14c_neff.R` generalises with a field argument, ~1 min).
+
+**Also noted:** the existing deep-Δ¹⁴C target is *everything below 2627.2 m*, not the model's
+2627–3700 m box (`zmax = 1e5` in the build script). Restricting to the model's actual box moves
+it −175.26 → −177.81 ‰, i.e. 0.25σ. The new terms should not inherit that inconsistency without
+a decision.
+
+Handoff written; ordering table amended (item 12 = the terms, item 11 = outcrop, DEAD).
