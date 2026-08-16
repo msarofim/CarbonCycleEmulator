@@ -334,8 +334,17 @@ ccx_init_unc <- function() ccx_par_to_unc(
 #' The forcing table is assembled ONCE and reused; only c14_cosmo is refreshed
 #' per draw, because natural 14C production is solved by the spinup and so
 #' depends on the parameters.
+#' @param base_params the parameter list the fitted parameters are written INTO.
+#'   Defaults to `ccx_default_params()`, which is the only thing any caller
+#'   wanted until 2026-08-16e. It exists so a STRUCTURAL choice that is not a
+#'   fitted parameter -- `pump_mode` "N" vs "D" is the case it was added for
+#'   (Marcus deferred that choice to the refit; see DESIGN sec.5.2f) -- can be
+#'   varied between two otherwise-identical objectives. Fitted parameters still
+#'   overwrite their entries, so passing a list that sets one of them has no
+#'   effect: this is for structure, not for pinning parameters.
 ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
-                             verbose = FALSE) {
+                             verbose = FALSE,
+                             base_params = ccx_default_params()) {
   ccx_load_cpp()
   # Built once at a REFERENCE bomb total; the bomb column scales linearly with
   # the total, so a draw only rescales it rather than rebuilding the table.
@@ -362,7 +371,7 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     }
     if (!is.finite(lp)) return(-Inf)
 
-    p <- ccx_default_params()
+    p <- base_params
     for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
     p$gamma_enso <- pv$gamma_enso
 
