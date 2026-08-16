@@ -1,0 +1,217 @@
+
+
+=== PART 1. GATES ===
+GATE A -- do these cells reproduce the SHIPPED targets, all 3 fields x 2 layers?
+
+field            layer       cells      rds      vw here       vw rds        |d|
+DIC (TCO2)       surf          533      533    2040.0117    2040.0117   0.00e+00
+DIC (TCO2)       deep         2897     2897    2273.1210    2273.1210   0.00e+00
+d13C             surf          500      500       1.2848       1.2848   0.00e+00
+d13C             deep         2561     2561       0.4239       0.4239   0.00e+00
+D14C (CONTROL)   surf          531      531      51.4382      51.4382   0.00e+00
+D14C (CONTROL)   deep         3592     3592    -175.2563    -175.2563   0.00e+00
+
+GATE A PASS -- same cells, same weighting, all six.
+
+
+=== PART 2. DECISION 1 -- WHICH GRADIENT IS THE TARGET? ===
+Handoff sec.4.4 quotes +244.7 umol/kg and -0.938 permil. The SHIPPED
+data/obs_glodap_deep.rds gives +233.1 and -0.861. BOTH ARE IN THE REPO and
+they are not the same target. The difference is the layer definition, and
+it is ~1 sigma on both fields -- so this is decision 1's actual content.
+
+layer definition                                              DIC grad   d13C grad
+shipped rds (0-100 / 2627.2-Inf, <=)                           +233.11     -0.8610
+model boxes at h_ml = 50    (0-50 / 2620-3700, <)              +252.12     -0.9754
+model boxes at h_ml = 75    (0-75 / 2627-3700, <) <- default h_ml, = handoff sec.4.4     +244.71     -0.9380
+model boxes at h_ml = 100   (0-100 / 2635-3700, <) <- h_ml under the pump (15d)     +234.98     -0.8852
+model boxes at h_ml = 140   (0-140 / 2646-3700, <)             +224.53     -0.8156
+model boxes at h_ml = 184   (0-184 / 2659-3700, <) <- FITTED h_ml (clause 1)     +212.79     -0.7472
+model boxes at h_ml = 220   (0-220 / 2670-3700, <)             +203.66     -0.6953
+
+THE MODEL-ANCHORED TARGET IS A FUNCTION OF h_ml: +212.8 umol/kg at
+h_ml = 184 and +235.0 at h_ml = 100 -- it moves +22.2 umol/kg as h_ml
+falls 184 -> 100, which is the exact move the pump makes (15d).
+
+WHY THAT IS A HAZARD AND NOT A DETAIL: an h_ml-anchored target REWARDS
+shrinking h_ml through the TARGET's motion, not only through the model's
+gradient. h_ml is clause 1 -- the thing the pump is being built to fix --
+so the term would be partly scoring its own layer choice. A FIXED-DEPTH
+target (the shipped rds row) has no such feedback, at the cost of a layer
+mismatch against the model's boxes. Both options are on the table; the
+point is that the choice is not free and it was not visible before.
+
+
+=== PART 3. DECISION 2 -- SIGMA ON THE GRADIENT, MEASURED ===
+Estimand Delta = xbar_deep - xbar_surf, so Var(Delta) = Var(D) + Var(S)
+- 2 Cov(D,S) and the covariance is measured, not assumed. Layers are the
+SHIPPED rds ones so this sigma pairs with the shipped target; part 2's
+other definitions change the CENTRE far more than they change the spread.
+
+
+---- DIC (TCO2) (umol/kg) ----
+surface 533 cells, sd_w 71.9581;  deep 2897 cells, sd_w 53.8814;  gradient +233.1094
+
+correlogram, decorrelation scale: surface rho<0.5 by ~3500 km, rho<0 by ~9000 km;
+                                  deep    rho<0.5 by ~5500 km, rho<0 by ~9000 km
+
+within-layer n_eff                   Kish correlogram rho floored
+  surface                             489       31.8        7.9
+  deep                               2752       85.3        5.8
+
+BLOCK BOOTSTRAP ON THE CONTRAST (4000 draws, seed 20260816):
+block             blocks    SE deep    SE surf SE GRADIENT  corr D,S  cancelled valid?
+10 deg lat           193     5.1009     5.0154      8.5246    -0.420     -19.2% biased HIGH
+20 deg lat            72     8.5677     8.1263     14.4629    -0.501     -22.5% biased HIGH
+30 deg lat            33    11.1726    11.1872     19.8196    -0.571     -25.4% yes
+60 deg lat            16    16.9018    10.9314     25.2736    -0.632     -25.6% yes
+
+sigma_Delta over the methodologically valid blocks (>= 30 deg): 19.8196 to 25.2736 umol/kg
+CROSS-LAYER COVARIANCE: corr(deep*, surf*) = -0.63 to -0.57, so the
+independent-layer calculation would be TOO SMALL by 26 to 25 %.
+  => ignoring it would make this term STRONGER than the data warrant.
+NOTE the SE has NOT plateaued in block size (30 -> 60 deg still rising),
+so sigma_Delta is reported as a RANGE, not a point. The 60 deg row is the
+most defensible and the noisiest (16 blocks); that tension is not resolved.
+
+n_eff EQUIVALENT (deep sd_w 53.8814 / sigma_Delta)^2, for comparison with
+LIK_D14C_DEEP_NEFF = 20 only: 4.5 to 7.4
+
+
+---- d13C (permil) ----
+surface 500 cells, sd_w 0.3133;  deep 2561 cells, sd_w 0.3274;  gradient -0.8610
+
+correlogram, decorrelation scale: surface rho<0.5 by ~1250 km, rho<0 by ~11000 km;
+                                  deep    rho<0.5 by ~4500 km, rho<0 by ~9000 km
+
+within-layer n_eff                   Kish correlogram rho floored
+  surface                             454      266.8       18.3
+  deep                               2414      111.2        6.9
+
+BLOCK BOOTSTRAP ON THE CONTRAST (4000 draws, seed 20260816):
+block             blocks    SE deep    SE surf SE GRADIENT  corr D,S  cancelled valid?
+10 deg lat           189     0.0319     0.0217      0.0351    +0.185       9.0% biased HIGH
+20 deg lat            74     0.0538     0.0323      0.0581    +0.161       7.4% biased HIGH
+30 deg lat            34     0.0675     0.0443      0.0747    +0.159       7.6% yes
+60 deg lat            16     0.1025     0.0614      0.1148    +0.089       4.0% yes
+
+sigma_Delta over the methodologically valid blocks (>= 30 deg): 0.0747 to 0.1148 permil
+CROSS-LAYER COVARIANCE: corr(deep*, surf*) = +0.09 to +0.16, so the
+independent-layer calculation would be TOO LARGE by 4 to 8 %.
+  => ignoring it would make this term WEAKER than the data warrant.
+NOTE the SE has NOT plateaued in block size (30 -> 60 deg still rising),
+so sigma_Delta is reported as a RANGE, not a point. The 60 deg row is the
+most defensible and the noisiest (16 blocks); that tension is not resolved.
+
+n_eff EQUIVALENT (deep sd_w 0.3274 / sigma_Delta)^2, for comparison with
+LIK_D14C_DEEP_NEFF = 20 only: 8.1 to 19.2
+
+
+---- D14C (CONTROL) (permil) ----
+surface 531 cells, sd_w 56.3912;  deep 3592 cells, sd_w 45.8813;  gradient -226.6944
+
+correlogram, decorrelation scale: surface rho<0.5 by ~4500 km, rho<0 by ~9000 km;
+                                  deep    rho<0.5 by ~5500 km, rho<0 by ~9000 km
+
+within-layer n_eff                   Kish correlogram rho floored
+  surface                             494       16.2        5.8
+  deep                               3408      110.1        6.4
+
+BLOCK BOOTSTRAP ON THE CONTRAST (4000 draws, seed 20260816):
+block             blocks    SE deep    SE surf SE GRADIENT  corr D,S  cancelled valid?
+10 deg lat           194     3.8370     3.5888      5.3025    -0.019      -0.9% biased HIGH
+20 deg lat            71     6.6663     5.6701      8.6989    +0.012       0.6% biased HIGH
+30 deg lat            33     9.0385     6.9078     11.9293    -0.103      -4.9% yes
+60 deg lat            16    13.4243     8.2634     15.0317    +0.102       4.6% yes
+
+sigma_Delta over the methodologically valid blocks (>= 30 deg): 11.9293 to 15.0317 permil
+CROSS-LAYER COVARIANCE: corr(deep*, surf*) = -0.10 to +0.10, so the
+independent-layer calculation would be TOO SMALL by 5 to 5 %.
+  => ignoring it would make this term STRONGER than the data warrant.
+NOTE the SE has NOT plateaued in block size (30 -> 60 deg still rising),
+so sigma_Delta is reported as a RANGE, not a point. The 60 deg row is the
+most defensible and the noisiest (16 blocks); that tension is not resolved.
+
+n_eff EQUIVALENT (deep sd_w 45.8813 / sigma_Delta)^2, for comparison with
+LIK_D14C_DEEP_NEFF = 20 only: 9.3 to 14.8
+
+
+=== PART 3b. PAIRED-COLUMN CHECK ON THE CROSS-LAYER SIGN ===
+field             columns   corr(S,D)   bootstrap      agree?
+DIC (TCO2)            390      -0.376      -0.602         YES
+d13C                  349      +0.094      +0.124         YES
+D14C (CONTROL)        460      -0.084      -0.001     both ~0
+
+The two estimators AGREE on the sign for every field, so the DIC
+anticorrelation is a property of the ocean and not of the block scheme.
+MECHANISM: surface DIC is HIGHEST where the water is cold and dense --
+the high latitudes -- and those are exactly the regions where the deep
+water is YOUNGEST and so LOWEST in respired carbon. Basins therefore
+trade the two ends of the gradient against each other, and a sample that
+is basin-skewed misses the gradient by MORE than it misses either level.
+This is the same young-Atlantic/old-Pacific contrast that drives the deep
+D14C correlogram's negative tail, read on a different pair of layers.
+
+
+=== GATE B -- THE D14C CONTROL ===
+D14C ran through the SAME generalised code above. Its deep layer is the one
+diag_deep_d14c_neff.R already measured, so those rows are a regression test
+on this file, not a new result.
+
+quantity                           here    shipped run        |d|
+cells                         3592.0000      3592.0000   0.00e+00
+sd_w                            45.8813        45.8813   0.00e+00
+Kish n_eff                    3408.2032      3408.2032   0.00e+00
+correlogram n_eff              110.0893       110.0893   0.00e+00
+rho-floored n_eff                6.3904         6.3904   0.00e+00
+
+GATE B PASS -- the generalisation reproduces the D14C measurement exactly.
+
+
+=== PART 3c. LEVEL n_eff PER FIELD -- THE sec.4.6 ANSWER ===
+field            layer          sd_w n_eff 30 deg n_eff 60 deg   vs incumbent
+DIC (TCO2)       deep        53.8814         23.3         10.2     CONSISTENT
+DIC (TCO2)       surf        71.9581         41.4         43.3    better det.
+d13C             deep         0.3274         23.5         10.2     CONSISTENT
+d13C             surf         0.3133         50.1         26.0    better det.
+D14C (CONTROL)   deep        45.8813         25.8         11.7     CONSISTENT
+D14C (CONTROL)   surf        56.3912         66.6         46.6    better det.
+
+ALL THREE DEEP LEVELS LAND IN THE SAME BRACKET, ~10 to ~26, and
+LIK_D14C_DEEP_NEFF = 20 sits inside it for every field. So sec.4.6's
+worry does NOT bite for the LEVEL formulation: DIC and d13C do have their
+own spatial structure, and it does not move n_eff enough to matter.
+IT DOES BITE FOR THE GRADIENT, for the reason in part 3b -- the contrast
+has a different and larger sampling error than either level.
+
+
+=== PART 4. THE CONSTANT THE TERMS ADD ===
+Handoff sec.4.2 puts it at ~384 log-units from LEVEL terms with deep DIC
+1996.2555 and deep d13C 1.55953. The model is recomputed here rather than
+copied, because a constant quoted from a stale spinup is exactly the class
+of number this repo has been bitten by.
+
+hemi       DIC surf     DIC deep     DIC grad    d13C deep    d13C grad
+NH        1986.3340    1986.3340     4.55e-13      1.55953     8.88e-13
+SH        2003.7207    2003.7207     0.00e+00      1.55953     1.11e-12
+
+THE MODEL'S INTERIOR IS UNIFORM TO MACHINE PRECISION, which is handoff
+sec.4.2's zero-leverage result restated: the gradient IS the miss, in full.
+
+term                                         miss      sigma          z  log-units
+DIC gradient (shipped layers)            -233.109    19.8196     -11.76       69.2  (tightest valid block)
+DIC gradient (shipped layers)            -233.109    25.2736      -9.22       42.5  (loosest valid block)
+d13C gradient (shipped layers)              0.861     0.0747      11.53       66.5  (tightest valid block)
+d13C gradient (shipped layers)              0.861     0.1148       7.50       28.1  (loosest valid block)
+
+TOTAL CONSTANT ADDED BY THE TWO GRADIENT TERMS: 71 to 136 log-units
+(handoff sec.4.2's LEVEL formulation gave ~384; these are GRADIENT terms
+on the shipped layers, which is the sec.4.3 recommendation for d13C.)
+
+This is a CONSTANT only while the model's interior is uniform. The pump
+breaks that on purpose -- which is the point of adding the terms, and the
+reason handoff sec.4.2 asks for a test asserting zero leverage with the
+pump OFF so the day it stops holding is visible.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/gradient_target_neff/diag_gradient_target_and_neff.rds

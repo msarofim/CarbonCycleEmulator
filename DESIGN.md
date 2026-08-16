@@ -471,6 +471,59 @@ fractionation constants, ocean areas/depth/layering, SST-anomaly scaling of GMST
   (flagged question Q1).
 - Optional single-number ocean bomb-¹⁴C inventory constraint at its epoch.
 
+### 5.2a The DIC and δ¹³C gradient terms — measured properties (2026-08-16)
+
+Task 12 (handoff 2026-08-16 §4). The two discriminating rows only a biological pump can
+move are **not yet in the objective**. Marcus took them into the next round; the two
+blockers he listed (§6 decisions 1 and 2) were measured in
+`calibration/diag_gradient_target_and_neff.R` (~25 s, gated against the shipped targets and
+against `diag_deep_d14c_neff.R`). **Nothing shipped — both decisions remain Marcus'.**
+
+**Decision 1 — the target is not one number, and the repo carries two of them.**
+
+| layer definition | DIC gradient | δ¹³C gradient |
+|---|---|---|
+| shipped `data/obs_glodap_deep.rds` (0–100 m / >2627.2 m) | **+233.11** | **−0.8610** |
+| model boxes at `h_ml` = 75 (the default) — *= handoff §4.4's numbers* | **+244.71** | **−0.9380** |
+| model boxes at `h_ml` = 100 (the pump's value) | +234.98 | −0.8852 |
+| model boxes at `h_ml` = 184 (the **fitted** value) | **+212.79** | **−0.7472** |
+
+The two in-repo numbers differ by ~1σ on both fields. Worse, a target anchored on the
+model's own boxes is **a function of `h_ml`**: it moves **+22.2 µmol/kg** as `h_ml` falls
+184 → 100, which is exactly the move the pump makes (15d). Such a term would reward
+shrinking `h_ml` partly through the *target's* motion rather than the model's gradient —
+and `h_ml` is clause 1, the thing the pump exists to fix. A fixed-depth target has no such
+feedback, at the cost of a layer mismatch against the model's boxes. **Open.**
+
+**Decision 2 — σ, measured.** The estimand is a **contrast**, so
+Var(Δ) = Var(D) + Var(S) − 2 Cov(D,S), and the covariance was measured by two estimators
+sharing no machinery (block bootstrap on the contrast; paired-column correlation).
+**They agree on the sign for all three fields.**
+
+| field | corr(surf, deep) | effect on σ_Δ | σ_Δ (valid blocks ≥30°) |
+|---|---|---|---|
+| DIC | **−0.38 to −0.60** | **inflates ~25 %** | **19.8 – 25.3 µmol/kg** |
+| δ¹³C | +0.09 to +0.12 | cancels ~4–8 % | 0.075 – 0.115 ‰ |
+| Δ¹⁴C (control) | ≈ 0 | none | 11.9 – 15.0 ‰ |
+
+DIC's anticorrelation is physical: surface DIC is highest where water is cold and dense
+(high latitudes), and that is precisely where the deep water is *youngest* and lowest in
+respired carbon — the same young-Atlantic/old-Pacific contrast that drives the deep-Δ¹⁴C
+correlogram's negative tail, read on a different pair of layers. **A basin-skewed sample
+misses the gradient by more than it misses either level.**
+
+**§4.6's worry does not bite for the LEVEL terms.** Deep-level `n_eff` measured per field:
+DIC 10.2–23.3, δ¹³C 10.2–23.5, Δ¹⁴C 11.7–25.8. `LIK_D14C_DEEP_NEFF` = 20 sits inside the
+bracket for **all three** — DIC and δ¹³C do have their own spatial structure and it does not
+move `n_eff` enough to matter. It bites only for the **gradient**, per the table above.
+
+**The constant the terms add is smaller than §4.2 estimated.** §4.2 gave ~384 log-units from
+*level* terms; **gradient** terms on the shipped layers give **71–136**. Two reasons: the
+gradient's σ is larger than a level's, and §4.2's model baseline (deep DIC 1996.2555) does
+not reproduce — the default spinup gives a column uniform at **1986.3340** (NH) /
+**2003.7207** (SH), interior uniform to machine precision. The zero-leverage result itself
+is confirmed: **the gradient *is* the miss, in full.**
+
 ### 5.3 Sampler
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and

@@ -4628,3 +4628,71 @@ it −175.26 → −177.81 ‰, i.e. 0.25σ. The new terms should not inherit th
 a decision.
 
 Handoff written; ordering table amended (item 12 = the terms, item 11 = outcrop, DEAD).
+
+## 2026-08-16 (evening) — §6's two blockers MEASURED: the gradient target is not one number, and the contrast's σ is not the levels' σ
+
+`calibration/diag_gradient_target_and_neff.R` (~25 s). Answers handoff §6 decisions 1 and 2.
+**Nothing shipped; both decisions remain Marcus'.** Full tables in DESIGN.md §5.2a.
+
+**Two gates first, both PASS.** (A) the cells reproduce all six shipped targets
+(3 fields × 2 layers) to 0.00e+00; (B) Δ¹⁴C run through the *generalised* code path
+reproduces `diag_deep_d14c_neff.R` exactly (Kish 3408.2032, correlogram 110.0893,
+ρ-floored 6.3904, all |d| = 0). So the generalisation is a regression test on itself, and
+the Δ¹⁴C rows below are a control, not a new result.
+
+**DECISION 1 — the repo already carries TWO gradient targets and they differ by ~1σ.**
+Handoff §4.4's +244.7 µmol/kg / −0.938 ‰ come from the model's own boxes **at `h_ml` = 75**
+(the *default*); the shipped `obs_glodap_deep.rds` gives **+233.11 / −0.8610** on fixed
+depths (0–100 m / >2627.2 m). Tracked down and reproduced exactly, so this is a layer
+choice, not a discrepancy.
+
+**And a hazard that was not visible before: a model-anchored target is a FUNCTION OF `h_ml`.**
+`ccx_ocean_grid()` puts the ML box at 0–`h_ml`, so the observed gradient reads
++244.7 (h_ml 75) → +235.0 (100) → **+212.8 (184, the FITTED value)**. It moves
+**+22.2 µmol/kg** as `h_ml` falls 184 → 100 — *exactly* the move the pump makes (15d). Such a
+term would reward shrinking `h_ml` partly through the **target's** motion rather than the
+model's gradient, and `h_ml` is clause 1, the thing the pump exists to fix. A fixed-depth
+target has no such feedback, at the cost of a layer mismatch against the model's boxes.
+
+**DECISION 2 — the estimand is a CONTRAST, and I predicted its covariance sign WRONG.**
+Var(Δ) = Var(D) + Var(S) − 2 Cov(D,S). I argued in the file header, *before measuring*, that
+the two layers share cruises so a sampling excursion biases both the same way and **cancels**,
+i.e. that ignoring the covariance would make the terms weaker than the data warrant.
+**Measured, by two estimators sharing no machinery — block bootstrap on the contrast, and
+a paired-column correlation on the raw field — and they AGREE on the sign for all three
+fields:**
+
+| field | corr(surf, deep) | effect on σ_Δ | σ_Δ (blocks ≥30°) | deep-LEVEL n_eff |
+|---|---|---|---|---|
+| DIC | **−0.38 to −0.60** | **INFLATES ~25 %** | **19.8 – 25.3 µmol/kg** | 10.2 – 23.3 |
+| δ¹³C | +0.09 to +0.12 | cancels ~4–8 % | 0.075 – 0.115 ‰ | 10.2 – 23.5 |
+| Δ¹⁴C (control) | ≈ 0 | none | 11.9 – 15.0 ‰ | 11.7 – 25.8 |
+
+For DIC — the field that matters most — the naive independent-layer calculation would have
+made the term **~25 % STRONGER** than the data warrant, the opposite of what I claimed.
+**Mechanism (and it is the same physics as the deep-Δ¹⁴C correlogram's negative tail, read on
+a different pair of layers):** surface DIC is highest where the water is cold and dense — the
+high latitudes — and that is precisely where the deep water is *youngest* and lowest in
+respired carbon. Basins trade the two ends of the gradient against each other, so a
+basin-skewed sample misses the **gradient** by more than it misses either **level**.
+
+**§4.6's worry does NOT bite for the LEVEL terms.** It asked whether `n_eff` = 20, measured
+for Δ¹⁴C, transfers to DIC and δ¹³C. It does: deep-level `n_eff` is 10.2–23.3 (DIC),
+10.2–23.5 (δ¹³C), 11.7–25.8 (Δ¹⁴C) — **20 sits inside the bracket for all three.** The fields
+do have their own spatial structure and it does not move `n_eff` enough to matter. The worry
+bites only for the **contrast**.
+
+**§4.2's ~384-log-unit constant does not reproduce, twice over.** (a) It is a *level*
+formulation; **gradient** terms on the shipped layers cost **71–136 log-units**, because the
+contrast's σ is larger than a level's. (b) Its model baseline (deep DIC 1996.2555 µmol/kg)
+does not reproduce — the default spinup gives a column uniform at **1986.3340** (NH) /
+**2003.7207** (SH). Recomputed live here rather than copied. The zero-leverage result itself
+is confirmed and sharpened: the interior is uniform to **machine precision** in both
+hemispheres, so **the gradient IS the miss, in full.**
+
+**Caveat carried, not buried:** the bootstrap SE has **not plateaued** in block size
+(30° → 60° still rising), so σ_Δ is a range, not a point. The 60° row is the most defensible
+and the noisiest (16 blocks); that tension is unresolved.
+
+**Written:** `calibration/output/gradient_target_neff/diag_gradient_target_and_neff.{rds,log}`,
+DESIGN.md §5.2a. No model file and no likelihood constant changed.
