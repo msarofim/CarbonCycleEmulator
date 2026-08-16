@@ -5138,3 +5138,57 @@ per-row scales (predicted DIC ~1.19, δ¹³C ~1.15, ALK the dissenter at ~0.95; 
 **NOT DONE / DELIBERATELY NOT TAKEN:** whether `pump_grad` is fixed or fitted; whether the pump
 ships ON; N vs D (not scanned here — the gradient rows cannot tell them apart, so a D column would
 duplicate these rows while re-opening a question already deferred to the refit); the refit itself.
+
+---
+
+## 2026-08-16e — `pump_grad` × `kz` is NOT degenerate; the pump-ON decision is taken, its wiring is staged, and 7 tests block it
+
+`calibration/diag_pump_kz_degeneracy.R` (NEW, ~15 min), `DESIGN.md` §5.2h.
+
+**THE PREREQUISITE, PASSED.** §5.2g profiled `pump_grad` with all 19 parameters held — the
+condition under which a new parameter always looks best. Over the whole `kz` bracket [3830, 6200]:
+**ρ = −0.167**, and `pump_grad`'s marginal σ is **1.01×** its conditional σ (13.0 vs 12.8). Fitting
+it buys a direction `kz` cannot supply, exactly as the structural result (transport cannot move the
+DIC/δ¹³C gradients) predicts. At `kz` = 6200 — where the posterior actually sits — the optimum is
+**270.7**, within **1.4 %** of the 1-D profile's 274.5.
+
+**TWO INTERNAL CHECKS FELL OUT FREE.** `ocean_grad_alk` is *exactly* `kz`-independent across every
+column (it reads the export field alone), and the ocean sink is identical down every pump column at
+fixed `kz` — the zero-uptake property holding across the whole bracket, not just at one mode. Also
+verified directly at DEFAULT parameters: pump ON vs OFF gives CO₂(2024) identical to **2.0e−08 ppm**
+and 1750–2024 uptake identical to **1.2e−07 GtC**, while adding **+3,457 GtC** of preindustrial
+interior inventory.
+
+**A PREDICTION OF MINE CAME BACK UNRESOLVED, NOT FALSE, AND THE FILE NOW SAYS SO.** P3 predicted the
+optimum would move < 15 % across the bracket. Three of four `kz` columns peaked at the **top of my
+pump grid**, so their optima are lower bounds and the first run's "20.2 % — FAIL" was a property of
+the grid, not the model. Rather than widen the grid, part 5 measures the mechanism: at `kz` = 3830,
+`pump_grad` 290 → 335 gains **+34.1 on atmospheric radiocarbon** while the three gradient rows
+**lose** 5.2 — an under-ventilated column uses the constant-mass pump as a **bomb-¹⁴C sink**. Real,
+and off the posterior's support: at `kz` = 6200 the same channel changes sign.
+
+**P2 HELD.** `kz` prefers the bracket's top with the pump both OFF and ON; the pump makes deep water
+older at every `kz`, which at 6200 moves that row toward its target (+1.60 → +1.15). The bracket was
+bisected at default parameters on a model with **no pump**, on the very row the pump moves — it is a
+refit question, not something to inherit.
+
+**MARCUS'S DECISION (2026-08-16d): the pump ships ON, and `pump_grad` is FITTED** with its prior
+anchored on the observed 233.109. Wiring written: `PUMP_GRAD_OBS` in `constants.R` (with the
+observed value, not §5.2g's fitted 274.5 — that is a fit at a `kz` the refit will move), the
+default in `model.R`, and the 20th `CCX_PARAM_TABLE` entry, `tr = "log"`,
+`dlnorm(log(PUMP_GRAD_OBS), 0.25)`. The prior mildly double-counts GLODAP and says so in place:
+its ±25 % width is ~4.5× the likelihood's own 13.1 µmol/kg.
+
+**THE WIRING IS NOT COMMITTED, AND THAT IS THE POINT.** Pump-ON takes the suite **4 → 19 failing
+expectations across 11 tests**. Attributed by running the full suite at HEAD and with the change:
+the **4 are pre-existing and unchanged**; **7 tests are new**. One of the seven pre-declares this
+event in its own comment and fails at exactly 233.109 — the pump installing precisely the gradient
+it names. **No test was edited.** Two of the seven — "single derivative agrees to roundoff" and
+"the pro-rata land-use debit agrees to roundoff" — could be a genuine parity break rather than a
+stale expectation, and are the first thing to diagnose.
+
+**ONE MIS-ATTRIBUTION OF MINE, CORRECTED BY MEASUREMENT.** I first read the `test-luc-permanence.R`
+failures as caused by the pump, since a constant-mass pump should not move a fossil pulse's airborne
+fraction. Measured at `pump_grad = 0`: af = **0.1513** at lag 100, **identical to the pump-ON arm at
+every lag** (1, 10, 50, 100, 150, 250 yr). They were already failing at HEAD. The property was never
+in question; my attribution was.

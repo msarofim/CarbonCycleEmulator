@@ -804,6 +804,65 @@ the share.
 parameter, and whether the pump ships ON at all. The profile says it *is* identifiable (σ ≈ 13 on
 a value of ≈ 274, ~4.8 %) — it does not say which way to take the decision.
 
+### 5.2h `pump_grad` × `kz`: not degenerate, and the pump ships ON as parameter 20 (2026-08-16d)
+
+`calibration/diag_pump_kz_degeneracy.R`, ~15 min. The prerequisite to fitting `pump_grad`: §5.2g
+profiled it with all 19 parameters **held**, which is the condition under which a new parameter
+always looks best. `kz` is the rival — the export field is solved against the model's own
+diffusion, so the pump's size is a statement about `kz` (§5.2c) — and the two meet on a third row,
+deep Δ¹⁴C, which is the row `kz`'s hard bracket [3830, 6200] exists to protect.
+
+**They are not degenerate.** Over the whole `kz` bracket × `pump_grad` ∈ {200 … 335}, the local
+Hessian gives **ρ = −0.167**, and the marginal σ of `pump_grad` is **1.01×** its conditional σ
+(13.0 vs 12.8 µmol/kg). Fitting `pump_grad` buys a direction `kz` cannot supply — which is what
+`diag_ocean_candidates.R`'s structural result (transport **cannot** move the DIC/δ¹³C gradients)
+predicts. The `ocean_grad_alk` row is **exactly** `kz`-independent across every column, and the
+ocean sink is identical down every pump column at fixed `kz` — the zero-uptake property holding
+across the whole bracket, not just at the mode.
+
+**At the `kz` the posterior occupies, `pump_grad` reproduces the 1-D profile**: 270.7 at `kz` =
+6200, against §5.2g's 274.5 at `kz` = 6119 — 1.4 % apart.
+
+**A prediction of mine came back UNRESOLVED rather than false, and the file says so.** P3 predicted
+the optimum would move < 15 % across the bracket; three of the four `kz` columns peaked at the
+**top of my pump grid**, so their optima are lower bounds and the "20.2 % spread" the first run
+printed was a property of the grid. Part 5 measures the mechanism instead of leaving it: at
+`kz` = 3830, raising `pump_grad` 290 → 335 gains **+34.1 on atmospheric radiocarbon**
+(`d14c_NH` +17.9, `d14c_SH` +16.2) while the three gradient rows **lose** 5.2. Mode N moves no
+carbon into the ocean but it does carry ¹⁴C down, so an under-ventilated column uses the pump as a
+**bomb-¹⁴C sink**. Real entanglement, and **off the posterior's support** — at `kz` = 6200 the same
+channel changes sign (−3.3).
+
+**P2 held: the pump does not release `kz`.** It prefers the bracket's top with the pump both OFF
+and ON. The pump makes deep water **older** at every `kz` (z_deep14 falls in every column), which
+at `kz` = 6200 moves that row *toward* its target (+1.60 → +1.15). **The bracket is therefore a
+refit question**: it was bisected at the default parameters on a model with no pump, and the pump
+moves the very row the bisection was built on.
+
+**THE DECISION IS TAKEN; THE WIRING IS STAGED, NOT COMMITTED.** Turning the pump on by default
+takes the suite from **4 failing expectations to 19** (11 tests). Four of those are the
+pre-existing failures, unchanged. The other seven are tests that encode the pump-OFF world —
+including one whose own comment pre-declares this exact event ("if this test ever fails, either a
+pump has landed (expected) or something is leaking carbon into the interior (not)"), which fails at
+exactly 233.109. **They have not been touched**: re-expressing a test so a model change passes is
+the move that hides regressions, and two of the seven ("single derivative agrees to roundoff", "the
+pro-rata land-use debit agrees to roundoff") could be a genuine parity break rather than a stale
+expectation. The default therefore still reads `pump_grad = 0` on the committed branch until those
+seven are re-derived deliberately.
+
+**THE DECISION (Marcus 2026-08-16d), on §5.2g plus the above:**
+
+1. **The pump ships ON.** `pump_grad` defaults to `PUMP_GRAD_OBS` = **233.109** — the *observation*,
+   not §5.2g's fitted 274.5, which is a fit at a `kz` the refit will move. `pump_grad = 0` still
+   turns the pump fully off and bit-reproduces every pre-2026-08-16 result.
+2. **`pump_grad` is FITTED** — the 20th parameter, `tr = "log"`, prior
+   `dlnorm(log(PUMP_GRAD_OBS), 0.25)`. Everything else about the pump stays structural: the export
+   shape is GLODAP's own profile, the carbonate share is pinned by GLODAP's alkalinity gradient.
+3. **The prior mildly double-counts GLODAP and this is stated, not hidden.** Its centre is the same
+   observation `ocean_grad_dic` scores. The ±25 % width is ~4.5× the likelihood's own 13.1 µmol/kg,
+   so the data dominate — but check the posterior against the prior before calling a pump magnitude
+   "constrained".
+
 ### 5.3 Sampler
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and

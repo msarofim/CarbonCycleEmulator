@@ -1,0 +1,157 @@
+GATE A: h_ml = 100 m inside [85, 120]; all three rows LIVE.
+
+
+=== PART 0. THE OPERATING POINT ===
+MODE (pre-gradient, quarantined). Its OWN kz = 6119.25, which is 96.6 % up
+the bracket [3830, 6200] that calibrate.R enforces. h_ml 183.95 -> 100 forced.
+grid: pump_grad 0, 200, 245, 290, 335  x  kz 3830, 4620, 5410, 6200
+
+
+=== PART 1. THE 2-D SURFACE ===
+  pump_grad    0.0  kz   3830       0 s
+  pump_grad  200.0  kz   3830       0 s
+  pump_grad  245.0  kz   3830       0 s
+  pump_grad  290.0  kz   3830       0 s
+  pump_grad  335.0  kz   3830       0 s
+  pump_grad    0.0  kz   4620       0 s
+  pump_grad  200.0  kz   4620       0 s
+  pump_grad  245.0  kz   4620       0 s
+  pump_grad  290.0  kz   4620       0 s
+  pump_grad  335.0  kz   4620       0 s
+  pump_grad    0.0  kz   5410       0 s
+  pump_grad  200.0  kz   5410       0 s
+  pump_grad  245.0  kz   5410       0 s
+  pump_grad  290.0  kz   5410       0 s
+  pump_grad  335.0  kz   5410       0 s
+  pump_grad    0.0  kz   6200       0 s
+  pump_grad  200.0  kz   6200       0 s
+  pump_grad  245.0  kz   6200       0 s
+  pump_grad  290.0  kz   6200       0 s
+  pump_grad  335.0  kz   6200       0 s
+
+FULL logL   (rows = pump_grad, cols = kz)
+               3830     4620     5410     6200
+         0  -5883.1  -4220.8  -3235.5  -2707.8
+       200  -5450.6  -3865.8  -2944.5  -2470.4
+       245  -5395.0  -3827.2  -2919.6  -2457.1
+       290  -5352.7  -3801.5  -2907.5  -2456.3
+       335  -5322.6  -3787.9  -2907.3  -2467.1
+
+the THREE gradient rows only   (rows = pump_grad, cols = kz)
+               3830     4620     5410     6200
+         0   -244.2   -233.7   -225.1   -217.9
+       200    -27.1    -24.0    -21.7    -19.9
+       245    -12.2    -10.6     -9.6     -8.9
+       290     -7.7     -7.6     -7.8     -8.1
+       335    -12.9    -14.2    -15.6    -16.9
+
+z of deep D14C -- the row kz's bracket exists to protect   (rows = pump_grad, cols = kz)
+               3830     4620     5410     6200
+         0    -3.95    -1.55     0.23     1.60
+       200    -4.21    -1.83    -0.06     1.29
+       245    -4.26    -1.89    -0.13     1.22
+       290    -4.32    -1.95    -0.20     1.15
+       335    -4.38    -2.02    -0.27     1.08
+
+z_DIC   (rows = pump_grad, cols = kz)
+               3830     4620     5410     6200
+         0   -11.24   -11.18   -11.14   -11.09
+       200    -3.31    -3.26    -3.22    -3.17
+       245    -1.53    -1.48    -1.43    -1.39
+       290     0.25     0.30     0.35     0.39
+       335     2.03     2.09     2.13     2.17
+
+z_d13C   (rows = pump_grad, cols = kz)
+               3830     4620     5410     6200
+         0    18.22    17.67    17.20    16.81
+       200     5.44     4.88     4.41     4.02
+       245     2.88     2.32     1.86     1.46
+       290     0.42    -0.14    -0.60    -0.99
+       335    -1.94    -2.50    -2.96    -3.35
+
+z_ALK   (rows = pump_grad, cols = kz)
+               3830     4620     5410     6200
+         0    -4.09    -4.09    -4.09    -4.09
+       200    -0.40    -0.40    -0.40    -0.40
+       245     0.43     0.43     0.43     0.43
+       290     1.26     1.26     1.26     1.26
+       335     2.10     2.10     2.10     2.10
+
+ocean sink 2010-2019, GtC/yr   (rows = pump_grad, cols = kz)
+               3830     4620     5410     6200
+         0    2.498    2.659    2.799    2.925
+       200    2.498    2.659    2.799    2.925
+       245    2.498    2.659    2.799    2.925
+       290    2.498    2.659    2.799    2.925
+       335    2.498    2.659    2.799    2.925
+
+
+=== PART 2. THE RIDGE -- P3 ===
+        kz best pump_grad as a scale
+      3830          335.0      1.437   AT A GRID EDGE
+      4620          335.0      1.437   AT A GRID EDGE
+      5410          335.0      1.437   AT A GRID EDGE
+      6200          270.7      1.161
+
+P3: UNRESOLVED. 3 of 4 kz columns peak at the top of the pump grid (335),
+    so their optima are LOWER BOUNDS and the spread below is my grid's, not
+    the model's. Part 5 measures WHY they run away; the resolved column is
+    kz = 6200, and it is the one the posterior actually occupies (P2).
+    apparent spread across the bracket: 20.2 % (NOT a verdict)
+
+
+=== PART 3. THE HESSIAN AND THE CORRELATION -- P1, THE DECISION ===
+quadratic fit R^2 = 0.9995 on 16 pumped cells
+Hessian negative definite: TRUE  (eigenvalues -16.06, -735.56)
+
+rho(pump_grad, kz) = -0.167
+sd(pump_grad):  conditional on kz  12.8   marginal  13.0  (inflation 1.01x)
+
+P1 VERDICT: |rho| = 0.17 < 0.8 -- NOT near-degenerate. Fitting pump_grad buys a
+  direction kz cannot supply, which is what the decision assumed.
+
+
+=== PART 4. DOES THE PUMP MOVE WHERE kz WANTS TO SIT? -- P2 ===
+        kz     logL OFF    logL best    z_d14 OFF   z_d14 best
+      3830      -5883.1      -5322.6        -3.95        -4.38
+      4620      -4220.8      -3787.9        -1.55        -2.02
+      5410      -3235.5      -2907.3         0.23        -0.27
+      6200      -2707.8      -2456.3         1.60         1.15
+
+kz preferred with the pump OFF: 6200   with the pump ON: 6200
+P2 said the pump makes the UPPER bound MORE binding. CONSISTENT -- kz still pins to the top of the bracket.
+
+EITHER WAY THE BRACKET IS A REFIT QUESTION: it was bisected at the DEFAULT
+parameters on a model with NO pump, and the pump moves the very row
+(deep D14C) the bisection was built on. Re-derive it at the refit rather
+than inherit it -- calibrate.R's own comment asks for exactly that.
+
+
+=== PART 5. WHY THE LOW-kz COLUMNS RUN AWAY -- the stream that pays ===
+
+kz 3830 : pump_grad 290 -> 335, total +30.1
+   d14c_NH                      +17.9
+   d14c_SH                      +16.2
+   d13c_level_MLO                +0.8
+   d13c_level_SPO                +0.6
+   ocean_grad_alk                -1.4
+   ocean_grad_d13c               -1.8
+   ocean_grad_dic                -2.0
+
+kz 6200 : pump_grad 290 -> 335, total -10.8
+   d13c_level_MLO                +0.6
+   d14c_NH                       -0.8
+   ocean_grad_alk                -1.4
+   ocean_grad_dic                -2.3
+   d14c_SH                       -2.5
+   ocean_grad_d13c               -5.1
+
+READ: at the bracket's BOTTOM the extra pump is bought by ATMOSPHERIC
+RADIOCARBON, not by the gradient rows -- which LOSE. Mode N moves no carbon
+into the ocean (the sink row is identical down every column above), but it
+does carry 14C down, so an under-ventilated column uses the pump as a bomb-14C
+sink. That is a real entanglement and it is OFF THE POSTERIOR'S SUPPORT: kz
+pins to the bracket's TOP (P2), and there the same channel changes sign.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pump_kz_degeneracy/diag_pump_kz_degeneracy.rds
