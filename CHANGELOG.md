@@ -5010,3 +5010,78 @@ FALSE. Guarded with `length(v) == 1L`, which also keeps the absence contract: a 
 does not supply is **absent**, not zero.
 
 **logL moves by another −12.25 log-units** and is again incomparable with runs before tonight.
+
+---
+
+## 2026-08-16 (night, later) — TASK 9: the pump is PORTED into both cores, OFF by default — and the port caught a 15 % sampling bias in the shim's export
+
+Marcus: start the port. It is in `R/model.R` + `src/ccx_core.cpp`, not a shim over `ccx_deriv()`.
+
+**OFF BY DEFAULT, AND OFF MEANS BIT-REPRODUCED.** `pump_grad = 0` → `aux$pump` is NULL → not one
+line of pump code runs. Same contract `w_up = 0` has carried since 2026-08-13, and the whole
+suite is the gate: **4 failing / 858 passing**, the same pre-existing four (was 4 / 767).
+
+| parameter | default | what it is |
+|---|---|---|
+| `pump_grad` | **0** | preindustrial bottom-minus-ML DIC gradient held, µmol/kg |
+| `pump_carb_frac` | **0.23** | carbonate share, **pinned by the alkalinity gradient**, not fitted |
+| `pump_mode` | `"N"` | nutrient- vs DIC-limited; **both ported, choice deferred to the refit** |
+
+**Still zero fitted parameters in the export field.** It is solved as the source that makes
+GLODAP's observed DIC shape an exact steady state of the model's own diffusion operator. The
+shape moved into a build product (`dic_profile`, fixed bins, 25 m near the surface) and is
+integrated onto whatever layers a draw asks for — re-binning 50,634 bottles per likelihood
+evaluation was never an option. `pump_grad` is **re-normalised on each grid's own layers**, so it
+delivers exactly the gradient it names (without that step 233.109 landed at 235.7).
+
+**Emitted through `add_flux()` rather than by touching `dy`** — conservative by the same
+construction as every other flux, isotopes at the source ratio, and it appears in the flux trace
+as its own `pump` channel. The shim could do none of this and errored under `record = TRUE`.
+
+**Verified**: R↔C++ parity **~1e-15** in both modes; spinup still an exact fixed point (the Newton
+branch now fires on the pump as well as the conveyor); `pump_grad` delivered exactly across
+`h_ml` ∈ {85, 100, 120} × three magnitudes; and the pre-registered **zero-uptake property** of a
+constant-mass pump is now a standing test rather than a diagnostic's one-off finding.
+
+**THE PORT CAUGHT A REAL BIAS IN THE SHIM, and my first diagnosis of it was WRONG.** Port parity
+(`calibration/diag_pump_port_parity.R`) agrees to **0.66 % on every row the likelihood scores**
+(DIC 0.00 %, δ¹³C 0.66 %, deep Δ¹⁴C 0.23 %) but the **export** disagreed by 28 %. I assumed the
+fixed-bin profile was too coarse near the surface and refined it — 250 m → 50 m → 25 m moved the
+disagreement **28 % → 8.8 % → 15.2 %**, *not* monotonically toward the shim, which is what said
+the diagnosis was wrong rather than under-resolved.
+
+**Measured cause.** Total export is the diffusive flux across the topmost interface alone (the sum
+telescopes), so it is set by the **mixed layer's mean DIC**. The shim's `dg_bin()` assigns cells by
+`floor(depth/250)`, so all of 0–100 m is **one cell** and its mean is weighted by **bottle
+density** — and GLODAP over-samples the shallowest water, where DIC rises fastest (25 m sub-bin
+means run 2017.7 → 2083.9 across 0–100 m). The shim's ML is therefore **10.04 µmol/kg too low**
+(2038.29 vs a thickness-weighted **2048.33**), its ML-to-box-1 gradient too steep, and its
+required export **~15 % too high**. A model mixed layer is a well-mixed slab, so the
+thickness-weighted value is correct and the **port is the better estimator, not the deviant one**.
+
+**CONSEQUENCE — numbers reported earlier today are corrected.** The shim's export figures (20.6
+GtC/yr at defaults, 25.2 at the pre-gradient mode, 30.3 at g\*) are high by ~15 %; at defaults the
+port gives **17.4**, and the literature-POC ratio is nearer **3.1×** than the 3.6× quoted in
+DESIGN §5.2c. The mode and g\* figures have not been re-measured. **No row the likelihood scores
+is affected** — those agree to 0.66 %.
+
+**As shipped** (`pump_grad` 233.109, h_ml 100, 23 % carbonate): z_DIC −1.79, z_δ¹³C **+2.02**,
+z_ALK **+0.21**. The carbonate limb is doing its job — the same DIC gradient costs δ¹³C −0.636
+against the single limb's −1.132. **The alkalinity row is no longer a constant**: it is read off
+`spin$aux$pump`, the same field the derivative integrated, so it cannot be scored against a pump
+the run did not use.
+
+**Two test-infrastructure fixes made along the way.** `skip_if_no_cpp()` was defined in
+`test-climate.R`, so it existed only for files testthat happened to run *after* that one and
+`test_file()` on any other file failed outright — moved to `setup.R`. And the provisional-constants
+**ledger** in `test-constants.R` failed on the two new fractionations, which is the ledger doing
+its job; updated deliberately.
+
+**One test of mine was wrong twice, both kept visible.** I asserted mode N and mode D differ at
+the preindustrial state — they are **identical** there, because the mixed layer holds exactly
+`ml_C0` and the DIC-limited scaling is 1; they diverge only once it is loaded, which is the
+mechanism. And the corrected version asserted equality to 1e-14 when the Newton spinup lands the
+ML on `ml_C0` to ~1e-7 GtC, making the scaling 1 + O(1e-11). Both now assert what is actually true.
+
+**NOT DONE:** the refit (task 8). And `pump_grad`'s value is still a DESIGN decision, not a
+default's to make — the observed gradient is 233.1, the transient rows want ~1.20× that.

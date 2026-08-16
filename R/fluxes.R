@@ -47,6 +47,7 @@ CCX_FLUX_CHANNELS <- c(
   as_down  = "Air to sea (gross)",
   as_up    = "Sea to air (gross)",
   ml_int   = "Surface ocean to deep (net)",
+  pump     = "Biological pump (export)",
   int_exch = "Interior ocean exchange (gross)",
   conv_ml  = "Conveyor surface limb",
   ihx_NS   = "Atmosphere NH to SH (gross)",

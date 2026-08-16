@@ -54,7 +54,14 @@ test_that("provisional constants are reported, not silently used", {
   # D14C_PI was RETIRED from this list on 2026-08-10 (IntCal20 supplied +2.16
   # per mil, replacing a 0-by-construction placeholder). The ledger failing on a
   # retirement is the intended behaviour -- it forces the update to be deliberate.
+  # ADDED 2026-08-16 with the biological pump (task 9): the two 13C
+  # fractionations on the export limbs. Both are recollected working values --
+  # ~20-22 permil depletion for marine organic matter, a small positive offset
+  # for biogenic CaCO3 -- and neither has a citation yet. They are the pump's
+  # only uncited numbers: its export FIELD is solved from GLODAP and its
+  # carbonate SHARE is pinned by GLODAP's alkalinity gradient.
   expect_setequal(prov, c("OCEAN_AREA_NH", "OCEAN_AREA_SH", "OCEAN_DEPTH",
-                          "ALK_SURFACE", "RHO_SEAWATER", "NPP_GLOBAL_PI",
+                          "ALK_SURFACE", "PUMP_EPS13_ORG", "PUMP_EPS13_CARB",
+                          "RHO_SEAWATER", "NPP_GLOBAL_PI",
                           "SST_PCO2_SENSITIVITY"))
 })

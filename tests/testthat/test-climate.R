@@ -8,11 +8,8 @@
 # FaIR's own forcing, and (c) leave the observational period alone.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
+# skip_if_no_cpp() moved to setup.R on 2026-08-16 -- defined here it existed
+# only for files that ran after this one.
 skip_if_no_climate <- function() {
   if (!file.exists(ccx_path("data", CLIMATE_MODULE_FILE)))
     skip("climate module not built (data-raw/build_climate_module.R)")

@@ -73,6 +73,15 @@ struct Aux {
                            // interhemispheric limbs are the only fluxes where
                            // it does not cancel between source and sink
   int carb_iter;
+  // THE BIOLOGICAL PUMP (task 9, 2026-08-16). Export field per hemisphere per
+  // interior box, GtC/yr, SOLVED in R (ccx_pump_export) rather than here: it is
+  // a property of the parameter draw, not of the timestep, so re-deriving it in
+  // the inner loop would be pure waste. `pump_on` 0 emits nothing at all, so the
+  // no-pump model is bit-reproduced -- the same contract w_up = 0 carries.
+  int pump_on;
+  double pump_org[2][NL], pump_carb[2][NL];
+  double ml_C0[2];                  // preindustrial ML carbon, DIC-limited mode
+  double alpha_pump_org, alpha_pump_carb;   // 13C fractionation, per limb
 };
 
 // FERTILISATION FORM. Mirrors CCX_FERT_LOG / CCX_FERT_MM in R/model.R; the two
@@ -94,6 +103,9 @@ struct Par {
   // Mirrors R/model.R's ccx_conveyor_geom(); the two must agree exactly.
   double q_conv;
   int conv_sink, conv_descent, conv_reverse;
+  // Pump export law: 0 = nutrient-limited (mass fixed), 1 = DIC-limited (export
+  // scales with the mixed layer's carbon). Mirrors R/model.R's `pump_mode`.
+  int pump_mode;
   double npp_leaf_frac, tau_leaf, tau_wood;
   double litter_slow_frac, tau_soil_fast, tau_soil_slow;
   double npp_veg_frac, ra_ratio;
@@ -312,6 +324,23 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       }
     }
 
+    // the biological pump: mixed layer -> every interior box, TWO LIMBS that
+    // differ only in their 13C signature. Soft tissue is ~20 permil DEPLETED
+    // relative to the DIC it is fixed from, biogenic CaCO3 slightly ENRICHED,
+    // and the carbonate share is pinned by GLODAP's alkalinity gradient rather
+    // than fitted (DESIGN sec.5.2d). 14C rides both limbs UNFRACTIONATED, by the
+    // Stuiver-Polach convention -- which is what add_flux already does.
+    // pump_on = 0 emits nothing, so the no-pump model is bit-reproduced.
+    if (A.pump_on) {
+      const double sc = (P.pump_mode == 1)
+        ? y[IX(iml, C)] / A.ml_C0[hi] : 1.0;
+      for (int kk = 0; kk < NL; ++kk) {
+        const int b = base + IML + 1 + kk;
+        add_flux(iml, b, A.pump_org[hi][kk] * sc, A.alpha_pump_org);
+        add_flux(iml, b, A.pump_carb[hi][kk] * sc, A.alpha_pump_carb);
+      }
+    }
+
     // overturning: uniform upwelling through every interface plus a polar
     // sinking limb from the mixed layer straight to the bottom box. Bulk water
     // transport, so it goes through add_flux at the source box's ratio -- see
@@ -446,6 +475,15 @@ static Aux unpack_aux(const List& a) {
   v = a["a_oc"];       A.a_oc[0] = v[0];       A.a_oc[1] = v[1];
   A.t_centre = a["t_centre"]; A.t_scale = a["t_scale"]; A.boron = a["boron"];
   A.carb_iter = a["carb_iter"];
+  A.pump_on = a["pump_on"];
+  A.alpha_pump_org = a["alpha_pump_org"]; A.alpha_pump_carb = a["alpha_pump_carb"];
+  v = a["ml_C0"]; A.ml_C0[0] = v[0]; A.ml_C0[1] = v[1];
+  // Sent FLAT, 2 x NL in hemisphere-major order, and zero-filled when the pump
+  // is off so a stale draw cannot leave a live field behind.
+  v = a["pump_org"];
+  for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_org[h][k] = v[h * NL + k];
+  v = a["pump_carb"];
+  for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_carb[h][k] = v[h * NL + k];
   return A;
 }
 
@@ -465,6 +503,7 @@ static Par unpack_par(const List& p) {
   P.q_conv = p["q_conv"];
   P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];
   P.conv_reverse = p["conv_reverse"];
+  P.pump_mode = p["pump_mode"];
   P.sst_scale = p["sst_scale"]; P.gamma_enso = p["gamma_enso"];
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];

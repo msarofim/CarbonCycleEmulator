@@ -120,6 +120,25 @@ CCX_CONSTANTS <- list(
     source = paste("Surface total alkalinity, held FIXED (alkalinity is near-conserved on",
                    "these timescales). NEEDS a cited global-mean surface value.")),
 
+  # ---- biological pump (task 9) ---------------------------------------
+  # STRUCTURAL, not fitted. The pump's magnitude and its carbonate share live in
+  # ccx_default_params() because a refit might touch them; these two do not.
+  PUMP_EPS13_ORG = list(
+    value = -20, units = "permil",
+    status = "provisional",
+    source = paste("Photosynthetic fractionation of marine organic matter",
+                   "relative to the DIC it is fixed from, ~20-22 permil.",
+                   "WORKING VALUE, recollected, NEEDS a cited source.")),
+
+  PUMP_EPS13_CARB = list(
+    value = 1, units = "permil",
+    status = "provisional",
+    source = paste("Biogenic CaCO3 relative to the DIC it precipitates from --",
+                   "SMALL and POSITIVE, unlike the organic limb. Expressed as a",
+                   "FRACTIONATION, not the ~+2 permil absolute value quoted in",
+                   "calibration/diag_alk_gradient.R: the absolute figure is",
+                   "surface DIC (+1.29 observed) plus this. WORKING VALUE.")),
+
   RHO_SEAWATER = list(
     value = 1025, units = "kg/m3",
     status = "provisional", source = "Working value for surface seawater density."),

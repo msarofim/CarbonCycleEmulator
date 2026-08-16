@@ -463,6 +463,36 @@ ccx_default_params <- function() {
     # Both 0 = the pure-diffusion ocean, exactly.
     w_out_NH  = 0,
     w_out_SH  = 0,
+    # ---- THE BIOLOGICAL PUMP (task 9, ported 2026-08-16 from the shim in
+    # calibration/pump_shim.R) --------------------------------------------
+    # OFF BY DEFAULT, and off means the model is BIT-REPRODUCED: pump_grad = 0
+    # emits no flux at all, exactly as w_up = 0 does above. Every result in this
+    # repo before 2026-08-16 was computed without a pump and stays reproducible.
+    #
+    # `pump_grad` is the PREINDUSTRIAL surface-to-bottom DIC gradient the pump
+    # holds, in umol/kg. The export field is not a parameter: it is SOLVED as the
+    # source that makes the observed profile SHAPE (data/obs_glodap_deep.rds
+    # $dic_profile, a build product) an exact steady state of the model's OWN
+    # diffusion operator, so it scales with `kz` and re-solves on every draw.
+    # The observed gradient is 233.1 umol/kg; the TRANSIENT terms want ~1.20x
+    # that (calibration/diag_pump_vs_gradient_terms.R part 3), and WHICH of those
+    # a refit should use -- or whether this becomes a fitted parameter at all --
+    # is a DESIGN decision, not this default's to make.
+    pump_grad = 0,
+    # Carbonate share of that gradient. PINNED BY OBSERVATION, not fitted:
+    # GLODAP's alkalinity gradient (+78.59 umol/kg) with
+    # d(ALK) = 2 C_carb - (N:C) C_org gives 23 % (diag_alk_gradient.R). The d13C
+    # row independently wants 26 % under transient scoring. Kept as a parameter
+    # rather than a constant because it is the thing the alkalinity row can move.
+    pump_carb_frac = 0.23,
+    # "N" = nutrient-limited, export mass FIXED (the standard steady-pump
+    # assumption, and the one whose zero-uptake property is proved).
+    # "D" = DIC-limited, export scales with the mixed layer's carbon -- the ONLY
+    # way the pump touches uptake. BOTH ARE PORTED AND THE CHOICE IS DEFERRED TO
+    # THE REFIT (Marcus 2026-08-16): mode D gains +195 log-units over N on the
+    # CO2 record with nothing refitted, but a refit has `beta_max` and `kz` free
+    # and could reallocate all of it, so banking it here would be premature.
+    pump_mode = "N",
     # ---- THE CONVEYOR (Marcus 2026-08-13, built after the configuration red
     # team in notes/redteam_2026-08-13_conveyor_configurations.md) ----------
     # NH sinking -> deep interhemispheric flow -> SH upwelling -> surface
@@ -837,6 +867,41 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       add_diffusion(col[kk], col[kk + 1], grid$dz[kk], grid$dz[kk + 1], aux$dz_mid[kk])
     }
 
+    # ---- the biological pump: mixed layer -> interior, per box --------
+    # TWO LIMBS, and the split is an OBSERVATION rather than a knob: GLODAP's
+    # alkalinity gradient pins the carbonate share at ~23 % (DESIGN sec.5.2d).
+    # They differ ONLY in their 13C signature, which is the whole reason both
+    # are needed -- soft tissue is ~20 permil DEPLETED relative to the DIC it is
+    # fixed from, biogenic CaCO3 is slightly ENRICHED. A single-limb pump sized
+    # to the DIC row overshoots the d13C row by 1.37x
+    # (calibration/diag_pump_vs_gradient_terms.R).
+    #
+    # 14C RIDES BOTH LIMBS UNFRACTIONATED, by the Stuiver-Polach convention the
+    # rest of the model uses (DESIGN sec.3.5): Delta14C observations are already
+    # fractionation-corrected. add_flux does exactly that.
+    #
+    # EMITTED THROUGH add_flux, NOT by touching dy: that makes the pump
+    # conservative by the same construction as every other flux here, carries
+    # both isotopes at the SOURCE box's ratio, and puts it in the flux trace
+    # (the shim in calibration/pump_shim.R could do none of these -- it stopped
+    # with an error under record = TRUE).
+    #
+    # `is.null(aux$pump)` emits nothing at all, so the no-pump model is BIT-
+    # reproduced. Same contract as w_up = 0 below.
+    if (!is.null(aux$pump)) {
+      pf <- aux$pump[[h]]
+      # NUTRIENT-LIMITED ("N"): export mass fixed, the standard steady-pump
+      # assumption. DIC-LIMITED ("D"): export scales with the mixed layer's
+      # carbon, the ONLY channel through which the pump touches uptake.
+      sc <- if (identical(p$pump_mode, "D")) y[iml, "C"] / aux$ml_C0[[h]] else 1
+      for (kk in seq_len(grid$nl)) {
+        add_flux(iml, ioc[kk], pf$org[kk] * sc,
+                 alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump")
+        add_flux(iml, ioc[kk], pf$carb[kk] * sc,
+                 alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump")
+      }
+    }
+
     # ---- ocean overturning (advective, NOT a second diffusivity) -----
     # Water upwells through EVERY interface at the same velocity w_up and
     # returns from the mixed layer to the bottom box in one step ("polar
@@ -1046,6 +1111,90 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 # ---------------------------------------------------------------------
 # Precomputed invariants
 # ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# THE BIOLOGICAL PUMP (task 9)
+# ---------------------------------------------------------------------
+# ZERO FITTED PARAMETERS IN THE FIELD ITSELF, which is the pump's whole claim to
+# not being an arbitrary knob. The export profile is SOLVED as the field that
+# makes GLODAPv2's observed DIC SHAPE an exact steady state of the model's own
+# diffusion operator; only the gradient's MAGNITUDE (`pump_grad`) and its
+# CARBONATE SHARE (`pump_carb_frac`, pinned by the alkalinity row) are set from
+# outside, and the shape comes from a build product.
+#
+# THE SOLVE. Steady state needs the source in box k to cancel the diffusive
+# convergence there: S_k = -[F(k-1,k) - F(k,k+1)], F(a,b) = kz (c_a - c_b)/dz_mid.
+# The concentration the diffusion code sees is y_k/dz_k, and y_k is proportional
+# to DIC_k * dz_k, so the layer thickness cancels exactly and this is arithmetic
+# rather than a fit. The sum telescopes, so the TOTAL export leaving the mixed
+# layer is the flux across the topmost interface alone.
+#
+# IT SCALES WITH kz, AND THAT IS A REAL PROPERTY RATHER THAN AN ARTEFACT. A 1-D
+# effective diffusivity standing in for 3-D ventilation also destroys gradients,
+# so holding a given gradient costs more export the larger kz is. At the
+# pre-gradient mode this needs ~25 GtC/yr against a 5-12 GtC/yr literature POC
+# export -- see DESIGN sec.5.2c. Do NOT read the solved export as an estimate of
+# real POC export.
+
+#' The observed DIC profile shape, integrated onto a model grid.
+#'
+#' Returns the layer-mean shape (0 at the mixed layer, 1 at the deepest bin),
+#' length nl + 1. Depth-weighted, so a model layer spanning several observed
+#' bins gets their thickness-weighted mean rather than a point sample.
+ccx_pump_shape <- local({
+  cache <- NULL
+  function(grid) {
+    if (is.null(cache)) {
+      g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_deep.rds")),
+                    error = function(e) NULL)
+      if (is.null(g) || is.null(g$dic_profile)) return(NULL)
+      cache <<- g$dic_profile
+    }
+    pr <- cache
+    zb <- c(0, cumsum(grid$dz))
+    vapply(seq_along(grid$dz), function(k) {
+      a <- zb[k]; b <- zb[k + 1]
+      ov <- pmax(0, pmin(b, pr$bot) - pmax(a, pr$top))   # overlap thickness
+      if (sum(ov) <= 0) return(pr$shape[nrow(pr)])
+      sum(ov * pr$shape) / sum(ov)
+    }, numeric(1))
+  }
+})
+
+#' The pump's export fields, per hemisphere, in GtC/yr into each interior box.
+#'
+#' @return NULL when the pump is off (`pump_grad` == 0) -- and NULL is what makes
+#'   ccx_deriv() emit no flux at all, so the pure-diffusion model is bit-
+#'   reproduced rather than reproduced to within an epsilon. Otherwise
+#'   list(NH = list(org =, carb =), SH = ...).
+ccx_pump_export <- function(p, aux, grid) {
+  if (!isTRUE(p$pump_grad > 0)) return(NULL)
+  shape <- ccx_pump_shape(grid)
+  if (is.null(shape)) return(NULL)
+  # RE-NORMALISE ON THIS GRID'S OWN LAYERS, not on the build product's bins.
+  # The stored shape spans exactly 1 between its first and last BIN, but a model
+  # layer is a thickness-weighted average of several bins, so the bottom LAYER's
+  # mean shape is not 1 (it reads 1.011 at h_ml = 100, which would deliver a
+  # 235.7 umol/kg gradient for a pump_grad of 233.1). Dividing by the realised
+  # span makes `pump_grad` mean exactly what its name says: the model's
+  # preindustrial bottom-box-minus-mixed-layer DIC gradient, directly comparable
+  # with the target the likelihood scores.
+  span <- shape[length(shape)] - shape[1]
+  if (!is.finite(span) || span <= 0) return(NULL)
+  prof <- (shape - shape[1]) / span * p$pump_grad
+  fc <- p$pump_carb_frac
+  out <- lapply(HEMIS, function(h) {
+    kappa <- aux$a_oc[[h]] * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
+    cc <- kappa * prof * 1e-6                                # GtC/m
+    Fi <- p$kz * (cc[-length(cc)] - cc[-1]) / aux$dz_mid     # nl interfaces
+    S <- numeric(grid$nl)
+    for (k in seq_len(grid$nl))
+      S[k] <- -(Fi[k] - if (k < grid$nl) Fi[k + 1] else 0)
+    list(org = S * (1 - fc), carb = S * fc)
+  })
+  names(out) <- HEMIS
+  out
+}
+
 ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   bn  <- ccx_box_names(grid$nl)
   idx <- lapply(HEMIS, function(h) {
@@ -1074,7 +1223,7 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   rev0  <- lapply(HEMIS, function(h) revelle_factor(dic0[[h]], alk, sst_l[[h]]))
   names(rev0) <- HEMIS
 
-  list(
+  aux <- list(
     idx = idx,
     # each hemisphere holds half the atmosphere, so ppm per hemisphere uses half
     gtc_per_ppm_hemi = ccx_const("GtC_PER_PPM") / 2,
@@ -1104,6 +1253,16 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
                          p$litter_slow_frac * p$tau_soil_slow)),
     sst         = list(NH = p$sst_NH, SH = p$sst_SH),
     ml_mass_kg  = lapply(a_oc, function(A) A * grid$h_ml * ccx_const("RHO_SEAWATER")),
+    # Preindustrial mixed-layer CARBON, GtC. Only the DIC-limited pump reads it,
+    # as the denominator of its export scaling, and it is computed here so the
+    # two pump modes cannot disagree about what "preindustrial" means.
+    # setNames, NOT a bare lapply: HEMIS is an unnamed character vector, so
+    # lapply over it returns an UNNAMED list and every `aux$ml_C0$NH` downstream
+    # silently reads NULL. (The neighbouring entries get their names from the
+    # named list they map over; this one has nothing to inherit from.)
+    ml_C0       = stats::setNames(lapply(HEMIS, function(h)
+                    dic0[[h]] * a_oc[[h]] * grid$h_ml * ccx_const("RHO_SEAWATER") /
+                      ccx_const("MOL_C_PER_GtC")), HEMIS),
     # air-sea prefactor: A [m2] * K0 [mol/(kg atm)] * rho [kg/m3] -> GtC/(yr uatm)
     asx = lapply(a_oc, function(A)
       A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC")),
@@ -1139,6 +1298,13 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     a_oc = a_oc,
     grid = grid
   )
+  # THE PUMP IS SOLVED ONCE PER PREPARE, not once per derivative evaluation.
+  # It needs `aux` (areas, dz_mid, mol_per_GtC), so it cannot be built inside the
+  # list above -- and it must not be built inside ccx_deriv(), which runs four
+  # times per RK4 substep. NULL when pump_grad == 0, which is what makes the
+  # pure-diffusion model bit-reproduced rather than reproduced to an epsilon.
+  aux$pump <- ccx_pump_export(p, aux, grid)
+  aux
 }
 
 # ---------------------------------------------------------------------

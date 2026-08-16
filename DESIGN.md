@@ -625,6 +625,15 @@ mode (`kz` 6119), **30.3** for the arm that closes both = **3.6×** the 5–12 G
 POC midpoint. A 1-D effective `kz` standing in for 3-D ventilation also destroys gradients.
 **Never quote the required export as an estimate of real POC export.**
 
+> **CORRECTION 2026-08-16, from the port (§5.2f).** Those four figures are **biased HIGH by
+> ~15 %** and come from the shim, not the shipped pump. The export is set by the mixed layer's
+> mean DIC, and the shim's `dg_bin()` assigns cells by `floor(depth/250)` — so all of 0–100 m
+> is one cell and the mean is weighted by **bottle density**. GLODAP over-samples the shallowest
+> water, where DIC rises fastest, biasing that mean **low** (2038.29 against a thickness-weighted
+> **2048.33**) and the required export high. A model mixed layer is a well-mixed slab, so the
+> thickness-weighted value is the right one. Corrected at defaults: **17.4 GtC/yr**, and the
+> literature ratio is nearer **3.1×** than 3.6×. The mode and g\* figures were not re-measured.
+
 **Clause 3 still flips with the operating point** (as `diag_dic_gradient.R` part 6 found): deep
 Δ¹⁴C z +1.48 → +1.08 at the mode (toward), −1.01 → −1.42 at defaults (away).
 
@@ -700,6 +709,45 @@ constant with ZERO leverage** until a carbonate pump exists. `ccx_model_ocean_al
 returns exactly 0 for every parameter — a model *prediction*, not a placeholder — and a test
 asserts that across `h_ml` × `kz`, because a carbonate pump breaks it on purpose. **Do not quote
 the row as evidence about anything until it is given a pump.**
+
+### 5.2f The pump as PORTED — task 9 (2026-08-16)
+
+Out of `calibration/pump_shim.R` and into both cores. **OFF by default** (`pump_grad = 0`), and
+off means the no-pump model is **bit-reproduced** — the guard is `is.null(aux$pump)`, so not one
+line of pump code runs. Same contract `w_up = 0` already carried.
+
+| parameter | default | what it is |
+|---|---|---|
+| `pump_grad` | **0** (off) | the preindustrial bottom-box-minus-mixed-layer DIC gradient the pump holds, µmol/kg — re-normalised on each grid's own layers so it delivers **exactly** what it names |
+| `pump_carb_frac` | **0.23** | carbonate share, **pinned by GLODAP's alkalinity gradient** (§5.2d), not fitted |
+| `pump_mode` | `"N"` | `"N"` nutrient-limited (mass fixed) / `"D"` DIC-limited. **Both ported, choice deferred to the refit** (Marcus 2026-08-16) |
+
+**Zero fitted parameters in the field itself.** The export profile is still SOLVED as the source
+that makes GLODAP's observed DIC shape an exact steady state of the model's own diffusion
+operator — the shape is now a build product (`obs_glodap_deep.rds$dic_profile`, fixed depth bins,
+25 m to 300 m) integrated onto whatever layers a draw asks for, because re-binning 50,634 bottles
+inside a likelihood evaluation is not an option. The two ¹³C fractionations
+(`PUMP_EPS13_ORG` −20 ‰, `PUMP_EPS13_CARB` +1 ‰) are the pump's **only uncited numbers**.
+
+**Emitted through `add_flux()`, not by touching `dy`** — so it is conservative by the same
+construction as every other flux, carries both isotopes at the source ratio, and appears in the
+flux trace as its own `pump` channel. The shim could do none of these; it stopped with an error
+under `record = TRUE`.
+
+**Verified**: R↔C++ parity to **~1e-15** in both export modes; the spinup remains an exact fixed
+point (the Newton branch now fires on the pump as well as the conveyor); `pump_grad` delivered
+exactly across `h_ml` × 3 values; and the **pre-registered zero-uptake property** — a
+constant-mass pump changes the ocean sink by exactly zero, mode D by construction does not — is
+now a standing test rather than a diagnostic's finding.
+
+**Port parity** (`calibration/diag_pump_port_parity.R`): on the rows the likelihood scores, the
+port and the shim agree to **0.66 %** (DIC 0.00 %, δ¹³C 0.66 %, deep Δ¹⁴C 0.23 %). The **export**
+differs by 15 % and is reported rather than gated — see the correction in §5.2c; the port is the
+better estimator there, not the deviant one.
+
+**As shipped at `pump_grad` = 233.109, h_ml = 100, 23 % carbonate**: z_DIC −1.79, z_δ¹³C **+2.02**,
+z_ALK **+0.21**. The carbonate limb does what it was added for — the same DIC gradient now costs
+δ¹³C −0.636 instead of the single limb's −1.132.
 
 ### 5.3 Sampler
 

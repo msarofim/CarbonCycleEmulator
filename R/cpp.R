@@ -52,13 +52,29 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     cK0 = cc$coefs$K0, cK1 = cc$coefs$K1, cK2 = cc$coefs$K2,
     cKb = cc$coefs$Kb, cKw = cc$coefs$Kw,
     t_centre = cc$t_centre, t_scale = cc$t_scale, boron = cc$boron_total,
-    carb_iter = as.integer(carb_iter)
+    carb_iter = as.integer(carb_iter),
+    # THE PUMP (task 9). Sent FLAT, 2 x NL hemisphere-major, and ZERO-FILLED when
+    # the pump is off -- the C++ reads the array unconditionally into a fixed
+    # buffer, so leaving it unset would hand the core whatever was there before.
+    # `pump_on` is what actually gates the flux, on both sides.
+    pump_on = as.integer(!is.null(aux$pump)),
+    pump_org = if (is.null(aux$pump)) numeric(2 * grid$nl) else
+      c(aux$pump$NH$org, aux$pump$SH$org),
+    pump_carb = if (is.null(aux$pump)) numeric(2 * grid$nl) else
+      c(aux$pump$NH$carb, aux$pump$SH$carb),
+    ml_C0 = c(aux$ml_C0$NH, aux$ml_C0$SH),
+    alpha_pump_org  = 1 + ccx_const("PUMP_EPS13_ORG") / 1000,
+    alpha_pump_carb = 1 + ccx_const("PUMP_EPS13_CARB") / 1000
   )
 }
 
 #' Parameters in the flat form the C++ unpacks (gamma_enso defaults to 0)
 ccx_cpp_par <- function(p) {
   if (is.null(p$gamma_enso)) p$gamma_enso <- 0
+  # Pump export law, added 2026-08-16. Defaulted here as well as in
+  # ccx_default_params() so a parameter list built before the port reaches the
+  # core as the nutrient-limited model rather than as garbage.
+  p$pump_mode <- if (identical(p$pump_mode, "D")) 1L else 0L
   if (is.null(p$revelle_frozen)) p$revelle_frozen <- 0
   # Land-structure parameters added 2026-08-12. Defaulted here as well as in
   # ccx_default_params() so that a hand-built or older parameter list cannot
@@ -115,7 +131,7 @@ ccx_cpp_par <- function(p) {
   }
   p[c("beta", "fert_form", "beta_max", "fert_k",
       "q10", "k_w", "kz", "w_up", "w_out_NH", "w_out_SH", "tau_ex",
-      "q_conv", "conv_sink", "conv_descent", "conv_reverse",
+      "q_conv", "conv_sink", "conv_descent", "conv_reverse", "pump_mode",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
       "npp_veg_frac", "ra_ratio", "f_luc_perm", "f_luc_wood",

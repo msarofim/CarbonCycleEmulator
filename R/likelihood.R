@@ -650,8 +650,16 @@ ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
   if (is.null(gd) || is.null(g3)) return(NULL)
   # Alkalinity needs no epoch: it has no transient in this model (no air-sea
   # flux, no anthropogenic source), so its profile is a steady-state function of
-  # the export field alone. `pump` is NULL until task 9 ships one, and the
-  # function then returns 0 -- the model's actual prediction, not an absence.
+  # the export field alone.
+  #
+  # THE PUMP IS READ OFF THE SPINUP RATHER THAN DEMANDED FROM THE CALLER. Every
+  # caller already hands in `spin`, and `spin$aux$pump` is the SAME field the
+  # derivative integrates -- so the alkalinity row cannot be scored against a
+  # pump the run did not actually use. A caller that passes `pump` explicitly
+  # overrides, which is what the tests use to drive a hand-built field.
+  if (is.null(pump) && !is.null(spin$aux$pump))
+    pump <- list(S_org  = lapply(spin$aux$pump, `[[`, "org"),
+                 S_carb = lapply(spin$aux$pump, `[[`, "carb"))
   list(dic = gd$dic, d13c = g3$d13c,
        alk = ccx_model_ocean_alk_gradient(spin, pump = pump))
 }

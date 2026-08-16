@@ -184,7 +184,13 @@ ccx_spinup <- function(p = ccx_default_params(),
   # No-op when the conveyor is off, so every pre-2026-08-13 result is
   # bit-reproduced, and it is placed HERE because it must use the same p0 and
   # zero forcing the residual diagnostic is measured with.
-  if (!is.null(ccx_conveyor_geom(p, grid)))
+  # THE ANALYTIC EQUILIBRIUM ABOVE IS A UNIFORM COLUMN, and both the conveyor and
+  # the biological pump stop that being a fixed point -- the pump ON PURPOSE,
+  # since holding a non-zero interior gradient is the entire mechanism. Either
+  # one therefore needs the full-state Newton solve. With both off it is a no-op
+  # on an already-exact fixed point, which is why the branch is gated rather than
+  # unconditional: the no-pump, no-conveyor model stays bit-identical.
+  if (!is.null(ccx_conveyor_geom(p, grid)) || !is.null(aux$pump))
     y <- ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0))
 
   nb <- nrow(y)

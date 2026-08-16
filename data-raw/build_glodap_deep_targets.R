@@ -385,8 +385,75 @@ cat(sprintf("carbonate share, COMMENSURABLE (both on the ALK pop):   %.0f %%\n",
 grad$talk <- grad_talk
 grad$tco2_alkpop <- grad_dic_alk    # reported for the ratio; NOT a term
 
+# ---------------------------------------------------------------------
+# THE OBSERVED DIC PROFILE, ON FIXED DEPTH BINS (added 2026-08-16c, task 9).
+# The pump's export field is SOLVED as the source that holds this profile as a
+# steady state of the model's own diffusion operator (calibration/pump_shim.R's
+# dg_export_field). The shim re-bins raw bottles into the MODEL's layers on every
+# call, which is fine for a 15-minute diagnostic and impossible inside a
+# likelihood evaluation. So the profile is built ONCE here, on GRID-INDEPENDENT
+# fixed depth bins, and R/model.R integrates it onto whatever layers a parameter
+# draw asks for.
+#
+# WHY FIXED BINS AND NOT THE MODEL'S LAYERS: the model's layers are a function of
+# h_ml, which is FITTED. A build product that depended on a fitted parameter
+# would be the same hazard the gradient TARGET has (see the h_ml note above) --
+# except here it would also be uncacheable.
+#
+# NORMALISED TO ITS OWN SURFACE, so it carries SHAPE only; the magnitude comes
+# from `pump_grad` at runtime. That keeps the one number a refit might touch out
+# of the build product entirely.
+GD_PROF_DZ <- 250                          # m, the binning already used above
+gd_profile <- function(ok, val) {
+  # 100 m is kept as a bin EDGE so the target's 0-100 m surface band is an exact
+  # union of bins and the mixed layer never straddles one. The last bin is
+  # CLOSED AT THE MODEL'S FLOOR (3500-3700 m), because a profile that stopped at
+  # 3500 would leave the bottom box's top 200 m undefined -- and the bottom box
+  # is exactly the layer the gradient target scores.
+  #
+  # THE TOP 500 m IS BINNED AT 50 m AND THAT IS NOT COSMETIC. The TOTAL export
+  # the pump needs is the diffusive flux across the TOPMOST interface alone (the
+  # sum telescopes), so it is set entirely by the gradient between the mixed
+  # layer and the FIRST interior box -- which is ~66 m thick at h_ml = 100. At
+  # 250 m bins that box and the one below it both read the SAME 100-250 m mean,
+  # which overstates the near-surface gradient and inflated the required export
+  # by 28 % against calibration/pump_shim.R's direct binning
+  # (calibration/diag_pump_port_parity.R). The delivered GRADIENT was unaffected,
+  # which is exactly why this was worth catching: the row the likelihood scores
+  # looked perfect while the pump's physical plausibility check did not.
+  zb <- sort(unique(c(seq(0, 300, by = 25), seq(300, 500, by = 50), 100,
+                      seq(500, GD_MODEL_DEPTH, by = GD_PROF_DZ), GD_MODEL_DEPTH)))
+  do.call(rbind, lapply(seq_len(length(zb) - 1), function(k) {
+    r <- gd_binned(ok, val, zb[k], zb[k + 1])
+    data.frame(top = zb[k], bot = zb[k + 1],
+               n_cells = if (is.null(r)) 0L else r$n_cells,
+               vw = if (is.null(r)) NA_real_ else r$vw)
+  }))
+}
+prof <- gd_profile(okco, "tco2")
+# The deepest bins can be thin on cells; carry the last finite value down rather
+# than emit NA into a field the model will integrate. Reported, not silent.
+if (anyNA(prof$vw)) {
+  cat(sprintf("\nNOTE: %d of %d profile bins have no usable cells; filled from above.\n",
+              sum(is.na(prof$vw)), nrow(prof)))
+  for (i in seq_len(nrow(prof))) if (is.na(prof$vw[i]) && i > 1) prof$vw[i] <- prof$vw[i - 1]
+}
+prof$shape <- (prof$vw - prof$vw[1]) / (prof$vw[nrow(prof)] - prof$vw[1])
+cat("\n\n=== OBSERVED DIC PROFILE (pump export shape; task 9) ===\n")
+cat(sprintf("%-14s %8s %10s %8s\n", "bin m", "cells", "DIC", "shape"))
+for (i in seq_len(nrow(prof)))
+  cat(sprintf("%-14s %8d %10.1f %8.4f\n",
+              sprintf("%.0f-%.0f", prof$top[i], prof$bot[i]),
+              prof$n_cells[i], prof$vw[i], prof$shape[i]))
+cat(sprintf("\nsurface-to-bottom span: %+.2f umol/kg (the gradient target is %+.2f on the\n",
+            prof$vw[nrow(prof)] - prof$vw[1], grad$tco2$target))
+cat("SAME surface band but a >2627.2 m deep band, so the two differ by the deep\n")
+cat("band's extra thickness. The profile carries SHAPE ONLY -- it is normalised --\n")
+cat("so that difference cannot leak into the pump's magnitude.\n")
+
 out <- list(
   gradient = grad,
+  dic_profile = prof,        # pump export shape (task 9); SHAPE only, normalised
   sigma_candidates = c(meas = 3, se_neff100 = r14$deep$sd_w / 10,
                        se_neff20 = r14$deep$sd_w / sqrt(20),
                        se_neff5 = r14$deep$sd_w / sqrt(5),
