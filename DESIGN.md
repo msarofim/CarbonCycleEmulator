@@ -593,6 +593,41 @@ observations' epoch rather than at the run's end. Parity gated to ~1e-13.
 incomparable with every prior run. Expected, not a bug. Note δ¹³C is the **stronger** of the
 two (z +16.5 vs −11.0) and will dominate the pump's fit.
 
+### 5.2c What the shipped terms demand OF THE PUMP (2026-08-16)
+
+`calibration/diag_pump_vs_gradient_terms.R`. Measured at the pre-gradient mode with `h_ml`
+forced to 100 m, through the shipped streams, nothing refitted. **These are design inputs for
+task 9, not results of it — the pump is still a shim over `ccx_deriv()` and the C++ core does
+not know about it.**
+
+**The two rows do not want the same pump.** The DIC row demands the export field × **1.202**,
+the δ¹³C row × **0.874** — **1.37× apart**, so no single export scale closes both. A
+soft-tissue pump (ε = −20) sized to the observed gradient lands z_DIC **−1.87**, z_δ¹³C
+**−2.42**; the pump that closes both needs **ε\* = −14.55 ‰** at **g\* = 1.2021** (z +0.00 /
++0.19, +252.3 log-units against pump-OFF's −2732.9, only +6.4 over plain soft-tissue).
+
+**Do NOT size the fractionation from the observed pair.** The observed (+233.109 µmol/kg,
+−0.8610 ‰) at deep DIC 2273.1 implies ε = **−8.40 ‰** (56 % carbonate). That is the
+**preindustrial** arithmetic and the terms are **transient**: the pump-OFF model starts at
+−47.1 µmol/kg and +1.0167 ‰ at the obs epoch (mixed layer holds C_ant and the Suess signal the
+bottom box has not seen), so the pump must supply **+280.2 / −1.8777**, whose ratio is not the
+observed ratio. An arm at ε = −8.40 is **105.9 log-units worse** on `ocean_grad_d13c` than
+ε = −20. Transient scoring more than halves the carbonate limb: **74 % soft-tissue**, not 44 %.
+
+**The gradient rows cannot choose nutrient-limited vs DIC-limited; the CO₂ record can.** Same ε
+and export field, mode D gains **+441.3** against mode N's **+245.9**, the whole +195.4 being
+CO₂-level streams (sink 2.913 → 3.051 GtC/yr) while both modes move the two gradient rows
+identically. Not evidence for D — a refit has `beta_max` and `kz` free — but the choice must be
+made deliberately in the port, not inherited from the shim.
+
+**The export required is a `kz` statement.** 20.6 GtC/yr at defaults (`kz` 5000), 25.2 at the
+mode (`kz` 6119), **30.3** for the arm that closes both = **3.6×** the 5–12 GtC/yr literature
+POC midpoint. A 1-D effective `kz` standing in for 3-D ventilation also destroys gradients.
+**Never quote the required export as an estimate of real POC export.**
+
+**Clause 3 still flips with the operating point** (as `diag_dic_gradient.R` part 6 found): deep
+Δ¹⁴C z +1.48 → +1.08 at the mode (toward), −1.01 → −1.42 at defaults (away).
+
 ### 5.3 Sampler
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and

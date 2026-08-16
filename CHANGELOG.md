@@ -4810,3 +4810,84 @@ bootstrap SE on equality would test RNG call order, not the estimator).
 **NOT DONE, and it is the other half of the round:** the pump. Handoff §4.5's ordering
 conclusion is terms + pump in the SAME round, then one refit. The terms are the harmless half;
 **the refit still waits for the pump.**
+
+---
+
+## 2026-08-16 (later, night) — §6 item 2 ANSWERED: the DIC pump does NOT close δ¹³C, but it misses by a hair — and the *preindustrial* arithmetic that says otherwise is a trap
+
+`calibration/diag_pump_vs_gradient_terms.R` (new, ~3.5 min), `calibration/pump_shim.R` (new,
+extraction), output in `calibration/output/pump_vs_gradient/`. Handoff `2026-08-16b` §6 item 2:
+the pump was designed against the DIC row, δ¹³C is now the **stronger** term, and nobody had
+checked whether the pump that closes one closes the other. **Scored through the SHIPPED
+streams** — `ccx_ocean_grad_scored()` + `ccx_loglik(ocean_grad = )`, i.e. the transient
+gradient at the observations' epoch on fixed depths at the block-bootstrap σ. These numbers are
+**not** comparable with `diag_dic_gradient.R` part 3's, which scored the spinup's bottom box
+against a preindustrial target under the old `n_eff` = 20 convention.
+
+At the pre-gradient MAP mode's parameters with `h_ml` forced to 100 m (inside the gate; asserted
+before anything runs), nothing refitted:
+
+| arm | export GtC/yr | z_DIC | z_δ¹³C | z_deep¹⁴C | Δ logL |
+|---|---|---|---|---|---|
+| pump OFF | 0 | **−11.10** | **+16.84** | +1.48 | 0 |
+| soft-tissue, ε = −20, sized to the observed gradient | 25.2 | **−1.87** | **−2.42** | +1.08 | **+245.9** |
+| ε = −8.40 (the preindustrial arithmetic's answer) | 25.2 | −1.87 | **+8.47** | +1.08 | +213.0 |
+| ε = 0 (control) | 25.2 | −1.87 | +16.36 | +1.08 | +115.2 |
+| **ε\* = −14.55, g\* = 1.2021 (solved to close both)** | 30.3 | **+0.00** | **+0.19** | +1.00 | **+252.3** |
+
+**VERDICT: NO — and the failure is a FRACTIONATION failure, not a size failure.** The DIC row
+demands the export field × **1.202**; the δ¹³C row demands × **0.874**. They are **1.37× apart**,
+so no single export scale closes both, and 1.37 = 20 / 14.55 is exactly the fractionation gap.
+
+**But the gap is far smaller than the observed pair implies, and that is the finding.** The
+effective fractionation the *observed* pair (+233.109 µmol/kg, −0.8610 ‰, deep DIC 2273.1)
+implies is **−8.40 ‰** — a 2.38× overshoot against soft-tissue's −20, i.e. 56 % carbonate limb.
+Under the shipped **transient** scoring the demand is **−14.55 ‰**, a **74 % soft-tissue share**.
+The reason is that the pump-OFF model does not start at zero gradient at the obs epoch: the
+mixed layer carries anthropogenic carbon and the Suess depletion the bottom box has not seen, so
+the pump must supply **+280.2 µmol/kg and −1.8777 ‰** rather than the observed +233.1 / −0.861 —
+and that ratio is not the observed ratio. **An arm built on the preindustrial arithmetic
+(ε = −8.40) is 105.9 log-units WORSE on `ocean_grad_d13c` than plain soft-tissue.** Designing
+the pump's fractionation from the observed pair alone would have got it badly wrong; this is the
+same trap as §4.4's, one field over.
+
+**Pre-registration scored.** Prediction 1 (naive, preindustrial: δ¹³C overshoots to z ≈ −10.7)
+**WRONG**, as the header expected — and its wrongness is the trap above. Prediction 2 (transient:
+both rows near −2 σ, g\* ≈ 1.19, ε\* ≈ −15) **RIGHT** — measured −1.87 / −2.42, 1.202, −14.55.
+Pump-OFF rows reproduce handoff §2's quoted −11.0 / +16.5 to −11.10 / +16.84.
+
+**A verdict-logic error I wrote, caught by the run itself, kept visible in the file.** I first
+classified the failure by comparing the **signs of the two z**. Both came out negative, which the
+sign test read as "same-sign miss, one export scale fixes both" — the **opposite** of the truth.
+Equal signs of z are opposite corrections here: the DIC target is positive (z < 0 = pump too
+**small**) while the δ¹³C target is negative (z < 0 = **too much** depletion). Replaced with the
+test that actually answers the question — what scale does each row demand of the same field —
+and the trap is documented in the file rather than edited away.
+
+**An unasked-for result, flagged and NOT banked: nutrient-limited vs DIC-limited is not a free
+choice.** Same ε, same export field, mode **D** gains **+441.3** against mode **N**'s +245.9, and
+the whole **+195.4** difference is the CO₂ record (`co2_level_SPO` +107.3, `co2_level_MLO` +93.6,
+`co2_icecore` −9.1); sink 2.913 → 3.051 GtC/yr. **The two gradient rows cannot tell N from D —
+they move identically.** A refit has `beta_max` and `kz` free and could reallocate all of it, so
+this is not evidence for D; it does mean the N/D choice must be made deliberately in the port
+(task 9) rather than inherited from the shim.
+
+**Clause 3 reproduces, including its sign flip.** At the mode the pump moves deep Δ¹⁴C **toward**
+the target (z +1.48 → +1.08, and +1.00 at ε\*/g\*); at defaults it moves **away** (−1.01 → −1.42).
+Same operating-point dependence `diag_dic_gradient.R` part 6 documented.
+
+**The export required is a statement about `kz`, and a large one.** 20.6 GtC/yr at defaults
+(`kz` 5000) vs 25.2 at the mode (`kz` 6119), and **30.3** for the arm that closes both — **3.6×**
+the 5–12 GtC/yr literature POC midpoint. A 1-D effective `kz` standing in for 3-D ventilation
+also destroys gradients, so the pump must work that much harder than the real one. **Do not quote
+the required export as an estimate of real POC export.**
+
+**Refactor, with a bit-identical regression check.** The shim, `dg_export_field()`, `dg_spinup()`,
+`dg_parity_gate()` and the GLODAP profile helpers moved from `diag_dic_gradient.R` into
+`calibration/pump_shim.R` so the two diagnostics cannot drift apart; the only added code is a
+double-source guard (sourcing twice would otherwise capture the already-wrapped `ccx_deriv()` and
+recurse). `diag_dic_gradient.R` re-run end-to-end afterwards: `all.equal()` against the saved
+pre-refactor `.rds` is **TRUE** across all five arms and the `h_ml` profile.
+
+**Still NOT done: the pump itself (task 9).** This measures a shim through the R reference core;
+the C++ core still knows nothing about it, and the refit (task 8) still waits.

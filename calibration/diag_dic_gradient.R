@@ -108,6 +108,11 @@
 
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
+# The pump shim, dg_export_field(), dg_spinup() and dg_parity_gate() were
+# EXTRACTED to calibration/pump_shim.R on 2026-08-16 so that this file and
+# diag_pump_vs_gradient_terms.R cannot drift apart. Byte-for-byte the same code;
+# DG_EPS_ORG below is now an alias for the shim's PUMP_EPS_ORG.
+source(ccx_path("calibration", "pump_shim.R"))
 
 # ---- named constants: every label, window and threshold below derives ----
 DG_YEARS      <- c(1750, 2024)
@@ -116,9 +121,12 @@ DG_H_REF      <- 75                        # m, the model default
 DG_H_MODE     <- 184                       # m, the pre-gradient MAP mode's h_ml
 DG_H_GRID     <- c(50, 75, 100, 140, 184, 220)
 DG_SINK_WIN   <- c(2010, 2019)             # decade for the reported ocean sink
-DG_GLODAP     <- ccx_path("data-raw", "downloads", "glodap_c13c14_subset.csv")
-DG_FLAG_OK    <- 2                         # GLODAP: 2 = acceptable measurement
-DG_DLAT <- 5; DG_DLON <- 10; DG_DZ <- 250  # binning, as build_glodap_deep_targets.R
+# The GLODAP path, flags and binning now live in calibration/pump_shim.R
+# (PUMP_GLODAP, PUMP_FLAG_OK, PUMP_DLAT/DLON/DZ) with the profile helpers that
+# use them. Aliased here so this file's labels still name their own constants.
+DG_GLODAP     <- PUMP_GLODAP
+DG_FLAG_OK    <- PUMP_FLAG_OK
+DG_DLAT <- PUMP_DLAT; DG_DLON <- PUMP_DLON; DG_DZ <- PUMP_DZ
 DG_N_EFF      <- 20                        # the deep-D14C target's convention;
                                            # reused for deep DIC and deep d13C
                                            # so the three rows are commensurable
@@ -126,7 +134,8 @@ DG_N_EFF      <- 20                        # the deep-D14C target's convention;
 # fixed from. THIS IS THE ONE STRUCTURAL CHOICE IN THE FILE AND IT IS RUN BOTH
 # WAYS -- arm N0 sets it to zero, which is the control that shows the deep d13C
 # gradient has the WRONG SIGN without it.
-DG_EPS_ORG    <- -20                       # permil, photosynthetic fractionation
+DG_EPS_ORG    <- PUMP_EPS_ORG              # permil, photosynthetic fractionation
+                                           # (defined in calibration/pump_shim.R)
 # 14C rides the export WITHOUT fractionation, by the same Stuiver-Polach
 # convention the rest of the model uses (DESIGN sec.3.5): Delta14C observations
 # are already fractionation-corrected. This answers handoff 15c sec.5's open
@@ -162,42 +171,9 @@ sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 # =====================================================================
 # PART 1. THE OBSERVED PROFILE, ON THE MODEL'S OWN LAYERS
 # =====================================================================
-# Same volume-weighting as data-raw/build_glodap_deep_targets.R (bin to
-# 5 deg lat x 10 deg lon x 250 m, weight cells by cos(lat)) -- GLODAP bottles
-# over-sample the Atlantic, so a raw bottle mean is biased. The raw mean is
-# printed beside it so the size of that bias stays visible.
-dg_glodap <- utils::read.csv(DG_GLODAP)
-
-dg_bin <- function(val, flag, zmin, zmax) {
-  d  <- dg_glodap
-  ok <- is.finite(d[[val]]) & d[[val]] > -900 &
-        is.finite(d[[flag]]) & d[[flag]] == DG_FLAG_OK &
-        d$depth >= zmin & d$depth < zmax
-  if (sum(ok) < 20) return(list(n = sum(ok), vw = NA_real_, raw = NA_real_,
-                                sd = NA_real_))
-  x    <- d[ok, ]
-  id   <- paste(floor(x$lat / DG_DLAT), floor(x$lon / DG_DLON),
-                floor(x$depth / DG_DZ))
-  cell <- tapply(x[[val]], id, mean)
-  w    <- cos(tapply(x$lat, id, mean) * pi / 180)
-  list(n = sum(ok), n_cells = length(cell), raw = mean(x[[val]]),
-       vw = sum(cell * w) / sum(w), sd = stats::sd(cell))
-}
-
-#' Observed DIC / d13C / D14C on the layers of a given grid
-dg_obs_profile <- function(grid) {
-  zb <- c(0, cumsum(grid$dz))
-  do.call(rbind, lapply(seq_along(grid$dz), function(k) {
-    a <- zb[k]; b <- zb[k + 1]
-    rc <- dg_bin("tco2", "tco2f", a, b)
-    r3 <- dg_bin("c13",  "c13f",  a, b)
-    r4 <- dg_bin("c14",  "c14f",  a, b)
-    data.frame(k = k - 1L, top = a, bot = b,
-               n_dic = rc$n, dic = rc$vw, dic_raw = rc$raw, dic_sd = rc$sd,
-               n_d13 = r3$n, d13 = r3$vw, d13_sd = r3$sd,
-               n_d14 = r4$n, d14 = r4$vw, d14_sd = r4$sd)
-  }))
-}
+# dg_bin() and dg_obs_profile() live in calibration/pump_shim.R, with the export
+# solve that consumes the profile they build. The volume-weighting rationale is
+# documented there.
 
 sep("PART 1. GLODAPv2.2023 ON THE MODEL'S OWN 11 LAYERS")
 grid_ref <- ccx_ocean_grid(DG_H_REF)
@@ -252,17 +228,7 @@ cat("    Only the DEEP D14C row is used as a target, as it already is.\n")
 # flux across the topmost interface -- and THAT is a number with a literature
 # value attached, which makes this a validation and not only a construction.
 
-#' Export field that holds `target_dic` (umol/kg, length nl+1) as a steady state
-#' @return list(S = GtC/yr into each interior box, E = total export, ok = signs)
-dg_export_field <- function(p, aux, grid, h, target_dic) {
-  kappa <- aux$a_oc[[h]] * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC  # GtC/m per (mol/kg)
-  cc    <- kappa * target_dic * 1e-6                                    # GtC/m
-  nl    <- grid$nl
-  Fi    <- p$kz * (cc[-length(cc)] - cc[-1]) / aux$dz_mid               # nl interfaces
-  S     <- numeric(nl)
-  for (k in seq_len(nl)) S[k] <- -(Fi[k] - if (k < nl) Fi[k + 1] else 0)
-  list(S = S, E = sum(S), n_neg = sum(S < 0), min_S = min(S))
-}
+# dg_export_field() lives in calibration/pump_shim.R, sourced at the top.
 
 sep("PART 2. THE IMPLIED EXPORT FLUX -- A FREE VALIDATION")
 aux_ref <- sp_ref$aux
@@ -307,140 +273,9 @@ if (any(vapply(fields, function(f) f$n_neg, integer(1)) > 0))
       "profile's slight mid-depth maximum (1314-1861 m is ~3 umol/kg above the\n",
       "bottom). Reported, not smoothed away; the magnitudes are printed above.\n")
 
-# =====================================================================
-# THE SHIM. No model file is touched.
-# =====================================================================
-.dg <- new.env(parent = emptyenv())
-.dg$on <- FALSE; .dg$S <- NULL; .dg$mode <- "N"; .dg$eps <- DG_EPS_ORG
-.dg$c_ml0 <- NULL
-
-.dg_deriv_base <- ccx_deriv
-ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
-  dy <- .dg_deriv_base(y, t, p, forc, grid, aux, record = record)
-  if (!.dg$on) return(dy)
-  if (record) stop("dic-gradient shim: the flux tap does not see the pump")
-  a13 <- 1 + .dg$eps / 1000
-  for (h in HEMIS) {
-    i   <- aux$idx[[h]]
-    S   <- .dg$S[[h]]
-    # NUTRIENT-LIMITED ("N"): export mass is fixed, as in the standard
-    # steady-pump assumption. DIC-LIMITED ("D"): export scales with the mixed
-    # layer's carbon, which is the ONLY way channel 1 is non-zero.
-    sc  <- if (.dg$mode == "D") y[i$ml, "C"] / .dg$c_ml0[[h]] else 1
-    r13 <- y[i$ml, "C13"] / y[i$ml, "C"]
-    r14 <- y[i$ml, "C14"] / y[i$ml, "C"]
-    E   <- sum(S) * sc
-    dy[i$ml, "C"]   <- dy[i$ml, "C"]   - E
-    dy[i$ml, "C13"] <- dy[i$ml, "C13"] - E * r13 * a13
-    dy[i$ml, "C14"] <- dy[i$ml, "C14"] - E * r14        # no fractionation
-    f <- S * sc
-    dy[i$oc, "C"]   <- dy[i$oc, "C"]   + f
-    dy[i$oc, "C13"] <- dy[i$oc, "C13"] + f * r13 * a13
-    dy[i$oc, "C14"] <- dy[i$oc, "C14"] + f * r14
-  }
-  dy
-}
-
-#' Spinup that ALWAYS runs the full-state Newton solve.
-#'
-#' A NEAR-VERBATIM COPY of ccx_spinup(), with exactly two deltas, both marked
-#' DELTA below. It exists because ccx_spinup()'s analytic equilibrium is a
-#' uniform column, which stops being a fixed point the moment the pump is on,
-#' and the Newton branch it already contains is gated on the conveyor.
-#' THE COPY IS GATED: dg_parity_gate() asserts it reproduces ccx_spinup() with
-#' the pump OFF, and it is run before anything else uses this function.
-dg_spinup <- function(p = ccx_default_params(),
-                      chi0  = ccx_const("CO2_PI_PPM"),
-                      d13c0 = ccx_const("D13C_PI"),
-                      d14c0 = ccx_const("D14C_PI")) {
-  aux <- ccx_prepare(p); grid <- aux$grid; y <- ccx_new_state(grid$nl)
-  for (h in HEMIS) {
-    i <- aux$idx[[h]]
-    y[i$atm, "C"] <- chi0 * aux$gtc_per_ppm_hemi
-    npp0 <- aux$npp0[[h]]
-    y[i$leaf, "C"] <- npp0 * p$npp_leaf_frac * p$tau_leaf
-    y[i$wood, "C"] <- npp0 * (1 - p$npp_leaf_frac) * p$tau_wood
-    y[i$soil_fast, "C"] <- npp0 * (1 - p$litter_slow_frac) * p$tau_soil_fast
-    y[i$soil_slow, "C"] <- npp0 * p$litter_slow_frac * p$tau_soil_slow
-    dic  <- ccx_dic_for_pco2(chi0, ccx_const("ALK_SURFACE"), aux$sst[[h]])
-    y[i$ml, "C"] <- dic * aux$ml_mass_kg[[h]] / aux$mol_per_GtC
-    conc <- y[i$ml, "C"] / grid$dz[1]
-    y[i$oc, "C"] <- conc * grid$dz[-1]
-  }
-  zero_forc <- function(prod = 0)
-    list(e_foss = list(NH = 0, SH = 0), e_luc = list(NH = 0, SH = 0),
-         gmst = 0, enso = 0, c14_bomb = 0, c14_nuclear = 0, c14_cosmo = prod)
-  p0 <- p; p0$gamma_enso <- 0; p0$seas_amp_NH <- 0; p0$seas_amp_SH <- 0
-
-  # DELTA 1: the Newton solve is UNCONDITIONAL, not gated on the conveyor. With
-  # the pump off it is a no-op on an already-exact fixed point (measured
-  # max|dy| 1.0e-07 GtC), which is what the parity gate checks.
-  y <- ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0))
-
-  nb <- nrow(y)
-  iso_operator <- function(tracer, forc) {
-    y0 <- y; y0[, tracer] <- 0
-    b  <- ccx_deriv(y0, 1750, p0, forc, grid, aux)[, tracer]
-    A  <- matrix(0, nb, nb)
-    for (j in seq_len(nb)) {
-      yj <- y0; yj[j, tracer] <- 1
-      A[, j] <- ccx_deriv(yj, 1750, p0, forc, grid, aux)[, tracer] - b
-    }
-    list(A = A, b = b)
-  }
-  # DELTA 2: none in the isotope solves. They invert whatever linear operator
-  # ccx_deriv() presents, and the pump term is linear in the ML's isotope
-  # state, so they pick it up with no change at all.
-  op13  <- iso_operator("C13", zero_forc(0))
-  iatmN <- aux$idx$NH$atm
-  A13 <- op13$A; rhs <- -op13$b
-  A13[iatmN, ] <- 0; A13[iatmN, iatmN] <- 1
-  rhs[iatmN] <- y[iatmN, "C"] * ccx_const("R13_VPDB") * (1 + d13c0 / 1000)
-  y[, "C13"] <- solve(A13, rhs)
-
-  op14 <- iso_operator("C14", zero_forc(1))
-  u    <- solve(op14$A, -op14$b)
-  atm_idx <- c(aux$idx$NH$atm, aux$idx$SH$atm)
-  prod <- sum(y[atm_idx, "C"]) * (1 + d14c0 / 1000) / sum(u[atm_idx])
-  y[, "C14"] <- prod * u
-
-  resid    <- ccx_deriv(y, 1750, p0, zero_forc(prod), grid, aux)
-  deep_idx <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 3)))
-  bot_idx  <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 1)))
-  ocean_idx<- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$ml, aux$idx[[h]]$oc)))
-  P_canon  <- 2.04 * (5.1e14 * 1e4) * 365.25 * 86400 / 6.02214076e23
-  list(y = y, prod_c14 = prod, aux = aux, grid = grid, params = p,
-       diagnostics = list(
-         max_abs_dCdt    = max(abs(resid[, "C"])),
-         max_abs_dC13dt  = max(abs(resid[, "C13"])),
-         max_abs_dC14dt  = max(abs(resid[, "C14"])),
-         co2_ppm         = sum(y[atm_idx, "C"]) / ccx_const("GtC_PER_PPM"),
-         d14c_deep_ocean = 1000 * (sum(y[deep_idx, "C14"]) / sum(y[deep_idx, "C"]) - 1),
-         d14c_bottom_box = 1000 * (sum(y[bot_idx,  "C14"]) / sum(y[bot_idx,  "C"]) - 1),
-         d13c_bottom_box = 1000 * (sum(y[bot_idx, "C13"]) /
-                                     (sum(y[bot_idx, "C"]) * ccx_const("R13_VPDB")) - 1),
-         dic_bottom_box  = sum(y[bot_idx, "C"]) * aux$mol_per_GtC * 1e6 /
-                             sum(vapply(HEMIS, function(h)
-                               aux$a_oc[[h]] * grid$dz[grid$nl + 1] *
-                                 ccx_const("RHO_SEAWATER"), numeric(1))),
-         ocean_C_GtC     = sum(y[ocean_idx, "C"]),
-         prod_c14_mol_yr = prod, prod_canonical = P_canon,
-         prod_ratio      = prod / P_canon))
-}
-
-#' HARD GATE: the copy must reproduce the shipped spinup with the pump off.
-dg_parity_gate <- function() {
-  .dg$on <- FALSE
-  a <- ccx_spinup(); b <- dg_spinup()
-  worst <- max(abs(a$y - b$y)); dp <- abs(a$prod_c14 - b$prod_c14)
-  cat(sprintf("\nPARITY GATE (pump OFF): max|dg_spinup - ccx_spinup| = %.3e GtC over %d states\n",
-              worst, length(a$y)))
-  cat(sprintf("                        |d prod_c14| = %.3e mol/yr\n", dp))
-  if (worst > 1e-6 || dp > 1e-6)
-    stop("dg_spinup() has drifted from ccx_spinup() -- fix the copy before reading anything below")
-  cat("                        PASS -- the copy is the shipped spinup.\n")
-  invisible(TRUE)
-}
+# The shim (.dg, the ccx_deriv() wrapper), dg_spinup() and dg_parity_gate() live
+# in calibration/pump_shim.R, sourced at the top of this file. The gate below is
+# still run HERE, before anything else uses dg_spinup().
 dg_parity_gate()
 
 # =====================================================================
