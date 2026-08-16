@@ -4400,3 +4400,96 @@ reach the target is now measured false.
 - **ENGINE GATE**: cpp and R agree to **7.5e-11** in logL and **0.00e+00** in sink, so the
   C++-scored B1 table and the R-scored A table are commensurable.
 - Suite unchanged: FAIL 4 | PASS 708.
+
+---
+
+## 2026-08-16 — `LIK_D14C_DEEP_NEFF` MEASURED: the asserted 20 survives, the range narrows 15× → ~4×, and it lands ACROSS the decision threshold
+
+`calibration/diag_deep_d14c_neff.R` (new, ~1 min, output
+`calibration/output/deep_d14c_neff/`). Marcus 2026-08-16: measure `n_eff`, don't pick from the
+five asserted candidates. **This file changes nothing** — `LIK_D14C_DEEP_NEFF` is still 20.
+
+**The estimand, written down because the estimators answer different questions.**
+`Var(x̄_w) = σ²·[ΣΣ w_i w_j ρ(d_ij)]/(Σw)²`, so `n_eff = (Σw)²/[ΣΣ w_i w_j ρ(d_ij)]`, which
+collapses to Kish when ρ = δ. Measured on the **build script's own cells** (5°×10°×250 m,
+cos-lat weights), gated to reproduce the shipped target exactly (Δ = 0.00e+00 on both the mean
+and `sd_w`) so σ = `sd_w`/√`n_eff` is the shipped formula with a measured denominator.
+
+### The gate caught a target-definition surprise
+
+The shipped deep target is **everything below 2627.2 m**, not the model's 2627–3700 m box —
+`build_glodap_deep_targets.R` calls `gd_binned(..., zmax = 1e5)`, so bottles *deeper than the
+model's floor* are in it. Restricting to the model's actual box gives **−177.81 ‰ over 1,805
+cells against the shipped −175.26 ‰, i.e. 0.25σ**. Flagged, not changed — it is a target
+definition and it is Marcus'. The gate is what surfaced it; assuming the layer would have
+measured `n_eff` for a different quantity.
+
+### Results
+
+Correlogram (no detrending — the basin gradient is *why* more Atlantic bottles don't pin the
+global mean): **ρ < 0.5 by ~5,500 km, ρ < 0 by ~9,000 km**, reaching −0.37 at 15,000+ km.
+
+| estimator | n_eff | σ (‰) |
+|---|---|---|
+| Kish, weights only (ρ = δ) | 3408 | 0.79 |
+| correlogram ESS, empirical ρ | 110.1 | 4.37 |
+| **correlogram ESS, ρ floored at 0** | **6.4** | **18.15** |
+| block bootstrap, 10° | 148.5 | 3.76 |
+| block bootstrap, 20° | 45.5 | 6.80 |
+| block bootstrap, 30° | 26.0 | 9.00 |
+| block bootstrap, 60° | 11.9 | 13.28 |
+| *asserted incumbent* | *20* | *10.26* |
+
+**The block bootstrap must be read against the decorrelation scale.** A block bootstrap is
+valid only when the block exceeds it; 10° ≈ 1,100 km breaks correlation *inside* its own blocks
+and is biased high, 60° ≈ 6,700 km does not. The monotone decline with block size is the
+expected signature. **The 30–60° rows (12–26) are the methodologically valid ones and also the
+noisiest** (33 and 16 blocks).
+
+**The correlogram estimate is a BRACKET, not a point.** Flooring ρ at 0 moves n_eff **110 → 6.4,
+a factor of 17** — the negative tail does all the work. Which end is right is a question about
+the ocean, not the arithmetic: if the young-Atlantic/old-Pacific contrast is *deterministic
+structure we have sampled*, the global mean is well determined and ~110 is right; if the basins
+are better treated as a handful of exchangeable water masses, ~6 is. **The correlated-mean
+formula is a random-field formula, and this field has large deterministic structure — which is
+exactly where it stops being well posed.** Stated, not resolved.
+
+### What it does to candidate A
+
+A's net is +0.86 log-units at the sigma in use, of which the deep term supplies **+1.43** and
+everything else **−0.57** (σ-independent). Closed form: **A is adopted for any σ < 16.30 ‰,
+i.e. n_eff > 7.9.**
+
+**The measurement brackets that threshold rather than clearing it** — defensible range ~6.4 to
+~26 against a crossover at 7.9. What it *does* settle:
+
+- **Ruled out: the full spread, σ = 45.88 (n_eff = 1)** — the only one of the five original
+  candidates that rejected A. And **Kish's 3408**, which assumes an independence the correlogram
+  refutes outright.
+- **The asserted 20 survives**: inside the measured range, on the adopting side, and
+  conservative relative to the correlogram's unfloored 110.
+- Range narrows from **15× asserted to ~4× measured**.
+- **Every candidate σ still HOLDS `kz`** against the −112.7 ‰ runaway (z 4.7–79.6), so the job
+  the sigma was originally chosen for remains insensitive to all of this.
+
+Leave-one-basin-out: the mean is hostage to the Pacific (44 % of weight, −211.5 ‰; dropping it
+moves the global mean to −146.4). Full leave-one-out span **46.2 ‰**. That is the physical
+reason n_eff is tens rather than thousands.
+
+### Two estimators failed and are recorded rather than dropped
+
+- **The detrended-residual variant returned n_eff = −4630.** A negative effective sample size
+  is not a small n_eff, it is a broken estimator: the interpolated binned empirical ρ is not
+  guaranteed positive semi-definite on a nonstationary field, and the double sum went negative.
+  Now guarded and reported as UNUSABLE.
+- A first version of the correlogram block printed "margin is 0.9 %, so the estimate is not a
+  near-cancellation" — **wrong reasoning**: `S/(Σw)²` *is* `1/n_eff` by construction, so a small
+  ratio is what a large n_eff means, not evidence about robustness. The real robustness check is
+  the floored-vs-unfloored comparison, which is what replaced it.
+
+### Still not measured, and both push σ UP
+
+Model **representation error** (a one-box deep ocean against a field spanning −234 to −87 ‰;
+`R/likelihood.R` records it as deliberately zero) and **unsampled volume** (part 5 has no
+bathymetry denominator). **A measured n_eff sets a CEILING on the term's weight, not the weight
+itself.** Both open questions are Marcus'.

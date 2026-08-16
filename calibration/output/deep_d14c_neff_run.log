@@ -1,0 +1,160 @@
+
+
+=== PART 0. THE CELLS, AND A GATE AGAINST THE SHIPPED TARGET ===
+bottles 8107 -> cells 3592 (5 deg lat x 10 deg lon x 250 m)
+volume-weighted mean  here -175.2563   built rds -175.2563   |d| 0.00e+00
+weighted sd           here 45.8813   built rds 45.8813   |d| 0.00e+00
+PASS -- these are the same cells the shipped target is built from.
+
+IN USE NOW: n_eff = 20 (ASSERTED) -> sigma = 10.26 permil
+
+FOR THE RECORD: the target is everything BELOW 2627.2 m, so bottles deeper
+than the model's 3700 m floor are in it. Restricting to the model's actual
+box gives -177.81 permil over 1805 cells against the shipped -175.26 -- 0.25 sigma.
+Flagged, not changed: it is a target definition, and it is Marcus'.
+
+
+=== PART 1. THE EMPIRICAL CORRELOGRAM (no detrending -- see the header) ===
+     distance km      pairs       rho
+           [0,1)       4708    +0.709   <- same column, different depth bin
+         [1,250)       9993    +0.881
+       [250,500)      12240    +0.928
+     [500,1e+03)      49029    +0.827
+ [1e+03,1.5e+03)      72653    +0.832
+ [1.5e+03,2e+03)     101931    +0.763
+   [2e+03,3e+03)     245840    +0.746
+   [3e+03,4e+03)     299691    +0.643
+   [4e+03,5e+03)     335354    +0.523
+   [5e+03,6e+03)     368411    +0.370
+   [6e+03,8e+03)     847155    +0.126
+   [8e+03,1e+04)     982503    -0.092
+ [1e+04,1.2e+04)     992085    -0.220
+[1.2e+04,1.5e+04)    1252938    -0.280
+[1.5e+04,2.01e+04)     874905    -0.366
+
+rho falls below 0.5 by ~5500 km and goes NEGATIVE by ~9000 km.
+The negative tail is the young Atlantic against the old Pacific. It is
+real, it is KEPT, and it is why the global mean is better determined than
+a positive-only correlation model would say.
+
+
+=== PART 2. ESTIMATORS 1-2: KISH AND THE CORRELOGRAM ESS ===
+estimator                                           n_eff      sigma
+1. Kish, weights only (rho = delta)                  3408       0.79
+2. correlogram ESS (empirical rho)                  110.1       4.37
+2b. same, rho floored at 0 (no anticorrelation)        6.4      18.15
+
+   THE NEGATIVE TAIL DOES ALL THE WORK: flooring rho at 0 moves n_eff
+   110.1 -> 6.4, a factor of 17. Row 2 is therefore NOT a point estimate;
+   rows 2 and 2b are a BRACKET, and which end is right is a question about
+   the ocean, not about the arithmetic:
+     * the deep Atlantic (-108.5) really is young and the deep Pacific
+       (-211.5) really is old, and they really are on opposite sides of the
+       globe. If that contrast is DETERMINISTIC STRUCTURE WE HAVE SAMPLED,
+       the global mean is well determined and row 2 (n_eff ~110) is right.
+     * if the basins are better thought of as a handful of exchangeable
+       water masses whose values we happen to know, row 2b (n_eff ~6) is.
+   The correlated-mean formula is a RANDOM-FIELD formula; applying it to a
+   field with large deterministic structure is exactly where it stops being
+   well posed. This is the residual ambiguity the measurement does NOT
+   remove, and part 6 shows it straddles the decision.
+   (detrended residual -- NOT the estimand)      UNUSABLE         --
+   detrended double sum went NEGATIVE -- the interpolated empirical rho is
+   not positive semi-definite on that field. Estimator dropped, not reported.
+   R^2 of the removed large-scale trend: 0.56
+
+
+=== PART 3. ESTIMATOR 3: SPATIAL BLOCK BOOTSTRAP ===
+Model-free. Resample whole spatial blocks with replacement and recompute
+the volume-weighted mean. The spread ACROSS block sizes is the honest
+uncertainty on n_eff, so all four are reported and none is preferred.
+
+READ THIS AGAINST PART 1: a block bootstrap is only valid when the block
+EXCEEDS the decorrelation scale, and part 1 puts rho = 0.5 at ~5500 km and
+rho = 0 at ~7000 km. 60 deg of latitude is ~6700 km, 10 deg is ~1100 km. So
+the small-block rows BREAK correlation inside their own blocks and are
+biased HIGH; the 30-60 deg rows are the methodologically valid ones, and
+they are also the noisiest (33 and 16 blocks). Monotone decline with block
+size is the expected signature, not a defect.
+
+block                    blocks  SE permil      n_eff      sigma
+10 deg lat x 20 lon         188      3.765      148.5       3.76
+20 deg lat x 40 lon          68      6.802       45.5       6.80
+30 deg lat x 60 lon          33      9.005       26.0       9.00
+60 deg lat x 120 lon         16     13.280       11.9      13.28
+
+
+=== PART 4. ESTIMATOR 4: LEAVE-ONE-BASIN-OUT ===
+Crude longitude/latitude masks, stated as crude. This is interpretable,
+not precise: it says which basin the global mean is hostage to.
+
+basin           cells       mean   wt share %  mean w/o it
+Arctic             26      -67.3          0.2      -175.52
+Atlantic          677     -108.5         20.6      -192.61
+Indian            459     -181.0         15.0      -174.24
+Pacific          1448     -211.5         44.4      -146.38
+Southern          982     -160.6         19.8      -178.86
+
+full mean -175.26; leave-one-out range -192.61 to -146.38 (span 46.24 permil)
+
+
+=== PART 5. ESTIMATOR 5: COVERAGE ===
+horizontal 5x10 cells sampled: 467
+depth bins per sampled column, median 8.0 (max 17)
+
+WHAT THIS CANNOT SAY, and it is a real gap: the DENOMINATOR -- how many
+5x10 cells contain ocean deeper than 2627 m -- needs bathymetry this repo
+does not carry. So coverage is reported as a count, not a fraction, and
+the unsampled-volume contribution to Var(xbar_w) is NOT in any number
+above. It would push n_eff DOWN.
+
+
+=== PART 6. THE CONSEQUENCE, RECOMPUTED LIVE ===
+Candidate A's iso-sink rows, re-read from diag_ocean_candidates.R rather
+than copied, so this table cannot go stale against them.
+
+A's measured net at the sigma in use: +0.86 log-units, of which
+the deep term supplies +1.43 and everything else -0.57 (sigma-independent).
+
+estimator                                   n_eff    sigma   A net logL A adopted?
+1. Kish (weights only)                     3408.2     0.79      +242.70        yes
+2. correlogram ESS                          110.1     4.37        +7.29        yes
+3. block bootstrap, 10 deg                  148.5     3.76       +10.04        yes
+3. block bootstrap, 20 deg                   45.5     6.80        +2.68        yes
+3. block bootstrap, 30 deg                   26.0     9.00        +1.29        yes
+3. block bootstrap, 60 deg                   11.9    13.28        +0.29        yes
+   -- asserted n_eff = 20 (incumbent)        20.0    10.26        +0.86        yes
+
+CROSSOVER: A is adopted for any sigma < 16.30 permil, i.e. n_eff > 7.9.
+THE MEASUREMENT BRACKETS THAT THRESHOLD RATHER THAN CLEARING IT.
+  defensible range: n_eff ~6.4 (correlogram, rho floored) to ~26
+  (30-degree blocks), against a crossover at 7.9. The asserted 20 sits
+  inside it and on the ADOPTING side.
+  Ruled OUT by the measurement: the full-spread sigma 45.88 (n_eff = 1),
+  which was the only one of the five original candidates that rejected A,
+  and Kish's 3408, which assumes an independence the correlogram refutes.
+  So the range narrows from 15x asserted to ~4x measured -- but it lands
+  ACROSS the threshold, not clear of it.
+
+kz-runaway check (the job the sigma was ORIGINALLY chosen for):
+estimator                                   sigma z vs -112.7
+1. Kish (weights only)                       0.79       79.6 HOLDS
+2. correlogram ESS                           4.37       14.3 HOLDS
+3. block bootstrap, 10 deg                   3.76       16.6 HOLDS
+3. block bootstrap, 20 deg                   6.80        9.2 HOLDS
+3. block bootstrap, 30 deg                   9.00        6.9 HOLDS
+3. block bootstrap, 60 deg                  13.28        4.7 HOLDS
+   -- asserted n_eff = 20 (incumbent)       10.26        6.1 HOLDS
+
+
+STILL NOT MEASURED BY ANY OF THIS, and both push sigma UP:
+ * model REPRESENTATION error -- a one-box deep ocean against a field
+   spanning -234 to -87 permil. R/likelihood.R records it as deliberately
+   zero. It is Marcus' open question, not settled here.
+ * UNSAMPLED VOLUME -- part 5 has no bathymetry denominator.
+A measured n_eff therefore sets a CEILING on the term's weight, not the
+weight itself. Do not read the largest n_eff as licence for the smallest
+sigma.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/deep_d14c_neff/diag_deep_d14c_neff.rds
