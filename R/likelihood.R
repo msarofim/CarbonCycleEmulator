@@ -500,6 +500,12 @@ ccx_deep_d14c_target <- local({
 # by_stream showing the term absent is how that becomes visible.
 LIK_USE_OCEAN_GRAD   <- TRUE
 LIK_OCEAN_GRAD_HML_OK <- c(85, 120)   # m; see the paragraph above
+# Alkalinity stoichiometry, for the third row (Marcus 2026-08-16b). CaCO3
+# dissolution adds 2 mol alkalinity per mol C; soft-tissue remineralisation
+# releases nitrate and so REMOVES ~1 mol per mol N. WORKING VALUES, not fitted,
+# and the N:C is an Anderson-Sarmiento-type recollection rather than a citation.
+LIK_ALK_PER_CARB <- 2
+LIK_ALK_NC_RATIO <- 16 / 117          # ~0.137 mol N per mol C
 
 #' Ocean DIC / d13C gradient targets, from the GLODAPv2 build product.
 #'
@@ -514,11 +520,75 @@ ccx_ocean_gradient_target <- local({
     g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_deep.rds")),
                   error = function(e) NULL)
     if (is.null(g) || is.null(g$gradient)) return(NULL)
-    out <- list(dic = g$gradient$tco2, d13c = g$gradient$d13c)
+    out <- list(dic = g$gradient$tco2, d13c = g$gradient$d13c,
+                alk = g$gradient$talk)
     cache <<- out
     out
   }
 })
+
+#' Steady-state interior profile implied by an interior source field.
+#'
+#' THE EXACT INVERSE of the export solve in calibration/pump_shim.R's
+#' dg_export_field(), which is what makes it testable without a pump:
+#' profile -> source -> profile must round-trip (test-likelihood.R).
+#'
+#' Steady state requires the source in box k to cancel the diffusive
+#' convergence there, S_k = -[F(k-1,k) - F(k,k+1)] with
+#' F(a,b) = kz (c_a - c_b) / dz_mid[a]. Reading that from the bottom up gives
+#' the interface fluxes, and the fluxes integrate to the profile.
+#'
+#' WHY IT IS A STEADY-STATE SOLVE AND NOT A TRACER. Alkalinity in this model has
+#' no air-sea flux, no decay and no anthropogenic source -- so unlike DIC it has
+#' NO TRANSIENT, and its profile is fully determined at every date by the export
+#' field. A fourth state column would carry the same information at the cost of
+#' the whole state, the C++ core, the Newton spinup and the parity tests.
+#'
+#' @param S numeric, source into each interior box, in the units of
+#'   dg_export_field()'s output (GtC/yr, or mol-equivalents/yr for alkalinity).
+#' @return numeric, concentration DIFFERENCE from the mixed layer for each
+#'   interior box, in umol/kg. Element `nl` is the bottom box, i.e. the gradient.
+ccx_steady_profile_from_source <- function(S, p, aux, grid, hemi) {
+  nl <- grid$nl
+  stopifnot(length(S) == nl)
+  # fluxes, from the bottom: F[nl] = -S[nl]; F[k] = F[k+1] - S[k]
+  Fi <- numeric(nl)
+  Fi[nl] <- -S[nl]
+  for (k in seq.int(nl - 1L, 1L)) Fi[k] <- Fi[k + 1L] - S[k]
+  kappa <- aux$a_oc[[hemi]] * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
+  # cc[k+1] = cc[k] - F[k] dz_mid[k] / kz, in GtC/m; /kappa/1e-6 -> umol/kg
+  cumsum(-Fi * aux$dz_mid / p$kz) / kappa * 1e6
+}
+
+#' The MODEL's deep-minus-surface ALKALINITY gradient, umol/kg.
+#'
+#' RETURNS EXACTLY 0 TODAY, FOR EVERY PARAMETER, AND THAT IS A MODEL PREDICTION
+#' RATHER THAN A PLACEHOLDER. `ALK_SURFACE` enters the mixed-layer carbonate
+#' solve and nowhere else (ccx_dic_for_pco2(), pco2_from_dic(), the
+#' revelle_factor() diagnostic); the interior has no alkalinity and no carbonate
+#' chemistry. With no carbonate pump there is no mechanism that could separate
+#' the two layers, so the model says zero and the observation says +78.6 -- a
+#' 4.09 sigma miss the pump (task 9) exists to close.
+#'
+#' @param spin the spinup.
+#' @param pump OPTIONAL list(S_org = , S_carb = ), the per-limb export fields per
+#'   hemisphere as dg_export_field() returns them. When the pump ships, pass it
+#'   here and the term becomes live with no other change: alkalinity rides the
+#'   carbonate limb at +2 per mole (CaCO3 dissolution) and the organic limb at
+#'   -(N:C) per mole (nitrate release), and the profile follows from the same
+#'   diffusion operator the DIC gradient uses.
+ccx_model_ocean_alk_gradient <- function(spin, pump = NULL) {
+  if (is.null(pump)) return(0)
+  aux <- spin$aux; grid <- spin$grid; p <- spin$params
+  num <- 0; den <- 0
+  for (h in HEMIS) {
+    S <- LIK_ALK_PER_CARB * pump$S_carb[[h]] - LIK_ALK_NC_RATIO * pump$S_org[[h]]
+    g <- ccx_steady_profile_from_source(S, p, aux, grid, h)[grid$nl]
+    m <- aux$a_oc[[h]] * grid$dz[grid$nl + 1L] * ccx_const("RHO_SEAWATER")
+    num <- num + g * m; den <- den + m       # mass-weighted, as the obs is
+  }
+  num / den
+}
 
 #' The MODEL's ocean gradient (bottom box - mixed layer), globally, at a year.
 #'
@@ -561,7 +631,9 @@ ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
 #' silent zero.
 #'
 #' @param spin the spinup, for aux/grid/params.
-ccx_ocean_grad_scored <- function(out, spin) {
+#' @param pump OPTIONAL pump export fields, forwarded to
+#'   ccx_model_ocean_alk_gradient(). NULL until task 9.
+ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
   tg <- ccx_ocean_gradient_target()
   if (is.null(tg)) return(NULL)
   h <- spin$grid$h_ml
@@ -576,7 +648,12 @@ ccx_ocean_grad_scored <- function(out, spin) {
                                  list(surf = tg$d13c$epoch_surf,
                                       deep = tg$d13c$epoch_deep))
   if (is.null(gd) || is.null(g3)) return(NULL)
-  list(dic = gd$dic, d13c = g3$d13c)
+  # Alkalinity needs no epoch: it has no transient in this model (no air-sea
+  # flux, no anthropogenic source), so its profile is a steady-state function of
+  # the export field alone. `pump` is NULL until task 9 ships one, and the
+  # function then returns 0 -- the model's actual prediction, not an absence.
+  list(dic = gd$dic, d13c = g3$d13c,
+       alk = ccx_model_ocean_alk_gradient(spin, pump = pump))
 }
 
 #' Hemisphere-area weights for the Hua zones
@@ -1074,13 +1151,31 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # parameter and the terms cannot distort the posterior. test-likelihood.R
   # asserts exactly that, because the pump breaks it ON PURPOSE and the day it
   # stops being true must be visible rather than inferred.
+  #
+  # THE ALKALINITY ROW (third scalar, added 2026-08-16b) IS DIFFERENT IN KIND
+  # AND MUST NOT BE READ AS THE OTHER TWO. DIC and d13C are STATE VARIABLES, so
+  # their gradients are computed quantities that already move (transient
+  # leverage <= 0.09 sigma). The model carries NO ALKALINITY at all -- it enters
+  # the mixed-layer carbonate solve and nowhere else -- so its gradient is
+  # EXACTLY 0 until a carbonate pump exists, and this term is a hard constant of
+  # -8.38 log-units with LITERALLY zero leverage. It is shipped anyway, on
+  # Marcus' instruction (2026-08-16b) and for the same reason the DIC row was
+  # shipped before the pump: the constraint has to be in the objective for the
+  # pump to be scored against it. Do NOT quote it as evidence about anything
+  # until ccx_model_ocean_alk_gradient() is given a pump.
   if (LIK_USE_OCEAN_GRAD && !is.null(ocean_grad)) {
     tg <- ccx_ocean_gradient_target()
     if (!is.null(tg))
-      for (k in list(c("dic", "ocean_grad_dic"), c("d13c", "ocean_grad_d13c")))
-        if (is.finite(ocean_grad[[k[1]]]))
-          add(k[2], stats::dnorm(tg[[k[1]]]$target, ocean_grad[[k[1]]],
-                                 tg[[k[1]]]$sd, log = TRUE))
+      for (k in list(c("dic", "ocean_grad_dic"), c("d13c", "ocean_grad_d13c"),
+                     c("alk", "ocean_grad_alk"))) {
+        # A ROW THE CALLER DID NOT SUPPLY IS ABSENT, NOT ZERO. `length(v) == 1L`
+        # is doing real work here: every caller written before 2026-08-16b passes
+        # an `ocean_grad` with no `alk` element, and is.finite(NULL) is
+        # logical(0), which is an error in `if` rather than FALSE.
+        v <- ocean_grad[[k[1]]]
+        if (!is.null(tg[[k[1]]]) && length(v) == 1L && is.finite(v))
+          add(k[2], stats::dnorm(tg[[k[1]]]$target, v, tg[[k[1]]]$sd, log = TRUE))
+      }
   }
 
   # ---- GCB sinks: PARTITION only -------------------------------------

@@ -4943,3 +4943,70 @@ carbonate limb) is no longer needed. Zero fitted parameters either way.
 not been block-bootstrapped **on the contrast**. The cell spread is reported instead and labelled
 as such. DIC's cross-layer covariance inflated its σ_Δ 25 %, so composing σ any other way is a
 known error of that size.
+
+---
+
+## 2026-08-16 (night) — The ALKALINITY gradient is the FOURTH likelihood term (`ocean_grad_alk`), and its model side is a steady-state solve rather than a fourth tracer
+
+Marcus: make it a term unless there is a good reason not to. There was not one, but there was
+a design fork and a population hazard, both measured rather than assumed.
+
+**THE TARGET, built the same way the other two were** (`data-raw/build_glodap_deep_targets.R`,
+new block; `G2talk` extracted from the master into `glodap_dic_talk_subset.csv`, 464,590 usable
+bottles):
+
+| | value |
+|---|---|
+| target | **+78.5927 µmol/kg** (0–100 m vs >2627.2 m, fixed depths) |
+| σ | **19.199** — block bootstrap **on the contrast**, 4000 draws, seed 20260816, conservative of the two valid block sizes (30° gives 13.879) |
+| epochs | 2002.4 surf / 2002.5 deep (recorded for provenance; alkalinity has no transient) |
+| **miss with no pump** | **4.09 σ, −12.25 log-units** |
+
+**Every pre-existing field of `obs_glodap_deep.rds` is bit-identical** (`all.equal(tolerance = 0)`
+against the pre-build copy). `gd_grad_boot()` re-seeds per call, so the new bootstrap cannot
+perturb the shipped ones.
+
+**THE POPULATION HAZARD, measured because the first report mixed two samples.** The shipped DIC
+target comes from the isotope subset ("bottles carrying δ¹³C or Δ¹⁴C", 2897/533 cells);
+alkalinity is measured on far more bottles (5886/829). Forming the carbonate share as
+ALK-gradient ÷ DIC-gradient across the two compares different samples of the ocean. Recomputed
+the DIC gradient **on the alkalinity population**: **+225.81 vs the shipped +233.11**, a
+**−0.29 σ** move, and the carbonate share goes **22 % → 23 %**. Immaterial — but it is now
+measured, and `gradient$tco2_alkpop` is stored for it. **The shipped DIC target is unchanged.**
+
+**THE MODEL SIDE IS THE INTERESTING DECISION, and it is NOT a fourth tracer.** Alkalinity in
+this model has **no air-sea flux, no decay, no anthropogenic source** — so unlike DIC it has **no
+transient**, and its profile is fully determined at every date by the export field. A state
+column would carry the same information at the cost of the state, the C++ core, the Newton
+spinup and the parity tests. Shipped instead:
+
+- `ccx_steady_profile_from_source()` — source field → the profile it holds, **the exact inverse
+  of `dg_export_field()`**. That inverse relationship is what makes the row testable *before a
+  pump exists*: a round-trip test composes the two and must return the profile it started from.
+- `ccx_model_ocean_alk_gradient(spin, pump = NULL)` — **returns exactly 0 today, for every
+  parameter, and that is a model PREDICTION, not a placeholder**: `ALK_SURFACE` enters the
+  mixed-layer carbonate solve and nowhere else, so with no carbonate pump nothing can separate
+  the two layers. Pass the pump's per-limb export fields when task 9 ships one and the row goes
+  live with no other change.
+- Stoichiometry as named constants: `LIK_ALK_PER_CARB` = 2 (CaCO₃ dissolution),
+  `LIK_ALK_NC_RATIO` = 16/117 (nitrate release). Working values, not fitted, not cited.
+
+**HOW THIS ROW DIFFERS FROM THE OTHER TWO, stated in the code so it cannot be misread.** DIC and
+δ¹³C are state variables whose gradients already move (transient leverage ≤ 0.09 σ). The
+alkalinity row is a **literal constant with zero leverage** until a carbonate pump exists. It is
+shipped anyway for the reason the DIC row was shipped before the pump — the constraint has to be
+in the objective for the pump to be scored against it — and the code says **do not quote it as
+evidence about anything** until it is given a pump.
+
+**+4 test blocks** (`test-likelihood.R`): the Gaussian and absence contract; **the exact-zero
+assertion across h_ml × kz**, which is the property a carbonate pump breaks on purpose; the
+round-trip solver test; and a **hand-built pump** that must move the row by the stoichiometry —
+a pure organic limb NEGATIVE at −(N:C)×, a pure carbonate limb at exactly +2×.
+
+**A latent bug the new row exposed in the row I shipped this morning.** The term loop used
+`is.finite(ocean_grad[[field]])`, and every caller written before today passes an `ocean_grad`
+with no `alk` element — `is.finite(NULL)` is `logical(0)`, which is an **error** in `if`, not
+FALSE. Guarded with `length(v) == 1L`, which also keeps the absence contract: a row the caller
+does not supply is **absent**, not zero.
+
+**logL moves by another −12.25 log-units** and is again incomparable with runs before tonight.

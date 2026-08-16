@@ -647,3 +647,95 @@ test_that("the TRANSIENT gradient's parameter leverage stays far below its miss"
     expect_lt(abs(gof(p) - b) / tg$dic$sd, LEV_MAX)
   }
 })
+
+# =====================================================================
+# The ocean ALKALINITY gradient term (fourth row; Marcus 2026-08-16b)
+# =====================================================================
+
+test_that("the alkalinity row is a Gaussian on the shipped target, absent without it", {
+  skip_if_no_cpp()
+  tg <- ccx_ocean_gradient_target()
+  skip_if(is.null(tg) || is.null(tg$alk), "GLODAPv2 alkalinity gradient absent")
+  f <- lik_fixture()
+  bare <- ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE)
+  expect_false("ocean_grad_alk" %in% names(bare))
+  at <- function(alk) ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE,
+                                 ocean_grad = list(dic = tg$dic$target,
+                                                   d13c = tg$d13c$target, alk = alk))
+  p0 <- at(tg$alk$target)
+  expect_true("ocean_grad_alk" %in% names(p0))
+  expect_equal(unname(p0[["ocean_grad_alk"]]),
+               stats::dnorm(0, 0, tg$alk$sd, log = TRUE), tolerance = 1e-10)
+  cost <- function(z) p0[["ocean_grad_alk"]] - at(tg$alk$target + z * tg$alk$sd)[["ocean_grad_alk"]]
+  expect_equal(cost(1), 0.5, tolerance = 1e-8)
+  expect_equal(cost(2), 4 * cost(1), tolerance = 1e-8)
+})
+
+test_that("the model's alkalinity gradient is EXACTLY zero without a pump, at every parameter", {
+  skip_if_no_cpp()
+  # NOT an approximation and NOT a placeholder: the model has no alkalinity
+  # state at all, so no parameter can separate the two layers. This is the
+  # property a carbonate pump breaks ON PURPOSE -- the day it stops holding
+  # must be a test failure, not something inferred from a logL that moved.
+  for (h in c(85, 100, 120)) {
+    p <- ccx_default_params(); p$h_ml <- h
+    for (kz in c(3000, 5000, 6200)) {
+      p$kz <- kz
+      sp <- ccx_spinup(p)
+      expect_identical(ccx_model_ocean_alk_gradient(sp), 0)
+    }
+  }
+  tg <- ccx_ocean_gradient_target()
+  skip_if(is.null(tg) || is.null(tg$alk), "GLODAPv2 alkalinity gradient absent")
+  # ...and the miss that zero implies is the one the pump has to close.
+  expect_equal(tg$alk$target / tg$alk$sd, 4.09, tolerance = 0.01)
+})
+
+test_that("the steady-state solver is the exact inverse of the export solve", {
+  skip_if_no_cpp()
+  # THIS IS WHAT MAKES THE ALKALINITY ROW TESTABLE BEFORE A PUMP EXISTS.
+  # dg_export_field() maps a target profile -> the source field that holds it;
+  # ccx_steady_profile_from_source() maps a source field -> the profile it
+  # holds. Composing them must return the profile it started from, and if it
+  # ever stops doing so the alkalinity row is silently scoring the wrong
+  # quantity the moment a pump is attached to it.
+  source(ccx_path("calibration", "pump_shim.R"))
+  p <- ccx_default_params(); p$h_ml <- 100
+  sp <- ccx_spinup(p); aux <- sp$aux; grid <- sp$grid
+  for (h in HEMIS) {
+    # an arbitrary NON-uniform profile, not one the model would produce
+    want <- 2000 + c(0, cumsum(seq_len(grid$nl)) * 7.5)
+    S    <- dg_export_field(p, aux, grid, h, want)$S
+    got  <- ccx_steady_profile_from_source(S, p, aux, grid, h)
+    expect_equal(got, want[-1] - want[1], tolerance = 1e-8)
+  }
+})
+
+test_that("a carbonate pump moves the alkalinity row, and by the stoichiometry", {
+  skip_if_no_cpp()
+  # The forward direction, exercised with a HAND-BUILT pump rather than a real
+  # one: alkalinity rides the carbonate limb at +2 per mole and the organic limb
+  # at -(N:C). A pure organic pump must therefore move the row NEGATIVE, and a
+  # pure carbonate pump must move it to +2x what the same field does for DIC.
+  source(ccx_path("calibration", "pump_shim.R"))
+  p <- ccx_default_params(); p$h_ml <- 100
+  sp <- ccx_spinup(p); aux <- sp$aux; grid <- sp$grid
+  fields <- lapply(HEMIS, function(h)
+    dg_export_field(p, aux, grid, h, 2000 + c(0, cumsum(rep(10, grid$nl))))$S)
+  names(fields) <- HEMIS
+  zero <- lapply(fields, function(x) x * 0)
+  dic_grad <- {
+    v <- vapply(HEMIS, function(h) {
+      g <- ccx_steady_profile_from_source(fields[[h]], p, aux, grid, h)[grid$nl]
+      m <- aux$a_oc[[h]] * grid$dz[grid$nl + 1L] * ccx_const("RHO_SEAWATER")
+      c(g * m, m)
+    }, numeric(2))
+    sum(v[1, ]) / sum(v[2, ])
+  }
+  carb_only <- ccx_model_ocean_alk_gradient(sp, list(S_carb = fields, S_org = zero))
+  org_only  <- ccx_model_ocean_alk_gradient(sp, list(S_carb = zero, S_org = fields))
+  expect_equal(carb_only, LIK_ALK_PER_CARB * dic_grad, tolerance = 1e-8)
+  expect_equal(org_only, -LIK_ALK_NC_RATIO * dic_grad, tolerance = 1e-8)
+  expect_lt(org_only, 0)
+  expect_gt(carb_only, 0)
+})

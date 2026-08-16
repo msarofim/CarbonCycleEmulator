@@ -103,7 +103,13 @@ ak_bin <- function(zmin, zmax) {
 }
 a_s <- ak_bin(tg$dic$layer_surf[1], tg$dic$layer_surf[2])
 a_d <- ak_bin(tg$dic$layer_deep[1], tg$dic$layer_deep[2])
-d_alk <- a_d$vw - a_s$vw
+# THE SHIPPED TARGET IS AUTHORITATIVE, not this file's recomputation. They differ
+# by ~0.4 umol/kg for a reason worth knowing: pump_shim.R's dg_bin() takes
+# `depth < zmax` and the build script's gd_binned() takes `depth <= zmax`, so the
+# bottles sitting exactly at 100 m are in one and not the other. Everything below
+# uses the build product; the local number is printed beside it as a cross-check.
+d_alk_local <- a_d$vw - a_s$vw
+d_alk <- if (!is.null(tg$alk)) tg$alk$target else d_alk_local
 
 cat(sprintf("%-10s %8s %8s %10s %10s %8s\n", "layer", "n", "cells", "ALK vw", "ALK raw", "cell sd"))
 cat(sprintf("%-10s %8d %8d %10.1f %10.1f %8.1f\n",
@@ -112,13 +118,20 @@ cat(sprintf("%-10s %8d %8d %10.1f %10.1f %8.1f\n",
 cat(sprintf("%-10s %8d %8d %10.1f %10.1f %8.1f\n",
             sprintf(">%g m", tg$dic$layer_deep[1]),
             a_d$n, a_d$n_cells, a_d$vw, a_d$raw, a_d$sd))
-cat(sprintf("\nOBSERVED ALKALINITY GRADIENT (deep - surf): %+.1f umol/kg\n", d_alk))
-cat(sprintf("model's fixed ALK_SURFACE:                   %.1f umol/kg\n",
+cat(sprintf("\nSHIPPED ALKALINITY GRADIENT (the build product): %+.4f umol/kg\n", d_alk))
+cat(sprintf("this file's own recomputation:                   %+.4f  (diff %+.4f)\n",
+            d_alk_local, d_alk_local - d_alk))
+cat("  -- the difference is the depth-boundary convention, not a disagreement:\n")
+cat("     dg_bin() takes `depth < zmax`, gd_binned() takes `depth <= zmax`, so the\n")
+cat("     bottles exactly at 100 m are in one and not the other. Build wins.\n")
+cat(sprintf("model's fixed ALK_SURFACE:                       %.1f umol/kg\n",
             ccx_const("ALK_SURFACE") * 1e6))
-cat("NOTE the sigma above is the CELL SPREAD, not a block-bootstrap sigma on the\n")
-cat("CONTRAST. If this ever becomes a likelihood term it needs the same treatment\n")
-cat("the DIC and d13C contrasts got (data-raw/build_glodap_deep_targets.R) --\n")
-cat("DIC's cross-layer covariance INFLATED its sigma 25 %. Not done here.\n")
+if (!is.null(tg$alk))
+  cat(sprintf("\nSIGMA is now a BLOCK BOOTSTRAP ON THE CONTRAST: %.4f umol/kg (30 deg %.4f),\n",
+              tg$alk$sd, tg$alk$sd_by_block[["blk30"]]))
+cat(sprintf("i.e. the model's zero gradient is a %.2f sigma miss and the row is in the\n",
+            if (is.null(tg$alk)) NA_real_ else tg$alk$target / tg$alk$sd))
+cat("objective as `ocean_grad_alk`. The cell spread printed above is NOT that sigma.\n")
 
 # =====================================================================
 # PART 2. THE CARBONATE LIMB, SIZED THREE WAYS

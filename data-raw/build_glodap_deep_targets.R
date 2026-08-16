@@ -305,6 +305,86 @@ for (nm in names(grad)) {
               if (nm == "d14c") "   <- reported only, no term" else ""))
 }
 
+# ---------------------------------------------------------------------
+# THE ALKALINITY GRADIENT (added 2026-08-16b). Marcus: make it a fourth
+# likelihood term. `G2talk` was never extracted before because nothing used it;
+# calibration/diag_alk_gradient.R showed it sizes the carbonate limb directly.
+#
+# IT COMES FROM A DIFFERENT BOTTLE POPULATION AND THAT IS NOT FREE. The subset
+# above is "bottles carrying d13C or D14C" -- a small, isotope-cruise-biased
+# sample. Alkalinity is measured on far more bottles. Using the bigger sample
+# gives a better sigma; mixing the two populations to form the RATIO
+# (ALK gradient / DIC gradient = the carbonate share) compares two different
+# samples of the ocean. So BOTH are measured here and the DIC gradient is
+# recomputed on the ALK population, which is what makes the ratio commensurable.
+# Nothing above this line is touched: `grad` is already built, and gd_grad_boot()
+# re-seeds on every call, so the pre-existing targets are bit-identical.
+GD_MASTER      <- ccx_path("data-raw", "downloads",
+                           "GLODAPv2.2023_Merged_Master_File.csv")
+GD_TALK_SUBSET <- ccx_path("data-raw", "downloads", "glodap_dic_talk_subset.csv")
+
+if (!file.exists(GD_TALK_SUBSET)) {
+  cat("\nextracting G2talk + G2tco2 from the master file (one pass, ~1 min)...\n")
+  keep <- c(G2year = "year", G2latitude = "lat", G2longitude = "lon",
+            G2depth = "depth", G2tco2 = "tco2", G2tco2f = "tco2f",
+            G2talk = "talk", G2talkf = "talkf")
+  hdr  <- strsplit(readLines(GD_MASTER, n = 1), ",")[[1]]
+  stopifnot(all(names(keep) %in% hdr))
+  dt <- utils::read.csv(GD_MASTER,
+                        colClasses = ifelse(hdr %in% names(keep), "numeric", "NULL"))
+  names(dt) <- keep[names(dt)]
+  dt <- dt[is.finite(dt$talk) & dt$talk > -900 & dt$talkf == GD_FLAG_OK, ]
+  utils::write.csv(dt, GD_TALK_SUBSET, row.names = FALSE)
+  cat(sprintf("written: %s (%d bottles with usable talk)\n", GD_TALK_SUBSET, nrow(dt)))
+}
+dt <- utils::read.csv(GD_TALK_SUBSET)
+
+# The gradient machinery above closes over `d`; point it at the ALK population
+# for these two calls and put it back. Explicit and reversed immediately, rather
+# than a second copy of gd_grad_boot()/gd_epoch() that could drift from the first.
+d_isotope <- d
+d <- dt
+ok_talk <- is.finite(d$talk) & d$talk > -900 & is.finite(d$talkf) & d$talkf == GD_FLAG_OK
+ok_dict <- is.finite(d$tco2) & d$tco2 > -900 & is.finite(d$tco2f) & d$tco2f == GD_FLAG_OK
+r_talk <- list(surf = gd_binned(ok_talk, "talk", 0, 100),
+               deep = gd_binned(ok_talk, "talk", GD_MODEL_DEEP_TOP, 1e5))
+r_dict <- list(surf = gd_binned(ok_dict, "tco2", 0, 100),
+               deep = gd_binned(ok_dict, "tco2", GD_MODEL_DEEP_TOP, 1e5))
+grad_talk    <- gd_gradient(ok_talk, "talk", r_talk)
+grad_dic_alk <- gd_gradient(ok_dict, "tco2", r_dict)
+d <- d_isotope
+
+cat("\n\n=== ALKALINITY GRADIENT (fourth term; Marcus 2026-08-16b) ===\n")
+cat(sprintf("%-30s %12s %10s %12s %10s\n", "quantity", "target", "sd (60deg)",
+            "sd (30deg)", "cells d/s"))
+cat(sprintf("%-30s %12.4f %10.4f %12.4f %6d/%-4d\n", "ALK gradient (ALK population)",
+            grad_talk$target, grad_talk$sd, grad_talk$sd_by_block[["blk30"]],
+            r_talk$deep$n_cells, r_talk$surf$n_cells))
+cat(sprintf("%-30s %12.4f %10.4f %12.4f %6d/%-4d\n", "DIC gradient (ALK population)",
+            grad_dic_alk$target, grad_dic_alk$sd, grad_dic_alk$sd_by_block[["blk30"]],
+            r_dict$deep$n_cells, r_dict$surf$n_cells))
+cat(sprintf("%-30s %12.4f %10.4f %12.4f %6d/%-4d\n", "DIC gradient (SHIPPED, isotope pop)",
+            grad$tco2$target, grad$tco2$sd, grad$tco2$sd_by_block[["blk30"]],
+            rco$deep$n_cells, rco$surf$n_cells))
+cat(sprintf("\nPOPULATION CHECK: the DIC gradient moves %+.2f umol/kg (%.2f sigma of the\n",
+            grad_dic_alk$target - grad$tco2$target,
+            (grad_dic_alk$target - grad$tco2$target) / grad$tco2$sd))
+cat("shipped sigma) between the isotope population and the ALK population. The\n")
+cat("SHIPPED DIC target is NOT changed -- it is the one the objective already\n")
+cat("carries -- but the carbonate share must be formed from the commensurable\n")
+cat("pair, and calibration/diag_alk_gradient.R part 2 mixed the two populations.\n")
+# ALK bookkeeping: d(ALK) = 2 C_carb - (N:C) C_org, C_carb + C_org = D.
+GD_ALK_PER_CARB <- 2.0
+GD_NC_RATIO     <- 16 / 117       # Anderson-Sarmiento-type N:C, a WORKING value
+share <- function(dA, D) (dA + GD_NC_RATIO * D) / ((GD_ALK_PER_CARB + GD_NC_RATIO) * D)
+cat(sprintf("\ncarbonate share, MIXED populations (as first reported): %.0f %%\n",
+            100 * share(grad_talk$target, grad$tco2$target)))
+cat(sprintf("carbonate share, COMMENSURABLE (both on the ALK pop):   %.0f %%\n",
+            100 * share(grad_talk$target, grad_dic_alk$target)))
+
+grad$talk <- grad_talk
+grad$tco2_alkpop <- grad_dic_alk    # reported for the ratio; NOT a term
+
 out <- list(
   gradient = grad,
   sigma_candidates = c(meas = 3, se_neff100 = r14$deep$sd_w / 10,

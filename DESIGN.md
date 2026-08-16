@@ -673,8 +673,33 @@ becomes a **prediction with nothing left to tune**:
 — an independent corroboration of the 2026-08-16 epoch decision, from an observation that was
 not used to make it. **Consequence for task 9: the two-limb pump is now the CHEAP option** — the
 split is pinned by ALK, ε_org stays at the canonical −20, and the effective-ε stand-in (−14.55)
-is no longer needed. The ALK gradient's σ has **not** been block-bootstrapped on the contrast;
-that is required before it could become a likelihood term (DIC's covariance inflated σ_Δ 25 %).
+is no longer needed.
+
+### 5.2e The alkalinity row as SHIPPED — stream `ocean_grad_alk` (2026-08-16b)
+
+Marcus took it into the objective. **Target +78.5927 µmol/kg, σ 19.199** (block bootstrap on the
+**contrast**, 4000 draws, seed 20260816, conservative of 30°/60°; 30° gives 13.879), same fixed
+depths and same `h_ml` gate as the other two. **Miss with no pump: 4.09 σ = −12.25 log-units**,
+so logL is again incomparable across the boundary. Pre-existing fields of
+`obs_glodap_deep.rds` are bit-identical.
+
+**Population**: the shipped DIC target comes from the isotope subset (2897/533 cells), alkalinity
+from a much larger sample (5886/829). The DIC gradient recomputed **on the alkalinity population**
+is **+225.81**, −0.29 σ from the shipped +233.11, moving the carbonate share 22 % → 23 %.
+Immaterial, now measured, stored as `gradient$tco2_alkpop`. The shipped DIC target is unchanged.
+
+**The model side is a STEADY-STATE SOLVE, not a fourth tracer.** Alkalinity here has no air-sea
+flux, no decay and no anthropogenic source, so it has **no transient** — its profile is fully
+determined by the export field at every date. `ccx_steady_profile_from_source()` is the **exact
+inverse of `dg_export_field()`** (round-trip tested), and `ccx_model_ocean_alk_gradient(spin,
+pump)` composes it with the stoichiometry `LIK_ALK_PER_CARB` = 2 and `LIK_ALK_NC_RATIO` = 16/117.
+
+**This row is not like the other two and the code says so.** DIC and δ¹³C are state variables
+with ≤ 0.09 σ of transient leverage; **alkalinity has no state at all, so the row is a literal
+constant with ZERO leverage** until a carbonate pump exists. `ccx_model_ocean_alk_gradient()`
+returns exactly 0 for every parameter — a model *prediction*, not a placeholder — and a test
+asserts that across `h_ml` × `kz`, because a carbonate pump breaks it on purpose. **Do not quote
+the row as evidence about anything until it is given a pump.**
 
 ### 5.3 Sampler
 
