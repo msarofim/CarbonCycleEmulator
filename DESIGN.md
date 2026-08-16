@@ -749,6 +749,61 @@ better estimator there, not the deviant one.
 z_ALK **+0.21**. The carbonate limb does what it was added for — the same DIC gradient now costs
 δ¹³C −0.636 instead of the single limb's −1.132.
 
+### 5.2g What the four-row objective wants `pump_grad` to BE (2026-08-16d)
+
+`calibration/diag_pump_grad_profile.R`, ~9 min. A profile of `pump_grad` over 0–400 µmol/kg at the
+quarantined pre-gradient mode with `h_ml` forced to 100, mode `"N"`, carbonate share at the pinned
+0.23 — the same operating point as §5.2c's table, which is what makes the two comparable. **This
+measures the profile; it does not take the decision. `pump_grad` stays 0 in `R/model.R`.**
+
+**The three rows now nearly agree, and that is the finding.** §5.2c's shim wanted export scales
+**1.37× apart** for DIC and δ¹³C — exactly the fractionation gap 20/14.55, which is why the failure
+was diagnosed as fractionation and not size. With the two-limb pump (effective ε = 0.77·(−20) +
+0.23·(+1) = **−15.2 ‰**) that gap closes to **1.03×**:
+
+| row | `pump_grad` it demands | as a scale on the observed 233.109 | its σ in `pump_grad` |
+|---|---|---|---|
+| DIC | 280.2 | 1.202 | 25.2 |
+| δ¹³C | 272.3 | **1.168** | **18.4** (the sharpest row) |
+| ALK | 221.6 | 0.951 | 54.1 (the loosest) |
+
+| | `pump_grad` | scale | implied σ |
+|---|---|---|---|
+| the three ocean rows, precision-weighted | 271.3 | 1.164 | 14.3 |
+| the three ocean rows, quadratic optimum | 271.3 | 1.164 | 14.4 |
+| **the FULL objective** | **274.5** | **1.178** | **13.1** |
+
+**All three rows close simultaneously.** At the best grid arm (`pump_grad` = 280): z_DIC −0.01,
+z_δ¹³C −0.42, z_ALK +1.08, deep Δ¹⁴C +1.04 — every one inside 2σ, with **zero fitted parameters in
+the export field**. Δ logL from pump-OFF is **+259.4**, of which **+211.2 is the three gradient
+rows** and **+48.2 is rows the pump was never designed against**: `d14c_NH` +25.0, `d14c_SH` +13.9,
+`d13c_level_MLO` +4.4, `d13c_level_SPO` +3.5.
+
+**READ THE OFF-TO-OPTIMUM MARGIN AS AN UPPER BOUND, NOT A VERDICT.** Every arm including OFF sits
+at the same unrefitted mode, so Δ logL *along* the profile is a fair within-slice comparison — but
+the no-pump incumbent gets no refit here, and `beta_max`, `kz` and `h_ml` could recover part of
+it. The shape and the per-row scales are the decision-grade output.
+
+**Two pre-registered gates, both PASS.** The **zero-uptake property**: max |ΔCO₂(2024)| across the
+whole scan is **2.24e−08 ppm** — the constant-mass pump is invisible to the atmosphere, as claimed.
+(The gate is on **ppm, not logL**: the first version of the file gated on 1e−6 log-units, a
+threshold tighter than the spinup's own convergence, and duly "failed" at 2.16e−6. The fix was to
+measure the physical quantity, not to loosen the threshold.) And **linearity**: the DIC and ALK
+rows are exactly linear in `pump_grad` (3.2e−11, 2.0e−16 relative), δ¹³C departs 4.6 % — it is a
+ratio, so its demand is read off the **bracketing pair**, not a line through the endpoints, which
+biased it 287.8 vs 272.3.
+
+**The pinned carbonate share survives an independent check.** Holding `pump_grad` = 280 and
+scanning `pump_carb_frac` ∈ {0.12, 0.23, 0.34} gives full logL −2492.3 / **−2485.8** / −2497.5;
+the quadratic vertex is **0.214 ± 0.026**, i.e. **0.61 σ** from the 0.23 that GLODAP's alkalinity
+gradient pinned. The transient rows and the observed ALK/DIC stoichiometry agree about the split —
+which is §5.2d's argument arriving from the other direction, and it is **not** a licence to fit
+the share.
+
+**Still open, and deliberately**: whether `pump_grad` ships at a fixed value or becomes a fitted
+parameter, and whether the pump ships ON at all. The profile says it *is* identifiable (σ ≈ 13 on
+a value of ≈ 274, ~4.8 %) — it does not say which way to take the decision.
+
 ### 5.3 Sampler
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and

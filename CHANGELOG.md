@@ -5085,3 +5085,56 @@ ML on `ml_C0` to ~1e-7 GtC, making the scaling 1 + O(1e-11). Both now assert wha
 
 **NOT DONE:** the refit (task 8). And `pump_grad`'s value is still a DESIGN decision, not a
 default's to make — the observed gradient is 233.1, the transient rows want ~1.20× that.
+
+---
+
+## 2026-08-16d — the `pump_grad` profile: the four-row objective wants ~1.18× the observed gradient, and all three ocean rows close at once
+
+`calibration/diag_pump_grad_profile.R` (NEW, ~9 min), `DESIGN.md` §5.2g. Handoff 16c §7 item 1 is
+the decision "what should `pump_grad` be, and is it fitted?" — **this file measures the profile the
+decision needs and does not take the decision. `pump_grad` is still 0 in `R/model.R`.**
+
+**THE HEADLINE.** At the quarantined pre-gradient mode with `h_ml` forced to 100 (the same
+operating point as `diag_pump_vs_gradient_terms.R`, which is what makes them comparable), the full
+objective puts `pump_grad` at **274.5 ± 13.1 µmol/kg** — **1.178 ± 0.056 × the observed 233.109** —
+and the three ocean rows on their own put it at **271.3 ± 14.3**. At the best grid arm (280) **all
+three rows close simultaneously**: z_DIC −0.01, z_δ¹³C −0.42, z_ALK +1.08, deep Δ¹⁴C +1.04, with
+**zero fitted parameters in the export field**.
+
+**THE FRACTIONATION GAP IS CLOSED BY THE CARBONATE LIMB, AS DESIGNED.** The shim's DIC and δ¹³C
+rows wanted export scales **1.37× apart** (= 20/14.55, the fractionation gap — that is why 16b §2
+called the failure structural rather than a size error). With two limbs at the pinned 23 % share
+the effective ε is −15.2 ‰ and the gap is **1.03×**: DIC demands 1.202×, δ¹³C 1.168×. **ALK is now
+the dissenting row at 0.951×**, and it dissents inside its own σ — it is the loosest of the three
+(σ = 54.1 in `pump_grad`, against δ¹³C's 18.4).
+
+**+259.4 log-units from OFF, of which +48.2 is rows the pump was never built against**:
+`d14c_NH` +25.0, `d14c_SH` +13.9, `d13c_level_MLO` +4.4, `d13c_level_SPO` +3.5 (the gradient rows
+are +211.2 of the total). **The margin is an UPPER BOUND, not a verdict** — every arm including OFF
+sits at the same unrefitted mode, so the no-pump incumbent never gets the refit that `beta_max`,
+`kz` and `h_ml` would give it. This is the iso-observable-slice discipline the ocean-candidate
+round cost 309 log-units to learn: read the *shape* and the per-row scales, not the margin.
+
+**THE PINNED CARBONATE SHARE CHECKS OUT INDEPENDENTLY.** Scanning `pump_carb_frac` at fixed
+`pump_grad` = 280 gives a quadratic vertex of **0.214 ± 0.026** against the **0.23** that GLODAP's
+alkalinity gradient pinned — **0.61 σ**. The transient likelihood and the observed ALK/DIC
+stoichiometry agree about the split, arriving from opposite directions. Not a licence to fit it.
+
+**A GATE OF MINE WAS WRONG AND IS FIXED THE RIGHT WAY, NOT THE CONVENIENT WAY.** The zero-uptake
+gate was written on logL at 1e−6 log-units — **tighter than the spinup's own convergence** — and
+duly reported FAIL at 2.16e−6. Loosening the threshold until it passed would have been the
+explaining-away move. Instead the gate now reads the **physical** quantity: max |ΔCO₂(2024)| across
+the whole scan is **2.24e−08 ppm**, six orders inside any meaningful leak, and the logL footprint
+is printed as context rather than as the test. **PASS.** Second estimator bug caught the same way:
+the δ¹³C row is a *ratio* and departs 4.6 % from linear, so a line through the endpoint arms put
+its demand at 287.8 against the bracketing pair's **272.3** — a 6 % error, larger than the
+row-to-row disagreement the part exists to measure. Both DIC and ALK are exactly linear
+(3.2e−11, 2.0e−16), which is what a fixed source under linear transport must be.
+
+**PREDICTIONS.** All four pre-registered predictions held: P1 zero uptake, P2 linearity, P3 the
+per-row scales (predicted DIC ~1.19, δ¹³C ~1.15, ALK the dissenter at ~0.95; measured 1.202,
+1.168, 0.951), P4 identifiability (predicted σ 15–25, measured 13.1).
+
+**NOT DONE / DELIBERATELY NOT TAKEN:** whether `pump_grad` is fixed or fitted; whether the pump
+ships ON; N vs D (not scanned here — the gradient rows cannot tell them apart, so a D column would
+duplicate these rows while re-opening a question already deferred to the refit); the refit itself.

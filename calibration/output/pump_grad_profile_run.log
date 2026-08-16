@@ -1,0 +1,105 @@
+GATE A: h_ml = 100 m is inside the gate [85, 120]. All THREE rows are LIVE.
+targets: DIC +233.109 +/- 25.247   d13C -0.8610 +/- 0.1115   ALK +78.593 +/- 19.199
+
+
+=== PART 0. THE OPERATING POINT ===
+MODE (pre-gradient, quarantined)   kz = 6119.25 m2/yr   h_ml 183.952 -> 100 m forced
+pump: mode "N", carbonate share 0.23 (pinned by the ALK gradient)
+scan: pump_grad = 0, 100, 160, 200, 233.109, 260, 280, 300, 340, 400 umol/kg
+
+
+=== PART 1. THE PROFILE OVER pump_grad ===
+  pump_grad   0.000       1 s
+  pump_grad 100.000       0 s
+  pump_grad 160.000       0 s
+  pump_grad 200.000       0 s
+  pump_grad 233.109       0 s
+  pump_grad 260.000       0 s
+  pump_grad 280.000       0 s
+  pump_grad 300.000       0 s
+  pump_grad 340.000       0 s
+  pump_grad 400.000       0 s
+
+pump_grad   scale   export DIC grad   z_DIC d13C grad  z_d13C ALK grad   z_ALK 3-row logL      logL    d logL
+    0.000   0.000     0.00    -47.1  -11.10    1.0167  +16.84     0.00   -4.09    -218.6   -2745.1      +0.0
+  100.000   0.429     9.16     52.9   -7.14    0.2694  +10.14    35.47   -2.25     -86.2   -2584.4    +160.7
+  160.000   0.686    14.65    112.9   -4.76   -0.1451   +6.42    56.75   -1.14     -39.3   -2526.8    +218.4
+  200.000   0.858    18.32    152.9   -3.18   -0.4088   +4.06    70.94   -0.40     -20.1   -2502.7    +242.4
+  233.109   1.000    21.35    186.0   -1.87   -0.6197   +2.16    82.68   +0.21     -10.9   -2490.8    +254.3
+  260.000   1.115    23.81    212.9   -0.80   -0.7864   +0.67    92.22   +0.71      -7.5   -2486.3    +258.8
+  280.000   1.201    25.64    232.9   -0.01   -0.9078   -0.42    99.32   +1.08      -7.4   -2485.8    +259.4
+  300.000   1.287    27.47    252.9   +0.78   -1.0270   -1.49   106.41   +1.45      -9.2   -2487.6    +257.5
+  340.000   1.459    31.14    292.9   +2.37   -1.2593   -3.57   120.60   +2.19     -18.3   -2498.0    +247.2
+  400.000   1.716    36.63    352.9   +4.74   -1.5931   -6.57   141.88   +3.30     -45.0   -2529.5    +215.6
+   TARGET                     233.1           -0.8610            78.59
+    sigma                      25.2            0.1115            19.20
+
+
+=== PART 2. P1 (ZERO UPTAKE) AND P2 (LINEARITY), SCORED ===
+P1  max |d CO2(2024)| across the whole scan: 2.237e-08 ppm
+    PASS (< 1e-06 ppm) -- the constant-mass pump adds no uptake, as the property says
+    its logL footprint on the CO2-LEVEL rows: 2.160e-06 log-units (context, NOT the gate)
+    correlation of |d CO2| with pump_grad: +0.678  (a real leak would be ~+1 and would scale; spinup residue would not)
+
+P2  worst relative departure from a straight line through the endpoints:
+      DIC  3.212e-11   PASS (exactly linear)
+      ALK  2.003e-16   PASS (exactly linear)
+      d13C 4.621e-02   (a RATIO -- approximate linearity is expected)
+
+
+=== PART 3. THE PER-ROW SCALES -- P3 ===
+row            pump_grad it       as a    its sd in           secant
+                    demands      scale    pump_grad                 
+DIC                   280.2      1.202         25.2          280-300
+d13C                  272.3      1.168         18.4          260-280
+ALK                   221.6      0.951         54.1      200-233.109
+
+the three rows' demands span 1.26x  (the SHIM's DIC-vs-d13C gap was 1.37x, one limb at eps -20)
+DIC vs d13C alone: 1.03x  -- the carbonate limb CLOSED the fractionation gap
+
+precision-weighted over the three rows: pump_grad = 271.3 +/- 14.3 umol/kg (1.164x)
+NOT a posterior -- it holds all 19 parameters at the mode. It is the ocean
+rows' own statement, which is the half of the decision they can speak to.
+
+
+=== PART 4. WHERE THE OBJECTIVE PUTS IT, AND HOW SHARPLY ===
+objective                   pump_grad      scale implied sd
+the THREE ocean rows            271.3      1.164       14.4
+the FULL objective              274.5      1.178       13.1
+
+best arm ON THE GRID: pump_grad 280.000, +259.4 log-units from OFF
+  z at that arm: DIC -0.01   d13C -0.42   ALK +1.08   deep D14C +1.04
+  rows closed (|z| < 2): DIC, d13C, ALK
+
+READ THE OFF-TO-OPTIMUM MARGIN AS AN UPPER BOUND, NOT A VERDICT: the no-pump
+incumbent is not refit in this slice, and a refit with beta_max, kz and h_ml
+free could recover part of it. The SHAPE and the per-row scales are what is
+decision-grade here.
+
+per-stream change from OFF at the best arm, biggest movers first:
+    ocean_grad_d13c                +141.8
+    ocean_grad_dic                  +61.6
+    d14c_NH                         +25.0
+    d14c_SH                         +13.9
+    ocean_grad_alk                   +7.8
+    d13c_level_MLO                   +4.4
+    d13c_level_SPO                   +3.5
+
+  ocean sink 2010-2019: OFF 2.913 -> best 2.913 GtC/yr (mode N adds no uptake,
+  so any difference here is spinup state, not the pump's flux)
+
+
+=== PART 5. THE CARBONATE SHARE, AT THE BEST pump_grad ===
+  carb_frac 0.12       0 s
+  carb_frac 0.34       0 s
+
+ carb_frac DIC grad   z_DIC d13C grad  z_d13C ALK grad   z_ALK 3-row logL      logL
+      0.23    232.9   -0.01   -0.9078   -0.42    99.32   +1.08      -7.4   -2485.8
+      0.12    232.9   -0.01   -1.1910   -2.96    33.50   -2.35     -13.9   -2492.3
+      0.34    232.9   -0.01   -0.6246   +2.12   165.13   +4.51     -19.2   -2497.5
+
+all three arms hold pump_grad = 280.000. The DIC row should barely move
+(both limbs carry the same carbon); d13C and ALK are what the share trades.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pump_grad_profile/diag_pump_grad_profile.rds
