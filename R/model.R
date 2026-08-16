@@ -465,20 +465,27 @@ ccx_default_params <- function() {
     w_out_SH  = 0,
     # ---- THE BIOLOGICAL PUMP (task 9, ported 2026-08-16 from the shim in
     # calibration/pump_shim.R) --------------------------------------------
-    # OFF BY DEFAULT, and off means the model is BIT-REPRODUCED: pump_grad = 0
-    # emits no flux at all, exactly as w_up = 0 does above. Every result in this
-    # repo before 2026-08-16 was computed without a pump and stays reproducible.
+    # THE PUMP SHIPS ON, AND `pump_grad` IS A FITTED PARAMETER (Marcus
+    # 2026-08-16d, on calibration/diag_pump_grad_profile.R + _kz_degeneracy.R).
+    # It was OFF by default from the port until that decision.
     #
     # `pump_grad` is the PREINDUSTRIAL surface-to-bottom DIC gradient the pump
     # holds, in umol/kg. The export field is not a parameter: it is SOLVED as the
     # source that makes the observed profile SHAPE (data/obs_glodap_deep.rds
     # $dic_profile, a build product) an exact steady state of the model's OWN
     # diffusion operator, so it scales with `kz` and re-solves on every draw.
-    # The observed gradient is 233.1 umol/kg; the TRANSIENT terms want ~1.20x
-    # that (calibration/diag_pump_vs_gradient_terms.R part 3), and WHICH of those
-    # a refit should use -- or whether this becomes a fitted parameter at all --
-    # is a DESIGN decision, not this default's to make.
-    pump_grad = 0,
+    #
+    # THE DEFAULT IS THE OBSERVATION, NOT THE FIT. `PUMP_GRAD_OBS` = 233.109 is
+    # GLODAP's own gradient and is also this parameter's prior centre. The
+    # four-row objective prefers ~274.5 +/- 13.1 (1.178x) at the pre-gradient
+    # mode, but that optimum is a fit at a `kz` the refit will move, so putting
+    # it here would launder a fit as a structural constant. The refit is what
+    # moves this number.
+    #
+    # SETTING IT TO 0 STILL TURNS THE PUMP FULLY OFF and bit-reproduces every
+    # pre-2026-08-16 result -- the `is.null(aux$pump)` guard is unchanged, and
+    # tests/testthat/test-pump.R holds it.
+    pump_grad = ccx_const("PUMP_GRAD_OBS"),
     # Carbonate share of that gradient. PINNED BY OBSERVATION, not fitted:
     # GLODAP's alkalinity gradient (+78.59 umol/kg) with
     # d(ALK) = 2 C_carb - (N:C) C_org gives 23 % (diag_alk_gradient.R). The d13C

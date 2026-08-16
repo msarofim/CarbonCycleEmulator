@@ -5192,3 +5192,68 @@ failures as caused by the pump, since a constant-mass pump should not move a fos
 fraction. Measured at `pump_grad = 0`: af = **0.1513** at lag 100, **identical to the pump-ON arm at
 every lag** (1, 10, 50, 100, 150, 250 yr). They were already failing at HEAD. The property was never
 in question; my attribution was.
+
+## 2026-08-16e — The seven tests re-derived; the pump wiring COMMITTED; the advection hypothesis on record was WRONG
+
+**The blocker from 16d is cleared.** All seven new failures re-derived, suite back to the
+pre-existing 4 — **855 passing against 802 at HEAD**. `git checkout -- R/` is no longer the escape
+hatch; the pump ships. **No test was re-expressed to make a model change pass**: five of the seven
+now assert *more* than before, and two ended up catching real defects (below). DESIGN §5.2i.
+
+**MY OWN HYPOTHESIS WAS WRONG, AND KILLING IT COST NOTHING BECAUSE IT WAS FLAGGED AS A GUESS.**
+Handoff 16d §5 offered "the export field is solved per hemisphere, so reversing which hemisphere
+sinks is no longer a symmetry" for `test-ocean-advection.R`. **Inapplicable, on inspection before
+any run**: `w_up` is a single *global* parameter and the test sets `w_out_NH = w_out_SH`, so **no
+hemisphere is ever swapped** — each column is reversed separately and identically. Both hemispheres
+break in the *same* direction, at the ratio of their ocean areas (1.24 measured vs 1.33), which a
+swap cannot produce.
+
+**WHAT IS ACTUALLY HAPPENING** (`calibration/diag_pump_advection_symmetry.R`, ~1 min, five
+pre-registered predictions, all confirmed). `e^{A_out t} = D (e^{A_up t})^T D^-1`, so propagator
+element (i,j) maps to (j,i): the mixed layer's **(1,1) is preserved BIT-EXACTLY** (|gap| =
+**0.000e+00** at 10 and 60 yr) and **interior→ML elements differ by O(1)** (0.402, 0.220).
+**The atmosphere's invariance was always conditional on the ocean having no interior source — the
+test said so in its own words — and the pump is the model's first interior source.** Premise
+falsified, theorem intact. **NOT A BUG:**
+
+- **CO₂, the mixed layer and the land still tie EXACTLY** (≤ 1.8e-12) at every `pump_grad` from 0 to
+  466.2. The break does not scale with the pump at all.
+- `ocean_C`'s **1351.8 GtC** gap is a *preindustrial-inventory offset*, flat to **7.3e-11** across
+  the run — a different steady state, not a different response.
+- What breaks is the **isotopes**: δ¹³C **1.7e-3 ‰** against a 0.44 ‰ σ — **0.4 % of one sigma**.
+
+**AND THE MECHANISM HAS ITS OWN MUTATION TEST.** In `pump_mode` "N" the export *mass* is fixed, so
+12C's interior source is a **constant field** and cancels from the linear anomaly equation. Mode N
+does not fix the export's *isotopic ratio*, which rides the Suess effect. **Mode "D" makes 12C's
+export state-dependent too and CO₂ moves 5.3e-2 ppm — 6e10× mode N.** State-*dependence*, not mere
+presence, is what reaches the atmosphere.
+
+**TWO TESTS CAUGHT REAL DEFECTS, WHICH IS THE ARGUMENT FOR RE-DERIVING RATHER THAN RE-BASELINING:**
+
+- The **`PUMP_GRAD_OBS` ↔ `ocean_grad_dic` consistency test** promised in 16d §4 was written and
+  **failed on its first run**: the constant was hand-typed **233.109** against a shipped target of
+  **233.109378176267**. 1.6e-6 relative — physically nothing, and *exactly* the drift the test
+  exists to prevent. Both the constant and `CCX_PARAM_TABLE$pump_grad$init` now carry the target's
+  own digits.
+- **`test-parity.R` was NEVER a parity break** (16d already retracted that priority call on
+  measurement) and the tolerance is now **derived, not re-baselined**: the pump emits into `nl` = 10
+  boxes on both limbs = **20 extra terms** carrying **18.83 GtC/yr**, so reassociation is bounded by
+  20 × ε × 18.83 = **8.36e-14** against a **measured 8.53e-14 — 1.02×**. The disagreement is the
+  pump's own fluxes summed in a different order and nothing else. Tolerance = 4× the derived bound,
+  with a **pump-OFF arm retained at the original 1e-15** so a real break cannot hide in the budget.
+
+**THE REST.** The `test-likelihood.R` tripwire fired as designed and split into two arms — OFF keeps
+the zero-uniformity claim unweakened, ON asserts the interior gradient **equals `pump_grad` to 1e-13
+for every parameter perturbed**, including `kz` and `h_ml`, which is a strictly stronger statement
+than "nonzero". The leverage test's **guard**, not its bound, is what failed: the pump closed the
+miss **11.02 σ → 1.79 σ**, so `expect_gt(miss, 5)` fired while every leverage stayed inside
+`LEV_MAX`; restated as the ratio it always meant (≤ 0.049 measured against a 0.10 gate). **The pump
+does not touch the leverage at all** — identical to three digits on and off — which is the
+level-vs-sensitivity separation the pump was adopted for, and is now gated. `test-pump.R` was
+testing the *default* under a title about *bit-reproduction*; split, and the reproduction claim
+strengthened to run against a parameter list carrying no `pump_grad` at all.
+
+**NOT DONE.** `test-parity.R`'s frozen-Revelle arm still carries a bare `1e-15` and **passes** with
+the pump on, so it was left alone rather than swept into `PARITY_REL_TOL` — a passing gate is not
+something to loosen on tidiness grounds. It is the one place the derivation above is not yet
+applied, and it will fire if a future mechanism raises the flux count through that branch.

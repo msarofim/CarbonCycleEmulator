@@ -1,0 +1,139 @@
+
+
+=== PART 0 -- the hemispheric-asymmetry hypothesis, killed on inspection ===
+`w_up` is ONE GLOBAL parameter; the test sets w_out_NH = w_out_SH = 4.
+No hemisphere is swapped: each column is reversed separately and
+identically. The handoff-16d hypothesis is INAPPLICABLE, not merely wrong.
+Part 2 shows both hemispheres break in the SAME direction, which a swap
+could not produce.
+
+
+=== PART 1 -- P1: is the pump the cause, and how does the break scale? (mode N) ===
+pump_grad       co2_NH       co2_SH      ml_C_NH      ml_C_SH       land_C    ml_C13_NH    ml_C13_SH      d13c_NH      d14c_NH      atm_C14
+0.000        5.684e-13    5.684e-13    2.842e-13    2.274e-13    1.819e-12    1.465e-14    2.576e-14    4.108e-12    1.336e-12    9.095e-13
+58.300       1.137e-12    1.080e-12    2.842e-13    2.842e-13    1.819e-12    2.442e-06    3.020e-06    4.604e-04    1.115e-02    1.061e-02
+116.600      6.821e-13    6.253e-13    2.274e-13    2.842e-13    1.364e-12    4.784e-06    5.917e-06    9.025e-04    2.273e-02    2.150e-02
+233.109      8.527e-13    7.958e-13    2.842e-13    2.842e-13    1.819e-12    9.186e-06    1.136e-05    1.734e-03    4.706e-02    4.402e-02
+466.200      1.364e-12    1.307e-12    2.842e-13    2.842e-13    2.274e-12    1.698e-05    2.099e-05    3.212e-03    9.999e-02    9.178e-02
+Warning messages:
+1: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+2: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+3: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+4: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+5: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+6: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+7: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+8: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+9: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+10: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+
+P1 CONFIRMED: at pump_grad = 0 the worst column is 4.11e-12, tolerance 1e-08.
+Doubling pump_grad multiplies the isotope break by 1.85-2.12 -- LINEAR, as P5 requires.
+CO2 does NOT scale: 5.68e-13 at grad 0, 1.36e-12 at grad 466.2.
+
+
+=== PART 2 -- every column at the shipped default: LEVEL gap vs ANOMALY gap ===
+Warning messages:
+1: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+2: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+col                max|gap|    max|anom|      gap(t0)   reading
+co2_NH            8.527e-13    8.527e-13    0.000e+00   TIED
+co2_SH            7.958e-13    7.958e-13    0.000e+00   TIED
+d13c_NH           1.734e-03    1.734e-03    0.000e+00   BROKEN
+d13c_SH           1.757e-03    1.757e-03   -5.551e-13   BROKEN
+d14c_NH           4.706e-02    6.884e-02    2.178e-02   BROKEN
+d14c_SH           8.690e-02    6.511e-02   -2.178e-02   BROKEN
+ocean_C           1.352e+03    7.276e-11    1.352e+03   constant OFFSET (spinup inventory)
+land_C            1.819e-12    2.274e-12    4.547e-13   TIED
+ocean_C14         1.134e+03    8.256e-02    1.134e+03   BROKEN
+land_C14          2.965e-02    3.854e-02    8.894e-03   BROKEN
+atm_C14           4.402e-02    4.402e-02    1.137e-13   BROKEN
+ml_C_NH           2.842e-13    2.274e-13   -5.684e-14   TIED
+ml_C13_NH         9.186e-06    9.186e-06   -3.109e-15   BROKEN
+deep_C_NH         2.885e+02    3.680e+00    2.885e+02   BROKEN
+deep_C13_NH       3.181e+00    3.945e-02    3.181e+00   BROKEN
+ml_C_SH           2.842e-13    2.842e-13    0.000e+00   TIED
+ml_C13_SH         1.136e-05    1.136e-05   -1.865e-14   BROKEN
+deep_C_SH         3.834e+02    4.575e+00    3.834e+02   BROKEN
+deep_C13_SH       4.228e+00    4.908e-02    4.228e+00   BROKEN
+
+READ: CO2, the MIXED LAYER and the LAND tie at roundoff -- the test's own
+claim SURVIVES the pump for total carbon. `ocean_C` differs by a CONSTANT
+(the two circulations store different PREINDUSTRIAL interior inventories);
+its TRANSIENT ties. What genuinely breaks is the ISOTOPES.
+Both hemispheres break the SAME WAY: ml_C13 NH 9.19e-06, SH 1.14e-05 (ratio 1.24,
+against the SH/NH ocean-area ratio 1.33) -- a scaling, not a swap.
+
+
+=== PART 3 -- P2: what the transpose preserves, on the OPERATORS alone ===
+t = 10 yr : (ml,ml) = 0.5866462195 both ways, |gap| 0.000e+00
+            max_{k>1} |(ml,k)_up - (ml,k)_out| = 4.024e-01
+t = 60 yr : (ml,ml) = 0.0407622203 both ways, |gap| 0.000e+00
+            max_{k>1} |(ml,k)_up - (ml,k)_out| = 2.196e-01
+
+P2 CONFIRMED. The mixed-layer DIAGONAL element is preserved EXACTLY (a
+bit-identical 0, not a small number); the INTERIOR-to-mixed-layer elements
+differ by O(1). A source at the mixed layer is invariant under the
+reversal; a source in the interior is not. The pump is the model's FIRST
+interior source, which is why the tie survived until it landed.
+
+
+=== PART 4 -- P4: mode D is P3's mutation test ===
+N        8.527e-13    7.958e-13    2.842e-13    2.842e-13    1.819e-12    9.186e-06    1.136e-05    1.734e-03    4.706e-02    4.402e-02
+D        5.315e-02    5.406e-02    8.391e-03    1.048e-02    8.634e-02    8.344e-05    1.043e-04    1.468e-03    3.011e-02    1.496e-01
+Warning messages:
+1: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+2: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+3: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+4: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+
+P4 CONFIRMED: CO2 goes 8.53e-13 (N, fixed export MASS) -> 5.32e-02 (D, export
+scaled by mixed-layer DIC), a factor of 6e+10.
+So it is STATE-DEPENDENCE of the interior source, not its mere presence,
+that reaches the atmosphere. Mode N fixes the export's MASS but NOT its
+ISOTOPIC RATIO -- which tracks the mixed layer's own and moves with the
+Suess effect -- so the isotopes break in mode N and 12C does not.
+
+
+=== PART 5 -- P5: the break tracks the ATMOSPHERIC transient in the window ===
+window         range d13c   break d13c    break co2
+1750-1770          0.4399    9.698e-05    2.274e-13
+1800-1820          0.4539    1.139e-04    2.842e-13
+1850-1870          0.4978    1.524e-04    2.842e-13
+1900-1960          1.0050    1.734e-03    8.527e-13
+1900-2000          2.0068    4.831e-03    9.095e-13
+Warning messages:
+1: window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+2: window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+3: window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+4: window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+5: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+6: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+7: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+8: window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself. 
+
+P5 CONFIRMED. The break grows monotonically with how far the atmosphere
+moves inside the window, and CO2 stays at roundoff in EVERY window.
+CAVEAT, stated rather than hidden: the 1750-1770 arm is not a zero-forcing
+control -- it still carries a 0.44 permil start-up transient off the
+spinup, so it BOUNDS the break from above rather than isolating zero.
+
+
+=== VERDICT ===
+test-ocean-advection.R's claim was ALWAYS CONDITIONAL on the ocean having
+no interior source, and said so in its own words -- 'the mixed layer is the
+ONLY box coupling the ocean to the rest of the model'. The pump falsifies
+that premise, not the theorem. NOT A BUG:
+  * CO2, the mixed layer and the land still tie EXACTLY (P3), at every
+    pump_grad tested including 2x the shipped default;
+  * `ocean_C`'s 1352 GtC gap is a preindustrial-inventory OFFSET, flat to
+    1e-10 across the run, not a transient;
+  * the isotope break is ~1e-3 permil in atmospheric d13C, against a
+    likelihood sigma of 0.44 permil -- 0.4 % of one sigma.
+The re-derived test should assert the CONDITIONAL claim plus its boundary,
+which is STRONGER than what it asserts today: (a) 12C invariant with the
+pump ON, (b) `ocean_C` a constant offset, (c) the isotopes MUST break, and
+(d) a pump-OFF arm recovering the original all-columns tie.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pump_advection_symmetry/diag_pump_advection_symmetry.rds

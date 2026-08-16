@@ -863,6 +863,75 @@ seven are re-derived deliberately.
    so the data dominate — but check the posterior against the prior before calling a pump magnitude
    "constrained".
 
+### 5.2i What pump-ON changed in the test suite, and what it taught (2026-08-16e)
+
+Wiring §5.2h's decision in took the suite from **4 failing expectations to 19** across 11 tests —
+4 pre-existing, **7 new**. All seven are now re-derived and the suite is back to the pre-existing
+4, with **855 passing against 802 before**. **No test was re-expressed to make a model change pass**;
+each was re-derived, and five of the seven ended up asserting *more* than they did before.
+
+The one that needed real work is `test-ocean-advection.R`, and the answer overturned the
+hypothesis on record. Handoff 16d guessed hemispheric asymmetry. **That is inapplicable**: `w_up` is
+a single *global* parameter and the test sets `w_out_NH = w_out_SH`, so no hemisphere is ever
+swapped. `calibration/diag_pump_advection_symmetry.R` (~1 min) measures what actually happens.
+
+| what | measured |
+|---|---|
+| **Cause** | The pump. At `pump_grad = 0` every column ties to **4.1e-12**. |
+| **What survives** | **CO₂, the mixed layer and the land still tie EXACTLY** (≤ 1.8e-12), at every `pump_grad` from 0 to 466.2 — the break does not scale with the pump at all. |
+| **What is a level, not a break** | `ocean_C` differs by **1351.8 GtC**, flat to **7.3e-11** across the run: the two circulations hold different *preindustrial* interior inventories. |
+| **What genuinely breaks** | The **isotopes** — δ¹³C **1.7e-3 ‰** (0.4 % of the 0.44 ‰ likelihood σ), Δ¹⁴C 4.7e-2 ‰ — scaling **linearly** in `pump_grad` and monotonically in how far the atmosphere moves inside the window (9.7e-5 over 1750–1770 → 4.8e-3 over 1900–2000). |
+
+**The mechanism, on the operators rather than on a run.** `A_out = D A_up^T D^-1` gives
+`e^{A_out t} = D (e^{A_up t})^T D^-1`, so propagator element (i,j) maps to (j,i) scaled by
+dz_i/dz_j. The mixed layer is box 1, so **(1,1) is preserved bit-exactly** (measured |gap| =
+**0.000e+00** at both 10 and 60 yr) while **interior→ML elements (1,k) differ by O(1)** (0.402 at
+10 yr, 0.220 at 60 yr). **The atmosphere's invariance was always conditional on the ocean having no
+interior source** — the test said so in its own words — and **the pump is the model's first interior
+source.** The pump falsifies the premise, not the theorem.
+
+**Why 12C survives anyway, with its own mutation test.** In `pump_mode` "N" the export *mass* is
+fixed (`sc = 1`), so 12C's interior source is a **constant field**: it cancels out of the linear
+anomaly equation and can only move the steady state — which is exactly `ocean_C`'s flat offset.
+Mode N does **not** fix the export's *isotopic ratio*, which tracks the mixed layer's own and moves
+with the Suess effect, so the isotopes get a state-dependent interior source and break.
+**`pump_mode` "D" is the mutation test**: it makes 12C's export state-dependent too, and CO₂ moves
+**5.3e-2 ppm — 6e10× mode N**. State-dependence of the interior source is what reaches the
+atmosphere, not its mere presence.
+
+**The other six, briefly.**
+
+- **The `test-likelihood.R` tripwire fired as designed** ("either a pump has landed (expected) or
+  something is leaking carbon (not)") at exactly `pump_grad`. Re-derived into two arms: OFF gives
+  the original zero-uniformity claim unweakened, ON asserts the interior gradient **equals
+  `pump_grad` to 1e-13 for every parameter perturbed** — including `kz`, which the export field is
+  solved against, and `h_ml`, which re-bins the shape. Parameter-independence is the non-trivial
+  part, and a leak would break it while leaving a "gradient is nonzero" test happy.
+- **The leverage guard, not the bound, is what failed.** `expect_gt(miss, 5)` existed so the bound
+  could not pass for the wrong reason; the pump closed the miss **11.02 σ → 1.79 σ**. Restated as
+  the ratio it always meant (leverage/miss < 0.10; measured ≤ 0.049). **The pump does not touch the
+  leverage at all** — identical to three digits with the pump on and off (`kz` 0.026, `beta_max`
+  0.088, `k_w` 0.013 σ). It moves the *level*, not the parameters' grip, which is the separation the
+  pump was adopted for; that is now gated too.
+- **`test-parity.R` was NOT a parity break, and the tolerance was DERIVED rather than re-baselined.**
+  The pump emits into each of `nl` = 10 interior boxes on both limbs: **20 extra terms** accumulating
+  into the mixed layer, carrying **18.83 GtC/yr**. Reassociation bound = 20 × ε × 18.83 =
+  **8.36e-14**; **measured 8.53e-14, 1.02× the bound.** Tolerance set at 4× the derived bound, with a
+  **pump-OFF arm retained at the original 1e-15** (measured 5.1e-18) so a real break cannot hide
+  inside the pump's roundoff budget.
+- **`test-pump.R`** tested the *default* under a title about *bit-reproduction*. Split: the default
+  being ON is now asserted deliberately (it is a decision), and the property is tested by setting
+  `pump_grad = 0` explicitly — and strengthened, since "bit-reproduced" is now measured against a
+  parameter list carrying no `pump_grad` at all.
+- **The parameter count** 19 → 20, with the `init`-equals-`PUMP_GRAD_OBS` tie asserted so a
+  stale-`kz` optimum cannot be laundered into the default.
+- **The promised `PUMP_GRAD_OBS` ↔ `ocean_grad_dic` test was written, and caught a drift on its
+  first run**: the constant was typed **233.109** against a shipped target of **233.109378176267**.
+  Trivial in size, exactly the failure mode the test exists for. Both the constant and
+  `CCX_PARAM_TABLE$pump_grad$init` now carry the target's own digits. (`init` must repeat rather than
+  read the constant: `R/calibrate.R` sorts *before* `R/constants.R`, so `ccx_const()` does not exist
+  when the table is built — the test is what makes the repetition safe.)
+
 ### 5.3 Sampler
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and

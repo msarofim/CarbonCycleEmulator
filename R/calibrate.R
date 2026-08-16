@@ -86,6 +86,48 @@ CCX_PARAM_TABLE <- list(
   # neither is a reason to move the bounds by hand ahead of the refit.
   kz          = list(tr = "logit", lo = 3830, hi = 6200, init = 5000,
                      prior = function(x) dunif(x, 3830, 6200, log = TRUE)),
+  # THE BIOLOGICAL PUMP'S MAGNITUDE -- the 20th parameter (Marcus 2026-08-16d).
+  # The preindustrial surface-to-bottom DIC gradient the pump holds, umol/kg.
+  # Everything else about the pump stays structural: the export SHAPE is GLODAP's
+  # own profile solved against the model's diffusion, and the carbonate share is
+  # PINNED by GLODAP's alkalinity gradient. This is the one number the data are
+  # asked to set.
+  #
+  # WHY FITTED RATHER THAN FIXED. calibration/diag_pump_grad_profile.R found the
+  # four-row objective prefers 274.5 +/- 13.1 -- 1.178x the observed gradient --
+  # at the pre-gradient mode. But the export field is solved against the model's
+  # OWN diffusion, so that optimum is conditional on `kz`, which the refit moves.
+  # Fixing the parameter at 274.5 would freeze a fit at a stale `kz`; fixing it
+  # at the observed 233.109 would assert the model's effective 1-D column needs
+  # exactly the real ocean's gradient, which the same profile says it does not
+  # (the 18 % excess is the 1-D column's gradient-destroying kz, the same effect
+  # behind the ~3x literature-POC ratio in DESIGN sec.5.2c). Fitting it lets the
+  # refit resolve the two together.
+  #
+  # AND THEY ARE NOT DEGENERATE -- MEASURED, NOT ASSUMED.
+  # calibration/diag_pump_kz_degeneracy.R scans pump_grad x kz over the whole kz
+  # bracket: rho = -0.17, and the marginal sd of `pump_grad` is 1.01x its
+  # conditional sd. Fitting it buys a direction `kz` cannot supply, which is what
+  # the transport result (diag_ocean_candidates.R: transport CANNOT move the
+  # DIC/d13C gradients) predicts structurally.
+  #
+  # THE PRIOR MILDLY DOUBLE-COUNTS GLODAP, AND THAT IS DELIBERATE AND STATED.
+  # Its centre `PUMP_GRAD_OBS` is the same observation the `ocean_grad_dic`
+  # likelihood row scores. The width is what keeps that harmless: sd = 0.25 in
+  # log-space is +/- 25 %, about 4.5x the likelihood's own 13.1 umol/kg, so the
+  # data dominate by a wide margin and the prior only excludes absurd magnitudes.
+  # A dunif on a generous bracket would avoid the double-count entirely and is
+  # the alternative if this ever looks like it is doing work -- check the
+  # posterior against the prior before quoting a pump magnitude as "constrained".
+  # `init` REPEATS PUMP_GRAD_OBS rather than reading it, and only because it has
+  # to: this table is built at source time and R/calibrate.R sorts BEFORE
+  # R/constants.R, so `ccx_const()` does not exist yet. The digits are therefore
+  # the constant's in full -- typed short, it drifted 3.8e-4 from the target on
+  # the first day -- and tests/testthat/test-likelihood.R ties the two, which is
+  # what makes the repetition safe rather than a second place to go stale.
+  pump_grad   = list(tr = "log",   init = 233.109378176267,
+                     prior = function(x) dlnorm(x, log(ccx_const("PUMP_GRAD_OBS")),
+                                                0.25, log = TRUE)),
   tau_ex      = list(tr = "log",   init = 1.3,
                      prior = function(x) dlnorm(x, log(1.3), 0.25, log = TRUE)),
   npp_frac_NH = list(tr = "logit", lo = 0.4, hi = 0.8,   init = 0.60,

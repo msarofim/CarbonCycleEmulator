@@ -65,3 +65,24 @@ test_that("provisional constants are reported, not silently used", {
                           "RHO_SEAWATER", "NPP_GLOBAL_PI",
                           "SST_PCO2_SENSITIVITY"))
 })
+
+test_that("PUMP_GRAD_OBS IS the shipped ocean_grad_dic target, not a copy of it", {
+  # PROMISED BY R/constants.R AND WRITTEN 2026-08-16e (handoff 16d sec.4 flagged
+  # it as the one piece of the pump wiring left undone).
+  #
+  # `PUMP_GRAD_OBS` is the prior CENTRE for the fitted `pump_grad`, and it is the
+  # same observation the `ocean_grad_dic` likelihood row scores -- a deliberate,
+  # documented mild double-count. That is only defensible while the two are the
+  # SAME NUMBER: if the target is ever re-derived (different depth bins, a newer
+  # GLODAP release, a different area weighting) and the constant is not, the
+  # prior would start pulling the parameter away from the row that scores it,
+  # silently and in a direction nobody chose. Hence a hard tie rather than a
+  # comment.
+  tg <- ccx_ocean_gradient_target()
+  skip_if(is.null(tg) || is.null(tg$dic), "GLODAPv2 gradient block absent")
+  expect_equal(ccx_const("PUMP_GRAD_OBS"), tg$dic$target, tolerance = 1e-9)
+  # ...and it is `status = "data"`, so ccx_check_constants() must NOT be
+  # reporting it as provisional -- the pump's magnitude prior is anchored on an
+  # observation, which is the whole argument for centring it there.
+  expect_false("PUMP_GRAD_OBS" %in% ccx_check_constants(quiet = TRUE))
+})

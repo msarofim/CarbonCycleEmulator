@@ -7,17 +7,51 @@
 # exactly the gradient it was asked for.
 # =====================================================================
 
+test_that("the pump SHIPS ON, at the observed gradient", {
+  # Marcus 2026-08-16d, on calibration/diag_pump_grad_profile.R and
+  # diag_pump_kz_degeneracy.R. Held as a test because it is a DECISION, not an
+  # implementation detail: the default was 0 from the port until that call, and
+  # a silent revert would change every result in the repo without changing a
+  # line of model code.
+  #
+  # AND THE DEFAULT IS THE OBSERVATION, NOT THE FIT. The four-row objective
+  # prefers ~274.5 at the pre-gradient mode, but that optimum is conditional on
+  # a `kz` the refit will move; `PUMP_GRAD_OBS` is GLODAP's own gradient and
+  # survives a refit. Asserting the tie to the constant is what stops the fit
+  # from being laundered in here as a structural default.
+  p <- ccx_default_params()
+  expect_gt(p$pump_grad, 0)
+  expect_identical(p$pump_grad, ccx_const("PUMP_GRAD_OBS"))
+  expect_false(is.null(ccx_prepare(p)$pump))
+})
+
 test_that("pump_grad = 0 emits NOTHING -- the no-pump model is bit-reproduced", {
   skip_if_no_cpp()
   # NOT "small". The guard is `is.null(aux$pump)`, so with the pump off not one
   # line of pump code runs and the derivative is the same object it was before
   # the port. Same contract w_up = 0 carries.
-  p <- ccx_default_params()
-  expect_equal(p$pump_grad, 0)
-  aux <- ccx_prepare(p)
-  expect_null(aux$pump)
-  p_on <- p; p_on$pump_grad <- 100
+  #
+  # RE-EXPRESSED 2026-08-16e, WITHOUT WEAKENING WHAT IT ASSERTS. This read
+  # `expect_equal(ccx_default_params()$pump_grad, 0)` and so tested the DEFAULT
+  # rather than the property named in its own title; when the pump shipped ON it
+  # failed for a reason that has nothing to do with bit-reproduction. The
+  # default is now asserted deliberately in the test above, and the property is
+  # tested by setting `pump_grad` explicitly -- and STRENGTHENED, because
+  # "bit-reproduced" is now measured against a parameter list carrying no
+  # `pump_grad` at all (the pre-port model), not merely inferred from the guard.
+  p0 <- ccx_default_params(); p0$pump_grad <- 0
+  expect_null(ccx_prepare(p0)$pump)
+  p_on <- p0; p_on$pump_grad <- 100
   expect_false(is.null(ccx_prepare(p_on)$pump))
+
+  # the pre-port model: no `pump_grad` in the list at all
+  p_pre <- p0; p_pre$pump_grad <- NULL
+  expect_null(ccx_prepare(p_pre)$pump)
+  s0 <- ccx_spinup(p0); s_pre <- ccx_spinup(p_pre)
+  expect_equal(s0$y, s_pre$y, tolerance = 0)
+  F <- ccx_build_forcing("historical", c(1900, 1960), prod_c14 = s0$prod_c14)
+  expect_equal(as.matrix(ccx_run_fast(s0, F)$out),
+               as.matrix(ccx_run_fast(s_pre, F)$out), tolerance = 0)
 })
 
 test_that("the pump delivers EXACTLY the gradient it was asked for", {

@@ -19,6 +19,34 @@ pf <- local({
   list(p = p)
 })
 
+# THE DERIVATIVE TOLERANCES, DERIVED FROM THE FLUX COUNT RATHER THAN FITTED TO A
+# MEASUREMENT (2026-08-16e).
+#
+# These were a single hard-coded 1e-15 relative, which was really an operation
+# count in disguise: it was sized on a pump-OFF derivative, where the two cores
+# happen to accumulate the mixed-layer tendency in nearly the same order and
+# agree to 5.1e-18. Wiring the biological pump ON took it to 8.5e-15 and the gate
+# fired -- NOT a parity break, and re-baselining the constant to the number that
+# passed would have destroyed the gate's meaning.
+#
+# THE DERIVATION. The pump emits through `add_flux` into each of the `nl` = 10
+# interior boxes, on both the organic and the carbonate limb: 2 * nl = 20 extra
+# terms accumulating into the mixed layer, carrying 18.83 GtC/yr in total. R and
+# C++ walk that loop in different orders, so the reassociation error is bounded
+# by n_terms * eps * throughput = 20 * 2.22e-16 * 18.83 = 8.36e-14 GtC/yr.
+# MEASURED: 8.53e-14, i.e. 1.02x the bound -- the disagreement is exactly
+# floating-point reassociation of the pump's own fluxes and nothing else. Divided
+# by max|dR| = 10.05 that is 8.5e-15 relative.
+#
+# So the tolerance below is 4x the DERIVED bound, not a round number above the
+# measurement -- and if a future mechanism raises the flux count, the right move
+# is to re-derive this line, not to raise it again.
+PARITY_REL_TOL <- 5e-14
+# ...and the pump-OFF arm keeps the ORIGINAL tolerance, unweakened. Without it,
+# loosening the constant above would let a genuine parity break in any pre-pump
+# code path hide inside the pump's roundoff budget. Measured 5.1e-18.
+PARITY_REL_TOL_OFF <- 1e-15
+
 test_that("single derivative agrees to roundoff", {
   skip_if_no_cpp()
   sp <- ccx_spinup(pf$p)
@@ -32,7 +60,15 @@ test_that("single derivative agrees to roundoff", {
   dC <- ccx_deriv_fast(sp$y, 1980.5, pf$p, forc, sp$grid, sp$aux)
   # Scale-relative: per-cell relative error is meaningless for cells whose value
   # is ~1e-16 (deep-ocean 14C tendencies that nearly cancel).
-  expect_lt(max(abs(dR - dC)) / max(abs(dR)), 1e-15)
+  expect_lt(max(abs(dR - dC)) / max(abs(dR)), PARITY_REL_TOL)
+  # THE PUMP-OFF ARM at the original tolerance -- see the derivation above. This
+  # is what stops PARITY_REL_TOL from being a place for a real disagreement in
+  # the pre-pump code paths to hide.
+  p0 <- pf$p; p0$pump_grad <- 0
+  sp0 <- ccx_spinup(p0); f0 <- forc; f0$c14_cosmo <- sp0$prod_c14
+  d0R <- ccx_deriv(sp0$y, 1980.5, p0, f0, sp0$grid, sp0$aux)
+  d0C <- ccx_deriv_fast(sp0$y, 1980.5, p0, f0, sp0$grid, sp0$aux)
+  expect_lt(max(abs(d0R - d0C)) / max(abs(d0R)), PARITY_REL_TOL_OFF)
 })
 
 test_that("the pro-rata land-use debit agrees to roundoff", {
@@ -50,7 +86,7 @@ test_that("the pro-rata land-use debit agrees to roundoff", {
                c14_cosmo = sp$prod_c14, d13c_foss = -27.6)
   dR <- ccx_deriv(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
   dC <- ccx_deriv_fast(sp$y, 1980.5, p, forc, sp$grid, sp$aux)
-  expect_lt(max(abs(dR - dC)) / max(abs(dR)), 1e-15)
+  expect_lt(max(abs(dR - dC)) / max(abs(dR)), PARITY_REL_TOL)
   # and it must actually be a different model from the WOOD-ONLY one, or the
   # test above would be passing for the wrong reason. Stated as an explicit
   # f_luc_wood = 1, NOT as `pf$p`: the default moved 1 -> 0 on 2026-08-13 and a

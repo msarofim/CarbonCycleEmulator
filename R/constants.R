@@ -123,6 +123,24 @@ CCX_CONSTANTS <- list(
   # ---- biological pump (task 9) ---------------------------------------
   # STRUCTURAL, not fitted. The pump's magnitude and its carbonate share live in
   # ccx_default_params() because a refit might touch them; these two do not.
+  #
+  # PUMP_GRAD_OBS is the exception that proves that rule: it is not the pump's
+  # magnitude but the OBSERVATION the magnitude's prior is anchored on, and it is
+  # here rather than typed into calibrate.R so there is one place to change it.
+  # It MUST equal the shipped `ocean_grad_dic` target -- tests/testthat/
+  # test-constants.R asserts exactly that against obs_glodap_deep.rds, so the two
+  # cannot drift apart silently if the target is ever re-derived.
+  # FULL PRECISION, and that is not fussiness: typed at the 233.109 the handoffs
+  # quote, it sat 3.8e-4 umol/kg off the shipped target and the consistency test
+  # below caught it on its first run. The digits here are the target's own.
+  PUMP_GRAD_OBS = list(
+    value = 233.109378176267, units = "umol/kg",
+    status = "data",
+    source = paste("GLODAPv2 deep-minus-surface DIC gradient on the shipped",
+                   "fixed depths (0-100 m vs >2627.2 m), = the `ocean_grad_dic`",
+                   "likelihood target. The PRIOR CENTRE for the fitted",
+                   "`pump_grad` (Marcus 2026-08-16d), NOT the value it takes.")),
+
   PUMP_EPS13_ORG = list(
     value = -20, units = "permil",
     status = "provisional",

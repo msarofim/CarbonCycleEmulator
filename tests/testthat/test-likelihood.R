@@ -353,7 +353,19 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # SELF-WEIGHTING -- the better CO2 fitted, the louder CO2 got, 2.04x across
   # the two points measured. The weight change from fixing it is 1.05x, which
   # is asserted separately so this ledger cannot absorb a re-weighting.
-  expect_length(CCX_PARAM_NAMES, 19L)
+  # 19 -> 20 on 2026-08-16d (Marcus): `pump_grad` FITTED, the biological pump's
+  # magnitude. Its prior is centred on the OBSERVED gradient (`PUMP_GRAD_OBS`),
+  # not on the 274.5 the four-row objective prefers, because that optimum is
+  # conditional on a `kz` the refit will move. Fitted rather than fixed because
+  # the profile and the degeneracy check both cleared it: rho(pump_grad, kz) =
+  # -0.17 and the marginal sd is 1.01x the conditional, so it is not `kz` in
+  # disguise (calibration/diag_pump_kz_degeneracy.R).
+  expect_length(CCX_PARAM_NAMES, 20L)
+  expect_true("pump_grad" %in% CCX_PARAM_NAMES)
+  # the prior is anchored on the OBSERVATION, not on the fit -- if this ever
+  # ties to 274.5 a stale-`kz` optimum has been laundered into a constant
+  expect_equal(CCX_PARAM_TABLE$pump_grad$init, ccx_const("PUMP_GRAD_OBS"),
+               tolerance = 1e-12)
   expect_false("sigma_co2" %in% CCX_PARAM_NAMES)
   expect_true(all(c("grad_off_co2", "grad_off_d13c") %in% CCX_PARAM_NAMES))
   # both are shrinkage priors CENTRED AT ZERO -- centring them on the measured
@@ -593,16 +605,28 @@ test_that("the h_ml gate skips the terms outside the like-for-like band", {
     expect_null(run_at(h)$g)
 })
 
-test_that("the PREINDUSTRIAL gradient is zero for every parameter -- the property the pump breaks", {
+test_that("the PREINDUSTRIAL gradient is EXACTLY pump_grad, and exactly zero without the pump", {
   skip_if_no_cpp()
-  # Handoff 2026-08-16 sec.4.2 measured this and asked for it to be GATED,
-  # because it is a property of the CURRENT structure and the pump is designed
-  # to destroy it. If this test ever fails, either a pump has landed (expected)
-  # or something is leaking carbon into the interior (not).
+  # THE TRIPWIRE FIRED, AS DESIGNED, AND THIS IS ITS RE-DERIVATION (2026-08-16e).
+  # Handoff 2026-08-16 sec.4.2 measured the zero-gradient property and asked for
+  # it to be GATED, because it is a property of the pump-free structure and the
+  # pump is designed to destroy it: "if this test ever fails, either a pump has
+  # landed (expected) or something is leaking carbon into the interior (not)."
+  # The pump landed (Marcus 2026-08-16d) and it failed at exactly 233.109 --
+  # `pump_grad` itself, to 1e-13 -- i.e. it CONFIRMED the pump rather than
+  # catching a leak. Both readings are now separated and gated:
   #
-  # It is a proof, not a coincidence: DIC and 13C are conserved with no interior
-  # source, so any steady state of any transport operator has a uniform interior;
-  # the ML value is carbonate equilibrium at fixed ALK_SURFACE and SST.
+  #   OFF arm -- the original claim, unweakened. A proof, not a coincidence: DIC
+  #     and 13C are conserved with no interior source, so any steady state of any
+  #     transport operator has a uniform interior; the ML value is carbonate
+  #     equilibrium at fixed ALK_SURFACE and SST.
+  #   ON arm -- STRICTLY STRONGER than what this test asserted before. The
+  #     delivered gradient equals `pump_grad` to roundoff for EVERY parameter
+  #     perturbed, including `kz` (which the export field is solved against and
+  #     so scales with) and `h_ml` (which re-bins the observed shape). That the
+  #     answer is parameter-INDEPENDENT is the non-trivial part, and a leak into
+  #     the interior would break it while leaving a "gradient is nonzero" test
+  #     perfectly happy.
   pi_grad <- function(p) {
     sp <- ccx_spinup(p); g <- sp$grid; rho <- ccx_const("RHO_SEAWATER")
     pool <- function(idx, dz) {
@@ -614,10 +638,14 @@ test_that("the PREINDUSTRIAL gradient is zero for every parameter -- the propert
       pool(function(h) sp$aux$idx[[h]]$ml, g$dz[1])
   }
   base <- ccx_default_params()
-  expect_lt(abs(pi_grad(base)), 1e-9)
-  for (nm in c("kz", "h_ml", "k_w", "beta_max", "q10")) {
-    p <- base; p[[nm]] <- p[[nm]] * 1.1
-    expect_lt(abs(pi_grad(p)), 1e-9)
+  expect_gt(base$pump_grad, 0)       # the ON arm below is not vacuous
+  for (nm in c("<none>", "kz", "h_ml", "k_w", "beta_max", "q10")) {
+    p <- base; if (nm != "<none>") p[[nm]] <- p[[nm]] * 1.1
+    # ON: the interior gradient IS the pump's, whatever else moves
+    expect_lt(abs(pi_grad(p) - p$pump_grad), 1e-9)
+    # OFF: and with the source removed the interior is uniform again
+    p0 <- p; p0$pump_grad <- 0
+    expect_lt(abs(pi_grad(p0)), 1e-9)
   }
 })
 
@@ -628,24 +656,48 @@ test_that("the TRANSIENT gradient's parameter leverage stays far below its miss"
   # Scoring the TRANSIENT (Marcus 2026-08-16) rather than the spinup means
   # sec.4.2's "leverage exactly zero" no longer holds: anthropogenic uptake
   # depends on the ocean parameters, so the terms are no longer a pure constant.
-  # MEASURED at <= 0.09 sigma per 10 % perturbation against an ~11 sigma miss,
-  # i.e. still ~120x too weak to hijack a parameter. This gate is a BOUND, not
+  # MEASURED at <= 0.09 sigma per 10 % perturbation. This gate is a BOUND, not
   # an equality, and it is the honest replacement for the zero-leverage one.
-  LEV_MAX <- 0.25          # sigma per 10 % perturbation; measured max 0.09
+  #
+  # RE-DERIVED 2026-08-16e, AND THE BOUND ITSELF WAS NEVER WHAT FAILED. The old
+  # `expect_gt(miss, 5)` was a guard against the bound passing for the wrong
+  # reason -- against a miss so small that "leverage is far below it" is vacuous.
+  # Wiring the pump ON closed the miss from 11.02 to 1.79 sigma, so the GUARD
+  # fired while every leverage stayed inside LEV_MAX. Loosening 5 to 1 would have
+  # kept the letter and lost the point, so the guard is now stated as what it
+  # always meant: the leverage must be far below the miss, as a RATIO, whatever
+  # the miss happens to be.
+  #
+  # AND THE PUMP DOES NOT TOUCH THE LEVERAGE AT ALL -- measured identical to
+  # three digits with the pump on and off (kz 0.026, beta_max 0.088, k_w 0.013
+  # sigma both ways). It moves the LEVEL of the scored gradient (-45.2 -> 187.9
+  # against a 233.1 target), not the parameters' grip on it, which is exactly the
+  # separation the pump was adopted for. The pump-OFF arm below gates that.
+  LEV_MAX   <- 0.25        # sigma per 10 % perturbation; measured max 0.09
+  LEV_SHARE <- 0.10        # ...and as a fraction of the miss; measured max 0.049
   base <- ccx_default_params(); base$h_ml <- mean(LIK_OCEAN_GRAD_HML_OK)
   gof <- function(p) {
     sp <- ccx_spinup(p)
     ff <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
     ccx_ocean_grad_scored(ccx_run_fast(sp, ff)$out, sp)$dic
   }
-  b <- gof(base)
-  # the miss is real and large -- if it were small the bound below would be
-  # passing for the wrong reason
-  expect_gt(abs(b - tg$dic$target) / tg$dic$sd, 5)
+  b    <- gof(base)
+  miss <- abs(b - tg$dic$target) / tg$dic$sd
+  # the miss is still REAL -- if it vanished the bound below would be vacuous,
+  # which is what the old `> 5` guard was protecting and what this preserves
+  expect_gt(miss, 1)
   for (nm in c("kz", "beta_max", "k_w")) {
     p <- base; p[[nm]] <- p[[nm]] * 1.1
-    expect_lt(abs(gof(p) - b) / tg$dic$sd, LEV_MAX)
+    lev <- abs(gof(p) - b) / tg$dic$sd
+    expect_lt(lev, LEV_MAX)
+    expect_lt(lev / miss, LEV_SHARE)
   }
+  # THE PUMP CLOSES THE MISS. Held here rather than in a comment because it is
+  # the reason the pump ships: without it this row sits ~11 sigma out and no
+  # ocean parameter can move it (that is diag_ocean_candidates.R's structural
+  # result), so a failure here means the pump has stopped reaching this row.
+  p0 <- base; p0$pump_grad <- 0
+  expect_gt(abs(gof(p0) - tg$dic$target) / tg$dic$sd, 3 * miss)
 })
 
 # =====================================================================
