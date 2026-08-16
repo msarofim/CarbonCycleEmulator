@@ -4739,3 +4739,74 @@ new download or a ΔC* build for DIC, while only δ¹³C had its correction in-r
 (surface) / **2002.4** (deep). Implementation cost, stated honestly: `ccx_run_fast()` returns
 only the **final** state, so this needs one recorded interior state at the obs epoch — a small
 output-contract addition, not free, but far cheaper than a C_ant build. **Layer axis still open.**
+
+## 2026-08-16 (night) — THE GRADIENT TERMS ARE IN THE OBJECTIVE (task 12). Both §6 decisions taken; suite back to its pre-existing 4 failures
+
+Marcus took the layer axis on the amended recommendation: **fixed depths + an `h_ml` gate**,
+rather than freezing at the `h_ml` = 75 grid, because at `h_ml` = 100 (the value the pump
+delivers) fixed depths are already like-for-like to **0.09 σ_Δ** — so the gate defers the
+choice to the refit instead of pre-judging it. Contamination axis: **transient at the
+observations' epoch**. Details in DESIGN.md §5.2b.
+
+**Shipped.** Streams `ocean_grad_dic` / `ocean_grad_d13c`. Targets +233.109 µmol/kg and
+−0.8610 ‰ on fixed depths (0–100 m / >2627.2 m); σ_Δ 25.25 and 0.1115 from the block
+bootstrap **on the contrast**; epochs 1999.8 / 2002.4 (surf / deep), measured per field *and*
+per layer because the observed gradient is itself a difference of two differently-timed means.
+`LIK_OCEAN_GRAD_HML_OK` = [85, 120] m; outside it both terms go **absent**, not zero.
+
+**MARCUS' EPOCH DECISION IS MEASURABLY EQUIVALENT TO THE CORRECTION HE DECLINED**, which was
+worth testing rather than assuming (part 5b). Because the model takes up anthropogenic carbon
+too, the contamination cancels on *both* sides:
+
+| route | miss (µmol/kg) | σ_Δ |
+|---|---|---|
+| **option 3 — transient at obs epoch (SHIPPED)** | **278.29** | **11.02** |
+| option 2 — preindustrial + ~50 µmol/kg C_ant | 283.11 | 11.21 |
+| option 1 — raw modern vs preindustrial model | 233.11 | 9.23 |
+
+**0.19 σ_Δ apart.** The cheap route is not a compromise. Option 1 would have understated the
+miss by **1.98 σ**, all of it in the direction that hides the pump — §4.4's trap, quantified.
+
+**A CONSEQUENCE §4.2 DID NOT ANTICIPATE: THE TERMS ARE NO LONGER A PURE CONSTANT.** §4.2's
+"leverage exactly zero ⇒ no posterior distortion and no parameter hijacking" is a property of
+the **preindustrial** gradient — still 0 to machine precision for every parameter, and now
+gated. But the **transient** gradient depends on anthropogenic uptake and therefore on the
+ocean parameters. **Measured: ≤ 0.09 σ_Δ per 10 % perturbation** across `kz`, `h_ml`, `k_w`,
+`beta_max`, `q10`, `tau_ex`, against an 11 σ miss — ~120× too weak to hijack anything, but not
+zero. So §4.2's requested zero-leverage gate was re-aimed: the **exact-zero** assertion sits on
+the preindustrial gradient (the property the pump breaks), and the transient gets a **bound**
+(`LEV_MAX` = 0.25 σ). Asserting exact zero on the shipped quantity would have failed.
+
+**Model cores changed, both of them.** `CCX_OCEAN_BOX_COLS` — mixed-layer and bottom-box C and
+¹³C per hemisphere, raw GtC, emitted as a **time series** (the terms score the obs epoch, not
+the run's end). Order is load-bearing: `ccx_run_fast()` names the C++ matrix positionally.
+Parity gated to ~1e-13 with an added anti-degeneracy check, so a transposed pair cannot pass.
+
+**logL moves by ~199 log-units** (DIC 64.9, δ¹³C 134.5 at `h_ml` = 100) and is now incomparable
+with every prior run. Expected. **δ¹³C is the STRONGER term** (z +16.5 vs −11.0) and will
+dominate the pump's fit — worth knowing before the refit, since the pump was designed against
+the DIC row.
+
+**A TEST FAILED AND IT WAS NOT A REGRESSION — reported rather than quietly fixed.**
+`test-ocean-advection.R:152` asserted `expect_equal(as.matrix(out$out), ...)` over the WHOLE
+frame, under a comment saying "the atmosphere, the land and the ocean TOTALS are tied ... the
+INTERIOR is not". Those were the same set only because `out` carried no interior quantity; the
+new columns broke the coincidence and the assertion began contradicting its own next line
+(which asserts the deep DOES move). Measured at the split: **every pre-existing column ties to
+≤ 1.5e-10, the MIXED-LAYER columns tie to ≤ 2.9e-13, and only the BOTTOM-BOX ones differ**
+(deep_C_NH by 3.68 GtC). Physics untouched; the assertion's scope was wrong. Re-scoped, and
+**strengthened** — the mixed-layer tie is now asserted explicitly, which is the test's own
+mechanism claim ("air-sea acts at `iml` and nowhere else") measured directly rather than
+inferred from totals that could tie by cancellation, and the bottom-box columns are now
+asserted to DIFFER.
+
+**Suite: 4 failing, 746 passing** (was 4 failing, 737 passing). The four are the pre-existing
+ones, unchanged and unflagged.
+
+**Gate C added** to `diag_gradient_target_and_neff.R`: the diagnostic now checks itself against
+the shipped build product — targets exact, σ within a 3 % Monte Carlo tolerance (gating a
+bootstrap SE on equality would test RNG call order, not the estimator).
+
+**NOT DONE, and it is the other half of the round:** the pump. Handoff §4.5's ordering
+conclusion is terms + pump in the SAME round, then one refit. The terms are the harmless half;
+**the refit still waits for the pump.**

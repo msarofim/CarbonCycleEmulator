@@ -203,7 +203,110 @@ cat("NOTE the incumbent bracket is effectively a HARD +/-25 permil box, TIGHTER 
 cat("anything but the most aggressive n_eff here -- deleting it for an honest term\n")
 cat("would LOOSEN the constraint, not tighten it.\n")
 
+# ---------------------------------------------------------------------
+# THE GRADIENT TARGETS (added 2026-08-16). Marcus took the DIC and d13C
+# gradient terms into the objective; these are the three numbers each needs.
+#
+# LAYERS. FIXED DEPTHS -- the `surf` and `deep` bands above -- NOT the model's
+# own boxes, decided by Marcus on 2026-08-16 after both options were priced in
+# calibration/diag_gradient_target_and_neff.R part 2b. A model-anchored target
+# is a function of h_ml and rewards a LARGE h_ml (penalty falls 81 -> 53
+# log-units across h_ml 50 -> 220), pushing against the very clause the pump
+# exists to fix; freezing at the h_ml = 75 grid instead overstates the miss by
+# 1.61 sigma at the fitted h_ml = 184, biasing IN FAVOUR of the pump. Fixed
+# depths are neutral on both counts AND are like-for-like to 0.09 sigma at
+# h_ml = 100, the value the pump delivers -- which is why the likelihood carries
+# a GATE on h_ml (LIK_OCEAN_GRAD_HML_OK) rather than a silent assumption.
+#
+# SIGMA. Var(Delta) = Var(D) + Var(S) - 2 Cov(D,S), and the covariance is NOT
+# negligible and NOT the same sign for every field: DIC anticorrelates at ~-0.6
+# (basins trade the two ends of the gradient -- surface DIC peaks where the deep
+# water is youngest), which INFLATES sigma_Delta ~25 %; d13C cancels weakly.
+# A block bootstrap on the CONTRAST carries that automatically, which is why the
+# sigma is measured here rather than composed from two per-layer n_eff.
+# Blocks must EXCEED the decorrelation scale (~9,000 km) to be valid, so only
+# 30 and 60 degrees are reported and the CONSERVATIVE (60 deg) one is shipped.
+#
+# EPOCH. The observed surface is anthropogenically contaminated, and Marcus'
+# resolution (2026-08-16) is to score the model's TRANSIENT gradient at the
+# observations' own epoch rather than correct the surface for C_ant and Suess --
+# the GLODAPv2.2023 bottle file carries no C_ant column, so correcting DIC would
+# have meant a new download or a dC* build. The epoch is therefore part of the
+# target and is measured here, per field AND per layer, because the two layers
+# are not sampled at the same mean time.
+GD_GRAD_BLOCKS <- c(30, 60)      # degrees latitude; > the ~9,000 km decorrelation scale
+GD_GRAD_NBOOT  <- 4000
+GD_GRAD_SEED   <- 20260816       # stated, so this build reproduces
+
+#' cos(lat)-weighted mean sampling year of the cells in a band
+gd_epoch <- function(ok, zmin, zmax) {
+  k <- ok & d$depth >= zmin & d$depth <= zmax
+  x <- d[k, ]
+  id <- paste(floor(x$lat / GD_DLAT), floor(x$lon / GD_DLON), floor(x$depth / GD_DZ))
+  yc <- tapply(x$year, id, mean)
+  w  <- cos(tapply(x$lat, id, mean) * pi / 180)
+  sum(yc * w) / sum(w)
+}
+
+#' Block bootstrap on the CONTRAST deep - surf. Blocks are HORIZONTAL and each
+#' carries both layers' cells, so a resampled block moves them together -- that
+#' is what makes the covariance ride along instead of being assumed.
+gd_grad_boot <- function(ok, val) {
+  cells <- function(zmin, zmax) {
+    k <- ok & d$depth >= zmin & d$depth <= zmax
+    x <- d[k, ]
+    id <- paste(floor(x$lat / GD_DLAT), floor(x$lon / GD_DLON), floor(x$depth / GD_DZ))
+    data.frame(v = as.numeric(tapply(x[[val]], id, mean)),
+               lat = as.numeric(tapply(x$lat, id, mean)),
+               lon = as.numeric(tapply(x$lon, id, mean)))
+  }
+  s <- cells(0, 100); b <- cells(GD_MODEL_DEEP_TOP, 1e5)
+  s$w <- cos(s$lat * pi / 180); b$w <- cos(b$lat * pi / 180)
+  set.seed(GD_GRAD_SEED)
+  vapply(GD_GRAD_BLOCKS, function(B) {
+    bs <- paste(floor(s$lat / B), floor(s$lon / (2 * B)))
+    bd <- paste(floor(b$lat / B), floor(b$lon / (2 * B)))
+    ub <- union(unique(bs), unique(bd)); nb <- length(ub)
+    is_ <- split(seq_len(nrow(s)), factor(bs, levels = ub))
+    id_ <- split(seq_len(nrow(b)), factor(bd, levels = ub))
+    dr <- vapply(seq_len(GD_GRAD_NBOOT), function(i) {
+      k  <- sample.int(nb, nb, replace = TRUE)
+      ks <- unlist(is_[k], use.names = FALSE); kd <- unlist(id_[k], use.names = FALSE)
+      if (!length(ks) || !length(kd)) return(NA_real_)
+      sum(b$w[kd] * b$v[kd]) / sum(b$w[kd]) - sum(s$w[ks] * s$v[ks]) / sum(s$w[ks])
+    }, numeric(1))
+    stats::sd(dr[is.finite(dr)])
+  }, numeric(1))
+}
+
+gd_gradient <- function(ok, val, r) {
+  se <- gd_grad_boot(ok, val)
+  names(se) <- paste0("blk", GD_GRAD_BLOCKS)
+  list(target = r$deep$vw - r$surf$vw,
+       # CONSERVATIVE of the valid blocks. A gradient term that is too tight is
+       # the failure mode that hijacks a posterior; too loose merely wastes data.
+       sd = max(se), sd_by_block = se,
+       epoch_surf = gd_epoch(ok, 0, 100),
+       epoch_deep = gd_epoch(ok, GD_MODEL_DEEP_TOP, 1e5),
+       layer_surf = c(0, 100), layer_deep = c(GD_MODEL_DEEP_TOP, 1e5),
+       nboot = GD_GRAD_NBOOT, blocks = GD_GRAD_BLOCKS, seed = GD_GRAD_SEED)
+}
+
+grad <- list(tco2 = gd_gradient(okco, "tco2", rco),
+             d13c = gd_gradient(ok13, "c13",  r13),
+             d14c = gd_gradient(ok14, "c14",  r14))   # D14C: reported, NOT a term
+cat("\n\n=== GRADIENT TARGETS (fixed depths; Marcus 2026-08-16) ===\n")
+cat(sprintf("%-8s %12s %10s %12s %12s %12s\n", "field", "target", "sd (60deg)",
+            "sd (30deg)", "epoch surf", "epoch deep"))
+for (nm in names(grad)) {
+  gg <- grad[[nm]]
+  cat(sprintf("%-8s %12.4f %10.4f %12.4f %12.1f %12.1f%s\n", nm, gg$target, gg$sd,
+              gg$sd_by_block[["blk30"]], gg$epoch_surf, gg$epoch_deep,
+              if (nm == "d14c") "   <- reported only, no term" else ""))
+}
+
 out <- list(
+  gradient = grad,
   sigma_candidates = c(meas = 3, se_neff100 = r14$deep$sd_w / 10,
                        se_neff20 = r14$deep$sd_w / sqrt(20),
                        se_neff5 = r14$deep$sd_w / sqrt(5),

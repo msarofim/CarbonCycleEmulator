@@ -500,7 +500,14 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
   // knowing an inventory convention; likelihood.R converts with a named
   // constant. Needed by the ocean excess-14C constraint, which is an inventory
   // at two reference years and so cannot be reconstructed from D14C alone.
-  NumericMatrix out(n, 11);
+  // ... then, for each hemisphere, the MIXED-LAYER and BOTTOM-BOX carbon and
+  // 13C, in STATE units (GtC), for the ocean DIC / d13C GRADIENT terms. Emitted
+  // RAW for the same reason the 14C inventories are: turning them into umol/kg
+  // needs the box volume, i.e. an observational convention the core has no
+  // business owning. R/likelihood.R converts. They are a TIME SERIES rather
+  // than a final state because the gradient terms are scored at the
+  // OBSERVATIONS' epoch (~2000, not the run's end year) -- Marcus 2026-08-16.
+  NumericMatrix out(n, 19);
   const double gpp = A.gtc_per_ppm_hemi;
 
   std::vector<double> f(N_FORCING);
@@ -526,6 +533,14 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
     }
     out(i, 6) = oc; out(i, 7) = ld;
     out(i, 8) = oc14; out(i, 9) = ld14; out(i, 10) = at14;
+    for (int hi = 0; hi < 2; ++hi) {
+      const int base = hi * NPH;
+      const int iml = base + IML, idp = base + IML + NL;
+      out(i, 11 + 4 * hi) = y[IX(iml, C)];
+      out(i, 12 + 4 * hi) = y[IX(iml, C13)];
+      out(i, 13 + 4 * hi) = y[IX(idp, C)];
+      out(i, 14 + 4 * hi) = y[IX(idp, C13)];
+    }
 
     for (int j = 0; j < N_FORCING; ++j) f[j] = forcing(i, j);
 

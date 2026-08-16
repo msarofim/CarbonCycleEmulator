@@ -362,8 +362,16 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # `deep` is the BOTTOM-BOX D14C of this draw's spinup -- free, since the
     # spinup has already run, and the layer moves 0.04 permil over the transient
     # so the steady state is the right thing to score (see LIK_D14C_DEEP_NEFF).
+    # `ocean_grad` is the model's (bottom box - mixed layer) DIC and d13C at the
+    # OBSERVATIONS' epoch, not at the run's end and not from the spinup -- the
+    # gradient terms score the transient (Marcus 2026-08-16). Unlike `deep`, it
+    # is therefore NOT free: it reads the CCX_OCEAN_BOX_COLS time series. It
+    # returns NULL, skipping both terms visibly, when h_ml leaves
+    # LIK_OCEAN_GRAD_HML_OK -- the band in which fixed-depth targets are
+    # like-for-like with the model's boxes.
     ll <- ccx_loglik(r$out, obs, err, luc = eluc,
-                     deep = sp$diagnostics$d14c_bottom_box)
+                     deep = sp$diagnostics$d14c_bottom_box,
+                     ocean_grad = ccx_ocean_grad_scored(r$out, sp))
     if (verbose) cat(sprintf("  ll %.1f  prior %.1f\n", ll, lp))
     if (!is.finite(ll)) return(-Inf)
     lp + ll

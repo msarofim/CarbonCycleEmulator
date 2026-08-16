@@ -543,3 +543,107 @@ test_that("the deep term is absent without `deep`, Gaussian with it", {
   expect_equal(sum(parts),
                ccx_loglik(f$out, f$obs, f$err, deep = tg$target), tolerance = 1e-9)
 })
+
+# =====================================================================
+# The ocean DIC / d13C GRADIENT terms (task 12; Marcus 2026-08-16)
+# =====================================================================
+
+test_that("the gradient terms are absent without `ocean_grad`, Gaussian with it", {
+  skip_if_no_cpp()
+  tg <- ccx_ocean_gradient_target()
+  skip_if(is.null(tg), "GLODAPv2 gradient block absent")
+  f <- lik_fixture()
+  bare <- ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE)
+  # ABSENT, not a silent zero -- the same visible-absence contract the deep
+  # D14C term uses, and the thing the h_ml gate relies on to be legible.
+  expect_false("ocean_grad_dic"  %in% names(bare))
+  expect_false("ocean_grad_d13c" %in% names(bare))
+  at <- function(dic, d13c) ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE,
+                                       ocean_grad = list(dic = dic, d13c = d13c))
+  p0 <- at(tg$dic$target, tg$d13c$target)
+  expect_true(all(c("ocean_grad_dic", "ocean_grad_d13c") %in% names(p0)))
+  expect_equal(unname(p0[["ocean_grad_dic"]]),
+               stats::dnorm(0, 0, tg$dic$sd, log = TRUE), tolerance = 1e-10)
+  # quadratic, and a 1-sigma miss costs exactly 0.5
+  cost <- function(z) p0[["ocean_grad_dic"]] -
+    at(tg$dic$target + z * tg$dic$sd, tg$d13c$target)[["ocean_grad_dic"]]
+  expect_equal(cost(1), 0.5, tolerance = 1e-8)
+  expect_equal(cost(2), 4 * cost(1), tolerance = 1e-8)
+})
+
+test_that("the h_ml gate skips the terms outside the like-for-like band", {
+  skip_if_no_cpp()
+  skip_if(is.null(ccx_ocean_gradient_target()), "GLODAPv2 gradient block absent")
+  # THE POINT OF THE GATE: the targets are on FIXED depths (0-100 m / >2627.2 m),
+  # which are like-for-like with the model's boxes only while h_ml is near 100 --
+  # 0.09 sigma there, but 1.61 sigma at the fitted h_ml = 184
+  # (diag_gradient_target_and_neff.R part 2b). Outside the band the terms must
+  # go ABSENT rather than score a mismatched layer.
+  F <- NULL
+  run_at <- function(h) {
+    p <- ccx_default_params(); p$h_ml <- h
+    sp <- ccx_spinup(p)
+    ff <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
+    list(g = ccx_ocean_grad_scored(ccx_run_fast(sp, ff)$out, sp), h = sp$grid$h_ml)
+  }
+  inb <- run_at(mean(LIK_OCEAN_GRAD_HML_OK))
+  expect_false(is.null(inb$g))
+  expect_true(is.finite(inb$g$dic) && is.finite(inb$g$d13c))
+  for (h in c(LIK_OCEAN_GRAD_HML_OK[1] - 10, LIK_OCEAN_GRAD_HML_OK[2] + 64))
+    expect_null(run_at(h)$g)
+})
+
+test_that("the PREINDUSTRIAL gradient is zero for every parameter -- the property the pump breaks", {
+  skip_if_no_cpp()
+  # Handoff 2026-08-16 sec.4.2 measured this and asked for it to be GATED,
+  # because it is a property of the CURRENT structure and the pump is designed
+  # to destroy it. If this test ever fails, either a pump has landed (expected)
+  # or something is leaking carbon into the interior (not).
+  #
+  # It is a proof, not a coincidence: DIC and 13C are conserved with no interior
+  # source, so any steady state of any transport operator has a uniform interior;
+  # the ML value is carbonate equilibrium at fixed ALK_SURFACE and SST.
+  pi_grad <- function(p) {
+    sp <- ccx_spinup(p); g <- sp$grid; rho <- ccx_const("RHO_SEAWATER")
+    pool <- function(idx, dz) {
+      C <- sum(vapply(HEMIS, function(h) sp$y[idx(h), "C"], numeric(1)))
+      M <- sum(vapply(HEMIS, function(h) sp$aux$a_oc[[h]] * dz * rho, numeric(1)))
+      C * sp$aux$mol_per_GtC / M * 1e6
+    }
+    pool(function(h) utils::tail(sp$aux$idx[[h]]$oc, 1), g$dz[length(g$dz)]) -
+      pool(function(h) sp$aux$idx[[h]]$ml, g$dz[1])
+  }
+  base <- ccx_default_params()
+  expect_lt(abs(pi_grad(base)), 1e-9)
+  for (nm in c("kz", "h_ml", "k_w", "beta_max", "q10")) {
+    p <- base; p[[nm]] <- p[[nm]] * 1.1
+    expect_lt(abs(pi_grad(p)), 1e-9)
+  }
+})
+
+test_that("the TRANSIENT gradient's parameter leverage stays far below its miss", {
+  skip_if_no_cpp()
+  tg <- ccx_ocean_gradient_target()
+  skip_if(is.null(tg), "GLODAPv2 gradient block absent")
+  # Scoring the TRANSIENT (Marcus 2026-08-16) rather than the spinup means
+  # sec.4.2's "leverage exactly zero" no longer holds: anthropogenic uptake
+  # depends on the ocean parameters, so the terms are no longer a pure constant.
+  # MEASURED at <= 0.09 sigma per 10 % perturbation against an ~11 sigma miss,
+  # i.e. still ~120x too weak to hijack a parameter. This gate is a BOUND, not
+  # an equality, and it is the honest replacement for the zero-leverage one.
+  LEV_MAX <- 0.25          # sigma per 10 % perturbation; measured max 0.09
+  base <- ccx_default_params(); base$h_ml <- mean(LIK_OCEAN_GRAD_HML_OK)
+  gof <- function(p) {
+    sp <- ccx_spinup(p)
+    ff <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
+    ccx_ocean_grad_scored(ccx_run_fast(sp, ff)$out, sp)$dic
+  }
+  b <- gof(base)
+  # the miss is real and large -- if it were small the bound below would be
+  # passing for the wrong reason
+  expect_gt(abs(b - tg$dic$target) / tg$dic$sd, 5)
+  for (nm in c("kz", "beta_max", "k_w")) {
+    p <- base; p[[nm]] <- p[[nm]] * 1.1
+    expect_lt(abs(gof(p) - b) / tg$dic$sd, LEV_MAX)
+  }
+})

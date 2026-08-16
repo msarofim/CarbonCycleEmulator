@@ -149,7 +149,30 @@ test_that("reversing the circulation leaves the ATMOSPHERE invariant, not the de
   out <- ccx_run_fast(s, F)
 
   # the atmosphere, the land and the ocean TOTALS are tied
-  expect_equal(as.matrix(out$out), as.matrix(up$run$out), tolerance = 1e-8)
+  #
+  # SCOPED 2026-08-16, and the reason is worth keeping. This was
+  # `expect_equal(as.matrix(out$out), ...)` over the WHOLE frame, which matched
+  # the comment above only by accident: `out` carried no interior quantity, so
+  # "everything in out" and "everything outside the column" were the same set.
+  # Adding the bottom-box columns (CCX_OCEAN_BOX_COLS, for the ocean gradient
+  # terms) broke that coincidence and the assertion started contradicting its
+  # own next line, which asserts the deep DOES move. Measured at the split:
+  # every pre-existing column ties to <= 1.5e-10, the MIXED-LAYER columns tie to
+  # <= 2.9e-13, and only the BOTTOM-BOX ones differ (deep_C_NH by 3.68 GtC).
+  # So the physics is untouched; the assertion's scope was wrong.
+  deep_cols <- grep("^deep_", CCX_OCEAN_BOX_COLS, value = TRUE)
+  tied <- setdiff(names(out$out), deep_cols)
+  expect_equal(as.matrix(out$out[, tied]), as.matrix(up$run$out[, tied]),
+               tolerance = 1e-8)
+  # The MIXED LAYER tying is not incidental -- it is the mechanism claim above
+  # ("air-sea acts at iml and nowhere else") measured directly, and it is a
+  # stronger statement than the totals alone, which could tie by cancellation.
+  for (cc in setdiff(CCX_OCEAN_BOX_COLS, deep_cols))
+    expect_lt(max(abs(out$out[[cc]] - up$run$out[[cc]])), 1e-8)
+  # ...and the BOTTOM BOX must NOT tie, or the transpose symmetry would be
+  # saying something far stronger than it does.
+  for (cc in deep_cols)
+    expect_gt(max(abs(out$out[[cc]] - up$run$out[[cc]])), 1e-6)
   # and the mechanism is doing something -- against no advection at all
   expect_false(isTRUE(all.equal(out$out$d13c_NH, a$run$out$d13c_NH)))
   # but the INTERIOR is not tied: the outcrop keeps the deep ocean OLDER, i.e.

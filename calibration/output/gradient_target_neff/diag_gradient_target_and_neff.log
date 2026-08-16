@@ -243,4 +243,35 @@ reason handoff sec.4.2 asks for a test asserting zero leverage with the
 pump OFF so the day it stops holding is visible.
 
 
+=== PART 5. GATE C -- THIS FILE AGAINST THE SHIPPED GRADIENT TARGETS ===
+field       target here     target rds      sd here       sd rds    rel |d|
+tco2           233.1094       233.1094      25.2736      25.2467   1.07e-03
+d13c            -0.8610        -0.8610       0.1148       0.1115   2.95e-02
+d14c          -226.6944      -226.6944      15.0317      14.8729   1.07e-02
+
+GATE C PASS -- targets exact, sigmas agree within 3 % MC tolerance.
+
+
+=== PART 5b. DOES TRANSIENT SCORING RECOVER WHAT A C_ant CORRECTION WOULD? ===
+Marcus chose (2026-08-16) to score the model's TRANSIENT gradient at the
+observations' epoch rather than correct the observed surface for
+anthropogenic carbon -- option 3 over option 2, because GLODAPv2's bottle
+file carries no C_ant column. THAT CHOICE IS TESTABLE: if the two routes
+are equivalent they should give the SAME miss, and if they are not, the
+cheaper one is not a substitute. Priced here rather than asserted.
+
+route                                                miss umol/kg      sigma
+option 3, TRANSIENT at the obs epoch (SHIPPED)             278.29      11.02
+option 2, preindustrial + 50 umol/kg C_ant (approx)        283.11      11.21
+option 1, raw modern vs PREINDUSTRIAL model (biased)       233.11       9.23
+
+OPTIONS 3 AND 2 AGREE TO 4.8 umol/kg = 0.19 sigma_Delta. So the cheap
+route is not a compromise -- it recovers the C_ant correction's answer
+without needing a C_ant product, because the model takes up anthropogenic
+carbon too and the contamination cancels on BOTH sides of the comparison.
+Option 1 would have understated the miss by 1.98 sigma, all of it in
+the direction that hides the pump -- which is handoff sec.4.4's trap,
+now quantified rather than flagged.
+
+
 written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/gradient_target_neff/diag_gradient_target_and_neff.rds

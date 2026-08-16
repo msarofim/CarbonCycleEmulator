@@ -661,6 +661,14 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
                     ocean_C = NA_real_, land_C = NA_real_,
                     ocean_C14 = NA_real_, land_C14 = NA_real_,
                     atm_C14 = NA_real_)
+  # Mixed-layer and bottom-box C and 13C per hemisphere, in STATE units, for the
+  # ocean DIC / d13C gradient terms. See the note in src/ccx_core.cpp: raw, not
+  # umol/kg, and a TIME SERIES because those terms are scored at the
+  # observations' epoch rather than at the run's end.
+  for (cc in CCX_OCEAN_BOX_COLS) out[[cc]] <- NA_real_
+  obox <- lapply(HEMIS, function(h)
+    c(ml = aux$idx[[h]]$ml, deep = utils::tail(aux$idx[[h]]$oc, 1)))
+  names(obox) <- HEMIS
   gpp <- ccx_const("GtC_PER_PPM") / 2
   # Flux trace (R/fluxes.R): OPT-IN, and evaluated at each month's OPENING state
   # rather than inside the RK4 substeps. It is a diagnostic; the substep-mean
@@ -680,6 +688,12 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
     out$ocean_C14[i] <- sum(y[ocean, "C14"])
     out$land_C14[i]  <- sum(y[land,  "C14"])
     out$atm_C14[i]   <- sum(y[atm,   "C14"])
+    for (h in HEMIS) {
+      out[[paste0("ml_C_",   h)]][i] <- y[obox[[h]]["ml"],   "C"]
+      out[[paste0("ml_C13_", h)]][i] <- y[obox[[h]]["ml"],   "C13"]
+      out[[paste0("deep_C_",   h)]][i] <- y[obox[[h]]["deep"], "C"]
+      out[[paste0("deep_C13_", h)]][i] <- y[obox[[h]]["deep"], "C13"]
+    }
     y <- ccx_step_rk4(y, F$t[i], 1 / 12, p, ccx_forcing_at(F, i), grid, aux, substeps)
   }
   res <- list(state = y, out = out)

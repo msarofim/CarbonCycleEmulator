@@ -548,6 +548,51 @@ not reproduce — the default spinup gives a column uniform at **1986.3340** (NH
 **2003.7207** (SH), interior uniform to machine precision. The zero-leverage result itself
 is confirmed: **the gradient *is* the miss, in full.**
 
+### 5.2b The gradient terms as SHIPPED (2026-08-16)
+
+Both §6 decisions taken, terms implemented, suite back to its pre-existing 4 failures
+(746 passing, was 737). Streams `ocean_grad_dic` and `ocean_grad_d13c`.
+
+| | value | source |
+|---|---|---|
+| target, DIC | **+233.109 µmol/kg** | `obs_glodap_deep.rds$gradient`, fixed depths 0–100 m / >2627.2 m |
+| target, δ¹³C | **−0.8610 ‰** | ditto |
+| σ_Δ, DIC / δ¹³C | **25.25 / 0.1115** | block bootstrap on the **contrast**, conservative of the two valid block sizes |
+| epoch (surf / deep) | **1999.8 / 2002.4** (DIC), 1999.8 / 2002.2 (δ¹³C) | cell-weighted mean sampling year, per field *and* per layer |
+| `h_ml` gate | **[85, 120] m** | `LIK_OCEAN_GRAD_HML_OK`; outside it both terms go **absent**, visibly |
+
+**Marcus' epoch decision is measurably equivalent to the C_ant correction he declined.**
+The model is scored on its **transient** gradient at the observations' epoch, so
+anthropogenic contamination cancels on *both* sides. Priced three ways (part 5b):
+
+| route | miss (µmol/kg) | σ_Δ |
+|---|---|---|
+| **option 3 — transient at obs epoch (shipped)** | **278.29** | **11.02** |
+| option 2 — preindustrial + ~50 µmol/kg C_ant | 283.11 | 11.21 |
+| option 1 — raw modern vs preindustrial model | 233.11 | 9.23 |
+
+Options 3 and 2 agree to **0.19 σ_Δ**, so the cheap route is not a compromise. Option 1
+would have understated the miss by **1.98 σ**, all of it in the direction that hides the
+pump — §4.4's trap, now quantified.
+
+**One consequence of transient scoring that §4.2 did not anticipate: the terms are no
+longer a pure constant.** §4.2's "leverage exactly zero ⇒ no posterior distortion" holds for
+the **preindustrial** gradient, which is still 0 to machine precision for every parameter
+(gated). But the *transient* gradient depends on anthropogenic uptake, hence on the ocean
+parameters. **Measured: ≤ 0.09 σ_Δ per 10 % perturbation** across `kz`, `h_ml`, `k_w`,
+`beta_max`, `q10`, `tau_ex` — ~120× smaller than the 11 σ miss, so the terms still cannot
+hijack a parameter. The gate is therefore a **bound** (`LEV_MAX` = 0.25 σ), not the equality
+§4.2 asked for; the exact-zero gate lives on the preindustrial gradient, which is the
+property the pump actually breaks.
+
+**Model-core change.** Both cores now emit `CCX_OCEAN_BOX_COLS` — mixed-layer and bottom-box
+C and ¹³C per hemisphere, raw (GtC), as a **time series** because the terms are scored at the
+observations' epoch rather than at the run's end. Parity gated to ~1e-13.
+
+**Constant added to logL: ~199 log-units** (DIC 64.9, δ¹³C 134.5 at `h_ml` = 100), so logL is
+incomparable with every prior run. Expected, not a bug. Note δ¹³C is the **stronger** of the
+two (z +16.5 vs −11.0) and will dominate the pump's fit.
+
 ### 5.3 Sampler
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and

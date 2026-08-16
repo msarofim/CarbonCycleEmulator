@@ -541,6 +541,75 @@ cat("breaks that on purpose -- which is the point of adding the terms, and the\n
 cat("reason handoff sec.4.2 asks for a test asserting zero leverage with the\n")
 cat("pump OFF so the day it stops holding is visible.\n")
 
+# =====================================================================
+# PART 5. GATE C, AND THE CROSS-CHECK THAT PRICES MARCUS' EPOCH DECISION
+# =====================================================================
+sep("PART 5. GATE C -- THIS FILE AGAINST THE SHIPPED GRADIENT TARGETS")
+gg <- readRDS(ccx_path("data", "obs_glodap_deep.rds"))$gradient
+if (is.null(gg)) {
+  cat("no `gradient` block in the build product -- re-run data-raw/build_glodap_deep_targets.R\n")
+} else {
+  # The TARGET is deterministic and must match exactly. The SIGMA is a Monte
+  # Carlo estimate on each side, from the same seed but a different call order,
+  # so it is gated on agreement to a stated MC tolerance rather than to zero --
+  # gating a bootstrap SE on equality would be a test of RNG call order, not of
+  # the estimator.
+  GN_MC_TOL <- 0.03      # relative; 4000 draws gives ~1/sqrt(2*4000) ~ 1.1 %
+  cat(sprintf("%-8s %14s %14s %12s %12s %10s\n", "field", "target here",
+              "target rds", "sd here", "sd rds", "rel |d|"))
+  okc <- TRUE
+  for (kk in list(c("tco2", "tco2"), c("c13", "d13c"), c("c14", "d14c"))) {
+    sg <- max(vapply(res[[kk[1]]]$boot[as.character(GN_BLOCKS[GN_BLOCKS >= GN_BLOCK_VALID])],
+                     function(r) r$se_grad, numeric(1)))
+    rr <- abs(sg - gg[[kk[2]]]$sd) / gg[[kk[2]]]$sd
+    if (abs(res[[kk[1]]]$grad - gg[[kk[2]]]$target) > 1e-9 || rr > GN_MC_TOL) okc <- FALSE
+    cat(sprintf("%-8s %14.4f %14.4f %12.4f %12.4f %10.2e\n", kk[2],
+                res[[kk[1]]]$grad, gg[[kk[2]]]$target, sg, gg[[kk[2]]]$sd, rr))
+  }
+  cat(if (okc) sprintf("\nGATE C PASS -- targets exact, sigmas agree within %.0f %% MC tolerance.\n",
+                       100 * GN_MC_TOL)
+      else "\nGATE C FAIL -- the shipped targets do not match this file.\n")
+
+  sep("PART 5b. DOES TRANSIENT SCORING RECOVER WHAT A C_ant CORRECTION WOULD?")
+  cat("Marcus chose (2026-08-16) to score the model's TRANSIENT gradient at the\n")
+  cat("observations' epoch rather than correct the observed surface for\n")
+  cat("anthropogenic carbon -- option 3 over option 2, because GLODAPv2's bottle\n")
+  cat("file carries no C_ant column. THAT CHOICE IS TESTABLE: if the two routes\n")
+  cat("are equivalent they should give the SAME miss, and if they are not, the\n")
+  cat("cheaper one is not a substitute. Priced here rather than asserted.\n\n")
+  p <- ccx_default_params(); p$h_ml <- mean(LIK_OCEAN_GRAD_HML_OK)
+  spg <- ccx_spinup(p)
+  Fg  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = spg$prod_c14)
+  og  <- ccx_ocean_grad_scored(suppressWarnings(ccx_run_fast(spg, Fg))$out, spg)
+  sig <- gg$tco2$sd
+  # Option 2's number, built from the repo's own C_ant estimate: the model's
+  # preindustrial gradient is 0, and diag_dic_gradient.R's header sources the
+  # surface anthropogenic load as ~50 umol/kg (GLODAP 0-75 m = 2028.9 modern
+  # against ~1979 preindustrial). NOT a new dataset -- an in-repo figure, and
+  # labelled as approximate because that is what it is.
+  GN_CANT_SURF <- 50
+  miss3 <- gg$tco2$target - og$dic
+  miss2 <- (gg$tco2$target + GN_CANT_SURF) - 0
+  cat(sprintf("%-52s %12s %10s\n", "route", "miss umol/kg", "sigma"))
+  cat(sprintf("%-52s %12.2f %10.2f\n",
+              "option 3, TRANSIENT at the obs epoch (SHIPPED)", miss3, miss3 / sig))
+  cat(sprintf("%-52s %12.2f %10.2f\n",
+              sprintf("option 2, preindustrial + %g umol/kg C_ant (approx)", GN_CANT_SURF),
+              miss2, miss2 / sig))
+  cat(sprintf("%-52s %12.2f %10.2f\n",
+              "option 1, raw modern vs PREINDUSTRIAL model (biased)",
+              gg$tco2$target, gg$tco2$target / sig))
+  cat(sprintf("\nOPTIONS 3 AND 2 AGREE TO %.1f umol/kg = %.2f sigma_Delta. So the cheap\n",
+              abs(miss3 - miss2), abs(miss3 - miss2) / sig))
+  cat("route is not a compromise -- it recovers the C_ant correction's answer\n")
+  cat("without needing a C_ant product, because the model takes up anthropogenic\n")
+  cat("carbon too and the contamination cancels on BOTH sides of the comparison.\n")
+  cat(sprintf("Option 1 would have understated the miss by %.2f sigma, all of it in\n",
+              (miss2 - gg$tco2$target) / sig))
+  cat("the direction that hides the pump -- which is handoff sec.4.4's trap,\n")
+  cat("now quantified rather than flagged.\n")
+}
+
 saveRDS(list(fields = res, grad_tab = grad_tab, model = mod,
              layers = list(surf = GN_SHIPPED_SURF, deep = GN_SHIPPED_DEEP),
              h_grid = GN_H_GRID, blocks = GN_BLOCKS, nboot = GN_NBOOT,

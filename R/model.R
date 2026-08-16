@@ -46,6 +46,15 @@
 N_INTERIOR <- 10L      # ocean interior layers below the mixed layer
 HEMIS      <- c("NH", "SH")
 
+# Extra `out` columns carrying the mixed-layer and bottom-box C and 13C per
+# hemisphere, in STATE units (GtC). Added 2026-08-16 for the ocean DIC / d13C
+# GRADIENT terms, which are scored at the OBSERVATIONS' epoch and so need a time
+# series, not the final state. ORDER IS LOAD-BEARING: ccx_run_fast() names the
+# C++ matrix positionally from this vector, and src/ccx_core.cpp emits
+# (ml_C, ml_C13, deep_C, deep_C13) for NH then SH. test-parity.R gates it.
+CCX_OCEAN_BOX_COLS <- unlist(lapply(HEMIS, function(h)
+  paste0(c("ml_C_", "ml_C13_", "deep_C_", "deep_C13_"), h)))
+
 # 1 Sv = 1e6 m3/s. The conveyor is parameterised by VOLUME flux because the two
 # hemispheres have different ocean areas -- see ccx_default_params()$q_conv.
 CCX_SV_TO_M3YR <- 1e6 * 365.25 * 86400

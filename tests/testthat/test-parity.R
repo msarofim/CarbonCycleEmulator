@@ -82,6 +82,16 @@ test_that("multi-decade trajectories agree to roundoff", {
   # rather than riding on the D14C ratios above.
   for (cc in c("ocean_C14", "land_C14", "atm_C14"))
     expect_lt(max(abs(rR$out[[cc]] - rC$out[[cc]])) / max(abs(rR$out[[cc]])), 1e-13)
+  # Mixed-layer and bottom-box C and 13C, per hemisphere: a SEPARATE emission in
+  # each implementation, positionally named from CCX_OCEAN_BOX_COLS on the C++
+  # side, and the ocean gradient likelihood terms read them. A transposed pair
+  # here would be invisible to every gate above, so they get their own.
+  for (cc in CCX_OCEAN_BOX_COLS)
+    expect_lt(max(abs(rR$out[[cc]] - rC$out[[cc]])) / max(abs(rR$out[[cc]])), 1e-13)
+  # ...and they must actually differ from each other, or a column-order bug that
+  # filled all four with the same box would pass the line above.
+  expect_gt(abs(rC$out$deep_C_NH[1] - rC$out$ml_C_NH[1]), 1)
+  expect_gt(abs(rC$out$ml_C_SH[1]   - rC$out$ml_C_NH[1]), 1e-6)
   # and the final state as a whole
   expect_lt(max(abs(rR$state - rC$state)) / max(abs(rR$state)), 1e-13)
 })

@@ -435,6 +435,150 @@ ccx_deep_d14c_target <- local({
   }
 })
 
+# ---------------------------------------------------------------------
+# OCEAN DIC AND d13C GRADIENT TERMS (task 12; Marcus 2026-08-16)
+# ---------------------------------------------------------------------
+# WHY THEY EXIST. Two of the five rows that discriminate the ocean structural
+# candidates -- the preindustrial vertical DIC and d13C gradients -- were NOT in
+# the objective, and they are the two rows only a biological pump can move
+# (DESIGN sec.3.4a). A refit could therefore never arbitrate the pump no matter
+# how long it ran, and diag_dic_gradient.R's pump had zero fitted parameters
+# because there was nothing to fit them against. These terms are what make a
+# fittable pump possible. This is the SANCTIONED direction -- add a missing
+# constraint, do not reweight existing ones.
+#
+# GRADIENT, NOT LEVEL, and for d13C that is substantive rather than stylistic.
+# The model's uniform ocean d13C is +1.560 permil against a preindustrial
+# surface nearer +2.0: the LEVEL is off by ~0.4 permil for reasons that have
+# nothing to do with the pump (air-sea fractionation constants and the
+# preindustrial atmospheric value). A level term would conflate that with the
+# pump signal; a gradient term is immune to it. For DIC the two are nearly the
+# same number, so the gradient is used for both and the pair stays comparable.
+#
+# THE THREE NUMBERS EACH TERM NEEDS ARE ALL BUILD PRODUCTS, not literals here --
+# same discipline as ccx_deep_d14c_target(). See data-raw/build_glodap_deep_targets.R.
+#
+#  * TARGET, on FIXED DEPTHS (0-100 m and > 2627.2 m). Marcus 2026-08-16, after
+#    calibration/diag_gradient_target_and_neff.R part 2b priced both options and
+#    found NEITHER neutral, with biases pointing OPPOSITE ways. A target anchored
+#    on the model's own boxes is a function of h_ml (it reads +244.7 at h_ml 75
+#    and +212.8 at the fitted 184) and, since the pre-pump model gradient is 0 at
+#    every h_ml, its penalty FALLS 81 -> 53 log-units across h_ml 50 -> 220 --
+#    i.e. it rewards a LARGE h_ml and pushes against clause 1, the thing the pump
+#    exists to fix. Freezing at the h_ml = 75 grid instead overstates the miss by
+#    1.61 sigma at the fitted h_ml, biasing IN FAVOUR of adopting a pump. Fixed
+#    depths are neutral on both counts.
+#
+#  * SIGMA, from a block bootstrap ON THE CONTRAST. Var(Delta) = Var(D) +
+#    Var(S) - 2 Cov(D,S), and the covariance is neither negligible nor
+#    same-signed across fields: DIC anticorrelates at ~-0.6, INFLATING
+#    sigma_Delta ~25 % (surface DIC peaks where the deep water is youngest, so
+#    basins trade the two ends of the gradient), while d13C cancels weakly at
+#    +0.16. Composing sigma from two per-layer n_eff would have got DIC wrong by
+#    25 % in the direction that makes the term TOO STRONG. The shipped sigma is
+#    the CONSERVATIVE of the two methodologically valid block sizes.
+#
+#  * EPOCH. The observed surface is anthropogenically contaminated (~+50 umol/kg
+#    of C_ant; Suess-depleted d13C), so a preindustrial model gradient scored
+#    against it is biased AGAINST the pump. Marcus 2026-08-16 resolved this by
+#    scoring the model's TRANSIENT gradient at the observations' own epoch
+#    instead of correcting the surface -- GLODAPv2.2023's bottle file has no
+#    C_ant column, so correcting DIC would have meant a new download or a dC*
+#    build. Hence these terms read a TIME SERIES (CCX_OCEAN_BOX_COLS) rather
+#    than the spinup, unlike the deep-D14C term. The two layers have different
+#    mean sampling years (~1999.8 surface, ~2002.4 deep) and each is scored at
+#    its own, because the observed gradient is itself a difference of two
+#    differently-timed means.
+#
+# THE h_ml GATE, AND WHY IT IS NOT A SILENT ASSUMPTION. Fixed depths are
+# like-for-like with the model's boxes only while h_ml is near the surface
+# band's 100 m: the mismatch is 0.09 sigma at h_ml = 100 (the value the pump
+# delivers, handoff 15d) but 1.61 sigma at the fitted 184. So the terms are
+# SKIPPED, visibly, outside LIK_OCEAN_GRAD_HML_OK. That is deliberately a skip
+# and not a stop: a sampler excursion must not take the posterior down, but a
+# POSTERIOR that lives outside the band means the target needs re-deriving, and
+# by_stream showing the term absent is how that becomes visible.
+LIK_USE_OCEAN_GRAD   <- TRUE
+LIK_OCEAN_GRAD_HML_OK <- c(85, 120)   # m; see the paragraph above
+
+#' Ocean DIC / d13C gradient targets, from the GLODAPv2 build product.
+#'
+#' @return list(dic = , d13c = ), each list(target, sd, epoch_surf, epoch_deep),
+#'   or NULL if the dataset or its `gradient` block is absent -- a missing
+#'   optional file must not take the posterior down with it, and by_stream then
+#'   shows the terms ABSENT, which is visible.
+ccx_ocean_gradient_target <- local({
+  cache <- NULL
+  function() {
+    if (!is.null(cache)) return(cache)
+    g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_deep.rds")),
+                  error = function(e) NULL)
+    if (is.null(g) || is.null(g$gradient)) return(NULL)
+    out <- list(dic = g$gradient$tco2, d13c = g$gradient$d13c)
+    cache <<- out
+    out
+  }
+})
+
+#' The MODEL's ocean gradient (bottom box - mixed layer), globally, at a year.
+#'
+#' Both hemispheres are combined the way the observation is: DIC as a
+#' VOLUME-weighted mean concentration (equivalently, total carbon over total
+#' mass), d13C as a CARBON-weighted ratio. Averaging the two hemispheres'
+#' d13C values directly would be wrong whenever their carbon differs, which it
+#' does -- the SH column is the larger.
+#'
+#' @param out  the `out` data.frame from ccx_run()/ccx_run_fast(); must carry
+#'   CCX_OCEAN_BOX_COLS. Its ABSENCE is what skips the terms.
+#' @param aux,grid  from the spinup, for the box volumes.
+#' @param epoch list(surf, deep) decimal years; each layer is read at its own.
+ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
+  if (!all(CCX_OCEAN_BOX_COLS %in% names(out))) return(NULL)
+  at <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
+  rho <- ccx_const("RHO_SEAWATER")
+  # kg of seawater in each hemisphere's ML and bottom box
+  mass <- lapply(HEMIS, function(h)
+    c(ml = aux$a_oc[[h]] * grid$dz[1] * rho,
+      deep = aux$a_oc[[h]] * grid$dz[length(grid$dz)] * rho))
+  names(mass) <- HEMIS
+  lay <- function(which, tt) {
+    C   <- sum(vapply(HEMIS, function(h) at(paste0(which, "_C_",   h), tt), numeric(1)))
+    C13 <- sum(vapply(HEMIS, function(h) at(paste0(which, "_C13_", h), tt), numeric(1)))
+    M   <- sum(vapply(HEMIS, function(h) mass[[h]][[which]], numeric(1)))
+    c(dic  = C * aux$mol_per_GtC / M * 1e6,
+      d13c = 1000 * (C13 / C / ccx_const("R13_VPDB") - 1))
+  }
+  s <- lay("ml", epoch$surf); b <- lay("deep", epoch$deep)
+  list(dic = unname(b["dic"] - s["dic"]), d13c = unname(b["d13c"] - s["d13c"]))
+}
+
+#' The model gradient as the likelihood should receive it: each field read at
+#' ITS OWN epoch, and the h_ml gate applied.
+#'
+#' Returns NULL -- which SKIPS both terms -- when the target is unavailable, the
+#' run does not carry the box columns, or `h_ml` is outside
+#' LIK_OCEAN_GRAD_HML_OK. A NULL here is the visible-absence contract, not a
+#' silent zero.
+#'
+#' @param spin the spinup, for aux/grid/params.
+ccx_ocean_grad_scored <- function(out, spin) {
+  tg <- ccx_ocean_gradient_target()
+  if (is.null(tg)) return(NULL)
+  h <- spin$grid$h_ml
+  if (h < LIK_OCEAN_GRAD_HML_OK[1] || h > LIK_OCEAN_GRAD_HML_OK[2]) return(NULL)
+  # Each field at its own epochs: the two layers are not sampled at the same
+  # mean time, and the two fields' means differ slightly too (deep DIC 2002.4,
+  # deep d13C 2002.2). Cheap enough to do exactly rather than approximately.
+  gd <- ccx_model_ocean_gradient(out, spin$aux, spin$grid,
+                                 list(surf = tg$dic$epoch_surf,
+                                      deep = tg$dic$epoch_deep))
+  g3 <- ccx_model_ocean_gradient(out, spin$aux, spin$grid,
+                                 list(surf = tg$d13c$epoch_surf,
+                                      deep = tg$d13c$epoch_deep))
+  if (is.null(gd) || is.null(g3)) return(NULL)
+  list(dic = gd$dic, d13c = g3$d13c)
+}
+
 #' Hemisphere-area weights for the Hua zones
 ccx_zone_weights <- function(nh_bounds = LIK_ZONE_BOUNDS_NH,
                              sh_bounds = LIK_ZONE_BOUNDS_SH) {
@@ -749,7 +893,7 @@ ccx_model_stats <- function(out, obs) {
 #' repo passes `by_stream =` by name, so nothing breaks -- but a positional 5th
 #' argument means `by_stream` and a positional 4th means `luc`. Name them.
 ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
-                       by_stream = FALSE) {
+                       ocean_grad = NULL, by_stream = FALSE) {
   parts <- c()
   add <- function(name, v) parts[[name]] <<- (if (is.null(parts[[name]])) 0 else parts[[name]]) + v
   interp <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
@@ -918,6 +1062,25 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     if (!is.null(tg))
       add("d14c_deep_ocean",
           stats::dnorm(tg$target, deep, tg$sd, log = TRUE))
+  }
+
+  # ---- ocean DIC and d13C GRADIENTS, GLODAPv2 (see LIK_USE_OCEAN_GRAD) -
+  # The only terms in the objective a biological pump can move. Two scalars,
+  # two Gaussians. `ocean_grad` is built by ccx_ocean_grad_scored(), which owns
+  # the epoch lookup and the h_ml gate; its ABSENCE skips both terms visibly.
+  #
+  # WHILE THE MODEL HAS NO PUMP THESE ARE A CONSTANT (~71-136 log-units): the
+  # interior is uniform to machine precision, so the gradient is 0 for every
+  # parameter and the terms cannot distort the posterior. test-likelihood.R
+  # asserts exactly that, because the pump breaks it ON PURPOSE and the day it
+  # stops being true must be visible rather than inferred.
+  if (LIK_USE_OCEAN_GRAD && !is.null(ocean_grad)) {
+    tg <- ccx_ocean_gradient_target()
+    if (!is.null(tg))
+      for (k in list(c("dic", "ocean_grad_dic"), c("d13c", "ocean_grad_d13c")))
+        if (is.finite(ocean_grad[[k[1]]]))
+          add(k[2], stats::dnorm(tg[[k[1]]]$target, ocean_grad[[k[1]]],
+                                 tg[[k[1]]]$sd, log = TRUE))
   }
 
   # ---- GCB sinks: PARTITION only -------------------------------------
