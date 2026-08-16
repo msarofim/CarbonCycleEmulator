@@ -489,11 +489,35 @@ against `diag_deep_d14c_neff.R`). **Nothing shipped — both decisions remain Ma
 | model boxes at `h_ml` = 184 (the **fitted** value) | **+212.79** | **−0.7472** |
 
 The two in-repo numbers differ by ~1σ on both fields. Worse, a target anchored on the
-model's own boxes is **a function of `h_ml`**: it moves **+22.2 µmol/kg** as `h_ml` falls
-184 → 100, which is exactly the move the pump makes (15d). Such a term would reward
-shrinking `h_ml` partly through the *target's* motion rather than the model's gradient —
-and `h_ml` is clause 1, the thing the pump exists to fix. A fixed-depth target has no such
-feedback, at the cost of a layer mismatch against the model's boxes. **Open.**
+model's own boxes is **a function of a fitted parameter**: it moves **+22.2 µmol/kg** as
+`h_ml` falls 184 → 100, exactly the move the pump makes (15d).
+
+**Neither way out is neutral, and their biases point opposite ways** (part 2b, priced at
+σ_Δ = 19.82 µmol/kg):
+
+| `h_ml` | like-for-like target | frozen @75 | freezing costs (σ_Δ) | anchoring gives (log-units) |
+|---|---|---|---|---|
+| 75 | 244.71 | 244.71 | 0.00 | 76.2 |
+| 100 *(pump)* | 234.98 | 244.71 | 0.49 | 70.3 |
+| 184 *(fitted)* | 212.79 | 244.71 | **1.61** | **57.6** |
+| 220 | 203.66 | 244.71 | 2.07 | 52.8 |
+
+- **Freezing at `h_ml` = 75** overstates the miss by **1.61 σ_Δ** at the fitted `h_ml` = 184,
+  because the model's ML box then spans 0–184 m while the target is built on 0–75 m water.
+  That bias is *in favour* of adopting a pump and a stronger one — it points at the
+  conclusion the term exists to test.
+- **Model-anchoring** gives a penalty falling **81 → 53 log-units** across `h_ml` 50 → 220
+  (pre-pump the model's gradient is 0 at every `h_ml`, so penalty = target²/2σ²), so it
+  **rewards a large `h_ml` and pushes against clause 1**. *(An earlier draft of this section
+  and of the 2026-08-16 evening CHANGELOG entry claimed the opposite sign — that anchoring
+  rewards shrinking `h_ml`. That was wrong; part 2b's table is what caught it.)*
+
+**Neutral on both counts:** freeze the layers, but freeze them at the `h_ml` the refit lands
+on — frozen removes the feedback, matched removes the representation bias. Costs one
+iteration and a gate on |`h_ml`_posterior − `h_ml`_target|. **And a coincidence worth using:**
+at `h_ml` = 100, the value the pump delivers, the like-for-like target is +234.98 against the
+shipped rds's +233.11 — a mismatch of **0.09 σ_Δ**. If the pump lands `h_ml` near 100 the
+shipped fixed-depth layers *are* the like-for-like choice and the question dissolves. **Open.**
 
 **Decision 2 — σ, measured.** The estimand is a **contrast**, so
 Var(Δ) = Var(D) + Var(S) − 2 Cov(D,S), and the covariance was measured by two estimators

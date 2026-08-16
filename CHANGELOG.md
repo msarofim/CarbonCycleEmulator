@@ -4649,10 +4649,8 @@ choice, not a discrepancy.
 **And a hazard that was not visible before: a model-anchored target is a FUNCTION OF `h_ml`.**
 `ccx_ocean_grid()` puts the ML box at 0–`h_ml`, so the observed gradient reads
 +244.7 (h_ml 75) → +235.0 (100) → **+212.8 (184, the FITTED value)**. It moves
-**+22.2 µmol/kg** as `h_ml` falls 184 → 100 — *exactly* the move the pump makes (15d). Such a
-term would reward shrinking `h_ml` partly through the **target's** motion rather than the
-model's gradient, and `h_ml` is clause 1, the thing the pump exists to fix. A fixed-depth
-target has no such feedback, at the cost of a layer mismatch against the model's boxes.
+**+22.2 µmol/kg** as `h_ml` falls 184 → 100 — *exactly* the move the pump makes (15d).
+See the correction appended below: my first statement of this hazard's DIRECTION was wrong.
 
 **DECISION 2 — the estimand is a CONTRAST, and I predicted its covariance sign WRONG.**
 Var(Δ) = Var(D) + Var(S) − 2 Cov(D,S). I argued in the file header, *before measuring*, that
@@ -4696,3 +4694,48 @@ and the noisiest (16 blocks); that tension is unresolved.
 
 **Written:** `calibration/output/gradient_target_neff/diag_gradient_target_and_neff.{rds,log}`,
 DESIGN.md §5.2a. No model file and no likelihood constant changed.
+
+## 2026-08-16 (evening, correction) — the h_ml-anchoring hazard runs the OTHER WAY, and freezing is not free either
+
+Marcus asked whether freezing the target at the `h_ml` = 75 grid has drawbacks. Pricing it
+did — and it caught a **directional claim of mine that was wrong**, made earlier the same
+evening in this CHANGELOG, DESIGN.md §5.2a and `diag_gradient_target_and_neff.R`.
+
+**RETRACTED:** "a model-anchored target would reward shrinking `h_ml` through the target's
+motion". **MEASURED (part 2b, new):** the opposite. Pre-pump the model's gradient is **0 at
+every `h_ml`** — the interior is uniform by conservation and the ML value is carbonate
+equilibrium at fixed `ALK_SURFACE` and SST, which does not involve `h_ml` — so the penalty is
+target²/2σ², and the target *falls* with `h_ml`. Penalty therefore falls **81 → 53 log-units**
+across `h_ml` 50 → 220: **model-anchoring rewards a LARGE `h_ml` and pushes AGAINST clause 1**,
+the thing the pump exists to fix. A worse hazard than the one I claimed, in the opposite
+direction. I reasoned about the target's motion and never checked the sign of its effect on
+the penalty.
+
+**And freezing is not free either — its bias points the other way.** Freezing at `h_ml` = 75
+overstates the miss by **1.61 σ_Δ** at the fitted `h_ml` = 184, because the model's ML box then
+spans 0–184 m while the target is built on 0–75 m water. That bias is **in favour of adopting a
+pump, and a stronger one** — i.e. it points at the conclusion the term exists to test.
+
+| `h_ml` | like-for-like | frozen @75 | freezing costs (σ_Δ) | anchoring gives (log-u) |
+|---|---|---|---|---|
+| 75 | 244.71 | 244.71 | 0.00 | 76.2 |
+| 100 *(pump)* | 234.98 | 244.71 | 0.49 | 70.3 |
+| 184 *(fitted)* | 212.79 | 244.71 | **1.61** | **57.6** |
+| 220 | 203.66 | 244.71 | 2.07 | 52.8 |
+
+**Neutral on both counts:** freeze the layers at the `h_ml` the refit actually lands on —
+frozen kills the feedback, matched kills the representation bias — for one iteration and a
+gate on |`h_ml`_posterior − `h_ml`_target|. **Coincidence worth using:** at `h_ml` = 100, the
+value the pump delivers (15d), the like-for-like target is +234.98 against the shipped rds's
+**+233.11 — a mismatch of 0.09 σ_Δ**. If the pump lands `h_ml` near 100 the shipped
+fixed-depth layers *are* the like-for-like choice and freeze-vs-anchor dissolves.
+
+**MARCUS DECIDED (contamination axis):** option 3 — **score the model's transient gradient at
+the observations' epoch** against the modern observation, rather than correcting the surface
+for anthropogenic carbon and Suess. No C_ant product needed, which matters because the
+GLODAPv2.2023 bottle master carries **no C_ant column** (checked) — option 2 would have meant a
+new download or a ΔC* build for DIC, while only δ¹³C had its correction in-repo
+(`eide2017_c13_suess_effect.nc`). GLODAP's cell-weighted mean sampling year is **1999.8**
+(surface) / **2002.4** (deep). Implementation cost, stated honestly: `ccx_run_fast()` returns
+only the **final** state, so this needs one recorded interior state at the obs epoch — a small
+output-contract addition, not free, but far cheaper than a C_ant build. **Layer axis still open.**

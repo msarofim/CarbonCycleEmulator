@@ -33,13 +33,14 @@ THE MODEL-ANCHORED TARGET IS A FUNCTION OF h_ml: +212.8 umol/kg at
 h_ml = 184 and +235.0 at h_ml = 100 -- it moves +22.2 umol/kg as h_ml
 falls 184 -> 100, which is the exact move the pump makes (15d).
 
-WHY THAT IS A HAZARD AND NOT A DETAIL: an h_ml-anchored target REWARDS
-shrinking h_ml through the TARGET's motion, not only through the model's
-gradient. h_ml is clause 1 -- the thing the pump is being built to fix --
-so the term would be partly scoring its own layer choice. A FIXED-DEPTH
-target (the shipped rds row) has no such feedback, at the cost of a layer
-mismatch against the model's boxes. Both options are on the table; the
-point is that the choice is not free and it was not visible before.
+So an h_ml-anchored target is a FUNCTION OF A FITTED PARAMETER, and the
+term would be partly scoring its own layer choice. Part 2b prices BOTH
+ways out, because neither is neutral and their biases point OPPOSITE ways.
+
+
+=== PART 2b. THE TWO WAYS OUT, PRICED -- AND THEIR BIASES POINT OPPOSITE WAYS ===
+Frozen-at-h_ml-75 target: +244.71 umol/kg. Priced against sigma_Delta
+from part 3 (tightest valid block), which is why this table prints AFTER it.
 
 
 === PART 3. DECISION 2 -- SIGMA ON THE GRADIENT, MEASURED ===
@@ -134,6 +135,34 @@ most defensible and the noisiest (16 blocks); that tension is not resolved.
 
 n_eff EQUIVALENT (deep sd_w 45.8813 / sigma_Delta)^2, for comparison with
 LIK_D14C_DEEP_NEFF = 20 only: 9.3 to 14.8
+
+  h_ml  like-for-like      frozen@75   FREEZING costs  ANCHORING gives
+               target         target    (sigma_Delta)      (log-units)
+    50         252.12         244.71            -0.37             80.9
+    75         244.71         244.71             0.00             76.2
+   100         234.98         244.71             0.49             70.3  <- pump
+   140         224.53         244.71             1.02             64.2
+   184         212.79         244.71             1.61             57.6  <- FITTED
+   220         203.66         244.71             2.07             52.8
+
+FREEZING AT h_ml = 75 overstates the miss by 1.61 sigma_Delta at the
+FITTED h_ml = 184, because the model's ML box then spans 0-184 m while the
+target is built on 0-75 m water. That bias is IN FAVOUR of adopting a pump
+and of a stronger one -- i.e. it points at the conclusion the term exists
+to test.
+MODEL-ANCHORING gives a penalty falling 81 -> 53 log-units across
+h_ml 50 -> 220, i.e. it REWARDS A LARGE h_ml and pushes AGAINST clause 1.
+
+THE ONE COMBINATION THAT IS NEUTRAL ON BOTH COUNTS: freeze the layers, but
+freeze them at the h_ml the refit actually lands on. Frozen removes the
+feedback; matched removes the representation bias. It costs one iteration
+and a gate on |h_ml_posterior - h_ml_target|.
+
+AND A COINCIDENCE WORTH USING: at h_ml = 100 -- the value the pump
+delivers (15d) -- the like-for-like target is +234.98 against the SHIPPED
+rds's +233.11, a mismatch of 0.09 sigma_Delta. So IF the pump lands h_ml
+near 100, the shipped fixed-depth layers ARE the like-for-like choice, and
+the freeze-vs-anchor question dissolves. If it lands elsewhere, it does not.
 
 
 === PART 3b. PAIRED-COLUMN CHECK ON THE CROSS-LAYER SIGN ===

@@ -197,13 +197,69 @@ cat(sprintf("h_ml = %g and %+.1f at h_ml = %g -- it moves %+.1f umol/kg as h_ml\
             gh[GN_H_GRID == GN_H_PUMP] - gh[GN_H_GRID == GN_H_FIT]))
 cat(sprintf("falls %g -> %g, which is the exact move the pump makes (15d).\n",
             GN_H_FIT, GN_H_PUMP))
-cat("\nWHY THAT IS A HAZARD AND NOT A DETAIL: an h_ml-anchored target REWARDS\n")
-cat("shrinking h_ml through the TARGET's motion, not only through the model's\n")
-cat("gradient. h_ml is clause 1 -- the thing the pump is being built to fix --\n")
-cat("so the term would be partly scoring its own layer choice. A FIXED-DEPTH\n")
-cat("target (the shipped rds row) has no such feedback, at the cost of a layer\n")
-cat("mismatch against the model's boxes. Both options are on the table; the\n")
-cat("point is that the choice is not free and it was not visible before.\n")
+cat("\nSo an h_ml-anchored target is a FUNCTION OF A FITTED PARAMETER, and the\n")
+cat("term would be partly scoring its own layer choice. Part 2b prices BOTH\n")
+cat("ways out, because neither is neutral and their biases point OPPOSITE ways.\n")
+
+# =====================================================================
+# PART 2b. NEITHER WAY OUT IS NEUTRAL -- PRICE BOTH, IN THE SAME UNITS
+# =====================================================================
+# RETRACTION, kept visible rather than edited away. On first writing this file I
+# asserted that the h_ml-anchored target "rewards shrinking h_ml". THAT IS THE
+# WRONG SIGN and the table below is what caught it. Pre-pump the model's
+# gradient is 0 at EVERY h_ml (interior uniform by conservation; the ML value is
+# carbonate equilibrium at fixed ALK_SURFACE and SST, which does not involve
+# h_ml), so the penalty is target^2 / 2 sigma^2 and the target FALLS with h_ml.
+# The model-anchored term therefore rewards a LARGE h_ml -- it pushes AGAINST
+# clause 1, which is the thing the pump exists to fix. That is a worse hazard
+# than the one I claimed, and in the opposite direction.
+sep("PART 2b. THE TWO WAYS OUT, PRICED -- AND THEIR BIASES POINT OPPOSITE WAYS")
+GN_FREEZE_H <- GN_H_REF     # the grid a "frozen" target would be built on
+gfz <- ccx_ocean_grid(GN_FREEZE_H); zf <- c(0, cumsum(gfz$dz)); nf <- length(gfz$dz)
+tgt_frozen <- gn_grad(GN_FIELDS[[1]], c(0, zf[2]), c(zf[nf], zf[nf + 1]), FALSE)
+sig_dic <- NA_real_   # filled after part 3; recomputed there, referenced here
+cat(sprintf("Frozen-at-h_ml-%g target: %+.2f umol/kg. Priced against sigma_Delta\n",
+            GN_FREEZE_H, tgt_frozen))
+cat("from part 3 (tightest valid block), which is why this table prints AFTER it.\n")
+part2b <- function(sig) {
+  cat(sprintf("\n%6s %14s %14s %16s %16s\n", "h_ml", "like-for-like",
+              sprintf("frozen@%g", GN_FREEZE_H), "FREEZING costs", "ANCHORING gives"))
+  cat(sprintf("%6s %14s %14s %16s %16s\n", "", "target", "target",
+              "(sigma_Delta)", "(log-units)"))
+  for (h in GN_H_GRID) {
+    gg <- ccx_ocean_grid(h); zb <- c(0, cumsum(gg$dz)); n <- length(gg$dz)
+    tl <- gn_grad(GN_FIELDS[[1]], c(0, zb[2]), c(zb[n], zb[n + 1]), FALSE)
+    cat(sprintf("%6g %14.2f %14.2f %16.2f %16.1f%s\n", h, tl, tgt_frozen,
+                (tgt_frozen - tl) / sig, tl^2 / (2 * sig^2),
+                if (h == GN_H_FIT) "  <- FITTED" else
+                if (h == GN_H_PUMP) "  <- pump" else ""))
+  }
+  gfit <- (function(h) { gg <- ccx_ocean_grid(h); zb <- c(0, cumsum(gg$dz)); n <- length(gg$dz)
+             gn_grad(GN_FIELDS[[1]], c(0, zb[2]), c(zb[n], zb[n + 1]), FALSE) })
+  cat(sprintf("\nFREEZING AT h_ml = %g overstates the miss by %.2f sigma_Delta at the\n",
+              GN_FREEZE_H, (tgt_frozen - gfit(GN_H_FIT)) / sig))
+  cat(sprintf("FITTED h_ml = %g, because the model's ML box then spans 0-%g m while the\n",
+              GN_H_FIT, GN_H_FIT))
+  cat("target is built on 0-75 m water. That bias is IN FAVOUR of adopting a pump\n")
+  cat("and of a stronger one -- i.e. it points at the conclusion the term exists\n")
+  cat("to test.\n")
+  cat(sprintf("MODEL-ANCHORING gives a penalty falling %.0f -> %.0f log-units across\n",
+              gfit(GN_H_GRID[1])^2 / (2 * sig^2),
+              gfit(GN_H_GRID[length(GN_H_GRID)])^2 / (2 * sig^2)))
+  cat(sprintf("h_ml %g -> %g, i.e. it REWARDS A LARGE h_ml and pushes AGAINST clause 1.\n",
+              GN_H_GRID[1], GN_H_GRID[length(GN_H_GRID)]))
+  cat("\nTHE ONE COMBINATION THAT IS NEUTRAL ON BOTH COUNTS: freeze the layers, but\n")
+  cat("freeze them at the h_ml the refit actually lands on. Frozen removes the\n")
+  cat("feedback; matched removes the representation bias. It costs one iteration\n")
+  cat("and a gate on |h_ml_posterior - h_ml_target|.\n")
+  gp <- gfit(GN_H_PUMP)
+  cat(sprintf("\nAND A COINCIDENCE WORTH USING: at h_ml = %g -- the value the pump\n", GN_H_PUMP))
+  cat(sprintf("delivers (15d) -- the like-for-like target is %+.2f against the SHIPPED\n", gp))
+  cat(sprintf("rds's %+.2f, a mismatch of %.2f sigma_Delta. So IF the pump lands h_ml\n",
+              grad_tab[[1]]["dic"], abs(gp - grad_tab[[1]]["dic"]) / sig))
+  cat("near 100, the shipped fixed-depth layers ARE the like-for-like choice, and\n")
+  cat("the freeze-vs-anchor question dissolves. If it lands elsewhere, it does not.\n")
+}
 
 # =====================================================================
 # PART 3. DECISION 2: n_eff / sigma FOR THE GRADIENT
@@ -323,6 +379,11 @@ for (fld in GN_FIELDS) {
                          sd_surf = gn_sdw(surf), sd_deep = gn_sdw(deep),
                          grad = gn_vw(deep) - gn_vw(surf), unit = fld$unit)
 }
+
+# PART 2b's table needs part 3's sigma, so it prints here -- deferred, not
+# reordered, so the layer argument still reads as one block above.
+part2b(min(vapply(res$tco2$boot[as.character(GN_BLOCKS[GN_BLOCKS >= GN_BLOCK_VALID])],
+                  function(r) r$se_grad, numeric(1))))
 
 # =====================================================================
 # PART 3b. THE CROSS-LAYER SIGN, BY AN ESTIMATOR SHARING NO MACHINERY
