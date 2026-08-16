@@ -182,6 +182,34 @@ a deep mixed layer *is* a crude "high `K` near the surface".
 **Passes the §2 pedagogy constraint** in one sentence ("the ocean stirs vigorously near the
 surface and sluggishly in the abyss"), which is why it is listed ahead of B.
 
+  > **MEASURED 2026-08-15, `calibration/diag_ocean_candidates.R`.** Form taken:
+  > `K(z) = kz·exp(−(z − h_ml)/z_K)`, anchored `f` = 1 at the ML base so `kz` keeps a
+  > NATRE-comparable meaning; `z_K` → ∞ is the shipped model exactly.
+  > **Compared ISO-SINK** — `kz` is solved per `z_K` so every row carries the incumbent's
+  > ocean sink — because the incumbent sits at its own fitted `kz` = 6119.2 and a coarse
+  > grid does not; the same constant-K model at `kz` = 5000 scores **309 log-units worse**,
+  > which is the size of the artifact an unmatched comparison would have measured instead.
+  >
+  > | | `kz` | deep Δ¹⁴C z | Δ logL |
+  > |---|---|---|---|
+  > | incumbent (`z_K` = ∞) | 6119 | **+1.70** | — |
+  > | `z_K` = 5000 | 6404 | **−0.17** | **+0.9** |
+  > | `z_K` = 3000 | 6601 | −1.76 | −1.6 |
+  > | `z_K` = 1200 | 7400 | −11.15 | −68.5 |
+  >
+  > **CLAUSE 3 PASSES DECISIVELY** — a very gentle decay (K falls to 0.61·`kz` at the
+  > bottom) lands the deep on target at the same sink, at slightly *better* logL, with one
+  > parameter and only `kz` re-optimised.
+  > **CLAUSE 1 FAILS** — `h_ml` stays at 184 m. A fixes the deep age; it does **not** supply
+  > what `h_ml` is faking. Only the pump has done that.
+  > **`z_K` WOULD BE WEAKLY IDENTIFIED.** The logL spread from `z_K` ∞ to 3000 is ~2 units
+  > while deep Δ¹⁴C moves ~3.5σ. That is not a defect — a 1.9σ gain *is* ~1.4 log-units —
+  > but it means adopting A puts real weight on the deep-Δ¹⁴C **n_eff choice that
+  > `data-raw/build_glodap_deep_targets.R` explicitly left UNRESOLVED** (five candidate
+  > sigmas spanning 15×). **Resolve that before, not after.**
+  > **CAVEAT:** two of 19 parameters re-optimised. `k_w`, `bomb_total` and the land are
+  > still at constant-K values.
+
 **B. High-latitude / outcrop conduit** — a direct surface↔interior path that bypasses the
 diffusive column, which is where the real ocean actually ventilates. Two forms, at very
 different cost:
@@ -189,21 +217,50 @@ different cost:
     `ccx_default_params()` and default to 0; the pure-diffusion model is bit-reproduced when
     they are. Freeing them is a **parameter** decision, not a structural one, and an SH-only
     value is a testable claim about the MLO−SPO gradient the likelihood already scores.
-    **This should be tried before B2.**
+
+    > **MEASURED 2026-08-15 and it FAILS.** Nine `w_out` values × three hemisphere
+    > allocations, through the C++ core. **Every configuration moves deep Δ¹⁴C AWAY from
+    > target, monotonically**: z +1.70 → +2.26 at the best-logL point (SH-only, 0.5 m/yr,
+    > Δ logL +0.1 — noise), → +6.69 at 20 m/yr. `h_ml` does not relax. The outcrop is
+    > another way to **ventilate** the abyss, and the model already over-ventilates it.
+    > **This closes a general statement rather than one candidate:** `kz`, `w_up`
+    > (CHANGELOG 2026-08-13, "at `w_up` ≥ 2 the deep age is unreachable at *any* `kz`")
+    > and `w_out` all buy ocean sink by moving surface water down, and all three pay the
+    > same deep-Δ¹⁴C bill. The escape is not more ventilation — it is changing its
+    > **depth distribution** (A) or adding an **interior source** (C).
   - **B2, HILDA proper.** A separate two-box high-latitude reservoir alongside the
     low-latitude diffusive column (Siegenthaler & Joos 1992; isotope budgets in Joos & Bruno
     1998, *GBC* 12:277, doi:10.1029/98GB00746). HILDA is the closest published relative of
     what this model is trying to be — it carries ¹³C and ¹⁴C and does A and B together.
     **It was considered and set aside at project inception** (§2, CHANGELOG 2026-08-09) on
-    *pedagogy* grounds — "too many parameters to communicate" — **not on physics.** That
-    rejection still stands unless the audience constraint is revisited; re-listing it here
-    records that its physical case has since strengthened, not that the decision has changed.
+    *pedagogy* grounds — "too many parameters to communicate" — **not on physics.**
+
+    > **THE PEDAGOGY CONSTRAINT WAS REVISITED AND NARROWED (Marcus, 2026-08-15).** It is no
+    > longer a blanket veto on B2. The rule is now: *added complexity is a real drawback, but
+    > complexity that is **forced** by the observations is its own pedagogical result* — "you
+    > need at least this much structure to match observed reality" is a thing worth teaching,
+    > and arguably the most valuable thing this model can teach. So B2 is **gated on evidence,
+    > not on parameter count**: it becomes indicated exactly when the cheaper candidates are
+    > measured and shown insufficient. The gate is the decision rule in
+    > `calibration/diag_ocean_candidates.R` — if no one-knob change to a single diffusive
+    > column reaches deep Δ¹⁴C |z| < 1 while holding the sink, B2 is indicated.
+    > **What this does NOT license** is adding B2 because it is interesting. The cheaper
+    > candidates must be measured and must fail first, and the failure is what gets taught.
+    >
+    > **THE GATE WAS RUN ON 2026-08-15 AND DID NOT FIRE.** Candidate A reaches |z| = 0.17
+    > at matched sink. **B2 is NOT indicated on the deep-Δ¹⁴C row.** It is not thereby
+    > excluded — clause 1 is still unmet by every candidate except the pump, and B2 is the
+    > only untested candidate that does A and B together — but the specific argument that
+    > a single column *cannot* reach the deep-Δ¹⁴C target is now measured false.
 
 **C. Biological pump.** The only candidate that can move the DIC and δ¹³C gradient rows.
 Measured at zero fitted parameters in `calibration/diag_dic_gradient.R` — see that file's
 header for what each of its three channels does, and §6 there for the clause scoring. Two
 scoping facts came out of it that any design must answer: the export required to hold the
-observed DIC gradient at `kz` = 5000 is **~2.6× the literature global POC export**, and a
+observed DIC gradient is **~2.6× the literature global POC export (5–12 GtC/yr) at the
+pump's own preferred configuration** — 22.5 GtC/yr at `kz` = 6119, `h_ml` = 100 m; the
+figure is a strong function of BOTH, running 4.8–35 GtC/yr across the plausible box and
+coming inside the literature range only for `kz` ≲ 2500–3000 — and a
 **soft-tissue-only** pump that matches the DIC gradient necessarily **overshoots δ¹³C**,
 because roughly half the observed DIC gradient is carbonate-pump carbon carrying no
 depletion — and a carbonate limb also moves alkalinity, which this model holds fixed at
@@ -212,12 +269,27 @@ depletion — and a carbonate limb also moves alkalinity, which this model holds
 **D. Conveyor.** **Built, off, and not to be shipped.** Falsified twice in-repo; see §4.3 of
 `notes/review_2026-08-14_architecture.md`. Listed only so it is not re-proposed.
 
-**Note that A and C are not alternatives.** A 2.6× export excess and a `kz` **9× Ledwell's
-NATRE thermocline diffusivity** — (1.7 ± 0.2) × 10⁻⁵ m² s⁻¹ = 536 m² yr⁻¹, the repo's own
-sourced figure (`notes/redteam_2026-08-13_conveyor_configurations.md` §1) — are the same
-observation seen twice: an *effective* diffusivity tuned to emulate three-dimensional
-advective transport also spuriously destroys *gradients*, so a pump inside this column has to
-work several times harder than the real one does. A lets C be built at a defensible export.
+**A and C are complements, but NOT for the reason first given here — that reason was wrong
+and is retracted.** The original claim was that A "lets C be built at a defensible export".
+**Measured false (2026-08-15).** The required export is set by the diffusive flux across the
+*top* interface, where A's shape is anchored at `f` = 1, so `K(z)` does not reduce it at
+fixed `kz` — and A's iso-sink solution wants `kz` = 6404 against the incumbent's 6119, which
+makes the export requirement *slightly worse* (14.6 → 15.3 GtC/yr at `h_ml` = 184). Only a
+smaller `kz` reduces it, and A does not deliver one.
+
+They are complements for a different and better-evidenced reason: **A fixes clause 3
+(deep Δ¹⁴C) and cannot touch clause 1 or rows 4–5; C fixes clause 1 and rows 4–5 and only
+half-fixes clause 3.** The measured division of labour is the argument, not the export.
+
+**What the export excess actually indicts is `kz` itself** — 9× Ledwell's NATRE thermocline
+diffusivity, (1.7 ± 0.2) × 10⁻⁵ m² s⁻¹ = 536 m² yr⁻¹
+(`notes/redteam_2026-08-13_conveyor_configurations.md` §1). An *effective* diffusivity tuned
+to emulate three-dimensional advective transport also spuriously destroys *gradients*, so a
+pump inside this column works several times harder than the real one does. Under A's
+anchoring `kz` becomes the *near-surface* diffusivity — the quantity NATRE actually measures
+— so the 9× stops being an acknowledged fiction and becomes a **testable claim that A's
+iso-sink solution FAILS by an even wider margin** (6404 vs 536, i.e. 12×). That is a cost of
+A that the logL does not see, and it should be weighed explicitly.
 
 ### 3.5 Isotopes
 
@@ -693,5 +765,8 @@ emissions in the app; N₂O/CH₄; permafrost.
 
 **Ocean structural candidates have moved OUT of this backlog and into §3.4a** (2026-08-15),
 where they are listed together with the observables that discriminate them. HILDA's
-separate high-latitude column (§3.4a B2) remains out of v1 on the §2 *pedagogy* constraint,
-which is a live decision and not a physics verdict.
+separate high-latitude column (§3.4a B2) is **no longer held out by the §2 pedagogy
+constraint as a blanket veto** — Marcus narrowed that constraint on 2026-08-15 to
+"complexity forced by the observations is itself a pedagogical result". B2 is now gated on
+*evidence*: it is indicated when the cheaper candidates are measured and shown insufficient.
+See §3.4a B2 for the gate.

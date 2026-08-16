@@ -4300,3 +4300,103 @@ to inform it, not to pre-empt it. Nothing was refitted; the −13.7 is a fixed-p
 And §3.4a's candidates A and B1 (`w_out_NH`/`w_out_SH`, already built and defaulting to 0) have
 **not** been run against the same five rows — that comparison is the obvious next step and would
 cost far less than the pump.
+
+---
+
+## 2026-08-15 (later still, part 5) — CANDIDATES A AND B1 SCORED: K(z) fixes the deep age, the outcrop fixes nothing, and the B2 gate does not fire
+
+`calibration/diag_ocean_candidates.R` (new, ~40 min, output
+`calibration/output/ocean_candidates/`). Scores DESIGN.md §3.4a's candidates **A**
+(depth-dependent `K_z`) and **B1** (outcrop `w_out_*`) on the **same five rows** as the pump.
+B1 needs **no new code** — it runs through the C++ core. A is a shim over `ccx_deriv()` with a
+bit-exact no-op mutation gate. **No model file touched.**
+
+### The prediction that was worth more than the scan
+
+Derived before running: **DIC and ¹³C are conserved and have no interior source, so any steady
+state of any transport operator has a uniform interior ratio.** ¹⁴C differs only because decay
+*is* an interior sink. **Measured: A and B1 move the DIC gradient by 0.00e+00 µmol/kg and the
+δ¹³C gradient by 2.2e-13 ‰.** Rows 4 and 5 are structurally reserved to biology. **The pump was
+never in competition with A, B1 or B2** — the question is which *combination*, and the
+objective cannot see two of the five rows at all.
+
+### B1 — the outcrop FAILS, and it closes a general statement
+
+Nine `w_out` values × three hemisphere allocations. **Every configuration moves deep Δ¹⁴C AWAY
+from target, monotonically:** z +1.70 → +2.26 at the best-logL point (SH-only 0.5 m/yr,
+Δ logL +0.1, i.e. noise) → +6.69 at 20 m/yr. `h_ml` does not relax.
+
+**`kz`, `w_up` and `w_out` all buy ocean sink by moving surface water down, and all three pay
+the same deep-Δ¹⁴C bill.** `w_up` was already measured this way (CHANGELOG 2026-08-13: "at
+`w_up` ≥ 2 the deep age is unreachable at *any* `kz`"). The escape is not more ventilation —
+it is changing its **depth distribution** (A) or adding an **interior source** (C).
+
+### A — PASSES clause 3 decisively, FAILS clause 1
+
+Form: `K(z) = kz·exp(−(z − h_ml)/z_K)`, anchored `f` = 1 at the ML base so `kz` keeps a
+NATRE-comparable meaning; `z_K` → ∞ is the shipped model exactly.
+
+**Compared ISO-SINK**, `kz` solved per `z_K` to carry the incumbent's ocean sink:
+
+| `z_K` | `kz` | deep Δ¹⁴C z | Δ logL |
+|---|---|---|---|
+| ∞ (incumbent) | 6119 | **+1.70** | — |
+| 5000 | 6404 | **−0.17** | **+0.9** |
+| 3000 | 6601 | −1.76 | −1.6 |
+| 2000 | 6857 | −4.21 | −10.5 |
+| 1200 | 7400 | −11.15 | −68.5 |
+
+A very gentle decay (K → 0.61·`kz` at the bottom) lands the deep **on target at an identical
+sink, at slightly better logL**, with one parameter and only `kz` re-optimised. But **`h_ml`
+stays at 184 m** — A does not supply what the deep mixed layer is faking. Only the pump has.
+
+**`z_K` would be WEAKLY IDENTIFIED.** The iso-sink logL spread from `z_K` ∞ to 3000 is ~2 units
+while deep Δ¹⁴C moves ~3.5σ. That is the term behaving correctly (a 1.9σ gain *is* ~1.4
+log-units) — but adopting A puts real weight on the deep-Δ¹⁴C **n_eff choice
+`build_glodap_deep_targets.R` left UNRESOLVED** (five sigmas spanning 15×). Resolve first.
+
+### Marcus narrowed the pedagogy constraint, and the gate it created did NOT fire
+
+**Marcus 2026-08-15:** added complexity is a real drawback, but *complexity forced by the
+observations is its own pedagogical result*. B2 is therefore gated on **evidence**, not
+parameter count. **The gate ran: candidate A reaches |z| = 0.17, so B2 is NOT indicated on the
+deep-Δ¹⁴C row.** Not excluded — clause 1 is unmet by everything but the pump, and B2 is the only
+untested candidate that does A and B together — but the argument that a single column *cannot*
+reach the target is now measured false.
+
+### THREE CORRECTIONS TO THIS REPO'S OWN CLAIMS, all mine, all from today
+
+1. **"A lets C be built at a defensible export" (DESIGN §3.4a) — RETRACTED, measured false.**
+   The export is set by the flux across the **top** interface, where A's shape is anchored at
+   `f` = 1, so `K(z)` does not reduce it at fixed `kz`; and A's iso-sink solution wants
+   `kz` = 6404 vs 6119, making the requirement *worse* (14.6 → 15.3 GtC/yr at `h_ml` = 184).
+   A and C are complements for a **measured division of labour** instead: A owns clause 3,
+   C owns clause 1 and rows 4–5.
+2. **The "2.6× literature export" headline needed its conditioning stated.** It is a strong
+   function of BOTH `kz` and `h_ml`, running **4.8–35 GtC/yr** across the plausible box, and
+   inside the literature range only for `kz` ≲ 2500–3000. It is ~2.6× (22.5 GtC/yr) at the
+   pump's own preferred point (`kz` 6119, `h_ml` 100), so the headline survives — but the 22.0
+   first quoted was at `(5000, 75)` and agreed only by offsetting differences.
+3. **A first-pass finding that "the objective prefers deep Δ¹⁴C at −9.75σ" — RETRACTED.** It
+   came from a coarse `(kz, z_K)` grid in which the **incumbent sat at its own fitted
+   `kz` = 6119.2 and no challenger did**. The size of that artifact is in the file's own control
+   column: the *same constant-K model* at `kz` = 5000 scores **309 log-units worse**. An
+   unmatched comparison measures the grid, not the candidate. Hence the iso-sink design.
+
+### The decision block was wrong TWICE and both failures are recorded in it
+
+- **v1** read the `z_K` = ∞ **control** as if it were candidate A, so it "passed" on the
+  incumbent, and never checked clause 2.
+- **v2** indexed the iso-sink winner out of the **wrong list** with an iso-sink key. R returns
+  `NULL` for a missing name, `abs(NULL$z14)` is `numeric(0)`, and **`min()` silently dropped
+  it** — so the rule scored B1 alone and fired the OPPOSITE way. A zero-length vector vanishing
+  inside `min()` does not error; it quietly removes a candidate from the comparison. Explicit
+  length assertions added.
+
+### Gates
+
+- **SHIM GATE**: `f` ≡ 1 is bit-exact (max|Δ| = 0.000e+00); `f` = exp(−z/1500) moves the
+  derivative by 4.4e-01. Both directions asserted.
+- **ENGINE GATE**: cpp and R agree to **7.5e-11** in logL and **0.00e+00** in sink, so the
+  C++-scored B1 table and the R-scored A table are commensurable.
+- Suite unchanged: FAIL 4 | PASS 708.

@@ -1,0 +1,159 @@
+
+
+=== PART 0. GATES -- the shim, the two engines, and the rows-4-and-5 prediction ===
+
+SHIM GATE  f == 1 no-op      max|d| = 0.000e+00   PASS (bit-exact)
+           f = exp(-z/1500)  max|d| = 4.413e-01   PASS (the shim does something)
+
+ENGINE GATE  logL  cpp -2269.6872   R -2269.6872   |d| = 7.46e-11
+             sink  cpp 3.062799   R 3.062799   |d| = 0.00e+00
+             PASS -- the two candidate tables can be read against each other.
+
+REFERENCE (mode parameters, h_ml = 184, no candidate):
+  sink 3.063 | deep D14C -157.8 (z +1.70) | DIC grad +0.0 | d13C grad -0.000 | logL -2269.7
+  observed:                              DIC grad +244.7 | d13C grad -0.938
+
+
+=== PART 1. CANDIDATE B1 -- OUTCROP (w_out_NH / w_out_SH, ALREADY BUILT) ===
+No new code. These are real parameters in R/model.R AND src/ccx_core.cpp,
+defaulting to 0 and bit-reproducing the pure-diffusion model there.
+Scored at the mode's other parameters, h_ml = 184.
+
+w_out                   SH only                NH only                   both
+m/yr           logL   z14  sink       logL   z14  sink       logL   z14  sink
+0           -2269.7 +1.70 3.063    -2269.7 +1.70 3.063    -2269.7 +1.70 3.063
+0.5         -2269.6 +2.26 3.090    -2276.2 +2.12 3.084    -2286.5 +2.68 3.112
+1           -2283.0 +2.74 3.118    -2291.0 +2.47 3.106    -2345.7 +3.51 3.161
+2           -2350.6 +3.50 3.174    -2345.8 +3.04 3.150    -2588.1 +4.84 3.259
+3           -2472.0 +4.08 3.230    -2434.0 +3.47 3.194    -2989.9 +5.85 3.356
+5           -2870.8 +4.88 3.341    -2707.8 +4.07 3.282    -4233.2 +7.25 3.546
+8           -3817.9 +5.61 3.503    -3339.9 +4.61 3.411    -7011.4 +8.52 3.813
+12          -5571.8 +6.16 3.701    -4502.0 +5.01 3.570   -11841.4 +9.47 4.131
+20          -9854.0 +6.69 4.032    -7359.0 +5.41 3.840   -22707.7 +10.40 4.635
+
+best B1 configuration: SH only 0.5   logL -2269.6 (reference -2269.7, +0.1)
+  deep D14C z +2.26 (reference +1.70) | sink 3.090 | DIC grad +0.0 | d13C grad -0.000
+
+CLAUSE 1: does h_ml relax? (best B1 setting vs w_out = 0)
+arm                 h=50      h=75     h=100     h=140     h=184     h=220   best h
+w_out = 0        -2904.1   -2695.6   -2526.6   -2342.8   -2269.7   -2312.8   184 m
+SH only 0.5      -2772.8   -2590.3   -2446.6   -2301.9   -2269.6   -2344.4   184 m
+
+
+=== PART 2. CANDIDATE A -- K(z) = kz exp(-(z - h_ml)/z_K) ===
+z_K = Inf is the SHIPPED constant-K model and is the control column.
+kz runs PAST its bracket [3830, 6200] on purpose -- see the header on why
+candidate A dissolves the bracket's rationale rather than violating it.
+
+the shape, at h_ml = 184 (K/kz at each interface):
+     z_K     184     234     305     404     542     735    1006    1385    1916    2659
+     Inf   1.000   1.000   1.000   1.000   1.000   1.000   1.000   1.000   1.000   1.000
+    5000   1.000   0.990   0.976   0.957   0.931   0.896   0.848   0.786   0.707   0.610
+    3000   1.000   0.983   0.961   0.929   0.888   0.832   0.760   0.670   0.561   0.438
+    2000   1.000   0.975   0.941   0.896   0.836   0.759   0.663   0.548   0.421   0.290
+    1200   1.000   0.959   0.904   0.833   0.742   0.632   0.504   0.367   0.236   0.127
+
+      kz      z_K       logL     z14     sink  DIC grad  d13 grad
+    5000      Inf    -2579.4   -0.37    2.889       0.0     0.000
+    5000     5000    -2700.3   -3.15    2.857       0.0    -0.000
+    5000     3000    -2794.5   -5.50    2.836       0.0    -0.000
+    5000     2000    -2932.6   -9.12    2.811       0.0    -0.000
+    5000     1200    -3316.7  -19.14    2.764       0.0     0.000
+    8000      Inf    -2786.3   +3.97    3.305       0.0    -0.000
+    8000     5000    -2605.4   +2.06    3.257       0.0    -0.000
+    8000     3000    -2512.3   +0.41    3.227       0.0     0.000
+    8000     2000    -2425.6   -2.18    3.191       0.0    -0.000
+    8000     1200    -2362.6   -9.75    3.124       0.0    -0.000
+   12000      Inf    -5766.3   +6.55    3.693       0.0     0.000
+   12000     5000    -5123.7   +5.21    3.629       0.0     0.000
+   12000     3000    -4752.8   +4.04    3.589       0.0    -0.000
+   12000     2000    -4346.6   +2.17    3.542       0.0    -0.000
+   12000     1200    -3705.6   -3.49    3.455       0.0     0.000
+
+
+=== PART 2b. ISO-SINK: does K(z) buy deep D14C at a matched ocean sink? ===
+kz is solved so every row has the reference's sink, 3.063 GtC/yr.
+z_K = Inf is the incumbent and MUST return kz = 6119.2 and z14 = +1.70 --
+that row is a self-check on the root-find, not a result.
+
+      z_K  kz solved      z14       logL      d logL export GtC/yr
+      Inf       6119    +1.70    -2269.7        -0.0         14.6
+     5000       6404    -0.17    -2268.8        +0.9         15.3
+     3000       6601    -1.76    -2271.3        -1.6         15.7
+     2000       6857    -4.21    -2280.2       -10.5         16.3
+     1200       7400   -11.15    -2338.2       -68.5         17.6
+
+best A for CLAUSE 3 at matched sink: z_K = 5000, kz = 6404 -> z14 -0.17 (incumbent +1.70)
+best A for logL     at matched sink: z_K = 5000, kz = 6404 -> logL -2268.8 (+0.9)
+
+CAVEAT, and it bounds every conclusion below: this re-optimises TWO of 19
+parameters (kz here, h_ml next). `k_w`, `bomb_total` and the land are still
+at values fitted for a constant-K column. A full refit can still move this.
+
+CLAUSE 1: does h_ml relax? (best-clause-3 iso-sink A vs the incumbent)
+arm                         h=50      h=75     h=100     h=140     h=184     h=220   best h
+constant K (control)     -2904.1   -2695.6   -2526.6   -2342.8   -2269.7   -2312.8   184 m
+A kz6404 zK5000          -2925.6   -2705.6   -2529.1   -2340.2   -2268.8   -2317.7   184 m
+
+
+=== PART 3. THE PUMP'S IMPLIED EXPORT UNDER CANDIDATE A (analytic, no runs) ===
+literature global POC export 5-12 GtC/yr; NATRE 536 m2/yr
+
+      kz     z_K Inf    z_K 5000    z_K 3000    z_K 2000    z_K 1200
+    5000        11.9        11.9        11.9        11.9        11.9
+    8000        19.1        19.1        19.1        19.1        19.1
+   12000        28.6        28.6        28.6        28.6        28.6
+
+NOTE, and it is the reason this table is small print: the export is set by
+the TOP interface, where the shape is anchored at f = 1. So K(z) as
+parameterised here does NOT reduce the required export at fixed kz -- it
+only does so by letting kz itself be smaller. Read the kz axis, not the
+z_K axis. If the best A configuration wants a LARGER kz, candidate A makes
+the pump's export problem WORSE, not better, and the two are then in
+tension rather than complementary -- which would correct DESIGN sec.3.4a.
+
+
+=== PART 4. THE FIVE-ROW COMPARISON ===
+candidate                       logL     sink      z14    best h   DIC grad  d13 grad
+reference (none)             -2269.7    3.063    +1.70       184        0.0    -0.000
+A  z_K 5000 (iso-sink)       -2268.8    3.063    -0.17       184        0.0     0.000
+B1 SH only 0.5               -2269.6    3.090    +2.26       184        0.0    -0.000
+C  pump (DIC-limited)        -2283.4    3.052    +1.08       100      254.7    -2.188
+OBSERVED                                  3.1     0.00     50-75      244.7    -0.938
+
+--- the rows-4-and-5 prediction, scored ---
+A and B1 move the DIC gradient by at most 0.00e+00 umol/kg and the
+d13C gradient by at most 2.22e-13 permil. Predicted: EXACTLY ZERO, by
+conservation -- neither tracer has an interior source, so any steady state
+of any transport operator is uniform in ratio.
+VERDICT: CONFIRMED. Transport CANNOT produce the observed interior gradients.
+
+
+=== PART 5. THE DECISION RULE, SCORED ===
+candidate A  best |z| at matched sink: 0.17  (z_K = 5000, kz = 6404, d logL +0.9)
+candidate B1 best |z|:                 2.26  (SH only 0.5, d logL +0.1)
+incumbent    |z|:                      1.70
+
+RULE FIRES: a one-knob transport fix reaches |z| < 1 AT MATCHED SINK.
+The deep-D14C deficit is STRUCTURAL -- a single diffusive column with a
+depth-DEPENDENT K reaches the target that the same column with a constant
+K cannot. B2 is NOT indicated by this result.
+BUT READ CLAUSE 1 BEFORE CONCLUDING: the h_ml profile above is what says
+whether the winner also supplies what h_ml = 184 m is faking, and a
+candidate that fixes clause 3 while leaving clause 1 untouched has solved
+one of the two things the ocean structure is wanted for, not both.
+AND NOTE HOW LITTLE THE OBJECTIVE CARES: over the iso-sink rows the logL
+spread from z_K Inf to z_K 3000 is ~2 units while deep D14C moves ~3.5
+sigma. That is the deep-D14C term's sigma (10.3 permil at n_eff = 20)
+doing exactly what it should -- a 1.9 sigma gain IS only ~1.4 log-units --
+but it means z_K would be WEAKLY IDENTIFIED in a refit, and how weakly is
+set by the GLODAP n_eff choice that build_glodap_deep_targets.R flagged as
+UNRESOLVED. Adopting A puts weight on that unresolved choice.
+
+AND INDEPENDENT OF WHICH: rows 4 and 5 are untouchable by transport, so the
+pump is NOT in competition with A, B1 or B2. The question was never which
+candidate; it is which COMBINATION, and the objective cannot currently see
+two of the five rows at all.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/ocean_candidates/diag_ocean_candidates.rds
