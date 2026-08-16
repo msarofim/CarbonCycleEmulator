@@ -370,7 +370,33 @@ LIK_EXCESS_C14_REP_FRAC <- 0.15
 # doing so; 10.3 is the bare SE and inflating it silently would move a number
 # Marcus chose. If representation error is wanted it belongs in this constant,
 # visibly.
-LIK_D14C_DEEP_NEFF <- 20             # effective sample size for the deep mean
+#
+# ---- 2026-08-16: 20 WAS ASSERTED; IT HAS NOW BEEN MEASURED, AND IT SURVIVES --
+# `calibration/diag_deep_d14c_neff.R` estimates n_eff seven ways from the same
+# GLODAPv2 cells the target is built from (gated to reproduce it exactly).
+# The correlogram puts rho = 0.5 at ~5500 km and rho = 0 at ~9000 km, so the
+# cells are nowhere near independent and Kish's 3408 is out; the block bootstrap
+# is only valid above the decorrelation scale, so its 10 and 20 degree rows are
+# out too. The ADMISSIBLE set (`diag_deep_d14c_sigma_choice.R` part 1) is
+#   6.4  correlogram with rho floored at 0   (basins as exchangeable masses)
+#  11.9  block bootstrap, 60 deg
+#  26.0  block bootstrap, 30 deg
+# 110.1  correlogram with the empirical rho  (basin contrast as sampled structure)
+# median 18.9, geometric mean 21.6. **20 sits between them, within 8 %.** The
+# value does not move: the defect was provenance, and changing 20 to 19 would
+# buy a 2.7 % sigma change while making every logL in the repo incomparable.
+#
+# TWO THINGS THAT MEASUREMENT DOES NOT SETTLE, both still open for Marcus:
+#  * n_eff is only known to a factor of ~3.4 (1 sd on log n_eff), i.e. sigma to
+#    a factor of ~1.85. Marginalising that out gives a Student-t with nu ~ 2.1,
+#    which changes NEITHER live decision but cuts the kz-runaway penalty 4.3x
+#    (20.1 -> 4.67 against a 4.50 threshold) -- so under it this term could
+#    never replace the kz bracket. Measured in diag_deep_d14c_sigma_choice.R.
+#  * representation error is STILL ZERO (see the paragraph above). At the
+#    conservative end of the admissible set, sigma 18.15, candidate A stops
+#    being adopted -- so this constant is now load-bearing on a structural
+#    decision, which it was not when it was chosen.
+LIK_D14C_DEEP_NEFF <- 20             # MEASURED-CONSISTENT (see above), not asserted
 # Mask the North Atlantic (lat > 40N) out of the observed mean? Deep water forms
 # there, so it is the one place below 2000 m carrying appreciable bomb 14C, and
 # the model's bottom box is a global preindustrial mean. Masking moves the

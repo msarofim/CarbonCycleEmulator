@@ -4493,3 +4493,83 @@ Model **representation error** (a one-box deep ocean against a field spanning �
 `R/likelihood.R` records it as deliberately zero) and **unsampled volume** (part 5 has no
 bathymetry denominator). **A measured n_eff sets a CEILING on the term's weight, not the weight
 itself.** Both open questions are Marcus'.
+
+---
+
+## 2026-08-16 (later) — The n_eff measurement turned into a sigma: 20 is MEASUREMENT-CONSISTENT, and marginalising costs margin rather than correctness
+
+`calibration/diag_deep_d14c_sigma_choice.R` (new, <5 s). Marcus 2026-08-16: "an n_eff median
+and sigma to be used in the MCMC". That can mean two different things and they were both
+built, because they are not the same answer:
+
+- **Option 1 — a POINT sigma.** Summarise the admissible estimators, keep the Gaussian term.
+- **Option 2 — MARGINALISE the sigma uncertainty.** For a scaled-inv-χ² prior on σ² the
+  single-observation marginal is a **Student-t** in closed form — one line in the likelihood.
+
+**`LIK_D14C_DEEP_NEFF` is unchanged at 20.** Its comment block in `R/likelihood.R` is rewritten
+from *asserted* to *measured-consistent*, carrying the admissible set and both open questions.
+That is the only edit to model code, and it changes no behaviour. Suite: FAIL 4 | PASS 708.
+
+### The admissible set is the judgement call, so it is written down
+
+A median over all seven estimators would be arithmetic dressed as a decision — two are
+known-invalid and would drag it. Excluded with reasons: **Kish 3408** (assumes an independence
+the correlogram refutes) and the **10°/20° block bootstraps** (block ≪ the ~5,500 km
+decorrelation scale, biased high). Admissible: **6.4, 11.9, 26.0, 110.1**.
+
+| summary | n_eff | σ (‰) |
+|---|---|---|
+| median | 18.9 | 10.54 |
+| geometric mean | 21.6 | 9.87 |
+| **incumbent (in use)** | **20** | **10.26** |
+| conservative end | 6.4 | 18.15 |
+
+**Every reasonable summary lands within 8 % of the asserted 20.** The value does not move:
+changing 20 → 19 buys a 2.7 % σ change and costs comparability with every logL in the repo.
+**The defect was provenance, and provenance is fixed by the receipt, not by moving the number.**
+
+n_eff is known to a factor of **3.4** (1 sd on log n_eff); σ to a factor of **1.85**.
+
+### Option 2 measured — and I expected it to fail and it does not
+
+ν calibrated from the measured spread via Var(log σ) = trigamma(ν/2)/4 → **ν = 2.12**, scale
+9.87 ‰. Near-Cauchy, which is what a 17× bracket on σ actually implies.
+
+| deviation | Gaussian | Student-t |
+|---|---|---|
+| **kz runaway, 62.6 ‰** | **20.08** | **4.67** |
+| 30 ‰ | 4.62 | 2.62 |
+| 50 ‰ | 12.83 | 4.02 |
+
+Against the build script's own "HOLDS `kz`" threshold (z > 3 = 4.50 log-units), **the Student-t
+still HOLDS, at 4.67.** I had expected it to break the term's founding purpose; it does not.
+What it does is cut the runaway penalty **4.3×**, leaving a **4 % margin where there was a 4×
+one**. So the objection to option 2 is not that it fails — it is that **under option 2 this term
+could never replace the `kz` bracket**, which would then stay load-bearing indefinitely.
+*(Caveat: scoring a t against a Gaussian-derived threshold is like-for-like only in the
+operational sense of log-units paid, not as a tail probability.)*
+
+Option 2 also changes nothing about candidate A (net **+0.82**, still adopted). It shrinks A's
+gain and the runaway penalty together — **a term that says less about everything**, not a thumb
+on the scale.
+
+| option | σ | A net logL | adopted? |
+|---|---|---|---|
+| option 1, median | 10.54 | +0.79 | yes |
+| option 1, geometric mean | 9.87 | +0.98 | yes |
+| option 1, incumbent | 10.26 | +0.86 | yes |
+| **option 1, conservative end** | **18.15** | **−0.11** | **no** |
+| option 2, Student-t | 9.87 | +0.82 | yes |
+
+### Recommendation and what stays open
+
+**Option 1 at the incumbent 20, re-documented as measured** — which is what was applied. Option
+2 is the better-posed error model and is a real alternative; the trade is *honest error model*
+vs *ability to retire the `kz` bracket*, and it is not mine to make.
+
+Still Marcus': **(1) representation error, still zero** — it adds in quadrature and at the
+conservative end (σ 18.15) candidate A stops being adopted, so this constant is now load-bearing
+on a structural decision in a way it was not when it was chosen; **(2)** whether candidate A's
+`kz` = 6404 outside the [3830, 6200] bracket is a blocker or a re-derivation — and note the
+coupling, since option 2 makes that question *harder* by removing the term's ability to stand in
+for the bracket.

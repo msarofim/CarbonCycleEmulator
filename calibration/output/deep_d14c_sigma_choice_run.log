@@ -1,0 +1,102 @@
+
+
+=== PART 1. THE ADMISSIBLE SET ===
+estimator                          n_eff  use?  why
+Kish, weights only                3408.2    no  assumes independence the correlogram refutes outright
+correlogram, empirical rho         110.1   YES  upper end of the bracket: basin contrast is sampled structure
+correlogram, rho floored             6.4   YES  lower end of the bracket: basins as exchangeable water masses
+block bootstrap, 10 deg            148.5    no  block ~1100 km << 5500 km decorrelation -- biased HIGH
+block bootstrap, 20 deg             45.5    no  block ~2200 km still below the decorrelation scale
+block bootstrap, 30 deg             26.0   YES  block ~3300 km, the shortest defensible one
+block bootstrap, 60 deg             11.9   YES  block ~6700 km > the ~7000 km zero crossing; noisiest (16 blocks)
+
+
+=== PART 2. OPTION 1 -- A POINT SIGMA ===
+admissible n_eff: 6.4, 11.9, 26.0, 110.1
+
+summary                                n_eff     sigma
+median                                  18.9     10.54
+geometric mean                          21.6      9.87
+incumbent                               20.0     10.26   <- IN USE, asserted
+conservative end (min admissible)        6.4     18.15
+
+spread of log n_eff: sd = 1.23, i.e. n_eff known to a factor of 3.4 (1 sd),
+equivalently sigma known to a factor of 1.85.
+
+THE HEADLINE: every reasonable summary of the admissible set lands within
+8 % of the asserted 20. median 18.9, geometric mean 21.6, incumbent 20.
+The asserted value is MEASUREMENT-CONSISTENT. Replacing 20 with 19 would be
+a 2.7 % change in sigma bought at the cost of making every pre-today logL
+incomparable -- the provenance is what needed fixing, not the number.
+
+
+=== PART 3. OPTION 2 -- MARGINALISE THE SIGMA UNCERTAINTY (Student-t) ===
+measured sd(log sigma) = 0.614  ->  nu = 2.12, scale s = 9.87 permil
+nu that small is very heavy-tailed -- near-Cauchy. That is not a modelling
+flourish, it is what a 17x bracket on sigma actually implies.
+
+deviation being priced                 Gaussian    Student-t
+kz runaway, 62.6 permil                   20.08         4.67
+10 permil                                  0.51         0.62
+20 permil                                  2.05         1.68
+30 permil                                  4.62         2.62
+50 permil                                 12.83         4.02
+
+"HOLDS kz" threshold (the build script's z > 3) = 4.50 log-units.
+  Gaussian at s = 9.87:  20.08  -> HOLDS
+  Student-t nu = 2.12:   4.67  -> HOLDS
+
+READ THAT PAIR CAREFULLY -- I EXPECTED OPTION 2 TO FAIL HERE AND IT DOES NOT.
+The t still HOLDS, at 4.67 against a threshold of 4.50. What it does is
+cut the runaway penalty 4.3x (20.1 -> 4.67) and leave a 4 % margin where
+there was a 4x one. So the objection to option 2 is NOT that it breaks the
+term's founding purpose -- it is that it removes all the margin on it, and
+the margin is what would let the term REPLACE the kz bracket rather than sit
+behind it. Under option 2 the bracket stays load-bearing indefinitely.
+
+CAVEAT ON THE COMPARISON: the z > 3 criterion was written for a Gaussian, so
+scoring a t against a Gaussian-derived threshold is like-for-like only in the
+operational sense that matters here -- how many log-units the objective pays
+for the runaway. It is not a tail probability.
+
+
+=== PART 4. WHAT EACH OPTION DOES TO CANDIDATE A ===
+A's non-deep cost is -0.57 log-units and does not depend on any of this.
+
+option                                       sigma   A net logL   adopted?
+option 1, median                             10.54        +0.79        yes
+option 1, geometric mean                      9.87        +0.98        yes
+option 1, incumbent (20)                     10.26        +0.86        yes
+option 1, conservative end                   18.15        -0.11         no
+option 2, Student-t                           9.87        +0.82        yes
+
+Note what option 2 does here too: it shrinks A's gain as well as the kz
+penalty, because heavy tails flatten the term everywhere beyond ~1 sigma.
+It is not a thumb on the scale for or against A -- it is a term that says
+less about everything.
+
+
+=== PART 5. RECOMMENDATION, AND WHAT IS STILL MARCUS' ===
+RECOMMEND OPTION 1 AT THE INCUMBENT 20, RE-DOCUMENTED AS MEASURED.
+  * median 18.9 and geometric mean 21.6 bracket it within 8 %;
+  * changing the number buys a 2.7 % sigma change and costs comparability
+    with every logL in the repo. The defect was provenance, and provenance
+    is fixed by the receipt, not by moving the value.
+  * option 2 is the statistically better-posed treatment and it changes
+    NEITHER decision -- it still holds kz and it still adopts A. What it
+    costs is margin: the runaway penalty falls 4.3x to within 4 % of the
+    holding threshold, so the term could no longer be trusted to REPLACE
+    the kz bracket. Take option 2 if the honest error model matters more
+    than retiring the bracket; take option 1 if retiring it is the goal.
+    That is a real trade and it is not mine to make.
+
+STILL NOT SETTLED BY THIS FILE, and both are Marcus':
+  1. REPRESENTATION ERROR. Still zero. It adds in quadrature and would push
+     sigma above 10.26; at 18.15 permil A stops being adopted.
+  2. Whether candidate A's kz = 6404, outside the [3830, 6200] bracket, is a
+     blocker or a re-derivation. Note the coupling: option 2 removes the
+     term's ability to replace the bracket, so it makes that question
+     HARDER, not easier.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/deep_d14c_neff/diag_deep_d14c_sigma_choice.rds
