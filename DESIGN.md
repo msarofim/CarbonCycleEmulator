@@ -628,6 +628,54 @@ POC midpoint. A 1-D effective `kz` standing in for 3-D ventilation also destroys
 **Clause 3 still flips with the operating point** (as `diag_dic_gradient.R` part 6 found): deep
 Δ¹⁴C z +1.48 → +1.08 at the mode (toward), −1.01 → −1.42 at defaults (away).
 
+### 5.2d Alkalinity: the carbonate limb is NOT blocked, and GLODAP sizes it (2026-08-16)
+
+`calibration/diag_alk_gradient.R`. Marcus asked whether the fixed-alkalinity assumption should
+go. It decomposes into two questions with different answers, plus a third thing that turned out
+to be the prize.
+
+**CORRECTION to §5.2c above: "the carbonate limb also moves alkalinity, which the model holds
+fixed at ALK_SURFACE — a second structural commitment" OVERSTATED the blocker.** Checked rather
+than recalled: `ALK_SURFACE` enters the **mixed-layer carbonate solve and nowhere else**
+(`ccx_dic_for_pco2()`, `pco2_from_dic()`, a `revelle_factor()` diagnostic). The interior has no
+alkalinity and no carbonate chemistry — interior DIC is a passive tracer. **A carbonate limb is
+just a second export field with its own δ¹³C signature; nothing has to be freed to represent it.**
+What fixed alkalinity suppresses is the *return* — deep ALK rising and diffusing back up.
+
+**That return channel is small, and the reason is that the model is already right.**
+`ALK_SURFACE` = 2300 µmol/kg against GLODAP's **2303.4** on the shipped 0–100 m layer, so a
+tracer cannot improve the present-day level — it can only let the modelled surface ALK *drift*
+away from it, and alkalinity is near-conserved over 1750–2024. Priced: d(Revelle)/d(ALK) =
+**−0.0005 per µmol/kg**, so a 10 µmol/kg drift moves the buffer factor **0.05 %**. Against
+`h_ml` faking uptake at the ~150 m level that is not a competitive channel.
+
+**THE PRIZE: `G2talk` is in the GLODAP master this repo already has, and it sizes the carbonate
+limb directly — no δ¹³C inference, no free parameter.** Same binning and cos(lat) weighting as
+the shipped targets:
+
+| | value |
+|---|---|
+| observed ALK, 0–100 m / >2627.2 m | 2303.4 / 2382.3 µmol/kg (829 / 5886 cells) |
+| **observed ALK gradient** | **+79.0 µmol/kg** |
+| implied carbonate share (ΔALK = 2·C_carb − (N:C)·C_org, N:C = 16/117) | **20–22 %** |
+
+**And it adjudicates the transient-vs-preindustrial question independently.** Alkalinity carries
+no Suess signal and essentially no C_ant, so the contamination that trapped the δ¹³C arithmetic
+does not bite. Fix the split by ALK and the stoichiometry by ε_org = −20, and the δ¹³C gradient
+becomes a **prediction with nothing left to tune**:
+
+| scoring | predicted δ¹³C | required | ratio |
+|---|---|---|---|
+| preindustrial (D = observed +233.1) | −1.578 ‰ | −0.861 | **1.83** |
+| **transient (D = the model's +280.2)** | **−1.965 ‰** | **−1.878** | **1.05** |
+
+**Three independent GLODAP gradients are mutually consistent only under the transient scoring**
+— an independent corroboration of the 2026-08-16 epoch decision, from an observation that was
+not used to make it. **Consequence for task 9: the two-limb pump is now the CHEAP option** — the
+split is pinned by ALK, ε_org stays at the canonical −20, and the effective-ε stand-in (−14.55)
+is no longer needed. The ALK gradient's σ has **not** been block-bootstrapped on the contrast;
+that is required before it could become a likelihood term (DIC's covariance inflated σ_Δ 25 %).
+
 ### 5.3 Sampler
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and

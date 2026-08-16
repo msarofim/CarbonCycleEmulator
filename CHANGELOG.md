@@ -4891,3 +4891,55 @@ pre-refactor `.rds` is **TRUE** across all five arms and the `h_ml` profile.
 
 **Still NOT done: the pump itself (task 9).** This measures a shim through the R reference core;
 the C++ core still knows nothing about it, and the refit (task 8) still waits.
+
+---
+
+## 2026-08-16 (later still) — "Should we stop holding alkalinity fixed?" — NO, and the reason is that GLODAP's alkalinity gradient does the job without freeing anything
+
+`calibration/diag_alk_gradient.R` (new, ~2 min first run, seconds after the subset caches),
+output in `calibration/output/alk_gradient/`. Marcus' reply to the pump-form question.
+
+**Two questions, different answers, plus the thing that turned out to matter.**
+
+**Q1 — is a carbonate limb blocked by fixed alkalinity? NO, and my own DESIGN §5.2c line saying
+otherwise is CORRECTED there.** Checked by grep rather than recalled: `ALK_SURFACE` enters the
+**mixed-layer carbonate solve and nowhere else**; the interior has no alkalinity and no carbonate
+chemistry. A carbonate limb is a second export field with its own δ¹³C signature, received by
+the interior as passive tracer exactly like the soft-tissue limb. Nothing needs freeing.
+
+**Q2 — would an alkalinity tracer change uptake? Barely, and because the model is already
+right.** `ALK_SURFACE` = 2300 µmol/kg against GLODAP's **2303.4** on the shipped 0–100 m layer.
+A tracer cannot improve the present-day level; it can only let the modelled surface value
+*drift*, and alkalinity is near-conserved on this timescale. Priced: **d(Revelle)/d(ALK) =
+−0.0005 per µmol/kg**, so 10 µmol/kg of drift moves the buffer factor **0.05 %**. Not competitive
+with `h_ml`, which handoff 15c argues is faking uptake at the ~150 m level.
+
+**THE PRIZE, which nobody had looked at: `G2talk` is in the 894 MB GLODAP master this repo
+already downloaded.** Extracted on the shipped fixed depths with the same cos(lat) cell
+weighting: **2303.4 µmol/kg (0–100 m, 829 cells) and 2382.3 (>2627.2 m, 5886 cells), gradient
++79.0**. With ΔALK = 2·C_carb − (N:C)·C_org at N:C = 16/117, that is a **20–22 % carbonate
+share** — against 26 % from the transient δ¹³C demand and **56 %** from the preindustrial
+arithmetic.
+
+**It adjudicates transient-vs-preindustrial from an observation that was not used to decide it.**
+Alkalinity carries no Suess signal and essentially no C_ant, so the contamination that trapped
+the δ¹³C arithmetic does not bite. Fix the split by ALK, the fractionation by ε_org = −20, and
+the δ¹³C gradient is a **prediction with nothing left to tune**:
+
+| scoring | predicted δ¹³C | required | ratio |
+|---|---|---|---|
+| preindustrial (D = observed +233.1) | −1.578 ‰ | −0.861 | **1.83** |
+| **transient (D = the model's +280.2)** | **−1.965 ‰** | **−1.878** | **1.05** |
+
+**Three independent GLODAP gradients are mutually consistent only under the transient scoring.**
+Independent corroboration of Marcus' 2026-08-16 epoch decision.
+
+**CONSEQUENCE FOR TASK 9, and it inverts what I recommended an hour earlier: the TWO-LIMB pump
+is now the CHEAP option.** The split is pinned by an observation, ε_org stays at the canonical
+−20, and the effective-ε stand-in (−14.55, which sits outside the −20 to −22 range and hides the
+carbonate limb) is no longer needed. Zero fitted parameters either way.
+
+**NOT done, and required before this could ever be a likelihood term:** the ALK gradient's σ has
+not been block-bootstrapped **on the contrast**. The cell spread is reported instead and labelled
+as such. DIC's cross-layer covariance inflated its σ_Δ 25 %, so composing σ any other way is a
+known error of that size.
