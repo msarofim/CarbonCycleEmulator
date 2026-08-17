@@ -1,0 +1,335 @@
+
+
+=== GATE A. THE BAND, THE TARGETS, AND WHERE init SITS RELATIVE TO IT ===
+LIK_OCEAN_GRAD_HML_OK = [85, 120] m
+h_ml init             = 75 m  -> rows *** ABSENT ***
+quarantined mode h_ml = 184 m  -> rows *** ABSENT ***
+targets: DIC +233.109 +/- 25.247   d13C -0.8610 +/- 0.1115   ALK +78.593 +/- 19.199
+
+
+=== GATE B. THE REPLICA MUST BE THE OBJECTIVE, NOT A LOOKALIKE ===
+h_ml 100.00  rows LIVE    replica     -4291.1659   objective     -4291.1659   |gap| 0.000e+00
+h_ml  75.00  rows ABSENT  replica     -4130.7917   objective     -4130.7917   |gap| 0.000e+00
+Replica == objective at an IN-BAND and an OUT-OF-BAND point, to 1e-9.
+Everything below is therefore a decomposition of the real objective.
+
+
+=== PART 1. STRADDLE EACH EDGE -- WHICH STREAMS MOVE DISCONTINUOUSLY? ===
+
+--- edge lo: h_ml 84.99 -> 85.01 (rows ABSENT -> LIVE) ---
+stream                          below          above        delta  note
+ocean_grad_dic                 ABSENT        -5.7468           --  APPEARS
+ocean_grad_d13c                ABSENT        -0.3703           --  APPEARS
+ocean_grad_alk                 ABSENT        -3.8965           --  APPEARS
+co2_level_SPO               -214.2327      -214.2845      -0.0518  
+co2_level_MLO               -151.0037      -151.0420      -0.0384  
+d14c_SH                     -446.3875      -446.4090      -0.0215  
+d14c_NH                     -350.9503      -350.9616      -0.0113  
+d13c_level_MLO              -171.8293      -171.8220      +0.0072  
+d13c_level_SPO               -45.8370       -45.8320      +0.0050  
+co2_icecore                 -747.3535      -747.3571      -0.0036  
+d13c_gradient               -381.1707      -381.1739      -0.0032  
+gcb_ocean_sink               -35.5587       -35.5557      +0.0030  
+co2_seasonal_MLO            -673.3518      -673.3536      -0.0018  
+co2_gradient                -111.8086      -111.8095      -0.0009  
+co2_seasonal_SPO             -55.9303       -55.9307      -0.0004  
+gcb_land_sink               -106.2601      -106.2599      +0.0003  
+d14c_deep_ocean               -3.6753        -3.6752      +0.0001  
+d14c_intcal                 -670.6096      -670.6096      -0.0001  
+excess_c14_ocean              -7.5111        -7.5111      -0.0000  
+
+prior        -12.6792       -12.6790      +0.0002
+total      -4186.1492     -4196.2800     -10.1308
+CONTINUOUS streams: 16, sum of deltas = -0.1173, max |delta| = 0.0518
+DISCONTINUOUS streams: ocean_grad_dic, ocean_grad_d13c, ocean_grad_alk
+
+--- edge hi: h_ml 119.99 -> 120.01 (rows LIVE -> ABSENT) ---
+stream                          below          above        delta  note
+ocean_grad_dic                -5.7071         ABSENT           --  VANISHES
+ocean_grad_d13c               -0.0783         ABSENT           --  VANISHES
+ocean_grad_alk                -3.8965         ABSENT           --  VANISHES
+co2_level_SPO               -320.3977      -320.4673      -0.0696  
+co2_level_MLO               -234.1838      -234.2406      -0.0568  
+d14c_SH                     -487.4412      -487.4666      -0.0254  
+d14c_NH                     -374.2992      -374.3146      -0.0154  
+d13c_level_MLO              -159.2386      -159.2315      +0.0071  
+d13c_level_SPO               -37.1671       -37.1623      +0.0049  
+co2_icecore                 -754.1310      -754.1351      -0.0041  
+d13c_gradient               -386.8461      -386.8493      -0.0033  
+gcb_ocean_sink               -30.4469       -30.4441      +0.0028  
+co2_seasonal_MLO            -676.1135      -676.1149      -0.0014  
+co2_gradient                -113.3911      -113.3920      -0.0009  
+gcb_land_sink               -105.8150      -105.8148      +0.0003  
+co2_seasonal_SPO             -56.4457       -56.4460      -0.0002  
+d14c_intcal                 -670.7029      -670.7030      -0.0001  
+d14c_deep_ocean               -3.5811        -3.5810      +0.0001  
+excess_c14_ocean              -7.5348        -7.5348      -0.0000  
+
+prior        -12.5495       -12.5495      -0.0000
+total      -4439.9672     -4430.4475      +9.5197
+CONTINUOUS streams: 16, sum of deltas = -0.1622, max |delta| = 0.0696
+DISCONTINUOUS streams: ocean_grad_dic, ocean_grad_d13c, ocean_grad_alk
+
+
+=== PART 2. IS THE CLIFF EXACTLY 'THE ROWS APPEARED'? ===
+If it is, then h_ml = 85 does not FIT WORSE than 84.99 -- it is SCORED ON
+MORE DATA. Those are different defects and only one of them is about h_ml.
+
+The identity being tested is EXACT, not approximate:
+  Delta total  =  (the rows that appeared)  +  (the continuous drift)
+where the drift is the sum of the 16 continuous streams' deltas plus the
+prior's. There is nothing else in the objective, so the residual on that
+identity must be ZERO to machine precision -- and a nonzero one would mean a
+stream is moving that this file has not accounted for.
+
+edge      Delta total           rows        drift       residual       P2
+lo           -10.1308       -10.0136      -0.1172      -6.42e-13     PASS
+hi            +9.5197        +9.6819      -0.1622      -2.44e-12     PASS
+
+RATIO of the discontinuity to the drift the SAME step produces:
+  edge lo   rows -10.0136  /  drift  -0.1172  =    85.5x
+  edge hi   rows  +9.6819  /  drift  -0.1622  =    59.7x
+
+16f sec.5.1 measured the ENTRY cost as -10.07 log-units; here -10.13.
+
+The three rows just INSIDE the band (h_ml = 85.01):
+   ocean_grad_dic           -5.7468 log-units
+   ocean_grad_d13c          -0.3703 log-units
+   ocean_grad_alk           -3.8965 log-units
+   SUM                     -10.0136
+
+model gradients / z:  DIC  +187.96 (z  -1.79)  d13C -0.6587 (z  +1.81)  ALK   +82.68 (z  +0.21)
+
+
+=== PART 3. THE h_ml SCAN -- AS SHIPPED, AND UNDER THREE TAPERS ===
+Scanning h_ml over [32, 192] at 30 points, every other parameter at init.
+30/30 points ran, 3.9 s (0.129 s/eval)
+
+
+=== PART 3a. WHAT THE ROWS WOULD HAVE SAID OUTSIDE THE BAND ===
+The gate returns NULL out of band, so the counterfactual row values are
+recomputed here with the SAME functions and the gate bypassed. Nothing in
+R/likelihood.R changes; this is the input a taper or an inflation needs.
+GATE C: in-band, ungated row sum reproduces the gated one to 0.000e+00 (11 points)
+
+  h_ml   rows      objective   rows removed      rows (cf)  obj + cf rows
+ 32.00    ABS       -3959.84       -3959.84         -10.58       -3970.42
+ 35.00    ABS       -3967.80       -3967.80         -10.55       -3978.34
+ 40.00    ABS       -3982.92       -3982.92         -10.49       -3993.41
+ 50.00    ABS       -4017.87       -4017.87         -10.38       -4028.26
+ 60.00    ABS       -4058.51       -4058.51         -10.27       -4068.79
+ 70.00    ABS       -4105.15       -4105.15         -10.17       -4115.32
+ 80.00    ABS       -4157.71       -4157.71         -10.06       -4167.77
+ 84.00    ABS       -4180.38       -4180.38         -10.02       -4190.41
+ 84.99    ABS       -4186.15       -4186.15         -10.01       -4196.16
+ 85.01   LIVE       -4196.28       -4186.27         -10.01       -4196.28
+ 86.00   LIVE       -4202.10       -4192.10         -10.00       -4202.10
+ 90.00   LIVE       -4226.26       -4216.29          -9.96       -4226.26
+ 94.00   LIVE       -4251.45       -4241.52          -9.93       -4251.45
+ 98.00   LIVE       -4277.66       -4267.78          -9.89       -4277.66
+102.00   LIVE       -4304.87       -4295.03          -9.85       -4304.87
+106.00   LIVE       -4333.08       -4323.27          -9.81       -4333.08
+110.00   LIVE       -4362.33       -4352.55          -9.77       -4362.33
+114.00   LIVE       -4392.62       -4382.89          -9.74       -4392.62
+118.00   LIVE       -4423.98       -4414.28          -9.70       -4423.98
+119.99   LIVE       -4439.97       -4430.29          -9.68       -4439.97
+120.01    ABS       -4430.45       -4430.45          -9.68       -4440.13
+122.00    ABS       -4446.72       -4446.72          -9.66       -4456.38
+132.00    ABS       -4532.40       -4532.40          -9.58       -4541.98
+142.00    ABS       -4624.33       -4624.33          -9.49       -4633.82
+152.00    ABS       -4722.95       -4722.95          -9.41       -4732.36
+162.00    ABS       -4828.00       -4828.00          -9.33       -4837.33
+172.00    ABS       -4939.72       -4939.72          -9.25       -4948.97
+182.00    ABS       -5060.56       -5060.56          -9.24       -5069.80
+184.00    ABS       -5085.51       -5085.51          -9.24       -5094.75  <- quarantined mode
+192.00    ABS       -5188.26       -5188.26          -9.22       -5197.48
+
+
+=== PART 3b. THE THREE TAPERS -- EACH REMOVES THE CLIFF, NONE MOVES THE SUMMIT ===
+variant                      argmax h   in band?    max total   gain OUT
+AS SHIPPED (hard skip)          32.00 *** NO ***     -3959.84    +236.44
+rows deleted entirely           32.00 *** NO ***     -3959.84    +226.43
+rows ALWAYS live (no gate)      32.00 *** NO ***     -3970.42    +225.86
+taper, 30 m ramp                32.00 *** NO ***     -3959.84    +236.44
+taper, 15 m ramp                32.00 *** NO ***     -3959.84    +236.44
+taper, 60 m ramp                32.00 *** NO ***     -3960.19    +236.09
+
+The taper's gain from leaving the band is (1 - w(h)) |row sum| by
+construction: a weight on a NEGATIVE sum is monotone the wrong way. The
+cliff becomes a ramp and the summit does not move.
+
+
+=== PART 4. THE REPRESENTATION ERROR, MEASURED ON THE OBSERVATIONS ===
+sigma_rep(h) = |shipped fixed-depth target - like-for-like target on the
+model's own boxes at h_ml = h|, per field. This is data-side only -- the
+same quantity diag_gradient_target_and_neff.R part 2b prints as 'FREEZING
+costs', re-read here as a SIGMA rather than as a bias.
+
+GATE D: reproduce the SHIPPED targets from these cells on the shipped
+fixed depths (0-100 m / >2627.2 m, upper edge CLOSED), before varying h_ml.
+field      from cells    shipped rds        |gap|
+dic          233.1094       233.1094     0.00e+00
+d13c          -0.8610        -0.8610     0.00e+00
+Both reproduced to < 0.001. The recipe is the build script's.
+
+NOTE: ALKALINITY IS NOT MEASURABLE HERE. The GLODAP subset carries only
+tco2/c13/c14 -- no talk column -- so sigma_rep for the third row would need
+a new download. Its target came from the same build, so the same
+representation question applies to it and is simply UNQUANTIFIED.
+
+--- dic: shipped target +233.1094, sigma_obs 25.2467 ---
+  h_ml  like-for-like    sigma_rep   /sigma_obs      inflation
+ 32.00       254.9973      21.8880         0.87           1.32x
+ 35.00       254.9739      21.8646         0.87           1.32x
+ 40.00       254.6255      21.5161         0.85           1.31x
+ 50.00       252.1170      19.0077         0.75           1.25x
+ 60.00       248.1435      15.0341         0.60           1.16x
+ 70.00       245.7896      12.6802         0.50           1.12x
+ 80.00       243.1286      10.0192         0.40           1.08x
+ 84.00       242.1346       9.0253         0.36           1.06x
+ 84.99       241.9648       8.8554         0.35           1.06x
+ 85.01       241.7780       8.6686         0.34           1.06x
+ 86.00       241.6492       8.5399         0.34           1.06x
+ 90.00       240.7788       7.6694         0.30           1.05x
+ 94.00       239.4573       6.3479         0.25           1.03x
+ 98.00       237.8078       4.6984         0.19           1.02x
+102.00       232.0608       1.0486         0.04           1.00x
+106.00       230.7431       2.3663         0.09           1.00x
+110.00       229.7503       3.3590         0.13           1.01x
+114.00       229.0844       4.0249         0.16           1.01x
+118.00       228.2736       4.8358         0.19           1.02x
+119.99       227.8109       5.2985         0.21           1.02x
+120.01       227.6041       5.5053         0.22           1.02x
+122.00       227.4144       5.6950         0.23           1.03x
+132.00       225.6441       7.4653         0.30           1.04x
+142.00       224.2907       8.8187         0.35           1.06x
+152.00       218.0460      15.0634         0.60           1.16x
+162.00       216.2924      16.8169         0.67           1.20x
+172.00       214.6621      18.4472         0.73           1.24x
+182.00       213.0594      20.0499         0.79           1.28x
+184.00       212.7868      20.3225         0.80           1.28x  <- quarantined mode
+192.00       212.0828      21.0266         0.83           1.30x
+
+--- d13c: shipped target -0.8610, sigma_obs 0.1115 ---
+  h_ml  like-for-like    sigma_rep   /sigma_obs      inflation
+ 32.00        -0.9842       0.1232         1.11           1.49x
+ 35.00        -0.9832       0.1222         1.10           1.48x
+ 40.00        -0.9816       0.1207         1.08           1.47x
+ 50.00        -0.9754       0.1144         1.03           1.43x
+ 60.00        -0.9575       0.0965         0.87           1.32x
+ 70.00        -0.9453       0.0844         0.76           1.25x
+ 80.00        -0.9294       0.0685         0.61           1.17x
+ 84.00        -0.9252       0.0643         0.58           1.15x
+ 84.99        -0.9242       0.0632         0.57           1.15x
+ 85.01        -0.9228       0.0619         0.55           1.14x
+ 86.00        -0.9221       0.0611         0.55           1.14x
+ 90.00        -0.9171       0.0561         0.50           1.12x
+ 94.00        -0.9109       0.0499         0.45           1.10x
+ 98.00        -0.9006       0.0397         0.36           1.06x
+102.00        -0.8722       0.0112         0.10           1.01x
+106.00        -0.8616       0.0007         0.01           1.00x
+110.00        -0.8540       0.0070         0.06           1.00x
+114.00        -0.8508       0.0102         0.09           1.00x
+118.00        -0.8447       0.0163         0.15           1.01x
+119.99        -0.8407       0.0202         0.18           1.02x
+120.01        -0.8392       0.0218         0.20           1.02x
+122.00        -0.8363       0.0246         0.22           1.02x
+132.00        -0.8231       0.0378         0.34           1.06x
+142.00        -0.8136       0.0473         0.42           1.09x
+152.00        -0.7838       0.0772         0.69           1.22x
+162.00        -0.7717       0.0892         0.80           1.28x
+172.00        -0.7605       0.1005         0.90           1.35x
+182.00        -0.7495       0.1115         1.00           1.41x
+184.00        -0.7472       0.1137         1.02           1.43x  <- quarantined mode
+192.00        -0.7427       0.1182         1.06           1.46x
+
+--- RECEIPT CHECK on R/likelihood.R's '0.09 sigma at 100, 1.61 at 184' ---
+shipped fixed-depth target        +233.1094  (sigma 25.2467)
+like-for-like at h_ml = 75         +244.7109
+like-for-like at h_ml = 100        +234.9816
+like-for-like at h_ml = 184        +212.7868
+
+candidate quantity for '1.61 sigma at 184'              sigma
+(shipped - lfl@184) / shipped sd  <- WHAT THE GATE GUARDS     0.80
+(frozen@75 - lfl@184) / shipped sd                       1.26
+(frozen@75 - lfl@184) / blk30 sd = 20.2                  1.58
+
+sd_by_block in the shipped rds: blk30 = 20.16, blk60 = 25.25
+shipped `sd` = 25.25, i.e. the CONSERVATIVE of the two.
+1.61 implies sigma = 19.83, which is blk30 (20.16) to 2 %.
+SO: 1.61 is the FROZEN-at-75 contrast divided by the TIGHTER blk30 sigma --
+part 2b's column, on part 2b's sigma. The gate's OWN quantity, on the sigma
+the gate's own term actually uses, is 0.80 sigma at h_ml = 184. NOT a code
+defect: the band still guards a real mismatch, and the '0.09 sigma at 100'
+half reproduces exactly (0.07 here). But the severity of the band has been
+argued from 1.61 in three handoffs, and it is ~2x overstated.
+
+IN-BAND, DIC sigma_rep/sigma_obs spans 0.04-0.34; OUT of band 0.22-0.87.
+THAT CONTRAST IS WHAT THE BAND ENCODES, and it is what an inflation would
+carry continuously instead of as a switch.
+
+
+=== PART 4b. THE THREE WAYS TO SPEND A ROW, PRICED AT THE SAME MISS ===
+For a row missing by z sigma_obs, what does each formulation contribute?
+  live      : -log(sigma sqrt(2 pi)) - z^2/2
+  skipped   :  0                                  <- a FREE gain of the above
+  inflated  : -log(sigma_eff sqrt(2 pi)) - (z sigma/sigma_eff)^2/2,
+              sigma_eff^2 = sigma^2 + sigma_rep^2  <- CHARGED for, and bounded
+The inflated row's best case over all sigma_eff is sigma_eff = |miss|, i.e.
+-log(|miss| sqrt(2 pi)) - 1/2 -- so inflation can never buy the whole row.
+
+row                         z       live    skipped  best inflated    gain skip   gain inflate
+ocean_grad_dic          -1.79      -5.75       0.00          -5.23         5.75           0.52
+ocean_grad_d13c          1.81      -0.37       0.00           0.18         0.37           0.55
+ocean_grad_alk           0.21      -3.90       0.00          -2.83         3.90           1.07
+
+TOTAL                                                                     10.01           2.14
+Inflation's best case recovers 21 % of what the skip gives away.
+
+
+=== PART 5. PREDICTIONS SCORED ===
+P1.  PASS     only the three ocean_grad_* streams jump; the rest is slope
+     jumpers: ocean_grad_dic, ocean_grad_d13c, ocean_grad_alk | jump/drift = 85x and 60x (bar 20x)
+P2.  PASS     the cliff IS the rows appearing (exact identity)
+     residual: lo -6.42e-13, hi -2.44e-12 (bar 1e-06); entry cost -10.13 vs 16f's -10.07
+P3.  PASS     no taper moves the argmax inside the band
+     taper, 30 m ramp -> 32.0 m | taper, 15 m ramp -> 32.0 m | taper, 60 m ramp -> 32.0 m
+P4.  *** FAIL *** inflation's gain is a LARGE fraction of the skip's
+     skip gives 10.01, inflation's best case 2.14 = 21 % (predicted > 50 %)
+     FAILED IN THE DIRECTION THAT STRENGTHENS INFLATION, and the reasoning
+     behind the prediction was wrong rather than the bar. I expected z^2/2 to
+     dominate each row's logL; it does not, because the misses are only ~1.8
+     sigma (z^2/2 ~ 1.6) while -log(sigma sqrt(2 pi)) carries the bulk. So
+     inflation caps the give-away at ~1/5 of the skip's, not ~4/5.
+P5.  *** FAIL *** sigma_rep is not small compared with sigma_obs
+     DIC sigma_rep/sigma_obs spans 0.04-0.87 over h_ml [32, 192]; d13C 0.01-1.11
+     ALSO FAILED, and this is the one that reframes the band. The
+     representation error the band exists to prevent NEVER EXCEEDS ~1 sigma
+     anywhere in h_ml's prior support. A mismatch that modest is being
+     enforced with a 10-log-unit switch.
+
+
+=== PART 6. THE CLIFF IS NOT WHY h_ml LEAVES THE BAND ===
+objective's argmax over h_ml        32.00 m       -3959.84
+best IN-BAND h_ml                   85.01 m       -4196.28
+the cliff at the band's floor                          -10.01
+
+THE PULL IS 24x THE CLIFF: 236 log-units of h_ml preference against
+10.0 log-units of discarded rows. Deleting the three rows entirely
+moves the argmax from 32 m to 32 m -- i.e. NOT AT ALL.
+
+So the rows are not what drives h_ml out of the band, and no formulation of
+them can pull it back in. That is a measurement about which of 16f sec.5.5's
+options addresses the blocker, and it says: option 1 is not a tie-breaker
+between formulations, it is a HARD CONSTRAINT worth the number below.
+
+COST OF BOUNDING h_ml TO [85, 120], at init parameters: 236 log-units.
+AN UPPER BOUND, and the same caveat class as 16f sec.5.2g's pump margin:
+beta_max, kz and k_w can reallocate some of it in a refit, which is exactly
+what a refit is for. It is NOT a claim about the refit's answer.
+
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/hml_band_discontinuity/hml_band_discontinuity.rds
+
+NOTHING HERE IS A PROPOSAL. R/likelihood.R is unchanged; the four options
+in handoff 16f sec.5.5 are Marcus's call, and this file exists so that the
+call is made on the decomposition rather than on the total.

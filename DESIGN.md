@@ -977,6 +977,102 @@ was that D's gain was entirely the CO₂ record — a refit either confirms that
 where each arm puts `pump_grad` **relative to its prior** rather than in absolute terms, and whether
 `kz` still pins against the re-bisected bracket.
 
+### 5.2k The `h_ml` band, DECOMPOSED — the cliff is not why `h_ml` leaves it (2026-08-16g)
+
+`calibration/diag_hml_band_discontinuity.R` (~4 min, 5 pre-registered predictions, 4 gates).
+Handoff 16f §5 measured the cliff — **−10.07 log-units to enter `LIK_OCEAN_GRAD_HML_OK` = [85, 120],
++9.6 to leave** — and offered four options. It did not decompose it. **Nothing here is proposed;
+`R/likelihood.R` is unchanged.** The four options remain Marcus's call, and this section exists so
+the call is made on the decomposition rather than on the total.
+
+**GATE B first: the decomposition is of the REAL objective.** The by-stream split needs a replica of
+`ccx_make_logpost()`, and a drifted replica would answer a different question silently — so the
+replica's total is asserted equal to the real objective's at both an in-band and an out-of-band
+point. **Gap 0.000e+00 at both.** GATE C: the out-of-band counterfactual row values reproduce the
+gated ones in-band to **0.000e+00** across 11 points. GATE D: part 4's cell recipe reproduces both
+shipped targets to **0.00e+00** before any `h_ml` is varied.
+
+#### The cliff is EXACTLY "the rows appeared", to 1e-12
+
+Straddling each edge by 0.01 m, the identity `Δ total = (rows that appeared) + (continuous drift)`
+closes to **−6.4e-13** (floor) and **−2.4e-12** (ceiling). Only the three `ocean_grad_*` streams jump;
+all 16 others plus the prior move continuously, and the jump is **85×** and **60×** the drift the
+same step produces.
+
+| edge | Δ total | rows | drift | residual |
+|---|---|---|---|---|
+| floor, `h_ml` 84.99 → 85.01 | −10.1308 | **−10.0136** | −0.1172 | −6.4e-13 |
+| ceiling, 119.99 → 120.01 | +9.5197 | **+9.6819** | −0.1622 | −2.4e-12 |
+
+The rows just inside: `ocean_grad_dic` **−5.75** (z −1.79), `ocean_grad_d13c` **−0.37** (z +1.81),
+`ocean_grad_alk` **−3.90** (z +0.21). **So `h_ml` = 85 does not FIT WORSE than 84.99 — it is SCORED
+ON MORE DATA.** Two separable defects wear that one number: **(A) a barrier** (the objective is
+discontinuous — 16f §5.4's MCMC hazard) and **(B) an incentive** (the objective is *paid* to discard
+rows, because a skipped Gaussian contributes 0 where a live one contributes a negative number).
+
+#### A TAPER FIXES (A) AND NOT (B), and that is an identity
+
+For any weight `w(h) ∈ [0,1]` on a **negative** row sum, `d/dw < 0`: the objective is still
+monotonically rewarded for `w → 0`. A taper converts a cliff into a ramp and **leaves the summit
+where it was**. Measured across three ramp half-widths (15 / 30 / 60 m), the argmax over `h_ml` is
+**32 m in every case** — as it is for the shipped hard skip, for the rows deleted entirely, and for
+the rows always live.
+
+#### AND THE HEADLINE: the rows are not why `h_ml` leaves the band
+
+The objective at init parameters falls **monotonically** across `h_ml`, argmax at the scan's lowest
+finite point (**32 m**; 30 is the prior bound, where `qlogis(0)` is −Inf).
+
+| quantity | value |
+|---|---|
+| objective's argmax over `h_ml` | **32 m**, −3959.84 |
+| best in-band `h_ml` | 85.01 m, −4196.28 |
+| **the pull** | **236 log-units** |
+| **the cliff** | **10.0 log-units** |
+
+**The pull is 24× the cliff, and deleting the three rows entirely moves the argmax not at all
+(32 → 32 m).** No formulation of the rows can pull `h_ml` back into the band, because they are not
+what pushes it out. That reframes 16f §5.5: **option 1 is not a tie-breaker between formulations, it
+is a hard constraint costing ~236 log-units** at init parameters — **an UPPER BOUND**, same caveat
+class as §5.2g's pump margin, since `beta_max`, `kz` and `k_w` can reallocate some of it in a refit.
+It is not a claim about the refit's answer.
+
+#### σ-inflation: the option NOT on 16f's list, and it is cheap
+
+The band exists because a fixed-depth target is like-for-like with the model's boxes only near 100 m.
+That is a **representation error**, and the honest way to carry one is **in quadrature**,
+`σ_eff(h)² = σ_obs² + σ_rep(h)²`, **with dnorm's normalisation term retained** — so inflating is
+*charged for* rather than free, and the gain is bounded (the best any inflation can do is
+`σ_eff = |miss|`). It is **not a tuning knob**: `σ_rep(h)` is measurable as the gap between the
+shipped fixed-depth target and the like-for-like model-box target at that `h_ml`.
+
+Measured (`h_ml` 32 → 192): **DIC `σ_rep/σ_obs` 0.04–0.87, δ¹³C 0.01–1.11**; in-band DIC 0.04–0.34,
+out-of-band 0.22–0.87. **The representation error the band exists to prevent never exceeds ~1σ
+anywhere in `h_ml`'s prior support** — a 10-log-unit switch is enforcing a sub-1σ mismatch. Priced at
+the measured misses, inflation's best case recovers **21 % of what the skip gives away** (2.14 of
+10.01 log-units). **That prediction FAILED in the direction that strengthens inflation, and the
+reasoning was wrong rather than the bar**: I expected `z²/2` to dominate each row's logL, but at
+~1.8σ misses `z²/2 ≈ 1.6` while `−log(σ√2π)` carries the bulk. **Alkalinity's `σ_rep` is
+UNQUANTIFIED** — the GLODAP subset carries no `talk` column, so it would need a new download.
+
+#### RECEIPT CHECK — `R/likelihood.R`'s own "1.61 σ at 184" is ~2× overstated
+
+The gate's justifying comment reads "the mismatch is 0.09 sigma at `h_ml` = 100 but 1.61 sigma at the
+fitted 184". **The first half reproduces (0.07 here). The second does not.**
+
+| candidate quantity | σ |
+|---|---|
+| (shipped − like-for-like@184) / shipped sd — **what the gate guards** | **0.80** |
+| (frozen@75 − like-for-like@184) / shipped sd (25.25) | 1.26 |
+| (frozen@75 − like-for-like@184) / **blk30** sd (20.16) | **1.58** |
+
+The shipped rds carries `sd_by_block = c(blk30 = 20.16, blk60 = 25.25)` and ships the
+**conservative** 25.25; `diag_gradient_target_and_neff.R` called `part2b()` with `min(...)` over the
+valid blocks, i.e. the **tighter** blk30. **So 1.61 is part 2b's frozen-at-75 contrast on part 2b's
+σ — a different contrast on a different σ from the one the gate's own term uses.** NOT a code defect:
+the band still guards a real mismatch. But the band's *severity* has been argued from 1.61 in three
+handoffs, and against the gate's own quantity it is **0.80 σ**.
+
 ### 5.3 Sampler
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and

@@ -5297,3 +5297,70 @@ So a refit launched as-is would very likely compare N against D **in the regime 
 main constraint is switched off**, for both arms — apples-to-apples, but the wrong apples. Put to
 Marcus rather than resolved here; `calibration/run_modefind_pump_arms.R` is written, gated
 (it refuses to run if the two arms differ in anything but `pump_mode`), and ready.
+
+## 2026-08-16g — The `h_ml` cliff DECOMPOSED: it is not why `h_ml` leaves the band, and the taper does not fix the part that matters
+
+`calibration/diag_hml_band_discontinuity.R` (~4 min, 5 pre-registered predictions, 4 gates).
+Handoff 16f §5 measured the cliff and offered four options; it did not decompose it. **Nothing was
+proposed and `R/likelihood.R` is unchanged** — the four options stay Marcus's call. DESIGN.md §5.2k
+has the full account.
+
+**Four gates first, so the decomposition is of the real objective and not of a lookalike.** The
+by-stream split needs a replica of `ccx_make_logpost()`; GATE B asserts the replica's total equals
+the real objective's at an in-band and an out-of-band point (**gap 0.000e+00 at both**). GATE C: the
+out-of-band counterfactual row values reproduce the gated ones in-band to **0.000e+00** over 11
+points. GATE D: part 4's cell recipe reproduces both shipped GLODAP targets to **0.00e+00** before
+any `h_ml` moves.
+
+- **THE CLIFF IS EXACTLY "THE ROWS APPEARED", TO 1e-12.** The identity
+  `Δ total = (rows that appeared) + (continuous drift)` closes to **−6.4e-13** at the floor and
+  **−2.4e-12** at the ceiling. Only the three `ocean_grad_*` streams jump; the other 16 plus the
+  prior are continuous, and the jump is **85×/60×** the drift the same 0.02 m step produces. So
+  `h_ml` = 85 does not *fit worse* than 84.99 — **it is scored on more data.**
+- **TWO SEPARABLE DEFECTS WEAR ONE NUMBER.** **(A) a barrier** — the discontinuity, 16f §5.4's MCMC
+  hazard. **(B) an incentive** — the objective is *paid* to discard rows, since a skipped Gaussian
+  contributes 0 where a live one contributes a negative number.
+- **A TAPER FIXES (A) AND NOT (B), and that is an identity rather than a measurement:** for any
+  weight on a negative row sum, the objective is monotone the wrong way. Measured at ramp
+  half-widths 15/30/60 m, the argmax over `h_ml` is **32 m in every case** — identical to the
+  shipped hard skip, to the rows deleted, and to the rows always live.
+- **THE HEADLINE: THE ROWS ARE NOT WHY `h_ml` LEAVES THE BAND.** The objective's argmax over `h_ml`
+  is **32 m** (30 is the prior bound, where `qlogis(0)` = −Inf) against a best in-band 85.01 — a
+  **236 log-unit pull against a 10.0 log-unit cliff, 24×** — and **deleting the three rows moves the
+  argmax not at all (32 → 32 m)**. No formulation of the rows can pull `h_ml` back in. **Option 1 is
+  therefore not a tie-breaker between formulations; it is a hard constraint costing ~236 log-units**
+  at init parameters — an **UPPER BOUND** (same caveat class as §5.2g's pump margin: `beta_max`, `kz`
+  and `k_w` can reallocate some of it in a refit).
+- **A FIFTH OPTION, NOT ON 16f's LIST: σ-INFLATION.** The band encodes a **representation error**, and
+  the honest way to carry one is in quadrature — `σ_eff² = σ_obs² + σ_rep(h)²` **with dnorm's
+  normalisation retained**, so inflating is charged for rather than free and the gain is bounded. Not
+  a tuning knob: `σ_rep(h)` is **measured** as the shipped-minus-like-for-like target gap.
+  **DIC `σ_rep/σ_obs` 0.04–0.87 over `h_ml` 32–192, δ¹³C 0.01–1.11** (in-band DIC 0.04–0.34) — i.e.
+  **the mismatch the band exists to prevent never exceeds ~1σ anywhere in the prior support.**
+  Alkalinity's is **UNQUANTIFIED**: the GLODAP subset carries no `talk` column.
+- **TWO PREDICTIONS FAILED, BOTH INFORMATIVELY, AND NEITHER BAR WAS LOOSENED.** P4 predicted
+  inflation would recover >50 % of what the skip gives away; measured **21 %** (2.14 of 10.01) — the
+  *reasoning* was wrong, not the bar: at ~1.8σ misses `z²/2 ≈ 1.6` while `−log(σ√2π)` carries the
+  bulk, so inflation is a **stronger** remedy than predicted. P5 predicted `σ_rep` would exceed
+  `σ_obs`; it barely does, which is what reframes the band as disproportionate.
+- **P1's first bar was measuring a slope and was RE-DERIVED, not re-baselined.** An absolute
+  0.05 log-unit bar on "nothing else moves discontinuously" failed at 0.0696 — on the objective's
+  ordinary ~8 log-units/m gradient in `h_ml`, which over a 0.02 m straddle is ~0.16 of legitimate
+  drift. Restated as the claim actually being made: the jump must dwarf the drift the same step
+  produces (85×/60× against a 20× bar). P2 likewise became an **exact identity** (bar 1e-6, residual
+  1e-12) rather than a 0.10 tolerance.
+- **RECEIPT CHECK: `R/likelihood.R`'s own "1.61 σ at 184" is ~2× overstated.** The "0.09 σ at 100"
+  half reproduces (0.07). The other half does not: against the gate's own quantity and the σ the
+  gate's own term uses, `h_ml` = 184 is **0.80 σ**. 1.61 is the *frozen-at-75* contrast divided by
+  the **tighter blk30** σ (20.16) — the shipped rds carries
+  `sd_by_block = c(blk30 = 20.16, blk60 = 25.25)` and ships the conservative 25.25, while
+  `diag_gradient_target_and_neff.R` called `part2b()` with `min(...)` over valid blocks. Reproduced
+  to **1.58 vs 1.61**. **Not a code defect — the band still guards a real mismatch** — but the band's
+  severity has been argued from 1.61 in three handoffs.
+
+**Two bugs in this file's own first drafts, both caught by its gates rather than by inspection.**
+`ccx_par_to_unc(ccx_default_params())` errors, because `bomb_total`, `luc_scale`, the two sigmas and
+the two gradient offsets are fitted parameters with **no field in `ccx_default_params()`** — the init
+vector must come from `ccx_init_unc()`. And `ccx_loglik(by_stream = TRUE)` returns a **named numeric
+vector, not a list**, so `[[missing_name]]` *errors* instead of returning NULL — which for a file
+about absent streams would have been fatal.
