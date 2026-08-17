@@ -5364,3 +5364,15 @@ the two gradient offsets are fitted parameters with **no field in `ccx_default_p
 vector must come from `ccx_init_unc()`. And `ccx_loglik(by_stream = TRUE)` returns a **named numeric
 vector, not a list**, so `[[missing_name]]` *errors* instead of returning NULL — which for a file
 about absent streams would have been fatal.
+
+**PART 7 — who pays the 236 (added same day).** The pull is **not a consensus**: between `h_ml` = 100
+and 32, `co2_level_SPO` (+144.5), `co2_level_MLO` (+98.0) and `d14c_SH` (+68.0) carry **96 %** of
++324.5, while `d13c_level_MLO` (−26.4), `d13c_level_SPO` (−18.5) and `gcb_ocean_sink` (−10.8) pull the
+**other way**. A thinner mixed layer absorbs less carbon, so airborne CO₂ rises — **the CO₂-level
+streams want `h_ml` small because the model at init OVER-ABSORBS**, and `co2_level_SPO` is −256
+log-units at `h_ml` = 100, i.e. init is a bad fit to the CO₂ record. Since `kz`, `k_w` and `beta_max`
+move ocean and land uptake directly — serving exactly those three streams — **`h_ml` is simply the
+cheapest single knob available while the other 19 are frozen, so part 6's 236 is an upper bound AND
+probably a large overstatement** of what bounding `h_ml` would cost a refit. **What survives
+unconditionally is the negative result: the gradient rows are irrelevant to where `h_ml` goes, so no
+re-formulation of them fixes the pull.**

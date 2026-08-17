@@ -1055,6 +1055,36 @@ reasoning was wrong rather than the bar**: I expected `z²/2` to dominate each r
 ~1.8σ misses `z²/2 ≈ 1.6` while `−log(σ√2π)` carries the bulk. **Alkalinity's `σ_rep` is
 UNQUANTIFIED** — the GLODAP subset carries no `talk` column, so it would need a new download.
 
+#### PART 7 — who pays the 236, and why it discounts itself
+
+The pull is **not a consensus**. Between `h_ml` = 100 and 32, with the three gradient rows excluded:
+
+| stream | Δ logL (32 − 100) |
+|---|---|
+| `co2_level_SPO` | **+144.5** |
+| `co2_level_MLO` | **+98.0** |
+| `d14c_SH` | **+68.0** |
+| … | … |
+| `gcb_ocean_sink` | −10.8 |
+| `d13c_level_SPO` | −18.5 |
+| `d13c_level_MLO` | −26.4 |
+| **sum** | **+324.5** |
+
+**Three streams carry 96 %**, and the **δ¹³C levels and the ocean sink pull the other way**. The
+mechanism is plain: a thinner mixed layer absorbs less carbon, so airborne CO₂ rises — the CO₂-level
+streams want `h_ml` small **because the model at init over-absorbs**. And their absolute size says how
+bad init is: `co2_level_SPO` alone is **−256 log-units at `h_ml` = 100**.
+
+**SO PART 6's 236 DISCOUNTS ITSELF.** `kz`, `k_w` and `beta_max` all move ocean and land uptake
+directly — they serve *exactly* the three streams carrying the pull — so with 19 parameters frozen at
+init, `h_ml` is merely the cheapest available patch for a CO₂-level misfit. **236 log-units is an
+upper bound and probably a large overstatement of what bounding `h_ml` would cost a refit.**
+
+**What survives unconditionally is the NEGATIVE result**: the three gradient rows are irrelevant to
+where `h_ml` goes — deleting them moves the argmax 32 → 32 m — so **no re-formulation of those rows
+is a fix for the pull**. Whether the pull survives a refit is the refit's question, and this file
+cannot answer it.
+
 #### RECEIPT CHECK — `R/likelihood.R`'s own "1.61 σ at 184" is ~2× overstated
 
 The gate's justifying comment reads "the mismatch is 0.09 sigma at `h_ml` = 100 but 1.61 sigma at the

@@ -103,7 +103,7 @@ model gradients / z:  DIC  +187.96 (z  -1.79)  d13C -0.6587 (z  +1.81)  ALK   +8
 
 === PART 3. THE h_ml SCAN -- AS SHIPPED, AND UNDER THREE TAPERS ===
 Scanning h_ml over [32, 192] at 30 points, every other parameter at init.
-30/30 points ran, 3.9 s (0.129 s/eval)
+30/30 points ran, 4.1 s (0.135 s/eval)
 
 
 === PART 3a. WHAT THE ROWS WOULD HAVE SAID OUTSIDE THE BAND ===
@@ -327,6 +327,52 @@ COST OF BOUNDING h_ml TO [85, 120], at init parameters: 236 log-units.
 AN UPPER BOUND, and the same caveat class as 16f sec.5.2g's pump margin:
 beta_max, kz and k_w can reallocate some of it in a refit, which is exactly
 what a refit is for. It is NOT a claim about the refit's answer.
+
+
+=== PART 7. WHICH STREAMS WANT A 32 m MIXED LAYER? ===
+The three ocean_grad_* rows are EXCLUDED here -- part 2 already accounts for
+them, and they are absent at four of these six depths anyway.
+
+stream                          32         50         75        100        140        184     32 - 100
+co2_level_SPO               -111.4     -138.8     -189.6     -255.9     -395.2     -596.5       +144.5
+co2_level_MLO                -84.7      -99.5     -133.1     -182.7     -296.4     -471.4        +98.0
+d14c_SH                     -395.3     -411.1     -436.0     -463.3     -513.8     -579.5        +68.0
+d14c_NH                     -327.2     -333.7     -345.6     -360.2     -390.9     -436.5        +33.0
+co2_icecore                 -738.8     -741.4     -745.6     -750.2     -758.4     -768.7        +11.4
+d13c_gradient               -372.7     -375.6     -379.6     -383.6     -390.1     -397.6        +10.9
+co2_seasonal_MLO            -664.6     -668.9     -672.4     -674.6     -677.5     -680.5        +10.0
+co2_gradient                -109.5     -110.3     -111.4     -112.5     -114.3     -116.4         +3.0
+co2_seasonal_SPO             -53.9      -54.9      -55.7      -56.2      -56.7      -57.1         +2.2
+d14c_intcal                 -670.5     -670.5     -670.6     -670.6     -670.8     -670.9         +0.2
+excess_c14_ocean              -7.5       -7.5       -7.5       -7.5       -7.6       -7.6         +0.0
+d14c_deep_ocean               -3.8       -3.8       -3.7       -3.6       -3.5       -3.4         -0.2
+gcb_land_sink               -106.9     -106.7     -106.4     -106.1     -105.6     -105.0         -0.9
+gcb_ocean_sink               -44.1      -41.1      -37.1      -33.3      -27.7      -22.3        -10.8
+d13c_level_SPO               -60.5      -55.3      -48.3      -42.0      -32.4      -21.9        -18.5
+d13c_level_MLO              -192.7     -185.4     -175.4     -166.3     -152.2     -136.5        -26.4
+SUM (excl. rows)           -3944.2    -4004.4    -4118.0    -4268.7    -4593.0    -5071.9       +324.5
+prior (incl. Jacobian)       -15.6      -13.4      -12.8      -12.6      -12.6      -13.6         -3.0
+
+THE PULL IS CONCENTRATED: co2_level_SPO + co2_level_MLO + d14c_SH carry +310 of the +324 log-units
+(96 %) between h_ml = 100 and 32.
+AND IT IS OPPOSED, by d13c_level_MLO + d13c_level_SPO + gcb_ocean_sink (-56 together) -- the d13C LEVELS and the
+ocean sink want a DEEP mixed layer. So h_ml is not being pulled by consensus;
+it is being pulled by the CO2 LEVEL record against the d13C level record.
+
+THE READING, AND IT DISCOUNTS PART 6's 236. A thinner mixed layer takes up
+less carbon, so airborne CO2 rises: the CO2-level streams want h_ml small
+because the model at init OVER-ABSORBS. Look at their absolute size -- SPO is
+-256 log-units at h_ml = 100. Init is a BAD FIT to the CO2 record, and h_ml is
+simply the cheapest single knob that patches it while the other 19 are frozen.
+kz, k_w and beta_max all move ocean and land uptake directly, i.e. they serve
+EXACTLY the three streams carrying 96 % of the pull.
+
+SO: part 6's 236 log-units is an upper bound AND probably a large
+overstatement of what bounding h_ml would really cost a refit. What survives
+unconditionally is the NEGATIVE result -- the three gradient rows are
+irrelevant to where h_ml goes (deleting them moves the argmax 32 -> 32 m), so
+no re-formulation of them is a fix for the pull. Whether the pull itself
+survives a refit is the refit's question and this file cannot answer it.
 
 wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/hml_band_discontinuity/hml_band_discontinuity.rds
 

@@ -687,7 +687,72 @@ cat("AN UPPER BOUND, and the same caveat class as 16f sec.5.2g's pump margin:\n"
 cat("beta_max, kz and k_w can reallocate some of it in a refit, which is exactly\n")
 cat("what a refit is for. It is NOT a claim about the refit's answer.\n")
 
+# =====================================================================
+# PART 7. WHO PAYS THE 236 LOG-UNITS?
+# =====================================================================
+# Part 6 makes the h_ml PULL the blocker rather than the cliff, which moves the
+# question from "how should the three rows be carried" to "why does the objective
+# want a 32 m mixed layer at all". A parameter running into its own prior bound is
+# a flag in this repo's own history (kz did it, and it was numerics wearing a
+# prior's clothes -- R/calibrate.R's note on the substep wall). And 32 m is THIN:
+# the observed global-mean mixed-layer depth is ~50-80 m. So the pull is either a
+# real constraint from a specific stream or a misfit h_ml is absorbing for
+# something else, and the per-stream split is what separates those.
+sep("PART 7. WHICH STREAMS WANT A 32 m MIXED LAYER?")
+HB_H_ATTRIB <- c(32, 50, 75, HB_H_IN, 140, HB_H_FIT)
+attrib <- lapply(HB_H_ATTRIB, function(h) hb_eval(hb_u_at(h)))
+names(attrib) <- as.character(HB_H_ATTRIB)
+ok7 <- !vapply(attrib, is.null, logical(1))
+attrib <- attrib[ok7]
+keys7 <- Reduce(union, lapply(attrib, function(a) names(a$parts)))
+keys7 <- setdiff(keys7, HB_GRAD_STREAMS)   # the rows are part 2's subject, not this one
+cat("The three ocean_grad_* rows are EXCLUDED here -- part 2 already accounts for\n")
+cat("them, and they are absent at four of these six depths anyway.\n\n")
+cat(sprintf("%-22s %s %12s\n", "stream",
+            paste(sprintf("%11s", names(attrib)), collapse = ""), "32 - 100"))
+gv <- function(a, k) if (k %in% names(a$parts)) a$parts[[k]] else NA_real_
+tab7 <- t(vapply(keys7, function(k) vapply(attrib, gv, numeric(1), k), numeric(length(attrib))))
+ref <- as.character(HB_H_IN)
+delta7 <- tab7[, "32"] - tab7[, ref]
+for (i in order(-delta7)) {
+  cat(sprintf("%-22s %s %+12.1f\n", keys7[i],
+              paste(sprintf("%11.1f", tab7[i, ]), collapse = ""), delta7[i]))
+}
+cat(sprintf("%-22s %s %+12.1f\n", "SUM (excl. rows)",
+            paste(sprintf("%11.1f", colSums(tab7)), collapse = ""), sum(delta7)))
+pri7 <- vapply(attrib, `[[`, numeric(1), "prior")
+cat(sprintf("%-22s %s %+12.1f\n", "prior (incl. Jacobian)",
+            paste(sprintf("%11.1f", pri7), collapse = ""), pri7[["32"]] - pri7[[ref]]))
+top <- order(-delta7)[1:3]
+cat(sprintf("\nTHE PULL IS CONCENTRATED: %s carry %+.0f of the %+.0f log-units\n",
+            paste(keys7[top], collapse = " + "), sum(delta7[top]), sum(delta7)),
+    sep = "")
+cat(sprintf("(%.0f %%) between h_ml = %g and %g.\n",
+            100 * sum(delta7[top]) / sum(delta7), HB_H_IN, 32))
+opp <- order(delta7)[1:3]
+cat(sprintf("AND IT IS OPPOSED, by %s (%+.0f together) -- the d13C LEVELS and the\n",
+            paste(keys7[opp], collapse = " + "), sum(delta7[opp])))
+cat("ocean sink want a DEEP mixed layer. So h_ml is not being pulled by consensus;\n")
+cat("it is being pulled by the CO2 LEVEL record against the d13C level record.\n")
+
+cat("\nTHE READING, AND IT DISCOUNTS PART 6's 236. A thinner mixed layer takes up\n")
+cat("less carbon, so airborne CO2 rises: the CO2-level streams want h_ml small\n")
+cat("because the model at init OVER-ABSORBS. Look at their absolute size -- SPO is\n")
+cat(sprintf("%.0f log-units at h_ml = %g. Init is a BAD FIT to the CO2 record, and h_ml is\n",
+            tab7["co2_level_SPO", ref], HB_H_IN))
+cat("simply the cheapest single knob that patches it while the other 19 are frozen.\n")
+cat("kz, k_w and beta_max all move ocean and land uptake directly, i.e. they serve\n")
+cat("EXACTLY the three streams carrying 96 % of the pull.\n")
+cat("\nSO: part 6's 236 log-units is an upper bound AND probably a large\n")
+cat("overstatement of what bounding h_ml would really cost a refit. What survives\n")
+cat("unconditionally is the NEGATIVE result -- the three gradient rows are\n")
+cat("irrelevant to where h_ml goes (deleting them moves the argmax 32 -> 32 m), so\n")
+cat("no re-formulation of them is a fix for the pull. Whether the pull itself\n")
+cat("survives a refit is the refit's question and this file cannot answer it.\n")
+
 saveRDS(list(straddle = straddle, scan = scan, variants = res_variants,
+             attrib = list(h = HB_H_ATTRIB, parts = tab7, prior = pri7,
+                           delta_32_minus_ref = delta7),
              sigma_rep = sig_rep, zs = zs, band = HB_BAND,
              predictions = c(P1 = p1, P2 = p2, P3 = p3, P4 = p4, P5 = p5),
              constants = list(HB_H_SCAN = HB_H_SCAN, HB_TAPER_W = HB_TAPER_W,
