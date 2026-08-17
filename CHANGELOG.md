@@ -5376,3 +5376,63 @@ cheapest single knob available while the other 19 are frozen, so part 6's 236 is
 probably a large overstatement** of what bounding `h_ml` would cost a refit. **What survives
 unconditionally is the negative result: the gradient rows are irrelevant to where `h_ml` goes, so no
 re-formulation of them fixes the pull.**
+
+## 2026-08-17 — The "1.61 σ at 184" prose corrected in `R/likelihood.R` (16g open item 5)
+
+**Comment-only. Nothing in the objective changed, and the two-arm refit launched 2026-08-16g was
+running throughout** (comments cannot reach a process that sourced the file at startup, and the diff
+was verified to touch no executable line).
+
+16g §2.5 receipt-checked `R/likelihood.R`'s own justification for the `h_ml` band and found the
+number it argues from is ~2× overstated, but left correcting the prose as open item 5 — "small, but it
+is load-bearing prose". Discharged:
+
+- **The `h_ml` gate paragraph** now reads **"0.07 σ at `h_ml` = 100 and 0.80 σ at the fitted 184"**,
+  and says explicitly that those are *this gate's own quantity* —
+  `(shipped target − like-for-like target at h_ml) / shipped sd`. It also now carries what 16g §2.4
+  measured and the file never stated: the mismatch the band exists to prevent is **sub-1σ everywhere
+  in `h_ml`'s prior support** (DIC `σ_rep/σ_obs` 0.04–0.34 in band, 0.22–0.87 out).
+- **The fixed-depth TARGET bullet** dropped the bare "1.61 σ" and now gives the frozen-at-75 contrast
+  on the σ this term actually ships (blk60, 25.25) — **1.26 σ** — with a pointer to where 1.61 came
+  from. The bullet's *argument* is untouched: freezing at 75 still overstates the miss and still
+  biases in favour of adopting a pump, which is why fixed depths were chosen.
+- Both sites cite `calibration/diag_hml_band_discontinuity.R` part 5 as the receipt.
+
+**`HB_REF_MISMATCH_184 <- 1.61` in the diagnostic is deliberately NOT changed** — part 5 *divides* by
+it to recover the σ it implies (19.83 ≈ blk30's 20.16 to 2 %), which is the step that identifies
+where 1.61 came from. Only its comment moved, from "R/likelihood.R's own figure" (now stale) to "the
+HISTORICAL figure this part receipt-checks".
+
+**Not done here:** the band itself is unchanged (`LIK_OCEAN_GRAD_HML_OK` is still `c(85, 120)`), and
+σ-inflation (16g §2.4, open item 4) remains unimplemented and Marcus's call. This commit corrects
+what the file *claims*, not what it *does*.
+
+## 2026-08-17 — The "1.61 σ at 184" prose corrected in `R/likelihood.R` (16g open item 5)
+
+**Comment-only. Nothing in the objective changed, and the two-arm refit launched 2026-08-16g was
+running throughout** (comments cannot reach a process that sourced the file at startup, and the diff
+was verified to touch no executable line).
+
+16g §2.5 receipt-checked `R/likelihood.R`'s own justification for the `h_ml` band and found the
+number it argues from is ~2× overstated, but left correcting the prose as open item 5 — "small, but it
+is load-bearing prose". Discharged:
+
+- **The `h_ml` gate paragraph** now reads **"0.07 σ at `h_ml` = 100 and 0.80 σ at the fitted 184"**,
+  and says explicitly that those are *this gate's own quantity* —
+  `(shipped target − like-for-like target at h_ml) / shipped sd`. It also now carries what 16g §2.4
+  measured and the file never stated: the mismatch the band exists to prevent is **sub-1σ everywhere
+  in `h_ml`'s prior support** (DIC `σ_rep/σ_obs` 0.04–0.34 in band, 0.22–0.87 out).
+- **The fixed-depth TARGET bullet** dropped the bare "1.61 σ" and now gives the frozen-at-75 contrast
+  on the σ this term actually ships (blk60, 25.25) — **1.26 σ** — with a pointer to where 1.61 came
+  from. The bullet's *argument* is untouched: freezing at 75 still overstates the miss and still
+  biases in favour of adopting a pump, which is why fixed depths were chosen.
+- Both sites cite `calibration/diag_hml_band_discontinuity.R` part 5 as the receipt.
+
+**`HB_REF_MISMATCH_184 <- 1.61` in the diagnostic is deliberately NOT changed** — part 5 *divides* by
+it to recover the σ it implies (19.83 ≈ blk30's 20.16 to 2 %), which is the step that identifies
+where 1.61 came from. Only its comment moved, from "R/likelihood.R's own figure" (now stale) to "the
+HISTORICAL figure this part receipt-checks".
+
+**Not done here:** the band itself is unchanged (`LIK_OCEAN_GRAD_HML_OK` is still `c(85, 120)`), and
+σ-inflation (16g §2.4, open item 4) remains unimplemented and Marcus's call. This commit corrects
+what the file *claims*, not what it *does*.

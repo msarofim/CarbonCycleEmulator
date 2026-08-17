@@ -103,7 +103,12 @@ HB_JUMP_RATIO_MIN <- 20       # x; the discontinuity over the same step's drift
 HB_P2_TOL     <- 1e-6         # log-units; P2 is now an EXACT identity, not a bar
 HB_REF_CLIFF  <- -10.07       # 16f sec.5.1's measured entry cost, for reproduction
 HB_FROZEN_H   <- 75           # the h_ml part 2b's "frozen" target was built on
-HB_REF_MISMATCH_184 <- 1.61   # sigma; R/likelihood.R's own figure, receipt-checked
+HB_REF_MISMATCH_184 <- 1.61   # sigma; the HISTORICAL figure this part receipt-
+                              # checks. It was R/likelihood.R's own until 2026-08-16g,
+                              # when part 5's finding was written back there (the gate's
+                              # own quantity is 0.80). Keep 1.61 here -- part 5 divides
+                              # by it to recover the sigma it implies, which is the
+                              # step that identifies it as part 2b's blk30.
 HB_INFLATE_MAX_FRAC <- 0.5    # P4's bar: inflation recovering MORE than this
                               # fraction of the skip's gain would make it a weak
                               # remedy. Predicted > 0.5; measured 0.21.

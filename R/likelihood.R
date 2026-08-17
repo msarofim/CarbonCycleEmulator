@@ -465,9 +465,13 @@ ccx_deep_d14c_target <- local({
 #    and +212.8 at the fitted 184) and, since the pre-pump model gradient is 0 at
 #    every h_ml, its penalty FALLS 81 -> 53 log-units across h_ml 50 -> 220 --
 #    i.e. it rewards a LARGE h_ml and pushes against clause 1, the thing the pump
-#    exists to fix. Freezing at the h_ml = 75 grid instead overstates the miss by
-#    1.61 sigma at the fitted h_ml, biasing IN FAVOUR of adopting a pump. Fixed
-#    depths are neutral on both counts.
+#    exists to fix. Freezing at the h_ml = 75 grid instead overstates the miss at
+#    the fitted h_ml, biasing IN FAVOUR of adopting a pump. Fixed depths are
+#    neutral on both counts. (The size of that overstatement was quoted here as
+#    1.61 sigma; that is part 2b's frozen-at-75 contrast on part 2b's TIGHTER
+#    blk30 sigma of 20.16. On the sigma this term actually ships -- the
+#    conservative blk60, 25.25 -- the same contrast is 1.26 sigma. Receipt-checked
+#    by calibration/diag_hml_band_discontinuity.R part 5, 2026-08-16g.)
 #
 #  * SIGMA, from a block bootstrap ON THE CONTRAST. Var(Delta) = Var(D) +
 #    Var(S) - 2 Cov(D,S), and the covariance is neither negligible nor
@@ -492,8 +496,16 @@ ccx_deep_d14c_target <- local({
 #
 # THE h_ml GATE, AND WHY IT IS NOT A SILENT ASSUMPTION. Fixed depths are
 # like-for-like with the model's boxes only while h_ml is near the surface
-# band's 100 m: the mismatch is 0.09 sigma at h_ml = 100 (the value the pump
-# delivers, handoff 15d) but 1.61 sigma at the fitted 184. So the terms are
+# band's 100 m: the mismatch is 0.07 sigma at h_ml = 100 (the value the pump
+# delivers, handoff 15d) and 0.80 sigma at the fitted 184. THOSE ARE THIS GATE'S
+# OWN QUANTITY -- (shipped target - like-for-like target at h_ml) / shipped sd --
+# receipt-checked by calibration/diag_hml_band_discontinuity.R part 5, 2026-08-16g.
+# This sentence previously read "0.09 ... but 1.61", which mixed the gate's own
+# in-band figure with part 2b's frozen-at-75 contrast on part 2b's tighter blk30
+# sigma; the band's severity was argued from that 1.61 in three handoffs and it is
+# ~2x overstated. The band still guards a real mismatch, but a sub-1-sigma one:
+# DIC sigma_rep/sigma_obs spans 0.04-0.34 in band and 0.22-0.87 out of it, and
+# NEVER exceeds ~1 sigma anywhere in h_ml's prior support. So the terms are
 # SKIPPED, visibly, outside LIK_OCEAN_GRAD_HML_OK. That is deliberately a skip
 # and not a stop: a sampler excursion must not take the posterior down, but a
 # POSTERIOR that lives outside the band means the target needs re-deriving, and
