@@ -1,0 +1,16 @@
+REFIT, TWO ARMS. 20 parameters: beta_max, fert_k, q10, k_w, h_ml, kz, pump_grad, tau_ex, npp_frac_NH, seas_amp_NH, seas_amp_SH, seas_phase_NH, seas_phase_SH, gamma_enso, bomb_total, luc_scale, sigma_d13c, sigma_d14c, grad_off_co2, grad_off_d13c
+kz bracket [3942.5, 6528] (re-bisected for the pump 2026-08-16e)
+pump default 233.109378 umol/kg = PUMP_GRAD_OBS
+
+
+=== h_ml BOUNDED FOR THIS REFIT (Marcus 2026-08-16g) ===
+h_ml: [30, 200] init 75   ->   [85, 120] init 100
+prior renormalised over the new support: log-prior shifts by +1.5805
+GATE H1: only `h_ml` changed. GATE H2: init 100 round-trips (u = -0.2877);
+         the shipped init 75 is correctly REJECTED by the new bound. OK
+GATE H3: all three rows LIVE at init (DIC +187.89, d13C -0.6545, ALK +82.68). OK
+GATE: the arms differ in `pump_mode` and nothing else. OK
+
+
+=== ARM pump_mode = N ===
+start: log-post at hand-set init = -4291.2
