@@ -1,0 +1,309 @@
+# =====================================================================
+# run_modefind_pump_arms.R -- THE REFIT (task 8), run as TWO ARMS: `pump_mode`
+# "N" (export mass fixed) and "D" (export scaled by mixed-layer DIC).
+#
+# WHY TWO ARMS. `pump_mode` is a STRUCTURAL choice, not a fitted parameter, and
+# it was deferred to the refit when the pump was ported (DESIGN sec.5.2f). The
+# gradient rows cannot tell N and D apart; the only place they differ is the
+# TRANSIENT, and at the pre-gradient mode D's apparent +195 was entirely the CO2
+# record -- a quantity a refit can reallocate to `beta_max`, `kz` and `k_w`,
+# which is exactly why comparing them at an UNREFITTED mode proves nothing.
+# Marcus 2026-08-16e: fit both and compare.
+#
+# THIS IS THE FIRST REFIT AT 20 PARAMETERS. `pump_grad` entered on 2026-08-16d
+# and `kz`'s bracket was re-bisected for the pump on 2026-08-16e, so nothing from
+# any earlier mode carries across: the likelihood is a different function and its
+# feasible region is a different set. DO NOT COMPARE ANY logL ACROSS THE
+# 2026-08-16 BOUNDARY.
+#
+# ---------------------------------------------------------------------
+# HOW THE TWO ARMS ARE COMPARED, decided before either was run.
+#
+#   PRIMARY: the LAPLACE EVIDENCE, log p(y) ~ log p(y, theta_MAP) + (d/2) log 2pi
+#   - 0.5 log|-H|. Both arms carry the SAME 20 parameters, the same priors, the
+#   same data and the same likelihood -- only the model structure differs -- so
+#   the (d/2) log 2pi term cancels exactly and the comparison reduces to
+#   Delta logpost(MAP) - 0.5 Delta log|-H|. That second term is the one a
+#   MAP-only comparison silently drops, and it is not small when a structural
+#   change alters how sharply the data pin the parameters.
+#
+#   THE HONEST CAVEAT, STATED HERE RATHER THAN DISCOVERED LATER. A Laplace
+#   evidence is a GAUSSIAN approximation at a single mode. With `kz` expected to
+#   pin against its bracket (sec.5.2h P2) the posterior is NOT locally Gaussian in
+#   that direction, and the Hessian there reports curvature of the transformed
+#   coordinate, not of a free parameter. So the evidence difference below is
+#   INDICATIVE, not a Bayes factor to quote. If the two arms come out close, the
+#   answer is "the data do not distinguish them", NOT the sign of a small number.
+#
+#   SECONDARY, and more informative when the primary is close:
+#     * the PER-STREAM logL decomposition -- which rows each arm buys and sells.
+#       The pre-mode reading was that D's gain was entirely the CO2 record; a
+#       refit either confirms that or shows the gain reallocated.
+#     * where each arm puts `pump_grad`, and whether the POSTERIOR is moved from
+#       the PRIOR (the prior mildly double-counts GLODAP by construction, so a
+#       `pump_grad` that just sits at its prior centre is not "constrained").
+#     * whether `kz` still pins at the re-bisected bracket's top, which is the
+#       standing question sec.5.2h left open.
+#     * the physical-plausibility screen both arms already print.
+#
+# ---------------------------------------------------------------------
+# RUNTIME ~5-6 h PER ARM (the 18-parameter refit took 237-294 min at 0.060
+# s/eval; 20 parameters and a pump in the derivative will not be faster). The
+# arms are INDEPENDENT and are run sequentially here rather than in parallel:
+# the machine is a 16 GB Mac, each arm holds its own forcing tables and spinup
+# state, and a swap-thrashed pair is slower than two clean runs. Each arm writes
+# its own output as it finishes, so a kill after the first arm loses only the
+# second.
+#
+# EVERY ARM USES THE SAME SEED. The mode-finder is derivative-free with a
+# deterministic simplex, so this is about the restart geometry being identical
+# between arms -- with a different seed per arm, part of any difference would be
+# search luck rather than structure.
+# =====================================================================
+
+for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+ccx_load_cpp()
+
+# ---- labels derive from constants (project rule) --------------------
+ARM_SEED       <- 2026
+ARM_MAXIT      <- 20000     # Nelder-Mead default 500 is far too small for 20 par
+ARM_RESTARTS   <- 20        # as run_modefind.R; stops early on convergence
+ARM_TOL        <- 1e-4      # stop when a restart gains less than this
+ARM_PENALTY    <- 1e6       # finite stand-in for -Inf so optim can navigate
+ARM_HESS_EPS   <- 3e-4      # step on the unconstrained scale; see run_modefind.R
+ARM_FLAG_SIGMA <- 3.0       # prior-sd distance at which a parameter is flagged
+ARM_MODES      <- c("N", "D")
+ARM_OUTDIR     <- ccx_path("calibration", "output", "pump_arms")
+ARM_OUT        <- function(m) file.path(ARM_OUTDIR, sprintf("mode_fit_pump%s.rds", m))
+
+dir.create(ARM_OUTDIR, recursive = TRUE, showWarnings = FALSE)
+sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
+
+cat(sprintf("REFIT, TWO ARMS. %d parameters: %s\n",
+            length(CCX_PARAM_NAMES), paste(CCX_PARAM_NAMES, collapse = ", ")))
+cat(sprintf("kz bracket [%g, %g] (re-bisected for the pump 2026-08-16e)\n",
+            CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi))
+cat(sprintf("pump default %.6f umol/kg = PUMP_GRAD_OBS\n",
+            ccx_default_params()$pump_grad))
+
+# GATE: the two arms must be the same objective except for `pump_mode`, and the
+# only way to know that is to check the thing that could go wrong -- the base
+# parameter lists differing anywhere ELSE. Cheap, and it fails loudly.
+b <- lapply(ARM_MODES, function(m) { p <- ccx_default_params(); p$pump_mode <- m; p })
+names(b) <- ARM_MODES
+d <- names(which(!vapply(names(b$N), function(n) identical(b$N[[n]], b$D[[n]]), logical(1))))
+if (!identical(d, "pump_mode"))
+  stop("the two arms differ in more than pump_mode: ", paste(d, collapse = ", "))
+cat(sprintf("GATE: the arms differ in `pump_mode` and nothing else. OK\n"))
+
+# ---------------------------------------------------------------------
+# One arm. Lifted from run_modefind.R rather than sourced, because that script
+# runs at load and writes a single fixed output path; the ONLY changes are the
+# `base_params` injection, the output path, and the arm label in the prints.
+# ---------------------------------------------------------------------
+arm_fit <- function(mode) {
+  sep(sprintf("ARM pump_mode = %s", mode))
+  set.seed(ARM_SEED)
+  bp <- ccx_default_params(); bp$pump_mode <- mode
+  lp_fun <- ccx_make_logpost(base_params = bp)
+
+  n_eval <- 0L
+  neg_lp <- function(u) {
+    n_eval <<- n_eval + 1L
+    v <- lp_fun(u)
+    if (!is.finite(v)) return(ARM_PENALTY)
+    -v
+  }
+  u0 <- ccx_init_unc(); lp0 <- lp_fun(u0)
+  cat(sprintf("start: log-post at hand-set init = %.1f\n", lp0))
+  t0 <- Sys.time()
+
+  # ---- (a) Nelder-Mead restarts -------------------------------------
+  u <- u0; best <- -lp0
+  trace <- data.frame(restart = 0L, logpost = lp0, evals = 0L)
+  for (i in seq_len(ARM_RESTARTS)) {
+    fit <- optim(u, neg_lp, method = "Nelder-Mead",
+                 control = list(maxit = ARM_MAXIT, reltol = 1e-12))
+    gain <- best - fit$value
+    u <- fit$par; best <- fit$value
+    cat(sprintf("[%s] restart %2d: log-post = %12.1f  (gain %10.4f)  evals %d\n",
+                mode, i, -best, gain, n_eval))
+    trace <- rbind(trace, data.frame(restart = i, logpost = -best, evals = n_eval))
+    if (i > 1 && gain < ARM_TOL) { cat("converged: gain below ARM_TOL\n"); break }
+  }
+  # FLAGGED, not silently accepted: a run that used every restart while still
+  # gaining is a truncated climb, and the 2026-08-12 refit did exactly that.
+  hit_cap <- nrow(trace) - 1L >= ARM_RESTARTS &&
+    (trace$logpost[nrow(trace)] - trace$logpost[nrow(trace) - 1L]) >= ARM_TOL
+  if (hit_cap)
+    cat(sprintf("*** [%s] HIT THE RESTART CAP WHILE STILL GAINING -- this mode is NOT converged\n",
+                mode))
+
+  # ---- (b) BFGS polish ----------------------------------------------
+  pol <- tryCatch(
+    optim(u, neg_lp, method = "BFGS", control = list(maxit = 500, reltol = 1e-14)),
+    error = function(e) { cat("BFGS polish failed:", conditionMessage(e), "\n"); NULL })
+  if (!is.null(pol) && pol$value < best) {
+    cat(sprintf("[%s] BFGS polish: log-post = %.1f (gain %.4f)\n",
+                mode, -pol$value, best - pol$value))
+    u <- pol$par; best <- pol$value
+  } else cat(sprintf("[%s] BFGS polish: no improvement\n", mode))
+  names(u) <- CCX_PARAM_NAMES
+  lp_mode <- -best
+  pm <- ccx_unc_to_par(u)
+
+  # ---- (b2) physical-plausibility screen ----------------------------
+  prior_z <- function(n) {
+    s <- CCX_PARAM_TABLE[[n]]; x <- pm[[n]]; g <- s$prior
+    lo <- x / 1e3; hi <- x * 1e3
+    if (s$tr == "logit") { lo <- s$lo + 1e-9; hi <- s$hi - 1e-9 }
+    xs <- seq(lo, hi, length.out = 4001)
+    dd <- exp(vapply(xs, function(z) g(z), numeric(1)))
+    dd[!is.finite(dd)] <- 0
+    if (sum(dd) <= 0) return(NA_real_)
+    cdf <- cumsum(dd) / sum(dd)
+    qnorm(min(max(approx(xs, cdf, xout = x, rule = 2)$y, 1e-12), 1 - 1e-12))
+  }
+  zs <- vapply(CCX_PARAM_NAMES,
+               function(n) tryCatch(prior_z(n), error = function(e) NA_real_), numeric(1))
+  cat(sprintf("\n[%s] prior-tail position (normal sds; |z| > %g flagged):\n", mode, ARM_FLAG_SIGMA))
+  print(round(zs, 2))
+  fl <- which(abs(zs) > ARM_FLAG_SIGMA)
+  if (length(fl)) cat("*** FLAGGED: ", paste(CCX_PARAM_NAMES[fl], collapse = ", "), "\n")
+
+  # BRACKET PRESSURE, printed rather than inferred later from a stuck sampler.
+  # sec.5.2h P2 predicted `kz` pins at the top; this is where that is checked
+  # against the RE-BISECTED bracket.
+  for (n in CCX_PARAM_NAMES) {
+    s <- CCX_PARAM_TABLE[[n]]
+    if (!identical(s$tr, "logit")) next
+    fr <- (pm[[n]] - s$lo) / (s$hi - s$lo)
+    if (fr < 0.02 || fr > 0.98)
+      cat(sprintf("*** [%s] %s PINNED at %.1f %% of [%g, %g] -- value %.4g\n",
+                  mode, n, 100 * fr, s$lo, s$hi, pm[[n]]))
+  }
+
+  p_mode <- bp
+  for (n in intersect(names(p_mode), CCX_PARAM_NAMES)) p_mode[[n]] <- pm[[n]]
+
+  # ---- (b3) per-stream decomposition at the mode ---------------------
+  # The secondary comparison, and the one that says WHICH rows an arm buys.
+  # Computed here rather than post hoc so it cannot drift from the mode it
+  # describes.
+  streams <- tryCatch({
+    sp <- ccx_spinup(p_mode)
+    F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
+                           bomb_total_kmol = 102)
+    F$c14_cosmo <- sp$prod_c14
+    F$c14_bomb  <- F$c14_bomb * (pm$bomb_total / 102)
+    for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH"))
+      F[[cc]] <- F[[cc]] * pm$luc_scale
+    attr(F, "luc_scale") <- pm$luc_scale
+    el <- ccx_forcing_eluc_annual(F); el$eluc <- el$eluc * pm$luc_scale
+    r <- ccx_run_fast(sp, F)
+    ccx_loglik(r$out, ccx_prepare_obs(),
+               list(sigma_d13c = pm$sigma_d13c, sigma_d14c = pm$sigma_d14c,
+                    grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c),
+               luc = el, deep = sp$diagnostics$d14c_bottom_box,
+               ocean_grad = ccx_ocean_grad_scored(r$out, sp), by_stream = TRUE)
+  }, error = function(e) { cat("per-stream decomposition failed:", conditionMessage(e), "\n"); NULL })
+
+  # ---- (c) numerical Hessian ----------------------------------------
+  cat(sprintf("[%s] hessian: central differences, %d parameters\n", mode, length(u)))
+  H <- local({
+    n <- length(u); M <- matrix(NA_real_, n, n); eps <- ARM_HESS_EPS
+    for (a in seq_len(n)) for (bb in a:n) {
+      ea <- eb <- numeric(n); ea[a] <- eps; eb[bb] <- eps
+      M[a, bb] <- M[bb, a] <-
+        (lp_fun(u + ea + eb) - lp_fun(u + ea - eb) -
+           lp_fun(u - ea + eb) + lp_fun(u - ea - eb)) / (4 * eps^2)
+    }
+    M
+  })
+  dimnames(H) <- list(CCX_PARAM_NAMES, CCX_PARAM_NAMES)
+  Sigma <- tryCatch(solve(-H), error = function(e) NULL)
+  ok_pd <- !is.null(Sigma) && all(is.finite(Sigma)) && all(diag(Sigma) > 0)
+  # The Laplace evidence's second term. NA when the Hessian is not PD, which is
+  # reported rather than patched -- a non-PD Hessian means this arm has no
+  # Laplace evidence, not that it should be given one.
+  ldet <- tryCatch({
+    ch <- chol(-H); 2 * sum(log(diag(ch)))
+  }, error = function(e) NA_real_)
+  Cor <- sdv <- ev <- NULL
+  if (ok_pd) {
+    sdv <- sqrt(diag(Sigma)); Cor <- Sigma / outer(sdv, sdv)
+    ev <- eigen(Sigma, symmetric = TRUE)
+    cat(sprintf("[%s] Laplace covariance: PD, condition number %.3g\n",
+                mode, max(abs(ev$values)) / min(abs(ev$values))))
+  } else {
+    cat(sprintf("[%s] Laplace covariance: NOT PD -- no evidence for this arm\n", mode))
+  }
+  el <- as.numeric(difftime(Sys.time(), t0, units = "mins"))
+  cat(sprintf("[%s] mode log-post = %.1f  (gain over init %.1f)\n", mode, lp_mode, lp_mode - lp0))
+  cat(sprintf("[%s] elapsed %.1f min, %d evaluations (%.3f s/eval)\n",
+              mode, el, n_eval, el * 60 / n_eval))
+  cat(sprintf("\n[%s] mode, natural scale:\n", mode)); print(round(unlist(pm), 4))
+
+  out <- list(pump_mode = mode, u_mode = u, par_mode = pm, logpost = lp_mode,
+              logpost_init = lp0, hessian = H, cov = Sigma, cor = Cor, sd_unc = sdv,
+              eigen = ev, pd = ok_pd, logdet_negH = ldet, trace = trace,
+              hit_cap = hit_cap, streams = streams, n_eval = n_eval, minutes = el,
+              seed = ARM_SEED, param_names = CCX_PARAM_NAMES, prior_z = zs,
+              kz_bracket = c(CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi),
+              substeps = ccx_substeps_for(p_mode))
+  saveRDS(out, ARM_OUT(mode))
+  cat(sprintf("[%s] wrote %s\n", mode, ARM_OUT(mode)))
+  out
+}
+
+fits <- list()
+for (m in ARM_MODES) fits[[m]] <- arm_fit(m)
+
+# ---------------------------------------------------------------------
+sep("COMPARISON")
+N <- fits$N; D <- fits$D
+cat(sprintf("%-28s %14s %14s %14s\n", "", "N", "D", "D - N"))
+cat(sprintf("%-28s %14.2f %14.2f %+14.2f\n", "log-posterior at MAP",
+            N$logpost, D$logpost, D$logpost - N$logpost))
+cat(sprintf("%-28s %14.2f %14.2f %+14.2f\n", "0.5 log|-H|",
+            0.5 * N$logdet_negH, 0.5 * D$logdet_negH,
+            0.5 * (D$logdet_negH - N$logdet_negH)))
+ev_d <- (D$logpost - N$logpost) - 0.5 * (D$logdet_negH - N$logdet_negH)
+cat(sprintf("%-28s %14s %14s %+14.2f\n", "LAPLACE log-evidence D-N", "", "", ev_d))
+cat("\n(The (d/2) log 2pi term cancels: both arms carry the same 20 parameters.)\n")
+cat("READ THIS AS INDICATIVE, NOT AS A BAYES FACTOR -- see the header. A pinned\n")
+cat("`kz` makes the posterior non-Gaussian in that direction, and the Hessian\n")
+cat("there reports the transformed coordinate's curvature, not a free one's.\n")
+
+if (!is.null(N$streams) && !is.null(D$streams)) {
+  sep("PER-STREAM: which rows does D buy, and which does it sell?")
+  nm <- union(names(N$streams), names(D$streams))
+  nm <- setdiff(nm, "total")
+  dd <- vapply(nm, function(s) {
+    a <- N$streams[[s]]; bq <- D$streams[[s]]
+    if (is.null(a) || is.null(bq)) return(NA_real_)
+    as.numeric(bq) - as.numeric(a)
+  }, numeric(1))
+  dd <- sort(dd[is.finite(dd) & abs(dd) > 0.5], decreasing = TRUE)
+  for (s in names(dd)) cat(sprintf("  %-26s %+10.2f\n", s, dd[[s]]))
+  cat("\nThe pre-refit reading was that D's gain was ENTIRELY the CO2 record.\n")
+  cat("This table either confirms that or shows a refit reallocating it.\n")
+}
+
+sep("THE STANDING QUESTIONS THIS RUN WAS ALSO MEANT TO ANSWER")
+for (m in ARM_MODES) {
+  f <- fits[[m]]; kb <- f$kz_bracket
+  cat(sprintf("[%s] kz = %.1f (%.1f %% up the re-bisected bracket [%g, %g])\n",
+              m, f$par_mode$kz, 100 * (f$par_mode$kz - kb[1]) / (kb[2] - kb[1]), kb[1], kb[2]))
+  cat(sprintf("[%s] h_ml = %.2f -- gradient rows LIVE only inside [%g, %g]: %s\n",
+              m, f$par_mode$h_ml, LIK_OCEAN_GRAD_HML_OK[1], LIK_OCEAN_GRAD_HML_OK[2],
+              if (f$par_mode$h_ml >= LIK_OCEAN_GRAD_HML_OK[1] &&
+                  f$par_mode$h_ml <= LIK_OCEAN_GRAD_HML_OK[2]) "LIVE" else "*** ABSENT ***"))
+  cat(sprintf("[%s] pump_grad = %.2f  (prior centre %.2f, 1-D optimum at the old mode 274.5)\n",
+              m, f$par_mode$pump_grad, ccx_const("PUMP_GRAD_OBS")))
+}
+
+saveRDS(list(fits = fits, evidence_D_minus_N = ev_d, seed = ARM_SEED,
+             modes = ARM_MODES, param_names = CCX_PARAM_NAMES),
+        file.path(ARM_OUTDIR, "pump_arms_comparison.rds"))
+cat(sprintf("\n\nwritten: %s\n", file.path(ARM_OUTDIR, "pump_arms_comparison.rds")))

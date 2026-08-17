@@ -84,8 +84,39 @@ CCX_PARAM_TABLE <- list(
   # -163.5. So the bracket is centred 16.7 permil BELOW the sourced target and
   # the new term pushes kz up inside it (own optimum 5525). Both facts are live;
   # neither is a reason to move the bounds by hand ahead of the refit.
-  kz          = list(tr = "logit", lo = 3830, hi = 6200, init = 5000,
-                     prior = function(x) dunif(x, 3830, 6200, log = TRUE)),
+  #
+  # ---- RE-BISECTED 2026-08-16e FOR THE PUMP (Marcus). [3830, 6200] -> below.
+  # NOT a hand adjustment: the SAME recipe, re-run on the model that now ships.
+  # calibration/diag_kz_bracket_pump.R, ~3 min. The bounds above were bisected on
+  # a model with NO PUMP, and the pump moves the very row they were bisected on
+  # (DESIGN sec.5.2h: it makes deep water older at every `kz`). It also BINDS --
+  # sec.5.2h P2 measured `kz` pinning to the bracket's TOP with the pump both off
+  # and on -- so a stale top is not a loose guard rail, it IS the refit's answer.
+  #
+  #   THE PUMP-OFF ARM IS THE CONTROL AND IT PASSES: re-bisecting at
+  #   `pump_grad` = 0 returns 3828.7 / 6200.8 against the shipped 3830 / 6200,
+  #   i.e. 1.3 and 0.8 m2/yr. The recipe is faithful; what moves is the pump.
+  #
+  #   PUMP ON: 3942.5 / 6528.0. The top moves +328 m2/yr (+5.3 %), in the
+  #   direction sec.5.2h predicted -- older deep water needs MORE mixing to reach
+  #   the same D14C, so the pump BUYS `kz` headroom rather than costing it.
+  #
+  #   ARM-INDEPENDENT, and that is a check rather than luck: `pump_mode` "N" and
+  #   "D" give the IDENTICAL bracket, because at the preindustrial steady state
+  #   D's scale factor y[iml,"C"]/ml_C0 is 1 by construction. The two arms can
+  #   differ only in the TRANSIENT, so this bracket cannot bias the N-vs-D
+  #   comparison either way.
+  #
+  #   ON THE BOTTOM BOX -- the layer `d14c_deep_ocean` actually scores -- the new
+  #   bracket is -219.8 / -162.8 against the old -220.4 / -163.5. Nearly a no-op
+  #   on the scored quantity, which is what makes this a low-risk correction: it
+  #   moves WHICH `kz` delivers the observed deep age, not the deep age.
+  #
+  # Bounds NOT rounded inward this time -- the bisection tolerance is 0.5 m2/yr
+  # and rounding would be smaller than the number's own meaning. init = the
+  # bracket centre, as before (was 5000 for a centre of 5015).
+  kz          = list(tr = "logit", lo = 3942.5, hi = 6528, init = 5235.25,
+                     prior = function(x) dunif(x, 3942.5, 6528, log = TRUE)),
   # THE BIOLOGICAL PUMP'S MAGNITUDE -- the 20th parameter (Marcus 2026-08-16d).
   # The preindustrial surface-to-bottom DIC gradient the pump holds, umol/kg.
   # Everything else about the pump stays structural: the export SHAPE is GLODAP's

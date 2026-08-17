@@ -5257,3 +5257,43 @@ strengthened to run against a parameter list carrying no `pump_grad` at all.
 the pump on, so it was left alone rather than swept into `PARITY_REL_TOL` — a passing gate is not
 something to loosen on tidiness grounds. It is the one place the derivation above is not yet
 applied, and it will fire if a future mechanism raises the flux count through that branch.
+
+## 2026-08-16f — kz re-bisected for the pump; the two-arm refit is BUILT and SMOKE-TESTED but NOT LAUNCHED
+
+**Marcus 2026-08-16e: fit `pump_mode` "N" and "D" and compare** — DESIGN §5.2f deferred that to the
+refit and this is it. `ccx_make_logpost()` gained `base_params` so a STRUCTURAL choice that is not a
+fitted parameter can be varied between two otherwise identical objectives; the default path is
+bit-identical (`identical()` on the log-posterior at init). N and D differ by **314 log-units at the
+hand-set init**, which is precisely why they must be *refitted* rather than compared there.
+
+**THE `kz` BRACKET WAS RE-BISECTED FIRST, and Marcus took the decision on the numbers.** It would
+otherwise have decided the answer: §5.2h P2 measured `kz` **pinning to the bracket's top**, so the
+top is the refit's `kz`, and [3830, 6200] was bisected on a model with **no pump** against the very
+row the pump moves. **The pump-OFF control reproduces the shipped bracket to 1.3 / 0.8 m²/yr**, so
+the recipe is faithful; pump-ON gives **[3942.5, 6528]**, the top **+328 m²/yr (+5.3 %)** — the pump
+makes deep water older, so it *buys* `kz` headroom. **N and D give the identical bracket** (at the
+preindustrial steady state D's scale factor is 1 by construction, so the arms differ only in the
+transient) — it cannot bias the comparison. On the **bottom box**, the layer actually scored, the new
+bracket is −219.8 / −162.8 against −220.4 / −163.5: nearly a no-op on the scored quantity.
+
+**THE RUN IS NOT LAUNCHED, AND THE SMOKE TEST IS WHY.** A truncated two-arm run (1 restart, 60
+iterations) was cheap and it surfaced a blocker that would have wasted ~11 h:
+
+- **`h_ml`'s init is 75 and `LIK_OCEAN_GRAD_HML_OK` is [85, 120] — the objective STARTS with all
+  three ocean-gradient rows ABSENT.** This is handoff 16d §7 item 7 ("where does the refit's `h_ml`
+  land?") arriving with teeth.
+- **The switch is a real discontinuity and it pays to be outside.** Measured at otherwise-init
+  parameters: crossing 84.99 → 85.00 (absent → live) **costs 10.07 log-units**; crossing
+  119.99 → 120.01 (live → absent) **gains 9.6**. A mode-finder is rewarded for leaving the band.
+- **And `h_ml`'s own likelihood pulls it well below the band anyway** — the log-posterior falls
+  monotonically from −4105 at `h_ml` = 70 to −4703 at 150. The previous mode's `h_ml` was **183.95**;
+  the truncated arm landed at **exactly 85.00**, sitting on the edge from the outside.
+- **The rows are what constrain `pump_grad`, so this is not cosmetic.** With them LIVE (`h_ml` = 100)
+  the best `pump_grad` is **250.0 — 0.28 prior sd**, close to both the observation (233.1) and the
+  1-D optimum (274.5). With them ABSENT the parameter is held by its prior plus weak leverage: the
+  truncated 20-parameter arm ran it to **963.6, |z| = 6.27**.
+
+So a refit launched as-is would very likely compare N against D **in the regime where the pump's
+main constraint is switched off**, for both arms — apples-to-apples, but the wrong apples. Put to
+Marcus rather than resolved here; `calibration/run_modefind_pump_arms.R` is written, gated
+(it refuses to run if the two arms differ in anything but `pump_mode`), and ready.

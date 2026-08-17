@@ -932,6 +932,51 @@ atmosphere, not its mere presence.
   read the constant: `R/calibrate.R` sorts *before* `R/constants.R`, so `ccx_const()` does not exist
   when the table is built — the test is what makes the repetition safe.)
 
+### 5.2j The `kz` bracket re-bisected for the pump, and the refit run as TWO ARMS (2026-08-16e)
+
+**Marcus, 2026-08-16e: fit `pump_mode` "N" and "D" and compare** — §5.2f deferred that choice to the
+refit and this is it. `pump_mode` is a *structural* choice, not a fitted parameter, so
+`ccx_make_logpost()` gained a `base_params` argument to carry it; the default path is bit-identical
+(verified by `identical()` on the log-posterior at init). At the hand-set init the two objectives
+differ by **314 log-units** — which is exactly why they must be *refitted* rather than compared
+there, since `beta_max`, `kz` and `k_w` can reallocate it.
+
+**And `kz`'s bracket was re-bisected first** (`calibration/diag_kz_bracket_pump.R`, ~3 min), because
+it would otherwise have decided the answer. §5.2h P2 measured `kz` **pinning to the bracket's top**
+with the pump both off and on — so the top is not a guard rail, **it is the refit's `kz`** — and the
+shipped [3830, 6200] was bisected on a model with **no pump**, against the very row the pump moves.
+
+| arm | lo (−200 ‰) | hi (−150 ‰) |
+|---|---|---|
+| **pump OFF (control)** | 3828.7 | 6200.8 |
+| shipped | 3830 | 6200 |
+| **pump ON** (N *and* D) | **3942.5** | **6528.0** |
+
+- **The OFF arm is the control and it passes**, reproducing the shipped bracket to **1.3 / 0.8
+  m²/yr**. The recipe is faithful; what moves is the pump.
+- **+328 m²/yr (+5.3 %) at the top**, in the direction §5.2h predicted: the pump makes deep water
+  older, so it takes *more* mixing to reach the same Δ¹⁴C. **The pump buys `kz` headroom.**
+- **N and D give the identical bracket** — a check, not luck: at the preindustrial steady state D's
+  scale factor `y[iml,"C"]/ml_C0` is 1 by construction, so **the arms can differ only in the
+  transient** and the bracket cannot bias the comparison either way.
+- **On the bottom box** — the layer `d14c_deep_ocean` actually scores — the new bracket reads
+  −219.8 / −162.8 against the old −220.4 / −163.5. **Nearly a no-op on the scored quantity**: the
+  re-bisection moves *which* `kz` delivers the observed deep age, not the deep age.
+
+**Marcus took the bracket decision on those numbers (2026-08-16e): re-bisect.** Not a hand
+adjustment — the same recipe `R/calibrate.R` documents, re-run on the model that ships.
+
+**How the arms are compared, decided before either was run.** Primary is the **Laplace evidence**;
+both arms carry the same 20 parameters, priors, data and likelihood, so `(d/2) log 2π` cancels
+exactly and the contrast is `Δ logpost(MAP) − ½ Δ log|−H|`. **Stated as indicative, not as a Bayes
+factor**: with `kz` expected to pin, the posterior is not locally Gaussian in that direction and the
+Hessian there reports the *transformed* coordinate's curvature. If the arms come out close the
+answer is "the data do not distinguish them", **not the sign of a small number**. Secondary, and more
+informative when the primary is close: the **per-stream logL decomposition** (the pre-refit reading
+was that D's gain was entirely the CO₂ record — a refit either confirms that or reallocates it),
+where each arm puts `pump_grad` **relative to its prior** rather than in absolute terms, and whether
+`kz` still pins against the re-bisected bracket.
+
 ### 5.3 Sampler
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and

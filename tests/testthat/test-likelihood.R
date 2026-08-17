@@ -401,8 +401,22 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # bisected values, so assert the transform is actually a bounded one -- a silent
   # revert to tr = "log" would restore the runaway with no other visible symptom.
   expect_identical(CCX_PARAM_TABLE$kz$tr, "logit")
-  expect_gte(CCX_PARAM_TABLE$kz$lo, 3830)
-  expect_lte(CCX_PARAM_TABLE$kz$hi, 6200)
+  # RE-BISECTED 2026-08-16e for the pump: [3830, 6200] -> [3942.5, 6528], the
+  # same recipe re-run on the model that ships (calibration/diag_kz_bracket_pump.R;
+  # the pump-OFF control reproduces the old numbers to 1.3 m2/yr). Asserted as a
+  # BAND rather than as the exact pair, because the bisection has a 0.5 m2/yr
+  # tolerance and the point of this line is that the bracket is bounded and
+  # roughly where the deep-D14C observation puts it -- not to re-type the
+  # bisection's output, which is R/calibrate.R's job.
+  expect_gte(CCX_PARAM_TABLE$kz$lo, 3500)
+  expect_lte(CCX_PARAM_TABLE$kz$hi, 7000)
+  # ...and the bracket must still EXCLUDE the unbounded runaway that motivated
+  # it (kz = 10,686, deep -129.9). Without this the band above could be widened
+  # into uselessness one re-bisection at a time.
+  expect_lt(CCX_PARAM_TABLE$kz$hi, 10686)
+  expect_equal(CCX_PARAM_TABLE$kz$init,
+               mean(c(CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi)),
+               tolerance = 1e-9)
   # round-trip through the unconstrained transform
   u <- ccx_init_unc()
   expect_named(u, CCX_PARAM_NAMES)
@@ -527,8 +541,14 @@ test_that("the term HOLDS kz at the chosen sigma -- decision 1's whole basis", {
   # ...and the converse, which is why the bracket was NOT deleted: expressed on
   # this same quantity the bracket is a hard box TIGHTER than the sigma allows,
   # so deleting it would loosen kz rather than tighten it.
-  lo <- ccx_spinup(within(ccx_default_params(), kz <- 3830))$diagnostics$d14c_bottom_box
-  hi <- ccx_spinup(within(ccx_default_params(), kz <- 6200))$diagnostics$d14c_bottom_box
+  # READS THE SHIPPED BRACKET rather than repeating its endpoints. They were
+  # typed here as 3830/6200 and would have gone stale silently at the 2026-08-16e
+  # re-bisection -- the test would have kept measuring the width of a bracket the
+  # model no longer uses, which is precisely the failure mode it exists to catch.
+  lo <- ccx_spinup(within(ccx_default_params(),
+                          kz <- CCX_PARAM_TABLE$kz$lo))$diagnostics$d14c_bottom_box
+  hi <- ccx_spinup(within(ccx_default_params(),
+                          kz <- CCX_PARAM_TABLE$kz$hi))$diagnostics$d14c_bottom_box
   expect_lt((hi - lo) / 2, 3 * tg$sd)
 })
 
