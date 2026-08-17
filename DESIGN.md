@@ -1052,8 +1052,28 @@ anywhere in `h_ml`'s prior support** — a 10-log-unit switch is enforcing a sub
 the measured misses, inflation's best case recovers **21 % of what the skip gives away** (2.14 of
 10.01 log-units). **That prediction FAILED in the direction that strengthens inflation, and the
 reasoning was wrong rather than the bar**: I expected `z²/2` to dominate each row's logL, but at
-~1.8σ misses `z²/2 ≈ 1.6` while `−log(σ√2π)` carries the bulk. **Alkalinity's `σ_rep` is
-UNQUANTIFIED** — the GLODAP subset carries no `talk` column, so it would need a new download.
+~1.8σ misses `z²/2 ≈ 1.6` while `−log(σ√2π)` carries the bulk.
+
+~~Alkalinity's `σ_rep` is UNQUANTIFIED — the GLODAP subset carries no `talk` column, so it would need
+a new download.~~ **MEASURED 2026-08-17** (`calibration/diag_alk_sigma_rep.R`), and the "new download"
+inference was **wrong**. The subset part 4 reads has no `talk`, but **the shipped ALK target was never
+built from it**: `data-raw/build_glodap_deep_targets.R:324` reads `glodap_dic_talk_subset.csv`
+(464,590 QC-passed bottles, already on disk) because alkalinity is measured on far more bottles than
+the isotope cruises carry. Part 4 pointed at one file while the target came from another. The recipe
+reproduces **both** shipped targets from that file's own cells to **0.00e+00** (`talk` 78.5927,
+`tco2_alkpop` 225.8087) before any `h_ml` moves, and:
+
+| row | in band | all `h_ml` |
+|---|---|---|
+| DIC | 0.04–0.34 | 0.04–0.87 |
+| δ¹³C | 0.01–0.55 | 0.01–1.11 |
+| **ALK** | **0.02–0.07** | **0.02–0.34** |
+
+**The row feared unquantified carries the smallest representation error of the three** — 0.17 σ even at
+the quarantined mode's `h_ml` = 184. This **strengthens** the paragraph above rather than qualifying
+it: the band switches all three rows off together and every one of them is sub-1σ everywhere in
+`h_ml`'s prior support. The 21 % pricing is unchanged — that needs the model's own gradient at each
+`h_ml`, and this diagnostic is observation-side only.
 
 #### PART 7 — who pays the 236, and why it discounts itself
 

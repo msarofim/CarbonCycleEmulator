@@ -1,0 +1,75 @@
+ALKALINITY sigma_rep -- the missing third input to 16g sec.2.4's
+sigma-inflation decision (open item 4).
+talk population : glodap_dic_talk_subset.csv
+isotope pop     : glodap_c13c14_subset.csv  (what 16g part 4 read, and why ALK was missed)
+
+
+=== READING THE ALKALINITY POPULATION ===
+glodap_dic_talk_subset.csv: 464590 rows, columns year/lat/lon/depth/tco2/tco2f/talk/talkf
+
+
+=== GATE G1/G2: reproduce the SHIPPED targets from this file's own cells ===
+On the shipped fixed depths (0-100 m / >2627.2 m, upper edge CLOSED),
+before any h_ml is varied.
+target                       from cells    shipped rds        |gap|
+talk (ALK row)                  78.5927        78.5927     0.00e+00
+tco2 on the ALK pop            225.8087       225.8087     0.00e+00
+Both reproduced to < 0.001. The recipe is the build script's, on the
+ALK population -- so sigma_rep measured below is the shipped target's own.
+
+
+=== GATE G3: at h_ml = 100 the model's surface box IS the shipped 0-100 m layer ===
+ccx_ocean_grid(100): surface box [0.0000, 100.0000] m; shipped surf layer [0, 100]
+OK -- so any sigma_rep at h_ml = 100 is the closed-vs-open edge convention
+ONLY, not a depth mismatch. That is the floor the curve must return to.
+
+
+=== ALKALINITY sigma_rep ACROSS h_ml ===
+shipped ALK target +78.5927 umol/kg, sigma_obs 19.1990 (the row's own)
+
+    h_ml  like-for-like    sigma_rep   /sigma note
+   32.00        85.1611       6.5683     0.34 
+   35.00        85.0853       6.4926     0.34 
+   40.00        84.7311       6.1384     0.32 
+   50.00        83.2658       4.6731     0.24 
+   60.00        81.9713       3.3786     0.18 
+   70.00        81.3069       2.7141     0.14 
+   80.00        80.1905       1.5978     0.08 
+   84.00        79.9937       1.4010     0.07 
+   84.99        79.9299       1.3372     0.07 
+   85.01        79.8850       1.2923     0.07   in band
+   86.00        79.8835       1.2908     0.07   in band
+   90.00        79.7378       1.1450     0.06   in band
+   94.00        79.5100       0.9173     0.05   in band
+   98.00        79.3635       0.7707     0.04   in band
+  102.00        78.2276       0.3651     0.02   in band
+  106.00        77.9961       0.5967     0.03   in band
+  110.00        77.8235       0.7693     0.04   in band
+  114.00        77.6957       0.8970     0.05   in band
+  118.00        77.6037       0.9890     0.05   in band
+  119.99        77.5041       1.0886     0.06   in band
+  120.01        77.4677       1.1251     0.06 
+  122.00        77.4357       1.1571     0.06 
+  132.00        76.7755       1.8172     0.09 
+  142.00        76.5534       2.0393     0.11 
+  152.00        75.7140       2.8787     0.15 
+  162.00        75.5532       3.0395     0.16 
+  172.00        75.4868       3.1060     0.16 
+  182.00        75.3898       3.2029     0.17 
+  184.00        75.3734       3.2193     0.17   <- quarantined mode
+  192.00        75.3775       3.2152     0.17 
+
+
+=== SUMMARY -- the third column 16g sec.2.4 could not fill ===
+row                                   in band   all h_ml
+DIC  sigma_rep/sigma_obs            0.04-0.34  0.04-0.87   <- 16g part 4
+d13C sigma_rep/sigma_obs            0.01-0.55  0.01-1.11   <- 16g part 4
+ALK  sigma_rep/sigma_obs            0.02-0.07  0.02-0.34   <- THIS FILE
+
+
+=== PREDICTIONS SCORED ===
+Q1   max sigma_rep/sigma_obs over all h_ml             0.342  bar 1.20     PASS
+Q2   max sigma_rep/sigma_obs in band                   0.067  bar 0.40     PASS
+Q3   r(ALK sigma_rep, DIC-on-ALK-pop sigma_rep)        0.922  bar 0.90     PASS
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/alk_sigma_rep/alk_sigma_rep.rds

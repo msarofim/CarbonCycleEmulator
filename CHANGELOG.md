@@ -5436,3 +5436,49 @@ HISTORICAL figure this part receipt-checks".
 **Not done here:** the band itself is unchanged (`LIK_OCEAN_GRAD_HML_OK` is still `c(85, 120)`), and
 σ-inflation (16g §2.4, open item 4) remains unimplemented and Marcus's call. This commit corrects
 what the file *claims*, not what it *does*.
+
+## 2026-08-17 (later) — Alkalinity's `σ_rep` MEASURED: 16g's "would need a new download" was wrong, and the row is the best-behaved of the three
+
+`calibration/diag_alk_sigma_rep.R`, ~30 s, **3 gates + 3 pre-registered predictions, all passing**.
+Nothing proposed; `R/likelihood.R` unchanged; the two-arm refit was running throughout and this was
+sized to not compete with it (one 19 MB CSV read, no model evaluation).
+
+**THE BLOCKER WAS A FILE-POINTER MISTAKE, NOT MISSING DATA.** 16g §2.4 left σ-inflation (open item 4)
+with two of three inputs, recording that "alkalinity's `σ_rep` is UNQUANTIFIED — the GLODAP subset
+carries no `talk` column, so it would need a new download or a stated assumption." The first clause is
+true of the file 16g's part 4 reads (`glodap_c13c14_subset.csv`); **the inference is not.** The shipped
+ALK target was never built from that file — `data-raw/build_glodap_deep_targets.R:324` reads
+`glodap_dic_talk_subset.csv`, **464,590 QC-passed bottles already on disk**, because (its own comment)
+"alkalinity is measured on far more bottles" than the isotope cruises. Part 4 pointed at one file while
+the target came from another. No download, no assumption.
+
+**GATES.** The recipe is copied from part 4 (itself copied from `diag_gradient_target_and_neff.R`) and
+not re-chosen. **G1/G2** reproduce **both** shipped targets from this file's own cells before any `h_ml`
+moves — `talk` **78.5927** and `tco2_alkpop` **225.8087**, each to **0.00e+00**. Two fields are gated,
+not one, because a recipe reproducing only `talk` could be right by luck about the cells and wrong about
+the cosine weighting. **G3** asserts `ccx_ocean_grid(100)`'s surface box *is* the shipped 0–100 m layer
+to 1e-9, which is what makes the curve's floor interpretable as the closed-vs-open edge convention
+rather than a depth mismatch.
+
+**THE RESULT — the row feared unquantified carries the SMALLEST representation error of the three:**
+
+| row | in band | all `h_ml` | source |
+|---|---|---|---|
+| DIC | 0.04–0.34 | 0.04–0.87 | 16g part 4 |
+| δ¹³C | 0.01–0.55 | 0.01–1.11 | 16g part 4 |
+| **ALK** | **0.02–0.07** | **0.02–0.34** | **this file** |
+
+At the quarantined mode's `h_ml` = 184 the ALK mismatch is **0.17 σ**; in band it never exceeds
+**0.07 σ**. The DIC/δ¹³C comparators are **read from 16g's own saved rds**, not transcribed from its
+handoff, so the table cannot inherit a prose typo — and doing so filled in a cell 16g's handoff left
+blank (δ¹³C in-band, 0.01–0.55).
+
+**This STRENGTHENS 16g §2.4 rather than qualifying it.** The band switches all three rows off together,
+and every one of them is sub-1σ across `h_ml`'s entire prior support — a 10-log-unit switch enforcing,
+at worst, a 1.11 σ mismatch and at best a 0.02 σ one. **Predictions: 3/3 PASS** (Q1 max ratio 0.342 vs
+bar 1.20; Q2 in-band 0.067 vs 0.40; Q3 r = 0.922 vs 0.90 — ALK's `σ_rep` tracks DIC's in shape, as two
+gradients of carbon-like tracers read on the same box edges should).
+
+**NOT done, and still Marcus's call:** σ-inflation remains **unimplemented**. This supplies its missing
+input; it does not price it. 16g's "inflation recovers 21 % of the skip's gain" is untouched — that
+needs the model's own gradient at each `h_ml`, and the refit owns the machine.

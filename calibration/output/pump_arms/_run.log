@@ -14,3 +14,4 @@ GATE: the arms differ in `pump_mode` and nothing else. OK
 
 === ARM pump_mode = N ===
 start: log-post at hand-set init = -4291.2
+[N] restart  1: log-post =      -2115.6  (gain  2175.5803)  evals 20001
