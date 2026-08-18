@@ -667,6 +667,10 @@ ccx_default_params <- function() {
     # ocean); free with shrinkage priors, for the seasonal streams to choose.
     sst_seas_amp_NH = 2.0,
     sst_seas_amp_SH = 1.2,
+    # 1 = annual-mean SST from the forcing's OBSERVED HadSST4 columns (with the
+    # ratio-scaled extension beyond the record); 0 = the legacy
+    # sst_scale * gmst map. Structural switch, not calibrated.
+    sst_obs = 1,
     # ENSO COEFFICIENT: 0, NOT the CCX_PARAM_TABLE init of 0.5, and this is a
     # deliberate asymmetry with beta/q10/kz (which do take their table inits).
     # Until 2026-08-13d it was ABSENT here, so ccx_deriv() -- which multiplies it
@@ -977,7 +981,13 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     }
 
     # ---- air-sea ----------------------------------------------------
-    sst    <- aux$sst[[h]] + p$sst_scale * forc$gmst
+    # Annual-mean SST: observed (HadSST4 columns) when the switch is on AND the
+    # forcing carries them; otherwise the legacy linear-in-GMST map. Hand-built
+    # test forcings carry no columns and land on the fallback unchanged.
+    sa <- forc[[paste0("sst_anom_", h)]]
+    sst <- aux$sst[[h]] +
+      (if (isTRUE(p$sst_obs > 0) && !is.null(sa) && is.finite(sa)) sa
+       else p$sst_scale * forc$gmst)
     # Seasonal SST, under the SAME seas_drivers switch as the land drivers --
     # so ccx_spinup()'s zeroing covers it and seas_drivers = 0 stays the exact
     # pre-2026-08-18 model. Zero-mean sine; the annual-mean pCO2 shift it

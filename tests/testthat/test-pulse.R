@@ -170,7 +170,7 @@ pd100_irf <- function() {
                       prod_c14 = spin$prod_c14, bomb_total_kmol = 0))
   for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
                "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
-  F_fwd$gmst <- F_fwd$gmst[1]        # climate held at the reference year
+  F_fwd <- ccx_hold_climate(F_fwd)   # gmst, enso AND observed-SST columns held
   F_hold <- ccx_hold_forcing(sp_ref, F_fwd)
   o <- ccx_irf(sp_ref, F_hold)
   o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR)

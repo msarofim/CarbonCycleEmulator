@@ -49,7 +49,9 @@ static const int C = 0, C13 = 1, C14 = 2;
 // disagreement in the column count is caught by ccx_cpp_forcing()'s name check;
 // a disagreement in the ceiling is NOT caught by anything, so if one moves the
 // other must move in the same commit.
-static const int N_FORCING = 12;
+static const int N_FORCING = 14;   // +sst_anom_NH, +sst_anom_SH (2026-08-18),
+                                   // appended LAST; NaN = column absent, and
+                                   // the deriv falls back to sst_scale * gmst
 static const double LUC_CLEARED_MAX = 0.9;
 
 // state is column-major [box + NB*tracer], matching R's matrix layout
@@ -131,6 +133,7 @@ struct Par {
   int    seas_drivers;
   double seas_T_amp[2], seas_lag_p;
   double sst_seas_amp[2];
+  int    sst_obs;
   double seas_n_norm[2], seas_r_norm[2];
   double revelle_frozen;                    // mechanism switch, 0 or 1
 };
@@ -344,7 +347,12 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // Seasonal SST under seas_drivers, hemisphere-signed -- twin of the block
     // in R/model.R, which carries the rationale (zero-mean driver; the pCO2
     // rectification is accepted as physics).
-    const double sst = A.sst[hi] + P.sst_scale * gmst
+    // Annual-mean part: observed HadSST4 anomaly (f[12+hi]) when the switch is
+    // on and the column exists (NaN = absent -> legacy fallback). Twin of the
+    // block in R/model.R.
+    const double sst_an = f[12 + hi];
+    const double sst = A.sst[hi]
+      + ((P.sst_obs > 0 && !std::isnan(sst_an)) ? sst_an : P.sst_scale * gmst)
       + (P.seas_drivers > 0
          ? (hi == 0 ? 1.0 : -1.0) * P.sst_seas_amp[hi]
            * std::sin(2.0 * M_PI * (t - (3.5 + SST_SEAS_LAG) / 12.0))
@@ -561,6 +569,7 @@ static Par unpack_par(const List& p) {
   P.seas_T_amp[0] = p["seas_T_amp_NH"]; P.seas_T_amp[1] = p["seas_T_amp_SH"];
   P.seas_lag_p = p["seas_lag_p"];
   P.sst_seas_amp[0] = p["sst_seas_amp_NH"]; P.sst_seas_amp[1] = p["sst_seas_amp_SH"];
+  P.sst_obs = (int) p["sst_obs"];
   // 720-point norm grid, NOT 12 -- twin of ccx_seas_norms() in R/model.R,
   // which documents why (the polar-night kink leaks +0.22 ppm / 275 yr at 12).
   for (int h = 0; h < 2; ++h) {

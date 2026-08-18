@@ -176,8 +176,11 @@ test_that("frozen Revelle does what it claims, and only that", {
   # drives a seasonal pCO2 cycle on the LIVE arm only, and the rectification
   # difference alone accumulates 0.38 ppm by 1850 -- nothing to do with what
   # this test guards. Both arms run seasonless, preserving the gate's premise.
-  p_on  <- pf$p;  p_on$seas_drivers <- 0
-  p_off <- pf$p; p_off$revelle_frozen <- 1; p_off$seas_drivers <- 0
+  # sst_obs = 0 for the same reason as seas_drivers: the frozen branch's pCO2
+  # has no T-dependence, so REAL 1850s SST anomalies (not just the seasonal
+  # cycle) move the live arm only -- 0.12 ppm at the 0.1-ppm 1850 gate.
+  p_on  <- pf$p;  p_on$seas_drivers <- 0;  p_on$sst_obs <- 0
+  p_off <- pf$p; p_off$revelle_frozen <- 1; p_off$seas_drivers <- 0; p_off$sst_obs <- 0
   sp_on  <- ccx_spinup(p_on)
   sp_off <- ccx_spinup(p_off)
 

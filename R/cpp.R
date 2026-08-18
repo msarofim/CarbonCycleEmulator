@@ -127,6 +127,10 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$seas_lag_p)) p$seas_lag_p <- 2.25
   if (is.null(p$sst_seas_amp_NH)) p$sst_seas_amp_NH <- 2.0
   if (is.null(p$sst_seas_amp_SH)) p$sst_seas_amp_SH <- 1.2
+  # Observed-SST switch: ABSENCE = the legacy sst_scale * gmst path, so a
+  # pre-2026-08-18 parameter list runs the model it was fitted to (the same
+  # principle as seas_drivers above). ccx_default_params() sets 1 explicitly.
+  if (is.null(p$sst_obs)) p$sst_obs <- 0
   if (is.null(p$q_conv)) p$q_conv <- 0
   if (is.null(p$conv_sink)) p$conv_sink <- N_INTERIOR
   if (is.null(p$conv_descent)) p$conv_descent <- 0L
@@ -156,7 +160,7 @@ ccx_cpp_par <- function(p) {
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH",
       "seas_drivers", "seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p",
-      "sst_seas_amp_NH", "sst_seas_amp_SH",
+      "sst_seas_amp_NH", "sst_seas_amp_SH", "sst_obs",
       "revelle_frozen")]
 }
 
@@ -167,7 +171,12 @@ ccx_cpp_par <- function(p) {
 # layout and test-parity.R runs them against each other.
 CCX_FORCING_COLS <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                       "gmst", "enso", "c14_bomb", "c14_nuclear", "c14_cosmo",
-                      "d13c_foss", "cum_luc_NH", "cum_luc_SH")
+                      "d13c_foss", "cum_luc_NH", "cum_luc_SH",
+                      # observed SST anomalies (2026-08-18), appended LAST so
+                      # every earlier index survives. A forcing without them
+                      # reaches C++ as NaN, and the core falls back to
+                      # sst_scale * gmst -- the absence contract, in the matrix.
+                      "sst_anom_NH", "sst_anom_SH")
 
 ccx_cpp_forcing <- function(F) {
   miss <- setdiff(CCX_FORCING_COLS, names(F))
@@ -218,7 +227,10 @@ ccx_deriv_fast <- function(y, t, p, forc, grid, aux) {
   cl <- ccx_forcing_cum_luc(forc)
   f <- c(forc$e_foss$NH, forc$e_foss$SH, forc$e_luc$NH, forc$e_luc$SH,
          forc$gmst, forc$enso, forc$c14_bomb, forc$c14_nuclear, forc$c14_cosmo,
-         ccx_forcing_d13c_foss(forc), cl$NH, cl$SH)
+         ccx_forcing_d13c_foss(forc), cl$NH, cl$SH,
+         # absent in most hand-built test forcings -> NaN -> C++ falls back
+         if (is.null(forc$sst_anom_NH)) NA_real_ else forc$sst_anom_NH,
+         if (is.null(forc$sst_anom_SH)) NA_real_ else forc$sst_anom_SH)
   d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, ccx_cpp_par(p), f, ccx_cpp_aux(aux, grid))
   dimnames(d) <- dimnames(y)
   d

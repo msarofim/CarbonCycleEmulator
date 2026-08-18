@@ -28,6 +28,7 @@ pm  <- m$par_mode
 bp <- ccx_default_params(); bp$pump_mode <- ARM
 p_mode <- bp
 for (n in intersect(names(p_mode), CCX_PARAM_NAMES)) p_mode[[n]] <- pm[[n]]
+p_mode$sst_obs <- 0       # observed-SST is post-mode too (2026-08-18)
 p_mode$seas_drivers <- 0  # THE ESCAPE HATCH, load-bearing: this mode was
 # fitted under the pre-2026-08-18 seasonal SINE (its seas_amp/phase are in
 # par_mode); the drivers path would ignore them and substitute defaults. The

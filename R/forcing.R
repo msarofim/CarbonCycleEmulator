@@ -23,6 +23,24 @@
 # the seasonality buy?" is one flag rather than a git checkout.
 FORC_USE_EMIS_SEASONALITY <- TRUE
 FORC_FOSS_NH_SHARE <- 0.9201 # fossil CO2 emitted in the NH. MEASURED (Marcus,
+
+# ---- OBSERVED SST (HadSST4) and its forward scaling (2026-08-18) -----
+# Historical hemispheric SST anomalies are PRESCRIBED from HadSST.4.2.0.0
+# (data/forcing_sst.rds, re-based to 1850-1900); beyond the observed record the
+# anomaly follows the gmst column INCREMENTALLY at a fixed ratio:
+#   sst_anom_h(t) = <obs over seam> + CCX_SST_RATIO_h * (gmst(t) - <gmst over seam>)
+# with both seam means taken over the last CCX_SST_SPLICE_YR observed years --
+# never a single year (standing baselining rule). The ratios are the LAST-30-YR
+# observed regressions of HadSST4 on IGCC GMST, no intercept, common 1850-1900
+# base (calibration/diag_hemis_t_ratios.R, 1995-2024 row). MEASURED, and the
+# choice is documented there: the window-to-window spread of that regression
+# (NH 0.61-1.10 over the record) is FORCING-PATTERN history (mid-century NH
+# aerosols), not warming-level dependence, so constant-forward is the honest
+# simple rule; a CMIP6-derived warming-level scaling can replace this function
+# without touching anything else. Marcus 2026-08-18: HadSST4; constant ratios.
+CCX_SST_RATIO_NH <- 0.819
+CCX_SST_RATIO_SH <- 0.762
+CCX_SST_SPLICE_YR <- 10
                              # 2026-08-15, review item 5) by the EDGAR v4.3.2
                              # country aggregation in
                              # data-raw/extract_emission_seasonality.py --
@@ -558,6 +576,9 @@ ccx_build_forcing <- function(scenario = "historical",
     c14_cosmo = rep(prod_c14, n),
     stringsAsFactors = FALSE
   )
+  # observed SST columns, derived from the gmst column just built (see
+  # ccx_sst_anom_from_gmst for the seam rule and the ratio provenance)
+  out <- ccx_sst_anom_from_gmst(out)
   # Stamped so a forcing carries its own provenance: the sink terms in
   # ccx_loglik() need the MODEL's land-use flux, not GCB's, and a run whose LUC
   # was scaled must not be scored against an unscaled one. Project convention --
@@ -631,7 +652,11 @@ ccx_forcing_at <- function(F, i) {
        cum_luc = list(NH = F$cum_luc_NH[i], SH = F$cum_luc_SH[i]),
        gmst = F$gmst[i], enso = F$enso[i], d13c_foss = F$d13c_foss[i],
        c14_bomb = F$c14_bomb[i], c14_nuclear = F$c14_nuclear[i],
-       c14_cosmo = F$c14_cosmo[i])
+       c14_cosmo = F$c14_cosmo[i],
+       # observed-SST columns (2026-08-18). NULL when the forcing predates them
+       # -- the deriv's fallback handles that; omitting them HERE while the C++
+       # matrix carried them broke R<->C++ parity at 9e-4 before this line.
+       sst_anom_NH = F$sst_anom_NH[i], sst_anom_SH = F$sst_anom_SH[i])
 }
 
 # ---------------------------------------------------------------------
@@ -699,4 +724,43 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
   res <- list(state = y, out = out)
   if (fluxes) res$fluxes <- ccx_flux_trace(ystore, F, p, grid, aux)
   res
+}
+
+
+#' (Re)derive the sst_anom_{NH,SH} columns from the CURRENT gmst column.
+#'
+#' Called by ccx_build_forcing() after the gmst column is final, and by
+#' ccx_run_coupled() after EVERY gmst update -- the sst columns must follow
+#' whatever gmst is current, or the coupled runner's future would silently
+#' keep build-time SST. Obs years take HadSST4 directly; beyond them the
+#' incremental rule above applies, seam-matched over CCX_SST_SPLICE_YR years.
+ccx_sst_anom_from_gmst <- function(F) {
+  so <- as.data.frame(readRDS(ccx_path("data", "forcing_sst.rds")))
+  last <- max(so$year)
+  for (h in c("NH", "SH")) {
+    ratio <- if (h == "NH") CCX_SST_RATIO_NH else CCX_SST_RATIO_SH
+    ocol  <- so[[paste0("sst_anom_", h)]]
+    v <- stats::approx(so$year + 0.5, ocol, xout = F$t, rule = 2)$y
+    beyond <- F$year > last
+    if (any(beyond)) {
+      seam_o <- mean(ocol[so$year > last - CCX_SST_SPLICE_YR])
+      seam_g <- mean(F$gmst[F$year > last - CCX_SST_SPLICE_YR & F$year <= last])
+      v[beyond] <- seam_o + ratio * (F$gmst[beyond] - seam_g)
+    }
+    F[[paste0("sst_anom_", h)]] <- v
+  }
+  F
+}
+
+#' Freeze the climate columns of a forcing at their i-th value (or a constant).
+#'
+#' Every "held climate" construction in the repo used to write F$gmst <- ... by
+#' hand; with the observed-SST columns that idiom silently leaves real SST
+#' warming in a "frozen" run. This is the one place that knows the full list.
+ccx_hold_climate <- function(F, i = 1L, value = NULL) {
+  for (cc in c("gmst", "enso", "sst_anom_NH", "sst_anom_SH")) {
+    if (is.null(F[[cc]])) next
+    F[[cc]] <- if (is.null(value)) F[[cc]][i] else value
+  }
+  F
 }

@@ -205,6 +205,9 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
     delta <- if (is.null(gmst_path)) Inf else max(abs(tnew - gmst_path))
     gmst_path <- tnew
     F$gmst <- ccx_annual_to_monthly(yrs, gmst_path, yrs)
+    # the observed-SST columns must FOLLOW the evolving gmst, or the coupled
+    # future silently keeps build-time SST (see ccx_sst_anom_from_gmst)
+    F <- ccx_sst_anom_from_gmst(F)
     if (delta < tol || iter >= max_iter) break
   }
 

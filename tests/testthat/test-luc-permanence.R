@@ -52,7 +52,7 @@ lp_background <- function(s) {
                    fossil_GtC = 0, luc_GtC = 0, d13c_foss = -24)
   F <- ccx_build_forcing("historical", LP_YRS, prod_c14 = s$prod_c14, emissions = ze)
   F$c14_bomb <- 0; F$c14_nuclear <- 0
-  F$gmst <- F$gmst[1]; F$enso <- F$enso[1]
+  F <- ccx_hold_climate(F)   # gmst, enso AND the observed-SST columns
   F
 }
 
@@ -105,6 +105,11 @@ test_that("a land-use pulse is not given back to the land", {
   # orthogonal to land-use permanence, so the control runs seasonless rather
   # than the gate being loosened.
   p_lp <- ccx_default_params(); p_lp$seas_drivers <- 0
+  # sst_obs = 0 too: ccx_hold_climate() freezes the observed-SST columns at
+  # their 1750 value, but that value is the 1850s HadSST4 anomaly (+0.02 K)
+  # while ccx_spinup() equilibrates at anomaly ZERO -- the mismatch alone
+  # drifts the control +0.03 ppm/275 yr. The control predates both drivers.
+  p_lp$sst_obs <- 0
   s   <- ccx_spinup(p_lp)
   F0  <- lp_background(s)
   ctl <- lp_co2(s, F0)
@@ -161,7 +166,7 @@ test_that("f_luc_perm = 0 AND f_luc_wood = 1 reproduce the pre-2026-08-13 behavi
   # (0.002 at 100 -> -0.003 at 150). The bar is NOT re-baselined: it is the
   # 0.02 the header already stated, now measured at the config it describes.
   p <- ccx_default_params(); p$f_luc_perm <- 0; p$f_luc_wood <- 1
-  p$seas_drivers <- 0    # same seasonless control as above
+  p$seas_drivers <- 0; p$sst_obs <- 0    # same seasonless, obs-less control
   s <- ccx_spinup(p)
   F0 <- lp_background(s); ctl <- lp_co2(s, F0)
   expect_lt(abs(lp_af(s, lp_pulse(F0, luc = TRUE), ctl, LP_LAG)), 0.02)

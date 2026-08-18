@@ -47,7 +47,14 @@ CCX_MECHANISMS <- list(
                   "Switch it off and the carbon cycle stops noticing the warming."),
     caveat = paste("The climate still warms — only the carbon cycle's RESPONSE",
                    "to it is removed, so the two effects can be told apart."),
-    apply = function(p, F) { p$q10 <- 1; p$sst_scale <- 0; list(p = p, F = F) }
+    apply = function(p, F) {
+      p$q10 <- 1; p$sst_scale <- 0
+      # sst_obs = 0, or the observed HadSST4 columns would carry real SST
+      # warming straight past the zeroed sst_scale and the switch would only
+      # HALF-remove the response it claims to remove (2026-08-18).
+      p$sst_obs <- 0
+      list(p = p, F = F)
+    }
   ),
   enso = list(
     label = "El Niño / La Niña",

@@ -93,7 +93,7 @@ lp_background <- function(s) {
                    fossil_GtC = 0, luc_GtC = 0, d13c_foss = -24)
   F <- ccx_build_forcing("historical", LP_YRS, prod_c14 = s$prod_c14, emissions = ze)
   F$c14_bomb <- 0; F$c14_nuclear <- 0
-  F$gmst <- F$gmst[1]; F$enso <- F$enso[1]
+  F <- ccx_hold_climate(F)   # incl. observed-SST columns (2026-08-18)
   F
 }
 lp_pulse <- function(F, luc) {

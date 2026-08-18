@@ -70,7 +70,7 @@ quiet_forcing <- function(s, years = CONV_YRS) {
   # state toward a smaller land -- a real drift, which this helper's callers
   # would read as a conveyor failure. Zeroing only the flux is not "quiet".
   F$cum_luc_NH <- 0; F$cum_luc_SH <- 0
-  F$gmst <- 0; F$enso <- 0; F$c14_bomb <- 0; F$c14_nuclear <- 0
+  F <- ccx_hold_climate(F, value = 0); F$c14_bomb <- 0; F$c14_nuclear <- 0
   F$c14_cosmo <- s$prod_c14
   F
 }

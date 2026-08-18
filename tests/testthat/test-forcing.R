@@ -115,7 +115,11 @@ test_that("the C++ forcing column contract is positional and complete", {
   # inserted so every existing position is untouched; src/ccx_core.cpp's
   # N_FORCING must match this length.
   expect_identical(CCX_FORCING_COLS[11:12], c("cum_luc_NH", "cum_luc_SH"))
-  expect_length(CCX_FORCING_COLS, 12L)
+  # sst_anom APPENDED 2026-08-18 (observed HadSST4), same discipline: appended,
+  # never inserted, and NaN in these two positions means "column absent -> the
+  # core falls back to sst_scale * gmst".
+  expect_identical(CCX_FORCING_COLS[13:14], c("sst_anom_NH", "sst_anom_SH"))
+  expect_length(CCX_FORCING_COLS, 14L)
   F <- ccx_build_forcing("historical", c(1900, 1910), prod_c14 = 0)
   expect_identical(colnames(ccx_cpp_forcing(F)), CCX_FORCING_COLS)
   expect_error(ccx_cpp_forcing(F[, setdiff(names(F), "d13c_foss")]),

@@ -5869,3 +5869,44 @@ box amp 4.77 → 4.41 ppm, toward the observed 3.02 — and adds at SPO (0.90 �
 **Deferred, needs a decision**: the OTHER half of the SST fix — observed hemispheric SST over
 the historical record replacing `0.8 × GMST` — requires a data product choice (HadSST4 vs
 ERSST) and a download into `data-raw/` + MANIFEST. Flagged, not resolved.
+
+## 2026-08-18 (drivers, part 3) — Observed SST: HadSST4 historical + constant-ratio forward scaling (Marcus)
+
+**Marcus: HadSST4 for the historical record.** The annual-mean SST is now the OBSERVED
+hemispheric HadSST4 anomaly (v4.2.0.0, 1850–2025, re-based 1961-90 → 1850-1900 to match the
+IGCC GMST convention) instead of `0.8 × GMST`; beyond the record it follows the gmst column
+incrementally at fixed ratios, seam-matched over 10 years (never one year).
+
+**The forward-scaling question (CMIP6 warming-level ratios vs constant obs ratios) was
+MEASURED, not opined** (`calibration/diag_hemis_t_ratios.R`, HadSST4 + CRUTEM5 on IGCC GMST,
+no intercept, common base): the ratio's window-to-window spread (SST_NH 0.61–1.10 across
+1880–2024) is **forcing-pattern history — mid-century NH aerosols — not warming-level
+dependence**, so neither option captures what drove the historical variation, and on
+GHG-dominated futures the cheap option is defensible: last-30-yr ≈ full-record (NH 0.82 vs
+0.79). **Adopted: constant last-30-yr ratios (NH 0.819, SH 0.762) as named constants**, with
+`ccx_sst_anom_from_gmst()` the single seam where a CMIP6-derived scaling can drop in later.
+CMIP6 effort estimate: ~a day from pre-digested sources (check the FaIRtoFrEDI PAI pipeline
+first), a week+ from raw ESGF — deferred. CRUTEM5 land ratios (NH 1.54, SH 1.14) measured and
+MANIFESTED for the same question; **land-T into q10 is NOT wired** (a further structural
+change, not ordered).
+
+**Plumbing**: `forcing_sst.rds` (new builder + 4 MANIFEST rows incl. CRUTEM5);
+`sst_anom_{NH,SH}` forcing columns (appended LAST, N_FORCING 12 → 14; NaN = absent → legacy
+fallback); `sst_obs` structural switch (default 1; **absence-default 0** so old parameter
+lists run the model they were fitted to); `ccx_run_coupled()` re-derives the columns after
+EVERY gmst update so the coupled future follows the evolving climate; **`ccx_hold_climate()`**
+replaces the hand-rolled `F$gmst <- F$gmst[1]` idiom at 7 sites (tests + diagnostics) because
+a "frozen climate" that leaves real SST warming in the columns is frozen in name only; the
+`warming_feedback` mechanism switch sets `sst_obs = 0` — zeroed `sst_scale` alone would have
+HALF-removed the response it claims to remove.
+
+**Caught by the probe, worth recording:** first full-run R↔C++ parity came back at **9e-4** —
+the pure-R runner's per-step forcing list is an explicit field list and did not carry the new
+columns, so R ran legacy while C++ ran obs. One line; parity back to 1.1e-15. The absence
+contract cuts both ways: a column the matrix carries but the list omits is a silent model
+fork.
+
+**Effect at defaults**: recent-mean CO2 moves −0.06 ppm (the 0.8 scale was itself fit to this
+record); the gain is the interannual structure and the hemispheric asymmetry, which the
+gradient and d13C streams can now see. rds gate still 0.000e+00 (sst_obs pinned 0 in the
+mode-reconstruction diagnostics).

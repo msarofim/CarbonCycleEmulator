@@ -82,7 +82,7 @@ test_that("turnover time from the flux trace matches an independent label pulse"
                                             bomb_total_kmol = 0))
     for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
                  "c14_bomb", "c14_nuclear")) F[[cc]] <- 0
-    F$gmst <- 0
+    F <- ccx_hold_climate(F, value = 0)   # gmst AND observed-SST columns
     ctl <- ccx_run(s, F)$out
     sl <- s
     for (k in c(s$aux$idx$NH$atm, s$aux$idx$SH$atm))

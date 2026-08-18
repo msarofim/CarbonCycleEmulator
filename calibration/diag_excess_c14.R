@@ -77,7 +77,7 @@ F_nat$e_foss_NH <- 0; F_nat$e_foss_SH <- 0
 F_nat$e_luc_NH  <- 0; F_nat$e_luc_SH  <- 0
 F_nat$c14_bomb  <- 0; F_nat$c14_nuclear <- 0
 o_natB <- run(F_nat)
-F_natC <- F_nat; F_natC$gmst <- 0; F_natC$enso <- 0
+F_natC <- ccx_hold_climate(F_nat, value = 0)
 o_natC <- run(F_natC)
 
 natA <- inv_kmol(o_full, 1)          # the run's own first row = the spinup state
