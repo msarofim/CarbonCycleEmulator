@@ -224,6 +224,24 @@ LIK_ANNUAL_MIN_MONTHS <- 9L
 # SPO monthly record begins (the Scripps 1957-1975 SH record is unreachable --
 # see CHANGELOG 2026-08-09), so both stations contribute over the same years.
 LIK_SEAS_WINDOW <- c(1975, 2024)
+
+# ---- d13C SEASONAL CYCLE (2026-08-18, Marcus priority rework item 3) --
+# Scored from today. The d13C level block's old justification for not scoring
+# it -- "a derived consequence of the same NEP harmonic the CO2 seasonal
+# statistic already constrains, so scoring it again would double-count one
+# mechanism" -- conflates two different claims. The CO2 cycle constrains the
+# NEP harmonic's amplitude and phase; the d13C cycle measures that SAME flux
+# through a DIFFERENT observable, whose amplitude carries the photosynthetic
+# discrimination and the air-sea contribution on top. The RATIO of the two
+# amplitudes is therefore an independent constraint the objective never had:
+# measured 2026-08-18 at package defaults, NH ratio 0.0738 permil/ppm against
+# MLO obs 0.178/3.02 = 0.0591 -- same order, not equal, i.e. information.
+# Two instruments measuring two species is not one measurement scored twice.
+#
+# Sigma is the interannual sd of the OBSERVED harmonic coefficients, exactly
+# as the CO2 seasonal statistic does it -- no free error scale (sigma_d13c is
+# retired, and this stream never met it anyway).
+LIK_USE_D13C_SEAS <- TRUE
 # The seasonal constraint is scored PER YEAR -- each year's two first-harmonic
 # coefficients are one observation pair -- with sigma set to the INTERANNUAL SD
 # of those coefficients. Not the standard error of their multi-year mean: the
@@ -885,6 +903,10 @@ ccx_prepare_obs <- function() {
     ccx_year_harmonic(o$decimal_date, o$d13c)
   })
   co2_seas <- lapply(co2_ann, ccx_seasonal_target)
+  # d13C seasonal target from the SAME per-year harmonics the level term uses --
+  # nothing new is estimated (the gradient-term idiom: statistics that already
+  # exist, differenced/windowed, keep model and obs on identical machinery).
+  d13_seas <- lapply(d13_ann, function(h) if (is.null(h)) NULL else ccx_seasonal_target(h))
 
   d14_nh_ann <- ccx_annual_mean(d14_nh$t, d14_nh$d14c, d14_nh$sd)
   d14_sh_ann <- ccx_annual_mean(d14_sh$t, d14_sh$d14c, d14_sh$sd)
@@ -918,6 +940,7 @@ ccx_prepare_obs <- function() {
   list(co2 = co2, d13 = d13, d14_nh = d14_nh, d14_sh = d14_sh,
        ice = ico, gcb = gcb, intcal = ic20, weights = w,
        co2_ann = co2_ann, d13_ann = d13_ann, co2_seas = co2_seas,
+       d13_seas = d13_seas,
        co2_grad = co2_grad, d13c_grad = d13c_grad,
        d14_nh_ann = d14_nh_ann, d14_sh_ann = d14_sh_ann,
        excess_c14_all = exc, excess_c14 = ccx_excess_c14_target(exc))
@@ -998,7 +1021,8 @@ ccx_model_stats <- function(out, obs) {
   co2 <- list(MLO = s$co2_NH, SPO = s$co2_SH)
   list(co2 = co2, d13 = list(MLO = s$d13c_NH, SPO = s$d13c_SH),
        d14 = list(NH = s$d14c_NH, SH = s$d14c_SH),
-       co2_seas = lapply(co2, ccx_seasonal_target))
+       co2_seas = lapply(co2, ccx_seasonal_target),
+       d13_seas = lapply(list(MLO = s$d13c_NH, SPO = s$d13c_SH), ccx_seasonal_target))
 }
 
 #' Log-likelihood of one model run
@@ -1089,14 +1113,27 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
         sum(stats::dnorm(o$b[good], m$b[k[good]], o$sd_b, log = TRUE)))
   }
 
+  # ---- d13C seasonal cycle (2026-08-18; see LIK_USE_D13C_SEAS) -------
+  # Same shape as the CO2 seasonal term: per-year harmonic coefficients against
+  # the observed interannual sd. Skips VISIBLY (stream absent under by_stream)
+  # when the obs target is missing, same contract as everything else here.
+  if (LIK_USE_D13C_SEAS) for (st in c("MLO", "SPO")) {
+    o <- obs$d13_seas[[st]]; m <- ms$d13_seas[[st]]
+    if (is.null(o) || is.null(m)) next
+    k <- match(o$year, m$year); good <- !is.na(k)
+    add(paste0("d13c_seasonal_", st),
+        sum(stats::dnorm(o$a[good], m$a[k[good]], o$sd_a, log = TRUE)) +
+        sum(stats::dnorm(o$b[good], m$b[k[good]], o$sd_b, log = TRUE)))
+  }
+
   # ---- ice-core CO2, independent ------------------------------------
   mod <- interp("co2_NH", obs$ice$year)   # SH-cored but globally well mixed pre-1900
   add("co2_icecore", sum(stats::dnorm(obs$ice$CO2ppm, mod, obs$ice$sd, log = TRUE)))
 
   # ---- d13C annual level ---------------------------------------------
-  # Level only. The model's d13C seasonality is a derived consequence of the
-  # same NEP harmonic the CO2 seasonal statistic already constrains, so scoring
-  # it again would double-count one mechanism.
+  # Level here; the SEASONAL cycle is scored by its own term since 2026-08-18
+  # (see LIK_USE_D13C_SEAS -- the old "would double-count one mechanism"
+  # justification conflated one mechanism with one measurement).
   for (st in c("MLO", "SPO")) {
     o <- obs$d13_ann[[st]]; m <- ms$d13[[st]]
     if (is.null(o) || !nrow(o) || is.null(m)) next

@@ -292,6 +292,31 @@ test_that("retiring sigma_co2 hardened the CO2 level stream, and only slightly",
   expect_true("rep_dC" %in% CCX_PARAM_NAMES)
 })
 
+test_that("the d13C seasonal cycle is scored, and through the NEP harmonic", {
+  # Added 2026-08-18 (priority rework item 3). Two claims, both cheap to pin:
+  # the streams EXIST in by_stream (the obs targets built, the term is on), and
+  # they are WIRED to the seasonal NEP parameters -- if a future change severs
+  # d13C from the NEP harmonic, this is what says so.
+  skip_if_no_cpp()
+  obs <- ccx_prepare_obs()
+  expect_false(is.null(obs$d13_seas$MLO))
+  expect_false(is.null(obs$d13_seas$SPO))
+  expect_true(LIK_USE_D13C_SEAS)
+  run_ll <- function(p) {
+    sp <- ccx_spinup(p)
+    F <- ccx_build_forcing("historical", c(1960, 2024), prod_c14 = sp$prod_c14)
+    out <- ccx_run_fast(sp, F)$out
+    ccx_loglik(out, obs, list(sigma_d14c = 5, grad_off_co2 = 0, grad_off_d13c = 0),
+               by_stream = TRUE)
+  }
+  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  l0 <- run_ll(p)
+  expect_true(all(c("d13c_seasonal_MLO", "d13c_seasonal_SPO") %in% names(l0)))
+  p2 <- p; p2$seas_amp_NH <- p$seas_amp_NH * 1.3
+  l1 <- run_ll(p2)
+  expect_gt(abs(l1[["d13c_seasonal_MLO"]] - l0[["d13c_seasonal_MLO"]]), 1)
+})
+
 test_that("rep_dC ties the CO2 and d13C level offsets to ONE knob", {
   # THE SAFETY ARGUMENT FOR THE SHARED PARAMETER, pinned. If these two could
   # move independently it would be a free d13C level offset in disguise, and it
