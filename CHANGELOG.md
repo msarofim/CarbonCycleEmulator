@@ -5628,3 +5628,59 @@ already hidden a real bug in this project for five handoffs. Repair by deriving 
 re-baselining it to wherever the code lands.
 
 No remote is configured, so nothing was pushed.
+
+## 2026-08-18 (job B) — The 4 test failures DIAGNOSED: 3 mis-specified bars, 1 stale test premise, and one REAL under-gated model bias
+
+**Suite baseline MEASURED rather than inherited: `FAIL 4 | WARN 53 | SKIP 2 | PASS 857`** on `main` at
+`ea06f1f`. **Nothing was changed** — no test edited, no bar moved, no source touched. Full account:
+`notes/diag_2026-08-18_test_failures.md`.
+
+**16f's triage was "all four are plausibly stale gates … that is an assessment, not a verdict."
+Attacking rather than accepting that label is what produced the finding below.**
+
+**THE FINDING THAT IS NOT ABOUT THE BARS.** Re-measured `diag_joos_irf.R` (PD100 protocol): the model's
+point IRF is **low at every horizon** — 0.520 / 0.378 / **0.292** / 0.207 at 20/50/100/300 vs Joos
+Table 5's 0.596 / 0.487 / 0.409 / 0.322. The integrated IRF passes gate 12 only inside the wide
+**5–95 %** band and sits near its floor (41.9 vs 39.5–65.2; best estimate 52.4). **And the levels
+gate 12 does not check:** Joos §4.4.1 gives TH100 integrated IRF of **34–47 yr preindustrial** and
+**45–62 present-day**; the model reads **25.6 (BELOW the PI range)** and **44.7 (marginally below
+PD)**. **Gate 12's secondary check is scoped to the PI < PD *ordering*, which the model satisfies — so
+both level failures are invisible to it.**
+
+**PREDICTIONS: I got both halves WRONG and recorded them before looking.** I predicted the pump
+(shipped 08-16e, after gate 12's status line was last measured 08-14) had lowered the integrated IRF,
+possibly below the floor: it reproduced **12.4 / 25.6 / 41.9 exactly — the line is NOT stale.** I
+predicted PD100 af(100) ≈ 0.33–0.36; measured **0.292**.
+
+**THE FOUR, each bar DERIVED at the protocol it should have been stated at — none re-baselined:**
+
+1. **`test-pulse.R:113`** (af(100) 0.213 vs > 0.30) — **bar mis-specified.** Its own comment cites
+   "recalled … **NOT verified**" Joos values, which are **PD100** (389 ppm held); the test measures on
+   **SSP1-1.9**. The model's own diagnostic gives PD-held 0.297, PD-decaying 0.244, ssp126 0.267,
+   PI 0.152 — **0.213 on ssp119 is exactly where it belongs.** No code defect.
+2. **`test-luc-permanence.R:88`** (`af_foss` 0.151 vs > 0.2) — **bar mis-specified, and the match is
+   exact.** `lp_background()` is zero-emission with GMST and ENSO frozen = a **preindustrial**
+   background, and `LP_PULSE`/`LP_LAG` are the Joos 100 GtC / 100 yr shape. **`diag_joos_irf.R`'s
+   "PI, background HELD" IRF@100 = 0.152; the test measures 0.151** — agreement to 0.001 from an
+   independent diagnostic. No code defect.
+3. **`test-mechanisms.R:32`** (ENSO 0.30 vs > 0.5) — **wrong statistic.** One endpoint bar is applied
+   to all six mechanisms. Five are monotone and clear it by 36–450× (emissions 212, fertilisation 200,
+   ocean_sink 116, revelle 34, warming_feedback 18). **ENSO is the only OSCILLATORY one**, so its 2100
+   value reads *phase*, not wiring — its **max over the series is 0.537 at 2032**, above the bar.
+   ENSO is wired. No code defect.
+4. **`test-luc-permanence.R:104`** (|af| 0.074 vs < 0.02) — **stale test premise.** Reproducing the
+   pre-2026-08-13 model needs **both** `f_luc_perm = 0` **and** `f_luc_wood = 1`; the test sets one.
+   With both: af@100 = **−0.0032**, af@150 = **−0.0026**, reproducing the recorded signature
+   (0.002 / −0.003) and passing. `CCX_F_LUC_WOOD_DEFAULT` was flipped 1 → 0 after the test was written.
+   **16f's triage already said "a case needing `f_luc_wood = 1`" — it was right and nobody acted.**
+
+**A REAL DEFECT FOUND ALONGSIDE (4).** `R/cpp.R:104-105` asserts *"this default IS the old behaviour,
+because `f_luc_wood` = 1 is the incumbent decision"* while **`R/model.R:159` sets
+`CCX_F_LUC_WOOD_DEFAULT <- 0`** — a comment claiming a default the code does not have, **in the very
+block that exists to stop the R and C++ cores silently running different models** ("which is exactly
+what `gamma_enso` did"). Behaviour is correct (both read the same constant); the comment misleads.
+
+**Repairs are specified but NOT applied** (`notes/diag_…` §5), because the standing rule is to report
+rather than edit a test into passing — and because item 6 is not a test edit at all: **decide whether
+gate 12 gains a LEVEL check on Joos §4.4.1. If it does, the model currently fails it**, which is a
+substantive result rather than test hygiene.
