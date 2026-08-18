@@ -26,8 +26,9 @@ below.
    §2.4 before quoting that — the driver itself says *indicative, not a Bayes factor*. §3.
 5. **THE PER-STREAM READING REVERSED.** "D's gain is entirely the CO₂ record" is **wrong**: CO₂ ties,
    and the contest is δ¹³C levels vs sinks + ¹⁴C. §2.3.
-6. **NEXT JOB IS B — the 4 test failures**, now riding on `main`. §6. Read §6's warning before
-   accepting any "stale gate" explanation.
+6. **JOB B IS DONE — the 4 test failures are DIAGNOSED, and none is a code bug.** Three
+   mis-specified bars, one stale test premise. **Repairs specified, NOT applied — they need a
+   decision.** §6, and `notes/diag_2026-08-18_test_failures.md`.
 7. **STILL NO POSTERIOR.** The sampler has never converged on this model. The mode is a mode. §7.
 
 ---
@@ -210,9 +211,41 @@ call, and its one missing input (the cost, re-derived over all three rows) is §
 
 ---
 
-## 6. NEXT JOB — B, the 4 test failures (Marcus 2026-08-18)
+## 6. JOB B — the 4 test failures, DIAGNOSED 2026-08-18 (none is a code bug)
 
-**They now ride on `main`.** Named, not counted, from 16f §8:
+**Full account: `notes/diag_2026-08-18_test_failures.md`. Suite baseline MEASURED, not inherited:
+`FAIL 4 | WARN 53 | SKIP 2 | PASS 857`.** 16f's "plausibly stale gates" was *"an assessment, not a
+verdict"* — attacking it rather than accepting it is what produced the diagnosis. **Every bar was
+DERIVED at the protocol it should have been stated at; none was re-baselined.**
+
+| # | test | measured vs bar | verdict |
+|---|---|---|---|
+| 1 | `test-pulse.R:113` | 0.213 vs > 0.30 | **bar mis-specified** — cites Joos **PD100** (389 ppm held) but measures on **SSP1-1.9**. Model's own diagnostic: PD-held 0.297, ssp126 0.267, PI 0.152. **0.213 is where it belongs.** |
+| 2 | `test-luc-permanence.R:88` | 0.151 vs > 0.2 | **bar mis-specified, match EXACT** — `lp_background()` is a **preindustrial** background; `diag_joos_irf.R`'s "PI, held" IRF@100 = **0.152** vs the test's **0.151**. |
+| 3 | `test-mechanisms.R:32` | 0.30 vs > 0.5 | **wrong statistic** — one endpoint bar for six mechanisms. Five are monotone and clear it 36–450×; **ENSO is the only OSCILLATORY one**, so 2100 reads *phase*. Its **max is 0.537 at 2032**. It IS wired. |
+| 4 | `test-luc-permanence.R:104` | 0.074 vs < 0.02 | **stale premise** — needs **both** `f_luc_perm = 0` **and** `f_luc_wood = 1`. With both: af@100 = **−0.0032**, af@150 = −0.0026, reproducing the recorded old signature and passing. |
+
+**A REAL DEFECT FOUND ALONGSIDE (4), minor but load-bearing:** `R/cpp.R:104-105` asserts *"this default
+IS the old behaviour, because `f_luc_wood` = 1 is the incumbent decision"* while **`R/model.R:159` sets
+`CCX_F_LUC_WOOD_DEFAULT <- 0`** — a comment claiming a default the code does not have, **in the block
+whose stated purpose is stopping the R and C++ cores from silently running different models** ("which
+is exactly what `gamma_enso` did"). Behaviour is correct; the comment misleads.
+
+**ON JOOS, FRAMING CORRECTED (Marcus 2026-08-18).** The re-measurement was the *evidence* that the
+failing numbers are right, and an earlier draft over-promoted it. On the **integrated** IRF the model
+is **12.7 / 15.5 / 20.0 % low and inside all three 5–95 % bands** — for a box model tuned only to the
+historical record, that is a **good result**. **The proposed "gate 12 needs a level check" item is
+RETRACTED.** My pre-registered predictions were both WRONG and are recorded as such: the pump did
+**not** move the integrated IRF (12.4 / 25.6 / 41.9 reproduced exactly — that status line is **not**
+stale), and PD100 af(100) came in at **0.292**, below my predicted 0.33–0.36.
+
+**⚠️ THE REPAIRS ARE NOT APPLIED, AND THAT IS DELIBERATE** — the standing rule is to report a failing
+test rather than edit it into passing. `notes/diag_…` §5 specifies all five, including **"do not simply
+lower 0.30"** and **"do not simply lower 0.2"**. They need Marcus's go-ahead.
+
+### The original triage, retained
+
+Named, not counted, from 16f §8:
 
 | test | failure | 16f's triage |
 |---|---|---|
@@ -224,7 +257,7 @@ call, and its one missing input (the cost, re-derived over all three rows) is §
 cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && Rscript tests/run_tests.R 2>&1 | tail -60
 ```
 
-**⚠️ READ THIS BEFORE ACCEPTING ANY EXPLANATION.** 16f's own words are *"All four are plausibly stale
+**⚠️ THE WARNING THAT PRODUCED THE DIAGNOSIS ABOVE — keep it for the next such job.** 16f's own words are *"All four are plausibly stale
 gates rather than physics failures — but nobody has diagnosed them, so that is an assessment, not a
 verdict."* **Treat "plausibly stale" as the hypothesis to ATTACK, not the answer.** A stale-fixture
 label has already hidden a real bug in this project for five handoffs (memory
@@ -242,7 +275,8 @@ rather than inherited.
 
 ## 7. Open decisions, in dependency order
 
-1. **Job B — diagnose the 4 test failures.** §6. **Next.**
+1. **APPLY THE 4 TEST REPAIRS + the `R/cpp.R` comment fix.** §6 / `notes/diag_…` §5. Diagnosed and
+   specified; **needs Marcus's go-ahead** because they edit tests. **Next.**
 2. **Re-derive `ARM_HESS_EPS` at 20 parameters** rather than inheriting 3e-4 from an 18-parameter run.
    Both Hessians came back PD, so this is no longer urgent — but the adopted evidence contrast depends
    on it. (16g item 3, partially discharged: `recompute_hessian.R` was not needed.)
@@ -313,7 +347,8 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > the good branch (`co2_level_SPO` −256 → −63), **`h_ml` went INTERIOR in both arms (94.4 / 91.2)** so
 > 16g's 236-log-unit pull was a freeze artefact, and **arm N is ADOPTED PROVISIONALLY** (evidence
 > +5.62, but *indicative, not a Bayes factor* — `kz` pinned, both arms capped, 0.7 noise floor).
-> `luc-veg-debit` is **merged; trunk is `main`**. **First job: B — diagnose the 4 test failures**
-> (§6), and read §6's warning first: "plausibly stale gate" is the hypothesis to attack, not the
-> answer, and bars get **derived, never re-baselined**. Establish the current suite baseline before
-> assuming it is still 4.
+> `luc-veg-debit` is **merged; trunk is `main`**. **Job B is DONE**: all 4 test failures diagnosed and
+> **none is a code bug** — three mis-specified bars, one stale premise needing `f_luc_wood = 1` as well
+> as `f_luc_perm = 0` (§6). **First job: apply the 5 repairs**, which were deliberately NOT applied
+> because they edit tests — `notes/diag_2026-08-18_test_failures.md` §5 specifies each, and "do not
+> simply lower the bar" is written into two of them.

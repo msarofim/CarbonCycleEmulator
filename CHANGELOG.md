@@ -5629,7 +5629,7 @@ re-baselining it to wherever the code lands.
 
 No remote is configured, so nothing was pushed.
 
-## 2026-08-18 (job B) — The 4 test failures DIAGNOSED: 3 mis-specified bars, 1 stale test premise, and one REAL under-gated model bias
+## 2026-08-18 (job B) — The 4 test failures DIAGNOSED: 3 mis-specified bars, 1 stale test premise, and no code bug
 
 **Suite baseline MEASURED rather than inherited: `FAIL 4 | WARN 53 | SKIP 2 | PASS 857`** on `main` at
 `ea06f1f`. **Nothing was changed** — no test edited, no bar moved, no source touched. Full account:
@@ -5638,14 +5638,30 @@ No remote is configured, so nothing was pushed.
 **16f's triage was "all four are plausibly stale gates … that is an assessment, not a verdict."
 Attacking rather than accepting that label is what produced the finding below.**
 
-**THE FINDING THAT IS NOT ABOUT THE BARS.** Re-measured `diag_joos_irf.R` (PD100 protocol): the model's
-point IRF is **low at every horizon** — 0.520 / 0.378 / **0.292** / 0.207 at 20/50/100/300 vs Joos
-Table 5's 0.596 / 0.487 / 0.409 / 0.322. The integrated IRF passes gate 12 only inside the wide
-**5–95 %** band and sits near its floor (41.9 vs 39.5–65.2; best estimate 52.4). **And the levels
-gate 12 does not check:** Joos §4.4.1 gives TH100 integrated IRF of **34–47 yr preindustrial** and
-**45–62 present-day**; the model reads **25.6 (BELOW the PI range)** and **44.7 (marginally below
-PD)**. **Gate 12's secondary check is scoped to the PI < PD *ordering*, which the model satisfies — so
-both level failures are invisible to it.**
+**HOW THE BARS WERE ADJUDICATED — re-measured `diag_joos_irf.R` (PD100 protocol).** This is the
+evidence that established the airborne-fraction numbers are right; it is **not** a finding about a
+model defect, and an earlier draft of this entry wrongly promoted it to one (see the retraction below).
+The model runs on the low side of Joos, by:
+
+| horizon | integrated IRF (model / Joos best) | point IRF (model / Joos T5) |
+|---|---|---|
+| 20 yr | 12.4 / 14.2 — **12.7 % low** | 0.520 / 0.596 — 12.8 % low |
+| 50 yr | 25.6 / 30.3 — **15.5 % low** | 0.378 / 0.487 — 22.4 % low |
+| 100 yr | 41.9 / 52.4 — **20.0 % low** | 0.292 / 0.409 — 28.6 % low |
+| 300 yr | — | 0.207 / 0.322 — 35.7 % low |
+
+**MARCUS 2026-08-18, AND HE IS RIGHT:** *"for a very simple model that is calibrated to historical
+data, matching Joos within 25 % at each probability threshold is pretty good."* On the **integrated**
+IRF — the quantity gate 12 actually scores — the model is **12.7 / 15.5 / 20.0 % low and inside all
+three of Joos's 5–95 % bands**. Agreeing with a 15-model ensemble that closely, from a box model tuned
+only to the historical record, is a **good result**. "Within 25 %" does not hold for the **point** IRF
+at long horizons (28.6 % at 100 yr, 35.7 % at 300) — but that is the tail of a pulse-decay curve,
+where a simple model is least expected to track, and it is a different metric from the gate's.
+
+Joos §4.4.1's TH100 integrated IRF is **34–47 yr preindustrial** / **45–62 present-day**; the model
+reads **25.6** and **44.7**. The PI value is **24.7 % below the floor of its range** — i.e. right at
+the boundary of the same tolerance, not clearly outside it. **Gate 12's secondary check is scoped to
+the PI < PD *ordering*, which the model satisfies.**
 
 **PREDICTIONS: I got both halves WRONG and recorded them before looking.** I predicted the pump
 (shipped 08-16e, after gate 12's status line was last measured 08-14) had lowered the integrated IRF,
@@ -5680,7 +5696,15 @@ because `f_luc_wood` = 1 is the incumbent decision"* while **`R/model.R:159` set
 block that exists to stop the R and C++ cores silently running different models** ("which is exactly
 what `gamma_enso` did"). Behaviour is correct (both read the same constant); the comment misleads.
 
-**Repairs are specified but NOT applied** (`notes/diag_…` §5), because the standing rule is to report
-rather than edit a test into passing — and because item 6 is not a test edit at all: **decide whether
-gate 12 gains a LEVEL check on Joos §4.4.1. If it does, the model currently fails it**, which is a
-substantive result rather than test hygiene.
+**Repairs 1–5 are specified but NOT applied** (`notes/diag_…` §5), because the standing rule is to
+report rather than edit a test into passing.
+
+**RETRACTED SAME DAY — item 6, "gate 12 should gain a LEVEL check on Joos §4.4.1, which the model
+currently fails."** Withdrawn on Marcus's assessment above. Scoring the integrated IRF against a
+5–95 % band is a **reasonable scope for this model**, and adding a level check would manufacture a
+failure out of agreement that is actually decent. **The error was mine and it was one of emphasis, not
+arithmetic:** the Joos comparison was the *evidence* that the failing tests' numbers were correct, and
+I promoted it to the headline finding — "a REAL under-gated model bias" — which the ratios do not
+support. **What stands:** the model runs low, DESIGN already says so, and that belongs in prose rather
+than a new gate. Repairs 1–5 rest on their own reasoning (wrong background, wrong statistic, a premise
+needing two knobs, a stale comment) and are untouched by this retraction.

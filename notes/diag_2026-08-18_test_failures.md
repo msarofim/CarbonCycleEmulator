@@ -3,15 +3,21 @@
 **Suite baseline MEASURED, not inherited: `FAIL 4 | WARN 53 | SKIP 2 | PASS 857`** on `main` at
 `ea06f1f`. (Last recorded count was 855 pass at 16e.)
 
-**VERDICT: no code bug in three of the four; one stale test premise; and one REAL finding that
-16f's "plausibly stale gates" label would have buried.** Every bar below was *derived* against the
+**VERDICT: no code bug in any of the four.** Three mis-specified bars, one stale test premise. Every bar below was *derived* against the
 protocol it should have been stated at — none was re-baselined to wherever the code lands.
 
 **Nothing was changed.** No test edited, no bar moved, no source touched. §5 is what needs deciding.
 
 ---
 
-## The overarching finding, which is NOT about the bars
+## How the bars were adjudicated — the Joos re-measurement
+
+> **FRAMING CORRECTED 2026-08-18 (Marcus).** This section is the EVIDENCE that the failing tests'
+> numbers are right. An earlier draft promoted it to "a REAL under-gated model bias", which the
+> ratios do not support: on the **integrated** IRF the model is **12.7 / 15.5 / 20.0 % low and inside
+> all three of Joos's 5–95 % bands** — for a box model tuned only to the historical record, agreeing
+> with a 15-model ensemble that closely is a **good result**, not a defect. Marcus: *"matching Joos
+> within 25 % at each probability threshold is pretty good."* **Item 6 below is RETRACTED.**
 
 **The model is genuinely on the low-airborne-fraction side, and gate 12 cannot see how far.**
 Re-measured `calibration/diag_joos_irf.R` (Joos et al. 2013 PD100 protocol, 100 GtC onto a background
@@ -37,9 +43,10 @@ a preindustrial background** and **45–62 on present-day**. The model:
 | present-day | **44.7** | 45–62 | marginally below |
 
 **Gate 12's secondary check is scoped to the ORDERING only** ("the model must reproduce the PI < PD
-ordering"), which the model satisfies (25.6 < 44.7). **So the fact that both LEVELS sit outside Joos's
-stated ranges is invisible to the gate.** DESIGN already says "the model remains on the low side of
-the literature"; what is new here is *how far* on the PI side, and that nothing gates it.
+ordering"), which the model satisfies (25.6 < 44.7). The PI value is **24.7 % below the floor of its
+range** — at the boundary of the same ~25 % tolerance, not clearly outside it. DESIGN already says
+"the model remains on the low side of the literature", and **that prose is the right home for this,
+not a new gate.**
 
 **PREDICTION SCORING — I got both halves WRONG, and said so before looking.** I predicted the pump
 (shipped 08-16e, after gate 12's status line was last measured 08-14) would have lowered the integrated
@@ -136,7 +143,7 @@ make it pass — report the failure and stop."* These were already failing, and 
    A wiring test should ask "≠ 0", not "big at one year".
 4. **`test-luc-permanence.R:104`** — set `f_luc_wood = 1` alongside `f_luc_perm = 0`. One line.
 5. **`R/cpp.R:104-105`** — correct the stale comment to match `CCX_F_LUC_WOOD_DEFAULT = 0`.
-6. **THE ONE THAT IS NOT A TEST EDIT, and the most important:** the model's low-side IRF bias is real
-   and **under-gated** — gate 12 checks the PI/PD *ordering* but not the *levels*, and the PI level
-   (25.6 yr) is below Joos's 34–47. **Decide whether gate 12 gains a level check.** If it does, the
-   model currently fails it, which is a substantive result rather than a test-hygiene one.
+6. ~~Decide whether gate 12 gains a level check on Joos §4.4.1.~~ **RETRACTED 2026-08-18 (Marcus).**
+   Scoring the integrated IRF against a 5–95 % band is a reasonable scope for this model, and a level
+   check would manufacture a failure out of agreement that is decent. **Repairs 1–5 are unaffected** —
+   they rest on wrong background, wrong statistic, a premise needing two knobs, and a stale comment.
