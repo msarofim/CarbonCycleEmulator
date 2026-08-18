@@ -5593,3 +5593,38 @@ reason this is defensible as a provisional call rather than a deferral. **The mo
 re-deriving over all three rows), and whether a **posterior** run keeps the `h_ml` bound. A hard bound
 is defensible for a mode-find and is a **weaker claim for a sampler**; that question is re-opened by,
 not settled by, this decision.
+
+## 2026-08-18 (later) — `luc-veg-debit` MERGED into `main` at last (16g item 9)
+
+**Done on Marcus's instruction 2026-08-18, immediately after the refit freed the machine.** The branch
+had been carried unmerged since well before the pump work and was flagged in eight consecutive
+handoffs.
+
+**It was a STRICT FAST-FORWARD, which is easier than every one of those handoffs implied.** `main` was
+a direct ancestor of `luc-veg-debit` — 99 ahead, **0 behind**, no conflicts, and therefore **no
+working-tree change at all**. Verified before executing (`git merge-base --is-ancestor`), then run as
+`git merge --ff-only`.
+
+| | before | after |
+|---|---|---|
+| `main` | `0b7371c` | **`e2c9238`** |
+| `luc-veg-debit` | `e2c9238` | `e2c9238` (unchanged) |
+| HEAD | `luc-veg-debit` | **`main`** |
+
+**FAST-FORWARD WAS CHOSEN OVER A SQUASH, and the reason is recoverability rather than taste:** a
+squashed history can always be produced later from preserved commits, while an un-squash is
+impossible. This project also leans hard on per-commit provenance — bisecting the pump and gradient
+work, and answering "when did this number change" — which a squash would destroy.
+
+**`luc-veg-debit` is KEPT, not deleted.** `0b7371c` is the recovery ref for `main`'s pre-merge state
+(`git branch -f main 0b7371c`) if this ever needs undoing.
+
+**The 4 known test failures rode along onto `main`** (`test-pulse.R` af(100) = 0.213 vs > 0.30;
+`test-luc-permanence.R` ×2; `test-mechanisms.R` ENSO 0.30 vs > 0.5). They are pre-existing, not
+pump-related, and **still undiagnosed since 2026-08-15** — the merge did not create them, but `main`
+now carries them. **Diagnosing them is the next queued job**, and the standing rule applies: treat
+"plausibly stale gate" as the hypothesis to attack, not the answer — a stale-fixture label has
+already hidden a real bug in this project for five handoffs. Repair by deriving the bar, never by
+re-baselining it to wherever the code lands.
+
+No remote is configured, so nothing was pushed.

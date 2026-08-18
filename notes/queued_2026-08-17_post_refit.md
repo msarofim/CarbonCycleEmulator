@@ -16,7 +16,18 @@ tail -40 ~/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pu
 
 ---
 
-## Job A — merge `luc-veg-debit` into `main` (16g item 9)
+## Job A — merge `luc-veg-debit` into `main` (16g item 9) — **DONE 2026-08-18**
+
+> **COMPLETED.** Fast-forwarded on Marcus's instruction 2026-08-18. `main` = `luc-veg-debit` =
+> `e2c9238`; HEAD moved to `main`; `luc-veg-debit` **kept, not deleted**. Pre-merge `main` was
+> `0b7371c` — the recovery ref if this ever needs undoing (`git branch -f main 0b7371c`).
+> **Fast-forward was chosen over a squash** because it is the *recoverable* option: a squash can
+> always be produced later from preserved history, while an un-squash is impossible — and this
+> project leans on per-commit provenance for bisecting the pump and gradient work. The 4 test
+> failures rode along, as job B was not run first; they are pre-existing and not pump-related.
+>
+> *Original assessment below, retained.*
+
 
 **ASSESSED READ-ONLY THIS SESSION, AND IT IS EASIER THAN THE HANDOFFS SUGGEST: this is a strict
 fast-forward.**
