@@ -5910,3 +5910,81 @@ fork.
 record); the gain is the interannual structure and the hemispheric asymmetry, which the
 gradient and d13C streams can now see. rds gate still 0.000e+00 (sst_obs pinned 0 in the
 mode-reconstruction diagnostics).
+
+## 2026-08-18 (pre-refit) — The Hessian step is validated at 21 parameters, and the check finds a KINK in `h_ml`
+
+**Marcus released the refit hold with one condition: check `ARM_HESS_EPS` at the new parameter
+count first.** `calibration/diag_hess_eps_21par.R`. The step survived; the check did not come
+back empty.
+
+**Why the check was worth an hour.** The two-arm comparison's primary statistic is a Laplace
+evidence, whose distinguishing term `-0.5 log|-H|` is computed from ONE fixed central-difference
+step. The driver does not sweep it: a non-PD Hessian degrades that arm's evidence to `NA` and the
+~11 h buys a comparison that cannot be made. Three things had changed since 3e-4 was last
+exercised — 18 → 21 parameters with six coordinates that did not previously exist; `rep_dC` on the
+IDENTITY scale with the smallest curvature in the table (the roundoff-vulnerable case); and `h_ml`
+bounded to [85, 120], a logit support 4.9× narrower than the shipped [30, 200], i.e. a different
+unconstrained scale, and a step size is a statement about a scale.
+
+**Method.** No mode exists on the post-08-18 model, so the sweep runs at TWO points instead of
+guessing one: `init` (where both arms start) and `lifted` (the adopted arm-N mode's 15 surviving
+parameters, defaults for the 6 new — NOT a mode of anything, but physically different in the 15
+directions carrying most of the curvature). Six steps, 1e-5 to 3e-3. A step failing at either
+point is disqualified for 1 minute of compute instead of 11 hours; passing at both is not proof
+it holds at the mode. That asymmetry is the design.
+
+**VERDICT: `ARM_HESS_EPS = 3e-4` KEPT.** Inside a stable window (rel. spread < 0.25) at both
+points for every coordinate whose curvature is a step-size question at all — 18/21 at `init`,
+19/21 at `lifted`. The exclusions are named rather than swept: `sst_seas_amp_NH` (both points) and
+`pump_grad` (init) have POSITIVE, step-STABLE curvature, which means only that neither probe point
+is a maximum in that direction — a category the first draft of the verdict conflated with
+step-size failure, and the table now splits. **The 1e-5 end is genuinely bad and should never be
+used**: it moves `gamma_enso` by 7× and flips the sign of `kz`.
+
+**THE FINDING — `h_ml` IS NOT A STEP-SIZE PROBLEM. IT IS A KINK.** Its second difference scales as
+**1/eps across six decades** (−170,900 at 1e-5 → −578 at 3e-3, a factor 3.0 per factor 3.0 of
+step). A discontinuity in the VALUE would scale as 1/eps²; roundoff would not scale at all. 1/eps
+is the signature of a continuous function with a discontinuous FIRST derivative — confirmed
+directly, the one-sided slopes at h_ml = 100 are **−16.21 and −17.92**, each stable over six
+decades.
+
+**Traced to `ccx_pump_shape()`, and it is NOT a bug.** The observed 25 m GLODAP DIC bins are
+remapped onto model layers by overlap integration, `pmax(0, pmin(b, bot) - pmax(a, top))` — the
+conservative, correct way to do it. But `h_ml` IS the first layer boundary, so as it moves the
+clamp switches on and off against fixed observed bin edges, and a clamped overlap is a |x|.
+**It reaches the isotopes and not CO2**, which is the pump's own signature: in `pump_mode = N` the
+export is constant-mass, so `d13c_level_MLO`/`_SPO` carry **−0.153 / −0.115** of the −0.270 total
+slope jump while `co2_level` carries −5e-4. Same channel as the pump × advection reversal.
+
+**The structure is SPARSE, which is why this is a caveat and not a blocker.** Derived from the
+shape function alone, no model runs: exactly **three kinks in [85, 120] — h_ml = 98.41, 100.00,
+101.29 m** (5 of 3499 probe points; smooth in between). They are the first three layer boundaries
+crossing the 100 / 150 / 225 m bin edges. `ARM_HESS_EPS` reaches ~2e-3 m of h_ml, so a mode must
+land within ~2 mm of one to contaminate the row.
+
+**`ARM_HML_INIT = 100` sits EXACTLY on the largest kink** — an unlucky coincidence with the pump's
+own reference depth. **Left at 100 deliberately**: Nelder-Mead is derivative-free, so the start
+point's differentiability is irrelevant, and moving it would change the refit trajectory for no
+gain.
+
+**What was NOT done, stated so it is a choice and not an oversight.** Smoothing the remap (PCHIP
+through bin midpoints instead of overlap averaging) would make the objective C1 in `h_ml` — but it
+changes the pump field, i.e. the MODEL, on the eve of a refit, to remove a risk of order 1e-4.
+Rejected. Raised for Marcus as a standing item, not actioned.
+
+**Driver hardened instead** (`run_modefind_pump_arms.R`), all at the driver level so the objective
+is untouched:
+1. The kink list is **DERIVED in-driver** from `ccx_pump_shape()`, not typed, so it cannot drift
+   from the code that creates the kinks; a count ≠ 3 prints a re-run warning.
+2. **Kink-proximity check at the found mode**, with `ARM_HESS_EPS` converted from the
+   unconstrained scale to METRES at wherever in the band the mode actually sits. A straddle prints
+   loudly that this arm's `log|-H|` and Laplace evidence are not reliable.
+3. **Diagonal step-stability re-measured AT the mode** (eps × 1/3, 1, 3) — the pre-refit sweep
+   could only run at non-modes; this is the same test at the point that carries the evidence.
+   Unstable coordinates are named rather than silently entering the determinant.
+4. All of it recorded into each arm's `.rds` (`hess_eps`, `hess_diag_by_step`, `hess_unstable`,
+   `hml_kinks`, `hml_kink_gap`, `hml_hess_reach`, `hml_kink_hit`) so a later reader need not take
+   `log|-H|` on faith.
+
+Suite at the time of the check: **FAIL 0 | WARN 55 | SKIP 2 | PASS 889** (884 + 5 from the SST
+commits).

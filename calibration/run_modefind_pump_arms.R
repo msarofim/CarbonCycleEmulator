@@ -82,6 +82,8 @@ ARM_HML_INIT   <- 100      # m; the pump's own h_ml (DESIGN sec.5.2f, handoff 15
                            # make .to_unc() return NaN, so this is not cosmetic.
 ARM_OUTDIR     <- ccx_path("calibration", "output", "pump_arms")
 ARM_OUT        <- function(m) file.path(ARM_OUTDIR, sprintf("mode_fit_pump%s.rds", m))
+ARM_KINK_STEP  <- 0.01     # h_ml resolution the kink scan below runs at
+ARM_KINK_FACT  <- 20       # a kink = this many times the median slope jump
 
 dir.create(ARM_OUTDIR, recursive = TRUE, showWarnings = FALSE)
 sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
@@ -194,6 +196,57 @@ if (is.null(.og_h))
 cat(sprintf("GATE H3: all three rows LIVE at init (DIC %+.2f, d13C %+.4f, ALK %+.2f). OK\n",
             .og_h$dic, .og_h$d13c, .og_h$alk))
 rm(.tab_before, .hml_before, .chg, .fld, .u_h, .sp_h, .F_h, .og_h)
+
+# =====================================================================
+# THE h_ml DIRECTION IS PIECEWISE-C1, AND THE HESSIAN HAS TO KNOW WHERE.
+#
+# calibration/diag_hess_eps_21par.R, run before this refit was launched, found
+# that `ARM_HESS_EPS = 3e-4` is inside a stable curvature window at both probe
+# points for every coordinate EXCEPT `h_ml` -- and that `h_ml`'s failure is not
+# a step-size failure at all. Its second difference scales as 1/eps across six
+# decades, the signature of a KINK: continuous value, discontinuous slope. The
+# one-sided slopes at h_ml = 100 are -16.21 and -17.92.
+#
+# SOURCE, and it is not a bug: ccx_pump_shape() remaps the 25 m GLODAP DIC bins
+# onto the model layers by overlap integration, `pmax(0, pmin(b, bot) -
+# pmax(a, top))`. That is the conservative way to do it. But `h_ml` IS the first
+# layer boundary, so as it moves the clamp switches against fixed observed bin
+# edges, and a clamped overlap is a |x|. It reaches the isotopes and not CO2
+# because in `pump_mode = N` the export is constant-mass -- d13c_level_MLO/_SPO
+# carry -0.153/-0.115 of the -0.270 slope jump, co2_level -5e-4.
+#
+# WHY THIS IS A CHECK AND NOT A FIX. The kinks are SPARSE -- three isolated
+# points in a 35 m band -- and `ARM_HESS_EPS` maps to about 2e-3 m of h_ml, so
+# a mode has to land within ~2 mm of one for the Hessian row to be contaminated.
+# Smoothing the remap (PCHIP through bin midpoints instead of overlap averaging)
+# would change the pump field, i.e. the model, on the eve of a refit, to remove
+# a risk of order 1e-4. NOT DONE. What IS done is refusing to discover it after
+# the fact: the kinks are located here and the found mode is checked against
+# them, so a contaminated log|-H| is reported rather than quoted.
+#
+# DERIVED, not typed. Reading the shape function itself means the list cannot
+# drift from the code that creates the kinks.
+sep("h_ml KINK MAP (see calibration/diag_hess_eps_21par.R)")
+ARM_KINKS <- local({
+  kh <- seq(ARM_HML_BOUND[1], ARM_HML_BOUND[2], by = ARM_KINK_STEP)
+  KS <- t(sapply(kh, function(h) ccx_pump_shape(ccx_ocean_grid(h))))
+  kt <- rowSums(abs(apply(KS, 2, function(v) diff(diff(v)))))
+  kb <- which(kt > ARM_KINK_FACT * stats::median(kt) + 1e-14)
+  if (!length(kb)) return(numeric(0))
+  unname(vapply(split(kb, cumsum(c(TRUE, diff(kb) > 1))),
+                function(ix) kh[ix[which.max(kt[ix])] + 1], numeric(1)))
+})
+cat(sprintf("%d kink(s) in [%g, %g]: h_ml = %s m\n", length(ARM_KINKS),
+            ARM_HML_BOUND[1], ARM_HML_BOUND[2],
+            paste(sprintf("%.2f", ARM_KINKS), collapse = ", ")))
+# The diagnostic found exactly three. A different count means the shape data or
+# the grid changed since, and the Hessian caveat was written against the old one.
+if (length(ARM_KINKS) != 3)
+  cat("*** the kink count has CHANGED since diag_hess_eps_21par.R -- re-run it\n")
+cat(sprintf("ARM_HML_INIT = %g is %s. Harmless: Nelder-Mead is derivative-free.\n",
+            ARM_HML_INIT,
+            if (any(abs(ARM_KINKS - ARM_HML_INIT) < 1e-6)) "EXACTLY ON A KINK" else
+              sprintf("%.2f m clear", min(abs(ARM_KINKS - ARM_HML_INIT)))))
 
 # GATE: the two arms must be the same objective except for `pump_mode`, and the
 # only way to know that is to check the thing that could go wrong -- the base
@@ -333,6 +386,47 @@ arm_fit <- function(mode) {
     M
   })
   dimnames(H) <- list(CCX_PARAM_NAMES, CCX_PARAM_NAMES)
+
+  # ---- (c2) is this mode's Hessian trustworthy where we know it might not be?
+  # Two checks, both cheap against the 5-6 h that produced the mode, and both
+  # reported into the rds so a later reader does not have to take log|-H| on
+  # faith.
+  #
+  # KINK PROXIMITY. ARM_HESS_EPS is a step on the unconstrained scale; what
+  # matters is how far that reaches in METRES, which depends on where in the
+  # logit band the mode sits. Converted rather than assumed.
+  h_mode <- pm$h_ml
+  h_reach <- abs(.from_unc(u[["h_ml"]] + ARM_HESS_EPS, CCX_PARAM_TABLE$h_ml) - h_mode)
+  h_gap <- if (length(ARM_KINKS)) min(abs(ARM_KINKS - h_mode)) else Inf
+  kink_hit <- h_gap <= h_reach
+  cat(sprintf("[%s] h_ml mode %.4f m; nearest kink %.2f m away; the Hessian step reaches %.2e m\n",
+              mode, h_mode, h_gap, h_reach))
+  if (kink_hit)
+    cat(sprintf("*** [%s] THE HESSIAN'S h_ml ROW STRADDLES A KINK -- log|-H| and therefore\n*** [%s] this arm's Laplace evidence are NOT reliable. See diag_hess_eps_21par.R.\n",
+                mode, mode))
+
+  # DIAGONAL STEP-STABILITY AT THE MODE ITSELF. The pre-refit sweep could only
+  # be run at points that were not modes; this is the same test at the point
+  # that actually carries the evidence. A coordinate whose curvature moves with
+  # the step is named here rather than silently entering the determinant.
+  dstab <- local({
+    es <- ARM_HESS_EPS * c(1/3, 1, 3)
+    D <- sapply(es, function(e) vapply(seq_along(u), function(k2) {
+      ee <- numeric(length(u)); ee[k2] <- e
+      fp <- lp_fun(u + ee); fm <- lp_fun(u - ee)
+      if (!is.finite(fp) || !is.finite(fm)) return(NA_real_)
+      (fp - 2 * lp_mode + fm) / e^2
+    }, numeric(1)))
+    rownames(D) <- CCX_PARAM_NAMES; colnames(D) <- format(es, scientific = TRUE)
+    D
+  })
+  spread <- apply(dstab, 1, function(r) { r <- r[is.finite(r)]
+    if (length(r) < 2) Inf else (max(r) - min(r)) / abs(mean(r)) })
+  unstable <- names(which(spread > 0.25))
+  cat(sprintf("[%s] curvature step-stability at the mode (eps x 1/3, 1, 3): %s\n", mode,
+              if (length(unstable)) paste("UNSTABLE at", paste(unstable, collapse = ", "))
+              else "all 21 coordinates stable"))
+
   Sigma <- tryCatch(solve(-H), error = function(e) NULL)
   ok_pd <- !is.null(Sigma) && all(is.finite(Sigma)) && all(diag(Sigma) > 0)
   # The Laplace evidence's second term. NA when the Hessian is not PD, which is
@@ -359,6 +453,9 @@ arm_fit <- function(mode) {
   out <- list(pump_mode = mode, u_mode = u, par_mode = pm, logpost = lp_mode,
               logpost_init = lp0, hessian = H, cov = Sigma, cor = Cor, sd_unc = sdv,
               eigen = ev, pd = ok_pd, logdet_negH = ldet, trace = trace,
+              hess_eps = ARM_HESS_EPS, hess_diag_by_step = dstab,
+              hess_unstable = unstable, hml_kinks = ARM_KINKS,
+              hml_kink_gap = h_gap, hml_hess_reach = h_reach, hml_kink_hit = kink_hit,
               hit_cap = hit_cap, streams = streams, n_eval = n_eval, minutes = el,
               seed = ARM_SEED, param_names = CCX_PARAM_NAMES, prior_z = zs,
               kz_bracket = c(CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi),
