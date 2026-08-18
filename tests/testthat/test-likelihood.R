@@ -276,7 +276,62 @@ test_that("retiring sigma_co2 hardened the CO2 level stream, and only slightly",
   expect_lt(wt, 1.10)
   # and the parameter is genuinely gone from the objective
   expect_false("sigma_co2" %in% CCX_PARAM_NAMES)
-  expect_true(all(c("sigma_d13c", "sigma_d14c") %in% CCX_PARAM_NAMES))
+  # `sigma_d13c` JOINED IT 2026-08-18 (Marcus). This line asserted it was still
+  # free, which was the 2026-08-15 decision; that decision was reversed on
+  # measurement, NOT on taste, so the assertion is inverted rather than deleted.
+  # The premise was that a free scale on a MINOR stream is a robustness valve
+  # rather than a feedback loop. calibration/diag_fit_at_mode.R measured it: the
+  # d13C residual is BIAS not scatter (de-biased scatter 0.033 / 0.036 permil,
+  # BELOW the 0.05 permil representation floor) while the parameter fitted
+  # 0.1931 -- so it explained no scatter and absorbed a structural bias at 4x
+  # the representation error. `sigma_d14c` stays free: its de-biased scatter is
+  # 14.0 / 12.1 permil against an observational sd of ~4.2, which is real.
+  expect_false("sigma_d13c" %in% CCX_PARAM_NAMES)
+  expect_true("sigma_d14c" %in% CCX_PARAM_NAMES)
+  # and the station-vs-box offset that replaced it in the count is present
+  expect_true("rep_dC" %in% CCX_PARAM_NAMES)
+})
+
+test_that("rep_dC ties the CO2 and d13C level offsets to ONE knob", {
+  # THE SAFETY ARGUMENT FOR THE SHARED PARAMETER, pinned. If these two could
+  # move independently it would be a free d13C level offset in disguise, and it
+  # would absorb the Suess overshoot instead of exposing it. Full derivation and
+  # the 30x measurement: calibration/diag_rep_dC_gates.R.
+  skip_if_no_cpp()
+  obs <- ccx_prepare_obs()
+  p <- ccx_default_params(); sp <- ccx_spinup(p)
+  F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
+  out <- ccx_run_fast(sp, F)$out
+  ms <- ccx_model_stats(out, obs)
+  bias <- function(rep) {
+    bc <- mean(sapply(c("MLO","SPO"), function(st) {
+      o <- obs$co2_ann[[st]]; mm <- ms$co2[[st]]
+      k <- match(o$year, mm$year); g <- !is.na(k)
+      mean(o$level[g] - (mm$level[k[g]] - rep)) }))
+    bd <- mean(sapply(c("MLO","SPO"), function(st) {
+      o <- obs$d13_ann[[st]]; mm <- ms$d13[[st]]
+      k <- match(o$year, mm$year); g <- !is.na(k)
+      pr <- mm$level[k[g]]
+      cb <- ms$co2[[st]]$level[match(o$year[g], ms$co2[[st]]$year)]
+      if (rep != 0) pr <- pr - rep * (LIK_REP_SOURCE_D13C - pr) / cb
+      mean(o$level[g] - pr) }))
+    c(bc, bd)
+  }
+  b0 <- bias(0); b1 <- bias(1); bm <- bias(-1)
+  # CO2 offset is exactly 1 ppm per ppm of rep_dC, by construction
+  expect_equal(unname(b1[1] - b0[1]), 1, tolerance = 1e-8)
+  # d13C moves in the mass-balance ratio, and NEGATIVELY: rep_dC > 0 means the
+  # box holds the extra LIGHT carbon, so the station is the heavier one.
+  ratio <- (b1[2] - b0[2]) / (b1[1] - b0[1])
+  expect_lt(ratio, 0)
+  yrs <- Reduce(intersect, lapply(c("MLO","SPO"), function(st) obs$d13_ann[[st]]$year))
+  d13_bg <- mean(sapply(c("MLO","SPO"), function(st) {
+    o <- obs$d13_ann[[st]]; mean(o$level[o$year %in% yrs]) }))
+  co2_bg <- mean(sapply(c("MLO","SPO"), function(st) {
+    o <- obs$co2_ann[[st]]; mean(o$level[o$year %in% yrs]) }))
+  expect_lt(abs(ratio / ((LIK_REP_SOURCE_D13C - d13_bg) / co2_bg) - 1), 0.15)
+  # and it is ONE knob: the ratio must not depend on rep_dC
+  expect_equal((bm[2] - b0[2]) / (bm[1] - b0[1]), ratio, tolerance = 1e-6)
 })
 
 test_that("the seasonal statistic constrains amplitude and phase", {

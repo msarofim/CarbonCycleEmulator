@@ -278,14 +278,49 @@ CCX_PARAM_TABLE <- list(
   # shows that biting -- CO2 level dominating the trace, or the chain unable to
   # leave a bad-CO2 region -- this is the first thing to look at.
   #
-  # `sigma_d13c` and `sigma_d14c` are DELIBERATELY LEFT FREE. The self-weighting
-  # argument is specific to the dominant stream; a free scale on a minor stream
-  # is a robustness valve rather than a feedback loop, and sigma_d13c's freedom
-  # was a separate decision taken 2026-08-15 (handoff sec.1, decision 3).
-  sigma_d13c  = list(tr = "log",   init = 0.1,
-                     prior = function(x) dlnorm(x, log(0.1), 0.7, log = TRUE)),
+  # `sigma_d13c` RETIRED 2026-08-18, overturning the 2026-08-15 decision quoted
+  # below. That decision said the self-weighting argument "is specific to the
+  # dominant stream; a free scale on a MINOR stream is a robustness valve rather
+  # than a feedback loop". calibration/diag_fit_at_mode.R MEASURED the premise
+  # and it fails: the d13C residual is BIAS, not scatter, and a free error scale
+  # cannot distinguish them. De-biased scatter is 0.033 / 0.036 permil -- BELOW
+  # the 0.05 permil representation floor the stream already carries -- while the
+  # parameter fitted 0.1931. It was explaining no scatter whatever; its entire
+  # value was absorbing a +0.19 permil structural bias at 4x the representation
+  # error. On a stream Marcus has prioritised, that is a valve venting the
+  # signal. ccx_loglik() still honours the field if supplied (absence contract),
+  # so every pre-2026-08-18 diagnostic reproduces exactly.
+  #
+  # `sigma_d14c` STAYS FREE, and the same measurement is the reason: its
+  # de-biased scatter is 14.0 / 12.1 permil against an observational sd of ~4.2,
+  # so it has genuine excess scatter to explain. Retiring both would have been
+  # a slogan; the data separate them.
   sigma_d14c  = list(tr = "log",   init = 5,
                      prior = function(x) dlnorm(x, log(5), 0.7, log = TRUE)),
+
+  # ---- station-vs-box representation offset (2026-08-18, Marcus) -----
+  # ONE parameter generating BOTH species' level offsets through mass balance --
+  # see the LIK_REP_SOURCE_D13C block in R/likelihood.R for the physics and for
+  # the 30x measurement that says a FREE d13C level offset would have swallowed
+  # the Suess overshoot.
+  #
+  # PRIOR sd = 1.0 ppm, which is LIK_CO2_REP_ERR: the repo's own station-vs-box
+  # scale, and the one number here with a receipt (co-located NOAA in-situ vs
+  # SIO flask at Mauna Loa disagree 0.39-0.59 ppm RMS over 702 months, so a
+  # station-vs-BOX term must exceed it). Centred at ZERO, a shrinkage prior, for
+  # the same reason the gradient offsets are: centring on the measured offset
+  # would tell the model the answer and then congratulate it for agreeing.
+  #
+  # THE DIAL THIS SETS. Absorbing the measured +0.194 permil d13C common-mode
+  # bias needs rep_dC = -4.19 ppm = 4.2 sd, AND would drag the CO2 level stream
+  # 4 ppm off its own 0.6 ppm fit. The prior admits a representation constant
+  # and resists a structural error wearing its clothes -- the grad_off_co2 idiom.
+  #
+  # NOTE the prior body resolves LIK_CO2_REP_ERR at CALL time. R/calibrate.R is
+  # sourced before R/likelihood.R (alphabetical), so the constant does not exist
+  # yet when this list is built; it does by the time any prior is evaluated.
+  rep_dC      = list(tr = "id",    init = 0,
+                     prior = function(x) dnorm(x, 0, LIK_CO2_REP_ERR, log = TRUE)),
 
   # ---- interhemispheric-gradient offsets (2026-08-15, review item 5) --
   # NUISANCE PARAMETERS, and the point of them is what they STOP happening.
@@ -429,7 +464,9 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # honours the field if it is supplied, so the objective omits it EXPLICITLY
     # rather than passing a zero -- passing 0 would give the same number today
     # and would silently reacquire the old branch if the contract ever changed.
-    err <- list(sigma_d13c = pv$sigma_d13c, sigma_d14c = pv$sigma_d14c,
+    # NOTE THE ABSENCE OF sigma_d13c TOO, retired 2026-08-18 on the same
+    # absence-contract terms as sigma_co2 above.
+    err <- list(sigma_d14c = pv$sigma_d14c, rep_dC = pv$rep_dC,
                 # The gradient offsets ride in `err` because that is the channel
                 # for likelihood-side parameters (the sigmas already do). Their
                 # ABSENCE skips the gradient terms rather than zeroing them --

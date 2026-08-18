@@ -134,6 +134,27 @@ for (nm in names(S)) {
               sqrt(mean(res^2)), mean(res), s$unit, gate))
   rows[[nm]] <- c(n = length(z), rmsz = sqrt(mean(z^2)), bias = mean(z))
 }
+# ---- DOES THE FITTED SIGMA HAVE ANY SCATTER TO EXPLAIN? --------------
+# A free error scale cannot tell BIAS from SCATTER: it inflates to cover either.
+# So decompose the residual and compare the DE-BIASED scatter against the FIXED
+# representation floor the stream already carries.  If the scatter sits below
+# the floor, the fitted sigma is explaining no scatter at all and its entire
+# value is bias absorption -- which is a structural misfit wearing an error bar.
+cat("\n--- de-biased SCATTER vs the fixed representation floor ---\n")
+cat(sprintf("%-18s %10s %10s %10s  %s\n", "stream", "RMSresid", "bias", "scatter", "vs fixed floor"))
+for (nm in c("d13c_level_MLO","d13c_level_SPO","d14c_NH","d14c_SH")) {
+  s2 <- S[[nm]]; res <- s2$o - s2$m; res <- res[is.finite(res)]
+  sc <- stats::sd(res)
+  floor_v <- if (grepl("d13c", nm)) LIK_D13C_REP_ERR else mean(s2$sd) # d14c sd is obs+sigma
+  fitted_sig <- if (grepl("d13c", nm)) err$sigma_d13c else err$sigma_d14c
+  cat(sprintf("%-18s %10.4f %+10.4f %10.4f  floor %.4f, fitted sigma %.4f -> %s\n",
+      nm, sqrt(mean(res^2)), mean(res), sc, floor_v, fitted_sig,
+      if (sc < floor_v) "SCATTER BELOW FLOOR (sigma explains nothing)" else "real scatter present"))
+}
+cat("\n  d14c obs sd (median of the observational sd column), NH / SH: ")
+cat(sprintf("%.2f / %.2f permil\n",
+    stats::median(obs$d14_nh_ann$sd, na.rm = TRUE), stats::median(obs$d14_sh_ann$sd, na.rm = TRUE)))
+
 cat("\nStreams NOT reconstructed here (no simple obs-vs-model form):\n  ")
 cat(paste(setdiff(names(m$streams), names(S)), collapse = ", "), "\n")
 cat("\nRANKED BY RMS z (worst fit first) -- this is the ranking that means\n")

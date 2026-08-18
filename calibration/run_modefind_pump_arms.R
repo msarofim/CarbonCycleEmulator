@@ -310,8 +310,11 @@ arm_fit <- function(mode) {
     attr(F, "luc_scale") <- pm$luc_scale
     el <- ccx_forcing_eluc_annual(F); el$eluc <- el$eluc * pm$luc_scale
     r <- ccx_run_fast(sp, F)
+    # NOTE: sigma_d13c retired 2026-08-18 and rep_dC added in its place -- this
+    # list must track CCX_PARAM_NAMES or the per-stream decomposition silently
+    # describes a DIFFERENT objective from the one that was optimised.
     ccx_loglik(r$out, ccx_prepare_obs(),
-               list(sigma_d13c = pm$sigma_d13c, sigma_d14c = pm$sigma_d14c,
+               list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
                     grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c),
                luc = el, deep = sp$diagnostics$d14c_bottom_box,
                ocean_grad = ccx_ocean_grad_scored(r$out, sp), by_stream = TRUE)

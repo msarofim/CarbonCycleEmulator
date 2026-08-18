@@ -114,6 +114,48 @@ LIK_D14C_BOMB_WIN  <- c(1955, 1970)
 # flagged in calibration/diag_sigma_co2.R and deliberately not taken.
 LIK_CO2_REP_ERR    <- 1.0            # ppm, station-vs-hemispheric-box
 LIK_D13C_REP_ERR   <- 0.05           # permil
+
+# ---- STATION-vs-BOX LEVEL OFFSET (2026-08-18, Marcus) ---------------
+# MLO and SPO are not exact measures of hemispheric concentration, so a LEVEL
+# offset between the station and the model's box is physically expected. Until
+# now the likelihood carried GRADIENT offsets and no level offset at all, which
+# was an arbitrary asymmetry: nothing makes the MLO-SPO differential
+# representable while the common mode is not.
+#
+# IT IS ONE PARAMETER FOR BOTH SPECIES, AND THAT IS THE WHOLE POINT.
+# Representation is one physical thing -- the box holds continental boundary
+# layer air the remote marine station never sees, carrying extra CO2 that is
+# ISOTOPICALLY LIGHT. So it must move CO2 and d13C TOGETHER, in a ratio set by
+# mass balance and the excess carbon's signature, not independently:
+#
+#   box = station + `rep_dC` ppm of carbon at LIK_REP_SOURCE_D13C
+#   predicted station CO2  = model_box_CO2  - rep_dC
+#   predicted station d13C = model_box_d13C - rep_dC (d_s - d13C_box) / CO2_box
+#
+# The d13C conversion is evaluated from the MODEL's own CO2 and d13C at each
+# scored year rather than from a frozen background pair, so it cannot go stale.
+#
+# WHY A SHARED PARAMETER RATHER THAN A FREE d13C OFFSET, which is the entire
+# reason this is safe: calibration/diag_station_representation.R measured the
+# common-mode biases at the arm-N mode as CO2 -0.138 ppm and d13C +0.194 permil.
+# The SIGN agrees -- the mechanism is real -- but mass balance says the measured
+# CO2 bias predicts only +0.0064 permil of d13C. The measured d13C bias is
+# 30.3x that. Explaining it as representation needs a -4.19 ppm CO2 offset,
+# against a station-vs-box scale of 1.0 ppm. So the residue is STRUCTURAL (the
+# Suess overshoot, project note d13c_suess_overshoot_structural), and a FREE
+# d13C level offset would have swallowed it whole and reported a good fit.
+# Tying the two species together means absorbing the d13C bias costs 4.2 sd on
+# the prior AND is rejected by the CO2 level stream, which sees the same knob.
+#
+# ABSENCE CONTRACT, same as `deep` and the gradient offsets: a NULL `rep_dC`
+# SKIPS the offset rather than defaulting it to zero -- except that here zero IS
+# the no-offset behaviour, so absence and zero coincide numerically. The
+# contract is kept anyway so every pre-2026-08-18 caller reproduces exactly.
+LIK_REP_SOURCE_D13C <- -26.5         # permil, fossil+respired excess carbon.
+                                     # Midpoint of [-25 respired, -28 fossil];
+                                     # the bracket moves the conversion by 8 %,
+                                     # far below the 30x this term is used to
+                                     # adjudicate.
 LIK_LAND_SINK_INFLATE <- 3.0         # multiplier on GCB land-sink sigma (Q1)
 
 # ---- INTERHEMISPHERIC GRADIENT (2026-08-15, review item 5) -----------
@@ -1028,8 +1070,10 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     good <- !is.na(k)
     sd <- if (is.null(err$sigma_co2)) LIK_CO2_REP_ERR
           else sqrt(err$sigma_co2^2 + LIK_CO2_REP_ERR^2)
+    # station = box - rep_dC  (see the LIK_REP_SOURCE_D13C block)
+    pred <- m$level[k[good]] - (if (is.null(err$rep_dC)) 0 else err$rep_dC)
     add(paste0("co2_level_", st),
-        sum(stats::dnorm(o$level[good], m$level[k[good]], sd, log = TRUE)))
+        sum(stats::dnorm(o$level[good], pred, sd, log = TRUE)))
   }
 
   # ---- CO2 seasonal cycle: per-year harmonic coefficients ------------
@@ -1058,9 +1102,41 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     if (is.null(o) || !nrow(o) || is.null(m)) next
     k <- match(o$year, m$year)
     good <- !is.na(k)
-    sd <- sqrt(err$sigma_d13c^2 + LIK_D13C_REP_ERR^2)
+    # `sigma_d13c` RETIRED 2026-08-18, and kept REACHABLE under the same absence
+    # contract `sigma_co2` uses, so every diagnostic written before today
+    # reproduces its numbers exactly:
+    #   err$sigma_d13c ABSENT  -> sd = LIK_D13C_REP_ERR      (the objective)
+    #   err$sigma_d13c PRESENT -> sd = sqrt(s^2 + REP^2)     (legacy parity)
+    #
+    # WHY, and it overturns the 2026-08-15 decision to leave it free. That
+    # decision's stated ground was that self-weighting "is specific to the
+    # dominant stream; a free scale on a MINOR stream is a robustness valve
+    # rather than a feedback loop". calibration/diag_fit_at_mode.R measured the
+    # premise and it does not hold, because the d13C residual is BIAS, not
+    # scatter, and a free scale cannot tell the two apart:
+    #   de-biased scatter  MLO 0.0328 / SPO 0.0361 permil
+    #   fixed rep floor                     0.0500 permil
+    #   fitted sigma_d13c                   0.1931 permil
+    # The scatter sits BELOW the floor the stream already carries, so
+    # `sigma_d13c` was explaining no scatter at all -- its whole value was
+    # absorbing a +0.19 permil structural bias, at 4x the representation error.
+    # That is a robustness valve venting the signal.
+    #
+    # `sigma_d14c` IS NOT RETIRED, and the same measurement is why: its
+    # de-biased scatter is 14.0 / 12.1 permil against an observational sd of
+    # ~4.2, so it has real excess scatter to explain and is doing its job.
+    sd <- if (is.null(err$sigma_d13c)) LIK_D13C_REP_ERR
+          else sqrt(err$sigma_d13c^2 + LIK_D13C_REP_ERR^2)
+    # station = box - rep_dC * (d_s - d13C_box) / CO2_box, evaluated on the
+    # model's OWN state at each scored year.
+    pred <- m$level[k[good]]
+    if (!is.null(err$rep_dC) && err$rep_dC != 0) {
+      cbox <- ms$co2[[st]]$level[match(o$year[good], ms$co2[[st]]$year)]
+      conv <- (LIK_REP_SOURCE_D13C - pred) / cbox
+      pred <- pred - err$rep_dC * conv
+    }
     add(paste0("d13c_level_", st),
-        sum(stats::dnorm(o$level[good], m$level[k[good]], sd, log = TRUE)))
+        sum(stats::dnorm(o$level[good], pred, sd, log = TRUE)))
   }
 
   # ---- INTERHEMISPHERIC GRADIENT (2026-08-15, review item 5) ---------
