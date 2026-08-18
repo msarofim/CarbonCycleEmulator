@@ -13,8 +13,9 @@ executed the priority rework that grew out of them. 18b's §2 (mutation-test les
 2. **THE OBJECTIVE AND THE MODEL BOTH CHANGED TODAY. NOTHING is comparable across
    2026-08-18.** `mode_fit_pump{N,D}.rds` is stale against the new objective AND the new
    model. **THE REFIT IS HELD (Marcus) — no quotable number exists on the new model.**
-3. **Parameters: 20 → 19**, twice re-shaped: −`sigma_d13c` +`rep_dC` (still 20), then
-   −seas_amp/phase ×4 +`seas_T_amp_NH/SH` +`seas_lag_p` (19).
+3. **Parameters: 20 → 21**, three times re-shaped: −`sigma_d13c` +`rep_dC` (20), then
+   −seas_amp/phase ×4 +`seas_T_amp_NH/SH` +`seas_lag_p` (19), then +`sst_seas_amp_NH/SH`
+   (21) when Marcus moved SEASONAL SST ahead of the refit (`6fadb34`).
 4. **Suite `FAIL 0 | WARN 55 | SKIP 2 | PASS 884`.** Every legacy stream in the rds
    reproduces to **0.000e+00** through the escape hatches (`diag_rep_dC_gates.R` gate 1).
 5. **The next driver candidate is SST** (§5) — after the refit.
@@ -89,11 +90,15 @@ both cores; the residual is the integrator's own). Sine drifted +0.044.
    expect `seas_T_amp_NH` to climb** (amp 5.0 → ~3.0 needs a stronger respiration
    counter-cycle) **and watch `q10`** — it now has seasonal duty; the linear part is
    absorbed by `seas_T_amp` but the nonlinear part is q10's own.
-2. **SST as the next driver** (Marcus's census question): observed hemispheric SST +
-   climatological seasonal SST cycle = the OCEAN half of the seasonal story. SPO's cycle is
-   substantially oceanic; land-only drivers make `seas_T_amp_SH` fake it, and **the d13C
-   seasonal ratio can now DETECT that mis-attribution** (ocean seasonal flux carries no
-   photosynthetic fractionation). After the refit.
+2. **SEASONAL SST: DONE, pre-refit** (`6fadb34`, Marcus's call — refit economics + not
+   baking the SPO mis-attribution into `seas_T_amp_SH`). Under `seas_drivers`; params 21;
+   at defaults the ocean term opposes the NH land cycle (MLO 4.77 → 4.41 ppm, toward obs
+   3.02). **A SH PHASE BUG was caught in the process**: the land seasonal-T sine had no
+   hemisphere flip (SH respiration peaking in austral winter), and the log-transformed
+   amplitude meant no sampler could ever have repaired it — only zeroed it. Fixed both cores.
+   **STILL OPEN: the observed-historical-SST half** — replacing `0.8 × GMST` with real
+   hemispheric SST needs a PRODUCT CHOICE (HadSST4 vs ERSST) + download/MANIFEST. Flagged,
+   not resolved; it also belongs before the refit if cheap, since it changes the transient.
 3. Carried from 18b: defaults-vs-mode bar derivation gap; gate 12 has no test;
    `ARM_HESS_EPS` at the new param count (now 19); σ-inflation spec; `kz` bracket; pilot
    MCMC barrier question; DESIGN §5.4 products.
