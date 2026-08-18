@@ -93,12 +93,23 @@ test_that("a land-use pulse is not given back to the land", {
   expect_gt(lp_af(s, lp_pulse(F0, luc = TRUE), ctl, 150), 0.8 * af_luc)
 })
 
-test_that("f_luc_perm = 0 reproduces the pre-2026-08-13 behaviour exactly", {
+test_that("f_luc_perm = 0 AND f_luc_wood = 1 reproduce the pre-2026-08-13 behaviour", {
   skip_if_no_cpp()
   # The escape hatch has to actually work, both so the regression can be
   # re-measured and so the fix's size can be quoted. It is NOT a supported
   # configuration -- it is the bug, kept reachable.
-  p <- ccx_default_params(); p$f_luc_perm <- 0
+  #
+  # IT TAKES BOTH KNOBS. The pre-08-13 model was permanence OFF *and* the debit
+  # taken from wood alone; ea7c70b later adopted pro rata and flipped
+  # CCX_F_LUC_WOOD_DEFAULT 1 -> 0, so f_luc_perm = 0 on its own now reproduces a
+  # model that never shipped (af@100 = 0.074, which is what this gate was
+  # failing on). Measured 2026-08-18 -- notes/diag_2026-08-18_test_failures.R:
+  #   perm 0, wood 0 : af@50 0.1171  af@100  0.0744  af@150  0.0542  (neither model)
+  #   perm 0, wood 1 : af@50 0.0187  af@100 -0.0032  af@150 -0.0026  (the bug)
+  # and -0.0032 / -0.0026 reproduce the signature this file's header records
+  # (0.002 at 100 -> -0.003 at 150). The bar is NOT re-baselined: it is the
+  # 0.02 the header already stated, now measured at the config it describes.
+  p <- ccx_default_params(); p$f_luc_perm <- 0; p$f_luc_wood <- 1
   s <- ccx_spinup(p)
   F0 <- lp_background(s); ctl <- lp_co2(s, F0)
   expect_lt(abs(lp_af(s, lp_pulse(F0, luc = TRUE), ctl, LP_LAG)), 0.02)

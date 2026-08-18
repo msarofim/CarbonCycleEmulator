@@ -23,14 +23,34 @@ mech_run <- function(off = character(), years = c(1750, 2100), scen = "ssp245") 
   ccx_run_fast(sp, F)$out
 }
 
+# THE WIRING FLOOR, ppm. This gate asks "is the switch connected", so the bar
+# must separate a real effect from numerical noise -- NOT rank the mechanisms by
+# size. It is read against max|dCO2| over the whole series, because ONE of the
+# six is oscillatory and an endpoint reads its phase rather than its amplitude.
+#
+# DERIVED, measured 2026-08-18 (notes/diag_2026-08-18_test_failures.md S3), as
+# max|dCO2| vs base over 1750-2100, ssp245:
+#   emissions 225.341 | fertilisation 201.185 | ocean_sink 116.211
+#   revelle    34.107 | warming_feedback 18.140 | enso 0.537 (at 2032)
+# The smallest true effect is ENSO's 0.537. MECH_WIRED_MIN sits ~500x below it
+# and ~5 orders above the integrator's round-off in ppm, so a disconnected
+# switch cannot clear it and no connected one can fail it.
+#
+# THE ENDPOINT BAR THIS REPLACED (0.5 ppm at 2100) was the wrong statistic, not
+# a wrong number: ENSO reads 0.300 at 2100 purely because of where in its cycle
+# 2100 falls. Its max, 0.537, was above the old bar all along. The five monotone
+# mechanisms are unaffected -- they clear MECH_WIRED_MIN by 4-8 orders.
+MECH_WIRED_MIN <- 1e-3
+
 test_that("every switch is wired up and changes the answer", {
   skip_if_no_cpp()
   base <- mech_run()
-  i <- nrow(base)
   for (nm in names(CCX_MECHANISMS)) {
     alt <- mech_run(nm)
-    expect_gt(abs(alt$co2_NH[i] - base$co2_NH[i]), 0.5,
-              label = sprintf("switch '%s' must move CO2 at 2100", nm))
+    expect_identical(nrow(alt), nrow(base),
+              label = sprintf("switch '%s' must not change the time grid", nm))
+    expect_gt(max(abs(alt$co2_NH - base$co2_NH)), MECH_WIRED_MIN,
+              label = sprintf("switch '%s' must move CO2 somewhere in 1750-2100", nm))
   }
 })
 

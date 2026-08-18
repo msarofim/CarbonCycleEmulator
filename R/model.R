@@ -438,9 +438,10 @@ ccx_default_params <- function() {
     # It is NOT a fudge factor with a convenient value: 1 is the mass-consistent
     # point, and it is the default for that reason rather than by fit.
     f_luc_perm = CCX_F_LUC_PERM_DEFAULT,
-    # WHERE the debit comes from, added 2026-08-13 as a switch with the
-    # incumbent as its default -- see CCX_F_LUC_WOOD_DEFAULT. 1 = wood alone
-    # (shipped), 0 = pro rata across the four pools.
+    # WHERE the debit comes from, added 2026-08-13 as a switch defaulting to
+    # the then-incumbent wood-only -- see CCX_F_LUC_WOOD_DEFAULT, which ea7c70b
+    # flipped to 0 when pro rata was adopted. 1 = wood alone, 0 = pro rata
+    # across the four pools (SHIPPED).
     f_luc_wood = CCX_F_LUC_WOOD_DEFAULT,
     k_w       = 1500,     # m/yr, gas transfer velocity
     h_ml      = 75,       # m, mixed-layer depth

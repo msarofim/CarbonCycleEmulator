@@ -101,8 +101,12 @@ ccx_cpp_par <- function(p) {
   # uses. If the two ever disagree, the C++ core silently runs a different model
   # from the R one -- which is exactly what gamma_enso did.
   if (is.null(p$f_luc_perm)) p$f_luc_perm <- CCX_F_LUC_PERM_DEFAULT
-  # WHERE the debit comes from. Unlike f_luc_perm this default IS the old
-  # behaviour, because f_luc_wood = 1 is the incumbent decision, not a bug.
+  # WHERE the debit comes from. Like f_luc_perm, this does NOT default to the
+  # old behaviour: wood-only (= 1) was the incumbent when the switch was added
+  # (b3108d7), but ea7c70b ADOPTED pro rata and flipped the constant to 0, so a
+  # pre-ea7c70b parameter list must reach the core as the pro-rata model that
+  # ships today. Read the default off CCX_F_LUC_WOOD_DEFAULT, never off this
+  # comment.
   if (is.null(p$f_luc_wood)) p$f_luc_wood <- CCX_F_LUC_WOOD_DEFAULT
   if (is.null(p$w_up)) p$w_up <- 0
   if (is.null(p$w_out_NH)) p$w_out_NH <- 0
