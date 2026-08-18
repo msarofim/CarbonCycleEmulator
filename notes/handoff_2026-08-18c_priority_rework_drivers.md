@@ -96,9 +96,17 @@ both cores; the residual is the integrator's own). Sine drifted +0.044.
    3.02). **A SH PHASE BUG was caught in the process**: the land seasonal-T sine had no
    hemisphere flip (SH respiration peaking in austral winter), and the log-transformed
    amplitude meant no sampler could ever have repaired it — only zeroed it. Fixed both cores.
-   **STILL OPEN: the observed-historical-SST half** — replacing `0.8 × GMST` with real
-   hemispheric SST needs a PRODUCT CHOICE (HadSST4 vs ERSST) + download/MANIFEST. Flagged,
-   not resolved; it also belongs before the refit if cheap, since it changes the transient.
+   **OBSERVED SST: DONE too (`98fd871`, Marcus: HadSST4)** — historical hemispheric HadSST4
+   anomalies (re-based to 1850-1900) replace `0.8 × GMST`; forward scaling = constant
+   last-30-yr obs ratios (NH 0.819 / SH 0.762, `diag_hemis_t_ratios.R` — the window spread is
+   AEROSOL history, not warming-level dependence), with `ccx_sst_anom_from_gmst()` the single
+   seam for a future CMIP6 scaling. `sst_obs` switch (absence-default 0); N_FORCING 12 → 14;
+   `ccx_hold_climate()` now the ONLY sanctioned way to freeze climate on a built forcing
+   (hand-rolled `F$gmst <- F$gmst[1]` leaves real SST warming in a "frozen" run); the
+   `warming_feedback` mechanism sets `sst_obs = 0`. CRUTEM5 land ratios measured (NH 1.54)
+   but **land-T into q10 NOT wired** — a further structural change, not ordered. The refit
+   now carries: 21 params, 2 new streams, rep_dC, driver seasonality (land + SST), and
+   observed annual SST.
 3. Carried from 18b: defaults-vs-mode bar derivation gap; gate 12 has no test;
    `ARM_HESS_EPS` at the new param count (now 19); σ-inflation spec; `kz` bracket; pilot
    MCMC barrier question; DESIGN §5.4 products.
