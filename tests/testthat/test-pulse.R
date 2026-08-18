@@ -120,8 +120,14 @@ test_that("the airborne fraction depends on the background -- Revelle saturation
 #     100 yr   0.292     0.409        0.71
 # The model is on the LOW-airborne-fraction side at every horizon, which is a
 # known and accepted property, not a defect -- on the time-INTEGRATED IRF it is
-# 12.7 / 15.5 / 20.0 % low and inside all three of Joos's 5-95 % bands (gate 12,
-# test-joos-gates.R).
+# 12.7 / 15.5 / 20.0 % low and inside all three of Joos's 5-95 % bands.
+#
+# THAT INTEGRATED CHECK IS *DESIGN.md* GATE 12, AND IT HAS NO TEST. Its only
+# implementation is calibration/diag_joos_irf.R part 3, a diagnostic nobody runs
+# -- which is how its recorded status went stale across two beta moves once
+# already. The test below scores the POINT IRF and does NOT cover it: passing
+# here is not gate 12 passing. Wiring gate 12 into this file is the obvious
+# follow-up and is deliberately not bundled into the repair that added this.
 #
 # THE TOLERANCE IS DERIVED AT THE ADOPTED MODE, NOT AT THESE DEFAULTS, and the
 # distinction is the whole reason this constant is 0.40 and not 0.35. Measured
