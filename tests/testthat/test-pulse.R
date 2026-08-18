@@ -7,11 +7,12 @@
 # 2150") straight off a difference between two model runs. If the pairing is
 # wrong, the number is wrong and nothing else in the app would show it.
 #
-# ON THE BENCHMARK NUMBERS BELOW. The Joos et al. (2013) impulse-response values
-# quoted in the comments are FROM RECOLLECTION and have not been checked against
-# the paper in this repository. They are used only to bound an order of
-# magnitude, and the assertions are deliberately loose enough that being wrong
-# about the third digit changes nothing. Do not cite them.
+# ON THE BENCHMARK NUMBERS BELOW. The Joos et al. (2013) values are no longer
+# from recollection: the Table 5 IRF fit and the Table 4 integrated ranges are
+# transcribed in R/joos_irf.R and are what the airborne-fraction test scores
+# against, at Joos's own PD100 protocol. Any OTHER Joos figure appearing in a
+# comment in this file is still unverified -- check R/joos_irf.R before citing
+# one, and if it is not there, it has not been checked.
 # =====================================================================
 
 skip_if_no_cpp <- function() {
@@ -101,16 +102,93 @@ test_that("the airborne fraction depends on the background -- Revelle saturation
   expect_gt(hi$frac[i] - lo$frac[i], 0.05)
 })
 
-test_that("the airborne fraction is in the right ballpark", {
-  skip_if_no_cpp(); skip_if_no_climate()
-  # Order-of-magnitude only. Recalled Joos et al. (2013) multi-model values for
-  # a 100 GtC pulse onto ~389 ppm are roughly 0.59 / 0.47 / 0.41 at 20 / 50 /
-  # 100 yr -- NOT verified against the paper, see the file header. SSP1-1.9 is
-  # the closest available background. The bounds below are wide on purpose.
-  lo <- pulse_pair(100, "ssp119")
-  at <- function(h) lo$frac[lo$year == PULSE_YEAR + h]
-  expect_gt(at(20), 0.45);  expect_lt(at(20), 0.80)
-  expect_gt(at(100), 0.30); expect_lt(at(100), 0.60)
+# THE JOOS TOLERANCE, as a fraction of the published multi-model mean.
+#
+# RE-PROTOCOLED 2026-08-18 (Marcus). The bar this replaced quoted Joos's PD100
+# numbers (0.59 / 0.47 / 0.41) but MEASURED on SSP1-1.9, a declining background
+# -- so it compared a model to a benchmark computed under different conditions,
+# and af(100) = 0.213 was failing a bar it was never being asked to meet. The
+# fix is to run Joos's protocol, not to loosen Joos's number: this test now uses
+# PD100 (100 GtC onto a background HELD at ~389 ppm by diagnosed compatible
+# emissions), which is the protocol Table 5 is for.
+#
+# WHERE THE TOLERANCE COMES FROM, measured 2026-08-18 by calibration/
+# diag_joos_irf.R part 2 and reproduced by this test:
+#   horizon    model    Joos T5    model/Joos
+#      20 yr   0.520     0.596        0.87
+#      50 yr   0.378     0.487        0.78
+#     100 yr   0.292     0.409        0.71
+# The model is on the LOW-airborne-fraction side at every horizon, which is a
+# known and accepted property, not a defect -- on the time-INTEGRATED IRF it is
+# 12.7 / 15.5 / 20.0 % low and inside all three of Joos's 5-95 % bands (gate 12,
+# test-joos-gates.R).
+#
+# THE TOLERANCE IS DERIVED AT THE ADOPTED MODE, NOT AT THESE DEFAULTS, and the
+# distinction is the whole reason this constant is 0.40 and not 0.35. Measured
+# 2026-08-18 by mutation test, worst |rel| gap over the three horizons:
+#   package defaults (what this test runs) 0.287
+#   ARM D mode                             0.297
+#   ARM N mode -- ADOPTED, the shipping configuration      0.325
+# A tolerance derived from the defaults' 0.287 lands at 0.35 and leaves the
+# ADOPTED model 0.025 from firing: that is a flaky gate, not a strict one, and
+# it would go red on ordinary re-fitting rather than on a real regression.
+# 0.40 is derived from the 0.325 that ships, with headroom for the same
+# parameter movement the arms already show between them.
+#
+# WHY IT CANNOT BE MUCH TIGHTER THAN THAT, stated so nobody "improves" it: the
+# point IRF is remarkably insensitive to the ocean parameters. Quartering k_w
+# or h_ml moves the worst gap by ~0.03. The one parameter it IS sensitive to is
+# kz -- and the calibration pins kz at the TOP of its bracket, which is the
+# direction that makes the Joos agreement WORSE (see the scan in the handoff).
+# So this gate catches gross breakage and a kz-scale structural change; it does
+# NOT certify agreement with Joos, and must not be quoted as if it did.
+#
+# IF THIS EVER TIGHTENS, tighten it because the model improved -- re-derive from
+# diag_joos_irf.R part 2 AT THE ADOPTED MODE, never from wherever code lands.
+JOOS_POINT_TOL <- 0.40
+
+# The PD100 background: historical spin-up to JOOS_REF_YEAR, then emissions
+# diagnosed to hold CO2 constant. This is diag_joos_irf.R's construction, using
+# the same R/joos_irf.R helpers, so the test and the diagnostic cannot drift.
+pd100_irf <- function() {
+  spin <- ccx_spinup(ccx_default_params())
+  F_hist <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR),
+                              prod_c14 = spin$prod_c14)
+  sp_ref <- spin
+  sp_ref$y <- ccx_run_fast(spin, F_hist)$state
+  # Joos releases the pulse 5 yr after the reference year, onto an already
+  # settled background, so the run must cover the shift plus the last horizon.
+  span <- (JOOS_PULSE_YR - JOOS_REF_YEAR) + max(JOOS_TH) + 10
+  F_fwd <- suppressWarnings(
+    ccx_build_forcing("historical", c(JOOS_REF_YEAR, JOOS_REF_YEAR + span),
+                      prod_c14 = spin$prod_c14, bomb_total_kmol = 0))
+  for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
+               "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
+  F_fwd$gmst <- F_fwd$gmst[1]        # climate held at the reference year
+  F_hold <- ccx_hold_forcing(sp_ref, F_fwd)
+  o <- ccx_irf(sp_ref, F_hold)
+  o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR)
+  list(t = o$t, irf = o$irf, dev = attr(F_hold, "dev"),
+       target = attr(F_hold, "target"))
+}
+
+test_that("the airborne fraction matches Joos et al. (2013) at Joos's own protocol", {
+  skip_if_no_cpp()
+  o <- pd100_irf()
+
+  # THE PROTOCOL'S OWN PRECONDITION. Every number below is meaningless if the
+  # background is not actually held, so gate it before reading the IRF. The
+  # diagnosed emissions hold ~388 ppm to ~1.1 ppm, i.e. 0.3 %.
+  expect_lt(o$dev / o$target, 0.01)
+  expect_gt(o$target, 370); expect_lt(o$target, 400)   # Joos's PD100 is 389 ppm
+
+  at <- function(h) o$irf[which.min(abs(o$t - h))]
+  for (h in JOOS_TH) {
+    ref <- joos_irf(h)
+    expect_lt(abs(at(h) - ref) / ref, JOOS_POINT_TOL,
+              label = sprintf("IRF@%d yr = %.3f vs Joos %.3f", h, at(h), ref))
+  }
+  # ... and it must decay, which no tolerance band would catch on its own.
   expect_lt(at(100), at(20))
 })
 

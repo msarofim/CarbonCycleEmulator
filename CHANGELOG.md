@@ -5708,3 +5708,70 @@ I promoted it to the headline finding — "a REAL under-gated model bias" — wh
 support. **What stands:** the model runs low, DESIGN already says so, and that belongs in prose rather
 than a new gate. Repairs 1–5 rest on their own reasoning (wrong background, wrong statistic, a premise
 needing two knobs, a stale comment) and are untouched by this retraction.
+
+## 2026-08-18 (job B, applied) — The 5 test repairs LANDED, and a mutation test moved one of the new bars before it shipped
+
+**Marcus gave the go-ahead and chose the two open bars** (`test-pulse.R` → re-protocol to PD100;
+`test-luc-permanence.R:88` → a preindustrial band). All five repairs from
+`notes/diag_2026-08-18_test_failures.md` §5 are applied.
+
+**Suite: `FAIL 4 | WARN 53 | SKIP 2 | PASS 857` → `FAIL 0 | WARN 53 | SKIP 2 | PASS 870`.** The
+baseline was MEASURED before touching anything and reproduced the diag exactly.
+
+**Repairs 3, 4, 5** (`a12ecee`) — the wiring statistic (`max|ΔCO₂|` over the series against a new
+derived `MECH_WIRED_MIN` = 1e-3 ppm, because ENSO is the only oscillatory switch and an endpoint read
+its *phase*); the two-knob premise (`f_luc_wood = 1` alongside `f_luc_perm = 0`); and the stale
+`f_luc_wood` comment. **Repair 5 was bigger than diagnosed:** the diag caught `R/cpp.R:104-105`, but
+`R/model.R:442-443` carried the identical defect, tagging `1 = wood alone (shipped)` when `0` ships.
+Traced: `b3108d7` added the switch defaulting to 1, `ea7c70b` adopted pro rata and flipped the
+constant without updating either prose site. Both corrected.
+
+**Repair 1 forced a dedup worth having on its own.** Running Joos's protocol inside the test needed
+`ccx_hold_forcing` and friends, which existed as **byte-identical copies in both `diag_joos_irf.R`
+and `diag_joos_beta_scan.R`**. All four helpers and every shared constant were verified identical
+function-by-function, then promoted to a new **`R/joos_irf.R`** (−244 lines, +124). Both diagnostics
+re-run clean and reproduce their recorded numbers exactly (0.520/0.378/0.292; 12.4/25.6/41.9), so the
+move changed nothing. A third copy in `tests/` was the alternative and would have made drift worse.
+
+### THE PART THAT MATTERS MORE THAN THE GREEN SUITE — the gates were mutation-tested
+
+Full account: `notes/diag_2026-08-18_gate_mutation_tests.md`. **A green suite is not evidence a
+rewritten gate works** — it is also what a gate that can never fire produces. Each new numeric bar was
+attacked. Two of three came back weaker than their comments claimed.
+
+- **`MECH_WIRED_MIN` — SOUND.** A disconnected switch trips it; live ENSO clears it 537×.
+- **`LP_FOSS_PI_REF` 0.152 ± 30 % — constant KEPT, comment rewritten.** It holds at both modes
+  (N 0.1622, D 0.1646) and across a 13× `kz` range (0.1852 → 0.1458) — but that *is* its limit: it is
+  a sanity and cross-check gate on the reference arm, not a sensitivity gate, and now says so.
+- **`JOOS_POINT_TOL` — THE BAR WAS DERIVED AT THE WRONG CONFIGURATION, and this is the reusable
+  lesson.** Set to 0.35 from the gap at **package defaults** (0.287). But the **adopted arm-N mode**
+  sits at **0.325** — 0.025 from firing, i.e. a flaky gate that would go red on ordinary re-fitting
+  rather than on a regression. **Re-derived at the shipping configuration: 0.35 → 0.40.** Still a
+  derivation, not a re-baseline; what changed is *which configuration the bar is derived at*.
+
+**STANDING GAP THIS EXPOSES, not fixed here:** the suite derives bars from `ccx_default_params()`
+while the project's adopted parameters live in `calibration/output/pump_arms/mode_fit_pumpN.rds`.
+Every default-derived bar inherits that discrepancy. Coupling tests to a calibration output is its own
+problem and was **not** done — but it is now measured for this gate and is worth checking before
+trusting another default-derived bar.
+
+### AND A RESULT THAT IS NOT ABOUT TESTS AT ALL
+
+The scan behind the tolerance shows the Joos point IRF is **monotone decreasing in `kz`**, and **the
+direction the calibration pins `kz` is the direction that makes the Joos agreement worse**:
+bracket floor 3942.5 → −25 % at 100 yr; **arm-N mode 6439.2 → −33 %**; `kz` ≈ 500–800 would put the
+model essentially **on** Joos's multi-model mean, an order of magnitude below the bracket.
+
+**This gives the standing "`kz` pinned near its bracket top" question (handoff §7 item 5) a concrete
+cost for the first time** — ~8 percentage points of Joos agreement at 100 yr, floor to mode.
+**⚠ It is a one-at-a-time scan** (other 19 parameters at defaults; the two mode rows are a 14-of-20
+overlay, since `bomb_total`, `luc_scale`, both sigmas and both gradient offsets have no field in
+`ccx_default_params()`). It does **NOT** show a low-`kz` model would score better overall — the
+likelihood pins `kz` high for reasons this scan does not evaluate, and the isotope and sink streams are
+what would pay. **Do not read it as "lower `kz`."**
+
+**Tried and caught, worth recording:** the first `kz` scan returned **bit-identical IRFs at all eight
+values over a 13× range** — the "suspicious uniformity ≈ bug signal" pattern, and it was a bug in the
+scan: `within(p0, kz <- kz)` **self-assigns**, the list's own `kz` shadowing the loop variable, so
+every row ran the default. `within()` is an attractive idiom for one-at-a-time scans and it fails
+silently into a flat, plausible-looking table.

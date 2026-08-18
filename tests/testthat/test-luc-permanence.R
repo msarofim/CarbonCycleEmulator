@@ -24,6 +24,26 @@ LP_YRS    <- c(1750, 2024)
 LP_PPM    <- 0.4707   # ppm per GtC, whole atmosphere
 LP_LAG    <- 100      # yr, the horizon the gate is stated at
 
+# The fossil reference arm's expected airborne fraction at LP_LAG, and its
+# tolerance. NOT a fitted value and NOT read off this test: it is the model's
+# "PI, background HELD" IRF@100 from calibration/diag_joos_irf.R part 4, which
+# is what lp_background() is -- a preindustrial, zero-emission, frozen-climate
+# control. See the derivation note at the gate below.
+#
+# WHAT THIS GATE DOES AND DOES NOT CATCH, measured 2026-08-18 so that nobody has
+# to re-derive it to find out. Values of af_foss:
+#   package defaults 0.1513 | ARM N mode (adopted) 0.1622 | ARM D mode 0.1646
+#   kz over its whole bracket and well below it (500 -> 6528): 0.1852 -> 0.1458
+#   k_w x4 or /4, h_ml /4: 0.1502 -> 0.1560
+# So the band holds at BOTH modes with room to spare, and a 13x change in kz
+# moves it only ~12 %. This is a SANITY AND CROSS-CHECK gate on the reference
+# arm -- it catches the arm breaking (af -> 0, or the pulse not landing) and it
+# catches the arm drifting away from the independent diagnostic. It is NOT
+# sensitive to ocean-parameter drift and must not be cited as if it were; the
+# Joos point-IRF gate in test-pulse.R is where kz-scale changes show up.
+LP_FOSS_PI_REF <- 0.152
+LP_FOSS_PI_TOL <- 0.30
+
 # A zero-emission background with GMST and ENSO FROZEN. Left free, a
 # zero-emission run moves +8.34 ppm over 275 yr -- the prescribed-warming
 # carbon-climate feedback, not drift -- and the control would not be flat.
@@ -85,7 +105,24 @@ test_that("a land-use pulse is not given back to the land", {
   # THE GATE. Pre-fix this ratio was 0.01. The threshold is set well below the
   # measured 0.50 so that ordinary parameter movement does not trip it, and far
   # above the regression it exists to catch.
-  expect_gt(af_foss, 0.2)                 # the reference arm must be sane
+  #
+  # THE REFERENCE ARM'S BAR IS A PREINDUSTRIAL ONE, restated 2026-08-18 (Marcus).
+  # It read "> 0.2" -- a present-day airborne fraction applied to a measurement
+  # taken on lp_background(), which is zero-emission with GMST and ENSO FROZEN,
+  # i.e. PREINDUSTRIAL. On a PI background the buffer is not yet stretched and
+  # the fraction is legitimately far lower, so the arm was failing a bar written
+  # for a background it never runs on.
+  #
+  # THE BAR IS DERIVED, AND FROM OUTSIDE THIS FILE. calibration/diag_joos_irf.R
+  # part 4 measures the model's "PI, background HELD" IRF at 100 yr as 0.152, by
+  # a completely separate code path (diagnosed-emission hold, ccx_irf, no
+  # lp_* helper involved). This test measures 0.151. Agreement to 0.001 across
+  # two independent constructions is a stronger statement than the bar it
+  # replaces made, and LP_FOSS_PI_REF/TOL turn it into a two-sided cross-check:
+  # the reference arm must land on the model's own PI impulse response, so this
+  # trips if EITHER the arm or the diagnostic moves.
+  expect_gt(af_foss, LP_FOSS_PI_REF * (1 - LP_FOSS_PI_TOL))
+  expect_lt(af_foss, LP_FOSS_PI_REF * (1 + LP_FOSS_PI_TOL))
   expect_gt(af_luc / af_foss, 0.3)
 
   # ... and it must not decay away afterwards, which is what the old model did:
