@@ -5482,3 +5482,82 @@ gradients of carbon-like tracers read on the same box edges should).
 **NOT done, and still Marcus's call:** σ-inflation remains **unimplemented**. This supplies its missing
 input; it does not price it. 16g's "inflation recovers 21 % of the skip's gain" is untouched — that
 needs the model's own gradient at each `h_ml`, and the refit owns the machine.
+
+## 2026-08-18 — THE TWO-ARM REFIT LANDED. §5.3 took the good branch; N favoured by 5.62; and the pre-refit per-stream reading REVERSED
+
+`calibration/run_modefind_pump_arms.R`, launched 2026-08-16g, **23 h 57 m wall** (N 753.5 min /
+303,661 evals; D 683.0 min / 297,804 evals). Outputs at `calibration/output/pump_arms/`:
+`mode_fit_pump{N,D}.rds` + `pump_arms_comparison.rds`. **This is the first serious calibration this
+model has ever had** — `calibration/output/mode_fit.rds` is still absent and every previous "at the
+mode" number came from the pre-gradient-terms quarantine.
+
+**§5.3 — THE CO₂-LEVEL STREAMS RECOVERED, so the bound was cheap and the comparison is readable.**
+Verified against 16g's saved rds rather than its prose:
+
+| stream | 16g @ `h_ml` = 100, else init | arm-N mode | recovery |
+|---|---|---|---|
+| `co2_level_SPO` | −255.94 | **−62.87** | **+193.1** |
+| `co2_level_MLO` | −182.72 | **−73.75** | **+109.0** |
+
+Biggest movers: `co2_seasonal_MLO` **+676.3**, `d13c_gradient` **+490.0**, `d14c_SH` +166.7,
+`d13c_level_MLO` +166.1. Only three streams worsened, all trivially (≤ 3.2).
+
+**AND `h_ml` LANDED INTERIOR IN BOTH ARMS — 94.36 (N), 91.16 (D) — with the gradient rows LIVE.**
+Nobody pre-registered this and it is the cleanest confirmation available: had the 236-log-unit pull
+survived a refit, `h_ml` would sit pinned at the 85 bound. It does not, in either arm. **§3's "236 is
+an upper bound and probably a large overstatement" is CONFIRMED — the pull was an artefact of holding
+the other 19 parameters at init**, and `kz`/`k_w`/`beta_max` absorb the CO₂-level misfit directly.
+
+**`pump_grad` IS CONSTRAINED IN BOTH ARMS** — 289.60 (N), 282.26 (D), against **963.6 / 1431.0** in
+16f's rows-off truncated arms. Both sit near the old mode's 1-D optimum (274.5) and above the observed
+233.11. The gradient rows are doing the job they were added to do.
+
+### The comparison
+
+| | N | D | D − N |
+|---|---|---|---|
+| log-posterior at MAP | −2091.16 | −2096.26 | −5.10 |
+| ½ log|−H| | 61.43 | 61.96 | +0.52 |
+| **Laplace log-evidence** | | | **−5.62** |
+
+**N is favoured by 5.62 log-units.** Both Hessians PD (cond 6.8e5 / 5.5e5), so `recompute_hessian.R`
+was not needed for either arm. The `(d/2)log 2π` term cancels (same 20 parameters) and 16g §4's prior
+renormalisation constant (+1.5805) is identical in both arms, so it cancels too.
+
+### THE PER-STREAM TABLE REVERSED THE PRE-REFIT READING — and 16g §5.4 was right to insist on reading it fresh
+
+16f's *truncated, unconverged* table hinted D gains on `co2_seasonal_MLO`, `d14c_NH` and
+`d13c_level_SPO`. Two held. **The third reversed outright: `d13c_level_SPO` is D's single biggest
+LOSS (−9.74), not a gain.** And the framing "D's gain was entirely the CO₂ record" is **wrong**:
+
+| what D buys | Δ | what D sells | Δ |
+|---|---|---|---|
+| `gcb_ocean_sink` | +2.51 | `d13c_level_SPO` | **−9.74** |
+| `gcb_land_sink` | +1.93 | `d13c_level_MLO` | **−7.30** |
+| `d14c_NH` | +1.92 | | |
+| `d14c_SH` | +1.80 | | |
+| `co2_seasonal_MLO` | +0.90 | | |
+| `d14c_deep_ocean` | +0.77 | | |
+
+**The CO₂ LEVELS are essentially tied** (−0.43 MLO, −0.16 SPO) and `d13c_gradient` is tied to
+**+0.00**. So the contest is **δ¹³C levels (N wins, −17.04) against sinks + ¹⁴C (D wins, +10.91)**,
+net loglik −6.13. **This independently corroborates the pump × advection symmetry result**
+(`project_ccx_pump_advection_symmetry`: the reversal ties CO₂ and breaks only the ISOTOPES) — at two
+modes that differ in all 20 parameters, CO₂ ties and the isotopes decide.
+
+### Caveats, none of them dismissible
+
+- **The driver's own words: "READ THIS AS INDICATIVE, NOT AS A BAYES FACTOR."** `kz` sits 96.6 % (N)
+  and 88.9 % (D) up the re-bisected bracket, so the posterior is non-Gaussian in that direction and
+  the Hessian reports the transformed coordinate's curvature.
+- **BOTH ARMS HIT THE 20-RESTART CAP WHILE STILL GAINING** and both are flagged NOT CONVERGED.
+  `ARM_TOL` = 1e-4 is unreachable for a 20-parameter Nelder-Mead here. Practical movement is tiny
+  (N moved 0.7 log-units over restarts 8→19; BFGS polish gained 0.09), so these are plateaus, not
+  climbs — **but that ~0.7 plateau wander is the noise floor, and 5.62 is only ~8× it.**
+- `bomb_total` sits at **z = +3.01** in N and is flagged; D flags nothing.
+- One `conveyor 12C spinup did not converge` warning, |resid| = 1.79e-06.
+- **`ARM_HESS_EPS` = 3e-4 is still inherited from an 18-parameter run** and un-re-derived at 20
+  (16g item 3, still open even though both Hessians came back PD).
+
+**Open: N or D is Marcus's call** (16g item 2). The evidence points to N; whether 5.62 against a
+0.7 noise floor and a pinned `kz` is decisive enough is the judgement.

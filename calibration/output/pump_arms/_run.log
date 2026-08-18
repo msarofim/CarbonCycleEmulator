@@ -15,3 +15,142 @@ GATE: the arms differ in `pump_mode` and nothing else. OK
 === ARM pump_mode = N ===
 start: log-post at hand-set init = -4291.2
 [N] restart  1: log-post =      -2115.6  (gain  2175.5803)  evals 20001
+[N] restart  2: log-post =      -2109.6  (gain     5.9844)  evals 37238
+[N] restart  3: log-post =      -2095.4  (gain    14.1421)  evals 57025
+[N] restart  4: log-post =      -2093.0  (gain     2.4559)  evals 72332
+[N] restart  5: log-post =      -2092.8  (gain     0.1570)  evals 92333
+[N] restart  6: log-post =      -2092.7  (gain     0.1741)  evals 112352
+[N] restart  7: log-post =      -2092.6  (gain     0.0866)  evals 127863
+[N] restart  8: log-post =      -2092.0  (gain     0.5806)  evals 145030
+[N] restart  9: log-post =      -2091.9  (gain     0.0749)  evals 156659
+[N] restart 10: log-post =      -2091.8  (gain     0.1420)  evals 167960
+[N] restart 11: log-post =      -2091.7  (gain     0.0509)  evals 180429
+[N] restart 12: log-post =      -2091.5  (gain     0.2150)  evals 193906
+[N] restart 13: log-post =      -2091.5  (gain     0.0313)  evals 203413
+[N] restart 14: log-post =      -2091.4  (gain     0.0624)  evals 218800
+[N] restart 15: log-post =      -2091.4  (gain     0.0656)  evals 229737
+[N] restart 16: log-post =      -2091.3  (gain     0.0142)  evals 244158
+[N] restart 17: log-post =      -2091.3  (gain     0.0176)  evals 261319
+[N] restart 18: log-post =      -2091.3  (gain     0.0385)  evals 278214
+[N] restart 19: log-post =      -2091.3  (gain     0.0140)  evals 289909
+[N] restart 20: log-post =      -2091.3  (gain     0.0141)  evals 301674
+*** [N] HIT THE RESTART CAP WHILE STILL GAINING -- this mode is NOT converged
+[N] BFGS polish: log-post = -2091.2 (gain 0.0922)
+
+[N] prior-tail position (normal sds; |z| > 3 flagged):
+     beta_max        fert_k           q10           k_w          h_ml 
+        -0.93         -1.49          0.94          0.99         -0.62 
+           kz     pump_grad        tau_ex   npp_frac_NH   seas_amp_NH 
+         1.82          1.39         -0.31          0.25          0.87 
+  seas_amp_SH seas_phase_NH seas_phase_SH    gamma_enso    bomb_total 
+         0.92         -0.45          1.22         -0.68          3.01 
+    luc_scale    sigma_d13c    sigma_d14c  grad_off_co2 grad_off_d13c 
+         0.47          1.12          0.50         -1.34         -0.02 
+*** FLAGGED:  bomb_total 
+[N] hessian: central differences, 20 parameters
+[N] Laplace covariance: PD, condition number 6.8e+05
+[N] mode log-post = -2091.2  (gain over init 2200.0)
+[N] elapsed 753.5 min, 303661 evaluations (0.149 s/eval)
+
+[N] mode, natural scale:
+     beta_max        fert_k           q10           k_w          h_ml 
+       0.5290      155.7044        2.2275     1968.7733       94.3587 
+           kz     pump_grad        tau_ex   npp_frac_NH   seas_amp_NH 
+    6439.1654      289.6009        1.0706        0.6396       17.7976 
+  seas_amp_SH seas_phase_NH seas_phase_SH    gamma_enso    bomb_total 
+       3.7300        3.9028       10.6551        0.5155      121.2200 
+    luc_scale    sigma_d13c    sigma_d14c  grad_off_co2 grad_off_d13c 
+       1.0081        0.1931        6.2779       -0.0456        0.0826 
+[N] wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pump_arms/mode_fit_pumpN.rds
+
+
+=== ARM pump_mode = D ===
+start: log-post at hand-set init = -4748.7
+[D] restart  1: log-post =      -2101.4  (gain  2647.3260)  evals 15829
+[D] restart  2: log-post =      -2099.6  (gain     1.8061)  evals 35830
+[D] restart  3: log-post =      -2098.3  (gain     1.3289)  evals 55831
+[D] restart  4: log-post =      -2097.7  (gain     0.5716)  evals 73340
+[D] restart  5: log-post =      -2097.5  (gain     0.2434)  evals 93341
+[D] restart  6: log-post =      -2097.4  (gain     0.0657)  evals 104250
+[D] restart  7: log-post =      -2097.4  (gain     0.0256)  evals 118035
+[D] restart  8: log-post =      -2097.1  (gain     0.2261)  evals 138036
+[D] restart  9: log-post =      -2096.7  (gain     0.4500)  evals 153055
+[D] restart 10: log-post =      -2096.7  (gain     0.0356)  evals 164618
+[D] restart 11: log-post =      -2096.6  (gain     0.0891)  evals 182881
+[D] restart 12: log-post =      -2096.5  (gain     0.0225)  evals 197570
+[D] restart 13: log-post =      -2096.5  (gain     0.0118)  evals 210983
+[D] restart 14: log-post =      -2096.4  (gain     0.0894)  evals 224476
+[D] restart 15: log-post =      -2096.4  (gain     0.0780)  evals 240861
+[D] restart 16: log-post =      -2096.3  (gain     0.0281)  evals 253594
+[D] restart 17: log-post =      -2096.3  (gain     0.0140)  evals 264237
+[D] restart 18: log-post =      -2096.3  (gain     0.0110)  evals 273060
+[D] restart 19: log-post =      -2096.3  (gain     0.0025)  evals 282591
+[D] restart 20: log-post =      -2096.3  (gain     0.0010)  evals 295656
+*** [D] HIT THE RESTART CAP WHILE STILL GAINING -- this mode is NOT converged
+[D] BFGS polish: log-post = -2096.3 (gain 0.0512)
+
+[D] prior-tail position (normal sds; |z| > 3 flagged):
+     beta_max        fert_k           q10           k_w          h_ml 
+        -0.96         -1.51          0.97          0.93         -0.93 
+           kz     pump_grad        tau_ex   npp_frac_NH   seas_amp_NH 
+         1.22          1.28         -0.30          0.27          0.88 
+  seas_amp_SH seas_phase_NH seas_phase_SH    gamma_enso    bomb_total 
+         0.93         -0.45          1.21         -0.69          2.90 
+    luc_scale    sigma_d13c    sigma_d14c  grad_off_co2 grad_off_d13c 
+         0.50          1.40          0.47         -1.16         -0.02 
+[D] hessian: central differences, 20 parameters
+[D] Laplace covariance: PD, condition number 5.5e+05
+[D] mode log-post = -2096.3  (gain over init 2652.5)
+[D] elapsed 683.0 min, 297804 evaluations (0.138 s/eval)
+
+[D] mode, natural scale:
+     beta_max        fert_k           q10           k_w          h_ml 
+       0.5038      150.4204        2.2426     1924.7987       91.1633 
+           kz     pump_grad        tau_ex   npp_frac_NH   seas_amp_NH 
+    6241.6129      282.2603        1.0719        0.6424       17.9633 
+  seas_amp_SH seas_phase_NH seas_phase_SH    gamma_enso    bomb_total 
+       3.7654        3.9008       10.6530        0.5121      119.5434 
+    luc_scale    sigma_d13c    sigma_d14c  grad_off_co2 grad_off_d13c 
+       1.0179        0.2357        6.1398       -0.0627        0.0828 
+[D] wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pump_arms/mode_fit_pumpD.rds
+Warning message:
+In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 1.788e-06
+
+
+=== COMPARISON ===
+                                          N              D          D - N
+log-posterior at MAP               -2091.16       -2096.26          -5.10
+0.5 log|-H|                           61.43          61.96          +0.52
+LAPLACE log-evidence D-N                                            -5.62
+
+(The (d/2) log 2pi term cancels: both arms carry the same 20 parameters.)
+READ THIS AS INDICATIVE, NOT AS A BAYES FACTOR -- see the header. A pinned
+`kz` makes the posterior non-Gaussian in that direction, and the Hessian
+there reports the transformed coordinate's curvature, not a free one's.
+
+
+=== PER-STREAM: which rows does D buy, and which does it sell? ===
+  gcb_ocean_sink                  +2.51
+  gcb_land_sink                   +1.93
+  d14c_NH                         +1.92
+  d14c_SH                         +1.80
+  co2_seasonal_MLO                +0.90
+  d14c_deep_ocean                 +0.77
+  d13c_level_MLO                  -7.30
+  d13c_level_SPO                  -9.74
+
+The pre-refit reading was that D's gain was ENTIRELY the CO2 record.
+This table either confirms that or shows a refit reallocating it.
+
+
+=== THE STANDING QUESTIONS THIS RUN WAS ALSO MEANT TO ANSWER ===
+[N] kz = 6439.2 (96.6 % up the re-bisected bracket [3942.5, 6528])
+[N] h_ml = 94.36 -- gradient rows LIVE only inside [85, 120]: LIVE
+[N] pump_grad = 289.60  (prior centre 233.11, 1-D optimum at the old mode 274.5)
+[D] kz = 6241.6 (88.9 % up the re-bisected bracket [3942.5, 6528])
+[D] h_ml = 91.16 -- gradient rows LIVE only inside [85, 120]: LIVE
+[D] pump_grad = 282.26  (prior centre 233.11, 1-D optimum at the old mode 274.5)
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pump_arms/pump_arms_comparison.rds
