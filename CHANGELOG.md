@@ -5561,3 +5561,35 @@ modes that differ in all 20 parameters, CO₂ ties and the isotopes decide.
 
 **Open: N or D is Marcus's call** (16g item 2). The evidence points to N; whether 5.62 against a
 0.7 noise floor and a pinned `kz` is decisive enough is the judgement.
+
+## 2026-08-18 (decision) — **ARM N ADOPTED, PROVISIONALLY** (16g open item 2 — Marcus 2026-08-18)
+
+**Decision: adopt N as the mode and unblock the critical path, with the choice recorded as
+PROVISIONAL and revisited once the sampler produces a real posterior.**
+
+**The case for N:** favoured on Laplace evidence (**5.62 log-units**, ~8× the ~0.7 plateau noise
+floor), favoured on MAP height (−2091.16 vs −2096.26), and it wins the **δ¹³C levels** (+17.04 over D)
+— the stream class the gradient rows and the pump were added to constrain in the first place.
+
+**WHAT "PROVISIONAL" IS CARRYING, and it is not a formality.** Every one of these stands unresolved:
+
+- **The driver's own verdict: "INDICATIVE, NOT A BAYES FACTOR."** `kz` sits **96.6 %** (N) / **88.9 %**
+  (D) up the re-bisected bracket, so the posterior is non-Gaussian in that direction and the Hessian
+  reports the transformed coordinate's curvature rather than a free one's.
+- **BOTH arms hit the 20-restart cap while still gaining** and are flagged NOT CONVERGED. They are
+  plateaus rather than climbs (N moved 0.7 log-units over restarts 8→19; BFGS polish +0.09), **but
+  that ~0.7 wander is the noise floor and 5.62 is only ~8× it.**
+- **`bomb_total` sits at z = +3.01 in N and is FLAGGED; D flags nothing.** The adopted arm is the one
+  in a prior tail.
+- **`ARM_HESS_EPS` = 3e-4 is still inherited from an 18-parameter run**, un-re-derived at 20, and the
+  evidence contrast depends on the Hessian it produces.
+
+**Nothing downstream is expensive to redo** if a converged posterior disagrees — which is the whole
+reason this is defensible as a provisional call rather than a deferral. **The mode is
+`calibration/output/pump_arms/mode_fit_pumpN.rds`.** Note `calibration/output/mode_fit.rds` is
+**still absent** and this does NOT create it; do not conflate the two paths.
+
+**NOT decided by this:** whether the σ-inflation redesign ships (open item 4 — its cost still needs
+re-deriving over all three rows), and whether a **posterior** run keeps the `h_ml` bound. A hard bound
+is defensible for a mode-find and is a **weaker claim for a sampler**; that question is re-opened by,
+not settled by, this decision.
