@@ -125,6 +125,8 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$seas_T_amp_NH)) p$seas_T_amp_NH <- 12
   if (is.null(p$seas_T_amp_SH)) p$seas_T_amp_SH <- 6
   if (is.null(p$seas_lag_p)) p$seas_lag_p <- 2.25
+  if (is.null(p$sst_seas_amp_NH)) p$sst_seas_amp_NH <- 2.0
+  if (is.null(p$sst_seas_amp_SH)) p$sst_seas_amp_SH <- 1.2
   if (is.null(p$q_conv)) p$q_conv <- 0
   if (is.null(p$conv_sink)) p$conv_sink <- N_INTERIOR
   if (is.null(p$conv_descent)) p$conv_descent <- 0L
@@ -154,6 +156,7 @@ ccx_cpp_par <- function(p) {
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH",
       "seas_drivers", "seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p",
+      "sst_seas_amp_NH", "sst_seas_amp_SH",
       "revelle_frozen")]
 }
 

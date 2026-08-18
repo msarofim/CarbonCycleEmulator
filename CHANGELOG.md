@@ -5836,3 +5836,36 @@ cycle, which is the OCEAN half of the seasonal story (SPO's cycle is substantial
 the land-only drivers make `seas_T_amp_SH` fake it, and the d13C seasonal ratio can now
 DETECT that mis-attribution because ocean seasonal flux carries no photosynthetic
 fractionation). After the refit.
+
+## 2026-08-18 (drivers, part 2) — SEASONAL SST lands BEFORE the refit (Marcus), and a SH phase bug is caught before it could calibrate
+
+**Marcus overturned the "SST after the refit" ordering, and the argument is refit economics
+plus attribution**: a land-only refit would calibrate `seas_T_amp_SH` to fake the ocean's
+contribution at SPO, and the post-SST refit would have to un-learn it. Reversed; both halves
+of the seasonal cycle now calibrate together.
+
+**A REAL BUG CAUGHT WHILE DESIGNING THE SST PHASE GEOMETRY**: the seasonal land-temperature
+sine had NO hemisphere phase flip — SH respiration was modulated as if austral summer were in
+July. The insolation side was correct (the declination formula antiphases at −30°); only the
+T sine was wrong. **And the sampler could never have repaired it**: `seas_T_amp_SH` is
+log-transformed, positive-only, so the refit's only recourse would have been shrinking the SH
+amplitude to zero — a wrong-phased mechanism quietly zeroing itself out. Fixed in both cores
+with a hemisphere sign (the norm is sign-invariant by symmetry); verified mid-Jan/mid-Jul
+respiration factors NH 0.56/1.28, SH 1.18/0.78.
+
+**Seasonal SST**: `sst += ±sst_seas_amp_h · sin(2π(t − (3.5 + CCX_SST_SEAS_LAG)/12))`, lag
+2.5 mo (ocean inertia > land's 2.0), under the SAME `seas_drivers` switch — so spinup's
+zeroing covers it and `seas_drivers = 0` remains the exact pre-08-18 model (rds gate re-run:
+0.000e+00). Zero-mean driver; the annual-mean pCO2 shift through carbonate nonlinearity is
+ACCEPTED as physics, the same call as the fertilisation rectifier. **Params 19 → 21**
+(`sst_seas_amp_NH/SH`, log, shrinkage priors at rough climatology ~2 K / ~1.2 K — the
+seasonal streams, including the newly scored d13C whose ocean flux carries no photosynthetic
+fractionation, apportion land vs ocean). Parity 1.45e-15.
+
+**Probe at (uncalibrated) defaults**: the ocean term OPPOSES the land cycle in the NH — MLO
+box amp 4.77 → 4.41 ppm, toward the observed 3.02 — and adds at SPO (0.90 → 1.09 vs obs
+0.55); apportioning is the refit's job.
+
+**Deferred, needs a decision**: the OTHER half of the SST fix — observed hemispheric SST over
+the historical record replacing `0.8 × GMST` — requires a data product choice (HadSST4 vs
+ERSST) and a download into `data-raw/` + MANIFEST. Flagged, not resolved.

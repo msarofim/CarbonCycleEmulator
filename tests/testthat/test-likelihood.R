@@ -448,12 +448,15 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # the profile and the degeneracy check both cleared it: rho(pump_grad, kz) =
   # -0.17 and the marginal sd is 1.01x the conditional, so it is not `kz` in
   # disguise (calibration/diag_pump_kz_degeneracy.R).
-  # 19 since 2026-08-18: the seasonal sine's 4 knobs left the table when the
-  # cycle moved onto its drivers, and 3 physical knobs (seas_T_amp_NH/SH,
-  # seas_lag_p) arrived. (The same day's earlier change swapped sigma_d13c for
-  # rep_dC at constant count.)
-  expect_length(CCX_PARAM_NAMES, 19L)
-  expect_true(all(c("seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p") %in% CCX_PARAM_NAMES))
+  # 21 since 2026-08-18, reshaped three times that day: sigma_d13c -> rep_dC
+  # (constant count), the seasonal sine's 4 knobs -> 3 driver knobs
+  # (seas_T_amp_NH/SH, seas_lag_p; 20 -> 19), then the seasonal-SST pair
+  # (sst_seas_amp_NH/SH; 19 -> 21) when Marcus moved the SST fix ahead of the
+  # refit so the ocean half of the seasonal cycle is calibrated WITH the land
+  # half rather than being faked by it.
+  expect_length(CCX_PARAM_NAMES, 21L)
+  expect_true(all(c("seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p",
+                    "sst_seas_amp_NH", "sst_seas_amp_SH") %in% CCX_PARAM_NAMES))
   expect_false(any(c("seas_amp_NH", "seas_phase_NH") %in% CCX_PARAM_NAMES))
   expect_true("pump_grad" %in% CCX_PARAM_NAMES)
   # the prior is anchored on the OBSERVATION, not on the fit -- if this ever

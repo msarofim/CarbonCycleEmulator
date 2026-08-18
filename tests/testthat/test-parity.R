@@ -169,8 +169,15 @@ test_that("parity holds with the frozen-Revelle switch engaged", {
 
 test_that("frozen Revelle does what it claims, and only that", {
   skip_if_no_cpp()
-  p_on  <- pf$p
-  p_off <- pf$p; p_off$revelle_frozen <- 1
+  # seas_drivers = 0: the 1850-agreement gate below rests on "the buffer has
+  # barely moved, so the ONLY difference between the arms is buffer
+  # stretching". The frozen branch pins pco2_ml to the linearised-DIC form with
+  # NO temperature dependence, so under the driver model the seasonal SST cycle
+  # drives a seasonal pCO2 cycle on the LIVE arm only, and the rectification
+  # difference alone accumulates 0.38 ppm by 1850 -- nothing to do with what
+  # this test guards. Both arms run seasonless, preserving the gate's premise.
+  p_on  <- pf$p;  p_on$seas_drivers <- 0
+  p_off <- pf$p; p_off$revelle_frozen <- 1; p_off$seas_drivers <- 0
   sp_on  <- ccx_spinup(p_on)
   sp_off <- ccx_spinup(p_off)
 

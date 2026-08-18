@@ -130,6 +130,7 @@ struct Par {
   // ccx_seas_norms() uses in R; a continuous-integral norm would break parity.
   int    seas_drivers;
   double seas_T_amp[2], seas_lag_p;
+  double sst_seas_amp[2];
   double seas_n_norm[2], seas_r_norm[2];
   double revelle_frozen;                    // mechanism switch, 0 or 1
 };
@@ -139,6 +140,7 @@ struct Par {
 // SV_TO_M3YR below).
 static const double SEAS_PHI_EFF[2] = { 75.0, -30.0 };
 static const double SEAS_T_LAG = 2.0;
+static const double SST_SEAS_LAG = 2.5;   // twin of CCX_SST_SEAS_LAG
 
 // Daily-mean TOA insolation, flat-sun formula, S0 omitted (all uses divide by
 // an annual-mean norm, so it cancels). Twin of R's ccx_insol(); periodic in t
@@ -317,8 +319,11 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     double q10f = std::pow(P.q10, gmst / 10.0);
     // Driver path: respiration breathes with the seasonal land temperature,
     // through the SAME q10, unit-annual-mean (twin of the block in R/model.R).
+    // Hemisphere sign: austral summer is January -- see the twin block in
+    // R/model.R for why the log-transformed amplitude cannot repair a wrong
+    // phase. The norm is sign-invariant by symmetry.
     if (P.seas_drivers > 0)
-      q10f *= std::pow(P.q10, P.seas_T_amp[hi]
+      q10f *= std::pow(P.q10, (hi == 0 ? 1.0 : -1.0) * P.seas_T_amp[hi]
                 * std::sin(2.0 * M_PI * (t - (3.5 + SEAS_T_LAG) / 12.0)) / 10.0)
               / P.seas_r_norm[hi];
     add_flux(isf, iatm, (y[IX(isf, C)] / P.tau_soil_fast) * q10f, 1.0);
@@ -336,7 +341,14 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       add_flux(isf, iatm, P.gamma_enso * enso * A.enso_share[hi], 1.0);
 
     // air-sea, gross both ways
-    const double sst = A.sst[hi] + P.sst_scale * gmst;
+    // Seasonal SST under seas_drivers, hemisphere-signed -- twin of the block
+    // in R/model.R, which carries the rationale (zero-mean driver; the pCO2
+    // rectification is accepted as physics).
+    const double sst = A.sst[hi] + P.sst_scale * gmst
+      + (P.seas_drivers > 0
+         ? (hi == 0 ? 1.0 : -1.0) * P.sst_seas_amp[hi]
+           * std::sin(2.0 * M_PI * (t - (3.5 + SST_SEAS_LAG) / 12.0))
+         : 0.0);
     const double dic_ml = y[IX(iml, C)] * A.mol_per_GtC / A.ml_mass_kg[hi];
     double K0, pco2_ml;
     if (P.revelle_frozen > 0.0) {
@@ -548,6 +560,7 @@ static Par unpack_par(const List& p) {
   P.seas_drivers = (int) p["seas_drivers"];
   P.seas_T_amp[0] = p["seas_T_amp_NH"]; P.seas_T_amp[1] = p["seas_T_amp_SH"];
   P.seas_lag_p = p["seas_lag_p"];
+  P.sst_seas_amp[0] = p["sst_seas_amp_NH"]; P.sst_seas_amp[1] = p["sst_seas_amp_SH"];
   // 720-point norm grid, NOT 12 -- twin of ccx_seas_norms() in R/model.R,
   // which documents why (the polar-night kink leaks +0.22 ppm / 275 yr at 12).
   for (int h = 0; h < 2; ++h) {

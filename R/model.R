@@ -205,6 +205,9 @@ CCX_F_LUC_WOOD_DEFAULT <- 0
 #' set it explicitly.
 CCX_SEAS_PHI_EFF <- c(NH = 75, SH = -30)   # deg latitude, flux-weighted effective
 CCX_SEAS_T_LAG   <- 2.0                    # months, seasonal land T peak after Jun
+CCX_SST_SEAS_LAG <- 2.5                    # months: the OCEAN's thermal inertia lags
+                                           # insolation more than land's 2.0 (NH SST
+                                           # peaks Aug-Sep, land air T late Jul-Aug)
 CCX_SEAS_DRIVERS_DEFAULT <- 1
 
 #' Daily-mean top-of-atmosphere insolation at latitude phi, flat-sun formula.
@@ -656,6 +659,14 @@ ccx_default_params <- function() {
     seas_T_amp_NH = 12,   # K, seasonal land temperature half-amplitude
     seas_T_amp_SH = 6,
     seas_lag_p = 2.25,    # months, phenology lag of NPP behind insolation
+    # Seasonal SST (2026-08-18, same session, Marcus: do the SST fix BEFORE the
+    # refit). Hemispheric-mean SST seasonal half-amplitudes, K. These are the
+    # OCEAN half of the seasonal cycle -- winter solubility uptake, summer
+    # outgassing -- which the land-only drivers otherwise force seas_T_amp_SH
+    # to fake at SPO. Inits are rough climatology (NH ~2 K, SH milder, more
+    # ocean); free with shrinkage priors, for the seasonal streams to choose.
+    sst_seas_amp_NH = 2.0,
+    sst_seas_amp_SH = 1.2,
     # ENSO COEFFICIENT: 0, NOT the CCX_PARAM_TABLE init of 0.5, and this is a
     # deliberate asymmetry with beta/q10/kz (which do take their table inits).
     # Until 2026-08-13d it was ABSENT here, so ccx_deriv() -- which multiplies it
@@ -922,8 +933,16 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # bit-identical to the pre-2026-08-18 model.
     if (isTRUE(p$seas_drivers > 0)) {
       a_t  <- if (h == "NH") p$seas_T_amp_NH else p$seas_T_amp_SH
+      # HEMISPHERE SIGN, and it is load-bearing: austral summer is in January,
+      # so the SH seasonal temperature is the NH's ANTIPHASE. Without the sign
+      # the SH respiration cycle peaks in austral WINTER -- and because the
+      # amplitude is log-transformed (positive-only), no sampler could repair
+      # the phase; it could only shrink the amplitude to zero. Caught
+      # 2026-08-18 before any refit ran. The norm needs no sign: the annual
+      # mean of q10^(A sin) equals that of q10^(-A sin) by symmetry.
+      sgn  <- if (h == "NH") 1 else -1
       nrm  <- ccx_seas_norms(p)[[h]]
-      q10f <- q10f * p$q10^(a_t * sin(2 * pi * (t - (3.5 + CCX_SEAS_T_LAG) / 12)) / 10) / nrm$r
+      q10f <- q10f * p$q10^(sgn * a_t * sin(2 * pi * (t - (3.5 + CCX_SEAS_T_LAG) / 12)) / 10) / nrm$r
     }
     add_flux(isf, iatm, (y[isf, "C"] / p$tau_soil_fast) * q10f)
     add_flux(iss, iatm, (y[iss, "C"] / p$tau_soil_slow) * q10f)
@@ -959,6 +978,18 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 
     # ---- air-sea ----------------------------------------------------
     sst    <- aux$sst[[h]] + p$sst_scale * forc$gmst
+    # Seasonal SST, under the SAME seas_drivers switch as the land drivers --
+    # so ccx_spinup()'s zeroing covers it and seas_drivers = 0 stays the exact
+    # pre-2026-08-18 model. Zero-mean sine; the annual-mean pCO2 shift it
+    # induces through carbonate-chemistry nonlinearity (~(0.042 A)^2/4, a few
+    # tenths of a percent) is ACCEPTED as physics, the same call as the
+    # fertilisation rectifier -- the driver is zero-mean, the response is not.
+    # Hemisphere sign as for the land T: austral summer is January.
+    if (isTRUE(p$seas_drivers > 0)) {
+      a_s <- if (h == "NH") p$sst_seas_amp_NH else p$sst_seas_amp_SH
+      sst <- sst + (if (h == "NH") 1 else -1) * a_s *
+             sin(2 * pi * (t - (3.5 + CCX_SST_SEAS_LAG) / 12))
+    }
     dic_ml <- y[iml, "C"] * aux$mol_per_GtC / aux$ml_mass_kg[[h]]   # mol/kg
     k      <- carb_constants(sst)
     pco2_ml <- if (isTRUE(p$revelle_frozen > 0)) {

@@ -187,6 +187,16 @@ CCX_PARAM_TABLE <- list(
   # is unphysical and priced accordingly by the prior rather than bounded.
   seas_lag_p = list(tr = "id", init = 2.25,
                      prior = function(x) dnorm(x, 2.25, 0.75, log = TRUE)),
+  # Seasonal SST half-amplitudes (2026-08-18, Marcus: SST before the refit).
+  # Shrinkage around rough climatology -- hemispheric-mean SST cycles are
+  # ~2 K NH / milder SH -- with the seasonal streams (CO2 AND the newly scored
+  # d13C, whose ocean flux carries no photosynthetic fractionation) left to
+  # apportion land vs ocean. Log transform: a negative amplitude would be a
+  # phase flip, which is the hemisphere sign's job, not the sampler's.
+  sst_seas_amp_NH = list(tr = "log", init = 2.0,
+                     prior = function(x) dlnorm(x, log(2.0), 0.5, log = TRUE)),
+  sst_seas_amp_SH = list(tr = "log", init = 1.2,
+                     prior = function(x) dlnorm(x, log(1.2), 0.6, log = TRUE)),
   gamma_enso  = list(tr = "id",    init = 0.5,
                      prior = function(x) dnorm(x, 0, 2, log = TRUE)),
   # LAND TURNOVER: ZERO degrees of freedom (2026-08-12, Marcus). The whole land
