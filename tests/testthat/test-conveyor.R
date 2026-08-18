@@ -55,7 +55,7 @@ CONFIGS  <- list(A = list(sink = N_INTERIOR, desc = 0L),
 
 conv_p <- function(q = 0, cfg = CONFIGS$C, reverse = 0L) {
   p <- ccx_default_params()
-  p$gamma_enso <- 0; p$seas_amp_NH <- 0; p$seas_amp_SH <- 0
+  p$gamma_enso <- 0; p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0
   p$q_conv <- q; p$conv_sink <- cfg$sink
   p$conv_descent <- cfg$desc; p$conv_reverse <- reverse
   p

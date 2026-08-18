@@ -5775,3 +5775,64 @@ values over a 13× range** — the "suspicious uniformity ≈ bug signal" patter
 scan: `within(p0, kz <- kz)` **self-assigns**, the list's own `kz` shadowing the loop variable, so
 every row ran the default. `within()` is an attractive idiom for one-at-a-time scans and it fails
 silently into a flat, plausible-looking table.
+
+## 2026-08-18 (drivers) — The seasonal cycle moves onto its PHYSICAL DRIVERS: insolation-shaped NPP + Q10 on seasonal temperature
+
+**Marcus's proposal, replacing the "add a second harmonic" fork**: rather than fitting the
+cycle's shape, derive it — NPP follows insolation, respiration follows seasonal land
+temperature through the SAME `q10` the decadal feedback uses. The asymmetry then EMERGES
+from Q10's exponential nonlinearity and the growing-season shape.
+
+**OFFLINE FIRST** (`calibration/diag_seasonal_drivers_offline.R`), and the sequence of fits is
+the story: (1) unconstrained fluxes found a MIRROR solution — shape right, both fluxes
+negative, physics inside out; (2) sign-constrained without a phenology lag collapsed to
+RMS 1.68 with the cycle peaking in March — both failures saying the same thing, that canopy
+uptake LAGS insolation; (3) with the lag, RMS 0.202, better than the descriptive 2-harmonic
+fit; (4) **the decisive test — fluxes PINNED at the model's own NPP (36 GtC/yr NH), zero free
+fluxes: RMS 0.357 vs the fitted sine's 0.608, amp1 96 % of observed, amp2/amp1 = 0.21 vs the
+observed 0.24, EMERGED not fitted.**
+
+**WIRED into both cores** behind `seas_drivers` (default 1; **0 = the sine, bit-exact** — the
+f_luc_perm escape idiom, and `mode_fit_pumpN.rds` reproduces to 0.000e+00 through it; cpp.R
+absence-default is 0 so pre-change parameter lists run the model they were fitted to).
+Driver-path R↔C++ parity 2.4e-15. Structural constants from the offline interior optimum:
+`CCX_SEAS_PHI_EFF` = (75 N, −30 S), `CCX_SEAS_T_LAG` = 2.0 mo; the light threshold optimised
+to ZERO (polar night rectifies the boreal growing season by itself) so no threshold constant
+exists. **Parameters 20 → 19**: seas_amp/seas_phase ×2 OUT of the table (fields kept for the
+escape path), `seas_T_amp_NH/SH` + `seas_lag_p` IN.
+
+**What the full model now does that it could not:** NH amp2 = 0.94 ppm (was 0.03 — the
+sawtooth exists); and the **seasonal-amplitude trend emerges from fertilisation: +17 % from
+1960-80 to 2000-20 vs the observed ~15-20 %, with nothing fitted to it** — the NPP-side
+amplitude is `npp × (shape − 1)`, a prediction, not a knob. At UNCALIBRATED defaults amp1
+overshoots (5.0 vs 3.0 ppm; d13C 0.37 vs 0.18 permil) — that is the refit's job (`seas_T_amp`
+is the counter-cycle), and the refit is HELD per Marcus.
+
+**Tried, measured, and half-kept — the zero-emission control drift.** The driver control
+drifts +0.43 ppm/275 yr where the sine drifted +0.044. Decomposed by ablation (`beta_max = 0`):
+**+0.33 is the fertilisation RECTIFIER** — the seasonal CO2 swing modulates NPP and the product
+has nonzero annual mean — real, amplitude-dependent physics that shrinks with the refit;
+**+0.10 is integrator quadrature over the polar-night kinks**, already cut from +0.22 by moving
+the shape norms from 12 to 720 points in both cores (the residual is the integrator's own and
+no norm choice removes it). First norm attempt (12-point) documented as superseded; my first
+test comment claimed "(amp/5)^2" scaling for the sine's rectifier — WRONG, measurement replaced
+it. `test-luc-permanence.R`'s flatness-gated control now runs seasonless, gate unloosened.
+
+**Five test sites thought they had turned seasonality off by zeroing `seas_amp_*`** — inert on
+the driver path; they now pin `seas_drivers = 0` (conservation, fluxes, conveyor, spinup, and
+the seasonal-statistic instrument). `test-gradient.R` item 5 and `test-parity.R`'s strict
+1e-15 arm instrument pre-driver logic and pin the sine likewise, each with the reason written
+in. `ccx_spinup` zeroes BOTH seasonal paths (driver terms are zero-mean over a year but not at
+the single t the isotope solve evaluates — left on, the operator is singular).
+
+**Also this arc, earlier commits:** `sigma_d13c` retired / `rep_dC` added (`6219df7`), d13C
+seasonality scored (`53efc93`), each with its own entry-level detail in the commit messages;
+suite green at every step. **The objective and the model have BOTH changed; nothing is
+comparable across 2026-08-18, and no headline number exists until the held refit runs.**
+
+**Next driver candidate, identified in the same census (Marcus's question):** SST — currently
+`sst_h + 0.8 × GMST`, could take observed hemispheric SST plus the climatological seasonal SST
+cycle, which is the OCEAN half of the seasonal story (SPO's cycle is substantially oceanic;
+the land-only drivers make `seas_T_amp_SH` fake it, and the d13C seasonal ratio can now
+DETECT that mis-attribution because ocean seasonal flux carries no photosynthetic
+fractionation). After the refit.

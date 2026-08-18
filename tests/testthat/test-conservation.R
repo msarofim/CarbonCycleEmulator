@@ -79,7 +79,7 @@ test_that("14C decays at exactly the right rate with transport switched off", {
   p$kz <- 0; p$k_w <- 0; p$tau_ex <- 1e12; p$beta <- 0
   p$tau_leaf <- 1e12; p$tau_wood <- 1e12
   p$tau_soil_fast <- 1e12; p$tau_soil_slow <- 1e12; p$gamma_enso <- 0
-  p$seas_amp_NH <- 0; p$seas_amp_SH <- 0
+  p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0  # BOTH seasonal paths off
   s <- test_state(p)
   y <- s$y; t <- 1900
   yrs <- 50

@@ -65,6 +65,11 @@ test_that("single derivative agrees to roundoff", {
   # is what stops PARITY_REL_TOL from being a place for a real disagreement in
   # the pre-pump code paths to hide.
   p0 <- pf$p; p0$pump_grad <- 0
+  # seas_drivers = 0 for the same reason as the frozen-Revelle arm below: this
+  # is the STRICT 1e-15 gate on the PRE-pump (hence pre-driver) code paths.
+  # The driver path's transcendentals sit at ~2e-15 and are gated by the
+  # derived PARITY_REL_TOL three lines up, which runs WITH drivers on.
+  p0$seas_drivers <- 0
   sp0 <- ccx_spinup(p0); f0 <- forc; f0$c14_cosmo <- sp0$prod_c14
   d0R <- ccx_deriv(sp0$y, 1980.5, p0, f0, sp0$grid, sp0$aux)
   d0C <- ccx_deriv_fast(sp0$y, 1980.5, p0, f0, sp0$grid, sp0$aux)
@@ -138,6 +143,12 @@ test_that("parity holds with the frozen-Revelle switch engaged", {
   # implementations. The default parity tests exercise only the first, so a
   # porting error on the frozen branch would be invisible to them.
   p <- pf$p; p$revelle_frozen <- 1
+  # seas_drivers = 0: this arm carries the STRICT 1e-15 gate on the pre-driver
+  # code paths. The driver path's extra transcendentals (acos/pow, evaluated in
+  # different order by R and C++) sit at ~2e-15 and are gated by the main arm's
+  # DERIVED tolerance above -- letting them into this arm would force weakening
+  # the one gate that keeps old-path disagreements from hiding.
+  p$seas_drivers <- 0
   sp <- ccx_spinup(p)
   # cum_luc is deliberately NON-ZERO: at zero the converted-land term collapses
   # to (1 - 0) and a porting error in it would be invisible to this gate.

@@ -75,7 +75,7 @@ test_that("turnover time from the flux trace matches an independent label pulse"
   # wrong for a one-month finite difference; the test pins both facts.
   mk <- function(seas_off) {
     p <- ccx_default_params(); p$gamma_enso <- 0
-    if (seas_off) { p$seas_amp_NH <- 0; p$seas_amp_SH <- 0 }
+    if (seas_off) { p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0 }  # BOTH paths
     s <- ccx_spinup(p)
     F <- suppressWarnings(ccx_build_forcing("historical", c(1750, 1760),
                                             prod_c14 = s$prod_c14,

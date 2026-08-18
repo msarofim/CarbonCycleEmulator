@@ -163,14 +163,30 @@ CCX_PARAM_TABLE <- list(
                      prior = function(x) dlnorm(x, log(1.3), 0.25, log = TRUE)),
   npp_frac_NH = list(tr = "logit", lo = 0.4, hi = 0.8,   init = 0.60,
                      prior = function(x) dunif(x, 0.4, 0.8, log = TRUE)),
-  seas_amp_NH = list(tr = "log",   init = 12,
-                     prior = function(x) dlnorm(x, log(12), 0.6, log = TRUE)),
-  seas_amp_SH = list(tr = "log",   init = 2,
-                     prior = function(x) dlnorm(x, log(2), 0.8, log = TRUE)),
-  seas_phase_NH = list(tr = "logit", lo = 0, hi = 12,    init = 3.5,
-                     prior = function(x) dunif(x, 0, 12, log = TRUE)),
-  seas_phase_SH = list(tr = "logit", lo = 0, hi = 12,    init = 9.5,
-                     prior = function(x) dunif(x, 0, 12, log = TRUE)),
+  # THE SEASONAL SINE'S 4 KNOBS (seas_amp/seas_phase per hemisphere) were
+  # RETIRED 2026-08-18 when the cycle moved onto its physical drivers --
+  # insolation-shaped NPP and Q10 on a seasonal land temperature (Marcus; see
+  # the CCX_SEAS_PHI_EFF block in R/model.R and
+  # calibration/diag_seasonal_drivers_offline.R for the offline feasibility).
+  # They survive as fields of ccx_default_params(), live only on the
+  # seas_drivers = 0 escape path; mode_fit_pump{N,D}.rds carries their fitted
+  # values and reproduces only there. 4 descriptive parameters out, 3 physical
+  # ones in -- and the NPP-side amplitude is now a PREDICTION (npp * shape),
+  # not a fitted number.
+  #
+  # seas_T_amp priors: shrinkage around climatology. NH flux-weighted seasonal
+  # land T half-amplitude ~10-14 K (boreal-dominated); the offline optimum was
+  # 12. SH land is subtropics-dominated and milder, and the SH shape is
+  # UNFITTED (SPO's cycle is substantially oceanic), so its prior is wider.
+  seas_T_amp_NH = list(tr = "log", init = 12,
+                     prior = function(x) dlnorm(x, log(12), 0.4, log = TRUE)),
+  seas_T_amp_SH = list(tr = "log", init = 6,
+                     prior = function(x) dlnorm(x, log(6), 0.6, log = TRUE)),
+  # Phenology lag, months: leaf area develops over weeks, so NPP peaks after
+  # peak light. Offline optimum 2.25; a negative lag (canopy leading the sun)
+  # is unphysical and priced accordingly by the prior rather than bounded.
+  seas_lag_p = list(tr = "id", init = 2.25,
+                     prior = function(x) dnorm(x, 2.25, 0.75, log = TRUE)),
   gamma_enso  = list(tr = "id",    init = 0.5,
                      prior = function(x) dnorm(x, 0, 2, log = TRUE)),
   # LAND TURNOVER: ZERO degrees of freedom (2026-08-12, Marcus). The whole land

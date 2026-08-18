@@ -113,6 +113,18 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$w_out_SH)) p$w_out_SH <- 0
   # The conveyor, added 2026-08-13, same reasoning again. NOTE the structural
   # switches must reach the C++ as INTEGERS -- unpack_par reads them into int.
+  # Seasonal drivers, added 2026-08-18. ABSENCE = the SINE, deliberately, and
+  # this is the f_luc_perm principle applied the other way round: a parameter
+  # list built before this date was fitted UNDER the sine (its seas_amp/phase
+  # carry that fit), so it must reach the core as the sine model -- running it
+  # under drivers would ignore its own seasonal fit and substitute defaults,
+  # silently. New lists get drivers because ccx_default_params() sets
+  # seas_drivers = 1 explicitly. The T-amp/lag defaults below are inert at
+  # seas_drivers = 0; they exist so unpack_par never reads a missing field.
+  if (is.null(p$seas_drivers)) p$seas_drivers <- 0
+  if (is.null(p$seas_T_amp_NH)) p$seas_T_amp_NH <- 12
+  if (is.null(p$seas_T_amp_SH)) p$seas_T_amp_SH <- 6
+  if (is.null(p$seas_lag_p)) p$seas_lag_p <- 2.25
   if (is.null(p$q_conv)) p$q_conv <- 0
   if (is.null(p$conv_sink)) p$conv_sink <- N_INTERIOR
   if (is.null(p$conv_descent)) p$conv_descent <- 0L
@@ -140,7 +152,9 @@ ccx_cpp_par <- function(p) {
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
       "npp_veg_frac", "ra_ratio", "f_luc_perm", "f_luc_wood",
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
-      "seas_phase_NH", "seas_phase_SH", "revelle_frozen")]
+      "seas_phase_NH", "seas_phase_SH",
+      "seas_drivers", "seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p",
+      "revelle_frozen")]
 }
 
 #' Forcing table -> the matrix the C++ expects, in its column order

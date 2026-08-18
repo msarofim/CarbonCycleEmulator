@@ -159,6 +159,87 @@ CCX_LUC_CLEARED_MAX    <- 0.9
 CCX_F_LUC_WOOD_DEFAULT <- 0
 
 # ---------------------------------------------------------------------
+# Seasonal-cycle DRIVERS (2026-08-18, Marcus): insolation + Q10 on seasonal T
+# ---------------------------------------------------------------------
+#' The seasonal NEP cycle was a prescribed sine with 4 fitted knobs
+#' (seas_amp/seas_phase per hemisphere) -- a description, and being a single
+#' harmonic, structurally unable to produce the observed asymmetry of the
+#' cycle (MLO second harmonic 0.83 ppm, 28 % of the first; the model made
+#' 0.03). Replaced by its physical drivers:
+#'
+#'   NPP(t)  = npp * n(t),  n = insolation at an effective boreal latitude,
+#'             lagged by a PHENOLOGY parameter (leaf area develops over weeks),
+#'             normalised to unit annual mean;
+#'   R_h(t)  = the existing q10 soil respiration, modulated by
+#'             q10^(T_seas/10) with T_seas a climatological seasonal land
+#'             temperature of FREE amplitude, renormalised to unit annual mean
+#'             so the annual carbon budget is untouched (Jensen term removed).
+#'
+#' The sawtooth then EMERGES from Q10's exponential nonlinearity and the
+#' growing-season shape. Feasibility was established OFFLINE FIRST
+#' (calibration/diag_seasonal_drivers_offline.R): with NPP and R_h pinned at
+#' the model's own 36 GtC/yr, five shape knobs reproduce the observed MLO
+#' cycle to RMS 0.357 ppm (fitted sine: 0.608) with amp2/amp1 = 0.21 vs the
+#' observed 0.24 -- EMERGED, not fitted. The constants below are that
+#' diagnostic's interior optimum (extended-grid re-run; nothing sits at a
+#' grid edge). The light threshold optimised to ZERO -- at 75 N the polar
+#' night rectifies the growing season by itself -- so no threshold constant
+#' exists.
+#'
+#' WHAT THIS BUYS BEYOND SHAPE. The NPP-side amplitude is npp * (n - 1): no
+#' longer a fitted number but a PREDICTION carrying the model's own NPP, so
+#' fertilisation GROWS the cycle and land clearing SHRINKS it (the old
+#' npp/npp0 scaling, inherited); and q10 gains a cross-timescale duty. The
+#' contamination risk of that duty is limited by construction: seas_T_amp_*
+#' absorbs the LINEAR seasonal response (at small amplitude only the product
+#' A_T * ln(q10) is identified), leaving q10 only the nonlinear part.
+#'
+#' SH is UNFITTED: the offline work fitted MLO only (SPO's 0.55 ppm cycle is
+#' substantially oceanic, which this land-only term does not model).
+#' CCX_SEAS_PHI_EFF["SH"] is the SH land centroid, and seas_T_amp_SH is free
+#' to absorb the amplitude. Revisit if the SPO seasonal stream misfits.
+#'
+#' The old sine remains REACHABLE at seas_drivers = 0 (the f_luc_perm escape
+#' idiom): every pre-2026-08-18 result -- including mode_fit_pump{N,D}.rds --
+#' reproduces only on that path. Diagnostics reconstructing those modes must
+#' set it explicitly.
+CCX_SEAS_PHI_EFF <- c(NH = 75, SH = -30)   # deg latitude, flux-weighted effective
+CCX_SEAS_T_LAG   <- 2.0                    # months, seasonal land T peak after Jun
+CCX_SEAS_DRIVERS_DEFAULT <- 1
+
+#' Daily-mean top-of-atmosphere insolation at latitude phi, flat-sun formula.
+#' S0 is omitted -- every use divides by the annual mean, so it cancels.
+#' Periodic in t with period exactly 1 (the +10 day offset rides inside the
+#' cosine), so callers pass continuous model time directly.
+ccx_insol <- function(phi_deg, tt) {
+  phi <- phi_deg * pi / 180
+  dec <- -23.44 * pi / 180 * cos(2 * pi * (tt * 365.25 + 10) / 365.25)
+  h0  <- acos(pmin(pmax(-tan(phi) * tan(dec), -1), 1))
+  (h0 * sin(phi) * sin(dec) + cos(phi) * cos(dec) * sin(h0)) / pi
+}
+
+#' Unit-mean normalisers for the two driver shapes, on a 720-POINT midpoint
+#' grid. BOTH cores must use exactly this definition (the C++ core precomputes
+#' it in unpack_par) or bit-parity breaks.
+#'
+#' WHY 720 AND NOT 12 (measured 2026-08-18, /tmp-scratch drift decomposition,
+#' numbers preserved in the CHANGELOG entry): the insolation shape has KINKS at
+#' the polar-night edges of the 75 N effective latitude, so a 12-point norm
+#' disagrees with the integrator's effective annual mean by enough to leak
+#' +0.22 ppm over 275 zero-emission years -- pure quadrature, on top of the
+#' +0.25 ppm the fertilisation rectifier genuinely produces. At 720 points the
+#' norm is the continuous mean to well beyond the integrator's own accuracy,
+#' and only the physical rectifier remains.
+ccx_seas_norms <- function(p) {
+  mid <- (seq_len(720) - 0.5) / 720
+  lapply(c(NH = "NH", SH = "SH"), function(h) {
+    a_t <- if (h == "NH") p$seas_T_amp_NH else p$seas_T_amp_SH
+    list(n = mean(ccx_insol(CCX_SEAS_PHI_EFF[[h]], mid - p$seas_lag_p / 12)),
+         r = mean(p$q10^(a_t * sin(2 * pi * (mid - (3.5 + CCX_SEAS_T_LAG) / 12)) / 10)))
+  })
+}
+
+# ---------------------------------------------------------------------
 # CO2 fertilisation: the functional FORM
 # ---------------------------------------------------------------------
 #' Fertilisation form codes. Structural, like `revelle_frozen` and the conveyor
@@ -561,10 +642,20 @@ ccx_default_params <- function() {
     sst_SH    = 16,
     sst_scale = 0.8,      # SST anomaly per unit GMST anomaly
     npp_frac_NH = 0.60,   # NH share of global NPP
-    seas_amp_NH = 12,     # GtC/yr, seasonal NEP amplitude
+    # THE SINE'S KNOBS, live only at seas_drivers = 0 (the escape hatch; see
+    # the CCX_SEAS_PHI_EFF block). Kept so pre-2026-08-18 parameter lists --
+    # mode_fit_pump{N,D}.rds included -- reach the core as the model they were
+    # fitted to. NOT in CCX_PARAM_TABLE any more; do not re-add them.
+    seas_amp_NH = 12,     # GtC/yr, seasonal NEP amplitude (sine path only)
     seas_amp_SH = 2,
-    seas_phase_NH = 3.5,  # month of peak uptake
+    seas_phase_NH = 3.5,  # month of peak uptake (sine path only)
     seas_phase_SH = 9.5,
+    # THE DRIVER PATH'S KNOBS (see CCX_SEAS_PHI_EFF block for the physics and
+    # the offline provenance of the inits).
+    seas_drivers = CCX_SEAS_DRIVERS_DEFAULT,
+    seas_T_amp_NH = 12,   # K, seasonal land temperature half-amplitude
+    seas_T_amp_SH = 6,
+    seas_lag_p = 2.25,    # months, phenology lag of NPP behind insolation
     # ENSO COEFFICIENT: 0, NOT the CCX_PARAM_TABLE init of 0.5, and this is a
     # deliberate asymmetry with beta/q10/kz (which do take their table inits).
     # Until 2026-08-13d it was ABSENT here, so ccx_deriv() -- which multiplies it
@@ -825,19 +916,36 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # is calibrated against, so it shares the parameter rather than inventing a
     # second one that the data cannot constrain.
     q10f <- p$q10^(forc$gmst / 10)
+    # DRIVER PATH: respiration breathes with the seasonal land temperature,
+    # through the SAME q10, unit-annual-mean so the budget is untouched (see
+    # the CCX_SEAS_PHI_EFF block). Sine path (seas_drivers = 0): unmodulated,
+    # bit-identical to the pre-2026-08-18 model.
+    if (isTRUE(p$seas_drivers > 0)) {
+      a_t  <- if (h == "NH") p$seas_T_amp_NH else p$seas_T_amp_SH
+      nrm  <- ccx_seas_norms(p)[[h]]
+      q10f <- q10f * p$q10^(a_t * sin(2 * pi * (t - (3.5 + CCX_SEAS_T_LAG) / 12)) / 10) / nrm$r
+    }
     add_flux(isf, iatm, (y[isf, "C"] / p$tau_soil_fast) * q10f)
     add_flux(iss, iatm, (y[iss, "C"] / p$tau_soil_slow) * q10f)
 
-    # ---- seasonal NEP: zero annual integral, amplitude scales with NPP
-    # Routed through the LEAF pool: the seasonal drawdown is foliage growth and
-    # senescence, which is what that pool is.
-    amp   <- if (h == "NH") p$seas_amp_NH else p$seas_amp_SH
-    phase <- if (h == "NH") p$seas_phase_NH else p$seas_phase_SH
-    # DENOMINATOR IS THE UNCLEARED npp0, deliberately. The seasonal amplitude
-    # tracks how much the land is fixing, so clearing land must SHRINK it;
-    # dividing by the cleared npp0_h would hold the ratio near 1 and keep a
-    # forest's seasonal cycle on a field.
-    seas  <- amp * sin(2 * pi * (t - phase / 12)) * (npp / aux$npp0[[h]])
+    # ---- seasonal NEP through the LEAF pool: the drawdown is foliage growth
+    # and senescence, which is what that pool is.
+    if (isTRUE(p$seas_drivers > 0)) {
+      # DRIVER PATH: npp * (n(t) - 1), n = phenology-lagged insolation at the
+      # effective latitude, unit annual mean. The amplitude is NOT a knob: it
+      # is the model's own NPP, so fertilisation grows the cycle and clearing
+      # shrinks it -- the old npp/npp0 scaling, now carried by npp itself.
+      nrm  <- ccx_seas_norms(p)[[h]]
+      seas <- npp * (ccx_insol(CCX_SEAS_PHI_EFF[[h]], t - p$seas_lag_p / 12) / nrm$n - 1)
+    } else {
+      amp   <- if (h == "NH") p$seas_amp_NH else p$seas_amp_SH
+      phase <- if (h == "NH") p$seas_phase_NH else p$seas_phase_SH
+      # DENOMINATOR IS THE UNCLEARED npp0, deliberately. The seasonal amplitude
+      # tracks how much the land is fixing, so clearing land must SHRINK it;
+      # dividing by the cleared npp0_h would hold the ratio near 1 and keep a
+      # forest's seasonal cycle on a field.
+      seas <- amp * sin(2 * pi * (t - phase / 12)) * (npp / aux$npp0[[h]])
+    }
     add_flux(iatm, ilef, seas, alpha13 = aux$alpha_photo, lab = "seas")
 
     # ---- ENSO: land -> atmosphere anomaly (El Nino = source) ---------

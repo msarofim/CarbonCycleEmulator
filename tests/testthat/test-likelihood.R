@@ -312,7 +312,10 @@ test_that("the d13C seasonal cycle is scored, and through the NEP harmonic", {
   p <- ccx_default_params(); p$gamma_enso <- 0.5
   l0 <- run_ll(p)
   expect_true(all(c("d13c_seasonal_MLO", "d13c_seasonal_SPO") %in% names(l0)))
-  p2 <- p; p2$seas_amp_NH <- p$seas_amp_NH * 1.3
+  # seas_T_amp_NH, not seas_amp_NH: the default model runs the DRIVER seasonal
+  # path (2026-08-18), where seas_amp_* is inert -- perturbing it here would
+  # make this a test that can never fail.
+  p2 <- p; p2$seas_T_amp_NH <- p$seas_T_amp_NH * 1.5
   l1 <- run_ll(p2)
   expect_gt(abs(l1[["d13c_seasonal_MLO"]] - l0[["d13c_seasonal_MLO"]]), 1)
 })
@@ -365,6 +368,11 @@ test_that("the seasonal statistic constrains amplitude and phase", {
   err <- list(sigma_co2 = 1.5, sigma_d13c = 0.1, sigma_d14c = 5)
   seas_ll <- function(amp, phase) {
     p <- ccx_default_params(); p$gamma_enso <- 0.5
+    # seas_drivers = 0: this test instruments the seasonal STATISTIC through
+    # the sine's amp/phase knobs, which are inert on the driver path. The sine
+    # is the cleanest instrument for the statistic; the DRIVER path's own
+    # wiring is tested separately (the d13c-seasonal test perturbs seas_T_amp).
+    p$seas_drivers <- 0
     p$seas_amp_NH <- amp; p$seas_phase_NH <- phase
     sp <- ccx_spinup(p)
     F  <- ccx_build_forcing("historical", c(1950, 2024), prod_c14 = sp$prod_c14)
@@ -440,7 +448,13 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # the profile and the degeneracy check both cleared it: rho(pump_grad, kz) =
   # -0.17 and the marginal sd is 1.01x the conditional, so it is not `kz` in
   # disguise (calibration/diag_pump_kz_degeneracy.R).
-  expect_length(CCX_PARAM_NAMES, 20L)
+  # 19 since 2026-08-18: the seasonal sine's 4 knobs left the table when the
+  # cycle moved onto its drivers, and 3 physical knobs (seas_T_amp_NH/SH,
+  # seas_lag_p) arrived. (The same day's earlier change swapped sigma_d13c for
+  # rep_dC at constant count.)
+  expect_length(CCX_PARAM_NAMES, 19L)
+  expect_true(all(c("seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p") %in% CCX_PARAM_NAMES))
+  expect_false(any(c("seas_amp_NH", "seas_phase_NH") %in% CCX_PARAM_NAMES))
   expect_true("pump_grad" %in% CCX_PARAM_NAMES)
   # the prior is anchored on the OBSERVATION, not on the fit -- if this ever
   # ties to 274.5 a stale-`kz` optimum has been laundered into a constant

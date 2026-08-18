@@ -91,7 +91,21 @@ lp_af <- function(s, F, ctl, lag) {
 
 test_that("a land-use pulse is not given back to the land", {
   skip_if_no_cpp()
-  s   <- ccx_spinup(ccx_default_params())
+  # seas_drivers = 0, and the reason is MEASURED, not assumed (2026-08-18
+  # drift decomposition; numbers in the CHANGELOG entry). The driver seasonal
+  # cycle drifts a zero-emission control +0.43 ppm over 275 yr: +0.33 is the
+  # fertilisation RECTIFIER (the seasonal CO2 swing modulates NPP and the
+  # product has nonzero annual mean -- real physics, amplitude-dependent, so it
+  # shrinks when the refit brings the uncalibrated 5 ppm default cycle to the
+  # observed 3) and +0.10 is the integrator's quadrature over the polar-night
+  # kinks (already cut from +0.22 by the 720-point norm; the residual is the
+  # integrator's own and no norm choice removes it). The old sine drifted
+  # +0.044, under this file's 0.05 flatness gate; the driver control cannot
+  # get under it, and the gate is load-bearing per the header. Seasonality is
+  # orthogonal to land-use permanence, so the control runs seasonless rather
+  # than the gate being loosened.
+  p_lp <- ccx_default_params(); p_lp$seas_drivers <- 0
+  s   <- ccx_spinup(p_lp)
   F0  <- lp_background(s)
   ctl <- lp_co2(s, F0)
 
@@ -147,6 +161,7 @@ test_that("f_luc_perm = 0 AND f_luc_wood = 1 reproduce the pre-2026-08-13 behavi
   # (0.002 at 100 -> -0.003 at 150). The bar is NOT re-baselined: it is the
   # 0.02 the header already stated, now measured at the config it describes.
   p <- ccx_default_params(); p$f_luc_perm <- 0; p$f_luc_wood <- 1
+  p$seas_drivers <- 0    # same seasonless control as above
   s <- ccx_spinup(p)
   F0 <- lp_background(s); ctl <- lp_co2(s, F0)
   expect_lt(abs(lp_af(s, lp_pulse(F0, luc = TRUE), ctl, LP_LAG)), 0.02)
@@ -156,7 +171,7 @@ test_that("the cleared fraction is what the arithmetic says it is", {
   # Guards the denominator. Using veg0 instead of land0 would make this ~4x
   # bigger and the debit over-permanent; the two are easy to confuse and the
   # difference is invisible in any single CO2 number.
-  s <- ccx_spinup(ccx_default_params())
+  s <- ccx_spinup(ccx_default_params())   # seasonality irrelevant: reads cum_luc only
   F <- ccx_build_forcing("historical", LP_YRS, prod_c14 = s$prod_c14)
   n <- nrow(F)
   land0 <- s$aux$land0$NH + s$aux$land0$SH

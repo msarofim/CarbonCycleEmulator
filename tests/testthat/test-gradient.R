@@ -172,8 +172,15 @@ test_that("4. neither sigma claims more precision than the observations have", {
 # ---------------------------------------------------------------------
 test_that("5. the term constrains tau_ex, and not in the direction the rest does", {
   skip_if_no_cpp()
-  base <- gr_run()
-  p_lo <- ccx_default_params(); p_lo$tau_ex <- p_lo$tau_ex * exp(-0.25)
+  # seas_drivers = 0: this test reads a SIGN off small logL differences, and on
+  # the driver path at UNCALIBRATED defaults the seasonal streams misfit by
+  # hundreds of log-units (amp 5 vs 3 ppm until the refit), swamping d_other
+  # with seasonal noise that has nothing to do with tau_ex. The term's
+  # directionality was derived on the incumbent model; instrument it there.
+  # Re-point to the driver path after a driver-era refit exists.
+  p_b <- ccx_default_params(); p_b$seas_drivers <- 0
+  base <- gr_run(p_b)
+  p_lo <- p_b; p_lo$tau_ex <- p_lo$tau_ex * exp(-0.25)
   r_lo <- gr_run(p_lo)
   b5 <- gr_parts(base, 0, 0); l5 <- gr_parts(r_lo, 0, 0)
   d_grad  <- l5[["co2_gradient"]] - b5[["co2_gradient"]]

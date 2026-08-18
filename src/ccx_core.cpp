@@ -122,8 +122,37 @@ struct Par {
   double f_luc_wood;
   double sst_scale, gamma_enso;
   double seas_amp[2], seas_phase[2];
+  // Seasonal-cycle DRIVERS (2026-08-18): insolation-driven NPP + Q10 on a
+  // climatological seasonal land temperature. seas_drivers = 0 is the escape
+  // hatch reproducing the sine above bit-for-bit; see the CCX_SEAS_PHI_EFF
+  // block in R/model.R for the physics and the offline provenance. The norms
+  // are PRECOMPUTED here on the 12 month midpoints -- exactly the definition
+  // ccx_seas_norms() uses in R; a continuous-integral norm would break parity.
+  int    seas_drivers;
+  double seas_T_amp[2], seas_lag_p;
+  double seas_n_norm[2], seas_r_norm[2];
   double revelle_frozen;                    // mechanism switch, 0 or 1
 };
+
+// Effective latitudes and the seasonal-T lag: MUST equal R/model.R's
+// CCX_SEAS_PHI_EFF and CCX_SEAS_T_LAG bit for bit (same discipline as
+// SV_TO_M3YR below).
+static const double SEAS_PHI_EFF[2] = { 75.0, -30.0 };
+static const double SEAS_T_LAG = 2.0;
+
+// Daily-mean TOA insolation, flat-sun formula, S0 omitted (all uses divide by
+// an annual-mean norm, so it cancels). Twin of R's ccx_insol(); periodic in t
+// with period exactly 1.
+static double seas_insol(double phi_deg, double tt) {
+  const double phi = phi_deg * M_PI / 180.0;
+  const double dec = -23.44 * M_PI / 180.0
+                     * std::cos(2.0 * M_PI * (tt * 365.25 + 10.0) / 365.25);
+  double x = -std::tan(phi) * std::tan(dec);
+  if (x > 1.0) x = 1.0; if (x < -1.0) x = -1.0;
+  const double h0 = std::acos(x);
+  return (h0 * std::sin(phi) * std::sin(dec)
+          + std::cos(phi) * std::cos(dec) * std::sin(h0)) / M_PI;
+}
 
 // 1 Sv = 1e6 m3/s. Must equal R/model.R's CCX_SV_TO_M3YR bit for bit.
 static const double SV_TO_M3YR = 1e6 * 365.25 * 86400.0;
@@ -285,13 +314,22 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     add_flux(iwod, isf, lit_wood * (1.0 - P.litter_slow_frac), 1.0);
     add_flux(iwod, iss, lit_wood * P.litter_slow_frac, 1.0);
 
-    const double q10f = std::pow(P.q10, gmst / 10.0);
+    double q10f = std::pow(P.q10, gmst / 10.0);
+    // Driver path: respiration breathes with the seasonal land temperature,
+    // through the SAME q10, unit-annual-mean (twin of the block in R/model.R).
+    if (P.seas_drivers > 0)
+      q10f *= std::pow(P.q10, P.seas_T_amp[hi]
+                * std::sin(2.0 * M_PI * (t - (3.5 + SEAS_T_LAG) / 12.0)) / 10.0)
+              / P.seas_r_norm[hi];
     add_flux(isf, iatm, (y[IX(isf, C)] / P.tau_soil_fast) * q10f, 1.0);
     add_flux(iss, iatm, (y[IX(iss, C)] / P.tau_soil_slow) * q10f, 1.0);
 
     // seasonal NEP through the leaf pool; ENSO out of the responsive soil pool
-    const double seas = P.seas_amp[hi] * std::sin(2.0 * M_PI * (t - P.seas_phase[hi] / 12.0))
-                        * (npp / A.npp0[hi]);
+    const double seas = (P.seas_drivers > 0)
+      ? npp * (seas_insol(SEAS_PHI_EFF[hi], t - P.seas_lag_p / 12.0)
+               / P.seas_n_norm[hi] - 1.0)
+      : P.seas_amp[hi] * std::sin(2.0 * M_PI * (t - P.seas_phase[hi] / 12.0))
+        * (npp / A.npp0[hi]);
     add_flux(iatm, ilef, seas, A.alpha_photo);
 
     if (A.enso_share[hi] != 0.0)
@@ -507,6 +545,21 @@ static Par unpack_par(const List& p) {
   P.sst_scale = p["sst_scale"]; P.gamma_enso = p["gamma_enso"];
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];
+  P.seas_drivers = (int) p["seas_drivers"];
+  P.seas_T_amp[0] = p["seas_T_amp_NH"]; P.seas_T_amp[1] = p["seas_T_amp_SH"];
+  P.seas_lag_p = p["seas_lag_p"];
+  // 720-point norm grid, NOT 12 -- twin of ccx_seas_norms() in R/model.R,
+  // which documents why (the polar-night kink leaks +0.22 ppm / 275 yr at 12).
+  for (int h = 0; h < 2; ++h) {
+    double sn = 0.0, sr = 0.0;
+    for (int m = 1; m <= 720; ++m) {
+      const double mid = (m - 0.5) / 720.0;
+      sn += seas_insol(SEAS_PHI_EFF[h], mid - P.seas_lag_p / 12.0);
+      sr += std::pow(P.q10, P.seas_T_amp[h]
+                     * std::sin(2.0 * M_PI * (mid - (3.5 + SEAS_T_LAG) / 12.0)) / 10.0);
+    }
+    P.seas_n_norm[h] = sn / 720.0; P.seas_r_norm[h] = sr / 720.0;
+  }
   P.revelle_frozen = p["revelle_frozen"];
   return P;
 }

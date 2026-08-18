@@ -176,8 +176,13 @@ ccx_spinup <- function(p = ccx_default_params(),
          gmst = 0, enso = 0, c14_bomb = 0, c14_nuclear = 0, c14_cosmo = prod)
   }
   p0 <- p; p0$gamma_enso <- 0
-  # seasonal term integrates to zero over a year; evaluate the annual-mean state
+  # seasonal term integrates to zero over a year; evaluate the annual-mean state.
+  # BOTH seasonal paths must be off here: the sine via its amplitudes, and the
+  # 2026-08-18 driver path via its switch -- n(t)-1 and the Q10 modulation are
+  # zero-mean over a year but NOT zero at the single t this solve evaluates,
+  # and leaving them on makes the isotope operator singular.
   p0$seas_amp_NH <- 0; p0$seas_amp_SH <- 0
+  p0$seas_drivers <- 0
 
   # Finish the 12C state when the conveyor couples the two columns. The analytic
   # equilibrium above is only a starting guess then -- see the function header.
