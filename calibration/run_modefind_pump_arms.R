@@ -47,6 +47,23 @@
 #     * the physical-plausibility screen both arms already print.
 #
 # ---------------------------------------------------------------------
+# RUNTIME ~18 h PER ARM AT 21 PARAMETERS -- MEASURED 2026-08-18, and the older
+# estimate on the next line was wrong by 3x, so do not plan against it. The
+# running 21-parameter refit turned in 100,010 evaluations in 4 h 28 m =
+# **0.161 s/eval**, against the 0.060 s/eval below. What changed since that
+# figure was taken: 18 -> 21 parameters, two new likelihood streams (the d13C
+# seasonal pair), driver seasonality on BOTH land and SST, and observed-SST
+# forcing columns re-derived per draw. At 20 restarts x ARM_MAXIT that is
+# ~18 h per arm and ~36 h for the pair, run sequentially.
+#
+# THE SEQUENTIAL CHOICE IS THE ONE TO REVISIT IF THAT IS TOO LONG, and the
+# argument below for it does not survive measurement: the running arm's RSS is
+# 158 MB, not the near-half-of-16-GB the swap-thrashing worry assumed, so two
+# concurrent arms would be ~320 MB and would halve wall-clock. Left sequential
+# for the 2026-08-18 run by Marcus's call ("let it run") rather than because
+# the reasoning holds.
+#
+# SUPERSEDED ESTIMATE, kept because the comparison is the point:
 # RUNTIME ~5-6 h PER ARM (the 18-parameter refit took 237-294 min at 0.060
 # s/eval; 20 parameters and a pump in the derivative will not be faster). The
 # arms are INDEPENDENT and are run sequentially here rather than in parallel:

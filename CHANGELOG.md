@@ -5988,3 +5988,35 @@ is untouched:
 
 Suite at the time of the check: **FAIL 0 | WARN 55 | SKIP 2 | PASS 889** (884 + 5 from the SST
 commits).
+
+### 2026-08-18 (refit in flight) — runtime measured at 3× the planned figure; the 20-parameter modes snapshotted before they could be overwritten
+
+**The driver header's "~5-6 h per arm" is wrong at 21 parameters.** Measured on the running
+job: **100,010 evaluations in 4 h 28 m = 0.161 s/eval**, against the 0.060 s/eval the header
+carried from the 18-parameter refit. At 20 restarts × `ARM_MAXIT` that is **~18 h per arm,
+~36 h for the pair**. What changed since 0.060 was taken: 18 → 21 parameters, two new
+likelihood streams (the d13C seasonal pair), driver seasonality on BOTH land and SST, and
+observed-SST columns re-derived per draw. Header corrected in place, with the old figure kept
+beside it because the comparison is the point.
+
+**Marcus's call: let it run** (sequential, ~36 h) rather than restart. Recorded because the
+sequential-arms argument in the header does NOT survive measurement — the running arm's RSS is
+**158 MB**, not the near-half-of-16-GB the swap-thrashing worry assumed, so two concurrent arms
+would be ~320 MB and would halve wall-clock. The arms stay sequential for this run by decision,
+not because the reasoning holds. That is the first thing to change if a future refit is
+wall-clock bound.
+
+**The 20-parameter modes were snapshotted before the run could overwrite them.**
+`run_modefind_pump_arms.R` writes `mode_fit_pump{N,D}.rds` and `pump_arms_comparison.rds` to
+FIXED paths, so the in-flight job would have replaced this morning's modes in place —
+**including the arm-N mode Marcus provisionally adopted**, and the source of the `lifted` probe
+point in `diag_hess_eps_21par.R`. Copied to
+`calibration/output/pump_arms/pre_refit_20260818d/` with a README stating what they are, that
+they are modes of a DIFFERENT objective, and that no logL / evidence / per-stream number may be
+compared across the 20 → 21 boundary. Caught after launch, not before — the fixed-path write
+should have been checked against the quarantine discipline first.
+
+**Progress at the time of writing:** arm N, restart 5 of 20, no flags fired. The gain sequence
+is NOT decaying monotonically — 33.4, 26.7, 9.2, **20.2** — so an early-convergence estimate
+from the first few restarts is not reliable, and hitting the restart cap while still gaining
+remains a live possibility.
