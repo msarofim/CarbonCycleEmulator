@@ -111,6 +111,68 @@ a **methodological choice awaiting Marcus' call**.
 
 ---
 
+## 3b. Seasonal climatology (added 2026-08-20e)
+
+**The gap this fills.** HadSST4 and CRUTEM5 are held as **annual anomaly** series, and an
+anomaly has its monthly climatology subtracted — so nothing in this repo could check the
+model's four seasonal temperature knobs (`seas_T_amp_{NH,SH}`, `sst_seas_amp_{NH,SH}`).
+The audit in `calibration/diag_driver_audit.R` found the fit sitting at −6.03 / −4.72 /
++3.83 prior-σ on priors that were recollections. These two products supply the **absolute**
+climatology those anomalies are anomalies *from*.
+
+| Dataset | Coverage | Role | Source |
+|---|---|---|---|
+| **CRU 1961–90 absolute climatology**, 5°, monthly | 12 months, global grid | land seasonal cycle → `seas_T_amp_*` | Jones et al. 1999, Rev. Geophys. 37:173–199, doi:10.1029/1999RG900002 |
+| **CRUTEM5 gridded anomalies**, 5° | 1850–2025 | **land mask** for the above | Osborn et al. 2021, JGR-Atmos 126:e2019JD032352 |
+| **NOAA ERSSTv5** monthly absolute SST, 2° | 1854–present | ocean seasonal cycle → `sst_seas_amp_*`; also the ocean mask used to derive land fraction | Huang et al. 2017, J. Climate 30:8179–8205, doi:10.1175/JCLI-D-16-0836.1 |
+
+Built by `data-raw/build_seasonal_climatology.R` → `data/obs_seasonal_clim.rds`.
+
+**Why these two products, on the IGCC-compatibility criterion.** For the **land** side the
+choice is forced and it is the right one: CRU's `absolute.nc` is the designed absolute
+companion to the CRUTEM anomalies the repo already holds — same 5° grid, same 1961–90
+baseline. For the **ocean** side, HadSST4 (which the repo uses for the annual anomaly, and
+which is HadCRUT5's ocean component) publishes **no absolute form at all**, so a different
+product is unavoidable. ERSSTv5 is the one to reach for: IGCC's GMST is a 4-dataset mean,
+and ERSSTv5 is the ocean component of **two of the four** — NOAAGlobalTemp and GISTEMP.
+No absolute SST product is common to all four, because the fourth's is HadSST4.
+
+**Mask caveat, stated not buried.** The seasonal cycle enters the model *additively*, on top
+of the HadSST4 annual anomaly (`R/model.R` ~line 1000), so an ERSST-vs-HadSST4 mask
+difference perturbs the seasonal **amplitude** only, never the anomaly path — and the
+amplitude it replaces is wrong by ~25×.
+
+**Weighting caveat, and it is the load-bearing one.** These are **area-weighted** means.
+The model's parameters are not area-weighted quantities: `seas_T_amp_*` multiplies **soil
+respiration** (so its counterpart is respiration-weighted) and `sst_seas_amp_*` modulates
+**air–sea exchange** (gas-exchange-weighted). **These are prior anchors, not values to
+prescribe.** The latitude-band variants (`all`, `>30`, `>45`) exist to bracket that gap from
+above, since NH heterotrophic respiration is boreal-weighted.
+
+### Two traps found while building it
+
+**`absolute.nc` is spatially complete and has no missing_value.** It carries an interpolated
+value in *every* cell, ocean included (range −70.3 to +35.7 °C, zero NAs). Averaged unmasked
+it gives an "NH land" mean of 14.59 °C and a half-amplitude of 6.68 K, both badly
+ocean-contaminated. The tell was NH and SH returning **exactly 1296 of 2592 cells each** —
+half the globe apiece, which no land mask produces. `sc_gate_cells()` now asserts the masked
+area fraction against a plausible range rather than printing it.
+
+**The two 5° grids disagree about latitude order.** `absolute.nc` runs N→S (+87.5 first),
+CRUTEM5 runs S→N; longitude agrees. Dimensions match either way, so an order assumption
+would have masked Antarctica with the Arctic's coverage and produced a plausible wrong
+answer. Aligned by `match()` on the values.
+
+**Cell-area weighting is not land weighting.** At 5°, a cell with one coastal station counts
+as wholly land; weighting by full cell area put the "land" mask at **41.9 %** of the globe.
+The build weights each cell by cos(lat) × **land fraction derived from ERSSTv5's own ocean
+mask**, giving 26.8 % globally against a true ~29 % — the residual is small islands and
+coastal smoothing at 2°. Coastal cells are maritime-damped in `absolute.nc`, so this
+approximation biases the land amplitude **low**, which is the conservative direction for the
+argument it is used in.
+
+---
+
 ### 3a. Pre-1850 land-use emissions (added 2026-08-13)
 
 **GCB's LUC column is empty before 1850.** Its fossil column starts 1750; the land-use

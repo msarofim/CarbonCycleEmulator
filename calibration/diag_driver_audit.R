@@ -26,6 +26,14 @@
 #   6. WHICH FORCING COLUMNS ACTUALLY CARRY WITHIN-YEAR STRUCTURE, measured
 #      on the built table rather than read off the build scripts.
 #
+# BLOCK 11 WAS ADDED AFTER THE FIRST RUN (2026-08-20e). Blocks 0 and 5 found
+# that nothing on disk could check the four seasonal temperature knobs; the
+# products that can were then downloaded (CRU absolute + CRUTEM5 mask for land,
+# ERSSTv5 for ocean; data-raw/build_seasonal_climatology.R). Block 11 is the
+# comparison those downloads make possible, and it is now the payoff of the
+# whole file. Blocks 0 and 5 are LEFT AS THEY WERE -- they are the record of
+# what was true before the download, not a caveat to rewrite.
+#
 # WHAT IT CANNOT DO, and this is block 0's finding rather than a caveat: the
 # repo holds NO absolute monthly climatology for either seasonal temperature
 # driver. HadSST4 and CRUTEM5 are downloaded as ANNUAL hemispheric ANOMALY
@@ -314,5 +322,70 @@ cat(sprintf("  %-22s %8.1f   %s\n", "CCX_SEAS_PHI_EFF SH", CCX_SEAS_PHI_EFF[["SH
 cat("\n  ENSO is the one that is easy AND unsourced: GFED4.1s is already on disk\n")
 cat("  (data-raw/downloads/gfed/), and the interannual land-flux anomaly it\n")
 cat("  drives is overwhelmingly tropical, not 50/50.\n")
+
+# ---------------------------------------------------------------------
+sep("11. THE FITTED SEASONAL AMPLITUDES AGAINST THE OBSERVED ONES")
+scf <- ccx_path("data", "obs_seasonal_clim.rds")
+if (!file.exists(scf)) {
+  cat("  data/obs_seasonal_clim.rds ABSENT -- run data-raw/build_seasonal_climatology.R\n")
+} else {
+  sc <- readRDS(scf)
+  cat(sprintf("  land : %s\n  ocean: %s\n", sc$land_source, sc$ocean_source))
+  cat(sprintf("  land mask %s, %d-%d, >= %d months; %.1f %% of global area\n\n",
+              sc$land_mask$source, sc$land_mask$window[1], sc$land_mask$window[2],
+              sc$land_mask$min_months, 100 * sc$land_mask$area_frac))
+  cat("  HALF-AMPLITUDES, which is the model's parameter convention (K):\n")
+  cat(sprintf("  %-18s %9s %9s %9s %9s %8s\n",
+              "parameter", "fitted", "prior mid", "OBSERVED", "obs/fitted", "prior-z"))
+  wk <- sprintf("%%s_%d-%d", sc$sst_window[1], sc$sst_window[2])
+  cmp <- list(
+    list("seas_T_amp_NH",   p$seas_T_amp_NH,   12,  sc$land[["NH_all"]]$half_amp,
+         sprintf("NH land, all cells (>30N %.1f, >45N %.1f)",
+                 sc$land[["NH_>30"]]$half_amp, sc$land[["NH_>45"]]$half_amp)),
+    list("seas_T_amp_SH",   p$seas_T_amp_SH,    6,  sc$land[["SH_all"]]$half_amp,
+         sprintf("SH land, all cells (>30S %.1f, >45S %.1f)",
+                 sc$land[["SH_>30"]]$half_amp, sc$land[["SH_>45"]]$half_amp)),
+    list("sst_seas_amp_NH", p$sst_seas_amp_NH, 2.0, sc$ocean[[sprintf(wk, "NH")]]$half_amp,
+         "NH ocean, area-weighted"),
+    list("sst_seas_amp_SH", p$sst_seas_amp_SH, 1.2, sc$ocean[[sprintf(wk, "SH")]]$half_amp,
+         "SH ocean, area-weighted"))
+  for (r in cmp)
+    cat(sprintf("  %-18s %9.4f %9.2f %9.3f %9.1fx %+8.2f   %s\n",
+                r[[1]], r[[2]], r[[3]], r[[4]], r[[4]] / r[[2]], z[[r[[1]]]], r[[5]]))
+  cat("\n  The two PRIORS were close to right (12 vs 11.4; 2.0 vs 2.24; 1.2 vs 1.75).\n")
+  cat("  The fit rejected them anyway. seas_T_amp_NH is 4.2x the observed value\n")
+  cat("  even against the most boreal-weighted bracket; both ocean amplitudes are\n")
+  cat("  ~25x too SMALL. This is not a prior that was mis-set.\n")
+
+  cat("\n  PHASE, converted into the model's own LAG units (months past the\n")
+  cat("  zero-lag mid-July peak, the (3.5 + LAG)/12 convention):\n")
+  cat(sprintf("  %-18s %9s %9s   %s\n", "constant", "shipped", "OBSERVED", "driver measured"))
+  cat(sprintf("  %-18s %9.2f %9.2f   %s\n", "CCX_SEAS_T_LAG", CCX_SEAS_T_LAG,
+              sc$land[["NH_all"]]$model_lag, "NH land AIR temperature"))
+  cat("      -> NOT a discrepancy. This constant multiplies SOIL respiration, which\n")
+  cat("         lags air T; R/model.R says so and the 18,944-logL profile confirms it.\n")
+  cat("         The observed air-T lag is the value that profile REJECTS. Leave it.\n")
+  cat(sprintf("  %-18s %9.2f %9.2f   %s\n", "CCX_SST_SEAS_LAG", CCX_SST_SEAS_LAG,
+              sc$ocean[[sprintf(wk, "NH")]]$model_lag, "NH sea-surface temperature"))
+  cat("      -> A REAL discrepancy, and this one is checkable: sst_seas_amp modulates\n")
+  cat("         SST ITSELF, not a lagged flux, so the observed SST phase IS its phase.\n")
+  cat(sprintf("         Shipped 2.50 is %.2f months LATE. It was never fitted -- model.R\n",
+              CCX_SST_SEAS_LAG - sc$ocean[[sprintf(wk, "NH")]]$model_lag))
+  cat("         calls it 'a prior belief', unidentifiable because the amplitude it\n")
+  cat("         phases is ~0. Now it does not have to be identified from the fit.\n")
+
+  cat("\n  TWO STRUCTURAL ASSUMPTIONS THE CLIMATOLOGY ALSO TESTS:\n")
+  dsep <- function(a, b) abs(((a - b + 0.5) %% 1 - 0.5) * 12)
+  cat(sprintf("   - hemispheres exactly antiphase (model: sgn = -1, i.e. 6.00 mo):\n"))
+  cat(sprintf("     observed separation %.2f mo (land), %.2f mo (SST). Small, real, not urgent.\n",
+              dsep(sc$land[["NH_all"]]$peak_frac, sc$land[["SH_all"]]$peak_frac),
+              dsep(sc$ocean[[sprintf(wk,"NH")]]$peak_frac, sc$ocean[[sprintf(wk,"SH")]]$peak_frac)))
+  cat(sprintf("   - the drivers are pure SINES (model has no 2nd harmonic). Observed\n"))
+  cat(sprintf("     amp2/amp1: NH land %.3f, SH land %.3f, NH SST %.3f, SH SST %.3f --\n",
+              sc$land[["NH_all"]]$amp2_over_amp1, sc$land[["SH_all"]]$amp2_over_amp1,
+              sc$ocean[[sprintf(wk,"NH")]]$amp2_over_amp1, sc$ocean[[sprintf(wk,"SH")]]$amp2_over_amp1))
+  cat("     small, so the sawtooth really does have to come from Q10 and the growing\n")
+  cat("     season, as designed. The drivers are not hiding it.\n")
+}
 
 sep("DONE")

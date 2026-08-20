@@ -6365,3 +6365,73 @@ OSCAR time-varying LUC shares, GFED fire seasonality — all sourced and hemisph
 
 **Not done, awaiting Marcus:** no download was made and no parameter, prior or constant was
 changed. The audit is measurement only.
+
+## 2026-08-20e — The seasonal climatology, downloaded: the fitted amplitudes are wrong by 4× and 25×
+
+Marcus, on the audit: *"Which products are most compatible with the IGCC historical data? …
+If there are obvious winners, go ahead and pull them. I would actually do the ¹³C after the
+downloads, because I think that getting this data right is necessary regardless."* Pulled;
+¹³C decomposition deliberately **not** started. 889 tests pass, 0 fail.
+
+**Product choice, on the IGCC criterion.** IGCC's GMST is a 4-dataset mean (HadCRUT5,
+NOAAGlobalTemp, GISTEMP, Berkeley Earth). On the **ocean** side the criterion is decisive and
+also, awkwardly, forced: **HadSST4 — the repo's own annual anomaly source, and HadCRUT5's
+ocean component — publishes no absolute form at all**, so no absolute product can be
+mask-consistent with what we already use. **ERSSTv5** is the best available: it is the ocean
+component of **two of IGCC's four** datasets (NOAAGlobalTemp and GISTEMP). On the **land**
+side there is a clean winner: CRU's `absolute.nc` is the *designed* absolute companion to the
+CRUTEM anomalies already held — same 5° grid, same 1961–90 baseline.
+
+Three files (`MANIFEST.csv` updated), built by `data-raw/build_seasonal_climatology.R` →
+`data/obs_seasonal_clim.rds`; full provenance and caveats in **DATA.md §3b**.
+
+**The comparison, block 11 of `diag_driver_audit.R` — half-amplitudes, K:**
+
+| parameter | fitted | prior mid | **observed** | obs/fitted | prior-z |
+|---|---|---|---|---|---|
+| `seas_T_amp_NH` | 48.07 | 12.0 | **11.45** (>30N 15.7, >45N 17.9) | 0.2× | +3.83 |
+| `seas_T_amp_SH` | 11.18 | 6.0 | **3.59** (>30S 7.1, >45S 9.0) | 0.3× | +1.25 |
+| `sst_seas_amp_NH` | 0.0892 | 2.0 | **2.237** | **25.1×** | −6.03 |
+| `sst_seas_amp_SH` | 0.0637 | 1.2 | **1.746** | **27.4×** | −4.72 |
+
+**The priors were close to right and the fit rejected them anyway** (12 vs 11.4; 2.0 vs 2.24;
+1.2 vs 1.75). This is not a mis-set prior. **Both land amplitudes are 3–4× too big and both
+ocean amplitudes ~25× too small** — the same land-over/ocean-under signature the δ¹³C-per-ppm
+ratio found independently on 08-20d (1.53× MLO, 2.54× SPO too isotopically depleted). Two
+diagnostics, different data, same direction.
+
+**A sourced correction to a constant that was never fitted.** Converting observed peak months
+into the model's own `(3.5 + LAG)/12` units:
+
+- `CCX_SEAS_T_LAG` shipped 2.00, observed NH land **air** T 0.04 — **not** a discrepancy. That
+  constant multiplies *soil* respiration, `R/model.R` says so, and the 18,944-logL profile
+  rejects exactly the air-temperature value. **Left alone.**
+- `CCX_SST_SEAS_LAG` shipped 2.50, observed NH SST **1.32** — **a real one, and checkable**,
+  because `sst_seas_amp` modulates SST itself rather than a lagged flux, so the observed SST
+  phase *is* its phase. The shipped value is **1.18 months late** and `R/model.R` calls it "a
+  prior belief", unidentifiable because the amplitude it phases is ~0. It no longer has to be
+  identified from the fit. **Not applied — awaiting Marcus.** It bears directly on the −673
+  logL that raising `sst_seas_amp_NH` to 2.0 cost on 08-20: part of that may be phase.
+
+**Two structural assumptions the climatology also tests, both survive:** hemispheres are
+antiphase to 5.78 mo (land) / 5.79 (SST) against the model's exact 6.00 — small and real; and
+observed amp2/amp1 is 0.06/0.14/0.08/0.05, so the drivers really are near-sinusoidal and the
+observed sawtooth must come from Q10 and the growing season, as designed.
+
+**Three traps, each of which produced a plausible wrong answer first** (DATA.md §3b): (1)
+`absolute.nc` is *spatially complete* with no `missing_value` — unmasked it gave an "NH land"
+14.59 °C / 6.68 K, and the tell was NH and SH returning **exactly 1296 of 2592 cells each**;
+(2) the two 5° grids run latitude in **opposite order** with matching dimensions, so an order
+assumption would have masked Antarctica with the Arctic's coverage
+(`nameless_matrix_order`); (3) full-cell-area weighting put "land" at **41.9 %** of the globe,
+since a 5° cell with one coastal station counts as wholly land — now weighted by a land
+fraction derived from ERSSTv5's own ocean mask (26.8 % vs a true ~29 %), which biases the land
+amplitude *low*, the conservative direction.
+
+**The NH/SH NPP split, asked in the same message: nothing on disk measures it.** GFED (fire),
+OSCAR (land-use) and GCB (global sink) all speak to land fluxes, none to NPP's hemispheric
+partition. And it is a **single scalar applied at 1750** (`npp_frac_NH`), not a time series:
+the realised share evolves only through hemisphere-specific clearing, and barely — **0.4662
+(1750) → 0.4600 (1850) → 0.4479 (1950) → 0.4466 (2024)**. Fertilisation is a common
+multiplier at a given CO₂ and cancels out of the share entirely. No product pulled for this;
+options are MODIS MOD17, TRENDY, or FLUXCOM, and the choice is Marcus'.
