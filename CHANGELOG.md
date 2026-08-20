@@ -6296,3 +6296,72 @@ it changes the driver that produced the current outputs, so it waits for Marcus.
 in the READER. The producing script documents this override at length and gates it; I indicted
 the artifact before reading the producer. **`par_mode` is band-independent and always safe;
 `u_mode`, `hessian`, `cov`, `sd_unc`, `eigen`, `logdet_negH` are u-space and band-dependent.**
+
+## 2026-08-20d — Input-driver audit: the seasonal cycle is fitted where it could be measured
+
+Marcus, opening the seasonal-amplitude work of handoff `2026-08-20c` §2: *"checking all the
+input drivers to make sure we are using all available information (e.g. land versus ocean in
+the southern hemisphere) is a first step."* Done as
+`calibration/diag_driver_audit.R` — ten measurement blocks, no fitting. 889 tests still pass.
+
+**The audit's finding, in one line: every seasonal driver in the model is a free parameter,
+and none of them is read from data.** The emission side is exemplary (EDGAR fossil shares,
+OSCAR time-varying LUC shares, GFED fire seasonality — all sourced and hemispheric). The
+*climate* side of the seasonal cycle is not sourced at all.
+
+- **No seasonal climatology exists anywhere in the repo.** HadSST4 and CRUTEM5 are both on
+  disk as ANNUAL hemispheric ANOMALY series, and the monthly summary series of both products
+  are anomalies too — an anomaly has its monthly climatology subtracted, so the seasonal
+  cycle is removed by construction. `seas_T_amp_{NH,SH}` and `sst_seas_amp_{NH,SH}` cannot be
+  checked against anything currently held. CRUTEM5 is tagged in MANIFEST.csv as "ratio
+  diagnostics only, NOT yet a forcing", and that is still true.
+- **Their priors are recollections, not measurements** ("NH flux-weighted seasonal land T
+  half-amplitude ~10–14 K"; "hemispheric-mean SST cycles are ~2 K NH / milder SH"), and the
+  fit went straight through them: `sst_seas_amp_NH` **−6.03 σ**, `sst_seas_amp_SH` **−4.72 σ**,
+  `seas_T_amp_NH` **+3.83 σ** (48.07 K — a soil told its seasonal temperature swings ±48 K).
+  The two largest prior-z in the whole 21-parameter vector after `rep_dC` are the two ocean
+  seasonal amplitudes, both pinned at zero.
+- **The ocean seasonal channel is off below the numerical noise of its own input.** Priced
+  through the repo's own `SST_PCO2_SENSITIVITY`, the fitted `sst_seas_amp_NH` is 3.0 µatm
+  peak-to-peak against 67.7 at the prior centre. Its 0.178 K peak-to-peak is the same order
+  as the **0.066 K spline-interpolation wiggle** that `ccx_annual_to_monthly()` leaves in the
+  annual `sst_anom_NH` column it sits on top of (block 7 projects that wiggle onto the scored
+  annual harmonic: 0.025 K, so it does not alias into the seasonal rows — but nobody chose it).
+- **Land versus ocean in the SH, as Marcus framed it, is worse than "unfitted".** The model's
+  own geometry makes the SH **19.2 % land** and the NH **39.2 %** (NH holds 67.1 % of global
+  land area). `npp_frac_NH` fits to **0.4662** — 53 % of global NPP on the ocean hemisphere,
+  making **SH land 2.34× as productive per m² as NH land**. Its prior is UNIFORM[0.4, 0.8]:
+  zero observational content on a quantity global NPP products resolve directly.
+- **But the profile inverts the obvious story, and this is the useful part.** Raising
+  `npp_frac_NH` toward physical values *helps* the NH deficit (`co2_seasonal_MLO` **+197 / +216
+  / +160** at 0.55 / 0.60 / 0.65) and is vetoed by **`d13c_seasonal_MLO` (−463 / −835 / −1277)**,
+  with `co2_seasonal_SPO` also paying. Net −312 / −794 / −1494. The NH NPP share is held down
+  by the **NH δ¹³C seasonal cycle**, not by the CO₂ cycle.
+- **Which points at a partition diagnostic needing no new data.** Photosynthesis moves CO₂ at
+  −18 ‰; air-sea exchange at −2 (invasion) / −10 (evasion). So seasonal δ¹³C amplitude *per ppm*
+  of seasonal CO₂ amplitude measures how photosynthetic the modelled cycle is, unit-free, both
+  sides from the likelihood's own harmonic estimator in one expression (the
+  `amp_definition_mismatch` rule):
+
+  | station | CO₂ obs | CO₂ model | err | δ¹³C/CO₂ obs | model | ratio |
+  |---|---|---|---|---|---|---|
+  | MLO | 6.764 ppm | 5.242 | −22.5 % | 0.0529 ‰/ppm | 0.0809 | **1.53×** |
+  | SPO | 1.196 ppm | 1.670 | +39.6 % | 0.0374 ‰/ppm | 0.0947 | **2.54×** |
+
+  (The CO₂ column reproduces `diag_seasonal_phase_obs_vs_model.R` exactly — the estimator is
+  the same one.) **The modelled seasonal cycle is 1.5× (NH) to 2.5× (SH) too isotopically
+  depleted per ppm.** Too much of it is land, at BOTH stations — including the hemisphere
+  that *undershoots* in CO₂. That is a partition statement the "NH too small, SH too big"
+  amplitude table alone cannot make, and it is the reason the fit cannot fix the NH deficit
+  by growing NPP: the isotopes see it.
+- **Other unsourced hemispheric splits found by the same sweep** (block 10): `enso_share`
+  hardcoded 50/50 in `ccx_aux()` with no comment and no source, when the interannual land-flux
+  anomaly it drives is overwhelmingly tropical and GFED4.1s is *already on disk*;
+  `FORC_NUC_NH_SHARE` 0.95 and `FORC_BOMB_NH_SHARE` 0.90 still PROVISIONAL; `OCEAN_AREA_{NH,SH}`
+  still `provisional` / "NEEDS a cited geographic source"; `sst_{NH,SH}` = 18/16 °C fixed with
+  no source while setting K0/K1/K2 and the Revelle factor; `CCX_SEAS_PHI_EFF["NH"] = 75°` an
+  offline-fitted *effective* knob rather than a measured NPP centroid, and `["SH"] = −30°`
+  asserted outright.
+
+**Not done, awaiting Marcus:** no download was made and no parameter, prior or constant was
+changed. The audit is measurement only.
