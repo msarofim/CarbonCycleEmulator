@@ -6757,3 +6757,46 @@ centred on the wrong quantity).
 
 **933 pass, 1 fail** — the fail is still `test-fluxes.R:99` from 08-20g, unchanged and untouched.
 No new failures; the count rose 918 → 933 on the 15 new assertions.
+
+## 2026-08-20l — The φ_eff answer: the latitudes were right, the amplitude was not
+
+Four profile passes (`calibration/diag_phi_eff_profile.R`, 21 cells, seasonal block re-optimised
+in every one) plus an offline form test on the observed shape (`diag_seas_rectification.R`).
+
+**A light THRESHOLD buys nothing.** Fitted to the observed 8-day shape it optimises to **c = 0**
+in 3 of 4 cases — it *chooses* to be the incumbent form. (The original offline fit recorded the
+same thing and it was never followed up.) A power form buys 4–9 %. **A free AMPLITUDE buys 34–35 %
+in the NH**, and its latitude is an **interior minimum at the shipped 75 with A ≈ 0.49** (7.5 %
+residual against 11.4 % at φ = 50). **The SH latitude is not determined once amplitude is free.**
+
+**So the offline fit that chose 75 was right about the SHAPE** — polar night at 75 N emulates a
+rectified boreal growing season better than any lower latitude's smooth curve. The model had no
+way to *scale* it, so 75's shape arrived with 75's amplitude, and `seas_T_amp_NH = 48 K` was the
+cancellation that fixed the difference.
+
+**The calibration agrees, and the arithmetic is unambiguous:**
+
+| φ NH | φ SH | amp NH | amp SH | REOPT | `seas_T_amp_NH` |
+|---|---|---|---|---|---|
+| 75 | −40 | 0.49 | 0.36 | −2025.2 | 10.75 |
+| **75** | **−30** | **0.49** | **0.50** | **−2027.7** | **10.77** |
+| 50 | −15.75 | 1 | 1 | −2071.4 | 11.68 |
+| **75** | **−30** | 1 | 1 | **−2576.0** | 38.61 |
+
+**+548 log-units for two MEASURED constants and no latitude change at all**, and `seas_T_amp_NH`
+lands on its observed 11.45 — 20d §6's cancellation hypothesis confirmed by its own repair.
+`seas_npp_amp_{NH,SH}` (added 08-20f with an identity default, never fitted) turns out to be
+exactly the knob; it should become **measured constants**, not fitted parameters.
+
+**The hemispheres INTERACT and pass 1 was misleading on its own.** At SH −30 the NH optimum is
+38–45 and 75 loses by ~390; at SH −15.75 the ordering **reverses**. `seas_lag_p`, `q10` and
+`npp_frac_NH` are global, not per-hemisphere. A 1D slice of a surface with an interaction reads
+as an answer — fill the plane.
+
+**STILL OPEN, and it is Marcus':** ship (i) the shipped latitudes + measured amplitudes, with the
+constant **renamed** to say it is a shape proxy rather than an NPP centroid; or (ii) the measured
+latitudes (50, −16) with unit amplitudes, which costs ~44 log-units and buys a constant that means
+what its name says. Nothing is committed to the model either way.
+
+**NOT explained by any of this:** `sst_seas_amp_NH` sits at 0.33–0.54 in **every** cell against an
+observed 2.237. That is the next real defect and this arc did not touch it.
