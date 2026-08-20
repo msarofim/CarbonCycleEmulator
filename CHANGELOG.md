@@ -6256,3 +6256,43 @@ and version there are still unmeasured. Noted for Marcus rather than worked arou
 per-stream likelihood is ~2 s, and 14 patch-rebuild-evaluate points took 32 s wall clock. The
 32.6 h refit is Nelder-Mead's eval COUNT, not per-eval cost — which is exactly why §6's
 parallel dispersed multi-start is the right restructuring rather than a port.
+
+## 2026-08-20 (later still) — Torch verified; and an `h_ml` "corruption" that was my reader, not the files
+
+**Torch works end to end.** R 4.5.1 under SLURM (the `/share/apps/r/4.5.1` wrapper is a
+Singularity container binding `${SLURM_TMPDIR}/rtmp-$$` onto `/tmp`, so it **fails on login
+nodes** and must be run through `sbatch`); `src/ccx_core.cpp` compiles in 4.1 s; Rcpp 1.1.0,
+Matrix 1.7.4, testthat 3.2.3 present, **`adaptMCMC` missing**. **Torch reproduces the Mac's
+logpost to all 9 decimals** on an identical subset. Per-eval the **Mac is ~2x faster** (0.141 s
+vs 0.294 s) — Torch's case is core count, not per-core speed. Probe at
+`/scratch/ms17839/ccx-probe/`, job 16075825.
+
+**The false alarm, recorded because the reasoning is the point.** Recomputing the arm modes'
+log-posteriors from `u_mode` gave +2.38 (N) and −42.93 (D), flipping the D − N margin from
++10.69 to −34.63 — deterministic, asymmetric, localised to `h_ml` alone. I wrote it up as a
+corrupt artifact. **It was not.** `run_modefind_pump_arms.R` overrides `CCX_PARAM_TABLE$h_ml`
+in-process to `ARM_HML_BOUND = c(85, 120)` (Marcus 2026-08-16g, with GATE H1), the repo default
+is `[30, 200]`, and **the rds does not record the band**. Under the refit's band
+`ccx_unc_to_par(u_mode)` reproduces `par_mode` to **0.000e+00** for all 21 parameters in both
+arms and both log-posteriors reproduce to ~5e-10, margin exactly +10.6914.
+
+**Pinned by solving for it, not guessing:** two arms give two equations
+`x = lo + plogis(u)(hi − lo)` in two unknowns → `lo = 85.0000, hi = 120.0000`, i.e. the driver's
+constant recovered from the stored numbers alone. Two independent pairs agreeing on one hidden
+constant is proof; one pair would have been a hypothesis.
+
+**Tried and discarded on the way** (each ruled out by measurement, none of them the cause):
+parameter-name reordering (`param_names` is identical to `CCX_PARAM_NAMES` in both files);
+code drift (`git diff de771be..c9e2478 -- R src data` is empty); nondeterminism in the objective
+(bit-identical on repeat); the untracked `data-raw/downloads/nuclear14c/` inputs (unchanged
+since Aug 10 — they explain only the full-repo vs subset offset, 6.15 log-units); and a
+`u`-mutating Hessian loop (it perturbs copies).
+
+**The one real defect, and it is small:** the rds records `kz_bracket` but not the h_ml band.
+Fix = store `hml_bound` in the `out` list and gate the round-trip on read. **Not applied yet** —
+it changes the driver that produced the current outputs, so it waits for Marcus.
+
+**Method lesson, promoted to memory:** "implausible result = bug" is right, but the bug can be
+in the READER. The producing script documents this override at length and gates it; I indicted
+the artifact before reading the producer. **`par_mode` is band-independent and always safe;
+`u_mode`, `hessian`, `cov`, `sd_unc`, `eigen`, `logdet_negH` are u-space and band-dependent.**

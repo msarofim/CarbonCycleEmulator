@@ -200,53 +200,61 @@ than generating it through nested ssh quoting. The overlay is `:ro`, so packages
 
 Partitions confirmed present: `cpu_short`, `cpu_prem`, `cs`, `cl`. Fairshare is **1.000000**.
 
-## A2. THE THING THE PARITY CHECK FOUND: `u_mode` is corrupt for `h_ml` in BOTH arm files
+## A2. WHAT THE PARITY CHECK FOUND — and the false alarm I raised on the way
 
-Recomputing the stored modes' log-posteriors from `u_mode` does not reproduce them —
-deterministically (identical on repeat) and very asymmetrically.
+**RESOLVED. There is no corruption.** I first wrote this section up as "`u_mode` is corrupt for
+`h_ml` in both arm files". That was **wrong**, and the error was in my reader, not in the files.
 
-| arm | stored | from `u_mode` | gap | from `par_mode` | gap |
-|---|---|---|---|---|---|
-| N | −2682.571 | −2680.188 | **+2.38** | −2682.458 | +0.11 |
-| D | −2671.880 | −2714.814 | **−42.93** | −2670.933 | +0.95 |
+**THE FACTS.** `calibration/run_modefind_pump_arms.R` overrides `CCX_PARAM_TABLE$h_ml`
+**in-process** — `lo`, `hi`, `init` and `prior` — to the ocean-gradient-rows validity band
+**`ARM_HML_BOUND = c(85, 120)`** (Marcus 2026-08-16g, lines 116–185, with GATE H1 asserting that
+nothing else in the table moved). The repo default is `logit, lo = 30, hi = 200`. **The rds does
+not record which band it was fitted under.** So a plain session decodes `u_mode` through the
+wrong logit:
 
-**The D − N margin flips sign**: stored **+10.69**, from `u_mode` **−34.63**, from `par_mode`
-**+11.53**.
+| arm | `par_mode$h_ml` | decoded under [30,200] | decoded under [85,120] |
+|---|---|---|---|
+| N | 95.6553 m | 81.7545 m | **95.655336 m** |
+| D | 88.3886 m | 46.4587 m | **88.388564 m** |
 
-**It is `h_ml`, and only `h_ml`.** `ccx_unc_to_par(u_mode)` reproduces `par_mode` to <1e-8 for
-all 21 parameters except `h_ml`:
+Under the default band the log-posteriors come out **+2.38 (N) / −42.93 (D)** off and the D − N
+margin flips to −34.63. **Under the refit's band, `ccx_unc_to_par(u_mode)` reproduces `par_mode`
+to 0.000e+00 for all 21 parameters in both arms, both log-posteriors reproduce to ~5e-10, and
+the margin is exactly the stored +10.6914.** The asymmetry that made it look like corruption is
+just logit geometry — D sits nearer a bound, where the two bands' slopes diverge most.
 
-| arm | `par_mode$h_ml` | `u_mode` decodes to |
-|---|---|---|
-| N | 95.6553 m | **81.7545 m** |
-| D | 88.3886 m | **46.4587 m** |
+**HOW IT WAS PINNED.** Rather than guessing, solve for the band: two arms give two equations
+`x = lo + plogis(u)(hi − lo)` in two unknowns, which return `lo = 85.0000, hi = 120.0000` —
+the driver's documented constant, recovered from the stored numbers alone. Two independent
+pairs agreeing on one hidden constant is proof; one pair would have been a hypothesis.
 
-The transform (`logit`, 30–200) is **unchanged since `0b5bb41`, 2026-08-12** — before the refit —
-so this is not a moved transform under a stored coordinate. The two fields were mutually
-inconsistent when written. **Cause not identified.** `h_ml` snapping onto `ccx_ocean_grid()` is
-the first place to look, and would also plausibly account for the 0.11 / 0.95 residual that
-`par_mode` leaves. Ruled out already: parameter-name ordering (`param_names` is identical to
-`CCX_PARAM_NAMES` in both files), code drift (`git diff de771be..c9e2478 -- R src data` is
-empty), and the untracked `data-raw/downloads/nuclear14c/` inputs (unchanged since Aug 10; they
-explain only the offset between full-repo and subset runs).
-
-**CONSEQUENCES.**
-1. **Use `par_mode`.** It reproduces the stored logposts and keeps the margin's sign. **Every
-   diagnostic in this handoff used `par_mode` and is unaffected** — as is the previous
-   handoff's §3a/§3b/§3c, which used it too.
-2. **Anything keyed on `u_mode` must be re-derived**, above all the **Laplace evidence**: its
-   `log|-H|` was finite-differenced in u-space about a point 14 m (N) / **42 m (D)** away from
-   the actual mode in `h_ml`. `diag_sst_seas_zeroing.R` rebuilds `u_mode` the same way.
-3. **This is a stronger reason the evidence is unquotable** than the four already on record, and
-   it points the same way as the margin: D is off ~18× further than N. It is probably also what
-   the pre-launch step-stability flag on D's `h_ml` was detecting.
-4. **Add a round-trip gate on read** wherever a mode file is loaded:
+**WHAT THIS MEANS IN PRACTICE.**
+1. **`par_mode` is band-independent and always safe.** Every diagnostic in this handoff used it.
+   The two that touch the likelihood (`diag_seas_lag_profile.R`,
+   `diag_seasonal_phase_obs_vs_model.R`) call `ccx_loglik` with no prior and no transform, so
+   they are unaffected either way.
+2. **`u_mode`, `hessian`, `cov`, `sd_unc`, `eigen` and `logdet_negH` are u-space and therefore
+   BAND-DEPENDENT** — re-apply the override before using any of them. **The Laplace evidence is
+   fine as stored**; it was computed in-process under the band. The four reasons it is still not
+   quotable are the ones in the previous handoff (§0.3), unchanged.
+3. **The one real defect is small: the rds stores `kz_bracket` but not the h_ml band.** That
+   asymmetry is what let a documented, gated override read as corruption. Fix by adding
+   `hml_bound = ARM_HML_BOUND` to the `out` list, and gating the round-trip on read:
    `stopifnot(max(abs(unlist(ccx_unc_to_par(u_mode)) - unlist(par_mode))) < tol)`.
+
+**Method note for the next reader:** "implausible result = bug" is right, but the bug can be in
+the reader. I had a deterministic, asymmetric, sign-flipping discrepancy and wrote it up as a
+corrupt artifact before checking what the producing script does to the shared parameter table —
+which it documents at length. **Read the producer before indicting the product.**
 
 ## A3. Revised next steps
 
-**Before anything else** — the `u_mode` round-trip gate, and diagnose the `h_ml` inconsistency.
-It is cheap, it gates the evidence, and it decides whether a re-polish is even meaningful.
-**Then** the seasonal amplitude work in §4 (SPO d13C 3.5× first). **Then**, if a re-fit is
-wanted, do it on Torch as parallel dispersed multi-start — the platform is now verified, and
-only `adaptMCMC` is missing.
+**The `h_ml` question is closed** — no re-polish is needed on its account, and the stored
+evidence stands or falls on the reasons already recorded. The remaining work, in order:
+
+1. **The seasonal amplitude deficit** (§4) — SPO d13C is 3.5x too big and SH seasonality is
+   unfitted by construction, so that is the cheapest large misfit. This is now the top item.
+2. **The small provenance fix**: record `hml_bound` in the arm files and add the round-trip
+   gate, so this cannot cost anyone else an afternoon.
+3. **If a refit is wanted**, run it on Torch as parallel dispersed multi-start — the platform is
+   verified end to end and only `adaptMCMC` is missing.
