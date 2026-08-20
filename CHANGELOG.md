@@ -6187,3 +6187,72 @@ D implies export rises with DIC, a negative CO2 feedback mainstream models do no
 **Pedagogically**, DESIGN.md line 740: a constant-mass pump changes the ocean sink by **exactly
 zero** and D does not, so N keeps "the pump sets the gradient, not the uptake" true for the app.
 **Recommendation: keep N — as the defensible default, not as the winner of a comparison.**
+
+## 2026-08-20 (later) — The seasonal-phase hypothesis fails its own decisive test, and the observed amplitude reference was a factor of 2 out
+
+Handoff `handoff_2026-08-20_refit_landed_seasonal_phase.md` §3a named one test as the one
+that would settle whether the seasonal geometry is a bug: compare the MODELLED MLO CO2
+seasonal phase against the OBSERVED phase the likelihood already scores. It ran, and it
+went against the hypothesis.
+
+**`calibration/diag_seasonal_phase_obs_vs_model.R` (new).** Same estimator on both sides
+(`ccx_seasonal_target()`, `LIK_SEAS_WINDOW` = 1975–2024); `a·sin + b·cos` peaks at
+`atan2(a, b)/2π`, which is the whole conversion.
+
+- **The scored observable is NOT 1–2 months late.** At the arm-N mode the model peaks
+  **0.09 months (2.7 days) EARLY** at `co2_seasonal_MLO`; SPO −0.51 mo, `d13c_seasonal_MLO`
+  +0.40 mo, `d13c_seasonal_SPO` −0.21 mo. Every scored stream is inside half a month. The
+  drivers being late does not propagate to what the likelihood sees.
+- **Cost decomposition** (each row's own Gaussian cost, re-evaluated at the observed phase
+  with the model's radius, and at the observed radius with the model's phase): three of the
+  four seasonal rows are **AMPLITUDE-dominated** — `co2_MLO` 228 vs 58, `co2_SPO` 116 vs 63,
+  `d13c_SPO` 361 vs 35. Only `d13c_MLO` is phase-dominated (202 vs 59).
+
+**THE FACTOR OF 2, and it inverts the 08-18/08-20 reading.** `diag_sst_seas_zeroing.R`
+compared PEAK-TO-PEAK model amplitudes (`2·mean(sqrt(a²+b²))`) against "obs 3.02 ppm /
+0.55 ppm / 0.178 ‰", which are the SEMI-amplitudes. Peak-to-peak observed is **MLO 6.764,
+SPO 1.196, d13C MLO 0.358** — and the raw NOAA monthly climatology (`co2_ppm − co2_deseas`,
+1990–2014) independently gives an MLO peak-to-trough of **6.61 ppm**. So:
+
+- The model **UNDERSHOOTS** MLO (5.24 vs 6.76, −22 %); it does not overshoot.
+- "Two mechanisms with the same sign of effect on the dominant stream ⇒ degeneracy" fails
+  with it. The ocean seasonal term is zeroed because it **damps an already-too-small cycle**
+  (5.28 off → 5.24 fitted → **4.50** at the physical 2.0 K, i.e. further below obs) — no
+  phase bug required. The −673 on `co2_seasonal_MLO` is amplitude AND phase both moving the
+  wrong way, not "amplitude improves while phase rotates away".
+- Correction block + named `SSTZ_OBS_P2P` constants added to `diag_sst_seas_zeroing.R`; the
+  original premise is left in place and marked WRONG rather than rewritten. The inline
+  literals are what let a factor of 2 survive — *labels derive from named constants*.
+
+**`calibration/diag_seas_lag_profile.R` (new) — the convention is RIGHT and the COMMENT is
+wrong.** `CCX_SEAS_T_LAG` / `CCX_SST_SEAS_LAG` are compile-time constants with hardcoded
+twins in `src/ccx_core.cpp` (`static const double`), so each point needs a source patch, a
+rebuild and a fresh process; the script does this in a `tempdir()` copy and never touches the
+working tree, and gates that the patch took before spending a run. At the mode, seasonal-row
+logL:
+
+| `CCX_SEAS_T_LAG` | 0.0 | 0.5 | 1.0 | 1.5 | **2.0** | 2.5 | 3.0 |
+|---|---|---|---|---|---|---|---|
+| seasonal logL | −19466 | −10841 | −4764 | −1411 | **−521** | −1507 | −3650 |
+
+The shipped 2.0 is a clean **interior optimum**, beating the "climatologically correct"
+mid-July peak (LAG = 0) by **18,944 log-units**. The slice is biased toward the incumbent
+(`match_incumbents_optim`: fitted incumbent, un-reoptimised challengers, which bought 309
+log-units of artifact last time) — but 19,000 is not 309, and the profile is smooth and
+single-peaked at the shipped value. **The constant multiplies SOIL respiration through
+`q10`, not air temperature, and soil temperature genuinely lags air temperature by weeks to
+months — so a September peak is defensible and the comment ("seasonal land T peak after
+Jun") is what is wrong.** `CCX_SST_SEAS_LAG` is nearly FLAT (−490 to −532 across 0.5–3.5 mo)
+— unidentified at this mode, which follows from `sst_seas_amp` being ~0.09 K.
+
+**Abandoned:** the plan to fix `(3.5 + LAG)/12` and redo the ~33 h refit. The data reject the
+"corrected" phase by four orders of magnitude in log-units. Open decision 1 is answered NO.
+
+**Not done:** Torch. `ssh torch` reaches `login.torch.hpc.nyu.edu` through the gateway but
+the final hop is refused (`Permission denied`, agent has no identities), so R availability
+and version there are still unmeasured. Noted for Marcus rather than worked around.
+
+**Scale note for the Torch question anyway:** one full 1750–2024 monthly run plus its
+per-stream likelihood is ~2 s, and 14 patch-rebuild-evaluate points took 32 s wall clock. The
+32.6 h refit is Nelder-Mead's eval COUNT, not per-eval cost — which is exactly why §6's
+parallel dispersed multi-start is the right restructuring rather than a port.
