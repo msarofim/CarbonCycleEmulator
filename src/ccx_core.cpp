@@ -142,8 +142,14 @@ struct Par {
 // CCX_SEAS_PHI_EFF and CCX_SEAS_T_LAG bit for bit (same discipline as
 // SV_TO_M3YR below).
 static const double SEAS_PHI_EFF[2] = { 75.0, -30.0 };
+// Twins of CCX_SEAS_T_LAG / CCX_SST_SEAS_LAG -- see the long note at those
+// constants in R/model.R before touching either. In short: the 3.5 in
+// (3.5 + LAG)/12 already places the zero-lag NH peak at mid-July, SEAS_T_LAG
+// scales SOIL respiration rather than air temperature so its mid-September peak
+// is correct (measured: a clean interior optimum, 18,944 log-units above LAG = 0),
+// and SST_SEAS_LAG is unidentified while sst_seas_amp sits near zero.
 static const double SEAS_T_LAG = 2.0;
-static const double SST_SEAS_LAG = 2.5;   // twin of CCX_SST_SEAS_LAG
+static const double SST_SEAS_LAG = 2.5;
 
 // Daily-mean TOA insolation, flat-sun formula, S0 omitted (all uses divide by
 // an annual-mean norm, so it cancels). Twin of R's ccx_insol(); periodic in t

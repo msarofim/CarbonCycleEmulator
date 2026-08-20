@@ -204,10 +204,26 @@ CCX_F_LUC_WOOD_DEFAULT <- 0
 #' reproduces only on that path. Diagnostics reconstructing those modes must
 #' set it explicitly.
 CCX_SEAS_PHI_EFF <- c(NH = 75, SH = -30)   # deg latitude, flux-weighted effective
-CCX_SEAS_T_LAG   <- 2.0                    # months, seasonal land T peak after Jun
-CCX_SST_SEAS_LAG <- 2.5                    # months: the OCEAN's thermal inertia lags
-                                           # insolation more than land's 2.0 (NH SST
-                                           # peaks Aug-Sep, land air T late Jul-Aug)
+# LAG CONVENTION: sin(2*pi*(t - (3.5 + LAG)/12)) peaks at t = 0.25 + (3.5 + LAG)/12,
+# so the 3.5 ALREADY places the zero-lag NH peak at mid-July and LAG is measured
+# from there, not from the solstice.
+#
+# CCX_SEAS_T_LAG = 2.0 therefore puts the NH peak in mid-SEPTEMBER, which is later
+# than NH land AIR temperature -- and that is correct, because this term multiplies
+# SOIL respiration (the tau_soil_fast/slow fluxes below), not air temperature.
+# MEASURED 2026-08-20, calibration/diag_seas_lag_profile.R: profiled at the arm-N
+# mode, the seasonal rows give -19466 / -10841 / -4764 / -1411 / -521 / -1507 / -3650
+# at LAG = 0.0 / 0.5 / 1.0 / 1.5 / 2.0 / 2.5 / 3.0. A clean interior optimum at 2.0,
+# 18,944 log-units above the mid-July peak an air-temperature reading would want.
+# An earlier comment here claimed "seasonal land T peak after Jun"; that was the
+# air-temperature reading and it is wrong. DO NOT "correct" the 2.0 to match it.
+CCX_SEAS_T_LAG   <- 2.0                    # months past the mid-July zero-lag peak
+# UNIDENTIFIED at the arm-N mode, which is why no measured value is quoted: the
+# same profile moves the seasonal rows only -490 -> -532 across 0.5-3.5 months,
+# because sst_seas_amp is fitted at ~0.09 K and a near-zero amplitude carries no
+# phase information. Kept at 2.5 as a prior belief (ocean thermal inertia exceeds
+# land's), not as a fitted quantity.
+CCX_SST_SEAS_LAG <- 2.5                    # months past the mid-July zero-lag peak
 CCX_SEAS_DRIVERS_DEFAULT <- 1
 
 #' Daily-mean top-of-atmosphere insolation at latitude phi, flat-sun formula.
