@@ -6949,3 +6949,55 @@ nothing for banding to fix.
 ~10 % at every latitude. Closing it needs a different driver for the water-limited tropics
 (precipitation or soil moisture), which is a much larger change than a band split and is NOT
 justified by 0.3 points.
+
+## 2026-08-20p — Dropping the low latitudes from the cycle: it derives the poleward φ, it doesn't beat it
+
+Marcus: *"what about not including the low-latitudes in the annual cycle at all, and just using the
+higher latitudes that are truly insolation driven? And maybe fewer than 4 bands?"* This is NOT the
+banding proposal — banding kept the badly-behaved low-latitude bands and gave them curves; **this
+deletes them from the seasonal term.** Tested offline, `calibration/diag_npp_seasonal_fraction.R`.
+
+Model: `n(t) = 1 + w(L)·A·(I(φ(L),t)/mean I − 1)`, with **both** `w(L)` (the NPP share poleward of
+the cutoff) and `φ(L)` (that share's NPP centroid) **measured from MOD17**. Equatorward of `L`, NPP
+is aseasonal — a statement, not a fudge: that carbon's cycle is water-driven. With `A = 1` this is a
+**zero-parameter** seasonal driver. The annual budget is untouched at every `L`.
+
+| NH cutoff | w(L) | φ(L) | resid, A = 1 (0 params) | resid, A free | A | w·A |
+|---|---|---|---|---|---|---|
+| 0 | 1.000 | 34.96 | 16.8 % | 13.1 % | 1.54 | 1.54 |
+| 23.5 | 0.674 | 47.04 | 16.2 % | 11.7 % | 1.56 | 1.05 |
+| 40 | 0.478 | 53.18 | 17.9 % | 11.0 % | 1.83 | 0.88 |
+| 55 | 0.188 | 61.42 | 24.4 % | 9.9 % | 3.65 | 0.69 |
+| **60** | **0.108** | **64.41** | 27.1 % | **9.4 %** | 5.85 | **0.63** |
+
+*(benchmarks on the same target: one curve, φ + amplitude free = **7.4 %**; four bands at their
+centroids with A = 1 = 14.6 %)*
+
+**The zero-parameter version fails — 16–27 %, worse than everything.** Extratropical insolation is
+not steep enough: at L = 23.5 the model delivers `w·p2p(φ)` ≈ 0.90 against an observed 1.75.
+**The A-free version improves monotonically with the cutoff but never reaches the single free
+curve** (9.4 % at L = 60 vs 7.4 %). **And "fewer bands" changes nothing**: two bands above 23.5,
+split at 55, give **7.5 %** — the same as one curve, for one more term.
+
+**But it DERIVES the poleward φ that the calibration independently prefers, which is the real
+result.** At L = 60 the model is a curve at **φ = 64.4 with an effective single-curve amplitude of
+0.63** — essentially the (φ 65, A 0.62) cell of the measured ridge, reached from a completely
+different direction. So the shipped configuration's poleward latitude and damped amplitude are
+**not two tuned constants**: they are *"the seasonal cycle is carried by the ~11 % of NH NPP
+poleward of 60 N, whose centroid is 64 N"*. That is a statable physical claim.
+
+**And `A` measures the rectification directly**: 1.54 at L = 0 rising to **5.85 at L = 60** — the
+boreal band's NPP swings ~6× harder than its own insolation, because it goes to zero in winter
+while insolation at 64 N only falls to ~10 % of its mean.
+
+**Marcus' SH prediction is confirmed again, and more strongly.** 62 % of SH NPP is equatorward of
+10 S, 0.0 % south of 55 S, and **at L = 60 there is no NPP at all** — the row is reported as
+"NO NPP POLEWARD OF THIS CUT" rather than fitted. Every SH cutoff leaves ~12 % residual regardless.
+Restricting to high southern latitudes is not merely unhelpful, it is empty.
+
+**Three self-inflicted failures found and fixed rather than tolerated:** an unconstrained
+least-squares amplitude returned **negative** values at low cutoffs — an *inverted* seasonal cycle,
+which fits a badly-shaped target better than an upright one — now clamped at zero, with the clamp
+reported; `qr.solve` on a near-empty band returns coefficients of order 1e3–1e6 **without
+erroring**, so non-finite candidates are skipped and **counted**; and an empty poleward cut gives
+`0/0` for the centroid, whose NaN killed the run several frames from its cause.
