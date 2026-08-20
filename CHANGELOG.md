@@ -6897,3 +6897,55 @@ both ends of the ridge (11.32 at 50, 11.45 at 75), so that diagnostic does not d
 **STILL MARCUS'.** The trade is now priced from end to end: 75 + 0.49 is the best fit and misnames
 the flux centroid by 40.7°; 50 + 0.96 costs 34.7, needs no amplitude correction worth the name, and
 sits 15.7° from the biomass. **Nothing is committed to the model.**
+
+## 2026-08-20o — Banding the NH land: the ecosystems ARE different, and splitting them buys nothing
+
+Marcus: *"It seems like the problem is that we are trying to apply a single insolation curve to
+some very different ecosystems. The atmosphere can still be at the hemispheric level, but the NPP
+can be a bit more complicated."* Tested offline, no model runs
+(`calibration/diag_npp_bands.R`, MOD17A2HGF 8-day PsnNet, 5 years, four ecosystem-motivated bands).
+
+**The test was designed to be decisive either way.** If the 11.4 % single-curve residual is an
+AGGREGATION artefact, each band on its own should be well described by its own insolation curve
+and the per-band residuals should collapse. If each band is individually just as badly matched,
+the PREMISE is wrong and banding buys parameters instead of physics.
+
+| NH band | NPP share | NPP centroid | own p2p | best-fit φ | best-fit A | residual |
+|---|---|---|---|---|---|---|
+| 0–23.5 | 32.6 % | 9.93 | 0.944 | 18.2 | 1.53 | **11.5 %** |
+| 23.5–40 | 19.7 % | 32.13 | 1.299 | 5.1 | 4.00\* | **13.7 %** |
+| 40–55 | 28.9 % | 47.83 | 2.659 | 67.8 | 1.06 | **8.3 %** |
+| 55–90 | 18.8 % | 61.42 | 3.964 | 86.5 | 1.08 | **9.5 %** |
+
+*(\*at the amplitude grid's ceiling — that band's per-band residual is grid-limited. The aggregate
+fits below solve for amplitude by least squares and are unaffected.)*
+
+**The per-band residuals are NOT smaller than the whole-hemisphere 11.4 % — two are worse.** So the
+misfit is not an aggregation artefact. Whole-hemisphere fits to the same observed aggregate:
+
+| model | NH | SH | params |
+|---|---|---|---|
+| 1 band, φ + amplitude free | **7.4 %** | 11.5 % | 2 |
+| 4 bands at NPP centroids, amplitudes = 1 | **14.6 %** | 12.9 % | **0** |
+| 4 bands at NPP centroids, amplitudes free | **7.1 %** | 10.5 % | 4 |
+
+**Banding buys 0.3 points for two extra parameters.** And the no-free-parameter version — honest
+spatial aggregation, the one most likely to be assumed correct — is **twice as bad as one curve**.
+
+**Marcus' physical reading is nonetheless RIGHT, and the bands prove it.** They are genuinely
+different: peak-to-peak spans 0.94 → 3.96 (4×) and best-fit φ spans 5 → 86. The pattern is
+readable: **40–55 and 55–90 want φ POLEWARD of their own centroids (47.8→67.8, 61.4→86.5) with
+A ≈ 1** — rectification, showing up independently in each boreal band and confirming what the
+whole-hemisphere fit found. **0–23.5 and 23.5–40 are not light-shaped at all** (the subtropical
+band wants φ = 5 with the amplitude pegged at the grid ceiling), because their cycle is
+water-driven, not light-driven. **The errors partly CANCEL in the aggregate**, which is why one
+curve does better than four honest ones.
+
+**And Marcus' SH prediction is confirmed by the numbers:** 75.9 % of SH NPP lies equatorward of
+23.5 S and **0.0 % south of 55 S**. There is no boreal-equivalent band to separate, so there is
+nothing for banding to fix.
+
+**Conclusion: do NOT band.** The residual is the insolation premise, not the aggregation, and it is
+~10 % at every latitude. Closing it needs a different driver for the water-limited tropics
+(precipitation or soil moisture), which is a much larger change than a band split and is NOT
+justified by 0.3 points.
