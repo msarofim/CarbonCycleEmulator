@@ -6800,3 +6800,48 @@ what its name says. Nothing is committed to the model either way.
 
 **NOT explained by any of this:** `sst_seas_amp_NH` sits at 0.33–0.54 in **every** cell against an
 observed 2.237. That is the next real defect and this arc did not touch it.
+
+## 2026-08-20m — The SH latitude, and the amplitude convention the data reject
+
+**Marcus' SH prior — "the weighted latitude of the non-Antarctic land mass, because that's where
+the biomass is" — checks out** (`calibration/diag_sh_land_latitude.R`), and three independent
+weightings land within 3.4° of each other:
+
+| weighting | SH | NH |
+|---|---|---|
+| **land area, Antarctica EXCLUDED** | **−18.08** | 37.70 |
+| land area, Antarctica *included* | −35.93 | 37.70 |
+| vegetated area (MOD17 valid pixels) | −18.47 | 40.59 |
+| NPP flux (MOD17) | −15.12 | 34.29 |
+
+Next to the 8-day shape-matched −16.14, that is four readings clustered at −15 to −18.5. **And the
+Antarctica-included row is −35.93, close to the shipped −30** — suggestive of where the shipped
+value came from, though not proof. Note the direction of the gaps: deserts are subtropical, so
+"where the land is" and "where the biomass is" are *not* the same latitude, and the NEP term
+represents the flux, not the acreage.
+
+**But the proposed NAMING does not survive the test.** Marcus suggested describing the pair as the
+"best amplitude fit" and "best shape fit" between NH land NPP and insolation. The second is
+accurate (with the qualifier that φ = 75 is the best shape fit *once amplitude is free* — at unit
+amplitude it is 50). **The first is not**, and the gap is not cosmetic: 0.49 is the *least-squares*
+scale, and the factor that would make the model's swing EQUAL the observed swing is **0.624** (NH,
+φ 75) and **1.995** (SH, φ −18). So the two conventions were run against each other:
+
+| φ NH | φ SH | amp NH | amp SH | REOPT | `seas_T_amp_NH` |
+|---|---|---|---|---|---|
+| 75 | −40 | 0.49 | 0.36 | **−2025.2** | 10.75 |
+| 75 | −15.75 | 0.49 | 1 | −2037.5 | 10.92 |
+| **75** | **−18** | **0.49** | **0.97** | **−2043.5** | **11.45** |
+| 75 | −18 | 0.62 | 0.97 | −2059.9 | 17.29 |
+| 75 | −30 | 0.62 | 1.14 | −2382.4 | 20.25 |
+| 75 | −18 | 0.62 | 1.99 | −2388.2 | 20.36 |
+
+**The amplitude-matching convention is rejected by ~345 log-units**, almost all of it the SH
+factor; the NH 0.62-vs-0.49 difference is ~16. **So the constants are residual-minimising scales,
+not amplitude-matching ones, and the name has to say so.** The model deliberately delivers **78 %**
+of the observed NH seasonal swing: the insolation shape is too peaked, so matching peak-to-peak
+would put carbon in the wrong months, and both the shape data and the CO₂ record prefer a damped
+version of the right shape over an undamped version of the wrong one.
+
+**At (75, −18, 0.49, 0.97) the re-optimised `seas_T_amp_NH` is 11.4539 against a measured
+11.4450.** That is the closest any cell has come, and it is Marcus' SH latitude.
