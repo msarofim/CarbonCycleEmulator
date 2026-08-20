@@ -6845,3 +6845,55 @@ version of the right shape over an undamped version of the wrong one.
 
 **At (75, −18, 0.49, 0.97) the re-optimised `seas_T_amp_NH` is 11.4539 against a measured
 11.4450.** That is the closest any cell has come, and it is Marcus' SH latitude.
+
+## 2026-08-20n — The measured ridge: 75 wins, but only by 35, and at 50 the amplitude knob vanishes
+
+Marcus asked two things: **what IS the NH NPP-weighted latitude, and could the NH optimum move now
+that the SH has**. Both were live gaps.
+
+**The NH NPP centroid is 34.29 — the shipped constant is 40.7° away from it.**
+
+| NH weighting | lat | insolation p2p | vs observed 1.747 |
+|---|---|---|---|
+| **NPP flux (MOD17)** | **34.29** | 0.871 | **0.50×** |
+| land area | 37.70 | 0.981 | 0.56× |
+| vegetated area | 40.59 | 1.081 | 0.62× |
+| best shape fit at unit amplitude | 49.96 | 1.458 | 0.83× |
+| amplitude-matching latitude | 55.49 | 1.747 | 1.00× |
+| **shipped** | **75.00** | 2.801 | **1.60×** |
+
+**No latitude has both the observed amplitude and the observed shape.** At the biomass centroid the
+light cycle is half as seasonal as productivity actually is; at 75 it is 1.6× too seasonal. What 75
+buys is **polar night** — a hard zero, the only thing in the insolation family resembling a growing
+season switching off.
+
+**And yes, the NH ranking DID depend on the SH.** The earlier "NH optimum is 38–45" was measured at
+SH −30, and most of its cells carried amplitude 1 while 75 and 65 carried their measured factors —
+a comparison rigged in 75's favour and then read as if it were not. Both flaws are fixed by
+profiling **along the measured ridge**: every NH latitude carries *its own* rms-optimal amplitude
+factor, SH pinned at −18 / 0.97.
+
+| φ NH | measured A | REOPT | `seas_T_amp_NH` |
+|---|---|---|---|
+| 34.29 | 1.53* | −2091.1 | 10.16 |
+| 45 | 1.12 | −2081.1 | 11.26 |
+| **50** | **0.96** | **−2078.2** | **11.32** |
+| 55 | 0.83 | −2074.4 | 11.57 |
+| 65 | 0.62 | −2065.3 | 11.84 |
+| **75** | **0.49** | **−2043.5** | **11.45** |
+
+*(\*34.29's A is extrapolated — the shape scan started at 38.35, A = 1.38.)*
+
+**The ridge is monotone toward 75 with no interior optimum, and it is NOT flat — but it is
+shallow: 47.6 log-units across 40° of latitude**, against the 548 that separates the shipped
+configuration from any repaired one. Every cell converged to under 1 log-unit on its last restart,
+so that spread is signal, not optimiser noise. Polar night is doing real work, modestly.
+
+**The new fact that matters for the choice: at φ = 50 the measured amplitude factor is 0.96 —
+within 4 % of 1.** Site the shape at 50 and the amplitude knob is very nearly redundant: **one
+constant instead of two, for 34.7 log-units.** And `seas_T_amp_NH` lands on its observed 11.45 at
+both ends of the ridge (11.32 at 50, 11.45 at 75), so that diagnostic does not discriminate.
+
+**STILL MARCUS'.** The trade is now priced from end to end: 75 + 0.49 is the best fit and misnames
+the flux centroid by 40.7°; 50 + 0.96 costs 34.7, needs no amplitude correction worth the name, and
+sits 15.7° from the biomass. **Nothing is committed to the model.**
