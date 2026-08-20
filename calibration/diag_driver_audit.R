@@ -388,4 +388,63 @@ if (!file.exists(scf)) {
   cat("     season, as designed. The drivers are not hiding it.\n")
 }
 
+# ---------------------------------------------------------------------
+sep("12. THE NH/SH NPP SPLIT AGAINST MOD17")
+npf <- ccx_path("data", "obs_npp_hemispheric.rds")
+if (!file.exists(npf)) {
+  cat("  data/obs_npp_hemispheric.rds ABSENT -- run data-raw/build_npp_hemispheric.R\n")
+} else {
+  np <- readRDS(npf)
+  cat(sprintf("  %s\n", np$source))
+  cat(sprintf("  global %.2f PgC/yr, %d-%d | NH share %.4f (sd %.4f over years)\n\n",
+              np$global_mean_PgC, min(np$years), max(np$years),
+              np$nh_share_mean, np$nh_share_sd))
+  # COMPARE AT THE MODEL'S MODERN STATE, NOT AT THE PARAMETER. npp_frac_NH is a
+  # 1750 split; MOD17 is 2001-2023. The model walks between them through
+  # hemispheric clearing, so the like-for-like comparison is against the
+  # REALISED modern share -- and the 1750 anchor is then BACKED OUT through the
+  # same clearing. Comparing the raw parameter to MOD17 would understate the
+  # gap, because clearing was NH-heavy and lowers the NH share over time.
+  npp0 <- c(NH = ccx_const("NPP_GLOBAL_PI") * p$npp_frac_NH,
+            SH = ccx_const("NPP_GLOBAL_PI") * (1 - p$npp_frac_NH))
+  land0 <- vapply(npp0, function(n) n * (p$npp_leaf_frac * p$tau_leaf +
+             (1 - p$npp_leaf_frac) * p$tau_wood +
+             (1 - p$litter_slow_frac) * p$tau_soil_fast +
+             p$litter_slow_frac * p$tau_soil_slow), 0)
+  Fm <- ccx_build_forcing("historical", AUDIT_PROFILE_YRS, prod_c14 = 0, bomb_total_kmol = 102)
+  for (cc in c("cum_luc_NH", "cum_luc_SH")) Fm[[cc]] <- Fm[[cc]] * p$luc_scale
+  # clearing evaluated over MOD17's own window, not at a single year
+  iw <- which(Fm$year >= min(np$years) & Fm$year <= max(np$years))
+  cl <- c(NH = mean(Fm$cum_luc_NH[iw]) / land0[["NH"]],
+          SH = mean(Fm$cum_luc_SH[iw]) / land0[["SH"]])
+  a <- 1 - cl[["NH"]]; b <- 1 - cl[["SH"]]
+  mod_modern <- p$npp_frac_NH * a / (p$npp_frac_NH * a + (1 - p$npp_frac_NH) * b)
+  # invert: which 1750 parameter reproduces the OBSERVED modern share?
+  q <- np$nh_share_mean
+  anchor <- q * b / (q * b + (1 - q) * a)
+  cat(sprintf("  model cleared fraction over %d-%d: NH %.3f, SH %.3f\n",
+              min(np$years), max(np$years), cl[["NH"]], cl[["SH"]]))
+  cat(sprintf("  %-42s %.4f\n", "npp_frac_NH (the 1750 parameter, fitted)", p$npp_frac_NH))
+  cat(sprintf("  %-42s %.4f\n", "-> model's REALISED modern NH share", mod_modern))
+  cat(sprintf("  %-42s %.4f\n", "MOD17 observed modern NH share", q))
+  cat(sprintf("  %-42s %+.4f\n", "gap (model - observed)", mod_modern - q))
+  cat(sprintf("  %-42s %.4f\n", "=> 1750 anchor implied by MOD17", anchor))
+  cat(sprintf("\n  The implied 1750 anchor %.3f sits comfortably inside the UNIFORM[0.4, 0.8]\n", anchor))
+  cat("  prior, so nothing was bounding the parameter away from it. The fit chose\n")
+  cat(sprintf("  %.3f instead, %.3f below.\n", p$npp_frac_NH, anchor - p$npp_frac_NH))
+  cat(sprintf("\n  Block 8 priced the move: at 0.60 the objective loses 794 log-units, and\n"))
+  cat("  the veto is d13c_seasonal_MLO. So MOD17 does not settle npp_frac_NH -- it\n")
+  cat("  converts it from an unconstrained fit into a CONFLICT with a scored\n")
+  cat("  stream, which is a much more useful thing to have.\n")
+  cat(sprintf("\n  Per unit vegetated area the SH really IS more productive (tropical-\n"))
+  cat(sprintf("  dominated): MOD17 says %.2fx, the model's mode says 2.34x. The model's\n",
+              (mean(np$by_year$SH_all) / mean(np$by_year$area_SH)) /
+              (mean(np$by_year$NH_all) / mean(np$by_year$area_NH))))
+  cat("  contrast is the right SIGN and too extreme, not qualitatively wrong.\n")
+  cat(sprintf("\n  TIME-VARYING? Over the satellite era the share moves by sd %.4f\n", np$nh_share_sd))
+  cat("  (range %.3f-%.3f) -- small. The case for a time-varying split is about\n" |>
+      sprintf(min(np$nh_share), max(np$nh_share)))
+  cat("  1750-2000 clearing, which the model already represents endogenously.\n")
+}
+
 sep("DONE")

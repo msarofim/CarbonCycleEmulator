@@ -171,6 +171,47 @@ coastal smoothing at 2°. Coastal cells are maritime-damped in `absolute.nc`, so
 approximation biases the land amplitude **low**, which is the conservative direction for the
 argument it is used in.
 
+### 3c. Terrestrial NPP hemispheric split (added 2026-08-20f)
+
+`npp_frac_NH` was fitted under a **UNIFORM[0.4, 0.8]** prior with nothing on disk able to
+check it. **MOD17A3HGF Collection 6.1** — the standard satellite NPP algorithm — now does.
+The LP DAAC original is 500 m sinusoidal HDF behind an Earthdata login; **ICDC Hamburg
+republishes it regridded to a regular 0.5° netCDF grid, CC-BY-4.0, no registration**, one
+46 MB zip covering 2001–2023. Running SW, Zhao M (2021), doi:10.5067/MODIS/MOD17A3HGF.061;
+regrid doi:10.25592/uhhfdm.14635. Built by `data-raw/build_npp_hemispheric.R` →
+`data/obs_npp_hemispheric.rds`.
+
+**Result:** global **52.75 PgC/yr**, NH share **0.5942** (sd 0.0135 across 2001–2023).
+
+**The area trap, and it is the same shape as §3b's.** `npp` is the grid-cell mean over MODIS
+pixels **carrying valid data**, not an average over the whole cell. Multiplying by full 0.5°
+cell area assumes every cell is wholly vegetated and gives **65.1 PgC/yr**, well above
+anything MOD17 publishes. The file carries its own fix: `numberofvalidvalues` counts
+contributing pixels, and because MOD17's native sinusoidal pixels are **equal-area** that
+count is proportional to valid area — 14400 at the equator, 7258 at 60°N (ratio 0.504 against
+cos 60° = 0.500). Valid area = `nvalid` × pixel area, pixel area derived from the grid as the
+equatorial cell ÷ 14400 (= 464 m square, against MODIS's nominal 463.3 m). Total then lands
+at 52.75, and the sanity gate on the global total is what catches a regression.
+
+**Compare at the model's modern state, never at the parameter.** `npp_frac_NH` is a **1750**
+split; MOD17 is 2001–2023. The model walks between them through hemispheric clearing, so the
+like-for-like comparison is against the *realised* modern share and the 1750 anchor is backed
+out through the same clearing. Comparing the raw parameter to MOD17 would **understate** the
+gap, since NH-heavy clearing lowers the NH share over time.
+
+| quantity | value |
+|---|---|
+| `npp_frac_NH`, fitted 1750 parameter | 0.4662 |
+| → model's realised modern NH share | 0.4461 |
+| MOD17 observed modern NH share | **0.5942** |
+| gap (model − observed) | **−0.1481** |
+| ⇒ 1750 anchor implied by MOD17 | **0.6136** |
+
+The implied anchor sits comfortably **inside** the uniform prior, so nothing was bounding the
+parameter away from it. Per unit vegetated area the SH genuinely *is* more productive
+(tropical-dominated): MOD17 1.64× against the model's 2.34× — right sign, too extreme.
+
+
 ---
 
 ### 3a. Pre-1850 land-use emissions (added 2026-08-13)
