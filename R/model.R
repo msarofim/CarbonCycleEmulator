@@ -675,6 +675,19 @@ ccx_default_params <- function() {
     seas_T_amp_NH = 12,   # K, seasonal land temperature half-amplitude
     seas_T_amp_SH = 6,
     seas_lag_p = 2.25,    # months, phenology lag of NPP behind insolation
+    # DIAGNOSTIC CHANNEL SWITCH (2026-08-20f). Scales the seasonal NEP term and
+    # NOTHING else. 1 = the shipped model, bit for bit. 0 turns that one channel
+    # off while leaving the annual carbon budget untouched, because the term is
+    # zero-annual-mean by construction (the / nrm$n normaliser is what makes it
+    # so). NOT in CCX_PARAM_TABLE and never fitted -- it is the missing third
+    # switch in a channel decomposition whose other two channels can already be
+    # isolated exactly (seas_T_amp = 0 kills the respiration modulation,
+    # sst_seas_amp = 0 kills the air-sea one). It exists because
+    # CCX_SEAS_PHI_EFF is a compile-time constant in src/ccx_core.cpp and so
+    # cannot be varied inside one R session. See
+    # calibration/diag_seas_channel_decomp.R.
+    seas_npp_amp_NH = 1,
+    seas_npp_amp_SH = 1,
     # Seasonal SST (2026-08-18, same session, Marcus: do the SST fix BEFORE the
     # refit). Hemispheric-mean SST seasonal half-amplitudes, K. These are the
     # OCEAN half of the seasonal cycle -- winter solubility uptake, summer
@@ -975,7 +988,8 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # is the model's own NPP, so fertilisation grows the cycle and clearing
       # shrinks it -- the old npp/npp0 scaling, now carried by npp itself.
       nrm  <- ccx_seas_norms(p)[[h]]
-      seas <- npp * (ccx_insol(CCX_SEAS_PHI_EFF[[h]], t - p$seas_lag_p / 12) / nrm$n - 1)
+      seas <- (if (h == "NH") p$seas_npp_amp_NH else p$seas_npp_amp_SH) * npp *
+        (ccx_insol(CCX_SEAS_PHI_EFF[[h]], t - p$seas_lag_p / 12) / nrm$n - 1)
     } else {
       amp   <- if (h == "NH") p$seas_amp_NH else p$seas_amp_SH
       phase <- if (h == "NH") p$seas_phase_NH else p$seas_phase_SH

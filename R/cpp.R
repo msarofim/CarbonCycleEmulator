@@ -127,6 +127,10 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$seas_lag_p)) p$seas_lag_p <- 2.25
   if (is.null(p$sst_seas_amp_NH)) p$sst_seas_amp_NH <- 2.0
   if (is.null(p$sst_seas_amp_SH)) p$sst_seas_amp_SH <- 1.2
+  # ABSENCE = 1 = the shipped model: a parameter list written before 2026-08-20f
+  # reaches the core as the model it was built for.
+  if (is.null(p$seas_npp_amp_NH)) p$seas_npp_amp_NH <- 1
+  if (is.null(p$seas_npp_amp_SH)) p$seas_npp_amp_SH <- 1
   # Observed-SST switch: ABSENCE = the legacy sst_scale * gmst path, so a
   # pre-2026-08-18 parameter list runs the model it was fitted to (the same
   # principle as seas_drivers above). ccx_default_params() sets 1 explicitly.
@@ -160,7 +164,7 @@ ccx_cpp_par <- function(p) {
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH",
       "seas_drivers", "seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p",
-      "sst_seas_amp_NH", "sst_seas_amp_SH", "sst_obs",
+      "sst_seas_amp_NH", "sst_seas_amp_SH", "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
       "revelle_frozen")]
 }
 

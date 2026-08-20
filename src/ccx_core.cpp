@@ -133,6 +133,15 @@ struct Par {
   int    seas_drivers;
   double seas_T_amp[2], seas_lag_p;
   double sst_seas_amp[2];
+  // DIAGNOSTIC CHANNEL SWITCH (2026-08-20f), not a fitted parameter and not in
+  // CCX_PARAM_TABLE. Scales the seasonal NEP term only. 1 = the shipped model,
+  // bit for bit; 0 = that channel off with the ANNUAL BUDGET UNTOUCHED, because
+  // the term it multiplies is zero-annual-mean by construction. It exists
+  // because the other two seasonal channels can already be switched exactly by
+  // parameters (seas_T_amp = 0, sst_seas_amp = 0) and this one could not --
+  // SEAS_PHI_EFF is a compile-time constant, so there was no way to isolate the
+  // NEP channel in a single session. See calibration/diag_seas_channel_decomp.R.
+  double seas_npp_amp[2];
   int    sst_obs;
   double seas_n_norm[2], seas_r_norm[2];
   double revelle_frozen;                    // mechanism switch, 0 or 1
@@ -340,8 +349,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 
     // seasonal NEP through the leaf pool; ENSO out of the responsive soil pool
     const double seas = (P.seas_drivers > 0)
-      ? npp * (seas_insol(SEAS_PHI_EFF[hi], t - P.seas_lag_p / 12.0)
-               / P.seas_n_norm[hi] - 1.0)
+      ? P.seas_npp_amp[hi] * npp * (seas_insol(SEAS_PHI_EFF[hi], t - P.seas_lag_p / 12.0)
+                                / P.seas_n_norm[hi] - 1.0)
       : P.seas_amp[hi] * std::sin(2.0 * M_PI * (t - P.seas_phase[hi] / 12.0))
         * (npp / A.npp0[hi]);
     add_flux(iatm, ilef, seas, A.alpha_photo);
@@ -575,6 +584,7 @@ static Par unpack_par(const List& p) {
   P.seas_T_amp[0] = p["seas_T_amp_NH"]; P.seas_T_amp[1] = p["seas_T_amp_SH"];
   P.seas_lag_p = p["seas_lag_p"];
   P.sst_seas_amp[0] = p["sst_seas_amp_NH"]; P.sst_seas_amp[1] = p["sst_seas_amp_SH"];
+  P.seas_npp_amp[0] = p["seas_npp_amp_NH"]; P.seas_npp_amp[1] = p["seas_npp_amp_SH"];
   P.sst_obs = (int) p["sst_obs"];
   // 720-point norm grid, NOT 12 -- twin of ccx_seas_norms() in R/model.R,
   // which documents why (the polar-night kink leaks +0.22 ppm / 275 yr at 12).

@@ -6435,3 +6435,94 @@ the realised share evolves only through hemisphere-specific clearing, and barely
 (1750) → 0.4600 (1850) → 0.4479 (1950) → 0.4466 (2024)**. Fertilisation is a common
 multiplier at a given CO₂ and cancels out of the share entirely. No product pulled for this;
 options are MODIS MOD17, TRENDY, or FLUXCOM, and the choice is Marcus'.
+
+## 2026-08-20f — The ¹³C channel decomposition: the NH "deficit" inverts at observed drivers
+
+Marcus: *"Once that is done, then start the 13C channel decomposition."* Done, plus the
+2×3 factorial the downloads made possible. **889 tests pass, 0 fail**, including after a core
+edit. Two new diagnostics, no refit.
+
+**A core edit, with an identity default.** Two of the three seasonal channels could already be
+switched off exactly by parameters (`seas_T_amp = 0`, `sst_seas_amp = 0`); the NEP channel
+could not, because `CCX_SEAS_PHI_EFF` is a compile-time constant in `src/ccx_core.cpp`. Added
+`seas_npp_amp_{NH,SH}` to both cores — a per-hemisphere multiplier on the seasonal NEP term,
+**default 1 = the shipped model bit for bit**, absent-means-1 in `ccx_cpp_par()`, not in
+`CCX_PARAM_TABLE` and never fitted. Same idiom as `seas_drivers` / `revelle_frozen` / `sst_obs`.
+R↔C++ bit-parity re-verified at 1.7e-13.
+
+### The amplitude budget (`diag_seas_channel_decomp.R`)
+
+Contributions are **vector** differences of the scored (sin, cos) pair, not scalar amplitudes —
+scalar reading is what made the 08-20 test wrong in both directions. **The channels sum to the
+all-off case within 0.9 % (MLO) / 0.2 % (SPO)**, so the budget is genuinely additive.
+
+MLO, peak-to-peak contribution and each channel's own δ¹³C-per-ppm signature:
+
+| channel | ΔCO₂ ppm | peak mo | signature | (observed total: 0.0528) |
+|---|---|---|---|---|
+| NEP NH | 11.767 | 4.51 | 0.0636 | photosynthetic, as expected |
+| resp NH | 7.708 | **11.09** | 0.0352 | **6.6 months antiphase to NEP** |
+| air-sea NH | **0.050** | 11.21 | 0.0045 | 1 % of the cycle |
+| emissions | 0.355 | 3.60 | 0.0495 | EDGAR/GFED, was not on the 08-20c channel list |
+| **all six** | **4.955** | 3.47 | 0.0848 | |
+
+**The two big land channels are each larger than the total and nearly antiphase.** They cancel.
+That is the mechanism behind the 08-20b non-monotonicity ("more respiration swing gives LESS
+MLO amplitude"), and it explains the isotopic excess: the cancellation suppresses net CO₂
+amplitude *more* than net δ¹³C amplitude, so the model's net signature (0.0848) is **higher than
+either contributing channel** (0.0636, 0.0352). The excess is a property of the cancellation
+geometry, not of any one channel. Meanwhile the ocean channel — the only isotopically neutral
+one available (0.0045) — contributes **0.05 ppm**, because it is fitted 25× below observation.
+
+Turning the ocean channel off *improves* the objective (+11.8 NH, +7.2 SH): at its fitted
+amplitude it is not merely inert but slightly harmful.
+
+### The 2×3 factorial (`diag_seas_obs_drivers.R`)
+
+Amplitude and phase varied **separately**, because the 08-20 amplitude-only test could not tell
+them apart. `CCX_SST_SEAS_LAG` is compile-time, so this patches + rebuilds + runs in a fresh
+process in a `tempdir()` copy (idiom from `diag_seas_lag_profile.R`), gating that the patch took.
+
+| SST lag | amplitudes | seas logL | MLO p2p | sig MLO | sig SPO |
+|---|---|---|---|---|---|
+| 2.50 shipped | fitted | −576.7 | 5.309 | 0.0825 | 0.0963 |
+| 2.50 shipped | ocean=obs | −2039.7 | 4.454 | 0.0973 | 0.0893 |
+| 2.50 shipped | ocean+land=obs | −6590.4 | 8.778 | 0.0684 | 0.0815 |
+| **1.32 observed** | fitted | **−558.0** | 5.297 | 0.0827 | 0.0977 |
+| 1.32 observed | ocean=obs | −1399.2 | 4.114 | 0.1053 | 0.1641 |
+| 1.32 observed | ocean+land=obs | −6883.6 | 8.805 | 0.0683 | 0.1037 |
+
+*(observed: MLO 6.754 ppm, sig 0.0528; SPO 1.170 ppm, sig 0.0288)*
+
+1. **The lag correction is real, free, and small: +18.7 log-units** for a constant that was
+   never fitted. Confirms it is mis-set; the effect is small precisely because the amplitude it
+   phases is ~0.
+2. **Phase was 44 % of the ocean term's rejection.** The penalty for observed ocean amplitude
+   falls from −1463 to −823 once the phase is right. The 08-20c §2d warning was correct — the
+   amplitude-only test could not separate them — but **56 % of the rejection survives**, so
+   phase is not the whole story.
+3. **The headline inverts.** At observed land *and* ocean amplitudes the NH cycle **overshoots**
+   — 8.78 ppm against an observed 6.754, +30 % — where the mode undershoots by −22 %. **The NH
+   "deficit" is not a deficit of drivers.** It is what two over-large antiphase land channels
+   look like after being tuned to cancel, with `seas_T_amp_NH = 48 K` (4.2× observed) doing the
+   cancelling. Restore the observed 11.45 K and the cancellation weakens and the cycle blows up.
+4. **The isotopes move the right way and do not close.** Observed drivers take the MLO signature
+   0.0825 → 0.0684 against an observed 0.0528. So observed drivers genuinely improve the
+   land/ocean partition — while breaking the amplitude, which the fit had been buying with them.
+
+**Caveat, and it bounds every loss above:** these are profiles at a mode fitted **under the
+shipped constants**, so the challengers are scored on the incumbent's home ground
+(`match_incumbents_optim`). A loss is weak evidence against; the **+18.7 win** is strong evidence for.
+
+**Next suspect, stated as a hypothesis:** `CCX_SEAS_PHI_EFF["NH"] = 75°` gives the NEP shape a
+unit-mean peak-to-peak of **2.80**, which at 28 GtC/yr of NH NPP is a 78 GtC/yr swing. It was
+fitted offline against MLO **under the pre-08-18 sine respiration**, and audit block 10 already
+flagged it as an effective knob rather than a measured NPP centroid. If the NEP channel is
+over-driven, that is where it comes from — and MOD17's higher NH NPP share (0.594 vs the model's
+realised 0.446) would make the overshoot *worse*, not better, which sharpens the conflict.
+
+**Two bugs found and fixed in the harness**, both silent-wrong-answer class: the worker copied
+`diag_seas_lag_profile.R`'s `intersect(names(p), names(par_mode))` idiom, which **drops
+`bomb_total`, `rep_dC`, `sigma_d14c` and `grad_off_*`** because `ccx_default_params()` has no
+fields for them (that script never reads them, so never noticed) — now assigns every name and
+asserts; and `system2(stderr = FALSE)` swallowed the resulting error into a row of NAs — now captured.
