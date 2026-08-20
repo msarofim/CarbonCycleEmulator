@@ -6113,3 +6113,77 @@ caveat did not bite. But step-stability flagged **`kz` in N, and `h_ml` AND `kz`
 `h_ml` sits 3.4 m off the band's lower bound, so its curvature reads the bound, not the data.
 **D's log|-H| therefore has two unreliable rows to N's one**, which is a further reason the +10.61
 is not a number to quote.
+
+## 2026-08-20 (post-refit diagnostics) — The seasonal PHASE is 1–2 months late; `rep_dC` is a CO2 LEVEL bias, not a δ¹³C sink. TWO OF MY OWN READINGS OVERTURNED.
+
+Marcus asked for the SST-zeroing and `rep_dC` questions to be measured.
+`calibration/diag_sst_seas_zeroing.R`, `calibration/diag_rep_dC_pinned.R`.
+
+### The seasonal phase — and the correction that matters most
+
+**MY FIRST READING, "degeneracy, not a phase bug", WAS WRONG, and so was the line the script
+printed.** That direction test compared **amplitudes only**. `ccx_year_harmonic()` returns sin
+and cos coefficients, so every seasonal row scores **amplitude AND PHASE**. Moving
+`sst_seas_amp_NH` from its fitted 0.089 K to the physical 2.0 K, per stream: **`co2_seasonal_MLO`
+−673.4**, `co2_seasonal_SPO` +88.7, `d13c_seasonal_MLO` +29.4, `co2_level_MLO` −1.1 — while the
+peak-to-peak amplitude *improves*, 5.30 → 3.89 ppm against obs 3.02. **Amplitude gets better and
+phase rotates away.** The script's conclusion line is rewritten to refuse that verdict.
+
+**The annual-mean rectifier hypothesis is also dead**: mean CO2 1990–2014 moves 379.41 → 379.35
+ppm, and `co2_level_MLO` pays only −1.1.
+
+**MEASURED PEAK MONTHS** — NH: seasonal SST **Oct** (expect Aug–Sep), land seasonal T **Sep**
+(expect Jul), insolation/NPP **Aug** (expect Jun–Jul). SH: Mar / **Mar** (expect Jan) / **Feb**
+(expect Dec–Jan). **Systematically 1–2 months late in both hemispheres.** The `(3.5 + LAG)/12`
+convention puts the zero-lag land-T peak at mid-July and `CCX_SEAS_T_LAG = 2.0` pushes it to
+mid-September, while the constant's own comment says "seasonal land T peak after Jun" — August.
+Code and stated intent disagree by ~1 month. *(The "expected" column is a statement of
+climatology and should itself be checked against HadSST4's monthly climatology, which the repo
+has.)*
+
+**THE EXISTING GATE CANNOT CATCH IT**: the 08-18 verification checked mid-Jan vs mid-Jul
+respiration factors (NH 0.56 / 1.28), and both sit on the same side of a 1–2 month phase error.
+`mutation_test_gates` again.
+
+**The profile is an INTERIOR optimum, not a rail**: Δlogpost −165 at 1e-4 K, −2.6 at 0.05,
+fitted 0.089, −13 at 0.25, **−513 at 2.0 K**. So the likelihood genuinely wants ~0.09 K and the
+mode-find is not at fault — **the −6σ is against the PRIOR**. A parameter can sit deep in its
+prior tail *and* at a clean likelihood optimum; those are different statements.
+
+**`seas_T_amp_NH` = 48.07 K is a degeneracy with `q10`**, which fell 2.2275 → **1.2613**. Only
+the product enters; the realised respiration swing is **9.3×**, peaking in **September** —
+consistent with the phase lateness. 18c §5.1's watch-item resolving into an unphysical corner.
+Neither parameter is individually interpretable at this mode.
+
+### `rep_dC`
+
+**MY SECOND WRONG READING: "it is absorbing the Suess overshoot".** Fitted **+5.9554 ppm ≈ 6σ**;
+pinning to zero costs **3,959 log-units**; and it pays in ALL FOUR level streams —
+`co2_level_SPO` **+1082.0**, `co2_level_MLO` **+1072.3**, `d13c_level_MLO` +950.8,
+`d13c_level_SPO` +605.2. The criterion registered before the numbers was that a bias sink pays in
+δ¹³C and **CHARGES** CO2. **It pays hugely in CO2, so it is not that signature.**
+
+**The reading: the mode carries a ~6 ppm roughly uniform CO2 LEVEL bias, and `rep_dC` is the only
+free parameter that shifts CO2 level directly.** The δ¹³C partner offset (−0.2917 ‰ via the
+measured −0.04898 ‰/ppm coupling) rides along and helps too. Profile is a clean interior optimum
+(−138 at 5 ppm, +1.8 at 6 ppm, −66 at 7 ppm), so the data really do want it. Connects to the
+standing `ccx_co2_level` and `ccx_luc_input` threads; some share is incomplete optimisation.
+
+**Note the prior's sizing argument failed in an unexpected direction.** `R/calibrate.R` predicted
+absorbing the d13C bias would "drag the CO2 level stream 4 ppm off its own fit" — it expected CO2
+to be the victim. CO2 is the beneficiary. The prior resisted the failure mode it was designed
+against and lost to a different one.
+
+**Also fixed**: `diag_rep_dC_pinned.R` read `p$bomb_total` / `p$luc_scale` from
+`ccx_default_params()`, where neither is a field — same class of bug as the earlier `rep_dC`
+lift. Now reads `md$par_mode`.
+
+### N vs D — a reason beyond fit
+
+DESIGN.md line 723 labels them **`"N"` nutrient-limited (mass fixed) / `"D"` DIC-limited**.
+Marine export is limited by N/P/Fe, not carbon, so N is the conventional box-model assumption;
+D implies export rises with DIC, a negative CO2 feedback mainstream models do not carry.
+*(Conventional position, NOT backed here by a citation — check before publishing.)*
+**Pedagogically**, DESIGN.md line 740: a constant-mass pump changes the ocean sink by **exactly
+zero** and D does not, so N keeps "the pump sets the gradient, not the uptake" true for the app.
+**Recommendation: keep N — as the defensible default, not as the winner of a comparison.**
