@@ -6526,3 +6526,50 @@ realised 0.446) would make the overshoot *worse*, not better, which sharpens the
 `bomb_total`, `rep_dC`, `sigma_d14c` and `grad_off_*`** because `ccx_default_params()` has no
 fields for them (that script never reads them, so never noticed) — now assigns every name and
 asserts; and `system2(stderr = FALSE)` swallowed the resulting error into a row of NAs — now captured.
+
+## 2026-08-20g — The measured drivers applied, on Marcus' standing instruction
+
+> *"Keep adding in the more physically correct data even if it moves the fit in the slightly
+> wrong direction."*
+
+Acted on. **918 tests pass, 1 fails** — see the last section; the failure is diagnosed and left
+standing rather than made to pass.
+
+**`CCX_SST_SEAS_LAG` 2.50 → 1.32, both cores.** A measurement replacing a stated belief, in a
+constant that was never fitted, and it *gains* +18.7 log-units. The C++ twin `SST_SEAS_LAG` was
+changed in lockstep. **`CCX_SEAS_T_LAG` deliberately left at 2.0** — the climatology's NH land
+*air* T lag of 0.04 looks like a discrepancy and is not, because that constant multiplies *soil*
+respiration and the 18,944-logL profile rejects exactly the air-temperature value.
+
+**The four seasonal amplitude priors re-anchored on the measurements.** Observations added to
+`R/constants.R` as `data`-status scalars (the `PUMP_GRAD_OBS` idiom); priors in `R/calibrate.R`
+now read them. **The land widths are derived, not chosen**: `ccx_bracket_lnorm()` builds the
+lognormal whose ±1σ spans the measured area-weighted-to-boreal bracket, so the width *is* the
+weighting ambiguity. NH uses all-land ↔ >45N; **SH uses all-land ↔ >30S, because >45S is
+Antarctica and has no respiring soil to weight toward**. The ocean width `SST_SEAS_LOGSD = 0.25`
+is a **stated judgement** covering the unmeasured area- vs gas-exchange-weighting gap, and lives
+in `calibrate.R` rather than the constants registry because a prior width is a calibration
+choice, not a physical quantity.
+
+**⚠ This changes the objective.** `mode_fit_pump{N,D}.rds`: `par_mode` is still a valid
+parameter vector, but `logpost`, `prior_z`, `hessian`, `cov`, `sd_unc`, `eigen`, `logdet_negH`
+and the Laplace evidence now describe a posterior that no longer exists. **A refit is owed.**
+The mode is far outside the new priors — log-prior −17.9 (`seas_T_amp_NH`), **−80.2 and −84.5**
+for the two ocean amplitudes — which is the point rather than a problem: the fit was buying its
+seasonal cycle with values the data exclude.
+
+**Three self-inflicted failures found and fixed before reporting:** the new constants were
+written as named length-2 vectors, which breaks the registry's `is.finite(k$value)` scalar
+contract (`test-constants.R:18`, 3 assertions); and `SST_SEAS_AMP_LOGSD` as a `provisional`
+constant would have forced an edit to the provisional-constant **ledger** (`test-constants.R:63`)
+— avoided by putting the prior width where it belongs instead.
+
+**One test left failing, deliberately: `test-fluxes.R:99`** (`on$tau_flux` vs `off$tau_flux`,
+tolerance 1e-3, "seas excluded"). Passed at lag 2.5, fails at 1.32 (4.684 vs 4.692, rel 1.72e-3).
+**Not modified — reported.** Diagnosed: `tau_turn` is not perfectly seasonality-free; the
+discrepancy is **exactly 0** at `sst_seas_amp = 0` and scales with it (5.4e-5 at 0.089, 7.2e-4 at
+1.0, 1.72e-3 at the default 2.0), so the leak is the seasonal SST term and the tolerance was
+accommodating it. `tau_turn[1]` samples the **first month**, whose seasonal-SST factor goes
+−0.2588 → **−0.7705** between the two lags (2.98×) — the whole of the move. **The tolerance was
+silently encoding `CCX_SST_SEAS_LAG = 2.5`.** Options in the handoff §4d; evaluating `tau_turn`
+on an annual mean instead of month 1 looks right, and would make the test stronger.

@@ -167,6 +167,67 @@ CCX_CONSTANTS <- list(
     status = "provisional",
     source = "Working value: preindustrial global NPP. NEEDS a cited source."),
 
+  # ---- observed seasonal amplitudes (2026-08-20g) ----------------------
+  # ONE SCALAR PER ENTRY. The registry's contract is is.finite(k$value)
+  # (test-constants.R:18), which a named length-2 vector fails -- the first
+  # version of this block used c(lo =, hi =) and broke three assertions.
+  # THE OBSERVATIONS BEHIND THE SEASONAL PRIORS in R/calibrate.R. They live here
+  # rather than typed into that file for the same reason PUMP_GRAD_OBS does:
+  # one place to change, and tests/testthat/test-likelihood.R ties the prior's
+  # literal `init` to the constant so the two cannot drift.
+  #
+  # ALL FOUR ARE HALF-AMPLITUDES, K -- the model's own parameter convention, not
+  # peak-to-peak. Built by data-raw/build_seasonal_climatology.R; provenance and
+  # the mask/weighting caveats in DATA.md section 3b.
+  #
+  # THE LAND PAIR CARRIES A BRACKET, AND THE BRACKET IS THE PRIOR'S WIDTH.
+  # `seas_T_amp_*` multiplies SOIL RESPIRATION, so its honest counterpart is
+  # respiration-weighted and what we can measure is AREA-weighted. The gap is not
+  # guessable, but it is BOUNDABLE: NH heterotrophic respiration is boreal-
+  # weighted, so the >45N band bounds it from above and the all-land mean from
+  # below. The prior is then the lognormal whose +/- 1 sigma spans exactly that
+  # bracket -- the width is the MEASURED weighting ambiguity rather than a
+  # chosen number.
+  #
+  # THE SH BRACKET USES >30S, NOT >45S, and that asymmetry is deliberate: south
+  # of 45 is Antarctica, which has no respiring soil to weight toward. Using it
+  # would put the upper bound on ice.
+  SEAS_T_AMP_NH_OBS_LO = list(
+    value = 11.44502, units = "K, half-amplitude",
+    status = "data",
+    source = paste("CRU 1961-90 absolute climatology (Jones et al. 1999,",
+                   "doi:10.1029/1999RG900002) masked by CRUTEM5 coverage and weighted by an",
+                   "ERSSTv5-derived land fraction. ALL NH land -- the LOWER bracket.")),
+  SEAS_T_AMP_NH_OBS_HI = list(
+    value = 17.92095, units = "K, half-amplitude",
+    status = "data",
+    source = paste("As SEAS_T_AMP_NH_OBS_LO but NH land >45N -- the UPPER bracket, because",
+                   "NH heterotrophic respiration is boreal-weighted.")),
+  SEAS_T_AMP_SH_OBS_LO = list(
+    value = 3.59155, units = "K, half-amplitude",
+    status = "data",
+    source = "As SEAS_T_AMP_NH_OBS_LO but all SH land -- the LOWER bracket."),
+  SEAS_T_AMP_SH_OBS_HI = list(
+    value = 7.10118, units = "K, half-amplitude",
+    status = "data",
+    source = paste("As SEAS_T_AMP_NH_OBS_LO but SH land >30S -- the UPPER bracket.",
+                   ">45S is Antarctica and carries no respiring soil, so it is NOT used.")),
+  # THE OCEAN PAIR HAS NO MEASURED BRACKET, so its width is a JUDGEMENT and is
+  # labelled as one: 0.25 in log space (~ +/- 28 %), covering the difference
+  # between the area-weighted mean we can compute and the gas-exchange-weighted
+  # mean the parameter actually is. Nothing measures that gap today. Replacing
+  # this with a flux-weighted estimate would be a real improvement.
+  SST_SEAS_AMP_NH_OBS = list(
+    value = 2.23739, units = "K, half-amplitude",
+    status = "data",
+    source = paste("NOAA ERSSTv5 (Huang et al. 2017, doi:10.1175/JCLI-D-16-0836.1),",
+                   "area-weighted NH hemispheric monthly climatology 1975-2024",
+                   "(= LIK_SEAS_WINDOW).")),
+  SST_SEAS_AMP_SH_OBS = list(
+    value = 1.74644, units = "K, half-amplitude",
+    status = "data",
+    source = "As SST_SEAS_AMP_NH_OBS, southern hemisphere."),
+
   # ---- temperature ----------------------------------------------------
   SST_PCO2_SENSITIVITY = list(
     value = 0.0423, units = "1/degC",

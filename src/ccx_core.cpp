@@ -156,9 +156,12 @@ static const double SEAS_PHI_EFF[2] = { 75.0, -30.0 };
 // (3.5 + LAG)/12 already places the zero-lag NH peak at mid-July, SEAS_T_LAG
 // scales SOIL respiration rather than air temperature so its mid-September peak
 // is correct (measured: a clean interior optimum, 18,944 log-units above LAG = 0),
-// and SST_SEAS_LAG is unidentified while sst_seas_amp sits near zero.
+// SST_SEAS_LAG is no longer unidentified: it is measured from ERSSTv5's own
+// NH seasonal peak month, because sst_seas_amp modulates SST itself.
 static const double SEAS_T_LAG = 2.0;
-static const double SST_SEAS_LAG = 2.5;
+static const double SST_SEAS_LAG = 1.32;   // MEASURED 2026-08-20g from ERSSTv5
+                                           // (was 2.5, a stated prior belief). MUST
+                                           // track CCX_SST_SEAS_LAG in R/model.R.
 
 // Daily-mean TOA insolation, flat-sun formula, S0 omitted (all uses divide by
 // an annual-mean norm, so it cancels). Twin of R's ccx_insol(); periodic in t

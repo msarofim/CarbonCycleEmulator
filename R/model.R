@@ -218,12 +218,27 @@ CCX_SEAS_PHI_EFF <- c(NH = 75, SH = -30)   # deg latitude, flux-weighted effecti
 # An earlier comment here claimed "seasonal land T peak after Jun"; that was the
 # air-temperature reading and it is wrong. DO NOT "correct" the 2.0 to match it.
 CCX_SEAS_T_LAG   <- 2.0                    # months past the mid-July zero-lag peak
-# UNIDENTIFIED at the arm-N mode, which is why no measured value is quoted: the
-# same profile moves the seasonal rows only -490 -> -532 across 0.5-3.5 months,
-# because sst_seas_amp is fitted at ~0.09 K and a near-zero amplitude carries no
-# phase information. Kept at 2.5 as a prior belief (ocean thermal inertia exceeds
-# land's), not as a fitted quantity.
-CCX_SST_SEAS_LAG <- 2.5                    # months past the mid-July zero-lag peak
+# MEASURED 2026-08-20g and CHANGED FROM 2.5. Unlike CCX_SEAS_T_LAG above, this
+# one IS directly checkable against observation: sst_seas_amp modulates SST
+# ITSELF, not a lagged flux, so the observed SST phase IS this constant's phase.
+# ERSSTv5's area-weighted NH hemispheric climatology (1975-2024, = LIK_SEAS_WINDOW)
+# peaks at month 7.82, which in this file's (3.5 + LAG)/12 convention is
+# LAG = 1.32. The shipped 2.5 was 1.18 months LATE and was never fitted -- the
+# comment here used to call it "a prior belief (ocean thermal inertia exceeds
+# land's), not a fitted quantity", unidentifiable because the amplitude it
+# phases sits at ~0.09 K. It no longer has to be identified from the fit.
+# WORTH +18.7 log-units on the seasonal rows at the arm-N mode, for free
+# (calibration/diag_seas_obs_drivers.R). It also recovers 44 % of the penalty
+# for raising sst_seas_amp to its observed value -- the 08-20 test that read
+# that penalty as "the ocean term is redundant" was amplitude-only and could not
+# separate amplitude from phase.
+# DO NOT read the 2.5 back in from ocean-thermal-inertia reasoning: the lag is
+# measured from the mid-July zero-lag peak, and the ocean's inertia is ALREADY
+# in the observed peak month this value is derived from.
+CCX_SST_SEAS_LAG <- 1.32                   # months past the mid-July zero-lag peak;
+                                           # ERSSTv5 NH 1975-2024. MEASURED, not
+                                           # believed. Twin: SST_SEAS_LAG in
+                                           # src/ccx_core.cpp -- change both.
 CCX_SEAS_DRIVERS_DEFAULT <- 1
 
 #' Daily-mean top-of-atmosphere insolation at latitude phi, flat-sun formula.

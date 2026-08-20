@@ -10,6 +10,24 @@
 
 # ---- parameter table -------------------------------------------------
 # transform: "log" (positive), "logit" (bounded by lo/hi), "id" (unbounded)
+#' Lognormal prior whose +/- 1 sigma spans a measured [LO, HI] bracket.
+#'
+#' The width is then the MEASURED ambiguity rather than a chosen number. Used
+#' for seas_T_amp_*, where what the model wants is respiration-weighted and what
+#' can be measured is area-weighted, and the gap is boundable but not knowable.
+ccx_bracket_lnorm <- function(x, stem) {
+  lo <- ccx_const(paste0(stem, "_LO")); hi <- ccx_const(paste0(stem, "_HI"))
+  stats::dlnorm(x, log(sqrt(lo * hi)), log(hi / lo) / 2, log = TRUE)
+}
+
+# PRIOR WIDTH on sst_seas_amp_*, log space (~ +/- 28 %). A JUDGEMENT, not a
+# measurement, and labelled as one: it stands in for the gap between the
+# area-weighted hemispheric mean ERSSTv5 gives and the gas-exchange-weighted
+# mean the parameter actually is. Nothing measures that gap today; the land pair
+# gets a DERIVED width instead because its bracket IS measured. Replacing this
+# with a flux-weighted estimate is a real improvement someone could make.
+SST_SEAS_LOGSD <- 0.25
+
 CCX_PARAM_TABLE <- list(
   # ---- CO2 fertilisation ---------------------------------------------
   # `beta` LEFT THE TABLE on 2026-08-14 when fert_form flipped to CCX_FERT_MM.
@@ -174,29 +192,57 @@ CCX_PARAM_TABLE <- list(
   # ones in -- and the NPP-side amplitude is now a PREDICTION (npp * shape),
   # not a fitted number.
   #
-  # seas_T_amp priors: shrinkage around climatology. NH flux-weighted seasonal
-  # land T half-amplitude ~10-14 K (boreal-dominated); the offline optimum was
-  # 12. SH land is subtropics-dominated and milder, and the SH shape is
-  # UNFITTED (SPO's cycle is substantially oceanic), so its prior is wider.
-  seas_T_amp_NH = list(tr = "log", init = 12,
-                     prior = function(x) dlnorm(x, log(12), 0.4, log = TRUE)),
-  seas_T_amp_SH = list(tr = "log", init = 6,
-                     prior = function(x) dlnorm(x, log(6), 0.6, log = TRUE)),
+  # SEASONAL AMPLITUDE PRIORS -- RE-ANCHORED ON MEASUREMENTS 2026-08-20g
+  # (Marcus: "keep adding in the more physically correct data even if it moves
+  # the fit in the slightly wrong direction").
+  #
+  # WHAT THEY WERE: shrinkage around REMEMBERED climatology -- "NH flux-weighted
+  # seasonal land T half-amplitude ~10-14 K", "hemispheric-mean SST cycles are
+  # ~2 K NH / milder SH". Nothing in the repo could check them, because HadSST4
+  # and CRUTEM5 are held as ANNUAL ANOMALY series and an anomaly has its monthly
+  # climatology subtracted by construction.
+  #
+  # WHAT THEY ARE NOW: the observed climatology (R/constants.R, built by
+  # data-raw/build_seasonal_climatology.R from CRU absolute + CRUTEM5 mask and
+  # ERSSTv5). The land widths are DERIVED -- the lognormal whose +/-1 sigma spans
+  # the measured area-weighted-to-boreal bracket, so the width is the weighting
+  # ambiguity itself. The ocean width is a stated JUDGEMENT
+  # (SST_SEAS_AMP_LOGSD), because no bracket for it exists.
+  #
+  # THE RECOLLECTIONS WERE CLOSE TO RIGHT: 12 vs an observed 11.4, 2.0 vs 2.24,
+  # 1.2 vs 1.75. The re-anchoring is therefore NOT a large move in the priors --
+  # it is a large move in what they are ENTITLED TO CLAIM, and a tightening.
+  #
+  # THIS CHANGES THE OBJECTIVE. calibration/output/pump_arms/mode_fit_pump{N,D}.rds
+  # were fitted under the OLD priors: their `par_mode` remains a valid parameter
+  # vector, but their `logpost`, `prior_z`, `hessian`, `cov` and Laplace evidence
+  # now describe a posterior that no longer exists. A REFIT IS OWED. The mode is
+  # very far out under the new priors -- seas_T_amp_NH +5.4 sigma,
+  # sst_seas_amp_NH -12.9 -- and that is the point: the fit was buying its
+  # seasonal cycle with values the data exclude.
+  #
+  # `init` is typed literally because CCX_PARAM_TABLE is built before
+  # ccx_const() exists; test-likelihood.R ties each literal to its constant, the
+  # same guard PUMP_GRAD_OBS carries.
+  seas_T_amp_NH = list(tr = "log", init = 14.3214,
+                     prior = function(x) ccx_bracket_lnorm(x, "SEAS_T_AMP_NH_OBS")),
+  seas_T_amp_SH = list(tr = "log", init = 5.0503,
+                     prior = function(x) ccx_bracket_lnorm(x, "SEAS_T_AMP_SH_OBS")),
   # Phenology lag, months: leaf area develops over weeks, so NPP peaks after
   # peak light. Offline optimum 2.25; a negative lag (canopy leading the sun)
   # is unphysical and priced accordingly by the prior rather than bounded.
+  # UNCHANGED 2026-08-20g -- no observation of it was acquired.
   seas_lag_p = list(tr = "id", init = 2.25,
                      prior = function(x) dnorm(x, 2.25, 0.75, log = TRUE)),
-  # Seasonal SST half-amplitudes (2026-08-18, Marcus: SST before the refit).
-  # Shrinkage around rough climatology -- hemispheric-mean SST cycles are
-  # ~2 K NH / milder SH -- with the seasonal streams (CO2 AND the newly scored
-  # d13C, whose ocean flux carries no photosynthetic fractionation) left to
-  # apportion land vs ocean. Log transform: a negative amplitude would be a
-  # phase flip, which is the hemisphere sign's job, not the sampler's.
-  sst_seas_amp_NH = list(tr = "log", init = 2.0,
-                     prior = function(x) dlnorm(x, log(2.0), 0.5, log = TRUE)),
-  sst_seas_amp_SH = list(tr = "log", init = 1.2,
-                     prior = function(x) dlnorm(x, log(1.2), 0.6, log = TRUE)),
+  # SST_SEAS_LOGSD is a PRIOR WIDTH, so it lives here and not in R/constants.R:
+  # it is a calibration choice, not a physical quantity, and the registry's
+  # provisional-constant LEDGER exists to track uncited PHYSICS.
+  sst_seas_amp_NH = list(tr = "log", init = 2.23739,
+                     prior = function(x) dlnorm(x, log(ccx_const("SST_SEAS_AMP_NH_OBS")),
+                                                SST_SEAS_LOGSD, log = TRUE)),
+  sst_seas_amp_SH = list(tr = "log", init = 1.74644,
+                     prior = function(x) dlnorm(x, log(ccx_const("SST_SEAS_AMP_SH_OBS")),
+                                                SST_SEAS_LOGSD, log = TRUE)),
   gamma_enso  = list(tr = "id",    init = 0.5,
                      prior = function(x) dnorm(x, 0, 2, log = TRUE)),
   # LAND TURNOVER: ZERO degrees of freedom (2026-08-12, Marcus). The whole land
