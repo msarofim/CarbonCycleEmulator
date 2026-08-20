@@ -167,6 +167,44 @@ CCX_CONSTANTS <- list(
     status = "provisional",
     source = "Working value: preindustrial global NPP. NEEDS a cited source."),
 
+  # ---- the NH/SH split of terrestrial NPP (2026-08-20k) ----------------
+  # npp_frac_NH was fitted under UNIFORM[0.4, 0.8] -- zero observational content
+  # -- and landed at 0.4662, putting 53 % of global NPP on the hemisphere that
+  # holds 19 % of the land. MOD17A3HGF now measures it (DATA.md section 3c).
+  NPP_FRAC_NH_OBS = list(
+    value = 0.5942187005, units = "fraction",
+    status = "data",
+    source = paste("MOD17A3HGF C6.1 (Running & Zhao, doi:10.5067/MODIS/MOD17A3HGF.061;",
+                   "ICDC 0.5 deg regrid doi:10.25592/uhhfdm.14635), NH share of global",
+                   "NPP, mean over 2001-2023, sd 0.0135. The MODERN share -- NOT the",
+                   "1750 parameter. Built by data-raw/build_npp_hemispheric.R.")),
+  # THE PRIOR CENTRE, and it is NOT the observation above. `npp_frac_NH` is a
+  # 1750 split and MOD17 is 2001-2023; the model walks between them through
+  # hemispheric clearing, so the anchor is the observation walked BACK through
+  # that clearing. Hence status "provisional": it rides on the model's own
+  # `luc_scale` and land turnover times, which are fitted.
+  #
+  # IT IS THE FIXED POINT, not the inversion evaluated at the incumbent's fit.
+  # The walk depends on cleared fraction = cum_luc / land0, and land0 is
+  # proportional to npp_frac_NH itself, so the inversion is implicit. Evaluated
+  # at the fitted 0.4662 it gives 0.6136 (the number handoff 20d section 5
+  # quotes); iterated to self-consistency it gives the value below. The
+  # difference, +0.0149, is larger than every other model-dependence here, which
+  # is why the fixed point rather than the one-shot inversion is shipped.
+  #
+  # AND THE CIRCULARITY IS PRICED, in calibration/diag_npp_frac_anchor.R:
+  # luc_scale +/- 30 % moves it by 0.0013, tau_soil_slow +/- 30 % by 0.0012,
+  # tau_wood +/- 30 % by 0.0003 -- an order of magnitude below the 0.04 prior
+  # width and below MOD17's own 0.0135 interannual sd. Re-derive it if
+  # `luc_scale` ever moves by much more than that.
+  NPP_FRAC_NH_ANCHOR_1750 = list(
+    value = 0.5986118987, units = "fraction",
+    status = "provisional",
+    source = paste("NPP_FRAC_NH_OBS inverted through the model's own hemispheric",
+                   "clearing to 1750, as a fixed point. The PRIOR CENTRE for the",
+                   "fitted `npp_frac_NH` (Marcus 2026-08-20k), NOT the value it takes.",
+                   "Derived by calibration/diag_npp_frac_anchor.R at the arm-N mode.")),
+
   # ---- observed seasonal amplitudes (2026-08-20g) ----------------------
   # ONE SCALAR PER ENTRY. The registry's contract is is.finite(k$value)
   # (test-constants.R:18), which a named length-2 vector fails -- the first

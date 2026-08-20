@@ -6708,3 +6708,52 @@ de-amplify NEP and the fit asks for the observed share by itself.
 **Caveat on convergence:** φ = 25 was still gaining at its third restart (+73.2) and its block is
 pathological (`q10` 0.948, `seas_T_amp_SH` 101.9). That row is not trustworthy; the rest settle
 to gains under 1 log-unit.
+
+## 2026-08-20k — `npp_frac_NH` re-anchored on MOD17 (Marcus)
+
+> *"This is a pedagogical product. As long as the approach is physically reasonable and uses as
+> much of the observed data as possible, it is fine to make choices that are designed to make the
+> model easier to calibrate and run."*
+
+**Option (a) taken: a prior on the 1750 parameter, not a likelihood term on the modern realised
+share.** The objection to (a) was circularity — the anchor is MOD17's *modern* share walked back
+through the model's own clearing, so it rides on `luc_scale`. That objection is now **priced**
+(`calibration/diag_npp_frac_anchor.R`) rather than argued:
+
+| perturbation | anchor | Δ |
+|---|---|---|
+| **self-consistent fixed point** | **0.5986119** | — |
+| `luc_scale` ×0.70 / ×1.30 | 0.597294 / 0.599930 | ∓0.00132 |
+| `tau_soil_slow` ×0.70 / ×1.30 | 0.599789 / 0.597846 | ±0.0012 |
+| `tau_wood` ×0.70 / ×1.30 | 0.598930 / 0.598334 | ±0.0003 |
+
+**Every model-dependence is an order of magnitude below the 0.04 prior width**, and below MOD17's
+own 0.0135 interannual sd. Option (b) — scoring the modern realised share — would have *relocated*
+the circularity into a direct `npp_frac_NH`↔`luc_scale` correlation in the posterior, added a
+likelihood stream and a per-draw readout, and made the model harder to calibrate, not easier.
+
+**It is the FIXED POINT, not the audit's 0.6136.** The inversion is implicit — the cleared
+fraction is `cum_luc / land0` and `land0` is proportional to `npp_frac_NH` itself — so evaluating
+it at the incumbent's fitted 0.4662 is not self-consistent. Iterating gives **0.5986119**, and the
++0.0149 difference is **larger than every other model-dependence in the table**, which is why the
+one-shot inversion is not what ships.
+
+**Prior:** `dnorm(x, NPP_FRAC_NH_ANCHOR_1750, 0.04)`, replacing `UNIFORM[0.4, 0.8]` (zero
+observational content). Bounds unchanged — ±3σ is [0.479, 0.719], well inside them, so the logit
+transform does no prior work. **The width 0.04 is a stated JUDGEMENT**, like `SST_SEAS_LOGSD`:
+MOD17's interannual sd is the *wrong* uncertainty (one product's spread about its own mean, not
+the product-to-product ambiguity), and no bracket exists on disk. Building one from a second NPP
+product is a real improvement someone could make.
+
+**The old mode now sits at −3.31 σ.** That is the point, not a problem.
+
+**Constants:** `NPP_FRAC_NH_OBS` (0.5942187, `data`) and `NPP_FRAC_NH_ANCHOR_1750` (`provisional`,
+because it is an observation inverted through the model). The latter joins the provisional
+**ledger** in `test-constants.R` deliberately — it keeps a model-dependent prior centre visible.
+`init` is a **literal**, because `R/calibrate.R` sources before `R/constants.R`; `test-likelihood.R`
+ties the literal to the constant, checks the prior is centred there rather than merely started
+there, and asserts the anchor sits **above** the modern share (an equality would mean someone
+centred on the wrong quantity).
+
+**933 pass, 1 fail** — the fail is still `test-fluxes.R:99` from 08-20g, unchanged and untouched.
+No new failures; the count rose 918 → 933 on the 15 new assertions.

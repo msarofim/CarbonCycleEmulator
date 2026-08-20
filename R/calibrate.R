@@ -28,6 +28,13 @@ ccx_bracket_lnorm <- function(x, stem) {
 # with a flux-weighted estimate is a real improvement someone could make.
 SST_SEAS_LOGSD <- 0.25
 
+# PRIOR WIDTH on npp_frac_NH, on the natural (share) scale. A JUDGEMENT, and
+# labelled as one for the same reason SST_SEAS_LOGSD is: MOD17's interannual sd
+# of 0.0135 measures one product's spread about its own mean, not the
+# product-to-product ambiguity that actually bounds the NH share. See the
+# npp_frac_NH entry below.
+NPP_FRAC_NH_SD <- 0.04
+
 CCX_PARAM_TABLE <- list(
   # ---- CO2 fertilisation ---------------------------------------------
   # `beta` LEFT THE TABLE on 2026-08-14 when fert_form flipped to CCX_FERT_MM.
@@ -179,8 +186,33 @@ CCX_PARAM_TABLE <- list(
                                                 0.25, log = TRUE)),
   tau_ex      = list(tr = "log",   init = 1.3,
                      prior = function(x) dlnorm(x, log(1.3), 0.25, log = TRUE)),
-  npp_frac_NH = list(tr = "logit", lo = 0.4, hi = 0.8,   init = 0.60,
-                     prior = function(x) dunif(x, 0.4, 0.8, log = TRUE)),
+  # RE-ANCHORED ON MOD17 2026-08-20k (Marcus). Was UNIFORM[0.4, 0.8] -- zero
+  # observational content, and the fit used the freedom: 0.4662, i.e. 53 % of
+  # global NPP on the hemisphere holding 19 % of the land.
+  #
+  # THE CENTRE IS THE 1750 ANCHOR, NOT THE OBSERVATION. MOD17 measures the
+  # MODERN share (NPP_FRAC_NH_OBS = 0.594) and this parameter is a 1750 split;
+  # NPP_FRAC_NH_ANCHOR_1750 is that observation walked back through the model's
+  # own clearing, as a fixed point. Centring on the raw observation would
+  # UNDERSTATE the target, because NH-heavy clearing lowers the NH share over
+  # time. See R/constants.R for the derivation and its circularity pricing.
+  #
+  # THE WIDTH IS A JUDGEMENT, like SST_SEAS_LOGSD and labelled as one. MOD17's
+  # own interannual sd (0.0135) is the WRONG uncertainty -- it is the spread of
+  # one product about its own mean, and the real ambiguity is product-to-product
+  # (MOD17's global total already sits below the model's NPP_GLOBAL_PI). 0.04
+  # covers that; it is not derived from a bracket, because no bracket exists on
+  # disk. Building one from a second NPP product would be a real improvement.
+  #
+  # THE BOUNDS ARE UNCHANGED at [0.4, 0.8]: +/- 3 sigma is [0.479, 0.719], well
+  # inside them, so the logit transform is not doing prior work.
+  # `init` is a LITERAL, not ccx_const(): R/calibrate.R sources BEFORE
+  # R/constants.R, so the table cannot call it at construction time -- the
+  # prior closure can, because it runs later. Same idiom as pump_grad, and
+  # test-likelihood.R ties the literal to the constant so they cannot drift.
+  npp_frac_NH = list(tr = "logit", lo = 0.4, hi = 0.8, init = 0.5986118987,
+                     prior = function(x) stats::dnorm(x, ccx_const("NPP_FRAC_NH_ANCHOR_1750"),
+                                                      NPP_FRAC_NH_SD, log = TRUE)),
   # THE SEASONAL SINE'S 4 KNOBS (seas_amp/seas_phase per hemisphere) were
   # RETIRED 2026-08-18 when the cycle moved onto its physical drivers --
   # insolation-shaped NPP and Q10 on a seasonal land temperature (Marcus; see

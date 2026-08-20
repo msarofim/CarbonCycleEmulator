@@ -467,6 +467,24 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   expect_true(all(c("grad_off_co2", "grad_off_d13c") %in% CCX_PARAM_NAMES))
   # both are shrinkage priors CENTRED AT ZERO -- centring them on the measured
   # offsets would tell the model the answer and then credit it for agreeing
+  # npp_frac_NH's centre is a CONSTANT and its `init` is a literal, because
+  # R/calibrate.R sources before R/constants.R. That is exactly the drift risk
+  # this file exists to close: if the anchor is ever re-derived (a new NPP
+  # product, a materially different luc_scale) and the literal is not, the
+  # prior's mode and its starting point would disagree silently.
+  expect_equal(CCX_PARAM_TABLE$npp_frac_NH$init,
+               ccx_const("NPP_FRAC_NH_ANCHOR_1750"), tolerance = 1e-12)
+  # ...and the prior really is centred there, not merely started there.
+  a <- ccx_const("NPP_FRAC_NH_ANCHOR_1750")
+  expect_gt(CCX_PARAM_TABLE$npp_frac_NH$prior(a),
+            CCX_PARAM_TABLE$npp_frac_NH$prior(a + 0.01))
+  expect_gt(CCX_PARAM_TABLE$npp_frac_NH$prior(a),
+            CCX_PARAM_TABLE$npp_frac_NH$prior(a - 0.01))
+  # The anchor is NOT the observation -- it is the observation walked back to
+  # 1750 through hemispheric clearing, so it must sit ABOVE the modern share.
+  # An equality here would mean someone centred the prior on the wrong quantity.
+  expect_gt(a, ccx_const("NPP_FRAC_NH_OBS"))
+  expect_lt(a - ccx_const("NPP_FRAC_NH_OBS"), 0.05)
   expect_equal(CCX_PARAM_TABLE$grad_off_co2$init,  0)
   expect_equal(CCX_PARAM_TABLE$grad_off_d13c$init, 0)
   for (n in c("grad_off_co2", "grad_off_d13c")) {

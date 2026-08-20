@@ -60,10 +60,17 @@ test_that("provisional constants are reported, not silently used", {
   # for biogenic CaCO3 -- and neither has a citation yet. They are the pump's
   # only uncited numbers: its export FIELD is solved from GLODAP and its
   # carbonate SHARE is pinned by GLODAP's alkalinity gradient.
+  # ADDED 2026-08-20k: NPP_FRAC_NH_ANCHOR_1750. It is NOT provisional for want
+  # of a source -- MOD17 is its source and NPP_FRAC_NH_OBS is `data`. It is
+  # provisional because it is the OBSERVATION INVERTED THROUGH THE MODEL's own
+  # clearing, so it rides on `luc_scale` and the land turnover times. The ledger
+  # is the right place for that: it keeps a model-dependent prior centre
+  # visible. Its dependence is priced in calibration/diag_npp_frac_anchor.R and
+  # is an order of magnitude below the prior width.
   expect_setequal(prov, c("OCEAN_AREA_NH", "OCEAN_AREA_SH", "OCEAN_DEPTH",
                           "ALK_SURFACE", "PUMP_EPS13_ORG", "PUMP_EPS13_CARB",
                           "RHO_SEAWATER", "NPP_GLOBAL_PI",
-                          "SST_PCO2_SENSITIVITY"))
+                          "SST_PCO2_SENSITIVITY", "NPP_FRAC_NH_ANCHOR_1750"))
 })
 
 test_that("PUMP_GRAD_OBS IS the shipped ocean_grad_dic target, not a copy of it", {
