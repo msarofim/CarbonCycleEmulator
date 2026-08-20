@@ -165,3 +165,88 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > hypothesis is dead — the observable is on time and the shipped lag wins by 18,944 log-units.
 > The live work is **§4, the seasonal AMPLITUDE deficit**, starting with the SPO d13C 3.5×
 > overshoot. Do not redo the refit for the phase convention.
+
+---
+
+# ADDENDUM (same day) — Torch is measured and WORKS, and checking it turned up a corrupt `u_mode`
+
+## A1. TORCH: R 4.5.1 works on a compute node, and the Mac is reproduced EXACTLY
+
+The link came up. Probe job `16075825`, `cpu_short`, 25 s wall clock; artifacts live at
+`/scratch/ms17839/ccx-probe/` (`ccx_torch_probe.R`, `probe.sbatch`, `logs/`).
+
+- **R 4.5.1**, `Rcpp 1.1.0`, `Matrix 1.7.4`, `testthat 3.2.3` all present.
+  **`adaptMCMC` is MISSING** — needed before any sampler work; install to
+  `/scratch/ms17839/.Rlib` (already on `.libPaths()`).
+- **`src/ccx_core.cpp` compiles there in 4.1 s.** No source changes needed.
+- **CROSS-PLATFORM PARITY HOLDS EXACTLY.** On an identical file subset, Torch and the Mac both
+  give `logpost = -2674.035951671` — all 9 printed decimals. A Torch-run mode-find would be
+  comparable with Mac results.
+- **Per-eval cost: Torch 0.294 s vs Mac 0.141 s — the Mac is ~2× FASTER per eval.** (Both
+  measured on the same 5-eval loop; my earlier "~2 s" figure was a full spinup + forcing build
+  + run, not a bare `lp(u)` call, and should not be compared with these.) **So Torch's case is
+  entirely CORE COUNT, not per-core speed** — 28 cores on the login node, 128 on the compute
+  nodes we saw, against the Mac's handful. §6's parallel dispersed multi-start still wins, but
+  it needs ≳4 concurrent starts just to break even.
+
+**THE R WRAPPER IS A SINGULARITY CONTAINER AND IT BITES.** `/share/apps/r/4.5.1/bin/Rscript` is
+a symlink to `__run_base_r.bash`, which binds `${SLURM_TMPDIR}/rtmp-$$` — or, if that is unset,
+`/state/partition1/${USER}/rtmp-$$` — onto the container's `/tmp`. **On the login node that
+directory is root-owned and R fails outright**, so R cannot be smoke-tested interactively; it
+must be run under SLURM. Job 1 also failed (exit 127) because a heredoc-through-ssh mangled the
+`SLURM_TMPDIR` fallback into an empty bind. **Write the sbatch locally and `scp` it** rather
+than generating it through nested ssh quoting. The overlay is `:ro`, so packages must go to
+`R_LIBS_USER` on scratch.
+
+Partitions confirmed present: `cpu_short`, `cpu_prem`, `cs`, `cl`. Fairshare is **1.000000**.
+
+## A2. THE THING THE PARITY CHECK FOUND: `u_mode` is corrupt for `h_ml` in BOTH arm files
+
+Recomputing the stored modes' log-posteriors from `u_mode` does not reproduce them —
+deterministically (identical on repeat) and very asymmetrically.
+
+| arm | stored | from `u_mode` | gap | from `par_mode` | gap |
+|---|---|---|---|---|---|
+| N | −2682.571 | −2680.188 | **+2.38** | −2682.458 | +0.11 |
+| D | −2671.880 | −2714.814 | **−42.93** | −2670.933 | +0.95 |
+
+**The D − N margin flips sign**: stored **+10.69**, from `u_mode` **−34.63**, from `par_mode`
+**+11.53**.
+
+**It is `h_ml`, and only `h_ml`.** `ccx_unc_to_par(u_mode)` reproduces `par_mode` to <1e-8 for
+all 21 parameters except `h_ml`:
+
+| arm | `par_mode$h_ml` | `u_mode` decodes to |
+|---|---|---|
+| N | 95.6553 m | **81.7545 m** |
+| D | 88.3886 m | **46.4587 m** |
+
+The transform (`logit`, 30–200) is **unchanged since `0b5bb41`, 2026-08-12** — before the refit —
+so this is not a moved transform under a stored coordinate. The two fields were mutually
+inconsistent when written. **Cause not identified.** `h_ml` snapping onto `ccx_ocean_grid()` is
+the first place to look, and would also plausibly account for the 0.11 / 0.95 residual that
+`par_mode` leaves. Ruled out already: parameter-name ordering (`param_names` is identical to
+`CCX_PARAM_NAMES` in both files), code drift (`git diff de771be..c9e2478 -- R src data` is
+empty), and the untracked `data-raw/downloads/nuclear14c/` inputs (unchanged since Aug 10; they
+explain only the offset between full-repo and subset runs).
+
+**CONSEQUENCES.**
+1. **Use `par_mode`.** It reproduces the stored logposts and keeps the margin's sign. **Every
+   diagnostic in this handoff used `par_mode` and is unaffected** — as is the previous
+   handoff's §3a/§3b/§3c, which used it too.
+2. **Anything keyed on `u_mode` must be re-derived**, above all the **Laplace evidence**: its
+   `log|-H|` was finite-differenced in u-space about a point 14 m (N) / **42 m (D)** away from
+   the actual mode in `h_ml`. `diag_sst_seas_zeroing.R` rebuilds `u_mode` the same way.
+3. **This is a stronger reason the evidence is unquotable** than the four already on record, and
+   it points the same way as the margin: D is off ~18× further than N. It is probably also what
+   the pre-launch step-stability flag on D's `h_ml` was detecting.
+4. **Add a round-trip gate on read** wherever a mode file is loaded:
+   `stopifnot(max(abs(unlist(ccx_unc_to_par(u_mode)) - unlist(par_mode))) < tol)`.
+
+## A3. Revised next steps
+
+**Before anything else** — the `u_mode` round-trip gate, and diagnose the `h_ml` inconsistency.
+It is cheap, it gates the evidence, and it decides whether a re-polish is even meaningful.
+**Then** the seasonal amplitude work in §4 (SPO d13C 3.5× first). **Then**, if a re-fit is
+wanted, do it on Torch as parallel dispersed multi-start — the platform is now verified, and
+only `adaptMCMC` is missing.
