@@ -214,6 +214,67 @@ parameter away from it. Per unit vegetated area the SH genuinely *is* more produ
 
 ---
 
+### 3d. The seasonal SHAPE of terrestrial productivity (added 2026-08-20i)
+
+§3c gives the *spatial* distribution of NPP and cannot say anything about its seasonal cycle,
+because MOD17A3HGF is annual. That left `CCX_SEAS_PHI_EFF` half-answered: the NPP-weighted
+effective latitude is **38.35 °N** if productivity follows insolation, but boreal productivity
+is **rectified** — a growing season that switches on and off — and a poleward effective
+latitude is a legitimate emulation of rectification rather than an error. **MOD17A2HGF
+Collection 6.1**, the 8-daily member of the same family, removes the premise: the hemispheric
+aggregate seasonal shape is *observed*, and the effective latitude is fitted to that.
+
+Same ICDC 0.5° netCDF regrid, CC-BY-4.0, no registration; doi:10.25592/uhhfdm.14449 over
+Running & Zhao doi:10.5067/MODIS/MOD17A2HGF.061. Downloaded by
+`data-raw/download_mod17_gpp8d.R`, built by `data-raw/build_npp_seasonal_shape.R` →
+`data/obs_npp_seasonal_shape.rds`. **Five years spread across the record** (2001, 2006, 2011,
+2016, 2021 — 2022 is absent upstream), so the spread across them is the reported uncertainty
+rather than a pentad's worth of ENSO. **The zips are kept and the unzipped files are not**:
+597 MB per year against a 70 MB zip, which also keeps the manifest SHA-256 verifiable — it is
+*not* verifiable for §3c, whose zip was deleted after unzipping.
+
+**Two variables, as a bracket, because neither is NPP.** `gpp` is gross, and autotrophic
+respiration runs through the shoulder seasons, so GPP is **less** rectified than NPP and its
+effective latitude is biased equatorward — toward the convenient answer.
+`net_photosynthesis` is MOD17's PsnNet = GPP − leaf and fine-root maintenance respiration:
+closer to NPP, still short of it (no growth respiration, no live-wood maintenance). The truth
+for NPP sits at or beyond the PsnNet end.
+
+| | φ (shape) | sd across yr | φ (amplitude) | observed p2p | unexplained |
+|---|---|---|---|---|---|
+| NH `gpp` | 49.26 | 2.62 | 54.60 | 1.699 | 10.8 % |
+| NH `psnnet` | **49.96** | 2.93 | **55.49** | 1.747 | 11.4 % |
+| SH `gpp` | −10.86 | 4.22 | −28.17 | 0.736 | 14.3 % |
+| SH `psnnet` | **−16.14** | 2.67 | **−32.15** | 0.845 | 12.8 % |
+| *shipped* | 75.0 / −30.0 | | | *p2p 2.801 / 0.742* | |
+| *annual product (§3c)* | 38.35 / −15.75 | | | *p2p 1.003 / 0.366* | |
+
+**Rectification is real and it is not worth 75.** The observed NH shape sits ~11° poleward of
+the insolation-weighted aggregate, so the defence of a poleward φ is genuine. But the shipped
+75 over-drives the *observed* peak-to-peak by ~1.6×, and 38.35 under-delivers it by ~0.6×.
+
+**Shape and amplitude give different latitudes, and both are reported.** No insolation shape
+can match a rectified one, so the SSE fit compromises and lands short on amplitude — 11 % of
+the NH cycle and 13–14 % of the SH cycle is residual that *no* single latitude can explain.
+The SH is the sharper case: shape wants −11 to −16 while amplitude wants −28 to −32, and the
+shipped −30 sits on the amplitude answer. SH productivity is tropical and water-limited, so
+the insolation premise is weakest exactly where the shipped constant looked best.
+
+**A by-product: the phenology lag is measured.** Insolation peaks at the solstice at every
+extratropical latitude, so the offset between observed productivity and insolation *is*
+`seas_lag_p`. NH: **+0.8 to +1.0 months**, against a fitted 2.17. SH: **−2.1 to −2.9 months**
+— a *lead*. One global `seas_lag_p` cannot be both, which is a structural limitation of the
+term rather than a mis-set value.
+
+**Read-the-file gates:** global GPP 91.7 PgC/yr and PsnNet 59.3 PgC/yr over the five years.
+The fitting operator is gated separately, by recovering a known (φ, lag) from a synthetic
+target — a shift applied in the wrong direction returns a plausible number and no error.
+
+**The comparison is window-integrated, not point-sampled**, and the last composite of each
+year is 5–6 days rather than 8. Point-sampling a curved shape at coarse steps biases its
+amplitude, and treating the short final window as a full one would inflate precisely the
+winter end of the NH cycle — the end that carries the rectification signal.
+
 ### 3a. Pre-1850 land-use emissions (added 2026-08-13)
 
 **GCB's LUC column is empty before 1850.** Its fossil column starts 1750; the land-use

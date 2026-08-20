@@ -6627,3 +6627,84 @@ claim.** Settling that properly needs a sub-annual product (MOD17A2H 8-day GPP);
 **Independent check on the read:** this script re-derives the global total and NH share from the
 raw files by its own path and gets **52.75 PgC/yr, share 0.5938** against
 `build_npp_hemispheric.R`'s 52.75 / 0.5942 (the residual is mean-of-ratio vs ratio-of-means).
+
+## 2026-08-20i — The 8-day product: rectification is real, and it is not worth 75
+
+Marcus authorised the sub-annual download. **MOD17A2HGF C6.1 8-daily**, same algorithm, same
+ICDC 0.5° regrid, CC-BY-4.0, no registration (doi:10.25592/uhhfdm.14449); five years spread
+across the record (2001, 2006, 2011, 2016, 2021 — 2022 absent upstream). It removes the premise
+that 20h had to assume: the hemispheric aggregate seasonal shape is now **observed**, not
+reconstructed from insolation, and φ_eff is fitted to that. Both `gpp` and `net_photosynthesis`
+(PsnNet) are carried, as a **bracket** — GPP is less rectified than NPP so its φ is biased
+equatorward, PsnNet is closer but still omits growth and live-wood respiration.
+
+| | φ (shape) | sd yr | φ (amplitude) | obs p2p | unexplained |
+|---|---|---|---|---|---|
+| NH `gpp` | 49.26 | 2.62 | 54.60 | 1.699 | 10.8 % |
+| NH `psnnet` | **49.96** | 2.93 | **55.49** | 1.747 | 11.4 % |
+| SH `gpp` | −10.86 | 4.22 | −28.17 | 0.736 | 14.3 % |
+| SH `psnnet` | **−16.14** | 2.67 | **−32.15** | 0.845 | 12.8 % |
+
+**Both of 20h's readings were wrong, in opposite directions.** Rectification is genuine — the
+observed NH shape sits ~11° poleward of the insolation-weighted aggregate, so a poleward φ was
+never indefensible — but the shipped 75 over-drives the *observed* peak-to-peak by ~1.6× and the
+annual-product 38.35 under-delivers it by ~0.6×.
+
+**Shape and amplitude disagree, and neither is the whole answer.** No insolation shape can match
+a rectified one: 11 % (NH) and 13–14 % (SH) of the observed cycle is residual that *no* single
+latitude explains. The SH is the sharp case — shape wants −11 to −16, amplitude wants −28 to −32,
+and the shipped −30 sits on the amplitude answer while getting the shape wrong. SH productivity
+is tropical and water-limited, so the insolation premise is weakest exactly where the shipped
+constant looked best.
+
+**By-product: `seas_lag_p` is now measured.** Insolation peaks at the solstice at every
+extratropical latitude, so the observed-productivity-minus-insolation offset IS that parameter.
+NH **+0.8 to +1.0 months** against a fitted 2.17; SH **−2.1 to −2.9 months**, a *lead*. **One
+global `seas_lag_p` cannot be both** — a structural limitation of the term, not a mis-set value.
+
+**Gates.** Global totals 91.7 (GPP) / 59.3 (PsnNet) PgC/yr as the read-the-file check; and the
+fitting operator is gated by recovering a known (φ, lag) from a synthetic target, because a
+circular shift applied in the wrong direction returns a plausible φ with a sign-flipped lag and
+no error. The model shape is **window-integrated**, not point-sampled, and the last composite of
+each year is 5–6 days, not 8 — treating it as 8 inflates the winter end of the NH cycle, which is
+the end that carries the rectification signal.
+
+## 2026-08-20j — The φ_eff profile: 75 loses by ~390, but the hemispheres interact
+
+`calibration/diag_phi_eff_profile.R`, 10 cases, each patching both cores, rebuilding in its own
+tempdir, passing three gates, and **re-optimising the seven parameters the seasonal cycle
+identifies** (`seas_T_amp_{NH,SH}`, `seas_lag_p`, `sst_seas_amp_{NH,SH}`, `npp_frac_NH`, `q10`)
+on the full post-08-20g posterior. A frozen profile would have been worthless: moving φ while
+holding `seas_T_amp_NH` at 48 K breaks the NEP/respiration cancellation by construction.
+
+**The gate that matters was mutation-tested.** Disabling the C++ patch while leaving the R patch
+in place makes the R-vs-C++ derivative parity check fire (`max|dR-dC|/max|dR| < 1e-12 is not
+TRUE`), so a worker cannot run the incumbent's constant under a challenger's label.
+
+**At the shipped SH, the shipped NH is rejected.** φ_NH = 75 scores −2576.0 against −2184.2 at
+38.35 and −2187.3 at 45 — a **~390 log-unit loss**, and this is the challenger winning on the
+incumbent's own ground rather than the reverse.
+
+**And `seas_T_amp_NH` comes home.** Re-optimised it lands at 38.6 K at φ=75, 18.3 at 55,
+**10.8 at 45** — against an observed **11.45**. The respiration channel returns to its measured
+amplitude exactly where the data want φ, which is the strongest single piece of evidence that
+the 48 K was buying cancellation for an over-driven NEP channel.
+
+**But the 1D profile is a slice of a surface with an interaction, and it must not be read as the
+answer.** Moving the SH from −30 to the measured −15.75 gains **+458.8** at φ_NH = 75 and only
++10.4 at 38.35 — enough to *reverse* the NH ordering, so (75, −15.75) is the best cell in this
+set at −2117.2. The coupling is real: `seas_lag_p`, `q10` and `npp_frac_NH` are global, not
+per-hemisphere. **The region everything else points at — NH 45–55 at SH ≈ −16 — was not tested**,
+so a 2D fill-in pass is running before anything is concluded.
+
+**This does bear on §5.** Re-optimised `npp_frac_NH` runs 0.459 at φ_NH = 75, 0.684 at 45, 0.728
+at 38.35, and **0.619 at (38.35, −15.75)** — against MOD17's 0.594 and a self-consistent 1750
+anchor of 0.5986. The audit's −794 veto on raising `npp_frac_NH` was **an artefact of φ = 75**:
+de-amplify NEP and the fit asks for the observed share by itself.
+
+**`sst_seas_amp_NH` is unmoved by any of this** — 0.33–0.54 at every φ, against an observed
+2.237. The NH ocean channel's rejection is not a φ_eff problem.
+
+**Caveat on convergence:** φ = 25 was still gaining at its third restart (+73.2) and its block is
+pathological (`q10` 0.948, `seas_T_amp_SH` 101.9). That row is not trustworthy; the rest settle
+to gains under 1 log-unit.
