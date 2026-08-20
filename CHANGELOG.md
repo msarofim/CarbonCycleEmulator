@@ -6573,3 +6573,57 @@ accommodating it. `tau_turn[1]` samples the **first month**, whose seasonal-SST 
 −0.2588 → **−0.7705** between the two lags (2.98×) — the whole of the move. **The tolerance was
 silently encoding `CCX_SST_SEAS_LAG = 2.5`.** Options in the handoff §4d; evaluating `tau_turn`
 on an annual mean instead of month 1 looks right, and would make the test stronger.
+
+## 2026-08-20h — The NPP-weighted effective latitude, measured: 38.35 N, not 75
+
+Handoff 20d §6 named `CCX_SEAS_PHI_EFF["NH"] = 75°` as the prime suspect behind the antiphase
+NEP/respiration cancellation, on the argument that 75 N is far poleward of any plausible
+NPP-weighted latitude. `calibration/diag_npp_eff_latitude.R` turns that impression into a number
+from the MOD17 field already on disk — **no new download**.
+
+**The measurement is a SHAPE match, not a weighted mean latitude, and the two differ.** The
+constant does not enter the model as a latitude; it enters as the assertion
+`NPP_h(t) = NPP_h · insol(φ_eff, t−lag) / mean insol`. Apply that same premise per grid cell and
+aggregate with each cell's annual NPP as the weight; φ_eff is then the latitude whose own
+normalised shape best matches the aggregate. Insolation is strongly nonlinear in latitude, so
+this is **not** the NPP-weighted mean latitude — both are reported so the gap is visible.
+
+| | φ | unit-mean peak-to-peak | rms resid |
+|---|---|---|---|
+| NH aggregate (MOD17-weighted) | — | **0.998** | — |
+| NH shipped | 75.00 | **2.801** | 0.704 |
+| NH shape-matched | **38.35** | 1.003 | 0.014 |
+| NH NPP-weighted mean latitude | 34.29 | 0.871 | 0.049 |
+| SH aggregate | — | **0.366** | — |
+| SH shipped | −30.00 | **0.742** | 0.134 |
+| SH shape-matched | **−15.75** | 0.366 | 0.002 |
+| SH NPP-weighted mean latitude | −15.12 | 0.351 | 0.006 |
+
+**The shipped constants over-drive the NEP seasonal shape by 2.81× (NH) and 2.03× (SH).** At the
+arm-N mode that is a **78.4 GtC/yr** NH seasonal swing where the measured shape supports 28.1 —
+against an observed MLO cycle worth ~14 GtC of atmospheric carbon peak-to-trough. This is the
+over-driving that would *require* an over-large antiphase respiration channel to cancel it, which
+is exactly the pair `diag_seas_channel_decomp.R` found.
+
+**Phase carries no information about φ_eff, and the table looks like a bug until that is said.**
+Daily-mean insolation is symmetric about the solstice at every extratropical latitude, so every
+candidate peaks in the same month as the aggregate and every best time shift is 0. The
+"phase-matched only" row is degenerate — it returns the lowest latitude whose peak still lands on
+the solstice, a property of the tropics. **All the information is in the peak-to-peak**, and
+`seas_lag_p` has nothing to absorb if φ moves. (The fit is nonetheless done lag-invariantly, by
+FFT cross-correlation, and the FFT is **gated against a brute-force loop** rather than trusted.)
+
+**⚠ WHAT THIS DOES NOT MEASURE, because MOD17A3HGF is an ANNUAL product.** It gives the *spatial*
+distribution of NPP, not its seasonal cycle. So it cannot test the model's premise that NPP
+follows insolation; it takes the premise as given and answers only the aggregation question.
+If real NPP is instead strongly **rectified** (a growing season that switches on and off, which
+boreal NPP is), then a poleward φ_eff is a legitimate *emulation of rectification* — and the
+offline fit that produced 75 says as much, noting that "at 75 N the polar night rectifies the
+growing season by itself". **So 38.35 is the honest reading of the constant's stated meaning, and
+75 is defensible only under a different meaning that the constant's name and comment do not
+claim.** Settling that properly needs a sub-annual product (MOD17A2H 8-day GPP); what the CO₂ and
+δ¹³C data say about it is the profile below.
+
+**Independent check on the read:** this script re-derives the global total and NH share from the
+raw files by its own path and gets **52.75 PgC/yr, share 0.5938** against
+`build_npp_hemispheric.R`'s 52.75 / 0.5942 (the residual is mean-of-ratio vs ratio-of-means).
