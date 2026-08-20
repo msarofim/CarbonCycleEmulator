@@ -7001,3 +7001,51 @@ which fits a badly-shaped target better than an upright one — now clamped at z
 reported; `qr.solve` on a near-empty band returns coefficients of order 1e3–1e6 **without
 erroring**, so non-finite candidates are skipped and **counted**; and an empty poleward cut gives
 `0/0` for the centroid, whose NaN killed the run several frames from its cause.
+
+## 2026-08-20q — The two-box test, and a CORRECTION to 20o's four-box number
+
+Marcus: *"So a single NPP box with a seasonal cycle based on 75 degrees outperforms a dual NPP box
+where 0–60 has a weak seasonal cycle and 60–90 has a strong one?"* **That configuration had never
+been run** — 20o tested four boxes, and 20p tested two boxes with the tropics *deleted*. Run now
+(`calibration/diag_npp_twobox.R`): two boxes spanning the whole hemisphere, weights and centroids
+measured, amplitudes tested fixed and free.
+
+| NH split | w_lo | φ_lo | w_hi | φ_hi | A = 1 | A free (≥0) | A_lo | A_hi |
+|---|---|---|---|---|---|---|---|---|
+| 40 | 0.522 | 18.30 | 0.478 | 53.18 | 15.1 % | 11.0 % | **0.00** | 1.83 |
+| 55 | 0.812 | 28.83 | 0.188 | 61.42 | 15.5 % | 9.9 % | **0.00** | 3.65 |
+| **60** | 0.892 | 31.40 | 0.108 | 64.41 | 15.9 % | **9.4 %** | **0.00** | 5.85 |
+| 70 | 0.994 | 34.75 | 0.006 | 71.74 | 16.8 % | 7.8 % | 0.09 | 90.99 |
+
+*(one box, φ + amplitude free = **7.4 %**)*
+
+**The low-latitude box's amplitude is driven to ZERO at every split up to 60.** Given a
+non-negativity constraint the two-box model *deletes its own low box* and becomes the cutoff model
+of 20p — and never reaches 7.4 %. **So yes: a single box at 75 with a damped amplitude does
+outperform the dual-box arrangement.**
+
+### ⚠ CORRECTION: 20o's "four boxes = 7.1 %, beating 7.4 %" was UNCONSTRAINED
+
+The two-box scan exposed that unconstrained solves in this family reach for **negative amplitudes**
+— a productivity box run backwards through the year, which fits and cannot exist. 20o's four-box
+number came from a bare `qr.solve`. Re-derived under non-negativity, exactly, by enumerating all
+2⁴ active sets:
+
+| | unconstrained | **non-negative** | fitted A |
+|---|---|---|---|
+| NH four boxes | 7.1 % | **9.9 %** | 0.00 0.00 0.00 3.65 |
+| SH four boxes | 10.5 % | **11.7 %** | 0.20 0.00 0.00 1633 |
+
+**The four-box model does NOT beat the single curve — it loses, 9.9 % against 7.4 %.** And its
+non-negative solution sets three of four boxes to zero, keeping only 55–90: it *is* the cutoff
+model at L = 55, which independently gave 9.9 %. The two diagnostics agree exactly, which is the
+check that the correction is right rather than a second error.
+
+**Withdraw the claim that banding "beat the single curve by 0.3 points".** No physically admissible
+multi-box model beats one curve, and the earlier statement was an artefact of an absent constraint.
+
+**Why one rectified curve beats the boreal box alone**, which is not obvious: at φ 75 with A 0.49
+the whole hemisphere's NPP carries a heavily rectified shape at half strength; the boreal-only
+model has 11 % of the NPP carrying its own shape at 5.9× strength. Similar amplitude, different
+distribution — and the observed aggregate prefers the rectified shape **spread across all the
+carbon** to a sharper one concentrated in a tenth of it.
