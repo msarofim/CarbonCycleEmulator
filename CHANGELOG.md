@@ -7098,6 +7098,13 @@ not merely mis-scaled — it is testing a quantity that is not monotone in the t
 hardcoding it; (ii) assert the sign only; (iii) run the case at the amplitude the assertion was
 written for and say so.
 
+**CONFIRMED at the exact constants** (the profile used the rounded 0.49 / 0.50): the shipped pair
+scores **−2027.3**, marginally better than the rounded −2027.7, so the **+548.7** gain over the old
+−2576.0 stands. Converged in 5.7 min, 2 restarts, last gain +0.1. There `seas_T_amp_NH` re-optimises
+to **11.084 against a measured 11.445** — within 3 %, and closer than any other cell tested. It sits
+2.0 below the best cell in the 30-cell set, (75, −40), which has no physical support: only 2.2 % of
+SH NPP lies poleward of 40 S. **`sst_seas_amp_NH` is 0.410 against an observed 2.237, unmoved.**
+
 **⚠ WHAT THIS INVALIDATES.** The model has changed. Diagnostics that rebuild a mode from
 `mode_fit_pump{N,D}.rds` now run it under different NEP amplitudes — `par_mode` does not carry
 `seas_npp_amp`, so it picks up the new default — and will NOT reproduce pre-08-20r numbers. Same
