@@ -6020,3 +6020,96 @@ should have been checked against the quarantine discipline first.
 is NOT decaying monotonically — 33.4, 26.7, 9.2, **20.2** — so an early-convergence estimate
 from the first few restarts is not reliable, and hitting the restart cap while still gaining
 remains a live possibility.
+
+## 2026-08-20 — THE 21-PARAMETER TWO-ARM REFIT LANDED. Both arms non-converged, the arms are near-identical in parameters, D's gain is now ENTIRELY THE SEASONAL ROWS — and the tail crashed on an operator error
+
+**Run:** launched 2026-08-18, finished 2026-08-20. Arm N 907.6 min / 377,286 evals; arm D
+1049.8 min / 380,746 evals. **~32.6 h total**, against the header's original 11 h — see the
+2026-08-18 runtime correction.
+
+### The operator error, first, because it shaped what had to be rebuilt
+
+**`run_modefind_pump_arms.R` was edited WHILE IT WAS RUNNING** (the runtime-header correction,
+`9f5bf71`) on the stated but false premise that "the running R process already has the script
+parsed". **Rscript parses INCREMENTALLY.** Inserting ~15 comment lines near the top shifted every
+later byte offset, and the process resumed mid-expression ~30 h later:
+`Error: unexpected symbol in: "  dd <- sort(dd[is.finite(dd) & abs(dd) > 0.5]..."`.
+
+**What survived, which is nearly everything**: both arms had already finished and written
+`mode_fit_pump{N,D}.rds` (29 fields each — modes, Hessians, per-stream decompositions, and the
+new kink/step-stability records), and the COMPARISON block had already printed in full to the
+log. **Lost: the standing-questions print and `pump_arms_comparison.rds`** — a repackaging of the
+two arm files carrying no information they lack.
+
+**Rebuilt by `calibration/finish_pump_arms_comparison.R`**, which reads ONLY the two rds files and
+re-derives the tail, so it cannot introduce a number the run did not produce. It also gates that
+the two files are the same run (same params, same seed, right arms) before comparing, since they
+sit at fixed paths any later run overwrites.
+
+**RULE: never edit a script a long job is executing. Copy it and edit the copy.**
+
+### Results
+
+**BOTH ARMS HIT THE RESTART CAP WHILE STILL GAINING — neither mode is converged.** And they did
+not stop in the same condition: at the cap N was gaining **0.45–1.24** per restart, D **0.10–0.12**.
+**N is the further from its mode**, and that asymmetry runs in D's favour — the
+`match_incumbents_optim` failure mode, where a less-optimised challenger buys a margin that is
+search residue. BFGS then gained **31.3 (N)** and **35.2 (D)**, an order more than any single
+restart, confirming Nelder-Mead was well short in both.
+
+**LAPLACE log-evidence D − N = +10.61** (MAP +10.69, 0.5 log|-H| +0.08). **NOT quotable**: two
+non-converged modes, `kz` pinned in both, and the optimisation asymmetry above points the same way
+as the margin.
+
+**THE ARMS ARE NEAR-IDENTICAL IN PARAMETERS — the strongest result of the run.** Every one of the
+21 coordinates agrees between arms within ~0.1 prior-sd except `h_ml` (0.8σ; 95.66 vs 88.39 m).
+**A structural switch that leaves 20 of 21 coordinates inside a tenth of a sd is not being resolved
+by these data.** That is the pre-registered reading for a close comparison, and it rests on
+parameter agreement rather than on an evidence difference computed from two bad Hessians.
+
+**THE PER-STREAM READING REVERSES AGAIN, and this is new.** Pre-refit it was "D's gain is entirely
+the CO2 record"; the 08-18 morning refit made it "CO2 ties, δ¹³C levels (N) vs sinks+¹⁴C (D)".
+**Now D's gain is ENTIRELY THE SEASONAL ROWS**: `co2_seasonal_MLO` **+12.68**, `d13c_seasonal_SPO`
++9.56, `d13c_seasonal_MLO` +5.45, `co2_seasonal_SPO` +4.36 — **+32.1 of seasonal** — against
+`gcb_ocean_sink` −7.36, `d14c_SH` −4.67, `d13c_level_MLO` −3.14, `d14c_NH` −2.88, `co2_icecore`
+−2.42. CO2 levels essentially tie (+1.10 / +0.57). The arms now differ where the 08-18 rework
+added the new physics.
+
+**FIVE PARAMETERS BEYOND 3σ, AND THE SAME FIVE IN BOTH ARMS** (N / D):
+
+| parameter | N | D |
+|---|---|---|
+| `rep_dC` | **+6.44** | **+6.67** |
+| `sst_seas_amp_NH` | **−6.03** | **−6.06** |
+| `sst_seas_amp_SH` | **−4.72** | **−4.63** |
+| `seas_T_amp_NH` | **+3.83** | **+3.78** |
+| `bomb_total` | **+3.24** | **+3.33** |
+
+Reproducing to two decimals under a different pump structure makes these **structural, not search
+artifacts**.
+
+1. **THE SST SEASONAL AMPLITUDES ARE BEING DRIVEN TO ZERO** while the land respiration
+   counter-cycle inflates. Both are log-transformed and positive-only, so negative z = shrinking
+   toward zero — **the same signature as the SH phase bug caught on 08-18**, where a wrong-phased
+   mechanism could only zero itself out because no sampler could repair a log-amplitude. The
+   seasonal cycle is being carried almost entirely by land. **NOT diagnosed — a hypothesis with
+   tests attached** (phase check at the mode, hemisphere-flip/sign geometry vs
+   `ccx_sst_anom_from_gmst()`, and an iso-observable profile of `sst_seas_amp_NH` with the land
+   terms frozen). That the arms differ mainly in the SEASONAL rows makes this the priority.
+2. **`rep_dC` at ~6.5σ is past the threshold its own design tried to make unaffordable.** The
+   parameter-table comment sizes the d13C common-mode bias at ~4.2 sd and argues the
+   N(0, 1.0 ppm) prior "resists a structural error wearing its clothes". It went further anyway,
+   so on this evidence it IS absorbing the Suess overshoot — the outcome choosing `rep_dC` over a
+   free d13C offset was meant to prevent. Directly on Marcus's isotopes-first priority.
+
+**Standing questions answered.** `kz` PINNED in both (98.8 % / 98.2 % of the re-bisected bracket)
+— §5.2h P2 confirmed again. `h_ml` INTERIOR and the gradient rows LIVE in both (95.66 / 88.39 m).
+`pump_grad` 310.71 (N) / 319.23 (D), both **above** the 233.11 prior centre and above the old 1-D
+optimum of 274.5 — moved from the prior, not sitting on it.
+
+**The Hessian checks added this session earned their place.** `h_ml` was clear of the kinks in
+BOTH arms (gaps 2.75 m and 10.02 m against steps reaching 2.2e-3 and 9.2e-4 m), so the kink
+caveat did not bite. But step-stability flagged **`kz` in N, and `h_ml` AND `kz` in D** — D's
+`h_ml` sits 3.4 m off the band's lower bound, so its curvature reads the bound, not the data.
+**D's log|-H| therefore has two unreliable rows to N's one**, which is a further reason the +10.61
+is not a number to quote.
