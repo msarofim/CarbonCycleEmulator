@@ -203,7 +203,21 @@ CCX_F_LUC_WOOD_DEFAULT <- 0
 #' idiom): every pre-2026-08-18 result -- including mode_fit_pump{N,D}.rds --
 #' reproduces only on that path. Diagnostics reconstructing those modes must
 #' set it explicitly.
-CCX_SEAS_PHI_EFF <- c(NH = 75, SH = -30)   # deg latitude, flux-weighted effective
+# NOT A FLUX-WEIGHTED LATITUDE -- that is what this comment used to claim and it
+# is wrong by forty degrees. MEASURED 2026-08-20: the NH NPP-weighted mean
+# latitude is 34.29 (calibration/diag_npp_eff_latitude.R, MOD17A3HGF), and the
+# SH's is -15.12. This constant is the latitude whose INSOLATION SHAPE best
+# matches observed land productivity once the amplitude is free, which is a
+# different quantity and a defensible one: 75 wins that contest as a clean
+# interior optimum because POLAR NIGHT gives the curve a hard zero, the only
+# thing in the insolation family resembling a boreal growing season switching
+# off. At unit amplitude the best shape match would be 50.
+# The size that goes with the shape is seas_npp_amp_{NH,SH} (0.497 / 0.503,
+# MEASURED) -- the pair is ONE (shape, size) unit and neither may move alone.
+# Splitting the hemisphere into latitude bands was tested and REJECTED: under a
+# non-negativity constraint every multi-box fit deletes its own low-latitude
+# boxes and loses to this single curve (calibration/diag_npp_twobox.R).
+CCX_SEAS_PHI_EFF <- c(NH = 75, SH = -30)   # deg; SHAPE latitude, not a centroid
 # LAG CONVENTION: sin(2*pi*(t - (3.5 + LAG)/12)) peaks at t = 0.25 + (3.5 + LAG)/12,
 # so the 3.5 ALREADY places the zero-lag NH peak at mid-July and LAG is measured
 # from there, not from the solstice.
@@ -701,8 +715,17 @@ ccx_default_params <- function() {
     # CCX_SEAS_PHI_EFF is a compile-time constant in src/ccx_core.cpp and so
     # cannot be varied inside one R session. See
     # calibration/diag_seas_channel_decomp.R.
-    seas_npp_amp_NH = 1,
-    seas_npp_amp_SH = 1,
+    # MEASURED 2026-08-20r and CHANGED FROM 1 (Marcus: "if 75 + 0.49 is the
+    # better fit, go with the better fit"). These are the scale the 75 / -30
+    # insolation SHAPES need to match observed productivity -- see the
+    # SEAS_NPP_AMP_* block in R/constants.R for what CCX_SEAS_PHI_EFF actually
+    # is and why its curve is 1.6x too big without them. Worth +548 log-units
+    # at the arm-N mode with the seasonal block re-optimised
+    # (calibration/diag_phi_eff_profile.R), and seas_T_amp_NH then falls from a
+    # fitted 48.07 to 10.8, against a MEASURED 11.45.
+    # RE-DERIVE BOTH IF CCX_SEAS_PHI_EFF MOVES -- they are conditional on it.
+    seas_npp_amp_NH = ccx_const("SEAS_NPP_AMP_NH"),
+    seas_npp_amp_SH = ccx_const("SEAS_NPP_AMP_SH"),
     # Seasonal SST (2026-08-18, same session, Marcus: do the SST fix BEFORE the
     # refit). Hemispheric-mean SST seasonal half-amplitudes, K. These are the
     # OCEAN half of the seasonal cycle -- winter solubility uptake, summer

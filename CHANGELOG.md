@@ -7049,3 +7049,56 @@ the whole hemisphere's NPP carries a heavily rectified shape at half strength; t
 model has 11 % of the NPP carrying its own shape at 5.9× strength. Similar amplitude, different
 distribution — and the observed aggregate prefers the rectified shape **spread across all the
 carbon** to a sharper one concentrated in a tenth of it.
+
+## 2026-08-20r — SHIPPED: the measured NEP amplitude factors (Marcus)
+
+> *"If 75 + 0.49 is the better fit, go with the better fit."*
+
+**`seas_npp_amp_{NH,SH}` 1 → 0.4969 / 0.5027**, as `SEAS_NPP_AMP_{NH,SH}` in `R/constants.R`
+(`data`). **`CCX_SEAS_PHI_EFF` is UNCHANGED at (75, −30)** — applying Marcus' own rule to the SH
+lands on the shipped latitude too (−30 + 0.50 scores −2027.7 against −18 + 0.97 at −2043.5), so no
+latitude moves at all. **Two measured constants, +548 log-units.** The SH is available at −18 for
+15.8 log-units if the physical reading is preferred; say the word.
+
+**The factors are the least-squares scale of the shipped latitude's insolation curve onto the
+observed productivity cycle** (MOD17A2HGF 8-day PsnNet, 5 years, window-integrated, free shift):
+NH **0.4969** (sd 0.046; GPP gives 0.487), SH **0.5027** (sd 0.087; GPP gives 0.352 — a 1.4×
+bracket, because SH productivity is water-driven). No C++ edit was needed: both cores already read
+these from the parameter list, so **parity is untouched**.
+
+**`CCX_SEAS_PHI_EFF`'s comment is rewritten, because it was wrong by forty degrees.** It called
+itself "flux-weighted effective"; the NH NPP-weighted mean latitude is **34.29**. It is the
+latitude whose insolation SHAPE best matches observed productivity *once the amplitude is free*,
+and 75 wins that as a clean interior optimum because polar night supplies a hard zero. **The pair
+is ONE (shape, size) unit** — `test-likelihood.R` now RE-FITS both factors from the observation
+product at the *current* φ and asserts agreement, with a mutation check that the gate fails at
+φ = 50. Move φ without redoing them and the test says so.
+
+### ⚠ A SECOND TEST NOW FAILS, AND IT IS NOT MODIFIED
+
+**947 pass, 2 fail.** `test-fluxes.R:99` is the known one from 08-20g. **`test-fluxes.R:100` is
+new**: `expect_lt(on$tau_label, off$tau_label - 0.2)` — "seasonality matters" — now gives 4.523
+against a 4.500 bar. **Reported, not fixed**, per the standing rule.
+
+Diagnosed, and it is the direct physical consequence of the change rather than a defect:
+
+| `seas_npp_amp` | `tau_label` | gap vs seasonality-off |
+|---|---|---|
+| 1.00 (old default) | 3.994 | 0.705 |
+| 0.70 | 4.293 | 0.407 |
+| **0.4969 (shipped)** | **4.523** | **0.177** |
+| 0.30 | 4.771 | **−0.071** |
+
+**The 0.2 threshold silently encoded `seas_npp_amp = 1`** — the same failure mode as line 99's
+1e-3 tolerance silently encoding `CCX_SST_SEAS_LAG = 2.5`, in the same test, found the same way.
+The direction is still right (seasonality does shorten the label turnover) and the magnitude simply
+halved with the amplitude. Note also that the gap **changes sign below ~0.35**, so the assertion is
+not merely mis-scaled — it is testing a quantity that is not monotone in the thing it varies.
+**Options for Marcus, not resolved here:** (i) derive the threshold from `seas_npp_amp` instead of
+hardcoding it; (ii) assert the sign only; (iii) run the case at the amplitude the assertion was
+written for and say so.
+
+**⚠ WHAT THIS INVALIDATES.** The model has changed. Diagnostics that rebuild a mode from
+`mode_fit_pump{N,D}.rds` now run it under different NEP amplitudes — `par_mode` does not carry
+`seas_npp_amp`, so it picks up the new default — and will NOT reproduce pre-08-20r numbers. Same
+class as the 08-20g lag change. **The refit that 20d §4 owes is now doubly owed.**

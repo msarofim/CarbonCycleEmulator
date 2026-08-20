@@ -926,3 +926,50 @@ test_that("a carbonate pump moves the alkalinity row, and by the stoichiometry",
   expect_lt(org_only, 0)
   expect_gt(carb_only, 0)
 })
+
+test_that("the NEP amplitude factors are the measured scale of the SHIPPED phi", {
+  # seas_npp_amp_{NH,SH} and CCX_SEAS_PHI_EFF are ONE (shape, size) unit: the
+  # factors are the least-squares scale of THAT latitude's insolation curve onto
+  # the observed productivity cycle. Move phi and they are wrong -- silently,
+  # and in the direction that re-opens the 48 K cancellation they were shipped
+  # to close. So they are RE-DERIVED here from the observation product at the
+  # CURRENT phi rather than compared with a stored number.
+  f <- ccx_path("data", "obs_npp_seasonal_shape.rds")
+  skip_if(!file.exists(f), "obs_npp_seasonal_shape.rds absent")
+  ss <- readRDS(f)
+  NG <- 720; tt <- (seq_len(NG) - 0.5) / NG
+  um <- function(v) v / mean(v)
+  refit <- function(nm, phi) {
+    x <- ss$fits[[nm]]
+    mid <- x$mid; days <- round(diff(c(mid, mid[1] + 1)) * 365); nd <- sum(days)
+    half <- (days / nd) / 2
+    W <- matrix(0, length(mid), NG)
+    for (i in seq_along(mid)) {
+      inw <- ((tt - (mid[i] - half[i])) %% 1) <= ((2 * half[i]) %% 1)
+      W[i, inw] <- 1 / sum(inw)
+    }
+    v <- um(ccx_insol(phi, tt)) - 1
+    mean(vapply(seq_along(x$years), function(i) {
+      tg <- x$shape_by_year[, i]; bb <- Inf; ba <- NA_real_
+      for (s in seq(0, 11.75, by = 0.05)) {
+        k <- round(s / 12 * NG) %% NG
+        B <- as.vector((if (k == 0) W else W[, c((k + 1):NG, seq_len(k))]) %*% v)
+        a <- max(0, sum(B * (tg - 1)) / sum(B^2))
+        e <- sum((1 + a * B - tg)^2)
+        if (e < bb) { bb <- e; ba <- a }
+      }
+      ba
+    }, numeric(1)))
+  }
+  expect_equal(refit("NH_psnnet", CCX_SEAS_PHI_EFF[["NH"]]),
+               ccx_const("SEAS_NPP_AMP_NH"), tolerance = 1e-3)
+  expect_equal(refit("SH_psnnet", CCX_SEAS_PHI_EFF[["SH"]]),
+               ccx_const("SEAS_NPP_AMP_SH"), tolerance = 1e-3)
+  # and the defaults carry them, so the shipped model IS the measured pair
+  p <- ccx_default_params()
+  expect_equal(p$seas_npp_amp_NH, ccx_const("SEAS_NPP_AMP_NH"), tolerance = 1e-12)
+  expect_equal(p$seas_npp_amp_SH, ccx_const("SEAS_NPP_AMP_SH"), tolerance = 1e-12)
+  # MUTATION: the gate must FAIL if phi moves without the factors being redone.
+  expect_false(isTRUE(all.equal(refit("NH_psnnet", 50), ccx_const("SEAS_NPP_AMP_NH"),
+                                tolerance = 1e-3)))
+})

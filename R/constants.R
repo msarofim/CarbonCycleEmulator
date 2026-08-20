@@ -205,6 +205,47 @@ CCX_CONSTANTS <- list(
                    "fitted `npp_frac_NH` (Marcus 2026-08-20k), NOT the value it takes.",
                    "Derived by calibration/diag_npp_frac_anchor.R at the arm-N mode.")),
 
+  # ---- the NEP seasonal amplitude factors (2026-08-20r) ----------------
+  # WHAT CCX_SEAS_PHI_EFF ACTUALLY IS, because its name misleads and its own
+  # comment used to. It is NOT the NPP centroid: the NH NPP-weighted mean
+  # latitude is 34.29 and this constant is 75, forty degrees poleward. It is the
+  # insolation latitude whose SHAPE best matches observed land productivity ONCE
+  # THE AMPLITUDE IS FREE -- and 75 wins that contest as a clean interior
+  # optimum (7.5 % residual against 11.4 % at 50; calibration/
+  # diag_seas_rectification.R). What it buys is POLAR NIGHT: a hard zero, the
+  # only thing in the insolation family that resembles a boreal growing season
+  # switching off. At unit amplitude the best shape match is 50, not 75.
+  #
+  # SO THE CURVE IS RIGHT AND ITS SIZE IS NOT. At 75 the unit-mean curve has a
+  # peak-to-peak of 2.801 against an observed 1.747, and until 2026-08-20r the
+  # model had no way to scale it -- so seas_T_amp_NH was fitted to 48 K, 4.2x
+  # its measured 11.45, purely to cancel the excess (handoff 20d section 3).
+  # These two factors are that missing scale, MEASURED.
+  #
+  # THEY ARE CONDITIONAL ON CCX_SEAS_PHI_EFF and must be re-derived if it moves
+  # -- the pair is a (shape, size) unit, not two independent numbers.
+  # test-likelihood.R re-fits them from data/obs_npp_seasonal_shape.rds at the
+  # CURRENT phi and asserts agreement, so the two cannot drift apart silently.
+  #
+  # THE SH IS MUCH LESS WELL DETERMINED and that is not a defect in the fit but
+  # a property of the hemisphere: 76 % of SH NPP lies equatorward of 23.5 S and
+  # its cycle is water-driven, not light-driven. PsnNet gives 0.503 and GPP
+  # 0.352 -- a 1.4x bracket, against 0.497/0.487 in the NH.
+  SEAS_NPP_AMP_NH = list(
+    value = 0.4969, units = "1",
+    status = "data",
+    source = paste("Least-squares scale of the CCX_SEAS_PHI_EFF['NH'] = 75 insolation",
+                   "shape onto the OBSERVED NH land productivity cycle, MOD17A2HGF C6.1",
+                   "8-daily net_photosynthesis, 5 years (sd 0.046). Window-integrated,",
+                   "free time shift. Derived by calibration/diag_seas_rectification.R;",
+                   "GPP gives 0.487 as the other end of the bracket.")),
+  SEAS_NPP_AMP_SH = list(
+    value = 0.5027, units = "1",
+    status = "data",
+    source = paste("As SEAS_NPP_AMP_NH at CCX_SEAS_PHI_EFF['SH'] = -30 (sd 0.087).",
+                   "GPP gives 0.352 -- a far wider bracket than the NH's, because SH",
+                   "productivity is tropical and water-driven.")),
+
   # ---- observed seasonal amplitudes (2026-08-20g) ----------------------
   # ONE SCALAR PER ENTRY. The registry's contract is is.finite(k$value)
   # (test-constants.R:18), which a named length-2 vector fails -- the first
