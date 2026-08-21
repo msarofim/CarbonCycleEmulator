@@ -81,6 +81,52 @@ else — because q10 also carries the ANNUAL feedback `q10^(gmst/10)`, and a pro
 flat in the seasonal rows but not in the rest would mean the repair is splitting q10's two
 duties, not re-anchoring a prior. Result pending.
 
+## 2026-08-21 (evening) — Pulse-partition prototype for the app panel, and two traps it walked into
+
+Marcus asked for an app panel: perturbation curve on top, reservoir-partition bar chart
+underneath, dense to 2100 then point estimates at 2200…3000. `calibration/diag_pulse_partition.R`
+is the feasibility prototype — not the panel, but the answer to the three questions the panel
+cannot be built without.
+
+**It works, and the partition closes EXACTLY.** 100 GtC in 2030 on SSP2-4.5, run to 3000:
+the four reservoirs account for the pulse to **0.000 %** from 2050 onward. Two coupled runs
+1750–3000 take **1.7 s**, so it is live-in-Shiny territory with no precomputation.
+
+| year | atmosphere | land | surface ocean | deep ocean | ppm left |
+|---|---|---|---|---|---|
+| 2100 | 0.506 | 0.233 | 0.024 | 0.237 | 23.8 |
+| 2300 | 0.292 | 0.352 | 0.016 | 0.339 | 13.8 |
+| 3000 | 0.164 | 0.396 | 0.011 | 0.429 | 7.7 |
+
+**TRAP 1 — the SSP emissions table is DECADAL past 2020.** Adding the pulse to the year-2030
+row of the raw table adds 100 GtC/yr to a decadal knot, and `ccx_annual_to_monthly()` then
+ramps through it for twenty years — delivering about **ten times** the pulse, smeared. The
+first run of this file reported **242 ppm** of perturbation from 100 GtC, which is 5× what
+100 GtC can produce even with zero uptake. `app/server.R` already interpolates to an annual
+grid first and is NOT affected. Now gated: the two emission series must differ in exactly one
+year and sum to exactly the pulse.
+
+**TRAP 2 — `deep_C_{NH,SH}` is the BOTTOM BOX, not the ocean interior.** `R/model.R:48` says
+so; those columns exist for the DIC/δ¹³C gradient likelihood terms and carry one of ten
+interior layers. Summing `ml + deep` as if it were the ocean accounts for **31 %** of
+`ocean_C` and loses 69 %, which showed up as the pulse partition failing to close by 32 %.
+The split that works with no model change takes the interior as a **remainder**:
+`ocean_C − (ml_C_NH + ml_C_SH)`.
+
+**TRAP 3, mine, in the benchmark rather than the model.** The Joos comparison row was typed
+from recall and had 50 yr and 100 yr wrong by 0.05–0.06 (0.44/0.35 against 0.487/0.409) —
+the same size as the difference it was being used to judge. Now EVALUATED from the Table 5
+fit recorded in DESIGN §6 gate 12 (a₀ 0.2173; aᵢ 0.2240/0.2824/0.2763; τᵢ 394.4/36.54/4.304).
+And relabelled: an SSP2-4.5 pulse in 2030 is **not** Joos's PD100 protocol (100 GtC onto a
+background HELD at 389 ppm), and DESIGN prices that difference at more than most of the
+disagreement. **The gate is `diag_joos_irf.R`, which runs the right protocol and PASSES** —
+integrated IRF 12.4 / 25.5 / 41.9 yr inside Joos's 5–95 % at all three horizons, though at
+the low end of each, with the point IRF 0.077–0.118 BELOW the multi-model mean throughout.
+
+**What the panel still needs from the model:** `land_C` is leaf + wood + soil_fast +
+soil_slow AGGREGATED, so a vegetation-vs-soil bar needs those four exposed as output columns.
+The state vector has them; `ccx_run_fast()` does not return them. A column, not a mechanism.
+
 ## 2026-08-21 (later still) — §2's ridge is real and aimed at the wrong coordinate; §3's blocker was a false alarm
 
 ### §2 step 1 — the falsification test PASSES, and inverts the causal story
