@@ -498,6 +498,76 @@ ccx_unc_to_par <- function(u) {
 ccx_init_unc <- function() ccx_par_to_unc(
   lapply(CCX_PARAM_TABLE, function(s) s$init))
 
+# ---- where a value sits in its own prior's tail ----------------------
+#' Prior-tail position of `x` under parameter `name`'s prior, in normal sds.
+#'
+#' This is the physical-plausibility screen both mode-finders print, and until
+#' 2026-08-21 each carried its own copy of it that was WRONG BY A LOT. The old
+#' version integrated the prior on a LINEAR grid, `seq(x/1e3, x*1e3,
+#' length.out = 4001)`. For `seas_T_amp_NH` at the arm-N mode that is a grid
+#' from 0.026 to 25,937 in steps of 6.5 K, against a prior whose +/- 1 sigma
+#' spans 11.4-17.9 K -- ONE grid point inside the entire prior. It reported
+#' +3.29 where the analytic answer is +2.65, and it reported q10 at -2.01
+#' where the analytic answer is -2.43. That matters because the flagged
+#' |z| > 3 list is what the 2026-08-21 handoff used to rank the next three
+#' pieces of work: `seas_T_amp_NH` was on it and does not belong on it.
+#'
+#' THE FIX IS TO INTEGRATE IN THE UNCONSTRAINED COORDINATE. Every prior in
+#' CCX_PARAM_TABLE has scale O(1) there by construction -- a lognormal in x is
+#' a normal in log x with sd = its logsd (0.22-0.4 here), a uniform under
+#' `logit` is a standard logistic, a normal under `id` is itself -- so ONE
+#' grid spacing and ONE window serve all 21 parameters, which is exactly what
+#' the natural scale could not give. The window is centred on the PRIOR's mode,
+#' found by a coarse scan, not on `x`: the whole point of the statistic is that
+#' `x` may be far out in the tail.
+#'
+#' The probability integral transform is invariant under the reparameterisation,
+#' so this returns the same number the natural-scale calculation would if the
+#' natural-scale calculation could be done accurately.
+#'
+#' @param name parameter name in CCX_PARAM_TABLE
+#' @param x    value on the NATURAL scale
+#' @return z such that pnorm(z) is the prior CDF at x; NA if the prior is
+#'   improper or x is outside its support
+CCX_PRIOR_Z_SCAN_HALF <- 60      # coarse-scan half-window, unconstrained units
+CCX_PRIOR_Z_SCAN_STEP <- 0.05    # coarse-scan spacing; << the 0.22 narrowest prior sd
+CCX_PRIOR_Z_HALF      <- 40      # fine-grid half-window about the prior mode
+CCX_PRIOR_Z_STEP      <- 0.002   # fine-grid spacing
+
+ccx_prior_z <- function(name, x, table = CCX_PARAM_TABLE) {
+  s <- table[[name]]
+  if (is.null(s)) stop("no such parameter: ", name)
+  ux <- .to_unc(x, s)
+  if (!is.finite(ux)) return(NA_real_)
+  # log prior density in the UNCONSTRAINED coordinate, Jacobian included
+  ld <- function(u) vapply(u, function(w) {
+    v <- s$prior(.from_unc(w, s)) + .log_jac(w, s)
+    if (is.finite(v)) v else -Inf
+  }, numeric(1))
+  # the prior's own mode, found without assuming it is anywhere near x
+  cs <- seq(ux - CCX_PRIOR_Z_SCAN_HALF, ux + CCX_PRIOR_Z_SCAN_HALF,
+            by = CCX_PRIOR_Z_SCAN_STEP)
+  lc <- ld(cs)
+  if (!any(is.finite(lc))) return(NA_real_)
+  u0 <- cs[which.max(lc)]
+  us <- seq(u0 - CCX_PRIOR_Z_HALF, u0 + CCX_PRIOR_Z_HALF, by = CCX_PRIOR_Z_STEP)
+  lu <- ld(us)
+  d  <- exp(lu - max(lu[is.finite(lu)]))
+  d[!is.finite(d)] <- 0
+  if (sum(d) <= 0) return(NA_real_)
+  # MIDPOINT, not right-edge: plain cumsum(d)/sum(d) evaluates the CDF at the
+  # far edge of each cell and leaves a half-cell bias, +0.003 sd at this
+  # spacing -- small, but systematic and free to remove.
+  cdf <- (cumsum(d) - d / 2) / sum(d)
+  # BOTH TAILS ARE CARRIED and the SMALLER one is used. A z of -6 is a lower
+  # cumulative of 1e-9; taking it as 1 - (upper cumulative) would evaluate it as
+  # the difference of two numbers within 1e-9 of each other and lose it entirely.
+  lo <- stats::approx(us, cdf, xout = ux, rule = 2)$y
+  hi <- 1 - lo
+  if (lo <= hi) stats::qnorm(max(lo, .Machine$double.xmin))
+  else         -stats::qnorm(max(hi, .Machine$double.xmin))
+}
+
 # ---- posterior -------------------------------------------------------
 #' Build a closure that evaluates the log-posterior on the unconstrained scale.
 #'

@@ -2,6 +2,86 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-21 (later) — The prior-tail screen was wrong by up to 1.3 sd, and it had already mis-ranked the work
+
+Started on handoff §2 (the `seas_T_amp_NH` × ln(`q10`) conflict). Restating the conflict
+from the constants rather than from the handoff turned up two errors in the numbers the
+handoff is built on, one mine and one the code's.
+
+**1. The prior centre is not the bracket's lower end.** `seas_T_amp_NH`'s prior is
+`ccx_bracket_lnorm`, whose centre is the GEOMETRIC MEAN of the measured bracket —
+`sqrt(11.445 × 17.921) = 14.3215`, not 11.445. So the joint prior implies
+14.3215 × ln(2.0) = **9.927** against the mode's 2.251: a factor of **4.41×**, not the
+3.52× the handoff quotes off the LO bracket. The direction of the finding is unchanged and
+the gap is larger than advertised.
+
+**2. `prior_z()` integrated the prior on a grid that barely contained it.** Both
+mode-finders carried their own copy of a physical-plausibility screen that built the prior
+CDF on `seq(x/1e3, x*1e3, length.out = 4001)` — a LINEAR grid. For `seas_T_amp_NH` at
+x = 25.94 that is 0.026 → 25,937 in steps of 6.5 K, against a prior whose ±1 σ spans
+11.4–17.9 K: **one grid point inside the entire prior**. Every tight lognormal was
+mis-reported:
+
+| parameter | reported | correct | error |
+|---|---|---|---|
+| `seas_T_amp_NH` | +3.29 | **+2.65** | 0.64 |
+| `bomb_total` | +3.08 | **+1.81** | 1.27 |
+| `q10` | −2.01 | **−2.43** | 0.41 |
+| `sst_seas_amp_NH` | −5.97 | **−6.27** | 0.30 |
+| `seas_T_amp_SH` | −3.71 | **−3.99** | 0.29 |
+| `rep_dC` | +5.75 | **+5.18** | 0.57 |
+
+**This is not cosmetic: it changes the flag list the handoff prioritised from.** At
+|z| > 3 the old screen flagged six parameters; four survive. `seas_T_amp_NH` (+2.65) and
+`bomb_total` (+1.81) come OFF the list. §2's headline "`seas_T_amp_NH` +3.29 σ and `q10`
+−2.43 σ" was also mixing the two calculations — one number from the file, one analytic.
+The honest pair is **+2.65 / −2.43**, and the conflict is a symmetric ~2.5 σ tug rather
+than the asymmetric one it looked like.
+
+**FIXED** as a single `ccx_prior_z()` in `R/calibrate.R`, called by both drivers. It
+integrates in the UNCONSTRAINED coordinate, where every prior in `CCX_PARAM_TABLE` has
+scale O(1) by construction — a lognormal in x is a normal in log x, a uniform under
+`logit` is a standard logistic — so one window and one spacing serve all 21 parameters,
+which is exactly what the natural scale could not do. The window is centred on the PRIOR's
+mode, found by a coarse scan, not on x: the whole point of the statistic is that x may be
+far out in the tail. Both tails are carried and the smaller is used, so a z of −6.27 (a
+lower-tail mass of 1.8e-10) survives instead of being lost to `1 - upper`. A half-cell
+midpoint correction removes the last +0.003 sd of bias.
+
+`tests/testthat/test-prior-z.R` pins it to the ANALYTIC z for all six lognormal priors,
+the one normal prior, and the uniform-under-logit case (where the Jacobian is what could
+most easily be got wrong), plus a deep-tail case at −15 σ and a mutation test that the
+caller-supplied `table=` argument is actually honoured (the arm driver overrides `h_ml`'s
+band in-process). 27 assertions.
+
+**NOT quarantined, deliberately.** The bug touches one REPORTED field, `prior_z`, in
+`mode_fit_pumpN.rds`; it never entered the objective, the mode, or the Hessian. Moving the
+15-hour refit's output to `outputs/quarantine/` would break §§2–4, which all read it, to
+protect against a screening statistic that is now recomputable in one line. The stale
+field stays where it is and is superseded by `ccx_prior_z()`.
+
+**Also fixed, in passing:** `ccx_forcing_eluc_annual()` reads `e_luc_{NH,SH}` straight off
+the forcing, so taking the annual LUC series AFTER the column multiply and then scaling it
+again applies `luc_scale` **twice**. `ccx_make_logpost()` avoids this by building its
+`ELUC_BASE` from the unscaled `base_forcing`; the diagnostic idiom copied out of
+`diag_phi_eff_profile.R` does not. Worth 1.91 log-units at the arm-N mode, all of it in
+`gcb_land_sink`. Caught by the new diagnostic's GATE 2 (loglik computed two ways) before
+it produced a single number. `diag_phi_eff_profile.R` still carries it — in its
+`by_stream`/`gcb_land_sink` column only, since its optimisation went through
+`ccx_make_logpost()` and its seasonal-row conclusions never touch LUC.
+
+**Added `calibration/diag_seas_T_amp_q10_ridge.R`** — the §2 step-1 falsification test.
+Profiles `seas_T_amp_NH` over 5–50 K at the converged mode with `q10` re-optimised, on the
+LOG-LIKELIHOOD rather than the log-posterior: the priors on those two parameters are the
+things in conflict, so an objective containing them cannot say whether the DATA
+distinguish the pair. Three tiers (q10 alone; q10 + `seas_T_amp_SH`, since q10 is SHARED
+between hemispheres and freezing the SH breaks its product by construction; the full
+seasonal block), and the profile is split into the four seasonal rows versus everything
+else — because q10 also carries the ANNUAL feedback `q10^(gmst/10)`, and a profile that is
+flat in the seasonal rows but not in the rest would mean the repair is splitting q10's two
+duties, not re-anchoring a prior. Result pending.
+
+
 ## 2026-08-09 — Project created; design locked (no code yet)
 
 - Repo created as a sibling of FaIRtoFrEDI (design conversation ran from a FaIRtoFrEDI

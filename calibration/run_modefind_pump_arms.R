@@ -408,19 +408,14 @@ arm_fit <- function(mode) {
   pm <- ccx_unc_to_par(u)
 
   # ---- (b2) physical-plausibility screen ----------------------------
-  prior_z <- function(n) {
-    s <- CCX_PARAM_TABLE[[n]]; x <- pm[[n]]; g <- s$prior
-    lo <- x / 1e3; hi <- x * 1e3
-    if (s$tr == "logit") { lo <- s$lo + 1e-9; hi <- s$hi - 1e-9 }
-    xs <- seq(lo, hi, length.out = 4001)
-    dd <- exp(vapply(xs, function(z) g(z), numeric(1)))
-    dd[!is.finite(dd)] <- 0
-    if (sum(dd) <= 0) return(NA_real_)
-    cdf <- cumsum(dd) / sum(dd)
-    qnorm(min(max(approx(xs, cdf, xout = x, rule = 2)$y, 1e-12), 1 - 1e-12))
-  }
+  # ccx_prior_z() SINCE 2026-08-21. This block used to carry its own copy that
+  # integrated the prior on a linear grid spanning x/1e3 to x*1e3 -- one grid
+  # point inside a tight lognormal -- and it mis-stated this very file's output:
+  # seas_T_amp_NH +3.29 (truly +2.65) and bomb_total +3.08 (truly +1.81), both
+  # of which it then FLAGGED at |z| > 3. See R/calibrate.R.
   zs <- vapply(CCX_PARAM_NAMES,
-               function(n) tryCatch(prior_z(n), error = function(e) NA_real_), numeric(1))
+               function(n) tryCatch(ccx_prior_z(n, pm[[n]]), error = function(e) NA_real_),
+               numeric(1))
   cat(sprintf("\n[%s] prior-tail position (normal sds; |z| > %g flagged):\n", mode, ARM_FLAG_SIGMA))
   print(round(zs, 2))
   fl <- which(abs(zs) > ARM_FLAG_SIGMA)

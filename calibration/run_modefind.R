@@ -135,20 +135,11 @@ lp_mode <- -best
 # substep count the integrator needed, so a mode pressed against the stability
 # criterion is visible rather than inferred later from a failed pilot.
 pm <- ccx_unc_to_par(u)
-prior_z <- function(n) {
-  s <- CCX_PARAM_TABLE[[n]]; x <- pm[[n]]
-  # numerical quantile position of x under the prior, expressed in normal sds
-  g <- s$prior
-  lo <- x / 1e3; hi <- x * 1e3
-  if (s$tr == "logit") { lo <- s$lo + 1e-9; hi <- s$hi - 1e-9 }
-  xs <- seq(lo, hi, length.out = 4001)
-  d <- exp(vapply(xs, function(z) g(z), numeric(1)))
-  d[!is.finite(d)] <- 0
-  if (sum(d) <= 0) return(NA_real_)
-  cdf <- cumsum(d) / sum(d)
-  qnorm(min(max(approx(xs, cdf, xout = x, rule = 2)$y, 1e-12), 1 - 1e-12))
-}
-zs <- vapply(CCX_PARAM_NAMES, function(n) tryCatch(prior_z(n), error = function(e) NA_real_),
+# ccx_prior_z() SINCE 2026-08-21 -- the local copy that used to live here
+# integrated the prior on a linear grid from x/1e3 to x*1e3 and reported tail
+# positions wrong by up to 1.3 sd on tight lognormals. See R/calibrate.R.
+zs <- vapply(CCX_PARAM_NAMES,
+             function(n) tryCatch(ccx_prior_z(n, pm[[n]]), error = function(e) NA_real_),
              numeric(1))
 flag <- which(abs(zs) > MODE_FLAG_SIGMA)
 cat("\nprior-tail position of the mode (normal sds; |z| > ", MODE_FLAG_SIGMA,
