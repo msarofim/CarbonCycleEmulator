@@ -89,7 +89,18 @@ ARM_TOL        <- 1e-4      # stop when a restart gains less than this
 ARM_PENALTY    <- 1e6       # finite stand-in for -Inf so optim can navigate
 ARM_HESS_EPS   <- 3e-4      # step on the unconstrained scale; see run_modefind.R
 ARM_FLAG_SIGMA <- 3.0       # prior-sd distance at which a parameter is flagged
-ARM_MODES      <- c("N", "D")
+# ONE ARM FOR THE 2026-08-20r REFIT, and this is a deliberate narrowing.
+# The 2026-08-18 two-arm run found the arms INDISTINGUISHABLE -- every coordinate
+# within 0.1 sd -- and its evidence margin was explicitly NOT quotable (kz pinned,
+# both arms capped, and the 08-18 smoke test had given the OPPOSITE sign). Marcus
+# adopted N on physical grounds: nutrient- rather than DIC-limited export, and a
+# constant-mass pump changes the ocean sink by EXACTLY zero. Nothing that has
+# changed since (the re-anchored seasonal priors 08-20g, npp_frac_NH 08-20k, the
+# NEP amplitude factors 08-20r) touches the pump, so re-running D would spend
+# ~18 h re-deciding a question the data already declined to answer.
+# RESTORE c("N", "D") IF THE PUMP STRUCTURE IS EVER BACK IN PLAY -- the
+# comparison block below is guarded and reactivates on its own.
+ARM_MODES      <- c("N")
 # h_ml IS BOUNDED TO THE GRADIENT ROWS' VALIDITY BAND FOR THIS REFIT (Marcus
 # 2026-08-16g). See the block below for what that does and does not buy.
 ARM_HML_BOUND  <- LIK_OCEAN_GRAD_HML_OK   # [85, 120]
@@ -105,7 +116,8 @@ ARM_KINK_FACT  <- 20       # a kink = this many times the median slope jump
 dir.create(ARM_OUTDIR, recursive = TRUE, showWarnings = FALSE)
 sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 
-cat(sprintf("REFIT, TWO ARMS. %d parameters: %s\n",
+cat(sprintf("REFIT, %d ARM(S) [%s]. %d parameters: %s\n",
+            length(ARM_MODES), paste(ARM_MODES, collapse = ", "),
             length(CCX_PARAM_NAMES), paste(CCX_PARAM_NAMES, collapse = ", ")))
 cat(sprintf("kz bracket [%g, %g] (re-bisected for the pump 2026-08-16e)\n",
             CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi))
@@ -268,12 +280,24 @@ cat(sprintf("ARM_HML_INIT = %g is %s. Harmless: Nelder-Mead is derivative-free.\
 # GATE: the two arms must be the same objective except for `pump_mode`, and the
 # only way to know that is to check the thing that could go wrong -- the base
 # parameter lists differing anywhere ELSE. Cheap, and it fails loudly.
+#
+# IT IS A TWO-ARM GATE and it must not fire on a ONE-arm run. With ARM_MODES =
+# "N", `b$D` is NULL and identical(x, NULL) is FALSE for every name, so the gate
+# reported all 48 parameters as differing -- a gate failing because there is
+# nothing to compare, which is the most confusing way for a run to die. It is
+# now built over the arms that EXIST and skipped, loudly, when there is one.
 b <- lapply(ARM_MODES, function(m) { p <- ccx_default_params(); p$pump_mode <- m; p })
 names(b) <- ARM_MODES
-d <- names(which(!vapply(names(b$N), function(n) identical(b$N[[n]], b$D[[n]]), logical(1))))
-if (!identical(d, "pump_mode"))
-  stop("the two arms differ in more than pump_mode: ", paste(d, collapse = ", "))
-cat(sprintf("GATE: the arms differ in `pump_mode` and nothing else. OK\n"))
+if (length(ARM_MODES) >= 2L) {
+  d <- names(which(!vapply(names(b[[1]]),
+                           function(n) identical(b[[1]][[n]], b[[2]][[n]]), logical(1))))
+  if (!identical(d, "pump_mode"))
+    stop("the two arms differ in more than pump_mode: ", paste(d, collapse = ", "))
+  cat(sprintf("GATE: the arms differ in `pump_mode` and nothing else. OK\n"))
+} else {
+  cat(sprintf("GATE SKIPPED: one arm (%s) -- there is no second arm to differ from.\n",
+              paste(ARM_MODES, collapse = ", ")))
+}
 
 # ---------------------------------------------------------------------
 # One arm. Lifted from run_modefind.R rather than sourced, because that script
@@ -476,6 +500,14 @@ arm_fit <- function(mode) {
               hit_cap = hit_cap, streams = streams, n_eval = n_eval, minutes = el,
               seed = ARM_SEED, param_names = CCX_PARAM_NAMES, prior_z = zs,
               kz_bracket = c(CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi),
+              # RECORDED FROM 2026-08-20r, and it should have been from the
+              # start: the refit OVERRIDES h_ml's bounds in-process, and the
+              # 08-18 files did not say so -- decoding their `u_mode` under the
+              # default [30, 200] gave 81.75 / 46.46 m and flipped the arm margin
+              # to -34.63 before the producer was read (ccx_hml_band_provenance).
+              # `par_mode` is band-independent; `u_mode`, `hessian` and `cov` are
+              # NOT, and cannot be decoded without this field.
+              hml_bound = ARM_HML_BOUND,
               substeps = ccx_substeps_for(p_mode))
   saveRDS(out, ARM_OUT(mode))
   cat(sprintf("[%s] wrote %s\n", mode, ARM_OUT(mode)))
@@ -486,6 +518,16 @@ fits <- list()
 for (m in ARM_MODES) fits[[m]] <- arm_fit(m)
 
 # ---------------------------------------------------------------------
+# The comparison is BETWEEN arms, so it runs only when there are two. With one
+# arm it is skipped explicitly rather than left to fail on `fits$D` being NULL --
+# a single-arm run must end by writing its mode, not by erroring after 18 hours
+# of fitting.
+ev_d <- NA_real_
+if (length(ARM_MODES) < 2L) {
+  sep("COMPARISON SKIPPED -- ONE ARM")
+  cat(sprintf("ARM_MODES = %s. See the ARM_MODES block for why D is not re-run.\n",
+              paste(ARM_MODES, collapse = ", ")))
+} else {
 sep("COMPARISON")
 N <- fits$N; D <- fits$D
 cat(sprintf("%-28s %14s %14s %14s\n", "", "N", "D", "D - N"))
@@ -500,8 +542,10 @@ cat("\n(The (d/2) log 2pi term cancels: both arms carry the same 20 parameters.)
 cat("READ THIS AS INDICATIVE, NOT AS A BAYES FACTOR -- see the header. A pinned\n")
 cat("`kz` makes the posterior non-Gaussian in that direction, and the Hessian\n")
 cat("there reports the transformed coordinate's curvature, not a free one's.\n")
+}
 
-if (!is.null(N$streams) && !is.null(D$streams)) {
+if (length(ARM_MODES) >= 2L && !is.null(fits$N$streams) && !is.null(fits$D$streams)) {
+  N <- fits$N; D <- fits$D
   sep("PER-STREAM: which rows does D buy, and which does it sell?")
   nm <- union(names(N$streams), names(D$streams))
   nm <- setdiff(nm, "total")
