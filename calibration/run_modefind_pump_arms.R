@@ -108,6 +108,17 @@ ARM_HML_INIT   <- 100      # m; the pump's own h_ml (DESIGN sec.5.2f, handoff 15
                            # and the depth every pump diagnostic scores at. The
                            # SHIPPED init of 75 is outside the new bound and would
                            # make .to_unc() return NaN, so this is not cosmetic.
+# WARM START (added 2026-08-21). The 08-20r run hit the restart cap while still
+# gaining and its BFGS polish then gained 16.08 -- two orders of magnitude more
+# than any of its last restarts -- so the simplex had collapsed in a direction
+# the gradient could still exploit and the mode was NOT located. Set TRUE to
+# start from the EXISTING output's `par_mode` instead of the hand-set init, and
+# to alternate Nelder-Mead with BFGS until the polish stops paying.
+# `par_mode` is band-INDEPENDENT and is re-encoded under this run's table, so a
+# warm start is safe where reusing `u_mode` would not be (ccx_hml_band_provenance).
+ARM_WARM       <- TRUE
+ARM_CYCLES     <- 6         # NM-then-polish cycles; 1 reproduces the old behaviour
+ARM_CYCLE_TOL  <- 0.5       # stop when a whole cycle gains less than this
 ARM_OUTDIR     <- ccx_path("calibration", "output", "pump_arms")
 ARM_OUT        <- function(m) file.path(ARM_OUTDIR, sprintf("mode_fit_pump%s.rds", m))
 ARM_KINK_STEP  <- 0.01     # h_ml resolution the kink scan below runs at
@@ -319,38 +330,79 @@ arm_fit <- function(mode) {
   }
   u0 <- ccx_init_unc(); lp0 <- lp_fun(u0)
   cat(sprintf("start: log-post at hand-set init = %.1f\n", lp0))
+  if (ARM_WARM && file.exists(ARM_OUT(mode))) {
+    prev <- readRDS(ARM_OUT(mode))
+    # Re-encode from par_mode, NOT prev$u_mode: u_mode is a function of the
+    # bounds in force when it was written, and this run's h_ml band may differ.
+    uw <- ccx_par_to_unc(prev$par_mode); lpw <- lp_fun(uw)
+    cat(sprintf("WARM START from %s: log-post there = %.1f (its file says %.1f)\n",
+                basename(ARM_OUT(mode)), lpw, prev$logpost))
+    if (!is.finite(lpw)) {
+      cat("*** warm start is NOT FINITE under this objective -- using the cold init\n")
+    } else if (lpw <= lp0) {
+      cat("*** warm start is WORSE than the cold init -- using the cold init\n")
+    } else { u0 <- uw; lp0 <- lpw }
+  }
   t0 <- Sys.time()
 
-  # ---- (a) Nelder-Mead restarts -------------------------------------
+  # ---- (a) Nelder-Mead restarts, ALTERNATED WITH BFGS ----------------
+  # The 08-20r run is the argument for the alternation: NM gains decayed to
+  # 0.07-0.27 per restart and BFGS then found 16.08 in one pass. Neither method
+  # alone locates this mode -- NM's simplex collapses in the narrow directions
+  # BFGS handles, and BFGS alone would not have crossed the 16,437 the first NM
+  # restart bought. So they take turns until a whole cycle stops paying.
   u <- u0; best <- -lp0
   trace <- data.frame(restart = 0L, logpost = lp0, evals = 0L)
-  for (i in seq_len(ARM_RESTARTS)) {
-    fit <- optim(u, neg_lp, method = "Nelder-Mead",
-                 control = list(maxit = ARM_MAXIT, reltol = 1e-12))
-    gain <- best - fit$value
-    u <- fit$par; best <- fit$value
-    cat(sprintf("[%s] restart %2d: log-post = %12.1f  (gain %10.4f)  evals %d\n",
-                mode, i, -best, gain, n_eval))
-    trace <- rbind(trace, data.frame(restart = i, logpost = -best, evals = n_eval))
-    if (i > 1 && gain < ARM_TOL) { cat("converged: gain below ARM_TOL\n"); break }
+  hit_cap <- FALSE
+  for (cyc in seq_len(ARM_CYCLES)) {
+    cyc_start <- best
+    for (i in seq_len(ARM_RESTARTS)) {
+      fit <- optim(u, neg_lp, method = "Nelder-Mead",
+                   control = list(maxit = ARM_MAXIT, reltol = 1e-12))
+      gain <- best - fit$value
+      u <- fit$par; best <- fit$value
+      cat(sprintf("[%s] cycle %d restart %2d: log-post = %12.1f  (gain %10.4f)  evals %d\n",
+                  mode, cyc, i, -best, gain, n_eval))
+      trace <- rbind(trace, data.frame(restart = nrow(trace), logpost = -best, evals = n_eval))
+      if (i > 1 && gain < ARM_TOL) { cat("  NM converged: gain below ARM_TOL\n"); break }
+    }
+    # FLAGGED, not silently accepted: a cycle that used every restart while
+    # still gaining is a truncated climb, and the 2026-08-12 and 08-20r refits
+    # both did exactly that.
+    # BOTH conditions: the loop used every restart AND the last one was still
+    # paying. Testing exhaustion alone cries wolf on a cycle that used its
+    # restarts and gained nothing, which is convergence, not truncation -- the
+    # smoke run fired exactly that false alarm at gain 0.0000.
+    if (i >= ARM_RESTARTS && gain >= ARM_TOL) {
+      hit_cap <- TRUE
+      cat(sprintf("*** [%s] cycle %d HIT THE RESTART CAP WHILE STILL GAINING\n", mode, cyc))
+    }
+    pc <- tryCatch(optim(u, neg_lp, method = "BFGS",
+                         control = list(maxit = 500, reltol = 1e-14)),
+                   error = function(e) NULL)
+    if (!is.null(pc) && pc$value < best) {
+      cat(sprintf("[%s] cycle %d polish: log-post = %.1f (gain %.4f)\n",
+                  mode, cyc, -pc$value, best - pc$value))
+      u <- pc$par; best <- pc$value
+    } else cat(sprintf("[%s] cycle %d polish: no improvement\n", mode, cyc))
+    cyc_gain <- cyc_start - best
+    cat(sprintf("[%s] === cycle %d total gain %.4f (log-post %.1f, %d evals) ===\n",
+                mode, cyc, cyc_gain, -best, n_eval))
+    # WRITTEN EVERY CYCLE, deliberately: this run may take hours and a kill must
+    # leave the best-so-far on disk rather than nothing. The pre-continuation
+    # file is in git at be86760, so overwriting is recoverable.
+    saveRDS(list(pump_mode = mode, par_mode = ccx_unc_to_par(setNames(u, CCX_PARAM_NAMES)),
+                 logpost = -best, cycle = cyc, trace = trace, n_eval = n_eval,
+                 hml_bound = ARM_HML_BOUND, in_progress = TRUE, seed = ARM_SEED),
+            file.path(ARM_OUTDIR, sprintf("mode_fit_pump%s_progress.rds", mode)))
+    if (cyc_gain < ARM_CYCLE_TOL) {
+      cat(sprintf("[%s] CONVERGED: cycle gain below ARM_CYCLE_TOL (%g)\n", mode, ARM_CYCLE_TOL))
+      hit_cap <- FALSE
+      break
+    }
   }
-  # FLAGGED, not silently accepted: a run that used every restart while still
-  # gaining is a truncated climb, and the 2026-08-12 refit did exactly that.
-  hit_cap <- nrow(trace) - 1L >= ARM_RESTARTS &&
-    (trace$logpost[nrow(trace)] - trace$logpost[nrow(trace) - 1L]) >= ARM_TOL
   if (hit_cap)
-    cat(sprintf("*** [%s] HIT THE RESTART CAP WHILE STILL GAINING -- this mode is NOT converged\n",
-                mode))
-
-  # ---- (b) BFGS polish ----------------------------------------------
-  pol <- tryCatch(
-    optim(u, neg_lp, method = "BFGS", control = list(maxit = 500, reltol = 1e-14)),
-    error = function(e) { cat("BFGS polish failed:", conditionMessage(e), "\n"); NULL })
-  if (!is.null(pol) && pol$value < best) {
-    cat(sprintf("[%s] BFGS polish: log-post = %.1f (gain %.4f)\n",
-                mode, -pol$value, best - pol$value))
-    u <- pol$par; best <- pol$value
-  } else cat(sprintf("[%s] BFGS polish: no improvement\n", mode))
+    cat(sprintf("*** [%s] LAST CYCLE HIT THE RESTART CAP -- this mode is NOT converged\n", mode))
   names(u) <- CCX_PARAM_NAMES
   lp_mode <- -best
   pm <- ccx_unc_to_par(u)
