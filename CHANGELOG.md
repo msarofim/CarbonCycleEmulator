@@ -2,6 +2,105 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-21 (later still) — The app runs on the calibrated mode; `rep_dC` is laundering a 9 ppm swing
+
+Took handoff 21c's stated default next move (§6, the app). Two things came out of it: the
+app fix, which was not the one-liner the handoff described, and a first-order finding about
+the calibration that the app work surfaced by accident.
+
+### 1. The app fix, and why the path was the small half
+
+`app/global.R` resolved `calibration/output/mode_fit.rds`, a file that has never existed, so
+the app shipped uncalibrated defaults. Repointing it at `pump_arms/mode_fit_pumpN.rds` is
+necessary and **not sufficient**: six of the 21 fitted parameters have no slot in
+`ccx_default_params()` and the existing `intersect()` dropped all six silently. Four are
+likelihood parameters and cannot move a trajectory. **Two are FORCING parameters** —
+`bomb_total` 122.22 kmol, `luc_scale` 0.8902 — applied by `ccx_make_logpost()` as column
+rescalings, worth **+5.8 ppm at 2024** on their own. The path fix alone would have run the
+fitted parameters against a forcing the fit never saw, and produced a WORSE curve than the
+defaults it replaced.
+
+Every forcing in the app now goes through `app_build_forcing()` / `app_run_coupled()`.
+The second needed a pass-through added to `ccx_run_coupled()`, which built its own forcing
+internally — worth another 2.7 ppm at 2100 of silent disagreement between the historical tab
+and the futures tab.
+
+| resolution | NH box @2024 | vs MLO | land sink | ocean sink |
+|---|---|---|---|---|
+| DEFAULTS (shipped until today) | 423.3 | −1.1 | +2.18 σ | −1.49 σ |
+| PAR-ONLY (path fix alone) | 433.8 | +9.4 | +2.06 σ | −0.47 σ |
+| **FULL (landed)** | **428.0** | **+3.6** | **+2.04 σ** | **−0.62 σ** |
+
+**What the fix buys is the ocean sink**, −1.49 → −0.62 σ. The land sink does not move and
+still misses by 2 σ.
+
+### 2. Handoff 21c §6's table does not reproduce, and it had set the priority
+
+21c §6 reported defaults at **409.8 ppm / −14.6 vs obs, land 2.73, ocean 2.44**, and called
+the fix "the single highest-value fix in the repo" on the strength of closing a 14.6 ppm
+gap. Measured here: **423.3 / −1.1, land 3.45, ocean 2.62**. Two independent checks say
+these are right — sourcing `app/global.R` itself returns them to the digit, and DESIGN §6
+gate 7's recorded line (land +2.28 σ / 3.50, ocean −1.52 σ / 2.61, 2026-08-14) agrees to
+within 0.1 σ. **So gate 7's status line is NOT stale, contra 21c §6, and the app was never
+14.6 ppm low.** The fix was still worth making; the reason given for it was wrong.
+
+### 3. `rep_dC` = +5.18 σ is the late half of a 9 ppm swing (`diag_rep_dC_shape.R`)
+
+`rep_dC` has prior N(0, `LIK_CO2_REP_ERR` = 1.0 ppm) — the repo's own station-vs-box scale,
+with a receipt. The mode puts it at **+5.176 ppm**, the largest |z| in the fit, and
+`R/calibrate.R` says the prior exists to "resist a structural error wearing its clothes"
+and that the case it was built for wants **−4.19** ppm. Opposite sign, larger magnitude.
+
+- **97 % common-mode** — NH −MLO +5.15, SH−SPO +4.93, difference 0.22 ppm. A station-vs-box
+  offset is a property of a station's latitude inside its box; the same number in both
+  hemispheres is +10.7 GtC of atmospheric carbon, not a representation constant.
+- **Flat over 1958–2024** — trend +0.0120 ± 0.0039 ppm/yr, 0.79 ppm of drift on a 5.06 ppm
+  mean. Subtract 5.18 and no decade of either station is off by more than 0.9 ppm: the model
+  has the SHAPE of the Keeling curve.
+- **But 1958–2024 was the wrong window.** `rep_dC` applies only to the station streams; the
+  ice-core term is scored without it. On Antarctic CO₂ across the whole record (Law Dome,
+  then SPO flask — the two agree to 0.31 ppm over 54 overlapping years):
+
+  | era | model−obs | era | model−obs | era | model−obs |
+  |---|---|---|---|---|---|
+  | 1750–1800 | −0.57 | 1900–1940 | **−4.12** | 1958–1980 | +4.51 |
+  | 1800–1850 | −1.28 | 1940–1960 | −0.77 | 1980–2000 | **+5.29** |
+  | 1850–1900 | −2.03 | | | 2000–2025 | +5.08 |
+
+  A **~9 ppm swing with its crossover in the 1940s**, not an offset. The model
+  under-accumulates through 1900–1940 and over-accumulates after 1950. The 1900 deficit is a
+  known arc (`diag_1900_deficit.R` took it from −6.5 to −2.08 ppm at default parameters);
+  what is new is that it did not go away, that it **changes sign**, and that the parameter
+  absorbing the modern half is 5 σ into its prior.
+- **Why the prior never stood a chance:** `rep_dC` 5.18 → 0 costs **2812 log-units** of
+  likelihood and saves **13.4** of prior. **210 to 1.** The absolute CO₂ level is held by the
+  ice-core term alone — ~14 units of inverse variance against 1523 monthly station points —
+  so post-1958 the model's absolute height is effectively unconstrained and only its shape is
+  fitted.
+
+Recorded, not acted on: the ice term is scored against `co2_NH` on a "globally well mixed
+pre-1900" argument, sound for its 87 pre-1900 rows and less so for its 52 post-1958 ones
+where the model's own NH−SH gradient reaches 3.5 ppm.
+
+### 4. A 13.1 ppm step between two tabs of the same app (`diag_app_params.R` gate 5)
+
+Pre-existing, parameter-independent, and not previously written down. Tab 1 runs the GCB
+2025 budget; tab 5 runs the SSP/LUH2 harmonisation. Over 1750–2020 they differ by **91.4 GtC
+of cumulative land-use carbon** (187.2 vs 278.6). Measured: **425.9 ppm at 2024 on tab 1,
+412.8 ppm at 2024 on tab 5.** SSP2-4.5 reaches 499.6 ppm at 2100 carrying the same deficit.
+
+### Not done, and why
+
+- **The §2 refit** — still blocked on a soil-damping factor with provenance, per 21c §2e.
+  Nothing here changes that.
+- **The Takahashi climatology** — still the wrong purchase, per 21c §4.
+- **Applying `rep_dC` to the app's Keeling panel.** It would make the panel look right, and
+  it would be exporting a 5 σ prior violation into a public-facing figure as if it were a
+  display convention. The banner now says the fit constrains shape more tightly than height;
+  the offset itself is a decision for Marcus.
+
+974 tests pass / 2 fail — the by-design `test-fluxes.R:99,:100` pair, unchanged.
+
 ## 2026-08-21 (later) — The prior-tail screen was wrong by up to 1.3 sd, and it had already mis-ranked the work
 
 Started on handoff §2 (the `seas_T_amp_NH` × ln(`q10`) conflict). Restating the conflict
