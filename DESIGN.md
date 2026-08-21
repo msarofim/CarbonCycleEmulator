@@ -1348,6 +1348,44 @@ Tabs (working names, undergrad-facing):
    emissions — the arrows *are* the residence-time lesson), parameter table with posterior
    ranges, data sources, model caveats, link to repo.
 
+### 7b. The pulse-partition panel (Marcus, 2026-08-21)
+
+A panel for tab 7's pulse lab, specified by Marcus and prototyped by
+`calibration/diag_pulse_partition.R` before any of it is built:
+
+- **Top:** the atmospheric perturbation over time — pulse run minus baseline run, ppm.
+- **Bottom:** a bar chart of the fraction of the pulse in each reservoir.
+- **Time axis:** annual to 2100, then point estimates at 2200, 2300, … through **3000**.
+
+**FIVE BARS, AND THEY SUM TO ONE** (Marcus 2026-08-21, chosen over a sinks-only variant):
+**atmosphere / vegetation / soil / surface ocean / deep ocean.** Summing to the whole pulse
+is the point — it makes conservation visible, and the model does close exactly (0.000 % from
+2050 onward in the prototype), so the bars can be drawn as fractions without a fudge.
+
+**PREREQUISITE, and it is the only one:** `land_C` aggregates leaf + wood + soil_fast +
+soil_slow, so **vegetation** and **soil** do not exist as output columns yet. The state
+vector has all four; `ccx_run_fast()` must return them, with a `test-parity.R` entry. That is
+a column, not a mechanism. Everything else the panel needs is already in `$out`.
+
+**THREE TRAPS, all hit by the prototype and all recorded so the panel does not re-hit them:**
+
+1. **The SSP emissions table is DECADAL past 2020.** The pulse must be added to an ANNUAL
+   grid; adding it to a decadal knot delivers ~10× the pulse, smeared over twenty years.
+   `app/server.R`'s existing pulse lab already interpolates first and is correct.
+2. **`deep_C_{NH,SH}` is the BOTTOM BOX**, one interior layer of ten, and exists for the
+   §5.2a gradient terms. The interior is the REMAINDER, `ocean_C − (ml_C_NH + ml_C_SH)`.
+3. **This panel is not gate 12** and must not be captioned as if it were: gate 12's PD100
+   protocol holds the background at 389 ppm. An SSP pulse is a different experiment.
+
+**It is live-computable:** two coupled runs 1750–3000 take 1.7 s, so nothing here needs
+precomputing.
+
+**AND IT IS A DIAGNOSTIC AS WELL AS A PANEL.** At year 3000 the model puts **40 %** of the
+pulse in the land against 43 % in the deep ocean. Gate 12 cannot see this — an airborne
+fraction says nothing about WHICH sink took the rest — so the panel scores something no
+existing gate does, and the land share should be checked against the literature before the
+panel ships with a caption claiming it teaches where carbon goes.
+
 ### 7a. "Claims you may meet" — a short signposting appendix, NOT a tab of its own
 
 **Marcus, 2026-08-13: keep the app on the positive learning; a brief summary of the
