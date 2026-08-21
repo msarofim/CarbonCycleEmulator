@@ -36,7 +36,7 @@ function(input, output, session) {
 
   # ---- 2. Where does it go -------------------------------------------
   hist_F <- reactive({
-    ccx_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
+    app_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
   })
   partition <- reactive(partition_table(APP_HIST$out, hist_F()))
 
@@ -119,7 +119,7 @@ function(input, output, session) {
     req(input$f_ssps)
     stats::setNames(
       lapply(input$f_ssps, function(s)
-        ccx_run_coupled(APP_SPIN, s, APP_FUTURE_YEARS)),
+        app_run_coupled(APP_SPIN, s, APP_FUTURE_YEARS)),
       names(APP_SSPS)[match(input$f_ssps, APP_SSPS)])
   })
 
@@ -128,7 +128,7 @@ function(input, output, session) {
                                  to_zero_year = input$s_zero_year,
                                  rate_pct = input$s_rate,
                                  background = input$s_bg)
-    ccx_run_coupled(APP_SPIN, input$s_bg, APP_FUTURE_YEARS,
+    app_run_coupled(APP_SPIN, input$s_bg, APP_FUTURE_YEARS,
                     nonco2_scenario = input$s_bg, emissions = em)
   })
 
@@ -146,9 +146,9 @@ function(input, output, session) {
     pulse_em$fossil_GtC[pulse_em$year == input$p_year] <-
       pulse_em$fossil_GtC[pulse_em$year == input$p_year] + input$p_gtc
     list(
-      base  = ccx_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
+      base  = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
                               emissions = base_em),
-      pulse = ccx_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
+      pulse = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
                               emissions = pulse_em),
       gtc = input$p_gtc, year = input$p_year)
   })

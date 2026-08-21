@@ -23,7 +23,7 @@ The app reads from the repository root, so deploy the whole tree, not just `app/
 | `R/` | the model |
 | `src/ccx_core.cpp` | compiled at startup |
 | `data/*.rds` | observations, forcings, the FaIR climate module |
-| `calibration/output/mode_fit.rds` | the parameter set, if present |
+| `calibration/output/pump_arms/mode_fit_pumpN.rds` | **the parameter set the app runs on.** This is the adopted mode; `mode_fit.rds` has never existed. Omit it and the app falls back to uncalibrated defaults SILENTLY (the banner is the only report) |
 | `DESIGN.md` | `.find_root()` locates the repo by looking for this file |
 
 `data-raw/` is **not** needed at runtime and is large. Exclude it.
@@ -34,10 +34,18 @@ The app reads from the repository root, so deploy the whole tree, not just `app/
 at the top of every tab reports which one it landed on:
 
 1. `calibration/output/posterior_draws.rds` → "calibrated posterior"
-2. `calibration/output/mode_fit.rds` → "posterior mode"  (checked for a matching
-   parameter-name vector, so a stale 18-parameter fit is ignored rather than
-   silently misaligned)
+2. the first of `calibration/output/pump_arms/mode_fit_pumpN.rds`, then
+   `calibration/output/mode_fit.rds`, that exists AND carries a matching
+   21-name parameter vector → "posterior mode" (so a stale 18-parameter fit is
+   ignored rather than silently misaligned)
 3. otherwise → "uncalibrated defaults", with the warning styling
+
+**Two of the 21 fitted parameters are FORCING parameters** (`bomb_total`,
+`luc_scale`), not model parameters, and `ccx_default_params()` has no slot for
+them. `app_build_forcing()` and `app_run_coupled()` in `global.R` exist to carry
+them onto every forcing the app builds; call those, never `ccx_build_forcing()`
+or `ccx_run_coupled()` directly. Skipping them is worth ~5.8 ppm at 2024 and
+nothing would report it. See `calibration/diag_app_params.R`.
 
 Do not remove the banner. What the model is fitted to changes what every number on
 every tab means.

@@ -150,9 +150,19 @@ ccx_climate_scenarios <- function() {
 #'   in test-climate.R does.
 #' @param emissions optional data.frame(year, fossil_GtC, luc_GtC) overriding the
 #'   scenario's emissions entirely -- the app's stylised pathways and pulses.
+#' @param bomb_total_kmol,luc_scale forcing parameters, passed straight through
+#'   to ccx_build_forcing(). Added 2026-08-21. BOTH ARE FITTED PARAMETERS
+#'   (CCX_PARAM_TABLE), and before this existed a caller running at a calibrated
+#'   mode got the fitted values on a forcing it built itself and the package
+#'   DEFAULTS on anything routed through here -- so the app's historical tab and
+#'   its futures tab would disagree by ~5.8 ppm at 2024 with nothing to say so.
+#'   The defaults are ccx_build_forcing()'s own, taken from its formals rather
+#'   than retyped, so the two cannot drift apart.
 ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
                             nonco2_scenario = scenario,
                             gmst_obs = TRUE, emissions = NULL,
+                            bomb_total_kmol = eval(formals(ccx_build_forcing)$bomb_total_kmol),
+                            luc_scale = eval(formals(ccx_build_forcing)$luc_scale),
                             tol = CLIM_TOL, max_iter = CLIM_MAX_ITER,
                             substeps = "auto") {
   mod  <- ccx_climate_module()
@@ -165,7 +175,9 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
   # reaches the caller.
   F <- withCallingHandlers(
     ccx_build_forcing(scenario, years, prod_c14 = spin$prod_c14,
-                      emissions = emissions),
+                      emissions = emissions,
+                      bomb_total_kmol = bomb_total_kmol,
+                      luc_scale = luc_scale),
     warning = function(w) {
       if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning")
     })

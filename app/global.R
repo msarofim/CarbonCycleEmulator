@@ -65,7 +65,16 @@ APP_PULSE_YEAR_DEFAULT <- 2050
 # Which parameters is this app running on, and how well tested are they?
 # ---------------------------------------------------------------------
 app_params <- local({
-  mode_file <- file.path(CCX_ROOT, "calibration", "output", "mode_fit.rds")
+  # RESOLUTION ORDER, most-preferred first. `mode_fit.rds` has NEVER EXISTED --
+  # the adopted mode is the pump-arm file, and until 2026-08-21 this list held
+  # only the name that is not on disk, so the app shipped uncalibrated defaults
+  # while its banner correctly, and unread, said so. A path that resolves to
+  # nothing fails SILENTLY here by design (the banner is the report), which is
+  # exactly why the list must be checked against the disk and not against
+  # memory. See calibration/diag_app_params.R.
+  mode_files <- file.path(CCX_ROOT, "calibration", "output",
+                          c(file.path("pump_arms", "mode_fit_pumpN.rds"),
+                            "mode_fit.rds"))
   post_file <- file.path(CCX_ROOT, "calibration", "output", "posterior_draws.rds")
   p <- ccx_default_params()
   p$gamma_enso <- CCX_PARAM_TABLE$gamma_enso$init
@@ -89,19 +98,46 @@ app_params <- local({
                   "record, with every other parameter at its starting value — so",
                   "the CO₂ curve is close but not calibrated. Compare it against",
                   "the observations shown alongside it.")
-  if (file.exists(mode_file)) {
+  # THE FORCING PARAMETERS. Six of the 21 fitted parameters have no slot in
+  # `ccx_default_params()`, and the `intersect()` below drops all six. Four of
+  # them (sigma_d14c, rep_dC, grad_off_co2, grad_off_d13c) are LIKELIHOOD
+  # parameters that score the model against observations and cannot move a
+  # trajectory, so dropping them is correct. The other two are FORCING
+  # parameters that `ccx_make_logpost()` applies by rescaling columns, and
+  # dropping them silently would run the fitted parameters against a forcing the
+  # fit never saw: worth +5.8 ppm at 2024 on its own. They are carried out of
+  # this block and passed to every ccx_build_forcing() call in the app.
+  bomb_total <- CCX_PARAM_TABLE$bomb_total$init
+  luc_scale  <- 1
+  for (mode_file in mode_files) {
+    if (!file.exists(mode_file)) next
     md <- tryCatch(readRDS(mode_file), error = function(e) NULL)
-    if (!is.null(md) && identical(md$param_names, CCX_PARAM_NAMES)) {
-      pm <- md$par_mode
-      for (n in intersect(names(p), names(pm))) p[[n]] <- pm[[n]]
-      p$gamma_enso <- pm$gamma_enso
-      src <- "posterior mode"
-      status <- "single best fit"
-      detail <- paste0("Maximum-a-posteriori fit of ", length(CCX_PARAM_NAMES),
-                       " parameters to CO₂, δ¹³C, Δ¹⁴C and",
-                       " Global Carbon Budget sinks. A single best fit, not yet a",
-                       " posterior — no uncertainty ranges are shown.")
-    }
+    if (is.null(md) || !identical(md$param_names, CCX_PARAM_NAMES)) next
+    pm <- md$par_mode
+    for (n in intersect(names(p), names(pm))) p[[n]] <- pm[[n]]
+    p$gamma_enso <- pm$gamma_enso
+    # `pump_mode` is a STRUCTURAL choice, not a fitted parameter, so it is not
+    # in par_mode and the loop above cannot carry it. It matches the default
+    # today (both "N"); setting it explicitly is what keeps that a fact rather
+    # than a coincidence if the default ever moves.
+    p$pump_mode <- md$pump_mode
+    bomb_total <- pm$bomb_total
+    luc_scale  <- pm$luc_scale
+    src <- "posterior mode"
+    status <- "single best fit"
+    # WHAT THIS SENTENCE MAY NOT SAY. Not "reproduces the record": the CO2 LEVEL
+    # streams are fitted through a free station-vs-box offset (`rep_dC`, +5.2 sd
+    # of its own prior at this mode), so the calibration constrains the SHAPE of
+    # the Keeling curve far more tightly than its absolute height, and the model
+    # box runs ~4 ppm above Mauna Loa on the panel next to this banner. See
+    # calibration/diag_rep_dC_shape.R.
+    detail <- paste0("Maximum-a-posteriori fit of ", length(CCX_PARAM_NAMES),
+                     " parameters to CO₂, δ¹³C, Δ¹⁴C and Global Carbon Budget",
+                     " sinks. A single best fit, not yet a posterior — no",
+                     " uncertainty ranges are shown, and the fit constrains the",
+                     " shape of these curves more tightly than their absolute",
+                     " height.")
+    break
   }
   if (file.exists(post_file)) {
     status <- "calibrated posterior"
@@ -109,10 +145,41 @@ app_params <- local({
                     "parameter uncertainty.")
   }
   list(p = p, source = src, status = status, detail = detail,
+       bomb_total = bomb_total, luc_scale = luc_scale,
        has_posterior = file.exists(post_file))
 })
 
-APP_PARAMS <- app_params$p
+APP_PARAMS     <- app_params$p
+APP_BOMB_TOTAL <- app_params$bomb_total
+APP_LUC_SCALE  <- app_params$luc_scale
+
+#' Build a forcing with THIS APP'S fitted forcing parameters applied
+#'
+#' Every forcing in the app goes through here. `ccx_build_forcing()` defaults to
+#' bomb_total_kmol = 102 and luc_scale = 1, which are the RIGHT defaults for the
+#' package and the WRONG ones for a calibrated run -- so a direct call is a
+#' silent 5.8 ppm error that nothing would catch. Routing every call through one
+#' wrapper is what makes the fitted values structurally impossible to forget.
+app_build_forcing <- function(scenario, years, ...) {
+  args <- list(...)
+  if (is.null(args$bomb_total_kmol)) args$bomb_total_kmol <- APP_BOMB_TOTAL
+  if (is.null(args$luc_scale))       args$luc_scale       <- APP_LUC_SCALE
+  do.call(ccx_build_forcing, c(list(scenario, years), args))
+}
+
+#' ccx_run_coupled() with THIS APP'S fitted forcing parameters applied
+#'
+#' Same argument as app_build_forcing(): the futures, stylised and pulse tabs
+#' all go through ccx_run_coupled(), which builds its own forcing internally, so
+#' without this they would silently run the calibrated PARAMETERS against an
+#' UNCALIBRATED forcing -- and disagree with the historical tab drawn two tabs
+#' to the left.
+app_run_coupled <- function(spin, scenario, years, ...) {
+  args <- list(...)
+  if (is.null(args$bomb_total_kmol)) args$bomb_total_kmol <- APP_BOMB_TOTAL
+  if (is.null(args$luc_scale))       args$luc_scale       <- APP_LUC_SCALE
+  do.call(ccx_run_coupled, c(list(spin, scenario, years), args))
+}
 
 # ---------------------------------------------------------------------
 # Startup state. The spinup and the historical run are the same for every
@@ -122,7 +189,7 @@ APP_SPIN <- ccx_spinup(APP_PARAMS)
 APP_OBS  <- ccx_prepare_obs()
 
 app_hist <- local({
-  F <- ccx_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
+  F <- app_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
   r <- ccx_run_fast(APP_SPIN, F)
   r$out$co2_global <- (r$out$co2_NH + r$out$co2_SH) / 2
   r
@@ -135,7 +202,7 @@ APP_HIST <- app_hist
 # the only place the app learns that photosynthesis is ~70 GtC/yr against ~11
 # GtC/yr of emissions -- which is the whole residence-time lesson.
 APP_FLUX <- local({
-  F <- ccx_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
+  F <- app_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
   ccx_flux_annual(ccx_run(APP_SPIN, F, fluxes = TRUE)$fluxes)
 })
 APP_FLUX_NOW <- APP_FLUX[nrow(APP_FLUX), ]
@@ -157,7 +224,7 @@ APP_FAIR <- tryCatch(
 app_run_mechanisms <- function(off = character(), years = APP_HIST_YEARS,
                                scenario = "historical") {
   F0 <- suppressWarnings(
-    ccx_build_forcing(scenario, years, prod_c14 = 0))
+    app_build_forcing(scenario, years, prod_c14 = 0))
   m <- ccx_apply_mechanisms(APP_PARAMS, F0, off)
   sp <- ccx_spinup(m$p)
   F <- m$F; F$c14_cosmo <- sp$prod_c14
