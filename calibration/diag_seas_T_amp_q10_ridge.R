@@ -23,12 +23,22 @@
 # two-parameter degeneracy and the soil-damping repair in sec.2 is aimed at the
 # wrong thing -- STOP THERE.
 #
-# THE OBJECTIVE IS THE LOG-LIKELIHOOD, NOT THE LOG-POSTERIOR, and that choice is
-# the whole design. The priors on A_T and q10 are the two things in conflict; an
-# objective containing them cannot say whether the DATA distinguish the pair. So
-# the priors are subtracted exactly (GATE 2 checks the subtraction against an
-# independently computed ccx_loglik) and the log-posterior is carried alongside
-# as a diagnostic, never optimised.
+# THE OBJECTIVE DROPS THE PRIORS ON THE TWO PARAMETERS UNDER TEST AND KEEPS
+# EVERY OTHER ONE. The priors on A_T and q10 are the two things in conflict, so
+# an objective containing them cannot say whether the DATA distinguish the pair
+# -- that much was the design from the start. What the first pass got wrong was
+# dropping ALL of them: with a pure likelihood the nuisance parameters escape,
+# and they did. In the LAND tier, `seas_T_amp_SH` went to 1e-23 and
+# `sst_seas_amp_NH` to 1e-31 in EVERY row -- both channels switched off, at
+# z = -37.5 apiece. The profile was internally consistent (the same two channels
+# were dead in the reference row too) but it was a profile of a DIFFERENT MODEL,
+# and quoting its flatness as a statement about this one would have been wrong.
+#
+# So `partial` (the default) is lp(u) minus the prior and Jacobian of the
+# profiled parameter and its partner, and nothing else. `lik` reproduces the
+# 2026-08-21 first pass and is kept only for that. GATE 2 checks the
+# subtraction against an independently computed ccx_loglik either way, and the
+# full log-posterior is carried alongside, never optimised.
 #
 # q10 HAS TWO JOBS AND THE SECOND ONE IS WHY THIS MIGHT NOT BE FLAT. Besides the
 # seasonal modulation it carries the ANNUAL climate-carbon feedback,
@@ -91,13 +101,21 @@ ccx_load_cpp()
 RQ_ARGS      <- commandArgs(TRUE)
 RQ_AXIS      <- if (length(RQ_ARGS) >= 1 && nzchar(RQ_ARGS[1])) RQ_ARGS[1] else "amp"
 RQ_TAG       <- if (length(RQ_ARGS) >= 2) RQ_ARGS[2] else ""
-stopifnot(RQ_AXIS %in% c("amp", "q10"))
+# args 3 and 4 narrow the run: which tiers, and which grid points. They exist
+# because the LAND tier below is three times the cost of BLOCK and is only worth
+# paying on part of the grid.
+RQ_ONLY      <- if (length(RQ_ARGS) >= 3 && nzchar(RQ_ARGS[3]))
+                  strsplit(RQ_ARGS[3], ",")[[1]] else NULL
+RQ_GRID_ARG  <- if (length(RQ_ARGS) >= 4 && nzchar(RQ_ARGS[4]))
+                  as.numeric(strsplit(RQ_ARGS[4], ",")[[1]]) else NULL
+RQ_OBJ       <- if (length(RQ_ARGS) >= 5 && nzchar(RQ_ARGS[5])) RQ_ARGS[5] else "partial"
+stopifnot(RQ_AXIS %in% c("amp", "q10"), RQ_OBJ %in% c("partial", "lik"))
 RQ_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
 RQ_OUT       <- file.path("calibration", "output",
                           sprintf("seas_T_amp_q10_ridge_%s%s.rds", RQ_AXIS,
                                   if (nzchar(RQ_TAG)) paste0("_", RQ_TAG) else ""))
 RQ_WORKERS   <- 4          # = performance cores on this machine
-RQ_NM_MAXIT  <- 1500       # per Nelder-Mead restart
+RQ_NM_MAXIT  <- 3000       # per Nelder-Mead restart; the LAND tier is 9-D
 RQ_NM_TRIES  <- 3          # restarts; stops early when a restart gains < RQ_NM_TOL
 RQ_NM_TOL    <- 1.0        # log-units
 # Brent brackets for the 1-parameter PAIR tier, per free parameter. q10's lower
@@ -112,11 +130,25 @@ RQ_SEAS_ROWS <- c("co2_seasonal_MLO", "co2_seasonal_SPO",
 # an axis is a table entry and not a second script.
 RQ_PROFILED  <- if (RQ_AXIS == "amp") "seas_T_amp_NH" else "q10"
 RQ_PARTNER   <- if (RQ_AXIS == "amp") "q10" else "seas_T_amp_NH"
+RQ_SEAS_BLOCK <- c("seas_T_amp_SH", "seas_lag_p",
+                   "sst_seas_amp_NH", "sst_seas_amp_SH", "npp_frac_NH")
+# THE LAND TIER, added 2026-08-21 after the q10 axis returned. BLOCK freezes
+# `beta_max`, `fert_k` and `luc_scale`, so the 352 log-units it charges for
+# q10 = 2.0 is an UPPER BOUND: raising q10 releases more soil carbon under the
+# observed warming, and the classic beta-gamma compensation -- more
+# fertilisation drawing it back down -- is exactly the repair BLOCK forbids.
+# Freeing the three is what turns "the fit will not go there" into "the DATA
+# will not go there". The ocean parameters (`k_w`, `kz`, `h_ml`, `tau_ex`) stay
+# frozen, so it is a tighter upper bound and not the refit itself.
 RQ_TIERS     <- list(
   pair   = RQ_PARTNER,
   pairSH = c(RQ_PARTNER, "seas_T_amp_SH"),
-  block  = c(RQ_PARTNER, "seas_T_amp_SH", "seas_lag_p",
-             "sst_seas_amp_NH", "sst_seas_amp_SH", "npp_frac_NH"))
+  block  = c(RQ_PARTNER, RQ_SEAS_BLOCK),
+  land   = c(RQ_PARTNER, RQ_SEAS_BLOCK, "beta_max", "fert_k", "luc_scale"))
+if (!is.null(RQ_ONLY)) {
+  stopifnot(all(RQ_ONLY %in% names(RQ_TIERS)))
+  RQ_TIERS <- RQ_TIERS[RQ_ONLY]
+}
 
 md <- readRDS(ccx_path(RQ_MODE_FILE))
 
@@ -141,6 +173,7 @@ RQ_GRID <- sort(unique(round(
   else                  c(1.02, 1.05, RQ_MODE_Q, 1.15,
                           exp(RQ_MODE_A * log(RQ_MODE_Q) / RQ_OBS_LO),
                           1.35, 1.5, 1.7, RQ_Q10_C, 2.3, 2.6), 4)))
+if (!is.null(RQ_GRID_ARG)) RQ_GRID <- sort(unique(round(RQ_GRID_ARG, 4)))
 
 # =====================================================================
 # h_ml band override, exactly as calibration/run_modefind_pump_arms.R did
@@ -174,11 +207,24 @@ rq_logprior <- function(u) {
   }
   s
 }
+# The prior terms of a NAMED SUBSET only -- what `partial` subtracts.
+rq_logprior_of <- function(u, which) {
+  names(u) <- CCX_PARAM_NAMES
+  pv <- ccx_unc_to_par(u)
+  s <- 0
+  for (n in which) {
+    e <- CCX_PARAM_TABLE[[n]]
+    s <- s + e$prior(pv[[n]]) + .log_jac(u[[n]], e)
+  }
+  s
+}
 rq_loglik <- function(u) {
   v <- lp(u)
   if (!is.finite(v)) return(-Inf)
   v - rq_logprior(u)
 }
+# THE OBJECTIVE. Set after RQ_PROFILED / RQ_PARTNER are known.
+rq_obj <- NULL
 
 sep <- function(s) cat(sprintf("\n%s\n%s\n", s, strrep("-", nchar(s))))
 
@@ -253,6 +299,22 @@ cat("for a tight lognormal on a large x resolves the prior with ~1 grid point.\n
 cat("The analytic values are the correct ones. Reported, not silently used.\n")
 
 # =====================================================================
+# The objective, and the gate that it is what it claims to be
+# =====================================================================
+RQ_DROPPED <- c(RQ_PROFILED, RQ_PARTNER)
+rq_obj <- if (RQ_OBJ == "lik") rq_loglik else
+  function(u) { v <- lp(u); if (!is.finite(v)) -Inf else v - rq_logprior_of(u, RQ_DROPPED) }
+sep(sprintf("GATE 3: the objective is `%s`", RQ_OBJ))
+cat(sprintf("priors DROPPED: %s\n", paste(RQ_DROPPED, collapse = ", ")))
+cat(sprintf("priors KEPT:    %s\n",
+            paste(setdiff(CCX_PARAM_NAMES, if (RQ_OBJ == "lik") CCX_PARAM_NAMES else RQ_DROPPED),
+                  collapse = ", ")))
+.o0 <- rq_obj(u0)
+.e0 <- if (RQ_OBJ == "lik") .ll_sub else .lp0 - rq_logprior_of(u0, RQ_DROPPED)
+cat(sprintf("at the mode: %.4f   expected %.4f   diff %.2e\n", .o0, .e0, .o0 - .e0))
+if (abs(.o0 - .e0) > 1e-9) stop("the objective is not what it says it is")
+
+# =====================================================================
 # One case = one (A_T, tier)
 # =====================================================================
 rq_case <- function(job) {
@@ -263,9 +325,9 @@ rq_case <- function(job) {
 
   ub <- u0
   ub[ia] <- .to_unc(a, CCX_PARAM_TABLE[[RQ_PROFILED]])
-  frozen <- rq_loglik(ub)
+  frozen <- rq_obj(ub)
 
-  f <- function(x) { u <- ub; u[ifr] <- x; v <- -rq_loglik(u); if (!is.finite(v)) 1e12 else v }
+  f <- function(x) { u <- ub; u[ifr] <- x; v <- -rq_obj(u); if (!is.finite(v)) 1e12 else v }
   gains <- numeric(0); nev <- 0; conv <- NA
   if (length(free) == 1L) {
     # Brent, not Nelder-Mead: NM in one dimension is documented-unreliable and
@@ -318,7 +380,7 @@ sep(sprintf("PROFILE: %s over %d values, %d tiers, %d workers",
 cat(sprintf("grid: %s\n", paste(sprintf("%.4g", RQ_GRID), collapse = " ")))
 for (tn in names(RQ_TIERS))
   cat(sprintf("tier %-5s free: %s\n", tn, paste(RQ_TIERS[[tn]], collapse = " ")))
-cat("objective = LOG-LIKELIHOOD (priors removed); logpost carried, never optimised\n")
+cat(sprintf("objective = %s; logpost carried, never optimised\n", RQ_OBJ))
 
 t0  <- Sys.time()
 res <- parallel::mclapply(jobs, function(j)
@@ -329,6 +391,7 @@ res <- parallel::mclapply(jobs, function(j)
 cat(sprintf("\n%.1f minutes\n", as.numeric(Sys.time() - t0, units = "mins")))
 res <- res[!vapply(res, is.null, logical(1))]
 saveRDS(list(res = res, grid = RQ_GRID, tiers = RQ_TIERS, mode = md$par_mode,
+             objective = RQ_OBJ, dropped_priors = RQ_DROPPED,
              profiled = RQ_PROFILED, hml_bound = RQ_HML_BOUND,
              prior = list(A_centre = RQ_PRIOR_C, A_logsd = RQ_PRIOR_S,
                           A_lo = RQ_OBS_LO, A_hi = RQ_OBS_HI,
@@ -362,7 +425,7 @@ for (tn in names(RQ_TIERS)) {
   sep(sprintf("TIER %s -- profiling %s, free: %s", toupper(tn), RQ_PROFILED,
               paste(RQ_TIERS[[tn]], collapse = " ")))
   cat(sprintf("%9s %9s %9s %11s %9s %9s %9s %11s %7s %7s\n",
-              RQ_XLAB, RQ_YLAB, "product", "loglik", "d(loglik)",
+              RQ_XLAB, RQ_YLAB, "product", RQ_OBJ, sprintf("d(%s)", RQ_OBJ),
               "d(seas4)", "d(rest)", "logpost", "z(A_T)", "z(q10)"))
   for (x in rr) {
     m <- names(RQ_MARKS)[vapply(RQ_MARKS, function(v) isTRUE(all.equal(x$amp, v)), logical(1))]

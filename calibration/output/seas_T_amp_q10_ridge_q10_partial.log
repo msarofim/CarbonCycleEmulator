@@ -1,0 +1,117 @@
+
+GATE 1: the arm-N mode reproduces
+---------------------------------
+h_ml band [85, 120]; logpost at par_mode -1877.9475 vs file -1877.9475 (diff -1.67e-10)
+
+GATE 2: loglik = logpost - logprior, checked independently
+----------------------------------------------------------
+subtracted -1809.2736   independent -1809.2736   diff 0.00e+00
+
+THE CONFLICT, from the constants
+--------------------------------
+seas_T_amp_NH prior: lognormal, centre 14.3215 K, logsd 0.2242  (bracket 11.4450-17.9210)
+q10 prior:           lognormal, centre 2.0000,   logsd 0.2500
+mode: A_T = 25.9371 K (z +2.649), q10 = 1.0907 (z -2.425)
+products A_T*ln(q10): prior centre 9.9269 | prior LO 7.9331 | MODE 2.2513
+=> the joint prior asks for 4.41x the modulation the mode accepts (3.52x off the LO bracket)
+
+NOTE the reported prior_z in the arm file disagrees with the analytic z
+above (it puts A_T at +3.29 and q10 at -2.01). run_modefind_pump_arms.R's
+prior_z() integrates the prior on a LINEAR grid from x/1e3 to x*1e3, which
+for a tight lognormal on a large x resolves the prior with ~1 grid point.
+The analytic values are the correct ones. Reported, not silently used.
+
+GATE 3: the objective is `partial`
+----------------------------------
+priors DROPPED: q10, seas_T_amp_NH
+priors KEPT:    beta_max, fert_k, k_w, h_ml, kz, pump_grad, tau_ex, npp_frac_NH, seas_T_amp_SH, seas_lag_p, sst_seas_amp_NH, sst_seas_amp_SH, gamma_enso, bomb_total, luc_scale, sigma_d14c, rep_dC, grad_off_co2, grad_off_d13c
+at the mode: -1872.5414   expected -1872.5414   diff 0.00e+00
+
+PROFILE: q10 over 6 values, 2 tiers, 4 workers
+----------------------------------------------
+grid: 1.091 1.15 1.35 1.5 1.7 2
+tier pairSH free: seas_T_amp_NH seas_T_amp_SH
+tier land  free: seas_T_amp_NH seas_T_amp_SH seas_lag_p sst_seas_amp_NH sst_seas_amp_SH npp_frac_NH beta_max fert_k luc_scale
+objective = partial; logpost carried, never optimised
+
+26.0 minutes
+
+TIER PAIRSH -- profiling q10, free: seas_T_amp_NH seas_T_amp_SH
+---------------------------------------------------------------
+      q10   A_T (K)   product     partial d(partial)  d(seas4)   d(rest)     logpost  z(A_T)  z(q10)
+   1.0907   26.0418    2.2609    -1872.52      0.00      0.00      0.00    -1877.97   +2.67   -2.43
+   1.1500   16.1888    2.2626    -1881.99     -9.47     -1.36     -3.57    -1883.55   +0.55   -2.21
+   1.3500    7.5462    2.2646    -1936.79    -64.27     -3.24    -46.30    -1941.06   -2.86   -1.57
+   1.5000    5.5866    2.2652    -1996.45   -123.93     -3.78   -100.39    -2004.88   -4.20   -1.15
+   1.7000    4.2699    2.2657    -2092.67   -220.15     -4.11   -191.26    -2106.40   -5.40   -0.65
+   2.0000    3.2695    2.2663    -2259.17   -386.65     -4.27   -352.13    -2279.83   -6.59   +0.00  <- LITERATURE / prior centre
+
+SPREAD over the grid: loglik 386.7 | seasonal-4 4.3 | everything else 352.1
+SPREAD over 1.091-2 only (mode to the far anchor): loglik 386.7 | seasonal-4 4.3 | rest 352.1
+PRODUCT A_T*ln(q10): 2.2609 - 2.2663 (ratio 1.00); perfect trade would hold it CONSTANT
+argmax q10 = 1.0907; likelihood-best A_T (K) there = 26.0418
+A_T needed at the LITERATURE q10 = 2.00, from the mode's product: 3.2479 K
+  => implied soil/air damping vs the all-land 11.4450 K: 0.284
+
+seasonal amplitudes at each re-optimised point (obs: MLO 6.754, SPO 1.170;
+d13C-per-ppm signatures 0.0528 MLO / 0.0288 SPO):
+  q10        1.0907  MLO p2p  6.217  SPO p2p  1.271  sig 0.06807 / 0.09198
+  q10        1.1500  MLO p2p  6.217  SPO p2p  1.267  sig 0.06805 / 0.09201
+  q10        1.3500  MLO p2p  6.218  SPO p2p  1.263  sig 0.06797 / 0.09198
+  q10        1.5000  MLO p2p  6.219  SPO p2p  1.261  sig 0.06791 / 0.09194
+  q10        1.7000  MLO p2p  6.222  SPO p2p  1.260  sig 0.06785 / 0.09187
+  q10        2.0000  MLO p2p  6.225  SPO p2p  1.259  sig 0.06776 / 0.09177
+
+optimiser convergence (last restart's gain should be small):
+  q10        1.0907      45 evals, 1 restart(s), gains +0.02
+  q10        1.1500     110 evals, 2 restart(s), gains +485.59 +0.00
+  q10        1.3500     110 evals, 2 restart(s), gains +6969.95 +0.00
+  q10        1.5000     112 evals, 2 restart(s), gains +13831.02 +0.00
+  q10        1.7000     110 evals, 2 restart(s), gains +22820.77 +0.00
+  q10        2.0000     112 evals, 2 restart(s), gains +33878.88 +0.00
+
+TIER LAND -- profiling q10, free: seas_T_amp_NH seas_T_amp_SH seas_lag_p sst_seas_amp_NH sst_seas_amp_SH npp_frac_NH beta_max fert_k luc_scale
+----------------------------------------------------------------------------------------------------------------------------------------------
+      q10   A_T (K)   product     partial d(partial)  d(seas4)   d(rest)     logpost  z(A_T)  z(q10)
+   1.0907   26.4931    2.3001    -1872.42      0.00      0.00     -3.07    -1878.08   +2.74   -2.43
+   1.1500   16.5815    2.3175    -1879.14     -6.72     -3.13     -2.25    -1880.76   +0.65   -2.21
+   1.3500    7.8071    2.3430    -1894.41    -21.99     -8.78     -2.44    -1898.26   -2.71   -1.57
+   1.5000    5.8609    2.3764    -1901.72    -29.31    -13.98      0.00    -1909.28   -3.98   -1.15
+   1.7000    4.4605    2.3668    -1911.22    -38.81    -13.75     -0.92    -1923.93   -5.20   -0.65
+   2.0000    3.4548    2.3947    -1922.73    -50.31    -18.47     -5.39    -1941.80   -6.34   +0.00  <- LITERATURE / prior centre
+
+SPREAD over the grid: loglik 50.3 | seasonal-4 18.5 | everything else 5.4
+SPREAD over 1.091-2 only (mode to the far anchor): loglik 50.3 | seasonal-4 18.5 | rest 5.4
+PRODUCT A_T*ln(q10): 2.3001 - 2.3947 (ratio 1.04); perfect trade would hold it CONSTANT
+argmax q10 = 1.0907; likelihood-best A_T (K) there = 26.4931
+A_T needed at the LITERATURE q10 = 2.00, from the mode's product: 3.2479 K
+  => implied soil/air damping vs the all-land 11.4450 K: 0.284
+
+seasonal amplitudes at each re-optimised point (obs: MLO 6.754, SPO 1.170;
+d13C-per-ppm signatures 0.0528 MLO / 0.0288 SPO):
+  q10        1.0907  MLO p2p  6.212  SPO p2p  1.266  sig 0.06815 / 0.09184
+  q10        1.1500  MLO p2p  6.203  SPO p2p  1.268  sig 0.06821 / 0.09160
+  q10        1.3500  MLO p2p  6.183  SPO p2p  1.269  sig 0.06834 / 0.09119
+  q10        1.5000  MLO p2p  6.184  SPO p2p  1.273  sig 0.06843 / 0.09140
+  q10        1.7000  MLO p2p  6.207  SPO p2p  1.283  sig 0.06802 / 0.09129
+  q10        2.0000  MLO p2p  6.168  SPO p2p  1.275  sig 0.06849 / 0.09113
+
+optimiser convergence (last restart's gain should be small):
+  q10        1.0907     500 evals, 1 restart(s), gains +0.13
+  q10        1.1500    3432 evals, 2 restart(s), gains +488.44 +0.00
+  q10        1.3500    4304 evals, 2 restart(s), gains +7012.16 +0.17
+  q10        1.5000    2960 evals, 3 restart(s), gains +13923.30 +2.44 +0.00
+  q10        1.7000    5442 evals, 2 restart(s), gains +23001.80 +0.41
+  q10        2.0000    6480 evals, 3 restart(s), gains +34213.65 +1.21 +0.47
+
+WHICH STREAMS PAY FOR MOVING q10 (tier BLOCK, vs the row at the mode)
+---------------------------------------------------------------------
+
+READING THIS
+------------
+flat in loglik AND in seasonal-4        -> ridge confirmed; sec.2's repair is aimed right
+flat in seasonal-4, NOT in `rest`       -> the ridge is real but q10's ANNUAL duty pays;
+                                           the repair is splitting q10, not re-anchoring a prior
+flat in neither                         -> not a ridge; STOP, sec.2 is wrong
+
+wrote calibration/output/seas_T_amp_q10_ridge_q10_partial.rds

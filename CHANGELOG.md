@@ -117,6 +117,67 @@ profile q10, re-optimise the amplitudes — separates the two claims in about an
 what decides whether the defect is the amplitude prior or the respiration model itself.
 Running.
 
+### §2, CONTINUED — two corrections to what I wrote above, and a computed answer
+
+**Correction 1: the "352 log-units" is an artefact of a frozen block.** The BLOCK tier
+freezes `beta_max`, `fert_k` and `luc_scale`. Raising q10 releases more soil carbon under
+the observed warming, and the classic β–γ compensation — more fertilisation drawing it
+back — is exactly the repair BLOCK forbids. Freeing the three (`land` tier) drops the cost
+of q10 = 2.0 from **352 to 50.3** log-units. **The fertilisation pair absorbs 85 % of it.**
+This is `match_incumbents_optim` biting: I read a frozen-block profile as if it bounded the
+posterior.
+
+**Correction 2: a pure-likelihood objective lets the NUISANCE parameters escape too.** In
+the first `land` run `seas_T_amp_SH` went to 1e-23 and `sst_seas_amp_NH` to 1e-31 in EVERY
+row — both channels switched off, z = −37.5 apiece — and reported a spread of 15.9. That
+profile was internally consistent and it was a profile of a DIFFERENT MODEL. Fixed by an
+objective `partial` that drops the priors on the two parameters UNDER TEST and keeps every
+other one, with a GATE 3 that prints which are dropped and which kept and checks the
+arithmetic at the mode. Under `partial` the parameters stay physical (`seas_T_amp_SH`
+0.28–1.31, `sst_seas_amp_NH` 0.38–0.45) and the answer is **50.3**.
+
+**What survives both corrections, unchanged:**
+
+- **The ridge is exact.** The product holds to 2.2609–2.2663 across q10 = 1.09 → 2.0 in the
+  PAIRSH tier, and the re-optimised `A_T` at q10 = 2.0 is 3.2695 K against the analytic
+  2.2513/ln 2 = 3.2479. Four significant figures.
+- **The seasonal rows barely identify q10** — 4.3 log-units across the range (PAIRSH),
+  18.5 (`land`, which travels further in `A_T`).
+- **cor(q10, `seas_T_amp_NH`) = −0.972** from the Hessian, agreeing with the profile.
+
+**And the arithmetic §2 step 3 was going to spend 15 hours to discover**
+(`calibration/diag_seas_reanchor_arithmetic.R`, exact — it re-scores the `land` points
+under a re-anchored prior set; no model runs):
+
+| q10 | `A_T` (K) | Δ logpost, CURRENT priors | Δ logpost, DAMPED priors |
+|---|---|---|---|
+| 1.0907 (mode) | 26.49 | 0.00 | 0.00 |
+| 1.35 | 7.81 | −20.2 | **+19.7** |
+| 1.50 | 5.86 | −31.2 | +18.1 |
+| 2.00 (literature) | 3.45 | **−63.7** | +4.0 |
+
+with the damping applied to **both** land amplitude priors (NH centre 14.32 → 4.06 K, SH
+5.05 → 1.43 K; the bracket ends scale, so the centre scales and the width does not).
+
+**So §2's repair does have leverage, and it does not reach its own success criterion.**
+The re-anchor flips the sign of the comparison — q10 = 2.0 goes from losing by 63.7 to
+winning by 4.0 — but the interior optimum lands at **q10 ≈ 1.35–1.5, `A_T` ≈ 6–8 K**, not
+at 2.0. And the decisive lever is the **SH** prior as much as the NH one: `seas_T_amp_SH`
+has to fall to 0.28 K to hold the SH product at a large q10, and that is where most of the
+50.3 sits.
+
+**Two caveats on that table, both stated rather than buried.** The damping factor 0.2838 is
+DERIVED to put the mode's product at the literature q10, so it is the most favourable value
+the hypothesis could have — it is not an independent measurement, and §2 step 2's
+requirement for provenance stands. And the `land` points were optimised under the CURRENT
+priors, so each row is conditioned on the wrong prior and the damped column is a LOWER
+bound on what a refit would find.
+
+**Recommendation.** §2 steps 2–4 are worth running, amended: the damping must be applied to
+`seas_T_amp_SH` as well, and the pre-registered success criterion should be "q10 moves to
+1.35–1.5", not "q10 back near 2.0". If a soil-temperature climatology gives a damping far
+from 0.28, that is the falsification and the refit should not be run at all.
+
 ### §3 — RESOLVED, and the blocker was smaller than it looked
 
 `recompute_hessian.R` needed three repairs before it could answer anything: it read
