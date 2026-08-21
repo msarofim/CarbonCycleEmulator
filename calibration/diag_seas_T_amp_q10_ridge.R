@@ -109,7 +109,7 @@ RQ_ONLY      <- if (length(RQ_ARGS) >= 3 && nzchar(RQ_ARGS[3]))
 RQ_GRID_ARG  <- if (length(RQ_ARGS) >= 4 && nzchar(RQ_ARGS[4]))
                   as.numeric(strsplit(RQ_ARGS[4], ",")[[1]]) else NULL
 RQ_OBJ       <- if (length(RQ_ARGS) >= 5 && nzchar(RQ_ARGS[5])) RQ_ARGS[5] else "partial"
-stopifnot(RQ_AXIS %in% c("amp", "q10"), RQ_OBJ %in% c("partial", "lik"))
+stopifnot(RQ_AXIS %in% c("amp", "q10", "sst"), RQ_OBJ %in% c("partial", "lik"))
 RQ_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
 RQ_OUT       <- file.path("calibration", "output",
                           sprintf("seas_T_amp_q10_ridge_%s%s.rds", RQ_AXIS,
@@ -128,8 +128,14 @@ RQ_SEAS_ROWS <- c("co2_seasonal_MLO", "co2_seasonal_SPO",
 # THE TWO AXES ARE TRANSPOSES OF ONE ANOTHER: whichever of the pair is profiled,
 # the other leads the free block. Everything downstream reads these, so adding
 # an axis is a table entry and not a second script.
-RQ_PROFILED  <- if (RQ_AXIS == "amp") "seas_T_amp_NH" else "q10"
-RQ_PARTNER   <- if (RQ_AXIS == "amp") "q10" else "seas_T_amp_NH"
+# THE AXIS TABLE. `amp` and `q10` are transposes of one another and share a
+# PARTNER -- the other half of the pair whose prior is also dropped. `sst`
+# (handoff 2026-08-21 sec.4) has no partner: `sst_seas_amp_NH` is one parameter
+# against its own observation, so only its prior comes out.
+RQ_PROFILED <- switch(RQ_AXIS, amp = "seas_T_amp_NH", q10 = "q10",
+                      sst = "sst_seas_amp_NH")
+RQ_PARTNER  <- switch(RQ_AXIS, amp = "q10", q10 = "seas_T_amp_NH",
+                      sst = character(0))
 RQ_SEAS_BLOCK <- c("seas_T_amp_SH", "seas_lag_p",
                    "sst_seas_amp_NH", "sst_seas_amp_SH", "npp_frac_NH")
 # THE LAND TIER, added 2026-08-21 after the q10 axis returned. BLOCK freezes
@@ -140,7 +146,16 @@ RQ_SEAS_BLOCK <- c("seas_T_amp_SH", "seas_lag_p",
 # Freeing the three is what turns "the fit will not go there" into "the DATA
 # will not go there". The ocean parameters (`k_w`, `kz`, `h_ml`, `tau_ex`) stay
 # frozen, so it is a tighter upper bound and not the refit itself.
-RQ_TIERS     <- list(
+RQ_TIERS <- if (RQ_AXIS == "sst") list(
+  # FROZEN is one evaluation and it is the incumbent's home ground in its purest
+  # form -- the number every previous "turning the ocean channel off HELPS"
+  # reading was made on. It is here to be BEATEN by `seas`, and the gap between
+  # them is the size of that home-ground advantage (match_incumbents_optim).
+  frozen = character(0),
+  seas   = setdiff(c(RQ_PARTNER, "q10", "seas_T_amp_NH", RQ_SEAS_BLOCK), RQ_PROFILED),
+  land   = setdiff(c(RQ_PARTNER, "q10", "seas_T_amp_NH", RQ_SEAS_BLOCK,
+                     "beta_max", "fert_k", "luc_scale"), RQ_PROFILED)
+) else list(
   pair   = RQ_PARTNER,
   pairSH = c(RQ_PARTNER, "seas_T_amp_SH"),
   block  = c(RQ_PARTNER, RQ_SEAS_BLOCK),
@@ -167,12 +182,16 @@ RQ_MODE_X  <- md$par_mode[[RQ_PROFILED]]
 # q10: the mode up to and past the LITERATURE 2.0, which is the value sec.2's
 #      success criterion is stated in terms of, plus the amplitude-implied
 #      2.25/ln(q10) = 11.445 point (q10 = 1.2160) so the two axes intersect.
-RQ_GRID <- sort(unique(round(
-  if (RQ_AXIS == "amp") c(5, 8, RQ_OBS_LO, RQ_PRIOR_C, RQ_OBS_HI, 20,
-                          RQ_MODE_A, 30, 36, 43, 50)
-  else                  c(1.02, 1.05, RQ_MODE_Q, 1.15,
-                          exp(RQ_MODE_A * log(RQ_MODE_Q) / RQ_OBS_LO),
-                          1.35, 1.5, 1.7, RQ_Q10_C, 2.3, 2.6), 4)))
+RQ_SST_OBS <- ccx_const("SST_SEAS_AMP_NH_OBS")
+RQ_GRID <- sort(unique(round(switch(RQ_AXIS,
+  amp = c(5, 8, RQ_OBS_LO, RQ_PRIOR_C, RQ_OBS_HI, 20, RQ_MODE_A, 30, 36, 43, 50),
+  q10 = c(1.02, 1.05, RQ_MODE_Q, 1.15,
+          exp(RQ_MODE_A * log(RQ_MODE_Q) / RQ_OBS_LO),
+          1.35, 1.5, 1.7, RQ_Q10_C, 2.3, 2.6),
+  # sec.4: the mode up to the OBSERVED value, plus points BELOW it -- under a
+  # pure likelihood this parameter ran to 1e-31, so "how much lower does the
+  # objective want it" is a real question and not a formality.
+  sst = c(0.05, 0.15, 0.30, RQ_MODE_X, 0.65, 0.90, 1.20, 1.55, 1.90, RQ_SST_OBS)), 4)))
 if (!is.null(RQ_GRID_ARG)) RQ_GRID <- sort(unique(round(RQ_GRID_ARG, 4)))
 
 # =====================================================================
@@ -329,7 +348,10 @@ rq_case <- function(job) {
 
   f <- function(x) { u <- ub; u[ifr] <- x; v <- -rq_obj(u); if (!is.finite(v)) 1e12 else v }
   gains <- numeric(0); nev <- 0; conv <- NA
-  if (length(free) == 1L) {
+  if (length(free) == 0L) {
+    # FROZEN: no optimisation at all, one evaluation. The incumbent's own point.
+    x <- numeric(0); best <- frozen
+  } else if (length(free) == 1L) {
     # Brent, not Nelder-Mead: NM in one dimension is documented-unreliable and
     # warns. The bracket is on the unconstrained (log) scale.
     br <- log(RQ_BRACKET[[free]])
@@ -362,7 +384,7 @@ rq_case <- function(job) {
 
   list(amp = a, tier = job$tier, free = free,
        frozen = frozen, loglik = best, logpost = lp(u1),
-       q10 = p1$q10, A_T = p1$seas_T_amp_NH,
+       q10 = p1$q10, A_T = p1$seas_T_amp_NH, sst_SH = p1$sst_seas_amp_SH,
        product = p1$seas_T_amp_NH * log(p1$q10),
        par = p1[free], n_eval = nev, gains = gains, conv = conv,
        by_stream = unlist(bs), loglik_bystream = tot,
@@ -401,19 +423,22 @@ saveRDS(list(res = res, grid = RQ_GRID, tiers = RQ_TIERS, mode = md$par_mode,
 # =====================================================================
 # Report
 # =====================================================================
-RQ_XLAB  <- if (RQ_AXIS == "amp") "A_T (K)" else "q10"
-RQ_YLAB  <- if (RQ_AXIS == "amp") "q10"     else "A_T (K)"
-rq_other <- function(x) if (RQ_AXIS == "amp") x$q10 else x$A_T
+RQ_XLAB  <- switch(RQ_AXIS, amp = "A_T (K)", q10 = "q10", sst = "sst_NH (K)")
+RQ_YLAB  <- switch(RQ_AXIS, amp = "q10", q10 = "A_T (K)", sst = "sst_SH (K)")
+rq_other <- function(x) switch(RQ_AXIS, amp = x$q10, q10 = x$A_T,
+                               sst = x$sst_SH)
 # The anchors worth marking on each axis, DERIVED: the mode, and on the amp
 # axis the two measured bracket ends and the prior centre, on the q10 axis the
 # literature value sec.2's success criterion is stated in.
-RQ_MARKS <- if (RQ_AXIS == "amp") {
-  c("MODE" = RQ_MODE_X, "obs LO (all NH land)" = RQ_OBS_LO,
-    "PRIOR CENTRE" = RQ_PRIOR_C, "obs HI (>45N)" = RQ_OBS_HI)
-} else {
-  c("MODE" = RQ_MODE_X, "LITERATURE / prior centre" = RQ_Q10_C,
-    "product at the all-land 11.445 K" = exp(RQ_MODE_A * log(RQ_MODE_Q) / RQ_OBS_LO))
-}
+RQ_MARKS <- switch(RQ_AXIS,
+  amp = c("MODE" = RQ_MODE_X, "obs LO (all NH land)" = RQ_OBS_LO,
+          "PRIOR CENTRE" = RQ_PRIOR_C, "obs HI (>45N)" = RQ_OBS_HI),
+  q10 = c("MODE" = RQ_MODE_X, "LITERATURE / prior centre" = RQ_Q10_C,
+          "product at the all-land 11.445 K" =
+            exp(RQ_MODE_A * log(RQ_MODE_Q) / RQ_OBS_LO)),
+  sst = c("MODE" = RQ_MODE_X, "OBSERVED (ERSSTv5, = prior centre)" = RQ_SST_OBS))
+RQ_MARKS <- round(RQ_MARKS, 4)   # same rounding as RQ_GRID, or an endpoint
+                                 # falls outside the range it defines
 
 for (tn in names(RQ_TIERS)) {
   rr <- res[vapply(res, function(x) x$tier, character(1)) == tn]
@@ -449,15 +474,20 @@ for (tn in names(RQ_TIERS)) {
   cat(sprintf("SPREAD over %.4g-%.4g only (mode to the far anchor): loglik %.1f | seasonal-4 %.1f | rest %.1f\n",
               min(aa[liv]), max(aa[liv]), diff(range(ll[liv])),
               diff(range(se[liv])), diff(range(re[liv]))))
-  cat(sprintf("PRODUCT A_T*ln(q10): %.4f - %.4f (ratio %.2f); ",
-              min(pr), max(pr), max(pr) / min(pr)))
-  cat("perfect trade would hold it CONSTANT\n")
-  cat(sprintf("argmax %s = %.4f; likelihood-best %s there = %.4f\n",
+  cat(sprintf("argmax %s = %.4f; best %s there = %.4f\n",
               RQ_XLAB, aa[which.max(ll)], RQ_YLAB, rq_other(rr[[which.max(ll)]])))
-  cat(sprintf("A_T needed at the LITERATURE q10 = %.2f, from the mode's product: %.4f K\n",
-              RQ_Q10_C, RQ_MODE_A * log(RQ_MODE_Q) / log(RQ_Q10_C)))
-  cat(sprintf("  => implied soil/air damping vs the all-land %.4f K: %.3f\n",
-              RQ_OBS_LO, RQ_MODE_A * log(RQ_MODE_Q) / log(RQ_Q10_C) / RQ_OBS_LO))
+  # The product and the damping are statements about the (A_T, q10) PAIR. On the
+  # sst axis they are constants of the run and printing them there invites the
+  # reader to think this profile bears on them. It does not.
+  if (RQ_AXIS != "sst") {
+    cat(sprintf("PRODUCT A_T*ln(q10): %.4f - %.4f (ratio %.2f); ",
+                min(pr), max(pr), max(pr) / min(pr)))
+    cat("perfect trade would hold it CONSTANT\n")
+    cat(sprintf("A_T needed at the LITERATURE q10 = %.2f, from the mode's product: %.4f K\n",
+                RQ_Q10_C, RQ_MODE_A * log(RQ_MODE_Q) / log(RQ_Q10_C)))
+    cat(sprintf("  => implied soil/air damping vs the all-land %.4f K: %.3f\n",
+                RQ_OBS_LO, RQ_MODE_A * log(RQ_MODE_Q) / log(RQ_Q10_C) / RQ_OBS_LO))
+  }
   cat("\nseasonal amplitudes at each re-optimised point (obs: MLO 6.754, SPO 1.170;\n")
   cat("d13C-per-ppm signatures 0.0528 MLO / 0.0288 SPO):\n")
   for (x in rr)
@@ -472,9 +502,10 @@ for (tn in names(RQ_TIERS)) {
 }
 
 # ---- which rows pay, relative to the mode's own value ------------------
-sep(sprintf("WHICH STREAMS PAY FOR MOVING %s (tier BLOCK, vs the row at the mode)",
-            RQ_PROFILED))
-rb <- res[vapply(res, function(x) x$tier, character(1)) == "block"]
+sep(sprintf("WHICH STREAMS PAY FOR MOVING %s (tier %s, vs the row at the mode)",
+            RQ_PROFILED, toupper(tail(names(RQ_TIERS), 1))))
+RQ_STREAM_TIER <- tail(names(RQ_TIERS), 1)
+rb <- res[vapply(res, function(x) x$tier, character(1)) == RQ_STREAM_TIER]
 if (length(rb)) {
   rb <- rb[order(vapply(rb, function(x) x$amp, numeric(1)))]
   ref <- rb[[which.min(abs(vapply(rb, function(x) x$amp, numeric(1)) - RQ_MODE_X))]]
@@ -490,8 +521,24 @@ if (length(rb)) {
 }
 
 sep("READING THIS")
+if (RQ_AXIS == "sst") {
+  cat("handoff 2026-08-21 sec.4 pre-registered three outcomes, and the per-stream\n")
+  cat("table above is what picks between them:\n\n")
+  cat("  the CO2 seasonal rows veto it   -> the air-sea flux response is too STRONG;\n")
+  cat("      suspect the solubility-only formulation (no seasonal MLD, no biology)\n")
+  cat("      applied to a single hemispheric box\n")
+  cat("  the d13C seasonal rows veto it  -> the PARTITION is wrong, not the amplitude.\n")
+  cat("      The ocean channel is isotopically near-neutral (0.0045), so adding it\n")
+  cat("      should HELP the signature -- a d13C veto is genuinely surprising and is\n")
+  cat("      a place to STOP and think rather than push on\n")
+  cat("  the annual/level rows veto it   -> the seasonal term is LEAKING into the\n")
+  cat("      annual budget, which is a BUG: it is zero-annual-mean by construction\n\n")
+  cat("Only if this is inconclusive is a new observational product worth it (a\n")
+  cat("Takahashi seasonal air-sea flux climatology). Do NOT start there.\n")
+} else {
 cat("flat in loglik AND in seasonal-4        -> ridge confirmed; sec.2's repair is aimed right\n")
 cat("flat in seasonal-4, NOT in `rest`       -> the ridge is real but q10's ANNUAL duty pays;\n")
 cat("                                           the repair is splitting q10, not re-anchoring a prior\n")
 cat("flat in neither                         -> not a ridge; STOP, sec.2 is wrong\n")
+}
 cat(sprintf("\nwrote %s\n", RQ_OUT))
