@@ -81,6 +81,104 @@ else — because q10 also carries the ANNUAL feedback `q10^(gmst/10)`, and a pro
 flat in the seasonal rows but not in the rest would mean the repair is splitting q10's two
 duties, not re-anchoring a prior. Result pending.
 
+## 2026-08-21 (later still) — §2's ridge is real and aimed at the wrong coordinate; §3's blocker was a false alarm
+
+### §2 step 1 — the falsification test PASSES, and inverts the causal story
+
+`diag_seas_T_amp_q10_ridge.R amp`, PAIRSH tier (q10 + `seas_T_amp_SH` free — the honest
+minimal test, since q10 is SHARED between hemispheres and freezing the SH breaks its own
+product by construction):
+
+| `A_T` (K) | q10 | product | Δ(seas4) | Δ(rest) |
+|---|---|---|---|---|
+| 5.0 | 1.4997 | 2.026 | −12.0 | **−100.2** |
+| 11.445 | 1.2135 | 2.214 | −0.01 | −12.6 |
+| 14.32 (prior centre) | 1.1685 | 2.230 | 0.00 | −5.8 |
+| 25.94 (mode) | 1.0905 | 2.248 | −0.33 | −0.1 |
+| 50.0 | 1.0461 | 2.251 | −0.58 | −1.0 |
+
+**The four seasonal rows move 0.6 log-units across 11.4 → 50 K** while the product holds to
+1.7 %. The coordinates trade one-for-one. The ridge is REAL, exactly as §2 said.
+
+**But the profile is not flat, and all of the non-flatness is in `rest`** — which is the
+second of the three outcomes the script pre-registered. The per-stream table names the
+payers at `A_T` = 5: `co2_level_MLO` −30.5, `co2_level_SPO` −18.3, `d13c_level_MLO` −13.8,
+`co2_icecore` −7.9. Annual and level rows, through q10's `q10^(gmst/10)` duty.
+
+**So the causal story inverts.** It is not two priors fighting over a shared product. It is:
+the ANNUAL rows pin q10 near 1.09; the SEASONAL rows pin the product near 2.25; and
+`A_T` = 2.25/ln(1.09) ≈ 26 K is then DERIVED. `seas_T_amp_NH` is not being fought over at
+all — it is a readout of q10. The seasonal channel is the side that is INDIFFERENT.
+
+**§2 steps 2–4 are therefore NOT run**, and the 15-hour refit is not spent. Re-anchoring
+`seas_T_amp_NH`'s prior downward cannot deliver §2's own stated success criterion ("q10
+back near 2.0"): it will move `A_T` and leave q10 where it is. The transpose test —
+profile q10, re-optimise the amplitudes — separates the two claims in about an hour and is
+what decides whether the defect is the amplitude prior or the respiration model itself.
+Running.
+
+### §3 — RESOLVED, and the blocker was smaller than it looked
+
+`recompute_hessian.R` needed three repairs before it could answer anything: it read
+`md$u_mode` and decoded it under the DEFAULT parameter table (the arm refit overrode
+`h_ml`'s band in process, so this can silently land metres away — `mode_fit_pumpN.rds` as
+it stands does round-trip, and GATE 1 now prints both rather than assuming either way); it
+**wrote its result back over the mode file**; and its step grid stopped at 3e-4, which is
+where `h_ml`'s problem starts.
+
+**The step rule is now DERIVED, not picked off a grid.** The first version of the rewrite
+took the largest step whose diagonal curvature agreed with both neighbours, which chose
+eps = 1e-1 for nearly everything — a move of 313 log-units for `beta_max` — and returned a
+Hessian with a **positive** eigenvalue of +86.8 in the (`beta_max`, `fert_k`) plane, whose
+correlation is +0.997. A diagonal-only stability scan cannot see a cross-derivative going
+bad. Replaced by
+
+    eps_k = HESS_EPS_FRAC × sd_k,   sd_k = 1/sqrt(−∂²logpost/∂u_k²)
+
+so the objective moves `HESS_EPS_FRAC²/2` = 0.005 log-units in EVERY direction by
+construction — about 5,000× above this integrator's noise floor, with a truncation error
+of a quarter of a percent. All 21 parameters are then stable to <1 % across eps/3 → 3·eps,
+`h_ml` included.
+
+**The cause is not the one §3 proposed.** §3 attributed `h_ml`'s failure to logit
+compression near the lower bound. That is true about REACH and wrong about CAUSE:
+`ARM_HESS_EPS` = 3e-4 is 0.5–1.8× the right step for the seven STIFF directions (`beta_max`,
+`fert_k`, `q10`, `k_w`, `bomb_total`, `luc_scale`, `grad_off_d13c`) and 0.003–0.06× for the
+soft ones. It was calibrated on the stiff subspace. `h_ml` is simply the SOFTEST direction
+in the model — unconstrained sd 0.888 — so 3e-4 is 296× too small there. **`kz` was
+under-stepped 181× and `gamma_enso` 66×, neither near a bound and neither flagged**,
+because their curvature happened to survive the noise at 3e-4. The instability report was
+UNDER-reporting.
+
+**And the answer is that it barely mattered.** Recomputed against stored:
+
+- `log|−H|` **127.0986 vs 127.1280** — a change of 0.03, against arm margins of 5.6–10.6.
+- `h_ml`'s sd moves **2 %**. Every other parameter moves **< 0.5 %**.
+- −H is positive-definite; all 21 eigenvalues negative.
+
+**So the handoff's "⚠ NO UNCERTAINTIES ARE QUOTABLE" was over-cautious.** The right call on
+the evidence available then, but the actual damage is 2 % on one parameter's sd. The
+uncertainties in `mode_fit_pumpN.rds` were usable all along. What the work buys is that
+they are now VERIFIED rather than assumed, that the step is derived and recorded, and that
+the instability flag would now catch something real.
+
+**Two numbers worth carrying forward, both new:**
+
+- **`q10` = 1.0907 ± 0.0193.** The literature 2.0 is **47 posterior sd away**. The prior
+  (logsd 0.25) is nowhere near strong enough to matter; this is a model-vs-literature
+  conflict on q10, not a prior-tuning question, and no re-anchoring of a seasonal
+  amplitude will touch it.
+- **cor(`q10`, `seas_T_amp_NH`) = −0.972** — the ridge, quantified from second-order
+  information, independently of the profile. Strong, and NOT degenerate: a pure product
+  ridge would be −0.999 or tighter.
+
+Also: cor(`beta_max`, `fert_k`) = **+0.997**, the Michaelis-Menten pair, which is the
+tightest degeneracy in the model and the one that broke the naive step rule.
+
+`mode_fit_pumpN.rds` is NOT modified; the second-order block is written beside it as
+`mode_fit_pumpN_hess.rds` and `--update` is required to write it back.
+
+
 
 ## 2026-08-09 — Project created; design locked (no code yet)
 

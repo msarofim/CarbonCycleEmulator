@@ -63,36 +63,60 @@
 # log-posterior column reproduces mode_fit_pumpN.rds exactly (GATE 1). The
 # LIKELIHOOD is band-independent, so the primary result does not rest on it.
 #
-# Usage:  Rscript calibration/diag_seas_T_amp_q10_ridge.R [tag]
-# Writes: calibration/output/seas_T_amp_q10_ridge[_tag].rds
-# RUNTIME ~1.5 h on 4 workers.
+# WHAT THE amp AXIS ANSWERED (2026-08-21, PAIRSH tier, the honest one). The four
+# seasonal rows move by 0.6 log-units across 11.4 -> 50 K while the product
+# holds to 1.7 % -- the ridge is REAL and the two coordinates DO trade
+# one-for-one. But the total is NOT flat, and essentially all of the
+# non-flatness is in `rest`: -12.6 at 11.4 K and -100.2 at 5 K. So it is the
+# ANNUAL rows, through q10's `q10^(gmst/10)` duty, that pin the pair -- not the
+# seasonal channel, which is indifferent.
+#
+# WHICH IS WHY THE q10 AXIS EXISTS. Read the amp profile the other way round:
+# the annual rows pin q10 near 1.09, the seasonal rows pin the PRODUCT near
+# 2.25, and A_T = 2.25 / ln(1.09) = 26 K is then DERIVED rather than fought
+# over. If that is right, re-anchoring `seas_T_amp_NH`'s prior downward cannot
+# deliver sec.2's stated success criterion ("q10 back near 2.0") -- it will move
+# A_T and leave q10 where it is. Profiling q10 with the amplitudes re-optimised
+# is the transpose, and it separates the two claims for about half an hour
+# against the 15 hours a refit costs.
+#
+# Usage:  Rscript calibration/diag_seas_T_amp_q10_ridge.R [axis] [tag]
+#         axis = "amp" (default; profiles seas_T_amp_NH) or "q10"
+# Writes: calibration/output/seas_T_amp_q10_ridge_<axis>[_tag].rds
+# RUNTIME ~1.5 h on 4 workers for `amp`, ~40 min for `q10`.
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
 RQ_ARGS      <- commandArgs(TRUE)
-RQ_TAG       <- if (length(RQ_ARGS) >= 1) RQ_ARGS[1] else ""
+RQ_AXIS      <- if (length(RQ_ARGS) >= 1 && nzchar(RQ_ARGS[1])) RQ_ARGS[1] else "amp"
+RQ_TAG       <- if (length(RQ_ARGS) >= 2) RQ_ARGS[2] else ""
+stopifnot(RQ_AXIS %in% c("amp", "q10"))
 RQ_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
 RQ_OUT       <- file.path("calibration", "output",
-                          sprintf("seas_T_amp_q10_ridge%s.rds",
+                          sprintf("seas_T_amp_q10_ridge_%s%s.rds", RQ_AXIS,
                                   if (nzchar(RQ_TAG)) paste0("_", RQ_TAG) else ""))
 RQ_WORKERS   <- 4          # = performance cores on this machine
 RQ_NM_MAXIT  <- 1500       # per Nelder-Mead restart
 RQ_NM_TRIES  <- 3          # restarts; stops early when a restart gains < RQ_NM_TOL
 RQ_NM_TOL    <- 1.0        # log-units
-RQ_Q10_BRACKET <- c(1.0005, 6.0)   # Brent bracket for the PAIR tier. The lower
-                           # end is just above 1: at q10 = 1 the seasonal
-                           # respiration channel switches off entirely and the
-                           # product is 0 for every A_T, which is a degenerate
-                           # point rather than an optimum.
+# Brent brackets for the 1-parameter PAIR tier, per free parameter. q10's lower
+# end is just above 1: at q10 = 1 the seasonal respiration channel switches off
+# entirely and the product is 0 for EVERY amplitude, a degenerate point rather
+# than an optimum.
+RQ_BRACKET   <- list(q10 = c(1.0005, 6.0), seas_T_amp_NH = c(0.05, 400))
 RQ_SEAS_ROWS <- c("co2_seasonal_MLO", "co2_seasonal_SPO",
                   "d13c_seasonal_MLO", "d13c_seasonal_SPO")
-RQ_PROFILED  <- "seas_T_amp_NH"
+# THE TWO AXES ARE TRANSPOSES OF ONE ANOTHER: whichever of the pair is profiled,
+# the other leads the free block. Everything downstream reads these, so adding
+# an axis is a table entry and not a second script.
+RQ_PROFILED  <- if (RQ_AXIS == "amp") "seas_T_amp_NH" else "q10"
+RQ_PARTNER   <- if (RQ_AXIS == "amp") "q10" else "seas_T_amp_NH"
 RQ_TIERS     <- list(
-  pair  = "q10",
-  pairSH = c("q10", "seas_T_amp_SH"),
-  block = c("q10", "seas_T_amp_SH", "seas_lag_p",
-            "sst_seas_amp_NH", "sst_seas_amp_SH", "npp_frac_NH"))
+  pair   = RQ_PARTNER,
+  pairSH = c(RQ_PARTNER, "seas_T_amp_SH"),
+  block  = c(RQ_PARTNER, "seas_T_amp_SH", "seas_lag_p",
+             "sst_seas_amp_NH", "sst_seas_amp_SH", "npp_frac_NH"))
 
 md <- readRDS(ccx_path(RQ_MODE_FILE))
 
@@ -103,12 +127,20 @@ RQ_PRIOR_C <- sqrt(RQ_OBS_LO * RQ_OBS_HI)           # ccx_bracket_lnorm's centre
 RQ_PRIOR_S <- log(RQ_OBS_HI / RQ_OBS_LO) / 2
 RQ_Q10_C   <- 2.0                                   # CCX_PARAM_TABLE q10 prior
 RQ_Q10_S   <- 0.25
-RQ_MODE_A  <- md$par_mode[[RQ_PROFILED]]
+RQ_MODE_A  <- md$par_mode$seas_T_amp_NH
 RQ_MODE_Q  <- md$par_mode$q10
-# 5 to 50 as sec.2 specifies, with the four points that MEAN something -- the
-# two bracket ends, the prior centre, and the mode -- landing exactly on grid.
-RQ_GRID    <- sort(unique(round(c(5, 8, RQ_OBS_LO, RQ_PRIOR_C, RQ_OBS_HI, 20,
-                                  RQ_MODE_A, 30, 36, 43, 50), 4)))
+RQ_MODE_X  <- md$par_mode[[RQ_PROFILED]]
+# amp: 5 to 50 as sec.2 specifies, with the four points that MEAN something --
+#      the two bracket ends, the prior centre and the mode -- exactly on grid.
+# q10: the mode up to and past the LITERATURE 2.0, which is the value sec.2's
+#      success criterion is stated in terms of, plus the amplitude-implied
+#      2.25/ln(q10) = 11.445 point (q10 = 1.2160) so the two axes intersect.
+RQ_GRID <- sort(unique(round(
+  if (RQ_AXIS == "amp") c(5, 8, RQ_OBS_LO, RQ_PRIOR_C, RQ_OBS_HI, 20,
+                          RQ_MODE_A, 30, 36, 43, 50)
+  else                  c(1.02, 1.05, RQ_MODE_Q, 1.15,
+                          exp(RQ_MODE_A * log(RQ_MODE_Q) / RQ_OBS_LO),
+                          1.35, 1.5, 1.7, RQ_Q10_C, 2.3, 2.6), 4)))
 
 # =====================================================================
 # h_ml band override, exactly as calibration/run_modefind_pump_arms.R did
@@ -238,8 +270,8 @@ rq_case <- function(job) {
   if (length(free) == 1L) {
     # Brent, not Nelder-Mead: NM in one dimension is documented-unreliable and
     # warns. The bracket is on the unconstrained (log) scale.
-    br <- log(RQ_Q10_BRACKET)
-    o  <- stats::optim(log(RQ_MODE_Q), f, method = "Brent", lower = br[1], upper = br[2])
+    br <- log(RQ_BRACKET[[free]])
+    o  <- stats::optim(ub[ifr], f, method = "Brent", lower = br[1], upper = br[2])
     x <- o$par; best <- -o$value; nev <- 1L; gains <- best - frozen; conv <- o$convergence
   } else {
     x <- ub[ifr]; best <- frozen
@@ -268,7 +300,8 @@ rq_case <- function(job) {
 
   list(amp = a, tier = job$tier, free = free,
        frozen = frozen, loglik = best, logpost = lp(u1),
-       q10 = p1$q10, product = a * log(p1$q10),
+       q10 = p1$q10, A_T = p1$seas_T_amp_NH,
+       product = p1$seas_T_amp_NH * log(p1$q10),
        par = p1[free], n_eval = nev, gains = gains, conv = conv,
        by_stream = unlist(bs), loglik_bystream = tot,
        seas = seas, rest = tot - seas,
@@ -305,6 +338,20 @@ saveRDS(list(res = res, grid = RQ_GRID, tiers = RQ_TIERS, mode = md$par_mode,
 # =====================================================================
 # Report
 # =====================================================================
+RQ_XLAB  <- if (RQ_AXIS == "amp") "A_T (K)" else "q10"
+RQ_YLAB  <- if (RQ_AXIS == "amp") "q10"     else "A_T (K)"
+rq_other <- function(x) if (RQ_AXIS == "amp") x$q10 else x$A_T
+# The anchors worth marking on each axis, DERIVED: the mode, and on the amp
+# axis the two measured bracket ends and the prior centre, on the q10 axis the
+# literature value sec.2's success criterion is stated in.
+RQ_MARKS <- if (RQ_AXIS == "amp") {
+  c("MODE" = RQ_MODE_X, "obs LO (all NH land)" = RQ_OBS_LO,
+    "PRIOR CENTRE" = RQ_PRIOR_C, "obs HI (>45N)" = RQ_OBS_HI)
+} else {
+  c("MODE" = RQ_MODE_X, "LITERATURE / prior centre" = RQ_Q10_C,
+    "product at the all-land 11.445 K" = exp(RQ_MODE_A * log(RQ_MODE_Q) / RQ_OBS_LO))
+}
+
 for (tn in names(RQ_TIERS)) {
   rr <- res[vapply(res, function(x) x$tier, character(1)) == tn]
   if (!length(rr)) next
@@ -312,33 +359,38 @@ for (tn in names(RQ_TIERS)) {
   bl <- max(vapply(rr, function(x) x$loglik, numeric(1)))
   bs <- max(vapply(rr, function(x) x$seas,   numeric(1)))
   br <- max(vapply(rr, function(x) x$rest,   numeric(1)))
-  sep(sprintf("TIER %s -- free: %s", toupper(tn), paste(RQ_TIERS[[tn]], collapse = " ")))
+  sep(sprintf("TIER %s -- profiling %s, free: %s", toupper(tn), RQ_PROFILED,
+              paste(RQ_TIERS[[tn]], collapse = " ")))
   cat(sprintf("%9s %9s %9s %11s %9s %9s %9s %11s %7s %7s\n",
-              "A_T (K)", "q10", "product", "loglik", "d(loglik)",
+              RQ_XLAB, RQ_YLAB, "product", "loglik", "d(loglik)",
               "d(seas4)", "d(rest)", "logpost", "z(A_T)", "z(q10)"))
   for (x in rr) {
-    tag <- if (isTRUE(all.equal(x$amp, RQ_MODE_A)))  "  <- MODE"
-           else if (isTRUE(all.equal(x$amp, RQ_OBS_LO)))  "  <- obs LO (all NH land)"
-           else if (isTRUE(all.equal(x$amp, RQ_PRIOR_C))) "  <- PRIOR CENTRE"
-           else if (isTRUE(all.equal(x$amp, RQ_OBS_HI)))  "  <- obs HI (>45N)"
-           else ""
+    m <- names(RQ_MARKS)[vapply(RQ_MARKS, function(v) isTRUE(all.equal(x$amp, v)), logical(1))]
     cat(sprintf("%9.4f %9.4f %9.4f %11.2f %9.2f %9.2f %9.2f %11.2f %+7.2f %+7.2f%s\n",
-                x$amp, x$q10, x$product, x$loglik, x$loglik - bl,
+                x$amp, rq_other(x), x$product, x$loglik, x$loglik - bl,
                 x$seas - bs, x$rest - br, x$logpost,
-                log(x$amp / RQ_PRIOR_C) / RQ_PRIOR_S,
-                log(x$q10 / RQ_Q10_C) / RQ_Q10_S, tag))
+                ccx_prior_z("seas_T_amp_NH", x$A_T), ccx_prior_z("q10", x$q10),
+                if (length(m)) paste0("  <- ", m[1]) else ""))
   }
-  ll  <- vapply(rr, function(x) x$loglik,  numeric(1))
-  pr  <- vapply(rr, function(x) x$product, numeric(1))
-  se  <- vapply(rr, function(x) x$seas,    numeric(1))
-  re  <- vapply(rr, function(x) x$rest,    numeric(1))
-  aa  <- vapply(rr, function(x) x$amp,     numeric(1))
+  ll <- vapply(rr, function(x) x$loglik,  numeric(1))
+  pr <- vapply(rr, function(x) x$product, numeric(1))
+  se <- vapply(rr, function(x) x$seas,    numeric(1))
+  re <- vapply(rr, function(x) x$rest,    numeric(1))
+  aa <- vapply(rr, function(x) x$amp,     numeric(1))
   cat(sprintf("\nSPREAD over the grid: loglik %.1f | seasonal-4 %.1f | everything else %.1f\n",
               diff(range(ll)), diff(range(se)), diff(range(re))))
-  cat(sprintf("PRODUCT A_T*ln(q10): %.4f - %.4f (ratio %.2f); ", min(pr), max(pr), max(pr)/min(pr)))
-  cat(sprintf("perfect trade would hold it CONSTANT\n"))
-  cat(sprintf("argmax A_T = %.4f K; likelihood-best q10 there = %.4f\n",
-              aa[which.max(ll)], rr[[which.max(ll)]]$q10))
+  # AND OVER THE PART OF THE GRID THAT IS PHYSICALLY LIVE. The far end of each
+  # axis is included to bracket the optimum, not because anyone would go there,
+  # and a spread quoted over the whole range is dominated by it.
+  liv <- aa >= min(RQ_MARKS) & aa <= max(RQ_MARKS)
+  cat(sprintf("SPREAD over %.4g-%.4g only (mode to the far anchor): loglik %.1f | seasonal-4 %.1f | rest %.1f\n",
+              min(aa[liv]), max(aa[liv]), diff(range(ll[liv])),
+              diff(range(se[liv])), diff(range(re[liv]))))
+  cat(sprintf("PRODUCT A_T*ln(q10): %.4f - %.4f (ratio %.2f); ",
+              min(pr), max(pr), max(pr) / min(pr)))
+  cat("perfect trade would hold it CONSTANT\n")
+  cat(sprintf("argmax %s = %.4f; likelihood-best %s there = %.4f\n",
+              RQ_XLAB, aa[which.max(ll)], RQ_YLAB, rq_other(rr[[which.max(ll)]])))
   cat(sprintf("A_T needed at the LITERATURE q10 = %.2f, from the mode's product: %.4f K\n",
               RQ_Q10_C, RQ_MODE_A * log(RQ_MODE_Q) / log(RQ_Q10_C)))
   cat(sprintf("  => implied soil/air damping vs the all-land %.4f K: %.3f\n",
@@ -346,21 +398,23 @@ for (tn in names(RQ_TIERS)) {
   cat("\nseasonal amplitudes at each re-optimised point (obs: MLO 6.754, SPO 1.170;\n")
   cat("d13C-per-ppm signatures 0.0528 MLO / 0.0288 SPO):\n")
   for (x in rr)
-    cat(sprintf("  A_T %8.4f  MLO p2p %6.3f  SPO p2p %6.3f  sig %7.5f / %7.5f\n",
-                x$amp, x$p2p[["MLO"]], x$p2p[["SPO"]], x$sig[["MLO"]], x$sig[["SPO"]]))
+    cat(sprintf("  %-8s %8.4f  MLO p2p %6.3f  SPO p2p %6.3f  sig %7.5f / %7.5f\n",
+                RQ_XLAB, x$amp, x$p2p[["MLO"]], x$p2p[["SPO"]],
+                x$sig[["MLO"]], x$sig[["SPO"]]))
   cat("\noptimiser convergence (last restart's gain should be small):\n")
   for (x in rr)
-    cat(sprintf("  A_T %8.4f  %6d evals, %d restart(s), gains %s\n",
-                x$amp, as.integer(x$n_eval), length(x$gains),
+    cat(sprintf("  %-8s %8.4f  %6d evals, %d restart(s), gains %s\n",
+                RQ_XLAB, x$amp, as.integer(x$n_eval), length(x$gains),
                 paste(sprintf("%+.2f", x$gains), collapse = " ")))
 }
 
-# ---- which rows pay, relative to the mode's own A_T --------------------
-sep("WHICH STREAMS PAY FOR MOVING A_T (tier BLOCK, vs the row at the mode's A_T)")
+# ---- which rows pay, relative to the mode's own value ------------------
+sep(sprintf("WHICH STREAMS PAY FOR MOVING %s (tier BLOCK, vs the row at the mode)",
+            RQ_PROFILED))
 rb <- res[vapply(res, function(x) x$tier, character(1)) == "block"]
 if (length(rb)) {
   rb <- rb[order(vapply(rb, function(x) x$amp, numeric(1)))]
-  ref <- rb[[which.min(abs(vapply(rb, function(x) x$amp, numeric(1)) - RQ_MODE_A))]]
+  ref <- rb[[which.min(abs(vapply(rb, function(x) x$amp, numeric(1)) - RQ_MODE_X))]]
   nm  <- names(ref$by_stream)
   D   <- vapply(rb, function(x) x$by_stream[nm] - ref$by_stream[nm], numeric(length(nm)))
   keep <- order(-apply(abs(D), 1, max))[seq_len(min(10L, length(nm)))]
@@ -368,7 +422,8 @@ if (length(rb)) {
               paste(sprintf("%9.4g", vapply(rb, function(x) x$amp, numeric(1))), collapse = "")))
   for (k in keep)
     cat(sprintf("%-20s %s\n", nm[k], paste(sprintf("%9.1f", D[k, ]), collapse = "")))
-  cat("\n(columns are A_T in K; entries are log-units relative to the mode's column)\n")
+  cat(sprintf("\n(columns are %s; entries are log-units relative to the mode's column)\n",
+              RQ_XLAB))
 }
 
 sep("READING THIS")
