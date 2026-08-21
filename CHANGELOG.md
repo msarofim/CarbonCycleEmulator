@@ -81,6 +81,84 @@ else — because q10 also carries the ANNUAL feedback `q10^(gmst/10)`, and a pro
 flat in the seasonal rows but not in the rest would mean the repair is splitting q10's two
 duties, not re-anchoring a prior. Result pending.
 
+## 2026-08-21 (night) — §4 answered: the δ¹³C rows veto the ocean amplitude. And a label is not a perturbation
+
+### §4 — `sst_seas_amp_NH`, and it is the outcome the handoff said to stop on
+
+`diag_seas_T_amp_q10_ridge.R sst`, profiling 0.05 → the observed 2.2374, `partial` objective.
+Two tiers: FROZEN (nothing free — the incumbent's home ground) and SEAS (the rest of the
+seasonal block re-optimised).
+
+**Re-optimisation halves the veto**: mode → observed costs **223.2** log-units frozen and
+**108.5** with the block free. So 51 % of every previous "the ocean channel is rejected"
+reading was home-ground advantage (`match_incumbents_optim` again).
+
+**Outcome 3 is excluded outright.** Of the 223.2 frozen cost, **222.3 is in the four
+seasonal rows and 0.96 in everything else.** The seasonal term is NOT leaking into the annual
+budget — that would have been a bug, and it is not happening.
+
+**And the veto is δ¹³C, not CO₂** — the outcome §4 called "genuinely surprising and worth
+stopping on". At the observed amplitude, SEAS tier, relative to the mode:
+
+| stream | Δ log-units |
+|---|---|
+| `d13c_seasonal_MLO` | **−52.3** |
+| `d13c_seasonal_SPO` | **−26.7** |
+| `co2_seasonal_MLO` | −20.4 |
+| `co2_seasonal_SPO` | −10.7 |
+| everything else combined | −1.8 |
+
+**δ¹³C carries 72 % of it.**
+
+**The mechanism is visible in the amplitude column and it is CANCELLATION, not strength.**
+As `sst_seas_amp_NH` rises 0.4668 → 2.2374 the MLO CO₂ seasonal amplitude FALLS, 6.224 →
+5.302 against an observed 6.754 — the ocean channel is ANTIPHASE to the net cycle, so
+strengthening it shrinks the observable. The δ¹³C-per-ppm signature then rises 0.06804 →
+0.07906 against an observed 0.0528: the numerator shrinks more slowly than the denominator.
+So the near-neutral ocean channel does NOT dilute the signature as §4 expected — it inflates
+it, by shrinking what it is divided by. **The model is already 1.29× too depleted per ppm at
+the mode and the observed ocean amplitude makes it 1.50×.**
+
+This is the same cancellation geometry `ccx_seas_chan_budget` found between NEP and
+respiration, now in the ocean limb — and it is NOT phase, because `CCX_SST_SEAS_LAG` is
+already at its measured 1.32. **§4's own advice applies: stop here rather than push on, and
+do NOT go buy a Takahashi flux climatology, which would measure the strength of a channel
+whose problem is its sign relative to everything else.**
+
+### A LABEL IS NOT A PERTURBATION, and the panel needs the second one
+
+Marcus proposed tagging the pulse with an inert isotopic label and watching where the label
+goes, rather than taking a paired difference. `calibration/diag_tracer_vs_perturbation.R`
+runs both from the same state on a held preindustrial background.
+
+**No fourth isotope is needed, and this is the useful part.** ¹⁴C decays at the same rate in
+every box, so if M(t) is the no-decay solution then L(t) = e^(−λt)·M(t) solves the decaying
+system exactly and **the fraction in each reservoir is identical**. Checked, not assumed:
+max |fraction with decay − fraction with decay undone| = **1.1e-16**. The model's existing
+¹⁴C, transported without fractionation, already IS the inert tracer.
+
+**And the two experiments give very different answers:**
+
+| yr | label: atm / land / ocean | perturbation: atm / land / ocean |
+|---|---|---|
+| 20 | 0.165 / 0.238 / 0.597 | 0.313 / 0.472 / 0.215 |
+| 100 | **0.055** / 0.131 / 0.814 | **0.154** / 0.597 / 0.249 |
+| 1000 | **0.021** / 0.058 / 0.921 | **0.147** / 0.424 / 0.429 |
+
+At 100 yr the atmosphere holds 5.5 % of the label and 15.4 % of the perturbation — a factor
+of **2.8**. The label converges on the reservoirs' own proportions (atmosphere 744, land
+1667, ocean 36,591 GtC → 1.9 / 4.3 / 93.8 %, against a measured 2.1 / 5.8 / 92.1 % at
+1000 yr) because atoms mix. The perturbation does not, because how much EXTRA the ocean will
+hold is set by carbonate buffering, not by size.
+
+**So DESIGN §7b's bar chart must stay the PERTURBATION partition.** Its headline is that a
+CO₂ pulse is still perturbing the atmosphere in the year 3000; the label partition on the
+same axes with the same caption shows the atmosphere nearly empty within a century, which is
+the true premise of the residence-time argument §7a exists to answer. **Both belong in the
+app — Cawley (2011) vs Essenhigh (2009) is exactly this — and they must not share a
+caption.** (Also: ¹⁵C is radioactive, t½ ≈ 2.4 s. For a public panel, "tagged carbon" beats
+an isotope number a curious student will look up.)
+
 ## 2026-08-21 (evening) — Pulse-partition prototype for the app panel, and two traps it walked into
 
 Marcus asked for an app panel: perturbation curve on top, reservoir-partition bar chart

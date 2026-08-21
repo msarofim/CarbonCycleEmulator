@@ -1,0 +1,159 @@
+
+GATE 1: the arm-N mode reproduces
+---------------------------------
+h_ml band [85, 120]; logpost at par_mode -1877.9475 vs file -1877.9475 (diff -1.67e-10)
+
+GATE 2: loglik = logpost - logprior, checked independently
+----------------------------------------------------------
+subtracted -1809.2736   independent -1809.2736   diff 0.00e+00
+
+THE CONFLICT, from the constants
+--------------------------------
+seas_T_amp_NH prior: lognormal, centre 14.3215 K, logsd 0.2242  (bracket 11.4450-17.9210)
+q10 prior:           lognormal, centre 2.0000,   logsd 0.2500
+mode: A_T = 25.9371 K (z +2.649), q10 = 1.0907 (z -2.425)
+products A_T*ln(q10): prior centre 9.9269 | prior LO 7.9331 | MODE 2.2513
+=> the joint prior asks for 4.41x the modulation the mode accepts (3.52x off the LO bracket)
+
+NOTE the reported prior_z in the arm file disagrees with the analytic z
+above (it puts A_T at +3.29 and q10 at -2.01). run_modefind_pump_arms.R's
+prior_z() integrates the prior on a LINEAR grid from x/1e3 to x*1e3, which
+for a tight lognormal on a large x resolves the prior with ~1 grid point.
+The analytic values are the correct ones. Reported, not silently used.
+
+GATE 3: the objective is `partial`
+----------------------------------
+priors DROPPED: sst_seas_amp_NH
+priors KEPT:    beta_max, fert_k, q10, k_w, h_ml, kz, pump_grad, tau_ex, npp_frac_NH, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p, sst_seas_amp_SH, gamma_enso, bomb_total, luc_scale, sigma_d14c, rep_dC, grad_off_co2, grad_off_d13c
+at the mode: -1858.7652   expected -1858.7652   diff 0.00e+00
+
+PROFILE: sst_seas_amp_NH over 10 values, 2 tiers, 4 workers
+-----------------------------------------------------------
+grid: 0.05 0.15 0.3 0.4668 0.65 0.9 1.2 1.55 1.9 2.237
+tier frozen free: 
+tier seas  free: q10 seas_T_amp_NH seas_T_amp_SH seas_lag_p sst_seas_amp_SH npp_frac_NH
+objective = partial; logpost carried, never optimised
+
+7.6 minutes
+
+TIER FROZEN -- profiling sst_seas_amp_NH, free: 
+------------------------------------------------
+sst_NH (K) sst_SH (K)   product     partial d(partial)  d(seas4)   d(rest)     logpost  z(A_T)  z(q10)
+   0.0500    0.5962    2.2513    -1843.42      0.00      0.00     -0.01    -1958.54   +2.65   -2.43
+   0.1500    0.5962    2.2513    -1845.82     -2.40     -2.40     -0.00    -1903.78   +2.65   -2.43
+   0.3000    0.5962    2.2513    -1850.93     -7.51     -7.52      0.00    -1882.77   +2.65   -2.43
+   0.4668    0.5962    2.2513    -1858.77    -15.34    -15.35     -0.01    -1877.95   +2.65   -2.43  <- MODE
+   0.6500    0.5962    2.2513    -1869.97    -26.55    -26.53     -0.03    -1881.73   +2.65   -2.43
+   0.9000    0.5962    2.2513    -1889.67    -46.25    -46.17     -0.08    -1895.84   +2.65   -2.43
+   1.2000    0.5962    2.2513    -1920.03    -76.61    -76.43     -0.18    -1922.67   +2.65   -2.43
+   1.5500    0.5962    2.2513    -1964.76   -121.34   -120.98     -0.36    -1965.37   +2.65   -2.43
+   1.9000    0.5962    2.2513    -2019.56   -176.14   -175.53     -0.62    -2019.31   +2.65   -2.43
+   2.2374    0.5962    2.2513    -2081.99   -238.56   -237.62     -0.96    -2081.52   +2.65   -2.43  <- OBSERVED (ERSSTv5, = prior centre)
+
+SPREAD over the grid: loglik 238.6 | seasonal-4 237.6 | everything else 1.0
+SPREAD over 0.4668-2.237 only (mode to the far anchor): loglik 223.2 | seasonal-4 222.3 | rest 1.0
+argmax sst_NH (K) = 0.0500; best sst_SH (K) there = 0.5962
+
+seasonal amplitudes at each re-optimised point (obs: MLO 6.754, SPO 1.170;
+d13C-per-ppm signatures 0.0528 MLO / 0.0288 SPO):
+  sst_NH (K)   0.0500  MLO p2p  6.442  SPO p2p  1.292  sig 0.06589 / 0.09051
+  sst_NH (K)   0.1500  MLO p2p  6.390  SPO p2p  1.288  sig 0.06640 / 0.09085
+  sst_NH (K)   0.3000  MLO p2p  6.311  SPO p2p  1.280  sig 0.06716 / 0.09135
+  sst_NH (K)   0.4668  MLO p2p  6.224  SPO p2p  1.272  sig 0.06804 / 0.09192
+  sst_NH (K)   0.6500  MLO p2p  6.128  SPO p2p  1.264  sig 0.06903 / 0.09253
+  sst_NH (K)   0.9000  MLO p2p  5.997  SPO p2p  1.252  sig 0.07043 / 0.09338
+  sst_NH (K)   1.2000  MLO p2p  5.841  SPO p2p  1.238  sig 0.07220 / 0.09438
+  sst_NH (K)   1.5500  MLO p2p  5.659  SPO p2p  1.223  sig 0.07437 / 0.09555
+  sst_NH (K)   1.9000  MLO p2p  5.477  SPO p2p  1.208  sig 0.07668 / 0.09671
+  sst_NH (K)   2.2374  MLO p2p  5.302  SPO p2p  1.194  sig 0.07906 / 0.09781
+
+optimiser convergence (last restart's gain should be small):
+  sst_NH (K)   0.0500       0 evals, 0 restart(s), gains 
+  sst_NH (K)   0.1500       0 evals, 0 restart(s), gains 
+  sst_NH (K)   0.3000       0 evals, 0 restart(s), gains 
+  sst_NH (K)   0.4668       0 evals, 0 restart(s), gains 
+  sst_NH (K)   0.6500       0 evals, 0 restart(s), gains 
+  sst_NH (K)   0.9000       0 evals, 0 restart(s), gains 
+  sst_NH (K)   1.2000       0 evals, 0 restart(s), gains 
+  sst_NH (K)   1.5500       0 evals, 0 restart(s), gains 
+  sst_NH (K)   1.9000       0 evals, 0 restart(s), gains 
+  sst_NH (K)   2.2374       0 evals, 0 restart(s), gains 
+
+TIER SEAS -- profiling sst_seas_amp_NH, free: q10 seas_T_amp_NH seas_T_amp_SH seas_lag_p sst_seas_amp_SH npp_frac_NH
+--------------------------------------------------------------------------------------------------------------------
+sst_NH (K) sst_SH (K)   product     partial d(partial)  d(seas4)   d(rest)     logpost  z(A_T)  z(q10)
+   0.0500    0.5838    2.4627    -1837.07      0.00      0.00     -0.00    -1952.19   +2.85   -2.41
+   0.1500    0.5868    2.4119    -1842.15     -5.08     -5.26      0.00    -1900.11   +2.81   -2.41
+   0.3000    0.5913    2.3358    -1849.92    -12.85    -13.29     -0.00    -1881.75   +2.73   -2.42
+   0.4668    0.5962    2.2513    -1858.77    -21.70    -22.43     -0.02    -1877.95   +2.65   -2.43  <- MODE
+   0.6500    0.6014    2.1587    -1868.75    -31.68    -32.72     -0.05    -1880.50   +2.55   -2.43
+   0.9000    0.6083    2.0324    -1882.81    -45.74    -47.17     -0.13    -1888.98   +2.41   -2.44
+   1.2000    0.6161    1.8812    -1900.38    -63.31    -65.15     -0.29    -1903.02   +2.23   -2.45
+   1.5500    0.6250    1.7047    -1921.88    -84.82    -87.03     -0.59    -1922.50   +2.00   -2.47
+   1.9000    0.6331    1.5298    -1944.46   -107.39   -109.83     -1.05    -1944.21   +1.77   -2.49
+   2.2374    0.6429    1.3489    -1967.22   -130.15   -132.55     -1.81    -1966.75   +1.53   -2.51  <- OBSERVED (ERSSTv5, = prior centre)
+
+SPREAD over the grid: loglik 130.1 | seasonal-4 132.5 | everything else 1.8
+SPREAD over 0.4668-2.237 only (mode to the far anchor): loglik 108.5 | seasonal-4 110.1 | rest 1.8
+argmax sst_NH (K) = 0.0500; best sst_SH (K) there = 0.5838
+
+seasonal amplitudes at each re-optimised point (obs: MLO 6.754, SPO 1.170;
+d13C-per-ppm signatures 0.0528 MLO / 0.0288 SPO):
+  sst_NH (K)   0.0500  MLO p2p  6.264  SPO p2p  1.264  sig 0.06659 / 0.09149
+  sst_NH (K)   0.1500  MLO p2p  6.255  SPO p2p  1.266  sig 0.06693 / 0.09159
+  sst_NH (K)   0.3000  MLO p2p  6.240  SPO p2p  1.269  sig 0.06746 / 0.09174
+  sst_NH (K)   0.4668  MLO p2p  6.224  SPO p2p  1.272  sig 0.06804 / 0.09192
+  sst_NH (K)   0.6500  MLO p2p  6.206  SPO p2p  1.276  sig 0.06869 / 0.09210
+  sst_NH (K)   0.9000  MLO p2p  6.182  SPO p2p  1.281  sig 0.06958 / 0.09236
+  sst_NH (K)   1.2000  MLO p2p  6.153  SPO p2p  1.286  sig 0.07066 / 0.09266
+  sst_NH (K)   1.5500  MLO p2p  6.119  SPO p2p  1.293  sig 0.07193 / 0.09300
+  sst_NH (K)   1.9000  MLO p2p  6.084  SPO p2p  1.299  sig 0.07322 / 0.09333
+  sst_NH (K)   2.2374  MLO p2p  6.057  SPO p2p  1.307  sig 0.07443 / 0.09365
+
+optimiser convergence (last restart's gain should be small):
+  sst_NH (K)   0.0500     980 evals, 2 restart(s), gains +6.35 +0.00
+  sst_NH (K)   0.1500     660 evals, 2 restart(s), gains +3.67 +0.00
+  sst_NH (K)   0.3000     732 evals, 2 restart(s), gains +1.02 +0.00
+  sst_NH (K)   0.4668     159 evals, 1 restart(s), gains +0.00
+  sst_NH (K)   0.6500     908 evals, 2 restart(s), gains +1.23 +0.00
+  sst_NH (K)   0.9000    1424 evals, 2 restart(s), gains +6.86 +0.00
+  sst_NH (K)   1.2000     732 evals, 2 restart(s), gains +19.65 +0.00
+  sst_NH (K)   1.5500     790 evals, 2 restart(s), gains +42.87 +0.00
+  sst_NH (K)   1.9000    1026 evals, 2 restart(s), gains +75.10 +0.00
+  sst_NH (K)   2.2374     894 evals, 2 restart(s), gains +114.77 +0.00
+
+WHICH STREAMS PAY FOR MOVING sst_seas_amp_NH (tier SEAS, vs the row at the mode)
+--------------------------------------------------------------------------------
+stream                    0.05     0.15      0.3   0.4668     0.65      0.9      1.2     1.55      1.9    2.237
+d13c_seasonal_MLO         10.4      8.0      4.3      0.0     -4.8    -11.7    -20.3    -30.8    -42.1    -52.3
+d13c_seasonal_SPO          5.7      4.4      2.3      0.0     -2.6     -6.1    -10.4    -15.6    -20.8    -26.7
+co2_seasonal_MLO           4.1      3.1      1.7      0.0     -1.9     -4.6     -7.9    -12.1    -16.5    -20.4
+co2_seasonal_SPO           2.2      1.7      0.9      0.0     -1.0     -2.3     -4.0     -6.0     -8.0    -10.7
+d13c_level_MLO            -0.5     -0.4     -0.2      0.0      0.2      0.5      0.9      1.3      1.8      2.2
+d13c_level_SPO             0.4      0.3      0.2      0.0     -0.2     -0.4     -0.7     -1.0     -1.3     -1.7
+co2_level_SPO              0.1      0.1      0.0      0.0     -0.1     -0.2     -0.3     -0.6     -1.0     -1.5
+co2_level_MLO             -0.0     -0.0     -0.0      0.0     -0.0     -0.0     -0.1     -0.2     -0.4     -0.7
+co2_icecore               -0.1     -0.0     -0.0      0.0      0.0      0.1      0.1      0.2      0.3      0.3
+gcb_ocean_sink             0.0      0.0      0.0      0.0     -0.0     -0.1     -0.1     -0.1     -0.2     -0.2
+
+(columns are sst_NH (K); entries are log-units relative to the mode's column)
+
+READING THIS
+------------
+handoff 2026-08-21 sec.4 pre-registered three outcomes, and the per-stream
+table above is what picks between them:
+
+  the CO2 seasonal rows veto it   -> the air-sea flux response is too STRONG;
+      suspect the solubility-only formulation (no seasonal MLD, no biology)
+      applied to a single hemispheric box
+  the d13C seasonal rows veto it  -> the PARTITION is wrong, not the amplitude.
+      The ocean channel is isotopically near-neutral (0.0045), so adding it
+      should HELP the signature -- a d13C veto is genuinely surprising and is
+      a place to STOP and think rather than push on
+  the annual/level rows veto it   -> the seasonal term is LEAKING into the
+      annual budget, which is a BUG: it is zero-annual-mean by construction
+
+Only if this is inconclusive is a new observational product worth it (a
+Takahashi seasonal air-sea flux climatology). Do NOT start there.
+
+wrote calibration/output/seas_T_amp_q10_ridge_sst.rds
