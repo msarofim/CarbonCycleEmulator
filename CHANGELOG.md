@@ -7177,3 +7177,44 @@ Also flagged: `seas_T_amp_SH` −3.70, `sst_seas_amp_SH` −3.95, `bomb_total` +
 and re-polish, iterating until the polish gain is small — the 16.08 says there is more there, and
 starting from the mode should cost hours rather than 15 h. **Do not quote this mode's evidence or
 uncertainties until it converges.**
+
+## 2026-08-21b — The continuation: the mode was ALREADY converged. My reasoning for running it was wrong
+
+15.6 min, 5,235 evaluations, warm-started from the 08-20r mode.
+
+```
+[N] cycle 1 restart 1: log-post = -1877.9  (gain 0.0000)  evals 2927
+[N] cycle 1 restart 2: log-post = -1877.9  (gain 0.0000)  evals 5109
+[N] cycle 1 polish:    log-post = -1877.9  (gain 0.0000)
+[N] CONVERGED: cycle gain below ARM_CYCLE_TOL (0.5)
+```
+
+**The mode did not move: max relative parameter change 2.3e-4, log-post identical at −1877.9475.**
+Nelder-Mead converged inside 2,927 and 2,182 evaluations against a 20,000 cap — it is a genuine
+local optimum for both methods, not a point BFGS happened to stop at. **`hit_cap` is now FALSE.**
+
+### ⚠ CORRECTION to 20-08-21's recommendation
+
+I read the 16.08 BFGS polish gain as *"there is more there"* and recommended a continuation on that
+basis. **That inference was wrong.** The large polish gain meant BFGS had *finished the job Nelder-
+Mead could not* — the simplex had collapsed in narrow directions and the gradient walked straight
+to the optimum — not that further climbing remained. The correct reading of a large polish gain
+after stalled NM restarts is "NM stalled", not "the mode is elsewhere".
+
+**The run was still worth its 15.6 minutes**, but for a different reason than the one given: it
+converts "NOT converged" from the driver's own flag into **converged, verified by an independent
+restart from the mode**. That is a real upgrade in what can be said about the file — it just is not
+the upgrade that was predicted.
+
+### What is still not quotable, and why — now ONE reason, not two
+
+**`hessian` remains UNSTABLE at `h_ml`** (curvature changes across eps × 1/3, 1, 3). So
+`logdet_negH`, `sd_unc`, `cov` and any Laplace evidence from this file are still NOT usable. Note
+what it is NOT: the mode sits at **87.56 m**, **10.85 m from the nearest kink**, so this is not the
+piecewise-C1 problem `ccx_hml_kink` documents. It is a parameter **2.56 m above its bound** in a
+direction whose curvature the central difference cannot resolve at any of the three steps tried.
+Laplace covariance is PD with condition number 4.42e5.
+
+**So the mode is converged and its uncertainties are not.** `par_mode` is usable; the second-order
+block is not. Fixing it needs a step-size study for `h_ml` specifically (or a Hessian on the other
+20 with `h_ml` profiled), and it is NOT done.

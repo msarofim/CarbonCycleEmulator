@@ -9,7 +9,8 @@ wrong in its remedy — see §3.
 
 ## 0. STATE IN TEN LINES
 
-1. **THE REFIT IS RUNNING** — one arm (N), ~18 h, launched 2026-08-20 evening. §7.
+1. **THE REFIT IS DONE AND CONVERGED.** −1877.9; the four seasonal rows went −576.6 → **+207.3**.
+   `seas_T_amp_NH` flags at +3.29 σ but that is the **q10 degeneracy**, not a failure. §7.
 2. **SHIPPED: `seas_npp_amp_{NH,SH}` 1 → 0.4969 / 0.5027**, measured. `CCX_SEAS_PHI_EFF` UNCHANGED
    at (75, −30). **+548.7 log-units for two constants and no latitude change.** §3.
 3. **The shipped latitudes were never the error — the amplitude was.** 75 is the best *shape* match
@@ -247,7 +248,7 @@ strength. Similar amplitude, different distribution — and the aggregate prefer
 
 ---
 
-## 7. THE REFIT — RUNNING
+## 7. THE REFIT — DONE (2026-08-21), CONVERGED, UNCERTAINTIES NOT QUOTABLE
 
 Launched 2026-08-20 evening, `calibration/run_modefind_pump_arms.R`, **ONE ARM (N)**, ~18 h.
 Log: `calibration/output/pump_arms/refit_20260820.log`. Output overwrites
@@ -270,7 +271,34 @@ Log: `calibration/output/pump_arms/refit_20260820.log`. Output overwrites
 **SMOKE-TESTED END TO END** at `ARM_MAXIT = 60`, `ARM_RESTARTS = 2`, output to a tempdir: exit 0,
 mode written, comparison skipped cleanly. That run's numbers are meaningless — it tests plumbing.
 
-**WHAT TO CHECK WHEN IT LANDS**, in this order:
+### RESULT (commits `be86760`, `8c785c9`, and the continuation)
+
+919 min + a 15.6 min continuation. **Mode −1877.9475, `hit_cap` FALSE, verified converged** by an
+independent warm-started restart that moved it by 2.3e-4 relative.
+
+| stream | 08-18 | **now** |
+|---|---|---|
+| `co2_seasonal_MLO` | −232.2 | **−39.1** |
+| `co2_seasonal_SPO` | −95.6 | **+35.1** |
+| `d13c_seasonal_MLO` | −141.6 | **+116.6** |
+| `d13c_seasonal_SPO` | −107.2 | **+94.7** |
+| **seasonal total** | **−576.6** | **+207.3** |
+
+**`seas_T_amp_NH` = 25.94 at +3.29 σ is the q10 DEGENERACY.** The identified quantity is
+`seas_T_amp` × ln(`q10`): **11.16** at the 08-18 mode, **2.205** in the 7-parameter profile,
+**2.251** here. The refit and the profile agree to 2 % — **the amplitude fix worked**; `q10` then
+slid to 1.0907 and dragged A up the ridge. **The prior is on the wrong coordinate.** NEXT.
+
+**`sst_seas_amp_NH` = 0.467 (−5.97 σ)** — moved 5× and still 4.8× below the observed 2.237.
+**`npp_frac_NH` = 0.559 (−0.99 σ)** — the re-anchored prior works, no fight. **`kz` = 6461 (97.4 %
+up its bracket)** — still pinned, §5.2h unresolved.
+
+**⚠ THE UNCERTAINTIES ARE NOT QUOTABLE.** `hessian` is UNSTABLE at `h_ml`, so `logdet_negH`,
+`sd_unc`, `cov` and any Laplace evidence are out. It is NOT the kink problem — the mode is 10.85 m
+from the nearest kink — it is a parameter 2.56 m above its bound. **`par_mode` is usable; the
+second-order block is not.** Fixing it needs a step-size study for `h_ml`, NOT done.
+
+**Superseded plan, kept because the reasoning was wrong and the correction is the lesson:**
 1. **The CO₂-level streams** (`co2_level_MLO/SPO`) — the 08-18 refit recovered them and that was
    the evidence the `h_ml` bound was cheap. If they blow out, the bound is doing damage.
 2. **`seas_T_amp_NH`** — it should land near 11.45. The profile says 11.08 with only seven
@@ -328,8 +356,10 @@ Everything in 20d §8 still applies. New:
 cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control ccx-dev
 ```
 
-> Read `notes/handoff_2026-08-20e_phi_eff_measured.md`. **§7 is the live thing — the refit is
-> running (one arm, ~18 h) and §7's numbered list is what to check when it lands.** The φ_eff and
+> Read `notes/handoff_2026-08-20e_phi_eff_measured.md`. **§7 is done: the refit CONVERGED at
+> −1877.9 and the seasonal rows went −576.6 → +207.3. Two things fall out of it: the
+> `seas_T_amp`×ln(`q10`) degeneracy means the prior is on the wrong coordinate, and the Hessian is
+> unstable at `h_ml` so no uncertainty from that file is quotable.** The φ_eff and
 > `npp_frac_NH` questions are both CLOSED and SHIPPED; do not reopen them without reading §3 and §5,
 > and note the CORRECTION in §5. **§6's `sst_seas_amp_NH` at −12.9 σ is the next real defect and
 > this arc did not touch it.** Two tests fail by design (§6) and are Marcus'. Do not quote
