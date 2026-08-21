@@ -7109,3 +7109,71 @@ SH NPP lies poleward of 40 S. **`sst_seas_amp_NH` is 0.410 against an observed 2
 `mode_fit_pump{N,D}.rds` now run it under different NEP amplitudes — `par_mode` does not carry
 `seas_npp_amp`, so it picks up the new default — and will NOT reproduce pre-08-20r numbers. Same
 class as the 08-20g lag change. **The refit that 20d §4 owes is now doubly owed.**
+
+## 2026-08-21 — THE REFIT LANDED. The seasonal rows transformed; the mode is NOT converged
+
+One arm (N), 919 min, 378,880 evaluations, 0.146 s/eval. Mode at
+`calibration/output/pump_arms/mode_fit_pumpN.rds`; the 08-18 mode is preserved under
+`pre_refit_20260820r/`. **`hml_bound` = [85, 120] is now recorded in the file.**
+
+### The seasonal streams transformed — this is what the arc bought
+
+| stream | 08-18 | **08-20r** |
+|---|---|---|
+| `co2_seasonal_MLO` | −232.2 | **−39.1** |
+| `co2_seasonal_SPO` | −95.6 | **+35.1** |
+| `d13c_seasonal_MLO` | −141.6 | **+116.6** |
+| `d13c_seasonal_SPO` | −107.2 | **+94.7** |
+| **seasonal total** | **−576.6** | **+207.3** |
+
+**~784 log-units on the four seasonal rows.** (The priors changed between these runs, so the
+*posterior* is not comparable; these are per-stream LIKELIHOOD contributions and two fitted error
+parameters touch them, so read the size, not the third digit.) The CO₂-**level** rows also improved
+(`co2_level_MLO` −79.6 → −74.1, `SPO` −68.5 → −64.2), so the `h_ml` bound remains cheap — the
+check that mattered most from the 08-18 run passes again.
+
+### `seas_T_amp_NH` = 25.94 against a measured 11.45 — and that is the q10 DEGENERACY, not a failure
+
+At small amplitude the identified quantity is **`seas_T_amp` × ln(`q10`)**, not either alone:
+
+| | `seas_T_amp_NH` | `q10` | **A·ln(q10)** |
+|---|---|---|---|
+| 08-18 mode | 48.07 | 1.2613 | **11.16** |
+| profile, 7 params free | 11.08 | 1.2201 | **2.205** |
+| **08-20r refit, 21 free** | **25.94** | **1.0907** | **2.251** |
+
+**The refit and the profile agree to 2 % on the identified product**, and both are ~5× below the
+08-18 mode. **The amplitude fix worked exactly as intended** — the respiration modulation collapsed
+from 11.16 to 2.25. What is left is that `q10` slid to **1.0907** (z = −2.01, and physically low for
+soil respiration), which drags `seas_T_amp_NH` back up the degeneracy ridge to hold the product.
+**So the +3.29 σ flag is a prior on the wrong coordinate**: the prior constrains A alone while the
+data identify A·ln(q10). That is the next structural thing to fix, and it was invisible until the
+amplitude excess was removed.
+
+### ⚠ THE MODE IS NOT CONVERGED, and the driver says so
+
+`*** [N] HIT THE RESTART CAP WHILE STILL GAINING`. Worse: after Nelder-Mead stalled at gains of
+0.07–0.27 per restart, **the BFGS polish gained 16.08** — two orders of magnitude more than any
+recent restart. A polish that large means the simplex had collapsed in a direction the gradient
+could still exploit; the reported mode is a good parameter vector but not a located optimum.
+**`hessian` is UNSTABLE at `h_ml`** (mode 87.56 m, 2.6 m above the bound), so `logdet_negH` and any
+Laplace evidence from this file are NOT usable — the same caveat the driver has always carried,
+now actually triggered.
+
+### The other three standing checks
+
+- **`sst_seas_amp_NH` = 0.467, z = −5.97.** It moved 5× (from 0.089) and is still **4.8× below** the
+  observed 2.237. **Confirmed independent of everything this arc did.** Still the largest misfit.
+- **`npp_frac_NH` = 0.559, z = −0.99.** The re-anchored prior is doing its job with no fight — the
+  data sit inside 1 σ of the MOD17-derived anchor. §20k is vindicated.
+- **`kz` = 6461.4, 97.4 % up the re-bisected bracket.** Still pinned. The standing question from
+  DESIGN §5.2h is UNRESOLVED and this run does not settle it.
+
+Also flagged: `seas_T_amp_SH` −3.70, `sst_seas_amp_SH` −3.95, `bomb_total` +3.08, `rep_dC` +5.75
+(the known CO₂-level bias sink). Two `ccx_c12_steady_conveyor` non-convergence warnings, worst
+|resid| 2.2e-02.
+
+**RECOMMENDED NEXT: a continuation, not a fresh run.** Restart Nelder-Mead from the polished mode
+and re-polish, iterating until the polish gain is small — the 16.08 says there is more there, and
+starting from the mode should cost hours rather than 15 h. **Do not quote this mode's evidence or
+uncertainties until it converges.**

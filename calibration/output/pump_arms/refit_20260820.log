@@ -1,0 +1,93 @@
+REFIT, 1 ARM(S) [N]. 21 parameters: beta_max, fert_k, q10, k_w, h_ml, kz, pump_grad, tau_ex, npp_frac_NH, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p, sst_seas_amp_NH, sst_seas_amp_SH, gamma_enso, bomb_total, luc_scale, sigma_d14c, rep_dC, grad_off_co2, grad_off_d13c
+kz bracket [3942.5, 6528] (re-bisected for the pump 2026-08-16e)
+pump default 233.109378 umol/kg = PUMP_GRAD_OBS
+
+
+=== h_ml BOUNDED FOR THIS REFIT (Marcus 2026-08-16g) ===
+h_ml: [30, 200] init 75   ->   [85, 120] init 100
+prior renormalised over the new support: log-prior shifts by +1.5805
+GATE H1: only `h_ml` changed. GATE H2: init 100 round-trips (u = -0.2877);
+         the shipped init 75 is correctly REJECTED by the new bound. OK
+GATE H3: all three rows LIVE at init (DIC +188.17, d13C -0.6025, ALK +82.68). OK
+
+
+=== h_ml KINK MAP (see calibration/diag_hess_eps_21par.R) ===
+3 kink(s) in [85, 120]: h_ml = 98.41, 100.00, 101.29 m
+ARM_HML_INIT = 100 is EXACTLY ON A KINK. Harmless: Nelder-Mead is derivative-free.
+GATE SKIPPED: one arm (N) -- there is no second arm to differ from.
+
+
+=== ARM pump_mode = N ===
+start: log-post at hand-set init = -18466.7
+[N] restart  1: log-post =      -2029.2  (gain 16437.4785)  evals 20002
+[N] restart  2: log-post =      -1927.4  (gain   101.8308)  evals 40004
+[N] restart  3: log-post =      -1924.8  (gain     2.6173)  evals 60005
+[N] restart  4: log-post =      -1907.9  (gain    16.8445)  evals 80007
+[N] restart  5: log-post =      -1903.3  (gain     4.6917)  evals 98120
+[N] restart  6: log-post =      -1899.7  (gain     3.5647)  evals 117284
+[N] restart  7: log-post =      -1899.0  (gain     0.6515)  evals 137286
+[N] restart  8: log-post =      -1898.2  (gain     0.8355)  evals 156802
+[N] restart  9: log-post =      -1897.6  (gain     0.6248)  evals 176804
+[N] restart 10: log-post =      -1896.6  (gain     0.9410)  evals 196806
+[N] restart 11: log-post =      -1896.2  (gain     0.4742)  evals 216808
+[N] restart 12: log-post =      -1895.1  (gain     1.1068)  evals 236810
+[N] restart 13: log-post =      -1895.0  (gain     0.0749)  evals 252193
+[N] restart 14: log-post =      -1894.8  (gain     0.1879)  evals 266750
+[N] restart 15: log-post =      -1894.7  (gain     0.0678)  evals 286752
+[N] restart 16: log-post =      -1894.6  (gain     0.0886)  evals 302158
+[N] restart 17: log-post =      -1894.6  (gain     0.0696)  evals 321059
+[N] restart 18: log-post =      -1894.3  (gain     0.2650)  evals 341061
+[N] restart 19: log-post =      -1894.2  (gain     0.1002)  evals 356555
+[N] restart 20: log-post =      -1894.0  (gain     0.1725)  evals 374332
+*** [N] HIT THE RESTART CAP WHILE STILL GAINING -- this mode is NOT converged
+[N] BFGS polish: log-post = -1877.9 (gain 16.0827)
+
+[N] prior-tail position (normal sds; |z| > 3 flagged):
+       beta_max          fert_k             q10             k_w            h_ml 
+          -0.49           -0.69           -2.01            1.06           -1.45 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+           1.95            1.51           -0.46           -0.99            3.29 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+          -3.70           -0.55           -5.97           -3.95           -0.34 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+           3.08            0.01            0.50            5.75           -0.26 
+  grad_off_d13c 
+           0.11 
+*** FLAGGED:  seas_T_amp_NH, seas_T_amp_SH, sst_seas_amp_NH, sst_seas_amp_SH, bomb_total, rep_dC 
+[N] hessian: central differences, 21 parameters
+[N] h_ml mode 87.5621 m; nearest kink 10.85 m away; the Hessian step reaches 7.12e-04 m
+[N] curvature step-stability at the mode (eps x 1/3, 1, 3): UNSTABLE at h_ml
+[N] Laplace covariance: PD, condition number 4.51e+05
+[N] mode log-post = -1877.9  (gain over init 16588.8)
+[N] elapsed 919.2 min, 378880 evaluations (0.146 s/eval)
+
+[N] mode, natural scale:
+       beta_max          fert_k             q10             k_w            h_ml 
+         0.9310        503.5262          1.0907       2024.4508         87.5621 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+      6461.4224        298.3241          1.0319          0.5590         25.9361 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+         1.2959          1.6376          0.4668          0.5962          0.7867 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+       122.2202          0.8902          6.2805          5.1754         -0.2147 
+  grad_off_d13c 
+         0.0931 
+[N] wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pump_arms/mode_fit_pumpN.rds
+Warning messages:
+1: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 2.480e-05
+2: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 2.172e-02
+
+
+=== COMPARISON SKIPPED -- ONE ARM ===
+ARM_MODES = N. See the ARM_MODES block for why D is not re-run.
+
+
+=== THE STANDING QUESTIONS THIS RUN WAS ALSO MEANT TO ANSWER ===
+[N] kz = 6461.4 (97.4 % up the re-bisected bracket [3942.5, 6528])
+[N] h_ml = 87.56 -- gradient rows LIVE only inside [85, 120]: LIVE
+[N] pump_grad = 298.32  (prior centre 233.11, 1-D optimum at the old mode 274.5)
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pump_arms/pump_arms_comparison.rds
