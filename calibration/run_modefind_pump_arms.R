@@ -119,7 +119,32 @@ ARM_HML_INIT   <- 100      # m; the pump's own h_ml (DESIGN sec.5.2f, handoff 15
 ARM_WARM       <- TRUE
 ARM_CYCLES     <- 6         # NM-then-polish cycles; 1 reproduces the old behaviour
 ARM_CYCLE_TOL  <- 0.5       # stop when a whole cycle gains less than this
-ARM_OUTDIR     <- ccx_path("calibration", "output", "pump_arms")
+# ---- SMOKE-TEST OVERRIDES (added 2026-08-22) ------------------------
+# This run costs hours, so it must be provable end-to-end for pennies first, and
+# a smoke test that writes to the REAL output directory would clobber the mode
+# the app ships. These four env vars make a cheap run possible AND make it
+# impossible for that run to overwrite anything: point CCX_ARM_OUTDIR somewhere
+# else and both the warm-start source and the output follow it, because
+# ARM_OUT() is defined from ARM_OUTDIR. Seed the smoke dir with a copy of the
+# real mode file to exercise the warm-start path exactly as the real run will.
+# Unset, every one of these is the production value -- the defaults below are
+# the literals that were here before, so a bare Rscript call is unchanged.
+.env_num <- function(nm, default) {
+  v <- Sys.getenv(nm, NA_character_)
+  if (is.na(v) || !nzchar(v)) return(default)
+  n <- suppressWarnings(as.numeric(v))
+  if (is.na(n)) stop(nm, " is not numeric: '", v, "'")
+  cat(sprintf("OVERRIDE %s = %s (default %s)\n", nm, format(n), format(default)))
+  n
+}
+ARM_RESTARTS   <- .env_num("CCX_ARM_RESTARTS", ARM_RESTARTS)
+ARM_CYCLES     <- .env_num("CCX_ARM_CYCLES",   ARM_CYCLES)
+ARM_MAXIT      <- .env_num("CCX_ARM_MAXIT",    ARM_MAXIT)
+ARM_OUTDIR     <- local({
+  d <- Sys.getenv("CCX_ARM_OUTDIR", NA_character_)
+  if (is.na(d) || !nzchar(d)) ccx_path("calibration", "output", "pump_arms")
+  else { cat(sprintf("OVERRIDE CCX_ARM_OUTDIR = %s\n", d)); d }
+})
 ARM_OUT        <- function(m) file.path(ARM_OUTDIR, sprintf("mode_fit_pump%s.rds", m))
 ARM_KINK_STEP  <- 0.01     # h_ml resolution the kink scan below runs at
 ARM_KINK_FACT  <- 20       # a kink = this many times the median slope jump
