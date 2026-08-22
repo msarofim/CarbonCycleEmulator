@@ -1157,6 +1157,28 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    0.43 (1970s), 0.47 (1980s), 0.38 (1990s), 0.42 (2000s), 0.45 (2010s), 0.50 (2020s
    partial). Roughly flat with substantial decadal variability — the model must not be
    *smoother* than this.
+
+   **STATUS AT THE SHIPPED MODE (2026-08-22, `diag_design_gates_at_mode.R`): SPLIT —
+   the LEVEL passes and the VARIABILITY fails, and the mode is WORSE than the
+   defaults on the half that fails.** AF 1959–2024 = **0.435** against GCB's 0.431
+   (defaults 0.426), the best level the model has recorded. But the decadal spread
+   is **sd 0.019 against the observations' 0.051 — 2.7× too smooth**, and the
+   defaults' 0.035 was closer. The gate's second sentence is the one being failed,
+   not the first. Per-decade the model runs 0.42 in the 1960s against an observed
+   0.35 and 0.41 in the 2020s against 0.50: it misses the record's low start and
+   its high end, which is precisely the "not smoother than this" criterion.
+
+   **This gate is IMMUNE to the contamination that afflicts gate 7**, and that is
+   why it is the right target. AF = atmospheric growth ÷ emissions, and GCB's
+   `imbalance` column is defined as the residual *after* the sinks — it enters
+   neither numerator nor denominator. So where gate 7 asks the model to match sink
+   terms that carry GCB's own +1.30/+1.62 GtC/yr mid-century closure error (handoff
+   2026-08-22 §3b), gate 4 asks it to match two independently measured quantities.
+   **A model 2.7× too smooth in decadal AF has a real, uncontaminated variability
+   deficit.** Handoff 2026-08-22 §4's pre-registration clause — that any future LUC
+   time-profile perturbation be "scored against gate 4's decadal airborne-fraction
+   variability rather than the level" — now has its number: the target is 0.051 and
+   the model supplies 0.019.
 5. **Bomb curve** (Hua et al. 2022): NH Zone 1 peak **944.6 ‰ at 1963.625**; Zone 2
    905.3 ‰ (1963.625); Zone 3 731.4 ‰ (1964.708); SH Zone 1-2 **660.1 ‰ at 1965.542**;
    SH Zone 3 667.0 ‰ (1964.958). NH Zone 1 post-peak e-folding **15.4 yr**
@@ -1170,6 +1192,67 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    `ccx_zone_weights()`, is **NH 853.2 ‰ at 1963.708, SH 659.4 ‰ at 1965.042, NH→SH lag
    1.33 yr**. Using the Zone 1 gate instead flattered the superseded bomb shape, whose
    996.9 ‰ peak in fact exceeded *every* observed zone.
+
+   **STATUS AT THE SHIPPED MODE (2026-08-22, `diag_design_gates_at_mode.R`): FAILS,
+   and the fitted `bomb_total` moved the peak-height miss across zero rather than
+   closing it.** The observed hemispheric aggregate is recomputed there from
+   `obs_d14c_zonal.rds` under `ccx_zone_weights()`, with the same peak estimator
+   applied to the model, and it reproduces this gate's own table — NH 855.3 ‰ at
+   1963.676 against the 853.2 / 1963.708 recorded above, SH 659.8 at 1965.016
+   against 659.4 / 1965.042, lag 1.34 against 1.33 — so the estimator is validated
+   on the side where a published answer exists before being used on the side where
+   none is.
+
+   | | NH peak ‰ | NH yr | SH peak ‰ | SH yr | NH→SH lag |
+   |---|---|---|---|---|---|
+   | obs (hemispheric) | 855.3 | 1963.676 | 659.8 | 1965.016 | **1.34** |
+   | defaults | 801.5 | 1964.610 | 603.2 | 1965.726 | 1.12 |
+   | **shipped mode (arm N)** | **892.3** | **1964.635** | **689.7** | **1965.549** | **0.91** |
+
+   Three separate readings, and they do not all point the same way:
+   - **Peak height**: defaults undershoot by 54 ‰; the mode, with `bomb_total`
+     fitted to 122.22 kmol against the 102 reference, **overshoots by 37 ‰**. The
+     miss changed sign and shrank by a third — a fitted delivery total absorbing a
+     shape error, not a delivery error being corrected.
+   - **Peak timing is ~1 yr LATE in every vector** (1964.6 against 1963.7), and
+     `bomb_total` cannot touch it: scaling a column does not move its peak. This is
+     structural and it is on no current work list.
+   - **The NH→SH lag — which this gate names as "the interhemispheric-exchange
+     constraint", i.e. the τ_ex observable — is 0.91 yr against 1.34 observed,
+     32 % too short, and the mode is WORSE than the defaults' 1.12.**
+
+   **AND THE TWO INTERHEMISPHERIC OBSERVABLES DISAGREE ABOUT τ_ex.** That is the
+   substantive result, and it is the opposite of what was assumed on the way to
+   measuring it: the natural reading — that the bomb lag concurs with gate 9's
+   MLO−SPO gradient, which was adopted in 2026-08-15 because it "supplies
+   information the rest of the objective did not have" about τ_ex — **does not
+   survive the profile.** `diag_design_gates_at_mode.R`'s gate-5 follow-up, at the
+   shipped mode with every other parameter frozen:
+
+   | τ_ex | bomb lag | `co2_gradient` | `d13c_gradient` | total logL |
+   |---|---|---|---|---|
+   | 0.600 | 0.49 | −331.9 | −42.3 | −2762.2 |
+   | 0.800 | 0.82 | −101.9 | +64.1 | −2028.4 |
+   | **1.032 (mode)** | **0.91** | **−6.5** | **+106.3** | **−1792.4** |
+   | 1.400 | 0.99 | −221.7 | +8.1 | −2230.8 |
+   | 2.000 | 1.08 | −1493.5 | −533.8 | −4491.7 |
+   | 3.000 | 1.86 | −5962.9 | −2285.4 | −11758.0 |
+
+   The lag rises monotonically with τ_ex and needs **≈ 2.3 yr** to reach the
+   observed 1.34. Both gradient streams sit at a **sharp interior optimum at the
+   mode's 1.032** and fall away steeply either side, rejecting τ_ex = 2.0 by ~1490
+   log-units on `co2_gradient` alone. **So gate 5's lag miss is a FORCED residual,
+   not an overlooked one: no single τ_ex satisfies both interhemispheric
+   observables, and the gradient outvotes the bomb lag by three orders of
+   magnitude.** That makes it a structural statement about the two-box exchange —
+   one exchange time serving a *seasonally-resolved surface station pair* and a
+   *hemispherically-integrated bomb tracer* — rather than a parameter nobody tried.
+
+   **Caveat on the magnitudes, not on the ordering:** this is a frozen 1-D profile,
+   so the logL costs are upper bounds — memory `ccx_seas_q10_ridge` measured
+   `beta_max`/`fert_k` absorbing 85 % of exactly this kind of frozen cost for
+   `q10`. What the profile establishes is the *location* of the gradient optimum
+   and the *direction* of the disagreement, both of which are robust to that.
 6. **Seasonal cycle** (MLO, peak-to-trough of the mean seasonal cycle by decade):
    **5.95 (1960s) → 6.17 → 6.40 → 6.42 → 6.38 → 6.86 (2010s) → 6.66 ppm (2020s partial)**.
    Amplitude growth of ~15 % across the record is a *fertilization* signature the model
@@ -1183,7 +1266,18 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    GCB's `land_sink` column is the residual sink alone; conflating the two inverted this
    term's pull on fertilisation for months (see `R/likelihood.R`, the GCB block).
    `calibration/diag_fert_saturating.R` §3. **Re-measure on any fertilisation or
-   `luc_scale` default change.** Note `luc_scale` does NOT close the remaining gap under
+   `luc_scale` default change.**
+
+   **STATUS AT THE SHIPPED MODE (2026-08-22): STILL FAILING ON LAND — land +2.04σ
+   (3.38 GtC/yr), ocean −0.62σ (2.97).** Measured twice, by independently written
+   reconstructions (`diag_app_params.R`'s FULL row and
+   `diag_design_gates_at_mode.R`), which agree to the reported precision. The fit
+   bought back most of the ocean miss (−1.50σ → −0.62σ) and almost none of the land
+   one (+2.23σ → +2.04σ). **But read this gate under handoff 2026-08-22 §3b's
+   caveat before ranking work off it:** it asks the model to match GCB's sinks *and*
+   the CO₂ record from GCB's emissions, which cannot both hold by exactly
+   `B_IM + S_CEM`, so it may be unreachable as written. Gate 4's decadal airborne
+   fraction is the imbalance-immune alternative. Note `luc_scale` does NOT close the remaining gap under
    the saturating form — it makes it slightly worse while blowing up the CO₂ bias.
 8. **δ¹³C Suess:** preindustrial **−6.469 ‰** (Law Dome spline, 1745–1755 mean) →
    **−8.700 ‰** (Scripps MLO, 2024) / **−8.580 ‰** (Scripps SPO, 2024); MLO starts
@@ -1289,6 +1383,43 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     at β ≲ 0.50 while the CO₂ record wants 0.75, which is the structural defect review §4.1
     diagnosed and item 7 fixed by replacing the functional form. **Re-measure this line
     whenever a fertilisation default moves; it is not a description, it is a measurement.**
+
+    **AND IT WAS STALE A THIRD TIME. STATUS AT THE SHIPPED MODE (2026-08-22): THIS
+    GATE FAILS, AT ALL THREE HORIZONS.** `calibration/diag_joos_irf.R` was hardcoded
+    to `ccx_default_params()` and grew a mode path today
+    (`Rscript calibration/diag_joos_irf.R [defaults|N|D]`, ~7 s); the 2026-08-22
+    expert panel ranked this #7 on its merged defect list. Integrated IRF, with the
+    margin now printed to two decimals because this gate is decided in its last
+    significant figure:
+
+    | TH | defaults | vs floor | **shipped mode (arm N)** | vs floor | Joos floor |
+    |---|---|---|---|---|---|
+    | 20 | 12.43 | +1.92 % | **11.74** | **−3.73 %** | 12.2 |
+    | 50 | 25.53 | +6.39 % | **23.97** | **−0.13 %** | 24.0 |
+    | 100 | 41.86 | +5.96 % | **39.36** | **−0.35 %** | 39.5 |
+
+    **Read the three rows differently: TH 20 is a substantive miss at −3.7 %, while
+    TH 50 and TH 100 sit ON the boundary to within a third of a percent and should
+    be quoted as "at the floor", not as failures with margin.** Arm D fails harder
+    (−5.64 / −2.65 / −3.19 %) but is not a like-for-like comparison — see the
+    provenance gate in `diag_design_gates_at_mode.R`.
+
+    **THE BACKGROUND IS NOT THE EXPLANATION, AND IT POINTS THE OTHER WAY.** The
+    mode's held 2010 background is 394.4 ppm against the defaults' 387.6 and Joos's
+    389. A *higher* background makes a pulse persist LONGER — the Revelle result
+    this gate's own secondary check rests on, measured in-model in §4 of the
+    diagnostic (PI 33.9 vs PD 42.1 yr at the mode). So the mode fails **in spite
+    of** a background biasing it upward. The imperfect hold (1.63 ppm, 0.41 %) is
+    likewise not the cause: `ccx_irf()` is a paired pulse-minus-baseline difference
+    on the same forcing, so a drifting baseline cancels to first order.
+
+    **The secondary PI-vs-PD check:** the ordering PASSES at both vectors (defaults
+    25.6 < 44.7; mode 33.9 < 42.1). But `diag_joos_irf.R`'s header note that the
+    model "is INSIDE BOTH" of Joos §4.4.1's ranges is now false at defaults, where
+    PI-held is 25.6 against 34–47; at the mode it is 33.9, just below. That comment
+    was written at β 0.38 and is the same stale-measurement failure as the status
+    line — recorded here rather than silently corrected, because it is a claim
+    about a measurement and re-measuring it is the fix.
     **The background protocol is not a detail:** held-vs-decaying is worth 2 yr of
     integrated IRF and PI-vs-PD is worth 7, both larger than any structural question
     currently open (see the expert-panel note, §2).

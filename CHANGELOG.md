@@ -2,6 +2,88 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-22b — DESIGN gates 4/5/7/12 at the vector the app actually ships
+
+Discharges panel item #7 ("DESIGN gates measured at defaults; the app ships the mode"). Since
+`8b94ba4` (2026-08-21) `app/global.R` resolves `mode_fit_pumpN.rds`, so every "Status at default
+parameters" line in DESIGN sec.6 described a vector the app does not run. `diag_joos_irf.R:97`
+was hardcoded to `ccx_default_params()` and grew a mode path
+(`Rscript calibration/diag_joos_irf.R [defaults|N|D]`, ~7 s); new
+`calibration/diag_design_gates_at_mode.R` (~9 s) covers gates 4, 5 and 7 plus a provenance gate.
+Both carry the two FORCING parameters (`bomb_total`, `luc_scale`) through a wrapper, the same
+construction and for the same reason as `app_build_forcing()` — and on gate 5 that is not a
+refinement, it is the whole measurement.
+
+**GATE 12 FAILS AT THE SHIPPED MODE, at all three horizons** — integrated IRF 11.74 / 23.97 /
+39.36 yr against Joos floors 12.2 / 24.0 / 39.5, i.e. −3.73 / −0.13 / −0.35 %. The gate's status
+line has now been stale three times. Read the rows differently: TH 20 is a substantive miss, TH
+50 and TH 100 sit ON the floor to within a third of a percent. **The background does not explain
+it and points the other way** — the mode's held 2010 background is 394.4 ppm vs 387.6 at
+defaults, and a higher background makes a pulse last *longer* (part 4 measures PI 33.9 vs PD
+42.1 at the mode), so it fails in spite of a bias in its favour. The imperfect hold is not the
+cause either: `ccx_irf()` is a paired difference, so baseline drift cancels to first order.
+
+**GATE 4 SPLITS — the level passes, the variability fails, and the mode is worse than the
+defaults on the half that fails.** AF 1959–2024 = 0.435 against GCB's 0.431 (best the model has
+recorded), but the decadal spread is sd 0.019 against the observations' 0.051 — **2.7× too
+smooth**, where defaults gave 0.035. The gate's second sentence ("must not be *smoother* than
+this") is the one being failed. **And gate 4 is immune to the contamination that afflicts gate
+7**: AF = growth ÷ emissions, while GCB's `imbalance` is the residual *after* the sinks, so it
+enters neither term. This supplies the number the 2026-08-22 handoff §4 pre-registration clause
+asked for — target 0.051, model 0.019.
+
+**GATE 5 FAILS, and the finding is not the one the measurement was started to confirm.** The
+observed hemispheric aggregate was recomputed under `ccx_zone_weights()` with the same peak
+estimator applied to the model, and it reproduces DESIGN's own table (NH 855.3 ‰ @1963.676 vs
+853.2/1963.708; lag 1.34 vs 1.33) — the estimator is validated where a published answer exists
+before being used where none is. At the mode: NH peak 892.3 ‰ (defaults 801.5, obs 855.3), so
+the fitted `bomb_total` = 122.22 kmol moved the miss ACROSS ZERO rather than closing it; peak
+timing ~1 yr late in every vector and `bomb_total` cannot touch it; NH→SH lag 0.91 vs 1.34 obs.
+
+**TRIED AND WITHDRAWN — "both interhemispheric constraints say τ_ex is too fast".** Written into
+DESIGN from the sign of gate 9's stored log-units, then profiled before it was allowed to stand,
+and it is FALSE. The bomb lag rises monotonically with τ_ex and needs ≈ 2.3 yr to reach 1.34;
+both gradient streams sit at a **sharp interior optimum at the mode's 1.032** and reject τ_ex =
+2.0 by ~1490 log-units on `co2_gradient` alone. **The two interhemispheric observables disagree,
+and the gradient outvotes the bomb lag by three orders of magnitude** — so gate 5's lag miss is a
+FORCED residual and a structural statement about the two-box exchange, not an untried parameter.
+Magnitudes are a frozen 1-D profile and therefore upper bounds (cf. `ccx_seas_q10_ridge`, where
+`beta_max`/`fert_k` absorbed 85 % of exactly this kind of cost); the ordering is robust.
+
+**GATE 7 still fails on land at the mode** — land +2.04σ (3.38 GtC/yr), ocean −0.62σ (2.97),
+measured by two independently written reconstructions that agree. The fit bought back most of
+the ocean miss and almost none of the land one.
+
+**BUG FOUND AND FIXED — `run_modefind_pump_arms.R:452` applied `luc_scale` TWICE** to the
+gross-land-sink reconstruction (the LUC columns of `F` were already scaled three lines up, then
+`el` was derived from that `F` and scaled again). `ccx_make_logpost()` does not have it — it
+derives `ELUC_BASE` once from a luc_scale = 1 forcing outside the closure — so **the objective
+was always right and every logpost / Hessian / evidence number stands.** What was wrong is the
+per-stream DECOMPOSITION stored in `mode_fit_pump{N,D}.rds`, which is the only per-stream table
+the project has and the one handoffs rank work from: arm N's `gcb_land_sink` reads −93.71 where
+the correct value is −95.62, flattered by 1.91 log-units. It is NOT common-mode (luc_scale
+0.8902 vs 0.8575), so the N-vs-D per-stream comparison inherits a differential error of the same
+order as the 5.62 evidence margin printed beside it. The stored `streams` stay wrong until the
+owed refit rewrites them — **quarantine of the arm files is Marcus's call**, and note their
+`par_mode`/`logpost`/Hessian fields are all fine, so quarantining would cost the app its
+parameters to fix a diagnostic field.
+
+**The provenance gate is the reusable part**, and it is what found that bug — the structural fix
+the 2026-08-22 handoff §5 asked for ("a provenance stamp on every saved fit"). It recomputes
+each arm file's stored per-stream logL at the same `par_mode` under today's code. Arm N moves by
+**+16.9 on `co2_icecore` alone**, independently reproducing `diag_ice_hemisphere.R`'s headline.
+**Arm D moves by −8244**, dominated by `co2_seasonal_MLO` (−7131): it was last fitted before the
+2026-08-20g `CCX_SST_SEAS_LAG` correction — both `refit_20260820.log` and
+`refit_20260821_cont.log` read "REFIT, 1 ARM(S) [N]". **So arm D and arm N are two objectives,
+not two pump modes, and must not be read as an arm comparison.** The likelihood is recomputed
+rather than the posterior because the refit's h_ml bound [85,120] renormalises the prior and is
+not reconstructible from `ccx_default_params()` (memory `ccx_hml_band_provenance`); `par_mode` is
+band-safe.
+
+974/976 tests pass — the same by-design `test-fluxes.R:99,:100` pair. No refit run; the objective
+change of `d6adb58` still owes one, and everything above is measured at the pre-change mode
+because that is what the app ships today.
+
 ## 2026-08-22 — Four-expert panel; the ice hemisphere, the estimator, and the isotopes
 
 **Objective CHANGED.** `R/likelihood.R`'s ice term now scores against `co2_SH`, not `co2_NH`.

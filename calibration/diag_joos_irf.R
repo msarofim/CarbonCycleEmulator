@@ -79,7 +79,29 @@
 #     is the testable claim; the level is out of sample for a model calibrated
 #     to the historical record, which is Marcus' own caveat.
 #
-# RUNTIME ~40 s.
+# RUNTIME ~7 s (the ~40 s recorded here was measured before ccx_run_fast).
+#
+# USAGE:  Rscript calibration/diag_joos_irf.R [defaults|N|D]      (default: defaults)
+#
+# [E] AT THE SHIPPED MODE, ADDED 2026-08-22 -- AND THE GATE FAILS THERE.
+#     app/global.R has run on mode_fit_pumpN.rds since 8b94ba4 (2026-08-21),
+#     while this file was hardcoded to ccx_default_params(); the 2026-08-22
+#     expert panel ranked that #7 on its merged defect list. Integrated IRF:
+#       TH            20       50      100
+#       defaults   12.43    25.53    41.86   (+1.92 / +6.39 / +5.96 % of floor)
+#       arm N      11.74    23.97    39.36   (-3.73 / -0.13 / -0.35 %)
+#     TH 20 is a substantive miss; TH 50 and TH 100 land ON the floor to within a
+#     third of a percent and should be quoted as "at the floor". The mode's held
+#     background is 394.4 ppm against the defaults' 387.6, and a HIGHER background
+#     makes a pulse last LONGER (part 4 measures it), so the mode fails IN SPITE
+#     of a background biasing it the other way. See DESIGN sec.6 gate 12.
+#
+#     AND [C] BELOW IS NOW STALE, which is the same failure the gate's own History
+#     paragraph records: "the model is INSIDE BOTH" was measured at beta 0.38. At
+#     today's defaults PI-held is 25.6 against Joos's 34-47, i.e. OUTSIDE; at the
+#     mode it is 33.9, just below. The PI < PD ORDERING -- which is what DESIGN
+#     actually gates -- still passes at both. Left in place and flagged rather
+#     than quietly rewritten, because it is a claim about a measurement.
 # =====================================================================
 
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
@@ -94,7 +116,69 @@ JOOS_MARKS     <- c(20, 50, 100, 300)
 
 
 
+# ---- WHICH PARAMETER VECTOR? (added 2026-08-22) ----------------------
+# UNTIL TODAY THIS LINE READ `p0 <- ccx_default_params()` AND NOTHING ELSE, so
+# gate 12's DESIGN sec.6 status line -- and every quotation of it -- described
+# the DEFAULTS while `app/global.R` has shipped the posterior mode since
+# 2026-08-21 (`8b94ba4`). That is the same failure the gate's own History
+# paragraph records twice: "it is not a description, it is a measurement".
+# The 2026-08-14 status line passes at TH 20 by 12.4 against a 12.2 floor --
+# 1.6 %, the tightest of the three horizons and tighter than the 6 % at TH 100
+# -- so the vector actually shipped had to be measured, not assumed.
+#
+# THE TWO FORCING PARAMETERS ARE THE TRAP, and it is the one `diag_app_params.R`
+# already priced at 5.79 ppm of 2024 CO2. `bomb_total` and `luc_scale` are
+# fitted but have no slot in ccx_default_params(); ccx_make_logpost() applies
+# them by rescaling forcing COLUMNS. A mode path that overlays par_mode and then
+# calls ccx_build_forcing() bare would run the fitted parameters against a
+# forcing the fit never saw -- and here that forcing sets the 2010 background
+# the whole Joos protocol is conditioned on, which is the Revelle lever the
+# result is most sensitive to. Hence the wrapper below, the same construction
+# and for the same reason as app_build_forcing() in app/global.R.
+JOOS_ARM_DEFAULT <- "defaults"
+JOOS_ARM_FILE    <- "calibration/output/pump_arms/mode_fit_pump%s.rds"
+JOOS_ARM <- (function(a) if (length(a) && a[1] %in% c("N", "D", "defaults")) a[1]
+             else JOOS_ARM_DEFAULT)(commandArgs(TRUE))
+
 p0 <- ccx_default_params()
+JOOS_LUC_SCALE  <- 1
+JOOS_BOMB_TOTAL <- 102
+JOOS_SRC <- "uncalibrated defaults"
+if (JOOS_ARM != "defaults") {
+  .md <- readRDS(sprintf(JOOS_ARM_FILE, JOOS_ARM))
+  stopifnot(identical(.md$param_names, CCX_PARAM_NAMES))   # the 21-name guard
+  .pm <- .md$par_mode
+  for (n in intersect(names(p0), CCX_PARAM_NAMES)) p0[[n]] <- .pm[[n]]
+  p0$gamma_enso <- .pm$gamma_enso
+  p0$pump_mode  <- .md$pump_mode
+  JOOS_LUC_SCALE  <- .pm$luc_scale
+  JOOS_BOMB_TOTAL <- .pm$bomb_total
+  JOOS_SRC <- sprintf("posterior mode, arm %s (%s, logpost %.2f)",
+                      JOOS_ARM, basename(sprintf(JOOS_ARM_FILE, JOOS_ARM)), .md$logpost)
+}
+
+#' ccx_build_forcing() with THIS RUN'S fitted forcing parameters applied
+#' Only fills what the caller left unset, so the protocol's own explicit
+#' `bomb_total_kmol = 0` (14C is irrelevant to the IRF) still wins.
+joos_build_forcing <- function(scenario, years, ...) {
+  args <- list(...)
+  if (is.null(args$bomb_total_kmol)) args$bomb_total_kmol <- JOOS_BOMB_TOTAL
+  if (is.null(args$luc_scale))       args$luc_scale       <- JOOS_LUC_SCALE
+  do.call(ccx_build_forcing, c(list(scenario, years), args))
+}
+joos_run_coupled <- function(spin, scenario, years, ...) {
+  args <- list(...)
+  if (is.null(args$bomb_total_kmol)) args$bomb_total_kmol <- JOOS_BOMB_TOTAL
+  if (is.null(args$luc_scale))       args$luc_scale       <- JOOS_LUC_SCALE
+  do.call(ccx_run_coupled, c(list(spin, scenario, years), args))
+}
+
+cat(sprintf("\n=== 0. PARAMETER VECTOR UNDER TEST ===\n  %s\n", JOOS_SRC))
+cat(sprintf("  luc_scale %.4f   bomb_total %.2f kmol   pump_mode %s\n",
+            JOOS_LUC_SCALE, JOOS_BOMB_TOTAL, p0$pump_mode))
+cat(sprintf("  beta_max %.4f  fert_k %.1f  q10 %.3f  h_ml %.2f  kz %.0f\n",
+            p0$beta_max, p0$fert_k, p0$q10, p0$h_ml, p0$kz))
+
 spin <- ccx_spinup(p0)
 
 # The Joos protocol helpers -- ccx_set_emissions, ccx_hold_forcing,
@@ -106,12 +190,12 @@ spin <- ccx_spinup(p0)
 # silently make the two diagnostics disagree about the same protocol.
 
 # Historical spin-up to the reference year, then the held background.
-F_hist <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14 = spin$prod_c14)
+F_hist <- joos_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14 = spin$prod_c14)
 sp_ref <- spin
 sp_ref$y <- ccx_run_fast(spin, F_hist)$state
 
 F_fwd <- suppressWarnings(
-  ccx_build_forcing("historical", c(JOOS_REF_YEAR, JOOS_REF_YEAR + JOOS_HORIZON + 10),
+  joos_build_forcing("historical", c(JOOS_REF_YEAR, JOOS_REF_YEAR + JOOS_HORIZON + 10),
                     prod_c14 = spin$prod_c14, bomb_total_kmol = 0))
 for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
              "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
@@ -144,12 +228,20 @@ for (y in JOOS_MARKS) {
 integ <- function(o, th) { k <- o$t <= th & o$t >= 0
   sum(diff(o$t[k]) * (utils::head(o$irf[k], -1) + utils::tail(o$irf[k], -1)) / 2) }
 o_pd_shifted <- list(t = irf_t, irf = irf)
+# MARGIN TO THE FLOOR IS PRINTED, AND AT TWO DECIMALS, because this gate is
+# decided in its last significant figure: at the posterior mode TH 50 lands on
+# 24.0 against a floor of 24.0 and TH 100 on 39.4 against 39.5. A one-decimal
+# table cannot be quoted for a pass/fail on those two rows, and this gate's
+# recorded status has already been stale twice (see DESIGN sec.6 gate 12's own
+# History paragraph). The margin is signed and relative to the FLOOR, since
+# that is the bound the model is near -- it has never been near the ceiling.
 cat("\n=== 3. TIME-INTEGRATED IRF vs JOOS TABLE 4 (yr) ===\n")
-cat(sprintf("%6s %12s %12s %18s  %s\n", "TH", "this model", "Joos best", "Joos 5-95 %", "verdict"))
+cat(sprintf("%6s %12s %12s %18s %10s  %s\n", "TH", "this model", "Joos best",
+            "Joos 5-95 %", "vs floor", "verdict"))
 for (i in seq_len(nrow(JOOS_T4))) {
   th <- JOOS_T4$th[i]; m <- integ(o_pd_shifted, th)
-  cat(sprintf("%6.0f %12.1f %12.1f %8.1f - %-7.1f  %s\n", th, m, JOOS_T4$best[i],
-              JOOS_T4$lo[i], JOOS_T4$hi[i],
+  cat(sprintf("%6.0f %12.2f %12.1f %8.1f - %-7.1f %+9.2f%%  %s\n", th, m, JOOS_T4$best[i],
+              JOOS_T4$lo[i], JOOS_T4$hi[i], 100 * (m - JOOS_T4$lo[i]) / JOOS_T4$lo[i],
               if (m >= JOOS_T4$lo[i] && m <= JOOS_T4$hi[i]) "inside"
               else if (m < JOOS_T4$lo[i]) "BELOW -- decays too fast"
               else "ABOVE -- decays too slowly"))
@@ -159,7 +251,7 @@ for (i in seq_len(nrow(JOOS_T4))) {
 # 4. What the BACKGROUND PROTOCOL is worth -- held vs decaying, PD vs PI.
 # Joos sec. 4.4.1 reports 34-47 yr (PI) against 45-62 yr (PD) at TH = 100.
 # ---------------------------------------------------------------------
-F_pi <- suppressWarnings(ccx_build_forcing("historical", c(1750, 1750 + JOOS_HORIZON + 10),
+F_pi <- suppressWarnings(joos_build_forcing("historical", c(1750, 1750 + JOOS_HORIZON + 10),
                                            prod_c14 = spin$prod_c14, bomb_total_kmol = 0))
 for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
              "c14_bomb", "c14_nuclear")) F_pi[[cc]] <- 0
@@ -237,9 +329,9 @@ fut_irf <- function(sc, pulse = 0) {
   em <- fut_emissions(sc, pulse)
   if (pulse != 0) {
     delivered <- local({
-      f0 <- suppressWarnings(ccx_build_forcing(sc, c(1750, FUT_END), prod_c14 = 0,
+      f0 <- suppressWarnings(joos_build_forcing(sc, c(1750, FUT_END), prod_c14 = 0,
                                                emissions = fut_emissions(sc, 0)))
-      f1 <- suppressWarnings(ccx_build_forcing(sc, c(1750, FUT_END), prod_c14 = 0,
+      f1 <- suppressWarnings(joos_build_forcing(sc, c(1750, FUT_END), prod_c14 = 0,
                                                emissions = em))
       sum((f1$e_foss_NH + f1$e_foss_SH) - (f0$e_foss_NH + f0$e_foss_SH)) / 12
     })
@@ -247,7 +339,7 @@ fut_irf <- function(sc, pulse = 0) {
       stop(sprintf("pulse mass wrong: %.1f GtC delivered for a nominal %.1f (%s)",
                    delivered, pulse, sc))
   }
-  r <- ccx_run_coupled(spin, scenario = sc, years = c(1750, FUT_END), emissions = em)
+  r <- joos_run_coupled(spin, scenario = sc, years = c(1750, FUT_END), emissions = em)
   o <- r$out
   list(t = o$t - PULSE_YR_FUT, co2 = (o$co2_NH + o$co2_SH) / 2,
        clim = r$climate, converged = r$converged)

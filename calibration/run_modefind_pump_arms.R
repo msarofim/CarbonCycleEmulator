@@ -449,7 +449,24 @@ arm_fit <- function(mode) {
     for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH"))
       F[[cc]] <- F[[cc]] * pm$luc_scale
     attr(F, "luc_scale") <- pm$luc_scale
-    el <- ccx_forcing_eluc_annual(F); el$eluc <- el$eluc * pm$luc_scale
+    # NO SECOND luc_scale HERE. `F`'s four LUC columns were already multiplied
+    # three lines up, so deriving `el` from it and scaling again applied
+    # luc_scale SQUARED to the gross-land-sink reconstruction. FIXED 2026-08-22.
+    # ccx_make_logpost() does not have the bug -- it derives ELUC_BASE once from
+    # a forcing built at luc_scale = 1, OUTSIDE the closure, and scales that. So
+    # the OBJECTIVE was always right and every logpost/hessian/evidence number
+    # stands; what was wrong is the per-stream DECOMPOSITION stored in
+    # mode_fit_pump{N,D}.rds, which is the only per-stream table the project has
+    # and the one handoffs rank work from.
+    # MEASURED at the shipped mode: stored gcb_land_sink -93.71 is exactly the
+    # double-scaled value; the correct one is -95.62, so arm N's sink row was
+    # flattered by 1.91 log-units. It is NOT common-mode across the arms
+    # (luc_scale 0.8902 vs 0.8575), so the N-vs-D per-stream comparison built at
+    # line ~594 -- the "sinks + 14C favour D" reading -- inherits a differential
+    # error of the same order as the 5.62 evidence margin it sits next to.
+    # calibration/diag_design_gates_at_mode.R's provenance gate detects this
+    # class by recomputing the stored streams; it is what found it.
+    el <- ccx_forcing_eluc_annual(F)
     r <- ccx_run_fast(sp, F)
     # NOTE: sigma_d13c retired 2026-08-18 and rep_dC added in its place -- this
     # list must track CCX_PARAM_NAMES or the per-stream decomposition silently
