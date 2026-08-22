@@ -1127,7 +1127,23 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   }
 
   # ---- ice-core CO2, independent ------------------------------------
-  mod <- interp("co2_NH", obs$ice$year)   # SH-cored but globally well mixed pre-1900
+  # LAW DOME IS AT 66.7 S, so the like-for-like model series is the SH box.
+  # This scored against co2_NH until 2026-08-22, on the comment "SH-cored but
+  # globally well mixed pre-1900". That argument is sound for the 96 pre-1900
+  # rows and fails progressively after: 159 of 255 rows are post-1900 and 52 are
+  # post-1958, where the model's own NH-SH gradient over the scored years runs
+  # +0.61 (1900-1940) -> +0.82 (1940-1958) -> +1.75 ppm (1958-1997).
+  #
+  # diag_co2_level_swing.R:66 already used co2_SH, with the same reasoning, so
+  # the OBJECTIVE and the DIAGNOSTIC that produced the sec.4 GATE D swing table
+  # disagreed about the same observations and were quoted interchangeably across
+  # handoffs 21c and 21d.
+  #
+  # Measured by diag_ice_hemisphere.R at mode_fit_pumpN: worth +16.9 log-units,
+  # and 1.76 ppm (16 %) of the 11.20 ppm era swing was this choice, not the
+  # model. NOTE: THIS CHANGES THE OBJECTIVE -- nothing fitted before 2026-08-22
+  # is comparable across it.
+  mod <- interp("co2_SH", obs$ice$year)
   add("co2_icecore", sum(stats::dnorm(obs$ice$CO2ppm, mod, obs$ice$sd, log = TRUE)))
 
   # ---- d13C annual level ---------------------------------------------
