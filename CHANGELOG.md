@@ -2,6 +2,49 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-22 — Four-expert panel; the ice hemisphere, the estimator, and the isotopes
+
+**Objective CHANGED.** `R/likelihood.R`'s ice term now scores against `co2_SH`, not `co2_NH`.
+Nothing fitted before `d6adb58` is comparable across it. Law Dome is at 66.7 S; the shipped
+comment ("SH-cored but globally well mixed pre-1900") covers 96 of 255 rows, and
+`diag_co2_level_swing.R:66` had been using `co2_SH` with the opposite reasoning all along — so
+the objective and the diagnostic that produced the sec.4 GATE D swing table disagreed and were
+quoted interchangeably. New `diag_ice_hemisphere.R`: +16.9 logL, and 1.76 ppm (16 %) of the
+11.20 ppm era swing was the hemisphere choice. 974/976 tests still pass.
+
+**TRIED AND WITHDRAWN — the sec.12c LUC time-profile programme.** Not abandoned for cost;
+abandoned because two measurements undercut its rationale. (1) `diag_swing_estimator.R`: 21d
+TEST 2's growth rates came from a loess(span=0.25) over 1850-1996, a ~36 yr window on a decadal
+feature. Raw within-decade OLS moves the minimum from the 1950s (+0.207) to the 1940s (+0.010).
+The pause is NOT weaker for it — against SPO flask on the same estimator the record's decadal
+error bar is 0.098 ppm/yr, so the raw pause is 4.7x the noise floor. The decade was wrong, the
+feature is real. And the model's growth-rate error tracks GCB's OWN published budget imbalance
+at r = 0.771 / slope 0.781 (r = 0.839 / 0.486 on the LOESS numbers, so it survives the estimator
+that produced it); GCB fails to close its own budget by 44.3 GtC = 20.9 ppm over 1930-1969
+against a ~9 ppm model swing, while the modern imbalance is +0.016 GtC/yr. (2)
+`diag_d13c_midcentury.R`: a terrestrial or emissions explanation of the swing is rejected at
+12.7 sigma. So the shape it would have been fitted to is largely GCB's imbalance, and the
+isotopes say it is not emissions.
+
+**The isotope test, and mutation-testing it before believing its negative.** 105 Law Dome d13C
+samples (37 in 1900-1960) were on disk and NOT in the objective. The d13C residual is monotone
+(-0.030 -> -0.160 permil) while the CO2 residual changes sign (-4.38 -> +4.76 ppm). Excursion at
+1940-1960: -0.003 +/- 0.016 permil against the -0.209 required. GATE 5 injected 33.1 GtC of
+mid-century LUC and confirmed the gate is LIVE at 6.4 se — and in doing so measured the transfer
+ratio at -0.0239 permil/ppm where closed-box mass balance gives -0.0571, a factor of 2.4 from
+air-sea isotopic damping. GATE 4's sigmas are inflated by that factor and GATE 6 supersedes them;
+GATE 2's ratio statistic is confounded where the CO2 residual crosses zero and is marked
+not-to-quote in the file.
+
+**Four claims in handoff 21d do not survive the code** (see the new handoff sec.5): the "1523
+monthly points" information ratio (levels are scored ANNUALLY, 126 rows); "the level is
+unconstrained post-1958" (it is nominally OVER-constrained by a non-independent ice term — the
+conclusion survives, the remedy is the covariance not the prior); sec.12a's "Reason 1" (void,
+Reason 2 kills it); and sec.12b's kz corollary (6528 is the permissive edge of the 14C bracket).
+None had been gated against anything — the same failure mode as 21c sec.6.
+
+Handoff: `notes/handoff_2026-08-22_panel_and_three_tests.md`.
+
 ## 2026-08-21 (last) — The swing survives four obs-artefact tests; three candidate fixes closed
 
 ### 1. Marcus challenged the swing on the ice data, and it held (`diag_co2_level_swing.R`)
