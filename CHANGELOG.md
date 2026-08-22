@@ -2,6 +2,80 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-21 (last) — The swing survives four obs-artefact tests; three candidate fixes closed
+
+### 1. Marcus challenged the swing on the ice data, and it held (`diag_co2_level_swing.R`)
+
+The challenge was right and my cross-check was weaker than I presented it: ice and SPO flask
+agreeing to 0.31 ppm is real, but **that overlap starts in 1957 and the crossover is at
+~1945–1955**, inside the window where ice is the only product. Four tests, each able to kill it:
+
+- **BY CORE.** Law Dome is five cores with **two gas-age offsets** (DE08/DE08-2 at 31 yr,
+  DSS/DSS0506 at 60). Over 1900–1940 DE08 gives **−3.85** and DSS **−3.86**. Over 1958–1997
+  DE08 +4.44, DE08-2 +5.45, DSSW20K +5.22. The two families differ by 0.73 ppm across
+  1900–1962 — the scale of any product inconsistency, against an 8.8 ppm swing. **8.3 of the
+  8.8 is within DE08 alone.**
+- **GROWTH RATE — and Marcus's "weird pause" is real.** The ice-derived rate runs 0.376 (1940s)
+  → **0.207 (1950s)** → 0.523 (1960s); the model runs smoothly 0.527 → 0.498 → 0.856. The error
+  is −0.05 to −0.10 ppm/yr in 1870–1920, **+0.15 to +0.33 in 1930–1965**, ~0 by the 1970s.
+  **It is one mid-century feature, not a drift** — which sharpens the earlier entry's framing.
+- **FIRN SMOOTHING**, scanned rather than asserted (no citation is carried): Gaussian widths
+  0/5/10/20/30 yr leave the swing at 8.82/9.01/9.41/7.44/8.64. Nothing removes it.
+- **GAS AGE.** A −10 yr shift collapses the swing to 1.68 and drives both ends to −7.50/−5.82.
+  Closed independently: the post-1958 end is corroborated by **SPO flask data**, which has no
+  firn and no age ambiguity, at +4.51/+5.29/+5.08.
+
+**Not settled, and recorded as such:** whether the pause is real atmosphere or an enclosure
+artefact **common to all Law Dome cores**. By-core agreement rules out core-*specific* artefacts,
+not a shared firn process — every core here is one site. Needs WAIS Divide / Siple or the
+literature; no papers folder on this machine, so no citation is asserted.
+
+### 2. No land knob fixes both ends (`diag_land_eagerness.R`)
+
+Built so the previous entry's "land sink is too eager" hypothesis could lose, and it half-lost.
+Every lever reducing the modern land sink makes the mid-century error **worse**, because each is
+a *gain* on a sink and a gain moves both ends the same way. All three verdicts: TRADES.
+
+**q10 is still the right knob for the modern half**: 1.09 → 2.0 takes land +2.04 → **+0.94 σ**
+and ocean −0.62 → −0.37 σ (both improve) for +4.5 ppm of CO₂; `beta_max` and `fert_k` buy more
+land-sink reduction and cost **+20–25 ppm**. q10 acts through warming, which is where the sink
+error is. It sits at 1.0907 because the **seasonal** rows put it there via the exact ridge with
+`seas_T_amp_NH` — rows that move 4.3 log-units across the whole q10 range. Note 21c §2d's
+re-anchored prediction (1.35–1.5) lands at **+1.44 σ: even the blocked refit does not close
+gate 7.** And **~40 % of the mid-century half is the land-use INPUT** — swapping to SSP/LUH2 cuts
+that error +0.228 → +0.137 while barely touching the sink.
+
+### 3. Three candidate directions tested and closed
+
+**The γ_IAV term is dead** (`diag_gamma_iav.R`), measured *before* touching the objective because
+a new likelihood term means refit-owed. Observed 1.779 ± 0.433 ppm/yr/K; model at the mode 1.581;
+model at q10 = 2.0 **2.491**. (a) The observable **points the wrong way** — the model already
+matches it at low q10 and raising q10 overshoots by 1.0–1.6 se. (b) It would be **absorbed**:
+`gamma_enso` (wide N(0,2) prior) has **17× the leverage per posterior σ**. The mode matches
+observed γ_IAV through a fitted ENSO flux, not through respiration temperature sensitivity.
+
+**The partition reframing, and its one lever, closed** (`diag_kz_railed.R`). Land +2.04 σ, ocean
+−0.62 σ, CO₂ +5 ppm read together say total uptake is about right and the *partition* is wrong.
+`kz` is the only knob moving land down / ocean up / CO₂ down together, and kz = 8000 lands the
+ocean sink on 3.20 vs GCB 3.22 ± 0.40. But: the likelihood **turns over at 6462, inside** the
+[3942.5, 6528] bracket — so the bracket is redundant, not binding; what holds kz is the **CO₂
+level streams by two orders of magnitude**; and **`rep_dC` does not rescue it** (profiled free,
+the optimum moves 6462 → 6528, +0.6 log-units — it can translate, and kz changes shape). The
+script's filename and first header both asserted "railed"; the header was rewritten, not the
+finding.
+
+**Good news corollary:** the bracket ceiling was bisected so kz maps to the observed deep-Δ¹⁴C
+edge (−150 ‰); the CO₂ record's optimum lands at 6462 **independently**. Two unrelated
+observables put kz in the same place to within 1 %.
+
+### What is left, and what was tried and abandoned
+
+**Abandoned, with measurements so they are not re-opened:** the γ_IAV likelihood term; `kz` as a
+partition lever; single-knob land eagerness. **Open:** the **land-use inventory's time profile** —
+the only lever that moved the mid-century end, with the two inventories 91.4 GtC apart. Ask what
+E_LUC(t) *shape* the CO₂ record wants; `luc_scale` is one number and cannot change a shape.
+**Do not refit** — no land parameter expresses the defect and the ocean parameters are pinned.
+
 ## 2026-08-21 (later still) — The app runs on the calibrated mode; `rep_dC` is laundering a 9 ppm swing
 
 Took handoff 21c's stated default next move (§6, the app). Two things came out of it: the
