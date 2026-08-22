@@ -22,32 +22,52 @@ for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
 ARM <- (function(a) if (length(a) && a[1] %in% c("N", "D")) a[1] else "N")(commandArgs(TRUE))
-m   <- readRDS(sprintf("calibration/output/pump_arms/mode_fit_pump%s.rds", ARM))
-pm  <- m$par_mode
+M   <- ccx_load_mode(ARM)          # R/calibrate.R: carries gamma_enso, pump_mode,
+pm  <- M$md$par_mode               # the 2 forcing params and the 4 likelihood ones
+m   <- M$md
 
-bp <- ccx_default_params(); bp$pump_mode <- ARM
-p_mode <- bp
-for (n in intersect(names(p_mode), CCX_PARAM_NAMES)) p_mode[[n]] <- pm[[n]]
-p_mode$sst_obs <- 0       # observed-SST is post-mode too (2026-08-18)
-p_mode$seas_drivers <- 0  # THE ESCAPE HATCH, load-bearing: this mode was
-# fitted under the pre-2026-08-18 seasonal SINE (its seas_amp/phase are in
-# par_mode); the drivers path would ignore them and substitute defaults. The
-# rds-reproduction gate below is what catches this line going missing.
+# THE seas_drivers/sst_obs ESCAPE HATCH WAS REMOVED 2026-08-22, and it had been
+# WRONG since the 2026-08-20 refit. It read:
+#     p_mode$sst_obs <- 0 ; p_mode$seas_drivers <- 0
+# on the argument that "this mode was fitted under the pre-2026-08-18 seasonal
+# SINE (its seas_amp/phase are in par_mode)". That was true of the 08-18 mode and
+# false of the one on disk: mode_fit_pumpN.rds (08-21) carries the DRIVER
+# parameters -- seas_T_amp_{NH,SH}, seas_lag_p, sst_seas_amp_{NH,SH}, npp_frac_NH
+# -- and no sine knobs at all, so the hatch was running the diagnostic at a
+# DIFFERENT MODEL from the fit it claimed to describe.
+#
+# Four more staleness defects were found with it, all on 2026-08-22, and all of
+# them silent:
+#   (A `gamma_enso` defect was ALSO claimed here on 2026-08-22 and WITHDRAWN the
+#   same day: `gamma_enso` IS a field of ccx_default_params() and IS in
+#   CCX_PARAM_NAMES, so intersect() picks it up and it was never dropped. The
+#   six parameters intersect() really does drop are bomb_total, luc_scale,
+#   sigma_d14c, rep_dC, grad_off_co2 and grad_off_d13c -- none of which have a
+#   slot in ccx_default_params(). app/global.R's explicit gamma_enso line is
+#   redundant on the mode path, not load-bearing.)
+#   * `rep_dC` was never applied. The likelihood predicts the STATION as
+#     `box - rep_dC` (R/likelihood.R, the LIK_REP_SOURCE_D13C block); this file
+#     compared observations to the bare box, so both CO2 level streams showed a
+#     -5.29 ppm "bias" that was just the 5.18 ppm offset, unmodelled.
+#   * `sigma_d13c` was RETIRED 2026-08-18, so `pm$sigma_d13c` is NULL and
+#     `sqrt(NULL^2 + REP^2)` is numeric(0): both d13C level rows silently
+#     reported n = 0 and were dropped from every ranking this file prints.
+#   * the ice term still read `co2_NH`, stale since `d6adb58`.
+#
+# AND THE GATE DID NOT STOP ANY OF IT. Every one of the 14 rows printed
+# "MISMATCH" while the file went on to print its rankings, and memory
+# `ccx_fit_at_mode` was written from those rankings. The gate is now FATAL at the
+# end of the report -- see the stopifnot() there.
 
-
-sp <- ccx_spinup(p_mode)
-F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0, bomb_total_kmol = 102)
-F$c14_cosmo <- sp$prod_c14
-F$c14_bomb  <- F$c14_bomb * (pm$bomb_total / 102)
-for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH"))
-  F[[cc]] <- F[[cc]] * pm$luc_scale
-attr(F, "luc_scale") <- pm$luc_scale
-el <- ccx_forcing_eluc_annual(F); el$eluc <- el$eluc * pm$luc_scale
+sp  <- ccx_spinup(M$p)
+SF  <- ccx_scaled_forcing(sp, years = c(1750, 2024),
+                          luc_scale = M$luc_scale, bomb_total = M$bomb_total)
+F   <- SF$F
+el  <- SF$eluc
 r   <- ccx_run_fast(sp, F)
 out <- r$out
 obs <- ccx_prepare_obs()
-err <- list(sigma_d13c = pm$sigma_d13c, sigma_d14c = pm$sigma_d14c,
-            grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c)
+err <- M$err                       # sigma_d14c, rep_dC, grad_off_co2, grad_off_d13c
 ms  <- ccx_model_stats(out, obs)
 interp <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
 
@@ -58,7 +78,11 @@ put <- function(nm, o, mo, sd, unit) S[[nm]] <<- list(o = o, m = mo, sd = sd, un
 for (st in c("MLO", "SPO")) {                                   # CO2 level
   o <- obs$co2_ann[[st]]; mm <- ms$co2[[st]]
   k <- match(o$year, mm$year); g <- !is.na(k)
-  put(paste0("co2_level_", st), o$level[g], mm$level[k[g]], LIK_CO2_REP_ERR, "ppm")
+  # station = box - rep_dC, mirroring R/likelihood.R. Omitting it reported the
+  # 5.18 ppm offset as if it were model bias.
+  put(paste0("co2_level_", st), o$level[g],
+      mm$level[k[g]] - (if (is.null(err$rep_dC)) 0 else err$rep_dC),
+      LIK_CO2_REP_ERR, "ppm")
 }
 for (st in c("MLO", "SPO")) {                                   # CO2 seasonal a,b
   o <- obs$co2_seas[[st]]; mm <- ms$co2_seas[[st]]
@@ -66,12 +90,27 @@ for (st in c("MLO", "SPO")) {                                   # CO2 seasonal a
   put(paste0("co2_seasonal_", st), c(o$a[g], o$b[g]), c(mm$a[k[g]], mm$b[k[g]]),
       c(rep(o$sd_a, sum(g)), rep(o$sd_b, sum(g))), "ppm (harmonic a,b)")
 }
-put("co2_icecore", obs$ice$CO2ppm, interp("co2_NH", obs$ice$year), obs$ice$sd, "ppm")
+# Law Dome is 66.7 S -> co2_SH. Was co2_NH here until 2026-08-22 (`d6adb58`).
+put("co2_icecore", obs$ice$CO2ppm, interp("co2_SH", obs$ice$year), obs$ice$sd, "ppm")
 for (st in c("MLO", "SPO")) {                                   # d13C level
   o <- obs$d13_ann[[st]]; mm <- ms$d13[[st]]
   k <- match(o$year, mm$year); g <- !is.na(k)
-  put(paste0("d13c_level_", st), o$level[g], mm$level[k[g]],
-      sqrt(err$sigma_d13c^2 + LIK_D13C_REP_ERR^2), "permil")
+  # station = box - rep_dC * (LIK_REP_SOURCE_D13C - box) / CO2_box, on the
+  # model's OWN state each year -- `rep_dC` is ONE offset serving BOTH species,
+  # entering d13C through an isotopic mixing conversion rather than additively.
+  # Omitted here until 2026-08-22, which is what made the d13C level rows read
+  # as a +0.30 permil model bias; the fitted offset accounts for essentially all
+  # of it, and memory `ccx_fit_at_mode`'s "d13C levels are pure BIAS" was written
+  # off the unoffset version.
+  pred <- mm$level[k[g]]
+  if (!is.null(err$rep_dC) && err$rep_dC != 0) {
+    cbox <- ms$co2[[st]]$level[match(o$year[g], ms$co2[[st]]$year)]
+    pred <- pred - err$rep_dC * (LIK_REP_SOURCE_D13C - pred) / cbox
+  }
+  # `sigma_d13c` RETIRED 2026-08-18: absent from err => the objective's sd is
+  # LIK_D13C_REP_ERR alone. The old sqrt(NULL^2 + REP^2) gave numeric(0) and both
+  # rows silently reported n = 0.
+  put(paste0("d13c_level_", st), o$level[g], pred, LIK_D13C_REP_ERR, "permil")
 }
 for (sp2 in list(list(nm="co2", og=obs$co2_grad, mod=ms$co2, off=err$grad_off_co2,
                       sd=LIK_GRAD_CO2_SD, u="ppm"),
@@ -113,12 +152,18 @@ local({
   # DESIGN gate 7 is stated on the 2015-2024 MEAN, not the year-by-year scatter.
   w <- g$year >= 2015
   cat(sprintf("\n--- DESIGN gate 7 (2015-2024 mean sinks, GtC/yr) ---\n"))
-  cat(sprintf("  ocean: model %.2f vs GCB %.2f (target sd 0.4)  => %+.1f sigma\n",
-              mean(g$ocean[w]), mean(g$ocean_sink[w]),
-              (mean(g$ocean[w]) - mean(g$ocean_sink[w]))/0.4))
-  cat(sprintf("  land : model %.2f vs GCB %.2f (target sd 0.9)  => %+.1f sigma\n",
-              mean((g$land+g$eluc)[w]), mean(g$land_sink[w]),
-              (mean((g$land+g$eluc)[w]) - mean(g$land_sink[w]))/0.9))
+  # SIGMAS FROM THE NAMED CONSTANTS, not literals. The land figure here was a
+  # hardcoded 0.9 until 2026-08-22 -- LIK_GCB_LAND_SD's value BEFORE it was
+  # changed to 0.5 on 2026-08-14. The stale literal turned DESIGN gate 7's land
+  # miss from +2.0 sigma (FAIL) into +1.1 sigma (PASS), and memory
+  # `ccx_fit_at_mode`'s "gate 7 PASSES" was written from it. Exactly the failure
+  # the project's "labels derive from named constants" rule exists to prevent.
+  cat(sprintf("  ocean: model %.2f vs GCB %.2f (target sd %.2f)  => %+.1f sigma\n",
+              mean(g$ocean[w]), mean(g$ocean_sink[w]), LIK_GCB_OCEAN_SD,
+              (mean(g$ocean[w]) - mean(g$ocean_sink[w]))/LIK_GCB_OCEAN_SD))
+  cat(sprintf("  land : model %.2f vs GCB %.2f (target sd %.2f)  => %+.1f sigma\n",
+              mean((g$land+g$eluc)[w]), mean(g$land_sink[w]), LIK_GCB_LAND_SD,
+              (mean((g$land+g$eluc)[w]) - mean(g$land_sink[w]))/LIK_GCB_LAND_SD))
 })
 
 # ---- report, with the reconstruction gate ---------------------------
@@ -126,7 +171,7 @@ cat(sprintf("\n=== FIT AT THE ARM-%s MODE (adopted arm is N) ===\n", ARM))
 cat("logL_rec vs logL_rds is the GATE: if it does not match, the row is wrong.\n\n")
 cat(sprintf("%-18s %5s %7s %7s %7s   %10s %10s  %-16s %s\n",
             "stream", "n", "RMSz", "bias_z", "max|z|", "RMSresid", "bias", "unit", "gate"))
-rows <- list()
+rows <- list(); bad <- character()
 for (nm in names(S)) {
   s <- S[[nm]]; z <- (s$o - s$m) / s$sd
   z <- z[is.finite(z)]; res <- (s$o - s$m)[is.finite(s$o - s$m)]
@@ -139,7 +184,34 @@ for (nm in names(S)) {
               nm, length(z), sqrt(mean(z^2)), mean(z), max(abs(z)),
               sqrt(mean(res^2)), mean(res), s$unit, gate))
   rows[[nm]] <- c(n = length(z), rmsz = sqrt(mean(z^2)), bias = mean(z))
+  if (!is.null(ll_rds) && abs(ll_rec - ll_rds) >= 1e-6) bad <<- c(bad, nm)
 }
+# THE GATE IS FATAL FROM 2026-08-22. It used to print "MISMATCH" in a column and
+# carry on to the rankings below -- and on 2026-08-22 all 14 rows were
+# mismatching while those rankings were being quoted into memory. A gate that
+# does not stop anything is a label. NOTE the expected-mismatch case: the ice
+# term moved to co2_SH in `d6adb58` AFTER these modes were fitted, so
+# `co2_icecore` legitimately differs by ~+16.9 until the owed refit; it is named
+# here rather than tolerated by a magnitude threshold, so a SECOND objective
+# change cannot hide inside the allowance.
+# EMPTY, AND THAT IS THE POINT. This list held two rows on the morning of
+# 2026-08-22 -- `co2_icecore` (the `d6adb58` ice co2_NH -> co2_SH change) and
+# `gcb_land_sink` (the luc_scale-SQUARED bug in the refit driver). Both were
+# repaired that afternoon by calibration/repair_arm_streams.R, which recomputed
+# the stored decomposition under the current objective, so all 14 streams now
+# reproduce to 1e-6 and NOTHING should be tolerated. Add a name here only with a
+# dated reason, and delete it the moment the owed refit clears it: an allowance
+# that outlives its cause is how the next objective change hides.
+STALE_BY_OBJECTIVE <- character(0)
+unexpected <- setdiff(bad, STALE_BY_OBJECTIVE)
+if (length(unexpected))
+  stop("reconstruction does not reproduce the stored logL for: ",
+       paste(unexpected, collapse = ", "),
+       "\n  The residual columns above are WRONG for those rows. Fix the ",
+       "reconstruction before reading anything below.")
+if (length(bad))
+  cat(sprintf("\n  GATE: %s mismatches as expected (objective changed in d6adb58);\n  every other stream reproduces its stored logL to 1e-6.\n",
+              paste(bad, collapse = ", ")))
 # ---- DOES THE FITTED SIGMA HAVE ANY SCATTER TO EXPLAIN? --------------
 # A free error scale cannot tell BIAS from SCATTER: it inflates to cover either.
 # So decompose the residual and compare the DE-BIASED scatter against the FIXED

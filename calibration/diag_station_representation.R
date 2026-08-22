@@ -39,11 +39,14 @@ pm <- m$par_mode
 bp <- ccx_default_params(); bp$pump_mode <- ARM
 p_mode <- bp
 for (n in intersect(names(p_mode), CCX_PARAM_NAMES)) p_mode[[n]] <- pm[[n]]
-p_mode$sst_obs <- 0       # observed-SST is post-mode too (2026-08-18)
-p_mode$seas_drivers <- 0  # THE ESCAPE HATCH, load-bearing: this mode was
-# fitted under the pre-2026-08-18 seasonal SINE (its seas_amp/phase are in
-# par_mode); the drivers path would ignore them and substitute defaults. The
-# rds-reproduction gate below is what catches this line going missing.
+# ESCAPE HATCH REMOVED 2026-08-22, and it had been WRONG since the 2026-08-20
+# refit. It forced `sst_obs <- 0` and `seas_drivers <- 0` on the argument that
+# this mode was fitted under the pre-2026-08-18 seasonal SINE -- true of the
+# 08-18 mode, false of the one on disk. mode_fit_pumpN.rds (08-21) carries the
+# DRIVER parameters (seas_T_amp_*, seas_lag_p, sst_seas_amp_*, npp_frac_NH) and
+# no sine knobs, so the hatch ran this diagnostic at a DIFFERENT MODEL from the
+# fit it describes. See calibration/diag_fit_at_mode.R's header for the full set
+# of staleness defects found with it.
 
 
 sp <- ccx_spinup(p_mode)

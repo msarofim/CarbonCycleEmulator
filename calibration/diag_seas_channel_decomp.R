@@ -97,7 +97,12 @@ cd_run <- function(mods = list()) {
   for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH"))
     F[[cc]] <- F[[cc]] * p$luc_scale
   attr(F, "luc_scale") <- p$luc_scale
-  el <- ccx_forcing_eluc_annual(F); el$eluc <- el$eluc * p$luc_scale
+  # luc_scale applied ONCE: the forcing above already carries it, so the second
+  # multiply that stood here until 2026-08-22 was luc_scale SQUARED on the
+  # gross-land-sink reconstruction. `luc` is read ONLY by `gcb_land_sink`, so that one
+  # stream was wrong and nothing else. Use R/calibrate.R's ccx_scaled_forcing(), which
+  # returns F and its eluc together so they cannot disagree.
+  el <- ccx_forcing_eluc_annual(F)
   r  <- ccx_run_fast(sp, F)
   ms <- ccx_model_stats(r$out, obs)
   ll <- ccx_loglik(r$out, obs, list(sigma_d14c = p$sigma_d14c, rep_dC = p$rep_dC,

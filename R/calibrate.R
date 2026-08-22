@@ -582,6 +582,86 @@ ccx_prior_z <- function(name, x, table = CCX_PARAM_TABLE) {
 #'   varied between two otherwise-identical objectives. Fitted parameters still
 #'   overwrite their entries, so passing a list that sets one of them has no
 #'   effect: this is for structure, not for pinning parameters.
+# ---------------------------------------------------------------------
+# CANONICAL MODE / FORCING RECONSTRUCTION (promoted 2026-08-22)
+#
+# WHY THESE EXIST. Fifty-five files reconstruct "par_mode onto defaults, scale
+# the forcing, call ccx_loglik", each with its own copy. On 2026-08-22 a scan of
+# those copies found EIGHT that applied `luc_scale` TWICE to the gross-land-sink
+# reconstruction -- the forcing's four LUC columns were scaled, and then `eluc`
+# was derived from THAT already-scaled forcing and scaled again. The objective
+# (ccx_make_logpost, below) never had the bug, so no fit was affected; what was
+# affected is every per-stream `gcb_land_sink` those diagnostics reported, and
+# the stored decomposition in mode_fit_pump{N,D}.rds that handoffs rank work
+# from. Arm N's read -93.71 where the truth is -95.62.
+#
+# The defect is structurally invited by splitting one quantity across two
+# statements. ccx_scaled_forcing() returns the forcing AND its matching annual
+# E_LUC from ONE call, so they cannot disagree; ccx_load_mode() returns the
+# parameter vector AND the two forcing parameters that have no slot in it.
+# `test-luc-scale.R` lints the repo for the old two-statement signature, which
+# is what stops it coming back -- a helper nobody is forced to use would not.
+
+#' Load a fitted arm file into a usable parameter vector
+#'
+#' Returns the MODEL parameters, the two FORCING parameters that
+#' `ccx_default_params()` has no slot for (`bomb_total`, `luc_scale`), and the
+#' four LIKELIHOOD parameters (`sigma_d14c`, `rep_dC`, `grad_off_co2`,
+#' `grad_off_d13c`) -- the six that a bare `intersect(names(p), CCX_PARAM_NAMES)`
+#' silently drops, two of which move a trajectory (worth 5.79 ppm of 2024 CO2,
+#' `diag_app_params.R`). NOTE `gamma_enso` is NOT one of them: it is a field of
+#' `ccx_default_params()` and is in `CCX_PARAM_NAMES`, so intersect() picks it up.
+#' It is assigned explicitly below only for symmetry with `app/global.R`.
+#'
+#' @param arm "N" or "D", or a path to a mode file
+#' @param base parameter vector to overlay onto
+ccx_load_mode <- function(arm = "N", base = ccx_default_params()) {
+  f <- if (file.exists(arm)) arm else
+    ccx_path("calibration", "output", "pump_arms", sprintf("mode_fit_pump%s.rds", arm))
+  md <- readRDS(f)
+  if (!identical(md$param_names, CCX_PARAM_NAMES))
+    stop("mode file '", basename(f), "' was fitted on a different parameter set (",
+         length(md$param_names), " names); refusing to overlay it silently.")
+  pm <- md$par_mode
+  p  <- base
+  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
+  p$gamma_enso <- pm$gamma_enso
+  p$pump_mode  <- md$pump_mode
+  list(p = p, luc_scale = pm$luc_scale, bomb_total = pm$bomb_total,
+       err = list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
+                  grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c),
+       md = md, file = f)
+}
+
+#' A forcing with `luc_scale`/`bomb_total` applied, AND its matching annual E_LUC
+#'
+#' Returns `list(F = , eluc = )`. Take BOTH from here and pass `eluc` straight to
+#' `ccx_loglik(luc = )`. Do NOT re-scale the returned `eluc`: it is already the
+#' model's own scaled land-use flux, which is exactly what the `gcb_land_sink`
+#' term's gross reconstruction wants.
+#'
+#' @param sp spinup, used only for `prod_c14`; pass NULL to leave c14_cosmo alone
+#' @param base an already-built base forcing at luc_scale 1 / bomb_total ref, to
+#'   avoid rebuilding it per draw. Built here when NULL.
+ccx_scaled_forcing <- function(sp = NULL, years = c(1750, 2024), luc_scale = 1,
+                               bomb_total = CCX_BOMB_REF, scenario = "historical",
+                               base = NULL) {
+  F <- if (is.null(base))
+    ccx_build_forcing(scenario, years, prod_c14 = 0, bomb_total_kmol = CCX_BOMB_REF)
+  else base
+  if (!is.null(sp)) F$c14_cosmo <- sp$prod_c14
+  F$c14_bomb <- F$c14_bomb * (bomb_total / CCX_BOMB_REF)
+  # The single scaling, and the E_LUC derived from the UNSCALED series before it
+  # -- equivalently, from the scaled columns with no second multiply. Both give
+  # the same answer; doing it in one place is what makes that a fact rather than
+  # a coincidence between two statements.
+  eluc <- ccx_forcing_eluc_annual(F)
+  eluc$eluc <- eluc$eluc * luc_scale
+  for (cc in CCX_LUC_COLS) F[[cc]] <- F[[cc]] * luc_scale
+  attr(F, "luc_scale") <- luc_scale
+  list(F = F, eluc = eluc)
+}
+
 ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
                              verbose = FALSE,
                              base_params = ccx_default_params()) {

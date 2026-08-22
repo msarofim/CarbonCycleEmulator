@@ -20,11 +20,14 @@ pm <- m$par_mode
 bp <- ccx_default_params(); bp$pump_mode <- "N"
 p_mode <- bp
 for (n in intersect(names(p_mode), names(pm))) p_mode[[n]] <- pm[[n]]
-p_mode$sst_obs <- 0       # observed-SST is post-mode too (2026-08-18)
-p_mode$seas_drivers <- 0  # THE ESCAPE HATCH, load-bearing: this mode was
-# fitted under the pre-2026-08-18 seasonal SINE (its seas_amp/phase are in
-# par_mode); the drivers path would ignore them and substitute defaults. The
-# rds-reproduction gate below is what catches this line going missing.
+# ESCAPE HATCH REMOVED 2026-08-22, and it had been WRONG since the 2026-08-20
+# refit. It forced `sst_obs <- 0` and `seas_drivers <- 0` on the argument that
+# this mode was fitted under the pre-2026-08-18 seasonal SINE -- true of the
+# 08-18 mode, false of the one on disk. mode_fit_pumpN.rds (08-21) carries the
+# DRIVER parameters (seas_T_amp_*, seas_lag_p, sst_seas_amp_*, npp_frac_NH) and
+# no sine knobs, so the hatch ran this diagnostic at a DIFFERENT MODEL from the
+# fit it describes. See calibration/diag_fit_at_mode.R's header for the full set
+# of staleness defects found with it.
 
 
 sp <- ccx_spinup(p_mode)
@@ -33,7 +36,12 @@ F$c14_cosmo <- sp$prod_c14
 F$c14_bomb  <- F$c14_bomb * (pm$bomb_total / 102)
 for (cc in c("e_luc_NH","e_luc_SH","cum_luc_NH","cum_luc_SH")) F[[cc]] <- F[[cc]] * pm$luc_scale
 attr(F, "luc_scale") <- pm$luc_scale
-el <- ccx_forcing_eluc_annual(F); el$eluc <- el$eluc * pm$luc_scale
+# luc_scale applied ONCE: `F` already carries it (its four LUC columns were scaled
+# just above), so the second multiply here was luc_scale SQUARED on the gross-land-sink
+# reconstruction. `luc` is read ONLY by `gcb_land_sink`. Fixed 2026-08-22, and the fix
+# was then re-broken the same day by an over-eager comment-stripping edit and caught by
+# the lint in tests/testthat/test-luc-scale.R -- which is the argument for the lint.
+el <- ccx_forcing_eluc_annual(F)
 r  <- ccx_run_fast(sp, F); obs <- ccx_prepare_obs()
 
 LL <- function(err) ccx_loglik(r$out, obs, err, luc = el,
@@ -45,9 +53,23 @@ ok <- TRUE
 say <- function(lbl, pass) { cat(sprintf("  %-56s %s\n", lbl, if (pass) "PASS" else "*** FAIL ***"))
                              if (!pass) ok <<- FALSE }
 
-# ---- gate 1: legacy parity ------------------------------------------
-cat("\n=== GATE 1: legacy parity (sigma_d13c supplied, rep_dC absent) ===\n")
-legacy <- LL(list(sigma_d13c = pm$sigma_d13c, sigma_d14c = pm$sigma_d14c,
+# ---- gate 1: does this reconstruction reproduce the stored streams? --
+# RETARGETED 2026-08-22. It used to assert LEGACY parity -- `sigma_d13c`
+# supplied, `rep_dC` absent -- against the arm file's stored streams. That was
+# the right test when the file was written, because the streams then on disk had
+# been computed the legacy way. It is the wrong test now, twice over:
+# `sigma_d13c` was RETIRED on 2026-08-18 (so `pm$sigma_d13c` is NULL and the
+# "supplied" branch is unreachable from a 21-parameter mode), and the stored
+# streams were recomputed WITH `rep_dC` by calibration/repair_arm_streams.R.
+# The gate was failing by 880.6 log-units against a contract that no longer
+# describes the object it was checking -- a stale gate reads exactly like a real
+# defect, which is why it is retargeted rather than loosened.
+#
+# What it checks now is the property that actually has to hold: this file's
+# reconstruction reproduces the stored decomposition under the CURRENT
+# objective. The absence contract itself is exercised by gate 1b below.
+cat("\n=== GATE 1: reconstruction reproduces the stored streams ===\n")
+legacy <- LL(list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
                   grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c))
 worst <- 0
 for (nm in names(m$streams)) {
@@ -56,6 +78,19 @@ for (nm in names(m$streams)) {
 }
 cat(sprintf("    worst |delta| over %d streams: %.3e\n", length(m$streams), worst))
 say("every stored stream reproduced to 1e-8", worst < 1e-8)
+
+# ---- gate 1b: the ABSENCE CONTRACT, checked against itself -----------
+# R/likelihood.R promises: `sigma_d13c` ABSENT => sd is LIK_D13C_REP_ERR alone;
+# PRESENT => sqrt(s^2 + REP^2). Supplying 0 must therefore equal supplying
+# nothing. This needs no stored file and so cannot go stale the way gate 1 did.
+cat("\n=== GATE 1b: the sigma_d13c absence contract ===\n")
+.base <- LL(list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
+                 grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c))
+.zero <- LL(list(sigma_d13c = 0, sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
+                 grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c))
+.w <- max(abs(unlist(.zero)[names(unlist(.base))] - unlist(.base)))
+cat(sprintf("    worst |delta| between absent and sigma_d13c = 0: %.3e\n", .w))
+say("supplying sigma_d13c = 0 equals supplying nothing", .w < 1e-8)
 
 # ---- gate 2: zero is a no-op ----------------------------------------
 cat("\n=== GATE 2: rep_dC = 0 is bit-identical to rep_dC absent ===\n")

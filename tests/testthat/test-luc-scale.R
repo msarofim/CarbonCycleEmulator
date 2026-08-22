@@ -149,3 +149,85 @@ test_that("the land term compares GROSS to GROSS", {
   expect_gt(mean(abs(g$eluc)), 0.5)          # GtC/yr, GCB-scale land-use flux
   expect_gt(abs(ref - net), 1)
 })
+
+# =====================================================================
+# THE DOUBLE-SCALING LINT AND ITS NUMERICAL TWIN (added 2026-08-22)
+#
+# On 2026-08-22 eight files were found applying `luc_scale` TWICE to the
+# gross-land-sink reconstruction: the forcing's four LUC columns were scaled,
+# and then the annual E_LUC was derived from THAT already-scaled forcing and
+# scaled again. ccx_make_logpost() never had it, so no FIT was affected -- but
+# the per-stream `gcb_land_sink` those diagnostics reported was, including the
+# decomposition stored in mode_fit_pump{N,D}.rds that handoffs rank work from.
+#
+# A helper alone does not fix this, because nothing forces a new diagnostic to
+# use it. The lint does: it fails on the SIGNATURE, wherever it is written.
+# =====================================================================
+
+test_that("no file derives eluc from an already-scaled forcing and scales it again", {
+  root  <- ccx_root()
+  files <- c(list.files(file.path(root, "R"), "\\.R$", full.names = TRUE),
+             list.files(file.path(root, "calibration"), "\\.R$", full.names = TRUE),
+             list.files(file.path(root, "app"), "\\.R$", full.names = TRUE))
+  offenders <- character()
+  for (f in files) {
+    L <- readLines(f, warn = FALSE)
+    hits <- grep("\\$eluc\\s*<-.*luc_scale", L)
+    for (j in hits) {
+      src <- sub(".*ccx_forcing_eluc_annual\\(\\s*([A-Za-z_.][A-Za-z0-9_.]*).*", "\\1", L[j])
+      if (identical(src, L[j])) next          # eluc source not on this line: fine
+      ctx <- L[max(1, j - 20):(j - 1)]
+      # was THAT SAME variable's LUC column set multiplied by luc_scale above?
+      scaled <- any(grepl(paste0("\\b", src, "\\[\\[[a-z]+\\]\\]\\s*<-.*luc_scale"), ctx)) ||
+                any(grepl(paste0("\\b", src, "\\$e_luc_NH\\s*<-.*luc_scale"), ctx))
+      if (scaled) offenders <- c(offenders, sprintf("%s:%d", basename(f), j))
+    }
+  }
+  expect_equal(offenders, character(),
+               info = paste("luc_scale applied twice at:", paste(offenders, collapse = ", ")))
+})
+
+test_that("ccx_scaled_forcing reproduces ccx_make_logpost's likelihood exactly", {
+  # THE NUMERICAL TWIN OF THE LINT. The lint catches the known signature; this
+  # catches any OTHER way the canonical reconstruction could drift from the
+  # objective, which is the property that actually has to hold.
+  #
+  # Evaluated at a u WE choose (the default init) rather than at a stored
+  # u_mode: u_mode decodes under the refit's h_ml bound [85,120], which
+  # ccx_default_params() cannot reconstruct, so comparing there would indict the
+  # product for a property of the producer (memory ccx_hml_band_provenance).
+  #
+  # AND IT IS EVALUATED OFF THE INIT, WHICH IS THE WHOLE POINT. `luc_scale`'s
+  # init is exactly 1 and `bomb_total`'s is exactly the reference 102, so at the
+  # bare init a double-scaling is INVISIBLE (1 * 1 = 1) and this test passes
+  # against a broken helper. Measured, not assumed: mutating ccx_scaled_forcing()
+  # to square luc_scale left the init version at FAIL 0. Both are perturbed.
+  u <- ccx_init_unc()
+  u[["luc_scale"]]  <- u[["luc_scale"]]  + 0.15
+  u[["bomb_total"]] <- u[["bomb_total"]] + 0.15
+  pv <- ccx_unc_to_par(u)
+  stopifnot(abs(pv$luc_scale - 1) > 0.05, abs(pv$bomb_total - CCX_BOMB_REF) > 1)
+
+  lp    <- ccx_make_logpost()
+  prior <- sum(vapply(CCX_PARAM_NAMES, function(n) {
+    sc <- CCX_PARAM_TABLE[[n]]
+    sc$prior(pv[[n]]) + .log_jac(u[[n]], sc)
+  }, numeric(1)))
+  ll_obj <- lp(u) - prior                       # the objective's own likelihood
+
+  p <- ccx_default_params()
+  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
+  p$gamma_enso <- pv$gamma_enso
+  sp <- ccx_spinup(p)
+  SF <- ccx_scaled_forcing(sp, luc_scale = pv$luc_scale, bomb_total = pv$bomb_total)
+  o  <- ccx_run_fast(sp, SF$F)$out
+  ll_rec <- ccx_loglik(o, ccx_prepare_obs(),
+                       list(sigma_d14c = pv$sigma_d14c, rep_dC = pv$rep_dC,
+                            grad_off_co2 = pv$grad_off_co2,
+                            grad_off_d13c = pv$grad_off_d13c),
+                       luc = SF$eluc, deep = sp$diagnostics$d14c_bottom_box,
+                       ocean_grad = ccx_ocean_grad_scored(o, sp))
+
+  expect_true(is.finite(ll_obj))
+  expect_equal(ll_rec, ll_obj, tolerance = 1e-8)
+})

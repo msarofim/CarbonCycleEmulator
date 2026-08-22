@@ -2,6 +2,77 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-22c — The luc_scale bug swept repo-wide; the arm files repaired; two lint gates
+
+Marcus: fix the stored streams and debug the code so the next step starts clean. Eight sites,
+two mutation-tested gates, both arm files repaired, and one claim of mine withdrawn.
+
+**THE SWEEP — eight sites, not one.** A mechanical scan of every file that derives an annual
+E_LUC and multiplies it by `luc_scale` found **eight** applying it twice (the forcing's LUC
+columns scaled, then `eluc` derived from that already-scaled forcing and scaled again):
+`run_modefind_pump_arms.R:452`, `diag_driver_audit.R`, `diag_fit_at_mode.R`,
+`diag_phi_eff_profile.R`, `diag_rep_dC_gates.R`, `diag_rep_dC_pinned.R`,
+`diag_seas_channel_decomp.R`, `diag_seas_obs_drivers.R`. Four near-identical-looking sites were
+**correct** and left alone — they take `eluc` from the UNSCALED base (`diag_dic_gradient.R`,
+`diag_h_ml_roles.R`, `diag_ocean_candidates.R`, `diag_hml_band_discontinuity.R`), which is the
+discriminator the first two passes of the scan both missed. **Blast radius is exactly one
+stream:** `ccx_loglik` reads `luc` only in the `gcb_land_sink` block.
+
+**THE STRUCTURAL FIX.** `ccx_load_mode()` and `ccx_scaled_forcing()` promoted to `R/calibrate.R`;
+the latter returns the forcing AND its matching `eluc` from one call, so they cannot disagree.
+`CCX_BOMB_REF` / `CCX_LUC_COLS` named in `R/constants.R`. But a helper nobody must use fixes
+nothing, so `test-luc-scale.R` gained **two gates**: a repo lint on the two-statement signature,
+and a numerical twin asserting the canonical reconstruction equals `ccx_make_logpost`'s own
+likelihood to 1e-8.
+
+**BOTH GATES WERE MUTATION-TESTED, AND THE SECOND ONE FAILED ITS MUTATION.** Squaring `luc_scale`
+inside the helper left the numerical gate at FAIL 0 — because it evaluated at `ccx_init_unc()`,
+where `luc_scale` init is exactly 1 and `bomb_total` exactly the reference 102, so a double
+scaling is invisible. Both are now perturbed off their inits and the gate asserts they are. It
+then catches the squared-luc mutation (−11.2) and a dropped-bomb_total mutation (+696). **The
+lint later caught a regression I introduced myself** — a comment-stripping edit silently reverted
+the fix in `diag_rep_dC_gates.R` — which is the argument for the lint over the helper.
+
+**ARM FILES REPAIRED** by new `calibration/repair_arm_streams.R`; pre-repair copies in
+`output/quarantine/20260822_luc_scale_squared_streams/` with a README. Each file now carries
+`streams` (this par_mode under the CURRENT objective), `streams_as_fitted` (what the refit stored)
+and `streams_provenance`. **`par_mode`, `logpost`, `hessian`, `cov`, `eigen` are untouched — the
+objective never had the bug, so no fitted quantity was ever affected.** Two vintages now live in
+each file deliberately, and the provenance field says so. All 21 streams reproduce to 0.000.
+
+**`diag_fit_at_mode.R` WAS COMPREHENSIVELY STALE — five defects, all silent, and its own gate
+printed MISMATCH on all 14 rows while the file went on to print the rankings that were quoted
+into memory `ccx_fit_at_mode`.** (1) The `seas_drivers/sst_obs <- 0` escape hatch claimed the mode
+was fitted under the pre-08-18 seasonal sine; the 08-21 file carries DRIVER parameters and no sine
+knobs, so it ran the diagnostic at a different model from the fit. (2) `rep_dC` never applied, so
+both CO2 level rows reported the 5.18 ppm offset as model bias. (3) `sigma_d13c` retired 08-18 ⇒
+`sqrt(NULL^2+REP^2)` is numeric(0) ⇒ both d13C level rows silently reported **n = 0** and were
+dropped from every ranking. (4) ice still on `co2_NH`. (5) **gate 7's land σ hardcoded 0.9** — the
+value `LIK_GCB_LAND_SD` held before 2026-08-14, when it became 0.5. All fixed; the gate is now
+FATAL and its allow-list is empty. The same stale hatch was removed from `diag_rep_dC_gates.R` and
+`diag_station_representation.R`, and `diag_rep_dC_gates.R`'s GATE 1 was **retargeted**: it was
+asserting legacy parity against stored streams that are no longer legacy, failing by 880.6
+log-units against a contract that no longer described the object. A new gate 1b checks the
+absence contract against itself, so it cannot go stale the same way.
+
+**CONSEQUENCE FOR MEMORY `ccx_fit_at_mode`: "gate 7 PASSES (−0.6σ/+0.9σ)" IS WRONG.** It rests on
+the stale 0.9. At `LIK_GCB_LAND_SD` = 0.5 the shipped mode is ocean −0.6σ, **land +1.9σ — gate 7
+FAILS**, consistent with the +2.04σ measured independently in 2026-08-22b. Its "d13C levels are
+pure BIAS" also came from the un-offset version; with `rep_dC` applied the d13C level biases are
++1.12 and **−0.77** z — small and OPPOSITE in sign between stations, which is not a common-mode
+bias at all.
+
+**TRIED AND WITHDRAWN — "`gamma_enso` is dropped by `intersect(names(p), CCX_PARAM_NAMES)`".** I
+wrote this into a code comment and a docstring off a crude grep, then checked before acting on it
+across 11 files: `gamma_enso` IS a field of `ccx_default_params()` and IS in `CCX_PARAM_NAMES`, so
+intersect() picks it up and it was never dropped anywhere. Both comments corrected. The six
+parameters intersect() really does drop are `bomb_total`, `luc_scale`, `sigma_d14c`, `rep_dC`,
+`grad_off_co2`, `grad_off_d13c`; `app/global.R`'s explicit `gamma_enso` line is redundant on the
+mode path, not load-bearing.
+
+977/979 tests pass — the same by-design `test-fluxes.R:99,:100` pair. Gate 12's numbers are
+unchanged by all of this (11.74 / 23.97 / 39.36), as they must be: the bug never touched a fit.
+
 ## 2026-08-22b — DESIGN gates 4/5/7/12 at the vector the app actually ships
 
 Discharges panel item #7 ("DESIGN gates measured at defaults; the app ships the mode"). Since

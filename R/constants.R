@@ -339,3 +339,10 @@ ccx_check_constants <- function(quiet = FALSE) {
   }
   invisible(prov)
 }
+
+# Reference bomb-14C total and the four land-use forcing columns. Both were
+# repeated as literals in ccx_make_logpost() and in a dozen diagnostics; named
+# here so ccx_scaled_forcing() and its callers cannot drift apart (promoted
+# 2026-08-22 with the luc_scale double-scaling fix).
+CCX_BOMB_REF <- 102
+CCX_LUC_COLS <- c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH")
