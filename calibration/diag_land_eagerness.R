@@ -191,3 +191,51 @@ cat("   MID-CENTURY column, which is a pure CO2-vs-ice comparison and is definit
 cat("   And note CO2 2024 falls to 409.2: the SSP series is not a drop-in replacement,\n")
 cat("   it is a measurement of how much of the mid-century defect the LUC TIME PROFILE\n")
 cat("   can carry.)\n")
+
+# ---- TEST E: IS IT A GAIN PROBLEM, OR A PARTITION PROBLEM? ----------
+# TEST C killed "the land sink is too eager" as a single-knob fix, and
+# diag_gamma_iav.R then killed the constraint that would have pinned q10. Read
+# the mode's three misses TOGETHER rather than one at a time:
+#
+#   land sink   +2.04 sd  TOO STRONG
+#   ocean sink  -0.62 sd  TOO WEAK
+#   CO2 level   ~+5 ppm   TOO HIGH (laundered by rep_dC, diag_rep_dC_shape.R)
+#
+# TOTAL uptake is roughly right and the PARTITION is wrong. That reframes the
+# whole thing: a knob that scales land uptake down raises CO2 (TEST B: +20 to
+# +25 ppm), because the carbon the land stops taking goes into the air. But a
+# knob that moves uptake FROM the land TO the ocean fixes all three at once --
+# ocean up, CO2 down, and land down TWICE (directly, and again because lower CO2
+# means less fertilisation).
+#
+# WANTED, and registered before the numbers: d(land) < 0 AND d(ocean) > 0 AND
+# d(CO2) < 0. A lever that does all three is a partition lever and is what the
+# mode actually needs. If none does, the defect is not in the ocean parameters.
+hdr("TEST E -- the OCEAN levers, scored on the PARTITION not on one sink")
+le_ocean <- function(lab, mod) {
+  p <- mod(p0); r <- le_score(p)
+  cat(sprintf("  %-22s %7.2f %+7.2f %8.2f %+9.3f %9.1f\n", lab, r$land,
+              (r$land - LE_GCB_LAND) / LE_GCB_LAND_SD, r$ocean, r$mid, r$co2))
+  invisible(r)
+}
+le_ocean("mode", function(p) p)
+for (v in c(95, 105, 120)) le_ocean(sprintf("h_ml = %d", v), function(p) { p$h_ml <- v; p })
+for (v in c(8000, 12000, 20000)) le_ocean(sprintf("kz = %d", v), function(p) { p$kz <- v; p })
+for (v in c(3000, 4000)) le_ocean(sprintf("k_w = %d", v), function(p) { p$k_w <- v; p })
+for (v in c(400, 550)) le_ocean(sprintf("pump_grad = %d", v), function(p) { p$pump_grad <- v; p })
+
+cat("\nTEST E VERDICT -- which levers move the PARTITION the right way?\n")
+cat(sprintf("  %-22s %10s %10s %10s %10s\n", "lever", "d(land)", "d(ocean)", "d(CO2)", "verdict"))
+ocean_levers <- list(
+  list("h_ml 87.6 -> 120",   function(p) { p$h_ml <- 120; p }),
+  list("kz 6461 -> 20000",   function(p) { p$kz <- 20000; p }),
+  list("k_w 2024 -> 4000",   function(p) { p$k_w <- 4000; p }),
+  list("pump_grad 298 -> 550", function(p) { p$pump_grad <- 550; p }),
+  list("q10 1.09 -> 2.0",    function(p) { p$q10 <- 2.0; p }))
+for (L in ocean_levers) {
+  r <- le_score(L[[2]](p0))
+  dl <- r$land - base$land; do_ <- r$ocean - base$ocean; dc <- r$co2 - base$co2
+  v <- if (dl < 0 && do_ > 0 && dc < 0) "PARTITION" else
+       if (dl < 0 && do_ > 0) "part(CO2 up)" else "no"
+  cat(sprintf("  %-22s %+10.3f %+10.3f %+10.2f %10s\n", L[[1]], dl, do_, dc, v))
+}

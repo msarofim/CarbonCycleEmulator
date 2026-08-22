@@ -16,7 +16,8 @@ this one; 21c is provenance for everything except §6.
    low — it was **1.1**. And **DESIGN §6 gate 7 is NOT stale**, contra 21c §6. §3.
 4. **`rep_dC` = +5.18 σ is not a representation offset.** It is 97 % common-mode and it absorbs
    the late half of a **~9 ppm swing** that changes sign in the 1940s. §4. **This is the
-   session's real finding and it is bigger than the app.**
+   session's real finding and it is bigger than the app.** **It survived four obs-artefact
+   tests (§10) — and those tests localised it to a mid-century growth-rate pause.**
 5. **The absolute CO₂ level is effectively unconstrained after 1958** — 210 log-units of
    likelihood per log-unit of prior, against an ice-core term ~100× weaker than the stations.
    The calibration fits the **shape** of the Keeling curve, not its height. §4.
@@ -26,9 +27,12 @@ this one; 21c is provenance for everything except §6.
 7. Cold start measured **73 s** unloaded. DEPLOY.md claims ~20. Untested against shinyapps.io. §6.
 8. **974 / 976 tests pass** — the by-design `test-fluxes.R:99,:100` pair, unchanged.
 9. Still no posterior. Nothing here changes that.
-10. **The science has NOT reached a good-enough state for a research claim about levels or
+10. **"The land sink is too eager" (§7) is at best HALF the story and is not sufficient** — no
+    land parameter fixes both ends of the swing (§11). q10 is the right knob for the modern
+    half; ~40 % of the mid-century half is the land-use INPUT's time profile.
+11. **The science has NOT reached a good-enough state for a research claim about levels or
     sinks. It has for a pedagogical app about shape and mechanism** — with captions that say so.
-    §7 is the argument.
+    §7 is the argument, and §11 sharpens it.
 
 ---
 
@@ -287,11 +291,17 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 > committed — do not re-open it. **Do NOT trust handoff 21c §6's numbers; §3 here shows they do
 > not reproduce.**
 >
-> **The open scientific question is §4: a ~9 ppm swing, sign-changing in the 1940s, absorbed by
-> a 5.2 σ `rep_dC`.** The hypothesis worth pre-registering (§7) is a land sink that is too
-> eager with the wrong time dependence — it would also explain the +2.04 σ land sink and gate
-> 12's low point IRF. **Design the test before running anything: a refit will move numbers
-> without addressing it.**
+> **The open scientific question is §4/§10: a ~9 ppm swing that survived four obs-artefact
+> tests and localises to a mid-century growth-rate pause the model does not reproduce.**
+> §11 killed the simple version of §7's hypothesis — **no land parameter fixes both ends** — so
+> do NOT refit. §11a and §12 say what is actually needed.
+>
+> **§12 closed three candidate directions with measurements** — the γ_IAV term (absorbed by
+> `gamma_enso`, 17× leverage per prior σ, and its own signal points the wrong way), the `kz`
+> partition lever (the bracket is redundant but the pin is real and survives a free `rep_dC`),
+> and single-knob land eagerness. **The one lever that moved the mid-century end is the land-use
+> inventory's TIME PROFILE (§12c) — start there, and ask what E_LUC(t) SHAPE the CO₂ record
+> wants rather than refitting `luc_scale`, which is one number and cannot change a shape.**
 >
 > **The open app decisions are Marcus's, not mine:** whether the Keeling panel applies `rep_dC`
 > (§4a), and what to do about the 13.1 ppm tab-1/tab-5 inventory step (§5).
@@ -301,3 +311,225 @@ cd ~/Documents/2026/CodeProjects/CarbonCycleEmulator && claude --remote-control 
 >
 > **Do NOT run the §2 refit** until a soil-damping factor with independent provenance exists.
 > **Do NOT buy the Takahashi climatology.** Both unchanged from 21c.
+
+
+---
+
+## 10. THE SWING SURVIVED FOUR OBS-ARTEFACT TESTS — AND THEY LOCALISED IT
+
+**Marcus 2026-08-21 challenged §4 on exactly the right grounds:** ice and air are not the same
+measurement. Firn air is enclosed over years, so an ice sample is a *smoothed* atmosphere with a
+gas-age offset from its ice age; cores differ in accumulation rate, hence in smoothing width and
+offset; and the mid-century is where several CO₂ products are awkward.
+
+**§4's own cross-check did not answer this and I over-sold it.** Ice and SPO flask agreeing to
+0.31 ppm is real, but **that overlap starts in 1957 and the crossover is at ~1945–1955** — inside
+the window where ice is the only product. It tested the wrong decade.
+
+`calibration/diag_co2_level_swing.R`, four tests, each able to kill the finding on its own:
+
+**TEST 1 — BY CORE. The strongest available, and it holds.** Law Dome is five cores with **two
+gas-age offsets** (DE08/DE08-2 at 31 yr, DSS/DSS0506 at 60) and different accumulation:
+
+| window | n | all | DE08 | DE08-2 | DSS | DSSW20K |
+|---|---|---|---|---|---|---|
+| 1850–1900 | 51 | −1.79 | −1.81 | — | −3.24 | — |
+| **1900–1940** | 66 | −3.78 | **−3.85** | (2) | **−3.86** | (1) |
+| 1940–1958 | 41 | −0.60 | −0.40 | −1.59 | −0.30 | (1) |
+| **1958–1997** | 52 | +5.05 | **+4.44** | **+5.45** | (1) | **+5.22** |
+
+Two independent cores, different Δage, **0.01 ppm apart** in 1900–1940. Three cores within
+1 ppm in 1958–1997. The two gas-age families differ by **0.73 ppm** across 1900–1962 — that is
+the scale of any product inconsistency, against an 8.8 ppm swing. **8.3 of the 8.8 happens
+within DE08 alone.**
+
+**TEST 2 — GROWTH RATE. Marcus's "weird pause" is real, and it IS the crossover.**
+
+| decade | ice | model | model−ice | | decade | ice | model | model−ice |
+|---|---|---|---|---|---|---|---|---|
+| 1890s | 0.289 | 0.197 | −0.092 | | 1940s | 0.376 | 0.527 | **+0.151** |
+| 1910s | 0.465 | 0.367 | −0.098 | | **1950s** | **0.207** | 0.498 | **+0.291** |
+| 1930s | 0.279 | 0.425 | +0.146 | | 1960s | 0.523 | 0.856 | **+0.333** |
+
+**The ice-derived growth rate nearly halves in the 1950s (0.376 → 0.207) and then jumps to
+0.523. The model runs smoothly through it.** So §4's "under-accumulates then over-accumulates"
+understated how localised this is: the error is −0.05 to −0.10 ppm/yr in 1870–1920, **+0.15 to
++0.33 in 1930–1965**, and back to ~0 by the 1970s. **It is one mid-century feature, not a drift.**
+
+**TEST 3 — FIRN SMOOTHING, scanned rather than asserted** (the repo carries no citation for a
+width, so none is claimed). Convolving the *model* with Gaussian air-age kernels — the ice
+already IS a smoothed atmosphere, so the model is what gets smoothed down to it:
+
+| kernel sd (yr) | 0 | 5 | 10 | 20 | 30 |
+|---|---|---|---|---|---|
+| swing (ppm) | 8.82 | 9.01 | 9.41 | 7.44 | 8.64 |
+
+**No plausible width removes it**, and the effect is not even monotone.
+
+**TEST 4 — GAS AGE.** A −10 yr shift *does* collapse the swing to 1.68 — and drives **both** ends
+to −7.50 / −5.82 ppm, trading a swing for a large uniform low bias. **That escape is closed
+independently:** the post-1958 end is corroborated by **SPO flask data**, which has no firn and
+no age ambiguity, at +4.51 / +5.29 / +5.08 across 1958–2025. A gas-age fix would have to break
+a measurement that has no gas age.
+
+### 10a. WHAT THIS DOES NOT SETTLE
+
+**Whether the mid-century pause is real atmosphere or an enclosure artefact COMMON to all Law
+Dome cores.** TEST 1 rules out core-*specific* artefacts; it cannot rule out a shared firn
+process, because every core here is from one site. Resolving it needs an **independent core**
+(WAIS Divide, Siple Dome) or the Law Dome literature. **There is no papers folder on this
+machine and no citation is asserted.** This is the open question, not an assumed answer.
+
+---
+
+## 11. NO LAND KNOB FIXES BOTH ENDS — §7's HYPOTHESIS IS HALF THE STORY
+
+`calibration/diag_land_eagerness.R`. §7 floated "a land sink that is too eager" as the single
+hypothesis explaining the land sink, gate 12's low IRF, and the swing. **Built so it could lose,
+and it half-lost.**
+
+| lever | d(land sink) | d(mid-century err) | verdict |
+|---|---|---|---|
+| q10 1.09 → 2.0 | −0.547 | **+0.009** | trades |
+| beta_max 0.93 → 0.60 | −1.138 | +0.078 | trades |
+| fert_k 504 → 1000 | −1.299 | +0.105 | trades |
+
+**No land PARAMETER fixes both ends**, and the reason is structural: every one of them is a
+*gain* on a sink, and a gain moves 1930–1965 and 2015–2024 the same way. Refitting cannot find
+what no parameter can express.
+
+**q10 is nonetheless the right knob for the modern half**, and by a wide margin:
+
+| setting | land | ocean | mid err | CO₂ 2024 |
+|---|---|---|---|---|
+| q10 = 1.0907 (mode) | +2.04 σ | −0.62 σ | +0.228 | 423.8 |
+| q10 = 1.50 | +1.44 σ | −0.47 σ | +0.232 | 426.2 |
+| **q10 = 2.00** | **+0.94 σ** | **−0.37 σ** | +0.237 | 428.3 |
+| beta_max → 0.60 | −0.24 σ | +0.25 σ | +0.305 | **444.0** |
+| fert_k → 1000 | −0.56 σ | +0.40 σ | +0.332 | **449.2** |
+
+**q10 → 2.0 improves BOTH sinks for +4.5 ppm of CO₂ and ~zero mid-century damage.** The
+fertilisation knobs buy more land-sink reduction and cost +20–25 ppm. q10 acts through warming,
+which is concentrated where the sink error is; fertilisation acts on the whole record.
+
+**Why q10 sits at 1.0907** — respiration feedback of 1.011 at today's warming, i.e. none.
+21c §2 established that the **seasonal** rows put it there through the exact ridge with
+`seas_T_amp_NH`, and that those rows move only **4.3 log-units** across the whole q10 range.
+**q10 is set by a seasonal amplitude prior, not by any annual carbon observation.** And 21c
+measured `beta_max`/`fert_k` absorbing **85 %** of a q10 change when free — so a refit undoes it.
+Note also that 21c §2d's re-anchored prediction (q10 → 1.35–1.5) lands at **+1.44 σ**, still
+outside gate 7. **Even the blocked refit does not close the land sink.**
+
+**TEST D — and ~40 % of the mid-century half is the INPUT, not the sink.** Swapping the land-use
+series for SSP/LUH2 cuts the mid-century error **+0.228 → +0.137** while barely touching the land
+sink (−0.047). It is the only lever tested that improves that end at all. **Not a drop-in** —
+2024 CO₂ falls to 409.2 — but it measures how much of the defect the LUC *time profile* can
+carry, and it lines up with §5's 91.4 GtC inventory disagreement.
+
+### 11a. SO WHAT IS ACTUALLY NEEDED
+
+**An observable that separates the TEMPERATURE sensitivity of land carbon from the CO₂
+sensitivity. Nothing currently scored does.** The seasonal rows do not identify q10 (4.3
+log-units), and the annual GCB sink levels constrain a *level*, not a sensitivity. The standard
+candidate is the **interannual sensitivity of the CO₂ growth rate to temperature** — a covariance
+this repo has every input for and does not use. That is a **likelihood term, not a refit**, and
+§12 measures whether it would actually bite before anything is added to the objective. **It does
+not.**
+
+
+---
+
+## 12. THE NEXT IMPROVEMENT STEP: THREE DOORS TESTED, THREE CLOSED, ONE LEFT OPEN
+
+§11a named the missing observable: an interannual constraint separating the temperature
+sensitivity of land carbon from the CO₂ sensitivity. **Adding a likelihood term changes the
+objective, and in this repo that means REFIT OWED and nothing comparable across it — so the term
+was measured before being proposed, and it was built so the answer could be no.** It was no.
+
+### 12a. `diag_gamma_iav.R` — the γ_IAV term is DEAD, for two independent reasons
+
+Slope of detrended CO₂ growth rate on detrended GMST, 1959–2024. Both a quadratic detrend and a
+first-difference filter, because "anomaly" is a choice.
+
+| series | ppm/yr/K | ± se | GtC/yr/K |
+|---|---|---|---|
+| **observed** (MLO+SPO, quad) | 1.779 | 0.433 | 3.78 |
+| **observed** (MLO+SPO, diff) | 2.238 | 0.460 | 4.75 |
+| model at the mode (q10 = 1.09) | 1.581 | | 3.36 |
+| model at q10 = 2.0 | 2.491 | | 5.29 |
+
+**Reason 1 — the observable points the WRONG WAY.** The model already reproduces observed γ_IAV
+at its current low q10, within ~0.5 se. Raising q10 to 2.0 — what the land sink wants —
+**overshoots the observation by 1.0–1.6 se.** So this constraint would push q10 *down*, not up.
+
+**Reason 2 — it would be absorbed before it ever reached q10.** The model has an explicit
+ENSO→soil flux, `gamma_enso`, with a **wide N(0, 2)** prior:
+
+| | span of γ_IAV | per posterior sd |
+|---|---|---|
+| q10 over 1.09–2.50 | +1.229 ppm/yr/K | +0.0154 |
+| `gamma_enso` over 0.0–3.0 | +3.894 ppm/yr/K | **+0.2619** |
+
+**`gamma_enso` has 17× the leverage per prior σ.** A γ_IAV term would be eaten by the nuisance
+parameter — the same trap `beta_max`/`fert_k` set for q10 in the annual budget. **A constraint a
+nuisance parameter can absorb is not a constraint.** And note what this implies about the mode:
+the model matches observed γ_IAV through a *fitted ENSO flux*, not through respiration
+temperature sensitivity. The two are degenerate.
+
+### 12b. The partition reframing — and `diag_kz_railed.R` closing it
+
+Reading the mode's three misses together rather than one at a time: **land +2.04 σ too strong,
+ocean −0.62 σ too weak, CO₂ ~+5 ppm too high.** Total uptake is roughly right and the
+**partition** is wrong. That predicts a specific kind of lever — one moving uptake *from* land
+*to* ocean, which fixes all three at once (ocean up, CO₂ down, land down twice, because lower
+CO₂ also means less fertilisation). `diag_land_eagerness.R` TEST E found exactly one:
+
+| lever | d(land) | d(ocean) | d(CO₂) | |
+|---|---|---|---|---|
+| h_ml 87.6 → 120 | −0.021 | +0.044 | −1.07 | partition, but tiny |
+| **kz 6461 → 20000** | **−0.473** | **+1.271** | **−23.31** | **partition** |
+| k_w 2024 → 4000 | −0.024 | +0.044 | −1.42 | partition, but tiny |
+| pump_grad 298 → 550 | 0.000 | 0.000 | 0.00 | nothing |
+| q10 1.09 → 2.0 | −0.547 | +0.099 | **+4.48** | not a partition lever |
+
+**And kz = 8000 lands the ocean sink on 3.20 against GCB's 3.22 ± 0.40** and takes 4.2 ppm off
+the level. The mode sits at 6461.5 — **97.4 % of the way to its [3942.5, 6528] ceiling** — which
+looked exactly like a truncated optimum, and the bracket is a bound used as a *proxy for an
+observable* (deep-ocean Δ¹⁴C) whose own likelihood term now exists. `R/calibrate.R` even states
+the exit condition: *"delete it only after a refit shows the term holding kz alone."*
+
+**The door is closed, and by three separate measurements:**
+
+1. **The likelihood turns over at kz = 6462 — INSIDE the bracket.** kz sits at 97.4 % of the
+   range because that is where the data put it, not because it is against a wall. The bracket is
+   **redundant but not binding**; removing it changes nothing.
+2. **What holds kz is the CO₂ level streams, by two orders of magnitude** — −138 at the mode
+   against −581 at kz 8000, while `d14c_deep_ocean` moves 5.8 log-units and `gcb_ocean_sink`
+   1.9. The deep-¹⁴C term *prefers lower* kz; the ocean-sink term prefers higher; **the CO₂
+   record outvotes both.**
+3. **And `rep_dC` does not rescue it.** Since those streams carry a free +5.18 σ offset, the
+   obvious suspicion was that the pin is an artefact of freezing it — 21c §2c's trap, committed
+   by me. **Profiled with `rep_dC` re-optimised at every kz, the optimum moves 6462 → 6528,
+   worth +0.6 log-units.** The pin survives: `rep_dC` can *translate* the record and kz changes
+   its *shape*, and a free offset does not rescue a curvature miss.
+
+**One corollary worth keeping, and it is good news.** The bracket ceiling 6528 was bisected so kz
+maps to the observed deep-Δ¹⁴C bracket edge, −150 ‰. The CO₂ record's own optimum lands at 6462
+**independently**. Two unrelated observables — the shape of the atmospheric CO₂ record and the
+radiocarbon age of the deep ocean — **put kz in the same place to within 1 %.** That belongs in
+the app somewhere a reader will see it.
+
+### 12c. WHAT IS LEFT, AND WHAT THIS SESSION BOUGHT
+
+**Closed, with measurements, so nobody re-opens them:** the γ_IAV term (§12a), the kz partition
+lever (§12b), and the single-knob "land sink is too eager" hypothesis (§11).
+
+**Still open, and now the only lever that moved the right end:** the **land-use inventory's time
+profile**. §11 TEST D cut the mid-century error 40 % (+0.228 → +0.137) by swapping GCB for
+SSP/LUH2, and §5 measured the two inventories 91.4 GtC apart in cumulative LUC. LUC is also the
+input with the widest genuine uncertainty and the one `luc_scale` already discounts by 11 %.
+**A next session should start there — and start by asking what E_LUC(t) shape the CO₂ record
+wants, not by refitting `luc_scale`, which is a single number and cannot change a shape.**
+
+**Do NOT refit.** §11 showed no land parameter expresses the defect and §12b showed the ocean
+parameters are pinned. A refit moves numbers without addressing either.
