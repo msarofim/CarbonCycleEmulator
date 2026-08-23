@@ -264,6 +264,62 @@ if (is.null(.og_h))
        " -- the bound does not do what it was chosen to do")
 cat(sprintf("GATE H3: all three rows LIVE at init (DIC %+.2f, d13C %+.4f, ALK %+.2f). OK\n",
             .og_h$dic, .og_h$d13c, .og_h$alk))
+
+# ---- PLACEMENT NOTE, and it cost a dead run ------------------------
+# This block was first written ABOVE the h_ml override and the run died on
+# "the h_ml override touched more than h_ml: h_ml, luc_scale". GATE H1 snapshots
+# the WHOLE parameter table and asserts that only `h_ml` moved across the
+# override -- so ANY other table edit must come AFTER it, not before. The gate
+# worked exactly as designed; the block was in the wrong place. Leave it here.
+# ---- OPTIONAL PARAMETER PIN (added 2026-08-23) ----------------------
+# WHY. The 2026-08-23 sink run showed the model ROUTING AROUND a prescribed
+# 1942-49 removal: `luc_scale` moved +5.52 posterior sd (0.8984 -> 1.0852,
+# crossing 1.0) and put 54 GtC of land-use emissions back against the sink's
+# 20 GtC. `rep_dC` therefore barely moved (5.566 -> 5.126) where a frozen 1-D
+# scan had predicted 2.21. A prescribed LOCAL perturbation is absorbed by a free
+# GLOBAL rescale, so the experiment could not test the question it was built for
+# -- is the fit being bent toward a mid-century the field cannot explain?
+#
+# HOW. The parameter stays in the 21-name vector (so the mode file, the Hessian
+# and every downstream reader keep their shape) but its prior is collapsed to a
+# near-delta at the pin and its init moved there. It is pinned in effect, not
+# deleted. The Hessian row will be ~1/PIN_SD^2 and its posterior sd ~PIN_SD;
+# that is expected, and it means the LAPLACE EVIDENCE OF A PINNED RUN IS NOT
+# COMPARABLE to an unpinned one -- read parameters and per-stream logL, not
+# evidence.
+ARM_PIN_SD <- 1e-4
+ARM_PIN <- local({
+  v <- Sys.getenv("CCX_PIN_LUC_SCALE", NA_character_)
+  if (is.na(v) || !nzchar(v)) return(NULL)
+  x <- as.numeric(v); if (is.na(x)) stop("CCX_PIN_LUC_SCALE not numeric: ", v)
+  x
+})
+if (!is.null(ARM_PIN)) {
+  cat(sprintf("\n*** luc_scale PINNED at %.6f (prior sd %.0e) ***\n", ARM_PIN, ARM_PIN_SD))
+  CCX_PARAM_TABLE$luc_scale$init  <- ARM_PIN
+  CCX_PARAM_TABLE$luc_scale$prior <- local({
+    mu <- log(ARM_PIN); sdv <- ARM_PIN_SD
+    function(x) stats::dlnorm(x, mu, sdv, log = TRUE)
+  })
+  # GATE: the pin must round-trip through the transform, and the prior must
+  # actually be sharp there -- a pin that silently failed to bind would look
+  # exactly like "the parameter chose to stay put", which is the conclusion
+  # this whole run exists to test.
+  # NB `luc_scale` is one of the SIX fitted parameters with no slot in
+  # ccx_default_params() (it is a FORCING parameter), so the round-trip is built
+  # from the parameter TABLE, not from a params list.
+  .pl <- lapply(CCX_PARAM_TABLE[CCX_PARAM_NAMES], `[[`, "init")
+  .pl$luc_scale <- ARM_PIN
+  .u    <- ccx_par_to_unc(.pl)[["luc_scale"]]
+  .uv   <- unlist(ccx_par_to_unc(.pl)); .uv[["luc_scale"]] <- .u
+  .back <- ccx_unc_to_par(.uv)$luc_scale
+  cat(sprintf("    GATE round-trip %.6f -> %.6f (err %.1e); prior at pin %.1f, at pin*1.05 %.1f\n",
+              ARM_PIN, .back, abs(.back - ARM_PIN),
+              CCX_PARAM_TABLE$luc_scale$prior(ARM_PIN),
+              CCX_PARAM_TABLE$luc_scale$prior(ARM_PIN * 1.05)))
+  stopifnot(abs(.back - ARM_PIN) < 1e-8)
+}
+
 rm(.tab_before, .hml_before, .chg, .fld, .u_h, .sp_h, .F_h, .og_h)
 
 # =====================================================================
