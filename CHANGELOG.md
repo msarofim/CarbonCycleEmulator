@@ -2,6 +2,49 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-23d — The 12.7 σ validated and CORRECTED to ~5 σ. The conclusion survives; the number does not.
+
+Marcus supplied the Bastos PDF, which quotes Francey et al. (1995) that Law Dome δ¹³C scatter can
+make terrestrial/oceanic partitioning spurious, and records Trudinger et al. (2002a) finding the
+terrestrial explanation's δ¹³C peak inconsistent with measurements **"although the differences are
+not large compared to the measurement uncertainties"**. That was in direct tension with the
+2026-08-22 session's headline. Validated, and **the tension was real: the error bar was too small.**
+
+**THE DEFECT.** `diag_d13c_midcentury.R` computed `se <- sd(resid) / sqrt(n)` — every ice sample
+treated as an independent draw of the atmosphere. **They are not.** Bastos §2.1 gives Law Dome's
+air-age spectral width as **4.5 yr (DE08, DE08-2), 5.8 (DSS), 7.0 (DSSW20K)** (Trudinger et al.
+2002b); samples closer together than that measure **overlapping air-age distributions**. The
+1940–1960 window's **13 samples sit in four tight groups — 1957–58, 1955, 1947–50, 1940–41 —
+spanning 18 yr**. span/width = **3.6** independent draws; clustering at one width gives **2**.
+Not 13. **This is the same non-independence the 2026-08-22 panel flagged for the CO₂ ice term
+(255 site-correlated rows scored as independent), sitting undetected in the isotope term.**
+
+**THE CORRECTION.** `se` is now computed on `n_eff`, clustered at `DM_SPECTRAL_WIDTH` = 5.0 (the
+sample-weighted mean over the window; larger widths give fewer draws and a *larger* σ, so 5.0 is
+the conservative end of the published range). Window se's go 0.014–0.020 → 0.023–0.076 ‰.
+
+| | shipped | corrected |
+|---|---|---|
+| observed excursion | −0.002 ± **0.016** ‰ | −0.002 ± **0.041** ‰ |
+| departure from the −0.214 ‰ a terrestrial explanation needs | **13.1 σ** | **5.1 σ** |
+
+**Estimator sensitivity, and it must be quoted as a range:** clustering gives 2 draws → 5.1 σ;
+span/width gives 3.6 → ~6.8 σ. **The verdict is ~5–7 σ. Do not quote "12.7 σ" again.**
+
+**THE CONCLUSION SURVIVES.** 5 σ still rejects a terrestrial or emissions explanation of the
+mid-century swing decisively, so **handoff 2026-08-22 §4's withdrawal of the LUC time-profile
+programme still stands** — it was the right call for a reason that is 2.5× weaker than stated.
+
+**A THIRD ERROR TERM IS STILL UNQUANTIFIED, and it is now the binding one.** The full budget:
+(1) sampling on `n_eff` — the σ above; (2) the trend-prediction error, ~0.006 ‰, **omitted
+entirely before today**, subdominant, moves the verdict <0.1 σ; (3) **systematic/calibration —
+unbounded here.** A *constant* offset cancels in this excursion by construction and a *linear*
+drift is absorbed by the fitted trend, so what survives is a **non-linear calibration drift
+localised near mid-century**. Nothing in the repo bounds it, and Francey's warning is precisely
+about that class. Recorded in the file's own GATE 6 output rather than left to a reader.
+
+977/979 tests pass. No objective change; no refit owed.
+
 ## 2026-08-23c — `rep_dC`: the panel's "mis-centred prior" does not survive measurement
 
 Marcus asked for panel item 12. New `calibration/diag_rep_dC_prior.R` (~4 min). **The prior was

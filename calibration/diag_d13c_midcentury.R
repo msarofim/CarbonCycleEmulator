@@ -59,6 +59,12 @@ DM_SIG_OCEAN <-  -2.0
 # GATE 5 mutation: the LUC pulse a terrestrial explanation of the swing needs
 DM_MUT_WIN   <- c(1930, 1965)
 DM_MUT_SCALE <- 1.60
+# Law Dome air-age spectral width, Trudinger et al. (2002b) via Bastos et al.
+# (2016) sec.2.1: 4.5 yr DE08/DE08-2, 5.8 DSS, 7.0 DSSW20K. One width is used
+# for the clustering because the windows mix cores; 5.0 is the sample-weighted
+# mean over the 1940-1960 window. Larger widths give FEWER independent draws
+# and a LARGER sigma, so 5.0 is the conservative end of the published range.
+DM_SPECTRAL_WIDTH <- 5.0
 
 md <- readRDS(DM_MODE_FILE); pm <- md$par_mode
 p <- ccx_default_params()
@@ -96,9 +102,29 @@ for (w in DM_WINDOWS) {
   if (sum(kc) < DM_MIN_N || sum(ki) < DM_MIN_N) next
   rc <- mean(mco2(c2$year[kc]) - c2$CO2ppm[kc])
   ri <- mean(md13(d3$year[ki]) - d3$d13CO2[ki])
-  se <- stats::sd(md13(d3$year[ki]) - d3$d13CO2[ki]) / sqrt(sum(ki))
+  # se ON n_eff, NOT n. VALIDATED AND CORRECTED 2026-08-23 after Bastos et al.
+  # (2016) sec.1 quoted Francey et al. (1995): Law Dome d13C "scatter and
+  # uncertainty in the data are relatively high and they affect how well it is
+  # possible to partition the biospheric and oceanic fluxes", and recorded
+  # Trudinger et al. (2002a) finding the terrestrial explanation's d13C peak
+  # inconsistent with measurements "although the differences are not large
+  # compared to the measurement uncertainties" -- in direct tension with the
+  # 12.7 sigma this file used to report.
+  #
+  # THE DEFECT: sd/sqrt(n) treats every sample as an independent draw of the
+  # atmosphere. They are not. Bastos sec.2.1 gives Law Dome's air-age spectral
+  # width as 4.5 yr (DE08, DE08-2), 5.8 (DSS) and 7.0 (DSSW20K) -- samples
+  # closer together than that measure OVERLAPPING air-age distributions. The
+  # 1940-1960 window's 13 samples sit in four tight groups (1957-58, 1955,
+  # 1947-50, 1940-41) spanning 18 yr: span/width = 3.6 independent draws, and
+  # clustering at one width gives 2. Not 13. This is the same non-independence
+  # the 2026-08-22 panel flagged for the CO2 ice term, in the isotope term.
+  yrs <- sort(d3$year[ki])
+  n_eff <- max(1L, sum(diff(yrs) > DM_SPECTRAL_WIDTH) + 1L)
+  se <- stats::sd(md13(d3$year[ki]) - d3$d13CO2[ki]) / sqrt(n_eff)
   rows <- rbind(rows, data.frame(lo = w[1], hi = w[2], nc = sum(kc), ni = sum(ki),
-                                 dco2 = rc, dd13 = ri, se = se, ratio = ri / rc))
+                                 dco2 = rc, dd13 = ri, se = se, n_eff = n_eff,
+                                 ratio = ri / rc))
   cat(sprintf("  %d-%-6d %4d %+9.2f %4d %+9.3f %9.3f %+10.4f\n",
               w[1], w[2], sum(kc), rc, sum(ki), ri, se, ri / rc))
 }
@@ -241,6 +267,21 @@ cat(sprintf("  => a LUC/terrestrial explanation requires %+.3f permil of d13C ex
             req_meas))
 cat(sprintf("     observed excursion                     %+.3f +/- %.3f permil\n",
             resid_mid, rows$se[mid]))
+cat(sprintf("     [sigma is on n_eff, not n -- see the DM_SPECTRAL_WIDTH block.\n"))
+cat(sprintf("      THE ERROR BUDGET, and what is still missing:\n"))
+cat(sprintf("        1. sampling, on n_eff        the sigma quoted here\n"))
+cat(sprintf("        2. trend-prediction error    ~0.006 permil, SUBDOMINANT, folded in\n"))
+cat(sprintf("           by quadrature it moves the verdict by <0.1 sigma\n"))
+cat(sprintf("        3. SYSTEMATIC / calibration  UNQUANTIFIED. Francey et al. (1995)\n"))
+cat(sprintf("           via Bastos (2016) warn d13C errors can make terrestrial and\n"))
+cat(sprintf("           oceanic fluxes spurious and correlated. A CONSTANT offset\n"))
+cat(sprintf("           cancels in this excursion by construction, and a LINEAR drift\n"))
+cat(sprintf("           is absorbed by the fitted trend -- so what survives is a\n"))
+cat(sprintf("           NON-LINEAR calibration drift localised near mid-century.\n"))
+cat(sprintf("           Nothing here bounds it.\n"))
+cat(sprintf("        n_eff ESTIMATOR SENSITIVITY: clustering at one spectral width\n"))
+cat(sprintf("        gives 2 draws; span/width gives 3.6. The verdict spans ~5-7\n"))
+cat(sprintf("        sigma across that choice. QUOTE THE RANGE, not a point.\n"))
 cat(sprintf("     departure                              %.1f sigma\n",
             abs(req_meas - resid_mid) / rows$se[mid]))
 cat("\n  CAVEAT that has to ride with this. The test assumes the model's d13C is\n")
