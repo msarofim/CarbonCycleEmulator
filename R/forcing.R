@@ -22,6 +22,13 @@
 # that changes and w == 1 is the incumbent. The switch exists so that "what does
 # the seasonality buy?" is one flag rather than a git checkout.
 FORC_USE_EMIS_SEASONALITY <- TRUE
+# ---- artificial mid-century sink (2026-08-23) -----------------------
+# OFF by default. See the block in ccx_build_forcing() for what it is, what it
+# is for, and the two limitations that make it a CO2-only instrument.
+# Window brackets the published 1940-1955 plateau; rate in GtC/yr.
+CCX_ARTIFICIAL_SINK_WIN  <- c(1942, 1949)
+CCX_ARTIFICIAL_SINK_RATE <- as.numeric(Sys.getenv("CCX_SINK_RATE", "0"))
+
 FORC_FOSS_NH_SHARE <- 0.9201 # fossil CO2 emitted in the NH. MEASURED (Marcus,
 
 # ---- OBSERVED SST (HadSST4) and its forward scaling (2026-08-18) -----
@@ -433,6 +440,41 @@ ccx_build_forcing <- function(scenario = "historical",
     foss_SH <- foss * (1 - FORC_FOSS_NH_SHARE)
     luc_NH  <- luc  * luc_sh_m
     luc_SH  <- luc  * (1 - luc_sh_m)
+  }
+
+  # ---- OPTIONAL ARTIFICIAL MID-CENTURY SINK (added 2026-08-23) --------
+  # Marcus: "an artificial short-term ocean sink ... our fit to the modern
+  # period should be best, and I am concerned that the model fit is being
+  # tweaked to match the 1935-1960 window when we know that models don't
+  # explain that period well."
+  #
+  # A LEVERAGE INSTRUMENT, NOT A FIT. It prescribes a FIXED removal over a
+  # FIXED window at a magnitude taken from the literature and carries NO free
+  # parameter, so the model cannot tune it. It exists to answer a
+  # counterfactual a residual table cannot: if the plateau were explained,
+  # where would the other 20 parameters go? The plateau window fits WELL
+  # (mean |resid| 2.22 ppm against 3.14 elsewhere) and the whole point is that
+  # it may fit well BECAUSE the parameters were bent to it.
+  #
+  # NOT the withdrawn sec.12c programme: that fitted a free E_LUC SHAPE to the
+  # swing and would have reported it as a mechanism. This is prescribed,
+  # unfitted, externally sized and labelled artificial.
+  #
+  # *** TWO LIMITATIONS, BOTH LOAD-BEARING ***
+  # 1. Applied as a NEGATIVE FOSSIL EMISSION, so the carbon leaves the SYSTEM
+  #    rather than entering the ocean box. Ocean inventory, excess-14C and
+  #    conservation are NOT right under it.
+  # 2. It therefore carries the FOSSIL d13C, where a real ocean sink is
+  #    near-neutral. The d13C streams are scored, so d13C is NOT trustworthy
+  #    under it. A proper version routes the flux into the ocean at its own
+  #    signature.
+  # READ CO2 UNDER THIS SWITCH. Do not quote d13C, D14C, or sink numbers.
+  # OFF by default (rate 0) -- every existing result reproduces exactly.
+  if (CCX_ARTIFICIAL_SINK_RATE != 0) {
+    wy <- yrs >= CCX_ARTIFICIAL_SINK_WIN[1] & yrs <= CCX_ARTIFICIAL_SINK_WIN[2]
+    sk <- rep(ifelse(wy, CCX_ARTIFICIAL_SINK_RATE, 0), each = 12)
+    foss_NH <- foss_NH - sk * FORC_FOSS_NH_SHARE
+    foss_SH <- foss_SH - sk * (1 - FORC_FOSS_NH_SHARE)
   }
 
   # ---- CUMULATIVE land-use carbon (2026-08-13) -----------------------
