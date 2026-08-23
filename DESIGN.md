@@ -1160,10 +1160,12 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
 
    **STATUS AT THE SHIPPED MODE (2026-08-22, `diag_design_gates_at_mode.R`): SPLIT —
    the LEVEL passes and the VARIABILITY fails, and the mode is WORSE than the
-   defaults on the half that fails.** AF 1959–2024 = **0.435** against GCB's 0.431
-   (defaults 0.426), the best level the model has recorded. But the decadal spread
-   is **sd 0.019 against the observations' 0.051 — 2.7× too smooth**, and the
-   defaults' 0.035 was closer. The gate's second sentence is the one being failed,
+   defaults on the half that fails.** AF 1959–2024 = **0.434** at the 2026-08-23 refitted mode
+   (0.435 pre-refit) against GCB's 0.431, and defaults 0.426 — the best level the
+   model has recorded. But the decadal spread is **sd 0.019 against the
+   observations' 0.051 — 2.7× too smooth**, and the defaults' 0.035 was closer.
+   **The refit moved neither number materially: the level stayed and the
+   variability deficit is untouched.** The gate's second sentence is the one being failed,
    not the first. Per-decade the model runs 0.42 in the 1960s against an observed
    0.35 and 0.41 in the 2020s against 0.50: it misses the record's low start and
    its high end, which is precisely the "not smoother than this" criterion.
@@ -1207,11 +1209,18 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    |---|---|---|---|---|---|
    | obs (hemispheric) | 855.3 | 1963.676 | 659.8 | 1965.016 | **1.34** |
    | defaults | 801.5 | 1964.610 | 603.2 | 1965.726 | 1.12 |
-   | **shipped mode (arm N)** | **892.3** | **1964.635** | **689.7** | **1965.549** | **0.91** |
+   | pre-refit mode (arm N) | 892.3 | 1964.635 | 689.7 | 1965.549 | 0.91 |
+   | **REFITTED mode, 2026-08-23** | **888.5** | **1964.636** | **686.6** | **1965.559** | **0.92** |
+
+   **The refit changed nothing that matters here.** `bomb_total` fell 122.22 →
+   121.22 kmol (−1.21 sd), taking the NH peak 892.3 → 888.5 ‰ — still **+33 ‰
+   over** the observed 855.3, still ~1 yr late, and the NH→SH lag is still 0.92
+   against 1.34. All three readings below stand.
 
    Three separate readings, and they do not all point the same way:
    - **Peak height**: defaults undershoot by 54 ‰; the mode, with `bomb_total`
-     fitted to 122.22 kmol against the 102 reference, **overshoots by 37 ‰**. The
+     fitted to 121.22 kmol against the 102 reference (122.22 pre-refit),
+     **overshoots by 33 ‰**. The
      miss changed sign and shrank by a third — a fitted delivery total absorbing a
      shape error, not a delivery error being corrected.
    - **Peak timing is ~1 yr LATE in every vector** (1964.6 against 1963.7), and
@@ -1268,8 +1277,9 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    `calibration/diag_fert_saturating.R` §3. **Re-measure on any fertilisation or
    `luc_scale` default change.**
 
-   **STATUS AT THE SHIPPED MODE (2026-08-22): STILL FAILING ON LAND — land +2.04σ
-   (3.38 GtC/yr), ocean −0.62σ (2.97).** Measured twice, by independently written
+   **STATUS AT THE REFITTED MODE (2026-08-23): STILL FAILING ON LAND — land
+   +2.12σ (3.42 GtC/yr), ocean −0.64σ (2.97).** Pre-refit it was +2.04σ / −0.62σ,
+   so the refit moved this gate slightly the wrong way and fixed nothing.** Measured twice, by independently written
    reconstructions (`diag_app_params.R`'s FULL row and
    `diag_design_gates_at_mode.R`), which agree to the reported precision. The fit
    bought back most of the ocean miss (−1.50σ → −0.62σ) and almost none of the land
@@ -1392,11 +1402,19 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     margin now printed to two decimals because this gate is decided in its last
     significant figure:
 
-    | TH | defaults | vs floor | **shipped mode (arm N)** | vs floor | Joos floor |
-    |---|---|---|---|---|---|
-    | 20 | 12.43 | +1.92 % | **11.74** | **−3.73 %** | 12.2 |
-    | 50 | 25.53 | +6.39 % | **23.97** | **−0.13 %** | 24.0 |
-    | 100 | 41.86 | +5.96 % | **39.36** | **−0.35 %** | 39.5 |
+    | TH | defaults | vs floor | pre-refit mode | **REFITTED mode (arm N)** | vs floor | Joos floor |
+    |---|---|---|---|---|---|---|
+    | 20 | 12.43 | +1.92 % | 11.74 | **11.69** | **−4.17 %** | 12.2 |
+    | 50 | 25.53 | +6.39 % | 23.97 | **23.81** | **−0.78 %** | 24.0 |
+    | 100 | 41.86 | +5.96 % | 39.36 | **39.06** | **−1.12 %** | 39.5 |
+
+    **RE-MEASURED AT THE 2026-08-23 REFIT (`refit_20260822.log`, arm N on the
+    post-`d6adb58` objective): STILL FAILS AT ALL THREE HORIZONS, and slightly
+    further out than before.** The +16.9 log-units the ice-hemisphere correction
+    was worth bought nothing here. TH 50 and TH 100 are no longer "on the floor"
+    to within a third of a percent — at −0.78 % and −1.12 % they are now clearly
+    below it, so the earlier instruction to quote them as "at the floor" is
+    withdrawn; only the direction of the finding is unchanged.
 
     **Read the three rows differently: TH 20 is a substantive miss at −3.7 %, while
     TH 50 and TH 100 sit ON the boundary to within a third of a percent and should

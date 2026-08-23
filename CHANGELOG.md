@@ -2,6 +2,59 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-23 — The arm-N refit onto the new objective: converged, and it fixed no gate
+
+First fit on the post-`d6adb58` objective. Arm N only (Marcus). 623.9 min, 266,961 evals,
+0.140 s/eval, warm-started from the repaired 08-21 mode. `refit_20260822.log`.
+
+**CONVERGED, AND THE 08-20r PATHOLOGY DID NOT RECUR.** Cycle 1 ran to the 20-restart cap
+(gain 1.7295) and its BFGS polish then gained **0.0359** — against the 16.08 that revealed the
+un-located mode in 08-20r. Cycle 2 confirmed it immediately: two restarts at 0.0000, polish
+0.0000, `CONVERGED: cycle gain below ARM_CYCLE_TOL`. Final log-post **−1859.32**.
+
+**THE 10.4-HOUR RUN LANDED EXACTLY WHERE THE 20-MINUTE SMOKE RUN DID.** Same log-post to four
+decimals (−1859.3225), max coordinate difference **0.0016 sd**. Two very different search budgets
+converging on the same point is good evidence the mode is genuinely located — and it means the
+next refit on a small objective change can be scoped at ~1 cycle with a warm start rather than
+20 restarts. Worth knowing before spending another 10 h.
+
+**THE MODE MOVED MORE THAN THE LOG-POST SUGGESTED, which is why the displacement was measured
+rather than inferred from the 1.7 gain.** RMS **0.577 sd**, three coordinates over 1 sd:
+`rep_dC` **+1.60** (5.176 → 5.566), `k_w` **−1.35** (2024 → 1977), `bomb_total` **−1.21**
+(122.22 → 121.22). Measured on the CORRECTED Hessian (below), encoding all vectors under one
+table since `par_mode` is band-safe and `u_mode` is not.
+
+**`rep_dC` GOT WORSE, NOT BETTER.** The ice-hemisphere fix pushed the station-vs-box CO₂ offset
+from 5.18 to **5.57 σ** outside its N(0,1) prior. The standing blocker in
+`ccx_rep_dc_co2_bias` is sharpened by the correction, not relieved by it. Parameters beyond 3 σ
+at the new mode: `sst_seas_amp_NH` −6.22, `rep_dC` +5.57, `sst_seas_amp_SH` −4.25,
+`seas_T_amp_SH` −3.95.
+
+**HESSIAN RECOMPUTED PER-DIRECTION** (`recompute_hessian.R --update`, `HESS_EPS_FRAC` 0.10), and
+it confirms `ccx_hess_step_sd` from measurement: the refit driver's scalar `ARM_HESS_EPS = 3e-4`
+is **250× too small for `h_ml`, 167× for `kz`, 67× for `gamma_enso`** (0.004× / 0.006× / 0.015×
+in the log's `vs refit 3e-4` column). `-H` PD, all coordinates step-stable. **The driver still
+writes the scalar-eps Hessian, so `recompute_hessian.R` remains a mandatory second step after
+every refit** — worth folding into the driver.
+
+**AND THE POINT OF THE WHOLE EXERCISE: NO GATE CHANGED VERDICT. Three drifted slightly worse.**
+
+| gate | pre-refit | refitted | verdict |
+|---|---|---|---|
+| 12 — Joos IRF | 11.74 / 23.97 / 39.36 | **11.69 / 23.81 / 39.06** | FAILS all three, further out |
+| 4 — airborne fraction | 0.435, sd 0.019 | **0.434, sd 0.019** | level passes, variability still 2.7× too smooth |
+| 5 — bomb curve | peak 892.3 ‰, lag 0.91 | **888.5 ‰, lag 0.92** | FAILS; still +33 ‰ and ~1 yr late |
+| 7 — sinks | land +2.04σ | **land +2.12σ**, ocean −0.64σ | FAILS on land |
+
+**WITHDRAWN: "TH 50 and TH 100 are ON the floor".** At −0.13 % and −0.35 % pre-refit that reading
+was fair; at **−0.78 % and −1.12 %** it is not. Gate 12 now fails clearly at all three horizons,
+not marginally at two.
+
+**So the +16.9 log-units the objective correction was worth bought no physical improvement.** The
+ice term was scored against the wrong hemisphere and fixing it moved the likelihood a long way
+and the observables not at all — which is itself the informative result, and it points the open
+questions back at structure rather than calibration.
+
 ## 2026-08-22c — The luc_scale bug swept repo-wide; the arm files repaired; two lint gates
 
 Marcus: fix the stored streams and debug the code so the next step starts clean. Eight sites,

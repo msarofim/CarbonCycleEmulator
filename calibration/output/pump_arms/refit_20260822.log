@@ -1,0 +1,99 @@
+REFIT, 1 ARM(S) [N]. 21 parameters: beta_max, fert_k, q10, k_w, h_ml, kz, pump_grad, tau_ex, npp_frac_NH, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p, sst_seas_amp_NH, sst_seas_amp_SH, gamma_enso, bomb_total, luc_scale, sigma_d14c, rep_dC, grad_off_co2, grad_off_d13c
+kz bracket [3942.5, 6528] (re-bisected for the pump 2026-08-16e)
+pump default 233.109378 umol/kg = PUMP_GRAD_OBS
+
+
+=== h_ml BOUNDED FOR THIS REFIT (Marcus 2026-08-16g) ===
+h_ml: [30, 200] init 75   ->   [85, 120] init 100
+prior renormalised over the new support: log-prior shifts by +1.5805
+GATE H1: only `h_ml` changed. GATE H2: init 100 round-trips (u = -0.2877);
+         the shipped init 75 is correctly REJECTED by the new bound. OK
+GATE H3: all three rows LIVE at init (DIC +188.17, d13C -0.6025, ALK +82.68). OK
+
+
+=== h_ml KINK MAP (see calibration/diag_hess_eps_21par.R) ===
+3 kink(s) in [85, 120]: h_ml = 98.41, 100.00, 101.29 m
+ARM_HML_INIT = 100 is EXACTLY ON A KINK. Harmless: Nelder-Mead is derivative-free.
+GATE SKIPPED: one arm (N) -- there is no second arm to differ from.
+
+
+=== ARM pump_mode = N ===
+start: log-post at hand-set init = -18620.9
+WARM START from mode_fit_pumpN.rds: log-post there = -1861.1 (its file says -1877.9)
+[N] cycle 1 restart  1: log-post =      -1860.3  (gain     0.7075)  evals 16400
+[N] cycle 1 restart  2: log-post =      -1860.2  (gain     0.1470)  evals 34708
+[N] cycle 1 restart  3: log-post =      -1860.2  (gain     0.0234)  evals 49200
+[N] cycle 1 restart  4: log-post =      -1860.2  (gain     0.0190)  evals 67892
+[N] cycle 1 restart  5: log-post =      -1860.1  (gain     0.0103)  evals 77477
+[N] cycle 1 restart  6: log-post =      -1859.5  (gain     0.6193)  evals 96241
+[N] cycle 1 restart  7: log-post =      -1859.5  (gain     0.0213)  evals 107070
+[N] cycle 1 restart  8: log-post =      -1859.4  (gain     0.0544)  evals 118617
+[N] cycle 1 restart  9: log-post =      -1859.4  (gain     0.0374)  evals 131614
+[N] cycle 1 restart 10: log-post =      -1859.4  (gain     0.0176)  evals 151616
+[N] cycle 1 restart 11: log-post =      -1859.4  (gain     0.0090)  evals 171367
+[N] cycle 1 restart 12: log-post =      -1859.4  (gain     0.0098)  evals 183746
+[N] cycle 1 restart 13: log-post =      -1859.4  (gain     0.0048)  evals 201112
+[N] cycle 1 restart 14: log-post =      -1859.4  (gain     0.0044)  evals 213349
+[N] cycle 1 restart 15: log-post =      -1859.4  (gain     0.0072)  evals 224045
+[N] cycle 1 restart 16: log-post =      -1859.4  (gain     0.0003)  evals 232234
+[N] cycle 1 restart 17: log-post =      -1859.4  (gain     0.0002)  evals 239369
+[N] cycle 1 restart 18: log-post =      -1859.4  (gain     0.0004)  evals 248649
+[N] cycle 1 restart 19: log-post =      -1859.4  (gain     0.0002)  evals 255737
+[N] cycle 1 restart 20: log-post =      -1859.4  (gain     0.0000)  evals 260323
+  NM converged: gain below ARM_TOL
+[N] cycle 1 polish: log-post = -1859.3 (gain 0.0359)
+[N] === cycle 1 total gain 1.7295 (log-post -1859.3, 262961 evals) ===
+[N] cycle 2 restart  1: log-post =      -1859.3  (gain     0.0000)  evals 264000
+[N] cycle 2 restart  2: log-post =      -1859.3  (gain     0.0000)  evals 266517
+  NM converged: gain below ARM_TOL
+[N] cycle 2 polish: log-post = -1859.3 (gain 0.0000)
+[N] === cycle 2 total gain 0.0000 (log-post -1859.3, 266961 evals) ===
+[N] CONVERGED: cycle gain below ARM_CYCLE_TOL (0.5)
+
+[N] prior-tail position (normal sds; |z| > 3 flagged):
+       beta_max          fert_k             q10             k_w            h_ml 
+          -0.42           -0.61           -2.42            0.69           -1.37 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+           1.89            0.91           -0.87           -0.97            2.64 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+          -3.95           -0.82           -6.22           -4.25            0.39 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+           1.73           -0.38            0.29            5.57           -0.49 
+  grad_off_d13c 
+           0.63 
+*** FLAGGED:  seas_T_amp_SH, sst_seas_amp_NH, sst_seas_amp_SH, rep_dC 
+[N] hessian: central differences, 21 parameters
+[N] h_ml mode 87.9958 m; nearest kink 10.41 m away; the Hessian step reaches 8.22e-04 m
+[N] curvature step-stability at the mode (eps x 1/3, 1, 3): UNSTABLE at h_ml
+[N] Laplace covariance: PD, condition number 4.67e+05
+[N] mode log-post = -1859.3  (gain over init 1.7)
+[N] elapsed 623.9 min, 266961 evaluations (0.140 s/eval)
+
+[N] mode, natural scale:
+       beta_max          fert_k             q10             k_w            h_ml 
+         1.0112        554.5448          1.0914       1977.2295         87.9958 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+      6452.4714        292.7591          1.0447          0.5600         25.9052 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+         1.3143          1.6355          0.4723          0.6032          0.7783 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+       121.2238          0.8984          6.1251          5.5658         -0.2426 
+  grad_off_d13c 
+         0.0945 
+[N] wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pump_arms/mode_fit_pumpN.rds
+Warning message:
+In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 3.418e-03
+
+
+=== COMPARISON SKIPPED -- ONE ARM ===
+ARM_MODES = N. See the ARM_MODES block for why D is not re-run.
+
+
+=== THE STANDING QUESTIONS THIS RUN WAS ALSO MEANT TO ANSWER ===
+[N] kz = 6452.5 (97.1 % up the re-bisected bracket [3942.5, 6528])
+[N] h_ml = 88.00 -- gradient rows LIVE only inside [85, 120]: LIVE
+[N] pump_grad = 292.76  (prior centre 233.11, 1-D optimum at the old mode 274.5)
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/pump_arms/pump_arms_comparison.rds
