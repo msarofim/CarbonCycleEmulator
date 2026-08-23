@@ -2,6 +2,53 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-23c — `rep_dC`: the panel's "mis-centred prior" does not survive measurement
+
+Marcus asked for panel item 12. New `calibration/diag_rep_dC_prior.R` (~4 min). **The prior was
+NOT changed** — the measurement says a change would hide the blocker rather than fix it, and the
+choice of what to do instead is Marcus's.
+
+**THE PHYSICS IN ITEM 12 IS RIGHT AND THE REMEDY IS NOT.** Both stations should read below their
+box means, so the physical expectation for `rep_dC` is positive rather than zero. But profiling it
+with its two strongly-correlated partners re-optimised (`k_w` −0.78, `bomb_total` −0.73) puts the
+**likelihood-only optimum at 5.62 ppm with curvature sd 0.097 ppm** — the data are ~10× tighter
+than the 1.0 ppm prior. **Re-centring the prior anywhere in [0, 3] ppm moves the posterior by
+≤ 0.03 ppm.** What it moves is the *diagnostic*: `prior_z` 5.57 → 3.59 at μ = 2. A prior centre
+that only moves the flag, and demotes the top-ranked one at that, is the `prior_z_grid_scale`
+failure repeated deliberately.
+
+**THE PRIOR SD HAS NO RECEIPT FOR THE QUANTITY IT CONSTRAINS.** `LIK_CO2_REP_ERR` = 1.0 ppm is
+both the CO₂-level stream sd and this prior's sd, and its stated receipt is **co-located
+INSTRUMENT disagreement at one site** (NOAA in-situ vs SIO flask at MLO, 0.39–0.59 ppm RMS). The
+comment concedes it: "a station-vs-hemispheric-BOX term must exceed it. 1.0 ppm is a plausible
+value." A station-vs-box offset is a *spatial-representativeness* quantity and nothing on disk
+measures it — which is what item 12's "1 h + **data**" price was really about.
+
+**AND THE REAL DEFECT IS NEITHER, which is the finding.** `rep_dC` is applied to the MLO/SPO level
+streams only; the ice block scores the bare `co2_SH` box. Comparing the two eras isolates it:
+
+| flask era | MLO | SPO | mean | | ice era | box − obs |
+|---|---|---|---|---|---|---|
+| 1958–70 | 4.85 | 4.49 | 4.67 | | 1850–1900 | **−1.89** |
+| 1970–85 | 5.94 | 5.67 | 5.81 | | 1900–40 | **−3.86** |
+| 1985–2000 | 5.94 | 5.72 | 5.83 | | 1940–58 | **−0.67** |
+| 2000–12 | 5.55 | 5.32 | 5.44 | | | |
+| 2012–24 | 5.67 | 5.49 | 5.58 | | | |
+
+**Within the flask era the demanded offset is constant to ~1 ppm over 66 years, and MLO and SPO
+agree to ~0.3 ppm — genuinely common-mode, and the fitted 5.57 is exactly the flask-era mean
+5.47. Before 1958 it has the OPPOSITE SIGN.** A representation offset is a property of a station
+versus a box; it cannot change sign because the observing system changed. **So `rep_dC` is not a
+representation constant that came out too big — it is the modern half of the ~9.4 ppm swing, and
+the +5.57 σ is that swing reported in the units of the parameter that hides it.** This reaches
+`ccx_rep_dc_co2_bias`'s conclusion from the residual side, where that memory reached it from logL.
+
+**Consequence: no change to this prior addresses it.** Re-centring hides it; widening hides it
+further; *tightening* forces the modern residual back into the CO₂ rows where it is visible, at a
+cost part 1 prices (~370 log-units to pin at 3.0 ppm with two partners free). And it ties
+`rep_dC` directly to the session's live scientific question rather than leaving it a nuisance
+parameter: the swing is the thing, and this parameter is where half of it went.
+
 ## 2026-08-23b — The per-direction Hessian folded into the refit driver
 
 Marcus. The correct Hessian existed only in `calibration/recompute_hessian.R`, as a manual second
