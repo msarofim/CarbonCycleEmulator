@@ -10,8 +10,10 @@ flight.**
 
 ## 0. STATE IN TEN LINES
 
-1. **A re-optimisation is RUNNING** with a 2.5 GtC/yr artificial sink over 1942–49, writing to
-   `calibration/output/pump_arms_SINK25/`. **It is INDICATIVE ONLY** — §4c. Nothing is decided.
+1. **The sink refit LANDED and the model ROUTED AROUND IT.** `luc_scale` 0.898 → **1.085**
+   (+5.5 sd, adding 54 GtC against the sink's 20 GtC) and **`rep_dC` barely moved (5.57 → 5.13)**
+   where the 1-D scan predicted 2.21. **The sink and `luc_scale` are DEGENERATE — the instrument
+   as built cannot test the hypothesis.** §4c-RESULT. Next: **pin `luc_scale` and re-run** (§4d1).
 2. **The objective is unchanged for the shipped mode.** Both new switches default OFF and
    reproduce every existing number exactly.
 3. **The figure set exists** — `calibration/fig_model_vs_obs.R`, 3 PNGs. §1.
@@ -152,7 +154,41 @@ directly, so it is correctly configured.
 six out-of-prior parameters come in. **DO NOT READ:** any δ¹³C or ¹⁴C stream, `gcb_ocean_sink`,
 or the total logL.
 
-**(d) THE PROPER IMPLEMENTATION, which is the next step if (c) is encouraging.** Route the flux
+**(c-RESULT) THE RUN LANDED — AND THE MODEL ROUTED AROUND THE SINK.** Converged
+(cycle 2 gained 0.0000 twice; polish 0.47 against the 16.08 that once exposed an un-located mode)
+at **−1894.26** against sink-off **−1859.32**.
+
+| | sink OFF | sink ON (2.5 GtC/yr) | move |
+|---|---|---|---|
+| **`luc_scale`** | 0.8984 | **1.0852** | **+5.52 posterior sd** |
+| `sigma_d14c` | 6.13 | 8.96 | +3.85 sd |
+| **`rep_dC`** | 5.566 | **5.126** | −1.81 sd |
+| `k_w` | 1977 | 2016 | +1.10 sd |
+| `fert_k` | 554.5 | 422.6 | −0.89 sd |
+
+**`rep_dC` DID NOT COME DOWN.** The 1-D scan predicted **2.21** at this rate; the full refit gives
+**5.126**, still 5.1 σ. **The reason is the biggest move in the table: `luc_scale` goes 0.898 →
+1.085, crossing 1.0, which ADDS 54 GtC of land-use emissions over the record against the sink's
+20 GtC removal.** The model put the carbon back rather than relaxing the parameters the plateau
+was allegedly bending.
+
+**⇒ THE SINK AND `luc_scale` ARE DEGENERATE, so this experiment cannot test the hypothesis.** A
+prescribed removal in one window is absorbed by a global emissions rescale. That is not a refutation
+of Marcus's concern — it is a statement that the instrument as built does not isolate it.
+
+Trustworthy CO₂ side: **CO₂ streams net +15.8** (`co2_icecore` **+34.4**, stations −20.3). Isotopes
+**−47.8** and **CONTAMINATED** — note `sigma_d14c` inflating +3.85 sd, which is the ¹⁴C error scale
+swelling to absorb the fossil-signature artefact, exactly as predicted. Total −38.2, of which the
+contaminated isotopes are −47.8: **on the readable streams the sink is net POSITIVE.**
+
+**(d) TWO NEXT STEPS, and the first is now the important one.**
+
+**(d1) PIN `luc_scale` AND RE-RUN.** This is the test that isolates the hypothesis. With
+`luc_scale` free the model has a global lever that undoes a local sink; fix it at the sink-off
+value (0.8984) and the question becomes the one Marcus asked — do the *other* parameters relax,
+and does `rep_dC` fall toward the 1-D scan's 2.21? Cheap: one warm cycle.
+
+**(d2) ROUTE THE FLUX INTO THE OCEAN BOX at its own isotopic signature** Route the flux
 **into the ocean box** at its own isotopic signature instead of subtracting it from fossil
 emissions. That fixes conservation, the ocean inventory and the ¹⁴C terms at once, and makes the
 δ¹³C streams usable — which matters because δ¹³C is how the literature attributes the plateau to

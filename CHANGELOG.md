@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-23f — The artificial sink: the model routes around it via `luc_scale`
+
+Sink-on refit (2.5 GtC/yr over 1942–49, arm N, warm) converged at **−1894.26** against sink-off
+**−1859.32**. `calibration/output/pump_arms_SINK25/` (SCRATCH — never the shipped mode).
+
+**`rep_dC` DID NOT COME DOWN.** The 1-D scan — every other parameter frozen — predicted **2.21**
+at this rate. The full refit gives **5.126**, still 5.1 σ. **The reason is the largest move in the
+fit: `luc_scale` 0.8984 → 1.0852, +5.52 posterior sd, crossing 1.0, which adds 54 GtC of land-use
+emissions over the record against the sink's 20 GtC removal.** The model put the carbon back
+rather than relaxing.
+
+**⇒ THE SINK AND `luc_scale` ARE DEGENERATE, and the experiment as built cannot test the
+hypothesis.** A prescribed removal in one window is absorbed by a global emissions rescale. This
+does **not** refute Marcus's concern that the fit is bent toward a mid-century the field cannot
+explain — it says the instrument does not isolate it. **The test that does: pin `luc_scale` at the
+sink-off value and re-run (one warm cycle).**
+
+**On the readable streams the sink is net POSITIVE:** CO₂ **+15.8** (`co2_icecore` **+34.4**,
+stations −20.3). Isotopes −47.8 and contaminated — and `sigma_d14c` inflates **+3.85 sd**
+(6.13 → 8.96), the ¹⁴C error scale swelling to absorb the fossil-signature artefact exactly as
+predicted. So the −38.2 total is smaller than the contamination it contains and cannot be read as
+a verdict.
+
+**A units error caught before it was quoted:** the first comparison divided *natural*-scale
+parameter differences by `sd_unc`, which is the posterior sd in the **unconstrained** coordinate —
+producing "+2202 sd" for `k_w`. Both sides must be in the same coordinate; redone, the largest
+move is `luc_scale` at +5.52 sd and the RMS is 1.57.
+
 ## 2026-08-23e — Model-vs-obs figures, and the mid-century correction: measured, and the premise does not hold
 
 Marcus asked for graphs of model vs observations, and whether an artificial correction for the
