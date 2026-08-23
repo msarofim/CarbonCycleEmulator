@@ -2,6 +2,52 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-23e — Model-vs-obs figures, and the mid-century correction: measured, and the premise does not hold
+
+Marcus asked for graphs of model vs observations, and whether an artificial correction for the
+mid-century alone would let the rest of the model solve better. New
+`calibration/fig_model_vs_obs.R` (~30 s → `calibration/output/figures/`, 3 PNGs) and an OFF-by-
+default `LIK_ICE_DISCREPANCY_*` window in `R/likelihood.R`.
+
+**THE FIGURES SHOW ONE THING THE APP CANNOT.** Both the raw model BOX and the STATION prediction
+(`box − rep_dC`) are drawn and labelled, because `plot_keeling()` draws only the box and the
+calibrated model therefore sits ~5.6 ppm above Mauna Loa there by construction. Panel B is the
+result: **post-1958 the ICE residual is +4.8 ppm while the STATION residual is ~0** — and Test 1
+showed those two observing systems read the same air to −0.31 ± 0.15 ppm. **`rep_dC` is hiding a
+model level bias for one of them.** Two plotting bugs found and fixed in the making: differencing
+the monthly series at integer years aliased the SH seasonal cycle into the "growth rate" (±0.3
+ppm/yr, comparable to the plateau signal itself), and `approx(rule = 2)` manufactured pre-1750
+"residuals" that were really the flat extrapolation of the model's 1750 value.
+
+**THE ANSWER ON THE CORRECTION IS NO, AND FOR THREE INDEPENDENT REASONS.** The window was built
+first and measured before being used.
+
+1. **The plateau is the SECOND-BEST-fitting era, not the worst.** Per-era ice fit:
+   1900–1935 mean residual **−4.08**, logL/row −2.90; **1935–1960 −1.21, −2.58**; 1960–1997
+   **+4.83, −3.07**. The plateau window is where the model's ~8.9 ppm swing **crosses zero**.
+   In-window mean |residual| **2.22 ppm against 3.14 out**. Inflating its σ would delete the
+   best-fitting quarter, leave both bad wings, and give the swing *more* freedom to steepen.
+2. **The likelihood is internally inconsistent about the offset, and repairing it does not help.**
+   `rep_dC` = 5.57 ppm is applied to MLO/SPO and **zero** to Law Dome — yet Test 1 says the two
+   read the same air to 0.31 ppm. Applying it consistently repairs 1960–97 (**+4.83 → −0.74**)
+   and wrecks everything earlier (1750–1850 **−0.93 → −6.49**), for **−263.0 log-units**.
+3. **A constant cannot change a difference.** Under that repair the swing is **+8.91 ppm before
+   and +8.91 ppm after — exactly unchanged.** The defect is a **shape** error; no offset scheme,
+   at any window, reaches it.
+
+**WHAT WOULD BE DEFENSIBLE, and it is not on the observations.** The swing tracks GCB's own
+published `imbalance` at r = 0.771, and that imbalance is **+1.30 (1940s) / +1.62 GtC/yr (1950s)**
+— GCB cannot close its own budget in the same decades. So the uncertainty belongs on the
+**emissions input**, not on the ice observations: a σ-inflation on the emissions-driven CO₂ across
+the swing era, externally justified by GCB's own numbers, adding **no parameter**. That is
+distinct from the §12c LUC time-profile programme the 2026-08-22 panel withdrew — that one *fitted
+a shape and claimed a mechanism*; this one only *widens*, and cannot absorb signal into a
+discovery.
+
+The `LIK_ICE_DISCREPANCY_*` switch is kept (OFF, default inert — `co2_icecore` reproduces
+−690.86) with the per-era table written into its own comment, so the next person to reach for the
+mid-century window meets the measurement first. 977/979 tests pass; no objective change.
+
 ## 2026-08-23d — The 12.7 σ validated and CORRECTED to ~5 σ. The conclusion survives; the number does not.
 
 Marcus supplied the Bastos PDF, which quotes Francey et al. (1995) that Law Dome δ¹³C scatter can

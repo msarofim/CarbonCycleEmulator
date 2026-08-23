@@ -158,6 +158,13 @@ LIK_REP_SOURCE_D13C <- -26.5         # permil, fossil+respired excess carbon.
                                      # adjudicate.
 LIK_LAND_SINK_INFLATE <- 3.0         # multiplier on GCB land-sink sigma (Q1)
 
+# ---- the mid-century discrepancy window (2026-08-23) ----------------
+# OFF by default. See the block in ccx_loglik() for what it is and why it is
+# not a tuning knob. The window brackets the published plateau with a small
+# margin for the 4.5-7.0 yr air-age spectral width either side.
+LIK_ICE_DISCREPANCY_WIN     <- c(1935, 1960)
+LIK_ICE_DISCREPANCY_INFLATE <- as.numeric(Sys.getenv("CCX_ICE_DISCREPANCY", "1"))
+
 # ---- INTERHEMISPHERIC GRADIENT (2026-08-15, review item 5) -----------
 # DESIGN sec.6 gate 9 has said since it was written that the MLO-SPO gradient is
 # "the main constraint on tau_ex". It was not in the objective at all: MLO and
@@ -1143,8 +1150,63 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # and 1.76 ppm (16 %) of the 11.20 ppm era swing was this choice, not the
   # model. NOTE: THIS CHANGES THE OBJECTIVE -- nothing fitted before 2026-08-22
   # is comparable across it.
+  # ---- OPTIONAL: a localised DISCREPANCY window on the ice term ------
+  # ADDED 2026-08-23 (Marcus): "recognizing that we can't solve the mid-century
+  # pause, is there an artificial correction for just that period that would let
+  # the rest of the model solve better?"
+  #
+  # WHAT THIS IS AND IS NOT. It is NOT a fitted shape -- that is the sec.12c LUC
+  # time-profile idea the 2026-08-22 panel withdrew, because a free function in
+  # a model with no discrepancy term absorbs real signal and returns it as a
+  # discovery. This is the OPPOSITE move: it DECLARES an interval unexplained
+  # and inflates its sigma so it cannot steer parameters that have to serve the
+  # other 250 years. It adds NO parameter, so it cannot fit anything.
+  #
+  # THE JUSTIFICATION IS EXTERNAL, WHICH IS WHAT MAKES IT LEGITIMATE. The
+  # 1940-1955 plateau (Etheridge et al. 1996; Rubino et al. 2019) requires
+  # 2-3 GtC/yr of uptake AFTER firn smoothing is accounted for, and Bastos et
+  # al. (2016) report a 0.9-2.0 PgC/yr mismatch across state-of-the-art
+  # reconstructions with four LUC datasets: NO model reproduces it. Widening the
+  # sigma where the field has a known, named, unexplained feature is a statement
+  # about model adequacy, not a tuning knob. See
+  # notes/lit_2026-08-23_1940s_co2_plateau.md.
+  #
+  # DEFAULT IS OFF (inflation 1.0) so every existing result reproduces exactly.
+  # Set LIK_ICE_DISCREPANCY_INFLATE > 1 to activate. IT CHANGES THE OBJECTIVE:
+  # a refit is owed, and no logL is comparable across it.
+  #
+  # *** AND THE MEASUREMENT SAYS DO NOT POINT IT AT THE PLATEAU. *** The window
+  # was built for the mid-century, then measured before being used, and the
+  # premise does not hold. Per-era ice fit at the 2026-08-23 mode:
+  #
+  #   era          n   mean resid   logL/row
+  #   1900-1935   49       -4.08      -2.90
+  #   1935-1960   61       -1.21      -2.58   <- the plateau: SECOND-BEST era
+  #   1960-1997   49       +4.83      -3.07   <- the worst
+  #
+  # The plateau window is where the model's ~8.9 ppm SWING CROSSES ZERO, so it
+  # is among the BEST-fitting quarter of the record, not the worst. Inflating
+  # its sigma would delete good rows, leave both bad wings, and give the swing
+  # MORE freedom to steepen. The misfit is in the WINGS.
+  #
+  # AND NO CONSTANT FIXES A SWING, WHICH IS THE GENERAL POINT. Applying rep_dC
+  # to the ice term as well -- which Test 1 of the 2026-08-23 session says is
+  # the CONSISTENT thing to do, since ice - SPO = -0.31 +/- 0.15 ppm in the
+  # 1962-96 overlap, i.e. they read the same air -- repairs 1960-97 (+4.83 ->
+  # -0.74) and wrecks everything earlier (1750-1850: -0.93 -> -6.49), for
+  # -263.0 log-units, and leaves the swing at +8.91 ppm EXACTLY UNCHANGED. A
+  # constant cannot change a difference. The defect is a SHAPE error and only a
+  # time-varying term reaches it -- see the handoff for why that term belongs on
+  # the EMISSIONS INPUT (GCB's own imbalance is +1.30/+1.62 GtC/yr in the same
+  # decades) rather than on the observations.
+  ice_sd <- obs$ice$sd
+  if (LIK_ICE_DISCREPANCY_INFLATE != 1) {
+    kd <- obs$ice$year >= LIK_ICE_DISCREPANCY_WIN[1] &
+          obs$ice$year <= LIK_ICE_DISCREPANCY_WIN[2]
+    ice_sd[kd] <- ice_sd[kd] * LIK_ICE_DISCREPANCY_INFLATE
+  }
   mod <- interp("co2_SH", obs$ice$year)
-  add("co2_icecore", sum(stats::dnorm(obs$ice$CO2ppm, mod, obs$ice$sd, log = TRUE)))
+  add("co2_icecore", sum(stats::dnorm(obs$ice$CO2ppm, mod, ice_sd, log = TRUE)))
 
   # ---- d13C annual level ---------------------------------------------
   # Level here; the SEASONAL cycle is scored by its own term since 2026-08-18
