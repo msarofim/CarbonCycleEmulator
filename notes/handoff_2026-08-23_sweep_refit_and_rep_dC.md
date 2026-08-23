@@ -239,6 +239,25 @@ transition problem is real for another reason.** Full write-up:
 
 ---
 
+## 6d. THE 12.7 σ IS NOW ~5 σ (validated 2026-08-23)
+
+**`diag_d13c_midcentury.R`'s σ was computed on `n`, not `n_eff`.** Law Dome's air-age spectral
+width is 4.5–7.0 yr (Trudinger et al. 2002b via Bastos §2.1), so samples closer than that measure
+**overlapping air**. The 1940–1960 window's **13 samples are four groups spanning 18 yr** →
+span/width 3.6 draws, clustering 2. Corrected: excursion **± 0.016 → ± 0.041 ‰**, departure
+**13.1 σ → 5.1 σ**, range **~5–7 σ** across the `n_eff` estimator. **Never quote 12.7 σ again.**
+
+**The conclusion survives** — 5 σ still rejects a terrestrial explanation, so 2026-08-22 §4's
+withdrawal of the LUC time-profile programme stands. **A third error term is unquantified and now
+binding:** systematic/calibration drift that is *non-linear and localised near mid-century* (a
+constant offset cancels by construction; a linear drift is absorbed by the fitted trend). Nothing
+in the repo bounds it.
+
+**The general lesson, and it is the transferable one:** this is the SAME non-independence the
+2026-08-22 panel flagged for the CO₂ ice term, sitting undetected in the isotope term built from
+the same samples. **When a correlated-rows defect is found in one stream, audit every stream built
+from those samples.** The ice covariance item on the work list should now be read as covering both.
+
 ## 7. NON-OBVIOUS STATE
 
 - `mode_fit_pumpN.rds` is **post-refit and post-per-direction-Hessian**. Its `streams` are correct
