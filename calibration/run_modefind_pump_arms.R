@@ -87,7 +87,11 @@ ARM_MAXIT      <- 20000     # Nelder-Mead default 500 is far too small for 20 pa
 ARM_RESTARTS   <- 20        # as run_modefind.R; stops early on convergence
 ARM_TOL        <- 1e-4      # stop when a restart gains less than this
 ARM_PENALTY    <- 1e6       # finite stand-in for -Inf so optim can navigate
-ARM_HESS_EPS   <- 3e-4      # step on the unconstrained scale; see run_modefind.R
+# ARM_HESS_EPS RETIRED 2026-08-23 -- the Hessian now sizes one step per
+# direction (R/calibrate.R ccx_hessian_per_direction). CCX_HESS_EPS_FRAC is
+# the knob that replaced it. Kept named here only so the log can report what
+# the old scalar would have been, for comparison with pre-08-23 arm files.
+ARM_HESS_EPS   <- 3e-4      # RETIRED: reporting only, not used for stepping
 ARM_FLAG_SIGMA <- 3.0       # prior-sd distance at which a parameter is flagged
 # ONE ARM FOR THE 2026-08-20r REFIT, and this is a deliberate narrowing.
 # The 2026-08-18 two-arm run found the arms INDISTINGUISHABLE -- every coordinate
@@ -266,6 +270,10 @@ rm(.tab_before, .hml_before, .chg, .fld, .u_h, .sp_h, .F_h, .og_h)
 # THE h_ml DIRECTION IS PIECEWISE-C1, AND THE HESSIAN HAS TO KNOW WHERE.
 #
 # calibration/diag_hess_eps_21par.R, run before this refit was launched, found
+# SUPERSEDED 2026-08-23: this whole justification is about a SCALAR step that is
+# no longer taken. It was also right only for the STIFF subspace -- 3e-4 is 250x
+# too small for `h_ml`, the very parameter the block below worries about (memory
+# ccx_hess_step_sd). Kept as provenance for pre-08-23 arm files. The block reads:
 # that `ARM_HESS_EPS = 3e-4` is inside a stable curvature window at both probe
 # points for every coordinate EXCEPT `h_ml` -- and that `h_ml`'s failure is not
 # a step-size failure at all. Its second difference scales as 1/eps across six
@@ -504,17 +512,22 @@ arm_fit <- function(mode) {
   }, error = function(e) { cat("per-stream decomposition failed:", conditionMessage(e), "\n"); NULL })
 
   # ---- (c) numerical Hessian ----------------------------------------
-  cat(sprintf("[%s] hessian: central differences, %d parameters\n", mode, length(u)))
-  H <- local({
-    n <- length(u); M <- matrix(NA_real_, n, n); eps <- ARM_HESS_EPS
-    for (a in seq_len(n)) for (bb in a:n) {
-      ea <- eb <- numeric(n); ea[a] <- eps; eb[bb] <- eps
-      M[a, bb] <- M[bb, a] <-
-        (lp_fun(u + ea + eb) - lp_fun(u + ea - eb) -
-           lp_fun(u - ea + eb) + lp_fun(u - ea - eb)) / (4 * eps^2)
-    }
-    M
-  })
+  # PER-DIRECTION STEPS SINCE 2026-08-23, via R/calibrate.R's
+  # ccx_hessian_per_direction(). This block used to take ONE step,
+  # ARM_HESS_EPS = 3e-4, in all 21 directions -- measured at the 2026-08-23 mode
+  # that is 250x too small for `h_ml`, 167x for `kz` and 67x for `gamma_enso`,
+  # so `sd_unc`, `cov`, `logdet_negH` and this arm's Laplace evidence were wrong
+  # precisely in the soft directions the evidence is most sensitive to, and
+  # nothing flagged it (memory ccx_hess_step_sd). The correct version existed
+  # only in calibration/recompute_hessian.R, as a manual second step someone had
+  # to remember -- forgetting it silently shipped the scalar Hessian. Both now
+  # call the same function, so there is one implementation to be right.
+  # Costs ~5 min on top of a multi-hour refit.
+  cat(sprintf("[%s] hessian: per-direction central differences, %d parameters\n",
+              mode, length(u)))
+  HD <- ccx_hessian_per_direction(lp_fun, u, verbose = TRUE)
+  H  <- HD$H
+  ARM_HESS_EPS_V <- HD$eps          # named vector, replaces the scalar below
   dimnames(H) <- list(CCX_PARAM_NAMES, CCX_PARAM_NAMES)
 
   # ---- (c2) is this mode's Hessian trustworthy where we know it might not be?
@@ -526,7 +539,12 @@ arm_fit <- function(mode) {
   # matters is how far that reaches in METRES, which depends on where in the
   # logit band the mode sits. Converted rather than assumed.
   h_mode <- pm$h_ml
-  h_reach <- abs(.from_unc(u[["h_ml"]] + ARM_HESS_EPS, CCX_PARAM_TABLE$h_ml) - h_mode)
+  # h_ml's OWN step now, not the global scalar -- and this matters here more than
+  # anywhere: h_ml is the softest direction, so its correct step is ~250x the old
+  # 3e-4 and its reach into the kink map is ~250x larger. A kink-straddle check
+  # run at the scalar step was reassuring about a step the Hessian did not take.
+  h_reach <- abs(.from_unc(u[["h_ml"]] + ARM_HESS_EPS_V[["h_ml"]],
+                           CCX_PARAM_TABLE$h_ml) - h_mode)
   h_gap <- if (length(ARM_KINKS)) min(abs(ARM_KINKS - h_mode)) else Inf
   kink_hit <- h_gap <= h_reach
   cat(sprintf("[%s] h_ml mode %.4f m; nearest kink %.2f m away; the Hessian step reaches %.2e m\n",
@@ -539,20 +557,14 @@ arm_fit <- function(mode) {
   # be run at points that were not modes; this is the same test at the point
   # that actually carries the evidence. A coordinate whose curvature moves with
   # the step is named here rather than silently entering the determinant.
-  dstab <- local({
-    es <- ARM_HESS_EPS * c(1/3, 1, 3)
-    D <- sapply(es, function(e) vapply(seq_along(u), function(k2) {
-      ee <- numeric(length(u)); ee[k2] <- e
-      fp <- lp_fun(u + ee); fm <- lp_fun(u - ee)
-      if (!is.finite(fp) || !is.finite(fm)) return(NA_real_)
-      (fp - 2 * lp_mode + fm) / e^2
-    }, numeric(1)))
-    rownames(D) <- CCX_PARAM_NAMES; colnames(D) <- format(es, scientific = TRUE)
-    D
-  })
-  spread <- apply(dstab, 1, function(r) { r <- r[is.finite(r)]
-    if (length(r) < 2) Inf else (max(r) - min(r)) / abs(mean(r)) })
-  unstable <- names(which(spread > 0.25))
+  # RE-USES ccx_hessian_per_direction()'s OWN verification (2026-08-23) rather
+  # than repeating it. This block used to re-run the eps x (1/3, 1, 3) sweep at
+  # the retired SCALAR step -- so it certified the stability of a step the
+  # Hessian did not take, which is worse than not checking. HD$verify is the
+  # same sweep around each direction's ACTUAL step, and HD$unstable applies the
+  # tighter CCX_HESS_STABLE_TOL (0.02) than the 0.25 used here before.
+  dstab    <- HD$verify
+  unstable <- HD$unstable
   cat(sprintf("[%s] curvature step-stability at the mode (eps x 1/3, 1, 3): %s\n", mode,
               if (length(unstable)) paste("UNSTABLE at", paste(unstable, collapse = ", "))
               else "all 21 coordinates stable"))
@@ -583,10 +595,12 @@ arm_fit <- function(mode) {
   out <- list(pump_mode = mode, u_mode = u, par_mode = pm, logpost = lp_mode,
               logpost_init = lp0, hessian = H, cov = Sigma, cor = Cor, sd_unc = sdv,
               eigen = ev, pd = ok_pd, logdet_negH = ldet, trace = trace,
-              hess_eps = ARM_HESS_EPS, hess_diag_by_step = dstab,
+              hess_eps = ARM_HESS_EPS_V, hess_eps_verify = dstab,
               hess_unstable = unstable, hml_kinks = ARM_KINKS,
               hml_kink_gap = h_gap, hml_hess_reach = h_reach, hml_kink_hit = kink_hit,
               hit_cap = hit_cap, streams = streams, n_eval = n_eval, minutes = el,
+              hess_eps_frac = HD$eps_frac, hess_sd_diag = HD$sd_diag,
+              hess_eps_grid = HD$curvature_by_step, hess_eps_no_plateau = HD$no_plateau,
               seed = ARM_SEED, param_names = CCX_PARAM_NAMES, prior_z = zs,
               kz_bracket = c(CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi),
               # RECORDED FROM 2026-08-20r, and it should have been from the

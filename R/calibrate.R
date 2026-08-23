@@ -662,6 +662,100 @@ ccx_scaled_forcing <- function(sp = NULL, years = c(1750, 2024), luc_scale = 1,
   list(F = F, eluc = eluc)
 }
 
+# ---------------------------------------------------------------------
+# PER-DIRECTION HESSIAN (promoted 2026-08-23 from calibration/recompute_hessian.R)
+#
+# WHY IT IS NOT A SCALAR STEP. `run_modefind_pump_arms.R` took its Hessian with
+# ONE step, ARM_HESS_EPS = 3e-4, in every direction. Measured at the 2026-08-23
+# mode, that is 250x too small for `h_ml`, 167x for `kz` and 67x for
+# `gamma_enso`, while being about right for the stiff directions -- so `sd_unc`,
+# `cov`, `logdet_negH` and any Laplace evidence built on it were wrong in exactly
+# the soft directions the evidence is most sensitive to, and NOTHING flagged it
+# (memory ccx_hess_step_sd). The fix is one step per direction, sized to that
+# direction's own posterior sd: eps_k = frac * sd_k, sd_k = 1/sqrt(-d2/du_k^2).
+#
+# WHY IT LIVES HERE. Until today the correct version existed only in
+# `recompute_hessian.R`, as a manual second step someone had to remember after
+# every refit -- and forgetting it silently shipped the scalar version. Both that
+# script and the refit driver now call this, so there is ONE implementation. That
+# is the same argument as ccx_scaled_forcing(): the duplication is the defect.
+#
+# Mixed steps are fine in a central cross-difference -- the a-direction is
+# differenced with eps_a, the b with eps_b, and the denominator carries both.
+#
+# @param lp   log-posterior closure, as ccx_make_logpost() returns
+# @param u    mode on the unconstrained scale (named)
+# @param verbose print the per-direction table
+# @return list(H, eps, sd_diag, curvature_by_step, verify, no_plateau, unstable)
+CCX_HESS_EPS_GRID   <- c(1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2, 1e-1, 3e-1)
+CCX_HESS_STABLE_TOL <- 0.02    # max relative disagreement with EITHER neighbour
+CCX_HESS_EPS_FRAC   <- 0.10    # step as a fraction of the direction's posterior sd
+CCX_HESS_FALLBACK   <- 3e-4    # only for directions with no stable plateau
+
+ccx_hessian_per_direction <- function(lp, u, verbose = TRUE) {
+  nm <- names(u); n <- length(u); lp0 <- lp(u)
+  if (!is.finite(lp0)) stop("log-posterior is not finite at the supplied mode")
+
+  diag_at <- function(v) vapply(seq_len(n), function(k) {
+    e <- numeric(n); e[k] <- v[k]
+    fp <- lp(u + e); fm <- lp(u - e)
+    if (!is.finite(fp) || !is.finite(fm)) return(NA_real_)
+    (fp - 2 * lp0 + fm) / v[k]^2
+  }, numeric(1))
+
+  # 1. curvature vs step, to find each direction's stable plateau
+  D <- sapply(CCX_HESS_EPS_GRID, function(e) diag_at(rep(e, n)))
+  dimnames(D) <- list(nm, format(CCX_HESS_EPS_GRID, scientific = TRUE))
+  plateau <- function(k) {
+    d <- D[k, ]
+    for (i in seq_along(d)) {
+      if (i == 1L || i == length(d)) next
+      tri <- d[c(i - 1L, i, i + 1L)]
+      if (anyNA(tri) || !all(is.finite(tri)) || tri[2] == 0) next
+      if (max(abs(tri - tri[2])) / abs(tri[2]) < CCX_HESS_STABLE_TOL)
+        return(c(d = tri[[2]], idx = i))
+    }
+    c(d = NA_real_, idx = NA_real_)
+  }
+  PL <- t(vapply(seq_len(n), plateau, numeric(2))); rownames(PL) <- nm
+  SDV <- ifelse(PL[, "d"] < 0, 1 / sqrt(-PL[, "d"]), NA_real_)
+  eps <- CCX_HESS_EPS_FRAC * SDV
+  no_plateau <- nm[is.na(eps)]
+  eps[is.na(eps)] <- CCX_HESS_FALLBACK
+  names(eps) <- nm
+
+  # 2. verify the chosen step at eps/3 and 3 eps
+  V <- cbind(lo = diag_at(eps / 3), mid = diag_at(eps), hi = diag_at(eps * 3))
+  rownames(V) <- nm
+  vspread <- apply(V, 1, function(r)
+    if (anyNA(r) || r[2] == 0) Inf else max(abs(r - r[2])) / abs(r[2]))
+  unstable <- nm[!(vspread < CCX_HESS_STABLE_TOL)]
+
+  # 3. the full Hessian, mixed steps
+  H <- matrix(NA_real_, n, n)
+  for (a in seq_len(n)) for (b in a:n) {
+    ea <- eb <- numeric(n); ea[a] <- eps[a]; eb[b] <- eps[b]
+    H[a, b] <- H[b, a] <-
+      (lp(u + ea + eb) - lp(u + ea - eb) - lp(u - ea + eb) + lp(u - ea - eb)) /
+      (4 * eps[a] * eps[b])
+  }
+  dimnames(H) <- list(nm, nm)
+
+  if (verbose) {
+    cat(sprintf("  eps = %.2f x each direction's own posterior sd, verified at eps/3 and 3 eps\n",
+                CCX_HESS_EPS_FRAC))
+    cat(sprintf("  %-16s %10s %11s %11s\n", "parameter", "sd (unc)", "eps (u)", "curvature"))
+    for (k in seq_len(n))
+      cat(sprintf("  %-16s %10.5f %11.3e %11.5g%s\n", nm[k], SDV[k], eps[k], V[k, "mid"],
+                  if (nm[k] %in% unstable) "  ** no stable step" else ""))
+    if (length(no_plateau))
+      cat(sprintf("  ** no plateau, fell back to %.0e: %s\n",
+                  CCX_HESS_FALLBACK, paste(no_plateau, collapse = ", ")))
+  }
+  list(H = H, eps = eps, sd_diag = SDV, curvature_by_step = D, verify = V,
+       no_plateau = no_plateau, unstable = unstable, eps_frac = CCX_HESS_EPS_FRAC)
+}
+
 ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
                              verbose = FALSE,
                              base_params = ccx_default_params()) {

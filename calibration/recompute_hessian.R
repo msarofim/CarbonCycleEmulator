@@ -145,56 +145,23 @@ reach <- vapply(nm, function(n) {
 }, numeric(1))
 
 # ---- diagonal curvature at each candidate step ------------------------
-diag_at <- function(eps) {
-  vapply(seq_along(u), function(k) {
-    e <- numeric(length(u)); e[k] <- eps
-    fp <- lp(u + e); fm <- lp(u - e)
-    if (!is.finite(fp) || !is.finite(fm)) return(NA_real_)
-    (fp - 2 * lp0 + fm) / eps^2
-  }, numeric(1))
-}
-sep(sprintf("DIAGONAL CURVATURE vs STEP (%d steps x %d parameters)",
-            length(HESS_EPS_GRID), length(u)))
-t0 <- Sys.time()
-D  <- sapply(HESS_EPS_GRID, diag_at)
-dimnames(D) <- list(nm, format(HESS_EPS_GRID, scientific = TRUE))
-cat(sprintf("%.1f minutes\n\n", as.numeric(Sys.time() - t0, units = "mins")))
+# THE COMPUTATION NOW LIVES IN R/calibrate.R (promoted 2026-08-23), and this
+# script became one of TWO callers rather than the only home of the correct
+# version. That is the point: the refit driver used to take a scalar step and
+# this script existed to fix its output afterwards, so the right implementation
+# was one someone had to remember to run. Both now call the same function; what
+# is left here is the REPORTING, which is what this file is actually for.
+HD   <- ccx_hessian_per_direction(lp, u, verbose = FALSE)
+D    <- HD$curvature_by_step
+SDV  <- HD$sd_diag
+EPSV <- HD$eps
+V    <- HD$verify
+unstable <- HD$no_plateau        # no stable plateau; fell back
+vspread  <- apply(V, 1, function(r)
+  if (anyNA(r) || r[2] == 0) Inf else max(abs(r - r[2])) / abs(r[2]))
+failed   <- HD$unstable          # chosen step not verified at eps/3 and 3 eps
 cat("NA = the step leaves the feasible region\n")
 print(signif(D, 4))
-
-# ---- SMALLEST step on the plateau, used only to ESTIMATE sd -----------
-# Smallest, not largest: past the noise floor it is the one carrying the least
-# truncation error. Requiring agreement with BOTH neighbours is what
-# distinguishes a plateau from a crossing.
-plateau <- function(k) {
-  d <- D[k, ]
-  for (i in seq_along(d)) {
-    if (i == 1L || i == length(d)) next
-    tri <- d[c(i - 1L, i, i + 1L)]
-    if (anyNA(tri) || !all(is.finite(tri)) || tri[2] == 0) next
-    if (max(abs(tri - tri[2])) / abs(tri[2]) < HESS_STABLE_TOL) return(c(d = tri[[2]], idx = i))
-  }
-  c(d = NA_real_, idx = NA_real_)
-}
-PL <- t(vapply(seq_along(nm), plateau, numeric(2)))
-rownames(PL) <- nm
-SDV  <- ifelse(PL[, "d"] < 0, 1 / sqrt(-PL[, "d"]), NA_real_)
-EPSV <- HESS_EPS_FRAC * SDV
-unstable <- nm[is.na(EPSV)]
-EPSV[is.na(EPSV)] <- HESS_FALLBACK
-
-# ---- verify the DERIVED step, at a third and three times ---------------
-diag_at_v <- function(v) vapply(seq_along(u), function(k) {
-  e <- numeric(length(u)); e[k] <- v[k]
-  fp <- lp(u + e); fm <- lp(u - e)
-  if (!is.finite(fp) || !is.finite(fm)) return(NA_real_)
-  (fp - 2 * lp0 + fm) / v[k]^2
-}, numeric(1))
-V <- cbind(lo = diag_at_v(EPSV / 3), mid = diag_at_v(EPSV), hi = diag_at_v(EPSV * 3))
-rownames(V) <- nm
-vspread <- apply(V, 1, function(r)
-  if (anyNA(r) || r[2] == 0) Inf else max(abs(r - r[2])) / abs(r[2]))
-failed <- nm[!(vspread < HESS_STABLE_TOL)]
 
 sep("CHOSEN STEP, PER PARAMETER")
 cat(sprintf("eps = %.2f x the direction's own posterior sd; verified at eps/3 and 3 eps\n",
@@ -234,16 +201,12 @@ if ("h_ml" %in% nm && !is.null(md$hml_kinks)) {
 # differenced with eps_a and the b-direction with eps_b, and the denominator
 # carries both.
 sep("FULL HESSIAN")
-n <- length(u); H <- matrix(NA_real_, n, n)
-t0 <- Sys.time()
-for (a in seq_len(n)) for (b in a:n) {
-  ea <- eb <- numeric(n); ea[a] <- EPSV[a]; eb[b] <- EPSV[b]
-  H[a, b] <- H[b, a] <-
-    (lp(u + ea + eb) - lp(u + ea - eb) - lp(u - ea + eb) + lp(u - ea - eb)) /
-    (4 * EPSV[a] * EPSV[b])
-}
-dimnames(H) <- list(nm, nm)
-cat(sprintf("%.1f minutes\n", as.numeric(Sys.time() - t0, units = "mins")))
+# Computed by ccx_hessian_per_direction() above, with MIXED steps: the
+# a-direction is differenced with eps_a and the b with eps_b, and the
+# denominator carries both.
+H <- HD$H
+cat(sprintf("21x21 with per-direction steps, eps = %.2f x each posterior sd\n",
+            HD$eps_frac))
 ev <- eigen(H, symmetric = TRUE)
 cat("\neigenvalues (all < 0 at a clean interior maximum):\n")
 print(signif(ev$values, 4))

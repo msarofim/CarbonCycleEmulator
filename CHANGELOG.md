@@ -2,6 +2,43 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-23b — The per-direction Hessian folded into the refit driver
+
+Marcus. The correct Hessian existed only in `calibration/recompute_hessian.R`, as a manual second
+step after every refit — and forgetting it silently shipped `sd_unc`, `cov`, `logdet_negH` and the
+Laplace evidence computed at a scalar `ARM_HESS_EPS = 3e-4` that is **250× too small for `h_ml`,
+167× for `kz`, 67× for `gamma_enso`** (`ccx_hess_step_sd`).
+
+**NOT COPIED INTO THE DRIVER — PROMOTED TO `R/calibrate.R`.** Copying it would have created the
+second implementation that yesterday's `luc_scale` sweep spent a day removing. New
+`ccx_hessian_per_direction(lp, u)` sizes one step per direction (`eps_k = 0.10 × sd_k`, plateau-
+scanned over a 10-point grid, verified at eps/3 and 3·eps), and **both** the driver and
+`recompute_hessian.R` now call it. `ARM_HESS_EPS` is retired to reporting-only.
+
+**VERIFIED BOTH WAYS.** The driver's new path against the reference `recompute_hessian.R` output:
+`max|ΔH|/max|H|` **1.4e-8**, Frobenius **2.9e-8**, `sd_unc` **3.4e-4**, `logdet(−H)` **6.7e-4**,
+both PD. The rewired `recompute_hessian.R` against its own previous output: **bit-identical,
+0.00e+00** on ΔH, `sd_unc` and `logdet`.
+
+**A 3.0e+04 "relative difference" in that first comparison was a DENOMINATOR ARTEFACT** and is
+recorded because it reads exactly like a real defect: the worst cell is `[rep_dC, bomb_total]`,
+where the reference entry is **exactly 0.0**. Scale by the matrix norm, not cell-wise, when
+comparing Hessians — same failure mode as `diag_d13c_midcentury.R`'s GATE 2.
+
+**TWO SILENT DEFECTS FELL OUT OF THE REWIRE:**
+1. The driver's kink-proximity check used the scalar step to compute how far the Hessian's `h_ml`
+   row reaches into the kink map. Since `h_ml`'s correct step is ~250× larger, **the check was
+   certifying the safety of a step the Hessian did not take** — reassurance about the wrong
+   quantity. Now uses `h_ml`'s own step.
+2. The driver's "curvature step-stability at the mode" block re-ran an eps × (1/3, 1, 3) sweep at
+   the same retired scalar, and at a loose 0.25 tolerance. It now consumes
+   `ccx_hessian_per_direction()`'s own verification around each direction's **actual** step, at
+   the tighter 0.02.
+
+Arm files now also record `hess_eps_frac`, `hess_sd_diag`, `hess_eps_grid`, `hess_eps_verify` and
+`hess_eps_no_plateau`, so the step choice is auditable from the file rather than from a log.
+977/979 tests pass — the same by-design `test-fluxes.R:99,:100` pair.
+
 ## 2026-08-23 — The arm-N refit onto the new objective: converged, and it fixed no gate
 
 First fit on the post-`d6adb58` objective. Arm N only (Marcus). 623.9 min, 266,961 evals,
