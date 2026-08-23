@@ -49,7 +49,8 @@ Rscript data-raw/download_data.R && Rscript data-raw/build_carbonate_tables.R &&
 |---|---|---|---|
 | Mauna Loa monthly CO₂, **in-situ** | 1958–2026, n=812 | dense NH target | Scripps CO₂ Program, `data-raw/manual/` |
 | South Pole monthly CO₂, flask+in-situ merge | 1957–2024, n=711 | dense SH target | Scripps CO₂ Program, `data-raw/manual/` |
-| Law Dome CO₂ spline | 154–1996 CE | pre-1958 target; **spinup anchor** | Rubino et al. 2019, NOAA/WDS 25830 |
+| Law Dome CO₂ **raw samples** (`law2018co2.txt`) | 1703–1996 CE, n=255 scored | **pre-1958 target** — `read_law_samples()`, ice + firn, `SampleID`/`age_ice`/`age_CO2` | Rubino et al. 2019, NOAA/WDS 25830 |
+| Law Dome CO₂ **spline** (`law2018splines.txt`) | 154–1996 CE | **spinup anchor only** — NOT the scored target | Rubino et al. 2019 |
 | Law Dome δ¹³C spline | 1020–1993 CE | pre-1980 Suess target | Rubino et al. 2019 |
 | MLO + SPO monthly δ¹³C | 1980–2024 (n=532), 1977–2024 (n=528) | land/ocean sink partition | Scripps, `data-raw/manual/` |
 | Zonal Δ¹⁴C, 5 zones, monthly | 1941.2–2019.4, n=4689 | bomb-era target, both hemispheres | Hua et al. 2022 via `SoilR::Hua2021` |
@@ -712,3 +713,21 @@ number and ours meet with no model in between. Rebuilding the atmospheric excess
 stratosphere 35.6 and 21.7 — **+4.8 % and +18.0 %**, which is what
 `LIK_EXCESS_C14_REP_FRAC = 0.15` carries. Note their stratosphere is a *model* value, so part of
 the 1995 gap may be theirs rather than ours.
+
+---
+
+## Law Dome: the scored target is RAW SAMPLES, not the spline (corrected 2026-08-23)
+
+The row above said "Law Dome CO₂ spline ... pre-1958 target" until 2026-08-23. It is wrong and it
+cost a real detour: it made an ice-vs-flask cross-validation look circular (if the scored record
+were a spline constrained by atmospheric data over its modern end, agreement with Scripps in the
+overlap would be by construction). `data-raw/build_calibration_data.R:156` reads
+`law2018co2.txt` through `read_law_samples()`; the spline file is read at :136 for the spinup
+anchor. Verified by value multiset: `obs$ice` and the raw file's in-window rows are identical.
+
+**Two traps if you compare `obs$ice` back to the raw file.** (1) **120 of 321 raw rows share an
+`age_CO2` with another row** — different cores at the same gas age — so `match()` on year pairs
+samples wrongly and manufactures differences up to 4.6 ppm. Compare as multisets or match on
+`SampleID`. (2) `age_ice` is a **character** column containing `"firn"` for the firn-air samples;
+coercing it numerically silently drops them, and in the 1962–1996 flask overlap **20 of 47 samples
+are firn**. See `notes/lit_2026-08-23_1940s_co2_plateau.md` §3.

@@ -200,7 +200,32 @@ which.** Treat −0.31 ppm as an upper bound *conditional on the spline being in
 ppm against a **measured** scatter of 1.05 ppm about the flask record. Either the σ carries a
 representativeness allowance the overlap says is unnecessary, or the term is ~4× under-weighted.
 
-### 6c. THREE TESTS THAT WOULD SETTLE IT
+### 6b-RESOLVED (2026-08-23, later the same day)
+
+**Tests 1 and 2 were run and the challenge is settled — the offset does NOT differ; the
+transition problem is real for another reason.** Full write-up:
+`notes/lit_2026-08-23_1940s_co2_plateau.md`.
+
+- **The circularity caveat above is RETRACTED.** `obs$ice` is the RAW sample file, not the spline
+  — DATA.md:52 mislabelled it (now corrected). Overlap 1962–96: ice − SPO **−0.31 ± 0.15 ppm**;
+  split by type **FIRN −0.40 ± 0.19 (n=20), ICE −0.24 ± 0.23 (n=27)**, differing by 0.16 ppm
+  (t = −0.53, n.s.). Both independent of Scripps ⇒ genuine cross-validation. **Test 1 needed no
+  download: the data were already on disk** — the second time that lesson has applied here.
+- **Test 2:** pre-1958 residual, n=160, on **dCO₂/dt R² 0.209** (slope −11.7, p = 1.2e-09) versus
+  **cumulative emissions R² 0.045**. Growth rate wins 4.6×, and its sign is **opposite** to what
+  firn smoothing predicts. Placement error is bounded by Test 1 at ~60× too small.
+- **THE LITERATURE IS THE ANSWER.** The mid-century pause is the published **1940s CO₂ plateau**
+  (~310–312 ppm, ~1940–1955), present in the revised Rubino et al. (2019) record we score
+  against. It needs **2–3 GtC/yr over 1942–49 AFTER firn diffusion and bubble trapping are
+  accounted for**. Bastos et al. (2016) put the model–obs mismatch at **0.9–2.0 PgC/yr** and
+  conclude the ocean hypothesis "cannot be confirmed by independent data". **No model reproduces
+  it.**
+- **Consequences:** our 4.7σ pause IS this plateau; our **12.7σ terrestrial rejection agrees with
+  the published δ¹³C attribution** (oceans ≥ two-thirds) and is stronger; and it coheres with
+  GCB's own imbalance peaking at +1.30/+1.62 GtC/yr in the same decade. **"Make the model fit the
+  mid-century" should be DE-RANKED** — it is an open problem in the field, not a defect here.
+
+### 6c. THREE TESTS THAT WOULD SETTLE IT — 1 and 2 DONE (see 6b-RESOLVED); 3 still open
 
 1. **Raw Law Dome samples (DE08 / DE08-2 / DSS) instead of the spline.** Removes the circularity
    in 6b outright. This is the decisive one and it is a download, not an analysis.
