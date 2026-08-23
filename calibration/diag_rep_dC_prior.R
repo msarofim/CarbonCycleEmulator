@@ -129,3 +129,47 @@ cat("\n  CONSEQUENCE: no change to this prior -- centre OR scale -- addresses th
 cat("  Re-centring hides it. Widening it hides it further. Tightening it forces the\n")
 cat("  modern residual back into the CO2 rows where it is VISIBLE, at a logL cost\n")
 cat("  that part 1 prices (~370 log-units to pin at 3.0 ppm, 2 partners free).\n")
+
+# =====================================================================
+# 4. MARCUS'S CHALLENGE (2026-08-23): "ice core vs direct measurements are so
+#    different that I wouldn't be surprised at very large change in offsets.
+#    I'm not sure why the offset can't change sign."
+#
+# THE CHALLENGE IS WELL FOUNDED AND PART 3'S SENTENCE WAS AN ASSERTION, NOT AN
+# ARGUMENT. `rep_dC` is applied to MLO/SPO ONLY; the ice block scores the bare
+# box. So part 3 compared an offset-CORRECTED residual against an
+# offset-FREE one and called the difference a sign flip in one quantity. It is
+# not one quantity. Firn smoothing on a rising curve, gas-age (Delta-age)
+# placement and a different absolute calibration scale are all real mechanisms
+# for the two observing systems to carry genuinely different offsets.
+#
+# THE TEST THAT SEPARATES THEM USES NO MODEL AT ALL: the two records OVERLAP.
+# If the observing systems disagree by several ppm where both exist, Marcus is
+# right and the eras deserve separate offsets. If they agree, the sign flip is
+# the MODEL's error and no observing-system argument reaches it.
+#
+# RESULT, 47 samples over 1962-1996:
+#     ice - SPO   -0.31 +/- 0.15 ppm (sd 1.05), trend -0.008 ppm/yr, p = 0.57
+#     ice - MLO   -1.81 ppm (sd 1.21)  <- the MLO-SPO gradient, as expected
+# The systems agree to about a third of a ppm, with no drift, in the window
+# where firn smoothing should be LARGEST (the steepest rise in the record). A
+# mechanism bounded at ~0.3 ppm when it is strongest cannot deliver several ppm
+# in 1900-40 when growth was far slower.
+#
+# *** THE LIMITATION THAT MUST RIDE WITH THAT NUMBER, AND IT IS NOT SMALL. ***
+# The record on disk is the Rubino et al. (2019) Law Dome **SPLINE** (DATA.md
+# line 52), not raw ice/firn samples. If that spline is constrained by
+# atmospheric measurements over its modern end -- which is exactly the era of
+# this overlap -- then the agreement is partly BY CONSTRUCTION and this is not
+# an independent cross-validation. NOTHING IN THIS REPO SETTLES WHICH. Treat
+# -0.31 ppm as an upper bound on the observing-system offset CONDITIONAL on the
+# spline being independent there, and see the handoff for the follow-up: the
+# raw DE08 / DE08-2 / DSS sample data, which would test it without the spline.
+#
+# SECONDARY FINDING, worth its own look: the ice term's stated sigma is ~4.04
+# ppm (median of `obs$ice$sd`) against a MEASURED scatter of 1.05 ppm about the
+# flask record. Either the sigma carries a representativeness allowance that
+# the overlap says is unnecessary, or the term is ~4x under-weighted. That is
+# the same block the 2026-08-22 panel flagged for scoring 255 site-correlated
+# rows as independent -- the two questions are coupled and should be taken
+# together.
