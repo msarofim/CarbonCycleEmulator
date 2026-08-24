@@ -643,6 +643,32 @@ ccx_load_mode <- function(arm = "N", base = ccx_default_params()) {
 #' @param sp spinup, used only for `prod_c14`; pass NULL to leave c14_cosmo alone
 #' @param base an already-built base forcing at luc_scale 1 / bomb_total ref, to
 #'   avoid rebuilding it per draw. Built here when NULL.
+# THE COLUMN-MULTIPLY PATHS CANNOT CARRY THE "luc" SINK ARM (2026-08-23c).
+# Both ccx_scaled_forcing() and ccx_make_logpost() apply `luc_scale` by
+# multiplying an already-built base forcing's LUC columns, which is exact ONLY
+# because every LUC quantity is LINEAR in the annual series. The "luc" arm of
+# the artificial mid-century sink subtracts a fixed 2.5 GtC/yr from that series,
+# making the columns AFFINE -- so the multiply would rescale the artificial
+# perturbation along with the flux and the three arms would stop being
+# magnitude-matched (2.5 -> 2.5 * 0.8984 at the adopted mode, a 10 % error in
+# the one quantity the comparison holds fixed).
+#
+# It ERRORS rather than correcting itself, because the correction has a right
+# answer that depends on what the caller meant, and a helper that guesses is how
+# `luc_scale` came to be applied twice in eight places (see above).
+# Build that arm with ccx_build_forcing(luc_scale =, sink_mode = "luc") directly.
+# The "foss" and "ocean" arms leave the LUC columns untouched and are unaffected.
+.ccx_assert_luc_arm_safe <- function(luc_scale) {
+  if (CCX_ARTIFICIAL_SINK_RATE != 0 &&
+      CCX_ARTIFICIAL_SINK_MODE == "luc" && luc_scale != 1)
+    stop("the \"luc\" arm of the artificial sink cannot ride a luc_scale ",
+         "COLUMN MULTIPLY (luc_scale = ", luc_scale, "): the columns are ",
+         "affine, not linear, so the 2.5 GtC/yr perturbation would be rescaled ",
+         "too. Build it with ccx_build_forcing(luc_scale =, sink_mode = ",
+         "\"luc\") instead.")
+  invisible(TRUE)
+}
+
 ccx_scaled_forcing <- function(sp = NULL, years = c(1750, 2024), luc_scale = 1,
                                bomb_total = CCX_BOMB_REF, scenario = "historical",
                                base = NULL) {
@@ -655,6 +681,7 @@ ccx_scaled_forcing <- function(sp = NULL, years = c(1750, 2024), luc_scale = 1,
   # -- equivalently, from the scaled columns with no second multiply. Both give
   # the same answer; doing it in one place is what makes that a fact rather than
   # a coincidence between two statements.
+  .ccx_assert_luc_arm_safe(luc_scale)
   eluc <- ccx_forcing_eluc_annual(F)
   eluc$eluc <- eluc$eluc * luc_scale
   for (cc in CCX_LUC_COLS) F[[cc]] <- F[[cc]] * luc_scale
@@ -795,6 +822,7 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     F <- base_forcing
     F$c14_cosmo <- sp$prod_c14
     F$c14_bomb  <- base_forcing$c14_bomb * (pv$bomb_total / BOMB_REF)
+    .ccx_assert_luc_arm_safe(pv$luc_scale)
     for (cc in LUC_COLS) F[[cc]] <- base_forcing[[cc]] * pv$luc_scale
     attr(F, "luc_scale") <- pv$luc_scale
     eluc <- ELUC_BASE

@@ -361,6 +361,19 @@ ccx_bomb_c14_annual_SUPERSEDED <- function(total_kmol = 102, years = 1945:1980) 
 #'   hemispheric split, monthly interpolation, annual-total conservation -- is
 #'   applied identically to a custom path and to an SSP. `scenario` still names
 #'   the run for labelling and still selects the non-CO2 climate background.
+#' @param sink_rate,sink_mode the artificial mid-century sink (2026-08-23c).
+#'   ARGUMENTS, not just env constants, so a diagnostic can build all three arms
+#'   in ONE process -- CCX_ARTIFICIAL_SINK_{RATE,MODE} are resolved when this
+#'   file is sourced, so driving the arms by Sys.setenv would require re-sourcing
+#'   and would silently test the OFF state if anyone forgot. The constants remain
+#'   the defaults, so an env-driven refit is unchanged.
+#'   NOTE the "luc" arm subtracts from the land-use series AFTER `luc_scale` has
+#'   been applied to it, so the reduction is an absolute 2.5 GtC/yr in the
+#'   MODEL's own flux and the three arms are magnitude-matched. That is why
+#'   ccx_scaled_forcing() and ccx_make_logpost(), which apply `luc_scale` as a
+#'   column MULTIPLY on an already-built base, refuse to run that arm: an affine
+#'   column is not linear in `luc_scale` and the multiply would rescale the
+#'   perturbation along with the flux.
 #' @param luc_scale multiplier on the land-use emission series (added 2026-08-14).
 #'   E_LUC is the least certain input in the table -- GCB 2025 states +/-0.7
 #'   GtC/yr on it (LIK_GCB_LUC_SD), and GCB's own 1850-2018 total is 34 % above
@@ -378,7 +391,9 @@ ccx_build_forcing <- function(scenario = "historical",
                               prod_c14 = NA_real_,
                               bomb_total_kmol = 102,
                               emissions = NULL,
-                              luc_scale = 1) {
+                              luc_scale = 1,
+                              sink_rate = CCX_ARTIFICIAL_SINK_RATE,
+                              sink_mode = CCX_ARTIFICIAL_SINK_MODE) {
 
   yrs <- seq(years[1], years[2])
   n   <- length(yrs) * 12
@@ -514,13 +529,16 @@ ccx_build_forcing <- function(scenario = "historical",
   # OFF by default (rate 0) -- every existing result reproduces exactly, in
   # every mode.
   sink_ocean <- rep(0, n)
-  if (CCX_ARTIFICIAL_SINK_RATE != 0) {
+  if (!sink_mode %in% CCX_ARTIFICIAL_SINK_MODES)
+    stop("sink_mode must be one of ",
+         paste(CCX_ARTIFICIAL_SINK_MODES, collapse = ", "), "; got ", sink_mode)
+  if (sink_rate != 0) {
     wy <- yrs >= CCX_ARTIFICIAL_SINK_WIN[1] & yrs <= CCX_ARTIFICIAL_SINK_WIN[2]
-    sk <- rep(ifelse(wy, CCX_ARTIFICIAL_SINK_RATE, 0), each = 12)
-    if (CCX_ARTIFICIAL_SINK_MODE == "foss") {
+    sk <- rep(ifelse(wy, sink_rate, 0), each = 12)
+    if (sink_mode == "foss") {
       foss_NH <- foss_NH - sk * FORC_FOSS_NH_SHARE
       foss_SH <- foss_SH - sk * (1 - FORC_FOSS_NH_SHARE)
-    } else if (CCX_ARTIFICIAL_SINK_MODE == "luc") {
+    } else if (sink_mode == "luc") {
       # Split on the LUC share, not the fossil one: this arm's claim is that
       # the LAND-USE flux was overstated, so the reduction must be apportioned
       # the way land-use carbon is. `luc` is reduced too so that the cumulative
@@ -692,6 +710,12 @@ ccx_build_forcing <- function(scenario = "historical",
   # was scaled must not be scored against an unscaled one. Project convention --
   # emit the basis, do not make the caller remember it.
   attr(out, "luc_scale") <- luc_scale
+  # Same reason as luc_scale: a forcing built under an arm of the artificial
+  # sink is a DIFFERENT INPUT and a table comparing arms must be able to say
+  # which it holds rather than infer it from a filename.
+  attr(out, "sink") <- if (sink_rate == 0) "off"
+    else sprintf("%s %.4g GtC/yr %d-%d", sink_mode, sink_rate,
+                 CCX_ARTIFICIAL_SINK_WIN[1], CCX_ARTIFICIAL_SINK_WIN[2])
   # Same reason, for the hemispheric split: a forcing built under the sourced
   # time-varying share and one built under the constant are different inputs, and
   # a diagnostic comparing them must be able to say which it has rather than

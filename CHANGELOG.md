@@ -2,6 +2,85 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-24 — The ocean-box arm: the isotopes clear it and the carbon budget kills it
+
+Handoff `2026-08-23c` §4 built, gated, and §4e run. **All three arms measured at the adopted mode
+in 8 seconds — no refit was needed to answer any of it**, and that is the first thing worth
+recording: three refits would have cost ~30 h and could not have made isotopically
+indistinguishable arms distinguishable.
+
+**THE BUILD.** `CCX_SINK_MODE` selects the isotopic signature at a fixed magnitude —
+`foss` (negative fossil emission, −28 ‰, ¹⁴C-FREE; the incumbent), `luc` (the land-use flux is
+reduced so the carbon stays in the WOOD pool), `ocean` (atmosphere → mixed layer through
+`add_flux` at the model's own `alpha_as_down`, ¹⁴C unfractionated at the source ratio). The ocean
+arm rides a new LAST forcing column `sink_ocean`, split in the deriv on the **ocean-area** shares
+`aux$asx` — not the fossil share — and mirrored in `src/ccx_core.cpp` (`N_FORCING` 14 → 15).
+`ccx_build_forcing()` gained `sink_rate`/`sink_mode` **arguments** so one process can build all
+three arms; the env constants remain the defaults.
+
+**FOUR MECHANICAL GATES, PRE-REGISTERED AND PASSING** (`test-artificial-sink.R`, +30 tests,
+1007 pass against 977): rate 0 bit-inert in every mode; the ocean gains exactly what the
+atmosphere loses, split on ocean area, isotopes at the source ratio; R↔C++ parity with the flux
+on; and conservation — **asserted as a DIFFERENCE, not a total.** Asserting closed-system ¹⁴C
+conservation failed at 4.2e-4, which is λ: ¹⁴C decays, so the *total* must not be gated (this is
+why `test-conservation.R` checks C and ¹³C only). What has to be conservative is the sink's own
+contribution, i.e. on-minus-off, and that closes to 1e-12 in all three tracers.
+
+**P1 — THE ¹⁴C NULL HOLDS, BY 58–80×.** Pre-bomb Δ¹⁴C excursion against the sink-off arm:
+`ocean` **0.122–0.156 ‰** against `foss` **7.12–11.57 ‰**. Worst-cell ratio **0.017** against a
+pre-registered ≤0.20 and an absolute pre-registration of <1 ‰. **P2** the same in δ¹³C, worst
+ratio **0.070**. On the likelihood at the mode: `foss` pays **−46.8** on `d14c_NH` and −13.4 on
+`d14c_SH`; `ocean` pays **−0.20 / +0.47**. The ¹⁴C rejection of the reduced-emissions hypothesis
+reproduces at the mode, un-refitted, and the ocean routing is isotopically invisible — exactly as
+the mechanism predicts, since removing carbon at the atmosphere's own ¹⁴C/C leaves the *ratio*
+alone.
+
+**P3 — MISSED AT THE WINDOW END, HELD AFTER, AND THE REASON MATTERS.** Pre-registered
+`ocean/foss` CO₂ ratio 0.08–0.25; measured **0.271** at 1949.5, **0.066** at 1960.5, **0.017** at
+2024.5. The band was derived from the *equilibrium* buffered-capacity partition
+(0.2503/(0.2503+2.1240) = 10.5 %) and applied to an epoch where the mixed layer has not yet given
+the carbon back and the sink is still running. Direction right, endpoint wrong; recorded rather
+than re-baselined.
+
+**THE RESULT: A MIXED-LAYER SINK CANNOT HOLD CARBON.** Of 18.75 GtC injected by the window end,
+the interior holds **3.02** and the mixed layer **1.38**; by 1960 the interior holds **1.47** and
+by 2024 **0.55**. Atmospheric drawdown **1.76 ppm** at the window end against `foss`'s 6.51, and
+**0.32 ppm** by 1960 against 4.79. Bisected on the model, matching the `foss` arm's CO₂ effect
+would need **9.4 GtC/yr** at the window end, **42.7** at 1960 and **294** at 2024 — against a
+literature sizing of 2–3 GtC/yr and a present-day *total* global ocean sink of ~3 GtC/yr.
+
+**⇒ THE TWO ARMS BRACKET EVERY OCEAN ROUTING, AND NO FOURTH RUN IS NEEDED TO SEE IT.** An ocean
+sink that ventilated its carbon instantly would have the **`foss` arm's CO₂ trajectory** (same
+removal, never returned) and the **`ocean` arm's isotopes** (removal at the atmosphere's own
+ratio, wherever it ends up). So the surviving hypothesis is not "an ocean sink" but
+**"an ocean sink whose carbon is exported below the mixed layer as fast as it is taken up"** — and
+the destination profile for such an arm is a mechanism choice, so it is **flagged for Marcus, not
+chosen here**.
+
+**The `luc` arm is nearly a relabelling of `foss` on CO₂** (−6.53 vs −6.51 ppm at the window end)
+and intermediate on ¹⁴C (`d14c_NH` −7.8 against `foss`'s −46.8), as the signature predicts. It
+pays **−840** at the mode against `foss`'s −796 and `ocean`'s **−2.00**; the ocean arm is
+essentially free *because it does almost nothing*.
+
+**ONE TRAP FOUND AND GATED.** `ccx_scaled_forcing()` and `ccx_make_logpost()` apply `luc_scale` as
+a **column multiply** on an already-built base, which is exact only because the LUC columns are
+LINEAR in the annual series. The `luc` arm makes them **affine**, so the multiply would have
+rescaled the 2.5 GtC/yr perturbation to 2.5 × 0.8984 and the arms would have stopped being
+magnitude-matched — a 10 % error in the one quantity the comparison holds fixed.
+`.ccx_assert_luc_arm_safe()` now **errors** in both paths rather than guessing, which is the same
+lesson as the eight `luc_scale`-squared sites.
+
+**Two of my own reporting bugs, both caught by the output rather than by a gate:** the pre-bomb
+residual table indexed `obs$d14$NH`, which does not exist (`ccx_prepare_obs()` returns
+`d14_nh`/`d14_sh`) and printed NaN in every cell; and the per-stream ranking indexed `ord` by
+POSITION, printing row 1 twice and TOTAL never. Both fixed; the numbers above are from the
+corrected run.
+
+**NOT DONE, DELIBERATELY:** no refit. Nothing in §4e needed one, and the ocean arm costs 2.00
+log-units at the mode — there is no misfit for a refit to relieve. **Open for Marcus** (carried
+forward from 23c): whether to pin `beta_max`/`fert_k`; and now also whether to build the
+`ocean_deep` arm and on what vertical profile.
+
 ## 2026-08-23f — The artificial sink: the model routes around it via `luc_scale`
 
 Sink-on refit (2.5 GtC/yr over 1942–49, arm N, warm) converged at **−1894.26** against sink-off
