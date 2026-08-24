@@ -49,9 +49,11 @@ static const int C = 0, C13 = 1, C14 = 2;
 // disagreement in the column count is caught by ccx_cpp_forcing()'s name check;
 // a disagreement in the ceiling is NOT caught by anything, so if one moves the
 // other must move in the same commit.
-static const int N_FORCING = 14;   // +sst_anom_NH, +sst_anom_SH (2026-08-18),
+static const int N_FORCING = 15;   // +sst_anom_NH, +sst_anom_SH (2026-08-18),
                                    // appended LAST; NaN = column absent, and
                                    // the deriv falls back to sst_scale * gmst
+                                   // +sink_ocean (2026-08-23c), also LAST; its
+                                   // "off" value is 0, not NaN
 static const double LUC_CLEARED_MAX = 0.9;
 
 // state is column-major [box + NB*tracer], matching R's matrix layout
@@ -274,10 +276,19 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 
   // forcing layout: e_foss_NH, e_foss_SH, e_luc_NH, e_luc_SH, gmst, enso,
   //                 c14_bomb, c14_nuclear, c14_cosmo, d13c_foss,
-  //                 cum_luc_NH, cum_luc_SH
+  //                 cum_luc_NH, cum_luc_SH, sst_anom_NH, sst_anom_SH,
+  //                 sink_ocean
   // Must stay in step with CCX_FORCING_COLS in R/cpp.R -- indexed by position,
   // so a mismatch is silent garbage. test-parity.R is the gate.
   const double gmst = f[4], enso = f[5], d13c_foss = f[9];
+
+  // ARTIFICIAL MID-CENTURY OCEAN SINK (2026-08-23c). Mirrors the block of the
+  // same name in R/model.R -- read the reasoning there; this is the port, and
+  // test-parity.R is what holds the two together. GLOBAL GtC/yr, split below on
+  // the ocean-area shares. Non-finite (an absent column) reads as OFF, and 0
+  // emits nothing at all, so the no-sink model is bit-reproduced.
+  const double sink_ocean = std::isfinite(f[14]) ? f[14] : 0.0;
+  const double sink_asx_tot = A.asx[0] + A.asx[1];
 
   for (int hi = 0; hi < 2; ++hi) {
     const int base = hi * NPH;
@@ -387,6 +398,11 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     const double gx = A.asx[hi] * P.k_w * K0;
     add_flux(iatm, iml, gx * chi,     A.alpha_as_down);
     add_flux(iml, iatm, gx * pco2_ml, A.alpha_as_up);
+
+    // the artificial sink rides the SAME downward fractionation as the invasion
+    // limb above and carries 14C unfractionated at the atmosphere's own ratio
+    if (sink_ocean != 0.0)
+      add_flux(iatm, iml, sink_ocean * A.asx[hi] / sink_asx_tot, A.alpha_as_down);
 
     // interior diffusion, per tracer on its own gradient
     for (int kk = 0; kk < NL; ++kk) {

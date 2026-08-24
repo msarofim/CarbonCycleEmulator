@@ -1084,6 +1084,40 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     add_flux(iatm, iml, gx * pco2_at, alpha13 = aux$alpha_as_down)   # invasion
     add_flux(iml, iatm, gx * pco2_ml, alpha13 = aux$alpha_as_up)     # evasion
 
+    # ---- ARTIFICIAL MID-CENTURY OCEAN SINK (2026-08-23c) -------------
+    # OFF unless the forcing carries a non-zero `sink_ocean`, which only
+    # happens under CCX_SINK_RATE != 0 AND CCX_SINK_MODE == "ocean". See the
+    # constants block in R/forcing.R for the three arms and what they test.
+    #
+    # WHY IT IS HERE AND NOT IN THE EMISSIONS. The hypothesis is an ocean
+    # UPTAKE, not a smaller emission, and the two differ ONLY isotopically --
+    # which is the whole discriminator. Emitted through add_flux so it is
+    # conservative by the same construction as every other flux in this
+    # function, takes 13C at the SOURCE (atmosphere) ratio with the model's own
+    # air-sea downward fractionation, and carries 14C UNFRACTIONATED at the
+    # source ratio (Stuiver-Polach, DESIGN sec.3.5). That last property is the
+    # pre-registered prediction: removing carbon at the atmosphere's OWN 14C/C
+    # leaves D14C nearly untouched, where removing 14C-free fossil carbon
+    # raises it by ~10 permil. `alpha_as_down` is REUSED, not invented -- it is
+    # the same factor the invasion limb two lines up already applies, and
+    # reusing it is what makes this an ocean uptake rather than a number
+    # somebody chose.
+    #
+    # SPLIT ON OCEAN AREA (aux$asx, which is area x rho / mol_per_GtC and so is
+    # proportional to a_oc), NOT on the fossil share: the fossil share is where
+    # the coal is burned and has nothing to do with where the ocean takes up.
+    #
+    # `lab` is deliberately NULL, so the flux trace classifies it as `as_down`
+    # and `ocean_net` counts it. It IS an atmosphere -> mixed-layer flux; giving
+    # it a private channel would leave the derived net ocean uptake wrong by
+    # exactly the sink whenever the instrument is on.
+    sk <- forc$sink_ocean
+    if (!is.null(sk) && is.finite(sk) && sk != 0) {
+      add_flux(iatm, iml,
+               sk * aux$asx[[h]] / (aux$asx$NH + aux$asx$SH),
+               alpha13 = aux$alpha_as_down)
+    }
+
     # ---- ocean interior diffusion -----------------------------------
     # F = Kz (C_k/dz_k - C_k+1/dz_k+1) / dz_mid  -- area cancels, exactly
     # conservative, and each flux is applied to both layers by add_flux.

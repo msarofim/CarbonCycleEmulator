@@ -180,7 +180,14 @@ CCX_FORCING_COLS <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                       # every earlier index survives. A forcing without them
                       # reaches C++ as NaN, and the core falls back to
                       # sst_scale * gmst -- the absence contract, in the matrix.
-                      "sst_anom_NH", "sst_anom_SH")
+                      "sst_anom_NH", "sst_anom_SH",
+                      # artificial mid-century OCEAN sink (2026-08-23c),
+                      # GtC/yr atmosphere -> mixed layer, GLOBAL: the deriv
+                      # splits it on the ocean-area shares. Appended LAST for
+                      # the same reason the sst columns were -- every earlier
+                      # index survives. Zero, not NaN, is its "off" value, and
+                      # ccx_build_forcing() always emits it.
+                      "sink_ocean")
 
 ccx_cpp_forcing <- function(F) {
   miss <- setdiff(CCX_FORCING_COLS, names(F))
@@ -234,7 +241,10 @@ ccx_deriv_fast <- function(y, t, p, forc, grid, aux) {
          ccx_forcing_d13c_foss(forc), cl$NH, cl$SH,
          # absent in most hand-built test forcings -> NaN -> C++ falls back
          if (is.null(forc$sst_anom_NH)) NA_real_ else forc$sst_anom_NH,
-         if (is.null(forc$sst_anom_SH)) NA_real_ else forc$sst_anom_SH)
+         if (is.null(forc$sst_anom_SH)) NA_real_ else forc$sst_anom_SH,
+         # absent -> 0, NOT NaN: this one has a well-defined "off" value and a
+         # NaN would poison the mixed-layer tendency rather than fall back.
+         if (is.null(forc$sink_ocean)) 0 else forc$sink_ocean)
   d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, ccx_cpp_par(p), f, ccx_cpp_aux(aux, grid))
   dimnames(d) <- dimnames(y)
   d

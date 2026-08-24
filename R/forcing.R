@@ -23,11 +23,47 @@
 # the seasonality buy?" is one flag rather than a git checkout.
 FORC_USE_EMIS_SEASONALITY <- TRUE
 # ---- artificial mid-century sink (2026-08-23) -----------------------
-# OFF by default. See the block in ccx_build_forcing() for what it is, what it
-# is for, and the two limitations that make it a CO2-only instrument.
+# OFF by default (rate 0). See the block in ccx_build_forcing() for what it is
+# and what it is for.
 # Window brackets the published 1940-1955 plateau; rate in GtC/yr.
 CCX_ARTIFICIAL_SINK_WIN  <- c(1942, 1949)
 CCX_ARTIFICIAL_SINK_RATE <- as.numeric(Sys.getenv("CCX_SINK_RATE", "0"))
+# THE ISOTOPIC ARM (added 2026-08-23c). The same CO2 removal, routed three
+# different ways, because the two hypotheses Marcus posed -- "an artificial
+# ocean sink" versus "reduce emissions during that period" -- produce the SAME
+# CO2 trajectory at the point of removal and differ ONLY isotopically. The
+# discriminator is therefore d13C and D14C, which is also how the published
+# double-deconvolution attributes the 1940s plateau.
+#
+#   "foss"  negative FOSSIL emission. Removed carbon is 14C-FREE and -28 permil,
+#           so removing it UNDOES Suess dilution and D14C RISES. This is the
+#           2026-08-23 incumbent and it is what the pre-bomb record REJECTED
+#           (+0.6 -> +13.5 permil residual, ~52 log-units).
+#   "luc"   the land-use flux is reduced instead, so the carbon simply stays in
+#           the WOOD pool and never reaches the atmosphere. It leaves at the
+#           vegetation box's own emergent ratio (~-25 permil, and NOT 14C-free),
+#           an intermediate case. Note this ALSO reduces the model E_LUC that
+#           ccx_forcing_eluc_annual() feeds the gcb_land_sink term -- correct for
+#           the hypothesis, but it means this arm perturbs a scored stream by a
+#           second route that the other two do not.
+#   "ocean" the flux is routed atmosphere -> MIXED LAYER through add_flux at the
+#           model's OWN air-sea downward fractionation, carrying 14C
+#           unfractionated at the source ratio. This is the only arm that is a
+#           real UPTAKE rather than a negative emission: carbon stays in the
+#           system, ocean inventory and excess-14C stay meaningful, and the
+#           mixed layer can give some of it back. It is the arm both the 14C
+#           result and the published d13C deconvolution favour.
+#
+# "foss" is the default so that every result produced before 2026-08-23c
+# reproduces bit for bit. At rate 0 all three modes are the untouched model.
+CCX_ARTIFICIAL_SINK_MODES <- c("foss", "luc", "ocean")
+CCX_ARTIFICIAL_SINK_MODE  <- local({
+  m <- Sys.getenv("CCX_SINK_MODE", "foss")
+  if (!m %in% CCX_ARTIFICIAL_SINK_MODES)
+    stop("CCX_SINK_MODE must be one of ",
+         paste(CCX_ARTIFICIAL_SINK_MODES, collapse = ", "), "; got ", m)
+  m
+})
 
 FORC_FOSS_NH_SHARE <- 0.9201 # fossil CO2 emitted in the NH. MEASURED (Marcus,
 
@@ -460,21 +496,48 @@ ccx_build_forcing <- function(scenario = "historical",
   # swing and would have reported it as a mechanism. This is prescribed,
   # unfitted, externally sized and labelled artificial.
   #
-  # *** TWO LIMITATIONS, BOTH LOAD-BEARING ***
-  # 1. Applied as a NEGATIVE FOSSIL EMISSION, so the carbon leaves the SYSTEM
-  #    rather than entering the ocean box. Ocean inventory, excess-14C and
-  #    conservation are NOT right under it.
-  # 2. It therefore carries the FOSSIL d13C, where a real ocean sink is
-  #    near-neutral. The d13C streams are scored, so d13C is NOT trustworthy
-  #    under it. A proper version routes the flux into the ocean at its own
-  #    signature.
-  # READ CO2 UNDER THIS SWITCH. Do not quote d13C, D14C, or sink numbers.
-  # OFF by default (rate 0) -- every existing result reproduces exactly.
+  # THE MODE SELECTS THE ISOTOPIC SIGNATURE, and that is the entire point --
+  # see CCX_ARTIFICIAL_SINK_MODE at the top of this file for the three arms and
+  # why the isotopes are the discriminator. The MAGNITUDE is identical across
+  # arms by construction: one `sk` vector, three destinations.
+  #
+  # THE "foss" ARM'S LIMITATION, kept because it is the incumbent and its
+  # numbers are already quoted: the carbon leaves the SYSTEM rather than
+  # entering a box, so ocean inventory, excess-14C and the closed-system budget
+  # are not right under it, and it carries the FOSSIL d13C where a real ocean
+  # sink is near-neutral. That limitation is exactly what "ocean" removes.
+  # 2026-08-23c CORRECTION to an earlier claim of mine: the "foss" arm does NOT
+  # break conservation -- the cumulative budget gap is identical with and
+  # without it (+260.95 GtC either way) because the carbon is simply never
+  # emitted. It is a valid test of a real hypothesis, just not of the ocean one.
+  #
+  # OFF by default (rate 0) -- every existing result reproduces exactly, in
+  # every mode.
+  sink_ocean <- rep(0, n)
   if (CCX_ARTIFICIAL_SINK_RATE != 0) {
     wy <- yrs >= CCX_ARTIFICIAL_SINK_WIN[1] & yrs <= CCX_ARTIFICIAL_SINK_WIN[2]
     sk <- rep(ifelse(wy, CCX_ARTIFICIAL_SINK_RATE, 0), each = 12)
-    foss_NH <- foss_NH - sk * FORC_FOSS_NH_SHARE
-    foss_SH <- foss_SH - sk * (1 - FORC_FOSS_NH_SHARE)
+    if (CCX_ARTIFICIAL_SINK_MODE == "foss") {
+      foss_NH <- foss_NH - sk * FORC_FOSS_NH_SHARE
+      foss_SH <- foss_SH - sk * (1 - FORC_FOSS_NH_SHARE)
+    } else if (CCX_ARTIFICIAL_SINK_MODE == "luc") {
+      # Split on the LUC share, not the fossil one: this arm's claim is that
+      # the LAND-USE flux was overstated, so the reduction must be apportioned
+      # the way land-use carbon is. `luc` is reduced too so that the cumulative
+      # converted-land integral below follows -- clearing that did not happen
+      # also did not shrink the land's equilibrium.
+      luc_NH <- luc_NH - sk * luc_sh_m
+      luc_SH <- luc_SH - sk * (1 - luc_sh_m)
+      luc    <- luc    - sk
+    } else {
+      # "ocean": carried as its OWN forcing column and routed into the mixed
+      # layer inside ccx_deriv(), which is where the air-sea fractionation and
+      # the ocean-area split live. A GLOBAL rate: the hemispheric apportionment
+      # is done there, on the same ocean-area shares the air-sea exchange uses
+      # (aux$asx), because a sink whose split came from the fossil share would
+      # be an ocean uptake in name only.
+      sink_ocean <- sk
+    }
   }
 
   # ---- CUMULATIVE land-use carbon (2026-08-13) -----------------------
@@ -616,6 +679,9 @@ ccx_build_forcing <- function(scenario = "historical",
     gmst = gm, enso = enso, d13c_foss = d13c_foss,
     c14_bomb = c14_bomb, c14_nuclear = c14_nuc,
     c14_cosmo = rep(prod_c14, n),
+    # artificial mid-century OCEAN sink, GtC/yr, atmosphere -> mixed layer.
+    # Identically zero unless CCX_SINK_RATE is set AND CCX_SINK_MODE == "ocean".
+    sink_ocean = sink_ocean,
     stringsAsFactors = FALSE
   )
   # observed SST columns, derived from the gmst column just built (see
@@ -698,7 +764,11 @@ ccx_forcing_at <- function(F, i) {
        # observed-SST columns (2026-08-18). NULL when the forcing predates them
        # -- the deriv's fallback handles that; omitting them HERE while the C++
        # matrix carried them broke R<->C++ parity at 9e-4 before this line.
-       sst_anom_NH = F$sst_anom_NH[i], sst_anom_SH = F$sst_anom_SH[i])
+       sst_anom_NH = F$sst_anom_NH[i], sst_anom_SH = F$sst_anom_SH[i],
+       # artificial ocean sink (2026-08-23c). NULL on a forcing that predates
+       # the column or on a hand-built one; ccx_deriv() reads that as zero,
+       # which is the same absence contract the sst columns carry.
+       sink_ocean = F$sink_ocean[i])
 }
 
 # ---------------------------------------------------------------------

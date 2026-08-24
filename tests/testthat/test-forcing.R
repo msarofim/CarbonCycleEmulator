@@ -119,7 +119,12 @@ test_that("the C++ forcing column contract is positional and complete", {
   # never inserted, and NaN in these two positions means "column absent -> the
   # core falls back to sst_scale * gmst".
   expect_identical(CCX_FORCING_COLS[13:14], c("sst_anom_NH", "sst_anom_SH"))
-  expect_length(CCX_FORCING_COLS, 14L)
+  # sink_ocean APPENDED 2026-08-23c (the artificial mid-century ocean sink),
+  # same discipline again. Unlike the two above its "absent" value is 0, not
+  # NaN -- it has a well-defined off state, and a NaN here would poison the
+  # mixed-layer tendency instead of falling back to anything.
+  expect_identical(CCX_FORCING_COLS[15], "sink_ocean")
+  expect_length(CCX_FORCING_COLS, 15L)
   F <- ccx_build_forcing("historical", c(1900, 1910), prod_c14 = 0)
   expect_identical(colnames(ccx_cpp_forcing(F)), CCX_FORCING_COLS)
   expect_error(ccx_cpp_forcing(F[, setdiff(names(F), "d13c_foss")]),
