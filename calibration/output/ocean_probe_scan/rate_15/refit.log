@@ -35,3 +35,5 @@ WARM START from mode_fit_pumpN.rds: log-post there = -1928.0 (its file says -185
 [N] cycle 1 polish: log-post = -1896.0 (gain 1.7156)
 [N] === cycle 1 total gain 32.0401 (log-post -1896.0, 155641 evals) ===
 [N] cycle 2 restart  1: log-post =      -1896.0  (gain     0.0000)  evals 158087
+[N] cycle 2 restart  2: log-post =      -1896.0  (gain     0.0000)  evals 159083
+  NM converged: gain below ARM_TOL

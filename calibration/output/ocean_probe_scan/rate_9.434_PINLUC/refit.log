@@ -1,0 +1,28 @@
+OVERRIDE CCX_ARM_RESTARTS = 8 (default 20)
+OVERRIDE CCX_ARM_CYCLES = 2 (default 6)
+OVERRIDE CCX_ARM_OUTDIR = /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/ocean_probe_scan/rate_9.434_PINLUC
+REFIT, 1 ARM(S) [N]. 21 parameters: beta_max, fert_k, q10, k_w, h_ml, kz, pump_grad, tau_ex, npp_frac_NH, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p, sst_seas_amp_NH, sst_seas_amp_SH, gamma_enso, bomb_total, luc_scale, sigma_d14c, rep_dC, grad_off_co2, grad_off_d13c
+kz bracket [3942.5, 6528] (re-bisected for the pump 2026-08-16e)
+pump default 233.109378 umol/kg = PUMP_GRAD_OBS
+
+
+=== h_ml BOUNDED FOR THIS REFIT (Marcus 2026-08-16g) ===
+h_ml: [30, 200] init 75   ->   [85, 120] init 100
+prior renormalised over the new support: log-prior shifts by +1.5805
+GATE H1: only `h_ml` changed. GATE H2: init 100 round-trips (u = -0.2877);
+         the shipped init 75 is correctly REJECTED by the new bound. OK
+GATE H3: all three rows LIVE at init (DIC +188.17, d13C -0.5983, ALK +82.68). OK
+
+*** luc_scale PINNED at 0.898376 (prior sd 1e-04) ***
+    GATE round-trip 0.898376 -> 0.898376 (err 0.0e+00); prior at pin 8.4, at pin*1.05 -119015.7
+
+
+=== h_ml KINK MAP (see calibration/diag_hess_eps_21par.R) ===
+3 kink(s) in [85, 120]: h_ml = 98.41, 100.00, 101.29 m
+ARM_HML_INIT = 100 is EXACTLY ON A KINK. Harmless: Nelder-Mead is derivative-free.
+GATE SKIPPED: one arm (N) -- there is no second arm to differ from.
+
+
+=== ARM pump_mode = N ===
+start: log-post at hand-set init = -20698.8
+WARM START from mode_fit_pumpN.rds: log-post there = -1879.3 (its file says -1859.3)
