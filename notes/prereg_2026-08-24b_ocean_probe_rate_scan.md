@@ -81,3 +81,63 @@ Suess artefact). Predicted |Δ`sigma_d14c`| < 1 σ at every rate. At the mode th
   `VECLIB_MAXIMUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`) — ~158 MB RSS per arm on a 10-core /
   16 GB machine. Unpinned BLAS has cost this project 11 h against 2 h17 before.
 - Output: `calibration/output/ocean_probe_scan/rate_*/`. **SCRATCH — never the shipped mode.**
+
+---
+
+# ADDENDUM — the PINNED arms (written 2026-08-24, before launch)
+
+## Why this addendum exists: P3 was FALSIFIED
+
+I predicted `luc_scale` would move < 1 σ against this probe and named **2 σ as the
+falsifier**, on the argument that the probe's time-shape (3.3 % of its 1950 effect left by 2024)
+is nearly orthogonal to a `luc_scale` rescale's (196 % by 2024), so the escape route was closed
+**by construction**.
+
+**Measured: +0.52 / +1.90 / +2.94 σ at rates 2.5 / 9.434 / 15. The falsifier is crossed.**
+
+The argument was wrong in a specific way worth recording: **a fit does not need to MATCH a
+perturbation's shape to route around it — it only needs to trade enough likelihood elsewhere.**
+Orthogonality bounds how *efficiently* a lever can absorb a perturbation, not *whether* it can.
+Measured efficiency at matched window-end CO₂ effect: `luc_scale` moves **+5.52 σ** against `foss`
+and **+1.90 σ** against `ocean` — 0.34×. Narrowed, not closed.
+
+**Consequence: the free runs cannot settle Marcus's question.** `rep_dC` stays put (+0.16 / +0.32 /
++0.21 σ), but with `luc_scale` free at ~3 σ I cannot separate *"the plateau does not drive
+`rep_dC`"* from *"`luc_scale` absorbed the relief before `rep_dC` saw it."* Marcus's call
+(2026-08-24): **pin `luc_scale` and rerun 9.434 and 15.**
+
+## Design
+
+Two refits, arm N, `CCX_SINK_MODE=ocean`, rates **9.434** and **15**, `CCX_PIN_LUC_SCALE` at the
+**rate-0 converged value 0.8983759151** (the sink-OFF value — the same logic as 23c's 0.8984 pin,
+but taken from this scan's own matched zero rather than a rounded literal). Scoping and warm start
+as before; each dir seeded with the **rate-0 mode**, whose `luc_scale` already sits exactly at the
+pin so the warm start is admissible under the near-delta prior.
+
+**A pinned run's Laplace evidence is NOT comparable to an unpinned one** — its `luc_scale` prior
+has been replaced. Read parameters and per-stream logL, never evidence.
+
+## P5 — THE PREDICTION
+
+**`rep_dC` will still not fall.** Predicted **|Δ`rep_dC`| < 0.5 σ** at both rates, against the
+`foss` probe's pinned **5.566 → 4.102 (−1.46, ≈ −21 σ in these units)** at matched CO₂ effect.
+
+**The falsifier is sharp and I want it on the record after getting P3 wrong:** if pinned `rep_dC`
+falls by **more than 1 σ** at either rate, then relieving the plateau decade DOES relax the level
+offset, my account of `rep_dC` as a century-scale common-mode drift is wrong, and Marcus's original
+worry is confirmed rather than redirected.
+
+## P6 — where the relief will go instead
+
+With `luc_scale` shut, I expect the **(`beta_max`, `fert_k`) ridge** (ρ = +0.997) to take over —
+it already moved −0.84 / −1.12 σ at rate 15 with `luc_scale` free, and it was the route the pinned
+`foss` run used (0.93 → 2.70 and 423 → 1738). Predicted **> 1.5 σ on both** at rate 15.
+
+If BOTH `rep_dC` and the ridge stay quiet, then the probe's cost is simply not recoverable, which
+is itself informative: it would mean the plateau window carries no leverage over any fitted
+parameter, and the ~15 log-units the free run recovered were bought entirely by `luc_scale`.
+
+## P7 — the isotopes, again
+
+`sigma_d14c` stays within **1 σ** (it was −0.15 free). The pin cannot change that: the probe's
+Δ¹⁴C excursion is 0.12–0.16 ‰ by construction and there is no Suess artefact to absorb.
