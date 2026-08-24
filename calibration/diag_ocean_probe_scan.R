@@ -53,6 +53,7 @@ SCAN_REF   <- "0"
 # its `luc_scale` prior has been replaced by a near-delta, so the logposts below
 # are NOT on the same scale as the free arms'. Read PARAMETERS and PER-STREAM
 # logL across the pin boundary, never evidence and never logpost.
+SCAN_MATCHED <- "9.434"   # the arm built to match `foss`'s window-end CO2 effect
 SCAN_PINNED <- c("9.434", "15")
 SCAN_PIN_AT <- 0.8983759151                   # = the rate-0 arm's own converged value
 SINK_WIN   <- CCX_ARTIFICIAL_SINK_WIN
@@ -85,7 +86,12 @@ have <- SCAN_RATES[file.exists(vapply(SCAN_RATES, done_path, "")) &
 # pinned arms carry a "P" suffix in every table below so no row can be read as a
 # free arm; their directory is rate_<r>_PINLUC
 pin_dir  <- function(r) file.path(SCAN_DIR, paste0("rate_", r, "_PINLUC"))
-pin_tag  <- function(r) paste0(r, "P")
+# GUARDED AGAINST ZERO LENGTH. `paste0(character(0), "P")` is "P" in R, not
+# character(0) -- the scalar recycles against the empty vector. Unguarded, an
+# empty pinned set injected a phantom "P" column into every table and the run
+# died in ccx_par_to_unc() on a NULL mode. Latent for one commit because the
+# only run with no pinned arms had its output truncated above the header row.
+pin_tag  <- function(r) if (!length(r)) character(0) else paste0(r, "P")
 have_pin <- SCAN_PINNED[file.exists(file.path(pin_dir(SCAN_PINNED),
                                               "pump_arms_comparison.rds"))]
 if (!SCAN_REF %in% have) stop("the reference arm (rate ", SCAN_REF, ") has not finished")
@@ -169,7 +175,17 @@ cat(sprintf("  worst |d| = %.2f sd; predicted < %.1f, falsifier > %.1f  ==>  %s\
             if (p3 < PRE_LUC_SCALE) "P3 HOLDS"
             else if (p3 < PRE_LUC_FALSIF) "P3 MISSED (not falsified) -- the escape route is NARROWED, not closed"
             else "P3 FALSIFIED -- the shape argument is WRONG"))
-cat(sprintf("  ratio to `foss` at matched CO2 effect: %.2fx\n", p3 / FOSS_LUC_SD))
+# THE MATCHED COMPARISON IS RATE 9.434 AND ONLY RATE 9.434 -- it is the arm
+# built to reproduce the `foss` probe's window-end CO2 drawdown (-6.51 ppm).
+# Taking the ratio from the WORST arm (rate 15, 2.3x that effect) and calling it
+# "matched" was a label that did not derive from what was computed.
+if (SCAN_MATCHED %in% have)
+  cat(sprintf("  at the MATCHED arm (rate %s, same -6.51 ppm as `foss`): %+.2f sd = %.2fx `foss`\n",
+              SCAN_MATCHED, D["luc_scale", SCAN_MATCHED],
+              abs(D["luc_scale", SCAN_MATCHED]) / FOSS_LUC_SD))
+cat(sprintf("  at the LARGEST arm (rate %s, %.1fx the `foss` CO2 effect): %+.2f sd = %.2fx\n",
+            utils::tail(have, 1), 15 / 9.434, D["luc_scale", utils::tail(have, 1)],
+            p3 / FOSS_LUC_SD))
 
 cat("\n=== P4 -- DO THE ISOTOPES STAY QUIET? ===\n")
 cat(sprintf("  the `foss` probe inflated sigma_d14c +%.2f sd (6.13 -> 8.96)\n", FOSS_SIGMA_D14C_SD))
@@ -211,8 +227,14 @@ ord <- c("TOTAL", setdiff(rownames(S)[order(-abs(S[, ncol(S)]))], "TOTAL"))
 cat(sprintf("%-20s", "stream")); for (r in colnames(S)) cat(sprintf(" %10s", r)); cat("\n")
 for (i in ord) { cat(sprintf("%-20s", i))
   for (r in colnames(S)) cat(sprintf(" %+10.2f", S[i, r])); cat("\n") }
-ice <- S["co2_icecore", setdiff(have, SCAN_REF), drop = TRUE]
-cat(sprintf("\n  co2_icecore by rate: %s\n", paste(sprintf("%+.2f", ice), collapse = "  ")))
+# THE REFERENCE ARM'S IMPLICIT ZERO IS PART OF THE CURVE. These are differences
+# vs rate 0, so rate 0 itself is 0.00 by construction -- and that is exactly the
+# point the rise-then-fall turns on. Testing monotonicity on the differences
+# alone reported "YES, monotone" for a sequence that goes 0.00 -> +0.87 -> -5.53.
+ice <- c(0, S["co2_icecore", setdiff(have, SCAN_REF), drop = TRUE])
+names(ice)[1] <- SCAN_REF
+cat(sprintf("\n  co2_icecore by rate (%s): %s\n", paste(names(ice), collapse = " / "),
+            paste(sprintf("%+.2f", ice), collapse = "  ")))
 cat(sprintf("  monotone in rate? %s -- pre-registered NOT monotone, because at the\n",
             if (all(diff(ice) > 0) || all(diff(ice) < 0)) "YES" else "NO"))
 cat("  mode the model already sits 1.67 ppm BELOW the ice in 1942-50, so a local\n")
