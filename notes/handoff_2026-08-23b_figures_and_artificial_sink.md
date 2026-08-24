@@ -141,10 +141,13 @@ bound by construction**, since the hypothesis is that the other 20 parameters we
 Warm start reads **−2655.8** against the sink-off **−1859.3**, matching the −796.5 measured
 directly, so it is correctly configured.
 
-> **⚠ THE SINK IS APPLIED AS A NEGATIVE FOSSIL EMISSION.** Two consequences, both load-bearing:
-> **(1)** the carbon leaves the *system* rather than entering the ocean box, so ocean inventory,
-> excess-¹⁴C and conservation are wrong under it; **(2)** it therefore carries the **fossil δ¹³C
-> (−28 ‰)** where a real ocean sink is near-neutral (~−2 ‰ discrimination) — **a factor ~10**.
+> **⚠ CORRECTED 2026-08-23.** This note first said the switch broke conservation and
+> "contaminated" δ¹³C. **Both claims were wrong and were measured:** the cumulative budget gap is
+> IDENTICAL with and without the sink (+260.95 GtC) and emitted differs by exactly 20.00 GtC — the
+> carbon is simply never emitted, so nothing is lost. It carries `d13c_foss` and the correct ¹⁴C
+> dilution. **It is a CONSISTENT "fossil emissions were overstated in 1942–49" scenario**, i.e. a
+> VALID isotopic test of one of the two hypotheses Marcus named — not a broken ocean sink. What it
+> is *not* is the ocean hypothesis, which has a different signature.
 > Measured contamination: **+0.113 ‰ at 1945**, decaying to +0.071 (1960), +0.025 (1980), +0.011
 > (2020), against δ¹³C residuals of ~0.1 ‰. **So δ¹³C, Δ¹⁴C and sink numbers from this run are
 > NOT trustworthy.** CO₂ outvotes partition ~40:1 ([[ccx_stream_leverage]]), so the CO₂ and
@@ -181,14 +184,60 @@ Trustworthy CO₂ side: **CO₂ streams net +15.8** (`co2_icecore` **+34.4**, st
 swelling to absorb the fossil-signature artefact, exactly as predicted. Total −38.2, of which the
 contaminated isotopes are −47.8: **on the readable streams the sink is net POSITIVE.**
 
-**(d) TWO NEXT STEPS, and the first is now the important one.**
+**(c-PINNED) THE PINNED RUN LANDED — `rep_dC` FALLS, AND ¹⁴C REJECTS THE HYPOTHESIS.**
+`calibration/output/pump_arms_SINK25_PINLUC/`, converged at −1920.9 (logpost NOT comparable —
+the `luc_scale` prior was replaced; compare the LIKELIHOOD).
 
-**(d1) PIN `luc_scale` AND RE-RUN.** This is the test that isolates the hypothesis. With
-`luc_scale` free the model has a global lever that undoes a local sink; fix it at the sink-off
-value (0.8984) and the question becomes the one Marcus asked — do the *other* parameters relax,
-and does `rep_dC` fall toward the 1-D scan's 2.21? Cheap: one warm cycle.
+| | sink OFF | sink ON, `luc` free | sink ON, `luc` PINNED |
+|---|---|---|---|
+| **`rep_dC`** | 5.566 | 5.126 | **4.102** |
+| `luc_scale` | 0.8984 | **1.0852** | 0.8984 (pinned) |
+| **`beta_max`** | 1.011 | 0.932 | **2.704** |
+| **`fert_k`** | 554.5 | 422.6 | **1738.0** |
+| `sigma_d14c` | 6.13 | 8.96 | 10.16 |
+| **likelihood** | **−1789.9** | −1828.1 | −1860.6 |
+| — CO₂ | −838.5 | **−822.6** | −853.6 |
+| — isotopes | −836.7 | −884.5 | −890.9 |
 
-**(d2) ROUTE THE FLUX INTO THE OCEAN BOX at its own isotopic signature** Route the flux
+**(1) MARCUS'S HYPOTHESIS HAS SUPPORT — AND THE MODEL ROUTED AROUND IT AGAIN.** Blocking the
+global emissions lever *does* relieve `rep_dC`: **5.566 → 5.126 → 4.102**. But it does not reach
+the 1-D scan's 2.21, because the model slid down **the next degenerate direction: `beta_max`
+0.93 → 2.70 with `fert_k` 423 → 1738** — the Michaelis-Menten pair that memory
+`ccx_seas_q10_ridge` records at **ρ = +0.997**. **Block one lever, it finds another.** The general
+lesson now has two instances: *before running a prescribed-perturbation experiment, enumerate every
+free direction that can undo it — not just the obvious one.*
+
+**(2) THE DECISIVE RESULT: ¹⁴C REJECTS THE REDUCED-EMISSIONS HYPOTHESIS.** Δ¹⁴C residual
+(model − obs, ‰), pre-bomb:
+
+| era | hemi | sink OFF | sink PINNED |
+|---|---|---|---|
+| 1941–1950 | NH | +3.23 | **+12.64** |
+| 1941–1950 | SH | +0.82 | **+7.84** |
+| 1950–1956 | NH | +0.64 | **+13.52** |
+| 1950–1956 | SH | +5.36 | **+17.33** |
+
+**Fossil carbon is ¹⁴C-free.** Emitting 20 GtC less of it in 1942–49 removes ~10 ‰ of Suess
+dilution and the model's Δ¹⁴C rises accordingly — **and the pre-bomb record does not show it**
+(`d14c_NH` −26.4, `d14c_SH` −25.9, ~52 log-units together; `sigma_d14c` inflates to 10.16 trying
+to absorb it).
+
+**⇒ THIS IS THE ISOTOPIC APPORTIONMENT MARCUS ASKED FOR, AND IT DISCRIMINATES.** An ocean sink
+removes carbon at roughly the atmosphere's own ¹⁴C/C ratio and produces **no** such signature; a
+fossil-emissions reduction produces a large one. **¹⁴C therefore favours the OCEAN version** —
+independently reaching where the literature's δ¹³C double-deconvolution already sits (oceans
+≥ two-thirds; `ccx_1940s_plateau`). A LUC reduction (~−25 ‰, also ¹⁴C-depleted but not ¹⁴C-free)
+sits between the two and is the third arm worth running.
+
+**(d) THE NEXT STEPS, re-ordered by what (c-PINNED) showed.**
+
+**(d1) DONE — see (c-PINNED).** `rep_dC` falls to 4.10 but the (`beta_max`, `fert_k`) ridge
+absorbs the rest. A further run would need to pin that pair too; whether that is a legitimate
+test or over-constraining the model to force an answer is **Marcus's call**.
+
+**(d2) ROUTE THE FLUX INTO THE OCEAN BOX at its own isotopic signature — NOW THE PRIORITY,
+because (2) above says ¹⁴C is what separates the hypotheses and only the ocean version can be
+tested that way** Route the flux
 **into the ocean box** at its own isotopic signature instead of subtracting it from fossil
 emissions. That fixes conservation, the ocean inventory and the ¹⁴C terms at once, and makes the
 δ¹³C streams usable — which matters because δ¹³C is how the literature attributes the plateau to
