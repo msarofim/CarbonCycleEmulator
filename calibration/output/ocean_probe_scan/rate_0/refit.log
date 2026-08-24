@@ -23,3 +23,77 @@ GATE SKIPPED: one arm (N) -- there is no second arm to differ from.
 === ARM pump_mode = N ===
 start: log-post at hand-set init = -18620.9
 WARM START from mode_fit_pumpN.rds: log-post there = -1859.3 (its file says -1859.3)
+[N] cycle 1 restart  1: log-post =      -1859.3  (gain     0.0000)  evals 1914
+[N] cycle 1 restart  2: log-post =      -1859.3  (gain     0.0000)  evals 3315
+  NM converged: gain below ARM_TOL
+[N] cycle 1 polish: log-post = -1859.3 (gain 0.0000)
+[N] === cycle 1 total gain 0.0000 (log-post -1859.3, 3695 evals) ===
+[N] CONVERGED: cycle gain below ARM_CYCLE_TOL (0.5)
+
+[N] prior-tail position (normal sds; |z| > 3 flagged):
+       beta_max          fert_k             q10             k_w            h_ml 
+          -0.42           -0.61           -2.42            0.69           -1.37 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+           1.89            0.91           -0.87           -0.97            2.64 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+          -3.95           -0.82           -6.22           -4.25            0.39 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+           1.73           -0.38            0.29            5.57           -0.49 
+  grad_off_d13c 
+           0.63 
+*** FLAGGED:  seas_T_amp_SH, sst_seas_amp_NH, sst_seas_amp_SH, rep_dC 
+[N] hessian: per-direction central differences, 21 parameters
+  eps = 0.10 x each direction's own posterior sd, verified at eps/3 and 3 eps
+  parameter          sd (unc)     eps (u)   curvature
+  beta_max            0.00415   4.147e-04      -58138
+  fert_k              0.00452   4.525e-04      -48845
+  q10                 0.00166   1.662e-04 -3.6186e+05
+  k_w                 0.00580   5.796e-04      -29763
+  h_ml                0.85170   8.517e-02     -1.3797
+  kz                  0.50040   5.004e-02     -3.9946
+  pump_grad           0.03940   3.940e-03     -643.22
+  tau_ex              0.01112   1.112e-03     -8080.5
+  npp_frac_NH         0.03830   3.830e-03     -681.46
+  seas_T_amp_NH       0.01896   1.896e-03     -2780.7
+  seas_T_amp_SH       0.18561   1.856e-02     -29.008
+  seas_lag_p          0.00908   9.082e-04      -12122
+  sst_seas_amp_NH     0.13084   1.308e-02     -58.405
+  sst_seas_amp_SH     0.07020   7.020e-03     -202.75
+  gamma_enso          0.19800   1.980e-02     -25.504
+  bomb_total          0.00274   2.736e-04 -1.3357e+05
+  luc_scale           0.00232   2.324e-04  -1.852e+05
+  sigma_d14c          0.09526   9.526e-03     -110.19
+  rep_dC              0.06923   6.923e-03     -208.63
+  grad_off_co2        0.04538   4.538e-03     -485.63
+  grad_off_d13c       0.00381   3.811e-04      -68844
+[N] h_ml mode 87.9957 m; nearest kink 10.41 m away; the Hessian step reaches 2.42e-01 m
+[N] curvature step-stability at the mode (eps x 1/3, 1, 3): all 21 coordinates stable
+[N] Laplace covariance: PD, condition number 4.7e+05
+[N] mode log-post = -1859.3  (gain over init 0.0)
+[N] elapsed 13.8 min, 3695 evaluations (0.224 s/eval)
+
+[N] mode, natural scale:
+       beta_max          fert_k             q10             k_w            h_ml 
+         1.0112        554.5447          1.0914       1977.2285         87.9957 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+      6452.4753        292.7589          1.0447          0.5600         25.9052 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+         1.3143          1.6355          0.4723          0.6032          0.7783 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+       121.2238          0.8984          6.1250          5.5658         -0.2426 
+  grad_off_d13c 
+         0.0945 
+[N] wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/ocean_probe_scan/rate_0/mode_fit_pumpN.rds
+
+
+=== COMPARISON SKIPPED -- ONE ARM ===
+ARM_MODES = N. See the ARM_MODES block for why D is not re-run.
+
+
+=== THE STANDING QUESTIONS THIS RUN WAS ALSO MEANT TO ANSWER ===
+[N] kz = 6452.5 (97.1 % up the re-bisected bracket [3942.5, 6528])
+[N] h_ml = 88.00 -- gradient rows LIVE only inside [85, 120]: LIVE
+[N] pump_grad = 292.76  (prior centre 233.11, 1-D optimum at the old mode 274.5)
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/ocean_probe_scan/rate_0/pump_arms_comparison.rds
