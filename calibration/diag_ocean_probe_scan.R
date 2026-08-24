@@ -56,6 +56,15 @@ SCAN_REF   <- "0"
 SCAN_MATCHED <- "9.434"   # the arm built to match `foss`'s window-end CO2 effect
 SCAN_PINNED <- c("9.434", "15")
 SCAN_PIN_AT <- 0.8983759151                   # = the rate-0 arm's own converged value
+# THE PIN TOLERANCE IS DERIVED FROM THE PIN, not picked. run_modefind_pump_arms.R
+# pins with ARM_PIN_SD = 1e-4 as a LOG-space sd, so `luc_scale` is free to move
+# ~1e-4 relative (~9e-5 absolute) and a converged arm lands a small fraction of
+# that away -- measured 1.04e-6, i.e. 0.01 prior sd. A hand-picked 1e-6 gate
+# fired on the real result and read as "the pin did NOT bind", which is the
+# opposite of the truth. Ten prior sds still rejects a free arm by 70x
+# (free rate 15 sits at 0.9935, 10.6 % away).
+SCAN_PIN_SD  <- 1e-4                          # = ARM_PIN_SD in the refit driver
+SCAN_PIN_TOL <- 10 * SCAN_PIN_SD * SCAN_PIN_AT
 SINK_WIN   <- CCX_ARTIFICIAL_SINK_WIN
 # The pre-registered thresholds, as named constants so the verdict text and the
 # test cannot drift apart.
@@ -109,9 +118,11 @@ ref <- M[[SCAN_REF]]
 # conclusion these arms exist to test.
 for (r in have_pin) {
   got <- M[[pin_tag(r)]]$par_mode$luc_scale
-  if (abs(got - SCAN_PIN_AT) > 1e-6)
+  if (abs(got - SCAN_PIN_AT) > SCAN_PIN_TOL)
     stop("pinned arm rate ", r, " has luc_scale = ", format(got, digits = 10),
-         ", not the pin ", format(SCAN_PIN_AT, digits = 10), " -- the pin did NOT bind.")
+         ", which is ", signif(abs(got - SCAN_PIN_AT) / (SCAN_PIN_SD * SCAN_PIN_AT), 3),
+         " prior sd from the pin ", format(SCAN_PIN_AT, digits = 10),
+         " -- the pin did NOT bind.")
 }
 if (length(have_pin))
   cat(sprintf("PINNED arms present (%s), tagged with a trailing P. luc_scale held at %.10f;\n  their logposts are NOT comparable to the free arms'.\n\n",

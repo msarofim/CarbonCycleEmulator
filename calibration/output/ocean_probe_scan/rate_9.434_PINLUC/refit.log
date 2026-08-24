@@ -26,3 +26,12 @@ GATE SKIPPED: one arm (N) -- there is no second arm to differ from.
 === ARM pump_mode = N ===
 start: log-post at hand-set init = -20698.8
 WARM START from mode_fit_pumpN.rds: log-post there = -1879.3 (its file says -1859.3)
+[N] cycle 1 restart  1: log-post =      -1871.5  (gain     7.8460)  evals 20002
+[N] cycle 1 restart  2: log-post =      -1870.7  (gain     0.7121)  evals 40004
+[N] cycle 1 restart  3: log-post =      -1869.9  (gain     0.8420)  evals 59253
+[N] cycle 1 restart  4: log-post =      -1869.6  (gain     0.2524)  evals 79271
+[N] cycle 1 restart  5: log-post =      -1869.6  (gain     0.0502)  evals 95446
+[N] cycle 1 restart  6: log-post =      -1869.6  (gain     0.0353)  evals 103682
+[N] cycle 1 restart  7: log-post =      -1869.5  (gain     0.0131)  evals 114969
+[N] cycle 1 restart  8: log-post =      -1869.5  (gain     0.0228)  evals 126800
+*** [N] cycle 1 HIT THE RESTART CAP WHILE STILL GAINING

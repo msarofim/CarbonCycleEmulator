@@ -120,7 +120,15 @@ has been replaced. Read parameters and per-stream logL, never evidence.
 ## P5 — THE PREDICTION
 
 **`rep_dC` will still not fall.** Predicted **|Δ`rep_dC`| < 0.5 σ** at both rates, against the
-`foss` probe's pinned **5.566 → 4.102 (−1.46, ≈ −21 σ in these units)** at matched CO₂ effect.
+`foss` probe's pinned **5.566 → 4.102** at matched CO₂ effect.
+
+> **CORRECTION, 2026-08-24, made when the first pinned arm landed.** This line originally
+> read ″−1.46, ≈ −21 σ in these units″. **The −21 σ was wrong; it is −6.02 σ.**
+> Measured by transforming 4.102 through `ccx_par_to_unc()` at the rate-0 mode and dividing
+> by that arm's `sd_unc` — 1 sd = 0.2433 in natural units (`rep_dC`'s transform is `id`,
+> so the natural-units delta of −1.464 maps linearly). The `foss` FREE run's 5.126 is
+> −1.81 σ. No verdict changes — both are far past the 1 σ falsifier — but a wrong number in
+> a pre-registration is exactly the thing that must not be quietly repaired.
 
 **The falsifier is sharp and I want it on the record after getting P3 wrong:** if pinned `rep_dC`
 falls by **more than 1 σ** at either rate, then relieving the plateau decade DOES relax the level
