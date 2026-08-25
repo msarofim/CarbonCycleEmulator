@@ -167,7 +167,70 @@ cat("    the boundary of the search, not because the model cannot represent it.\
 cat("  * FACE is a step change over years; `beta_max` is an equilibrium\n")
 cat("    asymptote. The mapping assumes the MM form transfers between them.\n")
 
+cat("\n=== 7. MARCUS 2026-08-25: THE EXACT NUMBERS ARE NOT A CONSTRAINT ===\n")
+cat("  Standing instruction: FACE is temperate FOREST, so its VALUES cannot bound a\n")
+cat("  global parameter -- but its response SHAPE and its REALISTIC LIMITS can.\n")
+cat("  Section 5's fert_k ceiling is a VALUE result, so it has to be re-priced as a\n")
+cat("  function of the assumed response rather than quoted at one target.\n\n")
+FACE_TARG_GRID <- c(0, 0.05, 0.10, 0.136, 0.15, 0.173, 0.20, 0.218, 0.23)
+ceil_tab <- data.frame()
+for (a in FACE_AMBIENT) {
+  e  <- a * (1 + FACE_ENRICH)
+  kk <- seq(FACE_K_LO, FACE_K_HI, length.out = 40000)
+  v  <- Rface(FACE_BMAX_HI, kk, a, e)
+  kpk <- kk[which.max(v)]
+  cat(sprintf("  --- ambient %d -> %.0f ppm | R peaks at fert_k = %.0f, box max R = %.1f%% ---\n",
+              a, e, kpk, 100 * max(v)))
+  cat(sprintf("  %9s  %9s  %10s   %s\n", "assumed R", "K floor", "K CEILING", "probes 1738/1784"))
+  for (tv in FACE_TARG_GRID) {
+    lo <- kk[kk <= kpk]; hi <- kk[kk >= kpk]
+    vlo <- Rface(FACE_BMAX_HI, lo, a, e) - tv; vhi <- Rface(FACE_BMAX_HI, hi, a, e) - tv
+    fl <- if (all(vlo > 0)) NA else lo[which(diff(sign(vlo)) != 0)[1]]
+    ce <- if (all(vhi > 0)) NA else hi[which(diff(sign(vhi)) != 0)[1]]
+    cat(sprintf("  %8.1f%%  %9s  %10s   %s\n", 100 * tv,
+                ifelse(is.na(fl), "none", sprintf("%.0f", fl)),
+                ifelse(is.na(ce), "none", sprintf("%.0f", ce)),
+                if (is.na(ce)) "survive -- NO ceiling in the box"
+                else if (ce < 1738) "REFUTED" else "survive"))
+    ceil_tab <- rbind(ceil_tab, data.frame(ambient = a, target = tv,
+                                           k_floor = fl, k_ceiling = ce))
+  }
+  cat("\n")
+}
+cat("  THE CEILING IS A KNIFE EDGE AT ~17.5 %, AND THE PROBES PREDICT 17.3 %.\n")
+cat("  Above ~17.5 % a ceiling exists and cuts the probes off; at 15 % or below there\n")
+cat("  is NO ceiling anywhere in [20, 2000]. So section 5's '~1374-1400' is not a\n")
+cat("  realistic limit -- it is a restatement of the 21.8 % plantation-weighted\n")
+cat("  headline, which is exactly the number Marcus rules out as a constraint.\n")
+cat("  SECTION 5's ACTIONABLE RESULT IS WITHDRAWN: option (b), narrowing the fert_k\n")
+cat("  bound on the FACE argument, is NOT available on this criterion.\n\n")
+
+cat("  WHAT SURVIVES AS A SHAPE / LIMIT STATEMENT, target-free:\n")
+cat(sprintf("   S1 R is NON-MONOTONE in fert_k with an INTERIOR peak (%.0f-%.0f across the\n",
+            min(ceil_tab$ambient) * 0 + 317, 376))
+cat("      ambient range) and a BOX MAXIMUM of 32.1-36.0 %. The model structurally\n")
+cat("      cannot produce a larger FACE response at ANY point of the prior box. Any\n")
+cat("      assumed response below ~15 % is reachable at essentially any fert_k.\n")
+cat("   S2 The constraint is on the RIDGE COORDINATE, not on either parameter. In the\n")
+cat("      linear regime (K >> 140 ppm) only beta_max/K is identified:\n")
+for (n in names(cells)) { c_ <- cells[[n]]
+  cat(sprintf("        %-28s beta_max/K = %.5f /ppm  ->  R = %5.1f%%\n",
+              n, c_[1] / c_[2], 100 * Rface(c_[1], c_[2], 400, 564))) }
+cat("      Mapping the literature RANGE (0-23 %) onto that coordinate is the honest\n")
+cat("      form of the evidence; mapping one target onto fert_k is not.\n")
+cat("   S3 EVERY cell above sits INSIDE the literature's 0-23 % span, so on the range\n")
+cat("      rather than a point, FACE REFUTES NOTHING. It brackets. The adopted mode's\n")
+cat("      13.6 % sits mid-range and nearer the mature-forest end; the probes' 17.3 %\n")
+cat("      sits above the mature sites and below the plantation synthesis.\n\n")
+cat("  AND A SHAPE CLAIM THAT IS NOT AVAILABLE, stated so it is not reached for later:\n")
+cat("   * Single-elevation FACE cannot identify the CO2 response FORM. Every site is\n")
+cat("     one ambient and one elevated level, so it fixes a chord, not a curvature.\n")
+cat("   * The mature-vs-young contrast is saturation in STAND AGE and NUTRIENT STATUS,\n")
+cat("     not in CO2. Reading it as evidence for MM's CO2 saturation is a category\n")
+cat("     error; it is a LEVEL statement about where a global mean should sit.\n\n")
+
 saveRDS(list(cells = cells, targets = FACE_TARGETS, ambient = FACE_AMBIENT,
+             ceiling_vs_target = ceil_tab,
              enrich = FACE_ENRICH, chi0 = FACE_CHI0),
         file.path(OUTDIR, "face_prior_scan.rds"))
 cat(sprintf("\nwritten: %s\n", file.path(OUTDIR, "face_prior_scan.rds")))

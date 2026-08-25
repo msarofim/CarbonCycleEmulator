@@ -1,0 +1,150 @@
+=== 1. DOES THE FACE RATIO DISCRIMINATE ALONG THE RIDGE? ===
+cell                            bmax        K | R(376->530) R(400->564) |   enh@388
+design (arithmetic, 08-14)    0.4913    120.0 |       9.1%       7.8% |    0.2362
+adopted mode (arm N)          1.0112    554.5 |      14.2%      13.6% |    0.1688
+pinned foss probe (08-23)     2.7000   1738.0 |      17.3%      17.3% |    0.1623
+pinned luc probe (08-24c)     2.7254   1783.7 |      17.1%      17.2% |    0.1598
+the bound itself              3.0000   2000.0 |      17.1%      17.3% |    0.1579
+
+  The historical observable (enh@388) spans 0.236 -> 0.158, a 1.5x range.
+  The FACE ratio spans a 2x range over the SAME cells and in the OPPOSITE
+  direction. It discriminates. The question is which way it pushes.
+
+=== 2. WHAT IS THE MODEL'S MAXIMUM ACHIEVABLE FACE RESPONSE? ===
+  ambient 376 -> 530 ppm: box maximum R = 36.0% at bmax 3.000, K 318
+  ambient 400 -> 564 ppm: box maximum R = 32.1% at bmax 3.000, K 377
+
+=== 3. THE ISO-FACE LOCI: what beta_max does each target imply? ===
+  For each target and each fert_k, the beta_max that reproduces it.
+  NA = unreachable anywhere in [0, 3].
+
+  --- ambient 376 -> 530 ppm ---
+  target                                         K=120      K=555      K=1000     K=1784     K=2000    
+  Norby 2025 synthesis (plantation-weighted)     1.709     1.692     2.363     --        --        
+  Norby 2005 (4 young plantations)               1.883     1.811     2.523     --        --        
+  BIFoR-FACE (mature Quercus)                    0.553     0.682     0.972     1.505     1.654     
+  EucFACE (mature, P-limited)                    --        --        --        --        --        
+
+  --- ambient 400 -> 564 ppm ---
+  target                                         K=120      K=555      K=1000     K=1784     K=2000    
+  Norby 2025 synthesis (plantation-weighted)     2.465     1.819     2.434     --        --        
+  Norby 2005 (4 young plantations)               2.793     1.955     2.607     --        --        
+  BIFoR-FACE (mature Quercus)                    0.675     0.708     0.976     1.479     1.619     
+  EucFACE (mature, P-limited)                    --        --        --        --        --        
+
+=== 4. THE CONSTRAINT IS ON THE PAIR, NOT ON beta_max ===
+  Read down any column above: a single FACE target fixes beta_max ONLY once
+  fert_k is fixed. Read across: the same target is met at beta_max values
+  differing several-fold. So a MARGINAL prior on beta_max cannot encode this
+  evidence -- it has to enter as a term in the ratio R(a,e), which is a
+  JOINT constraint on (beta_max, fert_k). That is also why the uniform
+  prior is not merely uninformative: beta_max is not the identified object.
+
+=== 5. THE ACTIONABLE RESULT: FACE PUTS A CEILING ON fert_k ===
+  R is NOT monotone in K -- it peaks at an INTERIOR K and falls away on
+  both sides (low K saturates the increment; high K inflates the ambient
+  denominator). So a high-K cell has a MAXIMUM achievable FACE response
+  even at beta_max = 3, and that is what rejects the corner.
+
+  --- ambient 376 -> 530 ppm ---
+      fert_k     max R at beta_max=3  reaches 21.8%? 23%? 10%?
+       120.0                   28.8%  yes    yes    yes   
+       318.0                   36.0%  yes    yes    yes   
+       554.5                   33.4%  yes    yes    yes   
+      1000.0                   26.4%  yes    yes    yes   
+      1500.0                   20.9%  NO     NO     yes   
+      1783.7                   18.6%  NO     NO     yes   
+      2000.0                   17.1%  NO     NO     yes   
+  => fert_k above ~1400 cannot reach the 21.8% synthesis target at ANY
+     beta_max in [0, 3]. The pinned probes sit at 1738 and 1784.
+
+  --- ambient 400 -> 564 ppm ---
+      fert_k     max R at beta_max=3  reaches 21.8%? 23%? 10%?
+       120.0                   23.7%  yes    yes    yes   
+       318.0                   31.9%  yes    yes    yes   
+       554.5                   31.0%  yes    yes    yes   
+      1000.0                   25.6%  yes    yes    yes   
+      1500.0                   20.7%  NO     NO     yes   
+      1783.7                   18.6%  NO     NO     yes   
+      2000.0                   17.3%  NO     NO     yes   
+  => fert_k above ~1374 cannot reach the 21.8% synthesis target at ANY
+     beta_max in [0, 3]. The pinned probes sit at 1738 and 1784.
+
+=== 6. WHAT IT DOES NOT SAY ===
+  * FACE is temperate FOREST NPP. `beta_max` here multiplies GLOBAL NPP,
+    which includes grasslands, croplands and the tropics -- where there is
+    NO forest FACE experiment at all. This is a prior, not a measurement.
+  * The 21.8% synthesis is plantation-weighted; the two MATURE sites are
+    the two smallest responses (EucFACE negligible, BIFoR +10%). Using the
+    headline alone would repeat the ratio_needs_its_base error.
+  * EucFACE's 0% prints as unreachable above only because beta_max = 0 is
+    the boundary of the search, not because the model cannot represent it.
+  * FACE is a step change over years; `beta_max` is an equilibrium
+    asymptote. The mapping assumes the MM form transfers between them.
+
+=== 7. MARCUS 2026-08-25: THE EXACT NUMBERS ARE NOT A CONSTRAINT ===
+  Standing instruction: FACE is temperate FOREST, so its VALUES cannot bound a
+  global parameter -- but its response SHAPE and its REALISTIC LIMITS can.
+  Section 5's fert_k ceiling is a VALUE result, so it has to be re-priced as a
+  function of the assumed response rather than quoted at one target.
+
+  --- ambient 376 -> 530 ppm | R peaks at fert_k = 317, box max R = 36.0% ---
+  assumed R    K floor   K CEILING   probes 1738/1784
+       0.0%       none        none   survive -- NO ceiling in the box
+       5.0%       none        none   survive -- NO ceiling in the box
+      10.0%         25        none   survive -- NO ceiling in the box
+      13.6%         37        none   survive -- NO ceiling in the box
+      15.0%         42        none   survive -- NO ceiling in the box
+      17.3%         51        1973   survive
+      20.0%         63        1600   REFUTED
+      21.8%         72        1400   REFUTED
+      23.0%         78        1283   REFUTED
+
+  --- ambient 400 -> 564 ppm | R peaks at fert_k = 376, box max R = 32.1% ---
+  assumed R    K floor   K CEILING   probes 1738/1784
+       0.0%       none        none   survive -- NO ceiling in the box
+       5.0%       none        none   survive -- NO ceiling in the box
+      10.0%         34        none   survive -- NO ceiling in the box
+      13.6%         51        none   survive -- NO ceiling in the box
+      15.0%         58        none   survive -- NO ceiling in the box
+      17.3%         71        1993   survive
+      20.0%         89        1592   REFUTED
+      21.8%        103        1374   REFUTED
+      23.0%        113        1246   REFUTED
+
+  THE CEILING IS A KNIFE EDGE AT ~17.5 %, AND THE PROBES PREDICT 17.3 %.
+  Above ~17.5 % a ceiling exists and cuts the probes off; at 15 % or below there
+  is NO ceiling anywhere in [20, 2000]. So section 5's '~1374-1400' is not a
+  realistic limit -- it is a restatement of the 21.8 % plantation-weighted
+  headline, which is exactly the number Marcus rules out as a constraint.
+  SECTION 5's ACTIONABLE RESULT IS WITHDRAWN: option (b), narrowing the fert_k
+  bound on the FACE argument, is NOT available on this criterion.
+
+  WHAT SURVIVES AS A SHAPE / LIMIT STATEMENT, target-free:
+   S1 R is NON-MONOTONE in fert_k with an INTERIOR peak (317-376 across the
+      ambient range) and a BOX MAXIMUM of 32.1-36.0 %. The model structurally
+      cannot produce a larger FACE response at ANY point of the prior box. Any
+      assumed response below ~15 % is reachable at essentially any fert_k.
+   S2 The constraint is on the RIDGE COORDINATE, not on either parameter. In the
+      linear regime (K >> 140 ppm) only beta_max/K is identified:
+        design (arithmetic, 08-14)   beta_max/K = 0.00409 /ppm  ->  R =   7.8%
+        adopted mode (arm N)         beta_max/K = 0.00182 /ppm  ->  R =  13.6%
+        pinned foss probe (08-23)    beta_max/K = 0.00155 /ppm  ->  R =  17.3%
+        pinned luc probe (08-24c)    beta_max/K = 0.00153 /ppm  ->  R =  17.2%
+        the bound itself             beta_max/K = 0.00150 /ppm  ->  R =  17.3%
+      Mapping the literature RANGE (0-23 %) onto that coordinate is the honest
+      form of the evidence; mapping one target onto fert_k is not.
+   S3 EVERY cell above sits INSIDE the literature's 0-23 % span, so on the range
+      rather than a point, FACE REFUTES NOTHING. It brackets. The adopted mode's
+      13.6 % sits mid-range and nearer the mature-forest end; the probes' 17.3 %
+      sits above the mature sites and below the plantation synthesis.
+
+  AND A SHAPE CLAIM THAT IS NOT AVAILABLE, stated so it is not reached for later:
+   * Single-elevation FACE cannot identify the CO2 response FORM. Every site is
+     one ambient and one elevated level, so it fixes a chord, not a curvature.
+   * The mature-vs-young contrast is saturation in STAND AGE and NUTRIENT STATUS,
+     not in CO2. Reading it as evidence for MM's CO2 saturation is a category
+     error; it is a LEVEL statement about where a global mean should sit.
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/face_prior/face_prior_scan.rds
