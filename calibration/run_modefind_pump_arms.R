@@ -288,37 +288,78 @@ cat(sprintf("GATE H3: all three rows LIVE at init (DIC %+.2f, d13C %+.4f, ALK %+
 # COMPARABLE to an unpinned one -- read parameters and per-stream logL, not
 # evidence.
 ARM_PIN_SD <- 1e-4
-ARM_PIN <- local({
+# GENERALISED 2026-08-25. `CCX_PIN_LUC_SCALE` still works and is unchanged, so
+# every existing run reproduces; `CCX_PIN_PARAMS="name=value,name=value"` pins
+# any subset. The generalisation exists because P3 of prereg 08-24c fired --
+# `sigma_d14c` moved +1.671 sd in the pinned `luc` arm, past its own falsifier --
+# and the only test that can settle whether that bought the `rep_dC` move is a
+# refit with `sigma_d14c` HELD. `rep_dC` and `sigma_d14c` share no likelihood
+# term (measured: the 1-D rep_dC argmax is bit-identical across sigma 2 -> 60
+# while the peak moves 200 log-units), so a fixed-state test has NO POWER and
+# only a re-optimisation can answer it.
+ARM_PINS <- local({
+  out <- list()
   v <- Sys.getenv("CCX_PIN_LUC_SCALE", NA_character_)
-  if (is.na(v) || !nzchar(v)) return(NULL)
-  x <- as.numeric(v); if (is.na(x)) stop("CCX_PIN_LUC_SCALE not numeric: ", v)
-  x
+  if (!is.na(v) && nzchar(v)) {
+    x <- as.numeric(v); if (is.na(x)) stop("CCX_PIN_LUC_SCALE not numeric: ", v)
+    out$luc_scale <- x
+  }
+  w <- Sys.getenv("CCX_PIN_PARAMS", NA_character_)
+  if (!is.na(w) && nzchar(w)) for (kv in strsplit(w, ",")[[1]]) {
+    kv <- trimws(kv); pr <- strsplit(kv, "=")[[1]]
+    if (length(pr) != 2L) stop("CCX_PIN_PARAMS entry must be name=value; got: ", kv)
+    nm <- trimws(pr[1]); x <- as.numeric(pr[2])
+    if (is.na(x)) stop("CCX_PIN_PARAMS value not numeric: ", kv)
+    if (!nm %in% CCX_PARAM_NAMES) stop("CCX_PIN_PARAMS names an unfitted parameter: ", nm)
+    if (!is.null(out[[nm]]) && !isTRUE(all.equal(out[[nm]], x)))
+      stop("parameter ", nm, " pinned twice at different values")
+    out[[nm]] <- x
+  }
+  out
 })
-if (!is.null(ARM_PIN)) {
-  cat(sprintf("\n*** luc_scale PINNED at %.6f (prior sd %.0e) ***\n", ARM_PIN, ARM_PIN_SD))
-  CCX_PARAM_TABLE$luc_scale$init  <- ARM_PIN
-  CCX_PARAM_TABLE$luc_scale$prior <- local({
-    mu <- log(ARM_PIN); sdv <- ARM_PIN_SD
+# `ARM_PIN` is retained so downstream provenance lines that quote the luc_scale
+# pin keep reading the same object.
+ARM_PIN <- ARM_PINS$luc_scale
+for (.nm in names(ARM_PINS)) {
+  .val <- ARM_PINS[[.nm]]
+  # THE NEAR-DELTA IS LOGNORMAL, so it is only the right shape for a
+  # log-transformed parameter. Anything else ERRORS rather than being pinned
+  # with a prior of the wrong family -- a pin that binds in the wrong
+  # coordinate would look exactly like a parameter that chose to stay put.
+  if (!identical(CCX_PARAM_TABLE[[.nm]]$tr, "log"))
+    stop("pin is a LOGNORMAL near-delta and ", .nm, " has tr = \"",
+         CCX_PARAM_TABLE[[.nm]]$tr, "\"; add the matching family before pinning it")
+  if (!(.val > 0)) stop("pin for ", .nm, " must be positive on the log scale; got ", .val)
+  cat(sprintf("\n*** %s PINNED at %.6f (prior sd %.0e) ***\n", .nm, .val, ARM_PIN_SD))
+  CCX_PARAM_TABLE[[.nm]]$init  <- .val
+  CCX_PARAM_TABLE[[.nm]]$prior <- local({
+    mu <- log(.val); sdv <- ARM_PIN_SD
     function(x) stats::dlnorm(x, mu, sdv, log = TRUE)
   })
   # GATE: the pin must round-trip through the transform, and the prior must
   # actually be sharp there -- a pin that silently failed to bind would look
   # exactly like "the parameter chose to stay put", which is the conclusion
-  # this whole run exists to test.
-  # NB `luc_scale` is one of the SIX fitted parameters with no slot in
-  # ccx_default_params() (it is a FORCING parameter), so the round-trip is built
-  # from the parameter TABLE, not from a params list.
+  # these runs exist to test. The tolerance is DERIVED from the pin's own prior
+  # sd rather than hand-picked: 08-24b's hand-picked 1e-6 errored against a pin
+  # that had bound perfectly (memory derive_gate_from_the_thing).
+  # NB several fitted parameters have no slot in ccx_default_params() (they are
+  # FORCING or LIKELIHOOD parameters), so the round-trip is built from the
+  # parameter TABLE, not from a params list.
   .pl <- lapply(CCX_PARAM_TABLE[CCX_PARAM_NAMES], `[[`, "init")
-  .pl$luc_scale <- ARM_PIN
-  .u    <- ccx_par_to_unc(.pl)[["luc_scale"]]
-  .uv   <- unlist(ccx_par_to_unc(.pl)); .uv[["luc_scale"]] <- .u
-  .back <- ccx_unc_to_par(.uv)$luc_scale
-  cat(sprintf("    GATE round-trip %.6f -> %.6f (err %.1e); prior at pin %.1f, at pin*1.05 %.1f\n",
-              ARM_PIN, .back, abs(.back - ARM_PIN),
-              CCX_PARAM_TABLE$luc_scale$prior(ARM_PIN),
-              CCX_PARAM_TABLE$luc_scale$prior(ARM_PIN * 1.05)))
-  stopifnot(abs(.back - ARM_PIN) < 1e-8)
+  .uv <- unlist(ccx_par_to_unc(.pl))
+  .back <- ccx_unc_to_par(.uv)[[.nm]]
+  .tol <- 10 * ARM_PIN_SD * .val
+  cat(sprintf("    GATE round-trip %.6f -> %.6f (err %.1e, tol %.1e); prior at pin %.1f, at pin*1.05 %.1f\n",
+              .val, .back, abs(.back - .val), .tol,
+              CCX_PARAM_TABLE[[.nm]]$prior(.val),
+              CCX_PARAM_TABLE[[.nm]]$prior(.val * 1.05)))
+  stopifnot(abs(.back - .val) < .tol)
+  # ...and the prior must actually be SHARP: a 5 % move must be rejected hard,
+  # or the "pin" is a suggestion. Mutation-tested by construction.
+  stopifnot(CCX_PARAM_TABLE[[.nm]]$prior(.val) -
+            CCX_PARAM_TABLE[[.nm]]$prior(.val * 1.05) > 1e4)
 }
+rm(.nm, .val, .pl, .uv, .back, .tol)
 
 rm(.tab_before, .hml_before, .chg, .fld, .u_h, .sp_h, .F_h, .og_h)
 
