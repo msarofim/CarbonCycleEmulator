@@ -29,3 +29,14 @@ WARM START from mode_fit_pumpN.rds: log-post there = -4764.7 (its file says NA)
 [N] cycle 1 restart  1: log-post =      -2348.2  (gain  2416.4940)  evals 20002
 [N] cycle 1 restart  2: log-post =      -2242.8  (gain   105.4397)  evals 40004
 [N] cycle 1 restart  3: log-post =      -2235.5  (gain     7.2986)  evals 60006
+[N] cycle 1 restart  4: log-post =      -2177.4  (gain    58.0210)  evals 80008
+[N] cycle 1 restart  5: log-post =      -2172.0  (gain     5.4680)  evals 100027
+[N] cycle 1 restart  6: log-post =      -2147.9  (gain    24.0224)  evals 120029
+[N] cycle 1 restart  7: log-post =      -2146.1  (gain     1.8634)  evals 134651
+[N] cycle 1 restart  8: log-post =      -2141.7  (gain     4.4037)  evals 150253
+*** [N] cycle 1 HIT THE RESTART CAP WHILE STILL GAINING
+[N] cycle 1 polish: log-post = -2040.7 (gain 100.9821)
+[N] === cycle 1 total gain 2723.9928 (log-post -2040.7, 152482 evals) ===
+[N] cycle 2 restart  1: log-post =      -2040.7  (gain     0.0000)  evals 157536
+[N] cycle 2 restart  2: log-post =      -2040.7  (gain     0.0000)  evals 163053
+  NM converged: gain below ARM_TOL
