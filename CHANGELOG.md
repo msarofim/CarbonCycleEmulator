@@ -2,6 +2,71 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-25b — G1: the century drift does not survive its own error bar; the seam is the ocean sink
+
+`calibration/diag_gcb_seam_1959.R`. Five data-only tests, no refit, as §6 of the 08-25 handoff
+specified. Note: `notes/diag_2026-08-25_g1_gcb_seam.md`.
+
+**The successor programme nominated in §5 — GCB's `imbalance` as the home for `rep_dC` — shrinks to
+a caveat.** Four of the five things it rested on fail their own bar or their own decomposition.
+
+| §5 | G1 |
+|---|---|
+| 37.8 ppm, 56 % pre-1959 | reproduced exactly; identity closes to 1.4e-10 |
+| "the century drift" | **1850–1939 nets 16.6 GtC and changes sign twice**; the 1940s+50s carry **63 %** in 17 % of the years |
+| 44.7 GtC is a number to explain | **0.43–1.5 σ** once errors are correlated as a smoothed reconstruction's must be |
+| the seam is a candidate generator | **confirmed and localised — the OCEAN SINK, not growth** |
+| `rep_dC` might live here | growth **exonerated** (6 %, 1.14 σ) and the test is **circular** |
+
+**The bar came first.** The imbalance's 1 σ is now derived from `R/likelihood.R`'s own sigmas —
+`sqrt(0.70² + 0.40² + 0.50² + 5 %·F̄)` = **0.949 GtC/yr**, a *floor* — instead of a hand-set 0.7,
+and the 109-yr cumulative's bar is scanned over the error correlation length: 9.9 GtC at ρ = 0
+(4.5 σ) but **29–104 GtC at ρ ≥ 0.8 (1.5 σ down to 0.43 σ)**. ρ = 0 is the wrong row: GCB's own
+header says the pre-1959 growth and ocean sink carry no year-to-year variability, i.e. their errors
+are the correlated case. [[curvature_needs_an_error_bar]], fourth firing.
+
+**The variance seam and the level seam are different objects.** Smoothness fingerprint (post/pre sd
+of second differences) is 27.9× for `atm_growth` and 42.4× for `ocean_sink`, ≤4.4× everywhere else
+— GCB's header, measured. But only `ocean_sink` also has a resolved **level** step: **+0.232 GtC/yr
+at 3.18 σ** (w = 10), monotone across windows to **+0.279 at 5.30 σ** (w = 20). `atm_growth`'s step
+is **0.54 σ — not resolved**.
+
+**Newey-West was anti-conservative by up to 4.9× here** (w = 8–20 residuals, lag truncation 1–2)
+and is not what any z uses. The bar used is a matched block bootstrap of each side's own local
+residuals through the same estimator, which preserves the seam's heteroscedasticity (`ocean_sink`
+residual sd about a local quadratic: pre **0.0093**, post **0.1015**).
+
+**TRIED AND ABANDONED — a null built around the wrong trend.** The first MC resampled residuals
+about a *global* linear fit, so for `atm_growth` the "noise" was the global line's curvature
+misspecification; it declared the analytic bar anti-conservative by 8× and would have made every
+step unresolvable. A null distribution must be built around a trend model the data could plausibly
+have come from. Recorded, not deleted.
+
+**TRIED AND NOT IDENTIFIED — the ocean-sink backcast.** Held constant over 109 yr the step prices
+at **+25.3 GtC = 57 %** of the pre-seam cumulative, an upper bound (a diagnostic model at lower CO₂
+*should* have a smaller sink). The replacement — `ocean_sink ~ (CO₂ − 276.88)` fitted post-seam and
+extrapolated back — gives **15 %** on 1959–1980 and **116 %** on 1959–2024, **7.6× apart**, because
+the relation is curved and the pre-seam era is outside the fitted range. No window is chosen; the
+seam's share is bounded, not measured.
+
+**Growth is exonerated, and the test is circular.** GCB's `atm_growth` cumulated from an 1850 ice
+anchor tracks the **172 raw Law Dome samples the likelihood scores** at **RMS z = 0.46**. The level
+residual *is* the running integral of the growth error, so its drift needs no bandwidth choice
+(preferred to a differentiated spline per [[smoother_wider_than_feature]]): **−1.19 ± 1.04 ppm =
+1.14 σ = 2.5 GtC = 6 %** of the cumulative, with n_eff from the 4.5–7.0 yr air-age spectral width
+([[ccx_d13c_neff]]) rather than the raw sample count. **And GCB's pre-1959 growth is Joos & Spahni
+2008, a reconstruction of that same record** — so it and our ice term are *one object*, agreement is
+by construction, and the imbalance could only ever have been a statement about emissions and sinks.
+§5's item 1 ("the model's sinks responding to a CO₂ level that is itself partly the imbalance's
+doing") has the causality backwards: CO₂ level is an **input** to the imbalance.
+
+**CONSEQUENCE.** G2 (price the transfer) and G3 (isotopic attribution) were scoped to explain a
+37.8 ppm century drift that does not survive T0 and T5 — **premature as written**. G4 (a refit) is
+unjustified by this line. What survives is narrow: GCB's pre-1959 `ocean_sink` carries a resolved
++0.23–0.28 GtC/yr discontinuity at its own methodology seam — a caveat on any future use of the
+pre-1959 budget, not a programme. **Nothing here is a home for `rep_dC`.**
+
+
 ## 2026-08-24c — `ocean_deep` is not needed: the `luc` arm already IS the discriminating cell
 
 08-24b closed the plateau arc but recorded a **residual confound**: `foss` (Δ`rep_dC` **−6.02 σ**)
