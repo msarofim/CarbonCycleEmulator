@@ -320,21 +320,63 @@ ARM_PINS <- local({
 # `ARM_PIN` is retained so downstream provenance lines that quote the luc_scale
 # pin keep reading the same object.
 ARM_PIN <- ARM_PINS$luc_scale
+# ---- THE NEAR-DELTA IS FAMILY-GENERAL (2026-08-25) ------------------
+# It USED to be hardcoded lognormal, which made it correct only for `tr = "log"`
+# and made the driver ERROR on anything else -- deliberately, because a pin that
+# binds in the wrong coordinate looks exactly like a parameter that chose to
+# stay put. That guard was right and the fix is to supply the missing families,
+# not to loosen it. `fert_k` and `beta_max` are BOTH `tr = "logit"`
+# (R/calibrate.R:61, 68), so the ridge could not be pinned at all.
+#
+# WHAT A PIN ACTUALLY IS. ccx_make_logpost() adds `s$prior(x) + .log_jac(u, s)`
+# (R/calibrate.R:874), i.e. priors are densities in the NATURAL parameter and
+# the Jacobian is applied separately. So a near-delta that is sharp in the
+# UNCONSTRAINED coordinate -- which is the coordinate the optimiser moves in,
+# and therefore the one a pin must bind in -- is
+#
+#     prior(x) = dnorm(u(x), u0, PIN_SD) - log_jac(u(x))
+#
+# whose contribution to the log-posterior is exactly dnorm(u, u0, PIN_SD). One
+# expression, all three families, no branching.
+#
+# AND IT REPRODUCES THE OLD LOGNORMAL EXACTLY. For tr = "log", u = log(x) and
+# log_jac = u, so the expression is dnorm(log x, log val, sd) - log(x) =
+# dlnorm(x, log val, sd). Every existing pinned run reproduces byte-for-byte;
+# test-pin-family.R gates that identity rather than asserting it here.
+ARM_PIN_BUMP_U <- log(1.05)   # sharpness-gate perturbation, in UNCONSTRAINED units
+                              # log(1.05) is chosen so the log family's gate is
+                              # still evaluated at exactly val * 1.05 and its
+                              # printed line is unchanged. A fixed *1.05 cannot
+                              # serve a logit parameter -- it can leave [lo, hi]
+                              # entirely -- so the perturbation is expressed in
+                              # the coordinate the pin binds in. Derived from the
+                              # transform, not from the value (memory
+                              # derive_gate_from_the_thing).
 for (.nm in names(ARM_PINS)) {
   .val <- ARM_PINS[[.nm]]
-  # THE NEAR-DELTA IS LOGNORMAL, so it is only the right shape for a
-  # log-transformed parameter. Anything else ERRORS rather than being pinned
-  # with a prior of the wrong family -- a pin that binds in the wrong
-  # coordinate would look exactly like a parameter that chose to stay put.
-  if (!identical(CCX_PARAM_TABLE[[.nm]]$tr, "log"))
-    stop("pin is a LOGNORMAL near-delta and ", .nm, " has tr = \"",
-         CCX_PARAM_TABLE[[.nm]]$tr, "\"; add the matching family before pinning it")
-  if (!(.val > 0)) stop("pin for ", .nm, " must be positive on the log scale; got ", .val)
+  .spec <- CCX_PARAM_TABLE[[.nm]]
+  if (!.spec$tr %in% c("log", "logit", "id"))
+    stop("no near-delta family for ", .nm, " with tr = \"", .spec$tr, "\"")
+  if (identical(.spec$tr, "log") && !(.val > 0))
+    stop("pin for ", .nm, " must be positive on the log scale; got ", .val)
+  if (identical(.spec$tr, "logit") && !(.val > .spec$lo && .val < .spec$hi))
+    stop("pin for ", .nm, " must be STRICTLY inside [", .spec$lo, ", ", .spec$hi,
+         "]; got ", .val, " -- the logit transform is infinite at the bounds")
+  .u0 <- .to_unc(.val, .spec)
+  if (!is.finite(.u0))
+    stop("pin for ", .nm, " does not encode to a finite unconstrained value: ", .val)
   cat(sprintf("\n*** %s PINNED at %.6f (prior sd %.0e) ***\n", .nm, .val, ARM_PIN_SD))
   CCX_PARAM_TABLE[[.nm]]$init  <- .val
   CCX_PARAM_TABLE[[.nm]]$prior <- local({
-    mu <- log(.val); sdv <- ARM_PIN_SD
-    function(x) stats::dlnorm(x, mu, sdv, log = TRUE)
+    u0 <- .u0; sdv <- ARM_PIN_SD; sp <- .spec
+    function(x) {
+      # suppressWarnings: qlogis() warns and returns NaN outside [lo, hi], which
+      # is the CORRECT answer here (-Inf prior) but would spam every optimiser
+      # step that proposes outside the support. The NaN is caught, not ignored.
+      u <- suppressWarnings(.to_unc(x, sp))
+      if (!all(is.finite(u))) return(-Inf)
+      stats::dnorm(u, u0, sdv, log = TRUE) - .log_jac(u, sp)
+    }
   })
   # GATE: the pin must round-trip through the transform, and the prior must
   # actually be sharp there -- a pin that silently failed to bind would look
@@ -348,18 +390,27 @@ for (.nm in names(ARM_PINS)) {
   .pl <- lapply(CCX_PARAM_TABLE[CCX_PARAM_NAMES], `[[`, "init")
   .uv <- unlist(ccx_par_to_unc(.pl))
   .back <- ccx_unc_to_par(.uv)[[.nm]]
-  .tol <- 10 * ARM_PIN_SD * .val
-  cat(sprintf("    GATE round-trip %.6f -> %.6f (err %.1e, tol %.1e); prior at pin %.1f, at pin*1.05 %.1f\n",
+  .tol <- 10 * ARM_PIN_SD * abs(.val)
+  # The perturbation is a fixed step in the UNCONSTRAINED coordinate, mapped
+  # back. For tr = "log" this IS .val * 1.05 and the line below is unchanged.
+  .bump <- .from_unc(.u0 + ARM_PIN_BUMP_U, .spec)
+  cat(sprintf("    GATE round-trip %.6f -> %.6f (err %.1e, tol %.1e); prior at pin %.1f, at %.6f %.1f\n",
               .val, .back, abs(.back - .val), .tol,
-              CCX_PARAM_TABLE[[.nm]]$prior(.val),
-              CCX_PARAM_TABLE[[.nm]]$prior(.val * 1.05)))
+              CCX_PARAM_TABLE[[.nm]]$prior(.val), .bump,
+              CCX_PARAM_TABLE[[.nm]]$prior(.bump)))
   stopifnot(abs(.back - .val) < .tol)
-  # ...and the prior must actually be SHARP: a 5 % move must be rejected hard,
-  # or the "pin" is a suggestion. Mutation-tested by construction.
-  stopifnot(CCX_PARAM_TABLE[[.nm]]$prior(.val) -
-            CCX_PARAM_TABLE[[.nm]]$prior(.val * 1.05) > 1e4)
+  # ...and the prior must actually be SHARP: a step of ARM_PIN_BUMP_U in the
+  # coordinate the optimiser moves in must be rejected hard, or the "pin" is a
+  # suggestion. The floor is DERIVED, not hand-picked: the near-delta is a
+  # normal of sd ARM_PIN_SD in u, so the drop is ARM_PIN_BUMP_U^2 / (2 sd^2)
+  # up to the Jacobian, and the gate demands at least half of that.
+  .want <- 0.5 * ARM_PIN_BUMP_U^2 / (2 * ARM_PIN_SD^2)
+  .drop <- CCX_PARAM_TABLE[[.nm]]$prior(.val) - CCX_PARAM_TABLE[[.nm]]$prior(.bump)
+  if (!(.drop > .want))
+    stop(sprintf("pin for %s is NOT SHARP: a %.4f step in u drops the prior only %.1f, wanted > %.1f",
+                 .nm, ARM_PIN_BUMP_U, .drop, .want))
 }
-rm(.nm, .val, .pl, .uv, .back, .tol)
+rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want, .drop)
 
 rm(.tab_before, .hml_before, .chg, .fld, .u_h, .sp_h, .F_h, .og_h)
 
