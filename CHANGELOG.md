@@ -2,6 +2,51 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-25e — the veto is a MEAN SHIFT on white residuals, not a stream weight
+
+`notes/collect_2026-08-25c_the_veto_is_not_a_weighting.md`. Two report-only files:
+`calibration/diag_landed_gap_streams.R`, `calibration/diag_stream_neff.R`.
+
+**THE 93 % WAS A FROZEN-VECTOR NUMBER AND IT DOES NOT SURVIVE THE LANDING.** Handoff 08-25b §4
+built the inherited objective-weighting question on `co2_level_MLO + co2_level_SPO` carrying 93 %
+of pin90's 86.7 log-unit penalty. Measured at the LANDED modes the pair carries **−0.1 %** (MLO
++2.49, SPO −2.40, net +0.09). The gap is carried by `d13c_seasonal_SPO` **−38.16** (44 %),
+`d13c_seasonal_MLO` **−24.22** (28 %) and `gcb_land_sink` **−24.00** (28 %) — 100 % between them.
+§7 of that same handoff had already written the rule ("never read a frozen conditional optimum as
+a prediction of where a refit lands"); §4 did not apply it to itself.
+
+**THE EFFECTIVE-n DIAGNOSTIC WAS RUN ANYWAY, ON ALL 15 ANNUAL STREAMS, AND IT INVERTS.** The
+station levels are genuinely weakly informed — Geyer n_eff **12.6 of 66** (MLO, ρ₁ +0.79) and
+**13.2 of 59** (SPO) — and they are exactly the streams that do not carry the gap. The three
+that do have n_eff ≈ N: ρ₁ = −0.20 / −0.01 / +0.16, all inside the white-noise band 2/√N.
+
+**AND THE PENALTY IS PURE BIAS**, which an n_eff correction must not forgive — `R/likelihood.R`'s
+own `sigma_d13c` block ("the d13C residual is BIAS, not scatter … a robustness valve venting the
+signal"). Splitting Δ into mean vs scatter: −38.12 / −24.96 / −24.48 is bias, −0.04 / +0.73 /
++0.48 is scatter. Both corrections therefore miss: pin90 goes −96.91 → **−82.75** (scalar n_eff/N)
+or **−82.08** (AR(1) GLS). **A 15 % haircut, not two orders of magnitude.**
+
+**WHAT THE BIAS IS.** The seasonal δ¹³C-per-ppm partition ratio (semi-amplitude √(a²+b²), same
+estimator both sides) goes **2.45× → 2.61× → 2.68× → 2.84×** at SPO across ref/pin120/pin90/pin60
+while the CO₂ amplitude does not move. Saturation buys the AF trend by making the seasonal flux
+MORE photosynthetic, deepening a misfit that is already 2.45× at the reference mode.
+
+⇒ `diag_fert_ridge_streams.R` offered (a) physical conflict / (b) mis-weighted stream / (c) frozen
+artifact. The refit killed (c); this kills (b). **What is left is (a)** — the model cannot have the
+airborne-fraction trend and the seasonal isotopic partition at once, and that is reportable as a
+real internal contradiction rather than as a weighting choice.
+
+**Two gates and two of my own bugs, both found by the gates.** (1) The `h_ml` band must be restored
+to `[85, 120]` before any of this reproduces: under the default `[30, 200]` every arm's logpost is
+off by ~1.1 in the same direction — right deltas, wrong levels — and `u_mode` does not decode at all
+(max |u − u(par_mode)| = 1.7). (2) A first draft detected the seasonal streams' stacked (a, b)
+vectors by `anyDuplicated(year)`; the ICE CORE has 255 rows over 136 years, took that branch, and
+was silently halved twice. Stream kind is now DECLARED. Also: pooled ρ₁ was being summed instead of
+averaged, and the gap-splitter split on the residual index (contiguous by construction) rather than
+on the year — the same defect design note 1 records the retired AR(1) having. All 15 residual
+reconstructions are gated against `by_stream` to 1e-6, and the 15 gated streams account for −89.70
+of pin90's −90.07 likelihood delta.
+
 ## 2026-08-25d — the refit falsifies its own headline: only gate 4 survives
 
 `notes/collect_2026-08-25_fert_ridge_refit.md`, against the pre-registration written before launch.
