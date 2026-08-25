@@ -1,0 +1,22 @@
+
+=== THE FERTILISATION RIDGE AGAINST GATES 4, 7, 12 ===
+mode arm N: beta_max 1.0112  fert_k 554.5  (logpost -1859.32)
+ridge held at enh(420 ppm) = 0.2074; beta_max solved for each fert_k
+TARGETS: AF 0.431, dec sd 0.0483, trend +0.0148 | land 2.36+-0.50, ocean 3.22+-0.40 | IRF floors 12.2/24/39.5
+
+ fert_k beta_max   FACE |      AF   dec sd  trend      r |   land  ocean |  TH20  TH50 TH100 | d logL |          
+  554.5    1.011  13.6% |   0.434   0.0188 -0.0007  -0.06 | +2.12s -0.64s | 11.69 23.81 39.06 |   +0.0 | MODE
+   60.0    0.294   3.8% |   0.443   0.0402 +0.0163  +0.57 | +0.74s -0.35s | 13.15 28.08 47.64 | -8656.6 | 
+   90.0    0.338   5.2% |   0.440   0.0328 +0.0124  +0.53 | +1.05s -0.42s | 12.86 27.18 45.73 | -4674.3 | 
+  120.0    0.381   6.4% |   0.439   0.0282 +0.0097  +0.49 | +1.26s -0.47s | 12.64 26.53 44.39 | -2778.6 | 
+  180.0    0.468   8.2% |   0.437   0.0230 +0.0063  +0.38 | +1.54s -0.52s | 12.35 25.66 42.63 | -1138.3 | 
+  250.0    0.570   9.8% |   0.436   0.0203 +0.0038  +0.26 | +1.74s -0.56s | 12.12 25.02 41.37 | -446.9 | 
+  400.0    0.787  12.1% |   0.435   0.0188 +0.0009  +0.06 | +1.98s -0.61s | 11.85 24.24 39.87 |  -51.7 | 
+ TARGET       --    --  |   0.431   0.0483 +0.0148     -- | +0.00s +0.00s |  12.2  24.0  39.5 |
+
+  FACE column = predicted 400 -> 564 ppm NPP response. Marcus 2026-08-25: the
+  literature's RANGE is the constraint (mature forests 0-10 %, plantation-
+  weighted synthesis 21.8-23 %), not any single number.
+  d logL is FROZEN-VECTOR and therefore an UPPER BOUND on the true cost.
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/fert_ridge_gates/fert_ridge_gates.rds
