@@ -84,7 +84,7 @@ Stuiver, M; Braziunas, TF, Anthropogenic and solar components of hemispheric 14C
 
 1. **Its reference list is the best one we have** on the residence-vs-adjustment distinction, and it
    supersedes the 2026-08-25 web sweep where the two differ — see
-    Part 4.
+   `notes/lit_2026-08-25_co2_lifetime_confusion.md` Part 4.
 2. **It moves the timeline back sixteen years.** Starr (1993) is the first published instance;
    O'Neill et al. (1997) was written to end the confusion; Revelle & Suess had the distinction in
    **1957** and Rodhe & Björkström proved the decoupling analytically in **1979**.
