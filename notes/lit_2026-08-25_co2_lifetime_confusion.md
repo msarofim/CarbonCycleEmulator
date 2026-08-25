@@ -70,3 +70,88 @@ Two nearby items found, **neither a match**, recorded so they are not later mist
 it: a full-text search of AGU 2014–2016 abstracts through ADS, or the confex Advanced Search, both
 of which need the presenter's name or a distinctive phrase. **If Marcus can recall a name, session,
 or wording, that closes it in one query.**
+
+---
+
+# Part 2 — the blog layer, the DOE roster, and what actually discriminates
+
+Added 2026-08-25 at Marcus's direction. **Two of the five authors of the DOE Climate Working
+Group's *A Critical Review of Impacts of Greenhouse Gas Emissions on the U.S. Climate* (23 July
+2025) — Judith Curry and Roy Spencer — have written on this topic for years.** The full roster is
+John Christy, Judith Curry, **Steven Koonin**, Ross McKitrick, Roy Spencer; the group was disbanded
+3 September 2025.
+
+**The LLNL item from Part 1 is not a stray after all.** It was **Ben Santer** cutting his
+affiliation with LLNL over the lab's decision to host a **Steven Koonin** seminar (27 May 2021) on
+*Unsettled* (published 4 May 2021); Santer retired 30 September 2021 and did not renew the
+affiliation. **Koonin is the third of the five.** So the "nearby non-match" I logged while hunting
+the AGU poster shares a name with the roster — worth knowing, but it is still **not** the poster,
+and Santer's protest was about the book and the seminar, **not** about a residence-time claim.
+
+## Judith Curry — Climate Etc. (mostly a venue; guest posts unless noted)
+
+| date | post | the claim | note |
+|---|---|---|---|
+| 2011-08-04 | *Carbon cycle questions* | commenter: *"Atmospheric bomb tests show the true t½ of all [CO₂]atm is only about a decade"*; another: natural fluxes ~200 GtC/yr dwarf 6.4 GtC/yr fossil | **The single best exhibit we have.** The ¹⁴C-bomb argument AND its correction appear in the same thread — Ferdinand Engelbeen replies that *"the bomb tests only show the turnover of CO₂, not how fast an excess in mass is removed. That is much longer, around 40 years half life time."* **That is our two-pulse panel, in 2011, in words.** |
+| 2016-08-10 | *Murry Salby's latest presentation* | Salby: *"The premise of the IPCC that increased atmospheric CO₂ results from fossil fuels emissions is impossible."* | **Curry distances herself** — posts it "for discussion", does not endorse. Record it that way. |
+| 2023-03-24 | *Emissions and CO₂ concentration: an evidence-based approach* | Dengler & Reid: absorption has no significant temperature dependence and *"a current CO₂ emission pulse is absorbed with a 42 year half-life time"* ⇒ CO₂ stabilises near 475 ppm and Paris is met on current emissions | guest post; summarises **Dengler & Reid 2023, *Atmosphere* 14(3) 566** |
+| 2023-09-26 | *Causality and climate* | Christofides, Koutsoyiannis, Onof, Kundzewicz: *"a unidirectional, potentially causal link with T as the cause and [CO₂] as the effect"*; human emissions "only 4 % of total emissions" | guest post; rests on **Koutsoyiannis et al., Proc. R. Soc. A 479:20220529 (2022)** and *Sci* (2023). The 4 % figure is the **gross-vs-net** error Cawley 2011 answers |
+
+**Rebuttal:** *…and Then There's Physics*, **"Scientifically intriguing?", 2023-10-01**, replying to
+the causality post. Note the author is **Ken Rice (Edinburgh) — a co-author on Köhler et al. 2018**,
+the peer-reviewed Harde rebuttal in Part 1. *(WebFetch is 403-blocked on that host; content
+characterised from search indexing, so treat the wording as indicative.)*
+
+## Roy Spencer — and his position moved
+
+**State this accurately: Spencer is not Salby.** His attribution claim changed substantially:
+
+| date | claim |
+|---|---|
+| 2009-01-21 | *Increasing Atmospheric CO₂: Manmade or Natural?* — had "usually accepted" the anthropogenic premise, but "an anthropogenic explanation … becomes less obvious". **He published Engelbeen's rebuttal himself the next day** (2009-01-22) |
+| 2009-05-11 | *Global Warming Causing Carbon Dioxide Increases: A Simple Model* — *"20 % of long-term rise is anthropogenic, while the other 80 % is natural"* |
+| 2022-04-09 | *Explaining Mauna Loa CO₂ Increases…* — **~85 % anthropogenic, ~15 % natural** |
+| 2023-04-13 | *CO₂ Budget Model Update…* — anthropogenic source + **a constant sink of 2.05 %/yr of the excess over 295 ppm** + ENSO; argues the sink rate is **not** declining |
+
+So by 2022–23 Spencer is close to mainstream on **attribution**. His live disagreement is about the
+**sink**, and that is where our model actually bites.
+
+## ⇒ THE MODERN FORM OF THE ERROR IS NOT "5 YEARS". IT IS A SINGLE EXPONENTIAL.
+
+Dengler & Reid (42-yr half-life ⇒ 60.6-yr e-fold) and Spencer (2.05 %/yr ⇒ 48.8-yr e-fold) both
+use **one-box, single-time-constant removal**. Against Joos et al. 2013 Table 5 (the multi-model
+mean already wired into DESIGN gate 12), fraction of a pulse still airborne:
+
+| yr | Joos T5 | Spencer 2.05 %/yr | Dengler–Reid 42 yr |
+|---|---|---|---|
+| 20 | 0.596 | 0.664 | 0.719 |
+| 50 | 0.487 | 0.359 | 0.438 |
+| 100 | 0.409 | 0.129 | 0.192 |
+| **300** | **0.322** | **0.002** | **0.007** |
+| **1000** | **0.235** | **0.000** | **0.000** |
+
+Joos's `a0 = 0.2173` is an **asymptote**: ~22 % that never leaves. **A single exponential gives zero
+at t → ∞ by construction**, so the disagreement is not a parameter choice — it is structural.
+
+## ⚠ AND GATE 12 AS CONFIGURED DOES NOT DISCRIMINATE THEM
+
+Time-integrated IRF against Joos Table 4's 5–95 % ranges — the exact test DESIGN gate 12 runs:
+
+| TH | Joos 5–95 % | Spencer | Dengler–Reid | **our model, adopted mode** |
+|---|---|---|---|---|
+| 20 | 12.2–16.3 | 16.4 ✓ | 17.0 ✓ | **11.69 ✗** |
+| 50 | 24.0–36.6 | 31.3 ✓ | 34.0 ✓ | **23.81 ✗** |
+| 100 | 39.5–65.2 | 42.5 ✓ | 49.0 ✓ | **39.06 ✗** |
+
+**Both single-exponential models PASS at all three horizons, and ours FAILS at all three.** Two
+consequences, and neither is comfortable:
+
+1. **The first century is where the wrong models look right.** Any figure or gate that stops at
+   TH 100 cannot separate "a fifth of it is permanent" from "all of it decays in a century". The
+   discriminating quantity is the **point IRF at 300–1000 yr** (0.32 / 0.24 versus ~0), i.e. the
+   **asymptote**, not the time-integral. **The app tab must show the tail, and gate 12 should grow
+   a TH-300/1000 or an `a0` test** — recorded here as a proposal, not a change.
+2. **Our own model is currently further from Joos at TH 20–100 than Spencer's one-box model is.**
+   That is a real statement about our calibration, not rhetoric. It also strengthens the
+   fertilisation-saturation case: at `fert_k` = 60 our integrated IRF is **13.15 / 28.08 / 47.64**,
+   inside at all three — and unlike theirs, our model keeps its long tail.
