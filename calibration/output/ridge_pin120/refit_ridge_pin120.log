@@ -29,3 +29,4 @@ WARM START from mode_fit_pumpN.rds: log-post there = -2763.0 (its file says NA)
 [N] cycle 1 restart  1: log-post =      -1971.7  (gain   791.3090)  evals 20002
 [N] cycle 1 restart  2: log-post =      -1933.3  (gain    38.4754)  evals 40004
 [N] cycle 1 restart  3: log-post =      -1919.2  (gain    14.0175)  evals 54046
+[N] cycle 1 restart  4: log-post =      -1900.2  (gain    19.0703)  evals 71639

@@ -1,15 +1,35 @@
 # Comment on Essenhigh (2009) — M. C. Sarofim, drafted 2011, never submitted
 
-**Transcription of `app/www/sarofim_essenhigh_comment_2011.doc`.** Author: Marcus C. Sarofim.
-Drafted 10 January 2011 (from the filename), never submitted; Cawley (2011) covered Essenhigh in
-*Energy & Fuels* the same year. Added to the repo 2026-08-25 at the author's request, for the
-historical-interest link from the app.
+**Transcription of `app/www/sarofim_essenhigh_comment_2011.doc`.** Author: Marcus C. Sarofim; the
+file's own metadata records **Company: MIT** and **Created 2011-04-15** (the filename says
+`1_10_2011`, so treat the drafting date as "early 2011" rather than either). Never submitted;
+Cawley (2011) covered Essenhigh in *Energy & Fuels* the same year. Added to the repo 2026-08-25 at
+the author's request, for the historical-interest link from the app.
 
-> **THE `.doc` IS AUTHORITATIVE, NOT THIS FILE.** This is a `textutil` rendering kept because it is
-> diffable and readable in a browser. **The conversion FLATTENS subscripts and superscripts**, so
-> `CO₂` appears as "CO2", `¹⁴C` as "14C", and `5.135 × 10¹⁸` as "5.135 x 1018". Nothing else has
-> been altered: no wording, ordering, or punctuation is edited, and the author's own trailing
-> footnote and marginal query are preserved at the end exactly where they appear.
+> **THE `.doc` CONTAINS NO FORMATTING TO LOSE, and my first note here said otherwise — that was
+> wrong.** I warned that this rendering flattened sub/superscripts. It does not: the original has
+> **zero** `<sup>`/`<sub>` runs and no bold, italic, or real footnotes. "CO2", "14C" and
+> "5.135 x 1018" are how the 2011 document itself reads. This transcription is therefore
+> character-faithful to the corrected `.doc`.
+
+## Corrections applied to the `.doc` — 2026-08-25, on the author's instruction
+
+Three citation errors fixed and one marginal query deleted. **Every correction is pre-2011
+information**, which was the author's condition: the latest year cited anywhere in the document is
+still **2010**. The untouched original is in git history at commit `d8945aa`.
+
+| was | now |
+|---|---|
+| `O'Neill B, Measuring Time in the Greenhouse, Climatic Change 37, 491-503, 1997` | `O'Neill BC; Oppenheimer M; Gaffin SR, Measuring Time in the Greenhouse; An Editorial Essay, Climatic Change, 37, 491-505, 1997` (three authors; pages **505**, not 503) |
+| `Doman AJ; ...` | `Dolman AJ; ...` — the body spells it Dolman twice |
+| `... Science, 367-371, 2004` | `... Science, **305**, 367-371, 2004` |
+| `shift this note down?` | deleted |
+
+**⚠ ONE THING LEFT ALONE, DELIBERATELY.** The note it referred to — *"Predated Essenhigh by 16
+years but used data on 14C levels…"*, which is about **Starr (1993)** — is still sitting at the end
+of the document, now with nothing pointing at it. It reads as a dangling paragraph. Moving it under
+the Starr reference is the obvious fix and is what the deleted query was probably asking for, but
+that is an editorial decision about someone else's document and it has not been made.
 
 ---
 
@@ -37,7 +57,7 @@ Archer D; Eby M; Brovkin V; Ridgwell A; Cao L; Mikolajewicz U; Caldeira K; Matsu
 
 Denman, K.L., et al. (2007) Couplings Between Changes in the Climate System and Biogeochemistry. In: Climate Change 2007: The Physical Science Basis. Contribution of Working Group I to the Fourth Assessment Report of the Intergovernmental Panel on Climate Change [Solomon, S., D. Qin, M. Manning, Z. Chen, M. Marquis, K.B. Averyt, M. Tignor and H.L. Miller (eds.)]. Cambridge University Press, Cambridge, United Kingdom and New York, NY, USA.
 
-Doman AJ; van der Werf GR; Ganssen G; Erisman, JW; Strengers B, A Carbon Cycle Science Update Since IPCC AR-4, A Journal of the Human Environment 39(5-6):402-412, 2010.  
+Dolman AJ; van der Werf GR; Ganssen G; Erisman, JW; Strengers B, A Carbon Cycle Science Update Since IPCC AR-4, A Journal of the Human Environment 39(5-6):402-412, 2010.  
 
 Forster, P. et al. (2007) Changes in Atmospheric Constituents and in Radiative Forcing. In: Climate Change 2007. The Physical Science Basis. Contribution of Working Group I to the Fourth Assessment Report of the Intergovernmental Panel on Climate Change [Solomon, S., D. Qin, M. Manning, Z. Chen, M. Marquis, K.B. Averyt, M. Tignor and H.L. Miller (eds.)]. Cambridge University Press, Cambridge, United Kingdom and New York, NY, USA.
 
@@ -47,13 +67,13 @@ Levin, I; Naegler, T; Kromer, B; Diehl, M; Francey, RJ; Gomez-Pelaez, AJ; Steele
 
 Oeschger, H; Siegenthaler, U; Schotterer, U; Gugelman, A, A Box Diffusion Model to Study the Carbon Dioxide Exchange in Nature, Tellus 27, 168-192, 1975.  
 
-O’Neill B, Measuring Time in the Greenhouse, Climatic Change 37, 491-503, 1997
+O’Neill BC; Oppenheimer M; Gaffin SR, Measuring Time in the Greenhouse; An Editorial Essay, Climatic Change, 37, 491-505, 1997
 
 Rodhe H; Björkström A; Some consequences of non-proportionality between fluxes and reservoir contents in natural systems, Tellus, 31, 269-278 (1979).
 
 Revelle R; Suess HE, Carbon Dioxide Exchange Between Atmosphere and Ocean and the Question of an Increase of Atmospheric CO2 during the Past Decades, Tellus IX, 1957.
 
-Sabine CL; Feely RA; Gruber N; Key RM; Lee K; Bullister JL; Wanninkhof R; Wong CS; Wallace DWR; Tilbrook B; Millero FJ; Peng TH; Kozyr A; Ono T; Rios AF, The Oceanic Sink for Anthropogenic CO2, Science, 367-371, 2004.
+Sabine CL; Feely RA; Gruber N; Key RM; Lee K; Bullister JL; Wanninkhof R; Wong CS; Wallace DWR; Tilbrook B; Millero FJ; Peng TH; Kozyr A; Ono T; Rios AF, The Oceanic Sink for Anthropogenic CO2, Science, 305, 367-371, 2004.
 
 Starr, C, Atmospheric CO2 residence time and the carbon cycle, Energy, 18, 1297-1310, 1993.  
 
@@ -73,22 +93,8 @@ Stuiver, M; Braziunas, TF, Anthropogenic and solar components of hemispheric 14C
 
 
 Predated Essenhigh by 16 years but used data on 14C levels in the atmosphere and similar logic to Essenhigh to also arrive at the erroneous conclusion of a non-anthropogenic cause of rising CO2 levels.
-shift this note down?
 
 ---
-
-# Errata — ADDED 2026-08-25, NOT part of the 2011 document
-
-Checked because this is about to be linked publicly. **Not corrected in the `.doc`** — the document
-is a historical artifact and editing it would misrepresent what was written in 2011.
-
-| in the draft | issue |
-|---|---|
-| `O'Neill B, Measuring Time in the Greenhouse, Climatic Change 37, 491-503, 1997` | **Three authors, and the pages are wrong.** It is **O'Neill, B.C., Oppenheimer, M. & Gaffin, S.R.**, *"Measuring Time in the Greenhouse; An Editorial Essay"*, *Climatic Change* **37**, **491–505**, doi `10.1023/A:1005335816806`. The body's "O'Neill et al." is the correct form; the reference list is what disagrees with it |
-| `Doman AJ; van der Werf GR; ...` | **Surname typo — should be `Dolman`**, which is how the body and the conclusion both spell it. Internal inconsistency, no external check needed |
-| `Sabine CL; ... Science, 367-371, 2004` | **Volume number omitted** (pages only) |
-
-Everything else in the reference list was left as written.
 
 # Why this document is in the repo
 
