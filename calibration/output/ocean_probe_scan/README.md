@@ -24,3 +24,33 @@ common-mode level offset and this probe is 96.7 % gone by 2024.
 Run 4-way parallel with BLAS pinned to one thread each (`OMP_NUM_THREADS`,
 `VECLIB_MAXIMUM_THREADS`, `OPENBLAS_NUM_THREADS` = 1); ~160 MB RSS per arm. ~6 h expected, from
 the `pump_arms_SINK25` run's measured 367 min at the same scoping.
+
+---
+
+## RESULT — all six arms, 2026-08-24
+
+| arm | logpost | `rep_dC` | Δσ | `luc_scale` Δσ | ridge Δσ |
+|---|---|---|---|---|---|
+| 0 (reference) | −1859.32 | 5.5658 | — | — | — |
+| 2.5 | −1860.38 | 5.6042 | +0.16 | +0.52 | −0.14 / −0.19 |
+| 9.434 | −1874.34 | 5.6447 | **+0.32** | +1.90 | −0.54 / −0.72 |
+| 15 | −1895.97 | 5.6174 | +0.21 | **+2.94** | −0.84 / −1.12 |
+| 9.434 **pinned** | −1868.5 | 5.6086 | +0.18 | pinned | +1.31 / +1.13 |
+| 15 **pinned** | −1893.4 | 5.5252 | −0.17 | pinned | **+2.08 / +1.75** |
+
+*(pinned logposts are NOT comparable to the free ones — the `luc_scale` prior was replaced.)*
+
+**P1 HOLDS / P2 HOLDS / P3 FALSIFIED / P4 HOLDS / P5 HOLDS / P6 HOLDS.**
+
+**THE RESULT: relieving the plateau decade does not relax `rep_dC`** — at any rate, free or
+pinned. `|Δ| ≤ 0.32 σ` in all five live arms, and the sign is inconsistent. Against the `foss`
+probe at the **same window-end CO₂ relief** and the same lever pinned: **−6.02 σ**
+(5.566 → 4.102). The relief `foss` bought was payment for its **permanent level shift**, not for
+explaining the plateau.
+
+**RESIDUAL CONFOUND, stated because it is not resolved here:** `ocean` differs from `foss` in TWO
+ways — temporal persistence AND isotopic signature — so this pair does not isolate which explains
+the `rep_dC` difference. The mechanism argument favours persistence (`rep_dC` is a CO₂ *level*
+offset; only persistence touches the level after 1960; `sigma_d14c` is a ¹⁴C error scale on other
+streams) but that is an argument, not a measurement. **`ocean_deep` would discriminate directly** —
+it has `foss`'s CO₂ trajectory and `ocean`'s isotopes.
