@@ -234,3 +234,102 @@ At Marcus's direction. `R/joos_irf.R` (benchmark, null locus, the two one-box re
 single exponential is rejected), `tests/testthat/test-joos-irf.R` (+4 tests, 22 pass),
 `DESIGN.md` §6 gate 12b. **12b is not a superset of 12a** — a τ = 10⁴ yr exponential passes 12b and
 is rejected by 12a — so both are retained and the pair is pinned by a test.
+
+---
+
+# Part 4 — Sarofim's unsubmitted Essenhigh comment (2011), and the corrected timeline
+
+**Primary source:** `~/Documents/2026/RMent/EssenhighRebuttal1_10_2011_updates.doc` — Marcus's
+drafted-but-never-submitted *Comment on "Potential Dependence of Global Warming on the Residence
+Time (RT) in the Atmosphere of Anthropogenically Sourced Carbon Dioxide"*. **Not copied into this
+repo** (personal file, ask before adding). Its reference list is better than the web sweep in Parts
+1–2 and supersedes it where they differ.
+
+## 4.1 CORRECTION: three independent lines, and the isotopes are the THIRD
+
+Parts 1–2 leaned on the isotopes as what settles attribution. **That is not the argument, and
+overstating the isotopes' role understates how thoroughly settled this is.** Marcus's framing:
+
+1. **Ice cores.** 800 kyr at 180–300 ppm (Jansen et al. 2007); today's value is far outside the
+   range of the past million years.
+2. **Mass balance.** Cumulative emissions exceed the atmospheric increase by more than 2×, so the
+   natural world is a **net sink**. Needs no model, no isotopes, no fitted parameter.
+3. **Isotopes + carbon-cycle modelling**, "fully understood by the 1980s".
+
+**Lines 1 and 2 each suffice on their own.** The draft says so directly: those two facts *"are
+enough in and of themselves to be strong evidence for an anthropogenic cause"*.
+
+**Checked against GCB 2025 — our own scored dataset — and it holds with room to spare:**
+
+| window | emitted | atmosphere gained | ratio | nature's net uptake |
+|---|---|---|---|---|
+| 1851–2010 (the draft's window) | **591.0 GtC** | 217.3 GtC (102.3 ppm) | **2.72** | 373.7 GtC |
+| 1850–2024 (full) | 751.0 | 291.6 (137.3 ppm) | **2.58** | 459.4 |
+| 1959–2024 (post-seam only) | 537.3 | 231.7 (109.1 ppm) | **2.32** | 305.6 |
+
+The draft's 2011 figures (">470 GtC", "about 200 GtC", ratio > 2) are reproduced and **strengthened**
+— today's LUC estimates are larger, so the ratio is higher.
+
+**Keep two questions apart, because our model sits on the second.** Mass balance settles
+**attribution** (*is the rise anthropogenic?*). Isotopes constrain **structure** — the gross fluxes,
+the partition, and hence the adjustment time. Our 21 streams are not needed to answer question one;
+they are what makes question two answerable.
+
+## 4.2 The timeline is 16 years longer than Part 1 said — and the physics is 68 years old
+
+| vintage | what |
+|---|---|
+| **1957** | **Revelle & Suess**, *Tellus* IX — already distinguish the two: the *"exchange rate of isotopically labeled CO₂ … is not identical with the rate of absorption"*, attributed to *"the peculiar buffer mechanism of sea water"*. They also **considered and rejected** ocean warming as the cause |
+| 1975 | **Oeschger et al.**, *Tellus* 27:168–192 — box-diffusion model; carbon-cycle models stopped being stirred reactors fifty years ago |
+| **1979** | **Rodhe & Björkström**, *Tellus* 31:269–278 — shows **analytically** that residence and adjustment times decouple when flux is not proportional to reservoir content, and that adjustment can be several times turnover |
+| **1993** | **Starr**, *Energy* 18:1297–1310 — **the first published instance**, on ¹⁴C, with Essenhigh's logic, **sixteen years earlier** |
+| **1997** | **O'Neill et al.**, *Climatic Change* 37:491–503, *"Measuring Time in the Greenhouse"* — **written specifically to clear up this confusion** |
+| 2009 / 2017 / 2023 | Essenhigh / Harde / Stallinga (Part 1) |
+
+**Part 1's "recurs every 6–8 years since 2009" is superseded.** The correct statement: **the physics
+was settled in 1957 and formalised in 1979; the confusion first reached print in 1993; a paper was
+written in 1997 for the sole purpose of ending it; and it has recurred at least four times since.**
+
+## 4.3 The draft anticipated gate 12b by fourteen years
+
+On Essenhigh's straw man: *"using only exponential decay models of CO₂ to represent the 'consensus'
+approach. Even the Bern Cycle approximation cited in the IPCC is a **sum of 3 exponentials and a
+constant** (Forster et al. 2007)."*
+
+**That is gate 12b's premise, written in 2011.** The gate built today tests exactly the "and a
+constant" — Joos T5's `a0 = 0.2173` — and rejects every single exponential on a parameter-free
+locus. The argument is not new; what is new is that it is now a **gated, mutation-tested assertion
+about our own model** rather than a point in a comment.
+
+## 4.4 The isotope-separation reductio — a candidate app panel
+
+Essenhigh's model requires ¹²CO₂ to have a residence time **a factor of 3 shorter than ¹⁴CO₂**.
+Real fractionation: **~0.2 %** for the physical air-sea kinetic effect, **2–3 %** for biological
+uptake. So the model needs an isotopic separation **~100× larger than the largest real mechanism**,
+between species that differ in mass by under 5 %.
+
+**Our model is unusually well placed to show this**, because it carries α values for exactly those
+processes (`alpha_as_down`, `alpha_as_up`, `alpha_photo`) and runs the ¹²C/¹³C/¹⁴C pulses from one
+state. Recorded as a candidate panel, not built.
+
+## 4.5 Numbers from the draft worth keeping
+
+- **Solubility:** 6.9–10.2 ppm per °C of SST (Denman et al. 2007). Against the observed **137 ppm**
+  rise that needs **13.5–19.9 °C** of SST warming; observed is ~1 °C. **The hypothesis fails by
+  10–15×**, and Revelle & Suess rejected it in 1957.
+- **Revelle factor 8–16** (Sabine et al. 2004): raising ocean carbon 1 % at equilibrium needs
+  atmospheric carbon to rise 8–16 %. This is the quantitative form of §3.2's fixed-equilibrium
+  defect.
+- **Deforestation** was the dominant human source until the early 20th century and is ~15 % of
+  fossil today — Essenhigh's Fig. 2 omitted it (CDIAC hosted it on the same page).
+
+## 4.6 Additional references the web sweep missed
+
+Levin et al. 2010 (*Tellus*) — modern ¹⁴C done properly. Stuiver & Quay 1981 (*EPSL* 53:349–362) and
+Stuiver & Braziunas 1998 (*GRL* 25:329–332) — pre- and post-bomb ¹⁴C with cosmic-ray and Suess
+corrections. Dolman et al. 2010 (*Ambio* 39:402–412) — post-AR4 carbon-cycle update. Denman et al.
+2007 and Forster et al. 2007 (AR4 WG1) — the FAQ box and the Bern approximation.
+
+**Status of the comment itself:** never submitted, and Cawley (2011) covered Essenhigh in the same
+year. Its value now is as a **reference compilation and an argument structure**, not as a
+publication.
