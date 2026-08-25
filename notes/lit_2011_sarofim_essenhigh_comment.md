@@ -6,30 +6,27 @@ file's own metadata records **Company: MIT** and **Created 2011-04-15** (the fil
 Cawley (2011) covered Essenhigh in *Energy & Fuels* the same year. Added to the repo 2026-08-25 at
 the author's request, for the historical-interest link from the app.
 
-> **THE `.doc` CONTAINS NO FORMATTING TO LOSE, and my first note here said otherwise — that was
-> wrong.** I warned that this rendering flattened sub/superscripts. It does not: the original has
-> **zero** `<sup>`/`<sub>` runs and no bold, italic, or real footnotes. "CO2", "14C" and
-> "5.135 x 1018" are how the 2011 document itself reads. This transcription is therefore
-> character-faithful to the corrected `.doc`.
+> **THE `.doc` IS AUTHORITATIVE. This plain-text rendering IS lossy.** The original carries **27
+> superscript and 33 subscript runs** — CO₂, ¹⁴C, ¹³C, ¹²C, 10¹⁸, CO₃⁻⁻, 4ᵗʰ — and `textutil`'s
+> text output flattens every one of them, so they read here as "CO2", "14C", "5.135 x 1018".
+> *(I asserted the opposite in an earlier revision of this header. That was a tooling artifact:
+> `textutil`'s HTML contains 8 NUL bytes, so `file` calls it "data" and plain `grep` silently
+> skips it — `grep -a` finds all 27. Counted correctly, the formatting was there all along.)*
 
-## Corrections applied to the `.doc` — 2026-08-25, on the author's instruction
+## Edits made to the `.doc` — 2026-08-25, on the author's instruction
 
-Three citation errors fixed and one marginal query deleted. **Every correction is pre-2011
-information**, which was the author's condition: the latest year cited anywhere in the document is
-still **2010**. The untouched original is in git history at commit `d8945aa`.
+**Every change is pre-2011 information**, which was the author's condition: the latest year cited
+anywhere in the document is still **2010**. Formatting is untouched — the corrected file carries the
+same 27 superscript and 33 subscript runs as the original, verified by diff. The untouched original
+is in git history at commit `d8945aa`.
 
 | was | now |
 |---|---|
-| `O'Neill B, Measuring Time in the Greenhouse, Climatic Change 37, 491-503, 1997` | `O'Neill BC; Oppenheimer M; Gaffin SR, Measuring Time in the Greenhouse; An Editorial Essay, Climatic Change, 37, 491-505, 1997` (three authors; pages **505**, not 503) |
+| `O'Neill B, Measuring Time in the Greenhouse, Climatic Change 37, 491-503, 1997` | `O'Neill BC; Oppenheimer M; Gaffin SR, Measuring Time in the Greenhouse; An Editorial Essay, Climatic Change, 37, 491-505, 1997` |
 | `Doman AJ; ...` | `Dolman AJ; ...` — the body spells it Dolman twice |
 | `... Science, 367-371, 2004` | `... Science, **305**, 367-371, 2004` |
 | `shift this note down?` | deleted |
-
-**⚠ ONE THING LEFT ALONE, DELIBERATELY.** The note it referred to — *"Predated Essenhigh by 16
-years but used data on 14C levels…"*, which is about **Starr (1993)** — is still sitting at the end
-of the document, now with nothing pointing at it. It reads as a dangling paragraph. Moving it under
-the Starr reference is the obvious fix and is what the deleted query was probably asking for, but
-that is an editorial decision about someone else's document and it has not been made.
+| trailing note, *"Predated Essenhigh by 16 years…"* | **deleted as redundant** — the body already says it: *"O'Neill et al. was a response in part to the publication of Starr (1993) which made similarly confused claims based on 14C levels in the atmosphere, though 16 years earlier than Essenhigh."* The ~12 empty paragraphs that had positioned it went with it, so the document no longer ends on a blank page |
 
 ---
 
@@ -81,26 +78,13 @@ Stuiver, M; Quay, PD, Atmospheric 14C changes resulting from fossil fuel CO2 rel
 
 Stuiver, M; Braziunas, TF, Anthropogenic and solar components of hemispheric 14C, Geophysical Research Letters, 25 (3), 329-332, 1998.
 
-
-
-
-
-
-
-
-
-
-
-
-Predated Essenhigh by 16 years but used data on 14C levels in the atmosphere and similar logic to Essenhigh to also arrive at the erroneous conclusion of a non-anthropogenic cause of rising CO2 levels.
-
 ---
 
 # Why this document is in the repo
 
 1. **Its reference list is the best one we have** on the residence-vs-adjustment distinction, and it
    supersedes the 2026-08-25 web sweep where the two differ — see
-   `notes/lit_2026-08-25_co2_lifetime_confusion.md` Part 4.
+    Part 4.
 2. **It moves the timeline back sixteen years.** Starr (1993) is the first published instance;
    O'Neill et al. (1997) was written to end the confusion; Revelle & Suess had the distinction in
    **1957** and Rodhe & Björkström proved the decoupling analytically in **1979**.
