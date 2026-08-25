@@ -248,6 +248,52 @@ for (i in seq_len(nrow(JOOS_T4))) {
 }
 
 # ---------------------------------------------------------------------
+# 3b. GATE 12b -- THE TAIL. Added 2026-08-25 (Marcus).
+#
+# Section 3 cannot do its job alone: BOTH published single-exponential
+# carbon-cycle models pass it at all three horizons (see R/joos_irf.R's
+# JOOS_TAIL block for the numbers and notes/lit_2026-08-25_co2_lifetime_
+# confusion.md for the provenance). The first century is where the wrong
+# STRUCTURE looks right, so the gate has to reach past it.
+#
+# The statistic is IRF(300)/IRF(100). For any single exponential this equals
+# IRF(100)^2 EXACTLY, whatever the time constant -- a parameter-free null. A
+# model with a real long tail sits far above its own locus value.
+# ---------------------------------------------------------------------
+cat("\n=== 3b. GATE 12b: THE TAIL, IRF(300)/IRF(100) ===\n")
+tail_m  <- joos_tail_ratio(irf_t, irf)
+null_m  <- joos_tail_null(at_yr(irf, irf_t, JOOS_TAIL_TH[1]))
+cat(sprintf("  %-44s %8s %10s %s\n", "", "ratio", "own null", "verdict"))
+cat(sprintf("  %-44s %8.4f %10.4f %s\n", "THIS MODEL", tail_m, null_m,
+            if (tail_m >= JOOS_TAIL_BAND[1] && tail_m <= JOOS_TAIL_BAND[2]) "inside"
+            else if (tail_m < JOOS_TAIL_BAND[1]) "BELOW -- tail too thin"
+            else "ABOVE -- tail too fat"))
+cat(sprintf("  %-44s %8.4f %10.4f %s\n", "Joos et al. 2013 Table 5", JOOS_TAIL_REF,
+            joos_tail_null(joos_irf(JOOS_TAIL_TH[1])), "-- the benchmark"))
+for (nm in names(JOOS_ONEBOX)) { f <- JOOS_ONEBOX[[nm]]
+  cat(sprintf("  %-44s %8.4f %10.4f %s\n", nm, f(300) / f(100), f(100)^2,
+              "ON its own null, by construction")) }
+cat(sprintf("\n  band [%.4f, %.4f] -- CONSTRUCTED: Joos publishes no 5-95%% range at\n",
+            JOOS_TAIL_BAND[1], JOOS_TAIL_BAND[2]))
+cat("  TH 300, so Table 4's TH-100 relative width is borrowed. That is an\n")
+cat("  assumption and it is stated, not silently adopted. The DISCRIMINATION does\n")
+cat(sprintf("  not rest on it: the one-box models sit %.0fx and %.0fx below even the\n",
+            JOOS_TAIL_BAND[1] / (JOOS_ONEBOX[[1]](300) / JOOS_ONEBOX[[1]](100)),
+            JOOS_TAIL_BAND[1] / (JOOS_ONEBOX[[2]](300) / JOOS_ONEBOX[[2]](100))))
+cat("  loosest end, and every single exponential lies ON the null by construction.\n")
+cat(sprintf("\n  MUTATION TEST of this gate, because passing is not the same as working:\n"))
+cat(sprintf("    a single exponential tuned to THIS MODEL's own IRF(100) = %.4f\n",
+            at_yr(irf, irf_t, JOOS_TAIL_TH[1])))
+cat(sprintf("    would score %.4f and the gate must REJECT it: %s\n", null_m,
+            if (null_m < JOOS_TAIL_BAND[1]) "REJECTED. OK" else "*** NOT REJECTED -- GATE IS BROKEN ***"))
+stopifnot(null_m < JOOS_TAIL_BAND[1])
+cat(sprintf("\n  and the ASYMPTOTE, which is what the ratio is really testing:\n"))
+cat(sprintf("    fraction still airborne at 300 yr: model %.3f vs Joos T5 %.3f\n",
+            at_yr(irf, irf_t, 300), joos_irf(300)))
+cat(sprintf("    Joos T5's t -> infinity limit is a0 = %.4f; a single exponential's is 0.\n",
+            JOOS_T5$a0))
+
+# ---------------------------------------------------------------------
 # 4. What the BACKGROUND PROTOCOL is worth -- held vs decaying, PD vs PI.
 # Joos sec. 4.4.1 reports 34-47 yr (PI) against 45-62 yr (PD) at TH = 100.
 # ---------------------------------------------------------------------

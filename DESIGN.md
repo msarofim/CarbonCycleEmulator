@@ -1442,6 +1442,50 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     integrated IRF and PI-vs-PD is worth 7, both larger than any structural question
     currently open (see the expert-panel note, §2).
 
+    ### Gate 12b — THE TAIL. Added 2026-08-25 (Marcus), because 12a cannot do its job alone.
+
+    **The TH 20/50/100 integrated test does not discriminate structure.** Both published
+    single-exponential carbon-cycle models in current circulation PASS it at all three
+    horizons (`notes/lit_2026-08-25_co2_lifetime_confusion.md`):
+
+    | | TH 20 | TH 50 | TH 100 | tail ratio |
+    |---|---|---|---|---|
+    | Joos T4 5–95 % | 12.2–16.3 | 24.0–36.6 | 39.5–65.2 | **0.787** |
+    | Spencer 2023, 2.05 %/yr over 295 ppm | 16.4 ✓ | 31.3 ✓ | 42.5 ✓ | **0.017** |
+    | Dengler & Reid 2023, 42-yr half-life | 17.0 ✓ | 34.0 ✓ | 49.0 ✓ | **0.037** |
+    | **this model, adopted mode** | 11.69 ✗ | 23.81 ✗ | 39.06 ✗ | **0.707 ✓** |
+
+    **The first century is where the wrong STRUCTURE looks right.** What separates them is the
+    fraction still airborne at 300 yr: **0.322 (Joos) against 0.002 and 0.007**.
+
+    **THE STATISTIC IS A RATIO, AND THAT IS WHY IT WORKS.** For *any* single exponential,
+    whatever its time constant, `IRF(300)/IRF(100) = exp(−200/τ) = IRF(100)²` **exactly**. The
+    one-box null is a **parameter-free locus**, not a threshold anybody chose, and a model with
+    a real tail must sit far above **its own** locus value. Joos sits at 0.787 where its locus
+    is 0.167 (4.7×); this model at **0.707 where its own locus is 0.075 — 9.4×**.
+
+    **The band [0.593, 0.979] is CONSTRUCTED and is labelled so wherever it prints.** Joos
+    publishes no 5–95 % range at TH 300, so Table 4's TH-100 relative width (0.754–1.244) is
+    borrowed — a spread measured on a time-*integral* at 100 yr, transferred onto a *ratio* at
+    300. **The discrimination does not rest on it:** the one-box models sit 36× and 16× below
+    even the loosest end, and every single exponential lies *on* the null by construction.
+
+    **Mutation-tested inside the diagnostic** (`mutate_test_gates`): a single exponential tuned
+    to this model's *own* IRF(100) scores 0.0750, and the gate `stopifnot`s that it is
+    rejected. `tests/testthat/test-joos-irf.R` additionally pins the null identity for six time
+    constants and both parameterisations.
+
+    **12b IS NOT A SUPERSET OF 12a — they fail in opposite directions and both are needed.** A
+    τ = 10⁴ yr exponential passes 12b (ratio 0.980) and is rejected by 12a (integrated 99.5 vs
+    a ceiling of 65.2); the one-box models pass 12a and fail 12b. 12a is a **century-scale
+    magnitude** test, 12b a **structure** test.
+
+    **READ THEM TOGETHER.** This model is ~1–4 % low on 12a and passes 12b comfortably. The
+    absolute tail is thin too — 0.194 airborne at 300 yr against Joos's 0.322 — so the ratio
+    passes because numerator and denominator are low together. **Structure right, century-scale
+    magnitude low.** The `fert_k` work moves 12a (13.15/28.08/47.64 at `fert_k` = 60, inside at
+    all three); 12b at that cell is not yet measured.
+
 ## 7. Shiny app design
 
 Public, shinyapps.io. Precompute posterior-ensemble ribbons for historical + preset

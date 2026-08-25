@@ -136,3 +136,57 @@ JOOS_T4 <- data.frame(
 # year 100 is 34-47 yr for a PREINDUSTRIAL background and 45-62 for present-day.
 JOOS_PI100_100 <- c(34, 47)
 JOOS_PD100_100 <- c(45, 62)
+
+# ---------------------------------------------------------------------
+# THE TAIL TEST (gate 12b, added 2026-08-25 at Marcus's direction)
+#
+# WHY IT HAD TO EXIST. Gate 12 tested the time-integrated IRF at TH 20/50/100
+# only, and calibration/../notes/lit_2026-08-25_co2_lifetime_confusion.R showed
+# that test CANNOT DO ITS JOB: the two published single-exponential carbon-cycle
+# models in current circulation both PASS it at all three horizons --
+#
+#   Spencer 2023      2.05 %/yr of the excess over 295 ppm  ->  16.4 / 31.3 / 42.5
+#   Dengler & Reid    42-yr half-life                       ->  17.0 / 34.0 / 49.0
+#   Joos T4 5-95 %                                              12.2-16.3 / 24.0-36.6 / 39.5-65.2
+#
+# -- while the quantity that actually separates them, the fraction still
+# airborne at 300 yr, is 0.322 (Joos) against 0.002 and 0.007. The first century
+# is where the wrong structure looks right.
+#
+# THE TEST IS A RATIO, AND THAT IS THE POINT. For ANY single exponential,
+# whatever its time constant,
+#     IRF(300)/IRF(100) = exp(-200/tau) = [exp(-100/tau)]^2 = IRF(100)^2
+# exactly. So the single-exponential null is a PARAMETER-FREE LOCUS, not a
+# number somebody chose, and a model with a genuine long tail must sit far above
+# its own IRF(100)^2. Joos sits at 0.787 where its own locus value is 0.167.
+JOOS_TAIL_TH   <- c(100, 300)            # the two horizons the ratio uses
+# Joos Table 5's own tail ratio, computed from the published fit, not quoted:
+JOOS_TAIL_REF  <- NULL                   # filled below, after joos_irf() exists
+# CONSTRUCTED TOLERANCE, AND IT IS FLAGGED AS CONSTRUCTED. Joos publishes no
+# 5-95 % range at TH 300, so the relative width of Table 4's TH-100 range
+# (39.5/52.4 = 0.754 and 65.2/52.4 = 1.244) is borrowed. That is an assumption:
+# it transfers a spread measured on a time-INTEGRAL at 100 yr onto a RATIO at
+# 300. It is stated rather than silently adopted -- and the discrimination does
+# not depend on it, because the single-exponential models sit 16-36x below even
+# the loosest end (see the diagnostic's own printout).
+JOOS_TAIL_RELBAND <- c(JOOS_T4$lo[JOOS_T4$th == 100] / JOOS_T4$best[JOOS_T4$th == 100],
+                       JOOS_T4$hi[JOOS_T4$th == 100] / JOOS_T4$best[JOOS_T4$th == 100])
+
+#' The single-exponential locus: what IRF(300)/IRF(100) MUST be for a one-box
+#' model, given its own IRF(100). Parameter-free -- no time constant enters.
+joos_tail_null <- function(irf100) irf100^2
+
+#' Tail ratio of an IRF series, on the SAME estimator for model and benchmark
+joos_tail_ratio <- function(t, irf) {
+  at <- function(y) irf[which.min(abs(t - y))]
+  at(JOOS_TAIL_TH[2]) / at(JOOS_TAIL_TH[1])
+}
+
+JOOS_TAIL_REF  <- joos_irf(JOOS_TAIL_TH[2]) / joos_irf(JOOS_TAIL_TH[1])
+JOOS_TAIL_BAND <- JOOS_TAIL_REF * JOOS_TAIL_RELBAND
+
+# The two published one-box models, carried so the gate PRINTS what it
+# discriminates rather than merely asserting that it does.
+JOOS_ONEBOX <- list(
+  "Spencer 2023 (2.05 %/yr over 295 ppm)" = function(t) exp(-0.0205 * t),
+  "Dengler & Reid 2023 (42-yr half-life)" = function(t) 0.5^(t / 42))

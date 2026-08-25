@@ -155,3 +155,82 @@ consequences, and neither is comfortable:
    That is a real statement about our calibration, not rhetoric. It also strengthens the
    fertilisation-saturation case: at `fert_k` = 60 our integrated IRF is **13.15 / 28.08 / 47.64**,
    inside at all three — and unlike theirs, our model keeps its long tail.
+
+---
+
+# Part 3 — Marcus's corrections, 2026-08-25
+
+## 3.1 The history is part of the record: BOTH toyed with "mostly natural"
+
+Part 2 reported Spencer's movement toward the mainstream and Curry's distance from Salby. That is
+accurate but **incomplete, and the incompleteness flatters them**. Marcus's correction: *both*
+entertained a mostly-natural origin for the modern rise, and for years.
+
+- **Spencer, 2009-01-21:** had "usually accepted" the anthropogenic premise, but "an anthropogenic
+  explanation … becomes less obvious". **2009-05-11:** *"20 % of long-term rise is anthropogenic,
+  while the other 80 % is natural."* That is not a hedge; it is the mostly-natural position, stated
+  as a model result. He reached ~85 %/15 % only by **2022** — a **thirteen-year** interval.
+- **Curry** hosted the carbon-cycle-questions thread (2011), Salby's presentation (2016), and both
+  2023 guest posts. She declines to endorse Salby's strongest claim, but the venue is the point:
+  she platformed the mostly-natural argument repeatedly across **twelve years** without a post
+  retiring it.
+
+**Why this belongs in the file rather than in a footnote.** Two of the five DOE Climate Working
+Group authors spent over a decade with an unresolved position on whether the CO₂ rise is
+anthropogenic — a question the isotopes settled before either post was written. That is the
+strongest available argument that the app's tab addresses a live confusion at the top of the
+policy chain, not a blog-comment curiosity. **Report the arc, not the endpoint.**
+
+## 3.2 Spencer's FIXED EQUILIBRIUM is a second defect, and we have measured its analogue
+
+Part 2 named the single exponential. Marcus names the other half: Spencer's sink is
+`k·(C − 295 ppm)` with **both `k` and the 295 held constant forever**. The ocean's uptake
+efficiency never degrades.
+
+That is not a separate curiosity — **it is the same assumption our own model carries a switch
+for.** `p$revelle_frozen = 1` pins the buffer factor at its 1750 value so that, in the code's own
+words, *"the ocean therefore keeps absorbing at its preindustrial efficiency."* And we measured it
+this session (`calibration/diag_af_trend_levers.R`):
+
+> **Freezing the buffer removes +0.0084/decade of airborne-fraction trend — 57 % of the entire
+> observed +0.0148/decade.** It was the single largest working contributor to the model's AF
+> time-dependence.
+
+So the assumption Spencer makes is worth, in our model, **more than half of the observed
+airborne-fraction trend**, and discarding it is not a detail of the tail — it is visible in the
+1959–2024 record the model is fitted to.
+
+**And it is where the practical payload sits.** With a fixed equilibrium and constant `k`, constant
+emissions give a **finite** stable concentration `C∞ = 295 + E/k`. That is exactly the mechanism by
+which Dengler & Reid reach *"CO₂ stabilises near 475 ppm and the Paris goals are fulfilled"* on
+unchanged emissions. The projection is the point of the error, not a by-product of it.
+
+## 3.3 Our model is not competing on equal terms, and 12a should not be read as if it were
+
+Part 2 flagged that our model fails gate 12a at TH 20/50/100 where Spencer's one-box model passes,
+and called that "uncomfortable". **Marcus's correction: it is not necessarily a defect at all.**
+
+Spencer's model has to match **one** series — total atmospheric concentration — with a sink
+coefficient free to absorb whatever that requires. Ours must simultaneously satisfy CO₂ at two
+stations, δ¹³C at two stations, Δ¹⁴C in both hemispheres including the bomb transient, the ice-core
+record, the interhemispheric gradients in two species, the deep-ocean Δ¹⁴C, the GCB sinks, and the
+seasonal cycles — **21 likelihood streams**, of which the isotopes are the ones that pin the *gross*
+fluxes and therefore the partition a one-box model simply asserts.
+
+A model tuned to one curve **should** fit that curve better. The question is what it costs
+elsewhere, and gate 12b is the answer: **structure right, century-scale magnitude low.** Stated as a
+comparison rather than an indictment:
+
+| | streams fitted | 12a (TH 20/50/100) | 12b (tail ratio) |
+|---|---|---|---|
+| Spencer 2023 | 1 (concentration) | passes | **fails by 36×** |
+| Dengler & Reid 2023 | 1 (concentration) | passes | **fails by 16×** |
+| **this model** | **21, incl. δ¹³C and Δ¹⁴C** | 1–4 % low | **passes, 9.4× above its own null** |
+
+## 3.4 DONE: gate 12b is implemented
+
+At Marcus's direction. `R/joos_irf.R` (benchmark, null locus, the two one-box reference models),
+`calibration/diag_joos_irf.R` §3b (the printed gate + an in-line mutation test that `stopifnot`s a
+single exponential is rejected), `tests/testthat/test-joos-irf.R` (+4 tests, 22 pass),
+`DESIGN.md` §6 gate 12b. **12b is not a superset of 12a** — a τ = 10⁴ yr exponential passes 12b and
+is rejected by 12a — so both are retained and the pair is pinned by a test.
