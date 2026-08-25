@@ -2,6 +2,53 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-25c — gate 4 is the fertilisation saturation SHAPE, and it zeroes `rep_dC`
+
+Marcus framed gate 4 mechanically: AF rises when emissions grow fast or when sinks saturate;
+emissions are an input, so the model's freedom is in how its sinks change over time. He named
+ocean warming/stratification, surface CO₂ saturation, fertilisation saturation, and deforestation.
+
+**Step 1 was a code inventory, not a scan.** Five of the six mechanisms already exist. **Ocean
+stratification is genuinely absent** — `R/model.R:846`, the interior flux is `p$kz * gradient` with
+`kz` a constant and `w_up` = 0.
+
+**TRIED AND ABANDONED — building the missing mechanism.** `kz` moves the AF *level* hard (0.490 at
+2000 → 0.415 at 9000) and its *trend* by **±0.0002 across that entire range**. Closing the
++0.0156/decade gap through the level needs `kz` to fall by more than its own value. The lever
+Marcus named first, and the only one missing, **cannot deliver the trend.**
+
+**The answer is the (`beta_max`, `fert_k`) ridge, travelled ALONG at fixed present-day NPP
+enhancement** — the one direction the historical CO₂ integral cannot identify:
+
+| `fert_k` | FACE | AF trend | dec sd | land σ | IRF 20/50/100 | Δ logL frozen → after `rep_dC` | `rep_dC` |
+|---|---|---|---|---|---|---|---|
+| 554.5 mode | 13.6 % | −0.0007 | 0.019 | +2.12 | 11.69/23.81/39.06 | 0 | **5.566** |
+| 180 | 8.2 % | +0.0063 | 0.023 | +1.54 | 12.35/25.66/42.63 | −1138 → −370 | 2.87 |
+| **90** | ~5 % | +0.010 | 0.031 | ~+1.0 | all inside | −4674 → **−1550** | **0.150** |
+| 60 | 3.8 % | **+0.0163** | 0.040 | **+0.74** | 13.15/28.08/47.64 | −8657 → −2914 | −1.75 |
+| target | 0–23 % | +0.0148 | 0.048 | 0 | 12.2/24.0/39.5 | — | 0 |
+
+**Gates 4, 7 and 12 move together, and so does the blocker.** Gate 12 passes at all three horizons
+for the first time at any fitted vector; gate 7's land sink comes inside 1 σ; and **`rep_dC` falls
+monotonically through zero at `fert_k` ≈ 90** — the 5.6 σ flag that has driven the whole 08-21 →
+08-25 arc is a fertilisation-shape artefact.
+
+**93 % of the cost is the two CO₂ station LEVEL streams**; **no sink stream objects at any cell**
+(`gcb_land_sink` −0.7, `gcb_ocean_sink` −1.0). Freeing `rep_dC` — a 1-D conditional optimum, exact
+because it enters only the station terms additively — returns a **flat ~67 % at every cell**, the
+signature of an offset absorbing a level and not a shape. The residue is then `d13c_level_MLO`
+(−578.8 at K=90), the CO₂ shape, and `co2_icecore`; `rep_dC` is shared between the CO₂ and δ¹³C
+station terms, so serving one costs the other.
+
+**TRIED AND CORRECTED — the gate-7 construction.** The first draft computed sinks from the monthly
+flux trace. Switched to `dg_gate7`'s stocks-plus-E_LUC construction: ~50× faster, and a second
+construction risked disagreeing with the gate being scored against.
+
+**This is a refit proposal, not a result.** Every Δ logL is a frozen-vector upper bound (19
+coordinates held, including `luc_scale` 0.898 and `q10` 1.091 — the plausible absorbers), and every
+`rep_dC` landing point is conditional.
+
+
 ## 2026-08-25b — G1: the century drift does not survive its own error bar; the seam is the ocean sink
 
 `calibration/diag_gcb_seam_1959.R`. Five data-only tests, no refit, as §6 of the 08-25 handoff
