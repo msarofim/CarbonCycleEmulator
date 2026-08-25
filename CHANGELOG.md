@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-25d — the refit falsifies its own headline: only gate 4 survives
+
+`notes/collect_2026-08-25_fert_ridge_refit.md`, against the pre-registration written before launch.
+
+**P1 FALSIFIED.** `ridge_free_from90`, seeded at the `fert_k` = 90 cell with a warm start of −3412,
+climbed back to **`fert_k` 554.98** against the adopted mode's 554.54 — 0.08 % apart, logpost
+identical to two decimals, `beta_max` and `rep_dC` restored exactly. **No second basin.** The
+pre-registration's stated consequence applies and is applied.
+
+**P2 FALSIFIED, and the mechanism is visible.** `rep_dC` landed 4.967 / 4.733 / 4.138 at
+K = 120/90/60 against the frozen scan's 1.370 / 0.150 / −1.750. **Pinning one coordinate of a
+ρ = +0.997 pair does not hold the pair:** each arm was seeded *on* the ridge at enh(420) = 0.2074
+and the fit moved *off* it — 0.2614 / 0.2873 / 0.3387 — raising present-day fertilisation 26–63 %,
+restoring the CO₂-level fit, and taking `rep_dC` back with it.
+
+**P3 holds and no longer means what it was meant to.** The refit recovers 15–19× more than the
+frozen estimate (pin120 −47.5 vs −912.9) — a measure of how efficiently the model routes around a
+pin, not of the cell's viability.
+
+**P4 holds, and is the one real survivor.** At the landed pin120 mode: AF trend −0.0007 → **+0.0107**
+(target +0.0148), decadal sd 0.019 → **0.030**, r −0.06 → **+0.48**, with 19 parameters free to undo
+it and none doing so. **Fertilisation saturation genuinely produces airborne-fraction
+time-dependence.** But **gate 7 reverses** — land **+2.62 σ**, worse than the reference's +2.12,
+where the frozen scan predicted +1.26 — and the AF level degrades 0.434 → 0.405.
+
+**P5 not supported:** `q10` 1.091 → 1.099–1.101.
+
+**RETRACTED: 2026-08-25c's "four problems, one direction".** One responds; three do not. The price
+of gate 4's trend is **47 log-units and +0.5 σ of land sink**, and the free arm says the posterior
+declines it. [[sens_scan_achievable]]: the scan ranked the work correctly and was wrong about
+everything it inferred beyond the ranking.
+
+**Still owed:** `ridge_pin60` and `ridge_pin90` are in cycle 1 (interim numbers above); gate 12 and
+12b at the landed modes are unmeasured — **do not quote the frozen figures for them.**
+
+
 ## 2026-08-25c — gate 4 is the fertilisation saturation SHAPE, and it zeroes `rep_dC`
 
 Marcus framed gate 4 mechanically: AF rises when emissions grow fast or when sinks saturate;
