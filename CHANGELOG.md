@@ -2,6 +2,84 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-24b — Six refits: the plateau decade is NOT the source of `rep_dC`
+
+Marcus: *"I was worried that fitting to the plateau was making the pre- and post-plateau model
+worse. It seems like some combination of reducing emissions or artificially injected atmospheric
+carbon into the oceans should be able to take the tension off of that decade."*
+
+**That is a LEVERAGE question and only a re-optimisation answers it.** The 08-24a work was at the
+fixed mode and could not. Six refits, all predictions pre-registered before launch
+(`notes/prereg_2026-08-24b_ocean_probe_rate_scan.md`).
+
+| arm | logpost | `rep_dC` | Δσ | `luc_scale` Δσ | ridge Δσ |
+|---|---|---|---|---|---|
+| 0 (matched zero) | −1859.32 | 5.5658 | — | — | — |
+| 2.5 | −1860.38 | 5.6042 | +0.16 | +0.52 | −0.14 / −0.19 |
+| 9.434 | −1874.34 | 5.6447 | **+0.32** | +1.90 | −0.54 / −0.72 |
+| 15 | −1895.97 | 5.6174 | +0.21 | **+2.94** | −0.84 / −1.12 |
+| 9.434 **pin** | −1868.5 | 5.6086 | +0.18 | pinned | +1.31 / +1.13 |
+| 15 **pin** | −1893.4 | 5.5252 | −0.17 | pinned | **+2.08 / +1.75** |
+
+Rate 0 reproduces the shipped mode (gain **0.0000**), so the scan's zero is the adopted mode
+rather than a re-derivation. Pinned logposts are NOT comparable to free ones.
+
+**THE ANSWER. `rep_dC` moves |≤0.32| σ in every live arm, with an inconsistent sign.** The `foss`
+probe at the **same window-end CO₂ relief** and the same lever pinned moved it **−6.02 σ**
+(5.566 → 4.102). ⇒ **the relief `foss` appeared to buy was payment for its PERMANENT LEVEL SHIFT**
+(42 % of its 1950 CO₂ effect survives to 2024, against `ocean`'s 3.3 %), **not for explaining the
+plateau.** Marcus's worry is redirected, not confirmed: the plateau decade is not what distorts the
+pre- and post-plateau fit — the century-scale drift is, and that was already traced to GCB's own
+budget imbalance (r = 0.771).
+
+**And `co2_icecore` is the sharpest form of it: 0.00 → +0.87 → −5.53 → −19.16.** The model already
+sits **1.67 ppm BELOW** the ice in 1942–50, so a temporally local probe **overshoots** the window
+it is meant to relieve. **There is no rate at which relieving the plateau improves the plateau
+term.**
+
+**ESCAPE ROUTES, in order.** `luc_scale` free (+2.94 σ); with it pinned, the (`beta_max`, `fert_k`)
+ridge takes over (+2.08 / +1.75 σ) — the same second route the pinned `foss` run used
+(0.93→2.70, 423→1738). `sigma_d14c` stays within 0.15 σ throughout, against `foss`'s **+3.85 σ**,
+so no Suess artefact contaminates the read.
+
+**P3 WAS FALSIFIED AND THE LESSON GENERALISES.** I predicted `luc_scale` < 1 σ because the probe's
+time-shape (3.3 % left by 2024) is nearly orthogonal to a `luc_scale` rescale's (196 % by 2024),
+and claimed the escape route **closed by construction**. It moved **+2.94 σ**, past the 2 σ
+falsifier I had named. **A fit does not need to MATCH a perturbation's shape to route around it —
+it only needs to trade enough likelihood elsewhere.** Orthogonality bounds the *exchange rate*
+(0.34× `foss` at matched CO₂ effect), never the possibility. Predict the exchange rate, not a
+yes/no, and pin the lever anyway when the conclusion depends on it.
+
+**FOUR OF MY OWN THRESHOLDS/LABELS WERE WRONG**, all caught by reading output rather than by a
+gate, and one fired **against a correct result**:
+
+- **The pin gate.** Hand-picked `1e-6`; it errored with *"the pin did NOT bind"* when the pin had
+  bound perfectly. `ARM_PIN_SD` is **1e-4 in LOG space**, so `luc_scale` may move ~9e-5 absolute
+  and the converged arm sat 1.04e-6 away = **0.01 prior sd**. Now derived as 10 × the pin's own
+  prior sd, still rejecting a free arm by 70×.
+- **`paste0(character(0), "P")` is `"P"` in R**, not `character(0)` — zero-length recycling
+  injected a phantom column and killed the run.
+- **"ratio at matched CO₂ effect"** was computed from the *unmatched* largest arm.
+- **Monotonicity** was tested on differences that dropped the reference arm's implicit 0.00 — the
+  point the rise-then-fall turns on — and printed *"monotone? YES"* for 0.00 → +0.87 → −5.53.
+- And the pre-registration quoted **−21 σ** where the measured value is **−6.02 σ**; corrected in
+  place with a visible note, since a wrong number in a pre-registration is the last thing that
+  should be quietly repaired.
+
+**A SEED-COPY TRAP, worth remembering for any warm-started scan.** Every arm directory was seeded
+with a copy of the adopted mode so the warm-start path runs as production does — so
+`mode_fit_pumpN.rds` **exists in an arm that has not started**, and it is the UNPERTURBED
+reference. Keying completion on it reported the still-running rate-15 arm as finished with every
+delta exactly **+0.00**. Completion now keys on `pump_arms_comparison.rds` plus a bit-identity
+gate. All-exactly-zero is a code path, never nature.
+
+**RESIDUAL CONFOUND, recorded not buried.** `ocean` differs from `foss` in **two** ways —
+persistence AND isotopic signature — so the pair does not isolate which drives the `rep_dC`
+difference. The mechanism argument favours persistence (`rep_dC` is a CO₂ *level* offset; only
+persistence touches the level after 1960) but it is an argument, not a measurement. **`ocean_deep`
+would discriminate directly** — `foss`'s CO₂ trajectory, `ocean`'s isotopes. Its vertical profile
+is a mechanism choice and remains Marcus's call, alongside 23c's `beta_max`/`fert_k` question.
+
 ## 2026-08-24 — The ocean-box arm: the isotopes clear it and the carbon budget kills it
 
 Handoff `2026-08-23c` §4 built, gated, and §4e run. **All three arms measured at the adopted mode
