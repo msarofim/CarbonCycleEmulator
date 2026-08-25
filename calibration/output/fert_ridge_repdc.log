@@ -1,0 +1,24 @@
+
+=== DOES rep_dC ABSORB THE SATURATION COST? ===
+mode: fert_k 554.5  beta_max 1.0112  rep_dC 5.5658 ppm (sd 0.2433)
+ridge held at enh(420 ppm) = 0.2074; rep_dC ~ N(0, 1.000) ppm
+
+ fert_k beta_max |   logL@rep0   logL@best   recovd | rep_dC best     d(sd)   d post
+  554.5    1.011 |         0.0         0.0      NA% |      5.570     +0.02     +0.0  <- MODE
+   60.0    0.294 |     -8656.6     -2914.4    66.3% |     -1.750    -30.07  -2914.4
+   90.0    0.338 |     -4674.3     -1550.4    66.8% |      0.150    -22.26  -1550.4
+  120.0    0.381 |     -2778.6      -912.9    67.1% |      1.370    -17.25   -912.9
+  180.0    0.468 |     -1138.3      -369.6    67.5% |      2.870    -11.08   -369.6
+  250.0    0.570 |      -446.9      -143.8    67.8% |      3.870     -6.97   -143.8
+  400.0    0.787 |       -51.7       -16.3    68.4% |      4.980     -2.41    -16.3
+
+  logL@rep0  = cost with rep_dC FROZEN at the mode's 5.566 ppm
+  logL@best  = cost after re-optimising rep_dC alone (posterior, prior carried)
+  recovd     = share of the frozen cost that rep_dC alone gives back
+  d(sd)      = rep_dC's move in units of its own posterior sd (0.2433 ppm)
+
+  A 1-D conditional optimum is EXACT for rep_dC (it enters only the station
+  terms, additively) but the other 19 parameters are frozen, so the recovered
+  cost is a LOWER bound on a refit's and the landing point is conditional.
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/fert_ridge_gates/fert_ridge_repdc.rds
