@@ -669,6 +669,65 @@ ccx_load_mode <- function(arm = "N", base = ccx_default_params()) {
   invisible(TRUE)
 }
 
+.ccx_luc_arm_active <- function()
+  CCX_ARTIFICIAL_SINK_RATE != 0 && CCX_ARTIFICIAL_SINK_MODE == "luc"
+
+# ---------------------------------------------------------------------
+# THE "luc" ARM'S AFFINE COLUMN PATH (2026-08-24c)
+#
+# WHAT CHANGED AND WHY IT IS NOT A GUESS. The refusal above was written because
+# "the correction has a right answer that depends on what the caller meant".
+# It does -- and ccx_build_forcing() has ALREADY MADE that choice and documents
+# it (R/forcing.R @param luc_scale: "the `luc` arm subtracts from the land-use
+# series AFTER `luc_scale` has been applied"). So the builder's columns are
+#
+#     F_luc(s) = s * L - S            L = the unscaled series, S = the arm
+#
+# which is affine in s, not linear -- exactly why the plain multiply is wrong.
+# But affine is still a closed form, so the fast path does not need a rebuild:
+# hold the arm-OFF base (columns L) and the perturbation d = (base - base0) =
+# -S, and compose  s * L + d. Constant-time, and EXACT rather than approximate.
+# test-luc-scale.R gates it against ccx_build_forcing() and MUTATION-TESTS the
+# gate by scaling the perturbation too -- the precise error the refusal existed
+# to prevent.
+#
+# THE REFUSAL IS NOT DELETED. It still fires for a caller that cannot supply the
+# scenario/years needed to rebuild the arm-off base, which is the only case in
+# which the composition genuinely cannot be formed.
+#
+# Returns a list of two closures plus the annual E_LUC table to carry `year`:
+#   $cols(s)  named list of the four LUC columns at luc_scale = s
+#   $eluc(s)  the annual E_LUC vector at luc_scale = s
+# For every arm EXCEPT "luc" these are the original plain multiply, bit-for-bit.
+.ccx_make_luc_scaler <- function(base, scenario = "historical",
+                                 years = c(1750, 2024)) {
+  eluc_base <- ccx_forcing_eluc_annual(base)
+  nm <- function(x) { names(x) <- CCX_LUC_COLS; x }
+  if (!.ccx_luc_arm_active())
+    return(list(
+      cols = function(s) nm(lapply(CCX_LUC_COLS, function(cc) base[[cc]] * s)),
+      eluc = function(s) eluc_base$eluc * s,
+      eluc_tbl = eluc_base, affine = FALSE))
+  if (is.null(scenario) || is.null(years)) .ccx_assert_luc_arm_safe(0)
+  base0 <- ccx_build_forcing(scenario, years, prod_c14 = 0,
+                             bomb_total_kmol = CCX_BOMB_REF, sink_rate = 0)
+  eluc0 <- ccx_forcing_eluc_annual(base0)
+  stopifnot(identical(eluc0$year, eluc_base$year))
+  d_cols <- nm(lapply(CCX_LUC_COLS, function(cc) base[[cc]] - base0[[cc]]))
+  d_eluc <- eluc_base$eluc - eluc0$eluc
+  # The arm must actually be PRESENT in `base`, or this composition silently
+  # degrades to the plain multiply and the run would look like an arm it is not.
+  if (max(abs(d_eluc)) <= 0)
+    stop("the \"luc\" arm is active (rate ", CCX_ARTIFICIAL_SINK_RATE,
+         ") but the supplied base forcing carries no perturbation: its E_LUC is ",
+         "identical to the arm-off build. The base was built with the arm OFF.")
+  list(
+    cols = function(s) nm(lapply(CCX_LUC_COLS,
+                                 function(cc) base0[[cc]] * s + d_cols[[cc]])),
+    eluc = function(s) eluc0$eluc * s + d_eluc,
+    eluc_tbl = eluc_base, affine = TRUE)
+}
+
 ccx_scaled_forcing <- function(sp = NULL, years = c(1750, 2024), luc_scale = 1,
                                bomb_total = CCX_BOMB_REF, scenario = "historical",
                                base = NULL) {
@@ -681,10 +740,11 @@ ccx_scaled_forcing <- function(sp = NULL, years = c(1750, 2024), luc_scale = 1,
   # -- equivalently, from the scaled columns with no second multiply. Both give
   # the same answer; doing it in one place is what makes that a fact rather than
   # a coincidence between two statements.
-  .ccx_assert_luc_arm_safe(luc_scale)
-  eluc <- ccx_forcing_eluc_annual(F)
-  eluc$eluc <- eluc$eluc * luc_scale
-  for (cc in CCX_LUC_COLS) F[[cc]] <- F[[cc]] * luc_scale
+  LUC  <- .ccx_make_luc_scaler(F, scenario, years)
+  eluc <- LUC$eluc_tbl
+  eluc$eluc <- LUC$eluc(luc_scale)
+  cols <- LUC$cols(luc_scale)
+  for (cc in CCX_LUC_COLS) F[[cc]] <- cols[[cc]]
   attr(F, "luc_scale") <- luc_scale
   list(F = F, eluc = eluc)
 }
@@ -798,8 +858,11 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
   # downstream LUC quantity -- monthly flux, in-window cumulative, and the
   # pre-window `luc_pre` folded into it -- is linear in that series.
   # test-luc-scale.R gates the two paths against each other so they cannot drift.
-  LUC_COLS  <- c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH")
-  ELUC_BASE <- ccx_forcing_eluc_annual(base_forcing)
+  # `.ccx_make_luc_scaler()` keeps the plain multiply for every arm except
+  # "luc", where the columns are AFFINE in luc_scale and it composes them
+  # exactly instead (see its block above ccx_scaled_forcing).
+  LUC_SCALER <- .ccx_make_luc_scaler(base_forcing, "historical", years)
+  ELUC_BASE  <- LUC_SCALER$eluc_tbl
 
   function(u) {
     names(u) <- CCX_PARAM_NAMES
@@ -822,11 +885,11 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     F <- base_forcing
     F$c14_cosmo <- sp$prod_c14
     F$c14_bomb  <- base_forcing$c14_bomb * (pv$bomb_total / BOMB_REF)
-    .ccx_assert_luc_arm_safe(pv$luc_scale)
-    for (cc in LUC_COLS) F[[cc]] <- base_forcing[[cc]] * pv$luc_scale
+    .cols <- LUC_SCALER$cols(pv$luc_scale)
+    for (cc in CCX_LUC_COLS) F[[cc]] <- .cols[[cc]]
     attr(F, "luc_scale") <- pv$luc_scale
     eluc <- ELUC_BASE
-    eluc$eluc <- eluc$eluc * pv$luc_scale
+    eluc$eluc <- LUC_SCALER$eluc(pv$luc_scale)
     # ccx_run_fast() defaults to substeps = "auto" and escalates on NA, so this
     # -Inf now means the MODEL failed, not that the integrator hit its explicit-
     # diffusion stability limit. Until 2026-08-11 it meant the latter, and the

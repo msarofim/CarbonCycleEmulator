@@ -231,3 +231,98 @@ test_that("ccx_scaled_forcing reproduces ccx_make_logpost's likelihood exactly",
   expect_true(is.finite(ll_obj))
   expect_equal(ll_rec, ll_obj, tolerance = 1e-8)
 })
+
+# =====================================================================
+# THE "luc" ARM IS AFFINE IN luc_scale, AND THE FAST PATH COMPOSES IT (2026-08-24c)
+#
+# ccx_build_forcing() applies the arm AFTER luc_scale, so its columns are
+# s * L - S: affine, not linear, which is why the plain column multiply was
+# refused. `.ccx_make_luc_scaler()` composes that closed form from the arm-off
+# base plus the perturbation, so the fast path is EXACT rather than refused.
+#
+# GATED AGAINST THE BUILDER, AND MUTATION-TESTED IN BOTH DIRECTIONS: the wrong
+# composition (scaling the perturbation too -- the precise error the refusal
+# existed to prevent) must FAIL the same assertion the right one passes, and it
+# must fail by a MATERIAL amount, or the gate is a tautology.
+# =====================================================================
+
+test_that("the luc arm's fast path equals rebuilding, and the wrong one does not", {
+  s    <- 0.8984                       # the adopted mode's luc_scale
+  rate <- 2.5                          # GtC/yr, the magnitude-matched arm
+  yrs  <- c(1750, 2024)
+
+  # The arm is an ENVIRONMENT-level switch, so drive the builder explicitly and
+  # emulate the switch by hand rather than restarting R with CCX_SINK_MODE set.
+  base  <- ccx_build_forcing("historical", yrs, prod_c14 = 0,
+                             sink_rate = rate, sink_mode = "luc")
+  base0 <- ccx_build_forcing("historical", yrs, prod_c14 = 0, sink_rate = 0)
+  slow  <- ccx_build_forcing("historical", yrs, prod_c14 = 0, luc_scale = s,
+                             sink_rate = rate, sink_mode = "luc")
+
+  # ...the arm must actually be present, or every assertion below is vacuous.
+  expect_gt(max(abs(base$e_luc_NH + base$e_luc_SH -
+                    (base0$e_luc_NH + base0$e_luc_SH))), 0.1)
+
+  for (cc in CCX_LUC_COLS) {
+    right <- base0[[cc]] * s + (base[[cc]] - base0[[cc]])   # affine, correct
+    wrong <- base[[cc]] * s                                 # the refused multiply
+    expect_equal(right, slow[[cc]], tolerance = 1e-12, info = paste("right", cc))
+    expect_false(isTRUE(all.equal(wrong, slow[[cc]], tolerance = 1e-9)),
+                 info = paste("mutation not caught:", cc))
+  }
+
+  # The mutation is MATERIAL, not a rounding difference: at s = 0.8984 the wrong
+  # path shrinks a 2.5 GtC/yr perturbation to 2.246, a 10 % error in the one
+  # quantity the three-arm comparison holds fixed.
+  w  <- (1 - s) * rate
+  dm <- max(abs(base$e_luc_NH * s + base$e_luc_SH * s -
+                (slow$e_luc_NH + slow$e_luc_SH)))
+  expect_gt(dm, 0.5 * w / 12)          # monthly columns are GtC/yr / 12
+})
+
+test_that("ccx_scaled_forcing carries the luc arm unscaled once the arm is on", {
+  s    <- 0.8984
+  rate <- 2.5
+  yrs  <- c(1750, 2024)
+  base <- ccx_build_forcing("historical", yrs, prod_c14 = 0,
+                            sink_rate = rate, sink_mode = "luc")
+  slow <- ccx_build_forcing("historical", yrs, prod_c14 = 0, luc_scale = s,
+                            sink_rate = rate, sink_mode = "luc")
+
+  # The scaler reads the arm from the ENVIRONMENT constants, so exercise it the
+  # way a run does -- with the constants temporarily set to the arm.
+  old_r <- CCX_ARTIFICIAL_SINK_RATE; old_m <- CCX_ARTIFICIAL_SINK_MODE
+  on.exit({
+    assign("CCX_ARTIFICIAL_SINK_RATE", old_r, envir = globalenv())
+    assign("CCX_ARTIFICIAL_SINK_MODE", old_m, envir = globalenv())
+  }, add = TRUE)
+  assign("CCX_ARTIFICIAL_SINK_RATE", rate, envir = globalenv())
+  assign("CCX_ARTIFICIAL_SINK_MODE", "luc", envir = globalenv())
+
+  got <- ccx_scaled_forcing(NULL, yrs, luc_scale = s, base = base)
+  for (cc in CCX_LUC_COLS)
+    expect_equal(got$F[[cc]], slow[[cc]], tolerance = 1e-12, info = cc)
+
+  # and the annual E_LUC handed to the gcb_land_sink term follows the SAME
+  # composition -- this is the quantity the 2026-08-22 double-scaling bug hit.
+  expect_equal(got$eluc$eluc, ccx_forcing_eluc_annual(slow)$eluc,
+               tolerance = 1e-10)
+
+  # A base built with the arm OFF must be REFUSED, not silently treated as the
+  # arm: that failure mode would report a run as an arm it never carried.
+  expect_error(ccx_scaled_forcing(NULL, yrs, luc_scale = s,
+                                  base = ccx_build_forcing("historical", yrs,
+                                                           prod_c14 = 0,
+                                                           sink_rate = 0)),
+               "carries no perturbation")
+})
+
+test_that("the arm being OFF leaves both paths bit-identical to before", {
+  s    <- 0.65
+  yrs  <- c(1750, 2024)
+  base <- ccx_build_forcing("historical", yrs, prod_c14 = 0)
+  got  <- ccx_scaled_forcing(NULL, yrs, luc_scale = s, base = base)
+  for (cc in CCX_LUC_COLS)
+    expect_identical(got$F[[cc]], base[[cc]] * s)
+  expect_identical(got$eluc$eluc, ccx_forcing_eluc_annual(base)$eluc * s)
+})

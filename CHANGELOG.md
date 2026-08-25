@@ -2,6 +2,58 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-24c — `ocean_deep` is not needed: the `luc` arm already IS the discriminating cell
+
+08-24b closed the plateau arc but recorded a **residual confound**: `foss` (Δ`rep_dC` **−6.02 σ**)
+and `ocean` (**+0.18 σ**) differ in **two** ways — persistence AND isotopic signature — so the pair
+cannot say which bought the relief. §8 proposed building **`ocean_deep`** to separate them, and
+blocked on choosing its vertical profile.
+
+**IT DOES NOT HAVE TO BE BUILT.** The `luc` arm already sits in that cell, is implemented, and its
+numbers were on disk from 08-24a (`output/sink_three_arms/three_arms_N_rate2.5.rds`):
+
+| arm | fraction of window-end CO₂ effect left at 1960 / 2024 | Δ¹⁴C excursion 1941–50 NH |
+|---|---|---|
+| `foss` 2.5 | 0.736 / **0.432** | **+9.72 ‰** |
+| **`luc` 2.5** | 0.745 / **0.501** | **+0.170 ‰** |
+| `ocean` 2.5 | 0.181 / **0.027** | −0.122 ‰ |
+
+`luc` carries **`foss`'s CO₂ trajectory** (window-end −6.531 vs −6.512 ppm, matched to **0.3 %**,
+and *more* persistent at 2024) with **`ocean`-scale isotopes** (both ~1–2 % of `foss`'s excursion).
+That is verbatim the specification §8 wrote for `ocean_deep` — *"`foss`'s CO₂ trajectory and
+`ocean`'s isotopes"* — **with no vertical profile to choose.** [[bracket_needs_no_new_run]] firing
+a second time on this arc: **look for a recombination among existing arms before building arm N+1.**
+
+**THE REFUSAL BECAME A CORRECT PATH.** `ccx_make_logpost()` and `ccx_scaled_forcing()` applied
+`luc_scale` as a column multiply and **errored** on the `luc` arm, because `ccx_build_forcing()`
+applies the arm *after* `luc_scale`, making the columns **affine** (`s·L − S`) not linear. The
+refusal's stated reason was that *"the correction has a right answer that depends on what the
+caller meant"* — but the builder has already made and documented that choice, so the answer is not
+a guess. `.ccx_make_luc_scaler()` now holds the arm-off base and the perturbation and composes
+`s·L + d`: **exact, constant-time, and bit-identical to the old path whenever the arm is off.** The
+refusal is not deleted — it still fires for a caller that cannot supply the scenario/years needed
+to rebuild the arm-off base, the only case where the composition genuinely cannot be formed. A base
+built with the arm OFF is **refused** rather than silently treated as the arm.
+
+**GATED AND MUTATION-TESTED IN BOTH DIRECTIONS** (`test-luc-scale.R`, +3 tests): the composition
+must equal `ccx_build_forcing()` to 1e-12, the refused multiply must **FAIL** the same assertion,
+and it must fail by a **material** amount (10 % of the perturbation at the mode's `luc_scale`), or
+the gate is a tautology.
+
+**ONE REFIT LAUNCHED**, predictions **pre-registered before launch**
+(`notes/prereg_2026-08-24c_luc_arm_persistence_vs_isotopes.md`). Arm N, `CCX_SINK_MODE=luc`,
+rate 2.5, `luc_scale` pinned 0.898400, `RESTARTS=8 CYCLES=2`, h_ml [85, 120] — **every setting
+copied from the pinned `foss` run**, so the two are like-for-like down to the restart count.
+Headline P1: **Δ`rep_dC` ≤ −5.0 σ** (falsifier |Δ| < 1.0 σ ⇒ the isotopic signature, not
+persistence, is the driver, and 08-24b §3's mechanism argument is wrong).
+
+**PROVENANCE GATE PASSED EXACTLY.** The warm-start logpost was predicted at **−2691.2** from the
+at-mode `luc` total (−1859.32 − 839.879 + ~8.0 for the pin's prior) and measured at **−2691.2** —
+so the new affine path and the 08-24a diagnostic's independent `ccx_build_forcing()` route agree to
+the decimal, and the run is carrying the arm it says it is rather than the seeded reference
+(08-24b §6's seed-copy trap). Output `calibration/output/luc_arm_pinluc/` — **SCRATCH, never the
+shipped mode.**
+
 ## 2026-08-24b — Six refits: the plateau decade is NOT the source of `rep_dC`
 
 Marcus: *"I was worried that fitting to the plateau was making the pre- and post-plateau model
