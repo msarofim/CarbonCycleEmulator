@@ -239,11 +239,14 @@ is rejected by 12a — so both are retained and the pair is pinned by a test.
 
 # Part 4 — Sarofim's unsubmitted Essenhigh comment (2011), and the corrected timeline
 
-**Primary source:** `~/Documents/2026/RMent/EssenhighRebuttal1_10_2011_updates.doc` — Marcus's
+**Primary source, now IN THE REPO** (2026-08-25, at the author's request, for a historical-interest
+link from the app): the original at **`app/www/sarofim_essenhigh_comment_2011.doc`** and a
+transcription at **`notes/lit_2011_sarofim_essenhigh_comment.md`**. Marcus's
 drafted-but-never-submitted *Comment on "Potential Dependence of Global Warming on the Residence
-Time (RT) in the Atmosphere of Anthropogenically Sourced Carbon Dioxide"*. **Not copied into this
-repo** (personal file, ask before adding). Its reference list is better than the web sweep in Parts
-1–2 and supersedes it where they differ.
+Time (RT) in the Atmosphere of Anthropogenically Sourced Carbon Dioxide"*. Its reference list is
+better than the web sweep in Parts 1–2 and **supersedes it where they differ** — with three errata
+listed in the transcription (O'Neill 1997 is O'Neill/Oppenheimer/Gaffin, pp. 491–**505**;
+`Doman` → `Dolman`; Sabine 2004 volume omitted), **not** corrected in the `.doc` itself.
 
 ## 4.1 CORRECTION: three independent lines, and the isotopes are the THIRD
 
