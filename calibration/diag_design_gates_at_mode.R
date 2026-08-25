@@ -328,10 +328,18 @@ for (i in seq_len(nrow(prof)))
   cat(sprintf("%9.3f %9.2f %12.1f %12.1f %12.1f%s\n", prof[i, "tau_ex"], prof[i, "lag"],
               prof[i, "co2_grad"], prof[i, "d13c_grad"], prof[i, "total"],
               if (isTRUE(all.equal(prof[i, "tau_ex"], V$N$p$tau_ex))) "   <- the mode" else ""))
+# The lag needed to reach the observed value is INTERPOLATED from the profile
+# just computed, not quoted: a hardcoded "2.3" would go stale the moment the
+# mode moves, which is the bug class DESIGN gate 12's History paragraph records.
+obs_lag  <- ob$SH[["t"]] - ob$NH[["t"]]
+tau_need <- if (max(prof[, "lag"]) >= obs_lag && min(prof[, "lag"]) <= obs_lag)
+  stats::approx(prof[, "lag"], prof[, "tau_ex"], xout = obs_lag)$y else NA_real_
 cat("\n  THE TWO OBSERVABLES DISAGREE, AND THE GRADIENT WINS BY THREE ORDERS OF\n")
-cat("  MAGNITUDE. The bomb lag rises monotonically with tau_ex and needs roughly\n")
-cat("  2.3 yr to reach the observed 1.34; both gradient streams sit at a sharp\n")
-cat("  INTERIOR optimum at the mode's 1.032 and fall away steeply on both sides.\n")
+cat(sprintf("  MAGNITUDE. The bomb lag rises monotonically with tau_ex and needs roughly\n"))
+cat(sprintf("  %.1f yr to reach the observed %.2f; both gradient streams sit at a sharp\n",
+            tau_need, obs_lag))
+cat(sprintf("  INTERIOR optimum at the mode's %.3f and fall away steeply on both sides.\n",
+            V$N$p$tau_ex))
 cat("  So gate 5's lag miss is a FORCED residual, not an overlooked one -- the\n")
 cat("  model cannot satisfy both interhemispheric constraints with one tau_ex,\n")
 cat("  which makes this a STRUCTURAL finding about the two-box exchange rather\n")
