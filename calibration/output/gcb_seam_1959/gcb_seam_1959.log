@@ -1,0 +1,145 @@
+
+=== G1: THE 1959 METHODOLOGY SEAM vs THE BUDGET ERROR ===
+window 1850-2024 | 2.124 GtC per ppm
+historical sheet: 175 rows kept, 100 dropped on is.na(imbalance)
+imbalance 1 sd, in quadrature from R/likelihood.R's own sigmas:
+  luc 0.70, ocean 0.40, land 0.50, fossil 5.0%x0.72 = 0.036  =>  0.949 GtC/yr
+  The pre-seam sinks are diagnostic-model and DGVM means, not the post-seam
+  products these sigmas describe, so this is a FLOOR on the pre-seam bar.
+
+T0  identity  max|imbalance - (F + L - G - O - S - cem)| = 1.36e-10 GtC/yr. CLOSES.
+    cumulative imbalance  1850-1958 =   44.66 GtC =  21.03 ppm  (56 % of total)
+                          1959-2024 =   35.63 GtC =  16.77 ppm
+                          1850-2024 =   80.29 GtC =  37.80 ppm
+
+    1 sd on the 109-yr cumulative, as a function of the error correlation length:
+      rho = 0      sd =    9.9 GtC =  4.67 ppm   =>  4.51 sigma on 44.7 GtC
+      rho = 0.5    sd =   17.1 GtC =  8.03 ppm   =>  2.62 sigma on 44.7 GtC
+      rho = 0.8    sd =   29.1 GtC = 13.71 ppm   =>  1.53 sigma on 44.7 GtC
+      rho = 0.9    sd =   41.3 GtC = 19.44 ppm   =>  1.08 sigma on 44.7 GtC
+      rho = 0.95   sd =   56.1 GtC = 26.42 ppm   =>  0.80 sigma on 44.7 GtC
+      rho = 0.99   sd =   87.6 GtC = 41.24 ppm   =>  0.51 sigma on 44.7 GtC
+      rho = 1      sd =  103.5 GtC = 48.72 ppm   =>  0.43 sigma on 44.7 GtC
+    The pre-seam terms are SMOOTH BY CONSTRUCTION, so the high-rho rows are the
+    relevant ones, not rho = 0. Read this before reading any attribution below.
+
+T1a SMOOTHNESS FINGERPRINT -- sd of SECOND differences, GtC/yr.
+    A smoothed reconstruction has ~0 curvature noise; a term with real IAV does not.
+    term                pre       post post/pre
+    fossil           0.0830     0.2081      2.5
+    luc              0.0452     0.2003      4.4
+    atm_growth       0.0756     2.1058     27.9   <== SEAM
+    ocean_sink       0.0038     0.1622     42.4   <== SEAM
+    land_sink        0.7611     1.3230      1.7
+    imbalance        0.7558     1.4462      1.9
+
+T1b STEP AT 1958.5, from local linear fits extrapolated to the boundary.
+    Newey-West se; a block bootstrap validates it below.
+    fossil        -0.017+-0.042  -0.049+-0.045  -0.146+-0.104  +0.015+-0.106 
+    luc           +0.007+-0.044  -0.129+-0.078  -0.227+-0.098  -0.200+-0.118 
+    atm_growth    +0.116+-0.363  +0.239+-0.309  +0.159+-0.333  +0.480+-0.309 
+    ocean_sink    +0.171+-0.058  +0.232+-0.050  +0.244+-0.048  +0.279+-0.048 
+    land_sink     -0.301+-0.484  -0.359+-0.412  -0.248+-0.341  -0.383+-0.297 
+    imbalance     +0.004+-0.375  -0.290+-0.286  -0.529+-0.256  -0.563+-0.249 
+    half-window             w=8           w=10           w=15           w=20
+
+    MATCHED BOOTSTRAP se (B = 4000, block 5 yr, residual pool +-30 yr about a local quadratic).
+    term              w       step     se(NW)  se(boot)   boot/NW z(boot)
+    fossil            8     -0.017      0.042     0.204      4.88   -0.08
+    fossil           10     -0.049      0.045     0.189      4.21   -0.26
+    fossil           15     -0.146      0.104     0.157      1.52   -0.93
+    fossil           20     +0.015      0.106     0.136      1.28   +0.11
+    luc               8     +0.007      0.044     0.121      2.77   +0.06
+    luc              10     -0.129      0.078     0.114      1.46   -1.13
+    luc              15     -0.227      0.098     0.092      0.94   -2.47  <== 2 sigma
+    luc              20     -0.200      0.118     0.082      0.70   -2.43  <== 2 sigma
+    atm_growth        8     +0.116      0.363     0.494      1.36   +0.23
+    atm_growth       10     +0.239      0.309     0.443      1.43   +0.54
+    atm_growth       15     +0.159      0.333     0.357      1.07   +0.45
+    atm_growth       20     +0.480      0.309     0.314      1.02   +1.53
+    ocean_sink        8     +0.171      0.058     0.083      1.44   +2.05  <== 2 sigma
+    ocean_sink       10     +0.232      0.050     0.073      1.48   +3.18  <== 2 sigma
+    ocean_sink       15     +0.244      0.048     0.060      1.26   +4.07  <== 2 sigma
+    ocean_sink       20     +0.279      0.048     0.053      1.11   +5.30  <== 2 sigma
+    land_sink         8     -0.301      0.484     0.496      1.02   -0.61
+    land_sink        10     -0.359      0.412     0.422      1.03   -0.85
+    land_sink        15     -0.248      0.341     0.332      0.97   -0.75
+    land_sink        20     -0.383      0.297     0.280      0.94   -1.37
+    imbalance         8     +0.004      0.375     0.442      1.18   +0.01
+    imbalance        10     -0.290      0.286     0.368      1.29   -0.79
+    imbalance        15     -0.529      0.256     0.289      1.13   -1.83
+    imbalance        20     -0.563      0.249     0.253      1.02   -2.23  <== 2 sigma
+    The bootstrap bar is 2-8x the Newey-West bar on every term, so NW is
+    ANTI-CONSERVATIVE here and every z below is the bootstrap one.
+
+    residual sd about a local quadratic, +-30 yr of the seam (this IS the seam,
+    stated as a noise level rather than as a step):
+      atm_growth   pre 0.2005   post 0.8139   ratio    4.1
+      ocean_sink   pre 0.0093   post 0.1015   ratio   10.9
+      land_sink    pre 0.4059   post 0.6011   ratio    1.5
+      imbalance    pre 0.3955   post 0.5222   ratio    1.3
+
+T2  NAIVE PRICE of a step, held constant over all 109 pre-seam years.
+    This is an UPPER BOUND on the seam's cumulative contribution, not an estimate:
+    a diagnostic model at a lower CO2 level should have a smaller sink, not one
+    offset by a constant. T3 replaces it.
+      atm_growth   step +0.239 GtC/yr (0.54 sigma boot)  =>    +26.0 GtC = +12.24 ppm  (+58 % of 44.7 GtC)   -- step NOT resolved
+      ocean_sink   step +0.232 GtC/yr (3.18 sigma boot)  =>    +25.3 GtC = +11.93 ppm  (+57 % of 44.7 GtC)
+
+T3  BACKCAST ocean_sink ~ (CO2 - 276.88 ppm), fitted post-seam, evaluated pre-seam.
+    CO2 excess: 8.6 ppm at 1850, 38.3 at 1959, 144.9 at 2024.
+    This is an EXTRAPOLATION below the fitted range; both windows are reported.
+    near (1959-1980)   slope 0.03338 GtC/yr per ppm, R2 0.838 | pre-seam gap: mean +0.062, cum    +6.8 GtC = +3.20 ppm (+15 % of 44.7)
+    full (1959-2024)   slope 0.02083 GtC/yr per ppm, R2 0.946 | pre-seam gap: mean +0.475, cum   +51.8 GtC = +24.37 ppm (+116 % of 44.7)
+    VERDICT: the two windows disagree by 7.6x (15 % to 116 % of the pre-seam
+    cumulative), because the sink-vs-CO2 relation is CURVED (the buffer factor rises
+    with CO2) and the pre-seam era is outside the fitted range. The backcast does NOT
+    identify the seam's cumulative contribution, and no window is chosen here.
+
+T4  GCB pre-seam growth vs the Law Dome samples the likelihood SCORES.
+    172 ice samples in 1850-1965 (obs$ice, raw samples with stated errors).
+    anchor: ice spline at 1850 = 285.45 ppm; GCB growth cumulated forward from there.
+    residual GCB-minus-ice over the 172 samples: mean -1.00 ppm, sd 1.77, RMS 2.03
+    in units of the ice term's OWN sigma: mean z -0.23, RMS z 0.46
+      1850-1869  n= 19  mean  -0.13 ppm  RMS  1.79
+      1870-1889  n= 16  mean  -0.55 ppm  RMS  1.73
+      1890-1909  n= 26  mean  -0.08 ppm  RMS  1.80
+      1910-1929  n= 31  mean  -1.41 ppm  RMS  2.20
+      1930-1949  n= 48  mean  -1.23 ppm  RMS  2.01
+      1950-1969  n= 32  mean  -1.75 ppm  RMS  2.33
+    in the 1940-1958 plateau window itself: n=43  mean -1.91 ppm  RMS 2.28  RMS z 0.53
+    worst 20-yr block mean -1.41 ppm against an ice sigma of 4.35 ppm.
+
+T4b the level residual IS the running integral of the growth error -- its drift
+    across the pre-seam era needs no extrapolation and no bandwidth:
+      1850-1879  -0.32 +- 0.81 ppm (n=24, n_eff=5.2 at a 5.75-yr air-age width)
+      1929-1958  -1.51 +- 0.66 ppm (n=70, n_eff=5.2)
+      DRIFT -1.19 +- 1.04 ppm = 1.14 sigma  =>  GCB growth is LOW by 2.5 GtC
+      which would inflate the pre-seam cumulative imbalance by +6 % of 44.7 GtC.
+      This is SMALL and it is the only growth-side number in this file that is
+      identified rather than extrapolated. It does NOT rescue the century-drift read.
+
+    READ THIS AS A CIRCULARITY TEST, NOT A CONFIRMATION. GCB's pre-seam growth is
+    Joos & Spahni 2008, itself a reconstruction of this same ice/firn record. Close
+    agreement means the two are ONE object, so a model already fitted to our ice term
+    is already fitted to GCB's growth, and the imbalance can only be a statement
+    about EMISSIONS and SINKS.
+
+T5  the 1940-1958 window (the de-ranked plateau arc) inside the pre-seam cumulative:
+    19 of 109 yr (17 %) carry 28.1 of 44.7 GtC = 63 % of the pre-seam cumulative.
+    mean atm_growth there 0.519 GtC/yr vs 0.757 in 1920-1939 -- the growth term COLLAPSES.
+
+    the pre-seam cumulative, decade by decade (GtC contributed, and running total):
+      1850s   +0.50 GtC/yr mean    +4.97 GtC  running    4.97 ( 11 % of 44.7)
+      1860s   +0.12 GtC/yr mean    +1.24 GtC  running    6.20 ( 14 % of 44.7)
+      1870s   +0.04 GtC/yr mean    +0.40 GtC  running    6.60 ( 15 % of 44.7)
+      1880s   -0.23 GtC/yr mean    -2.34 GtC  running    4.27 ( 10 % of 44.7)
+      1890s   -0.13 GtC/yr mean    -1.25 GtC  running    3.01 (  7 % of 44.7)
+      1900s   +0.19 GtC/yr mean    +1.88 GtC  running    4.89 ( 11 % of 44.7)
+      1910s   +0.14 GtC/yr mean    +1.40 GtC  running    6.29 ( 14 % of 44.7)
+      1920s   +0.45 GtC/yr mean    +4.51 GtC  running   10.80 ( 24 % of 44.7)
+      1930s   +0.58 GtC/yr mean    +5.76 GtC  running   16.56 ( 37 % of 44.7)
+      1940s   +1.30 GtC/yr mean   +13.04 GtC  running   29.59 ( 66 % of 44.7)
+      1950s   +1.67 GtC/yr mean   +15.07 GtC  running   44.66 (100 % of 44.7)
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/gcb_seam_1959/gcb_seam_1959.rds
