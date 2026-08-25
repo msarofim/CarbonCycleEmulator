@@ -28,7 +28,44 @@ ev <- function(file,lab){
     (mean(stock(o$ocean_C)[ks])-3.22)/LIK_GCB_OCEAN_SD,
     m$par_mode$fert_k, m$par_mode$beta_max*(420-ccx_const("CO2_PI_PPM"))/(m$par_mode$fert_k+420-ccx_const("CO2_PI_PPM"))))
 }
+# ---- GATE 12 / 12b, PD100 protocol, same as diag_joos_irf.R -------
+irf_at <- function(file){
+  m <- readRDS(file); p <- ccx_default_params()
+  for (n in intersect(names(p),CCX_PARAM_NAMES)) p[[n]] <- m$par_mode[[n]]
+  p$gamma_enso <- m$par_mode$gamma_enso; p$pump_mode <- m$pump_mode
+  spin <- ccx_spinup(p)
+  Fh <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14=spin$prod_c14,
+        bomb_total_kmol=m$par_mode$bomb_total, luc_scale=m$par_mode$luc_scale)
+  sp <- spin; sp$y <- ccx_run_fast(spin, Fh)$state
+  Ff <- suppressWarnings(ccx_build_forcing("historical", c(JOOS_REF_YEAR, JOOS_REF_YEAR+310),
+        prod_c14=spin$prod_c14, bomb_total_kmol=0, luc_scale=m$par_mode$luc_scale))
+  for (cc in c("e_foss_NH","e_foss_SH","e_luc_NH","e_luc_SH","enso","c14_bomb","c14_nuclear")) Ff[[cc]] <- 0
+  Ff$gmst <- Ff$gmst[1]
+  o <- ccx_irf(sp, ccx_hold_forcing(sp, Ff))
+  o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR); k <- o$t >= 0
+  tt <- o$t[k]; vv <- o$irf[k]
+  ig <- function(th){kk<-tt<=th; sum(diff(tt[kk])*(head(vv[kk],-1)+tail(vv[kk],-1))/2)}
+  list(int=vapply(JOOS_T4$th, ig, numeric(1)), tail=joos_tail_ratio(tt,vv),
+       null=joos_tail_null(vv[which.min(abs(tt-100))]), at300=vv[which.min(abs(tt-300))])
+}
+gate12 <- function(file,lab){
+  r <- irf_at(file)
+  cat(sprintf("  %-20s TH20 %6.2f%s TH50 %6.2f%s TH100 %6.2f%s | tail %.4f (null %.4f) %s | @300 %.3f\n",
+    lab, r$int[1], ifelse(r$int[1]>=JOOS_T4$lo[1],"*"," "), r$int[2], ifelse(r$int[2]>=JOOS_T4$lo[2],"*"," "),
+    r$int[3], ifelse(r$int[3]>=JOOS_T4$lo[3],"*"," "), r$tail, r$null,
+    ifelse(r$tail>=JOOS_TAIL_BAND[1] & r$tail<=JOOS_TAIL_BAND[2],"IN ","OUT"), r$at300))
+}
+
 cat(sprintf("GATE 4 / GATE 7 AT THE LANDED MODES (target trend %+.4f, sd %.4f, land 0, ocean 0)\n", TR, sd(afo)))
 ev("calibration/output/pump_arms/mode_fit_pumpN.rds","reference mode")
 ev("calibration/output/ridge_free_from90/mode_fit_pumpN.rds","free arm (LANDED)")
 ev("calibration/output/ridge_pin120/mode_fit_pumpN.rds","pin120 (LANDED)")
+ev("calibration/output/ridge_pin90/mode_fit_pumpN.rds","pin90 (LANDED)")
+ev("calibration/output/ridge_pin60/mode_fit_pumpN.rds","pin60 (LANDED)")
+
+cat(sprintf("\nGATE 12 / 12b AT THE LANDED MODES  (* = at or above the Joos 5-95%% floor %s; 12b band [%.3f, %.3f])\n",
+            paste(JOOS_T4$lo,collapse="/"), JOOS_TAIL_BAND[1], JOOS_TAIL_BAND[2]))
+gate12("calibration/output/pump_arms/mode_fit_pumpN.rds","reference mode")
+gate12("calibration/output/ridge_pin120/mode_fit_pumpN.rds","pin120 (LANDED)")
+gate12("calibration/output/ridge_pin90/mode_fit_pumpN.rds","pin90 (LANDED)")
+gate12("calibration/output/ridge_pin60/mode_fit_pumpN.rds","pin60 (LANDED)")

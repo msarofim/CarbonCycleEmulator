@@ -1,8 +1,10 @@
 # Collection — the 4-arm fertilisation-ridge refit. 2026-08-25.
 
 Against `notes/prereg_2026-08-25b_fert_ridge_refit.md`, written before launch.
-**Two arms finished (`ridge_free_from90`, `ridge_pin120`); `ridge_pin60` and `ridge_pin90` are
-still in cycle 1.** Measured with `calibration/diag_gates_at_landed_modes.R`.
+**ALL FOUR ARMS FINISHED** (8 h 53; all wrote `pump_arms_comparison.rds`). Measured with
+`calibration/diag_gates_at_landed_modes.R`. **This file was first written when two arms were still
+running and said gate 12 was unmeasured and "only gate 4 survives". Both are now corrected below —
+gate 12 survives too.**
 
 ## P1 — FALSIFIED. The likelihood pulls `fert_k` straight back to 555.
 
@@ -79,8 +81,8 @@ Corrected:
 | gate 4's AF trend responds to saturation | **HOLDS** — the one real result |
 | gate 7's land sink comes inside 1 σ | **RETRACTED** — lands at +2.62 σ, worse than baseline |
 | `rep_dC` falls to its prior centre | **RETRACTED** — stays at 4.1–5.0 of 5.566 |
-| gate 12 passes at all three horizons | **UNMEASURED at the landed modes** — do not quote the frozen figures |
-| four problems, one cause | **RETRACTED** — one problem responds, three do not |
+| gate 12 passes at all three horizons | **HOLDS** — measured at the landed modes, see below |
+| four problems, one cause | **RETRACTED** — **two** gates respond, two other things break, `rep_dC` does not move |
 
 **And the cost is now priced.** Buying +0.011/decade of AF trend costs **47 log-units** and **+0.5 σ
 on the land sink**, and the free arm says the posterior declines the trade.
@@ -88,7 +90,47 @@ on the land sink**, and the free arm says the posterior declines the trade.
 [[sens_scan_achievable]] in its purest form: the scan ranked the work correctly — fertilisation
 shape *is* the lever gate 4 responds to — and was wrong about everything it inferred beyond that.
 
-## What is still owed
+## THE FULL LANDED PICTURE — all four arms, all gates
 
-`ridge_pin60` and `ridge_pin90` are in cycle 1; their numbers above are interim and will move.
-Neither can rescue P1, which is decided. Gate 12 and gate 12b at the landed modes are unmeasured.
+**Gate 4 / gate 7** (targets: trend +0.0148, sd 0.0483, land 0 σ):
+
+| | AF | dec sd | trend | r(obs) | land σ | ocean σ | enh(420) |
+|---|---|---|---|---|---|---|---|
+| reference | 0.434 | 0.0188 | −0.0007 | −0.06 | +2.12 | −0.64 | 0.207 |
+| free arm | 0.434 | 0.0188 | −0.0007 | −0.06 | +2.12 | −0.64 | 0.207 |
+| pin120 | 0.405 | 0.0300 | +0.0107 | +0.48 | +2.62 | −0.49 | 0.261 |
+| **pin90** | 0.393 | 0.0355 | **+0.0138** | +0.52 | **+2.97** | −0.45 | 0.287 |
+| pin60 | 0.372 | 0.0442 | +0.0184 | +0.55 | **+3.72** | −0.37 | 0.339 |
+
+**Gate 12 / 12b** (floors 12.2 / 24.0 / 39.5; 12b band [0.593, 0.979]):
+
+| | TH20 | TH50 | TH100 | 12b tail | airborne @300 |
+|---|---|---|---|---|---|
+| reference | 11.69 ✗ | 23.81 ✗ | 39.06 ✗ | 0.707 ✓ | 0.194 |
+| pin120 | **12.28 ✓** | **25.35 ✓** | **41.79 ✓** | 0.713 ✓ | 0.210 |
+| pin90 | **12.38 ✓** | **25.61 ✓** | **42.20 ✓** | 0.718 ✓ | 0.213 |
+| pin60 | **12.50 ✓** | **25.89 ✓** | **42.58 ✓** | 0.730 ✓ | 0.217 |
+
+## ⇒ THE REAL RESULT IS A TENSION, NOT A DEAD END
+
+**Two gates are fixed by saturation and they survive the refit.** Gate 4's AF trend reaches
+**+0.0138 against a +0.0148 target** at pin90, and **gate 12 passes at all three horizons for the
+first time at any fitted vector** — where the reference fails all three. Neither is a frozen-vector
+artifact; 19 free parameters had every chance to undo them.
+
+**Two things break, monotonically in the same direction.** The GCB land sink goes +2.12 → +2.62 →
++2.97 → +3.72 σ, and the AF *level* degrades 0.434 → 0.372 against an observed 0.431.
+
+**And `rep_dC` does not move** (5.566 → 4.967/4.734/4.138).
+
+So the model is being pulled two ways by its own objective: **the pulse-response and
+airborne-fraction-variability gates want strong fertilisation saturation; the CO₂ station levels and
+the GCB land sink want weak saturation.** The likelihood, weighted as it currently is, chooses weak
+— by **86.7 log-units** at pin90, of which the frozen decomposition showed **93 % lives in
+`co2_level_MLO` + `co2_level_SPO`**, the two streams whose absolute level is absorbed by the
+`rep_dC` nuisance offset.
+
+**That is the question the next session inherits, and it is an OBJECTIVE question, not a parameter
+one.** Not "where on the ridge does the model sit" — that is answered, 555 — but "should two
+station-level streams, fitted through a 5.6 σ nuisance offset, outvote the pulse response and the
+airborne-fraction record by two orders of magnitude?"
