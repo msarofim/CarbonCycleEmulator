@@ -2,6 +2,29 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-25g — the post-fix refit is RUNNING, 3 arms, pre-registered
+
+`notes/prereg_2026-08-25f_post_isotope_fix_refit.md`, written before launch. Arms: `ref` (free, warm
+from the quarantined arm-N mode — becomes the canonical mode), `from90` (free, seeded at the K = 90
+ridge cell — **does a second basin exist now?**), `pin90` (`fert_k` pinned at 90 — prices forced
+saturation under the corrected objective). `pin60`/`pin120` deliberately NOT re-run: they bracket a
+cost curve whose middle point is the one that matters, and the free arm decides whether the curve is
+interesting at all.
+
+Warm-start log-posteriors under the NEW objective: ref **−1909.0** (its file says −1859.3, the old
+objective — an independent confirmation of the −49.7 frozen cost measured beforehand), from90
+−2457.5, pin90 −2445.9.
+
+**A smoke run at reduced settings proved the pipeline end-to-end first**, and inside 402 evaluations
+the reference arm had already gained **+306.4** over its warm start and was still gaining — which
+is P1's direction, though P1 is settled at the landed mode, not here.
+
+**GPP limbs declared `alpha13_signed` (reason (a), one-way by construction) before launch.** The
+guard would otherwise have turned a diverging state — where `npp` goes negative because CO₂ has —
+from "finite and rejected" into a hard `-Inf`, quietly shrinking the optimiser's feasible set. That
+is how the pre-2026-08-11 substep wall truncated the posterior, and it is not a change this fix was
+supposed to make. Parity re-checked at 5.6e-13; `test-seas-isotope.R` still 5/5.
+
 ## 2026-08-25f — FIXED: the seasonal NEP flux discriminated on both halves of its cycle
 
 **THE OBJECTIVE HAS CHANGED. Nothing fitted before this entry is comparable across it** — same class

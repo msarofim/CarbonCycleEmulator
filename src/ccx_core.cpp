@@ -342,9 +342,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     const double npp_wood = npp * (1.0 - P.npp_leaf_frac);
     const double ra_leaf = npp_leaf * P.ra_ratio;
     const double ra_wood = npp_wood * P.ra_ratio;
-    add_flux(iatm, ilef, npp_leaf + ra_leaf, A.alpha_photo);   // GPP, leaf
+    // alpha13_signed reason (a): one-way by construction (see R/model.R).
+    add_flux(iatm, ilef, npp_leaf + ra_leaf, A.alpha_photo, true);   // GPP, leaf
     add_flux(ilef, iatm, ra_leaf, 1.0);                        // Ra, at leaf's ratio
-    add_flux(iatm, iwod, npp_wood + ra_wood, A.alpha_photo);   // GPP, wood
+    add_flux(iatm, iwod, npp_wood + ra_wood, A.alpha_photo, true);   // GPP, wood
     add_flux(iwod, iatm, ra_wood, 1.0);                        // Ra, at wood's ratio
 
     // litter, split per SOURCE pool (the two carry different 14C ratios, so

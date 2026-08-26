@@ -1004,9 +1004,17 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     npp_wood <- npp * (1 - p$npp_leaf_frac)
     ra_leaf  <- npp_leaf * p$ra_ratio
     ra_wood  <- npp_wood * p$ra_ratio
-    add_flux(iatm, ilef, npp_leaf + ra_leaf, alpha13 = aux$alpha_photo)  # GPP, leaf
+    # alpha13_signed, reason (a): ONE-WAY BY CONSTRUCTION. Photosynthesis only
+    # ever runs atmosphere -> vegetation; these go negative only if `npp` does,
+    # i.e. if a diverging stage has driven CO2 below zero. Declared so that such
+    # a state keeps returning its old (rejected) value instead of becoming a
+    # hard stop -- the guard must not quietly shrink the optimiser's feasible
+    # set, which is how the pre-2026-08-11 substep wall truncated the posterior.
+    add_flux(iatm, ilef, npp_leaf + ra_leaf, alpha13 = aux$alpha_photo,
+             alpha13_signed = TRUE)                                      # GPP, leaf
     add_flux(ilef, iatm, ra_leaf)                                        # Ra, at leaf's ratio
-    add_flux(iatm, iwod, npp_wood + ra_wood, alpha13 = aux$alpha_photo)  # GPP, wood
+    add_flux(iatm, iwod, npp_wood + ra_wood, alpha13 = aux$alpha_photo,
+             alpha13_signed = TRUE)                                      # GPP, wood
     add_flux(iwod, iatm, ra_wood)                                        # Ra, at wood's ratio
 
     # LITTER. Both vegetation pools shed into the SAME two soil pools, split by
