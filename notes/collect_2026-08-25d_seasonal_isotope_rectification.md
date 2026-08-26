@@ -121,6 +121,56 @@ GCB land sink — a carbon-budget objection, not an isotopic one.** Same caveat 
 parameters fitted with the bug, both arms move under a refit, and the free arm has to be re-run
 before anything about the ridge is claimed.
 
+## 6. THE TWO OPTIONS, EVALUATED (added 2026-08-25e)
+
+**CORRECTION TO §2.** That section said the two corrections "coincide to first order ... and differ
+only by the leaf's own Suess disequilibrium, ~1 ‰ today". **Measured, both halves of that are
+wrong.** At the shipped state the gap is **+5.000 ‰**, flat across 1770/1860/1960/2014; after the
+fix it is **+0.012 to +0.025 ‰**. The 5 ‰ is not a physical disequilibrium — it is the bug's own
+accumulated fingerprint, the same enrichment the closed-box receipt shows driving the leaf pool from
+−18 ‰ to −5.6 ‰.
+
+| window | shipped: δ¹³C_leaf − (r_atm·α) | fixed |
+|---|---|---|
+| 1770–80 | **+5.000 ‰** | +0.012 ‰ |
+| 1860–70 | +5.000 ‰ | — |
+| 1960–70 | +5.007 ‰ | — |
+| 2014–24 | +5.000 ‰ | **+0.025 ‰** |
+
+**OPTION 2 IS NOT A VALID READING OF THE CODE AS WRITTEN.** The NH leaf pool's CARBON oscillates by
+**38 % of its own mass** peak-to-trough every year (7.67 GtC on 20.12 in 1770; 9.25 on 24.06 in
+2014), stable across 250 years. Carbon genuinely leaves the leaf pool for the atmosphere each
+autumn. A modulation of gross photosynthesis never reverses its flux and could not produce that
+oscillation — adopting option 2 would mean changing the CARBON side too, folding `seas` into the GPP
+limb at `model.R:980` so it never goes negative. **That is a different model, not a different
+isotope rule.**
+
+**AND ONCE THE BUG IS GONE THE TWO ARE INDISTINGUISHABLE ANYWAY** — 0.012–0.025 ‰ — because the leaf
+pool turns over in ~4 months (≈20 GtC on ≈60 GtC/yr GPP) and therefore tracks `r_atm·α`. The land
+isodisequilibrium lives in the litter/soil pools, and `rh` is already a separate, unfractionated
+flux, so nothing is lost. So the choice buys no numbers; take the principled one.
+
+**⇒ OPTION 1**, and it also REMOVES a kink rather than adding one: d(f13)/d(seas) across the sign
+change is `r_atm·α` above and `r_leaf` below, equal to 2.5e-5 relative once fixed, where the shipped
+code has `r_atm·α` above and `r_leaf·α` below — a 1.8 % slope discontinuity. Relevant given
+[[ccx_hml_kink]].
+
+**IMPLEMENT AS THE ONE-TOKEN FORM**, `alpha13 = if (seas > 0) aux$alpha_photo else 1`, NOT as two
+explicit limbs. The two-limb form is more self-documenting and numerically identical, but it swaps
+`from`/`to` and so re-enters `ccx_flux_channel()` with the opposite sign — which would silently
+change what the `seas` channel means in the flux trace and in `test-fluxes.R`. Not worth it.
+
+**AND ADD THE GUARD, which is the durable part:** make `add_flux()` refuse a negative flux carrying
+a fractionation —
+
+```r
+if (F_C < 0 && alpha13 != 1)
+  stop("add_flux: signed flux with a fractionation -- resolve alpha at the call site")
+```
+
+That would have caught this the moment it was written, it catches the next one, and it composes
+exactly with the one-token fix (which passes `alpha13 = 1` on the negative branch). Both cores.
+
 ## ⇒ WHAT IS OWED, AND IT IS MARCUS'S CALL
 
 1. **Adopt correction (1) or (2)** (§2). Second-order difference, but a real modelling statement.
