@@ -818,8 +818,35 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   # So every bidirectional interface is emitted as TWO one-way gross fluxes.
   # A signed net flux is still fine where the process really is one-way at a time
   # (seasonal NEP, ENSO), and add_flux handles the sign by swapping the source.
-  add_flux <- function(from, to, F_C, alpha13 = 1, lab = NULL) {
+  add_flux <- function(from, to, F_C, alpha13 = 1, lab = NULL,
+                       alpha13_signed = FALSE) {
     if (F_C == 0) return(invisible(NULL))
+    # A SIGNED FLUX MAY NOT CARRY A FRACTIONATION. Swapping the source box (two
+    # lines down) is the right thing for the RATIO and the wrong thing for
+    # `alpha13`: the reverse limb of a fractionating exchange is a different
+    # process with a different alpha, and reusing the forward one discriminates
+    # the returning carbon twice. That is exactly the 2026-08-25e seasonal-NEP
+    # bug, which no test could see -- this function is antisymmetric, so total
+    # 13C is conserved for ANY alpha, and a conservation gate is blind to a
+    # mis-partition. Resolve alpha at the CALL SITE, per direction.
+    # `alpha13_signed = TRUE` means THIS CALL SITE HAS BEEN REVIEWED FOR THE
+    # NEGATIVE CASE. Two kinds of site qualify and both must say WHICH in a
+    # comment at the call:
+    #   (a) ONE-WAY BY CONSTRUCTION -- the flux can only go negative in a
+    #       numerically broken state (the air-sea gross limbs, when a diverging
+    #       RK4 stage drives pCO2 below zero). The run is rejected anyway, and a
+    #       hard stop here would break ccx_run_fast()'s NA-retry escalation and
+    #       test-stability.R, which explores that regime ON PURPOSE.
+    #   (b) GENUINELY SIGNED AND STILL OPEN -- the biological pump.
+    # It is NOT a general escape hatch. The default (stop) is what catches the
+    # case this guard exists for: a flux that changes sign in a HEALTHY run
+    # while carrying a fractionation. That was the 2026-08-25e seasonal-NEP bug.
+    if (F_C < 0 && alpha13 != 1 && !alpha13_signed)
+      stop("add_flux: a negative flux may not carry alpha13 != 1 (from ", from,
+           " to ", to, ", F_C ", format(F_C), "). The reverse limb is a ",
+           "different process: resolve alpha13 at the call site, per direction. ",
+           "If the same alpha genuinely applies both ways, say so explicitly ",
+           "with alpha13_signed = TRUE.")
     if (record) .rec(from, to, F_C, lab)
     # ratios taken from the SOURCE box; for a negative flux the source is `to`
     src <- if (F_C > 0) from else to
@@ -1037,7 +1064,33 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # forest's seasonal cycle on a field.
       seas <- amp * sin(2 * pi * (t - phase / 12)) * (npp / aux$npp0[[h]])
     }
-    add_flux(iatm, ilef, seas, alpha13 = aux$alpha_photo, lab = "seas")
+    # PHOTOSYNTHESIS DISCRIMINATES; RESPIRATION DOES NOT. `seas` is ZERO-MEAN by
+    # construction, so it is negative for half of every year, and add_flux
+    # resolves a negative flux by swapping the SOURCE box (see its header) --
+    # the autumn limb is carbon leaving the leaf pool at the leaf pool's own
+    # ratio. Applying alpha_photo to it discriminated that carbon a SECOND time.
+    #
+    # FIXED 2026-08-25e. It had been wrong since the flux was written, and the
+    # receipt needs no model: a closed two-box system with one zero-mean
+    # sinusoid returned carbon to 9e-13 GtC and drifted d13C by -0.124 permil
+    # PER CYCLE, forever, pumping the atmosphere light and the leaf pool heavy.
+    # At the pre-fix mode the leaf pool sat +5.000 permil above r_atm*alpha,
+    # flat across 1770/1860/1960/2014 -- that offset WAS the bug. After the fix
+    # it is +0.012 to +0.025 permil, i.e. the leaf tracks equilibrium as a
+    # ~4-month pool must. calibration/diag_seas_isotope_rectification.R.
+    #
+    # WHY THIS FORM AND NOT TWO EXPLICIT LIMBS, which would read better and give
+    # identical numbers: the two-limb version swaps `from`/`to` and so re-enters
+    # ccx_flux_channel() with the opposite sign, silently changing what the
+    # `seas` channel means in the flux trace and in test-fluxes.R.
+    #
+    # WHY NOT alpha on BOTH halves at the ATMOSPHERE's ratio (the "modulation of
+    # gross photosynthesis" reading): the leaf pool's CARBON oscillates by 38 %
+    # of its own mass peak-to-trough, so carbon really does flow leaf -> atm
+    # here. A GPP modulation never reverses its flux; adopting it would mean
+    # changing the CARBON side too, by folding `seas` into the GPP limb above.
+    add_flux(iatm, ilef, seas,
+             alpha13 = if (seas > 0) aux$alpha_photo else 1, lab = "seas")
 
     # ---- ENSO: land -> atmosphere anomaly (El Nino = source) ---------
     # Out of the RESPONSIVE soil pool. The interannual anomaly is drought and
@@ -1081,8 +1134,14 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     pco2_at <- chi                                                  # ppm ~ uatm at 1 atm
     # GROSS both ways (see add_flux header): invasion and evasion separately.
     gx <- aux$asx[[h]] * p$k_w * k$K0
-    add_flux(iatm, iml, gx * pco2_at, alpha13 = aux$alpha_as_down)   # invasion
-    add_flux(iml, iatm, gx * pco2_ml, alpha13 = aux$alpha_as_up)     # evasion
+    # alpha13_signed, reason (a): ONE-WAY BY CONSTRUCTION. gx > 0 always, so
+    # these go negative only when pCO2 itself does, i.e. in a diverging
+    # intermediate state that ccx_run_fast() is about to reject. The two limbs
+    # already carry their own directional alphas, which is the correct pattern.
+    add_flux(iatm, iml, gx * pco2_at, alpha13 = aux$alpha_as_down,
+             alpha13_signed = TRUE)                                  # invasion
+    add_flux(iml, iatm, gx * pco2_ml, alpha13 = aux$alpha_as_up,
+             alpha13_signed = TRUE)                                  # evasion
 
     # ---- ARTIFICIAL MID-CENTURY OCEAN SINK (2026-08-23c) -------------
     # OFF unless the forcing carries a non-zero `sink_ocean`, which only
@@ -1113,9 +1172,12 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # exactly the sink whenever the instrument is on.
     sk <- forc$sink_ocean
     if (!is.null(sk) && is.finite(sk) && sk != 0) {
+      # alpha13_signed, reason (a): one-way by construction -- `sk` is a
+      # prescribed uptake and is checked non-zero above; a negative value would
+      # be a broken forcing, not a reversal.
       add_flux(iatm, iml,
                sk * aux$asx[[h]] / (aux$asx$NH + aux$asx$SH),
-               alpha13 = aux$alpha_as_down)
+               alpha13 = aux$alpha_as_down, alpha13_signed = TRUE)
     }
 
     # ---- ocean interior diffusion -----------------------------------
@@ -1154,10 +1216,29 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # carbon, the ONLY channel through which the pump touches uptake.
       sc <- if (identical(p$pump_mode, "D")) y[iml, "C"] / aux$ml_C0[[h]] else 1
       for (kk in seq_len(grid$nl)) {
+        # alpha13_signed: GRANDFATHERED 2026-08-25e, BEHAVIOUR UNCHANGED, AND
+        # OPEN. `S[k]` is built in ccx_pump_export() as the DIVERGENCE of the
+        # diffusive flux that would hold the observed DIC profile, so it is
+        # NEGATIVE by construction in some layers -- 2 of 10 at the adopted
+        # mode, carrying 0.4 % of the field's gross magnitude (0.039 of 9.58
+        # GtC/yr). The field does NOT sum to zero: it nets +12.3 GtC/yr into
+        # the interior, balanced in steady state by upward diffusion.
+        # The add_flux guard fires here, correctly: on a negative layer this sends carbon
+        # UP to the mixed layer and depletes it by a further eps_org, which is
+        # not what "organic matter sinks and remineralises" means.
+        #
+        # NOT CHANGED HERE, because unlike the seasonal-NEP case it is not
+        # obvious what the reverse limb should be -- a negative S[k] is an
+        # artifact of the divergence construction rather than a named process,
+        # and PUMP_EPS13_ORG is itself flagged "provisional, recollected, NEEDS
+        # a cited source" in constants.R. Priced in
+        # calibration/diag_pump_signed_alpha.R; Marcus's call.
         add_flux(iml, ioc[kk], pf$org[kk] * sc,
-                 alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump")
+                 alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",
+                 alpha13_signed = TRUE)
         add_flux(iml, ioc[kk], pf$carb[kk] * sc,
-                 alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump")
+                 alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump",
+                 alpha13_signed = TRUE)
       }
     }
 

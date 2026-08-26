@@ -2,6 +2,51 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-25f — FIXED: the seasonal NEP flux discriminated on both halves of its cycle
+
+**THE OBJECTIVE HAS CHANGED. Nothing fitted before this entry is comparable across it** — same class
+as the 2026-08-22 ice-hemisphere change. Every fitted vector, **including the adopted arm-N mode**,
+is quarantined at `calibration/output/quarantine/20260825_seas_isotope_rectification/` with a README.
+**There is no canonical mode until a refit runs**, and every diagnostic that resolves one will fail
+loudly. That is intended.
+
+**THE FIX.** `R/model.R` and `src/ccx_core.cpp` now emit the seasonal land flux as
+`alpha13 = if (seas > 0) alpha_photo else 1`. `seas` is zero-mean by construction, so it is negative
+half of every year, and `add_flux` resolves a negative flux by swapping the SOURCE box while still
+applying `alpha13` — so autumn respiration out of the leaf pool was discriminated a second time.
+Photosynthesis discriminates; respiration does not. Option 1 (bidirectional NEP) was adopted over
+option 2 (a modulation of gross photosynthesis) because **the NH leaf pool's CARBON oscillates by
+38 % of its own mass peak-to-trough**, so carbon really does flow leaf→atm each autumn; a GPP
+modulation never reverses and would need the carbon side changed too. Post-fix the two are
+indistinguishable anyway (0.012–0.025 ‰).
+
+**THE GUARD, which is the durable half.** `add_flux()` in both cores now REFUSES a negative flux
+carrying `alpha13 != 1`. Reviewed call sites declare `alpha13_signed = TRUE` with a stated reason:
+**(a) one-way by construction** — the air-sea gross limbs and the artificial sink, which can only go
+negative in a diverging RK4 stage the caller is about to reject, and where a hard stop would break
+`ccx_run_fast()`'s NA-retry and `test-stability.R`; **(b) genuinely signed and still OPEN** — the
+biological pump.
+
+**AND THE GUARD IMMEDIATELY FOUND A SECOND CASE, NOT FIXED.** `ccx_pump_export()` builds `S[k]` as
+the DIVERGENCE of a diffusive flux, so it is negative in **2 of 10 layers** at the adopted mode,
+carrying **0.4 % of the field's gross magnitude** (0.039 of 9.58 GtC/yr). On those layers the pump
+sends carbon UP to the mixed layer and depletes it by a further ε_org, which is not what "organic
+matter sinks and remineralises" means. **Grandfathered bit-exactly and flagged** — unlike the
+seasonal case it is not obvious what the reverse limb should be, and `PUMP_EPS13_ORG` is itself
+"provisional, recollected, NEEDS a cited source". Marcus's call.
+
+**TESTS.** New `tests/testthat/test-seas-isotope.R` — **the first test in the repo that exercises the
+seasonal isotope path with `seas_drivers = 1`**; `test-conservation.R:82` and `test-parity.R:72/151`
+all set it to 0, which is why nothing caught this. Its assertion is neither conservation (blind —
+`add_flux` is antisymmetric, so total ¹³C is conserved for any α) nor parity (blind — both cores
+shared the rule) but **that a zero-mean exchange must not RECTIFY**. Full suite: back to the two
+pre-existing by-design `test-fluxes.R:99/100` failures, with unchanged numbers (they are carbon
+quantities and the fix moves no carbon). R↔C++ parity 5.6e-13 at the pre-fix mode.
+
+**WHAT IS OWED:** a refit (~9 h), the ridge arms with it, and a re-measurement of every `DESIGN.md`
+§6 gate. Under the patch at pre-fix parameters the pin90-vs-reference gap goes −90.07 → −25.28 and
+what remains is `gcb_land_sink`, a carbon objection — **that is not a result**, both arms move.
+
 ## 2026-08-25e — the veto is a MEAN SHIFT on white residuals, not a stream weight
 
 `notes/collect_2026-08-25c_the_veto_is_not_a_weighting.md`. Two report-only files:

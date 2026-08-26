@@ -255,8 +255,16 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   for (int i = 0; i < NB * 3; ++i) dy[i] = 0.0;
 
   // flux helper: source-ratio transport, applied antisymmetrically
-  auto add_flux = [&](int from, int to, double F, double alpha13) {
+  auto add_flux = [&](int from, int to, double F, double alpha13,
+                      bool alpha13_signed = false) {
     if (F == 0.0) return;
+    // A signed flux may not carry a fractionation -- the reverse limb is a
+    // different process with a different alpha. Mirrors the R core's guard;
+    // see R/model.R add_flux() for why no test could catch this class.
+    // alpha13_signed is the one reviewed opt-out (the biological pump).
+    if (F < 0.0 && alpha13 != 1.0 && !alpha13_signed)
+      Rcpp::stop("add_flux: a negative flux may not carry alpha13 != 1 "
+                 "(from %d to %d). Resolve alpha13 at the call site.", from, to);
     const int src = (F > 0.0) ? from : to;
     const double cs = y[IX(src, C)];
     const double r13 = (cs > 0.0) ? y[IX(src, C13)] / cs : 0.0;
@@ -367,7 +375,11 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
                                 / P.seas_n_norm[hi] - 1.0)
       : P.seas_amp[hi] * std::sin(2.0 * M_PI * (t - P.seas_phase[hi] / 12.0))
         * (npp / A.npp0[hi]);
-    add_flux(iatm, ilef, seas, A.alpha_photo);
+    // Photosynthesis discriminates; respiration does not. `seas` is zero-mean,
+    // so the autumn limb is carbon leaving the leaf pool at the leaf's own
+    // ratio and must NOT be discriminated again. Fixed 2026-08-25e; mirrors
+    // R/model.R, which carries the full note.
+    add_flux(iatm, ilef, seas, (seas > 0.0) ? A.alpha_photo : 1.0);
 
     if (A.enso_share[hi] != 0.0)
       add_flux(isf, iatm, P.gamma_enso * enso * A.enso_share[hi], 1.0);
@@ -396,13 +408,16 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       pco2_ml = pco2_from_dic_cpp(dic_ml, A.alk, sst, A, &K0);
     }
     const double gx = A.asx[hi] * P.k_w * K0;
-    add_flux(iatm, iml, gx * chi,     A.alpha_as_down);
-    add_flux(iml, iatm, gx * pco2_ml, A.alpha_as_up);
+    // alpha13_signed reason (a): one-way by construction -- gx > 0 always, so
+    // these go negative only when pCO2 does, i.e. in a diverging intermediate
+    // state the caller is about to reject. See R/model.R for the contract.
+    add_flux(iatm, iml, gx * chi,     A.alpha_as_down, true);
+    add_flux(iml, iatm, gx * pco2_ml, A.alpha_as_up,   true);
 
     // the artificial sink rides the SAME downward fractionation as the invasion
     // limb above and carries 14C unfractionated at the atmosphere's own ratio
     if (sink_ocean != 0.0)
-      add_flux(iatm, iml, sink_ocean * A.asx[hi] / sink_asx_tot, A.alpha_as_down);
+      add_flux(iatm, iml, sink_ocean * A.asx[hi] / sink_asx_tot, A.alpha_as_down, true);
 
     // interior diffusion, per tracer on its own gradient
     for (int kk = 0; kk < NL; ++kk) {
@@ -428,8 +443,11 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
         ? y[IX(iml, C)] / A.ml_C0[hi] : 1.0;
       for (int kk = 0; kk < NL; ++kk) {
         const int b = base + IML + 1 + kk;
-        add_flux(iml, b, A.pump_org[hi][kk] * sc, A.alpha_pump_org);
-        add_flux(iml, b, A.pump_carb[hi][kk] * sc, A.alpha_pump_carb);
+        // alpha13_signed: grandfathered 2026-08-25e, behaviour unchanged and
+        // OPEN -- pump_org/pump_carb are a flux DIVERGENCE and are negative by
+        // construction in some layers. See R/model.R for the full note.
+        add_flux(iml, b, A.pump_org[hi][kk] * sc, A.alpha_pump_org, true);
+        add_flux(iml, b, A.pump_carb[hi][kk] * sc, A.alpha_pump_carb, true);
       }
     }
 
