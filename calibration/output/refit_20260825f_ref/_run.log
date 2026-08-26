@@ -42,3 +42,33 @@ GATE SKIPPED: one arm (N) -- there is no second arm to differ from.
 === ARM pump_mode = N ===
 start: log-post at hand-set init = -18633.8
 WARM START from mode_fit_pumpN.rds: log-post there = -1909.0 (its file says -1859.3)
+[N] cycle 1 restart  1: log-post =      -1564.4  (gain   344.6274)  evals 17238
+[N] cycle 1 restart  2: log-post =      -1562.4  (gain     2.0038)  evals 35758
+[N] cycle 1 restart  3: log-post =      -1562.3  (gain     0.1523)  evals 52484
+[N] cycle 1 restart  4: log-post =      -1562.1  (gain     0.1438)  evals 69846
+[N] cycle 1 restart  5: log-post =      -1562.0  (gain     0.0996)  evals 89100
+[N] cycle 1 restart  6: log-post =      -1562.0  (gain     0.0585)  evals 105030
+[N] cycle 1 restart  7: log-post =      -1561.8  (gain     0.2019)  evals 120529
+[N] cycle 1 restart  8: log-post =      -1561.7  (gain     0.0496)  evals 134201
+[N] cycle 1 restart  9: log-post =      -1561.6  (gain     0.1453)  evals 145595
+[N] cycle 1 restart 10: log-post =      -1561.3  (gain     0.2857)  evals 165597
+[N] cycle 1 restart 11: log-post =      -1561.2  (gain     0.0950)  evals 177436
+[N] cycle 1 restart 12: log-post =      -1561.1  (gain     0.0487)  evals 191408
+[N] cycle 1 restart 13: log-post =      -1561.1  (gain     0.0332)  evals 211410
+[N] cycle 1 restart 14: log-post =      -1561.0  (gain     0.0636)  evals 228726
+[N] cycle 1 restart 15: log-post =      -1560.9  (gain     0.1196)  evals 246008
+[N] cycle 1 restart 16: log-post =      -1560.9  (gain     0.0531)  evals 266010
+[N] cycle 1 restart 17: log-post =      -1560.8  (gain     0.1025)  evals 281450
+[N] cycle 1 restart 18: log-post =      -1560.7  (gain     0.0633)  evals 297546
+[N] cycle 1 restart 19: log-post =      -1560.4  (gain     0.2673)  evals 317548
+[N] cycle 1 restart 20: log-post =      -1560.0  (gain     0.3814)  evals 332360
+*** [N] cycle 1 HIT THE RESTART CAP WHILE STILL GAINING
+[N] cycle 1 polish: no improvement
+[N] === cycle 1 total gain 348.9956 (log-post -1560.0, 332846 evals) ===
+[N] cycle 2 restart  1: log-post =      -1560.0  (gain     0.0837)  evals 346358
+[N] cycle 2 restart  2: log-post =      -1559.9  (gain     0.0182)  evals 356979
+[N] cycle 2 restart  3: log-post =      -1559.9  (gain     0.0346)  evals 369901
+[N] cycle 2 restart  4: log-post =      -1559.9  (gain     0.0135)  evals 383397
+[N] cycle 2 restart  5: log-post =      -1559.9  (gain     0.0104)  evals 394103
+[N] cycle 2 restart  6: log-post =      -1559.7  (gain     0.1986)  evals 414105
+[N] cycle 2 restart  7: log-post =      -1559.6  (gain     0.1386)  evals 427863

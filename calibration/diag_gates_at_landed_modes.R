@@ -1,5 +1,30 @@
+# =====================================================================
+# diag_gates_at_landed_modes.R -- DESIGN gates 4 / 7 / 12 / 12b at whatever
+# arms are named below.  Report-only.
+#
+# ARM LIST IS A NAMED CONSTANT (2026-08-25g). It used to be five hard-coded
+# paths to the pre-fix `pump_arms` and `ridge_*` directories -- all of which
+# are now in calibration/output/quarantine/20260825_seas_isotope_rectification/,
+# so the file could not run at all. Editing the calls in place is how a chart
+# ends up labelled with the wrong run, so the arms are declared once, up top,
+# and every line below derives from them.
+#
+# THE PRE-FIX MODE IS INCLUDED DELIBERATELY, as the "before" row. Its LOGPOST is
+# NOT comparable across the 2026-08-25f objective change and is never printed
+# here -- but gates 4/7/12 are PHYSICAL diagnostics of a model run, not
+# likelihood values, so comparing them across the fix is exactly right.
+#
+# Usage:  Rscript calibration/diag_gates_at_landed_modes.R
+# =====================================================================
 for (f in list.files("R", pattern="[.]R$", full.names=TRUE)) source(f)
 ccx_load_cpp()
+GATE_ARMS <- c(
+  "pre-fix ref (BEFORE)" = "calibration/output/quarantine/20260825_seas_isotope_rectification/pump_arms/mode_fit_pumpN.rds",
+  "ref (cycle 2, RUNNING)" = "calibration/output/refit_20260825f_ref/mode_fit_pumpN_progress.rds",
+  "from90 FINAL"           = "calibration/output/refit_20260825f_from90/mode_fit_pumpN.rds",
+  "pin90 FINAL"            = "calibration/output/refit_20260825f_pin90/mode_fit_pumpN.rds")
+GATE_ARMS <- GATE_ARMS[file.exists(vapply(GATE_ARMS, ccx_path, character(1)))]
+stopifnot(length(GATE_ARMS) > 0)
 DEC <- c(1960,1970,1980,1990,2000,2010,2020); WIN <- c(1959,2024)
 g <- as.data.frame(readRDS(ccx_path("data","gcb_budget.rds"))$historical)
 g <- g[g$year>=WIN[1] & g$year<=WIN[2],]
@@ -57,15 +82,8 @@ gate12 <- function(file,lab){
 }
 
 cat(sprintf("GATE 4 / GATE 7 AT THE LANDED MODES (target trend %+.4f, sd %.4f, land 0, ocean 0)\n", TR, sd(afo)))
-ev("calibration/output/pump_arms/mode_fit_pumpN.rds","reference mode")
-ev("calibration/output/ridge_free_from90/mode_fit_pumpN.rds","free arm (LANDED)")
-ev("calibration/output/ridge_pin120/mode_fit_pumpN.rds","pin120 (LANDED)")
-ev("calibration/output/ridge_pin90/mode_fit_pumpN.rds","pin90 (LANDED)")
-ev("calibration/output/ridge_pin60/mode_fit_pumpN.rds","pin60 (LANDED)")
+for (nm in names(GATE_ARMS)) ev(GATE_ARMS[[nm]], nm)
 
 cat(sprintf("\nGATE 12 / 12b AT THE LANDED MODES  (* = at or above the Joos 5-95%% floor %s; 12b band [%.3f, %.3f])\n",
             paste(JOOS_T4$lo,collapse="/"), JOOS_TAIL_BAND[1], JOOS_TAIL_BAND[2]))
-gate12("calibration/output/pump_arms/mode_fit_pumpN.rds","reference mode")
-gate12("calibration/output/ridge_pin120/mode_fit_pumpN.rds","pin120 (LANDED)")
-gate12("calibration/output/ridge_pin90/mode_fit_pumpN.rds","pin90 (LANDED)")
-gate12("calibration/output/ridge_pin60/mode_fit_pumpN.rds","pin60 (LANDED)")
+for (nm in names(GATE_ARMS)) gate12(GATE_ARMS[[nm]], nm)

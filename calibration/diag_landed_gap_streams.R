@@ -55,17 +55,22 @@ GAP_YEARS      <- c(1750, 2024)
 GAP_REPRO_TOL  <- 1e-2      # log-units; stored logposts are printed to 2 dp
 GAP_SHOW_MIN   <- 0.50      # log-units; smaller movers are folded into "other"
 GAP_REF        <- "ref"
-GAP_FOCUS      <- "pin90"   # the arm sec.4's question is asked about
+GAP_FOCUS      <- "from90"  # the arm that falsified P3 -- where does its +15.43 come from?
 OUTDIR         <- ccx_path("calibration", "output", "landed_gap")
 OUTFILE        <- file.path(OUTDIR, "landed_gap_streams.rds")
 # The claim under test, from handoff_2026-08-25b sec.4 and the collect note.
 GAP_CLAIM_STREAMS <- c("co2_level_MLO", "co2_level_SPO")
 GAP_CLAIM_SHARE   <- 0.93
-GAP_ARMS <- c(ref    = "calibration/output/pump_arms/mode_fit_pumpN.rds",
-              free   = "calibration/output/ridge_free_from90/mode_fit_pumpN.rds",
-              pin120 = "calibration/output/ridge_pin120/mode_fit_pumpN.rds",
-              pin90  = "calibration/output/ridge_pin90/mode_fit_pumpN.rds",
-              pin60  = "calibration/output/ridge_pin60/mode_fit_pumpN.rds")
+# ARMS RE-POINTED 2026-08-25g at the POST-FIX refit. The pre-fix arms this file
+# was written against are in
+# calibration/output/quarantine/20260825_seas_isotope_rectification/ and are
+# NOT comparable across the objective change -- do not add them back here.
+# GATE 1 below stops if a stored logpost cannot be reproduced, which is what
+# keeps a quarantined file from being read as current.
+GAP_ARMS <- c(ref    = "calibration/output/refit_20260825f_ref/mode_fit_pumpN_progress.rds",
+              from90 = "calibration/output/refit_20260825f_from90/mode_fit_pumpN.rds",
+              pin90  = "calibration/output/refit_20260825f_pin90/mode_fit_pumpN.rds")
+GAP_ARMS <- GAP_ARMS[file.exists(vapply(GAP_ARMS, ccx_path, character(1)))]
 
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 
@@ -89,7 +94,13 @@ LP  <- ccx_make_logpost(GAP_YEARS, OBS)
 # "pin-offset removed" column of the collect note.
 gap_decompose <- function(file) {
   md <- readRDS(ccx_path(file))
-  stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
+  # A PROGRESS FILE CARRIES NO `param_names` -- the driver's per-cycle saveRDS
+  # omits it (run_modefind_pump_arms.R:575). So the identity is asserted on
+  # whichever field the file actually has, rather than skipped for progress
+  # files: a mis-ordered par_mode is exactly the failure this guards against
+  # (memory nameless_matrix_order).
+  if (!is.null(md$param_names)) stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
+  else stopifnot(identical(names(md$par_mode)[seq_along(CCX_PARAM_NAMES)], CCX_PARAM_NAMES))
   pv <- md$par_mode
   u  <- ccx_par_to_unc(pv)
   pri <- vapply(CCX_PARAM_NAMES, function(n) {
@@ -135,9 +146,13 @@ for (nm in names(A)) {
               else sprintf("%+.2f", a$stored - a$lp)))
   stopifnot(abs(a$lp_closure - a$lp) < GAP_REPRO_TOL)
 }
-unpinned <- c("ref", "free")
+# The UNPINNED arms must match their stored logpost exactly; `pin90` carries the
+# near-delta and is expected to differ by the pin offset, which is PRINTED above
+# rather than assumed -- +11.6698 at fert_k = 90, computed from the transform.
+unpinned <- intersect(c("ref", "from90"), names(A))
 for (nm in unpinned) stopifnot(abs(A[[nm]]$stored - A[[nm]]$lp) < GAP_REPRO_TOL)
-cat("GATE 1 PASS: both routes agree, and the unpinned arms match their stored logpost.\n")
+cat(sprintf("GATE 1 PASS: both routes agree; the %d unpinned arm(s) match their stored logpost.\n",
+            length(unpinned)))
 
 # ---- the decomposition ----------------------------------------------
 nms  <- names(A[[GAP_REF]]$streams)
@@ -173,27 +188,16 @@ row(sprintf("other (%d params)", length(smallp)),
 row("PRIOR TOTAL", sum(A[[GAP_REF]]$prior), colSums(Dp))
 row("LOG-POSTERIOR TOTAL", A[[GAP_REF]]$lp, GAP)
 
-# ---- THE CLAIM UNDER TEST -------------------------------------------
-claim <- colSums(D[GAP_CLAIM_STREAMS, , drop = FALSE])
-cat(sprintf("\n\n=== THE sec.4 CLAIM, TESTED AT THE LANDED MODES ===\n"))
-cat(sprintf("claim: %s carry %.0f%% of the gap.\n",
-            paste(GAP_CLAIM_STREAMS, collapse = " + "), 100 * GAP_CLAIM_SHARE))
-cat(sprintf("%-10s %10s %12s %10s\n", "arm", "gap", "claimed pair", "share"))
-for (nm in alt)
-  cat(sprintf("%-10s %10.2f %12.2f %9.1f%%\n", nm, GAP[[nm]], claim[[nm]],
-              100 * claim[[nm]] / GAP[[nm]]))
-
-# What DOES carry it, ranked, at the focus arm.
-cat(sprintf("\nWHAT CARRIES THE %s GAP OF %+.2f, ranked by share:\n", GAP_FOCUS, GAP[[GAP_FOCUS]]))
+# ---- WHERE DOES THE FOCUS ARM'S GAIN COME FROM? ---------------------
+cat(sprintf("\n\nWHAT MAKES UP %s's %+.2f vs %s, ranked:\n", GAP_FOCUS, GAP[[GAP_FOCUS]], GAP_REF))
 allrows <- c(setNames(D[, GAP_FOCUS], rownames(D)),
              setNames(Dp[, GAP_FOCUS], paste0("prior:", rownames(Dp))))
-allrows <- allrows[order(allrows)]
+allrows <- allrows[order(-allrows)]
 cum <- 0
 for (nm in names(allrows)) {
   if (abs(allrows[[nm]]) < GAP_SHOW_MIN) next
   cum <- cum + allrows[[nm]]
-  cat(sprintf("  %-24s %+8.2f  %6.1f%%   cum %+8.2f (%.0f%%)\n", nm, allrows[[nm]],
-              100 * allrows[[nm]] / GAP[[GAP_FOCUS]], cum, 100 * cum / GAP[[GAP_FOCUS]]))
+  cat(sprintf("  %-24s %+8.2f   cum %+8.2f\n", nm, allrows[[nm]], cum))
 }
 
 saveRDS(list(arms = A, D = D, Dprior = Dp, gap = GAP, hml_band = GAP_HML_BAND,

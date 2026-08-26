@@ -24,3 +24,107 @@ GATE SKIPPED: one arm (N) -- there is no second arm to differ from.
 === ARM pump_mode = N ===
 start: log-post at hand-set init = -24982.9
 WARM START from mode_fit_pumpN.rds: log-post there = -2445.9 (its file says NA)
+[N] cycle 1 restart  1: log-post =      -1644.9  (gain   800.9989)  evals 20002
+[N] cycle 1 restart  2: log-post =      -1583.1  (gain    61.7736)  evals 40004
+[N] cycle 1 restart  3: log-post =      -1561.3  (gain    21.8319)  evals 57274
+[N] cycle 1 restart  4: log-post =      -1557.3  (gain     3.9594)  evals 77276
+[N] cycle 1 restart  5: log-post =      -1551.5  (gain     5.7820)  evals 97278
+[N] cycle 1 restart  6: log-post =      -1547.8  (gain     3.6785)  evals 117280
+[N] cycle 1 restart  7: log-post =      -1547.5  (gain     0.3229)  evals 134064
+[N] cycle 1 restart  8: log-post =      -1547.2  (gain     0.2915)  evals 154066
+[N] cycle 1 restart  9: log-post =      -1547.0  (gain     0.2086)  evals 169150
+[N] cycle 1 restart 10: log-post =      -1547.0  (gain     0.0314)  evals 182788
+[N] cycle 1 restart 11: log-post =      -1546.9  (gain     0.0630)  evals 196800
+[N] cycle 1 restart 12: log-post =      -1546.9  (gain     0.0099)  evals 215700
+[N] cycle 1 restart 13: log-post =      -1546.9  (gain     0.0570)  evals 233892
+[N] cycle 1 restart 14: log-post =      -1546.8  (gain     0.0397)  evals 244990
+[N] cycle 1 restart 15: log-post =      -1546.8  (gain     0.0497)  evals 255221
+[N] cycle 1 restart 16: log-post =      -1546.7  (gain     0.0899)  evals 266919
+[N] cycle 1 restart 17: log-post =      -1546.6  (gain     0.0311)  evals 285951
+[N] cycle 1 restart 18: log-post =      -1546.5  (gain     0.1114)  evals 305953
+[N] cycle 1 restart 19: log-post =      -1546.2  (gain     0.3519)  evals 325955
+[N] cycle 1 restart 20: log-post =      -1546.2  (gain     0.0243)  evals 334892
+*** [N] cycle 1 HIT THE RESTART CAP WHILE STILL GAINING
+[N] cycle 1 polish: log-post = -1544.5 (gain 1.6601)
+[N] === cycle 1 total gain 901.3667 (log-post -1544.5, 336900 evals) ===
+[N] cycle 2 restart  1: log-post =      -1544.5  (gain     0.0000)  evals 339966
+[N] cycle 2 restart  2: log-post =      -1544.5  (gain     0.0000)  evals 341046
+  NM converged: gain below ARM_TOL
+[N] cycle 2 polish: log-post = -1544.5 (gain 0.0000)
+[N] === cycle 2 total gain 0.0000 (log-post -1544.5, 342008 evals) ===
+[N] CONVERGED: cycle gain below ARM_CYCLE_TOL (0.5)
+
+[N] prior-tail position (normal sds; |z| > 3 flagged):
+       beta_max          fert_k             q10             k_w            h_ml 
+          -1.01            0.00           -2.22            0.42           -0.20 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+           1.78            0.62           -0.46            1.40            2.25 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+          -4.43           -0.59           -3.43           -6.03            0.42 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+           1.48            1.19            0.29            3.09           -0.09 
+  grad_off_d13c 
+           0.52 
+*** FLAGGED:  seas_T_amp_SH, sst_seas_amp_NH, sst_seas_amp_SH, rep_dC 
+[N] hessian: per-direction central differences, 21 parameters
+  eps = 0.10 x each direction's own posterior sd, verified at eps/3 and 3 eps
+  parameter          sd (unc)     eps (u)   curvature
+  beta_max            0.00188   1.885e-04 -2.8152e+05
+  fert_k              0.00010   9.997e-06 -1.0006e+08
+  q10                 0.00137   1.375e-04 -5.2924e+05
+  k_w                 0.00579   5.793e-04      -29795
+  h_ml                0.44267   4.427e-02     -5.2402  ** no stable step
+  kz                  0.45422   4.542e-02       -4.85
+  pump_grad           0.04449   4.449e-03     -504.14
+  tau_ex              0.01209   1.209e-03     -6835.2
+  npp_frac_NH         0.03895   3.895e-03     -657.42
+  seas_T_amp_NH       0.01003   1.003e-03     -9946.8
+  seas_T_amp_SH       0.17437   1.744e-02     -32.859
+  seas_lag_p          0.00777   7.766e-04      -16577
+  sst_seas_amp_NH     0.10395   1.039e-02     -92.393
+  sst_seas_amp_SH     0.10062   1.006e-02     -98.567
+  gamma_enso          0.19643   1.964e-02     -25.901
+  bomb_total          0.00272   2.717e-04 -1.3545e+05
+  luc_scale           0.00154   1.541e-04 -4.2117e+05
+  sigma_d14c          0.09515   9.515e-03     -110.45
+  rep_dC              0.06884   6.884e-03     -211.01
+  grad_off_co2        0.04538   4.538e-03     -485.63
+  grad_off_d13c       0.00381   3.811e-04      -68844
+[N] h_ml mode 99.6879 m; nearest kink 0.31 m away; the Hessian step reaches 3.79e-01 m
+*** [N] THE HESSIAN'S h_ml ROW STRADDLES A KINK -- log|-H| and therefore
+*** [N] this arm's Laplace evidence are NOT reliable. See diag_hess_eps_21par.R.
+[N] curvature step-stability at the mode (eps x 1/3, 1, 3): UNSTABLE at h_ml
+[N] Laplace covariance: PD, condition number 1.49e+08
+[N] mode log-post = -1544.5  (gain over init 901.4)
+[N] elapsed 972.1 min, 342008 evaluations (0.171 s/eval)
+
+[N] mode, natural scale:
+       beta_max          fert_k             q10             k_w            h_ml 
+         0.4698         90.0000          1.1468       1776.1844         99.6879 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+      6431.2531        272.4320          1.1578          0.6545         23.7424 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+         1.1166          1.8059          0.9501          0.3872          0.8470 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+       118.2120          1.3938          6.1287          3.0931         -0.0465 
+  grad_off_d13c 
+         0.0782 
+[N] wrote calibration/output/refit_20260825f_pin90/mode_fit_pumpN.rds
+Warning messages:
+1: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 8.345e-07
+2: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 3.027e-09
+
+
+=== COMPARISON SKIPPED -- ONE ARM ===
+ARM_MODES = N. See the ARM_MODES block for why D is not re-run.
+
+
+=== THE STANDING QUESTIONS THIS RUN WAS ALSO MEANT TO ANSWER ===
+[N] kz = 6431.3 (96.3 % up the re-bisected bracket [3942.5, 6528])
+[N] h_ml = 99.69 -- gradient rows LIVE only inside [85, 120]: LIVE
+[N] pump_grad = 272.43  (prior centre 233.11, 1-D optimum at the old mode 274.5)
+
+
+written: calibration/output/refit_20260825f_pin90/pump_arms_comparison.rds
