@@ -2,6 +2,64 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27e/f — `tau_ex` EXONERATED; and the SH ocean channel's PHASE is RIGHT — its WEIGHTING is wrong
+
+Pre-registered in `notes/prereg_2026-08-27e_tau_ex_leak_profile.md` and
+`notes/prereg_2026-08-27f_so_pco2_phase.md`; scored in
+`notes/collect_2026-08-27ef_tau_ex_exonerated_and_the_weighting_error.md`. **Seven predictions,
+three FAILED, and the failures are the result.**
+
+**⚠ CORRECTING HANDOFF 27d §3(a) IN PLACE.** It read the 4.16-vs-8.52 phase gap as "the model's
+SH air-sea channel arrives in the wrong season". **The gap is real; my reading of it was half
+wrong.** Against the Landschützer/Laruelle merged pCO2 climatology (NCEI 0209633, downloaded and
+registered today, Marcus's choice):
+
+| band | pCO2 amp µatm | peak mo | SST peak mo | gap |
+|---|---|---|---|---|
+| **SH all (0–90 S)** | **3.69** | **1.20** | 2.05 | **0.85** |
+| SH subtrop 0–30 S | 12.62 | 1.43 | 2.21 | 0.78 |
+| **SO 40–90 S** | **16.26** | **7.50** | 1.94 | **5.56** |
+| NH all (0–90 N) | 1.77 | 8.14 | 7.84 | 0.30 |
+
+**P1 FAILED**: SH-MEAN ocean pCO2 is 0.85 months from SH-mean SST, so a solubility-only channel is
+the RIGHT description of the hemispheric mean. **P4 FAILED**: the model's channel at 4.16 matches
+the observed SH-mean ΔpCO2-implied 4.61 to **0.45 months**. I had conflated "the SH ocean" with
+"the Southern Ocean"; they are antiphase.
+
+**WHAT IS ACTUALLY WRONG IS THE WEIGHTING.** Subtropical limb (0–40 S) **9.47 at month 1.38**
+against Southern Ocean (40–90 S) **5.81 at month 7.50** — **5.88 months apart**. Vector sum 3.69
+against a scalar 15.28: **76 % CANCELS**. **The model matches the residual, which is not matching
+either regime.** What SPO sees is the Southern Ocean — its ΔpCO2 peaks **7.39** against the
+inversion's atmospheric **8.52 [7.82, 9.20]**, a 1.13-month lag (shorter than a quarter cycle
+because the box loses signal); the subtropical limb at 1.55 cannot produce 8.52 at any lag.
+
+⇒ **No value of `sst_seas_amp_SH` can fix this — the parameter scales a phase it cannot rotate**,
+which is why the fit suppressed it to 21 % of observed. **§7c-3 lands on Marcus's own named
+candidate: LATITUDE BANDS WITHIN A HEMISPHERE.** And the NH working is the control: NH-mean pCO2
+is 0.30 months from NH SST, so the NH really is solubility-dominated at the hemispheric mean.
+
+**P2 CONFIRMED converts the mechanism from a reading into a measurement**: south of 40 S pCO2
+peaks month 7.50, **5.56 months** from SST — wintertime entrainment raising pCO2 in the season
+solubility alone would lower it. **P3 method control PASSED** (subtropical gap 0.78 ≤ 2.5).
+
+**`tau_ex` IS EXONERATED AS A PARTITION LEVER (27e).** 11 nodes over 0.7–4.0 yr, two runs each so
+the leak is differenced vectorially at every node. **P2 CONFIRMED**: the SPO δ¹³C-per-ppm ratio
+moves **4.2 % across a 5.7× range** of `tau_ex` (1.83×→1.99×, fitted 1.91×) against a ±10 % band —
+**transport relabels WHERE the cycle was made, not WHAT made it.** The leak is a SIZE error, not
+the partition error. **P1 CONFIRMED on its falsifier** (leak 0.422 ppm at τ = 2.371 vs a predicted
+0.42–0.48) but **MISSED on its other half** — the SH-sink damping falls monotonically 11.0 → 5.9 %,
+it is not constant. **P3's substantive half CONFIRMED** (seasonal and gradient rows disagree in
+direction) **but MY SIGN WAS WRONG**: `co2_seasonal_SPO` wants a LONGER `tau_ex`, not shorter — I
+reasoned from amplitude alone on a row that is phase-driven, the same scalar-reading error
+`diag_seas_channel_decomp.R`'s header already records. **And my first P3 readout was an artefact
+of my own grid** (log spacing put 1.181 8× closer to the fitted 1.159 than 0.992); replaced with a
+symmetric central difference in ln τ, which also gives a free convergence check —
+slope÷curvature puts the optimum at **1.156** against the stored **1.159**, 0.3 %.
+
+**Carried:** pCO2 is NOT flux (`F = k·K0·ΔpCO2`; no wind or K0 seasonality in any number here, so
+nothing above is a flux amplitude); a climatology carries no error bar, so the spread ACROSS BANDS
+is the honest scale; the `tau_ex` profile is frozen in 20 parameters and overstates every cost.
+
 ## 2026-08-27d — §7c-3 OPENED: the model builds SPO's cycle out of the WRONG TWO PIECES, and its ocean piece arrives FIVE MONTHS LATE
 
 Pre-registered in `notes/prereg_2026-08-27d_sh_seasonal_partition_power.md` before either
