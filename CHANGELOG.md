@@ -2,6 +2,78 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27h — `tau_ex` POWER PRE-CHECK: **fork (a) is a guaranteed null, and it was not run**
+
+Marcus chose handoff 27h §4 **fork (a)** — pre-register and run the 27g seasonal slice **plus
+`tau_ex`**, on the hypothesis that P3 scored FAILED because the slice froze the only fittable lever
+on the 0.821 ppm NH seasonal import into SPO. **The wider slice was NOT run, no prereg was written
+for it, and that is the result.** The power was measured first, because the test's null was at risk
+of being structurally guaranteed: if the interhemispheric rows pin `tau_ex`, "we freed it and P3
+still failed" and "we never freed it" produce the same output.
+
+**This is the second half of 27e, not a re-derivation of it.** `diag_tau_ex_leak_profile.R` already
+exonerated `tau_ex` as a **partition** lever (SPO δ¹³C-per-ppm moves 4.2 % over a 5.7× range).
+Handoff 27h §4 accepts that and says the binding error is one of **SIZE** — which 27e did not
+settle, and could not: its own header calls it frozen in the other 20 parameters, every cost an
+overstatement, with `grad_off_co2` named as an unremoved caveat. All three are removed here.
+
+Two diagnostics added. **Nothing in `R/` or `src/` was touched.**
+
+    calibration/diag_tau_ex_seasonal_power.R      # 15-point profile, offsets re-optimised, ~12 min
+    calibration/diag_tau_ex_conditional_power.R   # whole 8-par slice re-optimised at fixed tau_ex
+
+### Three findings, ascending in force
+
+**PRICE.** `tau_ex` is pinned to **~2.6 % per log-unit**. The 27g challenger's entire **+11.62**
+net gain buys τ +9.2 %, moving the NH import **0.821 → 0.758 ppm** — **0.0054 ppm per log-unit,
+9 % of the ~0.70 ppm SPO land excess.** The conditional slice buys back ~30 % of the profile's cost
+(1.26τ: 77.01 → 53.93) without changing the verdict, and that point is **bought, not earned**:
+`grad_off_co2` lands at −0.827 ppm, past the measured station-latitude constant (−0.386/−0.549).
+The analytic two-box gain `(1/τ)/√(ω²+1/τ²)` is **verified against the measured import to 2–6 %**
+across an 8× range, so the 1/τ law is the right model of this lever.
+
+**INVARIANCE.** Over that 8× grid, at any price, the SPO **total** moves 1.141 → 1.121 (−1.7 %) and
+**SH-LOCAL land** 1.308 → 1.331 (**+1.7 %**) while NH-origin falls 73 %. `tau_ex` **reallocates**
+SPO's cycle between NH-origin and SH-local; it does not shrink it.
+
+**SIGN.** Re-run in the handoff's own estimator, the signature inversion, at τ = 4.636 yr (4.00×,
+−4529 log-units): the SPO land ratio goes **2.01× → 2.07×, WORSE**. NH-origin peaks month **6.47**
+and SH-local land month **10.09** — **108° apart, so they partially CANCEL**.
+**⇒ The NH import is not causing the SH-land overshoot; it is partly HIDING it.** Handoff §4's
+arithmetic is right and operationally irrelevant.
+
+### A standing code note now needs qualifying
+
+`R/likelihood.R:175` — "66 % of `tau_ex`'s leverage came from the seasonal harmonics", written
+2026-08-15 *as the justification for adding* the gradient term — holds only **downward** (at 0.79τ:
+`co2_seasonal_SPO` −57.0, `co2_seasonal_MLO` −28.3). **Upward, the direction that shrinks the
+import, the bill is annual-mean**: `d13c_level_MLO` −20.4, `d13c_level_SPO` −14.4, `d14c_NH` −12.1,
+`co2_level_MLO` −9.5, `d14c_SH` −8.0, `co2_gradient` −7.5 — with the four seasonal rows netting
+**−3.4**, and `co2_seasonal_SPO` actually **improving** +9.74.
+
+### Tried and discarded
+
+- **The wider slice itself.** Predictable from the above and not evidence. Reporting "P3 FAILED
+  again" from it would be a powerless null dressed as a finding.
+- **The first conditional run.** Hit `maxit` at all three points. An under-converged optimum at
+  fixed `tau_ex` overstates that `tau_ex`'s cost — it manufactures exactly the verdict the script
+  exists to test. Replaced by continuation warm-start + BFGS polish + restart-until-still, with the
+  restart count and last gain printed so a silent `maxit` cannot recur.
+- **A first grid whose smallest step above the mode was 1.26×.** That step costs 77 log-units, so
+  every affordability rung resolved to "1.00×" and printed NA. Fine points at 1.03–1.19 added.
+- **`p$bomb_total` / `p$luc_scale` in the new `run_at()`.** Seven of the 21 calibrated names are
+  likelihood-side and absent from `ccx_default_params()`, so `p$bomb_total` was NULL, `NULL/102` is
+  `numeric(0)`, and the c14 column silently became zero-length. Read off `pv`, as `streams_at()`
+  already did.
+
+### ⇒ The blocker moved again, and it is now specific
+
+**The SH-LOCAL land channel at SPO is ~2× the observed land component, and `seas_npp_amp_SH` — its
+dominant term (1.390 ppm at SPO against `resp SH`'s 0.092) — is a MEASURED CONSTANT no fit can
+touch.** Collected in `notes/collect_2026-08-27h_tau_ex_has_no_power_and_the_wrong_sign.md` §4 with
+three candidate readings and a recommendation to POWER-CHECK `seas_npp_amp_SH` before designing any
+refit around it. Marcus's call.
+
 ## 2026-08-27g — the SOUTHERN-OCEAN ENTRAINMENT CHANNEL (version 4a): P0 green, P1 has power
 
 Pre-registered in `notes/prereg_2026-08-27g_so_entrainment_channel.md`, written before a line of
