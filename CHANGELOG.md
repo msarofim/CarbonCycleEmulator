@@ -2,6 +2,61 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27i — `seas_npp_amp_SH` has the SIGN but not the price: **the land and ocean fixes are ONE fix**
+
+Marcus chose 27h fork **(A)**: power-check `seas_npp_amp_SH` — the dominant SH-local land channel at
+SPO and a MEASURED CONSTANT no fit can touch — before designing any refit around it.
+`calibration/diag_seas_npp_sh_power.R` added; **nothing in `R/` or `src/` touched.**
+
+**The grid came from the measurement.** `R/constants.R` gives PsnNet **0.5027 ± 0.087** with **GPP
+at 0.352** as the other end of the bracket, so the GPP end is **−1.73 sd** and the span is a
+measured product disagreement, not a chosen one. Gate: the driver factor `insol/n − 1` integrates
+to **1.086e-16** over a year, so this redistributes carbon within the year; measured rectification
+is negligible (every level row ≤ 0.06 across the whole grid).
+
+**IT HAS THE SIGN.** SH-local land at SPO goes **1.308 (1.92× obs) → 0.892 (1.31×)** at the GPP
+end — **67 % of the excess** — where 27h's `tau_ex` at 4× made the ratio *worse*. The δ¹³C-per-ppm
+partition ratio improves too, but **the raw and conditional arms disagree in sign** (raw
+1.930 → 1.950 *worse*; conditional 1.940 → **1.834** better), so both are now printed. MLO control
+0.965 → 0.965, invariant.
+
+**BUT THE PRICE IS 79 LOG-UNITS CONDITIONALLY (113.9 raw), AND THE ENTIRE BILL IS ONE ROW:**
+`co2_seasonal_SPO` **−113.25** of the −113.87, while `d13c_seasonal_SPO` **improves +2.99** and
+every level/gradient row moves ≤ 0.03. The CO2 amplitude row vetoes the land reduction; the δ¹³C
+row wants it. And that CO2 row is the one already matched to ~1 %, so it can only punish a driver
+that moves, never reward a correct one ([[seas_right_observable_wrong_drivers]]).
+
+### ⇒ The finding
+
+**The model's SPO total cycle is right BY CANCELLATION** — 1.141 against observed 1.168 (−2.3 %),
+built from land 1.92× too big and ocean 0.45× too small, ~5 months apart. Remove the excess land
+alone and the total collapses to 0.882 (−25 %). **This is the exact mirror of 27g**, where the
+entrainment channel worked mechanically but was spent as a counterweight because the total was
+already right.
+
+**The land correction and the ocean correction are not two candidate fixes. They are ONE fix, and
+neither arm can be scored alone.** Every experiment that has moved one while holding the other has
+been charged for breaking a cancellation.
+
+The joint arithmetic lands: the GPP end leaves the total **0.286 ppm short**, and 27g's P1 measured
+the entrainment channel adding **≈ 0.37 ppm at month 9.91** (from 0.247 @ 3.68) at 10 µmol/kg,
+inside the 5–30 physical band and within 1.4 months of the observed ocean peak of 8.52. Right size,
+right phase.
+
+**Recommended next:** a pre-registered **JOINT arm** — `seas_npp_amp_SH` at the GPP end AND
+`ent_seas_amp_SH` free in 5–30, matched design. Predictions and falsifier in
+`notes/collect_2026-08-27i_the_land_and_ocean_fix_is_one_fix.md` §4. If it fails, **4b becomes the
+live question** on a residual that has finally had both levers available. Marcus's call — and
+moving a measured constant to the far end of its bracket needs his sign-off on its own terms.
+
+### Fixed en route
+
+- **A silently empty report.** `ccx_model_stats()` returns a LIST of columns, so `nrow()` is NULL,
+  `sprintf()` returns `character(0)`, and `cat()` printed nothing — the whole rectification block
+  vanished without an error. `length()` + a `stopifnot`.
+- **`ccx_total(o)`** takes a state matrix, not the output series. And an invariant annual mean was
+  the wrong thing to assert anyway: gate the structure, MEASURE the rectification.
+
 ## 2026-08-27h — `tau_ex` POWER PRE-CHECK: **fork (a) is a guaranteed null, and it was not run**
 
 Marcus chose handoff 27h §4 **fork (a)** — pre-register and run the 27g seasonal slice **plus
