@@ -55,7 +55,14 @@ SI_CASES <- list(
   `resp NH off`    = list(seas_T_amp_NH   = 0),
   `resp SH off`    = list(seas_T_amp_SH   = 0),
   `air-sea NH off` = list(sst_seas_amp_NH = 0),
-  `air-sea SH off` = list(sst_seas_amp_SH = 0))
+  # ⚠ BOTH SH AIR-SEA LIMBS. With the Southern-Ocean entrainment channel
+  # (2026-08-27g) the SH ocean has TWO seasonal limbs, and `sst_seas_amp_SH = 0`
+  # alone leaves the entrainment one running -- so the case would isolate the
+  # SOLUBILITY limb and label it "air-sea SH". That matters twice over here:
+  # the OCEAN SIGNATURE s_O is measured from this case, and sec.6's
+  # decomposition cross-check reads it. At ent_seas_amp_SH = 0 this is
+  # identical to the old one-parameter case, so nothing pre-27g moves.
+  `air-sea SH off` = list(sst_seas_amp_SH = 0, ent_seas_amp_SH = 0))
 
 sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 amp    <- function(v) 2 * sqrt(sum(v^2))                       # PEAK-TO-PEAK
@@ -107,8 +114,12 @@ if (nzchar(SI_PAR_RDS)) {
 obs <- ccx_prepare_obs()
 cat(sprintf("mode %s (arm %s) | seas_drivers %g | nboot %d\n",
             basename(ccx_mode_file()), md$pump_mode, p0$seas_drivers, SI_NBOOT))
-cat(sprintf("ent_seas_amp_SH = %g umol/kg%s\n", SI_ENT_AMP,
-            if (SI_ENT_AMP == 0) "  (channel OFF -- the pre-27g inversion)" else
+# READ FROM p0, NOT FROM THE ENV VAR. CCX_PAR_RDS is applied after CCX_ENT_AMP
+# and can set the amplitude too; a label printed from SI_ENT_AMP then said
+# "channel OFF" over a run with the channel at 4.16. Labels derive from the
+# value that is actually used.
+cat(sprintf("ent_seas_amp_SH = %g umol/kg%s\n", p0$ent_seas_amp_SH,
+            if (p0$ent_seas_amp_SH == 0) "  (channel OFF -- the pre-27g inversion)" else
               sprintf("  (channel ON, peak month %.2f)", CCX_ENT_SEAS_PEAK_MO)))
 
 si_run <- function(mods = list()) {

@@ -61,11 +61,16 @@ CD_CASES <- list(
   `resp NH off`     = list(seas_T_amp_NH   = 0),
   `resp SH off`     = list(seas_T_amp_SH   = 0),
   `air-sea NH off`  = list(sst_seas_amp_NH = 0),
-  `air-sea SH off`  = list(sst_seas_amp_SH = 0),
+  # BOTH SH air-sea limbs -- see the twin note in diag_seas_signature_inversion.R.
+  # With the 2026-08-27g entrainment channel the SH ocean has TWO seasonal
+  # limbs, and sst_seas_amp_SH = 0 alone isolates the SOLUBILITY one and labels
+  # it "air-sea SH". Identical to the old case at ent_seas_amp_SH = 0.
+  `air-sea SH off`  = list(sst_seas_amp_SH = 0, ent_seas_amp_SH = 0),
   `emissions off`   = list(.emis = FALSE),
   `ALL model chans off` = list(seas_npp_amp_NH = 0, seas_npp_amp_SH = 0,
                               seas_T_amp_NH = 0, seas_T_amp_SH = 0,
-                              sst_seas_amp_NH = 0, sst_seas_amp_SH = 0),
+                              sst_seas_amp_NH = 0, sst_seas_amp_SH = 0,
+                              ent_seas_amp_SH = 0),
   # ---- THE CROSS-HEMISPHERE CASES (2026-08-27, prereg 27d) ------------
   # The six cases above answer "which CHANNEL", per hemisphere. They cannot
   # answer "which HEMISPHERE", because the two atmospheric boxes exchange at
@@ -93,6 +98,24 @@ sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 md <- readRDS(CD_MODE_FILE)
 p0 <- ccx_default_params(); for (n in names(md$par_mode)) p0[[n]] <- md$par_mode[[n]]
 p0$pump_mode <- md$pump_mode
+
+# Parameter overrides, so this can be run at a REFITTED vector rather than only
+# at the mode -- twin of the block in diag_seas_signature_inversion.R, and for
+# the same reason: the mode's drivers with one parameter changed is a model no
+# fit ever landed on.  CCX_PAR_RDS=<file.rds> Rscript ...
+CD_PAR_RDS <- Sys.getenv("CCX_PAR_RDS", "")
+if (nzchar(CD_PAR_RDS)) {
+  ov <- readRDS(CD_PAR_RDS)
+  stopifnot(is.list(ov), length(ov) > 0, !is.null(names(ov)))
+  unknown <- setdiff(names(ov), names(p0))
+  if (length(unknown)) stop("CCX_PAR_RDS names unknown parameters: ",
+                            paste(unknown, collapse = ", "))
+  for (n in names(ov)) p0[[n]] <- ov[[n]]
+  cat(sprintf("OVERRIDES from %s: %s\n", basename(CD_PAR_RDS),
+              paste(sprintf("%s=%.4g", names(ov), unlist(ov)), collapse = ", ")))
+}
+cat(sprintf("ent_seas_amp_SH = %g umol/kg\n",
+            if (is.null(p0$ent_seas_amp_SH)) 0 else p0$ent_seas_amp_SH))
 cat(sprintf("mode %s (arm %s) | window %d-%d | seas_drivers %g\n",
             basename(CD_MODE_FILE), md$pump_mode, CD_WINDOW[1], CD_WINDOW[2], p0$seas_drivers))
 
