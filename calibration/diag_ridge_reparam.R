@@ -50,7 +50,7 @@ for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 
 # ---- named constants ------------------------------------------------
 RR_CHI      <- 420          # ppm, the epoch enh() is held at
-RR_BASE     <- "calibration/output/refit_20260825f_from90/mode_fit_pumpN.rds"  # CANONICAL mode
+RR_BASE     <- ccx_mode_file()          # THE CANONICAL MODE (R/paths.R)
 RR_PERTURB  <- as.numeric(Sys.getenv("CCX_RR_PERTURB", "0.025"))
 RR_NSTART   <- 4
 RR_CAP      <- 8000L        # evals per run; the driver's own per-call cadence is 10.6-20k
@@ -168,7 +168,7 @@ IDX <- as.integer(ARGS[1]); CO <- ARGS[2]
 stopifnot(IDX >= 1L, IDX <= RR_NSTART, CO %in% c("u", "v"))
 ccx_load_cpp()
 lp <- ccx_make_logpost()
-md <- readRDS(ccx_path(RR_BASE))
+md <- readRDS(RR_BASE)                  # ccx_mode_file() is already absolute
 U0 <- ccx_par_to_unc(md$par_mode)
 
 if (IDX == 1L && CO == "u") {           # gates run once, in the first worker

@@ -48,7 +48,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-AP_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+AP_MODE_FILE <- ccx_mode_file()
 AP_YEARS     <- c(1750, 2024)          # = APP_HIST_YEARS in app/global.R
 AP_OBS_YEAR  <- 2024                   # the year the app's takeaway line reads
 AP_SINK_WIN  <- c(2015, 2024)          # GCB decadal-mean window, GCB 2025 Table 6

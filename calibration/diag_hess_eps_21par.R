@@ -62,7 +62,7 @@ HEPS_STABLE_TOL <- 0.25      # max relative spread over a window, as
 HEPS_WINDOW_MIN <- 3L        # a "window" must span at least this many grid steps
 HEPS_HML_BOUND  <- LIK_OCEAN_GRAD_HML_OK   # [85, 120], as ARM_HML_BOUND
 HEPS_HML_INIT   <- 100                     # as ARM_HML_INIT
-HEPS_MODE_FILE  <- ccx_path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+HEPS_MODE_FILE  <- ccx_mode_file()
 HEPS_ARM        <- "N"       # sweep arm; D is spot-checked at HEPS_SHIPPED
 HEPS_SPOT_ARM   <- "D"
 HEPS_MACH       <- .Machine$double.eps

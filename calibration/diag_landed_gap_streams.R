@@ -67,10 +67,16 @@ GAP_CLAIM_SHARE   <- 0.93
 # NOT comparable across the objective change -- do not add them back here.
 # GATE 1 below stops if a stored logpost cannot be reproduced, which is what
 # keeps a quarantined file from being read as current.
-GAP_ARMS <- c(ref    = "calibration/output/refit_20260825f_ref/mode_fit_pumpN_progress.rds",
-              from90 = "calibration/output/refit_20260825f_from90/mode_fit_pumpN.rds",
-              pin90  = "calibration/output/refit_20260825f_pin90/mode_fit_pumpN.rds")
-GAP_ARMS <- GAP_ARMS[file.exists(vapply(GAP_ARMS, ccx_path, character(1)))]
+# `ref` is the ONE literal here, and deliberately so: it names the PROGRESS
+# file, because `refit_20260825f_ref/mode_fit_pumpN.rds` is the PRE-FIX SEED the
+# driver warm-started from, not a result (-1909 under the current objective).
+# ccx_mode_file() refuses the name `ref` for exactly that reason, so this arm
+# cannot be resolved through it. The other two go through it.
+GAP_ARMS <- c(ref    = ccx_path("calibration", "output", "refit_20260825f_ref",
+                                "mode_fit_pumpN_progress.rds"),
+              from90 = ccx_mode_file("from90"),
+              pin90  = ccx_mode_file("pin90"))
+GAP_ARMS <- GAP_ARMS[file.exists(GAP_ARMS)]
 
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 
@@ -93,7 +99,7 @@ LP  <- ccx_make_logpost(GAP_YEARS, OBS)
 # construction and every arm is priced on the same objective. That is the
 # "pin-offset removed" column of the collect note.
 gap_decompose <- function(file) {
-  md <- readRDS(ccx_path(file))
+  md <- readRDS(file)          # GAP_ARMS entries are already absolute
   # A PROGRESS FILE CARRIES NO `param_names` -- the driver's per-cycle saveRDS
   # omits it (run_modefind_pump_arms.R:575). So the identity is asserted on
   # whichever field the file actually has, rather than skipped for progress

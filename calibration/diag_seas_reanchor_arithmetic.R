@@ -1,5 +1,5 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
-md <- readRDS("calibration/output/pump_arms/mode_fit_pumpN.rds")
+md <- readRDS(ccx_mode_file())
 r  <- readRDS("calibration/output/seas_T_amp_q10_ridge_q10_partial.rds")
 rr <- Filter(function(x) x$tier == "land", r$res); rr <- rr[order(sapply(rr, function(x) x$amp))]
 CCX_PARAM_TABLE$h_ml$lo <- md$hml_bound[1]; CCX_PARAM_TABLE$h_ml$hi <- md$hml_bound[2]

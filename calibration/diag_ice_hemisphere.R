@@ -28,7 +28,7 @@
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-IH_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+IH_MODE_FILE <- ccx_mode_file()
 IH_YEARS     <- c(1750, 2024)
 IH_ERAS      <- list(c(1750, 1800), c(1800, 1850), c(1850, 1900), c(1900, 1940),
                      c(1940, 1960), c(1958, 1980), c(1980, 2000), c(2000, 2025))

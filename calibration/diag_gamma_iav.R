@@ -50,7 +50,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-GI_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+GI_MODE_FILE <- ccx_mode_file()
 GI_YEARS     <- c(1750, 2024)
 GI_WIN       <- c(1959, 2024)
 GI_Q10       <- c(1.0907, 1.5, 2.0, 2.5)

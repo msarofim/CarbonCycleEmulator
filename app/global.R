@@ -72,9 +72,15 @@ app_params <- local({
   # nothing fails SILENTLY here by design (the banner is the report), which is
   # exactly why the list must be checked against the disk and not against
   # memory. See calibration/diag_app_params.R.
-  mode_files <- file.path(CCX_ROOT, "calibration", "output",
-                          c(file.path("pump_arms", "mode_fit_pumpN.rds"),
-                            "mode_fit.rds"))
+  # REPOINTED 2026-08-27 via ccx_mode_file() (R/paths.R), which is now the ONE
+  # place the canonical mode is named. The literal that used to sit here,
+  # `pump_arms/mode_fit_pumpN.rds`, was fitted before the 2026-08-25f
+  # seasonal-NEP isotope fix changed the objective and is quarantined. Because
+  # a path that resolves to nothing fails SILENTLY in this block, a stale
+  # literal here does not error -- it ships uncalibrated defaults behind a
+  # banner nobody reads, which is exactly what happened until 2026-08-21.
+  mode_files <- c(ccx_mode_file(CCX_MODE_CANONICAL),
+                  file.path(CCX_ROOT, "calibration", "output", "mode_fit.rds"))
   post_file <- file.path(CCX_ROOT, "calibration", "output", "posterior_draws.rds")
   p <- ccx_default_params()
   p$gamma_enso <- CCX_PARAM_TABLE$gamma_enso$init

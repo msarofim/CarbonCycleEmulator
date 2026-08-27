@@ -74,7 +74,7 @@
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-AL_MODE_FILE <- "calibration/output/pump_arms/mode_fit_pumpN.rds"
+AL_MODE_FILE <- ccx_mode_file()
 AL_YEARS     <- c(1750, 2024)
 AL_WIN       <- c(1959, 2024)
 AL_DECADES   <- c(1960, 1970, 1980, 1990, 2000, 2010, 2020)
@@ -102,7 +102,7 @@ cat(sprintf("\nTARGET (GCB 2025, recomputed): AF %.3f | decadal sd %.4f | trend 
             sum(gcb$atm_growth) / sum(gcb$fossil + gcb$luc), OBS[["sd"]], OBS[["tr"]]))
 
 # ---- the mode ---------------------------------------------------------
-md <- readRDS(ccx_path(AL_MODE_FILE))
+md <- readRDS(AL_MODE_FILE)
 stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
 P0 <- ccx_default_params()
 for (n in intersect(names(P0), CCX_PARAM_NAMES)) P0[[n]] <- md$par_mode[[n]]

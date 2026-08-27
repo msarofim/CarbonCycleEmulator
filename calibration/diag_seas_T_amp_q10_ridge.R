@@ -110,7 +110,7 @@ RQ_GRID_ARG  <- if (length(RQ_ARGS) >= 4 && nzchar(RQ_ARGS[4]))
                   as.numeric(strsplit(RQ_ARGS[4], ",")[[1]]) else NULL
 RQ_OBJ       <- if (length(RQ_ARGS) >= 5 && nzchar(RQ_ARGS[5])) RQ_ARGS[5] else "partial"
 stopifnot(RQ_AXIS %in% c("amp", "q10", "sst"), RQ_OBJ %in% c("partial", "lik"))
-RQ_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+RQ_MODE_FILE <- ccx_mode_file()
 RQ_OUT       <- file.path("calibration", "output",
                           sprintf("seas_T_amp_q10_ridge_%s%s.rds", RQ_AXIS,
                                   if (nzchar(RQ_TAG)) paste0("_", RQ_TAG) else ""))
@@ -165,7 +165,7 @@ if (!is.null(RQ_ONLY)) {
   RQ_TIERS <- RQ_TIERS[RQ_ONLY]
 }
 
-md <- readRDS(ccx_path(RQ_MODE_FILE))
+md <- readRDS(RQ_MODE_FILE)
 
 # ---- the anchors this profile is read against, all DERIVED --------------
 RQ_OBS_LO  <- ccx_const("SEAS_T_AMP_NH_OBS_LO")     # all NH land, CRU 1961-90

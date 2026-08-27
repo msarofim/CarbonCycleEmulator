@@ -48,7 +48,7 @@
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-FR_MODE_FILE <- "calibration/output/pump_arms/mode_fit_pumpN.rds"
+FR_MODE_FILE <- ccx_mode_file()
 FR_YEARS     <- c(1750, 2024)
 FR_AF_WIN    <- c(1959, 2024)
 FR_DECADES   <- c(1960, 1970, 1980, 1990, 2000, 2010, 2020)
@@ -71,7 +71,7 @@ AF_OBS_ALL <- sum(g59$atm_growth) / sum(g59$fossil + g59$luc)
 AF_OBS_SD  <- stats::sd(af_obs)
 AF_OBS_TR  <- unname(stats::coef(stats::lm(af_obs ~ FR_DECADES))[2]) * 10
 
-md <- readRDS(ccx_path(FR_MODE_FILE))
+md <- readRDS(FR_MODE_FILE)
 stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
 P0 <- ccx_default_params()
 for (n in intersect(names(P0), CCX_PARAM_NAMES)) P0[[n]] <- md$par_mode[[n]]

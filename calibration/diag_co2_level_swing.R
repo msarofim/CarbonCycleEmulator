@@ -47,7 +47,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-SW_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+SW_MODE_FILE <- ccx_mode_file()
 SW_YEARS     <- c(1750, 2024)
 SW_SMOOTH    <- c(0, 5, 10, 20, 30)     # Gaussian sd of the air-age kernel, yr
 SW_AGESHIFT  <- c(-10, -5, 0, 5, 10)    # gas-age perturbation, yr

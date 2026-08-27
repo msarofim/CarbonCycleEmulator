@@ -65,7 +65,7 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 
-PE_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+PE_MODE_FILE <- ccx_mode_file()
 PE_ARGS      <- commandArgs(TRUE)
 PE_TAG       <- if (length(PE_ARGS) >= 2) PE_ARGS[2] else ""
 PE_OUT       <- file.path("calibration", "output",
@@ -117,7 +117,7 @@ WORKER <- c(
 '# GATE 2: the C++ SOURCE carries the same pair.',
 'cc <- readLines(file.path("src", "ccx_core.cpp"))',
 'stopifnot(any(grepl(sprintf("SEAS_PHI_EFF[2] = { %s, %s };", phiN, phiS), cc, fixed = TRUE)))',
-'md <- readRDS(file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds"))',
+'md <- readRDS(ccx_mode_file())',
 'bp <- ccx_default_params(); bp$pump_mode <- md$pump_mode',
 'p <- bp; for (n in names(md$par_mode)) p[[n]] <- md$par_mode[[n]]',
 '# The NEP amplitude factors are NOT fitted parameters, so they ride in',

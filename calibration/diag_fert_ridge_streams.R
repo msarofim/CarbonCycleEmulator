@@ -40,7 +40,7 @@
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-FS_MODE_FILE <- "calibration/output/pump_arms/mode_fit_pumpN.rds"
+FS_MODE_FILE <- ccx_mode_file()
 FS_YEARS     <- c(1750, 2024)
 FS_CHI_NOW   <- 420
 FS_KGRID     <- c(60, 120, 250, 400)
@@ -48,7 +48,7 @@ OUTDIR       <- ccx_path("calibration", "output", "fert_ridge_gates")
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 CHI0 <- ccx_const("CO2_PI_PPM")
 
-md <- readRDS(ccx_path(FS_MODE_FILE))
+md <- readRDS(FS_MODE_FILE)
 stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
 P0 <- ccx_default_params()
 for (n in intersect(names(P0), CCX_PARAM_NAMES)) P0[[n]] <- md$par_mode[[n]]

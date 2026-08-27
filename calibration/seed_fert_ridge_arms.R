@@ -27,7 +27,7 @@
 # =====================================================================
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 
-SD_SRC   <- "calibration/output/pump_arms/mode_fit_pumpN.rds"
+SD_SRC   <- ccx_mode_file()
 SD_CHI   <- 420
 SD_CELLS <- list(
   ridge_free_from90 = list(K = 90,  rep = 0.150,  pin = NA),
@@ -35,7 +35,7 @@ SD_CELLS <- list(
   ridge_pin90       = list(K = 90,  rep = 0.150,  pin = 90),
   ridge_pin120      = list(K = 120, rep = 1.370,  pin = 120))
 
-md <- readRDS(ccx_path(SD_SRC))
+md <- readRDS(SD_SRC)
 stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
 CHI0  <- ccx_const("CO2_PI_PPM"); d_now <- SD_CHI - CHI0
 ENH0  <- md$par_mode$beta_max * d_now / (md$par_mode$fert_k + d_now)

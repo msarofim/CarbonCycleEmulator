@@ -68,7 +68,7 @@ REC_NCYC     <- 50                   # cycles in the closed-box receipt
 REC_NSTEP    <- 12000
 REC_F_AMP    <- 60                   # GtC/yr, the toy's exchange amplitude
 REC_C0       <- c(atm = 600, leaf = 300)
-REC_MODE     <- "calibration/output/pump_arms/mode_fit_pumpN.rds"
+REC_MODE     <- ccx_mode_file()
 REC_YEARS    <- c(1750, 2024)
 OUTDIR       <- ccx_path("calibration", "output", "seas_isotope")
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
@@ -135,7 +135,7 @@ rec_patch_globally <- function() {
   invisible(tf)
 }
 rec_run <- function() {
-  md <- readRDS(ccx_path(REC_MODE)); pv <- md$par_mode
+  md <- readRDS(REC_MODE); pv <- md$par_mode
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
   p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode

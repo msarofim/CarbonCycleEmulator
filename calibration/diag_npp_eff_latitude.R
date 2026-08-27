@@ -66,7 +66,7 @@ EL_TOTAL_OK  <- c(30, 80)      # PgC/yr, the same read-the-file-right gate as
                                # data-raw/build_npp_hemispheric.R
 EL_NGRID     <- 720            # points per year; matches ccx_seas_norms()'s norm grid
 EL_PHI_GRID  <- seq(0.5, 89.5, by = 0.05)   # candidate effective latitudes, NH
-EL_MODE_FILE <- ccx_path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+EL_MODE_FILE <- ccx_mode_file()
 
 # ---------------------------------------------------------------------
 # 1. NPP by latitude row, from MOD17

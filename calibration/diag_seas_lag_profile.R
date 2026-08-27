@@ -27,7 +27,7 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 
-LAGP_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+LAGP_MODE_FILE <- ccx_mode_file()
 LAGP_T_GRID    <- c(0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0)   # CCX_SEAS_T_LAG, months
 LAGP_S_GRID    <- c(0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5)   # CCX_SST_SEAS_LAG, months
 LAGP_T_HOLD    <- CCX_SEAS_T_LAG                          # shipped, held in the S sweep
@@ -49,7 +49,7 @@ writeLines(c(
 'ccx_load_cpp()',
 'a <- as.numeric(commandArgs(TRUE))',
 'stopifnot(abs(CCX_SEAS_T_LAG - a[1]) < 1e-9, abs(CCX_SST_SEAS_LAG - a[2]) < 1e-9)',
-'md <- readRDS(file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds"))',
+'md <- readRDS(ccx_mode_file())',
 'b <- ccx_default_params(); b$pump_mode <- md$pump_mode',
 'obs <- ccx_prepare_obs()',
 'p <- b; for (n in intersect(names(p), names(md$par_mode))) p[[n]] <- md$par_mode[[n]]',

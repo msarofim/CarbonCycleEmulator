@@ -135,9 +135,13 @@ JOOS_MARKS     <- c(20, 50, 100, 300)
 # the whole Joos protocol is conditioned on, which is the Revelle lever the
 # result is most sensitive to. Hence the wrapper below, the same construction
 # and for the same reason as app_build_forcing() in app/global.R.
+# ARM NAMES REPOINTED 2026-08-27. "N"/"D" were the PRE-FIX pump arms and are
+# quarantined -- ccx_mode_file() (R/paths.R) refuses them with the reason. The
+# post-fix arms are the names it knows; "defaults" stays a legal argument here
+# because gate 12's DESIGN status line is quoted at defaults as well as at a mode.
 JOOS_ARM_DEFAULT <- "defaults"
-JOOS_ARM_FILE    <- "calibration/output/pump_arms/mode_fit_pump%s.rds"
-JOOS_ARM <- (function(a) if (length(a) && a[1] %in% c("N", "D", "defaults")) a[1]
+JOOS_ARM_NAMES   <- c("defaults", names(CCX_MODE_FILES))
+JOOS_ARM <- (function(a) if (length(a) && a[1] %in% JOOS_ARM_NAMES) a[1]
              else JOOS_ARM_DEFAULT)(commandArgs(TRUE))
 
 p0 <- ccx_default_params()
@@ -145,7 +149,8 @@ JOOS_LUC_SCALE  <- 1
 JOOS_BOMB_TOTAL <- 102
 JOOS_SRC <- "uncalibrated defaults"
 if (JOOS_ARM != "defaults") {
-  .md <- readRDS(sprintf(JOOS_ARM_FILE, JOOS_ARM))
+  .arm_file <- ccx_mode_file(JOOS_ARM)
+  .md <- readRDS(.arm_file)
   stopifnot(identical(.md$param_names, CCX_PARAM_NAMES))   # the 21-name guard
   .pm <- .md$par_mode
   for (n in intersect(names(p0), CCX_PARAM_NAMES)) p0[[n]] <- .pm[[n]]
@@ -154,7 +159,7 @@ if (JOOS_ARM != "defaults") {
   JOOS_LUC_SCALE  <- .pm$luc_scale
   JOOS_BOMB_TOTAL <- .pm$bomb_total
   JOOS_SRC <- sprintf("posterior mode, arm %s (%s, logpost %.2f)",
-                      JOOS_ARM, basename(sprintf(JOOS_ARM_FILE, JOOS_ARM)), .md$logpost)
+                      JOOS_ARM, basename(dirname(.arm_file)), .md$logpost)
 }
 
 #' ccx_build_forcing() with THIS RUN'S fitted forcing parameters applied

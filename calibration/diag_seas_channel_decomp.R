@@ -47,7 +47,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-CD_MODE_FILE <- ccx_path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+CD_MODE_FILE <- ccx_mode_file()
 CD_YEARS     <- c(1750, 2024)
 CD_WINDOW    <- LIK_SEAS_WINDOW
 CD_STREAMS   <- c(co2_MLO = "co2_seas.MLO", co2_SPO = "co2_seas.SPO",

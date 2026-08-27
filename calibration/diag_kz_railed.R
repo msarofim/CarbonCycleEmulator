@@ -69,7 +69,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-KR_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+KR_MODE_FILE <- ccx_mode_file()
 KR_YEARS     <- c(1750, 2024)
 KR_DEEP_OBS  <- c(-200, -150)      # the observed bracket the bound was bisected on
 KR_SINK_WIN  <- c(2015, 2024)

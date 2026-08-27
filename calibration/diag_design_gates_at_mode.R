@@ -4,7 +4,7 @@
 #
 # WHY THIS EXISTS. Every one of those three gates carries a "Status at default
 # parameters" line in DESIGN.md, and since 2026-08-21 (`8b94ba4`) app/global.R
-# has resolved its parameters from calibration/output/pump_arms/mode_fit_pumpN.rds
+# has resolved its parameters from a fitted mode file (ccx_mode_file(), R/paths.R)
 # instead. So the gate statuses describe a vector the app does not run. Gate 12's
 # own History paragraph in DESIGN.md records that exact failure happening twice
 # before -- "it is not a description, it is a measurement" -- and the 2026-08-22
@@ -34,8 +34,14 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
 # ---- labels derive from named constants (project rule) --------------
-DG_ARMS      <- c("defaults", "N", "D")
-DG_ARM_FILE  <- "calibration/output/pump_arms/mode_fit_pump%s.rds"
+# ARMS REPOINTED 2026-08-27. "N"/"D" were the PRE-FIX pump arms; the 2026-08-25f
+# seasonal-NEP isotope fix changed the objective and quarantined them, so this
+# file now runs the post-fix arms ccx_mode_file() knows -- the canonical free
+# mode `from90` and the pinned comparison `pin90`. "defaults" is kept because
+# every DESIGN sec.6 status line quotes a defaults value alongside the mode.
+DG_ARMS      <- c("defaults", names(CCX_MODE_FILES))
+DG_SHIPPED   <- CCX_MODE_CANONICAL   # the arm app/global.R resolves, and the
+                                     # one the tau_ex profile is taken at
 DG_YEARS     <- c(1750, 2024)
 DG_BOMB_REF  <- 102                  # = BOMB_REF in ccx_make_logpost()
 
@@ -64,7 +70,7 @@ dg_vector <- function(arm) {
   p <- ccx_default_params()
   if (identical(arm, "defaults"))
     return(list(p = p, luc_scale = 1, bomb_total = DG_BOMB_REF, src = "uncalibrated defaults"))
-  md <- readRDS(sprintf(DG_ARM_FILE, arm))
+  md <- readRDS(ccx_mode_file(arm))
   stopifnot(identical(md$param_names, CCX_PARAM_NAMES))     # the 21-name guard
   pm <- md$par_mode
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
@@ -203,7 +209,7 @@ R <- lapply(V, dg_run)
 
 cat("\n=== PROVENANCE: stored per-stream logL vs RECOMPUTED at the same par_mode ===\n")
 for (a in setdiff(DG_ARMS, "defaults")) {
-  md <- readRDS(sprintf(DG_ARM_FILE, a))
+  md <- readRDS(ccx_mode_file(a))
   now <- unlist(dg_streams(R[[a]], V[[a]]))
   was <- unlist(md$streams)
   k <- intersect(names(was), names(now))
@@ -215,22 +221,20 @@ for (a in setdiff(DG_ARMS, "defaults")) {
   for (nm in names(sort(abs(mv), decreasing = TRUE)))
     cat(sprintf("    %-20s %+12.1f\n", nm, mv[[nm]]))
 }
-cat("\n  HOW TO READ THIS, AFTER THE 2026-08-22 REPAIR:\n")
-cat("  * Both arm files were repaired that day by calibration/repair_arm_streams.R,\n")
-cat("    so `streams` is now the decomposition of that par_mode under the CURRENT\n")
+cat("\n  HOW TO READ THIS:\n")
+cat("  * Both arms were fitted AFTER the 2026-08-25f seasonal-NEP isotope fix, so\n")
+cat("    `streams` is the decomposition of that par_mode under the CURRENT\n")
 cat("    objective and every row should reproduce. A non-empty list above is a\n")
-cat("    REGRESSION or a new objective change -- not the known backlog.\n")
-cat("  * `streams_as_fitted` still holds what the refit stored, for postmortem; the\n")
-cat("    pre-repair files are in output/quarantine/20260822_luc_scale_squared_streams/.\n")
-cat("  * What the gate found on its first run, before the repair: arm N +16.9 on\n")
-cat("    `co2_icecore` alone (independently reproducing diag_ice_hemisphere.R) and\n")
-cat("    -1.91 on `gcb_land_sink` (the luc_scale-SQUARED bug it uncovered); arm D\n")
-cat("    -8244, dominated by co2_seasonal_MLO -7131.\n")
-cat("  * ARM D IS STILL NOT LIKE-FOR-LIKE WITH ARM N, and the repair does not change\n")
-cat("    that: D was last FITTED before the 2026-08-20g CCX_SST_SEAS_LAG correction\n")
-cat("    (refit_20260820.log and refit_20260821_cont.log both read '1 ARM(S) [N]'),\n")
-cat("    so its par_mode optimises a different model. Two objectives, not two pump\n")
-cat("    modes -- never read the arm columns below as an arm comparison.\n")
+cat("    REGRESSION or a new objective change -- not a known backlog.\n")
+cat("  * THE ARMS ARE LIKE-FOR-LIKE HERE, unlike the pre-fix N-vs-D pair this file\n")
+cat("    used to run: both were fitted in the same 3-arm refit on the same\n")
+cat("    objective. What is NOT comparable is their STORED logpost -- `pin90`\n")
+cat("    carries a near-delta prior on `fert_k` worth +11.6698, so its -1544.50\n")
+cat("    is -1556.17 on the free scale, 11.56 BELOW the canonical mode. Compare\n")
+cat("    the GATES below, not the logposts.\n")
+cat("  * The pre-fix arms N and D are quarantined under\n")
+cat("    output/quarantine/20260825_seas_isotope_rectification/ and are NOT\n")
+cat("    comparable with anything here; ccx_mode_file() refuses them by name.\n")
 
 G4 <- Map(dg_gate4, R, V); G5 <- lapply(R, dg_gate5); G7 <- lapply(R, dg_gate7)
 
@@ -238,7 +242,7 @@ cat("\n=== VECTORS UNDER TEST ===\n")
 for (a in DG_ARMS)
   cat(sprintf("  %-9s %-34s luc_scale %.4f  bomb_total %.2f\n",
               a, V[[a]]$src, V[[a]]$luc_scale, V[[a]]$bomb_total))
-cat("  app/global.R ships arm N.\n")
+cat(sprintf("  app/global.R ships arm %s (ccx_mode_file(), R/paths.R).\n", DG_SHIPPED))
 
 cat(sprintf("\n=== GATE 4: AIRBORNE FRACTION, %d-%d (GCB 2025 = %.3f) ===\n",
             DG_AF_WIN[1], DG_AF_WIN[2], DG_AF_OBS))
@@ -320,14 +324,14 @@ dg_tauex_row <- function(te, v) {
 
 cat(sprintf("\n=== GATE 5 FOLLOW-UP: tau_ex PROFILE at the shipped mode (others FROZEN) ===\n"))
 cat(sprintf("  observed NH->SH bomb lag %.2f yr; the mode's tau_ex is %.3f yr\n",
-            ob$SH[["t"]] - ob$NH[["t"]], V$N$p$tau_ex))
+            ob$SH[["t"]] - ob$NH[["t"]], V[[DG_SHIPPED]]$p$tau_ex))
 cat(sprintf("%9s %9s %12s %12s %12s\n", "tau_ex", "bomb lag", "co2_grad", "d13c_grad", "total logL"))
-prof <- t(vapply(sort(c(DG_TAUEX_GRID, V$N$p$tau_ex)),
-                 function(te) dg_tauex_row(te, V$N), numeric(5)))
+prof <- t(vapply(sort(c(DG_TAUEX_GRID, V[[DG_SHIPPED]]$p$tau_ex)),
+                 function(te) dg_tauex_row(te, V[[DG_SHIPPED]]), numeric(5)))
 for (i in seq_len(nrow(prof)))
   cat(sprintf("%9.3f %9.2f %12.1f %12.1f %12.1f%s\n", prof[i, "tau_ex"], prof[i, "lag"],
               prof[i, "co2_grad"], prof[i, "d13c_grad"], prof[i, "total"],
-              if (isTRUE(all.equal(prof[i, "tau_ex"], V$N$p$tau_ex))) "   <- the mode" else ""))
+              if (isTRUE(all.equal(prof[i, "tau_ex"], V[[DG_SHIPPED]]$p$tau_ex))) "   <- the mode" else ""))
 # The lag needed to reach the observed value is INTERPOLATED from the profile
 # just computed, not quoted: a hardcoded "2.3" would go stale the moment the
 # mode moves, which is the bug class DESIGN gate 12's History paragraph records.
@@ -339,10 +343,11 @@ cat(sprintf("  MAGNITUDE. The bomb lag rises monotonically with tau_ex and needs
 cat(sprintf("  %.1f yr to reach the observed %.2f; both gradient streams sit at a sharp\n",
             tau_need, obs_lag))
 cat(sprintf("  INTERIOR optimum at the mode's %.3f and fall away steeply on both sides.\n",
-            V$N$p$tau_ex))
+            V[[DG_SHIPPED]]$p$tau_ex))
 cat("  So gate 5's lag miss is a FORCED residual, not an overlooked one -- the\n")
 cat("  model cannot satisfy both interhemispheric constraints with one tau_ex,\n")
 cat("  which makes this a STRUCTURAL finding about the two-box exchange rather\n")
 cat("  than a parameter that has not been tried.\n")
 
-cat("\n=== GATE 12 is in calibration/diag_joos_irf.R [defaults|N|D] ===\n")
+cat(sprintf("\n=== GATE 12 is in calibration/diag_joos_irf.R [%s] ===\n",
+            paste(DG_ARMS, collapse = "|")))

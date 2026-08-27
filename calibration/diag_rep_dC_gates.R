@@ -15,7 +15,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-m  <- readRDS("calibration/output/pump_arms/mode_fit_pumpN.rds")
+m  <- readRDS(ccx_mode_file())
 pm <- m$par_mode
 bp <- ccx_default_params(); bp$pump_mode <- "N"
 p_mode <- bp

@@ -45,7 +45,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-PHASE_MODE_FILE <- ccx_path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+PHASE_MODE_FILE <- ccx_mode_file()
 PHASE_WINDOW    <- LIK_SEAS_WINDOW          # the window the likelihood scores
 PHASE_YEARS     <- c(1750, 2024)
 PHASE_MONTHS    <- c("Jan","Feb","Mar","Apr","May","Jun",

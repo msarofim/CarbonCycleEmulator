@@ -39,7 +39,7 @@
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-SE_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+SE_MODE_FILE <- ccx_mode_file()
 SE_YEARS     <- c(1750, 2024)
 SE_DECADES   <- seq(1870, 1970, 10)     # decades with enough ice samples to fit
 SE_MIN_N     <- 5                       # samples required to fit a decade slope

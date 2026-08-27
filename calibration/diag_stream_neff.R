@@ -100,10 +100,14 @@ NEFF_FOCUS        <- "pin90"
 NEFF_SHOW_MIN     <- 0.50      # log-units of |delta| worth printing
 OUTDIR            <- ccx_path("calibration", "output", "landed_gap")
 OUTFILE           <- file.path(OUTDIR, "stream_neff.rds")
-NEFF_ARMS <- c(ref   = "calibration/output/pump_arms/mode_fit_pumpN.rds",
-               pin120 = "calibration/output/ridge_pin120/mode_fit_pumpN.rds",
-               pin90 = "calibration/output/ridge_pin90/mode_fit_pumpN.rds",
-               pin60 = "calibration/output/ridge_pin60/mode_fit_pumpN.rds")
+# ccx_mode_file() returns an ABSOLUTE path; the ridge arms are made absolute
+# here so the vector is uniform and readRDS() below needs no wrapper. The three
+# `ridge_*` arms are PRE-FIX and quarantined -- this file fails loudly on them,
+# which is the intended behaviour until they are refit.
+NEFF_ARMS <- c(ref    = ccx_mode_file(),
+               pin120 = ccx_path("calibration", "output", "ridge_pin120", "mode_fit_pumpN.rds"),
+               pin90  = ccx_path("calibration", "output", "ridge_pin90",  "mode_fit_pumpN.rds"),
+               pin60  = ccx_path("calibration", "output", "ridge_pin60",  "mode_fit_pumpN.rds"))
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 
 # The refit's h_ml band, same as diag_landed_gap_streams.R. Needed only for the
@@ -445,7 +449,7 @@ for (arm in alt)
 # memory amp_definition_mismatch records a semi-amplitude-vs-peak-to-peak mixup
 # inverting a CCX conclusion.
 neff_amp <- function(arm) {
-  md <- readRDS(ccx_path(NEFF_ARMS[[arm]])); pv <- md$par_mode
+  md <- readRDS(NEFF_ARMS[[arm]]); pv <- md$par_mode
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
   p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode

@@ -39,7 +39,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-RS_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+RS_MODE_FILE <- ccx_mode_file()
 RS_YEARS     <- c(1750, 2024)
 RS_BOMB_REF  <- 102
 RS_DECADES   <- seq(1960, 2020, by = 10)

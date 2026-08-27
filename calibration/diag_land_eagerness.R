@@ -35,7 +35,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-LE_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+LE_MODE_FILE <- ccx_mode_file()
 LE_YEARS     <- c(1750, 2024)
 LE_SINK_WIN  <- c(2015, 2024)     # GCB 2025 decadal mean window
 LE_MID_WIN   <- c(1930, 1965)     # where the growth-rate error peaks

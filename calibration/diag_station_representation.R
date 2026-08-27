@@ -34,7 +34,7 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
 ARM <- (function(a) if (length(a) && a[1] %in% c("N", "D")) a[1] else "N")(commandArgs(TRUE))
-m  <- readRDS(sprintf("calibration/output/pump_arms/mode_fit_pump%s.rds", ARM))
+m  <- readRDS(ccx_mode_file(ARM))
 pm <- m$par_mode
 bp <- ccx_default_params(); bp$pump_mode <- ARM
 p_mode <- bp

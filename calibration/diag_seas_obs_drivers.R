@@ -44,7 +44,7 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 
-OD_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+OD_MODE_FILE <- ccx_mode_file()
 OD_CLIM      <- file.path("data", "obs_seasonal_clim.rds")
 sc <- readRDS(ccx_path(OD_CLIM))
 wk <- sprintf("%%s_%d-%d", sc$sst_window[1], sc$sst_window[2])
@@ -70,7 +70,7 @@ writeLines(c(
 'a  <- commandArgs(TRUE); slag <- as.numeric(a[1]); which_amp <- a[2]',
 'so <- as.numeric(c(a[3], a[4])); lo <- as.numeric(c(a[5], a[6]))',
 'stopifnot(abs(CCX_SST_SEAS_LAG - slag) < 1e-9)   # the patch took',
-'md <- readRDS(file.path("calibration","output","pump_arms","mode_fit_pumpN.rds"))',
+'md <- readRDS(ccx_mode_file())',
 'p <- ccx_default_params(); p$pump_mode <- md$pump_mode',
 # EVERY name from par_mode, NOT intersect(names(p), ...). The fitted vector
 # carries parameters that ccx_default_params() has no field for -- bomb_total,

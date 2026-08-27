@@ -613,11 +613,18 @@ ccx_prior_z <- function(name, x, table = CCX_PARAM_TABLE) {
 #' `ccx_default_params()` and is in `CCX_PARAM_NAMES`, so intersect() picks it up.
 #' It is assigned explicitly below only for symmetry with `app/global.R`.
 #'
-#' @param arm "N" or "D", or a path to a mode file
+#' REPOINTED 2026-08-27. The literal `pump_arms/mode_fit_pump<arm>.rds` this
+#' used to build is QUARANTINED -- it was fitted before the seasonal-NEP isotope
+#' fix (`6bda464`) changed the objective. Resolution now goes through
+#' `ccx_mode_file()` (R/paths.R), which is the ONE place the canonical mode is
+#' named, and which refuses the retired arm names with the reason rather than a
+#' file-not-found.
+#'
+#' @param arm a mode name known to `ccx_mode_file()` (default: the canonical
+#'   mode, `CCX_MODE_CANONICAL`), or a path to a mode file
 #' @param base parameter vector to overlay onto
-ccx_load_mode <- function(arm = "N", base = ccx_default_params()) {
-  f <- if (file.exists(arm)) arm else
-    ccx_path("calibration", "output", "pump_arms", sprintf("mode_fit_pump%s.rds", arm))
+ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = ccx_default_params()) {
+  f  <- ccx_mode_file(arm)
   md <- readRDS(f)
   if (!identical(md$param_names, CCX_PARAM_NAMES))
     stop("mode file '", basename(f), "' was fitted on a different parameter set (",
@@ -627,10 +634,15 @@ ccx_load_mode <- function(arm = "N", base = ccx_default_params()) {
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
   p$gamma_enso <- pm$gamma_enso
   p$pump_mode  <- md$pump_mode
+  # `hml_bound` IS CARRIED because the driver overrides CCX_PARAM_TABLE$h_ml
+  # IN-PROCESS to [85, 120], and a logpost recomputed under the default band is
+  # off by ~1.1 while `u_mode` stops decoding (max |u - u(par_mode)| = 1.7).
+  # It is NULL on the older arm files, which did not record it -- callers that
+  # recompute a logpost must assert on it rather than assume the band.
   list(p = p, luc_scale = pm$luc_scale, bomb_total = pm$bomb_total,
        err = list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
                   grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c),
-       md = md, file = f)
+       hml_bound = md$hml_bound, md = md, file = f)
 }
 
 #' A forcing with `luc_scale`/`bomb_total` applied, AND its matching annual E_LUC

@@ -34,7 +34,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-REPD_MODE_FILE <- ccx_path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+REPD_MODE_FILE <- ccx_mode_file()
 REPD_PROFILE   <- c(-2, 0, 1, 2, 3, 4, 5, 6, 7, 8)   # ppm
 sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 

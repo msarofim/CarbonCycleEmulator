@@ -45,7 +45,7 @@
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-DM_MODE_FILE <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+DM_MODE_FILE <- ccx_mode_file()
 DM_YEARS     <- c(1750, 2024)
 DM_WINDOWS   <- list(c(1860, 1900), c(1900, 1920), c(1920, 1940),
                      c(1940, 1960), c(1960, 1980), c(1980, 1994))

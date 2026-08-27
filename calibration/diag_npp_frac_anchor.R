@@ -26,7 +26,7 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 
-AN_MODE <- ccx_path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+AN_MODE <- ccx_mode_file()
 AN_NPP  <- ccx_path("data", "obs_npp_hemispheric.rds")
 
 md <- readRDS(AN_MODE)

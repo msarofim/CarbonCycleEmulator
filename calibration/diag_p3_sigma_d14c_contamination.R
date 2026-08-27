@@ -43,7 +43,7 @@
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-P3_REF  <- file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+P3_REF  <- ccx_mode_file()
 P3_LUC  <- file.path("calibration", "output", "luc_arm_pinluc", "mode_fit_pumpN.rds")
 P3_SINK <- list(mode = "luc", rate = 2.5)      # the arm the luc file was fitted under
 P3_GRID <- seq(-3, 3, by = 0.02)               # rep_dC offsets, ppm, around each start

@@ -48,7 +48,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-AUDIT_MODE_FILE <- ccx_path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+AUDIT_MODE_FILE <- ccx_mode_file()
 AUDIT_ARM       <- "N"
 AUDIT_YEARS     <- c(1750, 2024)
 AUDIT_PROBE_YR  <- 2015          # the year block 6 measures within-year structure in

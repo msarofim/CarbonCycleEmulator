@@ -68,7 +68,7 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-SSTZ_MODE_FILE <- ccx_path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+SSTZ_MODE_FILE <- ccx_mode_file()
 SSTZ_PROFILE   <- c(1e-4, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0)  # K
 SSTZ_MONTHS    <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 # PEAK-TO-PEAK observed first-harmonic amplitudes, 1975-2024, on the SAME

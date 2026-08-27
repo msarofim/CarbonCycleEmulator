@@ -38,13 +38,13 @@
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-LC_REF  <- "calibration/output/pump_arms/mode_fit_pumpN.rds"
+LC_REF  <- ccx_mode_file()
 LC_LUC  <- "calibration/output/luc_arm_pinluc/mode_fit_pumpN.rds"
 LC_YEARS <- c(1750, 2024)
 LC_GRID  <- seq(-12, 14, by = 0.01)
 OUTDIR   <- ccx_path("calibration", "output", "fert_ridge_gates")
 
-ref <- readRDS(ccx_path(LC_REF)); luc <- readRDS(ccx_path(LC_LUC))
+ref <- readRDS(LC_REF); luc <- readRDS(ccx_path(LC_LUC))
 stopifnot(!isTRUE(all.equal(unlist(ref$par_mode), unlist(luc$par_mode))))   # seed-copy trap
 P0 <- ccx_default_params()
 for (n in intersect(names(P0), CCX_PARAM_NAMES)) P0[[n]] <- ref$par_mode[[n]]

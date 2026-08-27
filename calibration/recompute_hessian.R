@@ -90,7 +90,7 @@ args <- commandArgs(trailingOnly = TRUE)
 HESS_UPDATE    <- "--update" %in% args
 args           <- setdiff(args, "--update")
 HESS_MODE_FILE <- if (length(args)) args[1] else
-  file.path("calibration", "output", "pump_arms", "mode_fit_pumpN.rds")
+  ccx_mode_file()
 HESS_OUT_FILE  <- sub("\\.rds$", "_hess.rds", HESS_MODE_FILE)
 # HALF-DECADE GRID, three and a half decades wide. The old grid stopped at 3e-4,
 # which is where h_ml's problem STARTS -- a sweep that cannot reach the answer
