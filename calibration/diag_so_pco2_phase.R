@@ -68,11 +68,33 @@ awt <- function(lat, dlat) abs(sin((lat + dlat / 2) * pi / 180) -
 nc <- nc_open(SP_PCO2)
 plat <- ncvar_get(nc, "lat"); plon <- ncvar_get(nc, "lon")
 pco2 <- ncvar_get(nc, "pco2")                       # lon x lat x 12, muatm
+patt <- ncatt_get(nc, "pco2")
 nc_close(nc)
 pdlat <- abs(diff(plat)[1])
-cat(sprintf("pCO2  %s: %d lon x %d lat x %d mo, %.1f%% of cells valid in month 1\n",
-            basename(SP_PCO2), length(plon), length(plat), dim(pco2)[3],
-            100 * mean(is.finite(pco2[, , 1]))))
+# ⚠ THE FILL VALUE IS NOT APPLIED BY ncdf4 AND LAND IS NOT NA. This file names
+# the attribute `FillValue`, not the CF-standard `_FillValue`, so ncdf4 hands
+# back -999 over every land cell as if it were data. Read the declared value
+# from the FILE rather than hardcoding it, and mask on it.
+# WHAT IT COST BEFORE IT WAS CAUGHT (2026-08-27f, first run): every band mean
+# was diluted by its land fraction. -999 is CONSTANT IN TIME, so it contributes
+# nothing to a seasonal harmonic and every PHASE was unaffected -- but every
+# AMPLITUDE was scaled down by the band's ocean fraction, and the sec.1b area
+# weights came back EXACTLY equal to the hemispheric ones, which is the tell.
+stopifnot(!is.null(patt$FillValue) || !is.null(patt[["_FillValue"]]))
+# ...AND IT IS STORED AS A CHARACTER STRING, "-999", not a number -- so it is
+# not merely un-applied, it would not survive arithmetic either. Coerce and
+# gate the coercion; a silent NA here would mask NOTHING and restore the bug.
+fv <- as.numeric(if (!is.null(patt[["_FillValue"]])) patt[["_FillValue"]] else patt$FillValue)
+stopifnot(is.finite(fv), fv < 0)
+pco2[pco2 <= fv + 1] <- NA_real_
+fin <- mean(is.finite(pco2[, , 1]))
+cat(sprintf("pCO2  %s: %d lon x %d lat x %d mo | FillValue %g masked -> %.1f%% ocean\n",
+            basename(SP_PCO2), length(plon), length(plat), dim(pco2)[3], fv, 100 * fin))
+# GATE: the ocean is ~71 % of the globe and this product drops the Arctic
+# interior and the ice shelves, so anything outside this band means the mask
+# did not take (1.00 = the bug above) or took far too much.
+if (fin < 0.55 || fin > 0.78)
+  stop(sprintf("pCO2 land mask implausible: %.3f of cells finite", fin))
 
 # ---- SST climatology, ERSSTv5 over the scored window -----------------
 nc <- nc_open(SP_ERSST)
@@ -129,16 +151,29 @@ cat("  bands are ~180 deg apart, so the hemispheric mean is a small RESIDUAL of\
 cat("  two large opposing signals -- and a model that matches the residual has\n")
 cat("  not matched either regime.\n\n")
 CB <- list(`0-30S` = c(-30, 0), `30-40S` = c(-40, -30), `40-90S` = c(-90, -40))
+# OCEAN area, not hemispheric area. The bands differ in land fraction (0-30S
+# carries South America, southern Africa and Australia; 40-60S is almost all
+# water), so weighting by sin(lat) span would overweight the subtropics and
+# UNDERSTATE the cancellation. Ocean area = the area of the cells the pCO2
+# product actually reports, which is the same mask everything else here uses.
+ocean_area <- function(lo, hi) {
+  j <- which(plat > lo & plat <= hi)
+  w <- awt(plat[j], pdlat)
+  ok <- is.finite(pco2[, j, 1])
+  sum(matrix(rep(w, each = dim(pco2)[1]), nrow = dim(pco2)[1])[ok])
+}
+A_SH <- ocean_area(-90, 0)
 tot <- c(a = 0, b = 0); parts <- list()
-cat(sprintf("  %-10s %8s %10s %9s %12s\n", "band", "area wt", "pCO2 amp", "peak mo",
-            "wtd vector"))
+cat(sprintf("  %-10s %8s %8s %10s %9s %12s\n", "band", "hemis wt", "ocean wt",
+            "pCO2 amp", "peak mo", "wtd vector"))
 for (nm in names(CB)) {
   b <- CB[[nm]]
-  w <- abs(sin(b[2] * pi / 180) - sin(b[1] * pi / 180))   # fraction of a hemisphere
+  wh <- abs(sin(b[2] * pi / 180) - sin(b[1] * pi / 180))  # fraction of a hemisphere
+  w  <- ocean_area(b[1], b[2]) / A_SH                     # fraction of SH OCEAN
   h <- harm(band_clim(pco2, plat, pdlat, b[1], b[2]))
   parts[[nm]] <- w * h; tot <- tot + w * h
-  cat(sprintf("  %-10s %8.3f %10.2f %9.2f %12.2f\n", nm, w, amp(h), ang_mo(h),
-              amp(w * h)))
+  cat(sprintf("  %-10s %8.3f %8.3f %10.2f %9.2f %12.2f\n", nm, wh, w, amp(h),
+              ang_mo(h), amp(w * h)))
 }
 names(tot) <- c("a", "b")
 inphase <- parts[["0-30S"]] + parts[["30-40S"]]; names(inphase) <- c("a", "b")

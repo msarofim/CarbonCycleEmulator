@@ -16,22 +16,22 @@ registered today, Marcus's choice):
 
 | band | pCO2 amp µatm | peak mo | SST peak mo | gap |
 |---|---|---|---|---|
-| **SH all (0–90 S)** | **3.69** | **1.20** | 2.05 | **0.85** |
-| SH subtrop 0–30 S | 12.62 | 1.43 | 2.21 | 0.78 |
-| **SO 40–90 S** | **16.26** | **7.50** | 1.94 | **5.56** |
-| NH all (0–90 N) | 1.77 | 8.14 | 7.84 | 0.30 |
+| **SH all (0–90 S)** | **4.56** | **1.20** | 2.05 | **0.85** |
+| SH subtrop 0–30 S | 16.41 | 1.43 | 2.21 | 0.78 |
+| **SO 40–90 S** | **19.45** | **7.50** | 1.94 | **5.56** |
+| NH all (0–90 N) | 2.93 | 8.14 | 7.84 | 0.30 |
 
 **P1 FAILED**: SH-MEAN ocean pCO2 is 0.85 months from SH-mean SST, so a solubility-only channel is
 the RIGHT description of the hemispheric mean. **P4 FAILED**: the model's channel at 4.16 matches
-the observed SH-mean ΔpCO2-implied 4.61 to **0.45 months**. I had conflated "the SH ocean" with
+the observed SH-mean ΔpCO2-implied 4.54 to **0.38 months**. I had conflated "the SH ocean" with
 "the Southern Ocean"; they are antiphase.
 
-**WHAT IS ACTUALLY WRONG IS THE WEIGHTING.** Subtropical limb (0–40 S) **9.47 at month 1.38**
-against Southern Ocean (40–90 S) **5.81 at month 7.50** — **5.88 months apart**. Vector sum 3.69
-against a scalar 15.28: **76 % CANCELS**. **The model matches the residual, which is not matching
-either regime.** What SPO sees is the Southern Ocean — its ΔpCO2 peaks **7.39** against the
+**WHAT IS ACTUALLY WRONG IS THE WEIGHTING.** Subtropical limb (0–40 S) **11.70 at month 1.38**
+against Southern Ocean (40–90 S) **7.18 at month 7.50** — **5.88 months apart**. Vector sum 4.56
+against a scalar 18.87: **76 % CANCELS**. **The model matches the residual, which is not matching
+either regime.** What SPO sees is the Southern Ocean — its ΔpCO2 peaks **7.41** against the
 inversion's atmospheric **8.52 [7.82, 9.20]**, a 1.13-month lag (shorter than a quarter cycle
-because the box loses signal); the subtropical limb at 1.55 cannot produce 8.52 at any lag.
+because the box loses signal); the subtropical limb at 1.52 cannot produce 8.52 at any lag.
 
 ⇒ **No value of `sst_seas_amp_SH` can fix this — the parameter scales a phase it cannot rotate**,
 which is why the fit suppressed it to 21 % of observed. **§7c-3 lands on Marcus's own named
@@ -55,6 +55,18 @@ reasoned from amplitude alone on a row that is phase-driven, the same scalar-rea
 of my own grid** (log spacing put 1.181 8× closer to the fitted 1.159 than 0.992); replaced with a
 symmetric central difference in ln τ, which also gives a free convergence check —
 slope÷curvature puts the optimum at **1.156** against the stored **1.159**, 0.3 %.
+
+**⚠ A MASKING BUG, FOUND AND FIXED THE SAME DAY, AND WHAT IT DID NOT COST.** The pCO2 file names
+its fill attribute `FillValue`, not the CF-standard `_FillValue`, **and stores it as a STRING**, so
+`ncdf4` applied nothing and −999 entered every band mean over land. Caught by an arithmetic
+impossibility — ocean-area band weights came back EXACTLY equal to the sin(lat) hemispheric ones
+(0.500/0.143/0.357), which cannot happen in a band containing Australia — after the script's own
+"100.0 % of cells valid" line had been read past. **−999 is CONSTANT IN TIME, so it contributes
+nothing to a seasonal harmonic: every PHASE above is unchanged to the last decimal and no verdict
+moved.** Only AMPLITUDES were wrong, scaled by each band's ocean fraction (SH-mean 3.69 → 4.56;
+60–90 S, the most land/ice-covered band, 25.19 → 41.91). All amplitudes here and in the collect
+note, handoff and memory are the CORRECTED ones. `diag_so_pco2_phase.R` now reads the fill value
+from the file, coerces and asserts it, and **gates the finite fraction to 0.55–0.78**.
 
 **Carried:** pCO2 is NOT flux (`F = k·K0·ΔpCO2`; no wind or K0 seasonality in any number here, so
 nothing above is a flux amplitude); a climatology carries no error bar, so the spread ACROSS BANDS

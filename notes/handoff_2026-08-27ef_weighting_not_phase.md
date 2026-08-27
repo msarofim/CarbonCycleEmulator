@@ -34,31 +34,31 @@ registered today, Marcus's choice) + ERSSTv5, area-weighted over the same bands:
 
 | band | pCO2 amp µatm | peak mo | SST peak mo | gap |
 |---|---|---|---|---|
-| **SH all (0–90 S)** | **3.69** | **1.20** | 2.05 | **0.85** |
-| SH subtrop 0–30 S | 12.62 | 1.43 | 2.21 | 0.78 |
-| SH 30–40 S | 22.19 | 1.28 | 1.92 | 0.64 |
-| **SO 40–90 S** | **16.26** | **7.50** | 1.94 | **5.56** |
-| SO 60–90 S | 25.19 | 7.79 | 1.85 | 5.94 |
-| NH all (0–90 N) | 1.77 | 8.14 | 7.84 | 0.30 |
+| **SH all (0–90 S)** | **4.56** | **1.20** | 2.05 | **0.85** |
+| SH subtrop 0–30 S | 16.41 | 1.43 | 2.21 | 0.78 |
+| SH 30–40 S | 25.08 | 1.28 | 1.92 | 0.64 |
+| **SO 40–90 S** | **19.45** | **7.50** | 1.94 | **5.56** |
+| SO 60–90 S | 41.91 | 7.79 | 1.85 | 5.94 |
+| NH all (0–90 N) | 2.93 | 8.14 | 7.84 | 0.30 |
 
 **P1 FAILED. P4 FAILED. That is the result.** A solubility-only channel is the RIGHT description
 of the SH hemispheric mean (0.85 months), and the model's channel at atmospheric month **4.16**
-matches the observed SH-mean ΔpCO2-implied **4.61** — **0.45 months apart.** I had conflated *the
+matches the observed SH-mean ΔpCO2-implied **4.54** — **0.38 months apart.** I had conflated *the
 SH ocean* with *the Southern Ocean*. They are antiphase.
 
 **THE DEFECT IS THE AGGREGATION.** Weighted by area:
 
 | limb | amplitude | peak mo |
 |---|---|---|
-| subtropical (0–40 S) | 9.47 | 1.38 |
-| Southern Ocean (40–90 S) | 5.81 | **7.50** |
-| **vector sum** | **3.69** | 1.20 |
-| scalar sum | 15.28 | — **76 % CANCELS** |
+| subtropical (0–40 S) | 11.70 | 1.38 |
+| Southern Ocean (40–90 S) | 7.18 | **7.50** |
+| **vector sum** | **4.56** | 1.20 |
+| scalar sum | 18.87 | — **76 % CANCELS** |
 
 **The model matches a residual, which is matching neither regime.** And **what SPO sees is not
-the area mean** — the Southern Ocean's ΔpCO2 peaks **7.39** against the inversion's atmospheric
-**8.52 [7.82, 9.20]**, a **1.13-month** lag (shorter than a quarter cycle because the box loses
-signal to exchange and sinks). The subtropical limb, at 1.55, cannot produce 8.52 at any lag.
+the area mean** — the Southern Ocean's ΔpCO2 peaks **7.41** against the inversion's atmospheric
+**8.52 [7.82, 9.20]**, a **1.11-month** lag (shorter than a quarter cycle because the box loses
+signal to exchange and sinks). The subtropical limb, at 1.52, cannot produce 8.52 at any lag.
 
 **⇒ `sst_seas_amp_SH` CANNOT FIX THIS — the parameter scales a phase it cannot rotate.** 27d's
 conclusion that its −6.32 σ flag is the model penalised for a correct refusal SURVIVES, on a

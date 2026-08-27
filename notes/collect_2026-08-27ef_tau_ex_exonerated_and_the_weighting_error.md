@@ -20,16 +20,16 @@ entrainment mechanism as my reading and the 4.16-vs-8.52 phase gap as the measur
 
 | band | pCO2 amp (µatm) | peak mo | SST peak mo | gap |
 |---|---|---|---|---|
-| **SH all (0–90 S)** | **3.69** | **1.20** | 2.05 | **0.85** |
-| SH subtrop 0–30 S | 12.62 | 1.43 | 2.21 | 0.78 |
-| SH 30–40 S | 22.19 | 1.28 | 1.92 | 0.64 |
-| **SO 40–90 S** | **16.26** | **7.50** | 1.94 | **5.56** |
-| SO 60–90 S | 25.19 | 7.79 | 1.85 | 5.94 |
-| NH all (0–90 N) | 1.77 | 8.14 | 7.84 | 0.30 |
+| **SH all (0–90 S)** | **4.56** | **1.20** | 2.05 | **0.85** |
+| SH subtrop 0–30 S | 16.41 | 1.43 | 2.21 | 0.78 |
+| SH 30–40 S | 25.08 | 1.28 | 1.92 | 0.64 |
+| **SO 40–90 S** | **19.45** | **7.50** | 1.94 | **5.56** |
+| SO 60–90 S | 41.91 | 7.79 | 1.85 | 5.94 |
+| NH all (0–90 N) | 2.93 | 8.14 | 7.84 | 0.30 |
 
 **The SH-MEAN ocean pCO2 cycle IS in phase with SST — 0.85 months.** A solubility-only channel
 is the *right* description of the SH hemispheric mean, and the model's channel at month 4.16
-matches the observed SH-mean ΔpCO2-implied phase of **4.61 — 0.45 months apart.**
+matches the observed SH-mean ΔpCO2-implied phase of **4.54 — 0.38 months apart.**
 
 **P1 FAILED and P4 FAILED, and that is the finding.** I conflated "the SH ocean" with "the
 Southern Ocean". They are nearly opposite.
@@ -38,20 +38,20 @@ Southern Ocean". They are nearly opposite.
 
 | band | area wt | amp | peak mo | weighted |
 |---|---|---|---|---|
-| 0–30 S | 0.500 | 12.62 | 1.43 | 6.31 |
-| 30–40 S | 0.143 | 22.19 | 1.28 | 3.17 |
-| 40–90 S | 0.357 | 16.26 | 7.50 | 5.81 |
+| 0–30 S | 0.475 | 16.41 | 1.43 | 7.79 |
+| 30–40 S | 0.156 | 25.08 | 1.28 | 3.91 |
+| 40–90 S | 0.369 | 19.45 | 7.50 | 7.18 |
 
-subtropical limb (0–40 S) **9.47 at month 1.38** against Southern Ocean **5.81 at month 7.50** —
-**5.88 months apart, i.e. antiphase.** Vector sum **3.69**; scalar sum 15.28. **76 % CANCELS.**
+subtropical limb (0–40 S) **11.70 at month 1.38** against Southern Ocean **7.18 at month 7.50** —
+**5.88 months apart, i.e. antiphase.** Vector sum **4.56**; scalar sum 18.87. **76 % CANCELS.**
 
 **⇒ THE MODEL IS MATCHING A RESIDUAL.** Its single SH ocean box carries the area-mean SST cycle,
 which is the small leftover of two large opposing regimes — and reproducing the leftover is not
 reproducing either regime. **What SPO sees is not the area mean.** The inversion put the observed
-atmospheric ocean component at **8.52 [7.82, 9.20]**; the Southern Ocean's ΔpCO2 peaks at **7.39**,
-**1.13 months earlier** — the lag of an atmospheric anomaly behind its driving flux, shorter than
+atmospheric ocean component at **8.52 [7.82, 9.20]**; the Southern Ocean's ΔpCO2 peaks at **7.41**,
+**1.11 months earlier** — the lag of an atmospheric anomaly behind its driving flux, shorter than
 a quarter cycle because the SH box loses signal to exchange and sinks. The subtropical limb
-(ΔpCO2 at 1.55) cannot produce 8.52 at any lag.
+(ΔpCO2 at 1.52) cannot produce 8.52 at any lag.
 
 **⇒ §7c-3'S CANDIDATE IS A WEIGHTING/AGGREGATION ERROR, AND IT LANDS ON MARCUS'S OWN NAMED
 CANDIDATE — LATITUDE BANDS WITHIN A HEMISPHERE.** One SH ocean box cannot carry two nearly
