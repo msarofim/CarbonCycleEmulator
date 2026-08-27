@@ -135,8 +135,13 @@ obj_inc <- function(v) { u <- u0; u[idx] <- v; -lp_cached(0)(u) }
 fit_inc <- optim(u0[idx], obj_inc, method = "Nelder-Mead",
                  control = list(maxit = RF_MAXIT, reltol = 1e-10))
 u_inc <- u0; u_inc[idx] <- fit_inc$par
-cat(sprintf("  logpost %.3f -> %.3f (%+.1f from re-optimising the slice alone)\n",
-            md$logpost, -fit_inc$value, -fit_inc$value - md$logpost))
+# AGAINST THIS HARNESS'S OWN BASELINE, not the stored logpost. Subtracting
+# md$logpost here would fold the -3.32 offset above into the reported gain --
+# the precise mistake the offset note forbids, made in a print statement.
+cat(sprintf("  this harness at u_mode %.3f -> re-optimised %.3f  (gain %+.2f)\n",
+            one, -fit_inc$value, -fit_inc$value - one))
+cat(sprintf("  (stored logpost %.3f is NOT the baseline for that gain -- offset %+.4f)\n",
+            md$logpost, gap))
 
 # ---- CHALLENGER: the same slice, plus the channel ---------------------
 sep("2. CHALLENGER -- the same slice, plus ent_seas_amp_SH (log scale, bounded)")
@@ -153,8 +158,9 @@ ent_hat <- exp(fit_ch$par[length(fit_ch$par)])
 u_ch <- u0; u_ch[idx] <- fit_ch$par[-length(fit_ch$par)]
 cat(sprintf("  ent_seas_amp_SH = %.2f umol/kg (bounds %g-%g; the pre-check band is 5-30)\n",
             ent_hat, RF_ENT_BOUNDS[1], RF_ENT_BOUNDS[2]))
-cat(sprintf("  logpost %.3f  (incumbent %.3f)  -- NOT a model comparison: the\n",
-            -fit_ch$value, -fit_inc$value))
+cat(sprintf("  logpost %.3f  (incumbent %.3f, gain %+.2f)  -- NOT a model\n",
+            -fit_ch$value, -fit_inc$value, -fit_ch$value + fit_inc$value))
+cat("  comparison: the\n")
 cat("  challenger has one more free parameter and no prior on it.\n")
 if (ent_hat < RF_ENT_BOUNDS[1] * 1.05 || ent_hat > RF_ENT_BOUNDS[2] * 0.95)
   cat("  ⚠ RAILED against its bound -- the amplitude is NOT identified here.\n")
@@ -232,8 +238,9 @@ OUTDIR <- ccx_path("outputs", "diagnostics")
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 saveRDS(list(mode = basename(RF_MODE_FILE), block = RF_BLOCK,
              ent_hat = ent_hat, ent_bounds = RF_ENT_BOUNDS,
-             logpost = c(mode = md$logpost, incumbent = -fit_inc$value,
-                         challenger = -fit_ch$value),
+             logpost = c(stored_mode = md$logpost, harness_at_u_mode = one,
+                         incumbent = -fit_inc$value, challenger = -fit_ch$value),
+             harness_offset = gap,
              par_mode = md$par_mode[RF_BLOCK], par_inc = pv_inc[RF_BLOCK],
              par_ch = pv_ch[RF_BLOCK],
              streams = list(mode = s_mode, incumbent = s_inc, challenger = s_ch),
