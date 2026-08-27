@@ -2,6 +2,65 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27j — **ONE FIX, CONFIRMED: interaction +64.99 against a pre-registered gate of +39.59**
+
+Pre-registered in `notes/prereg_2026-08-27j_joint_land_ocean_arm.md`, committed **`fa83faa` before
+`calibration/diag_joint_land_ocean_refit.R` existed**. No gate was moved. All four arms converged.
+**Nothing in `R/` or `src/` touched.**
+
+A 2×2 — land at PsnNet 0.5027 vs the GPP end 0.352, ocean channel off vs free in 5–30 — because
+the claim was an INTERACTION, and
+
+    INTERACTION = JOINT − LAND-only − OCEAN-only + INCUMBENT,   npar 7−6−7+6 = 0
+
+is parameter-balanced and therefore interpretable, where a bare challenger-minus-incumbent
+Δlogpost is not (27g refused to read one, correctly).
+
+| arm | land | ent | vs incumbent |
+|---|---|---|---|
+| LAND-only | 0.352 | 0 | **−79.18** |
+| OCEAN-only | 0.5027 | 4.31 | **+11.93** (reproduces 27g's 4.16 / +11.62) |
+| **JOINT** | 0.352 | **8.11** | **−2.26** (sum of singles: −67.25) |
+
+**⇒ INTERACTION +64.99: 82 % of the land reduction's penalty is recovered when the channel is
+present.** P0 PASS · **P1 CONFIRMED** · P2 PASS (**ent 8.11, inside 5–30 for the first time** —
+27g landed 4.16, below) · P3 PASS (**partition 1.93 → 1.390**, beating both singles, 1.834 land /
+1.765 ocean) · P4 **FAIL** (total 1.267 vs gate 1.114–1.222) · P5 **FAIL** (ocean ratio 0.495 vs
+≥0.75) · P6 PASS (MLO 0.966).
+
+**The channel was being SUPPRESSED by the land error.** Given a corrected land the fit takes it to
+8.11 µmol/kg and uses it to **rotate the SPO ocean limb 4.13 → 9.24 months**, against an observed
+8.52 — the quantity **27g's P3 scored FAILED** on (3.35 → 3.45, +0.10). ⚠ Not a 27j gate and not
+claimed as a pass; reported as a measured outcome.
+
+**And LAND-only catches the cancellation in the act:** cutting land should shrink the total, so a
+compensating fit should raise the ocean — instead `sst_seas_amp_SH` collapses to **0.176 (z −9.18)**,
+because the solubility limb at month 4.13 was ANTIPHASE to land at 10.11 and *subtracting*.
+
+**Why P4/P5 failed, and it is one reason twice.** Once the ocean limb reaches 9.24 it is nearly in
+phase with land at 10.08, so the two now ADD where they used to cancel — the assembly nature uses.
+But **SH-local land is still 0.906 = 1.33× the observed 0.683** (the GPP end was not far enough),
+so two in-phase parts overshoot; and the wrong-phase solubility limb is still carried at
+`sst_seas_amp_SH` 0.656 (37.6 % of observed, z −3.92), cancelling the channel and holding the net
+ocean at 0.258 against an observed 0.522.
+
+### What this does NOT licence
+
+Not a licence to adopt the GPP end — `seas_npp_amp_SH` was FIXED, not fitted, so the interaction
+shows the corrections couple, not that 0.352 is right; PsnNet and GPP disagree by 1.4× and the
+model uses one end without saying why. **Marcus's call, on the measurement's terms.** Not a verdict
+on `phi_eff` — the (shape, size) pair must be re-derived together. **4b is not ruled out but is no
+longer indicated**: the existing channel reached its physical band and the right phase.
+
+⚠ `seas_T_amp_NH` lands at 31.41, prior z **+3.50**, the largest positive flag in the slice, and it
+moves the same way in every arm. Not caused by this experiment, not explained by it, not clean.
+
+**⇒ Next, in order:** (A) re-derive `CCX_SEAS_PHI_EFF['SH']` and `SEAS_NPP_AMP_SH` TOGETHER against
+the observed SH productivity cycle — the residual is a land SIZE error of 1.33× and the size is half
+of a pair whose shape has never been re-fitted for the SH; (B) pin `sst_seas_amp_SH` or price it
+honestly. Full reasoning in
+`notes/collect_2026-08-27j_one_fix_confirmed_the_residual_is_still_land.md` §4.
+
 ## 2026-08-27i — `seas_npp_amp_SH` has the SIGN but not the price: **the land and ocean fixes are ONE fix**
 
 Marcus chose 27h fork **(A)**: power-check `seas_npp_amp_SH` — the dominant SH-local land channel at
