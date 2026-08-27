@@ -225,13 +225,18 @@ cat(sprintf("  sst_seas_amp_SH  %.3f -> %.3f   (prior z %.2f -> %.2f)\n",
             ccx_prior_z("sst_seas_amp_SH", md$par_mode$sst_seas_amp_SH), z_ch))
 cat(sprintf("  SPO pair         %.1f -> %.1f    (gate: not worse than %.1f)\n",
             spo_sum(s_mode), spo_sum(s_ch), RF_P2_SPO_SUM))
-verdict <- if (amp_ch < RF_P2_FAIL_AMP)
+verdict <- {
+  if (amp_ch < RF_P2_FAIL_AMP) {
     "FALSIFIED -- the amplitude did NOT rise. The weighting account is wrong, and THAT is the finding."
-  else if (amp_ch >= RF_P2_PASS_AMP && z_ch > RF_P2_PASS_Z && spo_sum(s_ch) >= RF_P2_SPO_SUM)
+  } else if (amp_ch >= RF_P2_PASS_AMP && z_ch > RF_P2_PASS_Z &&
+             spo_sum(s_ch) >= RF_P2_SPO_SUM) {
     "CONFIRMED -- the objection was to the PHASE, not the amplitude."
-  else if (amp_ch >= RF_P2_PASS_AMP)
+  } else if (amp_ch >= RF_P2_PASS_AMP) {
     "PARTIAL -- the amplitude rose, but it was PAID FOR. Read section 4 before quoting this."
-  else "INCONCLUSIVE -- between the pass and fail thresholds; neither is claimed."
+  } else {
+    "INCONCLUSIVE -- between the pass and fail thresholds; neither is claimed."
+  }
+}
 cat(sprintf("\n  P2 -> %s\n", verdict))
 
 OUTDIR <- ccx_path("outputs", "diagnostics")
