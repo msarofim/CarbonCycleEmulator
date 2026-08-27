@@ -48,6 +48,56 @@ and confined to the cycles `ccx_deriv()` generates from PARAMETERS and `t` — l
 now entrainment. Those are gated by `seas_drivers`, which is the control to use. **An inventory
 gate now fails if a new forcing column appears without that decision being made.**
 
+### THE RESULT: P3 FAILED — the fit used the channel as a COUNTERWEIGHT
+
+Scored in `notes/collect_2026-08-27g_entrainment_channel_is_a_counterweight.md`. **Two PASS, one
+PARTIAL, one INCONCLUSIVE, one FAILED. No threshold was moved after the fact.**
+
+**The channel does what it was built to do, and the fit declined to use it that way.** Given the
+freedom it spent the new limb on *permission to double the wrong-phase solubility limb* —
+`sst_seas_amp_SH` 0.360 → **0.741** (prior z −6.32 → **−3.43**, 20.6 % → 42.5 % of observed) —
+while the NET ocean component stayed in austral autumn:
+
+| SPO ocean component | amplitude | peak month | vs obs |
+|---|---|---|---|
+| mode (channel off) | 0.236 ppm | 3.35 | 0.45× |
+| **challenger (channel 4.16)** | **0.124 ppm** | **3.45** | **0.23×** |
+| observed | 0.522 ppm | 8.52 | — |
+
+**P3 FAILED** on its own falsifier (stayed within 1.0 month of 3.35). **P4 INCONCLUSIVE**: the SPO
+residual moved **1.93× → 1.77×** with the MLO control at 0.97×, between its gates of ≤1.70 (pass)
+and ≥1.85 (fail). **P2 PARTIAL**: the amplitude rose, but the SPO pair fell 287.2 → 286.1.
+
+**THE +11.62 IS +16.78 PRIOR AGAINST −5.17 LIKELIHOOD**, measured. The channel buys the model
+permission to move its drivers toward observation at a thin, spread likelihood cost.
+
+**WHY, and it is not in the ocean.** SH land at SPO is **2.05× observed**, and **0.821 ppm of the
+model's 1.364 arrives from the NH**. The total SPO CO2 amplitude already overshoots at the
+challenger (−2.5 % → **+5.8 %**), so a bigger net ocean limb is unaffordable and the only
+profitable use of the channel is as a counterweight.
+
+**⚠ A LIMIT OF MY OWN DESIGN.** The P2 slice held no lever on the land: `seas_npp_amp_SH` — the
+dominant SH-local channel at SPO (1.390 ppm against `resp SH`'s 0.092) — is a measured constant
+and not fittable; **`tau_ex` is fittable, carries the NH import, and I froze it.** So P3's failure
+may be an artefact of the slice rather than the physics. **That is a hypothesis for a new
+pre-registered test, not a licence to re-run this one with `tau_ex` added and relabel it.** (27e
+exonerated `tau_ex` as a PARTITION lever while saying the leak is a SIZE error — size is what
+binds here, so the two findings do not conflict.)
+
+**WHAT IT SAYS ABOUT 4b:** not yet a case for it, and not a case against. **The blocker this
+residual identifies is not the ocean's structure**, and a second SH ocean column would not shrink
+an SH land component that is 2× too big. Recommended order: the wider slice (seasonal block +
+`tau_ex`) first, 4b decided after.
+
+### Bugs found in the OLDER diagnostics, which only bite once the ocean has two limbs
+
+`air-sea SH off` was `sst_seas_amp_SH = 0` in **both** `diag_seas_signature_inversion.R` and
+`diag_seas_channel_decomp.R`, leaving the entrainment limb running — and in the inversion that
+case is where the **ocean signature `s_O`** is measured, so it was substantive rather than
+cosmetic. Both now switch off both limbs, identically to before at amplitude 0. The inversion also
+printed its amplitude from the env var rather than the value used, so a run at 4.16 announced
+"channel OFF".
+
 ### P1, the power measurement — PASS, and the phase is right
 
 Threshold **0.70 ppm**, taken from the OBSERVED antiphase gap (model SPO ocean 0.236 ppm at month
