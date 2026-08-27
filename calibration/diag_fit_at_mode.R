@@ -16,12 +16,17 @@
 # to 1e-6, the residuals below are wrong and the row is marked. That check is
 # the whole reason to trust this file.
 #
-# Usage:  Rscript calibration/diag_fit_at_mode.R [N|D]
+# Usage:  Rscript calibration/diag_fit_at_mode.R [<mode name>]
+#         mode names come from ccx_mode_file() (R/paths.R); default = canonical
 # =====================================================================
 for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-ARM <- (function(a) if (length(a) && a[1] %in% c("N", "D")) a[1] else "N")(commandArgs(TRUE))
+# ARM REPOINTED 2026-08-27. "N"/"D" were the PRE-FIX pump arms; the 2026-08-25f
+# seasonal-NEP isotope fix changed the objective and quarantined them, and
+# ccx_mode_file() refuses those names with the reason.
+ARM <- (function(a) if (length(a) && a[1] %in% names(CCX_MODE_FILES)) a[1]
+        else CCX_MODE_CANONICAL)(commandArgs(TRUE))
 M   <- ccx_load_mode(ARM)          # R/calibrate.R: carries gamma_enso, pump_mode,
 pm  <- M$md$par_mode               # the 2 forcing params and the 4 likelihood ones
 m   <- M$md
