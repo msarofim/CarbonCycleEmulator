@@ -120,7 +120,47 @@ test_that("turnover time from the flux trace matches an independent label pulse"
   expect_gt(off$tau_flux, 3); expect_lt(off$tau_flux, 7)       # the "5-year" number
   on <- mk(FALSE)
   expect_equal(on$tau_flux, off$tau_flux, tolerance = 1e-3)    # seas excluded -- EXACT
-  expect_lt(on$tau_label, off$tau_label - 0.2)                 # and it matters
+  # THE 0.2 yr MAGNITUDE GATE IS WITHDRAWN (Marcus, 2026-08-27): a threshold has
+  # to come from an observation or a physical law, and this one could come from
+  # neither.
+  #
+  # WHY NOT AN OBSERVATION. The contaminating quantity is the January seasonal
+  # flux across the atmosphere's boundary, and the observed seasonal CO2 swing IS
+  # its time integral -- so it looks anchorable. It is not anchorable HERE,
+  # because this test runs at ccx_default_params() with the climate held, and in
+  # that configuration the model's seasonal cycle does not resemble the observed
+  # one: NH peak-to-peak 1.66 ppm against MLO's 5.72, and the SH January tendency
+  # is +2.03 ppm/yr against SPO's -3.40 -- an INVERTED SIGN. (At the canonical
+  # mode with full forcing it matches well: NH 6.36 vs 5.72 and +19.14 vs +16.75,
+  # SH 1.09 vs 1.08 and -3.37 vs -3.40. The mismatch is this harness, not the
+  # model.) A threshold cannot be derived from data the configuration does not
+  # reproduce.
+  #
+  # WHY NOT A PHYSICAL LAW. The obvious law is that seasonal NEP is zero-mean, so
+  # a label estimate should be contaminated over ONE month and CLOSE over TWELVE.
+  # Measured, it does not close: the 12-month contamination is 0.2307 yr, LARGER
+  # than the 1-month 0.1805. Over a full cycle the label is not a passive tracer
+  # -- it is rectified into and out of the leaf pool -- so the zero-mean law does
+  # not transfer to the label. Mass balance on the atmosphere does not close it
+  # either: M/(atm_out + |seas|) predicts a 0.489 yr shortening against 0.1805
+  # measured, because the label responds to GROSS one-way exchange, not to net NEP.
+  #
+  # WHAT THE OLD NUMBER WAS. 0.2 was set 2026-08-13 against a measured 0.37, and
+  # `f85ef7b` (2026-08-20) took the shortening 0.7079 -> 0.1805 in ONE commit by
+  # SHIPPING THE MEASURED NEP amplitude factors, seas_npp_amp 1 -> 0.4969/0.5027
+  # (seas[1] halved, -29.430 -> -14.585). The threshold was calibrated against an
+  # amplitude since measured to be ~2x too large. It was tracking a driver, which
+  # is exactly what a gate must not do.
+  #
+  # WHAT IS ASSERTED INSTEAD carries NO threshold: turning seasonality on must
+  # make the one-month label estimate a WORSE estimator of tau_turn than it is
+  # with seasonality off. That is the ordering the physical claim implies -- a
+  # zero-mean flux is excluded from the annual-mean turnover time but is present
+  # in any one-month window -- and it is a comparison between two measured
+  # quantities with no number chosen by anyone.
+  # MEASURED 2026-08-27: 0.1727 with seasonality on against 0.0078 with it off.
+  expect_gt(abs(on$tau_label  - off$tau_flux),
+            abs(off$tau_label - off$tau_flux))
 })
 
 test_that("gross fluxes dwarf the net, which is the point of the trace", {

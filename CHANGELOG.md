@@ -2,6 +2,61 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27c — `test-fluxes.R` GREEN, and a THRESHOLD RULE: observations or physical laws
+
+Decision 6b answered. Suite **1122 pass / 0 fail**, from 2 failing.
+
+**LINE 99 — REPAIRED BY COMPLETING ITS CONTROL** (`e816700`). Not the isotope fix: the probe is
+BIT-IDENTICAL either side of `6bda464`. `tau_turn = m_atm/(gpp + as_down)` and seasonal NEP is
+genuinely excluded — gpp identical to 0.000000, m_atm identical, **100 % of the difference in
+`as_down`** (65.340510 → 65.556037). Toggling the paths separately: seasonal NEP on with the
+seasonal SST OFF gives **4.691976, identical to baseline**. The assertion broke because
+`seas_drivers` is a MASTER switch that also kills the seasonal SST cycle, a second seasonal path
+that legitimately moves air-sea exchange — and `ccx_hold_climate()` does not suppress it, because
+that cycle comes from the `sst_seas_amp_*` PARAMETERS, not a forcing column. Dated:
+`25dce56` 0.000000 (exact) → `6fadb34` 0.002148 (a MARGIN, 46 % of tolerance, invisible) →
+`7708404` 0.008054 (red). The amplitudes never moved; it was the **PHASE**, because `tau_turn[1]`
+samples January alone. Repaired by holding the seasonal SST off in BOTH arms — the difference is
+then exactly zero and the tolerance was not loosened.
+
+**LINE 100 — THE MAGNITUDE GATE IS WITHDRAWN, and the rule is now standing.**
+Marcus: **"Thresholds should be derived from observations or from physical laws."** My first
+proposal — gate on 10× the same file's seasonality-off agreement — was rejected as self-referential,
+which it is: it derives a gate from the model's own numerics and can never reject them.
+
+Both principled routes were then TRIED AND MEASURED, and both fail *here*:
+- **Observation.** The contaminating quantity is the January seasonal boundary flux, whose time
+  integral IS the observed seasonal CO₂ swing — anchorable in principle. Not here: the test runs at
+  `ccx_default_params()` with climate held, where model NH pk-pk is **1.66 ppm against MLO's 5.72**
+  and the SH January tendency is **+2.03 against SPO's −3.40, an inverted sign**.
+- **Physical law.** "Seasonal NEP is zero-mean, so a label estimate must close over 12 months" is a
+  real law that **does not transfer**: measured, the 12-month contamination is **0.2307 yr, LARGER**
+  than the 1-month 0.1805, because the label is rectified into and out of the leaf pool. Mass
+  balance fails too — `M/(atm_out + |seas|)` predicts **0.489** against 0.1805 measured, because the
+  label responds to GROSS one-way exchange, not net NEP.
+
+**Why the old number went red: it was tracking a driver.** 0.2 was set 2026-08-13 against a measured
+0.37. **`f85ef7b` (2026-08-20) took the shortening 0.7079 → 0.1805 in ONE commit** by SHIPPING THE
+MEASURED NEP amplitude factors, `seas_npp_amp` 1 → **0.4969 / 0.5027** (`seas[1]` halved,
+−29.430 → −14.585). The gate went red for a deliberate, evidence-based improvement.
+
+**What is asserted instead carries NO threshold:** seasonality must make the one-month label
+estimate a WORSE estimator of `tau_turn` than it is without seasonality — an ordering between two
+measured quantities, with no number chosen by anyone. Measured: **0.1727 on against 0.0078 off.**
+
+**RIGHT OBSERVABLE, WRONG DRIVERS — and a FALSE ALARM caught before it was reported.** Checking the
+seasonal phase at the CANONICAL MODE with full forcing (rather than at defaults) gives model NH
+**6.36** pk-pk / **+19.14** ppm/yr against MLO 5.72 / +16.75, and model SH **1.09 / −3.37** against
+SPO **1.08 / −3.40** — both signs agree, SH to ~1 %, consistent with `ccx_seas_phase_late`. So the
+sign inversion above is the HARNESS, not the model; I nearly reported it as a defect.
+
+The standing consequence is larger than the test: **the model reproduces the observed seasonal CO₂
+cycle while running `seas_T_amp_SH` at 29 % of its bracket's LOW end, `sst_seas_amp_SH` at 21 % of
+observed and `seas_T_amp_NH` at 131 % of its HIGH end** (the 2026-08-27 §7c-2 finding). That is
+`ccx_seas_partition`'s compensation seen from the **CO₂** side. ⇒ **The CO₂ seasonal rows have NO
+POWER to reject the partition — they are already matched. Any test of it must run on the ISOTOPES
+or on the DRIVERS.** That is a direct constraint on how §7c-3 (the SH land box) should be posed.
+
 ## 2026-08-27b — GATE 7's WINDOW DROPS 2024 (Marcus), and the CAUSE WAS HALF A MONTH
 
 Follow-up to the 2026-08-27 entry's open decision 6a. Marcus: drop 2024.
