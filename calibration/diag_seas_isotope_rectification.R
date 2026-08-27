@@ -157,23 +157,60 @@ S$shipped <- rec_run()            # SHIPPED FIRST -- the patch below is one-way
 rec_patch_globally()
 S$fixed <- rec_run()
 
-rec_amp <- function(o) {
+# ESTIMATOR (2026-08-27, Marcus): CCX_SEAS_AMP_ESTIMATOR = "mean_vector".
+# This function used to hardcode mean(sqrt(a^2+b^2)), which inflates the
+# observed SPO d13C harmonic by 1.33x -- in the DENOMINATOR of `perppm`. Both
+# estimators are computed here and both are printed, so the inflation stays a
+# MEASUREMENT in the output rather than a claim in a comment; only the adopted
+# one is returned in the `perppm` column that the record quotes.
+rec_amp <- function(o, estimator = CCX_SEAS_AMP_ESTIMATOR) {
   ms <- ccx_model_stats(o, OBS)
   do.call(rbind, lapply(c("MLO", "SPO"), function(st) {
     oc <- OBS$co2_seas[[st]]; mc <- ms$co2_seas[[st]]
     od <- OBS$d13_seas[[st]]; mm <- ms$d13_seas[[st]]
-    Am <- mean(sqrt(mc$a[match(oc$year, mc$year)]^2 + mc$b[match(oc$year, mc$year)]^2))
-    Dm <- mean(sqrt(mm$a[match(od$year, mm$year)]^2 + mm$b[match(od$year, mm$year)]^2))
-    Ao <- mean(sqrt(oc$a^2 + oc$b^2)); Do <- mean(sqrt(od$a^2 + od$b^2))
-    data.frame(station = st, co2 = Am / Ao, d13c = Dm / Do, perppm = (Dm / Am) / (Do / Ao))
+    amp <- function(h, yr) ccx_harmonic_amp(h, yr, estimator = estimator)
+    Am <- amp(mc, oc$year); Dm <- amp(mm, od$year)
+    Ao <- amp(oc, NULL);    Do <- amp(od, NULL)
+    data.frame(station = st, co2 = Am / Ao, d13c = Dm / Do,
+               perppm = (Dm / Am) / (Do / Ao))
+  }))
+}
+# The inflation itself, per series -- mean-of-magnitudes over magnitude-of-mean.
+rec_inflation <- function(o) {
+  ms <- ccx_model_stats(o, OBS)
+  do.call(rbind, lapply(c("MLO", "SPO"), function(st) {
+    r <- function(h, yr) ccx_harmonic_amp(h, yr, "mean_magnitude") /
+                         ccx_harmonic_amp(h, yr, "mean_vector")
+    data.frame(station = st,
+               obs_co2   = r(OBS$co2_seas[[st]], NULL),
+               obs_d13c  = r(OBS$d13_seas[[st]], NULL),
+               mod_co2   = r(ms$co2_seas[[st]], OBS$co2_seas[[st]]$year),
+               mod_d13c  = r(ms$d13_seas[[st]], OBS$d13_seas[[st]]$year))
   }))
 }
 AS <- rec_amp(S$shipped$out); AF <- rec_amp(S$fixed$out)
+cat(sprintf("estimator: %s (CCX_SEAS_AMP_ESTIMATOR)\n\n", CCX_SEAS_AMP_ESTIMATOR))
 cat(sprintf("%-10s %-5s %12s %12s %12s\n", "arm", "stn", "CO2 mod/obs", "d13C mod/obs",
             "per-ppm m/o"))
 for (nm in c("shipped", "fixed")) { a <- if (nm == "shipped") AS else AF
   for (i in seq_len(nrow(a))) with(a[i, ],
     cat(sprintf("%-10s %-5s %11.2fx %11.2fx %11.2fx\n", nm, station, co2, d13c, perppm))) }
+
+# ---- the estimator's own effect, MEASURED, not asserted ---------------
+cat("\nWHAT THE OTHER ESTIMATOR WOULD HAVE SAID (mean-of-magnitudes):\n")
+AS2 <- rec_amp(S$shipped$out, "mean_magnitude"); AF2 <- rec_amp(S$fixed$out, "mean_magnitude")
+for (nm in c("shipped", "fixed")) { a <- if (nm == "shipped") AS2 else AF2
+  for (i in seq_len(nrow(a))) with(a[i, ],
+    cat(sprintf("%-10s %-5s %11.2fx %11.2fx %11.2fx\n", nm, station, co2, d13c, perppm))) }
+cat("\nINFLATION mean-of-magnitudes / magnitude-of-mean, per series:\n")
+INF <- rec_inflation(S$shipped$out)
+cat(sprintf("  %-5s %10s %10s %10s %10s\n", "stn", "obs CO2", "obs d13C", "mod CO2", "mod d13C"))
+for (i in seq_len(nrow(INF))) with(INF[i, ],
+  cat(sprintf("  %-5s %9.2fx %9.2fx %9.2fx %9.2fx\n", station, obs_co2, obs_d13c,
+              mod_co2, mod_d13c)))
+cat("  Only the observed SPO d13C series inflates, and it inflates the\n")
+cat("  DENOMINATOR of per-ppm -- which is why the adopted estimator reports a\n")
+cat("  LARGER partition residual than the one that had been quoted.\n")
 
 # ---- GATE 1: the fix touches NO carbon -------------------------------
 cat("\nGATE 1: the fix moves no carbon, so the CO2 column must be IDENTICAL.\n")
@@ -192,7 +229,9 @@ for (nm in names(sort(d, decreasing = TRUE))) if (abs(d[[nm]]) >= 0.5)
               S$fixed$streams[[nm]], d[[nm]]))
 
 saveRDS(list(closed_box = REC, streams_shipped = S$shipped$streams,
-             streams_fixed = S$fixed$streams,
-             amp_shipped = rec_amp(S$shipped$out), amp_fixed = rec_amp(S$fixed$out)),
+             streams_fixed = S$fixed$streams, estimator = CCX_SEAS_AMP_ESTIMATOR,
+             amp_shipped = AS, amp_fixed = AF,
+             amp_shipped_meanmag = AS2, amp_fixed_meanmag = AF2,
+             inflation = INF),
         file.path(OUTDIR, "seas_isotope_rectification.rds"))
 cat(sprintf("\nwritten: %s\n", file.path(OUTDIR, "seas_isotope_rectification.rds")))

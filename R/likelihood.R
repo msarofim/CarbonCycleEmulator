@@ -232,6 +232,69 @@ LIK_ANNUAL_MIN_MONTHS <- 9L
 # see CHANGELOG 2026-08-09), so both stations contribute over the same years.
 LIK_SEAS_WINDOW <- c(1975, 2024)
 
+# ---- WHICH AMPLITUDE ESTIMATOR REPORTS A SEASONAL CYCLE (2026-08-27, Marcus)
+# The likelihood scores the per-year sin/cos COEFFICIENTS and never forms an
+# amplitude, so this constant governs DIAGNOSTICS AND REPORTING ONLY -- no
+# objective, no gate in the suite, moves.
+#
+# There are two ways to reduce a set of per-year harmonics (a_y, b_y) to one
+# amplitude and they are not the same statistic:
+#
+#   "mean_vector"    |mean over years of (a, b)|   -- the coherent cycle
+#   "mean_magnitude" mean over years of |(a, b)|   -- the cycle PLUS the
+#                                                     year-to-year scatter
+#
+# mean_magnitude cannot separate a coherent cycle from interannual noise, and
+# on the noisiest series in this problem the two disagree badly. Measured
+# 2026-08-27d over LIK_SEAS_WINDOW, mean_magnitude / mean_vector:
+#
+#     MLO CO2 1.00x | MLO d13C 1.00x | SPO CO2 1.02x | SPO d13C 1.33x
+#
+# and all four MODEL series sit at 1.00x, because the model carries one fixed
+# amplitude and phase and so has no scatter to inflate. The 1.33x therefore
+# lands entirely in the DENOMINATOR of the SPO d13C-per-ppm partition residual,
+# and mean_magnitude is the estimator that FLATTERS the model: it reports that
+# residual as 1.48x where the noise-immune one reports 1.93x (1.93 / 1.33 =
+# 1.45). ADOPTED: mean_vector, and the standing SPO partition target is 1.93x.
+# See [[amp_definition_mismatch]] and notes/handoff_2026-08-27d.
+CCX_SEAS_AMP_ESTIMATOR <- "mean_vector"
+
+#' Reduce per-year first-harmonic coefficients to ONE semi-amplitude
+#'
+#' The single reduction applied to both observations and model output, for the
+#' same reason ccx_year_harmonic() is the single harmonic estimator (design
+#' note 1b): a residual between two series reduced by two different statistics
+#' is not a residual.
+#'
+#' @param h data.frame from ccx_year_harmonic() (columns year, a, b).
+#' @param years optional year vector to restrict to -- pass the OBSERVATIONS'
+#'   own years when comparing a model series to them, so both sides reduce over
+#'   exactly the same set.
+#' @param estimator "mean_vector" (default, and the adopted one) or
+#'   "mean_magnitude" (retained so a diagnostic can PRINT both and show the
+#'   inflation rather than assert it).
+#' @return the SEMI-amplitude in the series' own units; peak-to-peak is 2x it.
+ccx_harmonic_amp <- function(h, years = NULL,
+                             estimator = CCX_SEAS_AMP_ESTIMATOR) {
+  estimator <- match.arg(estimator, c("mean_vector", "mean_magnitude"))
+  k <- if (is.null(years)) seq_len(nrow(h)) else match(years, h$year)
+  k <- k[!is.na(k)]
+  if (!length(k)) return(NA_real_)
+  a <- h$a[k]; b <- h$b[k]
+  if (estimator == "mean_vector") sqrt(mean(a)^2 + mean(b)^2)
+  else mean(sqrt(a^2 + b^2))
+}
+
+#' Peak month of the window-mean first harmonic, in the same month convention
+#' the observational climatology diagnostics use (month 0 = 1 Jan).
+#' a*sin(2*pi*phi) + b*cos(2*pi*phi) peaks at phi = atan2(a, b) / (2*pi).
+ccx_harmonic_peak_month <- function(h, years = NULL) {
+  k <- if (is.null(years)) seq_len(nrow(h)) else match(years, h$year)
+  k <- k[!is.na(k)]
+  if (!length(k)) return(NA_real_)
+  ((atan2(mean(h$a[k]), mean(h$b[k])) / (2 * pi)) %% 1) * 12
+}
+
 # ---- d13C SEASONAL CYCLE (2026-08-18, Marcus priority rework item 3) --
 # Scored from today. The d13C level block's old justification for not scoring
 # it -- "a derived consequence of the same NEP harmonic the CO2 seasonal
