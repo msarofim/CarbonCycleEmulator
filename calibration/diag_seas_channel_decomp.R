@@ -65,7 +65,29 @@ CD_CASES <- list(
   `emissions off`   = list(.emis = FALSE),
   `ALL model chans off` = list(seas_npp_amp_NH = 0, seas_npp_amp_SH = 0,
                               seas_T_amp_NH = 0, seas_T_amp_SH = 0,
-                              sst_seas_amp_NH = 0, sst_seas_amp_SH = 0))
+                              sst_seas_amp_NH = 0, sst_seas_amp_SH = 0),
+  # ---- THE CROSS-HEMISPHERE CASES (2026-08-27, prereg 27d) ------------
+  # The six cases above answer "which CHANNEL", per hemisphere. They cannot
+  # answer "which HEMISPHERE", because the two atmospheric boxes exchange at
+  # tau_ex and a NH channel therefore reaches SPO. Read AT SPO:
+  #   base - (NH chans off) = the NH-ORIGIN part of the model's SH cycle
+  #   base - (SH chans off) = the SH-LOCAL part
+  # and the two need not sum to the total -- they are ~90 deg apart if the
+  # tau_ex transfer function is doing what prereg 27d P2 predicts, so they are
+  # differenced VECTORIALLY like everything else here and their magnitudes may
+  # each exceed the total without any of them being wrong.
+  # EMISSION SEASONALITY IS NOT IN EITHER CASE: it is a global forcing flag
+  # (see channel 4 above), so it stays ON in both and sits in the residual.
+  # `emissions off` sizes it.
+  `NH chans off (3)` = list(seas_npp_amp_NH = 0, seas_T_amp_NH = 0,
+                            sst_seas_amp_NH = 0),
+  `SH chans off (3)` = list(seas_npp_amp_SH = 0, seas_T_amp_SH = 0,
+                            sst_seas_amp_SH = 0),
+  `SH LAND off (2)`  = list(seas_npp_amp_SH = 0, seas_T_amp_SH = 0))
+# The six single channels, named rather than indexed: the linearity check below
+# must not silently pick up the aggregate cases appended after them.
+CD_SINGLE <- c("NEP NH off", "NEP SH off", "resp NH off", "resp SH off",
+               "air-sea NH off", "air-sea SH off")
 sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 
 md <- readRDS(CD_MODE_FILE)
@@ -146,13 +168,50 @@ for (st in c("MLO", "SPO")) {
                 if (amp(dc) > 1e-6) amp(dd) / amp(dc) else NA))
   }
   # LINEARITY CHECK: do the six model channels sum to the all-off case?
-  sm <- Reduce(`+`, lapply(names(CD_CASES)[1:6], function(nm)
+  sm <- Reduce(`+`, lapply(CD_SINGLE, function(nm)
     base$v[[paste0("co2_", st)]] - cases[[nm]]$v[[paste0("co2_", st)]]))
   tot <- base$v[[paste0("co2_", st)]] - cases[["ALL model chans off"]]$v[[paste0("co2_", st)]]
   cat(sprintf("  %-21s %9.3f  vs all-off %.3f -> residual %+.3f ppm (%.1f %%)\n\n",
               "SUM of 6 channels", amp(sm), amp(tot), amp(sm) - amp(tot),
               100 * (amp(sm) - amp(tot)) / amp(tot)))
 }
+
+# ---------------------------------------------------------------------
+sep("2b. WHICH HEMISPHERE MAKES THE SH CYCLE?  (prereg 27d P1/P2)")
+cat("  Read at SPO. NH-origin = base - (NH chans off); SH-local = base - (SH\n")
+cat("  chans off). Global emission seasonality is in NEITHER and sits in the\n")
+cat("  residual; the 'emissions off' row of sec.2 sizes it. The two parts are\n")
+cat("  VECTORS and need not sum -- see the phase column.\n\n")
+cd_two_box <- function(tau) {
+  om <- 2 * pi
+  list(gain = (1 / tau) / sqrt(om^2 + (1 / tau)^2), lag_mo = 12 * atan(om * tau) / (2 * pi))
+}
+for (st in c("MLO", "SPO")) {
+  tot <- base$v[[paste0("co2_", st)]]
+  cat(sprintf("  --- %s (base CO2 %.3f ppm pk-pk, peak month %.2f)\n",
+              st, amp(tot), ang_mo(tot)))
+  cat(sprintf("  %-18s %9s %7s %8s | %10s %9s\n",
+              "part", "dCO2 ppm", "% tot", "peak mo", "dd13C", "sig"))
+  for (nm in c("NH chans off (3)", "SH chans off (3)", "SH LAND off (2)")) {
+    lab <- c("NH-origin", "SH-local", "SH-local LAND")[match(nm, c(
+      "NH chans off (3)", "SH chans off (3)", "SH LAND off (2)"))]
+    dc <- tot - cases[[nm]]$v[[paste0("co2_", st)]]
+    dd <- base$v[[paste0("d13_", st)]] - cases[[nm]]$v[[paste0("d13_", st)]]
+    cat(sprintf("  %-18s %9.3f %6.1f%% %8.2f | %10.4f %9.4f\n",
+                lab, amp(dc), 100 * amp(dc) / amp(tot), ang_mo(dc), amp(dd),
+                if (amp(dc) > 1e-6) amp(dd) / amp(dc) else NA))
+  }
+  cat("\n")
+}
+tb <- cd_two_box(p0$tau_ex)
+cat(sprintf("  ANALYTIC CHECK, two well-mixed atm boxes at tau_ex = %.3f yr, NH source only:\n",
+            p0$tau_ex))
+cat(sprintf("    |C_S/C_N| = (1/tau)/sqrt(om^2 + 1/tau^2) = %.4f ; lag = atan(om tau) = %.2f mo\n",
+            tb$gain, tb$lag_mo))
+cat(sprintf("    x co2_NH pk-pk %.3f  ->  %.3f ppm predicted at SPO, undamped\n",
+            amp(base$v$co2_MLO), tb$gain * amp(base$v$co2_MLO)))
+cat("    (MLO/SPO are the STATION series, so this is indicative of the box ratio,\n")
+cat("     not an identity -- the damping by SH sinks is not in the arithmetic.)\n")
 
 # ---------------------------------------------------------------------
 sep("3. WHAT EACH CHANNEL COSTS THE SCORED ROWS (log-units, off minus base)")

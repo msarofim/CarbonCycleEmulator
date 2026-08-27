@@ -116,3 +116,65 @@ reject the observed SH drivers, and the structural case for the box gets stronge
   third bullet. It is read for SHAPE and RATIO between rows, never as a refit's Δlogpost.
 - The `SST_SEAS_LOGSD` = 0.25 caveat stands: `sst_seas_amp_SH`'s prior z is partly a statement
   about a judgement width, so the RATIO to the observed 1.746 is the robust half.
+
+---
+
+# AMENDMENT, written after measurement A and BEFORE measurement B was designed or run
+
+**Measurement A falsified the premise P3/P4 were built on**, so they are re-posed here rather than
+scored on a knob that cannot move the observable. Recorded openly; nothing above is edited.
+
+**What A showed that forces this.** At SPO the two SH LAND channels are wildly unequal:
+`NEP SH off` moves the SPO cycle by **1.390 ppm** and `resp SH off` by **0.092 ppm** — 15× apart.
+`seas_T_amp_SH`, the parameter P3/P4 named and the one carrying the −4.64 σ prior flag, is the
+knob behind the 0.092. **It has almost no authority over the observable the test was to be scored
+on**, so a slice in it would have measured the ridge and the priors, not the partition. The knob
+with the authority is `seas_npp_amp_SH` — a MEASURED CONSTANT (0.5027, bracket 0.352–0.503), not
+a fitted parameter.
+
+**And A produced a sharper target than either.** The SH air-sea channel's contribution at SPO
+peaks in month **4.17** while the base SPO cycle peaks at **8.71** — the model's ocean channel is
+~136° AGAINST the cycle it is supposed to help make. Its signature is 0.0047 ‰/ppm against land's
+0.048, and the observed SPO signature is 0.0288 against the model's 0.0555. A mixture at those two
+signatures puts the observed cycle at **~56 % land / ~44 % ocean**; the model's is ~100 % land in
+BOTH of its parts, because even the 72 % that arrives from the NH carries NH LAND's signature.
+
+## B, re-posed — an OBSERVATIONAL two-signature inversion, not a parameter slice
+
+Each channel's δ¹³C harmonic vector is ANTIPHASE to its CO2 harmonic vector to within a month
+(measured in A: 6.03, 5.77, 5.93 months at SPO), so each channel's signature is a signed SCALAR
+and the observed pair of harmonic vectors inverts EXACTLY into a land and an ocean component:
+
+    CO2_obs  = L + O                          (2-D harmonic vectors)
+    d13_obs  = s_L·L + s_O·O                  s_L ≈ −0.048, s_O ≈ −0.0047 ‰/ppm
+    ⇒  L = (d13_obs − s_O·CO2_obs)/(s_L − s_O),   O = CO2_obs − L
+
+This gives the **observed** land and ocean components' amplitude AND PHASE from data alone. It
+satisfies the new standing rule: the target comes from an observation, not from the code's own
+agreement ([[threshold_from_obs_or_law]]). Error bars by bootstrap over the per-year harmonics
+(the observed SPO δ¹³C carries 1.33× Jensen inflation, so it is the noisy one) crossed with the
+measured signature ranges (land 0.0463–0.0481, ocean 0.0043–0.0049).
+
+**P5 — the observed SPO cycle needs a large ocean share.** Predicted ocean share of the SPO CO2
+amplitude **40–50 %**. Weak as a prediction (it is near-arithmetic from the signatures); it is
+here so the inversion's amplitude half is on the record before it runs.
+
+**P6 — THE RISKY ONE, and the one that would redirect §7c-3.** Predicted: **the observed SPO ocean
+component peaks ≥ 3 months LATER than the model's SH air-sea channel does (month 4.17)** —
+i.e. in austral winter/spring, months 7–10. The physical reading if it holds: the model's SH
+air-sea seasonality is SOLUBILITY-ONLY (`sst_seas_amp_SH` modulates SST and nothing else), which
+draws CO2 DOWN in the cold season, while the real Southern Ocean's seasonal flux is dominated by
+wintertime ENTRAINMENT of DIC-rich water, which pushes CO2 UP in the same season. Those two are
+opposite in phase, which is exactly the 136 ° A measured.
+
+**If P6 holds, §7c-3's structural candidate is NOT a land box.** It is a missing seasonal
+mixed-layer / entrainment cycle in the SH ocean, and no amount of re-partitioning the land can
+substitute for it — the fit's 4.9× suppression of `sst_seas_amp_SH` is then the fit correctly
+refusing a channel that arrives in the wrong season.
+
+**If P6 FAILS** — the observed ocean component peaks near month 4 too — then the model's ocean
+phase is right, only its size is wrong, and the land box returns as the leading candidate.
+
+**P7 — THE METHOD CONTROL, and it is scored first.** Run the identical inversion at MLO, where the
+answer is known: **predicted land share ≥ 80 %.** If MLO does not come back land-dominated the
+inversion is broken and P5/P6 are not read at all.
