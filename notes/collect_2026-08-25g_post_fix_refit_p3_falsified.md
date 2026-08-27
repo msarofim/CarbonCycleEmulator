@@ -108,3 +108,61 @@ SPO 1.06× → 0.95×).
    and the race parallelises — ~50 min on four free cores.
 4. **No posterior.** All of this is mode-finding; the sampler has still never converged, so "the
    posterior prefers" means "the mode is higher", not a probability.
+
+---
+
+# ADDENDUM 2026-08-27 — the ridge reparametrisation is a NULL
+
+`calibration/diag_ridge_reparam.R`. **Two campaigns, 8 paired races, no effect.**
+
+## The hypothesis
+
+`beta_max` and `fert_k` are correlated at ρ = +0.997, which is what collapses a simplex, and the
+ridge-invariant coordinate `enh(420) = beta_max·d/(fert_k + d)` is what the CO₂ integral actually
+constrains. Fitting in `(enh, fert_k)` should therefore need fewer evaluations. The refit spends
+~332,000 per arm, so a real speedup would matter more than any hardware change.
+
+## The result
+
+| campaign | starts | paired (v − u) final log-post |
+|---|---|---|
+| A, sd 0.025 (starts −1803 to −2495) | 4 | +1.31, −0.51, −0.08, +0.20 |
+| B, sd 0.006 (starts −1560 to −1601, the CRAWL) | 4 | −0.91, +0.56, −0.17, +0.07 |
+
+**COMBINED n = 8: mean +0.059, sd 0.673, t(7) = 0.25, p = 0.812, sign split exactly 4:4.**
+**95 % CI on the paired difference: [−0.50, +0.62] log-units.** Threshold ladder in campaign B
+(evals to reach a given log-post) gives 0.98× / 0.68× / 1.71× — no consistent direction.
+
+## AND THIS TIME THE TEST HAD POWER
+
+Campaign A alone was a null from a test that could not see the effect: every run stopped **1.0–2.3
+log-units short** of the mode, so it measured progress-from-a-distance, not the final crawl where
+the refit actually spends its evaluations (`ref` went −1909 → −1602 in **402** evals and needed
+~330,000 more for the last ~40). [[no_power_null]] — so campaign B was run in the crawl regime, and
+there **7 of 8 runs finished within 0.35 log-units of the canonical mode** (u: 0.22/0.81/0.05/0.35;
+v: 1.13/0.24/0.22/0.28). The arms converge, and they converge equally.
+
+**The step-scale confound was removed**, not just noted: `optim`'s Nelder-Mead perturbs each
+coordinate by 10 % OF ITS VALUE, so `logit(beta_max)` and `logit(enh)` would seed different-sized
+simplexes. `RR_OFFSET` translates the enh coordinate so both arms start at NUMERICALLY IDENTICAL
+vectors (asserted to 1e-12 in the worker); a translation cannot change geometry, so what is left is
+decorrelation alone.
+
+**The "speedup" statistic was RETIRED.** The first report printed "median 1.28×", which reads as a
+win; when the ridge arm loses, that ratio is below 1 by construction and its magnitude depends on an
+arbitrary crossing point. It is not symmetric and must not be medianed. The paired difference in
+final log-post is the statistic.
+
+## What it means
+
+**Decorrelating this one pair does not reduce the evaluation count.** A plausible reason — NOT
+tested here — is that ρ = +0.997 is a 2-parameter feature of a 20-parameter problem, and the
+conditioning is dominated by other directions. **The measurement that would settle it is the Hessian
+condition number in both parametrisations**, and memory `ccx_hess_step_sd` warns that the Hessian in
+exactly this plane is numerically delicate, so it needs per-direction step sizing.
+
+**⇒ IT ALSO CORRECTS THE TORCH ADVICE.** On 2026-08-26 I recommended trying this reparametrisation
+BEFORE investigating Torch, on the grounds that it might make the throughput question moot. **It
+does not.** The per-arm evaluation count is not reducible by this route, Nelder-Mead remains
+strictly serial, and so Torch's arm-parallelism (and the MCMC, `cs` partition or checkpointed) is
+back to being the main lever for throughput.
