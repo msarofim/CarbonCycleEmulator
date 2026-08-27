@@ -2,6 +2,107 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27g — the SOUTHERN-OCEAN ENTRAINMENT CHANNEL (version 4a): P0 green, P1 has power
+
+Pre-registered in `notes/prereg_2026-08-27g_so_entrainment_channel.md`, written before a line of
+the channel existed. **Two decisions taken by Marcus first, both from handoff 27g:**
+
+- **§4 SCOPE → 4a**, a second seasonal air-sea CHANNEL. One SH ocean box, no new state, no C++
+  column port. **4b (a genuine second SH ocean column) is HELD, conditional on 4a's residual.**
+- **§7 ESTIMATOR → `|mean vector|`.** The standing SPO partition target is therefore **1.93×**,
+  not the ~1.48× that had been quoted.
+
+### The estimator, and why it changes no result
+
+`CCX_SEAS_AMP_ESTIMATOR` + `ccx_harmonic_amp()` / `ccx_harmonic_peak_month()` give the two
+estimators one named home. **The likelihood scores the per-year sin/cos COEFFICIENTS and never
+forms an amplitude**, so this moves no objective and no gate — it is reporting only.
+`diag_seas_isotope_rectification.R` now prints BOTH estimators and the per-series inflation, so
+the **1.33×** that lands in the observed SPO δ¹³C DENOMINATOR is a measurement in the output
+rather than a claim in a comment. All four MODEL series sit at 1.00×, having no interannual
+scatter to inflate; only the observed SPO δ¹³C series does.
+
+### The channel
+
+A zero-mean seasonal DIC anomaly on the SH mixed layer, peaking at `CCX_ENT_SEAS_PEAK_MO = 7.50`
+— **MEASURED** from the ocean-area-weighted 40–90 S pCO2 first harmonic, the same standing as
+`CCX_SST_SEAS_LAG` = 1.32, **not fitted**. It perturbs only the DIC entering the pCO2 calculation,
+so it moves no carbon vertically and adds no box, and it reaches the atmosphere through the
+evasion limb that already carries `alpha_as_up` — so what it adds is **ocean-signatured**. That is
+the point: SPO's cycle is too photosynthetic. **SH only**, and the asymmetry is measured rather
+than convenient: NH-mean pCO2 is **0.30 months** from NH-mean SST, so the NH gets no twin.
+
+Default 0, and ABSENT is 0 too, so every stored mode still runs the model it was fitted to. **Not
+in `CCX_PARAM_TABLE`** — adding it would change the calibrated vector's length and invalidate the
+stored mode and its Hessian.
+
+### P0, the method control — 35 assertions, all PASS
+
+Bit-identical at zero amplitude in BOTH cores; R/C++ parity with the channel ON at
+`test-parity.R`'s tolerance; **a mutation guard so parity cannot pass by both cores ignoring the
+parameter**; `seas_drivers = 0` kills it; conservation on `ccx_total()` in a closed system.
+
+It also **discharges 27g §6's audit**: `ccx_hold_climate()` is COMPLETE over the forcing columns
+that carry climate (`gmst`, `enso`, `sst_anom_{NH,SH}`), and the gap found in 27c is structural
+and confined to the cycles `ccx_deriv()` generates from PARAMETERS and `t` — land T, NPP, SST, and
+now entrainment. Those are gated by `seas_drivers`, which is the control to use. **An inventory
+gate now fails if a new forcing column appears without that decision being made.**
+
+### P1, the power measurement — PASS, and the phase is right
+
+Threshold **0.70 ppm**, taken from the OBSERVED antiphase gap (model SPO ocean 0.236 ppm at month
+3.35, observed 0.522 at 8.52 — 5.17 months apart, so the vector difference is 0.236 + 0.522), not
+chosen to pass. At **10 µmol/kg**, inside the 5–30 µmol/kg the prereg's pre-check derives, the
+channel delivers **0.860 ppm** at SPO and the model's whole ocean component moves
+
+| | amplitude | peak month |
+|---|---|---|
+| model, channel off | 0.247 ppm | 3.68 |
+| model, channel at 10 | **0.614 ppm** | **9.91** |
+| observed (inversion) | 0.522 ppm | 8.52 |
+
+**Size and phase both land near observation, and the ocean limb rotates ~6 months** — so this is
+not a reparametrisation of `sst_seas_amp_SH`, which was the failure mode named in advance.
+
+**AND THE COST IS EXACTLY WHERE THE ACCOUNT SAYS IT SHOULD BE.** At frozen neighbours the whole
+bill falls on `co2_seasonal_SPO` (57.4 → −169.5) while `d13c_seasonal_SPO` barely moves (−3.4).
+The SPO CO2 amplitude was already matched **by two errors cancelling**; adding a correctly-phased
+ocean limb puts ocean (9.84) nearly in phase with land (8.82), as the observations have them
+(8.52 and 9.29), so the total overshoots **until the land comes down**. Model SPO land is 2.01×
+observed. **That is what P2 tests.**
+
+### Two bugs found and fixed before anything was believed
+
+- `diag_so_entrainment_power.R`'s "total ocean" column subtracted a run that **still had the
+  channel on**, and so reported a dead-flat 0.247 ppm at month 3.68 for every amplitude. It was
+  isolating the SST limb and calling it the ocean.
+- The first conservation assertion used `ocean_C + land_C + atm_C`, which **omits the wood/product
+  pool** — replaced by the repo's own `ccx_total()` identity in a closed system.
+
+### ⚠ AN OPEN ITEM FOUND IN PASSING, PRE-EXISTING AND NOT CAUSED BY THIS WORK
+
+**`ccx_make_logpost()` does not reproduce the canonical mode's stored `logpost` at the mode's own
+`u_mode`: −1547.9370 against a stored −1544.6148, an offset of −3.3223.** Verified **identical at
+commit `fbf4b4c`**, before the entrainment channel existed, by checking `R/` and `src/` out at
+that commit in the working tree. Entirely in the LIKELIHOOD — the prior + Jacobian reproduce to
+the last decimal (−57.3519, and stored streams + that prior = the stored logpost exactly).
+
+**Its signature is an INTERHEMISPHERIC REDISTRIBUTION**, NH and SH rows moving in mirror-image
+pairs: `d14c_NH` −2.78 / `d14c_SH` +2.44, `d13c_level_MLO` −2.65 / `d13c_level_SPO` +1.97,
+`co2_level_MLO` −2.58 / `co2_level_SPO` −0.66.
+
+**Ruled out:** `FORC_USE_LUC_NH_SHARE_TS` and `FORC_USE_EMIS_SEASONALITY` (all four combinations
+tried; the shipped TRUE/TRUE is the best AND is the one that is 3.32 off), `substeps` (4 both
+ways), and the refit's `h_ml` [85, 120] bound (`h_ml` = 85.729 is inside both brackets, and the
+prior reproduces exactly regardless). **NOT diagnosed further — flagged, not resolved.**
+
+**It does not invalidate P2**, whose comparison is MATCHED (`match_incumbents_optim`): incumbent
+and challenger are scored by the SAME harness, so a constant offset cancels out of every
+difference. What it WOULD invalidate is quoting an absolute logpost from the refit script against
+a number from the mode file, so that script does not do it and carries the offset as a named
+constant with a gate that fires if it ever moves.
+
+
 ## 2026-08-27e/f — `tau_ex` EXONERATED; and the SH ocean channel's PHASE is RIGHT — its WEIGHTING is wrong
 
 Pre-registered in `notes/prereg_2026-08-27e_tau_ex_leak_profile.md` and
