@@ -135,6 +135,11 @@ struct Par {
   int    seas_drivers;
   double seas_T_amp[2], seas_lag_p;
   double sst_seas_amp[2];
+  // Southern-Ocean entrainment channel (2026-08-27g, version 4a). SH only --
+  // a scalar, not a [2] array, because the NH control measures 0.30 months
+  // between NH-mean pCO2 and NH-mean SST and so gets no such channel. See
+  // CCX_ENT_SEAS_PEAK_MO in R/model.R for the measurement and the physics.
+  double ent_seas_amp_SH;
   // DIAGNOSTIC CHANNEL SWITCH (2026-08-20f), not a fitted parameter and not in
   // CCX_PARAM_TABLE. Scales the seasonal NEP term only. 1 = the shipped model,
   // bit for bit; 0 = that channel off with the ANNUAL BUDGET UNTOUCHED, because
@@ -164,6 +169,12 @@ static const double SEAS_T_LAG = 2.0;
 static const double SST_SEAS_LAG = 1.32;   // MEASURED 2026-08-20g from ERSSTv5
                                            // (was 2.5, a stated prior belief). MUST
                                            // track CCX_SST_SEAS_LAG in R/model.R.
+// Twin of CCX_ENT_SEAS_PEAK_MO in R/model.R -- MUST track it. The month at
+// which the Southern-Ocean entrainment channel's surface-DIC anomaly peaks,
+// MEASURED from the ocean-area-weighted 40-90 S pCO2 first harmonic. NOT a lag
+// off a mid-July reference like the two above: it is an absolute peak month
+// measured in the Southern Hemisphere, and it carries no hemispheric sign flip.
+static const double ENT_SEAS_PEAK_MO = 7.50;
 
 // Daily-mean TOA insolation, flat-sun formula, S0 omitted (all uses divide by
 // an annual-mean norm, so it cancels). Twin of R's ccx_insol(); periodic in t
@@ -399,7 +410,17 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
          ? (hi == 0 ? 1.0 : -1.0) * P.sst_seas_amp[hi]
            * std::sin(2.0 * M_PI * (t - (3.5 + SST_SEAS_LAG) / 12.0))
          : 0.0);
-    const double dic_ml = y[IX(iml, C)] * A.mol_per_GtC / A.ml_mass_kg[hi];
+    // Southern-Ocean entrainment channel -- twin of the block in R/model.R,
+    // which carries the rationale (SH only; zero-mean driver, the pCO2
+    // rectification accepted as physics; no state touched, so this is 4a and
+    // not a second ocean column; reaches the atmosphere through the existing
+    // evasion limb and is therefore ocean-signatured). A sine peaks a quarter
+    // cycle after its zero crossing, so peak month M is phase M/12 - 1/4.
+    const double dic_ml = y[IX(iml, C)] * A.mol_per_GtC / A.ml_mass_kg[hi]
+      + ((P.seas_drivers > 0 && hi == 1 && P.ent_seas_amp_SH != 0.0)
+         ? P.ent_seas_amp_SH * 1e-6
+           * std::sin(2.0 * M_PI * (t - (ENT_SEAS_PEAK_MO / 12.0 - 0.25)))
+         : 0.0);
     double K0, pco2_ml;
     if (P.revelle_frozen > 0.0) {
       K0 = K0_only(sst, A);
@@ -622,6 +643,7 @@ static Par unpack_par(const List& p) {
   P.seas_T_amp[0] = p["seas_T_amp_NH"]; P.seas_T_amp[1] = p["seas_T_amp_SH"];
   P.seas_lag_p = p["seas_lag_p"];
   P.sst_seas_amp[0] = p["sst_seas_amp_NH"]; P.sst_seas_amp[1] = p["sst_seas_amp_SH"];
+  P.ent_seas_amp_SH = p["ent_seas_amp_SH"];
   P.seas_npp_amp[0] = p["seas_npp_amp_NH"]; P.seas_npp_amp[1] = p["seas_npp_amp_SH"];
   P.sst_obs = (int) p["sst_obs"];
   // 720-point norm grid, NOT 12 -- twin of ccx_seas_norms() in R/model.R,

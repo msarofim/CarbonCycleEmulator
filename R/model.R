@@ -255,6 +255,39 @@ CCX_SST_SEAS_LAG <- 1.32                   # months past the mid-July zero-lag p
                                            # src/ccx_core.cpp -- change both.
 CCX_SEAS_DRIVERS_DEFAULT <- 1
 
+# ---- SOUTHERN-OCEAN ENTRAINMENT CHANNEL (2026-08-27g, version 4a) -----
+# MEASURED, not fitted -- the same standing as CCX_SST_SEAS_LAG above, and for
+# the same reason: it is a phase, and a phase is observable.
+#
+# WHY THE CHANNEL EXISTS. sst_seas_amp_* modulates SST and NOTHING else, so
+# every air-sea cycle the model can build follows solubility and peaks in its
+# hemisphere's late summer. The observed SH ocean is TWO regimes 5.88 months
+# apart (calibration/diag_so_pco2_phase.R, Landschutzer/Laruelle NCEI 0209633
+# + ERSSTv5, ocean-area weighted over LIK_SEAS_WINDOW):
+#
+#     subtropical 0-40 S   11.70 uatm at month 1.38   0.78 mo from its SST
+#     Southern Ocean 40-90 S  7.18 uatm at month 7.50  5.56 mo from its SST
+#     SH mean (VECTOR)      4.56 uatm at month 1.20 -- a 76 % CANCELLATION
+#
+# so a solubility-only channel matches the hemispheric RESIDUAL while matching
+# NEITHER regime, and SPO sees the Southern Ocean. The missing physics is
+# wintertime mixed-layer deepening entraining DIC-rich water, which raises
+# surface pCO2 in the season solubility alone is lowering it.
+#
+# THE NH IS THE CONTROL AND GETS NO SUCH CHANNEL: NH-mean pCO2 sits 0.30 mo
+# from NH-mean SST. The NH really is solubility-dominated at the hemispheric
+# mean, and banding it on this evidence would be unfounded. The asymmetry here
+# is MEASURED, not a convenience.
+#
+# THE PHASE. Peak month of the ocean-area-weighted 40-90 S pCO2 first harmonic.
+# Band spread is the honest error scale: 40-60 S peaks 7.10, 60-90 S peaks 7.79
+# -- a climatology carries no bar of its own. NO hemispheric sign flip: unlike
+# the SST term this phase was measured IN the Southern Hemisphere and is
+# absolute.
+CCX_ENT_SEAS_PEAK_MO <- 7.50   # month of peak entrainment-driven surface DIC;
+                               # MEASURED. Twin: ENT_SEAS_PEAK_MO in
+                               # src/ccx_core.cpp -- change both.
+
 #' Daily-mean top-of-atmosphere insolation at latitude phi, flat-sun formula.
 #' S0 is omitted -- every use divides by the annual mean, so it cancels.
 #' Periodic in t with period exactly 1 (the +10 day offset rides inside the
@@ -734,6 +767,24 @@ ccx_default_params <- function() {
     # ocean); free with shrinkage priors, for the seasonal streams to choose.
     sst_seas_amp_NH = 2.0,
     sst_seas_amp_SH = 1.2,
+    # Southern-Ocean entrainment channel (2026-08-27g, version 4a). Amplitude
+    # of the zero-mean seasonal DIC anomaly it imposes on the SH mixed layer,
+    # umol/kg, peaking at CCX_ENT_SEAS_PEAK_MO. See that constant for what the
+    # channel is and why the NH has no twin.
+    #
+    # DEFAULT 0 = the channel is OFF and the model is the shipped one BIT FOR
+    # BIT. It is switched on deliberately, by a scan or a fit, never by
+    # accident. NOT in CCX_PARAM_TABLE: adding it would change the length of
+    # the calibrated vector and invalidate the stored mode and its Hessian.
+    #
+    # SCALE, from a pre-check done before the channel was written: the Southern
+    # Ocean's own solubility cycle (SST amp 3.0 K x ~4.23 %/K x ~370 uatm ~
+    # 47 uatm at month 1.94) has to be OVERCOME to leave the observed 19.45
+    # uatm at month 7.50, so the entrainment term is ~66 uatm in-band, i.e.
+    # dDIC ~ (66/370) x 2150 / 13 ~ 30 umol/kg -- and ~11 umol/kg averaged over
+    # the SH box after the 0.369 ocean-area weight of the band. A fitted value
+    # far outside ~5-30 is the channel being used as a fudge factor.
+    ent_seas_amp_SH = 0,
     # 1 = annual-mean SST from the forcing's OBSERVED HadSST4 columns (with the
     # ratio-scaled extension beyond the record); 0 = the legacy
     # sst_scale * gmst map. Structural switch, not calibrated.
@@ -1130,6 +1181,34 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
              sin(2 * pi * (t - (3.5 + CCX_SST_SEAS_LAG) / 12))
     }
     dic_ml <- y[iml, "C"] * aux$mol_per_GtC / aux$ml_mass_kg[[h]]   # mol/kg
+    # SOUTHERN-OCEAN ENTRAINMENT CHANNEL (2026-08-27g, 4a). SH only; see
+    # CCX_ENT_SEAS_PEAK_MO for the measurement and the NH control that says
+    # the NH gets no twin. Under the SAME seas_drivers switch as every other
+    # seasonal driver, so ccx_spinup()'s zeroing covers it and seas_drivers = 0
+    # is still the exact aseasonal model.
+    #
+    # WHAT IT DOES AND DOES NOT DO. It perturbs the DIC that enters the pCO2
+    # calculation; it does NOT touch the state vector, so it moves no carbon
+    # vertically and adds no box -- this is version 4a, a seasonal-flux channel,
+    # NOT a second ocean column. It reaches the atmosphere only through the
+    # evasion limb below, which already carries aux$alpha_as_up, so the carbon
+    # it adds is OCEAN-signatured. That is the entire point: the model's SPO
+    # seasonal cycle is too photosynthetic, and this is the one channel that can
+    # add ocean-signatured CO2 in austral winter.
+    #
+    # The driver is zero-mean; the response is not, because carbonate chemistry
+    # is nonlinear in DIC. That rectification is ACCEPTED AS PHYSICS -- the same
+    # call already made for the seasonal SST term ten lines up and for the
+    # fertilisation rectifier. It is the ocean's own nonlinearity, not an
+    # artefact of the discretisation.
+    #
+    # The peak month is absolute (no hemispheric sign flip): a sine peaks a
+    # quarter cycle after its zero crossing, so peak month M is phase M/12-1/4.
+    if (isTRUE(p$seas_drivers > 0) && h == "SH" && !is.null(p$ent_seas_amp_SH) &&
+        p$ent_seas_amp_SH != 0) {
+      dic_ml <- dic_ml + p$ent_seas_amp_SH * 1e-6 *
+                sin(2 * pi * (t - (CCX_ENT_SEAS_PEAK_MO / 12 - 0.25)))
+    }
     k      <- carb_constants(sst)
     pco2_ml <- if (isTRUE(p$revelle_frozen > 0)) {
       # Buffer factor pinned at its preindustrial value: pCO2 responds to DIC

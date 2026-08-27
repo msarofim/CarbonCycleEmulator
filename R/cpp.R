@@ -127,6 +127,11 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$seas_lag_p)) p$seas_lag_p <- 2.25
   if (is.null(p$sst_seas_amp_NH)) p$sst_seas_amp_NH <- 2.0
   if (is.null(p$sst_seas_amp_SH)) p$sst_seas_amp_SH <- 1.2
+  # ABSENCE = 0 = the channel OFF = the pre-2026-08-27g model, bit for bit. A
+  # parameter list written before the Southern-Ocean entrainment channel
+  # existed reaches the core as the model it was built for -- the same
+  # principle as seas_drivers and sst_obs below.
+  if (is.null(p$ent_seas_amp_SH)) p$ent_seas_amp_SH <- 0
   # ABSENCE = 1 = the shipped model: a parameter list written before 2026-08-20f
   # reaches the core as the model it was built for.
   if (is.null(p$seas_npp_amp_NH)) p$seas_npp_amp_NH <- 1
@@ -164,7 +169,8 @@ ccx_cpp_par <- function(p) {
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH",
       "seas_drivers", "seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p",
-      "sst_seas_amp_NH", "sst_seas_amp_SH", "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
+      "sst_seas_amp_NH", "sst_seas_amp_SH", "ent_seas_amp_SH",
+      "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
       "revelle_frozen")]
 }
 
