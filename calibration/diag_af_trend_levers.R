@@ -110,7 +110,8 @@ P0$gamma_enso <- md$par_mode$gamma_enso
 P0$pump_mode  <- md$pump_mode
 LUC0  <- md$par_mode$luc_scale
 BOMB0 <- md$par_mode$bomb_total
-cat(sprintf("mode arm N (logpost %.2f): beta_max %.4f  fert_k %.1f  q10 %.3f  kz %.0f  f_luc_perm %.3f\n",
+cat(sprintf("mode arm %s (logpost %.2f): beta_max %.4f  fert_k %.1f  q10 %.3f  kz %.0f  f_luc_perm %.3f\n",
+            CCX_MODE_CANONICAL,
             md$logpost, P0$beta_max, P0$fert_k, P0$q10, P0$kz, P0$f_luc_perm))
 
 al_run <- function(p, luc_scale = LUC0) {

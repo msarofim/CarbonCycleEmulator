@@ -89,8 +89,8 @@ point <- function(tl, sl) {
 }
 
 owd <- setwd(work); on.exit(setwd(owd))
-cat(sprintf("profiling at %s (arm N mode), shipped values T=%.1f S=%.1f\n\n",
-            LAGP_MODE_FILE, LAGP_T_HOLD, LAGP_S_HOLD))
+cat(sprintf("profiling at %s (arm %s mode), shipped values T=%.1f S=%.1f\n\n",
+            LAGP_MODE_FILE, CCX_MODE_CANONICAL, LAGP_T_HOLD, LAGP_S_HOLD))
 cat("Everything except the profiled constant is FROZEN at the mode. See the\n")
 cat("header: the incumbent is fitted here and the challengers are not.\n\n")
 show <- function(lines, what) {

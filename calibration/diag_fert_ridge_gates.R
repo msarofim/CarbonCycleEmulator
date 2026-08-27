@@ -143,7 +143,8 @@ fr_irf <- function(p, spin) {
 }
 
 cat(sprintf("\n=== THE FERTILISATION RIDGE AGAINST GATES 4, 7, 12 ===\n"))
-cat(sprintf("mode arm N: beta_max %.4f  fert_k %.1f  (logpost %.2f)\n", P0$beta_max, P0$fert_k, md$logpost))
+cat(sprintf("mode arm %s: beta_max %.4f  fert_k %.1f  (logpost %.2f)\n",
+            CCX_MODE_CANONICAL, P0$beta_max, P0$fert_k, md$logpost))
 cat(sprintf("ridge held at enh(%d ppm) = %.4f; beta_max solved for each fert_k\n", FR_CHI_NOW, ENH0))
 cat(sprintf("TARGETS: AF %.3f, dec sd %.4f, trend %+.4f | land %.2f+-0.50, ocean %.2f+-0.40 | IRF floors %s\n\n",
             AF_OBS_ALL, AF_OBS_SD, AF_OBS_TR, FR_GCB_LAND, FR_GCB_OCEAN,

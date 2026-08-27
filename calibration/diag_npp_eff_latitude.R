@@ -200,7 +200,7 @@ for (h in c("NH", "SH")) {
 if (file.exists(EL_MODE_FILE)) {
   fit <- readRDS(EL_MODE_FILE); pm <- fit$par_mode
   npp0 <- ccx_const("NPP_GLOBAL_PI")
-  cat("=== SEASONAL NEP SWING AT THE ADOPTED MODE (arm N) ===\n")
+  cat(sprintf("=== SEASONAL NEP SWING AT THE ADOPTED MODE (arm %s) ===\n", CCX_MODE_CANONICAL))
   cat(sprintf("  NPP_GLOBAL_PI %.1f GtC/yr, npp_frac_NH %.4f -> NH %.1f GtC/yr\n",
               npp0, pm[["npp_frac_NH"]], npp0 * pm[["npp_frac_NH"]]))
   for (h in c("NH", "SH")) {
