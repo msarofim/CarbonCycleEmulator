@@ -2,6 +2,91 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27 — WHOLE-MODEL QUALITY RE-ESTABLISHED POST-FIX: §7a, §7b, and §7c items 1–2
+
+`notes/collect_2026-08-27_post_fix_model_quality.md`. Commits `aa1c5e1`, `2779463`, `b5d482d`.
+Executes §7 of `notes/handoff_2026-08-27_post_fix_model_quality.md`.
+
+**§7a — the canonical mode is now named in ONE place.** `ccx_mode_file()` (`R/paths.R`) plus
+`CCX_MODE_CANONICAL` / `CCX_MODE_FILES` / `CCX_MODE_RETIRED`. 38 sites converted, plus
+`app/global.R` and `app/DEPLOY.md`. The retired names `N`/`D`/`ref` now ERROR **with the reason**
+(quarantine dir + fix commit `6bda464`) rather than file-not-found — because a diagnostic that
+resolves silently to a vector fitted on a different objective is the dangerous failure, and a
+missing file is the loud one. `ref` is refused deliberately: its mode file is the pre-fix SEED.
+`tests/testthat/test-mode-file.R` lints the literal out, with five DECLARED exemptions.
+`CCX_MODE_PINNED` records which arms are free, because `pin90`'s stored −1544.50 reads HIGHER than
+the canonical −1544.615 and is really **−1556.17** once the +11.6698 pin offset is removed; the test
+asserts the trap is still live so the comment cannot go stale.
+
+Two live-path defects surfaced only by doing the conversion: `diag_design_gates_at_mode.R`'s τ_ex
+profile read `V$N` and **crashed**, and ten call sites wrapped `ccx_path()` around a path that is
+already absolute.
+
+**§7b — DESIGN §6 re-measured at `from90` and `pin90`. THREE OF FOUR GATES MOVED.**
+
+| gate | pre-fix | `from90` | `pin90` |
+|---|---|---|---|
+| 4 AF level / decadal sd / **trend** | 0.434 / 0.019 / **−0.0007** | 0.413 / 0.026 / **+0.0080** | 0.391 / 0.036 / +0.0137 |
+| 5 NH→SH bomb lag (obs 1.34) | 0.92 | 0.97 — **FAILS** | 0.97 |
+| 7 land / ocean σ | +2.12 / −0.64 | **+2.46** / −0.67 | +3.03 / −0.55 |
+| 12 TH 20/50/100 | ✗✗✗ | **✗✓✓** | ✓✓✓ |
+| 12b tail ratio | 0.707 | 0.709 | 0.716 |
+
+**Gate 4's decadal AF trend had the WRONG SIGN pre-fix and now has the right one** at the
+posterior's own preferred free mode. **Gate 12 passes two of three horizons — the first pass at any
+fitted mode** (12.14 / 24.98 / 41.11; TH 20 misses by 0.48 %). **Gate 12b moved 0.002 while 12a moved
+from 0-of-3 to 2-of-3**, which is exactly the division of labour it was added for: 12a reads the
+calibration, 12b reads the STRUCTURE. Gate 7's ocean half passes and its land half went further out.
+Superseded blocks kept in `<details>`, marked not-comparable, rather than deleted.
+
+**Withdrawn:** `diag_joos_irf.R`'s header claim that the model is "INSIDE BOTH" of Joos §4.4.1's
+PI/PD ranges is false at every vector on disk (PI 27.4 vs 34–47; PD 43.8 vs 45–62). The ORDERING
+passes; the LEVELS do not.
+
+**§7c.1 — the rank-one d¹³C finding tightened 150×, and the COMMON MODE is gone.**
+`grad_off_d13c` = **+0.08512 ‰** equals the MLO−SPO level-bias difference **+0.08514 ‰** to
+**0.00002 ‰** (was 0.003 pre-fix). The two station biases are now **+0.84 / −0.86 z**, mean
+**−0.00042 ‰**, against +1.12 / −0.77 pre-fix: **the residual d¹³C level misfit is now PURELY
+ANTISYMMETRIC.** ⇒ `ccx_fit_at_mode`'s standing design recommendation — one shared representation
+parameter generating both species' level offsets by mass balance — **is now unmotivated and should
+NOT be built**: it existed to absorb a common mode that no longer exists. All 14 streams reproduce
+their stored logL; nothing is grossly misfit.
+
+**§7c.2 — `rep_dC` is no longer the model's largest prior flag. THREE SEASONAL AMPLITUDES ARE, and
+the fix INVERTED their hemispheric asymmetry.** `rep_dC` 5.566 → **3.378** sd, now only fourth.
+Ahead of it: `sst_seas_amp_SH` −4.25 → **−6.32 (worse)**, `seas_T_amp_SH` −3.95 → −4.64,
+`sst_seas_amp_NH` **−6.22 → −3.48 (relieved)**. Priced on RATIOS, which do not depend on a prior
+width: SH ocean seasonal SST at **21 %** of observed, NH ocean **42 %**, SH land **29 % of its
+bracket's LOW end**, NH land **131 % of the HIGH end**. **The fit buys its seasonal cycle by cranking
+NH LAND far above any observed amplitude and pushing SH land and both oceans far below.** Two of the
+three worst-flagged parameters in the whole fit are SH seasonal amplitudes — independent
+corroboration of §7c item 3's *untested* suspicion that the SH residual is the larger and a single SH
+land box at an effective latitude is the suspect. Caveat carried: `SST_SEAS_LOGSD` = 0.25 is a
+stated JUDGEMENT width (DESIGN 5.2, "no bracket for it exists"), so the ocean pair's z is partly a
+statement about that width — the ratio is the robust half. The land pair's width is a measured
+bracket, not a judgement.
+
+**FOUND, NOT PATCHED — DESIGN gate 7's two reconstructions disagree, and the whole disagreement is
+the run's LAST YEAR.** Land 2015–2024 reads **3.590** (+2.46σ) in `diag_design_gates_at_mode.R`
+against **3.525** (+2.33σ) in `diag_fit_at_mode.R`; per year they are identical to 1e-4 for
+2015–2023 and differ by **0.65 GtC/yr in 2024**. The run ends at 2024, so neither file has a 2025
+state to difference the land stock against — one extrapolates FLAT (`approx(rule = 2)`), the other
+LINEARLY. Dropping 2024 gives 3.514 / **+2.31σ**. The verdict (FAIL land) is unchanged, so this is
+not result-changing; the fix is a methodological choice — drop the truncated year, or run to 2025 —
+and it is **Marcus's, not resolved here.** DESIGN's claim that the two reconstructions "agree to the
+reported precision" has been moved into the superseded block.
+
+**NOT DONE (handoff §7c items 3–6, §7d):** the seasonal-partition test itself at ~1.5×, the d¹³C
+Suess overshoot re-check, whether `gcb_land_sink` should be decisive, `kz` railing (unchanged at
+6332 against a bracket top of 6528), the pump's `alpha13_signed` (b) case, `alpha_as_*`, the Hessian
+condition number, and the sampler.
+
+**PRE-EXISTING FAILURE, REPORTED NOT TOUCHED:** `test-fluxes.R:99/100` fail at `5777955` and still
+fail — the seasonal ¹⁴C label-turnover assertions (`on$tau_flux` vs `off$tau_flux`, and the >0.2 yr
+label shortening). Verified by stashing that they pre-date today's work. Almost certainly the
+isotope fix itself acting on exactly the quantity those two lines assert; it belongs in the §7c
+assessment, not in a test edit.
+
 ## 2026-08-25g — the post-fix refit is RUNNING, 3 arms, pre-registered
 
 `notes/prereg_2026-08-25f_post_isotope_fix_refit.md`, written before launch. Arms: `ref` (free, warm
