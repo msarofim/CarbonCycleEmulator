@@ -248,6 +248,11 @@ saveRDS(list(mode = basename(RF_MODE_FILE), block = RF_BLOCK,
              harness_offset = gap,
              par_mode = md$par_mode[RF_BLOCK], par_inc = pv_inc[RF_BLOCK],
              par_ch = pv_ch[RF_BLOCK],
+             # THE FULL VECTORS, not just the block. The first version of this
+             # saved only RF_BLOCK, and scoring the inversion at the refitted
+             # model then meant reconstructing u_ch from the block by hand.
+             # Anything downstream needs the vector the fit actually landed on.
+             u_inc = u_inc, u_ch = u_ch, u_mode = u0,
              streams = list(mode = s_mode, incumbent = s_inc, challenger = s_ch),
              verdict = verdict),
         file.path(OUTDIR, "so_entrainment_refit.rds"))

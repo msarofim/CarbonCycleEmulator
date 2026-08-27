@@ -84,6 +84,26 @@ SI_ENT_AMP <- as.numeric(Sys.getenv("CCX_ENT_AMP", "0"))
 stopifnot(is.finite(SI_ENT_AMP), SI_ENT_AMP >= 0)
 p0$ent_seas_amp_SH <- SI_ENT_AMP
 
+# ---- PARAMETER OVERRIDES, for scoring a REFITTED vector --------------
+# The channel is only half of what a refit produces: the other half is where
+# the seasonal drivers moved to pay for it. Scoring P3/P4 at the MODE's drivers
+# with only the amplitude changed would answer a question nobody asked -- that
+# model is not one any fit landed on. CCX_PAR_RDS names an .rds holding a named
+# list of parameter overrides (the refit's own `par_ch`, say), applied on top of
+# the mode.
+SI_PAR_RDS <- Sys.getenv("CCX_PAR_RDS", "")
+if (nzchar(SI_PAR_RDS)) {
+  ov <- readRDS(SI_PAR_RDS)
+  stopifnot(is.list(ov), length(ov) > 0, !is.null(names(ov)))
+  unknown <- setdiff(names(ov), names(p0))
+  if (length(unknown))
+    stop("CCX_PAR_RDS names parameters the model does not have: ",
+         paste(unknown, collapse = ", "))
+  for (n in names(ov)) p0[[n]] <- ov[[n]]
+  cat(sprintf("PARAMETER OVERRIDES from %s: %s\n", basename(SI_PAR_RDS),
+              paste(sprintf("%s=%.4g", names(ov), unlist(ov)), collapse = ", ")))
+}
+
 obs <- ccx_prepare_obs()
 cat(sprintf("mode %s (arm %s) | seas_drivers %g | nboot %d\n",
             basename(ccx_mode_file()), md$pump_mode, p0$seas_drivers, SI_NBOOT))
