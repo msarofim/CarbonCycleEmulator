@@ -269,6 +269,40 @@ fetch("eide_c13_suess",
             "use the global mean, not the hemispheric contrast."))
 
 # ---------------------------------------------------------------------
+# 6c. Surface-ocean pCO2 climatology (2026-08-27e)
+# ---------------------------------------------------------------------
+# WHY IT IS HERE. The seasonal-partition inversion
+# (calibration/diag_seas_signature_inversion.R) says the OCEAN-signatured part
+# of the observed SPO seasonal CO2 cycle peaks in month 8.52 [7.82, 9.20],
+# while the model's only SH air-sea seasonal channel -- `sst_seas_amp_SH`,
+# which modulates SST and nothing else -- peaks in month 4.16. This file is the
+# INDEPENDENT observational check on that phase, and it is the only route to
+# one: the inversion derives the phase from atmospheric station data, and a
+# surface-ocean pCO2 climatology derives it from the ocean side.
+#
+# 47.5 MB. Monthly climatology, 1x1 deg open ocean merged with 0.25 deg coastal.
+# CHOSEN OVER Takahashi et al. 2009 (older, 4x5 deg) and SeaFlux (needs the
+# climatology built) -- Marcus 2026-08-27, on `weight_recent_literature`.
+#
+# ⚠ IT IS A pCO2 PRODUCT, NOT A FLUX PRODUCT. The flux is k * K0 * dpCO2, so a
+# phase taken from dpCO2 alone OMITS the seasonality of the gas-transfer
+# velocity (wind) and of K0. Whoever uses it must say so.
+cat("[6c] Landschutzer/Laruelle merged surface-ocean pCO2 climatology\n")
+
+fetch("pco2_clim_mpi_ulb",
+      paste0("https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0209633/",
+             "MPI-ULB-SOM_FFN_clim.nc"),
+      "MPI-ULB-SOM_FFN_clim.nc",
+      paste("Landschutzer P, Laruelle GG, Roobaert A, Regnier P (2020). A combined",
+            "global ocean pCO2 climatology combining open ocean and coastal areas.",
+            "Earth Syst. Sci. Data 12:2537-2553, doi:10.5194/essd-12-2537-2020.",
+            "Dataset: NOAA NCEI Accession 0209633, doi:10.25921/qb25-f418."),
+      paste("Monthly pCO2 CLIMATOLOGY, 1x1 deg open ocean + 0.25 deg coastal, from",
+            "SOCAT via the 2-step SOM-FFN neural network. pCO2 ONLY -- no flux",
+            "field, and no wind/gas-transfer seasonality. Used by",
+            "calibration/diag_so_flux_phase.R for the SH seasonal PHASE only."))
+
+# ---------------------------------------------------------------------
 # 7. Local provenance — files reused from sibling projects (not downloaded)
 # ---------------------------------------------------------------------
 cat("[7] Local inputs copied from sibling repos\n")
