@@ -65,9 +65,31 @@ dmo    <- function(a, b) { d <- (a - b) %% 12; min(d, 12 - d) } # months apart, 
 md <- readRDS(ccx_mode_file())
 p0 <- ccx_default_params(); for (n in names(md$par_mode)) p0[[n]] <- md$par_mode[[n]]
 p0$pump_mode <- md$pump_mode
+
+# ---- THE SOUTHERN-OCEAN ENTRAINMENT CHANNEL (2026-08-27g) -------------
+# `ent_seas_amp_SH` is NOT in CCX_PARAM_TABLE and so is NOT in the mode file --
+# deliberately, because adding it would change the calibrated vector's length
+# and invalidate the stored mode and its Hessian. It therefore defaults to 0
+# here and this script reproduces the pre-channel inversion EXACTLY unless it
+# is asked for otherwise.
+#
+# Set CCX_ENT_AMP to run the inversion with the channel on. That is how P3 and
+# P4 of prereg 27g are scored: the inversion is the diagnostic that states the
+# result in the form the problem was posed in, and its MLO control (P7 below)
+# is the gate that says the inversion is still readable AT THAT AMPLITUDE --
+# which is not something a run at amplitude 0 can certify.
+#
+#   CCX_ENT_AMP=10 Rscript calibration/diag_seas_signature_inversion.R
+SI_ENT_AMP <- as.numeric(Sys.getenv("CCX_ENT_AMP", "0"))
+stopifnot(is.finite(SI_ENT_AMP), SI_ENT_AMP >= 0)
+p0$ent_seas_amp_SH <- SI_ENT_AMP
+
 obs <- ccx_prepare_obs()
 cat(sprintf("mode %s (arm %s) | seas_drivers %g | nboot %d\n",
             basename(ccx_mode_file()), md$pump_mode, p0$seas_drivers, SI_NBOOT))
+cat(sprintf("ent_seas_amp_SH = %g umol/kg%s\n", SI_ENT_AMP,
+            if (SI_ENT_AMP == 0) "  (channel OFF -- the pre-27g inversion)" else
+              sprintf("  (channel ON, peak month %.2f)", CCX_ENT_SEAS_PEAK_MO)))
 
 si_run <- function(mods = list()) {
   p <- p0; for (n in names(mods)) p[[n]] <- mods[[n]]
