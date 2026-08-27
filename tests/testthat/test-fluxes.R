@@ -73,8 +73,31 @@ test_that("turnover time from the flux trace matches an independent label pulse"
   # and the first month's decay is contaminated by it (measured: 4.32 yr against
   # a true 4.69). Excluding it is correct for the annual-mean turnover time and
   # wrong for a one-month finite difference; the test pins both facts.
+  #
+  # THE SEASONAL SST IS HELD OFF IN *BOTH* ARMS (2026-08-27), and that is what
+  # makes the third expectation an IDENTITY rather than a margin. `seas_drivers`
+  # is a MASTER switch: setting it to 0 disables the seasonal SST cycle as well
+  # as the seasonal NEP flux. So `mk(TRUE)` vs `mk(FALSE)` used to toggle TWO
+  # seasonal paths at once, and the ocean one legitimately moves `as_down` --
+  # which IS in atm_out. That is not a leak of `seas` into the turnover time; it
+  # is the test failing to control what it meant to control.
+  #
+  # MEASURED, before and after: with the SST cycle left on, seasonality moved
+  # tau_turn[1] by 8.05e-3 (gpp identical to 0.000000, m_atm identical, and the
+  # whole difference in as_down: 65.340510 -> 65.556037). With it held off in
+  # both arms the difference is EXACTLY ZERO. The tolerance below was therefore
+  # NOT loosened -- the control was completed, which is the stronger repair.
+  #
+  # AND THE DECAY HAS A DATE. At `25dce56` this difference was 0.000000; the
+  # seasonal SST landed at `6fadb34` (2026-08-18) and made it 2.15e-3, inside
+  # the tolerance and so invisible; `7708404` (SST lag 2.5 -> 1.32) took it to
+  # 8.05e-3 and the test went red. The AMPLITUDES never moved (2.0 / 1.2
+  # throughout) -- it was the PHASE, because tau_turn[1] samples January alone.
+  # `ccx_hold_climate()` does not suppress this: the cycle is generated from the
+  # `sst_seas_amp_*` PARAMETERS, not read from a forcing column.
   mk <- function(seas_off) {
     p <- ccx_default_params(); p$gamma_enso <- 0
+    p$sst_seas_amp_NH <- 0; p$sst_seas_amp_SH <- 0   # OFF IN BOTH ARMS -- see above
     if (seas_off) { p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0 }  # BOTH paths
     s <- ccx_spinup(p)
     F <- suppressWarnings(ccx_build_forcing("historical", c(1750, 1760),
@@ -96,7 +119,7 @@ test_that("turnover time from the flux trace matches an independent label pulse"
   expect_equal(off$tau_label, off$tau_flux, tolerance = 0.01)  # 4.700 vs 4.692
   expect_gt(off$tau_flux, 3); expect_lt(off$tau_flux, 7)       # the "5-year" number
   on <- mk(FALSE)
-  expect_equal(on$tau_flux, off$tau_flux, tolerance = 1e-3)    # seas excluded
+  expect_equal(on$tau_flux, off$tau_flux, tolerance = 1e-3)    # seas excluded -- EXACT
   expect_lt(on$tau_label, off$tau_label - 0.2)                 # and it matters
 })
 
