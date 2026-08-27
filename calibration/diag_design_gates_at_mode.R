@@ -58,10 +58,30 @@ DG_BOMB_SH_PEAK <- 659.4; DG_BOMB_SH_YR <- 1965.042
 DG_BOMB_LAG     <- 1.33
 DG_EFOLD_FLOOR  <- 20                # permil, the > 20 permil window DESIGN names
 
-# GATE 7 -- GCB 2025 2015-2024 means and stated 1 sigma
-DG_SINK_WIN  <- c(2015, 2024)
-DG_GCB_LAND  <- 2.36; DG_GCB_LAND_SD  <- LIK_GCB_LAND_SD
-DG_GCB_OCEAN <- 3.22; DG_GCB_OCEAN_SD <- LIK_GCB_OCEAN_SD
+# GATE 7 -- GCB 2025 decade means and stated 1 sigma.
+#
+# THE WINDOW ENDS AT 2023, NOT 2024, AND THAT IS A DECISION (Marcus, 2026-08-27).
+# The historical run ends at 2024-12 (t[n] = 2024.958), so the 2025 year boundary
+# this gate differences the stock against sits HALF A MONTH past the last model
+# state. That half month lands entirely on 2024, and it lands there at the moment
+# in the seasonal cycle when the land stock's slope is at its most NEGATIVE (NH
+# December respiration) -- so how the end is extrapolated is worth 0.65 GtC/yr on
+# the 2024 annual increment alone, against sub-0.001 in every other year. That
+# was enough to put this file 0.13 sigma apart from diag_fit_at_mode.R's
+# independent reconstruction, which is a gap in the gate's own reproducibility
+# rather than in the model. Dropping the year removes it at the cost of one year
+# of a ten-year mean, and moves the verdict by 0.02 sigma.
+DG_SINK_WIN  <- c(2015, 2023)
+# THE TARGETS ARE RECOMPUTED ON DG_SINK_WIN, NOT QUOTED. GCB's published decade
+# means are 2.36 (land) / 3.22 (ocean) over 2015-2024 -- verified: recomputing
+# them from the obs series over that window returns 2.363 / 3.221. But they are
+# means over a WINDOW, so quoting them against a different window would compare
+# nine model years with ten observed ones. Over 2015-2023 the observed means are
+# 2.410 / 3.202. Both sides move together; the like-for-like rule decides it.
+DG_GCB_LAND_SD  <- LIK_GCB_LAND_SD
+DG_GCB_OCEAN_SD <- LIK_GCB_OCEAN_SD
+DG_GCB_PUB_WIN  <- c(2015, 2024)     # the window GCB's published means are over
+DG_GCB_PUB_LAND <- 2.36; DG_GCB_PUB_OCEAN <- 3.22
 
 GtC_PER_PPM <- ccx_const("GtC_PER_PPM")
 
@@ -163,14 +183,38 @@ dg_gate5 <- function(r) {
 }
 
 # ---- GATE 7: sinks (same construction as diag_app_params.R) ---------
+# END HANDLING MATCHES THE OBJECTIVE, 2026-08-27. This used approx(rule = 2),
+# which holds the stock FLAT across the half month the year boundaries fall
+# outside the run at each end. R/likelihood.R:1422-1428 rejected exactly that for
+# the objective's own gcb_* streams and extrapolates LINEARLY instead, with the
+# reason stated there: flat "would silently under-count the first and last year's
+# flux ... it would land entirely on the two end years rather than spread out,
+# which is the shape of a bug". This file was the one out of line with that
+# convention, so the two reconstructions disagreed by 0.65 GtC/yr in the run's
+# last year. Aligning it is what makes them agree at ANY window boundary --
+# dropping 2024 only hides today's instance.
 dg_gate7 <- function(r) {
   o <- r$out
   yrs <- sort(unique(floor(o$t + 1e-9))); bnd <- c(yrs, max(yrs) + 1L)
-  stock <- function(v) diff(stats::approx(o$t, v, xout = bnd, rule = 2)$y)
+  tt <- o$t; n <- length(tt)
+  stock <- function(v) {
+    y  <- stats::approx(tt, v, xout = bnd)$y
+    lo <- bnd < tt[1]; hi <- bnd > tt[n]
+    if (any(lo)) y[lo] <- v[1] + (bnd[lo] - tt[1]) * (v[2] - v[1]) / (tt[2] - tt[1])
+    if (any(hi)) y[hi] <- v[n] + (bnd[hi] - tt[n]) * (v[n] - v[n - 1]) / (tt[n] - tt[n - 1])
+    diff(y)
+  }
   el <- ccx_forcing_eluc_annual(r$F)
   k <- yrs >= DG_SINK_WIN[1] & yrs <= DG_SINK_WIN[2]
   list(ocean = mean(stock(o$ocean_C)[k]),
        land  = mean((stock(o$land_C) + el$eluc[match(yrs, el$year)])[k]))
+}
+
+# ---- the gate-7 TARGETS, recomputed on DG_SINK_WIN from the obs series -------
+dg_gcb_target <- function(win) {
+  g <- as.data.frame(ccx_prepare_obs()$gcb)
+  k <- g$year >= win[1] & g$year <= win[2]
+  list(land = mean(g$land_sink[k]), ocean = mean(g$ocean_sink[k]), n = sum(k))
 }
 
 # ---- PROVENANCE GATE: is this arm file on TODAY'S objective? --------
@@ -276,17 +320,32 @@ for (a in DG_ARMS) {
               g$lag, g$pk$NH[["efold"]]))
 }
 
-cat(sprintf("\n=== GATE 7: SINKS %d-%d (GCB land %.2f+/-%.2f, ocean %.2f+/-%.2f) ===\n",
-            DG_SINK_WIN[1], DG_SINK_WIN[2], DG_GCB_LAND, DG_GCB_LAND_SD,
-            DG_GCB_OCEAN, DG_GCB_OCEAN_SD))
+DG_TGT <- dg_gcb_target(DG_SINK_WIN)
+cat(sprintf("\n=== GATE 7: SINKS %d-%d (GCB land %.3f+/-%.2f, ocean %.3f+/-%.2f; n = %d yr) ===\n",
+            DG_SINK_WIN[1], DG_SINK_WIN[2], DG_TGT$land, DG_GCB_LAND_SD,
+            DG_TGT$ocean, DG_GCB_OCEAN_SD, DG_TGT$n))
 cat(sprintf("%-9s %10s %9s %10s %9s  %s\n", "arm", "land", "(sigma)", "ocean", "(sigma)", "verdict"))
 for (a in DG_ARMS) {
   g <- G7[[a]]
-  zl <- (g$land - DG_GCB_LAND) / DG_GCB_LAND_SD
-  zo <- (g$ocean - DG_GCB_OCEAN) / DG_GCB_OCEAN_SD
+  zl <- (g$land - DG_TGT$land) / DG_GCB_LAND_SD
+  zo <- (g$ocean - DG_TGT$ocean) / DG_GCB_OCEAN_SD
   cat(sprintf("%-9s %10.2f %+9.2f %10.2f %+9.2f  %s\n", a, g$land, zl, g$ocean, zo,
               if (max(abs(c(zl, zo))) <= 1) "PASS" else "FAIL (|z| > 1)"))
 }
+# THE TARGET IS RECOMPUTED, SO IT IS TIED BACK TO THE PUBLISHED NUMBER RATHER
+# THAN DRIFTING AWAY FROM IT SILENTLY. If this stops reproducing 2.36 / 3.22 on
+# GCB's own window, the obs series has changed under us and the gate is wrong.
+local({
+  pub <- dg_gcb_target(DG_GCB_PUB_WIN)
+  cat(sprintf("\n  target CHECK: on GCB's published window %d-%d this obs series gives\n",
+              DG_GCB_PUB_WIN[1], DG_GCB_PUB_WIN[2]))
+  cat(sprintf("  land %.3f / ocean %.3f against the published %.2f / %.2f -- %s\n",
+              pub$land, pub$ocean, DG_GCB_PUB_LAND, DG_GCB_PUB_OCEAN,
+              if (max(abs(c(pub$land - DG_GCB_PUB_LAND,
+                            pub$ocean - DG_GCB_PUB_OCEAN))) < 0.01) "AGREES" else "*** DIVERGED ***"))
+  cat(sprintf("  The window ends at %d because the run's last year carries a half-month\n", DG_SINK_WIN[2]))
+  cat("  extrapolation worth 0.65 GtC/yr; see DG_SINK_WIN. Both sides use this window.\n")
+})
 cat("\n  DESIGN sec.6 gate 7's recorded status line is at DEFAULT parameters,\n")
 cat("  2026-08-14: land +2.28 sigma (3.50), ocean -1.52 sigma (2.61).\n")
 # ---- GATE 5 FOLLOW-UP: the two interhemispheric observables DISAGREE ----

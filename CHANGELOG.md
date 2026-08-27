@@ -2,6 +2,53 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27b — GATE 7's WINDOW DROPS 2024 (Marcus), and the CAUSE WAS HALF A MONTH
+
+Follow-up to the 2026-08-27 entry's open decision 6a. Marcus: drop 2024.
+
+**THE DIAGNOSIS NARROWED ON MEASUREMENT, and the earlier framing here was wrong.** The
+2026-08-27 entry said the two gate-7 reconstructions disagreed because "the run ends at 2024,
+so neither file has a 2025 state to difference the land stock against". That is not the size of
+the gap. The run ends at **t = 2024.958**, so the 2025 year boundary is **0.0417 yr — half a
+month — past the last state**, exactly as `R/likelihood.R:1422-1428` already documented. What
+makes half a month worth **0.65 GtC/yr** is *where* it falls in the seasonal cycle: at a
+year boundary the land stock's slope is at its most **negative** (NH December respiration), so
+flat extrapolation (`approx(rule = 2)`) and linear extrapolation of that slope differ far more
+than a half-month average flux would suggest. Under 0.001 GtC/yr in every other year.
+
+**FIXED TWO WAYS, because dropping the year alone would only hide today's instance:**
+1. `DG_SINK_WIN` / `FIT_SINK_WIN` = **2015–2023** in both reconstructions, and **the observed
+   means are RECOMPUTED on that window** (land **2.410**, ocean **3.202**) rather than the
+   published 2015–2024 figures being quoted against a nine-year model mean. The file asserts
+   that recomputing on GCB's own published window still returns **2.363 / 3.221** against the
+   published 2.36 / 3.22 — so the target cannot drift away from the publication silently.
+2. `diag_design_gates_at_mode.R` now extrapolates the ends **LINEARLY**. It had been the one
+   file using `approx(rule = 2)`, against `R/likelihood.R:1422-1428`'s stated convention and
+   its stated reason ("it would land entirely on the two end years rather than spread out,
+   which is the shape of a bug"). That divergence, not the window, is what let the two files
+   disagree at all.
+
+**NEW GATE 7, both reconstructions now agreeing to 1e-4:**
+
+| | land | σ | ocean | σ |
+|---|---|---|---|---|
+| GCB 2025, 2015–2023 | **2.410 ± 0.50** | — | **3.202 ± 0.40** | — |
+| defaults | 3.51 | +2.21 | 2.63 | −1.43 |
+| **`from90`** | **3.558** | **+2.30** | **2.970** | **−0.58** |
+| `pin90` | 3.85 | +2.87 | 3.02 | −0.46 |
+
+**Verdict unchanged — FAIL land, PASS ocean.** The whole change is worth **0.02σ**; its value
+is that the gate now reproduces itself.
+
+**THE OBJECTIVE IS UNCHANGED AND NO REFIT IS OWED.** `ccx_loglik`'s `gcb_land_sink` stream still
+scores 1959–**2024** and already used the linear form. Measured before deciding not to touch it:
+its 2024 row sits at z **+0.86** against a 1959–2023 mean |z| of **0.64** — **1.3×, not an
+outlier** — contributing −1.69 logL. This was a GATE window, not the objective, so nothing is
+quarantined.
+
+Also fixed: `diag_fit_at_mode.R`'s header printed "(adopted arm is N)" — now derived from
+`CCX_MODE_CANONICAL`.
+
 ## 2026-08-27 — WHOLE-MODEL QUALITY RE-ESTABLISHED POST-FIX: §7a, §7b, and §7c items 1–2
 
 `notes/collect_2026-08-27_post_fix_model_quality.md`. Commits `aa1c5e1`, `2779463`, `b5d482d`.

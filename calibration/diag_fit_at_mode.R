@@ -154,9 +154,23 @@ local({
   put("gcb_ocean_sink", g$ocean_sink, g$ocean, LIK_GCB_OCEAN_SD, "GtC/yr")
   put("gcb_land_sink",  g$land_sink,  g$land + g$eluc,
       LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE, "GtC/yr")
-  # DESIGN gate 7 is stated on the 2015-2024 MEAN, not the year-by-year scatter.
-  w <- g$year >= 2015
-  cat(sprintf("\n--- DESIGN gate 7 (2015-2024 mean sinks, GtC/yr) ---\n"))
+  # DESIGN gate 7 is stated on a DECADE MEAN, not the year-by-year scatter.
+  #
+  # THE WINDOW ENDS AT 2023 (Marcus, 2026-08-27). The run ends at 2024-12, so the
+  # 2025 year boundary is half a month past the last model state, and that half
+  # month lands entirely on 2024 -- at the point in the seasonal cycle where the
+  # land stock's slope is most negative. It is worth 0.65 GtC/yr there and under
+  # 0.001 everywhere else, which is what put this file 0.13 sigma from
+  # diag_design_gates_at_mode.R. Both files now use FIT_SINK_WIN and both
+  # recompute the target on it. Note the objective's OWN gcb_land_sink stream
+  # still scores 2024 (R/likelihood.R:1419) and is unchanged by this: its 2024
+  # row sits at z +0.86 against a 1959-2023 mean |z| of 0.64, i.e. 1.3x, so it is
+  # not an outlier there and no refit is owed. This is a GATE window, not the
+  # objective.
+  FIT_SINK_WIN <- c(2015, 2023)
+  w <- g$year >= FIT_SINK_WIN[1] & g$year <= FIT_SINK_WIN[2]
+  cat(sprintf("\n--- DESIGN gate 7 (%d-%d mean sinks, GtC/yr; n = %d yr) ---\n",
+              FIT_SINK_WIN[1], FIT_SINK_WIN[2], sum(w)))
   # SIGMAS FROM THE NAMED CONSTANTS, not literals. The land figure here was a
   # hardcoded 0.9 until 2026-08-22 -- LIK_GCB_LAND_SD's value BEFORE it was
   # changed to 0.5 on 2026-08-14. The stale literal turned DESIGN gate 7's land
@@ -172,7 +186,8 @@ local({
 })
 
 # ---- report, with the reconstruction gate ---------------------------
-cat(sprintf("\n=== FIT AT THE ARM-%s MODE (adopted arm is N) ===\n", ARM))
+cat(sprintf("\n=== FIT AT THE %s MODE (canonical arm is %s) ===\n",
+            toupper(ARM), CCX_MODE_CANONICAL))
 cat("logL_rec vs logL_rds is the GATE: if it does not match, the row is wrong.\n\n")
 cat(sprintf("%-18s %5s %7s %7s %7s   %10s %10s  %-16s %s\n",
             "stream", "n", "RMSz", "bias_z", "max|z|", "RMSresid", "bias", "unit", "gate"))

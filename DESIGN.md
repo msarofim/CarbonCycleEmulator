@@ -1308,8 +1308,24 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    **5.95 (1960s) → 6.17 → 6.40 → 6.42 → 6.38 → 6.86 (2010s) → 6.66 ppm (2020s partial)**.
    Amplitude growth of ~15 % across the record is a *fertilization* signature the model
    must produce, not prescribe.
-7. **Sinks** (GCB 2025, 2015–2024 mean): **ocean 3.22 GtC/yr, land 2.36 GtC/yr** — model
+7. **Sinks** (GCB 2025): **ocean 3.22 GtC/yr, land 2.36 GtC/yr over 2015–2024** — model
    must land within GCB stated uncertainty (GCB 2025 stated 1σ: land ±0.5, ocean ±0.4).
+
+   **THE GATE IS SCORED ON 2015–2023, NOT 2015–2024 (Marcus, 2026-08-27), AND BOTH SIDES
+   USE THAT WINDOW** (observed means recomputed on it: land **2.410**, ocean **3.202**).
+   The historical run ends at 2024-12, so the 2025 year boundary the annual sink is
+   differenced against sits **half a month past the last model state**. That half month
+   lands entirely on 2024, and it lands at the point in the seasonal cycle where the land
+   stock's slope is most negative (NH December respiration), so how the end is
+   extrapolated is worth **0.65 GtC/yr on the 2024 increment and under 0.001 in every
+   other year**. It is the run's edge, not a property of the model. Dropping the year
+   costs one year of a ten-year mean and moves the verdict by 0.02σ.
+   `diag_design_gates_at_mode.R` also now extrapolates the end LINEARLY, matching
+   `R/likelihood.R:1422-1428`'s stated convention — it had been the one file using
+   `approx(rule = 2)`, which is what made the two reconstructions disagree at all.
+   **The objective's own `gcb_land_sink` stream still scores 2024 and is UNCHANGED:**
+   that row sits at z **+0.86** against a 1959–2023 mean |z| of **0.64** (1.3×), so it is
+   not an outlier there and no refit is owed. This is a GATE window, not the objective.
    **Status at default parameters (2026-08-14, saturating form at `fert_k` 120): STILL
    FAILING, land +2.28σ (3.50 GtC/yr), ocean −1.52σ (2.61).** Down from +4.57σ / −2.13σ
    under the log form at β 0.75, so the flip halved the land miss without closing it.
@@ -1324,17 +1340,22 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    Re-measured after the 2026-08-25f fix changed the objective; the pre-fix
    readings below are not comparable.
 
+   All rows below are on the 2015–2023 window described above. Two independently
+   written reconstructions (`diag_design_gates_at_mode.R` and `diag_fit_at_mode.R`)
+   now agree to **1e-4**, which they did not before the window and end-handling were
+   settled.
+
    | | land GtC/yr | σ | ocean GtC/yr | σ | verdict |
    |---|---|---|---|---|---|
-   | GCB 2025 | **2.36 ± 0.50** | — | **3.22 ± 0.40** | — | — |
-   | defaults | 3.47 | +2.23 | 2.62 | −1.50 | FAIL both |
-   | **`from90` (canonical)** | **3.59** | **+2.46** | **2.95** | **−0.67** | **FAIL land** |
-   | `pin90` | 3.87 | +3.03 | 3.00 | −0.55 | FAIL land |
-   | *pre-fix mode (QUARANTINED)* | *3.42* | *+2.12* | *2.97* | *−0.64* | *FAIL land* |
+   | GCB 2025, 2015–2023 | **2.410 ± 0.50** | — | **3.202 ± 0.40** | — | — |
+   | defaults | 3.51 | +2.21 | 2.63 | −1.43 | FAIL both |
+   | **`from90` (canonical)** | **3.56** | **+2.30** | **2.97** | **−0.58** | **FAIL land** |
+   | `pin90` | 3.85 | +2.87 | 3.02 | −0.46 | FAIL land |
+   | *pre-fix mode (QUARANTINED, 2015–2024)* | *3.42* | *+2.12* | *2.97* | *−0.64* | *FAIL land* |
 
-   **The ocean half now PASSES** (−0.67σ, inside |z| < 1) and has done since the
+   **The ocean half now PASSES** (−0.58σ, inside |z| < 1) and has done since the
    2026-08-23 refit; the gate's failure is entirely the land sink, which went
-   +2.12σ → **+2.46σ**. `pin90` is worse still at +3.03σ, which is the same
+   +2.12σ → **+2.30σ**. `pin90` is worse still at +2.87σ, which is the same
    direction gate 4's trend improvement came from — the pinned arm buys decadal
    variability by running the land sink harder.
 
