@@ -2,6 +2,68 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27d — §7c-3 OPENED: the model builds SPO's cycle out of the WRONG TWO PIECES, and its ocean piece arrives FIVE MONTHS LATE
+
+Pre-registered in `notes/prereg_2026-08-27d_sh_seasonal_partition_power.md` before either
+measurement ran; scored in `notes/collect_2026-08-27d_sh_seasonal_partition_inversion.md`.
+**All six predictions recorded, hits and misses.**
+
+**THE TABLE.** The observed seasonal cycle split into LAND and OCEAN components by their δ¹³C
+signatures — amplitude AND phase, from the observations alone — against the same split of the
+model's:
+
+| stn | part | obs amp | model amp | ratio | obs peak mo | model peak mo | phase err |
+|---|---|---|---|---|---|---|---|
+| MLO | land | 7.717 | 7.235 | 0.94× | 3.39 | 3.54 | +0.15 |
+| MLO | ocean | 1.091 | 0.582 | 0.53× | 8.35 | 9.50 | +1.16 |
+| **SPO** | **land** | **0.683** | **1.373** | **2.01×** | 9.29 | 8.82 | −0.47 |
+| **SPO** | **ocean** | **0.522** | **0.236** | **0.45×** | **8.52** | **3.35** | **−5.17** |
+
+**Nature ADDS two nearly in-phase pieces** at SPO (0.77 months apart, 58 % + 45 % ≈ 103 %).
+**The model SUBTRACTS two nearly antiphase ones** (5.47 months apart, 120 % − 21 % ≈ 99 %).
+The CO2 amplitude agrees to 2 % **because two errors cancel** — which is handoff 27c §3's "the CO2
+rows have no power" turned from an inference into a measurement.
+
+**MEASUREMENT A** (`diag_seas_channel_decomp.R`, three cross-hemisphere cases added). **72.0 % of
+the model's SPO cycle is NH-ORIGIN**, arriving 2.25 months early (108°); the two parts close to
+the total as vectors within 1.6 %. The analytic two-box transfer function at `tau_ex` = 1.159 yr —
+`|C_S/C_N| = (1/τ)/√(ω²+1/τ²)` = 0.1360, lag `atan(ωτ)` = 2.74 mo — predicted 0.897 ppm undamped
+against 0.821 measured, so the SH sinks damp it by 8 %. **P1, P2 CONFIRMED.**
+
+**P3/P4 WITHDRAWN BEFORE SCORING, and the withdrawal is a finding.** `seas_T_amp_SH` — the
+parameter carrying the −4.64 σ prior flag — moves the SPO cycle by **0.092 ppm** against
+`NEP SH`'s **1.390**. It has no authority over the observable it was to be tested on, so the SH
+land respiration flag is **not** being set by the SPO seasonal rows.
+
+**MEASUREMENT B** (`diag_seas_signature_inversion.R`, NEW). Every channel's δ¹³C harmonic vector
+is antiphase to its CO2 vector to within **0.43 months** (GATED, all 12 pairs), so each signature
+is a signed scalar and two vector equations close exactly: `L = (d13 − s_O·CO2)/(s_L − s_O)`.
+Measured `s_L` = −0.04733, `s_O` = −0.00461 ‰/ppm — **10.3× apart**, which is what conditions the
+inverse. Bars: bootstrap over years × signature range, 2000 draws, **seeded**; angles averaged as
+VECTORS, never as wrapped scalars. **P7 control PASSES** (MLO observed land share 113.3 %),
+**P5 CONFIRMED** (SPO ocean share 44.7 %), **P6 CONFIRMED** (observed SPO ocean peaks
+**8.52 [7.82, 9.20]** against the model's solubility channel at **4.16** — 4.35 months).
+Cross-validated against the direct channel sum on the model side: SPO land +2.4 %, SPO ocean
+−4.9 %, all four phases within 0.55 months.
+
+**⇒ §7c-3'S CANDIDATE IS NOT A LAND BOX.** A solubility-only ocean (`sst_seas_amp_SH` modulates
+SST and nothing else) can only draw CO2 down in the cold season, so month ~4 is the only phase it
+can have; the observed component peaks five months later, where a seasonal mixed-layer /
+entrainment cycle would put it. **The fit's 4.9× suppression of `sst_seas_amp_SH` was CORRECT** —
+it was refusing a channel with the wrong phase, and its −6.32 σ flag is the model being penalised
+for that refusal. And **0.821 of the model's 1.373 ppm SH land arrives from the NH — more than the
+entire observed SPO land component of 0.683** — so a box placed in the SH cannot fix it.
+⚠ The entrainment MECHANISM is a reading, not a citation; the PHASE is the measurement. Named
+test: an observational Southern-Ocean seasonal flux climatology.
+
+**AND A STANDING NUMBER MOVES: the SPO partition residual is 1.93×, not ~1.5×.** Same quantity,
+two estimators, and the whole gap is ONE CELL — the observed SPO δ¹³C harmonic inflates **1.33×**
+under `mean(sqrt(a²+b²))` where all seven other series sit at 1.00–1.02×, and 1.93/1.33 = 1.45.
+`diag_seas_isotope_rectification.R` uses the mean of per-year magnitudes (Jensen-inflated by
+year-to-year scatter, which flatters the model because the inflation is in the denominator);
+`diag_seas_channel_decomp.R` uses the magnitude of the mean vector. **METHODOLOGICAL CHOICE,
+FLAGGED NOT RESOLVED** — recommendation is the noise-immune estimator; Marcus's call.
+
 ## 2026-08-27c — `test-fluxes.R` GREEN, and a THRESHOLD RULE: observations or physical laws
 
 Decision 6b answered. Suite **1122 pass / 0 fail**, from 2 failing.
