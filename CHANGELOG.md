@@ -2,6 +2,59 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-28b — **THE MODE'S `h_ml` WAS BEING DECODED UNDER THE WRONG BAND, AND THAT IS THE −3.3223 OFFSET**
+
+Suite **1164 / 0** (1157 + 7 new). New: `ccx_mode_params()` and `ccx_check_mode_decode()` in
+`R/paths.R`, `tests/testthat/test-mode-decode.R`, `calibration/diag_hml_mode_decode.R`.
+**No objective changed and no refit is owed** — the calibration was fine; what was wrong is what
+the DIAGNOSTICS fed the model afterwards.
+
+**THE DEFECT.** `h_ml` is logit-transformed onto `[lo, hi]`, and the pump refits **override that
+band in process** (`run_modefind_pump_arms.R`, `recompute_hessian.R:112-113`). The band is a
+property of the refit, so `R/calibrate.R` is deliberately untouched — but the same `u_mode` then
+decodes to a different depth depending on which band is in force, and `ccx_unc_to_par()` is a pure
+function of the SHIPPED table and cannot know:
+
+| | `h_ml` |
+|---|---|
+| `ccx_unc_to_par(md$u_mode)` (shipped `[30, 200]`) | **85.7292 m** |
+| `md$par_mode[["h_ml"]]` — what the refit found | **96.4737 m** |
+
+**An 11.14 % error, and `h_ml` is the ONLY one of the 21 parameters that moves.** Every diagnostic
+using the standard `pv <- ccx_unc_to_par(md$u_mode)` idiom has been running an **11 % shallower
+mixed layer than the mode it names**.
+
+**IT ACCOUNTS FOR THE STANDING OFFSET, EXACTLY.** Decoding under the recorded band moves the
+"mode logpost is not reproducible" gap from **−3.3223 to −1.5805**, and −1.5805 **is** the bounded
+refit's narrowed-prior constant — additive, deliberate, and cancelling from every contrast.
+`|residual − prior constant| = 0.0000`. ⇒ **`ccx_mode_logpost_offset` is CLOSED.** Its own note
+had listed "the h_ml refit bound" among the things ruled out; that ruling-out was wrong.
+
+**WHAT IT DOES NOT CHANGE — the refit's own guards were RIGHT.** At the true 96.47 m the nearest
+pump kink is **1.94 m** away and the Hessian's reach is **0.366 m**, so `hml_kink_hit = FALSE` was
+correct and **the Hessian is not kink-contaminated**. ⚠ **This retracts what I said on 08-27 about
+the softest direction being non-differentiable.** It is soft (1σ ≈ **11.00 m**, interval
+[88.67, 108.46]) but its Hessian row is clean.
+
+**THE REAL `h_ml` PROBLEM, RESTATED CORRECTLY.** Under the recorded band the logit maps [85, 120]
+onto the whole line, so **`h_ml` < 85 is UNREACHABLE**: the mode-find is protected **by
+construction, not by the data**. A sampler is not — the edge sits about **1.5σ** below the mode, a
+routine excursion, and the shipped model allows [30, 200] where the *unbounded* objective's argmax
+was measured at **32 m**. **Any posterior drawn in these coordinates is conditioned on a bound
+adopted as a refit expedient, not as a belief.** That is the live question, and it is the one
+Marcus flagged and did not resolve on 08-16g: **hard bound (option 1) vs measured σ-inflation
+(option 5)**. Still his call; nothing here preempts it.
+
+⚠ **MATCHED CONTRASTS SURVIVE; ABSOLUTE VALUES AND CROSS-SESSION CONTROLS DO NOT.** Every arm of a
+given driver shared the same wrong `h_ml`, so 27i–27q's differences and interactions stand. What
+does **not** stand is any absolute decomposition value, and in particular 27q's "P0 reproduced all
+four of 27j's control values to three decimals" — those agreed because all three sessions shared
+the defect, not because the values were right. [[mutation_test_gates]]
+
+**THE GUARD.** `ccx_check_mode_decode()` **errors** (not warns) when a mode file fails to decode to
+its own stored `par_mode`, and the test asserts the affected set is *exactly* `h_ml` — so a second
+parameter acquiring an in-process band override fails loudly instead of silently.
+
 ## 2026-08-27q — **THE MECHANISM REPLICATES IN FULL. THE ARITHMETIC DOES NOT.**
 
 Pre-registered `notes/prereg_2026-08-27q_admissible_2x2_land_ocean.md`, committed **`36e4051`
