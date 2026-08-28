@@ -99,3 +99,58 @@ into it.**
   it is recorded so the choice is visible rather than defaulted. [[threshold_from_obs_or_law]]
 - **It cannot see anything the five free parameters could not reach.** The 08-28 prereg's one-way
   argument (5 free is conservative) applies to LOWER unchanged; UPPER is free of it entirely.
+
+---
+
+# AMENDMENT — **STAGE B, OWED BY G1's FAILURE.** Written after Stage A, before the Stage B driver.
+
+Stage A ran at `1ea4922`. **G1 FAILED**: `max UPPER(out) = −1543.817` at 82 m against
+`max LOWER(in) = −1544.358` at 85.01 m — an overlap of **0.541** against bracket widths of
+0.50–0.65. The bracket is not decisive on the SHALLOW side. (On the deep side it is: every
+`h > 120` has `LOWER` at least 6.7 BELOW the in-band maximum and `UPPER` no higher, because the
+model's gradient misfits badly there — `rows_infl` runs −15.2 at 120.01 to −46.5 at 198.)
+
+**So Stage B is the prereg's own stated remedy: re-run the 26 points with inflation ON.**
+
+## B.1 HOW INFLATION IS APPLIED WITHOUT TOUCHING THE OBJECTIVE
+
+`ccx_loglik()` reads its σ from `ccx_ocean_gradient_target()`, which is a cached closure and does
+not see `h_ml`. Rather than duplicate `ccx_make_logpost()` — the project has already paid **309
+logL of artifact** for a challenger that did not match its incumbent's path
+[[match_incumbents_optim]] — Stage B uses the shipped path and an EXACT algebraic identity:
+
+    dnorm(t, v, σ_eff, log) = dnorm(t, v', σ_obs, log) − log(σ_eff / σ_obs),
+    with v' = t − (t − v) · σ_obs / σ_eff.
+
+So `ccx_ocean_grad_scored()` is overridden **in the driver's environment only** to (a) drop the
+band gate and (b) return the shrunk `v'`; the per-row constant `Σ −log(σ_eff(h)/σ_obs)` is added
+to the reported logpost afterwards. **`h_ml` is FIXED at every profile point, so that constant is
+constant within a point and cannot influence the optimisation** — it only makes the reported
+number the inflated one.
+
+⚠ **GUARD, and the run ABORTS if it fails:** at the mode's stored vector the overridden path must
+reproduce Stage A's `LOWER(96.4737) = −1544.6247` to < 1e-6. Stage A computed the same quantity by
+a completely different route (direct `dnorm` at σ_eff on a separately-run gradient), so agreement
+is a real cross-check of both. [[mutation_test_gates]]
+
+## B.2 PRE-REGISTERED PREDICTIONS — AND I EXPECT B1 TO FAIL
+
+- **B1 — the inflated argmax lands INSIDE [85, 120].** ⚠ **I PREDICT THIS FAILS.** Stage A's
+  overlap is 0.541 and the 82 m vector was optimised with the rows OFF, so switching them on gives
+  it real re-optimisation freedom (up to its 0.55 width), while the in-band points were already
+  optimised against these rows at nearly this σ and can gain ~0.13 at most. **Expected argmax
+  75–85 m, just outside the lower edge.** *Falsifier of my expectation:* an in-band argmax.
+- **B2 — THE HEADLINE. The residual pull is ≤ 0.70**, the refit's own restart noise floor.
+  *Bar:* `best(out-of-band) − best(in-band) ≤ 0.70`. *Falsifier:* > 0.70 ⇒ inflation leaves a pull
+  that is resolvable above the fit's own noise, and 08-28 §6's caution stands in magnitude.
+  **This, not B1, is what decides whether option 5 closes the free lunch in practice**: an argmax
+  0.2 outside a band, below the noise floor, is not a preference the fit can act on.
+- **B3 — STAGE A's BRACKET HELD.** *Bar:* every point's inflated logpost lies in
+  `[LOWER − 1e-6, UPPER + 1e-6]`. *Falsifier:* any violation ⇒ one of the two bounds is not
+  rigorous and Stage A's reasoning is wrong, not merely imprecise.
+- **B4 — THE INCENTIVE AT THE EDGES IS NOW INWARD.** *Bar:* the SIGNED jump on leaving the band is
+  ≤ 0 at BOTH 85 and 120. ⚠ **Stage A's G3 was mis-specified and this replaces it**: I gated on
+  `|jump|`, but a step DOWN on leaving the band is the remedy working, not a defect. Measured in
+  Stage A: 85 collapses **+7.300 → −0.131**, while 120 stays large and **REVERSES SIGN**,
+  **+8.426 → −6.743**. Carrying the evidence rather than the label: G3's numbers are in the
+  artifact and the bar was mine. [[explained_away_test]]
