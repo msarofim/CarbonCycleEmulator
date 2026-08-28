@@ -2,6 +2,62 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27l — **THE SH (shape, size) PAIR IS A DEGENERATE RIDGE; THE ARC'S RESIDUAL IS INSIDE IT**
+
+Collect: `notes/collect_2026-08-27l_the_sh_pair_is_a_degenerate_ridge.md`.
+**Nothing in `R/` or `src/` touched except one comment** (below). No model runs.
+
+**DECISION (ii) OF HANDOFF 27k IS ANSWERED, AND THE PROVENANCE ANSWERED IT ON 2026-08-20.**
+`data-raw/build_npp_seasonal_shape.R:20-28` and `DATA.md:237-242` say the GPP/PsnNet bracket is
+**ORDERED, not symmetric**: GPP is less rectified than NPP because autotrophic respiration runs
+through the shoulder seasons, so its phi_eff is biased equatorward — the derivation's own words,
+"toward the convenient answer" — and **"the truth for NPP sits at or BEYOND the PsnNet end."**
+`R/model.R:1115` confirms the driver multiplies the model's own `npp` through the leaf pool, so
+PsnNet is its observable. **⇒ 27j's LAND-only and JOINT arms are INADMISSIBLE as candidate
+configurations.** What survives is 27j's **INTERACTION (+64.99)** as evidence that the land and
+ocean corrections COUPLE — a structural claim that does not depend on 0.352.
+
+**MARCUS'S RULING: re-derive the bracket off a NON-MODIS product.** Neither end trusted; MOD17 is a
+single point of failure for a constant carrying the whole seasonal arc.
+
+**AND THEN THE BRACKET TURNED OUT NOT TO BE THE UNCERTAINTY.** Re-running the existing offline
+`calibration/diag_seas_rectification.R` and reading its Form-C profile — `A` re-optimised at every
+phi, which its own header calls the only fair way — for the **SH**, a row never read for this
+question:
+
+| phi | −15.75 | −20 | −25 | **−30 (shipped)** | −40 | −50 |
+|---|---|---|---|---|---|---|
+| `SH_psnnet` residual | 12.9% | 12.5% | 12.2% | **12.0%** | 11.9% | 12.2% |
+| `SH_psnnet` fitted A | **0.97** | 0.77 | 0.61 | **0.50** | 0.36 | **0.30** |
+
+**The SH latitude is NOT determined** — 1.0 percentage-point over 34°, against the NH's 5.2-point
+swing to a clean interior optimum at 75. Form C leaves **92 %** of the SH residual (NH: 65 %), so
+there is a ~12 % floor no single-latitude insolation curve gets below — the stated physics being
+that 76 % of SH NPP is equatorward of 23.5 S and the cycle is **water-driven, not light-driven**.
+
+    GPP/PsnNet bracket           1.4x   <- what 27i, 27j and decision (ii) argued about
+    SH land residual (27j)       1.33x  <- what the arc is trying to close
+    (phi, A) ridge degeneracy    3.2x   <- what is actually unpinned
+
+**`0.5027` was never a pinned measurement — it is one point on a flat ridge, selected by a phi_eff
+of −30 the data cannot distinguish from −15.75 or −40.** And the ridge holds BOTH answers at equal
+cost: the **measured** SH NPP centroid −15.12 gives **A = 0.97** (SH land nearly DOUBLE, the wrong
+way for the arc), while −40/−50 gives **0.36/0.30**, past the GPP end and the way the fit wants.
+
+**⇒ MARCUS'S TASK IS RE-SPECIFIED, NOT REFUSED.** A replacement product fitted onto the same
+insolation basis lands on the same ridge and returns a new number without pinning anything —
+**necessary, not sufficient.** An independence audit of the candidates is in the collect (sec.4);
+its trap is that **atmospheric inversions are CIRCULAR here**, being constrained by the same MLO/SPO
+CO2 the model is scored on, and **FLUXCOM and GOSIF/CSIF are MODIS-fed** and fail on independence.
+**TRENDY is the only candidate that IS NPP**; every other option reproduces "neither is NPP" in a
+new instrument. Three questions are open to Marcus (collect sec.5).
+
+**ALSO: handoff 27k's live item CLOSED.** `R/likelihood.R:175`'s "66 % of `tau_ex`'s leverage came
+from the seasonal harmonics" is now qualified with 27h's measurement that it describes only the
+**LOWER jaw** — upward at 1.26 tau_0 the bill is annual-mean isotopes and levels, the four seasonal
+rows net −3.40, and `co2_seasonal_SPO` **improves +9.74**. Comment only, commit `6e26248`.
+**Suite 1157 pass / 0 fail, unchanged.**
+
 ## 2026-08-27j — **ONE FIX, CONFIRMED: interaction +64.99 against a pre-registered gate of +39.59**
 
 Pre-registered in `notes/prereg_2026-08-27j_joint_land_ocean_arm.md`, committed **`fa83faa` before
