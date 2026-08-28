@@ -2,6 +2,74 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27p — **THE CONDITIONAL SLICE WAS LEAKING 64 % OF THE LEVER THROUGH `q10`**
+
+Pre-registered `notes/prereg_2026-08-27p_q10_pin_slice_repair.md`, committed **`a92aa5f` BEFORE**
+`calibration/diag_seas_slice_q10_pin.R` existed. **No gate was moved.** Collect:
+`notes/collect_2026-08-27p_the_q10_leak_disarmed_the_lever.md`. **`R/` and `src/` untouched**, so
+the 1157/0 suite is untouched by construction.
+
+**S0 ✓ S1 ✓ S2 ✓ S3 ✓ S4 ✓ S5 ✓ · ~60 s/point, against 27n's 10 / 70 / 150+ min.**
+
+**THE MECHANISM.** `R/model.R:194-195`, written long before this arc, already says that **at small
+amplitude only the product `A_T · ln(q10)` is identified** — and `q10` is **GLOBAL**. 27n's
+five-parameter conditional slice rode exactly that ridge: the NH product `seas_T_amp_NH · ln(q10)`
+was held to **2.98122 ± 0.00919 = 0.31 %** while its two factors moved **2.77×** and **2.75×**.
+Because `q10` is shared with the SH, that cancelled the perturbation the arm existed to apply. The
+SH product rose only **2.48×** where a pinned `q10` gives **6.83×** — **THE ARM DELIVERED 36.3 % OF
+ITS OWN LEVER** — and the bill was `seas_T_amp_NH` running to **79.35 K, prior z +7.65**.
+
+**THE REPAIR.** Pin `q10` at the mode's 1.13579 and leave `seas_T_amp_NH` free. The NH product still
+spans its whole range through `seas_T_amp_NH` alone, so **nothing the seasonal rows identify is
+removed**; what is removed is `q10`'s nonlinear part and its cross-timescale duty
+(`model.R:1086`), which the LEVEL rows and `gcb_land_sink` identify. **S0: the pin costs −1.36.
+S5: `gcb_land_sink` moves −0.04 = 0.03 % of the bill** — the risk the pin carried by construction
+did not materialise. 27o §7's two proposed repairs (drop `q10`, or reparameterise to
+(product, ratio)) are the **same slice up to a relabelling**; the pin is the simpler one.
+
+**THE RESULT.** SH-land at bracket HI **1.2256 → 0.8595**, *below* the full-frozen 0.8728 — the four
+remaining slice members are two OCEAN amplitudes, the **NH** land amplitude and a LAG, and
+measurably none of them restores SH-LOCAL land. **Vacated 0.4489 ppm, closing 71.8 % of the excess,
+not 15.3 %.** Honest cost **−161.72**, of which `co2_seasonal_SPO` carries **73.6 %** — the same row
+from the same direction as 27i (87 %) and 27n-frozen (87 %).
+
+**TWO 27o READINGS OVERTURNED.**
+- §7 called this a **SPEED** problem. It was also an **ATTENUATION** problem —
+  `[[no_power_null]]` in a new dress: not a null with no lever, but a lever silently disarmed by a
+  route back through a **shared** parameter. ⚠ 27n's **P4 (−35.11)** and **P8 (1.79× obs, 15.3 %)**
+  must not be quoted as the cancellation mechanism's reach.
+- ⚠ §5's **"P6 ✓ — the one clean result"**, on which §6 was explicitly built (*"P6 is what makes it
+  worth running"*), is **FALSIFIED**. With the leak closed `sst_seas_amp_SH` goes **0.3663 → 0.1553,
+  z −6.25 → −9.68** — **past 27j's LAND-only collapse to 0.176 (z −9.18)**. The ocean limb has **no**
+  room; the apparent room was the leak.
+
+**THE EXCHANGE RATE, and it is the real lesson.** Cost per ppm of SH-land removed: the admissible
+cancellation lever **193.0** on its first rung, the inadmissible productivity lever **206.8** —
+**7 % apart**. **The two vetoed levers cost the SAME at the margin and differ only in how long they
+stay cheap** (productivity holds ~207/ppm out to 0.383 ppm; cancellation doubles by 0.2 ppm and
+trebles by 0.45). That is what a *single row pricing the SH-land amplitude regardless of which knob
+moves it* looks like — a sharper form of 27o §6's "a row with no power punishing motion."
+⚠ The two **chords** agreeing at 359 / 360 is chord arithmetic over different arcs on a convex
+curve, **NOT** an invariance.
+
+**WHAT IT DOES NOT DO.** It does **not** rehabilitate `seas_T_amp_SH`: conditionally **−161.72**,
+worse than the −35.11 that 27o already called a veto, so the §6 veto is **strengthened**. No constant
+and no prior was edited. ⚠ **S3 was mis-argued in the prereg** — I called it exact "for the same
+reason as S0", but a difference of differences carries no sign constraint; the genuinely exact check
+is `pinned(a) ≤ free(a)` at every rung, and it holds at all four (−1.36, −26.60, −58.95, −127.97).
+
+**NEXT.** 27o §6's 2×2 in `seas_T_amp_SH` × `ent_seas_amp_SH` is still right but its **motivation is
+replaced**: not "the ocean limb has room" (dead) but "**the admissible lever now produces the same
+defect, at the same price, as the inadmissible one** — and 27j's JOINT arm is the only experiment
+that ever repaired it (`ent` 8.105 inside 5–30, limb rotated 4.13 → 9.24 mo, INTERACTION +64.99)."
+It must be built on the **PINNED** slice; parameter balance survives the swap (k − (k−1) − (k+1) + k
+= 0). **Not pre-registered, not run.**
+
+⚠ **Every earlier conditional slice holding BOTH `seas_T_amp_NH` and `q10` is suspect on this ground
+and should be re-read before being quoted.** 27j's four arms were **checked and are CLEAN** (NH
+product 2.9705–3.0224 = 1.7 %, `q10` 1.094–1.109, `seas_T_amp_NH` 29.1–33.3) because
+`seas_T_amp_SH` was FREE there and absorbed the SH adjustment itself.
+
 ## 2026-08-27n — **THE CANCELLATION MECHANISM IS REAL, EXACTLY AS PREDICTED, AND UNAFFORDABLE**
 
 Pre-registered `notes/prereg_2026-08-27n_...md`, committed **`11a59de` BEFORE**
