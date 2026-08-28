@@ -58,7 +58,11 @@ QP_FREE_RDS    <- ccx_path("outputs", "diagnostics", "seas_T_amp_sh_power.rds")
 QP_S0_BAND     <- c(-5.00, 0.00)  # pinned minus free at the LANDED point
 QP_S1_SHLAND   <- 1.05            # pinned SH-land at HI must be <= this
 QP_S1_FROZEN   <- 0.8728          # the full-frozen SH-land at HI, 27n
-QP_S1_FREE     <- 1.2256          # the free-slice SH-land at HI, 27n
+# ⚠ READ, NOT TYPED. This was hardcoded 1.2256 -- 27n's PRE-band-fix value -- and
+# went stale the moment 27n was re-run, while the vacated-ppm line right beside it
+# was computed from the rds and moved. A displayed constant that states a measured
+# quantity has to BE measured. [[figure_captions]]
+QP_S1_FREE     <- NA_real_        # filled from the 27n rds in sec.0
 QP_S2_NH       <- 30.0            # pinned seas_T_amp_NH at HI, K
 QP_S2_FREE_NH  <- 79.3466
 QP_S3_FREE_DLP <- -33.68          # 27n's free conditional dlp at HI
@@ -191,6 +195,7 @@ cat(sprintf("\n  NH product held to %.5f +/- %.5f = %.3f %% while its factors mo
             min(vapply(fr$cond, function(c1) c1$pv$seas_T_amp_NH, 0)),
             max(vapply(fr$cond, function(c1) log(c1$pv$q10), 0)) /
             min(vapply(fr$cond, function(c1) log(c1$pv$q10), 0))))
+QP_S1_FREE <- fr$cond[[sprintf("%.4f", QP_HI)]]$sl   # the value, from the file
 shp_free <- vapply(fr$cond, function(c1) c1$pv$seas_T_amp_SH * log(c1$pv$q10), 0)
 shp_pin  <- QP_GRID * log(Q10_PIN)
 cat(sprintf("  SH product delivered  %.5f -> %.5f = %.2fx\n", shp_free[1], shp_free[length(shp_free)],

@@ -1,6 +1,20 @@
 # COLLECT 2026-08-27p — **THE CONDITIONAL SLICE WAS LEAKING 64 % OF THE LEVER THROUGH `q10`**
 # All six pre-registered gates PASS. Two of 27o's own readings are overturned.
 
+> ## ⚠ RE-RUN 2026-08-28 AFTER THE `h_ml` BAND-DECODE FIX — **THE CONCLUSION HOLDS**
+>
+> Every number below was produced with `h_ml = 85.73 m` (`ccx_unc_to_par(md$u_mode)` under the
+> SHIPPED band) where the canonical mode's `h_ml` is **96.47 m**. Fixed by `ccx_adopt_mode_band()`
+> (`R/paths.R`, commit `abc9704`); pre-fix outputs are in
+> `outputs/quarantine/20260828_hml_band_decode/`. **The driver was re-run and NO VERDICT CHANGED.**
+> SH-land at HI **0.8595 → 0.8589**; vacated 0.4489 → **0.4491 ppm**; excess closed 71.8 % → **71.9 %**. **S0–S5 all still PASS.** ⚠ `QP_S1_FREE` was a hardcoded 1.2256 that went stale when 27n was re-run (now 1.2163); it is now READ from the rds.
+>
+> The SPO seasonal decomposition turns out to be nearly insensitive to `h_ml` — the mixed layer
+> sets the ocean's carbon CAPACITY, while the SPO seasonal AMPLITUDE is driven by
+> `sst_seas_amp_SH` and the entrainment channel. **The harness offset is now −1.5805, not −3.3223**;
+> the 1.7418 difference was the wrong decode, and what remains is the bounded refit's
+> narrowed-prior constant.
+
 **Prereg:** `notes/prereg_2026-08-27p_q10_pin_slice_repair.md`, committed **`a92aa5f` BEFORE the
 driver existed**. **No gate moved.** Driver `calibration/diag_seas_slice_q10_pin.R`, output
 `outputs/diagnostics/seas_slice_q10_pin.rds`. **Nothing in `R/` or `src/` was touched**, so the

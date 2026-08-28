@@ -2,6 +2,60 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-28c — **THE `h_ml` SWEEP: 10 DRIVERS PATCHED, EVERY ARC RE-RUN, AND NO VERDICT MOVED**
+
+Follow-up to `2f60dd9` / `abc9704`. Pre-fix outputs in
+`outputs/quarantine/20260828_hml_band_decode/` (with a README); canonical replacements regenerated
+to `outputs/diagnostics/`.
+
+**THE RE-RUNS, and the headline is that the arc survives its own worst bug.**
+
+| arc | pre-fix | band-corrected | verdict |
+|---|---|---|---|
+| **27g** `sst_seas_amp_SH` | 0.360 → 0.736, z −3.43 | 0.360 → 0.736, **z −3.45** | P2 PARTIAL, unchanged |
+| **27h** SH-local invariance | +1.7 %, NH-origin −73.4 % | **identical** | unchanged |
+| **27i** GPP-end SH-land | 0.892 ppm, cost −79.01 | 0.892 ppm, cost **−80.27** | unchanged |
+| **27j** INTERACTION | **+64.99** (gate 39.59) | **+67.28** (gate 40.22) | **P1 CONFIRMED** |
+| 27j recovery | 82.1 % | **83.6 %** | — |
+| **27n** P8 | 1.79× obs, 15.3 % closed | **1.78×, 14.7 %** | unchanged |
+| **27p** vacated / closed | 0.4489 ppm, 71.8 % | **0.4491 ppm, 71.9 %** | S0–S5 all PASS |
+| **27q** INTERACTION mid/hi | +32.81 / +67.76 | **+34.47 / +70.89** | **P1 FALSIFIED at both** |
+| 27q recovery | 40.9 / 41.9 % | **42.9 / 43.7 %** | still ~half of 27j |
+| 27q P2–P8 | ✓✓✓✓✓ / ✗✗ ✗✗ | **identical** | — |
+| **gates 6/8/10/11** | PASS/FAIL/FAIL/FLAGS | **identical** (gate 8 by 0.004 ‰, gate 10 by 0.3 ‰) | — |
+
+**WHY SO LITTLE MOVED, and it is not luck.** The mixed-layer depth sets the ocean's carbon
+**CAPACITY**; the SPO seasonal **AMPLITUDE** is driven by `sst_seas_amp_SH` and the entrainment
+channel. 27j's four P0 controls moved by **≤0.001** across an 11 % change in `h_ml`. The seasonal
+arc was reading a quantity the defect barely touches.
+
+**ONE THING CHANGED IN KIND RATHER THAN DEGREE.** 27q's P0 previously reproduced 27j's four
+control values to three decimals *because both sessions shared the defect*. Both are now measured
+at the correct 96.47 m and still agree — **the cross-session reproducibility claim is finally
+earned rather than coincidental.**
+
+**A SECOND LATENT BUG, EXPOSED BY FIXING THE FIRST.** `diag_seas_T_amp_sh_power.R`'s per-stream
+table used `sprintf(" %>10s")`, an invalid format that ABORTS. It had never executed because the
+original run took the try-error branch — the streams bug 27o §7 records. **Two defects in one
+block, the second hidden behind the first.**
+
+**AND A THIRD, of the same family, in my own 27p driver.** `QP_S1_FREE` was a hardcoded 1.2256 —
+27n's pre-fix value — printed beside a vacated-ppm figure that WAS computed from the rds. Re-running
+27n moved one and not the other. It now reads the value from the file. A displayed constant that
+states a measured quantity has to be measured.
+
+**AUDIT RESULT.** 10 drivers patched; 4 already applied the band by hand
+(`run_modefind_pump_arms`, `recompute_hessian`, `diag_hess_eps_21par`,
+`diag_seas_T_amp_q10_ridge`); 7 already used `md$par_mode` (`diag_design_gates_at_mode`,
+`diag_fit_at_mode`, `diag_joos_irf`, `diag_gates_at_landed_modes`, `diag_stream_neff`,
+`diag_landed_gap_streams`, **`app/global.R`**) — so the shipped app was never affected; 2 dead
+(`profile_kz_ventilation`, `profile_bomb_total` read a `mode_fit.rds` that does not exist).
+
+⚠ **`diag_landed_gap_streams.R:36-37` HAD ALREADY DOCUMENTED THE DEFECT** — "`u_mode` DOES NOT
+DECODE under the default [30, 200] band … `par_mode` is the authority" — and it never propagated
+to the other drivers or to memory. Same shape as the net/gross trap: **a trap documented once is
+not thereby fixed everywhere.**
+
 ## 2026-08-28b — **THE MODE'S `h_ml` WAS BEING DECODED UNDER THE WRONG BAND, AND THAT IS THE −3.3223 OFFSET**
 
 Suite **1164 / 0** (1157 + 7 new). New: `ccx_mode_params()` and `ccx_check_mode_decode()` in

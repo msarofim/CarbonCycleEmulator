@@ -1,6 +1,20 @@
 # COLLECT — 2026-08-27g: the Southern-Ocean entrainment channel WORKS, and the fit
 # USED IT AS A COUNTERWEIGHT INSTEAD
 
+> ## ⚠ RE-RUN 2026-08-28 AFTER THE `h_ml` BAND-DECODE FIX — **THE CONCLUSION HOLDS**
+>
+> Every number below was produced with `h_ml = 85.73 m` (`ccx_unc_to_par(md$u_mode)` under the
+> SHIPPED band) where the canonical mode's `h_ml` is **96.47 m**. Fixed by `ccx_adopt_mode_band()`
+> (`R/paths.R`, commit `abc9704`); pre-fix outputs are in
+> `outputs/quarantine/20260828_hml_band_decode/`. **The driver was re-run and NO VERDICT CHANGED.**
+> `sst_seas_amp_SH` 0.360 → **0.736**, prior z −6.32 → **−3.45** (was −3.43); **P2 still PARTIAL**.
+>
+> The SPO seasonal decomposition turns out to be nearly insensitive to `h_ml` — the mixed layer
+> sets the ocean's carbon CAPACITY, while the SPO seasonal AMPLITUDE is driven by
+> `sst_seas_amp_SH` and the entrainment channel. **The harness offset is now −1.5805, not −3.3223**;
+> the 1.7418 difference was the wrong decode, and what remains is the bounded refit's
+> narrowed-prior constant.
+
 Scores `notes/prereg_2026-08-27g_so_entrainment_channel.md`, written before a line of the channel
 existed. **Six predictions: two PASS, one PARTIAL, one INCONCLUSIVE, one FAILED — and the failure
 is the result.**

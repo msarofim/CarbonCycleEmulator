@@ -1,6 +1,20 @@
 # COLLECT 27h — **FORK (a) IS A GUARANTEED NULL. `tau_ex` HAS NEITHER THE PRICE NOR THE SIGN.**
 # The NH import is not causing the SH-land overshoot — it is partly HIDING it
 
+> ## ⚠ RE-RUN 2026-08-28 AFTER THE `h_ml` BAND-DECODE FIX — **THE CONCLUSION HOLDS**
+>
+> Every number below was produced with `h_ml = 85.73 m` (`ccx_unc_to_par(md$u_mode)` under the
+> SHIPPED band) where the canonical mode's `h_ml` is **96.47 m**. Fixed by `ccx_adopt_mode_band()`
+> (`R/paths.R`, commit `abc9704`); pre-fix outputs are in
+> `outputs/quarantine/20260828_hml_band_decode/`. **The driver was re-run and NO VERDICT CHANGED.**
+> SPO total 1.141 → **1.140**; SH-LOCAL land invariance **+1.7 %**, NH-origin **−73.4 %** — both unchanged.
+>
+> The SPO seasonal decomposition turns out to be nearly insensitive to `h_ml` — the mixed layer
+> sets the ocean's carbon CAPACITY, while the SPO seasonal AMPLITUDE is driven by
+> `sst_seas_amp_SH` and the entrainment channel. **The harness offset is now −1.5805, not −3.3223**;
+> the 1.7418 difference was the wrong decode, and what remains is the bounded refit's
+> narrowed-prior constant.
+
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`.
 **Decision it answers:** handoff `notes/handoff_2026-08-27h_the_blocker_moved_to_sh_land.md` §4,
 fork **(a)** — "pre-register and run the seasonal block **plus `tau_ex`**". Marcus chose (a)

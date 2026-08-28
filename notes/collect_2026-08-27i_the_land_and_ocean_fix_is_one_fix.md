@@ -1,6 +1,20 @@
 # COLLECT 27i — **`seas_npp_amp_SH` HAS THE SIGN BUT NOT THE PRICE, AND THE REASON IS THE RESULT**
 # The land and the ocean corrections are not two candidate fixes. They are ONE fix.
 
+> ## ⚠ RE-RUN 2026-08-28 AFTER THE `h_ml` BAND-DECODE FIX — **THE CONCLUSION HOLDS**
+>
+> Every number below was produced with `h_ml = 85.73 m` (`ccx_unc_to_par(md$u_mode)` under the
+> SHIPPED band) where the canonical mode's `h_ml` is **96.47 m**. Fixed by `ccx_adopt_mode_band()`
+> (`R/paths.R`, commit `abc9704`); pre-fix outputs are in
+> `outputs/quarantine/20260828_hml_band_decode/`. **The driver was re-run and NO VERDICT CHANGED.**
+> GPP-end SH-land **0.892 ppm = 1.31× observed** at a conditional cost of **−80.27** (was −79.01); partition 1.931 → **1.830**.
+>
+> The SPO seasonal decomposition turns out to be nearly insensitive to `h_ml` — the mixed layer
+> sets the ocean's carbon CAPACITY, while the SPO seasonal AMPLITUDE is driven by
+> `sst_seas_amp_SH` and the entrainment channel. **The harness offset is now −1.5805, not −3.3223**;
+> the 1.7418 difference was the wrong decode, and what remains is the bounded refit's
+> narrowed-prior constant.
+
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`.
 **Follows** `collect_2026-08-27h_tau_ex_has_no_power_and_the_wrong_sign.md`, which killed fork (a)
 and left the SH-LOCAL land channel standing as the blocker. Marcus chose **(A)** — power-check

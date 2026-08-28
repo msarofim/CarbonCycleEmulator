@@ -2,6 +2,20 @@
 # The channel finally lands inside its physical band, the ocean limb rotates 5.11 months into
 # place — and the residual that is left is STILL LAND
 
+> ## ⚠ RE-RUN 2026-08-28 AFTER THE `h_ml` BAND-DECODE FIX — **THE CONCLUSION HOLDS**
+>
+> Every number below was produced with `h_ml = 85.73 m` (`ccx_unc_to_par(md$u_mode)` under the
+> SHIPPED band) where the canonical mode's `h_ml` is **96.47 m**. Fixed by `ccx_adopt_mode_band()`
+> (`R/paths.R`, commit `abc9704`); pre-fix outputs are in
+> `outputs/quarantine/20260828_hml_band_decode/`. **The driver was re-run and NO VERDICT CHANGED.**
+> **INTERACTION +64.99 → +67.28** against a gate of 40.22; land cost −79.18 → **−80.44**; recovery **82.1 % → 83.6 %**. `ent` 8.105 → **8.21**. **P1 still CONFIRMED.** All four P0 controls moved by ≤0.001.
+>
+> The SPO seasonal decomposition turns out to be nearly insensitive to `h_ml` — the mixed layer
+> sets the ocean's carbon CAPACITY, while the SPO seasonal AMPLITUDE is driven by
+> `sst_seas_amp_SH` and the entrainment channel. **The harness offset is now −1.5805, not −3.3223**;
+> the 1.7418 difference was the wrong decode, and what remains is the bounded refit's
+> narrowed-prior constant.
+
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`.
 **Pre-registered:** `notes/prereg_2026-08-27j_joint_land_ocean_arm.md`, committed **`fa83faa`
 before `calibration/diag_joint_land_ocean_refit.R` existed.** No gate was moved.

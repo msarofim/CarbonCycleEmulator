@@ -2,6 +2,20 @@
 # P1 FALSIFIED at both bracket ends — and every physical gate that describes the
 # mechanism PASSES. The channel recovers **42 %** of the land penalty, not 27j's 82 %.
 
+> ## ⚠ RE-RUN 2026-08-28 AFTER THE `h_ml` BAND-DECODE FIX — **THE CONCLUSION HOLDS**
+>
+> Every number below was produced with `h_ml = 85.73 m` (`ccx_unc_to_par(md$u_mode)` under the
+> SHIPPED band) where the canonical mode's `h_ml` is **96.47 m**. Fixed by `ccx_adopt_mode_band()`
+> (`R/paths.R`, commit `abc9704`); pre-fix outputs are in
+> `outputs/quarantine/20260828_hml_band_decode/`. **The driver was re-run and NO VERDICT CHANGED.**
+> Interactions **+32.81 / +67.76 → +34.47 / +70.89**; recovery **40.9 / 41.9 % → 42.9 / 43.7 %**, against 27j's re-run **83.6 %**. **P1 still FALSIFIED at both ends and every one of P2–P8 lands identically.** ⚠ **§2's P0 claim is now EARNED**: it previously reproduced 27j's controls because both sessions shared the defect; both are now measured at the correct depth and still agree.
+>
+> The SPO seasonal decomposition turns out to be nearly insensitive to `h_ml` — the mixed layer
+> sets the ocean's carbon CAPACITY, while the SPO seasonal AMPLITUDE is driven by
+> `sst_seas_amp_SH` and the entrainment channel. **The harness offset is now −1.5805, not −3.3223**;
+> the 1.7418 difference was the wrong decode, and what remains is the bounded refit's
+> narrowed-prior constant.
+
 **Prereg:** `notes/prereg_2026-08-27q_admissible_2x2_land_ocean.md`, committed **`36e4051` BEFORE**
 the driver existed. **No gate moved.** Driver `calibration/diag_admissible_2x2_land_ocean.R`,
 output `outputs/diagnostics/admissible_2x2_land_ocean.rds`. **`R/` and `src/` untouched.**

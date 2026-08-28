@@ -2,6 +2,20 @@
 # **P0 ✓ P1 ✓ P2 ✓ P3 ✓ · P4 ✗ P5 ✗ P7 ✗ · P6 ✓ · P8 = 1.79× observed, 15.3 % of the excess closed.**
 # ⚠ **I PREDICTED P4 WOULD BE POSITIVE. IT LANDED AT −35.11. THAT PREDICTION WAS WRONG.**
 
+> ## ⚠ RE-RUN 2026-08-28 AFTER THE `h_ml` BAND-DECODE FIX — **THE CONCLUSION HOLDS**
+>
+> Every number below was produced with `h_ml = 85.73 m` (`ccx_unc_to_par(md$u_mode)` under the
+> SHIPPED band) where the canonical mode's `h_ml` is **96.47 m**. Fixed by `ccx_adopt_mode_band()`
+> (`R/paths.R`, commit `abc9704`); pre-fix outputs are in
+> `outputs/quarantine/20260828_hml_band_decode/`. **The driver was re-run and NO VERDICT CHANGED.**
+> **P8 1.79× → 1.78× observed**, excess closed 15.3 % → **14.7 %**. ⚠ A SECOND latent bug surfaced here — the per-stream table's `sprintf(" %>10s")` is an invalid format that ABORTS; it had never executed because the original run took the try-error branch (the streams bug §7 records). Fixed.
+>
+> The SPO seasonal decomposition turns out to be nearly insensitive to `h_ml` — the mixed layer
+> sets the ocean's carbon CAPACITY, while the SPO seasonal AMPLITUDE is driven by
+> `sst_seas_amp_SH` and the entrainment channel. **The harness offset is now −1.5805, not −3.3223**;
+> the 1.7418 difference was the wrong decode, and what remains is the bounded refit's
+> narrowed-prior constant.
+
 Pre-registered `notes/prereg_2026-08-27n_...md`, committed **`11a59de` BEFORE**
 `calibration/diag_seas_T_amp_sh_power.R` existed (driver `f0c7a1e`). **No gate was moved.**
 
