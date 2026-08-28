@@ -2,6 +2,60 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-28g — **OPTION 5 ADOPTED: the ocean-gradient rows are scored at every `h_ml`**
+
+**Marcus 2026-08-28: "Adopt option 5."** The `[85, 120]` skip is RETIRED. Suite **1164 -> 1203, 0 fail**.
+`data-raw/build_glodap_sigma_rep.R` -> `data/obs_glodap_sigma_rep.rds`; `R/likelihood.R`;
+`calibration/run_modefind_pump_arms.R` unbounded; 13 diagnostics swept.
+⚠ **A full 21-parameter refit is OWED and NOT YET RUN** — every pre-adoption fitted vector is
+non-comparable, and nothing is quarantined yet because quarantining before a replacement exists
+would break `ccx_mode_file()`, the app and every diagnostic.
+
+`sigma_eff(h)^2 = sigma_obs^2 + (target - like-for-like(h))^2`, normalisation retained, sigma_rep
+**measured** off GLODAP by the shipped target's own recipe (G1 reproduces all three targets to
+**0.00e+00**), on a 1 m grid across `h_ml`'s whole support. `ccx_loglik()` **errors** if a
+hand-built `ocean_grad` omits `sd_eff`: a silent fallback to sigma_obs is the retired objective
+wearing the new one's clothes.
+
+**NO SMOOTHING, and a moving average was TRIED AND REJECTED on measurement** — at every width it
+deviated from the raw curve by more than the jumps it removed (0.131 vs 0.090 at w = 11 m), because
+the V-bottom at the crossing is narrower than the smoother. Measured roughness: median 0.0055, max
+0.0734 log-units.
+
+⚠ **I OVERCLAIMED AND CORRECTED IT IN PLACE.** An earlier draft of the builder and likelihood
+comments said shipping `|sigma_rep|` instead of the signed like-for-like would "plant a KINK in the
+posterior's softest direction". **Measured: the two constructions differ by 0.0002 sigma_obs with
+second differences equal to six decimals** — sigma_eff squares the difference, so folding is nearly
+a no-op. Withdrawn in both files and gated by a test. The signed form still ships, for faithfulness
+to the measured quantity, **not** as a smoothness fix.
+
+⚠ **`h_ml` IS NOT NOW SMOOTH, AND THE EARLIER FRAMING NEEDS THIS QUALIFIER.** Widening the refit's
+kink scan from the retired band to the full support finds **26 kinks in [30, 200]** (46.85, 47.68,
+49.51, 50.00, 73.05, ... 199.86), many on round numbers. Option 5 removes the band CLIFF (+7.30 /
++8.43), which was by far the largest defect in the softest direction; the `1/eps` pump kinks are a
+SEPARATE, pre-existing problem ([[ccx_hml_kink]] had 3 inside the band alone) that this does not
+touch. `diag_hess_eps_21par.R` is owed a re-run.
+
+**THE SMOKE TEST, AND WHY ITS ALARMING RESULT IS NOT A FINDING.** A deliberately crippled run
+(1 restart, 1 cycle, maxit 60; 14.2 min) warm-started at 96.47 m and reported `h_ml` **35.38 m**,
+"gaining" 4.1 log-units — apparently contradicting Stage B's interior maximum. Diagnosed rather
+than rationalised, and it is neither a bug nor a refutation:
+
+    DELTA (smoke - old):  logpost +4.060 = prior +7.399  jac -2.139  loglik -1.201
+
+**The entire gain is PRIOR credit on the seasonal amplitudes** — `sst_seas_amp_SH` **+4.145**,
+`sst_seas_amp_NH` +1.632, `rep_dC` +1.088 — **bought by making the FIT WORSE.** Those are the known
+prior-data conflict ([[seas_amps_hemispheric_inversion]], `sst_seas_amp_SH` at z ~ -6.3). Stage B
+held all 16 of those parameters FIXED, so they could not move; the smoke let them go where their
+priors want and dragged `h_ml` down the softest direction as a side effect. **Verified first that
+the rows ARE scored at 35.38 m** (sum -7.876, sd_eff/sd_obs 1.322 / 1.483 / 1.055) — the
+implementation is correct. ⇒ **The real refit needs its full restart/cycle budget**, and the
+seasonal-amplitude prior conflict is now the dominant gradient in it.
+
+**One output line was genuinely WRONG and is fixed:** the arms' report still printed
+"gradient rows LIVE only inside [85, 120]: *** ABSENT ***" at the landed `h_ml`. The rows are always
+scored now; it reports `sd_eff/sd_obs` instead.
+
 ## 2026-08-28f — **STAGE B: σ-INFLATION ERASES THE FREE LUNCH; THE PULL IS 0.033**
 
 Prereg amendment `672dd8b` BEFORE the driver. `calibration/diag_sigma_inflation_profile.R`;
