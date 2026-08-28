@@ -93,21 +93,44 @@ sep("THE PROFILE -- h_ml fixed, the uptake set re-optimised at every point")
 kzb <- md$kz_bracket
 cat(sprintf("  %9s %5s | %11s | %9s %6s | %9s %9s %9s | %2s %8s\n", "h_ml", "rows",
             "cond dlp", "kz", "%brkt", "pump_grad", "beta_max", "fert_k", "re", "gain"))
-res <- list(); v_warm <- u0[idx]; ref <- NA
-for (h in HU_GRID) {
-  ua <- u0; ua[i_h] <- to_u(h)
-  ft <- fit_at(v_warm, ua); v_warm <- ft$par
-  uh <- ua; uh[idx] <- ft$par; pv <- ccx_unc_to_par(uh)
-  stopifnot(abs(pv$h_ml - h) < 1e-8)
-  if (is.na(ref)) ref <- -ft$value
-  live <- h >= HU_BAND[1] && h <= HU_BAND[2]
-  res[[sprintf("%.4f", h)]] <- list(h = h, lp = -ft$value, pv = pv, live = live,
-                                    converged = ft$converged)
-  cat(sprintf("  %9.4f %5s | %+11.2f | %9.1f %5.1f%% | %9.1f %9.4f %9.2f | %2d %8.4f%s\n",
-              h, if (live) "LIVE" else "off", -ft$value - ref, pv$kz,
-              100*(pv$kz - kzb[1])/diff(kzb), pv$pump_grad, pv$beta_max, pv$fert_k,
-              ft$restarts, ft$gain, if (!ft$converged) "  ⚠ MOVING" else ""))
+# ⚠ WALK OUTWARD FROM THE MODE, not left-to-right. Each point is warm-started
+# from its NEIGHBOUR, so the optimiser never has to cross the whole parameter
+# range in one step. The first attempt started at h_ml = 32 -- the far end -- and
+# its warm start was the mode's uptake vector, 64 m away.
+HU_ANCHOR <- HU_GRID[which.min(abs(HU_GRID - pm$h_ml))]
+HU_DOWN <- rev(sort(HU_GRID[HU_GRID <= HU_ANCHOR]))     # anchor first, then down
+HU_UP   <- sort(HU_GRID[HU_GRID > HU_ANCHOR])
+res <- list(); ref <- NA
+run_leg <- function(hs, v_start) {
+  v_warm <- v_start
+  for (h in hs) {
+    ua <- u0; ua[i_h] <- to_u(h)
+    t0 <- Sys.time()
+    ft <- try(fit_at(v_warm, ua), silent = TRUE)
+    if (inherits(ft, "try-error")) {                  # one bad point must not kill the run
+      cat(sprintf("  %9.4f  ⚠ FIT FAILED: %s\n", h, sub("\n.*", "", as.character(ft))))
+      flush.console(); next
+    }
+    v_warm <- ft$par
+    uh <- ua; uh[idx] <- ft$par; pv <- ccx_unc_to_par(uh)
+    stopifnot(abs(pv$h_ml - h) < 1e-8)
+    if (is.na(ref)) ref <<- -ft$value
+    live <- h >= HU_BAND[1] && h <= HU_BAND[2]
+    res[[sprintf("%.4f", h)]] <<- list(h = h, lp = -ft$value, pv = pv, live = live,
+                                       u_free = ft$par, converged = ft$converged)
+    cat(sprintf("  %9.4f %5s | %+11.2f | %9.1f %5.1f%% | %9.1f %9.4f %9.2f | %2d %8.4f%s  [%.0fs]\n",
+                h, if (live) "LIVE" else "off", -ft$value - ref, pv$kz,
+                100*(pv$kz - kzb[1])/diff(kzb), pv$pump_grad, pv$beta_max, pv$fert_k,
+                ft$restarts, ft$gain, if (!ft$converged) " ⚠MOVING" else "",
+                as.numeric(difftime(Sys.time(), t0, units = "secs"))))
+    flush.console()                                   # buffered rows were LOST to a kill
+  }
+  v_warm
 }
+invisible(run_leg(HU_DOWN, u0[idx]))
+# the up-leg restarts from the ANCHOR's fit, not from the bottom of the down-leg
+invisible(run_leg(HU_UP, res[[sprintf("%.4f", HU_ANCHOR)]]$u_free))
+res <- res[order(vapply(res, function(x) x$h, 0))]
 
 sep("THE PRE-REGISTERED GATES")
 L <- vapply(res, function(x) x$lp, 0); H <- vapply(res, function(x) x$h, 0)
