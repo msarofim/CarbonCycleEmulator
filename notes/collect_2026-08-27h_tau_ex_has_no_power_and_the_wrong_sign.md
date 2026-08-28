@@ -7,7 +7,7 @@
 > SHIPPED band) where the canonical mode's `h_ml` is **96.47 m**. Fixed by `ccx_adopt_mode_band()`
 > (`R/paths.R`, commit `abc9704`); pre-fix outputs are in
 > `outputs/quarantine/20260828_hml_band_decode/`. **The driver was re-run and NO VERDICT CHANGED.**
-> SPO total 1.141 → **1.140**; SH-LOCAL land invariance **+1.7 %**, NH-origin **−73.4 %** — both unchanged.
+> SPO total 1.141 → **1.140**; SH-LOCAL land invariance **+1.7 %**, NH-origin **−73.4 %** — both unchanged. The conditional arm re-ran too: the exchange rate is **0.0029 ppm of NH import per log-unit**, so 27g's entire +11.62 budget buys **0.034 ppm** against a **0.699 ppm** excess. Pre-fix that read 0.063 ppm / 9 % of the excess, so the **verdict is unchanged and if anything STRONGER** — `tau_ex` has even less power than 27h reported.
 >
 > The SPO seasonal decomposition turns out to be nearly insensitive to `h_ml` — the mixed layer
 > sets the ocean's carbon CAPACITY, while the SPO seasonal AMPLITUDE is driven by
