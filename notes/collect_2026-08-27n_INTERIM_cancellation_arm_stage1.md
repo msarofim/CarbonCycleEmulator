@@ -68,11 +68,37 @@ Prediction available in advance: raising respiration cuts the SPO total by ~0.06
 entrainment channel raised the ocean limb by ~0.37 ppm at the right phase, so the counterweight has
 ample reach. **NOT RUN, NOT PRE-REGISTERED YET.**
 
+## ⚠ WHY THE CONDITIONAL ARM IS SO SLOW — A DESIGN FLAW IN THIS DRIVER
+
+Points 1 and 2 took ~10 and ~70 min; **point 3 has taken over 2.5 hours.** The cause is on the
+books and it is my slice: **`TA_COND_BLOCK` contains BOTH `seas_T_amp_NH` AND `q10`, and
+`seas_T_amp_NH x ln(q10)` is an EXACT PRODUCT RIDGE** — held to **2.2609–2.2663** across
+q10 = 1.09 → 2.0, Hessian **cor = −0.972**, and "the four seasonal rows move 4.3 log-units across
+that whole range... they do NOT identify q10" (`diag_seas_T_amp_q10_ridge.R`, 2026-08-21).
+[[ccx_seas_q10_ridge]]
+
+**Nelder-Mead crawls along a flat direction, making gains too small to trip `TA_RESTOL` quickly and
+too large to stop.** ⚠ 27i's block had the SAME pair and ran 3 points in ~50 min, so the ridge alone
+is not sufficient — what compounds it here is the **warm-start step**: 27i moved a constant in small
+sd increments, while this grid jumps `seas_T_amp_SH` by **3.5× then 1.4× then 1.4×**, throwing the
+simplex far enough onto the ridge that it has to walk back.
+
+**FIX FOR THE NEXT RUN (not applied — the run is live):** either reparameterise to
+`(seas_T_amp_NH x ln q10)` and a ratio, or **drop `q10` from the conditional slice** and say so — the
+seasonal rows do not identify it anyway, which is exactly what makes it free to wander. Adding
+intermediate warm-start rungs would also help. **Do not simply raise `TA_RESTOL`**; that would buy
+speed by accepting under-convergence, which is the failure 27h's discarded run already made once.
+
 ## ⚠ STILL RUNNING / STILL OPEN
 
 - **The conditional arm is STILL RUNNING** (point 2 of 4 after ~80 min; the warm start has to travel
   3.5× in one step). **P4, P6, P7 and P8 have NO RESULT YET.** Reference point landed:
   a_t 1.0391 → cond Δlp **+1.43**, converged (1 restart, last gain 0.0000), SH-land 1.3234, ratio 1.946.
+  **Point 2 has since landed: a_t 3.5915 → cond Δlp −11.29** against a frozen −46.53, a **76 %
+  buy-back** (27i's was ~30 %) — but **SH-land came back UP to 1.2552** from the frozen 1.1144.
+  ⚠ **The slice buys the logpost back by RESTORING the very signal the lever removed**, so the
+  conditional land improvement is far smaller than the frozen one and **P8's residual will be worse
+  than the frozen 1.28×.** That is the same "bought, not earned" pattern P6 was written to catch.
   ⚠ **Do not infer P4 from the frozen −204.45** — 27i's conditional bought back ~30 %, and the number
   must be reported as measured, not predicted.
 - **A DRIVER BUG WAS FOUND AND FIXED MID-RUN.** The first version probed `attr(lp(u), "streams")`,
