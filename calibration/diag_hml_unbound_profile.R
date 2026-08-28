@@ -158,12 +158,27 @@ cat(sprintf("\n  H4  pump_grad where the rows are OFF: %.1f - %.1f (gate: > %g s
 pg_on <- vapply(res[vapply(res, function(x) x$live, TRUE)], function(x) x$pv$pump_grad, 0)
 cat(sprintf("      pump_grad where the rows are LIVE: %.1f - %.1f\n", min(pg_on), max(pg_on)))
 
+# ⚠ WRITE THE ARTIFACT BEFORE THE PRETTY-PRINTING. The first complete run of this
+# driver lost 45 minutes of fits because the section below errored and saveRDS came
+# after it. A reporting bug must not be able to destroy a run's output.
+OUT <- ccx_path("outputs", "diagnostics"); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
+saveRDS(list(grid = HU_GRID, free = HU_FREE, band = HU_BAND, res = res,
+             argmax = hmax, in_band = inb, kz_bracket = kzb),
+        file.path(OUT, "hml_unbound_profile.rds"))
+cat(sprintf("\nwritten: %s\n", file.path(OUT, "hml_unbound_profile.rds")))
+
 sep("THE THREE OCEAN-GRADIENT ROWS, across the edge")
 for (k in c("84.9900", "85.0100", "96.4737", "119.9900", "120.0100")) {
   s <- rows_at(res[[k]]$pv)
-  cat(sprintf("  h_ml %9s (%4s): %s\n", k, if (res[[k]]$live) "LIVE" else "off",
-              paste(sprintf("%s %+8.3f", sub("ocean_grad_", "", HU_GRAD_ROWS),
-                            vapply(HU_GRAD_ROWS, function(n) s[[n]], 0)), collapse = "  ")))
+  # ⚠ the rows are ABSENT from ccx_loglik's output when skipped -- not zero, ABSENT.
+  # That absence IS defect (B): a skipped Gaussian pays 0 where a live one pays
+  # negative, so leaving the band is a free gain. Print it as "skipped", not 0.
+  vals <- vapply(HU_GRAD_ROWS, function(n) if (is.null(s[[n]])) NA_real_ else s[[n]], 0)
+  cat(sprintf("  h_ml %9s (%4s): %s   sum %s\n", k, if (res[[k]]$live) "LIVE" else "off",
+              paste(sprintf("%s %s", sub("ocean_grad_", "", HU_GRAD_ROWS),
+                            ifelse(is.na(vals), " skipped", sprintf("%+8.3f", vals))),
+                    collapse = "  "),
+              if (all(is.na(vals))) "0 (FREE)" else sprintf("%+.3f", sum(vals, na.rm = TRUE))))
 }
 
 sep("SCORED")
@@ -181,8 +196,4 @@ cat(sprintf("\n  ⇒ %s\n", if (inb)
 cat("\n  ⚠ This prices neither option. 08-16g's 21 % sigma-inflation recovery is\n")
 cat("    OBSERVATION-SIDE ONLY and still needs the model's gradient. Open either way.\n")
 
-OUT <- ccx_path("outputs", "diagnostics"); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
-saveRDS(list(grid = HU_GRID, free = HU_FREE, band = HU_BAND, res = res,
-             argmax = hmax, in_band = inb, kz_bracket = kzb),
-        file.path(OUT, "hml_unbound_profile.rds"))
-cat(sprintf("\nwritten: %s\n\n\n=== DONE ===\n", file.path(OUT, "hml_unbound_profile.rds")))
+cat("\n\n=== DONE ===\n")
