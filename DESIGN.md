@@ -1305,9 +1305,46 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    `q10`. What the profile establishes is the *location* of the gradient optimum
    and the *direction* of the disagreement, both of which are robust to that.
 6. **Seasonal cycle** (MLO, peak-to-trough of the mean seasonal cycle by decade):
-   **5.95 (1960s) → 6.17 → 6.40 → 6.42 → 6.38 → 6.86 (2010s) → 6.66 ppm (2020s partial)**.
+   **5.95 (1960s) → 6.13 → 6.30 → 6.47 → 6.65 → 6.83 (2010s) → 6.97 ppm (2020s partial)**.
    Amplitude growth of ~15 % across the record is a *fertilization* signature the model
    must produce, not prescribe.
+
+   ⚠ **THE TARGET ROW ABOVE WAS CORRECTED 2026-08-28. The previous transcription read
+   `5.95 → 6.17 → 6.40 → 6.42 → 6.38 → 6.86 → 6.66` and is NOT what this section's own
+   documented recipe produces.** Running `data-raw/build_calibration_data.R:583-588`
+   verbatim (Scripps `co2_ppm − co2_deseas`, monthly climatology within the decade,
+   peak minus trough) against `data/obs_co2_monthly.rds` gives the corrected row, and
+   `ccx_prepare_obs()` reproduces it exactly — so the data path was never at fault.
+   **The two disagree QUALITATIVELY, not by rounding: the data is MONOTONE INCREASING
+   across every decade, where the old transcription DIPPED at the 2000s (6.38) and the
+   2020s (6.66).** Largest single error 0.27 ppm at the 2000s, against a total growth
+   signal of 0.88 ppm — i.e. **~30 % of the quantity the gate exists to test**. The
+   2020s entry is partial and will move as the record extends.
+
+   **STATUS AT THE CANONICAL MODE (2026-08-28, `diag_design_gates_unscored.R` at
+   `from90`): PASS — and this gate had NEVER been measured at any fitted vector.**
+
+   | decade | 1960s | 1970s | 1980s | 1990s | 2000s | 2010s | 2020s | growth |
+   |---|---|---|---|---|---|---|---|---|
+   | observed | 5.95 | 6.13 | 6.30 | 6.47 | 6.65 | 6.83 | 6.97 | **+14.8 %** |
+   | **`from90`** | 5.83 | 6.04 | 6.26 | 6.48 | 6.72 | 7.05 | 7.23 | **+21.0 %** |
+   | `pin90` | 5.87 | 6.10 | 6.33 | 6.56 | 6.80 | 7.11 | 7.28 | +21.1 % |
+   | defaults | 1.97 | 2.02 | 2.05 | 2.10 | 2.16 | 2.22 | 2.27 | +12.4 % |
+
+   **THE UNCALIBRATED DEFAULTS ARE A FACTOR OF THREE TOO SMALL (1.97 vs 5.95 ppm).**
+   The fitted mode reproduces the absolute amplitude to within 0.12 ppm in the 1960s
+   and tracks the monotone rise across the whole record; the residual is a clean
+   monotone drift from −0.12 ppm (1960s) to +0.22 ppm (2010s), i.e. **the model grows
+   the cycle slightly too fast** (+21.0 % against the observed +14.8 %) rather than
+   misplacing its level. That over-growth is the gate's one live objection and it
+   belongs with the seasonal arc's SH-land amplitude finding.
+
+   ⚠ **ESTIMATOR SENSITIVITY IS LARGE AND THE GATE MUST BE READ ON GROWTH, NOT LEVELS.**
+   Scripps' own `co2_deseas` and a 12-month centred moving average — applied to the
+   *same* observed record — differ by up to **0.449 ppm**, ~7 % of the amplitude and
+   half the growth signal, while their **growth ratios differ by only 0.0065**. The
+   model is therefore compared on the moving average (the only route with a model
+   counterpart) and gated on growth. Do not quote the decadal levels above to 0.01 ppm.
 7. **Sinks** (GCB 2025): **ocean 3.22 GtC/yr, land 2.36 GtC/yr over 2015–2024** — model
    must land within GCB stated uncertainty (GCB 2025 stated 1σ: land ±0.5, ocean ±0.4).
 
@@ -1390,6 +1427,26 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    **−8.700 ‰** (Scripps MLO, 2024) / **−8.580 ‰** (Scripps SPO, 2024); MLO starts
    −7.600 ‰ (1980), SPO −7.490 ‰ (1977). Preindustrial CO₂ from the same Law Dome source
    is **276.88 ppm** (1745–1755 mean) — this is the spinup target.
+
+   **STATUS AT THE CANONICAL MODE (2026-08-28, `diag_design_gates_unscored.R`): FAILS
+   ON THE DECLINE AT EVERY VECTOR — the δ¹³C Suess OVERSHOOT, now measured.** Gate the
+   *decline*, not the level: the model's station δ¹³C carries a fitted representation
+   offset (`rep_dC`, prior z **+3.38**) so the level is not a free comparison, while the
+   PI→2024 decline is offset-free.
+
+   | vector | PI δ¹³C (obs −6.469) | PI CO₂ (obs 276.88) | MLO decline | SPO decline |
+   |---|---|---|---|---|
+   | observed | — | — | **−2.231** | **−2.111** |
+   | **`from90`** | −6.484 (−0.015) | 277.10 (+0.22) | **−2.445** | **−2.254** |
+   | `pin90` | −6.488 (−0.019) | 277.17 (+0.29) | −2.429 | −2.246 |
+   | defaults | −6.482 (−0.013) | 277.03 (+0.15) | −2.586 | −2.360 |
+
+   **The spinup targets are met** (PI δ¹³C within 0.015 ‰, PI CO₂ within 0.22 ppm), so
+   this is not a spinup problem. **The model over-declines by +0.214 ‰ at MLO and
+   +0.143 ‰ at SPO — a ~9.6 % / 6.8 % overshoot**, and calibration only partly closes
+   it (defaults overshoot by 0.355 / 0.249). **The overshoot is LARGER in the NH**,
+   which is the hemisphere with the larger land flux. Tolerance used: 0.10 ‰ on both
+   stations, ~2× short at `from90`.
 9. **MLO − SPO gradient**, both stations on the Scripps 2012 SIO scale, **SEASONALLY
    ADJUSTED**, by decade (paired months in brackets): **0.47 [8] (1950s) → 0.85 [75] →
    1.66 [113] → 1.96 [117] → 2.32 [118] → 2.72 [115] → 3.66 [117] → 3.97 ppm [45]
@@ -1459,8 +1516,43 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     retained alongside it: on this same quantity the bracket is a hard box of half-width
     28.4 ‰, tighter than the σ, so deleting it would loosen `kz` rather than tighten it.
     `calibration/diag_deep_d14c_term.R`.
+
+    **STATUS AT THE CANONICAL MODE (2026-08-28, `diag_design_gates_unscored.R`): FAILS
+    A |z| ≤ 1 READING AT EVERY VECTOR, AND CALIBRATION CROSSED THE TARGET RATHER THAN
+    APPROACHING IT.** Against the likelihood's own accessor (`ccx_deep_d14c_target()`,
+    −175.3 ‰, σ 10.3):
+
+    | vector | bottom box | z | kz bracket (half-width 28.4 ‰) |
+    |---|---|---|---|
+    | defaults | −190.2 ‰ | **−1.46** | inside |
+    | **`from90`** | **−158.0 ‰** | **+1.68** | inside |
+    | `pin90` | −156.4 ‰ | +1.84 | inside |
+
+    **The defaults are too DEPLETED and the fitted modes too ENRICHED** — the fit moves
+    this quantity across the observation by 32 ‰ and lands 1.7σ on the far side. All
+    three remain inside the `kz` bracket, which is the tighter constraint here, so the
+    bracket is doing the work the term was added to do. Read alongside `kz` railing at
+    6332 against a bracket top of 6528: **the bound and this term pull the same way.**
 11. **Suspicious-uniformity screen** on all residual series (all-same-sign or
     exactly-linear residuals = bug signal, per standing discipline).
+
+    **STATUS AT THE CANONICAL MODE (2026-08-28, `diag_design_gates_unscored.R`): ALL
+    FOUR STATION SERIES FLAG ALL-SAME-SIGN, AT EVERY VECTOR — and that is the expected,
+    already-diagnosed result, not a new bug.** Annual model−observed residuals, mean
+    removed before the linearity test so a level bias cannot masquerade as a trend:
+
+    | series | n | mean residual | frac. same sign | R²(t) |
+    |---|---|---|---|---|
+    | `co2_MLO` | 67 | **+3.718 ppm** | 1.000 | 0.032 |
+    | `co2_SPO` | 67 | **+3.538 ppm** | 1.000 | 0.034 |
+    | `d13c_MLO` | 45 | −0.208 ‰ | 1.000 | 0.121 |
+    | `d13c_SPO` | 48 | −0.124 ‰ | 1.000 | 0.143 |
+
+    **Every R² is ≤ 0.14, so these are pure LEVEL offsets with no trend structure** —
+    consistent with `rep_dC` being a CO₂ level bias and with the δ¹³C levels being
+    rank-one bias. The screen reproducing a known, independently diagnosed result is
+    what validates it; it is now available to catch the next one. **A flag here is a
+    signal to investigate, not a verdict.**
 12. **CO₂ pulse response (IRF)** — **added 2026-08-13**, and it closes a hole: gates 1–11
     score sinks, seasonality, the bomb curve and the interhemispheric gradient, but
     **nothing scored the pulse response**, which is the quantity the app's flagship
