@@ -176,6 +176,19 @@ LIK_ICE_DISCREPANCY_INFLATE <- as.numeric(Sys.getenv("CCX_ICE_DISCREPANCY", "1")
 # harmonics -- the interhemispheric exchange time was being set by the shape of
 # the Keeling sawtooth.
 #
+# ⚠ THAT 66 % IS ONLY THE LOWER JAW, MEASURED 2026-08-27h. It was written here
+# on 2026-08-15 as the justification for adding this term, from a DOWNWARD
+# profile, and downward it still holds overwhelmingly: at 0.79 tau_0 the cost is
+# `co2_seasonal_SPO` -57.00 and `co2_seasonal_MLO` -28.31. UPWARD it inverts. At
+# 1.26 tau_0 with the offsets re-optimised, the bill is annual-mean isotopes and
+# levels -- d13c_level_MLO -20.43, d13c_level_SPO -14.44, d14c_NH -12.06,
+# co2_level_MLO -9.54, d14c_SH -7.98, co2_gradient -7.49 -- while the FOUR
+# SEASONAL ROWS NET ONLY -3.40 and `co2_seasonal_SPO` actively IMPROVES by
+# +9.74. tau_ex sits in a two-sided vice with a different jaw on each side.
+# Do not cite the 66 % for an upward move.
+# Receipt: notes/collect_2026-08-27h_tau_ex_has_no_power_and_the_wrong_sign.md sec.2
+#          (diag_tau_ex_seasonal_power.R; outputs/diagnostics/tau_ex_seasonal_power.rds).
+#
 # THE REASON THIS TERM CARRIES AN OFFSET PARAMETER. A two-box model's
 # NH-box-minus-SH-box is NOT the quantity MLO minus SPO measures. MLO sits at
 # 19.5 N, south of the northern mid-latitude source region, so the station
