@@ -2,6 +2,55 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-28d — **THE 236-LOG-UNIT `h_ml` PULL DOES NOT EXIST; THE CLIFF IS THE WHOLE STORY**
+
+Pre-registered `notes/prereg_2026-08-28_hml_unbound_profile.md` (`805e8c4`) BEFORE the driver.
+Collect: `notes/collect_2026-08-28_hml_unbound_profile.md`. 26 points, all converged.
+**`R/` and `src/` untouched; no objective changed, no refit owed.** **H1 ✓ H2 ✗ H3 ✗ H4 ✗.**
+
+Marcus asked for the profile while leaning toward option 5 (σ-inflation). It was run over the
+**SHIPPED** [30, 200] with `beta_max`, `fert_k`, `k_w`, `kz`, `pump_grad` re-optimised at every
+point — the configuration never previously run.
+
+**08-16g's "argmax 32 m, pull 236 log-units against a 10.0 cliff, 24×" DOES NOT REPRODUCE.** That
+was measured with **19 parameters frozen**. With the uptake set free: **argmax 75 m**, pull beyond
+the cliff **0.09**, and **32 m is 4.57 log-units WORSE than 75 m**. The refit had *suggested* the
+236 was an artefact; it is now **measured**. 5 free is conservative and one-way — freeing more can
+only reduce the pull — so this generalises to the full 20.
+
+**THE SHAPE IS THE RESULT.** In-band the objective is **flat**: +0.00 (96.47 m) → +0.35 (85.01 m)
+across 11.5 m, consistent with `h_ml`'s ~11 m 1σ, with the in-band optimum at the *shallow* end.
+The cliff is **−7.300 at 85** and **+8.426 at 120**. Beyond it the profile is flat then **declines**.
+
+**THE CLIFF *IS* THE THREE ROWS, TO 0.3 %.** Just inside the lower edge they sum to **−7.275**
+against a measured cliff of **−7.300**. Outside, they are **absent — not zero** — from
+`ccx_loglik`'s output. ⇒ **The bound IS load-bearing (H2 ✗), but 7.30 of the 7.39 advantage at the
+argmax is three skipped Gaussians.** The objective does not prefer a shallower mixed layer; it
+prefers **being scored on less data**. That is defect (B), isolated and quantified. At the upper
+edge ~1.0 log-unit is re-optimisation freedom on top (`pump_grad` 273.4 → 324.0).
+
+**H3 ✗ AND IT INVERTS.** `kz` does not come off its rail below the band — it is pushed **harder**
+onto it (92.4 % → **98.2 %** at 32 m), releasing only going *deeper* (**57.7 %** at 198 m). The
+bound is not propping `kz` up; a shallower mixed layer drives `kz` into its ceiling. My hypothesis
+had the sign backwards.
+
+**H4 ✗.** `pump_grad` stays **226–446** with the rows off, never near 963.6 / 1431.0. ⚠ Not a
+refutation of those — they came from truncated arms with far more freedom — but the effect **needs
+more than the uptake set to appear**.
+
+**FOR THE OPTION CHOICE, INCLUDING THE PART THAT DOES NOT FAVOUR OPTION 5.** This says exactly what
+σ-inflation must do: charge for the −7.275 the skip gives away free. ⚠ **But at 08-16g's measured
+21 % residual, inflation would leave ≈1.53 — the pull falls from 7.39 to ~1.6, an 80 % reduction,
+NOT elimination, and the argmax would still sit just outside the band.** And that 21 % is
+**observation-side only**. **The profile now makes the proper measurement cheap: re-run these
+out-of-band points with inflation ON and read the argmax, instead of scaling a number from another
+configuration.**
+
+**TWO PROCESS DEFECTS, BOTH MINE.** A reporting bug destroyed 45 minutes of fits because `saveRDS`
+came *after* the pretty-printing — the artifact is now written first. And I walked into a trap this
+project has already documented: `ccx_loglik(by_stream = TRUE)` returns a **named numeric VECTOR**,
+so `s[["absent"]]` **errors** rather than returning NULL. Test **membership**, never nullity.
+
 ## 2026-08-28c — **THE `h_ml` SWEEP: 10 DRIVERS PATCHED, EVERY ARC RE-RUN, AND NO VERDICT MOVED**
 
 Follow-up to `2f60dd9` / `abc9704`. Pre-fix outputs in

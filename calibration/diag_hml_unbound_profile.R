@@ -173,7 +173,10 @@ for (k in c("84.9900", "85.0100", "96.4737", "119.9900", "120.0100")) {
   # ⚠ the rows are ABSENT from ccx_loglik's output when skipped -- not zero, ABSENT.
   # That absence IS defect (B): a skipped Gaussian pays 0 where a live one pays
   # negative, so leaving the band is a free gain. Print it as "skipped", not 0.
-  vals <- vapply(HU_GRAD_ROWS, function(n) if (is.null(s[[n]])) NA_real_ else s[[n]], 0)
+  # ⚠ ccx_loglik(by_stream = TRUE) returns a named numeric VECTOR, so `s[[n]]` on an
+  # ABSENT name ERRORS -- it does not return NULL. Test membership, never nullity.
+  # This is documented in memory ccx_hml_band_discont and I walked into it anyway.
+  vals <- vapply(HU_GRAD_ROWS, function(n) if (n %in% names(s)) s[[n]] else NA_real_, 0)
   cat(sprintf("  h_ml %9s (%4s): %s   sum %s\n", k, if (res[[k]]$live) "LIVE" else "off",
               paste(sprintf("%s %s", sub("ocean_grad_", "", HU_GRAD_ROWS),
                             ifelse(is.na(vals), " skipped", sprintf("%+8.3f", vals))),
