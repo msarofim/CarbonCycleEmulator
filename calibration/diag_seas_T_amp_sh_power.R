@@ -153,8 +153,29 @@ cat(sprintf("\n  P3 -- PRIOR pays %+.2f from landed to bracket HI (predicted +8.
             dpri, if (abs(dpri - 8.34) < 0.05) "PASS" else "FAIL"))
 
 sep("2. WHICH ROWS PAY -- frozen, vs the incumbent")
+# ⚠ THE PER-STREAM BREAKDOWN COMES FROM ccx_loglik(by_stream = TRUE), NOT from an
+# attribute on the logpost. The first version of this script probed
+# attr(lp(u), "streams"), got NULL, and skipped P5 -- the arm's DIAGNOSTIC gate --
+# while printing a tidy "unavailable" line. A gate that silently declines to run
+# is worse than one that fails. [[mutation_test_gates]]
 streams_at <- function(u) {
-  s <- attr(lp(u), "streams"); if (is.null(s)) s <- lp(u, streams = TRUE)$streams; s
+  pv <- ccx_unc_to_par(u)
+  p  <- ccx_default_params()
+  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
+  p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode
+  sp <- ccx_spinup(p)
+  F  <- ccx_build_forcing("historical", TA_YEARS, prod_c14 = 0, bomb_total_kmol = 102)
+  F$c14_cosmo <- sp$prod_c14; F$c14_bomb <- F$c14_bomb * (pv$bomb_total / 102)
+  for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH"))
+    F[[cc]] <- F[[cc]] * pv$luc_scale
+  attr(F, "luc_scale") <- pv$luc_scale
+  o <- ccx_run_fast(sp, F)$out
+  unlist(ccx_loglik(o, obs, list(sigma_d14c = pv$sigma_d14c, rep_dC = pv$rep_dC,
+                                 grad_off_co2 = pv$grad_off_co2,
+                                 grad_off_d13c = pv$grad_off_d13c),
+                    luc = ccx_forcing_eluc_annual(F),
+                    deep = sp$diagnostics$d14c_bottom_box,
+                    ocean_grad = ccx_ocean_grad_scored(o, sp), by_stream = TRUE))
 }
 s_ref <- try(streams_at(u0), silent = TRUE)
 if (inherits(s_ref, "try-error")) {
