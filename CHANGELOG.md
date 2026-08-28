@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-28f — **STAGE B: σ-INFLATION ERASES THE FREE LUNCH; THE PULL IS 0.033**
+
+Prereg amendment `672dd8b` BEFORE the driver. `calibration/diag_sigma_inflation_profile.R`;
+collect `notes/collect_2026-08-28b_sigma_inflation_pricing.md`. 26 points, all converged.
+**`R/` and `src/` untouched; the band and the skip are exactly as shipped.**
+**B1 ✗ (pre-registered as expected to fail) B2 ✓ B3 ✓ B4 ✓.**
+
+**The shipped skip's pull was +7.39 log-units. With the rows scored at σ_eff everywhere it is
++0.033 — a 99.55 % reduction.** 08-28 §6's inferred ~1.6 ("80 %, NOT elimination") **is refuted by
+measurement.** Best in-band −1544.357 at 85.01 m; best out −1544.324 at **82 m** — so the argmax
+does sit 3 m outside the lower edge (B1 ✗, as pre-registered), but **by 0.033, which is 21× below
+the refit's own 0.70 restart noise floor.** That is not a preference the fit can act on.
+
+**Both cliffs are gone and leaving the band is now slightly downhill** (B4): 85 m
+**+7.3005 → −0.0064**, 120 m **+8.4257 → −0.0047**. ⚠ Stage A's LOWER had suggested the 120 edge
+would stay at −6.74; at 120.01 the five free parameters recover nearly the whole 8.4 of bracket
+width. **The bound was rigorous; the inference drawn from it was not.**
+
+**The substantive case for option 5:** the inflated objective has an **interior maximum** over the
+full [30, 200] support — a 1.64-log-unit plateau across 65–120 m, falling to **−5.56 at 32 m** and
+**−13.03 at 198 m**. `h_ml` no longer needs a hard bound to stay put; the data holds it.
+
+**B3 ✓ 26/26** — every refit landed inside Stage A's bracket, and the Stage B guard reproduced
+Stage A's `LOWER` at the mode by a completely different route at **0.000e+00**.
+
+**Two side-findings.** ⚠ **`kz` still rails and still inverts** (97.9 % of bracket at 32 m → 92.4 %
+at 96.47 → 66.1 % at 198), **unchanged** — inflation does not touch it, and this arc has now twice
+failed to be its cause. **`pump_grad` narrows 226–446 → 253–302**: with the rows on everywhere, the
+quantity they exist to constrain stops wandering. That is the positive half of §5's **H4 ✗** and
+the first direct evidence those three rows do the identifying.
+
+**NOT ADOPTED.** Option 5 remains Marcus's call and a likelihood redesign: the conditional argmax
+moves 96.47 → 82 m, and adoption owes a full 21-parameter refit even though the move is inside the
+noise. Correcting the **target** to its like-for-like value is a different, more aggressive remedy,
+measurable from the same curves — **not priced, not proposed.**
+
 ## 2026-08-28e — **σ-INFLATION, PRICED: THE ~1.6 RESIDUAL WAS A RATIO ON THE WRONG BASE**
 
 Pre-registered `notes/prereg_2026-08-28b_sigma_inflation_pricing.md` (`15d1906`) BEFORE the
