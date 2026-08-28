@@ -29,7 +29,11 @@
 #
 # ---------------------------------------------------------------------
 # THE h_ml BAND IS A GATE HERE, NOT HOUSEKEEPING. run_modefind_pump_arms.R:217
-# overrides CCX_PARAM_TABLE$h_ml to LIK_OCEAN_GRAD_HML_OK = [85, 120] IN THE
+# ⚠ RETIRED BAND, 2026-08-28. This file was written when the three
+# ocean-gradient rows SKIPPED outside [85, 120]. They are now scored at
+# sigma_eff at every h_ml (option 5). What it reads below is PROVENANCE:
+# results produced under it are NOT comparable with post-adoption fits.
+# overrides CCX_PARAM_TABLE$h_ml to LIK_OCEAN_GRAD_HML_OK_RETIRED = [85, 120] IN THE
 # RUNNING PROCESS, and the .rds does not record it (memory
 # ccx_hml_band_provenance). Two consequences, both live:
 #
@@ -83,7 +87,7 @@ dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 # ---- restore the REFIT's h_ml band ----------------------------------
 # Exactly run_modefind_pump_arms.R:216-222, so the prior term this file adds up
 # is the one the arms were fitted against. Without it GATE 1 fails by ~1.1.
-GAP_HML_BAND <- LIK_OCEAN_GRAD_HML_OK
+GAP_HML_BAND <- LIK_OCEAN_GRAD_HML_OK_RETIRED
 CCX_PARAM_TABLE$h_ml$lo    <- GAP_HML_BAND[1]
 CCX_PARAM_TABLE$h_ml$hi    <- GAP_HML_BAND[2]
 CCX_PARAM_TABLE$h_ml$prior <-

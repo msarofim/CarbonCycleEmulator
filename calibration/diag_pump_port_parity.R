@@ -37,7 +37,7 @@ source(ccx_path("calibration", "pump_shim.R"))
 
 PP_YEARS    <- c(1750, 2024)
 PP_BOMB_REF <- 102
-PP_H        <- 100          # m; inside LIK_OCEAN_GRAD_HML_OK
+PP_H        <- 100          # m; inside LIK_OCEAN_GRAD_HML_OK_RETIRED
 PP_GRAD     <- 233.109      # umol/kg, the shipped DIC target
 PP_TOL_PCT  <- 2            # %, the agreement this file calls a PASS. Applies to
                             # the SCORED ROWS ONLY -- see the export note below.

@@ -935,10 +935,10 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # `ocean_grad` is the model's (bottom box - mixed layer) DIC and d13C at the
     # OBSERVATIONS' epoch, not at the run's end and not from the spinup -- the
     # gradient terms score the transient (Marcus 2026-08-16). Unlike `deep`, it
-    # is therefore NOT free: it reads the CCX_OCEAN_BOX_COLS time series. It
-    # returns NULL, skipping both terms visibly, when h_ml leaves
-    # LIK_OCEAN_GRAD_HML_OK -- the band in which fixed-depth targets are
-    # like-for-like with the model's boxes.
+    # is therefore NOT free: it reads the CCX_OCEAN_BOX_COLS time series.
+    # ⚠ It no longer returns NULL for an out-of-band h_ml: since 2026-08-28 the
+    # rows are scored at EVERY h_ml, at an inflated sigma that carries the
+    # fixed-depth-vs-model-box mismatch, and it attaches that sigma as `sd_eff`.
     ll <- ccx_loglik(r$out, obs, err, luc = eluc,
                      deep = sp$diagnostics$d14c_bottom_box,
                      ocean_grad = ccx_ocean_grad_scored(r$out, sp))

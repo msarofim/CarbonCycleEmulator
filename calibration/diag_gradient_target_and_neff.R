@@ -577,7 +577,7 @@ if (is.null(gg)) {
   cat("file carries no C_ant column. THAT CHOICE IS TESTABLE: if the two routes\n")
   cat("are equivalent they should give the SAME miss, and if they are not, the\n")
   cat("cheaper one is not a substitute. Priced here rather than asserted.\n\n")
-  p <- ccx_default_params(); p$h_ml <- mean(LIK_OCEAN_GRAD_HML_OK)
+  p <- ccx_default_params(); p$h_ml <- mean(LIK_OCEAN_GRAD_HML_OK_RETIRED)
   spg <- ccx_spinup(p)
   Fg  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = spg$prod_c14)
   og  <- ccx_ocean_grad_scored(suppressWarnings(ccx_run_fast(spg, Fg))$out, spg)

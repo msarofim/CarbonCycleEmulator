@@ -113,10 +113,14 @@ dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 # The refit's h_ml band, same as diag_landed_gap_streams.R. Needed only for the
 # prior, which this file does not use -- restored anyway so the two files cannot
 # drift into pricing different objectives.
-CCX_PARAM_TABLE$h_ml$lo <- LIK_OCEAN_GRAD_HML_OK[1]
-CCX_PARAM_TABLE$h_ml$hi <- LIK_OCEAN_GRAD_HML_OK[2]
-CCX_PARAM_TABLE$h_ml$prior <- local({ lo <- LIK_OCEAN_GRAD_HML_OK[1]
-                                      hi <- LIK_OCEAN_GRAD_HML_OK[2]
+# ⚠ RETIRED BAND, 2026-08-28. This file was written when the three
+# ocean-gradient rows SKIPPED outside [85, 120]. They are now scored at
+# sigma_eff at every h_ml (option 5). What it reads below is PROVENANCE:
+# results produced under it are NOT comparable with post-adoption fits.
+CCX_PARAM_TABLE$h_ml$lo <- LIK_OCEAN_GRAD_HML_OK_RETIRED[1]
+CCX_PARAM_TABLE$h_ml$hi <- LIK_OCEAN_GRAD_HML_OK_RETIRED[2]
+CCX_PARAM_TABLE$h_ml$prior <- local({ lo <- LIK_OCEAN_GRAD_HML_OK_RETIRED[1]
+                                      hi <- LIK_OCEAN_GRAD_HML_OK_RETIRED[2]
                                       function(x) stats::dunif(x, lo, hi, log = TRUE) })
 OBS <- ccx_prepare_obs()
 

@@ -61,7 +61,7 @@ AS_SHIPPED_SURF  <- c(0, 100)            # build_glodap_deep_targets.R
 AS_SHIPPED_DEEP  <- c(2627.2, 1e5)       # ditto -- note the 1e5
 AS_MIN_CELLS     <- 20                   # part 4's minimum, unchanged
 AS_GATE_TOL      <- 1e-3                 # absolute, in each field's own units
-AS_BAND          <- LIK_OCEAN_GRAD_HML_OK               # [85, 120]
+AS_BAND          <- LIK_OCEAN_GRAD_HML_OK_RETIRED               # [85, 120]
 AS_H_IN          <- 100                  # the pump's own h_ml, the in-band ref
 AS_H_FIT         <- 184                  # the quarantined mode's h_ml
 # The same h_ml grid 16g part 4 scanned, so the ALK column is directly

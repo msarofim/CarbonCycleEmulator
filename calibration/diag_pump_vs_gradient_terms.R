@@ -94,7 +94,7 @@ source(ccx_path("calibration", "pump_shim.R"))
 # ---- named constants: every label, window and threshold below derives ----
 PG_YEARS     <- c(1750, 2024)
 PG_BOMB_REF  <- 102
-PG_H_SCORE   <- 100        # m. INSIDE LIK_OCEAN_GRAD_HML_OK by assertion below,
+PG_H_SCORE   <- 100        # m. INSIDE LIK_OCEAN_GRAD_HML_OK_RETIRED by assertion below,
                            # and the depth handoff 15d says the pump delivers.
 PG_EPS_ORG   <- PUMP_EPS_ORG          # -20 permil, soft-tissue
 PG_EPS_NONE  <- 0                     # the control arm
@@ -123,16 +123,24 @@ sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 # =====================================================================
 # GATE A. THE TERMS MUST BE LIVE AT THE DEPTH EVERYTHING IS SCORED AT
 # =====================================================================
-# The gradient terms SKIP outside LIK_OCEAN_GRAD_HML_OK. A skipped term reports
+# The gradient terms SKIP outside LIK_OCEAN_GRAD_HML_OK_RETIRED. A skipped term reports
 # as absent, not as zero -- so an arm run outside the band would silently
 # compare two runs that were never scored on these streams at all.
 tg <- ccx_ocean_gradient_target()
 stopifnot(!is.null(tg), !is.null(tg$dic), !is.null(tg$d13c))
-if (PG_H_SCORE < LIK_OCEAN_GRAD_HML_OK[1] || PG_H_SCORE > LIK_OCEAN_GRAD_HML_OK[2])
-  stop(sprintf("PG_H_SCORE = %g is outside LIK_OCEAN_GRAD_HML_OK [%g, %g] -- the terms would SKIP",
-               PG_H_SCORE, LIK_OCEAN_GRAD_HML_OK[1], LIK_OCEAN_GRAD_HML_OK[2]))
-cat(sprintf("GATE A: h_ml = %g m is inside the gate [%g, %g]. Both terms are LIVE.\n",
-            PG_H_SCORE, LIK_OCEAN_GRAD_HML_OK[1], LIK_OCEAN_GRAD_HML_OK[2]))
+# ⚠ THE OUT-OF-BAND GUARD THAT STOOD HERE IS DELETED, 2026-08-28. It
+# asserted the scoring depth was inside [85, 120] so the rows would not
+# SKIP. Since option 5 the rows are scored at EVERY h_ml, so the guard
+# was vacuous. The depth below stays as a deliberate CHOICE, not a
+# constraint -- it is where the model's surface box is the shipped layer.
+cat(sprintf("GATE A: the rows are scored at h_ml = %g m; since 2026-08-28 they are
+"
+            , PG_H_SCORE))
+cat(sprintf("        LIVE at EVERY h_ml, at sd_eff/sd_obs %.3f / %.3f / %.3f.
+",
+            ccx_ocean_sigma_eff("dic",  PG_H_SCORE) / tg$dic$sd,
+            ccx_ocean_sigma_eff("d13c", PG_H_SCORE) / tg$d13c$sd,
+            ccx_ocean_sigma_eff("alk",  PG_H_SCORE) / tg$alk$sd))
 dg_parity_gate()
 
 # =====================================================================

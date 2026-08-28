@@ -60,7 +60,11 @@ HEPS_SHIPPED    <- 3e-4      # the value under test = run_modefind_pump_arms.R's
 HEPS_STABLE_TOL <- 0.25      # max relative spread over a window, as
                              # recompute_hessian.R's HESS_STABLE_TOL
 HEPS_WINDOW_MIN <- 3L        # a "window" must span at least this many grid steps
-HEPS_HML_BOUND  <- LIK_OCEAN_GRAD_HML_OK   # [85, 120], as ARM_HML_BOUND
+# ⚠ RETIRED BAND, 2026-08-28. This file was written when the three
+# ocean-gradient rows SKIPPED outside [85, 120]. They are now scored at
+# sigma_eff at every h_ml (option 5). What it reads below is PROVENANCE:
+# results produced under it are NOT comparable with post-adoption fits.
+HEPS_HML_BOUND  <- LIK_OCEAN_GRAD_HML_OK_RETIRED   # [85, 120], as ARM_HML_BOUND
 HEPS_HML_INIT   <- 100                     # as ARM_HML_INIT
 HEPS_MODE_FILE  <- ccx_mode_file()
 HEPS_ARM        <- "N"       # sweep arm; D is spot-checked at HEPS_SHIPPED

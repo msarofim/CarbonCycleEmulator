@@ -61,9 +61,9 @@ for (m in FIN_MODES) {
   cat(sprintf("[%s] kz = %.1f (%.1f %% up the re-bisected bracket [%g, %g])\n",
               m, f$par_mode$kz, 100 * (f$par_mode$kz - kb[1]) / (kb[2] - kb[1]), kb[1], kb[2]))
   cat(sprintf("[%s] h_ml = %.2f -- gradient rows LIVE only inside [%g, %g]: %s\n",
-              m, f$par_mode$h_ml, LIK_OCEAN_GRAD_HML_OK[1], LIK_OCEAN_GRAD_HML_OK[2],
-              if (f$par_mode$h_ml >= LIK_OCEAN_GRAD_HML_OK[1] &&
-                  f$par_mode$h_ml <= LIK_OCEAN_GRAD_HML_OK[2]) "LIVE" else "*** ABSENT ***"))
+              m, f$par_mode$h_ml, LIK_OCEAN_GRAD_HML_OK_RETIRED[1], LIK_OCEAN_GRAD_HML_OK_RETIRED[2],
+              if (f$par_mode$h_ml >= LIK_OCEAN_GRAD_HML_OK_RETIRED[1] &&
+                  f$par_mode$h_ml <= LIK_OCEAN_GRAD_HML_OK_RETIRED[2]) "LIVE" else "*** ABSENT ***"))
   cat(sprintf("[%s] pump_grad = %.2f  (prior centre %.2f, 1-D optimum at the old mode 274.5)\n",
               m, f$par_mode$pump_grad, ccx_const("PUMP_GRAD_OBS")))
 }

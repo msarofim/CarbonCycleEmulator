@@ -107,7 +107,8 @@ ARM_FLAG_SIGMA <- 3.0       # prior-sd distance at which a parameter is flagged
 ARM_MODES      <- c("N")
 # h_ml IS BOUNDED TO THE GRADIENT ROWS' VALIDITY BAND FOR THIS REFIT (Marcus
 # 2026-08-16g). See the block below for what that does and does not buy.
-ARM_HML_BOUND  <- LIK_OCEAN_GRAD_HML_OK   # [85, 120]
+# ⚠ PROVENANCE ONLY since 2026-08-28 -- nothing may bound h_ml with this.
+ARM_HML_BOUND  <- LIK_OCEAN_GRAD_HML_OK_RETIRED   # what 16g-to-08-28 pinned
 ARM_HML_INIT   <- 100      # m; the pump's own h_ml (DESIGN sec.5.2f, handoff 15d)
                            # and the depth every pump diagnostic scores at. The
                            # SHIPPED init of 75 is outside the new bound and would
@@ -165,105 +166,70 @@ cat(sprintf("pump default %.6f umol/kg = PUMP_GRAD_OBS\n",
             ccx_default_params()$pump_grad))
 
 # =====================================================================
-# h_ml BOUNDED TO [85, 120] FOR THIS REFIT -- Marcus 2026-08-16g
+# h_ml IS **UNBOUNDED** FOR THIS REFIT -- Marcus 2026-08-28, option 5 adopted
 # =====================================================================
-# WHY, in one line: outside LIK_OCEAN_GRAD_HML_OK all three ocean-gradient rows
-# SKIP, so an unbounded refit scores a DIFFERENT OBJECTIVE from the one the pump
-# was introduced to be tested against -- and the smoke test found BOTH arms
-# landing there and diverging to unrelated corners (handoff 16f sec.5.3). Bounded,
-# both arms are scored on all three rows and the N-vs-D contrast is a comparison
-# rather than noise.
+# ⚠ THIS INVERTS THE 2026-08-16g DECISION. From 16g to 08-28 this driver pinned
+# h_ml to LIK_OCEAN_GRAD_HML_OK_RETIRED = [85, 120] and renormalised its prior over that
+# support, because outside the band all three ocean-gradient rows SKIPPED and an
+# unbounded refit would have scored a DIFFERENT objective from the one the pump
+# was introduced to be tested against.
 #
-# WHAT THE DECOMPOSITION SAYS THIS COSTS, AND WHAT IT DOES NOT SAY
-# (calibration/diag_hml_band_discontinuity.R, DESIGN sec.5.2k):
+# THE SKIP IS GONE. The rows are now scored at sigma_eff(h_ml) at EVERY depth
+# (R/likelihood.R, LIK_USE_OCEAN_GRAD's block), so the reason for the bound has
+# been removed rather than worked around, and h_ml refits over its OWN SHIPPED
+# SUPPORT [30, 200] with its OWN prior. No override, and therefore no +1.58
+# renormalisation constant to carry.
 #
-#  * The band's cliff is EXACTLY "the three rows appeared", to 1e-12 -- h_ml = 85
-#    is not a worse FIT than 84.99, it is scored on MORE DATA.
-#  * The rows are NOT why h_ml leaves the band. At init the objective pulls h_ml
-#    to its lower bound with 236 log-units against the cliff's 10.0, and deleting
-#    the three rows entirely moves the argmax 32 -> 32 m. So this bound is not
-#    settling a close call; it is OVERRIDING a real preference.
-#  * That 236 IS AN UPPER BOUND AND PROBABLY A LARGE OVERSTATEMENT of what it
-#    costs a refit: 96 % of it sits on co2_level_SPO, co2_level_MLO and d14c_SH,
-#    and `kz`, `k_w` and `beta_max` move ocean and land uptake directly. This run
-#    is the test of whether they absorb it.
+# WHY THE BOUND COULD NOT SIMPLY BE KEPT AS CONSERVATISM. It was measured to be
+# LOAD-BEARING, and to be bearing a FREE LUNCH rather than physics: outside the
+# band the rows were ABSENT rather than zero, so leaving it bought +7.30
+# log-units of un-scored data out of a +7.39 total advantage -- the objective did
+# not prefer a shallower mixed layer, it preferred BEING SCORED ON LESS DATA
+# (notes/collect_2026-08-28_hml_unbound_profile.md). With inflation on, the pull
+# falls to +0.033, both cliffs vanish (+7.30 -> -0.006 at 85, +8.43 -> -0.005 at
+# 120), and h_ml has an INTERIOR maximum over the full support -- it no longer
+# needs a wall to stay put (notes/collect_2026-08-28b_sigma_inflation_pricing.md).
 #
-# THE THING TO WATCH, AND IT IS THE REASON THIS RUN IS INFORMATIVE EITHER WAY:
-# if the CO2-level streams recover at h_ml in-band, the bound was cheap and the
-# refit is clean. IF THEY DO NOT -- if co2_level_SPO/MLO stay large in both arms
-# -- then `h_ml` was absorbing a CO2-level misfit that no other parameter can
-# take, both modes are bad, and N-vs-D is uninformative AGAIN. The per-stream
-# table at (b3) is where that is read, and it must be read BEFORE the evidence.
-#
-# HOW IT IS DONE: by overriding CCX_PARAM_TABLE's `h_ml` entry IN THIS PROCESS
-# ONLY. R/calibrate.R is NOT edited -- the bound is a property of this refit, not
-# of the model, and every diagnostic that runs tomorrow must still see [30, 200].
-# The prior is narrowed WITH the bounds: leaving dunif(30, 200) would keep a
-# density normalised over a support the sampler can no longer reach. That changes
-# the log-prior by a CONSTANT log(170/35) = +1.58, identical in both arms, so it
-# cancels from the evidence contrast -- but it is stated because a constant that
-# is not identical between arms would not.
-#
-# CONSEQUENCE, LOUDLY: this objective is a DIFFERENT FUNCTION from the unbounded
-# one. Its logpost is NOT comparable with any earlier run's, on either side of the
-# 2026-08-16 boundary. Only the N-vs-D contrast WITHIN this run is meaningful.
-sep("h_ml BOUNDED FOR THIS REFIT (Marcus 2026-08-16g)")
-# The snapshot is of the WHOLE table, not of the h_ml entry. GATE H1's first draft
-# compared each entry against itself for every name but h_ml -- a tautology that
-# could never have detected a change to a second parameter, which is the only
-# thing it exists to detect.
-.tab_before <- CCX_PARAM_TABLE
-.hml_before <- CCX_PARAM_TABLE$h_ml
-CCX_PARAM_TABLE$h_ml$lo    <- ARM_HML_BOUND[1]
-CCX_PARAM_TABLE$h_ml$hi    <- ARM_HML_BOUND[2]
-CCX_PARAM_TABLE$h_ml$init  <- ARM_HML_INIT
-CCX_PARAM_TABLE$h_ml$prior <-
-  local({ lo <- ARM_HML_BOUND[1]; hi <- ARM_HML_BOUND[2]
-          function(x) stats::dunif(x, lo, hi, log = TRUE) })
-cat(sprintf("h_ml: [%g, %g] init %g   ->   [%g, %g] init %g\n",
-            .hml_before$lo, .hml_before$hi, .hml_before$init,
-            CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi,
-            CCX_PARAM_TABLE$h_ml$init))
-cat(sprintf("prior renormalised over the new support: log-prior shifts by %+.4f\n",
-            log((.hml_before$hi - .hml_before$lo) /
-                (ARM_HML_BOUND[2] - ARM_HML_BOUND[1]))))
-
-# GATE H1: ONLY h_ml changed, and it changed in exactly the four documented ways.
-.chg <- names(which(!vapply(CCX_PARAM_NAMES, function(n)
-  identical(CCX_PARAM_TABLE[[n]], .tab_before[[n]]), logical(1))))
-if (!identical(.chg, "h_ml"))
-  stop("the h_ml override touched more than h_ml: ", paste(.chg, collapse = ", "))
-# and it must have changed h_ml in exactly the four documented fields
-.fld <- names(which(!vapply(names(.hml_before), function(f)
-  identical(CCX_PARAM_TABLE$h_ml[[f]], .hml_before[[f]]), logical(1))))
-if (!setequal(.fld, c("lo", "hi", "init", "prior")))
-  stop("h_ml changed in unexpected fields: ", paste(.fld, collapse = ", "))
-# GATE H2: the new init must be strictly inside the new bound and round-trip
-# finitely through the transform. The SHIPPED init of 75 fails this, which is the
-# whole reason ARM_HML_INIT exists -- qlogis of a negative number is NaN and the
-# mode-find would have started from a non-finite point.
-.u_h <- .to_unc(ARM_HML_INIT, CCX_PARAM_TABLE$h_ml)
-stopifnot(ARM_HML_INIT > ARM_HML_BOUND[1], ARM_HML_INIT < ARM_HML_BOUND[2],
-          is.finite(.u_h),
-          abs(.from_unc(.u_h, CCX_PARAM_TABLE$h_ml) - ARM_HML_INIT) < 1e-9)
-stopifnot(!is.finite(suppressWarnings(.to_unc(.hml_before$init, CCX_PARAM_TABLE$h_ml))))
-cat(sprintf("GATE H1: only `h_ml` changed. GATE H2: init %g round-trips (u = %+.4f);\n",
-            ARM_HML_INIT, .u_h))
-cat(sprintf("         the shipped init %g is correctly REJECTED by the new bound. OK\n",
-            .hml_before$init))
-# GATE H3: the gradient rows must actually be LIVE at the new init -- the entire
-# point of the bound. Asserted on ccx_ocean_grad_scored()'s own return, not on the
-# band arithmetic, so a change to the gate's internals cannot pass this silently.
-.sp_h <- ccx_spinup(local({ p <- ccx_default_params(); p$h_ml <- ARM_HML_INIT; p }))
+# CONSEQUENCE, LOUDLY: this objective is a DIFFERENT FUNCTION from BOTH the
+# pre-16g unbounded one and the 16g-to-08-28 bounded one. Its logpost is NOT
+# comparable with any earlier run's. Everything fitted before 2026-08-28 is
+# non-comparable and is quarantined.
+sep("h_ml UNBOUNDED -- the retired band is NOT re-applied (Marcus 2026-08-28)")
+# GATE H1, INVERTED: the shipped parameter table must be UNTOUCHED. The old gate
+# asserted that exactly one entry had changed; this asserts that none has, which
+# is the property that now matters -- a stray override would silently reinstate
+# the retired objective.
+.hml_now <- CCX_PARAM_TABLE$h_ml
+stopifnot(identical(.hml_now$lo, 30), identical(.hml_now$hi, 200))
+cat(sprintf("GATE H1: h_ml on its SHIPPED support [%g, %g], prior NOT renormalised. OK\n",
+            .hml_now$lo, .hml_now$hi))
+# GATE H2: the shipped init must now be ACCEPTED, where the bounded run rejected
+# it. Same round-trip the old gate ran, with the verdict deliberately reversed.
+.u_h <- .to_unc(.hml_now$init, .hml_now)
+stopifnot(is.finite(.u_h), abs(.from_unc(.u_h, .hml_now) - .hml_now$init) < 1e-9)
+cat(sprintf("GATE H2: the shipped init %g round-trips (u = %+.4f) and is ACCEPTED. OK\n",
+            .hml_now$init, .u_h))
+# GATE H3, INVERTED AND STRENGTHENED: the rows must be LIVE not just at init but
+# at BOTH ENDS of the support -- the entire content of the adoption. Asserted on
+# ccx_ocean_grad_scored()'s own return, so a change to its internals cannot pass
+# this silently, and on sd_eff so a build that lost the sigma_rep table cannot.
 .F_h  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
                            bomb_total_kmol = 102)
-.F_h$c14_cosmo <- .sp_h$prod_c14
-.og_h <- ccx_ocean_grad_scored(ccx_run_fast(.sp_h, .F_h)$out, .sp_h)
-if (is.null(.og_h))
-  stop("GATE H3 FAILED: the gradient rows are ABSENT at h_ml = ", ARM_HML_INIT,
-       " -- the bound does not do what it was chosen to do")
-cat(sprintf("GATE H3: all three rows LIVE at init (DIC %+.2f, d13C %+.4f, ALK %+.2f). OK\n",
-            .og_h$dic, .og_h$d13c, .og_h$alk))
+for (.h in c(.hml_now$lo + 1, .hml_now$init, .hml_now$hi - 1)) {
+  .sp_h <- ccx_spinup(local({ p <- ccx_default_params(); p$h_ml <- .h; p }))
+  .Fh <- .F_h; .Fh$c14_cosmo <- .sp_h$prod_c14
+  .og_h <- ccx_ocean_grad_scored(ccx_run_fast(.sp_h, .Fh)$out, .sp_h)
+  if (is.null(.og_h) || !all(is.finite(.og_h$sd_eff)))
+    stop("GATE H3 FAILED: the gradient rows are ABSENT or carry no sd_eff at ",
+         "h_ml = ", .h, " -- the retired band is still gating somewhere, or ",
+         "data/obs_glodap_sigma_rep.rds is missing.")
+  cat(sprintf("GATE H3: rows LIVE at h_ml %6.1f (DIC %+8.2f, d13C %+.4f, ALK %+7.2f; ",
+              .h, .og_h$dic, .og_h$d13c, .og_h$alk))
+  cat(sprintf("sd_eff/sd_obs %.3f/%.3f/%.3f). OK\n",
+              .og_h$sd_eff[["dic"]]  / ccx_ocean_gradient_target()$dic$sd,
+              .og_h$sd_eff[["d13c"]] / ccx_ocean_gradient_target()$d13c$sd,
+              .og_h$sd_eff[["alk"]]  / ccx_ocean_gradient_target()$alk$sd))
+}
 
 # ---- PLACEMENT NOTE, and it cost a dead run ------------------------
 # This block was first written ABOVE the h_ml override and the run died on
@@ -449,7 +415,10 @@ rm(.tab_before, .hml_before, .chg, .fld, .u_h, .sp_h, .F_h, .og_h)
 # drift from the code that creates the kinks.
 sep("h_ml KINK MAP (see calibration/diag_hess_eps_21par.R)")
 ARM_KINKS <- local({
-  kh <- seq(ARM_HML_BOUND[1], ARM_HML_BOUND[2], by = ARM_KINK_STEP)
+  # ⚠ SWEEPS THE FULL SUPPORT since 2026-08-28: h_ml is no longer bounded to
+  # [85, 120], so a scan over the retired band would miss every kink the
+  # refit can now actually reach.
+  kh <- seq(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi, by = ARM_KINK_STEP)
   KS <- t(sapply(kh, function(h) ccx_pump_shape(ccx_ocean_grid(h))))
   kt <- rowSums(abs(apply(KS, 2, function(v) diff(diff(v)))))
   kb <- which(kt > ARM_KINK_FACT * stats::median(kt) + 1e-14)
@@ -458,7 +427,7 @@ ARM_KINKS <- local({
                 function(ix) kh[ix[which.max(kt[ix])] + 1], numeric(1)))
 })
 cat(sprintf("%d kink(s) in [%g, %g]: h_ml = %s m\n", length(ARM_KINKS),
-            ARM_HML_BOUND[1], ARM_HML_BOUND[2],
+            CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi,
             paste(sprintf("%.2f", ARM_KINKS), collapse = ", ")))
 # The diagnostic found exactly three. A different count means the shape data or
 # the grid changed since, and the Hessian caveat was written against the old one.
@@ -574,7 +543,12 @@ arm_fit <- function(mode) {
     # file is in git at be86760, so overwriting is recoverable.
     saveRDS(list(pump_mode = mode, par_mode = ccx_unc_to_par(setNames(u, CCX_PARAM_NAMES)),
                  logpost = -best, cycle = cyc, trace = trace, n_eval = n_eval,
-                 hml_bound = ARM_HML_BOUND, in_progress = TRUE, seed = ARM_SEED),
+                 # ⚠ ccx_mode_params() RE-DECODES u_mode under this. It must be the
+                 # bound actually in force -- since 2026-08-28 that is the SHIPPED
+                 # table's, so the re-decode is correctly a no-op. Writing the
+                 # retired [85,120] here would corrupt every downstream decode.
+                 hml_bound = c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi),
+                 in_progress = TRUE, seed = ARM_SEED),
             file.path(ARM_OUTDIR, sprintf("mode_fit_pump%s_progress.rds", mode)))
     if (cyc_gain < ARM_CYCLE_TOL) {
       cat(sprintf("[%s] CONVERGED: cycle gain below ARM_CYCLE_TOL (%g)\n", mode, ARM_CYCLE_TOL))
@@ -758,7 +732,7 @@ arm_fit <- function(mode) {
               # to -34.63 before the producer was read (ccx_hml_band_provenance).
               # `par_mode` is band-independent; `u_mode`, `hessian` and `cov` are
               # NOT, and cannot be decoded without this field.
-              hml_bound = ARM_HML_BOUND,
+              hml_bound = c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi),
               substeps = ccx_substeps_for(p_mode))
   saveRDS(out, ARM_OUT(mode))
   cat(sprintf("[%s] wrote %s\n", mode, ARM_OUT(mode)))
@@ -817,9 +791,9 @@ for (m in ARM_MODES) {
   cat(sprintf("[%s] kz = %.1f (%.1f %% up the re-bisected bracket [%g, %g])\n",
               m, f$par_mode$kz, 100 * (f$par_mode$kz - kb[1]) / (kb[2] - kb[1]), kb[1], kb[2]))
   cat(sprintf("[%s] h_ml = %.2f -- gradient rows LIVE only inside [%g, %g]: %s\n",
-              m, f$par_mode$h_ml, LIK_OCEAN_GRAD_HML_OK[1], LIK_OCEAN_GRAD_HML_OK[2],
-              if (f$par_mode$h_ml >= LIK_OCEAN_GRAD_HML_OK[1] &&
-                  f$par_mode$h_ml <= LIK_OCEAN_GRAD_HML_OK[2]) "LIVE" else "*** ABSENT ***"))
+              m, f$par_mode$h_ml, LIK_OCEAN_GRAD_HML_OK_RETIRED[1], LIK_OCEAN_GRAD_HML_OK_RETIRED[2],
+              if (f$par_mode$h_ml >= LIK_OCEAN_GRAD_HML_OK_RETIRED[1] &&
+                  f$par_mode$h_ml <= LIK_OCEAN_GRAD_HML_OK_RETIRED[2]) "LIVE" else "*** ABSENT ***"))
   cat(sprintf("[%s] pump_grad = %.2f  (prior centre %.2f, 1-D optimum at the old mode 274.5)\n",
               m, f$par_mode$pump_grad, ccx_const("PUMP_GRAD_OBS")))
 }

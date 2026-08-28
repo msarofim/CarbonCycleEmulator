@@ -19,7 +19,7 @@
 # [LOWER, UPPER] at every h, and if max UPPER(out) < max LOWER(in) the argmax is
 # PROVABLY in-band.
 #
-# ⚠ NOTHING HERE CHANGES AN OBJECTIVE. LIK_OCEAN_GRAD_HML_OK and the skip stay
+# ⚠ NOTHING HERE CHANGES AN OBJECTIVE. LIK_OCEAN_GRAD_HML_OK_RETIRED and the skip stay
 # exactly as shipped; inflation is computed in this driver only, and no refit is
 # owed by anything it prints. [[ccx_hml_band_discont]] [[hml_cliff_is_the_free_lunch]]
 #
@@ -29,7 +29,7 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
 SI_YEARS    <- c(1750, 2024)
-SI_BAND     <- LIK_OCEAN_GRAD_HML_OK               # [85, 120], read not typed
+SI_BAND     <- LIK_OCEAN_GRAD_HML_OK_RETIRED               # [85, 120], read not typed
 SI_PROFILE  <- ccx_path("outputs", "diagnostics", "hml_unbound_profile.rds")
 SI_SR_ISO   <- ccx_path("calibration", "output", "hml_band_discontinuity",
                         "hml_band_discontinuity.rds")   # DIC + d13C, 16g part 4

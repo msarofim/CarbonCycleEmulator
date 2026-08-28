@@ -11,7 +11,7 @@
 # LOWER(in) -1544.358 at 85.01 m, an overlap of 0.541 against widths of ~0.5-0.65.
 # This is the prereg's own remedy -- refit all 26 points with the rows ON.
 #
-# ⚠ NOTHING HERE CHANGES THE SHIPPED OBJECTIVE. LIK_OCEAN_GRAD_HML_OK and the
+# ⚠ NOTHING HERE CHANGES THE SHIPPED OBJECTIVE. LIK_OCEAN_GRAD_HML_OK_RETIRED and the
 # skip are untouched on disk. ccx_ocean_grad_scored() is overridden IN THIS
 # DRIVER'S ENVIRONMENT ONLY, via an exact algebraic identity (prereg B.1), so the
 # shipped ccx_loglik/ccx_make_logpost path does the scoring. No refit is owed by
@@ -27,7 +27,7 @@ ccx_load_cpp()
 SB_YEARS  <- c(1750, 2024)
 SB_FREE   <- c("beta_max", "fert_k", "k_w", "kz", "pump_grad")   # 08-28 prereg sec.2
 SB_PROF   <- "h_ml"
-SB_BAND   <- LIK_OCEAN_GRAD_HML_OK
+SB_BAND   <- LIK_OCEAN_GRAD_HML_OK_RETIRED
 SB_GRID   <- c(32, 38, 45, 55, 65, 75, 82, 84.90, 84.99,
                85.01, 85.10, 88, 92, 96.4737, 104, 112, 118, 119.9, 119.99,
                120.01, 120.1, 126, 140, 160, 185, 198)      # §5's grid, unchanged

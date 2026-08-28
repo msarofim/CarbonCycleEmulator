@@ -74,9 +74,9 @@ ccx_load_cpp()
 # ---- named constants: every label, window and threshold below derives ----
 PGP_YEARS    <- c(1750, 2024)
 PGP_BOMB_REF <- 102
-PGP_H_SCORE  <- 100          # m; inside LIK_OCEAN_GRAD_HML_OK, and the depth the
+PGP_H_SCORE  <- 100          # m; inside LIK_OCEAN_GRAD_HML_OK_RETIRED, and the depth the
                              # pump delivers (handoff 15d). The MODE's own h_ml
-                             # is 184, which would SKIP all three rows.
+                             # is 184; pre-2026-08-28 that SKIPPED all three rows.
 PGP_MODE     <- "N"          # export law. "D" is deferred to the refit by
                              # decision (16c sec.7 item 3) and is NOT scanned
                              # here: the gradient rows cannot tell N from D, so a
@@ -121,11 +121,17 @@ sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 # would silently compare two runs never scored on these streams at all.
 tg <- ccx_ocean_gradient_target()
 stopifnot(!is.null(tg), !is.null(tg$dic), !is.null(tg$d13c), !is.null(tg$alk))
-if (PGP_H_SCORE < LIK_OCEAN_GRAD_HML_OK[1] || PGP_H_SCORE > LIK_OCEAN_GRAD_HML_OK[2])
-  stop(sprintf("PGP_H_SCORE = %g is outside LIK_OCEAN_GRAD_HML_OK [%g, %g] -- the rows would SKIP",
-               PGP_H_SCORE, LIK_OCEAN_GRAD_HML_OK[1], LIK_OCEAN_GRAD_HML_OK[2]))
-cat(sprintf("GATE A: h_ml = %g m is inside the gate [%g, %g]. All THREE rows are LIVE.\n",
-            PGP_H_SCORE, LIK_OCEAN_GRAD_HML_OK[1], LIK_OCEAN_GRAD_HML_OK[2]))
+# ⚠ THE OUT-OF-BAND GUARD THAT STOOD HERE IS DELETED, 2026-08-28. It
+# asserted the scoring depth was inside [85, 120] so the rows would not
+# SKIP. Since option 5 the rows are scored at EVERY h_ml, so the guard
+# was vacuous. The depth below stays as a deliberate CHOICE, not a
+# constraint -- it is where the model's surface box is the shipped layer.
+cat(sprintf("GATE A: the rows are scored at h_ml = %g m; since 2026-08-28 they are\n"
+            , PGP_H_SCORE))
+cat(sprintf("        LIVE at EVERY h_ml, at sd_eff/sd_obs %.3f / %.3f / %.3f.\n",
+            ccx_ocean_sigma_eff("dic",  PGP_H_SCORE) / tg$dic$sd,
+            ccx_ocean_sigma_eff("d13c", PGP_H_SCORE) / tg$d13c$sd,
+            ccx_ocean_sigma_eff("alk",  PGP_H_SCORE) / tg$alk$sd))
 cat(sprintf("targets: DIC %+.3f +/- %.3f   d13C %+.4f +/- %.4f   ALK %+.3f +/- %.3f\n",
             tg$dic$target, tg$dic$sd, tg$d13c$target, tg$d13c$sd,
             tg$alk$target, tg$alk$sd))

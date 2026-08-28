@@ -23,7 +23,7 @@ ccx_load_cpp()
 HU_YEARS <- c(1750, 2024)
 HU_FREE  <- c("beta_max", "fert_k", "k_w", "kz", "pump_grad")   # prereg sec.2
 HU_PROF  <- "h_ml"
-HU_BAND  <- LIK_OCEAN_GRAD_HML_OK           # [85, 120], read not typed
+HU_BAND  <- LIK_OCEAN_GRAD_HML_OK_RETIRED           # [85, 120], read not typed
 HU_GRID  <- c(32, 38, 45, 55, 65, 75, 82, 84.90, 84.99,
               85.01, 85.10, 88, 92, 96.4737, 104, 112, 118, 119.9, 119.99,
               120.01, 120.1, 126, 140, 160, 185, 198)

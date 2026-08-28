@@ -49,7 +49,7 @@
 #
 # ---------------------------------------------------------------------
 # WHAT THIS FILE DOES NOT DO. `h_ml` is held at PKZ_H_SCORE throughout, because
-# the three gradient rows SKIP outside LIK_OCEAN_GRAD_HML_OK and the mode's own
+# the three gradient rows SKIP outside LIK_OCEAN_GRAD_HML_OK_RETIRED and the mode's own
 # 183.95 is outside it. The full question is 3-D (`pump_grad` x `kz` x `h_ml`)
 # and belongs to the refit; this is the 2-D slice that decides whether the refit
 # should carry `pump_grad` as a free parameter at all. NO MODEL FILE IS TOUCHED.
@@ -87,10 +87,16 @@ sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 
 tg <- ccx_ocean_gradient_target()
 stopifnot(!is.null(tg), !is.null(tg$alk))
-if (PKZ_H_SCORE < LIK_OCEAN_GRAD_HML_OK[1] || PKZ_H_SCORE > LIK_OCEAN_GRAD_HML_OK[2])
-  stop("PKZ_H_SCORE is outside LIK_OCEAN_GRAD_HML_OK -- the rows would SKIP")
-cat(sprintf("GATE A: h_ml = %g m inside [%g, %g]; all three rows LIVE.\n",
-            PKZ_H_SCORE, LIK_OCEAN_GRAD_HML_OK[1], LIK_OCEAN_GRAD_HML_OK[2]))
+# ⚠ THE OUT-OF-BAND GUARD THAT STOOD HERE IS DELETED, 2026-08-28 (option 5).
+# It asserted the scoring depth was inside [85, 120] so the rows would not
+# SKIP; the rows are now scored at every h_ml, so the guard was vacuous.
+# The depth stays a deliberate CHOICE, not a constraint.
+cat(sprintf("GATE A: the rows are scored at h_ml = %g m; since 2026-08-28 they are\n"
+            , PKZ_H_SCORE))
+cat(sprintf("        LIVE at EVERY h_ml, at sd_eff/sd_obs %.3f / %.3f / %.3f.\n",
+            ccx_ocean_sigma_eff("dic",  PKZ_H_SCORE) / tg$dic$sd,
+            ccx_ocean_sigma_eff("d13c", PKZ_H_SCORE) / tg$d13c$sd,
+            ccx_ocean_sigma_eff("alk",  PKZ_H_SCORE) / tg$alk$sd))
 
 obs <- ccx_prepare_obs()
 base_forc <- ccx_build_forcing("historical", PKZ_YEARS, prod_c14 = 0,

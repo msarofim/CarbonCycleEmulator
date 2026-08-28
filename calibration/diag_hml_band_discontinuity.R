@@ -4,7 +4,7 @@
 # (handoff 2026-08-16f sec.5, the blocker; sec.9 item 1)
 #
 # THE QUESTION 16f DID NOT ASK. 16f measured the cliff -- -10.07 log-units to
-# enter LIK_OCEAN_GRAD_HML_OK at 85, +9.6 to leave at 120 -- and offered four
+# enter LIK_OCEAN_GRAD_HML_OK_RETIRED at 85, +9.6 to leave at 120 -- and offered four
 # options. It did not decompose it. That matters because the cliff is two
 # SEPARABLE defects wearing one number, and each option fixes a different one:
 #
@@ -72,7 +72,7 @@ ccx_load_cpp()
 # ---- named constants: every label, window and threshold below derives ----
 HB_YEARS      <- c(1750, 2024)
 HB_BOMB_REF   <- 102          # must match ccx_make_logpost()'s own BOMB_REF
-HB_BAND       <- LIK_OCEAN_GRAD_HML_OK        # [85, 120]
+HB_BAND       <- LIK_OCEAN_GRAD_HML_OK_RETIRED        # [85, 120]
 HB_EPS        <- 0.01         # m; the half-step used to straddle each edge
 HB_H_IN       <- 100          # m; the reference in-band depth (the pump's own)
 # The scan. Deliberately DENSE at the two edges (where the cliff is) and coarse
@@ -197,7 +197,7 @@ hb_u_at <- function(h) {
 
 sep("GATE A. THE BAND, THE TARGETS, AND WHERE init SITS RELATIVE TO IT")
 h_init <- ccx_default_params()$h_ml
-cat(sprintf("LIK_OCEAN_GRAD_HML_OK = [%g, %g] m\n", HB_BAND[1], HB_BAND[2]))
+cat(sprintf("LIK_OCEAN_GRAD_HML_OK_RETIRED = [%g, %g] m\n", HB_BAND[1], HB_BAND[2]))
 cat(sprintf("h_ml init             = %g m  -> rows %s\n", h_init,
             if (h_init >= HB_BAND[1] && h_init <= HB_BAND[2]) "LIVE" else "*** ABSENT ***"))
 cat(sprintf("quarantined mode h_ml = %g m  -> rows %s\n", HB_H_FIT,

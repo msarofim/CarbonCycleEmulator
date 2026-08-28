@@ -65,7 +65,11 @@ RR_TAG      <- Sys.getenv("CCX_RR_TAG", "")   # separates one campaign's files f
 # that never enters that regime is BLIND to the thing it is testing
 # (memory no_power_null). Hence a smaller perturbation and a threshold ladder.
 RR_THRESH   <- c(-1546.0, -1545.5, -1545.0, -1544.8)
-RR_HML      <- LIK_OCEAN_GRAD_HML_OK
+# ⚠ RETIRED BAND, 2026-08-28. This file was written when the three
+# ocean-gradient rows SKIPPED outside [85, 120]. They are now scored at
+# sigma_eff at every h_ml (option 5). What it reads below is PROVENANCE:
+# results produced under it are NOT comparable with post-adoption fits.
+RR_HML      <- LIK_OCEAN_GRAD_HML_OK_RETIRED
 OUTDIR      <- ccx_path("calibration", "output", "ridge_reparam")
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 
