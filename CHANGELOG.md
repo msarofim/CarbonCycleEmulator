@@ -2,6 +2,68 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27q — **THE MECHANISM REPLICATES IN FULL. THE ARITHMETIC DOES NOT.**
+
+Pre-registered `notes/prereg_2026-08-27q_admissible_2x2_land_ocean.md`, committed **`36e4051`
+BEFORE** `calibration/diag_admissible_2x2_land_ocean.R` existed. **No gate moved.** Collect:
+`notes/collect_2026-08-27q_the_mechanism_replicates_the_arithmetic_does_not.md`. **`R/` and `src/`
+untouched.** Six arms, all converged (1 restart, last gain 0.0000), 70–207 s each.
+
+**P0 ✓ · P1 ✗✗ · P2 ✓✓ P3 ✓✓ P6 ✓✓ P7 ✓✓ P8 ✓✓ · P4 ✗✗ P5 ✗✗**
+
+**P0 reproduced ALL FOUR of 27j's control values to three decimals** (total 1.141, SH-land 1.308,
+NH-origin 0.821, ratio 1.930), and the LAND arms landed within **0.07** of 27p's independently
+fitted profile. Three sessions, same numbers.
+
+**P1 IS FALSIFIED AT BOTH BRACKET ENDS.** INTERACTION **+32.81** (gate 40.07) at the prior centre
+and **+67.76** (gate 80.86) at bracket HI — **82 % and 84 % of gate**. The **recovered fraction is
+40.9 % and 41.9 %** across a 2× range of land cost: **the channel supplies a fixed FRACTION of what
+the cancellation lever vacates, not a fixed amount.** 27j's productivity lever recovered 82.1 %.
+
+**BUT THIS IS NOT A NULL — THE MECHANISM REPLICATES IN EVERY QUALITATIVE RESPECT.**
+- **The channel is SUPPRESSED by the land error and RELEASED when it is fixed**, 27j's central
+  structural claim, now with the ADMISSIBLE lever: `ent` sits at **4.342, BELOW the 5–30 band, in
+  OCEAN_only** (27g got 4.16) and moves **INSIDE** it the moment the land is pinned — **5.886**,
+  then **7.046**, scaling with how much land is fixed. The SH ocean limb rotates **4.13 → 9.42 mo**
+  (obs 8.52; 27j 9.24).
+- **P7 ✓✓ the collapse is repaired**: `sst_seas_amp_SH` recovers from 27p's crushed **0.1553
+  (z −9.68)** to **0.4856**, against a 0.26 gate derived before the run.
+- **P8 ✓✓, and it is the one that matters**: JOINT SH-land is **identical** to LAND-only
+  (0.859 at HI). **The refit does NOT undo the land correction**, so the 58 % shortfall is a genuine
+  residual cost and not the 27n failure mode.
+- **The interaction is carried by the vetoed row**: `co2_seasonal_SPO` supplies **+50.36 of +67.76
+  (74 %)**, no other stream above 1.1. The row that punishes each single move pays for the joint one.
+
+**WHY IT STILL FAILS, AND IT IS GEOMETRY.** The incumbent's SPO total is right because the two limbs
+sit **5.96 months apart and SUBTRACT**. Rotating the ocean into place is physically correct — nature's
+land and ocean both peak ~8.5–9.3 — but it **removes the cancellation** and exposes that **SH land is
+still 1.26× observed and SH ocean still 0.53× observed**. In phase, those two errors **add**:
+total **1.376** against 27j's 1.267 and an observed 1.168 (**P4 ✗**). **P5 ✗ at 0.532: the channel
+supplies PHASE, not AMPLITUDE.** ⚠ And the cancellation lever makes this *worse* than the
+productivity lever did, because it rotates the **land** limb too (10.09 → **9.59**, where 27j left it
+at 10.08), closing the gap to **0.17 mo** against 27j's 0.84.
+
+**⚠ THE 82 % vs 42 % CONTRAST IS CONFOUNDED AND IS NOT QUOTED AS CONTROLLED.** 27j ran 6 free + ent
+with `q10` FREE; this ran 4–5 free + ent with `q10` PINNED. Each interaction is balanced *within* its
+design; the fraction is not a controlled cross-design comparison. **The controlled test — not run,
+not pre-registered — is 27j's `seas_npp_amp_SH` lever on THIS pinned slice**, which changes only the
+land knob. It is cheap.
+
+**PREDICTIONS: 2 OF 4.** Right: P7 passes / P5 fails; `_hi` interaction > `_mid`. Wrong: P1 passes;
+P4 passes at `_hi`. ⚠ **The P4 miss is worth the record.** I argued the land lever "pulls the total
+DOWN" while the channel "pushes up" so "the two errors now oppose" — **treating two limbs as SCALARS
+when they are VECTORS**, with 27p's phase columns in front of me and `ang_mo` computed in the driver
+for exactly that reason. They do not oppose; rotating the ocean makes them **add**.
+
+**WHERE THE ARC STANDS.** Three levers have now been tested against `co2_seasonal_SPO` and the
+residual survived all three. But the defect is now **much better posed**: with the limbs finally in
+phase it is an **AMPLITUDE PAIR** — SH land **1.26×** observed, SH ocean **0.53×** — that can no
+longer hide inside a cancellation. **4b (the SH ocean AMPLITUDE, as distinct from the phase channel)
+has now failed P5 three times — 27g, 27j and here — always for the same reason.**
+
+⚠ **NOTHING IS ADOPTED.** `ent_seas_amp_SH` has no prior and `seas_T_amp_SH` sat at a pinned bracket
+value in every arm that passed anything. No constant, no prior edited.
+
 ## 2026-08-27p — **THE CONDITIONAL SLICE WAS LEAKING 64 % OF THE LEVER THROUGH `q10`**
 
 Pre-registered `notes/prereg_2026-08-27p_q10_pin_slice_repair.md`, committed **`a92aa5f` BEFORE**
