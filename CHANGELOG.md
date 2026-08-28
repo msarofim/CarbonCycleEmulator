@@ -2,6 +2,69 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27m — **TWO NON-MODIS PRODUCTS SAY THE SH SIZE SHOULD GO *UP*; THE MISSING PIECE IS CANCELLATION**
+
+Collect: `notes/collect_2026-08-27m_nonmodis_says_the_size_is_not_the_bug.md`.
+**No model runs. `R/` and `src/` untouched.**
+
+Marcus's 27l rulings executed: re-derive off a non-MODIS product (model-derivation and circularity
+accepted for a pedagogical tool), score the inversion both ways, **measure through both bases first**.
+Neither named product was fetchable as named — CAMS needs a Copernicus ADS key, TRENDY is
+access-by-request and unreachable — so **CMIP6 `npp` Lmon historical (34 models)** substitutes for
+TRENDY and **NOAA CarbonTracker CT2022** for CAMS. Both in `MANIFEST.csv` with SHA-256 and with
+their weaknesses in the `notes` column. Two build gates fired: **SAM0-UNICON returns NEGATIVE NPP**
+(would have inverted that model's shape under unit-mean normalisation) and **UKESM1-0-LL died on
+`2014-12-31`, which a 360-day calendar does not have**.
+
+**⚠ THE WINDOW WAS CONFOUNDED WITH THE PRODUCT, AND IT CORRECTS 27l.** CMIP6 is monthly, MOD17
+8-daily. `diag_mod17_monthly_control.R` pushes MOD17 through the identical monthly pipeline:
+
+| SH_psnnet | swing | A range | argmin |
+|---|---|---|---|
+| MOD17 8-day (27l) | 1.0 pp | 0.97 → 0.30 (3.2×) | ~−40 |
+| MOD17 **monthly** | **2.91 pp** | 1.01 → 0.19 (**5.26×**) | **−60, grid edge** |
+| CMIP6 monthly | 3.25 pp | 1.90 → 0.35 (5.41×) | −50 |
+
+**MOD17-monthly resembles CMIP6 far more than it resembles MOD17-8day** — most of the apparent
+product disagreement was smoothing. **27l's "1.0 pp" was 8-day-specific (2.9 pp at matched windows)
+and its 3.2× understated the degeneracy (5.3×).** The qualitative finding HARDENS: **the SH argmin
+runs to the grid edge and is still falling — on the insolation basis the SH latitude has no interior
+optimum at all.**
+
+**THE NH POWER CHECK PASSES AND CONFIRMS TWO SHIPPED CONSTANTS.** argmin **75** in all three of
+MOD17-8day, MOD17-monthly and CMIP6 (swings 5.2 / 6.29 / 5.22 pp), with A at 75 of 0.50 / 0.50 /
+0.60. **`CCX_SEAS_PHI_EFF['NH'] = 75` and `SEAS_NPP_AMP_NH = 0.4969` now have independent support
+from a product family with no satellite in it.**
+
+**THE RESULT.** At the shipped phi = −30 on matched monthly windows, MOD17 gives A = **0.50** (the
+shipped value) and **CMIP6 gives 0.94** (IQR 0.71–1.22) — a real **~1.9× product disagreement,
+LARGER than the 1.4× GPP/PsnNet bracket the whole of decision (ii) was about, and pointing the
+OPPOSITE way from the arc.** With 27l's measured centroid (−15.12 → A ≈ 0.97) that is **two
+independent lines saying the SH productivity swing should be roughly double the shipped constant**,
+while the atmosphere says the model's SH land signal is already 1.33–1.92× too big.
+**⇒ `SEAS_NPP_AMP_SH` is not the bug, and 27j's GPP move was compensating for something else.**
+
+**AND THE INVERSION SAYS WHAT.** Net-flux column, PgC/yr peak-to-peak:
+
+| | NH | SH |
+|---|---|---|
+| CMIP6 NPP (gross) | 61.5 | 15.0 |
+| CT2022 NEE (net) | 42.0 | **3.8** |
+| **net / gross** | **0.682** | **0.251** |
+
+**SH land cancels 74.9 % of its gross productivity swing before the atmosphere sees it; the NH
+cancels 31.8 % — a 2.72× asymmetry.** SH productivity is water-driven, so photosynthesis and
+heterotrophic respiration share a wet season and nearly cancel; the NH's separate in time.
+**The model carries ~half the gross and UNDER-CANCELS — shrinking the gross mimics cancellation with
+the wrong knob.** Named suspect already on the books: `seas_T_amp_SH` multiplies soil respiration and
+the fit drove **SH land to 29 % of its bracket's LOW end** while cranking NH land to 131 % of its
+HIGH end. **NOT TESTED — a hypothesis with a lever and a sign, to be pre-registered.**
+
+⚠ CT2022's SH land uptake centroid is **month 2.23**, but converting a flux centroid to the CO2
+signature phase is an integration and **was not done** — do not difference it against the model's
+10.09 SPO land peak. ⚠ The **second inversion column** Marcus asked for (the model-mediated
+constant) is **not run**; it needs a model evaluation at the mode.
+
 ## 2026-08-27l — **THE SH (shape, size) PAIR IS A DEGENERATE RIDGE; THE ARC'S RESIDUAL IS INSIDE IT**
 
 Collect: `notes/collect_2026-08-27l_the_sh_pair_is_a_degenerate_ridge.md`.
