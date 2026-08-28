@@ -2,6 +2,60 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-28e — **σ-INFLATION, PRICED: THE ~1.6 RESIDUAL WAS A RATIO ON THE WRONG BASE**
+
+Pre-registered `notes/prereg_2026-08-28b_sigma_inflation_pricing.md` (`15d1906`) BEFORE the
+driver, amended (`672dd8b`) for Stage B before *its* driver. `calibration/diag_sigma_inflation_pricing.R`.
+**`R/` and `src/` untouched; `LIK_OCEAN_GRAD_HML_OK` and the skip are exactly as shipped, and no
+refit is owed.** **G1 ✗ G2 ✓ G3 ✗ G4 ✓.**
+
+08-28 §6 proposed re-running the out-of-band profile points with inflation ON. **Both sides turned
+out to be boundable exactly from artifacts already on disk**, so Stage A bracketed first:
+
+    LOWER(h) = lp_shipped(h) − rows_shipped(h) + rows_inflated_at_the_STORED_vector(h)
+    UPPER(h) = lp_shipped(h) − rows_shipped(h) + Σ −log(√(2π) σ_eff(h))
+
+Both rigorous, in opposite directions: re-optimising with the rows ON can only *raise* the
+objective above its value at the stored vector, and can never raise a row above its own density
+peak. σ_eff² = σ_obs² + σ_rep(h)², with σ_rep PCHIP-interpolated through the **measured** points
+(`hml_band_discontinuity.rds` for DIC/δ¹³C, `alk_sigma_rep.rds` for ALK) — never a parametric fit.
+
+**⚠ 08-28 §6's "inflation leaves ≈1.53, an 80 % reduction not an elimination" IS WITHDRAWN AS
+REASONING.** 16g measured **2.14 of 10.01** — a *difference* (in-band row cost − out-of-band
+inflated row cost) expressed as a fraction of **its own** in-band cost. §6 multiplied that 21 % by
+§5's base of **7.30**, which is not 16g's. **The relief is a difference whose subtrahend is set by
+the σ's, not a fixed fraction of the base.** Measured: **+0.541**, not 1.6.
+[[ratio_needs_its_base]] — the project's own promoted convention, walked into from the inside.
+The 21 % itself is *not* wrong; it is a correct measurement of 16g's frozen-19 configuration, and
+of DIC + δ¹³C only, ALK's σ_rep not existing until 08-18.
+
+**G2 ✓ (+0.541 ≤ 0.70), G4 ✓ (inflation costs the mode −0.085).**
+
+**G1 ✗ — the bracket does not separate on the SHALLOW side**: `max UPPER(out) −1543.817` at 82 m
+against `max LOWER(in) −1544.358` at 85.01 m, an overlap of 0.541 against widths of 0.50–0.65.
+⇒ **Stage B owed and launched** (`diag_sigma_inflation_profile.R`), which refits all 26 points
+with the rows ON via an exact algebraic identity — `dnorm(t,v,σ_eff) = dnorm(t,v′,σ_obs) −
+log(σ_eff/σ_obs)` with `v′ = t − (t−v)σ_obs/σ_eff` — so the **shipped** `ccx_loglik` path does the
+scoring and no incumbent/challenger mismatch can creep in [[match_incumbents_optim]]. Its guard,
+that the override reproduce Stage A's `LOWER` at the mode by a completely different route,
+**passed at 0.000e+00**.
+
+**On the DEEP side the bracket IS decisive, and in the direction nobody predicted.** Every
+`h > 120` sits ≥ 6.7 log-units BELOW the in-band maximum, because the model's gradient misfits
+badly there once it is actually scored: `rows_infl` runs **−15.2 at 120.01 to −46.5 at 198**,
+against a ceiling of −6.8.
+
+**⚠ G3 ✗, AND THE FAILURE IS THE BAR'S, NOT THE REMEDY'S — carried as evidence, not as a label**
+[[explained_away_test]]. I gated on `|jump|` at the band edges. The 85 straddle collapses
+**+7.300 → −0.131**, as predicted. The 120 straddle stays large but **REVERSES SIGN**: **+8.426 →
+−6.743**. A step *down* on leaving the band is the remedy working — the incentive now points
+inward — so magnitude was the wrong quantity to gate. Stage B's **B4** replaces it with the
+**signed** jump.
+
+**Not priced, not proposed, recorded so it is visible rather than defaulted:** correcting the
+**target** to its like-for-like value at `h_ml` is a different and strictly more aggressive remedy,
+measurable from the same stored `like_for_like` columns. Marcus's call. [[threshold_from_obs_or_law]]
+
 ## 2026-08-28d — **THE 236-LOG-UNIT `h_ml` PULL DOES NOT EXIST; THE CLIFF IS THE WHOLE STORY**
 
 Pre-registered `notes/prereg_2026-08-28_hml_unbound_profile.md` (`805e8c4`) BEFORE the driver.
