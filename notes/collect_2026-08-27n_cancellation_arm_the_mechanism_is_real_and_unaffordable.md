@@ -1,5 +1,6 @@
-# INTERIM 2026-08-27n — **THE CANCELLATION ARM: STAGE 1 IS IN, AND P5 FAILS THE SAME WAY 27i DID**
-# ⚠ INTERIM. The conditional arm (P4, P6, P7, P8) is STILL RUNNING. Do not read this as the verdict.
+# Collect 2026-08-27n — **THE CANCELLATION MECHANISM IS REAL, EXACTLY AS PREDICTED, AND UNAFFORDABLE**
+# **P0 ✓ P1 ✓ P2 ✓ P3 ✓ · P4 ✗ P5 ✗ P7 ✗ · P6 ✓ · P8 = 1.79× observed, 15.3 % of the excess closed.**
+# ⚠ **I PREDICTED P4 WOULD BE POSITIVE. IT LANDED AT −35.11. THAT PREDICTION WAS WRONG.**
 
 Pre-registered `notes/prereg_2026-08-27n_...md`, committed **`11a59de` BEFORE**
 `calibration/diag_seas_T_amp_sh_power.R` existed (driver `f0c7a1e`). **No gate was moved.**
@@ -89,22 +90,62 @@ seasonal rows do not identify it anyway, which is exactly what makes it free to 
 intermediate warm-start rungs would also help. **Do not simply raise `TA_RESTOL`**; that would buy
 speed by accepting under-convergence, which is the failure 27h's discarded run already made once.
 
-## ⚠ STILL RUNNING / STILL OPEN
+## THE CONDITIONAL ARM — COMPLETE, ALL FOUR POINTS CONVERGED (re 1, last gain 0.0000)
 
-- **The conditional arm is STILL RUNNING** (point 2 of 4 after ~80 min; the warm start has to travel
-  3.5× in one step). **P4, P6, P7 and P8 have NO RESULT YET.** Reference point landed:
-  a_t 1.0391 → cond Δlp **+1.43**, converged (1 restart, last gain 0.0000), SH-land 1.3234, ratio 1.946.
-  **Point 2 has since landed: a_t 3.5915 → cond Δlp −11.29** against a frozen −46.53, a **76 %
-  buy-back** (27i's was ~30 %) — but **SH-land came back UP to 1.2552** from the frozen 1.1144.
-  ⚠ **The slice buys the logpost back by RESTORING the very signal the lever removed**, so the
-  conditional land improvement is far smaller than the frozen one and **P8's residual will be worse
-  than the frozen 1.28×.** That is the same "bought, not earned" pattern P6 was written to catch.
-  ⚠ **Do not infer P4 from the frozen −204.45** — 27i's conditional bought back ~30 %, and the number
-  must be reported as measured, not predicted.
-- **A DRIVER BUG WAS FOUND AND FIXED MID-RUN.** The first version probed `attr(lp(u), "streams")`,
-  got NULL, and **printed a tidy "per-stream breakdown unavailable" line while silently skipping P5 —
-  the arm's own diagnostic gate.** The breakdown comes from `ccx_loglik(by_stream = TRUE)`. Fixed in
-  the repo copy (the run continued from its frozen `/tmp` copy, which is what made that safe).
-  **A gate that declines to run is worse than one that fails.** [[mutation_test_gates]]
-  ⚠ The P5 table above was produced by a standalone re-run, so **the log in `/tmp/ccx_ta.log` still
-  shows the "unavailable" line** — the RDS from this run will not carry the streams.
+| a_t (K) | cond Δlp | frozen Δlp | buy-back | SH-land | ×obs | SPO δ¹³C/ppm |
+|---|---|---|---|---|---|---|
+| 1.0391 (landed) | +1.43 | −0.00 | — | 1.3234 | 1.94 | 1.946 |
+| 3.5915 (bracket LO) | −11.29 | −46.53 | 76 % | 1.2552 | 1.84 | 1.907 |
+| 5.0502 (prior init) | −21.13 | −100.43 | 79 % | 1.2395 | 1.81 | 1.899 |
+| **7.1012 (bracket HI)** | **−33.68** | −204.45 | **84 %** | **1.2256** | **1.79** | 1.893 |
+
+- **P4 FAIL** — conditional Δlogpost at bracket HI = **−35.11**, gate > −20.
+  ⚠ **I pre-registered this as PREDICTED POSITIVE**, reasoning that the prior pays +8.34 and the SPO
+  land overshoot should improve. **It is −35.11. That prediction was wrong**, and P5 is why: the row
+  that pays is not the row that benefits.
+- **P6 PASS** — `sst_seas_amp_SH` **0.3596 → 0.3046, z −1.19**, gate |z| < 2. **The one clean result
+  of the conditional arm.** 27j's LAND-only arm saw this parameter **collapse to 0.176 (z −9.18)** to
+  absorb its change; nothing of the sort happens here, so **the small improvement this lever does
+  deliver is EARNED, not bought.** [[ent_channel_counterweight]]
+- **P7 FAIL** — SPO δ¹³C-per-ppm **1.946 → 1.893**, gate < 1.85. Right direction, misses.
+- **P8** — residual **1.2256 = 1.79× observed**, closing **15.3 %** against a predicted **68.8 %**.
+
+**⇒ THE REFIT UNDOES 78 % OF THE LAND IMPROVEMENT.** Frozen, the lever takes SH-land **1.308 →
+0.873** (−0.435); conditionally it manages **1.3234 → 1.2256** (−0.098). The slice buys back 84 % of
+the logpost **by restoring the very signal the lever removed** — and it need not wreck anything to do
+it (P6), it simply re-inflates SH land through the other seasonal parameters. **An 84 % buy-back that
+returns the diagnostic almost to its starting value is not a cheaper fix; it is a refusal.**
+
+## ⇒ THE VERDICT
+
+**The mechanism is real and the arithmetic that predicted it was exactly right** — P1 to 0.4–0.7 %,
+and P2's non-monotone floor turning at 13.95 K is a signature only the 153° geometry produces.
+**27m's diagnosis stands: SH land under-cancels.** But `seas_T_amp_SH` **cannot deliver the fix
+alone**, for the reason P5 exposed and P4 confirmed: **the SPO CO₂ row vetoes any single-channel
+change to SH land, because the total is right BY CANCELLATION and every one-sided move breaks it.**
+
+**Two levers have now failed in the same place from opposite directions** — `seas_npp_amp_SH` (27i,
+−113.25 of −113.87 on that row) and `seas_T_amp_SH` (−187.21 of −214.70). That is not two
+coincidences; it is a row with no power punishing motion.
+[[seas_right_observable_wrong_drivers]] [[land_and_ocean_are_one_fix]]
+
+## ⇒ NEXT — 27j's STRUCTURE WITH AN ADMISSIBLE LEVER
+
+27j solved exactly this for the productivity lever by moving **land and ocean together** (interaction
+**+64.99**) — but with a `seas_npp_amp_SH` value the provenance forbids (27l/27m). **`seas_T_amp_SH`
+is the admissible lever and it needs the same counterweight.**
+
+**Proposed: a 2×2 in `seas_T_amp_SH` × `ent_seas_amp_SH`**, same parameter-balanced
+`JOINT − LAND − OCEAN + INCUMBENT`. The reach is there in advance: cancelling SH land drops the SPO
+total ~0.06 ppm (1.1407 → 1.0780 frozen) while 27j's entrainment channel added **≈0.37 ppm at month
+9.24** against an observed 8.52. **P6 is what makes it worth doing** — the ocean limb moved only
+z −1.19 here, so there is room. ⚠ **NOT RUN, NOT PRE-REGISTERED.**
+
+## ⚠ STILL OPEN
+
+- **The driver's conditional slice should be repaired before reuse** — see the ridge diagnosis above.
+- **The RDS `outputs/diagnostics/seas_T_amp_sh_power.rds` does NOT carry the per-stream breakdown**,
+  because the streams bug was fixed after this run started; the P5 table came from a standalone
+  re-run. Re-run the fixed driver if the streams are wanted in the archive.
+- The second inversion column (27m sec.5), and the `co2_NH`→MLO seasonal-amplitude representation
+  term (27k sec.7), both still untouched.

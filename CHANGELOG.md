@@ -2,6 +2,58 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-27n — **THE CANCELLATION MECHANISM IS REAL, EXACTLY AS PREDICTED, AND UNAFFORDABLE**
+
+Pre-registered `notes/prereg_2026-08-27n_...md`, committed **`11a59de` BEFORE**
+`calibration/diag_seas_T_amp_sh_power.R` existed. **No gate was moved.** Collect:
+`notes/collect_2026-08-27n_cancellation_arm_the_mechanism_is_real_and_unaffordable.md`.
+**`R/` and `src/` untouched.**
+
+**P0 ✓ P1 ✓ P2 ✓ P3 ✓ · P4 ✗ P5 ✗ P7 ✗ · P6 ✓ · P8 = 1.79× observed, 15.3 % of the excess closed.**
+
+**THE MECHANISM IS CONFIRMED AND THE CLOSED FORM WAS RIGHT.** P1 matched the pre-registered
+predictions to **0.4 / 0.4 / 0.6 / 0.7 %** against a 3 % gate. **P2's geometric floor is real and the
+profile is NON-MONOTONE** — SH-land bottoms at **0.6181 at 13.95 K** (predicted 0.633) and rises to
+**0.8107 at 20.0 K**, a turn only the 153° near-antiphase geometry produces. The prior pays exactly
+**+8.34** (P3). **27m's diagnosis stands: SH land under-cancels, and this is its lever.**
+
+**AND IT IS STILL UNAFFORDABLE.** Frozen at the bracket top the cost is **−204.45**, of which
+`co2_seasonal_SPO` carries **−187.21 — 87 %**. The prereg fixed P5 as `Δ > 0` and wrote down what a
+failure would mean: *"the SPO CO2 row is vetoing ANY change to SH land."* **It is the same signature
+as 27i**, where that row carried **−113.25 of −113.87** against the *productivity* lever. **Two
+levers, opposite directions, one veto** — the row already matches to ~1 %, has no power, and can only
+punish motion. [[seas_right_observable_wrong_drivers]]
+
+| a_t (K) | cond Δlp | frozen Δlp | SH-land | ×obs |
+|---|---|---|---|---|
+| 1.0391 (landed) | +1.43 | −0.00 | 1.3234 | 1.94 |
+| 3.5915 (bracket LO) | −11.29 | −46.53 | 1.2552 | 1.84 |
+| **7.1012 (bracket HI)** | **−33.68** | −204.45 | **1.2256** | **1.79** |
+
+⚠ **P4 WAS PRE-REGISTERED AS "PREDICTED POSITIVE" AND LANDED AT −35.11. THAT PREDICTION WAS WRONG.**
+The conditional slice buys back **84 %** of the frozen cost — but **by restoring the very signal the
+lever removed**: frozen, SH-land falls 1.308 → 0.873 (−0.435); conditionally only 1.3234 → 1.2256
+(−0.098), so **78 % of the improvement is undone** and only **15.3 %** of the excess closes against a
+predicted 68.8 %. **An 84 % buy-back that returns the diagnostic to its starting value is a refusal,
+not a cheaper fix.**
+
+**P6 PASSES AND IT IS THE ONE CLEAN RESULT**: `sst_seas_amp_SH` moves only **0.3596 → 0.3046,
+z −1.19**, where 27j's LAND-only arm saw it **collapse to 0.176 (z −9.18)**. **The small improvement
+this lever delivers is EARNED, not bought** — and it leaves the ocean limb with room, which is what
+makes the next arm worth running.
+
+**⇒ NEXT: a 2×2 in `seas_T_amp_SH` × `ent_seas_amp_SH`** — 27j's parameter-balanced structure with
+the admissible lever in place of the forbidden productivity one. NOT RUN, NOT PRE-REGISTERED.
+
+**TWO DRIVER DEFECTS, BOTH RECORDED.** (1) The first version read streams from
+`attr(lp(u), "streams")`, got NULL, and **printed "unavailable" while silently skipping P5, the arm's
+own diagnostic gate** — it is `ccx_loglik(by_stream = TRUE)`. Fixed; **a gate that declines to run is
+worse than one that fails.** (2) The conditional slice contains **both `seas_T_amp_NH` and `q10`,
+whose product ridge is EXACT** (2.2609–2.2663 across q10 1.09→2.0, Hessian cor −0.972), so
+Nelder-Mead crawls a direction the data does not constrain — points took 10 / 70 / 150+ min. Fix
+recorded: drop `q10` or reparameterise; **not** raise the restart tolerance.
+⚠ The archived RDS does **not** carry the streams (fix postdates the run).
+
 ## 2026-08-27m — **TWO NON-MODIS PRODUCTS SAY THE SH SIZE SHOULD GO *UP*; THE MISSING PIECE IS CANCELLATION**
 
 Collect: `notes/collect_2026-08-27m_nonmodis_says_the_size_is_not_the_bug.md`.
