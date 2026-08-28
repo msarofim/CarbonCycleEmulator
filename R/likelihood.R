@@ -637,24 +637,41 @@ ccx_deep_d14c_target <- local({
 #    its own, because the observed gradient is itself a difference of two
 #    differently-timed means.
 #
-# THE h_ml GATE, AND WHY IT IS NOT A SILENT ASSUMPTION. Fixed depths are
-# like-for-like with the model's boxes only while h_ml is near the surface
-# band's 100 m: the mismatch is 0.07 sigma at h_ml = 100 (the value the pump
-# delivers, handoff 15d) and 0.80 sigma at the fitted 184. THOSE ARE THIS GATE'S
-# OWN QUANTITY -- (shipped target - like-for-like target at h_ml) / shipped sd --
-# receipt-checked by calibration/diag_hml_band_discontinuity.R part 5, 2026-08-16g.
-# This sentence previously read "0.09 ... but 1.61", which mixed the gate's own
-# in-band figure with part 2b's frozen-at-75 contrast on part 2b's tighter blk30
-# sigma; the band's severity was argued from that 1.61 in three handoffs and it is
-# ~2x overstated. The band still guards a real mismatch, but a sub-1-sigma one:
-# DIC sigma_rep/sigma_obs spans 0.04-0.34 in band and 0.22-0.87 out of it, and
-# NEVER exceeds ~1 sigma anywhere in h_ml's prior support. So the terms are
-# SKIPPED, visibly, outside LIK_OCEAN_GRAD_HML_OK. That is deliberately a skip
-# and not a stop: a sampler excursion must not take the posterior down, but a
-# POSTERIOR that lives outside the band means the target needs re-deriving, and
-# by_stream showing the term absent is how that becomes visible.
+# THE h_ml REPRESENTATION ERROR, AND WHY THERE IS NO LONGER A GATE HERE.
+# Fixed depths are like-for-like with the model's boxes only while h_ml is near
+# the surface band's 100 m. UNTIL 2026-08-28 that was handled by SKIPPING all
+# three rows outside LIK_OCEAN_GRAD_HML_OK = [85, 120]. Marcus ADOPTED option 5
+# (sigma-inflation) on 2026-08-28 and the skip is GONE: the rows are scored at
+# EVERY h_ml, at an inflated sigma that carries the mismatch in quadrature,
+#
+#     sigma_eff(h)^2 = sigma_obs^2 + (shipped target - like-for-like target(h))^2
+#
+# with dnorm's normalisation RETAINED, so inflating is CHARGED FOR rather than
+# free and the gain is bounded by the density peak. sigma_rep is MEASURED off
+# GLODAP by data-raw/build_glodap_sigma_rep.R, never tuned.
+#
+# WHY THE SKIP HAD TO GO -- it was not conservatism, it was a FREE LUNCH. The
+# rows were ABSENT rather than zero outside the band, so leaving the band bought
+# +7.30 log-units of un-scored data against a +7.39 total advantage: the
+# objective did not prefer a shallower mixed layer, it preferred BEING SCORED ON
+# LESS DATA (notes/collect_2026-08-28_hml_unbound_profile.md). Inflation removes
+# the cause rather than walling off the symptom: MEASURED, the pull falls to
+# +0.033, both cliffs vanish (+7.30 -> -0.006 at 85, +8.43 -> -0.005 at 120), and
+# h_ml gains an INTERIOR maximum over its whole [30, 200] support, so it no
+# longer needs a hard bound to stay put (notes/collect_2026-08-28b_...md).
+# The retired band is kept below as PROVENANCE ONLY -- it must never gate again.
+#
+# THE SIGNED like-for-like TARGET IS WHAT SHIPS, NOT |sigma_rep| -- it is the
+# quantity actually measured, and folding discards the sign for no gain. ⚠ It is
+# NOT a smoothness fix: sigma_eff uses the SQUARE, so MEASURED 2026-08-28 the two
+# constructions differ by at most 0.0002 sigma_obs with second differences equal
+# to six decimals. An earlier comment here claimed folding would plant a kink in
+# the posterior's softest direction; that was WRONG and is withdrawn.
 LIK_USE_OCEAN_GRAD   <- TRUE
-LIK_OCEAN_GRAD_HML_OK <- c(85, 120)   # m; see the paragraph above
+# ⚠ PROVENANCE ONLY, RETIRED 2026-08-28. Nothing may gate on this. It records
+# what the band WAS, so a reader of an older handoff, output or quarantined arm
+# can tell which regime that artifact was produced under.
+LIK_OCEAN_GRAD_HML_OK_RETIRED <- c(85, 120)   # m; the skip option 5 replaced
 # Alkalinity stoichiometry, for the third row (Marcus 2026-08-16b). CaCO3
 # dissolution adds 2 mol alkalinity per mol C; soft-tissue remineralisation
 # releases nitrate and so REMOVES ~1 mol per mol N. WORKING VALUES, not fitted,
@@ -681,6 +698,56 @@ ccx_ocean_gradient_target <- local({
     out
   }
 })
+
+#' The ocean-gradient REPRESENTATION error, sigma_rep(h_ml), and the inflated
+#' sigma the three rows are scored at.
+#'
+#' Shipped by data-raw/build_glodap_sigma_rep.R as the SIGNED like-for-like
+#' target on a 1 m grid over h_ml's whole support -- the quantity actually
+#' measured. sigma_eff uses the SQUARE of the difference, so shipping |sigma_rep|
+#' instead would change it by at most 0.0002 sigma_obs (measured); the signed
+#' form is preferred for faithfulness, not for smoothness.
+#'
+#' Interpolation is MONOTONE HERMITE (C1) through the measured points, never a
+#' parametric fit. No smoothing: the measured roughness from bottle selection is
+#' a median 0.0055 and at most 0.0734 log-units on the three rows' summed logL.
+#'
+#' @return NULL if the file is absent -- the same visible-absence contract the
+#'   target loader uses; ccx_ocean_grad_scored() then STOPS rather than silently
+#'   reverting to sigma_obs, because that would be the retired objective.
+ccx_ocean_sigma_rep_table <- local({
+  cache <- NULL
+  function() {
+    if (!is.null(cache)) return(cache)
+    g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_sigma_rep.rds")),
+                  error = function(e) NULL)
+    if (is.null(g) || is.null(g$like_for_like)) return(NULL)
+    # One monotone-Hermite interpolant per row, built once and closed over.
+    g$fun <- lapply(names(g$like_for_like), function(n)
+      stats::splinefun(g$h, g$like_for_like[[n]], method = "monoH.FC"))
+    names(g$fun) <- names(g$like_for_like)
+    cache <<- g
+    g
+  }
+})
+
+#' sigma_eff for one scored ocean-gradient row at a given h_ml.
+#'
+#' @param row one of "dic", "d13c", "alk".
+#' @param h_ml mixed-layer depth, m. CLAMPED to the shipped grid: h_ml cannot
+#'   leave its own prior support, so an out-of-range value is a caller bug, and
+#'   extrapolating a monotone Hermite spline past its data would be worse than
+#'   holding the endpoint.
+ccx_ocean_sigma_eff <- function(row, h_ml) {
+  sr <- ccx_ocean_sigma_rep_table()
+  tg <- ccx_ocean_gradient_target()
+  if (is.null(sr) || is.null(tg) || is.null(sr$fun[[row]]))
+    stop("ccx_ocean_sigma_eff(): data/obs_glodap_sigma_rep.rds is missing or has ",
+         "no '", row, "' row. Rebuild with data-raw/build_glodap_sigma_rep.R. ",
+         "Falling back to sigma_obs would silently restore the RETIRED objective.")
+  h <- min(max(h_ml, min(sr$h)), max(sr$h))
+  sqrt(tg[[row]]$sd^2 + (sr$fun[[row]](h) - tg[[row]]$target)^2)
+}
 
 #' Steady-state interior profile implied by an interior source field.
 #'
@@ -780,10 +847,10 @@ ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
 #' The model gradient as the likelihood should receive it: each field read at
 #' ITS OWN epoch, and the h_ml gate applied.
 #'
-#' Returns NULL -- which SKIPS both terms -- when the target is unavailable, the
-#' run does not carry the box columns, or `h_ml` is outside
-#' LIK_OCEAN_GRAD_HML_OK. A NULL here is the visible-absence contract, not a
-#' silent zero.
+#' Returns NULL -- which SKIPS the terms -- when the target is unavailable or
+#' the run does not carry the box columns. A NULL here is the visible-absence
+#' contract, not a silent zero. ⚠ It NO LONGER returns NULL for `h_ml` outside
+#' [85, 120]: that skip was retired 2026-08-28 (option 5, sigma-inflation).
 #'
 #' @param spin the spinup, for aux/grid/params.
 #' @param pump OPTIONAL pump export fields, forwarded to
@@ -792,7 +859,8 @@ ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
   tg <- ccx_ocean_gradient_target()
   if (is.null(tg)) return(NULL)
   h <- spin$grid$h_ml
-  if (h < LIK_OCEAN_GRAD_HML_OK[1] || h > LIK_OCEAN_GRAD_HML_OK[2]) return(NULL)
+  # ⚠ NO BAND GATE. Retired 2026-08-28 when option 5 was adopted: the rows are
+  # scored at EVERY h_ml, at sigma_eff(h). See LIK_USE_OCEAN_GRAD's block.
   # Each field at its own epochs: the two layers are not sampled at the same
   # mean time, and the two fields' means differ slightly too (deep DIC 2002.4,
   # deep d13C 2002.2). Cheap enough to do exactly rather than approximately.
@@ -815,8 +883,16 @@ ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
   if (is.null(pump) && !is.null(spin$aux$pump))
     pump <- list(S_org  = lapply(spin$aux$pump, `[[`, "org"),
                  S_carb = lapply(spin$aux$pump, `[[`, "carb"))
+  # `sd_eff` rides WITH the values, so a caller physically cannot score them at
+  # the retired sigma_obs: ccx_loglik() requires it and errors without it. h_ml
+  # is not otherwise visible to ccx_loglik(), and threading it through that
+  # signature would have made every one of ~30 diagnostic call sites a silent
+  # opt-out. `h_ml` is carried for reporting and for the tests.
   list(dic = gd$dic, d13c = g3$d13c,
-       alk = ccx_model_ocean_alk_gradient(spin, pump = pump))
+       alk = ccx_model_ocean_alk_gradient(spin, pump = pump),
+       sd_eff = vapply(c("dic", "d13c", "alk"), ccx_ocean_sigma_eff, numeric(1),
+                       h_ml = h),
+       h_ml = h)
 }
 
 #' Hemisphere-area weights for the Hua zones
@@ -1452,6 +1528,15 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # until ccx_model_ocean_alk_gradient() is given a pump.
   if (LIK_USE_OCEAN_GRAD && !is.null(ocean_grad)) {
     tg <- ccx_ocean_gradient_target()
+    # ⚠ LOUD, NOT SILENTLY SKIPPABLE. Since option 5 was adopted these rows are
+    # scored at sigma_eff(h_ml), which ccx_ocean_grad_scored() attaches. A hand-
+    # built `ocean_grad` without it would otherwise score at sigma_obs -- the
+    # RETIRED objective -- and produce a number that looks comparable and is not.
+    if (!is.null(tg) && is.null(ocean_grad$sd_eff))
+      stop("ccx_loglik(): `ocean_grad` carries no `sd_eff`. Since 2026-08-28 the ",
+           "ocean-gradient rows are scored at the INFLATED sigma. Build the ",
+           "argument with ccx_ocean_grad_scored(out, spin), which attaches it; ",
+           "scoring at sigma_obs is the retired objective, not a fallback.")
     if (!is.null(tg))
       for (k in list(c("dic", "ocean_grad_dic"), c("d13c", "ocean_grad_d13c"),
                      c("alk", "ocean_grad_alk"))) {
@@ -1461,7 +1546,8 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
         # logical(0), which is an error in `if` rather than FALSE.
         v <- ocean_grad[[k[1]]]
         if (!is.null(tg[[k[1]]]) && length(v) == 1L && is.finite(v))
-          add(k[2], stats::dnorm(tg[[k[1]]]$target, v, tg[[k[1]]]$sd, log = TRUE))
+          add(k[2], stats::dnorm(tg[[k[1]]]$target, v,
+                                 ocean_grad$sd_eff[[k[1]]], log = TRUE))
       }
   }
 

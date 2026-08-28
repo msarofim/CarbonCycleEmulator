@@ -692,6 +692,11 @@ test_that("the deep term is absent without `deep`, Gaussian with it", {
 })
 
 # =====================================================================
+# Where the gradient fixtures below evaluate sigma_eff. 100 m is where the model's
+# surface box IS the shipped 0-100 m layer, so it is the representation error's
+# own floor -- the least arbitrary point to assert Gaussian shape at.
+SD_EFF_H <- 100
+
 # The ocean DIC / d13C GRADIENT terms (task 12; Marcus 2026-08-16)
 # =====================================================================
 
@@ -705,39 +710,57 @@ test_that("the gradient terms are absent without `ocean_grad`, Gaussian with it"
   # D14C term uses, and the thing the h_ml gate relies on to be legible.
   expect_false("ocean_grad_dic"  %in% names(bare))
   expect_false("ocean_grad_d13c" %in% names(bare))
+  # Since option 5 was adopted (2026-08-28) the rows are scored at sigma_eff(h_ml),
+  # which ccx_ocean_grad_scored() attaches; a hand-built ocean_grad must carry it
+  # or ccx_loglik() STOPS. The Gaussian properties below are unchanged -- they are
+  # simply asserted at sigma_eff rather than the retired sigma_obs.
+  se <- vapply(c("dic", "d13c", "alk"), ccx_ocean_sigma_eff, numeric(1), h_ml = SD_EFF_H)
   at <- function(dic, d13c) ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE,
-                                       ocean_grad = list(dic = dic, d13c = d13c))
+                                       ocean_grad = list(dic = dic, d13c = d13c,
+                                                         sd_eff = se))
   p0 <- at(tg$dic$target, tg$d13c$target)
   expect_true(all(c("ocean_grad_dic", "ocean_grad_d13c") %in% names(p0)))
   expect_equal(unname(p0[["ocean_grad_dic"]]),
-               stats::dnorm(0, 0, tg$dic$sd, log = TRUE), tolerance = 1e-10)
-  # quadratic, and a 1-sigma miss costs exactly 0.5
+               stats::dnorm(0, 0, se[["dic"]], log = TRUE), tolerance = 1e-10)
+  # quadratic, and a 1-sigma_eff miss costs exactly 0.5
   cost <- function(z) p0[["ocean_grad_dic"]] -
-    at(tg$dic$target + z * tg$dic$sd, tg$d13c$target)[["ocean_grad_dic"]]
+    at(tg$dic$target + z * se[["dic"]], tg$d13c$target)[["ocean_grad_dic"]]
   expect_equal(cost(1), 0.5, tolerance = 1e-8)
   expect_equal(cost(2), 4 * cost(1), tolerance = 1e-8)
 })
 
-test_that("the h_ml gate skips the terms outside the like-for-like band", {
+test_that("the retired h_ml gate is GONE: the rows are scored at every h_ml", {
   skip_if_no_cpp()
   skip_if(is.null(ccx_ocean_gradient_target()), "GLODAPv2 gradient block absent")
-  # THE POINT OF THE GATE: the targets are on FIXED depths (0-100 m / >2627.2 m),
-  # which are like-for-like with the model's boxes only while h_ml is near 100 --
-  # 0.09 sigma there, but 1.61 sigma at the fitted h_ml = 184
-  # (diag_gradient_target_and_neff.R part 2b). Outside the band the terms must
-  # go ABSENT rather than score a mismatched layer.
-  F <- NULL
+  # ⚠ THIS TEST WAS INVERTED 2026-08-28 WHEN MARCUS ADOPTED OPTION 5. It used to
+  # assert the terms go ABSENT outside [85, 120]. That skip was measured to bear a
+  # FREE LUNCH -- leaving the band bought +7.30 log-units of un-scored data -- so
+  # the mismatch is now carried as sigma-inflation instead and the rows are scored
+  # EVERYWHERE. The retired band survives only as LIK_OCEAN_GRAD_HML_OK_RETIRED.
   run_at <- function(h) {
     p <- ccx_default_params(); p$h_ml <- h
     sp <- ccx_spinup(p)
     ff <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
     list(g = ccx_ocean_grad_scored(ccx_run_fast(sp, ff)$out, sp), h = sp$grid$h_ml)
   }
-  inb <- run_at(mean(LIK_OCEAN_GRAD_HML_OK))
-  expect_false(is.null(inb$g))
-  expect_true(is.finite(inb$g$dic) && is.finite(inb$g$d13c))
-  for (h in c(LIK_OCEAN_GRAD_HML_OK[1] - 10, LIK_OCEAN_GRAD_HML_OK[2] + 64))
-    expect_null(run_at(h)$g)
+  b <- LIK_OCEAN_GRAD_HML_OK_RETIRED
+  for (h in c(b[1] - 10, mean(b), b[2] + 64)) {
+    r <- run_at(h)
+    expect_false(is.null(r$g))                       # <- the inversion
+    expect_true(is.finite(r$g$dic) && is.finite(r$g$d13c) && is.finite(r$g$alk))
+    expect_true(all(is.finite(r$g$sd_eff)))
+    expect_equal(unname(r$g$h_ml), h, tolerance = 1e-9)
+  }
+  # sigma_eff is never below sigma_obs, and is LARGER outside the retired band
+  # than at its centre -- that is the whole content of "representation error".
+  tg <- ccx_ocean_gradient_target()
+  se <- function(h) vapply(c("dic", "d13c", "alk"), ccx_ocean_sigma_eff,
+                           numeric(1), h_ml = h)
+  for (h in c(b[1] - 10, mean(b), b[2] + 64))
+    expect_true(all(se(h) >= vapply(c("dic", "d13c", "alk"),
+                                    function(n) tg[[n]]$sd, numeric(1)) - 1e-12))
+  expect_true(all(se(b[1] - 10) > se(mean(b))))
+  expect_true(all(se(b[2] + 64) > se(mean(b))))
 })
 
 test_that("the PREINDUSTRIAL gradient is EXACTLY pump_grad, and exactly zero without the pump", {
@@ -810,7 +833,7 @@ test_that("the TRANSIENT gradient's parameter leverage stays far below its miss"
   # separation the pump was adopted for. The pump-OFF arm below gates that.
   LEV_MAX   <- 0.25        # sigma per 10 % perturbation; measured max 0.09
   LEV_SHARE <- 0.10        # ...and as a fraction of the miss; measured max 0.049
-  base <- ccx_default_params(); base$h_ml <- mean(LIK_OCEAN_GRAD_HML_OK)
+  base <- ccx_default_params(); base$h_ml <- SD_EFF_H
   gof <- function(p) {
     sp <- ccx_spinup(p)
     ff <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
@@ -846,14 +869,16 @@ test_that("the alkalinity row is a Gaussian on the shipped target, absent withou
   f <- lik_fixture()
   bare <- ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE)
   expect_false("ocean_grad_alk" %in% names(bare))
+  se <- vapply(c("dic", "d13c", "alk"), ccx_ocean_sigma_eff, numeric(1), h_ml = SD_EFF_H)
   at <- function(alk) ccx_loglik(f$out, f$obs, f$err, by_stream = TRUE,
                                  ocean_grad = list(dic = tg$dic$target,
-                                                   d13c = tg$d13c$target, alk = alk))
+                                                   d13c = tg$d13c$target, alk = alk,
+                                                   sd_eff = se))
   p0 <- at(tg$alk$target)
   expect_true("ocean_grad_alk" %in% names(p0))
   expect_equal(unname(p0[["ocean_grad_alk"]]),
-               stats::dnorm(0, 0, tg$alk$sd, log = TRUE), tolerance = 1e-10)
-  cost <- function(z) p0[["ocean_grad_alk"]] - at(tg$alk$target + z * tg$alk$sd)[["ocean_grad_alk"]]
+               stats::dnorm(0, 0, se[["alk"]], log = TRUE), tolerance = 1e-10)
+  cost <- function(z) p0[["ocean_grad_alk"]] - at(tg$alk$target + z * se[["alk"]])[["ocean_grad_alk"]]
   expect_equal(cost(1), 0.5, tolerance = 1e-8)
   expect_equal(cost(2), 4 * cost(1), tolerance = 1e-8)
 })
