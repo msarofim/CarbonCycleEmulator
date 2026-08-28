@@ -177,3 +177,42 @@ ccx_check_mode_decode <- function(md = CCX_MODE_CANONICAL, tol = 1e-8) {
          paste(md$hml_bound, collapse = ", "), ").")
   invisible(TRUE)
 }
+
+#' Adopt a mode file's own `h_ml` band for the rest of this session
+#'
+#' The uniform fix for the defect documented above. `ccx_mode_params()` repairs
+#' ONE decode; this repairs ALL of them, including the ones inside
+#' `ccx_make_logpost()`, by putting the shipped `CCX_PARAM_TABLE` into the state
+#' the refit was run in. Call it ONCE, immediately after reading the mode, in
+#' any driver that decodes `u_mode` or perturbations of it.
+#'
+#' This is what `run_modefind_pump_arms.R`, `recompute_hessian.R`,
+#' `diag_hess_eps_21par.R` and `diag_seas_T_amp_q10_ridge.R` already do by hand;
+#' those files are correct and need no change.
+#'
+#' ⚠ IT ALSO NARROWS THE PRIOR, by construction — that is the same +1.5805
+#' additive constant the bounded refit carries. It cancels from every DIFFERENCE
+#' and must never be read as a change in fit. ⚠ It confines `h_ml` to the band,
+#' so do not call it in a driver that profiles `h_ml` across the edge.
+#'
+#' @param md a loaded mode file, or a mode name/path
+#' @return invisibly, the previous `h_ml` table entry, for restoring
+ccx_adopt_mode_band <- function(md = CCX_MODE_CANONICAL) {
+  if (is.character(md)) md <- readRDS(ccx_mode_file(md))
+  old <- CCX_PARAM_TABLE$h_ml
+  if (is.null(md$hml_bound)) return(invisible(old))
+  CCX_PARAM_TABLE$h_ml$lo <<- md$hml_bound[1]
+  CCX_PARAM_TABLE$h_ml$hi <<- md$hml_bound[2]
+  if (!is.null(md$par_mode)) {
+    u <- md$u_mode; names(u) <- CCX_PARAM_NAMES
+    got <- ccx_unc_to_par(u)$h_ml
+    if (abs(got - md$par_mode[["h_ml"]]) > 1e-8 * max(abs(md$par_mode[["h_ml"]]), 1e-12))
+      stop("adopting md$hml_bound = [", paste(md$hml_bound, collapse = ", "),
+           "] still does not reproduce par_mode's h_ml (", md$par_mode[["h_ml"]],
+           "); got ", got, ". This mode file was fitted under some OTHER band.")
+  }
+  cat(sprintf("[ccx_adopt_mode_band] h_ml band -> [%g, %g]; h_ml at the mode = %.4f m\n",
+              md$hml_bound[1], md$hml_bound[2],
+              if (is.null(md$par_mode)) NA_real_ else md$par_mode[["h_ml"]]))
+  invisible(old)
+}

@@ -63,6 +63,11 @@ if (!isTRUE(all.equal(ref$hml_bound, luc$hml_bound)))
 if (isTRUE(all.equal(unlist(ref$par_mode), unlist(luc$par_mode))))
   stop("the luc file IS the reference -- seed copy, not a fitted arm")
 cat(sprintf("h_ml bound [%g, %g] in both files. OK\n", ref$hml_bound[1], ref$hml_bound[2]))
+# ⚠ ADOPT THE MODE'S OWN h_ml BAND BEFORE DECODING (2026-08-28). The refits
+# override h_ml's logit band in process, so ccx_unc_to_par() returns 85.73 m
+# where this mode sits at 96.47 m. The band-equality gate above is what makes
+# adopting ref's band safe for both files. [[ccx_hml_band_decode]]
+ccx_adopt_mode_band(ref)
 
 sd_u <- unlist(ref$sd_unc)
 u_r  <- unlist(ref$u_mode); u_l <- unlist(luc$u_mode)

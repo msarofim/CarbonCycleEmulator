@@ -23,7 +23,11 @@
 # ⚠ THE BRACKET END IS A METHODOLOGICAL CHOICE, so it is MEASURED, not picked:
 # LAND and JOINT run at BOTH the prior centre 5.0502 and HI 7.1012.
 #
-# ⚠ NEVER QUOTE AN ABSOLUTE LOGPOST AGAINST THE MODE FILE (offset -3.3223).
+# ⚠ THE OFFSET IS NOW -1.5805, NOT -3.3223 (2026-08-28). Adopting the mode's
+# own h_ml band removes the 1.7418 that was a WRONG DECODE; what remains is
+# exactly the bounded refit's narrowed-prior constant, which is additive and
+# cancels from every difference. [[ccx_hml_band_decode]]
+# ⚠ NEVER QUOTE AN ABSOLUTE LOGPOST AGAINST THE MODE FILE (offset -1.5805).
 #
 # Usage:  Rscript calibration/diag_admissible_2x2_land_ocean.R
 # =====================================================================
@@ -44,7 +48,7 @@ AQ_MAXIT <- 1500; AQ_RESTARTS <- 6; AQ_RESTOL <- 0.02
 # ---- THE PRE-REGISTERED GATES, copied from prereg 27q sec.2. Fixed here so they
 # ---- cannot drift to meet the answer. P0-P6 are 27j's OWN gates, unchanged.
 AQ_P0_TOTAL  <- 1.141; AQ_P0_SHLAND <- 1.308
-AQ_P0_NHORIG <- 0.821; AQ_P0_RATIO  <- 1.930; AQ_P0_OFFSET <- -3.3223
+AQ_P0_NHORIG <- 0.821; AQ_P0_RATIO  <- 1.930; AQ_P0_OFFSET <- -1.5805
 AQ_P1_FRAC   <- 0.5                 # 27j's JR_P1_FRAC
 AQ_P2_BAND   <- c(5, 30)            # 27g's physical band
 AQ_P3_RATIO  <- 1.70                # 27g's own unmet gate
@@ -62,6 +66,14 @@ amp    <- function(v) 2 * sqrt(sum(v^2))                  # PEAK-TO-PEAK, always
 ang_mo <- function(v) 12 * ((atan2(v[1], v[2]) / (2 * pi)) %% 1)
 
 md <- readRDS(ccx_mode_file())
+# ⚠ ADOPT THE MODE'S OWN h_ml BAND BEFORE DECODING ANYTHING (2026-08-28).
+# The pump refits override h_ml's logit band IN PROCESS, so `ccx_unc_to_par()`
+# -- a pure function of the SHIPPED table -- returns 85.73 m where this mode
+# actually sits at 96.47 m, an 11 % shallower mixed layer. h_ml is frozen in
+# this driver, so the effect is a WRONG CONSTANT in every arm, not a changed
+# contrast; the arms below were previously all wrong together.
+# See the note above ccx_mode_params() in R/paths.R. [[ccx_hml_band_decode]]
+ccx_adopt_mode_band(md)
 u0 <- md$u_mode                     # ⚠ SPELL IT OUT: md$u partial-matches this
 names(u0) <- CCX_PARAM_NAMES
 stopifnot(AQ_LAND_PAR %in% CCX_PARAM_NAMES, "q10" %in% CCX_PARAM_NAMES,

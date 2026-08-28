@@ -30,7 +30,11 @@
 # question Marcus has flagged and this run does not settle.
 #
 # ⚠ NEVER QUOTE AN ABSOLUTE LOGPOST AGAINST THE MODE FILE. The harness sits
-# -3.3223 below it, pre-existing ([[ccx_mode_logpost_offset]]). Everything here
+# ⚠ THE OFFSET IS NOW -1.5805, NOT -3.3223 (2026-08-28). Adopting the mode's
+# own h_ml band removes the 1.7418 that was a WRONG DECODE; what remains is
+# exactly the bounded refit's narrowed-prior constant, which is additive and
+# cancels from every difference. [[ccx_hml_band_decode]]
+# -1.5805 below it, pre-existing ([[ccx_mode_logpost_offset]]). Everything here
 # is a difference within this harness.
 #
 # Usage:  Rscript calibration/diag_joint_land_ocean_refit.R
@@ -57,7 +61,7 @@ JR_P0_TOTAL   <- 1.141    # incumbent SPO total, measured 27h/27i
 JR_P0_SHLAND  <- 1.308
 JR_P0_NHORIG  <- 0.821
 JR_P0_RATIO   <- 1.930
-JR_P0_OFFSET  <- -3.3223
+JR_P0_OFFSET  <- -1.5805
 JR_P1_FRAC    <- 0.5      # interaction >= this x |LAND-only cost|
 JR_P2_BAND    <- c(5, 30) # the 27g physical pre-check band for the channel
 JR_P3_RATIO   <- 1.70     # 27g's OWN unmet P4 gate, reused unchanged
@@ -72,6 +76,14 @@ JR_SEAS_ROWS  <- c("co2_seasonal_MLO", "co2_seasonal_SPO",
 
 sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 md <- readRDS(ccx_mode_file())
+# ⚠ ADOPT THE MODE'S OWN h_ml BAND BEFORE DECODING ANYTHING (2026-08-28).
+# The pump refits override h_ml's logit band IN PROCESS, so `ccx_unc_to_par()`
+# -- a pure function of the SHIPPED table -- returns 85.73 m where this mode
+# actually sits at 96.47 m, an 11 % shallower mixed layer. h_ml is frozen in
+# this driver, so the effect is a WRONG CONSTANT in every arm, not a changed
+# contrast; the arms below were previously all wrong together.
+# See the note above ccx_mode_params() in R/paths.R. [[ccx_hml_band_decode]]
+ccx_adopt_mode_band(md)
 u0 <- md$u_mode; names(u0) <- CCX_PARAM_NAMES
 idx <- match(JR_BLOCK, CCX_PARAM_NAMES); stopifnot(!anyNA(idx))
 stopifnot(!("seas_npp_amp_SH" %in% CCX_PARAM_NAMES),

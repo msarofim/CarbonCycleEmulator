@@ -92,8 +92,13 @@ if (file.exists(ccx_mode_file("pin90"))) vecs$pin90 <- ccx_mode_file("pin90")
 run_vec <- function(mf) {
   p <- ccx_default_params(); bt <- CCX_PARAM_TABLE$bomb_total$init; ls_ <- 1; pv <- NULL
   if (!is.null(mf)) {
-    md <- readRDS(mf); u <- md$u_mode; names(u) <- CCX_PARAM_NAMES
-    pv <- ccx_unc_to_par(u)
+    md <- readRDS(mf)
+    # ⚠ ccx_mode_params(), NOT ccx_unc_to_par(md$u_mode): h_ml's logit band is
+    # overridden in process by the refits, so the shipped-table decode returns
+    # 85.73 m where this mode sits at 96.47 m. This driver runs SEVERAL mode
+    # files, which may carry DIFFERENT bands, so it repairs the decode per
+    # vector rather than adopting one band globally. [[ccx_hml_band_decode]]
+    pv <- ccx_mode_params(md)
     for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
     p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode
     bt <- pv$bomb_total; ls_ <- pv$luc_scale

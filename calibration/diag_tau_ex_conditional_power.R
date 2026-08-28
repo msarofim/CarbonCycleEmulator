@@ -24,7 +24,11 @@
 # be one.
 #
 # ⚠ NEVER QUOTE AN ABSOLUTE LOGPOST AGAINST THE MODE FILE -- the harness sits
-# -3.3223 below it, pre-existing ([[ccx_mode_logpost_offset]]). Everything here
+# ⚠ THE OFFSET IS NOW -1.5805, NOT -3.3223 (2026-08-28). Adopting the mode's
+# own h_ml band removes the 1.7418 that was a WRONG DECODE; what remains is
+# exactly the bounded refit's narrowed-prior constant, which is additive and
+# cancels from every difference. [[ccx_hml_band_decode]]
+# -1.5805 below it, pre-existing ([[ccx_mode_logpost_offset]]). Everything here
 # is a difference against THIS script's own tau_ex = mode conditional optimum.
 #
 # Usage:  Rscript calibration/diag_tau_ex_conditional_power.R
@@ -67,6 +71,14 @@ sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 stopifnot(file.exists(CP_POWER_RDS))
 pw <- readRDS(CP_POWER_RDS)
 md <- readRDS(ccx_mode_file())
+# ⚠ ADOPT THE MODE'S OWN h_ml BAND BEFORE DECODING ANYTHING (2026-08-28).
+# The pump refits override h_ml's logit band IN PROCESS, so `ccx_unc_to_par()`
+# -- a pure function of the SHIPPED table -- returns 85.73 m where this mode
+# actually sits at 96.47 m, an 11 % shallower mixed layer. h_ml is frozen in
+# this driver, so the effect is a WRONG CONSTANT in every arm, not a changed
+# contrast; the arms below were previously all wrong together.
+# See the note above ccx_mode_params() in R/paths.R. [[ccx_hml_band_decode]]
+ccx_adopt_mode_band(md)
 u0 <- md$u_mode; names(u0) <- CCX_PARAM_NAMES
 TAU0  <- pw$tau0
 i_tau <- match("tau_ex", CCX_PARAM_NAMES)

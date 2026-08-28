@@ -50,6 +50,14 @@ amp    <- function(v) 2 * sqrt(sum(v^2))                    # PEAK-TO-PEAK
 ang_mo <- function(v) 12 * ((atan2(v[1], v[2]) / (2 * pi)) %% 1)
 
 md <- readRDS(ccx_mode_file())
+# ⚠ ADOPT THE MODE'S OWN h_ml BAND BEFORE DECODING ANYTHING (2026-08-28).
+# The pump refits override h_ml's logit band IN PROCESS, so `ccx_unc_to_par()`
+# -- a pure function of the SHIPPED table -- returns 85.73 m where this mode
+# actually sits at 96.47 m, an 11 % shallower mixed layer. h_ml is frozen in
+# this driver, so the effect is a WRONG CONSTANT in every arm, not a changed
+# contrast; the arms below were previously all wrong together.
+# See the note above ccx_mode_params() in R/paths.R. [[ccx_hml_band_decode]]
+ccx_adopt_mode_band(md)
 u0 <- md$u_mode                       # ⚠ SPELL IT OUT: md$u partial-matches this
 names(u0) <- CCX_PARAM_NAMES
 stopifnot("seas_T_amp_SH" %in% CCX_PARAM_NAMES)      # a PARAMETER, not a constant
@@ -66,9 +74,13 @@ bp <- ccx_default_params(); bp$pump_mode <- md$pump_mode
 lp <- ccx_make_logpost(years = TA_YEARS, base_params = bp)
 u_at <- function(u, a) { u[i_at] <- log(a); u }
 one  <- lp(u0)
-cat(sprintf("\nharness at u_mode %.4f vs stored %.4f -> offset %+.4f (known -3.3223)\n",
+# ⚠ THE OFFSET IS NOW -1.5805, NOT -3.3223 (2026-08-28). Adopting the mode's
+# own h_ml band removes the 1.7418 that was a WRONG DECODE; what remains is
+# exactly the bounded refit's narrowed-prior constant, which is additive and
+# cancels from every difference. [[ccx_hml_band_decode]]
+cat(sprintf("\nharness at u_mode %.4f vs stored %.4f -> offset %+.4f (known -1.5805)\n",
             one, md$logpost, one - md$logpost))
-if (abs((one - md$logpost) - (-3.3223)) > 0.5)
+if (abs((one - md$logpost) - (-1.5805)) > 0.5)
   cat("  ⚠ THE OFFSET HAS MOVED. Investigate BEFORE reading this run.\n")
 
 obs  <- ccx_prepare_obs()
@@ -181,7 +193,11 @@ s_ref <- try(streams_at(u0), silent = TRUE)
 if (inherits(s_ref, "try-error")) {
   cat("  ⚠ per-stream breakdown unavailable from this harness; skipped.\n")
 } else {
-  cat(sprintf("  %8s", "a_t")); for (n in TA_COST_ROWS) cat(sprintf(" %>10s", substr(n,1,10)))
+  # ⚠ `%>10s` was an invalid format and would have ABORTED here. It never fired
+  # because the ORIGINAL run took the try-error branch above -- the streams bug
+  # 27o sec.7 records. Fixing that bug is what first executed this line, on
+  # 2026-08-28. A second defect hiding behind the first, in the same block.
+  cat(sprintf("  %8s", "a_t")); for (n in TA_COST_ROWS) cat(sprintf(" %10s", substr(n,1,10)))
   cat("\n")
   for (a in TA_INBRACKET) {
     s <- streams_at(u_at(u0, a)); cat(sprintf("  %8.4f", a))

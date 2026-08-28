@@ -67,6 +67,14 @@ RF_P2_SPO_SUM  <- 287.2      # co2_seasonal_SPO + d13c_seasonal_SPO at the mode
 
 sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 md <- readRDS(RF_MODE_FILE)
+# ⚠ ADOPT THE MODE'S OWN h_ml BAND BEFORE DECODING ANYTHING (2026-08-28).
+# The pump refits override h_ml's logit band IN PROCESS, so `ccx_unc_to_par()`
+# -- a pure function of the SHIPPED table -- returns 85.73 m where this mode
+# actually sits at 96.47 m, an 11 % shallower mixed layer. h_ml is frozen in
+# this driver, so the effect is a WRONG CONSTANT in every arm, not a changed
+# contrast; the arms below were previously all wrong together.
+# See the note above ccx_mode_params() in R/paths.R. [[ccx_hml_band_decode]]
+ccx_adopt_mode_band(md)
 u0 <- md$u_mode; names(u0) <- CCX_PARAM_NAMES
 idx <- match(RF_BLOCK, CCX_PARAM_NAMES)
 stopifnot(!anyNA(idx))
@@ -102,7 +110,11 @@ cat(sprintf("stored logpost %.4f | recomputed here %.4f | OFFSET %+.4f\n",
 
 # ⚠ THE OFFSET IS REAL, IT IS PRE-EXISTING, AND IT IS NOT MINE TO ABSORB.
 # ccx_make_logpost() does not reproduce the canonical mode's stored logpost at
-# the mode's OWN u_mode. Measured 2026-08-27: -3.3223, and IDENTICAL at commit
+# ⚠ THE OFFSET IS NOW -1.5805, NOT -3.3223 (2026-08-28). Adopting the mode's
+# own h_ml band removes the 1.7418 that was a WRONG DECODE; what remains is
+# exactly the bounded refit's narrowed-prior constant, which is additive and
+# cancels from every difference. [[ccx_hml_band_decode]]
+# the mode's OWN u_mode. Measured 2026-08-27 as -3.3223; -1.5805 since the 08-28 band fix, and IDENTICAL at commit
 # fbf4b4c, before the entrainment channel existed -- so it is a property of the
 # repo, not of this work. It is entirely in the LIKELIHOOD (the prior + Jacobian
 # reproduce to the last decimal), and its signature is an INTERHEMISPHERIC
@@ -121,7 +133,7 @@ cat(sprintf("stored logpost %.4f | recomputed here %.4f | OFFSET %+.4f\n",
 # logpost from this script against a number from the mode file -- so this script
 # does not do that, and neither should anything reading it. The offset is also
 # 3.3 against the ~227 log-units P1 measured on co2_seasonal_SPO alone.
-CCX_MODE_OFFSET_KNOWN <- -3.3223         # measured 2026-08-27, at fbf4b4c too
+CCX_MODE_OFFSET_KNOWN <- -1.5805         # measured 2026-08-27, at fbf4b4c too
 if (abs(gap - CCX_MODE_OFFSET_KNOWN) > 0.5)
   cat(sprintf("  ⚠ THE OFFSET HAS MOVED (known %+.4f). Something changed the\n",
               CCX_MODE_OFFSET_KNOWN),

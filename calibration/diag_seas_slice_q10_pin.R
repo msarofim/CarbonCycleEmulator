@@ -26,7 +26,11 @@
 #
 # ⚠ THIS IS A CONTROL, NOT AN ARM. It cannot rehabilitate seas_T_amp_SH -- the
 # FULL-FROZEN cost at bracket HI is -204.45 and that veto is untouched.
-# ⚠ NEVER QUOTE AN ABSOLUTE LOGPOST AGAINST THE MODE FILE (offset -3.3223).
+# ⚠ THE OFFSET IS NOW -1.5805, NOT -3.3223 (2026-08-28). Adopting the mode's
+# own h_ml band removes the 1.7418 that was a WRONG DECODE; what remains is
+# exactly the bounded refit's narrowed-prior constant, which is additive and
+# cancels from every difference. [[ccx_hml_band_decode]]
+# ⚠ NEVER QUOTE AN ABSOLUTE LOGPOST AGAINST THE MODE FILE (offset -1.5805).
 #
 # Usage:  Rscript calibration/diag_seas_slice_q10_pin.R
 # =====================================================================
@@ -43,7 +47,7 @@ QP_LO <- ccx_const("SEAS_T_AMP_SH_OBS_LO"); QP_HI <- ccx_const("SEAS_T_AMP_SH_OB
 QP_NH_HI <- ccx_const("SEAS_T_AMP_NH_OBS_HI")        # 17.92 K, for the S2 label
 QP_MAXIT <- 1500; QP_RESTARTS <- 6; QP_RESTOL <- 0.02
 QP_OBS_SPO_LAND <- 0.683                  # inversion at the mode, 27h
-QP_OFFSET <- -3.3223                      # [[ccx_mode_logpost_offset]]
+QP_OFFSET <- -1.5805                      # [[ccx_mode_logpost_offset]]
 QP_COST_ROWS <- c("co2_seasonal_MLO", "co2_seasonal_SPO", "d13c_seasonal_MLO",
                   "d13c_seasonal_SPO", "co2_level_MLO", "co2_level_SPO",
                   "d13c_level_MLO", "d13c_level_SPO", "gcb_land_sink",
@@ -66,6 +70,14 @@ amp    <- function(v) 2 * sqrt(sum(v^2))                  # PEAK-TO-PEAK, always
 ang_mo <- function(v) 12 * ((atan2(v[1], v[2]) / (2 * pi)) %% 1)
 
 md <- readRDS(ccx_mode_file())
+# ⚠ ADOPT THE MODE'S OWN h_ml BAND BEFORE DECODING ANYTHING (2026-08-28).
+# The pump refits override h_ml's logit band IN PROCESS, so `ccx_unc_to_par()`
+# -- a pure function of the SHIPPED table -- returns 85.73 m where this mode
+# actually sits at 96.47 m, an 11 % shallower mixed layer. h_ml is frozen in
+# this driver, so the effect is a WRONG CONSTANT in every arm, not a changed
+# contrast; the arms below were previously all wrong together.
+# See the note above ccx_mode_params() in R/paths.R. [[ccx_hml_band_decode]]
+ccx_adopt_mode_band(md)
 u0 <- md$u_mode                     # ⚠ SPELL IT OUT: md$u partial-matches this
 names(u0) <- CCX_PARAM_NAMES
 stopifnot(QP_PROFILED %in% CCX_PARAM_NAMES, "q10" %in% CCX_PARAM_NAMES)
