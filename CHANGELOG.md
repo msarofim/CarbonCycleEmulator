@@ -2,6 +2,65 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-29 — **THE REFIT LANDED AND CONVERGED. IT MUST NOT BE ADOPTED. Next: the SH land overshoot.**
+
+Landed 06:39:50, 10.9 h, 274,722 evals at 0.142 s/eval. **Cycle 2 gained exactly 0.0000** and
+`CONVERGED` fired: NM restarts and BFGS polish both gain zero from the cycle-1 mode. The cycle-1
+`HIT THE RESTART CAP WHILE STILL GAINING` banner is a **false alarm** — it is threshold-triggered
+(`ARM_TOL` 1e-4) on a gain of 0.0012, and the polish then gained **0.0317** against 08-20r's 16.08.
+
+⚠ **THE PRODUCTION REFIT REPRODUCED THE 14-MINUTE CRIPPLED SMOKE TEST TO THREE DECIMALS** —
++4.060 total, jac −2.139, loglik −1.199 vs −1.201, `h_ml` 35.38 m in both. **That INVERTS handoff
+08-28c §3**, which read the smoke's 35.38 m as an artefact of its budget. It did not wander. What
+§3 got right is the part that matters: **the +4.06 is ENTIRELY PRIOR CREDIT and the fit got WORSE.**
+
+### `h_ml` = 35.38 m is an ARTEFACT — measured twice, and BOTH tests corrected something of mine
+
+**`diag_hml_seasonal_limbs.R` — the repair hypothesis, REFUTED.** SH ocean limb 48% → **49%** of
+observed on a defect needing a doubling, while the **phase rotated AWAY** from obs (4.17 → 3.90
+against 8.52). This arc's own lesson again: limbs are **VECTORS**, and a magnitude moving the wanted
+way can still be a phase error that makes the sum worse. SH land **1.92× → 1.93×**: untouched.
+
+**`diag_hml_sst_elasticity.R` — MY explanation, REFUTED, and the physics INVERTED.** I inferred the
+shallow layer DAMPED the transfer from `sst_seas_amp_SH`, letting the fit buy prior credit by
+neutering the parameter. Its pre-registered P2 — stated as the live outcome, not a formality —
+**fired**: elasticities **1.0002 (35 m) vs 0.9999 (96 m)**, identical and exactly linear. Withdrawn.
+
+⚠ **AND THE PHYSICS I ASSERTED WAS BACKWARDS.** At FIXED `sst_seas_amp_SH` = 0.4312, `h_ml`
+96.47 → 35.38 m takes the limb **0.3066 → 0.2577 (59% → 49% of obs)** and its phase 4.15 → 3.90.
+**A shallower mixed layer makes this limb SMALLER, not larger.** Retracted in place, at the site,
+with the measurement. So `h_ml` → 35 m *degrades* the limb that is already ~2× too small, and the
+20% rise in `sst_seas_amp_SH` is **compensation for that damage**, not a gain.
+
+⚠ **ALSO RETRACTED: "revisit the `sst_seas_amp_*` priors".** `ccx_prior_z()` is the post-fix
+implementation (unconstrained coordinate, Jacobian, prior's own mode by scan, both tails with the
+smaller used) so **−6.32 is real**. And `INDEX_ccx_seas.md` is explicit that the priors are the part
+ANCHORED ON OBSERVATIONS — `sst_seas_amp_SH` sits at 21% of observed *because* SH land is 1.9× too
+big. **The prior is not wrong; the partition is.** I reasoned from the z magnitude without reading
+the seasonal sub-index first.
+
+### The decision, and what was deliberately NOT done
+
+**Not adopted.** It is the legitimate posterior mode of the adopted objective, but *posterior mode*
+and *better model* have come apart. **Nothing is quarantined and nothing is repointed** —
+`ccx_mode_file()` still resolves `from90`, and `run_post_refit_adoption.R`'s `quarantine` /
+`repoint` / `rerun` stages have never been run; only `check` (5/5) and `read`.
+
+⚠ **This reads as a problem with OPTION 5 rather than with the refit.** Freeing `h_ml` let the
+seasonal prior conflict pay itself out through ocean structure, because the CO2 seasonal rows have
+**no power to object** — already matched by cancellation. A candidate that keeps the σ-inflation
+while denying the anti-physical lever is a refit with `h_ml` PINNED at ~96; not run, not decided.
+
+### ⇒ NEXT: THE SH LAND OVERSHOOT (Marcus, 08-29)
+
+Two independent arcs now point at it. The seasonal arc reached it from the partition side; this
+refit reached it from the ocean side, by exhausting every ocean-side lever — `ent` vetoed, `tau_ex`
+exonerated, `(phi_eff, amp)` degenerate, and now `h_ml` running the wrong way. Order: (1) the
+**controlled `q10` test** (the 82%-vs-42% recovery contrast is confounded by q10 free vs pinned;
+cheap, still not run); (2) the **NH-import channel** — 0.821 of the model's 1.373 SH land is
+imported from the NH, more than the entire observed SPO land component, and nothing has been aimed
+at it; (3) the NH box's own seasonal amplitude, still unchecked; (4) then 4b.
+
 ## 2026-08-28i — **`pin90` retirement adopted; the band mirrors swept — and TWO of the four must NOT be widened**
 
 **Marcus: retire `pin90`, and remove anything that reads retired code.** Done, with two
