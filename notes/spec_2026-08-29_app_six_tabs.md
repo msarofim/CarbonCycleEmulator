@@ -100,6 +100,40 @@ AOD is a radiative driver rather than a climate variable. So once `gamma_diff` �
 no longer implies "volcanically quiet"** and a diagnostic that needs a quiet run must zero AOD
 itself. (This corrects my first answer to the inventory gate, which classified AOD as climate.)
 
+## 3a-bis. ⚠ THE SAME IS TRUE OF ENSO — IT IS A GENERAL RULE, NOT TWO SPECIAL CASES
+
+**Marcus, 2026-08-29:** *"ENSO off also has two effects: the ENSO-temperature effect and the direct
+effect of ENSO on the carbon cycle."*
+
+**⇒ EVERY DRIVER WITH BOTH A DIRECT CARBON PATH AND A TEMPERATURE PATH NEEDS TWO EDITS TO TURN OFF.**
+There are exactly two such drivers today, and they are structurally identical:
+
+| driver | DIRECT carbon path (a model term) | TEMPERATURE path (implicit in the observations) |
+|---|---|---|
+| **ENSO** | `gamma_enso * enso * enso_share[hi]` out of the responsive soil pool (`ccx_core.cpp:396`) | ENSO's contribution to `gmst` **and** to `sst_anom_*` |
+| **Volcanoes** | `gamma_diff * aod_h` on NPP (`ccx_core.cpp:~350`) | volcanic cooling in `gmst` **and** in `sst_anom_*` |
+
+**Zeroing the driver column alone leaves the temperature half running. Backing the component out of
+the temperature record alone leaves the direct half running. Both, or the checkbox lies.**
+
+### ⚠ AND A THIRD EDIT NOBODY WOULD GUESS: `sst_anom_*` IS NOT DERIVED FROM `gmst`
+
+Checked in `ccx_sst_anom_from_gmst()` (`R/forcing.R`): over the **observed record** the hemispheric
+SST anomalies are **PRESCRIBED FROM HadSST4** (`data/forcing_sst.rds`); they only follow `gmst`
+incrementally **beyond** the last observed year (`beyond <- F$year > last`).
+
+⇒ **Over the whole historical period `gmst` and `sst_anom_NH`/`sst_anom_SH` are INDEPENDENT
+observational series.** Subtracting the ENSO or volcanic component from `gmst` therefore does
+**NOT** remove it from `sst_anom_*`, and the **ocean would keep seeing the signal the checkbox
+claims to have switched off.** The decomposition must be applied to **BOTH**, consistently.
+
+### ⚠ AN ASYMMETRY IN `ccx_hold_climate()` THAT IS NOW REAL
+It freezes `gmst`, `enso`, `sst_anom_*` — so it removes **ENSO's variability on BOTH paths**
+(the `enso` column is one of the frozen four), but only the **THERMAL** half of the volcanic signal,
+because `aod_*` is deliberately not frozen (§3a). ⇒ once `gamma_diff` ≠ 0, **"climate held" is a
+volcanically NOISY, ENSO-quiet world.** Not a bug; a thing to know before reading any diagnostic
+that uses it.
+
 ## 3b. DECIDED (Marcus, 2026-08-29)
 
 **The GMST decomposition uses a Foster–Rahmstorf-style REGRESSION as the primary method**, with FaIR
