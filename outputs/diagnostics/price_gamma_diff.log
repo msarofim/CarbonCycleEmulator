@@ -1,0 +1,38 @@
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 96.4737 m
+mode mode_fit_pumpN.rds | slice: beta_max, fert_k, q10, rep_dC
+rep_dC at the mode 3.3780 | beta_max 0.5109 | fert_k 154.85 | q10 1.13579
+rep_dC prior sd (unconstrained, derived) 0.9830
+
+
+=== 1. THE CONDITIONAL PROFILE ===
+   gamma_d      frozen conditional  buy-back |     1992       r       sd     land    rep_dC
+     0.000        0.00        0.00       -- |    0.043   0.571   0.3006    3.558    3.3778
+     0.125          NA       -1.96       -- |   -0.211   0.606   0.3067    3.564    3.3710
+     0.250      -40.48       -7.42     82 % |   -0.464   0.624   0.3200    3.570    3.3647
+     0.500     -160.78      -28.72     82 % |   -0.969   0.626   0.3642    3.584    3.3537
+     0.750     -360.40      -63.67     82 % |   -1.470   0.602   0.4251    3.600    3.3450
+     0.970     -601.26     -105.54     82 % |   -1.910   0.575   0.4875    3.615    3.3393
+
+
+=== 2. SCORED ===
+  H0  gamma_diff = 0 conditional = +0.0000 (gate |.| <= 0.05) -> PASS
+  H1  price at gamma_diff 0.25 = -7.42 -> **CHEAP**
+  H2  buy-back 82 % (>= 40 confirms, < 15 refutes) -> LEVEL OFFSET CONFIRMED
+  H3  rep_dC moved -0.01 prior-sd by gamma_diff 0.97 (gate >= 1.0) -> ⚠ FAIL -- rep_dC did NOT move; H2's number is arithmetic, not mechanism
+  H4  best conditional r = 0.626 vs 0.571 at gamma_diff 0 -> PASS -- the correlation gain SURVIVES refitting
+  H5  max |d land sink| = 0.057 GtC/yr (gate < 0.10) -> PASS -- no secular land bias
+
+  H6  who pays at gamma_diff 0.25 (conditional, each row minus gamma_diff 0):
+    co2_icecore                 -4.53
+    co2_level_MLO               -1.63
+    co2_level_SPO               -1.57
+    gcb_land_sink               -1.05
+    co2_seasonal_MLO            +1.13
+
+  ⇒ THE MECHANISM IS CHEAP at gamma_diff 0.25. And the correlation gain is REAL -- it survives refitting.
+
+  ⚠ NOTHING ADOPTED. gamma_diff stays 0; making it the 22nd FITTED parameter is a
+    separate decision needing a full refit, not a conditional slice.
+
+
+=== DONE ===
