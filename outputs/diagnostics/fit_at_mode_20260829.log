@@ -1,0 +1,50 @@
+
+--- DESIGN gate 7 (2015-2023 mean sinks, GtC/yr; n = 9 yr) ---
+  ocean: model 2.97 vs GCB 3.20 (target sd 0.40)  => -0.6 sigma
+  land : model 3.56 vs GCB 2.41 (target sd 0.50)  => +2.3 sigma
+
+=== FIT AT THE FROM90 MODE (canonical arm is from90) ===
+logL_rec vs logL_rds is the GATE: if it does not match, the row is wrong.
+
+stream                 n    RMSz  bias_z  max|z|     RMSresid       bias  unit             gate
+co2_level_MLO         66    0.58   -0.14    1.29       0.5772    -0.1369  ppm              OK
+co2_level_SPO         59    0.53   +0.02    1.13       0.5324   +0.02366  ppm              OK
+co2_seasonal_MLO     100    1.14   -0.08    2.85        0.252  +0.003061  ppm (harmonic a,b) OK
+co2_seasonal_SPO      98    1.09   +0.26    2.70        0.134   +0.03283  ppm (harmonic a,b) OK
+co2_icecore          255    0.78   +0.29    1.72        3.392     +1.302  ppm              OK
+d13c_level_MLO        45    1.20   +0.84    2.37      0.06011   +0.04215  permil           OK
+d13c_level_SPO        44    1.22   -0.86    2.47      0.06102   -0.04299  permil           OK
+co2_gradient          59    0.68   -0.00    1.64       0.2387  -0.001483  ppm              OK
+d13c_gradient         43    0.78   +0.00    2.16      0.01955 +5.484e-05  permil           OK
+d14c_NH               79    0.98   -0.24    3.39        13.16     -2.825  permil           OK
+d14c_SH               79    1.02   +0.21    4.90        11.01     +2.732  permil           OK
+d14c_intcal          200    0.38   -0.28    1.03         4.07     -2.956  permil           OK
+gcb_ocean_sink        66    0.59   +0.20    1.61       0.2348   +0.07801  GtC/yr           OK
+gcb_land_sink         66    0.72   -0.63    1.52        1.084    -0.9408  GtC/yr           OK
+
+--- de-biased SCATTER vs the fixed representation floor ---
+stream               RMSresid       bias    scatter  vs fixed floor
+d14c_NH               13.1588    -2.8254    12.9340  floor 10.9622, fitted sigma 6.1086 -> real scatter present
+d14c_SH               11.0100    +2.7324    10.7337  floor 10.9559, fitted sigma 6.1086 -> SCATTER BELOW FLOOR (sigma explains nothing)
+
+  d14c obs sd (median of the observational sd column), NH / SH: 4.15 / 4.29 permil
+
+Streams NOT reconstructed here (no simple obs-vs-model form):
+  d13c_seasonal_MLO, d13c_seasonal_SPO, excess_c14_ocean, d14c_deep_ocean, ocean_grad_dic, ocean_grad_d13c, ocean_grad_alk 
+
+RANKED BY RMS z (worst fit first) -- this is the ranking that means
+'badly matched', as opposed to the logL list which ranks by leverage:
+   1. d13c_level_SPO     RMSz   1.22   bias  -0.86   n 44
+   2. d13c_level_MLO     RMSz   1.20   bias  +0.84   n 45
+   3. co2_seasonal_MLO   RMSz   1.14   bias  -0.08   n 100
+   4. co2_seasonal_SPO   RMSz   1.09   bias  +0.26   n 98
+   5. d14c_SH            RMSz   1.02   bias  +0.21   n 79
+   6. d14c_NH            RMSz   0.98   bias  -0.24   n 79
+   7. co2_icecore        RMSz   0.78   bias  +0.29   n 255
+   8. d13c_gradient      RMSz   0.78   bias  +0.00   n 43
+   9. gcb_land_sink      RMSz   0.72   bias  -0.63   n 66
+  10. co2_gradient       RMSz   0.68   bias  -0.00   n 59
+  11. gcb_ocean_sink     RMSz   0.59   bias  +0.20   n 66
+  12. co2_level_MLO      RMSz   0.58   bias  -0.14   n 66
+  13. co2_level_SPO      RMSz   0.53   bias  +0.02   n 59
+  14. d14c_intcal        RMSz   0.38   bias  -0.28   n 200
