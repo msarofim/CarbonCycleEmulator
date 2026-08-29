@@ -44,3 +44,99 @@ GATE SKIPPED: one arm (N) -- there is no second arm to differ from.
 start: log-post at hand-set init = -18342.1
 WARM START from mode_fit_pumpN.rds: log-post there = -1544.6 (its file says -1544.6)
 [N] cycle 1 restart  1: log-post =      -1543.9  (gain     0.6878)  evals 20002
+[N] cycle 1 restart  2: log-post =      -1543.8  (gain     0.1186)  evals 35735
+[N] cycle 1 restart  3: log-post =      -1541.3  (gain     2.4856)  evals 55737
+[N] cycle 1 restart  4: log-post =      -1541.2  (gain     0.1680)  evals 73176
+[N] cycle 1 restart  5: log-post =      -1540.9  (gain     0.2096)  evals 93178
+[N] cycle 1 restart  6: log-post =      -1540.7  (gain     0.2407)  evals 105440
+[N] cycle 1 restart  7: log-post =      -1540.6  (gain     0.0673)  evals 116118
+[N] cycle 1 restart  8: log-post =      -1540.6  (gain     0.0122)  evals 132691
+[N] cycle 1 restart  9: log-post =      -1540.6  (gain     0.0029)  evals 144450
+[N] cycle 1 restart 10: log-post =      -1540.6  (gain     0.0052)  evals 158650
+[N] cycle 1 restart 11: log-post =      -1540.6  (gain     0.0030)  evals 169610
+[N] cycle 1 restart 12: log-post =      -1540.6  (gain     0.0111)  evals 189612
+[N] cycle 1 restart 13: log-post =      -1540.6  (gain     0.0049)  evals 199109
+[N] cycle 1 restart 14: log-post =      -1540.6  (gain     0.0035)  evals 210315
+[N] cycle 1 restart 15: log-post =      -1540.6  (gain     0.0045)  evals 221536
+[N] cycle 1 restart 16: log-post =      -1540.6  (gain     0.0013)  evals 230849
+[N] cycle 1 restart 17: log-post =      -1540.6  (gain     0.0004)  evals 239366
+[N] cycle 1 restart 18: log-post =      -1540.6  (gain     0.0002)  evals 246137
+[N] cycle 1 restart 19: log-post =      -1540.6  (gain     0.0001)  evals 253612
+[N] cycle 1 restart 20: log-post =      -1540.6  (gain     0.0012)  evals 264587
+*** [N] cycle 1 HIT THE RESTART CAP WHILE STILL GAINING
+[N] cycle 1 polish: log-post = -1540.6 (gain 0.0317)
+[N] === cycle 1 total gain 4.0598 (log-post -1540.6, 266893 evals) ===
+[N] cycle 2 restart  1: log-post =      -1540.6  (gain     0.0000)  evals 270784
+[N] cycle 2 restart  2: log-post =      -1540.6  (gain     0.0000)  evals 273736
+  NM converged: gain below ARM_TOL
+[N] cycle 2 polish: log-post = -1540.6 (gain 0.0000)
+[N] === cycle 2 total gain 0.0000 (log-post -1540.6, 274722 evals) ===
+[N] CONVERGED: cycle gain below ARM_CYCLE_TOL (0.5)
+
+[N] prior-tail position (normal sds; |z| > 3 flagged):
+       beta_max          fert_k             q10             k_w            h_ml 
+          -0.94           -1.47           -2.26            0.53           -1.86 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+           1.68            0.51           -0.50            1.18            2.16 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+          -4.57           -0.66           -2.93           -5.60            0.42 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+           1.37            0.28            0.29            3.04           -0.31 
+  grad_off_d13c 
+           0.56 
+*** FLAGGED:  seas_T_amp_SH, sst_seas_amp_SH, rep_dC 
+[N] hessian: per-direction central differences, 21 parameters
+  eps = 0.10 x each direction's own posterior sd, verified at eps/3 and 3 eps
+  parameter          sd (unc)     eps (u)   curvature
+  beta_max            0.00244   2.443e-04 -1.6761e+05
+  fert_k              0.00375   3.753e-04      -70985
+  q10                 0.00147   1.468e-04 -4.6382e+05
+  k_w                 0.00606   6.057e-04      -27251
+  h_ml                0.59294   5.929e-02     -2.8471
+  kz                  0.36044   3.604e-02     -7.6992
+  pump_grad           0.05348   5.348e-03     -349.42
+  tau_ex              0.01173   1.173e-03     -7264.1
+  npp_frac_NH         0.04091   4.091e-03     -597.36
+  seas_T_amp_NH       0.01145   1.145e-03     -7618.9
+  seas_T_amp_SH       0.18028   1.803e-02     -30.745
+  seas_lag_p          0.00813   8.133e-04      -15116
+  sst_seas_amp_NH     0.11189   1.119e-02     -79.866
+  sst_seas_amp_SH     0.10323   1.032e-02     -93.602
+  gamma_enso          0.19591   1.959e-02     -26.033
+  bomb_total          0.00271   2.711e-04 -1.3608e+05
+  luc_scale           0.00196   1.960e-04 -2.6024e+05
+  sigma_d14c          0.09507   9.507e-03     -110.65
+  rep_dC              0.06884   6.884e-03     -211.01
+  grad_off_co2        0.04538   4.538e-03     -485.63
+  grad_off_d13c       0.00381   3.811e-04      -68844
+[N] h_ml mode 35.3845 m; nearest kink 11.47 m away; the Hessian step reaches 3.18e-01 m
+[N] curvature step-stability at the mode (eps x 1/3, 1, 3): all 21 coordinates stable
+[N] Laplace covariance: PD, condition number 5.29e+05
+[N] mode log-post = -1540.6  (gain over init 4.1)
+[N] elapsed 655.5 min, 274722 evaluations (0.143 s/eval)
+
+[N] mode, natural scale:
+       beta_max          fert_k             q10             k_w            h_ml 
+         0.5211        158.8885          1.1366       1853.2720         35.3845 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+      6407.4708        264.7009          1.1476          0.6457         23.2505 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+         1.0628          1.7556          1.0751          0.4312          0.8306 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+       116.9821          1.0802          6.1073          3.0393         -0.1547 
+  grad_off_d13c 
+         0.0842 
+[N] wrote calibration/output/refit_20260828_sigma_eff/mode_fit_pumpN.rds
+
+
+=== COMPARISON SKIPPED -- ONE ARM ===
+ARM_MODES = N. See the ARM_MODES block for why D is not re-run.
+
+
+=== THE STANDING QUESTIONS THIS RUN WAS ALSO MEANT TO ANSWER ===
+[N] kz = 6407.5 (95.3 % up the re-bisected bracket [3942.5, 6528])
+[N] h_ml = 35.38 -- rows SCORED (option 5); sd_eff/sd_obs 1.322 / 1.483 / 1.055
+[N] pump_grad = 264.70  (prior centre 233.11, 1-D optimum at the old mode 274.5)
+
+
+written: calibration/output/refit_20260828_sigma_eff/pump_arms_comparison.rds
