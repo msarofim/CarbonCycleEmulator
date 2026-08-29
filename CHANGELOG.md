@@ -2,6 +2,52 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-29b — **THE CONTROLLED `q10` TEST: THE RECOVERY FRACTION IS NOT A CHANNEL PROPERTY**
+
+Step 1 of the 08-29 handoff's ordered list, and it CLOSES the confound the OPPOSITE way to the
+prediction. `calibration/diag_q10_controlled_recovery.R` re-runs 27q's six arms with **ONE axis
+moved** — `q10` FREE in every arm instead of pinned, lever and everything else held.
+
+| | land lever | `q10` | land cost | INTERACTION | **recovered** | vacancy | per-ppm |
+|---|---|---|---|---|---|---|---|
+| 27j | `seas_npp_amp_SH` (INADMISSIBLE) | free | 80.44 | +67.28 | **83.6 %** | 0.383 | 175.8 |
+| 27q | `seas_T_amp_SH` pinned | pinned | 80.42 / 162.14 | +34.47 / +70.89 | **42.9 / 43.7 %** | 0.305 / 0.449 | 113.0 / 157.9 |
+| **08-29** | same lever | **FREE** | 29.75 / 43.60 | +6.24 / +7.41 | **21.0 / 17.0 %** | 0.081 / 0.092 | 77.3 / 80.8 |
+
+⇒ **`q10` is NOT why 27j reached 83.6 % — freeing it moves the fraction the WRONG WAY.** The
+contrast belongs to the **LEVER** (the shape of the vacancy), prereg 27q §4's alternative.
+
+**WHY, and it is the more useful finding.** With `q10` free the LAND arm barely imposes the defect
+at all — SH-land 1.308 → **1.216**, vacating **0.092 ppm** against 0.449 pinned — because
+`seas_T_amp_NH` runs to **57.5 / 75.5 K = 321-421 % of its measured 17.92 K high end** while
+`ln q10` falls 59-69 %, holding the identified product to 0.4 %. The three slices order themselves
+by **how much escape they allow**, and recovery falls monotonically along that order.
+**The fraction measures ESCAPE, not SUPPLY. Never quote one without its slice.**
+
+The MECHANISM replicates a THIRD time (`ent` 4.78 / 4.87, `sst_seas_amp_SH` 0.29 → 0.65 in JOINT);
+P1 falsified at both ends again. **SH land stays 1.308 = 1.92× obs, untouched.**
+
+### TRIED AND CORRECTED IN THIS SESSION
+
+- ⚠ **I wrote gates C1/C2 as ABSOLUTE logposts against numbers stored by 27j/27p/27q — which ran on
+  08-27, before `2153bd6` ("ADOPT OPTION 5") changed the objective.** Same defect the 08-29 handoff
+  flags in `test-mode-file.R`, reproduced in a driver whose header cites it. Amended the prereg to
+  **gap form BEFORE any arm result**; C2-as-registered then failed on exactly the two arms whose
+  whole gap was the shift (−0.082, −0.049). **The shift is an additive constant, MEASURED at four
+  points spanning 60 log units: −0.082, −0.082, −0.080, −0.080.** Gap-form reproduction of three
+  other drivers is then exact (+12.57, −29.75, −43.60).
+- ⚠ **C7 was mis-scoped**: `grep("grad")` swept in the ATMOSPHERIC `co2_gradient`/`d13c_gradient`
+  rows, which option 5 does not touch. Narrowed on the COMMIT (`R/likelihood.R:1541` names
+  `ocean_grad_{dic,d13c,alk}`), not on the answer — spread **0.0169 ≤ 0.05, PASS**.
+- ⚠ **BOTH registered predictions were wrong in magnitude**: I registered recovery "stable, 33-54 %"
+  (measured 21.0 / 17.0) and a per-ppm band 110-200 (measured 77.3 / 80.8). The direction they
+  existed to license survives a fortiori. Per-ppm was more stable only relatively — 2.2× against
+  the fraction's 4.9×.
+- **Nothing adopted, quarantined or repointed.** `ccx_mode_file()` still resolves `from90`.
+
+**NEXT: step 2, the NH-IMPORT channel** — 0.821 of the model's 1.373 SH land is imported from the
+NH, and this run measures NH_origin **INERT at 0.818-0.821 across all six arms**.
+
 ## 2026-08-29 — **THE REFIT LANDED AND CONVERGED. IT MUST NOT BE ADOPTED. Next: the SH land overshoot.**
 
 Landed 06:39:50, 10.9 h, 274,722 evals at 0.142 s/eval. **Cycle 2 gained exactly 0.0000** and
