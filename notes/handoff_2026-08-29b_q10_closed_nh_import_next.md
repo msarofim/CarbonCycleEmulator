@@ -144,3 +144,49 @@ BEFORE any prereg, exactly as the τ pre-check killed fork (a) before its prereg
 ## 6. HOW TO RUN WHAT THIS SESSION ADDED
 
     Rscript calibration/diag_q10_controlled_recovery.R      # ~29 min, 6 arms
+
+
+---
+
+# ADDENDUM 2026-08-29c — **THE FIVE DECISIONS ARE TAKEN, AND THE PAIR IS (GROSS × PHASE)**
+
+Marcus, 2026-08-29: *"Follow the 5 recommendations."* All five are done. Repo at `0909921`.
+
+## THE SCIENCE MOVED FIRST — a 12-second pre-check killed the obvious pair
+
+`calibration/diag_gross_cancellation_geometry.R` (prereg `30320c1`, collect
+`notes/collect_2026-08-29c_the_pair_is_gross_and_phase.md`). **The SH land channels are 152.9°
+apart, which floors the net at 0.454 × gross ⇒ the model cannot cancel more than 54.5 % at ANY
+respiration amplitude, where CT2022 needs 74.9 %.** At the CMIP6 gross the floor is **1.183, ABOVE
+the observed 0.683** — so **correcting error 1 makes error 2 impossible** and a (gross, respiration)
+2×2 is a guaranteed null. What is missing is **11.9° = 0.40 mo of separation**, and θ is
+NON-MONOTONE in **`seas_lag_p`**, peaking at 176.1°; the needed 164.8° sits between lag **2.00** (its
+profiled optimum) and **2.25** (its own init), against a mode drifted to **1.7677**.
+**⇒ NEXT: PRICE THE LAG** — it is GLOBAL, so it moves the NH too, and the fit chose 1.7677 for some
+reason. Then the (gross, lag) 2×2. [[gross_phase_not_amplitude]]
+
+## THE DECISIONS
+
+1. **CMIP6 ensemble value for `SEAS_NPP_AMP_SH`: AUTHORISED, diagnostic arms only.** Never shipped,
+   never an observational constraint. Shipped stays 0.5027 `status="data"`. (prereg 29c §0)
+2. **A diagnostic arm may leave a bracket for MEASUREMENT, not adoption.** (prereg 29c §0)
+3. **RATIFIED: do NOT adopt `refit_20260828_sigma_eff`**; `ccx_mode_file()` stays on `from90` and the
+   adoption chain's `quarantine`/`repoint`/`rerun` are not to be run. Recorded in that directory's
+   README. ⚠ **The pinned-96 successor is NOT a config change and was NOT launched** — three
+   blockers, all checked: `ARM_HML_BOUND` is marked PROVENANCE ONLY since `2153bd6` and the driver's
+   unbounded block is unconditional (needs a reviewed NEW constant); a BOUND with prior
+   renormalisation is a DIFFERENT OBJECT from a PIN and which is wanted is itself a decision; and
+   four Julia workers were at ~99 % CPU (load 6.32). **QUEUED.**
+4. **`test-mode-file.R`: the suite is GREEN.** (a) declared exemption for the two-mode comparison;
+   (b) the trap restated in GAP form — stored ordering **+0.113** kept as the TRAP, load-bearing
+   assertion recomputes both arms on ONE objective (**−11.497** vs the pin's +11.6698 credit, 1.5 %
+   apart), so it asserts the MECHANISM. Cost: +1.3 s.
+5. **`diag_landed_gap_streams.R` QUARANTINED**, kept in place and HARD-STOPPING, output in
+   `outputs/quarantine/20260829_preadoption_landed_gap/`. No replacement by design.
+
+## WHAT IS NOW OWED
+
+- **Price `seas_lag_p`** (the lag's likelihood cost, NH included) — then the (gross, lag) 2×2.
+- **The pinned-96 refit**: choose BOUND vs PIN, write the reviewed constant, wait for a free machine.
+- **`MEMORY.md` root 18.9 KB (soft 12)** — over for a fifth session. `INDEX_ccx_seas.md` is under
+  (content 14.3 KB) after two trims today.
