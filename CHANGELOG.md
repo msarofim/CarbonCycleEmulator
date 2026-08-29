@@ -2,6 +2,57 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-29d — **THE LAG IS PROHIBITIVE, AND THE BLOCKER IS MODEL STRUCTURE**
+
+`calibration/diag_price_the_lag.R`, prereg `1f3731c`. Q0 PASS on all six controls.
+
+| lag | θ | frozen | **conditional** | buy-back | SH-land | `seas_T_amp_SH` |
+|---|---|---|---|---|---|---|
+| 1.7677 (mode) | 152.9° | 0 | 0 | — | 1.308 | 1.0391 |
+| 2.00 | 160.2° | −391.5 | −184.8 | 53 % | 1.231 | 1.7960 |
+| **2.25** | **168.1°** | −1599.9 | **−838.3** | 48 % | **1.071** | **3.4945** |
+| 2.50 | 176.0° | −3456.7 | −1972.9 | 43 % | 0.890 | 5.4056 |
+
+**Q4 → PROHIBITIVE** (bands CHEAP ≤ 20 / MODERATE ≤ 100 / PROHIBITIVE > 100). 27n's lever cost −35
+conditionally; **this is 24× that.** ⚠ **My registered prediction was MODERATE, −20 to −60 — wrong
+by an order of magnitude.**
+
+**Q1 PASS: the NH pays 94 %** — `co2_seasonal_MLO` −586.96 + `d13c_seasonal_MLO` −201.57 of −838.32.
+**The reason is STRUCTURE, verified at `src/ccx_core.cpp:386`, not inferred:** `SEAS_PHI_EFF` is
+indexed by hemisphere but **`seas_lag_p` is a SCALAR** and shifts NPP phase in BOTH.
+`seas_npp_amp[2]` and `seas_T_amp[2]` are already per-hemisphere arrays a few lines away — **the lag
+is the one that is not.** The SH needs its NEP ~12° later, the NH does not, one knob serves both,
+and the part the model fits BEST pays for asking. **Q2 PASS** (frozen SH-land moves −1.9 % while the
+floor falls 0.632 → 0.283: the lag opens the door, it does not walk through it). **Q5 PASS**
+(r_SPO 1.930 → 1.956, away from the observed 1.00).
+
+### ⚠ Q3 FAILED, IN THE INFORMATIVE DIRECTION
+
+I predicted `seas_T_amp_SH` would not rise — the CO2 seasonal rows are matched by cancellation and
+"have no power". **It rose 1.0391 → 3.4945 at lag 2.25 and 5.4056 at 2.50, taking SH-land 1.308 →
+1.071 → 0.890 (1.92× observed → 1.57× → 1.30×).** ⇒ **once the geometry permits cancellation the fit
+USES it, unprompted.** That REFRAMES the no-power reading rather than overturning it: the rows still
+cannot SEE the partition error, but they will spend a lever that PAYS, and at θ = 152.9° this one
+did not. **The SH defect is fixable and self-fixing; only the shared lag's NH bill blocks it.**
+
+### ⇒ THE INDICATED NEXT STEP IS A MODEL CHANGE, AND IT IS A DESIGN CALL
+
+**`seas_lag_p` → `seas_lag_p[2]`**, exactly analogous to the amplitude arrays. Prediction to
+pre-register: **the NH's −788 disappears** (untouched), leaving ~−35 to −50 of SH-side cost against
+SH-land 1.308 → ~1.07. It adds a 22nd calibrated parameter, and `SEAS_T_LAG` (the respiration phase,
+also global, also compile-time at `ccx_core.cpp:168`) is an equally valid place to open the same
+angle. **Marcus's call. NOT STARTED.**
+
+### OPEN, FLAGGED NOT RESOLVED
+
+The `seas_T_amp_SH` prior gain measures **+90.66** here (`prior(log(x))` −99.09 → −8.45) where 27n
+recorded **+8.34** for the analogous move. `ccx_prior_z()` returns **−4.6387**, matching 27n's
+−4.64 σ exactly, so the prior's z has NOT changed and the two numbers measure different things.
+**Neither may be quoted as "the prior credit" until settled.** Nothing above depends on it.
+
+**Nothing adopted.** `seas_lag_p` stays at the mode, `seas_npp_amp_SH` stays 0.5027,
+`ccx_mode_file()` still resolves `from90`.
+
 ## 2026-08-29c — **THE PAIR IS (GROSS × PHASE), AND FOUR OWED DECISIONS ARE CLOSED**
 
 Marcus's ordered instruction: follow all five recommendations from the 08-29b decision list.
