@@ -112,7 +112,21 @@ BEFORE any prereg, exactly as the τ pre-check killed fork (a) before its prereg
 
 ## 5. NON-OBVIOUS STATE
 
-- **Suite: see §6.** Nothing running at handoff time.
+- ⚠ **THE SUITE IS NOT GREEN, AND THE PREVIOUS HANDOFF'S "1206 pass / 0 fail" IS WRONG.**
+  Measured 08-29b: **1205 pass, 2 skipped ({seacarb} not installed), 1 FAIL.**
+
+      1. Failure ('test-mode-file.R:57:3'): no live source hardcodes a fitted-mode path
+         hardcoded mode path -- use ccx_mode_file(): diag_hml_seasonal_limbs.R:63
+
+  **It is NOT from this session** — `diag_hml_seasonal_limbs.R:63` came in with `b496b8a`
+  (the 08-29a session) and I have not touched that file; my driver hardcodes no mode path.
+  **NOT FIXED AND NOT SKIPPED — reported, per the standing rule on a previously passing test.**
+  ⚠ It is also not a careless slip: that driver's PURPOSE is to compare the old and new `h_ml`
+  modes, so it genuinely needs two mode paths and `ccx_mode_file()` returns one. **The gate and
+  the driver are both right; the resolution is a decision** — teach the gate about a declared
+  two-mode comparison, or give the driver a sanctioned way to name a non-canonical mode. Note it
+  is the SAME test file as the owed item below, so both wants deciding together.
+- Nothing running at handoff time.
 - ⚠ **STILL OWED from 08-28d, and this session bears DIRECTLY on the first one:**
   (a) `test-mode-file.R`'s `expect_gt(lp[["pin90"]], lp[[CANONICAL]])` compares two STORED logposts
   across the objective change. **This session supplies both the diagnosis and the repair recipe** —
