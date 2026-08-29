@@ -1,0 +1,156 @@
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 96.4737 m
+mode mode_fit_pumpN.rds (arm N)
+harness at u_mode -1546.2766 vs stored -1544.6148 -> offset -1.6618 (known -1.5805)
+q10 FREE in EVERY arm, starting at the mode's 1.13579 | base slice (5): sst_seas_amp_NH, sst_seas_amp_SH, seas_T_amp_NH, seas_lag_p, q10
+land lever seas_T_amp_SH: FREE in INCUMBENT/OCEAN, PINNED at 5.0502 (mid) / 7.1012 (hi)
+ent bounds 0.5-60 (BOUNDS, not a prior), init 10
+
+
+=== 0. P0 -- METHOD CONTROL. If this fails, nothing below is read. ===
+  total       1.140  27j expected    1.141  ok
+  shland      1.308  27j expected    1.308  ok
+  nhorig      0.821  27j expected    0.821  ok
+  ratio       1.931  27j expected    1.930  ok
+  offset    -1.6618  27j expected  -1.5805  ok
+
+  P0 -> PASS
+
+
+=== 1. THE SIX ARMS ===
+  arm              a_t     ent |    logpost | vs u_mode  npar | re lastgain
+  INCUMBENT     1.0392   0.000 |  -1546.277 |     +0.00     6 |  1   0.0000
+  LAND_mid      5.0502   0.000 |  -1576.030 |    -29.75     5 |  1   0.0000
+  LAND_hi       7.1012   0.000 |  -1589.875 |    -43.60     5 |  1   0.0000
+  OCEAN_only    1.2302   4.320 |  -1533.709 |    +12.57     7 |  1   0.0000
+  JOINT_mid     5.0502   4.780 |  -1557.223 |    -10.95     6 |  1   0.0000
+  JOINT_hi      7.1012   4.871 |  -1569.895 |    -23.62     6 |  1   0.0000
+
+  wall clock per arm (s): 74, 152, 126, 443, 364, 616
+
+
+=== 1b. C1-C3 -- REPRODUCTION, NESTING, AND POWER. Read these BEFORE the statistic. ===
+  C1  four arms were MEASURED by other drivers; this is a reproduction, not a result
+  arm                here    expected      diff     tol  src
+  INCUMBENT     -1546.277   -1546.195    -0.082    0.10  27j  ok
+  OCEAN_only    -1533.709   -1533.627    -0.082    0.10  27j  ok
+  LAND_mid      -1576.030   -1575.950    -0.080    0.30  27p  ok
+  LAND_hi       -1589.875   -1589.795    -0.080    0.30  27p  ok
+  C1 -> PASS
+
+  C2  nesting: the 27q PINNED point is FEASIBLE here, so no arm may be worse
+  arm                free  27q pinned      gain  verdict
+  INCUMBENT     -1546.277   -1546.195    -0.082  ⚠ OPTIMISER FAILURE
+  LAND_mid      -1576.030   -1626.615   +50.585  ok
+  LAND_hi       -1589.875   -1708.338  +118.463  ok
+  OCEAN_only    -1533.709   -1533.660    -0.049  ⚠ OPTIMISER FAILURE
+  JOINT_mid     -1557.223   -1579.610   +22.387  ok
+  JOINT_hi      -1569.895   -1624.915   +55.020  ok
+  C2 -> FAIL -- do not read C4 from a failed fit
+
+  C3  POWER: q10 must MOVE and the NH ridge must be RIDDEN, or C4's null means nothing
+  arm               q10    ln q10  d ln q10 |     sTaNH  product  vs INC
+  INCUMBENT     1.13577   0.12731     -0.02% |    23.461   2.9868    +0.00%
+  LAND_mid      1.05362   0.05223    -58.98% |    57.459   3.0010    +0.48%   moved ok | ridge ok
+  LAND_hi       1.04050   0.03970    -68.82% |    75.528   2.9984    +0.39%   moved ok | ridge ok
+  OCEAN_only    1.14085   0.13177     +3.49% |    22.935   3.0222    +1.18%
+  JOINT_mid     1.06747   0.06529    -48.72% |    46.727   3.0508    +2.14%
+  JOINT_hi      1.05157   0.05028    -60.51% |    60.685   3.0515    +2.17%
+  C3 -> PASS -- the leak is operating; C4 has power
+
+
+=== 2. P1 -- THE TWO INTERACTIONS, both parameter-balanced ===
+
+  --- a_t = 5.0502 (mid) ---
+  npar: 6 - 5 - 7 + 6 = 0  (must be 0)
+  LAND  vs incumbent:    -29.75 | OCEAN vs incumbent:    +12.57 | JOINT:    -10.95
+  sum of the two singles:    -17.19
+  INTERACTION = +6.24   (gate >= 14.88 = 0.5 x the 29.75 land cost)  -> FAIL
+
+  --- a_t = 7.1012 (hi) ---
+  npar: 6 - 5 - 7 + 6 = 0  (must be 0)
+  LAND  vs incumbent:    -43.60 | OCEAN vs incumbent:    +12.57 | JOINT:    -23.62
+  sum of the two singles:    -31.03
+  INTERACTION = +7.41   (gate >= 21.80 = 0.5 x the 43.60 land cost)  -> FAIL
+
+  P1 -> FALSIFIED -- the channel cannot supply what the ADMISSIBLE lever vacates.
+        See prereg sec.4: that localises the coupling in the SHAPE of the vacancy.
+
+
+=== 3. P2-P8 -- THE PHYSICAL SCORECARD, scored on JOINT at each bracket end ===
+
+  --- JOINT at a_t = 5.0502 (mid) ---
+  prediction                                value       gate verdict
+  P2  ent_seas_amp_SH in band               4.780       5-30 FAIL
+  P3  SPO d13C-per-ppm                      1.660    <= 1.70 PASS
+  P4  SPO total (obs 1.168)                 1.279 1.114-1.222 FAIL
+  P5  SPO ocean ratio                       0.159    >= 0.75 FAIL
+  P6  MLO control d13C-per-ppm              0.965  0.90-1.10 PASS
+  P7  sst_seas_amp_SH recovered             0.653    >= 0.26 PASS
+  P8  JOINT SH-land (anti-27n)              1.187    <= 1.05 FAIL
+
+  --- JOINT at a_t = 7.1012 (hi) ---
+  prediction                                value       gate verdict
+  P2  ent_seas_amp_SH in band               4.871       5-30 FAIL
+  P3  SPO d13C-per-ppm                      1.646    <= 1.70 PASS
+  P4  SPO total (obs 1.168)                 1.285 1.114-1.222 FAIL
+  P5  SPO ocean ratio                       0.146    >= 0.75 FAIL
+  P6  MLO control d13C-per-ppm              0.965  0.90-1.10 PASS
+  P7  sst_seas_amp_SH recovered             0.641    >= 0.26 PASS
+  P8  JOINT SH-land (anti-27n)              1.171    <= 1.05 FAIL
+
+
+=== 4. WHERE EVERY ARM LANDS ===
+  arm            total     mo |  SH-land     mo |   SH-ocn     mo |  NH-orig     mo |   SPO r   MLO r |    sstSH    sTaNH
+  INCUMBENT      1.140   8.71 |    1.308  10.09 |    0.248   4.17 |    0.821   6.46 |   1.931   0.966 |   0.3596   23.461
+  LAND_mid       1.137   8.63 |    1.227  10.03 |    0.207   4.17 |    0.818   6.47 |   1.889   0.967 |   0.3005   57.459
+  LAND_hi        1.137   8.61 |    1.216  10.02 |    0.202   4.17 |    0.818   6.47 |   1.884   0.967 |   0.2933   75.528
+  OCEAN_only     1.249   8.74 |    1.289  10.08 |    0.155   4.95 |    0.818   6.47 |   1.750   0.965 |   0.7353   22.935
+  JOINT_mid      1.279   8.67 |    1.187  10.00 |    0.083   6.03 |    0.814   6.47 |   1.660   0.965 |   0.6532   46.727
+  JOINT_hi       1.285   8.66 |    1.171   9.98 |    0.076   6.38 |    0.813   6.47 |   1.646   0.965 |   0.6414   60.685
+  OBSERVED       1.168        |    0.683        |    0.522   8.52 |                 |   1.000
+
+  the scored seasonal rows, each arm minus the INCUMBENT:
+  arm         co2_seasonal_ co2_seasonal_ d13c_seasonal d13c_seasonal
+  INCUMBENT           +0.00         +0.00         +0.00         +0.00
+  LAND_mid            -0.37         -8.59         -1.42         -0.43
+  LAND_hi             -0.35        -10.13         -1.66         -0.64
+  OCEAN_only          -1.40         -1.52         -0.40         +0.10
+  JOINT_mid           -2.50        -10.19         -1.98         -0.88
+  JOINT_hi            -2.61        -11.97         -2.27         -1.25
+
+
+=== 5. SCORED ===
+  a_t 5.0502 (mid): P1 FAIL | P2 FAIL | P3 PASS | P4 FAIL | P5 FAIL | P6 PASS | P7 PASS | P8 FAIL
+  a_t 7.1012 (hi): P1 FAIL | P2 FAIL | P3 PASS | P4 FAIL | P5 FAIL | P6 PASS | P7 PASS | P8 FAIL
+
+  P0 PASS | INTERACTION mid +6.24, hi +7.41
+
+  ⇒ P1 FALSIFIED at both ends -- see prereg sec.4.
+
+  ⚠ A PASS IS NOT ADOPTION. `ent_seas_amp_SH` has no prior and `seas_T_amp_SH` sits at a
+    PINNED bracket value; adopting either is a provenance call, not a consequence of a gate.
+
+
+=== 6. C4-C6 -- THE CONTROLLED COMPARISON, AND THE PER-PPM STATISTIC ===
+  end   |   lc free    lc pin    drop |  rec free   rec pin   delta |  vac ppm  per-ppm
+  mid   |     29.75     80.42   63.0% |     21.0%     42.9%  -21.9 |    0.081     77.3
+  hi    |     43.60    162.14   73.1% |     17.0%     43.7%  -26.7 |    0.092     80.8
+  27j   |     80.44                   |     83.6%                   |    0.383    175.8   (27j, q10 free, npp lever)
+
+  C5  land cost falls >= 5% at both ends -> PASS -- the leak is operating
+  C6  LAND_hi SH-land 1.216 (27p 1.216, 27q PINNED 0.859, gate >= 1.15) -> PASS
+      a PASS means the defect is NOT IMPOSED, not that it was repaired.
+
+  C4  recovered free 21.0% / 17.0%  vs pinned 42.9% / 43.7%  vs 27j 83.6%
+      gates: EXPLAINS if >= 65% at either end | STABLE if inside 33-54% at BOTH
+      C4 -> INTERMEDIATE -- neither branch fires. Both ends quoted, neither alone.
+
+  SECONDARY (the honest one -- the denominator moved 3.7x): per-ppm 77.3 / 80.8,
+      27q pinned 113.0 / 157.9, 27j 175.8. REGISTERED band 110-200 -> OUTSIDE
+      ⚠ A ratio is not a magnitude until you multiply its BASE: the recovered FRACTION
+        and the per-ppm rate can move in OPPOSITE directions here. Quote both.
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/q10_controlled_recovery.rds
+
+
+=== DONE ===
