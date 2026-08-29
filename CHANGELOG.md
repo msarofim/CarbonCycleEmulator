@@ -2,6 +2,43 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-29g — **VOLCANIC DIFFUSE-LIGHT LANDED: r 0.571 → 0.625**
+
+Plan item ①, on Marcus's instruction. `NPP_h = npp0_h * capacity * fert * (1 + gamma_diff * AOD_h)`
+(Gu 2003; Mercado 2009), wired at six sites with R and C++ twins in parity and four tests.
+
+**`gamma_diff` DEFAULTS TO 0** — every pre-2026-08-29 result is bit-identical (logpost at `u_mode`
+still −1546.276578) and the calibrated 21 stay comparable. It is a `base_param` like
+`ent_seas_amp_SH`; fitting it is a separate decision.
+
+| `gamma_diff` | 1992 | sd | **r** | Δlogpost frozen |
+|---|---|---|---|---|
+| 0 | +0.043 | 0.301 | 0.571 | 0 |
+| **0.25 / 0.50** | −0.47 / −0.98 | 0.32 / 0.36 | **0.625 / 0.625** | −40 / −161 |
+| 0.97 | **−1.934** | 0.491 | 0.573 | −601 |
+| observed | **−1.937** | 0.900 | 1.000 | |
+
+**⇒ r RISES — the first change this session that makes the model MORE RIGHT rather than louder**
+(ENSO's r was flat across an 11× amplitude range). ⚠ **The two optima disagree**: Pinatubo wants
+γ ≈ 0.97, correlation wants 0.25–0.50. Reproducing a FEATURE and fitting the RECORD are different
+targets. **NOT ADOPTED** — the Δlogpost column is FROZEN, frozen costs are upper bounds, and the
+conditional profile is the next step.
+
+### ⚠ THE N_FORCING TRAP, WALKED INTO AND THEN GUARDED
+`src/ccx_core.cpp:52` hardcodes the forcing row width and its own comment says *"a disagreement in
+the ceiling is NOT caught by anything."* I appended two columns without bumping it, so `f[15]` and
+`f[16]` read **past the row buffer** and returned adjacent memory: **−0.0004 ppm of effect instead
+of −4.1, nothing errored, no test failed.** R↔C++ parity caught it (now 4.5e-13 with the mechanism
+on). The new test's third case is the mutation test: **turning the mechanism ON must MOVE the
+answer** — a test that only checks the OFF value could never see this.
+
+### Decisions recorded
+GMST decomposition uses a **Foster–Rahmstorf-style regression as primary**, FaIR as cross-check;
+the pulse tab gets **three charts** (total CO₂; tracer fraction by box; added CO₂ by box — the last
+two being exactly the label/perturbation pair that differ 2.8× at 100 yr); **more tabs are fine**;
+**the hemispheric tab is deferred until the component is fixed**; **four-box is HELD**.
+**Next: ② make the objective C1 in `h_ml`, then ③ seasonal `tau_ex`.**
+
 ## 2026-08-29f — **AOD IN HAND, ENSO PROFILED, AND THE ORDER DECIDED**
 
 ### The cheap test (Marcus's "do this first"): the two defects are INDEPENDENT
