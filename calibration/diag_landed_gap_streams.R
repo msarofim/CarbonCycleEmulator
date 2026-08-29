@@ -87,7 +87,26 @@ dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 # ---- restore the REFIT's h_ml band ----------------------------------
 # Exactly run_modefind_pump_arms.R:216-222, so the prior term this file adds up
 # is the one the arms were fitted against. Without it GATE 1 fails by ~1.1.
-GAP_HML_BAND <- LIK_OCEAN_GRAD_HML_OK_RETIRED
+#
+# ⚠ THIS IS THE ONE BAND MIRROR THAT MUST **NOT** BE WIDENED, and the reason is
+# in the line above. GATE 1 reproduces each arm's STORED logpost, and every arm
+# this file reads (`ref`, `from90`, `pin90`) was FITTED under [85, 120]. The band
+# is not a scoring choice here -- it is part of those vectors' provenance, and
+# scoring them on the shipped support would shift every logpost by exactly
+# log(170/35) = 1.5805 and fail GATE 1 BY CONSTRUCTION. The other three mirrors
+# were widened on 2026-08-28; this one deliberately was not.
+#
+# ⇒ WHAT THAT MEANS FOR THIS FILE: it is a PRE-ADOPTION driver. Its subjects are
+# being quarantined by the option-5 objective change, not by anything about the
+# band, and it cannot be made current by editing this constant. It needs to be
+# re-pointed at post-adoption arms -- of which there will be exactly ONE, so a
+# gap-between-arms driver may have nothing left to compare and may belong in the
+# quarantine itself. That is a decision, not a rename.
+GAP_HML_BAND <- LIK_OCEAN_GRAD_HML_OK_RETIRED   # PROVENANCE, deliberately not widened
+cat(paste0("\n⚠ PRE-ADOPTION DRIVER. h_ml is scored on the RETIRED band [",
+           GAP_HML_BAND[1], ", ", GAP_HML_BAND[2], "] because GATE 1 reproduces\n",
+           "  logposts STORED by arms fitted under it. These numbers are NOT comparable\n",
+           "  with post-adoption fits, and widening the band would fail GATE 1 by 1.5805.\n\n"))
 CCX_PARAM_TABLE$h_ml$lo    <- GAP_HML_BAND[1]
 CCX_PARAM_TABLE$h_ml$hi    <- GAP_HML_BAND[2]
 CCX_PARAM_TABLE$h_ml$prior <-

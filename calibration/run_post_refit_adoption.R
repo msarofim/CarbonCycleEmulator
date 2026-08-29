@@ -96,11 +96,22 @@ PRA_STAGE <- local({
     stop("unknown --stage='", s, "'; one of: ", paste(PRA_STAGES, collapse = ", "))
   s
 })
-# THE ONE CHOICE THIS SCRIPT WILL NOT MAKE FOR YOU -- see stage `repoint`.
+# RETIRING pin90 IS THE DEFAULT since 2026-08-28 (Marcus). It is as
+# pre-adoption as `from90` and just as non-comparable, and the cost of retiring
+# it was measured to be far smaller than first reported: only TWO files call
+# ccx_mode_file("pin90") -- diag_design_gates_unscored.R (already written as an
+# OPTIONAL read, and now guarded so it degrades instead of stopping) and
+# diag_landed_gap_streams.R, whose every other arm (`ref`, `from90`) is retired
+# by the same objective change anyway. The earlier "six diagnostics" count was
+# filename matches, not call sites: diag_stream_neff.R and seed_fert_ridge_arms.R
+# mean `ridge_pin90`, a DIFFERENT arm, and diag_design_gates_at_mode.R only
+# names it in comments. `--keep-pin90` still overrides, and is what to pass if
+# you want the +11.6698 pinned-prior offset reproducible from a live run rather
+# than only cited in comments.
 PRA_PIN90 <- local({
   keep <- "--keep-pin90" %in% ARGS; retire <- "--retire-pin90" %in% ARGS
   if (keep && retire) stop("--keep-pin90 and --retire-pin90 are contradictory")
-  if (keep) "keep" else if (retire) "retire" else NA_character_
+  if (keep) "keep" else "retire"
 })
 
 sep  <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
@@ -357,12 +368,15 @@ if ("repoint" %in% PRA_STAGE) {
   #                   objective stays resolvable BY NAME -- precisely the silent
   #                   failure the mode registry exists to prevent.
   # There is no default. Methodological choices are explicit.
-  if (is.na(PRA_PIN90))
-    stop("pass --retire-pin90 or --keep-pin90. `pin90` is as pre-adoption as ",
-         "`from90`; retiring it is the correct semantics and breaks six ",
-         "diagnostics loudly, keeping it leaves a non-comparable vector ",
-         "resolvable by name. Read the block above this stop() and decide.")
-  cat(sprintf("pin90: %s (from --%s-pin90)\n", PRA_PIN90, PRA_PIN90))
+  cat(sprintf("pin90: %s%s\n", PRA_PIN90,
+              if (any(c("--keep-pin90", "--retire-pin90") %in% ARGS)) " (explicit)"
+              else " (DEFAULT -- pass --keep-pin90 to override)"))
+  if (PRA_PIN90 == "retire")
+    cat(paste0("  ⇒ ccx_mode_file(\"pin90\") will ERROR with its reason. The one live\n",
+               "    reader left is diag_landed_gap_streams.R, a PRE-ADOPTION driver whose\n",
+               "    other arms are retired by the same change; it needs a decision, not a\n",
+               "    rename. The +11.6698 pinned-prior offset stops being reproducible from\n",
+               "    a live run -- if that matters, STORE it rather than keeping the arm.\n"))
 
   sub1 <- function(path, old, new) {           # exactly-one-match or it stops
     s <- readLines(path, warn = FALSE); txt <- paste(s, collapse = "\n")
@@ -455,8 +469,32 @@ if ("rerun" %in% PRA_STAGE) {
 
   # §4.5, reported rather than run. A mirror still carrying the retired band
   # would file pre-adoption numbers beside post-adoption ones.
-  still <- Filter(function(f) any(grepl("LIK_OCEAN_GRAD_HML_OK_RETIRED",
-                                        readLines(ccx_path(f), warn = FALSE))), PRA_MIRRORS)
+  # COMMENT LINES DO NOT COUNT. Three of the four were widened on 2026-08-28 and
+  # each still NAMES the retired constant in a comment explaining what it used to
+  # do -- which is provenance, and is the thing to keep. What makes a file stale
+  # is reading it on a LIVE line to configure a run. A grep that cannot tell those
+  # apart would report all four forever and the warning would stop being read.
+  # EXEMPTIONS, DECLARED rather than pattern-matched, so a third one is a visible
+  # decision -- same construction as test-mode-file.R's `allowed`. Both of these
+  # read the retired band on a LIVE line and both are CORRECT to:
+  #   diag_ridge_reparam.R      derives its logpost ladder's -1.5805 shift FROM
+  #                             the retired band. It cannot compute the offset
+  #                             between two supports without naming both.
+  #   diag_landed_gap_streams.R is deliberately NOT widened -- its GATE 1
+  #                             reproduces logposts STORED by arms fitted under
+  #                             that band, so widening fails it by construction.
+  exempt <- c("calibration/diag_ridge_reparam.R", "calibration/diag_landed_gap_streams.R")
+  still <- Filter(function(f) {
+    if (f %in% exempt) return(FALSE)
+    L <- readLines(ccx_path(f), warn = FALSE)
+    any(grepl("LIK_OCEAN_GRAD_HML_OK_RETIRED", L) & !grepl("^\\s*#", L))
+  }, PRA_MIRRORS)
+  cat(sprintf("mirror band sweep: %d of %d still configure on the retired band",
+              length(still), length(PRA_MIRRORS)))
+  cat(sprintf(" (%d declared exempt)\n", length(exempt)))
+  cat("  ⚠ diag_landed_gap_streams.R is a PRE-ADOPTION driver: every arm it reads\n",
+      "   is retired by the objective change, so it needs a DECISION (re-point or\n",
+      "   quarantine), not a band edit. Its numbers are not current either way.\n")
   if (length(still)) {
     warn("%d of the 4 mirror diagnostics still read the RETIRED band:", length(still))
     for (f in still) cat(sprintf("        %s\n", f))

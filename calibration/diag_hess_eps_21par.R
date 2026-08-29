@@ -60,12 +60,21 @@ HEPS_SHIPPED    <- 3e-4      # the value under test = run_modefind_pump_arms.R's
 HEPS_STABLE_TOL <- 0.25      # max relative spread over a window, as
                              # recompute_hessian.R's HESS_STABLE_TOL
 HEPS_WINDOW_MIN <- 3L        # a "window" must span at least this many grid steps
-# ⚠ RETIRED BAND, 2026-08-28. This file was written when the three
-# ocean-gradient rows SKIPPED outside [85, 120]. They are now scored at
-# sigma_eff at every h_ml (option 5). What it reads below is PROVENANCE:
-# results produced under it are NOT comparable with post-adoption fits.
-HEPS_HML_BOUND  <- LIK_OCEAN_GRAD_HML_OK_RETIRED   # [85, 120], as ARM_HML_BOUND
-HEPS_HML_INIT   <- 100                     # as ARM_HML_INIT
+# h_ml IS UNBOUNDED HERE SINCE 2026-08-28, mirroring the refit. This file used
+# to pin it to LIK_OCEAN_GRAD_HML_OK_RETIRED = [85, 120] because outside that
+# band the three ocean-gradient rows SKIPPED; under option 5 they are scored at
+# sigma_eff at EVERY h_ml, so the bound would now price a DIFFERENT objective
+# from the one being measured. Both constants are READ FROM THE SHIPPED TABLE
+# rather than written as [30, 200] / 75: a literal here would silently disagree
+# with R/calibrate.R the day it changes, which is the class of defect the
+# band-decode incident was.
+# ⚠ WHAT THIS CHANGES IN THE OUTPUT, so it is not read as noise: h_ml's logit is
+# over a 4.857x wider support, so its unconstrained coordinate rescales and the
+# per-direction step for h_ml is NOT comparable with any pre-08-28 run of this
+# file; and the kink scan below now sweeps the whole support (26 kinks) instead
+# of the 3 that were inside the retired band.
+HEPS_HML_BOUND  <- c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi)
+HEPS_HML_INIT   <- CCX_PARAM_TABLE$h_ml$init
 HEPS_MODE_FILE  <- ccx_mode_file()
 HEPS_ARM        <- "N"       # sweep arm; D is spot-checked at HEPS_SHIPPED
 HEPS_SPOT_ARM   <- "D"
@@ -83,20 +92,25 @@ cat(sprintf("shipped ARM_HESS_EPS = %.0e; grid = %s\n",
 # Without it this script measures curvature in a coordinate the refit does not
 # use, which is the failure it exists to prevent.
 # =====================================================================
-sep("h_ml BOUNDED, mirroring run_modefind_pump_arms.R")
+sep("h_ml UNBOUNDED, mirroring run_modefind_pump_arms.R")
+# THE GATE IS INVERTED, as run_modefind_pump_arms.R's H1/H2 were on 2026-08-28.
+# It used to assert that the override CHANGED h_ml and nothing else; it now
+# asserts the table is UNTOUCHED. Deleting the override without inverting the
+# gate would have left a check that passes because it can no longer fail, which
+# reads identically to one that looked and found nothing (memory no_power_null).
 .tab_before <- CCX_PARAM_TABLE
-CCX_PARAM_TABLE$h_ml$lo    <- HEPS_HML_BOUND[1]
-CCX_PARAM_TABLE$h_ml$hi    <- HEPS_HML_BOUND[2]
-CCX_PARAM_TABLE$h_ml$init  <- HEPS_HML_INIT
-CCX_PARAM_TABLE$h_ml$prior <-
-  local({ lo <- HEPS_HML_BOUND[1]; hi <- HEPS_HML_BOUND[2]
-          function(x) stats::dunif(x, lo, hi, log = TRUE) })
 .chg <- names(which(!vapply(CCX_PARAM_NAMES, function(n)
   identical(CCX_PARAM_TABLE[[n]], .tab_before[[n]]), logical(1))))
-if (!identical(.chg, "h_ml"))
-  stop("the h_ml override touched more than h_ml: ", paste(.chg, collapse = ", "))
-cat(sprintf("h_ml -> [%g, %g] init %g. GATE: only `h_ml` changed. OK\n",
+if (length(.chg))
+  stop("GATE: the parameter table must be UNTOUCHED here since 2026-08-28, but ",
+       paste(.chg, collapse = ", "), " differ(s).")
+if (!isTRUE(all.equal(CCX_PARAM_TABLE$h_ml$prior(100),
+                      stats::dunif(100, HEPS_HML_BOUND[1], HEPS_HML_BOUND[2], log = TRUE))))
+  stop("GATE: h_ml's prior is not uniform over its own support [",
+       HEPS_HML_BOUND[1], ", ", HEPS_HML_BOUND[2], "] -- this file assumed it was.")
+cat(sprintf("h_ml on its SHIPPED support [%g, %g], init %g, prior NOT renormalised.\n",
             HEPS_HML_BOUND[1], HEPS_HML_BOUND[2], HEPS_HML_INIT))
+cat("GATE: the parameter table is UNTOUCHED. OK\n")
 rm(.tab_before, .chg)
 
 # =====================================================================

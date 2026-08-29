@@ -92,29 +92,43 @@ relaxes**: each entry must name a quarantine path AND a cause commit, whatever t
 ## 3. ⇒ WHAT IS OWED, IN ORDER — **TWO ARE DECISIONS, NOT WORK**
 
 1. **Wait for the refit.** `pgrep -f run_modefind_pump_arms_FROZEN` before anything else.
-2. ⚠ **DECIDE `pin90`.** It is as pre-adoption as `from90` and just as non-comparable, but nothing
-   is replacing it and **six diagnostics name it** (`diag_design_gates_at_mode`, `_unscored`,
-   `diag_stream_neff`, `diag_landed_gap_streams`, `diag_gates_at_landed_modes`,
-   `seed_fert_ridge_arms`). `--retire-pin90` is the correct semantics and breaks those six LOUDLY —
-   which is what `R/paths.R`'s own header argues for — and costs the `+11.6698` pinned-prior offset
-   until they are refitted. `--keep-pin90` breaks nothing today and leaves a vector fitted on a
-   retired objective **resolvable by name**, the silent failure the registry exists to prevent.
-   **The driver has no default and stops.**
+2. ✅ **DECIDED 2026-08-28 (Marcus): RETIRE `pin90`. `--retire-pin90` is now the DEFAULT.**
+   ⚠ **My "six diagnostics name it" was WRONG — it is TWO**, and I withdraw the count. The rest
+   were filename matches, not call sites ([[audit_live_paths]]): `diag_stream_neff.R` and
+   `seed_fert_ridge_arms.R` mean **`ridge_pin90`, a DIFFERENT arm**, and
+   `diag_design_gates_at_mode.R` names it only in comments. The two real readers are
+   `diag_design_gates_unscored.R` (an OPTIONAL read, now guarded so it degrades instead of
+   stopping) and `diag_landed_gap_streams.R`, whose other arms (`ref`, `from90`) are retired by
+   the same change anyway. The `+11.6698` offset stops being reproducible from a live run — if
+   that matters, **STORE it**, do not keep an arm resolvable for it. `--keep-pin90` still overrides.
 3. ⚠ **REWRITE, do not relax, `test-mode-file.R`'s last assertion.**
    `expect_gt(lp[["pin90"]], lp[[CCX_MODE_CANONICAL]])` compares two **STORED** logposts; across
    the objective change that is **meaningless, not merely false**, and under `--retire-pin90`
    `pin90` is not resolvable at all. The trap it encodes — that a stored number decides an arm — is
    still worth asserting, just not across two objectives.
 4. **Then run the chain**, and read `read`'s decomposition before believing any `h_ml` number.
-5. **§4.5, still open:** the four mirror diagnostics (`diag_hess_eps_21par`, `diag_stream_neff`,
-   `diag_ridge_reparam`, `diag_landed_gap_streams`) **still read the retired band**. The driver
-   REPORTS them and refuses to run them: filing pre-adoption numbers beside post-adoption ones is
-   worse than not running them, because the output would look current. Widening
-   `HEPS_HML_BOUND` and friends to the shipped support is a reviewed edit nobody has made.
-   ⚠ In `diag_hess_eps_21par.R` the bound does **three** things — overrides the param table (88–92),
-   sets the kink-scan range (266), and reports (99/130/274) — so it is one constant but not one use.
-   ⚠ Its `HEPS_HML_INIT = 100` **sits exactly on a kink**. The refit driver calls that harmless
-   because Nelder-Mead is derivative-free; for a **finite-difference Hessian step study it is not**.
+5. **§4.5 — SWEPT 2026-08-28, and TWO of the four must NOT be widened.** See CHANGELOG 08-28i.
+   - `diag_hess_eps_21par.R`, `diag_stream_neff.R` — **WIDENED**, constants derived from the
+     shipped table; hess_eps's gate **INVERTED** (table must be UNTOUCHED), because deleting an
+     override without inverting its gate leaves a check that passes *because it cannot fail*
+     ([[no_power_null]]). ⚠ hess_eps's per-direction `h_ml` step is **not comparable** with any
+     pre-08-28 run — the logit is over a 4.857× wider support.
+   - `diag_ridge_reparam.R` — **WIDENED, LADDER SHIFTED.** `RR_THRESH` is a set of ABSOLUTE
+     logpost levels; on the shipped support the same vector scores lower by exactly
+     **log(170/35) = 1.5805** (pure prior renormalisation — the same −1.5805 08-28c calls the
+     bounded refit's narrowed-prior constant; verified numerically). Left as typed it would have
+     shifted every verdict one rung, silently. The shift is now COMPUTED, not typed.
+   - `diag_landed_gap_streams.R` — **DELIBERATELY NOT WIDENED.** Its GATE 1 reproduces arms'
+     **STORED** logposts and those arms were FITTED under `[85, 120]`; the band is their
+     PROVENANCE, and widening fails the gate by 1.5805 by construction. It is a PRE-ADOPTION
+     driver — **re-point or quarantine is a decision, still owed.** It says so at runtime now.
+   - ⚠ **The band CONSTANT itself stays.** `test-sigma-inflation.R:74` needs `c(85, 120)` to test
+     that the cliff at 85 and 120 is gone; deleting it deletes the adoption's regression test.
+   - ⚠ **None of the four was EXECUTED** — two need the new mode, one is expensive, all contend
+     with the refit. Parse-checked only; their on-disk outputs remain pre-adoption.
+   - ⚠ `HEPS_HML_INIT` now derives from the table (75). **75.00 is ALSO on a kink** — round numbers
+     dominate the 26, so no round init escapes one. Left as the shipped value and flagged, not
+     silently moved.
 
 ## 4. NON-OBVIOUS STATE
 

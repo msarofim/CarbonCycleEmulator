@@ -64,18 +64,35 @@ RR_TAG      <- Sys.getenv("CCX_RR_TAG", "")   # separates one campaign's files f
 # -1909 -> -1602 in 402 evals and needed ~330,000 more for the last ~40. A race
 # that never enters that regime is BLIND to the thing it is testing
 # (memory no_power_null). Hence a smaller perturbation and a threshold ladder.
-RR_THRESH   <- c(-1546.0, -1545.5, -1545.0, -1544.8)
-# ⚠ RETIRED BAND, 2026-08-28. This file was written when the three
-# ocean-gradient rows SKIPPED outside [85, 120]. They are now scored at
-# sigma_eff at every h_ml (option 5). What it reads below is PROVENANCE:
-# results produced under it are NOT comparable with post-adoption fits.
-RR_HML      <- LIK_OCEAN_GRAD_HML_OK_RETIRED
+# ⚠ THIS LADDER IS A SET OF ABSOLUTE logpost LEVELS, AND WIDENING THE BAND MOVES
+# THEM. Written under h_ml ~ U[85, 120]; on the shipped support the SAME vector
+# scores lower by exactly log(170/35) = 1.5805 -- the whole shift is h_ml's
+# uniform prior being renormalised over a 4.857x wider support, nothing physical.
+# (That constant is the same -1.5805 the 08-28 handoff reports as "the bounded
+# refit's narrowed-prior constant, exactly".) Leaving the ladder as typed would
+# compare post-adoption logposts against pre-adoption thresholds and silently
+# shift every verdict one rung. It is therefore SHIFTED, and the shift is
+# COMPUTED from the two priors rather than typed, so it cannot go stale.
+RR_THRESH_BAND <- c(-1546.0, -1545.5, -1545.0, -1544.8)  # as written, under [85, 120]
+RR_HML      <- c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi)   # SHIPPED support
+RR_PRIOR_SHIFT <- stats::dunif(mean(RR_HML), RR_HML[1], RR_HML[2], log = TRUE) -
+  stats::dunif(mean(RR_HML), LIK_OCEAN_GRAD_HML_OK_RETIRED[1],
+               LIK_OCEAN_GRAD_HML_OK_RETIRED[2], log = TRUE)
+RR_THRESH   <- RR_THRESH_BAND + RR_PRIOR_SHIFT
+cat(sprintf("h_ml UNBOUNDED [%g, %g]; the logpost ladder is shifted %+.4f for the\n",
+            RR_HML[1], RR_HML[2], RR_PRIOR_SHIFT))
+cat(sprintf("renormalised h_ml prior: %s -> %s\n",
+            paste(sprintf("%.1f", RR_THRESH_BAND), collapse = ", "),
+            paste(sprintf("%.4f", RR_THRESH), collapse = ", ")))
 OUTDIR      <- ccx_path("calibration", "output", "ridge_reparam")
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 
-CCX_PARAM_TABLE$h_ml$lo <- RR_HML[1]; CCX_PARAM_TABLE$h_ml$hi <- RR_HML[2]
-CCX_PARAM_TABLE$h_ml$prior <- local({ lo <- RR_HML[1]; hi <- RR_HML[2]
-                                      function(x) stats::dunif(x, lo, hi, log = TRUE) })
+# No override: RR_HML IS the shipped support, so assigning it back would be a
+# no-op dressed as a decision. Gated instead -- assert the property this file
+# needs (uniform over its own support) rather than compare the table with itself.
+if (!isTRUE(all.equal(CCX_PARAM_TABLE$h_ml$prior(mean(RR_HML)),
+                      stats::dunif(mean(RR_HML), RR_HML[1], RR_HML[2], log = TRUE))))
+  stop("h_ml's prior is not uniform over its own support; RR_PRIOR_SHIFT is wrong.")
 D_NOW <- RR_CHI - ccx_const("CO2_PI_PPM")
 IB <- match("beta_max", CCX_PARAM_NAMES); IF <- match("fert_k", CCX_PARAM_NAMES)
 SB <- CCX_PARAM_TABLE$beta_max; SF <- CCX_PARAM_TABLE$fert_k

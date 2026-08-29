@@ -2,6 +2,73 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-28i — **`pin90` retirement adopted; the band mirrors swept — and TWO of the four must NOT be widened**
+
+**Marcus: retire `pin90`, and remove anything that reads retired code.** Done, with two
+qualifications that came out of reading the files rather than the filenames.
+
+**⚠ I OVER-COUNTED THE COST OF RETIRING `pin90` AND WITHDRAW IT.** I reported "six diagnostics
+name it". **Two** call `ccx_mode_file("pin90")`. The others were filename matches, not call sites —
+exactly what [[audit_live_paths]] warns about: `diag_stream_neff.R` and `seed_fert_ridge_arms.R`
+mean **`ridge_pin90`, a DIFFERENT arm** (`output/ridge_pin90/`), and `diag_design_gates_at_mode.R`
+names it only in comments and `cat` text. `--retire-pin90` is now the DEFAULT.
+
+**And the one real cost is smaller than it looked.** `diag_landed_gap_streams.R` computes the
+`+11.6698` pinned-prior offset, which is cited in comments and stored nowhere. But its line 162
+reads `intersect(c("ref", "from90"), names(A))` and **`ref` is already unresolvable** — after the
+refit `from90` goes too. Every arm it compares is retired by the objective change, so `pin90` is
+not what keeps it alive. If that offset matters, **store it**; do not keep an arm resolvable for it.
+
+### ⚠ THE BAND CONSTANT STAYS. Deleting it would delete the proof that the adoption worked.
+
+`test-sigma-inflation.R:74` — "THE CLIFF IS GONE: no jump across either retired band edge" —
+iterates over `c(85, 120)`, and line 23 asserts the constant still equals it **so a rename is
+caught**. To test that a cliff at 85 and 120 is gone you must retain where 85 and 120 were.
+The distinction that matters is not whether a file NAMES the retired band but whether it uses it to
+**CONFIGURE a live run**. Provenance reads are the thing to keep.
+
+### The four mirrors, swept BY WHAT THEY DO WITH IT — two widened, two not
+
+- **`diag_hess_eps_21par.R` — WIDENED.** Bound and init now read from the shipped table, not typed.
+  Its gate is **INVERTED** (table must be UNTOUCHED), as the refit driver's H1/H2 were: deleting the
+  override without inverting the gate leaves a check that passes because it *cannot fail*, which
+  reads identically to one that looked and found nothing ([[no_power_null]]).
+  ⚠ Its per-direction `h_ml` step is **not comparable** with any pre-08-28 run — the logit is over a
+  4.857× wider support — and the kink scan now sweeps the whole support.
+- **`diag_stream_neff.R` — WIDENED**, on its own evidence: the override existed only for the prior,
+  and the comment that stood there said this file does not use it.
+- **`diag_ridge_reparam.R` — WIDENED, AND ITS LADDER SHIFTED.** `RR_THRESH` is a set of **absolute
+  logpost levels** written under `h_ml ~ U[85, 120]`. On the shipped support the same vector scores
+  lower by **exactly log(170/35) = 1.5805** — pure prior renormalisation, nothing physical, and the
+  same −1.5805 the 08-28 handoff calls "the bounded refit's narrowed-prior constant, exactly"
+  (verified numerically, not recalled). Left as typed it would have compared post-adoption logposts
+  against pre-adoption thresholds and **shifted every verdict one rung, silently**. The shift is
+  now COMPUTED from the two priors, so it cannot go stale.
+- **`diag_landed_gap_streams.R` — DELIBERATELY **NOT** WIDENED.** Its GATE 1 reproduces each arm's
+  **STORED** logpost, and every arm it reads was FITTED under `[85, 120]`. Here the band is not a
+  scoring choice, it is those vectors' **provenance**; widening would fail GATE 1 by 1.5805 **by
+  construction** — which its own pre-existing comment ("Without it GATE 1 fails by ~1.1") already
+  half-said. It is a PRE-ADOPTION driver and cannot be made current by editing a constant. It now
+  prints that at runtime, not just in a comment. **Re-point or quarantine is a decision, owed.**
+
+### Also
+
+- **`diag_design_gates_unscored.R:91`** asked `file.exists(ccx_mode_file("pin90"))` — but
+  `ccx_mode_file()` **throws on a retired name before `file.exists()` ever runs**, turning an
+  intended graceful absence into a hard stop. Now asks the registry first. Verified both ways:
+  old guard ERRORS, new guard returns FALSE.
+- **Same file named its canonical element `from90` by hand** while resolving the VALUE through
+  `CCX_MODE_CANONICAL` — so every table it printed would have gone on calling the new vector by the
+  old arm's name after the repoint. The label now derives from the constant.
+- **The driver's mirror-staleness check ignores COMMENT lines** and carries two DECLARED exemptions
+  (same construction as `test-mode-file.R`'s `allowed`). A check that cannot tell a provenance
+  mention from a live read would report all four forever and stop being read.
+
+**NOT DONE, and not runnable yet:** none of the four edited diagnostics was EXECUTED. Two need the
+new mode, one is expensive, and all would contend with the running refit for CPU. They are
+parse-checked, and the constants they now derive were verified numerically; their OUTPUTS on disk
+remain pre-adoption and are owed a re-run.
+
 ## 2026-08-28h — **THE OWED REFIT IS LAUNCHED; the post-refit chain is written and tested ahead of it**
 
 **The 21-parameter refit onto the post-option-5 objective is RUNNING** —

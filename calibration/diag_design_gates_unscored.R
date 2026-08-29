@@ -87,8 +87,18 @@ ptt_by_decade <- function(t, x, decades) {
   }, 0)
 }
 
-vecs <- list(defaults = NULL, from90 = ccx_mode_file(CCX_MODE_CANONICAL))
-if (file.exists(ccx_mode_file("pin90"))) vecs$pin90 <- ccx_mode_file("pin90")
+# THE LABEL DERIVES FROM THE CONSTANT. This element used to be named `from90`
+# by hand while its VALUE resolved through CCX_MODE_CANONICAL -- so the moment
+# the canonical mode is repointed, every table and message from this file would
+# have gone on calling the new vector by the old arm's name.
+vecs <- list(defaults = NULL)
+vecs[[CCX_MODE_CANONICAL]] <- ccx_mode_file(CCX_MODE_CANONICAL)
+# `pin90` IS OPTIONAL HERE and always was -- but the old guard asked
+# file.exists(ccx_mode_file("pin90")), and ccx_mode_file() ERRORS on a retired
+# name before file.exists() ever sees it. Once pin90 is retired that guard turns
+# an intended graceful absence into a hard stop, so the registry is asked first.
+if ("pin90" %in% names(CCX_MODE_FILES) && file.exists(ccx_mode_file("pin90")))
+  vecs$pin90 <- ccx_mode_file("pin90")
 run_vec <- function(mf) {
   p <- ccx_default_params(); bt <- CCX_PARAM_TABLE$bomb_total$init; ls_ <- 1; pv <- NULL
   if (!is.null(mf)) {

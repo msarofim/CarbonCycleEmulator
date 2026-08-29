@@ -110,18 +110,15 @@ NEFF_ARMS <- c(ref    = ccx_mode_file(),
                pin60  = ccx_path("calibration", "output", "ridge_pin60",  "mode_fit_pumpN.rds"))
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 
-# The refit's h_ml band, same as diag_landed_gap_streams.R. Needed only for the
-# prior, which this file does not use -- restored anyway so the two files cannot
-# drift into pricing different objectives.
-# ⚠ RETIRED BAND, 2026-08-28. This file was written when the three
-# ocean-gradient rows SKIPPED outside [85, 120]. They are now scored at
-# sigma_eff at every h_ml (option 5). What it reads below is PROVENANCE:
-# results produced under it are NOT comparable with post-adoption fits.
-CCX_PARAM_TABLE$h_ml$lo <- LIK_OCEAN_GRAD_HML_OK_RETIRED[1]
-CCX_PARAM_TABLE$h_ml$hi <- LIK_OCEAN_GRAD_HML_OK_RETIRED[2]
-CCX_PARAM_TABLE$h_ml$prior <- local({ lo <- LIK_OCEAN_GRAD_HML_OK_RETIRED[1]
-                                      hi <- LIK_OCEAN_GRAD_HML_OK_RETIRED[2]
-                                      function(x) stats::dunif(x, lo, hi, log = TRUE) })
+# THE h_ml OVERRIDE IS GONE, 2026-08-28. This file used to narrow h_ml to
+# LIK_OCEAN_GRAD_HML_OK_RETIRED = [85, 120] to match the refit. Under option 5
+# the refit is UNBOUNDED, so matching it now means leaving the shipped table
+# alone. This is the safest of the four band mirrors to widen, on this file's
+# own evidence: the override existed only for the PRIOR, and the comment that
+# stood here said in as many words that this file does not use it.
+NEFF_HML_SUPPORT <- c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi)
+cat(sprintf("h_ml on its SHIPPED support [%g, %g]; the table is UNTOUCHED.\n",
+            NEFF_HML_SUPPORT[1], NEFF_HML_SUPPORT[2]))
 OBS <- ccx_prepare_obs()
 
 # =====================================================================
