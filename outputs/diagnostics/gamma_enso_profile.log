@@ -1,0 +1,56 @@
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 96.4737 m
+gamma_enso at the mode 0.85119 | slice: beta_max, fert_k, q10
+
+
+=== 1. THE FROZEN PROFILE ===
+      gamma   d logpost       sd  sd_ENSO        r      1998 1992(Pin)
+     0.0000       -9.40   0.1725   0.0000    0.442     0.188    -0.183
+     0.4000       -2.64   0.2230   0.1412    0.543     0.302    -0.077
+     0.8512       -0.00   0.3006   0.2461    0.571     0.430     0.043   <- THE MODE
+     1.5000       -5.46   0.4271   0.3907    0.572     0.615     0.215
+     2.0000      -17.11   0.5296   0.5007    0.567     0.757     0.347
+     3.0500      -62.63   0.7504   0.7303    0.557     1.056     0.626   <- closes the sd gap
+     4.0000     -128.37   0.9531   0.9373    0.550     1.327     0.877
+
+  OBSERVED sd 0.8996, and the model's non-ENSO baseline is 0.1725
+  E1  sd_ENSO/gamma spread 43.80 % (gate 3 %) -> FAIL -- the response SATURATES
+  E2  frozen argmax gamma = 0.8512 vs the fitted 0.85119 -> PASS
+  E3  closing the sd gap (gamma 3.05) costs -62.63 FROZEN -> **MODERATE**
+  E4  the two co2_level rows carry -23.79 of -62.63 = 38 % (gate >= 50 %) -> FAIL
+
+  who refuses, at the gap-closing gamma (each row minus the mode):
+    gcb_land_sink              -21.72
+    co2_seasonal_SPO           -14.71
+    co2_level_MLO              -11.92
+    co2_level_SPO              -11.88
+    co2_seasonal_MLO            -5.64
+    d13c_level_MLO              -3.49
+    d13c_level_SPO              +2.16
+    gcb_ocean_sink              +2.80
+    d13c_seasonal_SPO           +3.36
+
+
+=== 2. E5 -- CONDITIONAL: does a carbon slice buy it back? ===
+      gamma      frozen conditional  buy-back |       sd        r
+     0.8512       -0.00        0.00    23436 % |   0.3006    0.571
+     2.0000      -17.11      -16.74        2 % |   0.5295    0.567
+     3.0500      -62.63      -61.26        2 % |   0.7502    0.557
+
+
+=== 3. E6 -- LOUDER, OR MORE RIGHT? ===
+  r at the mode 0.571 | r at gamma 3.05 0.557 | change -0.014
+  sd goes 0.3006 -> 0.7504 (obs 0.8996)
+
+  ⇒ AMPLITUDE ONLY: r is unchanged, so more ENSO makes the model LOUDER, NOT MORE RIGHT.
+     The missing variance is NOT ENSO amplitude.
+
+
+=== 4. SCORED ===
+  E1 FAIL | E2 PASS | E3 MODERATE | E4 FAIL
+
+  ⇒ TUNING JOB: the amplitude is affordable and the fit was simply never asked for it.
+
+  ⚠ NOTHING ADOPTED. gamma_enso stays at 0.85119.
+
+
+=== DONE ===
