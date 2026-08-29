@@ -801,6 +801,13 @@ ccx_default_params <- function() {
     # using all along. Setting it to the table's 0.5 would silently change every
     # existing default-parameter result.
     gamma_enso = 0,
+    # VOLCANIC DIFFUSE-LIGHT FERTILISATION (2026-08-29). Fractional NPP
+    # enhancement per unit stratospheric AOD. 0 = OFF, and 0 is deliberate:
+    # it makes every pre-2026-08-29 result bit-identical and keeps the
+    # calibrated 21 comparable. Turning it on is an explicit act, and whether
+    # it becomes a FITTED parameter is a separate decision (it is a
+    # base_param, like ent_seas_amp_SH).
+    gamma_diff = 0,
     # ---- mechanism switch, NOT a calibrated parameter -----------------
     # FROZEN REVELLE. 0 = normal carbonate chemistry. 1 = the ocean's buffer
     # factor is held at its preindustrial value instead of rising as the ocean
@@ -1022,7 +1029,14 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # FERTILISATION -- the form is selected by p$fert_form, and the ONE
     # implementation lives in ccx_fert_factor() so this line and the C++ core
     # cannot drift apart from the diagnostics that price them.
-    npp <- npp0_h * capacity * ccx_fert_factor(chi, p, aux$chi0)
+    # VOLCANIC DIFFUSE-LIGHT FERTILISATION -- twin of the block in
+    # src/ccx_core.cpp. Absence of the column reads as zero, and gamma_diff
+    # defaults to 0, so this line is an identity unless BOTH are supplied.
+    aod_h <- forc[[paste0("aod_", h)]]          # h is "NH"/"SH", as enso_share is
+    if (is.null(aod_h) || !is.finite(aod_h)) aod_h <- 0
+    gdiff <- if (is.null(p$gamma_diff)) 0 else p$gamma_diff
+    npp <- npp0_h * capacity * ccx_fert_factor(chi, p, aux$chi0) *
+      (1 + gdiff * aod_h)
 
     # GROSS PHOTOSYNTHESIS AND AUTOTROPHIC RESPIRATION. `ra_ratio` is Ra/NPP, so
     # GPP = NPP * (1 + ra_ratio) down and Ra = NPP * ra_ratio back up. The NET

@@ -76,6 +76,10 @@ ccx_cpp_par <- function(p) {
   # core as the nutrient-limited model rather than as garbage.
   p$pump_mode <- if (identical(p$pump_mode, "D")) 1L else 0L
   if (is.null(p$revelle_frozen)) p$revelle_frozen <- 0
+  # Volcanic diffuse-light fertilisation, added 2026-08-29. Defaulted HERE as
+  # well as in ccx_default_params() so a hand-built or pre-2026-08-29 parameter
+  # list reaches the core with the mechanism OFF rather than as an index error.
+  if (is.null(p$gamma_diff)) p$gamma_diff <- 0
   # Land-structure parameters added 2026-08-12. Defaulted here as well as in
   # ccx_default_params() so that a hand-built or older parameter list cannot
   # reach the C++ with a missing name -- which unpacks as garbage, not an error.
@@ -171,7 +175,7 @@ ccx_cpp_par <- function(p) {
       "seas_drivers", "seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p",
       "sst_seas_amp_NH", "sst_seas_amp_SH", "ent_seas_amp_SH",
       "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
-      "revelle_frozen")]
+      "revelle_frozen", "gamma_diff")]
 }
 
 #' Forcing table -> the matrix the C++ expects, in its column order
@@ -193,7 +197,15 @@ CCX_FORCING_COLS <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                       # the same reason the sst columns were -- every earlier
                       # index survives. Zero, not NaN, is its "off" value, and
                       # ccx_build_forcing() always emits it.
-                      "sink_ocean")
+                      "sink_ocean",
+                      # VOLCANIC stratospheric AOD, hemispheric (2026-08-29).
+                      # Appended LAST for the third time and for the same reason
+                      # -- every earlier index survives. Its "off" value is ZERO
+                      # (a quiet stratosphere), and ccx_build_forcing() always
+                      # emits it; a hand-built forcing without it reaches C++ as
+                      # NaN and the core reads that as zero, same absence
+                      # contract as the sst columns.
+                      "aod_NH", "aod_SH")
 
 ccx_cpp_forcing <- function(F) {
   miss <- setdiff(CCX_FORCING_COLS, names(F))

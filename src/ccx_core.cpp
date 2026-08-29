@@ -49,11 +49,20 @@ static const int C = 0, C13 = 1, C14 = 2;
 // disagreement in the column count is caught by ccx_cpp_forcing()'s name check;
 // a disagreement in the ceiling is NOT caught by anything, so if one moves the
 // other must move in the same commit.
-static const int N_FORCING = 15;   // +sst_anom_NH, +sst_anom_SH (2026-08-18),
+static const int N_FORCING = 17;   // +sst_anom_NH, +sst_anom_SH (2026-08-18),
                                    // appended LAST; NaN = column absent, and
                                    // the deriv falls back to sst_scale * gmst
                                    // +sink_ocean (2026-08-23c), also LAST; its
                                    // "off" value is 0, not NaN
+                                   // +aod_NH, +aod_SH (2026-08-29), also LAST;
+                                   // "off" value 0 = a quiet stratosphere.
+                                   // ⚠ FORGETTING THIS LINE IS EXACTLY THE
+                                   // "silent garbage, not an error" the column
+                                   // contract above warns about: f[15]/f[16]
+                                   // read PAST the row buffer and returned
+                                   // adjacent memory (~1e-4 ppm of effect
+                                   // instead of ~4). R<->C++ parity caught it;
+                                   // nothing else would have.
 static const double LUC_CLEARED_MAX = 0.9;
 
 // state is column-major [box + NB*tracer], matching R's matrix layout
@@ -124,7 +133,7 @@ struct Par {
   // the same six land parameters in both, deliberately, so neither side can
   // carry a stale vector.
   double f_luc_wood;
-  double sst_scale, gamma_enso;
+  double sst_scale, gamma_enso, gamma_diff;
   double seas_amp[2], seas_phase[2];
   // Seasonal-cycle DRIVERS (2026-08-18): insolation-driven NPP + Q10 on a
   // climatological seasonal land temperature. seas_drivers = 0 is the escape
@@ -296,7 +305,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   // forcing layout: e_foss_NH, e_foss_SH, e_luc_NH, e_luc_SH, gmst, enso,
   //                 c14_bomb, c14_nuclear, c14_cosmo, d13c_foss,
   //                 cum_luc_NH, cum_luc_SH, sst_anom_NH, sst_anom_SH,
-  //                 sink_ocean
+  //                 sink_ocean, aod_NH, aod_SH
   // Must stay in step with CCX_FORCING_COLS in R/cpp.R -- indexed by position,
   // so a mismatch is silent garbage. test-parity.R is the gate.
   const double gmst = f[4], enso = f[5], d13c_foss = f[9];
@@ -307,6 +316,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   // the ocean-area shares. Non-finite (an absent column) reads as OFF, and 0
   // emits nothing at all, so the no-sink model is bit-reproduced.
   const double sink_ocean = std::isfinite(f[14]) ? f[14] : 0.0;
+  // VOLCANIC stratospheric AOD, hemispheric (2026-08-29). Absence = 0 = a quiet
+  // stratosphere, the same contract the sst columns carry.
+  const double aod_h_[2] = { std::isfinite(f[15]) ? f[15] : 0.0,
+                             std::isfinite(f[16]) ? f[16] : 0.0 };
   const double sink_asx_tot = A.asx[0] + A.asx[1];
 
   for (int hi = 0; hi < 2; ++hi) {
@@ -347,7 +360,21 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       fert = 1.0 + P.beta_max * d / den;
       if (fert < 0.0) fert = 0.0;
     }
-    const double npp = npp0_h * capacity * fert;
+    // VOLCANIC DIFFUSE-LIGHT FERTILISATION (2026-08-29). Stratospheric aerosol
+    // scatters sunlight, raising the DIFFUSE fraction, and a canopy uses diffuse
+    // light more efficiently because shaded leaves receive more of it -- so NPP
+    // RISES after a large eruption (Gu et al. 2003 Science 299:2035; Mercado et
+    // al. 2009 Nature 458:1014). This is the mechanism the model was missing:
+    // the THERMAL path through observed gmst can supply at most ~7 % of the
+    // Pinatubo CO2 anomaly and measures ~0 % (2026-08-29e).
+    // ⚠ LINEAR IN AOD, and that is only defensible over the OBSERVED range
+    // (max 0.11 in the whole record). At large AOD the total-shortwave DIMMING
+    // wins and the true response TURNS OVER; that turnover is NOT represented,
+    // so do not drive this with a supervolcano.
+    // ⚠ gamma_diff DEFAULTS TO 0 -- the mechanism is OFF unless asked for, so
+    // every pre-2026-08-29 result is unchanged and remains comparable.
+    const double npp = npp0_h * capacity * fert
+                       * (1.0 + P.gamma_diff * aod_h_[hi]);
 
     const double npp_leaf = npp * P.npp_leaf_frac;
     const double npp_wood = npp * (1.0 - P.npp_leaf_frac);
@@ -637,6 +664,7 @@ static Par unpack_par(const List& p) {
   P.conv_reverse = p["conv_reverse"];
   P.pump_mode = p["pump_mode"];
   P.sst_scale = p["sst_scale"]; P.gamma_enso = p["gamma_enso"];
+  P.gamma_diff = p["gamma_diff"];
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];
   P.seas_drivers = (int) p["seas_drivers"];

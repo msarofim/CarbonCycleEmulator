@@ -697,6 +697,11 @@ ccx_build_forcing <- function(scenario = "historical",
     gmst = gm, enso = enso, d13c_foss = d13c_foss,
     c14_bomb = c14_bomb, c14_nuclear = c14_nuc,
     c14_cosmo = rep(prod_c14, n),
+    # VOLCANIC stratospheric AOD, hemispheric (2026-08-29). ZERO outside the
+    # series' coverage -- which means ZERO BEFORE 1850, so Laki 1783 and
+    # TAMBORA 1815 are absent and any pre-1850 volcanic claim is unsupported.
+    # See data-raw/build_volcanic_aod.R.
+    aod_NH = ccx_aod_at(t, "aod_NH"), aod_SH = ccx_aod_at(t, "aod_SH"),
     # artificial mid-century OCEAN sink, GtC/yr, atmosphere -> mixed layer.
     # Identically zero unless CCX_SINK_RATE is set AND CCX_SINK_MODE == "ocean".
     sink_ocean = sink_ocean,
@@ -777,6 +782,28 @@ ccx_forcing_cum_luc <- function(forc) {
   list(NH = 0, SH = 0)
 }
 
+#' Hemispheric stratospheric AOD on the model's monthly axis
+#'
+#' ZERO outside the source series' coverage. The series is CMIP7 (NASA GISS
+#' tau_reff_CMIP7-2-2-1.nc) and starts in 1850, so ⚠ **every eruption before
+#' 1850 is missing** -- Laki 1783, the 1808/09 unknown and TAMBORA 1815 -- and
+#' a run that starts in 1750 sees a volcanically silent first century. Filling
+#' that needs eVolv2k. See data-raw/build_volcanic_aod.R.
+ccx_aod_at <- local({
+  .cache <- NULL
+  function(t, col = c("aod_NH", "aod_SH", "aod_global")) {
+    col <- match.arg(col)
+    f <- ccx_path("data", "forcing_volcanic_aod.rds")
+    if (is.null(.cache)) {
+      if (!file.exists(f)) return(rep(0, length(t)))   # absence = quiet stratosphere
+      .cache <<- readRDS(f)
+    }
+    v <- stats::approx(.cache$t, .cache[[col]], xout = t, rule = 1)$y
+    v[!is.finite(v)] <- 0                            # outside coverage = quiet
+    v
+  }
+})
+
 #' Extract one month's forcing in the shape ccx_deriv() expects
 ccx_forcing_at <- function(F, i) {
   list(e_foss = list(NH = F$e_foss_NH[i], SH = F$e_foss_SH[i]),
@@ -792,7 +819,10 @@ ccx_forcing_at <- function(F, i) {
        # artificial ocean sink (2026-08-23c). NULL on a forcing that predates
        # the column or on a hand-built one; ccx_deriv() reads that as zero,
        # which is the same absence contract the sst columns carry.
-       sink_ocean = F$sink_ocean[i])
+       sink_ocean = F$sink_ocean[i],
+       # volcanic AOD (2026-08-29); NULL on a forcing that predates the columns,
+       # which ccx_deriv() reads as zero -- the same absence contract as above.
+       aod_NH = F$aod_NH[i], aod_SH = F$aod_SH[i])
 }
 
 # ---------------------------------------------------------------------
