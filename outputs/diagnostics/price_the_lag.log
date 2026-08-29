@@ -1,0 +1,90 @@
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 96.4737 m
+mode mode_fit_pumpN.rds | lag at the mode 1.7677 | q10 PINNED 1.13579 | slice (4): sst_seas_amp_NH, sst_seas_amp_SH, seas_T_amp_NH, seas_T_amp_SH
+shipped seas_npp_amp_SH 0.5027 | CMIP6 0.94 (⚠ DIAGNOSTIC ONLY)
+harness at u_mode -1546.2766 vs stored -1544.6148 -> offset -1.6618
+
+
+=== 0. Q0 -- METHOD CONTROL. If this fails, nothing below is read. ===
+  total       1.1402  expected    1.1400  ok
+  shland      1.3080  expected    1.3080  ok
+  nep         1.3896  expected    1.3896  ok
+  resp        0.0923  expected    0.0923  ok
+  theta     152.9454  expected  152.9000  ok
+  rspo        1.9309  expected    1.9300  ok
+  phases   NEP 10.15 mo, resp 5.05 mo (expected 10.15 / 5.05)  ok
+
+  Q0 -> PASS
+
+
+=== 1. THE FROZEN PROFILE -- shape and WHO PAYS, not price ===
+       lag  d logpost    theta  SH-land    floor    total    r_SPO |   NH rows   SH rows
+    1.5000    -561.24    144.7    1.327    0.810    1.137    1.897 |   -494.62    -65.12
+    1.7677      -0.00    152.9    1.308    0.632    1.140    1.931 |     +0.00     +0.00   <- THE MODE
+    1.9000    -129.36    157.1    1.300    0.539    1.146    1.943 |   -142.82    +12.78
+    2.0000    -391.52    160.2    1.294    0.468    1.151    1.949 |   -406.53    +13.84
+    2.1000    -785.30    163.4    1.289    0.394    1.159    1.953 |   -794.35     +7.43
+    2.2500   -1599.92    168.1    1.283    0.283    1.173    1.956 |  -1585.86    -16.31   <- theta reaches 164.8
+    2.4000   -2648.71    172.9    1.279    0.170    1.190    1.954 |  -2594.31    -57.20   <- theta reaches 164.8
+    2.5000   -3456.69    176.0    1.277    0.095    1.204    1.950 |  -3365.75    -94.08   <- theta reaches 164.8
+    2.7500   -5764.25    176.1    1.277    0.094    1.248    1.933 |  -5547.95   -220.17   <- theta reaches 164.8
+
+  Q1  at lag 2.25 the FROZEN cost is -1599.92, of which the NH rows carry -1585.86 = 99 %
+      (gate >= 50 %) -> PASS
+  Q2  SH-land net at 2.25 1.283 vs 1.308 at the mode (-1.9 %), while the FLOOR fell
+      0.632 -> 0.283. gate: net within 5 % -> PASS  ⇒ the lag OPENS the door, it does not walk through it.
+  Q5  r_SPO 1.930 -> 1.956 (1.4 %; obs 1.00). gate <= 5 % -> PASS
+
+  the scored seasonal rows, each lag minus the mode:
+       lag co2_seasonal_M co2_seasonal_S d13c_seasonal_ d13c_seasonal_
+    1.5000        -462.20         -56.86         -32.42          -8.26
+    1.7677          +0.00          +0.00          +0.00          +0.00
+    1.9000         -76.67         +11.02         -66.15          +1.76
+    2.0000        -258.01         +11.80        -148.51          +2.04
+    2.1000        -538.13          +6.06        -256.22          +1.37
+    2.2500       -1126.12         -14.90        -459.74          -1.41
+    2.4000       -1889.03         -50.82        -705.27          -6.38
+    2.5000       -2478.42         -83.17        -887.33         -10.91
+    2.7500       -4162.84        -193.68       -1385.10         -26.49
+
+
+=== 2. Q4/Q3/Q6 -- THE CONDITIONAL PRICE, on the SHIPPED gross ===
+
+  --- seas_npp_amp_SH = 0.5027  (SHIPPED, status=data) ---
+       lag  d logpost    theta  SH-land    floor    total    r_SPO     sTaSH 
+    1.7677       0.00    152.9    1.308    0.632    1.140    1.931    1.0391   <- INCUMBENT
+    2.0000    -184.78    160.2    1.231    0.467    1.028    1.967    1.7960
+    2.2500    -838.32    168.2    1.071    0.280    0.918    1.966    3.4945   theta ok
+    2.5000   -1972.89    176.2    0.890    0.090    0.818    1.942    5.4056   theta ok
+
+  Q4  CONDITIONAL price of lag 2.25 = -838.32 log units -> **PROHIBITIVE**
+      bands: CHEAP <= 20 | MODERATE <= 100 | PROHIBITIVE > 100  (27n's lever: -204 frozen / -35 conditional)
+  Q6  buy-back at 2.25: frozen -1599.92 -> conditional -838.32 = 48 % recovered
+  Q3  fitted seas_T_amp_SH 3.4945 vs the mode's 1.0391 (gate < 2.0x = 2.0782) -> ⚠ FAIL -- THE FIT WANTS THE GEOMETRY. That is a bigger result than this run sought.
+
+
+=== 3. THE SAME ARMS AT THE CMIP6 GROSS -- ⚠ DIAGNOSTIC ONLY (authorisation 1) ===
+  ⚠ seas_npp_amp_SH = 0.94 is a CMIP6 ENSEMBLE value. It may NOT be shipped, adopted, or
+    called an observational constraint. The shipped constant remains 0.5027, status="data".
+
+  --- seas_npp_amp_SH = 0.9400  (CMIP6 ENSEMBLE -- DIAGNOSTIC ONLY) ---
+       lag  d logpost    theta  SH-land    floor    total    r_SPO     sTaSH 
+    1.7677       0.00    153.1    2.304    1.177    1.301    2.755    3.7879   <- INCUMBENT
+    2.0000    -137.61    160.6    1.773    0.857    1.210    2.403    9.9182
+    2.2500    -746.57    168.8    1.246    0.499    1.059    2.087   15.4674   theta ok
+    2.5000   -1892.33    176.9    0.919    0.140    0.856    1.992   18.5234   theta ok
+
+
+=== 4. SCORED ===
+  Q0 PASS | Q1 PASS | Q2 PASS | Q3 FAIL | Q5 PASS
+  Q4 the lag at 2.25 costs -838.32 conditionally -> **PROHIBITIVE**
+
+  ⇒ THE LAG IS UNAFFORDABLE. The (gross, lag) 2x2 is not worth writing as posed.
+
+  ⚠ NOTHING ADOPTED. seas_lag_p stays at the mode; seas_npp_amp_SH stays 0.5027;
+    ccx_mode_file() still resolves from90.
+
+wall clock 10.2 min
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/price_the_lag.rds
+
+
+=== DONE ===
