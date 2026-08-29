@@ -5,12 +5,20 @@
 # WHY THIS EXISTS. The 2026-08-28 option-5 refit freed h_ml and it moved
 # 96.47 -> 35.38 m, buying +4.06 logpost that is ENTIRELY prior credit
 # (loglik -1.199) and relieving sst_seas_amp_SH from z -6.321 to -5.595 and
-# sst_seas_amp_NH from -3.483 to -2.931. A shallower mixed layer RAISES the
-# ocean's seasonal amplitude response, and "SH ocean 0.45x too small" is the
+# sst_seas_amp_NH from -3.483 to -2.931. "SH ocean 0.45x too small" is the
 # standing defect of the seasonal arc -- the one `ent` could not fix (vetoed),
 # `tau_ex` was exonerated of, and the (phi_eff, amp) pair could not resolve
-# (degenerate ridge). So the hypothesis is that the [85, 120] band had been
+# (degenerate ridge). So the hypothesis was that the [85, 120] band had been
 # BLOCKING a real lever on that limb, and option 5 handed it back.
+#
+# ⚠ THE PHYSICS THAT MOTIVATED THAT HYPOTHESIS WAS WRONG, AND IS RETRACTED HERE.
+# I wrote that "a shallower mixed layer RAISES the ocean's seasonal amplitude
+# response". diag_hml_sst_elasticity.R MEASURED the opposite: at a FIXED
+# sst_seas_amp_SH, taking h_ml 96.47 -> 35.38 m takes the SPO ocean limb
+# 0.3066 -> 0.2577, i.e. 59% -> 49% of observed, and rotates its phase from
+# 4.15 to 3.90 months against obs 8.52. A shallow mixed layer makes this limb
+# WORSE on both counts. The hypothesis below was therefore testing a lever that
+# runs the wrong way; the test still stands, and it is REFUTED.
 #
 # The alternative is that 35.38 m is just where the seasonal priors dragged a
 # soft direction, with no mechanism behind it. These predict different things
