@@ -177,7 +177,7 @@ reason. Then the (gross, lag) 2×2. [[gross_phase_not_amplitude]]
    unbounded block is unconditional (needs a reviewed NEW constant); a BOUND with prior
    renormalisation is a DIFFERENT OBJECT from a PIN and which is wanted is itself a decision; and
    four Julia workers were at ~99 % CPU (load 6.32). **QUEUED.**
-4. **`test-mode-file.R`: the suite is GREEN.** (a) declared exemption for the two-mode comparison;
+4. **`test-mode-file.R`: the suite is GREEN — 1210 pass / 2 skip / 0 fail** (was 1205 / 1 fail). (a) declared exemption for the two-mode comparison;
    (b) the trap restated in GAP form — stored ordering **+0.113** kept as the TRAP, load-bearing
    assertion recomputes both arms on ONE objective (**−11.497** vs the pin's +11.6698 credit, 1.5 %
    apart), so it asserts the MECHANISM. Cost: +1.3 s.
