@@ -10,10 +10,13 @@ Hold off on four-box."**
 is unchanged in position and therefore also waits on ③. The hemispheric TAB is likewise deferred
 until the component is fixed.
 
-**STATUS: ① IS DONE** (2026-08-29, `328cdb8`) — see
-`notes/collect_2026-08-29g_diffuse_light_landed.md`. Mechanism wired R+C++ with tests, `gamma_diff`
-defaults to 0 so nothing existing moved, and **r rises 0.571 → 0.625**. ⚠ Not adopted: the frozen
-cost needs a CONDITIONAL profile first. **② is next.**
+**STATUS: ① IS BUILT AND PRICED** (2026-08-29, `328cdb8` + `efe7367`). Mechanism wired R+C++ with
+tests, `gamma_diff` defaults to 0 so nothing existing moved; **r rises 0.571 → 0.624 and SURVIVES
+REFITTING**; conditional price **−7.42 = CHEAP** at γ = 0.25 (the frozen column overstated by 82 %).
+⚠ **NOT ADOPTED, and ONE CHECK GATES IT**: the price is paid by **`fert_k` +29 %**, the one parameter
+FACE constrains — *is `fert_k` 164–200 inside the FACE-informed range?* Cheap in logpost is not cheap
+in provenance. That check is small and should be done before ②.
+**Then ② is next** (Marcus's order: ① → ② → ③, four-box HELD).
 
 ## 0. THE SEQUENCING PRINCIPLE
 

@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-29h — **DIFFUSE LIGHT PRICED: CHEAP (−7.4), AND THE CORRELATION GAIN IS REAL**
+
+Marcus: *"Price gamma_diff conditionally first."* Slice `beta_max, fert_k, q10, rep_dC`.
+
+| γ | frozen | **conditional** | buy-back | **r** |
+|---|---|---|---|---|
+| 0 | 0 | 0 | — | 0.571 |
+| **0.25** | −40.5 | **−7.42 CHEAP** | **82 %** | **0.624** |
+| 0.50 | −160.8 | −28.7 | 82 % | **0.626** |
+| 0.97 (matches Pinatubo) | −601.3 | **−105.5** | 82 % | 0.575 |
+
+**The frozen cost overstated the price by 82 % at every γ** — handoff 08-25b §7 again. **H4: the r
+gain SURVIVES refitting**, so the mechanism supplies real signal rather than borrowing from frozen
+parameters (contrast ENSO, whose r was flat across an 11× range). H5: land sink moves ≤ 0.057
+GtC/yr. **Matching the Pinatubo feature costs 14× more than γ = 0.25 and fits the record WORSE.**
+
+### ⚠ H3 REFUTED MY OWN MECHANISM, WHICH IS WHY IT WAS THERE
+I proposed in 08-29g that the cost was a **cumulative CO₂ level offset**, put `rep_dC` in the slice
+so it could be refuted, and gated the mechanism separately. **H2 passed on the number and its
+printed verdict "LEVEL OFFSET CONFIRMED" is WRONG**: `rep_dC` moved **−0.01 prior-sd**. The absorber
+is the **FERTILISATION PAIR** — `fert_k` **+28.9 %**, `beta_max` +11.6 % along their ρ = +0.998 ridge.
+
+### ⚠ SO "CHEAP" IS CONDITIONAL — AND THIS GATES ADOPTION
+**`fert_k` is the one parameter in that slice with an EXTERNAL constraint**: FACE caps `fert_k` and
+cannot prior `beta_max`, so FACE is the only thing bounding this direction. **Cheap in logpost is not
+cheap in provenance. NOT YET CHECKED: is `fert_k` 164–200 inside the FACE-informed range?**
+
+**Largest payer is `co2_icecore` (−4.53), not the station rows** — the AOD series' biggest event is
+**Krakatau 1884**, so the amplitude is constrained by smoothed ice cores more than by Pinatubo at MLO.
+
+### Also settled
+**`ccx_hold_climate()` is KEPT** and is not replaced by the app's checkboxes: all 10 callers are
+diagnostics and TESTS, it FREEZES (usually at 0) rather than decomposing, and the
+warming/ENSO/volcanic decomposition is not exhaustive so three boxes cannot reproduce it. Tests must
+not depend on a regression fit. Build the checkboxes as a separate forcing-side layer.
+
 ## 2026-08-29g — **VOLCANIC DIFFUSE-LIGHT LANDED: r 0.571 → 0.625**
 
 Plan item ①, on Marcus's instruction. `NPP_h = npp0_h * capacity * fert * (1 + gamma_diff * AOD_h)`
