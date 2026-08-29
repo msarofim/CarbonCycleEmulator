@@ -502,9 +502,12 @@ if ("rerun" %in% PRA_STAGE) {
   cat(sprintf("mirror band sweep: %d of %d still configure on the retired band",
               length(still), length(PRA_MIRRORS)))
   cat(sprintf(" (%d declared exempt)\n", length(exempt)))
-  cat("  ⚠ diag_landed_gap_streams.R is a PRE-ADOPTION driver: every arm it reads\n",
-      "   is retired by the objective change, so it needs a DECISION (re-point or\n",
-      "   quarantine), not a band edit. Its numbers are not current either way.\n")
+  cat("  ✓ diag_landed_gap_streams.R: DECIDED 2026-08-29 (Marcus) -- QUARANTINED, not\n",
+      "   re-pointed. Every arm it reads is retired by the objective change and its\n",
+      "   GATE 1 reproduces STORED logposts, so widening fails it by construction.\n",
+      "   It now HARD-STOPS; outputs are in\n",
+      "   outputs/quarantine/20260829_preadoption_landed_gap/. There is no\n",
+      "   replacement: the question must be RE-ASKED post-adoption.\n")
   if (length(still)) {
     warn("%d of the 4 mirror diagnostics still read the RETIRED band:", length(still))
     for (f in still) cat(sprintf("        %s\n", f))

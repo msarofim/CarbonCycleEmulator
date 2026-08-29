@@ -41,9 +41,23 @@ test_that("no live source hardcodes a fitted-mode path", {
   #                                  cannot resolve its output through a reader.
   #   finish_pump_arms_comparison.R, repair_arm_streams.R -- ditto, they rebuild
   #                                  or repair arm files in place.
+  #   diag_hml_seasonal_limbs.R   -- a DECLARED TWO-MODE COMPARISON (added
+  #                                  2026-08-29). It measures the OLD h_ml mode
+  #                                  (96.47 m) against the NEW one (35.38 m), so
+  #                                  it needs BOTH paths at once, and
+  #                                  ccx_mode_file() returns exactly ONE mode by
+  #                                  construction -- it cannot express a
+  #                                  comparison. Same category as
+  #                                  diag_gates_at_landed_modes.R above.
+  #                                  ⚠ THE COST OF THIS MECHANISM: an exemption
+  #                                  is per FILE, so a careless hardcode
+  #                                  elsewhere in an exempt file also passes.
+  #                                  That is the price of "declared rather than
+  #                                  pattern-matched"; a sixth entry should
+  #                                  prompt a per-LINE marker instead.
   allowed <- c("paths.R", "diag_gates_at_landed_modes.R",
                "run_modefind_pump_arms.R", "finish_pump_arms_comparison.R",
-               "repair_arm_streams.R")
+               "repair_arm_streams.R", "diag_hml_seasonal_limbs.R")
   dirs <- c("pump_arms", basename(dirname(CCX_MODE_FILES)))
   rx   <- sprintf('"[^"]*(%s)[^"]*mode_fit_pump', paste(dirs, collapse = "|"))
   offenders <- character()
@@ -118,7 +132,41 @@ test_that("the canonical mode is a FREE arm, and stored logposts do not decide i
                function(a) readRDS(ccx_mode_file(a))$logpost, numeric(1))
   free <- names(CCX_MODE_FILES)[!CCX_MODE_PINNED[names(CCX_MODE_FILES)]]
   expect_equal(CCX_MODE_CANONICAL, free[which.max(lp[free])])
-  # and the trap is REAL, not hypothetical -- if this ever stops holding, the
-  # comment above is stale and the naive comparison has become safe.
-  expect_gt(lp[["pin90"]], lp[[CCX_MODE_CANONICAL]])
+
+  # ⚠ REWRITTEN 2026-08-29 -- THE PREMISE, NOT THE TOLERANCE. What stood here was
+  #     expect_gt(lp[["pin90"]], lp[[CCX_MODE_CANONICAL]])
+  # on two STORED logposts, and across an objective change that is not merely
+  # false, it is MEANINGLESS. The MARGIN measures how meaningless: the stored
+  # ordering favours pin90 by only +0.113, while the option-5 change (`2153bd6`)
+  # moved logposts by 0.081 -- measured at four separate points, collect
+  # 2026-08-29. A third objective change of that size FLIPS this assertion, and
+  # the old comment would then have read the flip as "the trap has become safe"
+  # when only the units moved. A test whose failure message is a false
+  # explanation is worse than no test.
+  #
+  # THE PREMISE RESTATED. The TRAP is that a reader compares STORED numbers.
+  # The TRUTH is what the arms are worth on ONE objective. Both are asserted
+  # below; only the second is load-bearing, because it is a GAP between two
+  # vectors scored by the SAME harness in the SAME session, so whatever the
+  # objective is, it cancels.
+  expect_gt(lp[["pin90"]] - lp[[CCX_MODE_CANONICAL]], 0)   # the trap is LIVE
+
+  skip_if_no_cpp()
+  # PIN_PRIOR_CREDIT is the near-delta fert_k prior at fert_k = 90 that the
+  # pinned arm's objective carries and the free arm's does not. Asserting the
+  # recomputed gap EQUALS it is asserting the MECHANISM -- so this fails if the
+  # trap's cause changes, and not merely if two numbers cross.
+  PIN_PRIOR_CREDIT <- 11.6698
+  band0 <- CCX_PARAM_TABLE$h_ml
+  on.exit(CCX_PARAM_TABLE$h_ml <<- band0, add = TRUE)
+  now <- vapply(names(CCX_MODE_FILES), function(a) {
+    md <- readRDS(ccx_mode_file(a))
+    ccx_adopt_mode_band(md)          # each arm decodes under its OWN band
+    bp <- ccx_default_params(); bp$pump_mode <- md$pump_mode
+    ccx_make_logpost(years = c(1750, 2024), base_params = bp)(md$u_mode)
+  }, numeric(1))
+  expect_lt(now[["pin90"]] - now[[CCX_MODE_CANONICAL]], 0)
+  expect_equal(now[["pin90"]] - now[[CCX_MODE_CANONICAL]], -PIN_PRIOR_CREDIT,
+               tolerance = 0.2,
+               info = "the canonical arm's advantage on ONE objective is no longer the pin's prior credit")
 })

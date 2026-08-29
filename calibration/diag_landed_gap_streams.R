@@ -51,6 +51,35 @@
 #
 # RUNTIME ~10 s.  Usage: Rscript calibration/diag_landed_gap_streams.R
 # =====================================================================
+# =====================================================================
+# ⚠⚠ QUARANTINED 2026-08-29 -- THIS DRIVER IS PRE-ADOPTION AND HARD-STOPS.
+#
+# Marcus's decision, 2026-08-29, closing the item owed since handoff 08-28d §5:
+# QUARANTINE, not re-point. `2153bd6` ("ADOPT OPTION 5") rescored the ocean-
+# gradient rows at sigma_eff, and EVERY arm this driver reads (`ref`, `from90`,
+# `pin90`) was fitted BEFORE it. Its whole method is differences of STORED
+# logposts, and across that change a stored logpost moves by 0.081 -- measured
+# at four points spanning 60 log units, collect 2026-08-29.
+#
+# It is NOT repairable by widening a band: GATE 1 reproduces logposts STORED by
+# band-fitted arms, so widening fails it BY CONSTRUCTION. That is why it was the
+# one mirror deliberately left un-widened on 08-28i.
+#
+#   outputs   -> outputs/quarantine/20260829_preadoption_landed_gap/
+#   nearest live reader -> calibration/diag_stream_neff.R (band-widened)
+#   replacement -> NONE. The question must be RE-ASKED post-adoption, not
+#                  re-pointed; re-pointing silently changes what GATE 1 checks.
+#
+# Kept in place, and readable, as PROVENANCE. Delete nothing.
+# =====================================================================
+stop("diag_landed_gap_streams.R is QUARANTINED (2026-08-29).\n",
+     "  Every arm it reads (ref / from90 / pin90) was fitted BEFORE the option-5\n",
+     "  objective change `2153bd6`, and its method is differences of STORED\n",
+     "  logposts, which that change moves by ~0.081.\n",
+     "  Its outputs: outputs/quarantine/20260829_preadoption_landed_gap/\n",
+     "  There is NO re-pointed replacement -- the question must be re-asked\n",
+     "  against post-adoption vectors. Nearest live reader: diag_stream_neff.R.")
+
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
