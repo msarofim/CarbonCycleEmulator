@@ -924,16 +924,26 @@ ccx_sst_anom_from_gmst <- function(F) {
 #' hand; with the observed-SST columns that idiom silently leaves real SST
 #' warming in a "frozen" run. This is the one place that knows the full list.
 ccx_hold_climate <- function(F, i = 1L, value = NULL) {
-  # aod_NH/aod_SH added 2026-08-29. THE DECISION test-so-entrainment.R's
-  # inventory gate demands: volcanic AOD IS a climate column and IS frozen here.
-  # The argument is the FUNCTION'S PURPOSE, not the column's pathway -- this
-  # exists to remove interannual variability from a run, and once gamma_diff is
-  # non-zero AOD is a source of exactly that. Leaving it out would let a
-  # "climate held" run keep taking volcanic NPP pulses, silently breaking the
-  # guarantee every caller relies on. (Its pathway is radiative -> NPP rather
-  # than thermal, which is the argument for the other answer; the purpose wins.)
-  # Behaviour-neutral today, because gamma_diff defaults to 0.
-  for (cc in c("gmst", "enso", "sst_anom_NH", "sst_anom_SH", "aod_NH", "aod_SH")) {
+  # ⚠ aod_NH/aod_SH are NOT held here, and that is the ARCHITECTURE, not an
+  # oversight (Marcus 2026-08-29, correcting my first answer to
+  # test-so-entrainment.R's inventory gate).
+  #
+  # THE MODEL HAS EXACTLY ONE AOD PATHWAY: diffuse light -> NPP. The volcanic
+  # TEMPERATURE effect is NOT a second mechanism -- it is already IMPLICIT in
+  # the observed `gmst` record this function does hold. So AOD is a radiative
+  # driver, not a climate variable, and holding `gmst` is what holds the
+  # volcanic climate signal.
+  #
+  # ⚠ DO NOT ADD AN AOD -> TEMPERATURE TERM. It would DOUBLE-COUNT the cooling
+  # that `gmst` already carries. Backing the volcanic signal OUT of `gmst` (for
+  # the app's volcano checkbox) is a FORCING-side job -- FaIR's volcanic-free
+  # run, or a Foster-Rahmstorf regression -- not a model term.
+  #
+  # ⚠ CONSEQUENCE, AND IT IS REAL: once `gamma_diff` is non-zero, "climate held"
+  # NO LONGER IMPLIES "no interannual variability" -- volcanic NPP pulses
+  # survive this call. A diagnostic that needs a volcanically quiet run must
+  # zero aod_NH/aod_SH itself. Moot while gamma_diff defaults to 0.
+  for (cc in c("gmst", "enso", "sst_anom_NH", "sst_anom_SH")) {
     if (is.null(F[[cc]])) next
     F[[cc]] <- if (is.null(value)) F[[cc]][i] else value
   }

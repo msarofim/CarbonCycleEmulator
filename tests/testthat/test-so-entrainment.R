@@ -126,9 +126,7 @@ test_that("P0.3 -- ccx_hold_climate() holds every climate FORCING COLUMN", {
   # division is the whole content of the gap found in 27c.
   sp <- ccx_spinup(ent_p)
   F  <- ccx_build_forcing("historical", c(1900, 1990), prod_c14 = sp$prod_c14)
-  # aod_NH/aod_SH added 2026-08-29 and DECIDED to be climate -- see the note in
-  # ccx_hold_climate(). The decision was made HERE, as this gate intends.
-  climate_cols <- c("gmst", "enso", "sst_anom_NH", "sst_anom_SH", "aod_NH", "aod_SH")
+  climate_cols <- c("gmst", "enso", "sst_anom_NH", "sst_anom_SH")
   H <- ccx_hold_climate(F, i = 1L)
   for (cc in climate_cols) {
     expect_true(!is.null(H[[cc]]), info = cc)
@@ -138,10 +136,16 @@ test_that("P0.3 -- ccx_hold_climate() holds every climate FORCING COLUMN", {
   # isotope source, a time axis or the artificial-sink instrument -- none of
   # them climate. A new column outside this list is a DECISION about whether
   # ccx_hold_climate() should freeze it, and this is where it gets made.
+  # aod_NH/aod_SH: NON-CLIMATE (Marcus 2026-08-29). The model's ONLY AOD pathway
+  # is diffuse light -> NPP; the volcanic TEMPERATURE effect is already implicit
+  # in the observed `gmst` this function holds, so AOD is a radiative driver and
+  # holding gmst is what holds the volcanic climate signal. ⚠ The consequence is
+  # that "climate held" does NOT imply "volcanically quiet" once gamma_diff != 0
+  # -- see the note in ccx_hold_climate().
   non_climate <- c("t", "year", "month", "e_foss_NH", "e_foss_SH",
                    "e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH",
                    "d13c_foss", "c14_bomb", "c14_nuclear", "c14_cosmo",
-                   "sink_ocean")
+                   "sink_ocean", "aod_NH", "aod_SH")
   expect_setequal(names(F), c(climate_cols, non_climate))
 })
 

@@ -35,10 +35,25 @@ answer** — a test that only checks the OFF value could never see this.
 ⚠ **CORRECTION.** I first wrote that "nothing else would have caught it". **False**:
 `test-forcing.R:127` pins `length(CCX_FORCING_COLS)` against `N_FORCING` and failed as soon as the
 suite ran — I had reported before running it. Extended to 17 (the deliberate edit the pin exists to
-force). A second failure, `test-so-entrainment.R`'s climate inventory gate, forced a real decision:
-**volcanic AOD IS a climate column and `ccx_hold_climate()` now freezes it**, on the argument that
-the function exists to remove interannual variability and AOD is now a source of it.
-Behaviour-neutral while `gamma_diff` = 0. **Suite GREEN afterwards: 1226 pass / 2 skip / 0 fail.**
+force). A second failure, `test-so-entrainment.R`'s climate inventory gate, forced a decision about AOD's
+classification. **I answered it wrong and Marcus corrected it.**
+
+### ⚠ THE AOD ARCHITECTURE (Marcus, 2026-08-29)
+*"The AOD should be a diffuse light → NPP mechanism, with the AOD → climate mechanism implicit in
+the existing temperature record (and then backed out with FaIR or Foster-Rahmstorf for removing
+volcanic influence through the checkbox)."*
+
+⇒ **THE MODEL HAS EXACTLY ONE AOD PATHWAY: diffuse light → NPP.** AOD is a **RADIATIVE DRIVER, not
+a climate variable**, so `ccx_hold_climate()` does **NOT** freeze it — the volcanic temperature
+effect is already carried by the observed `gmst` that function DOES hold.
+⚠ **NEVER add an AOD → temperature term: it would DOUBLE-COUNT the cooling `gmst` already has.**
+⚠ **Consequence, documented at the call site:** once `gamma_diff` ≠ 0, *"climate held" does NOT
+imply "volcanically quiet"* — a diagnostic needing a quiet run must zero AOD itself.
+⇒ **The app's "volcanoes off" is TWO forcing-side edits, neither sufficient alone:** zero AOD (the
+NPP path) AND subtract the volcanic component from `gmst` (the thermal path, via FaIR's
+volcanic-free run or the Foster–Rahmstorf regression term).
+
+**Suite GREEN: 1226 pass / 2 skip / 0 fail.**
 
 ### Decisions recorded
 GMST decomposition uses a **Foster–Rahmstorf-style regression as primary**, FaIR as cross-check;

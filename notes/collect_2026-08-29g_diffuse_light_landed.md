@@ -111,10 +111,17 @@ I described the implementation as sound while the full suite was still running. 
    column outside this list is a DECISION about whether `ccx_hold_climate()` should freeze it, and
    this is where it gets made."*
 
-**THE DECISION: volcanic AOD IS a climate column and `ccx_hold_climate()` now freezes it.** The
-argument is the FUNCTION'S PURPOSE rather than the column's pathway — `ccx_hold_climate()` exists to
-remove interannual variability from a run, and once `gamma_diff` is non-zero AOD is a source of
-exactly that; leaving it out would let a "climate held" run keep taking volcanic NPP pulses and
-silently break the guarantee its callers rely on. The counter-argument — that its pathway is
-radiative→NPP, not thermal, which would group it with instruments like `sink_ocean` — is real but
-loses to the purpose. **Behaviour-neutral today**, since `gamma_diff` defaults to 0.
+**THE DECISION — I got this wrong first, and Marcus corrected it.** I classified AOD as a CLIMATE
+column and froze it, arguing from the function's purpose (removing interannual variability).
+**Marcus 2026-08-29:** *"The AOD should be a diffuse light → NPP mechanism, with the AOD → climate
+mechanism implicit in the existing temperature record."*
+
+⇒ **AOD is a RADIATIVE DRIVER, NOT a climate variable, and `ccx_hold_climate()` does NOT freeze it.**
+The model has exactly ONE AOD pathway (diffuse light → NPP); the volcanic TEMPERATURE effect is
+already carried by the observed `gmst` that this function DOES hold, so holding `gmst` is what holds
+the volcanic climate signal. ⚠ **Adding an AOD → temperature term would double-count it.**
+
+My argument was not wrong about the consequence — it was wrong about which concept owns it.
+⚠ **The consequence is real and is now documented at the call site: once `gamma_diff` ≠ 0, "climate
+held" does NOT imply "volcanically quiet", and a diagnostic needing a quiet run must zero AOD
+itself.** Behaviour-neutral today, since `gamma_diff` defaults to 0.

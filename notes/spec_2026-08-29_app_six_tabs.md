@@ -78,6 +78,28 @@ counterfactual and nonsense as a physical state; the tab should say so rather th
 counterfactual RUNS of the calibrated model, not re-fits. Say this in the tab so nobody reads a
 checkbox state as "the model refitted without volcanoes".
 
+## 3a. ⚠ THE AOD ARCHITECTURE — WHAT THE VOLCANO CHECKBOX ACTUALLY HAS TO DO
+
+**Marcus, 2026-08-29:** *"The AOD should be a diffuse light → NPP mechanism, with the AOD → climate
+mechanism implicit in the existing temperature record (and then backed out with FaIR or
+Foster-Rahmstorf for removing volcanic influence through the checkbox)."*
+
+**⇒ THE MODEL HAS EXACTLY ONE AOD PATHWAY: diffuse light → NPP.** The volcanic TEMPERATURE effect is
+NOT a second model term — it is already carried by the observed `gmst` series
+(`ccx_core.cpp:371`, `q10f = pow(q10, gmst/10)`). ⚠ **Adding an AOD → temperature term would
+DOUBLE-COUNT it.**
+
+**So "volcanoes OFF" is TWO edits on the FORCING side, and neither alone is correct:**
+
+1. **zero `aod_NH` / `aod_SH`** → removes the diffuse-light NPP path (a model input);
+2. **subtract the volcanic component from `gmst`** → removes the implicit thermal path
+   (FaIR's volcanic-free run, or the Foster–Rahmstorf regression term).
+
+⚠ **A consequence worth knowing:** `ccx_hold_climate()` deliberately does NOT freeze AOD, because
+AOD is a radiative driver rather than a climate variable. So once `gamma_diff` ≠ 0, **"climate held"
+no longer implies "volcanically quiet"** and a diagnostic that needs a quiet run must zero AOD
+itself. (This corrects my first answer to the inventory gate, which classified AOD as climate.)
+
 ## 3b. DECIDED (Marcus, 2026-08-29)
 
 **The GMST decomposition uses a Foster–Rahmstorf-style REGRESSION as the primary method**, with FaIR
