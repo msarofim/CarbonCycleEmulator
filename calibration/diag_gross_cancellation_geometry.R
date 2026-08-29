@@ -226,6 +226,34 @@ cat(sprintf("\n  moves theta by >= %.2f mo across its prior span: %s\n", GC_G5_M
 cat(sprintf("  G5 -> %s\n", if (any(G5)) "a lever EXISTS -- name it in the next prereg" else
   "NO FREE PARAMETER MOVES THETA. The phase separation is STRUCTURAL: the next step is a\n        MODEL change (the SH land channels' timing), not a fit."))
 
+sep("5b. G5 ANSWERED A MAGNITUDE QUESTION; THE QUESTION IS DIRECTIONAL")
+# ⚠ NOT A GATE CHANGE. G5 stands exactly as pre-registered and is scored above.
+# It asks whether theta MOVES; G4 shows what matters is whether theta can move UP,
+# to >= 164.8 deg. Both prior-span ends came in BELOW the mode's 152.9, so this
+# profiles the axis rather than inferring a direction from two points.
+GC_LAG_GRID <- seq(0.5, 4.0, by = 0.25)
+cat(sprintf("  %12s %10s %10s %10s %10s\n", "seas_lag_p", "theta deg", "a_NEP", "floor", "vs need"))
+lagp <- lapply(GC_LAG_GRID, function(x) {
+  bb <- gc_run(list(seas_lag_p = x))
+  ne <- chan(bb, list(seas_npp_amp_SH = 0), list(seas_lag_p = x))
+  re <- chan(bb, list(seas_T_amp_SH   = 0), list(seas_lag_p = x))
+  th <- sep_dg(ne, re); list(x = x, th = th, a = amp(ne), fl = floor_of(amp(ne), th)) })
+need_cmip6 <- 180 - asin(GC_G3_OBS / gC$a) * 180 / pi
+for (g in lagp)
+  cat(sprintf("  %12.2f %10.1f %10.4f %10.4f %10.1f%s\n", g$x, g$th, g$a, g$fl,
+              g$th - need_cmip6,
+              if (abs(g$x - pv0$seas_lag_p) < 0.13) "   <- THE MODE" else ""))
+th_max <- max(vapply(lagp, function(g) g$th, 0))
+x_max  <- lagp[[which.max(vapply(lagp, function(g) g$th, 0))]]$x
+cat(sprintf("\n  max theta on this axis %.1f deg at seas_lag_p = %.2f; NEEDED at the CMIP6 gross %.1f\n",
+            th_max, x_max, need_cmip6))
+cat(sprintf("  ⇒ %s\n", if (th_max >= need_cmip6)
+  "seas_lag_p CAN reach the needed separation -- it is the second member of the pair." else
+  sprintf(paste("seas_lag_p CANNOT reach it -- short by %.1f deg (%.2f mo), and the mode already",
+                "sits\n        within %.1f deg of this axis' maximum. The phase deficit is NOT",
+                "reachable through\n        the fitted lag."), need_cmip6 - th_max,
+          (need_cmip6 - th_max) / 30, th_max - theta0)))
+
 sep("6. SCORED")
 cat(sprintf("  G0 %s | G1 %s | G2 %s | G3 %s | G5 %s\n",
             ifelse(all(G0), "PASS", "FAIL"), ifelse(G1, "PASS", "FAIL"), ifelse(G2, "PASS", "FAIL"),
@@ -242,7 +270,7 @@ dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 saveRDS(list(mode = basename(ccx_mode_file()), theta0 = theta0, nep0 = nep0, resp0 = resp0,
              land0 = land0, floor0 = f0, ta_grid = GC_TA_GRID, profile = prof,
              a_grid = GC_A_GRID, gross = G, cmip6 = gC, obs = GC_G3_OBS,
-             unreachable = G3_unreachable, lever = G5,
+             unreachable = G3_unreachable, lever = G5, lag_profile = lagp,
              verdicts = list(G0 = G0, G1 = G1, G2 = G2, G3 = G3_unreachable, G5 = G5)),
         file.path(OUTDIR, "gross_cancellation_geometry.rds"))
 cat(sprintf("\nwall clock %.1f min\nwritten: %s\n\n\n=== DONE ===\n",
