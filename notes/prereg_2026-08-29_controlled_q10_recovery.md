@@ -124,3 +124,42 @@ I record the opposite outcome explicitly so it cannot be reinterpreted afterward
   the same mode every other diagnostic reads.
 - **It is not a test of the NH-import channel** (step 2), which remains the biggest unexplained term
   at 0.821 of 1.373 and is untouched by this design.
+
+---
+
+## AMENDMENT 1 (2026-08-29, written after P0 and BEFORE any arm result)
+
+**⚠ C1 AND C2 AS WRITTEN ARE MIS-SPECIFIED, AND I WROTE THEM THAT WAY.** They compare ABSOLUTE
+logposts here against values STORED by 27j / 27p / 27q — and **the objective changed in between**.
+`2153bd6` (08-28, "ADOPT OPTION 5") rescores the ocean-gradient rows at `sigma_eff`; every one of
+27j/27p/27q ran on 08-27, i.e. on the RETIRED objective. This is exactly the defect
+`handoff_2026-08-29` §5 flags in `test-mode-file.R`: *across the objective change that is
+MEANINGLESS, not merely false.* I reproduced it while writing a driver whose header cites it.
+
+**MEASURED, not inferred:** this run's harness gives **−1546.2766** at `u0` where 27q recorded
+**−1546.195** — a **0.0816** shift, and the offset prints −1.6618 against the known −1.5805.
+
+**THE PREMISE IS REWRITTEN, NOT RELAXED TO GREEN.** C1 and C2 are restated in **GAP form**, which
+is invariant to any part of the objective change that is common to the arms:
+
+    gap(arm) = logpost(arm) - logpost(INCUMBENT of THIS run)
+
+- **C1′ — REPRODUCTION, in gaps.** OCEAN_only **+12.568**, LAND_mid **−29.755**, LAND_hi **−43.600**
+  (27j and 27p, each minus its own INCUMBENT −1546.195). Tolerances unchanged: 0.10 / 0.30 / 0.30.
+  INCUMBENT is 0 by construction and so drops out as a gate — its absolute value is instead
+  REPORTED as the measurement of the objective shift.
+- **C2′ — NESTING, in gaps.** gap_free(arm) ≥ gap_pinned(arm) − 0.02, against 27q's own gaps
+  (LAND_mid −80.420, LAND_hi −162.143, OCEAN_only +12.535, JOINT_mid −33.415, JOINT_hi −78.720).
+- **The as-registered absolute-form results are REPORTED ANYWAY**, next to the gap form, so the size
+  of the objective shift is visible rather than hidden by the repair.
+
+**⚠ THE RESIDUAL RISK IS NAMED AND WILL BE MEASURED, NOT ASSUMED.** Gap form is exact only if the
+option-5 reweighting contributes the SAME amount in every arm. `sigma_eff` is a function of `h_ml`
+ALONE, and `h_ml` is FROZEN at 96.4737 m in every arm here, so the reweighting is fixed; but the
+ocean-gradient RESIDUAL could still respond to the seasonal slice. **Gate C7: the ocean-gradient
+rows' by-stream loglik must vary by ≤ 0.05 across all six arms.** If it varies more, the gap-form
+comparison to 27j/27p is contaminated too and NO cross-run gate is read.
+
+**C4 is affected only at second order** — it is a ratio of within-run differences, and both its
+numerator and denominator are computed entirely inside this run. The cross-run part of C4 is the
+comparison to 42.9 / 43.7 %, which inherits whatever C7 measures.
