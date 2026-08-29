@@ -2,6 +2,63 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-29c — **THE PAIR IS (GROSS × PHASE), AND FOUR OWED DECISIONS ARE CLOSED**
+
+Marcus's ordered instruction: follow all five recommendations from the 08-29b decision list.
+
+### THE SCIENCE — a 12-second pre-check killed a 2×2 before it was pre-registered
+
+`calibration/diag_gross_cancellation_geometry.R`, prereg `30320c1`. The SH land channels at SPO are
+**152.9° apart** (NEP 1.3896 @ mo 10.15, respiration 0.0923 @ 5.05), so the net has a hard floor
+`a_NEP · sin(27.1°)` = **0.454 × gross**:
+
+> **THE MODEL CANNOT CANCEL MORE THAN 54.5 % OF ITS GROSS AT ANY RESPIRATION AMPLITUDE.
+> CT2022 needs 74.9 %.**
+
+Verified three ways — closed form 0.6320 vs 27n's 0.633; MEASURED minimum 0.6180 at 13.95 K
+(−2.2 %, profile turning after, as 27n's P2 predicted); `a_NEP` linear in the gross to 0.04 % with
+phase invariant to 0.000 mo. **At the CMIP6 gross A = 0.94 the floor is 1.1826 — ABOVE the observed
+0.683** (registered prediction ~1.19). ⇒ **correcting the gross makes the cancellation IMPOSSIBLE;
+a (gross, respiration) 2×2 is a guaranteed null.**
+
+**What is missing is 11.9° = 0.40 months of separation, and it has a FITTED lever.** θ is
+NON-MONOTONE in `seas_lag_p`, peaking at **176.1° at 2.75**, while `a_NEP` stays 1.37–1.43 — it
+rotates without rescaling. The needed **164.8°** sits between lag **2.00** (its profiled optimum)
+and **2.25** (its own `init`), against a mode that has drifted to **1.7677**.
+**⇒ THE PAIR IS (GROSS ↑, LAG ↑). NOT RUN.** Price the lag first — it is GLOBAL.
+
+⚠ **TRIED AND CORRECTED:** I pre-registered G5 as a MAGNITUDE gate ("does θ move?") for a
+DIRECTIONAL question ("can θ move UP?"). Its two-point sample returned 122.7° and 145.8°, both below
+the mode, and I read the sign backwards. **The profile refutes it — two points cannot see a hump.**
+G5 is scored as written; §5b is an ADDED measurement, not a moved gate.
+
+### THE DECISIONS (Marcus, 2026-08-29)
+
+1. **A CMIP6 ensemble value for `SEAS_NPP_AMP_SH` is AUTHORISED — diagnostic arms only**, never
+   shipped and never called an observational constraint. Shipped stays 0.5027, `status="data"`.
+2. **A diagnostic arm may leave a bracket — for MEASUREMENT, not adoption.** Both are recorded in
+   prereg 29c §0 and re-stated at the foot of every run.
+3. **RATIFIED: do NOT adopt `refit_20260828_sigma_eff`.** `ccx_mode_file()` stays on `from90`; the
+   adoption chain's `quarantine`/`repoint`/`rerun` stages are not to be run. Outputs committed as
+   provenance. ⚠ **The pinned-96 successor is NOT launchable as a config change** — `ARM_HML_BOUND`
+   is marked PROVENANCE ONLY since `2153bd6` and the driver's unbounded block is unconditional, so
+   it needs a reviewed NEW constant; a BOUND (with prior renormalisation, the source of the −1.5805
+   offset) is a different object from a PIN; and four Julia workers were saturating the machine.
+   **QUEUED, NOT LAUNCHED.**
+4. **`test-mode-file.R` — the suite is GREEN again.** (a) declared exemption for
+   `diag_hml_seasonal_limbs.R`, a two-mode comparison `ccx_mode_file()` cannot express by
+   construction; the per-FILE cost of that mechanism is documented and a sixth entry should force a
+   per-LINE marker. (b) the `pin90`-vs-canonical trap **restated in GAP form**: the stored ordering
+   (**+0.113**, against a measured objective drift of 0.081 — only 1.4× margin) is asserted as the
+   TRAP, and the load-bearing assertion now recomputes BOTH arms on ONE objective, getting
+   **−11.497** against the pin's +11.6698 `fert_k` prior credit — **1.5 % apart, so it asserts the
+   MECHANISM**, and fails if the trap's cause changes rather than if two numbers cross.
+5. **`diag_landed_gap_streams.R` QUARANTINED, not re-pointed.** Every arm it reads predates
+   `2153bd6`; its GATE 1 reproduces STORED logposts so widening fails it by construction. The driver
+   is kept in place, readable, and now HARD-STOPS with the reason; its output moved to
+   `outputs/quarantine/20260829_preadoption_landed_gap/` with a README. **No replacement — the
+   question must be re-asked post-adoption.**
+
 ## 2026-08-29b — **THE CONTROLLED `q10` TEST: THE RECOVERY FRACTION IS NOT A CHANNEL PROPERTY**
 
 Step 1 of the 08-29 handoff's ordered list, and it CLOSES the confound the OPPOSITE way to the
