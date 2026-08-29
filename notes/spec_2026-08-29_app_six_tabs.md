@@ -16,7 +16,15 @@
 **③ Future projections** — the van Vuuren scenarios, our model compared to **FaIR** and **MAGICC**.
 
 **④ Emission pulses** — using **a tracer**, so we can see total atmospheric concentration versus
-**which box of the model it ends up in**.
+**which box of the model it ends up in**. **DECIDED 2026-08-29 — THREE charts:**
+1. **top: total atmospheric CO₂**;
+2. **what FRACTION OF THE TRACER is in which box**;
+3. **how much ADDED CO₂ is in each box** — *"if it doesn't add too much complexity"*.
+
+⚠ **Charts 2 and 3 are exactly the LABEL and the PERTURBATION**, the two things §4 warns differ by
+**2.8× in the atmosphere at 100 yr**. Specifying them as separate charts is the right resolution —
+**they must carry separate captions saying which question each answers**, and chart 3 is worth the
+complexity precisely because it is the one that answers "how much extra CO₂ is left".
 
 **⑤ Hemispheric effects** (form TBD).
 
@@ -69,6 +77,19 @@ counterfactual and nonsense as a physical state; the tab should say so rather th
 **⚠ No recalibration is needed.** The model is calibrated with everything on; the checkboxes are
 counterfactual RUNS of the calibrated model, not re-fits. Say this in the tab so nobody reads a
 checkbox state as "the model refitted without volcanoes".
+
+## 3b. DECIDED (Marcus, 2026-08-29)
+
+**The GMST decomposition uses a Foster–Rahmstorf-style REGRESSION as the primary method**, with FaIR
+available as a cross-check: *"FaIR doesn't have ENSO, so it could serve as the 'ENSO-free' control.
+But a Foster–Rahmstorf-style regression might be better."* ⇒ **regression is primary; FaIR's
+ENSO-free run is a validation of the volcanic and trend components, not the source of the ENSO one.**
+
+**More tabs are acceptable** — the six are not a ceiling, so "What if…?" and "Under the hood" may
+survive as ⑦/⑧ rather than being folded.
+
+**⚠ TAB ⑤ (hemispheric) IS DEFERRED UNTIL THE COMPONENT IS FIXED.** Marcus: *"don't build the
+hemispheric tab until we've fixed it."* ⇒ it is gated behind plan items ③/④.
 
 ## 4. ⚠ THE TRAP IN ④, ALREADY MEASURED
 

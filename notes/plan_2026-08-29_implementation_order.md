@@ -1,6 +1,20 @@
 # PLAN 2026-08-29 — **THE ORDER TO IMPLEMENT THE CHANGES**
 # Recommendation, with the reasoning and the dependencies. **Marcus's call to approve or reorder.**
 
+## ⇒ APPROVED (Marcus, 2026-08-29), WITH ONE CHANGE
+
+**"Then go ahead with volcanic diffuse-light followed by the objective C1 and the seasonal tau_ex.
+Hold off on four-box."**
+
+⇒ **① → ② → ③ approved and in flight. ④ (four-box) is HELD — do not start it.** ⑤ (per-box NPP lag)
+is unchanged in position and therefore also waits on ③. The hemispheric TAB is likewise deferred
+until the component is fixed.
+
+**STATUS: ① IS DONE** (2026-08-29, `328cdb8`) — see
+`notes/collect_2026-08-29g_diffuse_light_landed.md`. Mechanism wired R+C++ with tests, `gamma_diff`
+defaults to 0 so nothing existing moved, and **r rises 0.571 → 0.625**. ⚠ Not adopted: the frozen
+cost needs a CONDITIONAL profile first. **② is next.**
+
 ## 0. THE SEQUENCING PRINCIPLE
 
 **Every structural change makes every fitted vector non-comparable and costs an ~18 h refit** (this
