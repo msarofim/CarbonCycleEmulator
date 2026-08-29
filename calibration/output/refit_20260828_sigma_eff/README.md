@@ -62,3 +62,48 @@ design gates (`diag_design_gates_at_mode.R`, `diag_design_gates_unscored.R`, `di
 no gate verdict is current;  5. re-run the 4 banner-flagged mirror diagnostics unbounded.
 
 ⚠ The harness offset −1.5805 is a PRE-ADOPTION number and is not current.
+
+---
+
+# ⚖ RATIFIED 2026-08-29: **DO NOT ADOPT.** (Marcus)
+
+`handoff_2026-08-29` §3 recommended against adopting this refit; **Marcus ratified that on
+2026-08-29.** The recommendation and the ratification rest on the same measurements:
+
+- The refit **CONVERGED** — cycle 2 gained exactly 0.0000, NM restarts and BFGS polish both gain
+  zero from the cycle-1 mode. This is a legitimate posterior mode of the adopted objective.
+- **But the +4.06 is ENTIRELY PRIOR CREDIT and the LIKELIHOOD IS WORSE by 1.199**, and `h_ml`
+  = 35.38 m moves ocean structure the **WRONG WAY**: at fixed `sst_seas_amp_SH`, 96 → 35 m takes
+  the SH ocean limb from 58.7 % to **49.4 %** of observed — on a defect that needs a DOUBLING —
+  and rotates its phase from 4.15 to 3.90 mo, further from the observed 8.52.
+  (`diag_hml_seasonal_limbs.R`, `diag_hml_sst_elasticity.R`; memory `hml_shallow_is_prior_credit`.)
+
+**⇒ `ccx_mode_file()` STAYS ON `from90`.** `run_post_refit_adoption.R` stages `quarantine`,
+`repoint` and `rerun` are **NOT to be run** for this refit; only `--stage=check` (5/5) and
+`--stage=read` have ever been run, and that remains correct.
+
+**These outputs are kept and committed as PROVENANCE** (`042a0df`) — they are the evidence for the
+non-adoption and the regression baseline for any future h_ml work. Never delete them.
+
+## THE SUCCESSOR CANDIDATE IS NOT A CONFIG CHANGE — READ THIS BEFORE QUEUEING IT
+
+`handoff_2026-08-29` §3 names the candidate: **a refit with `h_ml` PINNED at ~96**, keeping option
+5's σ-inflation while denying it the anti-physical lever. **It cannot simply be launched.** Checked
+2026-08-29:
+
+1. **There is no switch.** `run_modefind_pump_arms.R:111` still defines `ARM_HML_BOUND` but marks it
+   **"⚠ PROVENANCE ONLY since 2026-08-28 — nothing may bound h_ml with this"**, and the driver's
+   §"h_ml IS **UNBOUNDED** FOR THIS REFIT" block is unconditional. Re-bounding therefore needs a
+   **reviewed code change** introducing a NEW named constant with its own justification — reusing
+   the retired one would be the retired objective wearing the new one's clothes, which is precisely
+   what `2153bd6` set out to stop.
+2. **A bound is not a pin.** The 08-16g mechanism BOUNDED `h_ml` to [85, 120] **and renormalised its
+   prior over that band** — that renormalisation is what produced the −1.5805 offset constant. A
+   true pin at 96.47 is a different object again (one fewer d.o.f.), and which of the two is wanted
+   is itself a decision, not an implementation detail.
+3. **The machine was busy.** At 2026-08-29 10:30 four Julia workers were each at ~99 % CPU (load
+   6.32) — the SLR/BRICK side. An 18 h refit launched on top of that slows both jobs and the ETA
+   stops meaning anything (memory `eta_in_days_is_not_a_slow_run`).
+
+**⇒ QUEUED, NOT LAUNCHED**, pending (a) the choice of bound-vs-pin, (b) the reviewed constant, and
+(c) a free machine.
