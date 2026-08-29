@@ -2,6 +2,78 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-28h — **THE OWED REFIT IS LAUNCHED; the post-refit chain is written and tested ahead of it**
+
+**The 21-parameter refit onto the post-option-5 objective is RUNNING** —
+`calibration/output/refit_20260828_sigma_eff/`, launched 19:44, ~18 h, production budget,
+`h_ml` UNBOUNDED, BLAS pinned to one thread, run from a FROZEN copy of the driver so the tracked
+one stays editable ([[never_edit_a_running_script]]). Warm-started from a byte copy of the
+incumbent canonical mode: `par_mode` is band-INDEPENDENT and is re-encoded under this run's table,
+so warm-starting ACROSS the objective change is safe where reusing `u_mode` would not be.
+Gates H1/H2/H3 pass in the log, and the warm start reads −1544.6 against a file that says −1544.6
+— a MATCHED read, which is the only honest form of that comparison.
+
+**The launch was gated on the machine, not on the calendar.** The 08-28c handoff left it open
+because a Julia SLR job was running on this Mac; that job had finished, checked before launching
+rather than assumed ([[eta_in_days_is_not_a_slow_run]]).
+
+**The seeded mode rds is deliberately NOT committed.** It is the incumbent's bytes today and the
+driver overwrites it in place, so committing it now would record a result that does not exist.
+
+### `calibration/run_post_refit_adoption.R` — §4.2–4.5 as ONE command, written while waiting
+
+Five stages in the only safe order: `check` (refuse to start on an unfinished refit), `read`,
+`quarantine`, `repoint`, `rerun`. Written now, deliberately: the work is identical either way, and
+prepared against a handoff still in context it is reviewable, where reconstructed at the end of an
+18 h wait it is four chances to skip a step.
+
+- **`check` does not trust the mode file's EXISTENCE.** The directory was SEEDED with a copy of
+  the incumbent, so the file has been there since 19:43 and proves nothing; what discriminates is
+  its mtime against the incumbent's, plus the log ending in the comparison write, plus
+  `hml_bound` recording the SHIPPED support rather than the retired band — if the refit had written
+  `[85, 120]` there, every downstream `ccx_mode_params()` decode would silently be wrong.
+- **`read` exists so an `h_ml` move cannot be reported without its decomposition.** It re-evaluates
+  BOTH vectors under the CURRENT objective — the stored logposts belong to two different objectives
+  and cannot be subtracted — and splits Δlogpost into prior / jacobian / loglik, naming the
+  per-parameter movers. It prints a warning, by construction, when the total rises while the
+  likelihood falls: that is the smoke test's exact signature (+4.060 total, −1.201 loglik, the whole
+  gain prior credit on `sst_seas_amp_SH`/`_NH`) and it must not be read as a better fit.
+- **`repoint`'s three `R/paths.R` edits are exactly-one-match or they refuse.** MUTATION-TESTED
+  against a copy: the guard correctly refuses at 0 matches and at 2, and the rewrite parses, sources,
+  and satisfies all three structural invariants `test-mode-file.R` asserts ([[mutation_test_gates]]).
+- **`rerun` runs the Hessian pair and the three design gates, and REFUSES to run the four mirror
+  diagnostics.** They still read the retired band; re-running them as they stand would file
+  pre-adoption numbers beside post-adoption ones, which is worse than not running them because the
+  output would look current. It reports which still carry it.
+- **`recompute_hessian.R` is called WITHOUT `--update`** — it writes its own `_hess.rds` and does
+  not mutate the fresh mode file. Overwriting a mode's second-order block is a decision to take
+  after reading its gates, not a side effect.
+
+### `CCX_MODE_RETIRED` now carries a reason PER ARM (`R/paths.R`, `test-mode-file.R`)
+
+**Done first, because without it the repoint could not state its own cause.** The retirement reason
+lived in `ccx_mode_file()`'s error as ONE hardcoded sentence — the 2026-08-25f isotope fix
+(`6bda464`), quarantined under `20260825_seas_isotope_rectification/`. That was correct while a
+single objective change had retired every arm. Option 5 (`2153bd6`) is a SECOND one, so the shared
+sentence would have told a reader the wrong cause and pointed at the wrong directory. Entries now
+carry their own cause commit and quarantine path; the error composes from them.
+
+`test-mode-file.R`'s retired-arm test was checking every arm for the literal `"6bda464"`. That
+assertion generalises rather than relaxes: each entry must name a quarantine path AND a cause
+commit, whatever they are for that arm. A shared literal would have forced the next retirement to
+either state the wrong cause or edit the test — and "edit the test" is how a reason quietly stops
+being carried at all.
+
+**Left deliberately undone, and flagged in the driver rather than guessed:**
+- **`pin90` is as pre-adoption as `from90`, and the driver will not choose for you.** `repoint`
+  STOPS without `--retire-pin90` or `--keep-pin90`. Retiring is the correct semantics and breaks six
+  diagnostics LOUDLY (which is what the mode registry's own header argues for); keeping leaves a
+  vector fitted on a retired objective resolvable by name, which is the silent failure it exists to
+  prevent. A methodological choice, so it is not defaulted.
+- **`test-mode-file.R`'s `expect_gt(lp[["pin90"]], lp[[CCX_MODE_CANONICAL]])`.** Across the
+  objective change that comparison is MEANINGLESS, not merely false. Its premise needs rewriting,
+  not relaxing to green.
+
 ## 2026-08-28g — **OPTION 5 ADOPTED: the ocean-gradient rows are scored at every `h_ml`**
 
 **Marcus 2026-08-28: "Adopt option 5."** The `[85, 120]` skip is RETIRED. Suite **1164 -> 1203, 0 fail**.

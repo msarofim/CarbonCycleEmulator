@@ -69,12 +69,32 @@ CCX_MODE_FILES <- c(
 # The project rule is "the highest FREE arm wins regardless of name".
 CCX_MODE_PINNED <- c(from90 = FALSE, pin90 = TRUE)
 
-# The pre-fix names, kept ONLY so that asking for one gets the reason rather
+# The retired names, kept ONLY so that asking for one gets the reason rather
 # than a file-not-found. Everything here is quarantined and not comparable.
+#
+# EACH ENTRY CARRIES ITS OWN CAUSE AND ITS OWN QUARANTINE PATH, and that is not
+# decoration. Until 2026-08-28 the reason lived in ccx_mode_file()'s error
+# string as ONE hardcoded sentence -- the 2026-08-25f isotope fix (`6bda464`),
+# quarantined under 20260825_seas_isotope_rectification/ -- which was correct
+# while every retired arm had been retired by that one change. The project has
+# since had a SECOND objective change (option 5, sigma-inflation, 2026-08-28),
+# so the shared sentence would have told a reader the wrong cause and pointed
+# at the wrong directory for anything retired by it. A registry whose entries
+# cannot express why they are here has to be edited under pressure the first
+# time a second reason exists; this one is a one-line addition instead.
 CCX_MODE_RETIRED <- c(
-  N   = "arm N of the 2026-08-18/20 pump refit",
-  D   = "arm D of the 2026-08-18 pump refit",
-  ref = "the ABANDONED reference arm of refit_20260825f (its mode file is the PRE-FIX SEED)"
+  N   = paste("arm N of the 2026-08-18/20 pump refit, retired by the 2026-08-25f",
+              "seasonal-NEP isotope fix (`6bda464`), which changed the objective.",
+              "Quarantined under",
+              "calibration/output/quarantine/20260825_seas_isotope_rectification/"),
+  D   = paste("arm D of the 2026-08-18 pump refit, retired by the 2026-08-25f",
+              "seasonal-NEP isotope fix (`6bda464`), which changed the objective.",
+              "Quarantined under",
+              "calibration/output/quarantine/20260825_seas_isotope_rectification/"),
+  ref = paste("the ABANDONED reference arm of refit_20260825f (its mode file is the",
+              "PRE-FIX SEED, not a result), retired by the 2026-08-25f seasonal-NEP",
+              "isotope fix (`6bda464`), which changed the objective. Quarantined under",
+              "calibration/output/quarantine/20260825_seas_isotope_rectification/")
 )
 
 #' Absolute path to a fitted mode file, by name
@@ -89,11 +109,8 @@ ccx_mode_file <- function(mode = CCX_MODE_CANONICAL) {
   if (file.exists(mode)) return(mode)
   if (mode %in% names(CCX_MODE_FILES)) return(ccx_path(CCX_MODE_FILES[[mode]]))
   if (mode %in% names(CCX_MODE_RETIRED))
-    stop("mode '", mode, "' (", CCX_MODE_RETIRED[[mode]], ") was fitted BEFORE ",
-         "the 2026-08-25f seasonal-NEP isotope fix (`6bda464`), which changed ",
-         "the objective. It is quarantined under ",
-         "calibration/output/quarantine/20260825_seas_isotope_rectification/ ",
-         "and is NOT comparable with anything fitted since. The canonical mode ",
+    stop("mode '", mode, "' is RETIRED: ", CCX_MODE_RETIRED[[mode]],
+         ". It is NOT comparable with anything fitted since. The canonical mode ",
          "is '", CCX_MODE_CANONICAL, "'; see ccx_mode_file().")
   stop("unknown mode '", mode, "': expected a path, or one of ",
        paste(sprintf("'%s'", names(CCX_MODE_FILES)), collapse = ", "), ".")

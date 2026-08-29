@@ -63,11 +63,25 @@ test_that("ccx_mode_file refuses the quarantined arm names WITH THE REASON", {
   # A file-not-found would be loud but uninformative, and would invite someone
   # to "fix" it by pointing at the quarantine directory -- which is exactly the
   # move the quarantine exists to prevent. The error has to carry why.
+  #
+  # ASSERTED PER ARM AGAINST ITS OWN REGISTRY ENTRY, not against one shared
+  # literal. Until 2026-08-28 this checked every arm for the string "6bda464",
+  # which was right only while a SINGLE objective change had retired all of
+  # them. Option 5 (2026-08-28) is a second one, with a different cause commit
+  # and a different quarantine directory, so a shared-literal test would have
+  # forced the next retirement to either state the wrong cause or edit the test
+  # -- and "edit the test" is how the reason quietly stops being carried at all.
+  # What is required of an entry is therefore structural: it must name WHERE the
+  # vector went and WHICH commit caused it, whatever those are for that arm.
   for (a in names(CCX_MODE_RETIRED)) {
     e <- tryCatch({ ccx_mode_file(a); NULL }, error = function(e) conditionMessage(e))
     expect_true(!is.null(e), info = paste("retired arm", a, "resolved"))
-    expect_match(e, "quarantine", info = paste("arm", a, "error omits the reason"))
-    expect_match(e, "6bda464",   info = paste("arm", a, "error omits the fix commit"))
+    expect_match(e, CCX_MODE_RETIRED[[a]], fixed = TRUE,
+                 info = paste("arm", a, "error does not carry its OWN reason"))
+    expect_match(CCX_MODE_RETIRED[[a]], "quarantine/", fixed = TRUE,
+                 info = paste("arm", a, "reason does not say WHERE it was quarantined"))
+    expect_match(CCX_MODE_RETIRED[[a]], "`[0-9a-f]{7,}`",
+                 info = paste("arm", a, "reason does not name the CAUSE commit"))
   }
   expect_error(ccx_mode_file("no_such_arm"), "unknown mode")
   expect_error(ccx_mode_file(c("from90", "pin90")), "ONE mode name")
