@@ -278,11 +278,21 @@ if ("read" %in% PRA_STAGE) {
     attr(F, "luc_scale") <- p_new$luc_scale
     ccx_ocean_grad_scored(ccx_run_fast(sp, F)$out, sp)
   })
+  # ccx_ocean_grad_scored() returns a LIST (dic, d13c, alk, sd_eff, h_ml), not a
+  # data.frame -- `og[, cols]` fails with "incorrect number of dimensions". The
+  # observed sigmas come from ccx_ocean_gradient_target(), as
+  # run_modefind_pump_arms.R:228-231 does it.
   if (!is.null(og$sd_eff)) {
+    tg <- ccx_ocean_gradient_target()
     cat("\nocean-gradient rows at the landed h_ml (option 5's own rows):\n")
-    print(og[, intersect(c("name", "obs", "model", "sd", "sd_eff"), names(og))])
-    cat(sprintf("   sd_eff/sd_obs = %s\n",
-                paste(sprintf("%.3f", og$sd_eff / og$sd), collapse = " / ")))
+    cat(sprintf("   %-5s model %10.4f   target %10.4f   sd %8.4f   sd_eff %8.4f   ratio %.3f\n",
+                c("dic", "d13c", "alk"),
+                c(og$dic, og$d13c, og$alk),
+                vapply(c("dic","d13c","alk"), function(k) tg[[k]]$target, numeric(1)),
+                vapply(c("dic","d13c","alk"), function(k) tg[[k]]$sd,  numeric(1)),
+                og$sd_eff[c("dic","d13c","alk")],
+                og$sd_eff[c("dic","d13c","alk")] /
+                  vapply(c("dic","d13c","alk"), function(k) tg[[k]]$sd, numeric(1))))
   }
 
   # kz has railed at its bracket top in every run for weeks. State it either way.
