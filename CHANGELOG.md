@@ -38,7 +38,7 @@ suite ran — I had reported before running it. Extended to 17 (the deliberate e
 force). A second failure, `test-so-entrainment.R`'s climate inventory gate, forced a real decision:
 **volcanic AOD IS a climate column and `ccx_hold_climate()` now freezes it**, on the argument that
 the function exists to remove interannual variability and AOD is now a source of it.
-Behaviour-neutral while `gamma_diff` = 0.
+Behaviour-neutral while `gamma_diff` = 0. **Suite GREEN afterwards: 1226 pass / 2 skip / 0 fail.**
 
 ### Decisions recorded
 GMST decomposition uses a **Foster–Rahmstorf-style regression as primary**, FaIR as cross-check;
