@@ -2,6 +2,47 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-29f — **AOD IN HAND, ENSO PROFILED, AND THE ORDER DECIDED**
+
+### The cheap test (Marcus's "do this first"): the two defects are INDEPENDENT
+Gate 7 moves **+0.001 GtC/yr** across the whole seasonal-fix family where it needs **−1.148**, and
+the path is structurally absent — `seas_r_norm` removes the Jensen rectification by construction.
+Named in the prereg BEFORE the run so the null could not be mistaken for a measurement.
+
+### An AOD series
+`data/forcing_volcanic_aod.rds` from NASA GISS **`tau_reff_CMIP7-2-2-1.nc`** (1.23 MB) — CMIP7
+chosen **like-for-like with the project's FaIR calib 1.6.0 + CMIP7 drivers**. Global + NH + SH,
+monthly, exact sin(lat) band weights. Gates pass: Pinatubo peak global AOD **0.1070** (lit.
+0.08–0.20), quiet-year 2005 0.0043, and the two largest events come out as **Krakatau 1884 (0.110)
+and Pinatubo (0.107)**, correctly. ⚠ **Pre-1850 is ZERO — Laki 1783, 1808/09 and TAMBORA 1815 are
+missing** (need eVolv2k); 2024 held at 2023-12. Provenance in `download_data.R` + `MANIFEST.csv`.
+
+### `gamma_enso` profiled: louder, not righter
+Across γ = 0.4 → 4.0 (sd 0.223 → 0.953 against an observed 0.900) **r stays flat at 0.54–0.57.**
+The frozen argmax is **exactly** the fitted 0.85119 — the fit was asked and refuses, at **−62.6
+frozen / −61.3 conditional: MODERATE, not the PROHIBITIVE I predicted.** Largest objector is
+**`gcb_land_sink` −21.72 (35 %)**, a new untested link to gate 7.
+⇒ **the missing 2/3 of the interannual variance is NOT ENSO amplitude**, and the biggest single
+miss — Pinatubo — needs **diffuse-light fertilisation**, since the thermal path can supply ≤ 7 %.
+
+⚠ **Two more of my own gate verdicts were wrong and are corrected in the collect note**: E1's
+"the response SATURATES" is an artefact of quadrature-subtracting *correlated* components (on a
+valid estimator the response is linear to **0.25 %**), and the closing "the fit was never asked"
+contradicts E2, which shows it was. Third instance today of a verdict string asserting a mechanism
+the measurement does not establish.
+
+### The order (`notes/plan_2026-08-29_implementation_order.md`)
+① volcanic diffuse-light (additive, largest miss, AOD in hand, the tool needs it) → ② make the
+objective C1 in `h_ml` **before any refit** → ③ **seasonal `tau_ex`** as the CHEAP test of the
+gradient-vs-lag tension → ④ 4-box atmosphere **only if ③ fails** → ⑤ per-box NPP lag (**demoted**:
+③/④ change what "per hemisphere" means) → ⑥ gate 7 → ⑦ ENSO response shape (lowest).
+
+### The six-tab spec (`notes/spec_2026-08-29_app_six_tabs.md`)
+Recorded as requirements, mapped onto the existing app, with three flags: the four checkboxes need
+an **attributable GMST decomposition** and **FaIR supplies the volcanic half but NOT ENSO** (internal
+variability — needs Foster–Rahmstorf-style regression); the pulse tab must show **label and
+perturbation separately** (2.8× apart at 100 yr); and "What if…?" / "Under the hood" are displaced.
+
 ## 2026-08-29d — **THE LAG IS PROHIBITIVE, AND THE BLOCKER IS MODEL STRUCTURE**
 
 `calibration/diag_price_the_lag.R`, prereg `1f3731c`. Q0 PASS on all six controls.
