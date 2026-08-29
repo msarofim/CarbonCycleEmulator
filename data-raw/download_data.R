@@ -176,6 +176,22 @@ cat("[5] ENSO indices\n")
 # modern MEI and a long Nino 3.4 record are pulled; the choice of which
 # drives the model is a flagged methodological decision (see CHANGELOG).
 
+# ---------------------------------------------------------------------
+# Volcanic stratospheric aerosol (added 2026-08-29)
+# ---------------------------------------------------------------------
+cat("[*] Volcanic stratospheric aerosol optical depth\n")
+
+fetch("volcanic_aod",
+      "https://data.giss.nasa.gov/modelforce/strataer/data/tau_reff_CMIP7-2-2-1.nc",
+      "tau_reff_CMIP7-2-2-1.nc",
+      paste("NASA GISS stratospheric aerosol dataset, CMIP7 version 2-2-1",
+            "(tau = stratospheric AOD, reff = effective radius), as distributed at",
+            "data.giss.nasa.gov/modelforce/strataer/. Underlying reconstruction:",
+            "the CMIP7 volcanic forcing record."),
+      paste("24-band latitude grid, monthly 1850-01..2023-12. CHOSEN FOR LIKE-FOR-LIKE",
+            "with this project's FaIR calib 1.6.0 + CMIP7 drivers (2026-08-28).",
+            "PRE-1850 IS ABSENT: Laki 1783 / 1808-09 / Tambora 1815 need eVolv2k."))
+
 fetch("meiv2",
       "https://psl.noaa.gov/enso/mei/data/meiv2.data",
       "meiv2.data",
