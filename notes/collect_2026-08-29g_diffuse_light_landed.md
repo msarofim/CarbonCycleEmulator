@@ -39,9 +39,14 @@ it. `f[15]` and `f[16]` then read **past the row buffer** and returned adjacent 
     C++  gamma_diff 0 -> 327.9825 ; 2 -> 327.9821 ; effect -0.0004 ppm   <- garbage
     R    gamma_diff 0 -> 327.9825 ; 2 -> 323.8720 ; effect -4.1105 ppm   <- correct
 
-**Nothing errored. No test failed. The effect was simply ~10⁴× too small.** R↔C++ parity caught it
-(9.4 ppm gap) and nothing else would have. After the fix, parity is **4.5e-13 ppm** with the
-mechanism ON. **The new test's third case is the mutation test for exactly this**: a non-zero
+**Nothing errored and the effect was simply ~10⁴× too small.** R↔C++ parity caught it (9.4 ppm gap);
+after the fix parity is **4.5e-13 ppm** with the mechanism ON.
+
+⚠ **CORRECTION (added after the full suite ran): I wrote "and nothing else would have". THAT IS
+FALSE.** `tests/testthat/test-forcing.R:127` carries `expect_length(CCX_FORCING_COLS, 15L)` with the
+comment *"src/ccx_core.cpp's N_FORCING must match this length"* — **the paired half of the pin, and
+it failed the moment the suite was run.** The repo's guard worked; I had simply not run the suite
+before writing the claim. **Two further failures I asserted away by reporting too early** — see §6. **The new test's third case is the mutation test for exactly this**: a non-zero
 `gamma_diff` must MOVE the C++ answer — a test that only checked "0 changes nothing" would have
 passed throughout the bug.
 
@@ -91,3 +96,25 @@ The AOD series starts in **1850**, so **Laki 1783, the 1808/09 unknown and TAMBO
 and a 1750-start run sees a volcanically silent first century. The largest eruption in the model's
 whole window is therefore **Krakatau 1884**, not Tambora. **"The year without a summer" is not
 available as a teaching story until eVolv2k is added.**
+
+
+## 6. ⚠ TWO TEST FAILURES I REPORTED PAST, AND WHAT THEY DECIDED
+
+I described the implementation as sound while the full suite was still running. It came back
+**1219 pass / 2 skip / 2 FAIL**, and both failures were mine and both were correct:
+
+1. **`test-forcing.R:127` — the positional contract pin.** `expect_length(CCX_FORCING_COLS, 15L)`,
+   annotated *"src/ccx_core.cpp's N_FORCING must match this length"*. **This is the guard that
+   should have caught the N_FORCING bug, and it would have.** Extended to 17 with the two new
+   positions asserted — **the deliberate edit the pin exists to force, not a relaxation.**
+2. **`test-so-entrainment.R:143` — the climate inventory gate**, whose own comment says *"A new
+   column outside this list is a DECISION about whether `ccx_hold_climate()` should freeze it, and
+   this is where it gets made."*
+
+**THE DECISION: volcanic AOD IS a climate column and `ccx_hold_climate()` now freezes it.** The
+argument is the FUNCTION'S PURPOSE rather than the column's pathway — `ccx_hold_climate()` exists to
+remove interannual variability from a run, and once `gamma_diff` is non-zero AOD is a source of
+exactly that; leaving it out would let a "climate held" run keep taking volcanic NPP pulses and
+silently break the guarantee its callers rely on. The counter-argument — that its pathway is
+radiative→NPP, not thermal, which would group it with instruments like `sink_ocean` — is real but
+loses to the purpose. **Behaviour-neutral today**, since `gamma_diff` defaults to 0.

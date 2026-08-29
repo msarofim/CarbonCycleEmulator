@@ -126,7 +126,9 @@ test_that("P0.3 -- ccx_hold_climate() holds every climate FORCING COLUMN", {
   # division is the whole content of the gap found in 27c.
   sp <- ccx_spinup(ent_p)
   F  <- ccx_build_forcing("historical", c(1900, 1990), prod_c14 = sp$prod_c14)
-  climate_cols <- c("gmst", "enso", "sst_anom_NH", "sst_anom_SH")
+  # aod_NH/aod_SH added 2026-08-29 and DECIDED to be climate -- see the note in
+  # ccx_hold_climate(). The decision was made HERE, as this gate intends.
+  climate_cols <- c("gmst", "enso", "sst_anom_NH", "sst_anom_SH", "aod_NH", "aod_SH")
   H <- ccx_hold_climate(F, i = 1L)
   for (cc in climate_cols) {
     expect_true(!is.null(H[[cc]]), info = cc)

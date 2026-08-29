@@ -124,7 +124,16 @@ test_that("the C++ forcing column contract is positional and complete", {
   # NaN -- it has a well-defined off state, and a NaN here would poison the
   # mixed-layer tendency instead of falling back to anything.
   expect_identical(CCX_FORCING_COLS[15], "sink_ocean")
-  expect_length(CCX_FORCING_COLS, 15L)
+  # aod_NH/aod_SH APPENDED 2026-08-29 (volcanic stratospheric AOD), same
+  # discipline again; "absent" is 0, a quiet stratosphere.
+  # ⚠ THIS PIN IS THE PAIRED HALF OF src/ccx_core.cpp's N_FORCING AND IT DID ITS
+  # JOB: the 2026-08-29 commit appended the two columns and bumped N_FORCING
+  # only after R<->C++ parity flagged a garbage read. THIS test is what should
+  # have caught it first, and it would have -- it was simply not run yet.
+  # Updating the length here is the DELIBERATE edit the pin exists to force,
+  # not a relaxation.
+  expect_identical(CCX_FORCING_COLS[16:17], c("aod_NH", "aod_SH"))
+  expect_length(CCX_FORCING_COLS, 17L)
   F <- ccx_build_forcing("historical", c(1900, 1910), prod_c14 = 0)
   expect_identical(colnames(ccx_cpp_forcing(F)), CCX_FORCING_COLS)
   expect_error(ccx_cpp_forcing(F[, setdiff(names(F), "d13c_foss")]),

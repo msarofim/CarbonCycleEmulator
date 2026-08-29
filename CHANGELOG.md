@@ -32,6 +32,14 @@ of −4.1, nothing errored, no test failed.** R↔C++ parity caught it (now 4.5e
 on). The new test's third case is the mutation test: **turning the mechanism ON must MOVE the
 answer** — a test that only checks the OFF value could never see this.
 
+⚠ **CORRECTION.** I first wrote that "nothing else would have caught it". **False**:
+`test-forcing.R:127` pins `length(CCX_FORCING_COLS)` against `N_FORCING` and failed as soon as the
+suite ran — I had reported before running it. Extended to 17 (the deliberate edit the pin exists to
+force). A second failure, `test-so-entrainment.R`'s climate inventory gate, forced a real decision:
+**volcanic AOD IS a climate column and `ccx_hold_climate()` now freezes it**, on the argument that
+the function exists to remove interannual variability and AOD is now a source of it.
+Behaviour-neutral while `gamma_diff` = 0.
+
 ### Decisions recorded
 GMST decomposition uses a **Foster–Rahmstorf-style regression as primary**, FaIR as cross-check;
 the pulse tab gets **three charts** (total CO₂; tracer fraction by box; added CO₂ by box — the last

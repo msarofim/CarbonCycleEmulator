@@ -924,7 +924,16 @@ ccx_sst_anom_from_gmst <- function(F) {
 #' hand; with the observed-SST columns that idiom silently leaves real SST
 #' warming in a "frozen" run. This is the one place that knows the full list.
 ccx_hold_climate <- function(F, i = 1L, value = NULL) {
-  for (cc in c("gmst", "enso", "sst_anom_NH", "sst_anom_SH")) {
+  # aod_NH/aod_SH added 2026-08-29. THE DECISION test-so-entrainment.R's
+  # inventory gate demands: volcanic AOD IS a climate column and IS frozen here.
+  # The argument is the FUNCTION'S PURPOSE, not the column's pathway -- this
+  # exists to remove interannual variability from a run, and once gamma_diff is
+  # non-zero AOD is a source of exactly that. Leaving it out would let a
+  # "climate held" run keep taking volcanic NPP pulses, silently breaking the
+  # guarantee every caller relies on. (Its pathway is radiative -> NPP rather
+  # than thermal, which is the argument for the other answer; the purpose wins.)
+  # Behaviour-neutral today, because gamma_diff defaults to 0.
+  for (cc in c("gmst", "enso", "sst_anom_NH", "sst_anom_SH", "aod_NH", "aod_SH")) {
     if (is.null(F[[cc]])) next
     F[[cc]] <- if (is.null(value)) F[[cc]][i] else value
   }
