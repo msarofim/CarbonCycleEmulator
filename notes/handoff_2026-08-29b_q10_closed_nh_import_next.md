@@ -190,3 +190,43 @@ reason. Then the (gross, lag) 2×2. [[gross_phase_not_amplitude]]
 - **The pinned-96 refit**: choose BOUND vs PIN, write the reviewed constant, wait for a free machine.
 - **`MEMORY.md` root 18.9 KB (soft 12)** — over for a fifth session. `INDEX_ccx_seas.md` is under
   (content 14.3 KB) after two trims today.
+
+
+---
+
+# ADDENDUM 2026-08-29d — **THE LAG IS PRICED, AND IT IS PROHIBITIVE FOR A STRUCTURAL REASON**
+
+`calibration/diag_price_the_lag.R`, prereg `1f3731c`, collect
+`notes/collect_2026-08-29d_the_lag_is_prohibitive_and_the_lag_is_global.md`. Repo at `4e6f789`.
+
+**PRICE: −838.32 conditional at lag 2.25** (frozen −1599.9, buy-back 48 %), −184.8 at 2.00, −1972.9
+at 2.50. 27n's lever cost −35 conditionally; **this is 24×**. ⚠ my registered "MODERATE, −20 to −60"
+was wrong by an order of magnitude.
+
+**THE NH PAYS 94 %** (`co2_seasonal_MLO` −587, `d13c_seasonal_MLO` −202), and the cause is model
+STRUCTURE verified at `src/ccx_core.cpp:386`: **`seas_lag_p` is a SCALAR** shifting NPP phase in BOTH
+hemispheres, while `seas_npp_amp[2]` and `seas_T_amp[2]` are already per-hemisphere arrays.
+
+⚠ **Q3 FAILED IN THE INFORMATIVE DIRECTION — THE FIT WANTS THE FIX.** At lag 2.25 it raised
+`seas_T_amp_SH` **1.0391 → 3.4945 unprompted**, taking SH-land **1.308 → 1.071** (1.92× → 1.57× obs);
+at 2.50, **0.890** (1.30×). **The SH defect is fixable and SELF-FIXING** — the geometry, not the
+rows' power, was blocking the exchange. [[one_lag_two_hemispheres]]
+
+## ⇒ NEXT STEP IS A DESIGN CALL, NOT A DIAGNOSTIC
+
+**Make the NPP lag hemisphere-specific: `seas_lag_p` → `seas_lag_p[2]`.** Then the SH rotates to
+θ ≈ 165–168° while the NH keeps its fitted 1.7677. **Prediction to pre-register: the NH's −788
+disappears, leaving ~−35 to −50 of SH-side cost against SH-land → ~1.07.**
+
+⚠ **It adds a 22nd calibrated parameter**, and `SEAS_T_LAG` (the respiration phase, also global,
+also compile-time at `ccx_core.cpp:168`) is an **equally valid place to open the same angle**.
+Which one — and whether to open it at all — is Marcus's. **NOT STARTED.**
+
+## STILL OPEN
+
+- ⚠ **A prior discrepancy, flagged not resolved**: `seas_T_amp_SH`'s prior gain measures **+90.66**
+  here where 27n recorded **+8.34** for the analogous move, while `ccx_prior_z()` returns −4.6387,
+  matching 27n's −4.64 σ. **Quote neither as "the prior credit" until settled.** Nothing depends on it.
+- **The pinned-96 refit**: two of its three blockers stand (no switch; BOUND-vs-PIN undecided). The
+  third is gone — the machine is free.
+- **`MEMORY.md` root ~19 KB (soft 12)**, over for a fifth session.
