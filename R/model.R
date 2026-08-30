@@ -390,6 +390,20 @@ CCX_FERT_MM  <- 1L    # NPP = NPP0 (1 + beta_max dchi/(K + dchi)) -- saturating
 #' WHAT SETTLES THAT; these are a default, not a calibration.
 CCX_FERT_FORM_DEFAULT <- CCX_FERT_MM
 
+# VOLCANIC DIFFUSE-LIGHT FERTILISATION, adopted 2026-08-29 (Marcus).
+# Fractional NPP enhancement per unit stratospheric AOD. Named here and used by
+# BOTH ccx_default_params() and ccx_cpp_par(), the same way CCX_FERT_FORM_DEFAULT
+# is, so R and C++ cannot disagree about what a parameter list without the field
+# means -- the divergence the bit-parity rule exists to prevent.
+#
+# ⚠ 0.25 IS AN ADOPTION, NOT A DEFAULT-PRESERVING VALUE. Everything fitted before
+# 2026-08-29 was fitted at 0 and is NON-COMPARABLE with anything fitted after.
+# Chosen at the CONDITIONAL price -7.42 (r 0.571 -> 0.624, and the r gain survives
+# refitting); gamma = 0.97, which matches the Pinatubo feature, costs 14x more and
+# fits the record WORSE. FACE-gated: the implied response moves 8.61% -> 8.87%,
+# still at the mature-forest end of the observed bracket.
+CCX_GAMMA_DIFF_DEFAULT <- 0.25
+
 #' The fertilisation multiplier on NPP0, as a function of atmospheric CO2.
 #'
 #' Factored out of ccx_deriv() so that diagnostics, the app and the design-target
@@ -807,7 +821,9 @@ ccx_default_params <- function() {
     # calibrated 21 comparable. Turning it on is an explicit act, and whether
     # it becomes a FITTED parameter is a separate decision (it is a
     # base_param, like ent_seas_amp_SH).
-    gamma_diff = 0,
+    # ⚠ ADOPTED AT 0.25 on 2026-08-29 -- see CCX_GAMMA_DIFF_DEFAULT. It is no
+    # longer the behaviour-preserving value, and that is deliberate.
+    gamma_diff = CCX_GAMMA_DIFF_DEFAULT,
     # ---- mechanism switch, NOT a calibrated parameter -----------------
     # FROZEN REVELLE. 0 = normal carbonate chemistry. 1 = the ocean's buffer
     # factor is held at its preindustrial value instead of rising as the ocean
@@ -1588,15 +1604,58 @@ ccx_pump_shape <- local({
       g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_deep.rds")),
                     error = function(e) NULL)
       if (is.null(g) || is.null(g$dic_profile)) return(NULL)
-      cache <<- g$dic_profile
+      pr <- g$dic_profile
+      # THE REMAP IS C1 IN EVERY LAYER BOUNDARY, ADOPTED 2026-08-29 (Marcus).
+      #
+      # It used to be a conservative OVERLAP INTEGRAL of the 25 m observed bins,
+      #     ov <- pmax(0, pmin(b, pr$bot) - pmax(a, pr$top))
+      # which is correct and conservative but treats the shape as piecewise
+      # CONSTANT inside a bin. Its antiderivative is then only piecewise LINEAR,
+      # so the layer mean (S(b)-S(a))/(b-a) has a SLOPE JUMP wherever a boundary
+      # crosses a bin edge. `h_ml` IS the first boundary and the deeper ones
+      # scale with it, so the log-posterior was not C1 in `h_ml`: 26 kinks over
+      # the live support [30,200], clustered on the bin edges (50/75/100/125/
+      # 150/175 m). That is the recorded reason there is no posterior --
+      # `h_ml` is the softest direction of a Hessian conditioned 1.11e6.
+      #
+      # THE FIX INTERPOLATES THE CUMULATIVE INTEGRAL, NOT THE SHAPE. The bin
+      # averages pin S EXACTLY at every bin EDGE, so a monotone C1 spline through
+      # those edges (monoH.FC -- S is monotone because shape >= 0) is C1 AND
+      # conservative: whenever a model layer spans whole bins this reproduces the
+      # old overlap answer to machine precision (3.3e-16). Interpolating the
+      # SHAPE through bin MIDPOINTS instead is C1 but NOT conservative (2.0e-3)
+      # and overshoots 4x harder -- measured, and rejected for that reason.
+      #
+      # ⚠ THIS IS NOT A PURE CODE FIX AND WAS NOT ADOPTED AS ONE. It moves the
+      # pump field by 9.6-15.8% of the median layer step (15.4% at the incumbent
+      # mode), and the export is a DIFFERENCE of adjacent layers, so that is the
+      # scale the pump uses. What a remap does BETWEEN bin edges is a SUB-BIN
+      # MODEL the data do not contain: this one exceeds its local 3-bin range in
+      # 10 of 29 intervals (worst 42% of a bin step at ~450 m, the thermocline),
+      # and the old piecewise-CONSTANT assumption is equally absent from the data
+      # and is exactly what made it kinked. Neither is "the observations".
+      # Priced in calibration/diag_hml_c1_remap_price.R; adopted by Marcus.
+      edge   <- c(pr$top[1], pr$bot)
+      s_edge <- c(0, cumsum((pr$bot - pr$top) * pr$shape))
+      cache <<- list(pr = pr, fS = stats::splinefun(edge, s_edge, method = "monoH.FC"),
+                     z0 = edge[1], z1 = edge[length(edge)],
+                     S0 = s_edge[1], S1 = s_edge[length(s_edge)],
+                     sh0 = pr$shape[1], sh1 = pr$shape[nrow(pr)])
     }
-    pr <- cache
+    cc <- cache
+    # Outside the observed span the shape is held FLAT, which reproduces the old
+    # overlap function's own behaviour there (a layer entirely below the deepest
+    # bin returned pr$shape[nrow(pr)]).
+    Scum <- function(z) {
+      if (z <= cc$z0) return(cc$S0 + (z - cc$z0) * cc$sh0)
+      if (z >= cc$z1) return(cc$S1 + (z - cc$z1) * cc$sh1)
+      cc$fS(z)
+    }
     zb <- c(0, cumsum(grid$dz))
     vapply(seq_along(grid$dz), function(k) {
       a <- zb[k]; b <- zb[k + 1]
-      ov <- pmax(0, pmin(b, pr$bot) - pmax(a, pr$top))   # overlap thickness
-      if (sum(ov) <= 0) return(pr$shape[nrow(pr)])
-      sum(ov * pr$shape) / sum(ov)
+      if (b <= a) return(cc$sh1)
+      (Scum(b) - Scum(a)) / (b - a)
     }, numeric(1))
   }
 })

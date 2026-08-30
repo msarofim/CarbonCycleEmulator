@@ -234,3 +234,64 @@ test_that("the C++ core is fast enough for MCMC", {
   # Budget is 50 ms/run so that 1e5 MCMC evaluations stay under ~1.5 h.
   expect_lt(el, 0.05)
 })
+
+test_that("the single-step flat forcing vector is complete, and AOD reaches the core", {
+  skip_if_no_cpp()
+  # ⚠ REGRESSION, 2026-08-29k. ccx_deriv_fast() builds a FLAT forcing vector that
+  # the C++ indexes BY POSITION against CCX_FORCING_COLS. When aod_NH/aod_SH were
+  # appended (08-29g) the matrix builder ccx_cpp_forcing() was extended and this
+  # single-step builder was NOT, so the core read TWO SLOTS PAST THE END of a
+  # 15-element vector. Nothing errored in either language. It stayed invisible
+  # because `gamma_diff` defaulted to 0 and the out-of-bounds value was
+  # multiplied by zero; ADOPTING gamma_diff = 0.25 is what exposed it, as a
+  # ~0.07 GtC/yr parity break in the NPP-fed pools.
+  p  <- ccx_default_params()
+  sp <- ccx_spinup(p)
+  F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
+
+  # 1. THE STRUCTURAL PROPERTY. Pin the builder's length to the declared layout,
+  #    so the NEXT appended column cannot repeat this by being forgotten here.
+  fa <- ccx_forcing_at(F, 1900)
+  flat <- local({
+    cl <- ccx_forcing_cum_luc(fa)
+    c(fa$e_foss$NH, fa$e_foss$SH, fa$e_luc$NH, fa$e_luc$SH, fa$gmst, fa$enso,
+      fa$c14_bomb, fa$c14_nuclear, fa$c14_cosmo, ccx_forcing_d13c_foss(fa),
+      cl$NH, cl$SH, fa$sst_anom_NH, fa$sst_anom_SH, fa$sink_ocean,
+      fa$aod_NH, fa$aod_SH)
+  })
+  expect_identical(length(flat), length(CCX_FORCING_COLS))
+
+  # 2. PARITY AT NON-ZERO gamma_diff -- the configuration the bug lived in.
+  #    Pinned at explicit values so this coverage does not move if the default
+  #    ever moves, which is exactly how the bug survived.
+  for (gd in c(0, 0.25, 0.97)) {
+    p$gamma_diff <- gd
+    for (yr in c(1800, 1900, 2000)) {
+      fy <- ccx_forcing_at(F, yr)
+      expect_equal(ccx_deriv(sp$y, yr, p, fy, sp$grid, sp$aux),
+                   ccx_deriv_fast(sp$y, yr, p, fy, sp$grid, sp$aux),
+                   tolerance = 1e-12)
+    }
+  }
+
+  # 3. MUTATION TEST -- a guard that passes is not a guard that works. Drive the
+  #    AOD to a value the record never reaches and confirm BOTH paths move
+  #    TOGETHER and by a lot. Under the bug the C++ read a slot the R path never
+  #    saw, so this is precisely what could not hold.
+  p$gamma_diff <- 0.25
+  fy <- ccx_forcing_at(F, 1900)
+  loud <- fy; loud$aod_NH <- 1.0; loud$aod_SH <- 1.0
+  dq <- ccx_deriv_fast(sp$y, 1900, p, fy,   sp$grid, sp$aux)
+  dl <- ccx_deriv_fast(sp$y, 1900, p, loud, sp$grid, sp$aux)
+  expect_gt(max(abs(dl - dq)), 1)                      # the core really sees it
+  expect_equal(ccx_deriv(sp$y, 1900, p, loud, sp$grid, sp$aux), dl, tolerance = 1e-12)
+
+  # 4. THE ABSENCE CONTRACT: a forcing with no AOD columns must equal aod = 0,
+  #    not garbage, in both paths.
+  none <- fy; none$aod_NH <- NULL; none$aod_SH <- NULL
+  zero <- fy; zero$aod_NH <- 0;    zero$aod_SH <- 0
+  expect_equal(ccx_deriv_fast(sp$y, 1900, p, none, sp$grid, sp$aux),
+               ccx_deriv_fast(sp$y, 1900, p, zero, sp$grid, sp$aux), tolerance = 1e-12)
+  expect_equal(ccx_deriv(sp$y, 1900, p, none, sp$grid, sp$aux),
+               ccx_deriv(sp$y, 1900, p, zero, sp$grid, sp$aux), tolerance = 1e-12)
+})

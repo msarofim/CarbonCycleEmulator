@@ -76,10 +76,15 @@ ccx_cpp_par <- function(p) {
   # core as the nutrient-limited model rather than as garbage.
   p$pump_mode <- if (identical(p$pump_mode, "D")) 1L else 0L
   if (is.null(p$revelle_frozen)) p$revelle_frozen <- 0
-  # Volcanic diffuse-light fertilisation, added 2026-08-29. Defaulted HERE as
-  # well as in ccx_default_params() so a hand-built or pre-2026-08-29 parameter
-  # list reaches the core with the mechanism OFF rather than as an index error.
-  if (is.null(p$gamma_diff)) p$gamma_diff <- 0
+  # Volcanic diffuse-light fertilisation, added 2026-08-29 and ADOPTED at 0.25
+  # the same day. Defaults to the SAME named constant ccx_default_params() uses,
+  # so a hand-built parameter list cannot reach the core with a different
+  # mechanism strength than the R path would have given it.
+  # ⚠ This is no longer the behaviour-preserving fallback it was when the value
+  # was 0: a pre-2026-08-29 parameter list now reaches the core with the
+  # mechanism ON. That is the adoption, and it is why every vector fitted before
+  # the adoption is non-comparable.
+  if (is.null(p$gamma_diff)) p$gamma_diff <- CCX_GAMMA_DIFF_DEFAULT
   # Land-structure parameters added 2026-08-12. Defaulted here as well as in
   # ccx_default_params() so that a hand-built or older parameter list cannot
   # reach the C++ with a missing name -- which unpacks as garbage, not an error.
@@ -262,7 +267,30 @@ ccx_deriv_fast <- function(y, t, p, forc, grid, aux) {
          if (is.null(forc$sst_anom_SH)) NA_real_ else forc$sst_anom_SH,
          # absent -> 0, NOT NaN: this one has a well-defined "off" value and a
          # NaN would poison the mixed-layer tendency rather than fall back.
-         if (is.null(forc$sink_ocean)) 0 else forc$sink_ocean)
+         if (is.null(forc$sink_ocean)) 0 else forc$sink_ocean,
+         # VOLCANIC stratospheric AOD, hemispheric.
+         # ⚠ THESE WERE MISSING FROM 2026-08-29g TO 2026-08-29k. The columns were
+         # appended to CCX_FORCING_COLS and to the C++ (which reads f[15]/f[16]),
+         # and ccx_cpp_forcing() -- the MATRIX path ccx_run_fast() uses -- was
+         # correct throughout. This SINGLE-STEP builder was not: it stopped at
+         # sink_ocean, so the core indexed two slots PAST THE END of a 15-element
+         # vector. Nothing errored and nothing was caught, because `gamma_diff`
+         # defaulted to 0 and the out-of-bounds read was multiplied by zero.
+         # ADOPTING gamma_diff = 0.25 is what exposed it, as an R-vs-C++ parity
+         # break of ~0.07 GtC/yr in the NPP-fed pools.
+         # The lesson is structural, and test-parity.R now pins it: a flat
+         # forcing vector must be length(CCX_FORCING_COLS) BY CONSTRUCTION, not
+         # by whoever last appended a column remembering this second site.
+         if (is.null(forc$aod_NH)) NA_real_ else forc$aod_NH,
+         if (is.null(forc$aod_SH)) NA_real_ else forc$aod_SH)
+  # STRUCTURAL GUARD, not a comment: the C++ indexes this vector by POSITION
+  # against CCX_FORCING_COLS, so a short vector is an out-of-bounds read that
+  # neither language reports.
+  if (length(f) != length(CCX_FORCING_COLS))
+    stop("ccx_deriv_fast(): flat forcing vector has ", length(f), " element(s) but ",
+         "CCX_FORCING_COLS declares ", length(CCX_FORCING_COLS),
+         ". The C++ indexes by position -- a mismatch reads past the buffer. ",
+         "A column was appended to CCX_FORCING_COLS without extending this builder.")
   d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, ccx_cpp_par(p), f, ccx_cpp_aux(aux, grid))
   dimnames(d) <- dimnames(y)
   d

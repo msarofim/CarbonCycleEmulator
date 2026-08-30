@@ -2,6 +2,62 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-29k — **BOTH ADOPTED (Marcus), AND THE ADOPTION EXPOSED AN OUT-OF-BOUNDS READ**
+
+Marcus adopted **both** open calls from 08-29i/j: `gamma_diff = 0.25`, and the **CUM** C1 remap.
+
+### The adoptions
+- `CCX_GAMMA_DIFF_DEFAULT <- 0.25` in `R/model.R`, used by BOTH `ccx_default_params()` and
+  `ccx_cpp_par()` — the `CCX_FERT_FORM_DEFAULT` pattern, so R and C++ cannot disagree about what a
+  parameter list without the field means. **0.25 is NOT behaviour-preserving and that is the point:
+  everything fitted before today was fitted at 0 and is NON-COMPARABLE.**
+- `ccx_pump_shape()` now interpolates the **CUMULATIVE integral** with a monotone C1 spline, instead
+  of overlap-integrating piecewise-constant bins. **All 26 kinks on [30,200] are gone**; conservative
+  to **3.3e−16** whenever a layer spans whole bins.
+
+### ⚠ THE BUG THE ADOPTION EXPOSED — an out-of-bounds read, live for two days
+
+`ccx_deriv_fast()` builds a **flat** forcing vector the C++ indexes **by position** against
+`CCX_FORCING_COLS`. When `aod_NH`/`aod_SH` were appended on 08-29g, `CCX_FORCING_COLS`, the C++, and
+the MATRIX builder `ccx_cpp_forcing()` were all extended — **this single-step builder was not.** It
+stopped at `sink_ocean`, so the core read `f[15]`/`f[16]` **two slots past the end of a 15-element
+vector.** Neither language reported anything.
+
+**It was invisible because `gamma_diff` defaulted to 0** — the out-of-bounds value was multiplied by
+zero. **Adopting 0.25 is what exposed it**, as an R↔C++ parity break of **~0.07 GtC/yr** in the
+NPP-fed pools (atm/leaf/wood, every tracer block), 18 of 96 states. Parity was exact (1.6e−13) at
+`gamma_diff = 0` and broke at 0.25 — which is how it was attributed in one step.
+
+⚠ This is the **second** time in three days that appending those two columns bit through
+position-indexing; 08-29f was `N_FORCING` not being bumped. Both were silent. **The fix is
+structural this time**: `ccx_deriv_fast()` now ERRORS if its vector is not `length(CCX_FORCING_COLS)`,
+and `test-parity.R` pins the length, the parity at **explicit** γ = 0/0.25/0.97 (so coverage does not
+move if the default moves — which is exactly how this survived), a **loud-AOD mutation test**, and
+the absence contract. **Mutation-tested**: re-introducing the bug fails 7 assertions; the fix passes
+all 53.
+
+### Suite: 1227 pass / **7 fail** / 2 skip — and the 7 are attributed
+
+Re-running with the remap adopted but `gamma_diff` back at 0: **all 7 pass.** So **the C1 remap
+breaks nothing**, and every remaining failure is the `gamma_diff` adoption invalidating a contract
+that was written against `gamma_diff = 0`:
+
+| test | why it fails | what it needs |
+|---|---|---|
+| `test-volcanic-diffuse.R` "gamma_diff defaults to 0 and 0 is behaviour-preserving" | asserts the OLD default | rewrite to the adopted contract |
+| `test-conveyor.R` "a quiet run does not drift" (3) | a quiet run is **no longer quiet** — volcanoes now drive NPP. Handoff 08-29c §8 predicted exactly this | decide what "quiet" means post-adoption |
+| `test-luc-permanence.R` "a pulse is not given back" | same cause | same |
+| `test-likelihood.R` "a CO2 level bias is expensive" | fitted offset 3.017 ppm vs a `< 3` guard — **the level moved, the refit is OWED** | re-guard after the refit |
+| `test-mode-file.R` "stored logposts do not decide it" | the stored logpost changed, as every objective change makes it | refresh provenance |
+
+**NOT TOUCHED.** Per the standing rule a previously passing test is not edited to make it pass —
+reported and left for Marcus. ⚠ **The 21-param refit is OWED and NOT RUN**, and until it is, the
+calibrated 21 are a pre-adoption vector being read under a post-adoption objective.
+
+⚠ **The remap breaking zero tests is not a clearance.** GATE B measured it moving the pump field
+9.6–15.8 % of a layer step; the suite simply has no guard on that. That is a statement about the
+suite's power, not about the change's size.
+
 ## 2026-08-29j — **PLAN ITEM ②, MEASURED: THE C1 DEFECT IS 8.7× BIGGER THAN RECORDED, AND THE FIX IS NOT FREE**
 
 Two drivers, both measure-only: `diag_hml_c1_kinkmap.R`, `diag_hml_c1_remap_price.R`.
