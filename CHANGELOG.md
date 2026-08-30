@@ -2,6 +2,60 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-29j — **PLAN ITEM ②, MEASURED: THE C1 DEFECT IS 8.7× BIGGER THAN RECORDED, AND THE FIX IS NOT FREE**
+
+Two drivers, both measure-only: `diag_hml_c1_kinkmap.R`, `diag_hml_c1_remap_price.R`.
+**No model code touched, nothing adopted.**
+
+### ① The "sparse, 3 kinks" verdict was BAND-DEPENDENT and is superseded
+
+`ccx_hml_kink` recorded **3 kinks** in `h_ml`, *"sparse — 5 of 3499 probe points"*, which is why the
+C1 defect was filed as a caveat rather than a blocker. **That was measured over the refit band
+[85,120], and the σ-inflation adoption of 08-28 RETIRED that band** — `h_ml` now has an interior
+maximum over its full prior support **[30,200]**, 4.9× wider.
+
+Re-measured there: **26 kinks**, density **0.086 → 0.153 per metre (1.78×)**, closest pair **0.33 m**
+apart. They **cluster on the 25 m GLODAP bin edges** — tight groups at h_ml = 50, 75, 100, 125, 150,
+175 — because `h_ml` is the first layer boundary and the deeper boundaries scale with it.
+⚠ **`CCX_PARAM_TABLE$h_ml$init = 75` sits EXACTLY on a kink**, as `ARM_HML_INIT = 100` already did.
+Harmless to Nelder-Mead; not harmless to anything gradient-based started there. The incumbent mode
+(96.47 m) is 1.94 m clear and the rejected option-5 refit (35.38 m) 11.47 m clear, so **no fitted
+mode is contaminated** — the probability-of-landing-on-one reading survives; the *traverse* reading
+does not.
+
+### ② A conservative C1 remap exists, and it works
+
+The kink is a **box filter with hard edges**: the stored shape is treated as piecewise-CONSTANT in
+each bin, so its antiderivative is only piecewise-linear and the layer mean `(S(b)−S(a))/(b−a)` has
+slope jumps wherever a boundary crosses a bin edge. Two candidates priced:
+
+| | kinks in [30,200] | reproduces a whole bin's mean | field move at the mode |
+|---|---|---|---|
+| incumbent (clamped overlap) | **26** | 0 by construction | — |
+| **MID** (Hermite thru bin *midpoints*) | 0 | 2.0e−3 — **not conservative** | 26.7 % of a layer step |
+| **CUM** (C1 spline of the *cumulative* integral) | **0** | **3.3e−16** | **15.4 % of a layer step** |
+
+**CUM is the right construction**: the bin averages pin the cumulative integral EXACTLY at every bin
+edge, so interpolating **S** rather than **shape** is C1 *and* conservative. Mutation-tested — the
+gate fails the incumbent (3 kinks in [90,110]) and a C0 linear control (167), passes CUM (0).
+
+### ③ ⚠ BUT IT IS **NOT** "A CODE FIX, NOT A SCIENCE CHANGE"
+
+The plan note argued ② is a pure code fix. **The measurement refutes that.** CUM moves the pump
+field by **9.6–15.8 % of the median layer step** across the band (15.4 % at the incumbent mode) —
+and the export is a *difference* of adjacent layers, so that is the scale the pump actually uses.
+
+And the deeper point: **a remap's behaviour between bin edges is a SUB-BIN MODEL, and the data do
+not contain one.** CUM invents smooth sub-bin structure exceeding the local 3-bin range in **10 of
+29 intervals**, worst **42 % of a bin step at ~450 m** (the thermocline, where the profile curves
+hardest). But the **incumbent asserts the shape is CONSTANT within a bin** — equally absent from the
+data, and exactly what makes it kinked. **Neither remap is "the observations"; they are two
+different sub-bin assumptions, and choosing between them is a methodological call.**
+
+⇒ **FOR MARCUS.** Adopt CUM (C1 restored, conservative, pump field moves ~15 % of a layer step and
+`pump_grad` would want a refit), or keep the incumbent and carry 26 kinks on the live support.
+Not resolved here.
+
 ## 2026-08-29i — **THE FACE GATE CLEARS, AND THE GATE WAS FRAMED AROUND THE WRONG NUMBER**
 
 `calibration/diag_face_check_gamma_diff.R`. Handoff 08-29c §6 left one check gating adoption of
