@@ -2,6 +2,48 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-29i — **THE FACE GATE CLEARS, AND THE GATE WAS FRAMED AROUND THE WRONG NUMBER**
+
+`calibration/diag_face_check_gamma_diff.R`. Handoff 08-29c §6 left one check gating adoption of
+`gamma_diff`: *"the −7.42 is paid by `fert_k` +28.9 % … FACE is the only thing bounding this
+direction."* Both halves of that framing are wrong, and correcting them is most of the result.
+
+**① The +28.9 % is the γ = 0.97 number, and γ = 0.97 is already rejected** (14× dearer, fits the
+record worse). At the **γ = 0.25 operating point the payment is `fert_k` +6.1 %** (154.84 → 164.23)
+with `beta_max` +2.3 % — a fifth of the movement the gate was written against.
+
+**② FACE does not cap `fert_k`.** That ceiling was **withdrawn 2026-08-25** on Marcus's ruling —
+*"the exact numbers shouldn't be a constraint because FACE is only temperate forests, but FACE can
+still inform response shape and realistic limits."* The ceiling exists only if you adopt the
+**21.8 % plantation-weighted** headline, and at ≤ 15 % assumed response there is no ceiling anywhere
+in [20, 2000]. So the driver tests what FACE *does* constrain — the **ridge coordinate's implied
+FACE response** `R(400 → 564)` — against the observed **bracket**, and reports the ceiling only to
+show the distance to it.
+
+| γ | `beta_max` | `fert_k` | **R(400→564)** |
+|---|---|---|---|
+| 0 (mode) | 0.5109 | 154.84 | **8.61 %** |
+| **0.25** | 0.5228 | 164.23 | **8.87 %** |
+| 0.97 | 0.5701 | 199.58 | 9.76 % |
+
+**GATE-N PASSES: 8.87 %, +0.26 pt on the mode**, at the **mature-forest end** of the bracket
+(EucFACE ~0 %, BIFoR-FACE +10 %), far under the 21.8 % synthesis and the **32.1 % box maximum**.
+**GATE-M**: the pair moves **along** the ρ = +0.998 ridge (both up), and the withdrawn ceiling
+(~1374 at ambient 400) sits **8.4× above** the operating point — it was never the operative
+constraint. ⇒ **γ = 0.25 is defensible on FACE. The `fert_k` payment is not a provenance problem.**
+
+**Estimator validated against three recorded cells** — design 7.8 %, old adopted mode 13.6 %,
+pinned-`luc` probe 17.2 % (memory says 17.3 %) — same MM form as
+`diag_face_prior_for_beta_max.R`, so this is like-for-like, not a second opinion.
+
+**⚠ MEASURE THE GATE'S POWER BEFORE READING ITS PASS.** GATE-N only fires above 21.8 %: the
+mutation test FAILS the young-plantation cell (3.0 / 340 → 32.0 %) but **PASSES the pinned-`luc`
+probe at 17.2 %**. That is correct behaviour on Marcus's ruling — over this range **FACE brackets,
+it refutes nothing** — but it means the pass is informative through the **distance** (8.87 % is a
+third of the box maximum and moves 0.26 pt), not through the bare verdict.
+
+**Nothing adopted.** `gamma_diff` still defaults to 0; the calibrated 21 are untouched.
+
 ## 2026-08-29h — **DIFFUSE LIGHT PRICED: CHEAP (−7.4), AND THE CORRELATION GAIN IS REAL**
 
 Marcus: *"Price gamma_diff conditionally first."* Slice `beta_max, fert_k, q10, rep_dC`.
