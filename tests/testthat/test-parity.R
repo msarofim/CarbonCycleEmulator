@@ -294,4 +294,45 @@ test_that("the single-step flat forcing vector is complete, and AOD reaches the 
                ccx_deriv_fast(sp$y, 1900, p, zero, sp$grid, sp$aux), tolerance = 1e-12)
   expect_equal(ccx_deriv(sp$y, 1900, p, none, sp$grid, sp$aux),
                ccx_deriv(sp$y, 1900, p, zero, sp$grid, sp$aux), tolerance = 1e-12)
+
+  # 5. THE *PARAMETER* ABSENCE CONTRACT (added 2026-08-30, and it FAILED when
+  #    written). Item 4 above pins what an absent forcing COLUMN means. It says
+  #    nothing about what an absent PARAMETER means -- and the two cores
+  #    disagreed about that for a day: ccx_cpp_par() resolved a missing
+  #    gamma_diff to CCX_GAMMA_DIFF_DEFAULT while ccx_deriv() hardcoded 0, so a
+  #    parameter list without the field broke parity by 0.647 GtC/yr at
+  #    Pinatubo. ccx_mode_params() IS such a list: the fitted 21 do not carry
+  #    gamma_diff.
+  #
+  #    ⚠ ITEM 2 CANNOT CATCH THIS, and for a reason worth keeping: it pins
+  #    EXPLICIT gamma values so its coverage would not move if the default
+  #    moved. That was the right fix for the previous bug and it is exactly why
+  #    an explicit value never exercises either fallback. A default has TWO
+  #    contracts -- what the value IS, and what ABSENCE MEANS -- and pinning
+  #    only the first leaves the second to drift between the cores.
+  #
+  #    Asserted at the LOUDEST volcanic step in the record, because at aod = 0
+  #    every value of gamma_diff agrees and this gate would be vacuous.
+  #
+  #    ⚠ ccx_forcing_at() takes a ROW INDEX, not a year -- so the step is found
+  #    by argmax over the column rather than by naming a date. (The `yr` in
+  #    item 2 above is likewise an index; row 1900 of 3300 monthly rows is
+  #    1908, not 1900. Harmless there -- both cores get the same row -- but it
+  #    is why this block does not name a year.) The expect_gt is the POWER
+  #    check on the gate itself: if the AOD record is ever replaced by one
+  #    without a large event, this fails loudly instead of passing vacuously.
+  i_aod  <- which.max(F$aod_NH)
+  f_aod  <- ccx_forcing_at(F, i_aod)
+  t_aod  <- F$year[i_aod]
+  expect_gt(f_aod$aod_NH, 0.05)                        # the gate has something to bite on
+  p_abs <- p; p_abs$gamma_diff <- NULL
+  expect_equal(ccx_deriv(sp$y, t_aod, p_abs, f_aod, sp$grid, sp$aux),
+               ccx_deriv_fast(sp$y, t_aod, p_abs, f_aod, sp$grid, sp$aux),
+               tolerance = 1e-12)
+  # and absence must mean the DEFAULT in both cores, not merely agree with
+  # itself -- otherwise both could drift to a common wrong value together
+  p_expl <- p; p_expl$gamma_diff <- CCX_GAMMA_DIFF_DEFAULT
+  for (fn in list(ccx_deriv, ccx_deriv_fast))
+    expect_equal(fn(sp$y, t_aod, p_abs,  f_aod, sp$grid, sp$aux),
+                 fn(sp$y, t_aod, p_expl, f_aod, sp$grid, sp$aux), tolerance = 1e-12)
 })

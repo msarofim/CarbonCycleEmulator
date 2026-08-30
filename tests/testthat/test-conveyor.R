@@ -72,6 +72,26 @@ quiet_forcing <- function(s, years = CONV_YRS) {
   F$cum_luc_NH <- 0; F$cum_luc_SH <- 0
   F <- ccx_hold_climate(F, value = 0); F$c14_bomb <- 0; F$c14_nuclear <- 0
   F$c14_cosmo <- s$prod_c14
+  # AND THE VOLCANIC AEROSOL, added 2026-08-30 on Marcus's ruling after
+  # CCX_GAMMA_DIFF_DEFAULT went to 0.25. ccx_hold_climate() deliberately does
+  # NOT hold aod_* -- AOD is a radiative DRIVER, not a climate variable, and
+  # the volcanic temperature signal is already inside the gmst record it does
+  # hold (R/forcing.R). That function's own comment states the consequence and
+  # the remedy: "a diagnostic that needs a volcanically quiet run must zero
+  # aod_NH/aod_SH itself". This is that.
+  #
+  # SAME SHAPE AS THIS SUITE'S SEASONALITY PRECEDENT: test-luc-permanence.R
+  # runs its control seasonless rather than loosening its flatness gate,
+  # because seasonality is orthogonal to what that gate measures. Volcanic
+  # diffuse-light NPP is orthogonal to conveyor drift in exactly the same way.
+  #
+  # ⚠ AND THE FAILURE IT FIXES WAS NOT WHAT IT LOOKED LIKE. This window is
+  # 1750-1850 and the CMIP7 AOD series BEGINS in 1850, so 99 of these 100
+  # years are already volcanically silent. What tripped the gate was the
+  # record's TURN-ON STEP landing on the run's LAST year -- which is the one
+  # year an endpoint-minus-start drift gate reads. Measured: 0.0246 ppm with
+  # AOD free, EXACTLY 0.00000 with it zeroed (calibration/diag_attribute_the_seven.R).
+  F$aod_NH <- 0; F$aod_SH <- 0
   F
 }
 
@@ -121,6 +141,26 @@ test_that("a quiet run does not drift with the conveyor on", {
     expect_lt(abs(co2[length(co2)] - co2[1]), 1e-3)
     expect_lt(abs(r$d13c_NH[length(r$d13c_NH)] - r$d13c_NH[1]), 1e-3)
   }
+})
+
+test_that("MUTATION TEST: the quiet run is only quiet BECAUSE the AOD is zeroed", {
+  skip_if_no_cpp()
+  # Without this, quiet_forcing()'s AOD line could be deleted and the gate
+  # above would keep passing for a reason nobody checked -- the same way the
+  # 14C decay gate sat inert for weeks (feedback_mutation_test_your_gates).
+  #
+  # gamma_diff is set EXPLICITLY rather than taken from the default, so this
+  # coverage does not move if the default moves. That is the lesson of the
+  # 2026-08-29 f[15]/f[16] out-of-bounds read, which survived precisely
+  # because the mechanism was off by default.
+  p <- conv_p(Q_TEST); p$gamma_diff <- 0.25
+  s <- ccx_spinup(p)
+  F <- quiet_forcing(s)
+  F_aod <- ccx_build_forcing("historical", CONV_YRS, prod_c14 = 0, bomb_total_kmol = 0)
+  F$aod_NH <- F_aod$aod_NH; F$aod_SH <- F_aod$aod_SH   # put the volcanoes back
+  r <- ccx_run_fast(s, F)$out
+  co2 <- (r$co2_NH + r$co2_SH)
+  expect_gt(abs(co2[length(co2)] - co2[1]), 1e-3)
 })
 
 test_that("the conveyor conserves carbon on the derivative", {

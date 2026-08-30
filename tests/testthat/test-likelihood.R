@@ -138,8 +138,50 @@ test_that("a CO2 level bias is expensive", {
   # pathology while sitting a factor ~2.6 below the measured value (26.4), so
   # it has room for the model to keep improving without going stale.
   expect_gt(A, 10)
-  # the objective locates the level rather than being flat in it
-  expect_lt(abs(b0), 3)
+
+  # THE LEVEL BAR IS NOW DERIVED FROM AN OBSERVATION (2026-08-30, Marcus's
+  # ruling), replacing a round `abs(b0) < 3` that tripped at 3.017 when
+  # gamma_diff was adopted at 0.25.
+  #
+  # ⚠ THE OWED REFIT CANNOT MOVE THIS ONE, which is why it could not simply be
+  # deferred like the other post-adoption failures: lik_fixture() runs on
+  # ccx_default_params(), NOT the fitted mode, so re-fitting the 21 leaves it
+  # exactly where it is. b0 is linear in gamma_diff -- 2.418 / 2.718 / 3.017 at
+  # gamma = 0 / 0.125 / 0.25, +2.40 ppm per unit -- and was already at 81 % of
+  # the old bar BEFORE the adoption, so the round number was going to fail on
+  # the next change whatever it was.
+  #
+  # DERIVATION in calibration/diag_co2_level_bar.R; the short form is that a
+  # uniform shift of the model is degenerate with a systematic level offset in
+  # the record it is scored against, so the bar is that record's own level
+  # uncertainty. LIK_ICE_REP_ERR is the repo's estimate of it (gas-age + firn
+  # smoothing + model-vs-ice representation). The diagnostic also measures a
+  # fully external FLOOR -- Law Dome against SPO over their 1962-1996 overlap,
+  # like-for-like Antarctic, no model and no likelihood weight involved:
+  # RMS 1.087 ppm -- which confirms the constant is 3.7x conservative rather
+  # than fitted to fit. ⚠ The floor is BLIND to all three terms the bar
+  # carries (both records there are modern, precise and Antarctic), so it
+  # bounds from below and is NOT the bar.
+  #
+  # ⚠ AND THE COUPLING, SINCE THE RULE SAYS NAME IT: LIK_ICE_REP_ERR is inside
+  # the objective that produces b0. It is not re-baselining, because the
+  # dependence runs the wrong way to be self-satisfying -- inflating it
+  # DOWN-weights the ice samples, pulling b0 toward the MLO/SPO-only optimum
+  # rather than dragging b0 along with the bar.
+  expect_lt(abs(b0), LIK_ICE_REP_ERR)
+  # MUTATION TEST: a bar that passes is not a bar that works. A model whose
+  # level is genuinely broken must trip it. Shifting the run by twice the bar
+  # moves the fitted offset by the same amount, so the guard must fail there.
+  bad <- local({
+    o <- f$out; o$co2_NH <- o$co2_NH - 2 * LIK_ICE_REP_ERR
+    o$co2_SH <- o$co2_SH - 2 * LIK_ICE_REP_ERR
+    sh <- function(b) { q <- o; q$co2_NH <- q$co2_NH + b; q$co2_SH <- q$co2_SH + b
+                        ccx_loglik(q, f$obs, f$err) }
+    l <- vapply(bb, sh, numeric(1))
+    c2 <- stats::coef(stats::lm(I(l - l[bb == 0]) ~ 0 + bb + I(bb^2)))
+    c2[["bb"]] / (2 * -c2[["I(bb^2)"]])
+  })
+  expect_gt(abs(bad), LIK_ICE_REP_ERR)
   # ...and the direct AR(1) comparator, now measured from the optimum
   cost <- function(b) shift(b0) - shift(b0 + b)
   expect_gt(cost(50), 10000)

@@ -2,6 +2,93 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-30 — **THE 7 FAILURES RULED ON — and a THIRD one-core-only default found**
+
+Handoff 08-30 left 7 attributed failures for Marcus. All measured first
+(`calibration/diag_attribute_the_seven.R`), and **two of the five sketches in that handoff were
+wrong**:
+
+- **test-likelihood.R** was filed as *"re-guard AFTER the refit"*. **It cannot be**: `lik_fixture()`
+  runs on `ccx_default_params()`, not the fitted mode, so the owed 21-param refit does not touch it.
+  `b0` is **linear in `gamma_diff`** (2.418 / 2.718 / **3.017** at γ = 0 / 0.125 / 0.25, +2.40 ppm per
+  unit) and was already at **81 % of its bar before the adoption**. The curvature `A` — which the
+  test's own comment calls the load-bearing, scale-free half — is **26.398 at all three**, unmoved.
+- **test-mode-file.R** was filed as *"stored logpost changed, refresh provenance"*. The
+  **stored-logpost assertion passes.** What fails is the **recomputed** gap, which that file argues is
+  objective-independent "because it is a GAP between two vectors scored by the SAME harness". True for
+  a **common shift**; `gamma_diff` is not one — it changes the MODEL and the arms sit at different
+  `fert_k`. gap = **−11.4936 / −14.8961 / −19.8635** over the same γ. `PIN_PRIOR_CREDIT` is a PRIOR
+  term with no γ dependence, so the whole **+8.4 is a LIKELIHOOD differential**: diffuse light costs
+  pin90 more than the canonical arm. A finding, not drift.
+
+And the **conveyor** failure is not "volcanoes drive NPP across the run" either: the **CMIP7 AOD
+series begins in 1850**, so 99 of that test's 100 years are already volcanically silent. What trips it
+is the record's **turn-on step landing on the run's LAST year** — the one year an
+endpoint-minus-start gate reads.
+
+### ⚠ A THIRD SILENT ONE-CORE-ONLY DEFAULT — found, fixed, mutation-tested
+
+The 08-29k entry above says the adoption used the `CCX_FERT_FORM_DEFAULT` pattern "so R and C++
+cannot disagree about what a parameter list without the field means". **Only `ccx_cpp_par()` got the
+constant.** `ccx_deriv()` still hardcoded `if (is.null(p$gamma_diff)) 0`, so a parameter list
+**without** the field reached the R reference as 0 and the C++ as 0.25 — an R↔C++ parity break of
+**0.647 GtC/yr** at Pinatubo (vs 0.07 for yesterday's out-of-bounds read). **`ccx_mode_params()` is
+such a list**: the fitted 21 do not carry `gamma_diff`.
+
+⚠ **The adoption's own parity hardening could not catch it, for a good reason.** It pins parity at
+**explicit** γ = 0 / 0.25 / 0.97 — deliberately, so coverage would not move if the default moved. An
+explicit value **never exercises either fallback**. The general lesson, now encoded as `test-parity.R`
+item 5: **a default has TWO contracts — what the value IS, and what ABSENCE MEANS — and pinning only
+the first leaves the second free to drift between the cores.** Third instance in three days of one
+core being taught something the other was not (`N_FORCING`, the `f[15]`/`f[16]` read, this).
+
+### The rulings (Marcus, 2026-08-30)
+
+1. **"Quiet" means volcanically quiet too** (conveyor ×3 + LUC ×1). `quiet_forcing()` and
+   `lp_background()` zero `aod_NH`/`aod_SH` themselves — which is what `R/forcing.R` already
+   instructs, and the same shape as this suite's existing precedent of running the LUC control
+   *seasonless* rather than loosening its gate. Conveyor drift **0.0246 → exactly 0.00000** ppm; LUC
+   control **0.2322 → 0.0437** against its 0.05 gate. ⚠ **Only the flatness PRECONDITION was ever
+   affected** — the three assertions the LUC gate exists for are pulse-minus-control DIFFERENCES, so
+   the volcanic signal cancels: af_foss 0.1506 → 0.1513, ratio 1.033 → 1.032, 150-yr 0.864 → 0.867.
+   Both helpers now carry a **mutation test** at an EXPLICIT γ, so the zeroing cannot go vacuous.
+2. **The CO2 level bar is DERIVED, not rounded up** (`calibration/diag_co2_level_bar.R`). A uniform
+   model shift is degenerate with a systematic level offset in the record, so the bar is that
+   record's level uncertainty: **`LIK_ICE_REP_ERR` = 4.0 ppm**. Validated against a fully external
+   **floor** — Law Dome vs **SPO** (like-for-like Antarctic; against MLO the comparison carries the
+   real interhemispheric gradient and reads 1.6 ppm larger for no reason of record quality) over
+   their 1962–1996 overlap, **RMS 1.087 ppm**, no model or likelihood weight involved — which shows
+   the constant is **3.7× conservative**. ⚠ The floor is **BLIND** to gas-age, firn smoothing and
+   model-vs-ice representation (both records there are modern, precise and Antarctic), so it bounds
+   from below and is **not** the bar. ⚠ Coupling stated: `LIK_ICE_REP_ERR` is inside the objective,
+   but the dependence runs the wrong way to self-satisfy — inflating it *down*-weights the ice and
+   pulls `b0` toward the MLO/SPO-only optimum. Mutation-tested at 2× the bar.
+   **b0 = 3.017 is inside the bar (75 %) but 2.8× the floor** — a model-quality statement to re-read
+   after the refit.
+3. **test-mode-file.R stays FAILING, deliberately**, and the measurement is recorded in the file so
+   the next session does not re-derive it. Re-measure `PIN_PRIOR_CREDIT` after the refit; deriving it
+   now would bake in a number taken from vectors that are about to be replaced.
+4. **test-volcanic-diffuse.R's default contract INVERTED** (the 08-28 h_ml-gate precedent), and
+   re-aimed: it now asserts **the named constant** rather than a bare literal, so it breaks on a
+   CONTRACT change instead of on a value change, and it pins **absence** in both cores.
+
+**Tried and rejected:** loosening the conveyor/LUC tolerances to admit the volcanic signal (costs
+both gates real power — 30× and 6× — and confounds "did the conveyor drift" with "did the volcano do
+something"); making `ccx_hold_climate()` zero AOD (contradicts the 08-29 ruling that AOD is a
+radiative driver, and would silently disable diffuse light in every climate-held diagnostic).
+
+### Suite: **1243 pass / 1 fail / 2 skip**
+
+The single remaining failure is `test-mode-file.R:206`, **failing on purpose** by ruling 3 above; the
+reason is written into the file so it cannot be mistaken for a regression. Six of the seven are
+resolved, and the run is +16 assertions over the pre-ruling 1227 (the new mutation tests and the
+parameter-absence parity contract).
+
+**Still owed and unchanged:** the 21-param refit. Nothing quantitative off the calibrated 21 is
+quotable until it lands. ⚠ **Run it AFTER this commit, not before** — the absence-default fix changes
+what `ccx_deriv()` computes for any parameter list lacking `gamma_diff`, and the R core is the
+reference the C++ is checked against.
+
 ## 2026-08-29k — **BOTH ADOPTED (Marcus), AND THE ADOPTION EXPOSED AN OUT-OF-BOUNDS READ**
 
 Marcus adopted **both** open calls from 08-29i/j: `gamma_diff = 0.25`, and the **CUM** C1 remap.

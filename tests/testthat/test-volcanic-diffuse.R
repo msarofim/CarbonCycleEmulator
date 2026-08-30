@@ -11,9 +11,34 @@
 # throughout. So the guard is that a NON-ZERO gamma_diff must MOVE THE ANSWER.
 # =====================================================================
 
-test_that("gamma_diff defaults to 0 and 0 is behaviour-preserving", {
-  expect_identical(ccx_default_params()$gamma_diff, 0)
+test_that("gamma_diff defaults to the ADOPTED value, and absence means the same", {
+  # INVERTED 2026-08-30. This asserted `== 0` -- the pre-adoption contract --
+  # and the 2026-08-29 adoption of CCX_GAMMA_DIFF_DEFAULT = 0.25 invalidated
+  # it. Following the 2026-08-28 precedent (the h_ml gate test), the contract
+  # test is deliberately rewritten to the adopted contract rather than the
+  # adoption being trimmed to fit the test.
+  #
+  # ⚠ IT NOW ASSERTS THE CONSTANT, NOT A LITERAL. The old form pinned a bare
+  # 0, so it broke on a value change instead of on a CONTRACT change. What has
+  # to hold is that ccx_default_params() and ccx_cpp_par() agree about the
+  # default, whatever it is.
+  expect_identical(ccx_default_params()$gamma_diff, CCX_GAMMA_DIFF_DEFAULT)
+  expect_identical(ccx_cpp_par(ccx_default_params())[["gamma_diff"]],
+                   CCX_GAMMA_DIFF_DEFAULT)
+  # ...and so must ABSENCE, in BOTH cores. This half is not decoration: the two
+  # fallbacks disagreed for a day (R gave 0, C++ gave 0.25 -- 0.647 GtC/yr at
+  # Pinatubo, fixed 2026-08-30) and nothing in the suite looked. The parity
+  # form of the same contract is test-parity.R item 5.
+  p_abs <- ccx_default_params(); p_abs$gamma_diff <- NULL
+  expect_identical(ccx_cpp_par(p_abs)[["gamma_diff"]], CCX_GAMMA_DIFF_DEFAULT)
+
   skip_if_no_cpp()
+  # THE OLD SECOND HALF, RETAINED BUT RE-AIMED. It used to assert that an
+  # explicit default and an ABSENT gamma_diff give bit-identical runs, and
+  # called that "0 is behaviour-preserving". The behaviour-preservation claim
+  # is gone with the adoption; the AGREEMENT claim is not, and is now the
+  # thing worth pinning -- an old parameter list must reach the model as the
+  # adopted mechanism, not silently as the old one.
   p <- ccx_default_params()
   sp <- ccx_spinup(p)
   F  <- suppressWarnings(ccx_build_forcing("historical", c(1980, 1995),
@@ -24,6 +49,13 @@ test_that("gamma_diff defaults to 0 and 0 is behaviour-preserving", {
   sp2 <- ccx_spinup(p2)
   b <- as.data.frame(ccx_run_fast(sp2, F)$out)
   expect_equal(a$co2_NH, b$co2_NH, tolerance = 0)
+  # and the mutation test for it: an EXPLICIT 0 must NOT match, or the
+  # comparison above would pass simply because the mechanism does nothing over
+  # this window. 1980-1995 contains El Chichon and Pinatubo, so it bites.
+  p3 <- p; p3$gamma_diff <- 0
+  sp3 <- ccx_spinup(p3)
+  cc <- as.data.frame(ccx_run_fast(sp3, F)$out)
+  expect_false(isTRUE(all.equal(a$co2_NH, cc$co2_NH, tolerance = 1e-9)))
 })
 
 test_that("the AOD forcing column is present, zero pre-1850, and large at Pinatubo", {

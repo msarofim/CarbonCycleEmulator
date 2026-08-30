@@ -53,6 +53,23 @@ lp_background <- function(s) {
   F <- ccx_build_forcing("historical", LP_YRS, prod_c14 = s$prod_c14, emissions = ze)
   F$c14_bomb <- 0; F$c14_nuclear <- 0
   F <- ccx_hold_climate(F)   # gmst, enso AND the observed-SST columns
+  # AND THE VOLCANIC AEROSOL (2026-08-30, Marcus's ruling), for the same
+  # reason this control already runs seasonless and with sst_obs = 0: the
+  # mechanism is real but ORTHOGONAL to land-use permanence, so the control
+  # excludes it rather than the gate being loosened to admit it.
+  # ccx_hold_climate() does not hold aod_* by design (AOD is a radiative
+  # driver, not a climate variable; R/forcing.R states this and says a
+  # volcanically quiet diagnostic must zero it itself). Once
+  # CCX_GAMMA_DIFF_DEFAULT went to 0.25 this control drifted 0.2322 ppm
+  # against its 0.05 gate; zeroed, 0.0437, which is the pre-adoption value.
+  #
+  # ⚠ ONLY THE PRECONDITION WAS AFFECTED, NOT THE GATE'S SUBSTANCE. The three
+  # assertions below are pulse-MINUS-control differences, so the volcanic
+  # signal cancels out of them almost exactly: with AOD free vs zeroed,
+  # af_foss 0.1506 / 0.1513, af_luc/af_foss 1.033 / 1.032, 150-yr ratio
+  # 0.864 / 0.867 (calibration/diag_attribute_the_seven.R). Zeroing the AOD
+  # restores the flatness precondition; it does not move the answer.
+  F$aod_NH <- 0; F$aod_SH <- 0
   F
 }
 
@@ -147,6 +164,24 @@ test_that("a land-use pulse is not given back to the land", {
   # ... and it must not decay away afterwards, which is what the old model did:
   # 0.072 at 50 yr -> 0.002 at 100 -> -0.003 at 150.
   expect_gt(lp_af(s, lp_pulse(F0, luc = TRUE), ctl, 150), 0.8 * af_luc)
+})
+
+test_that("MUTATION TEST: the control is flat only BECAUSE lp_background() zeroes the AOD", {
+  skip_if_no_cpp()
+  # Otherwise the aod line in lp_background() could be dropped and the
+  # flatness gate above would keep passing without anyone noticing why.
+  # gamma_diff EXPLICIT, so this does not go quiet if the default moves.
+  p_lp <- ccx_default_params(); p_lp$seas_drivers <- 0; p_lp$sst_obs <- 0
+  p_lp$gamma_diff <- 0.25
+  s  <- ccx_spinup(p_lp)
+  F0 <- lp_background(s)
+  Fv <- ccx_build_forcing("historical", LP_YRS, prod_c14 = s$prod_c14,
+                          emissions = data.frame(year = seq(LP_YRS[1], LP_YRS[2]),
+                                                 fossil_GtC = 0, luc_GtC = 0,
+                                                 d13c_foss = -24))
+  F0$aod_NH <- Fv$aod_NH; F0$aod_SH <- Fv$aod_SH      # put the volcanoes back
+  ctl <- lp_co2(s, F0)
+  expect_gt(abs(ctl$co2[nrow(ctl)] - ctl$co2[1]), 0.05)
 })
 
 test_that("f_luc_perm = 0 AND f_luc_wood = 1 reproduce the pre-2026-08-13 behaviour", {

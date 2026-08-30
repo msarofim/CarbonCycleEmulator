@@ -156,6 +156,43 @@ test_that("the canonical mode is a FREE arm, and stored logposts do not decide i
   # pinned arm's objective carries and the free arm's does not. Asserting the
   # recomputed gap EQUALS it is asserting the MECHANISM -- so this fails if the
   # trap's cause changes, and not merely if two numbers cross.
+  # =================================================================
+  # ⚠ THIS ASSERTION IS FAILING ON PURPOSE AS OF 2026-08-30. DO NOT "FIX" IT.
+  #
+  # Marcus's ruling: leave it failing and re-measure after the owed 21-param
+  # refit. It is recorded here so the next session does not re-derive it or
+  # mistake it for the bookkeeping it is not.
+  #
+  # WHAT IT IS NOT. Handoff 2026-08-30 sec.4 filed this as "stored logpost
+  # changed, refresh provenance". The STORED-logpost assertion above (the
+  # `lp[["pin90"]] - lp[[...]] > 0` line) PASSES. What fails is the RECOMPUTED
+  # gap below -- the one this file's own comment argues is objective-INdependent
+  # "because it is a GAP between two vectors scored by the SAME harness, so
+  # whatever the objective is, it cancels".
+  #
+  # WHY THAT ARGUMENT DOES NOT COVER THIS CHANGE. It holds for an objective
+  # change that is a COMMON SHIFT. gamma_diff = 0.25 is not one: it changes the
+  # MODEL, and the two arms sit at different fert_k, so they pay different
+  # amounts for the same mechanism. Measured over gamma = 0 / 0.125 / 0.25
+  # (calibration/diag_attribute_the_seven.R part 5):
+  #
+  #     gap = -11.4936  /  -14.8961  /  -19.8635
+  #
+  # PIN_PRIOR_CREDIT is a PRIOR term -- the near-delta fert_k prior at 90 --
+  # and carries no gamma_diff dependence at all, so the entire +8.4 movement is
+  # a LIKELIHOOD differential: diffuse light costs the pinned arm more than the
+  # canonical one. That is a finding about the two arms, not drift in a
+  # provenance number, and the test caught exactly what it says it exists to
+  # catch ("this fails if the trap's CAUSE changes").
+  #
+  # WHY IT IS NOT RESOLVED NOW. Both arms are PRE-adoption vectors read under a
+  # POST-adoption objective, so the gap is provisional whichever way it is
+  # written; re-deriving PIN_PRIOR_CREDIT from them would bake in a number
+  # measured on vectors that are about to be replaced. (Sanity check that the
+  # harness is sound rather than the vectors: the canonical arm's own frozen
+  # price is -40.49 across the adoption, which reproduces the recorded "the
+  # frozen column overstated the price by 82 %" -- 7.42 / 0.18 = 41.2.)
+  # =================================================================
   PIN_PRIOR_CREDIT <- 11.6698
   band0 <- CCX_PARAM_TABLE$h_ml
   on.exit(CCX_PARAM_TABLE$h_ml <<- band0, add = TRUE)

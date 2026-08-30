@@ -1046,11 +1046,25 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # implementation lives in ccx_fert_factor() so this line and the C++ core
     # cannot drift apart from the diagnostics that price them.
     # VOLCANIC DIFFUSE-LIGHT FERTILISATION -- twin of the block in
-    # src/ccx_core.cpp. Absence of the column reads as zero, and gamma_diff
-    # defaults to 0, so this line is an identity unless BOTH are supplied.
+    # src/ccx_core.cpp. Absence of the FORCING COLUMN still reads as zero (a
+    # run with no AOD supplied has no diffuse-light signal to carry).
+    #
+    # ⚠ ABSENCE OF THE PARAMETER IS A DIFFERENT QUESTION, AND IT MUST RESOLVE
+    # THE SAME WAY IN BOTH CORES. This line read `if (is.null(p$gamma_diff)) 0`
+    # from 2026-08-29 until 2026-08-30 while ccx_cpp_par() resolved the same
+    # absence to CCX_GAMMA_DIFF_DEFAULT -- so a parameter list WITHOUT the
+    # field (ccx_mode_params() is one: the fitted 21 do not include it) got 0
+    # through this reference and 0.25 through the C++, a 0.647 GtC/yr parity
+    # break at Pinatubo. It survived the adoption's own parity hardening
+    # because that pins EXPLICIT gamma values -- deliberately, so coverage
+    # would not move if the default moved -- and an explicit value never
+    # exercises either fallback. THIRD instance in three days of one core
+    # being taught something the other was not (N_FORCING, the f[15]/f[16]
+    # out-of-bounds read, this). The rule the tests now encode: pin EXPLICIT
+    # values AND ABSENCE, in both cores.
     aod_h <- forc[[paste0("aod_", h)]]          # h is "NH"/"SH", as enso_share is
     if (is.null(aod_h) || !is.finite(aod_h)) aod_h <- 0
-    gdiff <- if (is.null(p$gamma_diff)) 0 else p$gamma_diff
+    gdiff <- if (is.null(p$gamma_diff)) CCX_GAMMA_DIFF_DEFAULT else p$gamma_diff
     npp <- npp0_h * capacity * ccx_fert_factor(chi, p, aux$chi0) *
       (1 + gdiff * aod_h)
 
