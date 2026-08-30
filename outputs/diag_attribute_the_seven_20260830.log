@@ -1,0 +1,46 @@
+
+======================================================================
+PART 1 -- where the AOD record is nonzero
+======================================================================
+first nonzero year: 1850   nonzero years: 175 of 275
+mean aod_NH 1850-2024: 0.009870  =>  a SUSTAINED +0.247% NPP at gamma_diff = 0.250
+aod_NH in 1850 (the conveyor window's LAST year): 0.002091
+
+======================================================================
+PART 2 -- test-conveyor.R, with and without AOD zeroed in quiet_forcing()
+======================================================================
+cfg A  zero_aod=FALSE  |dCO2| = 0.02462  |dd13C| = 0.000830   (both gated < 1e-3)
+cfg A  zero_aod=TRUE   |dCO2| = 0.00000  |dd13C| = 0.000000   (both gated < 1e-3)
+cfg B  zero_aod=FALSE  |dCO2| = 0.02460  |dd13C| = 0.000829   (both gated < 1e-3)
+cfg B  zero_aod=TRUE   |dCO2| = 0.00000  |dd13C| = 0.000000   (both gated < 1e-3)
+cfg C  zero_aod=FALSE  |dCO2| = 0.02461  |dd13C| = 0.000829   (both gated < 1e-3)
+cfg C  zero_aod=TRUE   |dCO2| = 0.00000  |dd13C| = 0.000000   (both gated < 1e-3)
+
+======================================================================
+PART 3 -- test-luc-permanence.R, with and without AOD zeroed in lp_background()
+======================================================================
+zero_aod=FALSE  ctl drift = 0.2322 (gate < 0.05)  |  af_foss = 0.1506 (0.152 +-30%)  af_luc/af_foss = 1.033 (> 0.3)  150/100 = 0.864 (> 0.8)
+zero_aod=TRUE   ctl drift = 0.0437 (gate < 0.05)  |  af_foss = 0.1513 (0.152 +-30%)  af_luc/af_foss = 1.032 (> 0.3)  150/100 = 0.867 (> 0.8)
+
+======================================================================
+PART 4 -- test-likelihood.R: the fitted level offset b0 vs gamma_diff
+======================================================================
+gamma_diff = 0.000   b0 =  2.4180 ppm (guard |b0| < 3)   A =  26.398 (guard A > 10)
+gamma_diff = 0.125   b0 =  2.7180 ppm (guard |b0| < 3)   A =  26.398 (guard A > 10)
+gamma_diff = 0.250   b0 =  3.0173 ppm (guard |b0| < 3)   A =  26.398 (guard A > 10)
+
+======================================================================
+PART 5 -- test-mode-file.R: the recomputed pin90 - canonical gap vs gamma_diff
+======================================================================
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 96.4737 m
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 99.6879 m
+gamma_diff = 0.000   gap = -11.4936 (expected -11.6698 +-0.2)   pin90 = -1557.769   canonical = -1546.276
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 96.4737 m
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 99.6879 m
+gamma_diff = 0.125   gap = -14.8961 (expected -11.6698 +-0.2)   pin90 = -1571.407   canonical = -1556.510
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 96.4737 m
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 99.6879 m
+gamma_diff = 0.250   gap = -19.8635 (expected -11.6698 +-0.2)   pin90 = -1606.629   canonical = -1586.766
+
+PIN_PRIOR_CREDIT is a PRIOR term (the near-delta fert_k prior at 90) and does not
+depend on gamma_diff. Any movement in the gap is therefore a LIKELIHOOD differential.
