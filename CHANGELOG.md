@@ -2,6 +2,130 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-31c — **THE BRACKET WAS THE ARTIFACT, NOT THE −232: `kz` ≤ 6528 IS A +1.2σ TRUNCATION**
+
+`calibration/diag_kz_bracket_on_the_sourced_target.R` (~18 min). Handoff 08-31b §1a lists the `kz`
+bracket as the BLOCKING item, and [[ccx_price_measured_off_support]] says which end of
+"−232 vs −285" is right "depends on whether `kz` ≤ 6528 is defensible. Settle the bracket BEFORE the
+judgement call." Settled. **It moved the call, and not in the direction 08-31b expected.**
+
+### ⚠ FIRST, A CORRECTION TO 08-31b's OWN FRAMING
+
+08-31b calls the bracket "a numerically-chosen support, **neither an observation nor a law**."
+**Half wrong, and it is the half that matters.** The bisection recipe in `R/calibrate.R` *is*
+observational — both ends are the `kz` that puts the model's deep ocean at a stated Δ¹⁴C. What is
+not sourced is the **target**: `[−200, −150] ‰`, which `R/calibrate.R` itself records as *"an
+uncited recollection"*, on the bottom **three** boxes — while the `d14c_deep_ocean` term added
+later scores the **bottom box** against GLODAPv2's sourced **−175.3 ± 10.3 ‰** ([[ccx_glodap_deep]]).
+So the question was never "observation or not". It was **which observation, on which layer, with
+what σ.**
+
+**And the physical-law route is closed with a receipt, not a shrug.** DESIGN §3.4 already prices
+`kz` against Ledwell's NATRE thermocline diffusivity, (1.7 ± 0.2)×10⁻⁵ m² s⁻¹ = 536 m² yr⁻¹: the
+model runs **7.4–12.2× that by construction**, because a 1-D column's effective diffusivity is
+emulating three-dimensional advective transport. [[threshold_from_obs_or_law]]'s law route cannot
+bound this parameter at all, so the deep-Δ¹⁴C observation is the *only* bound available — a reason
+to get it right, not to shrug.
+
+### PART 1 — the bracket in the units of the observation it encodes
+
+Gated against DESIGN §5.2j's own published bottom-box ends (reproduced to **0.05 ‰**).
+
+| | `kz` | bottom box | z vs GLODAP | 3-box (where it was bisected) |
+|---|---|---|---|---|
+| lo | 3942.5 | −219.75 | **−4.34** | −199.93 |
+| hi | **6528.0** | −162.78 | **+1.22** | −149.96 |
+
+⇒ **a box 5.55σ wide, centred 1.56σ BELOW the sourced target.** `kz` ≤ 6528 is a **hard truncation
+of GLODAP at +1.22σ** (on the *mode's* own map, +2.0σ). That is far tighter than the σ = 10.3 the
+likelihood term scores the same observable with — **which is why the term never speaks on the high
+side and the axis rails.**
+
+### PART 2 — the same recipe, re-bisected on GLODAP instead of the recollection
+
+| k | target ± kσ | → `kz` bracket (defaults) | top vs 6528 | at the MODE's params |
+|---|---|---|---|---|
+| 1 | [−185.5, −165.0] | [5211.9, **6373.9**] | −154 (−2 %) | [4888.3, 5884.2] |
+| 2 | [−195.8, −154.7] | [4763.5, **7146.6**] | +619 (+9 %) | [4495.6, **6529.1**] |
+| 3 | [−206.0, −144.5] | [4379.1, **8109.9**] | +1582 (+24 %) | [4154.7, 7314.9] |
+
+⚠ **At the mode's parameters the 2σ top is 6529.1 against the shipped 6528.** Not a plant — the
+bisection is at defaults and the sensitivity row is a different map — but it is the cleanest
+statement of what the ceiling *is*: **a 2σ cutoff.**
+
+### PART 3 — the land axis on the sourced 3σ support. **THE −232 WAS RIGHT.**
+
+Same frontier, same gates (objective-likelihood gate reads −1494.871 exactly), `kz` on a logit over
+the sourced 3σ bracket instead of the recollection's. Prior stays flat inside, every row including
+the anchor re-optimised on the same support.
+
+| `beta_max` | d loglik | (08-31b on-support) | d logpost | (08-31b) | `kz` | % of 3σ box | **deep z** | IRF100 |
+|---|---|---|---|---|---|---|---|---|
+| 0.5552 | 0.00 | 0.00 | 0.00 | 0.00 | 6486.1 | 56 % | +1.94 | 0.283 |
+| 0.5000 | −8.27 | — | −8.53 | — | 6608.1 | 60 % | +2.11 | 0.294 |
+| 0.4500 | −38.77 | −41.86 | −39.33 | −57.37 | 6799.7 | 65 % | +2.37 | 0.305 |
+| 0.4000 | −105.86 | — | −106.87 | — | 7121.6 | 74 % | +2.77 | 0.317 |
+| **0.3500** | **−231.96** | **−284.86** | **−233.93** | −298.16 | 7666.5 | 88 % | **+3.39** | 0.330 |
+| 0.3000 | −456.94 | −621.25 | −477.52 | −638.23 | 8109.9 | **100 % ⚠** | +3.83 | 0.348 |
+
+⚠ Deltas are comparable WITHIN a frontier only — different prior, different log-jacobian. ⚠ The
+0.30 row **rails on my own 3σ ceiling** and is therefore not a clean measurement of anything.
+
+⭐ **AN UNPLANNED CONVERGENCE CHECK, AND IT IS THE STRONGEST THING HERE.** The five non-railed rows
+reproduce the *published off-support* `kz` — 6486.0, 6608.1, 6799.6, 7121.6, 7666.6 — to a maximum
+of **0.1 m²/yr**. An unbounded `exp(u)` search and a logit search on a 3σ-sourced bracket, written
+a day apart for opposite purposes, land on the same optimum. **Both searches converged; the
+disagreement was never numerical.**
+
+⇒ **THE 08-31 FRONTIER'S PARAMETERS WERE RIGHT AND ITS SUPPORT WAS WRONG.** `kz` = 7667 at the
+gate-7 row is not "ocean mixing the model is not allowed to have" — it is ocean mixing the
+*recollection* excluded and the *sourced observation* permits. **−232 is the number; −285 is what
+truncation at +1.2σ costs.**
+
+⚠ **THE PROCESS FINDING OF 08-31b IS UNTOUCHED AND STILL RIGHT.** A frontier that optimises outside
+its own declared support, with nothing to object because `loglik_of()` never evaluates a prior, is a
+real defect and the support gate that caught it should stay. **What was wrong was the remedy: the
+fix was to re-derive the support, not to re-price against it.** ⇒ **A GATE INHERITS THE AUTHORITY OF
+THE BOUND IT ENFORCES.** Ours enforced a bound with no receipt, and so converted an uncited
+recollection into a −53-log-unit correction that read as a discovery.
+
+### ⇒ WHAT §8.3 IS ACTUALLY ASKING, RESTATED
+
+Not "is −232 or −285 the price?" The price is a **curve** in how much deep-Δ¹⁴C misfit is tolerated
+(−285 at +1.2σ, −232 at +3.4σ), and the `d14c_deep_ocean` term **already prices that continuously**.
+So the question for Marcus is a trade between two independent observations:
+
+> **Will we buy gate 7 (the GCB land/ocean partition) by putting the deep ocean 3.4σ young on
+> GLODAP?** At `beta_max` 0.35 both sinks land inside 1σ (land +0.78, ocean +0.16) — reproducing
+> the *published* closure exactly, not 08-31b's marginal +0.98 — and deep Δ¹⁴C goes −155.4 → −140.5 ‰.
+
+At z = 3.39 the deep term contributes only ≈ −5.7 log-units of the 232, so **it is not what is being
+paid** — the CO₂ streams are, at their usual 40:1 leverage ([[ccx_stream_leverage]]). The bracket
+was not preventing that trade. It was **hiding** it: capping `kz` at +1.2σ made the optimiser pay in
+likelihood instead of in deep-ocean age, where the cost is visible and scored.
+
+**Gate 12a unaffected either way** — IRF(100) reaches 0.330 (sourced) vs 0.342 (truncated) against
+Joos's 0.409. Still the equilibrium/capacity defect.
+
+### The exit condition in `R/calibrate.R` is MET at the mode, and only there
+
+*"Keep the bracket, add the term at n_eff = 20. DELETE IT ONLY AFTER A REFIT SHOWS THE TERM HOLDING
+`kz` ALONE."* `diag_kz_railed.R` asked this with every other parameter FROZEN. PART 3's anchor asks
+it with `kz`/`fert_k`/`q10` re-optimised — strictly harder — and **the term holds: `kz` turns over
+at 6486.1, 56 % of a 3σ box, ≥ 40 % clear of both ends, and identical to the incumbent anchor to
+0.1 m²/yr.** Under a *forced* `beta_max` it walks to +3.4σ, but that is CO₂ outvoting the deep term,
+which no bracket width fixes.
+
+**NOTHING ADOPTED.** `CCX_PARAM_TABLE` is never mutated (asserted at the end; the guard passed).
+Moving the bounds is Marcus's call and `R/calibrate.R` says so in terms. **Three options, and the
+staged refit's mode moves under all but the first:**
+1. **Keep [3942.5, 6528]** — then say in DESIGN that it is a +1.2σ truncation of GLODAP, chosen
+   deliberately, and stop quoting prices measured against it as physics.
+2. **Re-bisect on the sourced target at a stated k** — same recipe, one number to choose, and the
+   inherited layer/target mismatch goes away.
+3. **Delete the bracket and let the term hold `kz`** — the exit condition as written; PART 3's
+   anchor is the evidence it is met, and a wide logit (say k = 4) keeps the transform well posed.
+
 ## 2026-08-31b — **THE -232 WAS MEASURED OFF-SUPPORT, and the overlay idiom silently defaults**
 
 Handoff 08-31 §8.3 puts "gate 7 closes for −232 log-units" to Marcus as a judgement call. **The
@@ -45,6 +169,15 @@ boundary — that refuses to report an off-support point.
 bracket was re-bisected for the pump on 08-16e: a numerically-chosen support, neither an observation
 nor a law. **−232 and −285 BRACKET the truth**, and which end is right depends on whether `kz` ≤ 6528
 is defensible. Settle that before the judgement call; it is cheaper and it moves it.
+
+> ⛔ **SUPERSEDED 2026-08-31c — SETTLED, AND IT WENT THE OTHER WAY. DO NOT QUOTE −285 AS "the
+> corrected price".** The bracket IS observational (bisected on deep Δ¹⁴C); what is unsourced is its
+> TARGET, an uncited recollection on the wrong layer. On a support re-bisected against GLODAP the
+> price is **−232.0**, reproducing the "off-support" number, and the five non-railed rows reproduce
+> its `kz` to **0.1 m²/yr**. The frontier's PARAMETERS were right; its SUPPORT was wrong. See the
+> 08-31c entry above and `diag_kz_bracket_on_the_sourced_target.R`. The support-gate defect this
+> entry found is real and its gate stays.
+
 
 Gate 12a is unaffected — IRF(100) reaches 0.342 of Joos's 0.409. Still the equilibrium/capacity
 defect, closable on neither axis.
