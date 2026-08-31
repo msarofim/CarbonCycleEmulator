@@ -2,6 +2,78 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-31b — **THE -232 WAS MEASURED OFF-SUPPORT, and the overlay idiom silently defaults**
+
+Handoff 08-31 §8.3 puts "gate 7 closes for −232 log-units" to Marcus as a judgement call. **The
+number is measured at parameter values the model's own domain excludes.**
+
+`diag_price_the_gates.R` PART 2 re-optimises `kz`/`fert_k`/`q10` as `exp(u)` — unbounded log. But
+`kz` is a **logit** parameter on a hard support **[3942.5, 6528]**. Every land-axis row except the
+anchor sits above the top; the row that closes gate 7 uses **`kz` = 7667, 17 % over**, where
+`.to_unc()` is `NaN` and the prior is `−Inf`. Part of gate 7's closure was bought with ocean mixing
+the model is not allowed to have.
+
+**The defect class.** The 08-31 session added a self-check gate pinning the frontier's LIKELIHOOD to
+the objective's, after a truncated likelihood cost 253 log-units of artifact. That gate is necessary
+and it passes. **Nothing pinned the frontier's PARAMETERS to the objective's SUPPORT**, and
+`loglik_of()` never evaluates a prior, so there was nothing to object.
+
+⚠ **THE OCEAN AXIS IS NOT DAMAGED.** It leaves the support too (`kz` ≤ 3000 is under `lo`), but in
+the direction that makes the optimiser's job EASIER, and it still got worse on every gate. **"`kz` is
+not the lever" survives**; only the favourable price on the land axis does not.
+
+### The corrected axis (`diag_price_the_land_axis_on_support.R`, ~12 min)
+
+Same frontier, every parameter moving in ITS OWN transform so the search cannot leave the support,
+plus a gate — derived from `CCX_PARAM_TABLE`, not a literal, and mutation-tested exact at the
+boundary — that refuses to report an off-support point.
+
+| `beta_max` | d loglik | published | d logpost | z_land | z_ocean | IRF100 | `kz` |
+|---|---|---|---|---|---|---|---|
+| 0.5552 | 0.00 | 0.00 | 0.00 | +2.35 | −0.78 | 0.283 | 6486 (98 %) |
+| 0.4500 | −41.9 | −38.8 | −57.4 | +1.79 | −0.59 | 0.306 | 6528 (100 %) |
+| **0.3500** | **−284.9** | −232.0 | **−298.2** | **+0.98** | −0.34 | 0.342 | 6528 (100 %) |
+| 0.3000 | −621.3 | −449.4 | −638.2 | +0.40 | −0.15 | 0.368 | 6528 (100 %) |
+
+**Gate 7 still first closes at `beta_max` 0.35, so §8.3 is still a live call — at −285 likelihood /
+−298 posterior, 23 % more than quoted.** But the closure is MARGINAL: `z_land` **+0.98**, inside by
+0.02, against the off-support +0.78; and `z_ocean` never crosses over on support, so the published
+"both sinks inside, ocean at +0.16" was partly the off-support `kz`.
+
+⚠ **THE PRICE IS SET BY A BRACKET, NOT BY PHYSICS.** At every point below the anchor `kz` rails at
+**exactly 6528** — the constrained optimum is ON the boundary, so it still wants to go higher. That
+bracket was re-bisected for the pump on 08-16e: a numerically-chosen support, neither an observation
+nor a law. **−232 and −285 BRACKET the truth**, and which end is right depends on whether `kz` ≤ 6528
+is defensible. Settle that before the judgement call; it is cheaper and it moves it.
+
+Gate 12a is unaffected — IRF(100) reaches 0.342 of Joos's 0.409. Still the equilibrium/capacity
+defect, closable on neither axis.
+
+### ⚠ AND `diag_price_the_gates.R` CANNOT BE RE-RUN IN THE 22-PARAMETER BUILD
+
+Its own likelihood gate hard-stops it, which is how this surfaced. The cause is a THIRD instance of
+live-names-meet-a-stored-vector, and the only SILENT one so far:
+
+    for (n in intersect(names(base), names(p0))) base[[n]] <- p0[[n]]
+
+`p0` is a 21-parameter mode, `base` a 22-parameter default. `intersect()` does not error — **it
+omits** — so the fitted NPP lag is dropped and `base` runs at the DEFAULT **2.25** instead of the
+fitted **1.7502**. The gate then reads **−3187.902 against −1494.871: 1693 log-units**, because the
+seasonal CO₂ streams carry the model's highest leverage (`co2_seasonal_MLO` 4118). Routing `p0`
+through `ccx_migrate_par_set()` restores it to −1494.871 exactly.
+
+**Blast radius, and it splits on whether a guard exists.** 75 calibration scripts use an `intersect`
+overlay; 20 mention `param_names` at all. **The app is guarded and degrades honestly** —
+`app/global.R:121` skips any mode whose `param_names` mismatch, so it refuses all stored modes and
+falls back to hand-set values under a banner that says "not fitted to anything". The unguarded
+diagnostics do not. **Not fixed beyond the one script this needed: 75 call sites, and whether the fix
+belongs per-caller or in one shared helper, is Marcus's ruling.**
+
+⇒ **THE RULE THE DAY ARGUES FOR: `intersect()` on a stored parameter vector converts a version
+mismatch into a SILENT DEFAULT.** Of today's three instances, the two caught fast were caught because
+something asserted a CONTRACT — the objective's own gate, and a loop over `CCX_PARAM_NAMES` that
+refuses a `NULL`. The one that cost real numbers is the one that treats absence as normal.
+
 ## 2026-08-30 — **THE 7 FAILURES RULED ON — and a THIRD one-core-only default found**
 
 Handoff 08-30 left 7 attributed failures for Marcus. All measured first
