@@ -2,6 +2,88 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-31d — **THE PROBE: `kz` STAYED PUT WITH 2× THE CEILING — AND FOUND A BETTER MODE ELSEWHERE**
+
+`calibration/output/probe_20260831_kz_wide_support/` (220 min, 84,299 evals, one arm N, commits
+`89048f7` + `a323a5d`). Asks `R/calibrate.R`'s stated exit condition — *"delete it only after a
+REFIT shows the term holding `kz` alone"* — with **all 22 parameters free**, which neither
+`diag_kz_railed.R` (0 free) nor 08-31c PART 3 (3 free) could.
+
+### The support was set by POWER, not by taste
+
+`CCX_WIDEN_PARAMS="kz=3494.9,13265.0"` = the **k = 6σ** bracket re-bisected on GLODAP. The runaway
+the bracket exists to stop is the 17-param unbounded mode at `kz` = **10,686**, which on the shipping
+model reads deep Δ¹⁴C −125.6 ‰ = **z +4.84**. A support must CONTAIN that or the null is
+structurally guaranteed ([[no_power_null]]):
+
+    k = 4 -> [4045.3,  9344.5]  EXCLUDES the runaway -> NO POWER, rejected
+    k = 6 -> [3494.9, 13265.0]  CONTAINS it          -> ADOPTED
+
+**k = 6 is the smallest sourced bracket that can fail.**
+
+### THE RESULT — `kz` used none of 6,865 m²/yr of new headroom
+
+    kz  6400.4 (95.1 % of [3942.5,  6528.0])  ->  6302.4 (28.7 % of [3494.9, 13265.0])
+
+**Down 1.5 %, with the ceiling raised 2.03×.** Out of 20 shared parameters it is the **third
+least-changed in the whole vector**. Pre-registered reading: this is the "stays interior" outcome,
+**suggestive and NOT conclusive** — and the driver says why in its own words:
+`*** [N] LAST CYCLE HIT THE RESTART CAP -- this mode is NOT converged`. Restart 4 still gained 0.70
+and the BFGS polish then gained **9.07**, the same simplex-collapse signature as 08-20r.
+
+⇒ **This does NOT certify the exit condition met.** It is the strongest available version of "not
+violated": a run that travelled a long way, was free to range over twice its old ceiling, and did
+not go.
+
+### ⚠ BUT THE GAIN IS `h_ml`'s, NOT `kz`'s — so the probe did not isolate what it was built to
+
+    logpost  -1547.2 -> -1495.3   (+51.9)
+    h_ml       35.25 ->  134.11 m (+280 %)   <- inside its UNCHANGED band
+    seas_T_amp_SH +278 %, fert_k +63 %, beta_max +20 %, kz -1.5 %
+
+Decomposition, and it is **arithmetic, not measurement**: ≈1.5 is the reparameterisation artifact
+(predicted +1.49 from the parameter values before looking, observed +1.5), ≈11.3 the `seas_lag_p`
+split, leaving **≈39 that is a better `h_ml` the 08-30 run never found** — it too had hit its restart
+cap while still gaining. **The control that would separate these — the staged refit, split with the
+SHIPPED bracket — has not been run.**
+
+⚠ **THE FINDING TO FLAG HARDEST IS NOT ABOUT `kz`: THE CANONICAL MODE MAY NOT BE THE MODE.** −1495.3
+against −1547.2, driven by a parameter whose band nobody touched. That is direct evidence for the
+basin-survey argument in handoff 08-31b §2b, and it is not a bracket question at all.
+
+### Two predictions from 08-31c, both confirmed
+
+- **`kz`'s Hessian entry stabilised.** The morning's step study found `kz` the ONE step-dependent
+  coordinate at the `lifted` point; the probe reports **all 22 stable**. That was the
+  Jacobian-compression hypothesis (a logit pressed to 95.1 % of its bracket has `dkz/du` compressed
+  3.6–10×). ⚠ Confounded — `h_ml` moved 280 % too.
+- **Conditioning improved 5.36e5 → 6.84e4**, ~8×. [[ccx_hessian_is_the_blocker]] records 1.11e6 as
+  the sampler's blocker.
+
+### FIVE BUGS FIXED (`a323a5d`) — suite 1275 pass / 6 FAIL / 2 skip, the SAME six, no regressions
+
+1. ⛔ **`kz_bracket` was RECORDED AND NEVER RESTORED (HIGH).** The driver has written it since
+   08-16 for the reason it states beside `hml_bound` — *"`par_mode` is band-independent; `u_mode`,
+   `hessian` and `cov` are NOT"* — and `ccx_mode_params()` / `ccx_adopt_mode_band()` restored only
+   `hml_bound`. **Invisible for a fortnight because every file's `kz_bracket` equalled the shipped
+   table** ([[default_off_hides_the_bug]]). The probe wrote the first file where they differ, and on
+   it the standard idiom decodes `kz` as **4685.5 against a true 6302.4 — 26 % wrong, silently.**
+   Recorded bands now live ONCE in `CCX_MODE_BAND_FIELDS`; both functions restore and VERIFY all of
+   them. ⚠ A defect I introduced and caught mid-patch: `on.exit` registered INSIDE the restore loop
+   captures the loop variable at exit, restoring the last band twice and leaking the rest.
+2. **`diag_hess_eps_21par.R` CRASHED (exit 1).** Empty `kb` ⇒ `cumsum(c(TRUE, diff(integer(0))>1))`
+   is length 1 while `kb` is length 0 ⇒ `split()` yields one EMPTY group ⇒ length-0 into a
+   `numeric(1)` contract, erroring with neither cause nor variable named. Empty because the 08-29k
+   C1 remap removed the kinks. Three live sites of the idiom; **the other two were already guarded.**
+3. **`min()` of an empty vector** in the driver, printing *"ARM_HML_INIT = 100 is Inf m clear"* every
+   run. **Line ~795 of the same file already had the guarded form.**
+4. **A gate that could no longer pass**: `!= 3` was the PRE-remap kink count, so it fired every run.
+   Expected count is now **0**, measured and named with provenance.
+5. **Two "21 coordinates" labels in a 22-parameter build**, now derived from `length()`.
+
+**Not touched, deliberately:** the `intersect()` overlay across 75 scripts — per-caller vs one shared
+helper is a design decision parked with Marcus, not a bug fix.
+
 ## 2026-08-31c — **THE BRACKET WAS THE ARTIFACT, NOT THE −232: `kz` ≤ 6528 IS A +1.2σ TRUNCATION**
 
 `calibration/diag_kz_bracket_on_the_sourced_target.R` (~18 min). Handoff 08-31b §1a lists the `kz`
