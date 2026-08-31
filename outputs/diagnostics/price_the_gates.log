@@ -1,0 +1,48 @@
+GATE 7 targets on 2015-2023: land 2.410 +/- 0.50, ocean 3.202 +/- 0.40
+GATE 12a target: IRF(100) = 0.409 (Joos T5 multi-model mean)
+
+[ccx_adopt_mode_band] h_ml band -> [30, 200]; h_ml at the mode = 35.2523 m
+GATE: loglik at the mode's own vector = -1494.871 (objective's recomputed value -1494.871)
+GATE PASSED: prices below are on the objective.
+
+kz   6400 | loglik    -1494.87 | land  3.60 (+2.37 sd)  ocean  2.87 (-0.82 sd) | IRF100 0.284 (Joos 0.409) | beta_max 0.554 fert_k  188.84 q10 1.130
+kz   5000 | loglik    -1616.85 | land  3.92 (+3.01 sd)  ocean  2.56 (-1.61 sd) | IRF100 0.282 (Joos 0.409) | beta_max 0.596 fert_k  190.88 q10 1.133
+kz   4000 | loglik    -1938.79 | land  4.19 (+3.55 sd)  ocean  2.30 (-2.25 sd) | IRF100 0.279 (Joos 0.409) | beta_max 0.632 fert_k  193.52 q10 1.135
+kz   3000 | loglik    -2706.92 | land  4.51 (+4.20 sd)  ocean  2.00 (-2.99 sd) | IRF100 0.274 (Joos 0.409) | beta_max 0.678 fert_k  197.94 q10 1.138
+kz   2000 | loglik    -4608.90 | land  4.93 (+5.04 sd)  ocean  1.65 (-3.89 sd) | IRF100 0.266 (Joos 0.409) | beta_max 0.742 fert_k  205.96 q10 1.141
+kz   1200 | loglik    -8674.44 | land  5.39 (+5.96 sd)  ocean  1.28 (-4.81 sd) | IRF100 0.253 (Joos 0.409) | beta_max 0.824 fert_k  218.91 q10 1.144
+kz    800 | loglik   -13418.65 | land  5.71 (+6.61 sd)  ocean  1.05 (-5.39 sd) | IRF100 0.241 (Joos 0.409) | beta_max 0.892 fert_k  231.53 q10 1.146
+kz    500 | loglik   -20635.41 | land  6.04 (+7.27 sd)  ocean  0.83 (-5.94 sd) | IRF100 0.228 (Joos 0.409) | beta_max 0.977 fert_k  248.88 q10 1.148
+
+=====================================================================
+THE PRICE, read off the frontier
+=====================================================================
+      kz     d loglik     z_land    z_ocean    IRF100
+    6400         0.00       2.37      -0.82     0.284
+    5000      -121.98       3.01      -1.61     0.282
+    4000      -443.92       3.55      -2.25     0.279
+    3000     -1212.05       4.20      -2.99     0.274
+    2000     -3114.02       5.04      -3.89     0.266
+    1200     -7179.56       5.96      -4.81     0.253
+     800    -11923.78       6.61      -5.39     0.241
+     500    -19140.54       7.27      -5.94     0.228
+
+Joos IRF(100) = 0.409; gate 7 passes at |z| < 1 on BOTH sinks.
+
+
+=====================================================================
+PART 2 -- THE LAND AXIS (beta_max forced down, kz/fert_k/q10 re-optimised)
+=====================================================================
+beta_max 0.5552 | loglik    -1494.56 | land  3.58 (+2.35 sd)  ocean  2.89 (-0.78 sd) | IRF100 0.283 | kz  6486.0 fert_k  190.27
+beta_max 0.5000 | loglik    -1502.83 | land  3.44 (+2.06 sd)  ocean  2.95 (-0.64 sd) | IRF100 0.294 | kz  6608.1 fert_k  164.68
+beta_max 0.4500 | loglik    -1533.33 | land  3.27 (+1.72 sd)  ocean  3.02 (-0.47 sd) | IRF100 0.305 | kz  6799.6 fert_k  142.17
+beta_max 0.4000 | loglik    -1600.42 | land  3.06 (+1.30 sd)  ocean  3.12 (-0.21 sd) | IRF100 0.317 | kz  7121.6 fert_k  120.56
+beta_max 0.3500 | loglik    -1726.51 | land  2.80 (+0.78 sd)  ocean  3.27 (+0.16 sd) | IRF100 0.330 | kz  7666.6 fert_k  100.17
+beta_max 0.3000 | loglik    -1943.98 | land  2.47 (+0.12 sd)  ocean  3.49 (+0.72 sd) | IRF100 0.342 | kz  8601.1 fert_k   81.47
+
+READ PART 2 AS: if z_land walks toward 0 while IRF100 walks toward 0.409,
+the land sink and the pulse lifetime are ONE defect and this is the lever.
+If z_land closes but IRF100 does not, they are two, and the pulse needs
+something neither axis carries.
+READ IT AS: if the gates close for a few tens of log-units it is WEIGHTING;
+if closing them costs hundreds, or they never close at any kz, it is STRUCTURAL.
