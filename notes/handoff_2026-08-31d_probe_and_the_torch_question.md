@@ -267,8 +267,10 @@ bracket) it fails; at the probe's mode (`kz` interior, 28.7 %) **all 22 coordina
   `diag_landed_gap_streams.R` is QUARANTINED; `refit_20260828_sigma_eff` is RATIFIED "do not adopt";
   the pinned-96 successor is undecided and is NOT a config change.
 - ⚠ **Memory index staleness found today:** `INDEX_ccx_seas.md` says the hemispheric lag is "NOT
-  STARTED" (it shipped 08-31); `INDEX_ccx.md` says "SUITE 1255" (it is 1275). **Pre-existing dangling
-  memory link:** `glacier_gap_is_rate_not_curve`, referenced twice from `magicc_colder_than_fair_2300.md`.
+  STARTED" (it shipped 08-31); `INDEX_ccx.md` says "SUITE 1255" (it is 1275). ⚠ **Another session was writing
+  to `memory/` during this one** — `glacier_gap_is_rate_not_curve.md` appeared at 12:31, between two
+  link scans, resolving a dangling link I had already reported. **Re-scan before trusting any memory
+  audit taken earlier in a session than its conclusion.**
 - **Suite 1275 pass / 6 FAIL / 2 skip** — `test-mode-decode.R:15,:29`; `test-mode-file.R:109 ×2,
   :203`; `test-prior-z.R:38`. Same six as `11ff844`. ⚠ **"The refit is their fix" is optimistic while
   §2's basin question is open.**
