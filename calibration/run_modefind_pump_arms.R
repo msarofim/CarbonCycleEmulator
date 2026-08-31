@@ -532,12 +532,22 @@ ARM_KINKS <- local({
 cat(sprintf("%d kink(s) in [%g, %g]: h_ml = %s m\n", length(ARM_KINKS),
             CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi,
             paste(sprintf("%.2f", ARM_KINKS), collapse = ", ")))
-# The diagnostic found exactly three. A different count means the shape data or
-# the grid changed since, and the Hessian caveat was written against the old one.
-if (length(ARM_KINKS) != 3)
-  cat("*** the kink count has CHANGED since diag_hess_eps_21par.R -- re-run it\n")
+# ⚠ EXPECTED COUNT UPDATED 2026-08-31c, and the old one was a gate that could no
+# longer pass. This read `!= 3` -- the count diag_hess_eps_21par.R found on the
+# PRE-REMAP objective -- so after the 2026-08-29k C1 remap removed every kink it
+# fired on EVERY run. A warning that always fires carries no information and
+# trains the reader to skip it ([[no_power_null]]). 0 is the post-remap count,
+# measured, and a NON-zero one now means the remap regressed or the grid moved.
+ARM_KINK_EXPECT <- 0    # post-C1-remap (2026-08-29k); was 3 pre-remap
+if (length(ARM_KINKS) != ARM_KINK_EXPECT)
+  cat(sprintf("*** the kink count is %d, not the expected %d -- the C1 remap may have regressed, or the shape data / grid changed. Re-run diag_hess_eps_21par.R\n",
+              length(ARM_KINKS), ARM_KINK_EXPECT))
+# ⚠ GUARDED: min() of an empty vector is Inf WITH A WARNING, and with zero kinks
+# this printed "is Inf m clear" every run. Line ~795 of this same file already
+# had the guarded idiom; this site did not.
 cat(sprintf("ARM_HML_INIT = %g is %s. Harmless: Nelder-Mead is derivative-free.\n",
             ARM_HML_INIT,
+            if (!length(ARM_KINKS)) "clear -- THERE ARE NO KINKS on this objective" else
             if (any(abs(ARM_KINKS - ARM_HML_INIT) < 1e-6)) "EXACTLY ON A KINK" else
               sprintf("%.2f m clear", min(abs(ARM_KINKS - ARM_HML_INIT)))))
 
@@ -802,7 +812,8 @@ arm_fit <- function(mode) {
   unstable <- HD$unstable
   cat(sprintf("[%s] curvature step-stability at the mode (eps x 1/3, 1, 3): %s\n", mode,
               if (length(unstable)) paste("UNSTABLE at", paste(unstable, collapse = ", "))
-              else "all 21 coordinates stable"))
+              # ⚠ DERIVED, not typed: this said "21" in a 22-parameter build.
+              else sprintf("all %d coordinates stable", length(CCX_PARAM_NAMES))))
 
   Sigma <- tryCatch(solve(-H), error = function(e) NULL)
   ok_pd <- !is.null(Sigma) && all(is.finite(Sigma)) && all(diag(Sigma) > 0)

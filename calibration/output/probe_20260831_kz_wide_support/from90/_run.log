@@ -1,0 +1,133 @@
+OVERRIDE CCX_ARM_RESTARTS = 4 (default 20)
+OVERRIDE CCX_ARM_CYCLES = 1 (default 6)
+OVERRIDE CCX_ARM_MAXIT = 20000 (default 20000)
+OVERRIDE CCX_ARM_OUTDIR = calibration/output/probe_20260831_kz_wide_support/from90
+REFIT, 1 ARM(S) [N]. 22 parameters: beta_max, fert_k, q10, k_w, h_ml, kz, pump_grad, tau_ex, npp_frac_NH, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, sst_seas_amp_NH, sst_seas_amp_SH, gamma_enso, bomb_total, luc_scale, sigma_d14c, rep_dC, grad_off_co2, grad_off_d13c
+kz bracket [3942.5, 6528] (re-bisected for the pump 2026-08-16e)
+pump default 233.109378 umol/kg = PUMP_GRAD_OBS
+
+
+=== h_ml UNBOUNDED -- the retired band is NOT re-applied (Marcus 2026-08-28) ===
+GATE H1: h_ml on its SHIPPED support [30, 200], prior NOT renormalised. OK
+GATE H2: the shipped init 75 round-trips (u = -1.0217) and is ACCEPTED. OK
+GATE H3: rows LIVE at h_ml   31.0 (DIC  +187.78, d13C -0.6864, ALK  +82.68; sd_eff/sd_obs 1.326/1.484/1.060). OK
+GATE H3: rows LIVE at h_ml   75.0 (DIC  +188.31, d13C -0.7093, ALK  +82.68; sd_eff/sd_obs 1.101/1.216/1.007). OK
+GATE H3: rows LIVE at h_ml  199.0 (DIC  +190.17, d13C -0.7734, ALK  +82.68; sd_eff/sd_obs 1.377/1.575/1.015). OK
+Warning messages:
+1: In rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want,  :
+  object '.val' not found
+2: In rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want,  :
+  object '.spec' not found
+3: In rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want,  :
+  object '.u0' not found
+4: In rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want,  :
+  object '.pl' not found
+5: In rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want,  :
+  object '.uv' not found
+6: In rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want,  :
+  object '.back' not found
+7: In rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want,  :
+  object '.tol' not found
+8: In rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want,  :
+  object '.bump' not found
+9: In rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want,  :
+  object '.want' not found
+10: In rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want,  :
+  object '.drop' not found
+
+*** kz BRACKET WIDENED [3942.5, 6528] -> [3494.9, 13265]  (3.78x the range) ***
+    GATE init 5235.25 encodes to u = -1.5291; prior flat across the old bracket and FINITE at 8212.25 (was -Inf). OK
+GATE: the widening moved exactly kz and nothing else. OK
+
+
+=== h_ml KINK MAP (see calibration/diag_hess_eps_21par.R) ===
+0 kink(s) in [30, 200]: h_ml =  m
+*** the kink count has CHANGED since diag_hess_eps_21par.R -- re-run it
+ARM_HML_INIT = 100 is Inf m clear. Harmless: Nelder-Mead is derivative-free.
+Warning message:
+In min(abs(ARM_KINKS - ARM_HML_INIT)) :
+  no non-missing arguments to min; returning Inf
+GATE SKIPPED: one arm (N) -- there is no second arm to differ from.
+
+
+=== ARM pump_mode = N ===
+start: log-post at hand-set init = -18529.1
+WARM START MIGRATED from a 21-parameter file: filled seas_lag_p_NH, seas_lag_p_SH
+WARM START from mode_fit_pumpN.rds: log-post there = -1546.5 (its file says -1547.2)
+[N] cycle 1 restart  1: log-post =      -1514.0  (gain    32.5090)  evals 20001
+[N] cycle 1 restart  2: log-post =      -1508.8  (gain     5.1805)  evals 40002
+[N] cycle 1 restart  3: log-post =      -1505.1  (gain     3.7288)  evals 60003
+[N] cycle 1 restart  4: log-post =      -1504.4  (gain     0.6954)  evals 80004
+*** [N] cycle 1 HIT THE RESTART CAP WHILE STILL GAINING
+[N] cycle 1 polish: log-post = -1495.3 (gain 9.0707)
+[N] === cycle 1 total gain 51.1844 (log-post -1495.3, 84299 evals) ===
+*** [N] LAST CYCLE HIT THE RESTART CAP -- this mode is NOT converged
+
+[N] prior-tail position (normal sds; |z| > 3 flagged):
+       beta_max          fert_k             q10             k_w            h_ml 
+          -0.77           -1.05           -2.63            0.46            0.29 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+          -0.56            0.57           -1.81           -2.24            0.29 
+  seas_T_amp_SH   seas_lag_p_NH   seas_lag_p_SH sst_seas_amp_NH sst_seas_amp_SH 
+          -0.64           -1.06            0.09           -2.97           -4.76 
+     gamma_enso      bomb_total       luc_scale      sigma_d14c          rep_dC 
+           0.50            1.48           -0.23            0.12            3.59 
+   grad_off_co2   grad_off_d13c 
+           0.38            0.45 
+*** FLAGGED:  sst_seas_amp_SH, rep_dC 
+[N] hessian: per-direction central differences, 22 parameters
+  eps = 0.10 x each direction's own posterior sd, verified at eps/3 and 3 eps
+  parameter          sd (unc)     eps (u)   curvature
+  beta_max            0.00335   3.346e-04      -89314
+  fert_k              0.00415   4.145e-04      -58196
+  q10                 0.00294   2.938e-04 -1.1582e+05
+  k_w                 0.00533   5.334e-04      -35145
+  h_ml                0.08799   8.799e-03     -130.87
+  kz                  0.02224   2.224e-03     -2020.2
+  pump_grad           0.04633   4.633e-03     -464.94
+  tau_ex              0.01191   1.191e-03     -7052.6
+  npp_frac_NH         0.04122   4.122e-03     -588.39
+  seas_T_amp_NH       0.08125   8.125e-03     -151.23
+  seas_T_amp_SH       0.19078   1.908e-02     -27.469
+  seas_lag_p_NH       0.01085   1.085e-03       -8500
+  seas_lag_p_SH       0.03131   3.131e-03     -1015.8
+  sst_seas_amp_NH     0.09484   9.484e-03     -111.11
+  sst_seas_amp_SH     0.08201   8.201e-03     -148.52
+  gamma_enso          0.19795   1.979e-02     -25.507
+  bomb_total          0.00253   2.532e-04 -1.5604e+05
+  luc_scale           0.00223   2.232e-04  -2.008e+05
+  sigma_d14c          0.10407   1.041e-02     -92.325
+  rep_dC              0.06893   6.893e-03     -210.48
+  grad_off_co2        0.04538   4.538e-03     -485.63
+  grad_off_d13c       0.00381   3.811e-04      -68844
+[N] h_ml mode 134.1052 m; nearest kink Inf m away; the Hessian step reaches 3.55e-01 m
+[N] curvature step-stability at the mode (eps x 1/3, 1, 3): all 21 coordinates stable
+[N] Laplace covariance: PD, condition number 6.84e+04
+[N] mode log-post = -1495.3  (gain over init 51.2)
+[N] elapsed 220.2 min, 84299 evaluations (0.157 s/eval)
+
+[N] mode, natural scale:
+       beta_max          fert_k             q10             k_w            h_ml 
+         0.6645        308.9974          1.0352       1801.3665        134.1052 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+      6302.3685        268.7601          0.8276          0.5089         15.2720 
+  seas_T_amp_SH   seas_lag_p_NH   seas_lag_p_SH sst_seas_amp_NH sst_seas_amp_SH 
+         4.0542          1.4579          2.3159          1.0652          0.5316 
+     gamma_enso      bomb_total       luc_scale      sigma_d14c          rep_dC 
+         0.9959        118.2689          0.9368          5.4202          3.5867 
+   grad_off_co2   grad_off_d13c 
+         0.1913          0.0676 
+[N] wrote calibration/output/probe_20260831_kz_wide_support/from90/mode_fit_pumpN.rds
+
+
+=== COMPARISON SKIPPED -- ONE ARM ===
+ARM_MODES = N. See the ARM_MODES block for why D is not re-run.
+
+
+=== THE STANDING QUESTIONS THIS RUN WAS ALSO MEANT TO ANSWER ===
+[N] kz = 6302.4 (28.7 % up the re-bisected bracket [3494.9, 13265])
+[N] h_ml = 134.11 -- rows SCORED (option 5); sd_eff/sd_obs 1.046 / 1.062 / 1.005
+[N] pump_grad = 268.76  (prior centre 233.11, 1-D optimum at the old mode 274.5)
+
+
+written: calibration/output/probe_20260831_kz_wide_support/from90/pump_arms_comparison.rds

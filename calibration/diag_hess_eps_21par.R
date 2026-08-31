@@ -140,8 +140,11 @@ cat(sprintf("  new since that fit (%d, at defaults): %s\n", length(added), paste
 if (!all(is.finite(u_lift)))
   stop("the lifted point does not round-trip through the transforms: ",
        paste(CCX_PARAM_NAMES[!is.finite(u_lift)], collapse = ", "))
-cat(sprintf("  h_ml carried = %.2f m, inside [%g, %g]. all 21 coordinates finite. OK\n",
-            p_lift$h_ml, HEPS_HML_BOUND[1], HEPS_HML_BOUND[2]))
+# ⚠ the count is DERIVED, not typed: this line read "all 21 coordinates" while
+# the same script's header printed "at 22 parameters" (project rule -- a label
+# stating a computed quantity has to be computed).
+cat(sprintf("  h_ml carried = %.2f m, inside [%g, %g]. all %d coordinates finite. OK\n",
+            p_lift$h_ml, HEPS_HML_BOUND[1], HEPS_HML_BOUND[2], length(u_lift)))
 
 bp <- ccx_default_params(); bp$pump_mode <- HEPS_ARM
 lp <- ccx_make_logpost(base_params = bp)
@@ -281,15 +284,27 @@ kh <- seq(HEPS_HML_BOUND[1], HEPS_HML_BOUND[2], by = 0.01)
 KS <- t(sapply(kh, function(h) ccx_pump_shape(ccx_ocean_grid(h))))
 kt <- rowSums(abs(apply(KS, 2, function(v) diff(diff(v)))))
 kb <- which(kt > 20 * stats::median(kt) + 1e-14)
-# adjacent grid points belong to one kink
-grp <- cumsum(c(TRUE, diff(kb) > 1))
-KINKS <- vapply(split(kb, grp), function(ix) kh[ix[which.max(kt[ix])] + 1], numeric(1))
+# ⚠ GUARD THE EMPTY CASE, and it is not hypothetical: the 2026-08-29k C1 remap
+# removed every kink this scan was written to find, so `kb` is now EMPTY and
+# this block CRASHED (exit 1) on 2026-08-31c. With kb empty,
+# `cumsum(c(TRUE, diff(integer(0)) > 1))` still has length 1 while kb has
+# length 0, so split() yields ONE EMPTY GROUP and the vapply body returns
+# length 0 into a numeric(1) contract -- "values must be length 1, but
+# FUN(X[[1]]) result is length 0", an error naming neither the cause nor the
+# variable. run_modefind_pump_arms.R and diag_hml_c1_kinkmap.R carry this guard
+# already; this was the one site of the three that did not.
+KINKS <- if (!length(kb)) numeric(0) else {
+  # adjacent grid points belong to one kink
+  grp <- cumsum(c(TRUE, diff(kb) > 1))
+  vapply(split(kb, grp), function(ix) kh[ix[which.max(kt[ix])] + 1], numeric(1))
+}
 cat(sprintf("%d kink(s) in [%g, %g], from the pump shape's clamped overlap:\n",
             length(KINKS), HEPS_HML_BOUND[1], HEPS_HML_BOUND[2]))
 cat(sprintf("  h_ml = %s m\n", paste(sprintf("%.2f", KINKS), collapse = ", ")))
 cat(sprintf("  (%d of %d probe points carry one -- the direction is smooth in between)\n",
             length(kb), length(kt)))
 cat(sprintf("*** ARM_HML_INIT = %g sits %s ***\n", HEPS_HML_INIT,
+            if (!length(KINKS)) "clear -- THERE ARE NO KINKS on this objective" else
             if (any(abs(KINKS - HEPS_HML_INIT) < 1e-6)) "EXACTLY ON ONE OF THEM" else
               sprintf("%.2f m from the nearest", min(abs(KINKS - HEPS_HML_INIT)))))
 cat("Harmless to the mode-find itself -- Nelder-Mead is derivative-free -- but\n")

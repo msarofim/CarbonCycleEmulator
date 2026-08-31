@@ -131,7 +131,11 @@ ccx_mode_file <- function(mode = CCX_MODE_CANONICAL) {
 #     ccx_unc_to_par(md$u_mode)$h_ml   85.7292 m   <- shipped [30, 200]
 #     md$par_mode[["h_ml"]]            96.4737 m   <- what the refit FOUND
 #
-# an 11.1 % error, and `h_ml` is the ONLY one of the 21 that moves. Every
+# an 11.1 % error. `h_ml` was the ONLY one of the 21 that moved -- ⚠ NO LONGER
+# TRUE since 2026-08-31c: `CCX_WIDEN_PARAMS` lets the refit override `kz`'s
+# bracket too, and the driver records it as `kz_bracket`. The recorded-band
+# fields are listed ONCE in CCX_MODE_BAND_FIELDS below so a third one cannot
+# be recorded-but-never-restored the way `kz_bracket` was for a day. Every
 # diagnostic using the standard `pv <- ccx_unc_to_par(md$u_mode)` idiom has
 # been running an 11 % shallower mixed layer than the mode it names. It also
 # accounts for most of the long-standing "the mode's logpost is not
@@ -144,6 +148,33 @@ ccx_mode_file <- function(mode = CCX_MODE_CANONICAL) {
 # survive is any ABSOLUTE quantity, and any cross-session "reproduces the
 # earlier control values" check: those agree because the sessions share the
 # defect, not because the value is right. [[mutation_test_gates]]
+
+# WHICH FIELDS OF A MODE FILE RECORD AN OVERRIDDEN BRACKET, in one place.
+# ⚠ ADD A PARAMETER HERE THE SAME DAY THE DRIVER LEARNS TO OVERRIDE IT. The
+# `kz_bracket` field was WRITTEN by run_modefind_pump_arms.R from 2026-08-16 and
+# CONSUMED by nothing until 2026-08-31c -- invisible for the whole of that time
+# because every file's `kz_bracket` happened to equal the shipped table, so the
+# missing restore could not produce a wrong number until a run finally widened
+# it ([[default_off_hides_the_bug]]: a mechanism that is off by default is
+# untested exactly where it matters).
+CCX_MODE_BAND_FIELDS <- c(h_ml = "hml_bound", kz = "kz_bracket")
+
+#' The parameter brackets a mode file records having been fitted under
+#'
+#' @param md a loaded mode file
+#' @return named list of `c(lo, hi)`, one per recorded-and-present field
+#' @keywords internal
+ccx_mode_bands <- function(md) {
+  out <- list()
+  for (nm in names(CCX_MODE_BAND_FIELDS)) {
+    v <- md[[CCX_MODE_BAND_FIELDS[[nm]]]]
+    if (is.null(v)) next
+    if (!is.numeric(v) || length(v) != 2L || any(!is.finite(v)) || v[1] >= v[2])
+      stop("mode file's ", CCX_MODE_BAND_FIELDS[[nm]], " is not a finite [lo, hi] pair")
+    out[[nm]] <- v
+  }
+  out
+}
 
 #' Parameters at a fitted mode, decoded under the band that FOUND it
 #'
@@ -163,11 +194,18 @@ ccx_mode_params <- function(md = CCX_MODE_CANONICAL) {
     stop("mode file's u_mode has ", length(u), " values but its param_names has ",
          length(.nm), " -- the file is internally inconsistent.")
   names(u) <- .nm
-  if (is.null(md$hml_bound)) return(ccx_unc_to_par(u))
-  .old <- CCX_PARAM_TABLE$h_ml
-  on.exit(CCX_PARAM_TABLE$h_ml <<- .old, add = TRUE)
-  CCX_PARAM_TABLE$h_ml$lo <<- md$hml_bound[1]
-  CCX_PARAM_TABLE$h_ml$hi <<- md$hml_bound[2]
+  bands <- ccx_mode_bands(md)
+  bands <- bands[names(bands) %in% .nm]   # a band for a parameter this file lacks
+  if (!length(bands)) return(ccx_unc_to_par(u))
+  # ⚠ SNAPSHOT BEFORE THE LOOP, RESTORE IN ONE on.exit. An on.exit() registered
+  # INSIDE the loop would capture the loop variable, which R evaluates at EXIT --
+  # so it would restore the last band twice and leak every other one.
+  .orig <- CCX_PARAM_TABLE[names(bands)]
+  on.exit(for (.b in names(.orig)) CCX_PARAM_TABLE[[.b]] <<- .orig[[.b]], add = TRUE)
+  for (bn in names(bands)) {
+    CCX_PARAM_TABLE[[bn]]$lo <<- bands[[bn]][1]
+    CCX_PARAM_TABLE[[bn]]$hi <<- bands[[bn]][2]
+  }
   ccx_unc_to_par(u)
 }
 
@@ -236,10 +274,16 @@ ccx_check_mode_decode <- function(md = CCX_MODE_CANONICAL, tol = 1e-8) {
 #' @return invisibly, the previous `h_ml` table entry, for restoring
 ccx_adopt_mode_band <- function(md = CCX_MODE_CANONICAL) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
-  old <- CCX_PARAM_TABLE$h_ml
-  if (is.null(md$hml_bound)) return(invisible(old))
-  CCX_PARAM_TABLE$h_ml$lo <<- md$hml_bound[1]
-  CCX_PARAM_TABLE$h_ml$hi <<- md$hml_bound[2]
+  # EVERY recorded band, not just h_ml. `kz_bracket` was written from
+  # 2026-08-16 and adopted by nothing until 2026-08-31c; see
+  # CCX_MODE_BAND_FIELDS for why that stayed invisible.
+  bands <- ccx_mode_bands(md)
+  old <- CCX_PARAM_TABLE[names(bands)]
+  if (!length(bands)) return(invisible(CCX_PARAM_TABLE[character(0)]))
+  for (bn in names(bands)) {
+    CCX_PARAM_TABLE[[bn]]$lo <<- bands[[bn]][1]
+    CCX_PARAM_TABLE[[bn]]$hi <<- bands[[bn]][2]
+  }
   if (!is.null(md$par_mode)) {
     # ⚠ NAME A STORED VECTOR WITH THE NAMES IT WAS STORED WITH, not the live
     # ones. This read `names(u) <- CCX_PARAM_NAMES`, which is the live build's
@@ -255,21 +299,25 @@ ccx_adopt_mode_band <- function(md = CCX_MODE_CANONICAL) {
       stop("mode file's u_mode has ", length(u), " values but its param_names has ",
            length(.nm), " -- the file is internally inconsistent.")
     names(u) <- .nm
-    # DECODE ONLY `h_ml`, which is the only thing this check verifies. Decoding
-    # the WHOLE vector made the check fail on any mode file whose parameter set
-    # differs from the build's -- even though the h_ml band question it exists
-    # to answer is perfectly well posed for such a file. A gate should need no
-    # more of its input than the property it gates.
-    if (!"h_ml" %in% .nm)
-      stop("mode file carries an hml_bound but no h_ml in its param_names.")
-    got <- .from_unc(u[["h_ml"]], CCX_PARAM_TABLE$h_ml)
-    if (abs(got - md$par_mode[["h_ml"]]) > 1e-8 * max(abs(md$par_mode[["h_ml"]]), 1e-12))
-      stop("adopting md$hml_bound = [", paste(md$hml_bound, collapse = ", "),
-           "] still does not reproduce par_mode's h_ml (", md$par_mode[["h_ml"]],
-           "); got ", got, ". This mode file was fitted under some OTHER band.")
+    # DECODE ONLY THE BANDED PARAMETERS, which is all this check verifies.
+    # Decoding the WHOLE vector made the check fail on any mode file whose
+    # parameter set differs from the build's -- even though the band question it
+    # exists to answer is perfectly well posed for such a file. A gate should
+    # need no more of its input than the property it gates.
+    for (bn in names(bands)) {
+      if (!bn %in% .nm)
+        stop("mode file records a band for ", bn, " but has no ", bn,
+             " in its param_names.")
+      got <- .from_unc(u[[bn]], CCX_PARAM_TABLE[[bn]])
+      if (abs(got - md$par_mode[[bn]]) > 1e-8 * max(abs(md$par_mode[[bn]]), 1e-12))
+        stop("adopting ", bn, "'s recorded band [", paste(bands[[bn]], collapse = ", "),
+             "] still does not reproduce par_mode's ", bn, " (", md$par_mode[[bn]],
+             "); got ", got, ". This mode file was fitted under some OTHER band.")
+    }
   }
-  cat(sprintf("[ccx_adopt_mode_band] h_ml band -> [%g, %g]; h_ml at the mode = %.4f m\n",
-              md$hml_bound[1], md$hml_bound[2],
-              if (is.null(md$par_mode)) NA_real_ else md$par_mode[["h_ml"]]))
+  cat(sprintf("[ccx_adopt_mode_band] %s\n", paste(vapply(names(bands), function(bn)
+    sprintf("%s -> [%g, %g] (mode %.4f)", bn, bands[[bn]][1], bands[[bn]][2],
+            if (is.null(md$par_mode)) NA_real_ else md$par_mode[[bn]]),
+    character(1)), collapse = "; ")))
   invisible(old)
 }
