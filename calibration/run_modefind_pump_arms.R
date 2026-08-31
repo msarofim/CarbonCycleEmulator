@@ -385,6 +385,104 @@ rm(.nm, .val, .spec, .u0, .pl, .uv, .back, .tol, .bump, .want, .drop)
 # .chg/.fld and added the loop's .h/.Fh; this list follows it.
 rm(.hml_now, .u_h, .F_h, .h, .sp_h, .Fh, .og_h)
 
+# ---- OPTIONAL BRACKET WIDENING (added 2026-08-31c) ------------------
+# `CCX_WIDEN_PARAMS="name=lo,hi;name=lo,hi"` replaces a LOGIT parameter's hard
+# support with a WIDER one and rebuilds its uniform prior over the new range.
+#
+# WHY IT EXISTS. `R/calibrate.R` states the `kz` bracket's exit condition --
+# "delete it only after a REFIT shows the term holding kz alone" -- and there
+# was no way to ask that question without editing the shipped table, which is
+# adoption, not measurement. 08-31c measured that the bracket truncates GLODAP
+# deep-D14C at +1.22 sigma and that `kz` turns over INTERIOR at the anchor with
+# 3 parameters free; the exit condition asks it with all 22 free, and that is a
+# refit. This knob is how a probe run asks it without changing what ships.
+#
+# PLACEMENT: after the h_ml override for the reason the block above records --
+# GATE H1 asserts only `h_ml` moved across that override, so every other table
+# edit belongs below it. And before ccx_make_logpost()/ccx_init_unc()/the warm
+# start, all of which read the table.
+#
+# ⚠ WIDEN-ONLY, AND THE GATE ENFORCES THE NAME. A knob called "widen" that could
+# also narrow would be a pin wearing a different word, and narrowing is what
+# CCX_PIN_PARAMS is for. The bound matches the kind of claim the name makes
+# (memory gate_bound_matches_its_claim).
+#
+# ⚠ THE LAPLACE EVIDENCE OF A WIDENED RUN IS NOT COMPARABLE to an unwidened
+# one -- a uniform prior over a wider support has a different normalising
+# constant, so the log-posterior shifts by a constant no arm comparison can see.
+# Read PARAMETERS and per-stream logL, exactly as the pin block says for pins.
+ARM_WIDENS <- local({
+  out <- list()
+  w <- Sys.getenv("CCX_WIDEN_PARAMS", NA_character_)
+  if (!is.na(w) && nzchar(w)) for (kv in strsplit(w, ";")[[1]]) {
+    kv <- trimws(kv); if (!nzchar(kv)) next
+    pr <- strsplit(kv, "=")[[1]]
+    if (length(pr) != 2L) stop("CCX_WIDEN_PARAMS entry must be name=lo,hi; got: ", kv)
+    nm <- trimws(pr[1]); rg <- suppressWarnings(as.numeric(strsplit(pr[2], ",")[[1]]))
+    if (length(rg) != 2L || any(!is.finite(rg)))
+      stop("CCX_WIDEN_PARAMS range must be two finite numbers lo,hi; got: ", kv)
+    if (!nm %in% CCX_PARAM_NAMES)
+      stop("CCX_WIDEN_PARAMS names an unfitted parameter: ", nm)
+    if (!identical(CCX_PARAM_TABLE[[nm]]$tr, "logit"))
+      stop("CCX_WIDEN_PARAMS: ", nm, " is tr = \"", CCX_PARAM_TABLE[[nm]]$tr,
+           "\", which has no bracket to widen. Only logit parameters do.")
+    if (!(rg[1] < rg[2])) stop("CCX_WIDEN_PARAMS: lo must be < hi for ", nm)
+    out[[nm]] <- rg
+  }
+  out
+})
+if (length(ARM_WIDENS)) {
+  .tab_pre <- CCX_PARAM_TABLE
+  for (.nm in names(ARM_WIDENS)) {
+    .rg <- ARM_WIDENS[[.nm]]; .sp <- CCX_PARAM_TABLE[[.nm]]
+    # WIDEN-ONLY, and equality is allowed so one end may be left alone.
+    if (!(.rg[1] <= .sp$lo && .rg[2] >= .sp$hi))
+      stop(sprintf("CCX_WIDEN_PARAMS: [%g, %g] does not CONTAIN %s's shipped [%g, %g]. ",
+                   .rg[1], .rg[2], .nm, .sp$lo, .sp$hi),
+           "This knob widens; use CCX_PIN_PARAMS to constrain.")
+    if (isTRUE(all.equal(.rg[1], .sp$lo)) && isTRUE(all.equal(.rg[2], .sp$hi)))
+      stop("CCX_WIDEN_PARAMS: ", .nm, " asked for its own shipped bracket -- a no-op ",
+           "override reads identically to one that worked (memory no_power_null). ",
+           "Drop it from the string instead.")
+    cat(sprintf("\n*** %s BRACKET WIDENED [%g, %g] -> [%g, %g]  (%.2fx the range) ***\n",
+                .nm, .sp$lo, .sp$hi, .rg[1], .rg[2],
+                (.rg[2] - .rg[1]) / (.sp$hi - .sp$lo)))
+    CCX_PARAM_TABLE[[.nm]]$lo <- .rg[1]
+    CCX_PARAM_TABLE[[.nm]]$hi <- .rg[2]
+    CCX_PARAM_TABLE[[.nm]]$prior <- local({
+      lo <- .rg[1]; hi <- .rg[2]
+      function(x) stats::dunif(x, lo, hi, log = TRUE)
+    })
+    # GATE: the shipped init must still encode finitely under the new support,
+    # and the new prior must be FLAT across the OLD bracket -- a widening that
+    # left the density unchanged at the ends would not have bound.
+    .u <- .to_unc(CCX_PARAM_TABLE[[.nm]]$init, CCX_PARAM_TABLE[[.nm]])
+    if (!is.finite(.u))
+      stop("CCX_WIDEN_PARAMS: ", .nm, "'s init does not encode under the new support")
+    .pa <- CCX_PARAM_TABLE[[.nm]]$prior(.sp$lo + 1e-6)
+    .pb <- CCX_PARAM_TABLE[[.nm]]$prior(.sp$hi - 1e-6)
+    if (!is.finite(.pa) || !is.finite(.pb) || !isTRUE(all.equal(.pa, .pb)))
+      stop("CCX_WIDEN_PARAMS: ", .nm, "'s widened prior is not flat across the old bracket")
+    # ...and it must now be FINITE beyond the old top, which is the whole point.
+    .beyond <- .sp$hi + 0.25 * (.rg[2] - .sp$hi)
+    if (!is.finite(CCX_PARAM_TABLE[[.nm]]$prior(.beyond)))
+      stop("CCX_WIDEN_PARAMS: ", .nm, " still has -Inf prior at ", .beyond,
+           " -- the widening did not bind.")
+    cat(sprintf("    GATE init %.6g encodes to u = %.4f; prior flat across the old bracket ",
+                CCX_PARAM_TABLE[[.nm]]$init, .u))
+    cat(sprintf("and FINITE at %.6g (was -Inf). OK\n", .beyond))
+  }
+  # GATE: nothing but the named parameters moved, mirroring GATE H1's discipline.
+  .moved <- names(which(!vapply(CCX_PARAM_NAMES, function(n)
+    identical(CCX_PARAM_TABLE[[n]], .tab_pre[[n]]), logical(1))))
+  if (!setequal(.moved, names(ARM_WIDENS)))
+    stop("the bracket widening touched more than it was asked to: ",
+         paste(setdiff(.moved, names(ARM_WIDENS)), collapse = ", "))
+  cat(sprintf("GATE: the widening moved exactly %s and nothing else. OK\n",
+              paste(names(ARM_WIDENS), collapse = ", ")))
+  rm(.tab_pre, .nm, .rg, .sp, .u, .pa, .pb, .beyond, .moved)
+}
+
 # =====================================================================
 # THE h_ml DIRECTION IS PIECEWISE-C1, AND THE HESSIAN HAS TO KNOW WHERE.
 #
