@@ -264,7 +264,16 @@ CCX_PARAM_TABLE <- list(
   # peak light. Offline optimum 2.25; a negative lag (canopy leading the sun)
   # is unphysical and priced accordingly by the prior rather than bounded.
   # UNCHANGED 2026-08-20g -- no observation of it was acquired.
-  seas_lag_p = list(tr = "id", init = 2.25,
+  # ⚠ SPLIT PER HEMISPHERE 2026-08-31 (Marcus's design call, option A of
+  # notes/status_2026-08-29_whole_model_assessment.md). It was ONE SCALAR
+  # serving both hemispheres while `seas_npp_amp` and `seas_T_amp` were already
+  # [2] arrays a few lines above -- and that asymmetry was measured to cost
+  # -838.3 conditional at lag 2.25, of which THE NH PAID 94 %
+  # (notes/collect_2026-08-29d). Both entries keep the ORIGINAL prior, so the
+  # split adds a degree of freedom without smuggling in a new belief.
+  seas_lag_p_NH = list(tr = "id", init = 2.25,
+                     prior = function(x) dnorm(x, 2.25, 0.75, log = TRUE)),
+  seas_lag_p_SH = list(tr = "id", init = 2.25,
                      prior = function(x) dnorm(x, 2.25, 0.75, log = TRUE)),
   # SST_SEAS_LOGSD is a PRIOR WIDTH, so it lives here and not in R/constants.R:
   # it is a calibration choice, not a physical quantity, and the registry's
@@ -489,9 +498,22 @@ CCX_PARAM_NAMES <- names(CCX_PARAM_TABLE)
 ccx_par_to_unc <- function(p) vapply(CCX_PARAM_NAMES,
   function(n) .to_unc(p[[n]], CCX_PARAM_TABLE[[n]]), numeric(1))
 
+# ⚠ DECODES THE NAMES IT WAS GIVEN, not the build's list. It used to iterate
+# CCX_PARAM_NAMES unconditionally, which is right only while the parameter SET
+# never changes -- and on 2026-08-31, splitting `seas_lag_p` made every stored
+# 21-parameter `u_mode` fail here with a bare "subscript out of bounds" raised
+# three frames below the actual cause. A named vector carries its own contract;
+# honour it, and say so loudly when a name the caller needs is simply absent.
 ccx_unc_to_par <- function(u) {
-  out <- lapply(CCX_PARAM_NAMES, function(n) .from_unc(u[[n]], CCX_PARAM_TABLE[[n]]))
-  names(out) <- CCX_PARAM_NAMES
+  nm <- names(u)
+  if (is.null(nm)) nm <- CCX_PARAM_NAMES
+  unknown <- setdiff(nm, CCX_PARAM_NAMES)
+  if (length(unknown))
+    stop("ccx_unc_to_par(): u carries names this build does not know: ",
+         paste(unknown, collapse = ", "),
+         ". It was encoded under a different parameter set.")
+  out <- lapply(nm, function(n) .from_unc(u[[n]], CCX_PARAM_TABLE[[n]]))
+  names(out) <- nm
   out
 }
 
@@ -628,7 +650,16 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = ccx_default_params())
   md <- readRDS(f)
   if (!identical(md$param_names, CCX_PARAM_NAMES))
     stop("mode file '", basename(f), "' was fitted on a different parameter set (",
-         length(md$param_names), " names); refusing to overlay it silently.")
+         length(md$param_names), " names, this build has ", length(CCX_PARAM_NAMES),
+         "); refusing to overlay it silently.",
+         if (length(md$param_names) == 21L &&
+             "seas_lag_p" %in% md$param_names)
+           paste0(" This looks like a PRE-2026-08-31 21-parameter mode: `seas_lag_p`",
+                  " was split into `seas_lag_p_NH`/`_SH`. Its `par_mode` still",
+                  " overlays correctly via ccx_seas_lag_p()'s legacy fallback --",
+                  " it is the 21-vs-22 `u_mode` DECODING that is invalid, so warm-start",
+                  " from `par_mode` and refit rather than decoding `u_mode`.")
+         else "")
   pm <- md$par_mode
   p  <- base
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]

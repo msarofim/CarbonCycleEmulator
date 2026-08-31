@@ -1,0 +1,23 @@
+[ccx_adopt_mode_band] h_ml band -> [30, 200]; h_ml at the mode = 35.2523 m
+mode from90
+  NH lag held at its fitted 1.7502; SH lag scanned.
+
+  SH lag      d total |   co2_seas_MLO  d13c_seas_MLO |   co2_seas_SPO  d13c_seas_SPO |   SH-land
+  1.7502         0.00 |           0.00           0.00 |           0.00           0.00 |     0.660
+  2.0000        11.33 |           0.91          -0.23 |          -1.58          10.97 |     0.652
+  2.2500       -13.98 |           1.75          -0.66 |         -35.17          17.73 |     0.647
+  2.5000       -75.53 |           2.47          -1.31 |        -100.52          20.51 |     0.644
+
+=====================================================================
+SCORING THE PREDICTION (structural claim only -- see the header)
+=====================================================================
+  At SH lag 2.25, holding the NH at 1.7502:
+    total cost               -13.98   (both lags moved together: order -838)
+    NH seasonal rows pay      -2.41   (both moved together: order -788)
+    SH seasonal rows pay     -17.44
+    SH-land amplitude         0.647   (predicted to fall toward ~1.07)
+    baseline SH-land          0.660
+
+  CLAIM 1 -- the NH rows are spared: SUPPORTED
+  CLAIM 2 -- the total is 1-2 orders below the joint rotation: SUPPORTED
+  CLAIM 3 -- SH-land amplitude falls: SUPPORTED

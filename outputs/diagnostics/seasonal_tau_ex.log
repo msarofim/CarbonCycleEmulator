@@ -1,0 +1,31 @@
+[ccx_adopt_mode_band] h_ml band -> [30, 200]; h_ml at the mode = 35.2523 m
+mode from90 | observed bomb lag 1.33 yr (Hua 2022 hemispheric aggregate)
+
+BASELINE (amp 0): lag 0.969 yr | CO2 gradient 2.9336 ppm | d13C gradient -0.1510 permil
+                  lag GAP to observed: -0.361 yr
+
+   amp   phase |  lag (yr)      d lag |  d grad CO2 d grad d13C
+   0.0       0 |     0.969     +0.000 |    +0.00000    +0.00000
+   0.3       0 |     0.834     -0.135 |    -0.53181    +0.02696
+   0.3       3 |     1.039     +0.070 |    -0.11665    +0.00564
+   0.3       6 |     1.140     +0.171 |    +0.54784    -0.02784
+   0.3       9 |     0.685     -0.283 |    +0.14054    -0.00690
+   0.6       0 |     0.708     -0.261 |    -1.05583    +0.05347
+   0.6       3 |     1.089     +0.120 |    -0.21240    +0.01019
+   0.6       6 |     1.237     +0.268 |    +1.12022    -0.05702
+   0.6       9 |     0.608     -0.361 |    +0.30838    -0.01523
+   0.9       0 |     0.632     -0.336 |    -1.58020    +0.08000
+   0.9       3 |     1.138     +0.169 |    -0.28989    +0.01378
+   0.9       6 |     0.479     -0.490 |    +1.72615    -0.08803
+   0.9       9 |     0.577     -0.392 |    +0.50748    -0.02520
+
+=====================================================================
+SCORING MARCUS'S HYPOTHESIS
+=====================================================================
+  the lag has to move +0.361 yr to reach the observation
+  the BEST cell moves it +0.268 yr (amp 0.6, phase 6) = 74 % of the way
+  and it moves the CO2 gradient by +1.12022 ppm (38.19 % of the gradient itself)
+
+  ⚠ READ THE RATIO, NOT THE SIGN. A seasonal rate is worth having only if
+    it moves the LAG substantially while leaving the GRADIENT alone. Moving
+    both is what the single scalar already does.

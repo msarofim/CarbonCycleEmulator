@@ -104,6 +104,7 @@ struct Aux {
 
 struct Par {
   double beta, q10, k_w, kz, w_up, w_out[2], tau_ex;
+  double tau_ex_seas_amp, tau_ex_seas_phase;   // diagnostic, 2026-08-31; 0 = OFF
   // CO2 fertilisation form and the saturating pair. `fert_form` selects which
   // of beta / (beta_max, fert_k) is live; the other is inert. See the long note
   // above CCX_FERT_FORM_DEFAULT in R/model.R for why a second form exists.
@@ -142,7 +143,7 @@ struct Par {
   // are PRECOMPUTED here on the 12 month midpoints -- exactly the definition
   // ccx_seas_norms() uses in R; a continuous-integral norm would break parity.
   int    seas_drivers;
-  double seas_T_amp[2], seas_lag_p;
+  double seas_T_amp[2], seas_lag_p[2];   // lag per hemisphere since 2026-08-31
   double sst_seas_amp[2];
   // Southern-Ocean entrainment channel (2026-08-27g, version 4a). SH only --
   // a scalar, not a [2] array, because the NH control measures 0.30 months
@@ -410,7 +411,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 
     // seasonal NEP through the leaf pool; ENSO out of the responsive soil pool
     const double seas = (P.seas_drivers > 0)
-      ? P.seas_npp_amp[hi] * npp * (seas_insol(SEAS_PHI_EFF[hi], t - P.seas_lag_p / 12.0)
+      ? P.seas_npp_amp[hi] * npp * (seas_insol(SEAS_PHI_EFF[hi], t - P.seas_lag_p[hi] / 12.0)
                                 / P.seas_n_norm[hi] - 1.0)
       : P.seas_amp[hi] * std::sin(2.0 * M_PI * (t - P.seas_phase[hi] / 12.0))
         * (npp / A.npp0[hi]);
@@ -574,8 +575,16 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   }
 
   // interhemispheric, gross both ways
-  add_flux(0, NPH, y[IX(0, C)] / P.tau_ex, 1.0);
-  add_flux(NPH, 0, y[IX(NPH, C)] / P.tau_ex, 1.0);
+  // Twin of ccx_tau_ex_rate() in R/model.R, which carries the full note: the
+  // modulation is on the RATE with a zero-mean sinusoid, so the ANNUAL MEAN
+  // rate -- and hence the steady gradient -- is preserved while the transient
+  // is not. Amplitude 0 is EXACTLY 1/tau_ex, bit for bit.
+  const double k_ex = (P.tau_ex_seas_amp == 0.0)
+    ? 1.0 / P.tau_ex
+    : (1.0 / P.tau_ex) * (1.0 + P.tau_ex_seas_amp
+        * std::sin(2.0 * M_PI * (t - P.tau_ex_seas_phase / 12.0)));
+  add_flux(0, NPH, y[IX(0, C)] * k_ex, 1.0);
+  add_flux(NPH, 0, y[IX(NPH, C)] * k_ex, 1.0);
 
   // THE CONVEYOR, interhemispheric limbs: the deep limb from the sinking
   // hemisphere's sink layer to the other's, and the surface return. Emitted
@@ -658,6 +667,8 @@ static Par unpack_par(const List& p) {
   P.npp_veg_frac = p["npp_veg_frac"]; P.ra_ratio = p["ra_ratio"];
   P.f_luc_perm = p["f_luc_perm"]; P.f_luc_wood = p["f_luc_wood"];
   P.k_w = p["k_w"]; P.kz = p["kz"]; P.w_up = p["w_up"]; P.tau_ex = p["tau_ex"];
+  P.tau_ex_seas_amp = p["tau_ex_seas_amp"];
+  P.tau_ex_seas_phase = p["tau_ex_seas_phase"];
   P.w_out[0] = p["w_out_NH"]; P.w_out[1] = p["w_out_SH"];
   P.q_conv = p["q_conv"];
   P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];
@@ -669,7 +680,12 @@ static Par unpack_par(const List& p) {
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];
   P.seas_drivers = (int) p["seas_drivers"];
   P.seas_T_amp[0] = p["seas_T_amp_NH"]; P.seas_T_amp[1] = p["seas_T_amp_SH"];
-  P.seas_lag_p = p["seas_lag_p"];
+  // ccx_cpp_par() guarantees both fields are present, resolving absence through
+  // ccx_seas_lag_p() -- the SAME function the R core uses. Do not add a
+  // fallback here: a second opinion about absence is exactly the defect that
+  // cost 0.647 GtC/yr on 2026-08-30.
+  P.seas_lag_p[0] = p["seas_lag_p_NH"];
+  P.seas_lag_p[1] = p["seas_lag_p_SH"];
   P.sst_seas_amp[0] = p["sst_seas_amp_NH"]; P.sst_seas_amp[1] = p["sst_seas_amp_SH"];
   P.ent_seas_amp_SH = p["ent_seas_amp_SH"];
   P.seas_npp_amp[0] = p["seas_npp_amp_NH"]; P.seas_npp_amp[1] = p["seas_npp_amp_SH"];
@@ -680,7 +696,7 @@ static Par unpack_par(const List& p) {
     double sn = 0.0, sr = 0.0;
     for (int m = 1; m <= 720; ++m) {
       const double mid = (m - 0.5) / 720.0;
-      sn += seas_insol(SEAS_PHI_EFF[h], mid - P.seas_lag_p / 12.0);
+      sn += seas_insol(SEAS_PHI_EFF[h], mid - P.seas_lag_p[h] / 12.0);
       sr += std::pow(P.q10, P.seas_T_amp[h]
                      * std::sin(2.0 * M_PI * (mid - (3.5 + SEAS_T_LAG) / 12.0)) / 10.0);
     }

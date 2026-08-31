@@ -156,7 +156,13 @@ ccx_mode_file <- function(mode = CCX_MODE_CANONICAL) {
 ccx_mode_params <- function(md = CCX_MODE_CANONICAL) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   if (!is.null(md$par_mode)) return(md$par_mode)
-  u <- md$u_mode; names(u) <- CCX_PARAM_NAMES
+  # same rule as ccx_adopt_mode_band(): the file's own names, not the build's
+  u <- md$u_mode
+  .nm <- if (!is.null(md$param_names)) md$param_names else CCX_PARAM_NAMES
+  if (length(u) != length(.nm))
+    stop("mode file's u_mode has ", length(u), " values but its param_names has ",
+         length(.nm), " -- the file is internally inconsistent.")
+  names(u) <- .nm
   if (is.null(md$hml_bound)) return(ccx_unc_to_par(u))
   .old <- CCX_PARAM_TABLE$h_ml
   on.exit(CCX_PARAM_TABLE$h_ml <<- .old, add = TRUE)
@@ -176,7 +182,21 @@ ccx_mode_params <- function(md = CCX_MODE_CANONICAL) {
 ccx_check_mode_decode <- function(md = CCX_MODE_CANONICAL, tol = 1e-8) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   if (is.null(md$par_mode)) return(invisible(TRUE))   # nothing to check against
-  u <- md$u_mode; names(u) <- CCX_PARAM_NAMES
+  # THIRD SITE of the same defect (2026-08-31): a STORED u_mode named with the
+  # LIVE CCX_PARAM_NAMES. ccx_adopt_mode_band() and ccx_unc_to_par() were fixed
+  # the same day; this one was found by its own test, which caught the raw
+  # "'names' attribute [22] must be the same length as the vector [21]" instead
+  # of the decode message it asserts. A file from ANOTHER parameter set is a
+  # different question from a file that mis-decodes, and this function answers
+  # only the second -- so say the first plainly and decline.
+  u <- md$u_mode
+  .nm <- if (!is.null(md$param_names)) md$param_names else CCX_PARAM_NAMES
+  if (!identical(.nm, CCX_PARAM_NAMES))
+    stop("this mode file was fitted on a DIFFERENT parameter set (",
+         length(.nm), " names vs this build's ", length(CCX_PARAM_NAMES),
+         "), so 'does it decode to its own par_mode' is not a question this ",
+         "build can answer. Refit, or read it with ccx_mode_params().")
+  names(u) <- .nm
   pv <- ccx_unc_to_par(u)
   bad <- character(0)
   for (n in intersect(names(pv), names(md$par_mode))) {
@@ -221,8 +241,28 @@ ccx_adopt_mode_band <- function(md = CCX_MODE_CANONICAL) {
   CCX_PARAM_TABLE$h_ml$lo <<- md$hml_bound[1]
   CCX_PARAM_TABLE$h_ml$hi <<- md$hml_bound[2]
   if (!is.null(md$par_mode)) {
-    u <- md$u_mode; names(u) <- CCX_PARAM_NAMES
-    got <- ccx_unc_to_par(u)$h_ml
+    # ⚠ NAME A STORED VECTOR WITH THE NAMES IT WAS STORED WITH, not the live
+    # ones. This read `names(u) <- CCX_PARAM_NAMES`, which is the live build's
+    # list -- correct only while the parameter SET never changes, and it broke
+    # the moment `seas_lag_p` was split on 2026-08-31 (22 names onto a 21-vector,
+    # a bare 'names attribute must be the same length' from inside a band
+    # adopter, which says nothing about the real cause). Same defect class as
+    # the CCX_FORCING_COLS length trap: a stored artifact indexed by a constant
+    # that is free to move underneath it.
+    u <- md$u_mode
+    .nm <- if (!is.null(md$param_names)) md$param_names else CCX_PARAM_NAMES
+    if (length(u) != length(.nm))
+      stop("mode file's u_mode has ", length(u), " values but its param_names has ",
+           length(.nm), " -- the file is internally inconsistent.")
+    names(u) <- .nm
+    # DECODE ONLY `h_ml`, which is the only thing this check verifies. Decoding
+    # the WHOLE vector made the check fail on any mode file whose parameter set
+    # differs from the build's -- even though the h_ml band question it exists
+    # to answer is perfectly well posed for such a file. A gate should need no
+    # more of its input than the property it gates.
+    if (!"h_ml" %in% .nm)
+      stop("mode file carries an hml_bound but no h_ml in its param_names.")
+    got <- .from_unc(u[["h_ml"]], CCX_PARAM_TABLE$h_ml)
     if (abs(got - md$par_mode[["h_ml"]]) > 1e-8 * max(abs(md$par_mode[["h_ml"]]), 1e-12))
       stop("adopting md$hml_bound = [", paste(md$hml_bound, collapse = ", "),
            "] still does not reproduce par_mode's h_ml (", md$par_mode[["h_ml"]],

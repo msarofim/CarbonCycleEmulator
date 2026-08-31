@@ -133,7 +133,15 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$seas_drivers)) p$seas_drivers <- 0
   if (is.null(p$seas_T_amp_NH)) p$seas_T_amp_NH <- 12
   if (is.null(p$seas_T_amp_SH)) p$seas_T_amp_SH <- 6
-  if (is.null(p$seas_lag_p)) p$seas_lag_p <- 2.25
+  # ⚠ RESOLVED THROUGH ccx_seas_lag_p(), NOT with a second literal here. The
+  # R core resolves an absent lag through that same function, so the two cores
+  # cannot drift apart about what absence means -- the gamma_diff failure of
+  # 2026-08-30. Legacy `seas_lag_p` lists are carried by its own fallback.
+  # diagnostic seasonal exchange; absence = 0 = OFF in BOTH cores
+  if (is.null(p$tau_ex_seas_amp)) p$tau_ex_seas_amp <- 0
+  if (is.null(p$tau_ex_seas_phase)) p$tau_ex_seas_phase <- 0
+  .lagp <- ccx_seas_lag_p(p)
+  p$seas_lag_p_NH <- .lagp[["NH"]]; p$seas_lag_p_SH <- .lagp[["SH"]]
   if (is.null(p$sst_seas_amp_NH)) p$sst_seas_amp_NH <- 2.0
   if (is.null(p$sst_seas_amp_SH)) p$sst_seas_amp_SH <- 1.2
   # ABSENCE = 0 = the channel OFF = the pre-2026-08-27g model, bit for bit. A
@@ -177,10 +185,12 @@ ccx_cpp_par <- function(p) {
       "npp_veg_frac", "ra_ratio", "f_luc_perm", "f_luc_wood",
       "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH",
-      "seas_drivers", "seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p",
+      "seas_drivers", "seas_T_amp_NH", "seas_T_amp_SH",
+      "seas_lag_p_NH", "seas_lag_p_SH",
       "sst_seas_amp_NH", "sst_seas_amp_SH", "ent_seas_amp_SH",
       "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
-      "revelle_frozen", "gamma_diff")]
+      "revelle_frozen", "gamma_diff",
+      "tau_ex_seas_amp", "tau_ex_seas_phase")]
 }
 
 #' Forcing table -> the matrix the C++ expects, in its column order

@@ -496,9 +496,18 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # (sst_seas_amp_NH/SH; 19 -> 21) when Marcus moved the SST fix ahead of the
   # refit so the ocean half of the seasonal cycle is calibrated WITH the land
   # half rather than being faked by it.
-  expect_length(CCX_PARAM_NAMES, 21L)
-  expect_true(all(c("seas_T_amp_NH", "seas_T_amp_SH", "seas_lag_p",
+  # 22 SINCE 2026-08-31: `seas_lag_p` split into `seas_lag_p_NH`/`_SH` on
+  # Marcus's design call (option A of the 08-29 whole-model assessment). The
+  # lag was the one seasonal TIMING parameter still global while every
+  # seasonal AMPLITUDE was already a per-hemisphere pair, and that asymmetry
+  # was measured at -838 conditional with the NH paying 94 %.
+  expect_length(CCX_PARAM_NAMES, 22L)
+  expect_true(all(c("seas_T_amp_NH", "seas_T_amp_SH",
+                    "seas_lag_p_NH", "seas_lag_p_SH",
                     "sst_seas_amp_NH", "sst_seas_amp_SH") %in% CCX_PARAM_NAMES))
+  # the retired global name must be GONE, not merely unused -- a list carrying
+  # it is a pre-split list and must take ccx_seas_lag_p()'s legacy branch
+  expect_false("seas_lag_p" %in% CCX_PARAM_NAMES)
   expect_false(any(c("seas_amp_NH", "seas_phase_NH") %in% CCX_PARAM_NAMES))
   expect_true("pump_grad" %in% CCX_PARAM_NAMES)
   # the prior is anchored on the OBSERVATION, not on the fit -- if this ever

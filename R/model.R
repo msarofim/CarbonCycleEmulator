@@ -311,11 +311,51 @@ ccx_insol <- function(phi_deg, tt) {
 #' +0.25 ppm the fertilisation rectifier genuinely produces. At 720 points the
 #' norm is the continuous mean to well beyond the integrator's own accuracy,
 #' and only the physical rectifier remains.
+# Months of phenology lag of NPP behind insolation, when nothing says otherwise.
+CCX_SEAS_LAG_P_DEFAULT <- 2.25
+
+#' Resolve the NPP phenology lag to a per-hemisphere pair
+#'
+#' ⚠ ONE RESOLVER, AND BOTH CORES GO THROUGH IT. `ccx_cpp_par()` fills the C++
+#' struct's `seas_lag_p[2]` from this same function, so R and C++ cannot
+#' disagree about what a parameter list WITHOUT the fields means. That is not a
+#' hypothetical: on 2026-08-30 `gamma_diff`'s two fallbacks had drifted apart
+#' (R said 0, C++ said the default) for a 0.647 GtC/yr parity break that no test
+#' saw, because the tests all pinned EXPLICIT values. A default carries two
+#' contracts -- the value, and what ABSENCE means -- and this function is where
+#' the second one lives for this parameter.
+#'
+#' THE ABSENCE CONTRACT, deliberately backward-compatible:
+#'   both fields present  -> use them
+#'   only legacy scalar   -> BOTH hemispheres get it, i.e. the pre-2026-08-31
+#'                           model bit for bit (every stored 21-parameter
+#'                           `par_mode` takes this branch)
+#'   neither              -> CCX_SEAS_LAG_P_DEFAULT in both
+ccx_seas_lag_p <- function(p) {
+  legacy <- if (is.null(p$seas_lag_p)) CCX_SEAS_LAG_P_DEFAULT else p$seas_lag_p
+  c(NH = if (is.null(p$seas_lag_p_NH)) legacy else p$seas_lag_p_NH,
+    SH = if (is.null(p$seas_lag_p_SH)) legacy else p$seas_lag_p_SH)
+}
+
+#' Interhemispheric exchange RATE at time t (1/yr)
+#'
+#' ONE implementation, used by the R core and mirrored by the C++ twin, so the
+#' two cannot disagree about what an absent amplitude means -- the contract
+#' half of the 2026-08-30 gamma_diff lesson.
+#' Absence, or amplitude 0, is EXACTLY 1/tau_ex: the pre-2026-08-31 model.
+ccx_tau_ex_rate <- function(p, t) {
+  a <- if (is.null(p$tau_ex_seas_amp)) 0 else p$tau_ex_seas_amp
+  if (a == 0) return(1 / p$tau_ex)
+  ph <- if (is.null(p$tau_ex_seas_phase)) 0 else p$tau_ex_seas_phase
+  (1 / p$tau_ex) * (1 + a * sin(2 * pi * (t - ph / 12)))
+}
+
 ccx_seas_norms <- function(p) {
   mid <- (seq_len(720) - 0.5) / 720
+  lag <- ccx_seas_lag_p(p)
   lapply(c(NH = "NH", SH = "SH"), function(h) {
     a_t <- if (h == "NH") p$seas_T_amp_NH else p$seas_T_amp_SH
-    list(n = mean(ccx_insol(CCX_SEAS_PHI_EFF[[h]], mid - p$seas_lag_p / 12)),
+    list(n = mean(ccx_insol(CCX_SEAS_PHI_EFF[[h]], mid - lag[[h]] / 12)),
          r = mean(p$q10^(a_t * sin(2 * pi * (mid - (3.5 + CCX_SEAS_T_LAG) / 12)) / 10)))
   })
 }
@@ -733,6 +773,15 @@ ccx_default_params <- function() {
                           # the derivation in that entry. Default-parameter 14C
                           # numbers computed before this date are at kz 4000.
     tau_ex    = 1.3,      # yr, interhemispheric atmospheric exchange
+    # SEASONAL MODULATION OF THE EXCHANGE, added 2026-08-31 as a DIAGNOSTIC.
+    # ⚠ DEFAULT 0 = OFF = the model bit for bit. NOT adopted, NOT fitted, and
+    # NOT one of the 22: it exists to test whether a seasonally-varying exchange
+    # can separate the steady GRADIENT from the bomb-spike LAG, which one scalar
+    # tau_ex provably cannot (DESIGN gate 5: the gradient wants 1.159 yr, the
+    # bomb lag ~2.3). Marcus's hypothesis, 2026-08-31: the ITCZ migrates, so
+    # cross-equatorial exchange really is seasonal.
+    tau_ex_seas_amp = 0,     # fractional amplitude on the RATE, |amp| < 1
+    tau_ex_seas_phase = 0,   # months, peak-exchange phase
     sst_NH    = 18,       # degC, hemispheric-mean SST (inside the K1/K2 fit range)
     sst_SH    = 16,
     sst_scale = 0.8,      # SST anomaly per unit GMST anomaly
@@ -750,7 +799,11 @@ ccx_default_params <- function() {
     seas_drivers = CCX_SEAS_DRIVERS_DEFAULT,
     seas_T_amp_NH = 12,   # K, seasonal land temperature half-amplitude
     seas_T_amp_SH = 6,
-    seas_lag_p = 2.25,    # months, phenology lag of NPP behind insolation
+    # PER-HEMISPHERE since 2026-08-31; see CCX_SEAS_LAG_P_DEFAULT and
+    # ccx_seas_lag_p(). Both default to the old scalar, so a list built this
+    # way is bit-identical to the pre-split model until the two are moved apart.
+    seas_lag_p_NH = CCX_SEAS_LAG_P_DEFAULT,  # months, NPP phenology lag
+    seas_lag_p_SH = CCX_SEAS_LAG_P_DEFAULT,  # behind insolation
     # DIAGNOSTIC CHANNEL SWITCH (2026-08-20f). Scales the seasonal NEP term and
     # NOTHING else. 1 = the shipped model, bit for bit. 0 turns that one channel
     # off while leaving the annual carbon budget untouched, because the term is
@@ -1157,7 +1210,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # shrinks it -- the old npp/npp0 scaling, now carried by npp itself.
       nrm  <- ccx_seas_norms(p)[[h]]
       seas <- (if (h == "NH") p$seas_npp_amp_NH else p$seas_npp_amp_SH) * npp *
-        (ccx_insol(CCX_SEAS_PHI_EFF[[h]], t - p$seas_lag_p / 12) / nrm$n - 1)
+        (ccx_insol(CCX_SEAS_PHI_EFF[[h]], t - ccx_seas_lag_p(p)[[h]] / 12) / nrm$n - 1)
     } else {
       amp   <- if (h == "NH") p$seas_amp_NH else p$seas_amp_SH
       phase <- if (h == "NH") p$seas_phase_NH else p$seas_phase_SH
@@ -1533,9 +1586,20 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   # Gross both ways, for the same reason as air-sea: the NH-SH isotope gradient
   # (the bomb-spike propagation signal) is set by gross exchange, not by the
   # small net flux.
+  #
+  # SEASONAL MODULATION (2026-08-31, diagnostic; default OFF). The modulation is
+  # applied to the RATE, not to tau, and with a zero-mean sinusoid -- so the
+  # ANNUAL MEAN EXCHANGE RATE is preserved exactly and the steady gradient is
+  # untouched to first order, while the TRANSIENT response is not. That is the
+  # whole point: it is a SHAPE knob at fixed MEAN, which is the degree of
+  # freedom gate 5 says a single tau_ex does not have.
+  # ⚠ Modulating tau ITSELF would not preserve the mean rate -- mean(1/tau) is
+  # not 1/mean(tau) -- so it would move the gradient too and the test would be
+  # confounded from the start.
   iN <- aux$idx$NH$atm; iS <- aux$idx$SH$atm
-  add_flux(iN, iS, y[iN, "C"] / p$tau_ex)
-  add_flux(iS, iN, y[iS, "C"] / p$tau_ex)
+  k_ex <- ccx_tau_ex_rate(p, t)
+  add_flux(iN, iS, y[iN, "C"] * k_ex)
+  add_flux(iS, iN, y[iS, "C"] * k_ex)
 
   # ---- THE CONVEYOR: the two INTERHEMISPHERIC limbs ------------------
   # Emitted here, not in the hemisphere loop, because they are the first
