@@ -28,3 +28,101 @@ GATE SKIPPED: one arm (N) -- there is no second arm to differ from.
 === ARM pump_mode = N ===
 start: log-post at hand-set init = -25183.4
 WARM START from mode_fit_pumpN.rds: log-post there = -1593.4 (its file says -1544.5)
+[N] cycle 1 restart  1: log-post =      -1559.1  (gain    34.2883)  evals 12036
+[N] cycle 1 restart  2: log-post =      -1558.4  (gain     0.7469)  evals 30730
+[N] cycle 1 restart  3: log-post =      -1557.9  (gain     0.4914)  evals 49126
+[N] cycle 1 restart  4: log-post =      -1556.8  (gain     1.0097)  evals 65904
+[N] cycle 1 restart  5: log-post =      -1556.8  (gain     0.0972)  evals 80244
+[N] cycle 1 restart  6: log-post =      -1556.7  (gain     0.0095)  evals 91895
+[N] cycle 1 restart  7: log-post =      -1556.7  (gain     0.0174)  evals 107409
+[N] cycle 1 restart  8: log-post =      -1556.7  (gain     0.0022)  evals 116998
+[N] cycle 1 restart  9: log-post =      -1556.7  (gain     0.0107)  evals 135670
+[N] cycle 1 restart 10: log-post =      -1556.7  (gain     0.0068)  evals 147641
+[N] cycle 1 restart 11: log-post =      -1556.7  (gain     0.0012)  evals 157129
+[N] cycle 1 restart 12: log-post =      -1556.7  (gain     0.0042)  evals 168931
+[N] cycle 1 restart 13: log-post =      -1556.7  (gain     0.0096)  evals 180121
+[N] cycle 1 restart 14: log-post =      -1556.7  (gain     0.0035)  evals 191658
+[N] cycle 1 restart 15: log-post =      -1556.7  (gain     0.0025)  evals 200173
+[N] cycle 1 restart 16: log-post =      -1556.7  (gain     0.0017)  evals 210550
+[N] cycle 1 restart 17: log-post =      -1556.7  (gain     0.0005)  evals 222744
+[N] cycle 1 restart 18: log-post =      -1556.7  (gain     0.0009)  evals 231185
+[N] cycle 1 restart 19: log-post =      -1556.7  (gain     0.0008)  evals 243187
+[N] cycle 1 restart 20: log-post =      -1556.7  (gain     0.0005)  evals 250683
+*** [N] cycle 1 HIT THE RESTART CAP WHILE STILL GAINING
+[N] cycle 1 polish: log-post = -1556.7 (gain 0.0047)
+[N] === cycle 1 total gain 36.7101 (log-post -1556.7, 253067 evals) ===
+[N] cycle 2 restart  1: log-post =      -1556.7  (gain     0.0000)  evals 257821
+[N] cycle 2 restart  2: log-post =      -1556.7  (gain     0.0000)  evals 261082
+  NM converged: gain below ARM_TOL
+[N] cycle 2 polish: log-post = -1556.7 (gain 0.0000)
+[N] === cycle 2 total gain 0.0000 (log-post -1556.7, 261522 evals) ===
+[N] CONVERGED: cycle gain below ARM_CYCLE_TOL (0.5)
+
+[N] prior-tail position (normal sds; |z| > 3 flagged):
+       beta_max          fert_k             q10             k_w            h_ml 
+          -1.00            0.00           -2.24            0.50           -1.16 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+           1.97            0.67           -0.51            1.34            2.42 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+          -4.27           -0.60           -3.08           -5.58            0.49 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+           1.47            1.19            0.29            2.71           -0.02 
+  grad_off_d13c 
+           0.51 
+*** FLAGGED:  seas_T_amp_SH, sst_seas_amp_NH, sst_seas_amp_SH 
+[N] hessian: per-direction central differences, 21 parameters
+  eps = 0.10 x each direction's own posterior sd, verified at eps/3 and 3 eps
+  parameter          sd (unc)     eps (u)   curvature
+  beta_max            0.00186   1.859e-04 -2.8927e+05
+  fert_k              0.00010   9.997e-06 -1.0007e+08
+  q10                 0.00132   1.323e-04 -5.7109e+05
+  k_w                 0.00603   6.027e-04      -27531
+  h_ml                0.14295   1.430e-02     -48.732  ** no stable step
+  kz                  0.59997   6.000e-02     -2.7786
+  pump_grad           0.05068   5.068e-03     -389.16
+  tau_ex              0.01219   1.219e-03     -6729.7
+  npp_frac_NH         0.03844   3.844e-03     -675.01
+  seas_T_amp_NH       0.01000   9.996e-04      -10007
+  seas_T_amp_SH       0.17374   1.737e-02     -33.117
+  seas_lag_p          0.00774   7.737e-04      -16704
+  sst_seas_amp_NH     0.10754   1.075e-02     -86.248
+  sst_seas_amp_SH     0.09884   9.884e-03     -102.22
+  gamma_enso          0.19624   1.962e-02     -25.931
+  bomb_total          0.00271   2.714e-04 -1.3576e+05
+  luc_scale           0.00154   1.538e-04 -4.2299e+05
+  sigma_d14c          0.09526   9.526e-03      -110.2
+  rep_dC              0.06878   6.878e-03      -211.4
+  grad_off_co2        0.04538   4.538e-03     -485.63
+  grad_off_d13c       0.00381   3.811e-04      -68844
+[N] h_ml mode 50.7778 m; nearest kink Inf m away; the Hessian step reaches 2.62e-01 m
+[N] curvature step-stability at the mode (eps x 1/3, 1, 3): UNSTABLE at h_ml
+[N] Laplace covariance: PD, condition number 9.31e+07
+[N] mode log-post = -1556.7  (gain over init 36.7)
+[N] elapsed 658.5 min, 261522 evaluations (0.151 s/eval)
+
+[N] mode, natural scale:
+       beta_max          fert_k             q10             k_w            h_ml 
+         0.4740         90.0000          1.1414       1833.0186         50.7778 
+             kz       pump_grad          tau_ex     npp_frac_NH   seas_T_amp_NH 
+      6464.2509        275.3642          1.1449          0.6523         24.6330 
+  seas_T_amp_SH      seas_lag_p sst_seas_amp_NH sst_seas_amp_SH      gamma_enso 
+         1.1784          1.7997          1.0366          0.4324          0.9842 
+     bomb_total       luc_scale      sigma_d14c          rep_dC    grad_off_co2 
+       118.1789          1.3947          6.1124          2.7116         -0.0120 
+  grad_off_d13c 
+         0.0767 
+[N] wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20260830_gamma_diff_remap/pin90/mode_fit_pumpN.rds
+
+
+=== COMPARISON SKIPPED -- ONE ARM ===
+ARM_MODES = N. See the ARM_MODES block for why D is not re-run.
+
+
+=== THE STANDING QUESTIONS THIS RUN WAS ALSO MEANT TO ANSWER ===
+[N] kz = 6464.3 (97.5 % up the re-bisected bracket [3942.5, 6528])
+[N] h_ml = 50.78 -- rows SCORED (option 5); sd_eff/sd_obs 1.216 / 1.388 / 1.024
+[N] pump_grad = 275.36  (prior centre 233.11, 1-D optimum at the old mode 274.5)
+
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20260830_gamma_diff_remap/pin90/pump_arms_comparison.rds
+PIN90_EXIT=0

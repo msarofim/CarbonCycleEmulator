@@ -1,0 +1,64 @@
+
+========================================================================
+1. THE FACE GATE, RE-READ AT THE REALISED MODE (not the predicted one)
+========================================================================
+  incumbent (calib basis of everything shipped) beta_max 0.5109  fert_k  154.845  R(400->564) =   8.61 %
+  08-29i PREDICTED payment at gamma = 0.25      beta_max 0.5227  fert_k  164.230  R(400->564) =   8.87 %
+  REFIT 20260830 from90  <-- the realised mode  beta_max 0.5552  fert_k  189.218  R(400->564) =   9.50 %
+  REFIT 20260830 pin90   (fert_k held at 90)    beta_max 0.4740  fert_k   90.000  R(400->564) =   6.83 %
+
+  BRACKET: mature forest <= 10 % | plantation-weighted synthesis 21.8 % | young plantations 23.0 %
+  ⚠ The gate has POWER only above 21.8 % (mutation-tested 08-29i).
+
+  VERDICT: realised R = 9.50 %, which is below the 21.8 % synthesis.
+  Payment realised: fert_k +22.2 % vs the +6.1 % the gate was cleared on (3.6x).
+
+========================================================================
+2. h_ml = 35.25: IS THE GAIN PRIOR CREDIT OR LIKELIHOOD? (the 08-28 test)
+========================================================================
+[ccx_adopt_mode_band] h_ml band -> [30, 200]; h_ml at the mode = 35.2523 m
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 96.4737 m
+  refit  from90   h_ml   35.25  fert_k  189.218   logpost  -1547.158 = prior  -52.287 + loglik   -1494.871
+  incumbent       h_ml   96.47  fert_k  154.845   logpost  -1586.766 = prior  -58.932 + loglik   -1527.833
+
+  DELTA (refit - incumbent):  logpost  +39.608 = prior  +6.645 + loglik  +32.962
+  08-28 REJECTED refit, same split:   +4.060 = prior  +7.397 + loglik   -1.199
+
+  ⚠ VERDICT: THE 08-28 REJECTION CRITERION DOES NOT APPLY HERE. That mode was
+    rejected because its gain was PRIOR CREDIT bought with a WORSE likelihood.
+    This one's prior credit is comparable (+6.6 vs +7.4) but its LIKELIHOOD
+    IMPROVES BY +33.0 rather than degrading. A shallow h_ml is not the verdict;
+    the split is, and here it points the other way.
+  ⚠ WHAT THIS DOES NOT SAY: most of that +33.0 is RECOVERING the adoption's own
+    cost -- the incumbent is a pre-adoption vector read under a post-adoption
+    objective. The claim is 'the refit is likelihood-driven', NOT 'h_ml = 35.25
+    is vindicated'. Isolating h_ml needs a PROFILE at the new mode.
+
+========================================================================
+3. THE ARM GAP -- what test-mode-file.R asserts
+========================================================================
+[ccx_adopt_mode_band] h_ml band -> [30, 200]; h_ml at the mode = 50.7778 m
+[ccx_adopt_mode_band] h_ml band -> [85, 120]; h_ml at the mode = 99.6879 m
+  REFITTED arms   : pin90  -1568.345 - from90  -1547.158 = -21.1876
+  INCUMBENT arms  : pin90  -1606.629 - from90  -1586.766 = -19.8635
+
+  PIN_CREDIT the test expects: -11.6698 (tolerance 0.2)
+  ⚠ PIN_PRIOR_CREDIT is a PRIOR term at fert_k = 90 and does NOT depend on
+    gamma_diff, so any excess over it is a LIKELIHOOD differential.
+    Refitted excess: -9.5178
+
+========================================================================
+4. b0 AGAINST ITS DERIVED BAR (ruling 2, 2026-08-30)
+========================================================================
+  b0 = +3.0173 ppm  (bar LIK_ICE_REP_ERR = 4.0; external floor 1.087 ppm)
+  ⚠ UNCHANGED BY THE REFIT BY CONSTRUCTION -- the fixture is on ccx_default_params(),
+    which the refit does not touch. Recorded so nobody re-derives that.
+
+OPEN, and each needs a ruling rather than a default:
+  (a) test-mode-file.R's premise is now PERMANENTLY false, not transiently --
+      the gap survives refitting BOTH arms and is prior credit PLUS a ~9.5
+      likelihood differential. It needs rewriting, not re-tolerancing.
+  (b) an h_ml PROFILE at the new mode, to say whether 35.25 m specifically is
+      load-bearing or is riding along with the rest of the refit.
+  (c) whether ccx_mode_file() repoints to this arm. NOT taken here.
+
