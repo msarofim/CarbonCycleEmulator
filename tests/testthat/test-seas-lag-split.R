@@ -104,3 +104,76 @@ test_that("a stored vector decodes under ITS OWN names, not the build's", {
   u_old$seas_lag_p <- 0
   expect_error(ccx_unc_to_par(u_old), "different parameter set")
 })
+
+test_that("a stored vector ENCODES with a named refusal, not an index from vapply", {
+  # The MIRROR of the test above, and the half left unhardened on 2026-08-31.
+  # ccx_par_to_unc() iterates the BUILD's names, so a 21-parameter par_mode hit
+  # .to_unc(NULL, ...) and died as "values must be length 1, but FUN(X[[12]])
+  # result is length 0". That is the WARM-START path of the owed 22-parameter
+  # refit: the failure would have arrived seconds into a 14 h run, naming an
+  # index and no cause.
+  # ⚠ the FITTED list, not ccx_default_params(): the two carry different names
+  # and merging them silently drops bomb_total/luc_scale (memory
+  # ccx_two_param_lists). Encoding is defined on the fitted set.
+  p <- ccx_mode_params()
+  p_old <- p[setdiff(names(p), c("seas_lag_p_NH", "seas_lag_p_SH"))]
+  p_old$seas_lag_p <- 1.7502
+
+  err <- tryCatch(ccx_par_to_unc(p_old), error = conditionMessage)
+  expect_match(err, "different parameter set")
+  expect_match(err, "seas_lag_p_NH")
+  expect_match(err, "seas_lag_p_SH")
+})
+
+test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
+  # The migration must not hold its own opinion about what an absent split
+  # means -- it reads ccx_seas_lag_p(), the one resolver both cores go through.
+  # So a migrated legacy list must encode IDENTICALLY to one whose hemispheres
+  # were set to the legacy scalar by hand. Not "close": identical.
+  p <- ccx_mode_params()
+  p_old <- p[setdiff(names(p), c("seas_lag_p_NH", "seas_lag_p_SH"))]
+  p_old$seas_lag_p <- 1.7502
+
+  mig <- ccx_migrate_par_set(p_old)
+  expect_setequal(attr(mig, "migrated"), c("seas_lag_p_NH", "seas_lag_p_SH"))
+  expect_identical(mig$seas_lag_p_NH, 1.7502)
+  expect_identical(mig$seas_lag_p_SH, 1.7502)
+
+  p_hand <- p_old
+  p_hand$seas_lag_p_NH <- p_hand$seas_lag_p_SH <- 1.7502
+  expect_identical(ccx_par_to_unc(mig), ccx_par_to_unc(p_hand))
+
+  # ⚠ ccx_mode_params() is ITSELF a 21-parameter list today -- the canonical
+  # mode predates the split -- so "already current" has to be constructed.
+  expect_setequal(attr(ccx_migrate_par_set(p), "migrated"),
+                  c("seas_lag_p_NH", "seas_lag_p_SH"))
+  p_cur <- mig; attr(p_cur, "migrated") <- NULL
+  expect_identical(attr(ccx_migrate_par_set(p_cur), "migrated"), character(0))
+})
+
+test_that("migration REFUSES a list that carries no lag at all", {
+  # Filling from CCX_SEAS_LAG_P_DEFAULT would turn a warm start into an
+  # invented coordinate wearing a fitted vector's name.
+  p <- ccx_mode_params()
+  p_none <- p[setdiff(names(p), c("seas_lag_p_NH", "seas_lag_p_SH", "seas_lag_p"))]
+  expect_error(ccx_migrate_par_set(p_none), "not a fitted ancestor")
+})
+
+test_that("the REAL 08-30 arm files migrate and re-encode", {
+  # The end-to-end claim the refit rests on. Skips rather than fails if the
+  # arm directory is absent, so the suite stays runnable on a fresh clone.
+  root <- file.path(.root, "calibration/output/refit_20260830_gamma_diff_remap")
+  for (arm in c("from90", "pin90")) {
+    f <- file.path(root, arm, "mode_fit_pumpN.rds")
+    if (!file.exists(f)) { skip(paste("no", arm, "arm file")) }
+    prev <- readRDS(f)
+    expect_length(prev$param_names, 21L)
+    mig <- ccx_migrate_par_set(prev$par_mode)
+    u <- ccx_par_to_unc(mig)
+    expect_length(u, length(CCX_PARAM_NAMES))
+    expect_true(all(is.finite(u)))
+    # the legacy contract: BOTH hemispheres take the stored scalar
+    expect_identical(mig$seas_lag_p_NH, prev$par_mode$seas_lag_p)
+    expect_identical(mig$seas_lag_p_SH, prev$par_mode$seas_lag_p)
+  }
+})

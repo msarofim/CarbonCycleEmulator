@@ -121,6 +121,9 @@ ARM_HML_INIT   <- 100      # m; the pump's own h_ml (DESIGN sec.5.2f, handoff 15
 # to alternate Nelder-Mead with BFGS until the polish stops paying.
 # `par_mode` is band-INDEPENDENT and is re-encoded under this run's table, so a
 # warm start is safe where reusing `u_mode` would not be (ccx_hml_band_provenance).
+# ⚠ BAND-independent is not SET-independent. `par_mode` still carries the names
+# of the parameter set it was fitted under, so a warm start across a set change
+# goes through ccx_migrate_par_set() at the site below (2026-08-31).
 ARM_WARM       <- TRUE
 ARM_CYCLES     <- 6         # NM-then-polish cycles; 1 reproduces the old behaviour
 ARM_CYCLE_TOL  <- 0.5       # stop when a whole cycle gains less than this
@@ -486,7 +489,17 @@ arm_fit <- function(mode) {
     prev <- readRDS(ARM_OUT(mode))
     # Re-encode from par_mode, NOT prev$u_mode: u_mode is a function of the
     # bounds in force when it was written, and this run's h_ml band may differ.
-    uw <- ccx_par_to_unc(prev$par_mode); lpw <- lp_fun(uw)
+    # ⚠ AND par_mode is only as current as the parameter SET it was written
+    # under. The 2026-08-31 seas_lag_p split makes every stored file a
+    # 21-parameter list in a 22-parameter build; migrate it through the model's
+    # own absence contract and SAY what was filled, because a warm start that
+    # quietly invented a coordinate is worse than one that refused.
+    pw <- ccx_migrate_par_set(prev$par_mode)
+    if (length(attr(pw, "migrated")))
+      cat(sprintf("WARM START MIGRATED from a %d-parameter file: filled %s\n",
+                  length(prev$param_names),
+                  paste(attr(pw, "migrated"), collapse = ", ")))
+    uw <- ccx_par_to_unc(pw); lpw <- lp_fun(uw)
     cat(sprintf("WARM START from %s: log-post there = %.1f (its file says %.1f)\n",
                 basename(ARM_OUT(mode)), lpw, prev$logpost))
     if (!is.finite(lpw)) {

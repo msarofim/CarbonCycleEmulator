@@ -495,8 +495,70 @@ CCX_PARAM_NAMES <- names(CCX_PARAM_TABLE)
   logit = log(s$hi - s$lo) + plogis(u, log.p = TRUE) + plogis(-u, log.p = TRUE),
   id    = 0)
 
-ccx_par_to_unc <- function(p) vapply(CCX_PARAM_NAMES,
-  function(n) .to_unc(p[[n]], CCX_PARAM_TABLE[[n]]), numeric(1))
+# ⚠ THE ENCODE-SIDE MIRROR of ccx_unc_to_par()'s parameter-set guard, and it
+# was left unhardened when that one was fixed on 2026-08-31. It iterates the
+# BUILD's names, so a `par_mode` stored under an older parameter set reaches
+# `.to_unc(NULL, ...)` and dies inside vapply as "values must be length 1, but
+# FUN(X[[12]]) result is length 0" -- an INDEX, three frames below the cause,
+# naming nothing. Found on the WARM-START path of the 22-parameter refit, where
+# it would have killed a 14 h run in its first seconds. Say which names are
+# absent, and say that a parameter SET is what changed.
+ccx_par_to_unc <- function(p) {
+  absent <- CCX_PARAM_NAMES[vapply(CCX_PARAM_NAMES,
+                                   function(n) is.null(p[[n]]), logical(1))]
+  if (length(absent))
+    stop("ccx_par_to_unc(): p lacks parameters this build fits: ",
+         paste(absent, collapse = ", "),
+         ". It was written under a different parameter set -- bring it forward ",
+         "with ccx_migrate_par_set() first.")
+  vapply(CCX_PARAM_NAMES,
+         function(n) .to_unc(p[[n]], CCX_PARAM_TABLE[[n]]), numeric(1))
+}
+
+#' Bring a stored parameter list onto THIS build's fitted set.
+#'
+#' A stored `par_mode` is only as current as the parameter set it was written
+#' under. When a parameter SPLITS, the model already holds an opinion about what
+#' the retired scalar means -- and that opinion is READ FROM the model's own
+#' resolver here, never restated, so the two cannot drift apart. That is the
+#' 2026-08-30 `gamma_diff` lesson (one resolver, every consumer through it)
+#' applied to the calibration side.
+#'
+#' Migration is for a fitted ancestor, not for a blank slate: a name that no
+#' stored field can supply is an ERROR, never a silent fill from the named
+#' default. Warm-starting from an invented default is not a warm start.
+#'
+#' Returns `p` with every fitted name present and a `migrated` attribute naming
+#' what was filled.
+ccx_migrate_par_set <- function(p) {
+  absent <- CCX_PARAM_NAMES[vapply(CCX_PARAM_NAMES,
+                                   function(n) is.null(p[[n]]), logical(1))]
+  if (!length(absent)) return(structure(p, migrated = character(0)))
+  filled <- character(0)
+
+  # 2026-08-31: seas_lag_p -> seas_lag_p_NH / seas_lag_p_SH. ccx_seas_lag_p()
+  # IS the absence contract; ask it rather than re-deciding what a legacy
+  # scalar means. Refuse when there is no legacy scalar to read.
+  split_nm <- c("seas_lag_p_NH", "seas_lag_p_SH")
+  if (any(split_nm %in% absent)) {
+    if (is.null(p$seas_lag_p))
+      stop("ccx_migrate_par_set(): ", paste(intersect(split_nm, absent), collapse = ", "),
+           " absent and no legacy `seas_lag_p` to migrate from. This list ",
+           "carries no NPP lag at all; it is not a fitted ancestor.")
+    lag <- ccx_seas_lag_p(p)
+    for (h in c("NH", "SH")) {
+      n <- paste0("seas_lag_p_", h)
+      if (n %in% absent) { p[[n]] <- unname(lag[[h]]); filled <- c(filled, n) }
+    }
+  }
+
+  still <- setdiff(absent, filled)
+  if (length(still))
+    stop("ccx_migrate_par_set(): no migration contract for: ",
+         paste(still, collapse = ", "),
+         ". Add one here, next to the split it mirrors.")
+  structure(p, migrated = filled)
+}
 
 # ⚠ DECODES THE NAMES IT WAS GIVEN, not the build's list. It used to iterate
 # CCX_PARAM_NAMES unconditionally, which is right only while the parameter SET
