@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-31e — **THE PROBE'S MODE IS FEASIBLE UNDER THE SHIPPED BRACKET, AND IT IS A SEPARATE BASIN**
+
+`calibration/diag_probe_basin_vs_incumbent.R` (~40 s). Adopts nothing.
+
+08-31d left the +51.9 decomposed by ARITHMETIC and named the missing control — *"the staged refit,
+split with the SHIPPED bracket — HAS NOT BEEN RUN"* — and costed it as a refit. **It is not one.**
+The probe's mode has `kz` = 6302.37, **inside** the shipped `[3942.5, 6528]`, and `h_ml` = 134.11,
+inside the shipped `[30, 200]`; all 22 parameters are strictly interior. So the control is a matched
+pair of evaluations under one table.
+
+- **`probe − incumbent = +51.73` under the SHIPPED table** (incumbent = the 08-30 landed mode, md5
+  `f4f28060…`, = the probe's own warm start). The handoff's cross-bracket +51.9 survives almost
+  intact. ⇒ **the widening contributed NOTHING; the whole gain is available in the un-widened
+  problem.** It was never a bracket question.
+- ⛔ **NOT `CCX_MODE_CANONICAL`.** `refit_20260825f_from90` predates three of the four stacked
+  objective changes and reproduces its own stored logpost only to **−42.99** in today's build. The
+  08-30 file reproduces to −0.85. Using the canonical file would have priced the gap at +89.67 —
+  **wrong by 38 log-units**, all of it objective drift.
+- **NO single-coordinate move from the incumbent is uphill**: split lags alone **−654.53**, `h_ml`
+  alone **−330.05**, `kz` alone **−2.71**. Only the joint move gains.
+- **Each point is a local maximum in `h_ml` conditional on the rest** (argmax 35.0 m and 135.0 m on
+  a 43-point profile across the shipped band, each at its own value).
+- ⭐ **MODE CONNECTIVITY: the straight path in `u`-space dips to −1569.54 at t = 0.40 — 21.53
+  log-units BELOW the worse endpoint.** ⇒ **two basins, not one hill the 08-30 refit failed to
+  finish climbing.** A warm-started local search from the incumbent cannot cross.
+  ⚠ **CHECK, surfaced not swallowed:** one straight path bounds what a LOCAL search can reach; it is
+  not a proof of topological separation.
+- **The incumbent is not converged either** — on its own side of the barrier, t ∈ [0.025, 0.100]
+  scores above it, best **+2.43** at t = 0.05. Consistent with the 08-30 run hitting its restart cap
+  while still gaining.
+
+⇒ **RULING #4 IS ANSWERED, AND IT IS INDEPENDENT OF RULINGS #1–#3.** The basin question does not wait
+on the `kz` bracket. Any refit warm-started from the incumbent inherits the wrong basin, so the
+dispersed multi-start is now the load-bearing experiment — 08-31d §5b's recommendation, arrived at by
+measurement rather than by one accident.
+
+⚠ **Gates MUTATION-TESTED 2/2**: raising `kz$lo` above the probe's value fires GATE 1 on the probe
+alone; narrowing the shipped `h_ml` band fires GATE 4. A `<<-` restoring `CCX_PARAM_TABLE` at script
+top level searches ABOVE `globalenv()` and fails — plain `<-` at that scope.
+
 ## 2026-08-31d — **THE PROBE: `kz` STAYED PUT WITH 2× THE CEILING — AND FOUND A BETTER MODE ELSEWHERE**
 
 `calibration/output/probe_20260831_kz_wide_support/` (220 min, 84,299 evals, one arm N, commits
