@@ -1,0 +1,70 @@
+
+=== 0. PARAMETER VECTOR UNDER TEST ===
+  posterior mode, arm from90 (refit_20260825f_from90, logpost -1544.61)
+  luc_scale 1.1100   bomb_total 117.23 kmol   pump_mode N
+  beta_max 0.5109  fert_k 154.8  q10 1.136  h_ml 96.47  kz 6332
+    background held to 1.898 ppm of 391.66 (0.48 %); mean diagnosed emission 1.30 GtC/yr
+
+=== 1. BACKGROUND CHECK (Joos run 1: CO2 held constant) ===
+  target 391.66 ppm; max deviation over 300 yr: 1.898 ppm (0.48 %)
+  Joos's PD100 background is 389 ppm; this model's is 392 ppm at 2010.
+
+=== 2. POINT IRF vs JOOS TABLE 5 (multi-model mean) ===
+      yr   this model      Joos T5       diff
+      20        0.505        0.596     -0.091
+      50        0.370        0.487     -0.117
+     100        0.288        0.409     -0.122
+     300        0.204        0.322     -0.118
+
+=== 3. TIME-INTEGRATED IRF vs JOOS TABLE 4 (yr) ===
+    TH   this model    Joos best        Joos 5-95 %   vs floor  verdict
+    20        12.12         14.2     12.2 - 16.3        -0.69%  BELOW -- decays too fast
+    50        24.91         30.3     24.0 - 36.6        +3.81%  inside
+   100        40.99         52.4     39.5 - 65.2        +3.78%  inside
+
+=== 3b. GATE 12b: THE TAIL, IRF(300)/IRF(100) ===
+                                                  ratio   own null verdict
+  THIS MODEL                                     0.7091     0.0829 inside
+  Joos et al. 2013 Table 5                       0.7866     0.1676 -- the benchmark
+  Spencer 2023 (2.05 %/yr over 295 ppm)          0.0166     0.0166 ON its own null, by construction
+  Dengler & Reid 2023 (42-yr half-life)          0.0369     0.0369 ON its own null, by construction
+
+  band [0.5930, 0.9788] -- CONSTRUCTED: Joos publishes no 5-95% range at
+  TH 300, so Table 4's TH-100 relative width is borrowed. That is an
+  assumption and it is stated, not silently adopted. The DISCRIMINATION does
+  not rest on it: the one-box models sit 36x and 16x below even the
+  loosest end, and every single exponential lies ON the null by construction.
+
+  MUTATION TEST of this gate, because passing is not the same as working:
+    a single exponential tuned to THIS MODEL's own IRF(100) = 0.2879
+    would score 0.0829 and the gate must REJECT it: REJECTED. OK
+
+  and the ASYMPTOTE, which is what the ratio is really testing:
+    fraction still airborne at 300 yr: model 0.204 vs Joos T5 0.322
+    Joos T5's t -> infinity limit is a0 = 0.2173; a single exponential's is 0.
+
+=== 4. THE BACKGROUND PROTOCOL IS NOT A DETAIL ===
+case                         IRF@20  IRF@100  IRF@300 |   int IRF @100
+PD, background HELD           0.546    0.293    0.205 |           43.7
+PD, background decaying       0.520    0.250    0.176 |           40.2
+PI, background HELD           0.339    0.167    0.116 |           27.4
+PI, background decaying       0.339    0.168    0.126 |           27.4
+  Joos sec.4.4.1, integrated IRF at TH=100 across 10 models:
+    preindustrial background 34-47 yr ; present-day 45-62 yr
+  The PI-lower-than-PD ordering is Joos's own and the model must reproduce
+  the SIGN of it: a fuller ocean buffers less, so a pulse lasts longer.
+
+=== 5. PULSES ON FUTURE BACKGROUNDS (100 GtC in 2050, COUPLED climate) ===
+scenario   CO2@2050   T@2100   IRF@20   IRF@50  IRF@100 | int IRF @100
+ssp126          428     1.68    0.589    0.391    0.253 |         43.9
+ssp245          464     2.66    0.655    0.512    0.384 |         54.1
+ssp370          496     3.69    0.702    0.626    0.607 |         65.6
+ssp585          519     4.68    0.737    0.699    0.704 |         72.0
+
+  Joos (Bern3D-LPJ, Fig. 5): IRF_CO2 falls to ~70 % within two decades in
+  EVERY scenario, then keeps falling for RCP2.6 and the 389 ppm standard but
+  turns back UP for the higher pathways as CO2 and warming continue to rise;
+  for RCP8.5 the airborne fraction of the pulse is still above 80 % at year
+  1000. THE ORDERING IS THE TESTABLE CLAIM HERE, NOT THE LEVEL -- a model
+  calibrated to the historical record is out of sample in these futures, and
+  Marcus made exactly that caveat when asking for the comparison.
