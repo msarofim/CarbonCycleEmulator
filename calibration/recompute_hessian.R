@@ -105,7 +105,7 @@ sep <- function(s) cat(sprintf("\n%s\n%s\n", s, strrep("-", nchar(s))))
 
 md <- readRDS(HESS_MODE_FILE)
 nm <- md$param_names
-stopifnot(identical(nm, CCX_PARAM_NAMES))
+ccx_require_param_set(md, "recompute_hessian.R")
 
 # ---- the band the mode was FOUND under, from the file, not assumed -----
 if (!is.null(md$hml_bound)) {

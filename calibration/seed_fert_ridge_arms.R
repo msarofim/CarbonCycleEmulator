@@ -36,7 +36,7 @@ SD_CELLS <- list(
   ridge_pin120      = list(K = 120, rep = 1.370,  pin = 120))
 
 md <- readRDS(SD_SRC)
-stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
+ccx_require_param_set(md, "the fertilisation-ridge arm seeder")
 CHI0  <- ccx_const("CO2_PI_PPM"); d_now <- SD_CHI - CHI0
 ENH0  <- md$par_mode$beta_max * d_now / (md$par_mode$fert_k + d_now)
 cat(sprintf("source %s  (logpost %.2f)\n", SD_SRC, md$logpost))

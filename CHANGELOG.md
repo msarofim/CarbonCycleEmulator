@@ -2,6 +2,80 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01j — **PRE-REFIT PASS: THE OBJECTIVE ALREADY WANTS THE OCEAN TERM, AND 09-01g NAMED A SLOPE GAP AS A COEFFICIENT**
+
+`calibration/diag_enso_objective_leverage.R`, new (~6 min). Adopts nothing. Written to answer the
+one question the refit rests on: **can the objective see the four new coordinates, and which way
+does it pull them?** Measured at the 08-31e basin, matched harness, shipped table.
+
+**⭐ Q1 — LEVERAGE: yes, and they are the SOFTEST coordinates in the space.** 85–252 log-units per
+prior sd; diagonal conditional sd **0.10–0.16** in u. Ranked against all 25, `luc_scale` (0.0022),
+`bomb_total` (0.0025) and `q10` (0.0029) are 40–70× stiffer, so the survey's single-scalar
+dispersion of 0.96 is **6–9 sds** on the ENSO coordinates against **325–430** on the stiffest.
+**Nothing special is needed for the new parameters; if the dispersion is a problem it is a
+pre-existing one, and it is not a problem the split created.** ⚠ Diagonal curvature, not marginal
+sd — the Hessian's 1.11e6 conditioning is still the standing blocker.
+
+**⭐ Q2 — DIRECTION: the objective ALREADY WANTS an ocean ENSO term, in the observed direction.**
+
+| point (other 21 frozen) | Δ logpost | land | ocean | partition misfit |
+|---|---|---|---|---|
+| observed | — | −0.665 | +0.119 | 0.000 |
+| mode as migrated (ocean 0) | +0.00 | −0.352 | −0.155 | 0.587 |
+| land ×1.89 only | −9.85 | −0.732 | −0.099 | 0.284 |
+| **ocean +0.137 each only** | **+1.66** | −0.357 | −0.040 | 0.467 |
+| both | −4.75 | −0.738 | +0.016 | 0.175 |
+| ocean −0.137 (wrong way) | −8.42 | −0.346 | −0.270 | 0.708 |
+| ENSO off entirely | −12.71 | +0.076 | −0.218 | 1.078 |
+
+Re-optimising a 3-parameter carbon slice moves ocean-only from **+1.66 to +1.98**. A scan puts the
+conditional optimum near **+0.10 each (+1.91)**. ⇒ **The incumbent's ocean sign error was never
+something the objective was defending — it was something a one-parameter structure could not
+express.** The LAND amplitude is what the CO₂ streams resist (−9.85, barely relieved by
+re-optimisation).
+
+**⛔ AND A CORRECTION: 09-01g NAMED SLOPE QUANTITIES AS PARAMETER VALUES.**
+`diag_enso_ocean_term_design.R` printed `gamma_enso_ocn = +0.274` where +0.274 is the ocean-sink
+SLOPE gap, and `gamma_enso × 1.89` where 1.89 is a ratio of SLOPES. Measured transfer (R² =
+**1.000000**, five points each):
+
+    land   slope = +0.0762 − 0.4297 · coef
+    ocean  slope = −0.1550 + 0.4194 · coef
+
+- ⛔ **The transfer is ~0.43, not 1**, and the **intercepts are non-zero**. So the coefficients that
+  close the observed slopes are land **1.726 total (×1.734, not ×1.89)** and ocean **+0.653 total =
+  +0.326 EACH — 2.4× the +0.274 printed.** [[ratio_needs_its_base]]
+- ✅ **09-01g's slope arithmetic is sound and every conclusion it draws stands** — compensating
+  errors, 87 % cancellation, ocean-only worsens growth, ~72 % ceiling. **Two labels were wrong**,
+  and both are now corrected in place with the reason.
+- ⚠ **Why 0.43 and not 1**: the estimator scores at the OBSERVATION's own best lag (land 3 mo, ocean
+  2 mo) while the model's ENSO flux is contemporaneous; `cor(annual index at that lag, at lag 0)` is
+  0.82 / 0.91, so **the lag accounts for only ~0.85** and the rest is the annual sink's own response
+  to an instantaneous flux anomaly. Measured, not explained — and identical in both reservoirs,
+  which points at the estimator rather than the physics.
+- ⚠ **The objective wants about a THIRD of what the partition asks for** (+0.10 vs +0.326 each).
+  That trade is the refit's to make.
+
+**Also in this pass, before the refit:**
+- ⛔ **The Torch bundle is STALE.** `port_targets.csv` records `n_par = 22` at commit `3346ded`;
+  `run_dispersed_multistart.R` refuses it with "The target is stale." Re-run
+  `make_port_targets.R` and `make_bundle.sh`. The driver itself is fine — it already migrates both
+  reference points through `ccx_migrate_par_set()`.
+- **The measured dispersion moves 1.0493 → 0.9592 for a BOOKKEEPING reason, not a physical one**:
+  the two known basins differ by 0.01 in the land coordinates and **exactly 0** in the ocean ones
+  (neither file has an ocean term), so four near-identical coordinates dilute the per-coordinate RMS
+  by exactly √(21/25) = 0.9165. The scale is recomputed at every run, so nothing needs editing —
+  but the number in the README is now stale.
+- ✅ **`ccx_require_param_set()` replaces EIGHT bare `stopifnot(identical(md$param_names, …))`.**
+  That form raises "identical(nm, CCX_PARAM_NAMES) is not TRUE" — a diagnostic that cannot run and
+  does not say why ([[broken_gate_reports_nothing]]); it has aborted two gates on this project
+  already, and the ENSO split killed all eight in the same second. The refusal is unchanged; it now
+  names the retired and missing parameters and points at `ccx_migrate_par_set()`.
+- ⚠ **The app has been shipping UNCALIBRATED DEFAULTS since 2026-08-31, and NOT because of this
+  split.** `app/global.R` skips any mode whose `param_names` differ, and the canonical mode is a
+  **21-parameter** file — so it has been skipped since the `seas_lag_p` split. It could migrate and
+  say so instead; left alone as a separate decision.
+
 ## 2026-09-01i — **THE PUMP+CONVEYOR COVERAGE CLAIM WAS HALF WRONG, AND THE FIRST GATE I WROTE FOR IT WAS VACUOUS**
 
 `tests/testthat/test-pump-conveyor.R`, new, 23 assertions. Two corrections, both worth more than the
@@ -114,8 +188,12 @@ BUDGET IDENTITY, not by a magnitude heuristic — which got it wrong.)
   40:1, so only the weak streams can see the error.
 - ⛔ **Ocean-only would take growth from 53 % to 17 % of observed** — trading the better-measured,
   more heavily weighted observable for the weaker one.
-- ✅ **Ocean + land together**: `gamma_enso` × 1.89 with `gamma_enso_ocn` = +0.274 gives both
-  partitions right and growth **53 % → 72 %**.
+- ✅ **Ocean + land together**: closing both slope gaps gives both partitions right and growth
+  **53 % → 72 %**. ⛔ **The PARAMETER values this entry originally named (`gamma_enso` × 1.89,
+  `gamma_enso_ocn` = +0.274) are WRONG and were corrected 09-01j** — they are a slope ratio and a
+  slope gap wearing coefficient names. Measured transfer is ~0.43 with a non-zero intercept, so the
+  coefficients are land **×1.734** and ocean **+0.653 total (+0.326 each)**. The slope arithmetic
+  and every conclusion in this entry are unaffected.
 - ⚠ **A ceiling from the DATA:** GCB's own slopes do not close — −(land+ocean) = +0.547 against a
   measured growth of +0.757, the +0.210 gap living in the imbalance term. **No model tuned to those
   sink products can exceed ~72 %.**

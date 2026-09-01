@@ -103,7 +103,7 @@ cat(sprintf("\nTARGET (GCB 2025, recomputed): AF %.3f | decadal sd %.4f | trend 
 
 # ---- the mode ---------------------------------------------------------
 md <- readRDS(AL_MODE_FILE)
-stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
+ccx_require_param_set(md, "the airborne-fraction trend-lever diagnostic")
 P0 <- ccx_default_params()
 for (n in intersect(names(P0), CCX_PARAM_NAMES)) P0[[n]] <- md$par_mode[[n]]
 P0 <- ccx_set_enso(P0, md$par_mode)

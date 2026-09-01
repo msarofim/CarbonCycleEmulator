@@ -129,7 +129,7 @@ OBS <- ccx_prepare_obs()
 # looks right, only because sum(dnorm(.)) reproduces the objective's own number.
 neff_residuals <- function(file) {
   md <- readRDS(ccx_path(file))
-  stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
+  ccx_require_param_set(md, "the per-stream n_eff diagnostic")
   pv <- md$par_mode
   p  <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]

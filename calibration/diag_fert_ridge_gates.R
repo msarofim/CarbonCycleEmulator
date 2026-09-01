@@ -72,7 +72,7 @@ AF_OBS_SD  <- stats::sd(af_obs)
 AF_OBS_TR  <- unname(stats::coef(stats::lm(af_obs ~ FR_DECADES))[2]) * 10
 
 md <- readRDS(FR_MODE_FILE)
-stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
+ccx_require_param_set(md, "the fertilisation-ridge gate diagnostic")
 P0 <- ccx_default_params()
 for (n in intersect(names(P0), CCX_PARAM_NAMES)) P0[[n]] <- md$par_mode[[n]]
 P0 <- ccx_set_enso(P0, md$par_mode)

@@ -52,11 +52,24 @@ cat(sprintf("  land short by %+.3f, ocean off by %+.3f -- OPPOSITE effect on gro
             o_l-m_l, o_o-m_o, 100*min(abs(o_l-m_l),abs(o_o-m_o))/max(abs(o_l-m_l),abs(o_o-m_o))))
 cat(sprintf("\n%s\nTWO WAYS TO ADD THE OCEAN TERM\n%s\n", strrep("-",72), strrep("-",72)))
 go <- o_o - m_o
-cat(sprintf("  A. OCEAN ONLY (gamma_enso_ocn = %+.3f):\n", go))
+# ⛔ `go` IS A SLOPE GAP, NOT A COEFFICIENT, AND THIS LINE USED TO CALL IT
+# `gamma_enso_ocn` (corrected 2026-09-01j). Every number in this file is slope
+# arithmetic and is unaffected; what was wrong was the LABEL on two of them.
+# The model's measured transfer is slope = -0.1550 + 0.4194 * coef (R2 1.000000,
+# diag_enso_objective_leverage.R sec.4), so the COEFFICIENT that delivers this
+# slope gap is +0.653 in total -- 2.4x the +0.274 printed here as if it were one.
+# [[ratio_needs_its_base]]: a gap in slope-units is not a magnitude in
+# parameter-units until it is divided by the transfer.
+cat(sprintf("  A. OCEAN ONLY (ocean-sink SLOPE gap to close = %+.3f GtC/yr per index unit;\n     the COEFFICIENT that delivers it is +0.653 total, NOT this number):\n", go))
 cat(sprintf("     ocean %+.3f -> %+.3f  OK ;  growth %+.3f -> %+.3f = %.0f%% of observed (was %.0f%%)\n",
             m_o, o_o, m_g, m_g-go, 100*(m_g-go)/o_g, 100*m_g/o_g))
 cat(sprintf("     => fixes the partition, WORSENS the better-measured growth rate\n"))
-cat(sprintf("\n  B. OCEAN + LAND together (gamma_enso x %.2f as well):\n", o_l/m_l))
+# ⛔ AND THE SAME CORRECTION HERE. `o_l/m_l` is a ratio of SLOPES, and a slope
+# ratio is a coefficient ratio only if the transfer passes through the ORIGIN.
+# It does not: the land slope at zero ENSO coefficient is +0.0762 (the model's
+# residual ENSO response through the SST/q10 path), so the coefficient
+# multiplier that delivers this slope is x1.734, not x1.89.
+cat(sprintf("\n  B. OCEAN + LAND together (land-sink slope ratio %.2f; the COEFFICIENT\n     multiplier that delivers it is x1.734, NOT this ratio):\n", o_l/m_l))
 cat(sprintf("     land %+.3f -> %+.3f ; ocean %+.3f -> %+.3f ; growth %+.3f -> %+.3f = %.0f%% (was %.0f%%)\n",
             m_l, o_l, m_o, o_o, m_g, -(o_l+o_o), 100*(-(o_l+o_o))/o_g, 100*m_g/o_g))
 cat(sprintf("     => both partitions right AND the growth rate improves\n"))

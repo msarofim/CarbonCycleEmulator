@@ -49,7 +49,7 @@ dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 CHI0 <- ccx_const("CO2_PI_PPM")
 
 md <- readRDS(FS_MODE_FILE)
-stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
+ccx_require_param_set(md, "the stream-wise fertilisation-ridge diagnostic")
 P0 <- ccx_default_params()
 for (n in intersect(names(P0), CCX_PARAM_NAMES)) P0[[n]] <- md$par_mode[[n]]
 P0 <- ccx_set_enso(P0, md$par_mode)

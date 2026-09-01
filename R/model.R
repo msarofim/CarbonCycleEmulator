@@ -371,8 +371,16 @@ CCX_ENSO_PARAMS <- c("gamma_enso_land_NH", "gamma_enso_land_SH",
 #' calibration/diag_conveyor_enso_lever.R.)
 #'
 #' THE TWO ERRORS ARE COMPENSATING, which is why the fit never forced them:
-#' land short by -0.314 and ocean off by +0.274 have opposite effects on the
-#' atmosphere and cancel 87 % in CO2 growth, and CO2 outvotes partition 40:1.
+#' land short by -0.314 and ocean off by +0.274 (both in SLOPE units) have
+#' opposite effects on the atmosphere and cancel 87 % in CO2 growth, and CO2
+#' outvotes partition 40:1.
+#' ⚠ THOSE ARE SLOPE GAPS, NOT COEFFICIENTS. The measured transfer is
+#' slope = +0.0762 - 0.4297*coef (land) and -0.1550 + 0.4194*coef (ocean),
+#' R2 = 1.000000 -- ~0.43, not 1, and with a NON-ZERO intercept. So the
+#' coefficients that close the gaps are land TOTAL 1.726 (x1.734 the 08-31e
+#' mode) and ocean TOTAL +0.653, i.e. +0.326 in each hemisphere.
+#' 09-01g printed +0.274 and x1.89 with parameter names on them; corrected
+#' 09-01j (calibration/diag_enso_objective_leverage.R sec.4).
 #' ⚠ An OCEAN-ONLY term therefore makes things WORSE -- growth 53 % -> 17 % of
 #' observed. The pair together reaches ~72 %, which is the ceiling GCB's own
 #' slopes allow: -(land + ocean) = +0.547 against a measured growth of +0.757,

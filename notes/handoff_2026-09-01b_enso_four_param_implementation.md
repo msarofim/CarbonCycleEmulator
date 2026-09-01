@@ -105,7 +105,10 @@ the land total where the scalar had N(0, 2) — the land prior is **wider by √
 not a shift, and at a fitted 0.85 the prior is weak either way. **The alternative is 2/√2 on each
 half**, which preserves the total exactly. Revisit if the land pair ever runs to the prior rather
 than to the data. Ocean entries are centred on **0** = the incumbent model, so the prior does not
-presume the mechanism exists; the measurement says each should land near **+0.137**.
+presume the mechanism exists.
+⚠ **The "+0.137 each" this file first quoted was wrong** — see §9: that was a SLOPE gap wearing a
+coefficient's name. Closing the observed slope needs **+0.326 each**; the OBJECTIVE's own
+conditional optimum is nearer **+0.10 each**.
 
 ## 6. ⚠ NON-OBVIOUS STATE
 

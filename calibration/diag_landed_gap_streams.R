@@ -157,7 +157,7 @@ gap_decompose <- function(file) {
   # whichever field the file actually has, rather than skipped for progress
   # files: a mis-ordered par_mode is exactly the failure this guards against
   # (memory nameless_matrix_order).
-  if (!is.null(md$param_names)) stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
+  if (!is.null(md$param_names)) ccx_require_param_set(md, "the landed-gap stream decomposition")
   else stopifnot(identical(names(md$par_mode)[seq_along(CCX_PARAM_NAMES)], CCX_PARAM_NAMES))
   pv <- md$par_mode
   u  <- ccx_par_to_unc(pv)

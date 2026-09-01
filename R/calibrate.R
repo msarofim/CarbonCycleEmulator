@@ -347,8 +347,13 @@ CCX_PARAM_TABLE <- list(
   # to the prior rather than to the data.
   #
   # THE OCEAN PAIR IS CENTRED ON ZERO, which is the incumbent model: the prior
-  # does not presume the mechanism exists. The measurement says the pair should
-  # come out near +0.137 each.
+  # does not presume the mechanism exists.
+  # ⚠ WHERE THE MEASUREMENT PUTS IT (corrected 09-01j): closing the observed
+  # ocean-sink slope needs +0.326 in EACH hemisphere, not the +0.137 an earlier
+  # reading implied -- that number was a SLOPE gap wearing a coefficient's name,
+  # and the coefficient->slope transfer is ~0.43, not 1. The OBJECTIVE's own
+  # conditional optimum is nearer +0.10 each, about a third of what the
+  # partition asks for; that trade is what the refit is for.
   gamma_enso_land_NH = list(tr = "id", init = 0.25,
                      prior = function(x) dnorm(x, 0, 2, log = TRUE)),
   gamma_enso_land_SH = list(tr = "id", init = 0.25,
@@ -654,6 +659,40 @@ ccx_migrate_par_set <- function(p) {
          paste(still, collapse = ", "),
          ". Add one here, next to the split it mirrors.")
   structure(p, migrated = filled)
+}
+
+#' Refuse a stored mode that is not on THIS build's parameter set, WITH THE REASON
+#'
+#' ⛔ THE BARE FORM THIS REPLACES IS A NAMED DEFECT. Seven diagnostics carried
+#' `stopifnot(identical(md$param_names, CCX_PARAM_NAMES))`, which raises
+#' "identical(nm, CCX_PARAM_NAMES) is not TRUE" -- a diagnostic that cannot run
+#' and does not say why ([[broken_gate_reports_nothing]]). It has already
+#' aborted two gates on this project (see the notes in `diag_joos_irf.R` and
+#' `diag_design_gates_at_mode.R`), and after every parameter-set change it
+#' aborts ALL of them at once: on 2026-09-01 the ENSO split made all seven dead
+#' in the same second.
+#'
+#' REFUSAL IS OFTEN THE RIGHT ANSWER -- a Hessian at a MIGRATED point is not a
+#' Hessian at a mode, and a ridge measured there is not the fitted ridge. What
+#' is never right is refusing without saying what changed or what to do. Where
+#' a MIGRATED vector genuinely is a legitimate thing to measure, use
+#' `ccx_migrate_par_set()` and PRINT what was filled, as `dg_vector()` does.
+#'
+#' @param md a loaded mode file (needs `$param_names`)
+#' @param what one line naming what the caller was about to do, used in the message
+ccx_require_param_set <- function(md, what) {
+  nm <- md$param_names
+  if (identical(nm, CCX_PARAM_NAMES)) return(invisible(TRUE))
+  extra <- setdiff(nm, CCX_PARAM_NAMES); missing <- setdiff(CCX_PARAM_NAMES, nm)
+  stop(what, ": this mode file was fitted on a DIFFERENT parameter set (",
+       length(nm), " names, this build fits ", length(CCX_PARAM_NAMES), ").",
+       if (length(extra)) paste0(" It carries retired names: ",
+                                 paste(extra, collapse = ", "), ".") else "",
+       if (length(missing)) paste0(" It lacks: ",
+                                   paste(missing, collapse = ", "), ".") else "",
+       " Its `par_mode` can be brought forward with ccx_migrate_par_set() -- but a",
+       " MIGRATED point is not a mode of this space, so migrate only if measuring",
+       " AT a migrated vector is what you mean. Otherwise refit.")
 }
 
 # ⚠ DECODES THE NAMES IT WAS GIVEN, not the build's list. It used to iterate
