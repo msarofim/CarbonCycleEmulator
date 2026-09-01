@@ -140,8 +140,52 @@ CCX_PARAM_TABLE <- list(
   # Bounds NOT rounded inward this time -- the bisection tolerance is 0.5 m2/yr
   # and rounding would be smaller than the number's own meaning. init = the
   # bracket centre, as before (was 5000 for a centre of 5015).
-  kz          = list(tr = "logit", lo = 3942.5, hi = 6528, init = 5235.25,
-                     prior = function(x) dunif(x, 3942.5, 6528, log = TRUE)),
+  #
+  # ---- RE-BISECTED WIDE 2026-09-01 (Marcus). [3942.5, 6528] -> below.
+  # ⛔ THE DEFECT THIS FIXES IS THE TARGET, NOT THE RECIPE. Everything above
+  # bisected an observational recipe against an UNCITED RECOLLECTION,
+  # "[-200, -150] permil", and did it on the bottom THREE boxes -- while the
+  # `d14c_deep_ocean` likelihood term added 2026-08-14 scores the BOTTOM BOX
+  # against GLODAPv2's sourced -175.26 +/- 10.259 permil (n_eff 20, layer
+  # 2627.2-3700 m, [[ccx_glodap_deep]]). Expressed on the layer that is actually
+  # scored, the old bracket was z in [-4.34, +1.22]: a box 5.55 sigma WIDE,
+  # centred 1.56 sigma BELOW the target, and TRUNCATING it at the top. That top
+  # is where every constrained row of the land axis railed, so the -285/-298
+  # price of gate 7 was being set by the recollection rather than by the data.
+  #
+  # THE SAME RECIPE, RUN AGAINST THE SOURCED TARGET at k = 3 sigma, at the
+  # DEFAULT parameters exactly as every earlier bisection was:
+  #   calibration/diag_kz_bracket_on_the_sourced_target.R PART 2 (2026-08-31c,
+  #   re-run and reproduced 2026-09-01).
+  #     k = 1 sigma  [5211.9, 6373.9]
+  #     k = 2 sigma  [4763.5, 7146.6]
+  #     k = 3 sigma  [4379.1, 8109.9]   <- SHIPPED
+  # k = 3 is the ruling: a 3-sigma box on a sourced observation, so the support
+  # is the observation's own, and a turnover inside it is a turnover inside every
+  # narrower one. ⚠ The FLOOR RISES as well as the ceiling (3942.5 -> 4379.1) --
+  # this is a RE-CENTRING on the sourced target, not only a widening. Every mode
+  # file on disk stays strictly interior (kz 6169-6400).
+  #
+  # ⭐ AND IT IS NOT THE BRACKET THAT WAS HOLDING `kz`: on this support the
+  # anchor row turns over INTERIOR at 6486.1 = 56 % of the box, with
+  # `fert_k`/`q10` re-optimised (PART 3). The exit condition R/calibrate.R states
+  # above -- "delete it only after a refit shows the term holding kz alone" -- is
+  # therefore CLOSER but still not met by a refit; the bracket stays.
+  #
+  # ⚠ THE UNIVARIATE JUSTIFICATION WAS RE-MEASURED BEFORE THIS SHIPPED, because
+  # the sentence it rests on ("h_ml moves it under 1.5 permil across h_ml
+  # 39.7-100") was measured over a window that NO LONGER CONTAINS the better
+  # basin's h_ml = 143.9 m. calibration/diag_kz_bracket_hml_sensitivity.R:
+  # inside the original window the claim REPRODUCES (0.99 permil); across the
+  # whole live band [35, 195] the D14C at fixed `kz` moves 6.25 permil = 0.61
+  # sigma = 10.2 % of the 3-sigma box, and the bracket ends move -87 / -165
+  # m2/yr between the default h_ml and 143.9. An order of magnitude below the
+  # box, so a bound on `kz` alone remains sufficient AT THIS WIDTH -- it would
+  # not obviously remain so at k = 1.
+  #
+  # init = the bracket centre, as before.
+  kz          = list(tr = "logit", lo = 4379.1, hi = 8109.9, init = 6244.5,
+                     prior = function(x) dunif(x, 4379.1, 8109.9, log = TRUE)),
   # THE BIOLOGICAL PUMP'S MAGNITUDE -- the 20th parameter (Marcus 2026-08-16d).
   # The preindustrial surface-to-bottom DIC gradient the pump holds, umol/kg.
   # Everything else about the pump stays structural: the export SHAPE is GLODAP's

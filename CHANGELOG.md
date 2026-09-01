@@ -2,6 +2,81 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01 — **RULING #1 CLOSED: THE `kz` BRACKET IS RE-BISECTED WIDE ON THE SOURCED TARGET**
+
+`R/calibrate.R` `kz`: **[3942.5, 6528] → [4379.1, 8109.9]**, `init` 5235.25 → 6244.5. Marcus's call.
+
+**THE DEFECT WAS THE TARGET, NOT THE RECIPE.** The bisection is observational — both ends are the
+`kz` that puts the model's deep ocean at a stated Δ¹⁴C — but it was run against an **uncited
+recollection**, `[-200, -150]‰`, on the bottom **three** boxes, while the `d14c_deep_ocean` term
+added 2026-08-14 scores the **bottom box** against GLODAPv2's **−175.26 ± 10.259‰**. On the layer
+that is actually scored, the old bracket was **z ∈ [−4.34, +1.22]**: 5.55σ wide, centred 1.56σ BELOW
+the target, and truncating it at the top — which is exactly where every constrained row of the land
+axis railed. The same recipe at the same default parameters, against the sourced target:
+
+| k | target ± kσ | → `kz` bracket |
+|---|---|---|
+| 1 | [−185.52, −165.00] | [5211.9, 6373.9] |
+| 2 | [−195.78, −154.74] | [4763.5, 7146.6] |
+| **3** | **[−206.03, −144.48]** | **[4379.1, 8109.9]** ← SHIPPED |
+
+- ⚠ **THE FLOOR RISES TOO** (3942.5 → 4379.1): this is a **re-centring** on the sourced target, not
+  only a widening. Every mode file on disk stays strictly interior (`kz` 6169–6400).
+- ⭐ **THE BRACKET WAS NOT WHAT HELD `kz`**: on this support the anchor row turns over **INTERIOR at
+  6486.1 = 56 % of the box**, with `fert_k`/`q10` re-optimised. `R/calibrate.R`'s stated exit
+  condition — delete it only after a refit shows the term holding `kz` alone — is closer but unmet,
+  so the bracket stays.
+- ⚠ **THE UNIVARIATE JUSTIFICATION WAS RE-MEASURED BEFORE SHIPPING** — new
+  `calibration/diag_kz_bracket_hml_sensitivity.R`. The sentence it rests on ("`h_ml` moves it under
+  1.5‰ across `h_ml` 39.7–100") was measured over a window that **no longer contains the better
+  basin's 143.9 m**. Inside its own window it REPRODUCES (0.99‰); across the live band [35, 195] the
+  Δ¹⁴C at fixed `kz` moves **6.25‰ = 0.61σ = 10.2 % of the 3σ box**, and the bracket ends move
+  −87/−165 m²/yr. Sufficient at k = 3; it would not obviously hold at k = 1.
+
+**CONSEQUENCES, ALL MEASURED:**
+
+- **Every stored logpost moved**, because a fixed `kz` now sits at a different fraction of the
+  bracket and the logit Jacobian changes: incumbent −1548.011 → **−1546.345**, new basin −1496.013 →
+  **−1495.276**. ⇒ **the basin gap is +52.00 → +51.07**, and **all of the move is PRIOR**: the
+  loglik gap is unchanged at +37.82, so the prior share goes +14.18 → +13.25.
+- ✅ **Gates 4/5/7, both re-priced rulings and every prior-z are BIT-IDENTICAL** (diffed). They are
+  model-vs-obs at fixed parameters, so a support change must not touch them — and does not.
+- **`calibration/torch/port_targets.csv` re-measured**, and it now RECORDS the bracket it was
+  measured under. `run_dispersed_multistart.R` REFUSES a target file from a different table: a
+  re-centred bracket shifts every logpost, so a stale target would fail the port gate for a reason
+  that has nothing to do with the port.
+- ⛔ **THREE OF MY OWN BAND GATES WOULD HAVE REFUSED EVERY MODE FILE ON DISK**, because they demanded
+  a file's recorded bands EQUAL the shipped table — a strictly wider claim than any of them makes.
+  Narrowed to what each actually needs ([[gate_bound_matches_its_claim]]): **feasibility** for a
+  start point or a target, **same-bands-as-each-other** for a matched comparison, and the
+  table-identity check moved to where it belongs, on the port-target file. The band mismatch is now
+  RECORDED loudly instead of being fatal.
+
+⛔ **ONE PREVIOUSLY PASSING TEST NOW FAILS AND IS LEFT FAILING:** `test-likelihood.R:578`,
+`expect_lte(CCX_PARAM_TABLE$kz$hi, 7000)` — 8109.9 > 7000. It is a deliberate loose guard rail whose
+own comment says it exists so the band cannot be "widened into uselessness one re-bisection at a
+time". Its runaway guard (`hi < 10686`, the unbounded 17-parameter mode) still passes, and the new
+bracket has a sourced justification the old one lacked — but how loose that rail should be is a
+policy call, not a code fix. **Marcus's.**
+
+**Suite: 1282 / 6 FAIL / 2 skip** (was 1275 / 6 / 2). Same count, different composition — see below.
+
+### Also: the "all 6 failures say one thing" label was wrong, twice
+
+- ✅ **FIXED: `test-prior-z.R`** was ERRORING on `no such parameter: seas_lag_p`, the scalar retired
+  by the 08-31 split. It was booked under "the stored modes are 21-parameter files"; **it is not,
+  and no refit or adoption would have fixed it.** Now runs the analytic check on **both** limbs,
+  which actually TESTS `R/calibrate.R`'s claim that the split kept the original prior on each.
+- ⛔ **AND ADOPTION WOULD NOT FIX TWO MORE — IT WOULD INVERT THEM.** `test-mode-decode.R`'s two
+  failures encode the CURRENT canonical's **retired [85,120] band** as their premise: they assert
+  the band-blind idiom is wrong by ~10.7 m and that `ccx_check_mode_decode()` ERRORS. Point
+  `CCX_MODE_CANONICAL` at the polished mode — recorded under the shipped bands — and both premises
+  dissolve and the tests fail the other way. They need a file that genuinely carries an overridden
+  band (the 08-31 probe is one, on disk) rather than relying on the canonical happening to have one.
+- ⇒ **The honest tally: 3 of the 6 are "21-parameter file in a 22-parameter build" and adoption
+  fixes them; 2 are premises adoption inverts; 1 was unrelated and is fixed.** Plus the new bracket
+  guard rail above.
+
 ## 2026-08-31f — **THE DISPERSED MULTI-START, RESTRUCTURED FOR TORCH AND READY TO LAUNCH**
 
 `calibration/run_dispersed_multistart.R`, `calibration/collect_dispersed_multistart.R`,

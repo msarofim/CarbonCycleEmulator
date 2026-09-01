@@ -124,17 +124,34 @@ MS_CKPT <- file.path(MS_OUTDIR, sprintf("start_%03d_ckpt.rds", MS_ID))
 
 # ---- the two reference points, and the dispersion scale they set -----
 .mdI <- readRDS(ccx_path(MS_REF_INC)); .mdN <- readRDS(ccx_path(MS_REF_NEW))
-# ⚠ BOTH reference files must have been fitted under the SHIPPED bands, or their
-# stored logposts carry a reparameterisation constant and the port gate below
-# would be testing the constant rather than the port.
+# ⚠ WHAT A REFERENCE POINT MUST BE IS **FEASIBLE**, NOT FITTED-UNDER-THIS-TABLE
+# (narrowed 2026-09-01). This used to demand that each reference file's recorded
+# bands EQUAL the shipped table -- and the 09-01 `kz` re-bisection to the sourced
+# GLODAP support made that false for every mode file on disk, which would have
+# stopped the survey dead on a property of its warm starts rather than of the
+# port. The port gate does not use these files' stored logposts at all; it uses
+# `port_targets.csv`, measured under whatever table is shipped. So the
+# requirement here is that the point HAS a finite objective value, and the
+# requirement that actually needed a gate -- that the TARGET FILE was measured
+# under the SAME table this run uses -- is enforced at PORT GATE (a) below.
+# [[gate_bound_matches_its_claim]]
 .ship <- lapply(CCX_PARAM_TABLE, function(s) c(s$lo, s$hi))
-for (.r in list(list("incumbent", .mdI), list("new basin", .mdN)))
-  if (!isTRUE(all.equal(.r[[2]]$hml_bound, .ship$h_ml)) ||
-      !isTRUE(all.equal(.r[[2]]$kz_bracket, .ship$kz)))
-    stop("reference file for ", .r[[1]], " was fitted under NON-SHIPPED bands ",
-         "(hml [", paste(.r[[2]]$hml_bound, collapse = ", "), "], kz [",
-         paste(.r[[2]]$kz_bracket, collapse = ", "), "]). Its stored logpost ",
-         "carries a reparameterisation constant, so it cannot be a port target.")
+for (.r in list(list("incumbent", .mdI), list("new basin", .mdN))) {
+  .pm <- ccx_migrate_par_set(.r[[2]]$par_mode)
+  .bad <- Filter(function(n) {
+    b <- .ship[[n]]
+    !is.null(b) && all(is.finite(b)) && (.pm[[n]] <= b[1] || .pm[[n]] >= b[2])
+  }, CCX_PARAM_NAMES)
+  if (length(.bad))
+    stop("reference file for ", .r[[1]], " is NOT FEASIBLE under the shipped ",
+         "table (", paste(.bad, collapse = ", "), "), so it cannot be a start ",
+         "point: the objective has no finite value there.")
+  if (!isTRUE(all.equal(.r[[2]]$kz_bracket, .ship$kz)) ||
+      !isTRUE(all.equal(.r[[2]]$hml_bound, .ship$h_ml)))
+    cat(sprintf("NOTE the %s reference was FITTED under kz [%s], the shipped table is kz [%s].\n     Feasible, so it is a legal start; its own stored logpost is on a different scale.\n",
+                .r[[1]], paste(.r[[2]]$kz_bracket, collapse = ", "),
+                paste(.ship$kz, collapse = ", ")))
+}
 U_INC <- ccx_par_to_unc(ccx_migrate_par_set(.mdI$par_mode))
 U_NEW <- ccx_par_to_unc(ccx_migrate_par_set(.mdN$par_mode))
 U_COLD <- ccx_init_unc()
@@ -227,6 +244,25 @@ local({
   if (!identical(as.integer(r$n_par[1]), length(CCX_PARAM_NAMES)))
     stop("port targets were recorded on a ", r$n_par[1], "-parameter build; ",
          "this build fits ", length(CCX_PARAM_NAMES), ". The target is stale.")
+  # ⭐ THE TARGET MUST HAVE BEEN MEASURED UNDER THIS TABLE. A widened or
+  # re-centred bracket shifts every logpost by a reparameterisation constant, so
+  # a target from another table fails gate (a) for a reason that has nothing to
+  # do with the port -- and would be read as a bad port. The 09-01 `kz`
+  # re-bisection is exactly that event. Older CSVs carry no bracket columns;
+  # those cannot be checked, so they are REFUSED rather than trusted.
+  if (is.null(r$kz_lo) || is.na(r$kz_lo[1]))
+    stop("port targets file records no parameter bracket, so it cannot be shown ",
+         "to have been measured under this table. Re-run ",
+         "`Rscript calibration/make_port_targets.R` on the reference machine.")
+  .tt <- c(as.numeric(r$kz_lo[1]), as.numeric(r$kz_hi[1]),
+           as.numeric(r$hml_lo[1]), as.numeric(r$hml_hi[1]))
+  .lt <- c(.ship$kz, .ship$h_ml)
+  if (!isTRUE(all.equal(.tt, .lt)))
+    stop("port targets were measured under kz [", .tt[1], ", ", .tt[2], "] / h_ml [",
+         .tt[3], ", ", .tt[4], "]; this build ships kz [", .lt[1], ", ", .lt[2],
+         "] / h_ml [", .lt[3], ", ", .lt[4], "]. Every logpost differs by a ",
+         "reparameterisation constant, so the comparison would indict the PORT ",
+         "for a change in the TABLE. Re-run make_port_targets.R and re-ship the CSV.")
   tgt <- as.numeric(r$logpost[1])
   rel <- abs(MS_START_LP - tgt) / max(abs(tgt), 1e-12)
   cat(sprintf("PORT GATE (a) start point: here %.10f vs %s@%s %.10f, rel %.2e (tol %.0e)\n",
@@ -368,6 +404,7 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             # producer and consumed by no reader decoded 26 % wrong for a
             # fortnight. Written here because a downstream reader needs them.
             hml_bound = .ship$h_ml, kz_bracket = .ship$kz,
+            table_kz = .ship$kz, table_hml = .ship$h_ml,
             host = Sys.info()[["nodename"]],
             r_version = paste(R.version$major, R.version$minor, sep = "."))
 saveRDS(res, MS_OUT)

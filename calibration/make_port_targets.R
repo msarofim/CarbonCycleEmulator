@@ -44,11 +44,35 @@ rows <- lapply(names(PT_REFS), function(nm) {
     u <- ccx_init_unc(); stored <- NA_real_; src <- "ccx_init_unc()"
   } else {
     md <- readRDS(ccx_path(PT_REFS[[nm]]))
-    if (!isTRUE(all.equal(md$hml_bound, .ship$h_ml)) ||
-        !isTRUE(all.equal(md$kz_bracket, .ship$kz)))
-      stop(nm, " was fitted under NON-SHIPPED bands; its point is not a ",
-           "like-for-like target under the shipped table.")
-    u <- ccx_par_to_unc(ccx_migrate_par_set(md$par_mode))
+    # ⚠ FEASIBILITY IS THE REQUIREMENT; BAND EQUALITY IS NOT (fixed 2026-09-01).
+    # This used to REFUSE any file whose recorded bands differed from the shipped
+    # table -- and the 09-01 `kz` re-bisection made that every file on disk, so
+    # the gate would have blocked its own re-measurement. The claim this file
+    # makes is "here is what the objective evaluates to AT THIS POINT UNDER THE
+    # TABLE SHIPPED RIGHT NOW". For that, all the point has to be is FEASIBLE;
+    # what the file was FITTED under changes the meaning of its own stored
+    # logpost, which is reported below and gated on by nothing.
+    # [[gate_bound_matches_its_claim]] -- the bound must match the claim, and the
+    # claim that actually needs guarding is that the CONSUMER of this file runs
+    # the same table, which is why the bracket is now RECORDED in the CSV.
+    pmv <- ccx_migrate_par_set(md$par_mode)
+    bad <- Filter(function(n) {
+      b <- .ship[[n]]
+      !is.null(b) && all(is.finite(b)) && (pmv[[n]] <= b[1] || pmv[[n]] >= b[2])
+    }, CCX_PARAM_NAMES)
+    if (length(bad))
+      stop(nm, " is NOT FEASIBLE under the shipped table (", paste(bad, collapse = ", "),
+           "), so the objective has no finite value there and it cannot be a port target.")
+    if (!isTRUE(all.equal(md$kz_bracket, .ship$kz)) ||
+        !isTRUE(all.equal(md$hml_bound, .ship$h_ml)))
+      cat(sprintf("  NOTE %s was FITTED under kz [%s] / h_ml [%s], not the shipped
+       kz [%s] / h_ml [%s]. Its own stored logpost therefore carries a
+       reparameterisation constant; the TARGET below does not, because it is
+       measured here, now, under the shipped table.
+",
+                  nm, paste(md$kz_bracket, collapse = ", "), paste(md$hml_bound, collapse = ", "),
+                  paste(.ship$kz, collapse = ", "), paste(.ship$h_ml, collapse = ", ")))
+    u <- ccx_par_to_unc(pmv)
     stored <- md$logpost; src <- PT_REFS[[nm]]
   }
   v <- lp(u)
@@ -63,6 +87,14 @@ rows <- lapply(names(PT_REFS), function(nm) {
 tg <- do.call(rbind, rows)
 tg$arm       <- PT_ARM
 tg$n_par     <- length(CCX_PARAM_NAMES)
+# ⭐ THE TABLE THESE TARGETS WERE MEASURED UNDER, recorded so a consumer can
+# REFUSE a stale target instead of silently comparing across two tables. A
+# widened bracket shifts every logpost by a reparameterisation constant, so a
+# target measured under one table and checked under another fails for a reason
+# that has nothing to do with the port. [[recorded_but_never_restored]] --
+# recorded AND read, this time, by run_dispersed_multistart.R.
+tg$kz_lo     <- sprintf("%.6f", .ship$kz[1]);   tg$kz_hi   <- sprintf("%.6f", .ship$kz[2])
+tg$hml_lo    <- sprintf("%.6f", .ship$h_ml[1]); tg$hml_hi  <- sprintf("%.6f", .ship$h_ml[2])
 tg$commit    <- tryCatch(sub("\\s.*", "", system("git rev-parse --short HEAD",
                                                  intern = TRUE)), error = function(e) NA)
 tg$host      <- Sys.info()[["nodename"]]

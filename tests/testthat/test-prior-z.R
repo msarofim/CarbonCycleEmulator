@@ -34,9 +34,20 @@ test_that("ccx_prior_z matches the analytic z for every lognormal prior", {
 })
 
 test_that("ccx_prior_z matches the analytic z for the normal prior", {
-  # seas_lag_p is tr = "id" with dnorm(2.25, 0.75)
-  for (x in c(0, 1.6376, 2.25, 4.5))
-    expect_equal(ccx_prior_z("seas_lag_p", x), (x - 2.25) / 0.75, tolerance = 1e-3)
+  # NAMES UPDATED 2026-09-01. This read `seas_lag_p`, which the 2026-08-31 split
+  # (`11ff844`) retired, so it had been ERRORING with "no such parameter" -- not
+  # failing on the z, failing before reaching it. ⚠ It was booked under "the 6
+  # failures all say the stored modes are 21-parameter files"; it does not, and
+  # no refit or adoption would have fixed it ([[explained_away_test]]).
+  #
+  # BOTH LIMBS, not one. R/calibrate.R:272 states that the split keeps the
+  # ORIGINAL prior on each -- "the split adds a degree of freedom without
+  # smuggling in a new belief" -- so running the analytic check on both is what
+  # actually TESTS that claim, where picking either alone would only assume it.
+  for (n in c("seas_lag_p_NH", "seas_lag_p_SH"))
+    for (x in c(0, 1.6376, 2.25, 4.5))                # tr = "id", dnorm(2.25, 0.75)
+      expect_equal(ccx_prior_z(n, x), (x - 2.25) / 0.75, tolerance = 1e-3,
+                   info = sprintf("%s at %g", n, x))
 })
 
 test_that("ccx_prior_z is right for a uniform prior under the logit transform", {
