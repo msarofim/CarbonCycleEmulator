@@ -15,6 +15,28 @@ cd "$PROJ"
 set +u; source ~/.bashrc; set -u
 module load r/4.5.1
 
+# ⛔ THE R MODULE IS A SINGULARITY WRAPPER, AND ON THE LOGIN NODE IT HAS NO
+# WRITABLE /tmp TO BIND (found 2026-09-01, first real run on Torch).
+# /share/apps/r/4.5.1/bin/Rscript -> __run_base_r.bash picks its bind source as
+#   SLURM_TMPDIR set   -> "${SLURM_TMPDIR}/rtmp-$$"
+#   otherwise          -> "/state/partition1/${USER}/rtmp-$$"
+# MEASURED, both halves: inside a SLURM job Torch DOES set SLURM_TMPDIR
+# (/state/partition1/job-<id>) and /state/partition1 is drwxrwxrwt on the
+# compute nodes -- so multistart.sbatch needs NOTHING and was never at risk.
+# On the LOGIN node /state/partition1 is root-owned 755, the fallback mkdir
+# fails, and EVERY Rscript dies with
+#   "FATAL: container creation failed: ... mount source ... doesn't exist"
+# which names the container, the mount and the pid, and NOTHING about R, the
+# module, or the permission that actually failed. ⚠ The failing `mkdir` prints
+# ABOVE singularity's own banner and is easy to read as noise.
+# Setting SLURM_TMPDIR is the wrapper's OWN branch, not a workaround.
+if [ -z "${SLURM_TMPDIR:-}" ]; then
+  export SLURM_TMPDIR="/scratch/ms17839/tmp/ccx_setup_$$"
+  mkdir -p "$SLURM_TMPDIR"
+  trap 'rm -rf "${SLURM_TMPDIR}"' EXIT
+  echo "login node: SLURM_TMPDIR unset, using $SLURM_TMPDIR for the R container's /tmp"
+fi
+
 export R_LIBS_USER=/scratch/ms17839/Rlibs/4.5
 mkdir -p "$R_LIBS_USER" logs
 
