@@ -226,3 +226,68 @@ band now tracks a SOURCED k = 3σ box.
    `CCX_MODE_CANONICAL` appears in those files only in a comment), so adopting first buys nothing and
    risks doing it twice. ⚠ And plan §8.4's two inverted tests INTO the adoption — they will fail the
    moment the canonical moves.
+
+---
+
+# ⭐ §9 — APPENDED 2026-09-01: TORCH IS READY TO SUBMIT. CLAUDE CANNOT SUBMIT IT.
+
+Clean at `bfbfdd0`. Bundle built from that commit at `/tmp/ccx_torch_bundle.tar.gz` (2.0 MB, 236
+files). **Nothing has run on Torch.** `ssh -o BatchMode=yes torch` returns **exit 255** — the
+connection needs the NYU VPN, the gateway password, Duo and a Microsoft device-code, none of which
+is non-interactive. **Every command below is Marcus's to run.**
+
+## 9.1 THE SEQUENCE
+
+    # on the Mac
+    bash calibration/torch/make_bundle.sh          # prints the scp + untar lines
+    scp /tmp/ccx_torch_bundle.tar.gz torch:/scratch/ms17839/
+    ssh torch 'mkdir -p /scratch/ms17839/CarbonCycleEmulator && \
+               tar xzf /scratch/ms17839/ccx_torch_bundle.tar.gz \
+                   -C /scratch/ms17839/CarbonCycleEmulator && \
+               rm /scratch/ms17839/ccx_torch_bundle.tar.gz'
+
+    # on Torch
+    cd /scratch/ms17839/CarbonCycleEmulator
+    sshare -u ms17839                              # fairshare; below ~0.3 means queuing
+    sinfo -o "%P %l %m %c"                         # ⚠ THE OPEN QUESTION: what is cs's wall cap?
+    bash calibration/torch/setup_torch.sh          # Rcpp + a compile check + s/eval
+
+    CCX_MS_PREFLIGHT=1 sbatch --array=0-2,21,42 --time=00:15:00 \
+      calibration/torch/multistart.sbatch          # ~10 CPU-min, verifies EVERYTHING environmental
+    grep -h PREFLIGHT logs/ccx_multistart_*.out    # and reports s/eval per node
+
+    # size CCX_MS_MAXIT if that rate is much worse than ~0.6 s/eval, then:
+    sbatch --array=0-42%10 calibration/torch/multistart.sbatch
+    sacct -j <jobid> -X --format=JobID,State,ExitCode,Elapsed | head -12   # LOOK at wave one
+
+    CCX_MS_OUTDIR=calibration/output/multistart_20260831 \
+      Rscript calibration/collect_dispersed_multistart.R
+
+## 9.2 WHAT IS VERIFIED, AND WHAT IS NOT
+
+**Verified locally, end to end, through the real sbatch body via `SLURM_ARRAY_TASK_ID`:** the bundle
+is self-sufficient; all 43 ids preflight LAUNCHABLE with every dispersed draw feasible first try;
+4 concurrent C++ compiles race-free; checkpoint resume; peak RSS **213 MB** vs the 4 G request;
+a production-shape task exits **13.1 min of a 15 min budget**, guard-stopped not clock-stopped;
+`--vanilla` keeps an exported `R_LIBS_USER`; the port gate fires on a 1e-6 perturbation and passes
+on a resumed reference task.
+
+⛔ **NOT verified, and unverifiable from here: that Torch behaves like the Mac.** R 4.5.1 vs 4.5.3,
+BLAS, compiler, NFS, modules, the account/partition strings. **That is exactly what the preflight
+array is for, and it is why it runs before anything expensive.**
+
+## 9.3 ⚠ READ THESE BEFORE JUDGING THE FIRST RESULTS
+
+- **"OUT OF TIME" after round one is EXPECTED, not a failure.** 180 min gives ~29,000 evals against
+  the 67,311 the 08-31e polish needed from a far better start. Re-submit the same array to resume.
+  **Budget 2–3 rounds.** A real fault is a non-zero exit, a port-gate stop, or a task that gained
+  nothing.
+- **The polish is what makes a truncated round worth having** — 14 iterations gained **33.88**
+  log-units in the local test. It could never have run before 09-01; see the CHANGELOG.
+- **`%10` is the staged rollout.** It only protects if wave one is actually read.
+
+## 9.4 STILL OPEN, UNCHANGED
+
+`test-likelihood.R:578` (`kz$hi <= 7000`) fails and is deliberately left failing (§8.3). Adoption of
+the polished mode waits for the survey (§8.4 — and two `test-mode-decode.R` failures will INVERT on
+adoption). ⚠ **Suite 1282 / 6 FAIL / 2 skip**, composition per §8.4.
