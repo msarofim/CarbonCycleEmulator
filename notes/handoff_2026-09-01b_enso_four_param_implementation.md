@@ -133,7 +133,36 @@ presume the mechanism exists; the measurement says each should land near **+0.13
 2. **Fit the four.** ⚠ Ship any remaining structural changes FIRST: shipping `seas_lag_p` after the
    refit already cost 14 h once.
 3. **Profile or Hessian the four AFTER fitting** — identifiability is structural until measured.
-4. **Promote the pump+conveyor carbon-closure check to a real test** (09-01 arc §4, still open).
+4. ~~Promote the pump+conveyor carbon-closure check to a real test~~ **DONE — and the claim behind
+   it was half wrong.** `tests/testthat/test-pump-conveyor.R`, 23 assertions. See §8.
 5. **Cross-check the +0.119 ocean target against a genuine observation** — pCO₂ products or O₂/N₂ —
    to escape model-vs-model. Still the weakest link in the target itself.
 6. Still open from 08-31f: adopt the polished mode (after the survey), and the Torch survey itself.
+
+---
+
+## 8. ⛔ TWO CORRECTIONS FROM THE PUMP+CONVEYOR ITEM
+
+**The 09-01 arc §4 said "pump+conveyor had NO coverage". The premise is true and the conclusion is
+not.** `test-conveyor.R` really never sets `pump_grad` — but `ccx_default_params()` ships
+`pump_grad = PUMP_GRAD_OBS = 233.1094`, ON since 08-16d, so `conv_p()` has been running BOTH
+mechanisms all along: the derivative-conservation test, the quiet-run drift gate, the spinup
+fixed-point test and the R↔C++ parity test are already pump+conveyor tests.
+
+⚠ **The real defect is that the coverage is INCIDENTAL** — it exists only because a default happens
+to be non-zero, and that default HAS moved once (0 from the port until 08-16d). ⇒ **"never sets X"
+is a statement about the TEST; "is not covered" is a statement about the DEFAULT. Read the default
+before turning one into the other.**
+
+**And the first closure gate I wrote for it was VACUOUS.** The obvious form — a closed run with no
+emissions, asserting total carbon does not move — passes for the wrong reason: from an exact fixed
+point under a constant forcing every box's carbon comes back **BIT-IDENTICAL** after 3300 RK4 months
+(`max |dC| = 0` exactly). Measuring it is what showed that. The shipped gate is **DRIVEN** (1 GtC/yr,
+43 GtC through the boxes, closes to **1.0e−10 GtC** over 274 yr), its tolerance comes from the
+roundoff arithmetic (floor ≈ 4.8e−10, gate at 1e−8), and **its power is asserted**: a 1e−6 GtC
+misstatement of the input must trip it.
+
+What is now covered that was not, even incidentally: an EXPLICIT pin on both mechanisms, the
+**DIC-limited** pump with the conveyor on — the corner where the pump's export reads the mixed-layer
+carbon the conveyor is moving, i.e. the only place the two genuinely interact — and integrated
+closure.

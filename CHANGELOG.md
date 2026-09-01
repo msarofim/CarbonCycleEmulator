@@ -2,6 +2,43 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01i — **THE PUMP+CONVEYOR COVERAGE CLAIM WAS HALF WRONG, AND THE FIRST GATE I WROTE FOR IT WAS VACUOUS**
+
+`tests/testthat/test-pump-conveyor.R`, new, 23 assertions. Two corrections, both worth more than the
+file itself.
+
+**⛔ CORRECTION 1 — "pump+conveyor has NO coverage" is FALSE.** `diag_conveyor_enso_lever.R` (09-01f)
+reported that `test-conveyor.R` never sets `pump_grad` and `test-pump.R` never sets `q_conv`, and
+concluded the combination was untested. **The premise is true and the conclusion is not:**
+`ccx_default_params()` ships `pump_grad = PUMP_GRAD_OBS = 233.1094` — the pump has been ON by default
+since 08-16d — so `conv_p()` has been running BOTH mechanisms all along. Its derivative-conservation
+test, quiet-run drift gate, spinup fixed-point test and R↔C++ parity test **are already
+pump+conveyor tests**.
+
+- ⚠ **The real defect is that the coverage is INCIDENTAL.** It exists only because a default happens
+  to be non-zero, and that default HAS moved once (0 from the port until 08-16d). If it moves back,
+  every one of those tests keeps passing while quietly testing the conveyor alone — the mirror image
+  of [[default_off_hides_the_bug]]. ⇒ **"never sets X" is a statement about the TEST; "is not
+  covered" is a statement about the DEFAULT. Read the default before turning one into the other.**
+- What was genuinely uncovered, and is now covered: an **explicit** pin on both mechanisms, the
+  **DIC-limited** pump with the conveyor on (the corner where the pump's export reads the mixed-layer
+  carbon the conveyor is moving — the only place the two actually interact), and **integrated**
+  closure.
+
+**⛔ CORRECTION 2 — my first closure gate was VACUOUS, and measuring it is what showed that.** The
+obvious form — a closed run with no emissions, asserting total carbon does not move — passes for the
+wrong reason: from an exact fixed point under a constant forcing, every box's carbon comes back
+**BIT-IDENTICAL** after 3300 RK4 months (`max |dC| = 0` exactly; CO₂ 276.5064 → 276.5064). **A
+closure gate on a state that does not move cannot detect a closure failure.** [[gate_reads_its_own_output]]
+
+- ✅ **Driven instead**: 1 GtC/yr moves **43 GtC** through the boxes; stock change minus input closes
+  to **1.0e−10 GtC** over 274 yr (matching the 1.8e−10 the diagnostic reported).
+- ✅ **Tolerance FROM THE ARITHMETIC**: 3300 monthly increments into a ~37750 GtC total have a
+  roundoff floor of √3300 × 37750 × 2.2e−16 ≈ **4.8e−10 GtC**; the gate is set at **1e−8**, ~20×
+  the floor. [[tolerance_scaled_to_spread]]
+- ✅ **And its POWER is asserted**: restating the input wrong by 1e−6 GtC must trip it, and the run
+  must actually move ≥1 GtC. [[no_power_null]] [[mutation_test_gates]]
+
 ## 2026-09-01h — **THE FOUR-PARAMETER ENSO DESIGN IS IMPLEMENTED: 22 → 25 PARAMETERS**
 
 Marcus's design call of 09-01 (`notes/handoff_2026-09-01_enso_arc.md` §6), built. **Nothing is
