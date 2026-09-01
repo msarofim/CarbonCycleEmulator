@@ -33,6 +33,11 @@ CO_FRAC <- local({
   v <- Sys.getenv("CCX_MS_CLUSTER_FRAC", NA_character_)
   if (is.na(v) || !nzchar(v)) 0.25 else as.numeric(v)
 })
+# ⛔ THE VERDICT'S BOUND IS **READ FROM THE STARTS**, not set here. This is only
+# the value to assume when a file predates `cycle_tol` being recorded
+# (2026-09-01e) -- it is the driver's MS_CYCLE_TOL at that date, and using it is
+# an ASSUMPTION the report says out loud rather than a bound it knows.
+CO_TOL_FALLBACK <- 0.5
 CO_REF_IDS  <- c(cold = 0L, incumbent = 1L, new_basin = 2L)
 # ⛔ THE BENCHMARK IS THE BEST *RE-CONVERGED KNOWN BASIN*, NOT ID 2 (2026-09-01k).
 # Ids 1 and 2 are MIGRATED 21-parameter vectors: their ocean ENSO pair is
@@ -143,6 +148,46 @@ for (i in seq_along(o)) {
               r$minutes, r$kind))
 }
 
+# ---- the verdict's BOUND, READ FROM THE OPTIMISER THAT PRODUCED THESE --
+# ⛔ THIS USED TO BE A HARDCODED 1e-8, AND 1e-8 IS THE WRONG KIND OF BOUND HERE.
+# 1e-8 is right for the PORT GATE, whose claim is an EVALUATION IDENTITY: one
+# fixed point, two machines, agree to floating point or the port is broken. The
+# verdict's claim is different -- it compares two OPTIMISER OUTPUTS, and no
+# optimiser promises its output to 1e-8. So on 2026-09-01 it printed
+#   "4 dispersed starts did NOT reach the best re-converged known basin"
+# for a difference of -0.0000 (about 1e-6): a FALSE VERDICT, in the one line a
+# reader takes away, from a bound that did not match its claim
+# [[gate_bound_matches_its_claim]] -- reproduced in the very session that cited
+# that memory.
+# ⇒ The bound is the driver's OWN convergence criterion, `MS_CYCLE_TOL`: a start
+# is declared CONVERGED when a whole cycle gains less than this, so two finals
+# closer than it are, BY THIS OPTIMISER'S OWN STANDARD, not distinguishable.
+# It is READ from the start files [[recorded_but_never_restored]], PRINTED with
+# the verdict, and disagreement across files is a hard error rather than a
+# quietly-picked winner.
+# ⚠ AND ABSENCE MUST ASSERT, not fall through. `unique(unlist(...))` DROPS the
+# NULLs, so a directory mixing pre- and post-2026-09-01e files would pick the
+# recorded value and say nothing about the half that carries no opinion -- the
+# silent-omission shape of [[intersect_is_a_silent_default]]. Counted explicitly.
+CO_TOL <- local({
+  has <- vapply(R, function(r) !is.null(r$cycle_tol), logical(1))
+  v   <- unique(unlist(lapply(R[has], function(r) r$cycle_tol)))
+  if (length(v) > 1L)
+    stop("the starts under ", CO_DIR, " record DIFFERENT convergence tolerances (",
+         paste(v, collapse = ", "), "). Their finals cannot be judged against one ",
+         "bound; they are not one survey.")
+  if (!any(has)) {
+    cat(sprintf("\n  ⚠ NO start records `cycle_tol` (all written before 2026-09-01e).\n     The verdict below uses %.3g, ASSUMED from the driver at that date, not read.\n",
+                CO_TOL_FALLBACK))
+    return(CO_TOL_FALLBACK)
+  }
+  if (!all(has))
+    cat(sprintf("\n  ⚠ %d of %d starts record no `cycle_tol` (ids %s, written before\n     2026-09-01e). The verdict uses %.3g, read from the other %d -- those older\n     runs are ASSUMED to share it. Re-run them if that matters.\n",
+                sum(!has), length(R), paste(ids[!has], collapse = ", "),
+                as.numeric(v), sum(has)))
+  as.numeric(v)
+})
+
 # ---- the verdict, as an ORDERING against the incumbent to beat -------
 kB <- which(ids %in% CO_BENCH_IDS)
 if (!length(kB)) {
@@ -172,11 +217,11 @@ if (!length(kB)) {
     jd <- kD[which.max(fin[kD])]
     cat(sprintf("  BEST DISPERSED  id %d at %.4f (%+.4f vs the benchmark), of %d finished\n",
                 ids[jd], fin[jd], fin[jd] - bench, length(kD)))
-    cat(sprintf("  VERDICT: %d dispersed start%s %s the best re-converged known basin.\n",
+    cat(sprintf("  VERDICT: %d dispersed start%s %s the best re-converged known\n           basin, at the optimiser's own convergence bound of %.3g log-units.\n",
                 length(kD), if (length(kD) == 1L) "" else "s",
-                if (fin[jd] > bench + 1e-8) "FOUND A BETTER BASIN THAN"
-                else if (fin[jd] < bench - 1e-8) "did NOT reach"
-                else "REPRODUCED, and did not beat,"))
+                if (fin[jd] > bench + CO_TOL) "FOUND A BETTER BASIN THAN"
+                else if (fin[jd] < bench - CO_TOL) "did NOT reach"
+                else "REPRODUCED, and did not beat,", CO_TOL))
   }
   if (!is.na(lab[jb]) && !is.na(lab[kN]) && lab[jb] != lab[kN])
     cat("  ⚠ and the best start is in a DIFFERENT cluster from it -- a third basin.\n")

@@ -266,7 +266,11 @@ sbatch --array=0-45%10 calibration/torch/multistart.sbatch
 sacct -j <jobid> -X --format=JobID,State,ExitCode,Elapsed | head -12
 
 # 5. COLLECT (either machine). The verdict is an ordering against the best
-#    RE-CONVERGED known basin (ids 1-5), never against -1496.01.
+#    RE-CONVERGED known basin (ids 1-5), never against -1496.01 -- and it is
+#    bounded by the OPTIMISER's convergence tolerance (MS_CYCLE_TOL, read from
+#    the start files and printed), not by the port gate's 1e-8. 1e-8 is an
+#    EVALUATION-identity bound; applied to two optimiser outputs it called a
+#    -0.0000 difference "did NOT reach" on 2026-09-01.
 CCX_MS_OUTDIR=.../multistart_20260901_enso25 Rscript calibration/collect_dispersed_multistart.R
 
 # 6. ROUND 2 -- the fixed ids plus the best dispersed ids, NOT the whole array.

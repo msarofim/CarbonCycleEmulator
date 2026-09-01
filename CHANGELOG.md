@@ -2,6 +2,71 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01m — **THE TWO OWED FIXES, AND BOTH GATES MUTATION-TESTED**
+
+Clears the two items 09-01l left **OWED AND UNCOMMITTED**. **Neither changes a round-1 number** —
+every task ran in the right repo, on the right objective, against the right port targets; one wrote
+its files to the wrong path and one printed a wrong word.
+
+**1. `multistart.sbatch` — the clobbered `PROJ`.** Torch's `~/.bashrc` exports
+`PROJ=/scratch/ms17839/SLR-RFF-BRICK`, and the script set `PROJ`, `cd`-ed, sourced the rc, and only
+THEN built `CCX_MS_OUTDIR` from it — so round 1's ten result files landed in another project's tree
+with nothing erroring. ⚠ **The `cd` was correct only because it happened to precede the source: an
+ordering that works is not an ordering that is SAFE.** Three structural fixes rather than a
+re-ordering, because a re-ordering is a convention and conventions rot:
+
+* renamed to **`CCX_PROJ_DIR`** — a script may not name a variable the environment it sources also
+  owns (`CCX_PROJ` stays the override INPUT, which is what the local dry-run sets);
+* **`readonly`**, so a clobber is a HARD ERROR and not a silent rebind — verified: a rc setting
+  `CCX_PROJ_DIR` now aborts the job with `readonly variable` instead of continuing
+  [[split_name_must_hard_error]];
+* `CCX_MS_OUTDIR` computed **before** the source and **ASSERTED** to be under the project **after**
+  it (a gate placed before the hazard it guards is not a gate), with an explicit
+  `CCX_MS_OUTDIR_EXTERNAL=1` escape — plus an idempotent re-`cd` on the same side of the source,
+  because an rc may change the working directory as easily as it may rebind a name and the
+  `Rscript calibration/...` at the bottom is a RELATIVE path.
+
+**MUTATION-TESTED, all three states**: the default outdir passes; `CCX_MS_OUTDIR` pointed at
+`SLR-RFF-BRICK` — the exact round-1 bug — exits **1** naming both paths; the escape downgrades it to
+a warning and proceeds. `setup_torch.sh` gets the same rename: it never READ `$PROJ` after its own
+source, so it had no live bug, but leaving the shape in the neighbouring file is how the class comes
+back.
+
+**2. `collect_dispersed_multistart.R` — a bound that did not match its claim.** The verdict gated at
+**`1e-8`**. That is the right bound for the PORT GATE, whose claim is an **evaluation identity** —
+one fixed point, two machines, agree to floating point. The verdict's claim is a comparison of two
+**optimiser outputs**, and no optimiser promises `1e-8`; so it printed *"4 dispersed starts did NOT
+reach the best re-converged known basin"* for a difference of **−0.0000** (≈1e-6), in the single
+line a reader takes away. [[gate_bound_matches_its_claim]], reproduced in the same session that
+cited it.
+
+⇒ The bound is now the driver's **own convergence criterion**, `MS_CYCLE_TOL` = 0.5: a start is
+declared CONVERGED when a whole cycle gains less than that, so two finals closer than it are not
+distinguishable **by this optimiser's own standard**. It is **RECORDED** by the driver
+(`cycle_tol`, `restart_tol` in every `start_*.rds`) and **READ** by the collector
+[[recorded_but_never_restored]], **PRINTED** on the verdict line so the bound travels with the
+claim, and files disagreeing on it are a hard error — they are not one survey. A file written before
+today has no `cycle_tol`; the collector says so out loud and names the fallback as ASSUMED. ⚠ And
+**absence ASSERTS**: `unique(unlist(...))` drops NULLs, so a directory MIXING pre- and post-fix
+files would have taken the recorded value and said nothing about the half carrying no opinion —
+the silent-omission shape of [[intersect_is_a_silent_default]]. It now counts them and names the ids.
+
+**MUTATION-TESTED on a fixture carrying the REAL round-1 finals** (the Torch `start_*.rds` are on
+`/scratch`, so the fixture reproduces the published numbers rather than importing them). All six
+states fire correctly: the actual −0.0000 case now reads **REPRODUCED** (it read "did NOT reach");
+all dispersed −3 reads **did NOT reach**; +3 reads **FOUND A BETTER BASIN THAN**; −0.02, inside the
+bound, reads **REPRODUCED**; no `cycle_tol` anywhere names the fallback as assumed; 3-of-10 missing
+names the three ids; and two DIFFERENT `cycle_tol` values across files hard-errors.
+
+**Also corrected**, one line, in `multistart.sbatch`'s WALL block: it asserted "cpu_short caps at
+4 h", which [[torch_qos_is_the_real_cap]] contradicts — the QoS allows **6 h**. The arithmetic is
+unchanged because it is against this job's own `--time=04:00:00` REQUEST; the comment now says
+request-not-ceiling, and points at the 6 h a round 2 may claim.
+
+⛔ **Still ADOPTS NOTHING**, and the four open decisions of 09-01e §6 (adoption against the prior-z
+screen, ratifying the ENSO prior, a profile/Hessian on the four, whether to survey wider) are
+untouched.
+
 ## 2026-09-01l — **THE SURVEY RAN: ONE BASIN AT 25 PARAMETERS, AND THE 08-31e TWO-BASIN STRUCTURE WAS A 22-PARAMETER PROPERTY**
 
 Torch job **16732800**, `--array=0-45%10`. **10 COMPLETED, 11 CANCELLED** (Marcus, once the answer

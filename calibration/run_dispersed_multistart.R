@@ -709,6 +709,15 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             trace = trace, n_eval = n_eval, minutes = elapsed_min(),
             sec_per_eval = MS_SEC_PER_EVAL, restart_min = restart_min,
             prior_z = zs, param_names = CCX_PARAM_NAMES, pump_mode = MS_ARM,
+            # RECORDED **AND** READ by collect_dispersed_multistart.R's VERDICT.
+            # ⛔ THE BOUND ON "did this start reach that one" IS THIS OPTIMISER'S
+            # OWN CONVERGENCE TOLERANCE, and the only file that knows it is the
+            # one that ran it. Before 2026-09-01e the collector hardcoded 1e-8 --
+            # the right bound for the EVALUATION identity of the port gate and
+            # the wrong one for comparing two optimiser OUTPUTS -- and printed
+            # "4 dispersed starts did NOT reach the best re-converged known
+            # basin" for a difference of -0.0000 [[gate_bound_matches_its_claim]].
+            restart_tol = MS_TOL, cycle_tol = MS_CYCLE_TOL,
             seed = MS_SEED + MS_ID, spread = MS_SPREAD,
             spread_measured = MS_SPREAD_MEASURED, draws = st$draws,
             # RECORDED **AND** READ by collect_dispersed_multistart.R: which

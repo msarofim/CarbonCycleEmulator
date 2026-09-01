@@ -10,8 +10,15 @@
 # survey is a mode-finder and not a sampler).
 # =====================================================================
 set -euo pipefail
-PROJ=/scratch/ms17839/CarbonCycleEmulator
-cd "$PROJ"
+# ⛔ `CCX_PROJ_DIR`, NOT `PROJ`, AND `readonly` -- Torch's ~/.bashrc exports
+# `PROJ=/scratch/ms17839/SLR-RFF-BRICK`, and sourcing it below silently rebinds
+# any variable of that name. This script never READ $PROJ after the source, so
+# it had no live bug; it is renamed because the same shape in multistart.sbatch
+# wrote a whole survey round into another project's tree on 2026-09-01, and a
+# convention that holds in one file and not its neighbour is not a convention.
+CCX_PROJ_DIR=/scratch/ms17839/CarbonCycleEmulator
+readonly CCX_PROJ_DIR
+cd "$CCX_PROJ_DIR"
 set +u; source ~/.bashrc; set -u
 module load r/4.5.1
 
