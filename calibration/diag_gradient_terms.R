@@ -186,7 +186,7 @@ if (mode_ok) {
 if (mode_ok) {
   p_mode <- ccx_default_params()
   for (n in intersect(names(p_mode), CCX_PARAM_NAMES)) p_mode[[n]] <- md$par_mode[[n]]
-  p_mode$gamma_enso <- md$par_mode$gamma_enso
+  p_mode <- ccx_set_enso(p_mode, md$par_mode)
   r_mode <- gt_run(p_mode)
 }
 

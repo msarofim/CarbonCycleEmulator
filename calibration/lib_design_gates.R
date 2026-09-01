@@ -89,7 +89,7 @@ dg_vector <- function(arm) {
   pm <- ccx_migrate_par_set(md$par_mode)
   mig <- attr(pm, "migrated")
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
-  p$gamma_enso <- pm$gamma_enso
+  p <- ccx_set_enso(p, pm)
   p$pump_mode  <- md$pump_mode
   # ⚠ TWO LISTS, NOT ONE ([[ccx_two_param_lists]]). `p` is the MODEL's list --
   # ccx_default_params() overlaid with the fitted names it has slots for -- and

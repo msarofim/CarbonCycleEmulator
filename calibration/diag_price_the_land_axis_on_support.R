@@ -90,7 +90,7 @@ base <- ccx_default_params()
 for (n in intersect(names(base), names(p0))) base[[n]] <- p0[[n]]
 stopifnot(identical(base$seas_lag_p_NH, p0$seas_lag_p),
           identical(base$seas_lag_p_SH, p0$seas_lag_p))
-base$gamma_enso <- p0$gamma_enso
+base <- ccx_set_enso(base, p0)
 # ⚠ THE OBJECTIVE'S OWN err, NOT THE DIAGNOSTIC DEFAULTS. A first version of
 # this script passed list(sigma_co2 = 1.5, sigma_d13c = 0.1, sigma_d14c = 5)
 # and dropped `luc`, `deep` and `ocean_grad` -- a DIFFERENT likelihood from the

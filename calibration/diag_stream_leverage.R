@@ -60,7 +60,7 @@ pl_score <- function(p) {
 
 # ---- error-model defaults: the table's init, since ccx_default_params()
 # may not carry them ---------------------------------------------------
-for (nm in c("sigma_co2", "sigma_d13c", "sigma_d14c", "bomb_total", "gamma_enso"))
+for (nm in c("sigma_co2", "sigma_d13c", "sigma_d14c", "bomb_total", CCX_ENSO_PARAMS))
   if (is.null(pd[[nm]])) pd[[nm]] <- CCX_PARAM_TABLE[[nm]]$init
 
 # ---- perturbation set: one prior sd, or 10 % of a uniform range ------
@@ -76,7 +76,13 @@ PL_PERT <- list(
   seas_amp_SH   = list(kind = "rel", d = 0.80),
   seas_phase_NH = list(kind = "abs", d = 1.2),
   seas_phase_SH = list(kind = "abs", d = 1.2),
-  gamma_enso    = list(kind = "abs", d = 2.0),
+  # FOUR since 2026-09-01, each at its own prior sd (all four are N(0, 2), the
+  # prior the retired scalar carried) -- so the per-parameter leverage stays
+  # "one prior sd" and is comparable with the rest of this table.
+  gamma_enso_land_NH = list(kind = "abs", d = 2.0),
+  gamma_enso_land_SH = list(kind = "abs", d = 2.0),
+  gamma_enso_ocn_NH  = list(kind = "abs", d = 2.0),
+  gamma_enso_ocn_SH  = list(kind = "abs", d = 2.0),
   bomb_total    = list(kind = "rel", d = 0.10),
   sigma_co2     = list(kind = "rel", d = 0.70),
   sigma_d13c    = list(kind = "rel", d = 0.70),

@@ -83,7 +83,7 @@ cat(sprintf("   => the constant is %.1fx the floor, i.e. conservative, not fitte
 cat("\n-- 3. WHERE b0 SITS AGAINST BOTH --\n\n")
 obs <- ccx_prepare_obs()
 err <- list(sigma_co2 = 1.5, sigma_d13c = 0.1, sigma_d14c = 5)
-p <- ccx_default_params(); p$gamma_enso <- 0.5
+p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
 sp <- ccx_spinup(p)
 Fh <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
 out <- ccx_run_fast(sp, Fh)$out

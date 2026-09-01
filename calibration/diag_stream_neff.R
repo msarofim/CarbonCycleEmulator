@@ -133,7 +133,7 @@ neff_residuals <- function(file) {
   pv <- md$par_mode
   p  <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso
+  p <- ccx_set_enso(p, pv)
   p$pump_mode  <- md$pump_mode
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", NEFF_YEARS, prod_c14 = sp$prod_c14,
@@ -453,7 +453,7 @@ neff_amp <- function(arm) {
   md <- readRDS(NEFF_ARMS[[arm]]); pv <- md$par_mode
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode
+  p <- ccx_set_enso(p, pv); p$pump_mode <- md$pump_mode
   sp <- ccx_spinup(p)
   F <- ccx_build_forcing("historical", NEFF_YEARS, prod_c14 = sp$prod_c14,
                          bomb_total_kmol = pv$bomb_total, luc_scale = pv$luc_scale)

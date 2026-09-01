@@ -15,7 +15,7 @@ skip_if_no_cpp <- function() {
 }
 
 mech_run <- function(off = character(), years = c(1750, 2100), scen = "ssp245") {
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   F0 <- suppressWarnings(ccx_build_forcing(scen, years, prod_c14 = 0))
   m <- ccx_apply_mechanisms(p, F0, off)
   sp <- ccx_spinup(m$p)
@@ -152,7 +152,7 @@ test_that("the warming switch removes only the carbon cycle's response", {
 
 test_that("switches compose, and unknown names are refused", {
   skip_if_no_cpp()
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   F <- suppressWarnings(ccx_build_forcing("ssp245", c(1750, 2100), prod_c14 = 0))
   m <- ccx_apply_mechanisms(p, F, c("fertilisation", "revelle"))
   expect_equal(m$p$beta, 0)

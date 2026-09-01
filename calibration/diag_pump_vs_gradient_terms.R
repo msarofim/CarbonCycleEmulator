@@ -280,7 +280,7 @@ if (is.null(pm)) {
 } else {
   pmode <- ccx_default_params()
   for (n in intersect(names(pmode), names(pm))) pmode[[n]] <- pm[[n]]
-  pmode$gamma_enso <- pm$gamma_enso
+  pmode <- ccx_set_enso(pmode, pm)
   bomb_m <- pm$bomb_total; luc_m <- pm$luc_scale
   err_m <- PG_ERR_MODE; mode_label <- "MODE (pre-gradient, quarantined)"
 }

@@ -49,7 +49,7 @@ run_at <- function(sh_lag, mods = list()) {
   # the split names, so set BOTH explicitly rather than letting the fallback
   # quietly give the SH the NH's value.
   p$seas_lag_p_NH <- NH_LAG; p$seas_lag_p_SH <- sh_lag
-  p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode
+  p <- ccx_set_enso(p, pv); p$pump_mode <- md$pump_mode
   for (n in names(mods)) p[[n]] <- mods[[n]]
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", SL_YEARS, prod_c14 = 0, bomb_total_kmol = 102)

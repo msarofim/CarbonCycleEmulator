@@ -44,10 +44,10 @@ mode_fit <- if (file.exists(DIAG_MODE_FILE)) readRDS(DIAG_MODE_FILE) else
 p <- ccx_default_params()
 if (!is.null(mode_fit)) {
   for (n in intersect(names(p), names(mode_fit$par_mode))) p[[n]] <- mode_fit$par_mode[[n]]
-  p$gamma_enso <- mode_fit$par_mode$gamma_enso
+  p <- ccx_set_enso(p, mode_fit$par_mode)
   cat(sprintf("parameters: mode fit, bomb_total %.1f kmol\n", mode_fit$par_mode$bomb_total))
 } else {
-  p$gamma_enso <- 0
+  p <- ccx_set_enso(p, list(gamma_enso = 0))
   cat("parameters: ccx_default_params() -- NO mode fit found\n")
 }
 BOMB_FIT <- if (!is.null(mode_fit)) mode_fit$par_mode$bomb_total else DIAG_BOMB_ALT

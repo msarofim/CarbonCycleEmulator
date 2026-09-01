@@ -112,11 +112,11 @@ mode_fit <- if (file.exists(PART_MODE_FILE)) readRDS(PART_MODE_FILE) else NULL
 p <- ccx_default_params()
 if (!is.null(mode_fit)) {
   for (n in intersect(names(p), names(mode_fit$par_mode))) p[[n]] <- mode_fit$par_mode[[n]]
-  p$gamma_enso <- mode_fit$par_mode$gamma_enso
+  p <- ccx_set_enso(p, mode_fit$par_mode)
   cat(sprintf("parameters: mode fit (its own bomb_total %.1f is OVERRIDDEN to %.0f)\n",
               mode_fit$par_mode$bomb_total, PART_BOMB_TOTAL))
 } else {
-  p$gamma_enso <- 0
+  p <- ccx_set_enso(p, list(gamma_enso = 0))
   cat("parameters: ccx_default_params() -- NO mode fit found\n")
 }
 

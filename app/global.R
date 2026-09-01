@@ -83,7 +83,12 @@ app_params <- local({
                   file.path(CCX_ROOT, "calibration", "output", "mode_fit.rds"))
   post_file <- file.path(CCX_ROOT, "calibration", "output", "posterior_draws.rds")
   p <- ccx_default_params()
-  p$gamma_enso <- CCX_PARAM_TABLE$gamma_enso$init
+  # ENSO: FOUR inits since 2026-09-01, read off CCX_PARAM_TABLE rather than
+  # written as literals -- this is the app's only source of an uncalibrated
+  # ENSO response, and a literal here would go stale the first time the table
+  # moved. ccx_set_enso() is not used: there is no source list to read, and the
+  # table IS the contract for "nothing has been fitted yet".
+  for (.n in CCX_ENSO_PARAMS) p[[.n]] <- CCX_PARAM_TABLE[[.n]]$init
   src <- "uncalibrated defaults"
   status <- "provisional"
   # NO HARDCODED BIAS NUMBER. This string used to claim "about 27 ppm high",
@@ -121,7 +126,7 @@ app_params <- local({
     if (is.null(md) || !identical(md$param_names, CCX_PARAM_NAMES)) next
     pm <- md$par_mode
     for (n in intersect(names(p), names(pm))) p[[n]] <- pm[[n]]
-    p$gamma_enso <- pm$gamma_enso
+    p <- ccx_set_enso(p, pm)
     # `pump_mode` is a STRUCTURAL choice, not a fitted parameter, so it is not
     # in par_mode and the loop above cannot carry it. It matches the default
     # today (both "N"); setting it explicitly is what keeps that a fact rather

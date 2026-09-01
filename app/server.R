@@ -284,7 +284,10 @@ function(input, output, session) {
       seas_amp_SH = "Southern seasonal amplitude",
       seas_phase_NH = "Northern seasonal timing",
       seas_phase_SH = "Southern seasonal timing",
-      gamma_enso = "ENSO carbon sensitivity",
+      gamma_enso_land_NH = "ENSO land sensitivity, north",
+      gamma_enso_land_SH = "ENSO land sensitivity, south",
+      gamma_enso_ocn_NH  = "ENSO ocean sensitivity, north",
+      gamma_enso_ocn_SH  = "ENSO ocean sensitivity, south",
       tau_soil_fast = "Responsive soil turnover time",
       bomb_total = "Total bomb ¹⁴C released",
       # sigma_co2 left CCX_PARAM_NAMES on 2026-08-15 (review item 6b); the CO2
@@ -297,7 +300,11 @@ function(input, output, session) {
               q10 = "—", k_w = "m/yr", h_ml = "m", kz = "m²/yr",
               tau_ex = "yr", npp_frac_NH = "—", seas_amp_NH = "GtC/yr",
               seas_amp_SH = "GtC/yr", seas_phase_NH = "month",
-              seas_phase_SH = "month", gamma_enso = "GtC/yr per index unit",
+              seas_phase_SH = "month",
+              gamma_enso_land_NH = "GtC/yr per index unit",
+              gamma_enso_land_SH = "GtC/yr per index unit",
+              gamma_enso_ocn_NH  = "GtC/yr per index unit",
+              gamma_enso_ocn_SH  = "GtC/yr per index unit",
               tau_soil_fast = "yr", bomb_total = "kmol", sigma_co2 = "ppm",
               sigma_d13c = "‰", sigma_d14c = "‰")
     v <- vapply(nm, function(n) {

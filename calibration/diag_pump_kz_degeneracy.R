@@ -141,7 +141,7 @@ pm <- if (file.exists(PKZ_MODE_PATH)) readRDS(PKZ_MODE_PATH)$par_mode else NULL
 if (is.null(pm)) stop("quarantined mode absent -- this file scores at the mode")
 pmode <- ccx_default_params()
 for (n in intersect(names(pmode), names(pm))) pmode[[n]] <- pm[[n]]
-pmode$gamma_enso <- pm$gamma_enso
+pmode <- ccx_set_enso(pmode, pm)
 cat(sprintf("MODE (pre-gradient, quarantined). Its OWN kz = %.2f, which is %.1f %% up\n",
             pm$kz, 100 * (pm$kz - PKZ_KZ_BRACKET[1]) / diff(PKZ_KZ_BRACKET)))
 cat(sprintf("the bracket [%g, %g] that calibrate.R enforces. h_ml %.2f -> %g forced.\n",

@@ -76,7 +76,7 @@ if (file.exists(mode_path)) {
   pm <- readRDS(mode_path)$par_mode
   p1 <- ccx_default_params()
   for (n in intersect(names(p1), names(pm))) p1[[n]] <- pm[[n]]
-  p1$gamma_enso <- pm$gamma_enso
+  p1 <- ccx_set_enso(p1, pm)
   dq_scan(p1, pm$bomb_total,
           "at the 16-parameter mode's OTHER parameters (q10 overridden)")
 } else {

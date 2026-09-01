@@ -21,7 +21,7 @@ skip_if_no_cpp <- function() {
   if (!ok) skip("C++ core failed to compile")
 }
 
-ent_p <- local({ p <- ccx_default_params(); p$gamma_enso <- 0.5; p })
+ent_p <- local({ p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5)); p })
 
 # Twins of test-conservation.R's fixtures, which are local to that file. A
 # closed system (no emissions, no 14C production) and a state deliberately OUT
@@ -160,7 +160,7 @@ test_that("the entrainment channel is CONSERVATIVE, and rectifies no more than
   # test-conservation.R does it. (An out-columns identity is the wrong
   # instrument here: ocean_C + land_C + atm_C omits the wood/product pool.)
   s <- test_ent_state()
-  s$p$gamma_enso <- 0; s$p$ent_seas_amp_SH <- 20
+  s$p <- ccx_set_enso(s$p, list(gamma_enso = 0)); s$p$ent_seas_amp_SH <- 20
   y <- s$y; tot0 <- ccx_total(y); t <- 1900
   for (m in seq_len(12 * 40)) {
     y <- ccx_step_rk4(y, t, 1 / 12, s$p, ent_closed_forcing(), s$grid, s$aux)

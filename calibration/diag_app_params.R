@@ -90,7 +90,8 @@ cat(sprintf("GATE 3: default pump_mode '%s' vs mode file '%s' -> %s\n",
 ap_params <- function(kind) {
   p <- ccx_default_params()
   if (identical(kind, "DEFAULTS")) {
-    p$gamma_enso <- CCX_PARAM_TABLE$gamma_enso$init   # what global.R does today
+    # what global.R does today -- FOUR inits since the 2026-09-01 ENSO split
+    for (.n in CCX_ENSO_PARAMS) p[[.n]] <- CCX_PARAM_TABLE[[.n]]$init
     return(p)
   }
   for (n in in_p) p[[n]] <- pm[[n]]

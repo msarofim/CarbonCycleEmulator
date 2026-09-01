@@ -110,7 +110,7 @@ run_vec <- function(mf) {
     # vector rather than adopting one band globally. [[ccx_hml_band_decode]]
     pv <- ccx_mode_params(md)
     for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-    p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode
+    p <- ccx_set_enso(p, pv); p$pump_mode <- md$pump_mode
     bt <- pv$bomb_total; ls_ <- pv$luc_scale
   }
   sp <- ccx_spinup(p)

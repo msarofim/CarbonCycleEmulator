@@ -64,7 +64,7 @@ S0 <- PV$sst_seas_amp_SH
 run_at <- function(mods) {
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- PV[[n]]
-  p$gamma_enso <- PV$gamma_enso; p$pump_mode <- md$pump_mode
+  p <- ccx_set_enso(p, PV); p$pump_mode <- md$pump_mode
   p$ent_seas_amp_SH <- EL_ENT
   for (n in names(mods)) p[[n]] <- mods[[n]]
   sp <- ccx_spinup(p)

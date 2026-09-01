@@ -19,6 +19,23 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
+# ⚠ THIS FILE PROFILES A PARAMETER THAT NO LONGER EXISTS. `gamma_enso` was
+# split into four on 2026-09-01 (land/ocean x NH/SH); the scalar it slides is
+# gone from CCX_PARAM_TABLE. Refuse with the REASON rather than dying three
+# frames down on `match()` returning NA -- a diagnostic that cannot run must
+# say so out loud (memory `broken_gate_reports_nothing`).
+#
+# ITS QUESTION SURVIVES AND ITS ANSWER IS UNCHANGED: more ENSO amplitude made
+# the model LOUDER, not more RIGHT (r flat across an 11x range). That is the
+# reading the split was built on -- the defect was never the amplitude. To
+# re-ask it in the new space, profile the LAND PAIR jointly, and note that the
+# 3.05 target here was computed against a land-only response.
+if (!"gamma_enso" %in% CCX_PARAM_NAMES)
+  stop("diag_gamma_enso_profile.R profiles `gamma_enso`, SPLIT on 2026-09-01 ",
+       "into ", paste(CCX_ENSO_PARAMS, collapse = ", "), ". Not migrated: a ",
+       "one-parameter profile of a four-parameter response would report a ",
+       "slice, not a profile. See ccx_gamma_enso() in R/model.R.")
+
 GE_YEARS  <- c(1750, 2024)
 GE_WIN    <- c(1959, 2023)
 GE_GRID   <- c(0, 0.4, 0.85119, 1.5, 2.0, 3.05, 4.0)

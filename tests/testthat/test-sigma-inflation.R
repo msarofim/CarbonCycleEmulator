@@ -51,7 +51,7 @@ test_that("a hand-built ocean_grad without sd_eff is LOUD, not silently rescored
   skip_if_no_cpp()
   tg <- ccx_ocean_gradient_target()
   skip_if(is.null(tg), "GLODAPv2 gradient block absent")
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   ff <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
   f <- list(obs = ccx_prepare_obs(), out = ccx_run_fast(sp, ff)$out,

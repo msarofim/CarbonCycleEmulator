@@ -328,7 +328,34 @@ CCX_PARAM_TABLE <- list(
   sst_seas_amp_SH = list(tr = "log", init = 1.74644,
                      prior = function(x) dlnorm(x, log(ccx_const("SST_SEAS_AMP_SH_OBS")),
                                                 SST_SEAS_LOGSD, log = TRUE)),
-  gamma_enso  = list(tr = "id",    init = 0.5,
+  # ENSO, FOUR COEFFICIENTS SINCE 2026-09-01 (Marcus's design call). GtC/yr per
+  # unit Nino3.4 index. `gamma_enso` was ONE scalar moving LAND ONLY, split
+  # 50/50 by a hardcoded share -- and the ocean half of the model's ENSO
+  # response was measured ANTI-correlated with the observed one (r = -0.51
+  # against +0.535, both basins, detrend-invariant). See ccx_gamma_enso() in
+  # R/model.R for the full measurement, the compensating-error state that hid
+  # it, and why the per-path fractionation is what makes these identifiable.
+  #
+  # ⚠ EACH ENTRY KEEPS THE ORIGINAL N(0, 2) PRIOR, the same call as the
+  # `seas_lag_p` split: the split adds degrees of freedom without smuggling in
+  # a new belief about any one of them. It is NOT scale-preserving on the SUM
+  # -- two independent N(0,2) halves imply N(0, 2*sqrt(2)) on the land total
+  # where the scalar had N(0,2) -- i.e. the land prior is WIDER by sqrt(2).
+  # That is deliberate and it is a WIDENING, not a shift; at a fitted 0.85 the
+  # prior is weak either way. The alternative (2/sqrt(2) on each half, exactly
+  # preserving the total) is the choice to revisit if the land pair ever runs
+  # to the prior rather than to the data.
+  #
+  # THE OCEAN PAIR IS CENTRED ON ZERO, which is the incumbent model: the prior
+  # does not presume the mechanism exists. The measurement says the pair should
+  # come out near +0.137 each.
+  gamma_enso_land_NH = list(tr = "id", init = 0.25,
+                     prior = function(x) dnorm(x, 0, 2, log = TRUE)),
+  gamma_enso_land_SH = list(tr = "id", init = 0.25,
+                     prior = function(x) dnorm(x, 0, 2, log = TRUE)),
+  gamma_enso_ocn_NH  = list(tr = "id", init = 0,
+                     prior = function(x) dnorm(x, 0, 2, log = TRUE)),
+  gamma_enso_ocn_SH  = list(tr = "id", init = 0,
                      prior = function(x) dnorm(x, 0, 2, log = TRUE)),
   # LAND TURNOVER: ZERO degrees of freedom (2026-08-12, Marcus). The whole land
   # layout -- npp_leaf_frac, tau_leaf, tau_wood, litter_slow_frac, tau_soil_fast,
@@ -596,6 +623,31 @@ ccx_migrate_par_set <- function(p) {
     }
   }
 
+  # 2026-09-01: gamma_enso -> gamma_enso_land_NH/_SH + gamma_enso_ocn_NH/_SH.
+  # ccx_gamma_enso() IS the absence contract, exactly as above: ask it, never
+  # restate it. It gives the LAND pair the legacy scalar times the retired
+  # 0.5/0.5 share and the OCEAN pair 0 -- the mechanism did not exist, so a
+  # fitted ancestor holds no opinion about it and must not be given one.
+  enso_nm <- CCX_ENSO_PARAMS
+  if (any(enso_nm %in% absent)) {
+    # STRICT, like the lag above: a legacy scalar is what makes this a fitted
+    # ancestor. Filling an absent LAND coefficient from the named default would
+    # be an invented coordinate wearing a fitted vector's name. The OCEAN pair
+    # migrating to 0 is NOT such an invention -- 0 is what the ancestor RAN.
+    if (is.null(p$gamma_enso))
+      stop("ccx_migrate_par_set(): ", paste(intersect(enso_nm, absent), collapse = ", "),
+           " absent and no legacy `gamma_enso` to migrate from. This list ",
+           "carries no ENSO response at all; it is not a fitted ancestor.")
+    g <- ccx_gamma_enso(p)
+    for (n in intersect(enso_nm, absent)) {
+      key <- sub("^gamma_enso_", "", n)
+      p[[n]] <- unname(g[[key]]); filled <- c(filled, n)
+    }
+    # DROP the retired scalar: a list carrying both is what ccx_gamma_enso()
+    # refuses, and a migrated list must be usable without a second thought.
+    p$gamma_enso <- NULL
+  }
+
   still <- setdiff(absent, filled)
   if (length(still))
     stop("ccx_migrate_par_set(): no migration contract for: ",
@@ -737,9 +789,11 @@ ccx_prior_z <- function(name, x, table = CCX_PARAM_TABLE) {
 #' four LIKELIHOOD parameters (`sigma_d14c`, `rep_dC`, `grad_off_co2`,
 #' `grad_off_d13c`) -- the six that a bare `intersect(names(p), CCX_PARAM_NAMES)`
 #' silently drops, two of which move a trajectory (worth 5.79 ppm of 2024 CO2,
-#' `diag_app_params.R`). NOTE `gamma_enso` is NOT one of them: it is a field of
-#' `ccx_default_params()` and is in `CCX_PARAM_NAMES`, so intersect() picks it up.
-#' It is assigned explicitly below only for symmetry with `app/global.R`.
+#' `diag_app_params.R`). NOTE the four ENSO coefficients are NOT among them for a
+#' CURRENT mode file: they are fields of `ccx_default_params()` and are in
+#' `CCX_PARAM_NAMES`, so intersect() picks them up. They ARE among them for a
+#' pre-2026-09-01 file, which carries only the retired `gamma_enso` -- which is
+#' why the overlay below goes through `ccx_set_enso()` rather than by name.
 #'
 #' REPOINTED 2026-08-27. The literal `pump_arms/mode_fit_pump<arm>.rds` this
 #' used to build is QUARANTINED -- it was fitted before the seasonal-NEP isotope
@@ -758,7 +812,16 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = ccx_default_params())
     stop("mode file '", basename(f), "' was fitted on a different parameter set (",
          length(md$param_names), " names, this build has ", length(CCX_PARAM_NAMES),
          "); refusing to overlay it silently.",
-         if (length(md$param_names) == 21L &&
+         if (length(md$param_names) == 22L &&
+             "gamma_enso" %in% md$param_names)
+           paste0(" This looks like a PRE-2026-09-01 22-parameter mode: `gamma_enso`",
+                  " was split into the four `gamma_enso_land_*`/`gamma_enso_ocn_*`",
+                  " coefficients. Its `par_mode` still overlays correctly via",
+                  " ccx_gamma_enso()'s legacy fallback (land takes the scalar x 0.5,",
+                  " ocean takes 0) -- it is the 22-vs-25 `u_mode` DECODING that is",
+                  " invalid, so warm-start from `par_mode` and refit rather than",
+                  " decoding `u_mode`.")
+         else if (length(md$param_names) == 21L &&
              "seas_lag_p" %in% md$param_names)
            paste0(" This looks like a PRE-2026-08-31 21-parameter mode: `seas_lag_p`",
                   " was split into `seas_lag_p_NH`/`_SH`. Its `par_mode` still",
@@ -769,7 +832,9 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = ccx_default_params())
   pm <- md$par_mode
   p  <- base
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
-  p$gamma_enso <- pm$gamma_enso
+  # THROUGH THE RESOLVER: a pre-2026-09-01 `par_mode` carries the retired
+  # scalar, and intersect() would drop it in silence.
+  p <- ccx_set_enso(p, pm)
   p$pump_mode  <- md$pump_mode
   # `hml_bound` IS CARRIED because the driver overrides CCX_PARAM_TABLE$h_ml
   # IN-PROCESS to [85, 120], and a logpost recomputed under the default band is
@@ -1026,7 +1091,7 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
 
     p <- base_params
     for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-    p$gamma_enso <- pv$gamma_enso
+    p <- ccx_set_enso(p, pv)
 
     sp <- tryCatch(ccx_spinup(p), error = function(e) NULL)
     if (is.null(sp) || !is.finite(sp$prod_c14) || sp$prod_c14 <= 0) return(-Inf)

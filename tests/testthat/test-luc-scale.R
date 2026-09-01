@@ -217,7 +217,7 @@ test_that("ccx_scaled_forcing reproduces ccx_make_logpost's likelihood exactly",
 
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso
+  p <- ccx_set_enso(p, pv)
   sp <- ccx_spinup(p)
   SF <- ccx_scaled_forcing(sp, luc_scale = pv$luc_scale, bomb_total = pv$bomb_total)
   o  <- ccx_run_fast(sp, SF$F)$out

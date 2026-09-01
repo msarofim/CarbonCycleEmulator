@@ -101,7 +101,7 @@ for (h in prof$grid)
 si_grad_at <- function(pv) {
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode
+  p <- ccx_set_enso(p, pv); p$pump_mode <- md$pump_mode
   sp <- ccx_spinup(p)
   F <- ccx_build_forcing("historical", SI_YEARS, prod_c14 = 0, bomb_total_kmol = CCX_BOMB_REF)
   F$c14_cosmo <- sp$prod_c14; F$c14_bomb <- F$c14_bomb * (pv$bomb_total / CCX_BOMB_REF)

@@ -98,7 +98,7 @@ test_that("the sink conserves C, 13C and 14C exactly", {
   # flux in the model. Same test_state()/sink_closed_forcing() helpers as
   # test-conservation.R, with the sink column added.
   s <- sink_test_state()
-  s$p$gamma_enso <- 0
+  s$p <- ccx_set_enso(s$p, list(gamma_enso = 0))
   fc <- sink_closed_forcing(); fc$sink_ocean <- SINK_TEST_RATE
   d  <- ccx_deriv(s$y, 1945.5, s$p, fc, s$grid, s$aux)
   expect_lt(abs(sum(d[, "C"]))   / max(abs(d[, "C"])),   1e-12)
@@ -131,7 +131,7 @@ test_that("the ocean gains exactly what the atmosphere loses", {
   # difference between sink-on and sink-off must be +rate into the two mixed
   # layers and -rate out of the two atmospheres, and ZERO everywhere else.
   s <- sink_test_state()
-  s$p$gamma_enso <- 0
+  s$p <- ccx_set_enso(s$p, list(gamma_enso = 0))
   f_off <- sink_closed_forcing()
   f_on  <- sink_closed_forcing(); f_on$sink_ocean <- SINK_TEST_RATE
   d0 <- ccx_deriv(s$y, 1945.5, s$p, f_off, s$grid, s$aux)
@@ -169,7 +169,7 @@ test_that("the ocean gains exactly what the atmosphere loses", {
 
 test_that("R and C++ agree with the sink on", {
   skip_if_no_cpp()
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   forc <- list(e_foss = list(NH = 8, SH = 0.4), e_luc = list(NH = 0.6, SH = 0.5),
                cum_luc = list(NH = 120, SH = 80),

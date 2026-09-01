@@ -32,7 +32,7 @@ kz_wall <- function(h_ml, substeps) {
 
 run_at <- function(kz, h_ml = 75, substeps = "auto", retry_na = TRUE,
                    years = c(1900, 1960)) {
-  p <- ccx_default_params(); p$gamma_enso <- 0.5; p$kz <- kz; p$h_ml <- h_ml
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5)); p$kz <- kz; p$h_ml <- h_ml
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", years, prod_c14 = sp$prod_c14)
   ccx_run_fast(sp, F, substeps = substeps, retry_na = retry_na)
@@ -95,7 +95,7 @@ test_that("the auto substep count is accurate, not merely stable", {
   # inaccurate. Doubling the substeps beyond the controller's choice must not
   # move the answer more than RK4 truncation error.
   for (kz in c(175790, 1e6)) {
-    p <- ccx_default_params(); p$gamma_enso <- 0.5; p$kz <- kz
+    p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5)); p$kz <- kz
     ss <- ccx_substeps_for(p)
     a <- run_at(kz, substeps = ss)$out
     b <- run_at(kz, substeps = 2L * ss)$out

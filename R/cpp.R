@@ -40,7 +40,6 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     sst = c(aux$sst$NH, aux$sst$SH),
     dz = grid$dz, dz_mid = aux$dz_mid,
     a_oc = c(aux$a_oc$NH, aux$a_oc$SH),
-    enso_share = c(aux$enso_share$NH, aux$enso_share$SH),
     dic0 = c(aux$dic0$NH, aux$dic0$SH),
     revelle0 = c(aux$revelle0$NH, aux$revelle0$SH),
     pco2_0 = c(aux$pco2_0$NH, aux$pco2_0$SH),
@@ -68,9 +67,19 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
   )
 }
 
-#' Parameters in the flat form the C++ unpacks (gamma_enso defaults to 0)
+#' Parameters in the flat form the C++ unpacks
 ccx_cpp_par <- function(p) {
-  if (is.null(p$gamma_enso)) p$gamma_enso <- 0
+  # ⚠ RESOLVED THROUGH ccx_gamma_enso(), NOT with four literals here -- the same
+  # rule seas_lag_p follows twenty lines down, and for the same reason: the R
+  # core resolves an absent coefficient through that one function, so the two
+  # cores cannot drift apart about what absence means. A pre-2026-09-01 list
+  # carrying only `gamma_enso` takes its legacy branch (land = scalar x 0.5,
+  # ocean = 0) and reaches the core as the model it was fitted under.
+  .ge <- ccx_gamma_enso(p)
+  p$gamma_enso_land_NH <- unname(.ge[["land_NH"]])
+  p$gamma_enso_land_SH <- unname(.ge[["land_SH"]])
+  p$gamma_enso_ocn_NH  <- unname(.ge[["ocn_NH"]])
+  p$gamma_enso_ocn_SH  <- unname(.ge[["ocn_SH"]])
   # Pump export law, added 2026-08-16. Defaulted here as well as in
   # ccx_default_params() so a parameter list built before the port reaches the
   # core as the nutrient-limited model rather than as garbage.
@@ -183,7 +192,9 @@ ccx_cpp_par <- function(p) {
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
       "npp_veg_frac", "ra_ratio", "f_luc_perm", "f_luc_wood",
-      "sst_scale", "gamma_enso", "seas_amp_NH", "seas_amp_SH",
+      "sst_scale", "gamma_enso_land_NH", "gamma_enso_land_SH",
+      "gamma_enso_ocn_NH", "gamma_enso_ocn_SH",
+      "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH",
       "seas_drivers", "seas_T_amp_NH", "seas_T_amp_SH",
       "seas_lag_p_NH", "seas_lag_p_SH",

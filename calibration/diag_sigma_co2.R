@@ -135,7 +135,7 @@ if (mode_ok) {
   pm <- md$par_mode
   p2 <- ccx_default_params()
   for (n in intersect(names(p2), names(pm))) p2[[n]] <- pm[[n]]
-  p2$gamma_enso <- pm$gamma_enso
+  p2 <- ccx_set_enso(p2, pm)
   pts[[2]] <- sc_run(p2, pm$bomb_total, pm$luc_scale,
                      "pre-gradient MAP mode's parameters (18-par, quarantined)")
   attr(pts[[2]], "off") <- SC_GRAD_OFF_MODE

@@ -58,11 +58,12 @@ CCX_MECHANISMS <- list(
   ),
   enso = list(
     label = "El Niño / La Niña",
-    blurb = paste("ENSO moves carbon in and out of tropical land year by year.",
+    blurb = paste("ENSO moves carbon in and out of tropical land -- and, since",
+                  "2026-09-01, in and out of the surface ocean -- year by year.",
                   "It is why the Keeling curve wobbles around its trend.",
                   "Switch it off and the wobbles go."),
     caveat = "Affects year-to-year variability, not the long-term trend.",
-    apply = function(p, F) { p$gamma_enso <- 0; list(p = p, F = F) }
+    apply = function(p, F) { p <- ccx_set_enso(p, list(gamma_enso = 0)); list(p = p, F = F) }
   ),
   ocean_sink = list(
     label = "The ocean sink",

@@ -126,7 +126,7 @@ topo_excess_c14 <- function(topo, npp, d_ex) {
 # ---------------------------------------------------------------------
 # Drivers: two atmospheric Delta14C histories
 # ---------------------------------------------------------------------
-p <- ccx_default_params(); p$gamma_enso <- 0
+p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0))
 sp <- ccx_spinup(p)
 F_bomb <- ccx_build_forcing("historical", TOPO_YEARS, prod_c14 = sp$prod_c14,
                            bomb_total_kmol = TOPO_BOMB_TOTAL)

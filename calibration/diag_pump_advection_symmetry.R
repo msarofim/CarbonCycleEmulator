@@ -94,7 +94,7 @@ sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 # directions. `w_up` = distributed upwelling + non-local sinking; `w_out` =
 # non-local outcrop + distributed descent.
 pas_pair <- function(grad, yrs = PAS_YRS, mode = "N") {
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   p$pump_grad <- grad; p$pump_mode <- mode
   pu <- p; pu$w_up <- PAS_W
   po <- p; po$w_out_NH <- PAS_W; po$w_out_SH <- PAS_W

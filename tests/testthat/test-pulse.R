@@ -29,7 +29,7 @@ PULSE_YEAR <- 2050
 PULSE_SPAN <- c(1750, 2300)
 
 pulse_pair <- function(gtc, bg = "ssp245", pyear = PULSE_YEAR, yrs = PULSE_SPAN) {
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   y <- seq(yrs[1], yrs[2])
   e <- as.data.frame(readRDS(ccx_path("data", "ssp_emissions.rds")))

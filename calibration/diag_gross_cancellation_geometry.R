@@ -83,7 +83,7 @@ vec_of <- function(h) if (is.null(h)) c(NA, NA) else c(mean(h$a), mean(h$b))
 gc_run <- function(mods = list()) {
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv0[[n]]
-  p$gamma_enso <- pv0$gamma_enso; p$pump_mode <- md$pump_mode
+  p <- ccx_set_enso(p, pv0); p$pump_mode <- md$pump_mode
   for (n in names(mods)) p[[n]] <- mods[[n]]
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", GC_YEARS, prod_c14 = 0, bomb_total_kmol = 102)

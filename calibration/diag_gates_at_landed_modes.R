@@ -34,7 +34,7 @@ GtC <- ccx_const("GtC_PER_PPM")
 ev <- function(file,lab){
   m <- readRDS(file); p <- ccx_default_params()
   for (n in intersect(names(p),CCX_PARAM_NAMES)) p[[n]] <- m$par_mode[[n]]
-  p$gamma_enso <- m$par_mode$gamma_enso; p$pump_mode <- m$pump_mode
+  p <- ccx_set_enso(p, m$par_mode); p$pump_mode <- m$pump_mode
   sp <- ccx_spinup(p)
   F <- ccx_build_forcing("historical",c(1750,2024),prod_c14=sp$prod_c14,
         bomb_total_kmol=m$par_mode$bomb_total, luc_scale=m$par_mode$luc_scale)
@@ -57,7 +57,7 @@ ev <- function(file,lab){
 irf_at <- function(file){
   m <- readRDS(file); p <- ccx_default_params()
   for (n in intersect(names(p),CCX_PARAM_NAMES)) p[[n]] <- m$par_mode[[n]]
-  p$gamma_enso <- m$par_mode$gamma_enso; p$pump_mode <- m$pump_mode
+  p <- ccx_set_enso(p, m$par_mode); p$pump_mode <- m$pump_mode
   spin <- ccx_spinup(p)
   Fh <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14=spin$prod_c14,
         bomb_total_kmol=m$par_mode$bomb_total, luc_scale=m$par_mode$luc_scale)

@@ -62,7 +62,7 @@ md <- readRDS(FP_MODE_FILE)
 stopifnot(identical(md$param_names, CCX_PARAM_NAMES))
 P0 <- ccx_default_params()
 for (n in intersect(names(P0), CCX_PARAM_NAMES)) P0[[n]] <- md$par_mode[[n]]
-P0$gamma_enso <- md$par_mode$gamma_enso
+P0 <- ccx_set_enso(P0, md$par_mode)
 P0$pump_mode  <- md$pump_mode
 LUC0 <- md$par_mode$luc_scale; BOMB0 <- md$par_mode$bomb_total
 REP0 <- md$par_mode$rep_dC

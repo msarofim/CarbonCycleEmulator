@@ -174,7 +174,7 @@ if (JOOS_ARM != "defaults") {
   .pm <- ccx_migrate_par_set(.md$par_mode)
   .mig <- attr(.pm, "migrated")
   for (n in intersect(names(p0), CCX_PARAM_NAMES)) p0[[n]] <- .pm[[n]]
-  p0$gamma_enso <- .pm$gamma_enso
+  p0 <- ccx_set_enso(p0, .pm)
   p0$pump_mode  <- .md$pump_mode
   JOOS_LUC_SCALE  <- .pm$luc_scale
   JOOS_BOMB_TOTAL <- .pm$bomb_total

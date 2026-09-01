@@ -337,6 +337,126 @@ ccx_seas_lag_p <- function(p) {
     SH = if (is.null(p$seas_lag_p_SH)) legacy else p$seas_lag_p_SH)
 }
 
+# ---------------------------------------------------------------------
+# ENSO: FOUR coefficients, land/ocean x NH/SH (2026-09-01, Marcus's design)
+# ---------------------------------------------------------------------
+# The hemispheric split the LAND anomaly used before it became two parameters
+# -- the retired hardcoded `aux$enso_share`. It exists ONLY so the legacy branch
+# of ccx_gamma_enso() has a value to read; nothing in the live model multiplies
+# by it, and aux no longer carries it.
+CCX_ENSO_SHARE_LEGACY  <- c(NH = 0.5, SH = 0.5)
+# ENSO coefficient when nothing says otherwise. 0, for the same reason
+# ccx_default_params() carried gamma_enso = 0 rather than the table's init: it
+# is what every default-parameter run has been using.
+CCX_GAMMA_ENSO_DEFAULT <- 0
+# The fitted names, in ONE place. The one-name assignment they replace was
+# written at a dozen call sites; see ccx_set_enso() and the guard below.
+CCX_ENSO_PARAMS <- c("gamma_enso_land_NH", "gamma_enso_land_SH",
+                     "gamma_enso_ocn_NH",  "gamma_enso_ocn_SH")
+
+#' Resolve the ENSO response to its four coefficients (GtC/yr per index unit)
+#'
+#' WHY FOUR AND NOT ONE. `gamma_enso` moved LAND ONLY, split 50/50 between the
+#' hemispheres by a hardcoded share. Measured against GCB over 1959-2024 with a
+#' shared estimator (calibration/diag_enso_model_vs_obs.R): the land response is
+#' 53 % of observed, and the OCEAN response has the WRONG SIGN -- model slope
+#' -0.155 against an observed +0.119 GtC/yr per index unit, r = -0.51
+#' [-0.68, -0.28] against the observed +0.535 [+0.29, +0.72]. The ocean is not
+#' too quiet: its detrended residual sd is 0.122 against the observed 0.123. It
+#' moves the wrong way, because ENSO reaches the ocean through exactly one path
+#' -- SST solubility -- and there is no upwelling to suppress. (`q_conv` is
+#' inert, and making it time-varying was REFUTED by a static scan before any
+#' plumbing was built: the lever has the wrong sign, needs 136-542 % of the
+#' whole circulation per degree, and worsens the deep Delta14C gate.
+#' calibration/diag_conveyor_enso_lever.R.)
+#'
+#' THE TWO ERRORS ARE COMPENSATING, which is why the fit never forced them:
+#' land short by -0.314 and ocean off by +0.274 have opposite effects on the
+#' atmosphere and cancel 87 % in CO2 growth, and CO2 outvotes partition 40:1.
+#' ⚠ An OCEAN-ONLY term therefore makes things WORSE -- growth 53 % -> 17 % of
+#' observed. The pair together reaches ~72 %, which is the ceiling GCB's own
+#' slopes allow: -(land + ocean) = +0.547 against a measured growth of +0.757,
+#' the +0.210 gap living in the budget imbalance term. Do not chase the last
+#' 28 % against these targets.
+#'
+#' WHY THE FOUR ARE IDENTIFIABLE, AND IT IS THE ISOTOPES THAT DO IT: each
+#' anomaly carries the fractionation of its OWN uptake path. The land term
+#' leaves `soil_fast` at -24.35 permil = -0.0172 permil per GtC on atmospheric
+#' d13C; the ocean term rides the air-sea limbs at +0.0022 permil per GtC, ~8x
+#' weaker and OPPOSITE. So d13C identifies the LAND pair, CO2 identifies the
+#' OCEAN pair by difference, and MLO vs SPO -- separate high-leverage streams in
+#' both tracers, plus the two gradients -- separates the hemispheres. With a
+#' generic fractionation that identifiability disappears, and the `gcb_*`
+#' streams alone could never have separated land from ocean.
+#' ⚠ STRUCTURAL identifiability, NOT demonstrated precision. That needs a
+#' profile or a Hessian after fitting.
+#'
+#' ⚠ ONE RESOLVER, AND BOTH CORES GO THROUGH IT, for the reason
+#' `ccx_seas_lag_p()` states above: a default carries two contracts -- the
+#' value, and what ABSENCE means -- and the second one lives here.
+#'
+#' THE ABSENCE CONTRACT:
+#'   field present   -> use it
+#'   absent, legacy `gamma_enso` present -> LAND takes the scalar times the
+#'                      retired CCX_ENSO_SHARE_LEGACY, OCEAN takes 0. That is
+#'                      the pre-2026-09-01 model bit for bit: the
+#'                      behaviour-preserving default the `gamma_diff` adoption
+#'                      did not have and should have.
+#'   neither         -> CCX_GAMMA_ENSO_DEFAULT throughout
+ccx_gamma_enso <- function(p) {
+  leg  <- p$gamma_enso
+  # ⚠ BOTH AT ONCE IS AN ERROR, NOT A PRECEDENCE RULE. Splitting one name into
+  # four turned the old one-name assignment -- written at ~70 diagnostic
+  # call sites -- into a line that assigns a field NOTHING READS, on a list that
+  # already carries four explicit zeros. Silently, every one of those scripts
+  # would have run with the ENSO response switched OFF and reported a number.
+  # A precedence rule (split wins) is exactly the silent default this refuses:
+  # absence must ASSERT (memory `intersect_is_a_silent_default`). Migrate with
+  # ccx_migrate_par_set(), or copy with ccx_set_enso(); neither leaves both.
+  if (!is.null(leg) && any(!vapply(CCX_ENSO_PARAMS,
+                                   function(n) is.null(p[[n]]), logical(1))))
+    stop("ccx_gamma_enso(): the parameter list carries BOTH the retired ",
+         "`gamma_enso` and the 2026-09-01 split fields. Which one is meant is ",
+         "not for this function to guess. Set the four through ccx_set_enso(p, ",
+         "src) -- which reads the source through this same contract -- or bring ",
+         "a stored ancestor forward with ccx_migrate_par_set().")
+  land <- function(h) {
+    v <- p[[paste0("gamma_enso_land_", h)]]
+    if (!is.null(v)) v
+    else if (!is.null(leg)) leg * CCX_ENSO_SHARE_LEGACY[[h]]
+    else CCX_GAMMA_ENSO_DEFAULT
+  }
+  # NO LEGACY BRANCH FOR THE OCEAN, deliberately. The mechanism did not exist
+  # before the split, so a legacy list carries no opinion about it; giving it a
+  # share of the land coefficient would invent an ocean response the fit never
+  # saw, and with the wrong sign at that.
+  ocn <- function(h) {
+    v <- p[[paste0("gamma_enso_ocn_", h)]]
+    if (!is.null(v)) v else CCX_GAMMA_ENSO_DEFAULT
+  }
+  c(land_NH = land("NH"), land_SH = land("SH"),
+    ocn_NH  = ocn("NH"),  ocn_SH  = ocn("SH"))
+}
+
+#' Copy the four ENSO coefficients from a fitted vector onto a parameter list
+#'
+#' THROUGH THE RESOLVER, so a legacy source migrates by the same contract both
+#' cores use rather than by a second opinion at the call site. This function
+#' exists because the retired one-name assignment was written at a dozen sites
+#' and one name became four -- the shape of `recorded_but_never_restored`.
+ccx_set_enso <- function(p, src) {
+  g <- ccx_gamma_enso(src)
+  # DROP the retired scalar off the TARGET. Writing the four onto a legacy list
+  # without this leaves it carrying both, which ccx_gamma_enso() refuses -- and
+  # ccx_spinup() takes exactly that path on every pre-split parameter list.
+  p$gamma_enso <- NULL
+  p$gamma_enso_land_NH <- unname(g[["land_NH"]])
+  p$gamma_enso_land_SH <- unname(g[["land_SH"]])
+  p$gamma_enso_ocn_NH  <- unname(g[["ocn_NH"]])
+  p$gamma_enso_ocn_SH  <- unname(g[["ocn_SH"]])
+  p
+}
+
 #' Interhemispheric exchange RATE at time t (1/yr)
 #'
 #' ONE implementation, used by the R core and mirrored by the C++ twin, so the
@@ -856,7 +976,7 @@ ccx_default_params <- function() {
     # ratio-scaled extension beyond the record); 0 = the legacy
     # sst_scale * gmst map. Structural switch, not calibrated.
     sst_obs = 1,
-    # ENSO COEFFICIENT: 0, NOT the CCX_PARAM_TABLE init of 0.5, and this is a
+    # ENSO COEFFICIENTS: 0, NOT the CCX_PARAM_TABLE init, and this is a
     # deliberate asymmetry with beta/q10/kz (which do take their table inits).
     # Until 2026-08-13d it was ABSENT here, so ccx_deriv() -- which multiplies it
     # straight into add_flux -- died with "argument is of length zero" on default
@@ -867,7 +987,15 @@ ccx_default_params <- function() {
     # value: it is what every ccx_run_fast() call on default parameters has been
     # using all along. Setting it to the table's 0.5 would silently change every
     # existing default-parameter result.
-    gamma_enso = 0,
+    # ⚠ SPLIT INTO FOUR 2026-09-01 (Marcus's design call; see ccx_gamma_enso()
+    # for the measurement that motivated it). 0 in all four, so this list is
+    # the same model it was: the land pair at 0 reproduces the old scalar at 0,
+    # and the ocean pair at 0 is the mechanism OFF, which is what every result
+    # before today was computed under.
+    gamma_enso_land_NH = 0,
+    gamma_enso_land_SH = 0,
+    gamma_enso_ocn_NH  = 0,
+    gamma_enso_ocn_SH  = 0,
     # VOLCANIC DIFFUSE-LIGHT FERTILISATION (2026-08-29). Fractional NPP
     # enhancement per unit stratospheric AOD. 0 = OFF, and 0 is deliberate:
     # it makes every pre-2026-08-29 result bit-identical and keeps the
@@ -1019,6 +1147,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   # runs, and re-deriving it in two places is how they would drift apart.
   cg <- ccx_conveyor_geom(p, grid)
 
+  # Resolved ONCE, and through the resolver both cores share -- see
+  # ccx_gamma_enso() for the absence contract. Named `.ge` because `ge` would
+  # collide with nothing today and with something eventually.
+  .ge <- ccx_gamma_enso(p)
+
   for (hi in seq_along(HEMIS)) {
     h    <- HEMIS[hi]
     iatm <- aux$idx[[h]]$atm
@@ -1115,7 +1248,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # being taught something the other was not (N_FORCING, the f[15]/f[16]
     # out-of-bounds read, this). The rule the tests now encode: pin EXPLICIT
     # values AND ABSENCE, in both cores.
-    aod_h <- forc[[paste0("aod_", h)]]          # h is "NH"/"SH", as enso_share is
+    aod_h <- forc[[paste0("aod_", h)]]          # h is "NH"/"SH", as aux$idx is
     if (is.null(aod_h) || !is.finite(aod_h)) aod_h <- 0
     gdiff <- if (is.null(p$gamma_diff)) CCX_GAMMA_DIFF_DEFAULT else p$gamma_diff
     npp <- npp0_h * capacity * ccx_fert_factor(chi, p, aux$chi0) *
@@ -1252,9 +1385,12 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # Out of the RESPONSIVE soil pool. The interannual anomaly is drought and
     # fire-driven respiration of recently fixed carbon, not a draw on the
     # millennial passive pool.
-    if (aux$enso_share[[h]] != 0) {
-      add_flux(isf, iatm, p$gamma_enso * forc$enso * aux$enso_share[[h]],
-               lab = "enso")
+    # PER HEMISPHERE since 2026-09-01: the coefficient IS the hemisphere's
+    # own, not a global scalar times a hardcoded 0.5 share (which is what
+    # `aux$enso_share` was, and it is gone).
+    .ge_land <- .ge[[paste0("land_", h)]]
+    if (.ge_land != 0) {
+      add_flux(isf, iatm, .ge_land * forc$enso, lab = "enso")
     }
 
     # ---- air-sea ----------------------------------------------------
@@ -1326,6 +1462,33 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
              alpha13_signed = TRUE)                                  # invasion
     add_flux(iml, iatm, gx * pco2_ml, alpha13 = aux$alpha_as_up,
              alpha13_signed = TRUE)                                  # evasion
+
+    # ---- ENSO: the OCEAN anomaly (2026-09-01) ------------------------
+    # POSITIVE `gamma_enso_ocn_h` x positive index = MORE uptake, which is the
+    # observed sign: GCB's ocean sink correlates +0.535 with Nino3.4, because
+    # El Nino suppresses the equatorial Pacific upwelling of DIC-rich water and
+    # so suppresses outgassing. The model cannot produce that on its own -- its
+    # only ENSO path to the ocean is SST solubility, which gives -0.51 -- and
+    # the conveyor was refuted as the fix. See ccx_gamma_enso().
+    #
+    # TWO EXPLICIT LIMBS, NOT ONE SIGNED FLUX, and that is the whole isotopic
+    # content of the term: La Nina reverses it, and the reverse limb of a
+    # fractionating exchange is a DIFFERENT process with a different alpha.
+    # Reusing the downward one on the way up discriminates that carbon twice --
+    # exactly the 2026-08-25e seasonal-NEP bug, which no conservation gate can
+    # see. add_flux's guard would have caught it; resolving per direction here
+    # means the guard never has to.
+    #
+    # `lab` is deliberately NULL on both, so the trace classifies them as
+    # as_down / as_up and `ocean_net` counts them. This IS an air-sea flux; a
+    # private channel would leave the derived net ocean uptake wrong by exactly
+    # this term. Same call, and the same reason, as the artificial sink below.
+    .ge_ocn <- .ge[[paste0("ocn_", h)]] * forc$enso
+    if (.ge_ocn > 0) {
+      add_flux(iatm, iml, .ge_ocn, alpha13 = aux$alpha_as_down)   # extra uptake
+    } else if (.ge_ocn < 0) {
+      add_flux(iml, iatm, -.ge_ocn, alpha13 = aux$alpha_as_up)    # extra evasion
+    }
 
     # ---- ARTIFICIAL MID-CENTURY OCEAN SINK (2026-08-23c) -------------
     # OFF unless the forcing carries a non-zero `sink_ocean`, which only
@@ -1867,7 +2030,11 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     dic0        = dic0,
     revelle0    = rev0,
     pco2_0      = list(NH = ccx_const("CO2_PI_PPM"), SH = ccx_const("CO2_PI_PPM")),
-    enso_share  = list(NH = 0.5, SH = 0.5),
+    # enso_share RETIRED 2026-09-01: the hemispheric split of the ENSO anomaly
+    # is now carried by the four fitted coefficients themselves. The 0.5/0.5 it
+    # held survives as CCX_ENSO_SHARE_LEGACY, read ONLY by ccx_gamma_enso()'s
+    # legacy branch. Removed rather than left inert -- a field nothing reads is
+    # how a stale opinion outlives the mechanism that used it.
     bomb_share_NH = 0.9,
     nuc_share_NH  = 0.95,
     # Ocean areas, needed by the conveyor's interhemispheric limbs: those are

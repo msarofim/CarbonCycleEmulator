@@ -226,7 +226,7 @@ base <- ccx_default_params()
 for (n in intersect(names(base), names(p0))) base[[n]] <- p0[[n]]
 stopifnot(identical(base$seas_lag_p_NH, p0$seas_lag_p),
           identical(base$seas_lag_p_SH, p0$seas_lag_p))
-base$gamma_enso <- p0$gamma_enso
+base <- ccx_set_enso(base, p0)
 base$pump_mode  <- md$pump_mode
 
 sourced_at_mode <- do.call(rbind, lapply(KB_SIGMAS, function(k) {

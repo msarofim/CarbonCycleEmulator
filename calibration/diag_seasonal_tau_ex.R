@@ -54,7 +54,7 @@ tx_peak <- function(t, v) {            # parabolic refinement, gate 5's estimato
 run_at <- function(amp, phase) {
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode
+  p <- ccx_set_enso(p, pv); p$pump_mode <- md$pump_mode
   # the mode is a 21-parameter file: give both lag halves its legacy scalar
   p$seas_lag_p_NH <- pv$seas_lag_p; p$seas_lag_p_SH <- pv$seas_lag_p
   p$tau_ex_seas_amp <- amp; p$tau_ex_seas_phase <- phase

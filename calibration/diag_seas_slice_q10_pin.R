@@ -128,7 +128,7 @@ vec_of <- function(h) if (is.null(h)) c(NA, NA) else c(mean(h$a), mean(h$b))
 .params_for <- function(pv, mods = list()) {
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode
+  p <- ccx_set_enso(p, pv); p$pump_mode <- md$pump_mode
   for (n in names(mods)) p[[n]] <- mods[[n]]
   p
 }

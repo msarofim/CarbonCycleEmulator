@@ -264,7 +264,7 @@ pm <- if (file.exists(OC_MODE_PATH)) readRDS(OC_MODE_PATH)$par_mode else NULL
 if (is.null(pm)) stop("quarantined mode absent -- this file scores at the mode")
 pmode <- ccx_default_params()
 for (n in intersect(names(pmode), names(pm))) pmode[[n]] <- pm[[n]]
-pmode$gamma_enso <- pm$gamma_enso
+pmode <- ccx_set_enso(pmode, pm)
 pmode$h_ml <- 184                       # the pre-gradient MAP mode's own value
 auxm <- ccx_prepare(pmode); gm <- auxm$grid
 

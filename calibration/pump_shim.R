@@ -181,7 +181,7 @@ dg_spinup <- function(p = ccx_default_params(),
   zero_forc <- function(prod = 0)
     list(e_foss = list(NH = 0, SH = 0), e_luc = list(NH = 0, SH = 0),
          gmst = 0, enso = 0, c14_bomb = 0, c14_nuclear = 0, c14_cosmo = prod)
-  p0 <- p; p0$gamma_enso <- 0; p0$seas_amp_NH <- 0; p0$seas_amp_SH <- 0
+  p0 <- p; p0 <- ccx_set_enso(p0, list(gamma_enso = 0)); p0$seas_amp_NH <- 0; p0$seas_amp_SH <- 0
 
   # DELTA 1: the Newton solve is UNCONDITIONAL, not gated on the conveyor. With
   # the pump off it is a no-op on an already-exact fixed point (measured

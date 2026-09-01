@@ -117,7 +117,7 @@ cat(sprintf("    Refitted excess: %+.4f\n", (p$lp - a$lp) + 11.6698))
 
 hdr("4. b0 AGAINST ITS DERIVED BAR (ruling 2, 2026-08-30)")
 obs <- ccx_prepare_obs(); err <- list(sigma_co2 = 1.5, sigma_d13c = 0.1, sigma_d14c = 5)
-pp <- ccx_default_params(); pp$gamma_enso <- 0.5
+pp <- ccx_default_params(); pp <- ccx_set_enso(pp, list(gamma_enso = 0.5))
 sp <- ccx_spinup(pp)
 Fh <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
 out <- ccx_run_fast(sp, Fh)$out

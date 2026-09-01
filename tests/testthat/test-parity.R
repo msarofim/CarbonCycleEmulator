@@ -15,7 +15,7 @@ skip_if_no_cpp <- function() {
 }
 
 pf <- local({
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   list(p = p)
 })
 

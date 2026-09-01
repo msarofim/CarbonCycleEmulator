@@ -48,7 +48,7 @@ ref <- readRDS(LC_REF); luc <- readRDS(ccx_path(LC_LUC))
 stopifnot(!isTRUE(all.equal(unlist(ref$par_mode), unlist(luc$par_mode))))   # seed-copy trap
 P0 <- ccx_default_params()
 for (n in intersect(names(P0), CCX_PARAM_NAMES)) P0[[n]] <- ref$par_mode[[n]]
-P0$gamma_enso <- ref$par_mode$gamma_enso; P0$pump_mode <- ref$pump_mode
+P0 <- ccx_set_enso(P0, ref$par_mode); P0$pump_mode <- ref$pump_mode
 SD  <- unlist(ref$sd_unc); REP0 <- ref$par_mode$rep_dC
 OBS <- ccx_prepare_obs()
 

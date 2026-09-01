@@ -3,7 +3,7 @@
 # targets, and produces physically sensible free diagnostics.
 # =====================================================================
 
-sp <- local({ p <- ccx_default_params(); p$gamma_enso <- 0; ccx_spinup(p) })
+sp <- local({ p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0)); ccx_spinup(p) })
 
 test_that("the spinup state is genuinely stationary", {
   d <- sp$diagnostics
@@ -26,7 +26,7 @@ test_that("integrating the spinup state forward leaves it unchanged", {
   zero <- list(e_foss = list(NH = 0, SH = 0), e_luc = list(NH = 0, SH = 0),
                gmst = 0, enso = 0, c14_bomb = 0, c14_nuclear = 0,
                c14_cosmo = sp$prod_c14)
-  p <- sp$params; p$gamma_enso <- 0; p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0
+  p <- sp$params; p <- ccx_set_enso(p, list(gamma_enso = 0)); p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0
   y <- sp$y; t <- 1750
   for (m in seq_len(12 * 50)) {
     y <- ccx_step_rk4(y, t, 1 / 12, p, zero, sp$grid, sp$aux); t <- t + 1 / 12
@@ -72,7 +72,7 @@ test_that("isotopes exchange at equilibrium (the gross-flux fix)", {
   zero <- list(e_foss = list(NH = 0, SH = 0), e_luc = list(NH = 0, SH = 0),
                gmst = 0, enso = 0, c14_bomb = 0, c14_nuclear = 0,
                c14_cosmo = sp$prod_c14)
-  p <- sp$params; p$gamma_enso <- 0
+  p <- sp$params; p <- ccx_set_enso(p, list(gamma_enso = 0))
   d <- ccx_deriv(y, 1750, p, zero, sp$grid, sp$aux)
   # the perturbed box must lose 14C, and the atmosphere must gain some
   expect_lt(d[sp$aux$idx$NH$ml, "C14"], 0)

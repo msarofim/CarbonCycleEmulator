@@ -247,7 +247,7 @@ if (file.exists(HR_MODE_PATH)) {
   md <- readRDS(HR_MODE_PATH); pm <- md$par_mode
   p2 <- ccx_default_params()
   for (n in intersect(names(p2), names(pm))) p2[[n]] <- pm[[n]]
-  p2$gamma_enso <- pm$gamma_enso
+  p2 <- ccx_set_enso(p2, pm)
   out$mode <- hr_profile(p2, pm$bomb_total, pm$luc_scale, HR_ERR_MODE,
     "at the pre-gradient MAP mode's OTHER parameters (h_ml overridden)")
 }
@@ -268,7 +268,7 @@ if (!is.null(pm)) {
                 (CCX_PARAM_TABLE$kz$hi - CCX_PARAM_TABLE$kz$lo)))
   p2 <- ccx_default_params()
   for (n in intersect(names(p2), names(pm))) p2[[n]] <- pm[[n]]
-  p2$gamma_enso <- pm$gamma_enso
+  p2 <- ccx_set_enso(p2, pm)
   cat("log-likelihood relative to (h = 75, this row's kz). BEST h per row marked *.\n")
   cat("kz factors run PAST the calibration bracket on purpose: if the answer\n")
   cat("changed only outside it, the bracket would be creating the result.\n\n")
@@ -314,7 +314,7 @@ sep("PART 5. THE TWO TESTS DISAGREE -- WHICH CONSTRAINT IS DRIVING THE FLIP?")
 if (!is.null(pm)) {
   p2 <- ccx_default_params()
   for (n in intersect(names(p2), names(pm))) p2[[n]] <- pm[[n]]
-  p2$gamma_enso <- pm$gamma_enso
+  p2 <- ccx_set_enso(p2, pm)
   corners <- list(
     `mode (kz x1.0, h 184)`      = list(kz = pm$kz * 1.0, h = 184),
     `deeper kz  (x1.4, h 184)`   = list(kz = pm$kz * 1.4, h = 184),

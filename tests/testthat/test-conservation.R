@@ -8,7 +8,7 @@
 # =====================================================================
 
 # A closed configuration: no emissions, no 14C sources, no decay-driven leak
-# for the 12C budget. ENSO is off (gamma_enso absent from defaults).
+# for the 12C budget. ENSO is off (all four coefficients 0 in the defaults).
 closed_forcing <- function() {
   list(e_foss = list(NH = 0, SH = 0), e_luc = list(NH = 0, SH = 0),
        gmst = 0, enso = 0, c14_bomb = 0, c14_nuclear = 0, c14_cosmo = 0)
@@ -36,7 +36,7 @@ test_state <- function(p = ccx_default_params()) {
 
 test_that("total carbon derivative is exactly zero in a closed system", {
   s <- test_state()
-  s$p$gamma_enso <- 0
+  s$p <- ccx_set_enso(s$p, list(gamma_enso = 0))
   d <- ccx_deriv(s$y, 1900, s$p, closed_forcing(), s$grid, s$aux)
   # Relative to the largest individual box tendency, not to zero in absolute terms
   scale <- max(abs(d[, "C"]))
@@ -46,7 +46,7 @@ test_that("total carbon derivative is exactly zero in a closed system", {
 
 test_that("total carbon is conserved over a century of integration", {
   s <- test_state()
-  s$p$gamma_enso <- 0
+  s$p <- ccx_set_enso(s$p, list(gamma_enso = 0))
   y <- s$y
   tot0 <- ccx_total(y)
   t <- 1900
@@ -59,7 +59,7 @@ test_that("total carbon is conserved over a century of integration", {
 })
 
 test_that("conservation is independent of step size (formulation, not accuracy)", {
-  s <- test_state(); s$p$gamma_enso <- 0
+  s <- test_state(); s$p <- ccx_set_enso(s$p, list(gamma_enso = 0))
   tot0 <- ccx_total(s$y)
   errs <- sapply(c(1L, 4L, 16L), function(ss) {
     y <- s$y; t <- 1900
@@ -78,7 +78,7 @@ test_that("14C decays at exactly the right rate with transport switched off", {
   p <- ccx_default_params()
   p$kz <- 0; p$k_w <- 0; p$tau_ex <- 1e12; p$beta <- 0
   p$tau_leaf <- 1e12; p$tau_wood <- 1e12
-  p$tau_soil_fast <- 1e12; p$tau_soil_slow <- 1e12; p$gamma_enso <- 0
+  p$tau_soil_fast <- 1e12; p$tau_soil_slow <- 1e12; p <- ccx_set_enso(p, list(gamma_enso = 0))
   p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0  # BOTH seasonal paths off
   s <- test_state(p)
   y <- s$y; t <- 1900

@@ -311,8 +311,10 @@ cat(sprintf("  %-22s %8s   %s\n", "luc NH share (t)",
             "SOURCED -- OSCAR v3.1 regional E_LUC, time-varying (2026-08-15)"))
 cat(sprintf("  %-22s %8.4f   %s\n", "npp_frac_NH",  p$npp_frac_NH,
             "FITTED, prior UNIFORM[0.4, 0.8] -- NO SOURCE (block 2, block 8)"))
-cat(sprintf("  %-22s %8.4f   %s\n", "enso_share NH", 0.5,
-            "HARDCODED 50/50 in ccx_aux() -- NO SOURCE, no comment"))
+cat(sprintf("  %-22s %8.4f   %s\n", "enso land NH", p$gamma_enso_land_NH,
+            "FITTED since 2026-09-01 -- was a HARDCODED 50/50 share x one scalar"))
+cat(sprintf("  %-22s %8.4f   %s\n", "enso ocn NH", p$gamma_enso_ocn_NH,
+            "FITTED since 2026-09-01 -- the mechanism did not exist before it"))
 cat(sprintf("  %-22s %8.3g   %-12s %s\n", "OCEAN_AREA_NH", ccx_const("OCEAN_AREA_NH"),
             CCX_CONSTANTS$OCEAN_AREA_NH$status, "-- NEEDS a cited geographic source"))
 cat(sprintf("  %-22s %8.3g   %-12s %s\n", "OCEAN_AREA_SH", ccx_const("OCEAN_AREA_SH"),

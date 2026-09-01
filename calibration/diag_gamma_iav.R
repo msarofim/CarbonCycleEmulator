@@ -137,7 +137,7 @@ cat("\nQ3 -- does `gamma_enso` move gamma_IAV MORE? (the absorption test)\n")
 cat(sprintf("  %-14s %12s %12s\n", "gamma_enso", "quad ppm", "quad GtC"))
 ge <- list()
 for (e in GI_ENSO) {
-  p <- p0; p$gamma_enso <- e; r <- gi_run(p)
+  p <- p0; p <- ccx_set_enso(p, list(gamma_enso = e)); r <- gi_run(p)
   a <- gi_gamma(r$year, r$co2, "quad"); ge[[as.character(e)]] <- a
   cat(sprintf("  %-14s %12.3f %12.2f\n",
               sprintf("%.4f%s", e, if (abs(e - pm$gamma_enso) < 1e-3) "*" else ""),

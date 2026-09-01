@@ -130,7 +130,13 @@ test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
   # means -- it reads ccx_seas_lag_p(), the one resolver both cores go through.
   # So a migrated legacy list must encode IDENTICALLY to one whose hemispheres
   # were set to the legacy scalar by hand. Not "close": identical.
-  p <- ccx_mode_params()
+  # ⚠ ccx_mode_params() is a PRE-split list on EVERY split this build carries --
+  # the canonical mode predates the 08-31 lag split AND the 09-01 ENSO one -- so
+  # "an ancestor current in every other respect" has to be constructed, or this
+  # test measures whichever migration happens to be newest instead of the lag.
+  # UPDATED 2026-09-01: it used to migrate straight from ccx_mode_params(), which
+  # made `migrated` exactly the lag pair only while the lag was the ONLY split.
+  p <- ccx_migrate_par_set(ccx_mode_params()); attr(p, "migrated") <- NULL
   p_old <- p[setdiff(names(p), c("seas_lag_p_NH", "seas_lag_p_SH"))]
   p_old$seas_lag_p <- 1.7502
 
@@ -143,10 +149,6 @@ test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
   p_hand$seas_lag_p_NH <- p_hand$seas_lag_p_SH <- 1.7502
   expect_identical(ccx_par_to_unc(mig), ccx_par_to_unc(p_hand))
 
-  # ⚠ ccx_mode_params() is ITSELF a 21-parameter list today -- the canonical
-  # mode predates the split -- so "already current" has to be constructed.
-  expect_setequal(attr(ccx_migrate_par_set(p), "migrated"),
-                  c("seas_lag_p_NH", "seas_lag_p_SH"))
   p_cur <- mig; attr(p_cur, "migrated") <- NULL
   expect_identical(attr(ccx_migrate_par_set(p_cur), "migrated"), character(0))
 })
@@ -154,7 +156,7 @@ test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
 test_that("migration REFUSES a list that carries no lag at all", {
   # Filling from CCX_SEAS_LAG_P_DEFAULT would turn a warm start into an
   # invented coordinate wearing a fitted vector's name.
-  p <- ccx_mode_params()
+  p <- ccx_migrate_par_set(ccx_mode_params()); attr(p, "migrated") <- NULL
   p_none <- p[setdiff(names(p), c("seas_lag_p_NH", "seas_lag_p_SH", "seas_lag_p"))]
   expect_error(ccx_migrate_par_set(p_none), "not a fitted ancestor")
 })

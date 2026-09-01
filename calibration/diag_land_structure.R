@@ -52,7 +52,7 @@ LAND_DIVERGE_X  <- 3                         # veg/veg0 above this = diverged
 cat("\n=== diag_land_structure.R ===\n")
 cat("phi = npp_veg_frac (capacity), ra_ratio = the equilibrating part of GPP\n\n")
 
-base_p <- function() { p <- ccx_default_params(); p$gamma_enso <- 0; p }
+base_p <- function() { p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0)); p }
 run_p  <- function(p) {
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", LAND_YEARS, prod_c14 = sp$prod_c14,

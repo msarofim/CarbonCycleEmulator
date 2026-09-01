@@ -2,6 +2,61 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01h — **THE FOUR-PARAMETER ENSO DESIGN IS IMPLEMENTED: 22 → 25 PARAMETERS**
+
+Marcus's design call of 09-01 (`notes/handoff_2026-09-01_enso_arc.md` §6), built. **Nothing is
+fitted and nothing is adopted** — `CCX_MODE_CANONICAL` is untouched, every new coefficient defaults
+to **0**, and 0 in all four is the incumbent model bit for bit.
+
+`gamma_enso` (one scalar, LAND ONLY, split 50/50 by a hardcoded `aux$enso_share`) →
+**`gamma_enso_land_NH/_SH` + `gamma_enso_ocn_NH/_SH`**.
+
+- **ONE RESOLVER, `ccx_gamma_enso()` (R/model.R), and both cores go through it** — the
+  `ccx_seas_lag_p()` pattern, for the reason that function records: a default carries two contracts,
+  the value and what ABSENCE means, and the 08-30 `gamma_diff` break came from two cores holding
+  different opinions about the second.
+- ✅ **THE BEHAVIOUR-PRESERVING DEFAULT the `gamma_diff` adoption did not have.** A pre-split list
+  carrying only the scalar takes the legacy branch — LAND gets `gamma_enso` × the retired 0.5/0.5
+  share, OCEAN gets **0** — and reproduces the old model **bit for bit** (asserted at
+  `tolerance = 0` on CO₂ and δ¹³C over 1960–1990). The ocean pair gets 0 rather than a share of the
+  land coefficient because **the mechanism did not exist**: a fitted ancestor holds no opinion about
+  it, and inventing one would smuggle in a response of the wrong sign.
+- ⛔ **CARRYING BOTH NAMES IS AN ERROR, NOT A PRECEDENCE RULE.** One name became four at **~110 call
+  sites** (70 in `calibration/`, 37 in `tests/`, the rest in `R/` and `app/`), every one of them
+  `p$gamma_enso <- …` on a list that now carries four explicit zeros. Under a "split wins" rule each
+  would have run with **the ENSO response switched OFF** and reported a number. The guard turned all
+  of them into a loud stop; all were rewritten to `ccx_set_enso(p, src)`, which reads the source
+  through the same contract. [[intersect_is_a_silent_default]], [[recorded_but_never_restored]]
+- **The OCEAN term is TWO EXPLICIT LIMBS, alpha resolved per direction** — invasion carries
+  `alpha_as_down`, the La Niña reversal carries `alpha_as_up`. One signed flux with a single alpha
+  is the 08-25e seasonal-NEP bug exactly, and no conservation gate can see it. Both limbs are
+  UNLABELLED, so the trace classifies them `as_down`/`as_up` and `ocean_net` counts them — the same
+  call, and the same reason, as the artificial mid-century sink.
+- **`aux$enso_share` is GONE** from R and from the C++ `Aux` struct, in the same commit. The 0.5/0.5
+  survives as `CCX_ENSO_SHARE_LEGACY`, read only by the resolver's legacy branch.
+- **Priors: each of the four keeps the original N(0, 2)** — the `seas_lag_p` call, so the split adds
+  degrees of freedom without smuggling in a new belief about any one of them. ⚠ **It is NOT
+  scale-preserving on the SUM**: two independent halves imply N(0, 2√2) on the land total where the
+  scalar had N(0, 2), i.e. the land prior is **wider by √2**. Deliberate, recorded at the table, and
+  the alternative (2/√2 each) is what to revisit if the land pair ever runs to the prior rather than
+  to the data. **This is the one methodological choice in the change and it wants Marcus's
+  ratification.**
+- **`tests/testthat/test-enso-split.R`, 56 assertions**, all passing: the absence contract in both
+  cores, both-at-once refused, bit-identity of the legacy path, R↔C++ parity at four UNEQUAL and
+  SIGNED coefficients, migration identity, and two mutation tests — the land pair must separate by
+  hemisphere at a fixed total, and the ocean pair must move the ocean **in the observed direction**.
+- ⭐ **The isotope check is the load-bearing one.** The ocean term's applied fractionation is
+  asserted equal to `alpha_as_down` (and ≠ 1). That is what makes the four identifiable at all:
+  land is −0.0172 ‰ per GtC and ocean +0.0022 ‰, ~8× weaker and OPPOSITE, so δ¹³C identifies the
+  land pair and CO₂ the ocean pair by difference. With a generic fractionation the design collapses.
+- ⚠ **`calibration/diag_gamma_enso_profile.R` now REFUSES with the reason** rather than dying on
+  `match()` returning `NA`. It profiled a retired scalar; its answer — more amplitude is LOUDER, not
+  righter — is unchanged and is what the split was built on.
+- ⚠ **A 25-PARAMETER REFIT IS OWED, and it now stacks with the 22-parameter one already owed.**
+  Every stored mode is a 22-parameter file in a 25-parameter build: `par_mode` still overlays through
+  the legacy branch, `u_mode` does not decode. Warm-start from `par_mode` via
+  `ccx_migrate_par_set()`. `ccx_load_mode()` says exactly this when it refuses one.
+
 ## 2026-09-01g — **THE ENSO ERRORS ARE COMPENSATING: AN OCEAN-ONLY TERM WOULD MAKE THINGS WORSE**
 
 `calibration/diag_enso_ocean_term_design.R`. Pricing Marcus's proposal — an ENSO term on surface

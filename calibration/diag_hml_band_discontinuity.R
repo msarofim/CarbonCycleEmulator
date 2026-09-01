@@ -160,7 +160,7 @@ hb_eval <- function(u) {
   if (!is.finite(lp)) return(NULL)
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso
+  p <- ccx_set_enso(p, pv)
   sp <- tryCatch(ccx_spinup(p), error = function(e) NULL)
   if (is.null(sp) || !is.finite(sp$prod_c14) || sp$prod_c14 <= 0) return(NULL)
   F <- base_forc
@@ -361,7 +361,7 @@ hb_rows_ungated <- function(h) {
   u <- hb_u_at(h); pv <- ccx_unc_to_par(u)
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso
+  p <- ccx_set_enso(p, pv)
   sp <- tryCatch(ccx_spinup(p), error = function(e) NULL)
   if (is.null(sp)) return(NULL)
   # The forcing is assembled EXACTLY as hb_eval() does it, not approximately.

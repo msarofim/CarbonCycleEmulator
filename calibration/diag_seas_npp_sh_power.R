@@ -126,7 +126,7 @@ ang_mo <- function(v) 12 * ((atan2(v[1], v[2]) / (2 * pi)) %% 1)
 run_at <- function(pv, a, mods = list()) {
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode
+  p <- ccx_set_enso(p, pv); p$pump_mode <- md$pump_mode
   p$seas_npp_amp_SH <- a
   for (n in names(mods)) p[[n]] <- mods[[n]]
   sp <- ccx_spinup(p)
@@ -219,7 +219,7 @@ sep("2. WHICH ROWS PAY")
 streams_at <- function(a) {
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv0[[n]]
-  p$gamma_enso <- pv0$gamma_enso; p$pump_mode <- md$pump_mode; p$seas_npp_amp_SH <- a
+  p <- ccx_set_enso(p, pv0); p$pump_mode <- md$pump_mode; p$seas_npp_amp_SH <- a
   sp <- ccx_spinup(p)
   F <- ccx_build_forcing("historical", NP_YEARS, prod_c14 = 0, bomb_total_kmol = 102)
   F$c14_cosmo <- sp$prod_c14; F$c14_bomb <- F$c14_bomb * (pv0$bomb_total / 102)

@@ -44,7 +44,7 @@ STR_TAU_OBS    <- "~1-2"              # observed stratosphere-troposphere exchan
 cat("\n=== diag_stratosphere.R ===\n")
 cat("Would a stratospheric box help the bomb-14C budget, and with what?\n\n")
 
-p <- ccx_default_params(); p$gamma_enso <- 0
+p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0))
 sp <- ccx_spinup(p)
 F_b <- ccx_build_forcing("historical", STR_YEARS, prod_c14 = sp$prod_c14,
                         bomb_total_kmol = STR_BOMB_TOTAL)

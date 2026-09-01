@@ -265,7 +265,7 @@ if ("read" %in% PRA_STAGE) {
   p_full <- local({
     q <- ccx_default_params()
     for (n in intersect(names(q), CCX_PARAM_NAMES)) q[[n]] <- p_new[[n]]
-    q$gamma_enso <- p_new$gamma_enso
+    q <- ccx_set_enso(q, p_new)
     q
   })
   og <- local({

@@ -76,7 +76,7 @@ test_that("erf_co2 really is a function of concentration alone", {
 test_that("a future run warms, instead of holding 2024 flat", {
   skip_if_no_cpp(); skip_if_no_climate()
   # The regression test for the actual bug.
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   r <- ccx_run_coupled(sp, "ssp585", c(1750, 2100))
   cl <- r$climate
@@ -95,7 +95,7 @@ test_that("a future run warms, instead of holding 2024 flat", {
 
 test_that("the splice leaves the observational record untouched", {
   skip_if_no_cpp(); skip_if_no_climate()
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   r <- ccx_run_coupled(sp, "historical", c(1750, 2024))
   g <- as.data.frame(readRDS(ccx_path("data", "forcing_gmst.rds")))
@@ -110,7 +110,7 @@ test_that("the carbon-climate feedback is actually engaged", {
   # one pass and many passes would agree. Measured difference on SSP5-8.5 at
   # 2100 is ~111 ppm and ~0.3 C -- large enough that an accidental decoupling
   # cannot hide.
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   on  <- ccx_run_coupled(sp, "ssp585", c(1750, 2100))$climate
   off <- ccx_run_coupled(sp, "ssp585", c(1750, 2100), max_iter = 1L)$climate
@@ -126,7 +126,7 @@ test_that("caller-supplied emissions override the scenario, conserving totals", 
   em <- data.frame(year = yrs,
                    fossil_GtC = ifelse(yrs < 2000, 0, 5),
                    luc_GtC = 0)
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   F <- suppressWarnings(
     ccx_build_forcing("ssp245", c(1750, 2100), prod_c14 = sp$prod_c14,

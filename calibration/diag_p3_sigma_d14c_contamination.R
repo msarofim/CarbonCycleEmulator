@@ -108,7 +108,7 @@ profile_rep <- function(u0, sigma_override, label, sink_mode, sink_rate) {
   pv <- ccx_unc_to_par(u0); names(u0) <- pn
   p  <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso
+  p <- ccx_set_enso(p, pv)
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14,
                           bomb_total_kmol = pv$bomb_total, luc_scale = pv$luc_scale,

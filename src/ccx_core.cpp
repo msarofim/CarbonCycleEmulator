@@ -75,7 +75,10 @@ struct Aux {
   double alpha_photo, alpha_as_down, alpha_as_up;
   // d13c_foss MOVED to the forcing (2026-08-12): the fossil source d13C is
   // time-varying, so it is no longer an invariant.
-  double enso_share[2];
+  // enso_share RETIRED 2026-09-01 -- the hemispheric split of the ENSO
+  // anomaly is carried by the four fitted coefficients themselves. Removed
+  // from BOTH sides in the same commit: a field the R side stops sending and
+  // this one still reads unpacks as garbage, not as an error.
   double dic0[2], revelle0[2], pco2_0[2];   // preindustrial mixed-layer reference
   double bomb_share_NH, nuc_share_NH;
   double R13, R14STD, lambda, alk;
@@ -134,7 +137,15 @@ struct Par {
   // the same six land parameters in both, deliberately, so neither side can
   // carry a stale vector.
   double f_luc_wood;
-  double sst_scale, gamma_enso, gamma_diff;
+  double sst_scale, gamma_diff;
+  // ENSO, FOUR COEFFICIENTS SINCE 2026-09-01 (Marcus's design). GtC/yr per unit
+  // Nino3.4 index; [0] = NH, [1] = SH. The land pair drives soil_fast -> atm,
+  // the ocean pair an air-sea anomaly carrying the air-sea fractionation of its
+  // own direction. ccx_cpp_par() guarantees all four are present, resolving
+  // absence through ccx_gamma_enso() -- the SAME function the R core uses. Do
+  // not add a fallback here: a second opinion about absence is the defect that
+  // cost 0.647 GtC/yr on 2026-08-30. See R/model.R for the measurement.
+  double gamma_enso_land[2], gamma_enso_ocn[2];
   double seas_amp[2], seas_phase[2];
   // Seasonal-cycle DRIVERS (2026-08-18): insolation-driven NPP + Q10 on a
   // climatological seasonal land temperature. seas_drivers = 0 is the escape
@@ -421,8 +432,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // R/model.R, which carries the full note.
     add_flux(iatm, ilef, seas, (seas > 0.0) ? A.alpha_photo : 1.0);
 
-    if (A.enso_share[hi] != 0.0)
-      add_flux(isf, iatm, P.gamma_enso * enso * A.enso_share[hi], 1.0);
+    // ENSO land anomaly, PER HEMISPHERE since 2026-09-01 -- no global scalar
+    // times a hardcoded share. Twin of the block in R/model.R.
+    if (P.gamma_enso_land[hi] != 0.0)
+      add_flux(isf, iatm, P.gamma_enso_land[hi] * enso, 1.0);
 
     // air-sea, gross both ways
     // Seasonal SST under seas_drivers, hemisphere-signed -- twin of the block
@@ -463,6 +476,17 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // state the caller is about to reject. See R/model.R for the contract.
     add_flux(iatm, iml, gx * chi,     A.alpha_as_down, true);
     add_flux(iml, iatm, gx * pco2_ml, A.alpha_as_up,   true);
+
+    // ENSO ocean anomaly -- twin of the block in R/model.R, which carries the
+    // rationale (positive coefficient x positive index = MORE uptake, the
+    // observed sign; the model's only ENSO path to the ocean is SST solubility
+    // and it has the wrong sign; the conveyor was refuted as the fix). TWO
+    // EXPLICIT LIMBS, resolving alpha PER DIRECTION: La Nina reverses the term,
+    // and the reverse limb of a fractionating exchange is a different process.
+    // Unlabelled on both sides, so the flux trace counts it in ocean_net.
+    const double ge_ocn = P.gamma_enso_ocn[hi] * enso;
+    if (ge_ocn > 0.0)      add_flux(iatm, iml,  ge_ocn, A.alpha_as_down);
+    else if (ge_ocn < 0.0) add_flux(iml, iatm, -ge_ocn, A.alpha_as_up);
 
     // the artificial sink rides the SAME downward fractionation as the invasion
     // limb above and carries 14C unfractionated at the atmosphere's own ratio
@@ -627,7 +651,6 @@ static Aux unpack_aux(const List& a) {
   v = a["sst"];        A.sst[0] = v[0];        A.sst[1] = v[1];
   v = a["dz"];         for (int i = 0; i <= NL; ++i) A.dz[i] = v[i];
   v = a["dz_mid"];     for (int i = 0; i < NL; ++i)  A.dz_mid[i] = v[i];
-  v = a["enso_share"]; A.enso_share[0] = v[0]; A.enso_share[1] = v[1];
   v = a["dic0"];       A.dic0[0] = v[0];       A.dic0[1] = v[1];
   v = a["revelle0"];   A.revelle0[0] = v[0];   A.revelle0[1] = v[1];
   v = a["pco2_0"];     A.pco2_0[0] = v[0];     A.pco2_0[1] = v[1];
@@ -674,7 +697,11 @@ static Par unpack_par(const List& p) {
   P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];
   P.conv_reverse = p["conv_reverse"];
   P.pump_mode = p["pump_mode"];
-  P.sst_scale = p["sst_scale"]; P.gamma_enso = p["gamma_enso"];
+  P.sst_scale = p["sst_scale"];
+  P.gamma_enso_land[0] = p["gamma_enso_land_NH"];
+  P.gamma_enso_land[1] = p["gamma_enso_land_SH"];
+  P.gamma_enso_ocn[0]  = p["gamma_enso_ocn_NH"];
+  P.gamma_enso_ocn[1]  = p["gamma_enso_ocn_SH"];
   P.gamma_diff = p["gamma_diff"];
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];

@@ -167,7 +167,7 @@ gap_decompose <- function(file) {
 
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso
+  p <- ccx_set_enso(p, pv)
   p$pump_mode  <- md$pump_mode
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", GAP_YEARS, prod_c14 = sp$prod_c14,

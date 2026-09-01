@@ -11,10 +11,11 @@
 # =====================================================================
 
 test_p <- function() {
-  # gamma_enso is NOT in ccx_default_params() and ccx_deriv requires it
+  # the ENSO coefficients ARE in ccx_default_params(), at 0; set them non-zero
+  # so the `enso` channel this file checks is actually exercised
   # explicitly (handoff 2026-08-13c sec.7). Set non-zero here so the ENSO
   # channel is genuinely exercised rather than silently absent.
-  p <- ccx_default_params(); p$gamma_enso <- 0.5; p
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5)); p
 }
 
 test_that("recorded fluxes reproduce dy[, 'C'] exactly", {
@@ -96,7 +97,7 @@ test_that("turnover time from the flux trace matches an independent label pulse"
   # `ccx_hold_climate()` does not suppress this: the cycle is generated from the
   # `sst_seas_amp_*` PARAMETERS, not read from a forcing column.
   mk <- function(seas_off) {
-    p <- ccx_default_params(); p$gamma_enso <- 0
+    p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0))
     p$sst_seas_amp_NH <- 0; p$sst_seas_amp_SH <- 0   # OFF IN BOTH ARMS -- see above
     if (seas_off) { p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0 }  # BOTH paths
     s <- ccx_spinup(p)

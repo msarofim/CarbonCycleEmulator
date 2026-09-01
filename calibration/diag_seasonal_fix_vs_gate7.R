@@ -34,7 +34,7 @@ md <- readRDS(ccx_mode_file()); ccx_adopt_mode_band(md); pv0 <- ccx_mode_params(
 run_of <- function(pv, mods = list()) {
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p$gamma_enso <- pv$gamma_enso; p$pump_mode <- md$pump_mode
+  p <- ccx_set_enso(p, pv); p$pump_mode <- md$pump_mode
   for (n in names(mods)) p[[n]] <- mods[[n]]
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", G7_YEARS, prod_c14 = 0, bomb_total_kmol = 102)

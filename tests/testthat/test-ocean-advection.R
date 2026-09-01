@@ -37,7 +37,7 @@ W_TEST <- 4          # m/yr, the classical upwelling-diffusion value
 YRS    <- c(1900, 1960)
 
 run_w <- function(w, years = YRS, grad = NULL) {
-  p <- ccx_default_params(); p$gamma_enso <- 0.5; p$w_up <- w
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5)); p$w_up <- w
   if (!is.null(grad)) p$pump_grad <- grad
   s <- ccx_spinup(p)
   F <- ccx_build_forcing("historical", years, prod_c14 = s$prod_c14)
@@ -48,7 +48,7 @@ run_w <- function(w, years = YRS, grad = NULL) {
 # direction, per hemisphere. Both limbs get the SAME speed, so no hemisphere is
 # ever swapped -- see the symmetry tests below, where that matters.
 run_w_out <- function(w, years = YRS, grad = NULL) {
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   p$w_out_NH <- w; p$w_out_SH <- w
   if (!is.null(grad)) p$pump_grad <- grad
   s <- ccx_spinup(p)
@@ -123,7 +123,7 @@ test_that("overturning is conservative and leaves the spinup an exact fixed poin
                c14_cosmo = 0, d13c_foss = -28)
   y <- s$y
   y[s$aux$idx$NH$ml, "C"] <- y[s$aux$idx$NH$ml, "C"] * 1.3   # perturb, off the fixed point
-  d <- ccx_deriv(y, 1800, within(p, gamma_enso <- 0), zero, s$grid, s$aux)
+  d <- ccx_deriv(y, 1800, ccx_set_enso(p, list(gamma_enso = 0)), zero, s$grid, s$aux)
   expect_lt(abs(sum(d[, "C"])), 1e-9)
   expect_lt(abs(sum(d[, "C13"])), 1e-11)
 })
@@ -133,7 +133,7 @@ test_that("R and C++ agree with overturning on", {
   # test-parity.R runs the pure-diffusion column; the advective limbs are new
   # code in both files and need their own gate. Same scale-relative tolerance
   # discipline as test-parity.R.
-  p <- ccx_default_params(); p$w_up <- W_TEST; p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p$w_up <- W_TEST; p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   s <- ccx_spinup(p)
   F <- ccx_build_forcing("historical", c(1960, 1961), prod_c14 = s$prod_c14)
   frc <- list(e_foss = list(NH = F$e_foss_NH[1], SH = F$e_foss_SH[1]),

@@ -175,7 +175,7 @@ ccx_spinup <- function(p = ccx_default_params(),
     list(e_foss = list(NH = 0, SH = 0), e_luc = list(NH = 0, SH = 0),
          gmst = 0, enso = 0, c14_bomb = 0, c14_nuclear = 0, c14_cosmo = prod)
   }
-  p0 <- p; p0$gamma_enso <- 0
+  p0 <- p; p0 <- ccx_set_enso(p0, list(gamma_enso = 0))
   # seasonal term integrates to zero over a year; evaluate the annual-mean state.
   # BOTH seasonal paths must be off here: the sine via its amplitudes, and the
   # 2026-08-18 driver path via its switch -- n(t)-1 and the Q10 modulation are

@@ -202,7 +202,7 @@ pm <- if (file.exists(PGP_MODE_PATH)) readRDS(PGP_MODE_PATH)$par_mode else NULL
 if (is.null(pm)) stop("quarantined mode absent -- this file scores at the mode")
 pmode <- ccx_default_params()
 for (n in intersect(names(pmode), names(pm))) pmode[[n]] <- pm[[n]]
-pmode$gamma_enso <- pm$gamma_enso
+pmode <- ccx_set_enso(pmode, pm)
 CARB_PIN <- ccx_default_params()$pump_carb_frac
 cat(sprintf("MODE (pre-gradient, quarantined)   kz = %g m2/yr   h_ml %g -> %g m forced\n",
             pmode$kz, pm$h_ml, PGP_H_SCORE))

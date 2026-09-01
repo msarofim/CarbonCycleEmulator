@@ -58,7 +58,7 @@ CONFIGS <- list(A = list(sink = N_INTERIOR, desc = 0L),
                 C = list(sink = 8L,         desc = 0L))
 conv_p <- function(q, cfg) {
   p <- ccx_default_params()
-  p$gamma_enso <- 0; p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0
+  p <- ccx_set_enso(p, list(gamma_enso = 0)); p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0
   p$q_conv <- q; p$conv_sink <- cfg$sink; p$conv_descent <- cfg$desc
   p$conv_reverse <- 0L; p
 }
@@ -148,7 +148,7 @@ hdr("PART 4 -- test-likelihood.R: the fitted level offset b0 vs gamma_diff")
 obs <- ccx_prepare_obs()
 err <- list(sigma_co2 = 1.5, sigma_d13c = 0.1, sigma_d14c = 5)
 for (gd in GAMMAS) {
-  p <- ccx_default_params(); p$gamma_enso <- 0.5; p$gamma_diff <- gd
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5)); p$gamma_diff <- gd
   sp <- ccx_spinup(p)
   Fh <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
   out <- ccx_run_fast(sp, Fh)$out

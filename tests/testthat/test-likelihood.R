@@ -76,7 +76,7 @@ test_that("years below the month threshold are dropped, not fitted", {
 
 test_that("the fast model-side reduction equals the general estimator", {
   skip_if_no_cpp()
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", c(1950, 2000), prod_c14 = sp$prod_c14)
   out <- ccx_run_fast(sp, F)$out
@@ -94,7 +94,7 @@ test_that("the fast model-side reduction equals the general estimator", {
 
 lik_fixture <- function() {
   obs <- ccx_prepare_obs()
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14)
   list(obs = obs, out = ccx_run_fast(sp, F)$out,
@@ -351,7 +351,7 @@ test_that("the d13C seasonal cycle is scored, and through the NEP harmonic", {
     ccx_loglik(out, obs, list(sigma_d14c = 5, grad_off_co2 = 0, grad_off_d13c = 0),
                by_stream = TRUE)
   }
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   l0 <- run_ll(p)
   expect_true(all(c("d13c_seasonal_MLO", "d13c_seasonal_SPO") %in% names(l0)))
   # seas_T_amp_NH, not seas_amp_NH: the default model runs the DRIVER seasonal
@@ -409,7 +409,7 @@ test_that("the seasonal statistic constrains amplitude and phase", {
   obs <- ccx_prepare_obs()
   err <- list(sigma_co2 = 1.5, sigma_d13c = 0.1, sigma_d14c = 5)
   seas_ll <- function(amp, phase) {
-    p <- ccx_default_params(); p$gamma_enso <- 0.5
+    p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
     # seas_drivers = 0: this test instruments the seasonal STATISTIC through
     # the sine's amp/phase knobs, which are inert on the driver path. The sine
     # is the cleanest instrument for the statistic; the DRIVER path's own
@@ -501,7 +501,16 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # lag was the one seasonal TIMING parameter still global while every
   # seasonal AMPLITUDE was already a per-hemisphere pair, and that asymmetry
   # was measured at -838 conditional with the NH paying 94 %.
-  expect_length(CCX_PARAM_NAMES, 22L)
+  # 25 SINCE 2026-09-01: `gamma_enso` split into gamma_enso_land_NH/_SH +
+  # gamma_enso_ocn_NH/_SH on Marcus's design call (handoff 2026-09-01, the ENSO
+  # arc). The scalar moved LAND ONLY, split 50/50 by a hardcoded share, and the
+  # model's OCEAN ENSO response was measured ANTI-correlated with the observed
+  # one -- r = -0.51 [-0.68, -0.28] against +0.535 [+0.29, +0.72], powered and
+  # detrend-invariant. The two errors compensate 87 % in CO2 growth, which is
+  # why a fit that outvotes partition 40:1 never forced them.
+  expect_length(CCX_PARAM_NAMES, 25L)
+  expect_true(all(CCX_ENSO_PARAMS %in% CCX_PARAM_NAMES))
+  expect_false("gamma_enso" %in% CCX_PARAM_NAMES)
   expect_true(all(c("seas_T_amp_NH", "seas_T_amp_SH",
                     "seas_lag_p_NH", "seas_lag_p_SH",
                     "sst_seas_amp_NH", "sst_seas_amp_SH") %in% CCX_PARAM_NAMES))
@@ -611,7 +620,7 @@ test_that("the excess-14C term refuses to score off a wrong baseline", {
   # anyway would compare a 150-year-old excess to a 1750 one and quietly reward
   # whatever parameters happened to shrink the difference.
   obs <- ccx_prepare_obs()
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", c(1900, 2024), prod_c14 = sp$prod_c14)
   parts <- ccx_loglik(ccx_run_fast(sp, F)$out, obs,
@@ -627,7 +636,7 @@ test_that("the excess-14C term bites: it is monotone in bomb_total", {
   # source would be decoration.
   obs <- ccx_prepare_obs()
   err <- list(sigma_co2 = 1.5, sigma_d13c = 0.1, sigma_d14c = 5)
-  p <- ccx_default_params(); p$gamma_enso <- 0.5
+  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   sp <- ccx_spinup(p)
   term <- function(bt) {
     F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14,

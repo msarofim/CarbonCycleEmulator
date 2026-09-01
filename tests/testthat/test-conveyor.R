@@ -55,7 +55,7 @@ CONFIGS  <- list(A = list(sink = N_INTERIOR, desc = 0L),
 
 conv_p <- function(q = 0, cfg = CONFIGS$C, reverse = 0L) {
   p <- ccx_default_params()
-  p$gamma_enso <- 0; p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0
+  p <- ccx_set_enso(p, list(gamma_enso = 0)); p$seas_amp_NH <- 0; p$seas_amp_SH <- 0; p$seas_drivers <- 0
   p$q_conv <- q; p$conv_sink <- cfg$sink
   p$conv_descent <- cfg$desc; p$conv_reverse <- reverse
   p
@@ -210,7 +210,7 @@ test_that("without a conveyor the two hemispheres' deep oceans have the same age
 test_that("R and C++ agree with the conveyor on, in every config", {
   skip_if_no_cpp()
   for (nm in names(CONFIGS)) {
-    p <- conv_p(Q_TEST, CONFIGS[[nm]]); p$gamma_enso <- 0.5
+    p <- conv_p(Q_TEST, CONFIGS[[nm]]); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
     s <- ccx_spinup(p)
     F <- ccx_build_forcing("historical", c(1960, 1961), prod_c14 = s$prod_c14)
     frc <- list(e_foss = list(NH = F$e_foss_NH[1], SH = F$e_foss_SH[1]),

@@ -431,7 +431,7 @@ if (is.null(pm)) {
 } else {
   pmode <- ccx_default_params()
   for (n in intersect(names(pmode), names(pm))) pmode[[n]] <- pm[[n]]
-  pmode$gamma_enso <- pm$gamma_enso
+  pmode <- ccx_set_enso(pmode, pm)
   prof <- list()
   for (arm in list(list(id = "pump OFF", mode = NA),
                    list(id = "pump D  ", mode = "D"))) {
