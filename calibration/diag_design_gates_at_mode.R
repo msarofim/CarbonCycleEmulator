@@ -9,243 +9,42 @@
 # own History paragraph in DESIGN.md records that exact failure happening twice
 # before -- "it is not a description, it is a measurement" -- and the 2026-08-22
 # expert panel ranked it #7 on the merged defect list. Gate 12 is measured by
-# `calibration/diag_joos_irf.R [defaults|N|D]`, which grew the same mode path
-# today; this file covers the other three.
+# `calibration/diag_joos_irf.R [defaults|N|D]`, which grew the same mode path;
+# this file covers the other three.
 #
-# THE TWO FORCING PARAMETERS ARE CARRIED, for the reason diag_app_params.R
-# priced at 5.79 ppm of 2024 CO2: `bomb_total` and `luc_scale` are fitted, have
-# no slot in ccx_default_params(), and are applied by rescaling forcing columns.
-# Dropping them would run fitted parameters against a forcing the fit never saw
-# -- and gate 5 is a BOMB-CURVE gate, i.e. it is almost entirely a readout of
-# `bomb_total`, so on that gate the drop would not be a perturbation, it would
-# be the whole measurement.
+# ⭐ THE MEASUREMENT ITSELF MOVED OUT, 2026-08-31f. Gates 4/5/7, their targets,
+# their estimators and every constant behind them now live in
+# `calibration/lib_design_gates.R`, because `diag_gates_in_the_new_basin.R`
+# needs the SAME three gates and a second copy of a gate is the caption-sync bug
+# class in disguise. This file is now the REPORT: which arms, in what order,
+# with which commentary. The numbers are the library's.
 #
-# LIKE-FOR-LIKE ON BOTH SIDES. Gate 5's DESIGN entry states the Hua Zone-1
-# numbers and then says in bold not to gate the model on them, because the model
-# carries ONE area-weighted hemispheric box. Every observed quantity below is
-# therefore recomputed from obs_d14c_zonal.rds under ccx_zone_weights() with the
-# SAME estimator applied to the model series -- including the post-peak
-# e-folding, which DESIGN quotes only in its Zone-1 form (15.4 yr) and which has
-# no published hemispheric counterpart to quote.
+# ⛔ AND IT WAS BROKEN FROM 2026-08-31 UNTIL THAT MOVE. `seas_lag_p` split into
+# `_NH`/`_SH` on 08-31 (`11ff844`), so every stored mode file became a
+# 21-parameter file in a 22-parameter build and this script's
+# `stopifnot(identical(md$param_names, CCX_PARAM_NAMES))` aborted it before the
+# first gate -- the same one true thing the 6 failing tests say. The library
+# MIGRATES such a file through `ccx_migrate_par_set()` (the model's own absence
+# contract) and every arm below prints whether it was migrated. A migrated
+# vector is a legitimate thing to measure a gate AT; it is not a mode of this
+# build's space, and the report says which is which.
 #
 # Usage:  Rscript calibration/diag_design_gates_at_mode.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
+source(ccx_path("calibration", "lib_design_gates.R"))
 
-# ---- labels derive from named constants (project rule) --------------
+# ---- which arms this REPORT runs (the measurement is the library's) --
 # ARMS REPOINTED 2026-08-27. "N"/"D" were the PRE-FIX pump arms; the 2026-08-25f
 # seasonal-NEP isotope fix changed the objective and quarantined them, so this
-# file now runs the post-fix arms ccx_mode_file() knows -- the canonical free
-# mode `from90` and the pinned comparison `pin90`. "defaults" is kept because
-# every DESIGN sec.6 status line quotes a defaults value alongside the mode.
+# file runs the post-fix arms ccx_mode_file() knows -- the canonical free mode
+# `from90` and the pinned comparison `pin90`. "defaults" is kept because every
+# DESIGN sec.6 status line quotes a defaults value alongside the mode.
 DG_ARMS      <- c("defaults", names(CCX_MODE_FILES))
 DG_SHIPPED   <- CCX_MODE_CANONICAL   # the arm app/global.R resolves, and the
                                      # one the tau_ex profile is taken at
-DG_YEARS     <- c(1750, 2024)
-DG_BOMB_REF  <- 102                  # = BOMB_REF in ccx_make_logpost()
-
-# GATE 4 -- GCB 2025 airborne fraction (DESIGN sec.6 gate 4)
-DG_AF_WIN     <- c(1959, 2024)
-DG_AF_OBS     <- 0.431
-DG_AF_DECADES <- c(1960, 1970, 1980, 1990, 2000, 2010, 2020)
-DG_AF_OBS_DEC <- c(0.35, 0.43, 0.47, 0.38, 0.42, 0.45, 0.50)
-
-# GATE 5 -- Hua et al. 2022, HEMISPHERIC AGGREGATE (DESIGN's own like-for-like
-# benchmark, not the Zone 1 numbers it warns against)
-DG_BOMB_NH_PEAK <- 853.2; DG_BOMB_NH_YR <- 1963.708
-DG_BOMB_SH_PEAK <- 659.4; DG_BOMB_SH_YR <- 1965.042
-DG_BOMB_LAG     <- 1.33
-DG_EFOLD_FLOOR  <- 20                # permil, the > 20 permil window DESIGN names
-
-# GATE 7 -- GCB 2025 decade means and stated 1 sigma.
-#
-# THE WINDOW ENDS AT 2023, NOT 2024, AND THAT IS A DECISION (Marcus, 2026-08-27).
-# The historical run ends at 2024-12 (t[n] = 2024.958), so the 2025 year boundary
-# this gate differences the stock against sits HALF A MONTH past the last model
-# state. That half month lands entirely on 2024, and it lands there at the moment
-# in the seasonal cycle when the land stock's slope is at its most NEGATIVE (NH
-# December respiration) -- so how the end is extrapolated is worth 0.65 GtC/yr on
-# the 2024 annual increment alone, against sub-0.001 in every other year. That
-# was enough to put this file 0.13 sigma apart from diag_fit_at_mode.R's
-# independent reconstruction, which is a gap in the gate's own reproducibility
-# rather than in the model. Dropping the year removes it at the cost of one year
-# of a ten-year mean, and moves the verdict by 0.02 sigma.
-DG_SINK_WIN  <- c(2015, 2023)
-# THE TARGETS ARE RECOMPUTED ON DG_SINK_WIN, NOT QUOTED. GCB's published decade
-# means are 2.36 (land) / 3.22 (ocean) over 2015-2024 -- verified: recomputing
-# them from the obs series over that window returns 2.363 / 3.221. But they are
-# means over a WINDOW, so quoting them against a different window would compare
-# nine model years with ten observed ones. Over 2015-2023 the observed means are
-# 2.410 / 3.202. Both sides move together; the like-for-like rule decides it.
-DG_GCB_LAND_SD  <- LIK_GCB_LAND_SD
-DG_GCB_OCEAN_SD <- LIK_GCB_OCEAN_SD
-DG_GCB_PUB_WIN  <- c(2015, 2024)     # the window GCB's published means are over
-DG_GCB_PUB_LAND <- 2.36; DG_GCB_PUB_OCEAN <- 3.22
-
-GtC_PER_PPM <- ccx_const("GtC_PER_PPM")
-
-# ---- resolve one arm to (params, luc_scale, bomb_total) -------------
-dg_vector <- function(arm) {
-  p <- ccx_default_params()
-  if (identical(arm, "defaults"))
-    return(list(p = p, luc_scale = 1, bomb_total = DG_BOMB_REF, src = "uncalibrated defaults"))
-  md <- readRDS(ccx_mode_file(arm))
-  stopifnot(identical(md$param_names, CCX_PARAM_NAMES))     # the 21-name guard
-  pm <- md$par_mode
-  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
-  p$gamma_enso <- pm$gamma_enso
-  p$pump_mode  <- md$pump_mode
-  list(p = p, luc_scale = pm$luc_scale, bomb_total = pm$bomb_total,
-       sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
-       grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c,
-       src = sprintf("mode arm %s (logpost %.2f)", arm, md$logpost))
-}
-
-dg_run <- function(v) {
-  sp <- ccx_spinup(v$p)
-  F  <- ccx_build_forcing("historical", DG_YEARS, prod_c14 = sp$prod_c14,
-                          bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
-  list(sp = sp, F = F, out = ccx_run_fast(sp, F)$out)
-}
-
-# ---- GATE 4: airborne fraction --------------------------------------
-# AF = atmospheric growth / total emissions, both from THIS run: the model's own
-# E_LUC carries luc_scale, so a fit that shrinks land use by 11 % shrinks the
-# DENOMINATOR too. Scoring the model's growth against GCB's unscaled emissions
-# would credit it with an AF it never produced. The scaled denominator is the
-# self-consistent quantity; the unscaled one is printed beside it because
-# luc_scale is a fitted nuisance and the reader is owed both.
-dg_gate4 <- function(r, v) {
-  o <- r$out
-  yrs <- sort(unique(floor(o$t + 1e-9))); bnd <- c(yrs, max(yrs) + 1L)
-  atm <- stats::approx(o$t, (o$co2_NH + o$co2_SH) / 2 * GtC_PER_PPM,
-                       xout = bnd, rule = 2)$y
-  grow <- diff(atm)
-  el <- ccx_forcing_eluc_annual(r$F)
-  # No ccx_forcing_efoss_annual() exists; this is the eluc helper's own recipe
-  # (FUN = mean over the calendar year, because the columns are GtC/yr RATES,
-  # not monthly masses -- summing them would give twelve times the emission).
-  ef <- stats::aggregate(list(efoss = r$F$e_foss_NH + r$F$e_foss_SH),
-                         by = list(year = r$F$year), FUN = mean)
-  luc  <- el$eluc[match(yrs, el$year)]
-  foss <- ef$efoss[match(yrs, ef$year)]
-  af <- function(k) sum(grow[k]) / sum((foss + luc)[k])
-  k <- yrs >= DG_AF_WIN[1] & yrs <= DG_AF_WIN[2]
-  dec <- vapply(DG_AF_DECADES, function(d) {
-    kk <- yrs >= d & yrs <= min(d + 9, DG_AF_WIN[2]) & k; af(kk)
-  }, numeric(1))
-  list(all = af(k), dec = dec,
-       all_unscaled = sum(grow[k]) / sum((foss + luc / v$luc_scale)[k]))
-}
-
-# ---- GATE 5: bomb curve, hemispheric aggregate ----------------------
-# One estimator, applied to model and observations alike: parabolic refinement
-# of the peak on the monthly series (the raw argmax is quantised to the sampling
-# interval, which for the observations is 1/12 yr -- big enough to move the
-# NH->SH lag by a tenth of its value), then a log-linear fit of the post-peak
-# decline over Delta14C > DG_EFOLD_FLOOR.
-dg_peak <- function(t, v) {
-  i <- which.max(v)
-  if (i <= 1 || i >= length(v)) return(c(t = t[i], v = v[i]))
-  y1 <- v[i - 1]; y2 <- v[i]; y3 <- v[i + 1]
-  d  <- 0.5 * (y1 - y3) / (y1 - 2 * y2 + y3)          # in samples
-  c(t = t[i] + d * (t[i + 1] - t[i]), v = y2 - 0.25 * (y1 - y3) * d)
-}
-dg_efold <- function(t, v, tpk) {
-  k <- t > tpk & v > DG_EFOLD_FLOOR
-  if (sum(k) < 5) return(NA_real_)
-  -1 / stats::coef(stats::lm(log(v[k]) ~ t[k]))[[2]]
-}
-dg_obs_bomb <- local({
-  z <- as.data.frame(readRDS(ccx_path("data", "obs_d14c_zonal.rds")))
-  w <- ccx_zone_weights()
-  hemi <- function(h) {
-    ww <- w[[h]]
-    zz <- z[z$zone %in% names(ww), ]
-    tt <- sort(unique(zz$decimal_date))
-    m <- vapply(names(ww), function(nm) {
-      s <- zz[zz$zone == nm, ]
-      stats::approx(s$decimal_date, s$d14c, xout = tt, rule = 2)$y
-    }, numeric(length(tt)))
-    list(t = tt, v = as.vector(m %*% ww[colnames(m)]))
-  }
-  lapply(c(NH = "NH", SH = "SH"), hemi)
-})
-dg_gate5 <- function(r) {
-  o <- r$out
-  pk <- lapply(c(NH = "NH", SH = "SH"), function(h) {
-    v <- o[[paste0("d14c_", h)]]
-    p <- dg_peak(o$t, v)
-    c(p, efold = dg_efold(o$t, v, p[["t"]]))
-  })
-  list(pk = pk, lag = pk$SH[["t"]] - pk$NH[["t"]])
-}
-
-# ---- GATE 7: sinks (same construction as diag_app_params.R) ---------
-# END HANDLING MATCHES THE OBJECTIVE, 2026-08-27. This used approx(rule = 2),
-# which holds the stock FLAT across the half month the year boundaries fall
-# outside the run at each end. R/likelihood.R:1422-1428 rejected exactly that for
-# the objective's own gcb_* streams and extrapolates LINEARLY instead, with the
-# reason stated there: flat "would silently under-count the first and last year's
-# flux ... it would land entirely on the two end years rather than spread out,
-# which is the shape of a bug". This file was the one out of line with that
-# convention, so the two reconstructions disagreed by 0.65 GtC/yr in the run's
-# last year. Aligning it is what makes them agree at ANY window boundary --
-# dropping 2024 only hides today's instance.
-dg_gate7 <- function(r) {
-  o <- r$out
-  yrs <- sort(unique(floor(o$t + 1e-9))); bnd <- c(yrs, max(yrs) + 1L)
-  tt <- o$t; n <- length(tt)
-  stock <- function(v) {
-    y  <- stats::approx(tt, v, xout = bnd)$y
-    lo <- bnd < tt[1]; hi <- bnd > tt[n]
-    if (any(lo)) y[lo] <- v[1] + (bnd[lo] - tt[1]) * (v[2] - v[1]) / (tt[2] - tt[1])
-    if (any(hi)) y[hi] <- v[n] + (bnd[hi] - tt[n]) * (v[n] - v[n - 1]) / (tt[n] - tt[n - 1])
-    diff(y)
-  }
-  el <- ccx_forcing_eluc_annual(r$F)
-  k <- yrs >= DG_SINK_WIN[1] & yrs <= DG_SINK_WIN[2]
-  list(ocean = mean(stock(o$ocean_C)[k]),
-       land  = mean((stock(o$land_C) + el$eluc[match(yrs, el$year)])[k]))
-}
-
-# ---- the gate-7 TARGETS, recomputed on DG_SINK_WIN from the obs series -------
-dg_gcb_target <- function(win) {
-  g <- as.data.frame(ccx_prepare_obs()$gcb)
-  k <- g$year >= win[1] & g$year <= win[2]
-  list(land = mean(g$land_sink[k]), ocean = mean(g$ocean_sink[k]), n = sum(k))
-}
-
-# ---- PROVENANCE GATE: is this arm file on TODAY'S objective? --------
-# THE HANDOFF'S OWN STRUCTURAL RECOMMENDATION (2026-08-22 sec.5): "a provenance
-# stamp on every saved fit". An arm file stores the per-stream logL it was
-# fitted at; recomputing those streams at the SAME par_mode under today's code
-# says, per stream, exactly which parts of the objective have moved since. It
-# costs one model run per arm, which this file has already paid for.
-#
-# It is not optional bookkeeping here. Presenting two arms side by side in the
-# gate tables below is a like-for-like claim, and the mode files were NOT
-# refitted together: refit_20260820.log and refit_20260821_cont.log both read
-# "REFIT, 1 ARM(S) [N]". So arm D was last touched before the 2026-08-20g
-# CCX_SST_SEAS_LAG correction, which moves the MODEL and therefore the
-# likelihood -- and a reader comparing D's columns to N's would be comparing
-# two objectives, not two pump modes.
-#
-# The LIKELIHOOD is recomputed, not the posterior: the h_ml refit bound [85,120]
-# renormalises the prior and is not recorded in a way ccx_default_params() can
-# reconstruct (memory ccx_hml_band_provenance), so a logpost comparison would
-# indict the product for a property of the producer. par_mode is band-safe.
-dg_streams <- function(r, v) {
-  o <- r$out
-  pm <- v$p
-  eluc <- ccx_forcing_eluc_annual(r$F)
-  err <- list(sigma_d14c = v$sigma_d14c, rep_dC = v$rep_dC,
-              grad_off_co2 = v$grad_off_co2, grad_off_d13c = v$grad_off_d13c)
-  ccx_loglik(o, ccx_prepare_obs(), err, luc = eluc,
-             deep = r$sp$diagnostics$d14c_bottom_box,
-             ocean_grad = ccx_ocean_grad_scored(o, r$sp), by_stream = TRUE)
-}
+DG_TAUEX_GRID <- c(0.6, 0.8, 1.4, 2.0, 3.0)      # the mode's own value is inserted
 
 # ---- run -------------------------------------------------------------
 V <- lapply(DG_ARMS, dg_vector); names(V) <- DG_ARMS
@@ -253,7 +52,11 @@ R <- lapply(V, dg_run)
 
 cat("\n=== PROVENANCE: stored per-stream logL vs RECOMPUTED at the same par_mode ===\n")
 for (a in setdiff(DG_ARMS, "defaults")) {
-  md <- readRDS(ccx_mode_file(a))
+  md <- V[[a]]$md                                  # the library already read it
+  if (length(V[[a]]$migrated))
+    cat(sprintf("  arm %s: MIGRATED %d -> %d parameters, filled %s -- the gates below\n         are measured at a MIGRATED vector, not at a mode of this build.\n",
+                a, length(md$param_names), length(CCX_PARAM_NAMES),
+                paste(V[[a]]$migrated, collapse = ", ")))
   now <- unlist(dg_streams(R[[a]], V[[a]]))
   was <- unlist(md$streams)
   k <- intersect(names(was), names(now))
@@ -303,8 +106,7 @@ for (a in DG_ARMS) cat(sprintf("   %s %.3f", a, stats::sd(G4[[a]]$dec)))
 cat("\n")
 
 cat("\n=== GATE 5: BOMB CURVE, HEMISPHERIC AGGREGATE (Hua et al. 2022) ===\n")
-ob <- lapply(dg_obs_bomb, function(x) { p <- dg_peak(x$t, x$v)
-  c(p, efold = dg_efold(x$t, x$v, p[["t"]])) })
+ob <- dg_obs_gate5()          # the library's estimator, on the observations
 cat(sprintf("%-9s %10s %10s %10s %10s %8s %9s\n", "arm",
             "NH peak", "NH yr", "SH peak", "SH yr", "lag yr", "NH efold"))
 cat(sprintf("%-9s %10.1f %10.3f %10.1f %10.3f %8.2f %9.1f   DESIGN table\n",
@@ -362,7 +164,6 @@ cat("  2026-08-14: land +2.28 sigma (3.50), ocean -1.52 sigma (2.61).\n")
 # absorbing 85 % of exactly this kind of frozen-profile cost for q10. The
 # ORDERING and the location of the gradient optimum are what this establishes;
 # the magnitudes are ceilings.
-DG_TAUEX_GRID <- c(0.6, 0.8, 1.4, 2.0, 3.0)      # the mode's own value is inserted
 
 dg_tauex_row <- function(te, v) {
   p <- v$p; p$tau_ex <- te

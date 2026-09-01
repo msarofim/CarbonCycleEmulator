@@ -2,6 +2,58 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-31f — **THE GATES, RE-PRICED IN THE NEW BASIN — AND THE HARNESS THAT MEASURES THEM WAS BROKEN**
+
+`calibration/diag_gates_in_the_new_basin.R` (~10 s) + `calibration/lib_design_gates.R`. Adopts nothing.
+
+08-31e §8.6 left two open rulings carrying the same warning — *"worth re-pricing IN THE NEW BASIN
+before ruling"*. This does that. It also had to repair the thing that measures gates.
+
+- ⛔ **`diag_design_gates_at_mode.R` HAD NOT RUN SINCE 08-31.** Its
+  `stopifnot(identical(md$param_names, CCX_PARAM_NAMES))` aborted before the first gate the moment
+  `seas_lag_p` split — the same one true thing the 6 failing tests say. **A gate that cannot run
+  reports nothing**, which is worse than one that runs and says its input was migrated. Both it and
+  `diag_joos_irf.R` now MIGRATE a fitted ancestor through `ccx_migrate_par_set()` (the model's own
+  absence contract, which errors rather than hand-filling) and PRINT that they did.
+- ⛔ **`diag_joos_irf.R` took an unrecognised arm as a request for `defaults`.** A typo — or a
+  perfectly good PATH, legal to `ccx_mode_file()` since 08-27 — ran the uncalibrated defaults and
+  reported gate 12 as if that were what was asked. Absence now ASSERTS; paths are legal.
+  Mutation-tested: `nonsense_arm` stops.
+- **ONE KERNEL, TWO CALLERS.** Gates 4/5/7, their targets, windows and estimators moved to
+  `lib_design_gates.R` rather than being written a second time. A second copy of a gate is the
+  caption-sync bug class: the day one copy's window moves, two files report one gate name at two
+  measurements and nothing says so.
+
+**THE RE-PRICING (incumbent 08-30 → new basin 08-31e polished, matched under the SHIPPED table):**
+
+| gate | incumbent | new basin | direction |
+|---|---|---|---|
+| **4** airborne fraction (GCB 0.431) | 0.418 (err 0.013) | **0.428 (err 0.003)** | ✅ better |
+| 4 decadal sd (obs 0.051) | 0.028 | **0.024** | ⚠ SMOOTHER — worse on the spread half |
+| **5** NH→SH bomb lag (obs 1.34 yr) | 0.97 (−0.37) | **0.86 (−0.48)** | ⛔ worse |
+| **7** land σ | +2.37 | **+1.87** | ✅ better by 0.50 σ, still FAILS |
+| **7** ocean σ | −0.82 | **−0.45** | ✅ better, passes |
+| **12a** integrated IRF, TH-20 vs Joos floor | −0.09 % | **−3.33 %** | ⛔ worse, still BELOW |
+| **12b** tail ratio (band 0.593–0.979) | 0.7063 | 0.7077 | — unchanged, passes both |
+| prior-z flags (\|z\| > 3) | 3 | **2** | ✅ |
+
+- ⭐ **THE +52.0 IS LIKELIHOOD-DRIVEN: loglik +37.82, prior +14.18.** That is the
+  `hml_shallow_is_prior_credit` test, and this basin passes it where the 08-28 option-5 refit failed
+  it (+4.060 = prior +7.397 / loglik **−1.199**). The prior term is not zero and is not hidden.
+- **Biggest stream payers:** `d13c_level_SPO` +8.04, `co2_seasonal_SPO` +7.59, `gcb_land_sink`
+  +7.03, `co2_seasonal_MLO` +6.70, `d14c_NH` +5.47. **Biggest payer AGAINST: `co2_gradient` −9.70.**
+- ⛔ **GATE 12a DOES NOT CLOSE IN THIS BASIN EITHER — and moves the wrong way.** A 52-log-unit move
+  to a different basin buys nothing on the pulse response. That is the strongest evidence yet for
+  the standing reading that 12a is an ocean-CAPACITY defect, not a rate or a fitting one.
+- **RULING #2 re-priced:** gate 7's land axis improved 0.50 σ ON ITS OWN, and `d14c_deep_ocean`
+  barely moved (−4.89 → −4.53). The trade buys less and is needed less.
+- **RULING #3 re-priced:** `tau_ex` 1.147 → **0.828**, so gate 5's gap GREW and the seasonal-`tau_ex`
+  mechanism's best cell now covers **56 %** of it, against 72 % in the incumbent. ⚠ The numerator
+  (+0.268 yr) was measured in the OLD basin and is NOT re-measured here.
+
+⚠ **NOTHING IS ADOPTED. `CCX_MODE_CANONICAL` is unchanged.** No `R/` file was touched, so the suite
+stands where 08-31e left it (1275 / 6 FAIL / 2 skip) and was not re-run.
+
 ## 2026-08-31e — **THE PROBE'S MODE IS FEASIBLE UNDER THE SHIPPED BRACKET, AND IT IS A SEPARATE BASIN**
 
 `calibration/diag_probe_basin_vs_incumbent.R` (~40 s). Adopts nothing.

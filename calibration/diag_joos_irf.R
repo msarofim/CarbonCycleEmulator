@@ -141,8 +141,21 @@ JOOS_MARKS     <- c(20, 50, 100, 300)
 # because gate 12's DESIGN status line is quoted at defaults as well as at a mode.
 JOOS_ARM_DEFAULT <- "defaults"
 JOOS_ARM_NAMES   <- c("defaults", names(CCX_MODE_FILES))
-JOOS_ARM <- (function(a) if (length(a) && a[1] %in% JOOS_ARM_NAMES) a[1]
-             else JOOS_ARM_DEFAULT)(commandArgs(TRUE))
+# ⛔ AN UNRECOGNISED ARGUMENT IS AN ERROR, NOT A DEFAULT (2026-08-31f). This
+# read `if (a[1] %in% JOOS_ARM_NAMES) a[1] else "defaults"`, so a typo -- or a
+# perfectly good PATH to a mode file, which `ccx_mode_file()` has accepted since
+# 08-27 -- ran the UNCALIBRATED defaults and reported gate 12 as if that were
+# what was asked for. `JOOS_SRC` printed the truth, one line, 180 lines above
+# the verdict. That is the silent-default class ([[intersect_is_a_silent_default]]):
+# absence must ASSERT. A path is now legal, and anything else stops.
+JOOS_ARM <- local({
+  a <- commandArgs(TRUE)
+  if (!length(a) || !nzchar(a[1])) return(JOOS_ARM_DEFAULT)
+  if (a[1] %in% JOOS_ARM_NAMES || file.exists(a[1])) return(a[1])
+  stop("unknown arm '", a[1], "': expected a path to a mode file, or one of ",
+       paste(sprintf("'%s'", JOOS_ARM_NAMES), collapse = ", "),
+       ". (It used to fall back to '", JOOS_ARM_DEFAULT, "' silently.)")
+})
 
 p0 <- ccx_default_params()
 JOOS_LUC_SCALE  <- 1
@@ -151,15 +164,25 @@ JOOS_SRC <- "uncalibrated defaults"
 if (JOOS_ARM != "defaults") {
   .arm_file <- ccx_mode_file(JOOS_ARM)
   .md <- readRDS(.arm_file)
-  stopifnot(identical(.md$param_names, CCX_PARAM_NAMES))   # the 21-name guard
-  .pm <- .md$par_mode
+  # MIGRATE A FITTED ANCESTOR, AND SAY SO. This was
+  # `stopifnot(identical(.md$param_names, CCX_PARAM_NAMES))`, which aborted gate
+  # 12 outright from the 08-31 `seas_lag_p` split onward -- every stored mode
+  # became a 21-parameter file in a 22-parameter build. `ccx_migrate_par_set()`
+  # reads the model's own absence contract and ERRORS on any name it cannot
+  # supply; it never hand-fills. A migrated vector is a legitimate thing to
+  # measure gate 12 at, and JOOS_SRC below names it as migrated.
+  .pm <- ccx_migrate_par_set(.md$par_mode)
+  .mig <- attr(.pm, "migrated")
   for (n in intersect(names(p0), CCX_PARAM_NAMES)) p0[[n]] <- .pm[[n]]
   p0$gamma_enso <- .pm$gamma_enso
   p0$pump_mode  <- .md$pump_mode
   JOOS_LUC_SCALE  <- .pm$luc_scale
   JOOS_BOMB_TOTAL <- .pm$bomb_total
-  JOOS_SRC <- sprintf("posterior mode, arm %s (%s, logpost %.2f)",
-                      JOOS_ARM, basename(dirname(.arm_file)), .md$logpost)
+  JOOS_SRC <- sprintf("posterior mode, arm %s (%s, logpost %.2f)%s",
+                      JOOS_ARM, basename(dirname(.arm_file)), .md$logpost,
+                      if (length(.mig)) sprintf(" -- MIGRATED %d -> %d parameters, filled %s",
+                                                length(.md$param_names), length(CCX_PARAM_NAMES),
+                                                paste(.mig, collapse = ", ")) else "")
 }
 
 #' ccx_build_forcing() with THIS RUN'S fitted forcing parameters applied
