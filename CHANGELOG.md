@@ -2,7 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
-## 2026-09-01b — **THE MODEL GETS THE 2023/24 EL NIÑO OCEAN RESPONSE BACKWARDS, IN BOTH BASINS**
+## 2026-09-01c — **RETRACTED: THE EL NIÑO OCEAN "SIGN ERROR" IS 0.6 SIGMA, NOT A FINDING**
+
+Marcus, same day: *"Don't over-read a single year: every ENSO is going to have somewhat different
+impacts on land and ocean carbon, our best will only ever capture the average response (modulated by
+intensity)."* He is right and the arithmetic says so.
+
+- **model − obs on the ocean delta = 0.60 σ** of GCB's own stated 2-year bar. Not a detection. I
+  issued a `*** CONTRADICTS ***` verdict without ever computing the bar.
+- **And the bar is ambiguous, which is the deeper point.** GCB's stated 0.40 is systematic and
+  largely cancels in a difference; the series' own year-to-year sd is **0.11**, but that is a
+  smoothed model-ensemble mean. The same delta is **0.6 σ against one bar and 2.4 sd against the
+  other** — the definition of a question one event cannot settle.
+- ⛔ **"Both basins ⇒ structural" was not evidence.** Both are fits of ONE structure with ONE
+  `gamma_enso` and share an ENSO response by construction.
+- ⛔ **And it was model-vs-MODEL.** GCB's ocean sink is a product ensemble; Ke et al.'s +0.38 comes
+  from ML emulators of ocean biogeochemical models, not measured air-sea flux.
+
+The diagnostic keeps its year-by-year table and now reports the delta **with its bar and no verdict**.
+⭐ **What survives is a fact about the GATE, not the event**: gate 7 scores a 2015–2023 window MEAN
+and is blind to a terminal-year divergence by construction.
+
+**The standing rule this establishes:** a one-parameter ENSO response can only capture the AVERAGE
+response modulated by intensity, so it must be tested as a composite/regression over ALL events,
+never on one.
+
+## 2026-09-01b — **[SUPERSEDED BY 09-01c] the 2023/24 El Niño sink comparison**
 
 `calibration/diag_elnino_2023_sink_response.R` (~10 s). Adopts nothing.
 

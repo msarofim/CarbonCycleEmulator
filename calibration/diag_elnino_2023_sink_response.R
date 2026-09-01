@@ -98,16 +98,45 @@ for (nm in names(M)) {
   cat(sprintf("  %-12s %+12.2f %+12.2f %11.0f %%\n", nm, d(m$land, m$yrs),
               d(m$ocean, m$yrs), 100 * d(m$land, m$yrs) / obs_land))
 }
-# THE BOUND IS A SIGN, NOT A MAGNITUDE -- which is the claim the paper actually
-# licenses here, and the only one that survives the window mismatch.
-cat("\n  VERDICT, stated as the SIGN because that is what is like-for-like:\n")
+# ⛔ NO SIGN VERDICT. THE FIRST CUT OF THIS FILE ISSUED ONE -- "*** CONTRADICTS ***"
+# -- AND IT WAS NOT SUPPORTABLE (retracted 2026-09-01, Marcus). Two reasons, both
+# arithmetic that should have preceded the claim ([[curvature_needs_an_error_bar]]:
+# a difference needs a bar before it needs an explanation):
+#
+#   1. THE DIFFERENCE IS NOT A DETECTION. model - obs on the ocean delta is
+#      0.60 sigma of GCB's OWN stated 2-year bar (sqrt(2) x LIK_GCB_OCEAN_SD).
+#      Reported below rather than dressed as a verdict.
+#   2. AND THE BAR ITSELF IS AMBIGUOUS, which is the deeper reason one event
+#      cannot settle this. GCB's stated 0.40 is dominated by SYSTEMATIC product
+#      uncertainty that largely CANCELS in a difference, so sqrt(2) x 0.40
+#      over-states it; but the series' own year-to-year sd of 0.11 is the spread
+#      of a smoothed model-ensemble mean and UNDER-states it. The same delta is
+#      0.6 sigma against one and 2.4 sd against the other.
+#
+# ⚠ AND THE COMPARISON IS MODEL-vs-MODEL, NOT MODEL-vs-OBSERVATION. GCB's ocean
+# sink is a model/data-product ensemble, and Ke et al.'s +0.38 comes from ML
+# emulators of ocean biogeochemical models -- not from measured air-sea flux.
+#
+# ⚠ NOR DOES AGREEMENT BETWEEN THE TWO BASINS MAKE IT STRUCTURAL: both are fits
+# of ONE structure carrying ONE `gamma_enso`, so they share an ENSO response by
+# construction. Two fits of one model are not two lines of evidence.
+#
+# ⇒ WHAT THIS FILE IS FOR, NOW: displaying the year-by-year sinks that gate 7's
+# window mean averages away. Whether the ocean response is right is a question
+# about the AVERAGE response across MANY events scaled by intensity (Marcus,
+# 2026-09-01), and needs the composite/regression over the whole record -- N = 65
+# years, not N = 1 event. That test is NOT in this file.
+cat("\n  THE OCEAN DELTA, WITH ITS BAR -- reported, NOT ruled:\n")
 for (nm in names(M)) {
   mo <- d(M[[nm]]$ocean, M[[nm]]$yrs)
-  cat(sprintf("    %-12s ocean response %s the observed sign (%+.2f vs %+.2f)%s\n", nm,
-              if (sign(mo) == sign(obs_ocean)) "MATCHES" else "*** CONTRADICTS ***",
-              mo, obs_ocean,
-              if (sign(mo) != sign(obs_ocean)) "  <- the finding" else ""))
+  cat(sprintf("    %-12s model %+.2f vs obs %+.2f, difference %+.2f = %.2f sigma of GCB's\n                 stated 2-yr bar (%.2f) -- NOT a detection\n",
+              nm, mo, obs_ocean, mo - obs_ocean,
+              abs(mo - obs_ocean) / (sqrt(2) * LIK_GCB_OCEAN_SD),
+              sqrt(2) * LIK_GCB_OCEAN_SD))
 }
+cat("    ⚠ ONE EVENT CANNOT SETTLE THE SIGN. Every ENSO differs in its land/ocean\n")
+cat("      impact; the most a one-parameter ENSO response can capture is the\n")
+cat("      AVERAGE, modulated by intensity. Run the composite over all events.\n")
 cat(sprintf("\n  %s reports the ocean sink STRENGTHENING by %.2f GtC/yr while the land\n  sink weakens by %.2f, with CO2 growth %.2f +/- %.2f ppm/yr (Jul-Jul).\n",
             EN_SRC, EN_OCEAN_GAIN, EN_LAND_WEAKEN, EN_GROWTH, EN_GROWTH_SD))
 cat("  ⚠ ORIENTATION ONLY -- Jul-Jul window, different land decomposition. The\n")
