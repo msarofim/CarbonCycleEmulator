@@ -40,4 +40,7 @@ Rscript --vanilla -e '
               as.numeric(difftime(Sys.time(), t1, units = "secs")) / 20))'
 
 echo
-echo "NEXT: sbatch --array=0-2 calibration/torch/multistart.sbatch   # the gate batch"
+echo "NEXT: the PREFLIGHT batch -- ~2 min/task, exits 0 without optimising:"
+echo "  CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 \\"
+echo "    calibration/torch/multistart.sbatch"
+echo "  (0-5 are the fixed starts, 25 and 45 exercise the dispersed-draw path)"
