@@ -261,6 +261,20 @@ if (file.exists(MS_CKPT)) {
   ck <- readRDS(MS_CKPT)
   if (!identical(ck$id, MS_ID))
     stop("checkpoint at ", MS_CKPT, " is for id ", ck$id, ", not ", MS_ID)
+  # ⛔ AND FOR THIS PARAMETER SET. See the note at the saveRDS below. Older
+  # checkpoints carry no `param_names`; those are refused too rather than
+  # trusted, because "written before the field existed" and "written under a
+  # different set" are indistinguishable from here and only one of them is safe.
+  if (is.null(ck$param_names))
+    stop("checkpoint at ", MS_CKPT, " records no parameter set, so it cannot be ",
+         "shown to have been written under this build's ", length(CCX_PARAM_NAMES),
+         ". Delete it and restart this id, or point CCX_MS_OUTDIR at a fresh ",
+         "directory -- a `u` vector means nothing without the set it was encoded under.")
+  if (!identical(ck$param_names, CCX_PARAM_NAMES))
+    stop("checkpoint at ", MS_CKPT, " was written on a ", length(ck$param_names),
+         "-parameter build; this build fits ", length(CCX_PARAM_NAMES),
+         ". Resuming it would decode a `u` of the wrong length. Use a fresh ",
+         "CCX_MS_OUTDIR for a new parameter set; do not mix them in one directory.")
   u <- ck$u; best <- ck$best; trace <- ck$trace; cyc0 <- ck$cycle + 1L
   MS_RESUMED <- TRUE
   cat(sprintf("RESUMED from checkpoint at cycle %d, log-post %.4f\n", ck$cycle, -best))
@@ -509,8 +523,17 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
   # CHECKPOINT EVERY CYCLE. A wall-clock kill must leave the best-so-far on disk
   # and a requeue must be able to continue it -- that is what makes a 4 h
   # partition usable for a job whose length is not known in advance.
+  # ⭐ `param_names` IS RECORDED SO THE RESUME CAN REFUSE A STALE CHECKPOINT
+  # (2026-09-01j). A checkpoint is a `u` vector, and a `u` vector is only
+  # meaningful under the parameter set it was written for -- this project moved
+  # that set TWICE in three days (seas_lag_p 21->22 on 08-31, ENSO 22->25 on
+  # 09-01). Resuming a 22-parameter checkpoint into a 25-parameter build dies
+  # inside ccx_make_logpost() as "names attribute [25] must be the same length
+  # as the vector [22]", three frames below the cause and naming none of it.
+  # Recorded AND READ, at the resume below [[recorded_but_never_restored]].
   saveRDS(list(id = MS_ID, u = u, best = best, cycle = cyc, trace = trace,
-               n_eval = n_eval, seed = MS_SEED + MS_ID), MS_CKPT)
+               n_eval = n_eval, seed = MS_SEED + MS_ID,
+               param_names = CCX_PARAM_NAMES), MS_CKPT)
   # ⛔ A CYCLE THAT RAN NO RESTART IS NOT A CONVERGED CYCLE. It gained 0.0000
   # because nothing was tried, and `0 < MS_CYCLE_TOL` is true for exactly that
   # reason -- so the budget guard firing before the first restart used to print

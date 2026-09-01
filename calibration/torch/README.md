@@ -1,5 +1,38 @@
 # Torch bundle — the DISPERSED MULTI-START
 
+> ## ⚠ RE-CUT FOR 25 PARAMETERS, 2026-09-01j
+>
+> The ENSO split (22 → 25) landed after this bundle was first staged. **`port_targets.csv` has been
+> regenerated** at commit `53ef03d`, `n_par = 25`; the previous CSV (`n_par = 22`, commit `3346ded`)
+> would have been **refused** by the port gate with "The target is stale", killing every task in
+> about two seconds — which is the gate working.
+>
+> **Nothing in the driver needed changing.** `run_dispersed_multistart.R` already brings both
+> reference points forward through `ccx_migrate_par_set()`, and the dispersion scale is recomputed
+> from those points at every run.
+>
+> ⭐ **The port targets moved by EXACTLY the prior-split constant, and by nothing else.** The
+> reference logposts went `+0.8125 → −3.9643` (incumbent) and `+0.7364 → −4.0379` (new basin);
+> the analytic shift from replacing one N(0, 2) prior with four is **−4.7768** and **−4.7743**, and
+> the residuals are **3e−7**, which is the precision of the `gamma_enso` values as printed. **The
+> likelihood at both reference points is untouched** — a stronger statement of the split's
+> behaviour-preserving default than the trajectory bit-identity test, because it covers the whole
+> objective.
+>
+> **The dispersion scale moved 1.0493 → 0.9592 for a BOOKKEEPING reason, not a physical one.** The
+> two known basins differ by 0.01 in the two land coordinates and by **exactly 0** in the two ocean
+> ones — neither file has an ocean term — so four near-identical coordinates dilute the
+> per-coordinate RMS by exactly √(21/25) = 0.9165. Over the 21 shared coordinates the separation is
+> **1.0466**, essentially what it always was.
+>
+> ⚠ **Both reference points are MIGRATED 21-parameter vectors, so NEITHER IS A MODE of this space** —
+> there is a measured uphill direction at each (the ocean ENSO pair is worth **+1.98** at the new
+> basin after re-optimising a carbon slice, `diag_enso_objective_leverage.R`). That does not affect
+> the survey: reference points are start points and port-gate anchors, not claims about optima. It
+> does mean **the survey and a serial 25-parameter polish answer different questions and can run in
+> parallel.**
+
+
 **Status: RUNNABLE, NOT YET RUN, and READY TO LAUNCH.** Everything below has been
 smoke-tested on the Mac; nothing has touched Torch. **Claude cannot submit** — Torch needs the NYU
 VPN, the gateway password, Duo, and a Microsoft device-code at `login.torch`. The steps are Marcus's.
@@ -26,7 +59,7 @@ is untouched, and the survey writes `start_*.rds` files no other code reads.
 
 | choice | value | where it came from |
 |---|---|---|
-| dispersion **sd** | **1.0493** in u-space | **MEASURED**: the per-coordinate RMS distance between the two KNOWN basins, recomputed from their own mode files at every run. That is the separation a survey must resolve to be worth running. `CCX_MS_SPREAD` overrides. |
+| dispersion **sd** | **0.9592** in u-space (was 1.0493 at 22 parameters) | **MEASURED**: the per-coordinate RMS distance between the two KNOWN basins, recomputed from their own mode files at every run. That is the separation a survey must resolve to be worth running. `CCX_MS_SPREAD` overrides. |
 | dispersion **centre** | the COLD hand-set init | Neither known basin, so the survey is not centred on an answer. |
 | **budget per start** | 3 restarts × 6000 maxit × 6 cycles, **180 min** wall | `cpu_short` caps at 240 min; the task's own budget stops it at 180, so **"OUT OF TIME" is a clean exit 0 with a checkpoint, never a SLURM kill**. A restart would have to overrun its measured projection by **>3×** to reach the cap; the worst contention ever measured on this model was 1.61×. |
 | **N starts** | 40 (`--array=3-42`) | Arbitrary, and the only one of the four with no measurement behind it. Raise it if fairshare allows. |
