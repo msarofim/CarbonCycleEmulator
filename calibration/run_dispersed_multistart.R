@@ -317,6 +317,12 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
                 MS_ID, cyc))
     out_of_time <- TRUE
   }
+# ⛔ A CYCLE WHOSE POLISH WAS SKIPPED IS NOT A COMPLETED CYCLE, so its gain is
+# not the quantity ARM_CYCLE_TOL was set against -- the BFGS half is exactly the
+# half that gained 9.07 in the probe run from an NM-stalled point. Declaring
+# CONVERGED on the NM-only gain would report the two states at once, which is
+# what the first end-to-end run did: "CONVERGED" and "ran out of wall time" on
+# the same task. `out_of_time` therefore vetoes convergence outright.
   cyc_gain <- cyc_start - best
   cat(sprintf("[%03d] === cycle %d total gain %.4f (log-post %.4f, %d evals, %.1f min) ===\n",
               MS_ID, cyc, cyc_gain, -best, n_eval, elapsed_min()))
@@ -331,7 +337,9 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
   # "WALL BUDGET REACHED -- NOT converged" and then "CONVERGED" three lines
   # later, on a task with 0 evals. A null that is structurally guaranteed reports
   # the same string as one that looked and found nothing ([[no_power_null]]).
-  if (cyc_restarts > 0L && cyc_gain < MS_CYCLE_TOL) { converged <- TRUE; break }
+  if (!out_of_time && cyc_restarts > 0L && cyc_gain < MS_CYCLE_TOL) {
+    converged <- TRUE; break
+  }
   if (out_of_time) break
 }
 if (out_of_time)

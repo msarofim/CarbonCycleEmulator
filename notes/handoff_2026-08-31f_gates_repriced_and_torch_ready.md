@@ -98,8 +98,18 @@ a SLURM array instead of a queue. ⚠ **Claude cannot submit** (VPN + gateway + 
   objective drift and would have eaten most of a 1.0-log-unit budget before the port was considered.
 - **The wall guard PROJECTS and SHORTENS.** `optim()` cannot be interrupted once entered, so a
   clock-only check commits a task to a whole further restart and lands past the 4 h cap.
-- ⛔ **Two bugs the smoke found, both "a structurally guaranteed null":** a task whose budget could
-  not fit ONE restart reported **CONVERGED**, and printed an eval rate over **zero evals**.
+- ⛔ **FOUR bugs the smoke found, all of them REPORTING bugs.** A task whose budget could not fit ONE
+  restart reported **CONVERGED** and printed an eval rate over **zero evals**; a task whose BFGS
+  polish was skipped for budget reported **`CONVERGED` and `OUT OF TIME` at once** (the polish is the
+  half that gained 9.07 in the probe run, so a cycle without it is not a completed cycle —
+  `out_of_time` now VETOES convergence, and the collector ERRORS on both flags, mutation-tested
+  against the pre-fix files); and the collector's own consistency gate printed all 22 parameter names
+  above the report title, because at top level in an `Rscript` the value of a call is auto-printed.
+- **End-to-end, 5 starts on a contended laptop:** port gates passed on all three references (rel
+  6e-16 to 2e-14), id 2 re-found **−1496.0128 exactly**, id 1 gained **+15.31 in 802 evals** — a
+  fresh confirmation the incumbent is not converged — and a dispersed draw climbed −450,536 → −2,196
+  in the same budget. ⚠ Run on SHORT budgets, so no start reached a real basin; what is verified is
+  the PIPELINE and the GATES, not a survey result.
 - ⚠ **A dispersed start is a LONG climb** — at sd 1.05 a draw scores ~−3×10⁵ against the cold init's
   −1.9×10⁴. Every task checkpoints every cycle, so **re-submitting the same array RESUMES**.
 

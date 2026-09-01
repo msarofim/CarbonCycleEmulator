@@ -43,7 +43,9 @@ R <- lapply(fs, readRDS)
   if (length(v) > 1)
     stop("the starts under ", CO_DIR, " disagree on ", what, ": ",
          paste(v, collapse = "  /  "), ". They are not one survey.")
-  v
+  # invisible: at TOP LEVEL in an Rscript the value of a call is auto-printed,
+  # so this gate used to dump all 22 parameter names above the report's title.
+  invisible(v)
 }
 .chk("param_names", "the parameter set")
 .chk("pump_mode",   "the arm")
@@ -81,8 +83,15 @@ keep <- which(!oot & did_work)
 if (any(!did_work))
   cat(sprintf("  ⚠ %d start(s) ran NO restart at all (the wall budget did not fit one).\n     Excluded from the basin count.\n",
               sum(!did_work)))
-cat(sprintf("\n  %d of %d starts CONVERGED, %d ran out of wall time (excluded from\n  the basin count, included in the table below).\n",
-            sum(conv), length(R), sum(oot)))
+# CONVERGED and OUT-OF-TIME are mutually exclusive as of 08-31f, and the counts
+# must sum: a report saying "1 of 5 converged, 5 ran out of time" is describing
+# two states of one task and is how that driver bug was caught.
+cat(sprintf("\n  %d of %d starts CONVERGED, %d ran out of wall time (excluded from the\n  basin count, kept in the table), %d spent their restart budget.\n",
+            sum(conv), length(R), sum(oot), sum(!conv & !oot)))
+if (any(conv & oot))
+  stop("a start reports BOTH converged and out-of-time: ",
+       paste(ids[conv & oot], collapse = ", "),
+       ". Those are exclusive states; the driver that wrote it is wrong.")
 cat(sprintf("  cluster radius %.4f = %.2f x the measured inter-basin separation\n",
             RAD, CO_FRAC))
 

@@ -45,6 +45,21 @@ ONE start per process, so N starts are an array instead of a queue. ⚠ **Claude
 −1.9×10⁴, so a start may spend its whole wall budget unconverged. Every task checkpoints every
 cycle, so re-submitting the same array RESUMES rather than restarts.
 
+**⭐ THE FIRST END-TO-END RUN FOUND TWO MORE, and both were reporting bugs, not arithmetic ones:**
+
+- ⛔ **A task reported `CONVERGED` *and* `OUT OF TIME`.** Its BFGS polish had been skipped for budget,
+  and the NM-only cycle gain then cleared `ARM_CYCLE_TOL`. But the polish is exactly the half that
+  gained **9.07** in the probe run from an NM-stalled point, so a cycle without it is not a completed
+  cycle. `out_of_time` now VETOES convergence, and the collector **errors** if it ever sees both
+  flags — mutation-tested against the pre-fix files, which still carry them.
+- ⛔ **The collector's own consistency gate printed all 22 parameter names above the report title.**
+  At top level in an `Rscript`, the value of a call is auto-printed; the gate returned it. `invisible()`.
+
+**End-to-end, 5 starts (short budget, contended laptop):** the port gates passed on all three
+references (rel 6e-16 to 2e-14), id 2 re-found **−1496.0128 exactly**, id 1 gained **+15.31 in 802
+evals** — a fresh confirmation that the incumbent is not converged — and a dispersed draw climbed
+from −450,536 to −2,196 in the same budget.
+
 ⚠ **The only R dependency is Rcpp** (`adaptMCMC` is used only by `ccx_run_mcmc()` and is not on
 Torch — which is why the survey is a mode-finder, not a sampler). The bundle excludes `data-raw/`
 (3.4 GB) and is ~2 MB. `DESIGN.md` is **not** optional: it is `REPO_MARKER` in `R/paths.R`.
