@@ -113,7 +113,11 @@ MS_EVAL_TOL   <- 1e-8         # relative, on a pure evaluation identity
 MS_RESTARTS <- .env_num("CCX_MS_RESTARTS", 3)
 MS_CYCLES   <- .env_num("CCX_MS_CYCLES",   6)
 MS_MAXIT    <- .env_num("CCX_MS_MAXIT",    6000)
-MS_WALL_MIN <- .env_num("CCX_MS_WALL_MIN", 210)
+# ⚠ 180 MATCHES calibration/torch/multistart.sbatch. Two files stating two
+# different "defaults" for the same budget is the caption-sync bug class: the
+# batch job would run 180 while anyone invoking the driver directly got 210, and
+# the preflight would print a budget no production task uses.
+MS_WALL_MIN <- .env_num("CCX_MS_WALL_MIN", 180)
 MS_SEED     <- .env_num("CCX_MS_SEED",     MS_SEED_BASE)
 
 # ---- WHICH START. Absence ASSERTS nothing here -- 0 is a legal, MEANINGFUL
@@ -342,20 +346,6 @@ local({
 })
 
 # ---- the wall budget, PROJECTED rather than merely checked ------------
-if (MS_PREFLIGHT) {
-  cat(sprintf("PREFLIGHT id %03d: start %s, log-post %.4f, %d draw%s, port %s. LAUNCHABLE.\n",
-              MS_ID, if (st$draws == 0L) "REFERENCE" else "dispersed", MS_START_LP,
-              st$draws, if (st$draws == 1L) "" else "s",
-              if (isTRUE(MS_PORT$checked)) sprintf("VERIFIED rel %.1e", MS_PORT$rel)
-              else "NOT VERIFIED"))
-  if (!isTRUE(MS_PORT$checked))
-    stop("PREFLIGHT id ", MS_ID, ": the port is NOT verified, so this task would ",
-         "spend its whole budget on an unchecked objective. Fix that before submitting.")
-  if (!is.finite(MS_START_LP))
-    stop("PREFLIGHT id ", MS_ID, ": the start point has a non-finite log-posterior.")
-  quit(save = "no", status = 0)
-}
-
 # ⛔ A BUDGET CHECK THAT ONLY LOOKS AT THE CLOCK CANNOT STOP A RESTART THAT HAS
 # ALREADY STARTED. `optim()` is not interruptible from inside, so "elapsed <
 # budget, go" commits the task to a WHOLE further restart -- MS_MAXIT evals,
@@ -401,6 +391,28 @@ cat(sprintf("measured %.4f s/eval (median of %d; range %.4f-%.4f) => one %d-eval
 if (MS_PROJ_SAFETY * MS_SEC_PER_EVAL * MS_MAXIT / 60 > MS_WALL_MIN)
   cat(sprintf("*** WARNING: a full %d-eval restart does NOT fit %g min at this rate.\n    Every restart will be SHORTENED. Lower CCX_MS_MAXIT or raise CCX_MS_WALL_MIN.\n",
               MS_MAXIT, MS_WALL_MIN))
+
+# ⭐ THE PREFLIGHT EXITS **HERE**, NOT BEFORE THE RATE MEASUREMENT (moved
+# 2026-09-01). Measuring s/eval costs 5 evaluations -- about two seconds -- and
+# it is the ONE number that cannot be obtained from the reference machine: how
+# fast this model runs on THIS node. Exiting above meant a preflight array on
+# the cluster verified the environment and then threw away the measurement that
+# sizes CCX_MS_MAXIT for every task after it. A preflight now does both.
+if (MS_PREFLIGHT) {
+  cat(sprintf("PREFLIGHT id %03d on %s: start %s, log-post %.4f, %d draw%s, port %s,\n             %.4f s/eval => a %d-eval restart takes %.1f min of a %g min budget. LAUNCHABLE.\n",
+              MS_ID, Sys.info()[["nodename"]],
+              if (st$draws == 0L) "REFERENCE" else "dispersed", MS_START_LP,
+              st$draws, if (st$draws == 1L) "" else "s",
+              if (isTRUE(MS_PORT$checked)) sprintf("VERIFIED rel %.1e", MS_PORT$rel)
+              else "NOT VERIFIED",
+              MS_SEC_PER_EVAL, MS_MAXIT, MS_SEC_PER_EVAL * MS_MAXIT / 60, MS_WALL_MIN))
+  if (!isTRUE(MS_PORT$checked))
+    stop("PREFLIGHT id ", MS_ID, ": the port is NOT verified, so this task would ",
+         "spend its whole budget on an unchecked objective. Fix that before submitting.")
+  if (!is.finite(MS_START_LP))
+    stop("PREFLIGHT id ", MS_ID, ": the start point has a non-finite log-posterior.")
+  quit(save = "no", status = 0)
+}
 elapsed_min <- function() as.numeric(difftime(Sys.time(), t0, units = "mins"))
 restart_min <- numeric(0)
 # ⇒ THE BUDGET SIZES THE RESTART; IT DOES NOT MERELY VETO IT. A task whose

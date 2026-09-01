@@ -100,23 +100,46 @@ bash calibration/torch/make_bundle.sh          # prints the scp + untar lines
 #    IT PRINTS THE MEASURED s/eval. Size the array on THAT, not on the Mac's.
 bash calibration/torch/setup_torch.sh
 
-# 3. PREFLIGHT THE WHOLE ARRAY -- ~2 s per task, no optimisation, no fairshare.
-#    Proves every id draws a finite start and every task agrees on the objective.
-for i in $(seq 0 42); do
-  CCX_MS_PREFLIGHT=1 CCX_MS_ID=$i Rscript --vanilla \
-    calibration/run_dispersed_multistart.R 2>&1 | grep -E "PREFLIGHT|Error"
-done
-
-# 4. THE GATE BATCH -- 5 tasks, and NOT ids 0-2 alone (see below)
-sbatch --array=0-2,21,42 calibration/torch/multistart.sbatch
+# 3. THE PREFLIGHT ARRAY -- ~2 min/task, ~10 CPU-minutes for the whole thing.
+#    This is the real gate: it loads the modules, imports Rcpp, COMPILES the C++
+#    core, resolves every NFS path, checks the run-time inputs, verifies the port
+#    against the shipped targets, draws each start -- and MEASURES s/eval on the
+#    compute nodes themselves. Then it exits 0 without optimising.
+CCX_MS_PREFLIGHT=1 sbatch --array=0-2,21,42 --time=00:15:00 \
+  calibration/torch/multistart.sbatch
 sacct -j <jobid> -X --format=JobID,State,ExitCode,Elapsed
+grep -h PREFLIGHT logs/ccx_multistart_*.out        # read the s/eval it reports
 
-# 5. ONLY IF THE GATE BATCH PASSES -- the survey, THROTTLED to 10 at a time
-sbatch --array=3-42%10 calibration/torch/multistart.sbatch
+# 4. SIZE THE RUN FROM WHAT STEP 3 MEASURED (see "Sizing" below), then launch
+#    the whole flight. %10 IS the staged rollout: 10 tasks run, the other 30 wait.
+sbatch --array=0-42%10 calibration/torch/multistart.sbatch
+#    ...then LOOK at the first wave before walking away:
+sacct -j <jobid> -X --format=JobID,State,ExitCode,Elapsed | head -12
 
-# 6. COLLECT (either machine)
+# 5. COLLECT (either machine)
 CCX_MS_OUTDIR=.../multistart_20260831 Rscript calibration/collect_dispersed_multistart.R
 ```
+
+## Subset first, or the whole flight? — neither, quite
+
+**Run the PREFLIGHT array, then launch the whole flight throttled.** A separate 5-task
+*real-compute* gate batch is the wrong shape for what is still unknown: it would run for up to
+3 hours to tell you things the 2-minute preflight already established.
+
+Everything still unverified is **"Torch differs from the Mac"** — R 4.5.1 vs 4.5.3, a different
+BLAS, a different compiler, NFS paths, the module environment, the `~/.bashrc` sandwich, the account
+and partition strings, `R_LIBS_USER`. **Every one of those is decided in the first two minutes of a
+task**, and the preflight exercises all of them, on the compute nodes, for ~10 CPU-minutes total. It
+also returns the one number that cannot be measured from the Mac: **s/eval on a real node**.
+
+What the preflight does *not* cover is long-run behaviour — the wall guard, checkpointing, the
+polish, memory over 3 h. But that is pure R control flow: machine-independent, and all of it tested
+locally end to end. The residual is memory drift over hours, and **`%10` covers exactly that**: ten
+tasks expose it while thirty wait, and `scancel` is one command. ⚠ **The throttle only protects you
+if you actually look at wave one** — that is the step to not skip, not the extra submission.
+
+⚠ **If the preflight reports much worse than ~0.6 s/eval**, lower `CCX_MS_MAXIT` before step 4, or
+every restart will be shortened and the task will spend its budget on stunted climbs.
 
 ⚠ **CHECK FAIRSHARE FIRST**: `sshare -u ms17839`. Below ~0.3 and jobs queue behind other users even
 on an idle cluster; submit in smaller batches and prefer off-peak.
