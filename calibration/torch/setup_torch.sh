@@ -40,26 +40,70 @@ fi
 export R_LIBS_USER=/scratch/ms17839/Rlibs/4.5
 mkdir -p "$R_LIBS_USER" logs
 
-Rscript --vanilla -e '
-  if (!requireNamespace("Rcpp", quietly = TRUE))
-    install.packages("Rcpp", repos = "https://cloud.r-project.org",
-                     lib = Sys.getenv("R_LIBS_USER"))
-  cat("Rcpp", as.character(packageVersion("Rcpp")), "OK\n")'
+# ⛔ EVERY R SNIPPET BELOW GOES THROUGH A FILE, NEVER `Rscript -e`
+# (found the hard way 2026-09-01, on the first real run on Torch).
+# /share/apps/r/4.5.1/bin/Rscript is a wrapper that re-quotes its argv --
+#     for i in "$@"; do args="${args} \"${i//\"/\\\"}\""; done
+#     singularity exec ... /bin/bash -c "... ${cmd} ${args}"
+# -- and that inner string is DOUBLE-quoted, so it escapes backslashes and
+# double quotes but NOT `$`. Every `$` in an -e argument is expanded by the
+# inner bash before R ever sees it.
+#
+# MEASURED, both halves:
+#   via -e    `y <- x; y$pump_mode <- "N"; class(y)` -> "character"
+#   from file  the same three statements            -> "list"
+# In this script's own compile check that turned `bp$pump_mode <- "N"` into
+# `bp <- "N"`, so ccx_make_logpost() got base_params = "N", the closure bailed
+# at its spinup guard, and setup reported
+#     log-post at the cold init = -Inf      PER-EVAL 0.0240 s
+# ⚠ WHICH READS EXACTLY LIKE A BROKEN PORT AND IS NOT ONE. The port is fine:
+# from a file this machine returns -19204.7216 at the cold init, bit-matching
+# the Mac. The tells that it was the harness and not the model: 0.024 s/eval is
+# far too FAST for a real evaluation (it is the early-return path), and R warned
+# "Coercing LHS to a list" once per call -- the `$<-` onto an atomic.
+# ⇒ `multistart.sbatch` WAS NEVER AT RISK: it runs a script FILE.
+R_TMP_SCRIPT="${SLURM_TMPDIR}/ccx_setup_check.R"
+
+cat > "$R_TMP_SCRIPT" <<'RSCRIPT'
+if (!requireNamespace("Rcpp", quietly = TRUE))
+  install.packages("Rcpp", repos = "https://cloud.r-project.org",
+                   lib = Sys.getenv("R_LIBS_USER"))
+cat("Rcpp", as.character(packageVersion("Rcpp")), "OK\n")
+RSCRIPT
+Rscript --vanilla "$R_TMP_SCRIPT"
 
 # COMPILE CHECK -- the C++ core is compiled by Rcpp::sourceCpp() at load, once
-# per process. Prove it builds on this toolchain BEFORE an array of 40 tasks
+# per process. Prove it builds on this toolchain BEFORE an array of 46 tasks
 # each discovers it cannot.
-Rscript --vanilla -e '
-  for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
-  t0 <- Sys.time(); ccx_load_cpp()
-  cat(sprintf("C++ core compiled in %.1f s\n",
-              as.numeric(difftime(Sys.time(), t0, units = "secs"))))
-  bp <- ccx_default_params(); bp$pump_mode <- "N"
-  lp <- ccx_make_logpost(base_params = bp); u <- ccx_init_unc()
-  t1 <- Sys.time(); for (i in 1:20) v <- lp(u)
-  cat(sprintf("log-post at the cold init = %.4f\n", v))
-  cat(sprintf("PER-EVAL %.4f s -- the Mac measured 0.15-0.22; size the array on THIS.\n",
-              as.numeric(difftime(Sys.time(), t1, units = "secs")) / 20))'
+# ⭐ AND GATE THE COLD-INIT VALUE, rather than printing it for a human to eyeball.
+# The -Inf above was printed, read, and very nearly believed; a number this
+# script KNOWS is a hard comparison, not a report [[gate_bound_matches_its_claim]].
+# The bound is RELATIVE and tight because this is an EVALUATION of one fixed
+# point: two machines must agree to floating point or the port is broken.
+cat > "$R_TMP_SCRIPT" <<'RSCRIPT'
+COLD_REF <- -19204.7215567491   # calibration/torch/port_targets.csv, row "cold"
+COLD_TOL <- 1e-8                # relative; = MS_EVAL_TOL in the driver
+for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+t0 <- Sys.time(); ccx_load_cpp()
+cat(sprintf("C++ core compiled in %.1f s\n",
+            as.numeric(difftime(Sys.time(), t0, units = "secs"))))
+bp <- ccx_default_params(); bp$pump_mode <- "N"
+stopifnot(is.list(bp), length(bp) > 1)   # the -e mangling, caught at the source
+lp <- ccx_make_logpost(base_params = bp); u <- ccx_init_unc()
+t1 <- Sys.time(); for (i in 1:20) v <- lp(u)
+per <- as.numeric(difftime(Sys.time(), t1, units = "secs")) / 20
+rel <- abs(v - COLD_REF) / abs(COLD_REF)
+cat(sprintf("log-post at the cold init = %.4f  (Mac %.4f, rel %.2e)\n",
+            v, COLD_REF, rel))
+if (!is.finite(v) || rel > COLD_TOL)
+  stop("SETUP GATE FAILED: this machine does not reproduce the cold init to ",
+       COLD_TOL, " relative. Every task in the survey would optimise a ",
+       "different objective. STOP AND DIAGNOSE -- and check the harness before ",
+       "the model: a `$` eaten by `Rscript -e` produces exactly this symptom.")
+cat("SETUP GATE PASSED -- the port reproduces the reference machine.\n")
+cat(sprintf("PER-EVAL %.4f s -- the Mac measured 0.15-0.22; SIZE THE ARRAY ON THIS.\n", per))
+RSCRIPT
+Rscript --vanilla "$R_TMP_SCRIPT"
 
 echo
 echo "NEXT: the PREFLIGHT batch -- ~2 min/task, exits 0 without optimising:"
