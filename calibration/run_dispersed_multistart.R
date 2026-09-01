@@ -209,6 +209,17 @@ ms_start <- function(id) {
        "this parameter table; lower CCX_MS_SPREAD and say so in the output dir.")
 }
 
+# ---- PREFLIGHT: prove the whole array is launchable WITHOUT launching it ----
+# ⭐ `CCX_MS_PREFLIGHT=1` runs everything up to and including the port gate and
+# the start draw, prints one line, and EXITS 0 without optimising. Looping it
+# over every id in the array validates the entire submission in ~2 s per task
+# instead of discovering a bad one after 3 h x 40 of fairshare.
+#
+# It exercises the REAL code path rather than a copy of it, which is the whole
+# reason it lives here and not in a separate preflight script: a preflight that
+# re-implements the draw would be testing itself.
+MS_PREFLIGHT <- nzchar(Sys.getenv("CCX_MS_PREFLIGHT", ""))
+
 # ---- resume, if this task has already run part of its budget ---------
 st <- ms_start(MS_ID)
 u <- st$u; best <- -lp_fun(u)
@@ -254,7 +265,14 @@ MS_PORT <- list(checked = FALSE, target = NA_real_, rel = NA_real_)
 local({
   f <- ccx_path(MS_TARGETS)
   nm <- names(MS_REF_IDS)[match(MS_ID, MS_REF_IDS)]
-  if (is.na(nm)) return(invisible(NULL))          # dispersed starts have no target
+  # ⭐ EVERY TASK CHECKS THE PORT, NOT ONLY IDS 0-2 (2026-09-01). A dispersed
+  # task has no target of its own, so it evaluates the NEW-BASIN reference point
+  # -- one extra objective call, well under a second -- and checks that. The
+  # reason is fairshare, not elegance: without it, an array submitted without
+  # its gate batch (or after the table moved) would spend 40 x 3.5 h optimising
+  # a different objective and only the collector would ever notice. With it, a
+  # broken port kills every task in about two seconds.
+  if (is.na(nm)) nm <- "new_basin"
   if (!file.exists(f)) {
     cat(sprintf("*** PORT GATE SKIPPED: no %s. Run `Rscript calibration/make_port_targets.R`\n    on the reference machine and ship it. This run is NOT port-verified.\n",
                 MS_TARGETS))
@@ -286,9 +304,16 @@ local({
          "reparameterisation constant, so the comparison would indict the PORT ",
          "for a change in the TABLE. Re-run make_port_targets.R and re-ship the CSV.")
   tgt <- as.numeric(r$logpost[1])
-  rel <- abs(MS_REF_LP - tgt) / max(abs(tgt), 1e-12)
-  cat(sprintf("PORT GATE (a) reference point: here %.10f vs %s@%s %.10f, rel %.2e (tol %.0e)\n",
-              MS_REF_LP, r$host[1], r$commit[1], tgt, rel, MS_EVAL_TOL))
+  # THE VALUE THIS TASK EVALUATES AT THE REFERENCE POINT. For ids 0-2 that IS
+  # their own start point and is already in hand; for a dispersed id it is a
+  # point this task never visits, so evaluate it -- one call, and the whole
+  # justification for doing so is that it is cheap.
+  here <- if (identical(MS_ID, unname(MS_REF_IDS[[nm]]))) MS_REF_LP
+          else lp_fun(switch(nm, cold = U_COLD, incumbent = U_INC, new_basin = U_NEW))
+  rel <- abs(here - tgt) / max(abs(tgt), 1e-12)
+  cat(sprintf("PORT GATE (a) at the %s reference point: here %.10f vs %s@%s %.10f,\n              rel %.2e (tol %.0e)%s\n",
+              nm, here, r$host[1], r$commit[1], tgt, rel, MS_EVAL_TOL,
+              if (identical(MS_ID, unname(MS_REF_IDS[[nm]]))) "" else "  [this task's own start is elsewhere]"))
   if (rel > MS_EVAL_TOL)
     stop("PORT GATE (a) FAILED: this machine does not reproduce the objective ",
          "at a FIXED point to ", MS_EVAL_TOL, " relative. Every dispersed start ",
@@ -300,6 +325,20 @@ local({
 })
 
 # ---- the wall budget, PROJECTED rather than merely checked ------------
+if (MS_PREFLIGHT) {
+  cat(sprintf("PREFLIGHT id %03d: start %s, log-post %.4f, %d draw%s, port %s. LAUNCHABLE.\n",
+              MS_ID, if (st$draws == 0L) "REFERENCE" else "dispersed", MS_START_LP,
+              st$draws, if (st$draws == 1L) "" else "s",
+              if (isTRUE(MS_PORT$checked)) sprintf("VERIFIED rel %.1e", MS_PORT$rel)
+              else "NOT VERIFIED"))
+  if (!isTRUE(MS_PORT$checked))
+    stop("PREFLIGHT id ", MS_ID, ": the port is NOT verified, so this task would ",
+         "spend its whole budget on an unchecked objective. Fix that before submitting.")
+  if (!is.finite(MS_START_LP))
+    stop("PREFLIGHT id ", MS_ID, ": the start point has a non-finite log-posterior.")
+  quit(save = "no", status = 0)
+}
+
 # ⛔ A BUDGET CHECK THAT ONLY LOOKS AT THE CLOCK CANNOT STOP A RESTART THAT HAS
 # ALREADY STARTED. `optim()` is not interruptible from inside, so "elapsed <
 # budget, go" commits the task to a WHOLE further restart -- MS_MAXIT evals,
@@ -312,12 +351,36 @@ local({
 # start evaluation -- a measurement, not a guess. MS_PROJ_SAFETY is the margin
 # on it, and NM's own early `reltol` exit means the projection is an UPPER
 # bound: restarts finish early far more often than they overrun.
-MS_PROJ_SAFETY <- 1.25
+# ⚠ 1.5, NOT 1.25, AND THE ARITHMETIC IS WRITTEN DOWN BECAUSE A TIMEOUT COSTS
+# FAIRSHARE. The guard starts a restart only if `elapsed + SAFETY * projection`
+# still fits `MS_WALL_MIN`, so the worst case is a restart that begins just
+# inside the budget and then runs LONGER than projected -- which is exactly what
+# node contention does ([[eta_in_days_is_not_a_slow_run]]: a 1.61x degradation
+# was measured on this very model). With SAFETY = 1.5 and MS_WALL_MIN set 60 min
+# below the SLURM wall, a restart would have to overrun its projection by more
+# than 2.5x to reach the hard cap. At 1.25 with a 30 min gap, 2x was enough.
+MS_PROJ_SAFETY <- 1.5
+MS_RATE_SAMPLES <- 5
 t0 <- Sys.time()
-.t <- Sys.time(); invisible(lp_fun(u))
-MS_SEC_PER_EVAL <- as.numeric(difftime(Sys.time(), .t, units = "secs"))
-cat(sprintf("measured %.4f s/eval here => one %d-eval restart projects to %.1f min\n",
-            MS_SEC_PER_EVAL, MS_MAXIT, MS_SEC_PER_EVAL * MS_MAXIT / 60))
+# ⛔ ONE TIMED CALL IS NOT A RATE. This measured a SINGLE evaluation and used it
+# to project a 6,000-eval restart -- a 6,000x extrapolation from n = 1, on a
+# shared node, where the first call is also the one most likely to be
+# unrepresentative (cold caches, first touch of the forcing arrays). The MEDIAN
+# of a few is still cheap (~1 s) and cannot be thrown by one outlier.
+.tv <- vapply(seq_len(MS_RATE_SAMPLES), function(i) {
+  .t <- Sys.time(); invisible(lp_fun(u))
+  as.numeric(difftime(Sys.time(), .t, units = "secs"))
+}, numeric(1))
+MS_SEC_PER_EVAL <- stats::median(.tv)
+cat(sprintf("measured %.4f s/eval (median of %d; range %.4f-%.4f) => one %d-eval restart\n  projects to %.1f min, and the wall budget is %g min\n",
+            MS_SEC_PER_EVAL, MS_RATE_SAMPLES, min(.tv), max(.tv), MS_MAXIT,
+            MS_SEC_PER_EVAL * MS_MAXIT / 60, MS_WALL_MIN))
+# SAY IT OUT LOUD IF ONE RESTART CANNOT FIT THE BUDGET AT ALL -- that is a
+# sizing error, and the task should announce it rather than quietly shorten
+# every restart for hours.
+if (MS_PROJ_SAFETY * MS_SEC_PER_EVAL * MS_MAXIT / 60 > MS_WALL_MIN)
+  cat(sprintf("*** WARNING: a full %d-eval restart does NOT fit %g min at this rate.\n    Every restart will be SHORTENED. Lower CCX_MS_MAXIT or raise CCX_MS_WALL_MIN.\n",
+              MS_MAXIT, MS_WALL_MIN))
 elapsed_min <- function() as.numeric(difftime(Sys.time(), t0, units = "mins"))
 restart_min <- numeric(0)
 MS_MAXIT_FLOOR <- 200     # evals below which a restart is not worth entering

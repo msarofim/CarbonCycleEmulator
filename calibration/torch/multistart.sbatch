@@ -18,9 +18,23 @@
 # THEN the survey:
 #     sbatch --array=3-42 calibration/torch/multistart.sbatch
 #
-# WALL. cpu_short caps at 4 h. CCX_MS_WALL_MIN below stops the optimiser
-# cleanly with 30 min to spare and CHECKPOINTS, so re-submitting the same array
-# RESUMES each task from its own checkpoint rather than restarting it.
+# WALL -- THE ARITHMETIC, BECAUSE A TIMEOUT COSTS FAIRSHARE AND A CLEAN EXIT
+# DOES NOT. cpu_short caps at 4 h = 240 min. The task's OWN budget
+# (CCX_MS_WALL_MIN) is 180, so it stops the optimiser, checkpoints and exits 0
+# with ~57 min to spare -- "OUT OF TIME" is a normal exit here, NOT a SLURM kill,
+# and re-submitting the same array RESUMES each task from its checkpoint.
+#
+#   worst case: the guard starts a restart only if elapsed + 1.5 x projection
+#   still fits 180, so a restart can begin at 180 - 1.5p and, if it actually
+#   takes k x p, ends at 180 + (k - 1.5)p. With p ~ 37 min (6,000 evals at the
+#   ~0.37 s/eval a 2x-slower-than-Mac node implies) it takes k > 3.0 -- a
+#   THREEFOLD overrun of a measured projection -- to reach the 240 min cap.
+#   The worst contention ever measured on this model was 1.61x.
+#
+# MEMORY. --mem=4G against a MEASURED peak RSS of 213 MB for a full task
+# (2026-09-01, /usr/bin/time -l): 19x headroom, deliberately generous because
+# the g++ compile of src/ccx_core.cpp runs inside the job's own cgroup. Outputs
+# are 1.4 KB per task, so disk is not a consideration at any array size.
 # =====================================================================
 #SBATCH --job-name=ccx_multistart
 #SBATCH --account=torch_pr_1041_general
@@ -63,7 +77,7 @@ fi
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 
 export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$PROJ/calibration/output/multistart_20260831}"
-export CCX_MS_WALL_MIN="${CCX_MS_WALL_MIN:-210}"        # 3.5 h of the 4 h partition cap
+export CCX_MS_WALL_MIN="${CCX_MS_WALL_MIN:-180}"        # 3 h of the 4 h cap; see WALL above
 export CCX_MS_RESTARTS="${CCX_MS_RESTARTS:-3}"
 export CCX_MS_CYCLES="${CCX_MS_CYCLES:-6}"
 export CCX_MS_MAXIT="${CCX_MS_MAXIT:-6000}"

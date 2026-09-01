@@ -28,8 +28,27 @@ is untouched, and the survey writes `start_*.rds` files no other code reads.
 |---|---|---|
 | dispersion **sd** | **1.0493** in u-space | **MEASURED**: the per-coordinate RMS distance between the two KNOWN basins, recomputed from their own mode files at every run. That is the separation a survey must resolve to be worth running. `CCX_MS_SPREAD` overrides. |
 | dispersion **centre** | the COLD hand-set init | Neither known basin, so the survey is not centred on an answer. |
-| **budget per start** | 3 restarts × 6000 maxit × 6 cycles, 210 min wall | Sized to `cpu_short`'s 4 h with 30 min of margin. The guard **projects** from a measured restart duration rather than merely reading the clock — `optim()` cannot be interrupted once entered. |
+| **budget per start** | 3 restarts × 6000 maxit × 6 cycles, **180 min** wall | `cpu_short` caps at 240 min; the task's own budget stops it at 180, so **"OUT OF TIME" is a clean exit 0 with a checkpoint, never a SLURM kill**. A restart would have to overrun its measured projection by **>3×** to reach the cap; the worst contention ever measured on this model was 1.61×. |
 | **N starts** | 40 (`--array=3-42`) | Arbitrary, and the only one of the four with no measurement behind it. Raise it if fairshare allows. |
+
+## ⚠ EXPECT MOST TASKS TO COME BACK "OUT OF TIME" AFTER ROUND ONE — THAT IS NOT A FAILURE
+
+Measured 2026-09-01 at production *shape* (same restarts × cycles, a budget the task actually
+reaches, so the wall guard is exercised rather than short-circuited). A dispersed start climbed
+**−263,312 → −2,609 in one restart (5 min) → −1,855 in two → −1,588 in three**, then the guard
+shortened the last restart, skipped the polish and **exited 0 at 13.1 min of a 15 min budget** —
+1.9 min unused, by design. Scaled to 180 min that is an exit around **157 min, ~83 min inside the
+240 min cap**.
+
+But arithmetic on the same numbers: 180 min at the ~0.37 s/eval a 2×-slower node implies is
+**~29,000 evals**, while the 08-31e polish needed **67,311 evals to converge from an ALREADY GOOD
+point**. A dispersed start begins far further out and reached only −1,588 against the basin's
+−1,495.3 in this test. ⇒ **one round will land most tasks in the −1,500s and NOT converged.**
+
+**That is what checkpoint/resume is for.** Re-submit the same array and each task continues from its
+own checkpoint (tested). Budget **2–3 rounds**, and read a round of "OUT OF TIME" as progress, not
+as a fault — a genuine fault looks like a non-zero exit, a port-gate stop, or a task that gained
+nothing.
 
 ⚠ **A dispersed start is a LONG climb.** At sd 1.05 a draw scores ~−3×10⁵ against the cold init's
 −1.9×10⁴, so a start may spend its whole wall budget and check out unconverged. That is expected and
@@ -46,16 +65,31 @@ bash calibration/torch/make_bundle.sh          # prints the scp + untar lines
 #    IT PRINTS THE MEASURED s/eval. Size the array on THAT, not on the Mac's.
 bash calibration/torch/setup_torch.sh
 
-# 3. THE GATE BATCH -- 5 tasks, and NOT ids 0-2 alone (see below)
+# 3. PREFLIGHT THE WHOLE ARRAY -- ~2 s per task, no optimisation, no fairshare.
+#    Proves every id draws a finite start and every task agrees on the objective.
+for i in $(seq 0 42); do
+  CCX_MS_PREFLIGHT=1 CCX_MS_ID=$i Rscript --vanilla \
+    calibration/run_dispersed_multistart.R 2>&1 | grep -E "PREFLIGHT|Error"
+done
+
+# 4. THE GATE BATCH -- 5 tasks, and NOT ids 0-2 alone (see below)
 sbatch --array=0-2,21,42 calibration/torch/multistart.sbatch
 sacct -j <jobid> -X --format=JobID,State,ExitCode,Elapsed
 
-# 4. ONLY IF THE GATE BATCH PASSES -- the survey
-sbatch --array=3-42 calibration/torch/multistart.sbatch
+# 5. ONLY IF THE GATE BATCH PASSES -- the survey, THROTTLED to 10 at a time
+sbatch --array=3-42%10 calibration/torch/multistart.sbatch
 
-# 5. COLLECT (either machine)
+# 6. COLLECT (either machine)
 CCX_MS_OUTDIR=.../multistart_20260831 Rscript calibration/collect_dispersed_multistart.R
 ```
+
+⚠ **CHECK FAIRSHARE FIRST**: `sshare -u ms17839`. Below ~0.3 and jobs queue behind other users even
+on an idle cluster; submit in smaller batches and prefer off-peak.
+
+⚠ **`%10` IS NOT DECORATION.** It caps how many array tasks run at once, which does two things worth
+having: it bounds the blast radius if something is wrong to 10 tasks rather than 40, and it limits
+self-contention — 40 of our own tasks on shared nodes is exactly the situation that turned a measured
+0.150 s/eval into 0.241 on this model. The wall guard adapts to that, but not needing to is better.
 
 ⚠ **THE GATE BATCH IS `0-2,21,42`, NOT `0-2`.** Ids 0–2 are all *reference* starts — warm, already
 at a known point — and they never execute the dispersed-draw path: the redraw loop, the long climb
@@ -93,6 +127,24 @@ The whole bundle was extracted to a clean directory and driven through **the rea
 reason); **4 tasks compiling the C++ core simultaneously** all exit 0 with distinct outputs and no
 cache race; **checkpoint resume** picks up at the right cycle. Local eval rate **0.186 s/eval** —
 ⚠ **size the array on the number `setup_torch.sh` prints on Torch, not on this one.**
+
+## Resource sizing — measured, not assumed
+
+| | measured | requested | margin |
+|---|---|---|---|
+| **peak RSS**, full task | **213 MB** (`/usr/bin/time -l`, 2026-09-01) | `--mem=4G` | **19×** — deliberately generous, the `g++` compile of `src/ccx_core.cpp` runs inside the job's own cgroup |
+| **wall**, per task | budget 180 min, exits 0 | `--time=04:00:00` | **~57 min**; needs a **>3× overrun** of a measured projection to time out |
+| **output** | 1.4 KB/task + 645 B checkpoint | — | ~80 KB for the whole 40-task array |
+| **eval rate** | 0.199 s/eval on the Mac (median of 5, range 0.182–0.246) | — | ⚠ **re-read it from `setup_torch.sh` on Torch and re-size if it is worse than ~0.6 s/eval** |
+
+⚠ **The rate is measured as a MEDIAN OF 5, not one call** — a single timed evaluation spread 35 %
+across samples on an idle laptop, and it was being extrapolated 6,000× to project a restart.
+
+⭐ **EVERY TASK VERIFIES THE PORT, not only ids 0–2.** A dispersed task evaluates the new-basin
+reference point once (well under a second) and checks it against `port_targets.csv`. This is a
+fairshare protection, not elegance: without it, an array submitted without its gate batch — or after
+the parameter table moved — would spend **40 × 3 h** optimising a different objective, and only the
+collector would ever notice. With it, a broken port kills every task in about two seconds.
 
 ## The port gate — read it before scaling
 
