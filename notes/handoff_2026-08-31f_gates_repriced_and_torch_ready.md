@@ -163,3 +163,66 @@ a SLURM array instead of a queue. ⚠ **Claude cannot submit** (VPN + gateway + 
     Rscript calibration/diag_joos_irf.R <path-to-mode-file|arm>       # ~9 s, gate 12
     Rscript calibration/make_port_targets.R                           # ~5 s, re-run if the objective moves
     CCX_MS_ID=2 Rscript calibration/run_dispersed_multistart.R        # one start, locally
+
+---
+
+# ⭐ §8 — APPENDED 2026-09-01: RULING #1 CLOSED, AND THE FAILING-TEST LABEL WAS WRONG TWICE
+
+Clean at `330d177`. **Suite 1282 / 6 FAIL / 2 skip** — same count as 08-31e, DIFFERENT composition.
+
+## 8.1 THE `kz` BRACKET IS RE-BISECTED WIDE AND SHIPPED
+
+`CCX_PARAM_TABLE$kz`: **[3942.5, 6528] → [4379.1, 8109.9]**, `init` 6244.5. Same recipe, same
+default parameters, run against GLODAP's sourced **−175.26 ± 10.259‰ on the bottom box** at
+**k = 3σ**. ⚠ **The floor RISES too — a RE-CENTRING, not only a widening.** Every mode file stays
+strictly interior. ⭐ On this support the anchor turns over **INTERIOR at 6486 = 56 % of the box**:
+the bracket was not what held `kz`.
+
+⚠ **Re-measured before shipping** (`diag_kz_bracket_hml_sensitivity.R`): the "`h_ml` moves it under
+1.5‰" justification was measured over **39.7–100 m**, which no longer contains the better basin's
+**143.9 m**. It reproduces inside its own window (0.99‰); across [35, 195] the Δ¹⁴C at fixed `kz`
+moves **6.25‰ = 10.2 % of the 3σ box**. Sufficient at k = 3, **not obviously at k = 1**.
+
+## 8.2 WHAT MOVED, AND WHAT DID NOT
+
+- **Every stored logpost moved** with the logit Jacobian: incumbent −1548.011 → **−1546.345**, new
+  basin −1496.013 → **−1495.276**. ⇒ **the basin gap is +52.00 → +51.07, and ALL of it is PRIOR**
+  (loglik gap unchanged at +37.82; prior share +14.18 → **+13.25**).
+- ✅ **Gates 4/5/7, both re-priced rulings and every prior-z are BIT-IDENTICAL** (diffed). A support
+  change must not touch a model-vs-obs measurement, and it did not.
+- **`port_targets.csv` re-measured and now records its bracket**; the driver REFUSES a target from a
+  different table. ⛔ **Three of my own band gates would have refused every mode file on disk** —
+  each demanded bands EQUAL the shipped table, wider than any of them claims. Narrowed.
+
+## 8.3 ⛔ ONE PREVIOUSLY PASSING TEST FAILS AND IS LEFT FAILING — YOURS
+
+`test-likelihood.R:578`, `expect_lte(CCX_PARAM_TABLE$kz$hi, 7000)`: **8109.9 > 7000**. A deliberate
+loose guard rail whose own comment says it exists so the band cannot be *"widened into uselessness
+one re-bisection at a time"*. Its runaway guard (`hi < 10686`) still passes and the new bracket is
+sourced where the old was not — but **how loose that rail should be is policy, not a code fix.**
+Suggested: raise to a number that still excludes the 10,686 runaway and say in the comment that the
+band now tracks a SOURCED k = 3σ box.
+
+## 8.4 THE FAILING-TEST LABEL WAS WRONG TWICE
+
+08-31e said all 6 "say ONE true thing — the stored modes are 21-parameter files".
+
+- ✅ **FIXED — `test-prior-z.R`** was ERRORING on `no such parameter: seas_lag_p`. Unrelated to mode
+  files; no refit would have fixed it. Now checks **both** limbs, which actually tests
+  `R/calibrate.R`'s claim that the split kept the original prior on each.
+- ⛔ **AND ADOPTION WOULD NOT FIX TWO MORE — IT WOULD INVERT THEM.** `test-mode-decode.R`'s two
+  failures encode the CURRENT canonical's **retired [85,120] band** as their premise. Point
+  `CCX_MODE_CANONICAL` at the polished mode and both premises dissolve: the band-blind idiom becomes
+  CORRECT and `ccx_check_mode_decode()` stops erroring, so both fail the other way. **They need a
+  file that genuinely carries an overridden band** — the 08-31 probe is one, on disk.
+- ⇒ **HONEST TALLY: 3 fixed by adoption, 2 INVERTED by it, 1 unrelated (fixed), + the new §8.3 rail.**
+
+## 8.5 ORDERING, RECOMMENDED
+
+1. ✅ **`kz` bracket** — done, and it had to be first: the bracket IS the survey's coordinate system.
+2. **Torch gate batch** `--array=0-2`, then the survey `--array=3-42`. ⚠ **Re-ship
+   `port_targets.csv`** — it was re-measured under the new table and the driver now refuses a stale one.
+3. **Adopt after the survey.** Adoption is decoupled from it (the survey reads modes by PATH;
+   `CCX_MODE_CANONICAL` appears in those files only in a comment), so adopting first buys nothing and
+   risks doing it twice. ⚠ And plan §8.4's two inverted tests INTO the adoption — they will fail the
+   moment the canonical moves.
