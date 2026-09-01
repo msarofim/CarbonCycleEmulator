@@ -2,6 +2,35 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01d — **THE OBSERVABLE IS NOT BLIND: THE ENSO SINK SENSITIVITIES, MEASURED**
+
+`calibration/diag_enso_sink_power.R` (~5 s, OBSERVATIONS ONLY — it scores no model).
+
+Run as the power check that had to precede any ENSO composite: a series that cannot show the effect
+reports "no effect" identically to one that looked. **It can show it.**
+
+| sink | best lag | r | 95 % CI | slope (GtC/yr per °C Niño3.4) | n → n_eff |
+|---|---|---|---|---|---|
+| **land** (positive control) | 3 mo | **−0.677** | [−0.790, −0.519] | **−0.665** | 65 → 65 |
+| **ocean** | 2 mo | **+0.535** | [+0.287, +0.716] | **+0.119** | 65 → **45** |
+
+- ✅ **The positive control passes** — the land signal is found strongly, with the known sign — so a
+  null on the ocean would have meant something. There is no null: **the ocean signal is real and
+  POSITIVE. El Niño strengthens ocean uptake**, agreeing in direction with Ke et al. 2026.
+- **n_eff, not n.** Both series are autocorrelated (detrended ocean lag-1 = 0.60), which cuts the
+  ocean's effective sample from 65 to 45; the naive CI would have been far too tight.
+- **Robust to every free choice**: 13/13 lags individually significant, so the scanned best-lag CI
+  is not carrying the verdict; stable across detrending orders 1–3; stronger on MEI.
+- ⚠ **The ocean is the weaker case** — it clears its 80 %-power detection floor by only 1.3×, land
+  by 2.0×.
+- ⛔ **AND IT RETIRES A NUMBER.** Ke et al.'s 0.38 GtC/yr at MEI 0.71 implies ~0.54 per unit —
+  **4.5× the measured slope**, and 5.9× the detection floor. A persistent response that size would be
+  unmissable here and is not. It is an event-specific, Jul–Jul, baseline-relative anomaly:
+  **never use it as a sensitivity. Use +0.119.**
+
+⇒ **The composite test is now well posed and worth running**, with a quantitative target for the
+model's ocean response rather than a one-event sign.
+
 ## 2026-09-01c — **RETRACTED: THE EL NIÑO OCEAN "SIGN ERROR" IS 0.6 SIGMA, NOT A FINDING**
 
 Marcus, same day: *"Don't over-read a single year: every ENSO is going to have somewhat different
