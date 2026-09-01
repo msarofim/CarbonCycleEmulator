@@ -2,6 +2,41 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01e — **THE OCEAN'S ENSO RESPONSE IS ANTI-CORRELATED, AND THIS TIME IT IS POWERED**
+
+`calibration/diag_enso_model_vs_obs.R` (~20 s) + `calibration/lib_enso_regression.R`. Adopts nothing.
+
+The properly-shaped version of the claim retracted at 09-01c. Regression of detrended annual sinks
+on Niño3.4 over **1959–2024**, model and observation through **one shared estimator**:
+
+| | land slope | ocean slope | ocean r (95 % CI) |
+|---|---|---|---|
+| **observed (GCB)** | **−0.665** | **+0.119** | **+0.535** [+0.287, +0.716] |
+| incumbent | −0.383 (**58 %**) | **−0.109** | **−0.496** [−0.673, −0.265] |
+| new basin | −0.352 (**53 %**) | **−0.155** | **−0.506** [−0.680, −0.278] |
+
+- ⛔ **The ocean sign is wrong**, p = 1e−4 in both basins, **CIs non-overlapping** with the
+  observation, and **invariant to the detrending order to three decimals**. n = 66 years, not one
+  event. **Marcus's retraction was right about the method and the conclusion survived it.**
+- ⭐ **The amplitude is right and the phase is wrong**: the incumbent's detrended ocean residual sd
+  is **0.122** against the observed **0.123**. The ocean is not too quiet — it moves the wrong way.
+  (The new basin is noisier at 0.170: a second small mark against it.)
+- **Land is right-signed at 53–58 % of observed** — a magnitude shortfall, not a structural one, and
+  better than the 33 % of CO₂-growth variability recorded in `ccx_variability_gap`.
+- ⇒ **HYPOTHESIS, not tested:** the model carries the THERMAL term (El Niño ⇒ warmer SST ⇒ lower
+  solubility ⇒ weaker uptake, the sign it produces) and lacks the CIRCULATION term that dominates in
+  nature (suppressed equatorial upwelling of DIC-rich water ⇒ less outgassing ⇒ stronger net uptake).
+  A 2-box ocean with no ENSO modulation of upwelling behaves exactly like this, and it coheres with
+  the standing reading that the ocean's defects are circulation and capacity rather than rate.
+- ⚠ Three caveats stated in the file and not softened: **not independent** (the model is driven by
+  this index), **model-vs-product** (GCB's ocean sink is an ensemble, not measured air-sea flux), and
+  the ocean target clears its own detection floor by only 1.3×.
+
+**Also de-duplicated:** the annual-sink construction became `dg_annual_sinks()` in
+`lib_design_gates.R` — gate 7 is now the window mean of that same series, and
+`diag_elnino_2023_sink_response.R` no longer carries its own copy. Gate 7 verified **bit-identical**
+across the refactor, as was the power test across the regression extraction.
+
 ## 2026-09-01d — **THE OBSERVABLE IS NOT BLIND: THE ENSO SINK SENSITIVITIES, MEASURED**
 
 `calibration/diag_enso_sink_power.R` (~5 s, OBSERVATIONS ONLY — it scores no model).

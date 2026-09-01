@@ -33,16 +33,19 @@
 # Usage:  Rscript calibration/diag_enso_sink_power.R    # ~5 s, no model run
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+# ⭐ THE ESTIMATOR IS SHARED with diag_enso_model_vs_obs.R -- one detrending
+# convention, one lag convention, one effective sample size. See the header there.
+source(ccx_path("calibration", "lib_enso_regression.R"))
 
 # ---- named constants ------------------------------------------------
-PW_INDEX   <- "nino34_anom"      # the longer of the two in forcing_enso.rds; `mei` is NA pre-1979
-PW_ALT     <- "mei"              # reported alongside, as a robustness check
-PW_LAGS    <- 0:12               # months the sink is allowed to trail the index
-PW_DEGS    <- 1:3                # detrending polynomial orders, all reported
-PW_DEG     <- 2                  # the one the headline uses
+PW_INDEX   <- ER_INDEX
+PW_ALT     <- ER_ALT
+PW_LAGS    <- ER_LAGS
+PW_DEGS    <- ER_DEGS
+PW_DEG     <- ER_DEG
 PW_YRS     <- c(1959, 2024)      # the GCB record
-PW_ALPHA   <- 0.05
-PW_POWER   <- 0.80               # for the minimum-detectable-effect calculation
+PW_ALPHA   <- ER_ALPHA
+PW_POWER   <- ER_POWER
 # Ke et al. 2026 (iScience 29(8):117053): +0.38 GtC/yr stronger ocean uptake in
 # an event of MEI 0.71. ⚠ ORIENTATION ONLY -- their window is Jul-Jul and their
 # decomposition is not this series. Used to ASK whether an effect of that ORDER
@@ -59,31 +62,11 @@ e <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
 # ---- the index, aggregated to the sink's own annual resolution at each lag ----
 # A lag of L months means the annual mean of the index over the 12 months ENDING
 # L months before each year's end -- i.e. the sink is allowed to trail the index.
-pw_index_annual <- function(col, lag_m) {
-  t <- e$year + (e$month - 0.5) / 12
-  v <- e[[col]]
-  ok <- is.finite(v)
-  vapply(g$year, function(y) {
-    hi <- (y + 1) - lag_m / 12
-    k <- ok & t > hi - 1 & t <= hi
-    if (sum(k) < 6) NA_real_ else mean(v[k])
-  }, numeric(1))
-}
-pw_detrend <- function(x, deg) residuals(lm(x ~ poly(g$year, deg)))
-ac1 <- function(x) { x <- x[is.finite(x)]; cor(x[-1], x[-length(x)]) }
+pw_index_annual <- function(col, lag_m) er_index_annual(g$year, col, lag_m)
+pw_detrend <- function(x, deg) er_detrend(x, g$year, deg)
+ac1 <- er_ac1
 
-# ---- correlation with an EFFECTIVE sample size -----------------------
-pw_cor <- function(x, y) {
-  k <- is.finite(x) & is.finite(y); x <- x[k]; y <- y[k]; n <- length(x)
-  r <- cor(x, y)
-  # Bartlett/Quenouille: autocorrelation in BOTH series inflates the apparent n.
-  rr <- ac1(x) * ac1(y)
-  n_eff <- max(3, n * (1 - rr) / (1 + rr))
-  z <- atanh(r); se <- 1 / sqrt(n_eff - 3)
-  ci <- tanh(z + c(-1, 1) * qnorm(1 - PW_ALPHA / 2) * se)
-  p  <- 2 * (1 - pnorm(abs(z) / se))
-  list(r = r, n = n, n_eff = n_eff, ci = ci, p = p, slope = coef(lm(y ~ x))[[2]])
-}
+pw_cor <- er_cor    # the shared estimator; see lib_enso_regression.R
 
 # ---- 1. THE POSITIVE CONTROL -----------------------------------------
 cat(sprintf("\n%s\n1. POSITIVE CONTROL -- the LAND sink, whose ENSO response is long established.\n   If this machinery cannot find it, no null it reports on the ocean is worth having.\n%s\n",

@@ -54,21 +54,12 @@ cat(sprintf("\n%s\nTHE 2023/24 EL NINO SINK RESPONSE, YEAR BY YEAR\n  benchmark 
             strrep("=", 78), EN_SRC, strrep("=", 78)))
 
 g <- as.data.frame(ccx_prepare_obs()$gcb)
+# ⭐ NO LOCAL COPY: the annual-sink construction is `dg_annual_sinks()` in
+# lib_design_gates.R, the SAME kernel gate 7 takes its window mean of. This file
+# carried a second copy until 2026-09-01.
 en_annual <- function(path) {
-  v <- dg_vector(path); r <- dg_run(v); o <- r$out
-  yrs <- sort(unique(floor(o$t + 1e-9))); bnd <- c(yrs, max(yrs) + 1L)
-  tt <- o$t; n <- length(tt)
-  stock <- function(x) {                    # = dg_gate7()'s construction, shared
-    y  <- stats::approx(tt, x, xout = bnd)$y
-    lo <- bnd < tt[1]; hi <- bnd > tt[n]
-    if (any(lo)) y[lo] <- x[1] + (bnd[lo]-tt[1]) * (x[2]-x[1]) / (tt[2]-tt[1])
-    if (any(hi)) y[hi] <- x[n] + (bnd[hi]-tt[n]) * (x[n]-x[n-1]) / (tt[n]-tt[n-1])
-    diff(y)
-  }
-  el <- ccx_forcing_eluc_annual(r$F)
-  atm <- stats::approx(o$t, (o$co2_NH + o$co2_SH)/2, xout = bnd, rule = 2)$y
-  list(yrs = yrs, land = stock(o$land_C) + el$eluc[match(yrs, el$year)],
-       ocean = stock(o$ocean_C), grow = diff(atm), src = v$src)
+  v <- dg_vector(path); a <- dg_annual_sinks(dg_run(v))
+  list(yrs = a$year, land = a$land, ocean = a$ocean, grow = a$growth_ppm, src = v$src)
 }
 M <- lapply(EN_MODES, en_annual)
 

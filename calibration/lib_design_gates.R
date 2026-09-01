@@ -203,7 +203,17 @@ dg_obs_gate5 <- function() {
 # silently under-count the first and last year's flux ... which is the shape of
 # a bug". Aligning it is what makes the two reconstructions agree at ANY window
 # boundary -- dropping 2024 only hides today's instance.
-dg_gate7 <- function(r) {
+#' Annual land / ocean sinks and CO2 growth from one run
+#'
+#' ⭐ EXTRACTED 2026-09-01 because `dg_gate7()` was not the only caller any more:
+#' `diag_elnino_2023_sink_response.R` had copied this construction to get the
+#' same quantity YEAR BY YEAR, and a second copy of an estimator is the
+#' caption-sync bug class -- the day the end handling changes in one, the two
+#' report the same sink at two values and nothing says so. Gate 7 is now the
+#' WINDOW MEAN of this series, which is exactly what it always was.
+#'
+#' @return list(year, land, ocean, growth_ppm)
+dg_annual_sinks <- function(r) {
   o <- r$out
   yrs <- sort(unique(floor(o$t + 1e-9))); bnd <- c(yrs, max(yrs) + 1L)
   tt <- o$t; n <- length(tt)
@@ -214,10 +224,17 @@ dg_gate7 <- function(r) {
     if (any(hi)) y[hi] <- v[n] + (bnd[hi] - tt[n]) * (v[n] - v[n - 1]) / (tt[n] - tt[n - 1])
     diff(y)
   }
-  el <- ccx_forcing_eluc_annual(r$F)
-  k <- yrs >= DG_SINK_WIN[1] & yrs <= DG_SINK_WIN[2]
-  list(ocean = mean(stock(o$ocean_C)[k]),
-       land  = mean((stock(o$land_C) + el$eluc[match(yrs, el$year)])[k]))
+  el  <- ccx_forcing_eluc_annual(r$F)
+  atm <- stats::approx(o$t, (o$co2_NH + o$co2_SH) / 2, xout = bnd, rule = 2)$y
+  list(year = yrs, ocean = stock(o$ocean_C),
+       land = stock(o$land_C) + el$eluc[match(yrs, el$year)],
+       growth_ppm = diff(atm))
+}
+
+dg_gate7 <- function(r) {
+  a <- dg_annual_sinks(r)
+  k <- a$year >= DG_SINK_WIN[1] & a$year <= DG_SINK_WIN[2]
+  list(ocean = mean(a$ocean[k]), land = mean(a$land[k]))
 }
 
 # ---- the gate-7 TARGETS, recomputed on DG_SINK_WIN from the obs series -------
