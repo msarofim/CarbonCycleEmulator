@@ -26,6 +26,8 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
+source(ccx_path("calibration", "lib_run_inputs.R"))
+ccx_require_run_inputs()   # BEFORE the wall budget, and before any target is written
 
 PT_ARM  <- "N"
 PT_OUT  <- ccx_path("calibration", "torch", "port_targets.csv")

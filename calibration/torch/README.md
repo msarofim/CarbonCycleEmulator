@@ -46,8 +46,8 @@ bash calibration/torch/make_bundle.sh          # prints the scp + untar lines
 #    IT PRINTS THE MEASURED s/eval. Size the array on THAT, not on the Mac's.
 bash calibration/torch/setup_torch.sh
 
-# 3. THE GATE BATCH -- ids 0/1/2 = cold init, 08-30 incumbent, 08-31e new basin
-sbatch --array=0-2 calibration/torch/multistart.sbatch
+# 3. THE GATE BATCH -- 5 tasks, and NOT ids 0-2 alone (see below)
+sbatch --array=0-2,21,42 calibration/torch/multistart.sbatch
 sacct -j <jobid> -X --format=JobID,State,ExitCode,Elapsed
 
 # 4. ONLY IF THE GATE BATCH PASSES -- the survey
@@ -57,16 +57,57 @@ sbatch --array=3-42 calibration/torch/multistart.sbatch
 CCX_MS_OUTDIR=.../multistart_20260831 Rscript calibration/collect_dispersed_multistart.R
 ```
 
+⚠ **THE GATE BATCH IS `0-2,21,42`, NOT `0-2`.** Ids 0–2 are all *reference* starts — warm, already
+at a known point — and they never execute the dispersed-draw path: the redraw loop, the long climb
+from ~−3×10⁵, or the budget-shortened restart. A gate batch made only of them would certify a code
+path the survey does not use. 21 and 42 are dispersed ids from inside the production range, which
+also satisfies the HPC rule of a **≥5-task smoke test spread across the index range** before any
+array with N > 20 (each failed task still burns fairshare).
+
+## What the local smoke test found — all four fixed, all four verified
+
+The whole bundle was extracted to a clean directory and driven through **the real sbatch body** via
+`SLURM_ARRAY_TASK_ID`, 2026-09-01. It found:
+
+1. ⛔ **`data-raw/downloads/nuclear14c/` was not in the bundle** (gitignored, 428 KB of the excluded
+   3.4 GB tree). `ccx_nuclear_c14_annual()` reads it at run time through a default argument and, when
+   absent, **warns and sets the industrial ¹⁴C source to zero** — a different objective, ~1e-3
+   relative, with no error. **The port gate caught it on the first run**, which is exactly what a
+   1e-8 bound on a pure evaluation is for; no looser tolerance would have. Now shipped, and
+   `calibration/lib_run_inputs.R` asserts every run-time input **by name** before the wall budget, so
+   the next missing file says so instead of surfacing as "the port is broken".
+2. ⛔ **A resumed reference task failed the port gate spuriously.** Gate (a) read whatever the run
+   *started from*, which after a checkpoint resume is the optimiser's progress, not the reference
+   point — so re-submitting an array to continue it (this README's own advice) aborted with a false
+   "this machine does not reproduce the objective". Gate (a) now always evaluates the **fixed**
+   point; gate (b)'s ordering still uses the resumed one. Re-mutation-tested: it still fires on a
+   genuinely perturbed target.
+3. **The sbatch body hardcoded `/scratch/ms17839/...`**, so it could never be run anywhere else. The
+   body is parameterised (`CCX_PROJ`, `CCX_SKIP_MODULES`); the `#SBATCH` directives stay literal
+   because SLURM parses them before any shell runs.
+4. ⚠ **`mkdir -p logs` inside the script does not create the directory `--output` writes to** —
+   SLURM opens that file first. `setup_torch.sh` creates it, which is why setup is not optional.
+
+**Also verified, not assumed:** `Rscript --vanilla` implies `--no-environ` but **keeps an exported
+`R_LIBS_USER`** (measured — if it did not, every task would fail to find Rcpp for the same invisible
+reason); **4 tasks compiling the C++ core simultaneously** all exit 0 with distinct outputs and no
+cache race; **checkpoint resume** picks up at the right cycle. Local eval rate **0.186 s/eval** —
+⚠ **size the array on the number `setup_torch.sh` prints on Torch, not on this one.**
+
 ## The port gate — read it before scaling
 
 Ids **1** and **2** start at points already converged on the Mac, and each is gated **twice**, with
 each bound matching its own claim:
 
-* **(a) the START point is an EVALUATION**, so two machines must agree to floating point. The bound
-  is **relative, 1e-8**, against `calibration/torch/port_targets.csv` — logposts measured on the Mac
-  by `calibration/make_port_targets.R`, carrying host, commit and timestamp. **This is the gate that
-  catches a bad port** (a different BLAS, a half-copied data file, a stale build).
+* **(a) the FIXED REFERENCE point is an EVALUATION**, so two machines must agree to floating point.
+  The bound is **relative, 1e-8**, against `calibration/torch/port_targets.csv` — logposts measured
+  on the Mac by `calibration/make_port_targets.R`, carrying host, commit, **and the parameter
+  bracket they were measured under**. **This is the gate that catches a bad port** (a different
+  BLAS, a half-copied data file, a stale build) — and it did, on the first run.
   Mutation-tested: perturbing a target by 1e-6 relative makes it fire.
+  ⚠ **Re-run `make_port_targets.R` and re-ship the CSV whenever the parameter table moves.** The
+  09-01 `kz` re-bisection shifted every logpost; the driver now REFUSES a target measured under a
+  different bracket rather than reading the shift as a port fault.
 * **(b) the FINAL value is an OPTIMISATION**, so the only available claim is an **ordering** — it may
   not come back worse than it started. That one runs on *every* task, not just the references.
 

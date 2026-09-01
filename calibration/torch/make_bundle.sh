@@ -13,9 +13,16 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 OUT=/tmp/ccx_torch_bundle.tar.gz
+# ⚠ `data-raw/downloads/nuclear14c` IS NOT OPTIONAL, and it is 428 KB of the
+# 3.4 GB tree. `ccx_nuclear_c14_annual()` reads it AT RUN TIME through a default
+# argument and, when it is absent, WARNS and sets the industrial 14C source to
+# zero -- a different objective, ~1e-3 relative, with no error. Omitting it is
+# how the 2026-09-01 port gate came to fail on a machine that was fine.
+# Everything in calibration/lib_run_inputs.R's manifest must be listed here.
 tar czf "$OUT" \
   DESIGN.md CLAUDE.md README.md DATA.md \
   R src data tests \
+  data-raw/downloads/nuclear14c \
   calibration/*.R calibration/torch \
   calibration/output/refit_20260831_seas_lag_split \
   calibration/output/polish_20260831_probe_basin

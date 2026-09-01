@@ -57,6 +57,8 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
+source(ccx_path("calibration", "lib_run_inputs.R"))
+ccx_require_run_inputs()   # BEFORE the wall budget, and before any target is written
 
 # ---- named constants ------------------------------------------------
 MS_ARM        <- "N"          # the shipped arm; see run_modefind_pump_arms.R
@@ -210,23 +212,43 @@ ms_start <- function(id) {
 # ---- resume, if this task has already run part of its budget ---------
 st <- ms_start(MS_ID)
 u <- st$u; best <- -lp_fun(u)
+# ⭐ THE FIXED REFERENCE POINT'S VALUE, CAPTURED BEFORE ANY RESUME CAN MOVE IT.
+# ⛔ THE BUG THIS KILLS (found 2026-09-01 by re-submitting reference id 1):
+# PORT GATE (a) used to read whatever the run STARTED FROM, which after a
+# checkpoint resume is the OPTIMISER'S progress, not the reference point. So
+# re-submitting an array to continue it -- the workflow the README recommends,
+# and the whole reason tasks checkpoint -- made a reference task abort with
+# "this machine does not reproduce the objective ... STOP AND DIAGNOSE", a
+# false alarm pointing at the port when nothing was wrong at all. Gate (a)'s
+# claim is about a FIXED point, so it must evaluate the FIXED point, always.
+MS_REF_LP <- -best
 trace <- data.frame(cycle = 0L, restart = 0L, logpost = -best, evals = 0L)
 cyc0 <- 1L
+MS_RESUMED <- FALSE
 if (file.exists(MS_CKPT)) {
   ck <- readRDS(MS_CKPT)
   if (!identical(ck$id, MS_ID))
     stop("checkpoint at ", MS_CKPT, " is for id ", ck$id, ", not ", MS_ID)
   u <- ck$u; best <- ck$best; trace <- ck$trace; cyc0 <- ck$cycle + 1L
+  MS_RESUMED <- TRUE
   cat(sprintf("RESUMED from checkpoint at cycle %d, log-post %.4f\n", ck$cycle, -best))
 }
-cat(sprintf("start: %s (%d draw%s), log-post there = %.4f\n",
-            st$kind, st$draws, if (st$draws == 1L) "" else "s", -best))
+# TWO NUMBERS, SAID SEPARATELY. Printing one line for both is how the gate came
+# to conflate them: on a resumed run the old line claimed the DRAW landed where
+# the OPTIMISER had got to.
+cat(sprintf("start point: %s (%d draw%s), log-post there = %.4f\n",
+            st$kind, st$draws, if (st$draws == 1L) "" else "s", MS_REF_LP))
+if (MS_RESUMED)
+  cat(sprintf("  ...but this run CONTINUES from the checkpoint at %.4f, cycle %d\n",
+              -best, cyc0 - 1L))
 
-# ---- PORT GATE (a): the START point EVALUATES the same here as on the
-# reference machine. Run BEFORE spending the budget, so a bad port costs
+# ---- PORT GATE (a): the FIXED REFERENCE point evaluates the same here as on
+# the reference machine. Run BEFORE spending the budget, so a bad port costs
 # seconds rather than a full array. The target is read from a file this script
 # did not write ([[gate_reads_its_own_output]]); if it is absent, say so and
 # decline to claim the port is verified -- do not silently proceed as if it were.
+# ⚠ IT GATES `MS_REF_LP`, NOT `MS_START_LP`: the two differ after a resume, and
+# only the first is the fixed point the claim is about.
 MS_START_LP <- -best
 MS_PORT <- list(checked = FALSE, target = NA_real_, rel = NA_real_)
 local({
@@ -264,9 +286,9 @@ local({
          "reparameterisation constant, so the comparison would indict the PORT ",
          "for a change in the TABLE. Re-run make_port_targets.R and re-ship the CSV.")
   tgt <- as.numeric(r$logpost[1])
-  rel <- abs(MS_START_LP - tgt) / max(abs(tgt), 1e-12)
-  cat(sprintf("PORT GATE (a) start point: here %.10f vs %s@%s %.10f, rel %.2e (tol %.0e)\n",
-              MS_START_LP, r$host[1], r$commit[1], tgt, rel, MS_EVAL_TOL))
+  rel <- abs(MS_REF_LP - tgt) / max(abs(tgt), 1e-12)
+  cat(sprintf("PORT GATE (a) reference point: here %.10f vs %s@%s %.10f, rel %.2e (tol %.0e)\n",
+              MS_REF_LP, r$host[1], r$commit[1], tgt, rel, MS_EVAL_TOL))
   if (rel > MS_EVAL_TOL)
     stop("PORT GATE (a) FAILED: this machine does not reproduce the objective ",
          "at a FIXED point to ", MS_EVAL_TOL, " relative. Every dispersed start ",
@@ -398,7 +420,7 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             seed = MS_SEED + MS_ID, spread = MS_SPREAD,
             spread_measured = MS_SPREAD_MEASURED, draws = st$draws,
             port_checked = MS_PORT$checked, port_target = MS_PORT$target,
-            port_rel = MS_PORT$rel,
+            port_rel = MS_PORT$rel, ref_logpost = MS_REF_LP, resumed = MS_RESUMED,
             # RECORDED **AND** RESTORED: these are the fields ccx_mode_bands()
             # reads. [[recorded_but_never_restored]] -- a band written by a
             # producer and consumed by no reader decoded 26 % wrong for a
