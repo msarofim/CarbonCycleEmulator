@@ -23,11 +23,13 @@ on Niño3.4 over **1959–2024**, model and observation through **one shared est
   (The new basin is noisier at 0.170: a second small mark against it.)
 - **Land is right-signed at 53–58 % of observed** — a magnitude shortfall, not a structural one, and
   better than the 33 % of CO₂-growth variability recorded in `ccx_variability_gap`.
-- ⇒ **HYPOTHESIS, not tested:** the model carries the THERMAL term (El Niño ⇒ warmer SST ⇒ lower
-  solubility ⇒ weaker uptake, the sign it produces) and lacks the CIRCULATION term that dominates in
-  nature (suppressed equatorial upwelling of DIC-rich water ⇒ less outgassing ⇒ stronger net uptake).
-  A 2-box ocean with no ENSO modulation of upwelling behaves exactly like this, and it coheres with
-  the standing reading that the ocean's defects are circulation and capacity rather than rate.
+- ⭐ **AND THE HYPOTHESIS IS CONFIRMED FROM THE CODE — the negative sign is the ONLY sign this
+  structure can produce.** ENSO enters as a **land-only** flux (`R/model.R:1256`, `soil_fast → atm`);
+  the ocean feels it through **exactly one path, SST** (`cor(sst_anom, Niño3.4) ≈ +0.40`), i.e. the
+  thermal term alone. **There is no upwelling to suppress**: the conveyor is built but `q_conv = 0`,
+  is not in `CCX_PARAM_TABLE`, and is absent from the fitted mode, so vertical transport is
+  time-invariant diffusion. The pump is live but constant-mass. **No value of `gamma_enso` can fix
+  this, because `gamma_enso` only moves land.**
 - ⚠ Three caveats stated in the file and not softened: **not independent** (the model is driven by
   this index), **model-vs-product** (GCB's ocean sink is an ensemble, not measured air-sea flux), and
   the ocean target clears its own detection floor by only 1.3×.
