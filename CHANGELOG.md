@@ -2,6 +2,40 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01b — **THE MODEL GETS THE 2023/24 EL NIÑO OCEAN RESPONSE BACKWARDS, IN BOTH BASINS**
+
+`calibration/diag_elnino_2023_sink_response.R` (~10 s). Adopts nothing.
+
+Marcus supplied **Ke et al. (2026), iScience 29(8):117053**, doi:10.1016/j.isci.2026.117053
+(open access, vintage 2026-08-21) as background. It quantifies the event our historical run now ends
+inside: CO₂ growth **3.66 ± 0.09 ppm/yr** over Jul2023–Jun2024, the highest July-to-July rate since
+1979, from a **2.24 GtC/yr** net-land-sink weakening (97.5 % tropical), **partly offset by
+0.38 GtC/yr of STRONGER ocean uptake**.
+
+Testing the mechanism against the GCB series the objective already uses, 2022 → 2024:
+
+| | land Δ | ocean Δ | land captured |
+|---|---|---|---|
+| **observed** | **−1.16** | **+0.27** | — |
+| incumbent | −1.04 | **−0.03** | 89 % |
+| new basin | −0.91 | **−0.07** | 78 % |
+
+- ⛔ **The land response is largely right; the OCEAN moves the WRONG WAY in BOTH basins**, so it is
+  structural rather than a property of the basin choice. **2023 is the model's worst ocean-sink year
+  of the decade (−0.67 GtC/yr).** A third independent line pointing where gate 12a's capacity defect
+  and gate 7's ocean half already point.
+- ⚠ **DESIGN gate 7 cannot see this**: it scores the 2015–2023 window MEAN, and a mean over nine
+  years averages away a divergence concentrated in the last one. The model passes ocean at −0.45σ on
+  the mean while 2023 alone is 0.67 off. That is `no_power_null` in the shape of an averaging window,
+  and it is why this file reports YEAR BY YEAR.
+- ⚠ **The paper's own numbers are quoted for ORIENTATION and never differenced against ours** — its
+  window is Jul–Jul and its land decomposition is not the `land_sink` column this differences.
+  Quoting 2.24 against our −1.16 would be exactly the like-for-like error the project rule forbids.
+  What the paper licenses here is the **mechanism and the sign**.
+- ⚠ Small mark against the new basin for the adoption call: it captures **78 %** of the land drop
+  where the incumbent gets **89 %**.
+- ⚠ The paper never uses the phrase "airborne fraction"; any link to gate 4 is inference, not its framing.
+
 ## 2026-09-01 — **RULING #1 CLOSED: THE `kz` BRACKET IS RE-BISECTED WIDE ON THE SOURCED TARGET**
 
 `R/calibrate.R` `kz`: **[3942.5, 6528] → [4379.1, 8109.9]**, `init` 5235.25 → 6244.5. Marcus's call.
