@@ -2,6 +2,53 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-08-31f — **THE DISPERSED MULTI-START, RESTRUCTURED FOR TORCH AND READY TO LAUNCH**
+
+`calibration/run_dispersed_multistart.R`, `calibration/collect_dispersed_multistart.R`,
+`calibration/make_port_targets.R`, `calibration/torch/` (sbatch + setup + bundle + README).
+**Adopts nothing. Nothing has touched Torch.**
+
+**TORCH VERDICT (standing rule, said out loud): RUNNABLE, NOT YET RUN, AND NOW STAGED.** A straight
+port of the serial driver is still MEASURED TO LOSE — the Mac is ~2× faster per eval and one
+warm-started chain took 203 min. **Torch wins only RESTRUCTURED**, and this is the restructuring:
+ONE start per process, so N starts are an array instead of a queue. ⚠ **Claude cannot submit**
+(VPN + gateway + Duo + device-code); every step is Marcus's.
+
+- **ONE START PER INVOCATION**, id from `CCX_MS_ID` or `SLURM_ARRAY_TASK_ID`, deterministic per id
+  (`seed + id`), so a start is the same point whether it runs alone or in an array of 400 and a
+  failed task can be requeued unchanged.
+- ⭐ **THE DISPERSION SCALE IS MEASURED, NOT INVENTED: 1.0493**, the per-coordinate RMS distance
+  between the TWO KNOWN BASINS, recomputed from their own mode files every run. That is the
+  separation a survey must resolve to be worth running. ⚠ Still a methodological choice; printed,
+  stored in every output, and `CCX_MS_SPREAD` overrides it.
+- ⭐ **THE PORT GATES ITSELF, AND EACH BOUND MATCHES ITS OWN CLAIM.** Ids 0/1/2 are the cold init,
+  the 08-30 incumbent and the 08-31e new basin. **(a)** the START point is an EVALUATION ⇒ relative
+  **1e-8** against `calibration/torch/port_targets.csv`, logposts measured on the Mac and carrying
+  host + commit; **(b)** the FINAL value is an OPTIMISATION ⇒ an **ORDERING** and no threshold at
+  all. Mutation-tested: perturbing a target by 1e-6 relative fires (a).
+  ⚠ The target is **NOT** each file's stored `logpost` — the incumbent's −0.85 is objective drift
+  and would have spent most of a 1.0-log-unit budget before the port was considered.
+- **THE BUDGET SIZES THE RESTART, IT DOES NOT MERELY VETO IT.** `optim()` cannot be interrupted once
+  entered, so a clock-only check commits a task to a whole further restart and lands past the
+  partition cap. The guard PROJECTS from a measured restart duration — and when a full-maxit restart
+  does not fit, it runs a SHORTER one rather than checking out with 0 evals.
+- ⛔ **TWO BUGS THE SMOKE FOUND, both of the "a null that is structurally guaranteed" class:**
+  a task whose budget could not fit ONE restart reported **`CONVERGED`** (cycle gain 0.0000 because
+  nothing was tried), and printed an eval rate of 2.6 s/eval computed over zero evals. Both now say
+  what actually happened. The collector excludes such a task from the basin count.
+- **The collector counts BASINS, not runs** — single-linkage in u-space at 0.25 × the measured
+  inter-basin separation, i.e. the survey's own resolution — and states the verdict as an ORDERING
+  against the incumbent to beat (−1496.01). ⚠ It says explicitly that a survey bounds what N starts
+  at ONE dispersion found and is not a proof that no better basin exists.
+
+⚠ **A dispersed start is a LONG climb**: at sd 1.05 a draw scores ~−3×10⁵ against the cold init's
+−1.9×10⁴, so a start may spend its whole wall budget unconverged. Every task checkpoints every
+cycle, so re-submitting the same array RESUMES rather than restarts.
+
+⚠ **The only R dependency is Rcpp** (`adaptMCMC` is used only by `ccx_run_mcmc()` and is not on
+Torch — which is why the survey is a mode-finder, not a sampler). The bundle excludes `data-raw/`
+(3.4 GB) and is ~2 MB. `DESIGN.md` is **not** optional: it is `REPO_MARKER` in `R/paths.R`.
+
 ## 2026-08-31f — **THE GATES, RE-PRICED IN THE NEW BASIN — AND THE HARNESS THAT MEASURES THEM WAS BROKEN**
 
 `calibration/diag_gates_in_the_new_basin.R` (~10 s) + `calibration/lib_design_gates.R`. Adopts nothing.
