@@ -6,17 +6,27 @@
 # password, Duo, and a Microsoft device-code at login.torch; none of that is
 # scriptable from here.
 #
-# ⛔ RUN THE GATE BATCH FIRST AND READ IT:
-#     sbatch --array=0-2 calibration/torch/multistart.sbatch
-# Ids 0/1/2 are the cold init, the 08-30 incumbent and the 08-31e new basin.
-# Ids 1 and 2 carry a PORT GATE against logposts measured on the Mac and shipped
-# in calibration/torch/port_targets.csv. If either fails, every dispersed start
-# in the survey would be optimising a different objective. Do not scale past it.
-# This is also the skill's own "test before you scale" gate: 5 tasks, all
-# exit 0, real output files, before any array with N > 20.
+# ⛔ RUN THE PREFLIGHT BATCH FIRST AND READ IT (~2 min/task, exits 0 without
+# optimising):
+#     CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 \
+#       calibration/torch/multistart.sbatch
+# Ids 0/1/2 are the cold init, the 08-30 incumbent and the 08-31e new basin;
+# ids 3/4/5 are the ENSO-SEEDED carries of the two known basins into the
+# 25-parameter space (see run_dispersed_multistart.R's header -- the migrated
+# files are NOT modes of this space, so the survey has to produce its own
+# baseline). 25 and 45 are dispersed ids from inside the production range, so
+# the batch covers the draw path as well as the warm one.
+# EVERY task carries a PORT GATE against logposts measured on the Mac and
+# shipped in calibration/torch/port_targets.csv. If it fails, every start in the
+# survey would be optimising a different objective. Do not scale past it.
 #
-# THEN the survey:
-#     sbatch --array=3-42 calibration/torch/multistart.sbatch
+# THEN the survey, THROTTLED -- %10 caps how many run at once:
+#     sbatch --array=0-45%10 calibration/torch/multistart.sbatch
+# ⚠ ROUND 2 IS **NOT** THE SAME ARRAY AGAIN. Re-submit only the fixed starts and
+# the best dispersed ids from round 1's summary.csv -- resuming all 40 spends
+# three times the fairshare converging tasks that are already 50+ log-units
+# behind. See calibration/torch/README.md, "Two rounds, and the second is not
+# the first repeated".
 #
 # WALL -- THE ARITHMETIC, BECAUSE A TIMEOUT COSTS FAIRSHARE AND A CLEAN EXIT
 # DOES NOT. cpu_short caps at 4 h = 240 min. The task's OWN budget
@@ -76,7 +86,10 @@ fi
 # and cost 11 h vs 2 h17 elsewhere when they oversubscribe. [[pin_blas_threads]]
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$PROJ/calibration/output/multistart_20260831}"
+# ⚠ THE DIRECTORY NAMES THE PARAMETER SET. A `u` vector is meaningless without
+# it, and this project moved the set twice in three days; the driver's resume
+# refuses a foreign checkpoint, but not mixing them is the cleaner answer.
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$PROJ/calibration/output/multistart_20260901_enso25}"
 export CCX_MS_WALL_MIN="${CCX_MS_WALL_MIN:-180}"        # 3 h of the 4 h cap; see WALL above
 export CCX_MS_RESTARTS="${CCX_MS_RESTARTS:-3}"
 export CCX_MS_CYCLES="${CCX_MS_CYCLES:-6}"

@@ -2,6 +2,91 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01k — **THE TORCH SURVEY IS RE-DESIGNED FOR THE 25-PARAMETER MODEL, NOT JUST RE-CUT FOR IT**
+
+09-01j regenerated `port_targets.csv` and made the bundle **runnable** at 25 parameters. This entry
+asks the different question — **what the survey should now DO** — and changes three things.
+`run_dispersed_multistart.R`, `collect_dispersed_multistart.R`, `calibration/torch/multistart.sbatch`
+and `calibration/torch/README.md`. **Adopts nothing; `CCX_MODE_CANONICAL` untouched.**
+
+**⛔ 1. NEITHER KNOWN BASIN IS A MODE OF THIS SPACE, SO THE SURVEY HAD NO BASELINE IT COULD USE.**
+Both mode files are migrated 21-parameter vectors whose ocean ENSO pair is **exactly 0** — 0 is what
+they RAN, because the mechanism did not exist when they were fitted. Measured on the shipped
+objective: migrated incumbent **−1551.1222**, migrated new basin **−1500.0507**, and moving the
+ocean pair to **+0.10 in each hemisphere with nothing else touched** is worth **+1.9087** at the new
+basin and **+0.2947** at the incumbent (reproducing `diag_enso_objective_leverage.R`'s +1.91).
+⇒ **−1496.01 is not a number a 25-parameter result may be ranked against**, and neither is id 2's
+start value — that comparison is an optimum against a migrated point [[like_for_like_forcing]].
+
+**The fix is three more fixed ids, not a caveat in a README.** The array's fixed head went from 3
+to 6: **id 3** = incumbent + ocean +0.10 each (−1550.8275), **id 4** = new basin + the same
+(−1498.1420), **id 5** = new basin + the **OBSERVATION-implied** partition, ocean +0.326 each and
+land ×1.734 (−1507.6925). Ids 1 and 2 stay as **UNSEEDED controls** beside 3 and 4, so the pair
+says what the seeding was worth, and the collector prints that difference. **Id 5 is conditionally
+WORSE on purpose**: it starts where GCB's measured ENSO sink slopes say the partition is, which a
+frozen slice scores at −7.72 — and a conditional sign is a hypothesis about a refit, not a
+prediction of one (the gate-pricing arc measured 253 log-units of pure frozen-slice artifact, and
+09-01g's compensating-error state is exactly other coordinates absorbing an ENSO change).
+
+`collect_dispersed_multistart.R`'s verdict is now an ordering against **the best FINAL value among
+ids 1–5**, not against id 2, and it says so with the missing ids named when some are absent. It also
+reports **BEST DISPERSED separately from BEST FOUND**: only a dispersed start can answer "is there a
+third basin", and with the fixed starts now seeded the top of the table is quite likely to be one of
+them — one line for both states would print the same string for "the survey found something" and
+"the known basins are still the best known basins" [[no_power_null]].
+
+**⛔ 2. THE DISPERSION WAS DILUTED 8.4 % BY A BOOKKEEPING ARTIFACT.** `MS_SPREAD` is the
+per-coordinate RMS separation between the two known basins. Four of the 25 coordinates were
+**migrated in BOTH files**, so their separation is a property of the migration contract and not of
+the basins — the ocean pair differs by **exactly 0**, the land pair by **0.0100**, which is the
+retired scalar cut in half. Averaging them in multiplied the whole dispersion by
+**√(21/25) = 0.9165**. Measured: **RMS over all 25 = 0.9592, over the 21 that at least one
+reference point FITTED = 1.0466.** The pool is now the second, derived from `attr(, "migrated")` —
+the field the migration itself records — so the next split fixes itself, and the excluded names are
+PRINTED rather than assumed. ⚠ **0.9592 was never "the basins got closer"**; over the shared
+coordinates the separation is what it always was.
+
+⚠ **This does NOT give the four ENSO coordinates a scale of their own**, and that is stated at the
+point of use: they are dispersed at the shared pooled sd, which is an **assertion**, because their
+own separation is structurally zero and no second basin exists to measure it against. 09-01j is the
+check that it is not silly — at ~1.05 they land **6–9 conditional sds** out against **325–430** for
+the stiffest coordinates.
+
+**⚠ 3. ROUND 2 IS NOT ROUND 1 REPEATED — and that answers the N = 40 question 09-01c left open.**
+At 25 parameters the Nelder-Mead simplex has **26 vertices**, so each task converges less far in the
+same wall than the 22-dimensional design assumed. The old advice was "re-submit the same array";
+that spends three times the fairshare converging starts already 50+ log-units behind. **Round 1 =
+`0-45%10`. Round 2 = the six fixed ids plus the best ~8 dispersed ids from `summary.csv`.** The
+fixed ids are always re-submitted — they are the baseline the verdict is an ordering against, so
+they are the tasks that most need to be converged. ⇒ **N stays at 40**: buy DEPTH in round 2, not
+width in round 1. ⚠ The cost is written down rather than hidden ([[no_power_null]]): a truncated
+start is ranked on a value it had not finished climbing to, so a deep basin that started slowly can
+be dropped — which is why the cut is the best ~8 and why OUT-OF-TIME is printed beside every rank.
+
+**What did NOT change, and why.** `CCX_MS_MAXIT = 6000` — the **wall**, not the cycle budget, stops
+a round (3 × 6,000 evals is ~111 min at the 0.37 s/eval a 2×-slower node implies), so raising it
+would change nothing a round executes. The dispersion **centre** is still the COLD init. The
+objective and the parameter table are untouched: `port_targets.csv` still stands at `53ef03d`,
+`n_par = 25`, and **nothing here needed it re-run**.
+
+**⭐ A GUARD FOUND BY MUTATION-TESTING THE GUARD.** The first cut dispatched the seeded ids as
+`id == MS_SEED_IDS[["new_obs"]]`. Deleting an entry then died at *"subscript out of bounds"* three
+frames from the cause and **never reached the gap guard written for exactly that case**. Dispatch is
+now through `names(MS_SEED_IDS)[match(id, ...)]`, and **both directions fire with the reason**: an
+id the vector no longer names hits the gap guard ("id 5 is below MS_DISPERSED_FROM but matches no
+fixed start"), an id it names with no branch hits a new one. ⇒ **a guard that is unreachable is not
+a guard**; the mutation test is what distinguishes the two [[mutation_test_gates]].
+
+**Also**: the default output directory names the **parameter set** (`multistart_20260901_enso25`),
+not a date — a `u` vector is meaningless without it, and this project moved that set twice in three
+days; `start_class`, the dispersion pool and the ENSO seed values are recorded in every
+`start_*.rds` **and read by the collector** [[recorded_but_never_restored]]; and two stale captions
+went with it (`(2n+1)` at n = 22, and a −1548.0112 port-gate example that predates both the `kz`
+re-bisection and the split).
+
+**PREFLIGHTED on the Mac for ids 0, 1, 2, 3, 4, 5, 25 and 45** — all eight `PORT GATE (a) PASSED`,
+rel 7.6e-16 to 2.5e-14. Nothing has touched Torch; Marcus submits.
+
 ## 2026-09-01j — **PRE-REFIT PASS: THE OBJECTIVE ALREADY WANTS THE OCEAN TERM, AND 09-01g NAMED A SLOPE GAP AS A COEFFICIENT**
 
 `calibration/diag_enso_objective_leverage.R`, new (~6 min). Adopts nothing. Written to answer the

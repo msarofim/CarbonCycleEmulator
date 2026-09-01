@@ -1,37 +1,92 @@
 # Torch bundle — the DISPERSED MULTI-START
 
-> ## ⚠ RE-CUT FOR 25 PARAMETERS, 2026-09-01j
+> ## ⚠ RE-CUT FOR THE 25-PARAMETER MODEL, 2026-09-01k
 >
-> The ENSO split (22 → 25) landed after this bundle was first staged. **`port_targets.csv` has been
-> regenerated** at commit `53ef03d`, `n_par = 25`; the previous CSV (`n_par = 22`, commit `3346ded`)
-> would have been **refused** by the port gate with "The target is stale", killing every task in
-> about two seconds — which is the gate working.
+> The ENSO split (22 → 25) landed after this bundle was first staged. Regenerating
+> `port_targets.csv` (09-01j) made the bundle *runnable* at 25 parameters. **This pass asks the
+> different question — what the survey should now DO** — and changes three things. The driver, the
+> collector and the sbatch body carry the reasoning in full; this is the summary.
 >
-> **Nothing in the driver needed changing.** `run_dispersed_multistart.R` already brings both
-> reference points forward through `ccx_migrate_par_set()`, and the dispersion scale is recomputed
-> from those points at every run.
+> ### 1. ⛔ NEITHER KNOWN BASIN IS A MODE OF THIS SPACE, SO THE SURVEY MUST PRODUCE ITS OWN BASELINE
 >
-> ⭐ **The port targets moved by EXACTLY the prior-split constant, and by nothing else.** The
-> reference logposts went `+0.8125 → −3.9643` (incumbent) and `+0.7364 → −4.0379` (new basin);
-> the analytic shift from replacing one N(0, 2) prior with four is **−4.7768** and **−4.7743**, and
-> the residuals are **3e−7**, which is the precision of the `gamma_enso` values as printed. **The
-> likelihood at both reference points is untouched** — a stronger statement of the split's
-> behaviour-preserving default than the trajectory bit-identity test, because it covers the whole
-> objective.
+> Both mode files are **migrated 21-parameter vectors whose ocean ENSO pair is exactly 0** — 0 is
+> what they RAN, because the mechanism did not exist when they were fitted. Measured on the shipped
+> objective: the migrated incumbent is **−1551.1222**, the migrated new basin **−1500.0507**, and
+> moving the ocean pair to **+0.10 in each hemisphere with nothing else touched** is worth
+> **+1.9087** at the new basin (+0.2947 at the incumbent). ⇒ **−1496.01 is not a number a
+> 25-parameter result may be ranked against**, and neither is id 2's start value: that comparison is
+> an optimum against a migrated point.
 >
-> **The dispersion scale moved 1.0493 → 0.9592 for a BOOKKEEPING reason, not a physical one.** The
-> two known basins differ by 0.01 in the two land coordinates and by **exactly 0** in the two ocean
-> ones — neither file has an ocean term — so four near-identical coordinates dilute the
-> per-coordinate RMS by exactly √(21/25) = 0.9165. Over the 21 shared coordinates the separation is
-> **1.0466**, essentially what it always was.
+> **So the fixed head of the array grew from three ids to six.** Ids 3–5 carry the two known basins
+> INTO this space, on the same machine and the same objective as everything they will be compared
+> with:
 >
-> ⚠ **Both reference points are MIGRATED 21-parameter vectors, so NEITHER IS A MODE of this space** —
-> there is a measured uphill direction at each (the ocean ENSO pair is worth **+1.98** at the new
-> basin after re-optimising a carbon slice, `diag_enso_objective_leverage.R`). That does not affect
-> the survey: reference points are start points and port-gate anchors, not claims about optima. It
-> does mean **the survey and a serial 25-parameter polish answer different questions and can run in
-> parallel.**
-
+> | id | start | log-post there |
+> |---|---|---|
+> | 0 | the COLD hand-set init | −19204.7216 |
+> | 1 | the INCUMBENT, migrated (UNSEEDED control) | −1551.1222 |
+> | 2 | the NEW BASIN, migrated (UNSEEDED control) | −1500.0507 |
+> | **3** | **incumbent + ocean ENSO +0.10 each** | **−1550.8275** |
+> | **4** | **new basin + ocean ENSO +0.10 each** | **−1498.1420** |
+> | **5** | **new basin + the OBSERVATION-implied partition** (ocean +0.326 each, land ×1.734) | **−1507.6925** |
+>
+> Ids 1/2 are kept UNSEEDED beside 3/4 precisely so the pair says what the seeding was worth; the
+> collector prints that difference. **Id 5 is the one that is conditionally WORSE on purpose** —
+> it starts where GCB's measured ENSO sink slopes say the partition is, which the objective
+> conditionally resists by −7.72. A conditional sign is a hypothesis about a refit, not a
+> prediction of one (the gate-pricing arc measured 253 log-units of pure frozen-slice artifact),
+> and 09-01g's compensating-error reading is exactly other coordinates absorbing an ENSO change.
+> One task buys the answer.
+>
+> ### 2. ⛔ THE DISPERSION WAS DILUTED 8.4 % BY A BOOKKEEPING ARTIFACT
+>
+> `MS_SPREAD` is the per-coordinate RMS separation between the two known basins. Four of the 25
+> coordinates were **migrated in both files**, so their separation is a property of the migration
+> contract, not of the basins: the ocean pair differs by **exactly 0** and the land pair by
+> **0.0100**, which is the retired scalar cut in half. Averaging those four in multiplied the whole
+> dispersion by √(21/25) = 0.9165.
+>
+> **RMS over all 25 = 0.9592; over the 21 that at least one reference point FITTED = 1.0466.** The
+> pool is now the second, derived from `attr(, "migrated")` so the next split fixes itself, and the
+> excluded names are PRINTED. ⚠ **Do not read 0.9592 as "the basins got closer"** — over the shared
+> coordinates the separation is what it always was.
+>
+> ⚠ **This does NOT give the four ENSO coordinates a scale of their own.** They are dispersed at the
+> shared pooled sd, which is an ASSERTION: their own separation is structurally zero and there is no
+> second basin to measure it against. `diag_enso_objective_leverage.R` is the check that it is not
+> silly — at ~1.05 they land **6–9 conditional sds** out against **325–430** for the stiffest
+> coordinates, so they are genuinely dispersed and are not what makes a dispersed start expensive.
+>
+> ### 3. ⚠ ROUND 2 IS NOT ROUND 1 REPEATED
+>
+> The old advice was "re-submit the same array to continue". At 25 parameters the Nelder-Mead
+> simplex has **26 vertices**, so each task converges less far in the same wall than the
+> 22-dimensional design assumed, and most tasks will still check out in the −1500s. Re-submitting
+> all 40 spends three times the fairshare converging starts that are already 50+ log-units behind.
+> **Round 2 = the six fixed ids plus the best dispersed ids from round 1's `summary.csv`.** See
+> "Two rounds, and the second is not the first repeated" below.
+>
+> ### What did NOT change, and why
+>
+> * **N = 40 dispersed starts.** Still the one choice with no measurement behind it, and still 40:
+>   the space is bigger, but the four new coordinates are the SOFTEST in it, so the added volume is
+>   the cheap part of the search. Buying depth in round 2 beats buying width in round 1 — width
+>   cannot be narrowed later, and a wider first array costs fairshare up front.
+> * **`CCX_MS_MAXIT = 6000`.** The wall, not the cycle budget, is what stops a round: 3 × 6,000
+>   evals is ~111 min at the ~0.37 s/eval a 2×-slower node implies, so a 180 min task does not
+>   reach even two cycles. The guard already shortens restarts to fit; raising maxit would change
+>   nothing a round actually executes.
+> * **The dispersion CENTRE** is still the COLD init — neither known basin, so the survey is not
+>   centred on an answer.
+> * **The objective and the parameter table.** `port_targets.csv` still stands at `53ef03d`,
+>   `n_par = 25`, kz [4379.1, 8109.9]; **nothing here re-ran it and nothing needs to.**
+>
+> **Preflighted 2026-09-01 on the Mac for ids 0, 1, 2, 3, 4, 5, 25 and 45** — all eight print
+> `PORT GATE (a) PASSED`, and the three seeded start values above are what they reported. Both
+> directions of the new fixed-id guard are mutation-tested.
+>
+> ⚠ **Use a FRESH output directory**: the default moved to
+> `calibration/output/multistart_20260901_enso25`, which names the parameter set rather than a date.
 
 **Status: RUNNABLE, NOT YET RUN, and READY TO LAUNCH.** Everything below has been
 smoke-tested on the Mac; nothing has touched Torch. **Claude cannot submit** — Torch needs the NYU
@@ -49,20 +104,24 @@ gain nothing if it did.
 experiment `handoff_2026-08-31e_the_basin.md` §4/§8.6 names — the incumbent and the 08-31e polished
 mode are **two basins separated by a 21.53-log-unit barrier**, so no warm-started local search can
 survey between them, and the polished basin (−1496.01, +52.0 over the incumbent) is **one basin, the
-one the probe stumbled into.** The survey asks whether a third is better.
+one the probe stumbled into.** The survey asks whether a third is better. ⚠ **Those two numbers are
+21-parameter numbers**; under the shipped 25-parameter objective the same two points evaluate to
+**−1500.0507** and **−1551.1222**, a gap of **51.07**, and neither is a mode — which is what ids 3–5
+exist to fix.
 
 ⛔ **Restructuring the experiment was a methodological change and therefore Marcus's call.** This
 bundle implements it; it does not decide it. **Nothing here adopts anything** — `CCX_MODE_CANONICAL`
 is untouched, and the survey writes `start_*.rds` files no other code reads.
 
-## The four choices this bundle makes, all of them yours to change
+## The five choices this bundle makes, all of them yours to change
 
 | choice | value | where it came from |
 |---|---|---|
-| dispersion **sd** | **0.9592** in u-space (was 1.0493 at 22 parameters) | **MEASURED**: the per-coordinate RMS distance between the two KNOWN basins, recomputed from their own mode files at every run. That is the separation a survey must resolve to be worth running. `CCX_MS_SPREAD` overrides. |
+| dispersion **sd** | **1.0466** in u-space (0.9592 before the pool was fixed; 1.0493 at 22 parameters) | **MEASURED**: the per-coordinate RMS distance between the two KNOWN basins, recomputed at every run — pooled over the 21 coordinates at least one of them FITTED, not over all 25. `CCX_MS_SPREAD` overrides. |
 | dispersion **centre** | the COLD hand-set init | Neither known basin, so the survey is not centred on an answer. |
 | **budget per start** | 3 restarts × 6000 maxit × 6 cycles, **180 min** wall | `cpu_short` caps at 240 min; the task's own budget stops it at 180, so **"OUT OF TIME" is a clean exit 0 with a checkpoint, never a SLURM kill**. A restart would have to overrun its measured projection by **>3×** to reach the cap; the worst contention ever measured on this model was 1.61×. |
-| **N starts** | 40 (`--array=3-42`) | Arbitrary, and the only one of the four with no measurement behind it. Raise it if fairshare allows. |
+| **N starts** | 40 (`--array=6-45`) | Arbitrary, and the only one of the four with no measurement behind it. Kept at 40 for round 1 deliberately: buy DEPTH in round 2, not width in round 1. |
+| **the fixed head** | 6 ids (`0-5`), of which **3 are ENSO-seeded** | **MEASURED**, and it is the 09-01k re-cut: the migrated mode files are not modes of this space, so the baseline a survey is judged against has to be produced BY the survey. |
 
 ## Partition: can we avoid the 4 h cap?
 
@@ -113,15 +172,35 @@ polish, running for **14 iterations** on the budget reserved for it, gained **33
 (−1612.10 → −1578.22) — against −1588.10 for the identical run before the polish was reachable. A
 round that ends "OUT OF TIME" still ends *polished*.
 
-**That is what checkpoint/resume is for.** Re-submit the same array and each task continues from its
-own checkpoint (tested). Budget **2–3 rounds**, and read a round of "OUT OF TIME" as progress, not
-as a fault — a genuine fault looks like a non-zero exit, a port-gate stop, or a task that gained
-nothing.
+**That is what checkpoint/resume is for.** Re-submitting a task continues it from its own
+checkpoint (tested). Budget **2–3 rounds**, and read a round of "OUT OF TIME" as progress, not as a
+fault — a genuine fault looks like a non-zero exit, a port-gate stop, or a task that gained nothing.
+⚠ **But re-submit a SUBSET, not the same array** — see the next section.
 
 ⚠ **A dispersed start is a LONG climb.** At sd 1.05 a draw scores ~−3×10⁵ against the cold init's
 −1.9×10⁴, so a start may spend its whole wall budget and check out unconverged. That is expected and
-is why every task **checkpoints every cycle**: re-submitting the same array **resumes** each task
-from its own checkpoint instead of restarting it.
+is why every task **checkpoints every cycle**: re-submitting a task **resumes** it from its own
+checkpoint instead of restarting it. (Measured 2026-09-01 at the 09-01k dispersion: id 25 draws at
+−168,724 and id 45 at −229,287.)
+
+## Two rounds, and the second is not the first repeated
+
+**Round 1** — `--array=0-45%10`. Every fixed id, every dispersed id, one 180 min budget each.
+
+**Round 2** — **the six fixed ids plus the best dispersed ids from round 1**, read off
+`summary.csv`, e.g. `--array=0-5,<the best ~8>`. Same command, same output directory; each task
+resumes from its own checkpoint.
+
+⛔ **Do NOT re-submit `0-45` a second time.** The survey's question is "is there a THIRD basin", and
+after round 1 a start 50+ log-units behind the best is not a candidate for it — it is a start whose
+basin has already been identified as worse. Converging it costs a full task and changes no verdict.
+The fixed ids are the exception and are always re-submitted: they are the BASELINE the verdict is an
+ordering against, so they are the tasks that most need to be converged.
+
+⚠ **What this trades away, said out loud** ([[no_power_null]]): a truncated start is ranked on a
+value it had not finished climbing to, so a genuinely deep basin that happened to start slowly can
+be dropped in round 1. That is a real cost and it is why the cut is the best **~8**, not the best 2
+— and why the collector prints the OUT-OF-TIME flag beside every rank rather than hiding it.
 
 ## Run it
 
@@ -138,19 +217,23 @@ bash calibration/torch/setup_torch.sh
 #    core, resolves every NFS path, checks the run-time inputs, verifies the port
 #    against the shipped targets, draws each start -- and MEASURES s/eval on the
 #    compute nodes themselves. Then it exits 0 without optimising.
-CCX_MS_PREFLIGHT=1 sbatch --array=0-2,21,42 --time=00:15:00 \
+CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 \
   calibration/torch/multistart.sbatch
 sacct -j <jobid> -X --format=JobID,State,ExitCode,Elapsed
 grep -h PREFLIGHT logs/ccx_multistart_*.out        # read the s/eval it reports
 
 # 4. SIZE THE RUN FROM WHAT STEP 3 MEASURED (see "Sizing" below), then launch
-#    the whole flight. %10 IS the staged rollout: 10 tasks run, the other 30 wait.
-sbatch --array=0-42%10 calibration/torch/multistart.sbatch
+#    the whole flight. %10 IS the staged rollout: 10 tasks run, the rest wait.
+sbatch --array=0-45%10 calibration/torch/multistart.sbatch
 #    ...then LOOK at the first wave before walking away:
 sacct -j <jobid> -X --format=JobID,State,ExitCode,Elapsed | head -12
 
-# 5. COLLECT (either machine)
-CCX_MS_OUTDIR=.../multistart_20260831 Rscript calibration/collect_dispersed_multistart.R
+# 5. COLLECT (either machine). The verdict is an ordering against the best
+#    RE-CONVERGED known basin (ids 1-5), never against -1496.01.
+CCX_MS_OUTDIR=.../multistart_20260901_enso25 Rscript calibration/collect_dispersed_multistart.R
+
+# 6. ROUND 2 -- the fixed ids plus the best dispersed ids, NOT the whole array.
+sbatch --array=0-5,<best ids from summary.csv> calibration/torch/multistart.sbatch
 ```
 
 ## Subset first, or the whole flight? — neither, quite
@@ -182,12 +265,12 @@ having: it bounds the blast radius if something is wrong to 10 tasks rather than
 self-contention — 40 of our own tasks on shared nodes is exactly the situation that turned a measured
 0.150 s/eval into 0.241 on this model. The wall guard adapts to that, but not needing to is better.
 
-⚠ **THE GATE BATCH IS `0-2,21,42`, NOT `0-2`.** Ids 0–2 are all *reference* starts — warm, already
-at a known point — and they never execute the dispersed-draw path: the redraw loop, the long climb
-from ~−3×10⁵, or the budget-shortened restart. A gate batch made only of them would certify a code
-path the survey does not use. 21 and 42 are dispersed ids from inside the production range, which
-also satisfies the HPC rule of a **≥5-task smoke test spread across the index range** before any
-array with N > 20 (each failed task still burns fairshare).
+⚠ **THE GATE BATCH IS `0-5,25,45`, NOT `0-5`.** Ids 0–5 are all *fixed* starts — warm, at a known
+point — and they never execute the dispersed-draw path: the redraw loop, the long climb from
+~−2×10⁵, or the budget-shortened restart. A gate batch made only of them would certify a code path
+the survey does not use. 25 and 45 are dispersed ids from inside the production range, which also
+satisfies the HPC rule of a **≥5-task smoke test spread across the index range** before any array
+with N > 20 (each failed task still burns fairshare).
 
 ## What the local smoke test found — all four fixed, all four verified
 
@@ -234,13 +317,14 @@ across samples on an idle laptop, and it was being extrapolated 6,000× to proje
 ⭐ **EVERY TASK VERIFIES THE PORT, not only ids 0–2.** A dispersed task evaluates the new-basin
 reference point once (well under a second) and checks it against `port_targets.csv`. This is a
 fairshare protection, not elegance: without it, an array submitted without its gate batch — or after
-the parameter table moved — would spend **40 × 3 h** optimising a different objective, and only the
+the parameter table moved — would spend **46 × 3 h** optimising a different objective, and only the
 collector would ever notice. With it, a broken port kills every task in about two seconds.
 
 ## The port gate — read it before scaling
 
-Ids **1** and **2** start at points already converged on the Mac, and each is gated **twice**, with
-each bound matching its own claim:
+Ids **1** and **2** start at points converged on the Mac **under the 21-parameter objective**, so
+they are the two the port targets were measured at — not points this build's optimiser must
+reproduce. Each is gated **twice**, with each bound matching its own claim:
 
 * **(a) the FIXED REFERENCE point is an EVALUATION**, so two machines must agree to floating point.
   The bound is **relative, 1e-8**, against `calibration/torch/port_targets.csv` — logposts measured
@@ -254,8 +338,10 @@ each bound matching its own claim:
 * **(b) the FINAL value is an OPTIMISATION**, so the only available claim is an **ordering** — it may
   not come back worse than it started. That one runs on *every* task, not just the references.
 
-⚠ **The target is NOT each mode file's stored `logpost`.** The 08-30 incumbent stores −1547.1579 and
-evaluates to **−1548.0112**: a −0.85 objective-drift offset that has nothing to do with any port.
+⚠ **The target is NOT each mode file's stored `logpost`.** The 08-30 incumbent stores −1547.1579
+and evaluates, under the shipped 25-parameter table, to **−1551.1222** — an offset of **−3.9643**,
+of which **−4.7768** is the analytic ENSO prior-split constant and the remainder is the band and
+objective drift that was already there. None of it has anything to do with any port.
 Gating a port on it would spend most of the budget before the port was even considered.
 
 ⚠ **Re-run `make_port_targets.R` whenever the objective changes**, and re-ship the CSV. A target file

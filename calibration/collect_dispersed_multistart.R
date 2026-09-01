@@ -23,13 +23,27 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 
 CO_DIR <- local({
   d <- Sys.getenv("CCX_MS_OUTDIR", NA_character_)
-  if (is.na(d) || !nzchar(d)) ccx_path("calibration", "output", "multistart_20260831") else d
+  # ⚠ MATCHES run_dispersed_multistart.R's default. Two files naming two
+  # different default directories is the caption-sync bug: the collector would
+  # read an empty 22-parameter directory and say "no start_*.rds".
+  if (is.na(d) || !nzchar(d))
+    ccx_path("calibration", "output", "multistart_20260901_enso25") else d
 })
 CO_FRAC <- local({
   v <- Sys.getenv("CCX_MS_CLUSTER_FRAC", NA_character_)
   if (is.na(v) || !nzchar(v)) 0.25 else as.numeric(v)
 })
-CO_REF_IDS <- c(cold = 0L, incumbent = 1L, new_basin = 2L)
+CO_REF_IDS  <- c(cold = 0L, incumbent = 1L, new_basin = 2L)
+# ⛔ THE BENCHMARK IS THE BEST *RE-CONVERGED KNOWN BASIN*, NOT ID 2 (2026-09-01k).
+# Ids 1 and 2 are MIGRATED 21-parameter vectors: their ocean ENSO pair is
+# exactly 0 because the mechanism did not exist when they were fitted, and the
+# objective is measured to want it elsewhere. Ranking a dispersed 25-parameter
+# result against id 2's start value -- or against the -1496.01 in its mode file
+# -- compares an optimum against a migrated point [[like_for_like_forcing]].
+# So the number to beat is the best FINAL value among the fixed non-cold starts,
+# which is what ids 3-5 exist to produce.
+CO_SEED_IDS <- c(inc_enso = 3L, new_enso = 4L, new_obs = 5L)
+CO_BENCH_IDS <- c(CO_REF_IDS[c("incumbent", "new_basin")], CO_SEED_IDS)
 CO_OUT     <- file.path(CO_DIR, "summary.csv")
 
 fs <- sort(list.files(CO_DIR, pattern = "^start_[0-9]+\\.rds$", full.names = TRUE))
@@ -130,17 +144,50 @@ for (i in seq_along(o)) {
 }
 
 # ---- the verdict, as an ORDERING against the incumbent to beat -------
-kN <- which(ids == CO_REF_IDS[["new_basin"]])
-if (length(kN)) {
+kB <- which(ids %in% CO_BENCH_IDS)
+if (!length(kB)) {
+  cat(sprintf("\n%s\n  ⚠ NO VERDICT: not one of the known-basin starts (ids %s) is present, so\n    there is nothing in THIS parameter space to rank a dispersed result against.\n    Run them before reading the table above as a survey result.\n",
+              strrep("-", 74), paste(sort(CO_BENCH_IDS), collapse = ", ")))
+} else {
+  kN <- kB[which.max(fin[kB])]
   bench <- fin[kN]; best <- max(fin); jb <- which.max(fin)
-  cat(sprintf("\n%s\n  BEST FOUND      id %d at %.4f\n  TO BEAT         id %d (08-31e new basin) at %.4f\n  difference      %+.4f log-units\n",
-              strrep("-", 74), ids[jb], best, ids[kN], bench, best - bench))
-  cat(sprintf("  VERDICT: the survey %s the 08-31e basin.\n",
-              if (best > bench + 1e-8) "FOUND A BETTER BASIN THAN"
-              else if (best < bench - 1e-8) "did NOT reach"
-              else "REPRODUCED, and did not beat,"))
+  cat(sprintf("\n%s\n  BEST FOUND      id %d at %.4f\n  TO BEAT         id %d (%s) at %.4f\n  difference      %+.4f log-units\n",
+              strrep("-", 74), ids[jb], best, ids[kN], R[[kN]]$kind, bench, best - bench))
+  if (length(kB) < length(CO_BENCH_IDS))
+    cat(sprintf("  ⚠ the benchmark is the best of only %d of the %d known-basin starts;\n    ids %s are MISSING and one of them could be higher.\n",
+                length(kB), length(CO_BENCH_IDS),
+                paste(sort(setdiff(CO_BENCH_IDS, ids)), collapse = ", ")))
+  # ⭐ ONLY A DISPERSED START CAN ANSWER THE SURVEY'S QUESTION. A fixed start
+  # that comes back on top says the known basins are still the best known
+  # basins -- which is worth printing, but it is NOT "the survey found
+  # something". Reporting one "BEST FOUND" for both conflates them, and with the
+  # fixed starts now seeded (ids 3-5) the top of the table is quite likely to be
+  # one of them [[no_power_null]]: the two states must not print the same line.
+  kD <- which(vapply(R, function(r) identical(r$start_class, "dispersed") ||
+                       (is.null(r$start_class) && !(r$id %in% c(CO_REF_IDS, CO_SEED_IDS))),
+                     logical(1)))
+  if (!length(kD)) {
+    cat("  ⚠ NO DISPERSED START finished, so the survey has not been run yet --\n    the table above is the known basins re-converged, and nothing more.\n")
+  } else {
+    jd <- kD[which.max(fin[kD])]
+    cat(sprintf("  BEST DISPERSED  id %d at %.4f (%+.4f vs the benchmark), of %d finished\n",
+                ids[jd], fin[jd], fin[jd] - bench, length(kD)))
+    cat(sprintf("  VERDICT: %d dispersed start%s %s the best re-converged known basin.\n",
+                length(kD), if (length(kD) == 1L) "" else "s",
+                if (fin[jd] > bench + 1e-8) "FOUND A BETTER BASIN THAN"
+                else if (fin[jd] < bench - 1e-8) "did NOT reach"
+                else "REPRODUCED, and did not beat,"))
+  }
   if (!is.na(lab[jb]) && !is.na(lab[kN]) && lab[jb] != lab[kN])
     cat("  ⚠ and the best start is in a DIFFERENT cluster from it -- a third basin.\n")
+  # ⭐ WHAT THE SEEDING WAS WORTH, which is only readable because ids 1/2 were
+  # kept as UNSEEDED controls beside ids 3/4.
+  for (p in list(c("incumbent", "inc_enso"), c("new_basin", "new_enso"))) {
+    ku <- which(ids == CO_REF_IDS[[p[1]]]); ks <- which(ids == CO_SEED_IDS[[p[2]]])
+    if (length(ku) && length(ks))
+      cat(sprintf("  ENSO seeding at the %-9s: %+.4f log-units (%.4f seeded vs %.4f not)\n",
+                  p[1], fin[ks] - fin[ku], fin[ks], fin[ku]))
+  }
 }
 cat("  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a\n")
 cat("    proof that no better basin exists ([[no_power_null]]: measure the\n")
@@ -151,6 +198,8 @@ sm <- data.frame(id = ids, logpost = fin, basin = lab, converged = conv,
                  n_eval = vapply(R, function(r) r$n_eval, numeric(1)),
                  draws = vapply(R, function(r) r$draws, numeric(1)),
                  kind = vapply(R, function(r) r$kind, character(1)),
+                 start_class = vapply(R, function(r)
+                   if (is.null(r$start_class)) NA_character_ else r$start_class, character(1)),
                  host = vapply(R, function(r) r$host, character(1)))
 utils::write.csv(sm[order(-sm$logpost), ], CO_OUT, row.names = FALSE)
 cat(sprintf("\n  summary written to %s\n⛔ NOTHING IS ADOPTED.\n%s\n", CO_OUT, strrep("=", 74)))

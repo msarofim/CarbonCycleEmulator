@@ -20,17 +20,38 @@
 # is untouched; ranking and adoption are separate steps and the adoption one is
 # Marcus's.
 #
-# THE THREE REFERENCE STARTS ARE THE PORT'S OWN GATE. Ids 0, 1 and 2 are not
-# dispersed:
+# THE SIX FIXED STARTS. Ids 0-5 are not dispersed:
 #   id 0  the COLD hand-set init            -- the control the refits all quote
-#   id 1  the INCUMBENT (08-30 landed)      -- must re-find -1548.01
-#   id 2  the NEW BASIN (08-31e polished)   -- must re-find -1496.01
-# Ids 1 and 2 are warm starts at points ALREADY converged on the Mac, so on any
-# machine they must return those numbers to within the optimiser's own noise.
+#   id 1  the INCUMBENT (08-30 landed), migrated
+#   id 2  the NEW BASIN (08-31e polished), migrated
+#   id 3  the INCUMBENT + the ocean ENSO pair at the objective's own conditional
+#         optimum
+#   id 4  the NEW BASIN + the same
+#   id 5  the NEW BASIN + the OBSERVATION-implied ENSO partition (land x1.734,
+#         ocean +0.326 each), which the objective conditionally RESISTS
 # ⚠ THE TARGETS COME FROM FILES THIS SCRIPT DID NOT WRITE ([[gate_reads_its_own_output]]):
 # they are read out of the two mode files, not restated as literals here, and a
-# port that silently changes the objective fails them. Run ids 0-2 FIRST, before
+# port that silently changes the objective fails them. Run ids 0-5 FIRST, before
 # any large array.
+#
+# ⛔ RE-CUT 2026-09-01k FOR THE 25-PARAMETER MODEL, AND IDS 3-5 ARE THE RE-CUT.
+# Ids 1 and 2 USED to be "warm starts at points ALREADY converged on the Mac, so
+# on any machine they must return -1548.01 / -1496.01 to within the optimiser's
+# own noise". THAT IS NO LONGER TRUE and the sentence had to go: after the ENSO
+# split both files are MIGRATED 21-parameter vectors carrying an ocean pair of
+# EXACTLY 0, and 0 is not where the objective wants it. Measured on the shipped
+# objective, 2026-09-01: the migrated incumbent is -1551.1222 and the migrated
+# new basin -1500.0507, and moving the ocean pair to +0.10 in each hemisphere --
+# nothing else touched -- is worth +1.9087 at the new basin and +0.2947 at the
+# incumbent. So NEITHER is a mode of this space, and a survey that ranked a
+# third basin against -1496.01 would be comparing a 25-parameter optimum against
+# a 21-parameter migrated point ([[like_for_like_forcing]]).
+# ⇒ THE BASELINE A SURVEY IS JUDGED AGAINST MUST BE PRODUCED BY THE SURVEY, on
+# the same machine and the same objective. That is what ids 3-5 are for, and it
+# is why they are worth three tasks: they carry the two known basins into the
+# 25-parameter space rather than importing a number from a run that predates it.
+# Ids 1 and 2 stay as the un-seeded controls -- the pair says what the seeding
+# was worth.
 #
 # THE DISPERSION SCALE IS MEASURED, NOT INVENTED. Every prior in
 # CCX_PARAM_TABLE has O(1) scale in the unconstrained coordinate by construction
@@ -41,6 +62,27 @@
 # running. ⚠ IT IS STILL A METHODOLOGICAL CHOICE (project rule: flag, do not
 # silently resolve). `CCX_MS_SPREAD` overrides it and the value used is printed
 # and stored in every output file.
+#
+# ⛔ AND THE POOL IT IS AVERAGED OVER IS NOT ALL 25 COORDINATES (fixed
+# 2026-09-01k). A coordinate that BOTH reference points got by MIGRATION rather
+# than from a fit carries no basin separation at all: the ocean ENSO pair is
+# EXACTLY 0 in both files because the mechanism did not exist when either was
+# fitted, and the land pair differs by 0.0100 only because it is the retired
+# scalar cut in half. Averaging four such coordinates into the RMS multiplied
+# the whole dispersion by sqrt(21/25) = 0.9165 -- so the survey drew every
+# coordinate 8.4 % NARROWER than the measurement says, for a bookkeeping reason.
+# Measured: RMS over all 25 = 0.9592, over the 21 that at least one reference
+# point FITTED = 1.0466. The pool is now the second, and the excluded names are
+# printed, so the next split fixes itself instead of quietly shrinking the
+# survey again ([[recorded_but_never_restored]] -- a value derived from a field
+# whose meaning changed).
+# ⚠ WHAT THIS DOES NOT DO IS GIVE THE FOUR ENSO COORDINATES A SCALE OF THEIR
+# OWN. They are dispersed at the SHARED pooled sd, which is an assertion, not a
+# measurement: their own separation is structurally zero and no second basin
+# exists to measure it against. `diag_enso_objective_leverage.R` (09-01j) is the
+# check that this is not silly -- at ~1.05 they land 6-9 conditional sds out,
+# against 325-430 for the stiffest coordinates, so they are genuinely dispersed
+# and are not what makes a dispersed start expensive.
 #
 # Usage
 #   CCX_MS_ID=7 Rscript calibration/run_dispersed_multistart.R
@@ -69,13 +111,47 @@ MS_CYCLE_TOL  <- 0.5          # = ARM_CYCLE_TOL; a cycle below this is CONVERGED
 MS_DRAW_TRIES <- 200          # redraws allowed before a start is declared dead
 MS_REF_INC    <- "calibration/output/refit_20260831_seas_lag_split/from90/mode_fit_pumpN.rds"
 MS_REF_NEW    <- "calibration/output/polish_20260831_probe_basin/from90/mode_fit_pumpN.rds"
+# ⚠ THESE THREE NAMES ARE ALSO THE PORT-TARGET KEYS in calibration/torch/
+# port_targets.csv, so this vector may not be extended with ids that have no
+# target row -- the seeded ids below are deliberately NOT in it, and the port
+# gate treats them the way it treats a dispersed id (it checks the new-basin
+# reference point, which every task can evaluate).
 MS_REF_IDS    <- c(cold = 0L, incumbent = 1L, new_basin = 2L)
+# ---- THE ENSO-SEEDED STARTS (2026-09-01k) ---------------------------
+# ⛔ THE SURVEY MUST PRODUCE ITS OWN BASELINE. See the header: both mode files
+# are migrated 21-parameter vectors whose ocean ENSO pair is exactly 0, so
+# neither is a mode of this space and neither -1548.01 nor -1496.01 is a number
+# a 25-parameter result may be ranked against.
+MS_SEED_IDS   <- c(inc_enso = 3L, new_enso = 4L, new_obs = 5L)
+MS_DISPERSED_FROM <- 6L        # every id at or above this one is a random draw
+# MEASURED, and re-measurable in four evaluations. The objective's own
+# conditional optimum for the ocean pair at the 08-31e basin, with the other 23
+# coordinates FROZEN: +0.05 -> +1.43, +0.10 -> +1.91, +0.15 -> +1.44,
+# +0.20 -> +0.03, -0.10 -> -5.45 (2026-09-01, shipped table, matched harness;
+# reproduces diag_enso_objective_leverage.R's +1.91 at +0.10).
+# ⚠ A START POINT DOES NOT HAVE TO BE RIGHT -- it has to be somewhere the
+# optimiser would not otherwise go. The precision of this number is irrelevant;
+# its SIGN and ORDER are the point.
+MS_ENSO_OCN_OPT <- 0.10
+# THE OBSERVATION-IMPLIED PARTITION, which is a DIFFERENT claim from the one
+# above and deliberately gets its own start. Closing GCB's measured ENSO sink
+# slopes needs land x1.734 and ocean +0.326 in each hemisphere (09-01j, after
+# the slope-for-coefficient correction: the coefficient->slope transfer is
+# ~0.43, not 1 [[slope_gap_is_not_a_coefficient]]). Conditionally the objective
+# REFUSES that -- it scores -7.72 against the unseeded basin -- but a
+# conditional sign is a hypothesis about a refit, not a prediction of one
+# ([[ccx_gates_priced]]: frozen slices overstated a cost by 253 log-units), and
+# the compensating-error state (09-01g) is precisely other coordinates absorbing
+# an ENSO change. This start asks the question a frozen slice cannot: started
+# where the OBSERVATION says the partition is, does the fit stay near there?
+MS_ENSO_OCN_OBS   <- 0.326
+MS_ENSO_LAND_OBS  <- 1.734     # multiplier on BOTH land coefficients
 # ---- budget shaping. ⚠ THESE LIVE HERE, WITH THE OTHER NAMED CONSTANTS, and
 # not beside the loop that uses them: the first cut defined MS_POLISH_TARGET
 # next to the wall guard and referenced it in the startup banner 20 lines
 # earlier, which is an "object not found" at run time and nowhere else.
 MS_MAXIT_FLOOR  <- 200    # NM evals below which a restart is not worth entering
-MS_POLISH_MAXIT <- 500    # BFGS iterations; each costs ~(2n+1) evals at n = 22
+MS_POLISH_MAXIT <- 500    # BFGS iterations; each costs ~(2n+1) = 51 evals at n = 25
 MS_POLISH_FLOOR <- 10     # BFGS iterations below which a polish is not worth entering
 MS_POLISH_TARGET <- 100   # BFGS iterations the last cycle is GUARANTEED room for
 # ⚠ AND THE RESERVE IS CAPPED AS A FRACTION OF THE BUDGET. A reserve expressed
@@ -137,8 +213,13 @@ MS_ID <- local({
 
 MS_OUTDIR <- local({
   d <- Sys.getenv("CCX_MS_OUTDIR", NA_character_)
+  # ⚠ THE DEFAULT NAMES THE PARAMETER SET, NOT JUST A DATE (2026-09-01k). It
+  # was `multistart_20260831`, staged for a 22-parameter build; a date is not a
+  # parameter set, and this project moved that set TWICE in three days. The
+  # resume now refuses a checkpoint from another set, but a directory whose name
+  # says which set it holds is the answer that does not rely on a guard firing.
   if (is.na(d) || !nzchar(d))
-    ccx_path("calibration", "output", "multistart_20260831")
+    ccx_path("calibration", "output", "multistart_20260901_enso25")
   else d
 })
 dir.create(MS_OUTDIR, recursive = TRUE, showWarnings = FALSE)
@@ -175,10 +256,26 @@ for (.r in list(list("incumbent", .mdI), list("new basin", .mdN))) {
                 .r[[1]], paste(.r[[2]]$kz_bracket, collapse = ", "),
                 paste(.ship$kz, collapse = ", ")))
 }
-U_INC <- ccx_par_to_unc(ccx_migrate_par_set(.mdI$par_mode))
-U_NEW <- ccx_par_to_unc(ccx_migrate_par_set(.mdN$par_mode))
+P_INC <- ccx_migrate_par_set(.mdI$par_mode)
+P_NEW <- ccx_migrate_par_set(.mdN$par_mode)
+U_INC <- ccx_par_to_unc(P_INC)
+U_NEW <- ccx_par_to_unc(P_NEW)
 U_COLD <- ccx_init_unc()
-MS_SPREAD_MEASURED <- sqrt(mean((U_NEW - U_INC)^2))
+# ---- THE DISPERSION POOL. A coordinate MIGRATED IN BOTH reference points has
+# a separation that is an artifact of the migration contract, not a measured
+# distance between basins, so it is excluded from the RMS rather than averaged
+# into it. Derived from `attr(, "migrated")` -- the field the migration itself
+# records -- so the next split is handled without editing this line, and the
+# excluded names are PRINTED rather than assumed ([[intersect_is_a_silent_default]]:
+# absence must say so).
+MS_SPREAD_SKIP <- intersect(attr(P_INC, "migrated"), attr(P_NEW, "migrated"))
+MS_SPREAD_POOL <- setdiff(CCX_PARAM_NAMES, MS_SPREAD_SKIP)
+if (!length(MS_SPREAD_POOL))
+  stop("every coordinate was migrated in BOTH reference points, so there is no ",
+       "measured basin separation left to set a dispersion from. Set CCX_MS_SPREAD ",
+       "explicitly and say in the output directory name what it came from.")
+MS_SPREAD_MEASURED <- sqrt(mean((U_NEW - U_INC)[MS_SPREAD_POOL]^2))
+MS_SPREAD_ALL25    <- sqrt(mean((U_NEW - U_INC)^2))   # the diluted value, for the record
 MS_SPREAD <- .env_num("CCX_MS_SPREAD", MS_SPREAD_MEASURED)
 
 cat(sprintf("\n%s\nDISPERSED MULTI-START, id %d, arm %s, %d parameters\n",
@@ -187,8 +284,10 @@ cat(sprintf("  host %s   R %s   seed %d + id\n", Sys.info()[["nodename"]],
             paste(R.version$major, R.version$minor, sep = "."), MS_SEED))
 cat(sprintf("  budget: %d restarts x %d maxit x %d cycles, wall %g min\n",
             MS_RESTARTS, MS_MAXIT, MS_CYCLES, MS_WALL_MIN))
-cat(sprintf("  dispersion sd %.4f in u-space (measured per-coordinate RMS between\n    the two known basins = %.4f)\n",
-            MS_SPREAD, MS_SPREAD_MEASURED))
+cat(sprintf("  dispersion sd %.4f in u-space (measured per-coordinate RMS between\n    the two known basins = %.4f, pooled over the %d coordinates at least one of\n    them FITTED; over all %d it would be %.4f, diluted by the %d migrated in BOTH:\n    %s)\n",
+            MS_SPREAD, MS_SPREAD_MEASURED, length(MS_SPREAD_POOL),
+            length(CCX_PARAM_NAMES), MS_SPREAD_ALL25, length(MS_SPREAD_SKIP),
+            if (length(MS_SPREAD_SKIP)) paste(MS_SPREAD_SKIP, collapse = ", ") else "none"))
 cat(sprintf("  out %s\n%s\n", MS_OUT, strrep("=", 70)))
 
 bp <- ccx_default_params(); bp$pump_mode <- MS_ARM
@@ -206,15 +305,59 @@ neg_lp <- function(u) {
 # an array of 8 or in an array of 400, and a failed task can be requeued without
 # changing what it was. That is the property `set.seed(ARM_SEED)` gives the
 # serial driver, carried over to a fan-out.
+ms_seed_ocn <- function(p, x) {
+  p$gamma_enso_ocn_NH <- x; p$gamma_enso_ocn_SH <- x; p
+}
+ms_seed_land <- function(p, m) {
+  p$gamma_enso_land_NH <- p$gamma_enso_land_NH * m
+  p$gamma_enso_land_SH <- p$gamma_enso_land_SH * m; p
+}
 ms_start <- function(id) {
   if (id == MS_REF_IDS[["cold"]])
     return(list(u = U_COLD, kind = "reference: COLD hand-set init", draws = 0L, ref = NA_real_))
   if (id == MS_REF_IDS[["incumbent"]])
-    return(list(u = U_INC, kind = "reference: INCUMBENT (08-30 landed)",
+    return(list(u = U_INC, kind = "reference: INCUMBENT (08-30 landed), MIGRATED -- not a mode of this space",
                 draws = 0L, ref = .mdI$logpost))
   if (id == MS_REF_IDS[["new_basin"]])
-    return(list(u = U_NEW, kind = "reference: NEW BASIN (08-31e polished)",
+    return(list(u = U_NEW, kind = "reference: NEW BASIN (08-31e polished), MIGRATED -- not a mode of this space",
                 draws = 0L, ref = .mdN$logpost))
+  # ---- THE SEEDED STARTS. ⚠ SEEDED IN PARAMETER SPACE, THEN ENCODED, never by
+  # adding to `u`: the ENSO entries happen to be `tr = "id"` today, so the two
+  # would agree, and that is exactly the coincidence a later transform change
+  # would break silently. Go through ccx_par_to_unc() and the encoding stays the
+  # table's business.
+  # ⚠ DISPATCHED THROUGH THE VECTOR, NOT BY `MS_SEED_IDS[["name"]]` AT EACH
+  # BRANCH. Under the direct form, DELETING an entry made this function die at
+  # "subscript out of bounds" three frames from the cause and never reached the
+  # gap guard below (mutation-tested 2026-09-01k, which is how it was found).
+  # Now: an id the vector names with no branch here stops with the reason, and
+  # an id the vector no longer names falls through to the gap guard.
+  .sk <- names(MS_SEED_IDS)[match(id, MS_SEED_IDS)]
+  if (!is.na(.sk) && !(.sk %in% c("inc_enso", "new_enso", "new_obs")))
+    stop("MS_SEED_IDS names id ", id, " as '", .sk, "' but ms_start() has no ",
+         "branch that builds it. Add one beside the others.")
+  if (identical(.sk, "inc_enso"))
+    return(list(u = ccx_par_to_unc(ms_seed_ocn(P_INC, MS_ENSO_OCN_OPT)),
+                kind = sprintf("seeded: INCUMBENT + ocean ENSO %+0.3f each (objective's conditional optimum)",
+                               MS_ENSO_OCN_OPT), draws = 0L, ref = NA_real_))
+  if (identical(.sk, "new_enso"))
+    return(list(u = ccx_par_to_unc(ms_seed_ocn(P_NEW, MS_ENSO_OCN_OPT)),
+                kind = sprintf("seeded: NEW BASIN + ocean ENSO %+0.3f each (objective's conditional optimum)",
+                               MS_ENSO_OCN_OPT), draws = 0L, ref = NA_real_))
+  if (identical(.sk, "new_obs"))
+    return(list(u = ccx_par_to_unc(ms_seed_land(ms_seed_ocn(P_NEW, MS_ENSO_OCN_OBS),
+                                                MS_ENSO_LAND_OBS)),
+                kind = sprintf("seeded: NEW BASIN + the OBSERVATION-implied partition (ocean %+0.3f each, land x%.3f)",
+                               MS_ENSO_OCN_OBS, MS_ENSO_LAND_OBS),
+                draws = 0L, ref = NA_real_))
+  # ⛔ AN ID BELOW THE DISPERSED FLOOR THAT MATCHED NOTHING ABOVE IS A GAP IN
+  # THIS FUNCTION, NOT A DISPERSED START. Falling through would silently turn a
+  # fixed start into a random draw and the output file would call it dispersed.
+  if (id < MS_DISPERSED_FROM)
+    stop("id ", id, " is below MS_DISPERSED_FROM (", MS_DISPERSED_FROM, ") but ",
+         "matches no fixed start. The fixed ids are ",
+         paste(sort(c(MS_REF_IDS, MS_SEED_IDS)), collapse = ", "),
+         "; add the missing one here or raise the floor.")
   set.seed(MS_SEED + id)
   for (k in seq_len(MS_DRAW_TRIES)) {
     u <- U_COLD + MS_SPREAD * stats::rnorm(length(U_COLD))
@@ -301,7 +444,9 @@ local({
   f <- ccx_path(MS_TARGETS)
   nm <- names(MS_REF_IDS)[match(MS_ID, MS_REF_IDS)]
   # ⭐ EVERY TASK CHECKS THE PORT, NOT ONLY IDS 0-2 (2026-09-01). A dispersed
-  # task has no target of its own, so it evaluates the NEW-BASIN reference point
+  # or SEEDED task has no target of its own -- port_targets.csv holds the three
+  # reference points and nothing else, deliberately, because a target must be a
+  # FIXED point and a seed is a start -- so it evaluates the NEW-BASIN reference point
   # -- one extra objective call, well under a second -- and checks that. The
   # reason is fairshare, not elegance: without it, an array submitted without
   # its gate batch (or after the table moved) would spend 40 x 3.5 h optimising
@@ -415,7 +560,8 @@ if (MS_PROJ_SAFETY * MS_SEC_PER_EVAL * MS_MAXIT / 60 > MS_WALL_MIN)
 if (MS_PREFLIGHT) {
   cat(sprintf("PREFLIGHT id %03d on %s: start %s, log-post %.4f, %d draw%s, port %s,\n             %.4f s/eval => a %d-eval restart takes %.1f min of a %g min budget. LAUNCHABLE.\n",
               MS_ID, Sys.info()[["nodename"]],
-              if (st$draws == 0L) "REFERENCE" else "dispersed", MS_START_LP,
+              if (MS_ID >= MS_DISPERSED_FROM) "dispersed"
+              else if (MS_ID %in% MS_SEED_IDS) "SEEDED" else "REFERENCE", MS_START_LP,
               st$draws, if (st$draws == 1L) "" else "s",
               if (isTRUE(MS_PORT$checked)) sprintf("VERIFIED rel %.1e", MS_PORT$rel)
               else "NOT VERIFIED",
@@ -478,9 +624,10 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
   }
   # ⛔ THE POLISH IS SHORTENED TO FIT, NOT VETOED -- AND WITHOUT THIS IT NEVER RAN
   # ON TORCH AT ALL (found 2026-09-01, working out what a longer wall would buy).
-  # A 500-iteration BFGS costs ~500 x (2n+1) = 22,500 evals at n = 22, which is
-  # 136 min at the ~0.37 s/eval a 2x-slower node implies -- so the admission test
-  # `elapsed + 1.5 x 136 <= 180` is FALSE at elapsed = 0, forever. On the Mac's
+  # A 500-iteration BFGS costs ~500 x (2n+1) = 25,500 evals at n = 25 (22,500 at
+  # the n = 22 this was first measured at), which is 157 min at the ~0.37 s/eval
+  # a 2x-slower node implies -- so the admission test
+  # `elapsed + 1.5 x 157 <= 180` is FALSE at elapsed = 0, forever. On the Mac's
   # 0.199 s/eval it projects to 73 min and runs, which is exactly why every local
   # smoke test looked fine and every Torch task would have skipped it.
   # ⚠ THAT WOULD NOT HAVE BEEN A SLOWDOWN, IT WOULD HAVE BEEN A WRONG ANSWER:
@@ -564,6 +711,17 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             prior_z = zs, param_names = CCX_PARAM_NAMES, pump_mode = MS_ARM,
             seed = MS_SEED + MS_ID, spread = MS_SPREAD,
             spread_measured = MS_SPREAD_MEASURED, draws = st$draws,
+            # RECORDED **AND** READ by collect_dispersed_multistart.R: which
+            # kind of start this was, and what the dispersion was pooled over.
+            # A `start_*.rds` whose `kind` string is the only record of whether
+            # it was seeded cannot be grouped by a collector without parsing
+            # prose [[recorded_but_never_restored]].
+            start_class = if (MS_ID >= MS_DISPERSED_FROM) "dispersed"
+                          else if (MS_ID %in% MS_SEED_IDS) "seeded" else "reference",
+            spread_pool = MS_SPREAD_POOL, spread_skipped = MS_SPREAD_SKIP,
+            spread_all = MS_SPREAD_ALL25,
+            enso_seed = c(ocn_opt = MS_ENSO_OCN_OPT, ocn_obs = MS_ENSO_OCN_OBS,
+                          land_obs_mult = MS_ENSO_LAND_OBS),
             port_checked = MS_PORT$checked, port_target = MS_PORT$target,
             port_rel = MS_PORT$rel, ref_logpost = MS_REF_LP, resumed = MS_RESUMED,
             # RECORDED **AND** RESTORED: these are the fields ccx_mode_bands()
