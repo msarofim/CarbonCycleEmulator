@@ -18,7 +18,7 @@ it makes, the partition analysis and the full command list. **This file does not
 
 ## 0. STATE IN SIX LINES
 
-1. ✅ **The bundle is RE-CUT for 25 parameters and rebuilt** — `/tmp/ccx_torch_bundle.tar.gz`, 3.0 MB.
+1. ✅ **The bundle is RE-CUT for 25 parameters and rebuilt** — `/tmp/ccx_torch_bundle.tar.gz`, **2.1 MB** (`du -h` rounds it to 3.0M — that is allocated blocks, not the file).
    `port_targets.csv` is regenerated at commit `778baa3`'s parent `53ef03d`, `n_par = 25`. §1
 2. ✅ **Preflighted for ids 0, 1, 2, 3, 7.** PORT GATE (a) verified to **rel 4.5e-15** on the
    reference machine. The whole chain — migrate, encode, gate, draw — runs at 25. §1
@@ -43,7 +43,7 @@ landed after it.
 | `port_targets.csv` | `n_par = 22`, commit `3346ded` | **`n_par = 25`, commit `53ef03d`** |
 | dispersion sd | 1.0493 | **0.9592** (recomputed at every run; see §3) |
 | `run_dispersed_multistart.R` | — | **unchanged and correct** — it already migrates both reference points |
-| tarball | 2.0 MB | **rebuilt, 3.0 MB** |
+| tarball | staged 08-31f | **rebuilt, 2.1 MB** |
 
 ⭐ **The stale CSV would have been CAUGHT, not silently used.** The port gate refuses a target
 recorded on a different parameter count — "The target is stale" — killing every task about two
@@ -154,7 +154,7 @@ and the owed refit resolves them. The count in their messages moved 22 → 25.
 Microsoft device-code at `login.torch`. **Full command list is in `calibration/torch/README.md`;
 this is the order, not a replacement for it.**
 
-1. **Ship it.** The tarball is already built at `/tmp/ccx_torch_bundle.tar.gz` (3.0 MB). If the repo
+1. **Ship it.** The tarball is already built at `/tmp/ccx_torch_bundle.tar.gz` (2.1 MB). If the repo
    has moved since, rebuild with `bash calibration/torch/make_bundle.sh` — **it re-runs nothing
    else, so re-run `Rscript calibration/make_port_targets.R` FIRST if the parameter table changed.**
 2. **`bash calibration/torch/setup_torch.sh`** on the cluster (once).
