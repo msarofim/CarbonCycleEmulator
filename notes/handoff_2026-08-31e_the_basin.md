@@ -2,7 +2,8 @@
 # **THE MISSING CONTROL WAS TWO EVALUATIONS, NOT A REFIT — AND IT SAYS**
 # **THE INCUMBENT IS NOT THE MODE. TWO BASINS, 21.5 LOG-UNITS APART.**
 
-**Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`, **clean at `fd6d696`**.
+**Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`, **clean at `dee1916`**.
+⭐ **UPDATED AFTER THE POLISH LANDED — see §8, appended. The basin is CONVERGED and the gap is +52.0.**
 1 commit. Nothing running. **No files under `R/` touched** ⇒ the suite cannot have regressed and was
 not re-run; it stands at 1275 / 6 FAIL / 2 skip.
 Continues `handoff_2026-08-31d_probe_and_the_torch_question.md`, whose **ruling #4 is now ANSWERED**.
@@ -149,3 +150,107 @@ still missing there.
 ## 7. HOW TO RUN IT
 
     Rscript calibration/diag_probe_basin_vs_incumbent.R    # ~40 s, adopts nothing, gates 4/4
+
+
+---
+
+# ⭐ §8 — APPENDED: THE POLISH LANDED. CONVERGED, +52.0, AND `kz` IS NOT RAILED.
+
+`calibration/output/polish_20260831_probe_basin/` (`398691b` staging, `dee1916` outputs).
+203.4 min, 67,311 evals, arm N, **SHIPPED bracket**, warm-started from a byte copy of the probe mode.
+
+## 8.1 CONVERGED — the caveat is retired
+
+    [N] cycle 1 restart  4: gain 0.0046
+    *** [N] cycle 1 HIT THE RESTART CAP WHILE STILL GAINING
+    [N] cycle 1 polish: log-post = -1496.0 (gain 0.0251)
+    [N] === cycle 1 total gain 0.2648 ===
+    [N] CONVERGED: cycle gain below ARM_CYCLE_TOL (0.5)
+
+⚠ **READ THE CYCLE LINE, NOT THE RESTART LINE.** The restart-cap string is the same one that
+disqualified the probe; `ARM_CYCLE_TOL` cleared `hit_cap` and the driver declared **CONVERGED**.
+⇒ **the "NOT converged" caveat that qualified this basin since 08-31d is DISCHARGED.**
+
+⭐ **The BFGS polish added 0.0251** — against the **9.07** it gained in the probe run from an
+NM-stalled point. Starting from a polished point, it found nothing. That is the measurement that
+justifies §8.5's abandoned restarts after the fact.
+
+## 8.2 THE CONVERGED GAP IS +52.0
+
+    MATCHED under the SHIPPED table
+      incumbent (08-30)     -1548.0112
+      probe (unconverged)   -1496.2776
+      polished (converged)  -1496.0128
+      polished - incumbent   +51.9984
+      polished - probe        +0.2648
+
+⇒ **the +51.73 lower bound was right to 0.27.** The polished mode file is a **22-parameter file
+recorded under the SHIPPED bands** (`hml_bound` [30, 200], `kz_bracket` [3942.5, 6528]), so it
+carries **no reparameterisation constant at all** and is directly comparable with anything fitted on
+this objective.
+
+## 8.3 ⭐ THE RESULT THAT FEEDS RULING #1: `kz` MOVES *AWAY* FROM THE CEILING
+
+| mode | `kz` | % of shipped bracket | `h_ml` |
+|---|---|---|---|
+| incumbent (08-30) | 6400.36 | **95.1 %** | 35.25 m |
+| probe (unconverged) | 6302.37 | 91.3 % | 134.11 m |
+| **polished (converged)** | **6169.22** | **86.1 %** | **143.92 m** |
+
+⇒ ⛔ **THE RAILING THAT MOTIVATED THE WHOLE BRACKET INVESTIGATION IS A PROPERTY OF THE WRONG BASIN.**
+`kz` sits **further from the ceiling the better the fit gets**, and it is comfortably interior at the
+converged mode. This does **not** settle ruling #1 — the wrong-layer / uncited-target defect in the
+bracket's derivation is untouched by it — but it **removes the pressure** that framed the bracket as
+binding, and it is new evidence *for* #1 rather than something blocked by it.
+
+## 8.4 PRIOR TAILS MOSTLY IMPROVE; TWO STILL FLAGGED
+
+Flagged (|z| > 3) **3 → 2**. Big movers: **`h_ml` −1.87 → +0.44** (from the tail to central — the
+shallow-`h_ml` prior-credit signature is GONE), **`seas_T_amp_SH` −4.54 → −0.63**,
+`seas_T_amp_NH` 2.31 → 0.28, `kz` 1.65 → 1.09. Worse: `npp_frac_NH` 1.15 → **−2.26**,
+`tau_ex` −0.50 → −1.81.
+⚠ **Still flagged: `sst_seas_amp_SH` −5.63 → −4.73** (improved, still deep) and **`rep_dC`
+3.06 → 3.68** (worse). Both are long-standing; neither is created by this basin.
+
+⚠ **Hessian: conditioning 5.36e5 → 1.12e5 (~4.8×), PD. `h_ml` is STEP-UNSTABLE — but so it was at
+the incumbent**, so this is NOT a regression. ⛔ **08-31d §5d's conditional answer ("`kz` interior ⇒
+all 22 stable") does NOT survive**: at the converged mode `kz` IS interior (86.1 %) and `h_ml` is
+unstable anyway. That reading came from the probe's NON-CONVERGED point. **The Laplace covariance
+here has one untrustworthy row** — matters for any evidence/uncertainty use, not for the MAP gap.
+
+## 8.5 ⚠ THE FIRST ATTEMPT WAS ABANDONED AT 3 h — AND WHY
+
+A 20-restart budget was launched first and killed at 3 h (`398691b`; log preserved as
+`from90/_run_ABANDONED_20restarts.log`; nothing had been written, so the requeue reproduced restarts
+1–2 **bit-identically**, confirming determinism under `ARM_SEED = 2026`).
+
+Two errors in the original ETA, both recorded so they are not repeated:
+1. ⛔ **Restart length generalised from ONE datapoint.** Restart 1's 10,545 evals (early `reltol`
+   convergence from a polished start) was the EXCEPTION; restarts 2–3 used 17,503 and **20,001** =
+   maxit. The "halves cycle 1" claim was wrong.
+2. ⛔ **CONTENTION, not a slow run** ([[eta_in_days_is_not_a_slow_run]]): **0.150 → 0.241 s/eval
+   (1.61×)**, tracking four Julia processes at ~100 % CPU from ANOTHER SESSION. **Left running.**
+
+The remaining 17 restarts priced at **≈23 h**; the gain had already collapsed geometrically to
+**0.0023**. §8.1's polish gain of 0.0251 confirms they would have bought **< 0.05**.
+
+## 8.6 WHAT THIS CHANGES FOR THE RULINGS
+
+| # | status after the polish |
+|---|---|
+| **1** `kz` bracket | **STILL OPEN, STILL YOURS.** §8.3 is new evidence: `kz` is interior at 86.1 % in the better basin, so the bracket is not binding where it matters. The derivation defect (wrong layer, uncited target) is untouched. **My recommendation is unchanged: re-bisect wide.** |
+| **2** §8.3 gate-7 trade | **OPEN, untouched.** ⚠ Worth re-pricing IN THE NEW BASIN before ruling — the land/ocean split moved. |
+| **3** seasonal `tau_ex` | **OPEN, untouched.** ⚠ `tau_ex` moved −0.50 → −1.81 in prior-z; re-measure here first. |
+| **4** the `h_ml` basin | ✅ **ANSWERED AND NOW CONVERGED.** +52.0. |
+
+⛔ **NOTHING IS ADOPTED.** The polished mode is **not** `CCX_MODE_CANONICAL` and this run did not make
+it so. **Adopting it is a call for Marcus** — and it is a bigger one than it looks: it would move the
+canonical mode into a different basin, which re-prices every gate and both open trades.
+
+⚠ **AND THE SURVEY IS STILL OWED.** This converged ONE basin — the one the probe stumbled into. It
+says nothing about whether a THIRD is better. **The dispersed multi-start remains the load-bearing
+experiment** (§4, §5), and now has a proper incumbent to beat: **−1496.01**.
+
+**TORCH VERDICT (standing): RUNNABLE, NOT YET RUN.** Unchanged, and this run is evidence FOR the
+restructured form — 203 min for one warm-started chain on a contended laptop is exactly the serial
+cost a dispersed survey multiplies by N.
