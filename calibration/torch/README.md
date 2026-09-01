@@ -88,7 +88,44 @@
 > ⚠ **Use a FRESH output directory**: the default moved to
 > `calibration/output/multistart_20260901_enso25`, which names the parameter set rather than a date.
 
-**Status: RUNNABLE, NOT YET RUN, and READY TO LAUNCH.** Everything below has been
+> ## ✅ SHIPPED, SET UP, AND PREFLIGHTED ON TORCH — 2026-09-01
+>
+> Bundle extracted to `/scratch/ms17839/CarbonCycleEmulator`; `setup_torch.sh` run (Rcpp 1.1.0, C++
+> core compiles in ~18 s). **Preflight array `0-5,25,45` (job 16731571): 8/8 COMPLETED, exit 0:0**,
+> and **every start value matches the Mac to the digit**. `PORT GATE (a)` verified at **rel
+> 1.1e-13 – 2.3e-13** against a 1e-8 tolerance, at all three reference points, on the compute nodes.
+> **THE PORT IS VERIFIED.** Nothing has been optimised; the production array has NOT been submitted.
+>
+> ⭐ **MEASURED s/eval ON THE COMPUTE NODES: 0.245–0.455, median ~0.33** — the number that could not
+> be obtained from the Mac, and essentially the ~0.37 this design assumed. **`CCX_MS_MAXIT = 6000`
+> stands**: a full restart projects to 24.5–45.5 min of the 180 min budget, so three restarts plus
+> the polish reserve fit. ⚠ **The LOGIN node measured 0.808 s/eval** — 2.4× worse, pure contention.
+> Size on a job's number, never a login node's.
+>
+> ⛔ **TWO TORCH TRAPS COST AN HOUR AND ARE NOW FIXED IN `setup_torch.sh`** (`multistart.sbatch` was
+> never at risk — it runs a script FILE). Both are in the `nyu-torch-hpc` skill.
+> 1. **The r/4.5.1 module is a Singularity wrapper whose `Rscript -e` EATS `$`** — it re-quotes argv
+>    into a double-quoted `bash -c`. `bp$pump_mode <- "N"` became `bp <- "N"`, so `base_params` was
+>    the string `"N"`, the closure bailed at its spinup guard, and setup printed **`log-post at the
+>    cold init = -Inf`**. ⚠ **That reads exactly like a broken port and is not one.** The tells:
+>    **0.024 s/eval is far too FAST** (an early-return path, not a different answer), and R warned
+>    `Coercing LHS to a list` once per call. ⇒ **The cold init is now GATED at 1e-8, not printed** —
+>    the −Inf was printed, read, and very nearly believed.
+> 2. **The container needs a writable `/tmp` bind source.** Inside a job Torch sets `SLURM_TMPDIR`
+>    and `/state/partition1` is `drwxrwxrwt`; on the login node it is root-owned 755 and every
+>    `Rscript` dies with `FATAL: container creation failed`, naming nothing about R.
+>
+> ✅ **The partition question is ANSWERED, and `sinfo` was the wrong command**: it reports
+> `cpu_short infinite` because that is the *partition* limit. The **QoS** is the cap —
+> `cpu_short` = **MaxWall 6 h** (not 4 h) and **`cpu=32` per user**, so `%10` is a choice, not the
+> ceiling; `cs` carries **no partition QoS** and this account's `normal` QoS has no MaxWall, so the
+> long-wall phase 2 looks available there. ⚠ Not proven — no job has been submitted with `--qos`.
+>
+> ⚠ Two benign NOTEs in every reference log: the mode files were fitted under `kz [3942.5, 6528]`
+> and the shipped table is `[4379.1, 8109.9]`. **Feasible, so they are legal starts** — the driver
+> says so by design, and the port gate uses `port_targets.csv`, not their stored logposts.
+
+**Status: PREFLIGHTED ON TORCH. The production array is NOT yet submitted.** Everything below has been
 smoke-tested on the Mac; nothing has touched Torch. **Claude cannot submit** — Torch needs the NYU
 VPN, the gateway password, Duo, and a Microsoft device-code at `login.torch`. The steps are Marcus's.
 
