@@ -2,6 +2,61 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01l — **THE SURVEY RAN: ONE BASIN AT 25 PARAMETERS, AND THE 08-31e TWO-BASIN STRUCTURE WAS A 22-PARAMETER PROPERTY**
+
+Torch job **16732800**, `--array=0-45%10`. **10 COMPLETED, 11 CANCELLED** (Marcus, once the answer
+was clear). **ADOPTS NOTHING**; `CCX_MODE_CANONICAL` untouched.
+
+**⭐ ALL TEN STARTS CONVERGE TO −1495.795**, from starts spanning six orders of magnitude — the cold
+init (−19,205), the migrated incumbent (−1551.12), the migrated new basin (−1500.05), the
+observation-implied ENSO partition (−1507.69), and four dispersed draws (−181,947 to −2,113,779).
+**Total spread 0.0022 log-units.**
+
+**⛔ AND THEY ARE THE SAME POINT — CHECKED, NOT ASSUMED.** "All the same value" is the
+suspicious-uniformity pattern, so the question was whether one basin or a flat direction. Pairwise
+Euclidean distance in 25-dim `u` is **≤0.0005** within {0,1,2,3,4,6,7}; a micro-cluster {5,8,9} sits
+**0.069** away; the ONLY coordinate with meaningful spread is **`h_ml`** (0.065), then `rep_dC`
+(0.017) and `kz` (0.013) — every other coordinate agrees to 4–5 decimals. The micro-split is the
+already-documented `h_ml` step-instability reproducing. Collector: **1 DISTINCT BASIN**.
+
+**⇒ The 08-31e "two basins, +52.0 apart, 21.53-log-unit barrier" is CORRECT IN THE 22-PARAMETER
+SPACE and scope-limited to it.** The four ENSO coordinates connect them. **A barrier on the straight
+`u`-path in a smaller space is not a barrier in a larger one.** Within-run gains are the comparable
+statement: incumbent lineage **+55.3**, new-basin lineage **+4.26**. ⚠ −1495.795 is NOT comparable
+to −1496.01 (different parameter count AND `kz` bracket).
+
+**✅ BOTH SUB-QUESTIONS THE RE-DESIGN ADDED ANSWERED, both negatively — which is the useful
+outcome.** ENSO seeding bought **0.0000**: Nelder-Mead finds the ocean direction unaided within one
+restart, so the +1.91 conditional advantage does not survive re-optimising — measurable ONLY because
+ids 1/2 were kept as unseeded controls. ⚠ The seeded/unseeded ordering FLIPPED between restart 1 and
+restart 2 at sub-log-unit gaps; reading a winner off either snapshot would have been wrong. And the
+**observation-implied partition converged to the same mode**, so its conditional −7.72 was a
+FROZEN-SLICE artifact — the third time this arc has paid for that lesson.
+
+**⚠ WHAT IT DOES NOT SHOW**: 4 dispersed starts at ONE dispersion. A bound, not a proof.
+
+**⛔ TWO FIXES ARE OWED AND UNCOMMITTED** (local repo access was lost to a macOS TCC revocation
+mid-session; neither affects the numbers). (1) `multistart.sbatch` named a variable **`PROJ`**, which
+Torch's `~/.bashrc` exports as `/scratch/ms17839/SLR-RFF-BRICK` — it clobbered ours BETWEEN the `cd`
+and the `CCX_MS_OUTDIR` line, so round 1 ran in the right repo and wrote its results into another
+project's tree, silently. Namespace it `CCX_PROJ_DIR`, compute the outdir BEFORE sourcing, and
+ASSERT it is under the project. **An ordering that works is not an ordering that is SAFE.** Files
+have been moved and the stray empty dirs removed with `rmdir`. (2) `collect_dispersed_multistart.R`
+gates its verdict at **1e-8** — an EVALUATION bound applied to an OPTIMISATION comparison — and
+printed "did NOT reach" for a −0.0000 difference.
+
+**⚠ NOT ADOPTED, and the prior-z screen is unexamined**: `sst_seas_amp_SH` **−4.71**, `rep_dC`
+**+3.60**, `sst_seas_amp_NH` −2.95, `q10` −2.64, `npp_frac_NH` −2.28.
+
+**Torch lessons**, both now in the `nyu-torch-hpc` skill: **`Rscript -e` EATS `$`** (the module is a
+Singularity wrapper re-quoting argv into a double-quoted `bash -c`; it forged a `-Inf` cold init that
+reads exactly like a broken port — the tells were 0.024 s/eval being far too FAST and a per-call
+`Coercing LHS to a list`), and **the QoS, not `sinfo`, carries the cap** (`cpu_short` = 6 h and
+`cpu=32` per user, not 4 h). Measured eval rate on the compute nodes **0.245–0.455 s/eval, median
+0.33**; the login node's 0.808 was contention.
+
+Handoff: `notes/handoff_2026-09-01e_torch_survey_result.md`.
+
 ## 2026-09-01k — **THE TORCH SURVEY IS RE-DESIGNED FOR THE 25-PARAMETER MODEL, NOT JUST RE-CUT FOR IT**
 
 09-01j regenerated `port_targets.csv` and made the bundle **runnable** at 25 parameters. This entry
