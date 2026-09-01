@@ -70,6 +70,23 @@ MS_DRAW_TRIES <- 200          # redraws allowed before a start is declared dead
 MS_REF_INC    <- "calibration/output/refit_20260831_seas_lag_split/from90/mode_fit_pumpN.rds"
 MS_REF_NEW    <- "calibration/output/polish_20260831_probe_basin/from90/mode_fit_pumpN.rds"
 MS_REF_IDS    <- c(cold = 0L, incumbent = 1L, new_basin = 2L)
+# ---- budget shaping. ⚠ THESE LIVE HERE, WITH THE OTHER NAMED CONSTANTS, and
+# not beside the loop that uses them: the first cut defined MS_POLISH_TARGET
+# next to the wall guard and referenced it in the startup banner 20 lines
+# earlier, which is an "object not found" at run time and nowhere else.
+MS_MAXIT_FLOOR  <- 200    # NM evals below which a restart is not worth entering
+MS_POLISH_MAXIT <- 500    # BFGS iterations; each costs ~(2n+1) evals at n = 22
+MS_POLISH_FLOOR <- 10     # BFGS iterations below which a polish is not worth entering
+MS_POLISH_TARGET <- 100   # BFGS iterations the last cycle is GUARANTEED room for
+# ⚠ AND THE RESERVE IS CAPPED AS A FRACTION OF THE BUDGET. A reserve expressed
+# only as "room for 100 BFGS iterations" is an ABSOLUTE cost -- 41.6 min at the
+# rate a 2x-slower node implies -- which is 23 % of a 180 min budget but 155 %
+# of a 15 min one. The first cut had no cap and, on a short budget, reserved
+# more than the whole budget so NO RESTART COULD EVER RUN. Whatever the budget,
+# the polish may claim at most this share of it up front; it can still grow
+# beyond the reserve when NM finishes early, because the polish is sized from
+# what is actually left.
+MS_POLISH_RESERVE_FRAC <- 0.15
 MS_TARGETS    <- "calibration/torch/port_targets.csv"
 # THE PORT GATE IS TWO GATES, AND EACH BOUND MATCHES ITS OWN CLAIM
 # ([[gate_bound_matches_its_claim]]):
@@ -372,9 +389,12 @@ t0 <- Sys.time()
   as.numeric(difftime(Sys.time(), .t, units = "secs"))
 }, numeric(1))
 MS_SEC_PER_EVAL <- stats::median(.tv)
-cat(sprintf("measured %.4f s/eval (median of %d; range %.4f-%.4f) => one %d-eval restart\n  projects to %.1f min, and the wall budget is %g min\n",
+cat(sprintf("measured %.4f s/eval (median of %d; range %.4f-%.4f) => one %d-eval restart\n  projects to %.1f min; wall budget %g min, of which %.1f min is RESERVED for the\n  BFGS polish (%d iterations)\n",
             MS_SEC_PER_EVAL, MS_RATE_SAMPLES, min(.tv), max(.tv), MS_MAXIT,
-            MS_SEC_PER_EVAL * MS_MAXIT / 60, MS_WALL_MIN))
+            MS_SEC_PER_EVAL * MS_MAXIT / 60, MS_WALL_MIN,
+            min(MS_PROJ_SAFETY * MS_POLISH_TARGET * (2 * length(CCX_PARAM_NAMES) + 1) *
+                  MS_SEC_PER_EVAL / 60, MS_POLISH_RESERVE_FRAC * MS_WALL_MIN),
+            MS_POLISH_TARGET))
 # SAY IT OUT LOUD IF ONE RESTART CANNOT FIT THE BUDGET AT ALL -- that is a
 # sizing error, and the task should announce it rather than quietly shorten
 # every restart for hours.
@@ -383,14 +403,23 @@ if (MS_PROJ_SAFETY * MS_SEC_PER_EVAL * MS_MAXIT / 60 > MS_WALL_MIN)
               MS_MAXIT, MS_WALL_MIN))
 elapsed_min <- function() as.numeric(difftime(Sys.time(), t0, units = "mins"))
 restart_min <- numeric(0)
-MS_MAXIT_FLOOR <- 200     # evals below which a restart is not worth entering
 # ⇒ THE BUDGET SIZES THE RESTART; IT DOES NOT MERELY VETO IT. A task whose
 # remaining budget cannot fit a FULL-maxit restart used to do nothing at all and
 # check out with 0 evals, which spends the whole allocation to learn nothing.
 # It now runs a SHORTER restart scaled to what is left. Returns 0 when even the
 # floor does not fit, which is the only case where doing nothing is right.
+# ⭐ THE POLISH GETS A RESERVED SLICE, NOT THE LEFTOVERS. Sizing it to whatever
+# NM happens to leave makes its size an accident of how the last restart landed
+# -- and at some budget geometries that is ZERO. The polish is measured to be
+# worth 9.07 log-units from an NM-stalled point (08-31e §8.1), which is worth far
+# more than the few thousand extra NM evals the reserve costs, so NM stops early
+# enough to leave room for MS_POLISH_TARGET iterations.
+polish_reserve_min <- function()
+  min(MS_PROJ_SAFETY * MS_POLISH_TARGET * (2 * length(u) + 1) * MS_SEC_PER_EVAL / 60,
+      MS_POLISH_RESERVE_FRAC * MS_WALL_MIN)
+
 maxit_for_budget <- function() {
-  left <- MS_WALL_MIN - elapsed_min()
+  left <- MS_WALL_MIN - elapsed_min() - polish_reserve_min()
   per  <- if (length(restart_min)) max(restart_min) / MS_MAXIT else MS_SEC_PER_EVAL / 60
   n    <- floor(left / (MS_PROJ_SAFETY * per))
   if (n < MS_MAXIT_FLOOR) 0L else as.integer(min(n, MS_MAXIT))
@@ -421,12 +450,30 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
     trace <- rbind(trace, data.frame(cycle = cyc, restart = i, logpost = -best, evals = n_eval))
     if (i > 1 && gain < MS_TOL) break
   }
-  # The BFGS polish is capped at 500 iterations but each costs a GRADIENT, i.e.
-  # ~2n evals, so it is projected on the same rule rather than assumed cheap.
-  if (!out_of_time && elapsed_min() + MS_PROJ_SAFETY * 500 * 2 *
-        length(u) * MS_SEC_PER_EVAL / 60 <= MS_WALL_MIN) {
+  # ⛔ THE POLISH IS SHORTENED TO FIT, NOT VETOED -- AND WITHOUT THIS IT NEVER RAN
+  # ON TORCH AT ALL (found 2026-09-01, working out what a longer wall would buy).
+  # A 500-iteration BFGS costs ~500 x (2n+1) = 22,500 evals at n = 22, which is
+  # 136 min at the ~0.37 s/eval a 2x-slower node implies -- so the admission test
+  # `elapsed + 1.5 x 136 <= 180` is FALSE at elapsed = 0, forever. On the Mac's
+  # 0.199 s/eval it projects to 73 min and runs, which is exactly why every local
+  # smoke test looked fine and every Torch task would have skipped it.
+  # ⚠ THAT WOULD NOT HAVE BEEN A SLOWDOWN, IT WOULD HAVE BEEN A WRONG ANSWER:
+  # 08-31e §8.1 measured the polish gaining 9.07 from an NM-stalled point, so a
+  # survey that never polishes under-reports the depth of every basin it finds
+  # and can rank two basins the wrong way round.
+  # Same idiom as maxit_for_budget(): size the step to the budget, and skip only
+  # when even the floor does not fit.
+  mx_pol <- local({
+    per <- MS_PROJ_SAFETY * (2 * length(u) + 1) * MS_SEC_PER_EVAL / 60
+    n <- floor((MS_WALL_MIN - elapsed_min()) / per)
+    if (n < MS_POLISH_FLOOR) 0L else as.integer(min(n, MS_POLISH_MAXIT))
+  })
+  if (!out_of_time && mx_pol > 0L) {
+    if (mx_pol < MS_POLISH_MAXIT)
+      cat(sprintf("[%03d] cycle %d polish: SHORTENED to maxit %d by the wall budget\n",
+                  MS_ID, cyc, mx_pol))
     pc <- tryCatch(optim(u, neg_lp, method = "BFGS",
-                         control = list(maxit = 500, reltol = 1e-14)),
+                         control = list(maxit = mx_pol, reltol = 1e-14)),
                    error = function(e) NULL)
     if (!is.null(pc) && pc$value < best) {
       cat(sprintf("[%03d] cycle %d polish: log-post = %.4f (gain %.4f)\n",
@@ -434,8 +481,8 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
       u <- pc$par; best <- pc$value
     }
   } else if (!out_of_time) {
-    cat(sprintf("[%03d] cycle %d polish SKIPPED: it does not fit the remaining budget\n",
-                MS_ID, cyc))
+    cat(sprintf("[%03d] cycle %d polish SKIPPED: not even %d BFGS iterations fit the\n      remaining budget. This is the END of the round, not a defect.\n",
+                MS_ID, cyc, MS_POLISH_FLOOR))
     out_of_time <- TRUE
   }
 # ⛔ A CYCLE WHOSE POLISH WAS SKIPPED IS NOT A COMPLETED CYCLE, so its gain is

@@ -31,6 +31,36 @@ is untouched, and the survey writes `start_*.rds` files no other code reads.
 | **budget per start** | 3 restarts × 6000 maxit × 6 cycles, **180 min** wall | `cpu_short` caps at 240 min; the task's own budget stops it at 180, so **"OUT OF TIME" is a clean exit 0 with a checkpoint, never a SLURM kill**. A restart would have to overrun its measured projection by **>3×** to reach the cap; the worst contention ever measured on this model was 1.61×. |
 | **N starts** | 40 (`--array=3-42`) | Arbitrary, and the only one of the four with no measurement behind it. Raise it if fairshare allows. |
 
+## Partition: can we avoid the 4 h cap?
+
+**What I know**, from the operational notes: `cpu_short` caps at **4 h** and typically has 244+ idle
+nodes, so tasks start almost immediately. `cs` has 513 GB/node and no QoS *memory* limit, is **lower
+priority** and less crowded. ⚠ **I do not know `cs`'s wall limit** — the notes record its memory
+characteristics, not its time cap, and I have no way to check from here. One command settles it:
+
+```bash
+sinfo -o "%P %l %m %c"      # %l is each partition's time limit; %P marks the default
+```
+
+**But the cap is already cheap, and that changes the question.** Checkpoint/resume is tested: a
+re-submitted array continues each task from its own checkpoint. So a 4 h cap costs about **2 min of
+R startup and C++ compile per round**, plus queue time — not lost work. Against that, `cs` is
+explicitly *lower priority*: with 40 tasks throttled 10 at a time, four waves queuing behind other
+users can easily cost more wall-clock than the 2 min/round the cap costs. **On the numbers I have,
+`cpu_short` + resume is likely to finish sooner**, and it is also the safer choice while the survey
+is still unproven.
+
+⭐ **The case where a long wall genuinely wins is the SECOND phase, not the first.** The survey has a
+natural two-phase shape — screen wide, then converge the best few. Phase 1 is 40 short tasks and is
+ideal for `cpu_short`. Phase 2 is a handful of long, uninterrupted climbs on the most promising
+basins, and that is exactly what a long-wall, low-priority, uncrowded partition is for. If `sinfo`
+shows `cs` allows a long wall, use it **for the top few after round 1**, not for the whole array.
+
+⚠ **If you do move to a long wall, raise `CCX_MS_CYCLES` as well.** At 6 cycles × 3 restarts ×
+6,000 evals the task exhausts its *cycle* budget at roughly 108,000 evals (~11 h at 0.37 s/eval), so
+on a 12 h partition the cycle cap, not the wall, would stop it — and it would exit "restart budget
+spent" rather than using the time you asked for.
+
 ## ⚠ EXPECT MOST TASKS TO COME BACK "OUT OF TIME" AFTER ROUND ONE — THAT IS NOT A FAILURE
 
 Measured 2026-09-01 at production *shape* (same restarts × cycles, a budget the task actually
@@ -44,6 +74,11 @@ But arithmetic on the same numbers: 180 min at the ~0.37 s/eval a 2×-slower nod
 **~29,000 evals**, while the 08-31e polish needed **67,311 evals to converge from an ALREADY GOOD
 point**. A dispersed start begins far further out and reached only −1,588 against the basin's
 −1,495.3 in this test. ⇒ **one round will land most tasks in the −1,500s and NOT converged.**
+
+⭐ **The polish is what makes a truncated round still worth having.** In that same test the BFGS
+polish, running for **14 iterations** on the budget reserved for it, gained **33.88 log-units**
+(−1612.10 → −1578.22) — against −1588.10 for the identical run before the polish was reachable. A
+round that ends "OUT OF TIME" still ends *polished*.
 
 **That is what checkpoint/resume is for.** Re-submit the same array and each task continues from its
 own checkpoint (tested). Budget **2–3 rounds**, and read a round of "OUT OF TIME" as progress, not
