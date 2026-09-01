@@ -113,7 +113,9 @@ presume the mechanism exists; the measurement says each should land near **+0.13
   **21-parameter** file in a 25-parameter build. `par_mode` still overlays through the legacy branch;
   `u_mode` does not decode. Warm-start from `par_mode` via `ccx_migrate_par_set()`, never by decoding
   `u_mode`. `ccx_load_mode()` refuses with exactly this text.
-- ⚠ The **same 6 suite failures** as before, in the same family and saying the same true thing —
+- ⚠ **SUITE 1365 / 6 FAIL / 2 skip** (was 1282 / 6 / 2). **The same six**, in the same family and
+  saying the same true thing: `test-likelihood.R:587` is the deliberate `kz`-bracket failure
+  (8109.9 against a stale 7000 ceiling), and `test-mode-decode.R` ×2 + `test-mode-file.R` ×3 say the
   stored modes are on an older parameter set. The count in their messages moved 22 → 25.
 - ⚠ **`calibration/diag_gamma_enso_profile.R` now REFUSES with the reason.** It profiled a retired
   scalar. Its ANSWER is unchanged and is what the split was built on: more amplitude is LOUDER, not
