@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01f — **THE CONVEYOR IS REFUTED AS THE ENSO FIX — WRONG SIGN, AND CHEAPLY**
+
+`calibration/diag_conveyor_enso_lever.R` (~1 min). Adopts nothing; `q_conv` stays 0.
+
+09-01e proposed that the ocean's ENSO sign error is the missing CIRCULATION term, and named the
+conveyor. ⭐ **The obvious next step — make `q_conv` time-varying — would have meant a new forcing
+column, R and C++ twins, a parity test and an `N_FORCING` bump.** A STATIC scan over `q_conv` asks
+the same question in one minute. **Measure the lever before building the machinery.**
+
+| q_conv (Sv) | ocean sink | land sink | deep Δ¹⁴C |
+|---|---|---|---|
+| 0 | 3.024 | 3.345 | −158.8 |
+| 10 | 3.122 | 3.313 | −146.3 |
+| 20 | 3.226 | 3.280 | −135.0 |
+
+- ⛔ **THE SIGN IS WRONG.** `d(ocean sink)/dq = +0.0101 GtC/yr per Sv` — **more conveyor, more
+  uptake**. El Niño *suppressing* the overturning therefore makes the response **more negative**, the
+  discrepancy WORSE. Closing the gap needs `k < 0`: El Niño *strengthening* the cell, the opposite of
+  the physical story. In a transient anthropogenic run, ventilating deep water undersaturated in
+  anthropogenic carbon beats upwelling DIC-rich water to outgas.
+- ⛔ **The magnitude is implausible regardless**: 136 % (q0 = 20 Sv) to 542 % (5 Sv) of the whole
+  circulation, per °C.
+- ⛔ **And it worsens the deep-ventilation gate**: Δ¹⁴C −158.8 → −135.0 against GLODAP's −175.3.
+- ⭐ **20 Sv moves the sink by 0.20 GtC/yr** — transport is a weak lever on this ocean, a third
+  instance of the standing reading that the defects are capacity, not transport.
+- ✅ **By-product: an untested combination now has a check.** `test-conveyor.R` never sets
+  `pump_grad`, `test-pump.R` never sets `q_conv` — pump+conveyor had **no coverage**. Carbon closure
+  departs from the `q=0` case by **1.8e−10 GtC over 274 yr**. Worth promoting to a real test.
+
+⚠ **The sign error stands; my mechanism for it does not.** Still open: an over-amplified
+SST/solubility path, or a structural limit — equatorial upwelling has no tropics to live in here.
+
+⚠ **Two bugs of my own, both caught by running it:** a top-level `if/else` (the identical trap I hit
+and documented in `run_dispersed_multistart.R` earlier the same day), and a 1959 forcing start that
+put a 165.8 GtC land-use start-up transient inside the measurement window. Now `DG_YEARS`.
+
 ## 2026-09-01e — **THE OCEAN'S ENSO RESPONSE IS ANTI-CORRELATED, AND THIS TIME IT IS POWERED**
 
 `calibration/diag_enso_model_vs_obs.R` (~20 s) + `calibration/lib_enso_regression.R`. Adopts nothing.
