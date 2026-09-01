@@ -2,6 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01g — **THE ENSO ERRORS ARE COMPENSATING: AN OCEAN-ONLY TERM WOULD MAKE THINGS WORSE**
+
+`calibration/diag_enso_ocean_term_design.R`. Pricing Marcus's proposal — an ENSO term on surface
+uptake in each hemisphere, mirroring the land term — **before building it**. Adopts nothing.
+
+**Slopes in GtC/yr per °C Niño3.4** (⚠ GCB `atm_growth` is GtC/yr; the model's is ppm/yr. Comparing
+them raw is a factor-2.124 error and it inverted this file's first answer. Units settled by the
+BUDGET IDENTITY, not by a magnitude heuristic — which got it wrong.)
+
+| | land | ocean | CO₂ growth |
+|---|---|---|---|
+| **observed** | −0.665 | **+0.119** | **+0.757** |
+| model | −0.352 (53 %) | **−0.155** | +0.404 (53 %) |
+
+- ⭐ **The model is in a COMPENSATING-ERROR state.** Land short by −0.314, ocean off by +0.274 —
+  opposite effects on the atmosphere, **cancelling 87 %**. That is why growth is a respectable 53 %
+  while both components are badly wrong, and why the fit never forced it: CO₂ outvotes partition
+  40:1, so only the weak streams can see the error.
+- ⛔ **Ocean-only would take growth from 53 % to 17 % of observed** — trading the better-measured,
+  more heavily weighted observable for the weaker one.
+- ✅ **Ocean + land together**: `gamma_enso` × 1.89 with `gamma_enso_ocn` = +0.274 gives both
+  partitions right and growth **53 % → 72 %**.
+- ⚠ **A ceiling from the DATA:** GCB's own slopes do not close — −(land+ocean) = +0.547 against a
+  measured growth of +0.757, the +0.210 gap living in the imbalance term. **No model tuned to those
+  sink products can exceed ~72 %.**
+
 ## 2026-09-01f — **THE CONVEYOR IS REFUTED AS THE ENSO FIX — WRONG SIGN, AND CHEAPLY**
 
 `calibration/diag_conveyor_enso_lever.R` (~1 min). Adopts nothing; `q_conv` stays 0.
