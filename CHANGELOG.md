@@ -2,6 +2,54 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02h — **BOTH SPLIT CONTRACTS HARD-ERROR, AND "BOTH ACTIVE" IS NARROWER THAN IT SOUNDS**
+
+Marcus: add a hard error where a legacy branch and a current branch are both active, and
+check first that no legacy branch is in use.
+
+**⛔ THE AUDIT FOUND THE THING THAT MADE IT NON-TRIVIAL: `ccx_migrate_par_set()` NEVER DROPPED
+THE `seas_lag_p` SCALAR** while its `gamma_enso` branch always had. So every migrated ancestor
+carried BOTH names and a naive error would have fired on `from90` immediately. **The tell was
+the parameter COUNT**: migration returned **26** names against `CCX_PARAM_NAMES`' 25, and the
+extra one was exactly that scalar. Now dropped -- numerically inert, since the split fields
+are filled FROM it (1.7677/1.7677 preserved, gate 7 land 3.5774 / gate Q 0.8025 / AF 0.41128
+all unchanged).
+
+**⛔ MY FIRST ATTEMPT WAS TOO COARSE AND A TEST CAUGHT IT.** `any(split present)` took the
+suite 6 -> 7: `test-seas-lag-split.R:47` pins `lag_p(sh = 2.4, legacy = 1.9)` -> `c(1.9, 2.4)`
+ON PURPOSE ("an explicit field WINS over the legacy scalar"). **The test was right and the
+contract was wrong; the test was NOT touched.** A legacy scalar beside a PARTIAL split is not
+an ambiguity -- it is what FILLS the absent half, and `ccx_migrate_par_set()` calls the
+resolver for exactly that. An `any()` rule breaks the migration from inside itself.
+⇒ **"BOTH ACTIVE" = THE SCALAR IS SHADOWED BY A COMPLETE SET**, not merely present:
+
+| shape | result |
+|---|---|
+| complete split + legacy | **ERROR** -- nothing to fill, two answers, the silent no-op |
+| partial split + legacy | resolves (migration's own fill path) |
+| legacy only | resolves, pre-split ancestor bit for bit |
+| neither | the named default |
+
+**⭐ AND `ccx_gamma_enso()` HAD THE IDENTICAL LATENT BUG, `any()` -> `all()`.** A legacy scalar
+beside a PARTIALLY split list errored, and that error came out of `ccx_migrate_par_set()`
+itself. Dormant only because every stored ancestor has all four names absent; it would have
+fired the first time one carried three of four. Verified on a real fitted par_set: partial +
+legacy now migrates to 25 names, `land_NH` filled to 0.4256, scalar dropped.
+
+**✅ THE BUG THIS WAS FOR IS CAUGHT.** `p$seas_lag_p <- x` on a live list is now an error,
+because `ccx_default_params()` always carries a complete split set. That is what made
+`diag_gross_cancellation_geometry.R`'s 15-point `GC_LAG_GRID` sweep run FLAT -- every point at
+2.25, its printed maximum read off a constant. Fixed to write the split names.
+⚠ **THAT FILE'S LAG-AXIS NUMBERS THEREFORE CHANGE.** Not re-run here: the old ones were
+meaningless, so it is a re-measurement to make deliberately, possibly with a quarantine.
+
+**LEGACY-BRANCH AUDIT, the answer to the question asked:** nothing live uses one. The
+25-parameter survey vectors carry neither retired name; `ccx_default_params()` carries
+neither; `alpha_as_tdep` is 1. The scalar-only branch stays reachable and correct for
+pre-split ancestors, which is its purpose.
+
+Suite 1457 / 6 / 2, failure set identical to baseline.
+
 ## 2026-09-02g — **DEBUG THE GATES: ONE WAS NEVER CALLED, TWO HAVE NO BOUND**
 
 Asked to debug all the gates before the §6 review. Ran the standing suite, measured every

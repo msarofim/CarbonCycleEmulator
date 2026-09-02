@@ -233,16 +233,25 @@ sep("5b. G5 ANSWERED A MAGNITUDE QUESTION; THE QUESTION IS DIRECTIONAL")
 # profiles the axis rather than inferring a direction from two points.
 GC_LAG_GRID <- seq(0.5, 4.0, by = 0.25)
 cat(sprintf("  %12s %10s %10s %10s %10s\n", "seas_lag_p", "theta deg", "a_NEP", "floor", "vs need"))
+# ⛔ THIS SWEEP WAS FLAT UNTIL 2026-09-02 AND ITS PRINTED MAXIMUM WAS MEANINGLESS.
+# It set the RETIRED scalar `seas_lag_p`, and ccx_seas_lag_p() resolved by silent
+# PRECEDENCE -- the split fields, which ccx_default_params() always carries, won
+# every time. So all 15 grid points ran at the same lag (2.25) and `x_max` below
+# was read off a constant curve. ccx_seas_lag_p() now HARD-ERRORS on a list
+# carrying both, so this can no longer happen quietly anywhere.
+# ⚠ THE NUMBERS THIS FILE PRINTS FOR THE LAG AXIS THEREFORE CHANGED on 09-02.
+# Every other section is untouched: they do not go through this assignment.
+GC_LAG_SET <- function(x) list(seas_lag_p_NH = x, seas_lag_p_SH = x)
 lagp <- lapply(GC_LAG_GRID, function(x) {
-  bb <- gc_run(list(seas_lag_p = x))
-  ne <- chan(bb, list(seas_npp_amp_SH = 0), list(seas_lag_p = x))
-  re <- chan(bb, list(seas_T_amp_SH   = 0), list(seas_lag_p = x))
+  bb <- gc_run(GC_LAG_SET(x))
+  ne <- chan(bb, list(seas_npp_amp_SH = 0), GC_LAG_SET(x))
+  re <- chan(bb, list(seas_T_amp_SH   = 0), GC_LAG_SET(x))
   th <- sep_dg(ne, re); list(x = x, th = th, a = amp(ne), fl = floor_of(amp(ne), th)) })
 need_cmip6 <- 180 - asin(GC_G3_OBS / gC$a) * 180 / pi
 for (g in lagp)
   cat(sprintf("  %12.2f %10.1f %10.4f %10.4f %10.1f%s\n", g$x, g$th, g$a, g$fl,
               g$th - need_cmip6,
-              if (abs(g$x - pv0$seas_lag_p) < 0.13) "   <- THE MODE" else ""))
+              if (abs(g$x - ccx_seas_lag_p(pv0)[["NH"]]) < 0.13) "   <- THE MODE" else ""))
 th_max <- max(vapply(lagp, function(g) g$th, 0))
 x_max  <- lagp[[which.max(vapply(lagp, function(g) g$th, 0))]]$x
 cat(sprintf("\n  max theta on this axis %.1f deg at seas_lag_p = %.2f; NEEDED at the CMIP6 gross %.1f\n",

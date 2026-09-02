@@ -626,6 +626,17 @@ ccx_migrate_par_set <- function(p) {
       n <- paste0("seas_lag_p_", h)
       if (n %in% absent) { p[[n]] <- unname(lag[[h]]); filled <- c(filled, n) }
     }
+    # DROP the retired scalar, exactly as the gamma_enso branch below does and
+    # for the same reason: a list carrying both is what ccx_seas_lag_p() now
+    # refuses, and a migrated list must be usable without a second thought.
+    # ⚠ THIS WAS MISSING UNTIL 2026-09-02 while the gamma_enso branch had it.
+    # The tell was the parameter COUNT: migrating a 21-parameter ancestor
+    # returned 26 names against CCX_PARAM_NAMES' 25, and the extra one was this
+    # scalar. Numerically inert to drop -- the split fields were filled FROM it,
+    # so they carry the same value -- but while it stayed, every migrated
+    # ancestor was a list carrying both names, i.e. the one shape no resolver
+    # should ever have to guess about.
+    p$seas_lag_p <- NULL
   }
 
   # 2026-09-01: gamma_enso -> gamma_enso_land_NH/_SH + gamma_enso_ocn_NH/_SH.

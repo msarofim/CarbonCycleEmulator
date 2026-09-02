@@ -332,6 +332,30 @@ CCX_SEAS_LAG_P_DEFAULT <- 2.25
 #'                           `par_mode` takes this branch)
 #'   neither              -> CCX_SEAS_LAG_P_DEFAULT in both
 ccx_seas_lag_p <- function(p) {
+  # ⚠ BOTH AT ONCE IS AN ERROR, NOT A PRECEDENCE RULE -- aligned with
+  # ccx_gamma_enso() on 2026-09-02 (Marcus's call). This function used to let
+  # the split fields WIN SILENTLY, which is the very rule ccx_gamma_enso()'s
+  # comment names and refuses; and because ccx_default_params() always carries
+  # the split fields, `p$seas_lag_p <- x` on a live list was ALWAYS a no-op.
+  # It had already misfired: calibration/diag_gross_cancellation_geometry.R
+  # swept a 15-point GC_LAG_GRID through that assignment and every point
+  # returned the same lag, so the sweep ran flat and its printed maximum was
+  # read off a constant. Absence must ASSERT.
+  # [[intersect_is_a_silent_default]], [[split_name_must_hard_error]]
+  # ⚠ "BOTH ACTIVE" MEANS THE SCALAR IS SHADOWED, NOT MERELY PRESENT. A legacy
+  # scalar sitting beside a PARTIAL split is what FILLS the absent half -- it is
+  # doing work, and ccx_migrate_par_set() calls this resolver for exactly that.
+  # An `any()` here would therefore break the migration from inside itself, and
+  # would break test-seas-lag-split.R:47, which pins the partial case on purpose.
+  # The ambiguous shape is the scalar beside a COMPLETE pair: nothing left to
+  # fill, two answers on the list, and no way to tell which was meant.
+  if (!is.null(p$seas_lag_p) &&
+      !is.null(p$seas_lag_p_NH) && !is.null(p$seas_lag_p_SH))
+    stop("ccx_seas_lag_p(): the parameter list carries BOTH the retired ",
+         "`seas_lag_p` and the 2026-08-31 split fields. Which one is meant is ",
+         "not for this function to guess. Set the split names directly, or ",
+         "bring a stored ancestor forward with ccx_migrate_par_set(), which ",
+         "fills the pair and drops the scalar.")
   legacy <- if (is.null(p$seas_lag_p)) CCX_SEAS_LAG_P_DEFAULT else p$seas_lag_p
   c(NH = if (is.null(p$seas_lag_p_NH)) legacy else p$seas_lag_p_NH,
     SH = if (is.null(p$seas_lag_p_SH)) legacy else p$seas_lag_p_SH)
@@ -421,7 +445,13 @@ ccx_gamma_enso <- function(p) {
   # A precedence rule (split wins) is exactly the silent default this refuses:
   # absence must ASSERT (memory `intersect_is_a_silent_default`). Migrate with
   # ccx_migrate_par_set(), or copy with ccx_set_enso(); neither leaves both.
-  if (!is.null(leg) && any(!vapply(CCX_ENSO_PARAMS,
+  # ⚠ all(), NOT any() -- CORRECTED 2026-09-02. With any(), a legacy scalar
+  # beside a PARTIALLY split list errored, and since ccx_migrate_par_set() calls
+  # this resolver to fill the absent names, that error came out of the migration
+  # itself. Dormant only because every stored ancestor has all four absent; it
+  # would have fired the first time one carried three of the four. The ambiguous
+  # shape is the scalar beside a COMPLETE set, which is what this now catches.
+  if (!is.null(leg) && all(!vapply(CCX_ENSO_PARAMS,
                                    function(n) is.null(p[[n]]), logical(1))))
     stop("ccx_gamma_enso(): the parameter list carries BOTH the retired ",
          "`gamma_enso` and the 2026-09-01 split fields. Which one is meant is ",
