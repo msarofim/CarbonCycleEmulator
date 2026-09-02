@@ -99,11 +99,30 @@ eix_demean <- function(d, win) {
   k <- d$year >= win[1] & d$year <= win[2]
   d$value <- d$value - mean(d$value[k]); d
 }
-eix_detrend <- function(d, win) {
+# ⛔ A DETREND IS ONLY VALID INSIDE ITS FITTING WINDOW. Fitted on 1948-2024 and
+# applied to the full ERSST record, this imposes **+1.22 degC (+1.39 sigma) at
+# 1854** -- a fabricated 19th-century ENSO ramp, over a span 54 % of which lies
+# outside the window. In the 2026-09-02 bake-off that artifact WON the native
+# span by 24.3 log-units, which is the model exploiting it, not a better index.
+# So extrapolation is refused unless the caller says it wants it, and `frac` says
+# how far out of sample it went.
+EIX_EXTRAP_MAX <- 0.05     # fraction of rows allowed outside the fitting window
+eix_detrend <- function(d, win, allow_extrap = FALSE) {
   k  <- d$year >= win[1] & d$year <= win[2]
+  if (sum(k) < 24) stop("eix_detrend: fewer than 24 months inside the window")
+  frac <- mean(!k)
+  if (frac > EIX_EXTRAP_MAX && !allow_extrap)
+    stop(sprintf(paste0("eix_detrend: %.0f%% of the series lies OUTSIDE the %d-%d ",
+                        "fitting window, so the correction there is EXTRAPOLATED ",
+                        "and fabricates signal (at the far end it reached +1.39 sd ",
+                        "in the 09-02 bake-off). Restrict the series to the window, ",
+                        "or pass allow_extrap = TRUE and say so in the report."),
+                 100 * frac, win[1], win[2]))
   tt <- d$year + (d$month - 0.5) / 12
   f  <- stats::lm(d$value[k] ~ tt[k])
-  d$value <- d$value - as.numeric(stats::coef(f)[1] + stats::coef(f)[2] * tt); d
+  d$value <- d$value - as.numeric(stats::coef(f)[1] + stats::coef(f)[2] * tt)
+  attr(d, "extrap_frac") <- frac
+  d
 }
 
 # ---- ⭐ RELATIVE SST: the OBSERVATIONAL detrend ---------------------
@@ -114,12 +133,26 @@ eix_detrend <- function(d, win) {
 # It is also the physically right quantity -- deep convection and the Walker
 # circulation respond to RELATIVE warmth, not absolute SST, and the circulation
 # is what carries ENSO into the land carbon flux.
-eix_relative_sst <- function() {
+# ⚠ AND IT COSTS ENSO SIGNAL, MEASURED: the tropical mean is ITSELF 44 % ENSO
+# (r = 0.667 against Nino 3.4 at a +1 month lag), so subtracting it whole removes
+# the lagged tropical response along with the forced warming -- the index loses
+# 19 % of its sd (0.877 -> 0.707) and the 09-02 bake-off ranked it LAST.
+# `lowpass = TRUE` subtracts only the LOW-FREQUENCY tropical mean, which carries
+# the forced trend but not the 2-7 yr ENSO band: sd 0.866 (1 % lost) and +4.0
+# log-units recovered. That is the version to use if this route is used at all.
+EIX_LF_YEARS <- 21          # centred low-pass, well above the ENSO band
+eix_relative_sst <- function(lowpass = FALSE) {
   a <- eix_fixed_base(eix_ersst_box(EIX_BOX_N34))
   t <- eix_fixed_base(eix_ersst_box(EIX_BOX_TROP))
   m <- match(a$year * 12L + a$month, t$year * 12L + t$month)
   stopifnot(!anyNA(m))
-  data.frame(year = a$year, month = a$month, value = a$value - t$value[m])
+  tv <- t$value[m]
+  if (lowpass) {
+    n <- length(tv); h <- (EIX_LF_YEARS * 12L) %/% 2L
+    tv <- vapply(seq_len(n), function(i) mean(tv[max(1, i - h):min(n, i + h)]), numeric(1))
+    attr(a, "partial_window") <- sum(seq_len(n) <= h | seq_len(n) > n - h)
+  }
+  data.frame(year = a$year, month = a$month, value = a$value - tv)
 }
 
 # ---- MEI ------------------------------------------------------------

@@ -1,0 +1,21 @@
+low-pass 21 yr: 252 of 2071 months use a PARTIAL window; 107 of 924 inside 1948-2024 (12%)
+  n34_v5     mean -0.1962 sd 0.877 trend +0.0774/dec
+  relsst     mean +0.0261 sd 0.707 trend -0.0403/dec
+  relsst_lf  mean +0.0180 sd 0.866 trend -0.0290/dec
+  r(relsst_lf, n34_v5) = 0.9621   (relsst vs n34_v5: 0.9328)
+
+=== ALL v5, PRODUCT-MATCHED: observational detrend vs statistical ===
+
+  --- COMMON 1948-2005 ---
+  n34_v5          REFIT  -1504.922  | mean -0.1962 sd 0.877 trend +0.0774
+  n34_v5_demean   REFIT  -1493.125  | mean +0.0000 sd 0.877 trend +0.0774
+  n34_v5_detrend  REFIT  -1501.416  | mean -0.0000 sd 0.860 trend +0.0000
+  relsst          REFIT  -1511.930  | mean +0.0261 sd 0.707 trend -0.0403
+  relsst_lf       REFIT  -1507.934  | mean +0.0180 sd 0.866 trend -0.0290
+
+  --- NATIVE 1854-2026 ---
+  n34_v5          REFIT  -1510.919  | mean -0.1962 sd 0.877 trend +0.0774
+  n34_v5_demean   REFIT  -1506.815  | mean +0.0000 sd 0.877 trend +0.0774
+  n34_v5_detrend  REFIT  -1482.565  | mean -0.0000 sd 0.860 trend +0.0000
+  relsst          REFIT  -1506.387  | mean +0.0261 sd 0.707 trend -0.0403
+  relsst_lf       REFIT  -1501.210  | mean +0.0180 sd 0.866 trend -0.0290
