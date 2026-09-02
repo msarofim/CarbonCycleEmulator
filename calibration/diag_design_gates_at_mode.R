@@ -122,6 +122,29 @@ for (a in DG_ARMS) {
               g$lag, g$pk$NH[["efold"]]))
 }
 
+# ---- GATE Q: air-sea d13C disequilibrium -----------------------------
+# ⚠ ADDED TO THIS REPORT 2026-09-02, AND IT SHOULD HAVE SHIPPED WITH THE GATE.
+# dg_gateQ() landed in lib_design_gates.R with the T-dependent alphas (6263bf6)
+# and NO diagnostic called it -- its only caller was tests/testthat/test-alpha-as.R.
+# So the handoff's own refit-acceptance criterion ("GATE Q must still PASS")
+# could not be checked by running either gate report. A gate nothing calls
+# reports nothing, which is the failure [[broken_gate_reports_nothing]] records.
+# The unit test remains the DISCRIMINATION test (it asserts the retired pair
+# FAILS); this is the per-arm MEASUREMENT, which is what a report is for.
+cat(sprintf("\n=== GATE Q: AIR-SEA d13C DISEQUILIBRIUM %d (Quay et al. 2003 = %.2f +/- %.2f permil) ===\n",
+            DG_Q_YEAR, DG_Q_OBS, DG_Q_SD))
+cat(sprintf("%-9s %9s %9s %10s %8s  %s\n", "arm", "NH", "SH", "mean", "n_sd", "verdict"))
+for (a in DG_ARMS) {
+  q <- dg_gateQ(R[[a]], V[[a]])
+  cat(sprintf("%-9s %+9.3f %+9.3f %+10.4f %8.2f  %s\n", a,
+              q$by_hemi[["NH"]], q$by_hemi[["SH"]], q$mean, q$n_sd,
+              if (q$pass) "PASS" else sprintf("FAIL (n_sd > %g)", DG_Q_NSD)))
+}
+cat(sprintf("  bound is %g observational sigma (DG_Q_NSD); the alphas are\n", DG_Q_NSD))
+cat("  ccx_alpha_as(), Zhang et al. (1995), adopted 2026-09-02 (6263bf6).\n")
+cat("  ⚠ AREA-UNWEIGHTED two-box mean against a global estimate; the hemispheric\n")
+cat("  pair is printed because its spread is comparable to the observational sigma.\n")
+
 DG_TGT <- dg_gcb_target(DG_SINK_WIN)
 cat(sprintf("\n=== GATE 7: SINKS %d-%d (GCB land %.3f+/-%.2f, ocean %.3f+/-%.2f; n = %d yr) ===\n",
             DG_SINK_WIN[1], DG_SINK_WIN[2], DG_TGT$land, DG_GCB_LAND_SD,
@@ -132,7 +155,8 @@ for (a in DG_ARMS) {
   zl <- (g$land - DG_TGT$land) / DG_GCB_LAND_SD
   zo <- (g$ocean - DG_TGT$ocean) / DG_GCB_OCEAN_SD
   cat(sprintf("%-9s %10.2f %+9.2f %10.2f %+9.2f  %s\n", a, g$land, zl, g$ocean, zo,
-              if (max(abs(c(zl, zo))) <= 1) "PASS" else "FAIL (|z| > 1)"))
+              if (max(abs(c(zl, zo))) <= DG_G7_NSD) "PASS"
+              else sprintf("FAIL (|z| > %g)", DG_G7_NSD)))
 }
 # THE TARGET IS RECOMPUTED, SO IT IS TIED BACK TO THE PUBLISHED NUMBER RATHER
 # THAN DRIFTING AWAY FROM IT SILENTLY. If this stops reproducing 2.36 / 3.22 on

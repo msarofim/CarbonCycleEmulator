@@ -276,7 +276,8 @@ for (a in NB_ORDER) {
   zo <- (g$ocean - DG_TGT$ocean) / DG_GCB_OCEAN_SD
   NB_Z[[a]] <- c(land = zl, ocean = zo)
   cat(sprintf("  %-10s %10.2f %+9.2f %10.2f %+9.2f  %s\n", a, g$land, zl, g$ocean, zo,
-              if (max(abs(c(zl, zo))) <= 1) "PASS" else "FAIL (|z| > 1)"))
+              if (max(abs(c(zl, zo))) <= DG_G7_NSD) "PASS"
+              else sprintf("FAIL (|z| > %g)", DG_G7_NSD)))
 }
 # TIED BACK TO THE PUBLISHED NUMBER rather than drifting away from it silently.
 local({

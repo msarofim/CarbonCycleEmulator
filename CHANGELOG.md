@@ -2,6 +2,52 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02g — **DEBUG THE GATES: ONE WAS NEVER CALLED, TWO HAVE NO BOUND**
+
+Asked to debug all the gates before the §6 review. Ran the standing suite, measured every
+gate at every arm, and mutation-tested the two that have bounds.
+
+**⛔ GATE Q WAS IN NEITHER GATE REPORT.** It shipped in `lib_design_gates.R` with the
+T-dependent alphas (`6263bf6`) and its ONLY caller was `tests/testthat/test-alpha-as.R`. So
+the refit-acceptance criterion the handoff itself sets -- "GATE Q must still PASS" -- could
+not be checked by running either gate report. Added to `diag_design_gates_at_mode.R` as a
+per-arm measurement; the unit test remains the DISCRIMINATION test. It now reads
+defaults 1.37 / from90 0.80 / pin90 0.76 observational sigma, all PASS.
+
+**⚠ AND THE QUOTED SIGMA REPRODUCES AT NO ARM.** The handoff §3 and memory
+`alpha_as_t_dependent_shipped` both say "6.4 sigma -> 1.0 sigma". Measured: from90 0.80,
+defaults 1.37, retired pair 6.59 / 6.02. The pre-check's 0.741 permil = 1.4 sigma is the
+DEFAULTS arm. Nothing gives 1.0. The verdict (PASS, and discrimination) is unaffected.
+
+**⛔ GATES 4 AND 5 HAVE NO BOUND AND NO VERDICT.** Line 135 was the only verdict logic in
+the whole report. They print tables and cannot fail. Gate 5's NH->SH lag is 0.97 against an
+observed 1.34 (-28 %) and its peaks are ~0.95 yr late; gate 4's decadal spread is 0.030
+against GCB's 0.051 under a stated "must not be SMOOTHER than this" test. Both misses are
+sitting in a report under the word GATE with nothing to fail against. **NOT fixed here:
+choosing those thresholds is a design decision, flagged for Marcus.**
+
+**⚠ GATE 7's BOUND WAS A BARE LITERAL, DUPLICATED.** `|z| <= 1` was copy-pasted into the
+verdict line of BOTH callers while this library's own header claims "one kernel, two
+callers" -- the kernel was centralised on 08-31f, the VERDICT was not. Now `DG_G7_NSD`,
+named in the library and referenced by both. ⚠ It is 1 where GATE Q's `DG_Q_NSD` is 2, both
+distributional claims against a stated sigma; recorded at the constant, NOT ruled on.
+
+**✅ GATE 7 MUTATION-TESTED AND IT HAS POWER.** Walking `beta_max` x0.5 -> x2.0 moves land
+1.663 -> 6.697 GtC/yr, z -1.49 -> +8.57, monotone, failing on BOTH sides and PASSING at
+x0.80 (land 2.819, z +0.82; ocean 3.208, z +0.01). So its standing FAIL at the mode
+(land +2.33 sigma) is a real model miss, not a broken gate -- and it is not new: DESIGN
+records +2.28 sigma on 2026-08-14.
+
+**⚠ "GATE 4" IS TWO DIFFERENT GATES.** `diag_gates_in_the_new_basin.R` defines its own
+GATE 1/2/3/4 as hard `stop()` guards (feasibility, encoding, bands, objective-purity) in
+the same file that reports DESIGN gate 4/5/7. "GATE 4 FAILED -- the objective is not a pure
+function of u" is not the airborne fraction. Flagged, not renamed.
+
+**Credit: GATE 12b is the best-built gate in the repo** -- it declares its borrowed band as
+an assumption and carries its own in-run mutation test.
+
+Suite 1457 / 6 / 2, byte-identical to the pre-patch run: no test outcome changed.
+
 ## 2026-09-02f — **DECLARE THE SWITCH, AND HAND OFF TO A REVIEW-THEN-REFIT**
 
 **A defect I introduced this morning, found by auditing my own change rather than by a failure.**

@@ -65,6 +65,18 @@ DG_SINK_WIN  <- c(2015, 2023)
 # 2.410 / 3.202. Both sides move together; the like-for-like rule decides it.
 DG_GCB_LAND_SD  <- LIK_GCB_LAND_SD
 DG_GCB_OCEAN_SD <- LIK_GCB_OCEAN_SD
+DG_G7_NSD <- 1      # how many GCB sigma gate 7 allows. ⚠ NAMED HERE 2026-09-02: it
+                    # was a BARE LITERAL 1 duplicated in the verdict line of BOTH
+                    # callers (diag_design_gates_at_mode.R, diag_gates_in_the_new_
+                    # basin.R) while this file's own header claims "one kernel, two
+                    # callers". The KERNEL was centralised in 08-31f; the VERDICT was
+                    # not, so the one number that decides pass/fail could move in one
+                    # caller and not the other -- the caption-sync class this file
+                    # exists to kill, one level up. [[gate_bound_matches_its_claim]]
+                    # ⚠ AND IT IS 1 WHERE GATE Q's DG_Q_NSD IS 2, which is a real
+                    # inconsistency and NOT ruled on here: both are distributional
+                    # claims against a stated sigma. Recorded for Marcus, not resolved.
+
 DG_GCB_PUB_WIN  <- c(2015, 2024)     # the window GCB's published means are over
 DG_GCB_PUB_LAND <- 2.36; DG_GCB_PUB_OCEAN <- 3.22
 
