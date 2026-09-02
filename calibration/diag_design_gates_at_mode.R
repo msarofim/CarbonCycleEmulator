@@ -155,6 +155,54 @@ for (a in DG_ARMS) {
                         else sprintf("|z| > %g", DG_G5_NSD))))
 }
 
+# ---- GATE G: ocean DIC level against GLODAPv2.2023 --------------------
+# ⚠ THE HELPERS COME FROM lib_glodap_obs.R, NOT pump_shim.R. The latter wraps
+# ccx_deriv() in the global environment, so sourcing it here would change the
+# model every gate in this file is measuring.
+source(ccx_path("calibration", "lib_glodap_obs.R"))
+local({
+  gr  <- ccx_ocean_grid(V[[DG_SHIPPED]]$p$h_ml)
+  obs <- dg_gateG_obs(gr)
+  cat(sprintf("\n=== GATE G: OCEAN DIC LEVEL vs GLODAPv2.2023 ===\n"))
+  cat(sprintf("  epoch DERIVED from the bottles: mean %.2f, median %.0f, range %.0f-%.0f (n = %d)\n",
+              obs$epoch_mean, obs$epoch_median, obs$epoch_range[1],
+              obs$epoch_range[2], obs$n_bottles))
+  cat(sprintf("  observed 0-%.0f m volume-weighted DIC %.1f umol/kg (cell sd %.1f, n = %d)\n",
+              gr$dz[1], obs$surf, obs$surf_sd, obs$surf_n))
+  cat(sprintf("  sigma = SE at n_eff = %d (the convention ruled 2026-08-14 for the\n",
+              DG_GD_NEFF))
+  cat("  deep D14C target, LIK_D14C_DEEP_NEFF -- not a number chosen here).\n")
+  cat(sprintf("\n  %-9s %9s %9s %9s %9s | %11s %9s  %s\n", "arm", "surf 1750",
+              "surf mod", "obs", "z", "inventory", "vs obs %", "verdict"))
+  for (a in DG_ARMS) {
+    # ⚠ THE GRID IS THE ARM'S OWN. h_ml differs between arms, so the top layer
+    # differs, so the OBSERVED slab must be re-binned per arm -- comparing an
+    # arm's mixed layer against another arm's slab is not like-for-like.
+    ga  <- ccx_ocean_grid(V[[a]]$p$h_ml)
+    oa  <- dg_gateG_obs(ga)
+    g   <- dg_gateG(V[[a]], oa)
+    vd  <- dg_gateG_verdict(g, oa)
+    cat(sprintf("  %-9s %9.1f %9.1f %9.1f %+9.2f | %11.1f %+9.3f  %s\n", a,
+                g$surf_1750, g$surf, oa$surf, vd$z, g$inv, vd$inv_pct,
+                if (vd$pass) "PASS" else sprintf("FAIL (|z| > %g)", DG_GD_NSD)))
+    if (identical(a, DG_SHIPPED)) {
+      cat(sprintf("    [%s] run to %d; NH %.1f / SH %.1f; anthropogenic uptake since %d %+.1f GtC\n",
+                  a, g$year, g$surf_NH, g$surf_SH, DG_YEARS[1], vd$uptake))
+      cat("    n_eff SENSITIVITY, because the sigma is a convention and not a measurement:\n")
+      for (ne in DG_GD_NEFF_WALK) {
+        w <- dg_gateG_verdict(g, oa, n_eff = ne)
+        cat(sprintf("      n_eff %4d -> sigma %6.2f umol/kg, z %+6.2f  %s\n",
+                    ne, w$se, w$z, if (w$pass) "PASS" else "FAIL"))
+      }
+    }
+  }
+  cat("  ⚠ THE INVENTORY COLUMN IS REPORTED, NOT BOUNDED. The pump's export field\n")
+  cat("    was solved to hold the OBSERVED gradient anchored on the model's own\n")
+  cat("    mixed layer, so a bound on the inventory would partly read back what\n")
+  cat("    built it. The BOUND is on the surface LEVEL, which nothing that made\n")
+  cat("    the model ever saw.\n")
+})
+
 # ---- GATE Q: air-sea d13C disequilibrium -----------------------------
 # ⚠ ADDED TO THIS REPORT 2026-09-02, AND IT SHOULD HAVE SHIPPED WITH THE GATE.
 # dg_gateQ() landed in lib_design_gates.R with the T-dependent alphas (6263bf6)

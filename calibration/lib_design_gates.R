@@ -140,6 +140,11 @@ DG_GtC_PER_PPM <- ccx_const("GtC_PER_PPM")
 #   * THERE IS NOT ONE LAW-DERIVED GATE IN THE SET. Every gate here is
 #     observational or model-derived; nothing tests the model against a
 #     conservation law, Henry's law, or carbonate equilibrium.
+#     ⚠ STILL TRUE after GATE G (2026-09-02), which is OBSERVATIONAL. What G
+#     does is put an observation ON the surface carbonate state, which is the
+#     quantity a Revelle or Henry's-law gate would test -- so it narrows the
+#     hole without closing it. Candidates remain: carbonate/Revelle consistency
+#     and Henry's-law solubility.
 # =====================================================================
 DG_LEDGER <- list(
   list(id = "4", what = "airborne fraction 1959-2024",
@@ -213,6 +218,33 @@ DG_LEDGER <- list(
             surface-ocean d13C, which is why it caught a 6.4-sigma",
          "
             wrong-sign error that no stream had ever objected to.")),
+  list(id = "G", what = "ocean mixed-layer DIC level at the GLODAP epoch",
+       class = "OBSERVATION", src = paste("GLODAPv2.2023, doi:10.25921/z7hc-v261;",
+         "
+            Lauvset et al. 2024 ESSD 16:2047. Volume-weighted on the",
+         "
+            MODEL's own top layer, at the bottles' own mean year."),
+       bound = paste("|z| <= DG_GD_NSD on the SURFACE LEVEL only. ⚠ The column",
+         "
+            INVENTORY is reported and NOT bounded: the pump's export was",
+         "
+            solved to hold the OBSERVED gradient, so an inventory gate",
+         "
+            would partly read back what built it."),
+       scored = paste("NO -- the three ocean rows are GRADIENTS with fitted",
+         "
+            offsets, d14c_deep_ocean is Delta14C, gcb_ocean_sink is a FLUX.",
+         "
+            Nothing that set the model's surface DIC saw this number."),
+       power  = paste("REAL and OUT-OF-SAMPLE, and it LOCALISES: the surface",
+         "
+            Revelle factor is a function of surface DIC and alkalinity, so",
+         "
+            a level that is right bounds gate 12a's ocean-capacity defect",
+         "
+            AWAY from the surface carbonate state. ⚠ Its sigma borrows the",
+         "
+            ABYSSAL n_eff = 20, which is conservative at the surface.")),
   list(id = "12/12b", what = "Joos IRF: integrated pulse response, and the tail",
        class = "MODEL", src = paste(
          "Joos et al. 2013 multi-model mean, vintage 2013.",
@@ -248,11 +280,10 @@ dg_print_ledger <- function() {
   cat(sprintf("  The three distributional gates now share one strictness: DG_G5_NSD %g,\n",
               DG_G5_NSD))
   cat(sprintf("    DG_G7_NSD %g, DG_Q_NSD %g.\n", DG_G7_NSD, DG_Q_NSD))
-  cat("  ⚠ NO LAW-DERIVED GATE EXISTS. Candidates, none built: carbonate /\n")
-  cat("    Revelle consistency, Henry's-law solubility, and -- most valuable,\n")
-  cat("    since gate 12a reports an ocean-CAPACITY defect it cannot localise --\n")
-  cat("    an ocean DIC inventory against GLODAP, which is observational and\n")
-  cat("    currently ungated.\n")
+  cat("  ⚠ STILL NO LAW-DERIVED GATE. GATE G (2026-09-02) is OBSERVATIONAL; it\n")
+  cat("    puts an observation ON the surface carbonate state, which narrows the\n")
+  cat("    hole without closing it. Candidates, none built: carbonate / Revelle\n")
+  cat("    consistency, and Henry's-law solubility.\n")
 }
 
 # ---- resolve one arm to (params, luc_scale, bomb_total) -------------
@@ -599,6 +630,122 @@ dg_gcb_target <- function(win) {
   g <- as.data.frame(ccx_prepare_obs()$gcb)
   k <- g$year >= win[1] & g$year <= win[2]
   list(land = mean(g$land_sink[k]), ocean = mean(g$ocean_sink[k]), n = sum(k))
+}
+
+# =====================================================================
+# GATE G: OCEAN DIC LEVEL AGAINST GLODAPv2.2023  (2026-09-02, Marcus)
+#
+# WHY IT EXISTS. The 09-02 ledger found NOT ONE law-derived gate in the set and
+# named this as the most valuable candidate that could be built: gate 12a reports
+# an ocean-CAPACITY defect it cannot LOCALISE, and nothing in the repo tests the
+# ocean's absolute DIC against an observation.
+#
+# ⛔ AND THE FIRST DESIGN -- "the whole-column inventory" -- IS PARTLY CIRCULAR,
+# which is why the BOUND is not on it. The biological pump's export field was
+# SOLVED to hold `DIC_ml(model) + [DIC_k(obs) - DIC_0(obs)]` as an exact steady
+# state: the observed GRADIENT, anchored on the model's own mixed layer. So the
+# profile's SHAPE is GLODAP-derived by construction, and a gate on the inventory
+# would be partly reading back what built it -- [[gate_reads_its_own_output]].
+# (Not WHOLLY circular: the pump's magnitude carries a prior and the model's
+# gradient comes out ~13 % larger than observed, so the shape is informed by
+# GLODAP rather than equal to it. The inventory is therefore REPORTED, with this
+# said, and not bounded.)
+#
+# ✅ WHAT *IS* OUT-OF-SAMPLE, AND IT WAS CHECKED RATHER THAN ASSUMED: the
+# MIXED-LAYER DIC LEVEL.
+#   * The likelihood's three ocean rows are GRADIENTS (`ocean_grad_dic`,
+#     `_d13c`, `_alk` -- surface MINUS deep, R/likelihood.R:1541), and the CO2
+#     and d13C gradient rows carry FITTED offsets. A gradient with a fitted
+#     offset is blind to the level.
+#   * `d14c_deep_ocean` is Delta14C, not DIC. `gcb_ocean_sink` is a FLUX, not a
+#     stock.
+#   * The model's mixed-layer DIC is set by carbonate equilibrium with the 1750
+#     atmosphere at `ALK_SURFACE`, a FIXED constant whose own status string says
+#     it still "NEEDS a cited global-mean surface value" -- it is not from GLODAP.
+#   ⇒ Nothing that produced the model's surface DIC level saw this observation.
+#
+# AND IT IS THE RIGHT PLACE TO LOOK FOR AN OCEAN-CAPACITY DEFECT: the surface
+# Revelle factor, which sets how much of a pulse the ocean can take, is a
+# function of surface DIC and alkalinity. A level that is right bounds the defect
+# AWAY from the surface carbonate state.
+#
+# ⚠ LIKE-FOR-LIKE IN TIME, and it is not free: GLODAP bottles are MODERN, so the
+# model is run to the bottles' OWN MEAN YEAR rather than to 2024 or compared at
+# the 1750 spinup. The epoch is DERIVED from the data (mean sampling year of the
+# accepted DIC bottles), never typed. Comparing a preindustrial model column with
+# a modern observation would show the anthropogenic increment as a model defect.
+#
+# ⚠ THE SIGMA IS AN SE, NOT THE SPREAD, and it uses the n_eff convention Marcus
+# already ruled for the deep Delta14C target on 2026-08-14 (`LIK_D14C_DEEP_NEFF`)
+# rather than a new number chosen here. "The spread is NOT the sigma"
+# ([[ccx_glodap_deep]]): a one-box model is scored against the volume-weighted
+# MEAN, whose uncertainty is the spread over an effective sample size. ⚠ n_eff =
+# 20 was chosen for the ABYSS, where water masses are basin-coherent; the surface
+# is better sampled and less coherent, so borrowing it is CONSERVATIVE -- it
+# makes this gate more lenient than the surface data warrant, in the direction
+# that weakens a gate. Said out loud rather than silently exploited, and the
+# report walks z across a range of n_eff so the reader can see the sensitivity.
+# =====================================================================
+DG_GD_NSD  <- 2                      # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD
+DG_GD_NEFF <- LIK_D14C_DEEP_NEFF     # the ruled convention, not a new number
+DG_GD_NEFF_WALK <- c(5, 20, 100, 500)   # sensitivity, printed not chosen
+
+#' The observed side of GATE G: epoch, surface DIC, spread, column inventory
+#'
+#' ⛔ HARD-ERRORS if the GLODAP helpers are not loaded, rather than skipping. A
+#' gate that quietly does not run reports nothing while looking like a pass
+#' ([[broken_gate_reports_nothing]]).
+#' @param grid an ccx_ocean_grid() for the arm under test -- the layers must be
+#'   the MODEL's own, or the surface row compares two different slabs.
+dg_gateG_obs <- function(grid) {
+  if (!exists("dg_obs_profile") || !exists("dg_glodap_bottles"))
+    stop("GATE G needs the GLODAP helpers. source(ccx_path(\"calibration\", ",
+         "\"lib_glodap_obs.R\")) first. ⛔ Do NOT source pump_shim.R for them: ",
+         "it wraps ccx_deriv() and would change the model being gated.")
+  d  <- dg_glodap_bottles()
+  ok <- is.finite(d$tco2) & d$tco2 > -900 & is.finite(d$tco2f) & d$tco2f == PUMP_FLAG_OK
+  op <- dg_obs_profile(grid)
+  list(epoch_mean = mean(d$year[ok]), epoch_median = stats::median(d$year[ok]),
+       epoch_range = range(d$year[ok]), n_bottles = sum(ok),
+       surf = op$dic[1], surf_sd = op$dic_sd[1], surf_n = op$n_dic[1],
+       profile = op)
+}
+
+#' The model side of GATE G at one arm, AT THE OBSERVATION'S OWN EPOCH
+#' @param v a dg_vector(); @param obs a dg_gateG_obs()
+dg_gateG <- function(v, obs) {
+  sp   <- ccx_spinup(v$p)
+  aux  <- sp$aux
+  grid <- ccx_ocean_grid(v$p$h_ml)
+  yr   <- round(obs$epoch_mean)
+  F  <- ccx_build_forcing("historical", c(DG_YEARS[1], yr), prod_c14 = sp$prod_c14,
+                          bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
+  st <- ccx_run_fast(sp, F)$state
+  rho <- ccx_const("RHO_SEAWATER")
+  ml <- function(y, h) y[aux$idx[[h]]$ml, "C"] * aux$mol_per_GtC /
+          (aux$a_oc[[h]] * grid$dz[1] * rho) * 1e6
+  # AREA-WEIGHTED, because the observation is a global volume-weighted mean and
+  # the two hemispheres differ by ~15 umol/kg (the model's solubility pump).
+  aw <- function(y) (ml(y, "NH") * aux$a_oc$NH + ml(y, "SH") * aux$a_oc$SH) /
+          (aux$a_oc$NH + aux$a_oc$SH)
+  ix   <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$ml, aux$idx[[h]]$oc)))
+  mass <- (aux$a_oc$NH + aux$a_oc$SH) * grid$dz * rho
+  list(year = yr, surf = aw(st), surf_1750 = aw(sp$y),
+       surf_NH = ml(st, "NH"), surf_SH = ml(st, "SH"),
+       inv = sum(st[ix, "C"]), inv_1750 = sum(sp$y[ix, "C"]),
+       inv_obs = sum(obs$profile$dic * 1e-6 * mass / aux$mol_per_GtC))
+}
+
+#' GATE G's verdict: a distributional claim on the SURFACE LEVEL only
+dg_gateG_verdict <- function(g, obs, n_eff = DG_GD_NEFF) {
+  se <- obs$surf_sd / sqrt(n_eff)
+  z  <- (g$surf - obs$surf) / se
+  list(se = se, z = z, n_eff = n_eff, pass = abs(z) <= DG_GD_NSD,
+       d_umol = g$surf - obs$surf,
+       # REPORTED, NOT BOUNDED -- see the header on why the inventory is partly
+       # constructed from the observation it would be tested against.
+       inv_d = g$inv - g$inv_obs, inv_pct = 100 * (g$inv - g$inv_obs) / g$inv_obs,
+       uptake = g$inv - g$inv_1750)
 }
 
 # ---- per-stream logL at a vector, for provenance and for pricing ----

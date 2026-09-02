@@ -2,6 +2,76 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02l — **RULING 3 OF 4: GATE G, AND THE FIRST DESIGN FOR IT WAS PARTLY CIRCULAR**
+
+Marcus's pick if only one gate got built: an ocean DIC gate against GLODAP, because gate 12a
+reports an ocean-CAPACITY defect it cannot LOCALISE and nothing in the repo tests the ocean's
+absolute DIC against an observation.
+
+**⛔ THE OBVIOUS DESIGN — "the whole-column inventory" — IS PARTLY CIRCULAR, and it was caught
+before it shipped, not after.** The biological pump's export field was SOLVED to hold
+`DIC_ml(model) + [DIC_k(obs) − DIC_0(obs)]` as an exact steady state: the OBSERVED GRADIENT,
+anchored on the model's own mixed layer. So the profile's SHAPE is GLODAP-derived by construction,
+and an inventory gate would partly read back what built it — [[gate_reads_its_own_output]], which
+is the same failure GATE Q committed on 09-02 morning. (Not WHOLLY circular: the pump's magnitude
+carries a prior and the model's gradient comes out ~13 % LARGER than observed. So the inventory is
+REPORTED, with this said, and **not bounded**.)
+
+**✅ WHAT IS OUT-OF-SAMPLE, CHECKED RATHER THAN ASSUMED: THE MIXED-LAYER DIC LEVEL.** The
+likelihood's three ocean rows are GRADIENTS with fitted offsets (`R/likelihood.R:1541`), and a
+gradient with a fitted offset is blind to the level; `d14c_deep_ocean` is Δ¹⁴C, not DIC;
+`gcb_ocean_sink` is a FLUX, not a stock. The model's surface DIC comes from carbonate equilibrium
+with the 1750 atmosphere at `ALK_SURFACE`, a fixed constant whose own status string still says it
+"NEEDS a cited global-mean surface value". **Nothing that produced the model's surface DIC level
+ever saw this observation.**
+
+**AND IT IS THE RIGHT PLACE TO LOOK FOR AN OCEAN-CAPACITY DEFECT**: the surface Revelle factor is a
+function of surface DIC and alkalinity, so a level that is right bounds gate 12a's defect AWAY from
+the surface carbonate state.
+
+**THE RESULT: PASS at every arm.** At the bottles' own epoch (**2002.4**, derived from the data, not
+typed) the observed 0–96 m volume-weighted DIC is **2034.9 µmol/kg** and from90 gives **2045.7**,
+**+10.8 µmol/kg = +0.61σ**. defaults +0.81, pin90 +0.41. Column inventory **36,948.5 GtC** against
+an observed 36,990.8 (**−0.11 %**); anthropogenic uptake 1750→2002 **+148.9 GtC**.
+⚠ **LIKE-FOR-LIKE IN TIME IS NOT FREE**: GLODAP bottles are MODERN, so the model is run to the
+bottles' mean year. Comparing the 1750 spinup column (1996.3) with a modern observation would have
+shown the anthropogenic increment as a **−38.6 µmol/kg model defect**.
+⚠ **THE SIGMA IS A CONVENTION, AND THE REPORT SAYS SO WITH A WALK.** It is an SE at
+`LIK_D14C_DEEP_NEFF` = 20 — the n_eff Marcus ruled on 2026-08-14 for the deep Δ¹⁴C target, borrowed
+rather than re-chosen. That n_eff was picked for the ABYSS, where water masses are basin-coherent;
+the surface is better sampled, so borrowing it is **CONSERVATIVE — it makes this gate more lenient
+than the surface data warrant**. The report walks n_eff 5/20/100/500: z runs +0.30/+0.61/+1.35/+3.03,
+so **the verdict flips at n_eff ≈ 500**. Stated, not exploited.
+
+**⭐ AND IT HAS DEMONSTRATED POWER, ON THE MODEL AND NOT ONLY ON ITS OWN OUTPUT.**
+`calibration/diag_gate_g_mutation.R` walks `ALK_SURFACE` and the gate **FAILS at ±2 %** while
+passing within ±1 % (−3.67σ at ×0.96, +2.74σ at ×1.02). The measured elasticity is **R = 0.932 %
+of DIC per % of ALK** — near 1, which is what carbonate equilibrium at fixed pCO₂ predicts, so the
+mutation reaches the gate through the physics the header claims and not through some other path.
+⇒ **GATE G bounds a PROVISIONAL constant observationally at ±2 %**, which is the first quantitative
+handle this repo has had on `ALK_SURFACE`. The mutation is restored and **the restoration is
+checked**, not assumed.
+⚠ A trap worth naming: the first run failed with "object 'CCX_CONSTANTS' not found" because the
+loop runs at TOP LEVEL, where `<<-` starts its search in globalenv's PARENT — the attached packages
+— and never finds it. **A superassignment at top level is not "assign globally".**
+
+**⭐ AN EXTRACTION THE GATE FORCED, AND IT IS NOT TIDINESS.** GATE G needs the GLODAP binning
+helpers, and `calibration/pump_shim.R` **cannot be sourced to get them**: it wraps `ccx_deriv()` in
+the global environment, so sourcing it into a gate report would change the model the gates are
+measuring. The alternative — a second copy of the binning — is the caption-sync bug class
+(`dg_annual_sinks` was extracted 08-31 for exactly this). The three pure helpers moved VERBATIM to
+**`calibration/lib_glodap_obs.R`**, which is safe to source twice because it has no wrapper to
+re-capture. `pump_shim.R` now sources it.
+
+**THE LEDGER'S "NOT ONE LAW-DERIVED GATE" FINDING STILL STANDS.** GATE G is OBSERVATIONAL. What it
+does is put an observation ON the surface carbonate state — the quantity a Revelle or Henry's-law
+gate would test — so it **narrows the hole without closing it**. Carbonate/Revelle consistency and
+Henry's-law solubility remain unbuilt, and the printed ledger says so.
+
+**`tests/testthat/test-gate-bounds.R` is now 40 assertions.** GATE G's include the one that matters
+most: **wrecking the inventory must leave the verdict untouched** (`expect_equal(a$z, b$z)` with
+`inv = 10000`), which is the circularity guard turned into a test rather than a comment.
+
 ## 2026-09-02k — **RULING 2 OF 4: GATES 4 AND 5 GET BOUNDS; GATE 7 STOPS OUT-JUDGING THE FIT**
 
 **GATE 7 NOW JUDGES AT THE OBJECTIVE'S OWN SIGMAS.** The 09-02i ledger found its standing FAIL

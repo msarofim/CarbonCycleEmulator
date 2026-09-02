@@ -113,3 +113,35 @@ test_that("GATE 7 judges at the objective's sigmas, and can still fail", {
   # still be reported and must be the stricter of the two
   expect_gt(abs(bad_l$z_land_bare), abs(bad_l$z_land))
 })
+
+test_that("GATE G bounds the SURFACE LEVEL and not the inventory, and can fail", {
+  source(skip_if_no_gates(), local = TRUE)
+  expect_identical(DG_GD_NSD, DG_Q_NSD)      # one strictness across the four
+  expect_identical(DG_GD_NEFF, LIK_D14C_DEEP_NEFF)   # the ruled convention, not a new number
+
+  obs <- list(surf = 2034.9, surf_sd = 79.9,
+              profile = data.frame(dic = 2034.9))
+  mk <- function(surf, inv = 36990, inv_obs = 36990)
+    list(surf = surf, inv = inv, inv_obs = inv_obs, inv_1750 = inv - 149)
+  se <- obs$surf_sd / sqrt(DG_GD_NEFF)
+
+  expect_true(dg_gateG_verdict(mk(obs$surf), obs)$pass)
+  expect_equal(dg_gateG_verdict(mk(obs$surf), obs)$z, 0)
+  expect_false(dg_gateG_verdict(mk(obs$surf + (DG_GD_NSD + 0.5) * se), obs)$pass)
+  expect_false(dg_gateG_verdict(mk(obs$surf - (DG_GD_NSD + 0.5) * se), obs)$pass)
+
+  # ⛔ THE INVENTORY MUST NOT ENTER THE VERDICT. The pump's export field was
+  # solved to hold the OBSERVED gradient, so a bound on the inventory would
+  # partly read back what built it ([[gate_reads_its_own_output]]). Wreck the
+  # inventory and the verdict must be unmoved.
+  a <- dg_gateG_verdict(mk(obs$surf), obs)
+  b <- dg_gateG_verdict(mk(obs$surf, inv = 10000), obs)
+  expect_true(a$pass); expect_true(b$pass)
+  expect_equal(a$z, b$z)
+  expect_false(isTRUE(all.equal(a$inv_pct, b$inv_pct)))   # ... but it IS reported
+
+  # the sigma is a convention, so the verdict must move with n_eff -- which is
+  # why the report walks it rather than quoting one number
+  tight <- dg_gateG_verdict(mk(obs$surf + 1.5 * se), obs, n_eff = DG_GD_NEFF * 25)
+  expect_false(tight$pass)
+})

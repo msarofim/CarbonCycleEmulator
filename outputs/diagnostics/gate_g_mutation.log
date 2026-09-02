@@ -1,0 +1,30 @@
+
+==============================================================================
+GATE G MUTATION TEST -- does the gate have power over ALK_SURFACE?
+  arm from90; |z| <= 2 at n_eff = 20. ADOPTS NOTHING.
+==============================================================================
+  unmutated ALK_SURFACE = 0.0023 mol/kg
+  observed surface DIC  = 2034.9 umol/kg (cell sd 79.9), epoch 2002
+
+     x ALK     ALK mol/kg    surf DIC  d vs obs        z  verdict
+      0.96       0.002208      1969.3     -65.6    -3.67  FAIL
+      0.98       0.002254      2007.6     -27.4    -1.53  PASS
+      0.99       0.002277      2026.7      -8.3    -0.46  PASS
+      1.00         0.0023      2045.7     +10.8    +0.61  PASS
+      1.01       0.002323      2064.8     +29.9    +1.67  PASS
+      1.02       0.002346      2083.8     +48.9    +2.74  FAIL
+      1.04       0.002392      2121.9     +86.9    +4.87  FAIL
+
+  ALK_SURFACE restored to 0.0023 -- checked, not assumed.
+
+  RESPONSE: 19.07 umol/kg of DIC per 1 % of ALK_SURFACE
+    = ELASTICITY R = 0.932 (% of DIC per % of ALK).
+  ⚠ R NEAR 1 IS THE EXPECTED ANSWER at fixed pCO2 -- adding alkalinity to a
+    solution held at the atmosphere's pCO2 draws in very nearly the same
+    proportion of DIC. A response far from 1 would say the mutation is
+    reaching the gate through something other than carbonate equilibrium.
+
+  ⇒ THE GATE FAILS once ALK_SURFACE moves by about 2.0%,
+    so the gate HAS POWER over the surface carbonate state.
+
+=== DONE ===

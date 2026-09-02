@@ -35,57 +35,12 @@ PUMP_EPS_ORG <- -20                    # permil, photosynthetic fractionation
 # ---------------------------------------------------------------------
 # THE OBSERVED PROFILE, ON THE MODEL'S OWN LAYERS. The export field is solved
 # against a TARGET PROFILE, so the binning that produces that profile is part of
-# the pump's construction and lives here with it.
-#
-# Same volume-weighting as data-raw/build_glodap_deep_targets.R (bin to
-# 5 deg lat x 10 deg lon x 250 m, weight cells by cos(lat)) -- GLODAP bottles
-# over-sample the Atlantic, so a raw bottle mean is biased. dg_bin() returns the
-# raw mean beside it so the size of that bias stays visible.
+# the pump's construction -- but it is PURE DATA, and since 2026-09-02 GATE G
+# needs the same helpers. They moved VERBATIM to calibration/lib_glodap_obs.R so
+# there is one binning, not two; this file is not sourceable from a gate report
+# because it wraps ccx_deriv(), which is exactly why they had to leave.
 # ---------------------------------------------------------------------
-PUMP_GLODAP  <- ccx_path("data-raw", "downloads", "glodap_c13c14_subset.csv")
-PUMP_FLAG_OK <- 2                          # GLODAP: 2 = acceptable measurement
-PUMP_DLAT <- 5; PUMP_DLON <- 10; PUMP_DZ <- 250   # binning, as the build script
-
-#' The GLODAPv2.2023 bottle subset, read once per session.
-dg_glodap_bottles <- local({
-  cache <- NULL
-  function() {
-    if (is.null(cache)) cache <<- utils::read.csv(PUMP_GLODAP)
-    cache
-  }
-})
-
-#' Volume-weighted mean of one GLODAP field over a depth slab
-dg_bin <- function(val, flag, zmin, zmax) {
-  d  <- dg_glodap_bottles()
-  ok <- is.finite(d[[val]]) & d[[val]] > -900 &
-        is.finite(d[[flag]]) & d[[flag]] == PUMP_FLAG_OK &
-        d$depth >= zmin & d$depth < zmax
-  if (sum(ok) < 20) return(list(n = sum(ok), vw = NA_real_, raw = NA_real_,
-                                sd = NA_real_))
-  x    <- d[ok, ]
-  id   <- paste(floor(x$lat / PUMP_DLAT), floor(x$lon / PUMP_DLON),
-                floor(x$depth / PUMP_DZ))
-  cell <- tapply(x[[val]], id, mean)
-  w    <- cos(tapply(x$lat, id, mean) * pi / 180)
-  list(n = sum(ok), n_cells = length(cell), raw = mean(x[[val]]),
-       vw = sum(cell * w) / sum(w), sd = stats::sd(cell))
-}
-
-#' Observed DIC / d13C / D14C on the layers of a given grid
-dg_obs_profile <- function(grid) {
-  zb <- c(0, cumsum(grid$dz))
-  do.call(rbind, lapply(seq_along(grid$dz), function(k) {
-    a <- zb[k]; b <- zb[k + 1]
-    rc <- dg_bin("tco2", "tco2f", a, b)
-    r3 <- dg_bin("c13",  "c13f",  a, b)
-    r4 <- dg_bin("c14",  "c14f",  a, b)
-    data.frame(k = k - 1L, top = a, bot = b,
-               n_dic = rc$n, dic = rc$vw, dic_raw = rc$raw, dic_sd = rc$sd,
-               n_d13 = r3$n, d13 = r3$vw, d13_sd = r3$sd,
-               n_d14 = r4$n, d14 = r4$vw, d14_sd = r4$sd)
-  }))
-}
+source(ccx_path("calibration", "lib_glodap_obs.R"))
 
 #' Export field that holds `target_dic` (umol/kg, length nl+1) as a steady state
 #'
