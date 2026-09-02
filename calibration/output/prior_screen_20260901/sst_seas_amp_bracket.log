@@ -1,0 +1,75 @@
+
+============================================================================
+sst_seas_amp BRACKET -- the weighting ambiguity, MEASURED
+============================================================================
+
+[1] ERSSTv5
+    sst                    finite  68.6 %  range [-1.8, 34.33]
+    climatology cells with data: 10988 of 16020
+
+[2] GATE 1 -- reproduce the incumbent area-weighted anchors
+    NH  here 2.23741  registry 2.23739  rel 1.08e-05  OK
+    SH  here 1.74642  registry 1.74644  rel 1.06e-05  OK
+
+[3] CT2022 ocean flux -> exchange-intensity weight
+    ocn_flux_opt           finite 100.0 %  range [-1.363e-06, 1.033e-06]
+    CT grid 360 x 180, lon [-179.5, 179.5]
+    regridded weight finite 100.0 %, >0 in 54.8 % of cells
+
+[4] K0(SST) x pCO2 -> law-shaped weight (missing only k)
+    pco2                   ⚠ 34.23 % OUTSIDE [50, 2000] -> NA (unapplied fill?)
+    pco2                   finite  65.8 %  range [50.13, 693]   [sentinel found and handled]
+    regridded weight finite 65.7 %
+    ⚠ SOLU drops 462 of 10988 SST-bearing cells (4.2 %): NH 343, SH 119
+    ⚠ FLUX drops 2241 of 10988 SST-bearing cells (20.4 %): NH 1853, SH 388
+
+============================================================================
+THE WEIGHTINGS -- half-amplitude, K, and the peak month
+============================================================================
+  weight     NH amp    NH peak     SH amp    SH peak
+  AREA       2.2374       7.82     1.7464       2.04
+  FLUX       3.0813       7.98     2.0104       2.06
+  SOLU       2.2745       7.86     1.6577       2.04
+
+----------------------------------------------------------------------------
+[5] SENSITIVITY -- month-varying flux weight (the choice flagged in [3])
+----------------------------------------------------------------------------
+  NH month-varying: half-amp 1.1682 K (fixed-weight FLUX 3.0813) -> -62.1 %
+  SH month-varying: half-amp 0.3267 K (fixed-weight FLUX 2.0104) -> -83.7 %
+
+  ⛔ THIS IS NOT A BRACKET ENDPOINT AND IS DELIBERATELY EXCLUDED BELOW.
+     Two reasons, either sufficient. (1) THE BOX MODEL CANNOT REPRESENT IT:
+     the parameter multiplies ONE prescribed cycle on ONE box, so its honest
+     analogue is sum_i wbar_i T'_i(t) with a FIXED wbar. A time-varying w_i(t)
+     adds a rectification term the box has no way to carry, so this number
+     answers a question the parameter does not ask. (2) THE WEIGHT COVARIES
+     WITH WHAT IT WEIGHTS: |flux| carries dpCO2, and dpCO2's seasonality is
+     itself partly driven by the SST cycle being measured. That is circular,
+     and it is the likelier explanation of a -84 % collapse than any physics.
+     ⇒ Reported because it is large and someone will otherwise compute it and
+     believe it. NOT interpretable as either a bracket end or a clean
+     rectification estimate without a k field.
+
+============================================================================
+THE BRACKET -- LO/HI over the defensible weightings
+============================================================================
+⛔ NOT a claim that any one weighting is correct. The amplitude factors are
+   NOT observables; what is measured here is the SPREAD they span.
+
+  NH  LO 2.23741  HI 3.08127  centre(geo) 2.62566  implied log-sd 0.1600  (vs SST_SEAS_LOGSD 0.25)
+  SH  LO 1.65772  HI 2.01044  centre(geo) 1.82558  implied log-sd 0.0965  (vs SST_SEAS_LOGSD 0.25)
+
+============================================================================
+PROJECTED EFFECT ON THE SCREEN (25-par mode, cluster rep A)
+============================================================================
+  hemi      fitted       z NOW z new WIDTH z new W+CENTRE
+  NH        1.0690       -2.95       -4.62       -5.62
+  SH        0.5375       -4.71      -12.22      -12.68
+
+  ⇒ THE MEASURED AMBIGUITY IS NARROWER THAN THE JUDGEMENT IT REPLACES, so
+    measuring the width makes the flag BIGGER, not smaller. The 0.25 was
+    GENEROUS to the fit, not harsh on it.
+
+  written to data-raw/downloads/sst_seas_amp_bracket.rds
+⛔ R/constants.R IS NOT EDITED BY THIS FILE.
+============================================================================
