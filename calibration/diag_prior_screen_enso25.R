@@ -68,8 +68,14 @@ PS_REPS  <- c("A: cluster 1 (cold init)"          = "start_000.rds",
 # assert what a file can be asked. Each row below prints n and its lag/ENSO
 # field names, so a mislabelled directory cannot mislead the reader either.
 # Names are SHORT because they are also the attribution table's column heads.
+# ⚠ `from90` goes through ccx_mode_file(), NOT a literal. It was a literal here
+# when this landed (`900f90b`) and test-mode-file.R's hardcoded-path lint has
+# been FAILING on this line ever since -- the handoff that shipped it recorded
+# "6 FAIL, the same six, unchanged", and it was seven. The registry is the one
+# place a mode is named; a literal here is a second chance to point at the
+# quarantine. The other two are refit OUTPUTS, not registry entries.
 PS_ANCESTORS <- c(
-  "from90"   = "calibration/output/refit_20260825f_from90/mode_fit_pumpN.rds",
+  "from90"   = ccx_mode_file("from90"),
   "inc0830"  = "calibration/output/refit_20260831_seas_lag_split/from90/mode_fit_pumpN.rds",
   "bas0831e" = "calibration/output/polish_20260831_probe_basin/from90/mode_fit_pumpN.rds")
 # ⛔ AND THE CONFOUND THAT FOLLOWS FROM IT, stated where it is read and not

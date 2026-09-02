@@ -2,6 +2,62 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02 — **THE 2×2 RE-PRICED: THE LAND *PARAMETER* CLOSED, THE LAND *LIMB* GOT WORSE**
+
+`handoff_2026-09-01f` §4's check, run. `calibration/diag_2x2_repriced_at_enso25.R` on the new
+`calibration/lib_seas_limbs.R`, ~70 s. **ADOPTS NOTHING, REFITS NOTHING** — 27q's P1 interaction
+needs six refitted arms and was not re-run; what is re-priced is the ARITHMETIC verdict, which is
+what §4 says went out of date.
+
+**⛔ THE PREMISE WAS RIGHT AND THE ANSWER GOES THE OTHER WAY.** 27q said rotating the SH ocean into
+phase overshoots the SPO total by 18 %, measured against an SH land limb at 1.26× observed. At the
+25-parameter mode the SH land **limb** is **2.55× observed** (1.312 → 1.743 ppm), the SPO total is
+**0.927×** obs so 27q's P4 window now fails from BELOW, the d13C-per-ppm ratio worsened 1.933 →
+2.063, and **putting the ocean limb at the observed one overshoots by +62.1 %, not +42.4 %**. The
+required ocean limb moved AWAY from the observed one on both axes (0.89× → 0.57× in size, 3.0 →
+4.1 months off in phase). Both cluster representatives agree to three decimals on every limb.
+
+**⭐ AND THE LEVER IS NOT THE ONE THE ARC WAS WATCHING.** One-at-a-time, 27q INCUMBENT → enso25 A:
+`npp_frac_NH` 0.6485 → 0.5076 is **+0.600** on the SH-land limb; `seas_T_amp_SH` 1.039 → 4.054 does
+exactly what 27q said it does, **−0.228**, and is **outvoted 2.6 : 1**. Pre-checked before believing
+it: the SH NPP share goes ×1.4008, predicting 1.838 against a measured 1.912, **+4.0 %** — a
+productivity shift across the equator and nothing else. So the fit traded a MEASURED-bracket flag
+for a JUDGEMENT-width one (`NPP_FRAC_NH_SD` = 0.04, moved 3.5 of those sd) and the observable got
+worse. ⛔ **Not a fix to reach for**: matching the observed land limb by NPP share alone needs
+`npp_frac_NH` ≈ 0.81, outside its [0.4, 0.8] bounds, and its own prior centre would make the limb
+worse still — the SIZE was already exonerated, the missing piece is CANCELLATION.
+
+**GATE R was fired, and NOT widened.** Re-scoring 27q's stored arms through today's harness missed
+by 1.8e-3–5.0e-3 relative, uniformly one sign, on a **1e-8 identity bound**. Rather than loosen it,
+the gate now carries a control: at `gamma_diff = 0` — its value when 27q ran — all twelve limbs
+reproduce to **≤7e-14**. The whole gap is volcanic diffuse-light fertilisation (`328cdb8`, adopted
+`a2298dc`, both 2026-08-29; 27q ran 08-28). A SECOND change would now fail that control instead of
+hiding inside a tolerance someone had widened to make a table print.
+
+**Tried and rejected: editing `diag_admissible_2x2_land_ocean.R` to use the new library.** It is a
+pre-registered artefact whose gates may not move under a refactor. It keeps its inline estimator;
+what binds the two files is GATE R re-scoring its stored arms through the library.
+
+**One error of mine, caught by output contradicting a comment I had just written.** I documented the
+21-parameter ancestors as having run with the ENSO response OFF at the pre-split default of 0. The
+new ENSO limb came back at 0.0055 ppm on those arms instead of the identical zero I predicted:
+`gamma_enso` was one of their 21 **calibrated** names, fitted at 0.8512. The machinery was right —
+the migration contract had split the fitted value correctly — and only the comment was wrong.
+
+**⚠ Owed:** SPO total 1.168 / land 0.683 / ocean 0.522 / ocean phase 8.52 are not in
+`R/constants.R`; they are replicated file-locally across ~10 diagnostics. Gate O checks them against
+the obs actually loaded (1.170, implied land 0.679, mutually consistent as VECTORS), but a registry
+entry is owed.
+
+**⚠ AND THE SUITE WAS AT SEVEN, NOT SIX.** `handoff_2026-09-01f` records "1365 / 6 FAIL / 2 skip,
+the same six, unchanged by everything here". It was **1364 / 7**: `900f90b` shipped
+`diag_prior_screen_enso25.R` with the `from90` ancestor written as a **literal mode path**, which
+`test-mode-file.R:71`'s hardcoded-path lint has been failing on ever since. Fixed here — the line
+now calls `ccx_mode_file("from90")`, which resolves to the identical file — and the suite is back to
+**6 FAIL / 2 skip**, the six being the standing 21-vs-25 parameter-set failures that will clear on
+adoption plus the `kz` bracket bound. ⚠ The lesson is not the literal; it is that a suite count
+quoted in a handoff was quoted rather than read.
+
 ## 2026-09-01n — **THE LAND HALF CLOSED, THE OCEAN HALF GOT WORSE, AND THE WIDTH WAS THE WRONG SUSPECT**
 
 The prior screen 09-01e §6 made adoption conditional on, plus the width measurement it pointed to.

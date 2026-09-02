@@ -1,0 +1,152 @@
+
+==============================================================================
+RE-PRICING THE 08-27q ARITHMETIC VERDICT AT THE 25-PARAMETER MODE
+  old: calibration/diag_admissible_2x2_land_ocean.R (read from outputs/diagnostics/admissible_2x2_land_ocean.rds)
+  new: calibration/output/multistart_20260901_enso25
+  25 parameters in this build. ADOPTS NOTHING. DOES NOT REFIT.
+==============================================================================
+
+
+=== O. GATE O -- ARE THE QUOTED OBSERVED CONSTANTS STILL THE OBSERVATIONS? ===
+  loaded obs SPO total        1.1700 ppm @  9.01 mo   vs quoted 1.168   |d| 0.0020  ok
+  IMPLIED obs land = total - ocean    0.6785 ppm @  9.39 mo   vs quoted 0.683   |d| 0.0045  ok
+
+  ⇒ the three quoted observed limbs are MUTUALLY CONSISTENT as VECTORS.
+
+  vectors:
+    08-27q INCUMBENT 08-27q arm INCUMBENT (21 par, ent 0.000)
+    08-27q LAND_hi   08-27q arm LAND_hi (21 par, ent 0.000)
+    08-27q JOINT_hi  08-27q arm JOINT_hi (21 par, ent 7.157)
+    enso25 A         survey id 0, reference: COLD hand-set init, logpost -1495.795, converged=TRUE
+    enso25 B         survey id 5, seeded: NEW BASIN + the OBSERVATION-implied partition (ocean +0.326 each, land x1.734), logpost -1495.797, converged=TRUE
+
+
+=== 1. GATE R -- DOES TODAY'S HARNESS REPRODUCE 27q's STORED LIMBS? ===
+  Same parameter vector, same model, same estimator: an IDENTITY. If this
+  fails, the old and new columns are NOT like-for-like and nothing below
+  may be read as a change in the physics.
+
+  arm              limb          amp 27q    amp now     rel now    rel CTRL     d mo now
+  08-27q INCUMBENT total         1.14021    1.14588    4.97e-03    5.84e-16     5.26e-04 attributed
+  08-27q INCUMBENT NH_origin     0.82064    0.82384    3.90e-03    2.30e-15     7.33e-05 attributed
+  08-27q INCUMBENT SH_land       1.30801    1.31211    3.14e-03    2.38e-15     5.36e-06 attributed
+  08-27q INCUMBENT SH_ocean      0.24802    0.24758    1.77e-03    6.95e-14     7.95e-04 attributed
+  08-27q LAND_hi   total         1.08859    1.09367    4.67e-03    5.30e-15     4.08e-05 attributed
+  08-27q LAND_hi   NH_origin     0.79193    0.79502    3.89e-03    8.69e-15     7.89e-05 attributed
+  08-27q LAND_hi   SH_land       0.85887    0.86167    3.26e-03    2.20e-15     2.85e-04 attributed
+  08-27q LAND_hi   SH_ocean      0.10523    0.10504    1.77e-03    5.59e-14     7.94e-04 attributed
+  08-27q JOINT_hi  total         1.38208    1.38608    2.89e-03    7.87e-15     2.17e-03 attributed
+  08-27q JOINT_hi  NH_origin     0.79324    0.79631    3.86e-03    9.80e-16     7.03e-05 attributed
+  08-27q JOINT_hi  SH_land       0.85851    0.86131    3.26e-03    2.91e-14     2.85e-04 attributed
+  08-27q JOINT_hi  SH_ocean      0.28826    0.28735    3.13e-03    3.39e-14     2.86e-04 attributed
+
+  on TODAY's model            -> FAIL
+  with gamma_diff = 0 (27q's) -> PASS
+
+  GATE R -> ATTRIBUTED. The old arms reproduce EXACTLY once the one mechanism 
+            adopted after 27q is switched off, so the whole gap is that 
+            mechanism and nothing else moved. ⇒ sec.2-4 compare every 
+            vector through TODAY's model, which is like-for-like BETWEEN 
+            COLUMNS; the STORED 27q numbers are the historical record and 
+            differ from their re-scored selves by the amounts above.
+  (bound 1e-08 relative, an IDENTITY -- not widened, ATTRIBUTED)
+
+
+=== 2. WHERE EVERY VECTOR LANDS -- 27q's TABLE, WITH THE NEW MODE IN IT ===
+  vector              total     mo |  SH-land     mo |   SH-ocn     mo |  NH-orig     mo |   SPO r   MLO r |    sstSH    sTaSH
+  08-27q INCUMBENT    1.146   8.71 |    1.312  10.09 |    0.248   4.17 |    0.824   6.47 |   1.933   0.967 |   0.3596    1.039
+  08-27q LAND_hi      1.094   8.08 |    0.862   9.59 |    0.105   4.17 |    0.795   6.49 |   1.790   0.966 |   0.1526    7.101
+  08-27q JOINT_hi     1.386   8.48 |    0.861   9.59 |    0.287   9.47 |    0.796   6.49 |   1.432   0.962 |   0.4880    7.101
+  enso25 A            1.083   9.00 |    1.743  10.62 |    0.370   4.17 |    1.133   6.34 |   2.063   0.964 |   0.5375    4.054
+  enso25 B            1.083   9.00 |    1.743  10.62 |    0.370   4.18 |    1.133   6.34 |   2.062   0.963 |   0.5381    4.058
+  OBSERVED            1.170   9.01 |    0.679   9.39 |    0.522   8.52 |                 |   1.000   1.000
+
+  ⚠ the OBSERVED land row is total MINUS the inversion's ocean limb, so it
+    carries the NH-origin contribution too; the model's SH-land column does
+    NOT. 27q compared them anyway and its 1.26x is that comparison -- kept
+    here so the columns mean the same thing they did, flagged so the ratio
+    is not read as like-for-like between model limb and observed limb.
+
+
+=== 3. THE ARITHMETIC, RE-PRICED -- WHAT THE OCEAN LIMB WOULD HAVE TO BE ===
+  27q's verdict was ARITHMETIC: land 1.26x obs and ocean 0.53x, rotated into
+  phase, ADD to 1.382 against obs 1.168. Re-priced as the sharper question --
+  GIVEN this vector's NH-origin and SH-land limbs, what must the SH ocean limb
+  BE for the SPO total to be right, and how far is that from the observed one?
+
+  ⚠ THE THREE LIMBS DO NOT SUM TO THE TOTAL -- the model is nonlinear and each
+    limb is a zeroing DIFFERENCE. The gap is carried as a fixed REMAINDER and
+    printed; every counterfactual below holds it. That is an assumption, and
+    it is the size of the printed remainder.
+
+  vector            remaindr of which |  land/   ocn/ |  d phase   total/     P4? |   REQ ocn   @ mo  REQ/obs
+                         ppm     ENSO |    obs    obs | land-ocn      obs         |       ppm                
+  08-27q INCUMBENT    0.0698   0.0055 |  1.921  0.474 |    +5.92    0.981    PASS |    0.1700   2.58    0.326
+  08-27q LAND_hi      0.0698   0.0060 |  1.262  0.201 |    +5.43    0.936    FAIL |    0.4660  11.53    0.893
+  08-27q JOINT_hi     0.0699   0.0060 |  1.261  0.550 |    +0.13    1.187    FAIL |    0.4669  11.53    0.894
+  enso25 A            0.0369   0.0034 |  2.552  0.709 |    -5.55    0.927    FAIL |    0.2962   4.44    0.567
+  enso25 B            0.0369   0.0034 |  2.552  0.710 |    -5.56    0.927    FAIL |    0.2964   4.45    0.568
+  OBSERVED                            |  0.993  1.000 |             1.000      -- |    0.5220   8.52    1.000
+
+
+=== 4. THE COUNTERFACTUAL 27q ACTUALLY RAN -- ROTATE THE OCEAN INTO PHASE ===
+  Hold NH-origin, SH-land and the remainder; move the SH ocean limb, first to
+  the SH LAND phase at its own amplitude (27q's rotation), then to the
+  OBSERVED limb entirely. The overshoot 27q reported is the first column.
+
+  vector           as measured     /obs | ocn ROTATED     /obs |  ocn = OBS     /obs
+  08-27q INCUMBENT      1.146    0.981 |      1.548    1.325 |      1.848    1.582
+  08-27q LAND_hi        1.094    0.936 |      1.228    1.051 |      1.664    1.425
+  08-27q JOINT_hi       1.386    1.187 |      1.376    1.178 |      1.663    1.424
+  enso25 A              1.083    0.927 |      1.702    1.457 |      1.893    1.621
+  enso25 B              1.083    0.927 |      1.702    1.457 |      1.893    1.621
+
+  ⚠ THE FIRST ROW IS THE CONTROL. 27q's JOINT_hi had ALREADY rotated its
+    ocean limb by refitting, so its `as measured` and `ocn ROTATED` columns
+    must nearly agree; if they do not, this arithmetic is not reproducing
+    what the refit did and the new rows inherit that.
+
+
+=== 5. SCORED ===
+  08-27q JOINT_hi's overshoot, as it stood: total 1.386 = 118.7 % of obs 1.168
+  its rotation self-check: measured 1.386 vs arithmetic 1.376 (-0.010)
+
+  the same arithmetic at the 25-parameter mode:
+    enso25 A   land 2.552x obs, ocean 0.709x | put the ocean at OBSERVED and the
+                 total becomes 1.893 = 162.1 % of obs (27q: 142.4 %)
+    enso25 B   land 2.552x obs, ocean 0.710x | put the ocean at OBSERVED and the
+                 total becomes 1.893 = 162.1 % of obs (27q: 142.4 %)
+
+  ⛔ NOTHING HERE IS AN ADOPTION AND NOTHING HERE IS 27q's P1. The interaction
+     statistic needs six REFITTED arms; this file refits none. What it says is
+     whether the ARITHMETIC the verdict rested on still gives the same answer.
+
+
+=== 6. WHICH MOVE DID IT -- A ONE-AT-A-TIME WALK ON THE SH-LAND LIMB ===
+  08-27q INCUMBENT -> enso25 A, one parameter group at a time, each from the FROM vector.
+  ⚠ ONE-AT-A-TIME IS NOT A DECOMPOSITION. The two vectors sit in different
+    basins and the parameters interact; the sum of the singles is printed
+    against the ACTUAL end-to-end move, and the gap between them is the
+    interaction this device cannot see. Read the ORDERING, not the shares.
+
+  parameter              from           to |  d SH-land    d total
+  npp_frac_NH          0.6485       0.5076 |    +0.5997    +0.4784
+  seas_T_amp_SH         1.039        4.054 |    -0.2283    -0.0622
+  fert_k                154.8          309 |    -0.1142    -0.1300
+  beta_max             0.5109       0.6627 |    +0.0762    +0.0860
+  q10                   1.136        1.033 |    +0.0598    +0.3676
+  tau_ex                1.159        0.819 |    -0.0304    +0.0850
+  seas_lag_p            1.768        1.457 |    -0.0270    -0.5203
+  luc_scale              1.11       0.9348 |    +0.0054    +0.0091
+
+  sum of ALL 21 singles  +0.3398   vs the ACTUAL move  +0.4308   interaction  +0.0909
+  SH-land limb: 1.312 -> 1.743 ppm  (obs land 0.683)
+
+  pre-check on the dominant step: SH NPP share 0.3515 -> 0.4924 (x1.4008)
+  a pure share rescaling predicts SH-land 1.838; measured 1.912 (+4.0 %)
+  ⇒ the step IS, to within 10 %, a productivity shift across the equator.
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/2x2_repriced_at_enso25.rds
+
+
+=== DONE ===
