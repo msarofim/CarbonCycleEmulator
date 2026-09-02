@@ -2,6 +2,51 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02q — **PRE-LAUNCH REVIEW: TWO THINGS WOULD HAVE CORRUPTED THE REFIT**
+
+Marcus: check the model and the Torch launch code, then run the refit. The review found two live
+hazards, both created by *today's* work, and neither would have announced itself.
+
+### ⛔ 1. A 09-01 CHECKPOINT WOULD HAVE BEEN SILENTLY RESUMED INTO A DIFFERENT OBJECTIVE
+`run_dispersed_multistart.R` refused a stale checkpoint on `param_names` — written 09-01j precisely
+because the parameter set had moved twice in three days. **But 2026-09-02 moved the OBJECTIVE three
+times at a CONSTANT 25 names** (T-dependent air-sea ¹³C alphas, the one-way GPP ENSO term, Ruling
+A's demeaning). Verified against the real file: `start_000_ckpt.rds` carries **25 matching names and
+no objective stamp**, so the guard would have **waved it through** and the task would have resumed a
+pre-adoption `best` of −1495.795 into a post-adoption objective.
+
+**The fix stamps the FIXED REFERENCE POINT's own value** (`ref_logpost`) into every checkpoint and
+re-reads it at resume — derived from the objective itself, not a commit hash a comment-only commit
+would move. **Mutation-tested in three directions**: a real 09-01 checkpoint (no stamp) is refused;
+a stamp perturbed by 0.01 is refused with the delta named; the true stamp **resumes**, so it is not
+a gate that can only fail. ⇒ [[recorded_but_never_restored]]
+
+Belt and braces: the output directory is renamed **`multistart_20260902_demean25`**, because a
+directory named for the parameter set alone cannot distinguish two objectives at 25 names.
+
+### ⛔ 2. THE PORT TARGETS WERE STALE, AND THE PORT GATE WOULD HAVE FAILED EVERY TASK
+`port_targets.csv` was measured 09-01 at `53ef03d`, before all three objective changes.
+Regenerated at `eae5d92`. **The gate working, not a bug** — but it had to be re-cut before launch.
+
+### ⭐ AND THE REGENERATION REVEALED SOMETHING: THE OBJECTIVE CHANGE REORDERED THE KNOWN POINTS
+
+| point | 09-01 objective | today | moved |
+|---|---|---|---|
+| `start_000` (the 09-01 survey basin) | −1495.7950 | **−1512.0151** | **−16.22** |
+| `new_basin` (08-31e, migrated) | −1500.0507 | **−1496.2524** | +3.80 |
+| `incumbent` (08-30, migrated) | −1551.1222 | −1543.6880 | +7.43 |
+
+**09-01: `start_000` beat `new_basin` by 4.26. Today `new_basin` beats it by 15.76.** ⇒ The
+handoff's "the refit starts from −1512.02" names where Ruling A was *priced*, **not the best
+available start** — and a ranking that flips under an objective change is the argument for
+re-running the **dispersed survey** rather than warm-starting one basin. The driver's existing
+ids 0–5 already carry `new_basin` and its ENSO-seeded variants, so no design change was needed.
+
+### CLEAN
+The model sees ENSO only through `forc$enso`, one demeaning point; `ccx_spinup()` sets it to 0.
+The run-input manifest is still complete — re-checked with the grep its own header prescribes,
+since today added `EIX_ERSST_V6` (a *calibration* read, not a run-time one).
+
 ## 2026-09-02p — **THE v6 GRID CLOSES §4, AND MY OWN "FINDING" LASTED TWO CONTROLS**
 
 Marcus: **pull it.** 90 MB, `downloads.psl.noaa.gov/Datasets/noaa.ersst.v6/sst.mnmean.nc`,

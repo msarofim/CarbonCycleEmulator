@@ -418,6 +418,27 @@ if (file.exists(MS_CKPT)) {
          "-parameter build; this build fits ", length(CCX_PARAM_NAMES),
          ". Resuming it would decode a `u` of the wrong length. Use a fresh ",
          "CCX_MS_OUTDIR for a new parameter set; do not mix them in one directory.")
+  # ⛔ AND UNDER THIS OBJECTIVE. Recorded AND READ -- a stamp nobody checks is
+  # the [[recorded_but_never_restored]] failure with extra steps. MS_REF_LP was
+  # evaluated a few lines above, at the FIXED reference point, on today's build;
+  # if the checkpoint's stamp differs the objective moved underneath it.
+  # ⚠ Older checkpoints carry no stamp and are REFUSED, not trusted, for exactly
+  # the reason the `param_names` guard gives: "written before the field existed"
+  # and "written under a different objective" are indistinguishable from here.
+  if (is.null(ck$ref_logpost))
+    stop("checkpoint at ", MS_CKPT, " records no `ref_logpost`, so it cannot be ",
+         "shown to have been written under THIS objective (the parameter set ",
+         "alone does not pin it -- 2026-09-02 moved the objective three times ",
+         "at a constant 25 names). Delete it, or point CCX_MS_OUTDIR at a fresh ",
+         "directory.")
+  if (!isTRUE(abs(ck$ref_logpost - MS_REF_LP) <=
+              MS_EVAL_TOL * max(1, abs(MS_REF_LP))))
+    stop("checkpoint at ", MS_CKPT, " was written under a DIFFERENT OBJECTIVE: ",
+         "its fixed reference point scored ", sprintf("%.6f", ck$ref_logpost),
+         " and on this build the same point scores ", sprintf("%.6f", MS_REF_LP),
+         " (delta ", sprintf("%+.6f", MS_REF_LP - ck$ref_logpost), "). Resuming ",
+         "would carry a `best` from one objective into another. Use a fresh ",
+         "CCX_MS_OUTDIR for a new objective; do not mix them in one directory.")
   u <- ck$u; best <- ck$best; trace <- ck$trace; cyc0 <- ck$cycle + 1L
   MS_RESUMED <- TRUE
   cat(sprintf("RESUMED from checkpoint at cycle %d, log-post %.4f\n", ck$cycle, -best))
@@ -678,9 +699,20 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
   # inside ccx_make_logpost() as "names attribute [25] must be the same length
   # as the vector [22]", three frames below the cause and naming none of it.
   # Recorded AND READ, at the resume below [[recorded_but_never_restored]].
+  # ⭐ AND `ref_logpost` IS RECORDED FOR THE SAME REASON, ONE LEVEL UP
+  # (2026-09-02). `param_names` proves the checkpoint was written under this
+  # PARAMETER SET; it says nothing about the OBJECTIVE, and on 2026-09-02 the
+  # objective moved three times while the set stayed at 25 -- T-dependent
+  # air-sea 13C alphas, the one-way GPP ENSO term, and Ruling A's demeaning,
+  # the last worth +56.4785 on its own. A 09-01 checkpoint has 25 names that
+  # match exactly, so the guard above would have WAVED IT THROUGH and the task
+  # would have resumed a pre-adoption `best` into a post-adoption objective.
+  # The stamp is the FIXED reference point's own value, not a commit hash: it
+  # is derived from the objective itself rather than from a proxy that a
+  # comment-only commit would move [[threshold_from_obs_or_law]].
   saveRDS(list(id = MS_ID, u = u, best = best, cycle = cyc, trace = trace,
                n_eval = n_eval, seed = MS_SEED + MS_ID,
-               param_names = CCX_PARAM_NAMES), MS_CKPT)
+               param_names = CCX_PARAM_NAMES, ref_logpost = MS_REF_LP), MS_CKPT)
   # ⛔ A CYCLE THAT RAN NO RESTART IS NOT A CONVERGED CYCLE. It gained 0.0000
   # because nothing was tried, and `0 < MS_CYCLE_TOL` is true for exactly that
   # reason -- so the budget guard firing before the first restart used to print

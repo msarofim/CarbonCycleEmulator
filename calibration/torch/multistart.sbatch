@@ -89,12 +89,19 @@ mkdir -p logs calibration/output
 # task dies with no log to say why. `setup_torch.sh` creates it; that is why
 # setup is not optional even once Rcpp is installed.
 
-# ⚠ THE DIRECTORY NAMES THE PARAMETER SET. A `u` vector is meaningless without
-# it, and this project moved the set twice in three days; the driver's resume
-# refuses a foreign checkpoint, but not mixing them is the cleaner answer.
+# ⚠ THE DIRECTORY NAMES THE PARAMETER SET **AND THE OBJECTIVE**. A `u` vector is
+# meaningless without the set it was encoded under, and this project moved the
+# set twice in three days -- but on 2026-09-02 it moved the OBJECTIVE three
+# times at a CONSTANT 25 names (T-dependent air-sea 13C alphas, the one-way GPP
+# ENSO term, and Ruling A's demeaning), which a set-only name cannot
+# distinguish. Hence `_demean25`, not `_enso25`: the 09-01 checkpoints have 25
+# matching names and would have been RESUMED into a different objective.
+# The driver now refuses that too (it stamps `ref_logpost` into every checkpoint
+# and re-reads it), but a directory that cannot collide is the cleaner answer
+# and the guard is the backstop, not the plan.
 # ⛔ COMPUTED **BEFORE** THE `source ~/.bashrc` BELOW -- see the CCX_PROJ_DIR note
 # above. This line is the one that silently wrote round 1 into SLR-RFF-BRICK.
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260901_enso25}"
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260902_demean25}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.
