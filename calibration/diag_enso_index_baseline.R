@@ -44,11 +44,22 @@
 # index swings ~19 % wider. That is FIVE TIMES the entire sd spread of the four
 # conventions this file exists to separate (3.3 %), so any `roll_full` minus
 # `fix_v5` difference prices an amplitude mismatch and calls it a convention.
-# ⚠ IT IS NOT AN EXTRACTION BUG, which was checked before it was blamed on the
-# product: the equatorial profile of the local file is textbook (warm pool
-# 29.5 degC at 150E, cold tongue 24.7 at 90-100W), the lag scan peaks at 0, and
-# no box or weighting variant tried -- flat vs cos, +/-1 grid cell in either
-# direction, 6S-6N -- brings the slope inside.
+# ⛔ AND THE FIRST NAME FOR THAT GAP WAS WRONG. It was called a v5-vs-v6 PRODUCT
+# difference before it was decomposed. CPC publishes a Nino 3.4 index from the
+# SAME ERSST v5 and the SAME 1991-2020 base as the local grid, which holds
+# version and base fixed and isolates METHOD -- and the local extraction
+# reproduces it essentially exactly (r 1.0000, slope 0.997, climatology
+# agreeing to 0.02 degC in every month). So the extraction is RIGHT, and the
+# disagreement is between the two PUBLISHED indices: CPC's is 0.60 degC colder
+# in the 1991-2020 climatology and 15 % LARGER in ENSO amplitude than PSL's
+# nina34.data, which is the file the whole pipeline is driven by.
+# ⚠ WHETHER THAT IS v5 -> v6 IS STILL NOT ESTABLISHED. A 15 % ENSO-amplitude
+# disagreement between two ERSST versions over a densely observed satellite-era
+# window is not obviously plausible; the versions diverge in the SPARSE early
+# record, which is not where this was measured. What is established is that the
+# shipped ENSO forcing's amplitude is uncertain at the ~15 % level between two
+# published Nino 3.4 products. Settling THAT needs the v6 grid (86 MB, PSL
+# noaa.ersst.v6/sst.mnmean.nc) run through the extraction verified here.
 # ⇒ TO PRICE AN UNCLIPPED ROLLING BASE, PULL THE **v6** Nino 3.4 RECORD back to
 #   at least 1933. That is a download and a MANIFEST entry, not a code change.
 #
@@ -84,6 +95,8 @@ EI_ERSST      <- file.path("data-raw", "downloads", "ersst_v5_sst_mnmean.nc")
 EI_BOX_LAT    <- c(-5, 5)           # Nino 3.4, 5S-5N   (= the nina34.data box)
 EI_BOX_LON    <- c(190, 240)        # Nino 3.4, 170W-120W in degrees east
 EI_ERSST_EPOCH <- "1800-01-01"      # the netCDF's `days since` origin
+EI_CPC        <- file.path("data-raw", "downloads", "ersst5.nino.mth.91-20.ascii")
+EI_CPC_COL    <- "NINO3.4"          # absolute SST column; its ANOM twin is unused
 EI_PRE_FILE   <- file.path("outputs", "diagnostics", "enso_gpp_margin_pre.rds")
 EI_OUT        <- file.path("outputs", "diagnostics", "enso_index_baseline.rds")
 EI_TREATMENTS <- c("asis", "demean", "detrend", "roll")   # the shipped product
@@ -353,6 +366,44 @@ cat(sprintf("                 ⤷ mutation, BOTH directions: itself -> slope %.3
 cat(sprintf("                   PASS; rescaled x%.3f -> slope %.3f FAIL.\n",
             EI_GP_MUT, sl_mut))
 
+# ---- WHOSE FAULT IS THE GAP? method, or product? --------------------
+# ⛔ THE GATE SAYS THE TWO INDICES ARE TOO FAR APART. It does NOT say why, and
+# the first name given to the gap -- "a v5-vs-v6 product difference" -- was
+# asserted before it was measured. CPC publishes Nino 3.4 from the SAME ERSST
+# v5 as the local grid on the SAME 1991-2020 base, which holds version and base
+# FIXED. Anything left is METHOD.
+cpc <- utils::read.table(ccx_path(EI_CPC), header = TRUE, check.names = FALSE)
+cpc <- data.frame(year = cpc[[1]], month = cpc[[2]], value = cpc[[EI_CPC_COL]])
+ei_pair <- function(A, B) {
+  kA <- A$year >= EI_CLIM_BASE[1] & A$year <= EI_CLIM_BASE[2] & !is.na(A$value)
+  mB <- match(A$year * 12L + A$month, B$year * 12L + B$month)
+  k  <- kA & !is.na(mB) & !is.na(B$value[mB])
+  cA <- tapply(A$value[k], A$month[k], mean); cB <- tapply(B$value[mB[k]], A$month[k], mean)
+  xa <- A$value[k]     - as.numeric(cA[as.character(A$month[k])])
+  xb <- B$value[mB[k]] - as.numeric(cB[as.character(A$month[k])])
+  c(n = sum(k), r = stats::cor(xa, xb), slope = unname(stats::coef(stats::lm(xa ~ xb))[2]),
+    dclim = mean(A$value[k]) - mean(B$value[mB[k]]))
+}
+d_meth <- ei_pair(abs_v5, cpc)                                   # same VERSION, same BASE
+d_ver  <- ei_pair(cpc, data.frame(year = abs_v6$year, month = abs_v6$month,
+                                  value = abs_v6$value))         # two PUBLISHED indices
+cat("  G-P ⤷ WHOSE GAP IS IT? both rows over the shared base period:\n")
+cat(sprintf("        METHOD  local grid vs CPC, same v5 : r %.4f slope %.3f dclim %+.3f\n",
+            d_meth[["r"]], d_meth[["slope"]], d_meth[["dclim"]]))
+cat(sprintf("        PRODUCT CPC vs PSL nina34, both published: r %.4f slope %.3f dclim %+.3f\n",
+            d_ver[["r"]], d_ver[["slope"]], d_ver[["dclim"]]))
+if (abs(d_meth[["slope"]] - 1) > EI_CONV_SPREAD) {
+  cat("        ⇒ the EXTRACTION is implicated; fix it before blaming a product.\n")
+} else {
+  cat(sprintf("        ⇒ THE EXTRACTION IS EXONERATED (|slope-1| %.4f, inside the\n",
+              abs(d_meth[["slope"]] - 1)),
+      sprintf("          %.4f bound). The gap is between the two PUBLISHED indices.\n",
+              EI_CONV_SPREAD), sep = "")
+}
+cat("        ⚠ That still does NOT name it v5->v6: a 15 % amplitude gap in a\n")
+cat("          densely observed window is where two ERSST versions should agree\n")
+cat("          BEST. Naming it needs the v6 grid through this same extraction.\n")
+
 g_b <- TRUE
 for (kd in EI_TREATMENTS) {
   want <- switch(kd, demean = 0, detrend = 0, NA_real_)   # roll/asis unconstrained
@@ -413,6 +464,7 @@ if (!is.null(pre)) {
 
 saveRDS(list(treatments = res, extension = ext, mutation = mut,
              product_slope = slope, product_bound = EI_CONV_SPREAD, g_p = g_p,
+             gap_method = d_meth, gap_product = d_ver,
              bare = v_bare, pre = pre,
              index_stats = lapply(setNames(c(EI_TREATMENTS, EI_EXTEND),
                                            c(EI_TREATMENTS, EI_EXTEND)), function(kd) {
