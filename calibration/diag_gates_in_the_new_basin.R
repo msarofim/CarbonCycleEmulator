@@ -272,13 +272,20 @@ cat(sprintf("  %-10s %10s %9s %10s %9s  %s\n", "vector", "land", "(sigma)", "oce
 NB_Z <- list()
 for (a in NB_ORDER) {
   g <- G7[[a]]
-  zl <- (g$land - DG_TGT$land) / DG_GCB_LAND_SD
-  zo <- (g$ocean - DG_TGT$ocean) / DG_GCB_OCEAN_SD
-  NB_Z[[a]] <- c(land = zl, ocean = zo)
-  cat(sprintf("  %-10s %10.2f %+9.2f %10.2f %+9.2f  %s\n", a, g$land, zl, g$ocean, zo,
-              if (max(abs(c(zl, zo))) <= DG_G7_NSD) "PASS"
-              else sprintf("FAIL (|z| > %g)", DG_G7_NSD)))
+  # ⭐ ONE VERDICT, BOTH CALLERS (2026-09-02). This block used to recompute the
+  # z-scores and the pass rule inline, in parallel with the other caller.
+  vd <- dg_gate7_verdict(g, DG_TGT)
+  NB_Z[[a]] <- c(land = vd$z_land, ocean = vd$z_ocean)
+  cat(sprintf("  %-10s %10.2f %+9.2f %10.2f %+9.2f  %s\n", a, g$land, vd$z_land,
+              g$ocean, vd$z_ocean,
+              if (vd$pass) "PASS" else sprintf("FAIL (|z| > %g)", DG_G7_NSD)))
 }
+cat(sprintf("  JUDGED at the OBJECTIVE's sigmas (land %.2f, ocean %.2f), |z| <= %g;\n",
+            DG_G7_LAND_SD, DG_G7_OCEAN_SD, DG_G7_NSD))
+cat(sprintf("  GCB's BARE stated sigmas (%.2f / %.2f) are what the header prints and\n",
+            DG_GCB_LAND_SD, DG_GCB_OCEAN_SD))
+cat("  what every pre-2026-09-02 result reported. ⚠ NB_Z BELOW IS NOW ON THE\n")
+cat("  OBJECTIVE'S SIGMAS, so its numbers are not comparable with a stored one.\n")
 # TIED BACK TO THE PUBLISHED NUMBER rather than drifting away from it silently.
 local({
   pub <- dg_gcb_target(DG_GCB_PUB_WIN)

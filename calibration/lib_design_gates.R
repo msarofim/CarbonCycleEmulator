@@ -65,7 +65,30 @@ DG_SINK_WIN  <- c(2015, 2023)
 # 2.410 / 3.202. Both sides move together; the like-for-like rule decides it.
 DG_GCB_LAND_SD  <- LIK_GCB_LAND_SD
 DG_GCB_OCEAN_SD <- LIK_GCB_OCEAN_SD
-DG_G7_NSD <- 1      # how many GCB sigma gate 7 allows. ⚠ NAMED HERE 2026-09-02: it
+# ⭐ RULED 2026-09-02 (Marcus): GATE 7 NOW JUDGES AT THE OBJECTIVE'S OWN SIGMAS.
+# The 09-02 ledger found its standing FAIL was a STRICTNESS MISMATCH, not a model
+# defect: the likelihood scores the land sink at LIK_GCB_LAND_SD *
+# LIK_LAND_SINK_INFLATE = 1.50 GtC/yr and this gate judged the SAME stream on the
+# SAME data at 0.50, where the shipped mode reads +2.33 sigma. At the sigma the
+# fit was actually scored at it reads +0.78 -- a PASS. A gate that re-judges a
+# fitted stream three times more strictly than the objective is not measuring the
+# model; it is measuring the discrepancy between two sigmas.
+# ⚠ THE OCEAN SIGMA IS *NOT* INFLATED IN THE LIKELIHOOD (R/likelihood.R:1608-1612
+# -- ocean at LIK_GCB_OCEAN_SD bare, land at LIK_GCB_LAND_SD * the inflate), so
+# the two halves take DIFFERENT sigmas here and that asymmetry is the objective's,
+# not this file's.
+# ⚠ DG_GCB_*_SD STAY GCB's STATED sigmas: they are what the report PRINTS beside
+# the target, and printing 1.50 as "GCB's stated 1 sigma" would be false. The
+# gate's judging sigmas are the DG_G7_*_SD pair below, and both are shown.
+DG_G7_LAND_SD  <- LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE   # 0.5 x 3.0 = 1.50
+DG_G7_OCEAN_SD <- LIK_GCB_OCEAN_SD                          # 0.40, uninflated
+DG_G7_NSD <- 2      # how many of the OBJECTIVE's sigma gate 7 allows.
+                    # ⭐ 1 -> 2 on 2026-09-02 (Marcus), harmonising with GATE Q's
+                    # DG_Q_NSD and DG_G5_NSD: all three are distributional claims
+                    # against a stated sigma and there was no reason for this one
+                    # to be twice as strict. The 09-02 ledger recorded the
+                    # inconsistency; this resolves it.
+                    # ⚠ NAMED HERE 2026-09-02: it
                     # was a BARE LITERAL 1 duplicated in the verdict line of BOTH
                     # callers (diag_design_gates_at_mode.R, diag_gates_in_the_new_
                     # basin.R) while this file's own header claims "one kernel, two
@@ -73,9 +96,8 @@ DG_G7_NSD <- 1      # how many GCB sigma gate 7 allows. ⚠ NAMED HERE 2026-09-0
                     # not, so the one number that decides pass/fail could move in one
                     # caller and not the other -- the caption-sync class this file
                     # exists to kill, one level up. [[gate_bound_matches_its_claim]]
-                    # ⚠ AND IT IS 1 WHERE GATE Q's DG_Q_NSD IS 2, which is a real
-                    # inconsistency and NOT ruled on here: both are distributional
-                    # claims against a stated sigma. Recorded for Marcus, not resolved.
+                    # (was a bare literal 1 duplicated into both callers' verdict
+                    # lines; the VERDICT itself is now centralised too, below.)
 
 DG_GCB_PUB_WIN  <- c(2015, 2024)     # the window GCB's published means are over
 DG_GCB_PUB_LAND <- 2.36; DG_GCB_PUB_OCEAN <- 3.22
@@ -104,14 +126,17 @@ DG_GtC_PER_PPM <- ccx_const("GtC_PER_PPM")
 # ⛔ WHAT THIS LEDGER MADE VISIBLE, AND NOBODY HAD WRITTEN IT DOWN:
 #   * GATE Q IS THE ONLY GENUINELY OUT-OF-SAMPLE GATE. Everything else either
 #     restates a scored stream or rests on another model.
-#   * GATE 7 IS NOT AN INDEPENDENT TEST AND ITS STANDING FAILURE IS A SIGMA
+#   * GATE 7 IS NOT AN INDEPENDENT TEST AND ITS STANDING FAILURE WAS A SIGMA
 #     MISMATCH, not a model defect. The likelihood scores the land sink at
-#     LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE = 0.5 * 3.0 = 1.5 GtC/yr; this
-#     gate judges the SAME stream against the SAME data at 0.5. At the
-#     likelihood's own sigma the shipped mode is well inside 1 sigma. The gate
-#     is a deliberate STRICTER RE-JUDGEMENT and had never said so out loud.
-#   * GATES 4 AND 5 HAVE NO BOUND AT ALL, so neither can fail. Gate 4 is close
-#     to algebraic in quantities the objective already fits.
+#     LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE = 0.5 * 3.0 = 1.5 GtC/yr; the gate
+#     judged the SAME stream against the SAME data at 0.5. ✅ ALIGNED 2026-09-02
+#     (Marcus): it now judges at the objective's own sigmas. It is STILL not an
+#     independent test -- aligning a sigma cannot make a restatement out-of-sample
+#     -- so a refit should not chase it.
+#   * GATES 4 AND 5 HAD NO BOUND AT ALL, so neither could fail. ✅ RESOLVED
+#     2026-09-02 (Marcus): gate 4 gets an ORDERING on its decadal spread and its
+#     LEVEL stays deliberately unbounded; gate 5 gets two orderings plus a
+#     leave-one-zone-out sigma on its peak times and lag.
 #   * THERE IS NOT ONE LAW-DERIVED GATE IN THE SET. Every gate here is
 #     observational or model-derived; nothing tests the model against a
 #     conservation law, Henry's law, or carbonate equilibrium.
@@ -119,15 +144,42 @@ DG_GtC_PER_PPM <- ccx_const("GtC_PER_PPM")
 DG_LEDGER <- list(
   list(id = "4", what = "airborne fraction 1959-2024",
        class = "OBSERVATION", src = "GCB 2025",
-       bound = "NONE -- prints a table, cannot fail",
+       bound = paste("ORDERING, no threshold (2026-09-02):",
+         "
+            sd(model decadal AF) >= sd(GCB decadal AF). The gate's own",
+         "
+            stated claim is 'must not be SMOOTHER than this', and an",
+         "
+            ordering gets no threshold. ⚠ The AF LEVEL stays UNBOUNDED",
+         "
+            on purpose -- see POWER."),
        scored = "YES (CO2 growth is fitted; emissions are inputs)",
-       power  = "~NONE. Near-algebraic in quantities the fit already matches."),
+       power  = paste("~NONE on the LEVEL -- near-algebraic in quantities the fit",
+         "
+            already matches, so a bound there would test the optimiser.",
+         "
+            REAL on the VARIABILITY: nothing in the objective asks the",
+         "
+            decadal AF to vary, and the model is currently too smooth.")),
   list(id = "5", what = "bomb 14C peak, hemispheric lag, e-fold",
        class = "OBSERVATION", src = "Hua et al. 2022, hemispheric aggregate",
-       bound = "NONE -- prints a table, cannot fail",
+       bound = paste("TWO KINDS (2026-09-02). ORDERINGS, no threshold:",
+         "
+            SH peaks AFTER NH, NH peak HIGHER than SH -- the bomb source",
+         "
+            was northern. DISTRIBUTIONAL: |z| <= DG_G5_NSD on peak times",
+         "
+            and lag, against a sigma DERIVED by leave-one-zone-out on the",
+         "
+            observed aggregate (Hua publishes none). ⚠ That sigma is the",
+         "
+            aggregate's sensitivity to its own zonal composition, not a",
+         "
+            measurement error, and rests on few draws."),
        scored = "STREAM yes, FUNCTIONAL no (likelihood scores levels)",
-       power  = "MODERATE, and the best-sourced gate here: a different
-            functional of a scored stream. Needs a bound to be a gate."),
+       power  = paste("MODERATE, and the best-sourced gate here: a different",
+         "
+            functional of a scored stream. It now HAS a bound.")),
   list(id = "7", what = "land / ocean sinks 2015-2023",
        class = "OBSERVATION + MODEL", src = paste(
          "GCB 2025. ⚠ MIXED: the ocean sink is a product of ocean",
@@ -135,13 +187,23 @@ DG_LEDGER <- list(
             biogeochemistry MODELS and the land sink is a RESIDUAL of the",
          "
             budget, so this is not a clean observation."),
-       bound = "|z| <= DG_G7_NSD, a distributional claim on GCB's stated sigma",
+       bound = paste("|z| <= DG_G7_NSD (2 since 2026-09-02), against the",
+         "
+            OBJECTIVE'S OWN sigmas: land 1.50 = LIK_GCB_LAND_SD x",
+         "
+            LIK_LAND_SINK_INFLATE, ocean 0.40 uninflated. ⚠ Until",
+         "
+            2026-09-02 it judged land at 0.50, three times stricter than",
+         "
+            the fit, which is where its standing FAIL came from."),
        scored = "YES -- gcb_land_sink and gcb_ocean_sink are BOTH fitted",
-       power  = paste("NONE out-of-sample. Same streams, same data. And it judges",
+       power  = paste("STILL NONE out-of-sample -- same streams, same data, and",
          "
-            at 1/LIK_LAND_SINK_INFLATE of the sigma the fit was scored at,",
+            aligning the sigma does not change that. What it now tests is",
          "
-            so its standing FAIL is a strictness mismatch, not a defect.")),
+            whether the optimiser did its job, which is worth stating and",
+         "
+            is not worth chasing in a refit.")),
   list(id = "Q", what = "air-sea d13C disequilibrium, 1995",
        class = "OBSERVATION", src = "Quay et al. 2003 (0.60 +- 0.10 permil)",
        bound = "n_sd <= DG_Q_NSD, a distributional claim on the stated sigma",
@@ -175,10 +237,17 @@ dg_print_ledger <- function() {
     cat(sprintf("  class : %s\n  source: %s\n  bound : %s\n  scored: %s\n  POWER : %s\n",
                 g$class, g$src, g$bound, g$scored, g$power))
   }
-  cat(sprintf("\n  ⚠ GATE 7's two sigmas, computed not quoted: likelihood %.2f GtC/yr\n",
-              LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE))
-  cat(sprintf("    (LIK_GCB_LAND_SD %.2f x LIK_LAND_SINK_INFLATE %.1f) vs this gate's %.2f.\n",
-              LIK_GCB_LAND_SD, LIK_LAND_SINK_INFLATE, DG_GCB_LAND_SD))
+  cat(sprintf("\n  GATE 7's sigmas, computed not quoted: it JUDGES at land %.2f / ocean %.2f\n",
+              DG_G7_LAND_SD, DG_G7_OCEAN_SD))
+  cat(sprintf("    (= LIK_GCB_LAND_SD %.2f x LIK_LAND_SINK_INFLATE %.1f, and the ocean\n",
+              LIK_GCB_LAND_SD, LIK_LAND_SINK_INFLATE))
+  cat(sprintf("    UNINFLATED at %.2f -- the objective's own asymmetry). GCB's STATED\n",
+              LIK_GCB_OCEAN_SD))
+  cat(sprintf("    sigmas, which the report prints beside the target, are %.2f / %.2f.\n",
+              DG_GCB_LAND_SD, DG_GCB_OCEAN_SD))
+  cat(sprintf("  The three distributional gates now share one strictness: DG_G5_NSD %g,\n",
+              DG_G5_NSD))
+  cat(sprintf("    DG_G7_NSD %g, DG_Q_NSD %g.\n", DG_G7_NSD, DG_Q_NSD))
   cat("  ⚠ NO LAW-DERIVED GATE EXISTS. Candidates, none built: carbonate /\n")
   cat("    Revelle consistency, Henry's-law solubility, and -- most valuable,\n")
   cat("    since gate 12a reports an ocean-CAPACITY defect it cannot localise --\n")
@@ -402,6 +471,127 @@ dg_gate7 <- function(r) {
   a <- dg_annual_sinks(r)
   k <- a$year >= DG_SINK_WIN[1] & a$year <= DG_SINK_WIN[2]
   list(ocean = mean(a$ocean[k]), land = mean(a$land[k]))
+}
+
+# ---- GATE 7 VERDICT, centralised 2026-09-02 -------------------------
+#' The gate-7 z-scores and pass/fail, in ONE place
+#'
+#' ⭐ WHY THIS FUNCTION EXISTS. Until 2026-09-02 the z-scores and the verdict were
+#' computed INLINE in both callers, while this file's header claimed "one kernel,
+#' two callers". The kernel was centralised on 08-31f; the verdict was not, so the
+#' one number that decides pass/fail could move in one caller and not the other.
+#' That is the caption-sync bug class, one level up.
+#'
+#' @param g7 the list from dg_gate7()
+#' @param tgt the list from dg_gcb_target()
+dg_gate7_verdict <- function(g7, tgt) {
+  zl <- (g7$land  - tgt$land)  / DG_G7_LAND_SD
+  zo <- (g7$ocean - tgt$ocean) / DG_G7_OCEAN_SD
+  list(z_land = zl, z_ocean = zo,
+       # ALSO at GCB's bare stated sigma, because that is what every result
+       # before 2026-09-02 reported and a reader comparing to one needs it.
+       z_land_bare  = (g7$land  - tgt$land)  / DG_GCB_LAND_SD,
+       z_ocean_bare = (g7$ocean - tgt$ocean) / DG_GCB_OCEAN_SD,
+       pass = max(abs(c(zl, zo))) <= DG_G7_NSD)
+}
+
+# =====================================================================
+# GATE 4 AND GATE 5 GET BOUNDS (2026-09-02, Marcus)
+#
+# Both printed tables and no verdict, so neither could fail -- the 09-02 ledger's
+# starkest finding. Giving them bounds is a DESIGN decision, and the two need
+# DIFFERENT KINDS of bound because they make different kinds of claim
+# ([[gate_bound_matches_its_claim]]).
+# =====================================================================
+
+# ---- GATE 4: an ORDERING, so it gets NO THRESHOLD -------------------
+# The gate's own stated test is "the model must not be SMOOTHER than this": its
+# decadal airborne fraction must vary at least as much as GCB's does. That is an
+# ORDERING between two MEASURED quantities, and the rule for an ordering is that
+# it gets no threshold at all -- inventing one here would be choosing the physics.
+# ⚠ THE AF *LEVEL* DELIBERATELY STAYS UNBOUNDED. It is near-algebraic in
+# quantities the objective already fits (atmospheric growth is a scored stream and
+# emissions are inputs), so a bound on it would test the optimiser, not the model.
+# The ledger says so; this is that sentence turned into code.
+DG_G4_CLAIM <- "sd(model decadal AF) >= sd(observed decadal AF) -- an ORDERING"
+dg_gate4_verdict <- function(g4) {
+  sm <- stats::sd(g4$dec); so <- stats::sd(DG_AF_OBS_DEC)
+  list(sd_model = sm, sd_obs = so, ratio = sm / so, pass = sm >= so)
+}
+
+# ---- GATE 5: a DISTRIBUTIONAL claim, so it needs a SIGMA ------------
+# ⛔ AND HUA 2022 PUBLISHES NO SIGMA ON A HEMISPHERIC PEAK TIME OR ON THE NH->SH
+# LAG, so one has to be DERIVED, not typed. The rule is observation first, law
+# second, another model last ([[threshold_from_obs_or_law]]), and the observation
+# can supply it: the hemispheric aggregate is a weighted mean over Hua's ZONES, so
+# recomputing the same estimator with one zone left out at a time gives the
+# spread the aggregate's own spatial composition carries. That is a tolerance
+# SCALED TO THE QUANTITY IT TESTS ([[tolerance_scaled_to_spread]]), not a
+# hand-picked gate.
+# ⚠ WHAT IT IS AND IS NOT. It is the sensitivity of the aggregate to its zonal
+# composition. It is NOT a measurement error on the underlying Delta14C, and with
+# 3 NH zones and 2 SH zones it rests on few draws -- so it is reported with its n,
+# and it should be read as an ORDER OF MAGNITUDE for the tolerance rather than a
+# calibrated standard error.
+# ⚠ A SECOND, THRESHOLD-FREE CLAIM RIDES ALONGSIDE, and it is the stronger one
+# because it needs no sigma at all: the bomb source was NORTHERN, so the SH peak
+# must come AFTER the NH peak and the NH peak must be HIGHER. Those are orderings
+# and are bounded as orderings.
+DG_G5_NSD <- 2      # harmonised with DG_Q_NSD and DG_G7_NSD, 2026-09-02
+
+#' Leave-one-zone-out spread of the observed gate-5 quantities
+#'
+#' Same estimator as dg_obs_gate5(), re-run with each contributing zone dropped
+#' (weights renormalised over the survivors). Returns the sd across those
+#' re-runs for each quantity, plus the number of draws behind it.
+dg_obs_gate5_spread <- function() {
+  w  <- ccx_zone_weights()
+  z  <- as.data.frame(readRDS(ccx_path("data", "obs_d14c_zonal.rds")))
+  agg <- function(ww) {
+    zz <- z[z$zone %in% names(ww), ]
+    tt <- sort(unique(zz$decimal_date))
+    m <- vapply(names(ww), function(nm) {
+      s <- zz[zz$zone == nm, ]
+      stats::approx(s$decimal_date, s$d14c, xout = tt, rule = 2)$y
+    }, numeric(length(tt)))
+    v <- as.vector(m %*% (ww[colnames(m)] / sum(ww)))
+    p <- dg_peak(tt, v)
+    c(p, efold = dg_efold(tt, v, p[["t"]]))
+  }
+  # ⚠ EACH HEMISPHERE'S SPREAD IS TAKEN OVER ITS OWN DISTINCT DRAWS, and that
+  # matters. Pooling the NH quantities over all (NH-drop x SH-drop) COMBINATIONS
+  # repeats each NH value once per SH drop; the mean is unchanged but the n-1
+  # denominator is not, and the sd comes out ~10 % LOW -- which would make the
+  # gate stricter than the data warrants, silently. Only the LAG is a genuine
+  # function of both, so only the lag is taken over the combinations.
+  drop_sets <- function(ww) c(list(ww), lapply(names(ww), function(nm)
+    ww[setdiff(names(ww), nm)]))
+  nh <- lapply(drop_sets(w$NH), agg)
+  sh <- lapply(drop_sets(w$SH), agg)
+  get <- function(l, f) vapply(l, function(x) x[[f]], numeric(1))
+  lag <- as.vector(outer(get(sh, "t"), get(nh, "t"), `-`))
+  list(sd = c(nh_t = stats::sd(get(nh, "t")), nh_v = stats::sd(get(nh, "v")),
+              sh_t = stats::sd(get(sh, "t")), sh_v = stats::sd(get(sh, "v")),
+              lag  = stats::sd(lag),
+              nh_efold = stats::sd(get(nh, "efold"))),
+       n = c(nh = length(nh), sh = length(sh), lag = length(lag)),
+       nh = nh, sh = sh)
+}
+
+#' Gate 5's verdict: two orderings with no threshold, and three z-scores
+#' @param g5 the list from dg_gate5()
+#' @param ob the list from dg_obs_gate5()
+#' @param sp the list from dg_obs_gate5_spread()
+dg_gate5_verdict <- function(g5, ob, sp) {
+  lag_obs <- ob$SH[["t"]] - ob$NH[["t"]]
+  z <- c(nh_t = (g5$pk$NH[["t"]] - ob$NH[["t"]]) / sp$sd[["nh_t"]],
+         sh_t = (g5$pk$SH[["t"]] - ob$SH[["t"]]) / sp$sd[["sh_t"]],
+         lag  = (g5$lag - lag_obs)              / sp$sd[["lag"]])
+  ord <- c(sh_after_nh = g5$lag > 0,
+           nh_peak_higher = g5$pk$NH[["v"]] > g5$pk$SH[["v"]])
+  list(z = z, ord = ord,
+       pass = all(abs(z) <= DG_G5_NSD) && all(ord),
+       pass_z = all(abs(z) <= DG_G5_NSD), pass_ord = all(ord))
 }
 
 # ---- the gate-7 TARGETS, recomputed on DG_SINK_WIN from the obs series -------

@@ -101,9 +101,16 @@ for (a in DG_ARMS)
   cat(sprintf("%-9s %8.3f %10.3f | %s\n", a, G4[[a]]$all, G4[[a]]$all_unscaled,
               paste(sprintf("%6.2f", G4[[a]]$dec), collapse = "")))
 cat(sprintf("\n  DECADAL SPREAD (sd), the 'must not be SMOOTHER than this' test:\n"))
-cat(sprintf("    GCB 2025 %.3f", stats::sd(DG_AF_OBS_DEC)))
-for (a in DG_ARMS) cat(sprintf("   %s %.3f", a, stats::sd(G4[[a]]$dec)))
-cat("\n")
+cat(sprintf("  BOUND (2026-09-02): %s\n", DG_G4_CLAIM))
+cat(sprintf("  %-9s %10s %10s %8s  %s\n", "arm", "sd model", "sd GCB", "ratio", "verdict"))
+for (a in DG_ARMS) {
+  vd <- dg_gate4_verdict(G4[[a]])
+  cat(sprintf("  %-9s %10.3f %10.3f %8.2f  %s\n", a, vd$sd_model, vd$sd_obs,
+              vd$ratio, if (vd$pass) "PASS" else "FAIL (SMOOTHER than GCB)"))
+}
+cat("  ⚠ The AF LEVEL above is DELIBERATELY UNBOUNDED: it is near-algebraic in\n")
+cat("    quantities the objective already fits, so a bound would test the\n")
+cat("    optimiser rather than the model. See DG_LEDGER.\n")
 
 cat("\n=== GATE 5: BOMB CURVE, HEMISPHERIC AGGREGATE (Hua et al. 2022) ===\n")
 ob <- dg_obs_gate5()          # the library's estimator, on the observations
@@ -120,6 +127,32 @@ for (a in DG_ARMS) {
   cat(sprintf("%-9s %10.1f %10.3f %10.1f %10.3f %8.2f %9.1f\n", a,
               g$pk$NH[["v"]], g$pk$NH[["t"]], g$pk$SH[["v"]], g$pk$SH[["t"]],
               g$lag, g$pk$NH[["efold"]]))
+}
+
+# ---- GATE 5's BOUND, added 2026-09-02 (Marcus) ----------------------
+# Two kinds, because the gate makes two kinds of claim. The ORDERINGS need no
+# threshold; the TIMINGS need a sigma, and Hua publishes none for a hemispheric
+# peak, so it is DERIVED by leave-one-zone-out on the observed aggregate.
+G5SP <- dg_obs_gate5_spread()
+cat(sprintf("\n  DERIVED SIGMA (leave-one-zone-out on the OBSERVED aggregate; NH %d, SH %d, lag %d draws):\n",
+            G5SP$n[["nh"]], G5SP$n[["sh"]], G5SP$n[["lag"]]))
+cat(sprintf("    NH peak yr %.3f   SH peak yr %.3f   lag %.3f   NH efold %.3f\n",
+            G5SP$sd[["nh_t"]], G5SP$sd[["sh_t"]], G5SP$sd[["lag"]],
+            G5SP$sd[["nh_efold"]]))
+cat("  ⚠ It is the aggregate's sensitivity to its own ZONAL COMPOSITION, not a\n")
+cat("    measurement error on Delta14C, and it rests on few draws. Read it as an\n")
+cat("    order of magnitude for the tolerance.\n")
+cat(sprintf("\n  %-9s %9s %9s %9s | %-12s %-12s  %s\n", "arm", "z NH yr",
+            "z SH yr", "z lag", "SH after NH", "NH > SH", "verdict"))
+for (a in DG_ARMS) {
+  vd <- dg_gate5_verdict(G5[[a]], ob, G5SP)
+  cat(sprintf("  %-9s %+9.2f %+9.2f %+9.2f | %-12s %-12s  %s\n", a,
+              vd$z[["nh_t"]], vd$z[["sh_t"]], vd$z[["lag"]],
+              if (vd$ord[["sh_after_nh"]]) "ok" else "VIOLATED",
+              if (vd$ord[["nh_peak_higher"]]) "ok" else "VIOLATED",
+              if (vd$pass) "PASS" else
+                sprintf("FAIL (%s)", if (!vd$pass_ord) "ordering"
+                        else sprintf("|z| > %g", DG_G5_NSD))))
 }
 
 # ---- GATE Q: air-sea d13C disequilibrium -----------------------------
@@ -152,11 +185,19 @@ cat(sprintf("\n=== GATE 7: SINKS %d-%d (GCB land %.3f+/-%.2f, ocean %.3f+/-%.2f;
 cat(sprintf("%-9s %10s %9s %10s %9s  %s\n", "arm", "land", "(sigma)", "ocean", "(sigma)", "verdict"))
 for (a in DG_ARMS) {
   g <- G7[[a]]
-  zl <- (g$land - DG_TGT$land) / DG_GCB_LAND_SD
-  zo <- (g$ocean - DG_TGT$ocean) / DG_GCB_OCEAN_SD
-  cat(sprintf("%-9s %10.2f %+9.2f %10.2f %+9.2f  %s\n", a, g$land, zl, g$ocean, zo,
-              if (max(abs(c(zl, zo))) <= DG_G7_NSD) "PASS"
-              else sprintf("FAIL (|z| > %g)", DG_G7_NSD)))
+  vd <- dg_gate7_verdict(g, DG_TGT)          # ONE verdict, both callers
+  cat(sprintf("%-9s %10.2f %+9.2f %10.2f %+9.2f  %s\n", a, g$land, vd$z_land,
+              g$ocean, vd$z_ocean,
+              if (vd$pass) "PASS" else sprintf("FAIL (|z| > %g)", DG_G7_NSD)))
+}
+cat(sprintf("  JUDGED at the OBJECTIVE's sigmas (land %.2f, ocean %.2f), |z| <= %g.\n",
+            DG_G7_LAND_SD, DG_G7_OCEAN_SD, DG_G7_NSD))
+cat("  At GCB's BARE stated sigmas, which is what every pre-2026-09-02 result\n")
+cat("  reported, the same runs read:\n")
+for (a in DG_ARMS) {
+  vd <- dg_gate7_verdict(G7[[a]], DG_TGT)
+  cat(sprintf("    %-9s land %+.2f  ocean %+.2f  (sigma %.2f / %.2f)\n", a,
+              vd$z_land_bare, vd$z_ocean_bare, DG_GCB_LAND_SD, DG_GCB_OCEAN_SD))
 }
 # THE TARGET IS RECOMPUTED, SO IT IS TIED BACK TO THE PUBLISHED NUMBER RATHER
 # THAN DRIFTING AWAY FROM IT SILENTLY. If this stops reproducing 2.36 / 3.22 on

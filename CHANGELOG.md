@@ -2,6 +2,55 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02k — **RULING 2 OF 4: GATES 4 AND 5 GET BOUNDS; GATE 7 STOPS OUT-JUDGING THE FIT**
+
+**GATE 7 NOW JUDGES AT THE OBJECTIVE'S OWN SIGMAS.** The 09-02i ledger found its standing FAIL
+was a STRICTNESS MISMATCH: the likelihood scores the land sink at `LIK_GCB_LAND_SD *
+LIK_LAND_SINK_INFLATE` = **1.50** GtC/yr and the gate judged the same stream on the same data at
+**0.50**. ⚠ **The ocean sigma is NOT inflated in the likelihood** (`R/likelihood.R:1608-1612`), so
+the two halves take different sigmas and that asymmetry is the objective's, not the gate's.
+`DG_G7_NSD` 1 → **2**, harmonising with `DG_Q_NSD` and the new `DG_G5_NSD`. **All three arms now
+PASS** (from90 land **+0.72**, ocean −0.55), and the report still prints the BARE-sigma reading
+(+2.15) because that is what every pre-today result quoted.
+⚠ **It is still not an independent test.** Aligning a sigma cannot make a restatement
+out-of-sample. The ledger now says so where it used to say the FAIL was a mismatch.
+
+**⭐ AND THE VERDICT ITSELF IS FINALLY CENTRALISED.** `dg_gate7_verdict()` — the z-scores and the
+pass rule were computed INLINE in both callers while the file's header claimed "one kernel, two
+callers". The kernel was centralised 08-31f; the verdict was not.
+
+**GATE 4 GETS AN ORDERING, AND NO THRESHOLD.** Its own stated claim is "must not be SMOOTHER than
+this", which is an ordering between two measured quantities, and an ordering gets no threshold —
+inventing one would be choosing the physics. **All three arms FAIL**: decadal AF spread
+defaults 0.039 / from90 **0.032** / pin90 0.041 against GCB's **0.051**. That is the variability
+gap, now gated.
+⚠ **THE AF LEVEL STAYS DELIBERATELY UNBOUNDED** and the report says why: it is near-algebraic in
+quantities the objective already fits, so a bound would test the optimiser, not the model.
+
+**GATE 5 GETS TWO ORDERINGS AND A DERIVED SIGMA.** ⛔ Hua 2022 publishes no sigma on a hemispheric
+peak time or on the NH→SH lag, so one had to be **derived, not typed**: the aggregate is a weighted
+mean over Hua's ZONES, so re-running the same estimator with one zone left out at a time gives the
+spread its own spatial composition carries — **NH 0.444 yr (4 draws), SH 0.338 (3), lag 0.494 (12)**.
+⚠ **A trap avoided, and it is worth naming**: pooling the hemispheric quantities over all 12
+(NH-drop × SH-drop) COMBINATIONS repeats each value and biases the sd about **10 % LOW**, which
+would have made the gate quietly stricter than the data warrants. Each hemisphere's spread is taken
+over its own distinct draws; only the lag, a function of both, uses the combinations.
+Result: **all three arms FAIL on the NH peak time (+2.11 to +2.15 sigma, ~0.95 yr late)** — the SH
+is inside at +1.72 to +2.10 and the lag is comfortably inside at −0.45 to −0.75. The two
+threshold-free orderings (SH peaks AFTER NH; NH peak HIGHER) pass everywhere.
+⇒ **The gate localises what was previously a table: the miss is the NH PEAK TIME, not the lag.**
+
+**✅ ALL THREE BOUNDS ARE MUTATION-TESTED, PERMANENTLY** — `tests/testthat/test-gate-bounds.R`,
+29 assertions. Each is exercised in BOTH directions, which matters because gates 4 and 5 currently
+fail at every arm and **a gate that can only fail is as uninformative as one that can only pass**.
+Gate 4 passes a rougher model and fails a smoother one, and passes exactly AT the observation
+(the claim is ">=", not ">"). Gate 5 passes a synthetic model built FROM the observation, fails a
+peak pushed past the bound **on the z clause and not the ordering clause** (a mutation that trips
+the wrong clause is no test of this one), and fails each ordering when inverted. Gate 7 pins
+`DG_G7_LAND_SD` to the likelihood's own product, so a change in `R/likelihood.R` fails here rather
+than letting the gate drift away from the fit. The draw counts (4/3/12) are pinned too: if the zone
+definitions change, every gate-5 tolerance silently re-scales, and this fails instead.
+
 ## 2026-09-02j — **RULING 1 OF 4: THE ENSO LAND TERM IS NOW A ONE-WAY GPP MODULATION**
 
 Marcus ruled all four of the 09-02i handoff's owed rulings. This is the first, and it is the
