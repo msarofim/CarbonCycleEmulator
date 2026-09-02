@@ -42,7 +42,12 @@ CCX_FLUX_CHANNELS <- c(
   litter   = "Litterfall to soil",
   rh       = "Soil respiration",
   seas     = "Seasonal growth cycle",
-  enso     = "El Nino / La Nina anomaly",
+  # `enso` RETIRED 2026-09-02. The ENSO land anomaly was a signed flux
+  # soil_fast -> atmosphere and had a channel of its own; it is now a ONE-WAY
+  # MODULATION of the GPP limbs (R/model.R), so it no longer names an edge and
+  # a channel for it could only ever report zero -- which is the silent-gate
+  # shape, not a diagnostic. The anomaly is gamma_enso_land_<h> * forc$enso,
+  # available directly to anyone who wants it, and it is INSIDE `gpp` here.
   luc      = "Land-use change",
   as_down  = "Air to sea (gross)",
   as_up    = "Sea to air (gross)",
@@ -148,8 +153,11 @@ ccx_flux_derive <- function(ch, y, aux) {
   m_atm <- sum(y[atm, "C"])
   atm_out <- ch[["gpp"]] + ch[["as_down"]]
   c(ch,
+    # `- ch[["enso"]]` DROPPED 2026-09-02 with the channel: the ENSO land
+    # anomaly is now folded into `gpp`, so subtracting it here would remove it
+    # twice. The identity is otherwise unchanged.
     land_net  = unname(ch[["gpp"]] + ch[["seas"]] -
-                       ch[["ra"]] - ch[["rh"]] - ch[["enso"]] - ch[["luc"]]),
+                       ch[["ra"]] - ch[["rh"]] - ch[["luc"]]),
     ocean_net = unname(ch[["as_down"]] - ch[["as_up"]]),
     atm_out   = unname(atm_out),
     tau_turn  = unname(if (atm_out > 0) m_atm / atm_out else NA_real_))

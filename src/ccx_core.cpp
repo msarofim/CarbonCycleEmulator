@@ -413,10 +413,27 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     const double npp_wood = npp * (1.0 - P.npp_leaf_frac);
     const double ra_leaf = npp_leaf * P.ra_ratio;
     const double ra_wood = npp_wood * P.ra_ratio;
+
+    // ENSO land anomaly as a ONE-WAY GPP MODULATION (2026-09-02, Marcus).
+    // Twin of the block in R/model.R, which carries the full rationale: the
+    // old signed flux out of soil_fast ran atmosphere -> soil_fast in reverse,
+    // which was the MAJORITY direction for the SH (61 % of active months,
+    // 44.5 GtC vs 21.7), and add_flux's guard is structurally blind to it.
+    // The two channels are NOT isotopically separable (0.32-0.48 permil apart
+    // because soil_fast IS old photosynthate), so this is a physics choice:
+    // the model already has a respiration path (q10 on gmst) and NO moisture
+    // path at all. Sign: P.gamma_enso_land[hi] * enso is the atmosphere-ward
+    // anomaly, so the GPP modulation is its negative. Split by npp_leaf_frac
+    // to keep each limb's FRACTIONAL perturbation equal. No new parameter.
+    const double enso_gpp = -P.gamma_enso_land[hi] * enso;
     // alpha13_signed reason (a): one-way by construction (see R/model.R).
-    add_flux(iatm, ilef, npp_leaf + ra_leaf, A.alpha_photo, true);   // GPP, leaf
+    // Since 2026-09-02 reason (a) also covers "gamma large enough to shut
+    // photosynthesis off" -- a rejected state of the same class as npp < 0.
+    add_flux(iatm, ilef, npp_leaf + ra_leaf + enso_gpp * P.npp_leaf_frac,
+             A.alpha_photo, true);                             // GPP, leaf
     add_flux(ilef, iatm, ra_leaf, 1.0);                        // Ra, at leaf's ratio
-    add_flux(iatm, iwod, npp_wood + ra_wood, A.alpha_photo, true);   // GPP, wood
+    add_flux(iatm, iwod, npp_wood + ra_wood + enso_gpp * (1.0 - P.npp_leaf_frac),
+             A.alpha_photo, true);                             // GPP, wood
     add_flux(iwod, iatm, ra_wood, 1.0);                        // Ra, at wood's ratio
 
     // litter, split per SOURCE pool (the two carry different 14C ratios, so
@@ -441,7 +458,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     add_flux(isf, iatm, (y[IX(isf, C)] / P.tau_soil_fast) * q10f, 1.0);
     add_flux(iss, iatm, (y[IX(iss, C)] / P.tau_soil_slow) * q10f, 1.0);
 
-    // seasonal NEP through the leaf pool; ENSO out of the responsive soil pool
+    // seasonal NEP through the leaf pool (ENSO now rides the GPP limbs above)
     const double seas = (P.seas_drivers > 0)
       ? P.seas_npp_amp[hi] * npp * (seas_insol(SEAS_PHI_EFF[hi], t - P.seas_lag_p[hi] / 12.0)
                                 / P.seas_n_norm[hi] - 1.0)
@@ -453,10 +470,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // R/model.R, which carries the full note.
     add_flux(iatm, ilef, seas, (seas > 0.0) ? A.alpha_photo : 1.0);
 
-    // ENSO land anomaly, PER HEMISPHERE since 2026-09-01 -- no global scalar
-    // times a hardcoded share. Twin of the block in R/model.R.
-    if (P.gamma_enso_land[hi] != 0.0)
-      add_flux(isf, iatm, P.gamma_enso_land[hi] * enso, 1.0);
+    // ENSO land: MOVED 2026-09-02 to the GPP limbs above, as a one-way
+    // modulation. It used to be add_flux(isf, iatm, gamma_enso_land[hi]*enso)
+    // -- one signed flux at alpha13 = 1 whose reverse limb ran
+    // atmosphere -> soil_fast. Twin of the note in R/model.R.
 
     // air-sea, gross both ways
     // Seasonal SST under seas_drivers, hemisphere-signed -- twin of the block

@@ -2,6 +2,79 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02j — **RULING 1 OF 4: THE ENSO LAND TERM IS NOW A ONE-WAY GPP MODULATION**
+
+Marcus ruled all four of the 09-02i handoff's owed rulings. This is the first, and it is the
+one that had to land before the refit because it changes what gets fitted.
+
+**THE CHANGE.** The ENSO land anomaly was ONE SIGNED FLUX out of `soil_fast` at `alpha13 = 1`,
+whose reverse limb ran atmosphere → `soil_fast`: a land uptake that never passes through
+vegetation. For the SH that reverse direction was the **MAJORITY** direction — 61 % of
+ENSO-active months, 44.5 GtC against the forward limb's 21.7 — and `add_flux`'s guard is
+STRUCTURALLY BLIND to it (it fires on `alpha13 != 1`, so it can never see a reversing flux that
+*should* fractionate and does not). It is now folded into the two GPP limbs as a modulation that
+cannot reverse, **split by `npp_leaf_frac`**, in both cores. **No new fitted coordinate; still
+25 parameters.**
+
+**WHY GPP AND NOT RESPIRATION, given 09-02i proved the data cannot tell them apart.** Because
+it is a PHYSICS choice, not a fitted one, and the model already has a respiration path (`q10`
+on GMST, worth 3.2 % of the term) and **no moisture path at all**. The GPP/moisture limb is the
+one that is missing. Fire stays unrepresented either way.
+
+**⭐ THE PRICE, MEASURED PROPERLY: −65.74 log-units at fixed parameters** — and the diagnosis
+matters more than the number. `calibration/diag_enso_gpp_margin.R` runs twice, once in a git
+worktree at the pre-change source, and refuses to report anything if the two runs share a
+**model-source fingerprint** (the first attempt caught itself this way: the commit hash was
+identical because the change was uncommitted, so the guard now hashes `R/model.R` +
+`src/ccx_core.cpp`, not `git rev-parse`).
+
+**⛔ THE COST IS NOT ISOTOPIC AND IT IS NOT A BUG — IT IS A PROPERTY OF THE FORCING.** The two
+structures put the SAME net carbon into the SAME atmosphere at every instant, so −65.7 needed a
+diagnosis before it could be accepted. By stream it is paid almost entirely in CO2 LEVELS
+(MLO −33.8, SPO −20.2) for a **0.58 ppm** shift in CO2_NH(2024), not in the isotopes
+(d14c_NH −0.02, d13c_NH moved 0.0004 permil). The cause:
+
+* **the ENSO index is NOT zero-mean** — mean **−0.218** over 1948–2024, identically 0 before,
+  so the two structures are bit-identical pre-1948 and the whole difference is post-1948;
+* a sustained anomaly loads onto **different pools**: the old form onto `soil_fast` alone
+  (**tau 2.0 yr**), the new form onto the whole land chain (**veg 8.6 + soil 26.9 = 35.5 yr**);
+* the arithmetic: +0.083 GtC/yr sustained x (35.5 − 2.0) yr = **+2.77 GtC = −1.31 ppm**, against
+  a measured −0.58 ppm. Same sign, 2.3x over — expected, since the estimate is a full
+  equilibrium while the anomaly has run 76 yr against a 36 yr constant, with the ocean and CO2
+  fertilisation damping it.
+
+⇒ **THE SAME COEFFICIENT MEANS SOMETHING DIFFERENT IN THE TWO STRUCTURES**, so −65.74 is an
+UPPER BOUND a refit should largely recover.
+⚠ **AND IT SURFACES A CHOICE NOBODY HAS MADE: should the ENSO index be DEMEANED over its
+non-zero span?** Under the old structure the mean was nearly inert; under the new one it is a
+~1 ppm lever. **NOT RESOLVED — for Marcus.**
+
+**✅ THE MARGIN, because folding into a gross flux buys one-wayness at the price of a new way to
+go negative.** Peak |anomaly| against the hemisphere's own preindustrial gross GPP limb:
+NH **1.42 %**, SH **14.45 %**. It would take a gamma about **7x** the fitted one to shut
+photosynthesis off. `ra_ratio` is 0 in this arm, so the gross limb IS `npp` and adds no headroom.
+
+**THE `enso` FLUX CHANNEL WAS RETIRED WITH IT** (`R/fluxes.R`). The term no longer names an edge,
+so a channel for it could only ever report zero — the silent-gate shape. `land_net` drops its
+`- ch[["enso"]]` term (the anomaly is now inside `gpp`; subtracting it would remove it twice).
+
+**A TEST WAS DELIBERATELY REPLACED, NOT SKIPPED.** `test-fluxes.R`'s `any(fl$enso != 0)` pinned
+the exact design being changed. Its replacement is **stronger**: `expect_false("enso" %in%
+names(fl))` (retired, not merely empty) plus a new test that the term actually MOVES `gpp`, with
+a **sign check** at the largest-|index| month — El Nino must SUPPRESS photosynthesis. A dropped
+label can only be dropped; a modulation folded into another flux can be silently ZERO, which is
+the failure mode that actually bit twice on 09-02.
+
+**Suite 1459 PASS / 6 FAIL / 2 skip**, failure set byte-identical to the standing one (5 x the
+21-vs-25 parameter mismatch, 1 x the `kz$hi <= 7000` guard rail left failing for Marcus). The
++2 is this change's two new assertions.
+
+**ALSO LANDED, no judgement required:** the quarantine ruling 4 asked for —
+`outputs/quarantine/20260902_mechanism_off/` with a README naming the retired-`seas_lag_p`
+bug, the files, and the canonical replacement path; and the 09-02 note that contradicted
+itself (**+18.7 %** in its title line against **+42.4 %** in its body, off the same 1.424 → 1.621
+column) now says +42.4 % with the correction recorded in place.
+
 ## 2026-09-02i — **THE ENSO PRE-CHECK REFUTED THE ARGUMENT I MADE FOR IT; THE GATE LEDGER**
 
 Marcus asked for both: price the two-channel ENSO restructuring, and start a gate ledger.

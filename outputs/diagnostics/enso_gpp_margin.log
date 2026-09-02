@@ -1,0 +1,91 @@
+
+==============================================================================
+ENSO -> GPP RESTRUCTURING: THE MARGIN AND THE PRICE  [role: post]
+  arm from90, basin multistart_20260901_enso25
+  commit b9f183d
+==============================================================================
+  model source fingerprint 8c0bcad3cbde
+
+=== 1. THE MARGIN: can the modulation shut photosynthesis off? ===
+  ENSO index over 1948-2024: sd 0.751, max|index| 2.244 (n = 924 months)
+  ra_ratio 0.000, npp_leaf_frac 0.600
+
+  hem |      gamma  peak |anom| gross GPP PI |  anom/GPP
+   NH |    -0.2457        0.551       38.908 |     1.42 %
+   SH |    +1.3583        3.048       21.092 |    14.45 %
+
+  ⇒ worst hemisphere: SH at 14.45 % of its own gross GPP limb.
+  STRESS: the gamma multiplier at which the anomaly would reach the limb.
+    gamma x 1   ->   14.5 % ok
+    gamma x 2   ->   28.9 % ok
+    gamma x 4   ->   57.8 % ok
+    gamma x 8   ->  115.6 % ⛔ SHUTS PHOTOSYNTHESIS OFF
+    gamma x 16  ->  231.2 % ⛔ SHUTS PHOTOSYNTHESIS OFF
+  ⇒ it would take a gamma about 7x the fitted one to bite.
+  ⚠ CONSERVATIVE AGAINST FERTILISATION (modern npp exceeds npp0) and NOT
+    conservative against clearing (luc_scale = 1.1100 in this arm).
+  ⚠ ra_ratio is 0 in this arm, so the gross limb IS npp -- the gross
+    respiration loop is off by default and adds no headroom here.
+
+=== 2. THE PRICE: the same 25-par vector through both structures ===
+  logpost at the 09-01 basin vector, THIS build: -1568.4936
+  (25 parameters; migrated: )
+  by-stream loglik total -1525.2346 over 21 streams
+  CO2_NH(2024) 425.393 ppm   d13c_NH -8.8286 permil   D14c_NH -10.59 permil
+
+  logpost, PRE  (b9f183d, fp fa476151): -1502.7488
+  logpost, POST (b9f183d, fp 8c0bcad3): -1568.4936
+  => THE RESTRUCTURING COSTS -65.7448 log-units at fixed parameters.
+
+  WHERE IT IS PAID, stream by stream (post - pre; negative = worse):
+    co2_level_MLO                -33.8230
+    co2_level_SPO                -20.1937
+    d13c_gradient                -10.4062
+    d13c_level_SPO                -8.8010
+    co2_gradient                  -5.1113
+    d13c_seasonal_SPO             -3.7683
+    co2_seasonal_MLO              -1.1645
+    d14c_NH                       -0.0175
+    ocean_grad_d13c               -0.0127
+    d14c_deep_ocean               +0.0000
+    ocean_grad_alk                +0.0000
+    d14c_intcal                   +0.0000
+    ocean_grad_dic                +0.0064
+    excess_c14_ocean              +0.0466
+    co2_seasonal_SPO              +0.9303
+    gcb_ocean_sink                +0.9814
+    d13c_seasonal_MLO             +1.1357
+    gcb_land_sink                 +1.2266
+    d13c_level_MLO                +1.4460
+    d14c_SH                       +1.9515
+    co2_icecore                   +9.8290
+    SUM (loglik only)            -65.7448
+
+  AND WHAT MOVED IN THE TRAJECTORY (post - pre):
+    co2_NH_2024         -0.5814   (pre 425.9743 -> post 425.3929)
+    co2_SH_2024         -0.4275   (pre 424.0154 -> post 423.5879)
+    d13c_NH_2024        -0.0004   (pre -8.8282 -> post -8.8286)
+    d14c_NH_2024        +3.6850   (pre -14.2788 -> post -10.5938)
+
+  ⚠ AT FIXED PARAMETERS. The refit has not run; the coefficients were
+    fitted to the OLD structure, so this is an UPPER BOUND on the cost.
+  ⚠ NOT A VERDICT. The change was made on physical grounds the data
+    cannot adjudicate -- both isotopic discriminants are below noise
+    (diag_enso_two_channel_precheck.R).
+
+=== 3. WHY: the ENSO index is not zero-mean, and the pools differ ===
+  mean ENSO index, whole run 1750-2024 : -0.06098  (sd 0.4092, n 3300)
+  mean ENSO index, 1948-2024       : -0.21778  (sd 0.7513, n 924)
+  before 1948 the index is identically 0.0, so the two structures are
+  bit-identical there and the whole difference is post-1948.
+
+  sustained SH GPP anomaly from the mean: -(+1.3583) x (-0.06098) = +0.08283 GtC/yr
+  effective land residence time: veg 8.60 + soil 26.90 = 35.50 yr
+  tau_soil_fast (the OLD form's only pool):            2.00 yr
+  => extra land stock in the NEW form: +2.7747 GtC = -1.3063 ppm of CO2
+  ⚠ THAT IS A FULL-EQUILIBRIUM ESTIMATE and the anomaly has only run since
+    1948 (76 yr against a 36 yr time constant), with the ocean and
+    CO2 fertilisation both damping it -- so it is an OVERESTIMATE of the
+    measured shift, and should be read for its SIGN and ORDER only.
+
+=== DONE ===

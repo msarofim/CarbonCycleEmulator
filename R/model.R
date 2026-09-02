@@ -1385,17 +1385,72 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     npp_wood <- npp * (1 - p$npp_leaf_frac)
     ra_leaf  <- npp_leaf * p$ra_ratio
     ra_wood  <- npp_wood * p$ra_ratio
+
+    # ---- ENSO LAND ANOMALY: A ONE-WAY GPP MODULATION (2026-09-02, Marcus) ---
+    # It used to be ONE SIGNED FLUX out of `soil_fast` at alpha13 = 1, ~110
+    # lines below. That form was wrong in the reverse direction and the wrong
+    # direction was the MAJORITY one: over 1948-2024 the SH coefficient
+    # (+1.3583) ran in reverse for 61 % of ENSO-active months and moved 44.5
+    # GtC against the forward limb's 21.7. Reversed, the flux ran
+    # atmosphere -> soil_fast: a land UPTAKE that never passes through
+    # vegetation, which no pool in this model represents. add_flux's guard is
+    # STRUCTURALLY BLIND to it -- the guard fires on alpha13 != 1, so it can
+    # never see a reversing flux that SHOULD carry fractionation and does not.
+    #
+    # WHY A MODULATION AND NOT TWO LIMBS. A suppressed-GPP anomaly is not a
+    # flux at all; it is carbon that is never fixed. Representing El Nino as
+    # leaf -> atmosphere would draw down the leaf pool, which is a different
+    # process. So the anomaly has to ride ON the gross GPP flux, where it can
+    # only reverse if it shuts photosynthesis off entirely -- the same
+    # "numerically broken state" class as npp < 0 that reason (a) below covers.
+    #
+    # WHY GPP AND NOT RESPIRATION, given the data cannot tell them apart.
+    # calibration/diag_enso_two_channel_precheck.R priced the discriminants: a
+    # respiration limb draws soil_fast at -24.9 to -26.4 permil and a GPP limb
+    # withholds at delta_atm + eps_photo = -25.2 to -26.8, i.e. 0.32-0.48 apart,
+    # BECAUSE SOIL_FAST *IS* OLD PHOTOSYNTHATE. On whole-record gross carbon
+    # that is 0.04 permil of atmospheric d13C against a 0.05 permil
+    # representation error, and 3.6 permil of D14C against a fitted sigma_d14c
+    # of 6.1 -- BOTH BELOW NOISE. So this is a PHYSICS choice, not a fitted one,
+    # and it is made for the reason the data cannot supply: the model has a
+    # respiration path already (q10 on gmst) and NO moisture path at all -- no
+    # precipitation, soil water, drought or aridity variable anywhere in this
+    # file. The GPP/moisture limb is the one that is missing.
+    # ⚠ NOT A DOUBLE COUNT WITH q10. GMST does carry ENSO (r +0.41, +0.53 at
+    # the 3-month lag), but 1 sd of ENSO moves GMST 0.042 C, which at q10 =
+    # 1.136 is +0.054 % of respiration = 0.032 GtC/yr against the SH term's
+    # 1.025 -- 3.2 %. Weak because q10 rides GLOBAL mean temperature where the
+    # physics is TROPICAL LAND temperature and moisture.
+    # ⚠ FIRE -- the third limb of the observed 2015-16 attribution -- is
+    # unrepresented here and was unrepresented before. This change does not
+    # touch that.
+    #
+    # SIGN. `.ge_land * forc$enso` is unchanged in meaning: POSITIVE = an
+    # anomalous flux TOWARDS the atmosphere (El Nino = source). As a GPP
+    # modulation that is the NEGATIVE of the anomaly, hence the minus.
+    # SPLIT BY npp_leaf_frac, not leaf-only: it keeps the FRACTIONAL
+    # perturbation of each limb equal to the anomaly's fraction of npp, which
+    # is what keeps the sum away from zero. Leaf-only would concentrate the
+    # whole anomaly on the smaller of the two limbs.
+    # NO NEW FITTED COORDINATE: one coefficient per hemisphere, exactly as
+    # before. The parameter count is unchanged at 25.
+    .ge_land <- .ge[[paste0("land_", h)]]
+    enso_gpp <- -.ge_land * forc$enso
     # alpha13_signed, reason (a): ONE-WAY BY CONSTRUCTION. Photosynthesis only
     # ever runs atmosphere -> vegetation; these go negative only if `npp` does,
     # i.e. if a diverging stage has driven CO2 below zero. Declared so that such
     # a state keeps returning its old (rejected) value instead of becoming a
     # hard stop -- the guard must not quietly shrink the optimiser's feasible
     # set, which is how the pre-2026-08-11 substep wall truncated the posterior.
-    add_flux(iatm, ilef, npp_leaf + ra_leaf, alpha13 = aux$alpha_photo,
-             alpha13_signed = TRUE)                                      # GPP, leaf
+    # SINCE 2026-09-02 the ENSO land anomaly rides here too, so reason (a) now
+    # also covers "the fitted gamma is large enough to shut photosynthesis off",
+    # which is a rejected state of the same class as npp < 0. The margin at the
+    # mode is measured by calibration/diag_enso_gpp_margin.R.
+    add_flux(iatm, ilef, npp_leaf + ra_leaf + enso_gpp * p$npp_leaf_frac,
+             alpha13 = aux$alpha_photo, alpha13_signed = TRUE)           # GPP, leaf
     add_flux(ilef, iatm, ra_leaf)                                        # Ra, at leaf's ratio
-    add_flux(iatm, iwod, npp_wood + ra_wood, alpha13 = aux$alpha_photo,
-             alpha13_signed = TRUE)                                      # GPP, wood
+    add_flux(iatm, iwod, npp_wood + ra_wood + enso_gpp * (1 - p$npp_leaf_frac),
+             alpha13 = aux$alpha_photo, alpha13_signed = TRUE)           # GPP, wood
     add_flux(iwod, iatm, ra_wood)                                        # Ra, at wood's ratio
 
     # LITTER. Both vegetation pools shed into the SAME two soil pools, split by
@@ -1481,17 +1536,16 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     add_flux(iatm, ilef, seas,
              alpha13 = if (seas > 0) aux$alpha_photo else 1, lab = "seas")
 
-    # ---- ENSO: land -> atmosphere anomaly (El Nino = source) ---------
-    # Out of the RESPONSIVE soil pool. The interannual anomaly is drought and
-    # fire-driven respiration of recently fixed carbon, not a draw on the
-    # millennial passive pool.
-    # PER HEMISPHERE since 2026-09-01: the coefficient IS the hemisphere's
-    # own, not a global scalar times a hardcoded 0.5 share (which is what
-    # `aux$enso_share` was, and it is gone).
-    .ge_land <- .ge[[paste0("land_", h)]]
-    if (.ge_land != 0) {
-      add_flux(isf, iatm, .ge_land * forc$enso, lab = "enso")
-    }
+    # ---- ENSO land: MOVED 2026-09-02 --------------------------------
+    # It used to be here, as `add_flux(isf, iatm, .ge_land * forc$enso,
+    # lab = "enso")` -- one signed flux out of the responsive soil pool at
+    # alpha13 = 1, whose reverse limb ran atmosphere -> soil_fast. It is now a
+    # ONE-WAY GPP MODULATION folded into the two photosynthesis limbs ~110
+    # lines above, which carry the full rationale. The `enso` FLUX CHANNEL was
+    # retired with it (R/fluxes.R): the term no longer names an edge of its own,
+    # so a channel for it could only ever report zero.
+    # PER HEMISPHERE since 2026-09-01; the coefficient is still the
+    # hemisphere's own and there is still one of them per hemisphere.
 
     # ---- air-sea ----------------------------------------------------
     # Annual-mean SST: observed (HadSST4 columns) when the switch is on AND the

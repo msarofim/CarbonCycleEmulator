@@ -1,8 +1,17 @@
 # Collect — 2026-09-02: the 08-27q 2×2 re-priced at the 25-parameter mode
 # **THE VERDICT IS NOT REHABILITATED. IT IS STRENGTHENED.**
-# **The overshoot grew +18.7 % → +62.1 %, and the SH LAND LIMB got 33 % WORSE
+# **The overshoot grew +42.4 % → +62.1 %, and the SH LAND LIMB got 33 % WORSE
 # while its PARAMETER moved inside its bracket.**
 # **The cause is `npp_frac_NH`, a JUDGEMENT-width prior, not `seas_T_amp_SH`.**
+
+> **CORRECTION 2026-09-02 (second session).** The title line above read
+> **+18.7 % → +62.1 %** while the body (§ the 2×2 table, below) reads
+> **+42.4 % → +62.1 %** off the same "put ocean AT obs" column, 1.424 → 1.621.
+> The body is right. The stray 1.187 behind "+18.7 %" is JOINT_hi's *SPO
+> total/obs* — a different row of a different table. The memory
+> `ccx_land_limb_worse_at_enso25` had inherited the same wrong number in its
+> frontmatter and was corrected at the same time; the handoff and the CHANGELOG
+> always said +42.4 %. Nothing downstream of this note used the wrong figure.
 
 **What ran:** `calibration/diag_2x2_repriced_at_enso25.R` (~70 s), on
 `calibration/lib_seas_limbs.R` (new). Log and rds under `outputs/diagnostics/`.

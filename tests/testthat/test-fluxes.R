@@ -47,18 +47,46 @@ test_that("fluxes = TRUE does not change the trajectory", {
   expect_identical(ccx_run(s, F)$out, ccx_run(s, F, fluxes = TRUE)$out)
 })
 
-test_that("the ENSO, seasonal and land-use channels are separated from their neighbours", {
-  # Each of these three shares an endpoint PAIR with another process, so they
-  # are the only fluxes carrying an explicit label. A regression that dropped a
-  # label would silently merge two physically distinct channels.
+test_that("the seasonal and land-use channels are separated from their neighbours", {
+  # Each of these shares an endpoint PAIR with another process, so they are the
+  # only fluxes carrying an explicit label. A regression that dropped a label
+  # would silently merge two physically distinct channels.
+  # ⚠ `enso` WAS the third one and was RETIRED 2026-09-02 with the signed
+  # soil_fast flux it named; the term is now a one-way GPP modulation and has
+  # no edge of its own. Its replacement assertion is the next test, which is
+  # STRONGER: a label can only be dropped, but a modulation folded into another
+  # flux can be silently ZERO, which is the failure mode that actually bit
+  # (two diagnostics ran for a day with their mechanism off).
   p <- test_p(); s <- ccx_spinup(p)
   F <- suppressWarnings(ccx_build_forcing("historical", c(1990, 1991),
                                           prod_c14 = s$prod_c14))
   fl <- ccx_run(s, F, fluxes = TRUE)$fluxes
-  expect_true(any(fl$enso != 0))              # soil -> atm, not folded into rh
+  expect_false("enso" %in% names(fl))         # retired, not merely empty
   expect_true(any(fl$seas != 0))              # atm -> leaf, not folded into gpp
   expect_true(all(fl$luc > 0))                # wood -> atm, not folded into ra
   expect_true(all(fl$gpp > 0), all(fl$rh > 0))
+})
+
+test_that("the ENSO land term actually moves GPP, and only GPP", {
+  # The mechanism-is-live test the retired channel used to give for free. It
+  # must move `gpp` and NOT `rh`: the whole point of 2026-09-02 is that the
+  # term left the soil pool. A sign check is included because the modulation's
+  # minus sign is the one thing that could be inverted without any other
+  # symptom -- El Nino (positive index) must SUPPRESS photosynthesis.
+  s0 <- ccx_spinup(ccx_set_enso(ccx_default_params(), list(gamma_enso = 0)))
+  s1 <- ccx_spinup(test_p())
+  F0 <- suppressWarnings(ccx_build_forcing("historical", c(1990, 1991),
+                                           prod_c14 = s0$prod_c14))
+  F1 <- suppressWarnings(ccx_build_forcing("historical", c(1990, 1991),
+                                           prod_c14 = s1$prod_c14))
+  a <- ccx_run(s0, F0, fluxes = TRUE)$fluxes
+  b <- ccx_run(s1, F1, fluxes = TRUE)$fluxes
+  expect_true(any(abs(b$gpp - a$gpp) > 1e-8))
+  # the ENSO index over 1990-1991 is not identically zero, so pick the month
+  # with the largest |index| and check the sign of the GPP response there
+  e <- F1$enso[seq_len(nrow(b))]
+  k <- which.max(abs(e))
+  expect_lt((b$gpp[k] - a$gpp[k]) * e[k], 0)
 })
 
 test_that("turnover time from the flux trace matches an independent label pulse", {
