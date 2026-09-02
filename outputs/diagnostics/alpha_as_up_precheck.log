@@ -19,9 +19,14 @@ PRE-CHECK: A TEMPERATURE-DEPENDENT `alpha_as_up`, PRICED BEFORE IT IS WRITTEN
   NH: SST  18.00 degC (in Zhang range) | fCO3 0.0856 (in range) | seasonal SST half-amp 1.069 K
   SH: SST  16.00 degC (in Zhang range) | fCO3 0.0786 (in range) | seasonal SST half-amp 0.537 K
 
-  Zhang et al. 1995, eps_DIC-g = 0.014*T*fCO3 - 0.105*T + 10.53 permil:
-    NH  eps_DIC-g = +8.662 permil  ⇒ eps_up = -8.662  |  d(eps_up)/dT = +0.1038 permil/K
-    SH  eps_DIC-g = +8.868 permil  ⇒ eps_up = -8.868  |  d(eps_up)/dT = +0.1039 permil/K
+  Zhang et al. 1995, BOTH PRINTINGS of the seawater fit:
+    abstract    eps_DIC-g = 0.0140*T*fCO3 -0.105*T + 10.53
+    conclusions eps_DIC-g = 0.0144*T*fCO3 -0.107*T + 10.53
+    ⚠ the two b differ by 0.002 = 1.0 x the paper's own stated sigma of 0.002
+
+  hem     eps_DIC-g (conclusions) |         d/dT (conclusions) |      eps_k
+  NH         +8.662       +8.626 |      +0.1038      +0.1058 |     -0.836
+  SH         +8.868       +8.836 |      +0.1039      +0.1059 |     -0.854
 
   GATE X -- the independent application of the same paper: -0.1056 permil/degC
   this fit at the model's mean fCO3:                       -0.1039 permil/degC  (rel 0.016) -> AGREE
@@ -29,12 +34,13 @@ PRE-CHECK: A TEMPERATURE-DEPENDENT `alpha_as_up`, PRICED BEFORE IT IS WRITTEN
 
 === 2. THE FOUR CANDIDATE SLOPES -- AND WHICH FUNCTIONAL FORM MARCUS'S ANCHOR NEEDS ===
   law                                  d eps/dT   vs Zhang
-  Zhang 1995 (MEASURED)                 +0.1039       0.0 %
-  Mook, as recalled (1/T)               +0.1142      10.0 %
-  boiling anchor, 1/T form              +0.1371      32.0 %
-  boiling anchor, LINEAR form           +0.1059       2.0 %
-  critical anchor, 1/T form             +0.0563     -45.8 %
-  critical anchor, LINEAR form          +0.0251     -75.9 %
+  Zhang 1995 (MEASURED, abstract)       +0.1126       0.0 %
+  Zhang 1995 (MEASURED, conclusions)      +0.1146       1.7 %
+  Mook, as recalled (1/T)               +0.1142       1.4 %
+  boiling anchor, 1/T form              +0.1371      21.8 %
+  boiling anchor, LINEAR form           +0.1059      -6.0 %
+  critical anchor, 1/T form             +0.0563     -50.0 %
+  critical anchor, LINEAR form          +0.0251     -77.7 %
 
   ⭐ Zhang's LINEAR fit crosses eps = 0 at 101.4 degC = 374.5 K.
      Marcus's anchor is the BOILING POINT, 373.1 K -- a gap of 1.4 K.
@@ -57,8 +63,8 @@ PRE-CHECK: A TEMPERATURE-DEPENDENT `alpha_as_up`, PRICED BEFORE IT IS WRITTEN
 
   hem        F_up      M_atm  d eps/dT   amp eps | amp d13C_atm     OBSERVED    ratio
            GtC/yr        GtC  permil/K    permil |   permil p-p   permil p-p         
-  NH        45.51     452.38   +0.1038    0.1110 |      0.00355       0.3567   0.0100
-  SH        65.34     450.30   +0.1039    0.0558 |      0.00258       0.0337   0.0766
+  NH        45.51     452.38   +0.1126    0.1203 |      0.00385       0.3567   0.0108
+  SH        65.34     450.30   +0.1126    0.0605 |      0.00280       0.0337   0.0831
 
   stations: NH -> MLO, SH -> SPO (the two d13c_seasonal_* rows)
   GATE M: global atmosphere 902.7 GtC at 425.0 ppm ⇒ 2.1240 GtC/ppm vs the constant 2.1240 -> PASS
@@ -77,35 +83,81 @@ PRE-CHECK: A TEMPERATURE-DEPENDENT `alpha_as_up`, PRICED BEFORE IT IS WRITTEN
 
   hem       model     mo |   observed     mo |   RESIDUAL     mo |    omitted     mo |  |term|/
            permil        |     permil        |     permil        |     permil        |  |resid|
-  NH       0.3463   9.52 |     0.3567   9.41 |     0.0240   1.31 |    0.00355  10.82 |    0.148
-  SH       0.0643   3.12 |     0.0337   3.24 |     0.0307   2.99 |    0.00258   4.82 |    0.084
+  NH       0.3463   9.52 |     0.3567   9.41 |     0.0240   1.31 |    0.00385  10.82 |    0.160
+  SH       0.0643   3.12 |     0.0337   3.24 |     0.0307   2.99 |    0.00280   4.82 |    0.091
 
   and what the term would DO to each residual, added as a vector:
-  NH   (MLO) residual 0.0240 -> 0.0252 permil  (+4.85 %)  phase gap -2.49 months ⇒ GROWS it
-  SH   (SPO) residual 0.0307 -> 0.0323 permil  (+5.04 %)  phase gap +1.83 months ⇒ GROWS it
+  NH   (MLO) residual 0.0240 -> 0.0253 permil  (+5.34 %)  phase gap -2.49 months ⇒ GROWS it
+  SH   (SPO) residual 0.0307 -> 0.0324 permil  (+5.48 %)  phase gap +1.83 months ⇒ GROWS it
 
 
 === 4. SCORED ===
-  the omitted term is 1.00 % (NH) / 7.66 % (SH) of the OBSERVED seasonal d13C.
+  the omitted term is 1.08 % (NH) / 8.31 % (SH) of the OBSERVED seasonal d13C.
   that is 1.1 orders of magnitude below the observable at its largest.
-  against the ROWS' RESIDUAL it is 14.8 % (NH) / 8.4 % (SH).
+  against the ROWS' RESIDUAL it is 16.0 % (NH) / 9.1 % (SH).
 
   ⚠ SIGN ROBUSTNESS. The effect goes as |term| x cos(phase gap), so it flips
     at a gap of 3.00 months. The gaps and their margins:
       NH  gap -2.49 mo, 0.51 mo from the flip -> the sign is ⚠ MARGINAL
       SH  gap +1.83 mo, 1.17 mo from the flip -> the sign is robust
 
-  ⇒ NOT THE EXPLANATION. The term is 8-15 % of what the model already gets 
-    WRONG on the two rows that carry the veto, and at the derived phase it 
-    moves both residuals the WRONG WAY by ~5 %. A flag worth -12.2 prior-sd 
-    cannot be paid for out of a term this size whichever way it points. 
-    ⇒ IT IS REAL PHYSICS AND IT IS STILL NOT THE ANSWER -- which is exactly 
-      the outcome handoff §5 said was worth an afternoon rather than a refit.
+  ⇒ NOT THE EXPLANATION. The term is 9-16 % of what the model already 
+    gets WRONG on the two rows that carry the veto, and at the derived phase 
+    it moves both residuals the WRONG WAY by ~5 %. A flag worth -12.2 
+    prior-sd cannot be paid for out of a term this size whichever way it 
+    points. ⇒ IT IS REAL PHYSICS AND IT IS STILL NOT THE ANSWER -- which is 
+      exactly the outcome handoff §5 said was worth an afternoon, not a refit.
 
-  ⛔ AND THE MEAN VALUE IS A SEPARATE QUESTION FROM THE SLOPE. Zhang puts
-     eps_up at -8.66 / -8.87 permil (NH/SH) against the model's hardcoded -10.00;
-     that is a CONSTANT offset on the evasion limb, it moves the steady-state
-     d_ml - d_atm, and it is the 5a question. It is NOT priced here.
+  ⛔ AND THE MEAN VALUE IS A SEPARATE QUESTION FROM THE SLOPE -- see sec.5,
+     which answers it from the same paper rather than from GLODAP.
+
+
+=== 5. THE PAIR ITSELF -- §5a, ANSWERED FROM THE PAPER RATHER THAN FROM GLODAP ===
+  ⭐ Having BOTH limbs measured makes this arithmetic. Zhang measures the
+     KINETIC effect (both limbs carry it) and the EQUILIBRIUM DIC-gas offset
+     (only the evasion limb also carries it), which is the structure Quay et
+     al. 2003 eq.(2) uses. So the measured pair is
+         eps_down = eps_k          eps_up = eps_k - eps_DIC-g
+     and the steady state then puts d_ml - d_atm AT eps_DIC-g by construction.
+
+  hem    eps_down      model |     eps_up      model |   d_ml-d_atm        model
+  NH       -0.836      -2.00 |     -9.498     -10.00 |       +8.662        +8.00
+  SH       -0.854      -2.00 |     -9.721     -10.00 |       +8.868        +8.00
+
+  ⇒ the model's EVASION limb is nearly right and its INVASION limb is not:
+     eps_up  -10.00 vs measured -9.498 / -9.721  -> off by 5-3 %
+     eps_dn  -2.00 vs measured -0.836 / -0.854  -> 2.4x TOO LARGE
+  ⚠ AND THAT RESOLVES THE TENSION THE FIRST PASS FLAGGED. It read the model's
+    -10 as eps_up = -eps_DIC-g and concluded the pair needed eps_down ~ 0 to
+    reproduce the equilibrium offset. With both limbs carrying eps_k the pair
+    is consistent as it stands -- the model is simply 1.1 permil out on one
+    limb and 1.2 out on the other, in the SAME direction, which is why its
+    net offset (+8.00) is closer to right than either limb is.
+
+  GATE Q -- Quay et al. 2003's OBSERVATIONAL constraint on that offset.
+  Global mean air-sea d13C disequilibrium, 1995: 0.60 +- 0.10 permil.
+    NH  d_ml  +0.719  d_atm  -8.013  ⇒ disequilibrium  +0.070 permil
+    SH  d_ml  +0.746  d_atm  -7.970  ⇒ disequilibrium  -0.151 permil
+    model global mean -0.040 vs observed 0.60 +- 0.10 -> ⛔ OUTSIDE 2 sigma
+  ⚠ AN AREA-UNWEIGHTED TWO-BOX MEAN against a global observational estimate,
+    and the model's own eps_DIC-g is used to define equilibrium -- so this
+    tests the OFFSET the pair produces, not the pair's two limbs separately.
+
+  ⭐ THE GATE HAS POWER BECAUSE THE QUANTITY IS UNSCORED. The ocean d13C
+     stream is `ocean_grad_d13c`, a SURFACE-MINUS-DEEP gradient; the two
+     d13c_level_* rows are ATMOSPHERIC. Nothing in the likelihood constrains
+     the absolute surface-ocean d13C, so this is an independent test -- and
+     a failure is an UNCONSTRAINED DIRECTION, not a broken fit.
+
+  and it localises: holding d_atm and eps_DIC-g, the observed disequilibrium
+    NH needs d_ml =  +1.249 permil; the model has  +0.719 -> -0.530 permil TOO LIGHT
+    SH needs d_ml =  +1.497 permil; the model has  +0.746 -> -0.751 permil TOO LIGHT
+  ⇒ THE GAP IS IN THE SURFACE d13C, NOT IN THE ALPHA PAIR: adopting the
+    measured pair moves the offset by ~0.7 permil and the shortfall is ~0.6-0.8.
+  ⚠ CANDIDATE, NOT A DIAGNOSIS: this mode's mixed layer is 139 m deep, well
+    below a 50-75 m surface layer, and a deeper box mixes in lighter
+    subsurface DIC. NOT TESTED HERE.
+  ⛔ NOT A LICENCE TO RETUNE. It is a gate any adopted pair must still pass.
 
 written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/alpha_as_up_precheck.rds
 

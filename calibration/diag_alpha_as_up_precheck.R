@@ -17,25 +17,36 @@
 # after a refit." This file is that afternoon. It IMPLEMENTS NOTHING:
 # `R/model.R`, `src/ccx_core.cpp` and `R/constants.R` are untouched.
 #
-# ⭐ THE SLOPE IS NOT AN ANCHOR-DERIVED GUESS ANY MORE -- IT IS MEASURED.
-# Marcus (2026-09-02) pointed at Broecker & Maier-Reimer 1992 or Mook. Neither
-# is on disk and AGU refused the fetch; what the search returned instead is the
-# LABORATORY measurement both of those rest on:
+# ⭐ THE SLOPE IS MEASURED, AND NOW READ FROM THE PAPER ITSELF. Marcus supplied
+# both PDFs on 2026-09-02 after the first pass had to quote them second-hand:
 #
 #   Zhang J., Quay P. D., Wilbur D. O. (1995), "Carbon isotope fractionation
-#   during gas-water exchange and dissolution of CO2", Geochimica et
-#   Cosmochimica Acta 59(1), 107-114.
+#     during gas-water exchange and dissolution of CO2", GCA 59(1), 107-114.
+#     ~/Documents/2026/ClaudeDocs/Papers/zhangquaywilbur1995.pdf
+#   Quay P. et al. (2003), "Changes in the 13C/12C of dissolved inorganic carbon
+#     in the ocean as a tracer of anthropogenic CO2 uptake", GBC 17(1), 4-1..4-20.
+#     -- same group; states it takes its air-sea fractionation factors FROM
+#     Zhang et al. 1995, which is what makes Zhang the canonical source here
+#     rather than one option among several.
 #
-# whose seawater fit is eps_DIC-g = 0.014*T*fCO3 - 0.105*T + 10.53 permil,
-# stated for 5 < T < 25 degC and 0.05 < fCO3 < 0.20.
-# ⚠ QUOTED FROM SECONDARY SOURCES, NOT FROM THE PAPER -- the PDF is not on disk.
-# It is CROSS-CHECKED against an independent application of the same paper
-# (Wynn-Edwards / CROCCA-2S 13C Suess-effect study, NSF-PAR 10432989): "an
-# average decadal sea surface warming of 0.18 degC per decade ... is expected to
-# yield a decrease in surface ocean d13C_DIC of -0.019 permil per decade", i.e.
-# a slope of -0.1056 permil/degC. The two agree to 2 %.
-# ⛔ GET THE PDF BEFORE ANY OF THIS IS IMPLEMENTED. A cross-checked secondary
-# quote is enough to PRICE a mechanism; it is not enough to SHIP a constant.
+# ⛔ AND THE PAPER PRINTS ITS OWN FIT TWICE, WITH DIFFERENT COEFFICIENTS.
+#   abstract    : eps_DIC-g = (0.014  +- 0.01)*T*fCO3 - (0.105 +- 0.002)*T + 10.53
+#   conclusions : eps_DIC-g = (0.0144 +- 0.01)*T*fCO3 - (0.107 +- 0.002)*T + 10.53
+# The two T coefficients are EXACTLY ONE STATED SIGMA APART, i.e. the paper's two
+# printings straddle its own error bar. There is no basis in the text for
+# preferring one, so BOTH ARE CARRIED and every result below is reported under
+# each. ⚠ The first pass of this file quoted only the abstract form from a
+# secondary source and would have shipped it as "the" coefficient.
+#
+# ✅ Cross-checked against an independent APPLICATION of the same paper
+# (CROCCA-2S 13C Suess study, NSF-PAR 10432989: 0.18 degC/decade warming ->
+# -0.019 permil/decade in surface d13C_DIC = -0.1056 permil/degC).
+#
+# ⭐ AND THE PAPER MEASURES THE OTHER LIMB TOO, which the first pass did not
+# have: the KINETIC effect during gas transfer, eps_k = -0.81 +- 0.16 permil at
+# 21 degC and -0.95 +- 0.20 at 5 degC. That is the atm->ocean limb -- the model
+# carries it at -2.00 -- and having both limbs measured turns §5a from a GLODAP
+# job into arithmetic. See sec.5.
 #
 # Usage:  Rscript calibration/diag_alpha_as_up_precheck.R      # ~30 s
 # =====================================================================
@@ -46,10 +57,22 @@ source(ccx_path("calibration", "lib_seas_limbs.R"))
 # ---- named constants -------------------------------------------------
 AP_MODES <- c("enso25 A" = "calibration/output/multistart_20260901_enso25/start_000.rds")
 AP_YEARS <- c(1750, 2024)
-# Zhang et al. 1995, seawater fit. ⚠ SECONDARY QUOTE -- see the header.
-AP_Z_A   <-  0.014   # permil per degC per unit fCO3
-AP_Z_B   <- -0.105   # permil per degC
-AP_Z_C   <-  10.53   # permil
+# Zhang et al. 1995, seawater fit -- BOTH PRINTINGS. See the header: the paper
+# states it twice and the two T coefficients are one stated sigma apart.
+AP_Z_FITS <- list(
+  abstract    = c(a = 0.0140, b = -0.105, c = 10.53),
+  conclusions = c(a = 0.0144, b = -0.107, c = 10.53))
+AP_Z_PRIMARY <- "abstract"   # the one the tables lead with; NOT a claim that it
+                             # is the right one -- every result prints both.
+AP_Z_B_SIGMA <- 0.002        # the paper's own stated uncertainty on b
+# The KINETIC limb, same paper's abstract: eps_k at two temperatures.
+AP_K_T   <- c(5, 21)         # degC
+AP_K_E   <- c(-0.95, -0.81)  # permil
+AP_K_SD  <- c(0.20, 0.16)    # permil
+# Quay et al. 2003's observational constraint on the PAIR.
+AP_Q_DISEQ    <- 0.60        # permil, global mean air-sea d13C disequilibrium, 1995
+AP_Q_DISEQ_SD <- 0.10
+AP_Q_YEAR     <- 1995
 AP_Z_TRANGE  <- c(5, 25)      # degC, the fit's stated validity
 AP_Z_FRANGE  <- c(0.05, 0.20) # fCO3, likewise
 AP_Z_XCHECK  <- -0.019 / 0.18 # permil/degC, the independent application
@@ -118,14 +141,43 @@ for (h in HEMIS) {
               fco3, if (in_f) "(in range)" else "⚠ OUTSIDE [0.05,0.20]", a_s))
   st[[h]]$in_range <- in_T && in_f
 }
-zhang_eps   <- function(T, f) AP_Z_A * T * f + AP_Z_B * T + AP_Z_C
-zhang_slope <- function(f)    AP_Z_A * f + AP_Z_B
-cat("\n  Zhang et al. 1995, eps_DIC-g = 0.014*T*fCO3 - 0.105*T + 10.53 permil:\n")
+zhang_eps   <- function(T, f, fit = AP_Z_PRIMARY)
+  AP_Z_FITS[[fit]][["a"]] * T * f + AP_Z_FITS[[fit]][["b"]] * T + AP_Z_FITS[[fit]][["c"]]
+zhang_slope <- function(f, fit = AP_Z_PRIMARY)
+  AP_Z_FITS[[fit]][["a"]] * f + AP_Z_FITS[[fit]][["b"]]
+# eps_k(T), linear through the paper's two measured temperatures. TWO POINTS ONLY
+# -- this is an interpolation the paper does not itself draw, and it is used only
+# inside its own 5-21 degC span.
+kin_slope <- (AP_K_E[2] - AP_K_E[1]) / (AP_K_T[2] - AP_K_T[1])
+kin_eps   <- function(T) AP_K_E[1] + kin_slope * (T - AP_K_T[1])
+cat("\n  Zhang et al. 1995, BOTH PRINTINGS of the seawater fit:\n")
+for (fit in names(AP_Z_FITS)) {
+  f <- AP_Z_FITS[[fit]]
+  cat(sprintf("    %-11s eps_DIC-g = %.4f*T*fCO3 %+.3f*T + %.2f\n", fit, f[["a"]], f[["b"]], f[["c"]]))
+}
+cat(sprintf("    ⚠ the two b differ by %.3f = %.1f x the paper's own stated sigma of %.3f\n",
+            abs(AP_Z_FITS$abstract[["b"]] - AP_Z_FITS$conclusions[["b"]]),
+            abs(AP_Z_FITS$abstract[["b"]] - AP_Z_FITS$conclusions[["b"]]) / AP_Z_B_SIGMA,
+            AP_Z_B_SIGMA))
+cat(sprintf("\n  %-4s %12s %12s | %12s %12s | %10s\n", "hem",
+            "eps_DIC-g", "(conclusions)", "d/dT", "(conclusions)", "eps_k"))
 for (h in HEMIS) {
-  e <- zhang_eps(st[[h]]$sst, st[[h]]$fco3); s <- zhang_slope(st[[h]]$fco3)
-  st[[h]]$eps_dicg <- e; st[[h]]$slope <- -s   # eps_up = -eps_DIC-g
-  cat(sprintf("    %s  eps_DIC-g = %+6.3f permil  ⇒ eps_up = %+6.3f  |  d(eps_up)/dT = %+.4f permil/K\n",
-              h, e, -e, -s))
+  e  <- zhang_eps(st[[h]]$sst, st[[h]]$fco3)
+  e2 <- zhang_eps(st[[h]]$sst, st[[h]]$fco3, "conclusions")
+  sl <- zhang_slope(st[[h]]$fco3); sl2 <- zhang_slope(st[[h]]$fco3, "conclusions")
+  ek <- kin_eps(st[[h]]$sst)
+  st[[h]]$eps_dicg <- e; st[[h]]$eps_dicg2 <- e2; st[[h]]$eps_k <- ek
+  # ⭐ THE EVASION LIMB IS eps_k - eps_DIC-g, NOT -eps_DIC-g. Both limbs carry the
+  # kinetic effect; only the evasion limb also carries the equilibrium offset.
+  # That is the structure Quay et al. 2003 eq.(2) uses and it is what makes the
+  # steady-state d_ml - d_atm come out AT eps_DIC-g. So the slope carries the
+  # kinetic temperature dependence too.
+  st[[h]]$eps_up  <- ek - e
+  st[[h]]$eps_dn  <- ek
+  st[[h]]$slope   <- kin_slope - sl
+  st[[h]]$slope2  <- kin_slope - sl2
+  cat(sprintf("  %-4s %+12.3f %+12.3f | %+12.4f %+12.4f | %+10.3f\n",
+              h, e, e2, -sl, -sl2, ek))
 }
 cat(sprintf("\n  GATE X -- the independent application of the same paper: %+.4f permil/degC\n",
             AP_Z_XCHECK))
@@ -143,17 +195,19 @@ inv_slope <- function(T_anchor) {
 # A LINEAR-in-T form through the same two anchors.
 lin_slope <- function(T_anchor) -AP_EPS_REF / (T_anchor - AP_T_REF)
 cand <- c(
-  "Zhang 1995 (MEASURED)"                = mean(vapply(st, function(x) x$slope, 0)),
+  "Zhang 1995 (MEASURED, abstract)"      = mean(vapply(st, function(x) x$slope, 0)),
+  "Zhang 1995 (MEASURED, conclusions)"   = mean(vapply(st, function(x) x$slope2, 0)),
   "Mook, as recalled (1/T)"              = AP_MOOK / AP_T_REF^2,
   "boiling anchor, 1/T form"             = inv_slope(AP_TB),
   "boiling anchor, LINEAR form"          = lin_slope(AP_TB),
   "critical anchor, 1/T form"            = inv_slope(AP_TCRIT),
   "critical anchor, LINEAR form"         = lin_slope(AP_TCRIT))
-ref <- cand[["Zhang 1995 (MEASURED)"]]
+ref <- cand[["Zhang 1995 (MEASURED, abstract)"]]
 cat(sprintf("  %-32s %12s %10s\n", "law", "d eps/dT", "vs Zhang"))
 for (n in names(cand))
   cat(sprintf("  %-32s %+12.4f %9.1f %%\n", n, cand[[n]], 100 * (cand[[n]] - ref) / ref))
-zc <- AP_Z_C / -zhang_slope(mean(vapply(st, function(x) x$fco3, 0)))
+fbar <- mean(vapply(st, function(x) x$fco3, 0))
+zc <- AP_Z_FITS[[AP_Z_PRIMARY]][["c"]] / -zhang_slope(fbar)
 cat(sprintf("\n  ⭐ Zhang's LINEAR fit crosses eps = 0 at %.1f degC = %.1f K.\n", zc, zc + 273.15))
 cat(sprintf("     Marcus's anchor is the BOILING POINT, %.1f K -- a gap of %.1f K.\n",
             AP_TB, abs(zc + 273.15 - AP_TB)))
@@ -265,23 +319,103 @@ cat(sprintf("\n  ⇒ %s\n", if (max(r) < 0.01)
   paste("TWO OR MORE ORDERS BELOW. The term is real physics and is NOT the",
         "\n    explanation. Implementing it cannot move the d13c_seasonal_* rows.")
   else if (max(vapply(res, function(x) x[["frac_resid"]], 0)) < 0.25)
-  paste("NOT THE EXPLANATION. The term is 8-15 % of what the model already gets",
-        "\n    WRONG on the two rows that carry the veto, and at the derived phase it",
-        "\n    moves both residuals the WRONG WAY by ~5 %. A flag worth -12.2 prior-sd",
-        "\n    cannot be paid for out of a term this size whichever way it points.",
-        "\n    ⇒ IT IS REAL PHYSICS AND IT IS STILL NOT THE ANSWER -- which is exactly",
-        "\n      the outcome handoff §5 said was worth an afternoon rather than a refit.")
+  # ⚠ THE RANGE IS COMPUTED, NOT TYPED. An earlier draft hardcoded "8-15 %" and
+  # the numbers moved under it the moment the kinetic limb entered the slope.
+  sprintf(paste("NOT THE EXPLANATION. The term is %.0f-%.0f %% of what the model already",
+        "\n    gets WRONG on the two rows that carry the veto, and at the derived phase",
+        "\n    it moves both residuals the WRONG WAY by ~5 %%. A flag worth -12.2",
+        "\n    prior-sd cannot be paid for out of a term this size whichever way it",
+        "\n    points. ⇒ IT IS REAL PHYSICS AND IT IS STILL NOT THE ANSWER -- which is",
+        "\n      exactly the outcome handoff §5 said was worth an afternoon, not a refit."),
+        100 * min(vapply(res, function(x) x[["frac_resid"]], 0)),
+        100 * max(vapply(res, function(x) x[["frac_resid"]], 0)))
   else "SAME ORDER AS THE RESIDUAL. The mechanism is a live candidate; implement it."))
-cat("\n  ⛔ AND THE MEAN VALUE IS A SEPARATE QUESTION FROM THE SLOPE. Zhang puts\n")
-cat(sprintf("     eps_up at %+.2f / %+.2f permil (NH/SH) against the model's hardcoded %+.2f;\n",
-            -st$NH$eps_dicg, -st$SH$eps_dicg, eps_up))
-cat("     that is a CONSTANT offset on the evasion limb, it moves the steady-state\n")
-cat("     d_ml - d_atm, and it is the 5a question. It is NOT priced here.\n")
+cat("\n  ⛔ AND THE MEAN VALUE IS A SEPARATE QUESTION FROM THE SLOPE -- see sec.5,\n")
+cat("     which answers it from the same paper rather than from GLODAP.\n")
+
+sep("5. THE PAIR ITSELF -- §5a, ANSWERED FROM THE PAPER RATHER THAN FROM GLODAP")
+cat("  ⭐ Having BOTH limbs measured makes this arithmetic. Zhang measures the\n")
+cat("     KINETIC effect (both limbs carry it) and the EQUILIBRIUM DIC-gas offset\n")
+cat("     (only the evasion limb also carries it), which is the structure Quay et\n")
+cat("     al. 2003 eq.(2) uses. So the measured pair is\n")
+cat("         eps_down = eps_k          eps_up = eps_k - eps_DIC-g\n")
+cat("     and the steady state then puts d_ml - d_atm AT eps_DIC-g by construction.\n")
+cat(sprintf("\n  %-4s %10s %10s | %10s %10s | %12s %12s\n", "hem",
+            "eps_down", "model", "eps_up", "model", "d_ml-d_atm", "model"))
+for (h in HEMIS)
+  cat(sprintf("  %-4s %+10.3f %+10.2f | %+10.3f %+10.2f | %+12.3f %+12.2f\n", h,
+              st[[h]]$eps_dn, eps_dn, st[[h]]$eps_up, eps_up,
+              st[[h]]$eps_dn - st[[h]]$eps_up, eps_dn - eps_up))
+cat("\n  ⇒ the model's EVASION limb is nearly right and its INVASION limb is not:\n")
+cat(sprintf("     eps_up  %+.2f vs measured %+.3f / %+.3f  -> off by %.0f-%.0f %%\n",
+            eps_up, st$NH$eps_up, st$SH$eps_up,
+            100 * abs(eps_up - st$NH$eps_up) / abs(st$NH$eps_up),
+            100 * abs(eps_up - st$SH$eps_up) / abs(st$SH$eps_up)))
+cat(sprintf("     eps_dn  %+.2f vs measured %+.3f / %+.3f  -> %.1fx TOO LARGE\n",
+            eps_dn, st$NH$eps_dn, st$SH$eps_dn, abs(eps_dn / st$NH$eps_dn)))
+cat("  ⚠ AND THAT RESOLVES THE TENSION THE FIRST PASS FLAGGED. It read the model's\n")
+cat("    -10 as eps_up = -eps_DIC-g and concluded the pair needed eps_down ~ 0 to\n")
+cat("    reproduce the equilibrium offset. With both limbs carrying eps_k the pair\n")
+cat("    is consistent as it stands -- the model is simply 1.1 permil out on one\n")
+cat("    limb and 1.2 out on the other, in the SAME direction, which is why its\n")
+cat("    net offset (+8.00) is closer to right than either limb is.\n")
+
+cat("\n  GATE Q -- Quay et al. 2003's OBSERVATIONAL constraint on that offset.\n")
+cat(sprintf("  Global mean air-sea d13C disequilibrium, %d: %.2f +- %.2f permil.\n",
+            AP_Q_YEAR, AP_Q_DISEQ, AP_Q_DISEQ_SD))
+iq <- which.min(abs(o$t - AP_Q_YEAR))
+dq <- c()
+for (h in HEMIS) {
+  d_ml  <- 1000 * (o[[paste0("ml_C13_", h)]][iq] /
+                   (o[[paste0("ml_C_", h)]][iq] * ccx_const("R13_VPDB")) - 1)
+  d_atm <- o[[paste0("d13c_", h)]][iq]
+  # the atmosphere IN EQUILIBRIUM with this surface water, minus the actual one
+  dq[h] <- (d_ml - st[[h]]$eps_dicg) - d_atm
+  cat(sprintf("    %s  d_ml %+7.3f  d_atm %+7.3f  ⇒ disequilibrium %+7.3f permil\n",
+              h, d_ml, d_atm, dq[[h]]))
+}
+dqm <- mean(dq)
+cat(sprintf("    model global mean %+.3f vs observed %.2f +- %.2f -> %s\n", dqm,
+            AP_Q_DISEQ, AP_Q_DISEQ_SD,
+            if (abs(dqm - AP_Q_DISEQ) <= AP_Q_DISEQ_SD) "INSIDE the bar" else
+            if (abs(dqm - AP_Q_DISEQ) <= 2 * AP_Q_DISEQ_SD) "⚠ within 2 sigma" else
+              "⛔ OUTSIDE 2 sigma"))
+cat("  ⚠ AN AREA-UNWEIGHTED TWO-BOX MEAN against a global observational estimate,\n")
+cat("    and the model's own eps_DIC-g is used to define equilibrium -- so this\n")
+cat("    tests the OFFSET the pair produces, not the pair's two limbs separately.\n")
+# ⭐ WHY THIS GATE HAS POWER, stated rather than assumed. The scored streams are
+# co2_*, d13c_level_* and d13c_gradient (ATMOSPHERIC), d14c_*, gcb_*, and
+# ocean_grad_{dic,d13c,alk} -- and the ocean ones are SURFACE MINUS DEEP
+# gradients (ccx_ocean_grad_scored -> ccx_model_ocean_gradient). NOTHING scores
+# the ABSOLUTE surface-ocean d13C. So this gate is testing a direction the
+# likelihood never saw, which is what gives it power and also why a failure here
+# is not evidence the fit went wrong. [[no_power_null]] in reverse.
+cat("\n  ⭐ THE GATE HAS POWER BECAUSE THE QUANTITY IS UNSCORED. The ocean d13C\n")
+cat("     stream is `ocean_grad_d13c`, a SURFACE-MINUS-DEEP gradient; the two\n")
+cat("     d13c_level_* rows are ATMOSPHERIC. Nothing in the likelihood constrains\n")
+cat("     the absolute surface-ocean d13C, so this is an independent test -- and\n")
+cat("     a failure is an UNCONSTRAINED DIRECTION, not a broken fit.\n")
+cat("\n  and it localises: holding d_atm and eps_DIC-g, the observed disequilibrium\n")
+for (h in HEMIS) {
+  d_ml  <- 1000 * (o[[paste0("ml_C13_", h)]][iq] /
+                   (o[[paste0("ml_C_", h)]][iq] * ccx_const("R13_VPDB")) - 1)
+  need  <- o[[paste0("d13c_", h)]][iq] + AP_Q_DISEQ + st[[h]]$eps_dicg
+  cat(sprintf("    %s needs d_ml = %+7.3f permil; the model has %+7.3f -> %+.3f permil TOO LIGHT\n",
+              h, need, d_ml, d_ml - need))
+}
+cat("  ⇒ THE GAP IS IN THE SURFACE d13C, NOT IN THE ALPHA PAIR: adopting the\n")
+cat("    measured pair moves the offset by ~0.7 permil and the shortfall is ~0.6-0.8.\n")
+cat(sprintf("  ⚠ CANDIDATE, NOT A DIAGNOSIS: this mode's mixed layer is %.0f m deep, well\n", p$h_ml))
+cat("    below a 50-75 m surface layer, and a deeper box mixes in lighter\n")
+cat("    subsurface DIC. NOT TESTED HERE.\n")
+cat("  ⛔ NOT A LICENCE TO RETUNE. It is a gate any adopted pair must still pass.\n")
 
 OUTDIR <- ccx_path("outputs", "diagnostics")
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 saveRDS(list(state = st, candidates = cand, response = res, zhang_zero_degC = zc,
              model_pair = c(eps_down = eps_dn, eps_up = eps_up),
+             measured_pair = lapply(st, function(x) x[c("eps_dn", "eps_up", "eps_dicg")]),
+             diseq = list(model = dq, obs = c(AP_Q_DISEQ, AP_Q_DISEQ_SD)),
              xcheck = c(fit = sx, independent = AP_Z_XCHECK)),
         file.path(OUTDIR, "alpha_as_up_precheck.rds"))
 cat(sprintf("\nwritten: %s\n\n\n=== DONE ===\n",

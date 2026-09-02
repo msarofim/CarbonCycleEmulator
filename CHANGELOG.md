@@ -2,6 +2,47 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02c — **THE PAPERS ARRIVED: THE INVASION LIMB IS THE WRONG ONE, AND AN UNSCORED GATE FAILS**
+
+Marcus supplied `zhangquaywilbur1995.pdf` and Quay et al. 2003 (GBC 17(1)) after the first pass had
+to quote them second-hand. `calibration/diag_alpha_as_up_precheck.R` rebuilt on the primary source.
+**STILL IMPLEMENTS NOTHING.**
+
+**⛔ THE PAPER PRINTS ITS OWN FIT TWICE, WITH DIFFERENT COEFFICIENTS.** Abstract:
+`eps_DIC-g = (0.014 ± 0.01)*T*fCO3 - (0.105 ± 0.002)*T + 10.53`. Conclusions: `(0.0144 ± 0.01)` and
+**`(0.107 ± 0.002)`**. The two T coefficients are exactly one stated sigma apart — the paper's two
+printings straddle its own error bar — and nothing in the text prefers one. **Both are now carried**
+and every result prints under each (it moves dE/dT by 1.7 %). The first pass had only the abstract
+form, from a secondary source, and would have shipped it as "the" coefficient.
+
+**⭐ AND THE PAPER MEASURES THE OTHER LIMB, WHICH CHANGES THE ANSWER.** `eps_k = -0.81 ± 0.16` per
+mille at 21 °C and `-0.95 ± 0.20` at 5 °C. BOTH limbs carry eps_k; only evasion also carries the
+equilibrium offset — the structure Quay 2003 eq.(2) uses. So the measured pair is
+`eps_down = eps_k`, `eps_up = eps_k - eps_DIC-g`, and the slope inherits the kinetic dependence:
+**+0.113 per mille/K**, not the +0.104 of the first pass. Against that, the recalled Mook value
+(+0.114) is within **1.4 %**, and the boiling-point anchor with a LINEAR law within 6 %.
+
+**⭐ §5a IS ANSWERED, AND WITHOUT GLODAP.** Measured pair vs the model's: `eps_down` **-0.84 vs -2.00,
+i.e. 2.4x TOO LARGE**; `eps_up` -9.50/-9.72 vs -10.00, right to 3-5 %. So the limb that is wrong is
+the INVASION one, not the evasion one the arc was looking at. ⚠ This CORRECTS the first pass, which
+read the model's -10 as `-eps_DIC-g` and concluded the pair needed `eps_down ~ 0`: with both limbs
+carrying eps_k the pair is structurally consistent, just ~1.1 per mille out on each limb in the same
+direction.
+
+**⛔ AND A NEW GATE FAILS AT ~6 SIGMA, WITH THE WRONG SIGN.** Quay 2003's global mean air-sea d13C
+disequilibrium for 1995 is 0.60 ± 0.10 per mille; the model gives **-0.04**. ⭐ The gate has POWER
+precisely because the quantity is UNSCORED — the ocean d13C stream is `ocean_grad_d13c`, a
+SURFACE-MINUS-DEEP gradient, and the two `d13c_level_*` rows are atmospheric, so nothing in the
+likelihood constrains the absolute surface-ocean d13C. A failure is an unconstrained direction, not
+a broken fit. It localises to **d_ml being 0.53-0.75 per mille too light**, not to the alpha pair
+(adopting the measured pair moves the offset only ~0.7). ⚠ Candidate, untested: this mode's mixed
+layer is 139 m, well below a 50-75 m surface layer, and a deeper box mixes in lighter subsurface DIC.
+
+**The §5b verdict is unchanged by any of it**: the omitted temperature term is 9-16 % of the two
+d13c_seasonal rows' residual and moves both the wrong way. ⚠ One label had gone stale under the new
+slope — the verdict string said "8-15 %" while the numbers read 16.0/9.1 — and now derives from the
+computed values, which is the rule it should have followed from the start.
+
 ## 2026-09-02b — **`alpha_as_up` PRICED: REAL PHYSICS, AND STILL NOT THE ANSWER**
 
 `handoff_2026-09-01f` §5's pre-check, run before anything was written.
