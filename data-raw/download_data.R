@@ -204,6 +204,17 @@ fetch("nino34",
       "NOAA PSL Nino 3.4 SST index (5N-5S, 170W-120W), from NOAA ERSST.",
       "1948-present, monthly; candidate long ENSO index covering the full dense-CO2 era")
 
+# THE PROVENANCE CONTROL for the index above. Same ERSST VERSION as the local
+# gridded netCDF and the same base period as ENSO_CLIM_BASE, so it holds both
+# fixed and isolates METHOD -- which is how 2026-09-02 established that the
+# extraction in diag_enso_index_baseline.R is right (r 1.0000 against this file)
+# and that the 15 % amplitude gap is between nina34.data and CPC, not in our code.
+fetch("nino34_cpc_v5",
+      "https://www.cpc.ncep.noaa.gov/data/indices/ersst5.nino.mth.91-20.ascii",
+      "ersst5.nino.mth.91-20.ascii",
+      "NOAA CPC monthly Nino region SST indices from ERSST v5, 1991-2020 base period.",
+      "1950-present, monthly; the version- and base-matched control for nina34.data")
+
 # ---------------------------------------------------------------------
 # 6. Atmospheric Delta14C — Hua et al. 2022 zonal compilation (via SoilR)
 # ---------------------------------------------------------------------
