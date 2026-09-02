@@ -1040,7 +1040,21 @@ ccx_default_params <- function() {
     # saturation is an emergent property of the carbonate system rather than a
     # coefficient anywhere. Temperature-dependent SOLUBILITY (K0) is deliberately
     # left alone, so the switch isolates the buffer effect and nothing else.
-    revelle_frozen = 0
+    revelle_frozen = 0,
+    # AIR-SEA 13C FRACTIONATION: 1 = the temperature-dependent Zhang (1995) pair
+    # (the model since 2026-09-02), 0 = the retired scalars, which reproduce the
+    # pre-09-02 model BIT FOR BIT and are how a vector fitted before that date is
+    # reproduced. Same standing as `revelle_frozen` above: it selects a
+    # mechanism, it does not tune one.
+    #
+    # ⚠ DECLARED HERE ON PURPOSE, and it was NOT on the day it shipped. It lived
+    # only as a `p$alpha_as_tdep` read inside ccx_prepare(), so it did not appear
+    # in the default parameter list at all -- and a MISSPELLED switch
+    # (`alpha_as_tdp <- 0`) would then have been absent, defaulted to 1, and run
+    # the WRONG MODEL while printing numbers. That is the same silent-default
+    # class as the alphas themselves before this change; found by auditing the
+    # change rather than by anything failing.
+    alpha_as_tdep = 1
   )
 }
 

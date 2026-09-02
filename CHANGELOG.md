@@ -2,6 +2,38 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02f — **DECLARE THE SWITCH, AND HAND OFF TO A REVIEW-THEN-REFIT**
+
+**A defect I introduced this morning, found by auditing my own change rather than by a failure.**
+`alpha_as_tdep` shipped as a `p$alpha_as_tdep` read inside `ccx_prepare()` and was NOT in
+`ccx_default_params()`. So a MISSPELLED switch (`alpha_as_tdp <- 0`) would have been absent,
+defaulted to 1, and run the WRONG MODEL while printing numbers -- the same silent-default class as
+the alphas themselves before this change, and the third instance of it today. Now declared beside
+`revelle_frozen`, with the reason at the line. Suite unchanged at 1457 / 6 / 2.
+
+**⚠ AND THE MARSHALLING AUDIT THAT FOUND IT ALSO PRODUCED TWO FALSE ALARMS**, both looking exactly
+like an uninitialised-memory bug in the C++ struct: once from `tr -d 'a["]'` deleting every letter
+`a` from the field names, once from a character class `[A-Za-z_]` that excluded the digit in
+`fco3`. The code was correct both times. The working form is recorded in the handoff:
+`grep -o 'a\["alpha_as_[A-Za-z0-9_]*"\]' src/ccx_core.cpp | sed 's/^a\["//; s/"\]$//' | sort -u`
+against `grep("^alpha_as_", names(ccx_cpp_aux(...)))`. Verified clean both ways.
+
+**HANDOFF** at `notes/handoff_2026-09-02_the_limb_the_pair_and_the_shipped_alphas.md`, ordered as
+Marcus directed: **code review first, then refit.** The review section names specific risks rather
+than asking for a general look -- the two split contracts that disagree (`ccx_seas_lag_p()` uses
+precedence where `ccx_gamma_enso()` hard-errors), the strongly ANTIsymmetric fitted ENSO
+coefficients nobody has asked about, whether four ENSO parameters earn their keep at |z| <= 0.68 and
+0.003-0.006 ppm of seasonal amplitude, the four alpha application sites and whether `sst` is the
+seasonal one at each, and one inconsistency better ruled on than discovered: GATE Q uses the box-mean
+SST while the deriv uses the seasonal one. The refit section flags the judgement (one basin at 25
+parameters across ten starts, so a polish may beat another dispersed multi-start) rather than making
+it, and carries the Torch traps and the quarantine contract.
+
+**The pattern the handoff closes on**, because it should weight the review: three errors this session
+and all three were in checks I wrote, not the code they checked -- GATE Q built self-referentially,
+the 2x2 diagnostic's stored ratios nearly drifting under my own change (a 3-byte file difference),
+and the two bad audits above.
+
 ## 2026-09-02e — **SHIPPED: THE AIR-SEA 13C ALPHAS ARE TEMPERATURE-DEPENDENT. THE OBJECTIVE CHANGED.**
 
 Marcus's call, steps 1-3 of the plan priced in 09-02d. `R/constants.R`, `R/model.R`,
