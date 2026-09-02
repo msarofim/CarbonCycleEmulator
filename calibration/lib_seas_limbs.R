@@ -15,11 +15,17 @@
 # amplitudes and phases back. If this file ever drifts from that one, the gate
 # fires and names the arm. A comment claiming they agree would not.
 #
-# ⚠ THE FOUR OBSERVED CONSTANTS ARE **NOT** HERE and not in `R/constants.R`
-# either: SPO total 1.168, land 0.683, ocean 0.522, ocean phase 8.52 months are
-# replicated as file-local constants across ~10 diagnostics. That is a real
-# drift risk and it is not this file's to fix silently -- registering them is a
-# constants-registry decision. Callers still declare their own.
+# ✅ THE FOUR OBSERVED CONSTANTS ARE NOW REGISTERED (2026-09-02). SPO total
+# 1.168, land 0.683, ocean 0.522, ocean phase 8.52 months -- plus the land phase
+# 9.29 and the ocean phase's 95 % bounds [7.82, 9.20] -- live in
+# `R/constants.R` as `SPO_SEAS_*`, with the provenance and the ⚠ that three of
+# them are observations INVERTED THROUGH THE MODEL's own signatures and so sit
+# on the provisional ledger. This file still does not read them: it is the
+# ESTIMATOR, and its callers supply the targets.
+# ⛔ THE COPIES ARE NOT CONVERTED IN BULK -- several callers are pre-registered
+# artefacts whose gates may not move. What binds them is CONVERT ON TOUCH plus
+# `tests/testthat/test-spo-constants-tie.R`, which ties all 34 file-local copies
+# to the registry exactly and can only ratchet down.
 # =====================================================================
 
 # PEAK-TO-PEAK, always -- the estimator the whole arc is quoted in.

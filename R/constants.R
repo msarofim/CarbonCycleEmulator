@@ -418,7 +418,107 @@ CCX_CONSTANTS <- list(
     status = "provisional",
     source = paste("d ln pCO2 / dT ~ 4.23 %/degC (Takahashi). NEEDS the exact citation;",
                    "note the carbonate module already carries the full T dependence of",
-                   "K0/K1/K2, so check for DOUBLE COUNTING before applying this factor."))
+                   "K0/K1/K2, so check for DOUBLE COUNTING before applying this factor.")),
+
+  # ---- the SPO seasonal partition (registered 2026-09-02) -------------
+  # WHY THEY ARE HERE. These four are the targets ~13 seasonal diagnostics
+  # score against, and until now every one of them re-typed the literal. Same
+  # argument as AIRSEA_D13C_DISEQ_OBS: a gate's target may not be a literal in
+  # the gate. `calibration/lib_seas_limbs.R` extracted the ESTIMATOR for this
+  # arc and said in its header that the four constants were "not this file's to
+  # fix silently -- registering them is a constants-registry decision". This is
+  # that decision.
+  #
+  # ⚠ THREE OF THE FOUR ARE PROVISIONAL, AND NOT FOR WANT OF A SOURCE. They are
+  # OBSERVATIONS INVERTED THROUGH THE MODEL's own d13C signatures -- exactly the
+  # standing that NPP_FRAC_NH_ANCHOR_1750 has, and for the same reason: the
+  # ledger is where a model-dependent target stays visible. The inversion solves
+  #     CO2 = L + O ; d13 = s_L L + s_O O
+  # on the OBSERVED first-harmonic vectors, and only s_L / s_O come from the
+  # model (measured from its own channels, -0.04733 vs -0.00461 permil/ppm, a
+  # 10.3x separation, with their spreads propagated). The dependence is real and
+  # small: re-measuring at a different `tau_ex` moved the land limb 0.683 ->
+  # 0.676, i.e. -1 % (notes/collect_2026-08-27h).
+  #
+  # ⚠ THE THREE INVERTED LIMBS ARE BOOTSTRAP MEDIANS, NOT POINT ESTIMATES, so
+  # THEY DO NOT CLOSE ON THE TOTAL AND ARE NOT SUPPOSED TO. The inversion sets
+  # O = CO2 - L, so at the POINT estimate the identity holds by construction --
+  # but the reported limbs are the medians of 2000 bootstrap draws, and a median
+  # does not commute with the nonlinear amp()/ang_mo(). Measured: the two limbs'
+  # vector sum at the printed values is 1.181, i.e. 1.1 % above the total, while
+  # the printed rounding admits only +-0.002. ⛔ THAT 1.1 % IS NOT A GATE. Do
+  # not write a closure test against it -- the only bound available would be the
+  # residual itself, which is [[gate_reads_its_own_output]]. Stated so the next
+  # reader does not mistake it for a defect and "fix" a limb to make it close.
+  # The TOTAL, by contrast, was re-measured model-free on 2026-09-02 and returns
+  # 1.1684 -- so it is the total that is solid and the limbs that carry the bar.
+  #
+  # ⛔ DO NOT SILENTLY RE-MEASURE THESE AT A NEW MODE. Every number the seasonal
+  # arc is quoted in -- the 2.01x land excess, the 0.45x ocean deficit, the 5.17
+  # month phase gap -- is a ratio against these. Moving them at the same time as
+  # the model moves is re-baselining, and the ratio would not show it.
+  SPO_SEAS_AMP_OBS = list(
+    value = 1.168, units = "ppm CO2, peak-to-peak",
+    status = "data",
+    source = paste("Observed South Pole seasonal CO2 cycle, FIRST HARMONIC,",
+                   "peak-to-peak = 2*sqrt(a^2+b^2) of the mean vector, 1975-2024,",
+                   "measured in calibration/diag_seas_signature_inversion.R",
+                   "(2026-08-27d). NO MODEL IN THE LOOP -- the inversion's",
+                   "CO2 = L + O closes on the observed total, so this one is",
+                   "data where the three limbs below are not.",
+                   "⚠ THE AMPLITUDE DEFINITION IS A FLAGGED, UNRESOLVED CHOICE",
+                   "([[amp_definition_mismatch]]): magnitude-of-mean-vector,",
+                   "NOT mean-of-per-year-magnitudes, which inflates a noisy",
+                   "series by Jensen. Quote nothing against this constant that",
+                   "was measured the other way.")),
+  SPO_SEAS_AMP_LAND_INV = list(
+    value = 0.683, units = "ppm CO2, peak-to-peak",
+    status = "provisional",
+    source = paste("The LAND-signatured part of SPO_SEAS_AMP_OBS, from the d13C",
+                   "signature inversion at the canonical mode",
+                   "(calibration/diag_seas_signature_inversion.R, 2026-08-27d;",
+                   "collect note the same day). Observed peak month 9.29.",
+                   "PROVISIONAL because it is an observation inverted through",
+                   "the model's own signatures -- see the section header --",
+                   "not because it lacks a source.")),
+  SPO_SEAS_AMP_OCEAN_INV = list(
+    value = 0.522, units = "ppm CO2, peak-to-peak",
+    status = "provisional",
+    source = paste("The OCEAN-signatured part of SPO_SEAS_AMP_OBS, same",
+                   "inversion and same provisional standing as",
+                   "SPO_SEAS_AMP_LAND_INV. Land 0.683 at month 9.29 plus ocean",
+                   "0.522 at month 8.52 are 0.77 months apart and sum to 103 %",
+                   "of the total: nature ADDS two nearly in-phase pieces where",
+                   "the model SUBTRACTS two nearly antiphase ones.")),
+  SPO_SEAS_LAND_PHASE_INV = list(
+    value = 9.29, units = "month of year (peak of the first harmonic)",
+    status = "provisional",
+    source = paste("Peak month of the land-signatured SPO component, same",
+                   "inversion and same standing as SPO_SEAS_AMP_LAND_INV.",
+                   "The model puts this limb at 8.82 -- a 0.47 month miss,",
+                   "against the ocean limb's 5.17.")),
+  SPO_SEAS_OCEAN_PHASE_INV = list(
+    value = 8.52, units = "month of year (peak of the first harmonic)",
+    status = "provisional",
+    source = paste("Peak month of the ocean-signatured SPO component, same",
+                   "inversion, 95 % CI [7.82, 9.20] bootstrapped over YEARS",
+                   "crossed with the signature spreads, 2000 draws, seed",
+                   "20260827; angles averaged as VECTORS. The model's only SH",
+                   "air-sea seasonal channel peaks at 3.35 -- a 5.17 month gap.",
+                   "⚠ IT HAS NO INDEPENDENT OBSERVATIONAL CONFIRMATION YET:",
+                   "the phase comes from ATMOSPHERIC station data, and the",
+                   "surface-ocean pCO2 climatology pulled to check it from the",
+                   "ocean side (data-raw/download_data.R sec.6c) is a pCO2",
+                   "product, so it omits the seasonality of gas transfer and",
+                   "K0. Until that closes the phase gap is a hypothesis.")),
+  SPO_SEAS_OCEAN_PHASE_INV_LO = list(
+    value = 7.82, units = "month of year",
+    status = "provisional",
+    source = "Lower 95 % bootstrap bound of SPO_SEAS_OCEAN_PHASE_INV, as that entry."),
+  SPO_SEAS_OCEAN_PHASE_INV_HI = list(
+    value = 9.20, units = "month of year",
+    status = "provisional",
+    source = "Upper 95 % bootstrap bound of SPO_SEAS_OCEAN_PHASE_INV, as that entry.")
 )
 
 #' Fetch a constant's value, erroring on unknown names

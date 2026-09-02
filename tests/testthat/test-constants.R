@@ -82,12 +82,26 @@ test_that("provisional constants are reported, not silently used", {
   #     is why they were replaced. ⚠ They are the ONE case here where being on
   #     this list is not a debt to pay down -- the debt was paid by measuring
   #     them, and they survive only as a reproduction path.
+  # ADDED 2026-09-02 with the SPO seasonal-partition registry. SIX entries, and
+  # the ledger fired on all six -- again the mechanism working. Same standing as
+  # NPP_FRAC_NH_ANCHOR_1750 and for the same reason: the land limb, the ocean
+  # limb, their phases and the phase's bootstrap bounds are OBSERVATIONS
+  # INVERTED THROUGH THE MODEL's own d13C signatures, so they carry a model
+  # dependence that the ledger is the right place to keep visible. Measured, it
+  # is small -- re-inverting at a different `tau_ex` moved the land limb -1 %.
+  # ⚠ The TOTAL, SPO_SEAS_AMP_OBS, is deliberately NOT on this list: the
+  # inversion closes CO2 = L + O on the observed total, so no model enters it,
+  # and it was re-measured model-free on 2026-09-02 at 1.1684.
   expect_setequal(prov, c("OCEAN_AREA_NH", "OCEAN_AREA_SH", "OCEAN_DEPTH",
                           "ALK_SURFACE", "PUMP_EPS13_ORG", "PUMP_EPS13_CARB",
                           "RHO_SEAWATER", "NPP_GLOBAL_PI",
                           "SST_PCO2_SENSITIVITY", "NPP_FRAC_NH_ANCHOR_1750",
                           "ALPHA_AS_FCO3",
-                          "ALPHA_AS_DOWN_LEGACY", "ALPHA_AS_UP_LEGACY"))
+                          "ALPHA_AS_DOWN_LEGACY", "ALPHA_AS_UP_LEGACY",
+                          "SPO_SEAS_AMP_LAND_INV", "SPO_SEAS_AMP_OCEAN_INV",
+                          "SPO_SEAS_LAND_PHASE_INV", "SPO_SEAS_OCEAN_PHASE_INV",
+                          "SPO_SEAS_OCEAN_PHASE_INV_LO",
+                          "SPO_SEAS_OCEAN_PHASE_INV_HI"))
 })
 
 test_that("PUMP_GRAD_OBS IS the shipped ocean_grad_dic target, not a copy of it", {

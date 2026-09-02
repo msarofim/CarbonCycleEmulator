@@ -2,6 +2,60 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02n — **THE FOUR SPO CONSTANTS ARE REGISTERED, AND TIED TO THEIR 34 COPIES**
+
+Handoff 09-02k §8.5's standing debt, discharged. The four numbers the whole seasonal-partition arc
+is scored against — observed SPO total **1.168 ppm**, land limb **0.683**, ocean limb **0.522**,
+ocean peak month **8.52** — were file-local literals in **14 diagnostics** and in `R/constants.R`
+nowhere. `lib_seas_limbs.R` had extracted the *estimator* for this arc in August and deliberately
+left the constants alone, saying registering them was "a constants-registry decision". This is that
+decision.
+
+**REGISTERED AS `SPO_SEAS_*`**, seven entries — the four above plus the land peak month **9.29** and
+the ocean phase's 95 % bootstrap bounds **[7.82, 9.20]**, because `diag_so_pco2_phase.R` scores
+against those bounds and a gate's target may not be a literal in the gate (the
+`AIRSEA_D13C_DISEQ_OBS` precedent).
+
+**SIX OF THE SEVEN ARE `provisional`, AND NOT FOR WANT OF A SOURCE.** They are observations
+**inverted through the model's own δ¹³C signatures** — exactly `NPP_FRAC_NH_ANCHOR_1750`'s standing,
+and the ledger is where a model-dependent target stays visible. The dependence is measured and small
+(re-inverting at a different `tau_ex` moved the land limb −1 %). The **total is not** on the ledger:
+the inversion closes `CO2 = L + O` on the observed total, so no model enters it.
+
+**AND THE TOTAL WAS RE-MEASURED MODEL-FREE** rather than copied forward: `1.1684`, SPO first
+harmonic, magnitude-of-mean-vector, 44 years 1979–2023. It confirms the literal exactly.
+
+### ⛔ A CLOSURE GATE CONSIDERED AND REFUSED
+The two limbs' vector sum at the printed values is **1.181**, i.e. **1.1 % above the total**, where
+the printed rounding admits only ±0.002 — six times the envelope. That looked like an inconsistency
+worth gating. It is not one: **the reported limbs are bootstrap MEDIANS of 2000 draws**, and a median
+does not commute with the nonlinear `amp()`/`ang_mo()`. At the point estimate the identity holds by
+construction. **No gate was written**, because the only bound available would have been the residual
+itself — [[gate_reads_its_own_output]]. The arithmetic is recorded in `R/constants.R` so the next
+reader does not mistake it for a defect and "fix" a limb to make it close.
+
+### THE TIE, NOT A BULK CONVERSION
+`tests/testthat/test-spo-constants-tie.R`. The copies are **not** converted in bulk — several
+callers are pre-registered artefacts whose scored gates may not move under a refactor
+(`diag_admissible_2x2_land_ocean.R` is the explicit case). So this follows Marcus's Ruling B idiom:
+**convert on touch, and let a ratchet make the count go one way.** Three assertions over **34
+copies in 14 files**, the middle one load-bearing:
+- **TIE** — every copy equals the registry, **exactly** (it is an identity, so the bound is exact).
+- **NO-STALE** — a listed declaration that is *gone* also fails, so converting a file forces its
+  removal and the list can only shrink.
+- **SUBSET / NO-GROWTH** — no unlisted top-level constant in `calibration/` carries one of the
+  values, and the count may not rise.
+
+It **parses** each diagnostic rather than sourcing it (these files run the model), and evaluates
+only numeric literals and `c()` of literals. **Mutation-tested three ways**: moving a registry value
+fails TIE across every copying file; converting one declaration to `ccx_const()` fails NO-STALE;
+appending a new copy fails SUBSET. Restored, it passes 61.
+
+**Suite 1611 PASS / 6 FAIL / 2 skip** — failure set byte-identical to standing (5 × the
+21-parameter-modes-in-a-25-parameter-build mismatch, plus `test-likelihood.R:587`'s `kz$hi <= 7000`
+guard rail left for Marcus). ⚠ The pass count is **not** comparable to 09-02k's 1515: that run quit
+at the default max-fails; this one sets `max_fails = Inf`, so more of the suite actually ran.
+
 ## 2026-09-02m — **RULING 4 OF 4: AND THE RE-RUN FOUND A LIVE BUG THE HANDOFF HAD MIS-DIAGNOSED**
 
 Marcus: fix `diag_gamma_iav.R`, quarantine, re-run both. The quarantine landed in 09-02j. This is
