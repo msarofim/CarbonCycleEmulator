@@ -12,7 +12,7 @@ This session is its §7 — Marcus's four rulings — executed in full.
 
 ---
 
-## 0. STATE IN EIGHT LINES
+## 0. STATE IN TEN LINES
 
 1. ✅ **RULING 1: the ENSO land term is a ONE-WAY GPP MODULATION.** Price **−65.74**, and the
    diagnosis is worth more than the number. §1
@@ -25,6 +25,10 @@ This session is its §7 — Marcus's four rulings — executed in full.
 6. **Suite 1507 PASS / 6 FAIL / 2 skip**, failure set byte-identical to the standing one. §6
 7. ⇒ **THE 25-PARAMETER REFIT IS NOW UNBLOCKED AND IS THE NEXT THING.** §5
 8. ⇒ **TWO NEW RULINGS OWED**, both created by this session's measurements. §5
+9. ✅ **THE MEMORY CONSOLIDATION PASS RAN.** Nothing over its hard ceiling; **0 orphans, 0 broken
+   links, 0 files retired** — the store was not rotting, the indexes were. §7
+10. ⭐ **LAUNCH FROM `FaIRtoFrEDI/`, NOT `CarbonCycleEmulator/`** — the memory keyspace follows the
+   cwd, and all CCX memory lives under the FaIRtoFrEDI key. §8
 
 Commits: `1df8654` (ruling 1), `c811b82` (ruling 2), `06bdeb5` (ruling 3), `65923bc` (ruling 4).
 
@@ -205,17 +209,82 @@ phase 8.52) are **not in `R/constants.R`** and are replicated across ~10 diagnos
 * **`CCX_MODE_CANONICAL` is STILL `from90`**, a 21-parameter ancestor. **5 of the 6 standing suite
   failures are that mismatch**; the 6th is `test-likelihood.R:587`'s `kz$hi <= 7000` guard rail,
   left failing for Marcus since 09-01.
-* **A git worktree at `b9f183d`** lives under this session's scratchpad for the pre/post pricing.
-  `git worktree remove` it when done; `outputs/diagnostics/enso_gpp_margin_pre.rds` records which
-  source it came from.
+* **The pre/post pricing worktree at `b9f183d` HAS BEEN REMOVED** (`git worktree list` shows only
+  the repo). To re-price anything, re-create it — `calibration/diag_enso_gpp_margin.R`'s header
+  carries the four-line recipe, and `outputs/diagnostics/enso_gpp_margin_pre.rds` records the
+  model-source fingerprint its `pre` half was measured at.
 * **`GATE 4` still names two different gates** — `diag_gates_in_the_new_basin.R` has its own `stop()`
   guards GATE 1/2/3/4 in the file that also reports DESIGN gate 4/5/7. Flagged, not renamed.
 * **`NB_Z` in `diag_gates_in_the_new_basin.R` is now on the OBJECTIVE's sigmas**, so its numbers are
   not comparable with any stored one.
-* **Memory index budgets are over their SOFT targets** and want a restructure pass: `MEMORY.md`
-  **15.7 KB** against 12 KB soft, `INDEX_ccx.md` **16.8 KB** against 14 KB soft. Both are inside the
-  18 KB hard ceiling. They were already over before this session; three findings were added and
-  three blocks compressed.
+* **The memory consolidation pass RAN — see §7.** Nothing is over its hard ceiling any more.
 * **The 09-02 note that contradicted itself is fixed** (+18.7 % → +42.4 % in its title line), and
   the **"6.4σ → 1.0σ" GATE Q figure is corrected in memory** to the measured per-arm 1.37 / 0.80 /
   0.76 — that "1.0" reproduces at no arm.
+
+---
+
+## 7. THE MEMORY CONSOLIDATION PASS (2026-09-02, after the four rulings)
+
+**THE STORE IS NOT ROTTING, AND THAT WAS THE FIRST THING MEASURED.** 469 files, **0 orphans**
+(every memory is reachable from an index), 3 broken links, and **no line violating the index's own
+300-chars-per-link rule**. So **nothing was retired** — 469 files in, 469 out. The rot was entirely
+in the indexes, and `INDEX_ccx.md` was **279 bytes from its 18 KB hard ceiling**.
+
+**⚠ THREE CAPTION-SYNC ERRORS, one of them made earlier the same day.** This is the class the index's
+own rules exist to prevent, and it still bit:
+* `INDEX_ccx.md` said "**FIVE** OBJECTIVE/SPACE CHANGES NOW STACK" while listing **six** — the ENSO
+  one-way change was appended without touching the count.
+* `MEMORY.md`'s rules header said "ROOT INDEX + **EIGHT** on-demand sub-indexes" and named eight.
+  There are **ten** (`ccx_ocean` and `cmp` were missing).
+* A stale suite count (1365 → **1507**) and a stale "LIVE STATE (2026-09-01)".
+
+**MERGED AND MOVED.** Two `INDEX_ccx_arch.md` sections were the SAME `h_ml` arc under different
+headers, with one bullet appearing **verbatim twice**. Five closed/superseded arcs moved from the
+live CCX index into the archive tier — the 08-28 band decode, the off-support −232, the 08-31f
+re-pricing, the pre-09-02 gate table, the withdrawn FACE ceiling — each under a banner reading
+**"every gate-7 sigma below is on the RETIRED 0.50"**. Header prose in `INDEX_ccx.md` that restated
+bullets sitting directly beneath it was collapsed to pointers.
+
+**STALE FACTS CORRECTED.** `ccx_app_beta_blockers.md`'s gate-7 line — the VALUES (land 3.50, ocean
+2.61 GtC/yr) stand and re-measure at 3.54; the "+2.28 sd / −1.52 sd" were on the retired sigma and
+now read **+0.75 / −1.44 ⇒ PASS**. That discharged a TODO `INDEX_ccx.md` had been carrying. Also one
+relative date ("yesterday's 1.94≈1.9 match" → **2026-06-03**, from the file's own dateline) and the
+three broken links (two were a function name and a `~/.claude/CLAUDE.md` rule written as wikilinks;
+the third was a false positive from R code inside a fence).
+
+**RESULT — verified with `wc -c`, which is the unit the budget rule specifies:**
+
+| | bytes | vs budget |
+|---|---|---|
+| `MEMORY.md` | 15,664 (13,164 content) | over **soft** by 876 |
+| `INDEX_ccx.md` | **16,221** | over soft by 1,885 — **2,211 of HARD headroom**, was 279 |
+| `INDEX_ccx_arch.md` | 16,621 | over soft by 2,285 |
+| `INDEX_cmp.md` / `INDEX_slr.md` | 14,912 / 14,749 | over soft by 576 / 413 |
+| the other five | 5,083–12,773 | ok |
+
+⚠ **A UNIT TRAP WORTH KNOWING: `wc -c` counts BYTES, Python's `len()` counts CHARACTERS.** These
+files are dense with `⚠ ⛔ ⭐ → σ ×`, so a Python-measured size runs several hundred bytes LOW —
+i.e. it flatters the file against a budget denominated in bytes. **Measure with `wc -c`.**
+
+⛔ **WHAT WAS DELIBERATELY NOT DONE.** No deep duplicate-content audit across the 469 topic files —
+the graph metrics said that was not where the problem lived, and reading all of them was not worth
+the context. And the four indexes still over SOFT were left there: the rules define over-soft as
+"merge when convenient", and **rule 3 is explicit that length is not a reason to delete a number**.
+⚠ `INDEX_ccx_arch` is now the fattest index. It is provenance-only and rarely read, so it is the
+cheapest place for that weight — but it is the next candidate if it keeps growing.
+
+---
+
+## 8. ⭐ AN OPERATIONAL FACT WORTH MORE THAN THIS SESSION
+
+**THE MEMORY DIRECTORY IS KEYED TO THE LAUNCH cwd, AND ALL CCX MEMORY LIVES UNDER THE FaIRtoFrEDI
+KEY.** The only directory under `~/.claude/projects/*/memory` is
+`-Users-MarcusMarcus-Documents-2026-CodeProjects-FaIRtoFrEDI/memory/`, and its slug matches this
+session's cwd exactly.
+⇒ **Launch from `FaIRtoFrEDI/`, even though every line of CCX code is in `CarbonCycleEmulator/`.**
+A session started from `CarbonCycleEmulator/` would pick up that repo's own `CLAUDE.md` but land on
+a **different, empty memory keyspace** — `INDEX_ccx.md` and its nine siblings would simply not be
+there. Prefer `/clear` in a `FaIRtoFrEDI/`-launched window over opening a new session elsewhere.
+⚠ The cwd-keying is INFERRED from the slug matching and from only one such directory existing; the
+mechanism was not read out of the harness. The practical instruction stands either way.
