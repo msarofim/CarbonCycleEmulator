@@ -132,6 +132,14 @@ test_that("the ocean gains exactly what the atmosphere loses", {
   # layers and -rate out of the two atmospheres, and ZERO everywhere else.
   s <- sink_test_state()
   s$p <- ccx_set_enso(s$p, list(gamma_enso = 0))
+  # ⚠ SEASONALITY OFF, and for a reason the isotope block below depends on:
+  # since 2026-09-02 the invasion alpha is a function of the LOCAL, seasonally
+  # varying SST, and the derivative here is taken at mid-year. With seasonality
+  # on, reproducing the expectation would mean copying the model's seasonal-SST
+  # formula into the test -- a second copy that could drift. Off, the box SST is
+  # aux$sst and the assertion stays EXACT at 1e-12. The sink's isotope routing
+  # is what this test is about and it does not depend on seasonality.
+  s$p$seas_drivers <- 0
   f_off <- sink_closed_forcing()
   f_on  <- sink_closed_forcing(); f_on$sink_ocean <- SINK_TEST_RATE
   d0 <- ccx_deriv(s$y, 1945.5, s$p, f_off, s$grid, s$aux)
@@ -154,16 +162,29 @@ test_that("the ocean gains exactly what the atmosphere loses", {
   expect_equal(dd[ml[["NH"]], "C"], SINK_TEST_RATE * sh_NH, tolerance = 1e-12)
   expect_false(isTRUE(all.equal(sh_NH, FORC_FOSS_NH_SHARE, tolerance = 1e-3)))
 
-  # ISOTOPES AT THE SOURCE RATIO. 13C carries alpha_as_down; 14C carries NO
-  # fractionation. This is the mechanism behind the pre-registered 14C null, so
-  # it is asserted directly rather than inferred from a run.
+  # ISOTOPES AT THE SOURCE RATIO. 13C carries the INVASION limb's alpha; 14C
+  # carries NO fractionation. This is the mechanism behind the pre-registered
+  # 14C null, so it is asserted directly rather than inferred from a run.
+  #
+  # ⚠ UPDATED 2026-09-02, and it FIRED first: this read `s$aux$alpha_as_down`,
+  # which since that date is the RETIRED SCALAR and no longer what the sink
+  # carries. The claim is unchanged -- the sink rides the invasion limb -- but
+  # the invasion limb is now a FUNCTION OF SST, so the expectation is resolved
+  # through `ccx_alpha_as()` exactly as the model resolves it. Pinning the old
+  # field would have asserted a constant the model had stopped using.
+  # ⛔ NOT a loosened tolerance: still 1e-12, and the 14C null is untouched.
   for (h in HEMIS) {
     ia <- s$aux$idx[[h]]$atm; im <- s$aux$idx[[h]]$ml
     fC <- dd[im, "C"]
     r13 <- s$y[ia, "C13"] / s$y[ia, "C"]
     r14 <- s$y[ia, "C14"] / s$y[ia, "C"]
-    expect_equal(dd[im, "C13"], fC * r13 * s$aux$alpha_as_down, tolerance = 1e-12)
+    # seasonality is switched off above, so the box SST is exactly aux$sst
+    a_dn <- ccx_alpha_as(s$aux$sst[[h]], s$aux)$down
+    expect_equal(dd[im, "C13"], fC * r13 * a_dn, tolerance = 1e-12)
     expect_equal(dd[im, "C14"], fC * r14, tolerance = 1e-12)
+    # and the mutation test for THIS line: the retired scalar must NOT pass
+    expect_false(isTRUE(all.equal(dd[im, "C13"],
+                                  fC * r13 * s$aux$alpha_as_down, tolerance = 1e-12)))
   }
 })
 

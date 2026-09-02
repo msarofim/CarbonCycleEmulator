@@ -45,6 +45,13 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     pco2_0 = c(aux$pco2_0$NH, aux$pco2_0$SH),
     alpha_photo = aux$alpha_photo,
     alpha_as_down = aux$alpha_as_down, alpha_as_up = aux$alpha_as_up,
+    # the T-dependent pair (2026-09-02). Sent UNCONDITIONALLY, like the pump
+    # arrays: the C++ reads every field into a fixed struct, so a field the R
+    # side sometimes omits is whatever was in that memory before.
+    alpha_as_tdep = as.integer(aux$alpha_as_tdep),
+    alpha_as_zA = aux$alpha_as_zA, alpha_as_zB = aux$alpha_as_zB,
+    alpha_as_zC = aux$alpha_as_zC, alpha_as_fco3 = aux$alpha_as_fco3,
+    alpha_as_kin_a = aux$alpha_as_kin_a, alpha_as_kin_b = aux$alpha_as_kin_b,
     bomb_share_NH = aux$bomb_share_NH, nuc_share_NH = aux$nuc_share_NH,
     R13 = ccx_const("R13_VPDB"), R14STD = ccx_const("R14_STD"),
     lambda = ccx_const("LAMBDA_C14"), alk = ccx_const("ALK_SURFACE"),

@@ -307,6 +307,111 @@ CCX_CONSTANTS <- list(
     status = "data",
     source = "As SST_SEAS_AMP_NH_OBS, southern hemisphere."),
 
+  # ---- air-sea 13C fractionation (2026-09-02) --------------------------
+  # THESE REPLACE TWO LITERALS. Until today `alpha_as_down` = 1 - 2/1000 and
+  # `alpha_as_up` = 1 - 10/1000 sat inside ccx_prepare()'s aux (R/model.R),
+  # carrying the word "provisional" WITHOUT being in this ledger -- so the audit
+  # that exists to find provisional constants could not find them. They were
+  # also readable from nowhere else, which made setting them on a parameter list
+  # a SILENT NO-OP. Both defects are fixed here and in R/model.R.
+  #
+  # THE STRUCTURE, and why it is two limbs and not one net alpha: BOTH
+  # directions carry the kinetic effect; only EVASION also carries the
+  # equilibrium DIC-gas offset. That is Quay et al. (2003) eq.(2), and it is
+  # what makes the steady-state d_ml - d_atm come out AT eps_DIC-g.
+  #     eps_down = eps_k(T)                  eps_up = eps_k(T) - eps_DIC-g(T)
+  #
+  # ⚠ THE PAPER PRINTS ITS SEAWATER FIT TWICE WITH DIFFERENT COEFFICIENTS --
+  # abstract (0.014, -0.105), conclusions (0.0144, -0.107) -- and the two T
+  # coefficients are EXACTLY ONE STATED SIGMA APART. Nothing in the text
+  # prefers one. The ABSTRACT form is registered because it is the form the
+  # secondary literature quotes; the difference moves d(eps_up)/dT by 1.7 %,
+  # which is below every verdict it has been used for
+  # (calibration/diag_alpha_as_up_precheck.R sec.2 prints both).
+  ALPHA_AS_ZHANG_A = list(
+    value = 0.014, units = "permil/degC per unit fCO3",
+    status = "data",
+    source = paste("Zhang J., Quay P. D., Wilbur D. O. (1995), Geochim.",
+                   "Cosmochim. Acta 59(1), 107-114, seawater fit",
+                   "eps_DIC-g = a*T*fCO3 + b*T + c, ABSTRACT printing;",
+                   "valid 5-25 degC and 0.05 < fCO3 < 0.20. See",
+                   "ALPHA_AS_ZHANG_B for the two-printing discrepancy.")),
+  ALPHA_AS_ZHANG_B = list(
+    value = -0.105, units = "permil/degC",
+    status = "data",
+    source = paste("Zhang et al. (1995), as ALPHA_AS_ZHANG_A. ABSTRACT gives",
+                   "-(0.105 +- 0.002); the CONCLUSIONS section of the same",
+                   "paper gives -(0.107 +- 0.002) with a = 0.0144. The two are",
+                   "one stated sigma apart and the text prefers neither.")),
+  ALPHA_AS_ZHANG_C = list(
+    value = 10.53, units = "permil",
+    status = "data",
+    source = "Zhang et al. (1995), as ALPHA_AS_ZHANG_A; +- 0.05, both printings."),
+  # fCO3 IS HELD CONSTANT RATHER THAN SOLVED, and the approximation is priced.
+  # Carrying it properly needs [CO3=]/DIC from the carbonate solve at every
+  # step, on both the R and C++ paths. Its whole contribution is
+  # a*T*fCO3 ~ 0.014 * 17 * 0.082 = 0.020 permil against an eps_DIC-g of ~8.7
+  # and a stated uncertainty of +- 0.05, and its contribution to the SLOPE is
+  # a*fCO3 = 0.0011 permil/K against 0.105 -- i.e. 1 % of the term this whole
+  # change is about. Held, said, and quantified.
+  ALPHA_AS_FCO3 = list(
+    value = 0.082, units = "1",
+    status = "provisional",
+    source = paste("Surface [CO3=]/DIC held fixed rather than solved per step.",
+                   "Measured at the 25-parameter mode's own surface state",
+                   "(NH 0.0856, SH 0.0786; mean 0.082) -- INSIDE Zhang's stated",
+                   "0.05-0.20. Contributes 0.020 permil of an ~8.7 permil",
+                   "eps_DIC-g and 1 % of its temperature slope.")),
+  # THE KINETIC LIMB, linear through the paper's two measured temperatures.
+  # ⚠ TWO POINTS ONLY -- this line is an interpolation the paper does not
+  # itself draw, and it is used only inside its own 5-21 degC span.
+  ALPHA_AS_KIN_5 = list(
+    value = -0.95, units = "permil",
+    status = "data",
+    source = paste("Zhang et al. (1995), kinetic fractionation during CO2 gas",
+                   "transfer, -0.95 +- 0.20 permil at 5 degC.")),
+  ALPHA_AS_KIN_21 = list(
+    value = -0.81, units = "permil",
+    status = "data",
+    source = paste("Zhang et al. (1995), kinetic fractionation during CO2 gas",
+                   "transfer, -0.81 +- 0.16 permil at 21 degC.")),
+  # THE RETIRED SCALARS, kept so `alpha_as_tdep = 0` reproduces the pre-09-02
+  # model BIT FOR BIT and so the value that produced every shipped result is
+  # recoverable by name rather than from a git blame.
+  ALPHA_AS_DOWN_LEGACY = list(
+    value = -2, units = "permil",
+    status = "provisional",
+    source = paste("The pre-2026-09-02 invasion fractionation, a literal in",
+                   "ccx_prepare()'s aux. Measured against Zhang et al. (1995)",
+                   "it is 2.4x TOO LARGE (eps_k ~ -0.84 at the model's SST).",
+                   "Retained ONLY as the behaviour-preserving path.")),
+  ALPHA_AS_UP_LEGACY = list(
+    value = -10, units = "permil",
+    status = "provisional",
+    source = paste("The pre-2026-09-02 evasion fractionation, a literal in",
+                   "ccx_prepare()'s aux. Right to 3-5 % against Zhang et al.",
+                   "(1995) (-9.50/-9.72 at the model's SST).",
+                   "Retained ONLY as the behaviour-preserving path.")),
+  # Quay et al. (2003)'s observational constraint, registered because GATE Q
+  # scores against it and a gate's target may not be a literal in the gate.
+  AIRSEA_D13C_DISEQ_OBS = list(
+    value = 0.60, units = "permil",
+    status = "data",
+    source = paste("Quay P. et al. (2003), Global Biogeochem. Cycles 17(1),",
+                   "doi:10.1029/2001GB001817: global mean air-sea d13C",
+                   "disequilibrium in 1995, 0.60 +- 0.10 permil. That paper",
+                   "takes its own fractionation factors from Zhang et al.",
+                   "(1995), so the gate and the constants share a lineage --",
+                   "said here because it means this is NOT a fully",
+                   "independent check of the coefficients, only of the",
+                   "model state they produce.")),
+  AIRSEA_D13C_DISEQ_SD = list(
+    value = 0.10, units = "permil",
+    status = "data", source = "Quay et al. (2003), as AIRSEA_D13C_DISEQ_OBS."),
+  AIRSEA_D13C_DISEQ_YEAR = list(
+    value = 1995, units = "year",
+    status = "data", source = "Quay et al. (2003), as AIRSEA_D13C_DISEQ_OBS."),
+
   # ---- temperature ----------------------------------------------------
   SST_PCO2_SENSITIVITY = list(
     value = 0.0423, units = "1/degC",

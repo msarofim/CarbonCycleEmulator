@@ -452,6 +452,25 @@ ccx_gamma_enso <- function(p) {
 #' cores use rather than by a second opinion at the call site. This function
 #' exists because the retired one-name assignment was written at a dozen sites
 #' and one name became four -- the shape of `recorded_but_never_restored`.
+#' Air-sea 13C fractionation factors at a given SST
+#'
+#' @param sst temperature in degC -- the LOCAL, seasonally varying one, which is
+#'   the whole point: a scalar alpha cannot carry a seasonal cycle.
+#' @param aux from ccx_prepare()
+#' @return list(down = alpha_as_down, up = alpha_as_up), multiplicative factors
+#'
+#' ⚠ `aux$alpha_as_tdep == 0` returns the retired SCALARS unchanged, so the
+#' pre-2026-09-02 model is reproduced bit for bit. Mirrored in
+#' src/ccx_core.cpp (ccx_alpha_as); test-parity.R holds the two together.
+ccx_alpha_as <- function(sst, aux) {
+  if (aux$alpha_as_tdep == 0L)
+    return(list(down = aux$alpha_as_down, up = aux$alpha_as_up))
+  eps_k    <- aux$alpha_as_kin_a + aux$alpha_as_kin_b * (sst - 5)
+  eps_dicg <- aux$alpha_as_zA * sst * aux$alpha_as_fco3 + aux$alpha_as_zB * sst +
+              aux$alpha_as_zC
+  list(down = 1 + eps_k / 1000, up = 1 + (eps_k - eps_dicg) / 1000)
+}
+
 ccx_set_enso <- function(p, src) {
   g <- ccx_gamma_enso(src)
   # DROP the retired scalar off the TARGET. Writing the four onto a legacy list
@@ -1116,7 +1135,36 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     r13 <- if (y[src, "C"] > 0) y[src, "C13"] / y[src, "C"] else 0
     r14 <- if (y[src, "C"] > 0) y[src, "C14"] / y[src, "C"] else 0
     f13 <- F_C * r13 * alpha13
-    f14 <- F_C * r14                       # NO fractionation -- see header
+    # ⛔ 14C CARRIES NO FRACTIONATION HERE, AND THAT IS THE CONVENTION, NOT AN
+    # OMISSION. The C14 column is stored so that C14/C = 1 + D14C/1000
+    # (ccx_spinup: `d14c_atm <- 1000 * (sum(C14)/sum(C) - 1)`), i.e. this model
+    # carries DELTA-14C, which is BY DEFINITION normalised for fractionation to
+    # a common d13C of -25 permil. That normalisation is exact precisely WHEN
+    # the 14C fractionation is the square of the 13C one, alpha14 = alpha13^2
+    # (eps14 = 2*eps13 for small eps) -- so a Delta-14C tracer moves through a
+    # fractionating interface unfractionated, and applying an alpha here would
+    # DOUBLE-COUNT by ~2 x 8.7 = 17 permil, about 3x the fitted `sigma_d14c`.
+    #
+    # ⭐ AND THAT IS WHY THE 2026-09-02 TEMPERATURE DEPENDENCE NEEDED NO 14C
+    # WORK: the 14C fractionation is DEFINED by its relationship to the 13C one,
+    # so it INHERITS whatever temperature dependence alpha13 has (Marcus,
+    # 2026-09-02). alpha13 is now a function of SST, therefore the alpha13^2 this
+    # line assumes is too -- automatically, with no code and nothing to keep in
+    # sync. ⚠ The inheritance is the mechanism; do NOT "add" a 14C term later
+    # and reintroduce the double-count.
+    #
+    # ⚠ This line used to read "NO fractionation -- see header" while the header
+    # said nothing, which is why the question had to be asked at all.
+    #
+    # THE ONE RESIDUAL, AND ITS SIZE. The square law is exact for equilibrium and
+    # ~1.9 rather than 2 for the diffusive/kinetic limb, so ~10 % of eps_k
+    # survives the normalisation: ~0.09 permil on the mean and, with
+    # d(eps_k)/dT = 0.0088 permil/K, ~0.001 permil/K -- about 0.002 permil over a
+    # +-1 K seasonal SST swing against a fitted sigma_d14c of ~5.3. THREE ORDERS
+    # below the noise floor. It is a deviation from the DEFINING relationship,
+    # not a missing temperature dependence, and it would only become a question
+    # if the model moved to ABSOLUTE 14C/C ratios -- a much larger change.
+    f14 <- F_C * r14
     dy[from, "C"]   <<- dy[from, "C"]   - F_C
     dy[to,   "C"]   <<- dy[to,   "C"]   + F_C
     dy[from, "C13"] <<- dy[from, "C13"] - f13
@@ -1466,9 +1514,13 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # these go negative only when pCO2 itself does, i.e. in a diverging
     # intermediate state that ccx_run_fast() is about to reject. The two limbs
     # already carry their own directional alphas, which is the correct pattern.
-    add_flux(iatm, iml, gx * pco2_at, alpha13 = aux$alpha_as_down,
+    # ⚠ `sst` HERE IS THE SEASONAL ONE (set ~50 lines up), not aux$sst. That is
+    # deliberate and is the mechanism: the evasion limb's fractionation now
+    # carries the seasonal cycle it physically has. [[alpha_as_up_priced_not_the_answer]]
+    a_as <- ccx_alpha_as(sst, aux)
+    add_flux(iatm, iml, gx * pco2_at, alpha13 = a_as$down,
              alpha13_signed = TRUE)                                  # invasion
-    add_flux(iml, iatm, gx * pco2_ml, alpha13 = aux$alpha_as_up,
+    add_flux(iml, iatm, gx * pco2_ml, alpha13 = a_as$up,
              alpha13_signed = TRUE)                                  # evasion
 
     # ---- ENSO: the OCEAN anomaly (2026-09-01) ------------------------
@@ -1493,9 +1545,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # this term. Same call, and the same reason, as the artificial sink below.
     .ge_ocn <- .ge[[paste0("ocn_", h)]] * forc$enso
     if (.ge_ocn > 0) {
-      add_flux(iatm, iml, .ge_ocn, alpha13 = aux$alpha_as_down)   # extra uptake
+      add_flux(iatm, iml, .ge_ocn, alpha13 = a_as$down)   # extra uptake
     } else if (.ge_ocn < 0) {
-      add_flux(iml, iatm, -.ge_ocn, alpha13 = aux$alpha_as_up)    # extra evasion
+      add_flux(iml, iatm, -.ge_ocn, alpha13 = a_as$up)    # extra evasion
     }
 
     # ---- ARTIFICIAL MID-CENTURY OCEAN SINK (2026-08-23c) -------------
@@ -1532,7 +1584,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # be a broken forcing, not a reversal.
       add_flux(iatm, iml,
                sk * aux$asx[[h]] / (aux$asx$NH + aux$asx$SH),
-               alpha13 = aux$alpha_as_down, alpha13_signed = TRUE)
+               alpha13 = a_as$down, alpha13_signed = TRUE)
     }
 
     # ---- ocean interior diffusion -----------------------------------
@@ -2017,11 +2069,38 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
       A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC")),
     dz_mid = (grid$dz[-length(grid$dz)] + grid$dz[-1]) / 2,
     alpha_photo = 1 - 18 / 1000,     # provisional, see constants.R note
-    # air-sea 13C fractionation differs by direction: kinetic on invasion,
-    # equilibrium on evasion. With gross fluxes both must be carried separately
-    # -- a single "net" alpha cannot represent the two-way exchange.
-    alpha_as_down = 1 -  2 / 1000,   # provisional, kinetic (atm -> ocean)
-    alpha_as_up   = 1 - 10 / 1000,   # provisional, equilibrium (ocean -> atm)
+    # AIR-SEA 13C FRACTIONATION -- TEMPERATURE-DEPENDENT SINCE 2026-09-02.
+    #
+    # Two limbs, because a single "net" alpha cannot represent a two-way gross
+    # exchange: kinetic on invasion, kinetic PLUS the equilibrium DIC-gas offset
+    # on evasion (Quay et al. 2003 eq.2). Both are now FUNCTIONS OF SST, from
+    # Zhang et al. (1995); the coefficients live in R/constants.R with their
+    # provenance and the paper's own two-printing discrepancy.
+    #
+    # ⚠ WHAT CHANGED AND WHY IT MATTERS. These were the scalars -2 and -10
+    # permil, hardcoded here, read from nowhere else, and absent from the
+    # constants ledger. Against the measurement the evasion limb was right to
+    # 3-5 % and the INVASION limb was 2.4x TOO LARGE. Adopting both moves the
+    # air-sea d13C disequilibrium from -0.04 permil (6.4 sigma out, WRONG SIGN)
+    # to +0.74 (1.4 sigma) against Quay et al. 2003 -- an observable NO stream
+    # scores, so the fit had no way to compensate for it. See GATE Q.
+    #
+    # ⛔ THIS CHANGES THE OBJECTIVE. Every vector fitted before 2026-09-02 was
+    # fitted against the scalar pair. `alpha_as_tdep = 0` reproduces that model
+    # BIT FOR BIT (test-alpha-as.R asserts it) and is how a pre-change vector is
+    # reproduced; it is NOT a supported configuration for new work.
+    alpha_as_tdep  = if (is.null(p$alpha_as_tdep)) 1 else as.integer(p$alpha_as_tdep > 0),
+    alpha_as_zA    = ccx_const("ALPHA_AS_ZHANG_A"),
+    alpha_as_zB    = ccx_const("ALPHA_AS_ZHANG_B"),
+    alpha_as_zC    = ccx_const("ALPHA_AS_ZHANG_C"),
+    alpha_as_fco3  = ccx_const("ALPHA_AS_FCO3"),
+    alpha_as_kin_a = ccx_const("ALPHA_AS_KIN_5"),
+    alpha_as_kin_b = (ccx_const("ALPHA_AS_KIN_21") - ccx_const("ALPHA_AS_KIN_5")) /
+                     (21 - 5),
+    # the legacy scalars, and the values the T-dependent path collapses to when
+    # it is switched off. NOT a default: `alpha_as_tdep` defaults to ON.
+    alpha_as_down = 1 + ccx_const("ALPHA_AS_DOWN_LEGACY") / 1000,
+    alpha_as_up   = 1 + ccx_const("ALPHA_AS_UP_LEGACY") / 1000,
     # d13c_foss MOVED TO THE FORCING TABLE 2026-08-12. It was a single -28
     # permil here, applied from 1750 to 2024. That is not one value: the
     # emission-weighted fuel mix ran from ~-24 permil (1850, essentially all

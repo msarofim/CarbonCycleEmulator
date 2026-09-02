@@ -68,11 +68,22 @@ static const double LUC_CLEARED_MAX = 0.9;
 // state is column-major [box + NB*tracer], matching R's matrix layout
 inline int IX(int box, int tr) { return box + NB * tr; }
 
+// Air-sea 13C fractionation at a given SST. Twin of R's ccx_alpha_as();
+// `tdep == 0` returns the retired scalars so the pre-2026-09-02 model is
+// reproduced bit for bit. Defined on the struct below, so declared after it.
 struct Aux {
   double gtc_per_ppm_hemi, chi0, mol_per_GtC;
   double npp0[2], veg0[2], land0[2], ml_mass_kg[2], asx[2], sst[2];
   double dz[NL + 1], dz_mid[NL];
   double alpha_photo, alpha_as_down, alpha_as_up;
+  // AIR-SEA 13C, TEMPERATURE-DEPENDENT SINCE 2026-09-02 (Zhang et al. 1995).
+  // alpha_as_down/up above are now the RETIRED SCALARS, used only when
+  // alpha_as_tdep == 0, which reproduces the pre-09-02 model bit for bit.
+  // Twin of the block in R/model.R's ccx_prepare(); ccx_alpha_as() below
+  // mirrors R's ccx_alpha_as() and test-parity.R holds the two together.
+  int    alpha_as_tdep;
+  double alpha_as_zA, alpha_as_zB, alpha_as_zC, alpha_as_fco3;
+  double alpha_as_kin_a, alpha_as_kin_b;
   // d13c_foss MOVED to the forcing (2026-08-12): the fossil source d13C is
   // time-varying, so it is no longer an invariant.
   // enso_share RETIRED 2026-09-01 -- the hemispheric split of the ENSO
@@ -99,6 +110,16 @@ struct Aux {
   double ml_C0[2];                  // preindustrial ML carbon, DIC-limited mode
   double alpha_pump_org, alpha_pump_carb;   // 13C fractionation, per limb
 };
+
+static inline void ccx_alpha_as(double sst, const Aux &A,
+                                double *a_down, double *a_up) {
+  if (A.alpha_as_tdep == 0) { *a_down = A.alpha_as_down; *a_up = A.alpha_as_up; return; }
+  const double eps_k    = A.alpha_as_kin_a + A.alpha_as_kin_b * (sst - 5.0);
+  const double eps_dicg = A.alpha_as_zA * sst * A.alpha_as_fco3
+                        + A.alpha_as_zB * sst + A.alpha_as_zC;
+  *a_down = 1.0 + eps_k / 1000.0;
+  *a_up   = 1.0 + (eps_k - eps_dicg) / 1000.0;
+}
 
 // FERTILISATION FORM. Mirrors CCX_FERT_LOG / CCX_FERT_MM in R/model.R; the two
 // must agree exactly or test-parity.R fails, which is the point.
@@ -474,8 +495,11 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // alpha13_signed reason (a): one-way by construction -- gx > 0 always, so
     // these go negative only when pCO2 does, i.e. in a diverging intermediate
     // state the caller is about to reject. See R/model.R for the contract.
-    add_flux(iatm, iml, gx * chi,     A.alpha_as_down, true);
-    add_flux(iml, iatm, gx * pco2_ml, A.alpha_as_up,   true);
+    // `sst` here is the SEASONAL one, not A.sst[hi] -- that is the mechanism.
+    double a_as_dn, a_as_up;
+    ccx_alpha_as(sst, A, &a_as_dn, &a_as_up);
+    add_flux(iatm, iml, gx * chi,     a_as_dn, true);
+    add_flux(iml, iatm, gx * pco2_ml, a_as_up, true);
 
     // ENSO ocean anomaly -- twin of the block in R/model.R, which carries the
     // rationale (positive coefficient x positive index = MORE uptake, the
@@ -485,13 +509,13 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // and the reverse limb of a fractionating exchange is a different process.
     // Unlabelled on both sides, so the flux trace counts it in ocean_net.
     const double ge_ocn = P.gamma_enso_ocn[hi] * enso;
-    if (ge_ocn > 0.0)      add_flux(iatm, iml,  ge_ocn, A.alpha_as_down);
-    else if (ge_ocn < 0.0) add_flux(iml, iatm, -ge_ocn, A.alpha_as_up);
+    if (ge_ocn > 0.0)      add_flux(iatm, iml,  ge_ocn, a_as_dn);
+    else if (ge_ocn < 0.0) add_flux(iml, iatm, -ge_ocn, a_as_up);
 
     // the artificial sink rides the SAME downward fractionation as the invasion
     // limb above and carries 14C unfractionated at the atmosphere's own ratio
     if (sink_ocean != 0.0)
-      add_flux(iatm, iml, sink_ocean * A.asx[hi] / sink_asx_tot, A.alpha_as_down, true);
+      add_flux(iatm, iml, sink_ocean * A.asx[hi] / sink_asx_tot, a_as_dn, true);
 
     // interior diffusion, per tracer on its own gradient
     for (int kk = 0; kk < NL; ++kk) {
@@ -656,6 +680,10 @@ static Aux unpack_aux(const List& a) {
   v = a["pco2_0"];     A.pco2_0[0] = v[0];     A.pco2_0[1] = v[1];
   A.alpha_photo = a["alpha_photo"];
   A.alpha_as_down = a["alpha_as_down"]; A.alpha_as_up = a["alpha_as_up"];
+  A.alpha_as_tdep = a["alpha_as_tdep"];
+  A.alpha_as_zA = a["alpha_as_zA"]; A.alpha_as_zB = a["alpha_as_zB"];
+  A.alpha_as_zC = a["alpha_as_zC"]; A.alpha_as_fco3 = a["alpha_as_fco3"];
+  A.alpha_as_kin_a = a["alpha_as_kin_a"]; A.alpha_as_kin_b = a["alpha_as_kin_b"];
   A.bomb_share_NH = a["bomb_share_NH"]; A.nuc_share_NH = a["nuc_share_NH"];
   A.R13 = a["R13"]; A.R14STD = a["R14STD"]; A.lambda = a["lambda"]; A.alk = a["alk"];
   v = a["cK0"]; for (int i = 0; i < 7; ++i) A.cK0[i] = v[i];

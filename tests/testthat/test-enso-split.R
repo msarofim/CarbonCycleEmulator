@@ -171,8 +171,21 @@ test_that("the OCEAN term carries the AIR-SEA fractionation, not the land one", 
   # the 13C/C ratio of the carbon this term removes, against the atmosphere's
   # own ratio: the quotient IS the applied fractionation factor
   r_atm <- sum(s0$y[atm, "C13"]) / sum(s0$y[atm, "C"])
-  expect_equal(dC13 / dC / r_atm, s0$aux$alpha_as_down, tolerance = 1e-9)
-  expect_false(isTRUE(all.equal(s0$aux$alpha_as_down, 1)))   # a real alpha
+  # ⚠ UPDATED 2026-09-02, and it FIRED first: this read `s0$aux$alpha_as_down`,
+  # which is now the RETIRED SCALAR. The claim is unchanged -- the ENSO ocean
+  # limb rides the INVASION alpha -- but that alpha is a function of SST, so the
+  # expectation is resolved through `ccx_alpha_as()` as the model resolves it.
+  # ⚠ The deriv runs at F$t[1] with seasonality ON, so the two hemispheres see
+  # different SSTs; this is a summed-over-hemispheres quantity, so it is bracketed
+  # by the two rather than pinned to one. Tight: the bracket is ~0.002 wide on a
+  # factor of ~0.999, and the retired scalar 0.998 is OUTSIDE it, which is
+  # asserted below so the bracket cannot be satisfied by the old constant.
+  a_dn <- vapply(HEMIS, function(h) ccx_alpha_as(s0$aux$sst[[h]], s0$aux)$down, 0)
+  q <- dC13 / dC / r_atm
+  expect_gte(q, min(a_dn) - 1e-6); expect_lte(q, max(a_dn) + 1e-6)
+  expect_false(isTRUE(all.equal(q, 1)))                      # a real alpha
+  expect_false(isTRUE(all.equal(q, s0$aux$alpha_as_down,     # NOT the retired one
+                                tolerance = 1e-6)))
 })
 
 test_that("R and C++ agree at four UNEQUAL coefficients, and on the legacy path", {

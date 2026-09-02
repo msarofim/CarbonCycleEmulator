@@ -37,6 +37,15 @@
 #   * enso25 A / B  -- the two cluster representatives of the 09-01 survey, the
 #                      same two the prior screen used, MEASURED here.
 #
+# ⛔ THE COMMITTED .rds AND .log ARE PRE-2026-09-02 AND MUST STAY THAT WAY.
+# On 09-02 the air-sea 13C alphas became temperature-dependent, which CHANGED
+# THE OBJECTIVE. Re-running this file today reproduces every CO2 number
+# EXACTLY -- a 13C change cannot touch total carbon, and that identity is worth
+# knowing -- but it moves the d13C-per-ppm ratios: enso25 A `r_SPO` 2.063 ->
+# 2.172, the 27q INCUMBENT 1.933 -> 1.998. The sec.4/sec.5 verdicts are CO2
+# arithmetic and are unaffected. `alpha_as_tdep` is recorded in the output so a
+# reader can tell which model produced a stored run.
+#
 # Usage:  Rscript calibration/diag_2x2_repriced_at_enso25.R      # ~1 min
 # =====================================================================
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
@@ -369,6 +378,8 @@ saveRDS(list(vectors = lapply(V, function(v) v[c("src", "ent", "pump")]),
                                                land = obs_land_v),
              walk = list(from = RP_WALK_FROM, to = RP_WALK_TO, steps = steps,
                          base_land = base_land, end_land = end_land),
+             # PROVENANCE: which air-sea alpha model produced these numbers.
+             alpha_as_tdep = ccx_prepare(ccx_default_params())$alpha_as_tdep,
              control = SC, gates = list(O = GO, R = GR, R_ctrl = GRC),
              gdiff_preadopt = RP_GDIFF_PREADOPT, tol = c(repro = RP_REPRO_TOL, obs = RP_OBS_TOL)),
         file.path(OUTDIR, "2x2_repriced_at_enso25.rds"))

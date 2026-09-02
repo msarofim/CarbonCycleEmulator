@@ -6,7 +6,7 @@
 
 **What ran:** `calibration/diag_2x2_repriced_at_enso25.R` (~70 s), on
 `calibration/lib_seas_limbs.R` (new). Log and rds under `outputs/diagnostics/`.
-**Adopts nothing.** `CCX_MODE_CANONICAL` and `R/constants.R` untouched; every mode read BY PATH.
+**Adopts nothing.** ⚠ **MEASURED BEFORE the 09-02 alpha change** — see §9. `CCX_MODE_CANONICAL` and `R/constants.R` untouched; every mode read BY PATH.
 **Refits nothing** — 27q's headline statistic is an INTERACTION between six refitted arms and no
 gate here is 27q's P1. What is re-priced is the ARITHMETIC verdict, which is what
 `handoff_2026-09-01f` §4 says went out of date.
@@ -152,3 +152,14 @@ written as a path literal instead of `ccx_mode_file("from90")`.
 two files pass the lint. ⚠ The lesson is not the literal, which the registry exists to prevent and
 the lint caught on the day. It is that the count was **quoted rather than read** — the same class as
 the attribution header in §2 of that handoff that "was typed, then went stale within the hour".
+
+## 9. ⚠ PROVENANCE: these are PRE-09-02 numbers
+
+Later the same day the air-sea ¹³C alphas became temperature-dependent, which **changed the
+objective**. Re-running this file reproduces **every CO₂ number exactly** — a ¹³C change cannot touch
+total carbon, and that identity is itself worth having — but it moves the d¹³C-per-ppm ratios:
+enso25 A `r_SPO` **2.063 → 2.172**, the 27q INCUMBENT **1.933 → 1.998**.
+
+⇒ **The §3–§6 verdicts are CO₂ arithmetic and are unaffected**; only the two `SPO r` / `MLO r`
+columns move. The committed `.rds` and `.log` are the pre-change run and are kept consistent with
+each other; `alpha_as_tdep` is now recorded in the output so a stored run says which model made it.

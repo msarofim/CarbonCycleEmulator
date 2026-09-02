@@ -67,10 +67,27 @@ test_that("provisional constants are reported, not silently used", {
   # is the right place for that: it keeps a model-dependent prior centre
   # visible. Its dependence is priced in calibration/diag_npp_frac_anchor.R and
   # is an order of magnitude below the prior width.
+  # ADDED 2026-09-02 with the temperature-dependent air-sea 13C pair, and the
+  # ledger fired on all three, which is the mechanism working: registering a
+  # provisional constant has to be deliberate.
+  #   ALPHA_AS_FCO3 -- the surface carbonate fraction is HELD rather than solved
+  #     per step. Not provisional for want of a source (it is measured at the
+  #     mode's own surface state and sits inside Zhang's stated 0.05-0.20) but
+  #     because it is an APPROXIMATION: carrying it properly means [CO3=]/DIC
+  #     from the carbonate solve on both the R and C++ paths. Priced in
+  #     R/constants.R -- 0.020 permil of an ~8.7 permil offset, 1 % of the slope.
+  #   ALPHA_AS_DOWN_LEGACY / _UP_LEGACY -- the RETIRED scalars, kept so
+  #     `alpha_as_tdep = 0` reproduces the pre-09-02 model bit for bit. They are
+  #     provisional in the ledger's exact sense: they never had a source, which
+  #     is why they were replaced. ⚠ They are the ONE case here where being on
+  #     this list is not a debt to pay down -- the debt was paid by measuring
+  #     them, and they survive only as a reproduction path.
   expect_setequal(prov, c("OCEAN_AREA_NH", "OCEAN_AREA_SH", "OCEAN_DEPTH",
                           "ALK_SURFACE", "PUMP_EPS13_ORG", "PUMP_EPS13_CARB",
                           "RHO_SEAWATER", "NPP_GLOBAL_PI",
-                          "SST_PCO2_SENSITIVITY", "NPP_FRAC_NH_ANCHOR_1750"))
+                          "SST_PCO2_SENSITIVITY", "NPP_FRAC_NH_ANCHOR_1750",
+                          "ALPHA_AS_FCO3",
+                          "ALPHA_AS_DOWN_LEGACY", "ALPHA_AS_UP_LEGACY"))
 })
 
 test_that("PUMP_GRAD_OBS IS the shipped ocean_grad_dic target, not a copy of it", {

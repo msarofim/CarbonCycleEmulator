@@ -2,6 +2,59 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02e — **SHIPPED: THE AIR-SEA 13C ALPHAS ARE TEMPERATURE-DEPENDENT. THE OBJECTIVE CHANGED.**
+
+Marcus's call, steps 1-3 of the plan priced in 09-02d. `R/constants.R`, `R/model.R`,
+`src/ccx_core.cpp`, `R/cpp.R`, `calibration/lib_design_gates.R`, `tests/testthat/test-alpha-as.R`.
+
+**1. REGISTERED.** Eleven constants with provenance: the Zhang (1995) seawater fit with BOTH
+printings and their one-sigma discrepancy documented; the kinetic pair; the held fCO3 with its
+approximation priced (0.020 per mille of an ~8.7 per mille offset, 1 % of the slope); the retired
+scalars; and Quay (2003)'s disequilibrium target, registered because a gate's target may not be a
+literal in the gate. The two alphas had been literals read from nowhere else -- which is what made
+setting them a silent no-op.
+
+**2. TEMPERATURE-DEPENDENT.** `eps_down = eps_k(T)`, `eps_up = eps_k(T) - eps_DIC-g(T)`, applied at
+the LOCAL SEASONAL SST on both the R and C++ paths. `alpha_as_tdep = 0` reproduces the pre-09-02
+model BIT FOR BIT. ⚠ It defaults ON, so the LEGACY path is now the untested one and `test-alpha-as.R`
+asserts both -- the inverse of the usual default-off trap.
+
+**3. GATE Q**, in the shared design-gate library beside 4/5/7. **Legacy 6.4 sigma FAIL -> shipped
+1.0 sigma PASS**, and that discrimination is itself a test. ⛔ I built it wrong first: it read the
+equilibrium offset off the model's OWN alphas, which made it self-referential and PASSED the retired
+pair at 1.2 sigma. Caught only because BOTH settings passed when legacy was known to fail.
+
+**WHAT MOVED.** Invasion limb -2.00 -> -0.84 (it was 2.4x too large); evasion -10.00 -> -9.50/-9.72.
+Objective **-4.84 log-units at the un-refitted mode, and ONLY d13C streams move** -- `d13c_level_MLO`
++7.77 against `d13c_seasonal_SPO` -4.73, `d13c_seasonal_MLO` -3.19, `d13c_level_SPO` -3.97. The CO2
+limbs are untouched to machine precision, which is the correct signature of a 13C-only change.
+⛔ **EVERY FITTED VECTOR PREDATES THIS AND A REFIT IS OWED.**
+
+**⭐ 14C INHERITS THE TEMPERATURE DEPENDENCE -- no separate term, and adding one would be a bug.**
+Marcus's framing, and it is the right one: the 14C fractionation is DEFINED by its relationship to
+the 13C one, so it inherits whatever temperature dependence alpha13 has. The model carries
+Delta-14C (`C14/C = 1 + D/1000`) and `add_flux` applies no fractionation to it, which is exact
+precisely WHEN alpha14 = alpha13^2. alpha13 is now a function of SST, so the alpha13^2 that line
+assumes is too -- automatically, with no code and nothing to keep in sync. Adding a 14C term later
+would DOUBLE-COUNT by ~2 x 8.7 = 17 per mille, about 3x the fitted `sigma_d14c`. The one residual is
+a deviation from the DEFINING relationship rather than a missing dependence: the square law is exact
+for equilibrium and ~1.9 for the kinetic limb, leaving ~0.09 per mille on the mean and ~0.001 per
+mille/K -- three orders below the noise floor. Recorded in `add_flux`, whose comment said "NO
+fractionation -- see header" while the header did not say, which is why the question arose at all.
+
+**THREE TESTS FIRED AND ALL THREE WERE RIGHT TO.** `test-artificial-sink.R` and `test-enso-split.R`
+each pinned `aux$alpha_as_down`, now the retired scalar; `test-constants.R`'s provisional ledger
+demanded the three new entries be deliberate. **None was loosened** -- each was re-pointed at
+`ccx_alpha_as()` at 1e-12, with the retired value asserted to FAIL so the update cannot be satisfied
+by the old constant. The sink test also needed `seas_drivers = 0`, so the box SST is exactly
+`aux$sst`; otherwise the expectation would have meant a second copy of the seasonal-SST formula.
+
+**Memory consolidated** (snapshot `memory_backup_20260902/`). `INDEX_ccx_seas.md` had breached its
+HARD ceiling at 17.6 KB; the closed 08-27 sub-arc (28 bullets) moved to `INDEX_ccx_arch.md` and the
+live state was compressed -- **17.6 -> 11.6 KB**. ⚠ On the root index I nearly repeated the mistake
+its own footer records: `MEMORY.md` is 29 % comment, so its CONTENT is 10.9 KB against a 12 KB soft
+budget and it was compliant all along. Measure content, not the file.
+
 ## 2026-09-02d — **THE MEASURED PAIR CLOSES GATE Q, AND THE ALPHAS ARE UNSETTABLE**
 
 Asked what the next model improvement should be, and tested the candidate rather than arguing it.

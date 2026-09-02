@@ -116,6 +116,57 @@ dg_run <- function(v) {
   list(sp = sp, F = F, out = ccx_run_fast(sp, F)$out)
 }
 
+# ---- GATE Q: air-sea d13C disequilibrium (2026-09-02) ----------------
+# WHY IT EXISTS. It scores the ONE air-sea isotope quantity the likelihood does
+# NOT: the ocean d13C stream is `ocean_grad_d13c`, a SURFACE-MINUS-DEEP
+# gradient, and both `d13c_level_*` rows are ATMOSPHERIC. So nothing constrains
+# the ABSOLUTE surface-ocean d13C, and this gate is an out-of-sample test of the
+# air-sea fractionation pair rather than a restatement of a fitted stream.
+# That is exactly what gave it power: before the 2026-09-02 pair it read
+# -0.04 permil against an observed 0.60 +- 0.10, i.e. 6.4 sigma out AND THE
+# WRONG SIGN, and no stream had ever objected.
+#
+# ⚠ WHAT IT IS NOT. The target comes from Quay et al. (2003), which takes its
+# OWN fractionation factors from Zhang et al. (1995) -- the same paper the
+# adopted constants come from. So this is NOT an independent check of the
+# COEFFICIENTS; it is a check of the model STATE they produce. Said here rather
+# than discovered later. [[threshold_from_obs_or_law]]
+#
+# ⚠ AND IT IS AN AREA-UNWEIGHTED TWO-BOX MEAN against a global observational
+# estimate. The hemispheric pair is returned so a caller can see the spread,
+# which is comparable to the observational sigma.
+DG_Q_YEAR <- ccx_const("AIRSEA_D13C_DISEQ_YEAR")
+DG_Q_OBS  <- ccx_const("AIRSEA_D13C_DISEQ_OBS")
+DG_Q_SD   <- ccx_const("AIRSEA_D13C_DISEQ_SD")
+DG_Q_NSD  <- 2      # how many observational sigma the gate allows. A DISTRIBUTIONAL
+                    # claim against a stated +- , so it is scaled to that sigma and
+                    # to nothing else. [[gate_bound_matches_its_claim]]
+
+dg_gateQ <- function(r, v) {
+  o <- r$out; aux <- r$sp$aux
+  j <- which.min(abs(o$t - DG_Q_YEAR))
+  d <- vapply(HEMIS, function(h) {
+    # surface DIC d13C, from the state
+    d_ml  <- 1000 * (o[[paste0("ml_C13_", h)]][j] /
+                     (o[[paste0("ml_C_", h)]][j] * ccx_const("R13_VPDB")) - 1)
+    # ⛔ THE EQUILIBRIUM OFFSET COMES FROM THE MEASUREMENT, NOT FROM THE MODEL.
+    # The first version of this gate read it off the model's OWN alphas
+    # (`ccx_alpha_as()`), which made it self-referential: it measured the
+    # departure from whatever equilibrium the model happened to believe in, so
+    # it PASSED the retired -2/-10 pair at 1.2 sigma when that pair is in fact
+    # 6.4 sigma out. A gate derived from the code under test can never reject
+    # it -- re-baselining in disguise. [[gate_reads_its_own_output]],
+    # [[threshold_from_obs_or_law]]. Caught because BOTH settings passed, when
+    # the legacy one was known to fail.
+    eps_dicg <- ccx_const("ALPHA_AS_ZHANG_A") * aux$sst[[h]] * ccx_const("ALPHA_AS_FCO3") +
+                ccx_const("ALPHA_AS_ZHANG_B") * aux$sst[[h]] + ccx_const("ALPHA_AS_ZHANG_C")
+    (d_ml - eps_dicg) - o[[paste0("d13c_", h)]][j]
+  }, 0)
+  n_sd <- abs(mean(d) - DG_Q_OBS) / DG_Q_SD
+  list(year = DG_Q_YEAR, by_hemi = d, mean = mean(d), obs = DG_Q_OBS,
+       sd = DG_Q_SD, n_sd = n_sd, pass = n_sd <= DG_Q_NSD)
+}
+
 # ---- GATE 4: airborne fraction --------------------------------------
 # AF = atmospheric growth / total emissions, both from THIS run: the model's own
 # E_LUC carries luc_scale, so a fit that shrinks land use by 11 % shrinks the
