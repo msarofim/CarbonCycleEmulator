@@ -80,21 +80,21 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 source(ccx_path("calibration", "lib_design_gates.R"))
+source(ccx_path("calibration", "lib_enso_index.R"))
 
 # ---- labels derive from named constants (project rule) --------------
 EI_ARM        <- "from90"
 EI_BASIN      <- "calibration/output/multistart_20260901_enso25/start_000.rds"
 EI_WIN        <- c(1948, 2024)      # the ENSO-active record, as in the pre-check
-EI_CLIM_BASE  <- c(1991, 2020)      # = ENSO_CLIM_BASE in build_calibration_data.R
-EI_ROLL_LEN   <- 30                 # ONI centred base-period length, years
-EI_ROLL_STEP  <- 5                  # ONI base-period refresh interval, years
+# ⛔ TAKEN FROM THE LIB, NOT RE-TYPED. These three still appear in this file's
+# LABELS, and a label that disagrees with the builder is the caption-sync bug
+# this project keeps paying for. The paths, the Nino 3.4 box, the netCDF epoch
+# and the PSL missing code are NOT here any more: `lib_enso_index.R` owns them,
+# and nothing outside the builders read them.
+EI_CLIM_BASE  <- EIX_CLIM_BASE      # = ENSO_CLIM_BASE in build_calibration_data.R
+EI_ROLL_LEN   <- EIX_ROLL_LEN       # ONI centred base-period length, years
+EI_ROLL_STEP  <- EIX_ROLL_STEP      # ONI base-period refresh interval, years
 EI_MUT_OFFSET <- 1.0                # deg C, the G-M mutation
-EI_RAW        <- file.path("data-raw", "downloads", "nina34.data")
-EI_RAW_MISS   <- -99.99
-EI_ERSST      <- file.path("data-raw", "downloads", "ersst_v5_sst_mnmean.nc")
-EI_BOX_LAT    <- c(-5, 5)           # Nino 3.4, 5S-5N   (= the nina34.data box)
-EI_BOX_LON    <- c(190, 240)        # Nino 3.4, 170W-120W in degrees east
-EI_ERSST_EPOCH <- "1800-01-01"      # the netCDF's `days since` origin
 EI_CPC        <- file.path("data-raw", "downloads", "ersst5.nino.mth.91-20.ascii")
 EI_CPC_COL    <- "NINO3.4"          # absolute SST column; its ANOM twin is unused
 EI_PRE_FILE   <- file.path("outputs", "diagnostics", "enso_gpp_margin_pre.rds")
@@ -139,84 +139,30 @@ cat("    That gradient is mean-state warming of the Nino 3.4 box, not ENSO.\n")
 # 2. THE FOUR CANDIDATE INDICES
 # =====================================================================
 # ---- ONI-style rolling base, rebuilt from the ABSOLUTE SST ----------
-ei_read_psl <- function(path, missing) {
-  ln  <- readLines(path)
-  hdr <- scan(text = ln[1], quiet = TRUE)
-  body <- ln[2:(1 + (hdr[2] - hdr[1] + 1))]
-  m <- do.call(rbind, lapply(body, function(l) scan(text = l, quiet = TRUE)))
-  d <- data.frame(year = rep(m[, 1], 12),
-                  month = rep(seq_len(12), each = nrow(m)),
-                  value = as.vector(m[, -1]))
-  d$value[d$value %in% missing | d$value < -90] <- NA_real_
-  d[order(d$year, d$month), ]
-}
-# ---- the ABSOLUTE Nino 3.4 SST from ERSSTv5, back to 1854 -----------
-# The netCDF is a 2-degree global field; the box is area-weighted by cos(lat),
-# which is the same average nina34.data reports. It exists here for ONE reason:
-# a centred 30-yr base for 1948 needs SST from 1933, and nina34.data starts in
-# 1948. ⚠ It is a DIFFERENT SST VERSION from the shipped index, which is why
-# `fix_v5` is priced alongside it rather than assumed immaterial.
-ei_nino34_ersst <- function() {
-  nc  <- ncdf4::nc_open(ccx_path(EI_ERSST))
-  on.exit(ncdf4::nc_close(nc), add = TRUE)
-  lat <- ncdf4::ncvar_get(nc, "lat"); lon <- ncdf4::ncvar_get(nc, "lon")
-  tm  <- ncdf4::ncvar_get(nc, "time")
-  il  <- which(lat >= EI_BOX_LAT[1] & lat <= EI_BOX_LAT[2])
-  io  <- which(lon >= EI_BOX_LON[1] & lon <= EI_BOX_LON[2])
-  if (!length(il) || !length(io)) stop("the Nino 3.4 box selected no grid cells")
-  sst <- ncdf4::ncvar_get(nc, "sst", start = c(min(io), min(il), 1),
-                          count = c(length(io), length(il), -1))
-  W   <- matrix(rep(cos(lat[il] * pi / 180), each = length(io)), nrow = length(io))
-  v   <- apply(sst, 3, function(m) sum(m * W, na.rm = TRUE) / sum(W * is.finite(m)))
-  d   <- as.Date(EI_ERSST_EPOCH) + tm
-  data.frame(year = as.integer(format(d, "%Y")),
-             month = as.integer(format(d, "%m")), value = v)
-}
+# ⛔ THE FOUR BUILDERS THAT WERE INLINE HERE ARE GONE. `eix_read_psl`,
+# `eix_ersst_box`, `eix_fixed_base` and `eix_roll_base` in
+# `calibration/lib_enso_index.R` are the ONE definition; this file had private
+# copies of all four, which is the drift the lib was extracted to end.
+# ✅ THE FOLD WAS MEASURED, NOT ASSERTED (2026-09-02): old and new agree
+# IDENTICALLY on the real inputs -- the PSL table, the ERSST box, both fixed
+# bases, both rolling tables AND both clip counters -- so every number this
+# file has ever reported is unchanged.
+#
+# WHY THE ABSOLUTE ERSST GRID IS READ AT ALL: a centred 30-yr base for 1948
+# needs SST from 1933, and nina34.data starts in 1948. ⚠ It is a DIFFERENT SST
+# VERSION from the shipped index, which is why `fix_v5` is priced alongside it
+# rather than assumed immaterial.
+# ⚠ THE CLIPPING IS REPORTED, NOT HIDDEN, and the count is restricted to blocks
+# intersecting EI_WIN -- blocks outside the scored span cannot affect a number
+# here, and counting them would inflate the reported defect. That is why
+# `eix_roll_base()` takes the window rather than assuming one.
 
-# ---- the two base-period conventions, as functions of an ABSOLUTE series ----
-ei_fixed_base <- function(a) {
-  k  <- a$year >= EI_CLIM_BASE[1] & a$year <= EI_CLIM_BASE[2]
-  cl <- tapply(a$value[k], a$month[k], mean)
-  data.frame(year = a$year, month = a$month,
-             value = a$value - as.numeric(cl[as.character(a$month)]))
-}
-# ⚠ THE CLIPPING IS REPORTED, NOT HIDDEN. A centred EI_ROLL_LEN window needs
-# EI_ROLL_LEN/2 years on each side; a block without them has its window shifted
-# to the nearest FULL one. That is standard practice at a record end and it is
-# also exactly where the mean-state bias is largest, so the count is returned.
-# ⚠ THE COUNT IS OVER BLOCKS THAT INTERSECT EI_WIN. Blocks outside the scored
-# span cannot affect any number here, and counting them would inflate the
-# reported defect of a series that is long enough where it matters.
-ei_roll_base <- function(a) {
-  y_lo <- min(a$year); y_hi <- max(a$year)
-  blocks <- sort(unique((a$year %/% EI_ROLL_STEP) * EI_ROLL_STEP))
-  n_clip <- 0L; n_blk <- 0L
-  out <- do.call(rbind, lapply(blocks, function(b) {
-    scored <- b + EI_ROLL_STEP - 1L >= EI_WIN[1] && b <= EI_WIN[2]
-    if (scored) n_blk <<- n_blk + 1L
-    ctr <- b + EI_ROLL_STEP / 2
-    lo  <- round(ctr - EI_ROLL_LEN / 2); hi <- lo + EI_ROLL_LEN - 1L
-    clipped <- FALSE
-    if (lo < y_lo) { lo <- y_lo; hi <- lo + EI_ROLL_LEN - 1L; clipped <- TRUE }
-    if (hi > y_hi) { hi <- y_hi; lo <- hi - EI_ROLL_LEN + 1L; clipped <- TRUE }
-    if (clipped && scored) n_clip <<- n_clip + 1L
-    w  <- a$year >= lo & a$year <= hi
-    cl <- tapply(a$value[w], a$month[w], mean)
-    k  <- a$year >= b & a$year < b + EI_ROLL_STEP
-    data.frame(year = a$year[k], month = a$month[k],
-               value = a$value[k] - as.numeric(cl[as.character(a$month[k])]))
-  }))
-  out <- out[order(out$year, out$month), ]
-  list(tbl = out, n_clip = n_clip, n_blk = n_blk)
-}
-
-abs_v6  <- ei_read_psl(ccx_path(EI_RAW), EI_RAW_MISS)
-abs_v6  <- abs_v6[!is.na(abs_v6$value), ]
-abs_v5  <- ei_nino34_ersst()
-r_v6    <- ei_roll_base(abs_v6)
-r_v5    <- ei_roll_base(abs_v5)
+abs_v6  <- eix_read_psl()               # the lib drops the missing rows itself
+abs_v5  <- eix_ersst_box(EIX_BOX_N34)
+r_v6    <- eix_roll_base(abs_v6, EI_WIN)
+r_v5    <- eix_roll_base(abs_v5, EI_WIN)
 en_roll <- r_v6$tbl
-en_fix5 <- ei_fixed_base(abs_v5)
+en_fix5 <- eix_fixed_base(abs_v5)
 en_rollf<- r_v5$tbl
 
 ei_make <- function(kind) {
@@ -332,7 +278,7 @@ sd_conv <- vapply(EI_TREATMENTS, function(kd) {
              d <- ei_make(kd); k <- ei_span(d); stats::sd(d$value[k]) }, numeric(1))
 EI_CONV_SPREAD <- (max(sd_conv) - min(sd_conv)) / stats::sd(en_ship$value[ei_span(en_ship)])
 
-ia <- en_ship; ip <- ei_fixed_base(abs_v5)
+ia <- en_ship; ip <- eix_fixed_base(abs_v5)
 mp <- match(ia$year * 12L + ia$month, ip$year * 12L + ip$month)
 kp <- !is.na(mp) & ia$year >= EI_CLIM_BASE[1] & ia$year <= EI_CLIM_BASE[2]
 cA <- tapply(ia$value[kp], ia$month[kp], mean); cP <- tapply(ip$value[mp[kp]], ia$month[kp], mean)
