@@ -26,7 +26,7 @@ This session is its §7 — Marcus's four rulings — executed in full.
 7. ⇒ **THE 25-PARAMETER REFIT IS NOW UNBLOCKED AND IS THE NEXT THING.** §5
 8. ⇒ **TWO NEW RULINGS OWED**, both created by this session's measurements. §5
 
-Commits: `1df8654` (ruling 1), `c811b82` (ruling 2), `06bdeb5` (ruling 3), + ruling 4.
+Commits: `1df8654` (ruling 1), `c811b82` (ruling 2), `06bdeb5` (ruling 3), `65923bc` (ruling 4).
 
 ---
 
