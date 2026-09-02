@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02p — **THE v6 GRID CLOSES §4, AND MY OWN "FINDING" LASTED TWO CONTROLS**
+
+Marcus: **pull it.** 90 MB, `downloads.psl.noaa.gov/Datasets/noaa.ersst.v6/sst.mnmean.nc`,
+registered in `MANIFEST.csv` and — for the first time — in `download_data.R`, which had **never**
+carried the v5 grid either (it was fetched by hand, so "re-fetchable from `download_data.R`" was
+false of it). Both are there now. Same 2° grid, same `days since 1800-1-1` epoch, same variable
+names as v5, so `eix_ersst_box()` takes it unchanged — **gated (V-G), not assumed**.
+
+### Q1 — IS THE 15 % AMPLITUDE GAP A VERSION EFFECT? **PARTLY, AND ONLY PARTLY.**
+Deseasonalised over 1991–2020, `nina34.data` sits closer to the v6 grid than to v5
+(|slope−1| **0.1116 vs 0.1577**, 1.41×), so the version naming is **not wrong** — but it is not the
+story either. The two grids differ by only **5.1 %** (slope 0.949) while `nina34.data` is still
+**11.2 %** off v6, and the **+0.60 °C climatology offset barely moves** (v6−v5 is +0.039 of it).
+⇒ **The level offset is essentially NOT a version effect.** The gate that licensed this is an
+**ORDERING** — the two disagreements compared with each other — because no external number exists
+for how much better v6 ought to agree. ⇒ [[threshold_from_obs_or_law]]
+
+### Q2 — DOES AN UNCLIPPED ROLLING BASE BEAT `demean`? **NO. AND THE FIRST ANSWER WAS AN ARTIFACT.**
+The v6 grid reaches 1850, so its rolling base clips **3 of 16** scored blocks against nina34's
+**6 of 16** (V-U). Raw, the unclipped rolling base beat demeaning **within v6 by +43.38** — which
+would have reopened a ruling adopted the same day. **It did not survive two controls:**
+- **AMPLITUDE** (rescale demean_v6 to roll_v6's sd, convention unchanged): **+2.76**. Small.
+- ⭐ **COVERAGE**: both v6 candidates supply ENSO for **1850–1947**, where the shipped model has
+  `FORC_ENSO_PRE1948 = 0`, and the PSL pair they were being set against has no such extension.
+  Truncated to nina34's own span, roll − demean = **−5.12**. ⇒ [[like_for_like_forcing]]
+
+**The like-for-like sign matches the PSL pair (−1.91) and `detrend` (−1.78). RULING A STANDS.**
+
+### ⭐ TWO RESULTS THAT FELL OUT OF THE CONTROLS
+1. **Extending the ENSO forcing before 1948 costs −49.21 under a fixed 1991–2020 base and −0.71
+   under a rolling one.** The fixed base carries its mean-state offset through all 98 added years.
+   ⇒ **If the forcing is ever extended pre-1948, it must use a rolling base.** A price, not a ruling.
+   ⚠ This confound was invisible until now: the baseline diagnostic's `roll_full` had exactly the
+   same coverage mismatch and was never priced, because G-P refused it.
+2. **With convention AND span matched, the v6 grid and `nina34.data` land 0.55 log-units apart.**
+   So the 15 % amplitude gap costs the *shipped* configuration far less than §1 suggests.
+
+`calibration/diag_enso_v6_provenance.R`, three gates (V-G grid, V-C ordering, V-U unclipping), and
+it says in its own header that a win would be a **reopening for Marcus, not an adoption**.
+
 ## 2026-09-02o — ⭐ **RULING A ADOPTED: THE ENSO INDEX IS DEMEANED**
 
 Marcus, this session: **adopt `demean`, then refit.** Shipped in `ccx_build_forcing()`'s ENSO

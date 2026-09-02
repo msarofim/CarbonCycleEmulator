@@ -25,6 +25,11 @@ EIX_ROLL_STEP <- 5               # ONI base-period refresh interval, years
 EIX_BOX_N34   <- list(lat = c(-5, 5), lon = c(190, 240))   # 5S-5N, 170W-120W
 EIX_BOX_TROP  <- list(lat = c(-20, 20), lon = NULL)        # 20S-20N, all lons
 EIX_ERSST     <- file.path("data-raw", "downloads", "ersst_v5_sst_mnmean.nc")
+# ⭐ THE v6 GRID (pulled 2026-09-02, Marcus). Same 2-deg grid, same
+# `days since 1800-1-1` epoch, same variable names as v5 -- VERIFIED, which
+# is why `eix_ersst_box()` takes it unchanged. It reaches 1850 where v5
+# reaches 1854 and nina34.data reaches 1948.
+EIX_ERSST_V6  <- file.path("data-raw", "downloads", "ersst_v6_sst_mnmean.nc")
 EIX_EPOCH     <- "1800-01-01"
 EIX_PSL       <- file.path("data-raw", "downloads", "nina34.data")
 EIX_PSL_MISS  <- -99.99

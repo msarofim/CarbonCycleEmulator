@@ -224,6 +224,44 @@ fetch("nino34_cpc_v5",
       "NOAA CPC monthly Nino region SST indices from ERSST v5, 1991-2020 base period.",
       "1950-present, monthly; the version- and base-matched control for nina34.data")
 
+# ---- the two ERSST GRIDS ---------------------------------------------
+# ⚠ ADDED HERE 2026-09-02. The v5 grid has been in MANIFEST.csv since 08-20 but
+# was never in this script -- it was fetched by hand, so "re-fetchable from
+# download_data.R" was not true of it. Registering v6 exposed that; both are
+# here now.
+#
+# WHY v6 IS PULLED (Marcus, 2026-09-02). `nina34.data` -- the file the whole
+# pipeline runs on -- is 0.60 degC warmer in climatology and 15 % WEAKER in ENSO
+# amplitude than CPC's published ERSSTv5 Nino 3.4, and our extraction is NOT the
+# cause (r 1.0000 against CPC on the same v5). The gap is between two PUBLISHED
+# indices, and the standing hypothesis that it is v5-vs-v6 was WITHDRAWN for
+# want of a measurement: 1991-2020 is densely observed, which is where two ERSST
+# versions should agree BEST. This file is that measurement -- v6 through the
+# SAME extraction the v5 grid goes through.
+# ⭐ IT ANSWERS A SECOND QUESTION AT THE SAME TIME. A centred 30-yr ONI base for
+# 1948 needs SST from 1933; nina34.data starts in 1948, so the rolling base
+# clips its 6 earliest scored blocks -- exactly where the mean-state offset is
+# largest -- and `roll`'s price is only a LOWER bound. v6 reaches 1850.
+# ⚠ 90 MB. Slowest entry in this script by an order of magnitude.
+fetch("ersst_v5_monthly",
+      "https://downloads.psl.noaa.gov/Datasets/noaa.ersst.v5/sst.mnmean.nc",
+      "ersst_v5_sst_mnmean.nc",
+      paste("Huang B et al. (2017) J. Climate 30:8179-8205,",
+            "doi:10.1175/JCLI-D-16-0836.1. NOAA ERSSTv5 monthly absolute SST,",
+            "2 deg, 1854-present, via NOAA PSL."),
+      paste("SEASONAL CLIMATOLOGY for sst_seas_amp_*, the ocean mask behind land",
+            "fraction, and the long-record ENSO extraction. 157 MB."))
+
+fetch("ersst_v6_monthly",
+      "https://downloads.psl.noaa.gov/Datasets/noaa.ersst.v6/sst.mnmean.nc",
+      "ersst_v6_sst_mnmean.nc",
+      paste("Huang B et al., NOAA ERSSTv6 monthly absolute SST, 2 deg,",
+            "1850-present, via NOAA PSL (downloads.psl.noaa.gov)."),
+      paste("The VERSION control for the 15 % nina34.data amplitude gap, and the",
+            "only route to an UNCLIPPED ONI rolling base (it reaches 1850, where",
+            "nina34.data starts 1948). Same grid, epoch and variable names as v5.",
+            "90 MB."))
+
 # ---------------------------------------------------------------------
 # 6. Atmospheric Delta14C — Hua et al. 2022 zonal compilation (via SoilR)
 # ---------------------------------------------------------------------
