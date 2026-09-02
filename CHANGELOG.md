@@ -2,6 +2,60 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-01n — **THE LAND HALF CLOSED, THE OCEAN HALF GOT WORSE, AND THE WIDTH WAS THE WRONG SUSPECT**
+
+The prior screen 09-01e §6 made adoption conditional on, plus the width measurement it pointed to.
+**ADOPTS NOTHING**; `CCX_MODE_CANONICAL` and `R/constants.R` both untouched.
+
+**⭐ THE LAND HALF OF THE SEASONAL-AMPLITUDE PROBLEM HAS CLOSED.** `seas_T_amp_SH` −4.64 → **−0.64**
+and `seas_T_amp_NH` +2.20 → **+0.29**: both MEASURED-bracket parameters are now INSIDE their
+brackets, where 08-27 had NH land at 131 % of its high end and SH land at 29 % of its low end. That
+finding no longer holds. ⚠ Attribution is CONFOUNDED — everything moves in the 08-30 → 08-31e
+column, which carries the `seas_lag_p` split AND the basin together, and the only post-lag-split
+ancestor on disk is also the new basin.
+
+**⛔ THE OCEAN HALF SURVIVES, AND MEASURING ITS WIDTH MADE IT WORSE.** Three fixed weightings of one
+ERSSTv5 climatology (area; |CT2022 flux|; K0(SST)·pCO₂) put the weighting ambiguity at log-sd
+**0.160 (NH) / 0.097 (SH)** against the **0.25 JUDGEMENT** it would replace — narrower, and flux
+weighting moves the anchor UP, away from the fit. `sst_seas_amp_SH` goes **−4.71 → −12.2**.
+**The 0.25 was GENEROUS to the fit, and the width is no longer an explanation for the flag.**
+Marcus's constraint shaped the whole design: the amplitude factors are NOT true observables, so the
+job was never to recentre on a flux-weighted number — only to measure the SPREAD.
+
+**Both cluster representatives give the SAME screen** (max |B−A| = 0.02), so the `h_ml` micro-split
+costs nothing. **The ENSO split moved nothing either** — every parameter within 0.08 of the 08-31e
+basin, the four coordinates at |z| ≤ 0.68, and ANTIsymmetric (ocean −0.950 NH / +1.187 SH) where
+both seeds assumed symmetry.
+
+**A z-RANKING WAS THE WRONG INSTRUMENT** and the project already knew it: `SST_SEAS_LOGSD` and
+`NPP_FRAC_NH_SD` are widths the code LABELS as judgements while `seas_T_amp_*` carry measured
+brackets. Every z now prints its prior's PROVENANCE, three-valued (BRACKET / JUDGEMENT /
+UNLABELLED — the last meaning *the code does not say*), derived by deparsing each closure.
+
+**Gates.** Stored `prior_z` recomputed under today's table (1e-11); the ancestor comparison gated
+per parameter on that recompute, which FIRES on `kz` and `h_ml`; and the area-weighted anchor
+reproduced from the new pipeline to 1.1e-05 with the target READ from the registry.
+⚠ **One gate had to be rewritten mid-run**: I gated the finite fraction on every `ncvar_get` and
+MPI-ULB's `pco2` returned "100.0 % finite, range [−999, 693]" — **−999 IS FINITE**, so the gate
+passed on poisoned data. `fillvalue_not_applied` reproducing itself one gate short. Reads now
+declare a PHYSICAL RANGE.
+
+⚠ **Three label errors of mine, all caught by output contradicting the label**:
+`refit_20260831_seas_lag_split/` holds a 21-parameter SCALAR-lag vector (I read its directory name);
+the attribution header went stale within the hour; and ratios against zero-centred priors printed
+1e13-scale garbage that looked like a result. Counts, field names and headers are now read or
+derived, and zero-centred priors report an OFFSET.
+
+**NEXT, both recorded in the handoff**: (1) re-price the 08-27q admissible 2×2 — its 18 % overshoot
+verdict was measured against an SH land limb at 1.26× obs, and that limb has moved; (2)
+`alpha_as_up` — the preindustrial DIC−atmosphere offset the α pair implies (+8 ‰) checked against
+GLODAP, and its missing TEMPERATURE dependence, anchored on **α → 1 at the boiling point** (Marcus).
+Also noted: `tau_ex_seas_amp` and `ent_seas_amp_SH` are implemented, defaulted to 0, and NOT in the
+fitted set; `k_w` is aseasonal; and no wind field is on disk, which is why `k` is missing from both
+the model and every weighting above.
+
+Handoff: `notes/handoff_2026-09-01f_prior_screen_width_and_alpha.md`.
+
 ## 2026-09-01m — **THE TWO OWED FIXES, AND BOTH GATES MUTATION-TESTED**
 
 Clears the two items 09-01l left **OWED AND UNCOMMITTED**. **Neither changes a round-1 number** —
