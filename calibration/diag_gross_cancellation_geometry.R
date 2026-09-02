@@ -68,11 +68,34 @@ floor_of <- function(a_amp, theta_deg) a_amp * sin(pi * (180 - theta_deg) / 180)
 
 md <- readRDS(ccx_mode_file())
 ccx_adopt_mode_band(md)                       # ⚠ before decoding anything
-pv0 <- ccx_mode_params(md)                    # ⚠ NEVER ccx_unc_to_par(md$u_mode)
+# ⛔ MIGRATE, 2026-09-02, AND THIS FILE'S OWN G0 GATE IS WHAT CAUGHT ITS ABSENCE.
+# `ccx_mode_params()` returns the file's par_mode RAW, and `from90` is a PRE-SPLIT
+# 21-parameter ancestor, so it has the legacy `seas_lag_p` scalar and NEITHER
+# `seas_lag_p_NH` nor `_SH`. gc_run()'s copy loop below is
+#     for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv0[[n]]
+# and ASSIGNING NULL DELETES THE ELEMENT, so both split names vanished from a
+# ccx_default_params() that carries no legacy scalar either -- and
+# ccx_seas_lag_p() fell all the way through to the NAMED DEFAULT, 2.25.
+# ⇒ EVERY RUN IN THIS FILE USED LAG 2.25 WHILE ITS OWN HEADER PRINTED 1.7677,
+# read off pv0 rather than off the parameters the model actually got. A
+# caption-sync bug sitting on top of a silent-default bug.
+# [[intersect_is_a_silent_default]]
+#
+# ⭐ AND THE 27n FIXTURE WAS NOT STALE -- THE CODE WAS WRONG. Forcing
+# seas_lag_p_NH = _SH = 1.7677 reproduces 27n's NEP at 1.3970 @ 10.15 mo against
+# its recorded 1.3950 @ 10.15 (0.14 %, 0.00 months). The 1.3807 @ 10.66 the file
+# was reporting is exactly the lag-2.25 row of that same profile. The failing
+# gate was RIGHT, which is the [[explained_away_test]] lesson: a "the fixture is
+# stale" label would have buried a live defect.
+pv0 <- ccx_migrate_par_set(ccx_mode_params(md))   # ⚠ NEVER ccx_unc_to_par(md$u_mode)
+cat(sprintf("migrated: %s\n", paste(attr(pv0, "migrated"), collapse = ", ")))
 cat(sprintf("mode %s (arm %s) | shipped SEAS_NPP_AMP_SH %.4f | CMIP6 %.2f\n",
             basename(ccx_mode_file()), md$pump_mode, GC_A_SHIP, GC_A_CMIP6))
-cat(sprintf("seas_T_amp_SH at the mode %.4f K | seas_lag_p %.4f | q10 %.5f\n",
-            pv0$seas_T_amp_SH, pv0$seas_lag_p, pv0$q10))
+# ⚠ THE LAG IS PRINTED THROUGH THE RESOLVER, not off a field. Printing
+# `pv0$seas_lag_p` is what let the header disagree with the run for a fortnight.
+cat(sprintf("seas_T_amp_SH at the mode %.4f K | seas_lag_p NH %.4f / SH %.4f | q10 %.5f\n",
+            pv0$seas_T_amp_SH, ccx_seas_lag_p(pv0)[["NH"]],
+            ccx_seas_lag_p(pv0)[["SH"]], pv0$q10))
 
 obs <- ccx_prepare_obs()
 pick   <- function(ms, k) { kk <- strsplit(k, ".", fixed = TRUE)[[1]]; ms[[kk[1]]][[kk[2]]] }
@@ -81,9 +104,13 @@ vec_of <- function(h) if (is.null(h)) c(NA, NA) else c(mean(h$a), mean(h$b))
 # ⚠ bomb_total / luc_scale come off `pv`: seven of the 21 calibrated names are
 # likelihood-side and absent from ccx_default_params(). Cost a run on 27h.
 gc_run <- function(mods = list()) {
-  p <- ccx_default_params()
-  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv0[[n]]
-  p <- ccx_set_enso(p, pv0); p$pump_mode <- md$pump_mode
+  p <- ccx_overlay_par(ccx_default_params(), pv0)   # migrate, copy, repair, ASSERT
+  p$pump_mode <- md$pump_mode
+  # ⭐ THE GUARD THAT WOULD HAVE CAUGHT THE 2.25 (2026-09-02). It runs BEFORE
+  # `mods` are applied, so it asserts the BASELINE is the mode's -- which is the
+  # thing that was silently wrong -- and does not fight a sweep that is
+  # deliberately moving the lag.
+  stopifnot(isTRUE(all.equal(unlist(ccx_seas_lag_p(p)), unlist(ccx_seas_lag_p(pv0)))))
   for (n in names(mods)) p[[n]] <- mods[[n]]
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", GC_YEARS, prod_c14 = 0, bomb_total_kmol = 102)
@@ -200,22 +227,42 @@ cat(sprintf("\n  the model HAS %.1f deg = %.2f mo. The gap is the specification 
 sep("5. G5 -- IS THERE A LEVER ON THETA AT ALL?")
 cat("  ⚠ CCX_SEAS_PHI_EFF['SH'] is a COMPILE-TIME constant in src/ccx_core.cpp -- reported,\n")
 cat("    not swept. If nothing free moves theta, the phase is STRUCTURAL, not fittable.\n\n")
+# ⛔ FIXED 2026-09-02: THIS BLOCK STILL SWEPT THE RETIRED SCALAR. `95e97ab` fixed
+# section 5b's grid and MISSED G5's lever list, which named `seas_lag_p` -- a name
+# `ccx_migrate_par_set()` now DROPS, so `pv0[["seas_lag_p"]]` is NULL and
+# `prior_span()` died on a length-zero argument. (Before the migration was added
+# above it did not die; it swept a legacy scalar beside a complete split, which
+# the 09-02 contract now hard-errors on.) A LEVER IS A SETTER, NOT A NAME: each
+# entry below says which FIELDS it writes and which parameter-table entry supplies
+# its prior, so a split name can never be confused with a retired one again.
+# [[split_name_must_hard_error]], [[intersect_is_a_silent_default]]
+GC_LEVERS <- list(
+  # the lag is swept NH = SH: the scalar SLICE through the split, which is the
+  # pre-split model's one degree of freedom and the right slice for "is there a
+  # lever at all". Its prior comes from _NH, and _SH carries the identical one.
+  seas_lag_p = list(tab = "seas_lag_p_NH", at = function() ccx_seas_lag_p(pv0)[["NH"]],
+                    set = function(x) list(seas_lag_p_NH = x, seas_lag_p_SH = x)),
+  q10        = list(tab = "q10", at = function() pv0$q10,
+                    set = function(x) list(q10 = x)))
 # range from the PRIOR itself: where logprior falls 2 units off its own mode
-prior_span <- function(nm) {
-  tr <- CCX_PARAM_TABLE[[nm]]$tr; pf <- CCX_PARAM_TABLE[[nm]]$prior
-  x0 <- if (tr == "log") log(pv0[[nm]]) else pv0[[nm]]
+prior_span <- function(lv) {
+  tr <- CCX_PARAM_TABLE[[lv$tab]]$tr; pf <- CCX_PARAM_TABLE[[lv$tab]]$prior
+  x_at <- lv$at()
+  stopifnot(length(x_at) == 1L, is.finite(x_at))   # the length-zero this file hit
+  x0 <- if (tr == "log") log(x_at) else x_at
   gr <- seq(x0 - 3, x0 + 3, length.out = 601); lp <- vapply(gr, pf, 0)
   keep <- gr[lp >= max(lp) - 2]
   v <- range(keep); if (tr == "log") exp(v) else v
 }
 cat(sprintf("  %-12s %10s %10s %10s %10s\n", "parameter", "value", "theta deg", "d theta", "d mo"))
 G5 <- c()
-for (nm in c("seas_lag_p", "q10")) {
-  sp2 <- prior_span(nm); dth <- c()
+for (nm in names(GC_LEVERS)) {
+  lv <- GC_LEVERS[[nm]]; sp2 <- prior_span(lv); dth <- c()
   for (x in sp2) {
-    bb <- gc_run(setNames(list(x), nm))
-    ne <- chan(bb, list(seas_npp_amp_SH = 0), setNames(list(x), nm))
-    re <- chan(bb, list(seas_T_amp_SH   = 0), setNames(list(x), nm))
+    mm <- lv$set(x)
+    bb <- gc_run(mm)
+    ne <- chan(bb, list(seas_npp_amp_SH = 0), mm)
+    re <- chan(bb, list(seas_T_amp_SH   = 0), mm)
     th <- sep_dg(ne, re); dth <- c(dth, th)
     cat(sprintf("  %-12s %10.4f %10.1f %10.1f %10.3f\n", nm, x, th, th - theta0, (th - theta0) / 30))
   }
@@ -241,7 +288,7 @@ cat(sprintf("  %12s %10s %10s %10s %10s\n", "seas_lag_p", "theta deg", "a_NEP", 
 # carrying both, so this can no longer happen quietly anywhere.
 # ⚠ THE NUMBERS THIS FILE PRINTS FOR THE LAG AXIS THEREFORE CHANGED on 09-02.
 # Every other section is untouched: they do not go through this assignment.
-GC_LAG_SET <- function(x) list(seas_lag_p_NH = x, seas_lag_p_SH = x)
+GC_LAG_SET <- GC_LEVERS$seas_lag_p$set   # ONE definition of "sweep the lag"
 lagp <- lapply(GC_LAG_GRID, function(x) {
   bb <- gc_run(GC_LAG_SET(x))
   ne <- chan(bb, list(seas_npp_amp_SH = 0), GC_LAG_SET(x))

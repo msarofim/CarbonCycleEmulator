@@ -57,10 +57,30 @@ GI_Q10       <- c(1.0907, 1.5, 2.0, 2.5)
 GI_ENSO      <- c(0, 0.7868, 1.5, 3.0)
 GI_PPM_PER_GTC <- 1 / ccx_const("GtC_PER_PPM")
 
-md <- readRDS(GI_MODE_FILE); pm <- md$par_mode
-p0 <- ccx_default_params()
-for (n in intersect(names(p0), CCX_PARAM_NAMES)) p0[[n]] <- pm[[n]]
+md <- readRDS(GI_MODE_FILE)
+# ⛔ FIXED 2026-09-02. This read `md$par_mode` RAW and then did
+#     for (n in intersect(names(p0), CCX_PARAM_NAMES)) p0[[n]] <- pm[[n]]
+# `from90` is a PRE-SPLIT 21-parameter ancestor, so `pm[["gamma_enso_land_NH"]]`
+# is NULL -- and ASSIGNING NULL DELETES THE ELEMENT. All four ENSO names
+# vanished, `ccx_gamma_enso()` found neither the split names nor the scalar and
+# returned zeros, and **every scan in this file ran with ENSO OFF**, including
+# the q10 scan whose whole point is whether the explicit ENSO term absorbs q10.
+# MEASURED COST: 3.68 ppm of CO2_NH over 1960-2000 against the correctly
+# migrated vector. [[intersect_is_a_silent_default]]
+#
+# ⭐ THE ORDERING BELOW IS LOAD-BEARING AND WAS UNDOCUMENTED. `dg_vector()` in
+# calibration/lib_design_gates.R uses the SAME idiom and is safe ONLY because
+# the next line calls `ccx_set_enso()`, which repairs the deletion. Migrate,
+# copy, THEN repair -- in that order.
+pm <- ccx_migrate_par_set(md$par_mode)
+p0 <- ccx_overlay_par(ccx_default_params(), pm)   # migrate, copy, repair, ASSERT
 p0$pump_mode <- md$pump_mode
+GI_GE <- ccx_gamma_enso(pm)
+cat(sprintf("mode %s, migrated: %s\n", basename(GI_MODE_FILE),
+            paste(attr(pm, "migrated"), collapse = ", ")))
+cat(sprintf("ENSO at the mode: land NH %+.4f  land SH %+.4f  ocn NH %+.4f  ocn SH %+.4f\n",
+            GI_GE[["land_NH"]], GI_GE[["land_SH"]], GI_GE[["ocn_NH"]], GI_GE[["ocn_SH"]]))
+stopifnot(any(unlist(GI_GE) != 0))   # the deletion this file used to suffer, gated
 
 gm <- as.data.frame(readRDS(ccx_path("data", "forcing_gmst.rds")))
 
@@ -133,15 +153,25 @@ for (q in GI_Q10) {
 span_q <- gq[[as.character(GI_Q10[length(GI_Q10)])]][["ppm"]] - gq[[as.character(GI_Q10[1])]][["ppm"]]
 
 # ---- Q3: the compensation trap -- does gamma_enso move it more? ----
+# ⚠ THIS SWEEP IS A SCALAR SLICE THROUGH A FOUR-DIMENSIONAL SPACE since the
+# 2026-09-01 split. `ccx_set_enso(p, list(gamma_enso = e))` fills all four
+# coefficients from one scalar, so the sweep moves land and ocean, NH and SH,
+# together -- which is the pre-split model's one degree of freedom and is the
+# right SLICE for an absorption question, but it is not the fitted geometry.
+# The mode's four are ANTIsymmetric (land -0.2457 / +1.3583), so there is no
+# single scalar to mark a row with; the mode's own values are printed above
+# instead of a `*` against one sweep point.
+# ⚠ AND SINCE 2026-09-02 the land half is a ONE-WAY GPP MODULATION, not a
+# signed soil_fast flux ([[ccx_enso_gpp_modulation]]), so these numbers are not
+# comparable with any run of this file before that date -- which is the whole
+# reason it is being re-run.
 cat("\nQ3 -- does `gamma_enso` move gamma_IAV MORE? (the absorption test)\n")
 cat(sprintf("  %-14s %12s %12s\n", "gamma_enso", "quad ppm", "quad GtC"))
 ge <- list()
 for (e in GI_ENSO) {
   p <- p0; p <- ccx_set_enso(p, list(gamma_enso = e)); r <- gi_run(p)
   a <- gi_gamma(r$year, r$co2, "quad"); ge[[as.character(e)]] <- a
-  cat(sprintf("  %-14s %12.3f %12.2f\n",
-              sprintf("%.4f%s", e, if (abs(e - pm$gamma_enso) < 1e-3) "*" else ""),
-              a[["ppm"]], a[["gtc"]]))
+  cat(sprintf("  %-14s %12.3f %12.2f\n", sprintf("%.4f", e), a[["ppm"]], a[["gtc"]]))
 }
 span_e <- ge[[as.character(GI_ENSO[length(GI_ENSO)])]][["ppm"]] - ge[[as.character(GI_ENSO[1])]][["ppm"]]
 
@@ -150,7 +180,13 @@ span_e <- ge[[as.character(GI_ENSO[length(GI_ENSO)])]][["ppm"]] - ge[[as.charact
 # N(0, 2) prior and q10 a tight one, so raw ranges flatter whichever parameter
 # was given more room. What decides absorption is how far each can move within
 # ITS OWN prior.
+# ⚠ THESE ARE 21-PARAMETER POSTERIOR SDs read out of a pre-split mode file, used
+# in a 25-parameter build. `gamma_enso`'s is the SCALAR's sd, which is the right
+# scale for the scalar SLICE this file sweeps -- but it is not the sd of any of
+# the four fitted coefficients, and no 25-par posterior exists to supply one
+# ([[ccx_hessian_is_the_blocker]]). Named here rather than left implicit.
 q_sd <- md$sd_unc[["q10"]]; e_sd <- md$sd_unc[["gamma_enso"]]
+stopifnot(is.finite(q_sd), is.finite(e_sd))
 lev_q <- span_q / (max(GI_Q10) - min(GI_Q10)) * q_sd
 lev_e <- span_e / (max(GI_ENSO) - min(GI_ENSO)) * e_sd
 obs_se <- gi_gamma(og$year, og$co2, "quad")[["se"]]

@@ -1,0 +1,114 @@
+[ccx_adopt_mode_band] h_ml -> [85, 120] (mode 96.4737); kz -> [3942.5, 6528] (mode 6332.2119)
+migrated: seas_lag_p_NH, seas_lag_p_SH, gamma_enso_land_NH, gamma_enso_land_SH, gamma_enso_ocn_NH, gamma_enso_ocn_SH
+mode mode_fit_pumpN.rds (arm N) | shipped SEAS_NPP_AMP_SH 0.5027 | CMIP6 0.94
+seas_T_amp_SH at the mode 1.0391 K | seas_lag_p NH 1.7677 / SH 1.7677 | q10 1.13579
+
+
+=== 0. G0 -- REPRODUCTION AT THE MODE. If this fails, nothing below is read. ===
+  channel           amp      mo |  27n amp  27n mo | verdict
+  NEP            1.3970   10.15 |   1.3950   10.15 | ok
+  resp           0.0929    5.05 |   0.0926    5.05 | ok
+  vector sum     1.3150   10.09 |   1.3130   10.09 | ok
+  SH-land k/o    1.3150   10.09 |   1.3080         | ok
+
+  SEPARATION 5.10 mo = 152.9 deg   (27n: 5.10 mo = 153 deg)
+  G0 -> PASS
+
+
+=== 1. G1 -- THE FLOOR AT THE SHIPPED GROSS, CLOSED FORM vs MEASURED ===
+  closed form  a_NEP * sin(180 - 152.9) = 1.3970 * 0.4548 = 0.6354   (27n 0.633)  ok
+
+  the MEASURED profile (⚠ leaves the bracket [3.5915, 7.1012] by authorisation 2):
+  seas_T_amp_SH SH-land net       mo
+      1.0391     1.3150    10.09
+      3.5915     1.1201     9.90
+      5.0502     1.0146     9.76
+      7.1012     0.8773     9.52
+      9.0000     0.7672     9.21
+     11.0800     0.6754     8.78
+     13.9500     0.6213     8.04   <- MEASURED MINIMUM
+     17.0000     0.6742     7.24
+     20.0000     0.8151     6.65
+
+  measured min 0.6213 vs closed form 0.6354 -> -2.2 %   G1 -> PASS
+  ⇒ the model cannot cancel more than 54.5 % of its gross at ANY respiration
+    amplitude. CT2022 needs 74.9 %. [[sh_land_undercancels]]
+
+
+=== 2. G2 -- IS THE GROSS LINEAR, AND DOES ITS PHASE HOLD? ===
+         A      a_NEP       mo    a_NEP/A  theta deg      floor
+    0.3520     0.9782    10.15     2.7789      153.0     0.4448   <- 27j GPP end (INADMISSIBLE, control only)
+    0.5027     1.3970    10.15     2.7791      152.9     0.6354   <- SHIPPED
+    0.7000     1.9455    10.15     2.7793      152.9     0.8851
+    0.9400     2.6128    10.15     2.7796      152.9     1.1889   <- CMIP6
+    1.2200     3.3915    10.15     2.7799      152.9     1.5437
+
+  a_NEP/A spread 0.04 % (gate 2 %) -> PASS | NEP phase drift 0.000 mo (gate 0.25) -> PASS
+
+
+=== 3. G3 -- THE STATISTIC: THE FLOOR AT THE CMIP6 GROSS vs THE OBSERVATION ===
+  a_NEP(A=0.94) = 2.6128 @ 10.15 mo | theta 152.9 deg | FLOOR 1.1889
+  observed SPO land 0.683
+
+  floor 1.1889 > obs 0.683  (registered prediction: ~1.19, UNREACHABLE)
+  G3 -> AMPLITUDES ALONE CANNOT CLOSE IT. The pair must be (gross, PHASE); a (gross, respiration)
+        2x2 is a GUARANTEED NULL and must NOT be pre-registered as one.
+
+
+=== 4. G4 -- WHAT SEPARATION WOULD BE NEEDED (reported either way) ===
+  gross                             a_NEP theta need = mo apart
+  A = 0.5027                       1.3970      150.7       5.02
+  A = 0.9400                       2.6128      164.8       5.49
+
+  the model HAS 152.9 deg = 5.10 mo. The gap is the specification for the next arm.
+
+
+=== 5. G5 -- IS THERE A LEVER ON THETA AT ALL? ===
+  ⚠ CCX_SEAS_PHI_EFF['SH'] is a COMPILE-TIME constant in src/ccx_core.cpp -- reported,
+    not swept. If nothing free moves theta, the phase is STRUCTURAL, not fittable.
+
+  parameter         value  theta deg    d theta       d mo
+  seas_lag_p       0.7577      122.7      -30.3     -1.010
+  seas_lag_p       3.7477      145.8       -7.1     -0.237
+  q10              3.1498      153.7        0.7      0.025
+  q10             22.1387      155.1        2.2      0.073
+
+  moves theta by >= 0.10 mo across its prior span: seas_lag_p YES | q10 no
+  G5 -> a lever EXISTS -- name it in the next prereg
+
+
+=== 5b. G5 ANSWERED A MAGNITUDE QUESTION; THE QUESTION IS DIRECTIONAL ===
+    seas_lag_p  theta deg      a_NEP      floor    vs need
+          0.50      115.2     1.4398     1.3032      -49.7
+          0.75      122.4     1.4368     1.2127      -42.4
+          1.00      129.7     1.4300     1.0995      -35.1
+          1.25      137.2     1.4203     0.9657      -27.7
+          1.50      144.7     1.4091     0.8141      -20.1
+          1.75      152.4     1.3978     0.6477      -12.5   <- THE MODE
+          2.00      160.2     1.3880     0.4700       -4.6
+          2.25      168.1     1.3807     0.2847        3.3
+          2.50      176.0     1.3769     0.0954       11.2
+          2.75      176.1     1.3766     0.0941       11.2
+          3.00      168.3     1.3794     0.2802        3.4
+          3.25      160.6     1.3844     0.4595       -4.2
+          3.50      153.1     1.3904     0.6289      -11.7
+          3.75      145.8     1.3959     0.7855      -19.1
+          4.00      138.5     1.3999     0.9269      -26.3
+
+  max theta on this axis 176.1 deg at seas_lag_p = 2.75; NEEDED at the CMIP6 gross 164.8
+  ⇒ seas_lag_p CAN reach the needed separation -- it is the second member of the pair.
+
+
+=== 6. SCORED ===
+  G0 PASS | G1 PASS | G2 PASS | G3 UNREACHABLE | G5 lever exists
+
+  ⇒ THE PAIR IS (GROSS, PHASE), NOT (GROSS, RESPIRATION AMPLITUDE).
+
+  ⚠ NOTHING HERE IS ADOPTED. seas_npp_amp_SH stays 0.5027 (status="data"); every value
+    outside a bracket is a MEASUREMENT under authorisation 2, not a fitted value.
+
+wall clock 0.3 min
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/gross_cancellation_geometry.rds
+
+
+=== DONE ===

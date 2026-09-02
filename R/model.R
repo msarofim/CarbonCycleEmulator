@@ -514,6 +514,53 @@ ccx_set_enso <- function(p, src) {
   p
 }
 
+#' Overlay a fitted parameter set onto a model parameter list, SAFELY
+#'
+#' ⛔ THE BUG THIS EXISTS TO KILL, found 2026-09-02 by a diagnostic's own
+#' reproduction gate. Roughly sixty places in this repo write
+#'
+#'     for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
+#'
+#' and every stored mode file is a PRE-SPLIT 21-parameter ancestor. So
+#' `pm[["seas_lag_p_NH"]]` is NULL -- and **assigning NULL DELETES the element**.
+#' Both split lag names vanish from a `ccx_default_params()` that carries no
+#' legacy scalar either, `ccx_seas_lag_p()` falls through to the NAMED DEFAULT,
+#' and the run silently uses **2.25** where the mode says **1.7677**. The same
+#' hole swallows the four `gamma_enso_*` names, which then resolve to zero.
+#' [[intersect_is_a_silent_default]]
+#'
+#' ⚠ AND `ccx_set_enso()` IS NOT A FIX FOR IT. It repairs the ENSO names only, so
+#' a caller that migrates nothing but calls it looks safe and still runs at the
+#' wrong lag -- which is the majority shape in this repo.
+#'
+#' WHAT THIS DOES, in the order that matters: MIGRATE the fitted set (so every
+#' name this build expects exists), COPY, REPAIR the ENSO names, then ASSERT that
+#' the overlay DELETED NOTHING. The assertion is the point; the rest is the
+#' idiom everyone already writes.
+#'
+#' @param p a model parameter list, normally `ccx_default_params()`
+#' @param pm a fitted parameter set, migrated or not
+#' @return `p` with the fitted names overlaid, same length as it went in
+ccx_overlay_par <- function(p, pm) {
+  n0 <- names(p)
+  if (!isTRUE(attr(pm, "migrated_done"))) {
+    pm <- ccx_migrate_par_set(pm)
+    attr(pm, "migrated_done") <- TRUE
+  }
+  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
+  p <- ccx_set_enso(p, pm)
+  # `gamma_enso` is dropped by ccx_set_enso() BY DESIGN -- the retired scalar must
+  # not sit beside a complete split -- so it is the one permitted disappearance.
+  lost <- setdiff(setdiff(n0, names(p)), "gamma_enso")
+  if (length(lost))
+    stop("ccx_overlay_par(): the overlay DELETED ", length(lost), " parameter(s) -- ",
+         paste(lost, collapse = ", "), ". That happens when the fitted set has no ",
+         "value for a name and R drops the element on a NULL assignment, leaving ",
+         "the model on its NAMED DEFAULT with nothing said. Migrate the fitted ",
+         "set, or add the name to it.")
+  p
+}
+
 #' Interhemispheric exchange RATE at time t (1/yr)
 #'
 #' ONE implementation, used by the R core and mirrored by the C++ twin, so the

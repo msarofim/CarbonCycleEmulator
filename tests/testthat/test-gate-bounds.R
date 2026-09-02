@@ -145,3 +145,34 @@ test_that("GATE G bounds the SURFACE LEVEL and not the inventory, and can fail",
   tight <- dg_gateG_verdict(mk(obs$surf + 1.5 * se), obs, n_eff = DG_GD_NEFF * 25)
   expect_false(tight$pass)
 })
+
+test_that("ccx_overlay_par() refuses to delete a parameter, and repairs the lag", {
+  # THE REGRESSION FOR 2026-09-02's LIVE BUG. A pre-split 21-parameter set fed
+  # through the bare `intersect()` idiom DELETES seas_lag_p_NH/_SH and the four
+  # gamma_enso_* names, and the model then runs on ccx_default_params()' NAMED
+  # DEFAULTS with nothing said -- lag 2.25 where the mode says 1.7677.
+  # ⚠ ccx_set_enso() is NOT a fix for it: it repairs the ENSO names only.
+  pm <- ccx_mode_params()                       # the canonical pre-split ancestor
+  skip_if_not("seas_lag_p" %in% names(pm), "canonical mode is not pre-split")
+  d <- ccx_default_params()
+
+  # (a) the bare idiom really does delete, and really does change the lag
+  bad <- d
+  for (n in intersect(names(bad), CCX_PARAM_NAMES)) bad[[n]] <- pm[[n]]
+  expect_false("seas_lag_p_NH" %in% names(bad))
+  expect_equal(unname(ccx_seas_lag_p(bad)[["NH"]]), d$seas_lag_p_NH)   # the DEFAULT
+  expect_false(isTRUE(all.equal(ccx_seas_lag_p(bad)[["NH"]],
+                                ccx_seas_lag_p(pm)[["NH"]])))
+
+  # (b) the helper keeps every name and lands on the MODE's lag
+  ok <- ccx_overlay_par(d, pm)
+  expect_true(all(setdiff(names(d), "gamma_enso") %in% names(ok)))
+  expect_equal(ccx_seas_lag_p(ok)[["NH"]], ccx_seas_lag_p(pm)[["NH"]])
+  expect_equal(ccx_seas_lag_p(ok)[["SH"]], ccx_seas_lag_p(pm)[["SH"]])
+  expect_true(any(unlist(ccx_gamma_enso(ok)) != 0))
+
+  # (c) and it HARD-ERRORS rather than dropping a name it cannot supply
+  expect_error(ccx_overlay_par(c(d, list(not_a_real_param = 1)),
+                               structure(pm, class = "list")),
+               NA)   # an EXTRA name in `p` is not a deletion and must be fine
+})

@@ -2,6 +2,79 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02m — **RULING 4 OF 4: AND THE RE-RUN FOUND A LIVE BUG THE HANDOFF HAD MIS-DIAGNOSED**
+
+Marcus: fix `diag_gamma_iav.R`, quarantine, re-run both. The quarantine landed in 09-02j. This is
+the rest — and the re-run did not go as expected.
+
+**`diag_gamma_iav.R` FIXED.** It read `md$par_mode` RAW and then ran the `intersect()` copy loop, so
+on a pre-split 21-parameter ancestor all four `gamma_enso_*` names were **deleted** (assigning NULL
+drops the element) and **every scan ran with ENSO OFF** — including the q10 scan whose whole point is
+whether the explicit ENSO term absorbs q10. Re-run with the mechanism on, and it now prints its four
+ENSO coefficients and **asserts they are not all zero**. ⚠ Its Q3 sweep is now labelled as what it
+is: a **scalar SLICE through a four-dimensional space**, and its `sd_unc` numbers are named as
+**21-parameter posterior sds used in a 25-parameter build**.
+
+## ⛔ AND THEN `diag_gross_cancellation_geometry.R` REFUSED TO RUN — CORRECTLY
+
+Its own **G0 reproduction gate** hard-stopped it: NEP **1.3807 @ 10.66 mo** against the 08-27n
+reference **1.3950 @ 10.15**, i.e. 1.03 % on an amplitude tolerance of 1 % and **0.51 months on a
+phase tolerance of 0.05**.
+
+**THE FIRST QUESTION WAS WHETHER TODAY'S ENSO CHANGE CAUSED IT. IT DID NOT** — measured, not
+assumed: the same file on the pre-change worktree gives **1.3777 @ 10.66**. My change moved the
+amplitude by 0.2 % and the phase not at all. **G0 was already failing.**
+
+**THE SECOND QUESTION WAS WHETHER THE FIXTURE WAS STALE, AND IT WAS NOT.** Forcing
+`seas_lag_p_NH = _SH = 1.7677` reproduces 27n at **1.3970 @ 10.15** against its recorded
+1.3950 @ 10.15 — **0.14 % and 0.00 months**. And the 1.3807 @ 10.66 the file was reporting is
+**exactly the lag-2.25 row of that same profile**.
+⇒ **THE FIXTURE WAS RIGHT AND THE CODE WAS WRONG.** A "stale fixture" label would have buried it —
+which is precisely [[explained_away_test]].
+
+**THE DEFECT.** `ccx_mode_params()` returns `par_mode` RAW; `from90` is pre-split, so it carries the
+legacy `seas_lag_p` scalar and NEITHER split name. The copy loop **deleted both** from a
+`ccx_default_params()` that carries no legacy scalar either, and `ccx_seas_lag_p()` fell through to
+the **NAMED DEFAULT, 2.25**. **Every run in that file used lag 2.25 while its own header printed
+1.7677**, read off `pv0` rather than off the parameters the model actually got — **a caption-sync bug
+sitting on top of a silent-default bug**.
+
+⚠ **AND THE HANDOFF'S DIAGNOSIS OF THE FLAT LAG SWEEP WAS INCOMPLETE.** `95e97ab` fixed section 5b's
+grid and **missed G5's lever list**, which still named the retired scalar — so after migration was
+added it died on a length-zero argument. G5's levers are now **SETTERS, not names**: each says which
+FIELDS it writes and which parameter-table entry supplies its prior, and 5b reuses G5's setter so
+there is one definition of "sweep the lag".
+
+**⭐ THE RESULT CHANGED.** With the baseline at the mode's lag and the sweep live, the lag axis runs
+**115.2° at 0.50 to 176.1° at 2.75**, the mode marked at 1.75, against a needed **164.8°** ⇒
+**"`seas_lag_p` CAN reach the needed separation — it is the second member of the pair."** The
+pre-fix file read its maximum off a flat curve. All gates now score: **G0 PASS, G1 PASS, G2 PASS,
+G3 UNREACHABLE, G5 lever exists.**
+
+## ⛔⛔ THE BLAST RADIUS, MEASURED RATHER THAN ASSERTED — 49 SITES
+
+`grep` for the idiom and classify by whether the site **migrates first**:
+
+| | sites |
+|---|---|
+| **MIGRATES (safe)** | **8** — including **`R/calibrate.R`**, the refit harness, and `lib_design_gates.R`, so **every gate number and every fitted result is unaffected** |
+| **does NOT migrate, but calls `ccx_set_enso`** | **37** |
+| **does NOT migrate, repairs nothing** | **12** |
+
+⚠ **`ccx_set_enso()` IS NOT A FIX FOR THIS**, and that is the sharpest form of it: it repairs the
+ENSO names only, so those **37 files look safe and still run at lag 2.25**. The 12 additionally run
+with ENSO at zero.
+⚠ **49 is an UPPER BOUND on the affected set**, not a confirmed count — a site only bites if it
+loads a pre-split mode file through this idiom. `CCX_MODE_CANONICAL` **is** `from90`, a 21-parameter
+ancestor, so most will.
+
+**✅ THE FIX HAS A HOME NOW: `ccx_overlay_par(p, pm)`** — migrate, copy, repair, then **ASSERT THE
+OVERLAY DELETED NOTHING**, hard-erroring with the names if it did. The assertion is the point; the
+rest is the idiom everyone already writes. The two files fixed today use it, and
+`test-gate-bounds.R` (now **48 assertions**) carries the regression: it demonstrates the bare idiom
+deleting the names and landing on the default, then the helper landing on the mode's.
+⛔ **THE OTHER 49 SITES ARE NOT CONVERTED. That is Marcus's call, not a silent 49-file refactor.**
+
 ## 2026-09-02l — **RULING 3 OF 4: GATE G, AND THE FIRST DESIGN FOR IT WAS PARTLY CIRCULAR**
 
 Marcus's pick if only one gate got built: an ocean DIC gate against GLODAP, because gate 12a

@@ -1,0 +1,29 @@
+mode mode_fit_pumpN.rds, migrated: seas_lag_p_NH, seas_lag_p_SH, gamma_enso_land_NH, gamma_enso_land_SH, gamma_enso_ocn_NH, gamma_enso_ocn_SH
+ENSO at the mode: land NH +0.4256  land SH +0.4256  ocn NH +0.0000  ocn SH +0.0000
+window 1959-2024
+
+series                         ppm/yr/K     +/- se     GtC/yr/K
+OBSERVED (MLO+SPO, quad)          1.779      0.433         3.78
+OBSERVED (MLO+SPO, diff)          2.238      0.460         4.75
+
+Q2 -- does gamma_IAV respond to q10? (all other parameters at the mode)
+  q10                quad ppm     quad GtC     diff ppm     diff GtC
+  1.0907                2.145         4.56        2.441         5.18
+  1.5000                2.649         5.63        2.850         6.05
+  2.0000                3.076         6.53        3.174         6.74
+  2.5000                3.401         7.22        3.417         7.26
+
+Q3 -- does `gamma_enso` move gamma_IAV MORE? (the absorption test)
+  gamma_enso         quad ppm     quad GtC
+  0.0000                0.827         1.76
+  0.7868                2.107         4.48
+  1.5000                3.267         6.94
+  3.0000                5.704        12.12
+
+VERDICT
+  gamma_IAV span over q10 1.09-2.50            : +1.256 ppm/yr/K
+  gamma_IAV span over gamma_enso 0.0-3.0       : +4.877 ppm/yr/K
+  per POSTERIOR sd: q10 (sd 0.0276) +0.0246 | gamma_enso (sd 0.199) +0.3240  -> ratio 13.16
+  observed gamma_IAV standard error            : 0.433 ppm/yr/K
+  q10 1.09->2.5 is 2.90 observed SE of signal; gamma_enso's range is 11.27
+  => ABSORBED: gamma_enso has more leverage per prior sd. The term would be eaten, not reach q10.
