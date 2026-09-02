@@ -65,9 +65,15 @@
 #
 # THE GATES, because a wrapper that silently does nothing looks exactly like a
 # treatment that costs nothing ([[broken_gate_reports_nothing]]):
-#   G-I  IDENTITY -- `asis` through the wrapper must reproduce the UNWRAPPED
-#        logpost to the bit. If it does not, the wrapper is not a no-op and no
-#        other number here means anything.
+#   G-I  IDENTITY -- the SHIPPED treatment through the wrapper must reproduce
+#        the UNWRAPPED logpost to the bit. If it does not, the wrapper is not a
+#        no-op and no other number here means anything.
+#        ⚠ SINCE RULING A WAS ADOPTED (2026-09-02) THE SHIPPED TREATMENT IS
+#        `demean`, NOT `asis`. `asis` is now the PRE-ADOPTION index -- the raw
+#        1991-2020-based column as it sits in data/forcing_enso.rds -- and it is
+#        kept as the reference the +56.4785 is measured FROM.
+#        EI_SHIPPED_TREATMENT follows FORC_ENSO_DEMEAN so the gate keeps its
+#        power under either setting.
 #   G-F  FIRED -- the wrapper must have been called at least once per treatment.
 #   G-M  MUTATION -- a deliberate +EI_MUT_OFFSET offset must move the logpost.
 #        A treatment machinery that cannot move the objective cannot price one
@@ -95,6 +101,17 @@ EI_CLIM_BASE  <- EIX_CLIM_BASE      # = ENSO_CLIM_BASE in build_calibration_data
 EI_ROLL_LEN   <- EIX_ROLL_LEN       # ONI centred base-period length, years
 EI_ROLL_STEP  <- EIX_ROLL_STEP      # ONI base-period refresh interval, years
 EI_MUT_OFFSET <- 1.0                # deg C, the G-M mutation
+# ⭐ WHICH TREATMENT IS THE ONE THAT SHIPS. Before Ruling A was adopted
+# (2026-09-02) it was `asis`; after, `ccx_build_forcing()` removes the index's
+# 1948-2024 mean and the shipped convention IS `demean`. G-I below is the gate
+# that the wrapper is a NO-OP on whatever ships, so it has to follow the model
+# rather than name a treatment. Hardcoding `asis` would have turned G-I from a
+# wrapper check into a hard stop the moment the model moved.
+EI_SHIPPED_TREATMENT <- if (isTRUE(FORC_ENSO_DEMEAN)) "demean" else "asis"
+# ...and the priced `demean` is only the SHIPPED `demean` if it removes the mean
+# over the SAME window. Asserted, not assumed: with different windows G-I would
+# fail with a confusing message about the wrapper instead of about the window.
+stopifnot(identical(as.numeric(EI_WIN), as.numeric(FORC_ENSO_DEMEAN_WIN)))
 EI_CPC        <- file.path("data-raw", "downloads", "ersst5.nino.mth.91-20.ascii")
 EI_CPC_COL    <- "NINO3.4"          # absolute SST column; its ANOM twin is unused
 EI_PRE_FILE   <- file.path("outputs", "diagnostics", "enso_gpp_margin_pre.rds")
@@ -238,7 +255,8 @@ ei_price <- function(kind) {
 cat("\n=== 3. THE PRICE AT THE 09-01 BASIN VECTOR (25 par, migrated) ===\n")
 lp_bare  <- ccx_make_logpost(base_params = bp)
 v_bare   <- lp_bare(u0)
-cat(sprintf("  UNWRAPPED logpost, this build, shipped index: %.6f\n", v_bare))
+cat(sprintf("  UNWRAPPED logpost, this build, shipped index (`%s`): %.6f\n",
+            EI_SHIPPED_TREATMENT, v_bare))
 
 res <- lapply(EI_TREATMENTS, ei_price); names(res) <- EI_TREATMENTS
 mut <- ei_price("mutate")
@@ -248,12 +266,14 @@ mut <- ei_price("mutate")
 
 # ---- THE GATES ------------------------------------------------------
 cat("\n  --- GATES ---\n")
-g_i <- isTRUE(all.equal(res$asis$logpost, v_bare, tolerance = 0))
-cat(sprintf("  G-I IDENTITY : wrapped `asis` %.6f vs unwrapped %.6f -> %s\n",
-            res$asis$logpost, v_bare, if (g_i) "PASS (bit-identical)" else "⛔ FAIL"))
+g_i <- isTRUE(all.equal(res[[EI_SHIPPED_TREATMENT]]$logpost, v_bare, tolerance = 0))
+cat(sprintf("  G-I IDENTITY : wrapped `%s` %.6f vs unwrapped %.6f -> %s\n",
+            EI_SHIPPED_TREATMENT, res[[EI_SHIPPED_TREATMENT]]$logpost, v_bare,
+            if (g_i) "PASS (bit-identical)" else "⛔ FAIL"))
 if (!g_i)
-  stop("the wrapper is not a no-op on the shipped index. Every price below ",
-       "would be confounded with a wrapper artefact. Refusing to report.")
+  stop("the wrapper is not a no-op on the shipped index (`", EI_SHIPPED_TREATMENT,
+       "`, FORC_ENSO_DEMEAN = ", FORC_ENSO_DEMEAN, "). Every price below would ",
+       "be confounded with a wrapper artefact. Refusing to report.")
 g_f <- all(vapply(res, function(r) r$fired >= 1L, logical(1)))
 cat(sprintf("  G-F FIRED    : calls per treatment %s -> %s\n",
             paste(vapply(res, function(r) r$fired, integer(1)), collapse = "/"),

@@ -54,7 +54,11 @@ cat(sprintf("\n%s\nENSO INDEX BAKE-OFF: each candidate with its OWN best gammas\
 
 # ---- the candidates, all through lib_enso_index.R --------------------
 CAND <- list(
-  asis    = list(d = eix_nino34_shipped(),               note = "shipped Nino 3.4 (PSL, v6), degC"),
+  # ⚠ `asis` IS THE PRE-ADOPTION INDEX. Ruling A was adopted 2026-09-02 on this
+  # very bake-off, so the stored column is no longer what the model sees --
+  # `demean` below is. `asis` stays as the reference the +56.4785 is measured
+  # FROM, which is what a price needs.
+  asis    = list(d = eix_nino34_shipped(),               note = "stored Nino 3.4 (PSL, v6), PRE-adoption, degC"),
   demean  = list(d = eix_demean(eix_nino34_shipped(), EB_SCORED),
                                                          note = "shipped, span mean removed"),
   detrend = list(d = eix_detrend(eix_nino34_shipped(), EB_SCORED),

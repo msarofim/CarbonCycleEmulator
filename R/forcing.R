@@ -125,6 +125,43 @@ FORC_LAND0_NOMINAL <- 2130   # GtC, total preindustrial land carbon at the
 FORC_ENSO_PRE1948  <- 0      # Nino 3.4 starts 1948; no ENSO term before that.
                              # A DISCONTINUITY IN CONSTRAINT, not in physics:
                              # pre-1948 residuals lack an ENSO explanation.
+                             # ⭐ AFTER FORC_ENSO_DEMEAN this zero is genuinely
+                             # NEUTRAL -- it is the 1948-2024 mean state. Before
+                             # it, zero was +0.218 degC of El Nino relative to
+                             # the index's own mean.
+# ---- RULING A, ADOPTED 2026-09-02 (Marcus) --------------------------
+# ⭐ THE MEAN OF THE Nino 3.4 INDEX IS A BASE-PERIOD CONVENTION, NOT A SIGNAL,
+# AND IT IS REMOVED. `build_calibration_data.R` pins ENSO_CLIM_BASE to the WMO
+# normal 1991-2020 -- fixed and RECENT -- so the Nino 3.4 box's own warming puts
+# the early decades below zero BY CONSTRUCTION: mean -0.2178 over 1948-2024.
+# Feeding that to a ONE-WAY GPP modulation loads a 35.5 yr chain instead of a
+# 2 yr pool, which is the whole -65.74 the one-way term cost.
+#
+# THE EVIDENCE IS OBSERVATIONAL, not an inference from the build script: MEI.ext
+# and Nino 3.4 correlate r = 0.896 over the same 696 months and their means have
+# OPPOSITE SIGN (+0.140 vs -0.274). Two indices of one phenomenon, agreeing on
+# the variability and disagreeing on the sign of the mean.
+#
+# AND IT WAS TESTED, with each candidate given its OWN four refitted
+# `gamma_enso` coordinates so the comparison could not rank AMPLITUDE instead of
+# INDEX (diag_enso_index_bakeoff.R, 09-02). `demean` won on BOTH SST products
+# and BOTH spans with the same ordering each time -- v6 -1494.32 / -1490.86, v5
+# -1493.13 -- worth +14.4 over `asis`; additionally removing the TREND costs
+# 5-7. At the 09-01 basin vector, unrefitted, it is -1512.02 against `asis`
+# -1568.49, recovering +56.48 = 86 % of the -65.74.
+#
+# ⚠ THE MEAN IS TAKEN OVER THE INDEX'S OWN RECORD, NOT OVER THE REQUESTED RUN
+# WINDOW. A mean that moved with `yrs` would make the forcing depend on the span
+# a caller asked for -- a 1750-2300 build and a 1948-2024 build would then see
+# different ENSO, silently. The window is FIXED and named.
+FORC_ENSO_DEMEAN     <- TRUE          # ⛔ FALSE reproduces the pre-adoption
+                                      # model BIT FOR BIT. Same reproduction
+                                      # path as ALPHA_AS_*_LEGACY; it is not a
+                                      # tuning knob and nothing but a
+                                      # provenance run should set it.
+FORC_ENSO_DEMEAN_WIN <- c(1948, 2024) # the span the bake-off priced, = the
+                                      # ENSO-active record. Changing it changes
+                                      # what was tested.
 
 # ---------------------------------------------------------------------
 #' Sourced hemispheric monthly emission seasonality, cached.
@@ -660,6 +697,17 @@ ccx_build_forcing <- function(scenario = "historical",
   # ---- ENSO: Nino 3.4 anomaly, zero before 1948 ----------------------
   en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
   en <- en[!is.na(en$nino34_anom), ]
+  # RULING A -- see FORC_ENSO_DEMEAN above for what this is and what it is worth.
+  if (FORC_ENSO_DEMEAN) {
+    kb <- en$year >= FORC_ENSO_DEMEAN_WIN[1] & en$year <= FORC_ENSO_DEMEAN_WIN[2]
+    if (sum(kb) < 12)
+      stop(sprintf(paste0("ccx_build_forcing: the ENSO index covers %d months of ",
+                          "the %d-%d demeaning window, too few to define a mean. ",
+                          "The index record is %d-%d."),
+                   sum(kb), FORC_ENSO_DEMEAN_WIN[1], FORC_ENSO_DEMEAN_WIN[2],
+                   min(en$year), max(en$year)))
+    en$nino34_anom <- en$nino34_anom - mean(en$nino34_anom[kb])
+  }
   en_t <- en$year + (en$month - 0.5) / 12
   enso <- stats::approx(en_t, en$nino34_anom, xout = t, rule = 2)$y
   enso[yv < min(en$year)] <- FORC_ENSO_PRE1948

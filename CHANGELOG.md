@@ -2,6 +2,55 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02o — ⭐ **RULING A ADOPTED: THE ENSO INDEX IS DEMEANED**
+
+Marcus, this session: **adopt `demean`, then refit.** Shipped in `ccx_build_forcing()`'s ENSO
+branch behind `FORC_ENSO_DEMEAN` (TRUE) over `FORC_ENSO_DEMEAN_WIN = c(1948, 2024)` — the span the
+bake-off priced.
+
+**WHAT IT IS WORTH, MEASURED THROUGH THE LIVE BUILDER, NOT THE BAKE-OFF'S WRAPPER.** At the 09-01
+basin vector, unrefitted: `FORC_ENSO_DEMEAN = FALSE` gives **−1568.4936** and TRUE gives
+**−1512.0151**, a gain of **+56.4785** — the published pair back to 3 × 10⁻⁵, i.e. inside their own
+printed precision. That is **86 % of the one-way GPP term's −65.74** recovered by removing a
+base-period artifact.
+
+**THE MEAN IS TAKEN OVER THE INDEX'S OWN RECORD, NOT THE REQUESTED RUN WINDOW.** A mean that moved
+with `yrs` would make a 1750–2300 build and a 1948–2024 build see different ENSO, silently, and
+every stored logpost would depend on the span it was scored over.
+
+**`FORC_ENSO_DEMEAN = FALSE` reproduces the pre-adoption model bit for bit** — the same reproduction
+path `ALPHA_AS_*_LEGACY` has. It is not a tuning knob.
+
+### ⚠ A GATE I WROTE HAD NO POWER, AND THE MUTATION TEST CAUGHT IT
+`test-enso-demean.R`'s SPAN-INVARIANCE test first compared a 1750–2024 build against a 1948–2024
+one. **That pair cannot fail**: the ENSO index starts in 1948, so both windows select the same index
+rows, and a mutation that demeaned over the *requested* window instead of the fixed one **passed
+unchanged**. The second span now cuts *into* the record (1980–2024) and the mutation fails as it
+must. Four gates, all mutation-tested: INTENT (mean is zero), IDENTITY (legacy exact; the change is
+a *constant*, and a non-zero one, so the gate cannot pass vacuously), SPAN-INVARIANCE, and the
+PRICED anchor above. ⇒ [[no_power_null]]
+
+### AND ONE THAT WOULD NOT HAVE RUN AT ALL
+The priced anchor guarded itself with `skip_if(!exists("dg_vector"))`, which under `test_dir()`
+**skipped it in every full-suite run**. It sources the lib it needs instead.
+⇒ [[broken_gate_reports_nothing]]
+
+### THE DIAGNOSTIC'S OWN GATE FOLLOWED THE MODEL
+`diag_enso_index_baseline.R`'s **G-I** hard-stops unless the wrapper is a no-op on the shipped
+index. Hardcoded to `asis`, adoption would have turned it into a permanent refusal. It now reads
+`EI_SHIPPED_TREATMENT`, which follows `FORC_ENSO_DEMEAN`, and asserts that the priced window equals
+the shipped one. Re-run post-adoption: **G-I PASS, bit-identical on `demean`**, every treatment
+price unchanged, G-M now −792.37 (it mutates a demeaned baseline).
+
+**`asis` IS NOW THE PRE-ADOPTION INDEX**, not the shipped one, and is relabelled as such in the
+bake-off and in `eix_nino34_shipped()`'s header. Leaving those captions alone is the drift this
+project keeps paying for.
+
+**Suite 1622 PASS / 6 FAIL / 2 skip** — failure set byte-identical to standing. No test in the suite
+pinned an absolute logpost against a stored mode, so nothing else moved.
+
+⇒ **NEXT: the 25-parameter refit, starting from the `demean` vector (−1512.02, not −1568.49).**
+
 ## 2026-09-02n — **THE FOUR SPO CONSTANTS ARE REGISTERED, AND TIED TO THEIR 34 COPIES**
 
 Handoff 09-02k §8.5's standing debt, discharged. The four numbers the whole seasonal-partition arc

@@ -172,6 +172,12 @@ eix_meiv2 <- function() {
   e <- e[!is.na(e$mei), c("year", "month", "mei")]
   names(e)[3] <- "value"; e[order(e$year, e$month), ]
 }
+# ⚠ THE NAME IS NOW HALF TRUE. This returns the Nino 3.4 column exactly as it
+# sits in data/forcing_enso.rds -- the 1991-2020 fixed-base anomaly. Since
+# RULING A was adopted (2026-09-02) `ccx_build_forcing()` removes that column's
+# 1948-2024 mean, so what SHIPS is `eix_demean(eix_nino34_shipped(),
+# FORC_ENSO_DEMEAN_WIN)`. Read this as "the stored column", and reach for the
+# demeaned form when you want what the model actually sees.
 eix_nino34_shipped <- function() {
   e <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
   e <- e[!is.na(e$nino34_anom), c("year", "month", "nino34_anom")]
