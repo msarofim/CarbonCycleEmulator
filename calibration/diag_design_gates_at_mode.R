@@ -233,5 +233,7 @@ cat("  model cannot satisfy both interhemispheric constraints with one tau_ex,\n
 cat("  which makes this a STRUCTURAL finding about the two-box exchange rather\n")
 cat("  than a parameter that has not been tried.\n")
 
+dg_print_ledger()
+
 cat(sprintf("\n=== GATE 12 is in calibration/diag_joos_irf.R [%s] ===\n",
             paste(DG_ARMS, collapse = "|")))

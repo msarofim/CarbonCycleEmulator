@@ -82,6 +82,110 @@ DG_GCB_PUB_LAND <- 2.36; DG_GCB_PUB_OCEAN <- 3.22
 
 DG_GtC_PER_PPM <- ccx_const("GtC_PER_PPM")
 
+# =====================================================================
+# THE GATE LEDGER (2026-09-02, Marcus asked "are these the tests we want?")
+#
+# Every gate carries FOUR properties and until today only the first was written
+# down anywhere. The one that changes how a result READS is the last:
+#
+#   SOURCE CLASS  OBSERVATION > LAW > MODEL, the hierarchy in ~/.claude/CLAUDE.md.
+#                 A model-derived threshold is a LAST RESORT and must name the
+#                 model and its vintage. [[threshold_from_obs_or_law]]
+#   BOUND         and what KIND of claim it is. An identity gets an exact bound;
+#                 a distributional claim gets the stated sigma; an ordering gets
+#                 no threshold at all. [[gate_bound_matches_its_claim]]
+#   SCORED?       whether the LIKELIHOOD already scores this quantity. A gate on
+#                 a scored stream is a RESTATEMENT, not an out-of-sample test:
+#                 it can only tell you the optimiser did its job.
+#   POWER         what a PASS is actually worth, given the three above.
+#                 [[no_power_null]] -- a test whose null is structurally
+#                 guaranteed reports "no effect" identically to one that looked.
+#
+# ⛔ WHAT THIS LEDGER MADE VISIBLE, AND NOBODY HAD WRITTEN IT DOWN:
+#   * GATE Q IS THE ONLY GENUINELY OUT-OF-SAMPLE GATE. Everything else either
+#     restates a scored stream or rests on another model.
+#   * GATE 7 IS NOT AN INDEPENDENT TEST AND ITS STANDING FAILURE IS A SIGMA
+#     MISMATCH, not a model defect. The likelihood scores the land sink at
+#     LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE = 0.5 * 3.0 = 1.5 GtC/yr; this
+#     gate judges the SAME stream against the SAME data at 0.5. At the
+#     likelihood's own sigma the shipped mode is well inside 1 sigma. The gate
+#     is a deliberate STRICTER RE-JUDGEMENT and had never said so out loud.
+#   * GATES 4 AND 5 HAVE NO BOUND AT ALL, so neither can fail. Gate 4 is close
+#     to algebraic in quantities the objective already fits.
+#   * THERE IS NOT ONE LAW-DERIVED GATE IN THE SET. Every gate here is
+#     observational or model-derived; nothing tests the model against a
+#     conservation law, Henry's law, or carbonate equilibrium.
+# =====================================================================
+DG_LEDGER <- list(
+  list(id = "4", what = "airborne fraction 1959-2024",
+       class = "OBSERVATION", src = "GCB 2025",
+       bound = "NONE -- prints a table, cannot fail",
+       scored = "YES (CO2 growth is fitted; emissions are inputs)",
+       power  = "~NONE. Near-algebraic in quantities the fit already matches."),
+  list(id = "5", what = "bomb 14C peak, hemispheric lag, e-fold",
+       class = "OBSERVATION", src = "Hua et al. 2022, hemispheric aggregate",
+       bound = "NONE -- prints a table, cannot fail",
+       scored = "STREAM yes, FUNCTIONAL no (likelihood scores levels)",
+       power  = "MODERATE, and the best-sourced gate here: a different
+            functional of a scored stream. Needs a bound to be a gate."),
+  list(id = "7", what = "land / ocean sinks 2015-2023",
+       class = "OBSERVATION + MODEL", src = paste(
+         "GCB 2025. ⚠ MIXED: the ocean sink is a product of ocean",
+         "
+            biogeochemistry MODELS and the land sink is a RESIDUAL of the",
+         "
+            budget, so this is not a clean observation."),
+       bound = "|z| <= DG_G7_NSD, a distributional claim on GCB's stated sigma",
+       scored = "YES -- gcb_land_sink and gcb_ocean_sink are BOTH fitted",
+       power  = paste("NONE out-of-sample. Same streams, same data. And it judges",
+         "
+            at 1/LIK_LAND_SINK_INFLATE of the sigma the fit was scored at,",
+         "
+            so its standing FAIL is a strictness mismatch, not a defect.")),
+  list(id = "Q", what = "air-sea d13C disequilibrium, 1995",
+       class = "OBSERVATION", src = "Quay et al. 2003 (0.60 +- 0.10 permil)",
+       bound = "n_sd <= DG_Q_NSD, a distributional claim on the stated sigma",
+       scored = "NO -- ocean d13C is scored as a GRADIENT; d13c_level_* are atmospheric",
+       power  = paste("REAL, AND THE ONLY ONE. Nothing constrains absolute",
+         "
+            surface-ocean d13C, which is why it caught a 6.4-sigma",
+         "
+            wrong-sign error that no stream had ever objected to.")),
+  list(id = "12/12b", what = "Joos IRF: integrated pulse response, and the tail",
+       class = "MODEL", src = paste(
+         "Joos et al. 2013 multi-model mean, vintage 2013.",
+         "
+            ⚠ LAST-RESORT source class: a threshold from another model.",
+         "
+            Named here rather than discovered. 12b's band is CONSTRUCTED",
+         "
+            (Joos publishes no 5-95 % at TH 300) and says so."),
+       bound = "12a: Joos published 5-95 %. 12b: constructed band, stated.",
+       scored = "NO -- the IRF is not a stream",
+       power  = "REAL, and 12b carries its OWN in-run mutation test.")
+)
+
+#' Print the ledger. Called by the gate REPORTS so the numbers and their
+#' provenance never drift apart -- the caption-sync rule applied to gates.
+dg_print_ledger <- function() {
+  cat(sprintf("\n%s\nTHE GATE LEDGER -- source class, bound, and whether the gate has POWER\n%s\n",
+              strrep("=", 74), strrep("=", 74)))
+  for (g in DG_LEDGER) {
+    cat(sprintf("\nGATE %s -- %s\n", g$id, g$what))
+    cat(sprintf("  class : %s\n  source: %s\n  bound : %s\n  scored: %s\n  POWER : %s\n",
+                g$class, g$src, g$bound, g$scored, g$power))
+  }
+  cat(sprintf("\n  ⚠ GATE 7's two sigmas, computed not quoted: likelihood %.2f GtC/yr\n",
+              LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE))
+  cat(sprintf("    (LIK_GCB_LAND_SD %.2f x LIK_LAND_SINK_INFLATE %.1f) vs this gate's %.2f.\n",
+              LIK_GCB_LAND_SD, LIK_LAND_SINK_INFLATE, DG_GCB_LAND_SD))
+  cat("  ⚠ NO LAW-DERIVED GATE EXISTS. Candidates, none built: carbonate /\n")
+  cat("    Revelle consistency, Henry's-law solubility, and -- most valuable,\n")
+  cat("    since gate 12a reports an ocean-CAPACITY defect it cannot localise --\n")
+  cat("    an ocean DIC inventory against GLODAP, which is observational and\n")
+  cat("    currently ungated.\n")
+}
+
 # ---- resolve one arm to (params, luc_scale, bomb_total) -------------
 #' @param arm "defaults", a name ccx_mode_file() knows, or a path to a mode file
 #' @return list(p = model params, pm = fitted params, luc_scale, bomb_total,

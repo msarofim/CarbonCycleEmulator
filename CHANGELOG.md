@@ -2,6 +2,64 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02i — **THE ENSO PRE-CHECK REFUTED THE ARGUMENT I MADE FOR IT; THE GATE LEDGER**
+
+Marcus asked for both: price the two-channel ENSO restructuring, and start a gate ledger.
+
+**⛔ I ARGUED THE TWO CHANNELS WOULD BE ISOTOPICALLY IDENTIFIABLE. THEY ARE NOT, AND THE
+PRE-CHECK WAS WRITTEN TO BE ABLE TO SAY SO.** `calibration/diag_enso_two_channel_precheck.R`,
+~40 s, IMPLEMENTS NOTHING. A respiration limb draws `soil_fast` at −24.9 to −26.4 permil; a
+GPP limb withholds carbon at delta_atm + eps_photo = −25.2 to −26.8. **They differ by
+0.32–0.48 permil, because SOIL_FAST *IS* OLD PHOTOSYNTHATE** — the only contrast is Suess
+drift across its ~2 yr turnover. On whole-record gross carbon that is **0.04 permil** of
+atmospheric d13C against a **0.05** representation error: BELOW NOISE. 14C is the larger
+contrast (+35 to +52 permil post-bomb) and still comes to **3.6** against a fitted
+`sigma_d14c` of **6.1**: ALSO BELOW NOISE.
+⇒ **The data CANNOT apportion the term between the channels.** A fitted partition would be a
+judgement width wearing a fitted coefficient's name — the `npp_frac_NH` failure mode.
+
+**⛔ NOR IS IT A DOUBLE-COUNTING FIX.** GMST does carry ENSO (r = +0.41, **+0.53 at the
+3-month lag**), but 1 sd of ENSO moves GMST only **0.042 degC**, which at the mode's
+`q10 = 1.136` is **+0.054 %** of respiration = 0.032 GtC/yr against the explicit SH term's
+1.025 — **3.2 %**. The channel is weak because q10 rides GLOBAL mean temperature while the
+physics is TROPICAL land temperature and moisture. ⚠ **And the model has NO moisture variable
+at all** — no precipitation, soil water, drought or aridity anywhere in `R/model.R`.
+
+**✅ WHAT SURVIVES IS CORRECTNESS, AND IT IS ENOUGH.** The reverse limb moves carbon
+atm → `soil_fast` — land uptake that never passes through vegetation — at `alpha13 = 1`, and
+`add_flux`'s guard is STRUCTURALLY BLIND to it because it only fires on `alpha13 != 1`. In the
+SH that is **61 % of ENSO-active months and twice the forward limb's carbon**.
+⇒ **REVISED RECOMMENDATION: make the term ONE-WAY, do NOT split it into two FITTED channels.**
+One coefficient per hemisphere as now, no new coordinate. The GPP/moisture limb is the one the
+model LACKS ENTIRELY. ⚠ Fire, the third observed limb, stays unrepresented either way.
+
+**⚠ AND THE PRE-CHECK'S FIRST RUN PRINTED AN EMPTY TABLE RATHER THAN ERRORING**: `alpha_photo`
+lives in the AUX list, so `v$p$alpha_photo` was NULL, `(NULL - 1) * 1000` is `numeric(0)`, and
+that flows through `sprintf()` as `character(0)`. The same silent zero-length class as
+[[intersect_is_a_silent_default]]. Guarded with `stopifnot(length(...) == 1L)`.
+
+**THE GATE LEDGER** (`DG_LEDGER` + `dg_print_ledger()` in `lib_design_gates.R`, printed by the
+canonical report). Each gate now declares SOURCE CLASS, BOUND + claim kind, SCORED?, and
+POWER. The last column is the one nobody had written down, and it re-reads the whole set:
+* **GATE Q is the ONLY genuinely out-of-sample gate.** Everything else restates a scored
+  stream or rests on another model.
+* **⛔ GATE 7's STANDING FAILURE IS A SIGMA MISMATCH, NOT A MODEL DEFECT.** The likelihood
+  scores the land sink at `LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE` = 0.5 × 3.0 = **1.50**
+  GtC/yr; the gate judges the SAME stream on the SAME data at **0.50**. A deliberate 3×
+  stricter re-judgement that had never said so. Computed in the ledger, not quoted.
+* Gate 7's source is also MIXED — GCB's ocean sink is a model product, its land sink a residual.
+* Gates 4 and 5 have NO BOUND and cannot fail; gate 4 is near-algebraic in fitted quantities.
+* **⛔ NOT ONE LAW-DERIVED GATE EXISTS.** Candidates named, none built: carbonate/Revelle,
+  Henry's-law solubility, and — most valuable, since gate 12a reports an ocean-CAPACITY defect
+  it cannot localise — **ocean DIC inventory vs GLODAP**, observational and currently ungated.
+
+**Verdict on "rewrite the gates from scratch": NO — restructure.** The estimators are the
+expensive part and they are sound (gate 5's parabolic peak refinement, gate 7's linear end
+extrapolation matched to the objective, gate 4's self-consistent scaled denominator). The
+deficiencies are bounds, provenance and power, not sources.
+
+Suite 1457 / 6 / 2, failure set identical to baseline.
+
 ## 2026-09-02h — **BOTH SPLIT CONTRACTS HARD-ERROR, AND "BOTH ACTIVE" IS NARROWER THAN IT SOUNDS**
 
 Marcus: add a hard error where a legacy branch and a current branch are both active, and
