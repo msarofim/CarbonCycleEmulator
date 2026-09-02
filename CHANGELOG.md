@@ -2,6 +2,30 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02d — **THE MEASURED PAIR CLOSES GATE Q, AND THE ALPHAS ARE UNSETTABLE**
+
+Asked what the next model improvement should be, and tested the candidate rather than arguing it.
+`diag_alpha_as_up_precheck.R` sec.6. **STILL ADOPTS NOTHING.**
+
+**⛔ FIRST, A DEFECT THE TEST HAD TO WORK AROUND.** `alpha_as_down` / `alpha_as_up` are literals
+inside `ccx_prepare()`'s aux and are read from NOWHERE else, so setting them on a parameter list is a
+**silent no-op** — it returns an unchanged number with no error. The first attempt did exactly that
+and produced four IDENTICAL rows; the uniformity is the only reason it was caught. Third instance
+today of "a value you can set that nothing reads". The only injection point is `ccx_prepare()`, and
+the SPINUP must see the change or the run starts at the old isotopic equilibrium.
+
+**⭐ WITH THAT FIXED, THE RESULT IS DECISIVE.** Alphas changed in the spinup too, nothing refitted:
+the model as it stands gives an air-sea d13C disequilibrium of -0.040 per mille (**6.4 sigma out,
+wrong sign**); the measured pair gives **+0.741, i.e. 1.4 sigma** against Quay's 0.60 ± 0.10. Surface
+d13C_DIC moves from +0.72/+0.75 to **+1.47/+1.50**, inside the observed modern range. **Only the full
+pair works** — invasion-only lands at 5.3 sigma, evasion-only at 10.3. So this is not a knob turned
+to meet a target: two independently measured constants agree with an independent, UNSCORED
+observation only together.
+
+⚠ Still high, not centred, and the NH/SH spread is comparable to the observational sigma.
+⛔ Adopting changes the objective ⇒ every fitted vector quarantined and a refit owed. Batch it with
+any other objective-changing adoption rather than spending a refit on it alone.
+
 ## 2026-09-02c — **THE PAPERS ARRIVED: THE INVASION LIMB IS THE WRONG ONE, AND AN UNSCORED GATE FAILS**
 
 Marcus supplied `zhangquaywilbur1995.pdf` and Quay et al. 2003 (GBC 17(1)) after the first pass had

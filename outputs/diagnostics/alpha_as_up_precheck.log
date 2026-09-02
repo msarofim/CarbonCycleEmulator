@@ -159,6 +159,40 @@ PRE-CHECK: A TEMPERATURE-DEPENDENT `alpha_as_up`, PRICED BEFORE IT IS WRITTEN
     subsurface DIC. NOT TESTED HERE.
   ⛔ NOT A LICENCE TO RETUNE. It is a gate any adopted pair must still pass.
 
+
+=== 6. WHAT ADOPTING THE MEASURED PAIR WOULD DO TO GATE Q ===
+  ⛔ FIRST, A DEFECT THIS TEST HAD TO WORK AROUND AND THAT ANY ADOPTION MUST
+     FIX: `alpha_as_down` / `alpha_as_up` are LITERALS inside ccx_prepare()'s
+     aux (R/model.R:2023-2024) and are read from NOWHERE else. Setting them on
+     a parameter list is a SILENT NO-OP -- it returns a number, unchanged, with
+     no error. The first attempt at this section did exactly that and got four
+     IDENTICAL rows, which is the only reason it was caught.
+     ⇒ The one injection point is ccx_prepare() itself, patched below FOR THIS
+       TEST ONLY so the SPINUP sees the new pair too -- the preindustrial
+       isotopic equilibrium depends on it, and overriding after the spinup
+       would start the run at the OLD equilibrium.
+
+  hemispheric means of the measured pair: eps_down -0.845, eps_up -9.610
+  (a SCALAR pair, as the model's is -- the hemispheric spread is carried as a
+   residual below, not as two constants)
+
+  model as it stands       d_ml +0.719/+0.746 | diseq +0.070/-0.151 mean -0.040 |  6.4 sigma ⛔ OUTSIDE
+  measured pair (BOTH)     d_ml +1.473/+1.501 | diseq +0.850/+0.631 mean +0.741 |  1.4 sigma within 2
+  invasion limb ONLY       d_ml +1.861/+1.889 | diseq +1.244/+1.024 mean +1.134 |  5.3 sigma ⛔ OUTSIDE
+  evasion limb ONLY        d_ml +0.331/+0.359 | diseq -0.323/-0.544 mean -0.433 | 10.3 sigma ⛔ OUTSIDE
+
+  ⭐ ONLY THE FULL PAIR WORKS. Either limb alone over- or undershoots, so this
+     is not a knob being turned to meet a target -- it is two independently
+     MEASURED constants that only agree with the observation together.
+  ⇒ GATE Q goes from 6.4 sigma OUT WITH THE WRONG SIGN to 1.4 sigma.
+  ⚠ AND IT IS STILL HIGH, not centred: the mean sits above the observation and
+    the NH/SH spread is comparable to the observational sigma. NOTHING WAS
+    REFITTED -- though note the fit has no direct handle here, since sec.5
+    established that no stream scores this quantity.
+  ⛔ ADOPTING THIS CHANGES THE OBJECTIVE ⇒ every fitted vector is quarantined
+    and a refit is owed. That is the real cost and it should be batched with
+    any other objective-changing adoption, not spent alone.
+
 written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/alpha_as_up_precheck.rds
 
 

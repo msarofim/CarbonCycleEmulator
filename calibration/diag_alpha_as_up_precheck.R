@@ -410,12 +410,76 @@ cat("    below a 50-75 m surface layer, and a deeper box mixes in lighter\n")
 cat("    subsurface DIC. NOT TESTED HERE.\n")
 cat("  ⛔ NOT A LICENCE TO RETUNE. It is a gate any adopted pair must still pass.\n")
 
+sep("6. WHAT ADOPTING THE MEASURED PAIR WOULD DO TO GATE Q")
+cat("  ⛔ FIRST, A DEFECT THIS TEST HAD TO WORK AROUND AND THAT ANY ADOPTION MUST\n")
+cat("     FIX: `alpha_as_down` / `alpha_as_up` are LITERALS inside ccx_prepare()'s\n")
+cat("     aux (R/model.R:2023-2024) and are read from NOWHERE else. Setting them on\n")
+cat("     a parameter list is a SILENT NO-OP -- it returns a number, unchanged, with\n")
+cat("     no error. The first attempt at this section did exactly that and got four\n")
+cat("     IDENTICAL rows, which is the only reason it was caught.\n")
+cat("     ⇒ The one injection point is ccx_prepare() itself, patched below FOR THIS\n")
+cat("       TEST ONLY so the SPINUP sees the new pair too -- the preindustrial\n")
+cat("       isotopic equilibrium depends on it, and overriding after the spinup\n")
+cat("       would start the run at the OLD equilibrium.\n")
+.orig_prepare <- ccx_prepare
+AP_OVR <- new.env(); AP_OVR$dn <- NULL
+ccx_prepare <- function(p, ...) {
+  a <- .orig_prepare(p, ...)
+  if (!is.null(AP_OVR$dn)) { a$alpha_as_down <- 1 + AP_OVR$dn / 1000
+                             a$alpha_as_up   <- 1 + AP_OVR$up / 1000 }
+  a }
+ap_diseq <- function(dn, up, lab) {
+  AP_OVR$dn <- dn; AP_OVR$up <- up
+  q <- sl_overlay(md$par_mode, md$pump_mode); q <- ccx_set_enso(q, md$par_mode)
+  s2 <- ccx_spinup(q)
+  # the override HELD -- asserted, not assumed, given what sec.6 opens with
+  if (!is.null(dn)) stopifnot(abs((s2$aux$alpha_as_down - 1) * 1000 - dn) < 1e-9)
+  F2 <- ccx_build_forcing("historical", AP_YEARS, prod_c14 = 0, bomb_total_kmol = 102)
+  F2$c14_cosmo <- s2$prod_c14
+  F2$c14_bomb  <- F2$c14_bomb * (md$par_mode$bomb_total / 102)
+  for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH"))
+    F2[[cc]] <- F2[[cc]] * md$par_mode$luc_scale
+  attr(F2, "luc_scale") <- md$par_mode$luc_scale
+  o2 <- ccx_run_fast(s2, F2)$out; j <- which.min(abs(o2$t - AP_Q_YEAR))
+  dml <- vapply(HEMIS, function(h) 1000 * (o2[[paste0("ml_C13_", h)]][j] /
+                (o2[[paste0("ml_C_", h)]][j] * ccx_const("R13_VPDB")) - 1), 0)
+  dqq <- vapply(HEMIS, function(h) (dml[[h]] - st[[h]]$eps_dicg) -
+                o2[[paste0("d13c_", h)]][j], 0)
+  n_sd <- abs(mean(dqq) - AP_Q_DISEQ) / AP_Q_DISEQ_SD
+  cat(sprintf("  %-24s d_ml %+6.3f/%+6.3f | diseq %+6.3f/%+6.3f mean %+6.3f | %4.1f sigma %s\n",
+              lab, dml[["NH"]], dml[["SH"]], dqq[["NH"]], dqq[["SH"]], mean(dqq), n_sd,
+              if (n_sd <= 1) "INSIDE" else if (n_sd <= 2) "within 2" else "⛔ OUTSIDE"))
+  AP_OVR$dn <- NULL; c(mean = mean(dqq), n_sd = n_sd) }
+edn <- mean(vapply(HEMIS, function(h) st[[h]]$eps_dn, 0))
+eup <- mean(vapply(HEMIS, function(h) st[[h]]$eps_up, 0))
+cat(sprintf("\n  hemispheric means of the measured pair: eps_down %+.3f, eps_up %+.3f\n", edn, eup))
+cat("  (a SCALAR pair, as the model's is -- the hemispheric spread is carried as a\n")
+cat("   residual below, not as two constants)\n\n")
+AD <- list()
+AD$incumbent <- ap_diseq(NULL, NULL, "model as it stands")
+AD$both      <- ap_diseq(edn,  eup,  "measured pair (BOTH)")
+AD$inv       <- ap_diseq(edn,  eps_up, "invasion limb ONLY")
+AD$eva       <- ap_diseq(eps_dn, eup, "evasion limb ONLY")
+ccx_prepare <- .orig_prepare       # restore, so nothing below inherits the patch
+cat("\n  ⭐ ONLY THE FULL PAIR WORKS. Either limb alone over- or undershoots, so this\n")
+cat("     is not a knob being turned to meet a target -- it is two independently\n")
+cat("     MEASURED constants that only agree with the observation together.\n")
+cat(sprintf("  ⇒ GATE Q goes from %.1f sigma OUT WITH THE WRONG SIGN to %.1f sigma.\n",
+            AD$incumbent[["n_sd"]], AD$both[["n_sd"]]))
+cat("  ⚠ AND IT IS STILL HIGH, not centred: the mean sits above the observation and\n")
+cat("    the NH/SH spread is comparable to the observational sigma. NOTHING WAS\n")
+cat("    REFITTED -- though note the fit has no direct handle here, since sec.5\n")
+cat("    established that no stream scores this quantity.\n")
+cat("  ⛔ ADOPTING THIS CHANGES THE OBJECTIVE ⇒ every fitted vector is quarantined\n")
+cat("    and a refit is owed. That is the real cost and it should be batched with\n")
+cat("    any other objective-changing adoption, not spent alone.\n")
+
 OUTDIR <- ccx_path("outputs", "diagnostics")
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 saveRDS(list(state = st, candidates = cand, response = res, zhang_zero_degC = zc,
              model_pair = c(eps_down = eps_dn, eps_up = eps_up),
              measured_pair = lapply(st, function(x) x[c("eps_dn", "eps_up", "eps_dicg")]),
-             diseq = list(model = dq, obs = c(AP_Q_DISEQ, AP_Q_DISEQ_SD)),
+             diseq = list(model = dq, obs = c(AP_Q_DISEQ, AP_Q_DISEQ_SD)), adopt = AD,
              xcheck = c(fit = sx, independent = AP_Z_XCHECK)),
         file.path(OUTDIR, "alpha_as_up_precheck.rds"))
 cat(sprintf("\nwritten: %s\n\n\n=== DONE ===\n",
