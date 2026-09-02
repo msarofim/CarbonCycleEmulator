@@ -1,0 +1,119 @@
+
+==============================================================================
+PRIOR SCREEN AT THE 25-PARAMETER MODE -- BOTH CLUSTER REPRESENTATIVES
+==============================================================================
+⛔ ADOPTS NOTHING. CCX_MODE_CANONICAL untouched; every mode read by path.
+
+  A: cluster 1 (cold init)               logpost   -1495.795019  converged
+
+  B: cluster 2 (obs-implied partition)   logpost   -1495.797205  converged
+
+------------------------------------------------------------------------------
+GATE 1 -- stored prior_z vs recomputed under TODAY's priors
+------------------------------------------------------------------------------
+  A: cluster 1 (cold init)               max |recomputed - stored| = 1.31e-11  OK
+  B: cluster 2 (obs-implied partition)   max |recomputed - stored| = 4.04e-12  OK
+
+==============================================================================
+THE SCREEN -- |z| RANKED, WITH EACH PRIOR'S PROVENANCE
+==============================================================================
+  BRACKET    = width is a MEASURED ambiguity (ccx_bracket_lnorm)
+  JUDGEMENT  = width is a CHOSEN number the code labels as chosen
+  UNLABELLED = the code does not say. NOT the same as measured.
+
+  parameter                   z(A)      z(B)     B - A  prior width
+  sst_seas_amp_SH            -4.71     -4.71      0.00  JUDGEMENT
+  rep_dC                      3.60      3.62      0.02  UNLABELLED
+  sst_seas_amp_NH            -2.95     -2.96     -0.00  JUDGEMENT
+  q10                        -2.64     -2.64     -0.00  UNLABELLED
+  npp_frac_NH                -2.28     -2.28     -0.00  JUDGEMENT
+  tau_ex                     -1.85     -1.85     -0.00  UNLABELLED
+  bomb_total                  1.49      1.49     -0.00  UNLABELLED
+  seas_lag_p_NH              -1.06     -1.06     -0.00  UNLABELLED
+  fert_k                     -1.05     -1.05      0.00  UNLABELLED
+  beta_max                   -0.77     -0.77      0.00  UNLABELLED
+  gamma_enso_land_SH          0.68      0.68      0.00  UNLABELLED
+  seas_T_amp_SH              -0.64     -0.64      0.00  BRACKET
+
+==============================================================================
+PRICED ON THE RATIO -- fitted against what the prior centres on
+==============================================================================
+  This is the founded comparison for a JUDGEMENT width, where the z is
+  partly a statement about a number someone chose.
+
+  parameter                fitted(A) prior centre  ratio(A)  ratio(B)  provenance
+  beta_max                    0.6627      1.5000     0.442     0.442  UNLABELLED
+  fert_k                    308.9580   1010.0000     0.306     0.307  UNLABELLED
+  q10                         1.0331      2.0000     0.517     0.516  UNLABELLED
+  tau_ex                      0.8190      1.3000     0.630     0.630  UNLABELLED
+  npp_frac_NH                 0.5076      0.5986     0.848     0.848  JUDGEMENT
+  seas_T_amp_NH              15.2905     14.3215     1.068     1.067  BRACKET SEAS_T_AMP_NH_OBS [11.445, 17.921]
+  seas_T_amp_SH               4.0537      5.0502     0.803     0.804  BRACKET SEAS_T_AMP_SH_OBS [3.592, 7.101]
+  seas_lag_p_NH               1.4568      2.2500     0.647     0.647  UNLABELLED
+  sst_seas_amp_NH             1.0690      2.2374     0.478     0.477  JUDGEMENT
+  sst_seas_amp_SH             0.5375      1.7464     0.308     0.308  JUDGEMENT
+  gamma_enso_land_SH          1.3583     -0.0000    +1.358    +1.361  UNLABELLED  (OFFSET, prior centred 0 -- no ratio exists)
+  bomb_total                118.4339    102.0000     1.161     1.161  UNLABELLED
+  rep_dC                      3.5999     -0.0000    +3.600    +3.616  UNLABELLED  (OFFSET, prior centred 0 -- no ratio exists)
+
+------------------------------------------------------------------------------
+THE FOUR ENSO COEFFICIENTS -- the new coordinates, prior N(0, 2)
+------------------------------------------------------------------------------
+  parameter               fitted(A)  fitted(B)      z(A)      z(B)
+  gamma_enso_land_NH        -0.2457    -0.2477     -0.12     -0.12
+  gamma_enso_land_SH         1.3583     1.3614      0.68      0.68
+  gamma_enso_ocn_NH         -0.9502    -0.9466     -0.48     -0.47
+  gamma_enso_ocn_SH          1.1870     1.1840      0.59      0.59
+
+==============================================================================
+AGAINST THE ANCESTORS -- shared names only, EACH GATED SEPARATELY
+==============================================================================
+
+------------------------------------------------------------------------------
+from90   <- calibration/output/refit_20260825f_from90/mode_fit_pumpN.rds
+------------------------------------------------------------------------------
+  21 parameters; 19 shared with the 25-par set.
+  lag field(s): seas_lag_p   |   ENSO field(s): gamma_enso
+  prior UNCHANGED for 17; MOVED for 2; unevaluable for 0.
+    ⛔ PRIOR MOVED (delta z at the SAME value): h_ml 0.17, kz 1.38
+
+------------------------------------------------------------------------------
+inc0830   <- calibration/output/refit_20260831_seas_lag_split/from90/mode_fit_pumpN.rds
+------------------------------------------------------------------------------
+  21 parameters; 19 shared with the 25-par set.
+  lag field(s): seas_lag_p   |   ENSO field(s): gamma_enso
+  prior UNCHANGED for 18; MOVED for 1; unevaluable for 0.
+    ⛔ PRIOR MOVED (delta z at the SAME value): kz 1.55
+
+------------------------------------------------------------------------------
+bas0831e   <- calibration/output/polish_20260831_probe_basin/from90/mode_fit_pumpN.rds
+------------------------------------------------------------------------------
+  22 parameters; 21 shared with the 25-par set.
+  lag field(s): seas_lag_p_NH, seas_lag_p_SH   |   ENSO field(s): gamma_enso
+  prior UNCHANGED for 20; MOVED for 1; unevaluable for 0.
+    ⛔ PRIOR MOVED (delta z at the SAME value): kz 1.14
+
+==============================================================================
+ATTRIBUTION -- z by stage. A BLANK cell = that stage's prior GATE failed,
+which means NOT COMPARABLE, not 'no change'.
+⚠ 08-30 -> 08-31e MOVES TWO THINGS AT ONCE (the lag split AND the basin), so a
+  change in that column attributes to NEITHER on its own.
+==============================================================================
+  parameter                from90  inc0830 bas0831e  NOW(25)  prior width
+  seas_T_amp_SH             -4.64    -4.54    -0.63    -0.64  BRACKET
+  npp_frac_NH                1.25     1.15    -2.26    -2.28  JUDGEMENT
+  h_ml                          .    -1.87     0.44     0.36  UNLABELLED
+  seas_T_amp_NH              2.20     2.31     0.28     0.29  BRACKET
+  sst_seas_amp_SH           -6.32    -5.63    -4.73    -4.71  JUDGEMENT
+  tau_ex                    -0.46    -0.50    -1.81    -1.85  UNLABELLED
+  grad_off_co2              -0.36    -0.34     0.38     0.42  UNLABELLED
+  rep_dC                     3.38     3.06     3.68     3.60  UNLABELLED
+  luc_scale                  0.37     0.14    -0.24    -0.24  UNLABELLED
+  sst_seas_amp_NH           -3.48    -2.95    -2.98    -2.95  JUDGEMENT
+  fert_k                    -1.49    -1.37    -1.03    -1.05  UNLABELLED
+  q10                       -2.26    -2.28    -2.64    -2.64  UNLABELLED
+
+==============================================================================
+⛔ ADOPTS NOTHING. A screen says where a mode SITS against its priors;
+   it does not say the mode is wrong, and a JUDGEMENT width cannot say it.
+==============================================================================
