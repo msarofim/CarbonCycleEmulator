@@ -209,6 +209,15 @@ fetch("nino34",
 # fixed and isolates METHOD -- which is how 2026-09-02 established that the
 # extraction in diag_enso_index_baseline.R is right (r 1.0000 against this file)
 # and that the 15 % amplitude gap is between nina34.data and CPC, not in our code.
+# ⛔ MEI.ext's FLAT FILE IS 404 upstream (the note in build_calibration_data.R is
+# right). Only the HTML table survives, so it is fetched as HTML and PARSED, and
+# the copy in downloads/ is tracked rather than assumed re-fetchable.
+fetch("mei_ext",
+      "https://psl.noaa.gov/enso/mei.ext/table.ext.html",
+      "mei_ext_table.html",
+      "Wolter K, Timlin MS (2011) Int J Climatol 31:1074-1087. Extended MEI (SLP+SST).",
+      "1871-2005, bimonthly; normalised to mean 0 / sd 1 over its own 135 years")
+
 fetch("nino34_cpc_v5",
       "https://www.cpc.ncep.noaa.gov/data/indices/ersst5.nino.mth.91-20.ascii",
       "ersst5.nino.mth.91-20.ascii",
