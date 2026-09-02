@@ -208,3 +208,40 @@ one **in its timestamp and nothing else**.
 **Memory written this session:** `ccx_enso_demean_shipped`, `ccx_enso_pre1948_extension`,
 `ccx_spo_constants_registry`; `ccx_enso_index_baseline` updated to ADOPTED, `INDEX_ccx.md` and
 `MEMORY.md` re-pointed and two stale lines fixed.
+
+---
+
+## 9. ⭐ ADDENDUM — THE REFIT IS RUNNING (added same day, after the review Marcus asked for)
+
+**Torch job `16805561`**, `sbatch --array=0-45%10`, outputs in
+`calibration/output/multistart_20260902_demean25/`, bundle at commit `5c35033`.
+Preflight `16805527` (ids 0-5, 25, 45): **all 8 LAUNCHABLE**, port VERIFIED **rel 2.5e-13** against
+a 1e-8 tolerance, **0.32 s/eval** ⇒ a 6000-eval restart projects to ~32 min of a 180 min budget.
+
+### ⛔ THE REVIEW FOUND TWO HAZARDS, BOTH SILENT, BOTH CREATED BY THIS SAME DAY'S WORK
+1. ⭐ **A 09-01 CHECKPOINT WOULD HAVE BEEN RESUMED INTO A DIFFERENT OBJECTIVE.** The resume guard
+   refused stale checkpoints on `param_names` — written 09-01j because the parameter SET had moved
+   twice in three days. But 09-02 moved the **OBJECTIVE** three times at a **constant 25 names**.
+   Verified against the real file: `start_000_ckpt.rds` carries 25 matching names and no objective
+   stamp, so it would have been **waved through** with a pre-adoption `best` of −1495.795.
+   **Fixed**: every checkpoint now stamps the fixed reference point's own value and the resume
+   re-reads it. Mutation-tested three ways, including that a correct stamp still RESUMES.
+   ⇒ **A name that pins the PARAMETER SET does not pin the OBJECTIVE.** Hence `_demean25`.
+2. **`port_targets.csv` was stale** (09-01, `53ef03d`) and would have failed every task — the gate
+   working, not a bug. Regenerated at `eae5d92`.
+
+### ⭐ AND THE KNOWN POINTS REORDERED
+`start_000` −1495.7950 → **−1512.0151**; `new_basin` −1500.0507 → **−1496.2524**; `incumbent`
+−1551.1222 → −1543.6880. **09-01 had `start_000` ahead by 4.26; today `new_basin` leads by 15.76.**
+⇒ §8's "the refit starts from −1512.02" names where Ruling A was **priced**, not the best available
+start — and a ranking that flips under an objective change is the argument for the **dispersed
+survey**, which is what was launched. Best point at preflight: **id 4 (new_basin + ENSO seeding),
+−1491.5671.**
+
+### ⇒ WHAT TO DO WHEN IT LANDS
+- `squeue -u ms17839 -j 16805561`; logs in `/scratch/ms17839/CarbonCycleEmulator/logs/`.
+- ⚠ **"OUT OF TIME" is a NORMAL exit**, not a SLURM kill — tasks checkpoint at the 180 min budget
+  and a re-submit RESUMES them (and the new stamp now proves the objective has not moved under them).
+- ⚠ **ROUND 2 IS NOT THE SAME ARRAY AGAIN** — re-submit only the fixed starts and round 1's best
+  dispersed ids. Resuming all 40 spends three times the fairshare on tasks already 50+ behind.
+- ⛔ **THE DRIVER ADOPTS NOTHING.** Ranking and adoption are separate, and adoption is Marcus's.
