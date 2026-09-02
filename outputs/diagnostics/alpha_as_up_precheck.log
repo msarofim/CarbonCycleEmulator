@@ -1,0 +1,113 @@
+
+==============================================================================
+PRE-CHECK: A TEMPERATURE-DEPENDENT `alpha_as_up`, PRICED BEFORE IT IS WRITTEN
+  IMPLEMENTS NOTHING. R/model.R, src/ccx_core.cpp, R/constants.R untouched.
+==============================================================================
+
+
+=== 0. THE MODEL'S PAIR, AS IT STANDS ===
+  alpha_as_down = 0.998000  -> eps_down =  -2.00 permil  (kinetic,     atm -> ocean)
+  alpha_as_up   = 0.990000  -> eps_up   = -10.00 permil  (equilibrium, ocean -> atm)
+  ⇒ the PAIR implies a steady-state surface offset d_ml - d_atm = +8.00 permil
+  ⚠ NEITHER IS IN `R/constants.R`. Both are literals carrying the word
+    "provisional" without being in the provisional-constant LEDGER that
+    exists to track exactly this. Registering them is a prerequisite to
+    changing them: an unregistered constant cannot be found by the audit.
+
+
+=== 1. THE MEASURED FRACTIONATION, AT THE MODEL'S OWN SST AND CARBONATE STATE ===
+  NH: SST  18.00 degC (in Zhang range) | fCO3 0.0856 (in range) | seasonal SST half-amp 1.069 K
+  SH: SST  16.00 degC (in Zhang range) | fCO3 0.0786 (in range) | seasonal SST half-amp 0.537 K
+
+  Zhang et al. 1995, eps_DIC-g = 0.014*T*fCO3 - 0.105*T + 10.53 permil:
+    NH  eps_DIC-g = +8.662 permil  ⇒ eps_up = -8.662  |  d(eps_up)/dT = +0.1038 permil/K
+    SH  eps_DIC-g = +8.868 permil  ⇒ eps_up = -8.868  |  d(eps_up)/dT = +0.1039 permil/K
+
+  GATE X -- the independent application of the same paper: -0.1056 permil/degC
+  this fit at the model's mean fCO3:                       -0.1039 permil/degC  (rel 0.016) -> AGREE
+
+
+=== 2. THE FOUR CANDIDATE SLOPES -- AND WHICH FUNCTIONAL FORM MARCUS'S ANCHOR NEEDS ===
+  law                                  d eps/dT   vs Zhang
+  Zhang 1995 (MEASURED)                 +0.1039       0.0 %
+  Mook, as recalled (1/T)               +0.1142      10.0 %
+  boiling anchor, 1/T form              +0.1371      32.0 %
+  boiling anchor, LINEAR form           +0.1059       2.0 %
+  critical anchor, 1/T form             +0.0563     -45.8 %
+  critical anchor, LINEAR form          +0.0251     -75.9 %
+
+  ⭐ Zhang's LINEAR fit crosses eps = 0 at 101.4 degC = 374.5 K.
+     Marcus's anchor is the BOILING POINT, 373.1 K -- a gap of 1.4 K.
+     ⚠ That is an EXTRAPOLATION 4x beyond the fit's stated range and Zhang
+       claims nothing at 100 degC. But it is independent of the anchor, and
+       it lands on it. ⇒ THE ANCHOR IS RIGHT AND THE 1/T FORM IS WHAT WAS
+       WRONG: the same anchor with a LINEAR law reproduces the measurement.
+       Mook, as recalled, crosses zero at 396.9 K -- also near boiling.
+
+
+=== 3. THE PRE-CHECK -- HOW BIG IS THE SEASONAL ATMOSPHERIC d13C SIGNAL? ===
+  A seasonal SST cycle modulates eps_up, which modulates the ISOTOPIC RATIO
+  of the evasion limb only. For a sinusoid at omega = 2*pi/yr, well above the
+  air-sea relaxation rate F_up/M_atm, the atmospheric response is
+      amplitude(d13C_atm) = F_up * amplitude(eps_up) / (M_atm * omega)
+  ⚠ ANALYTIC AND HEMISPHERICALLY LOCAL: it ignores interhemispheric exchange
+    and the ocean's own d13C response, both of which DAMP it. So this is an
+    UPPER bound on the term, which is the right side to err on for a gate
+    whose purpose is to kill a mechanism.
+
+  hem        F_up      M_atm  d eps/dT   amp eps | amp d13C_atm     OBSERVED    ratio
+           GtC/yr        GtC  permil/K    permil |   permil p-p   permil p-p         
+  NH        45.51     452.38   +0.1038    0.1110 |      0.00355       0.3567   0.0100
+  SH        65.34     450.30   +0.1039    0.0558 |      0.00258       0.0337   0.0766
+
+  stations: NH -> MLO, SH -> SPO (the two d13c_seasonal_* rows)
+  GATE M: global atmosphere 902.7 GtC at 425.0 ppm ⇒ 2.1240 GtC/ppm vs the constant 2.1240 -> PASS
+
+
+=== 3b. AGAINST THE ROWS' RESIDUAL -- WHICH IS WHAT sec.3's VERDICT ASKS FOR ===
+  7 % of an OBSERVABLE is not the same statement as 7 % of what the model
+  gets WRONG on that observable. And an amplitude alone cannot say whether a
+  term helps: two vectors of the same size ADD or CANCEL by their PHASE.
+
+  ⚠ THE RESPONSE PHASE IS DERIVED, NOT MEASURED. eps_up rises with SST, so
+    the evasion limb sends ISOTOPICALLY HEAVIER carbon up in local summer;
+    the atmosphere INTEGRATES that, so its anomaly lags the SST peak by a
+    quarter cycle. The model's SST peaks at month 3.5 + CCX_SST_SEAS_LAG + 3
+    in the NH and six months later in the SH (the sign flip at model.R:1421).
+
+  hem       model     mo |   observed     mo |   RESIDUAL     mo |    omitted     mo |  |term|/
+           permil        |     permil        |     permil        |     permil        |  |resid|
+  NH       0.3463   9.52 |     0.3567   9.41 |     0.0240   1.31 |    0.00355  10.82 |    0.148
+  SH       0.0643   3.12 |     0.0337   3.24 |     0.0307   2.99 |    0.00258   4.82 |    0.084
+
+  and what the term would DO to each residual, added as a vector:
+  NH   (MLO) residual 0.0240 -> 0.0252 permil  (+4.85 %)  phase gap -2.49 months ⇒ GROWS it
+  SH   (SPO) residual 0.0307 -> 0.0323 permil  (+5.04 %)  phase gap +1.83 months ⇒ GROWS it
+
+
+=== 4. SCORED ===
+  the omitted term is 1.00 % (NH) / 7.66 % (SH) of the OBSERVED seasonal d13C.
+  that is 1.1 orders of magnitude below the observable at its largest.
+  against the ROWS' RESIDUAL it is 14.8 % (NH) / 8.4 % (SH).
+
+  ⚠ SIGN ROBUSTNESS. The effect goes as |term| x cos(phase gap), so it flips
+    at a gap of 3.00 months. The gaps and their margins:
+      NH  gap -2.49 mo, 0.51 mo from the flip -> the sign is ⚠ MARGINAL
+      SH  gap +1.83 mo, 1.17 mo from the flip -> the sign is robust
+
+  ⇒ NOT THE EXPLANATION. The term is 8-15 % of what the model already gets 
+    WRONG on the two rows that carry the veto, and at the derived phase it 
+    moves both residuals the WRONG WAY by ~5 %. A flag worth -12.2 prior-sd 
+    cannot be paid for out of a term this size whichever way it points. 
+    ⇒ IT IS REAL PHYSICS AND IT IS STILL NOT THE ANSWER -- which is exactly 
+      the outcome handoff §5 said was worth an afternoon rather than a refit.
+
+  ⛔ AND THE MEAN VALUE IS A SEPARATE QUESTION FROM THE SLOPE. Zhang puts
+     eps_up at -8.66 / -8.87 permil (NH/SH) against the model's hardcoded -10.00;
+     that is a CONSTANT offset on the evasion limb, it moves the steady-state
+     d_ml - d_atm, and it is the 5a question. It is NOT priced here.
+
+written: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/alpha_as_up_precheck.rds
+
+
+=== DONE ===

@@ -2,6 +2,50 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-02b — **`alpha_as_up` PRICED: REAL PHYSICS, AND STILL NOT THE ANSWER**
+
+`handoff_2026-09-01f` §5's pre-check, run before anything was written.
+`calibration/diag_alpha_as_up_precheck.R`, ~30 s. **IMPLEMENTS NOTHING** — `R/model.R`,
+`src/ccx_core.cpp` and `R/constants.R` are all untouched.
+
+**⭐ THE SLOPE IS NO LONGER AN ANCHOR-DERIVED GUESS.** Marcus pointed at Broecker & Maier-Reimer
+1992 or Mook; neither is in `ClaudeDocs/Papers/` and AGU refused the fetch. What surfaced instead is
+the laboratory measurement both rest on — **Zhang, Quay & Wilbur (1995), GCA 59, 107–114**, whose
+seawater fit is `eps_DIC-g = 0.014*T*fCO3 - 0.105*T + 10.53` per mille for 5–25 °C and
+0.05 < fCO3 < 0.20. The model's own state sits inside both ranges (NH 18 °C / fCO3 0.086; SH 16 °C /
+0.079), giving **d(eps_up)/dT = +0.104 per mille/K**. ⚠ Quoted from SECONDARY sources — the PDF is
+not on disk — and therefore cross-checked against an independent application of the same paper
+(CROCCA-2S 13C Suess study: 0.18 °C/decade ⇒ −0.019 per mille/decade = −0.1056 per mille/°C). The two
+agree to 1.6 %. **Get the PDF before shipping a constant; a cross-checked secondary quote is enough
+to price a mechanism and not enough to adopt one.**
+
+**⭐ AND MARCUS'S ANCHOR IS RIGHT — THE `1/T` FORM WAS WHAT WAS WRONG.** Against the measured
++0.104: the boiling-point anchor with a `1/T` law gives +0.137 (**+32 %**), with a LINEAR law
+**+0.106 (+2 %)**; the critical-point anchor gives −46 %; Mook as recalled +10 %. And Zhang's linear
+fit crosses eps = 0 at **101.4 °C = 374.5 K**, 1.4 K from the boiling point — an independent
+corroboration of the anchor from data that knew nothing about it. (⚠ A 4× extrapolation beyond the
+fit's stated range; Zhang claims nothing at 100 °C.)
+
+**⛔ THE MECHANISM IS NOT THE EXPLANATION FOR THE −12.2 FLAG.** The analytic response
+`amp(d13C_atm) = F_up * amp(eps_up) / (M_atm * omega)` — an UPPER bound, since it ignores
+interhemispheric exchange and the ocean's own d13C response — gives 0.0036 (NH) / 0.0026 (SH) per
+mille peak-to-peak. That is 1.0 % / 7.7 % of the OBSERVED seasonal d13C, and **14.8 % / 8.4 % of what
+the model already gets WRONG on the two rows that carry the veto**. At the derived phase it moves
+BOTH residuals the wrong way by ~5 %. ⚠ The phase is derived, not measured, and the effect goes as
+cos(gap), so its sign flips at a 3-month gap: the SH gap (+1.83 mo) is robust, the **NH gap (−2.49 mo)
+is MARGINAL, 0.51 mo from flipping**. Either way, a flag worth −12.2 prior-sd cannot be paid for out
+of a term this size. Real physics; not the answer — which is exactly the outcome §5 said was worth an
+afternoon rather than a refit.
+
+**Not priced, and deliberately separated: the MEAN value.** Zhang puts eps_up at −8.66 / −8.87 per
+mille against the model's hardcoded −10.00. That is a constant offset on the evasion limb and it is
+the §5a question. ⚠ It also exposes a tension the pair cannot hold: reproducing Zhang's equilibrium
+offset (~+8.8 per mille) while keeping a −2 per mille kinetic invasion term needs eps_down ≈ 0.
+
+**⚠ Still owed, and a prerequisite to changing either:** `alpha_as_down` / `alpha_as_up` are literals
+at `R/model.R:2023-2024` (mirrored `src/ccx_core.cpp:477-478`) carrying the word "provisional"
+without being in the provisional-constant LEDGER that exists to track exactly this.
+
 ## 2026-09-02 — **THE 2×2 RE-PRICED: THE LAND *PARAMETER* CLOSED, THE LAND *LIMB* GOT WORSE**
 
 `handoff_2026-09-01f` §4's check, run. `calibration/diag_2x2_repriced_at_enso25.R` on the new
