@@ -2,6 +2,56 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-03 — ⭐ **THE 25-PARAMETER REFIT LANDED: ONE BASIN AT −1482.6144**
+
+Torch jobs `16805561` (ids 0–19) + `16814121` (ids 20–45, resubmitted). **46 of 46 tasks
+COMPLETED, 42 converged.** Results in `calibration/output/multistart_20260902_demean25/`.
+
+| | logpost | n | converged |
+|---|---|---|---|
+| **cluster A** | **−1482.6144 / −1482.6145** | **38** | 35/38 |
+| cluster B | −1482.7079 / −1482.7080 | 7 | 7/7 |
+| outlier (id 26) | −1543.8553 | 1 | **0/1 — hit the wall** |
+
+**THE GAIN, against every reference measured on the same objective:**
+• vs the incumbent −1543.6880 → **+61.07**  • vs the 09-01 basin −1512.0151 → **+29.40**
+• vs `new_basin` −1496.2524 → **+13.64**  • vs the best preflight point −1491.5671 → **+8.95**
+
+⭐ **THE COLD INIT REACHED IT.** Id 0 starts at −18986 and lands on −1482.6144, the same value as
+the warm starts — so the optimum is reachable without being told where it is.
+
+### ⛔ CLUSTER B IS NOT A SECOND BASIN, AND THE OUTLIER IS NOT A THIRD
+Measured on the same instrument the 09-01 survey used for its own "one basin" claim:
+• within A, max pairwise u-distance **0.0119**; within B, **0.000748**; **A↔B 0.1712**.
+• ⭐ **95 % of that separation is ONE coordinate: `h_ml`** (0.163 of 0.171). Everything else is at
+  noise level. In physical units **148.33 m vs 154.00 m — 3.8 % apart, worth 0.0936 log-units**,
+  against an h_ml spread WITHIN cluster A of 147.94–148.34 m across 38 tasks.
+⇒ **A shallow `h_ml` ridge, which is the step-instability this project already knows about** — not
+a basin. And **id 26 is one of the 4 tasks that never converged**, so its −1543.86 is an unfinished
+run, not structure. **The survey found ONE basin.**
+
+### ⛔ AND THE REASON THE 09-01 BASIN WAS NOT ADOPTED STILL APPLIES — ONE FLAG WORSE, ONE NEW
+prior-z at the winner: **5 coordinates |z| > 2, three of them |z| > 3.**
+
+| | 09-01 basin | refit winner |
+|---|---|---|
+| `sst_seas_amp_SH` | −4.71 | **−5.14** (worse) |
+| `rep_dC` | +3.60 | +3.59 (unchanged) |
+| `sst_seas_amp_NH` | not flagged | **−3.56 (NEW)** |
+| `q10` / `npp_frac_NH` | — | −2.58 / −2.15 |
+
+⚠ **BOTH seasonal SST amplitudes are now pushed hard below their priors**, which lands squarely on
+the ACTIVE seasonal arc. ⛔ **This is an argument against adopting the vector as-is**, and adoption
+is Marcus's call in any case — the driver writes `start_<id>.rds` and no mode file.
+⚠ `fert_k` = **328.09** continues the 189→320 move; **the FACE re-check is still owed.**
+
+### ⚠ AN OPERATIONAL NOTE, AND IT WAS NOT OURS
+Array elements `_[20-45]` showed **CANCELLED by 0**. Not a limit and not the submission: at
+2026-09-02T19:02:10 the scheduler purged **1,751 pending jobs across many users** cluster-wide.
+Resubmitted as `16814121` and they all completed. ⚠ **The job ran under QoS `cpu48`** (2-day wall,
+cpu=3000), **not `cpu_short`** — so the "cpu_short = 6 h / cpu=32" figure in memory is not the cap
+that applied here.
+
 ## 2026-09-02q — **PRE-LAUNCH REVIEW: TWO THINGS WOULD HAVE CORRUPTED THE REFIT**
 
 Marcus: check the model and the Torch launch code, then run the refit. The review found two live
