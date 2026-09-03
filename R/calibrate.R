@@ -35,24 +35,40 @@ SST_SEAS_LOGSD <- 0.25
 # npp_frac_NH entry below.
 NPP_FRAC_NH_SD <- 0.04
 
-# PRIOR WIDTH on ent_seas_amp_SH, log space. A JUDGEMENT, and labelled as one
-# for the same reason SST_SEAS_LOGSD and NPP_FRAC_NH_SD are.
+# PRIOR WIDTH on ent_seas_amp_SH, log space. ⭐ DERIVED FROM A PHYSICAL
+# CEILING, NOT FROM THE RECORDED BAND -- re-derived 2026-09-03 during a
+# provenance audit of this arc's own numbers.
 #
-# WHERE 0.45 COMES FROM, AND WHY IT IS NOT 0.896. The channel's derivation
-# carries a recorded plausibility band -- "a fitted value far outside ~5-30 is
-# the channel being used as a fudge factor". Read as a +/- 1 sigma BRACKET (the
-# ccx_bracket_lnorm idiom) that band gives log-sd 0.896. It is NOT a bracket:
-# its endpoints mix two different scales (30 is the IN-BAND value, ~11 the
-# box-average one -- ENT_SEAS_AMP_SH_INBAND vs ENT_SEAS_AMP_SH_DERIV), and its
-# own wording -- "far outside" -- is a plausibility GATE, which is a 2 sigma
-# statement, not a 1 sigma one. At log-sd 0.45 the band sits at roughly +/- 2
-# sigma of the derived centre (log(30/11.07) = 0.997, log(11.07/5) = 0.795),
-# which is what the sentence actually claims.
-# ⚠ Marcus's call, 2026-09-03, taken on those numbers. The alternative offered
-# was a uniform on [0, 40]; it was rejected because an unpriored mechanism is a
-# FREE COMPENSATOR, and then a logpost gain says nothing about whether the
-# mechanism is right ([[ccx_seasonal_entrainment_hypothesis]]'s standing rule).
-ENT_SEAS_LOGSD <- 0.45
+# ⛔ WHAT IT IS NOT, AND WHY THAT MATTERS. The first version read the recorded
+# plausibility band -- "a fitted value far outside ~5-30 is the channel being
+# used as a fudge factor" -- as a 2 sigma statement and took log(30/5)/4 = 0.45.
+# That rests on the number **5**, WHICH HAS NO DERIVATION ANYWHERE. A width
+# resting on an unsourced endpoint is a chosen number wearing a measurement's
+# clothes. [[threshold_from_obs_or_law]]
+#
+# ⭐ WHAT IT IS. The parameter is the IN-BAND anomaly DILUTED onto the SH box by
+# the 40-90 S ocean-area fraction. So there is a hard geometric ceiling: the box
+# mean cannot exceed the in-band amplitude, and it reaches it only if EVERY SH
+# ocean square metre behaves like the observed 40-90 S band. That no-dilution
+# limit sits at exactly log(1 / ENT_SEAS_BAND_AREA_FRAC) = 0.99696 above the
+# centre, and reading THAT ceiling as 2 sigma gives
+#
+#     ENT_SEAS_LOGSD = log(1 / ENT_SEAS_BAND_AREA_FRAC) / 2 = 0.49848
+#
+# -- one named, registered quantity, no unsourced endpoint. ⚠ The "2 sigma"
+# remains a CONVENTION (the project's shared strictness), and is labelled one.
+#
+# ✅ AND IT CORROBORATES THE RECORDED BAND RATHER THAN DISCARDING IT: under this
+# width the band's own endpoints land at z -1.57 (5) and +2.02 (30). The 30
+# lands at 2 sigma BY CONSTRUCTION -- it IS the in-band value -- and the 5
+# falling near -1.6 is the independent check that the two readings agree.
+#
+# ⚠ MARCUS APPROVED 0.45 ON 2026-09-03, BEFORE THIS AUDIT. The change is
+# 0.45 -> 0.49848 and it is a PROVENANCE repair, not a retuning: the band both
+# readings encode is the same to within a fifth of a sigma. Flagged, not slipped in.
+# ⚠ Typed literally because CCX_PARAM_TABLE is built before ccx_const() exists;
+# test-ent-seas-fitted.R ties it to log(1/ENT_SEAS_BAND_AREA_FRAC)/2.
+ENT_SEAS_LOGSD <- 0.49848
 
 CCX_PARAM_TABLE <- list(
   # ---- CO2 fertilisation ---------------------------------------------
@@ -368,9 +384,13 @@ CCX_PARAM_TABLE <- list(
   # doing entrainment's job. P1 (the limb's PHASE, now scored by GATE S) and P3
   # (`npp_frac_NH` back inside its bounds) are corroboration, not the test.
   #
-  # THE PRIOR CENTRE IS DERIVED, NOT CHOSEN: ENT_SEAS_AMP_SH_DERIV = 11.07
-  # umol/kg is the in-band 30 diluted onto the SH box by the 40-90 S ocean-area
-  # weight 0.369. The WIDTH is a judgement -- see ENT_SEAS_LOGSD above.
+  # THE PRIOR CENTRE IS DERIVED, NOT CHOSEN: ENT_SEAS_AMP_SH_DERIV = 10.9524
+  # umol/kg is the in-band 29.68 diluted onto the SH box by the registered
+  # 40-90 S ocean-area fraction. ⭐ BOTH ARE COMPUTED from named inputs since
+  # the 2026-09-03 provenance audit -- they were typed answers with the
+  # arithmetic in prose, which is how 30 and 11.07 had already drifted from
+  # their own chain (29.68 and 10.9524). The WIDTH is derived too, from the
+  # no-dilution ceiling -- see ENT_SEAS_LOGSD above.
   # `init` is typed literally because CCX_PARAM_TABLE is built before ccx_const()
   # exists; test-likelihood.R ties each literal to its constant, as seas_T_amp_*
   # and PUMP_GRAD_OBS already are.
@@ -383,7 +403,7 @@ CCX_PARAM_TABLE <- list(
   # not a defect to route around. ⚠ `tau_ex_seas_amp` is STILL implemented,
   # defaulted 0 and unfitted; it was deliberately NOT freed here, so that P2 has
   # one mechanism to attribute to.
-  ent_seas_amp_SH = list(tr = "log", init = 11.07,
+  ent_seas_amp_SH = list(tr = "log", init = 10.952353,
                      prior = function(x) dlnorm(x, log(ccx_const("ENT_SEAS_AMP_SH_DERIV")),
                                                 ENT_SEAS_LOGSD, log = TRUE)),
   # ENSO, FOUR COEFFICIENTS SINCE 2026-09-01 (Marcus's design call). GtC/yr per

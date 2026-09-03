@@ -23,6 +23,52 @@
 .SEC_PER_YR   <- 365.25 * 86400
 .AVOGADRO     <- 6.02214076e23
 .M_C          <- 12.011            # g/mol
+.SST_PCO2_DLNDT <- 0.0423          # 1/degC, d ln pCO2 / dT (Takahashi). Hoisted
+                                   # 2026-09-03: SST_PCO2_SENSITIVITY and the
+                                   # entrainment chain below BOTH need it, and
+                                   # the entrainment chain had re-typed it --
+                                   # the very duplication the audit was for.
+
+# ---- inputs to the Southern-Ocean entrainment amplitude (2026-09-03) --
+# ⛔ NAMED HERE AND COMPUTED BELOW, NOT TYPED AS AN ANSWER. The entry that
+# replaced them carried `value = 30` with the arithmetic only in its prose
+# `source`, i.e. it was labelled "derived" while being an independent copy --
+# THE EXACT LAMBDA_C14 BUG this file's header warns about. Computing it moved
+# the number 30 -> 29.68, which is the drift a typed "derived" value hides.
+.ENT_SO_SST_AMP   <- 3.0      # K, seasonal SST half-amplitude of the 40-90 S
+                              # BAND (ERSSTv5). ⚠ NOT SST_SEAS_AMP_SH_OBS
+                              # (1.746 K), which is the SH HEMISPHERIC MEAN and
+                              # a different quantity -- the band is colder and
+                              # swings harder than the hemisphere containing it.
+                              # Named apart so the two are never conflated.
+.ENT_PCO2_DLNDT   <- .SST_PCO2_DLNDT   # ⛔ NOT re-typed: this IS
+                              # SST_PCO2_SENSITIVITY, which was already
+                              # registered, and the 2026-09-03 audit caught this
+                              # chain having typed 0.0423 a second time. The one
+                              # THERMODYNAMIC input here; the rest is geometry or
+                              # observation. ⚠ That entry warns about DOUBLE
+                              # COUNTING against the carbonate module's own
+                              # K0/K1/K2 temperature dependence -- not a risk
+                              # here, because this factor is used ONLY in a
+                              # back-of-envelope PRIOR CENTRE and never applied
+                              # inside the model.
+.ENT_PCO2_REF     <- 370      # uatm, reference surface pCO2 the % is taken on
+.ENT_SO_PCO2_AMP  <- 19.45    # uatm, OBSERVED 40-90 S pCO2 seasonal amplitude
+                              # (Landschutzer/Laruelle NCEI 0209633), the same
+                              # product CCX_ENT_SEAS_PEAK_MO's 7.50 comes from
+.ENT_DIC_SURF     <- 2150     # umol/kg, surface DIC. ⚠ UNCITED, and it sits
+                              # ~5.6 % above the GLODAP surface value GATE G
+                              # scores against (~2035). Left as inherited rather
+                              # than switched, because the impact is measured and
+                              # negligible: 2150 -> 2035 moves the prior centre
+                              # by log(2035/2150)/ENT_SEAS_LOGSD = 0.11 sigma.
+                              # Stated rather than quietly reconciled.
+.ENT_REVELLE      <- 13       # buffer factor. ⛔ DELIBERATELY NOT read off the
+                              # model's own carbonate chemistry: this number
+                              # sets a PRIOR CENTRE, and a prior derived from
+                              # the code under test can never disagree with it
+                              # ([[gate_reads_its_own_output]]).
+.ENT_BAND_AREA_FR <- 0.369    # 40-90 S ocean area as a fraction of SH ocean area
 
 CCX_CONSTANTS <- list(
 
@@ -414,7 +460,7 @@ CCX_CONSTANTS <- list(
 
   # ---- temperature ----------------------------------------------------
   SST_PCO2_SENSITIVITY = list(
-    value = 0.0423, units = "1/degC",
+    value = .SST_PCO2_DLNDT, units = "1/degC",
     status = "provisional",
     source = paste("d ln pCO2 / dT ~ 4.23 %/degC (Takahashi). NEEDS the exact citation;",
                    "note the carbonate module already carries the full T dependence of",
@@ -527,35 +573,56 @@ CCX_CONSTANTS <- list(
   # ccx_default_params(), which is exactly the free-floating-number class the
   # registry exists to close: a prior centre that is not a named constant
   # cannot be tied to its own arithmetic by a test.
+  ENT_SEAS_BAND_AREA_FRAC = list(
+    value = .ENT_BAND_AREA_FR, units = "fraction, dimensionless",
+    status = "provisional",
+    source = paste("Ocean area of the 40-90 S band as a fraction of TOTAL SH",
+                   "ocean area, from the 2026-08-27g entrainment pre-check's",
+                   "own area weighting. ⚠ PROVISIONAL: it is a GEOGRAPHIC area",
+                   "ratio and NEEDS a cited source, exactly as OCEAN_AREA_NH/SH",
+                   "do. It was a free-floating literal in three files until",
+                   "2026-09-03; registering it is what makes the two entries",
+                   "below computable rather than typed.",
+                   "⭐ It also sets the PRIOR WIDTH: 1/this is the no-dilution",
+                   "limit, i.e. every SH ocean square metre behaving like the",
+                   "observed band. See ENT_SEAS_LOGSD in R/calibrate.R.")),
   ENT_SEAS_AMP_SH_INBAND = list(
-    value = 30, units = "umol/kg, half-amplitude, WITHIN the 40-90 S band",
+    value = (.ENT_SO_SST_AMP * .ENT_PCO2_DLNDT * .ENT_PCO2_REF + .ENT_SO_PCO2_AMP) /
+            .ENT_PCO2_REF * .ENT_DIC_SURF / .ENT_REVELLE,
+    units = "umol/kg, half-amplitude, WITHIN the 40-90 S band",
     status = "derived",
-    source = paste("The Southern Ocean's own solubility cycle has to be",
-                   "OVERCOME before the observed signal is left, and the two",
-                   "are close to antiphase: solubility ~ SST amp 3.0 K x",
-                   "4.23 %/K x 370 uatm = 47 uatm at month 1.94, against an",
-                   "observed 19.45 uatm at month 7.50, so entrainment carries",
-                   "~66 uatm in band. Through the Revelle factor (~13) that is",
-                   "dDIC ~ (66/370) x 2150 / 13 ~ 30 umol/kg.",
-                   "⚠ This is the IN-BAND value. It is NOT the parameter --",
-                   "see ENT_SEAS_AMP_SH_DERIV, which is this number times the",
-                   "band's ocean-area weight. The recorded plausibility band",
-                   "'far outside ~5-30 is a fudge factor' mixes the two",
-                   "scales, and that is why both are registered separately.")),
+    source = paste("COMPUTED from the named inputs at the head of this file, not",
+                   "typed. The Southern Ocean's own solubility cycle has to be",
+                   "OVERCOME before the observed signal is left, and the two are",
+                   "close to antiphase: solubility =",
+                   ".ENT_SO_SST_AMP x .ENT_PCO2_DLNDT x .ENT_PCO2_REF = 46.95",
+                   "uatm at month 1.94, against an OBSERVED 19.45 uatm at month",
+                   "7.50, so entrainment carries 66.40 uatm in band. Through the",
+                   "buffer factor that is dDIC = (66.40/370) x 2150 / 13 =",
+                   "29.68 umol/kg.",
+                   "⚠ This is the IN-BAND value and NOT the parameter -- see",
+                   "ENT_SEAS_AMP_SH_DERIV, which dilutes it onto the SH box.",
+                   "⚠ The near-antiphase geometry is what licenses ADDING the",
+                   "two amplitudes; at a smaller phase separation the sum would",
+                   "overstate the entrainment term.")),
   ENT_SEAS_AMP_SH_DERIV = list(
-    value = 30 * 0.369, units = "umol/kg, half-amplitude, SH BOX MEAN",
+    value = (.ENT_SO_SST_AMP * .ENT_PCO2_DLNDT * .ENT_PCO2_REF + .ENT_SO_PCO2_AMP) /
+            .ENT_PCO2_REF * .ENT_DIC_SURF / .ENT_REVELLE * .ENT_BAND_AREA_FR,
+    units = "umol/kg, half-amplitude, SH BOX MEAN",
     status = "derived",
-    source = paste("ENT_SEAS_AMP_SH_INBAND times the 40-90 S band's ocean-area",
-                   "weight within the SH box, 0.369. `ent_seas_amp_SH`",
-                   "perturbs the WHOLE SH mixed layer, so the band value must",
-                   "be diluted onto the box before it can be a prior centre.",
-                   "Gives 11.07 umol/kg.",
-                   "⚠ DERIVED, NOT MEASURED: it inherits the pCO2 product's",
-                   "own caveat (data-raw/download_data.R sec.6c omits the",
-                   "seasonality of gas transfer and K0), the assumed Revelle",
-                   "factor, and the near-antiphase geometry the 47 + 19.45",
-                   "addition assumes. Its PRIOR WIDTH is a judgement and is",
-                   "labelled as one at ENT_SEAS_LOGSD in R/calibrate.R."))
+    source = paste("ENT_SEAS_AMP_SH_INBAND times ENT_SEAS_BAND_AREA_FRAC --",
+                   "COMPUTED from the same named inputs, never re-typed from",
+                   "the in-band number. `ent_seas_amp_SH` perturbs the WHOLE SH",
+                   "mixed layer, so the band value must be diluted onto the box",
+                   "before it can be a prior centre. Gives 10.95 umol/kg.",
+                   "⚠ It INHERITS a provisional input (the area fraction) and",
+                   "the pCO2 product's own caveat: that product omits the",
+                   "seasonality of gas transfer and K0.",
+                   "⚠ The recorded plausibility band 'far outside ~5-30 is a",
+                   "fudge factor' MIXES the two scales -- 30 is the in-band",
+                   "value, ~11 the box mean -- which is why both are registered",
+                   "separately and why the prior width is NOT read off that",
+                   "band's unsourced lower endpoint."))
 )
 
 #' Fetch a constant's value, erroring on unknown names

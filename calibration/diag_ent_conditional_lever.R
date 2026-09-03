@@ -60,5 +60,6 @@ cat("      at 4.19 and entrainment at 7.50 are nearly antiphase and CANCEL. Limb
 cat("      VECTORS. Conditionally the two cannot both be right -- which is exactly\n")
 cat("      what a REFIT is for, since it may move `sst_seas_amp_SH` too. That is P2.\n")
 cat("  (d) ⚠ A TENSION WORTH FLAGGING: the phase-centring value is ~5, at prior-z\n")
-cat("      about -1.8, while the DERIVED centre 11.07 puts the phase at 9.70 (z +3.34).\n")
+cat(sprintf("      about -1.6, while the DERIVED centre %.2f puts the phase near 9.7.\n",
+            ccx_const("ENT_SEAS_AMP_SH_DERIV")))
 cat("      The prior and the phase disagree by roughly 2 sigma. The refit arbitrates.\n")

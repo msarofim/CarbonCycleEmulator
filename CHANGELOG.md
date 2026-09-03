@@ -36,19 +36,89 @@ this vector to **4e-16** (amplitude) and **4e-14** (phase).
 ### ⭐⭐ `ent_seas_amp_SH` ENTERS `CCX_PARAM_TABLE` — 25 → 26
 Implemented since 08-27g, **defaulted 0 and unfitted** — [[default_off_hides_the_bug]] in its
 textbook form — while the worst prior violation was the solubility amplitude standing in for it.
-* **Prior centre DERIVED**: `ENT_SEAS_AMP_SH_DERIV` = 11.07 µmol/kg = the in-band 30 diluted onto
-  the SH box by the 40–90 S ocean-area weight 0.369. Both scales are now registered separately,
-  because the recorded "5–30" band **mixes them** (30 is in-band, ~11 is the box mean).
-* **Width `ENT_SEAS_LOGSD = 0.45`, a judgement, labelled as one** (Marcus's call). Read as a ±1σ
-  bracket the band would give 0.896; its own wording — "far outside" — is a **plausibility gate**,
-  a 2σ statement. At 0.45 the band lands at z −1.77 (5) and +2.22 (30). ⛔ A uniform on [0, 40] was
-  offered and rejected: an unpriored mechanism is a **free compensator**, and then a logpost gain
-  says nothing about whether the mechanism is right.
+* **Prior centre DERIVED and COMPUTED**: `ENT_SEAS_AMP_SH_DERIV` = **10.95** µmol/kg = the in-band
+  **29.68** diluted onto the SH box by the now-registered `ENT_SEAS_BAND_AREA_FRAC`. Both scales are
+  registered separately, because the recorded "5–30" band **mixes them**. (See the provenance audit
+  below for why these are 10.95/29.68 and not 11.07/30.)
+* **Width `ENT_SEAS_LOGSD` = 0.49848, DERIVED from a geometric ceiling.** ⛔ A uniform on [0, 40]
+  was offered and rejected: an unpriored mechanism is a **free compensator**, and then a logpost
+  gain says nothing about whether the mechanism is right.
 * ⛔ **THE ACCEPTANCE TEST IS NOT THE LOGPOST.** Freeing a parameter cannot lower it. **P2** —
   does `sst_seas_amp_SH`'s prior-z relax from **−5.14**? — is the test. If it does not move, the
   hypothesis is wrong and solubility was never doing entrainment's job.
 * ⚠ `tau_ex_seas_amp` is in the same defaulted-off state and was **deliberately NOT freed**, so P2
   has one mechanism to attribute to.
+
+### ⭐⭐ PROVENANCE AUDIT (Marcus asked: does every test trace to an OBSERVATION or a LAW?)
+Every number introduced by this arc, classified. **Four did not trace, and all four were mine.**
+
+| number | class | verdict |
+|---|---|---|
+| `DG_S_OBS` / `_LO` / `_HI` / `_AMP_OBS` | OBSERVATION (inverted, provisional, stated) | ✅ |
+| `DG_S_SD` = (HI−LO)/(2·1.96) | OBSERVATION + the *definition* of a 95 % interval | ✅ |
+| `dg_mo_diff`'s 6 / 12 | DEFINITION (months are an angle) | ✅ |
+| `DG_S_KO` | taken from `SL_CASES`, not retyped | ✅ |
+| `DG_S_NSD = 2` | **CONVENTION** — the project's shared strictness, tied to `DG_Q_NSD` | ⚠ labelled |
+| `ENT_SEAS_AMP_SH_INBAND` | said "derived", **value was TYPED `30`** | ⛔ **FIXED** |
+| `ENT_SEAS_AMP_SH_DERIV` | re-typed the `30`; `0.369` free-floating in 3 files | ⛔ **FIXED** |
+| `ENT_SEAS_LOGSD = 0.45` | rested on the band's **unsourced lower endpoint 5** | ⛔ **FIXED** |
+| test gates `z ∈ (1.5, 2.5)`, `\|z\| > 10`, `< 0.05 mo` | **invented tolerances** | ⛔ **FIXED** |
+
+**1. "Derived" must mean COMPUTED.** `ENT_SEAS_AMP_SH_INBAND` carried `value = 30` with its
+arithmetic only in the prose `source` — labelled derived while being an independent copy, **the exact
+`LAMBDA_C14` bug `constants.R`'s own header warns about.** Computing it from named inputs
+(`.ENT_SO_SST_AMP` … `.ENT_REVELLE`) gives **29.68**, and the centre **10.95** rather than 11.07 —
+the drift a typed "derived" value hides. Init moved 11.07 → 10.952353.
+⚠ The chain's one thermodynamic input is Takahashi's 0.0423 /K; the rest is observation and geometry.
+⛔ The Revelle factor is **deliberately not read off the model's own carbonate chemistry** — this sets
+a PRIOR CENTRE, and a prior derived from the code under test can never disagree with it.
+
+**2. `0.369` is now `ENT_SEAS_BAND_AREA_FRAC`**, registered **provisional** (a geographic area ratio
+with no cited source, exactly as `OCEAN_AREA_NH/SH` are) — and a test guards the *label*, so anything
+derived from it inherits that weakness visibly. It was a free literal in `constants.R`, `model.R` and
+a test.
+
+**3. ⭐ THE PRIOR WIDTH IS RE-DERIVED, 0.45 → 0.49848.** The approved 0.45 read the recorded "5–30"
+band at 2σ — but **the number 5 has no derivation anywhere**, so the width rested on an unsourced
+endpoint. It now comes from a **geometric ceiling**: the box mean cannot exceed the in-band amplitude,
+reaching it only if every SH ocean square metre behaves like the observed band, so the no-dilution
+limit sits at exactly `log(1/ENT_SEAS_BAND_AREA_FRAC)` = 0.99696 above the centre; read as the
+family's 2σ that fixes the width. **The in-band value now lands at +2.000σ by construction**, and the
+recorded band's own endpoints fall at z −1.57 (5) and +2.02 (30) — so the two readings **corroborate**
+rather than compete, and neither is fitted to the other.
+⚠ **Marcus approved 0.45 before this audit.** The change is a provenance repair, not a retuning — the
+band both readings encode is the same to within a fifth of a sigma — and it is flagged, not slipped in.
+
+**4. Invented test tolerances replaced by derivations.** `z ∈ (1.5, 2.5)` → the width tied to
+`log(1/area)/2` plus the exact `z(in-band) = 2`; `|z| > 10` → `|z| > DG_S_NSD`, the gate's own bound;
+`< 0.05 months` → the *exact* predictable gap, `(OBS − CI midpoint) ± (2 − 1.96)·σ`. Remaining
+tolerances are **propagated typed precision** (half a unit in a literal's last digit), stated as such.
+
+**5. ⭐ THE AUDIT CAUGHT ITSELF TWICE MORE, VIA THE REPO'S OWN LEDGERS.**
+* `0.0423` — the Takahashi coefficient my chain named `.ENT_PCO2_DLNDT` — **was already registered
+  as `SST_PCO2_SENSITIVITY`.** I had committed the exact duplication I was auditing for. Hoisted to
+  one module-local that both entries now reference. ⚠ That entry warns about **double counting**
+  against the carbonate module's own K0/K1/K2 temperature dependence; not a risk here, because the
+  factor is used only in a back-of-envelope prior centre and never applied inside the model.
+* `test-constants.R`'s **provisional ledger fired** on `ENT_SEAS_BAND_AREA_FRAC` — the mechanism
+  working exactly as its own comments describe ("registering a provisional constant has to be
+  deliberate"). Declared, with the reason, and both `ENT_SEAS_AMP_SH_*` are noted as inheriting that
+  debt despite being labelled "derived".
+
+**⚠ TWO INPUTS STATED RATHER THAN QUIETLY RECONCILED.** `.ENT_SO_SST_AMP` = 3.0 K is the **40–90 S
+band**, *not* `SST_SEAS_AMP_SH_OBS` = 1.746 K (the SH hemispheric mean) — a different quantity, now
+named apart so they cannot be conflated. And `.ENT_DIC_SURF` = 2150 µmol/kg is **uncited and sits
+~5.6 % above the GLODAP surface value GATE G scores against (~2035)**; left as inherited because the
+impact is measured and negligible — `log(2035/2150)/ENT_SEAS_LOGSD` = **0.11 σ**.
+
+**⚠ THE PRE-EXISTING SET, CHECKED NOT ASSUMED.** Gates 4/5/7/Q/G trace to GCB 2025, Hua 2022, Quay
+2003 and GLODAPv2 respectively; 12/12b is **already labelled** last-resort ("a threshold from another
+model", Joos 2013, vintage stated). `DG_EFOLD_FLOOR = 20` ‰ is a DESIGN window, not an observation —
+labelled. The weakest survivor is `test-gate-bounds.R`'s `0.9 *` in gate 5's spread guard: it encodes
+the stated "biases the sd about 10 % low", so it has a rationale but not a derivation. **Left alone —
+not mine, and not load-bearing for a verdict.**
+⭐ **GATE S does NOT change the ledger's standing admission: there is STILL NOT ONE LAW-DERIVED GATE.**
+It is observational, like every other one.
 
 ### ⚠ TWO CONSEQUENCES, NEITHER ROUTED AROUND
 1. **`tr = "log"` has no 0**, so the channel's OFF state is not a point of the fitted space. A

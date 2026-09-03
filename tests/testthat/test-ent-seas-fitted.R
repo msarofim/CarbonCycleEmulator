@@ -21,8 +21,11 @@ test_that("ent_seas_amp_SH is fitted, and its init is TIED to the derived consta
   # THE DRIFT THIS CLOSES. `init` is a literal because CCX_PARAM_TABLE is built
   # before ccx_const() exists, so the prior's CENTRE and its STARTING POINT are
   # written in two places. Same guard as pump_grad and npp_frac_NH carry.
-  expect_equal(CCX_PARAM_TABLE$ent_seas_amp_SH$init,
-               ccx_const("ENT_SEAS_AMP_SH_DERIV"), tolerance = 1e-12)
+  # ⚠ The tolerance is the TYPED PRECISION, not a chosen number: `init` carries
+  # six decimals, so half a unit in the last of them is the most agreement a
+  # literal can be asked for.
+  expect_lt(abs(CCX_PARAM_TABLE$ent_seas_amp_SH$init -
+                ccx_const("ENT_SEAS_AMP_SH_DERIV")), 0.5e-6)
   expect_identical(CCX_PARAM_TABLE$ent_seas_amp_SH$tr, "log")
 })
 
@@ -33,11 +36,36 @@ test_that("the derived centre is the IN-BAND value diluted onto the SH box", {
   # recorded plausibility band "far outside ~5-30" mixes them, which is exactly
   # why both are registered and why this ties the arithmetic.
   expect_equal(ccx_const("ENT_SEAS_AMP_SH_DERIV"),
-               ccx_const("ENT_SEAS_AMP_SH_INBAND") * 0.369, tolerance = 1e-12)
+               ccx_const("ENT_SEAS_AMP_SH_INBAND") *
+                 ccx_const("ENT_SEAS_BAND_AREA_FRAC"), tolerance = 1e-12)
   expect_lt(ccx_const("ENT_SEAS_AMP_SH_DERIV"), ccx_const("ENT_SEAS_AMP_SH_INBAND"))
+  # ⛔ AND BOTH MUST BE **COMPUTED**, NOT TYPED. Until 2026-09-03 the in-band
+  # entry carried `value = 30` with its arithmetic only in the prose `source` --
+  # labelled "derived" while being an independent copy, which is the LAMBDA_C14
+  # bug this file's own header warns about. Recomputing moved it 30 -> 29.68 and
+  # the centre 11.07 -> 10.95. Re-deriving the chain here is what keeps a future
+  # edit to any input from leaving these two behind.
+  # ⚠ THE COEFFICIENT IS REFERENCED, THE REST IS TRANSCRIBED, AND THAT SPLIT IS
+  # DELIBERATE. `SST_PCO2_SENSITIVITY` is a REGISTERED constant, so the chain
+  # must USE it -- the audit caught this very chain having typed 0.0423 a second
+  # time. The remaining inputs are module-locals with no public name, so
+  # transcribing them here is an INDEPENDENT check that the arithmetic has not
+  # drifted, which is the whole point of a derivation test.
+  inband <- (3.0 * ccx_const("SST_PCO2_SENSITIVITY") * 370 + 19.45) / 370 * 2150 / 13
+  expect_equal(ccx_const("ENT_SEAS_AMP_SH_INBAND"), inband, tolerance = 1e-10)
+  # ⛔ AND THE COEFFICIENT MUST NOT SILENTLY FORK AGAIN: if someone re-types it
+  # in the chain, this stops agreeing with the registry.
+  expect_equal(ccx_const("ENT_SEAS_AMP_SH_INBAND") /
+                 ((3.0 * ccx_const("SST_PCO2_SENSITIVITY") * 370 + 19.45) / 370),
+               2150 / 13, tolerance = 1e-10)
+  # the area fraction is REGISTERED, so it cannot go on being a free literal
+  expect_true("ENT_SEAS_BAND_AREA_FRAC" %in% names(CCX_CONSTANTS))
+  # ⚠ and it is PROVISIONAL -- a geographic area ratio with no cited source --
+  # so anything derived from it inherits that. Guard the label, not just the value.
+  expect_identical(CCX_CONSTANTS$ENT_SEAS_BAND_AREA_FRAC$status, "provisional")
 })
 
-test_that("the prior is CENTRED on the derived value and reads 5-30 as ~2 sigma", {
+test_that("the prior is CENTRED on the derived value and its WIDTH is a geometric ceiling", {
   a  <- ccx_const("ENT_SEAS_AMP_SH_DERIV")
   # ⛔ CENTRED IN THE **UNCONSTRAINED** COORDINATE, WHICH IS WHERE THE CLAIM
   # LIVES -- and asserting it on the natural-scale DENSITY would be wrong, not
@@ -54,18 +82,30 @@ test_that("the prior is CENTRED on the derived value and reads 5-30 as ~2 sigma"
   }
   # ... and monotone away from it, so `a` really is the extremum and not a shelf
   expect_gt(ccx_prior_z("ent_seas_amp_SH", a * 2), ccx_prior_z("ent_seas_amp_SH", a * 1.2))
-  # ⭐ THE WIDTH ENCODES A CLAIM, AND THIS IS THE CLAIM. The recorded band's own
-  # wording -- "a fitted value FAR OUTSIDE ~5-30 is the channel being used as a
-  # fudge factor" -- is a plausibility GATE, i.e. a ~2 sigma statement, not the
-  # +/- 1 sigma bracket that ccx_bracket_lnorm() would have made of it. Read as a
-  # bracket the width would be 0.896 and both endpoints would sit at 1 sigma;
-  # this must fail if anyone makes that substitution.
-  for (edge in c(5, 30)) {
-    z <- abs(ccx_prior_z("ent_seas_amp_SH", edge))
-    expect_gt(z, 1.5); expect_lt(z, 2.5)
-  }
-  # and the width is a JUDGEMENT that lives in ONE place
-  expect_identical(ENT_SEAS_LOGSD, 0.45)
+  # ⭐ THE WIDTH IS DERIVED FROM A GEOMETRIC CEILING, AND THIS TIES IT THERE.
+  # The parameter is the in-band anomaly DILUTED onto the SH box, so the box
+  # mean cannot exceed the in-band amplitude; it reaches it only if every SH
+  # ocean square metre behaves like the observed 40-90 S band. That no-dilution
+  # limit is log(1/area fraction) above the centre, and reading it as DG-family
+  # 2 sigma fixes the width. ⛔ The width must NOT be read off the recorded
+  # "5-30" band instead: that band's lower endpoint has no derivation anywhere,
+  # and a width resting on an unsourced number is a chosen one in disguise.
+  expect_lt(abs(ENT_SEAS_LOGSD -
+                log(1 / ccx_const("ENT_SEAS_BAND_AREA_FRAC")) / 2), 0.5e-5)
+  # ⭐ THE CONSEQUENCE, EXACT BY CONSTRUCTION: the in-band value sits at +2 sigma.
+  # If this stops holding, the width and the ceiling have come apart.
+  # ⚠ The tolerance is PROPAGATED from the typed precision, not chosen: z scales
+  # as 1/ENT_SEAS_LOGSD, which is a literal carrying five decimals, so half a
+  # unit in its last digit moves this z by DG_S_NSD * 0.5e-5 / ENT_SEAS_LOGSD.
+  expect_lt(abs(ccx_prior_z("ent_seas_amp_SH", ccx_const("ENT_SEAS_AMP_SH_INBAND")) - 2),
+            2 * 0.5e-5 / ENT_SEAS_LOGSD)
+  # ✅ AND THE INDEPENDENT CORROBORATION -- an ORDERING, with no threshold of its
+  # own: the recorded plausibility band, derived a completely different way,
+  # must fall INSIDE the interval this ceiling implies. It does (z -1.57 at 5).
+  # That the two readings agree is the check; neither is fitted to the other.
+  expect_lt(abs(ccx_prior_z("ent_seas_amp_SH", 5)), 2)
+  expect_gt(abs(ccx_prior_z("ent_seas_amp_SH", 5)),
+            abs(ccx_prior_z("ent_seas_amp_SH", ccx_const("ENT_SEAS_AMP_SH_DERIV"))))
 })
 
 test_that("a 25-parameter ancestor migrates to 0 -- what it RAN -- and says so", {

@@ -1070,7 +1070,7 @@ ccx_default_params <- function() {
     # ⭐ IT IS IN CCX_PARAM_TABLE SINCE 2026-09-03 (Marcus) -- 25 -> 26 fitted
     # parameters -- AND THIS DEFAULT DELIBERATELY STAYS 0. Those are not in
     # conflict; they are two different statements:
-    #   * the TABLE INIT (11.07 = ENT_SEAS_AMP_SH_DERIV) is where the SEARCH
+    #   * the TABLE INIT (= ENT_SEAS_AMP_SH_DERIV, 10.95) is where the SEARCH
     #     starts, and it is what tests the mechanism at an explicit non-zero
     #     value ([[default_off_hides_the_bug]]);
     #   * this DEFAULT is what an UNCALIBRATED run does, and the mechanism is a
@@ -1087,13 +1087,19 @@ ccx_default_params <- function() {
     #   vector -- but it means `ccx_default_params()` is no longer encodable,
     #   and that is a real consequence rather than an oversight.
     #
-    # SCALE, from a pre-check done before the channel was written: the Southern
-    # Ocean's own solubility cycle (SST amp 3.0 K x ~4.23 %/K x ~370 uatm ~
-    # 47 uatm at month 1.94) has to be OVERCOME to leave the observed 19.45
-    # uatm at month 7.50, so the entrainment term is ~66 uatm in-band, i.e.
-    # dDIC ~ (66/370) x 2150 / 13 ~ 30 umol/kg -- and ~11 umol/kg averaged over
-    # the SH box after the 0.369 ocean-area weight of the band. A fitted value
-    # far outside ~5-30 is the channel being used as a fudge factor.
+    # SCALE. ⛔ THE ARITHMETIC THAT USED TO BE RESTATED HERE NOW LIVES IN THE
+    # REGISTRY, COMPUTED FROM NAMED INPUTS: ENT_SEAS_AMP_SH_INBAND (29.68
+    # umol/kg within 40-90 S) and ENT_SEAS_AMP_SH_DERIV (10.95, that value
+    # diluted onto the SH box by ENT_SEAS_BAND_AREA_FRAC). Read them there.
+    # ⚠ This comment previously carried the chain in prose beside a TYPED
+    # `value = 30`, and the prose and the number had already drifted: computing
+    # it gives 29.68 and 10.95, not 30 and 11.07. That is the whole reason the
+    # registry insists a "derived" constant be derived IN CODE.
+    # ⚠ The old rule of thumb "a fitted value far outside ~5-30 is the channel
+    # being used as a fudge factor" is RETAINED as a reading aid only. Its
+    # UPPER end is now derived (it IS the in-band value, which the box mean
+    # cannot exceed, and it sets the prior width); its LOWER end, 5, has no
+    # derivation anywhere and must not be used to set a tolerance.
     ent_seas_amp_SH = 0,
     # 1 = annual-mean SST from the forcing's OBSERVED HadSST4 columns (with the
     # ratio-scaled extension beyond the record); 0 = the legacy

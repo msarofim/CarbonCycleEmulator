@@ -92,6 +92,15 @@ test_that("provisional constants are reported, not silently used", {
   # ⚠ The TOTAL, SPO_SEAS_AMP_OBS, is deliberately NOT on this list: the
   # inversion closes CO2 = L + O on the observed total, so no model enters it,
   # and it was re-measured model-free on 2026-09-02 at 1.1684.
+  # ADDED 2026-09-03 with the entrainment prior. ENT_SEAS_BAND_AREA_FRAC is the
+  # 40-90 S ocean area as a fraction of SH ocean area, and it is provisional for
+  # the plainest reason on this list: it is a GEOGRAPHIC ratio with no cited
+  # source, exactly as OCEAN_AREA_NH/SH are. It was a free-floating literal in
+  # three files until the provenance audit; registering it is what let the two
+  # entrainment constants be COMPUTED rather than typed, and it also sets the
+  # prior WIDTH (1/it is the no-dilution ceiling). ⚠ So both ENT_SEAS_AMP_SH_*
+  # inherit this debt even though they are labelled "derived" -- the ledger is
+  # the right place for that to stay visible.
   expect_setequal(prov, c("OCEAN_AREA_NH", "OCEAN_AREA_SH", "OCEAN_DEPTH",
                           "ALK_SURFACE", "PUMP_EPS13_ORG", "PUMP_EPS13_CARB",
                           "RHO_SEAWATER", "NPP_GLOBAL_PI",
@@ -101,7 +110,8 @@ test_that("provisional constants are reported, not silently used", {
                           "SPO_SEAS_AMP_LAND_INV", "SPO_SEAS_AMP_OCEAN_INV",
                           "SPO_SEAS_LAND_PHASE_INV", "SPO_SEAS_OCEAN_PHASE_INV",
                           "SPO_SEAS_OCEAN_PHASE_INV_LO",
-                          "SPO_SEAS_OCEAN_PHASE_INV_HI"))
+                          "SPO_SEAS_OCEAN_PHASE_INV_HI",
+                          "ENT_SEAS_BAND_AREA_FRAC"))
 })
 
 test_that("PUMP_GRAD_OBS IS the shipped ocean_grad_dic target, not a copy of it", {

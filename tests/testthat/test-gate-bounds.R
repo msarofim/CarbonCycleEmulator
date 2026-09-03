@@ -187,10 +187,16 @@ test_that("GATE S bounds the limb PHASE, is CIRCULAR, and fires on the 3.35 defe
   expect_equal(DG_S_OBS_LO, ccx_const("SPO_SEAS_OCEAN_PHASE_INV_LO"))
   expect_equal(DG_S_OBS_HI, ccx_const("SPO_SEAS_OCEAN_PHASE_INV_HI"))
   expect_equal(DG_S_SD, (DG_S_OBS_HI - DG_S_OBS_LO) / (2 * stats::qnorm(0.975)))
-  # ... and harmonising with the family must not have widened the registered
-  # interval: |z| <= 2 has to reproduce [LO, HI] to better than 0.05 months.
-  expect_lt(abs(DG_S_OBS - DG_S_NSD * DG_S_SD - DG_S_OBS_LO), 0.05)
-  expect_lt(abs(DG_S_OBS + DG_S_NSD * DG_S_SD - DG_S_OBS_HI), 0.05)
+  # ⭐ ... and harmonising with the family must not have widened the registered
+  # interval. THE DISCREPANCY IS PREDICTABLE EXACTLY, so this asserts equality
+  # rather than a chosen slack: the bound differs from [LO, HI] by the point's
+  # offset from the CI midpoint plus the (2 - 1.96) sigma the convention adds.
+  mid  <- (DG_S_OBS_LO + DG_S_OBS_HI) / 2
+  slop <- (DG_S_NSD - stats::qnorm(0.975)) * DG_S_SD
+  expect_equal(DG_S_OBS + DG_S_NSD * DG_S_SD - DG_S_OBS_HI,
+               (DG_S_OBS - mid) + slop, tolerance = 1e-9)
+  expect_equal(DG_S_OBS - DG_S_NSD * DG_S_SD - DG_S_OBS_LO,
+               (DG_S_OBS - mid) - slop, tolerance = 1e-9)
 
   mk <- function(mo, amp = DG_S_AMP_OBS) list(mo = mo, amp = amp)
   # AT the observation: pass, and exactly zero.
@@ -209,7 +215,9 @@ test_that("GATE S bounds the limb PHASE, is CIRCULAR, and fires on the 3.35 defe
   v <- dg_gateS_verdict(mk(3.35))
   expect_false(v$pass)
   expect_equal(v$d_mo, 3.35 - DG_S_OBS, tolerance = 1e-9)
-  expect_gt(abs(v$z), 10)
+  # ⚠ The claim is "outside the gate's OWN bound", not "bigger than some round
+  # number I picked" -- an invented `> 10` sat here until the 2026-09-03 audit.
+  expect_gt(abs(v$z), DG_S_NSD)
   # ⚠ AND THE PASS DIRECTION IS DEMONSTRATED ABOVE, NOT HERE. It is tempting to
   # assert that the DISABLED entrainment channel passes -- but CCX_ENT_SEAS_PEAK_MO
   # is the DRIVER's peak month, not a measured SPO limb, and the two differ by
