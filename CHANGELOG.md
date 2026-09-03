@@ -2,6 +2,25 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-03 — **ROUND 1 CLOSED (40/40, 0 errors); ROUND 2 RUNNING**
+
+**`16837149` final: 40 COMPLETED, 0 errors, ids 40–45 cancelled deliberately.**
+**39 of 40 at −1446.7627 / −1446.7631** (spread 4e-4) — of which **34 were dispersed draws and 33
+hit the basin**. One outlier, id 12, at −1508.7786.
+
+**⭐ THE `colClasses` PROVENANCE FIX SHIPPED IN THIS WINDOW**, which is the whole reason it was held:
+nothing was running to have its driver re-parsed underneath it ([[never_edit_a_running_script]]), and
+nothing was pending to read a different build than its siblings.
+
+**ROUND 2, both verified as started correctly:**
+* **`16905918`** — id 12 resumed: `RESUMED from checkpoint at cycle 2, log-post −1508.7786`, wall
+  budget **300 min** (inside `cpu_short`'s 6 h QoS, read off `sacctmgr`). It reached only cycle 2 of
+  6 in round 1, so this gives it cycles 3–6 with full-length restarts. **Diagnostic either way:**
+  stays at −1508.78 ⇒ a real local optimum; drops to −1446.76 ⇒ it was budget, and the `CONVERGED`
+  label was measuring an exhausted wall.
+* **`16905919`** — 5 draws at **half** the measured dispersion, `OVERRIDE CCX_MS_SPREAD = 0.5233
+  (default 1.046575)`, own output directory. The dispersion, not the count, was the untested axis.
+
 ## 2026-09-03 — ⭐⭐ **THE REFIT ANSWERS THE PRE-REGISTRATION: P1/P2/P3 LAND, P5 IS FALSIFIED**
 
 Job `16837149`, **12 of 46 tasks in, every one at −1446.7627/−1446.7631 (spread 4e-4)** — ONE BASIN,
