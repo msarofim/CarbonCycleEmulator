@@ -398,3 +398,54 @@ detectable, which is why the file carries its commit.
   row (`h_ml` is step-unstable — 08-31e §8.4).
 * **`data-raw/` (3.4 GB)** is excluded from the bundle. `DESIGN.md` is **not** optional — it is
   `REPO_MARKER` in `R/paths.R`, and without it `ccx_root()` resolves nothing.
+
+---
+
+## ROUND 2 OF THE 26-PARAMETER SURVEY (planned 2026-09-03, job `16837149`)
+
+**WHY THERE IS A ROUND 2, AND WHY IT IS NOT ROUND 1 REPEATED.** Round 1 ran ids 0–39; **ids 40–45
+were CANCELLED deliberately** (Marcus, on the marginal-value question below). Of the 30 tasks
+complete at that point, **24 were dispersed draws and 23 hit the same basin**, so six more draws
+**at the same dispersion** would have tested exactly what the first 24 tested. That is this
+project's own standing caution: *"the bound is 4 dispersed starts at ONE dispersion, not a proof"*
+([[no_power_null]]). **The count was never the limitation; the single dispersion is.**
+
+⛔ **RUN THESE ONLY AFTER THE ARRAY HAS FULLY DRAINED.** Two separate reasons, and both have bitten:
+1. `Rscript` parses the file **as it goes**, so editing a driver under a live task resumes it
+   mid-token and blames a line that is fine on disk ([[never_edit_a_running_script]]). The pending
+   `colClasses` provenance fix ships in this window, not before.
+2. A pending task reads the driver from `/scratch` **at start time**, so re-shipping mid-array
+   silently splits one array across two builds.
+
+### (a) SETTLE id 12 — the one genuine open question in round 1
+It finished at **−1508.7786**, 61.9 log-units above the basin, and is labelled `CONVERGED` — but its
+last two restarts read `SHORTENED to maxit 2591 / 1348 by the wall budget` with `gain 0.0000`. So
+"converged" here means *the cycle-gain test passed on restarts the wall had already truncated*, which
+is a weaker claim than the label makes. ⚠ It reached only **cycle 2 of 6**.
+A resume continues from its checkpoint with room to finish, and the two outcomes are diagnostic:
+**stays at −1508.78 on full-length restarts ⇒ a real local optimum; drops to −1446.76 ⇒ it was budget.**
+
+    sbatch --array=12 --time=05:30:00 \
+      --export=ALL,CCX_MS_WALL_MIN=300 calibration/torch/multistart.sbatch
+
+⚠ 5 h 30 is inside `cpu_short`'s **6 h** QoS wall, read off the machine (`sacctmgr`), not recalled
+([[torch_qos_is_the_real_cap]]). Same `CCX_MS_OUTDIR` — the resume needs its own checkpoint.
+
+### (b) PROBE A SECOND DISPERSION, which is the axis with actual power
+Fresh outdir, because a different dispersion is a different experiment and the driver's own rule is
+to **say in the directory name what the dispersion came from**.
+
+    sbatch --array=6-10 --export=ALL,CCX_MS_SPREAD=0.5233,\
+    CCX_MS_OUTDIR=/scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260903_ent26_sd0p5 \
+      calibration/torch/multistart.sbatch
+
+### ⛔ TWO THINGS DELIBERATELY **NOT** DONE, AND WHY
+- **No 2× dispersion.** At the measured sd 1.0466 the draws already start at −144,561 (id 12) and
+  −333,427 (id 25). Doubling it puts starts in numerically absurd regions where the budget is spent
+  climbing back rather than exploring — **cost without power**.
+- ⭐ **The more informative change is the dispersion CENTRE, not its scale, and it is not an env
+  var.** Every draw is dispersed about the **COLD init**, so the survey tests "can the optimiser
+  climb from anywhere". Dispersing about the **found optimum** would instead test "is there
+  structure NEAR the answer" — which is the `h_ml`-ridge question and the one a posterior would care
+  about ([[ccx_hessian_is_the_blocker]]). That needs a small code change to the start-point block
+  and should be its own, reviewed piece of work, not smuggled into a resubmission.
