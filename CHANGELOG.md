@@ -2,6 +2,122 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-03 — ⭐⭐ **FIX A SHIPPED: `ent_seas_amp_SH` IS FITTED (25 → 26), AND GATE S EXISTS**
+
+Structural change **before** the refit, which is the ordering that cost 14 h once. Nothing is
+adopted and no refit has been launched.
+
+### ⭐ GATE S — the SPO **ocean** limb's **PHASE**, the bound the seasonal arc was missing
+The model's SH ocean seasonal limb has been carried for weeks as "~5 months out of phase", and
+**nothing scored it.** `co2_seasonal_SPO` IS a fitted stream, but it scores the **TOTAL**, which
+the model already matches to ~1 % by cancelling a 2.48× land limb against a 0.63× ocean one — a
+matched total has no power over the partition beneath it. GATE S scores the partition's phase.
+* Target `SPO_SEAS_OCEAN_PHASE_INV` = 8.52 mo, registered 09-02, **not produced by this gate**.
+  Its model-dependence is two δ¹³C signature SCALARS; the model's own seasonal phase never enters,
+  and the registered CI was bootstrapped over years **crossed with the signature spread**.
+* **Sigma DERIVED, not chosen**: (9.20 − 7.82) / (2 × 1.96) = 0.3520 mo. At `DG_S_NSD = 2` — the
+  one strictness the distributional gates share — that reproduces the registered CI to 0.02 mo.
+* The limb **amplitude is REPORTED and NOT bounded**: `SPO_SEAS_AMP_OCEAN_INV` carries no interval,
+  so no bound is derivable and inventing one would be choosing a number after seeing the result.
+* **Mutation-tested in both directions** (`test-gate-bounds.R`), including the circularity: months
+  are an angle, so 0.1 and 11.9 are 0.2 apart, and a wrapped phase reads identically.
+
+**FIRST MEASUREMENT, at the refit winner:** limb **0.3300 ppm @ month 4.19** against **0.522 @
+8.52** ⇒ **z −12.30, FAIL.**
+
+### ⛔ AND IT CORRECTED THE ARC'S OWN RECORDED NUMBERS
+The handoff and memory carry this limb at **3.35 mo / 0.45×**, a 5.17-month miss, attributed to the
+refit winner. Measured there with the shared estimator it is **4.19 mo / 0.632×**, a **4.33**-month
+miss. Those recorded values belong to **earlier vectors** (the `h_ml` arc walked this limb
+4.15 → 3.90). The direction and the verdict are unchanged; every RATIO quoted against 3.35 or 0.45×
+is not. ⚠ Verified, not asserted: the GATE S kernel reproduces `lib_seas_limbs.R`'s `sl_score()` at
+this vector to **4e-16** (amplitude) and **4e-14** (phase).
+
+### ⭐⭐ `ent_seas_amp_SH` ENTERS `CCX_PARAM_TABLE` — 25 → 26
+Implemented since 08-27g, **defaulted 0 and unfitted** — [[default_off_hides_the_bug]] in its
+textbook form — while the worst prior violation was the solubility amplitude standing in for it.
+* **Prior centre DERIVED**: `ENT_SEAS_AMP_SH_DERIV` = 11.07 µmol/kg = the in-band 30 diluted onto
+  the SH box by the 40–90 S ocean-area weight 0.369. Both scales are now registered separately,
+  because the recorded "5–30" band **mixes them** (30 is in-band, ~11 is the box mean).
+* **Width `ENT_SEAS_LOGSD = 0.45`, a judgement, labelled as one** (Marcus's call). Read as a ±1σ
+  bracket the band would give 0.896; its own wording — "far outside" — is a **plausibility gate**,
+  a 2σ statement. At 0.45 the band lands at z −1.77 (5) and +2.22 (30). ⛔ A uniform on [0, 40] was
+  offered and rejected: an unpriored mechanism is a **free compensator**, and then a logpost gain
+  says nothing about whether the mechanism is right.
+* ⛔ **THE ACCEPTANCE TEST IS NOT THE LOGPOST.** Freeing a parameter cannot lower it. **P2** —
+  does `sst_seas_amp_SH`'s prior-z relax from **−5.14**? — is the test. If it does not move, the
+  hypothesis is wrong and solubility was never doing entrainment's job.
+* ⚠ `tau_ex_seas_amp` is in the same defaulted-off state and was **deliberately NOT freed**, so P2
+  has one mechanism to attribute to.
+
+### ⚠ TWO CONSEQUENCES, NEITHER ROUTED AROUND
+1. **`tr = "log"` has no 0**, so the channel's OFF state is not a point of the fitted space. A
+   25-parameter ancestor migrates to **0 — what it RAN**, the same reasoning that migrated the ENSO
+   ocean pair — and such a vector can be **RUN and MEASURED but not ENCODED**.
+   `ccx_par_to_unc()` was **hardened** to refuse a non-finite encoding **by name and with the
+   value**; it previously returned −Inf silently and would have handed a non-finite start vector to
+   the optimiser three frames away. `run_dispersed_multistart.R` now **seeds** such a coordinate at
+   its table init and prints both numbers — what the ancestor ran, and where the search begins.
+2. **`ccx_default_params()` stays 0** and is therefore no longer encodable. Deliberate: the INIT is
+   where the search starts, the DEFAULT is what an uncalibrated run does, and the mechanism is a
+   hypothesis nothing has adopted. Flipping the default would move every "at defaults" number on
+   the project for a mechanism nothing has accepted. **Flip it when the refit is adopted.**
+
+⭐ **THE INVARIANT, ASSERTED IN THE DRIVER:** adding the parameter must not move a measurement at an
+already-fitted vector. GATE S reads **bit-identical** across the 25 → 26 change.
+
+### ⚠ A PRE-EXISTING LINT BREAK, FOUND AND CLEARED
+`test-overlay-idiom-lint.R` had been **RED since this morning's `4f327cb`**: both 09-03 gate drivers
+carried the bare `intersect()` idiom and were never added to the baseline (64 occurrences > 61).
+Inert while stored vector and build both had 25 names; **live** the moment the table grew. All three
+09-03 drivers converted to `ccx_overlay_par()` (convert-on-touch). Baseline count unchanged — they
+were never on it.
+
+### ⭐ THE CHANNEL'S LEVER, MEASURED — and it withdrew a caveat I had pre-registered
+`calibration/diag_ent_conditional_lever.R`. ⛔ **CONDITIONAL: nothing re-optimised, every other
+coordinate held at the refit winner, `sst_seas_amp_SH` included.** It measures the LEVER, not the fit.
+
+| `ent` | limb amp | × obs | peak mo | z | GATE S |
+|---|---|---|---|---|---|
+| 0 | 0.3300 | 0.632 | 4.19 | −12.30 | FAIL |
+| 5 | 0.1136 | **0.218** | 8.90 | **+1.07** | **PASS** |
+| 11.07 | 0.6189 | 1.186 | 9.70 | +3.34 | FAIL |
+| 30 | 2.2403 | 4.292 | 9.81 | +3.67 | FAIL |
+
+* **(a) The lever exists.** The limb rotates 4.19 → ~9.8 months and crosses the observed window.
+* **(b) ⛔ MY PRE-REGISTERED CEILING IS WITHDRAWN.** I had written that a limb inheriting the
+  driver's 7.50 could not clear GATE S (7.50 is itself z −2.90). Measured: the limb **saturates near
+  9.8, ~2.3 months LATER than the driver**, so it does not inherit the driver's phase and the
+  reachable range **brackets** 8.52. The assertion in `test-gate-bounds.R` stands; the inference did not.
+* **(c) ⚠ WHAT BINDS INSTEAD IS AMPLITUDE.** Where the phase is right (`ent` ≈ 5) the amplitude
+  **collapses to 0.218×**: solubility at 4.19 and entrainment at 7.50 are nearly antiphase and
+  **cancel**. Limbs are VECTORS. Conditionally the two cannot both be right — which is precisely
+  what the refit is for, and precisely **P2**.
+* **(d) ⚠ PRIOR vs PHASE DISAGREE BY ~2σ.** The phase-centring value is ≈5 (prior-z ≈ −1.8); the
+  derived centre 11.07 puts the phase at 9.70 (z +3.34). The refit arbitrates; neither is moved by hand.
+
+### ⛔ FOUR PREVIOUSLY-PASSING TESTS NOW FAIL, AND THEY ARE NOT MODIFIED
+`test-enso-demean.R:105`, `test-enso-split.R:236`, `test-seas-lag-split.R:150` and `:174`. **All four
+have the same single cause** and it is the design decision above: each MIGRATES an ancestor and then
+**ENCODES** it, and a vector carrying `ent_seas_amp_SH = 0` is not a point of a log space.
+⚠ In all four the encoding is **machinery, not the claim** (three compare migrated against
+hand-built; one builds a fixture). ⛔ **Left failing for Marcus** — per the standing rule, a
+previously-passing test is reported, not edited. Suite **1702 pass / 10 fail / 2 skip**; the other
+**six are the pre-existing family** (five "stored modes are 21-parameter ancestors", plus
+`test-likelihood.R:596`'s `kz$hi <= 7000` guard rail, failing since 09-01).
+**THE CHOICE IS BETWEEN TWO MEANINGS OF A MIGRATED ANCESTOR:**
+* **fill 0** (shipped) — *"it ran with the channel off"*. Truthful, and GATE S is **bit-identical**
+  across 25 → 26. Cost: the migrated vector cannot be encoded, so those four tests need a different
+  vehicle.
+* **fill the init** — *"it holds no opinion; start it at the prior centre"*. All ten tests go green.
+  Cost: **every measurement at a stored mode silently moves** — GATE S at the refit winner would go
+  from z −12.30 to z +3.34 — which is re-baselining in disguise.
+
+### ⚠ WHAT IS NOT DONE
+The **refit is not launched** (Torch submission is Marcus's call), so P1–P5 are pre-registered and
+unmeasured. Fix B's pCO₂-disequilibrium pre-test and Fix C's pulse partition on the Joos PD100
+background are untouched.
+
 ## 2026-09-03 — ⭐ **THE 25-PARAMETER REFIT LANDED: ONE BASIN AT −1482.6144**
 
 Torch jobs `16805561` (ids 0–19) + `16814121` (ids 20–45, resubmitted). **46 of 46 tasks

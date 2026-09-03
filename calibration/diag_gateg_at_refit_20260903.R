@@ -5,8 +5,10 @@ D <- "calibration/output/multistart_20260902_demean25"
 S <- readRDS(file.path(D, "survey_summary.rds"))
 iA <- which(S$group=="A")[which.max(S$logpost[S$group=="A"])]
 res <- readRDS(S$files[iA]); pm <- res$par_mode
-p <- ccx_default_params(); for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
-p <- ccx_set_enso(p, pm); p$pump_mode <- res$pump_mode
+# CONVERTED ON TOUCH 2026-09-03 (Ruling B) -- see diag_gates_at_refit_20260903.R
+# for why the bare intersect() loop stopped being inert on that date.
+p <- ccx_overlay_par(ccx_default_params(), pm)
+p$pump_mode <- res$pump_mode
 v <- list(p = p, pm = pm, luc_scale = pm$luc_scale, bomb_total = pm$bomb_total)
 gr <- ccx_ocean_grid(p$h_ml); obs <- dg_gateG_obs(gr)
 g  <- dg_gateG(v, obs); vd <- dg_gateG_verdict(g, obs)

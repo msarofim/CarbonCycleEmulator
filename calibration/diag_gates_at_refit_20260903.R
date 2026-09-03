@@ -13,9 +13,14 @@ S  <- readRDS(file.path(D, "survey_summary.rds"))
 iA <- which(S$group == "A")[which.max(S$logpost[S$group == "A"])]
 res <- readRDS(S$files[iA])
 pm  <- res$par_mode
-p   <- ccx_default_params()
-for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
-p <- ccx_set_enso(p, pm); p$pump_mode <- res$pump_mode
+# CONVERTED ON TOUCH 2026-09-03 (Ruling B). The bare `intersect()` loop this
+# replaces assigns NULL for any name the fitted set lacks, which DELETES the
+# element and drops the run on a NAMED DEFAULT with nothing said. It was inert
+# while the stored vector and the build both had 25 names; `ent_seas_amp_SH`
+# entering the table the same day made it live. ccx_overlay_par() migrates,
+# copies, calls ccx_set_enso(), and ASSERTS the overlay deleted nothing.
+p   <- ccx_overlay_par(ccx_default_params(), pm)
+p$pump_mode <- res$pump_mode
 v <- list(p = p, pm = pm, luc_scale = pm$luc_scale, bomb_total = pm$bomb_total,
           sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
           grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c,

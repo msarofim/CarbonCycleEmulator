@@ -35,6 +35,25 @@ SST_SEAS_LOGSD <- 0.25
 # npp_frac_NH entry below.
 NPP_FRAC_NH_SD <- 0.04
 
+# PRIOR WIDTH on ent_seas_amp_SH, log space. A JUDGEMENT, and labelled as one
+# for the same reason SST_SEAS_LOGSD and NPP_FRAC_NH_SD are.
+#
+# WHERE 0.45 COMES FROM, AND WHY IT IS NOT 0.896. The channel's derivation
+# carries a recorded plausibility band -- "a fitted value far outside ~5-30 is
+# the channel being used as a fudge factor". Read as a +/- 1 sigma BRACKET (the
+# ccx_bracket_lnorm idiom) that band gives log-sd 0.896. It is NOT a bracket:
+# its endpoints mix two different scales (30 is the IN-BAND value, ~11 the
+# box-average one -- ENT_SEAS_AMP_SH_INBAND vs ENT_SEAS_AMP_SH_DERIV), and its
+# own wording -- "far outside" -- is a plausibility GATE, which is a 2 sigma
+# statement, not a 1 sigma one. At log-sd 0.45 the band sits at roughly +/- 2
+# sigma of the derived centre (log(30/11.07) = 0.997, log(11.07/5) = 0.795),
+# which is what the sentence actually claims.
+# ⚠ Marcus's call, 2026-09-03, taken on those numbers. The alternative offered
+# was a uniform on [0, 40]; it was rejected because an unpriored mechanism is a
+# FREE COMPENSATOR, and then a logpost gain says nothing about whether the
+# mechanism is right ([[ccx_seasonal_entrainment_hypothesis]]'s standing rule).
+ENT_SEAS_LOGSD <- 0.45
+
 CCX_PARAM_TABLE <- list(
   # ---- CO2 fertilisation ---------------------------------------------
   # `beta` LEFT THE TABLE on 2026-08-14 when fert_form flipped to CCX_FERT_MM.
@@ -328,6 +347,45 @@ CCX_PARAM_TABLE <- list(
   sst_seas_amp_SH = list(tr = "log", init = 1.74644,
                      prior = function(x) dlnorm(x, log(ccx_const("SST_SEAS_AMP_SH_OBS")),
                                                 SST_SEAS_LOGSD, log = TRUE)),
+  # ---- SOUTHERN-OCEAN ENTRAINMENT, FITTED SINCE 2026-09-03 (Marcus) ---
+  # 25 -> 26 parameters. The channel has existed since 2026-08-27g, IMPLEMENTED,
+  # DEFAULTED TO 0 AND NOT IN THIS TABLE -- the textbook shape of
+  # [[default_off_hides_the_bug]] -- while the model's WORST prior violation was
+  # `sst_seas_amp_SH` two lines up, strained to prior-z -5.14, and the SH ocean
+  # seasonal limb still landed 4.33 months from the observed one (GATE S, first
+  # measured 2026-09-03 at the refit winner: z -12.30, FAIL).
+  #
+  # ⭐ THE HYPOTHESIS THIS ENTRY EXISTS TO TEST: the fit is straining SOLUBILITY
+  # 5 sigma against its prior to do ENTRAINMENT's job, and still lands in the
+  # wrong season -- so it cannot, and the LAND has to run 2.48x observed to make
+  # up the amplitude. One missing mechanism would explain the worst prior
+  # violation, the seasonal partition error and the land limb's excess at once.
+  #
+  # ⛔ THE ACCEPTANCE TEST IS **NOT** THE LOGPOST. Freeing a parameter cannot
+  # lower it, and a mechanism that improves a fit is not thereby right. The
+  # pre-registered test (P2) is whether `sst_seas_amp_SH`'s prior-z RELAXES from
+  # -5.14. If it does not move, the hypothesis is WRONG and solubility was never
+  # doing entrainment's job. P1 (the limb's PHASE, now scored by GATE S) and P3
+  # (`npp_frac_NH` back inside its bounds) are corroboration, not the test.
+  #
+  # THE PRIOR CENTRE IS DERIVED, NOT CHOSEN: ENT_SEAS_AMP_SH_DERIV = 11.07
+  # umol/kg is the in-band 30 diluted onto the SH box by the 40-90 S ocean-area
+  # weight 0.369. The WIDTH is a judgement -- see ENT_SEAS_LOGSD above.
+  # `init` is typed literally because CCX_PARAM_TABLE is built before ccx_const()
+  # exists; test-likelihood.R ties each literal to its constant, as seas_T_amp_*
+  # and PUMP_GRAD_OBS already are.
+  #
+  # ⚠ `tr = "log"` MEANS 0 IS NOT A POINT OF THIS SPACE, and that is a real
+  # consequence rather than a technicality: the channel's OFF state is no longer
+  # representable in the fitted coordinates. A 25-parameter ancestor genuinely
+  # RAN at 0, so ccx_migrate_par_set() fills 0 and says so -- and such a migrated
+  # vector can be RUN and MEASURED but not ENCODED. That is the honest refusal,
+  # not a defect to route around. ⚠ `tau_ex_seas_amp` is STILL implemented,
+  # defaulted 0 and unfitted; it was deliberately NOT freed here, so that P2 has
+  # one mechanism to attribute to.
+  ent_seas_amp_SH = list(tr = "log", init = 11.07,
+                     prior = function(x) dlnorm(x, log(ccx_const("ENT_SEAS_AMP_SH_DERIV")),
+                                                ENT_SEAS_LOGSD, log = TRUE)),
   # ENSO, FOUR COEFFICIENTS SINCE 2026-09-01 (Marcus's design call). GtC/yr per
   # unit Nino3.4 index. `gamma_enso` was ONE scalar moving LAND ONLY, split
   # 50/50 by a hardcoded share -- and the ocean half of the model's ENSO
@@ -587,8 +645,32 @@ ccx_par_to_unc <- function(p) {
          paste(absent, collapse = ", "),
          ". It was written under a different parameter set -- bring it forward ",
          "with ccx_migrate_par_set() first.")
-  vapply(CCX_PARAM_NAMES,
-         function(n) .to_unc(p[[n]], CCX_PARAM_TABLE[[n]]), numeric(1))
+  u <- vapply(CCX_PARAM_NAMES,
+              function(n) .to_unc(p[[n]], CCX_PARAM_TABLE[[n]]), numeric(1))
+  # ⚠ THE SECOND WAY THIS ENCODER CAN LIE, HARDENED 2026-09-03. The guard above
+  # catches an ABSENT name. It does not catch a name that is PRESENT but sits
+  # outside its transform's domain -- log(0), or a logit at its own bound --
+  # which returns -Inf QUIETLY and hands a non-finite start vector to an
+  # optimiser three frames away. It became reachable the moment
+  # `ent_seas_amp_SH` entered the table with `tr = "log"`: a 25-parameter
+  # ancestor migrates to 0 (what it RAN), and 0 is not a point of a log space.
+  # Refusing here, by name and with the value, is the difference between "this
+  # ancestor's OFF state is unrepresentable, seed the coordinate" and a run that
+  # dies in its first seconds naming an index. [[broken_gate_reports_nothing]]
+  bad <- CCX_PARAM_NAMES[!is.finite(u)]
+  if (length(bad))
+    stop("ccx_par_to_unc(): ", length(bad), " parameter(s) lie OUTSIDE their ",
+         "transform's domain and encode to a non-finite value: ",
+         paste(sprintf("%s = %g (tr = %s)", bad,
+                       vapply(bad, function(n) as.numeric(p[[n]]), 0),
+                       vapply(bad, function(n) CCX_PARAM_TABLE[[n]]$tr, "")),
+               collapse = ", "),
+         ". A value the model can RUN is not automatically a point of the ",
+         "FITTED space -- a migrated ancestor whose mechanism was OFF is the ",
+         "usual case. Seed the coordinate at its table init if you meant this ",
+         "vector as a START point; measure at it directly if you meant it as a ",
+         "vector to RUN.")
+  u
 }
 
 #' Bring a stored parameter list onto THIS build's fitted set.
@@ -662,6 +744,27 @@ ccx_migrate_par_set <- function(p) {
     # DROP the retired scalar: a list carrying both is what ccx_gamma_enso()
     # refuses, and a migrated list must be usable without a second thought.
     p$gamma_enso <- NULL
+  }
+
+  # 2026-09-03: ent_seas_amp_SH entered the table (25 -> 26). A 25-parameter
+  # ancestor holds no opinion about it because THE CHANNEL WAS OFF WHEN IT WAS
+  # FITTED -- so 0 is not an invented coordinate, it is what the ancestor RAN,
+  # exactly as the ENSO OCEAN pair migrating to 0 was. The absence contract is
+  # the model's own (`R/cpp.R`, and the `!is.null()` guard in R/model.R): absent
+  # = 0 = the pre-2026-08-27g model, bit for bit. Asked here rather than
+  # restated, in the sense that this branch fills the SAME value those guards
+  # would have produced had the name simply been left absent.
+  # ⚠ AND THE FILLED VECTOR CANNOT BE ENCODED. `tr = "log"` excludes 0, so
+  # ccx_par_to_unc() on a migrated ancestor gives -Inf in this coordinate. That
+  # is CORRECT and it is the point: a vector whose own value is unrepresentable
+  # in this build's space is not a point of this build's space. Such a vector is
+  # still a legitimate thing to RUN and MEASURE -- which is what every gate
+  # driver does with it -- and refusing to encode it is the honest answer rather
+  # than a bug to route around. [[ccx_require_param_set]]'s standing: refusal is
+  # often right; refusing without saying what changed never is.
+  if ("ent_seas_amp_SH" %in% absent) {
+    p$ent_seas_amp_SH <- 0
+    filled <- c(filled, "ent_seas_amp_SH")
   }
 
   still <- setdiff(absent, filled)

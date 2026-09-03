@@ -258,6 +258,31 @@ for (.r in list(list("incumbent", .mdI), list("new basin", .mdN))) {
 }
 P_INC <- ccx_migrate_par_set(.mdI$par_mode)
 P_NEW <- ccx_migrate_par_set(.mdN$par_mode)
+# ---- SEED A COORDINATE THE MIGRATION COULD ONLY FILL WITH ITS OFF STATE ----
+# `ent_seas_amp_SH` entered CCX_PARAM_TABLE on 2026-09-03 with `tr = "log"`.
+# ccx_migrate_par_set() fills it with 0 -- WHAT THE ANCESTOR RAN, which is the
+# right answer for a vector you MEASURE at -- but a log space has no 0, so a
+# reference point migrated that way cannot be a START point. These are different
+# statements and the code now says both: the migration records what the ancestor
+# ran, and this seeds where the search begins.
+# ⛔ NOT a silent repair. It fires only for a coordinate the migration itself
+# reports as filled, it names the coordinate, and it prints both numbers.
+ms_seed_migrated <- function(P, who) {
+  mig <- attr(P, "migrated")
+  for (nm in intersect(mig, CCX_PARAM_NAMES)) {
+    s <- CCX_PARAM_TABLE[[nm]]
+    if (is.finite(.to_unc(P[[nm]], s))) next     # encodable: leave it alone
+    cat(sprintf(paste0("SEEDING %s for the %s start: migration filled %g (the ",
+                       "state the ancestor RAN), which tr = \"%s\" cannot encode.\n",
+                       "     Starting at the table init %g. The ancestor held no ",
+                       "opinion about this coordinate.\n"),
+                nm, who, P[[nm]], s$tr, s$init))
+    P[[nm]] <- s$init
+  }
+  P
+}
+P_INC <- ms_seed_migrated(P_INC, "incumbent")
+P_NEW <- ms_seed_migrated(P_NEW, "new basin")
 U_INC <- ccx_par_to_unc(P_INC)
 U_NEW <- ccx_par_to_unc(P_NEW)
 U_COLD <- ccx_init_unc()

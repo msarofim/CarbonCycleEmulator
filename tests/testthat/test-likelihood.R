@@ -508,7 +508,16 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # one -- r = -0.51 [-0.68, -0.28] against +0.535 [+0.29, +0.72], powered and
   # detrend-invariant. The two errors compensate 87 % in CO2 growth, which is
   # why a fit that outvotes partition 40:1 never forced them.
-  expect_length(CCX_PARAM_NAMES, 25L)
+  # 26 SINCE 2026-09-03: `ent_seas_amp_SH` entered the table on Marcus's design
+  # call. The Southern-Ocean entrainment channel had been IMPLEMENTED, DEFAULTED
+  # TO 0 AND UNFITTED since 2026-08-27g while the model's WORST prior violation
+  # was the SOLUBILITY amplitude it stands in for (`sst_seas_amp_SH`, prior-z
+  # -5.14) and the SH ocean seasonal limb still landed 4.33 months from the
+  # observed one (GATE S, first measured the same day: z -12.30, FAIL).
+  # ⛔ Freeing it is a TEST, not an adoption: the acceptance criterion is
+  # whether that -5.14 RELAXES, not whether the logpost rises.
+  expect_length(CCX_PARAM_NAMES, 26L)
+  expect_true("ent_seas_amp_SH" %in% CCX_PARAM_NAMES)
   expect_true(all(CCX_ENSO_PARAMS %in% CCX_PARAM_NAMES))
   expect_false("gamma_enso" %in% CCX_PARAM_NAMES)
   expect_true(all(c("seas_T_amp_NH", "seas_T_amp_SH",

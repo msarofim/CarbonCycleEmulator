@@ -518,7 +518,44 @@ CCX_CONSTANTS <- list(
   SPO_SEAS_OCEAN_PHASE_INV_HI = list(
     value = 9.20, units = "month of year",
     status = "provisional",
-    source = "Upper 95 % bootstrap bound of SPO_SEAS_OCEAN_PHASE_INV, as that entry.")
+    source = "Upper 95 % bootstrap bound of SPO_SEAS_OCEAN_PHASE_INV, as that entry."),
+
+  # ---- Southern-Ocean entrainment amplitude (2026-09-03) --------------
+  # REGISTERED BECAUSE IT BECAME A PRIOR CENTRE. `ent_seas_amp_SH` entered
+  # CCX_PARAM_TABLE on 2026-09-03 (25 -> 26 parameters), and its prior is
+  # centred here. Until then the derivation lived only in a comment beside
+  # ccx_default_params(), which is exactly the free-floating-number class the
+  # registry exists to close: a prior centre that is not a named constant
+  # cannot be tied to its own arithmetic by a test.
+  ENT_SEAS_AMP_SH_INBAND = list(
+    value = 30, units = "umol/kg, half-amplitude, WITHIN the 40-90 S band",
+    status = "derived",
+    source = paste("The Southern Ocean's own solubility cycle has to be",
+                   "OVERCOME before the observed signal is left, and the two",
+                   "are close to antiphase: solubility ~ SST amp 3.0 K x",
+                   "4.23 %/K x 370 uatm = 47 uatm at month 1.94, against an",
+                   "observed 19.45 uatm at month 7.50, so entrainment carries",
+                   "~66 uatm in band. Through the Revelle factor (~13) that is",
+                   "dDIC ~ (66/370) x 2150 / 13 ~ 30 umol/kg.",
+                   "⚠ This is the IN-BAND value. It is NOT the parameter --",
+                   "see ENT_SEAS_AMP_SH_DERIV, which is this number times the",
+                   "band's ocean-area weight. The recorded plausibility band",
+                   "'far outside ~5-30 is a fudge factor' mixes the two",
+                   "scales, and that is why both are registered separately.")),
+  ENT_SEAS_AMP_SH_DERIV = list(
+    value = 30 * 0.369, units = "umol/kg, half-amplitude, SH BOX MEAN",
+    status = "derived",
+    source = paste("ENT_SEAS_AMP_SH_INBAND times the 40-90 S band's ocean-area",
+                   "weight within the SH box, 0.369. `ent_seas_amp_SH`",
+                   "perturbs the WHOLE SH mixed layer, so the band value must",
+                   "be diluted onto the box before it can be a prior centre.",
+                   "Gives 11.07 umol/kg.",
+                   "⚠ DERIVED, NOT MEASURED: it inherits the pCO2 product's",
+                   "own caveat (data-raw/download_data.R sec.6c omits the",
+                   "seasonality of gas transfer and K0), the assumed Revelle",
+                   "factor, and the near-antiphase geometry the 47 + 19.45",
+                   "addition assumes. Its PRIOR WIDTH is a judgement and is",
+                   "labelled as one at ENT_SEAS_LOGSD in R/calibrate.R."))
 )
 
 #' Fetch a constant's value, erroring on unknown names

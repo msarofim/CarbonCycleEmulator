@@ -245,6 +245,50 @@ DG_LEDGER <- list(
             AWAY from the surface carbonate state. ⚠ Its sigma borrows the",
          "
             ABYSSAL n_eff = 20, which is conservative at the surface.")),
+  list(id = "S", what = "SPO seasonal cycle: the OCEAN limb's PHASE",
+       class = "OBSERVATION", src = paste(
+         "SPO_SEAS_OCEAN_PHASE_INV = 8.52 months, 95 % CI [7.82, 9.20].",
+         "
+            The observed SPO CO2 and d13C first harmonics, split by the",
+         "
+            two-signature inversion (diag_seas_signature_inversion.R).",
+         "
+            \u26a0 PROVISIONAL: the split uses the model's own d13C",
+         "
+            SIGNATURES -- two signed SCALARS. The model's seasonal PHASE",
+         "
+            never enters, and the CI is bootstrapped over years CROSSED",
+         "
+            WITH the signature spread, so that dependence is inside it."),
+       bound = paste("|z| <= DG_S_NSD on the PHASE, against a sigma DERIVED",
+         "
+            from the registered CI as (HI - LO) / (2 x 1.96). At NSD = 2",
+         "
+            that reproduces [LO, HI] to 0.02 months. \u26a0 The limb",
+         "
+            AMPLITUDE is REPORTED and NOT bounded: the registered",
+         "
+            SPO_SEAS_AMP_OCEAN_INV carries no interval, so no bound is",
+         "
+            derivable and inventing one would be choosing a number",
+         "
+            after seeing the answer."),
+       scored = paste("NO, in the sense that matters. co2_seasonal_SPO IS a",
+         "
+            fitted stream -- but it scores the TOTAL, which the model",
+         "
+            already matches to ~1 % by cancelling a 2.55x land limb",
+         "
+            against a 0.45x ocean one. Nothing scores the PARTITION."),
+       power  = paste("REAL, and it is the gate the seasonal arc was missing:",
+         "
+            a 5.17-month limb error survived weeks of fitting because",
+         "
+            the matched total has no power over the partition beneath",
+         "
+            it. \u26a0 The observed ocean phase rests on a pCO2 product,",
+         "
+            which omits the seasonality of gas transfer and K0.")),
   list(id = "12/12b", what = "Joos IRF: integrated pulse response, and the tail",
        class = "MODEL", src = paste(
          "Joos et al. 2013 multi-model mean, vintage 2013.",
@@ -277,9 +321,15 @@ dg_print_ledger <- function() {
               LIK_GCB_OCEAN_SD))
   cat(sprintf("    sigmas, which the report prints beside the target, are %.2f / %.2f.\n",
               DG_GCB_LAND_SD, DG_GCB_OCEAN_SD))
-  cat(sprintf("  The three distributional gates now share one strictness: DG_G5_NSD %g,\n",
+  cat(sprintf("  The distributional gates share one strictness: DG_G5_NSD %g,\n",
               DG_G5_NSD))
-  cat(sprintf("    DG_G7_NSD %g, DG_Q_NSD %g.\n", DG_G7_NSD, DG_Q_NSD))
+  cat(sprintf("    DG_G7_NSD %g, DG_Q_NSD %g, DG_GD_NSD %g, DG_S_NSD %g.\n",
+              DG_G7_NSD, DG_Q_NSD, DG_GD_NSD, DG_S_NSD))
+  cat(sprintf("  GATE S's sigma is DERIVED, not chosen: (%.2f - %.2f) / (2 x 1.96) = %.4f mo,\n",
+              DG_S_OBS_HI, DG_S_OBS_LO, DG_S_SD))
+  cat(sprintf("    so |z| <= %g is months [%.3f, %.3f] against the registered [%.2f, %.2f].\n",
+              DG_S_NSD, DG_S_OBS - DG_S_NSD * DG_S_SD, DG_S_OBS + DG_S_NSD * DG_S_SD,
+              DG_S_OBS_LO, DG_S_OBS_HI))
   cat("  ⚠ STILL NO LAW-DERIVED GATE. GATE G (2026-09-02) is OBSERVATIONAL; it\n")
   cat("    puts an observation ON the surface carbonate state, which narrows the\n")
   cat("    hole without closing it. Candidates, none built: carbonate / Revelle\n")
@@ -761,4 +811,105 @@ dg_streams <- function(r, v) {
   ccx_loglik(o, ccx_prepare_obs(), err, luc = eluc,
              deep = r$sp$diagnostics$d14c_bottom_box,
              ocean_grad = ccx_ocean_grad_scored(o, r$sp), by_stream = TRUE)
+}
+
+# =====================================================================
+# GATE S -- THE SPO **OCEAN** SEASONAL LIMB'S **PHASE** (2026-09-03)
+#
+# WHY IT EXISTS, AND WHY IT IS OWED. The model's only active SH ocean seasonal
+# limb peaks at month 3.35 against an observed 8.52 -- a 5.17 MONTH error, i.e.
+# very nearly antiphase -- and NOTHING IN THE OBJECTIVE OR IN THIS GATE SET
+# SCORED IT. That is how an error of that size survived for weeks: the SPO CO2
+# seasonal rows ARE in the likelihood, but they score the TOTAL, which the model
+# matches to ~1 % by cancelling a 2.55x land limb against a 0.45x ocean one
+# ([[seas_right_observable_wrong_drivers]]). A matched total has no power over
+# the partition that produced it. This gate scores the partition's PHASE, which
+# is the functional that does.
+#
+# ⭐ THE CLAIM IS THE PHASE, AND ONLY THE PHASE. The limb AMPLITUDE is REPORTED
+# beside it and is NOT bounded, for the same reason GATE G reports the column
+# inventory unbounded: `SPO_SEAS_AMP_OCEAN_INV` is registered with NO interval,
+# so no bound is derivable from it and inventing one would be choosing a number
+# after seeing the result. [[gate_bound_matches_its_claim]]
+#
+# ⭐ WHAT THE TARGET DEPENDS ON, STATED BEFORE IT IS USED. `SPO_SEAS_OCEAN_PHASE_INV`
+# is on the PROVISIONAL ledger because it is an observation inverted through the
+# model's own d13C SIGNATURES ([[ccx_spo_constants_registry]]). That dependence
+# is real and it is bounded: the inversion (diag_seas_signature_inversion.R) takes
+# the OBSERVED SPO CO2 and d13C first-harmonic vectors and two signed SCALARS
+# s_L, s_O (permil per ppm). The model's own seasonal PHASE does not enter it at
+# any point -- so this gate is NOT reading back the quantity it tests
+# ([[gate_reads_its_own_output]]) -- and the registered 95 % CI was bootstrapped
+# over YEARS **crossed with the signature spread**, so the signature dependence
+# is already inside the interval this gate judges against.
+#
+# THE SIGMA IS DERIVED FROM THE REGISTERED CI, NOT CHOSEN. sd = (HI - LO) /
+# (2 * 1.96). At DG_S_NSD = 2 -- the one strictness the distributional gates
+# share -- the resulting interval reproduces the registered [LO, HI] to 0.02
+# months, so harmonising with the family costs nothing and invents nothing.
+#
+# ⚠ AND THE OBSERVED PHASE ITSELF RESTS ON A pCO2 PRODUCT on the ocean side
+# (data-raw/download_data.R sec.6c), which omits the seasonality of gas transfer
+# and K0. That caveat belongs to the constant and is repeated at its use.
+# =====================================================================
+# ONE ESTIMATOR, not a second copy. `lib_seas_limbs.R` is THE SPO limb estimator
+# for this project and every file that quotes a limb sources it; a gate carrying
+# its own peak-to-peak / peak-month arithmetic is the caption-sync bug class, and
+# peak-to-peak vs semi-amplitude has already inverted a conclusion on this arc
+# ([[amp_definition_mismatch]]).
+source(ccx_path("calibration", "lib_seas_limbs.R"))
+
+DG_S_OBS     <- ccx_const("SPO_SEAS_OCEAN_PHASE_INV")
+DG_S_OBS_LO  <- ccx_const("SPO_SEAS_OCEAN_PHASE_INV_LO")
+DG_S_OBS_HI  <- ccx_const("SPO_SEAS_OCEAN_PHASE_INV_HI")
+DG_S_AMP_OBS <- ccx_const("SPO_SEAS_AMP_OCEAN_INV")   # REPORTED, NOT BOUNDED
+DG_S_SD      <- (DG_S_OBS_HI - DG_S_OBS_LO) / (2 * stats::qnorm(0.975))
+DG_S_NSD     <- 2    # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_GD_NSD
+# ⚠ THE KNOCKOUT MUST KILL **BOTH** SH OCEAN LIMBS. `sst_seas_amp_SH = 0` alone
+# leaves the entrainment limb running -- the bug the channel exposed on 27g --
+# and this gate exists precisely to be run with that channel switched ON, so the
+# one-limb form would silently gate the wrong thing. Taken from SL_CASES rather
+# than retyped, so it cannot drift from the estimator's own definition.
+DG_S_KO <- SL_CASES$SH_ocean
+
+#' Signed CIRCULAR difference between two months of year, in (-6, +6]
+#' Months are an angle: 11.9 and 0.1 are 0.2 months apart, not 11.8.
+dg_mo_diff <- function(a, b) ((a - b + 6) %% 12) - 6
+
+#' The SPO CO2 first-harmonic vector at one dg_vector(), as (a, b)
+dg_spo_vec <- function(v, obs) {
+  r  <- dg_run(v)
+  ms <- ccx_model_stats(r$out, obs)
+  h  <- ms$co2_seas$SPO
+  if (is.null(h)) stop("GATE S: the run returned no SPO seasonal harmonic.")
+  c(mean(h$a), mean(h$b))
+}
+
+#' GATE S's model side: the SH-OCEAN limb of SPO, by knockout
+#'
+#' The limb is BASE MINUS the run with both SH ocean drivers zeroed -- the
+#' contribution those drivers make to SPO, as a VECTOR. Limbs are vectors: an
+#' amplitude that grows while the phase stays antiphase makes the cancellation
+#' WORSE, not better ([[ccx_seas_2x2_admissible]]).
+#' @param v a dg_vector(); @param obs a ccx_prepare_obs()
+dg_gateS <- function(v, obs) {
+  base <- dg_spo_vec(v, obs)
+  vk   <- v
+  for (n in names(DG_S_KO)) vk$p[[n]] <- DG_S_KO[[n]]
+  ko   <- dg_spo_vec(vk, obs)
+  d    <- base - ko
+  list(v_ocean = d, amp = sl_amp(d), mo = sl_ang_mo(d),
+       v_total = base, amp_total = sl_amp(base), mo_total = sl_ang_mo(base),
+       ent = v$p$ent_seas_amp_SH, sst_amp_SH = v$p$sst_seas_amp_SH)
+}
+
+#' GATE S's verdict: a DISTRIBUTIONAL claim on the limb PHASE alone
+dg_gateS_verdict <- function(g, obs_mo = DG_S_OBS, sd = DG_S_SD, n_sd = DG_S_NSD) {
+  d <- dg_mo_diff(g$mo, obs_mo)
+  z <- d / sd
+  list(mo = g$mo, obs_mo = obs_mo, d_mo = d, sd = sd, z = z,
+       n_sd = n_sd, pass = abs(z) <= n_sd,
+       lo = obs_mo - n_sd * sd, hi = obs_mo + n_sd * sd,
+       # REPORTED, NOT BOUNDED -- the registered amplitude carries no interval.
+       amp = g$amp, amp_obs = DG_S_AMP_OBS, amp_ratio = g$amp / DG_S_AMP_OBS)
 }

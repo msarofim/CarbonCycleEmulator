@@ -1065,8 +1065,27 @@ ccx_default_params <- function() {
     #
     # DEFAULT 0 = the channel is OFF and the model is the shipped one BIT FOR
     # BIT. It is switched on deliberately, by a scan or a fit, never by
-    # accident. NOT in CCX_PARAM_TABLE: adding it would change the length of
-    # the calibrated vector and invalidate the stored mode and its Hessian.
+    # accident.
+    #
+    # ⭐ IT IS IN CCX_PARAM_TABLE SINCE 2026-09-03 (Marcus) -- 25 -> 26 fitted
+    # parameters -- AND THIS DEFAULT DELIBERATELY STAYS 0. Those are not in
+    # conflict; they are two different statements:
+    #   * the TABLE INIT (11.07 = ENT_SEAS_AMP_SH_DERIV) is where the SEARCH
+    #     starts, and it is what tests the mechanism at an explicit non-zero
+    #     value ([[default_off_hides_the_bug]]);
+    #   * this DEFAULT is what an UNCALIBRATED run does, and the mechanism is a
+    #     HYPOTHESIS that has not been refitted, let alone adopted. Flipping it
+    #     to the init would move every "at defaults" number on the project for a
+    #     mechanism nothing has yet accepted -- silent re-baselining.
+    # ⇒ FLIP THIS TO THE INIT WHEN THE REFIT IS ADOPTED, not before. Until then
+    #   a bare `intersect()` overlay of a 25-parameter ancestor deletes the name
+    #   and lands on the absence contract, which is 0 -- what that ancestor RAN.
+    # ⚠ THE PRICE, SAID OUT LOUD: with `tr = "log"` in the table, 0 is not a
+    #   point of the fitted space, so ccx_par_to_unc() on a list carrying THIS
+    #   default REFUSES, by name and with the value (hardened the same day).
+    #   That refusal is correct -- an uncalibrated default list is not a fitted
+    #   vector -- but it means `ccx_default_params()` is no longer encodable,
+    #   and that is a real consequence rather than an oversight.
     #
     # SCALE, from a pre-check done before the channel was written: the Southern
     # Ocean's own solubility cycle (SST amp 3.0 K x ~4.23 %/K x ~370 uatm ~
