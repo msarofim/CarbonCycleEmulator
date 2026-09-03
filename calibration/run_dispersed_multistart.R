@@ -492,7 +492,16 @@ local({
                 MS_TARGETS))
     return(invisible(NULL))
   }
-  tg <- utils::read.csv(f, stringsAsFactors = FALSE)
+  # ⛔ `colClasses` ON THE PROVENANCE COLUMNS, OR read.csv EATS THE COMMIT.
+  # A short hash is often all-digits-and-e -- `8297e84` parses as 8.297e+87 --
+  # so the 2026-09-03 preflight logged its own provenance as a number in
+  # scientific notation. The GATE is unaffected (it keys on `n_par` and the
+  # brackets, and the CSV on disk is intact), but a provenance label that
+  # silently becomes a different string is the label-drift class this project
+  # keeps paying for. Read them as text and they cannot be reinterpreted.
+  tg <- utils::read.csv(f, stringsAsFactors = FALSE,
+                        colClasses = c(commit = "character", host = "character",
+                                       name = "character"))
   r  <- tg[tg$name == nm, ]
   if (!nrow(r)) stop("port targets file has no row for reference '", nm, "'")
   if (!identical(as.integer(r$n_par[1]), length(CCX_PARAM_NAMES)))

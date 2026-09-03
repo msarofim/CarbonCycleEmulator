@@ -2,6 +2,44 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-03 — ⭐⭐ **THE 26-PARAMETER REFIT IS RUNNING ON TORCH: job `16837149`**
+
+Marcus's call, submitted over a live ControlMaster. `--array=0-45%10`, `cpu_short`, 4 h wall against
+a 180 min task budget, out to `calibration/output/multistart_20260903_ent26/`.
+
+**CHECKED BEFORE SUBMITTING, because reading the launch path found three places the 25 → 26 change
+bites, not one:**
+* `make_port_targets.R` migrates-then-encodes as well — so the seeding moved into the library as
+  `ccx_seed_unencodable()`, beside the migration it completes. It stays **separate** from the
+  migration on purpose: the migration says what the ancestor **RAN** (which is why every gate at a
+  stored mode reads the same across 25 → 26), this says where a **SEARCH** begins.
+* **PORT GATE (a) hard-stops on a parameter-count change by design** ("The target is stale").
+  `port_targets.csv` regenerated at 26 parameters, at the run's own commit.
+* `MS_SPREAD_ALL25` → `MS_SPREAD_ALL`; the sbatch outdir moved to `_ent26`, because the 09-02
+  checkpoints are 25-name files and a directory that cannot collide beats leaning on the guard.
+
+**MEASURED, NOT ASSUMED:** the `migrated` attribute survives element assignment, so
+`ent_seas_amp_SH` lands in `MS_SPREAD_SKIP` and **the dispersion pool stays 19 coordinates at
+sd 1.0466** — adding a parameter did not dilute the dispersion scale. Local preflight passed ids
+0/1/2/25; the **Torch preflight batch (`16837134`, 8 tasks) passed PORT GATE (a) on real nodes at
+rel 1.1e-12 – 1.2e-13** against a 1e-8 tolerance. No jobs of mine queued, `cpu_short` at 44 pending
+/ 35 running, scratch 82 % with 617T free.
+
+### ⚠ ONE DEFECT THE PREFLIGHT LOGS SURFACED, AND WHY IT IS NOT SHIPPED YET
+The gate printed its own provenance as **`8.297e+87`**: `read.csv` parses the short hash `8297e84`
+as a number. The **gate is unaffected** — it keys on `n_par` and the brackets, and the CSV on disk is
+intact — but a provenance label that silently becomes a different string is the label-drift class
+this project keeps paying for. Fixed locally with `colClasses` on the provenance columns.
+⛔ **NOT SHIPPED WHILE THE ARRAY RUNS.** Pending tasks read the driver from `/scratch` at start time,
+so re-shipping now would have tasks 10–45 running different code from 0–9 — a silent split of one
+array across two builds. It goes up when the array drains.
+
+### WHAT THE RUN IS FOR, restated so the result is judged on it
+⛔ **NOT the logpost** — freeing a parameter cannot lower it. **P2**: does `sst_seas_amp_SH`'s
+prior-z relax from **−5.14**? **P3**: does the SPO land limb come down from **2.48×**?
+⚠ And the pre-registered risk: the refit may simply **move the strain** onto `ent_seas_amp_SH`
+(conditional optimum sits at prior-z −3.41), which would falsify the hypothesis.
+
 ## 2026-09-03 — ⭐⭐ **FIX A SHIPPED: `ent_seas_amp_SH` IS FITTED (25 → 26), AND GATE S EXISTS**
 
 Structural change **before** the refit, which is the ordering that cost 14 h once. Nothing is
