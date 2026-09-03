@@ -2,9 +2,13 @@
 # =====================================================================
 # multistart.sbatch -- ONE dispersed start per array task.
 #
-# ⚠ SUBMITTED BY MARCUS, NOT BY CLAUDE. Torch needs the NYU VPN, the gateway
-# password, Duo, and a Microsoft device-code at login.torch; none of that is
-# scriptable from here.
+# ⚠ SUBMISSION IS MARCUS'S CALL, AND THE AUTHENTICATION IS HIS TOO. Torch needs
+# the NYU VPN, the gateway password, Duo, and a Microsoft device-code at
+# login.torch; none of that is scriptable. ⭐ BUT ONCE A ControlMaster IS LIVE
+# the channel is reusable, and Claude submitted the 2026-09-03 run over exactly
+# that, on Marcus's explicit instruction. The constraint is AUTHENTICATION, not
+# authorship -- check the machine, not this comment
+# ([[runnable_is_not_undrivable]]).
 #
 # ⛔ RUN THE PREFLIGHT BATCH FIRST AND READ IT (~2 min/task, exits 0 without
 # optimising):
@@ -101,7 +105,12 @@ mkdir -p logs calibration/output
 # and the guard is the backstop, not the plan.
 # ⛔ COMPUTED **BEFORE** THE `source ~/.bashrc` BELOW -- see the CCX_PROJ_DIR note
 # above. This line is the one that silently wrote round 1 into SLR-RFF-BRICK.
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260902_demean25}"
+# ⭐ 2026-09-03: `_ent26`. `ent_seas_amp_SH` entered CCX_PARAM_TABLE, so this is
+# a 26-NAME space and the 09-02 checkpoints in `_demean25` are 25-name files.
+# The driver's checkpoint guard would REFUSE them by `param_names` -- correctly,
+# and loudly -- but a directory that cannot collide is the cleaner answer and
+# the guard is the backstop, not the plan.
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260903_ent26}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.

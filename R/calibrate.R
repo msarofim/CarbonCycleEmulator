@@ -795,6 +795,42 @@ ccx_migrate_par_set <- function(p) {
   structure(p, migrated = filled)
 }
 
+#' Seed the coordinates a MIGRATION could only fill with an unencodable state
+#'
+#' ⭐ WHY THIS IS SEPARATE FROM THE MIGRATION, AND MUST STAY SEPARATE. They
+#' answer two different questions and conflating them is how a measurement turns
+#' into a re-baselining:
+#'   * `ccx_migrate_par_set()` says WHAT THE ANCESTOR RAN. That is the right
+#'     answer for a vector you MEASURE at, and it is why every gate at a stored
+#'     mode reads the same before and after a parameter enters the table.
+#'   * this says WHERE A SEARCH BEGINS, which the ancestor has no opinion about.
+#'
+#' It fires ONLY for a coordinate the migration itself reported as filled AND
+#' whose filled value cannot be encoded -- e.g. `ent_seas_amp_SH = 0` under
+#' `tr = "log"`, where the ancestor's own state has prior probability ZERO
+#' ([[runnable_is_not_encodable]]). It names the coordinate and prints BOTH
+#' numbers rather than repairing anything quietly.
+#'
+#' ⛔ IT IS NOT A GENERAL "MAKE THIS ENCODABLE" HELPER. A coordinate that is
+#' unencodable WITHOUT having been migrated is a bug in the caller, not a
+#' warm-start gap, and is left to `ccx_par_to_unc()` to refuse by name.
+#'
+#' @param p a list returned by ccx_migrate_par_set() (carries `migrated`)
+#' @param who one word naming the caller's use, printed
+ccx_seed_unencodable <- function(p, who = "start") {
+  for (nm in intersect(attr(p, "migrated"), CCX_PARAM_NAMES)) {
+    s <- CCX_PARAM_TABLE[[nm]]
+    if (is.finite(.to_unc(p[[nm]], s))) next
+    cat(sprintf(paste0("SEEDING %s for the %s: the migration filled %g -- the state ",
+                       "the ancestor RAN --\n     which tr = \"%s\" cannot encode. ",
+                       "Starting at the table init %g.\n     The ancestor held no ",
+                       "opinion about this coordinate.\n"),
+                nm, who, p[[nm]], s$tr, s$init))
+    p[[nm]] <- s$init
+  }
+  p
+}
+
 #' Refuse a stored mode that is not on THIS build's parameter set, WITH THE REASON
 #'
 #' ⛔ THE BARE FORM THIS REPLACES IS A NAMED DEFECT. Seven diagnostics carried

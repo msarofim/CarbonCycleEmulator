@@ -267,22 +267,8 @@ P_NEW <- ccx_migrate_par_set(.mdN$par_mode)
 # ran, and this seeds where the search begins.
 # ⛔ NOT a silent repair. It fires only for a coordinate the migration itself
 # reports as filled, it names the coordinate, and it prints both numbers.
-ms_seed_migrated <- function(P, who) {
-  mig <- attr(P, "migrated")
-  for (nm in intersect(mig, CCX_PARAM_NAMES)) {
-    s <- CCX_PARAM_TABLE[[nm]]
-    if (is.finite(.to_unc(P[[nm]], s))) next     # encodable: leave it alone
-    cat(sprintf(paste0("SEEDING %s for the %s start: migration filled %g (the ",
-                       "state the ancestor RAN), which tr = \"%s\" cannot encode.\n",
-                       "     Starting at the table init %g. The ancestor held no ",
-                       "opinion about this coordinate.\n"),
-                nm, who, P[[nm]], s$tr, s$init))
-    P[[nm]] <- s$init
-  }
-  P
-}
-P_INC <- ms_seed_migrated(P_INC, "incumbent")
-P_NEW <- ms_seed_migrated(P_NEW, "new basin")
+P_INC <- ccx_seed_unencodable(P_INC, "incumbent start")
+P_NEW <- ccx_seed_unencodable(P_NEW, "new basin start")
 U_INC <- ccx_par_to_unc(P_INC)
 U_NEW <- ccx_par_to_unc(P_NEW)
 U_COLD <- ccx_init_unc()
@@ -300,7 +286,9 @@ if (!length(MS_SPREAD_POOL))
        "measured basin separation left to set a dispersion from. Set CCX_MS_SPREAD ",
        "explicitly and say in the output directory name what it came from.")
 MS_SPREAD_MEASURED <- sqrt(mean((U_NEW - U_INC)[MS_SPREAD_POOL]^2))
-MS_SPREAD_ALL25    <- sqrt(mean((U_NEW - U_INC)^2))   # the diluted value, for the record
+MS_SPREAD_ALL      <- sqrt(mean((U_NEW - U_INC)^2))   # the diluted value, for the record
+# ⚠ RENAMED from MS_SPREAD_ALL25 on 2026-09-03: the build fits 26 and a name
+# carrying a stale count is the label-drift bug the project rule exists to stop.
 MS_SPREAD <- .env_num("CCX_MS_SPREAD", MS_SPREAD_MEASURED)
 
 cat(sprintf("\n%s\nDISPERSED MULTI-START, id %d, arm %s, %d parameters\n",
@@ -311,7 +299,7 @@ cat(sprintf("  budget: %d restarts x %d maxit x %d cycles, wall %g min\n",
             MS_RESTARTS, MS_MAXIT, MS_CYCLES, MS_WALL_MIN))
 cat(sprintf("  dispersion sd %.4f in u-space (measured per-coordinate RMS between\n    the two known basins = %.4f, pooled over the %d coordinates at least one of\n    them FITTED; over all %d it would be %.4f, diluted by the %d migrated in BOTH:\n    %s)\n",
             MS_SPREAD, MS_SPREAD_MEASURED, length(MS_SPREAD_POOL),
-            length(CCX_PARAM_NAMES), MS_SPREAD_ALL25, length(MS_SPREAD_SKIP),
+            length(CCX_PARAM_NAMES), MS_SPREAD_ALL, length(MS_SPREAD_SKIP),
             if (length(MS_SPREAD_SKIP)) paste(MS_SPREAD_SKIP, collapse = ", ") else "none"))
 cat(sprintf("  out %s\n%s\n", MS_OUT, strrep("=", 70)))
 
@@ -785,7 +773,7 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             start_class = if (MS_ID >= MS_DISPERSED_FROM) "dispersed"
                           else if (MS_ID %in% MS_SEED_IDS) "seeded" else "reference",
             spread_pool = MS_SPREAD_POOL, spread_skipped = MS_SPREAD_SKIP,
-            spread_all = MS_SPREAD_ALL25,
+            spread_all = MS_SPREAD_ALL,
             enso_seed = c(ocn_opt = MS_ENSO_OCN_OPT, ocn_obs = MS_ENSO_OCN_OBS,
                           land_obs_mult = MS_ENSO_LAND_OBS),
             port_checked = MS_PORT$checked, port_target = MS_PORT$target,

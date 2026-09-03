@@ -74,6 +74,14 @@ rows <- lapply(names(PT_REFS), function(nm) {
 ",
                   nm, paste(md$kz_bracket, collapse = ", "), paste(md$hml_bound, collapse = ", "),
                   paste(.ship$kz, collapse = ", "), paste(.ship$h_ml, collapse = ", ")))
+    # ⚠ A MIGRATED ANCESTOR MAY CARRY AN UNENCODABLE STATE (2026-09-03): with
+    # `ent_seas_amp_SH` in the table under `tr = "log"`, a pre-09-03 vector
+    # migrates to 0, which is not a point of the fitted space. Seed it, LOUDLY.
+    # The target does not need to be a GOOD point -- it is an identity check
+    # that two machines agree at the SAME point -- but it does need to be one
+    # both machines can reach, and the seed must be reproducible, which it is:
+    # it comes from CCX_PARAM_TABLE, which the bracket columns already gate.
+    pmv <- ccx_seed_unencodable(pmv, paste(nm, "port target"))
     u <- ccx_par_to_unc(pmv)
     stored <- md$logpost; src <- PT_REFS[[nm]]
   }
