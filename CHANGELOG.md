@@ -2,6 +2,43 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-03 — ⭐⭐ **WHY THE FIT IS EXPENSIVE, PROFILED: IT IS THE SPINUP, IN R**
+
+Marcus asked whether a 15-hour array for a "simple model" is just the parameter count. ⛔ **It is not.**
+
+| piece of one evaluation | time | share |
+|---|---|---|
+| **`ccx_spinup()`** | **0.1252 s** | **84 %** |
+| transient, 1750–2024 | 0.0282 s | 19 % |
+| `ccx_loglik()`, ~20 streams | 0.0025 s | 2 % |
+| **full objective** | **0.1485 s** | |
+
+⚠ **THE PHYSICS IS CHEAP.** 96 state numbers (32 boxes × 3 tracers), 4 substeps/month ⇒ **13,200 RK4
+steps / 52,800 derivative calls** for 275 years in **0.028 s** — about **0.5 µs per derivative call**,
+because the transient runs in the C++ core. **Re-deriving the 1750 equilibrium costs 4.4× the entire
+historical simulation.**
+
+⭐ **AND THE DIAGNOSIS IS ONE LINE.** `Rprof` over 40 spinups: **`ccx_deriv` is 91 % of it**
+(`add_flux` 41.7 %, `add_diffusion` 17.9 %, **`%in%` 7.3 %**, `h_from_dic_alk` 3.7 %).
+**`ccx_spinup()` calls the *R* `ccx_deriv` while `ccx_deriv_cpp` is already exported**
+(`src/ccx_core.cpp:783`) and is what the transient uses. Three hot sites in `R/spinup.R`: the Newton
+residual (`:84`, inside the iteration), the isotope operator (`:207`/`:211` — a loop building a
+32×32 matrix **one column at a time**, ~32 calls per tracer), and a final residual (`:239`).
+
+**WHAT IT COSTS:** Torch runs 0.27 s/eval (~1.8× the Mac); 6,000 × 3 restarts × 6 cycles ⇒ up to
+108,000 evals/task, **46 tasks ⇒ up to 138 CPU-hours** — of which **≈5 CPU-days is spinup and ≈1
+CPU-day is the climate history.**
+
+**THE OTHER TWO MULTIPLIERS, both real but smaller:** Nelder-Mead at n=26 (derivative-free is FORCED
+because `h_ml` re-discretises the grid, and the **1055× sd ratio** is what makes the eval count
+large), and **× 46 dispersed starts** — whose expected value is now lower than when the design was
+set, since 09-01 and 09-02 both found ONE basin.
+
+⇒ **~5× is on the table**, larger than any other speed lever here. ⛔ **Hazard: it would move the
+OBJECTIVE if the two derivatives differ at all.** `test-parity.R` holds them together, but parity to
+1e-9 is not bit-identical and a Newton solve amplifies — any substitution must reproduce stored
+logposts to the port gate's own 1e-8 before adoption. ⛔ **And not while an array is running.**
+
 ## 2026-09-03 — ⭐⭐ **THE 26-PARAMETER REFIT IS RUNNING ON TORCH: job `16837149`**
 
 Marcus's call, submitted over a live ControlMaster. `--array=0-45%10`, `cpu_short`, 4 h wall against
