@@ -2,6 +2,43 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-03 — ⭐⭐ **THE REFIT ANSWERS THE PRE-REGISTRATION: P1/P2/P3 LAND, P5 IS FALSIFIED**
+
+Job `16837149`, **12 of 46 tasks in, every one at −1446.7627/−1446.7631 (spread 4e-4)** — ONE BASIN,
+reached from the cold init, the migrated ancestors, the seeded starts and dispersed draws alike.
+⛔ **NOT comparable to the 25-par −1482.6144**; different space.
+
+| | 25-par winner | 26-par refit | |
+|---|---|---|---|
+| **P2** `sst_seas_amp_SH` prior-z | **−5.14** | **+0.24** | ✅ **the 5σ strain is GONE** |
+| **P1** GATE S ocean limb | 0.330 @ 4.19, z −12.30 | **0.438 @ 8.87, z +0.99** | ✅ **PASS** |
+| **P3** SPO land limb | 2.48× obs | **1.68×** | ⚠ better, not closed |
+| **P3** `npp_frac_NH` prior-z | −2.15 | **−0.05** | ✅ back at its prior |
+| **P5** IRF(100) | 0.276 | **0.276** | ⛔ **unmoved** |
+| `ent_seas_amp_SH` | — | **19.03, z +1.11** | ✅ not strained |
+| \|z\|>2 / \|z\|>3 | 5 / 3 | **3 / 2** | |
+
+⭐ **THE HYPOTHESIS HELD.** One missing mechanism did explain the worst prior violation, the seasonal
+partition error and the land limb's excess at once — and the mechanism landed at a **physically
+plausible 19.03 µmol/kg**, inside its prior and inside the recorded 5–30 band, not at a fudge-factor
+value. ⭐ **The pre-registered risk did NOT materialise**: the conditional profile put the optimum at
+ent ≈ 2 / prior-z −3.41 and warned the strain might just move onto the new coordinate. It didn't —
+another frozen slice overstating a cost, exactly as this project keeps finding.
+
+### ⛔ AND THE PART THAT DID NOT WORK, WHICH IS THE PEDAGOGICALLY IMPORTANT ONE
+**P5 IS FALSIFIED. IRF(100) 0.276 → 0.276; ∫IRF@100 39.23 → 39.26.** Fixing the seasonal ocean
+physics did **not** lengthen the perturbation lifetime by any amount. ⇒ **The three problems are
+INDEPENDENT**, the hoped-for "constrain the seasonal observables with the right mechanisms and the
+long lifetime falls out" **does not happen**, and Fix C needs its own mechanism. That was written
+down as a prediction before the run precisely so it could fail this way.
+
+### ⚠ AND A NEW WORST VIOLATION, WHICH IS NOT THE SAME FIX AGAIN
+`sst_seas_amp_NH` went **−3.56 → −3.91** and is now the model's worst prior violation. ⛔ The NH
+deliberately has **no** entrainment channel, and that is a MEASUREMENT, not an omission: NH-mean pCO2
+sits 0.30 months from NH-mean SST, so the NH really is solubility-dominated at the hemispheric mean.
+Also open: the SH land limb is 1.68× at phase **11.19 against an observed 9.29**, and `rep_dC` is
+still +3.38.
+
 ## 2026-09-03 — ⭐⭐ **WHY THE FIT IS EXPENSIVE, PROFILED: IT IS THE SPINUP, IN R**
 
 Marcus asked whether a 15-hour array for a "simple model" is just the parameter count. ⛔ **It is not.**
