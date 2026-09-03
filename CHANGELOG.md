@@ -177,11 +177,49 @@ previously-passing test is reported, not edited. Suite **1702 pass / 10 fail / 2
 `test-likelihood.R:596`'s `kz$hi <= 7000` guard rail, failing since 09-01).
 **THE CHOICE IS BETWEEN TWO MEANINGS OF A MIGRATED ANCESTOR:**
 * **fill 0** (shipped) — *"it ran with the channel off"*. Truthful, and GATE S is **bit-identical**
-  across 25 → 26. Cost: the migrated vector cannot be encoded, so those four tests need a different
-  vehicle.
-* **fill the init** — *"it holds no opinion; start it at the prior centre"*. All ten tests go green.
-  Cost: **every measurement at a stored mode silently moves** — GATE S at the refit winner would go
-  from z −12.30 to z +3.34 — which is re-baselining in disguise.
+  across 25 → 26. Cost: the migrated vector cannot be encoded.
+* **fill the init** — *"it holds no opinion; start it at the prior centre"*. Cost: every measurement
+  at a stored mode moves — GATE S at the refit winner would go z −12.30 → +3.34.
+
+### ⛔ CORRECTION, MEASURED THE SAME DAY — I GOT TWO THINGS WRONG ABOVE
+**(i) "fill the init → all ten go green" is FALSE. It fixes THREE of the four.** Measured
+(`probe`, `diag_ent_conditional_lever.R`): `test-enso-demean.R:105` still fails, because its two
+published anchors are **stale in a 26-parameter space no matter which fill is chosen** —
+−1568.4936 → **−1880.10** and −1512.0151 → **−1829.09**, and Ruling A's headline gain
+**+56.4785 → +51.0081**. That is the precedented consequence of a parameter-count change (the ENSO
+split moved every stored logpost −4.777 and it was re-measured, not repaired).
+
+**(ii) "one cause" is too strong.** Three are the ENCODER (`:174` asserts `all(is.finite(u))`
+outright — *"the end-to-end claim the refit rests on"*; `:150` and `enso-split:236` use the encoder
+merely as a comparison vehicle, and **both sides break equally**). The fourth additionally carries a
+**stale logpost reference**, which no fill repairs.
+
+**⭐ AND THE SHARPEST STATEMENT OF THE PROBLEM, which neither framing had reached:** under fill-0 the
+ancestor's own state does not merely fail to encode — **it has prior probability ZERO.**
+`dlnorm(0)` is 0, so a lognormal prior *asserts the mechanism is present*. A 25-parameter ancestor is
+not at the edge of the new space; it is outside its support.
+
+### ⚠ AND THE DATA, CONDITIONALLY, DO NOT WANT THE DERIVED AMPLITUDE
+Profile along the axis at the refit winner, everything else held (prior term separated exactly):
+
+| `ent` | logpost | prior term | likelihood | prior-z |
+|---|---|---|---|---|
+| 0.01 | −1581.35 | −98.79 | −1482.56 | −14.04 |
+| 1 | −1492.09 | −11.75 | **−1480.34** | −4.80 |
+| **2** | **−1490.13** | −6.04 | −1484.09 | −3.41 |
+| 10.95 | −1788.44 | −0.22 | −1788.22 | 0.00 |
+| 29.68 | −4042.26 | −2.22 | −4040.04 | +2.00 |
+
+* ✅ **The prior is NOT choosing the physics.** The likelihood dominates by *hundreds* of log-units;
+  it costs the prior only **11.53** to sit at the likelihood's own optimum. That was the live worry
+  about an informative prior on a new mechanism, and it is answered.
+* ⭐ **There IS a real likelihood gain from a small channel**: ~0 → 1 buys **+2.22** in likelihood.
+* ⛔ **But the data want it 5–10× SMALLER than the derived 10.95**, and the conditional optimum sits
+  at prior-z **−3.41**. ⚠ **RISK TO P2, pre-registered now:** the refit may simply **move the strain**
+  from `sst_seas_amp_SH` (−5.14) onto `ent_seas_amp_SH` (−3.4) rather than relieve it. That outcome
+  would falsify the hypothesis, which is what the pre-registration is for.
+* ⚠ **CONDITIONAL, and that is the whole caveat**: every other coordinate is held at a vector fitted
+  *without* the channel. The hypothesis is precisely that the fit re-arranges. This cannot decide it.
 
 ### ⚠ WHAT IS NOT DONE
 The **refit is not launched** (Torch submission is Marcus's call), so P1–P5 are pre-registered and
