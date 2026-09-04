@@ -2,6 +2,92 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04g — GATE S's TARGET IS CORROBORATED BY AN INDEPENDENT OBSERVATION, AND FIX B IS PRICED
+
+Handoff `notes/handoff_2026-09-04_gate_audit.md` §8 item 1 — the top of the open list, and the one
+place where a single product answers two owed questions. Pre-registered in
+`notes/prereg_2026-09-04g_gateS_independent_and_fixB.md` (written before the script existed),
+scored in `notes/collect_2026-09-04g_gateS_corroborated_and_fixB_priced.md`; new diagnostic
+`calibration/diag_gateS_indep_and_fixB.R`, ~4 s. **No refit, no parameter change, no new gate.**
+Suite unchanged (nothing under `R/` or `calibration/lib_*` was touched).
+
+⭐⭐ **GATE S IS NO LONGER RESTING ON THE MODEL ALONE.** Its target `SPO_SEAS_OCEAN_PHASE_INV`
+= **8.52 mo [7.82, 9.20]** was an observation inverted through **two scalars the model supplies**,
+which is why all six `SPO_SEAS_*` constants read `status = "provisional"`. The independent route
+uses **no signature scalar and no model output**: surface-ocean ΔpCO₂ from the
+Landschützer/Laruelle climatology gives the flux phase, and the conversion to an atmospheric phase
+is a **LAW EXPRESSED AS A BRACKET, NOT A NUMBER** — a first-order box lags its forcing by
+`arctan(ωτ) ∈ (0°, 90°]`, i.e. 0–3 months.
+* **A1 CORROBORATED**: the Southern Ocean (40–90 °S) ΔpCO₂ peaks **7.41**, bracket **[7.41, 10.41]**,
+  which contains 8.52, the whole registered CI, and `ent26`'s own limb at **8.871**.
+* ⭐ **A2 — AND IT HAS POWER, which is the half worth pre-registering.** The bracket is **25 % of
+  the circle** (random pass p = 0.25), and it **EXCLUDES both readings of the model's pre-fix SH
+  ocean limb** — 4.16 (channel decomposition) and 3.35 (`lib_seas_limbs.R`). ⇒ **the defect gate S
+  was built to catch is independently confirmed to be a defect**, not an artefact of the inversion.
+* **A3 — and it says WHICH regime SPO samples.** The SH **area-mean** bracket **[1.54, 4.54]**
+  excludes 8.52 **and contains 4.16**: the pre-fix model was matching the SH area mean, which
+  2026-08-27f independently measured as a **76 % cancellation of two antiphase limbs**. Two routes,
+  one reading. ⚠ Not band-unique — the NH bracket also contains 8.52; irrelevant to a South Pole
+  station, but stated rather than left to be noticed.
+* ⚠ **A4, the row pre-registered as biased, lands late as predicted.** With τ from `tau_ex` = 0.902 yr
+  the lag is `arctan(ωτ)` = **2.67 mo** ⇒ implied phase **10.08**, **+1.56 mo** from 8.52. The prereg
+  said in advance that `tau_ex` alone is an **UPPER BOUND** on the SH box's loss time, so the lag is
+  biased LATE — and it landed late. **Reported; it does not fail the gate.** The honest follow-up is
+  to MEASURE the model's own flux→atmosphere lag rather than assume τ.
+⇒ **A DECISION FOR MARCUS, NOT TAKEN HERE:** the constant's provisional status can narrow from
+"circular" to "model-dependent in a way now bounded by an independent observation".
+
+⭐⭐ **FIX B: THE RESERVOIR IS REAL AND LARGE, AND THE MODEL CANNOT REPRESENT ANY OF IT.**
+* **B1 — an ORDERING, so no threshold had to be invented.** Annual area-weighted pCO₂ minus the
+  global ocean mean — an **INTERNAL CONTRAST**, needing neither an atmospheric field (this product
+  has none) nor a reference year (it states none): **eq. Pacific +55.47 > tropics +15.24 > global**,
+  Southern Ocean −2.98 µatm. Widening the longitude mask moves it only −12 %.
+* **B2 — a SOURCE reading, not a run**: two hemispheric mixed layers, one `pco2_ml` each, **no
+  zonal or equatorial box** ⇒ the model's representable tropical-minus-global contrast is
+  **EXACTLY ZERO**, and its ENSO ocean term is an additive flux with a free coefficient
+  (`src/ccx_core.cpp:528`), not an upwelling response — as its own comment says.
+* **B3 — the mechanism is the right SIZE.** GCB ocean sink on annual Niño3.4 with a year term
+  (1959–2024, n = 66): **+0.1153 ± 0.0246 GtC/yr per index unit**, t +4.69, residual r **+0.488**.
+  Through the model's **own** air-sea prefactor over the equatorial mask (4.1 % of ocean area) that
+  needs a ΔpCO₂ swing of **13.15 µatm** = **0.24× the measured reservoir** ⇒ equatorial upwelling
+  can plausibly carry the WHOLE observed signal; it asks for a quarter of the pool, not more.
+
+⛔⛔ **B4 — THE VERDICT INVERTS WHEN THE COMPARISON IS MADE LIKE-FOR-LIKE.** The first draft put the
+**patch coefficient** (|γ_NH|+|γ_SH| = 0.356) against the **net** GCB slope (0.115) and read
+"**308 %**, the patch is 3× too strong". **Not like-for-like** — the model's net response is the
+patch **plus** a wrong-sign solubility path. Measured the way the observation was:
+
+| arm | slope GtC/yr per index | se | r |
+|---|---|---|---|
+| **GCB (observed)** | **+0.1153** | 0.0246 | **+0.488** |
+| model, `ent26` | **+0.0532** | 0.0303 | +0.207 |
+| model, patch OFF | **−0.1274** | 0.0318 | **−0.432** |
+
+⭐ **The model is UNDER-responding, at 0.46× observed** — not over. The patch is oversized because
+it must first cancel the solubility path: **0.356 of coefficient buys +0.181 of net slope.**
+⭐ And the comment's "wrong sign" is **re-measured, not recalled**: solubility-only gives
+**r −0.432** at `ent26`; the recorded −0.51 was measured at an earlier mode.
+⇒ **THIS IS A STRONGER ARGUMENT FOR FIX B THAN THE HANDOFF CARRIED.** Fix B is not "shrink an
+oversized coefficient" — it is that **a wrong-sign mechanism is being paid for twice**: once in the
+patch that cancels it, and again in a net response still at half the observed value.
+**REPORTED, NOT GATED:** the observed sensitivity supplies **31 %** of gate V's 0.213 deficit — and
+gate V's own record says a FAIL there **is not a blocker**.
+
+🐛 **TWO BUGS IN THIS SESSION'S OWN SCRIPT, BOTH CAUGHT BY AN IMPLAUSIBLE MAGNITUDE AND BOTH
+VERDICT-CHANGING. Each now has a gate, and each gate was MUTATION-TESTED against the exact bug.**
+1. ⛔ **THE MASK WRAPPED THE DATE LINE AND THE CODE DID NOT.** The grid runs **−180…180**, so
+   `160 °E → 80 °W` written as `lon >= 160 & lon <= 280` selects **160–180 °E only** — 20° of
+   **WARM POOL**, the *lowest*-pCO₂ part of the basin, at **one sixth** of the intended area — and
+   still printed a plausible **+23.78 µatm**. Caught because the printed area was **6× below** the
+   `2πR²·Δsinφ·Δλ/360` hand calculation. ⇒ correct: **+55.47 µatm**. `lon_mask()` now **gates its
+   own span**; the buggy form errors with *"asked for 120.0 deg, selected 20.0"*.
+   ⭐⭐ **B3's VERDICT INVERTED ON THIS:** "1.78× the reservoir, **FALSIFIED**, Fix B is
+   mis-specified" became "**0.24×**, CONFIRMED". A wrong mask produced a coherent, confident, WRONG
+   conclusion that would have killed a live mechanism.
+2. ⛔ **`forcing_enso.rds` IS MONTHLY AND GCB IS ANNUAL.** Merging on `year` alone replicated each
+   GCB row **twelve times**: n **66 → 792**, t inflated by ≈√12 to a meaningless **+11.30**.
+   ⇒ annualised: **+0.1153**, t **+4.69**. `stopifnot(nrow == n_years)` now guards it.
+
 ## 2026-09-04f — SOLAR AND ANTHROPOGENIC-AEROSOL DIFFUSE LIGHT: SCOPED, BOTH DECLINED
 
 Marcus, on gate V: *"I wouldn't expect to be able to capture all of the interannual variability with
