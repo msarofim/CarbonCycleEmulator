@@ -1,0 +1,128 @@
+
+========================================================================
+A. THE TARGET -- COMPUTED, NOT TYPED (lib_design_gates.R, 2026-09-04)
+========================================================================
+  decade                1960     1970     1980     1990     2000     2010     2020 
+  TYPED (retired)     0.3500   0.4300   0.4700   0.3800   0.4200   0.4500   0.5000 
+  mean-of-annual      0.3534   0.4265   0.4661   0.3807   0.4245   0.4482   0.4970 
+  ratio-of-sums  <=   0.3568   0.4303   0.4684   0.3840   0.4228   0.4483   0.4984 
+
+  sd: typed 0.0515 | mean-of-annual 0.0491 | ratio-of-sums 0.0483  <= THE BOUND
+  The model side is a RATIO OF SUMS, so that is the like-for-like target.
+  Window AF 1959-2024 = 0.4313 (typed 0.431).
+
+========================================================================
+B. THE NOISE FLOOR -- IS THERE A RESOLVED DECADAL SIGNAL AT ALL?
+========================================================================
+  interannual anomaly about a smooth AF(t): sd 0.911 GtC/yr, lag-1 rho +0.014
+  per-decade noise sd on the decadal AF:
+      0.0596   0.0454   0.0406   0.0357   0.0305   0.0259   0.0360 
+    rms = 0.0404      (the 2020s decade is 5 years, not 10)
+
+  observed decadal spread   0.0483
+  noise floor (rms)         0.0404
+  => RESOLVED decadal signal 0.0265  (70% of the spread's VARIANCE is noise)
+
+  SMOOTHING IS A CHOICE, so it is walked, not picked:
+    ns df=2: eps sd 0.933 GtC/yr, rho +0.047, noise rms 0.0426, smooth-signal sd 0.0295
+    ns df=3: eps sd 0.911 GtC/yr, rho +0.014, noise rms 0.0404, smooth-signal sd 0.0415
+    ns df=4: eps sd 0.910 GtC/yr, rho +0.012, noise rms 0.0403, smooth-signal sd 0.0421
+    ns df=5: eps sd 0.907 GtC/yr, rho +0.012, noise rms 0.0402, smooth-signal sd 0.0422
+
+========================================================================
+C. THE ARMS
+========================================================================
+  defaults   uncalibrated defaults
+  ent26      refit_20260903_ent26 (logpost -1446.76)
+  2 runs in 0.4 s
+
+  arm         AF(all)  sd(dec)    ratio | decadal AF
+  GCB 2025     0.4313   0.0483    1.000 |   0.357  0.430  0.468  0.384  0.423  0.448  0.498
+  defaults     0.4244   0.0393    0.813 |   0.348  0.429  0.395  0.405  0.434  0.465  0.450  FAIL
+  ent26        0.4246   0.0246    0.509 |   0.382  0.431  0.405  0.423  0.430  0.458  0.402  FAIL
+
+========================================================================
+D. TREND vs VARIABILITY -- sd() OVER SEVEN DECADES CANNOT TELL THEM APART
+========================================================================
+  arm          sd(dec) sd(trend)  sd(detr)      R2
+  GCB 2025      0.0483    0.0320    0.0397   0.439
+  defaults      0.0393    0.0323    0.0245   0.677
+  ent26         0.0246    0.0107    0.0243   0.188
+
+  A gate written as sd(model) >= sd(obs) is passed by a DRIFTING AF just as
+  well as by a varying one. Detrended, the same comparison reads:
+    defaults   detrended ratio 0.617  (raw 0.813)
+    ent26      detrended ratio 0.613  (raw 0.509)
+
+========================================================================
+E. IS THE SHORTFALL DECADAL, OR IS IT THE KNOWN INTERANNUAL GAP?
+========================================================================
+  arm        eps GtC/yr      rho sd(AF ann)  noise rms sd(signal)
+  GCB 2025        0.911   +0.014     0.1157     0.0404     0.0415
+  defaults        0.638   +0.255     0.0873     0.0352     0.0332
+  ent26           0.698   +0.193     0.0916     0.0366     0.0164
+
+  PREDICTED decadal spread if an arm had the OBSERVED decadal signal and
+  only its OWN interannual noise -- sqrt(sd(signal_obs)^2 + noise_rms^2):
+    defaults   predicted 0.0440   measured 0.0393
+    ent26      predicted 0.0452   measured 0.0246
+
+  interannual anomaly, model / observed: defaults 0.70  |  ent26 0.77
+
+========================================================================
+F. DOES GATE 4 HAVE POWER? THE TREND, WITH ITS ERROR BAR
+========================================================================
+  GCB 2025   AF trend +0.00147 +- 0.00080 /yr  (+0.0147 +- 0.0080 per decade)
+             t = +1.83, 95% CI per decade [-0.0011, +0.0304]
+  defaults   AF trend +0.0157 per decade   z vs obs +0.12   INSIDE obs 95% CI
+  ent26      AF trend +0.0057 per decade   z vs obs -1.12   INSIDE obs 95% CI
+
+========================================================================
+G. THE PER-DECADE MISS, SCALED TO THE OBSERVATIONS' OWN NOISE
+========================================================================
+  decade         1960    1970    1980    1990    2000    2010    2020
+  obs noise    0.0596  0.0454  0.0406  0.0357  0.0305  0.0259  0.0360
+  z defaults    -0.15   -0.02   -1.80    0.60    0.38    0.66   -1.33   max|z| 1.80
+  z ent26        0.43    0.01   -1.56    1.08    0.25    0.38   -2.68   max|z| 2.68
+
+  ⚠ PROPOSED, NOT ADOPTED. The gate's bound is a DESIGN decision and stays
+    where lib_design_gates.R puts it until it is ruled on.
+
+========================================================================
+H. VALIDATE THE ANALYTIC NOISE FLOOR AGAINST A MATCHED MONTE CARLO
+========================================================================
+
+  prescribed AF slope +0.0000/decade -> true decadal sd 0.0000
+    analytic per-decade floor    0.0596  0.0454  0.0406  0.0357  0.0305  0.0259  0.0360
+    Monte Carlo per-decade       0.0594  0.0444  0.0401  0.0355  0.0301  0.0255  0.0347
+    E[sd(7 decades)] MC 0.0379  [5%..95%: 0.0199 .. 0.0596]  quadrature 0.0404
+      (E[sd] < quadrature is Jensen, not a discrepancy)
+      observed 0.0483 INSIDE |  defaults 0.0393 INSIDE  ent26 0.0246 INSIDE
+
+  prescribed AF slope +0.0147/decade -> true decadal sd 0.0309
+    analytic per-decade floor    0.0596  0.0454  0.0406  0.0357  0.0305  0.0259  0.0360
+    Monte Carlo per-decade       0.0584  0.0450  0.0402  0.0349  0.0301  0.0253  0.0363
+    E[sd(7 decades)] MC 0.0483  [5%..95%: 0.0265 .. 0.0741]  quadrature 0.0509
+      (E[sd] < quadrature is Jensen, not a discrepancy)
+      observed 0.0483 INSIDE |  defaults 0.0393 INSIDE  ent26 0.0246 OUTSIDE
+
+  ⇒ if the two per-decade rows agree, the floor in section B is the floor.
+  ⚠ THE ARMS ARE SHOWN AGAINST A NULL BUILT ON THE *OBSERVED* NOISE AMPLITUDE.
+    Each arm has less interannual variance than that (section E), so this
+    placement is a like-for-like statement about the TARGET, not a test of
+    the arm: an arm with 0.77x the anomaly is EXPECTED near 0.77x the spread.
+
+========================================================================
+I. IS THERE A DECADAL-SPECIFIC DEFECT LEFT, ONCE THE ARM IS JUDGED AGAINST ITSELF?
+========================================================================
+  arm          sd(dec)    own eps | null from ITS OWN trend+noise [5% .. 50% .. 95%]
+  GCB 2025      0.0483      0.911 | 0.0261 .. 0.0472 .. 0.0734   INSIDE
+  defaults      0.0393      0.638 | 0.0239 .. 0.0410 .. 0.0602   INSIDE
+  ent26         0.0246      0.698 | 0.0165 .. 0.0303 .. 0.0489   INSIDE
+
+  ⚠ THE NULL DRAWS WHITE NOISE while both arms' residuals are autocorrelated
+    (rho +0.255/+0.193 vs the observations' +0.014), which INFLATES a decade sum's variance.
+    So the arms' intervals here are if anything too NARROW, and they are INSIDE
+    anyway -- the error runs in the direction that would have caught a defect.
+
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/gate4_af_spread/gate4_af_spread.rds

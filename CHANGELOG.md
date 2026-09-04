@@ -2,6 +2,75 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04d — GATE 4 HAS NO POWER: the "smoother than the defaults" reading is a TREND artifact
+
+Open decision 1 of the adoption handoff was gate 4 — *"why did the AF decadal spread get SMOOTHER?
+0.48x observed against defaults' 0.76x, the clearest new lead the adoption produced."* Measured, it
+is not a lead. Both prior numbers reproduce exactly (0.763 / 0.478 against the retired target), so
+what follows is a re-reading of the same measurement. `calibration/diag_gate4_af_spread.R`,
+note `notes/diag_2026-09-04_gate4_has_no_power.md`.
+
+⛔ **THE TWO SIDES OF THE GATE WERE USING DIFFERENT ESTIMATORS.** `DG_AF_OBS_DEC` was seven typed
+two-decimal literals with no provenance line. Recomputed from the same GCB budget the likelihood
+reads, only ONE of the two natural estimators reproduces all seven: the **mean of annual AF**
+(0.3534 0.4265 0.4661 0.3807 0.4245 0.4482 0.4970). `dg_gate4()` has always computed the model side
+as a **ratio of decade sums** (0.3568 ...) — and 2 dp of rounding hid the difference in six of the
+seven decades; only the 1960s, 0.3568 → 0.36 against the typed 0.35, exposes it.
+⚠ **The gate's BOUND is the sd of that vector**: 0.0515 typed → 0.0491 mean-of-annual → **0.0483
+like-for-like**, so the model was being asked to beat a spread 6.6 % larger than the observations
+have. Both sides now go through one `dg_af_dec()`; the literals are kept as `*_TYPED` and their
+provenance is pinned in `test-gate-bounds.R`, so a GCB vintage change has to break something.
+No verdict flips. [[derived_must_mean_computed]], [[like_for_like_forcing]]
+
+⛔ **70 % OF THE TARGET'S VARIANCE IS INTERANNUAL NOISE.** The anomaly about a smooth AF(t) is
+0.911 GtC/yr and white (lag-1 rho +0.014), so a decade's AF carries a sampling sd of 0.026–0.060
+(the 2020s "decade" is 5 years). Analytic floor rms **0.0404** against an observed spread of 0.0483
+⇒ the RESOLVED decadal signal is **0.0265**. Robust across ns df 2–5. ⭐ The analytic se was
+validated against a **matched Monte Carlo** before anything was concluded from it: per-decade
+0.0594/0.0444/0.0401/0.0355/0.0301/0.0255/0.0347 against the analytic row, agreement 1–4 %.
+
+⭐⭐ **AND THE DEFAULTS' ADVANTAGE WAS A DRIFT, NOT A WIGGLE.** `sd()` over seven decades cannot tell
+a model whose AF *varies* from one whose AF *drifts* ([[two_statistics_can_be_blind]]):
+
+| arm | sd(dec) | sd(trend) | sd(detrended) | R² | raw ratio | **detrended** |
+|---|---|---|---|---|---|---|
+| GCB 2025 | 0.0483 | 0.0320 | 0.0397 | 0.439 | 1.000 | 1.000 |
+| defaults | 0.0393 | 0.0323 | 0.0245 | 0.677 | 0.813 | **0.617** |
+| ent26 | 0.0246 | 0.0107 | 0.0243 | 0.188 | 0.509 | **0.613** |
+
+Detrended, **the two arms are identical to three decimals**. The adoption did not smooth the
+airborne fraction; it changed the AF TREND (+0.0157 → +0.0057 per decade) and the gate's statistic
+charged that to variability.
+
+⚠ **AND THE TREND CANNOT REJECT EITHER ARM.** Estimated on the ANNUAL series, the observed AF trend
+is **+0.0147 ± 0.0080 per decade, t = +1.83** — not significant at 95 %, and both arms sit inside its
+95 % CI (z +0.12 and −1.12). A trend needs an error bar before it needs an explanation.
+
+⭐ **THE DECISIVE TEST — judge each arm against ITSELF.** A null built on an arm's OWN fitted trend
+and OWN anomaly amplitude puts every arm INSIDE: GCB 0.0483 in [0.0261, 0.0734], defaults 0.0393 in
+[0.0239, 0.0602], ent26 0.0246 in [0.0165, 0.0489] (median 0.0303). ⇒ **Nothing decadal is left
+over.** Gate 4's failure decomposes entirely into a trend inside the observations' own CI plus the
+already-recorded interannual gap (the arms carry 0.70 / 0.77 of the observed anomaly sd).
+
+✅ **WHAT DOES SURVIVE: the 2020s, and half of it is one year.** Scored per decade against the
+observations' own sampling noise, the only miss with size is 2020–2024, ent26 **z −2.68** (defaults
+−1.33). Model growth 22.92 GtC vs GCB 28.50 = a **5.58 GtC deficit**, ~1.1 GtC/yr of excess sink,
+visible in the cumulative CO₂ rise (model−GCB +0.37 ppm at 2019 → **−2.26 ppm at 2024**);
+`luc_scale` = 0.975 accounts for 0.16 GtC, so it is not an emissions-input artifact. ⚠ But **2024
+alone is −2.89 GtC, 52 % of it** — the observed record 7.92 GtC/yr read as 5.03 — which is the ENSO
+arc (Fix B), not a new decadal finding. The steadier ~1 GtC/yr over 2020–2022 is unattributed.
+
+⇒ **RULINGS OWED (Marcus; proposed, NOT adopted).** (1) Gate 4's ordering should be split or
+retired — the natural replacement is the per-decade z against the observations' own sampling sd,
+the only form here with power ([[tolerance_scaled_to_spread]]). (2) Open decision 1 should be
+**re-ranked**: it is the interannual gap under a decadal name, not the clearest lead the adoption
+produced.
+
+⇒ **AND THE STANDING RULE THIS ADDS TO:** *a gate that reports one number for two mechanisms cannot
+be read as evidence about either.* Gate 4's `sd()` was blind to the trend/variability distinction,
+so the same statistic ranked the UNCALIBRATED defaults above the adopted mode — and the ranking
+inverted the moment the two were separated.
+
 ## 2026-09-04c — SUITE FULLY GREEN: 1737 pass / 0 fail / 0 error / 4 skip
 
 The last three problems were all the same shape — a test asserting something that is not true of the

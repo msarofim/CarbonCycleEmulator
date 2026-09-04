@@ -41,6 +41,29 @@ test_that("GATE 4's ordering fails a smoother model and passes a rougher one", {
   expect_equal(dg_gate4_verdict(spread(1.0))$sd_obs, so)
 })
 
+test_that("GATE 4's observed vector is COMPUTED, and the retired literals were a DIFFERENT estimator", {
+  source(skip_if_no_gates(), local = TRUE)
+  a <- DG_AF_OBS_ANNUAL
+  # 1. THE GATE SCORES AT THE MODEL'S OWN ESTIMATOR. dg_gate4() computes the
+  #    model's decadal AF as a ratio of decade sums, so the observed side must be
+  #    the same functional or the gate is not like-for-like.
+  expect_equal(DG_AF_OBS_DEC, dg_af_dec(a, how = "ratio_of_sums")$dec)
+  expect_equal(DG_AF_OBS,     dg_af_dec(a, how = "ratio_of_sums")$all)
+  # 2. PROVENANCE OF THE RETIRED LITERALS, PINNED. They are the MEAN OF ANNUAL
+  #    AF to 2 dp -- all seven -- and that is how the mismatch was found. If a
+  #    GCB vintage change moves the budget, this fails rather than drifting.
+  expect_identical(round(dg_af_dec(a, how = "mean_of_annual")$dec, 2),
+                   DG_AF_OBS_DEC_TYPED)
+  # 3. AND THE TWO ESTIMATORS ARE NOT INTERCHANGEABLE: the 1960s decade is where
+  #    they round differently, which is the single observation that identified it.
+  expect_false(identical(round(dg_af_dec(a, how = "ratio_of_sums")$dec, 2),
+                         DG_AF_OBS_DEC_TYPED))
+  # 4. THE BOUND MOVED, and it moved DOWN -- the rounded literals were 6.6 %
+  #    wider than the observations they stood for. Guard the ordering, not the
+  #    number ([[tolerance_scaled_to_spread]]).
+  expect_lt(stats::sd(DG_AF_OBS_DEC), stats::sd(DG_AF_OBS_DEC_TYPED))
+})
+
 test_that("GATE 5's derived sigma is positive, finite, and rests on stated draws", {
   source(skip_if_no_gates(), local = TRUE)
   sp <- dg_obs_gate5_spread()

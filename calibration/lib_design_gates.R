@@ -36,9 +36,32 @@ DG_YEARS     <- c(1750, 2024)
 
 # GATE 4 -- GCB 2025 airborne fraction (DESIGN sec.6 gate 4)
 DG_AF_WIN     <- c(1959, 2024)
-DG_AF_OBS     <- 0.431
 DG_AF_DECADES <- c(1960, 1970, 1980, 1990, 2000, 2010, 2020)
-DG_AF_OBS_DEC <- c(0.35, 0.43, 0.47, 0.38, 0.42, 0.45, 0.50)
+# ⭐ 2026-09-04: THE OBSERVED SIDE IS COMPUTED, NOT TYPED -- AND RECOMPUTING IT
+# FOUND THE TWO SIDES WERE USING DIFFERENT ESTIMATORS.
+# `DG_AF_OBS_DEC` was seven typed two-decimal literals with no provenance line,
+# while the MODEL side was an estimator -- so the gate compared an estimator with
+# a copy, and a typed value with prose arithmetic drifts
+# ([[derived_must_mean_computed]]). Recomputing from the SAME GCB budget the
+# likelihood reads identifies where the literals came from, because only ONE of
+# the two natural estimators reproduces all seven to 2 dp:
+#     MEAN OF ANNUAL AF   0.3534 0.4265 0.4661 0.3807 0.4245 0.4482 0.4970
+#                         -> rounds to 0.35 0.43 0.47 0.38 0.42 0.45 0.50, ALL SEVEN
+#     RATIO OF SUMS       0.3568 0.4303 0.4684 0.3840 0.4228 0.4483 0.4984
+#                         -> 0.3568 rounds to 0.36, NOT the typed 0.35
+# and the RATIO OF SUMS is what `dg_gate4()` has always computed for the model.
+# ⛔ So this gate compared a model ratio-of-sums against an observed
+# mean-of-annual-ratios -- a LIKE-FOR-LIKE violation ([[like_for_like_forcing]])
+# that 2 dp of rounding hid in six of the seven decades. Both sides now go
+# through `dg_af_dec()`, which defaults to the model's own estimator.
+# ⚠ AND IT MOVES THE BOUND, which IS the sd of this vector: 0.0515 typed ->
+# 0.0491 mean-of-annual -> 0.0483 like-for-like, i.e. the model was being asked
+# to beat a spread 6.6 % larger than the observations have. (No verdict flips.)
+# The literals are kept as `*_TYPED` and their provenance is pinned in
+# test-gate-bounds.R, so a GCB vintage change has to break something.
+DG_AF_OBS_TYPED     <- 0.431
+DG_AF_OBS_DEC_TYPED <- c(0.35, 0.43, 0.47, 0.38, 0.42, 0.45, 0.50)
+# DG_AF_OBS and DG_AF_OBS_DEC are assigned below, once dg_af_dec() exists.
 
 # GATE 5 -- Hua et al. 2022, HEMISPHERIC AGGREGATE (DESIGN's own like-for-like
 # benchmark, not the Zone 1 numbers it warns against)
@@ -440,28 +463,66 @@ dg_gateQ <- function(r, v) {
 # would credit it with an AF it never produced. The scaled denominator is the
 # self-consistent quantity; the unscaled one is printed beside it because
 # luc_scale is a fitted nuisance and the reader is owed both.
-dg_gate4 <- function(r, v) {
+
+# THE ANNUAL SERIES, ONE PER SIDE. Split out 2026-09-04 so that the decadal
+# estimator below can be applied to the OBSERVATIONS with the same code path.
+dg_af_annual_model <- function(r) {
   o <- r$out
   yrs <- sort(unique(floor(o$t + 1e-9))); bnd <- c(yrs, max(yrs) + 1L)
   atm <- stats::approx(o$t, (o$co2_NH + o$co2_SH) / 2 * DG_GtC_PER_PPM,
                        xout = bnd, rule = 2)$y
-  grow <- diff(atm)
   el <- ccx_forcing_eluc_annual(r$F)
   # No ccx_forcing_efoss_annual() exists; this is the eluc helper's own recipe
   # (FUN = mean over the calendar year, because the columns are GtC/yr RATES,
   # not monthly masses -- summing them would give twelve times the emission).
   ef <- stats::aggregate(list(efoss = r$F$e_foss_NH + r$F$e_foss_SH),
                          by = list(year = r$F$year), FUN = mean)
-  luc  <- el$eluc[match(yrs, el$year)]
-  foss <- ef$efoss[match(yrs, ef$year)]
-  af <- function(k) sum(grow[k]) / sum((foss + luc)[k])
-  k <- yrs >= DG_AF_WIN[1] & yrs <= DG_AF_WIN[2]
-  dec <- vapply(DG_AF_DECADES, function(d) {
-    kk <- yrs >= d & yrs <= min(d + 9, DG_AF_WIN[2]) & k; af(kk)
-  }, numeric(1))
-  list(all = af(k), dec = dec,
-       all_unscaled = sum(grow[k]) / sum((foss + luc / v$luc_scale)[k]))
+  list(year = yrs, grow = diff(atm),
+       foss = ef$efoss[match(yrs, ef$year)], luc = el$eluc[match(yrs, el$year)])
 }
+
+# ⚠ GCB's OWN AF USES fossil + luc AND EXCLUDES cement_carbonation, matching the
+# model's numerator/denominator pair above; the carbonation sink is inside the
+# model's ocean, not its emissions.
+dg_af_annual_obs <- function() {
+  g <- as.data.frame(ccx_prepare_obs()$gcb)
+  list(year = g$year, grow = g$atm_growth, foss = g$fossil, luc = g$luc)
+}
+
+# ONE DECADAL ESTIMATOR, TWO CALLERS -- the whole point of this file.
+# ⚠ `how` EXISTS ONLY SO THE RETIRED LITERALS' PROVENANCE STAYS TESTABLE. The
+# gate is scored at the default, "ratio_of_sums", which is what the model side
+# has always used; "mean_of_annual" is the estimator the typed observed vector
+# turned out to have been built with, and nothing but the provenance test calls it.
+dg_af_dec <- function(a, decades = DG_AF_DECADES, win = DG_AF_WIN,
+                      how = c("ratio_of_sums", "mean_of_annual")) {
+  how  <- match.arg(how)
+  emis <- a$foss + a$luc
+  af <- if (how == "ratio_of_sums") function(k) sum(a$grow[k]) / sum(emis[k])
+        else                        function(k) mean(a$grow[k] / emis[k])
+  k <- a$year >= win[1] & a$year <= win[2]
+  dec <- vapply(decades, function(d) {
+    kk <- a$year >= d & a$year <= min(d + 9, win[2]) & k; af(kk)
+  }, numeric(1))
+  list(all = af(k), dec = dec)
+}
+
+dg_gate4 <- function(r, v) {
+  a <- dg_af_annual_model(r)
+  g <- dg_af_dec(a)
+  k <- a$year >= DG_AF_WIN[1] & a$year <= DG_AF_WIN[2]
+  c(g, list(annual = a,
+            all_unscaled = sum(a$grow[k]) /
+                           sum((a$foss + a$luc / v$luc_scale)[k])))
+}
+
+# ---- the observed side, COMPUTED (see the constants block) -----------
+DG_AF_OBS_ANNUAL <- dg_af_annual_obs()
+local({
+  o <- dg_af_dec(DG_AF_OBS_ANNUAL)
+  DG_AF_OBS     <<- o$all
+  DG_AF_OBS_DEC <<- o$dec
+})
 
 # ---- GATE 5: bomb curve, hemispheric aggregate ----------------------
 # One estimator, applied to model and observations alike: parabolic refinement
