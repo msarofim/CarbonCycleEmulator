@@ -1100,7 +1100,25 @@ ccx_default_params <- function() {
     # UPPER end is now derived (it IS the in-band value, which the box mean
     # cannot exceed, and it sets the prior width); its LOWER end, 5, has no
     # derivation anywhere and must not be used to set a tolerance.
-    ent_seas_amp_SH = 0,
+    # ⭐ FLIPPED 0 -> the DERIVED PRIOR CENTRE on 2026-09-04, when the 26-parameter
+    # `ent26` mode was adopted. Held at 0 from 2026-09-03 deliberately, so that
+    # the pre-registered Fix A refit had one mechanism to attribute P2 to and the
+    # gate diagnostics' "defaults" arm still ran the model as it then shipped.
+    # ⚠ WHY IT CANNOT STAY 0 NOW. R/model.R's own guard is
+    # `p$ent_seas_amp_SH != 0`, so a zero default does not merely set a small
+    # amplitude -- it SHORT-CIRCUITS the entire entrainment code path, and every
+    # defaults-arm run then exercises a model the calibrated one does not have
+    # ([[default_off_hides_the_bug]]: a mechanism defaulted OFF is untested
+    # exactly where it matters).
+    # ⛔ THE VALUE IS READ FROM THE PARAMETER TABLE, NOT TYPED. Its own chain
+    # (ENT_SEAS_AMP_SH_INBAND x ENT_SEAS_BAND_AREA_FRAC) had ALREADY drifted from
+    # a typed copy once -- 30 -> 29.68 and 11.07 -> 10.9524 -- which is the
+    # incident that produced the "DERIVED must mean COMPUTED" rule.
+    # ⚠ It is the PRIOR CENTRE, not the fitted 19.0291: `ccx_default_params()` is
+    # the UNCALIBRATED reference vector (`sst_seas_amp_SH` is 1.2 here against a
+    # fitted 1.85), and putting a fitted number in it would make the gates'
+    # "defaults" column a second, undeclared copy of the mode.
+    ent_seas_amp_SH = CCX_PARAM_TABLE$ent_seas_amp_SH$init,
     # 1 = annual-mean SST from the forcing's OBSERVED HadSST4 columns (with the
     # ratio-scaled extension beyond the record); 0 = the legacy
     # sst_scale * gmst map. Structural switch, not calibrated.

@@ -49,25 +49,31 @@ ccx_path <- function(...) file.path(ccx_root(), ...)
 # under the current objective); cycle 1's real result is in the `_progress.rds`
 # beside it. That arm was abandoned as a worse local optimum. Naming it here
 # would hand out the seed as if it were a mode.
-CCX_MODE_CANONICAL <- "from90"
+CCX_MODE_CANONICAL <- "ent26"
 
 CCX_MODE_FILES <- c(
-  from90 = file.path("calibration", "output", "refit_20260825f_from90",
-                     "mode_fit_pumpN.rds"),
-  pin90  = file.path("calibration", "output", "refit_20260825f_pin90",
-                     "mode_fit_pumpN.rds")
+  ent26 = file.path("calibration", "output", "refit_20260903_ent26",
+                    "mode_fit_pumpN.rds")
 )
 
 # WHICH ARMS ARE FREE -- AND WHY THE STORED logpost IS A TRAP ACROSS THEM.
-# `pin90`'s stored logpost is -1544.50, HIGHER than the canonical mode's
-# -1544.615, and reading that as "pin90 wins" is wrong: the pinned arm's
-# objective carries a near-delta prior on `fert_k`, worth +11.6698 at
-# fert_k = 90. On the comparable scale pin90 is -1556.17, i.e. 11.56 BELOW the
-# free mode. That offset is COMPUTED from the transform by
-# diag_landed_gap_streams.R (gate 1), never quoted, so it is not stored here --
-# what is stored is which arms may be compared on their stored value at all.
-# The project rule is "the highest FREE arm wins regardless of name".
-CCX_MODE_PINNED <- c(from90 = FALSE, pin90 = TRUE)
+# The project rule is "the highest FREE arm wins regardless of name", and this
+# vector records which arms may be compared on their stored value at all.
+#
+# ⚠ AS OF 2026-09-04 THERE IS EXACTLY ONE ARM, AND THAT IS NOT A SIMPLIFICATION
+# TO BE COMFORTABLE ABOUT. The pinned comparison (`pin90`) retired with the
+# 21-parameter set; nothing has refit a pinned arm at 26 parameters, so the
+# free-vs-pinned check this vector exists to express currently has nothing to
+# compare. A one-entry registry cannot catch the trap it was built for -- it is
+# a gate with no power ([[no_power_null]]), not a gate that passes -- and it
+# starts working again the day a second arm lands, not before.
+#
+# THE TRAP ITSELF, kept because it is what the vector is FOR: `pin90`'s stored
+# logpost was -1544.50, HIGHER than the then-canonical -1544.615, and reading
+# that as "pin90 wins" was wrong -- its objective carried a near-delta prior on
+# `fert_k` worth +11.6698 at fert_k = 90, putting it 11.56 BELOW on the
+# comparable scale. A stored number never decides an arm.
+CCX_MODE_PINNED <- c(ent26 = FALSE)
 
 # The retired names, kept ONLY so that asking for one gets the reason rather
 # than a file-not-found. Everything here is quarantined and not comparable.
@@ -94,7 +100,23 @@ CCX_MODE_RETIRED <- c(
   ref = paste("the ABANDONED reference arm of refit_20260825f (its mode file is the",
               "PRE-FIX SEED, not a result), retired by the 2026-08-25f seasonal-NEP",
               "isotope fix (`6bda464`), which changed the objective. Quarantined under",
-              "calibration/output/quarantine/20260825_seas_isotope_rectification/")
+              "calibration/output/quarantine/20260825_seas_isotope_rectification/"),
+  from90 = paste("the FREE arm of refit_20260825f and the canonical mode from 2026-08-26",
+              "to 2026-09-04, a TWENTY-ONE-parameter vector. Retired by the",
+              "2026-09-03 freeing of `ent_seas_amp_SH` (`88ee23c`), the last of",
+              "three splits that took the fitted set 21 -> 22 -> 25 -> 26. It is",
+              "not a mode of this space: `ccx_migrate_par_set()` can say what it",
+              "RAN, but under `tr = \"log\"` its own state has prior probability",
+              "ZERO and cannot be encoded at all. Quarantined under",
+              "calibration/output/quarantine/20260903_ent26_adopted/"),
+  pin90  = paste("the fert_k-PINNED comparison arm of refit_20260825f, retired by the",
+              "same 2026-09-03 freeing of `ent_seas_amp_SH` (`88ee23c`) and equally",
+              "not a mode of this space. Its +11.6698 near-delta prior credit was",
+              "never an observational or physical quantity -- it is the value of a",
+              "prior this project chose, at a fert_k this project chose -- so it is",
+              "NOT preserved here; a pinned comparison needs a new 26-parameter",
+              "pinned refit. Quarantined under",
+              "calibration/output/quarantine/20260903_ent26_adopted/")
 )
 
 #' Absolute path to a fitted mode file, by name

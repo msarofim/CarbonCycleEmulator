@@ -27,8 +27,8 @@ for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
 NEW  <- file.path("calibration", "output", "refit_20260830_gamma_diff_remap")
-OLD  <- file.path("calibration", "output", "refit_20260825f_from90")
-OLDP <- file.path("calibration", "output", "refit_20260825f_pin90")
+OLD  <- file.path("calibration", "output", "quarantine", "20260903_ent26_adopted", "refit_20260825f_from90")
+OLDP <- file.path("calibration", "output", "quarantine", "20260903_ent26_adopted", "refit_20260825f_pin90")
 hdr  <- function(s) cat("\n", strrep("=", 72), "\n", s, "\n", strrep("=", 72), "\n", sep = "")
 
 # ---- FACE estimator, copied verbatim from diag_face_check_gamma_diff.R ----

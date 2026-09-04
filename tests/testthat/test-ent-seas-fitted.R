@@ -146,14 +146,33 @@ test_that("the migrated ancestor REFUSES to encode, by name and with the value",
   expect_true(all(is.finite(ccx_par_to_unc(seeded))))
 })
 
-test_that("the DEFAULT stays 0 while the INIT is non-zero, deliberately", {
-  # ⛔ NOT AN INCONSISTENCY -- two different statements, and the asymmetry is the
-  # ruling. The INIT is where the search starts (and is what tests an
-  # off-by-default mechanism at an explicit non-zero value); the DEFAULT is what
-  # an UNCALIBRATED run does, and the mechanism is a hypothesis that has not been
-  # refitted, let alone adopted. Flipping the default would move every "at
-  # defaults" number on the project for a mechanism nothing has accepted.
-  # ⇒ WHEN THE REFIT IS ADOPTED, this expectation is the thing to change.
-  expect_equal(ccx_default_params()$ent_seas_amp_SH, 0)
+test_that("the DEFAULT is the derived prior centre, now that the refit is adopted", {
+  # ⭐ CHANGED 2026-09-04, and this test asked to be. Its previous form asserted
+  # `default == 0` while the INIT was non-zero, with the reason written into it:
+  # "the mechanism is a hypothesis that has not been refitted, let alone
+  # adopted... ⇒ WHEN THE REFIT IS ADOPTED, this expectation is the thing to
+  # change." The 26-parameter `ent26` mode was adopted on 2026-09-04, so it is.
+  #
+  # ⚠ WHY THE DEFAULT COULD NOT STAY 0 ONCE THE CHANNEL WAS REAL. R/model.R's
+  # guard is `p$ent_seas_amp_SH != 0`, so zero does not mean "a small amplitude"
+  # -- it SHORT-CIRCUITS the entrainment code path outright, and every
+  # defaults-arm run (the gates' whole "defaults" column) would exercise a model
+  # the calibrated one does not have ([[default_off_hides_the_bug]]).
+  #
+  # ⛔ THE DEFAULT IS THE PRIOR CENTRE, NOT THE FITTED 19.0291. The two are
+  # different statements and conflating them is what this file is about:
+  # `ccx_default_params()` is the UNCALIBRATED reference (its `sst_seas_amp_SH`
+  # is 1.2 against a fitted 1.85), so a fitted number here would make the gates'
+  # "defaults" column an undeclared second copy of the mode.
+  expect_equal(ccx_default_params()$ent_seas_amp_SH,
+               CCX_PARAM_TABLE$ent_seas_amp_SH$init)
   expect_gt(CCX_PARAM_TABLE$ent_seas_amp_SH$init, 0)
+  # ⛔ AND NO TIGHTER ASSERTION THAN THAT HERE. The obvious next line -- that the
+  # default EQUALS ccx_const("ENT_SEAS_AMP_SH_DERIV") to machine precision -- was
+  # written on 2026-09-04 and REMOVED the same hour: it fails by 4.41e-07,
+  # because `init` is necessarily a six-decimal LITERAL (R/calibrate.R is sourced
+  # before R/constants.R, so ccx_const() does not exist when the table is built).
+  # The first test in this file already bounds that drift, and bounds it by the
+  # literal's own typed precision rather than by a chosen number. Repeating it
+  # tighter here would not be a stronger guard, only a failing one.
 })

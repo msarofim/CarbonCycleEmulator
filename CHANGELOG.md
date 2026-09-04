@@ -2,6 +2,105 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04 — THE 26-PARAMETER MODE IS ADOPTED: `ent26` is `CCX_MODE_CANONICAL`
+
+**The refit results were never pulled off Torch.** `calibration/output/multistart_20260903_ent26/`
+was EMPTY locally; both rounds (40 + 5 starts) are now down and the collector reproduces the
+handoff exactly — 39 of 40 at −1446.7627/−1446.7631 (spread 3.93e-4), id 12 alone at −1508.7786.
+
+**ADOPTED.** `from90` (21 par, canonical since 2026-08-26) and `pin90` are quarantined under
+`calibration/output/quarantine/20260903_ent26_adopted/`; `CCX_MODE_CANONICAL` is `ent26`,
+promoted from start id 18 by the new `calibration/promote_multistart_mode.R` (5 gates; the start
+is COMPUTED from the directory, never typed). This is the first time a multistart result has been
+promoted to a mode file, which is why no such tool existed.
+
+**All five pre-registered claims re-measured AT THE ADOPTED FILE** (`diag_adoption_read_ent26.R`),
+and every one reproduces the handoff: P2 `sst_seas_amp_SH` −5.139 → +0.237; P1 GATE S 0.330 ppm
+@ 4.19 (z −12.30) → 0.437 @ 8.87 (z +1.00), FAIL → PASS; P3 land limb 2.475× → 1.683×;
+`npp_frac_NH` −2.153 → −0.051; `ent_seas_amp_SH` 19.029 at prior-z +1.11. |z|>2: 5 → 3; |z|>3: 3 → 2.
+
+⭐ **AND THE HALF THE HANDOFF COULD NOT STATE: the LIKELIHOOD moved +20.41.** The two logposts are
+not comparable (different spaces), but the 21 data streams and their sigmas are identical across
+the builds, so the likelihood is. The fit improved; the prior was not merely paid.
+
+⭐ **THE HESSIAN BLOCKER IS MEASURABLY BETTER, AND `h_ml` IS NO LONGER STEP-UNSTABLE.** At the new
+mode −H is PD, **condition number 7.394e+04** against the 1.11e6 recorded at `from90` (⚠ a
+DIFFERENT objective — three changes separate them, so this is indicative, not like-for-like), and
+**no parameter is flagged unstable**: `h_ml`'s own eps/3–3eps disagreement is 1.20 % against the
+2 % tolerance. Softest/stiffest eigen-sd ratio 1055× → 272×. `kz` sits at 6356 inside [4379, 8110],
+not railed.
+
+**THREE BUGS FOUND AND FIXED WHILE DOING IT, none of them in the model:**
+1. ⛔ `recompute_hessian.R`'s per-parameter step table printed its header and **ZERO ROWS** on the
+   promoted file. Line 177 indexed `md$hess_eps`, which a multistart-promoted mode does not have;
+   `NULL / EPSV[k]` is `numeric(0)`, `sprintf()` returns `character(0)`, `cat()` prints nothing —
+   and the `*** UNSTABLE` step-stability verdict rode along in that same row. The silent-gate
+   family exactly. Both branches now mutation-tested.
+2. ⛔ Its **"condition number" was the RECIPROCAL** — `max/min` over eigenvalues that are all
+   negative, so the two signs cancelled and it printed 1.352e-05 for a conditioning of 7.394e+04.
+   Wrong for every mode this script has ever produced. `run_modefind_pump_arms.R` used `abs()` and
+   is unaffected. Also: `21x21` was a hardcoded label in a 26-parameter build.
+3. ⛔ **Retiring an arm silently UN-LINTED its path.** `test-mode-file.R`'s hardcode lint builds its
+   directory list from `CCX_MODE_FILES`, so quarantining `from90`/`pin90` dropped them from scope at
+   exactly the moment seven live lines across four files went stale. Widening that lint to scan the
+   quarantine was the WRONG fix (it pulls in the `luc_arm_*`/`ridge_pin*` scratch arms the lint's own
+   SCOPE paragraph excludes) and is recorded as such; the staleness question is now a SEPARATE test —
+   every quoted `mode_fit_pump*` path on a live line must exist on disk. It found an eighth
+   occurrence nobody knew about: `diag_luc_arm_ridge_confound.R` had pointed at a `luc_arm_pinluc`
+   moved by the 2026-08-25 quarantine, stale for ten days. Mutation-tested.
+
+**TEST SUITE 1710/10/2 → 1719 pass / 1 fail / 4 skip.** Adoption cleared everything the handoff
+predicted (`test-mode-file.R:109×2/:203`, `test-mode-decode.R:15`, and all four 09-03 encoder
+failures). It also broke 20 previously-passing assertions, NONE of them a model defect — Marcus's
+criterion ("the only tests that matter are the ones against observations or physics") sorted them:
+
+- `test-so-entrainment.R` (15) — an IDENTITY control. Its fixture read the zero baseline off
+  `ccx_default_params()`, which the adoption flipped 0 → 10.9524. The claim it guards (absent ≡
+  zero) was MEASURED intact, bit for bit, both cores, all five columns. ⚠ **Two assertions did NOT
+  fail, which is the worse half**: P0.2's mutation guard and the rectification bound both used the
+  default as their OFF baseline, silently became ON-vs-ON, and kept passing while measuring less
+  than they claimed. The off-state is now a named fixture; nothing in that file reads the default.
+- `test-ent-seas-fitted.R:157` (1) — a POLICY assertion that named itself as the thing to change on
+  adoption. ⚠ Its replacement was first written one assertion too strong (default == the derived
+  constant to 1e-9); that fails by 4.41e-07 because `init` is necessarily a six-decimal literal —
+  `R/calibrate.R` is sourced before `R/constants.R`. Removed; the file's first test already bounds
+  that drift by the literal's own typed precision.
+- `test-mode-decode.R` (4) — a PROVENANCE guard asserting the h_ml band-provenance trap is PRESENT.
+  ⭐ **The trap is gone**: `ent26` was fitted on the shipped support with no in-process override, so
+  `u_mode` decodes to `par_mode` exactly (134.150 m either way). Deleting the tests would leave the
+  trap-handling code exercised by NOTHING, so the trap half now runs against an explicit override
+  fixture (with a mutation guard on the fixture itself) and the canonical file gets the assertion
+  that is true of it.
+
+⛔ **`test-likelihood.R:596` LEFT RED, and it is the only failure.** It is the one
+observation-facing assertion: "kz is BOUNDED to the range that keeps deep-ocean D14C inside the
+observed −150 to −200", and `expect_lte(kz$hi, 7000)` fails because the 09-01 re-bisection on the
+sourced GLODAP target moved `hi` to 8109.9. VERIFIED untouched by this session — it failed
+identically in the pre-repoint baseline and none of the changed files goes near `kz`. It is a real
+tension between two observations and needs a ruling on which binds.
+
+⚠ **`ccx_default_params()$ent_seas_amp_SH` FLIPPED 0 → the derived prior centre** (10.9524, read
+from `CCX_PARAM_TABLE`, not typed). Held at 0 deliberately until adoption. It could not stay:
+`R/model.R`'s guard is `!= 0`, so zero SHORT-CIRCUITS the entrainment path and every defaults-arm
+run would exercise a model the calibrated one does not have. It is the PRIOR CENTRE, not the fitted
+19.029 — `ccx_default_params()` is the uncalibrated reference.
+
+⛔ **`pin90` retired, and the `PIN_PRIOR_CREDIT` assertion retired with it rather than being
+re-measured or preserved** (Marcus's ruling). Both sides were the model's own fitted arms scored by
+the model's own objective, against the value of a prior this project chose at a `fert_k` this
+project chose — a threshold taken from the code under test, which can never reject that code.
+⚠ **The cost is stated, not glossed**: with one arm in the registry the free-vs-pinned comparison
+has NO POWER, and `test-mode-file.R` now reports it DARK via `skip()` rather than green. A
+26-parameter PINNED refit is what would restore it.
+
+⛔ **P5 IS STILL FALSIFIED.** IRF(100) 0.276 → 0.276. Fixing the seasonal ocean physics did not
+lengthen the perturbation lifetime by any amount; the three problems are INDEPENDENT and Fix C
+needs its own mechanism. This is the pedagogically important failure, because the emergent-lifetime
+claim is what the model exists to demonstrate.
+
+⚠ **`sst_seas_amp_NH` −3.558 → −3.911 is now the model's worst prior violation**, and it is
+explicitly NOT the SH fix repeated — the NH has no entrainment channel by measurement.
+
 ## 2026-09-03 — **ROUND 2 CLOSED, AND THE SPINUP SPEEDUP IS SHIPPED**
 
 **`16905919` (half dispersion): 5/5 COMPLETED, 0 errors, all five at −1446.7631 / −1446.7627** — the

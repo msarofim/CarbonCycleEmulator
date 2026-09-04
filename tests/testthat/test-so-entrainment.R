@@ -23,6 +23,21 @@ skip_if_no_cpp <- function() {
 
 ent_p <- local({ p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5)); p })
 
+# ⛔ THE OFF-STATE IS NAMED, NOT INHERITED (2026-09-04). Until the `ent26`
+# adoption `ccx_default_params()$ent_seas_amp_SH` was 0, so `ent_p` WAS the
+# off-state and every "channel off" baseline in this file got it for free. The
+# adoption flipped that default to the derived prior centre and FIFTEEN
+# assertions here failed at once -- none of them because the model changed: the
+# identity they guard (absent == zero) was measured intact, bit for bit, in both
+# cores and all five columns.
+# ⚠ AND TWO ASSERTIONS DID NOT FAIL, WHICH IS THE WORSE HALF. P0.2's mutation
+# guard and the rectification bound below both used `ent_p` as their OFF
+# baseline; with the default at 10.95 they silently became ON-vs-ON comparisons
+# and kept passing while measuring something smaller than they claimed. A
+# control that depends on a DEFAULT'S VALUE is not a control -- so the off-state
+# is now written down, and nothing in this file reads the default to find it.
+ent_p_off <- local({ p <- ent_p; p$ent_seas_amp_SH <- 0; p })
+
 # Twins of test-conservation.R's fixtures, which are local to that file. A
 # closed system (no emissions, no 14C production) and a state deliberately OUT
 # of equilibrium -- conservation must hold out of balance too.
@@ -45,39 +60,49 @@ test_ent_state <- function(p = ccx_default_params()) {
   list(y = y, p = p, aux = aux, grid = grid)
 }
 
+ENT_P01_COLS <- c("co2_NH", "co2_SH", "d13c_SH", "ocean_C", "land_C")
+
+# 20 umol/kg: inside the band the pre-check derives, and large enough that a
+# dropped term or a sign error could not hide under the parity tolerance.
+# ⚠ Named once, because three tests use it as "the channel ON".
+ENT_P02_AMP <- 20
+
 test_that("P0.1 -- at zero amplitude the channel is absent, bit for bit", {
-  sp <- ccx_spinup(ent_p)
+  # THE CLAIM, and it is exactly one: `NULL` is how every pre-2026-08-27g
+  # parameter list arrives; 0 is how a current one asks for the channel off.
+  # They must be the SAME MODEL, or the absence contract is a silent model
+  # change for every stored mode in the repo.
+  # ⚠ The default run is NOT the reference any more. While the default was 0 it
+  # was a third spelling of the same state, so two of this test's three
+  # comparisons were one comparison written twice.
+  p_absent <- ent_p_off; p_absent$ent_seas_amp_SH <- NULL
+  sp <- ccx_spinup(ent_p_off)
   F  <- ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp$prod_c14)
-  # `NULL` is how every pre-2026-08-27g parameter list arrives; 0 is how a
-  # current one asks for the channel off. They must be the SAME MODEL, or the
-  # default is a silent model change for every stored mode in the repo.
-  p_absent <- ent_p; p_absent$ent_seas_amp_SH <- NULL
-  p_zero   <- ent_p; p_zero$ent_seas_amp_SH   <- 0
-  a <- ccx_run(sp, F)$out
-  b <- ccx_run(ccx_spinup(p_absent), F)$out
-  cc <- ccx_run(ccx_spinup(p_zero), F)$out
-  for (col in c("co2_NH", "co2_SH", "d13c_SH", "ocean_C", "land_C")) {
-    expect_identical(a[[col]], b[[col]])
-    expect_identical(a[[col]], cc[[col]])
-  }
+  b  <- ccx_run(ccx_spinup(p_absent), F)$out
+  cc <- ccx_run(sp, F)$out
+  for (col in ENT_P01_COLS) expect_identical(b[[col]], cc[[col]])
+
+  # MUTATION GUARD, so this cannot pass by the channel being dead everywhere:
+  # an explicitly ON state must DIFFER from the off-state it was just compared
+  # against. Without it, deleting the entrainment term entirely turns P0.1 green.
+  p_on <- ent_p_off; p_on$ent_seas_amp_SH <- ENT_P02_AMP
+  on   <- ccx_run(ccx_spinup(p_on), F)$out
+  expect_gt(max(abs(on$co2_SH - cc$co2_SH)), 1e-6)
 })
 
 test_that("P0.1 -- and bit for bit in the C++ core too", {
   skip_if_no_cpp()
-  sp <- ccx_spinup(ent_p)
+  p_absent <- ent_p_off; p_absent$ent_seas_amp_SH <- NULL
+  sp <- ccx_spinup(ent_p_off)
   F  <- ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp$prod_c14)
-  p_absent <- ent_p; p_absent$ent_seas_amp_SH <- NULL
-  a <- ccx_run_fast(sp, F)$out
-  b <- ccx_run_fast(ccx_spinup(p_absent), F)$out
-  for (col in c("co2_NH", "co2_SH", "d13c_SH", "ocean_C", "land_C"))
-    expect_identical(a[[col]], b[[col]])
+  b  <- ccx_run_fast(ccx_spinup(p_absent), F)$out
+  cc <- ccx_run_fast(sp, F)$out
+  for (col in ENT_P01_COLS) expect_identical(b[[col]], cc[[col]])
 })
 
 test_that("P0.2 -- R and C++ are the same model with the channel ON", {
   skip_if_no_cpp()
-  # 20 umol/kg: inside the 5-30 the pre-check derives, and large enough that a
-  # dropped term or a sign error could not hide under the parity tolerance.
-  p <- ent_p; p$ent_seas_amp_SH <- 20
+  p <- ent_p_off; p$ent_seas_amp_SH <- ENT_P02_AMP
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp$prod_c14)
   rR <- ccx_run(sp, F); rC <- ccx_run_fast(sp, F)
@@ -90,9 +115,12 @@ test_that("P0.2 -- R and C++ are the same model with the channel ON", {
 test_that("P0.2 -- and the channel is not a no-op in EITHER core", {
   # A parity test between two cores that both ignore the parameter would pass.
   # MUTATION GUARD: this is the assertion that makes P0.2 mean something.
-  sp0 <- ccx_spinup(ent_p)
+  # ⚠ `ent_p_off`, NOT `ent_p`: with the post-adoption default this compared
+  # 10.95 against 20 -- two ON states -- and still passed, measuring a fraction
+  # of what it claims to.
+  sp0 <- ccx_spinup(ent_p_off)
   F   <- ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp0$prod_c14)
-  p   <- ent_p; p$ent_seas_amp_SH <- 20
+  p   <- ent_p_off; p$ent_seas_amp_SH <- ENT_P02_AMP
   sp  <- ccx_spinup(p)
   expect_gt(max(abs(ccx_run(sp, F)$out$co2_SH - ccx_run(sp0, F)$out$co2_SH)), 1e-6)
   skip_if_no_cpp()
@@ -103,7 +131,7 @@ test_that("P0.2 -- and the channel is not a no-op in EITHER core", {
 test_that("P0.3 -- seas_drivers = 0 kills the channel, hold_climate does NOT", {
   F0 <- NULL
   run <- function(amp, drivers) {
-    p <- ent_p; p$ent_seas_amp_SH <- amp; p$seas_drivers <- drivers
+    p <- ent_p_off; p$ent_seas_amp_SH <- amp; p$seas_drivers <- drivers
     sp <- ccx_spinup(p)
     if (is.null(F0)) F0 <<- ccx_build_forcing("historical", c(1960, 1990),
                                               prod_c14 = sp$prod_c14)
@@ -176,12 +204,16 @@ test_that("the entrainment channel is CONSERVATIVE, and rectifies no more than
   # term's own rectification measured in the same run. Both are second order in
   # their driver amplitude through the same nonlinearity, which is why that is
   # the right comparison and not a tolerance picked to pass.
-  sp0  <- ccx_spinup(ent_p)
+  # ⚠ THE BASELINE MUST BE THE OFF STATE. With the post-adoption default this
+  # read `base` at ent = 10.95, so `d_ent` measured the step 10.95 -> 20 rather
+  # than the channel's own rectification -- a bound quietly loosened by a factor
+  # it never declared, and it kept passing.
+  sp0  <- ccx_spinup(ent_p_off)
   F    <- ccx_build_forcing("historical", c(1960, 1990), prod_c14 = sp0$prod_c14)
   base <- ccx_run(sp0, F)$out
-  p_e  <- ent_p; p_e$ent_seas_amp_SH <- 20
+  p_e  <- ent_p_off; p_e$ent_seas_amp_SH <- ENT_P02_AMP
   ent  <- ccx_run(ccx_spinup(p_e), F)$out
-  p_s  <- ent_p; p_s$sst_seas_amp_SH <- 0
+  p_s  <- ent_p_off; p_s$sst_seas_amp_SH <- 0
   sst  <- ccx_run(ccx_spinup(p_s), F)$out
   d_ent <- abs(tail(ent$ocean_C, 1) - tail(base$ocean_C, 1))
   d_sst <- abs(tail(sst$ocean_C, 1) - tail(base$ocean_C, 1))

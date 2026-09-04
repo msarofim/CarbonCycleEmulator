@@ -58,6 +58,15 @@ test_that("no live source hardcodes a fitted-mode path", {
   allowed <- c("paths.R", "diag_gates_at_landed_modes.R",
                "run_modefind_pump_arms.R", "finish_pump_arms_comparison.R",
                "repair_arm_streams.R", "diag_hml_seasonal_limbs.R")
+  # ⚠ SCOPE DELIBERATELY UNCHANGED, and one attempt to widen it is recorded here
+  # because the failure was instructive. On 2026-09-04 this list was extended to
+  # cover every QUARANTINED arm directory, on the reasoning that retiring an arm
+  # drops its directory out of the lint at exactly the moment a hardcode to it
+  # becomes dangerous. That reasoning is right; the mechanism was wrong. Scanning
+  # the quarantine pulls in `luc_arm_*`, `ridge_pin*` and the SINK arms -- the
+  # scratch runs this lint's SCOPE paragraph above deliberately excludes -- so it
+  # silently redefined what the lint is for. ⇒ The staleness question is a
+  # DIFFERENT question and is asked separately, in the test below.
   dirs <- c("pump_arms", basename(dirname(CCX_MODE_FILES)))
   rx   <- sprintf('"[^"]*(%s)[^"]*mode_fit_pump', paste(dirs, collapse = "|"))
   offenders <- character()
@@ -71,6 +80,47 @@ test_that("no live source hardcodes a fitted-mode path", {
   expect_equal(offenders, character(),
                info = paste("hardcoded mode path -- use ccx_mode_file():",
                             paste(offenders, collapse = ", ")))
+})
+
+test_that("no live source names a mode-file path that has MOVED", {
+  # ⭐ A DIFFERENT QUESTION FROM THE LINT ABOVE, and it needs to be. That one asks
+  # "should this path go through ccx_mode_file()?" and is scoped to the REGISTRY
+  # arms on purpose. This one asks "does this path still EXIST?", which is scoped
+  # to nothing at all -- a scratch arm's path going stale is just as broken as a
+  # canonical one's, and quarantining is precisely the operation that breaks them.
+  #
+  # WHY IT DID NOT EXIST BEFORE 2026-09-04: nothing had ever been adopted out of
+  # a multistart, so no registry arm had moved since the lint above was written.
+  # The `ent26` adoption moved two, and SEVEN live lines across four files went
+  # stale with nothing reporting it. One of the seven --
+  # diag_luc_arm_ridge_confound.R's `luc_arm_pinluc` -- had been stale since the
+  # 2026-08-25 quarantine and no test had ever looked.
+  root  <- ccx_root()
+  files <- c(list.files(file.path(root, "R"),           "\\.R$", full.names = TRUE),
+             list.files(file.path(root, "calibration"), "\\.R$", full.names = TRUE),
+             list.files(file.path(root, "app"),         "\\.R$", full.names = TRUE))
+  # run_post_refit_adoption.R holds string TEMPLATES it substitutes INTO
+  # R/paths.R -- paths it WRITES, not paths it reads. Declared, not pattern-matched.
+  allowed <- c("run_post_refit_adoption.R")
+  rx <- '"((?:[^"]*/)?[^"]*mode_fit_pump[^"]*)"'
+  stale <- character()
+  for (f in files) {
+    if (basename(f) %in% allowed) next
+    L <- readLines(f, warn = FALSE)
+    for (j in seq_along(L)) {
+      if (grepl("^\\s*#", L[j])) next            # a comment naming a path is history
+      m <- regmatches(L[j], gregexpr(rx, L[j], perl = TRUE))[[1]]
+      for (q in m) {
+        pth <- sub('^"(.*)"$', "\\1", q)
+        if (!grepl("/", pth)) next                # a bare filename is a pattern, not a path
+        if (!file.exists(file.path(root, pth)))
+          stale <- c(stale, sprintf("%s:%d -> %s", basename(f), j, pth))
+      }
+    }
+  }
+  expect_equal(stale, character(),
+               info = paste("mode-file path no longer on disk (quarantined?):",
+                            paste(stale, collapse = "; ")))
 })
 
 test_that("ccx_mode_file refuses the quarantined arm names WITH THE REASON", {
@@ -98,10 +148,10 @@ test_that("ccx_mode_file refuses the quarantined arm names WITH THE REASON", {
                  info = paste("arm", a, "reason does not name the CAUSE commit"))
   }
   expect_error(ccx_mode_file("no_such_arm"), "unknown mode")
-  expect_error(ccx_mode_file(c("from90", "pin90")), "ONE mode name")
+  expect_error(ccx_mode_file(rep(CCX_MODE_CANONICAL, 2L)), "ONE mode name")
 })
 
-test_that("every named mode is on disk and carries the 21-parameter set", {
+test_that("every named mode is on disk and carries THIS BUILD's parameter set", {
   for (a in names(CCX_MODE_FILES)) {
     f <- ccx_mode_file(a)
     expect_true(file.exists(f), info = paste("mode", a, "is named but missing:", f))
@@ -117,13 +167,11 @@ test_that("every named mode is on disk and carries the 21-parameter set", {
 })
 
 test_that("the canonical mode is a FREE arm, and stored logposts do not decide it", {
-  # THE TRAP THIS ENCODES. `pin90`'s STORED logpost is HIGHER than the canonical
-  # mode's, and a reader comparing the two numbers picks the wrong arm. The
-  # pinned arm's objective carries a near-delta prior on `fert_k` worth
-  # +11.6698 at fert_k = 90; on the comparable scale it is 11.56 BELOW. The
-  # project rule is "the highest FREE arm wins regardless of name", so what is
-  # asserted here is that the canonical mode is FREE -- not that its stored
-  # number is the largest, which it is not.
+  # THE TRAP THIS ENCODES. A reader compares two STORED logposts and picks the
+  # wrong arm, because a pinned arm's objective carries a near-delta prior the
+  # free arm's does not. The project rule is "the highest FREE arm wins
+  # regardless of name", so what is asserted is that the canonical mode is FREE
+  # -- never that its stored number is the largest.
   expect_true(CCX_MODE_CANONICAL %in% names(CCX_MODE_FILES))
   expect_setequal(names(CCX_MODE_PINNED), names(CCX_MODE_FILES))
   expect_false(CCX_MODE_PINNED[[CCX_MODE_CANONICAL]])
@@ -133,77 +181,49 @@ test_that("the canonical mode is a FREE arm, and stored logposts do not decide i
   free <- names(CCX_MODE_FILES)[!CCX_MODE_PINNED[names(CCX_MODE_FILES)]]
   expect_equal(CCX_MODE_CANONICAL, free[which.max(lp[free])])
 
-  # ⚠ REWRITTEN 2026-08-29 -- THE PREMISE, NOT THE TOLERANCE. What stood here was
-  #     expect_gt(lp[["pin90"]], lp[[CCX_MODE_CANONICAL]])
-  # on two STORED logposts, and across an objective change that is not merely
-  # false, it is MEANINGLESS. The MARGIN measures how meaningless: the stored
-  # ordering favours pin90 by only +0.113, while the option-5 change (`2153bd6`)
-  # moved logposts by 0.081 -- measured at four separate points, collect
-  # 2026-08-29. A third objective change of that size FLIPS this assertion, and
-  # the old comment would then have read the flip as "the trap has become safe"
-  # when only the units moved. A test whose failure message is a false
-  # explanation is worse than no test.
+  # =================================================================
+  # ⛔ THE PIN_PRIOR_CREDIT ASSERTION IS GONE, 2026-09-04, AND THIS SAYS WHY
+  # so that nobody re-derives it or reads its absence as an oversight.
   #
-  # THE PREMISE RESTATED. The TRAP is that a reader compares STORED numbers.
-  # The TRUTH is what the arms are worth on ONE objective. Both are asserted
-  # below; only the second is load-bearing, because it is a GAP between two
-  # vectors scored by the SAME harness in the SAME session, so whatever the
-  # objective is, it cancels.
-  expect_gt(lp[["pin90"]] - lp[[CCX_MODE_CANONICAL]], 0)   # the trap is LIVE
+  # It asserted that the free arm's advantage over `pin90`, recomputed on ONE
+  # objective, EQUALS 11.6698 -- the pinned arm's near-delta `fert_k` prior at
+  # fert_k = 90. It had been failing deliberately since 2026-08-30 on Marcus's
+  # ruling ("leave it failing and re-measure after the owed refit"), because
+  # gamma_diff = 0.25 changed the MODEL and the two arms, sitting at different
+  # fert_k, paid differently for it: the gap ran -11.49 / -14.90 / -19.86 across
+  # gamma = 0 / 0.125 / 0.25.
+  #
+  # ⭐ WHAT SETTLED IT (Marcus, 2026-09-04): "the only tests that matter are the
+  # ones that are against observations or physics" -- and this is NEITHER. Both
+  # sides are the model's own fitted arms, scored by the model's own objective,
+  # against a number that is the value of a prior this project chose evaluated
+  # at a fert_k this project chose. A threshold taken from the code under test
+  # can never reject that code ([[threshold_from_obs_or_law]]); it re-baselines.
+  # So it retired with `pin90` rather than being carried forward or re-measured,
+  # and the +11.6698 is deliberately NOT preserved anywhere.
+  #
+  # ⚠ WHAT IS GENUINELY LOST, stated rather than glossed: with one arm in the
+  # registry the free-vs-pinned comparison above has NO POWER -- `free` is a
+  # single name and which.max() over one element cannot fail. It regains power
+  # when a second arm lands, and a 26-parameter PINNED refit is the thing that
+  # would do it. Until then this is a gate that says nothing, and saying so is
+  # the point ([[no_power_null]]).
+  # =================================================================
+})
 
-  skip_if_no_cpp()
-  # PIN_PRIOR_CREDIT is the near-delta fert_k prior at fert_k = 90 that the
-  # pinned arm's objective carries and the free arm's does not. Asserting the
-  # recomputed gap EQUALS it is asserting the MECHANISM -- so this fails if the
-  # trap's cause changes, and not merely if two numbers cross.
-  # =================================================================
-  # ⚠ THIS ASSERTION IS FAILING ON PURPOSE AS OF 2026-08-30. DO NOT "FIX" IT.
-  #
-  # Marcus's ruling: leave it failing and re-measure after the owed 21-param
-  # refit. It is recorded here so the next session does not re-derive it or
-  # mistake it for the bookkeeping it is not.
-  #
-  # WHAT IT IS NOT. Handoff 2026-08-30 sec.4 filed this as "stored logpost
-  # changed, refresh provenance". The STORED-logpost assertion above (the
-  # `lp[["pin90"]] - lp[[...]] > 0` line) PASSES. What fails is the RECOMPUTED
-  # gap below -- the one this file's own comment argues is objective-INdependent
-  # "because it is a GAP between two vectors scored by the SAME harness, so
-  # whatever the objective is, it cancels".
-  #
-  # WHY THAT ARGUMENT DOES NOT COVER THIS CHANGE. It holds for an objective
-  # change that is a COMMON SHIFT. gamma_diff = 0.25 is not one: it changes the
-  # MODEL, and the two arms sit at different fert_k, so they pay different
-  # amounts for the same mechanism. Measured over gamma = 0 / 0.125 / 0.25
-  # (calibration/diag_attribute_the_seven.R part 5):
-  #
-  #     gap = -11.4936  /  -14.8961  /  -19.8635
-  #
-  # PIN_PRIOR_CREDIT is a PRIOR term -- the near-delta fert_k prior at 90 --
-  # and carries no gamma_diff dependence at all, so the entire +8.4 movement is
-  # a LIKELIHOOD differential: diffuse light costs the pinned arm more than the
-  # canonical one. That is a finding about the two arms, not drift in a
-  # provenance number, and the test caught exactly what it says it exists to
-  # catch ("this fails if the trap's CAUSE changes").
-  #
-  # WHY IT IS NOT RESOLVED NOW. Both arms are PRE-adoption vectors read under a
-  # POST-adoption objective, so the gap is provisional whichever way it is
-  # written; re-deriving PIN_PRIOR_CREDIT from them would bake in a number
-  # measured on vectors that are about to be replaced. (Sanity check that the
-  # harness is sound rather than the vectors: the canonical arm's own frozen
-  # price is -40.49 across the adoption, which reproduces the recorded "the
-  # frozen column overstated the price by 82 %" -- 7.42 / 0.18 = 41.2.)
-  # =================================================================
-  PIN_PRIOR_CREDIT <- 11.6698
-  band0 <- CCX_PARAM_TABLE$h_ml
-  on.exit(CCX_PARAM_TABLE$h_ml <<- band0, add = TRUE)
-  now <- vapply(names(CCX_MODE_FILES), function(a) {
-    md <- readRDS(ccx_mode_file(a))
-    ccx_adopt_mode_band(md)          # each arm decodes under its OWN band
-    bp <- ccx_default_params(); bp$pump_mode <- md$pump_mode
-    ccx_make_logpost(years = c(1750, 2024), base_params = bp)(md$u_mode)
-  }, numeric(1))
-  expect_lt(now[["pin90"]] - now[[CCX_MODE_CANONICAL]], 0)
-  expect_equal(now[["pin90"]] - now[[CCX_MODE_CANONICAL]], -PIN_PRIOR_CREDIT,
-               tolerance = 0.2,
-               info = "the canonical arm's advantage on ONE objective is no longer the pin's prior credit")
+test_that("the free-vs-pinned comparison has POWER, or says that it does not", {
+  # ⛔ NOT `expect_length(CCX_MODE_FILES, 1L)`, which is what this line was for
+  # about a minute: that would PIN the registry at one arm and fail on the very
+  # event it is waiting for. What is worth asserting is the POWER of the test
+  # above, which is a different statement -- with one arm, `free` is a single
+  # name and which.max() over one element cannot fail, so a green result there
+  # means "nothing was compared", not "the right arm won".
+  n <- length(CCX_MODE_FILES)
+  if (n < 2L)
+    skip(sprintf(paste("%d arm in the registry: the free-vs-pinned comparison cannot",
+                       "fail and is reported DARK rather than green. It regains power",
+                       "when a second arm lands -- a 26-parameter PINNED refit is the",
+                       "thing that would do it."), n))
+  expect_true(any(CCX_MODE_PINNED[names(CCX_MODE_FILES)]),
+              info = "more than one arm, but none is pinned -- nothing tests the trap")
 })

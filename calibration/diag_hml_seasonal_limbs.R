@@ -60,7 +60,7 @@ HL_OBS_TOTAL <- 1.168; HL_OBS_LAND <- 0.683; HL_OBS_OCEAN <- 0.522
 HL_OBS_OCEAN_MO <- 8.52                      # obs ocean limb phase, months
 HL_ENT       <- 0                            # the SHIPPED default; `ent` is not
                                              # one of the 21 and is NOT fitted here
-HL_MODES     <- c(old = "calibration/output/refit_20260825f_from90/mode_fit_pumpN.rds",
+HL_MODES     <- c(old = "calibration/output/quarantine/20260903_ent26_adopted/refit_20260825f_from90/mode_fit_pumpN.rds",
                   new = "calibration/output/refit_20260828_sigma_eff/mode_fit_pumpN.rds")
 
 sep    <- function(s) cat(sprintf("\n\n=== %s ===\n", s))

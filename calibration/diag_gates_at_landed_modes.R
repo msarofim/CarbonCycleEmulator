@@ -21,8 +21,8 @@ ccx_load_cpp()
 GATE_ARMS <- c(
   "pre-fix ref (BEFORE)" = "calibration/output/quarantine/20260825_seas_isotope_rectification/pump_arms/mode_fit_pumpN.rds",
   "ref (cycle 2, RUNNING)" = "calibration/output/refit_20260825f_ref/mode_fit_pumpN_progress.rds",
-  "from90 FINAL"           = "calibration/output/refit_20260825f_from90/mode_fit_pumpN.rds",
-  "pin90 FINAL"            = "calibration/output/refit_20260825f_pin90/mode_fit_pumpN.rds")
+  "from90 FINAL"           = "calibration/output/quarantine/20260903_ent26_adopted/refit_20260825f_from90/mode_fit_pumpN.rds",
+  "pin90 FINAL"            = "calibration/output/quarantine/20260903_ent26_adopted/refit_20260825f_pin90/mode_fit_pumpN.rds")
 GATE_ARMS <- GATE_ARMS[file.exists(vapply(GATE_ARMS, ccx_path, character(1)))]
 stopifnot(length(GATE_ARMS) > 0)
 DEC <- c(1960,1970,1980,1990,2000,2010,2020); WIN <- c(1959,2024)

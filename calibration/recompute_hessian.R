@@ -168,13 +168,32 @@ cat(sprintf("eps = %.2f x the direction's own posterior sd; verified at eps/3 an
             HESS_EPS_FRAC))
 cat(sprintf("d(logpost) over the step is %.4f in EVERY direction by construction\n",
             HESS_EPS_FRAC^2 / 2))
-cat(sprintf("%-16s %10s %10s %11s %11s %9s %s\n", "parameter", "sd (unc)", "eps (u)",
-            "reach (nat)", "curvature", "eps/3-3eps", "vs refit 3e-4"))
+# ⛔ THE LAST COLUMN IS OPTIONAL, AND ITS ABSENCE USED TO ERASE THE WHOLE TABLE.
+# `md$hess_eps` is the step the PRODUCING refit used, and a mode file promoted
+# from a dispersed multistart has no Hessian block at all, so it is NULL. In a
+# sprintf() argument list NULL is a ZERO-LENGTH vector, sprintf() then returns
+# character(0), and cat() prints NOTHING -- so on 2026-09-03 this loop ran 26
+# times and emitted not one row, taking the "*** UNSTABLE" annotation with it.
+# The stability verdict is the reason this table exists; a table that vanishes
+# silently when one decorative column is missing is the silent-gate family
+# exactly ([[mutation_test_gates]]). The comparison column is now OMITTED, by
+# name, when there is nothing to compare against.
+HESS_REF_EPS  <- if (is.null(md$hess_eps)) NA_real_ else md$hess_eps
+HESS_HAS_REF  <- length(HESS_REF_EPS) == 1L && is.finite(HESS_REF_EPS)
+cat(sprintf("%-16s %10s %10s %11s %11s %9s%s\n", "parameter", "sd (unc)", "eps (u)",
+            "reach (nat)", "curvature", "eps/3-3eps",
+            if (HESS_HAS_REF) sprintf(" %s", sprintf("vs refit %.0e", HESS_REF_EPS)) else ""))
+if (!HESS_HAS_REF)
+  cat("(this mode file carries no producing-refit step -- the comparison column is
+",
+      " OMITTED, not blank: there is nothing to compare against.)
+", sep = "")
 for (k in seq_along(nm)) {
-  st <- if (nm[k] %in% failed) " *** UNSTABLE" else ""
-  cat(sprintf("%-16s %10.5f %10.3e %11.4g %11.5g %8.2f%% %8.3fx%s\n",
+  st  <- if (nm[k] %in% failed) " *** UNSTABLE" else ""
+  ref <- if (HESS_HAS_REF) sprintf(" %8.3fx", HESS_REF_EPS / EPSV[k]) else ""
+  cat(sprintf("%-16s %10.5f %10.3e %11.4g %11.5g %8.2f%%%s%s\n",
               nm[k], SDV[k], EPSV[k], EPSV[k] * reach[k], V[k, "mid"],
-              100 * min(vspread[k], 999), md$hess_eps / EPSV[k], st))
+              100 * min(vspread[k], 999), ref, st))
 }
 if (length(failed))
   cat(sprintf("\n*** %d parameter(s) UNSTABLE at the derived step: %s\n",
@@ -182,11 +201,17 @@ if (length(failed))
 if (length(unstable))
   cat(sprintf("*** %d parameter(s) had no plateau at all, using the fallback: %s\n",
               length(unstable), paste(unstable, collapse = ", ")))
-cat("\nthe refit's single 3e-4, as a multiple of the right step: soft directions\n")
-cat("are UNDER-stepped (ratio << 1), stiff ones are about right (ratio ~ 1)\n")
+if (HESS_HAS_REF) {
+  cat(sprintf("\nthe refit's single %.0e, as a multiple of the right step: soft directions\n",
+              HESS_REF_EPS))
+  cat("are UNDER-stepped (ratio << 1), stiff ones are about right (ratio ~ 1)\n")
+}
 
 # h_ml's step must not reach a kink -- the piecewise-C1 direction (ccx_hml_kink)
-if ("h_ml" %in% nm && !is.null(md$hml_kinks)) {
+# ⚠ `length(md$hml_kinks)` NOT `!is.null()`: post-C1-remap (2026-08-29k) the
+# expected kink count is ZERO, so a correctly-derived field is numeric(0) and an
+# is.null() test cannot tell "no kinks, checked" from "never looked".
+if ("h_ml" %in% nm && length(md$hml_kinks)) {
   ih <- match("h_ml", nm)
   gap <- min(abs(md$hml_kinks - md$par_mode$h_ml))
   cat(sprintf("\nh_ml: step reaches %.4g m; nearest kink is %.4g m away (%s)\n",
@@ -205,7 +230,10 @@ sep("FULL HESSIAN")
 # a-direction is differenced with eps_a and the b with eps_b, and the
 # denominator carries both.
 H <- HD$H
-cat(sprintf("21x21 with per-direction steps, eps = %.2f x each posterior sd\n",
+# ⚠ THE SIZE IS READ, NOT TYPED. This said "21x21" through a 22-, a 25- and a
+# 26-parameter build (project rule: labels derive from named constants).
+cat(sprintf("%dx%d with per-direction steps, eps = %.2f x each posterior sd\n",
+            length(nm), length(nm),
             HD$eps_frac))
 ev <- eigen(H, symmetric = TRUE)
 cat("\neigenvalues (all < 0 at a clean interior maximum):\n")
@@ -215,8 +243,15 @@ pd <- all(ev$values < 0)
 Sigma <- Cor <- sdv <- NULL
 if (pd) {
   Sigma <- solve(-H); sdv <- sqrt(diag(Sigma)); Cor <- Sigma / outer(sdv, sdv)
+  # ⛔ abs(), AND IT WAS MISSING UNTIL 2026-09-04. At a clean interior maximum
+  # every eigenvalue of H is NEGATIVE, so max()/min() is |smallest|/|largest| --
+  # the RECIPROCAL of the condition number -- and the two minus signs cancel so
+  # it comes out positive and plausible-looking rather than erroring. Measured
+  # at the ent26 mode it printed 1.352e-05 for a conditioning of 7.395e+04.
+  # ⚠ run_modefind_pump_arms.R has always used abs() on the COVARIANCE and is
+  # unaffected; cond(Sigma) == cond(-H), so its numbers stay comparable to these.
   cat(sprintf("\n-H IS positive-definite. condition number %.4g\n",
-              max(ev$values) / min(ev$values)))
+              max(abs(ev$values)) / min(abs(ev$values))))
   cat(sprintf("log|-H| = %.4f\n", sum(log(-ev$values))))
   cat("\nstrongest parameter correlations (|r| > 0.8):\n")
   ut <- which(upper.tri(Cor) & abs(Cor) > 0.8, arr.ind = TRUE)

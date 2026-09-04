@@ -39,7 +39,10 @@ for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
 LC_REF  <- ccx_mode_file()
-LC_LUC  <- "calibration/output/luc_arm_pinluc/mode_fit_pumpN.rds"
+# ⚠ REPOINTED 2026-09-04 at the quarantine it has actually lived in since the
+# 2026-08-25f isotope fix. The path above it was stale for ten days and
+# nothing reported it; test-mode-file.R now has a staleness lint that does.
+LC_LUC  <- "calibration/output/quarantine/20260825_seas_isotope_rectification/luc_arm_pinluc/mode_fit_pumpN.rds"
 LC_YEARS <- c(1750, 2024)
 LC_GRID  <- seq(-12, 14, by = 0.01)
 OUTDIR   <- ccx_path("calibration", "output", "fert_ridge_gates")
