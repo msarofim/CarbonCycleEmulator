@@ -2,6 +2,56 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04f — SOLAR AND ANTHROPOGENIC-AEROSOL DIFFUSE LIGHT: SCOPED, BOTH DECLINED
+
+Marcus, on gate V: *"I wouldn't expect to be able to capture all of the interannual variability with
+just ENSO, volcanoes, and temperature ... look into the solar insolation/photosynthesis link (which
+isn't only about the 11 year cycle but also the increase in solar activity in the early 20th
+century) or anthropogenic aerosol emissions → diffuse light to see if there is some easy benefit
+there, but interannual variability is not a dealbreaker."* Scoped in
+`calibration/diag_aerosol_solar_diffuse_scope.R`; note
+`notes/diag_2026-09-04_solar_and_aerosol_diffuse_scope.md`. **No easy benefit from either.**
+✅ **And gate V's status is now recorded AT THE GATE: a FAIL there is NOT a blocker.**
+
+⛔ **SOLAR → PHOTOSYNTHESIS IS DEAD ON MAGNITUDE, by ~175×.** The early-20th-century rise IS there in
+the CMIP7/FaIR-1.6.0 solar ERF — **1900-19 → 1950-69 = +0.0267 W/m²**, alongside an 11-yr amplitude
+of 0.0378 — and both are tiny once converted: ΔTSI of **0.031 %** (11-yr peak-to-trough) and
+**0.011 %** (secular). Taking NPP PROPORTIONAL to irradiance, which is a **ceiling** because
+photosynthesis saturates with light, that is **0.0082 GtC/yr** of 11-yr amplitude = **0.91 % of the
+observed anomaly sd and 0.004 % of its variance**, and **0.29 GtC over the 50 years** the secular
+shift takes. The mechanism already in the model — `gamma_diff` 0.25 × Pinatubo AOD 0.110 — is
+**1.445 GtC/yr, 175× larger.**
+⭐ **THE STRUCTURAL REASON, not just the arithmetic:** aerosols change the **DIFFUSE FRACTION**,
+redistributing light into shaded canopy that direct beam never reaches — that is where the leverage
+is (Gu 2003, Mercado 2009, the pair the volcanic term already cites). The sun changes **TOTAL
+irradiance**, 1:1 at best. **The high-leverage channel is unavailable to solar by physics.** Nothing
+was implemented: no run can rescue a three-order-of-magnitude variance deficit.
+
+⛔ **ANTHROPOGENIC AEROSOL CANNOT HELP GATE V, AND THE EMISSIONS SAID SO BEFORE THE RUN DID.** CMIP7
+SO₂ goes 2.3 → **peak 139.9 Mt/yr in 1979** → 71.8, but its interannual sd about a 12-dof spline is
+**3.79 Mt = 2.7 % of the peak**; sulfate lifetime is days, so the AOD inherits that smoothness.
+Measured: gate V moves **0.698 → 0.690** across the whole scan, i.e. 0.008 GtC/yr and slightly the
+WRONG way (z −2.67 → −2.77).
+⭐ **What it DOES move is the AF TREND**, the one real difference gate 4's retirement left standing:
+**+0.0057 → +0.0120 per decade** at A_peak 0.10 against the observed **+0.0147 ± 0.0080**, with the
+AF level still right (0.4225 vs 0.4313).
+
+⛔⛔ **BUT IT IS ~100 % DEGENERATE WITH CO₂ FERTILISATION** — and the frozen column would have said the
+opposite, exactly as it did when `gamma_diff` itself was priced in August (frozen overstated by
+82 %). Re-optimising (`beta_max`, `fert_k`) at each A_peak: **frozen −106 / −692 / −2810 / −11362
+becomes +5.3 / +8.3 / +1.0 / −151.9 — 99-105 % absorbed.** A gain of 5-8 log units on an objective
+measured in thousands is the fit shrugging, not a signal. ⇒ **The only feature fertilisation cannot
+imitate is the POST-1979 DECLINE** (the global-brightening signature), and the objective has no
+target keyed to it.
+
+⚠ **FACE NARROWS IT BUT DOES NOT DECIDE IT.** R(400→564) at the conditional optima: **11.5 % →
+13.0 % → 15.5 % → 14.3 %**, against a FACE envelope running from **0 %** (EucFACE, mature and
+P-limited) to **23 %** (Norby 2005 young plantations) — too wide to reject anything.
+⇒ **AND THAT IS THE ARGUMENT AGAINST ADDING IT NOW:** buying the aerosol term relocates `beta_max`
+by **2.3×** while changing nothing measurable, and `beta_max` is what the pulse IRF and every
+fertilisation result rest on. **An unidentifiable term that silently moves an identified parameter is
+a bad trade.** ⇒ Revisit if a target keyed to the post-1979 decline ever exists — not with more CO₂ data.
+
 ## 2026-09-04e — THE GATE SET, AUDITED: 4/8/10 RETIRED, GATE V ADDED, GATE 12 DEMOTED
 
 Marcus's rule, applied to the whole set: **every test must compare an observed variable — including

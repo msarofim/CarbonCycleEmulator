@@ -730,6 +730,15 @@ dg_gate4_verdict <- function(g4) stop(DG_G4_RETIRED, call. = FALSE)
 # direct ENSO links to land and ocean uptake. All three are already wired, so the
 # gate is a claim about their COMBINED amplitude, and
 # `diag_gateV_variability_drivers.R` decomposes it by knockout.
+# ⚠⚠ STATUS (Marcus 2026-09-04, the same day it was created): A GATE V FAILURE IS
+# NOT A BLOCKER. "I wouldn't expect to be able to capture all of the interannual
+# variability with just ENSO, volcanoes, and temperature ... interannual
+# variability is not a dealbreaker." The gate is here because it MEASURES a real
+# observation the objective never asks for, and because its knockouts say WHERE
+# the model's variability comes from -- not because the model must pass it.
+# ⇒ Report it; do not chase it, and do not read a FAIL here as a defect that
+# blocks a headline claim. The two candidate mechanisms for closing it were
+# scoped and BOTH DECLINED: `diag_aerosol_solar_diffuse_scope.R`.
 DG_V_WIN <- DG_AF_WIN     # 1959-2024: where GCB's annual budget exists
 DG_V_DF  <- 3             # dof of the smooth AF(t) the anomaly is taken about
 DG_V_NSD <- 2             # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_S_NSD

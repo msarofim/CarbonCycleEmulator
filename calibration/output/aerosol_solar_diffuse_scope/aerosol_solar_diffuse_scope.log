@@ -1,0 +1,120 @@
+
+==========================================================================
+1. THE SOLAR PATH, PRICED FROM FIRST PRINCIPLES BEFORE ANY RUN
+==========================================================================
+  Solar ERF (CMIP7/FaIR 1.6.0): 11-yr amplitude 0.0378 W/m2, and the
+  EARLY-20TH-CENTURY RISE Marcus named IS THERE: 1900-19 -> 1950-69 = +0.0267 W/m2.
+
+  ERF -> TSI (ERF = dTSI/4 x (1 - 0.29)) -> fraction of 1361 W/m2:
+    11-yr, peak-to-trough  0.426 W/m2 TSI = 0.0313 % of TSI
+    secular 1900s->1950s   0.150 W/m2 TSI = 0.0110 % of TSI
+
+  UPPER BOUND on NPP, taking NPP PROPORTIONAL to irradiance (it is not --
+  photosynthesis saturates with light, so 1:1 is a CEILING), on 52.7 PgC/yr:
+    11-yr amplitude  0.0082 GtC/yr   = 0.91 % of the observed anomaly sd (0.911)
+                                   = 0.0041 % of its VARIANCE
+    secular shift    0.0058 GtC/yr   -> 0.29 GtC over the 50 yr it takes
+
+  FOR SCALE, the mechanism the model ALREADY HAS: gamma_diff 0.25 x Pinatubo
+  AOD 0.110 = 2.74 % of NPP = 1.445 GtC/yr -- 175x the solar 11-yr bound.
+
+  ⇒ THE STRUCTURAL REASON, not just the arithmetic: aerosols change the
+    DIFFUSE FRACTION, which redistributes light into shaded canopy; the sun
+    changes TOTAL irradiance, which is 1:1 at best. The high-leverage
+    channel is UNAVAILABLE to solar by physics, and the low-leverage one is
+    three orders of magnitude down in VARIANCE. No run can rescue that.
+
+==========================================================================
+2. ANTHROPOGENIC AEROSOL -> DIFFUSE LIGHT: THE SHAPE FIRST
+==========================================================================
+  CMIP7 SO2: 1750 2.3 -> PEAK 139.9 Mt SO2/yr in 1979 -> 71.8 in 2024.
+  ⛔ AND IT IS SMOOTH: interannual sd about a 12-dof spline is 3.79 Mt,
+     2.7 % of the peak. Sulfate lifetime is days, so anthropogenic AOD
+     inherits the emissions' shape -- a TREND driver, not an interannual one.
+     ⇒ Predicted before running: this helps GATE V hardly at all. What it
+       could move is the AF TREND and the decadal profile.
+
+==========================================================================
+3. THE SCAN
+==========================================================================
+  5 runs in 1.0 s
+
+  A_peak       NPP+%    sd(V)      z(V)    AF(all)   AF trend   d(logL)  land sink
+  OBSERVED        --    0.911        --     0.4313    +0.0147        --      2.410
+  0.00          0.00    0.698     -2.67     0.4246     0.0057       0.0      3.295
+  0.02          0.50    0.697     -2.69     0.4209     0.0078    -106.3      3.287
+  0.05          1.25    0.695     -2.71     0.4153     0.0111    -691.8      3.275
+  0.10          2.50    0.692     -2.74     0.4060     0.0165   -2810.1      3.256
+  0.20          5.00    0.693     -2.74     0.3874     0.0273  -11361.7      3.218
+
+  DECADAL AF (GCB in the first row):
+  obs         0.357  0.430  0.468  0.384  0.423  0.448  0.498
+  0.00        0.382  0.431  0.405  0.423  0.430  0.458  0.402
+  0.02        0.372  0.421  0.399  0.420  0.427  0.458  0.404
+  0.05        0.356  0.406  0.390  0.416  0.423  0.459  0.406
+  0.10        0.329  0.381  0.376  0.410  0.415  0.460  0.410
+  0.20        0.275  0.331  0.346  0.398  0.399  0.462  0.418
+
+  WHICH STREAMS PAY, at the largest A_peak:
+    co2_level_MLO         -5566.60
+    co2_level_SPO         -4876.98
+    d13c_level_SPO         -392.32
+    d13c_level_MLO         -223.53
+    co2_icecore            -152.32
+    co2_seasonal_MLO        -47.28
+
+  SENSITIVITY to the NH share assumption (at A_peak = 0.10):
+    NH share 0.70: sd(V) 0.693, AF 0.4074, d(logL) -2429.4
+    NH share 1.00: sd(V) 0.692, AF 0.4053, d(logL) -3022.1
+
+==========================================================================
+4. CONDITIONAL PRICING -- because the frozen column is NOT the price
+==========================================================================
+  re-optimising (beta_max, fert_k) from (0.6974, 303.75) at each A_peak
+  done in 56 s
+
+  A_peak      beta_max    fert_k    d(logL)     frozen d     absorbed
+  0.00          0.6974     303.7        0.0          0.0          NA %
+  0.02          0.7547     351.5        5.3       -106.3         105 %
+  0.05          0.8975     465.1        8.3       -691.8         101 %
+  0.10          1.6339    1026.8        1.0      -2810.1         100 %
+  0.20          2.4085    2000.0     -151.9     -11361.7          99 %
+
+  ⇒ read the FIRST number, not the fourth. A term that costs a lot frozen
+    and little re-optimised is DEGENERATE with what absorbed it, not wrong.
+
+  AND AT THE CONDITIONAL OPTIMUM, what the AF and gate V do:
+  A_peak       sd(V)      z(V)    AF(all)   AF trend
+  0.00         0.698     -2.67     0.4246     0.0057
+  0.02         0.696     -2.69     0.4243     0.0071
+  0.05         0.694     -2.72     0.4238     0.0091
+  0.10         0.691     -2.76     0.4225     0.0120
+  0.20         0.690     -2.77     0.4347     0.0246
+  OBSERVED     0.911        --     0.4313     0.0147
+
+==========================================================================
+5. ⭐ WHAT BREAKS THE DEGENERACY: FACE, NOT THE CO2 RECORD
+==========================================================================
+  FACE observations, 400 -> 564 ppm: Norby 2025 synthesis 21.8 %; Norby 2005 (young plantations) 23.0 %
+  ⚠ Those are YOUNG PLANTATIONS; the mature-forest end is lower, so this
+    reads as a CEILING on the model's response, not a target.
+
+  A_peak      beta_max    fert_k R(400-564) vs Norby 21.8%
+  0.00          0.6974     303.7      11.5 %      -10.3 pp
+  0.02          0.7547     351.5      12.0 %       -9.8 pp
+  0.05          0.8975     465.1      13.0 %       -8.8 pp
+  0.10          1.6339    1026.8      15.5 %       -6.3 pp
+  0.20          2.4085    2000.0      14.3 %       -7.5 pp
+
+  ⇒ FACE NARROWS IT BUT DOES NOT DECIDE IT, and saying so is the point. The
+    compensated response moves +4 pp, which stays INSIDE a FACE envelope that
+    runs from 0 % (EucFACE, mature and P-limited) to 23 % (young plantations)
+    -- an envelope too wide to reject anything here. So the honest reading is:
+    the CO2 record cannot identify the term, and neither can FACE.
+  ⚠ WHAT IS STILL TRUE, AND IS THE ARGUMENT AGAINST ADDING IT NOW: buying the
+    aerosol term RELOCATES `beta_max` by a factor of 2.3 while changing nothing
+    measurable -- and `beta_max` is what the pulse IRF and every fertilisation
+    result rest on. An unidentifiable term that silently moves an identified
+    parameter is a bad trade. [[ccx_saturating_fert]], [[ccx_beta_recentred]]
+
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/aerosol_solar_diffuse_scope/aerosol_solar_diffuse_scope.rds
