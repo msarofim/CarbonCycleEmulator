@@ -503,6 +503,52 @@ CCX_CONSTANTS <- list(
   # arc is quoted in -- the 2.01x land excess, the 0.45x ocean deficit, the 5.17
   # month phase gap -- is a ratio against these. Moving them at the same time as
   # the model moves is re-baselining, and the ratio would not show it.
+  # ---- THE INDEPENDENT OCEAN-PHASE ROUTE (2026-09-04h) ----------------
+  # GATE S's replacement target after the two-signature inversion was retired
+  # (see the six *_INV entries below). This route uses NO model output and no
+  # d13C signature: a surface-ocean pCO2 climatology gives the phase of the
+  # FLUX, and a PHYSICAL LAW converts it to a bound on the atmospheric limb.
+  SO_DPCO2_PEAK_MO = list(
+    value = 7.4107, units = "month of year (peak of the first harmonic)",
+    status = "data",
+    source = paste("Peak month of the Southern Ocean (40-90 S) air-sea pCO2",
+                   "DIFFERENCE, area-weighted, first harmonic by the magnitude",
+                   "of the mean vector. Ocean side: Landschutzer, Laruelle,",
+                   "Roobaert & Regnier (2020) ESSD 12:2537, NOAA NCEI accession",
+                   "0209633 (doi:10.25921/qb25-f418) -- a monthly pCO2",
+                   "CLIMATOLOGY. Atmospheric side: the observed SPO CO2 seasonal",
+                   "harmonic. Computed in calibration/diag_gateS_indep_and_fixB.R",
+                   "and TIED to that computation by test-gate-bounds.R, which",
+                   "recomputes it from the NetCDF when the file is present.",
+                   "⭐ NO MODEL IN THE LOOP -- this is the whole point: it",
+                   "replaces a target that was an observation inverted through",
+                   "the model's own d13C signatures.",
+                   "⭐ ROBUST TO THE BAND EDGE: 7.448 / 7.411 / 7.385 / 7.440",
+                   "for 35/40/45/50 S, a spread of 0.063 months, far inside the",
+                   "lag bound below.",
+                   "⚠ pCO2 IS NOT FLUX: F = k*K0*dpCO2, and neither the wind",
+                   "seasonality in k nor the temperature seasonality in K0 is in",
+                   "this number. Both modulate AMPLITUDE strongly; their effect",
+                   "on PHASE is second-order but not zero. That is one reason",
+                   "the bound below is an INTERVAL and not a sigma.")),
+  SO_DPCO2_LAG_MAX_MO = list(
+    value = 12 / 4, units = "months",
+    status = "derived",
+    source = paste("A QUARTER CYCLE of a 12-month year, and it is a PHYSICAL",
+                   "LAW rather than a fitted or chosen number: a first-order",
+                   "box forced sinusoidally at omega, dC/dt = F(t) - C/tau,",
+                   "lags its forcing by arctan(omega*tau), which is bounded",
+                   "above by 90 degrees and reached only in the LOSSLESS limit.",
+                   "So an atmospheric concentration limb lags its driving flux",
+                   "by BETWEEN 0 AND 3 MONTHS, and the admissible interval for",
+                   "the ocean-signatured limb is",
+                   "[SO_DPCO2_PEAK_MO, SO_DPCO2_PEAK_MO + this].",
+                   "⚠ It is deliberately NOT narrowed by an assumed tau: doing",
+                   "so with tau_ex alone lands 1.56 months late, because tau_ex",
+                   "is an UPPER BOUND on the box's loss time (sinks drain it",
+                   "too) and biases the implied lag LATE. Narrowing it needs the",
+                   "model's OWN measured flux-to-atmosphere lag, which would",
+                   "reintroduce a model dependence this route exists to avoid.")),
   SPO_SEAS_AMP_OBS = list(
     value = 1.168, units = "ppm CO2, peak-to-peak",
     status = "data",
@@ -519,8 +565,9 @@ CCX_CONSTANTS <- list(
                    "was measured the other way.")),
   SPO_SEAS_AMP_LAND_INV = list(
     value = 0.683, units = "ppm CO2, peak-to-peak",
-    status = "provisional",
-    source = paste("The LAND-signatured part of SPO_SEAS_AMP_OBS, from the d13C",
+    status = "retired",
+    source = paste("⛔ RETIRED 2026-09-04h. The two-signature inversion that produced this number CANNOT BE RUN at the canonical mode: the 2026-09-02 temperature-dependent air-sea 13C alphas make the ocean limb's isotopic signature ROTATE seasonally, so it is no longer the signed SCALAR the method assumes, and all four ocean channels now fail the inversion's own antiphase gate (s_O = NaN). Setting alpha_as_tdep=0 restores it and reproduces this value exactly, so the cause is isolated -- but that reverts a model improvement. PROVENANCE ONLY: do not use as a live target. Gate S was rebased on the independent pCO2 route (SO_DPCO2_PEAK_MO). ",
+                   "The LAND-signatured part of SPO_SEAS_AMP_OBS, from the d13C",
                    "signature inversion at the canonical mode",
                    "(calibration/diag_seas_signature_inversion.R, 2026-08-27d;",
                    "collect note the same day). Observed peak month 9.29.",
@@ -529,8 +576,9 @@ CCX_CONSTANTS <- list(
                    "not because it lacks a source.")),
   SPO_SEAS_AMP_OCEAN_INV = list(
     value = 0.522, units = "ppm CO2, peak-to-peak",
-    status = "provisional",
-    source = paste("The OCEAN-signatured part of SPO_SEAS_AMP_OBS, same",
+    status = "retired",
+    source = paste("⛔ RETIRED 2026-09-04h. The two-signature inversion that produced this number CANNOT BE RUN at the canonical mode: the 2026-09-02 temperature-dependent air-sea 13C alphas make the ocean limb's isotopic signature ROTATE seasonally, so it is no longer the signed SCALAR the method assumes, and all four ocean channels now fail the inversion's own antiphase gate (s_O = NaN). Setting alpha_as_tdep=0 restores it and reproduces this value exactly, so the cause is isolated -- but that reverts a model improvement. PROVENANCE ONLY: do not use as a live target. Gate S was rebased on the independent pCO2 route (SO_DPCO2_PEAK_MO). ",
+                   "The OCEAN-signatured part of SPO_SEAS_AMP_OBS, same",
                    "inversion and same provisional standing as",
                    "SPO_SEAS_AMP_LAND_INV. Land 0.683 at month 9.29 plus ocean",
                    "0.522 at month 8.52 are 0.77 months apart and sum to 103 %",
@@ -538,15 +586,17 @@ CCX_CONSTANTS <- list(
                    "the model SUBTRACTS two nearly antiphase ones.")),
   SPO_SEAS_LAND_PHASE_INV = list(
     value = 9.29, units = "month of year (peak of the first harmonic)",
-    status = "provisional",
-    source = paste("Peak month of the land-signatured SPO component, same",
+    status = "retired",
+    source = paste("⛔ RETIRED 2026-09-04h. The two-signature inversion that produced this number CANNOT BE RUN at the canonical mode: the 2026-09-02 temperature-dependent air-sea 13C alphas make the ocean limb's isotopic signature ROTATE seasonally, so it is no longer the signed SCALAR the method assumes, and all four ocean channels now fail the inversion's own antiphase gate (s_O = NaN). Setting alpha_as_tdep=0 restores it and reproduces this value exactly, so the cause is isolated -- but that reverts a model improvement. PROVENANCE ONLY: do not use as a live target. Gate S was rebased on the independent pCO2 route (SO_DPCO2_PEAK_MO). ",
+                   "Peak month of the land-signatured SPO component, same",
                    "inversion and same standing as SPO_SEAS_AMP_LAND_INV.",
                    "The model puts this limb at 8.82 -- a 0.47 month miss,",
                    "against the ocean limb's 5.17.")),
   SPO_SEAS_OCEAN_PHASE_INV = list(
     value = 8.52, units = "month of year (peak of the first harmonic)",
-    status = "provisional",
-    source = paste("Peak month of the ocean-signatured SPO component, same",
+    status = "retired",
+    source = paste("⛔ RETIRED 2026-09-04h. The two-signature inversion that produced this number CANNOT BE RUN at the canonical mode: the 2026-09-02 temperature-dependent air-sea 13C alphas make the ocean limb's isotopic signature ROTATE seasonally, so it is no longer the signed SCALAR the method assumes, and all four ocean channels now fail the inversion's own antiphase gate (s_O = NaN). Setting alpha_as_tdep=0 restores it and reproduces this value exactly, so the cause is isolated -- but that reverts a model improvement. PROVENANCE ONLY: do not use as a live target. Gate S was rebased on the independent pCO2 route (SO_DPCO2_PEAK_MO). ",
+                   "Peak month of the ocean-signatured SPO component, same",
                    "inversion, 95 % CI [7.82, 9.20] bootstrapped over YEARS",
                    "crossed with the signature spreads, 2000 draws, seed",
                    "20260827; angles averaged as VECTORS. The model's only SH",
@@ -559,12 +609,20 @@ CCX_CONSTANTS <- list(
                    "K0. Until that closes the phase gap is a hypothesis.")),
   SPO_SEAS_OCEAN_PHASE_INV_LO = list(
     value = 7.82, units = "month of year",
-    status = "provisional",
-    source = "Lower 95 % bootstrap bound of SPO_SEAS_OCEAN_PHASE_INV, as that entry."),
+    status = "retired",
+    source = paste("Lower 95 % bootstrap bound of SPO_SEAS_OCEAN_PHASE_INV,",
+                   "as that entry -- and RETIRED 2026-09-04h with it, for the",
+                   "same reason: the two-signature inversion that produced this",
+                   "bootstrap cannot be run at the canonical mode. PROVENANCE",
+                   "ONLY. Gate S was rebased on SO_DPCO2_PEAK_MO.")),
   SPO_SEAS_OCEAN_PHASE_INV_HI = list(
     value = 9.20, units = "month of year",
-    status = "provisional",
-    source = "Upper 95 % bootstrap bound of SPO_SEAS_OCEAN_PHASE_INV, as that entry."),
+    status = "retired",
+    source = paste("Upper 95 % bootstrap bound of SPO_SEAS_OCEAN_PHASE_INV,",
+                   "as that entry -- and RETIRED 2026-09-04h with it, for the",
+                   "same reason: the two-signature inversion that produced this",
+                   "bootstrap cannot be run at the canonical mode. PROVENANCE",
+                   "ONLY. Gate S was rebased on SO_DPCO2_PEAK_MO.")),
 
   # ---- Southern-Ocean entrainment amplitude (2026-09-03) --------------
   # REGISTERED BECAUSE IT BECAME A PRIOR CENTRE. `ent_seas_amp_SH` entered
@@ -576,7 +634,9 @@ CCX_CONSTANTS <- list(
   ENT_SEAS_BAND_AREA_FRAC = list(
     value = .ENT_BAND_AREA_FR, units = "fraction, dimensionless",
     status = "provisional",
-    source = paste("Ocean area of the 40-90 S band as a fraction of TOTAL SH",
+    source = paste("⛔ RETIRED 2026-09-04h. The two-signature inversion that produced this number CANNOT BE RUN at the canonical mode: the 2026-09-02 temperature-dependent air-sea 13C alphas make the ocean limb's isotopic signature ROTATE seasonally, so it is no longer the signed SCALAR the method assumes, and all four ocean channels now fail the inversion's own antiphase gate (s_O = NaN). Setting alpha_as_tdep=0 restores it and reproduces this value exactly, so the cause is isolated -- but that reverts a model improvement. PROVENANCE ONLY: do not use as a live target. Gate S was rebased on the independent pCO2 route (SO_DPCO2_PEAK_MO). ",
+                   "⛔ RETIRED 2026-09-04h. The two-signature inversion that produced this number CANNOT BE RUN at the canonical mode: the 2026-09-02 temperature-dependent air-sea 13C alphas make the ocean limb's isotopic signature ROTATE seasonally, so it is no longer the signed SCALAR the method assumes, and all four ocean channels now fail the inversion's own antiphase gate (s_O = NaN). Setting alpha_as_tdep=0 restores it and reproduces this value exactly, so the cause is isolated -- but that reverts a model improvement. PROVENANCE ONLY: do not use as a live target. Gate S was rebased on the independent pCO2 route (SO_DPCO2_PEAK_MO). ",
+                   "Ocean area of the 40-90 S band as a fraction of TOTAL SH",
                    "ocean area, from the 2026-08-27g entrainment pre-check's",
                    "own area weighting. ⚠ PROVISIONAL: it is a GEOGRAPHIC area",
                    "ratio and NEEDS a cited source, exactly as OCEAN_AREA_NH/SH",

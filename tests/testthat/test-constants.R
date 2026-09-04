@@ -13,7 +13,13 @@ test_that("every constant declares a status and a source", {
     k <- CCX_CONSTANTS[[nm]]
     expect_true(!is.null(k$value),  info = nm)
     expect_true(!is.null(k$units),  info = nm)
-    expect_true(k$status %in% c("derived", "cited", "data", "provisional"), info = nm)
+    # "retired" added 2026-09-04h: a constant whose GENERATING METHOD has been
+    # invalidated, kept by name for matched comparison and provenance, and read
+    # by no live gate. It is a distinct state from "provisional" -- provisional
+    # means "we are using it and it carries a dependence"; retired means "do
+    # NOT use it as a target". A test below asserts the roster.
+    expect_true(k$status %in% c("derived", "cited", "data", "provisional", "retired"),
+                info = nm)
     expect_true(nchar(k$source) > 20, info = paste(nm, "needs a real source string"))
     expect_true(is.finite(k$value), info = nm)
   }
@@ -107,11 +113,35 @@ test_that("provisional constants are reported, not silently used", {
                           "SST_PCO2_SENSITIVITY", "NPP_FRAC_NH_ANCHOR_1750",
                           "ALPHA_AS_FCO3",
                           "ALPHA_AS_DOWN_LEGACY", "ALPHA_AS_UP_LEGACY",
-                          "SPO_SEAS_AMP_LAND_INV", "SPO_SEAS_AMP_OCEAN_INV",
-                          "SPO_SEAS_LAND_PHASE_INV", "SPO_SEAS_OCEAN_PHASE_INV",
-                          "SPO_SEAS_OCEAN_PHASE_INV_LO",
-                          "SPO_SEAS_OCEAN_PHASE_INV_HI",
                           "ENT_SEAS_BAND_AREA_FRAC"))
+})
+
+test_that("the RETIRED roster is exactly the two-signature inversion's outputs", {
+  # ⛔ RETIRED 2026-09-04h. These six were the inversion's outputs and they were
+  # PROVISIONAL until the method that produced them stopped working: the
+  # 2026-09-02 temperature-dependent air-sea 13C alphas make the ocean limb's
+  # isotopic signature ROTATE seasonally, so it is not the signed SCALAR the
+  # inversion assumes, all four ocean channels fail its own antiphase gate, and
+  # diag_seas_signature_inversion.R ERRORS at the canonical mode.
+  #
+  # THE ROSTER IS ASSERTED, NOT COUNTED, for the reason the whole file exists:
+  # retiring a constant must be a deliberate, listed act. If a SEVENTH thing is
+  # ever retired this fails and someone has to say why -- and, just as
+  # important, if one of these is quietly un-retired and pressed back into
+  # service as a target, this fails too.
+  ret <- names(CCX_CONSTANTS)[vapply(CCX_CONSTANTS,
+                                     function(k) identical(k$status, "retired"), TRUE)]
+  expect_setequal(ret, c("SPO_SEAS_AMP_LAND_INV", "SPO_SEAS_AMP_OCEAN_INV",
+                         "SPO_SEAS_LAND_PHASE_INV", "SPO_SEAS_OCEAN_PHASE_INV",
+                         "SPO_SEAS_OCEAN_PHASE_INV_LO",
+                         "SPO_SEAS_OCEAN_PHASE_INV_HI"))
+  # ⚠ SPO_SEAS_AMP_OBS is NOT retired and must not be: the inversion closes
+  # CO2 = L + O on the observed TOTAL, so no model enters it. It survives the
+  # method that produced its siblings.
+  expect_identical(CCX_CONSTANTS$SPO_SEAS_AMP_OBS$status, "data")
+  # every retirement must SAY it is retired, in its own source string
+  for (nm in ret)
+    expect_match(CCX_CONSTANTS[[nm]]$source, "RETIRED", info = nm)
 })
 
 test_that("PUMP_GRAD_OBS IS the shipped ocean_grad_dic target, not a copy of it", {

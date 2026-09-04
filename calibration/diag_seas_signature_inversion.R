@@ -41,6 +41,47 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 if (!exists("%||%")) `%||%` <- function(a, b) if (is.null(a)) b else a
+
+# =====================================================================
+# ⛔⛔ RETIRED 2026-09-04h -- THIS SCRIPT'S METHOD NO LONGER HOLDS
+#
+# It ERRORS by name rather than failing obscurely 200 lines down in
+# `stopifnot(sO < 0)`, which is what it did for two days while nothing noticed.
+#
+# WHY. The two-signature inversion assumes each channel's d13C vector is
+# ANTIPHASE to its CO2 vector, so the signature is a signed SCALAR. The
+# 2026-09-02 temperature-dependent air-sea 13C alphas (Zhang et al. 1995) make
+# the ocean limb's fractionation vary with seasonal SST, so its isotopic
+# signature ROTATES over the year. All four ocean channels now sit 1.4-5.6
+# months off antiphase against a 1.0-month tolerance, s_O is NaN, and there is
+# no ocean signature to invert with. THAT IS PHYSICS, NOT A BUG -- the model
+# got better and the method did not follow.
+#
+# WHAT REPLACED IT. Gate S was rebased on an INDEPENDENT route that uses no
+# model output at all: SO_DPCO2_PEAK_MO (the SOM-FFN surface-ocean pCO2
+# climatology) plus a quarter-cycle lag bound from a physical law. The four
+# SPO_SEAS_*_INV constants this script produced are `status = "retired"`.
+#
+# ⚠ IT STILL RUNS AT `alpha_as_tdep = 0`, and reproduces the registered
+# interval exactly -- that is how the cause was isolated. Use it ONLY to
+# reproduce a pre-2026-09-02 result, and say so wherever the numbers land:
+#
+#   CCX_ALLOW_RETIRED_INVERSION=1 CCX_PAR_RDS=<a file setting alpha_as_tdep=0> \
+#     Rscript calibration/diag_seas_signature_inversion.R
+#
+# ⇒ notes/assessment_2026-09-04_public_readiness.md sec.2b-bis.
+# =====================================================================
+if (!nzchar(Sys.getenv("CCX_ALLOW_RETIRED_INVERSION", "")))
+  stop("diag_seas_signature_inversion.R is RETIRED (2026-09-04h).\n",
+       "  The 2026-09-02 temperature-dependent air-sea 13C alphas falsified its\n",
+       "  ocean premise: the ocean signature is no longer a signed SCALAR, all\n",
+       "  four ocean channels fail this script's own antiphase gate, and s_O is\n",
+       "  NaN. Its four SPO_SEAS_*_INV outputs are status = 'retired'.\n",
+       "  GATE S was rebased on SO_DPCO2_PEAK_MO -- an independent pCO2\n",
+       "  climatology plus a quarter-cycle law -- and needs nothing from here.\n",
+       "  To reproduce a PRE-2026-09-02 result, set CCX_ALLOW_RETIRED_INVERSION=1\n",
+       "  and CCX_PAR_RDS to a file setting alpha_as_tdep = 0, and label the\n",
+       "  output as pre-09-02 provenance.")
 ccx_load_cpp()
 
 SI_YEARS  <- c(1750, 2024)

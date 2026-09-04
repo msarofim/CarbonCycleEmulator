@@ -228,86 +228,75 @@ test_that("ccx_overlay_par() refuses to delete a parameter, and repairs the lag"
                NA)   # an EXTRA name in `p` is not a deletion and must be fine
 })
 
-test_that("GATE S bounds the limb PHASE, is CIRCULAR, and fires on the 3.35 defect", {
+test_that("GATE S is an INTERVAL from an OBSERVATION plus a LAW, and it still fires on 3.35", {
   source(skip_if_no_gates(), local = TRUE)
-  # ONE STRICTNESS across the distributional gates, ruled 2026-09-02.
-  expect_identical(DG_S_NSD, DG_Q_NSD)
-  # THE SIGMA IS DERIVED FROM THE REGISTRY, NOT TYPED. If the registered CI
-  # moves, this must fail rather than let the gate keep an orphaned tolerance.
-  expect_equal(DG_S_OBS,    ccx_const("SPO_SEAS_OCEAN_PHASE_INV"))
-  expect_equal(DG_S_OBS_LO, ccx_const("SPO_SEAS_OCEAN_PHASE_INV_LO"))
-  expect_equal(DG_S_OBS_HI, ccx_const("SPO_SEAS_OCEAN_PHASE_INV_HI"))
-  expect_equal(DG_S_SD, (DG_S_OBS_HI - DG_S_OBS_LO) / (2 * stats::qnorm(0.975)))
-  # ⭐ ... and harmonising with the family must not have widened the registered
-  # interval. THE DISCREPANCY IS PREDICTABLE EXACTLY, so this asserts equality
-  # rather than a chosen slack: the bound differs from [LO, HI] by the point's
-  # offset from the CI midpoint plus the (2 - 1.96) sigma the convention adds.
-  mid  <- (DG_S_OBS_LO + DG_S_OBS_HI) / 2
-  slop <- (DG_S_NSD - stats::qnorm(0.975)) * DG_S_SD
-  expect_equal(DG_S_OBS + DG_S_NSD * DG_S_SD - DG_S_OBS_HI,
-               (DG_S_OBS - mid) + slop, tolerance = 1e-9)
-  expect_equal(DG_S_OBS - DG_S_NSD * DG_S_SD - DG_S_OBS_LO,
-               (DG_S_OBS - mid) - slop, tolerance = 1e-9)
+  # ⛔⛔ REBASED 2026-09-04h. This block used to assert a Gaussian bound derived
+  # from SPO_SEAS_OCEAN_PHASE_INV's bootstrap CI. That target is RETIRED -- the
+  # two-signature inversion that produced it cannot be run at the canonical
+  # mode -- and the gate now reads an INDEPENDENT pCO2 climatology plus a
+  # physical law. THE BOUND'S KIND FOLLOWS ITS SOURCE
+  # ([[gate_bound_matches_its_claim]]): an arc, not a sigma.
 
-  mk <- function(mo, amp = DG_S_AMP_OBS) list(mo = mo, amp = amp)
-  # AT the observation: pass, and exactly zero.
-  expect_true(dg_gateS_verdict(mk(DG_S_OBS))$pass)
-  expect_equal(dg_gateS_verdict(mk(DG_S_OBS))$z, 0)
-  # just INSIDE each edge passes, just OUTSIDE fails -- both directions
+  # (1) BOTH ENDS COME FROM THE REGISTRY, NOT FROM LITERALS HERE.
+  expect_equal(DG_S_PCO2_MO, ccx_const("SO_DPCO2_PEAK_MO"))
+  expect_equal(DG_S_LAG_MAX, ccx_const("SO_DPCO2_LAG_MAX_MO"))
+  expect_equal(DG_S_LO, DG_S_PCO2_MO)
+  expect_equal(DG_S_HI, (DG_S_PCO2_MO + DG_S_LAG_MAX) %% 12)
+  # (2) THE LAG BOUND IS A QUARTER CYCLE, DERIVED -- not a chosen tolerance.
+  # If someone re-types it as a convenient number this fails.
+  expect_equal(DG_S_LAG_MAX, 12 / 4)
+  # (3) THERE IS NO SIGMA, AND THERE MUST NOT BE ONE. A gate whose source is
+  # "somewhere in this arc" that grows a sigma has invented a distribution.
+  expect_false(exists("DG_S_SD"))
+  expect_false(exists("DG_S_NSD"))
+
+  mk <- function(mo, amp = 0.5) list(mo = mo, amp = amp)
+  # (4) INSIDE passes with a zero miss; just outside each edge fails -- both
+  # directions, and the arc is CIRCULAR.
+  expect_true(dg_gateS_verdict(mk(DG_S_LO))$pass)
+  expect_true(dg_gateS_verdict(mk(DG_S_HI))$pass)
+  expect_equal(dg_gateS_verdict(mk((DG_S_LO + DG_S_LAG_MAX / 2) %% 12))$d_mo, 0)
   eps <- 0.02
-  expect_true( dg_gateS_verdict(mk(DG_S_OBS - DG_S_NSD * DG_S_SD + eps))$pass)
-  expect_true( dg_gateS_verdict(mk(DG_S_OBS + DG_S_NSD * DG_S_SD - eps))$pass)
-  expect_false(dg_gateS_verdict(mk(DG_S_OBS - (DG_S_NSD + 0.5) * DG_S_SD))$pass)
-  expect_false(dg_gateS_verdict(mk(DG_S_OBS + (DG_S_NSD + 0.5) * DG_S_SD))$pass)
+  expect_true( dg_gateS_verdict(mk((DG_S_LO + eps) %% 12))$pass)
+  expect_true( dg_gateS_verdict(mk((DG_S_HI - eps) %% 12))$pass)
+  expect_false(dg_gateS_verdict(mk((DG_S_LO - eps) %% 12))$pass)
+  expect_false(dg_gateS_verdict(mk((DG_S_HI + eps) %% 12))$pass)
+  # circularity: a month on the far side of the wrap is judged by ARC distance
+  expect_false(dg_gateS_verdict(mk(1.0))$pass)
+  expect_lt(abs(dg_gateS_verdict(mk(0.5))$d_mo), 6)
 
-  # ⭐ THE MUTATION THAT MATTERS: the model's ACTIVE solubility limb peaks at
-  # 3.35 months. The gate exists because nothing scored that, so it must FAIL
-  # there -- and fail by ~5.17 months, not by some other route.
-  v <- dg_gateS_verdict(mk(3.35))
-  expect_false(v$pass)
-  expect_equal(v$d_mo, 3.35 - DG_S_OBS, tolerance = 1e-9)
-  # ⚠ The claim is "outside the gate's OWN bound", not "bigger than some round
-  # number I picked" -- an invented `> 10` sat here until the 2026-09-03 audit.
-  expect_gt(abs(v$z), DG_S_NSD)
-  # ⚠ AND THE PASS DIRECTION IS DEMONSTRATED ABOVE, NOT HERE. It is tempting to
-  # assert that the DISABLED entrainment channel passes -- but CCX_ENT_SEAS_PEAK_MO
-  # is the DRIVER's peak month, not a measured SPO limb, and the two differ by
-  # whatever lag the transport and air-sea exchange impose. Testing the constant
-  # against this gate would compare a driver with an observable.
-  # ⭐ WHAT IS WORTH RECORDING, AS AN ORDERING WITH NO THRESHOLD: the entrainment
-  # driver is far CLOSER to the observed limb than the active solubility one.
-  expect_lt(abs(dg_mo_diff(CCX_ENT_SEAS_PEAK_MO, DG_S_OBS)),
-            abs(dg_mo_diff(3.35, DG_S_OBS)))
-  # THE DRIVER'S OWN 7.50 IS 1.02 MONTHS EARLY, i.e. |z| ~ 2.9 on this gate's
-  # DERIVED sigma -- OUTSIDE the bound. That is a property of the gate and it is
-  # what this asserts.
-  # ⛔ IT WAS ALSO PRE-REGISTERED AS A CEILING ON FIX A -- "a limb that merely
-  # inherits the driver's phase cannot clear GATE S" -- AND THAT CEILING IS NOW
-  # MEASURED AND WITHDRAWN (diag_ent_conditional_lever.R, 2026-09-03): the SPO
-  # limb saturates near month 9.8, some 2.3 months LATER than the driver, so it
-  # does NOT inherit the driver's phase and the reachable range BRACKETS 8.52.
-  # The assertion below stands; the inference drawn from it did not.
-  expect_false(dg_gateS_verdict(mk(CCX_ENT_SEAS_PEAK_MO))$pass)
-  expect_gt(abs(dg_gateS_verdict(mk(CCX_ENT_SEAS_PEAK_MO))$z), DG_S_NSD)
+  # (5) ⭐⭐ THE POWER ASSERTION -- THE REASON A WIDER GATE IS STILL A GATE.
+  # The rebased bound is 3.00 months against the retired 1.41, i.e. 25 % of the
+  # circle, so it MUST be shown to still reject what it exists to reject: the
+  # model's pre-fix SH ocean limb, on BOTH readings of it (4.16 on the channel
+  # decomposition, 3.35 on lib_seas_limbs.R). If a future edit to the pCO2
+  # constant ever swallows these, this fails and the gate has quietly lost its
+  # power ([[no_power_null]]).
+  expect_false(dg_gateS_verdict(mk(3.35))$pass)
+  expect_false(dg_gateS_verdict(mk(4.16))$pass)
+  # and it rejects them EARLY, not by wrapping round the far side
+  expect_lt(dg_gateS_verdict(mk(3.35))$d_mo, 0)
+  expect_lt(dg_gateS_verdict(mk(4.16))$d_mo, 0)
 
-  # ⭐ MONTHS ARE AN ANGLE. A limb at 0.1 is 0.2 months from one at 11.9, not
-  # 11.8 -- and a wrapped phase must read identically to its unwrapped twin.
-  expect_equal(dg_mo_diff(0.1, 11.9), 0.2, tolerance = 1e-9)
-  expect_equal(dg_mo_diff(11.9, 0.1), -0.2, tolerance = 1e-9)
-  expect_equal(dg_gateS_verdict(mk(DG_S_OBS + 12))$z, 0)
-  expect_equal(dg_gateS_verdict(mk(DG_S_OBS - 12))$z, 0)
-  # the largest possible miss is half a year, never more
-  expect_lte(max(abs(vapply(seq(0, 12, by = 0.25),
-                            function(m) dg_gateS_verdict(mk(m))$d_mo, 0))), 6)
+  # (6) THE RETIRED TARGET IS STILL CARRIED, FOR MATCHED COMPARISON ONLY, and
+  # it lies INSIDE the new arc -- which is the corroboration that licensed the
+  # rebase in the first place (2026-09-04g, the SOM-FFN bracket).
+  expect_equal(DG_S_OBS_RETIRED, ccx_const("SPO_SEAS_OCEAN_PHASE_INV"))
+  expect_true(dg_gateS_verdict(mk(DG_S_OBS_RETIRED))$pass)
 
-  # ⛔ THE AMPLITUDE MUST NOT ENTER THE VERDICT. It is reported because the arc
-  # is quoted in it, but SPO_SEAS_AMP_OCEAN_INV carries no interval, so bounding
-  # it would be choosing a number after seeing the result. Wreck it and the
-  # verdict must be unmoved -- the GATE G idiom.
-  a <- dg_gateS_verdict(mk(DG_S_OBS))
-  b <- dg_gateS_verdict(mk(DG_S_OBS, amp = DG_S_AMP_OBS * 100))
-  expect_true(a$pass); expect_true(b$pass); expect_equal(a$z, b$z)
-  expect_false(isTRUE(all.equal(a$amp_ratio, b$amp_ratio)))   # ... but IS reported
+  # (7) ⭐ AN ORDERING, NO THRESHOLD: the entrainment driver is far closer to
+  # the arc than the active solubility limb is. Retained from the pre-rebase
+  # block, because it is a statement about the model and not about the bound.
+  expect_lt(abs(dg_mo_diff(CCX_ENT_SEAS_PEAK_MO, DG_S_LO)),
+            abs(dg_mo_diff(3.35, DG_S_LO)))
+  # ⭐ AND THE DRIVER'S OWN 7.50 NOW PASSES, WHERE IT FAILED THE RETIRED BOUND
+  # AT |z| ~ 2.9. That is a real loosening and it is recorded here rather than
+  # left to be discovered: the arc's lower edge is 7.41, and 7.50 sits just
+  # inside it. The pre-registered "a limb that merely inherits the driver's
+  # phase cannot clear GATE S" ceiling was already MEASURED AND WITHDRAWN on
+  # 2026-09-03 for a different reason (the limb saturates ~2.3 months later
+  # than the driver), so nothing depends on the old exclusion.
+  expect_true(dg_gateS_verdict(mk(CCX_ENT_SEAS_PEAK_MO))$pass)
 })
 
 test_that("GATE S's knockout kills BOTH SH ocean limbs, and comes from the estimator", {

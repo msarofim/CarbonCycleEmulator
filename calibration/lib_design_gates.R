@@ -288,40 +288,64 @@ DG_LEDGER <- list(
          "
             ABYSSAL n_eff = 20, which is conservative at the surface.")),
   list(id = "S", what = "SPO seasonal cycle: the OCEAN limb's PHASE",
-       class = "OBSERVATION", src = paste(
-         "SPO_SEAS_OCEAN_PHASE_INV = 8.52 months, 95 % CI [7.82, 9.20].",
+       class = "OBSERVATION + LAW", src = paste(
+         "SO_DPCO2_PEAK_MO = 7.41 months: the Southern Ocean (40-90 S)",
          "
-            The observed SPO CO2 and d13C first harmonics, split by the",
+            air-sea pCO2 DIFFERENCE, first harmonic. Ocean side is the",
          "
-            two-signature inversion (diag_seas_signature_inversion.R).",
+            Landschutzer/Laruelle SOM-FFN climatology (NCEI 0209633),",
          "
-            \u26a0 PROVISIONAL: the split uses the model's own d13C",
+            atmospheric side the observed SPO CO2 harmonic.",
          "
-            SIGNATURES -- two signed SCALARS. The model's seasonal PHASE",
+            \u2b50 NO MODEL IN THE LOOP.",
          "
-            never enters, and the CI is bootstrapped over years CROSSED",
+            \u26d4 REBASED 2026-09-04h. The old target,",
          "
-            WITH the signature spread, so that dependence is inside it."),
-       bound = paste("|z| <= DG_S_NSD on the PHASE, against a sigma DERIVED",
+            SPO_SEAS_OCEAN_PHASE_INV = 8.52 [7.82, 9.20], came from the",
          "
-            from the registered CI as (HI - LO) / (2 x 1.96). At NSD = 2",
+            two-signature inversion and is RETIRED: the 09-02",
          "
-            that reproduces [LO, HI] to 0.02 months. \u26a0 The limb",
+            T-dependent air-sea alphas make the ocean signature rotate",
          "
-            AMPLITUDE is REPORTED and NOT bounded: the registered",
+            seasonally, so it is not a signed SCALAR and the inversion",
          "
-            SPO_SEAS_AMP_OCEAN_INV carries no interval, so no bound is",
+            no longer runs at all."),
+       bound = paste("INTERVAL MEMBERSHIP, not a sigma -- the bound's KIND",
          "
-            derivable and inventing one would be choosing a number",
+            follows its source. A first-order box lags its sinusoidal",
          "
-            after seeing the answer."),
+            forcing by arctan(omega*tau), bounded above by a QUARTER",
+         "
+            CYCLE, so the admissible arc is [7.41, 10.41].",
+         "
+            \u26a0 WIDER THAN THE RETIRED BOUND AND HONESTLY SO: 3.00",
+         "
+            months vs 1.41, i.e. 25 % of the circle, p(random pass)",
+         "
+            = 0.25. \u2b50 Its POWER was measured before adoption and it",
+         "
+            EXCLUDES the pre-fix limb (4.16 and 3.35), the defect this",
+         "
+            gate exists to catch; test-gate-bounds.R fails if that is",
+         "
+            ever lost. \u26a0 The limb AMPLITUDE is now printed BARE:",
+         "
+            pCO2 is not flux, so this route supplies no amplitude",
+         "
+            comparator, and the retired one is provenance."),
        scored = paste("NO, in the sense that matters. co2_seasonal_SPO IS a",
          "
             fitted stream -- but it scores the TOTAL, which the model",
          "
-            already matches to ~1 % by cancelling a 2.55x land limb",
+            matches to ~2 % while nothing scores the PARTITION beneath",
          "
-            against a 0.45x ocean one. Nothing scores the PARTITION."),
+            it. \u26a0 The '2.55x land / 0.45x ocean' this line used to",
+         "
+            quote was measured at a PRE-ent26 mode AND on an ORIGIN",
+         "
+            split, not the land/ocean one; like-for-like at ent26 the",
+         "
+            limbs are 1.05x and 0.77x. Retracted 2026-09-04h."),
        power  = paste("REAL, and it is the gate the seasonal arc was missing:",
          "
             a 5.17-month limb error survived weeks of fitting because",
@@ -365,16 +389,17 @@ dg_print_ledger <- function() {
               DG_GCB_LAND_SD, DG_GCB_OCEAN_SD))
   cat(sprintf("  The distributional gates share one strictness: DG_G5_NSD %g,\n",
               DG_G5_NSD))
-  cat(sprintf("    DG_G7_NSD %g, DG_Q_NSD %g, DG_GD_NSD %g, DG_S_NSD %g.\n",
-              DG_G7_NSD, DG_Q_NSD, DG_GD_NSD, DG_S_NSD))
-  cat(sprintf("  GATE S's sigma is DERIVED, not chosen: (%.2f - %.2f) / (2 x 1.96) = %.4f mo,\n",
-              DG_S_OBS_HI, DG_S_OBS_LO, DG_S_SD))
-  cat(sprintf("    so |z| <= %g is months [%.3f, %.3f] against the registered [%.2f, %.2f].\n",
-              DG_S_NSD, DG_S_OBS - DG_S_NSD * DG_S_SD, DG_S_OBS + DG_S_NSD * DG_S_SD,
-              DG_S_OBS_LO, DG_S_OBS_HI))
-  cat("  ⚠ STILL NO LAW-DERIVED GATE. GATE G (2026-09-02) is OBSERVATIONAL; it\n")
-  cat("    puts an observation ON the surface carbonate state, which narrows the\n")
-  cat("    hole without closing it. Candidates, none built: carbonate / Revelle\n")
+  cat(sprintf("    DG_G7_NSD %g, DG_Q_NSD %g, DG_GD_NSD %g.  GATE S no longer has one.\n",
+              DG_G7_NSD, DG_Q_NSD, DG_GD_NSD))
+  cat(sprintf("  GATE S is now an INTERVAL, not a sigma: [%.3f, %.3f], width %.2f mo,\n",
+              DG_S_LO, DG_S_HI, DG_S_LAG_MAX))
+  cat(sprintf("    = SO_DPCO2_PEAK_MO %.4f + a quarter-cycle lag bound. The retired\n",
+              DG_S_PCO2_MO))
+  cat(sprintf("    inversion target was %.2f; it is kept by name for matched comparison only.\n",
+              DG_S_OBS_RETIRED))
+  cat("  ⭐ GATE S IS NOW PART LAW-DERIVED -- its CONVERSION is a quarter-cycle\n")
+  cat("    bound, not a fitted or chosen sigma. GATE G remains OBSERVATIONAL.\n")
+  cat("    Still unbuilt, and still worth building: carbonate / Revelle\n")
   cat("    consistency, and Henry's-law solubility.\n")
 }
 
@@ -741,7 +766,9 @@ dg_gate4_verdict <- function(g4) stop(DG_G4_RETIRED, call. = FALSE)
 # scoped and BOTH DECLINED: `diag_aerosol_solar_diffuse_scope.R`.
 DG_V_WIN <- DG_AF_WIN     # 1959-2024: where GCB's annual budget exists
 DG_V_DF  <- 3             # dof of the smooth AF(t) the anomaly is taken about
-DG_V_NSD <- 2             # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_S_NSD
+DG_V_NSD <- 2             # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_GD_NSD
+                          # (GATE S left the family 2026-09-04h: its bound is an
+                          #  INTERVAL from a law, so it has no sigma to harmonise.)
 DG_V_CLAIM <- paste("|sd(model interannual growth anomaly) - sd(observed)| <=",
                     "DG_V_NSD x the OBSERVED sd's own sampling error")
 
@@ -992,7 +1019,10 @@ dg_streams <- function(r, v) {
 # very nearly antiphase -- and NOTHING IN THE OBJECTIVE OR IN THIS GATE SET
 # SCORED IT. That is how an error of that size survived for weeks: the SPO CO2
 # seasonal rows ARE in the likelihood, but they score the TOTAL, which the model
-# matches to ~1 % by cancelling a 2.55x land limb against a 0.45x ocean one
+# matches to ~2 % while nothing scores the PARTITION beneath it. ⚠ The
+# '2.55x land / 0.45x ocean' this comment used to quote was measured at a
+# PRE-ent26 mode AND on an ORIGIN split rather than the land/ocean one;
+# like-for-like at ent26 the limbs are 1.05x and 0.77x (retracted 09-04h)
 # ([[seas_right_observable_wrong_drivers]]). A matched total has no power over
 # the partition that produced it. This gate scores the partition's PHASE, which
 # is the functional that does.
@@ -1003,25 +1033,17 @@ dg_streams <- function(r, v) {
 # so no bound is derivable from it and inventing one would be choosing a number
 # after seeing the result. [[gate_bound_matches_its_claim]]
 #
-# ⭐ WHAT THE TARGET DEPENDS ON, STATED BEFORE IT IS USED. `SPO_SEAS_OCEAN_PHASE_INV`
-# is on the PROVISIONAL ledger because it is an observation inverted through the
-# model's own d13C SIGNATURES ([[ccx_spo_constants_registry]]). That dependence
-# is real and it is bounded: the inversion (diag_seas_signature_inversion.R) takes
-# the OBSERVED SPO CO2 and d13C first-harmonic vectors and two signed SCALARS
-# s_L, s_O (permil per ppm). The model's own seasonal PHASE does not enter it at
-# any point -- so this gate is NOT reading back the quantity it tests
-# ([[gate_reads_its_own_output]]) -- and the registered 95 % CI was bootstrapped
-# over YEARS **crossed with the signature spread**, so the signature dependence
-# is already inside the interval this gate judges against.
+# ⭐ WHAT THE TARGET DEPENDS ON, STATED BEFORE IT IS USED. Nothing in the model.
+# The ocean side is a pCO2 CLIMATOLOGY and the atmospheric side an observed
+# station harmonic; the conversion between them is a physical law. This is a
+# deliberate change of kind from the retired target, which was an observation
+# inverted through the model's own d13C signatures.
 #
-# THE SIGMA IS DERIVED FROM THE REGISTERED CI, NOT CHOSEN. sd = (HI - LO) /
-# (2 * 1.96). At DG_S_NSD = 2 -- the one strictness the distributional gates
-# share -- the resulting interval reproduces the registered [LO, HI] to 0.02
-# months, so harmonising with the family costs nothing and invents nothing.
-#
-# ⚠ AND THE OBSERVED PHASE ITSELF RESTS ON A pCO2 PRODUCT on the ocean side
-# (data-raw/download_data.R sec.6c), which omits the seasonality of gas transfer
-# and K0. That caveat belongs to the constant and is repeated at its use.
+# ⚠ AND THE ROUTE'S OWN CAVEAT, REPEATED AT ITS USE: pCO2 IS NOT FLUX.
+# F = k*K0*dpCO2, and neither the wind seasonality in k nor the temperature
+# seasonality in K0 is in the number. Both modulate AMPLITUDE strongly; their
+# effect on PHASE is second-order but not zero. That is part of why the bound
+# is a 3-month INTERVAL and not a sigma.
 # =====================================================================
 # ONE ESTIMATOR, not a second copy. `lib_seas_limbs.R` is THE SPO limb estimator
 # for this project and every file that quotes a limb sources it; a gate carrying
@@ -1030,17 +1052,44 @@ dg_streams <- function(r, v) {
 # ([[amp_definition_mismatch]]).
 source(ccx_path("calibration", "lib_seas_limbs.R"))
 
-DG_S_OBS     <- ccx_const("SPO_SEAS_OCEAN_PHASE_INV")
-DG_S_OBS_LO  <- ccx_const("SPO_SEAS_OCEAN_PHASE_INV_LO")
-DG_S_OBS_HI  <- ccx_const("SPO_SEAS_OCEAN_PHASE_INV_HI")
-DG_S_AMP_OBS <- ccx_const("SPO_SEAS_AMP_OCEAN_INV")   # REPORTED, NOT BOUNDED
-DG_S_SD      <- (DG_S_OBS_HI - DG_S_OBS_LO) / (2 * stats::qnorm(0.975))
-DG_S_NSD     <- 2    # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_GD_NSD
-# ⚠ THE KNOCKOUT MUST KILL **BOTH** SH OCEAN LIMBS. `sst_seas_amp_SH = 0` alone
-# leaves the entrainment limb running -- the bug the channel exposed on 27g --
-# and this gate exists precisely to be run with that channel switched ON, so the
-# one-limb form would silently gate the wrong thing. Taken from SL_CASES rather
-# than retyped, so it cannot drift from the estimator's own definition.
+# ⛔⛔ REBASED 2026-09-04h. GATE S USED TO READ `SPO_SEAS_OCEAN_PHASE_INV`
+# = 8.52 [7.82, 9.20], an observation inverted through the model's own d13C
+# SIGNATURES, and judged |z| <= 2 against a sigma derived from that CI. That
+# target is now RETIRED: the 2026-09-02 temperature-dependent air-sea alphas
+# make the ocean limb's isotopic signature rotate seasonally, so it is not the
+# signed SCALAR the inversion assumes, and the inversion no longer runs at all
+# (all four ocean channels fail its own antiphase gate).
+#
+# ⭐ THE REPLACEMENT USES NO MODEL OUTPUT. The SOM-FFN surface-ocean pCO2
+# climatology gives the phase of the air-sea FLUX; a PHYSICAL LAW bounds the
+# lag from flux to atmospheric limb at a QUARTER CYCLE. The admissible interval
+# is therefore [SO_DPCO2_PEAK_MO, SO_DPCO2_PEAK_MO + SO_DPCO2_LAG_MAX_MO].
+#
+# ⭐ THE BOUND'S KIND CHANGED WITH ITS SOURCE, deliberately
+# ([[gate_bound_matches_its_claim]]): a law that says "somewhere in this arc"
+# is an INTERVAL, not a Gaussian. There is no sigma here and none is invented.
+#
+# ⚠ IT IS WIDER AND THAT IS THE HONEST COST: 3.00 months against the retired
+# 1.41, i.e. 25 % of the circle, so a phase drawn at random passes with
+# p = 0.25. ⭐ BUT ITS POWER WAS MEASURED BEFORE IT WAS ADOPTED, and it retains
+# the power that matters: it EXCLUDES both readings of the pre-fix SH ocean
+# limb (4.16 on the channel decomposition, 3.35 on lib_seas_limbs.R) -- the
+# defect this gate was created to catch. A wider gate that still rejects the
+# thing it exists to reject is a real gate; see test-gate-bounds.R, which
+# asserts exactly that and fails if the exclusion is ever lost.
+DG_S_PCO2_MO <- ccx_const("SO_DPCO2_PEAK_MO")
+DG_S_LAG_MAX <- ccx_const("SO_DPCO2_LAG_MAX_MO")
+DG_S_LO      <- DG_S_PCO2_MO
+DG_S_HI      <- (DG_S_PCO2_MO + DG_S_LAG_MAX) %% 12
+# The RETIRED target, kept by name so a matched comparison against any result
+# fitted before 2026-09-04h is still possible without a git blame.
+DG_S_OBS_RETIRED <- ccx_const("SPO_SEAS_OCEAN_PHASE_INV")
+# ⚠ THE LIMB AMPLITUDE NO LONGER HAS AN OBSERVED COMPARATOR. It used to be
+# reported (never bounded) against SPO_SEAS_AMP_OCEAN_INV, which is retired
+# with the rest of the inversion. The pCO2 route CANNOT supply one: pCO2 is not
+# flux, and the wind seasonality in k and temperature seasonality in K0 both
+# modulate amplitude strongly. The amplitude is therefore printed BARE, with no
+# ratio, rather than kept against a number that is now provenance.
 DG_S_KO <- SL_CASES$SH_ocean
 
 #' Signed CIRCULAR difference between two months of year, in (-6, +6]
@@ -1074,13 +1123,23 @@ dg_gateS <- function(v, obs) {
        ent = v$p$ent_seas_amp_SH, sst_amp_SH = v$p$sst_seas_amp_SH)
 }
 
-#' GATE S's verdict: a DISTRIBUTIONAL claim on the limb PHASE alone
-dg_gateS_verdict <- function(g, obs_mo = DG_S_OBS, sd = DG_S_SD, n_sd = DG_S_NSD) {
-  d <- dg_mo_diff(g$mo, obs_mo)
-  z <- d / sd
-  list(mo = g$mo, obs_mo = obs_mo, d_mo = d, sd = sd, z = z,
-       n_sd = n_sd, pass = abs(z) <= n_sd,
-       lo = obs_mo - n_sd * sd, hi = obs_mo + n_sd * sd,
-       # REPORTED, NOT BOUNDED -- the registered amplitude carries no interval.
-       amp = g$amp, amp_obs = DG_S_AMP_OBS, amp_ratio = g$amp / DG_S_AMP_OBS)
+#' GATE S's verdict: INTERVAL membership on the limb PHASE alone
+#'
+#' The claim is "the atmospheric ocean-signatured limb lags the observed
+#' air-sea pCO2 difference by between 0 and a quarter cycle". That is an arc,
+#' so the test is arc membership and `d_mo` reports the SIGNED distance to the
+#' nearer edge (0 when inside). No z, because there is no sigma to divide by.
+dg_gateS_verdict <- function(g, lo = DG_S_LO, w = DG_S_LAG_MAX) {
+  inside <- ((g$mo - lo) %% 12) <= w
+  # signed miss: negative = early of the lower edge, positive = late of the upper
+  d_lo <- ((g$mo - lo + 6) %% 12) - 6
+  d_hi <- ((g$mo - (lo + w) + 6) %% 12) - 6
+  d    <- if (inside) 0 else if (abs(d_lo) < abs(d_hi)) d_lo else d_hi
+  list(mo = g$mo, lo = lo, hi = (lo + w) %% 12, width = w,
+       d_mo = d, pass = inside,
+       # the retired inversion target, for matched comparison ONLY
+       obs_mo_retired = DG_S_OBS_RETIRED,
+       d_mo_vs_retired = ((g$mo - DG_S_OBS_RETIRED + 6) %% 12) - 6,
+       # PRINTED BARE -- the pCO2 route supplies no amplitude comparator
+       amp = g$amp)
 }
