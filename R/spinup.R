@@ -15,7 +15,7 @@
 # than an input -- see ccx_spinup()$diagnostics and test-spinup.R.
 #
 # The 12C equilibrium is analytic; the 13C and 14C equilibria are obtained by
-# exact linear solves, because both tracers enter ccx_deriv() LINEARLY once the
+# exact linear solves, because both tracers enter the derivative LINEARLY once the
 # carbon fluxes are fixed (transport uses ratios r = C_iso/C from the source
 # box, decay is -lambda*C14, and sources are independent of the isotope state).
 # Forward-integrating instead would need >10,000 yr to equilibrate 14C.
@@ -65,7 +65,7 @@ ccx_dic_for_pco2 <- function(pco2_target, alk, sst) {
 #' chi, and chi is no longer identical in the two hemispheres.
 #'
 #' So: Newton on every box's carbon, with a finite-difference Jacobian, using
-#' ccx_deriv() ITSELF as the residual so the solve cannot disagree with the
+#' the DERIVATIVE ITSELF as the residual so the solve cannot disagree with the
 #' model it is solving. GLOBAL preindustrial CO2 is the pin; the split is free.
 #' Started from the analytic equilibrium, which is within ~1 %.
 #' The 13C/14C solves downstream need no change: they invert whatever linear
@@ -81,7 +81,7 @@ ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
 
   resid <- function(cv) {
     yy <- y; yy[, "C"] <- cv
-    r  <- ccx_deriv(yy, 1750, p0, forc, grid, aux)[, "C"]
+    r  <- ccx_deriv_fast(yy, 1750, p0, forc, grid, aux)[, "C"]
     # The operator conserves carbon, so the steady-state system is rank
     # deficient by one. Trade one equation for the pin; the dropped row is then
     # implied by the other 31 plus conservation.
@@ -109,6 +109,32 @@ ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
   y[, "C"] <- cv
   y
 }
+
+# ---- WHY THIS FILE CALLS `ccx_deriv_fast()`, NOT `ccx_deriv()` (2026-09-03) --
+# ⭐ THE SPINUP WAS 84 % OF EVERY OBJECTIVE EVALUATION, AND 91 % OF THE SPINUP WAS
+# THE INTERPRETED DERIVATIVE. Profiled, not assumed: the transient -- 275 years,
+# 13,200 RK4 steps, 52,800 derivative calls -- runs in the C++ core in 0.028 s,
+# while re-deriving the 1750 equilibrium cost 0.125 s. The spinup makes ~135
+# derivative calls per evaluation, and every one of them went through R:
+#   * 68 in ccx_c12_steady_conveyor()'s Newton -- a 32-column finite-difference
+#     Jacobian, which runs whenever the PUMP is on, not just the conveyor;
+#   * 67 building the two isotope operators one column at a time, plus the
+#     closing residual.
+# `ccx_deriv_fast()` is the SAME SIGNATURE and the same model, so this is a
+# substitution and not a reformulation.
+#
+# ⚠ THE TWO CORES ARE **NOT** BIT-IDENTICAL, AND THAT IS PRICED, NOT ASSUMED.
+# test-parity.R bounds their disagreement ANALYTICALLY at 8.5e-15 relative --
+# floating-point reassociation of the pump's own 20 flux terms, nothing else --
+# which is five orders below this Newton's 1e-9 residual tolerance and eight
+# below its 1e-7 finite-difference step, so neither the Jacobian nor the
+# convergence test can feel it.
+# MEASURED END TO END at the 26-parameter mode: the logpost moves
+# **+1.155e-10 absolute, 7.98e-14 relative** -- against the port gate's own
+# 1e-8, i.e. inside it by five orders. Spinup 0.1252 -> 0.0178 s (7.0x), full
+# evaluation 0.1404 -> 0.0483 s (**2.9x**).
+# ⇒ Stored logposts, port targets and checkpoint `ref_logpost` stamps all remain
+#   valid: every one of those gates is 1e-8 relative and this is 8e-14.
 
 #' Preindustrial steady state
 #'
@@ -154,7 +180,7 @@ ccx_spinup <- function(p = ccx_default_params(),
     # w_up * A * conc across every interface and the sinking limb returns the
     # same volume flux at the same concentration, so a uniform column has zero
     # advective tendency too. The 13C/14C solves need no change either -- they
-    # invert whatever linear operator ccx_deriv() presents. test-ocean-advection.R
+    # invert whatever linear operator the derivative presents. test-ocean-advection.R
     # holds both statements.
     #
     # NOT EXACT WITH THE CONVEYOR ON, and this is the one place the two differ.
@@ -204,11 +230,11 @@ ccx_spinup <- function(p = ccx_default_params(),
   # dy_iso/dt = A %*% y_iso + b, exact because the isotope enters linearly.
   iso_operator <- function(tracer, forc) {
     y0 <- y; y0[, tracer] <- 0
-    b  <- ccx_deriv(y0, 1750, p0, forc, grid, aux)[, tracer]
+    b  <- ccx_deriv_fast(y0, 1750, p0, forc, grid, aux)[, tracer]
     A  <- matrix(0, nb, nb)
     for (j in seq_len(nb)) {
       yj <- y0; yj[j, tracer] <- 1
-      A[, j] <- ccx_deriv(yj, 1750, p0, forc, grid, aux)[, tracer] - b
+      A[, j] <- ccx_deriv_fast(yj, 1750, p0, forc, grid, aux)[, tracer] - b
     }
     list(A = A, b = b)
   }
@@ -236,7 +262,7 @@ ccx_spinup <- function(p = ccx_default_params(),
   y[, "C14"] <- prod * u
 
   # ---- diagnostics ----------------------------------------------------
-  resid <- ccx_deriv(y, 1750, p0, zero_forc(prod), grid, aux)
+  resid <- ccx_deriv_fast(y, 1750, p0, zero_forc(prod), grid, aux)
   d14c_atm <- 1000 * (sum(y[atm_idx, "C14"]) / sum(y[atm_idx, "C"]) - 1)
   d13c_atm <- 1000 * (sum(y[atm_idx, "C13"]) /
                         (sum(y[atm_idx, "C"]) * ccx_const("R13_VPDB")) - 1)

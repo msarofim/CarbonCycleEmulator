@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-03 — ⭐⭐ **THE SPINUP MOVED TO THE COMPILED DERIVATIVE: 2.9× ON EVERY EVALUATION**
+
+`R/spinup.R`'s four call sites now use **`ccx_deriv_fast()`** — the same-signature compiled twin
+`test-parity.R` already exercised, so this is a substitution, not a reformulation.
+
+| | before | after | |
+|---|---|---|---|
+| `ccx_spinup()` | 0.1252 s | **0.0178 s** | 7.0× |
+| full objective | 0.1404 s | **0.0483 s** | **2.9×** |
+
+⭐ **THE OBJECTIVE MOVED 7.98e-14 RELATIVE (+1.155e-10 absolute)** — five orders **inside** the port
+gate's own 1e-8. So `port_targets.csv`, every stored logpost and every checkpoint `ref_logpost` stamp
+stay valid, and nothing needed regenerating. That is consistent with `test-parity.R`'s **analytic**
+bound of 8.5e-15 relative (floating-point reassociation of the pump's 20 flux terms and nothing
+else), which sits 5 orders below the Newton's 1e-9 residual tolerance and 8 below its 1e-7
+finite-difference step — neither the Jacobian nor the convergence test can feel it.
+⚠ Suite unchanged: 1710 pass / 10 fail / 2 skip, `test-parity.R` among the passes.
+
+⚠ **The balance has flipped and that is the right shape**: the transient is now ~58 % of an
+evaluation and the spinup ~37 %. Any further gain would have to come from building the two isotope
+operators **analytically** — both tracers enter the derivative linearly — rather than by 32
+finite-difference columns each.
+⛔ **NOT YET SHIPPED TO TORCH**: `16905919`'s five half-dispersion tasks are still running.
+
+## 2026-09-03 — ⛔ **THE OUTLIER IS REAL: TWO BASINS, NOT ONE**
+
+id 12's resume (`16905918`, 300 min budget) ran cycle 3 with **two FULL-LENGTH restarts** — 4,521 and
+8,634 evals, **not** wall-shortened — and both gained **exactly 0.0000**, finishing in 44 of 300 min.
+⇒ **−1508.7786 is a genuine local optimum, 61.9 log-units above the main basin**, found by **1 of 34**
+dispersed draws.
+
+⚠ **I had leaned the other way** — "most likely a task that ran out of budget in a bad region". The
+resume was the test and it said otherwise. ⇒ **The survey's claim is "one DOMINANT basin (33/34)
+plus a second at −1508.78", not "one basin"** — and the round-1 `CONVERGED` label, which I flagged as
+overstating, turns out to have been right for the wrong reason.
+
 ## 2026-09-03 — **ROUND 1 CLOSED (40/40, 0 errors); ROUND 2 RUNNING**
 
 **`16837149` final: 40 COMPLETED, 0 errors, ids 40–45 cancelled deliberately.**
