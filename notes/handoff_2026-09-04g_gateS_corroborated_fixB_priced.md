@@ -138,12 +138,15 @@ mutation-tested against the exact bug**.
 ## 4. ⚠ NON-OBVIOUS STATE
 
 * **Torch: nothing running.** Everything here is local and takes seconds.
-* ⚠⚠ **`INDEX_ccx.md` IS AT 18,225 BYTES OF CONTENT AGAINST AN 18 KB HARD CEILING** (464-byte header
-  excluded). I kept it under only by **routing this session's two findings to the sub-indexes that
-  own them** — gate S to `INDEX_ccx_seas.md` (13,999 B), Fix B to `INDEX_ccx_ocean.md` (11,969 B) —
-  and leaving a two-line pointer in the root. **The previous handoff's warning stands and is now
-  urgent: the next addition to `INDEX_ccx.md` needs a RESTRUCTURE, not another trim.**
-  `MEMORY.md` is **17,087 B** against a 12 KB soft target and was **not** added to.
+* ✅ **THE MEMORY RESTRUCTURE THE LAST HANDOFF DEMANDED IS DONE (later the same day).**
+  `INDEX_ccx.md` had reached its 18 KB HARD ceiling, so the **interannual-variability / ENSO /
+  volcano / diffuse-light / GATE V arc split to a new `INDEX_ccx_var.md`**; ccx fell
+  **18,689 → 15,097 B**. Registered in the root's routing block and its budget roster.
+* ⛔ **AND A MEASUREMENT ERROR THIS HANDOFF ORIGINALLY REPEATED, NOW CORRECTED.** I wrote that
+  `MEMORY.md` was "17,087 B against a 12 KB soft target". **That measured the FILE.** Its own header
+  says to strip the HTML comment blocks first — they are ~28 % of it — and the **CONTENT is
+  11,939 B, COMPLIANT.** Two handoffs in a row made this exact mistake. Nothing was over the root
+  budget and nothing needed to be cut from it.
 * **New memories:** `ccx_gateS_corroborated_by_pco2`, `ccx_fixB_reservoir_priced`,
   `mask_wraps_the_code_does_not` (the last pointed at from `INDEX_diag.md`'s silent-gate family,
   now **eleven** members).
