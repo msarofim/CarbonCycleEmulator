@@ -2,6 +2,59 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04h(2) — WHAT IS ACTUALLY WRONG: THREE LARGE ERRORS ARE ABSORBED BY FREE OFFSETS
+
+`notes/assessment_2026-09-04h_what_is_actually_wrong.md`. Every number measured at `ent26`.
+
+⭐⭐ **THE HEADLINE, AND IT IS NEW.** The likelihood carries three additive nuisance parameters, and
+at the canonical mode **each sits on the discrepancy it can absorb, to four decimals**:
+
+| free parameter | fitted | absorbs | prior z | flagged? |
+|---|---|---|---|---|
+| `rep_dC` | **+3.3930** | CO₂ level bias **+3.31 / +3.55 ppm** | **+3.39** | ⚠ yes |
+| `grad_off_co2` | **+0.2098** | CO₂ gradient error **−0.2120 ppm** | +0.42 | ⛔ **no** |
+| `grad_off_d13c` | **+0.06464** | δ¹³C gradient error **−0.06470 ‰** | +0.43 | ⛔ **no** |
+
+⇒ **The δ¹³C interhemispheric gradient is 1.97× observed** (−0.1314 vs −0.0668 ‰) **and nothing
+notices**: `d13c_gradient` scores **+106** log-units, among the model's best. The gradient streams
+constrain the gradient's **year-to-year variation, not its level**.
+⚠ **This is NOT the silent-gate family.** No gate is broken and no check is blind — **the
+compensator is simply not strained enough to trip anything**, so a prior-z screen can never find it.
+⇒ **For every additive nuisance parameter, print it BESIDE the residual it absorbs.**
+⇒ ⭐ **Cheapest high-value fix in the repo: gate the gradient LEVEL.** Objective, not model.
+
+✅ **WHAT IT GENUINELY MATCHES** — CO₂ seasonal cycle 1.01× @ 0.04 mo (MLO) and 0.98× @ 0.01 mo
+(SPO); CO₂ shape RMS **0.51 / 0.45 ppm** offset-removed; post-bomb Δ¹⁴C RMS **4.1 ‰** (SH);
+ocean sink −0.32σ; GLODAP surface DIC −0.06σ; Quay δ¹³C disequilibrium +1.27σ.
+
+⛔ **WHAT IT MISSES OUTRIGHT.** δ¹³C level **0.14–0.20 ‰ TOO DEPLETED** at both stations with
+RMS ≈ |bias| (a pure offset, and **no free parameter absorbs this one**); SPO δ¹³C seasonal
+amplitude **1.19×**; bomb-spike Δ¹⁴C **RMS 22 ‰, max 53 ‰** over 1955–75 against 4–7 ‰ after 1975;
+land sink **3.29 vs GCB 2.410 ± 0.50** — it passes gate 7 at +0.59σ only on the objective's 3×
+inflated sigma, and is **+1.76σ at GCB's own**; interannual variability 0.77×.
+⇒ ⭐ **The δ¹³C level, the δ¹³C gradient and the SPO δ¹³C seasonal amplitude tell ONE story: too much
+isotopically-light carbon in the NORTH.** Diagnose them together.
+
+⛔⛔ **THE PHYSICS PROBLEMS — four, and three are in the ocean.**
+1. **ENSO→ocean has the wrong sign and a fitted coefficient cancels it** (solubility-only −0.1274,
+   r −0.432; net +0.0532 = **0.46× observed +0.1153**). No tropical box. **Worst defect for a
+   teaching model: right answer, wrong physics.**
+2. **One `tau_ex` cannot serve both the interhemispheric gradient (~1.16 yr) and the bomb lag
+   (~2.3)** — it lands at 0.902 and gate 5's +2.17σ peak miss is what the compromise costs. The
+   recurring pattern: **one scalar serving two things that need different values.**
+3. **Centennial ocean CAPACITY is short**: IRF(100) 0.276 vs Joos 0.409 **while** the present-day
+   ocean sink (−0.32σ) and surface DIC (−0.06σ) are right and the tail SHAPE is inside the band.
+   That combination localises it to interior buffering, not uptake rate or surface carbonate.
+   ⚠ A reported difference against another MODEL, so a research question — the hypothesis is owed.
+4. **`sst_seas_amp_NH` at −3.91σ**, the worst prior violation, **with no mechanism to relieve it**:
+   the SH's identical strain went −5.14 → +0.24 once it was given the entrainment channel, and the
+   NH has no twin. ⚠ `q10` at −2.24 is the second strained one, and it too is SHARED.
+
+⚠ **NOT CONSTRAINED AT ALL**: no law-derived gate anywhere (Revelle and Henry's law both unbuilt);
+the seasonal land limb (gate S covers the ocean limb only, and its observed target retired today);
+`obs_d14c_station_validation`, the Eide δ¹³C Suess profile and the MOD17 global NPP level, all held
+and read by nothing; the ocean anthropogenic-C inventory and atmospheric O₂/APO, absent entirely.
+
 ## 2026-09-04h — THE SIGNATURE INVERSION NO LONGER RUNS AT THE CANONICAL MODE, AND MY OWN 09-04g LAND-LIMB CLAIM IS RETRACTED
 
 Tier 1 of `notes/assessment_2026-09-04_public_readiness.md`, worked. Suite unchanged 1757/0/0/4.
