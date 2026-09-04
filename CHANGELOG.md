@@ -2,6 +2,68 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04b — the kz guard rail becomes a test against the OBSERVATION
+
+**Marcus's ruling, and it generalises: "the only tests that matter are the ones against
+observations or physics."** `kz` is not directly observed; the deep-ocean Δ¹⁴C is.
+
+⛔ **REMOVED `expect_lte(CCX_PARAM_TABLE$kz$hi, 7000)`** (test-likelihood.R). It had been failing
+since the 09-01 re-bisection moved `kz$hi` to 8109.9, and the reason it failed is that it was never
+a test of the model: it bounded the SUPPORT OF A LATENT PARAMETER and justified itself by naming
+"the observed −150 to −200", which `R/calibrate.R`'s own header records as **an uncited
+recollection**, on the bottom THREE boxes rather than the bottom box the likelihood scores. The
+09-01 work replaced it with GLODAPv2's sourced **−175.26 ± 10.259 ‰** — which is precisely why
+`kz$hi` moved past 7000. The assertion was failing against a number the project had already retired.
+⚠ **And it had no power either way**: at `ent26`, `kz` = 6356, BELOW the 7000 it bounded.
+
+✅ **REPLACED by the observable**: the model's bottom-box Δ¹⁴C must sit within 2σ of
+`ccx_deep_d14c_target()` (read, never retyped). Measured at `ent26`: **−156.15 ‰ vs −175.26 ± 10.26,
+z = +1.86 — INSIDE, but on the young/better-ventilated side and not comfortably so** (~450 m²/yr of
+`kz` of margin). That thinness is information: the model really does sit near the edge of the
+observation.
+
+⭐ **MUTATION-TESTED ACROSS `kz`, and the table says something the bracket does not:**
+
+| kz | 4379.1 | 5000 | 6356.2 | 7000 | 8109.9 | 10686 |
+|---|---|---|---|---|---|---|
+| deep Δ¹⁴C | −196.94 | −181.05 | −156.14 | −147.41 | −135.36 | −116.49 |
+| z | −2.11 | −0.57 | **+1.86** | +2.71 | +3.89 | +5.73 |
+| verdict | FAIL | PASS | **PASS (mode)** | FAIL | FAIL | FAIL |
+
+It fails at the runaway that motivated the original bound (10,686, z +5.73) — the mutation that
+matters. ⚠ **And it fails at BOTH ENDPOINTS of the shipped bracket [4379.1, 8109.9].** Not a
+contradiction — a prior SUPPORT is not a 2σ interval, and the bisection recipe never claimed to be
+one — but the retired comment's promise, "the range that keeps deep-ocean D14C inside the observed
+range", was **not literally true at the bracket's own edges**. The observationally admissible window
+at 2σ is roughly `kz` ∈ (4400, 6800); the fit lands at 6356.
+
+**KEPT**: `expect_identical(kz$tr, "logit")` and `expect_lt(kz$hi, 10686)` — the latter is a
+different KIND of claim, an ORDERING against a MEASURED runaway rather than a threshold anyone chose.
+
+## ⛔ CORRECTION TO THE 2026-09-04 ENTRY ABOVE: the suite counts omitted ERRORS
+
+`as.data.frame(test_dir(...))$failed` counts FAILURES and **not ERRORS**, so "1719 pass / 1 fail /
+4 skip" understated the state. **The true post-adoption count is 1720 pass / 1 fail / 2 ERRORS /
+4 skip** (3 problems, against the handoff's 10).
+
+⇒ **Adoption cleared TWO of the four 09-03 encoder failures, not all four.**
+`test-enso-split.R:236` and `test-seas-lag-split.R:150` went green; **`test-seas-lag-split.R:174`
+and `test-enso-demean.R:105` still ERROR.** Same root cause in both: they migrate a **pre-26
+ancestor** and then ENCODE it, and `ent_seas_amp_SH = 0` has no image under `tr = "log"`. VERIFIED
+untouched by the adoption — they read `refit_20260830_gamma_diff_remap/` and
+`multistart_20260901_enso25/`, neither of which moved. ⚠ The 09-03 ruling was that nothing would
+encode a pre-26 ancestor once a 26-par mode was adopted; these two still do, so the ruling implies
+an edit to them that has NOT been made. **AWAITING A RULING; not modified.**
+
+⚠ **AND ONE MORE, WHICH IS THE MACHINE AND NOT THE CODE:** `test-parity.R:235` failed once —
+"the C++ core is fast enough for MCMC", `el < 0.05` s. It is a WALL-CLOCK BUDGET, not a parity or
+physics assertion. Measured 15 times: **median 0.0490 s against the 0.05 s budget, 7 of 15 over.**
+The test sits on its own threshold and is ~50/50 by construction. It passed in both earlier suite
+runs today at load ~3; it failed at **load 11.85 on 10 cores**, with a concurrent
+`slr-refresh-2025` pymagicc/MAGICC job (not ours) running 6+ processes. **NOT widened** — a
+performance gate that measures the machine rather than the code is worth a decision, not a bigger
+number.
+
 ## 2026-09-04 — THE 26-PARAMETER MODE IS ADOPTED: `ent26` is `CCX_MODE_CANONICAL`
 
 **The refit results were never pulled off Torch.** `calibration/output/multistart_20260903_ent26/`

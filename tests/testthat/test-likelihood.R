@@ -431,6 +431,57 @@ test_that("the seasonal statistic constrains amplitude and phase", {
   expect_gt(lp[2], lp[3])
 })
 
+test_that("the deep ocean is where GLODAP puts it -- the OBSERVABLE kz stands in for", {
+  # ⭐ THE REPLACEMENT FOR THE RETIRED `kz$hi <= 7000` (2026-09-04). The project
+  # cares that the model's deep water is as old as the ocean's actually is; `kz`
+  # is only the knob that gets it there, and bounding a knob is not testing that.
+  # This asserts the thing itself, at the CANONICAL mode, against the SOURCED
+  # target the likelihood scores -- GLODAPv2, bottom box 2627.2-3700 m.
+  #
+  # ⚠ THE TOLERANCE IS THE TARGET'S OWN SIGMA, not a chosen number, and the
+  # target is READ from ccx_deep_d14c_target() rather than retyped -- retyping is
+  # exactly how the "-150 to -200" recollection outlived its own evidence
+  # ([[derived_must_mean_computed]]).
+  # Harmonised with GATE 5/7/Q/G/S's DG_*_NSD, named here rather than typed twice.
+  CCX_DEEP_D14C_NSD <- 2
+  skip_if_no_cpp()
+  tg <- ccx_deep_d14c_target()
+  skip_if(is.null(tg), "no sourced deep-D14C target on this install")
+  md <- readRDS(ccx_mode_file())
+  p  <- ccx_overlay_par(ccx_default_params(), md$par_mode)
+  p$pump_mode <- md$pump_mode
+  deep <- ccx_spinup(p)$diagnostics$d14c_bottom_box
+  expect_true(is.finite(deep))
+  z <- (deep - tg$target) / tg$sd
+  # ⚠ MEASURED +1.86 at `ent26` on 2026-09-04: INSIDE, but on the young/
+  # better-ventilated side and NOT comfortably so -- the margin to the bound is
+  # about 450 m2/yr of `kz`. That thinness is information, not a nuisance: the
+  # model really does sit near the edge of the observation.
+  #
+  # ⭐ MUTATION-TESTED ACROSS `kz`, and the table is worth keeping because it says
+  # something the bracket does not:
+  #
+  #     kz      4379.1   5000    6356.2    7000    8109.9   10686
+  #     deep    -196.94 -181.05  -156.14  -147.41 -135.36  -116.49
+  #     z        -2.11   -0.57    +1.86    +2.71   +3.89    +5.73
+  #     verdict  FAIL    PASS   PASS(mode)  FAIL    FAIL     FAIL
+  #
+  # It fails at the runaway that motivated the original bound (10,686, z +5.73),
+  # which is the mutation that matters. ⚠ AND IT FAILS AT BOTH ENDPOINTS OF THE
+  # SHIPPED BRACKET [4379.1, 8109.9]. That is not a contradiction -- a prior
+  # SUPPORT is not a 2-sigma confidence interval, and the 09-01 bisection recipe
+  # never claimed to be one -- but it does mean the retired comment's promise,
+  # "the range that keeps deep-ocean D14C inside the observed range", was not
+  # literally true at the bracket's own edges. The observationally admissible
+  # window at 2 sigma is roughly kz in (4400, 6800); the fit lands at 6356.
+  # expect_true(), not expect_lt(): only the former carries `info`, and a bare
+  # "2.13 is not less than 2" would send the next reader to re-derive the numbers
+  # this failure is entirely about.
+  expect_true(abs(z) < CCX_DEEP_D14C_NSD,
+              info = sprintf("deep-ocean D14C %.2f permil vs GLODAP %.2f +/- %.2f (z %+.2f)",
+                             deep, tg$target, tg$sd, z))
+})
+
 test_that("rho is gone and the parameter vector is self-consistent", {
   expect_false("rho" %in% CCX_PARAM_NAMES)
   # 17 -> 16 on 2026-08-12 (Marcus): the land layout is STRUCTURE, not calibrated.
@@ -580,23 +631,39 @@ test_that("rho is gone and the parameter vector is self-consistent", {
               "npp_leaf_frac", "litter_slow_frac"))
     expect_false(n %in% CCX_PARAM_NAMES, info = n)
 
-  # DECISION 2: kz is BOUNDED to the range that keeps deep-ocean D14C inside the
-  # observed -150 to -200. Unbounded it ran to 10,686 (deep -129.9). The bounds are
-  # bisected values, so assert the transform is actually a bounded one -- a silent
-  # revert to tr = "log" would restore the runaway with no other visible symptom.
+  # DECISION 2: kz is BOUNDED, because unbounded it ran to 10,686 and put the
+  # deep ocean at -129.9 permil. The bounds are bisected values, so assert the
+  # transform is actually a bounded one -- a silent revert to tr = "log" would
+  # restore the runaway with no other visible symptom.
   expect_identical(CCX_PARAM_TABLE$kz$tr, "logit")
-  # RE-BISECTED 2026-08-16e for the pump: [3830, 6200] -> [3942.5, 6528], the
-  # same recipe re-run on the model that ships (calibration/diag_kz_bracket_pump.R;
-  # the pump-OFF control reproduces the old numbers to 1.3 m2/yr). Asserted as a
-  # BAND rather than as the exact pair, because the bisection has a 0.5 m2/yr
-  # tolerance and the point of this line is that the bracket is bounded and
-  # roughly where the deep-D14C observation puts it -- not to re-type the
-  # bisection's output, which is R/calibrate.R's job.
+  # =================================================================
+  # ⛔ `expect_lte(CCX_PARAM_TABLE$kz$hi, 7000)` STOOD HERE AND IS REMOVED
+  # (2026-09-04, Marcus's ruling). It had been failing since the 2026-09-01
+  # re-bisection moved `kz$hi` to 8109.9, and the reason it failed is that it was
+  # never a test of the model.
+  #
+  # ⭐ THE RULING, AND IT GENERALISES: "the only tests that matter are the ones
+  # against observations or physics." `kz` is NOT directly observed. The
+  # deep-ocean Delta14C IS. This line bounded the SUPPORT OF A LATENT PARAMETER
+  # and justified itself by naming an observation -- "the range that keeps
+  # deep-ocean D14C inside the observed -150 to -200" -- which R/calibrate.R's
+  # own header records as AN UNCITED RECOLLECTION, and on the bottom THREE boxes
+  # rather than the bottom box the likelihood actually scores. The 09-01
+  # re-bisection replaced it with GLODAPv2's sourced -175.26 +/- 10.259 permil,
+  # which is precisely WHY `kz$hi` moved past 7000. So the assertion was failing
+  # against a number the project had already retired.
+  #
+  # ⚠ AND IT COULD NOT HAVE CAUGHT ANYTHING: measured at the adopted `ent26`
+  # mode, `kz` is 6356 -- BELOW the 7000 it bounded -- while the observable it
+  # invoked sits at z = +1.86, inside 2 sigma. A gate on the bracket's ceiling
+  # cannot fail when the fit does, and cannot pass when the fit is wrong
+  # [[no_power_null]]. What replaces it is the observation itself, below.
+  # =================================================================
   expect_gte(CCX_PARAM_TABLE$kz$lo, 3500)
-  expect_lte(CCX_PARAM_TABLE$kz$hi, 7000)
-  # ...and the bracket must still EXCLUDE the unbounded runaway that motivated
-  # it (kz = 10,686, deep -129.9). Without this the band above could be widened
-  # into uselessness one re-bisection at a time.
+  # The bracket must still EXCLUDE the unbounded runaway that motivated it
+  # (kz = 10,686, deep -129.9). ⭐ THIS ONE STAYS, and it is a different KIND of
+  # claim: an ORDERING against a MEASURED runaway, not a threshold anyone chose
+  # ([[gate_bound_matches_its_claim]], [[threshold_from_obs_or_law]]).
   expect_lt(CCX_PARAM_TABLE$kz$hi, 10686)
   expect_equal(CCX_PARAM_TABLE$kz$init,
                mean(c(CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi)),
