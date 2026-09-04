@@ -2,6 +2,63 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04h — THE SIGNATURE INVERSION NO LONGER RUNS AT THE CANONICAL MODE, AND MY OWN 09-04g LAND-LIMB CLAIM IS RETRACTED
+
+Tier 1 of `notes/assessment_2026-09-04_public_readiness.md`, worked. Suite unchanged 1757/0/0/4.
+
+⛔⛔ **`diag_seas_signature_inversion.R` ERRORS AT `CCX_MODE_CANONICAL`** (`Error: sO < 0 is not
+TRUE`). Its own antiphase gate — a channel's δ¹³C vector must lie within 1.0 month of antiphase to
+its CO₂ vector for the signature to be a signed SCALAR — **drops all four ocean channels** (off by
+5.58, 5.46, 1.44, 1.49 mo), leaving `s_O = NaN` from n = 0.
+⭐ **THE CAUSE IS ISOLATED, NOT GUESSED.** `alpha_as_tdep = 0` (the bit-exact pre-09-02 model)
+restores it — two channels pass at 0.25 / 0.41 mo, **s_O −0.00461, separation 10.2×** — and
+**reproduces the registered interval exactly**: SPO obs ocean **8.52 [7.83, 9.20]** against the
+registered [7.82, 9.20], obs land **0.681 @ 9.30** against the registered 0.683 / 9.29.
+⇒ **The 2026-09-02 temperature-dependent air-sea ¹³C alphas falsified the inversion's ocean
+premise — and that is PHYSICS, not a bug**: a fractionation that varies with seasonal SST makes the
+ocean limb's isotopic signature ROTATE over the year, so it is no longer a signed scalar.
+⚠ Even at `tdep = 0` the two SH ocean channels now fail (3.30, 2.99 mo) and `s_O` rests on the NH
+pair alone, n = 2 — the method was already degrading before it broke.
+
+⇒ **WHAT THIS COSTS.** The four `SPO_SEAS_*_INV` constants — including **GATE S's target** — are now
+**PROVENANCE, not reproducible targets**; a reader who re-runs the named script gets an error.
+⭐⭐ **The 09-04g pCO₂ corroboration is therefore LOAD-BEARING, not a nicety**: the SOM-FFN bracket
+[7.41, 10.41] is the ONLY live support for 8.52. Gate S survives on it — but only because that work
+happened to be done first.
+⚠⚠ **Nothing noticed for two days, and GATE S WAS BUILT ON 09-03 — after the premise broke on
+09-02 — on a number the inversion could no longer produce.** The suite is green because this is a
+DIAGNOSTIC, not a test. ⇒ **a constant's provenance script belongs in the suite, at minimum as a
+"does it still run" smoke test.**
+
+🐛 **AND A SECOND BUG IN THE SAME FILE, FIXED.** `p0$ent_seas_amp_SH <- Sys.getenv("CCX_ENT_AMP",
+"0")` was **UNCONDITIONAL**, so it overwrote the FITTED value **19.029 with 0 on every run** while
+the banner printed the canonical mode's filename. The comment justifying it — *"`ent_seas_amp_SH` is
+NOT in CCX_PARAM_TABLE and so is NOT in the mode file"* — **went stale on 2026-09-03**, when the
+parameter became fitted (25 → 26 params). The mode's value is now used unless `CCX_ENT_AMP` is set,
+an override is ANNOUNCED, and a guard errors if a fitted parameter arrives absent. Mutation-tested
+both ways. ⇒ `default_off_hides_the_bug`.
+
+⛔ **AND I RETRACT MY OWN 09-04g CLAIM, MADE EARLIER THE SAME DAY.** The assessment said *"the SPO
+land limb is 1.683× observed and 1.90 months late, and 56 % of the seasonal amplitude cancels."*
+**That compared `SL_CASES$SH_land` — an ORIGIN split, SH-land only — against
+`SPO_SEAS_AMP_LAND_INV`, a TYPE split covering ALL land by δ¹³C signature.** Three different things
+are called "the land limb". The 56 % cancellation is real but belongs to the ORIGIN split, where an
+antiphase `NH_origin` limb cancels against SH — **interhemispheric transport, not the land/ocean
+partition the pedagogical claim rests on.**
+
+✅ **LIKE-FOR-LIKE AT `ent26`, and the partition is much better than the record says:**
+
+| SPO limb | model | observed (95 % bootstrap) | ratio | phase err | inside? |
+|---|---|---|---|---|---|
+| **land** | 0.7153 @ 8.86 | 0.681 [0.479, 0.905] @ 9.30 [8.78, 9.77] | **1.05×** | −0.44 mo | ✅ both |
+| **ocean** | 0.4046 @ 9.17 | 0.524 [0.309, 0.728] @ 8.52 [7.83, 9.20] | **0.77×** | +0.65 mo | ✅ both |
+| total | 1.1513 @ 9.03 | 1.168 @ 9.01 | 0.98× | +0.02 mo | — |
+
+⭐ **The limbs ADD, they do not cancel**: scalar sum 1.1199 vs vector total 1.1513 = **−3 %**.
+⭐ **δ¹³C-per-ppm agrees**: **MLO 0.97× / SPO 1.21×** at `ent26`, against the recorded **1.53× /
+2.54×**. ⚠ The observed intervals are WIDE (±30 % on amplitude), so this is a **weak pass, not a
+tight one** — but it is the opposite of an excess, and **"gate L" is not the priority I claimed.**
+
 ## 2026-09-04g — GATE S's TARGET IS CORROBORATED BY AN INDEPENDENT OBSERVATION, AND FIX B IS PRICED
 
 Handoff `notes/handoff_2026-09-04_gate_audit.md` §8 item 1 — the top of the open list, and the one

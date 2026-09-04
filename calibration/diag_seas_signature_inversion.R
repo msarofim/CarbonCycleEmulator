@@ -40,6 +40,7 @@
 # Usage:  Rscript calibration/diag_seas_signature_inversion.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+if (!exists("%||%")) `%||%` <- function(a, b) if (is.null(a)) b else a
 ccx_load_cpp()
 
 SI_YEARS  <- c(1750, 2024)
@@ -74,22 +75,46 @@ p0 <- ccx_default_params(); for (n in names(md$par_mode)) p0[[n]] <- md$par_mode
 p0$pump_mode <- md$pump_mode
 
 # ---- THE SOUTHERN-OCEAN ENTRAINMENT CHANNEL (2026-08-27g) -------------
-# `ent_seas_amp_SH` is NOT in CCX_PARAM_TABLE and so is NOT in the mode file --
-# deliberately, because adding it would change the calibrated vector's length
-# and invalidate the stored mode and its Hessian. It therefore defaults to 0
-# here and this script reproduces the pre-channel inversion EXACTLY unless it
-# is asked for otherwise.
+# 🐛 FIXED 2026-09-04g. This block used to read:
 #
-# Set CCX_ENT_AMP to run the inversion with the channel on. That is how P3 and
-# P4 of prereg 27g are scored: the inversion is the diagnostic that states the
-# result in the form the problem was posed in, and its MLO control (P7 below)
-# is the gate that says the inversion is still readable AT THAT AMPLITUDE --
-# which is not something a run at amplitude 0 can certify.
+#     `ent_seas_amp_SH` is NOT in CCX_PARAM_TABLE and so is NOT in the mode
+#     file -- deliberately... It therefore defaults to 0 here.
+#     SI_ENT_AMP <- as.numeric(Sys.getenv("CCX_ENT_AMP", "0"))
+#     p0$ent_seas_amp_SH <- SI_ENT_AMP
 #
-#   CCX_ENT_AMP=10 Rscript calibration/diag_seas_signature_inversion.R
-SI_ENT_AMP <- as.numeric(Sys.getenv("CCX_ENT_AMP", "0"))
-stopifnot(is.finite(SI_ENT_AMP), SI_ENT_AMP >= 0)
-p0$ent_seas_amp_SH <- SI_ENT_AMP
+# ⛔ THAT COMMENT WENT STALE ON 2026-09-03 AND THE ASSIGNMENT BECAME A BUG.
+# `ent_seas_amp_SH` entered CCX_PARAM_TABLE that day (25 -> 26 parameters) and
+# IS in the canonical mode file, at 19.029. The unconditional assignment then
+# OVERWROTE a fitted parameter with 0 on every run, so this script reported the
+# PRE-CHANNEL model while its own banner printed the canonical mode's filename.
+# It is the script that PRODUCED the registered SPO_SEAS_* constants, so the
+# blast radius is every ratio quoted against them.
+# ⇒ [[default_off_hides_the_bug]]: a mechanism defaulted OFF is untested where
+# it matters, and a capability comment goes stale silently.
+#
+# THE CONTRACT NOW. The mode's own value is used unless CCX_ENT_AMP is set;
+# setting it is an EXPLICIT override and is announced. An unset env var can no
+# longer silently disable a calibrated mechanism.
+#
+#   CCX_ENT_AMP=0  Rscript ...   # the pre-27g inversion, ON PURPOSE
+#   CCX_ENT_AMP=10 Rscript ...   # prereg 27g's P3/P4 amplitude scan
+.si_ent_env <- Sys.getenv("CCX_ENT_AMP", "")
+if (nzchar(.si_ent_env)) {
+  SI_ENT_AMP <- as.numeric(.si_ent_env)
+  stopifnot(is.finite(SI_ENT_AMP), SI_ENT_AMP >= 0)
+  cat(sprintf("CCX_ENT_AMP OVERRIDE: ent_seas_amp_SH %g -> %g (the MODE's value is being replaced)\n",
+              p0$ent_seas_amp_SH %||% 0, SI_ENT_AMP))
+  p0$ent_seas_amp_SH <- SI_ENT_AMP
+} else {
+  # GATE: if the parameter is fitted, the mode MUST have supplied it. A NULL
+  # here would fall through to 0 and restore exactly the bug above.
+  if ("ent_seas_amp_SH" %in% names(CCX_PARAM_TABLE) &&
+      !is.finite(p0$ent_seas_amp_SH %||% NA_real_))
+    stop("ent_seas_amp_SH is FITTED but absent from the resolved parameter set: ",
+         "the mode was not applied, and defaulting it to 0 would silently ",
+         "disable a calibrated mechanism.")
+  SI_ENT_AMP <- p0$ent_seas_amp_SH
+}
 
 # ---- PARAMETER OVERRIDES, for scoring a REFITTED vector --------------
 # The channel is only half of what a refit produces: the other half is where
