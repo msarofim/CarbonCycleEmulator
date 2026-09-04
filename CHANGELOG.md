@@ -2,6 +2,85 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04e — THE GATE SET, AUDITED: 4/8/10 RETIRED, GATE V ADDED, GATE 12 DEMOTED
+
+Marcus's rule, applied to the whole set: **every test must compare an observed variable — including
+measures of interannual variability and other second-order observations — or a physical law, against
+the model.** Note `notes/diag_2026-09-04_gate_set_audit_and_gateV.md`.
+
+⛔ **GATE 4 RETIRED.** Its quantity is a GCB observation, so it passes the rule as WORDED; it fails
+what the rule is FOR. Its numerator is a scored stream and its denominator a model input, and the one
+signal it had — the 2020s — reappears in `co2_level_MLO` at **mean z −0.96, max |z| 1.63**, the
+largest decadal excursion in that stream's record: same sign, same size, already in the objective.
+The AF is still COMPUTED and PRINTED; `dg_gate4_verdict()` now ERRORS with the reason.
+
+⭐⭐ **GATE V ADDED — the interannual CO₂ growth variability**, the second-order observation gate 4
+was reaching for, where it IS resolved (66 annual values, not 7 decadal ones). Estimator identical
+both sides (`grow = AF(y)·emis + eps`, AF a natural spline); the gate is `sd(eps)`. ⭐ **The bound is
+DERIVED FROM THE OBSERVATION**: the sampling error of an sd, `sd/sqrt(2(n−1))` = **0.080 GtC/yr**,
+MC-validated to three decimals; two-sided at `DG_V_NSD` = 2. **Nothing in the objective asks for it**
+— `co2_level_*` scores levels at a soft 1.0 ppm.
+
+| | sd GtC/yr | ratio | z |
+|---|---|---|---|
+| GCB 2025 | 0.911 ± 0.080 | 1.00 | — |
+| defaults | 0.638 | 0.70 | −3.42 |
+| **ent26** | 0.698 | 0.77 | **−2.67 FAIL** |
+
+⭐ **AND THE KNOCKOUT DECOMPOSITION MAKES IT ACTIONABLE** (`diag_gateV_variability_drivers.R`, 5 runs
+in 0.5 s). Variance lost when each driver Marcus named is removed — temperature SMOOTHED with an
+11-yr centred mean rather than held, so the trend survives: **TEMPERATURE (`gmst` + `sst_anom_*`)
+−47.8 %, ENSO (land + ocean) −66.3 %, VOLCANIC (AOD → diffuse light) −6.1 %, all three −92.6 %.**
+⚠ Singles sum to 0.586 against the joint 0.451 — the difference is INTERACTION, printed not hidden.
+⇒ **The named drivers would have to supply 1.76× their present combined variance to close gate V**,
+and ENSO is the largest share — with the ENSO OCEAN response already on record as ANTI-correlated
+with observed (r −0.51 vs +0.535). **Gate V points at Fix B.**
+
+☀ **AND A SOLAR CYCLE WOULD NOT HELP — three independent grounds.** (1) **It is already in the
+model**: CCX is driven with the OBSERVED GMST, which carries whatever the solar cycle did to
+temperature — the same argument `R/forcing.R` already makes for volcanic cooling; a solar→T term
+DOUBLE-COUNTS, and the only non-redundant addition is a direct irradiance→photosynthesis MECHANISM.
+(2) **The observations show no significant cycle**: best-fitting period in 9–13 yr is **9.4 yr, not
+11**, amplitude 0.477 GtC/yr — but a white-noise null searched over the SAME band has median 0.316
+and 95 % 0.502, so it sits at the **93rd percentile**. (3) **Too small either way**: it carries
+0.114 of the 0.343 (GtC/yr)² needed, **33 %**. ⚠ **Power stated**: the test detects any harmonic
+above ~15 % of the observed variance and cannot rule out smaller ones — on ~6 cycles that is the
+honest null.
+
+⛔ **GATES 8 AND 10 RETIRED, neither replaced.** Gate 8 differenced two station-years that
+`d13c_level_MLO/SPO` score EVERY year of, then re-judged them at a typed 0.10 ‰ with no derivation.
+Gate 10 is the clearest case in the set: its own header said its target AND sigma came from
+"the LIKELIHOOD's own accessor, so this gate cannot drift from the stream that scores it" — **a gate
+tied to the stream it checks cannot fail independently of the optimiser.** ⚠ What is LOST is written
+into the retirement block: both were the only places certain quantities were PRINTED beside their
+targets. Bring back the print, never the verdict.
+🐛 **And `diag_design_gates_unscored.R`'s summary could not run at all** — `cn` was the typed literal
+`"from90"`, quarantined 09-04, so every lookup indexed a NULL. Now `CCX_MODE_CANONICAL`. **Gate 6
+PASSES at ent26** (growth +19.4 % vs observed +15.6 %).
+
+⚠ **GATE 12 / 12a / 12b → A POST-MODEL COMPARISON, NOT A STRICT TEST** (Marcus): *"we don't
+necessarily expect to meet it, the long lifetime should be an emergent behavior."* Joos 2013 is
+another MODEL, and **no observation constrains a CO₂ perturbation lifetime** — ¹⁴C measures tracer
+transport and the two are ~2.8× apart at 100 yr. Still computed, still printed against Joos's ranges
+with inside/BELOW/ABOVE; **nothing scored, gated, or chased in a refit.**
+⛔⛔ **CONSEQUENCE: P5 IS NO LONGER "FALSIFIED."** IRF(100) = 0.276 is now a REPORTED DIFFERENCE about
+where the emergent lifetime sits. Every record saying "P5 FALSIFIED" predates this ruling.
+The strict assertion in `test-pulse.R` — |model − Joos|/Joos < **0.40**, a typed band against another
+model, evaluated at `ccx_default_params()` rather than the fitted mode — is GONE; what remains
+asserted there is only what is ours (the protocol's precondition, IRF ∈ (0,1), and decay).
+`test-joos-irf.R` keeps EVERY assertion, because none of them is about our model: the
+single-exponential locus is parameter-free ALGEBRA and the rest are properties of the REFERENCE.
+
+⇒ **STILL OPEN, and now the top of the list.** **GATE S IS CIRCULAR** — its target is an SPO
+observation inverted through the model's own signatures, all six constants `status = "provisional"`,
+and the independent check its own source names is the **MPI SOM-FFN surface-ocean pCO₂ climatology
+already on disk**, used only to bracket `sst_seas_amp`. That same product is the Fix B pre-test.
+Untested observations we HAVE: `obs_d14c_station_validation` (160 points, built as a held-out
+validation set, used by nothing), the Eide ocean δ¹³C Suess depth profile, the MOD17 GLOBAL NPP
+level. Not in the repo at all: the ocean **anthropogenic carbon inventory** (¹⁴C measures
+ventilation, not buffer capacity, and gate 12a's verdict is an ocean-CAPACITY defect) and
+**atmospheric O₂/APO**.
+
 ## 2026-09-04d — GATE 4 HAS NO POWER: the "smoother than the defaults" reading is a TREND artifact
 
 Open decision 1 of the adoption handoff was gate 4 — *"why did the AF decadal spread get SMOOTHER?

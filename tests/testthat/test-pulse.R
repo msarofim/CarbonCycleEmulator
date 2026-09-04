@@ -151,7 +151,9 @@ test_that("the airborne fraction depends on the background -- Revelle saturation
 #
 # IF THIS EVER TIGHTENS, tighten it because the model improved -- re-derive from
 # diag_joos_irf.R part 2 AT THE ADOPTED MODE, never from wherever code lands.
-JOOS_POINT_TOL <- 0.40
+# ⛔ RETIRED 2026-09-04 with the strict Joos assertion it served: a typed 40 %
+# band against another model, with no derivation. Kept as provenance only.
+JOOS_POINT_TOL_RETIRED <- 0.40
 
 # The PD100 background: historical spin-up to JOOS_REF_YEAR, then emissions
 # diagnosed to hold CO2 constant. This is diag_joos_irf.R's construction, using
@@ -178,24 +180,35 @@ pd100_irf <- function() {
        target = attr(F_hold, "target"))
 }
 
-test_that("the airborne fraction matches Joos et al. (2013) at Joos's own protocol", {
+test_that("the pulse IRF obeys its own protocol and stays inside (0, 1), decaying", {
+  # ⭐⭐ RULED 2026-09-04 (Marcus): THE COMPARISON WITH JOOS IS NO LONGER A TEST.
+  # This block used to assert |model - Joos| / Joos < JOOS_POINT_TOL at 20/50/100
+  # yr. That was a strict test against ANOTHER MODEL at a hand-picked 40 % band,
+  # evaluated at ccx_default_params() rather than at the fitted mode -- and the
+  # long lifetime is meant to be EMERGENT, not something the model is held to.
+  # See R/joos_irf.R's STATUS block. The Joos numbers are still COMPUTED and
+  # REPORTED here (and fully in calibration/diag_joos_irf.R); what is ASSERTED is
+  # only what is ours: the protocol's own precondition, and the two properties
+  # any impulse response into a sink system must have.
   skip_if_no_cpp()
   o <- pd100_irf()
 
   # THE PROTOCOL'S OWN PRECONDITION. Every number below is meaningless if the
-  # background is not actually held, so gate it before reading the IRF. The
+  # background is not actually held, so check it before reading the IRF. The
   # diagnosed emissions hold ~388 ppm to ~1.1 ppm, i.e. 0.3 %.
   expect_lt(o$dev / o$target, 0.01)
   expect_gt(o$target, 370); expect_lt(o$target, 400)   # Joos's PD100 is 389 ppm
 
   at <- function(h) o$irf[which.min(abs(o$t - h))]
-  for (h in JOOS_TH) {
-    ref <- joos_irf(h)
-    expect_lt(abs(at(h) - ref) / ref, JOOS_POINT_TOL,
-              label = sprintf("IRF@%d yr = %.3f vs Joos %.3f", h, at(h), ref))
-  }
-  # ... and it must decay, which no tolerance band would catch on its own.
+  # LAW, not calibration: a positive pulse into a system with sinks keeps a
+  # positive but shrinking airborne fraction. Neither bound involves Joos.
+  for (h in JOOS_TH) { expect_gt(at(h), 0); expect_lt(at(h), 1) }
   expect_lt(at(100), at(20))
+
+  # REPORTED, NOT ASSERTED -- so the comparison stays visible in the suite log.
+  message(sprintf("  [comparison, not a test] IRF %s | Joos %s",
+                  paste(sprintf("%d yr %.3f", JOOS_TH, vapply(JOOS_TH, at, 0)), collapse = ", "),
+                  paste(sprintf("%.3f", vapply(JOOS_TH, joos_irf, 0)), collapse = ", ")))
 })
 
 test_that("a pulse warms, and the warming outlives the century", {

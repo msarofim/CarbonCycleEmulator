@@ -170,25 +170,44 @@ DG_GtC_PER_PPM <- ccx_const("GtC_PER_PPM")
 #     and Henry's-law solubility.
 # =====================================================================
 DG_LEDGER <- list(
-  list(id = "4", what = "airborne fraction 1959-2024",
+  list(id = "4", what = "airborne fraction 1959-2024 -- ⛔ RETIRED 2026-09-04",
        class = "OBSERVATION", src = "GCB 2025",
-       bound = paste("ORDERING, no threshold (2026-09-02):",
+       bound = paste("NONE. The verdict is GONE; the AF is still PRINTED.",
          "
-            sd(model decadal AF) >= sd(GCB decadal AF). The gate's own",
+            `dg_gate4_verdict()` ERRORS with DG_G4_RETIRED."),
+       scored = "YES, and that is why it went: numerator = a scored stream,",
+       power  = paste("⛔ NONE, MEASURED [[ccx_gate4_no_power]]. Its 2020s signal",
          "
-            stated claim is 'must not be SMOOTHER than this', and an",
+            reappears in co2_level_MLO at mean z -0.96 / max |z| 1.63;",
          "
-            ordering gets no threshold. ⚠ The AF LEVEL stays UNBOUNDED",
+            70 % of its target's variance was sampling noise; and its",
          "
-            on purpose -- see POWER."),
-       scored = "YES (CO2 growth is fitted; emissions are inputs)",
-       power  = paste("~NONE on the LEVEL -- near-algebraic in quantities the fit",
+            sd() ranked the UNCALIBRATED DEFAULTS above the adopted",
          "
-            already matches, so a bound there would test the optimiser.",
+            mode because it cannot tell a drift from a wiggle.",
          "
-            REAL on the VARIABILITY: nothing in the objective asks the",
+            ⇒ REPLACED BY GATE V.")),
+  list(id = "V", what = "interannual CO2 growth variability 1959-2024",
+       class = "OBSERVATION", src = "GCB 2025 annual budget",
+       bound = paste("DISTRIBUTIONAL, |z| <= DG_V_NSD (2), TWO-SIDED, against",
          "
-            decadal AF to vary, and the model is currently too smooth.")),
+            the OBSERVED sd's OWN sampling error sd/sqrt(2(n-1)) =",
+         "
+            0.080 GtC/yr -- derived from the observation, not chosen,",
+         "
+            and MC-validated to three decimals."),
+       scored = "NO. co2_level_* scores LEVELS at a soft 1.0 ppm sigma; nothing",
+       power  = paste("REAL, and it is the only gate that tests a SECOND-ORDER",
+         "
+            observation. ent26 reads -2.67 sigma (0.698 vs 0.911",
+         "
+            GtC/yr), defaults -3.42. The model's variability should",
+         "
+            come from observed TEMPERATURE, VOLCANIC AOD via diffuse",
+         "
+            light, and the ENSO land+ocean links -- all already wired,",
+         "
+            so this bounds their COMBINED amplitude.")),
   list(id = "5", what = "bomb 14C peak, hemispheric lag, e-fold",
        class = "OBSERVATION", src = "Hua et al. 2022, hemispheric aggregate",
        bound = paste("TWO KINDS (2026-09-02). ORDERINGS, no threshold:",
@@ -646,19 +665,101 @@ dg_gate7_verdict <- function(g7, tgt) {
 # ([[gate_bound_matches_its_claim]]).
 # =====================================================================
 
-# ---- GATE 4: an ORDERING, so it gets NO THRESHOLD -------------------
-# The gate's own stated test is "the model must not be SMOOTHER than this": its
-# decadal airborne fraction must vary at least as much as GCB's does. That is an
-# ORDERING between two MEASURED quantities, and the rule for an ordering is that
-# it gets no threshold at all -- inventing one here would be choosing the physics.
-# ⚠ THE AF *LEVEL* DELIBERATELY STAYS UNBOUNDED. It is near-algebraic in
-# quantities the objective already fits (atmospheric growth is a scored stream and
-# emissions are inputs), so a bound on it would test the optimiser, not the model.
-# The ledger says so; this is that sentence turned into code.
-DG_G4_CLAIM <- "sd(model decadal AF) >= sd(observed decadal AF) -- an ORDERING"
-dg_gate4_verdict <- function(g4) {
-  sm <- stats::sd(g4$dec); so <- stats::sd(DG_AF_OBS_DEC)
-  list(sd_model = sm, sd_obs = so, ratio = sm / so, pass = sm >= so)
+# =====================================================================
+# ⛔⛔ GATE 4 IS RETIRED (2026-09-04, Marcus). IT IS NOW A PRINTED COMPARISON.
+#
+# `dg_gate4()` still computes the airborne fraction and callers still print it --
+# the LEVEL is a useful sanity number (0.4246 model vs 0.4313 GCB). What is gone
+# is the VERDICT, and the reason is not that the source was wrong. The AF is a
+# GCB observation. The reason is that the gate carried no information the
+# objective did not already have, and reported it through a statistic that cannot
+# be read [[ccx_gate4_no_power]]:
+#
+#   * ITS NUMERATOR IS A SCORED STREAM AND ITS DENOMINATOR IS A MODEL INPUT.
+#     AF = model atmospheric growth / model emissions. Emissions are prescribed;
+#     growth is what `co2_level_MLO/SPO` scores. Measured, the one signal gate 4
+#     had -- the 2020s -- appears in `co2_level_MLO` at MLO 2020-24 mean z -0.96,
+#     max |z| 1.63, the largest decadal excursion in that stream's record. Same
+#     sign, same size, already in the objective.
+#   * 70 % OF ITS TARGET'S VARIANCE WAS SAMPLING NOISE. Observed decadal spread
+#     0.0483 against a per-decade noise floor of 0.0404 (analytic, MC-validated).
+#   * AND sd() OVER SEVEN DECADES CANNOT TELL A DRIFT FROM A WIGGLE, so the gate
+#     ranked the UNCALIBRATED DEFAULTS above the adopted mode; detrended, the two
+#     arms are identical (0.617 vs 0.613).
+#
+# ⇒ REPLACED BY GATE V BELOW, which tests the second-order observation gate 4 was
+# reaching for -- the interannual variability itself -- where it IS resolved.
+DG_G4_RETIRED <- paste(
+  "GATE 4 (airborne fraction) was RETIRED 2026-09-04: its numerator is a scored",
+  "stream and its denominator a model input, so it restated `co2_level`; 70 % of",
+  "its target was sampling noise; and its sd() conflated a trend with a wiggle.",
+  "The AF is still PRINTED. The variability claim it was reaching for is GATE V.")
+dg_gate4_verdict <- function(g4) stop(DG_G4_RETIRED, call. = FALSE)
+
+# =====================================================================
+# ⭐ GATE V: THE INTERANNUAL CO2 GROWTH VARIABILITY (2026-09-04, Marcus)
+#
+# WHAT IT IS. The model must reproduce the OBSERVED year-to-year variability of
+# atmospheric CO2 growth, not merely its trend. That is a second-order
+# observation, it is resolved (66 annual values, not 7 decadal ones), and NOTHING
+# in the objective asks for it: `co2_level_*` scores LEVELS at a deliberately soft
+# 1.0 ppm, which the year-to-year anomaly barely moves. The variability gap has
+# been a recorded finding with no test since 2026-08-29 [[ccx_variability_gap]];
+# this is that finding turned into a gate.
+#
+# THE ESTIMATOR, APPLIED IDENTICALLY TO MODEL AND OBSERVATION. Regress annual
+# atmospheric growth on emissions with a smoothly time-varying airborne fraction,
+#     grow_y = AF(y) * emis_y + eps_y,   AF(y) a natural spline of DG_V_DF dof,
+# and take sd(eps). The smooth part is the decadal signal; `eps` is the
+# interannual anomaly in GtC/yr. ⚠ DG_V_DF IS A SMOOTHING CHOICE, so the
+# diagnostic WALKS it: obs 0.907-0.933 and the arms 0.627-0.698 across df 2-5,
+# i.e. the verdict does not turn on it.
+#
+# THE BOUND IS DERIVED FROM THE OBSERVATION ITSELF, not chosen. The sampling
+# error of an sd on n independent draws is sd / sqrt(2(n-1)) -- 0.080 GtC/yr here
+# -- and a matched Monte Carlo returns 0.080 to three decimals. So the gate is a
+# DISTRIBUTIONAL claim at the observation's own sigma, |z| <= DG_V_NSD, two-sided:
+# too MUCH interannual variance is as wrong as too little.
+# ⚠ The observed anomaly is white (lag-1 rho +0.014), which is what makes
+# sqrt(2(n-1)) the right denominator; the MODEL's is not (rho +0.19 to +0.26), and
+# that inflates the model's own sampling error rather than the bound's. Stated
+# because it means a model arm sitting just inside the bound is not thereby safe.
+#
+# WHAT SHOULD DRIVE IT, IN THE MODEL (Marcus 2026-09-04): observed TEMPERATURE
+# variability, VOLCANIC AEROSOL (the AOD -> diffuse-light -> NPP path), and the
+# direct ENSO links to land and ocean uptake. All three are already wired, so the
+# gate is a claim about their COMBINED amplitude, and
+# `diag_gateV_variability_drivers.R` decomposes it by knockout.
+DG_V_WIN <- DG_AF_WIN     # 1959-2024: where GCB's annual budget exists
+DG_V_DF  <- 3             # dof of the smooth AF(t) the anomaly is taken about
+DG_V_NSD <- 2             # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_S_NSD
+DG_V_CLAIM <- paste("|sd(model interannual growth anomaly) - sd(observed)| <=",
+                    "DG_V_NSD x the OBSERVED sd's own sampling error")
+
+#' The interannual growth anomaly of an annual series, in GtC/yr.
+dg_v_anom <- function(a, df = DG_V_DF, win = DG_V_WIN) {
+  k <- a$year >= win[1] & a$year <= win[2]
+  yr <- a$year[k]; gr <- a$grow[k]; em <- (a$foss + a$luc)[k]
+  stats::residuals(stats::lm(gr ~ 0 + em + I(em * splines::ns(yr, df = df))))
+}
+
+dg_gateV <- function(r, df = DG_V_DF) {
+  e <- dg_v_anom(dg_af_annual_model(r), df = df)
+  list(sd = stats::sd(e), rho = stats::acf(e, plot = FALSE, lag.max = 1)$acf[2],
+       n = length(e), df = df)
+}
+
+dg_gateV_obs <- function(df = DG_V_DF) {
+  e <- dg_v_anom(DG_AF_OBS_ANNUAL, df = df)
+  n <- length(e); sd <- stats::sd(e)
+  list(sd = sd, se = sd / sqrt(2 * (n - 1)), n = n,
+       rho = stats::acf(e, plot = FALSE, lag.max = 1)$acf[2], df = df)
+}
+
+dg_gateV_verdict <- function(gv, ov) {
+  z <- (gv$sd - ov$sd) / ov$se
+  list(sd_model = gv$sd, sd_obs = ov$sd, se_obs = ov$se,
+       ratio = gv$sd / ov$sd, z = z, pass = abs(z) <= DG_V_NSD)
 }
 
 # ---- GATE 5: a DISTRIBUTIONAL claim, so it needs a SIGMA ------------

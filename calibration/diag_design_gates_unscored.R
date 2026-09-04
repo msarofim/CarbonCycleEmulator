@@ -48,18 +48,10 @@ DGU_G6_GROW_CHK<- 0.02        # the two OBSERVED routes must agree on GROWTH thi
 # model -- to compare. The gate itself is then taken on GROWTH, which is the
 # quantity DESIGN's gate sentence actually tests and which survives the estimator
 # change. [[derive_gate_from_the_thing]] [[amp_definition_mismatch]]
-# ---- GATE 8, DESIGN sec.6: d13C Suess endpoints.
-DGU_G8_PI_D13C <- ccx_const("D13C_PI")     # -6.469, Law Dome 1745-1755
-DGU_G8_PI_CO2  <- ccx_const("CO2_PI_PPM")  # 276.88, same source = spinup target
-DGU_G8_PI_WIN  <- c(1745, 1755)
-DGU_G8_ENDS    <- list(MLO = list(yr = 2024, target = -8.700),
-                       SPO = list(yr = 2024, target = -8.580))
-DGU_G8_STARTS  <- list(MLO = list(yr = 1980, target = -7.600),
-                       SPO = list(yr = 1977, target = -7.490))
-DGU_G8_TOL     <- 0.10        # per mil, on the SUESS DECLINE (see note at print)
-# ---- GATE 10: GLODAPv2.2023 deep box; target + sigma from the LIKELIHOOD's own
-# ---- accessor, so this gate cannot drift from the stream that scores it.
-DGU_G10_BRACKET_HALF <- 28.4  # permil, the kz bracket as a hard box (likelihood.R:498)
+# ---- GATES 8 AND 10 ARE RETIRED (2026-09-04). Their constants are kept here as
+# ---- PROVENANCE ONLY -- nothing reads them; see the retirement block below.
+DGU_G8_RETIRED  <- "GATE 8 retired 2026-09-04: a restatement of d13c_level_MLO/SPO at a typed 0.10 per mil."
+DGU_G10_RETIRED <- "GATE 10 retired 2026-09-04: target AND sigma came from the likelihood's own accessor, so it could not fail independently."
 # ---- GATE 11: suspicious-uniformity screen thresholds.
 DGU_G11_SIGN <- 0.95          # |fraction same sign| above this = flag
 DGU_G11_R2   <- 0.90          # R^2 of residual ~ year above this = flag
@@ -190,48 +182,37 @@ for (nm in names(R)) {
 cat(sprintf("\n  GATE: growth >= %.0f %% across the record, PRODUCED not prescribed (obs %+.1f %%).\n",
             100 * DGU_G6_GROWTH, 100 * (o_ptt[["2010s"]] / o_ptt[["1960s"]] - 1)))
 
-sep("GATE 8 -- d13C SUESS ENDPOINTS")
-cat("  ⚠ The model's station d13C carries a FITTED representation offset (`rep_dC`,\n")
-cat("  prior_z +3.38) and the gradient offsets. The DECLINE is offset-free; the LEVEL\n")
-cat("  is not. Both are printed and only the DECLINE is gated.\n\n")
-at_year <- function(o, col, yr) { k <- o$t >= yr & o$t < yr + 1; if (!any(k)) NA else mean(o[[col]][k]) }
-pi_of   <- function(o, col) { k <- o$t >= DGU_G8_PI_WIN[1] & o$t < DGU_G8_PI_WIN[2]; mean(o[[col]][k]) }
-cat(sprintf("  %-10s | %8s %8s | %8s %8s | %9s %9s | %s\n", "vector", "PI d13C", "(obs)",
-            "PI CO2", "(obs)", "MLO decl", "SPO decl", "verdict"))
-o_decl <- c(MLO = DGU_G8_ENDS$MLO$target - DGU_G8_PI_D13C,
-            SPO = DGU_G8_ENDS$SPO$target - DGU_G8_PI_D13C)
-cat(sprintf("  %-10s | %8.3f %8s | %8.2f %8s | %9.3f %9.3f |\n", "OBSERVED",
-            DGU_G8_PI_D13C, "", DGU_G8_PI_CO2, "", o_decl[["MLO"]], o_decl[["SPO"]]))
-g8 <- list()
-for (nm in names(R)) {
-  o <- R[[nm]]$out
-  pid <- pi_of(o, "d13c_NH"); pic <- pi_of(o, "co2_NH")
-  dm <- at_year(o, "d13c_NH", DGU_G8_ENDS$MLO$yr) - pid
-  ds <- at_year(o, "d13c_SH", DGU_G8_ENDS$SPO$yr) - pi_of(o, "d13c_SH")
-  pass <- abs(dm - o_decl[["MLO"]]) <= DGU_G8_TOL && abs(ds - o_decl[["SPO"]]) <= DGU_G8_TOL
-  g8[[nm]] <- list(pi_d13c = pid, pi_co2 = pic, decl = c(MLO = dm, SPO = ds), pass = pass)
-  cat(sprintf("  %-10s | %8.3f %+8.3f | %8.2f %+8.2f | %9.3f %9.3f | %s\n", nm, pid,
-              pid - DGU_G8_PI_D13C, pic, pic - DGU_G8_PI_CO2, dm, ds,
-              if (pass) "PASS" else "FAIL"))
-}
-cat(sprintf("\n  GATE: |modelled - observed Suess decline| <= %.2f per mil at BOTH stations.\n",
-            DGU_G8_TOL))
-
-sep("GATE 10 -- NATURAL DEEP-OCEAN D14C (GLODAPv2.2023 bottom box)")
-tg <- ccx_deep_d14c_target()
-cat(sprintf("  target from the likelihood's OWN accessor: %.1f permil, sigma %.1f\n",
-            tg$target, tg$sd))
-cat(sprintf("  %-10s | %10s %8s | %s\n", "vector", "bottom box", "z", "verdict"))
-g10 <- list()
-for (nm in names(R)) {
-  v <- R[[nm]]$sp$diagnostics$d14c_bottom_box; z <- (v - tg$target) / tg$sd
-  inb <- abs(v - tg$target) <= DGU_G10_BRACKET_HALF
-  g10[[nm]] <- list(value = v, z = z, in_bracket = inb, pass = abs(z) <= 1)
-  cat(sprintf("  %-10s | %10.1f %+8.2f | %s (kz bracket half-width %.1f: %s)\n", nm, v, z,
-              if (abs(z) <= 1) "PASS" else "FAIL", DGU_G10_BRACKET_HALF,
-              if (inb) "inside" else "OUTSIDE"))
-}
-cat("  ⚠ This is the SPINUP (preindustrial) value -- the gate is the NATURAL profile.\n")
+# =====================================================================
+# ⛔⛔ GATES 8 AND 10 ARE RETIRED (2026-09-04, Marcus). NEITHER IS REPLACED.
+#
+# Both were OBSERVATIONAL in source and both were RESTATEMENTS of a stream the
+# objective already scores, so neither could tell us anything the fit had not
+# already been asked for -- the "SCORED?" column of DG_LEDGER turned into a
+# decision [[ccx_gate4_no_power]].
+#
+#   GATE 8 (d13C SUESS ENDPOINTS) took the modelled minus preindustrial d13C
+#   decline at MLO 2024 and SPO 2024 against Scripps/Law Dome. Those exact
+#   station-years are inside `d13c_level_MLO` and `d13c_level_SPO`, which score
+#   EVERY year of the same records; differencing two of them and re-checking the
+#   result at a hand-picked 0.10 per mil (DGU_G8_TOL, a typed round number with no
+#   derivation) re-judges a fitted stream at a tolerance nobody derived.
+#
+#   GATE 10 (NATURAL DEEP-OCEAN D14C) is the clearest case in the set: its own
+#   header said the target AND the sigma came from `ccx_deep_d14c_target()`, "the
+#   LIKELIHOOD's own accessor, so this gate cannot drift from the stream that
+#   scores it". A gate deliberately tied to the stream it checks CANNOT FAIL
+#   INDEPENDENTLY of the optimiser -- it reports that the fit ran. The
+#   observation itself is not lost: `d14c_deep_ocean` scores it, and
+#   `test-likelihood.R` bounds `kz` THROUGH it (2026-09-04, the ruling that
+#   replaced the kz bracket with the observable).
+#
+# ⚠ WHAT IS LOST, SAID OUT LOUD. Gate 8 was the only place the PREINDUSTRIAL
+# d13C and CO2 levels were printed beside their targets for every arm; gate 10
+# was the only place the spinup's bottom-box D14C was printed beside the kz
+# bracket. Both are DIAGNOSTIC prints, not tests, and both quantities remain
+# available (`sp$diagnostics`, `ccx_deep_d14c_target()`). If a future session
+# wants them back, bring back the PRINT, not the verdict.
+# =====================================================================
 
 sep("GATE 11 -- SUSPICIOUS-UNIFORMITY SCREEN on annual residuals")
 cat("  Screens model-minus-observed for the two bug signatures in the standing\n")
@@ -268,15 +249,16 @@ cat("  ⚠ A flag here is a SIGNAL TO INVESTIGATE, not a verdict: a genuine, alr
 cat("  diagnosed level bias will trip ALL-SAME-SIGN legitimately.\n")
 
 sep("SUMMARY at the canonical mode")
-cn <- "from90"
+# ⛔ `cn` WAS THE TYPED LITERAL "from90" -- an arm QUARANTINED on 2026-09-04, so
+# every g6/g8/g10/g11 lookup below indexed a NULL and this summary could not run
+# at all. THE LABEL DERIVES FROM THE CONSTANT, which is the rule this same file
+# already states at `vecs` and which was applied there and not here.
+cn <- CCX_MODE_CANONICAL
 cat(sprintf("  gate  6 (MLO seasonal growth)  %s   growth %+.1f %% vs observed %+.1f %%\n",
             if (g6[[cn]]$pass) "PASS" else "FAIL", 100 * (g6[[cn]]$growth - 1),
             100 * (o_ptt[["2010s"]] / o_ptt[["1960s"]] - 1)))
-cat(sprintf("  gate  8 (d13C Suess decline)   %s   MLO %.3f / SPO %.3f vs %.3f / %.3f\n",
-            if (g8[[cn]]$pass) "PASS" else "FAIL", g8[[cn]]$decl[["MLO"]], g8[[cn]]$decl[["SPO"]],
-            o_decl[["MLO"]], o_decl[["SPO"]]))
-cat(sprintf("  gate 10 (deep natural D14C)    %s   %.1f permil, z %+.2f\n",
-            if (g10[[cn]]$pass) "PASS" else "FAIL", g10[[cn]]$value, g10[[cn]]$z))
+cat(sprintf("  gate  8 (d13C Suess decline)   ⛔ %s\n", DGU_G8_RETIRED))
+cat(sprintf("  gate 10 (deep natural D14C)    ⛔ %s\n", DGU_G10_RETIRED))
 fl <- unlist(lapply(g11[grep(paste0("^", cn), names(g11))], function(x) length(x$flag) > 0))
 cat(sprintf("  gate 11 (uniformity screen)    %s   %d of %d series flagged\n",
             if (!any(fl)) "CLEAN" else "FLAGS", sum(fl), length(fl)))
@@ -284,6 +266,6 @@ cat(sprintf("  gate 11 (uniformity screen)    %s   %d of %d series flagged\n",
 OUTDIR <- ccx_path("outputs", "diagnostics")
 dir.create(OUTDIR, recursive = TRUE, showWarnings = FALSE)
 saveRDS(list(g6 = g6, g6_obs = o_ptt, g6_obs_scripps = o_scr, g6_design = DGU_G6_DESIGN, g6_estimator_ok = ok6,
-             g8 = g8, g8_obs_decline = o_decl, g10 = g10, g10_target = tg, g11 = g11),
+             g8 = DGU_G8_RETIRED, g10 = DGU_G10_RETIRED, g11 = g11),
         file.path(OUTDIR, "design_gates_unscored.rds"))
 cat(sprintf("\nwritten: %s\n\n\n=== DONE ===\n", file.path(OUTDIR, "design_gates_unscored.rds")))

@@ -1,6 +1,14 @@
 
 # =====================================================================
-# GATE 12b -- the tail ratio (added 2026-08-25). See DESIGN sec.6 gate 12b.
+# THE TAIL RATIO (was gate 12b, added 2026-08-25). See DESIGN sec.6 gate 12b.
+#
+# ⭐ STATUS 2026-09-04 (Marcus): the Joos comparison is NOT a strict test of this
+# model -- see R/joos_irf.R's STATUS block. EVERYTHING ASSERTED IN THIS FILE IS
+# STILL A STRICT CLAIM, because none of it is about our model: the
+# single-exponential locus is parameter-free ALGEBRA, and the rest are properties
+# of the REFERENCE (Joos's own published fit) and of the ESTIMATOR applied to it.
+# That is exactly the part worth keeping -- it is what makes the reported
+# comparison mean anything at all.
 # =====================================================================
 
 test_that("the single-exponential null is exact and parameter-free", {
@@ -18,7 +26,7 @@ test_that("the single-exponential null is exact and parameter-free", {
   }
 })
 
-test_that("the gate REJECTS every single exponential and ACCEPTS Joos", {
+test_that("the REFERENCE band rejects every single exponential and contains Joos", {
   expect_gt(JOOS_TAIL_REF, JOOS_TAIL_BAND[1])
   expect_lt(JOOS_TAIL_REF, JOOS_TAIL_BAND[2])
   # mutation: no one-box model, at any time constant, can reach the floor
@@ -40,7 +48,7 @@ test_that("joos_tail_ratio() uses the same estimator on any series", {
   expect_equal(joos_tail_ratio(tt, f(tt)), f(300) / f(100), tolerance = 1e-6)
 })
 
-test_that("a very long single exponential still fails, so the gate is not a speed test", {
+test_that("a very long single exponential still sits outside, so the statistic is not a speed test", {
   # tau = 1e4 makes IRF(100) = 0.990 and IRF(300) = 0.970 -- a ratio of 0.980,
   # which is INSIDE the band. That is correct and worth pinning: the gate tests
   # the SHAPE at a given decay level, so it cannot reject a model that barely

@@ -1,0 +1,54 @@
+ARM: refit_20260903_ent26 (logpost -1446.76)
+OBS: sd 0.911 GtC/yr, se 0.080, n 66, lag-1 rho +0.014
+
+==========================================================================
+A. THE KNOCKOUT DECOMPOSITION
+==========================================================================
+  5 runs in 0.5 s
+
+  case              sd GtC/yr  z vs obs  variance lost
+  all drivers on        0.698     -2.67            --
+  no TEMPERATURE        0.505     -5.09       -47.8 %
+  no VOLCANIC           0.677     -2.93        -6.1 %
+  no ENSO               0.405     -6.33       -66.3 %
+  none of them          0.190     -9.02       -92.6 %
+
+  ⇒ driver-free residual 0.190 = 7 % of the run's variance;
+    the three named drivers together supply 93 % of it.
+    single-knockout variances sum to 0.586 against the 0.451 the
+    all-off run says: the difference IS the interaction, not an error.
+
+  THE GAP TO CLOSE: obs var 0.830 - model var 0.488 = 0.343 (GtC/yr)^2,
+    i.e. the named drivers would have to supply 1.76x their present
+    combined variance for gate V to close at this residual.
+
+==========================================================================
+B. IS THE ESTIMATOR STABLE? (the smoothing is a CHOICE)
+==========================================================================
+  series             df=2  df=3  df=4  df=5
+  GCB 2025           0.933  0.911  0.910  0.907
+
+==========================================================================
+C. WOULD AN OBSERVED SOLAR CYCLE HELP? -- ASKED OF THE OBSERVATIONS FIRST
+==========================================================================
+  1. THE SOLAR CYCLE'S TEMPERATURE SIGNATURE IS ALREADY IN THE MODEL.
+     CCX is driven with the OBSERVED GMST record, which contains whatever
+     the solar cycle did to temperature -- exactly the argument R/forcing.R
+     :979-988 already makes for volcanic cooling. A solar -> temperature
+     term would DOUBLE-COUNT. The only non-redundant addition would be a
+     DIRECT irradiance -> photosynthesis path, the solar analogue of
+     `gamma_diff` -- and that is a new mechanism, not a new forcing column.
+
+  2. BEST-FITTING PERIOD in 9-13 yr: 9.4 yr, amplitude 0.477 GtC/yr
+     = 52.4 % of the anomaly's sd (0.911), i.e. 13.7 % of its VARIANCE.
+     WHITE-NOISE NULL over the same band: median 0.316, 95% 0.502
+     ⇒ observed 0.477 sits at the 93th percentile of the null.
+  3. FOR SCALE: closing gate V needs 0.343 (GtC/yr)^2 of extra variance;
+     a harmonic of the observed amplitude carries 0.114, i.e. 33 % of it.
+  4. POWER: the 95% null cut is 0.502 GtC/yr, so this test DETECTS any
+     harmonic in the band above that amplitude -- 15 % of the observed
+     variance -- and CANNOT rule out smaller ones. On 66 years (~6.0
+     cycles) that is the honest statement: a solar cycle big enough to matter
+     for gate V would have shown; one too small to matter might not have.
+
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/gateV_variability_drivers/gateV_variability_drivers.rds

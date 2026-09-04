@@ -29,8 +29,13 @@ v <- list(p = p, pm = pm, luc_scale = pm$luc_scale, bomb_total = pm$bomb_total,
 cat(sprintf("\n=== GATES AT %s ===\n", v$src))
 r <- dg_run(v)
 
-g4 <- dg_gate4(r, v);  cat("\n-- GATE 4 (airborne fraction) --\n")
-print(dg_gate4_verdict(g4))
+g4 <- dg_gate4(r, v)
+cat("\n-- GATE 4 (airborne fraction): RETIRED 2026-09-04, REPORTED ONLY --\n")
+cat(sprintf("   %s\n", DG_G4_RETIRED))
+cat(sprintf("   AF %.4f vs GCB %.4f;  decadal sd %.4f vs %.4f\n",
+            g4$all, DG_AF_OBS, stats::sd(g4$dec), stats::sd(DG_AF_OBS_DEC)))
+cat("\n-- GATE V (interannual CO2 growth variability) --\n")
+print(dg_gateV_verdict(dg_gateV(r), dg_gateV_obs()))
 g5 <- dg_gate5(r); ob <- dg_obs_gate5(); sp <- dg_obs_gate5_spread()
 cat("\n-- GATE 5 (bomb 14C) --\n"); print(dg_gate5_verdict(g5, ob, sp))
 DG_TGT <- dg_gcb_target(DG_SINK_WIN)

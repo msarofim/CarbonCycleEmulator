@@ -83,7 +83,9 @@
 #
 # USAGE:  Rscript calibration/diag_joos_irf.R [defaults|N|D]      (default: defaults)
 #
-# [E] AT THE SHIPPED MODE, ADDED 2026-08-22 -- AND THE GATE FAILS THERE.
+# [E] AT THE SHIPPED MODE, ADDED 2026-08-22 -- AND THE MODEL SITS BELOW JOOS THERE.
+#     ⚠ Read as a COMPARISON since 2026-09-04 (see R/joos_irf.R's STATUS block);
+#     the word 'fails' below is historical and is not a verdict.
 #     app/global.R has run on mode_fit_pumpN.rds since 8b94ba4 (2026-08-21),
 #     while this file was hardcoded to ccx_default_params(); the 2026-08-22
 #     expert panel ranked that #7 on its merged defect list. Integrated IRF:
@@ -263,7 +265,12 @@ o_pd_shifted <- list(t = irf_t, irf = irf)
 # recorded status has already been stale twice (see DESIGN sec.6 gate 12's own
 # History paragraph). The margin is signed and relative to the FLOOR, since
 # that is the bound the model is near -- it has never been near the ceiling.
-cat("\n=== 3. TIME-INTEGRATED IRF vs JOOS TABLE 4 (yr) ===\n")
+cat("\n=== 3. TIME-INTEGRATED IRF vs JOOS TABLE 4 (yr) -- A COMPARISON ===\n")
+cat("  ⚠ RULED 2026-09-04 (Marcus): this is a POST-MODEL COMPARISON, NOT A GATE.\n")
+cat("    Joos is another MODEL, and no observation constrains a CO2 perturbation\n")
+cat("    lifetime, so the long tail is something the model should EMERGE, not\n")
+cat("    something it should be made to pass. 'inside/BELOW/ABOVE' below is a\n")
+cat("    reading, not a verdict, and nothing here is chased in a refit.\n")
 cat(sprintf("%6s %12s %12s %18s %10s  %s\n", "TH", "this model", "Joos best",
             "Joos 5-95 %", "vs floor", "verdict"))
 for (i in seq_len(nrow(JOOS_T4))) {
@@ -288,7 +295,10 @@ for (i in seq_len(nrow(JOOS_T4))) {
 # IRF(100)^2 EXACTLY, whatever the time constant -- a parameter-free null. A
 # model with a real long tail sits far above its own locus value.
 # ---------------------------------------------------------------------
-cat("\n=== 3b. GATE 12b: THE TAIL, IRF(300)/IRF(100) ===\n")
+cat("\n=== 3b. THE TAIL, IRF(300)/IRF(100) -- A COMPARISON (was gate 12b) ===\n")
+cat("  ⚠ Same status as section 3: reported, not gated. What IS a strict claim\n")
+cat("    here is the single-exponential locus -- parameter-free algebra, and the\n")
+cat("    reason the statistic discriminates at all.\n")
 tail_m  <- joos_tail_ratio(irf_t, irf)
 null_m  <- joos_tail_null(at_yr(irf, irf_t, JOOS_TAIL_TH[1]))
 cat(sprintf("  %-44s %8s %10s %s\n", "", "ratio", "own null", "verdict"))

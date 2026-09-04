@@ -237,10 +237,22 @@ for (a in NB_ORDER)
   cat(sprintf("  %-10s %8.3f %10.3f %8.3f | %s\n", a, G4[[a]]$all, G4[[a]]$all_unscaled,
               abs(G4[[a]]$all - DG_AF_OBS),
               paste(sprintf("%6.2f", G4[[a]]$dec), collapse = "")))
-cat("  DECADAL SPREAD (sd), the 'must not be SMOOTHER than this' test:\n")
+cat(sprintf("  ⛔ %s\n", DG_G4_RETIRED))
+cat("  Decadal spread (sd), REPORTED not judged:\n")
 cat(sprintf("    GCB 2025 %.3f", stats::sd(DG_AF_OBS_DEC)))
 for (a in NB_ORDER) cat(sprintf("   %s %.3f", a, stats::sd(G4[[a]]$dec)))
 cat("\n")
+
+cat(sprintf("\n%s\nGATE V: INTERANNUAL CO2 GROWTH VARIABILITY, %d-%d\n",
+            strrep("-", 74), DG_V_WIN[1], DG_V_WIN[2]))
+NB_OV <- dg_gateV_obs()
+cat(sprintf("  GCB 2025  sd %.3f GtC/yr, se %.3f (n = %d)\n", NB_OV$sd, NB_OV$se, NB_OV$n))
+cat(sprintf("  %-10s %10s %8s %8s  %s\n", "vector", "sd GtC/yr", "ratio", "z", "verdict"))
+for (a in NB_ORDER) {
+  vd <- dg_gateV_verdict(dg_gateV(R[[a]]), NB_OV)
+  cat(sprintf("  %-10s %10.3f %8.2f %8.2f  %s\n", a, vd$sd_model, vd$ratio, vd$z,
+              if (vd$pass) "PASS" else "FAIL (too SMOOTH)"))
+}
 
 cat(sprintf("\n%s\nGATE 5: BOMB CURVE, HEMISPHERIC AGGREGATE (Hua et al. 2022)\n", strrep("-", 74)))
 ob <- dg_obs_gate5()

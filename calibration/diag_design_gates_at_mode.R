@@ -100,17 +100,25 @@ cat(sprintf("%-9s %8.3f %10s | %s\n", "GCB 2025", DG_AF_OBS, "--",
 for (a in DG_ARMS)
   cat(sprintf("%-9s %8.3f %10.3f | %s\n", a, G4[[a]]$all, G4[[a]]$all_unscaled,
               paste(sprintf("%6.2f", G4[[a]]$dec), collapse = "")))
-cat(sprintf("\n  DECADAL SPREAD (sd), the 'must not be SMOOTHER than this' test:\n"))
-cat(sprintf("  BOUND (2026-09-02): %s\n", DG_G4_CLAIM))
-cat(sprintf("  %-9s %10s %10s %8s  %s\n", "arm", "sd model", "sd GCB", "ratio", "verdict"))
+cat(sprintf("\n  ⛔ %s\n", DG_G4_RETIRED))
+cat(sprintf("  Decadal spread (sd), REPORTED not judged:  GCB %.3f", stats::sd(DG_AF_OBS_DEC)))
+for (a in DG_ARMS) cat(sprintf("   %s %.3f", a, stats::sd(G4[[a]]$dec)))
+cat("\n")
+
+cat(sprintf("\n=== GATE V: INTERANNUAL CO2 GROWTH VARIABILITY, %d-%d ===\n",
+            DG_V_WIN[1], DG_V_WIN[2]))
+cat(sprintf("  BOUND: %s\n", DG_V_CLAIM))
+OV <- dg_gateV_obs()
+cat(sprintf("  GCB 2025  sd %.3f GtC/yr, se %.3f (n = %d, lag-1 rho %+.3f)\n",
+            OV$sd, OV$se, OV$n, OV$rho))
+cat(sprintf("  %-9s %10s %8s %8s %9s  %s\n", "arm", "sd GtC/yr", "ratio", "z", "rho", "verdict"))
 for (a in DG_ARMS) {
-  vd <- dg_gate4_verdict(G4[[a]])
-  cat(sprintf("  %-9s %10.3f %10.3f %8.2f  %s\n", a, vd$sd_model, vd$sd_obs,
-              vd$ratio, if (vd$pass) "PASS" else "FAIL (SMOOTHER than GCB)"))
+  gv <- dg_gateV(R[[a]]); vd <- dg_gateV_verdict(gv, OV)
+  cat(sprintf("  %-9s %10.3f %8.2f %8.2f %+9.3f  %s\n", a, vd$sd_model, vd$ratio,
+              vd$z, gv$rho, if (vd$pass) "PASS" else "FAIL (too SMOOTH)"))
 }
-cat("  ⚠ The AF LEVEL above is DELIBERATELY UNBOUNDED: it is near-algebraic in\n")
-cat("    quantities the objective already fits, so a bound would test the\n")
-cat("    optimiser rather than the model. See DG_LEDGER.\n")
+cat("  ⚠ Smoothing is a CHOICE; diag_gateV_variability_drivers.R walks DG_V_DF\n")
+cat("    and decomposes the model's variance by knocking out each driver.\n")
 
 cat("\n=== GATE 5: BOMB CURVE, HEMISPHERIC AGGREGATE (Hua et al. 2022) ===\n")
 ob <- dg_obs_gate5()          # the library's estimator, on the observations

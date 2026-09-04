@@ -25,20 +25,48 @@ skip_if_no_gates <- function() {
   f
 }
 
-test_that("GATE 4's ordering fails a smoother model and passes a rougher one", {
+test_that("GATE 4 is RETIRED, and says so by name rather than scoring", {
   source(skip_if_no_gates(), local = TRUE)
-  so <- stats::sd(DG_AF_OBS_DEC)
-  # The bound is an ORDERING with no threshold, so the mutation is a scale on the
-  # spread about its own mean -- which changes the variability and nothing else.
-  spread <- function(f) {
-    m <- mean(DG_AF_OBS_DEC); list(dec = m + f * (DG_AF_OBS_DEC - m))
-  }
-  expect_false(dg_gate4_verdict(spread(0.5))$pass)   # smoother than GCB -> FAIL
-  expect_true( dg_gate4_verdict(spread(1.5))$pass)   # rougher  than GCB -> PASS
-  # AT the observation it must pass: the claim is ">=", not ">".
-  expect_true( dg_gate4_verdict(spread(1.0))$pass)
-  expect_equal(dg_gate4_verdict(spread(1.0))$ratio, 1)
-  expect_equal(dg_gate4_verdict(spread(1.0))$sd_obs, so)
+  # ⛔ RETIRED 2026-09-04 (Marcus). The ordering this block used to mutation-test
+  # -- sd(model decadal AF) >= sd(GCB decadal AF) -- is gone: its numerator was a
+  # scored stream, its denominator a model input, 70 % of its target's variance
+  # was sampling noise, and sd() over seven decades could not tell a drift from a
+  # wiggle [[ccx_gate4_no_power]]. A retired verdict must ERROR WITH THE REASON,
+  # the way a retired mode name does, not return a plausible number.
+  expect_error(dg_gate4_verdict(list(dec = DG_AF_OBS_DEC)), "RETIRED")
+  # ...and the AF itself is still COMPUTED, because the level is worth printing.
+  expect_equal(length(DG_AF_OBS_DEC), length(DG_AF_DECADES))
+  expect_true(is.function(dg_gate4))
+})
+
+test_that("GATE V's bound is DERIVED from the observation, and fails in BOTH directions", {
+  source(skip_if_no_gates(), local = TRUE)
+  ov <- dg_gateV_obs()
+  # ONE STRICTNESS across the distributional gates.
+  expect_identical(DG_V_NSD, DG_Q_NSD)
+  # THE SIGMA IS THE OBSERVED sd's OWN SAMPLING ERROR, not a chosen tolerance.
+  expect_equal(ov$se, ov$sd / sqrt(2 * (ov$n - 1)))
+  expect_gt(ov$sd, 0); expect_gt(ov$se, 0); expect_gt(ov$n, 50)
+  # ...and that analytic form is VALIDATED AGAINST A MATCHED MONTE CARLO, which
+  # is the standing rule for any analytic se this project acts on.
+  set.seed(20260904)
+  mc <- stats::sd(replicate(2000, stats::sd(stats::rnorm(ov$n, 0, ov$sd))))
+  expect_lt(abs(mc - ov$se) / ov$se, 0.06)
+  # MUTATION, BOTH DIRECTIONS -- the claim is two-sided: too MUCH interannual
+  # variance is as wrong as too little.
+  at <- function(sd) dg_gateV_verdict(list(sd = sd), ov)
+  expect_true( at(ov$sd)$pass); expect_equal(at(ov$sd)$z, 0)
+  expect_true( at(ov$sd - (DG_V_NSD - 0.1) * ov$se)$pass)
+  expect_true( at(ov$sd + (DG_V_NSD - 0.1) * ov$se)$pass)
+  expect_false(at(ov$sd - (DG_V_NSD + 0.5) * ov$se)$pass)   # too SMOOTH
+  expect_false(at(ov$sd + (DG_V_NSD + 0.5) * ov$se)$pass)   # too NOISY
+  # THE OBSERVED ANOMALY IS WHITE, which is what makes sqrt(2(n-1)) the right
+  # denominator. If a GCB vintage change made it autocorrelated, the bound would
+  # be wrong and this must fail rather than let it pass silently.
+  expect_lt(abs(ov$rho), 0.2)
+  # AND THE SMOOTHING IS A CHOICE, so the observed side must not turn on it.
+  sds <- vapply(2:5, function(d) dg_gateV_obs(df = d)$sd, 0)
+  expect_lt(diff(range(sds)) / mean(sds), 0.05)
 })
 
 test_that("GATE 4's observed vector is COMPUTED, and the retired literals were a DIFFERENT estimator", {
@@ -58,9 +86,9 @@ test_that("GATE 4's observed vector is COMPUTED, and the retired literals were a
   #    they round differently, which is the single observation that identified it.
   expect_false(identical(round(dg_af_dec(a, how = "ratio_of_sums")$dec, 2),
                          DG_AF_OBS_DEC_TYPED))
-  # 4. THE BOUND MOVED, and it moved DOWN -- the rounded literals were 6.6 %
-  #    wider than the observations they stood for. Guard the ordering, not the
-  #    number ([[tolerance_scaled_to_spread]]).
+  # 4. The rounded literals were 6.6 % wider than the observations they stood
+  #    for. That WAS the gate's bound until 2026-09-04; the AF is now printed
+  #    rather than judged, so this guards the printed number's provenance.
   expect_lt(stats::sd(DG_AF_OBS_DEC), stats::sd(DG_AF_OBS_DEC_TYPED))
 })
 

@@ -127,6 +127,35 @@ joos_irf <- function(t) JOOS_T5$a0 + colSums(outer(JOOS_T5$a, t, function(a, tt)
                                              exp(-outer(JOOS_T5$tau, t, function(s, tt) tt / s)))
 # Joos et al. 2013 Table 4, time-integrated IRF_CO2 in years, PD100:
 # best estimate from the fit, and the 5-95 % confidence range.
+# =====================================================================
+# ⭐⭐ STATUS, RULED 2026-09-04 (Marcus): GATE 12 / 12a / 12b ARE A POST-MODEL
+# COMPARISON, NOT A STRICT TEST. "We don't necessarily expect to meet it; the
+# long lifetime should be an emergent behavior."
+#
+# WHY. Joos et al. 2013 is ANOTHER MODEL -- a multi-model mean, the last-resort
+# class in the source hierarchy (~/.claude/CLAUDE.md: observation, then law, then
+# another model). Every other gate in this project now rests on an observation or
+# a law; this one cannot, because NO OBSERVATION CONSTRAINS A CO2 PERTURBATION
+# LIFETIME. The bomb-14C record measures tracer transport, not the perturbation:
+# 14C is already inert on this axis and the two are ~2.8x apart at 100 yr
+# [[pulse_label_vs_perturb]]. So the comparison is worth MAKING and is not worth
+# PASSING: a long tail that appears because the model was tuned to Joos's number
+# is not evidence of anything, whereas a long tail that emerges from the ocean
+# carbonate chemistry and the land sink is.
+#
+# ⇒ WHAT THIS CHANGES IN PRACTICE:
+#   * The numbers are still computed and still PRINTED against Joos's ranges,
+#     with "inside / BELOW / ABOVE" -- calibration/diag_joos_irf.R sections 3, 3b.
+#   * NOTHING IS SCORED, GATED, OR CHASED IN A REFIT on this axis.
+#   * ⚠ AND THE PRE-REGISTERED CLAIM P5 IS NO LONGER "FALSIFIED". IRF(100) = 0.276
+#     against Joos's band is now a REPORTED DIFFERENCE -- a statement about where
+#     the model's emergent lifetime sits, not a failed test. Every record that
+#     says "P5 FALSIFIED" predates this ruling.
+#   * The DISCRIMINATION the tail statistic provides is kept and is still
+#     asserted, because it is a property of the ESTIMATOR and the REFERENCE, not
+#     of our model: no single exponential, at any time constant, can reach the
+#     band (test-joos-irf.R).
+# =====================================================================
 JOOS_T4 <- data.frame(
   th   = c(20, 50, 100),
   best = c(14.2, 30.3, 52.4),
