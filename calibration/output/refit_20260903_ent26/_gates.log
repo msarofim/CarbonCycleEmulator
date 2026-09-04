@@ -1,0 +1,249 @@
+
+=== PROVENANCE: stored per-stream logL vs RECOMPUTED at the same par_mode ===
+  arm ent26: stored sum -1415.9 -> recomputed -1415.9  (delta -0.0 over 21 streams)
+    no stream moved by more than 0.05 -- ON TODAY'S OBJECTIVE
+
+  HOW TO READ THIS:
+  * Both arms were fitted AFTER the 2026-08-25f seasonal-NEP isotope fix, so
+    `streams` is the decomposition of that par_mode under the CURRENT
+    objective and every row should reproduce. A non-empty list above is a
+    REGRESSION or a new objective change -- not a known backlog.
+  * THE ARMS ARE LIKE-FOR-LIKE HERE, unlike the pre-fix N-vs-D pair this file
+    used to run: both were fitted in the same 3-arm refit on the same
+    objective. What is NOT comparable is their STORED logpost -- `pin90`
+    carries a near-delta prior on `fert_k` worth +11.6698, so its -1544.50
+    is -1556.17 on the free scale, 11.56 BELOW the canonical mode. Compare
+    the GATES below, not the logposts.
+  * The pre-fix arms N and D are quarantined under
+    output/quarantine/20260825_seas_isotope_rectification/ and are NOT
+    comparable with anything here; ccx_mode_file() refuses them by name.
+
+=== VECTORS UNDER TEST ===
+  defaults  uncalibrated defaults              luc_scale 1.0000  bomb_total 102.00
+  ent26     refit_20260903_ent26 (logpost -1446.76) luc_scale 0.9750  bomb_total 118.27
+  app/global.R ships arm ent26 (ccx_mode_file(), R/paths.R).
+
+=== GATE 4: AIRBORNE FRACTION, 1959-2024 (GCB 2025 = 0.431) ===
+arm             AF   unscaled |   1960s  1970s  1980s  1990s  2000s  2010s  2020s
+GCB 2025     0.431         -- |   0.35  0.43  0.47  0.38  0.42  0.45  0.50
+defaults     0.424      0.424 |   0.35  0.43  0.40  0.41  0.43  0.47  0.45
+ent26        0.425      0.422 |   0.38  0.43  0.40  0.42  0.43  0.46  0.40
+
+  DECADAL SPREAD (sd), the 'must not be SMOOTHER than this' test:
+  BOUND (2026-09-02): sd(model decadal AF) >= sd(observed decadal AF) -- an ORDERING
+  arm         sd model     sd GCB    ratio  verdict
+  defaults       0.039      0.051     0.76  FAIL (SMOOTHER than GCB)
+  ent26          0.025      0.051     0.48  FAIL (SMOOTHER than GCB)
+  ⚠ The AF LEVEL above is DELIBERATELY UNBOUNDED: it is near-algebraic in
+    quantities the objective already fits, so a bound would test the
+    optimiser rather than the model. See DG_LEDGER.
+
+=== GATE 5: BOMB CURVE, HEMISPHERIC AGGREGATE (Hua et al. 2022) ===
+arm          NH peak      NH yr    SH peak      SH yr   lag yr  NH efold
+obs            853.2   1963.708      659.4   1965.042     1.33        NA   DESIGN table
+obs            855.3   1963.676      659.8   1965.016     1.34      15.5   recomputed here
+defaults       802.2   1964.610      603.0   1965.713     1.10      14.6
+ent26          859.4   1964.638      693.0   1965.497     0.86      15.1
+
+  DERIVED SIGMA (leave-one-zone-out on the OBSERVED aggregate; NH 4, SH 3, lag 12 draws):
+    NH peak yr 0.444   SH peak yr 0.338   lag 0.494   NH efold 0.056
+  ⚠ It is the aggregate's sensitivity to its own ZONAL COMPOSITION, not a
+    measurement error on Delta14C, and it rests on few draws. Read it as an
+    order of magnitude for the tolerance.
+
+  arm         z NH yr   z SH yr     z lag | SH after NH  NH > SH       verdict
+  defaults      +2.11     +2.07     -0.48 | ok           ok            FAIL (|z| > 2)
+  ent26         +2.17     +1.42     -0.97 | ok           ok            FAIL (|z| > 2)
+
+=== GATE G: OCEAN DIC LEVEL vs GLODAPv2.2023 ===
+  epoch DERIVED from the bottles: mean 2002.43, median 2003, range 1981-2021 (n = 37394)
+  observed 0-134 m volume-weighted DIC 2047.7 umol/kg (cell sd 76.5, n = 7012)
+  sigma = SE at n_eff = 20 (the convention ruled 2026-08-14 for the
+  deep D14C target, LIK_D14C_DEEP_NEFF -- not a number chosen here).
+
+  arm       surf 1750  surf mod       obs         z |   inventory  vs obs %  verdict
+  defaults     1996.3    2043.2    2028.9     +0.79 |     36404.7    -1.616  PASS
+  ent26        1996.3    2046.7    2047.7     -0.06 |     36905.8    -0.213  PASS
+    [ent26] run to 2002; NH 2038.2 / SH 2053.0; anthropogenic uptake since 1750 +155.7 GtC
+    n_eff SENSITIVITY, because the sigma is a convention and not a measurement:
+      n_eff    5 -> sigma  34.22 umol/kg, z  -0.03  PASS
+      n_eff   20 -> sigma  17.11 umol/kg, z  -0.06  PASS
+      n_eff  100 -> sigma   7.65 umol/kg, z  -0.14  PASS
+      n_eff  500 -> sigma   3.42 umol/kg, z  -0.31  PASS
+  ⚠ THE INVENTORY COLUMN IS REPORTED, NOT BOUNDED. The pump's export field
+    was solved to hold the OBSERVED gradient anchored on the model's own
+    mixed layer, so a bound on the inventory would partly read back what
+    built it. The BOUND is on the surface LEVEL, which nothing that made
+    the model ever saw.
+
+=== GATE Q: AIR-SEA d13C DISEQUILIBRIUM 1995 (Quay et al. 2003 = 0.60 +/- 0.10 permil) ===
+arm              NH        SH       mean     n_sd  verdict
+defaults     +0.830    +0.653    +0.7414     1.41  PASS
+ent26        +0.731    +0.724    +0.7275     1.27  PASS
+  bound is 2 observational sigma (DG_Q_NSD); the alphas are
+  ccx_alpha_as(), Zhang et al. (1995), adopted 2026-09-02 (6263bf6).
+  ⚠ AREA-UNWEIGHTED two-box mean against a global estimate; the hemispheric
+  pair is printed because its spread is comparable to the observational sigma.
+
+=== GATE 7: SINKS 2015-2023 (GCB land 2.410+/-0.50, ocean 3.202+/-0.40; n = 9 yr) ===
+arm             land   (sigma)      ocean   (sigma)  verdict
+defaults        3.54     +0.75       2.63     -1.44  PASS
+ent26           3.29     +0.59       3.07     -0.32  PASS
+  JUDGED at the OBJECTIVE's sigmas (land 1.50, ocean 0.40), |z| <= 2.
+  At GCB's BARE stated sigmas, which is what every pre-2026-09-02 result
+  reported, the same runs read:
+    defaults  land +2.25  ocean -1.44  (sigma 0.50 / 0.40)
+    ent26     land +1.77  ocean -0.32  (sigma 0.50 / 0.40)
+
+  target CHECK: on GCB's published window 2015-2024 this obs series gives
+  land 2.363 / ocean 3.221 against the published 2.36 / 3.22 -- AGREES
+  The window ends at 2023 because the run's last year carries a half-month
+  extrapolation worth 0.65 GtC/yr; see DG_SINK_WIN. Both sides use this window.
+
+  DESIGN sec.6 gate 7's recorded status line is at DEFAULT parameters,
+  2026-08-14: land +2.28 sigma (3.50), ocean -1.52 sigma (2.61).
+
+=== GATE 5 FOLLOW-UP: tau_ex PROFILE at the shipped mode (others FROZEN) ===
+  observed NH->SH bomb lag 1.34 yr; the mode's tau_ex is 0.902 yr
+   tau_ex  bomb lag     co2_grad    d13c_grad   total logL
+    0.600      0.52       -177.8         39.9      -1913.7
+    0.800      0.80        -37.3         98.2      -1460.8
+    0.902      0.86        -14.1        106.1      -1415.9
+    1.400      0.97       -356.1        -50.8      -2192.5
+    2.000      1.07      -1727.1       -618.9      -4662.6
+    3.000      1.81      -6157.1      -2296.3     -11826.9
+
+  THE TWO OBSERVABLES DISAGREE, AND THE GRADIENT WINS BY THREE ORDERS OF
+  MAGNITUDE. The bomb lag rises monotonically with tau_ex and needs roughly
+  2.4 yr to reach the observed 1.34; both gradient streams sit at a sharp
+  INTERIOR optimum at the mode's 0.902 and fall away steeply on both sides.
+  So gate 5's lag miss is a FORCED residual, not an overlooked one -- the
+  model cannot satisfy both interhemispheric constraints with one tau_ex,
+  which makes this a STRUCTURAL finding about the two-box exchange rather
+  than a parameter that has not been tried.
+
+==========================================================================
+THE GATE LEDGER -- source class, bound, and whether the gate has POWER
+==========================================================================
+
+GATE 4 -- airborne fraction 1959-2024
+  class : OBSERVATION
+  source: GCB 2025
+  bound : ORDERING, no threshold (2026-09-02): 
+            sd(model decadal AF) >= sd(GCB decadal AF). The gate's own 
+            stated claim is 'must not be SMOOTHER than this', and an 
+            ordering gets no threshold. ⚠ The AF LEVEL stays UNBOUNDED 
+            on purpose -- see POWER.
+  scored: YES (CO2 growth is fitted; emissions are inputs)
+  POWER : ~NONE on the LEVEL -- near-algebraic in quantities the fit 
+            already matches, so a bound there would test the optimiser. 
+            REAL on the VARIABILITY: nothing in the objective asks the 
+            decadal AF to vary, and the model is currently too smooth.
+
+GATE 5 -- bomb 14C peak, hemispheric lag, e-fold
+  class : OBSERVATION
+  source: Hua et al. 2022, hemispheric aggregate
+  bound : TWO KINDS (2026-09-02). ORDERINGS, no threshold: 
+            SH peaks AFTER NH, NH peak HIGHER than SH -- the bomb source 
+            was northern. DISTRIBUTIONAL: |z| <= DG_G5_NSD on peak times 
+            and lag, against a sigma DERIVED by leave-one-zone-out on the 
+            observed aggregate (Hua publishes none). ⚠ That sigma is the 
+            aggregate's sensitivity to its own zonal composition, not a 
+            measurement error, and rests on few draws.
+  scored: STREAM yes, FUNCTIONAL no (likelihood scores levels)
+  POWER : MODERATE, and the best-sourced gate here: a different 
+            functional of a scored stream. It now HAS a bound.
+
+GATE 7 -- land / ocean sinks 2015-2023
+  class : OBSERVATION + MODEL
+  source: GCB 2025. ⚠ MIXED: the ocean sink is a product of ocean 
+            biogeochemistry MODELS and the land sink is a RESIDUAL of the 
+            budget, so this is not a clean observation.
+  bound : |z| <= DG_G7_NSD (2 since 2026-09-02), against the 
+            OBJECTIVE'S OWN sigmas: land 1.50 = LIK_GCB_LAND_SD x 
+            LIK_LAND_SINK_INFLATE, ocean 0.40 uninflated. ⚠ Until 
+            2026-09-02 it judged land at 0.50, three times stricter than 
+            the fit, which is where its standing FAIL came from.
+  scored: YES -- gcb_land_sink and gcb_ocean_sink are BOTH fitted
+  POWER : STILL NONE out-of-sample -- same streams, same data, and 
+            aligning the sigma does not change that. What it now tests is 
+            whether the optimiser did its job, which is worth stating and 
+            is not worth chasing in a refit.
+
+GATE Q -- air-sea d13C disequilibrium, 1995
+  class : OBSERVATION
+  source: Quay et al. 2003 (0.60 +- 0.10 permil)
+  bound : n_sd <= DG_Q_NSD, a distributional claim on the stated sigma
+  scored: NO -- ocean d13C is scored as a GRADIENT; d13c_level_* are atmospheric
+  POWER : REAL, AND THE ONLY ONE. Nothing constrains absolute 
+            surface-ocean d13C, which is why it caught a 6.4-sigma 
+            wrong-sign error that no stream had ever objected to.
+
+GATE G -- ocean mixed-layer DIC level at the GLODAP epoch
+  class : OBSERVATION
+  source: GLODAPv2.2023, doi:10.25921/z7hc-v261; 
+            Lauvset et al. 2024 ESSD 16:2047. Volume-weighted on the 
+            MODEL's own top layer, at the bottles' own mean year.
+  bound : |z| <= DG_GD_NSD on the SURFACE LEVEL only. ⚠ The column 
+            INVENTORY is reported and NOT bounded: the pump's export was 
+            solved to hold the OBSERVED gradient, so an inventory gate 
+            would partly read back what built it.
+  scored: NO -- the three ocean rows are GRADIENTS with fitted 
+            offsets, d14c_deep_ocean is Delta14C, gcb_ocean_sink is a FLUX. 
+            Nothing that set the model's surface DIC saw this number.
+  POWER : REAL and OUT-OF-SAMPLE, and it LOCALISES: the surface 
+            Revelle factor is a function of surface DIC and alkalinity, so 
+            a level that is right bounds gate 12a's ocean-capacity defect 
+            AWAY from the surface carbonate state. ⚠ Its sigma borrows the 
+            ABYSSAL n_eff = 20, which is conservative at the surface.
+
+GATE S -- SPO seasonal cycle: the OCEAN limb's PHASE
+  class : OBSERVATION
+  source: SPO_SEAS_OCEAN_PHASE_INV = 8.52 months, 95 % CI [7.82, 9.20]. 
+            The observed SPO CO2 and d13C first harmonics, split by the 
+            two-signature inversion (diag_seas_signature_inversion.R). 
+            ⚠ PROVISIONAL: the split uses the model's own d13C 
+            SIGNATURES -- two signed SCALARS. The model's seasonal PHASE 
+            never enters, and the CI is bootstrapped over years CROSSED 
+            WITH the signature spread, so that dependence is inside it.
+  bound : |z| <= DG_S_NSD on the PHASE, against a sigma DERIVED 
+            from the registered CI as (HI - LO) / (2 x 1.96). At NSD = 2 
+            that reproduces [LO, HI] to 0.02 months. ⚠ The limb 
+            AMPLITUDE is REPORTED and NOT bounded: the registered 
+            SPO_SEAS_AMP_OCEAN_INV carries no interval, so no bound is 
+            derivable and inventing one would be choosing a number 
+            after seeing the answer.
+  scored: NO, in the sense that matters. co2_seasonal_SPO IS a 
+            fitted stream -- but it scores the TOTAL, which the model 
+            already matches to ~1 % by cancelling a 2.55x land limb 
+            against a 0.45x ocean one. Nothing scores the PARTITION.
+  POWER : REAL, and it is the gate the seasonal arc was missing: 
+            a 5.17-month limb error survived weeks of fitting because 
+            the matched total has no power over the partition beneath 
+            it. ⚠ The observed ocean phase rests on a pCO2 product, 
+            which omits the seasonality of gas transfer and K0.
+
+GATE 12/12b -- Joos IRF: integrated pulse response, and the tail
+  class : MODEL
+  source: Joos et al. 2013 multi-model mean, vintage 2013. 
+            ⚠ LAST-RESORT source class: a threshold from another model. 
+            Named here rather than discovered. 12b's band is CONSTRUCTED 
+            (Joos publishes no 5-95 % at TH 300) and says so.
+  bound : 12a: Joos published 5-95 %. 12b: constructed band, stated.
+  scored: NO -- the IRF is not a stream
+  POWER : REAL, and 12b carries its OWN in-run mutation test.
+
+  GATE 7's sigmas, computed not quoted: it JUDGES at land 1.50 / ocean 0.40
+    (= LIK_GCB_LAND_SD 0.50 x LIK_LAND_SINK_INFLATE 3.0, and the ocean
+    UNINFLATED at 0.40 -- the objective's own asymmetry). GCB's STATED
+    sigmas, which the report prints beside the target, are 0.50 / 0.40.
+  The distributional gates share one strictness: DG_G5_NSD 2,
+    DG_G7_NSD 2, DG_Q_NSD 2, DG_GD_NSD 2, DG_S_NSD 2.
+  GATE S's sigma is DERIVED, not chosen: (9.20 - 7.82) / (2 x 1.96) = 0.3520 mo,
+    so |z| <= 2 is months [7.816, 9.224] against the registered [7.82, 9.20].
+  ⚠ STILL NO LAW-DERIVED GATE. GATE G (2026-09-02) is OBSERVATIONAL; it
+    puts an observation ON the surface carbonate state, which narrows the
+    hole without closing it. Candidates, none built: carbonate / Revelle
+    consistency, and Henry's-law solubility.
+
+=== GATE 12 is in calibration/diag_joos_irf.R [defaults|ent26] ===
