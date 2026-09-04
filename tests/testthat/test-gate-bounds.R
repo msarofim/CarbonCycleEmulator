@@ -228,6 +228,73 @@ test_that("ccx_overlay_par() refuses to delete a parameter, and repairs the lag"
                NA)   # an EXTRA name in `p` is not a deletion and must be fine
 })
 
+test_that("GATE H bounds the gradient CONTRAST, keeps its CO2 control, and cannot read its own offset", {
+  source(skip_if_no_gates(), local = TRUE)
+  obs <- ccx_prepare_obs()
+  ho  <- dg_gateH_obs(obs)
+
+  # (1) THE TARGET AND THE BOUND ARE BOTH COMPUTED FROM THE OBSERVATIONS, not
+  # typed. If either side is ever re-typed as a literal this fails.
+  expect_equal(ho$co2$mean,  mean(obs$co2_grad$grad[is.finite(obs$co2_grad$grad)]))
+  expect_equal(ho$d13c$mean, mean(obs$d13c_grad$grad[is.finite(obs$d13c_grad$grad)]))
+  expect_equal(ho$co2$se,  ho$co2$sd  / sqrt(ho$co2$n_eff))
+  expect_equal(ho$d13c$se, ho$d13c$sd / sqrt(ho$d13c$n_eff))
+  # n_eff is a CORRECTION, never a licence: it may not exceed n.
+  expect_lte(ho$co2$n_eff,  ho$co2$n)
+  expect_lte(ho$d13c$n_eff, ho$d13c$n)
+  expect_identical(DG_H_NSD, DG_Q_NSD)   # one strictness across the family
+
+  # (2) ⭐ THE MUTATION THAT MATTERS. The gate exists because a FITTED OFFSET
+  # absorbs the d13C gradient error. Feed it a model whose d13C gradient is the
+  # OBSERVED one -- i.e. the error the offset hides, removed -- and the contrast
+  # must collapse to the CO2 arm's own miss and PASS. If it does not, the gate
+  # is not measuring what it claims.
+  g_ok <- list(co2 = ho$co2$mean, d13c = ho$d13c$mean)
+  v_ok <- dg_gateH_verdict(g_ok, ho)
+  expect_equal(v_ok$R_co2, 1); expect_equal(v_ok$R_d13c, 1)
+  expect_equal(v_ok$d, 0); expect_true(v_ok$pass)
+
+  # (3) ⭐⭐ AND IT MUST FAIL ON THE REAL DEFECT. A d13C gradient 1.97x observed
+  # with the CO2 gradient at 0.91x is the measured state at ent26; the contrast
+  # must reject it, and reject it in the POSITIVE direction (d13C too steep
+  # RELATIVE to CO2), not by some other route.
+  g_bad <- list(co2 = 0.913 * ho$co2$mean, d13c = 1.969 * ho$d13c$mean)
+  v_bad <- dg_gateH_verdict(g_bad, ho)
+  expect_false(v_bad$pass)
+  expect_gt(v_bad$z, DG_H_NSD)
+  expect_gt(v_bad$z, 5)          # it is a ~6.5 sigma miss, not a marginal one
+
+  # (4) ⭐ A COMMON TRANSPORT ERROR MUST CANCEL. That is the gate's whole
+  # premise: scale BOTH gradients by the same factor and the contrast must not
+  # move. If this ever fails, the gate has started charging transport errors to
+  # the isotopes and its verdict means something else.
+  for (k in c(0.7, 0.85, 1.15, 1.4)) {
+    vk <- dg_gateH_verdict(list(co2 = k * ho$co2$mean, d13c = k * ho$d13c$mean), ho)
+    expect_true(vk$pass, info = paste("common scaling", k))
+    expect_equal(vk$d, 0, tolerance = 1e-12, info = paste("common scaling", k))
+  }
+
+  # (5) ⛔ IT MUST NOT BE ABLE TO READ THE COMPENSATOR. dg_gateH() takes the RAW
+  # MLO-SPO difference; if a future edit ever adds the fitted offset back in,
+  # the gate would be comparing the observation against itself and could never
+  # fail. Asserted structurally: the model side must not depend on grad_off_*.
+  v  <- dg_vector(CCX_MODE_CANONICAL)
+  g1 <- dg_gateH(v, obs, ho)
+  v2 <- v; v2$p$grad_off_co2 <- 0; v2$p$grad_off_d13c <- 0
+  g2 <- dg_gateH(v2, obs, ho)
+  expect_equal(g1$co2,  g2$co2)
+  expect_equal(g1$d13c, g2$d13c)
+
+  # (6) ⭐ THE CO2 CONTROL PASSES ON ITS OWN LEVEL AT THE CANONICAL MODE. This
+  # is what licenses reading the contrast at all: a gate whose control also
+  # fails cannot separate a transport error from an isotopic one.
+  vd <- dg_gateH_verdict(g1, ho)
+  expect_lt(abs(vd$z_level_co2), DG_H_NSD)
+  # ...and the d13C arm is the one that is out, by a lot.
+  expect_gt(abs(vd$z_level_d13c), 5)
+  expect_false(vd$pass)
+})
+
 test_that("GATE S is an INTERVAL from an OBSERVATION plus a LAW, and it still fires on 3.35", {
   source(skip_if_no_gates(), local = TRUE)
   # ⛔⛔ REBASED 2026-09-04h. This block used to assert a Gaussian bound derived

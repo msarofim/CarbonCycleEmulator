@@ -208,6 +208,60 @@ DG_LEDGER <- list(
             light, and the ENSO land+ocean links -- all already wired,",
          "
             so this bounds their COMBINED amplitude.")),
+  list(id = "H", what = "interhemispheric gradient CONTRAST (CO2 vs d13C)",
+       class = "OBSERVATION", src = paste(
+         "The observed MLO-SPO gradients themselves -- CO2 1962-2023",
+         "
+            (n 59) and d13C 1980-2023 (n 43). Both means and both",
+         "
+            standard errors are COMPUTED at source time from the obs",
+         "
+            bundle, never typed."),
+       bound = paste("|z| <= DG_H_NSD on the CONTRAST of the two ratios,",
+         "
+            R_d13c - R_co2, against the OBSERVED means' OWN sampling",
+         "
+            error se = sd/sqrt(n_eff) propagated in quadrature. n_eff",
+         "
+            is from the DETRENDED lag-1 autocorrelation (the gradients",
+         "
+            trend as emissions grow). ⚠ The model side is",
+         "
+            DETERMINISTIC and contributes no error term."),
+       scored = paste("NO -- and this is the whole point. Both gradient streams",
+         "
+            are scored THROUGH A FITTED ADDITIVE OFFSET, so the",
+         "
+            objective constrains their year-to-year VARIATION and not",
+         "
+            their LEVEL. At ent26 each offset sits on the discrepancy",
+         "
+            it absorbs to 4 dp (grad_off_d13c +0.06464 vs an error of",
+         "
+            -0.06470), so the d13C gradient is 1.97x observed while",
+         "
+            d13c_gradient still scores +106 log-units."),
+       power  = paste("REAL, and it has an INTERNAL CONTROL. A transport or",
+         "
+            representation error acts on the interhemispheric exchange,",
+         "
+            which is TRACER-INDEPENDENT, so it scales both gradients",
+         "
+            alike and cancels in the contrast; the CO2 arm absorbs it.",
+         "
+            ⭐ That control PASSES on its own level at ent26 (-1.06",
+         "
+            se), so the gate is not rejecting everything it is shown.",
+         "
+            ent26 reads z +6.55, defaults +6.56 -- calibration moved",
+         "
+            the contrast 1.473 -> 1.056 but not its significance.",
+         "
+            ⇒ Rejecting it says the miss is NOT transport: it is in",
+         "
+            the isotopic source or the air-sea disequilibrium, which is",
+         "
+            what a pure-diffusion ocean cannot hold.")),
   list(id = "5", what = "bomb 14C peak, hemispheric lag, e-fold",
        class = "OBSERVATION", src = "Hua et al. 2022, hemispheric aggregate",
        bound = paste("TWO KINDS (2026-09-02). ORDERINGS, no threshold:",
@@ -1009,6 +1063,119 @@ dg_streams <- function(r, v) {
   ccx_loglik(o, ccx_prepare_obs(), err, luc = eluc,
              deep = r$sp$diagnostics$d14c_bottom_box,
              ocean_grad = ccx_ocean_grad_scored(o, r$sp), by_stream = TRUE)
+}
+
+# =====================================================================
+# GATE H -- THE INTERHEMISPHERIC GRADIENT CONTRAST (2026-09-04h)
+#
+# WHY IT EXISTS. The objective scores both MLO-SPO gradients through a FITTED
+# ADDITIVE OFFSET (`grad_off_co2`, `grad_off_d13c`), so it constrains each
+# gradient's YEAR-TO-YEAR VARIATION and not its LEVEL. Measured at `ent26`, each
+# offset sits on the discrepancy it can absorb to four decimals:
+#
+#     grad_off_co2  = +0.2098  vs a CO2  gradient error of -0.2120 ppm
+#     grad_off_d13c = +0.06464 vs a d13C gradient error of -0.06470 permil
+#
+# ⇒ the model's d13C interhemispheric gradient is **1.97x observed** and the
+# `d13c_gradient` stream still scores +106 log-units, among the model's best.
+# ⚠ THIS IS NOT A SILENT GATE: nothing is broken and no check is blind. The
+# COMPENSATOR IS SIMPLY NOT STRAINED -- prior z +0.43 -- so no prior screen can
+# find it. What finds it is putting the offset next to the residual it absorbs.
+# ⚠ AND IT WAS PARTLY KNOWN: R/likelihood.R's own block says grad_off_d13c is
+# "absorbing the known STRUCTURAL d13C misfit ... in effect the d13C gradient
+# term is a SHAPE term". This gate does not discover that. IT GIVES IT A
+# THRESHOLD, which is what was missing.
+#
+# ⭐⭐ WHAT IS SCORED, AND WHY IT IS A CONTRAST RATHER THAN A LEVEL.
+# A two-box model's BOX gradient is legitimately not the STATION gradient, so a
+# gate that demanded model == observed would be asserting something the repo has
+# already argued is wrong. But a REPRESENTATION or TRANSPORT error acts on the
+# interhemispheric exchange, which is TRACER-INDEPENDENT: gradient ~ (net
+# hemispheric source) x (exchange time / atmospheric mass), and the last two are
+# shared. So a common transport error SCALES BOTH GRADIENTS ALIKE, and
+#
+#     R_co2 = model_co2 / obs_co2   and   R_d13c = model_d13c / obs_d13c
+#
+# must AGREE. The CO2 gradient is therefore an INTERNAL CONTROL that absorbs
+# whatever transport/representation error the two tracers share, and the gate
+# isolates the part that is ISOTOPIC. Rejecting it says: the discrepancy is NOT
+# transport -- it is in the isotopic source or the air-sea disequilibrium.
+#
+# THE BOUND IS THE OBSERVATIONS' OWN SAMPLING ERROR, NOT A CHOSEN TOLERANCE.
+# Each observed mean carries se = sd / sqrt(n_eff), with n_eff from the lag-1
+# autocorrelation of the DETRENDED series (the gradients trend as emissions
+# grow, and charging that trend to the noise would inflate n_eff's correction).
+# The two ratios' errors propagate in quadrature. ⚠ The model side is
+# DETERMINISTIC at a fixed vector and contributes no term -- said out loud
+# because a missing error bar on one side is easy to forget.
+#
+# ⭐ AND THE CO2 ARM IS A REAL CONTROL, NOT DECORATION: at `ent26` it reads
+# -1.06 se on its own level and PASSES, so this gate is demonstrably not
+# rejecting everything it is shown. test-gate-bounds.R asserts that.
+#
+# ⛔ IT READS THE **RAW** MODEL GRADIENT AND NEVER THE FITTED OFFSET. Adding the
+# offset would feed the compensator back in and the gate could never fail
+# ([[gate_reads_its_own_output]]).
+# =====================================================================
+DG_H_NSD <- 2      # harmonised with DG_Q_NSD / DG_G5_NSD / DG_G7_NSD / DG_GD_NSD
+
+#' n_eff of a series from its DETRENDED lag-1 autocorrelation
+#' @param x the series; @param t its time coordinate
+dg_neff_ar1 <- function(x, t) {
+  r  <- stats::residuals(stats::lm(x ~ t))
+  rho <- stats::acf(r, lag.max = 1, plot = FALSE)$acf[2]
+  # a NEGATIVE rho would inflate n_eff above n; clamp at n, which is the
+  # independent upper bound and the incumbent convention.
+  min(length(x), length(x) * (1 - rho) / (1 + rho))
+}
+
+#' The observed side of GATE H, COMPUTED at source time from the obs bundle
+#'
+#' ⛔ Not typed. The gate-4 audit's finding was that a hand-typed target and a
+#' computed model side can drift into being different estimators; both sides
+#' here come from the same two lines.
+dg_gateH_obs <- function(obs = ccx_prepare_obs()) {
+  f <- function(g) {
+    ok <- is.finite(g$grad)
+    x <- g$grad[ok]; t <- g$year[ok]
+    n_eff <- dg_neff_ar1(x, t)
+    list(mean = mean(x), sd = stats::sd(x), n = length(x), n_eff = n_eff,
+         se = stats::sd(x) / sqrt(n_eff), year = t)
+  }
+  list(co2 = f(obs$co2_grad), d13c = f(obs$d13c_grad))
+}
+
+#' GATE H's model side: the RAW MLO-SPO gradient means, on the observed years
+#' @param v a dg_vector(); @param obs a ccx_prepare_obs(); @param ho a dg_gateH_obs()
+dg_gateH <- function(v, obs, ho = dg_gateH_obs(obs)) {
+  ms <- ccx_model_stats(dg_run(v)$out, obs)
+  f <- function(mod, g) {
+    mg <- mod$MLO$level[match(g$year, mod$MLO$year)] -
+          mod$SPO$level[match(g$year, mod$SPO$year)]
+    if (!all(is.finite(mg)))
+      stop("GATE H: the model has no gradient on some observed years.")
+    mean(mg)
+  }
+  list(co2 = f(ms$co2, ho$co2), d13c = f(ms$d13, ho$d13c))
+}
+
+#' GATE H's verdict: the two gradients' RATIOS must agree
+dg_gateH_verdict <- function(g, ho, n_sd = DG_H_NSD) {
+  r  <- function(m, o) m / o$mean
+  sr <- function(m, o) abs(m / o$mean) * (o$se / abs(o$mean))  # model has no error
+  R_co2  <- r(g$co2,  ho$co2);  s_co2  <- sr(g$co2,  ho$co2)
+  R_d13c <- r(g$d13c, ho$d13c); s_d13c <- sr(g$d13c, ho$d13c)
+  d  <- R_d13c - R_co2
+  se <- sqrt(s_co2^2 + s_d13c^2)
+  z  <- d / se
+  list(R_co2 = R_co2, R_d13c = R_d13c, se_co2 = s_co2, se_d13c = s_d13c,
+       d = d, se = se, z = z, n_sd = n_sd, pass = abs(z) <= n_sd,
+       # REPORTED BESIDE IT: each arm's own level miss, in its own se. The CO2
+       # arm is the control and is expected to pass on its own terms too.
+       z_level_co2  = (g$co2  - ho$co2$mean)  / ho$co2$se,
+       z_level_d13c = (g$d13c - ho$d13c$mean) / ho$d13c$se,
+       mod_co2 = g$co2, mod_d13c = g$d13c,
+       obs_co2 = ho$co2$mean, obs_d13c = ho$d13c$mean)
 }
 
 # =====================================================================

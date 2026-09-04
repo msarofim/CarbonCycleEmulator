@@ -2,6 +2,54 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04i — GATE H: THE GRADIENT LEVEL IS GATED AT LAST, AS A CONTRAST
+
+The fix ranked first in `notes/assessment_2026-09-04h_what_is_actually_wrong.md` §7 — objective,
+not model. Suite **1771 → 1798 / 0 fail / 4 skip**.
+
+⭐⭐ **WHAT IT SCORES, AND WHY A CONTRAST RATHER THAN A LEVEL.** A two-box model's BOX gradient is
+legitimately not the STATION gradient, so a gate demanding model == observed would assert something
+`R/likelihood.R` has already argued is wrong. But a representation or transport error acts on the
+**interhemispheric exchange, which is TRACER-INDEPENDENT** — gradient ≈ (net hemispheric source) ×
+(exchange time / atmospheric mass), and the last two are shared — so it **scales both gradients
+alike**. The gate therefore scores **R_d13c − R_co2**, with the **CO₂ gradient as an INTERNAL
+CONTROL** that absorbs whatever the two tracers share. Rejecting it says the miss is **NOT
+transport**: it is in the isotopic source or the air-sea disequilibrium.
+
+**THE BOUND IS THE OBSERVATIONS' OWN SAMPLING ERROR**, not a chosen tolerance: `se = sd/sqrt(n_eff)`
+with n_eff from the **DETRENDED** lag-1 autocorrelation (the gradients trend as emissions grow, and
+charging that trend to the noise would corrupt the correction), propagated in quadrature. Both means
+and both errors are **COMPUTED at source time** from the obs bundle, never typed. ⚠ The model side
+is deterministic and contributes no error term — said out loud.
+
+| arm | R(CO₂) | z level CO₂ | R(δ¹³C) | z level δ¹³C | contrast z | verdict |
+|---|---|---|---|---|---|---|
+| defaults | 1.270 | +3.29 | 2.743 | −24.04 | **+6.56** | FAIL |
+| **`ent26`** | **0.913** | **−1.06** | **1.969** | **−13.36** | **+6.55** | **FAIL** |
+
+⭐ **THE CONTROL PASSES AT `ent26` (−1.06 se), which is what licenses reading the contrast at all** —
+a gate whose control also failed could not separate a transport error from an isotopic one, and the
+test asserts exactly that.
+⚠ **Calibration moved the contrast 1.473 → 1.056 but not its significance** (6.56 → 6.55): both the
+discrepancy and its error bar shrank together. **The fit cannot reach this.**
+
+⛔ **IT READS THE RAW GRADIENT AND NEVER THE FITTED OFFSET** — adding it back would feed the
+compensator in and the gate could never fail. **MUTATION-TESTED**: patching `dg_gateH()` to add
+`grad_off_*` breaks **5 assertions**, including the two that assert the model side is independent of
+those parameters and the one that requires the δ¹³C arm to be >5σ out.
+Other mutation tests: a model matching the observed gradients exactly **passes** with contrast 0;
+scaling **both** gradients by 0.7/0.85/1.15/1.4 leaves the contrast **exactly 0** (the
+tracer-independence premise); n_eff may never exceed n.
+
+⚠ **THIS GATE DISCOVERS NOTHING NEW — IT GIVES A KNOWN DEFECT A THRESHOLD.** `R/likelihood.R`'s own
+block already said `grad_off_d13c` is "absorbing the known STRUCTURAL d13C misfit ... in effect the
+d13C gradient term is a SHAPE term", and `ccx_d13c_suess` diagnosed the cause as **the price of the
+pure-diffusion ocean** — the real ocean holds isotopic disequilibrium by UPWELLING. What was missing
+was anything that FAILS.
+⭐⭐ **AND THAT JOINS THREE DEFECTS INTO ONE**: the δ¹³C over-depletion, the 2× δ¹³C gradient, and
+**Fix B's wrong-signed ENSO ocean response** all point at the same absent mechanism — **the model
+has no ocean upwelling**. Fix B's tropical box would be the first instance of it.
+
 ## 2026-09-04h(2) — WHAT IS ACTUALLY WRONG: THREE LARGE ERRORS ARE ABSORBED BY FREE OFFSETS
 
 `notes/assessment_2026-09-04h_what_is_actually_wrong.md`. Every number measured at `ent26`.

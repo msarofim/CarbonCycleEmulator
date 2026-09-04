@@ -120,6 +120,32 @@ for (a in DG_ARMS) {
 cat("  ⚠ Smoothing is a CHOICE; diag_gateV_variability_drivers.R walks DG_V_DF\n")
 cat("    and decomposes the model's variance by knocking out each driver.\n")
 
+cat("\n=== GATE H: INTERHEMISPHERIC GRADIENT CONTRAST (CO2 vs d13C) ===\n")
+cat("  The objective scores both gradients THROUGH A FITTED OFFSET, so it\n")
+cat("  constrains their VARIATION and not their LEVEL. A transport error scales\n")
+cat("  both gradients alike, so the CO2 arm is an INTERNAL CONTROL and the\n")
+cat("  CONTRAST isolates the isotopic part. RAW model gradient, never the offset.\n")
+# The obs bundle is read HERE rather than passed in: this script has no `obs`
+# in scope, and a gate that quietly reused some other bundle would be comparing
+# two different things.
+OBS_H <- ccx_prepare_obs()
+OH <- dg_gateH_obs(OBS_H)
+cat(sprintf("  observed  CO2  %+7.4f ppm    se %.4f (n %2d, n_eff %5.1f)\n",
+            OH$co2$mean, OH$co2$se, OH$co2$n, OH$co2$n_eff))
+cat(sprintf("  observed  d13C %+7.4f permil se %.4f (n %2d, n_eff %5.1f)\n",
+            OH$d13c$mean, OH$d13c$se, OH$d13c$n, OH$d13c$n_eff))
+cat(sprintf("  %-9s %9s %9s %9s %9s %9s  %s\n", "arm",
+            "R(co2)", "z lvl co2", "R(d13c)", "z lvl d13c", "contrast z", "verdict"))
+for (a in DG_ARMS) {
+  gh <- dg_gateH(V[[a]], OBS_H, OH); vd <- dg_gateH_verdict(gh, OH)
+  cat(sprintf("  %-9s %9.3f %9.2f %9.3f %10.2f %9.2f  %s\n", a, vd$R_co2,
+              vd$z_level_co2, vd$R_d13c, vd$z_level_d13c, vd$z,
+              if (vd$pass) "PASS" else "FAIL"))
+}
+cat("  \u26a0 The CO2 arm is the CONTROL: if it ever stops passing on its own\n")
+cat("    level, the contrast has lost its ability to separate transport from\n")
+cat("    isotopes and this gate must not be read.\n")
+
 cat("\n=== GATE 5: BOMB CURVE, HEMISPHERIC AGGREGATE (Hua et al. 2022) ===\n")
 ob <- dg_obs_gate5()          # the library's estimator, on the observations
 cat(sprintf("%-9s %10s %10s %10s %10s %8s %9s\n", "arm",
