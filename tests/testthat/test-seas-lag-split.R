@@ -161,9 +161,23 @@ test_that("migration REFUSES a list that carries no lag at all", {
   expect_error(ccx_migrate_par_set(p_none), "not a fitted ancestor")
 })
 
-test_that("the REAL 08-30 arm files migrate and re-encode", {
-  # The end-to-end claim the refit rests on. Skips rather than fails if the
-  # arm directory is absent, so the suite stays runnable on a fresh clone.
+test_that("the REAL 08-30 arm files MIGRATE, and REFUSE to encode", {
+  # ⛔ THE ENCODE ASSERTION IS GONE, 2026-09-04. This read
+  #     u <- ccx_par_to_unc(mig); expect_true(all(is.finite(u)))
+  # and called it "the end-to-end claim the refit rests on". It stopped being
+  # true the moment `ent_seas_amp_SH` was freed (25 -> 26, `88ee23c`): a 21-par
+  # ancestor migrates to `ent_seas_amp_SH = 0`, and 0 has NO IMAGE under
+  # `tr = "log"`. The vector can be RUN and MEASURED at; it is not a point of
+  # the FITTED space, and under a lognormal prior it has probability ZERO --
+  # so asserting it encodes was asserting something FALSE about the model, not
+  # something true about the migration. [[runnable_is_not_encodable]]
+  #
+  # ⭐ WHAT REPLACES IT IS THE OPPOSITE ASSERTION, and it is a real one: the
+  # encoder must REFUSE, and refuse BY NAME. That guard was hardened on purpose
+  # on 09-03 (`ccx_par_to_unc()` reports the offending coordinate rather than
+  # returning a silent -Inf), and nothing was testing it.
+  #
+  # MIGRATION -- this file's actual subject -- is asserted exactly as before.
   root <- file.path(.root, "calibration/output/refit_20260830_gamma_diff_remap")
   for (arm in c("from90", "pin90")) {
     f <- file.path(root, arm, "mode_fit_pumpN.rds")
@@ -171,11 +185,17 @@ test_that("the REAL 08-30 arm files migrate and re-encode", {
     prev <- readRDS(f)
     expect_length(prev$param_names, 21L)
     mig <- ccx_migrate_par_set(prev$par_mode)
-    u <- ccx_par_to_unc(mig)
-    expect_length(u, length(CCX_PARAM_NAMES))
-    expect_true(all(is.finite(u)))
+    expect_length(intersect(names(mig), CCX_PARAM_NAMES), length(CCX_PARAM_NAMES))
     # the legacy contract: BOTH hemispheres take the stored scalar
     expect_identical(mig$seas_lag_p_NH, prev$par_mode$seas_lag_p)
     expect_identical(mig$seas_lag_p_SH, prev$par_mode$seas_lag_p)
+    # ...and the migrated vector is RUNNABLE but NOT ENCODABLE, by name.
+    expect_identical(mig$ent_seas_amp_SH, 0)
+    expect_error(ccx_par_to_unc(mig), "ent_seas_amp_SH")
+    # SEEDED at its table init, the same vector encodes finitely -- which is the
+    # separation `ccx_seed_unencodable()` exists to make: the migration says what
+    # the ancestor RAN, the seeder says where a SEARCH begins.
+    seeded <- mig; seeded$ent_seas_amp_SH <- CCX_PARAM_TABLE$ent_seas_amp_SH$init
+    expect_true(all(is.finite(ccx_par_to_unc(seeded))))
   }
 })

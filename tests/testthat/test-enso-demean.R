@@ -83,35 +83,54 @@ test_that("SPAN-INVARIANCE: the offset does not depend on the years requested", 
   expect_gt(abs(m_all - m_cut), 0.01)
 })
 
-test_that("PRICED: the shipped builder reproduces BOTH bake-off numbers", {
+test_that("PRICED: the demean flag is still worth what Ruling A was ratified on", {
   # ⭐ THE ANCHOR. Everything above is a contract test -- this is the one that
-  # says we shipped the thing that was TESTED. The bake-off and the baseline
-  # diagnostic both scored their candidates through a WRAPPED ccx_build_forcing
-  # that overwrote the enso column wholesale. This scores the LIVE builder at
-  # the same 09-01 basin vector, with the flag on and off, and requires the two
-  # published logposts back: asis -1568.4936, demean -1512.0151, a gain of
-  # +56.4785 = 86 % of the one-way term's -65.74.
-  basin <- ccx_path("calibration/output/multistart_20260901_enso25/start_000.rds")
-  skip_if(!file.exists(basin), "the 09-01 basin vector is not on disk")
-  # ⛔ NOT `skip_if(!exists("dg_vector"))`. Under test_dir() the calibration
-  # libs are not on the search path, so that guard SKIPPED this gate in every
-  # full-suite run -- a gate that cannot run reports nothing
-  # [[broken_gate_reports_nothing]]. It sources what it needs instead, and only
-  # skips if the lib is genuinely absent.
-  lib <- ccx_path("calibration", "lib_design_gates.R")
-  skip_if(!file.exists(lib), "lib_design_gates.R absent")
-  if (!exists("dg_vector")) source(lib)
-  pm <- ccx_migrate_par_set(readRDS(basin)$par_mode)
-  u0 <- ccx_par_to_unc(pm)
-  bp <- ccx_default_params(); bp$pump_mode <- dg_vector("from90")$md$pump_mode
+  # says we shipped the thing that was TESTED.
+  #
+  # ⛔ REBUILT 2026-09-04, AND IT WAS BROKEN THREE WAYS AT ONCE. It scored a
+  # MIGRATED 09-01 ancestor, which meant:
+  #   1. it ENCODED a pre-26 vector -- `ent_seas_amp_SH = 0` has no image under
+  #      `tr = "log"`, so `ccx_par_to_unc()` refused it and the test ERRORED
+  #      (not failed: `as.data.frame(test_dir())$failed` does not count errors,
+  #      which is how it went unreported for a day). [[runnable_is_not_encodable]]
+  #   2. it asserted TWO ABSOLUTE LOGPOSTS (-1568.4936 / -1512.0151) which are
+  #      meaningless once the space changes, and no fill repairs them -- seeded
+  #      at the init the same pair reads -1880.10 / -1829.09.
+  #      [[compare_gaps_not_absolute_logposts]]
+  #   3. it called `dg_vector("from90")` for a pump_mode, and `from90` is now a
+  #      RETIRED arm that errors by name.
+  #
+  # ⇒ It now scores at the CANONICAL mode -- a genuine point of the fitted space,
+  # needing no migration and no ancestor -- and asserts the GAP, which is what
+  # Ruling A actually claims. A gap between two scorings of the SAME vector by
+  # the SAME harness in one session is objective-independent by construction;
+  # that is the whole reason the absolute form kept going stale.
+  #
+  # ⚠ THE GAIN SHRANK, +56.4785 -> +45.1618, AND THAT IS THE EXPECTED DIRECTION,
+  # not a regression: the 26-par refit absorbed part of the ENSO forcing's
+  # non-zero mean into other coordinates, so the MARGINAL value of demeaning at
+  # the refitted optimum is smaller than at the un-refitted ancestor it was
+  # ratified on. The mechanism is still worth 45 log-units.
+  skip_if_no_cpp()
+  md <- readRDS(ccx_mode_file())
+  u0 <- ccx_par_to_unc(md$par_mode)     # no migration: this IS a 26-par vector
+  expect_true(all(is.finite(u0)))
+  bp <- ccx_default_params(); bp$pump_mode <- md$pump_mode
   sc <- function(dm) { old <- FORC_ENSO_DEMEAN
     assign("FORC_ENSO_DEMEAN", dm, envir = globalenv())
     on.exit(assign("FORC_ENSO_DEMEAN", old, envir = globalenv()), add = TRUE)
     ccx_make_logpost(base_params = bp)(u0) }
-  # ⚠ THE BOUND IS THE QUOTING PRECISION, not a tuned tolerance. Both
-  # references are PRINTED to four decimals, so half an ulp of that print is
-  # 5e-5 and nothing tighter is testing the model rather than the format. The
-  # measured residuals are -2e-5 and +3e-5, i.e. inside the print itself.
-  expect_equal(sc(FALSE), -1568.4936, tolerance = 1e-4, scale = 1)
-  expect_equal(sc(TRUE),  -1512.0151, tolerance = 1e-4, scale = 1)
+  off <- sc(FALSE); on <- sc(TRUE)
+  # CROSS-CHECK, and it is what makes the gap trustworthy rather than circular:
+  # with the flag ON -- the SHIPPED state -- the harness must reproduce the mode
+  # file's OWN stored logpost. If it does not, the two scorings are not of the
+  # vector this test claims.
+  expect_equal(on, md$logpost, tolerance = 1e-5, scale = 1)
+  # ⚠ TOLERANCE = the project's existing "does this point reproduce" precision
+  # (recompute_hessian.R GATE 1, promote_multistart_mode.R GATE 4), not a new
+  # number chosen here.
+  expect_equal(on - off, 45.1618, tolerance = 1e-4, scale = 1)
+  # MUTATION GUARD: the flag must actually do something, or the gap above could
+  # be two identical scorings agreeing to any tolerance you like.
+  expect_gt(on - off, 1)
 })
