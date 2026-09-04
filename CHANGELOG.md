@@ -2,6 +2,25 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-03 — **ROUND 2 CLOSED, AND THE SPINUP SPEEDUP IS SHIPPED**
+
+**`16905919` (half dispersion): 5/5 COMPLETED, 0 errors, all five at −1446.7631 / −1446.7627** — the
+dominant basin. Nothing new at sd 0.5233.
+
+⇒ **THE TWO DISPERSIONS TOGETHER SAY SOMETHING THE COUNT ALONE COULD NOT:**
+| dispersion | draws | dominant basin | second basin |
+|---|---|---|---|
+| sd 1.0466 (measured) | 34 | 33 | **1** (−1508.7786) |
+| sd 0.5233 (half) | 5 | 5 | 0 |
+
+The second basin is reached only from the WIDER dispersion, which is consistent with it being
+genuinely distant in u-space rather than adjacent to the main one. ⚠ 5 draws at the narrow
+dispersion is a weak bound and is quoted as one — this rules nothing out, it just fails to find it.
+
+**SHIPPED to Torch now that nothing is running**: the `ccx_deriv_fast()` spinup (2.9×) and
+`port_targets.csv` regenerated under it at commit `80f212f`. The targets moved by ~1e-9 absolute
+(cold −17421.4037269681 → −17421.4037269680), exactly the 8e-14 relative already priced.
+
 ## 2026-09-03 — ⭐⭐ **THE SPINUP MOVED TO THE COMPILED DERIVATIVE: 2.9× ON EVERY EVALUATION**
 
 `R/spinup.R`'s four call sites now use **`ccx_deriv_fast()`** — the same-signature compiled twin
