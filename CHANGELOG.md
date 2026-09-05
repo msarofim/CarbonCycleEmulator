@@ -2,6 +2,57 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04k — DEPTH-DEPENDENT K IS COUNTERPRODUCTIVE; HILDA SAYS THE MISSING PIECE IS HIGH-LATITUDE
+
+Marcus: *"Test the depth-dependent K. Separately, consider the HILDA model…"*
+`calibration/diag_candidateA_intermediate.R`, note `collect_2026-09-04k_candidateA_and_HILDA.md`.
+Suite unchanged 1798/0/0/4. **Nothing implemented.**
+
+⛔ **THE AUGUST SHIM COULD NOT DO THIS.** `diag_ocean_candidates.R` overrides `ccx_deriv`, but
+`ccx_spinup()` calls **`ccx_deriv_fast`** and its isotope state comes from `iso_operator()`, which
+differentiates `ccx_deriv_fast` column by column — so that shim is **inert on the preindustrial
+profile** (deep Δ¹⁴C identical to 6 dp with it on and off). This file shims `ccx_deriv_fast`.
+**Mutation gate both ways**: `f == 1` bit-exact; `f = exp(−z/1500)` moves deep Δ¹⁴C −156.145 →
+−275.885. Control is **ISO-DEEP** (`kz` re-solved to hold the bottom box), scored band **> 1500 m**
+where the bomb addition is ≤ 4.5 ‰.
+
+⛔⛔ **EVERY DEPTH-DEPENDENT FORM MAKES THE INTERMEDIATE PROFILE WORSE, MONOTONICALLY.** Scored mean
+|z|: incumbent **2.55**; A:5000 2.84; A:3000 3.05; A:2000 3.32; A:1200 3.87; **HILDA's own fitted
+shape 3.08**; and 3.34 / 3.76 / 3.72 for the other HILDA variants.
+⭐ **AND I ALMOST TESTED THE WRONG THING.** The repo's inherited `oc_shape()` is floorless with the
+August grid at z_K 1200–5000 m; **Siegenthaler & Joos (1992, Tellus 44B:186) §3(3) eq.1 fit
+K(z) = 465 + 7096·exp(−(z−75)/253)** — a FLOOR plus a decay scale **5–20× shorter** (K = 7561 at the
+ML base, 1788 at 500 m, 648 at 1000 m). Both families are scanned; **the verdict is the same in
+both**, which is what makes it robust. ⚠ And the grid resolves it — layers 2–5 are 51/72/100/140 m
+against a 253 m scale.
+⇒ **DESIGN §3.4a's EVIDENCE GATE FIRES: the cheaper candidate is measured and shown insufficient**,
+indeed counterproductive.
+
+⭐⭐ **HILDA SAYS WHY, AND IT IS STRUCTURAL.** Read from the paper, not recalled. HILDA is a
+low-latitude surface box (**84 %** of area) over an advective-diffusive Interior **plus a separate
+high-latitude surface box (HS, 16 %, SST < 5 °C) over its own high-latitude deep box (HD)**, with
+four transport parameters: `K`, upwelling `w`, HS↔HD `u`, HD↔Interior `q`.
+⇒ **In HILDA, K(z) does the UPPER ocean and the high-latitude conduit does the DEEP. Their fitted
+deep diffusivity is K₀ = 465 m²/yr. Our model has no conduit, so K must do both jobs — and every arm
+above needs a deep K of 2519–6356, i.e. 5–14× HILDA's.** That over-mixed interior IS our
+intermediate-water defect, and it is why depth-dependence backfires: sharpening K at the top forces
+`kz` 6356 → 71084 to hold the deep age, ventilating the middle harder. **One mechanism cannot serve
+two timescales** — the same pattern as `tau_ex` and `q10`.
+⭐ Siegenthaler & Joos hit exactly this: constant K calibrated to steady-state ¹⁴C gives **853**, to
+bomb ¹⁴C gives **4700**, and they call it *"an unsatisfactory situation"*. Their fix was K(z) — **but
+they already had the conduit carrying the deep.** ⚠ Even their K(z) version reports pre-industrial
+¹⁴C *"too low above 1500 m"*, a residual in the band we are failing.
+
+⚠⚠ **AND THIS IS AWKWARD FOR THE EQUATORIAL BOX.** The two motivations now point apart: **Fix B/ENSO
+→ an EQUATORIAL box; the intermediate-water defect → a HIGH-LATITUDE conduit.** Equatorial upwelling
+is the RETURN limb; high-latitude sinking is the VENTILATION limb, and it is the ventilation limb the
+Δ¹⁴C profile says is missing. ⚠ That is an ARGUMENT, not a measurement — the honest next step is to
+price the two against the Δ¹⁴C profile the way this file priced K(z).
+⛔ **What does NOT follow:** B1's August failure (`w_out`, within-column) does not condemn HILDA's
+HS/HD. `w_out` lifted deep water into the EXISTING mixed layer with no separate cold surface; HILDA's
+HS is its own 16 %-of-area box exchanging with the atmosphere at < 5 °C and sinking. Only the first
+has been measured.
+
 ## 2026-09-04j — ROUTE 1 IS CLOSED, AND THE VENTILATION ERROR IS AT INTERMEDIATE DEPTH
 
 Marcus: *"Do route 1 first. I wonder if a tropical box might help with capturing intermediate
