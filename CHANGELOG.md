@@ -2,6 +2,55 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04k(2) — THE HILDA CONDUIT WORKS: 3/3, AND IT IS THE FIRST MECHANISM IN THIS ARC THAT HELPS
+
+Marcus: *"Yes, test the Hilda approach."* Pre-registered in
+`notes/prereg_2026-09-04k_hilda_conduit.md`, scored in
+`notes/collect_2026-09-04k2_hilda_conduit_works.md`; `calibration/diag_hilda_conduit.R`.
+Suite unchanged 1798/0/0/4. **Nothing implemented, fitted or adopted.**
+
+**THE GEOMETRY, AND WHY IT IS NOT `w_out`.** `w_out` lifts bottom water to the mixed layer and
+returns it **DISTRIBUTED DOWNWARD through every layer**, injecting surface water straight into the
+intermediate boxes — which is why it over-ventilated them and failed in August. **HILDA's HD
+exchanges with the Interior as a reservoir; its intermediate layers are never injected.** So the form
+tested is a **two-way ML↔BOTTOM exchange with NO distributed return** — the one conduit geometry
+never measured here.
+
+✅ **P0** — `u = 0` **bit-exact**; `u = 5` moves deep Δ¹⁴C **−156.145 → −82.420**; carbon closes.
+✅ **P1 — THE CONDUIT RELIEVES `kz`, WHICH IS THE MECHANISM ITSELF: 6356 → 3177, exactly 0.50×.**
+✅ **P2 — the intermediate profile improves: scored mean |z| 2.55 → 1.81.**
+✅ **P3 — and it lands where the defect is**: 1622 m **+3.25 → +2.03**, 2268 m **+2.57 → +1.54**.
+
+| u (m/yr) | kz | kz/kz(0) | 1622 m | 2268 m | scored mean \|z\| |
+|---|---|---|---|---|---|
+| 0 | 6356 | 1.000 | +3.25 | +2.57 | **2.55** |
+| 0.5 | 4780 | 0.752 | +2.87 | +2.24 | 2.32 |
+| **1** | **3177** | **0.500** | **+2.03** | **+1.54** | **1.81** |
+
+⭐ **The unscored PEAK moves most**: 1160 m, the model's worst layer, goes **+3.12 → +1.98**, and
+831 m goes +0.79 → −0.01. ⚠ Bomb-contaminated, so reported for SHAPE, not as evidence.
+⛔ **A ceiling, and it is informative: at u ≥ 2 NO `kz` holds the deep age.** The conduit
+over-ventilates the deep faster than any `kz` reduction offsets, so the usable range is u ≲ 1–2 and
+**the best arm sits AT the feasibility edge** — the reduced form is straining.
+
+⭐⭐ **THE MECHANISM IS CONFIRMED, NOT JUST THE OUTCOME.** The HILDA reading said `K` is forced to do
+both the upper and the deep, over-mixing the interior. **P1 tests that directly and it holds** —
+giving the deep its own pathway HALVES the diffusivity it needs. First time in this arc the
+predicted INTERMEDIATE STEP was measured, not only the endpoint.
+
+⚠ **WHAT IT IS NOT.** It does **not** reach |z| < 1 (1.81 against DESIGN §3.4a's benchmark), so the
+row is not solved. ⚠ **`u` here is NOT HILDA's `u`** — theirs is 38 ± 17 m/yr between high-latitude
+boxes over 16 % of area, mine a global-area-equivalent ML↔bottom rate; **not comparable**. The
+GEOMETRY is tested, the PHYSICS is not: no cold surface, no 16 % split, none of the
+poorly-equilibrated Δ¹⁴C HILDA's HS carries (−120 ‰ vs LS's −40) — which are plausibly what would
+close the remaining 0.81. No claim about Joos, the ENSO sign, or gate H.
+
+⇒ ⭐ **THIS REVERSES THE DIRECTION THE ARC WAS HEADING.** A high-latitude conduit is now the
+better-supported structure for the intermediate-water defect, against the equatorial box scoped on
+09-04j — and it is the structure HILDA actually uses for this job. The equatorial box's ENSO
+motivation survives only if a tropical box's sign differs from every within-column lever, which is
+untested. **Build the conduit properly and re-measure; do not treat 1.81 as the answer.**
+
 ## 2026-09-04k — DEPTH-DEPENDENT K IS COUNTERPRODUCTIVE; HILDA SAYS THE MISSING PIECE IS HIGH-LATITUDE
 
 Marcus: *"Test the depth-dependent K. Separately, consider the HILDA model…"*
