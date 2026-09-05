@@ -2,6 +2,61 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04j — ROUTE 1 IS CLOSED, AND THE VENTILATION ERROR IS AT INTERMEDIATE DEPTH
+
+Marcus: *"Do route 1 first. I wonder if a tropical box might help with capturing intermediate
+waters."* Both answered. `calibration/diag_fixB_route1_solubility.R`,
+`calibration/diag_ventilation_profile.R`. Suite unchanged 1798/0/0/4. **Nothing implemented.**
+
+⛔⛔ **ROUTE 1 IS CLOSED: THE SOLUBILITY PATH IS NOT OVER-AMPLIFIED.** The chain is
+`nino34 → (observed) hemispheric SST → carbonate chemistry → pCO₂ → flux`; the first arrow is DATA
+(HadSST4), so the only testable amplitude is the chemistry.
+⭐ **The model's emergent `d ln pCO₂ / dT` is 0.04198 /°C against Takahashi's 0.04230 — 0.99×.**
+That is a genuine out-of-sample check: `SST_PCO2_SENSITIVITY` is registered but **the model does not
+use it** — the carbonate module carries the full T dependence of K0/K1/K2 and the sensitivity is
+EMERGENT. **There is nothing to de-amplify.**
+- The ENSO signal in the SST forcing is data and is real: **+0.105 ± 0.027 (NH), +0.087 ± 0.019 (SH)
+  °C per index unit**, t +4.0 / +4.6.
+- Scaling the ENSO component of SST is **perfectly linear** (R² = **1.00000**, slope −0.1637);
+  zeroing the solubility slope needs **k = 0.22**, i.e. cutting the observed SST ENSO signal to 22 %.
+- ⛔ **And the decisive point: rescaling a wrong-signed path cannot make it right-signed — only
+  smaller.** Route 1 was a mitigation, not a fix, and it is not even available.
+
+⭐⭐ **MARCUS'S INTERMEDIATE-WATER HYPOTHESIS IS MEASURED AND SUPPORTED.** Model Δ¹⁴C against GLODAP,
+layer by layer, at the bottle epoch (2002, n = 37,394), area-weighted, same estimator as
+`d14c_bottom_box`:
+
+| band | layers | mean z | note |
+|---|---|---|---|
+| **upper ≤ 500 m** | 5 | **+0.61** | bomb-dominated — and it MATCHES |
+| **mid 500–2500 m** | 5 | **+3.30** | **MAX +4.49 at 1160 m** (−86.9 vs −144.1 ‰) |
+| bottom > 2500 m | 1 | **+1.85** | **the ONLY layer the likelihood scores** |
+
+⇒ **The model is systematically TOO YOUNG below ~600 m — its interior is OVER-ventilated — and the
+error PEAKS at intermediate depth. The one scored Δ¹⁴C depth row sits BELOW the problem.**
+⚠ The upper rows are **not** independent evidence: they are dominated by the bomb transient (printed
+per layer), which the calibration fits through `d14c_NH/SH`.
+
+🐛 **AND I GOT THIS WRONG THE FIRST TIME, IN A WAY WORTH RECORDING.** I first ran the comparison on
+the **PREINDUSTRIAL steady state**, because `R/likelihood.R` says that is the right thing to score
+modern bottle data against. **That argument holds for the DEEP BOX ONLY** — bomb ¹⁴C has not reached
+2627–3700 m. Applied to the upper ocean it read a **98 ‰ surface "error" that was entirely the bomb
+spike**. The transient run removes it and the upper ocean then MATCHES. The diagnostic now prints
+the bomb addition per layer so the argument's domain is visible.
+
+⚠⚠ **A TENSION THIS DOES NOT RESOLVE, STATED RATHER THAN SMOOTHED:** an over-ventilated interior
+should take up **MORE** anthropogenic carbon, yet the centennial pulse response is too **LOW**
+(IRF(100) 0.276 vs Joos 0.409). **Transport and capacity point OPPOSITE ways**, which argues the
+capacity shortfall is **buffer chemistry, not ventilation** — consistent with gate 12a's standing
+"ocean-CAPACITY defect" reading and with surface DIC being right at −0.06σ.
+
+⇒ **WHERE THIS LEAVES FIX B.** Route 1 closed; the built levers dead on sign (09-04i). **A tropical
+box is now the only route left**, and the profile above gives it a *second*, independent motivation
+beyond ENSO — the model's worst ventilation error is exactly the water mass such a box would
+introduce. ⚠ It remains a NEW BOX, and DESIGN §2's pedagogy constraint plus §3.4a's evidence gate
+still apply — but "the cheaper candidates were measured and shown insufficient" is now **the
+recorded state of the arc**, which is precisely the condition §3.4a names.
+
 ## 2026-09-04i(2) — FIX B ON THE BUILT OCEAN LEVERS: DEAD ON SIGN, AND MY SYNTHESIS IS ONE-THIRD RIGHT
 
 Marcus: *"Yes, I think we need to do work on Fix B."* Pre-registered in
