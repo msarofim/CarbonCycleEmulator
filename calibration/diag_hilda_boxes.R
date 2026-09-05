@@ -35,8 +35,17 @@ HB_SCORED_MIN_DEPTH <- 1500  # bomb addition <= 4.5 permil below this
 HB_UPPER_MAX_DEPTH  <- 500   # N1's control band: the layers that already MATCH
 HB_HS_TARGET <- c(-120, 30)  # HILDA Table 2, from GEOSECS: HS = -120 +/- 30
 HB_HD_HILDA  <- -136         # HILDA Table 2, THEIR MODEL's value, not an obs
+# ⚠ TWO CROSS-RUN REFERENCE VALUES, AND THEY ARE ROUNDED PRINTOUTS FROM ANOTHER
+# SCRIPT -- diag_hilda_conduit.R's reduced form, which this script CANNOT
+# recompute because that geometry is a shim, not a parameter setting. The rule
+# from notes/prereg_2026-09-05c_hs_gas_exchange.md sec.1 is "never gate on a
+# threshold typed from another run's rounded output"; where a value genuinely
+# cannot be recomputed, the comparison must instead carry a MARGIN CHECK, which
+# `HB_SHIM_MARGIN` below supplies -- a verdict inside the rounding is reported as
+# INDISTINGUISHABLE rather than as a pass or a fail.
 HB_SHIM_MEANZ <- 1.81        # 2026-09-04k2's reduced form, the thing to beat
 HB_INCUMBENT_MEANZ <- 2.55
+HB_SHIM_MARGIN <- 0.02       # half the last printed digit, doubled
 
 v0   <- dg_vector(CCX_MODE_CANONICAL)
 grid <- ccx_ocean_grid(v0$p$h_ml)
@@ -185,9 +194,12 @@ if (p2_ok) {
   cat(sprintf("  P3 -- kz below the shim's 3177?  kz = %.0f (%.3fx incumbent) -> %s\n",
               hil$kz, hil$kz / res[["incumbent"]]$kz,
               if (hil$kz < 3177) "CONFIRMED" else "FALSIFIED"))
+  .m <- mz[[hil$lbl]]
   cat(sprintf("  P4 -- mean|z| below the shim's %.2f?  %.2f (incumbent %.2f) -> %s\n",
-              HB_SHIM_MEANZ, mz[[hil$lbl]], HB_INCUMBENT_MEANZ,
-              if (mz[[hil$lbl]] < HB_SHIM_MEANZ) "CONFIRMED" else "FALSIFIED"))
+              HB_SHIM_MEANZ, .m, HB_INCUMBENT_MEANZ,
+              if (abs(.m - HB_SHIM_MEANZ) < HB_SHIM_MARGIN)
+                "INDISTINGUISHABLE -- inside the reference's own rounding"
+              else if (.m < HB_SHIM_MEANZ) "CONFIRMED" else "FALSIFIED"))
   cat(sprintf("  P5 -- HD near HILDA's %+.0f?  HD %+.1f  (model-to-model, REPORTED not gated)\n",
               HB_HD_HILDA, hil$d$d14c_hd[["NH"]]))
   cat(sprintf("        falsifier is HD WARMER than the LS mixed layer -> %s\n",
