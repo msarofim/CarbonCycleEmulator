@@ -2,6 +2,68 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-04i(2) — FIX B ON THE BUILT OCEAN LEVERS: DEAD ON SIGN, AND MY SYNTHESIS IS ONE-THIRD RIGHT
+
+Marcus: *"Yes, I think we need to do work on Fix B."* Pre-registered in
+`notes/prereg_2026-09-04i_fixB_ocean_candidates.md`, scored in
+`notes/collect_2026-09-04i_fixB_levers_scored.md`; new diagnostic
+`calibration/diag_fixB_ocean_levers.R` (~2 min). **Nothing implemented, fitted or adopted.**
+
+**WHY A RE-SCORING AND NOT A NEW MECHANISM.** DESIGN §3.4a's candidates are **already built and
+default to 0** — `w_up`, `w_out_NH/SH`, `q_conv`. They were scored in August on five observables,
+and **the two that matter for Fix B did not exist then**: the ENSO ocean sign error was diagnosed
+**2026-09-01**, two weeks after B1 was rejected, and **GATE H was built today**. "B1 FAILED" is a
+verdict on the deep-Δ¹⁴C row and it stands; it was never a verdict on these rows.
+⭐ Standing method, followed: **MEASURE THE LEVER BEFORE BUILDING THE MACHINERY.**
+
+✅ **P0, THE HARNESS CONTROL, VALIDATES AGAINST TWO INDEPENDENT RECORDS.** Both levers move deep
+Δ¹⁴C away (+1.385 / +1.041 z per m/yr), reproducing 2026-08-15; and the conveyor returns
+**d(sink)/d(q_conv) = +0.01012** GtC/yr per Sv against the **+0.0101** measured 2026-09-01 —
+three significant figures, two weeks apart.
+
+⛔⛔ **P1 — FIX B DIES THE CONVEYOR'S DEATH.** `d(sink)/d(w) = +0.11010` GtC/yr per (m/yr) for BOTH
+levers. The observed story needs El Niño to SUPPRESS upwelling and thereby INCREASE uptake, i.e. a
+NEGATIVE derivative. It is positive, so the term would need El Niño to *strengthen* upwelling —
+backwards. Same reason as before: ventilating anthropogenic-poor deep water dominates over upwelling
+DIC-rich water to outgas. **Third instance.**
+
+⛔ **P2 — I PREDICTED THE MAGNITUDE WOULD FAIL TOO. IT DOES NOT: 44 %**, not the >100 % the conveyor
+needed (2.20 m/yr of modulation against a 5 m/yr scan top). **Sign is the only obstacle here**, and
+I recorded the opposite in advance.
+
+✅ **P3 — THE δ¹³C DIAGNOSIS IS CONFIRMED BY A LEVER SCAN FOR THE FIRST TIME**, both halves:
+`w_out` **+0.00989** ‰ per (m/yr) beats `w_up` **+0.00832**, and the one-step deep→surface limb
+beating the distributed one is exactly the mechanism `ccx_d13c_suess` names (upwelled water last in
+contact with a *preindustrial* atmosphere returns isotopically OLD carbon).
+⛔ **UNAFFORDABLE:** closing the full −0.196 ‰ needs `w_out` ≈ **19.8 m/yr**, at which deep Δ¹⁴C is
+**z ≈ +22**. August's verdict stands verbatim: *"the escape is not more ventilation."*
+
+⛔ **P4 — GATE H MOVES THE WRONG WAY.** Both levers INCREASE the contrast (+0.0092 / +0.0094 per
+m/yr) from its base +1.056.
+
+⛔⛔ **SO I RETRACT TWO-THIRDS OF YESTERDAY'S SYNTHESIS.** I said the δ¹³C over-depletion, gate H's
+2× contrast and the wrong-signed ENSO response *"all say the model has no ocean upwelling."*
+Measured: **δ¹³C level CONFIRMED; ENSO sign REFUTED (backwards); gate H REFUTED (worse).**
+**"One absent mechanism explains all three" was a story, not a measurement.** The three defects are
+NOT one thing.
+
+⭐⭐ **AND A NEW STRUCTURAL FINDING: THE OCEAN SINK IS BLIND TO CIRCULATION GEOMETRY.** `w_up` and
+`w_out` are completely different plumbing and their deep Δ¹⁴C at w = 5 differs hugely (**−81.2** vs
+**−100.5 ‰**) — but **their ocean sink is identical to 1e-12 GtC/yr at every node.** Verified rather
+than argued: the spinup pins surface pCO₂ to the preindustrial atmosphere, so **preindustrial
+mixed-layer DIC is identical across all three configurations, spread exactly 0.000 µmol/kg**, while
+the bottom box spans **2028.9 / 2188.0 / 2254.3**. Uptake then depends only on the VOLUMETRIC rate.
+⇒ **Any future ocean-structure proposal must be scored on INTERIOR tracers**, and **DESIGN §3.4a's
+first discriminating row ("ocean sink → ~3.1 GtC/yr") has no power to discriminate at all** — it
+bounds the total, not the structure.
+
+⇒ **WHAT FIX B NEEDS NOW.** (1) ⭐ the untested cheap route: **is the solubility path simply
+over-amplified?** `SST_PCO2_SENSITIVITY` is a *provisional* constant. (2) ⭐⭐ a genuine **TROPICAL
+box** — ⚠ **this scan does NOT refute it**: these levers move water within a hemispheric column
+where the upwelled water is anthropogenic-poor, whereas an equatorial box upwells *thermocline*
+water that is shallower, younger and partly anthropogenic-loaded, so the fatal sign is not
+guaranteed to carry over. But it is a new box, not a knob, and route 1 is cheaper and unmeasured.
+
 ## 2026-09-04i — GATE H: THE GRADIENT LEVEL IS GATED AT LAST, AS A CONTRAST
 
 The fix ranked first in `notes/assessment_2026-09-04h_what_is_actually_wrong.md` §7 — objective,
