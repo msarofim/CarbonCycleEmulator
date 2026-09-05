@@ -125,7 +125,7 @@ struct Aux {
   // memory before. `hs_on` is what gates every flux, on both cores -- and it is
   // also what sets NPH/NB above.
   int    hs_on;
-  double hs_frac, dz_hd, sst_hs, dic0_hs, revelle0_hs;
+  double hs_frac, h_hs, dz_hd, sst_hs, dic0_hs, revelle0_hs;
   double a_ls[2], a_hs[2], hs_mass_kg[2], asx_hs[2];
   int pump_on;
   double pump_org[2][NL], pump_carb[2][NL];
@@ -672,7 +672,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       // (b) HS <-> HD, two-way GROSS at u_hs m/yr over the HS area; the area
       //     cancels within the column exactly as it does for w_up.
       if (P.u_hs != 0.0) {
-        add_flux(ihs, ihd, P.u_hs * y[IX(ihs, C)] / A.dz[0], 1.0);
+        add_flux(ihs, ihd, P.u_hs * y[IX(ihs, C)] / A.h_hs, 1.0);
         add_flux(ihd, ihs, P.u_hs * y[IX(ihd, C)] / A.dz_hd, 1.0);
       }
 
@@ -798,7 +798,8 @@ static Aux unpack_aux(const List& a) {
   for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_org[h][k] = v[h * NL + k];
   v = a["pump_carb"];
   for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_carb[h][k] = v[h * NL + k];
-  A.hs_frac = a["hs_frac"]; A.dz_hd = a["dz_hd"]; A.sst_hs = a["sst_hs"];
+  A.hs_frac = a["hs_frac"]; A.h_hs = a["h_hs"];
+  A.dz_hd = a["dz_hd"]; A.sst_hs = a["sst_hs"];
   A.dic0_hs = a["dic0_hs"]; A.revelle0_hs = a["revelle0_hs"];
   v = a["a_ls"];       A.a_ls[0] = v[0];       A.a_ls[1] = v[1];
   v = a["a_hs"];       A.a_hs[0] = v[0];       A.a_hs[1] = v[1];

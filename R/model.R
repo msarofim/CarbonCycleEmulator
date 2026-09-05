@@ -967,6 +967,17 @@ ccx_default_params <- function() {
                           # distributed over the interior layers IN PROPORTION
                           # TO THEIR VOLUME -- their q is "assumed independent
                           # of depth". Table 1: q^-1 = 538 +/- 510 yr.
+    h_hs      = 0,        # m, HS thickness. 0 = FOLLOW `h_ml`, which is choice
+                          # C2 of notes/prereg_2026-09-05_hilda_boxes.md and the
+                          # 2026-09-05 build; a positive value PINS it instead.
+                          # HILDA uses 75 m for BOTH surface boxes. The absence
+                          # contract is the usual one: 0 reproduces the 09-05
+                          # structure bit for bit.
+                          # ⚠ IT IS NOT A FREE KNOB. HS thickness sets the
+                          # residence time (h/u) that competes with air-sea
+                          # equilibration, and 09-05's §2 prices our 134.1 m
+                          # against HILDA's 75 as one of the two terms that put
+                          # HS at -80.3 instead of their -111.
     sst_hs    = 2,        # degC. HILDA defines HS by an annual-mean SST < 5 and
                           # gives no single value.
                           # ⚠ 2 IS A FLOOR IMPOSED BY THE CHEMISTRY, NOT A
@@ -2066,7 +2077,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #     interface would transport no isotope at all -- which is precisely
       #     the quantity this structure exists to move.
       if (p$u_hs != 0) {
-        add_flux(ihs, ihd, p$u_hs * y[ihs, "C"] / grid$dz[1])
+        add_flux(ihs, ihd, p$u_hs * y[ihs, "C"] / aux$h_hs)
         add_flux(ihd, ihs, p$u_hs * y[ihd, "C"] / aux$dz_hd)
       }
 
@@ -2368,6 +2379,12 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   # the two columns get their own shares. With hs_frac = 0, `a_ls` is `a_oc`
   # multiplied by exactly 1, so every downstream quantity is bit-identical.
   f_hs <- if (hs_on) p$hs_frac else 0
+  # HS THICKNESS. 0 = follow the low-latitude mixed layer (choice C2, and the
+  # 2026-09-05 build); a positive `h_hs` pins it instead -- HILDA uses 75 m for
+  # both surface boxes. HD is then everything below HS, so the two move together
+  # and the high-latitude column always spans the full depth.
+  h_hs <- if (!is.null(p$h_hs) && is.finite(p$h_hs) && p$h_hs > 0) p$h_hs
+          else grid$h_ml
   a_ls <- lapply(a_oc, function(A) A * (1 - f_hs))
   a_hs <- lapply(a_oc, function(A) A * f_hs)
   npp0 <- list(NH = ccx_const("NPP_GLOBAL_PI") * p$npp_frac_NH,
@@ -2497,8 +2514,9 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # HS is as thick as the low-latitude mixed layer (choice C2): HILDA uses
     # 75 m for BOTH surface boxes, ours is a fitted 134 m, and giving HS its own
     # depth would add a parameter to a structural test. HD is everything below.
-    hs_mass_kg  = lapply(a_hs, function(A) A * grid$h_ml * ccx_const("RHO_SEAWATER")),
-    dz_hd       = sum(grid$dz) - grid$h_ml,
+    h_hs        = h_hs,
+    hs_mass_kg  = lapply(a_hs, function(A) A * h_hs * ccx_const("RHO_SEAWATER")),
+    dz_hd       = sum(grid$dz) - h_hs,
     sst_hs      = if (is.null(p$sst_hs)) 2 else p$sst_hs,
     grid = grid
   )

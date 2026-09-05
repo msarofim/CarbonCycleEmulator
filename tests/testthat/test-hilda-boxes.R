@@ -162,3 +162,41 @@ test_that("the diagnostics are NA when the structure is off, never a stale zero"
   expect_true(all(is.na(d$d14c_hs)))
   expect_true(all(is.na(d$d14c_hd)))
 })
+
+test_that("h_hs = 0 means FOLLOW h_ml, and absence means the same thing", {
+  # The absence contract, for the parameter added 2026-09-05b. A list written
+  # before it existed must reach both cores as the 09-05 structure.
+  p <- ccx_default_params()
+  p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2
+  expect_identical(p$h_hs, 0)
+  q <- p; q$h_hs <- NULL
+  r <- p; r$h_hs <- ccx_ocean_grid(p$h_ml)$h_ml
+  expect_identical(ccx_spinup(p)$y, ccx_spinup(q)$y)
+  expect_identical(ccx_spinup(p)$y, ccx_spinup(r)$y)
+  expect_identical(ccx_prepare(p)$h_hs, ccx_prepare(p)$grid$h_ml)
+})
+
+test_that("HS's Delta14C is INVARIANT to its thickness, because the h cancels", {
+  # ⛔ THIS PINS A RETRACTION. notes/collect_2026-09-05_hilda_boxes.md sec.2
+  # explained HS's shortfall against HILDA with TWO terms, one of them a 1.79x
+  # thickness ratio. There is no such term: in steady state HS's isotope ratio
+  # is a balance of rates PER UNIT VOLUME, and both the HS<->HD limbs (u/h_hs)
+  # and air-sea equilibration (gx/(A h_hs)) carry the same 1/h_hs, so the ratio
+  # -- and hence the steady state -- does not depend on it. Thickness sets the
+  # box's INVENTORY, i.e. how fast it REACHES steady state, not what it is.
+  #
+  # Held as a test because the algebra is easy to forget and the next person to
+  # reach for "make HS thinner" deserves to be told in one second rather than
+  # after a spinup sweep. See notes/collect_2026-09-05bc_hs_endmember.md sec.1.
+  base <- ccx_default_params()
+  base$hs_frac <- 0.16; base$u_hs <- 38; base$tau_q <- 538; base$sst_hs <- 2
+  thick <- base; thick$h_hs <- 150
+  thin  <- base; thin$h_hs  <- 50
+  hs <- function(p) ccx_spinup(p)$diagnostics$d14c_hs[["NH"]]
+  # 3x the thickness, and HS must not move by more than a fraction of a permil
+  expect_lt(abs(hs(thick) - hs(thin)), 0.5)
+  # ...while the INVENTORY does move, which is what thickness actually sets --
+  # the control that says the invariance above is physics and not an inert knob
+  m <- function(p) { sp <- ccx_spinup(p); sp$y[sp$aux$idx$NH$hs, "C"] }
+  expect_gt(m(thick) / m(thin), 2.5)
+})

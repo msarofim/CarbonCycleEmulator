@@ -2,6 +2,142 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-05b/c — **THE HS ENDMEMBER IS SETTLED AND IS NOT THE LEVER.** THICKNESS IS NOT A TERM; THE GAS EXCHANGE IS ALL OF IT, AND AN OBSERVATION EXCLUDES IT
+
+Pre-registered in `notes/prereg_2026-09-05b_hs_thickness.md` and
+`notes/prereg_2026-09-05c_hs_gas_exchange.md`, scored in
+`notes/collect_2026-09-05bc_hs_endmember.md`; `calibration/diag_hilda_hs_thickness.R`,
+`calibration/diag_hilda_hs_gasexchange.R`. Suite **1836 → 1842 / 0 / 0 / 4**.
+**Nothing fitted, nothing adopted.**
+
+⛔⛔ **RETRACTION — `collect_2026-09-05_hilda_boxes.md` §2 IS HALF WRONG, AND IT IS RETRACTED IN
+PLACE.** It explained HS's −80.3 ‰ (against HILDA's −111) with **two** terms, gas exchange 1.97×
+and thickness 1.79×, "both pushing the same way". **Measured: HS moves 0.2 ‰ across a 2.7× change
+in thickness** (134.1 → 100 → 75 → 50 m), and the crossover does not move one layer. **P1b and
+P2b's HD clause are FALSIFIED.**
+⭐⭐ **AND IT IS ANALYTIC — IT SHOULD HAVE BEEN DERIVED, NOT PREDICTED.** In steady state HS's
+isotope ratio is a balance of rates **per unit volume**, and both carry the same `1/h_hs`: the
+HS↔HD limbs go as `u / h_hs`, air-sea equilibration as `gx / (A · h_hs)`. **The ratio, hence the
+steady state, is independent of thickness** — thickness sets the box's INVENTORY, i.e. how fast it
+*reaches* steady state. ⇒ ⭐ **A RATIO OF TWO TIMESCALES THAT SHARE A FACTOR IS NOT A LEVER: cancel
+the algebra before pricing the mechanism.** Pinned by a test, with the inventory as its control.
+
+⛔ **AND A SECOND RETRACTION: MY OWN GATE SCORED A NO-CHANGE AS A PASS.** The script printed
+*"P4b — mean|z| below the 09-05 build's 2.05? 2.05 → CONFIRMED"*, comparing a live value against a
+constant **rounded to 2 dp out of the previous run's printout**; a fourth-decimal difference cleared
+it. Fixed — the baseline arm is recomputed in the same run and gated on a DELTA against an explicit
+materiality tolerance. ⇒ **NEVER GATE ON A THRESHOLD TYPED FROM ANOTHER RUN'S ROUNDED OUTPUT.** A
+new member of the SILENT-GATE family, and `derived_must_mean_computed` in a new costume.
+
+⭐⭐ **THE GAS EXCHANGE IS THE WHOLE OF IT.** `k_w` DERIVED in-script, not typed: HILDA's Table 1
+gives **15.1 ± 1.2 mol m⁻² yr⁻¹ at 280 ppm** against our **29.80** at the same pCO₂ and 2 °C, so
+their gas exchange is **`k_w` = 906 m/yr**. Iso-deep, everything else at HILDA's values:
+
+| arm | `k_w` | flux | `kz` | HS Δ¹⁴C | HD Δ¹⁴C | mean \|z\| | LS ML vs GEOSECS −40 ± 20 |
+|---|---|---|---|---|---|---|---|
+| `ent26` | 1788 | 29.80 | **1900** | −80.3 | −109.2 | **2.048** | −29.8 ✅ |
+| **HILDA** | **906** | **15.10** | **5334** | **−107.5** | **−126.7** | **2.023** | **−78.5 ⛔ ~2σ out** |
+| half HILDA | 453 | 7.55 | — | — | — | — | **no `kz` holds the deep age** |
+
+✅ **P1c: HS = −107.5 against HILDA's own −111**, inside their −120 ± 30. **The endmember question
+is settled** — one term, and it is the gas exchange.
+✅ **P2c: HD −126.7, and `q`'s crossover moves 1160 → 1622 m.** A ¹⁴C-colder HS really does feed an
+older HD and really does push the sign flip deeper.
+⛔⛔ **P4c "confirms" at a delta of 0.025, WHICH IS THE NEGATIVE RESULT.** Two prices, both visible
+in the same row: **`kz` goes back to 5334**, so **almost the entire relief P2/P3 won is spent buying
+the endmember** — the two cannot be had at once — and **GEOSECS excludes the arm** at LS = −78.5.
+⚠ `k_w` is GLOBAL here, and HILDA themselves assume `g_l = g_h`, so giving HS its own gas exchange
+would be a departure from the source rather than an application of it.
+⭐ **AND THE EXCLUSION IS ITSELF A FINDING: `k_w` AND `kz` ARE COUPLED THROUGH AN UNSCORED
+OBSERVABLE.** LS surface Δ¹⁴C runs −29.8 at (1788, 1900) and −78.5 at (906, 5334) — the model needs
+a high `k_w` to keep its surface young **because** its `kz` mixes so much old water up. **GEOSECS's
+−40 ± 20 is a candidate gate on that pair, and the likelihood does not score it.**
+
+⇒ **SETTLED: HS under-equilibrates (yes, and at HILDA's gas exchange it reproduces HILDA's value);
+thickness is not a lever (analytically); the ENDMEMBER is not the lever on the scored band.**
+⇒ **THE ONLY CANDIDATE LEFT IS `q`'s ATTACHMENT DEPTH — and that is a DEPARTURE from HILDA's Fig. 1
+(where `q` exchanges with the Interior as a reservoir, "assumed independent of depth"), so it is a
+DECISION, not a run.** Flagged, not taken.
+
+## 2026-09-05 — **THE HILDA HS/HD BOXES ARE BUILT.** THE 09-04k2 CEILING WAS THE MISSING BOX, AND `q` HAS THE WRONG SIGN IN THE SCORED BAND
+
+Marcus: *"Full HS+HD, R+C++ twins."* Pre-registered in
+`notes/prereg_2026-09-05_hilda_boxes.md`, scored in `notes/collect_2026-09-05_hilda_boxes.md`;
+`calibration/diag_hilda_boxes.R`, `tests/testthat/test-hilda-boxes.R`.
+Suite **1798 → 1836 / 0 fail / 0 error / 4 skip** (+38, all in the new file).
+**Nothing fitted, nothing adopted; `ent26` untouched and `hs_frac` defaults to 0.**
+
+**THE STRUCTURE.** Siegenthaler & Joos (1992), *Tellus* **44B**:186–207, Fig. 1 and Table 1, **read
+from the scanned PDF, not recalled** (`pdftotext` returns nothing on it). A cold surface box **HS**
+at **16 %** of each hemisphere's ocean area over its own well-mixed deep box **HD**, **beside** the
+low-latitude column rather than under it; **HS↔HD at `u_hs`** (HILDA 38 ± 17 m/yr), **HD↔interior at
+`tau_q`** (HILDA q⁻¹ = 538 ± 510 yr), volume-proportional because their `q` is *"assumed independent
+of depth"*. **32 → 36 boxes**, both cores, parity tested.
+
+⚠ **"OFF" MEANS ABSENT, NOT PRESENT-AND-EMPTY, AND THE BOX COUNT IS RUNTIME.** Carrying two
+zero-mass boxes would make `ccx_spinup()`'s Newton Jacobian and **both isotope operators singular**
+(all-zero rows and columns) and would change the incumbent's state vector. So `NPH`/`NB` are set by
+`unpack_aux()` from `aux$hs_on`, and `hs_frac = 0` is **BIT-EXACT with every HL parameter set** —
+the contract `pump_grad = 0` and `alpha_as_tdep = 0` already carry.
+
+✅ **P0** — no-op bit-exact (32 boxes); 0.16 bites (deep **−156.145 → −110.287**); carbon closes to
+**1.33e-15**; R vs C++ **5.70e-14**, *smaller than the incumbent's own 1.14e-13*.
+⭐⭐ **P2 — THE CEILING WAS THE MISSING BOX.** 09-04k2 found that at a whole-column-equivalent
+`u` ≳ 2 **no `kz` holds the deep age**; HILDA's own `u` = 38 m/yr over 16 % of area is **6.08** in
+that convention, **~3× beyond it**. It now solves at **`kz` = 1900**.
+✅ **P3 — `kz` 0.299×** the incumbent, against the reduced form's 0.500×.
+✅ **P1 — HS under-equilibrates on its own: −80.3 ‰ against an LS mixed layer at −29.8**, a
+**50.5 ‰ split**, nothing prescribed and no HS observable in the likelihood.
+⚠ **BUT IT PASSES BY 0.3 ‰ AND IS OUTSIDE HILDA'S OWN −120 ± 30** — do not quote it as "HILDA's HS
+reproduced". **The shortfall is explained quantitatively and BOTH terms push the same way:** our
+gross air-sea invasion is **1.97×** HILDA's (**29.80** vs 15.1 mol m⁻² yr⁻¹, at `k_w` = 1787.8) and
+our HS is **1.79×** thicker (134.1 m = `h_ml`, choice C2, vs 75 m), so the residence-to-equilibration
+ratio is ≈ 1.97× theirs.
+
+⛔⛔ **P4 FAILS AT 2.05** (incumbent 2.55, reduced form **1.81**) — **AND THE REASON IS A MECHANISM
+RESULT, NOT A SHORTFALL. `q` INJECTS WATER THAT IS YOUNGER THAN THE INTERIOR EVERYWHERE BELOW
+~1000 m**, i.e. it ventilates exactly the layers that are already over-ventilated. HD = **−109.2**
+against the interior at −118.1 / −134.7 / −148.3 (1160 / 1622 / 2268 m): the crossover sits at
+**~1000 m and the whole scored band is below it.**
+⇒ **The improvement comes ENTIRELY from the `kz` relief and `q` is fighting it.** That is why the
+reduced form beat the structure: **ML↔bottom-only collected the relief and paid none of the
+penalty**; HILDA's own geometry puts the penalty back.
+⚠ **NOT a repeat of `w_out`.** `w_out` injected **surface** water (−40 ‰); this injects **HD** water
+(−109 ‰), 70 ‰ older. **The endmember is right; the DEPTH OF ATTACHMENT is wrong for our column.**
+
+| arm | `kz` | `kz`/`kz`(0) | HS | HD | LS ML | mean \|z\| |
+|---|---|---|---|---|---|---|
+| incumbent (no HS) | 6356 | 1.000 | — | — | −49.3 | **2.55** |
+| `u` = 0 (**HD + q only**) | 6410 | 1.009 | +1.4 | −141.5 | −57.9 | **2.23** |
+| **`u` = 38 (HILDA)** | **1900** | **0.299** | **−80.3** | −109.2 | −29.8 | **2.05** |
+| `u` = 76 | 1502 | 0.236 | −90.1 | −106.4 | −26.3 | 1.96 |
+| `u` = 38, τ_q = 28 | 139 | 0.022 | −112.4 | −153.2 | **−17.1** | **1.32** |
+
+⭐ **The `u` = 0 arm is a finding on its own**: an HD reservoir with **no conduit at all** improves
+the scored band **2.55 → 2.23 at essentially unchanged `kz`** (6356 → 6410). That is the reservoir,
+not the conduit.
+⭐ **AN UNPLANNED OUT-OF-SAMPLE CHECK DISCRIMINATES THE ARMS.** GEOSECS puts the low-latitude surface
+at **−40 ± 20 ‰** (HILDA Table 2) and nothing in our likelihood scores it. The arm with the **best**
+mean |z| in the whole table (τ_q = 28, **1.32**) reads **−17.1 and is EXCLUDED by it** — and
+independently needs `kz` = 139, **46×** below the 09-01 bracket [4379.1, 8109.9].
+
+⛔ **TWO CORRECTIONS TO MY OWN WORK, both made in place:**
+1. **N1's LEVEL is invalid and I built it that way.** At a **preindustrial** steady state the
+   ≤ 500 m band is dominated by the **absent bomb spike** — the incumbent's own upper mean |z| is
+   4.54, essentially all artefact (67 m: model −48.3 against an observed **+50.5**). This is exactly
+   the ⚠⚠ trap `handoff_2026-09-04_ocean_structure_arc.md` §5 states in so many words. **The DELTA
+   between arms is still interpretable** (4.54 → 3.98, it improves); the level is not.
+   ⇒ **A CONTROL BAND MUST BE CHOSEN WHERE THE COMPARISON IS VALID, NOT WHERE THE DEFECT IS.**
+2. **A mutation test asserted exact equality where the two columns still share an ATMOSPHERE.** HS
+   exchanges CO₂ with it, so switching `tau_q` off moves `prod_c14` and the LS column feels it:
+   **3.9e-04 ‰**, four orders below the conduit's own effect. Now **pinned**, not hidden — asserting
+   exact equality there would have been asserting that an air-sea flux does nothing.
+
+⇒ **NEXT, AND NAMED BY THE DIAGNOSIS RATHER THAN BY TASTE** (pre-registered in
+`notes/prereg_2026-09-05b_hs_thickness.md`): **(a) HS at HILDA's own 75 m**, which the §2 arithmetic
+predicts deepens HS toward −120, ages HD, and pushes `q`'s crossover deeper; **(b) the attachment
+depth of `q`** — ⚠ a **departure from HILDA's Fig. 1** and to be labelled as one.
+
 ## 2026-09-04k(2) — THE HILDA CONDUIT WORKS: 3/3, AND IT IS THE FIRST MECHANISM IN THIS ARC THAT HELPS
 
 Marcus: *"Yes, test the Hilda approach."* Pre-registered in

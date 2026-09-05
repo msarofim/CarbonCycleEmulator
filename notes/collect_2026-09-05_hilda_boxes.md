@@ -55,6 +55,14 @@ parameter was fitted to one. That is the physics the 09-04k2 shim could not carr
 **But −80.3 clears the pre-registered [−160, −80] window by 0.3 ‰ and is OUTSIDE HILDA's own
 −120 ± 30.** Quoting this as "HILDA's HS reproduced" would be wrong.
 
+> ⛔⛔ **§2 IS HALF RETRACTED, 2026-09-05b/c — SEE `collect_2026-09-05bc_hs_endmember.md`.**
+> **THE THICKNESS TERM DOES NOT EXIST.** Measured: HS moves **0.2 ‰ across a 2.7× change in
+> thickness** (134.1 → 50 m), because in steady state both the HS↔HD limbs (`u / h_hs`) and air-sea
+> equilibration (`gx / (A · h_hs)`) carry the same `1/h_hs` and **the ratio is independent of it** —
+> thickness sets the box's INVENTORY, not its steady state. **Only the 1.97× gas-exchange term is
+> real, and it is sufficient on its own**: at HILDA's own 15.1 mol m⁻² yr⁻¹ HS lands at **−107.5**
+> against their −111. The table below is kept for provenance; read the ratio row as retracted.
+
 ⭐⭐ **AND THE SHORTFALL IS EXPLAINED QUANTITATIVELY, BY THE TWO DEPARTURES THE PREREG FLAGGED —
 BOTH PUSHING THE SAME WAY.**
 
@@ -64,11 +72,12 @@ BOTH PUSHING THE SAME WAY.**
 | HS thickness (choice C2: = `h_ml`) | **134.1 m** | 75 m | 1.79× |
 | HS residence at `u` = 38 | **3.53 yr** | 1.97 yr | 1.79× |
 
-Isotopic equilibration goes as thickness / gas exchange, so **1.79 / 1.97 = 0.91** — our HS
-equilibrates slightly FASTER than HILDA's — while its residence is **1.79× LONGER**. The ratio
-residence : equilibration is therefore ≈ **1.97×** HILDA's, and HS gets about twice as far toward
-atmospheric equilibrium. ⇒ **C2 and C6 together are sufficient to explain −80 against −111, and
-neither is a free parameter to tune: `k_w` is fitted, and `h_ml` is C2's declared choice.**
+⛔ **THE ARITHMETIC IN THIS PARAGRAPH WAS WRONG AND IS RETRACTED (see the box above).** It read:
+*"equilibration goes as thickness / gas exchange, so 1.79 / 1.97 = 0.91 while residence is 1.79×
+longer, hence a ratio ≈ 1.97× HILDA's."* **Both timescales are linear in the thickness, so the h
+cancels and 1.79 was never a term.** The conclusion that C6 alone explains −80 against −111 is the
+one that survives, and it is now MEASURED rather than argued.
+⇒ ⭐ **A RATIO OF TWO TIMESCALES THAT SHARE A FACTOR IS NOT A LEVER.**
 
 ## 3. ⛔⛔ WHY P4 FAILS, AND IT IS A MECHANISM RESULT, NOT A SHORTFALL
 
@@ -127,3 +136,8 @@ pre-registered, and reported as such.**
   deepens HS toward −120, ages HD, and pushes `q`'s crossover DEEPER; (b) **the attachment depth of
   `q`**, which §3 identifies as the thing costing the scored band. ⚠ (b) is a departure from HILDA's
   Fig. 1 and must be labelled as one.
+  > **BOTH HALVES OF (a) ARE NOW RUN — see `collect_2026-09-05bc_hs_endmember.md`.** Thickness is
+  > **not a term** (0.2 ‰ over 2.7×, analytically), and the endmember reached through the gas
+  > exchange **does** move the crossover 1160 → 1622 m but **buys 0.025 of mean |z| while giving
+  > back the entire `kz` relief (1900 → 5334) and putting the LS surface 2σ outside GEOSECS**.
+  > ⇒ **(b) IS NOW THE ONLY CANDIDATE THE DIAGNOSIS NAMES, AND IT NEEDS A DECISION, NOT A RUN.**

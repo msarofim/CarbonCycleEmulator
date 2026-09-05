@@ -81,7 +81,7 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     a_hs = c(aux$a_hs$NH, aux$a_hs$SH),
     hs_mass_kg = c(aux$hs_mass_kg$NH, aux$hs_mass_kg$SH),
     asx_hs = c(aux$asx_hs$NH, aux$asx_hs$SH),
-    dz_hd = aux$dz_hd, sst_hs = aux$sst_hs,
+    h_hs = aux$h_hs, dz_hd = aux$dz_hd, sst_hs = aux$sst_hs,
     dic0_hs = aux$dic0_hs, revelle0_hs = aux$revelle0_hs
   )
 }
