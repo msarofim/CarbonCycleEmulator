@@ -88,6 +88,14 @@ ccx_flux_boxclass <- function(aux, nb) {
     cls[ix$soil_slow] <- "soil"
     cls[ix$ml]        <- "ml"
     cls[ix$oc]        <- "int"
+    # HS is a SURFACE box and HD a deep one, so they take the existing classes
+    # rather than new ones: atm<->HS is genuinely air-sea and belongs in
+    # as_down/as_up, HS<->HD is a surface-to-interior exchange like ml_int, and
+    # HD<->interior is interior exchange. Adding private channels would leave
+    # the derived net ocean uptake wrong by exactly the HS air-sea flux -- the
+    # same call, and the same reason, as the artificial sink and the ENSO limbs.
+    if (!is.null(ix$hs)) cls[ix$hs] <- "ml"
+    if (!is.null(ix$hd)) cls[ix$hd] <- "int"
   }
   if (anyNA(cls)) stop("ccx_flux_boxclass: unclassified box(es) at ",
                        paste(which(is.na(cls)), collapse = ", "))

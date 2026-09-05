@@ -70,7 +70,19 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
       c(aux$pump$NH$carb, aux$pump$SH$carb),
     ml_C0 = c(aux$ml_C0$NH, aux$ml_C0$SH),
     alpha_pump_org  = 1 + ccx_const("PUMP_EPS13_ORG") / 1000,
-    alpha_pump_carb = 1 + ccx_const("PUMP_EPS13_CARB") / 1000
+    alpha_pump_carb = 1 + ccx_const("PUMP_EPS13_CARB") / 1000,
+    # THE HIGH-LATITUDE BOXES (HILDA HS/HD, 2026-09-05). Sent UNCONDITIONALLY,
+    # for the reason the pump arrays and the T-dependent alphas are: the core
+    # reads every field into a fixed struct, so a field the R side sometimes
+    # omits is whatever was in that memory before. `hs_on` is read FIRST on the
+    # C++ side because it also sets the box stride.
+    hs_on = as.integer(aux$hs_on), hs_frac = aux$hs_frac,
+    a_ls = c(aux$a_ls$NH, aux$a_ls$SH),
+    a_hs = c(aux$a_hs$NH, aux$a_hs$SH),
+    hs_mass_kg = c(aux$hs_mass_kg$NH, aux$hs_mass_kg$SH),
+    asx_hs = c(aux$asx_hs$NH, aux$asx_hs$SH),
+    dz_hd = aux$dz_hd, sst_hs = aux$sst_hs,
+    dic0_hs = aux$dic0_hs, revelle0_hs = aux$revelle0_hs
   )
 }
 
@@ -104,6 +116,13 @@ ccx_cpp_par <- function(p) {
   # Land-structure parameters added 2026-08-12. Defaulted here as well as in
   # ccx_default_params() so that a hand-built or older parameter list cannot
   # reach the C++ with a missing name -- which unpacks as garbage, not an error.
+  # HILDA high-latitude boxes, added 2026-09-05. Defaulted here as well as in
+  # ccx_default_params() so a parameter list built before that date cannot reach
+  # the core with a missing name -- which unpacks as garbage, not as an error.
+  # The behaviour-preserving values are the OFF ones: hs_frac = 0 (in the aux,
+  # via ccx_hs_on()) means the boxes are absent, and these two are then inert.
+  if (is.null(p$u_hs))  p$u_hs  <- 0
+  if (is.null(p$tau_q)) p$tau_q <- 0
   if (is.null(p$npp_veg_frac)) p$npp_veg_frac <- 0
   if (is.null(p$ra_ratio)) p$ra_ratio <- 0
   # Fertilisation form, added 2026-08-14. Defaults to the SAME named constant
@@ -195,6 +214,7 @@ ccx_cpp_par <- function(p) {
   }
   p[c("beta", "fert_form", "beta_max", "fert_k",
       "q10", "k_w", "kz", "w_up", "w_out_NH", "w_out_SH", "tau_ex",
+      "u_hs", "tau_q",    # HILDA HS/HD (2026-09-05)
       "q_conv", "conv_sink", "conv_descent", "conv_reverse", "pump_mode",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
@@ -272,7 +292,8 @@ ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
                     "ocean_C14", "land_C14", "atm_C14",
                     CCX_OCEAN_BOX_COLS)
     state <- res$state
-    dimnames(state) <- list(ccx_box_names(spin$grid$nl), CCX_TRACERS)
+    dimnames(state) <- list(
+      ccx_box_names(spin$grid$nl, ccx_hs_on(spin$params)), CCX_TRACERS)
     list(state = state, out = cbind(t = F$t, out), substeps = as.integer(nsub))
   }
   r <- one(ss)

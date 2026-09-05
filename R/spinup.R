@@ -150,7 +150,7 @@ ccx_spinup <- function(p = ccx_default_params(),
 
   aux  <- ccx_prepare(p)
   grid <- aux$grid
-  y    <- ccx_new_state(grid$nl)
+  y    <- ccx_new_state(grid$nl, ccx_hs_on(p))
 
   # ---- 12C: analytic equilibrium -------------------------------------
   for (h in HEMIS) {
@@ -194,6 +194,20 @@ ccx_spinup <- function(p = ccx_default_params(),
     y[i$ml, "C"] <- dic * aux$ml_mass_kg[[h]] / aux$mol_per_GtC
     conc <- y[i$ml, "C"] / grid$dz[1]
     y[i$oc, "C"] <- conc * grid$dz[-1]
+
+    # THE HIGH-LATITUDE COLUMN, when it exists: HS in Henry equilibrium with the
+    # atmosphere at ITS OWN temperature, HD uniform beneath it. This is only a
+    # STARTING GUESS and cannot be the fixed point -- HS is colder than the
+    # mixed layer, so the two columns sit at different DIC and the exchange
+    # limbs see a real gradient, exactly as the conveyor does between
+    # hemispheres. ccx_c12_steady_conveyor() below finishes the job, and its
+    # gate is widened to include this structure for that reason.
+    if (!is.null(i$hs)) {
+      dic_h <- ccx_dic_for_pco2(chi0, ccx_const("ALK_SURFACE"), aux$sst_hs)
+      y[i$hs, "C"] <- dic_h * aux$hs_mass_kg[[h]] / aux$mol_per_GtC
+      y[i$hd, "C"] <- dic_h * aux$a_hs[[h]] * aux$dz_hd *
+                      ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
+    }
   }
 
   # ---- forcing at equilibrium: nothing external ----------------------
@@ -221,7 +235,7 @@ ccx_spinup <- function(p = ccx_default_params(),
   # one therefore needs the full-state Newton solve. With both off it is a no-op
   # on an already-exact fixed point, which is why the branch is gated rather than
   # unconditional: the no-pump, no-conveyor model stays bit-identical.
-  if (!is.null(ccx_conveyor_geom(p, grid)) || !is.null(aux$pump))
+  if (!is.null(ccx_conveyor_geom(p, grid)) || !is.null(aux$pump) || aux$hs_on == 1L)
     y <- ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0))
 
   nb <- nrow(y)
@@ -266,7 +280,10 @@ ccx_spinup <- function(p = ccx_default_params(),
   d14c_atm <- 1000 * (sum(y[atm_idx, "C14"]) / sum(y[atm_idx, "C"]) - 1)
   d13c_atm <- 1000 * (sum(y[atm_idx, "C13"]) /
                         (sum(y[atm_idx, "C"]) * ccx_const("R13_VPDB")) - 1)
-  ocean_idx <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$ml, aux$idx[[h]]$oc)))
+  # HS and HD ARE ocean carbon and belong in the inventory; `$hs`/`$hd` are NULL
+  # when the structure is off, and c() drops them, so this is the same vector.
+  ocean_idx <- unlist(lapply(HEMIS, function(h)
+    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd)))
   deep_idx  <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 3)))
   bot_idx   <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 1)))
 
@@ -320,6 +337,18 @@ ccx_spinup <- function(p = ccx_default_params(),
         k <- tail(aux$idx[[h]]$oc, 1)
         1000 * (sum(y[k, "C14"]) / sum(y[k, "C"]) - 1)
       }, numeric(1)),
+      # THE HIGH-LATITUDE BOXES, reported SEPARATELY and NOT folded into any row
+      # above. `d14c_bottom_box` is the quantity every iso-deep protocol in this
+      # repo re-solves kz against, and the kz bracket was derived from it; a
+      # structural change that quietly redefined it would make every stored
+      # number non-comparable in exactly the way nothing would catch.
+      # NA when the structure is off, so a caller cannot read a stale 0 as data.
+      d14c_hs = if (aux$hs_on == 1L) vapply(HEMIS, function(h) {
+        k <- aux$idx[[h]]$hs; 1000 * (y[k, "C14"] / y[k, "C"] - 1)
+      }, numeric(1)) else stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS),
+      d14c_hd = if (aux$hs_on == 1L) vapply(HEMIS, function(h) {
+        k <- aux$idx[[h]]$hd; 1000 * (y[k, "C14"] / y[k, "C"] - 1)
+      }, numeric(1)) else stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS),
       ocean_C_GtC       = sum(y[ocean_idx, "C"]),
       land_C_GtC        = sum(y[unlist(lapply(HEMIS, function(h)
                             aux$idx[[h]]$land)), "C"]),

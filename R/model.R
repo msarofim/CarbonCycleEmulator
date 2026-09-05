@@ -710,18 +710,42 @@ ccx_luc_pool_shares <- function(p) {
   w / sum(w)
 }
 
-#' Names of the 32 boxes, in state order
-ccx_box_names <- function(nl = N_INTERIOR) {
+#' Names of the boxes, in state order
+#'
+#' 32 boxes with the high-latitude structure OFF (`hs = FALSE`), which is the
+#' default and every result before 2026-09-05; 36 with it on, the two extra
+#' boxes per hemisphere appended AFTER the interior column so that no existing
+#' index moves. `src/ccx_core.cpp` mirrors this order and derives its stride
+#' from it -- see the layout comment at the top of that file.
+#'
+#' ⚠ THE BOX COUNT IS CONDITIONAL, NOT FIXED AT 36. Carrying two zero-mass
+#' boxes when the structure is off would make ccx_spinup()'s Newton Jacobian and
+#' both isotope operators SINGULAR (all-zero rows and columns), so "off" has to
+#' mean absent, not present-and-empty. It also keeps the incumbent's state
+#' vector literally identical, which is what makes `hs_frac = 0` bit-exact.
+ccx_box_names <- function(nl = N_INTERIOR, hs = FALSE) {
   unlist(lapply(HEMIS, function(h)
     c(paste0(h, "_atm"), paste0(h, "_", CCX_LAND_POOLS),
-      paste0(h, "_ml"), paste0(h, "_oc", seq_len(nl)))))
+      paste0(h, "_ml"), paste0(h, "_oc", seq_len(nl)),
+      if (hs) c(paste0(h, "_hs"), paste0(h, "_hd")))))
+}
+
+#' Is the high-latitude (HILDA HS/HD) structure on for this parameter set?
+#'
+#' ONE RESOLVER, and every caller goes through it -- `ccx_prepare()`,
+#' `ccx_spinup()`, `ccx_cpp_aux()` and the tests. A parameter list built before
+#' 2026-09-05 carries no `hs_frac` at all and must reach both cores as the
+#' 32-box model, so absence and zero mean the same thing here.
+ccx_hs_on <- function(p) {
+  f <- p$hs_frac
+  !is.null(f) && is.finite(f) && f > 0
 }
 
 CCX_TRACERS <- c("C", "C13", "C14")
 
 #' Build an empty state: matrix [box x tracer]
-ccx_new_state <- function(nl = N_INTERIOR) {
-  bn <- ccx_box_names(nl)
+ccx_new_state <- function(nl = N_INTERIOR, hs = FALSE) {
+  bn <- ccx_box_names(nl, hs)
   matrix(0, nrow = length(bn), ncol = length(CCX_TRACERS),
          dimnames = list(bn, CCX_TRACERS))
 }
@@ -904,6 +928,58 @@ ccx_default_params <- function() {
     # Both 0 = the pure-diffusion ocean, exactly.
     w_out_NH  = 0,
     w_out_SH  = 0,
+    # ---- THE HIGH-LATITUDE BOXES (HILDA HS/HD, built 2026-09-05) ---------
+    # Siegenthaler & Joos (1992), Tellus 44B:186-207,
+    # doi:10.3402/tellusb.v44i3.15441. Their Fig. 1 is the geometry and their
+    # Table 1 is where every number below comes from; the PDF is scanned, so it
+    # must be READ as images -- pdftotext returns nothing.
+    #
+    # WHAT IT IS. A cold surface box (HS) covering `hs_frac` of each
+    # hemisphere's ocean area, over its own well-mixed deep box (HD) spanning
+    # h_ml to the sea floor. HS exchanges with the atmosphere on exactly the
+    # same law as the low-latitude mixed layer; HS exchanges with HD at `u_hs`;
+    # HD exchanges with the interior COLUMN at `tau_q`.
+    #
+    # WHY IT IS NOT `w_out`, WHICH WAS BUILT, MEASURED AND FAILED. `w_out` lifts
+    # bottom water into the EXISTING mixed layer and returns it distributed
+    # downward through every interior layer -- i.e. it injects SURFACE water
+    # (-40 permil) into the intermediate boxes, which is why it over-ventilates
+    # them. The HD limb here injects HD water (~-136 permil in HILDA), which is
+    # OLD. Same wiring diagram, opposite endmember.
+    #
+    # THE SWITCH IS `hs_frac`, and 0 means the structure is ABSENT, not empty:
+    # ccx_box_names() returns 32 boxes and not one line of the code below runs,
+    # so every result before 2026-09-05 is bit-reproduced. See ccx_hs_on().
+    hs_frac   = 0,        # HS share of EACH hemisphere's ocean area.
+                          # HILDA: 0.16 of the GLOBAL surface, "the Antarctic
+                          # south of ~52 S and parts of the northern North
+                          # Atlantic". Applying 0.16 per hemisphere gives 0.16
+                          # globally with no further assumption; the real HS is
+                          # SH-heavy, and that allocation is the pre-registered
+                          # sensitivity, not the default.
+    u_hs      = 38,       # m/yr, HS <-> HD exchange OVER THE HS AREA.
+                          # HILDA Table 1, K(z) version: 38 +/- 17.
+                          # ⚠ NOT comparable to the 2026-09-04k shim's `u`,
+                          # which acted over the WHOLE column: that convention
+                          # divides this by 1/hs_frac (38 x 0.16 = 6.08).
+    tau_q     = 538,      # yr. HD <-> interior exchange, as HILDA parameterises
+                          # it: an exchange volume flux of V_interior / tau_q,
+                          # distributed over the interior layers IN PROPORTION
+                          # TO THEIR VOLUME -- their q is "assumed independent
+                          # of depth". Table 1: q^-1 = 538 +/- 510 yr.
+    sst_hs    = 2,        # degC. HILDA defines HS by an annual-mean SST < 5 and
+                          # gives no single value.
+                          # ⚠ 2 IS A FLOOR IMPOSED BY THE CHEMISTRY, NOT A
+                          # CHOICE: data-raw/build_carbonate_tables.R fits K0,
+                          # K1, K2, Kb, Kw on seq(2, 35, 0.25) because Lueker et
+                          # al. (2000) is validated for T = 2-35 degC. At 2 degC
+                          # seacarb warns for Kf/Kspa/Kspc only -- none of which
+                          # this model uses; at -1.8 it warns for K0, K1, K2, Kb
+                          # AND Kw, i.e. every constant the model does use.
+                          # Going colder needs a polar-valid formulation
+                          # (Waters et al. 2014, seacarb k1k2 = "w14"), which
+                          # would move LS pCO2 by +0.14 % at 18 degC and so is a
+                          # separate, measured decision -- NOT a silent refit.
     # ---- THE BIOLOGICAL PUMP (task 9, ported 2026-08-16 from the shim in
     # calibration/pump_shim.R) --------------------------------------------
     # THE PUMP SHIPS ON, AND `pump_grad` IS A FITTED PARAMETER (Marcus
@@ -1944,6 +2020,83 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       }
     }
 
+    # ---- THE HIGH-LATITUDE COLUMN (HILDA HS/HD, 2026-09-05) ----------
+    # Siegenthaler & Joos (1992) Fig. 1: a cold surface box over its own
+    # well-mixed deep box, beside the low-latitude column rather than under it.
+    # Wired in notes/prereg_2026-09-05_hilda_boxes.md; `hs_frac = 0` emits
+    # NOTHING and the boxes do not exist, so the 32-box model is bit-reproduced.
+    if (aux$hs_on == 1L) {
+      ihs <- aux$idx[[h]]$hs
+      ihd <- aux$idx[[h]]$hd
+
+      # (a) AIR-SEA, on exactly the law the mixed layer uses. HILDA assumes the
+      #     gas exchange coefficient PER UNIT AREA is the same in high and low
+      #     latitudes (their Table 1, g_l = g_h), justified by sea ice
+      #     suppressing exchange in winter and roughly cancelling the stronger
+      #     high-latitude winds. That is THEIR ASSUMPTION and it is inherited
+      #     here as one -- not a measurement.
+      #
+      #     ⚠ NO SEASONAL CYCLE ON THIS BOX. The anomaly response is the
+      #     hemisphere's (so HS warms with it), but sst_seas_amp_* and the
+      #     Southern-Ocean entrainment channel are LS mechanisms fitted against
+      #     LS observables, and reusing them here would move fitted quantities
+      #     inside a structural test.
+      sst_hs <- aux$sst_hs +
+        (if (isTRUE(p$sst_obs > 0) && !is.null(sa) && is.finite(sa)) sa
+         else p$sst_scale * forc$gmst)
+      dic_hs <- y[ihs, "C"] * aux$mol_per_GtC / aux$hs_mass_kg[[h]]   # mol/kg
+      k_hs   <- carb_constants(sst_hs)
+      pco2_hs <- if (isTRUE(p$revelle_frozen > 0)) {
+        ccx_const("CO2_PI_PPM") *
+          (1 + aux$revelle0_hs * (dic_hs - aux$dic0_hs) / aux$dic0_hs)
+      } else {
+        pco2_from_dic(dic_hs, ccx_const("ALK_SURFACE"), sst_hs, k = k_hs)
+      }
+      gx_hs  <- aux$asx_hs[[h]] * p$k_w * k_hs$K0
+      a_as_h <- ccx_alpha_as(sst_hs, aux)
+      add_flux(iatm, ihs, gx_hs * pco2_at, alpha13 = a_as_h$down,
+               alpha13_signed = TRUE)                                  # invasion
+      add_flux(ihs, iatm, gx_hs * pco2_hs, alpha13 = a_as_h$up,
+               alpha13_signed = TRUE)                                  # evasion
+
+      # (b) HS <-> HD, two-way GROSS at `u_hs` m/yr over the HS area. The area
+      #     cancels within the column exactly as it does for w_up, so this is a
+      #     velocity over a thickness. GROSS both ways for the reason in
+      #     add_flux's header: at equilibrium the net is zero and a net-only
+      #     interface would transport no isotope at all -- which is precisely
+      #     the quantity this structure exists to move.
+      if (p$u_hs != 0) {
+        add_flux(ihs, ihd, p$u_hs * y[ihs, "C"] / grid$dz[1])
+        add_flux(ihd, ihs, p$u_hs * y[ihd, "C"] / aux$dz_hd)
+      }
+
+      # (c) HD <-> INTERIOR, volume-proportional over every interior layer.
+      #     HILDA's q is "assumed independent of depth" and their Interior is
+      #     one advective-diffusive continuum, so the discretisation of that is
+      #     an exchange volume flux V_int/tau_q split by layer volume:
+      #       Q_k = a_ls * dz_k / tau_q
+      #     which makes the layer -> HD limb exactly y_k / tau_q and the HD ->
+      #     layer limb Q_k * conc_HD. Volume-symmetric, hence conservative.
+      #
+      #     ⚠ THE AREAS DO NOT CANCEL HERE. This and the conveyor's
+      #     interhemispheric limbs are the only fluxes in the model that cross
+      #     between columns of DIFFERENT area, so both sides need a true
+      #     per-volume concentration.
+      #
+      #     ⭐ AND THIS IS THE WHOLE DIFFERENCE FROM `w_out`, WHICH FAILED.
+      #     `w_out`'s distributed return injects MIXED-LAYER water into every
+      #     interior layer; this injects HD water, which is old. Same wiring,
+      #     opposite endmember.
+      if (p$tau_q > 0) {
+        conc_hd <- y[ihd, "C"] / (aux$a_hs[[h]] * aux$dz_hd)           # GtC/m3
+        for (kk in seq_len(grid$nl)) {
+          add_flux(ihd, ioc[kk],
+                   aux$a_ls[[h]] * grid$dz[kk + 1] / p$tau_q * conc_hd)
+          add_flux(ioc[kk], ihd, y[ioc[kk], "C"] / p$tau_q)
+        }
+      }
+    }
+
     # ---- prescribed emissions ---------------------------------------
     # Fossil carbon comes from OUTSIDE the modelled system (geology), so it is a
     # true external source, and it is 14C-free.
@@ -2172,7 +2325,12 @@ ccx_pump_export <- function(p, aux, grid) {
   prof <- (shape - shape[1]) / span * p$pump_grad
   fc <- p$pump_carb_frac
   out <- lapply(HEMIS, function(h) {
-    kappa <- aux$a_oc[[h]] * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
+    # THE LS AREA, not the total: with the high-latitude boxes on, the
+    # diffusive column covers only (1 - hs_frac) of the hemisphere, and the pump
+    # is an LS-column mechanism (choice C9 of
+    # notes/prereg_2026-09-05_hilda_boxes.md -- Southern-Ocean export is real
+    # and is DEFERRED, not denied). Identical to aux$a_oc when hs_frac = 0.
+    kappa <- aux$a_ls[[h]] * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
     cc <- kappa * prof * 1e-6                                # GtC/m
     Fi <- p$kz * (cc[-length(cc)] - cc[-1]) / aux$dz_mid     # nl interfaces
     S <- numeric(grid$nl)
@@ -2185,12 +2343,17 @@ ccx_pump_export <- function(p, aux, grid) {
 }
 
 ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
-  bn  <- ccx_box_names(grid$nl)
+  hs_on <- ccx_hs_on(p)
+  bn  <- ccx_box_names(grid$nl, hs_on)
   idx <- lapply(HEMIS, function(h) {
     v <- list(
       atm  = which(bn == paste0(h, "_atm")),
       ml   = which(bn == paste0(h, "_ml")),
       oc   = which(bn %in% paste0(h, "_oc", seq_len(grid$nl))))
+    if (hs_on) {
+      v$hs <- which(bn == paste0(h, "_hs"))
+      v$hd <- which(bn == paste0(h, "_hd"))
+    }
     for (pool in CCX_LAND_POOLS) v[[pool]] <- which(bn == paste0(h, "_", pool))
     # every land index in state order, for the callers that want the land as a
     # whole (spinup diagnostics, forcing.R's budget split)
@@ -2200,6 +2363,13 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   names(idx) <- HEMIS
 
   a_oc <- list(NH = ccx_const("OCEAN_AREA_NH"), SH = ccx_const("OCEAN_AREA_SH"))
+  # THE AREA PARTITION. `a_oc` stays the hemisphere TOTAL -- the conveyor's
+  # interhemispheric limbs are parameterised by volume flux and need it -- and
+  # the two columns get their own shares. With hs_frac = 0, `a_ls` is `a_oc`
+  # multiplied by exactly 1, so every downstream quantity is bit-identical.
+  f_hs <- if (hs_on) p$hs_frac else 0
+  a_ls <- lapply(a_oc, function(A) A * (1 - f_hs))
+  a_hs <- lapply(a_oc, function(A) A * f_hs)
   npp0 <- list(NH = ccx_const("NPP_GLOBAL_PI") * p$npp_frac_NH,
                SH = ccx_const("NPP_GLOBAL_PI") * (1 - p$npp_frac_NH))
 
@@ -2241,7 +2411,7 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
                          (1 - p$litter_slow_frac) * p$tau_soil_fast +
                          p$litter_slow_frac * p$tau_soil_slow)),
     sst         = list(NH = p$sst_NH, SH = p$sst_SH),
-    ml_mass_kg  = lapply(a_oc, function(A) A * grid$h_ml * ccx_const("RHO_SEAWATER")),
+    ml_mass_kg  = lapply(a_ls, function(A) A * grid$h_ml * ccx_const("RHO_SEAWATER")),
     # Preindustrial mixed-layer CARBON, GtC. Only the DIC-limited pump reads it,
     # as the denominator of its export scaling, and it is computed here so the
     # two pump modes cannot disagree about what "preindustrial" means.
@@ -2250,10 +2420,10 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # silently reads NULL. (The neighbouring entries get their names from the
     # named list they map over; this one has nothing to inherit from.)
     ml_C0       = stats::setNames(lapply(HEMIS, function(h)
-                    dic0[[h]] * a_oc[[h]] * grid$h_ml * ccx_const("RHO_SEAWATER") /
+                    dic0[[h]] * a_ls[[h]] * grid$h_ml * ccx_const("RHO_SEAWATER") /
                       ccx_const("MOL_C_PER_GtC")), HEMIS),
     # air-sea prefactor: A [m2] * K0 [mol/(kg atm)] * rho [kg/m3] -> GtC/(yr uatm)
-    asx = lapply(a_oc, function(A)
+    asx = lapply(a_ls, function(A)
       A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC")),
     dz_mid = (grid$dz[-length(grid$dz)] + grid$dz[-1]) / 2,
     alpha_photo = 1 - 18 / 1000,     # provisional, see constants.R note
@@ -2316,8 +2486,29 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # the only fluxes in the model where the hemisphere's area does NOT cancel
     # between source and sink, so they need a true per-volume concentration.
     a_oc = a_oc,
+    # ---- THE HIGH-LATITUDE COLUMN (HILDA HS/HD, 2026-09-05) -------------
+    # All present unconditionally, like the pump arrays and the T-dependent
+    # alphas: `hs_on` is what gates the flux, on BOTH cores, so a field the R
+    # side sometimes omits would be whatever was in that memory before.
+    hs_on       = as.integer(hs_on),
+    hs_frac     = f_hs,
+    a_ls        = a_ls,
+    a_hs        = a_hs,
+    # HS is as thick as the low-latitude mixed layer (choice C2): HILDA uses
+    # 75 m for BOTH surface boxes, ours is a fitted 134 m, and giving HS its own
+    # depth would add a parameter to a structural test. HD is everything below.
+    hs_mass_kg  = lapply(a_hs, function(A) A * grid$h_ml * ccx_const("RHO_SEAWATER")),
+    dz_hd       = sum(grid$dz) - grid$h_ml,
+    sst_hs      = if (is.null(p$sst_hs)) 2 else p$sst_hs,
     grid = grid
   )
+  # HS's own preindustrial chemistry references, for the frozen-Revelle switch,
+  # built on the SAME two solves the low-latitude pair uses so the cold box
+  # cannot end up with a different notion of "preindustrial".
+  aux$dic0_hs     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk, aux$sst_hs)
+  aux$revelle0_hs <- revelle_factor(aux$dic0_hs, alk, aux$sst_hs)
+  aux$asx_hs      <- lapply(a_hs, function(A)
+    A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC"))
   # THE PUMP IS SOLVED ONCE PER PREPARE, not once per derivative evaluation.
   # It needs `aux` (areas, dz_mid, mol_per_GtC), so it cannot be built inside the
   # list above -- and it must not be built inside ccx_deriv(), which runs four

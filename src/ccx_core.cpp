@@ -37,10 +37,24 @@ using namespace Rcpp;
 
 // Box layout, per hemisphere, in state order -- MUST match ccx_box_names():
 //   0 atm | 1 leaf | 2 wood | 3 soil_fast | 4 soil_slow | 5 ml | 6..15 interior
-static const int NPH = 16;         // boxes per hemisphere (the stride)
-static const int NB = 2 * NPH;     // boxes
+//   16 hs | 17 hd                      <- ONLY when the HILDA structure is on
+//
+// ⚠ THE STRIDE IS RUNTIME, NOT COMPILE-TIME, SINCE 2026-09-05. The
+// high-latitude boxes are ABSENT rather than empty when hs_frac = 0: carrying
+// two zero-mass boxes would make ccx_spinup()'s Newton Jacobian and both
+// isotope operators singular (all-zero rows and columns), and it would change
+// the incumbent's state vector, which is what has to stay identical for
+// hs_frac = 0 to be bit-exact. So NPH/NB are set by unpack_aux() from
+// aux$hs_on, and EVERY entry point calls unpack_aux() before touching y.
+// They are file statics, so this core is not re-entrant across threads with
+// two different structures; it never was thread-safe and the calibration
+// parallelises by FORKING, which gives each worker its own copy.
+static int NPH = 16;               // boxes per hemisphere (the stride)
+static int NB  = 32;               // boxes
 static const int NL = 10;          // ocean interior layers
 static const int IML = 5;          // mixed layer, relative to the hemisphere base
+static const int IHS = IML + NL + 1;   // high-latitude surface (= 16), if present
+static const int IHD = IHS + 1;        // high-latitude deep     (= 17), if present
 static const int C = 0, C13 = 1, C14 = 2;
 
 // Forcing columns, and the ceiling on the cleared fraction. BOTH are duplicated
@@ -105,6 +119,14 @@ struct Aux {
   // a property of the parameter draw, not of the timestep, so re-deriving it in
   // the inner loop would be pure waste. `pump_on` 0 emits nothing at all, so the
   // no-pump model is bit-reproduced -- the same contract w_up = 0 carries.
+  // THE HIGH-LATITUDE BOXES (HILDA HS/HD, 2026-09-05). Sent UNCONDITIONALLY,
+  // like the pump arrays and the T-dependent alphas: this struct is read into a
+  // fixed layout, so a field the R side sometimes omits is whatever was in that
+  // memory before. `hs_on` is what gates every flux, on both cores -- and it is
+  // also what sets NPH/NB above.
+  int    hs_on;
+  double hs_frac, dz_hd, sst_hs, dic0_hs, revelle0_hs;
+  double a_ls[2], a_hs[2], hs_mass_kg[2], asx_hs[2];
   int pump_on;
   double pump_org[2][NL], pump_carb[2][NL];
   double ml_C0[2];                  // preindustrial ML carbon, DIC-limited mode
@@ -128,6 +150,7 @@ static inline void ccx_alpha_as(double sst, const Aux &A,
 
 struct Par {
   double beta, q10, k_w, kz, w_up, w_out[2], tau_ex;
+  double u_hs, tau_q;        // HILDA HS<->HD and HD<->interior (2026-09-05)
   double tau_ex_seas_amp, tau_ex_seas_phase;   // diagnostic, 2026-08-31; 0 = OFF
   // CO2 fertilisation form and the saturating pair. `fert_form` selects which
   // of beta / (beta_max, fert_k) is live; the other is inert. See the long note
@@ -616,6 +639,57 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       }
     }
 
+    // ---- THE HIGH-LATITUDE COLUMN (HILDA HS/HD) -- twin of the block in
+    // R/model.R, which carries the full reasoning: a cold surface box over its
+    // own well-mixed deep box, BESIDE the low-latitude column rather than under
+    // it (Siegenthaler & Joos 1992, Fig. 1). hs_on = 0 emits nothing and the
+    // boxes do not exist, so the 32-box model is bit-reproduced.
+    if (A.hs_on) {
+      const int ihs = base + IHS;
+      const int ihd = base + IHD;
+
+      // (a) air-sea, on the mixed layer's own law. HILDA assumes the per-area
+      //     gas exchange coefficient is the same in high and low latitudes
+      //     (their Table 1, g_l = g_h); that is THEIR assumption, inherited.
+      //     No seasonal cycle on this box -- see the R twin.
+      const double sst_h = A.sst_hs
+        + ((P.sst_obs > 0 && !std::isnan(sst_an)) ? sst_an : P.sst_scale * gmst);
+      const double dic_hs = y[IX(ihs, C)] * A.mol_per_GtC / A.hs_mass_kg[hi];
+      double K0h, pco2_hs;
+      if (P.revelle_frozen > 0.0) {
+        K0h = K0_only(sst_h, A);
+        pco2_hs = A.chi0 * (1.0 + A.revelle0_hs
+                            * (dic_hs - A.dic0_hs) / A.dic0_hs);
+      } else {
+        pco2_hs = pco2_from_dic_cpp(dic_hs, A.alk, sst_h, A, &K0h);
+      }
+      const double gx_hs = A.asx_hs[hi] * P.k_w * K0h;
+      double a_dn_h, a_up_h;
+      ccx_alpha_as(sst_h, A, &a_dn_h, &a_up_h);
+      add_flux(iatm, ihs, gx_hs * chi,     a_dn_h, true);
+      add_flux(ihs, iatm, gx_hs * pco2_hs, a_up_h, true);
+
+      // (b) HS <-> HD, two-way GROSS at u_hs m/yr over the HS area; the area
+      //     cancels within the column exactly as it does for w_up.
+      if (P.u_hs != 0.0) {
+        add_flux(ihs, ihd, P.u_hs * y[IX(ihs, C)] / A.dz[0], 1.0);
+        add_flux(ihd, ihs, P.u_hs * y[IX(ihd, C)] / A.dz_hd, 1.0);
+      }
+
+      // (c) HD <-> interior, volume-proportional: Q_k = a_ls * dz_k / tau_q,
+      //     so the layer -> HD limb is exactly y_k / tau_q. The areas do NOT
+      //     cancel on the other limb -- this and the conveyor's
+      //     interhemispheric limbs are the only cross-column fluxes.
+      if (P.tau_q > 0.0) {
+        const double conc_hd = y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd);
+        for (int kk = 0; kk < NL; ++kk) {
+          const int ik = base + IML + 1 + kk;
+          add_flux(ihd, ik, A.a_ls[hi] * A.dz[kk + 1] / P.tau_q * conc_hd, 1.0);
+          add_flux(ik, ihd, y[IX(ik, C)] / P.tau_q, 1.0);
+        }
+      }
+    }
+
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
     // external to the modelled system; land-use change is not, so it is a
     // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
@@ -681,6 +755,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 // ---- unpack helpers -------------------------------------------------
 static Aux unpack_aux(const List& a) {
   Aux A;
+  // FIRST, because it sets the stride every index below depends on.
+  A.hs_on = a["hs_on"];
+  NPH = A.hs_on ? (IHD + 1) : (IML + NL + 1);
+  NB  = 2 * NPH;
   A.gtc_per_ppm_hemi = a["gtc_per_ppm_hemi"];
   A.chi0 = a["chi0"]; A.mol_per_GtC = a["mol_per_GtC"];
   NumericVector v;
@@ -720,6 +798,12 @@ static Aux unpack_aux(const List& a) {
   for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_org[h][k] = v[h * NL + k];
   v = a["pump_carb"];
   for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_carb[h][k] = v[h * NL + k];
+  A.hs_frac = a["hs_frac"]; A.dz_hd = a["dz_hd"]; A.sst_hs = a["sst_hs"];
+  A.dic0_hs = a["dic0_hs"]; A.revelle0_hs = a["revelle0_hs"];
+  v = a["a_ls"];       A.a_ls[0] = v[0];       A.a_ls[1] = v[1];
+  v = a["a_hs"];       A.a_hs[0] = v[0];       A.a_hs[1] = v[1];
+  v = a["hs_mass_kg"]; A.hs_mass_kg[0] = v[0]; A.hs_mass_kg[1] = v[1];
+  v = a["asx_hs"];     A.asx_hs[0] = v[0];     A.asx_hs[1] = v[1];
   return A;
 }
 
@@ -738,6 +822,10 @@ static Par unpack_par(const List& p) {
   P.tau_ex_seas_amp = p["tau_ex_seas_amp"];
   P.tau_ex_seas_phase = p["tau_ex_seas_phase"];
   P.w_out[0] = p["w_out_NH"]; P.w_out[1] = p["w_out_SH"];
+  // Defaulted on the R side by ccx_cpp_par(), which is where every other
+  // "a pre-dated parameter list must still reach the core as a model"
+  // fallback lives; read unconditionally here, as every field is.
+  P.u_hs = p["u_hs"]; P.tau_q = p["tau_q"];
   P.q_conv = p["q_conv"];
   P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];
   P.conv_reverse = p["conv_reverse"];
