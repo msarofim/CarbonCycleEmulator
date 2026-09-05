@@ -81,6 +81,14 @@ model needs a HIGH `k_w` to keep its surface young **because** its `kz` mixes so
 the same "one scalar, two jobs" pattern this arc keeps finding, and **GEOSECS's −40 ± 20 is a
 candidate gate on the pair that the likelihood currently does not score.**
 
+> ⛔⛔ **THE LAST CLAUSE IS RETRACTED, 2026-09-05d — see `collect_2026-09-05d_surface_d14c_power.md`.**
+> **"UNSCORED" IS NOT "UNCONSTRAINED".** Measured on the posterior's own directions (the stored
+> Laplace covariance), the existing objective pins this surface Δ¹⁴C to **sd = 0.93 ‰** — against a
+> target width of 20. The posterior holds `k_w` **20.8× tighter than its own prior**, so HILDA's 906
+> is **−35.3 POSTERIOR sigma** and **the likelihood had already excluded that arm by a colossal
+> margin; GEOSECS agreed with something that was not in doubt.** ⇒ **The gate would be REDUNDANT and
+> is not built.** The EXCLUSION stands; the inference that it was new information does not.
+
 ## 5. ⇒ WHAT IS NOW SETTLED, AND THE ONE CANDIDATE LEFT
 
 | question | status |

@@ -2,6 +2,53 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-05d — **DO NOT BUILD THE GEOSECS SURFACE GATE.** "UNSCORED" IS NOT "UNCONSTRAINED": THE OBJECTIVE ALREADY PINS IT TO ±0.93 ‰
+
+Marcus: *"Score GEOSECS LS-surface Delta14C as a gate first."* Pre-registered in
+`notes/prereg_2026-09-05d_surface_d14c_power.md`, scored in
+`notes/collect_2026-09-05d_surface_d14c_power.md`; `calibration/diag_surface_d14c_power.R`.
+**No gate built, no target asserted, nothing adopted.** Scope: the SHIPPED model, `hs_frac = 0`.
+
+**POWER BEFORE TARGET, DELIBERATELY.** The value in play — **−40 ± 20 ‰** — is **prescribed in
+HILDA's Table 2**, a model calibration paper, attributed there to GEOSECS; the primary was never
+read. The right product (**GLODAP's mapped NATURAL / pre-bomb Δ¹⁴C**, Rubin & Key 2002 separation,
+Key et al. 2004 *GBC* 18:GB4031) is a gridded field **not in this repo**. So the target-free question
+was measured first: **a gate on a quantity with no power is worthless however well its threshold is
+sourced.**
+
+✅ **P1d — the quantity MOVES: 98.4 ‰** across ±2σ of `k_w`'s prior × the `kz` bracket.
+⛔⛔ **P2d — AND IT IS ALREADY PINNED. Posterior-induced sd = 0.93 ‰**, against a 20 ‰ target width.
+At the mode the model reads **−48.35 ‰**, already **z = −0.42** inside −40 ± 20.
+⇒ **The gate could never reject anything the likelihood does not already reject — it would pass by
+construction, which is the definition of a SILENT GATE.**
+✅ **P3d** — rises with `k_w`, falls with `kz`, both as predicted.
+
+⭐ **THE MEASUREMENT WAS ALMOST WRONG, AND THE FIX IS THIS REPO'S OWN LESSON.** The first pass scored
+P2d on a **2-D SLICE** with the other 24 parameters held. That cannot establish redundancy —
+[[ccx_gates_priced]] measured that an iso-fit frontier which **re-optimises** the others REVERSES
+what a one-at-a-time `kz` scan says. Redone on the **posterior's own directions** using the Laplace
+covariance already in the mode file (26 × 26, `pd`): linearise the observable in `u`, take
+`sqrt(gᵀ Σ g)` — **52 spinups, not 25 refits**. The slice and the profile agreed this time; ⚠ that
+is NOT the same as the slice having been fine.
+⭐ **AND AN INDEPENDENT CROSS-CHECK CLOSES IT**: the scan's **d(surface)/d ln `k_w` ≈ 59.9 ‰ per log
+unit** × the stored posterior sd **0.0193** = **1.15 ‰** against the Laplace **0.93** — consistent,
+by two routes sharing no code.
+
+⛔⛔ **AND IT RETRACTS 09-05c's INFERENCE, retracted in place.** That note called the pair *"coupled
+through an UNSCORED observable — a candidate gate"*. **The posterior holds `k_w` 20.8× tighter than
+its own prior**, so HILDA's `k_w` = 906 is **−35.3 POSTERIOR sigma**: the likelihood had already
+excluded that arm by a colossal margin and **GEOSECS agreed with something that was not in doubt**.
+The EXCLUSION stands; the claim that it was new information does not.
+
+⇒ ⭐⭐ **STANDING RULE: "UNSCORED" IS NOT "UNCONSTRAINED".** An observable absent from the likelihood
+can still be pinned by everything else in it. **Before proposing a gate on an unscored quantity,
+measure the spread the EXISTING objective still permits — on the posterior's own directions, not on
+a coordinate slice.** Measuring the power first is also what made a dataset acquisition unnecessary:
+the alternative order would have downloaded GLODAP's natural-Δ¹⁴C field, written a build script, added
+a MANIFEST entry and argued an `n_eff` — to gate a quantity with 0.93 ‰ of freedom.
+⭐ **One thing worth keeping:** the model's preindustrial surface Δ¹⁴C is **−48.35 ‰** against the
+observation's −40 ± 20. **Report it as an AGREEMENT, never as a test.**
+
 ## 2026-09-05b/c — **THE HS ENDMEMBER IS SETTLED AND IS NOT THE LEVER.** THICKNESS IS NOT A TERM; THE GAS EXCHANGE IS ALL OF IT, AND AN OBSERVATION EXCLUDES IT
 
 Pre-registered in `notes/prereg_2026-09-05b_hs_thickness.md` and
