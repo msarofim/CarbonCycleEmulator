@@ -1,0 +1,113 @@
+
+=== q ATTACHMENT: SCAN, OBS PIN, TWO TIMESCALES -- mode ent26 ===
+  source refit_20260903_ent26 (logpost -1446.76); migrated: none
+  HS: hs_frac 0.16  u_hs 38  tau_q 538  sst_hs 2.0   kz0 6356.2  h_ml 134.15
+  layers: 67 160 221 307 427 595 831 1160 1622 2268 3172
+  scored (>1500 m): 1622/2268/3172;  FREE: 1622/2268;  PINNED: 3172 m
+  GLODAP at scored depths: -165.2 / -175.6 / -177.6  (se at n_eff 20: 13.4 / 13.6 / 11.6)
+
+=== PART B: THE BOUNDARY, EVERY LAYER, ISO-DEEP (bottom box held at -156.145) ===
+  attach   zmid     kz    kz/kz0      HS       HD    LSml   z1622   z2268   band    free
+     1     160     1900   0.299    -80.3   -109.2   -29.3   +2.28   +2.01   2.048   2.147
+     2     221     1960   0.308    -80.6   -109.7   -29.2   +2.32   +2.03   2.064   2.172
+     3     307     2033   0.320    -81.1   -110.3   -29.1   +2.36   +2.05   2.085   2.203
+     4     427     2117   0.333    -81.7   -111.1   -29.0   +2.41   +2.07   2.111   2.243
+     5     595     2208   0.347    -82.4   -112.0   -28.8   +2.48   +2.10   2.143   2.291
+     6     831     2293   0.361    -83.1   -113.0   -28.6   +2.56   +2.14   2.181   2.347
+     7    1160     2353   0.370    -83.8   -113.9   -28.5   +2.64   +2.17   2.220   2.405
+     8    1622     2367   0.372    -83.9   -114.1   -28.5   +2.67   +2.18   2.232   2.424
+     9    2268     2353   0.370    -82.0   -111.6   -29.2   +2.33   +2.05   2.079   2.195
+    10    3172     2686   0.423    -72.5    -98.7   -32.6   +1.98   +1.39   1.739   1.685
+  (pinned layer 3172 m contributes |z| = 1.848 to EVERY band score -- dead weight)
+
+  B1  kz monotone non-decreasing in attachment       : FAIL
+  B2  no interior optimum (free stat, tol 0.05)       : PASS  (argmin = layer 10, 1.685 vs bottom 1.685)
+  B3  free stat non-increasing over layers 7..10     : PASS
+  B4  every arm solves (no ceiling at tau_q 538)      : PASS  (10/10)
+  B5  HD moves with kz, not the attachment          : PASS
+  ⛔ The scan is REPORTED. Its argmin is not a decision.
+
+=== PART A: DECOMPOSITION at MATCHED kz (1900 = iso-deep attach 1; 2686 = iso-deep attach 10) ===
+  kz      attach   bottom     control?   z1622   z2268   band     FREE
+   1900   indep      -156.1   on         +2.28   +2.01   2.048    2.147
+   1900   bottom     -171.7   OFF        +0.23   -0.39   0.377    0.312
+   2686   indep      -143.3   OFF        +3.31   +3.01   3.092    3.162
+   2686   bottom     -156.1   on         +1.98   +1.39   1.739    1.685
+
+  attachment effect (indep - bottom) on FREE: +1.835 at kz 1900, +1.477 at kz 2686
+  kz effect (1900 -> 2686) on FREE          : +1.015 at indep, +1.373 at bottom
+  main effects: attachment +1.656, kz +1.194; interaction -0.358
+  A1  bottom beats indep at BOTH kz (> 0.05)  : PASS
+  A2  |attachment effect| > |kz effect|       : PASS
+  A3  interaction < smaller main effect       : PASS
+  ⚠ Off-control cells' BAND stat is not a score; only FREE is comparable across the 2x2.
+
+=== PART C: kz SOLVED TO THE OBSERVATION -- bottom box at -175.3 (d14c_deep_ocean target, n_eff 20) ===
+  binned GLODAP on the pinned layer is -177.6 +/- 11.6, so the pinned z is +0.20 in every arm
+
+  arm                               kz   in bracket?      HS       HD    LSml   band    free
+  incumbent (32 boxes)              5267   yes               NA       NA   -47.6   1.283   1.822
+  attach 1 (HILDA, depth-indep)     1061   NO [4379,8110]   -91.4   -124.3   -24.4   0.375   0.461
+  attach 10 (BOTTOM ONLY)           1747   NO [4379,8110]   -79.3   -108.0   -29.0   0.435   0.551
+
+  per-layer z (model - GLODAP)/se:
+  depth (m)                          67    160    221    307    427    595    831   1160   1622   2268   3172
+  GLODAP                           50.5   34.6   22.6   -2.1  -27.9  -58.1 -101.3 -144.1 -165.2 -175.6 -177.6
+  incumbent (32 boxes)            -47.6  -54.7  -59.2  -65.2  -73.2  -83.8  -97.2 -114.1 -134.7 -157.1 -175.3
+     z                            -6.53  -5.41  -4.71  -3.67  -2.73  -1.59  +0.29  +2.35  +2.28  +1.36  +0.20
+  attach 1 (HILDA, depth-indep)   -24.4  -42.6  -53.5  -67.2  -83.8 -102.8 -122.7 -141.9 -158.5 -169.9 -175.3
+     z                            -4.98  -4.68  -4.38  -3.79  -3.37  -2.76  -1.52  +0.17  +0.50  +0.42  +0.20
+  attach 10 (BOTTOM ONLY)         -29.0  -42.1  -50.3  -61.1  -75.5  -93.7 -115.9 -141.7 -168.4 -187.3 -175.3
+     z                            -5.29  -4.64  -4.20  -3.44  -2.86  -2.20  -1.04  +0.19  -0.24  -0.86  +0.20
+  ⚠ layers above ~1500 m are compared to BOMB-CONTAMINATED bottles from a preindustrial
+    state; their z is printed for shape only and is not evidence either way.
+
+  C1  incumbent kz in [4800, 6200] and inside the bracket : PASS  (5267)
+  C2  incumbent z(1622 m) > +1, shape too steep        : PASS  (+2.28)
+  C3  ⭐ BOTTOM: every scored layer inside |z| < 1     : PASS  (-0.24 / -0.86 / +0.20)
+  C4  bottom kz in [1500, 2300], OUTSIDE the bracket     : PASS  (1747)
+  C5  HILDA attach does NOT reach all-inside; 1622 young : FAIL  (+0.50 / +0.42 / +0.20; kz 1061)
+  ⛔ These arms are 'HILDA HS/HD boxes with q attached at the BOTTOM' -- NOT HILDA's model.
+
+=== PART D: TWO TIMESCALES -- transient 1750-2024, ent26 parameters, kz from part C ===
+  R0 incumbent, own kz         kz    6356  deep  -156.1  logL  -1415.94  sink  3.07 (z -0.32)  NH peak z +2.17  min sst_hs -
+  R1 incumbent, obs-pinned     kz    5267  deep  -175.3  logL  -1748.48  sink  2.89 (z -0.79)  NH peak z +2.17  min sst_hs -
+  R2 attach 10, obs-pinned     kz    1747  deep  -175.3  logL  -4265.25  sink  2.54 (z -1.66)  NH peak z +2.16  min sst_hs 1.62 EXTRAPOLATED below the Lueker floor
+  R3 attach 1, obs-pinned      kz    1061  deep  -175.3  logL  -6996.56  sink  2.36 (z -2.10)  NH peak z +2.16  min sst_hs 1.62 EXTRAPOLATED below the Lueker floor
+
+  per-stream log-likelihood, DELTA vs R0:
+  stream                        R0     R1-R0     R2-R0     R3-R0
+  co2_level_MLO             -69.36   -115.82  -1084.39  -1974.48
+  co2_level_SPO             -61.00   -146.05  -1132.89  -2011.38
+  co2_seasonal_MLO           -0.91     -0.10     -0.43     -1.25
+  co2_seasonal_SPO           68.56     -0.06     -1.16     -0.95
+  d13c_seasonal_MLO         212.03     +0.05     +1.18     +1.14
+  d13c_seasonal_SPO         252.01     -0.01     +0.08     +0.09
+  co2_icecore              -682.44     -4.45    -34.69    -61.84
+  d13c_level_MLO             73.10    -25.86    -51.12   -192.15
+  d13c_level_SPO             69.66     +5.96     -1.07    -72.50
+  co2_gradient              -14.12     -0.35     -1.12     -1.60
+  d13c_gradient             106.13     -0.22     -1.12     -2.02
+  d14c_NH                  -283.64    -28.78   -157.56   -508.69
+  d14c_SH                  -287.33    -13.25   -148.65   -468.33
+  d14c_intcal              -671.04     +0.31     +0.45     +1.06
+  excess_c14_ocean          -10.35     +0.44     +1.14     +1.74
+  d14c_deep_ocean            -4.98     +1.74     +1.74     +1.74
+  ocean_grad_dic             -4.30     -0.03    -13.94    -18.42
+  ocean_grad_d13c             1.20     -0.02   -188.81   -210.37
+  ocean_grad_alk             -4.24     +0.00     +0.36     +0.36
+  gcb_ocean_sink             -6.38     -5.15    -34.54    -58.95
+  gcb_land_sink             -98.53     -0.89     -2.78     -3.80
+  TOTAL                   -1415.94   -332.54  -2849.31  -5580.61
+
+  decadal set (d14c_NH + d14c_SH + gcb_ocean_sink) delta vs R0: R1 -47.17  R2 -340.74  R3 -1035.98
+  deep term (d14c_deep_ocean) delta vs R0    : R1 +1.74  R2 +1.74  R3 +1.74
+  D1  pure column: decadal loss (47.17) > deep gain (1.74)      : PASS
+  D2  ⭐ bottom keeps more decadal than the column (by > 1)  : FAIL  (R2 -340.74 vs R1 -47.17)
+  D3  R2 ocean sink inside gate 7's bound (|z| <= 2)        : PASS  (z -1.66; R0 -0.32)
+  D4  R2 NH bomb peak no later than R0                       : PASS  (z +2.16 vs +2.17)
+  D5  land/seasonal streams move < 2 in every run           : FAIL  (max 0.89 / 2.78 / 3.80)
+
+  ⚠ MATCHED-PARAMETER, NOT A REFIT: k_w, bomb_total, pump_grad, h_ml are ent26's 32-box values.
+  ⚠ Every HS/HD arm is a deliberate departure from HILDA. NOT HILDA's model. Nothing adopted.
+EXIT 0
