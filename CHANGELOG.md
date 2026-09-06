@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-06 — the suite is green again, and the ocean index was SPLIT rather than trimmed
+
+**`test-overlay-idiom-lint` fixed (`ac67b65`).** It had been failing since **`d6587be`** — the last
+commit of the 09-05 session, whose handoff reported "1842 pass / 0 fail / green throughout". Two
+assertions: a novel site (`diag_surface_d14c_power.R`) and the ratchet at **62 > 61**.
+
+Fixed the ruling's own way — **CONVERT ON TOUCH**, to `ccx_overlay_par()` — not by adding a baseline
+entry, which would have defeated the ratchet the lint exists to be. ⚠ The header warns each
+conversion needs a look, because converting a site that had been running at the default lag MOVES
+its printed numbers. **Checked, not assumed:** `pv` there is built from `CCX_PARAM_NAMES` so it
+carries all 26 by construction, the deletion the helper guards against cannot occur, and the run is
+**BYTE-IDENTICAL** before and after — mode −48.35, sd 0.93. **The 09-05d collect's numbers stand.**
+Count back to **61 = OI_BASELINE_N**, so no decrement owed. No mutation test was needed: the lint
+caught the real novel site on its own, which is the same demonstration.
+⇒ **A handoff's "suite green" is only as good as the run behind it, and the LAST COMMIT of a session
+is exactly where that claim goes stale.**
+
+**Memory (outside this repo).** `INDEX_ccx_ocean.md` had reached **288 B of its hard ceiling**, where
+trimming would have meant deleting live findings. **Split instead**, on a line that makes future
+routing decidable: **`INDEX_ccx_ocean.md` = what the ocean IS** (pump, `h_ml`, `kz`, `tau_ex`,
+carbonate/Revelle, gradients, GLODAP, the gates on those) and new **`INDEX_ccx_ocean_struct.md` =
+what SHAPE it should BE** (candidate geometries, the HILDA HS/HD boxes, `q`'s attachment, the
+circulation limbs, the ocean's ENSO response). ⚠ **`kz` splits both ways** and both files say so:
+its value/bracket/pricing stay with the properties, what a STRUCTURE does to it goes with the
+structures. **18,144 B → 9,248 + 11,400**, both well under soft; verified by an orphan/dangling-link
+sweep that nothing was lost (**540 memories, 0 orphans, 0 dangling**). Routing updated in `MEMORY.md`
+and the project `CLAUDE.md`.
+
 ## 2026-09-05f — **`q`'s ATTACHMENT DEPTH: THE OUTCOME HOLDS, MY PRE-REGISTERED MECHANISM DOES NOT**
 
 Pre-registered `notes/prereg_2026-09-05f_q_attachment_depth.md`, scored
