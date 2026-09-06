@@ -682,7 +682,50 @@ CCX_CONSTANTS <- list(
                    "fudge factor' MIXES the two scales -- 30 is the in-band",
                    "value, ~11 the box mean -- which is why both are registered",
                    "separately and why the prior width is NOT read off that",
-                   "band's unsourced lower endpoint."))
+                   "band's unsourced lower endpoint.")),
+  # ---- Schmidt number of CO2 in seawater (2026-09-06, for hs_asx_frac) ----
+  # Sc(t) = A + B t + C t^2 + D t^3 + E t^4, t in degC, salinity 35, as FIVE
+  # scalar entries (the registry's contract is one finite number per entry;
+  # test-constants.R). Used ONLY by data-raw/build_hs_exchange_factor.R to price
+  # the cold box's gas exchange relative to the warm box's (k ~ Sc^-1/2,
+  # Wanninkhof 2014 eq. 4). The model itself has NO Schmidt dependence: `k_w`
+  # is one fitted piston velocity per unit area, which is exactly why the
+  # HS/LL ratio needs this factor. Check: Sc(20 C) = 668.
+  # ⚠ Sourced at one remove: the Wiley full text was unreachable (403) on
+  # 2026-09-06; the coefficients were read from pySeaFlux
+  # (github.com/lukegre/pySeaFlux, gas_transfer_velocity.py), which reproduces
+  # Wanninkhof (2014) Table 1 and cites it. Verify against the paper when a PDF
+  # is available; the values agree with the author's recollection of Table 1.
+  SC_CO2_W14_A = list(
+    value = 2116.8, units = "dimensionless per degC^0 (Sc polynomial term)",
+    status = "cited",
+    source = paste("Wanninkhof R. (2014), Limnol. Oceanogr. Methods 12, 351-362,",
+                   "doi:10.4319/lom.2014.12.351, Table 1 (CO2, seawater), as reproduced",
+                   "in pySeaFlux gas_transfer_velocity.py (accessed 2026-09-06).")),
+  SC_CO2_W14_B = list(
+    value = -136.25, units = "dimensionless per degC^-1 (Sc polynomial term)",
+    status = "cited",
+    source = paste("Wanninkhof R. (2014), Limnol. Oceanogr. Methods 12, 351-362,",
+                   "doi:10.4319/lom.2014.12.351, Table 1 (CO2, seawater), as reproduced",
+                   "in pySeaFlux gas_transfer_velocity.py (accessed 2026-09-06).")),
+  SC_CO2_W14_C = list(
+    value = 4.7353, units = "dimensionless per degC^-2 (Sc polynomial term)",
+    status = "cited",
+    source = paste("Wanninkhof R. (2014), Limnol. Oceanogr. Methods 12, 351-362,",
+                   "doi:10.4319/lom.2014.12.351, Table 1 (CO2, seawater), as reproduced",
+                   "in pySeaFlux gas_transfer_velocity.py (accessed 2026-09-06).")),
+  SC_CO2_W14_D = list(
+    value = -0.092307, units = "dimensionless per degC^-3 (Sc polynomial term)",
+    status = "cited",
+    source = paste("Wanninkhof R. (2014), Limnol. Oceanogr. Methods 12, 351-362,",
+                   "doi:10.4319/lom.2014.12.351, Table 1 (CO2, seawater), as reproduced",
+                   "in pySeaFlux gas_transfer_velocity.py (accessed 2026-09-06).")),
+  SC_CO2_W14_E = list(
+    value = 0.0007555, units = "dimensionless per degC^-4 (Sc polynomial term)",
+    status = "cited",
+    source = paste("Wanninkhof R. (2014), Limnol. Oceanogr. Methods 12, 351-362,",
+                   "doi:10.4319/lom.2014.12.351, Table 1 (CO2, seawater), as reproduced",
+                   "in pySeaFlux gas_transfer_velocity.py (accessed 2026-09-06)."))
 )
 
 #' Fetch a constant's value, erroring on unknown names

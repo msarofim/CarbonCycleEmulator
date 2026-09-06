@@ -1,0 +1,24 @@
+
+=== DECLARED-PARAMETER SCANS -- mode ent26 (refit_20260903_ent26 (logpost -1446.76)) ===
+  deep target -175.3; observed B - deep -0.4, se 4.04 (60-deg block)
+  arm: f solved = 0.0486 (K_deep 309), 1 root(s); expected 0.049 +/- 0.005 -> PASS
+  kz_zscale = 500: NO f holds the deep (closest 8.8 permil)
+  u_hs = 76: NO f holds the deep (closest 1.2 permil)
+  tau_q = 269: NO f holds the deep (closest 33.1 permil)
+
+  point                                          A       B    deep  B-D z     HS     HD |   dTOTAL  dDECAD  dCO2lv    dMID   dDEEP |  sink    z7  z5NH
+  arm (HILDA attach, hs_asx 0.8, f solved)  -161.2  -172.0  -175.3  +0.88  -94.7 -121.9 |     +0.0    +0.0    +0.0    +0.0    +0.0 |  2.97 -0.59 +2.16
+  ent26 (32-box incumbent)                  -125.9  -140.7  -156.1  +3.90     NA     NA |   +255.1   +41.9   +68.2    -8.1    -1.7 |  3.07 -0.32 +2.17
+  kz_zscale = 150, f held 0.049             -176.3  -183.0  -185.0  +0.57 -102.5 -132.0 |   -488.1   -38.9  -399.6    -0.1    -0.4 |  2.81 -0.98 +2.16
+  kz_zscale = 150, f re-solved 0.112        -159.3  -170.0  -175.3  +1.39  -95.9 -123.4 |   -222.8   -12.2  -200.8    -0.1    -0.0 |  2.87 -0.83 +2.16
+  kz_zscale = 500, f held 0.049             -134.3  -153.8  -162.5  +2.25  -85.1 -109.5 |     +4.1   -38.5   +34.6    -4.3    -0.8 |  3.13 -0.17 +2.16
+  u_hs = 19, f held 0.049                   -171.6  -183.2  -186.6  +0.94  -85.2 -134.1 |   -854.8   -24.0  -830.1    +0.0    -0.6 |  2.72 -1.21 +2.17
+  u_hs = 19, f re-solved 0.136              -152.9  -167.3  -175.3  +2.05  -79.6 -125.2 |   -517.0    +0.8  -550.6    -0.7    +0.0 |  2.78 -1.06 +2.17
+  u_hs = 76, f held 0.049                   -155.0  -165.4  -168.5  +0.85 -100.3 -114.7 |   -241.4   -55.4  -165.5    -0.6    -0.2 |  3.24 +0.10 +2.16
+  tau_q = 269, f held 0.049                 -134.4  -138.0  -138.7  +0.25  -86.0 -110.8 |    +92.5    +4.9   +64.2    -6.8    -6.4 |  3.04 -0.41 +2.16
+  tau_q = 1076, f held 0.049                -191.1  -215.2  -226.0  +2.76  -99.6 -128.3 |   -139.1    -4.5   -75.7    -5.4   -12.2 |  2.92 -0.70 +2.16
+  tau_q = 1076, f re-solved 0.313           -139.0  -158.4  -175.3  +4.28  -81.3 -104.7 |    +92.8   -19.0   +67.1    -3.0    -0.0 |  3.08 -0.31 +2.16
+
+  deltas are vs the ARM (not ent26); ent26's row shows the arm's own matched-parameter cost with the sign reversed.
+  ⚠ Nothing adopted. These are the caveat register's numbers: 'if HILDA's value were 2x, ...'.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/declared_param_scans_20260906.rds
