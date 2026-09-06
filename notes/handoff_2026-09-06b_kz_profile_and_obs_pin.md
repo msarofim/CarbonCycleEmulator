@@ -4,7 +4,7 @@
 # **⇒ THE NEXT STEP IS A RULING, NOT A RUN: the design of a refit WITH the structure (§5).**
 
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`, no remote. Commits this
-session: `a0e91f1` (the scan) and the K(z) commit after it. `FaIRtoFrEDI/` untouched.
+session: `a0e91f1` (the scan), `1bb1a45` (K(z) + conduit), and the handoff commit after it. `FaIRtoFrEDI/` untouched.
 ⚠ **Sessions launch from `FaIRtoFrEDI/`; all of this is in `CarbonCycleEmulator/`.** Use `git -C`.
 
 **Read before this one:** `handoff_2026-09-06_session_close.md` (the state this session started
