@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-06c (ii) — **HOW MANY CAN WE AFFORD? THE PROFILE'S LEVELS DECIDE NOTHING; ITS CONTRAST DECIDES THE ATTACHMENT — HILDA'S, NOT THE BOTTOM**
+
+Marcus: *"How many of the 5 variables can we afford to free?"* Scored `notes/prereg_2026-09-06c_structure_identifiability.md`
+(with amendments 1–3, each written before its run), collect `notes/collect_2026-09-06c_structure_identifiability.md`.
+Four runs and two measurements, all local (the Torch verdict: 3–20 min each, no queue worth it):
+1. **Hessian at the working arm — indefinite**, not a count (gradients to 6114/log-unit; r −0.97 trades).
+   `h_hs` HAS transient power (16 on `d14c_SH`) — 09-05b's steady-state "no lever" over-generalised.
+2. **Free optimum (10 params)**: closes the whole gap to `ent26` by switching the conduit OFF (`tau_q` to
+   its bound, `u_hs` → 10), `kz` 8821, `h_ml` 196; slabs back to **+2.13 / +0.96**.
+3. **Conduit declared (7 params)**: removes `K(z)` instead (f → 1, its bound), `kz` 3786, `h_ml` 202;
+   slabs **+2.95 / +2.35**. `hs_asx_frac` 0.74, marginal sd **0.10** — supported through the bomb rows.
+4. **The slabs' n_eff MEASURED** (`diag_mid_d14c_neff.R`): **21.1 / 20.0** — the reused 20 was right.
+5. **The price of the profile is ZERO** (`diag_structure_profile_price.R`, iso-fit frontier on the slab
+   weight): +2.4 / +0.3 vs `ent26` with the slabs inside 1.5σ — but held by a sharp `K(z)` and a
+   **200–220 m mixed layer** with the conduit off, and the bottom 2σ too old. **Three levels at ±13 ‰
+   cannot tell "filled from below" from "sharp K(z) + deep ML".**
+6. ⭐⭐ **The vertical CONTRAST can** (`diag_d14c_profile_covariance.R`): the three means share their
+   columns (corr 0.97–0.99), so **se(B − deep) = 3.5–4.0 ‰** against ±13 on the levels. Observed
+   **B − deep = −0.4** — flat. Every column arm and every BOTTOM-attached arm is rejected at 3–5σ
+   (`ent26` +3.9, 09-06b's K(z)+bottom **−5.0**); **HILDA's depth-independent attachment is the only
+   structure inside 2σ (+1.4)**. The 09-05f departure from HILDA is reversed by an observation.
+7. ⭐ **HILDA's configuration solves once the cold box exchanges more slowly**: at `hs_asx_frac` 0.8,
+   f = 0.049 (K_deep **309**, HILDA's 465), all three levels and the contrast inside 1σ; at matched
+   parameters the transient is **−193 to −255 vs `ent26`** of which −115 to −134 is the pump-δ¹³C
+   artefact nuisances recover. The best-supported arm of the whole arc.
+⇒ **Objective change #9 indicated (the profile as one MVN row with the measured covariance) and the
+refit design is Marcus's ruling** — `notes/prereg_2026-09-07_hilda_refit_design.md`. Nothing adopted.
+
 ## 2026-09-06c — **OBJECTIVE CHANGE #8: THE INTERMEDIATE Δ¹⁴C ROWS; AND THE HS EXCHANGE-AREA FACTOR**
 
 Marcus (2026-09-06): *"the priority is to use observations and known physical laws to constrain the

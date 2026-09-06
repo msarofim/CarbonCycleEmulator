@@ -1,0 +1,20 @@
+observed levels: A -168.6  B -175.6  deep -175.3;  contrasts A-B +7.0, B-deep -0.4
+
+block 30 deg (33 blocks): level se A 11.55  B 11.72  deep 9.10;  corr(A,B) 0.99  corr(B,deep) 0.97  corr(A,deep) 0.98
+  contrast se: A-B 1.81   B-deep 3.51   (the level rows' own se at n_eff 20: 13.5 / 13.6 / 10.3)
+
+block 60 deg (16 blocks): level se A 15.67  B 16.40  deep 13.45;  corr(A,B) 0.99  corr(B,deep) 0.98  corr(A,deep) 0.99
+  contrast se: A-B 2.29   B-deep 4.04   (the level rows' own se at n_eff 20: 13.5 / 13.6 / 10.3)
+
+B - deep contrast, observed -0.4;  z at the 60-deg and 30-deg contrast se:
+  ent26 (column, kz 6356)                      B  -140.7 deep  -156.1  contrast  +15.4   z  +3.90 (60)  +4.49 (30)
+  column obs-pinned kz 5267                    B  -157.1 deep  -175.3  contrast  +18.2   z  +4.60 (60)  +5.28 (30)
+  HILDA attach, obs-pinned                     B  -169.9 deep  -175.3  contrast   +5.4   z  +1.42 (60)  +1.64 (30)
+  bottom attach, obs-pinned kz 1747            B  -187.3 deep  -175.3  contrast  -12.0   z  -2.89 (60)  -3.32 (30)
+  K(z)+bottom conduit (09-06b)                 B  -195.8 deep  -175.3  contrast  -20.5   z  -4.99 (60)  -5.74 (30)
+  frontier W10 (K(z)+deep ML, conduit off)     B  -179.1 deep  -197.9  contrast  +18.8   z  +4.74 (60)  +5.45 (30)
+
+  ⚠ Arm values are the LS-column slab and bottom-box means from today's logs; the observed contrast
+    is the same estimator on the same cells. A contrast row with THIS se is the observation that
+    discriminates 'filled from below' from 'sharp K(z) + deep mixed layer'. Not yet in the objective.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/d14c_profile_covariance_20260906.rds

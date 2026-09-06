@@ -257,6 +257,17 @@ different cost:
     is the HS air–sea exchange**, which the 32-box posterior pinned with one surface box.
     ⇒ `notes/collect_2026-09-06_q_attachment_scan.md`, `notes/collect_2026-09-06b_kz_profile_with_conduit.md`.
     ⚠ `hs_frac` ships 0 and `kz_deep_frac` ships 1; NOT adopted; NOT "HILDA's model".
+  - ⭐⭐ **2026-09-06c — THE VERTICAL CONTRAST DECIDES THE ATTACHMENT, AND IT IS HILDA'S.** The three
+    interior GLODAP levels share their 5°×10° columns (sampling correlation 0.97–0.99), so the
+    B − deep contrast is known to **±3.5–4 ‰** against ±13 on the levels; observed **−0.4** (flat).
+    Every column arm (+3.9 to +4.7σ) and every bottom-attached arm (−2.9 to −5.0σ) is rejected;
+    HILDA's depth-independent `q` is inside 2σ (+1.4). With the cold box exchanging at 0.7–0.8 of
+    the low-latitude rate (`hs_asx_frac`), HILDA's attachment + `K(z)` at `z_K` 253 solves at
+    K_deep **309–602** (HILDA's 465) with all three levels and the contrast inside 1σ, and its
+    matched-parameter transient (−193 to −255 vs `ent26`, of which −115 to −134 is the recoverable
+    pump-δ¹³C artefact) is the best of the arc. ⇒ objective change #9 (the profile as one MVN row
+    with the measured covariance) and a refit — `notes/prereg_2026-09-07_hilda_refit_design.md`.
+    `notes/collect_2026-09-06c_structure_identifiability.md`. Still NOT adopted.
   - **B2, HILDA proper.** A separate two-box high-latitude reservoir alongside the
     low-latitude diffusive column (Siegenthaler & Joos 1992; isotope budgets in Joos & Bruno
     1998, *GBC* 12:277, doi:10.1029/98GB00746). HILDA is the closest published relative of

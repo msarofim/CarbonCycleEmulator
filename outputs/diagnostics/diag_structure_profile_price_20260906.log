@@ -1,0 +1,43 @@
+
+=== THE PRICE OF THE INTERMEDIATE PROFILE: iso-fit frontier over the slab weight; 10 free; mode ent26 ===
+  start: kz_deep_frac 0.166, kz_zscale 253, u_hs 38, tau_q 538, hs_asx_frac 1, h_hs 134.1, kz 6356, k_w 1788, bomb_total 118.3, h_ml 134.1
+  logL at the arm -1883.548;  ent26 (32 boxes) under objective #8 -1431.275;  gap -452.27
+
+  W    logL_true  vs ent26  z slabA  z slabB   z deep |        f     z_K    u_hs   tau_q hs_asx      kz    h_ml    sink
+  3     -1428.91     +2.36    +1.42    +0.24    -1.65 |    0.496     198    13.5    5000  0.827    7320   200.7   3.05   (conv 0, 3738 evals)
+  10    -1430.94     +0.34    +0.88    -0.26    -2.19 |    0.672     109    19.7    5000  0.953    5395   218.8   3.04   (conv 1, 3843 evals)
+  30    -1431.23     +0.05    +0.71    -0.37    -2.27 |    1.000      52    37.0    5000  0.906    3683   209.2   3.05   (conv 52, 4074 evals)
+
+  per-stream at each frontier point, TRUE objective, delta vs ent26:
+  stream                     ent26        W3      W10      W30
+  co2_level_MLO             -69.36     +0.21    +0.29    +0.53
+  co2_level_SPO             -61.00     +0.36    +0.46    +0.17
+  co2_seasonal_MLO           -0.91     +1.16    +1.05    +1.08
+  co2_seasonal_SPO           68.56     -5.17    -6.21    -5.00
+  d13c_seasonal_MLO         212.03     -0.09    -0.10    +0.10
+  d13c_seasonal_SPO         252.01     +0.14    +0.14    +0.13
+  co2_icecore              -682.44     +0.12    +0.21    -0.35
+  d13c_level_MLO             73.10     -0.34    -1.00    +1.13
+  d13c_level_SPO             69.66     +0.75    +1.30    -0.37
+  co2_gradient              -14.12     +0.04    +0.00    +0.02
+  d13c_gradient             106.13     -0.02    -0.03    -0.04
+  d14c_NH                  -283.64     +2.26    +2.80    +0.23
+  d14c_SH                  -287.33     -0.74    -1.16    +0.29
+  d14c_intcal              -671.04     +0.14    +0.16    +0.03
+  excess_c14_ocean          -10.35     +0.03    +0.05    +0.01
+  d14c_deep_ocean            -4.98     +0.38    -0.67    -0.85
+  d14c_mid_1500_2000         -8.52     +3.98    +4.61    +4.75
+  d14c_mid_2000_2627         -6.81     +3.25    +3.25    +3.21
+  ocean_grad_dic             -4.30     -1.76    -1.81    -1.85
+  ocean_grad_d13c             1.20     -2.11    -2.50    -3.25
+  ocean_grad_alk             -4.24     +0.35    +0.35    +0.35
+  gcb_ocean_sink             -6.38     -0.61    -0.87    -0.28
+  gcb_land_sink             -98.53     +0.02    +0.02    -0.01
+
+  I15 at W = 10 both slabs inside |z| < 1.5           : PASS  (z +0.88 / -0.26)
+  I16 the PRICE at the first W that holds the profile : PASS  (W 3: +2.4 vs ent26)
+  I17 conduit alive and f < 0.5 there                 : FAIL  (tau_q 5000, u_hs 13.5, f 0.496)
+  I18 the payers are bomb / pump d13C, not CO2 level  : PASS  (co2_seasonal_SPO -5.2, ocean_grad_d13c -2.1, ocean_grad_dic -1.8)
+  ⚠ W is a DEVICE to trace the frontier; every number above is re-scored under the TRUE objective. Nothing adopted.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/structure_profile_price_20260906.rds
+EXIT 0

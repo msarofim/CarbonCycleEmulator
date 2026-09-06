@@ -1,0 +1,107 @@
+
+=== CONDITIONAL OPTIMUM of 10 parameters at the 09-06b arm; mode ent26 ===
+  start: kz_deep_frac 0.166, kz_zscale 253, u_hs 38, tau_q 538, hs_asx_frac 1, h_hs 134.1, kz 6356, k_w 1788, bomb_total 118.3, h_ml 134.1
+  logL at the arm -1883.548;  ent26 (32 boxes) under objective #8 -1431.275;  gap -452.27
+
+  L-BFGS-B: convergence 1 (NEW_X), 76 iterations, 1596 evaluations, 3.6 min
+  logL -1883.548 -> -1430.524  (+453.02);  gap to ent26 now +0.75
+
+  parameter       start      optimum    x-fold   on bound?
+  kz_deep_frac      0.166       0.4317    2.600   
+  kz_zscale           253        252.9    1.000   
+  u_hs                 38        9.818    0.258   
+  tau_q               538         5000    9.294   UPPER
+  hs_asx_frac           1       0.6455    0.646   
+  h_hs              134.1        121.9    0.909   
+  kz                 6356         8821    1.388   
+  k_w                1788         1737    0.972   
+  bomb_total        118.3        118.4    1.001   
+  h_ml              134.1        195.9    1.460   
+
+  per-stream, arm -> optimum (delta), and vs ent26 under objective #8:
+  co2_level_MLO             -77.53 ->    -69.28  (   +8.26)   vs ent26    +0.08
+  co2_level_SPO             -81.10 ->    -60.68  (  +20.42)   vs ent26    +0.32
+  co2_seasonal_MLO            0.21 ->      0.17  (   -0.04)   vs ent26    +1.08
+  co2_seasonal_SPO           66.20 ->     65.12  (   -1.08)   vs ent26    -3.44
+  d13c_seasonal_MLO         213.12 ->    212.05  (   -1.07)   vs ent26    +0.02
+  d13c_seasonal_SPO         252.10 ->    252.13  (   +0.03)   vs ent26    +0.13
+  co2_icecore              -684.08 ->   -682.44  (   +1.63)   vs ent26    -0.01
+  d13c_level_MLO             77.82 ->     75.22  (   -2.60)   vs ent26    +2.12
+  d13c_level_SPO              9.52 ->     68.31  (  +58.79)   vs ent26    -1.35
+  co2_gradient              -14.14 ->    -14.04  (   +0.11)   vs ent26    +0.09
+  d13c_gradient             106.08 ->    106.12  (   +0.04)   vs ent26    -0.01
+  d14c_NH                  -329.85 ->   -284.95  (  +44.90)   vs ent26    -1.31
+  d14c_SH                  -404.41 ->   -287.61  ( +116.80)   vs ent26    -0.28
+  d14c_intcal              -672.01 ->   -671.02  (   +0.99)   vs ent26    +0.02
+  excess_c14_ocean          -10.67 ->    -10.39  (   +0.28)   vs ent26    -0.04
+  d14c_deep_ocean            -3.25 ->     -3.53  (   -0.29)   vs ent26    +1.45
+  d14c_mid_1500_2000         -3.56 ->     -5.80  (   -2.24)   vs ent26    +2.72
+  d14c_mid_2000_2627         -4.63 ->     -3.99  (   +0.65)   vs ent26    +2.82
+  ocean_grad_dic            -19.13 ->     -6.20  (  +12.93)   vs ent26    -1.90
+  ocean_grad_d13c          -193.90 ->     -0.74  ( +193.16)   vs ent26    -1.94
+  ocean_grad_alk             -3.88 ->     -3.89  (   -0.01)   vs ent26    +0.35
+  gcb_ocean_sink             -7.61 ->     -6.57  (   +1.05)   vs ent26    -0.18
+  gcb_land_sink             -98.85 ->    -98.51  (   +0.34)   vs ent26    +0.02
+
+  at the optimum: sink 3.06 (gate 7 z -0.36), NH peak year z +2.17, deep -183.0, slabs -139.8 / -162.6 (z +2.13 / +0.96)
+  HS -56.0  HD -105.1  LS ml -47.5 permil
+
+  gradient at the optimum (should be ~0 off-bound): kz_deep_frac -16.0, kz_zscale -10.1, u_hs -17.0, tau_q +4.2, hs_asx_frac -10.7, h_hs +4.8, kz -47.3, k_w +2.4, bomb_total -150.2, h_ml -15.6
+  -H eigenvalues: 1.8e+05 1.76e+04 9.33e+03 95.6 63.1 7.15 6.88 1.12 -5.48 -42.1   NOT PD
+
+  parameter       cond sd   marginal sd   prior width   verdict
+  kz_deep_frac     0.028        0.989            -   declare
+  kz_zscale        0.054        1.769            -   declare
+  u_hs             0.035        0.763         0.45   declare
+  tau_q            0.420        0.746         0.95   declare
+  hs_asx_frac      0.043        0.932            -   declare
+  h_hs             0.107        1.291            -   declare
+  kz               0.010        1.259            -   (existing)
+  k_w              0.005        0.131            -   (existing)
+  bomb_total       0.003        0.008            -   (existing)
+  h_ml             0.019        1.706            -   (existing)
+
+  correlation matrix (marginal):
+                kz_deepkz_zsca   u_hs  tau_qhs_asx_   h_hs     kz    k_wbomb_to   h_ml
+  kz_deep_frac    +1.00  +0.78  +0.78  +0.20  -0.25  -0.04  -0.94  +0.12  -0.14  +0.49
+  kz_zscale       +0.78  +1.00  +0.73  +0.54  -0.46  +0.52  -0.58  +0.36  -0.17  -0.07
+  u_hs            +0.78  +0.73  +1.00  +0.56  -0.72  +0.21  -0.59  +0.62  +0.32  +0.02
+  tau_q           +0.20  +0.54  +0.56  +1.00  -0.75  +0.60  +0.08  +0.74  +0.32  -0.59
+  hs_asx_frac     -0.25  -0.46  -0.72  -0.75  +1.00  -0.35  -0.01  -0.99  -0.65  +0.50
+  h_hs            -0.04  +0.52  +0.21  +0.60  -0.35  +1.00  +0.32  +0.34  -0.15  -0.79
+  kz              -0.94  -0.58  -0.59  +0.08  -0.01  +0.32  +1.00  +0.14  +0.21  -0.75
+  k_w             +0.12  +0.36  +0.62  +0.74  -0.99  +0.34  +0.14  +1.00  +0.70  -0.57
+  bomb_total      -0.14  -0.17  +0.32  +0.32  -0.65  -0.15  +0.21  +0.70  +1.00  -0.26
+  h_ml            +0.49  -0.07  +0.02  -0.59  +0.50  -0.79  -0.75  -0.57  -0.26  +1.00
+
+  softest two directions of -H:
+    eigenvalue -42.1 : h_ml +0.70, kz -0.47, h_hs -0.38, kz_deep_frac +0.29
+    eigenvalue -5.48 : kz_zscale +0.73, h_hs +0.34, kz_deep_frac +0.30, u_hs +0.26
+
+  MUTATION +/- 0.5 (log) at the optimum: largest single-stream move
+  kz_deep_frac  max |dlogL|   102.93  on co2_level_MLO           has power
+  kz_zscale     max |dlogL|    25.16  on co2_level_MLO           has power
+  u_hs          max |dlogL|    58.78  on co2_level_MLO           has power
+  tau_q         max |dlogL|     1.91  on ocean_grad_d13c         NO POWER
+  hs_asx_frac   max |dlogL|    37.61  on d13c_level_MLO          has power
+  h_hs          max |dlogL|    10.25  on d14c_SH                 has power
+  kz            max |dlogL|   612.64  on co2_level_MLO           has power
+  k_w           max |dlogL|  2205.64  on d14c_NH                 has power
+  bomb_total    max |dlogL| 17168.18  on d14c_NH                 has power
+  h_ml          max |dlogL|   266.72  on co2_level_MLO           has power
+
+  I1  h_hs has NO power                        : FAIL  (mut 10.25, cond sd 0.11)
+  I2  ⭐ kz_deep_frac and hs_asx_frac supported  : FAIL  (msd 0.989 / 0.932)
+  I3  u_hs / tau_q NOT separately supported     : FAIL  (msd 0.763 / 0.746; softest h_ml, kz, h_hs)
+  I4  kz_zscale weakly supported (0.5..2)      : PASS  (msd 1.769)
+  I5  strongest new-old coupling via k_w/bomb  : PASS  (|r| 0.99, hs_asx_frac-k_w)
+  I6  curvatures step-stable                    : PASS
+  I7  closes > 50% of the gap to ent26          : PASS  (gap -452.3 -> +0.8)
+  I8  hs_asx_frac < 1                           : PASS  (0.646)
+  I9  k_w down, bomb_total up                   : PASS  (x0.972, x1.001)
+  I10 -H positive definite at the optimum       : FAIL
+
+  ⇒ DATA-SUPPORTED new parameters at the conditional optimum: 0 of 6 -- none
+  ⚠ A conditional optimum of 10 with 16 held is NOT a mode. Nothing adopted.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/structure_conditional_optimum_20260906.rds
+EXIT 0

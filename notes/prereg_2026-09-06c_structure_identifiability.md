@@ -90,3 +90,54 @@ Added predictions:
 | **I8** | `hs_asx_frac` lands **below 1** — the direction both 09-06b residuals (the deep floor, the bomb curve) and the gradient (−1025) point | ≥ 1 |
 | **I9** | `k_w` falls and `bomb_total` rises from `ent26`'s values (their gradients' signs) | either moves the other way |
 | **I10** | at the optimum −H is positive definite, so the marginal sds are a count | not PD |
+
+## 6. AMENDMENT 2 — written after the second run, before the third (2026-09-06)
+
+**What the conditional optimum found** (`diag_structure_conditional_optimum_20260906.log`): it
+closed the whole gap to `ent26` (+453, to +0.75) **by removing the structure** — `tau_q` to its
+upper bound 5000, `u_hs` 38 → 9.8, `kz` 6356 → 8821, `h_ml` 134 → 196, f 0.17 → 0.43 — and the
+intermediate slabs went back to **z +2.13 / +0.96**. The two new rows are worth ~10 log-units
+against hundreds in the transient streams, so a free fit trades them away and rediscovers the
+incumbent's over-ventilated column with a `K(z)` floor for the deep (candidate A alone). −H still
+indefinite (soft `h_ml`/`kz`/`h_hs` ridge, eigenvalues −42 and −5.5), so I10 fails and the count is
+again not a count. ⇒ **"How many can we afford" is a WEIGHTING question**: the intermediate rows'
+leverage is set by an n_eff that was never measured for them.
+
+**The third run** holds the conduit at HILDA's declared values (`u_hs` 38, `tau_q` 538, `z_K` 253,
+attachment bottom) and frees only {f, `hs_asx_frac`, `h_hs`} with the four coupled nuisances — the
+"declare three, free two-or-three" design — under the same objective. Separately, the slabs'
+n_eff is MEASURED with the deep slab's own estimator (`diag_deep_d14c_neff.R`), which is the
+observational route to their weight.
+
+| | prediction | falsifier |
+|---|---|---|
+| **I11** | with the conduit declared, the intermediate slabs stay inside \|z\| < 1.5 at the optimum | either outside |
+| **I12** | the gap to `ent26` closes to within **60** log-units (the structure costs something the free fit did not pay) | worse than −60 |
+| **I13** | `hs_asx_frac` < 1 and f ∈ [0.1, 0.4] | either outside |
+| **I14** | the measured slab n_eff differs from 20 by more than a factor 2 in at least one slab | both within 2× of 20 |
+
+## 7. AMENDMENT 3 — the PRICE of the intermediate profile (written before the run)
+
+**What runs two and three found.** Free (ten parameters): the fit removes the conduit (`tau_q` to
+its bound, `u_hs` 38 → 10), keeps a `K(z)` floor for the deep, and leaves the slabs at
+**z +2.13 / +0.96**. Conduit declared (seven free): the fit removes `K(z)` instead (f → 1, its bound),
+takes `kz` to 3786 and `h_ml` to 202, and leaves the slabs at **+2.95 / +2.35**. In both, the slabs'
+weight (n_eff MEASURED at 21.1 / 20.0 — I14 failed, the reuse was right) is what it is: ~10
+log-units against hundreds in the bomb, CO₂-level and pump-δ¹³C streams. **`hs_asx_frac` IS
+supported through the bomb rows** (0.65–0.74, marginal sd ≤ 0.10); f is not determined by the
+profile.
+
+**The question that remains is a price**, and the repo's method for it is the iso-fit frontier
+([[ccx_gates_priced]]): re-optimise everything at each step of a constraint and self-check the
+frontier's likelihood against the true objective. Here the constraint is the slabs' weight,
+multiplied by **W ∈ {3, 10, 30}** as a DEVICE (n_eff × W in the accessor, the objective itself is
+unchanged); at each W the ten parameters are re-optimised from the working arm, then every point is
+re-scored under the TRUE objective (W = 1). The **price** of holding the intermediate profile is
+the true-objective loss at the smallest W whose optimum puts both slabs inside |z| < 1.5.
+
+| | prediction | falsifier |
+|---|---|---|
+| **I15** | at W = 10 both slabs sit inside \|z\| < 1.5 | either outside |
+| **I16** | the price at that W is **< 60** log-units on the true objective relative to `ent26` | ≥ 60 |
+| **I17** | on the frontier point that holds the profile the conduit is ALIVE (`tau_q` < 2000, `u_hs` > 15) and f < 0.5 — the structure, not a rate | conduit off or f ≥ 0.5 |
+| **I18** | the streams that pay are the bomb rows and the pump δ¹³C gradient, not the CO₂ level | CO₂ level pays most |
