@@ -1,0 +1,72 @@
+
+=== STRUCTURE IDENTIFIABILITY -- mode ent26, arm: hs_frac 0.16, u_hs 38, tau_q 538, sst_hs 2, q_attach_from 10, kz_zscale 253, kz_deep_frac 0.166, hs_asx_frac 1 ===
+  centre: kz_deep_frac 0.166, kz_zscale 253, u_hs 38, tau_q 538, hs_asx_frac 1, h_hs 134.1, kz 6356, k_w 1788, bomb_total 118.3, h_ml 134.1
+  step 0.05 (log); mutation 0.5; support if marginal sd < 0.5
+  base log-likelihood -1883.548  (streams: 23)
+
+  gradient (d logL / d log-param) and conditional sd 1/sqrt(-H_ii):
+  kz_deep_frac  grad   +156.42   H_ii    -193.59   cond sd   0.072   H_ii at steps 0.025/0.05/0.1: -193.45 / -193.59 / -194.16 
+  kz_zscale     grad    +71.01   H_ii    -893.77   cond sd   0.033   H_ii at steps 0.025/0.05/0.1: -893.97 / -893.77 / -893.01 
+  u_hs          grad    +17.99   H_ii   -2394.70   cond sd   0.020   H_ii at steps 0.025/0.05/0.1: -2395.28 / -2394.70 / -2392.37 
+  tau_q         grad    +33.97   H_ii     +17.06   cond sd     Inf   H_ii at steps 0.025/0.05/0.1: +17.08 / +17.06 / +16.99 
+  hs_asx_frac   grad  -1024.74   H_ii   -3112.96   cond sd   0.018   H_ii at steps 0.025/0.05/0.1: -3113.91 / -3112.96 / -3109.16 
+  h_hs          grad     +1.12   H_ii     -53.81   cond sd   0.136   H_ii at steps 0.025/0.05/0.1: -53.77 / -53.81 / -53.95 
+  kz            grad    +55.51   H_ii   -5858.38   cond sd   0.013 
+  k_w           grad  -3460.49   H_ii  -29329.11   cond sd   0.006 
+  bomb_total    grad  +6114.21   H_ii -132272.76   cond sd   0.003 
+  h_ml          grad    +70.38   H_ii   -1448.80   cond sd   0.026 
+
+  -H eigenvalues: 1.54e+05 1.53e+04 6.06e+03 581 36.8 24.5 -13.2 -70.4 -202 -430   NOT PD -- marginal sds below are from a REGULARISED matrix
+
+  parameter       cond sd   marginal sd   prior width   verdict
+  kz_deep_frac     0.072        1.419            -   declare
+  kz_zscale        0.033        2.214            -   declare
+  u_hs             0.020        2.059         0.45   declare
+  tau_q              Inf        2.429         0.95   declare
+  hs_asx_frac      0.018        0.958            -   declare
+  h_hs             0.136        0.310            -   DATA-SUPPORTED
+  kz               0.013        1.569            -   (existing)
+  k_w              0.006        0.337            -   (existing)
+  bomb_total       0.003        0.010            -   (existing)
+  h_ml             0.026        2.316            -   (existing)
+
+  correlation matrix (marginal):
+                kz_deepkz_zsca   u_hs  tau_qhs_asx_   h_hs     kz    k_wbomb_to   h_ml
+  kz_deep_frac    +1.00  -0.74  +0.12  +0.46  -0.03  -0.16  +0.32  -0.00  +0.14  -0.16
+  kz_zscale       -0.74  +1.00  -0.13  +0.15  -0.06  +0.11  -0.22  +0.19  +0.32  -0.15
+  u_hs            +0.12  -0.13  +1.00  -0.02  -0.94  +0.32  -0.67  +0.84  -0.53  -0.14
+  tau_q           +0.46  +0.15  -0.02  +1.00  +0.05  -0.39  -0.09  -0.00  +0.41  +0.02
+  hs_asx_frac     -0.03  -0.06  -0.94  +0.05  +1.00  -0.49  +0.51  -0.97  +0.31  +0.44
+  h_hs            -0.16  +0.11  +0.32  -0.39  -0.49  +1.00  +0.11  +0.56  -0.02  -0.61
+  kz              +0.32  -0.22  -0.67  -0.09  +0.51  +0.11  +1.00  -0.36  +0.64  -0.50
+  k_w             -0.00  +0.19  +0.84  -0.00  -0.97  +0.56  -0.36  +1.00  -0.11  -0.61
+  bomb_total      +0.14  +0.32  -0.53  +0.41  +0.31  -0.02  +0.64  -0.11  +1.00  -0.51
+  h_ml            -0.16  -0.15  -0.14  +0.02  +0.44  -0.61  -0.50  -0.61  -0.51  +1.00
+
+  softest two directions of -H (eigenvectors, largest loadings):
+    eigenvalue -430 : u_hs -0.68, h_ml +0.59, hs_asx_frac +0.36, kz +0.14
+    eigenvalue -202 : h_ml -0.58, kz +0.55, u_hs -0.40, tau_q +0.31
+
+  MUTATION +/- 0.5 (log): largest single-stream move
+  kz_deep_frac  max |dlogL|    55.37  on ocean_grad_d13c         has power
+  kz_zscale     max |dlogL|   111.74  on co2_level_SPO           has power
+  u_hs          max |dlogL|   227.72  on co2_level_SPO           has power
+  tau_q         max |dlogL|    32.46  on ocean_grad_d13c         has power
+  hs_asx_frac   max |dlogL|   323.88  on d14c_SH                 has power
+  h_hs          max |dlogL|    16.02  on d14c_SH                 has power
+  kz            max |dlogL|   392.56  on co2_level_SPO           has power
+  k_w           max |dlogL|  1555.29  on d14c_SH                 has power
+  bomb_total    max |dlogL| 13429.66  on d14c_NH                 has power
+  h_ml          max |dlogL|   131.64  on d14c_SH                 has power
+
+  I1  h_hs has NO power                        : FAIL  (mut 16.02, cond sd 0.14)
+  I2  ⭐ kz_deep_frac and hs_asx_frac supported  : FAIL  (msd 1.419 / 0.958)
+  I3  u_hs / tau_q NOT separately supported     : PASS  (msd 2.059 / 2.429 vs widths 0.45 / 0.95; softest: u_hs, h_ml, hs_asx_frac)
+  I4  kz_zscale weakly supported (0.5..2)      : FAIL  (msd 2.214)
+  I5  strongest new-old coupling via k_w/bomb  : PASS  (max |r| 0.97; per new param: kz_deep_frac->kz, kz_zscale->bomb_total, u_hs->k_w, tau_q->bomb_total, hs_asx_frac->k_w, h_hs->h_ml)
+  I6  new-parameter curvatures step-stable      : PASS
+
+  ⇒ DATA-SUPPORTED new parameters: 1 of 6 -- h_hs
+  ⚠ Local curvature at a NON-optimum, matched parameters, no priors. Nothing adopted.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/structure_identifiability_20260906.rds
+EXIT 0

@@ -1350,9 +1350,12 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # ⚠ It no longer returns NULL for an out-of-band h_ml: since 2026-08-28 the
     # rows are scored at EVERY h_ml, at an inflated sigma that carries the
     # fixed-depth-vs-model-box mismatch, and it attaches that sigma as `sd_eff`.
+    # `d14c_mid` (2026-09-06): the two intermediate slabs, from the SAME spinup
+    # as `deep`, on the same steady-state grounds.
     ll <- ccx_loglik(r$out, obs, err, luc = eluc,
                      deep = sp$diagnostics$d14c_bottom_box,
-                     ocean_grad = ccx_ocean_grad_scored(r$out, sp))
+                     ocean_grad = ccx_ocean_grad_scored(r$out, sp),
+                     d14c_mid = ccx_model_d14c_slabs(sp))
     if (verbose) cat(sprintf("  ll %.1f  prior %.1f\n", ll, lp))
     if (!is.finite(ll)) return(-Inf)
     lp + ll

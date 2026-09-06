@@ -1062,7 +1062,8 @@ dg_streams <- function(r, v) {
               grad_off_co2 = v$grad_off_co2, grad_off_d13c = v$grad_off_d13c)
   ccx_loglik(o, ccx_prepare_obs(), err, luc = eluc,
              deep = r$sp$diagnostics$d14c_bottom_box,
-             ocean_grad = ccx_ocean_grad_scored(o, r$sp), by_stream = TRUE)
+             ocean_grad = ccx_ocean_grad_scored(o, r$sp), by_stream = TRUE,
+             d14c_mid = ccx_model_d14c_slabs(r$sp))
 }
 
 # =====================================================================

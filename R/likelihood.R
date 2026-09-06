@@ -549,6 +549,24 @@ LIK_D14C_DEEP_NEFF <- 20             # MEASURED-CONSISTENT (see above), not asse
 LIK_D14C_DEEP_MASK_NATL <- FALSE
 LIK_USE_D14C_DEEP <- TRUE
 
+# ---- INTERMEDIATE D14C ROWS (2026-09-06, Marcus: "use observations and known
+# physical laws to constrain the model's behavior") ------------------------
+# Two natural-D14C slabs, 1500-2000 m and 2000-2627.2 m, from GLODAPv2.2023 by
+# the deep row's own recipe (data-raw/build_glodap_intermediate_targets.R).
+# They tile the bomb-free interior with the deep row and score the depths where
+# 2026-09-04j found the model's worst ventilation error -- ABOVE the only row
+# the objective had. Steady state, like the deep row (bomb addition <= 4.5
+# permil below 1500 m). Fixed DEPTH slabs; the model side is a thickness-
+# weighted mean over the layers that overlap each slab, so the comparison is
+# like for like at every h_ml (ccx_model_d14c_slabs()).
+# ⚠ n_eff is REUSED from the deep slab, where it was measured; it has not been
+# measured for these slabs, and intermediate water masses are if anything
+# larger, so 20 is not conservative here. Owed.
+# ⚠ OBJECTIVE CHANGE #8: every logpost stored before 2026-09-06 lacks these two
+# streams. A LIKELIHOOD is comparable across the change stream by stream.
+LIK_USE_D14C_MID  <- TRUE
+LIK_D14C_MID_NEFF <- LIK_D14C_DEEP_NEFF
+
 #' Deep-ocean D14C target, with the sigma resolved from LIK_D14C_DEEP_NEFF.
 #'
 #' Reads the GLODAPv2 build product and DERIVES the sigma rather than carrying a
@@ -577,6 +595,67 @@ ccx_deep_d14c_target <- local({
     out
   }
 })
+
+#' The intermediate-ocean D14C targets (2026-09-06), sigma from LIK_D14C_MID_NEFF.
+#' Same discipline as ccx_deep_d14c_target(): read the build product, DERIVE
+#' the sigma, cache, and return NULL (stream ABSENT, visibly) if the file is
+#' missing. `slabs` is a data.frame with name/top/bot/target/sd/sd_spread.
+ccx_mid_d14c_target <- local({
+  cache <- NULL
+  function(n_eff = LIK_D14C_MID_NEFF, mask_natl = LIK_D14C_DEEP_MASK_NATL) {
+    key <- paste(n_eff, mask_natl)
+    if (!is.null(cache) && identical(attr(cache, "key"), key)) return(cache)
+    g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_intermediate.rds")),
+                  error = function(e) NULL)
+    if (is.null(g) || is.null(g$slabs)) return(NULL)
+    sl <- do.call(rbind, lapply(g$slabs, function(s) {
+      r <- if (mask_natl) s$no_natl else s$all
+      data.frame(name = s$name, top = s$top, bot = s$bot,
+                 stream = sprintf("d14c_mid_%.0f_%.0f", s$top, s$bot),
+                 target = r$vw, sd = r$sd_w / sqrt(n_eff), sd_spread = r$sd_w,
+                 n_cells = r$n_cells, stringsAsFactors = FALSE)
+    }))
+    out <- list(slabs = sl, n_eff = n_eff, masked = mask_natl, deep_top = g$deep_top,
+                source = g$source, neff_note = g$neff_note)
+    attr(out, "key") <- key
+    cache <<- out
+    out
+  }
+})
+
+#' The MODEL's D14C over fixed depth slabs, from a spinup (2026-09-06)
+#'
+#' Thickness-weighted over the low-latitude interior layers that overlap each
+#' slab, both hemispheres pooled exactly as `d14c_bottom_box` pools them (sum
+#' of C14 over sum of C). A layer is assumed uniform within itself, so the mass
+#' it contributes to a slab is its overlap fraction times its stock. The
+#' high-latitude HS/HD boxes are NOT included, as the bottom box excludes them.
+#' Returns a named numeric vector (one entry per slab) or NULL if the targets
+#' are absent, so the caller's ABSENCE is visible rather than a silent zero.
+ccx_model_d14c_slabs <- function(sp, slabs = NULL) {
+  if (is.null(slabs)) {
+    tg <- ccx_mid_d14c_target()
+    if (is.null(tg)) return(NULL)
+    slabs <- tg$slabs
+  }
+  grid <- sp$grid; aux <- sp$aux; y <- sp$y
+  zb  <- cumsum(grid$dz)                    # bottom of ML, then of interior 1..nl
+  ztp <- c(0, zb[-length(zb)])              # top of each
+  v <- vapply(seq_len(nrow(slabs)), function(i) {
+    a <- slabs$top[i]; b <- slabs$bot[i]
+    num <- 0; den <- 0
+    for (h in HEMIS) for (k in seq_len(grid$nl)) {
+      ov <- max(0, min(b, zb[k + 1]) - max(a, ztp[k + 1]))
+      if (ov <= 0) next
+      fr <- ov / grid$dz[k + 1]
+      ix <- aux$idx[[h]]$oc[k]
+      num <- num + fr * y[ix, "C14"]; den <- den + fr * y[ix, "C"]
+    }
+    if (den <= 0) return(NA_real_)
+    1000 * (num / den - 1)
+  }, numeric(1))
+  stats::setNames(v, slabs$name)
+}
 
 # ---------------------------------------------------------------------
 # OCEAN DIC AND d13C GRADIENT TERMS (task 12; Marcus 2026-08-16)
@@ -1217,7 +1296,7 @@ ccx_model_stats <- function(out, obs) {
 #' repo passes `by_stream =` by name, so nothing breaks -- but a positional 5th
 #' argument means `by_stream` and a positional 4th means `luc`. Name them.
 ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
-                       ocean_grad = NULL, by_stream = FALSE) {
+                       ocean_grad = NULL, by_stream = FALSE, d14c_mid = NULL) {
   parts <- c()
   add <- function(name, v) parts[[name]] <<- (if (is.null(parts[[name]])) 0 else parts[[name]]) + v
   interp <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
@@ -1504,6 +1583,18 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     if (!is.null(tg))
       add("d14c_deep_ocean",
           stats::dnorm(tg$target, deep, tg$sd, log = TRUE))
+  }
+
+  # ---- INTERMEDIATE D14C slabs, GLODAPv2 (see LIK_USE_D14C_MID) --------
+  # One Gaussian per slab, same form as the deep row. `d14c_mid` is the named
+  # vector from ccx_model_d14c_slabs(spinup); ABSENT skips the rows visibly.
+  if (LIK_USE_D14C_MID && !is.null(d14c_mid)) {
+    tg <- ccx_mid_d14c_target()
+    if (!is.null(tg)) for (i in seq_len(nrow(tg$slabs))) {
+      m <- d14c_mid[[tg$slabs$name[i]]]
+      if (!is.null(m) && is.finite(m))
+        add(tg$slabs$stream[i], stats::dnorm(tg$slabs$target[i], m, tg$slabs$sd[i], log = TRUE))
+    }
   }
 
   # ---- ocean DIC and d13C GRADIENTS, GLODAPv2 (see LIK_USE_OCEAN_GRAD) -

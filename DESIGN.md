@@ -1152,6 +1152,18 @@ valid blocks, i.e. the **tighter** blk30. **So 1.61 is part 2b's frozen-at-75 co
 the band still guards a real mismatch. But the band's *severity* has been argued from 1.61 in three
 handoffs, and against the gate's own quantity it is **0.80 σ**.
 
+### 5.2l The intermediate Δ¹⁴C rows — objective change #8 (2026-09-06, Marcus)
+
+Two natural-Δ¹⁴C slabs from GLODAPv2.2023, **1500–2000 m (−168.6 ‰, se 13.5)** and
+**2000–2627.2 m (−175.6 ‰, se 13.6)**, scored as Gaussians exactly like the deep row (§4 / `LIK_D14C_DEEP_NEFF`),
+tiling the bomb-free interior with it. Why: 2026-09-04j found the model's ventilation error peaks at
+1000–2500 m while the only scored interior row sat below it; 2026-09-06 found the pure column cannot
+flatten the deep profile at any `kz` and the conduit arms can — the discriminating observation was
+never in the objective. Model side: a thickness-weighted mean over whichever layers overlap each
+FIXED slab (`ccx_model_d14c_slabs()`), so the comparison is like-for-like at every `h_ml`.
+⚠ n_eff = 20 is reused from the deep slab; not measured here. At `ent26` the rows cost 15.3 log-units
+(z +3.16 / +2.56). Every logpost stored before 2026-09-06 lacks them.
+
 ### 5.3 Sampler
 
 Adaptive Metropolis (adaptMCMC or custom), 4 chains, convergence gates R̂ < 1.05 and

@@ -2,6 +2,39 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-06c — **OBJECTIVE CHANGE #8: THE INTERMEDIATE Δ¹⁴C ROWS; AND THE HS EXCHANGE-AREA FACTOR**
+
+Marcus (2026-09-06): *"the priority is to use observations and known physical laws to constrain the
+model's behavior"*, and "move forward with your recommendations" — which were: put the two
+intermediate GLODAP rows into the likelihood, treat the cold box's AIR–SEA EXCHANGE (not its
+thickness — 09-05b measured thickness to be no lever) as the parameter to free, run a curvature
+check, then design the refit.
+
+**The rows.** `data-raw/build_glodap_intermediate_targets.R` → `data/obs_glodap_intermediate.rds`:
+natural Δ¹⁴C over **1500–2000 m (−168.6, se 13.5)** and **2000–2627.2 m (−175.6, se 13.6)** by the
+deep row's own recipe (5°×10°×250 m cells, cos-lat weights; the script re-derives the deep row and
+refuses to write unless it reproduces −175.256). They tile the bomb-free interior with the deep row.
+`R/likelihood.R`: `LIK_USE_D14C_MID`, `ccx_mid_d14c_target()`, `ccx_model_d14c_slabs()` (thickness-
+weighted over the layers overlapping each FIXED-depth slab, both hemispheres pooled as the bottom
+box is; like-for-like at every `h_ml`), and streams `d14c_mid_1500_2000` / `d14c_mid_2000_2627` in
+`ccx_loglik(d14c_mid = )` — ABSENT visibly when not passed, like `deep`. Wired into the two canonical
+objective paths (`ccx_make_logpost`, `dg_streams`). ⚠ **n_eff = 20 is REUSED from the deep slab, where
+it was measured; not measured for these. Owed.** `tests/testthat/test-d14c-mid.R` (22).
+**At `ent26` the rows cost −15.33** (z **+3.16 / +2.56** — the intermediate is too young, as
+09-04j said); at the 09-06b working arm −8.19 (z −0.26 / −1.49). The one fixture that reproduces a
+stored logpost (`test-enso-demean.R`) was repaired by DERIVATION — score with the rows off, then
+require the difference to be exactly the two Gaussians — not by re-baselining.
+⇒ **Every logpost stored before 2026-09-06 lacks these two streams.** A likelihood is comparable
+stream by stream; a logpost is not.
+
+**The factor.** `hs_asx_frac` (default 1 = bit-exact) multiplies the HS gas-exchange AREA in
+`ccx_prepare()`'s `aux$asx_hs`, so both cores see it with no core change. Errors by name if
+non-positive. `tests/testthat/test-hs-asx-frac.R` (15): absence bit-exact, mutation on HS/HD/deep
+and on the atmosphere's bomb curve, mass untouched, parity, invalid values. ⚠ An OBSERVATIONAL pin
+(annual open-water fraction over the HS area) is owed before it is freed.
+
+**Suite** re-run after both: see the entry above this one once it lands.
+
 ## 2026-09-06b — **K(z) WITH THE CONDUIT: THE MODERN SINK COMES BACK, THE DEEP IS RIGHT AT 1622 m, AND WHAT IS STILL LOST IS THE COLD BOX'S GAS EXCHANGE**
 
 Pre-registered `notes/prereg_2026-09-06b_kz_profile_with_conduit.md`, scored

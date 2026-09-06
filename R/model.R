@@ -967,6 +967,19 @@ ccx_default_params <- function() {
                           # distributed over the interior layers IN PROPORTION
                           # TO THEIR VOLUME -- their q is "assumed independent
                           # of depth". Table 1: q^-1 = 538 +/- 510 yr.
+    # THE HS AIR-SEA EXCHANGE AREA FACTOR (2026-09-06, Marcus). Multiplies the
+    # cold box's gas-exchange area: 1 = HS exchanges on exactly the low-latitude
+    # law over its whole area (HILDA's assumption -- winter ice cover cancelling
+    # the stronger high-latitude winds -- inherited as THEIRS, not measured).
+    # Every residual of the 09-06 arc pointed at this one quantity: at ent26's
+    # k_w the HS endmember is -86 permil against HILDA's -120, which puts a
+    # floor of ~-171 under HILDA's own attachment and makes the cold box too
+    # strong a bomb-14C sink (collect_2026-09-06b sec.2-3). The 32-box posterior
+    # pinned k_w with ONE surface box; this is the degree of freedom that
+    # structure re-opens. An observational pin (annual open-water fraction over
+    # the HS area) is OWED before it is freed; until then 1 ships and the model
+    # is reproduced bit for bit (A * 1 == A).
+    hs_asx_frac = 1,
     # WHERE HD ATTACHES TO THE COLUMN (2026-09-05f, prereg
     # notes/prereg_2026-09-05f_q_attachment_depth.md). The SHALLOWEST interior
     # layer index that exchanges with HD; the set is that layer down to the
@@ -2613,8 +2626,13 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   # cannot end up with a different notion of "preindustrial".
   aux$dic0_hs     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk, aux$sst_hs)
   aux$revelle0_hs <- revelle_factor(aux$dic0_hs, alk, aux$sst_hs)
+  # `hs_asx_frac` scales the EXCHANGE area only (2026-09-06); the HS mass and
+  # the HS<->HD limb are untouched. Errors by name rather than clamping.
+  fx <- if (is.null(p$hs_asx_frac)) 1 else p$hs_asx_frac
+  if (!is.finite(fx) || fx <= 0)
+    stop("hs_asx_frac must be a positive finite exchange-area factor; got ", format(p$hs_asx_frac))
   aux$asx_hs      <- lapply(a_hs, function(A)
-    A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC"))
+    A * fx * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC"))
   # THE PUMP IS SOLVED ONCE PER PREPARE, not once per derivative evaluation.
   # It needs `aux` (areas, dz_mid, mol_per_GtC), so it cannot be built inside the
   # list above -- and it must not be built inside ccx_deriv(), which runs four

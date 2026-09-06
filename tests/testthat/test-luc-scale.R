@@ -226,7 +226,10 @@ test_that("ccx_scaled_forcing reproduces ccx_make_logpost's likelihood exactly",
                             grad_off_co2 = pv$grad_off_co2,
                             grad_off_d13c = pv$grad_off_d13c),
                        luc = SF$eluc, deep = sp$diagnostics$d14c_bottom_box,
-                       ocean_grad = ccx_ocean_grad_scored(o, sp))
+                       ocean_grad = ccx_ocean_grad_scored(o, sp),
+                       # objective change #8 (2026-09-06): the objective carries the
+                       # two intermediate D14C rows, so the reconstruction must too
+                       d14c_mid = ccx_model_d14c_slabs(sp))
 
   expect_true(is.finite(ll_obj))
   expect_equal(ll_rec, ll_obj, tolerance = 1e-8)

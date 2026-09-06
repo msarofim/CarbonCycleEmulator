@@ -125,7 +125,24 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
   # with the flag ON -- the SHIPPED state -- the harness must reproduce the mode
   # file's OWN stored logpost. If it does not, the two scorings are not of the
   # vector this test claims.
-  expect_equal(on, md$logpost, tolerance = 1e-5, scale = 1)
+  # ⚠ OBJECTIVE CHANGE #8 (2026-09-06): the two intermediate D14C rows were added
+  # AFTER this mode was stored, so the stored logpost lacks them. The repair is
+  # DERIVED, not re-baselined ([[stale_fixture_repair]]): score the same vector
+  # with the rows switched off and require THAT to reproduce the file; then
+  # require the difference to be exactly the two rows' own Gaussians.
+  sc_nomid <- function() { old <- LIK_USE_D14C_MID
+    assign("LIK_USE_D14C_MID", FALSE, envir = globalenv())
+    on.exit(assign("LIK_USE_D14C_MID", old, envir = globalenv()), add = TRUE)
+    ccx_make_logpost(base_params = bp)(u0) }
+  on_nomid <- sc_nomid()
+  expect_equal(on_nomid, md$logpost, tolerance = 1e-5, scale = 1)
+  tgm <- ccx_mid_d14c_target()
+  if (!is.null(tgm)) {
+    pp  <- ccx_overlay_par(bp, ccx_unc_to_par(u0))
+    mid <- ccx_model_d14c_slabs(ccx_spinup(pp))
+    rows <- sum(stats::dnorm(tgm$slabs$target, mid[tgm$slabs$name], tgm$slabs$sd, log = TRUE))
+    expect_equal(on - on_nomid, rows, tolerance = 1e-6, scale = 1)
+  }
   # ⚠ TOLERANCE = the project's existing "does this point reproduce" precision
   # (recompute_hessian.R GATE 1, promote_multistart_mode.R GATE 4), not a new
   # number chosen here.
