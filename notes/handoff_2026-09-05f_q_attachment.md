@@ -2,7 +2,7 @@
 # **⭐ THE OUTCOME HOLDS — 2.048 → 1.739, under the reduced form's 1.81.**
 # **⛔ THE MECHANISM I PRE-REGISTERED IS REFUTED: `kz` RISES, it does not relieve.**
 # **⛔ TWO ERRORS OF MINE, BOTH CAUGHT BY MY OWN TESTS — §4 before quoting P3 or P4.**
-# **⚠ THE SUITE IS NOT GREEN, AND IT WAS NOT GREEN WHEN I ARRIVED — §5.**
+# **✅ BOTH §5 ITEMS CLOSED 2026-09-06: the lint is FIXED and the ocean index is SPLIT — see §5.**
 
 **Repo:** `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, trunk `main`, working tree CLEAN.
 Commits **`5309195`, `5a95341`, `13eb0ad`, `2d29eff` (4)**. No remote.
@@ -76,20 +76,36 @@ mutation fires (−113.20 → −116.07) · out-of-range **errors by name on bot
 
 ## 5. ⚠⚠ NON-OBVIOUS STATE — THE SUITE IS NOT GREEN AND THAT IS NOT NEW
 
-⛔ **`test-overlay-idiom-lint.R` FAILS 2**: novel site **`diag_surface_d14c_power.R`**, and the
-ratchet **62 > 61**. **Introduced by `d6587be`, the LAST COMMIT OF THE 09-05 SESSION** — verified by
-removing every file of mine and re-running, where it fails identically. **The 09-05 handoff's
-"1842 pass / 0 fail / green throughout" was wrong, or the lint was never re-run after that commit.**
-**I did not touch it** — the fix is to convert that file to `ccx_overlay_par(p, pm)` and decrement
-`OI_BASELINE_N`, and it is one line of judgement that belongs to whoever owns that diagnostic.
-⇒ **A handoff's "suite green" claim is only as good as the run that produced it, and the last
-commit of a session is exactly where it goes stale.**
+✅ **RESOLVED 2026-09-06, `ac67b65`.** `test-overlay-idiom-lint.R` had failed since **`d6587be`** —
+the LAST COMMIT OF THE 09-05 SESSION, whose handoff reported "1842 pass / 0 fail / green
+throughout". Two assertions: novel site `diag_surface_d14c_power.R`, and the ratchet **62 > 61**.
+Fixed the ruling's own way — **CONVERT ON TOUCH** to `ccx_overlay_par()` — **not** by adding a
+baseline entry, which would have defeated the ratchet the lint exists to be.
+⚠ The lint's header warns each conversion needs a look, because converting a site that had been
+running at the default lag MOVES its numbers. **Checked, not assumed:** `pv` there is built from
+`CCX_PARAM_NAMES`, so it carries all 26 by construction, the deletion the helper guards against
+cannot occur, and the run is **BYTE-IDENTICAL** before and after — mode −48.35, sd 0.93.
+**The 09-05d collect's numbers stand.** Count back to **61 = `OI_BASELINE_N`**, no decrement owed.
+⇒ **A handoff's "suite green" claim is only as good as the run that produced it, and the LAST
+COMMIT of a session is exactly where it goes stale.** ⭐ No mutation test was needed here: the lint
+caught the real novel site on its own, which is the same demonstration.
 
 * **Torch: nothing running.** All local; the diagnostic is ~2 min, the suite ~12.
 * ⚠ **`hs_frac = 0` IS THE SHIPPED CONFIGURATION AND MUST STAY THAT WAY** until a decision.
-* ⚠ **`INDEX_ccx_ocean.md` is 18,144 B against a hard ceiling of 18,432** — **288 B of headroom.**
-  It needs **restructuring, not nibbling**; I compressed the superseded conduit entry and that
-  bought 34 B. `INDEX_cmp_pulse.md` was taken 18,076 → 17,736 by consolidating its archive pointers.
+* ✅ **`INDEX_ccx_ocean.md` was SPLIT 2026-09-06** (it had 288 B of hard-ceiling headroom, where
+  trimming meant deleting live findings). The split line is chosen so future routing is decidable:
+  **`INDEX_ccx_ocean.md` = what the ocean IS** (pump, `h_ml`, `kz`, `tau_ex`, carbonate/Revelle,
+  gradients, GLODAP, the gates on those); new **`INDEX_ccx_ocean_struct.md` = what SHAPE it should
+  BE** (candidate geometries, the HILDA HS/HD boxes, `q`'s attachment, the circulation limbs, the
+  ocean's ENSO response). ⚠ **`kz` splits both ways and both files say so** — its value, bracket and
+  pricing stay with the properties; what a STRUCTURE does to it goes with the structures.
+  **18,144 → 9,248 + 11,400**, both well under soft. Verified by an orphan/dangling sweep that
+  nothing was lost: **540 memories, 0 orphans, 0 dangling**. Routing updated in `MEMORY.md` and the
+  project `CLAUDE.md` (FaIRtoFrEDI `15f0498`).
+  ⚠ **Still over SOFT, none over hard: 7 of 17** — `INDEX_cmp_pulse` 17,736 (taken there 09-05 by
+  consolidating its archive pointers), `INDEX_slr` 17,253, `INDEX_cmp` 17,220, `INDEX_ccx` 16,536,
+  `INDEX_diag` 16,341, `INDEX_ccx_seas` 15,627, `INDEX_ais` 14,983. **`INDEX_cmp_pulse` is the next
+  one that will need this treatment**, and the ocean split is the worked precedent for how.
 * **Memory:** `ccx_q_attach_bottom`, `iso_deep_control_licenses_one_comparison`,
   `retraction_in_place_does_not_propagate` (from the cleanup, §6).
 * **Still owed from before, untouched:** the SOM-FFN tie for `SO_DPCO2_PEAK_MO`; `sst_seas_amp_NH`
@@ -118,7 +134,7 @@ commit of a session is exactly where it goes stale.**
 1. ⭐⭐ **Prereg the matched-`kz` decomposition** (§2). It carries the whole attribution and it is post hoc.
 2. ⭐ **The attachment BOUNDARY.** Only layers **1 and 10** were run; the prereg refused a tunable
    boundary. A declared scan is a separate question — ⛔ **and it must not be scored by picking its best.**
-3. **The lint (§5)** — one file, one line, someone's call.
-4. **A refit**, if the attachment is ever adopted: `ent26`'s 26 parameters were fitted at
+3. **A refit**, if the attachment is ever adopted: `ent26`'s 26 parameters were fitted at
    `hs_frac = 0`, and `kz` = 2686 is an iso-deep **solve**, not a fit.
-5. **`INDEX_ccx_ocean.md`'s 288 B** (§5) — restructure.
+4. **`INDEX_cmp_pulse.md` at 17,736 B** — the next index that will need the ocean split's treatment.
+~~The lint~~ and ~~`INDEX_ccx_ocean`~~ are **DONE** (§5).
