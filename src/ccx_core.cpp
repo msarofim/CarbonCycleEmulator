@@ -89,6 +89,10 @@ struct Aux {
   double gtc_per_ppm_hemi, chi0, mol_per_GtC;
   double npp0[2], veg0[2], land0[2], ml_mass_kg[2], asx[2], sst[2];
   double dz[NL + 1], dz_mid[NL];
+  // Per-interface diffusivity (2026-09-06b): K at the base of layer k. Twin of
+  // R's aux$kz_int; rep(kz, NL) at the default kz_deep_frac = 1, so P.kz below
+  // is read but the operator uses THIS.
+  double kz_int[NL];
   double alpha_photo, alpha_as_down, alpha_as_up;
   // AIR-SEA 13C, TEMPERATURE-DEPENDENT SINCE 2026-09-02 (Zhang et al. 1995).
   // alpha_as_down/up above are now the RETIRED SCALARS, used only when
@@ -560,12 +564,13 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     if (sink_ocean != 0.0)
       add_flux(iatm, iml, sink_ocean * A.asx[hi] / sink_asx_tot, a_as_dn, true);
 
-    // interior diffusion, per tracer on its own gradient
+    // interior diffusion, per tracer on its own gradient, at the interface's
+    // own K (A.kz_int, 2026-09-06b; == P.kz everywhere at the default)
     for (int kk = 0; kk < NL; ++kk) {
       const int a = base + IML + kk;
       const int b = base + IML + kk + 1;
       for (int tr = 0; tr < 3; ++tr) {
-        const double Ft = P.kz * (y[IX(a, tr)] / A.dz[kk] - y[IX(b, tr)] / A.dz[kk + 1])
+        const double Ft = A.kz_int[kk] * (y[IX(a, tr)] / A.dz[kk] - y[IX(b, tr)] / A.dz[kk + 1])
                           / A.dz_mid[kk];
         dy[IX(a, tr)] -= Ft;
         dy[IX(b, tr)] += Ft;
@@ -780,6 +785,7 @@ static Aux unpack_aux(const List& a) {
   v = a["sst"];        A.sst[0] = v[0];        A.sst[1] = v[1];
   v = a["dz"];         for (int i = 0; i <= NL; ++i) A.dz[i] = v[i];
   v = a["dz_mid"];     for (int i = 0; i < NL; ++i)  A.dz_mid[i] = v[i];
+  v = a["kz_int"];     for (int i = 0; i < NL; ++i)  A.kz_int[i] = v[i];
   v = a["dic0"];       A.dic0[0] = v[0];       A.dic0[1] = v[1];
   v = a["revelle0"];   A.revelle0[0] = v[0];   A.revelle0[1] = v[1];
   v = a["pco2_0"];     A.pco2_0[0] = v[0];     A.pco2_0[1] = v[1];

@@ -39,6 +39,11 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     asx = c(aux$asx$NH, aux$asx$SH),
     sst = c(aux$sst$NH, aux$sst$SH),
     dz = grid$dz, dz_mid = aux$dz_mid,
+    # Per-interface diffusivity (2026-09-06b). Sent UNCONDITIONALLY like every
+    # vector field below, and LOUD if absent: an aux built without it would
+    # otherwise hand the core whatever was in that buffer before.
+    kz_int = if (is.null(aux$kz_int))
+      stop("aux lacks kz_int -- build it with ccx_prepare() (2026-09-06b)") else aux$kz_int,
     a_oc = c(aux$a_oc$NH, aux$a_oc$SH),
     dic0 = c(aux$dic0$NH, aux$dic0$SH),
     revelle0 = c(aux$revelle0$NH, aux$revelle0$SH),

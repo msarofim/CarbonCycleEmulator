@@ -778,8 +778,10 @@ ccx_steady_profile_from_source <- function(S, p, aux, grid, hemi) {
   Fi[nl] <- -S[nl]
   for (k in seq.int(nl - 1L, 1L)) Fi[k] <- Fi[k + 1L] - S[k]
   kappa <- aux$a_oc[[hemi]] * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
-  # cc[k+1] = cc[k] - F[k] dz_mid[k] / kz, in GtC/m; /kappa/1e-6 -> umol/kg
-  cumsum(-Fi * aux$dz_mid / p$kz) / kappa * 1e6
+  # cc[k+1] = cc[k] - F[k] dz_mid[k] / K_k, in GtC/m; /kappa/1e-6 -> umol/kg.
+  # K_k is the interface's own diffusivity (2026-09-06b); uniform kz before.
+  kzv <- if (is.null(aux$kz_int)) rep(p$kz, nl) else aux$kz_int
+  cumsum(-Fi * aux$dz_mid / kzv) / kappa * 1e6
 }
 
 #' The MODEL's deep-minus-surface ALKALINITY gradient, umol/kg.

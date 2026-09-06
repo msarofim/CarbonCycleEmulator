@@ -2,6 +2,76 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-06b — **K(z) WITH THE CONDUIT: THE MODERN SINK COMES BACK, THE DEEP IS RIGHT AT 1622 m, AND WHAT IS STILL LOST IS THE COLD BOX'S GAS EXCHANGE**
+
+Pre-registered `notes/prereg_2026-09-06b_kz_profile_with_conduit.md`, scored
+`notes/collect_2026-09-06b_kz_profile_with_conduit.md`. **Mechanism built in BOTH cores:**
+`kz_deep_frac` (f) and `kz_zscale` (z_K), `K(z_k) = kz·[f + (1−f)·exp(−(z_k − h_ml)/z_K)]` at each
+interface, anchored `K(h_ml) = kz` exactly; **f = 1 or absent is the model BIT FOR BIT** (the
+exponential is never evaluated), `kz_zscale` is then inert. Threaded through `aux$kz_int`: the R
+derivative, the C++ derivative, the pump's export solve, `ccx_steady_profile_from_source`, and the
+substep bound (at `max(K)` = `kz`). `tests/testthat/test-kz-profile.R`, 26 expectations: absence
+bit-exact in spinup AND transient, z_K inert, mutation, anchor + monotone, R/C++ parity at f 0.5
+with HS on, conservation, the pump reads the profile, invalid values error by name, substeps.
+**Suite 1887 / 0 / 4 skip / 70 warn** (+26 = this file; +4 warnings = its own Lueker/LUC notices).
+**Nothing adopted:** f ships 1, `hs_frac` ships 0.
+
+**Why it exists.** 09-04k measured K(z) WITHOUT a conduit (counterproductive); 09-06 measured the
+conduit WITHOUT K(z) (starves the thermocline). DESIGN §3.4a's B2 is the two together and had never
+been run. HILDA's own profile is `465 + 7096·exp(−(z−75)/253)` (Siegenthaler & Joos 1992).
+
+**Result, `kz` HELD at ent26's 6356 and only the deep floor f solved to GLODAP's −175.3:**
+- ⛔ **HILDA's own attachment has NO solution at any z_K** — its deep floor is HD − ~54 ≈ −171 ‰
+  because `q` injects HD water (−117 here; −136 in HILDA) into every layer. The floor is the HS
+  endmember, i.e. `ent26`'s `k_w` (1788, 2× HILDA's) — `ccx_hs_endmember_is_kw` as a hard ceiling.
+- **Bottom attachment solves at z_K = 253 only** (f **0.166**, K_deep 1058 = 2.3× HILDA's 465; z_K 500
+  misses by 3.3 ‰). Profile **−165.5 / −195.7 / −175.3**: 1622 m z −0.03, **2268 m −1.48 (too old)**.
+- ⭐ **Transient at matched parameters: total −459 vs −2849 (uniform-kz conduit) and −333 (pure
+  column). The CO₂-level rows go −2217 → −28; the sink 2.54 → 2.99 GtC/yr (gate 7 z −1.66 → −0.52).**
+  The modern sink is a THERMOCLINE quantity and never needed the deep K the deep age forbids.
+- ⛔ Bomb ¹⁴C still pays (−46 NH / −117 SH): the atmosphere is **21 ‰ below ent26 by 1975** — the cold
+  box is too strong a bomb sink at ent26's `k_w`/`bomb_total`. Same organ as the floor above.
+  `ocean_grad_d13c` −195 and `d13c_level_SPO` −60 are matched-parameter artifacts (pump δ¹³C fitted
+  at uniform K; HS ¹³C fractionation never seen by the fit).
+- Verdicts: E0 ✅, E1/E2/E3 ⛔ as registered (E3 on the one arm: −165 vs −170 needed, 48 % of R2's
+  loss), E3b ⛔, E4 not run as registered (bottom arm inside both bounds), E5 ✅, E6 VACUOUS, E7 ✅.
+
+**⚠ Two of my own errors, on the record.** (1) The first run's solver used an endpoint-sign bracket
+and reported "no f holds the deep" for BOTH arms; the deep is NON-MONOTONE in f (−116 → −187 →
+−156 as f → 0: the layer above the bottom dies while the conduit holds the bottom near HD − 60), so
+there are two roots. The solver now scans every sign change and reports the largest f, printing the
+dead-intermediate root (f 0.0097) rather than using it. First log kept as `_run1_endpoint_bracket`.
+(2) The first run printed E6 PASS on zero arms — `all(diff(empty))` is TRUE. Now VACUOUS.
+
+**⇒ Three structural statements now rest on observations** (collect §4), and the remaining losses
+point at one organ. **A refit WITH the structure is indicated; its design is Marcus's ruling** —
+which of {f, z_K, u_hs, tau_q, an HS-specific exchange factor, h_hs} to free, the attachment and
+`hs_frac` as declared choices, the `kz` bracket re-bisected on 36 boxes, on Torch.
+
+## 2026-09-06 (ii) — **q ATTACHMENT: THE VERDICT IS CONTROL-DEPENDENT, THE COLUMN CANNOT FLATTEN THE DEEP AT ANY kz, AND EVERY DEEP-RIGHT ARM LOSES THE MODERN SINK**
+
+Pre-registered `notes/prereg_2026-09-06_q_attachment_scan_and_obs_pin.md`, scored
+`notes/collect_2026-09-06_q_attachment_scan.md`, `calibration/diag_q_attachment_scan.R` (2 min).
+Paid the two debts of 09-05f and added two parts:
+- **A (owed): the matched-kz decomposition, pre-registered — PASSES.** Attachment main effect
+  +1.66 vs kz +1.19, interaction −0.36. The 09-05f attribution stands.
+- **B (owed): the boundary, every layer, iso-deep.** Nine of ten attachments sit within 2.15–2.42
+  and **the whole gain is the last step** — not injecting HD water at 2268 m. B1 (kz monotone in
+  attachment) FAILED by 0.6 % at layers 8 → 9: HD is not a fixed endmember, it gets younger with
+  fewer old partners.
+- **C (new): kz solved to the OBSERVATION (−175.3) instead of the incumbent's −156.1** (which sits
+  at z +1.85 and was a third of every arm's score — dead weight; [[threshold_from_obs_or_law]]).
+  ⭐ **Both conduit arms put every scored layer inside |z| < 1** — DESIGN §3.4a's benchmark, first
+  time — and **HILDA's own attachment edges the bottom, 0.461 vs 0.551**: the 09-05f ranking was a
+  property of the control. ⭐⭐ **The pure column cannot match the deep SHAPE at any kz**: obs-pinned
+  at 5267, 1622 m is still +2.28 (GLODAP is flat below 1600 m; a no-flux-bottom column is curved).
+- **D (new): the transient at matched parameters.** R1 (column, kz 5267) loses 333; **R2 (bottom
+  conduit, kz 1747) loses 2849 — the sink 3.07 → 2.54, CO₂ rows −2217, bomb −306.** D2 (HILDA's
+  mechanism) FAILED by 7×: the conduit decouples the DEEP from kz, not the THERMOCLINE. Gate 5's NH
+  peak YEAR is +2.16/+2.17 across four runs whose deep ventilation differs 6× — a no-power pass; the
+  peak time is set above the thermocline. `sst_hs` reached 1.62 °C (Lueker extrapolation, flagged).
+⇒ pointed straight at K(z) + conduit, the entry above.
+
 ## 2026-09-06 — the suite is green again, and the ocean index was SPLIT rather than trimmed
 
 **`test-overlay-idiom-lint` fixed (`ac67b65`).** It had been failing since **`d6587be`** — the last

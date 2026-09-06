@@ -1107,6 +1107,27 @@ ccx_default_params <- function() {
                           # track CCX_PARAM_TABLE$kz's init and [lo, hi] -- see
                           # the derivation in that entry. Default-parameter 14C
                           # numbers computed before this date are at kz 4000.
+    # DEPTH-DEPENDENT K (2026-09-06b, prereg
+    # notes/prereg_2026-09-06b_kz_profile_with_conduit.md). At interface k,
+    #     K(z_k) = kz * [ f + (1 - f) * exp(-(z_k - h_ml) / kz_zscale) ]
+    # anchored so K(h_ml) = kz EXACTLY: `kz` keeps its meaning as the
+    # thermocline diffusivity the decadal streams were fitted with, and the
+    # new number is the deep FLOOR f * kz. HILDA's own profile is
+    # K = 465 + 7096 exp(-(z - 75)/253) m2/yr (Siegenthaler & Joos 1992,
+    # Table 1) -- 7500 at the surface-box base, 465 below ~700 m.
+    #
+    # ⚠ THE ABSENCE CONTRACT: f = 1 (or both fields absent) gives K == kz at
+    # every interface BIT FOR BIT -- ccx_kz_profile() returns rep(kz, nl)
+    # without evaluating the exponential -- and kz_zscale is then INERT.
+    # Every result before 2026-09-06 is reproduced. NOT one of the fitted
+    # parameters; a structural switch like hs_frac and q_attach_from.
+    #
+    # WHY IT EXISTS. 2026-09-04k measured K(z) WITHOUT a conduit and it was
+    # counterproductive; 2026-09-06 measured the conduit WITHOUT K(z) and it
+    # starved the thermocline (sink 3.07 -> 2.54 GtC/yr). Each half failed for
+    # the reason the other exists. DESIGN sec.3.4a's B2 is the two together.
+    kz_deep_frac = 1,     # f in (0, 1]; 1 = uniform K, the model as before
+    kz_zscale    = 253,   # m; HILDA's z0. INERT at f = 1.
     tau_ex    = 1.3,      # yr, interhemispheric atmospheric exchange
     # SEASONAL MODULATION OF THE EXCHANGE, added 2026-08-31 as a DIAGNOSTIC.
     # ⚠ DEFAULT 0 = OFF = the model bit for bit. NOT adopted, NOT fitted, and
@@ -1424,9 +1445,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   # concentration gradients, which is what builds the deep-ocean 14C depletion
   # even where the net carbon flux vanishes. Antisymmetric, so still exactly
   # conservative for every tracer.
-  add_diffusion <- function(a, b, dz_a, dz_b, dz_mid) {
+  add_diffusion <- function(a, b, dz_a, dz_b, dz_mid, kz) {
     for (tr in CCX_TRACERS) {
-      F_t <- p$kz * (y[a, tr] / dz_a - y[b, tr] / dz_b) / dz_mid
+      F_t <- kz * (y[a, tr] / dz_a - y[b, tr] / dz_b) / dz_mid
       if (record && tr == "C" && F_t != 0) .rec(a, b, F_t, NULL)
       dy[a, tr] <<- dy[a, tr] - F_t
       dy[b, tr] <<- dy[b, tr] + F_t
@@ -1887,11 +1908,14 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     }
 
     # ---- ocean interior diffusion -----------------------------------
-    # F = Kz (C_k/dz_k - C_k+1/dz_k+1) / dz_mid  -- area cancels, exactly
+    # F = K_k (C_k/dz_k - C_k+1/dz_k+1) / dz_mid  -- area cancels, exactly
     # conservative, and each flux is applied to both layers by add_flux.
+    # K_k is the interface's own value from aux$kz_int (2026-09-06b); at the
+    # default kz_deep_frac = 1 every entry IS p$kz, bit for bit.
     col <- c(iml, ioc)
     for (kk in seq_len(grid$nl)) {
-      add_diffusion(col[kk], col[kk + 1], grid$dz[kk], grid$dz[kk + 1], aux$dz_mid[kk])
+      add_diffusion(col[kk], col[kk + 1], grid$dz[kk], grid$dz[kk + 1], aux$dz_mid[kk],
+                    aux$kz_int[kk])
     }
 
     # ---- the biological pump: mixed layer -> interior, per box --------
@@ -2377,7 +2401,12 @@ ccx_pump_export <- function(p, aux, grid) {
     # and is DEFERRED, not denied). Identical to aux$a_oc when hs_frac = 0.
     kappa <- aux$a_ls[[h]] * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
     cc <- kappa * prof * 1e-6                                # GtC/m
-    Fi <- p$kz * (cc[-length(cc)] - cc[-1]) / aux$dz_mid     # nl interfaces
+    # THE SAME OPERATOR THE DERIVATIVE USES: the interface's own K, so the
+    # export that holds the observed gradient is solved against the profile
+    # the model actually mixes with (2026-09-06b). A caller that built `aux`
+    # by hand before that date carries no kz_int and gets the uniform kz.
+    kzv <- if (is.null(aux$kz_int)) rep(p$kz, grid$nl) else aux$kz_int
+    Fi <- kzv * (cc[-length(cc)] - cc[-1]) / aux$dz_mid      # nl interfaces
     S <- numeric(grid$nl)
     for (k in seq_len(grid$nl))
       S[k] <- -(Fi[k] - if (k < grid$nl) Fi[k + 1] else 0)
@@ -2385,6 +2414,28 @@ ccx_pump_export <- function(p, aux, grid) {
   })
   names(out) <- HEMIS
   out
+}
+
+#' Interior diffusivity at each of the `nl` interfaces (2026-09-06b)
+#'
+#' K(z_k) = kz * [f + (1 - f) exp(-(z_k - h_ml) / z_K)], z_k the base of layer
+#' k (so z_1 = h_ml and K(z_1) = kz exactly). f = kz_deep_frac, z_K = kz_zscale.
+#' ⚠ f = 1, or both fields ABSENT, returns rep(kz, nl) WITHOUT evaluating the
+#' exponential -- the absence contract is bit-exact, not exact-to-epsilon.
+#' Errors by name on f outside (0, 1] or a non-positive scale: a silent clamp
+#' would be a mechanism that reports "no effect" identically to one measured.
+ccx_kz_profile <- function(p, grid) {
+  f  <- p$kz_deep_frac
+  if (is.null(f)) return(rep(p$kz, grid$nl))
+  if (!is.finite(f) || f <= 0 || f > 1)
+    stop("kz_deep_frac must be in (0, 1]; got ", format(f))
+  if (f == 1) return(rep(p$kz, grid$nl))
+  zs <- p$kz_zscale
+  if (is.null(zs) || !is.finite(zs) || zs <= 0)
+    stop("kz_zscale must be a positive depth scale in m when kz_deep_frac < 1; got ",
+         format(zs))
+  z <- cumsum(grid$dz)[seq_len(grid$nl)]           # interface depths, z_1 = h_ml
+  p$kz * (f + (1 - f) * exp(-(z - grid$h_ml) / zs))
 }
 
 ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
@@ -2552,6 +2603,9 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     hs_mass_kg  = lapply(a_hs, function(A) A * h_hs * ccx_const("RHO_SEAWATER")),
     dz_hd       = sum(grid$dz) - h_hs,
     sst_hs      = if (is.null(p$sst_hs)) 2 else p$sst_hs,
+    # Per-interface diffusivity (2026-09-06b). Present unconditionally so both
+    # cores read the same vector; rep(kz, nl) at the default.
+    kz_int      = ccx_kz_profile(p, grid),
     grid = grid
   )
   # HS's own preindustrial chemistry references, for the frozen-Revelle switch,
@@ -2668,7 +2722,9 @@ ccx_advection_eigbound <- function(w_up, grid, p = NULL) {
 #' Substeps needed to keep the explicit interior transport stable over one step
 #' @param dt master step, years (1/12 for the monthly integrator)
 ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
-  lam <- ccx_diffusion_eigmax(p$kz, grid) +
+  # The bound is taken at the LARGEST interface K, which is kz itself at the
+  # ML base for every admissible kz_deep_frac -- conservative for the rest.
+  lam <- ccx_diffusion_eigmax(max(ccx_kz_profile(p, grid)), grid) +
     ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), grid, p)
   need <- dt * lam / (CCX_STAB_SAFETY * CCX_RK4_STAB_LIMIT)
   as.integer(min(max(CCX_SUBSTEPS_MIN, ceiling(need)), CCX_SUBSTEPS_MAX))

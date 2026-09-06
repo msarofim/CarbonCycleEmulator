@@ -169,7 +169,8 @@ scored by the likelihood. That asymmetry is itself a finding: the candidate with
 distinctive signature is the one the objective is currently blind to.
 
 **A. Depth-dependent `K_z`** — *the literature's answer to exactly this tension, and the
-cheapest thing on the list.* `K(z) = kz · f(z)` with a single decay scale. **One extra
+cheapest thing on the list.* (**BUILT 2026-09-06b** as `kz_deep_frac` / `kz_zscale`, ships uniform
+bit-exact; measured WITH B2 — see the "B2 + A TOGETHER" bullet below.) `K(z) = kz · f(z)` with a single decay scale. **One extra
 parameter, no new state, no new fluxes, no isotope-fractionation decisions**, and the
 existing per-interface diffusion loop already accepts a coefficient vector. The classic
 box-diffusion result is that a *constant* `K` cannot reproduce natural Δ¹⁴C (a 10²–10³ yr
@@ -241,6 +242,21 @@ different cost:
     removed youngening, shown by a matched-`kz` decomposition that is **post hoc**.
     ⇒ `notes/prereg_2026-09-05f_q_attachment_depth.md`, `notes/collect_2026-09-05f_q_attachment.md`.
     ⚠ Any such arm is **NOT "HILDA's model"** and every number must carry that label.
+  - ⭐⭐ **B2 + A TOGETHER, 2026-09-06b — BUILT AND MEASURED; a refit is the next ruling.** Preceded
+    the same day by two findings on the same arms: **the pure column cannot flatten the deep at ANY
+    `kz`** (obs-pinned at 5267, 1622 m still +2.28σ — GLODAP is flat below 1600 m, a no-flux-bottom
+    column is curved) and **the 09-05f attachment ranking is control-dependent** (pinned to the
+    observation rather than the incumbent's −156.1, BOTH attachments reach |z| < 1 on every scored
+    layer; HILDA's edges the bottom, 0.461 vs 0.551), while at matched parameters every uniform-`kz`
+    deep-right arm loses the modern sink (CO₂-level rows −2217). With `K(z)` at HILDA's `z_K` = 253,
+    `kz` held at `ent26`'s 6356 and the bottom-attached conduit, the deep floor solves at
+    **f = 0.166** (1058 m²/yr, 2.3× HILDA's 465): 1622 m z **−0.03**, 2268 m −1.48, and **the modern
+    sink returns** (CO₂ rows −28; gate 7 z −0.52). ⛔ **HILDA's own depth-independent `q` has NO
+    solution at any `z_K`** — its deep floor is HD − 54 ≈ −171 ‰ at `ent26`'s `k_w`. ⛔ Bomb ¹⁴C still
+    pays −163 (atmosphere 21 ‰ low by 1975): the cold box exchanges too fast. **Every remaining loss
+    is the HS air–sea exchange**, which the 32-box posterior pinned with one surface box.
+    ⇒ `notes/collect_2026-09-06_q_attachment_scan.md`, `notes/collect_2026-09-06b_kz_profile_with_conduit.md`.
+    ⚠ `hs_frac` ships 0 and `kz_deep_frac` ships 1; NOT adopted; NOT "HILDA's model".
   - **B2, HILDA proper.** A separate two-box high-latitude reservoir alongside the
     low-latitude diffusive column (Siegenthaler & Joos 1992; isotope budgets in Joos & Bruno
     1998, *GBC* 12:277, doi:10.1029/98GB00746). HILDA is the closest published relative of
