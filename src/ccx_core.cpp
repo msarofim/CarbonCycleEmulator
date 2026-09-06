@@ -151,6 +151,9 @@ static inline void ccx_alpha_as(double sst, const Aux &A,
 struct Par {
   double beta, q10, k_w, kz, w_up, w_out[2], tau_ex;
   double u_hs, tau_q;        // HILDA HS<->HD and HD<->interior (2026-09-05)
+  double q_attach_from;      // shallowest interior layer HD attaches to,
+                             // 1-BASED as in R. 1 = every layer = HILDA's
+                             // depth-independent q (2026-09-05f)
   double tau_ex_seas_amp, tau_ex_seas_phase;   // diagnostic, 2026-08-31; 0 = OFF
   // CO2 fertilisation form and the saturating pair. `fert_form` selects which
   // of beta / (beta_max, fert_k) is live; the other is inert. See the long note
@@ -680,9 +683,16 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       //     so the layer -> HD limb is exactly y_k / tau_q. The areas do NOT
       //     cancel on the other limb -- this and the conveyor's
       //     interhemispheric limbs are the only cross-column fluxes.
+      //     `q_attach_from` (2026-09-05f) subsets this loop; it is 1-BASED
+      //     to match R, so the 0-based start is kfrom - 1. Conservation is
+      //     unaffected -- each layer's two limbs are volume-symmetric on
+      //     their own, so dropping layers drops matched pairs.
       if (P.tau_q > 0.0) {
+        const int kfrom = (int) P.q_attach_from;
+        if (kfrom < 1 || kfrom > NL)
+          Rcpp::stop("q_attach_from must be in 1..%d; got %d", NL, kfrom);
         const double conc_hd = y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd);
-        for (int kk = 0; kk < NL; ++kk) {
+        for (int kk = kfrom - 1; kk < NL; ++kk) {
           const int ik = base + IML + 1 + kk;
           add_flux(ihd, ik, A.a_ls[hi] * A.dz[kk + 1] / P.tau_q * conc_hd, 1.0);
           add_flux(ik, ihd, y[IX(ik, C)] / P.tau_q, 1.0);
@@ -827,6 +837,7 @@ static Par unpack_par(const List& p) {
   // "a pre-dated parameter list must still reach the core as a model"
   // fallback lives; read unconditionally here, as every field is.
   P.u_hs = p["u_hs"]; P.tau_q = p["tau_q"];
+  P.q_attach_from = p["q_attach_from"];
   P.q_conv = p["q_conv"];
   P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];
   P.conv_reverse = p["conv_reverse"];

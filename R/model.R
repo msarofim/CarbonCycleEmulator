@@ -967,6 +967,30 @@ ccx_default_params <- function() {
                           # distributed over the interior layers IN PROPORTION
                           # TO THEIR VOLUME -- their q is "assumed independent
                           # of depth". Table 1: q^-1 = 538 +/- 510 yr.
+    # WHERE HD ATTACHES TO THE COLUMN (2026-09-05f, prereg
+    # notes/prereg_2026-09-05f_q_attachment_depth.md). The SHALLOWEST interior
+    # layer index that exchanges with HD; the set is that layer down to the
+    # bottom. 1 = EVERY layer = HILDA's depth-independent q = the 09-05
+    # structure, reproduced BIT FOR BIT, so this default changes nothing.
+    #
+    # ⭐ WHY IT IS A KNOB AT ALL. HD sits at -109 permil and the interior
+    # crosses -109 at ~1000 m, so a SINGLE-ENDMEMBER bulk exchange matches its
+    # endmember at exactly ONE depth and fights the profile on both sides of
+    # it -- ageing above the crossover, YOUNGENING below. Our whole scored
+    # band lies below, and is already too young against GLODAP. That is
+    # arithmetic, not a property of the fit.
+    #
+    # ⚠ `tau_q` KEEPS ITS PER-LAYER MEANING, IT IS NOT RENORMALISED: the
+    # layer -> HD limb stays exactly y_k / tau_q whatever the set is, so a
+    # smaller set means LESS total exchange, not the same exchange packed into
+    # fewer layers. Deliberate -- renormalising would smuggle a rate change in
+    # with a geometry change and neither could then be read.
+    #
+    # ⛔ A VALUE > 1 IS A DEPARTURE FROM HILDA, authorised by Marcus 2026-09-05
+    # ("we don't need to stay true to HILDA, but we should stay true to the
+    # conceptual way that the simplified model's ocean works"). Any result on
+    # such an arm must carry that label -- it is NOT "HILDA's model".
+    q_attach_from = 1,
     h_hs      = 0,        # m, HS thickness. 0 = FOLLOW `h_ml`, which is choice
                           # C2 of notes/prereg_2026-09-05_hilda_boxes.md and the
                           # 2026-09-05 build; a positive value PINS it instead.
@@ -2098,9 +2122,19 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #     `w_out`'s distributed return injects MIXED-LAYER water into every
       #     interior layer; this injects HD water, which is old. Same wiring,
       #     opposite endmember.
+      #     ⭐ `q_attach_from` (2026-09-05f) SUBSETS this loop -- see the
+      #     parameter's own comment in ccx_default_params(). Conservation is
+      #     unaffected by construction: each layer's pair of limbs is
+      #     volume-symmetric ON ITS OWN, so dropping layers drops matched
+      #     pairs. 1 = every layer = the 09-05 structure, bit for bit.
       if (p$tau_q > 0) {
+        kfrom <- as.integer(p$q_attach_from)
+        if (!is.finite(kfrom) || kfrom < 1L || kfrom > grid$nl)
+          stop("q_attach_from must be an integer in 1..", grid$nl,
+               " (the interior layer where HD attaches); got ",
+               format(p$q_attach_from))
         conc_hd <- y[ihd, "C"] / (aux$a_hs[[h]] * aux$dz_hd)           # GtC/m3
-        for (kk in seq_len(grid$nl)) {
+        for (kk in seq.int(kfrom, grid$nl)) {
           add_flux(ihd, ioc[kk],
                    aux$a_ls[[h]] * grid$dz[kk + 1] / p$tau_q * conc_hd)
           add_flux(ioc[kk], ihd, y[ioc[kk], "C"] / p$tau_q)

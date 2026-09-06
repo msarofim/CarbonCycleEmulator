@@ -2,6 +2,60 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-05f — **`q`'s ATTACHMENT DEPTH: THE OUTCOME HOLDS, MY PRE-REGISTERED MECHANISM DOES NOT**
+
+Pre-registered `notes/prereg_2026-09-05f_q_attachment_depth.md`, scored
+`notes/collect_2026-09-05f_q_attachment.md`. New `calibration/diag_q_attachment.R`,
+`tests/testthat/test-q-attachment.R`. **Nothing adopted, nothing fitted.** `hs_frac` stays **0**;
+`ent26` untouched.
+
+**MARCUS'S RULING (09-05):** *"We don't need to stay true to HILDA, but we should stay true to the
+conceptual way that the simplified model's ocean works."* CCX's ocean is a **pure-diffusion column**
+whose interior is reached by mixing from above; deep water formation, which is what HS/HD
+represents, fills the **deep**. New parameter **`q_attach_from`**, the shallowest interior layer HD
+exchanges with. **1 = every layer = HILDA's depth-independent `q` = the 09-05 structure, BIT FOR
+BIT**, so nothing written before today changes model. Wired in both cores; `tau_q` deliberately
+**not** renormalised over the subset (a smaller set is *less* exchange, not the same exchange
+repacked) — pinned by a test, because renormalising would smuggle a rate change in with a geometry
+change and neither could then be read.
+
+✅ **P0** identity **0.000e+00**, closure **1.08e-16**, parity **3.55e-14** (incumbent's own
+1.14e-13), mutation fires, out-of-range errors by name on both cores.
+⛔ **P1 FAILED AND THE FAILURE IS THE FINDING: `kz` goes UP (1900 → 2686), not down.** I predicted
+the deep's own pathway would *relieve* `kz` as 09-04k2's reduced form did (0.50×). It cannot: with
+`tau_q` per-layer, bottom-only is *less* total exchange, so `kz` must do *more*. Both arms still
+relieve against the incumbent (0.299× / 0.423×); P1 was written against the depth-independent arm.
+✅ **P2 PASSES AND BEATS THE STRETCH: mean|z| 2.048 → 1.739**, under the reduced form's **1.81**.
+⭐ **A matched-`kz` decomposition (POST HOC, flagged as such) attributes it to the attachment**: at
+`kz` = 1900 the bottom arm scores 0.377 vs 2.048, at 2686 1.739 vs 3.092 — it dominates at both, so
+the gain is not coming from elsewhere. ⛔ Those two off-control scores decompose; they are not
+quotable scores. ⭐ **`tau_q` scan: HILDA's own central 538 is the best arm** (200 → 1.783, 1048 →
+2.204; 28 and 100 hit the ceiling). Nothing was tuned to land there.
+
+**⛔ TWO ERRORS OF MINE THIS ARC, BOTH CAUGHT BY MY OWN TESTS.**
+1. **P3 as pre-registered could not pass — I put the control inside the test.** It required *every*
+   scored layer to age, but 3172 m **is the iso-deep control**, pinned in every arm; it read +0.0 and
+   the gate printed FAIL. Scored on the FREE layers it passes (−4.1, −8.5, both toward GLODAP).
+   ⭐⭐ The same fact is a **power** statement: that layer contributes an identical |z| to every arm,
+   so **one third of the scored statistic cannot discriminate between attachments.** `mean|z|` is
+   left on the full band anyway — changing it would break comparability with 2.55 / 2.048 / 1.81.
+2. **P4 was measured across a `kz` change.** I read HD off the two **iso-deep** arms (−98.7 vs
+   −109.2) and called the 10.5 permil the attachment's. The control solves a *different* `kz` per
+   arm. Deconfounded at fixed `kz`: **attachment +2.92, `kz` +8.90 — HD is set by `kz`, 3.1×** — and
+   the pre-check's predicted *direction* is wrong too. **The test caught it, not me**: the assertion
+   failed at `ccx_default_params()` (−94.57 vs −94.14) because the true effect is ~1-3 permil with
+   **no robust sign**. The test now asserts what is robust, attachment < `kz`/3.
+   ⇒ ⭐⭐ **THE ISO-DEEP CONTROL LICENSES EXACTLY ONE COMPARISON — the intermediate PROFILE, which is
+   what it equalises the deep age for. Every quantity it does not pin must be read at MATCHED `kz`.**
+
+⛔ **NOT "HILDA's model".** Every number is *HILDA HS/HD boxes with `q` attached at the BOTTOM*, a
+deliberate departure. **Owed before adoption:** a prereg for the matched-`kz` decomposition; the
+attachment BOUNDARY (only layers 1 and 10 were run — the prereg refused a tunable boundary, and a
+scan must not be scored by picking the best); and a refit, since `ent26`'s 26 parameters were fitted
+at `hs_frac = 0` and `kz` = 2686 is an iso-deep solve, not a fit.
+
+Also this session: **LICENSE (MIT)**, Marcus's call — it blocked any public release.
+
 ## 2026-09-05e — DESIGN §6's acceptance criteria were pinned to a mode that now ERRORS by name
 
 Housekeeping, owed since the 09-04 handoff and re-listed as rank 2 in the 09-05 one. **No model

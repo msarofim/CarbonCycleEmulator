@@ -228,6 +228,19 @@ different cost:
     > and `w_out` all buy ocean sink by moving surface water down, and all three pay the
     > same deep-Δ¹⁴C bill. The escape is not more ventilation — it is changing its
     > **depth distribution** (A) or adding an **interior source** (C).
+  - ⭐ **B2 STATUS, 2026-09-05f — BUILT, MEASURED, AND `q`'s ATTACHMENT DEPTH IS THE LIVE
+    QUESTION.** The HS/HD boxes exist in both cores (2026-09-05), ship **OFF** (`hs_frac = 0`,
+    bit-exact), and HILDA's **published depth-independent `q` FAILS** here: HD sits near −109 ‰
+    and the interior crosses −109 at ~1000 m, so a single-endmember bulk exchange ages the column
+    above that depth and **youngens** it below — and the whole scored band is below, already too
+    young against GLODAP. **Marcus 2026-09-05 authorised departing from HILDA** provided the
+    result stays true to how CCX's own ocean works. Attaching `q` at the **bottom** takes the
+    scored band **2.048 → 1.739**, under the 09-04k2 reduced form's **1.81** and toward this
+    section's own **|z| < 1** benchmark — ⛔ but still **not** reaching it, and **NOT adopted**.
+    ⛔ **`kz` RELIEF IS REFUTED as the mechanism** (`kz` *rises*, 1900 → 2686); the gain is the
+    removed youngening, shown by a matched-`kz` decomposition that is **post hoc**.
+    ⇒ `notes/prereg_2026-09-05f_q_attachment_depth.md`, `notes/collect_2026-09-05f_q_attachment.md`.
+    ⚠ Any such arm is **NOT "HILDA's model"** and every number must carry that label.
   - **B2, HILDA proper.** A separate two-box high-latitude reservoir alongside the
     low-latitude diffusive column (Siegenthaler & Joos 1992; isotope budgets in Joos & Bruno
     1998, *GBC* 12:277, doi:10.1029/98GB00746). HILDA is the closest published relative of

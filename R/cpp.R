@@ -123,6 +123,10 @@ ccx_cpp_par <- function(p) {
   # via ccx_hs_on()) means the boxes are absent, and these two are then inert.
   if (is.null(p$u_hs))  p$u_hs  <- 0
   if (is.null(p$tau_q)) p$tau_q <- 0
+  # q_attach_from (2026-09-05f): 1 = every interior layer = HILDA's
+  # depth-independent q, so a parameter list written before that date reaches
+  # BOTH cores as the 09-05 structure. Same absence contract as h_hs.
+  if (is.null(p$q_attach_from)) p$q_attach_from <- 1
   if (is.null(p$npp_veg_frac)) p$npp_veg_frac <- 0
   if (is.null(p$ra_ratio)) p$ra_ratio <- 0
   # Fertilisation form, added 2026-08-14. Defaults to the SAME named constant
@@ -214,7 +218,7 @@ ccx_cpp_par <- function(p) {
   }
   p[c("beta", "fert_form", "beta_max", "fert_k",
       "q10", "k_w", "kz", "w_up", "w_out_NH", "w_out_SH", "tau_ex",
-      "u_hs", "tau_q",    # HILDA HS/HD (2026-09-05)
+      "u_hs", "tau_q", "q_attach_from",   # HILDA HS/HD (2026-09-05, -05f)
       "q_conv", "conv_sink", "conv_descent", "conv_reverse", "pump_mode",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
