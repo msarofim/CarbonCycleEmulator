@@ -2,6 +2,41 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-05e — DESIGN §6's acceptance criteria were pinned to a mode that now ERRORS by name
+
+Housekeeping, owed since the 09-04 handoff and re-listed as rank 2 in the 09-05 one. **No model
+change, no refit, no gate built.** `hs_frac` still 0.
+
+**THE DEFECT.** Every "STATUS AT THE CANONICAL MODE" block in §6 — nine of them — was measured at
+**`from90`**, and four tables label that arm **"(canonical)"**. `R/paths.R` has since quarantined
+it: `ccx_mode_file()` **ERRORS on `from90` and `pin90` by name**, so not one of those blocks can be
+re-run as written. A document stating the acceptance criteria for headline claims was quoting a
+retired arm as current.
+
+**THE FIX, AND WHAT IT DELIBERATELY DOES NOT DO.** A header now states the tables are **PROVENANCE**
+and carries the measured ledger at `ent26` (adopted 09-04): **4 PASS** — gate 7 ocean z **−0.32**,
+Q **1.27**, G **−0.06**, S **+1.00** — **2 FAIL**, gate 4 on decadal AF *spread* (**sd 0.025 vs GCB
+0.051, ratio 0.48**, against **0.76 at defaults in the same run**; the level, 0.425 vs 0.431, is
+fine) and gate 5 on the NH bomb peak **YEAR** (**z +2.17**). Adoption fixed the seasonal gates and
+moved **neither** standing failure — consistent with P5.
+
+⚠ **No table was deleted and no number was re-measured.** The `from90` values are the record of what
+that arm ran, and re-deriving them is impossible by construction — the mode errors. The header also
+flags the like-for-like trap: those numbers predate the 09-02 T-dependent alphas (**−4.84**
+log-units), so **`from90` → `ent26` is INDICATIVE only**; the within-run `ent26`-vs-defaults contrast
+is the measured one.
+
+**STILL OWED:** rewriting §6's criteria *at* `ent26`. This is a stopgap against misreading, not that
+rewrite.
+
+**Memory maintenance the same session** (`~/.claude/.../memory/`, outside this repo): the SHIPPED
+record of the 09-02 alphas, `alpha_as_t_dependent_shipped.md`, was an **ORPHAN** — linked from no
+index — while `INDEX_ccx_seas.md` quoted GATE Q at a **"1.0σ" that file's own text retracts** ("
+reproduces at NO arm"; measured **defaults 1.37**, and **1.27 at `ent26`**). The root also routed
+the alphas to `INDEX_ccx.md`, which does not hold them. All three fixed; new memory
+`retraction_in_place_does_not_propagate` records the mechanism — **an in-place retraction does not
+reach the indexes that quote the number, and an unlinked memory cannot correct a linked one.**
+
 ## 2026-09-05d — **DO NOT BUILD THE GEOSECS SURFACE GATE.** "UNSCORED" IS NOT "UNCONSTRAINED": THE OBJECTIVE ALREADY PINS IT TO ±0.93 ‰
 
 Marcus: *"Score GEOSECS LS-surface Delta14C as a gate first."* Pre-registered in
