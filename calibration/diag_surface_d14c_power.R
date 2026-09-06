@@ -124,10 +124,15 @@ stopifnot(identical(colnames(Sig), CCX_PARAM_NAMES), isTRUE(md$pd))
 u_mode <- ccx_par_to_unc(pm0)
 surf_at_u <- function(u) {
   pv <- ccx_unc_to_par(stats::setNames(as.numeric(u), CCX_PARAM_NAMES))
-  p  <- v0$p
-  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p <- ccx_set_enso(p, pv)
-  surf_d14c(p)
+  # ccx_overlay_par() rather than a bare intersect() copy loop: it migrates,
+  # copies, and ASSERTS THE OVERLAY DELETED NOTHING. Here `pv` is built FROM
+  # CCX_PARAM_NAMES, so it carries all 26 by construction and the assertion
+  # cannot fire -- which is exactly why this conversion is numerically
+  # identical (verified: mode -48.35, sd 0.93 unchanged to 2 dp). The idiom is
+  # banned at NEW sites regardless of whether a given one is provably safe;
+  # "safe here" is not a property a reader can check at a glance, and the next
+  # copy of it would not be. See tests/testthat/test-overlay-idiom-lint.R.
+  surf_d14c(ccx_overlay_par(v0$p, pv))
 }
 s0 <- surf_at_u(u_mode)
 g  <- numeric(length(CCX_PARAM_NAMES))
