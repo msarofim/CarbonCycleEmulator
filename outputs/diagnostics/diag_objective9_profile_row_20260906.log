@@ -1,0 +1,19 @@
+
+=== OBJECTIVE #9 MUTATION -- mode ent26 ===
+  targets A -168.6 B -175.6 deep -175.3; independent sd 13.5 / 13.6 / 10.3; contrast se(B-deep) 3.51 (30) 4.04 (60)
+
+  arm                                                  A       B    deep    B-D |    indep    mvn30    mvn60 | loss vs HILDA arm: indep / mvn60  (mvn60 - indep)
+  ent26 column (kz as fitted)                     -125.9  -140.7  -156.1  +15.4 |   -20.32   -39.24   -48.45 |   -9.83 /  -35.83  (-26.00)
+  column, obs-pinned kz 5267                      -139.6  -157.1  -175.3  +18.2 |   -13.54   -73.92   -83.64 |   -3.06 /  -71.02  (-67.96)
+  HILDA attach + K(z), hs_asx 0.8, f 0.049        -161.2  -172.0  -175.3   +3.2 |   -10.49   -11.55   -12.62 |   +0.00 /   +0.00  ( +0.00)
+  bottom attach, uniform obs-pinned kz 1747       -172.5  -187.3  -175.3  -12.0 |   -10.71   -20.40   -15.63 |   -0.22 /   -3.01  ( -2.78)
+  bottom attach + K(z), f 0.166 (09-06b)          -172.0  -195.7  -175.3  -20.4 |   -11.42   -59.09   -38.98 |   -0.93 /  -26.35  (-25.42)
+
+  GATE (prereg sec.2, 60-deg block): the bottom-attached arms lose >= 9 MORE on the row than under the independent form:
+    bottom attach, uniform obs-pinned kz 1747      extra loss  +2.78  -> FAIL
+    bottom attach + K(z), f 0.166 (09-06b)         extra loss +25.42  -> PASS
+    column, obs-pinned kz 5267                     extra loss +67.96  (the columns; +4 sigma on the contrast, so they too should pay)
+    ent26 column (kz as fitted)                    extra loss +26.00
+
+  ⚠ Nothing adopted: LIK_USE_D14C_PROFILE_MVN ships FALSE. This is the number the ruling asked for.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/objective9_profile_row_20260906.rds

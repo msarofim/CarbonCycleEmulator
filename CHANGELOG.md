@@ -2,6 +2,59 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-06d — **THE OBSERVATIONAL PIN ON `hs_asx_frac` (0.65: HILDA'S CANCELLATION IS REAL, THE SCHMIDT TERM IS THE REST); THE THREE CAVEAT SCANS; OBJECTIVE #9 BUILT, SHIPS OFF**
+
+Continuation of 09-06c under the standing priority (observations and laws first; HILDA's numbers as
+caveats). Nothing adopted; the refit design `notes/prereg_2026-09-07_hilda_refit_design.md` is
+still Marcus's ruling — this entry supplies the numbers it asked for.
+
+**1. `hs_asx_frac` from observations and a law** (`data-raw/download_hs_exchange_obs.R` → HadISST1
+sea-ice concentration 1° + NCEP/NCAR R1 monthly |U| at σ0.995; `data-raw/build_hs_exchange_factor.R`
+→ `data/obs_hs_exchange_factor.rds`; ERSST v5 already in the manifest defines the cold area). The
+model's `k_w` is ONE fitted piston velocity per unit area, so the observational counterpart of the
+factor is ⟨(1 − ice)·U²·Sc^−½⟩_HS / ⟨U²·Sc^−½⟩_LL (Wanninkhof 2014 eq. 4, k ∝ ⟨U²⟩Sc^−½, no exchange
+through ice), area- and month-weighted on ERSST's 2° grid. 1981–2010:
+- **the cold area (annual-mean SST < 5 °C) is 0.160 of the ocean — HILDA's 0.16, now MEASURED**
+  (NH 0.123, SH 0.190; the model gives both hemispheres 0.16).
+- **ice × wind = 1.064**: HILDA's "winter ice cancels the stronger polar winds" is right to 6 %
+  (open water 0.651 × U² ratio 1.358, rectified over months and cells).
+- **the Schmidt term is 0.549** (HS mean SST 0.65 °C vs LL 21.5 °C; 0.571 at the model's `sst_hs` 2 °C)
+  and a single fitted `k_w` cannot carry it ⇒ **FACTOR 0.653** (windows 1961–2020: 0.61–0.66;
+  NH 0.32, SH 0.78).
+- ⇒ **the fitted 0.65–0.8 (0.74 ± 0.10 at the declared-conduit optimum) is the Schmidt number**, within
+  1 sd of the pin; the design's "> 2 sd is the finding" is NOT triggered. ⚠ The design's own proposed
+  statistic — open-water fraction ALONE — is 0.651, equal to the full factor by two cancelling
+  omissions (wind ×1.36, Schmidt ×0.55); it would have passed as a confirmation for the wrong reason.
+- `SC_CO2_W14_A..E` registered in `R/constants.R` (five scalar entries, the registry's one-number contract) (cited at one remove: the Wiley text was 403; the
+  coefficients were read from pySeaFlux, which reproduces Wanninkhof 2014 Table 1; Sc(20 °C) = 668 ✓).
+
+**2. The caveat scans** (`calibration/diag_declared_param_scans.R`, log + rds `_20260906`), on the
+09-06c §7 arm (HILDA attachment, `z_K` 253, `hs_asx_frac` 0.8; f re-solved **0.0486** — the
+reconstruction gate PASSES against §7's 0.049). One at a time, f held AND f re-solved to hold the deep:
+- **`z_K`**: 150 → the whole interior ages 10 ‰ (f held); re-solved f 0.112 restores the levels
+  (contrast +1.4σ) at **−223** on the transient, −201 of it the CO₂ level rows (sink 2.97 → 2.87).
+  **500 → NO f holds the deep** (8.8 ‰ short): the window above HILDA's value is closed.
+- **`u_hs`**: 19 → re-solved f 0.136, **−517** (CO₂ rows −551, sink 2.78). **76 → NO f** (1.2 ‰ short).
+- **`tau_q`**: **269 → NO f** (33 ‰ short). 1076 → f held: the deep goes to −226; **re-solved f 0.313:
+  +93 on the transient (CO₂ rows +67) with the contrast at +4.28σ** — the CO₂ level rows REWARD
+  drifting back toward the column that the contrast rejects. That is 09-06c run 2's "free optimum
+  removes the conduit" seen from the other side, and the reason #9 has to precede the refit.
+
+**3. Objective change #9 — BUILT, `LIK_USE_D14C_PROFILE_MVN` ships FALSE** (pending the ruling).
+`data-raw/build_glodap_profile_covariance.R` promotes the 09-06c bootstrap to `data/obs_glodap_profile_cov.rds`
+(30° and 60° blocks, seed 20260906, 4000 draws; GATE: the point means reproduce the three row targets
+to 1e-3 ‰ — they do to 1e-4). `R/likelihood.R`: `ccx_profile_d14c_cov()`, `ccx_dmvnorm_log()` (Cholesky,
+no dependency), and when ON the three level rows are REPLACED by one `d14c_profile_mvn` row on
+(A, B, deep) with the SAME targets and the bootstrap's covariance; any absent input falls back to the
+independent rows visibly. `tests/testthat/test-d14c-profile-mvn.R` (23): ships off; targets identical;
+exact reduction to three Gaussians on a diagonal Σ; **a level shift is cheaper and a contrast shift
+dearer than under independent rows** (margins derived from the stored covariance); ON moves the total
+by exactly (row − three). **Mutation** (`calibration/diag_objective9_profile_row.R`, arms rebuilt and
+re-solved, not typed): extra loss under the 60° row vs the independent form — **K(z)+bottom conduit
+(09-06b) −25.4 (gate ≥ 9 PASS)**, obs-pinned column −68.0, `ent26` −26.0, uniform-`kz` bottom pin
+**−2.8 (FAIL on the ≥ 9 as written — its contrast is −2.9σ, the design's number was calibrated on
+the −5σ arm)**. A gate number is per arm; the prereg should say which.
+
 ## 2026-09-06c (ii) — **HOW MANY CAN WE AFFORD? THE PROFILE'S LEVELS DECIDE NOTHING; ITS CONTRAST DECIDES THE ATTACHMENT — HILDA'S, NOT THE BOTTOM**
 
 Marcus: *"How many of the 5 variables can we afford to free?"* Scored `notes/prereg_2026-09-06c_structure_identifiability.md`

@@ -567,6 +567,50 @@ LIK_USE_D14C_DEEP <- TRUE
 LIK_USE_D14C_MID  <- TRUE
 LIK_D14C_MID_NEFF <- LIK_D14C_DEEP_NEFF
 
+# ---- OBJECTIVE CHANGE #9 (2026-09-06) -- THE PROFILE AS ONE MVN ROW. ⛔ SHIPS OFF.
+# The three interior levels above are built from the SAME GLODAP columns, so
+# their sampling errors are correlated 0.97-0.99 and the vertical CONTRAST
+# (B - deep: observed -0.4, se 3.5-4.0 permil) is known 3-4x better than any
+# level (se ~13). Three independent Gaussians throw that away; a free fit then
+# trades the profile off at zero cost (09-06c). With the switch ON the three
+# rows are REPLACED by one multivariate-normal row on (A, B, deep) with the
+# measured covariance (data-raw/build_glodap_profile_covariance.R), the SAME
+# three targets, and the bootstrap's own level variances. Same observation,
+# same means -- only the discarded correlation is restored.
+# ⛔ DEFAULT FALSE: adopting it is Marcus's ruling (prereg_2026-09-07 sec.2),
+# and every stored logpost was scored without it. `LIK_D14C_PROFILE_BLOCK` is
+# the bootstrap block size in degrees latitude: 60 (conservative) or 30.
+LIK_USE_D14C_PROFILE_MVN <- FALSE
+LIK_D14C_PROFILE_BLOCK   <- 60
+
+#' The measured joint covariance of the three interior D14C levels (#9).
+#' NULL (row ABSENT, visibly) if the build product is missing or the block is
+#' not one it stored. Cached like its siblings.
+ccx_profile_d14c_cov <- local({
+  cache <- NULL
+  function(block = LIK_D14C_PROFILE_BLOCK) {
+    key <- as.character(block)
+    if (!is.null(cache) && identical(attr(cache, "key"), key)) return(cache)
+    g <- tryCatch(readRDS(ccx_path("data", "obs_glodap_profile_cov.rds")), error = function(e) NULL)
+    if (is.null(g) || is.null(g$cov[[key]])) return(NULL)
+    out <- list(cov = g$cov[[key]], se = g$se[[key]], means = g$means, targets = g$targets,
+                streams = g$streams, slab_names = g$slab_names, block = block,
+                contrast_obs = g$contrast_obs, built = g$built)
+    attr(out, "key") <- key
+    cache <<- out
+    out
+  }
+})
+
+#' log density of a multivariate normal, by Cholesky; no package dependency.
+#' With a DIAGONAL Sigma this is exactly the sum of the marginal dnorm(log=TRUE)
+#' terms, which is what test-d14c-profile-mvn.R asserts.
+ccx_dmvnorm_log <- function(x, mu, Sigma) {
+  R <- chol(Sigma)
+  z <- backsolve(R, x - mu, transpose = TRUE)
+  -0.5 * sum(z^2) - sum(log(diag(R))) - 0.5 * length(x) * log(2 * pi)
+}
+
 #' Deep-ocean D14C target, with the sigma resolved from LIK_D14C_DEEP_NEFF.
 #'
 #' Reads the GLODAPv2 build product and DERIVES the sigma rather than carrying a
@@ -1578,7 +1622,26 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # ---- deep-ocean D14C, GLODAPv2 (see LIK_D14C_DEEP_NEFF) -------------
   # One scalar, one Gaussian. The only term in the objective that prices ocean
   # VENTILATION; everything else touching kz does so through d13C.
-  if (LIK_USE_D14C_DEEP && !is.null(deep) && is.finite(deep)) {
+  # ---- OBJECTIVE CHANGE #9: the profile as ONE MVN row (ships OFF) ------
+  # When ON, and the deep AND both slabs are present, the three level rows
+  # below are replaced by one row on (A, B, deep) with the measured
+  # covariance. The targets are the rows' own (the build gates on that); only
+  # the correlation the independent form discards is added. If any input is
+  # absent the row is skipped and the independent rows are scored as before,
+  # so nothing can be silently half-scored.
+  profile_mvn <- FALSE
+  if (LIK_USE_D14C_PROFILE_MVN && !is.null(deep) && is.finite(deep) && !is.null(d14c_mid)) {
+    pc <- ccx_profile_d14c_cov(); tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
+    if (!is.null(pc) && !is.null(tgm) && !is.null(tgd)) {
+      m <- c(d14c_mid[[tgm$slabs$name[1]]], d14c_mid[[tgm$slabs$name[2]]], deep)
+      if (length(m) == 3L && all(is.finite(m))) {
+        add("d14c_profile_mvn", ccx_dmvnorm_log(c(tgm$slabs$target, tgd$target), m, pc$cov))
+        profile_mvn <- TRUE
+      }
+    }
+  }
+
+  if (!profile_mvn && LIK_USE_D14C_DEEP && !is.null(deep) && is.finite(deep)) {
     tg <- ccx_deep_d14c_target()
     if (!is.null(tg))
       add("d14c_deep_ocean",
@@ -1588,7 +1651,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # ---- INTERMEDIATE D14C slabs, GLODAPv2 (see LIK_USE_D14C_MID) --------
   # One Gaussian per slab, same form as the deep row. `d14c_mid` is the named
   # vector from ccx_model_d14c_slabs(spinup); ABSENT skips the rows visibly.
-  if (LIK_USE_D14C_MID && !is.null(d14c_mid)) {
+  if (!profile_mvn && LIK_USE_D14C_MID && !is.null(d14c_mid)) {
     tg <- ccx_mid_d14c_target()
     if (!is.null(tg)) for (i in seq_len(nrow(tg$slabs))) {
       m <- d14c_mid[[tg$slabs$name[i]]]

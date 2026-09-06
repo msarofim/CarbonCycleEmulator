@@ -84,3 +84,19 @@ log-units on the row (its −5σ contrast) relative to the independent form.
 3. `h_hs` declared (follow `h_ml`) — or freed given its transient power.
 4. The sea-ice pin for `hs_asx_frac`: cross-check (recommended) or prior.
 5. Launch on Torch with the 46-start harness.
+
+## 8. ADDENDUM 2026-09-06d — the numbers the design asked for (nothing ruled; see CHANGELOG 09-06d)
+
+- **§4's sea-ice cross-check is DONE and it passes**: the observation-and-law factor is **0.653**
+  (`data/obs_hs_exchange_factor.rds`; ice × wind 1.064, Schmidt 0.549), within 1 sd of the fitted
+  0.74 ± 0.10. ⚠ Open-water fraction ALONE (this section's original statistic) is 0.651 by two
+  cancelling omissions; the full factor is the one to quote. Question 4 can be answered either way
+  on the same number: as a cross-check it passes; as a prior it would be N(0.65, ~0.05) with the
+  window spread as the width. `hs_frac` is now measured (0.160) rather than HILDA's.
+- **§3's scans are DONE** (`calibration/diag_declared_param_scans.R`): every declared parameter's
+  window is ONE-SIDED — `z_K` 500, `u_hs` 76 and `tau_q` 269 leave no deep floor that holds the deep;
+  the other direction costs 223 / 517 on the transient (`z_K` 150 / `u_hs` 19) or GAINS 93 while
+  failing the contrast at +4.3σ (`tau_q` 1076). The last is the case for doing §2 before the refit.
+- **§2 is BUILT and ships OFF** (`LIK_USE_D14C_PROFILE_MVN`, block 60): the mutation gate passes on
+  the arm it was written for (K(z)+bottom, extra loss 25.4 ≥ 9) and not on the uniform-`kz` bottom pin
+  (2.8; its contrast is −2.9σ). The gate line should read "the K(z)+bottom arm"; the ≥ 9 stands.
