@@ -1,4 +1,4 @@
-"name","logpost","stored","offset","source","arm","n_par","kz_lo","kz_hi","hml_lo","hml_hi","commit","host","r_version","measured"
-"cold","-17421.4037269680",NA,NA,"ccx_init_unc()","N",26,"4379.100000","8109.900000","30.000000","200.000000","80f212f","MacBook-Pro-2.local","4.5.3","2026-09-04T06:52:11-0400"
-"incumbent","-1764.5467624456","-1547.1579134124","-217.3888490332","calibration/output/refit_20260831_seas_lag_split/from90/mode_fit_pumpN.rds","N",26,"4379.100000","8109.900000","30.000000","200.000000","80f212f","MacBook-Pro-2.local","4.5.3","2026-09-04T06:52:11-0400"
-"new_basin","-1812.2272606448","-1496.0128065243","-316.2144541204","calibration/output/polish_20260831_probe_basin/from90/mode_fit_pumpN.rds","N",26,"4379.100000","8109.900000","30.000000","200.000000","80f212f","MacBook-Pro-2.local","4.5.3","2026-09-04T06:52:11-0400"
+"name","logpost","stored","offset","source","arm","n_par","struct","kz_lo","kz_hi","hml_lo","hml_hi","commit","host","r_version","measured"
+"cold","-16659.9396487006",NA,NA,"ccx_init_unc()","N",28,"hilda","1161.600000","27808.000000","30.000000","200.000000","ce3d20b","MacBook-Pro-2.local","4.5.3","2026-09-06T17:42:36-0400"
+"incumbent","-2099.5623127148","-1547.1579134124","-552.4043993024","calibration/output/refit_20260831_seas_lag_split/from90/mode_fit_pumpN.rds","N",28,"hilda","1161.600000","27808.000000","30.000000","200.000000","ce3d20b","MacBook-Pro-2.local","4.5.3","2026-09-06T17:42:36-0400"
+"new_basin","-2151.8432993983","-1496.0128065243","-655.8304928740","calibration/output/polish_20260831_probe_basin/from90/mode_fit_pumpN.rds","N",28,"hilda","1161.600000","27808.000000","30.000000","200.000000","ce3d20b","MacBook-Pro-2.local","4.5.3","2026-09-06T17:42:36-0400"
