@@ -19,6 +19,10 @@ caught the real novel site on its own, which is the same demonstration.
 ⇒ **A handoff's "suite green" is only as good as the run behind it, and the LAST COMMIT of a session
 is exactly where that claim goes stale.**
 
+✅ **Verified green: 1861 pass / 0 fail / 4 skip / 66 warn.** ⭐ The counts pin the 09-05 error
+exactly: **1861 − 19** (this arc's new `test-q-attachment.R`) **= 1842**, the number that handoff
+reported. Its pass-count was right; its **"0 fail" was not.**
+
 **Memory (outside this repo).** `INDEX_ccx_ocean.md` had reached **288 B of its hard ceiling**, where
 trimming would have meant deleting live findings. **Split instead**, on a line that makes future
 routing decidable: **`INDEX_ccx_ocean.md` = what the ocean IS** (pump, `h_ml`, `kz`, `tau_ex`,

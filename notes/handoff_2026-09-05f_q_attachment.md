@@ -53,6 +53,12 @@ hit the ceiling). **Nothing was tuned to land there.**
 
 ## 3. ✅ P0 IS CLEAN
 
+**SUITE (verified 2026-09-06, full `test_dir`): 1861 pass / 0 FAIL / 4 skip / 66 warn.**
+⭐ The counts reconstruct the 09-05 error exactly: **1861 − 19** (this arc's new
+`test-q-attachment.R`) **= 1842**, the pass-count that handoff reported. So its 1842 was
+RIGHT and its **"0 fail" was not** — the two lint failures came in with `d6587be`, the very
+last commit, and the suite was never re-run after it.
+
 identity **0.000e+00** · closure **1.08e-16** · parity **3.55e-14** (incumbent's own 1.14e-13) ·
 mutation fires (−113.20 → −116.07) · out-of-range **errors by name on both cores** ·
 **19/19 in `tests/testthat/test-q-attachment.R`.**
