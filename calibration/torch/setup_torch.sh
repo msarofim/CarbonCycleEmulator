@@ -45,6 +45,8 @@ if [ -z "${SLURM_TMPDIR:-}" ]; then
 fi
 
 export R_LIBS_USER=/scratch/ms17839/Rlibs/4.5
+# 2026-09-06d: the HILDA-structure refit; must match multistart.sbatch and the CSV.
+export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
 mkdir -p "$R_LIBS_USER" logs
 
 # ⛔ EVERY R SNIPPET BELOW GOES THROUGH A FILE, NEVER `Rscript -e`
@@ -88,13 +90,31 @@ Rscript --vanilla "$R_TMP_SCRIPT"
 # The bound is RELATIVE and tight because this is an EVALUATION of one fixed
 # point: two machines must agree to floating point or the port is broken.
 cat > "$R_TMP_SCRIPT" <<'RSCRIPT'
-COLD_REF <- -19204.7215567491   # calibration/torch/port_targets.csv, row "cold"
+# THE COLD TARGET IS READ FROM THE SHIPPED port_targets.csv, never typed here
+# (2026-09-06d): it was a literal (-19204.72, the 25-parameter cold init) and
+# went stale at every table change. The CSV is written on the Mac by
+# make_port_targets.R -- a file this script did not produce -- and it carries
+# the parameter count and the STRUCTURE label the run must match.
+pt <- utils::read.csv("calibration/torch/port_targets.csv", stringsAsFactors = FALSE,
+                      colClasses = c(commit = "character", host = "character",
+                                     name = "character", struct = "character"))
+r  <- pt[pt$name == "cold", ]
+COLD_REF <- as.numeric(r$logpost[1])
 COLD_TOL <- 1e-8                # relative; = MS_EVAL_TOL in the driver
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+if (!identical(as.integer(r$n_par[1]), length(CCX_PARAM_NAMES)))
+  stop("port_targets.csv was made on a ", r$n_par[1], "-parameter build; this one fits ",
+       length(CCX_PARAM_NAMES), ". Re-run make_port_targets.R on the Mac and re-ship.")
+if (!identical(r$struct[1], Sys.getenv("CCX_MS_STRUCT", "")))
+  stop("port_targets.csv was made with structure '", r$struct[1], "'; CCX_MS_STRUCT here is '",
+       Sys.getenv("CCX_MS_STRUCT", ""), "'.")
 t0 <- Sys.time(); ccx_load_cpp()
 cat(sprintf("C++ core compiled in %.1f s\n",
             as.numeric(difftime(Sys.time(), t0, units = "secs"))))
 bp <- ccx_default_params(); bp$pump_mode <- "N"
+bp <- ccx_apply_structure(bp)   # CCX_MS_STRUCT, the same definition the driver uses
+cat(sprintf("structure '%s'; cold target %.4f from %s@%s (%d parameters)\n",
+            attr(bp, "struct"), COLD_REF, r$host[1], r$commit[1], r$n_par[1]))
 stopifnot(is.list(bp), length(bp) > 1)   # the -e mangling, caught at the source
 lp <- ccx_make_logpost(base_params = bp); u <- ccx_init_unc()
 t1 <- Sys.time(); for (i in 1:20) v <- lp(u)
@@ -108,7 +128,7 @@ if (!is.finite(v) || rel > COLD_TOL)
        "different objective. STOP AND DIAGNOSE -- and check the harness before ",
        "the model: a `$` eaten by `Rscript -e` produces exactly this symptom.")
 cat("SETUP GATE PASSED -- the port reproduces the reference machine.\n")
-cat(sprintf("PER-EVAL %.4f s -- the Mac measured 0.15-0.22; SIZE THE ARRAY ON THIS.\n", per))
+cat(sprintf("PER-EVAL %.4f s -- compare the Mac preflight logs (0.08 on 2026-09-06d); SIZE THE ARRAY ON THIS.\n", per))
 RSCRIPT
 Rscript --vanilla "$R_TMP_SCRIPT"
 

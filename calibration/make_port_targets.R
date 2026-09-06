@@ -38,6 +38,7 @@ PT_REFS <- c(
 )
 
 bp <- ccx_default_params(); bp$pump_mode <- PT_ARM
+bp <- ccx_apply_structure(bp)   # 2026-09-06d: the SAME definition the driver uses (CCX_MS_STRUCT)
 lp <- ccx_make_logpost(base_params = bp)
 .ship <- lapply(CCX_PARAM_TABLE, function(s) c(s$lo, s$hi))
 
@@ -58,6 +59,10 @@ rows <- lapply(names(PT_REFS), function(nm) {
     # claim that actually needs guarding is that the CONSUMER of this file runs
     # the same table, which is why the bracket is now RECORDED in the CSV.
     pmv <- ccx_migrate_par_set(md$par_mode)
+    # SEED BEFORE the feasibility check (2026-09-06d): kz_deep_frac migrates to
+    # 1 = its box's upper bound, so the unseeded ancestor is infeasible by
+    # construction; the seed (table init, printed by name) is the start point.
+    pmv <- ccx_seed_unencodable(pmv, paste(nm, "port target"))
     bad <- Filter(function(n) {
       b <- .ship[[n]]
       !is.null(b) && all(is.finite(b)) && (pmv[[n]] <= b[1] || pmv[[n]] >= b[2])
@@ -81,7 +86,6 @@ rows <- lapply(names(PT_REFS), function(nm) {
     # that two machines agree at the SAME point -- but it does need to be one
     # both machines can reach, and the seed must be reproducible, which it is:
     # it comes from CCX_PARAM_TABLE, which the bracket columns already gate.
-    pmv <- ccx_seed_unencodable(pmv, paste(nm, "port target"))
     u <- ccx_par_to_unc(pmv)
     stored <- md$logpost; src <- PT_REFS[[nm]]
   }
@@ -97,6 +101,7 @@ rows <- lapply(names(PT_REFS), function(nm) {
 tg <- do.call(rbind, rows)
 tg$arm       <- PT_ARM
 tg$n_par     <- length(CCX_PARAM_NAMES)
+tg$struct    <- attr(bp, "struct")            # "" = column, "hilda" = the declared structure
 # ⭐ THE TABLE THESE TARGETS WERE MEASURED UNDER, recorded so a consumer can
 # REFUSE a stale target instead of silently comparing across two tables. A
 # widened bracket shifts every logpost by a reparameterisation constant, so a

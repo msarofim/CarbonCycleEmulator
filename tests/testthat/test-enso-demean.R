@@ -139,8 +139,14 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
   tgm <- ccx_mid_d14c_target()
   if (!is.null(tgm)) {
     pp  <- ccx_overlay_par(bp, ccx_unc_to_par(u0))
-    mid <- ccx_model_d14c_slabs(ccx_spinup(pp))
+    sp  <- ccx_spinup(pp); mid <- ccx_model_d14c_slabs(sp); deep <- sp$diagnostics$d14c_bottom_box
+    # OBJECTIVE #9 (2026-09-06d): with the MVN row ON, "rows off" also drops the
+    # row (it contains the mid rows), leaving the deep Gaussian; the difference
+    # is then (MVN row - deep Gaussian). Derived from the switch, not typed.
     rows <- sum(stats::dnorm(tgm$slabs$target, mid[tgm$slabs$name], tgm$slabs$sd, log = TRUE))
+    if (LIK_USE_D14C_PROFILE_MVN) { pc <- ccx_profile_d14c_cov(); td <- ccx_deep_d14c_target()
+      rows <- ccx_dmvnorm_log(unname(pc$targets), c(mid[[tgm$slabs$name[1]]], mid[[tgm$slabs$name[2]]], deep), pc$cov) -
+              stats::dnorm(td$target, deep, td$sd, log = TRUE) }
     expect_equal(on - on_nomid, rows, tolerance = 1e-6, scale = 1)
   }
   # ⚠ TOLERANCE = the project's existing "does this point reproduce" precision

@@ -580,7 +580,9 @@ LIK_D14C_MID_NEFF <- LIK_D14C_DEEP_NEFF
 # ⛔ DEFAULT FALSE: adopting it is Marcus's ruling (prereg_2026-09-07 sec.2),
 # and every stored logpost was scored without it. `LIK_D14C_PROFILE_BLOCK` is
 # the bootstrap block size in degrees latitude: 60 (conservative) or 30.
-LIK_USE_D14C_PROFILE_MVN <- FALSE
+# RULED ON 2026-09-06 (Marcus): ON, 60-degree block. Every logpost stored
+# before this date was scored with the three independent rows.
+LIK_USE_D14C_PROFILE_MVN <- TRUE
 LIK_D14C_PROFILE_BLOCK   <- 60
 
 #' The measured joint covariance of the three interior D14C levels (#9).
@@ -1630,9 +1632,18 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # absent the row is skipped and the independent rows are scored as before,
   # so nothing can be silently half-scored.
   profile_mvn <- FALSE
-  if (LIK_USE_D14C_PROFILE_MVN && !is.null(deep) && is.finite(deep) && !is.null(d14c_mid)) {
+  # The row CONTAINS the deep and mid rows, so it is off whenever either of
+  # those is switched off -- which is how a fixture scores "without the rows".
+  if (LIK_USE_D14C_PROFILE_MVN && LIK_USE_D14C_MID && LIK_USE_D14C_DEEP &&
+      !is.null(deep) && is.finite(deep) && !is.null(d14c_mid)) {
     pc <- ccx_profile_d14c_cov(); tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
     if (!is.null(pc) && !is.null(tgm) && !is.null(tgd)) {
+      # The build gates the covariance's means on the row targets; assert the
+      # ORDER and the targets here too, at the scoring site (audit 09-06d).
+      if (!identical(pc$streams, c(tgm$slabs$stream, "d14c_deep_ocean")) ||
+          max(abs(pc$targets - c(tgm$slabs$target, tgd$target))) > 1e-6)
+        stop("d14c_profile_mvn: the covariance product's streams/targets do not match ",
+             "the rows it replaces -- rebuild data/obs_glodap_profile_cov.rds.")
       m <- c(d14c_mid[[tgm$slabs$name[1]]], d14c_mid[[tgm$slabs$name[2]]], deep)
       if (length(m) == 3L && all(is.finite(m))) {
         add("d14c_profile_mvn", ccx_dmvnorm_log(c(tgm$slabs$target, tgd$target), m, pc$cov))

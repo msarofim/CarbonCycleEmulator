@@ -30,8 +30,8 @@ with_mvn <- function(on, expr) {
   force(expr)
 }
 
-test_that("the switch ships OFF and the build product scores the rows' own targets", {
-  expect_false(LIK_USE_D14C_PROFILE_MVN)
+test_that("the switch is ON (ruled 2026-09-06) and the build product scores the rows' own targets", {
+  expect_true(LIK_USE_D14C_PROFILE_MVN); expect_identical(LIK_D14C_PROFILE_BLOCK, 60)
   skip_if_no_prof()
   pc <- ccx_profile_d14c_cov(); tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
   expect_equal(unname(pc$targets), c(tgm$slabs$target, tgd$target))

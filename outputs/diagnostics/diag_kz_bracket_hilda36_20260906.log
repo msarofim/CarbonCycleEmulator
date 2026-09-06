@@ -1,0 +1,14 @@
+
+=== kz BRACKET ON THE 36-BOX STRUCTURE: f 0.050, hs_asx 1.00, z_K 253, attach 1; target -175.26 +/- 10.26 ===
+  kz         500    1000    2000    4000    6356    8000   12000   20000   40000
+  d14C    -220.5  -208.6  -196.6  -184.5  -176.3  -172.1  -164.2  -152.8  -134.3
+  GATE PASSED: strictly increasing.
+
+     k     target +/- k sigma          -> kz bracket
+     1   [ -185.52,  -165.00]   [  3774.7,  11519.4]
+     2   [ -195.78,  -154.74]   [  2094.4,  18461.3]
+     3   [ -206.03,  -144.48]   [  1161.6,  27808.0]
+
+  shipped column bracket [4379.1, 8109.9]; the 09-06c working arm sits at kz 5000 (f 0.049)
+  ⚠ Nothing adopted by this script; the k = 3 box goes into R/calibrate.R by hand.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/kz_bracket_hilda36_20260906.rds

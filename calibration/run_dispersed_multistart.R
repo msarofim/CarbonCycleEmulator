@@ -219,7 +219,9 @@ MS_OUTDIR <- local({
   # resume now refuses a checkpoint from another set, but a directory whose name
   # says which set it holds is the answer that does not rely on a guard firing.
   if (is.na(d) || !nzchar(d))
-    ccx_path("calibration", "output", "multistart_20260901_enso25")
+    ccx_path("calibration", "output",
+             if (identical(Sys.getenv("CCX_MS_STRUCT", ""), "hilda")) "multistart_20260907_hilda28"
+             else "multistart_20260901_enso25")
   else d
 })
 dir.create(MS_OUTDIR, recursive = TRUE, showWarnings = FALSE)
@@ -241,7 +243,11 @@ MS_CKPT <- file.path(MS_OUTDIR, sprintf("start_%03d_ckpt.rds", MS_ID))
 # [[gate_bound_matches_its_claim]]
 .ship <- lapply(CCX_PARAM_TABLE, function(s) c(s$lo, s$hi))
 for (.r in list(list("incumbent", .mdI), list("new basin", .mdN))) {
-  .pm <- ccx_migrate_par_set(.r[[2]]$par_mode)
+  # SEED BEFORE THE FEASIBILITY CHECK (2026-09-06d): a migrated ancestor's
+  # kz_deep_frac is 1 -- what it RAN -- and 1 is the box's upper bound, so the
+  # unseeded vector is infeasible by construction and the seed is what makes
+  # it a start point. (The P_INC/P_NEW below seed again; same numbers.)
+  .pm <- ccx_seed_unencodable(ccx_migrate_par_set(.r[[2]]$par_mode), paste(.r[[1]], "feasibility"))
   .bad <- Filter(function(n) {
     b <- .ship[[n]]
     !is.null(b) && all(is.finite(b)) && (.pm[[n]] <= b[1] || .pm[[n]] >= b[2])
@@ -304,6 +310,11 @@ cat(sprintf("  dispersion sd %.4f in u-space (measured per-coordinate RMS betwee
 cat(sprintf("  out %s\n%s\n", MS_OUT, strrep("=", 70)))
 
 bp <- ccx_default_params(); bp$pump_mode <- MS_ARM
+# THE DECLARED STRUCTURE (2026-09-06d): one definition, shared with
+# make_port_targets.R, selected by CCX_MS_STRUCT ("" = column, "hilda").
+bp <- ccx_apply_structure(bp); MS_STRUCT <- attr(bp, "struct")
+cat(sprintf("  structure: '%s'%s\n", MS_STRUCT,
+            if (nzchar(MS_STRUCT)) paste0(" (", paste(sprintf("%s=%s", names(CCX_STRUCT_HILDA), CCX_STRUCT_HILDA), collapse = ", "), ")") else " (32-box column)"))
 lp_fun <- ccx_make_logpost(base_params = bp)
 n_eval <- 0L
 neg_lp <- function(u) {
@@ -501,7 +512,7 @@ local({
   # keeps paying for. Read them as text and they cannot be reinterpreted.
   tg <- utils::read.csv(f, stringsAsFactors = FALSE,
                         colClasses = c(commit = "character", host = "character",
-                                       name = "character"))
+                                       name = "character", struct = "character"))
   r  <- tg[tg$name == nm, ]
   if (!nrow(r)) stop("port targets file has no row for reference '", nm, "'")
   if (!identical(as.integer(r$n_par[1]), length(CCX_PARAM_NAMES)))
@@ -526,6 +537,15 @@ local({
          "] / h_ml [", .lt[3], ", ", .lt[4], "]. Every logpost differs by a ",
          "reparameterisation constant, so the comparison would indict the PORT ",
          "for a change in the TABLE. Re-run make_port_targets.R and re-ship the CSV.")
+  # AND UNDER THIS STRUCTURE (2026-09-06d): a target measured on the column
+  # against a run with HILDA's boxes on differs by hundreds of log-units for a
+  # reason that has nothing to do with the port. Older CSVs carry no column;
+  # those are refused like a missing bracket.
+  if (is.null(r$struct) || is.na(r$struct[1]))
+    stop("port targets file records no structure label; re-run make_port_targets.R.")
+  if (!identical(as.character(r$struct[1]), Sys.getenv("CCX_MS_STRUCT", "")))
+    stop("port targets were measured with structure '", r$struct[1], "'; this run has '",
+         Sys.getenv("CCX_MS_STRUCT", ""), "'. Re-run make_port_targets.R under the run's CCX_MS_STRUCT.")
   tgt <- as.numeric(r$logpost[1])
   # THE VALUE THIS TASK EVALUATES AT THE REFERENCE POINT. For ids 0-2 that IS
   # their own start point and is already in hand; for a dispersed id it is a

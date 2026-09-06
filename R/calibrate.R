@@ -219,8 +219,51 @@ CCX_PARAM_TABLE <- list(
   # not obviously remain so at k = 1.
   #
   # init = the bracket centre, as before.
-  kz          = list(tr = "logit", lo = 4379.1, hi = 8109.9, init = 6244.5,
-                     prior = function(x) dunif(x, 4379.1, 8109.9, log = TRUE)),
+  # ---- RE-BISECTED 2026-09-06d ON THE 36-BOX STRUCTURE (Marcus's ruling,
+  # prereg_2026-09-07 sec.4). [4379.1, 8109.9] -> below. The column bracket
+  # above was bisected where `kz` ALONE set the bottom box; with HILDA's HS/HD
+  # boxes and K(z) ON, the bottom box is set by K_deep = kz_deep_frac * kz and
+  # the conduit, so the same recipe (default parameters, pump ON at the
+  # observed gradient, mode N, the SOURCED GLODAP bottom-box target, k = 3
+  # sigma) run with the structure DECLARED at its refit values and the two
+  # fitted structure parameters at their table inits gives a box 24x wide:
+  #   calibration/diag_kz_bracket_hilda36.R (2026-09-06d):
+  #     k = 1 sigma  [3774.7, 11519.4]
+  #     k = 2 sigma  [2094.4, 18461.3]
+  #     k = 3 sigma  [1161.6, 27808.0]   <- SHIPPED
+  # ⚠ A bracket on `kz` AT FIXED f: in the refit f is free and the deep row
+  # pins the PRODUCT, so this is a SUPPORT (the role the bracket always had),
+  # not an identification. Prediction R6 -- `kz` lands INTERIOR -- is the test.
+  # init = the GEOMETRIC centre, sqrt(1161.6 * 27808.0) = 5683.5, because the
+  # arithmetic centre (14485) of a 24x box is 2.3x the working arm's 6356 and
+  # would start the cold control with the deep far too young.
+  kz          = list(tr = "logit", lo = 1161.6, hi = 27808.0, init = 5683.5,
+                     prior = function(x) dunif(x, 1161.6, 27808.0, log = TRUE)),
+  # ---- THE TWO FITTED STRUCTURE PARAMETERS (2026-09-06d; 26 -> 28) ----------
+  # Marcus's ruling on prereg_2026-09-07 sec.3-4: HILDA's attachment, z_K,
+  # u_hs, tau_q, hs_frac, sst_hs and h_hs are DECLARED (ccx_apply_structure()
+  # below); the deep floor f and the cold box's exchange-area factor are
+  # FITTED, with no prior beyond their box (dunif, as beta_max / h_ml / kz).
+  # ⚠ The design said "log scale, box"; this table has no log-spaced box, so
+  # both are `logit` on the box with a uniform prior on the NATURAL scale. The
+  # logit Jacobian pulls toward the box centre by ~1.7 log-units between
+  # f = 0.05 and 0.5 -- the same convention h_ml and kz carry, and an order
+  # of magnitude below the rows that pin f (the deep row + the profile
+  # contrast). Stated, not hidden.
+  # kz_deep_frac: K_deep / kz. 1 = the uniform column (bit-exact, the shipped
+  # default) and it is the box's UPPER BOUND, so a migrated ancestor (which
+  # ran at 1) cannot be ENCODED and is seeded at init by ccx_seed_unencodable()
+  # -- the ent_seas_amp_SH precedent. init 0.05 = the 09-06c working arm
+  # (f 0.049, K_deep 309; HILDA's own K0 465 / 6356 = 0.073).
+  kz_deep_frac = list(tr = "logit", lo = 0.005, hi = 1.0, init = 0.05,
+                      prior = function(x) dunif(x, 0.005, 1.0, log = TRUE)),
+  # hs_asx_frac: the HS air-sea exchange AREA factor. 1 = HILDA's assumption
+  # (the shipped default) and it is INTERIOR, so ancestors encode. The
+  # observation-and-law value is 0.653 (data/obs_hs_exchange_factor.rds) and
+  # is deliberately NOT the prior: it is the out-of-sample cross-check
+  # (prereg sec.4, ruled 2026-09-06: cross-check only).
+  hs_asx_frac  = list(tr = "logit", lo = 0.2, hi = 2.0, init = 1.0,
+                      prior = function(x) dunif(x, 0.2, 2.0, log = TRUE)),
   # THE BIOLOGICAL PUMP'S MAGNITUDE -- the 20th parameter (Marcus 2026-08-16d).
   # The preindustrial surface-to-bottom DIC gradient the pump holds, umol/kg.
   # Everything else about the pump stays structural: the export SHAPE is GLODAP's
@@ -787,6 +830,18 @@ ccx_migrate_par_set <- function(p) {
     filled <- c(filled, "ent_seas_amp_SH")
   }
 
+  # 2026-09-06d: kz_deep_frac and hs_asx_frac entered the table (26 -> 28).
+  # A 26-parameter ancestor RAN the uniform column with HILDA's exchange
+  # assumption -- both absent = 1 by the model's own contracts
+  # (ccx_kz_profile(): NULL -> rep(kz, nl); ccx_prepare(): NULL -> factor 1) --
+  # so 1 is what it ran, not an invented coordinate. kz_deep_frac = 1 is the
+  # box's upper bound and does not ENCODE; ccx_seed_unencodable() seeds it at
+  # init for a START point, exactly as ent_seas_amp_SH above.
+  for (nm in c("kz_deep_frac", "hs_asx_frac")) if (nm %in% absent) {
+    p[[nm]] <- 1
+    filled <- c(filled, nm)
+  }
+
   still <- setdiff(absent, filled)
   if (length(still))
     stop("ccx_migrate_par_set(): no migration contract for: ",
@@ -1266,6 +1321,27 @@ ccx_hessian_per_direction <- function(lp, u, verbose = TRUE) {
        no_plateau = no_plateau, unstable = unstable, eps_frac = CCX_HESS_EPS_FRAC)
 }
 
+# ---- THE DECLARED STRUCTURE (2026-09-06d, Marcus's ruling) -----------
+#' The HILDA HS/HD + K(z) structure at its DECLARED values, applied to a base
+#' parameter list. ONE definition, read by the refit driver AND by
+#' make_port_targets.R, so the port gate and the run cannot disagree about
+#' which structure the objective was measured on. `struct` is the label the
+#' run carries (`CCX_MS_STRUCT`): "" = the 32-box column exactly as before;
+#' "hilda" = the declared values below. Anything else is an error by name.
+#' The two FITTED structure parameters (kz_deep_frac, hs_asx_frac) are NOT
+#' set here: they come from the vector, through CCX_PARAM_TABLE.
+#' Sources: notes/caveats_declared_parameters.md (each value's provenance).
+CCX_STRUCT_HILDA <- list(hs_frac = 0.16, u_hs = 38, tau_q = 538, sst_hs = 2,
+                         q_attach_from = 1L, kz_zscale = 253)
+ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
+  if (identical(struct, "")) return(structure(p, struct = ""))
+  if (!identical(struct, "hilda"))
+    stop("ccx_apply_structure(): unknown structure label '", struct,
+         "'. Known: \"\" (column) and \"hilda\".")
+  for (n in names(CCX_STRUCT_HILDA)) p[[n]] <- CCX_STRUCT_HILDA[[n]]
+  structure(p, struct = "hilda")
+}
+
 ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
                              verbose = FALSE,
                              base_params = ccx_default_params()) {
@@ -1286,6 +1362,8 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
   # exactly instead (see its block above ccx_scaled_forcing).
   LUC_SCALER <- .ccx_make_luc_scaler(base_forcing, "historical", years)
   ELUC_BASE  <- LUC_SCALER$eluc_tbl
+  # the fitted names the MODEL has a slot for (computed once, not per draw)
+  MODEL_SLOTS <- intersect(CCX_PARAM_NAMES, names(ccx_default_params()))
 
   function(u) {
     names(u) <- CCX_PARAM_NAMES
@@ -1299,6 +1377,16 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     if (!is.finite(lp)) return(-Inf)
 
     p <- base_params
+    # intersect() would silently DROP a fitted name absent from base_params
+    # and the sampler would move a prior-only coordinate with zero leverage
+    # ([[intersect_is_a_silent_default]]; audit 2026-09-06d). Refuse by name.
+    # Only the fitted names that HAVE a model slot are checked: the six
+    # nuisances (bomb_total, luc_scale, sigma_d14c, rep_dC, grad_off_*) never
+    # enter the model list by design ([[ccx_two_param_lists]]).
+    .miss <- setdiff(MODEL_SLOTS, names(p))
+    if (length(.miss))
+      stop("ccx_make_logpost(): base_params lacks fitted name(s) ",
+           paste(.miss, collapse = ", "), "; they would never reach the model.")
     for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
     p <- ccx_set_enso(p, pv)
 

@@ -885,7 +885,12 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
   substeps <- ccx_resolve_substeps(substeps, p, grid)
   n <- nrow(F)
   atmN <- aux$idx$NH$atm; atmS <- aux$idx$SH$atm
-  ocean <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$ml, aux$idx[[h]]$oc)))
+  # HS and HD ARE ocean carbon (as spinup.R and the C++ core count them);
+  # `$hs`/`$hd` are NULL with the structure off and c() drops them. Audit
+  # 2026-09-06d: this line excluded them, so the R path's ocean_C / ocean_C14
+  # disagreed with ccx_run_fast() by the HS+HD excess whenever hs_frac > 0.
+  ocean <- unlist(lapply(HEMIS, function(h)
+    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd)))
   land  <- unlist(lapply(HEMIS, function(h) aux$idx[[h]]$land))
 
   atm   <- c(atmN, atmS)

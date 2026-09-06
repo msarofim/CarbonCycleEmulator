@@ -567,7 +567,10 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # observed one (GATE S, first measured the same day: z -12.30, FAIL).
   # ⛔ Freeing it is a TEST, not an adoption: the acceptance criterion is
   # whether that -5.14 RELAXES, not whether the logpost rises.
-  expect_length(CCX_PARAM_NAMES, 26L)
+  # 28 SINCE 2026-09-06d: kz_deep_frac and hs_asx_frac, the two FITTED
+  # structure parameters of the HILDA refit (Marcus's ruling, prereg 09-07).
+  expect_length(CCX_PARAM_NAMES, 28L)
+  expect_true(all(c("kz_deep_frac", "hs_asx_frac") %in% CCX_PARAM_NAMES))
   expect_true("ent_seas_amp_SH" %in% CCX_PARAM_NAMES)
   expect_true(all(CCX_ENSO_PARAMS %in% CCX_PARAM_NAMES))
   expect_false("gamma_enso" %in% CCX_PARAM_NAMES)
@@ -659,15 +662,32 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # cannot fail when the fit does, and cannot pass when the fit is wrong
   # [[no_power_null]]. What replaces it is the observation itself, below.
   # =================================================================
-  expect_gte(CCX_PARAM_TABLE$kz$lo, 3500)
-  # The bracket must still EXCLUDE the unbounded runaway that motivated it
-  # (kz = 10,686, deep -129.9). ⭐ THIS ONE STAYS, and it is a different KIND of
-  # claim: an ORDERING against a MEASURED runaway, not a threshold anyone chose
-  # ([[gate_bound_matches_its_claim]], [[threshold_from_obs_or_law]]).
-  expect_lt(CCX_PARAM_TABLE$kz$hi, 10686)
+  # =================================================================
+  # 2026-09-06d: THE COLUMN-ERA GUARDS ARE RETIRED WITH THE COLUMN. Marcus's
+  # ruling re-bisected `kz` on the 36-box STRUCTURE (HILDA HS/HD + K(z)),
+  # where the bottom box is set by K_deep = kz_deep_frac * kz and the conduit,
+  # not by `kz` alone. The three assertions that stood here --
+  #   lo >= 3500; hi < 10686 (the 17-parameter runaway); init = the arithmetic
+  #   centre --
+  # were all statements about a column in which `kz` alone set the deep. On
+  # the structure at f = 0.05, kz = 10686 puts the bottom box at ~+0.9 sigma:
+  # the deep row does not reject the runaway through `kz` alone any more, it
+  # rejects it through f * kz, and a ceiling below 10686 would only forbid the
+  # thermocline diffusivity the sink needs. So the claim that is now checkable
+  # is that the SHIPPED box IS the k = 3 sigma bisection on the structure
+  # (calibration/diag_kz_bracket_hilda36.R -- a product this table did not
+  # write, [[gate_reads_its_own_output]]), and that init is its GEOMETRIC
+  # centre (the arithmetic centre of a 24x box is 2.3x the working arm).
+  # =================================================================
+  bis <- tryCatch(readRDS(ccx_path("outputs", "diagnostics", "kz_bracket_hilda36_20260906.rds")),
+                  error = function(e) NULL)
+  skip_if(is.null(bis), "36-box bisection product absent")
+  b3 <- bis$res[bis$res$k == 3, ]
+  expect_equal(c(CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi),
+               round(c(b3$kz_lo, b3$kz_hi), 1), tolerance = 1e-8)
   expect_equal(CCX_PARAM_TABLE$kz$init,
-               mean(c(CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi)),
-               tolerance = 1e-9)
+               sqrt(CCX_PARAM_TABLE$kz$lo * CCX_PARAM_TABLE$kz$hi),
+               tolerance = 1e-5)   # the TYPED precision of the init (0.1 m2/yr on 5683.5)
   # round-trip through the unconstrained transform
   u <- ccx_init_unc()
   expect_named(u, CCX_PARAM_NAMES)
@@ -783,24 +803,28 @@ test_that("the term scores the BOTTOM BOX, not the 3-box 'deep' average", {
 test_that("the term HOLDS kz at the chosen sigma -- decision 1's whole basis", {
   tg <- ccx_deep_d14c_target()
   skip_if(is.null(tg), "GLODAPv2 build product absent")
-  # The 17-parameter unbounded mode ran kz to 10,686. If this term cannot reject
-  # that on its own, deleting the kz bracket (13i sec.A3's original plan) leaves
-  # the deep ocean unconstrained. Measured: 5.3 sigma at n_eff = 20.
+  # The 17-parameter unbounded mode ran kz to 10,686. On the COLUMN the term
+  # rejects that on its own (measured 5.3 sigma at n_eff = 20) -- still true,
+  # and still the reason the bracket exists as a support.
   p <- ccx_default_params(); p$kz <- 10686
   runaway <- ccx_spinup(p)$diagnostics$d14c_bottom_box
   expect_gt(abs(runaway - tg$target) / tg$sd, 2)
-  # ...and the converse, which is why the bracket was NOT deleted: expressed on
-  # this same quantity the bracket is a hard box TIGHTER than the sigma allows,
-  # so deleting it would loosen kz rather than tighten it.
-  # READS THE SHIPPED BRACKET rather than repeating its endpoints. They were
-  # typed here as 3830/6200 and would have gone stale silently at the 2026-08-16e
-  # re-bisection -- the test would have kept measuring the width of a bracket the
-  # model no longer uses, which is precisely the failure mode it exists to catch.
-  lo <- ccx_spinup(within(ccx_default_params(),
-                          kz <- CCX_PARAM_TABLE$kz$lo))$diagnostics$d14c_bottom_box
-  hi <- ccx_spinup(within(ccx_default_params(),
-                          kz <- CCX_PARAM_TABLE$kz$hi))$diagnostics$d14c_bottom_box
-  expect_lt((hi - lo) / 2, 3 * tg$sd)
+  # ...and the converse: expressed on this same quantity the SHIPPED bracket is
+  # the observation's own 3-sigma box -- ON THE STRUCTURE IT WAS BISECTED FOR
+  # (2026-09-06d: HILDA's boxes + K(z) declared, the two fitted structure
+  # parameters at their table inits, pump ON at the observed gradient, mode N;
+  # the recipe of calibration/diag_kz_bracket_hilda36.R). READS THE SHIPPED
+  # BRACKET rather than repeating its endpoints, as before.
+  pb <- ccx_apply_structure(ccx_default_params(), "hilda")
+  pb$pump_grad <- ccx_const("PUMP_GRAD_OBS"); pb$pump_mode <- "N"
+  pb$kz_deep_frac <- CCX_PARAM_TABLE$kz_deep_frac$init
+  pb$hs_asx_frac  <- CCX_PARAM_TABLE$hs_asx_frac$init
+  lo <- ccx_spinup(within(pb, kz <- CCX_PARAM_TABLE$kz$lo))$diagnostics$d14c_bottom_box
+  hi <- ccx_spinup(within(pb, kz <- CCX_PARAM_TABLE$kz$hi))$diagnostics$d14c_bottom_box
+  # a 3-sigma box to the bisection's own tolerance (0.5 m2/yr on kz), and not narrower than 2.9
+  expect_lt((hi - lo) / 2, 3 * tg$sd * (1 + 1e-3))
+  expect_gt((hi - lo) / 2, 2.9 * tg$sd)
+  expect_lt(abs(0.5 * (hi + lo) - tg$target), 0.05 * tg$sd)   # centred on the target
 })
 
 test_that("the deep term is absent without `deep`, Gaussian with it", {

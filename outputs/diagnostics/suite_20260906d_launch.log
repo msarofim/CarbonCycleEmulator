@@ -1,0 +1,961 @@
+alpha-as: .................................
+artificial-sink: ..............................
+carbonate: ....SS...
+climate: ..................................
+conservation: ...........
+constants: ..........................................................................................................................................................................................................................................................................................................................
+conveyor: ............................W...W...W...
+d14c-mid: ............W..........
+d14c-profile-mvn: ..............W..........
+emission-seasonality: .........................................
+enso-demean: .......W..1
+enso-split: ....................................................2.....
+ent-seas-fitted: ........................................................
+fertilisation: ............................
+fluxes: ................W......
+forcing: ..........................W.......W.W.W............W.....
+gate-bounds: .........................................................S......................................................
+gradient: ..............................
+hilda-boxes: ..........................WWW.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW.....................
+hs-asx-frac: .........WW..WWW....
+joos-irf: ......................
+kz-profile: ......W........WWW............
+likelihood: ............W........................................W.W.....WWW..WWW..........................................................................W.................................................................................................
+luc-nh-share: ......................
+luc-permanence: ............
+luc-scale: ...........WW................................................
+mechanisms: .......................................................
+mode-decode: .3....45..6..
+mode-file: .........................7.....S
+ocean-advection: ...W...WW..WW.WW......W...WW.........WWW.................................
+overlay-idiom-lint: ........
+parity: .....W.....................W..........W.W...................
+pin-family: ..........................................
+prior-z: ...............................
+pulse: .........................
+pump-conveyor: .......................
+pump: .......W.......................
+q-attachment: ...................
+seas-isotope: .....
+seas-lag-split: ..........................8.......9
+sigma-inflation: ..........................
+so-entrainment: W......W.....W....W..W..W...........W.
+spinup: ..................
+spo-constants-tie: .............................................................
+stability: ..........W.W.W.W.W...W...W...W...W...WWW.WW..WW..
+volcanic-diffuse: ............
+
+══ Skipped ═════════════════════════════════════════════════════════════════════
+1. pCO2 matches seacarb across the DIC x T operating range ('test-carbonate.R:17:3') - Reason: {seacarb} is not installed
+
+2. Revelle factor matches seacarb and rises with DIC ('test-carbonate.R:36:3') - Reason: {seacarb} is not installed
+
+3. ccx_overlay_par() refuses to delete a parameter, and repairs the lag ('test-gate-bounds.R:207:3') - Reason: canonical mode is not pre-split
+
+4. the free-vs-pinned comparison has POWER, or says that it does not ('test-mode-file.R:222:3') - Reason: 1 arm in the registry: the free-vs-pinned comparison cannot fail and is reported DARK rather than green. It regains power when a second arm lands -- a 26-parameter PINNED refit is the thing that would do it.
+
+══ Warnings ════════════════════════════════════════════════════════════════════
+1. R and C++ agree with the conveyor on, in every config ('test-conveyor.R:215:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+2. R and C++ agree with the conveyor on, in every config ('test-conveyor.R:215:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+3. R and C++ agree with the conveyor on, in every config ('test-conveyor.R:215:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+4. the rows are absent without `d14c_mid`, Gaussian with it, and decompose ('test-d14c-mid.R:80:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+5. switched ON the row replaces the three and moves the total by exactly their difference ('test-d14c-profile-mvn.R:74:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+6. SPAN-INVARIANCE: the offset does not depend on the years requested ('test-enso-demean.R:74:3') - window starts at 1980 with 215.6 GtC of land-use carbon already emitted, so the land's equilibrium is 10.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+7. gross fluxes dwarf the net, which is the point of the trace ('test-fluxes.R:197:3') - window starts at 2015 with 275.6 GtC of land-use carbon already emitted, so the land's equilibrium is 12.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+8. emission hemispheric splits sum to the global total ('test-forcing.R:42:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+9. bomb 14C total is set by the prior, not by the provisional shape ('test-forcing.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+10. bomb 14C total is set by the prior, not by the provisional shape ('test-forcing.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+11. bomb 14C total is set by the prior, not by the provisional shape ('test-forcing.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+12. the C++ forcing column contract is positional and complete ('test-forcing.R:137:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+13. R and C++ agree with the boxes on ('test-hilda-boxes.R:96:3') - window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+14. R and C++ agree with the boxes on ('test-hilda-boxes.R:98:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+15. R and C++ agree with the boxes on ('test-hilda-boxes.R:98:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+16. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+17. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+18. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+19. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+20. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+21. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+22. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+23. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+24. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+25. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+26. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+27. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+28. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+29. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+30. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+31. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+32. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+33. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+34. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+35. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+36. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+37. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+38. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+39. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+40. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+41. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+42. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+43. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+44. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+45. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+46. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+47. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+48. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+49. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+50. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+51. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+52. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+53. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+54. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+55. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+56. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+57. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+58. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+59. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+60. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+61. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+62. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+63. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+64. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+65. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+66. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+67. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+68. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+69. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+70. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+71. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+72. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+73. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+74. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+75. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+76. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+77. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+78. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+79. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+80. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+81. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+82. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+83. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+84. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+85. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+86. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+87. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+88. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+89. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+90. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+91. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+92. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+93. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+94. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+95. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+96. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+97. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+98. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+99. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+100. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+101. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+102. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+103. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+104. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+105. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+106. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+107. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+108. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+109. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+110. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+111. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+112. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+113. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+114. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+115. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+116. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+117. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+118. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+119. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+120. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+121. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+122. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+123. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+124. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+125. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+126. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+127. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+128. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+129. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+130. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+131. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+132. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+133. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+134. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+135. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+136. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+137. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+138. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+139. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+140. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+141. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+142. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+143. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+144. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+145. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+146. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+147. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+148. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+149. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+150. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+151. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+152. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+153. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+154. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+155. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+156. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+157. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+158. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+159. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+160. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+161. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+162. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+163. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+164. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+165. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+166. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+167. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+168. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+169. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+170. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+171. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+172. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+173. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+174. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+175. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+176. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+177. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+178. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+179. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+180. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+181. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+182. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+183. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+184. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+185. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+186. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+187. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+188. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+189. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+190. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+191. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+192. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+193. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+194. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+195. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+196. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+197. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+198. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+199. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+200. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+201. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+202. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+203. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+204. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+205. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+206. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+207. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+208. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+209. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+210. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+211. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+212. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+213. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+214. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+215. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+216. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+217. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+218. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+219. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+220. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+221. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+222. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+223. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+224. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+225. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+226. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+227. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+228. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+229. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+230. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+231. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+232. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+233. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+234. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+235. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+236. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+237. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+238. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+239. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+240. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+241. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+242. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+243. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+244. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+245. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+246. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+247. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+248. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+249. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+250. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+251. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+252. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+253. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+254. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+255. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+256. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+257. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+258. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+259. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+260. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+261. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+262. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+263. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+264. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+265. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+266. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+267. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+268. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+269. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+270. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+271. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+272. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+273. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+274. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+275. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+276. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+277. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+278. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+279. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+280. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+281. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+282. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+283. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+284. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+285. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+286. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+287. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+288. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+289. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+290. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+291. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+292. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+293. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+294. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+295. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+296. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+297. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+298. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+299. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+300. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+301. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+302. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+303. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+304. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+305. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+306. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+307. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+308. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+309. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+310. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+311. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+312. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+313. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+314. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+315. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+316. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+317. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+318. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+319. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+320. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+321. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+322. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+323. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+324. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+325. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+326. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+327. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+328. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+329. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+330. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+331. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+332. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+333. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+334. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+335. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+336. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+337. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+338. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+339. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+340. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+341. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+342. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+343. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+344. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+345. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+346. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+347. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+348. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+349. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+350. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+351. R and C++ agree with the boxes on ('test-hilda-boxes.R:105:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+352. the atmosphere's bomb curve sees it, through the C++ transient ('test-hs-asx-frac.R:56:5') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+353. the atmosphere's bomb curve sees it, through the C++ transient ('test-hs-asx-frac.R:56:5') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+354. R and C++ agree at 0.5 ('test-hs-asx-frac.R:67:3') - window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+355. R and C++ agree at 0.5 ('test-hs-asx-frac.R:69:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+356. R and C++ agree at 0.5 ('test-hs-asx-frac.R:69:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+357. f = 1 and ABSENCE reproduce the model bit for bit -- spinup and transient ('test-kz-profile.R:66:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+358. R and C++ agree at f = 0.5 with the HS boxes on ('test-kz-profile.R:97:3') - window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+359. R and C++ agree at f = 0.5 with the HS boxes on ('test-kz-profile.R:99:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+360. R and C++ agree at f = 0.5 with the HS boxes on ('test-kz-profile.R:99:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+361. the fast model-side reduction equals the general estimator ('test-likelihood.R:81:3') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+362. the d13C seasonal cycle is scored, and through the NEP harmonic ('test-likelihood.R:349:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+363. the d13C seasonal cycle is scored, and through the NEP harmonic ('test-likelihood.R:349:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+364. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+365. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+366. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+367. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+368. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+369. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+370. the excess-14C term refuses to score off a wrong baseline ('test-likelihood.R:721:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+371. the PRE-WINDOW cumulative scales too ('test-luc-scale.R:47:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+372. the PRE-WINDOW cumulative scales too ('test-luc-scale.R:48:3') - window starts at 1900 with 44.0 GtC of land-use carbon already emitted, so the land's equilibrium is 2.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+373. w_up = 0 is the pure-diffusion model, exactly ('test-ocean-advection.R:84:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+374. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:99:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+375. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:100:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+376. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:104:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+377. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:104:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+378. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:106:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+379. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:106:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+380. R and C++ agree with overturning on ('test-ocean-advection.R:138:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+381. with NO interior source, reversing the circulation ties EVERY column ('test-ocean-advection.R:176:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+382. with NO interior source, reversing the circulation ties EVERY column ('test-ocean-advection.R:177:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+383. with the pump ON, TOTAL CARBON is still invariant and the ISOTOPES are not ('test-ocean-advection.R:235:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+384. with the pump ON, TOTAL CARBON is still invariant and the ISOTOPES are not ('test-ocean-advection.R:236:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+385. with the pump ON, TOTAL CARBON is still invariant and the ISOTOPES are not ('test-ocean-advection.R:237:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+386. multi-decade trajectories agree to roundoff ('test-parity.R:109:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+387. parity holds with the frozen-Revelle switch engaged ('test-parity.R:163:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+388. frozen Revelle does what it claims, and only that ('test-parity.R:210:3') - window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+389. the C++ core conserves carbon exactly, independently of R ('test-parity.R:222:3') - window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+390. pump_grad = 0 emits NOTHING -- the no-pump model is bit-reproduced ('test-pump.R:52:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+391. P0.1 -- at zero amplitude the channel is absent, bit for bit ('test-so-entrainment.R:80:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+392. P0.1 -- and bit for bit in the C++ core too ('test-so-entrainment.R:97:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+393. P0.2 -- R and C++ are the same model with the channel ON ('test-so-entrainment.R:107:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+394. P0.2 -- and the channel is not a no-op in EITHER core ('test-so-entrainment.R:122:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+395. P0.3 -- seas_drivers = 0 kills the channel, hold_climate does NOT ('test-so-entrainment.R:136:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+396. P0.3 -- ccx_hold_climate() holds every climate FORCING COLUMN ('test-so-entrainment.R:156:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+397. the entrainment channel is CONSERVATIVE, and rectifies no more than
+           the seasonal SST term the model already accepts ('test-so-entrainment.R:212:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+398. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:63:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+399. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:65:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+400. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:63:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+401. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:65:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+402. no NAs anywhere in or far beyond the prior's support ('test-stability.R:74:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+403. no NAs anywhere in or far beyond the prior's support ('test-stability.R:74:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+404. no NAs anywhere in or far beyond the prior's support ('test-stability.R:74:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+405. no NAs anywhere in or far beyond the prior's support ('test-stability.R:74:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+406. no NAs anywhere in or far beyond the prior's support ('test-stability.R:74:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+407. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:87:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+408. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:87:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+409. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:87:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+410. the auto substep count is accurate, not merely stable ('test-stability.R:100:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+411. the auto substep count is accurate, not merely stable ('test-stability.R:101:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+412. the auto substep count is accurate, not merely stable ('test-stability.R:100:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+413. the auto substep count is accurate, not merely stable ('test-stability.R:101:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+══ Failed ══════════════════════════════════════════════════════════════════════
+── 1. Error ('test-enso-demean.R:116:3'): PRICED: the demean flag is still worth
+Error in `ccx_par_to_unc(md$par_mode)`: ccx_par_to_unc(): p lacks parameters this build fits: kz_deep_frac, hs_asx_frac. It was written under a different parameter set -- bring it forward with ccx_migrate_par_set() first.
+Backtrace:
+    ▆
+ 1. └─global ccx_par_to_unc(md$par_mode) at test-enso-demean.R:116:3
+
+── 2. Error ('test-enso-split.R:236:3'): ccx_migrate_par_set reproduces the LEGA
+Error in `ccx_par_to_unc(mig)`: ccx_par_to_unc(): 1 parameter(s) lie OUTSIDE their transform's domain and encode to a non-finite value: kz_deep_frac = 1 (tr = logit). A value the model can RUN is not automatically a point of the FITTED space -- a migrated ancestor whose mechanism was OFF is the usual case. Seed the coordinate at its table init if you meant this vector as a START point; measure at it directly if you meant it as a vector to RUN.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_identical(ccx_par_to_unc(mig), ccx_par_to_unc(p_hand)) at test-enso-split.R:236:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_par_to_unc(mig)
+
+── 3. Error ('test-mode-decode.R:44:30'): the FIXTURE really is a mis-decoding f
+Error in `names(u) <- CCX_PARAM_NAMES`: 'names' attribute [28] must be the same length as the vector [26]
+
+── 4. Error ('test-mode-decode.R:61:30'): the band-blind idiom really is wrong, 
+Error in `names(u) <- CCX_PARAM_NAMES`: 'names' attribute [28] must be the same length as the vector [26]
+
+── 5. Failure ('test-mode-decode.R:75:3'): ccx_check_mode_decode ERRORS on a mis
+`ccx_check_mode_decode(md_overridden)` threw an error with unexpected message.
+Expected match: "does NOT decode to its own stored par_mode"
+Actual message: "this mode file was fitted on a DIFFERENT parameter set (26 names vs this build's 28), so 'does it decode to its own par_mode' is not a question this build can answer. Refit, or read it with ccx_mode_params()."
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_error(...) at test-mode-decode.R:75:3
+ 2. │ └─testthat:::quasi_capture(...)
+ 3. │   ├─testthat (local) .capture(...)
+ 4. │   │ └─base::withCallingHandlers(...)
+ 5. │   └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 6. └─global ccx_check_mode_decode(md_overridden)
+
+── 6. Error ('test-mode-decode.R:90:3'): the CANONICAL mode decodes cleanly -- i
+Error in `ccx_check_mode_decode(md)`: this mode file was fitted on a DIFFERENT parameter set (26 names vs this build's 28), so 'does it decode to its own par_mode' is not a question this build can answer. Refit, or read it with ccx_mode_params().
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(ccx_check_mode_decode(md)) at test-mode-decode.R:90:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_check_mode_decode(md)
+
+── 7. Failure ('test-mode-file.R:159:5'): every named mode is on disk and carrie
+Expected `md$param_names` to be identical to `CCX_PARAM_NAMES`.
+Differences:
+Lengths differ: 26 is not 28
+mode ent26 was fitted on a different parameter set
+
+── 8. Error ('test-seas-lag-split.R:150:3'): ccx_migrate_par_set reproduces the 
+Error in `ccx_par_to_unc(mig)`: ccx_par_to_unc(): 1 parameter(s) lie OUTSIDE their transform's domain and encode to a non-finite value: kz_deep_frac = 1 (tr = logit). A value the model can RUN is not automatically a point of the FITTED space -- a migrated ancestor whose mechanism was OFF is the usual case. Seed the coordinate at its table init if you meant this vector as a START point; measure at it directly if you meant it as a vector to RUN.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_identical(ccx_par_to_unc(mig), ccx_par_to_unc(p_hand)) at test-seas-lag-split.R:150:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_par_to_unc(mig)
+
+── 9. Error ('test-seas-lag-split.R:199:5'): the REAL 08-30 arm files MIGRATE, a
+Error in `ccx_par_to_unc(seeded)`: ccx_par_to_unc(): 1 parameter(s) lie OUTSIDE their transform's domain and encode to a non-finite value: kz_deep_frac = 1 (tr = logit). A value the model can RUN is not automatically a point of the FITTED space -- a migrated ancestor whose mechanism was OFF is the usual case. Seed the coordinate at its table init if you meant this vector as a START point; measure at it directly if you meant it as a vector to RUN.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(all(is.finite(ccx_par_to_unc(seeded)))) at test-seas-lag-split.R:199:5
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_par_to_unc(seeded)
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+SUITE: pass 1961 fail 2 skip 4 warn 413
+                  file
+229 test-mode-decode.R
+235   test-mode-file.R
+                                                                  test failed
+229                ccx_check_mode_decode ERRORS on a mis-decoding file      1
+235 every named mode is on disk and carries THIS BUILD's parameter set      1

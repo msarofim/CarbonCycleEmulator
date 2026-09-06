@@ -2,6 +2,62 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-06d (ii) — **THE RULING, THE AUDIT, AND THE LAUNCH PREP: 28 PARAMETERS, #9 ON, `kz` RE-BISECTED ON 36 BOXES**
+
+**Marcus ruled** on `prereg_2026-09-07_hilda_refit_design.md` §7: (1) objective #9 ON, 60° block;
+(2) `z_K`/`u_hs`/`tau_q` DECLARED; (3) `h_hs` declared; (4) the observational `hs_asx_frac` is a
+CROSS-CHECK, not a prior; (5) *"check all the model code and launch … on Torch."* The binding
+pre-registration of the run, with R1 amended to "within 2 sd of 0.653" and a new R7, is
+`notes/prereg_2026-09-07_hilda_refit_run.md`.
+
+**The audit** (a read-only subagent over the HS/HD, K(z), `hs_asx_frac`, C++ parity, table and
+MVN code paths) found **one real bug and four hardening items**, all fixed:
+- ⛔ **`ccx_run()` (the pure-R transient) excluded HS/HD from `ocean_C`/`ocean_C14`** while
+  `spinup.R` and the C++ core counted them. The OBJECTIVE runs the C++ path, so no fitted quantity
+  was wrong; every R-path diagnostic of a structure-on run would have been. Fixed in
+  `R/forcing.R`; `test-hilda-boxes.R` now compares the R and C++ transients on the stocks (1e-12).
+- `ccx_make_logpost()` refuses by name a fitted MODEL-slot parameter absent from `base_params`
+  (the `intersect()` silent-drop; the six nuisances are exempt by design).
+- The MVN row asserts the covariance product's stream ORDER and targets at the scoring site.
+- The migration contract for the two new names (fill 1 = what the ancestor RAN; `kz_deep_frac` = 1
+  is the box's upper bound, so `ccx_seed_unencodable()` seeds it at init — the `ent_seas_amp_SH`
+  precedent). ⚠ Both the driver's and `make_port_targets.R`'s FEASIBILITY check ran on the
+  unseeded vector and rejected every ancestor; seeding now precedes the check.
+- Verified OK by the audit, on the record: mass conservation of every HS/HD limb, isotope ratios
+  riding the source box, `kz_int` interface indexing in both cores, the q-attachment loop parity,
+  runtime box counts (no 32/36 literal), `hs_asx_frac` on the area only in both cores, the
+  Cholesky MVN density.
+
+**The table: 26 → 28.** `kz_deep_frac` (logit [0.005, 1], init 0.05) and `hs_asx_frac` (logit
+[0.2, 2], init 1), uniform on the box like `beta_max`/`h_ml`/`kz`. ⚠ The design said "log scale";
+the table has no log-spaced box, so the logit Jacobian pulls f toward the centre by ~1.7 log-units
+between 0.05 and 0.5 — stated in the table. **`kz` re-bisected on the structure**
+(`calibration/diag_kz_bracket_hilda36.R`: structure declared, f and the factor at their inits,
+sourced target, k = 3σ): **[1161.6, 27808.0]**, 24× wide because the deep now sees `kz` only
+through f·kz; init 5683.5 = the geometric centre. **The column-era guards on `kz` (lo ≥ 3500,
+hi < 10686, init = arithmetic centre, the 3σ box measured on the column) are RETIRED** in
+`test-likelihood.R` and replaced by: the box equals the 36-box bisection product, init is the
+geometric centre, and the box is a 3σ box ON THE STRUCTURE (2.9–3.0σ, centred on the target).
+⚠ On the structure, kz = 10686 puts the bottom box at +0.9σ: the runaway is now a statement
+about f·kz, not `kz`. `CCX_STRUCT_HILDA` + `ccx_apply_structure()` (R/calibrate.R) is the ONE
+definition of the declared structure, read by the driver AND `make_port_targets.R` under
+`CCX_MS_STRUCT=hilda`; the port targets carry a `struct` column and gate (a) refuses a mismatch.
+
+**Objective #9 is ON** (`LIK_USE_D14C_PROFILE_MVN` TRUE, block 60) and is switched off with the mid
+or deep rows, so the fixtures that score "without the rows" still reproduce their stored logposts;
+their derived differences are now (MVN row − deep Gaussian), computed from the switch, not typed.
+
+**Left FAILING, on purpose and reported:** `test-mode-file.R` "every named mode carries THIS
+BUILD's parameter set" and `test-mode-decode.R`'s mis-decoding fixture — the canonical mode
+`ent26` is a 26-name file under a 28-name build. The same two failed across the 22 → 25 transition
+until that refit's mode was promoted; they pass when this one is.
+
+**Launch path.** Port targets regenerated (28, `hilda`, the new brackets); local preflight ids
+0/1/2 reproduce them to every printed digit; dispersion pool unchanged at sd 1.0452 (both new
+names migrated in both references ⇒ excluded, as designed). Then: bundle → Torch → `setup_torch.sh`
+→ preflight array → `--array=0-45%10` to `multistart_20260907_hilda28/`. Suite count and job ids
+below once they exist.
+
 ## 2026-09-06d — **THE OBSERVATIONAL PIN ON `hs_asx_frac` (0.65: HILDA'S CANCELLATION IS REAL, THE SCHMIDT TERM IS THE REST); THE THREE CAVEAT SCANS; OBJECTIVE #9 BUILT, SHIPS OFF**
 
 Continuation of 09-06c under the standing priority (observations and laws first; HILDA's numbers as

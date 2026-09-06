@@ -98,9 +98,17 @@ test_that("R and C++ agree with the boxes on", {
   dR <- ccx_deriv(sp$y, 1850, p, fr, sp$grid, sp$aux)
   dC <- ccx_deriv_fast(sp$y, 1850, p, fr, sp$grid, sp$aux)
   expect_equal(dR, dC, tolerance = 1e-10)
-  # and the transient integrates without falling over
-  r <- ccx_run_fast(sp, F)
+  # and the transient integrates without falling over -- AND the R path
+  # agrees with it on the stocks (audit 2026-09-06d: ccx_run() had excluded
+  # HS/HD from ocean_C / ocean_C14 while the C++ core counted them)
+  r  <- ccx_run_fast(sp, F)
+  # the R path re-evaluates the carbonate constants at the HS temperature every
+  # substep and warns each time it dips below 2 C (the documented extrapolation,
+  # handoff 09-06b); the C++ path does not. Silenced HERE only -- the stocks are the test.
+  rR <- suppressWarnings(ccx_run(sp, F))
   expect_false(anyNA(r$out))
+  for (cc in c("ocean_C", "ocean_C14", "co2_NH", "co2_SH"))
+    expect_lt(max(abs(rR$out[[cc]] - r$out[[cc]])) / max(abs(r$out[[cc]])), 1e-12)
   expect_identical(rownames(r$state)[sp$aux$idx$NH$hs], "NH_hs")
 })
 
