@@ -1143,6 +1143,34 @@ Rcpp with a bit-parity test against the R reference implementation (both stay in
 
 ## 6. Sanity gates (all must pass before headline claims)
 
+> ⛔⛔ **READ THIS BEFORE ANY TABLE BELOW — THE MODE THEY WERE MEASURED AT IS RETIRED.**
+> Every "STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE" block in §6 was measured at **`from90`**, which has since
+> been **QUARANTINED**: `ccx_mode_file()` **ERRORS on `from90` and `pin90` by name**, so none of
+> these blocks can be re-run as written. The canonical mode is **`ent26`** (adopted 2026-09-04).
+> **The tables below are PROVENANCE. They are not the current acceptance criteria.**
+>
+> ⚠⚠ **They also straddle an OBJECTIVE CHANGE.** The 2026-09-02 T-dependent air-sea ¹³C alphas
+> (Zhang 1995) moved the objective by −4.84 log-units at the un-refitted mode. Every `from90`
+> number here predates it, so **a `from90` → `ent26` comparison is INDICATIVE, NOT like-for-like**;
+> only within-run contrasts (e.g. `ent26` vs defaults, measured in the same run) are.
+>
+> **THE CURRENT LEDGER AT `ent26` — 4 PASS, 2 FAIL** (`diag_design_gates_at_mode.R`, log in the
+> refit dir). Adoption fixed the SEASONAL gates and moved **neither** standing failure:
+>
+> | gate | at `ent26` | verdict |
+> |---|---|---|
+> | **7** sinks, ocean z | **−0.32** (defaults −1.44) | ✅ PASS |
+> | **Q** δ¹³C disequilibrium | **1.27** | ✅ PASS |
+> | **G** ocean DIC z @ GLODAP epoch | **−0.06** (defaults −1.62) | ✅ PASS |
+> | **S** | **+1.00** | ✅ PASS |
+> | **4** airborne fraction | level fine (**0.425** vs GCB 0.431); bound is on decadal SPREAD — **sd 0.025 vs GCB 0.051, ratio 0.48**, against **0.76 at defaults in the same run**. Culprit is the 2020s (model 0.40, GCB 0.50). | ⛔ **FAIL, margin WORSE** |
+> | **5** bomb ¹⁴C | NH peak **YEAR** z **+2.17** (was +2.15); SH improved +2.07 → **+1.42**, lag −0.48 → −0.97. The miss is the peak TIME. | ⛔ **FAIL** |
+>
+> ⇒ **The two standing failures are INDEPENDENT of the seasonal work** — consistent with P5.
+> **OWED:** §6's acceptance criteria have not been rewritten at `ent26`; this block is the
+> stopgap that keeps them from being read as current. Items 1–3 (conservation, zero-emissions,
+> paired-pulse) are mode-independent and stand as written.
+
 Adapted from the standing climate-modeling checklist. **Targets 4–8 below were computed
 from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
 2026-08-09) — they are data-derived, not recalled. Re-running that script regenerates them.
@@ -1158,7 +1186,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    partial). Roughly flat with substantial decadal variability — the model must not be
    *smoother* than this.
 
-   **STATUS AT THE CANONICAL MODE (2026-08-27, `diag_design_gates_at_mode.R` at
+   **STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE (2026-08-27, `diag_design_gates_at_mode.R` at
    `from90`): STILL SPLIT, but the two halves moved in OPPOSITE directions and the
    headline sentence has changed.** Re-measured after the 2026-08-25f seasonal-NEP
    isotope fix (`6bda464`) changed the objective; every number in the superseded
@@ -1168,7 +1196,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    |---|---|---|---|---|
    | GCB 2025 | **0.431** | **0.051** | **+0.0148** | — |
    | defaults | 0.426 | 0.035 | — | — |
-   | **`from90` (canonical)** | **0.413** | **0.026** | **+0.0080** | **+0.41** |
+   | **`from90` (RETIRED — quarantined)** | **0.413** | **0.026** | **+0.0080** | **+0.41** |
    | `pin90` | 0.391 | 0.036 | +0.0137 | — |
 
    **THE TREND IS THE HALF THAT MOVED, AND IT MOVED THE RIGHT WAY.** The pre-fix
@@ -1235,7 +1263,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    1.33 yr**. Using the Zone 1 gate instead flattered the superseded bomb shape, whose
    996.9 ‰ peak in fact exceeded *every* observed zone.
 
-   **STATUS AT THE CANONICAL MODE (2026-08-27, `diag_design_gates_at_mode.R` at
+   **STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE (2026-08-27, `diag_design_gates_at_mode.R` at
    `from90`): STILL FAILS, on all three readings, and the isotope fix moved the
    peak-height miss back toward zero without closing the two that matter.**
    Re-measured after the 2026-08-25f seasonal-NEP isotope fix changed the
@@ -1251,7 +1279,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    |---|---|---|---|---|---|---|
    | obs (hemispheric) | 855.3 | 1963.676 | 659.8 | 1965.016 | **1.34** | 15.5 |
    | defaults | 801.5 | 1964.610 | 603.2 | 1965.726 | 1.12 | 14.6 |
-   | **`from90` (canonical)** | **873.1** | **1964.631** | **669.8** | **1965.602** | **0.97** | **15.0** |
+   | **`from90` (RETIRED — quarantined)** | **873.1** | **1964.631** | **669.8** | **1965.602** | **0.97** | **15.0** |
    | `pin90` | 875.4 | 1964.628 | 670.7 | 1965.598 | 0.97 | 15.1 |
    | *pre-fix mode (QUARANTINED)* | *888.5* | *1964.636* | *686.6* | *1965.559* | *0.92* | — |
 
@@ -1321,7 +1349,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    signal of 0.88 ppm — i.e. **~30 % of the quantity the gate exists to test**. The
    2020s entry is partial and will move as the record extends.
 
-   **STATUS AT THE CANONICAL MODE (2026-08-28, `diag_design_gates_unscored.R` at
+   **STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE (2026-08-28, `diag_design_gates_unscored.R` at
    `from90`): PASS — and this gate had NEVER been measured at any fitted vector.**
 
    | decade | 1960s | 1970s | 1980s | 1990s | 2000s | 2010s | 2020s | growth |
@@ -1372,7 +1400,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    `calibration/diag_fert_saturating.R` §3. **Re-measure on any fertilisation or
    `luc_scale` default change.**
 
-   **STATUS AT THE CANONICAL MODE (2026-08-27, `diag_design_gates_at_mode.R` at
+   **STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE (2026-08-27, `diag_design_gates_at_mode.R` at
    `from90`): STILL FAILING ON LAND, and the isotope fix moved it FURTHER OUT.**
    Re-measured after the 2026-08-25f fix changed the objective; the pre-fix
    readings below are not comparable.
@@ -1386,7 +1414,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    |---|---|---|---|---|---|
    | GCB 2025, 2015–2023 | **2.410 ± 0.50** | — | **3.202 ± 0.40** | — | — |
    | defaults | 3.51 | +2.21 | 2.63 | −1.43 | FAIL both |
-   | **`from90` (canonical)** | **3.56** | **+2.30** | **2.97** | **−0.58** | **FAIL land** |
+   | **`from90` (RETIRED — quarantined)** | **3.56** | **+2.30** | **2.97** | **−0.58** | **FAIL land** |
    | `pin90` | 3.85 | +2.87 | 3.02 | −0.46 | FAIL land |
    | *pre-fix mode (QUARANTINED, 2015–2024)* | *3.42* | *+2.12* | *2.97* | *−0.64* | *FAIL land* |
 
@@ -1428,7 +1456,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
    −7.600 ‰ (1980), SPO −7.490 ‰ (1977). Preindustrial CO₂ from the same Law Dome source
    is **276.88 ppm** (1745–1755 mean) — this is the spinup target.
 
-   **STATUS AT THE CANONICAL MODE (2026-08-28, `diag_design_gates_unscored.R`): FAILS
+   **STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE (2026-08-28, `diag_design_gates_unscored.R`): FAILS
    ON THE DECLINE AT EVERY VECTOR — the δ¹³C Suess OVERSHOOT, now measured.** Gate the
    *decline*, not the level: the model's station δ¹³C carries a fitted representation
    offset (`rep_dC`, prior z **+3.38**) so the level is not a free comparison, while the
@@ -1517,7 +1545,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     28.4 ‰, tighter than the σ, so deleting it would loosen `kz` rather than tighten it.
     `calibration/diag_deep_d14c_term.R`.
 
-    **STATUS AT THE CANONICAL MODE (2026-08-28, `diag_design_gates_unscored.R`): FAILS
+    **STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE (2026-08-28, `diag_design_gates_unscored.R`): FAILS
     A |z| ≤ 1 READING AT EVERY VECTOR, AND CALIBRATION CROSSED THE TARGET RATHER THAN
     APPROACHING IT.** Against the likelihood's own accessor (`ccx_deep_d14c_target()`,
     −175.3 ‰, σ 10.3):
@@ -1536,7 +1564,7 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
 11. **Suspicious-uniformity screen** on all residual series (all-same-sign or
     exactly-linear residuals = bug signal, per standing discipline).
 
-    **STATUS AT THE CANONICAL MODE (2026-08-28, `diag_design_gates_unscored.R`): ALL
+    **STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE (2026-08-28, `diag_design_gates_unscored.R`): ALL
     FOUR STATION SERIES FLAG ALL-SAME-SIGN, AT EVERY VECTOR — and that is the expected,
     already-diagnosed result, not a new bug.** Annual model−observed residuals, mean
     removed before the linearity test so a level bias cannot masquerade as a trend:
@@ -1583,14 +1611,14 @@ from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
     diagnosed and item 7 fixed by replacing the functional form. **Re-measure this line
     whenever a fertilisation default moves; it is not a description, it is a measurement.**
 
-    **STATUS AT THE CANONICAL MODE (2026-08-27, `Rscript calibration/diag_joos_irf.R
+    **STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE (2026-08-27, `Rscript calibration/diag_joos_irf.R
     from90`): THE GATE NOW PASSES AT TWO OF THREE HORIZONS — the first time any
     fitted mode has passed it at all.** Re-measured after the 2026-08-25f
     seasonal-NEP isotope fix changed the objective; the pre-fix rows below are
     quarantined and not comparable. Margins to two decimals, because this gate is
     decided in its last significant figure:
 
-    | TH | Joos floor | defaults | **`from90` (canonical)** | vs floor | `pin90` | vs floor |
+    | TH | Joos floor | defaults | **`from90` (RETIRED — quarantined)** | vs floor | `pin90` | vs floor |
     |---|---|---|---|---|---|---|
     | 20 | 12.2 | 12.43 (+1.92 %) | **12.14** | **−0.48 %** ✗ | 12.32 | +0.96 % ✓ |
     | 50 | 24.0 | 25.53 (+6.39 %) | **24.98** | **+4.08 %** ✓ | 25.43 | +5.94 % ✓ |
