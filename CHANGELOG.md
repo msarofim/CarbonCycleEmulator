@@ -55,8 +55,15 @@ until that refit's mode was promoted; they pass when this one is.
 **Launch path.** Port targets regenerated (28, `hilda`, the new brackets); local preflight ids
 0/1/2 reproduce them to every printed digit; dispersion pool unchanged at sd 1.0452 (both new
 names migrated in both references ⇒ excluded, as designed). Then: bundle → Torch → `setup_torch.sh`
-→ preflight array → `--array=0-45%10` to `multistart_20260907_hilda28/`. Suite count and job ids
-below once they exist.
+→ preflight array → `--array=0-45%10` to `multistart_20260907_hilda28/`.
+**DONE 2026-09-06 evening.** Suite **1961 pass / 2 fail (the two named above) / 4 skip**. Bundle at
+`ce3d20b` (targets `7ca9d01`); Torch setup gate rel **3.8e-13**; preflight **`17072646`** 8/8
+COMPLETED, port VERIFIED rel ≤ 7e-13 on cs603/cs605/cs674, **0.15–0.21 s/eval** on the compute
+nodes (threshold 0.6); ids 3–5 SEEDED at −2096.1 / −2148.4 / −2160.5, the dispersed path exercised
+(ids 25, 45). **PRODUCTION: job `17072999`, `--array=0-45%10`, submitted ~19:40 ET**, first wave
+of 10 running within a minute. Collect with
+`CCX_MS_OUTDIR=.../multistart_20260907_hilda28 Rscript calibration/collect_dispersed_multistart.R`;
+judge on `prereg_2026-09-07_hilda_refit_run.md` R1–R7, never on the logpost.
 
 ## 2026-09-06d — **THE OBSERVATIONAL PIN ON `hs_asx_frac` (0.65: HILDA'S CANCELLATION IS REAL, THE SCHMIDT TERM IS THE REST); THE THREE CAVEAT SCANS; OBJECTIVE #9 BUILT, SHIPS OFF**
 
