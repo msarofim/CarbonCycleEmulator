@@ -36,6 +36,7 @@ to follow `h_ml` and every basin drove `h_ml` to an extreme. `hs_asx_frac` floor
 
 **Round 2 pre-registered** in `notes/prereg_2026-09-07b_hilda_refit_round2.md` (R1–R8; R7 = `h_ml`
 returns to 60–180 m, R8 = unimodal at the top). Port targets at 29 / `hilda`; launch path as 09-06d.
+**LAUNCHED:** suite 1992 / 2 (the two mode-file tests) / 4; bundle `aa545af` + targets `441b4a4`; Torch setup gate rel 3.8e-13; preflight `17110372` 8/8 (0.19–0.24 s/eval); **production job `17110417`, `--array=0-45%10`, out `multistart_20260907b_hilda29/`**, first wave of 10 past the port gate.
 
 ## 2026-09-07 — ⛔ **THE HILDA REFIT CONVERGED, AND IT REJECTS THE STRUCTURE'S PREMISE: R1, R2, R3, R5 FAIL. Objective #9's correlation made a 50 ‰-too-young deep ocean cost 5 log-units.**
 
