@@ -2,6 +2,50 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-07c — ⭐⭐ **ROUND 2 CONVERGED: THE STRUCTURE NOW HOLDS THE Δ¹⁴C PROFILE (R1, R2, R6, R8 PASS) — AND BREAKS THE DIC / δ¹³C GRADIENTS (R3, R4, R5, R7 FAIL). The conduit's high-latitude water has no biology.**
+
+Job `17110417`: 46/46 COMPLETED, all converged. `calibration/output/multistart_20260907b_hilda29/`;
+scored by `calibration/diag_hilda29_predictions.R` (log + rds `_20260907`).
+
+**Five basins, one winner from 28 starts.** `−1508.24`: f **0.0086** (K_deep 101; prior-z −2.7, near
+the 0.005 floor), `hs_asx_frac` **0.507** (−1.5 sd from the observational 0.653; off the 0.02 floor),
+`kz` 11,706 (40 % into the box), **`h_ml` 37 m, `h_hs` 399 m**, `pump_grad` **524** (2.25× observed,
+prior-z +3.2). Second family (13 starts, −1516.8): f 0.022, factor 0.70, `h_ml` **200 (the ceiling)**,
+`h_hs` 311, `kz` 6,121. Profile at the winner: **−179 / −190 / −191**, z **−1.32 / +1.40 / +0.42** on
+(level, A−B, B−deep) — inside 2σ, the first time in the arc after a refit.
+
+| | prediction | result | verdict |
+|---|---|---|---|
+| R1 | structure kept, factor in band, off the floor | f 0.009, 0.507 | PASS |
+| R2 | level and contrasts inside 2σ | −1.32 / +1.40 / +0.42 | PASS |
+| R3 | sink and bomb within 2 of `ent26` | sink −0.8, `d14c_NH` **−4.1**, SH +1.1 | FAIL |
+| R4 | pump gradient rows within 5 each | δ¹³C **−27.6**, DIC −6.1, ALK −7.1 | FAIL |
+| R5 | gain exceeds the profile rows' own | +188 vs rows +231 ⇒ rest **−43** | FAIL |
+| R6 | `kz` interior | 40 % | PASS |
+| R7 | `h_ml` back to 60–180, `h_hs` interior | **37 m**; 399 (79 %) | FAIL |
+| R8 | unimodal top | 28 starts, no rival within 5 | PASS |
+
+**⭐⭐ WHERE THE −43 GOES, AND WHY — measured, and my first hypothesis refuted on the way.** At the
+winner the surface−deep **DIC gradient is 118 µmol/kg vs `ent26`'s 221**, the **δ¹³C gradient +0.36 ‰
+vs −0.88 — the WRONG SIGN**, ALK 156 vs 95. I first suspected the pump solve (`ccx_pump_export()`
+sizes the export against DIFFUSION only, `kz_int`, and does not know the conduit), predicting the
+export had SHRUNK with K_deep. The opposite: **organic export is 56.7 GtC/yr at the winner vs 19.1 at
+`ent26` and 16.1 at the 09-06c arm** (K(top) 11,706 × `pump_grad` 524) — 3× the column and ~5× the
+real ocean — **and the gradient still halves.** HILDA's depth-independent conduit (τ_q 538 yr into
+EVERY layer) ventilates the interior with HS water that is air–sea-equilibrated and has **no pump**
+(choice C9, Southern-Ocean export DEFERRED), so it carries low DIC and heavy δ¹³C into a deep ocean
+whose DIC/δ¹³C gradient the pump then cannot rebuild at any export. The 09-06c "artefact nuisances
+recover" was this, and it does not recover. ⚠ `ent26`'s own 19 GtC/yr export is ~2× the real ocean's —
+a pre-existing property of a 1-D diffusivity 12× Ledwell's, noted, not chased.
+
+**The mixed layer.** With `h_hs` free (399 m), `h_ml` still splits 37 vs 200: the two families differ by
+6 on the likelihood, 4.7 of it `ocean_grad_d13c` — the ML depth is being used as a gradient lever too.
+
+⛔ **Nothing adopted; canonical stays `ent26`.** The structural finding for the ruling: **a conduit of
+unstripped high-latitude surface water fixes the ventilation age and destroys the biological
+gradients; the two halves of the deep ocean's state need the HS box to have a pump (or a preformed-DIC
+end-member) before the profile and the gradients can be held together.**
+
 ## 2026-09-07b — ⭐⭐ **OBJECTIVE #10: THE PROFILE AS (LEVEL, A−B, B−deep), GENERALISED-NORMAL ROWS WITH SHAPE 4; `h_hs` FITTED (28 → 29); THE EXCHANGE FLOOR 0.02; ROUND 2 LAUNCHED**
 
 **Marcus (2026-09-07):** *"I like the third form. Can we also make the cost of a miss non linear, such

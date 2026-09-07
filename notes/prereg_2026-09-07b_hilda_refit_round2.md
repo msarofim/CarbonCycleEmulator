@@ -30,3 +30,9 @@ on all three at matched parameters, so such a region exists.
 | R6 | `kz` interior (> 5 % from each bound) | rails |
 | R7 | `h_ml` returns toward the incumbent's range (**60–180 m**) once `h_hs` is free, and `h_hs` lands interior | `h_ml` at 37–47 or 184–200 again, or `h_hs` at a bound |
 | R8 | the survey is UNIMODAL at the top: the best basin is reached from ≥ 10 starts and no second basin within 5 log-units differs in f by > 0.2 | two structurally different basins within 5 |
+
+## SCORED 2026-09-07 (job 17110417, 46/46) — `calibration/diag_hilda29_predictions.R`
+R1 PASS (f 0.009, factor 0.507), R2 PASS (−1.32 / +1.40 / +0.42), **R3 FAIL** (`d14c_NH` −4.1), **R4 FAIL**
+(δ¹³C −27.6, DIC −6.1, ALK −7.1), **R5 FAIL** (+188 vs rows +231; rest −43), R6 PASS, **R7 FAIL** (`h_ml` 37),
+R8 PASS (28 starts). The structure holds the Δ¹⁴C profile and breaks the DIC/δ¹³C gradients: the conduit's
+HS water has no biology (export 57 GtC/yr cannot rebuild a gradient it flushes). CHANGELOG 2026-09-07c.
