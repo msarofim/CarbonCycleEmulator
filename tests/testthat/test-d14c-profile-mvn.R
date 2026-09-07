@@ -23,15 +23,20 @@ skip_if_no_cpp <- function() {
 }
 skip_if_no_prof <- function() skip_if(is.null(ccx_profile_d14c_cov()) || is.null(ccx_mid_d14c_target()) ||
                                         is.null(ccx_deep_d14c_target()), "profile covariance build product absent")
+# 2026-09-07: the MVN form is SUPERSEDED by the generalised-normal rows (#10);
+# these tests exercise it with the gnorm form switched OFF, so they stay a
+# guard on the MVN machinery diagnostics still use.
 with_mvn <- function(on, expr) {
-  old <- LIK_USE_D14C_PROFILE_MVN
+  old <- LIK_USE_D14C_PROFILE_MVN; oldg <- LIK_USE_D14C_PROFILE_GNORM
   assign("LIK_USE_D14C_PROFILE_MVN", on, envir = globalenv())
-  on.exit(assign("LIK_USE_D14C_PROFILE_MVN", old, envir = globalenv()), add = TRUE)
+  assign("LIK_USE_D14C_PROFILE_GNORM", FALSE, envir = globalenv())
+  on.exit({ assign("LIK_USE_D14C_PROFILE_MVN", old, envir = globalenv())
+            assign("LIK_USE_D14C_PROFILE_GNORM", oldg, envir = globalenv()) }, add = TRUE)
   force(expr)
 }
 
-test_that("the switch is ON (ruled 2026-09-06) and the build product scores the rows' own targets", {
-  expect_true(LIK_USE_D14C_PROFILE_MVN); expect_identical(LIK_D14C_PROFILE_BLOCK, 60)
+test_that("the MVN switch is OFF (superseded 2026-09-07 by #10) and the build product scores the rows' own targets", {
+  expect_false(LIK_USE_D14C_PROFILE_MVN); expect_identical(LIK_D14C_PROFILE_BLOCK, 60)
   skip_if_no_prof()
   pc <- ccx_profile_d14c_cov(); tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
   expect_equal(unname(pc$targets), c(tgm$slabs$target, tgd$target))

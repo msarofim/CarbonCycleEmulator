@@ -262,8 +262,20 @@ CCX_PARAM_TABLE <- list(
   # observation-and-law value is 0.653 (data/obs_hs_exchange_factor.rds) and
   # is deliberately NOT the prior: it is the out-of-sample cross-check
   # (prereg sec.4, ruled 2026-09-06: cross-check only).
-  hs_asx_frac  = list(tr = "logit", lo = 0.2, hi = 2.0, init = 1.0,
-                      prior = function(x) dunif(x, 0.2, 2.0, log = TRUE)),
+  # FLOOR LOWERED 0.2 -> 0.02 on 2026-09-07 (Marcus): the first refit sat at
+  # 0.220, effectively AT the floor, so the box was choosing the answer. If
+  # the fit now drives it toward zero, that is a "the cold box wants no
+  # air-sea exchange" signal to read, not a fit to adopt.
+  hs_asx_frac  = list(tr = "logit", lo = 0.02, hi = 2.0, init = 1.0,
+                      prior = function(x) dunif(x, 0.02, 2.0, log = TRUE)),
+  # h_hs: the cold box's thickness, FITTED since 2026-09-07 (28 -> 29). It was
+  # declared to FOLLOW h_ml (choice C2), which coupled the HS bomb capacity to
+  # the low-latitude mixed layer; every basin of the first refit then moved
+  # h_ml to an extreme (37-47 or 184-200 m). Box [20, 500] (the 09-06c
+  # identifiability run's), uniform; init 75 = HILDA's (one remove, the cold
+  # control only -- a migrated ancestor starts at ITS OWN h_ml, what it ran).
+  h_hs         = list(tr = "logit", lo = 20, hi = 500, init = 75,
+                      prior = function(x) dunif(x, 20, 500, log = TRUE)),
   # THE BIOLOGICAL PUMP'S MAGNITUDE -- the 20th parameter (Marcus 2026-08-16d).
   # The preindustrial surface-to-bottom DIC gradient the pump holds, umol/kg.
   # Everything else about the pump stays structural: the export SHAPE is GLODAP's
@@ -840,6 +852,14 @@ ccx_migrate_par_set <- function(p) {
   for (nm in c("kz_deep_frac", "hs_asx_frac")) if (nm %in% absent) {
     p[[nm]] <- 1
     filled <- c(filled, nm)
+  }
+  # 2026-09-07: h_hs entered the table (28 -> 29). Absent = 0 = FOLLOW h_ml in
+  # the model's own contract (ccx_prepare()), so what the ancestor RAN is its
+  # own h_ml -- filled from the list itself, never from a named default.
+  if ("h_hs" %in% absent) {
+    if (is.null(p$h_ml)) stop("ccx_migrate_par_set(): h_hs absent and no h_ml to follow.")
+    p$h_hs <- p$h_ml
+    filled <- c(filled, "h_hs")
   }
 
   still <- setdiff(absent, filled)

@@ -582,8 +582,90 @@ LIK_D14C_MID_NEFF <- LIK_D14C_DEEP_NEFF
 # the bootstrap block size in degrees latitude: 60 (conservative) or 30.
 # RULED ON 2026-09-06 (Marcus): ON, 60-degree block. Every logpost stored
 # before this date was scored with the three independent rows.
-LIK_USE_D14C_PROFILE_MVN <- TRUE
+LIK_USE_D14C_PROFILE_MVN <- FALSE   # SUPERSEDED 2026-09-07 by the (level, contrasts) form below; kept for diagnostics
 LIK_D14C_PROFILE_BLOCK   <- 60
+
+# ---- OBJECTIVE CHANGE #10 (2026-09-07, Marcus): THE PROFILE AS (LEVEL, A-B, B-deep),
+# EACH A GENERALISED-NORMAL ROW WITH A DECLARED SIGMA AND SHAPE. ✅ ON.
+# WHY. The MVN row (#9) is the same three means in the (A, B, deep) basis with
+# the bootstrap covariance; rotated into (mean level, A-B, B-deep) it is three
+# nearly independent rows -- and the bootstrap's 0.98 correlation gave the
+# LEVEL a sigma of ~15 permil, ONE datum, so a deep ocean 50 permil too young
+# cost 5 log-units and the 2026-09-07 refit took that trade
+# ([[ccx_hilda_refit_result]]). The contrasts' sigmas ARE well measured (2.3 /
+# 4.0 permil, the reason #9 existed); the level's is a DECISION, declared here
+# as the deep row's own convention (sd_w / sqrt(n_eff), 10.26 permil) rather
+# than the 16-block bootstrap.
+# THE SHAPE. A Gaussian row costs z^2/2, so each extra sigma costs only
+# linearly more (0.5, 1.5, 2.5, ...). With shape beta the cost is |z|^beta/2:
+# identical to the Gaussian at 1 sigma, and at beta = 4 a 2-sigma miss costs
+# 8, 3 sigma 40, 5 sigma 312 -- each additional sigma several times the last.
+# This is a PLAUSIBILITY COST for a bounded representation error, not a
+# sampling likelihood, and it applies to these three rows ONLY (the transient
+# streams' residuals are noise-like and stay Gaussian). beta = 2 reproduces
+# the Gaussian rows exactly (the mutation gate, test-d14c-profile-gnorm.R).
+LIK_USE_D14C_PROFILE_GNORM <- TRUE
+LIK_D14C_PROFILE_BETA      <- 4
+
+#' Generalised-normal log density, parameterised so that the cost relative to
+#' the mode is |z|^beta / 2 with z = (x - mu) / sd: at beta = 2 this IS
+#' dnorm(x, mu, sd, log = TRUE), constant included.
+ccx_dgnorm_log <- function(x, mu, sd, beta = LIK_D14C_PROFILE_BETA) {
+  z <- abs(x - mu) / sd
+  -0.5 * z^beta + log(beta) - log(2) - log(sd) - log(2) / beta - lgamma(1 / beta)
+}
+
+#' The (level, A-B, B-deep) specification: targets DERIVED from the three row
+#' targets, sigmas from the deep row's convention (level) and the bootstrap
+#' product (contrasts). NULL if any input is absent (rows ABSENT, visibly).
+ccx_profile_d14c_spec <- function(block = LIK_D14C_PROFILE_BLOCK, beta = LIK_D14C_PROFILE_BETA) {
+  pc <- ccx_profile_d14c_cov(block); tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
+  if (is.null(pc) || is.null(tgm) || is.null(tgd)) return(NULL)
+  if (!identical(pc$streams, c(tgm$slabs$stream, "d14c_deep_ocean")) ||
+      max(abs(pc$targets - c(tgm$slabs$target, tgd$target))) > 1e-6)
+    stop("the profile covariance product's streams/targets do not match the rows -- ",
+         "rebuild data/obs_glodap_profile_cov.rds.")
+  mu <- c(tgm$slabs$target, tgd$target)
+  list(level = mean(mu), ab = mu[1] - mu[2], bd = mu[2] - mu[3],
+       level_sd = tgd$sd, ab_sd = pc$se[["AB"]], bd_sd = pc$se[["BD"]],
+       beta = beta, block = block, slab_names = tgm$slabs$name, mu = mu)
+}
+
+#' The profile rows the objective carries at the model vector m = (A, B, deep)
+#' under the CURRENT switches: the three generalised-normal rows (#10), else
+#' the one MVN row (#9), else NULL (the independent rows are scored by
+#' ccx_loglik() itself). ONE source for the objective and for every fixture.
+ccx_profile_rows_at <- function(m) {
+  if (length(m) != 3L || !all(is.finite(m))) return(NULL)
+  if (LIK_USE_D14C_PROFILE_GNORM) {
+    sp <- ccx_profile_d14c_spec(); if (is.null(sp)) return(NULL)
+    return(c(d14c_profile_level = ccx_dgnorm_log(sp$level, mean(m), sp$level_sd, sp$beta),
+             d14c_profile_ab    = ccx_dgnorm_log(sp$ab, m[1] - m[2], sp$ab_sd, sp$beta),
+             d14c_profile_bd    = ccx_dgnorm_log(sp$bd, m[2] - m[3], sp$bd_sd, sp$beta)))
+  }
+  if (LIK_USE_D14C_PROFILE_MVN) {
+    pc <- ccx_profile_d14c_cov(); tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
+    if (is.null(pc) || is.null(tgm) || is.null(tgd)) return(NULL)
+    if (!identical(pc$streams, c(tgm$slabs$stream, "d14c_deep_ocean")) ||
+        max(abs(pc$targets - c(tgm$slabs$target, tgd$target))) > 1e-6)
+      stop("d14c_profile_mvn: the covariance product's streams/targets do not match ",
+           "the rows it replaces -- rebuild data/obs_glodap_profile_cov.rds.")
+    return(c(d14c_profile_mvn = ccx_dmvnorm_log(c(tgm$slabs$target, tgd$target), m, pc$cov)))
+  }
+  NULL
+}
+
+#' For FIXTURES: what switching LIK_USE_D14C_MID off removes from the objective
+#' at (mid, deep). With a profile form ON that is (its rows - the deep Gaussian
+#' that replaces them); with both forms OFF it is the two mid Gaussians.
+#' Derived from the switches, never typed.
+ccx_profile_rows_delta <- function(mid, deep) {
+  tg <- ccx_mid_d14c_target(); td <- ccx_deep_d14c_target()
+  two <- sum(stats::dnorm(tg$slabs$target, mid[tg$slabs$name], tg$slabs$sd, log = TRUE))
+  rows <- ccx_profile_rows_at(c(mid[[tg$slabs$name[1]]], mid[[tg$slabs$name[2]]], deep))
+  if (is.null(rows)) return(two)
+  sum(rows) - stats::dnorm(td$target, deep, td$sd, log = TRUE)
+}
 
 #' The measured joint covariance of the three interior D14C levels (#9).
 #' NULL (row ABSENT, visibly) if the build product is missing or the block is
@@ -1624,31 +1706,20 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # ---- deep-ocean D14C, GLODAPv2 (see LIK_D14C_DEEP_NEFF) -------------
   # One scalar, one Gaussian. The only term in the objective that prices ocean
   # VENTILATION; everything else touching kz does so through d13C.
-  # ---- OBJECTIVE CHANGE #9: the profile as ONE MVN row (ships OFF) ------
-  # When ON, and the deep AND both slabs are present, the three level rows
-  # below are replaced by one row on (A, B, deep) with the measured
-  # covariance. The targets are the rows' own (the build gates on that); only
-  # the correlation the independent form discards is added. If any input is
-  # absent the row is skipped and the independent rows are scored as before,
-  # so nothing can be silently half-scored.
+  # ---- THE PROFILE ROWS (#9 MVN / #10 generalised-normal) -------------
+  # When a profile form is ON and the deep AND both slabs are present, the
+  # three independent level rows below are REPLACED by ccx_profile_rows_at()'s
+  # rows on the same three numbers. The form CONTAINS the deep and mid rows,
+  # so it is off whenever either is switched off (how a fixture scores
+  # "without the rows"). Any absent input falls back to the independent rows,
+  # visibly, so nothing can be silently half-scored.
   profile_mvn <- FALSE
-  # The row CONTAINS the deep and mid rows, so it is off whenever either of
-  # those is switched off -- which is how a fixture scores "without the rows".
-  if (LIK_USE_D14C_PROFILE_MVN && LIK_USE_D14C_MID && LIK_USE_D14C_DEEP &&
+  if ((LIK_USE_D14C_PROFILE_GNORM || LIK_USE_D14C_PROFILE_MVN) && LIK_USE_D14C_MID && LIK_USE_D14C_DEEP &&
       !is.null(deep) && is.finite(deep) && !is.null(d14c_mid)) {
-    pc <- ccx_profile_d14c_cov(); tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
-    if (!is.null(pc) && !is.null(tgm) && !is.null(tgd)) {
-      # The build gates the covariance's means on the row targets; assert the
-      # ORDER and the targets here too, at the scoring site (audit 09-06d).
-      if (!identical(pc$streams, c(tgm$slabs$stream, "d14c_deep_ocean")) ||
-          max(abs(pc$targets - c(tgm$slabs$target, tgd$target))) > 1e-6)
-        stop("d14c_profile_mvn: the covariance product's streams/targets do not match ",
-             "the rows it replaces -- rebuild data/obs_glodap_profile_cov.rds.")
-      m <- c(d14c_mid[[tgm$slabs$name[1]]], d14c_mid[[tgm$slabs$name[2]]], deep)
-      if (length(m) == 3L && all(is.finite(m))) {
-        add("d14c_profile_mvn", ccx_dmvnorm_log(c(tgm$slabs$target, tgd$target), m, pc$cov))
-        profile_mvn <- TRUE
-      }
+    tgm <- ccx_mid_d14c_target()
+    if (!is.null(tgm)) {
+      rows <- ccx_profile_rows_at(c(d14c_mid[[tgm$slabs$name[1]]], d14c_mid[[tgm$slabs$name[2]]], deep))
+      if (!is.null(rows)) { for (n in names(rows)) add(n, rows[[n]]); profile_mvn <- TRUE }
     }
   }
 

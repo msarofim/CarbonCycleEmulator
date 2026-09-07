@@ -2,6 +2,41 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-07b — ⭐⭐ **OBJECTIVE #10: THE PROFILE AS (LEVEL, A−B, B−deep), GENERALISED-NORMAL ROWS WITH SHAPE 4; `h_hs` FITTED (28 → 29); THE EXCHANGE FLOOR 0.02; ROUND 2 LAUNCHED**
+
+**Marcus (2026-09-07):** *"I like the third form. Can we also make the cost of a miss non linear, such
+that each additional sigma off costs several times more than the last one?"* → *"Go."*
+
+**#10** (`R/likelihood.R`: `LIK_USE_D14C_PROFILE_GNORM` TRUE, `LIK_D14C_PROFILE_BETA` 4; #9 OFF, kept
+for diagnostics). The MVN row rotated into its natural basis and each component given its OWN sigma
+and a shape: **level** = mean of the three targets (−173.2), sigma **10.26** = the deep row's
+`sd_w/√n_eff` convention (a DECISION, declared — not the 16-block bootstrap's 15); **A−B** 6.96 ± 2.29
+and **B−deep** −0.35 ± 4.04 from the bootstrap (the well-measured part, the reason #9 existed). Cost
+per row |z|^β/2 with **β = 4**: 1σ 0.5 (= Gaussian), 2σ 8, 3σ 40, 5σ 312 — a PLAUSIBILITY cost for a
+bounded representation error, on these three rows only; the transient streams stay Gaussian.
+`ccx_dgnorm_log()` (β = 2 IS `dnorm`, constant included; integrates to 1 at β = 4),
+`ccx_profile_d14c_spec()`, and **`ccx_profile_rows_at()` — ONE source for the objective and every
+fixture** (`ccx_profile_rows_delta()` replaces the per-test derivations). `tests/testthat/test-d14c-profile-gnorm.R`
+(31): the switches, the β = 2 reduction, the cost table, decomposition and fallback, and a MUTATION
+on round 1's own basins.
+
+**Round 1's basins under #10** (levels from `hilda28_basins_20260907.rds`; `rest` unchanged):
+| basin | level | A−B | B−deep | rows | rest | likelihood |
+|---|---|---|---|---|---|---|
+| winner (f 0.81) | **−287.8** | −4.4 | −29.0 | −321 | −1417 | −1738 |
+| `ent26` column | −51.9 | −71.5 | **−118.2** | −242 | −1411 | −1653 |
+| structural (f 0.006) | −11.4 | −10.2 | −2.2 | **−24** | −1451 | **−1475** |
+The structural basin leads by 178; the winner's +50 ‰ level and the column's shape are both untenable.
+That is the intended reversal — and a fit inside ~2σ on all three exists (the 09-06c arm was inside 1σ).
+
+**The two coupled fixes.** `h_hs` FITTED (logit [20, 500], init 75 = HILDA's for the cold control;
+migration fills a 28-parameter ancestor with ITS OWN `h_ml` = what it ran) — round 1 had it declared
+to follow `h_ml` and every basin drove `h_ml` to an extreme. `hs_asx_frac` floor 0.2 → **0.02**: round
+1 sat at 0.220. Register updated. Targeted tests 528/0; suite below.
+
+**Round 2 pre-registered** in `notes/prereg_2026-09-07b_hilda_refit_round2.md` (R1–R8; R7 = `h_ml`
+returns to 60–180 m, R8 = unimodal at the top). Port targets at 29 / `hilda`; launch path as 09-06d.
+
 ## 2026-09-07 — ⛔ **THE HILDA REFIT CONVERGED, AND IT REJECTS THE STRUCTURE'S PREMISE: R1, R2, R3, R5 FAIL. Objective #9's correlation made a 50 ‰-too-young deep ocean cost 5 log-units.**
 
 Job `17072999`: **46/46 COMPLETED, exit 0, every task converged in cycle 2** (1–2 h each, not 4).

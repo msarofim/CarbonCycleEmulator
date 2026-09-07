@@ -22,18 +22,8 @@ skip_if_no_cpp <- function() {
   if (!ok) skip("C++ core failed to compile")
 }
 skip_if_no_mid <- function() skip_if(is.null(ccx_mid_d14c_target()), "intermediate build product absent")
-# What the objective carries for the interior profile at (mid, deep), MINUS what
-# it carries with LIK_USE_D14C_MID off (the deep Gaussian alone). Objective #9
-# (2026-09-06d): with the MVN row ON that is (MVN row - deep Gaussian); with it
-# OFF it is the two mid Gaussians. Derived from the switch, never typed.
-ccx_d14c_profile_rows_delta <- function(mid, deep) {
-  tg <- ccx_mid_d14c_target(); td <- ccx_deep_d14c_target()
-  two <- sum(stats::dnorm(tg$slabs$target, mid[tg$slabs$name], tg$slabs$sd, log = TRUE))
-  if (!LIK_USE_D14C_PROFILE_MVN) return(two)
-  pc <- ccx_profile_d14c_cov()
-  ccx_dmvnorm_log(unname(pc$targets), c(mid[[tg$slabs$name[1]]], mid[[tg$slabs$name[2]]], deep), pc$cov) -
-    stats::dnorm(td$target, deep, td$sd, log = TRUE)
-}
+# The fixture helper now lives in R/likelihood.R as ccx_profile_rows_delta()
+# (2026-09-07): ONE source for the objective and every fixture.
 
 test_that("the two slabs tile 1500 m to the deep row's top, with a derived sigma", {
   skip_if_no_mid()
@@ -118,7 +108,7 @@ test_that("the objective carries the rows: switching them off moves the logpost 
   tg  <- ccx_mid_d14c_target()
   pp  <- ccx_overlay_par(ccx_default_params(), ccx_unc_to_par(u0))
   sp  <- ccx_spinup(pp); mid <- ccx_model_d14c_slabs(sp); deep <- sp$diagnostics$d14c_bottom_box
-  rows <- ccx_d14c_profile_rows_delta(mid, deep)   # what switching the mid rows OFF removes
+  rows <- ccx_profile_rows_delta(mid, deep)   # what switching the mid rows OFF removes
   expect_equal(on - off, rows, tolerance = 1e-6, scale = 1)
   expect_gt(abs(rows), 0.1)   # and they are not a vanishing constant
 })

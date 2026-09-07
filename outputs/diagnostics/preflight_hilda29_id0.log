@@ -1,0 +1,50 @@
+run-time inputs present: 1/1. OK
+SEEDING ent_seas_amp_SH for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 10.9524.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the incumbent feasibility: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+NOTE the incumbent reference was FITTED under kz [3942.5, 6528], the shipped table is kz [1161.6, 27808].
+     Feasible, so it is a legal start; its own stored logpost is on a different scale.
+SEEDING ent_seas_amp_SH for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 10.9524.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the new basin feasibility: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+NOTE the new basin reference was FITTED under kz [3942.5, 6528], the shipped table is kz [1161.6, 27808].
+     Feasible, so it is a legal start; its own stored logpost is on a different scale.
+SEEDING ent_seas_amp_SH for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 10.9524.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the incumbent start: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+SEEDING ent_seas_amp_SH for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 10.9524.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the new basin start: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+
+======================================================================
+DISPERSED MULTI-START, id 0, arm N, 29 parameters
+  host MacBook-Pro-2.local   R 4.5.3   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 180 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 1.0452, pooled over the 21 coordinates at least one of
+    them FITTED; over all 29 it would be 0.9917, diluted by the 8 migrated in BOTH:
+    gamma_enso_land_NH, gamma_enso_land_SH, gamma_enso_ocn_NH, gamma_enso_ocn_SH, ent_seas_amp_SH, kz_deep_frac, hs_asx_frac, h_hs)
+  out /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20260907b_hilda29/start_000.rds
+======================================================================
+  structure: 'hilda' (hs_frac=0.16, u_hs=38, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253)
+start point: reference: COLD hand-set init (0 draws), log-post there = -16660.1600
+PORT GATE (a) at the cold reference point: here -16660.1600275482 vs MacBook-Pro-2.local@5d6054c -16660.1600275482,
+              rel 6.55e-16 (tol 1e-08)
+PORT GATE (a) PASSED.
+measured 0.0826 s/eval (median of 5; range 0.0820-0.1197) => one 6000-eval restart
+  projects to 8.3 min; wall budget 180 min, of which 12.2 min is RESERVED for the
+  BFGS polish (100 iterations)
+PREFLIGHT id 000 on MacBook-Pro-2.local: start REFERENCE, log-post -16660.1600, 0 draws, port VERIFIED rel 6.6e-16,
+             0.0826 s/eval => a 6000-eval restart takes 8.3 min of a 180 min budget. LAUNCHABLE.

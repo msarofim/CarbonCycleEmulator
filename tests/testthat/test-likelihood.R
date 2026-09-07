@@ -569,8 +569,9 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # whether that -5.14 RELAXES, not whether the logpost rises.
   # 28 SINCE 2026-09-06d: kz_deep_frac and hs_asx_frac, the two FITTED
   # structure parameters of the HILDA refit (Marcus's ruling, prereg 09-07).
-  expect_length(CCX_PARAM_NAMES, 28L)
-  expect_true(all(c("kz_deep_frac", "hs_asx_frac") %in% CCX_PARAM_NAMES))
+  # 29 SINCE 2026-09-07: h_hs fitted (decoupled from h_ml after the first refit).
+  expect_length(CCX_PARAM_NAMES, 29L)
+  expect_true(all(c("kz_deep_frac", "hs_asx_frac", "h_hs") %in% CCX_PARAM_NAMES))
   expect_true("ent_seas_amp_SH" %in% CCX_PARAM_NAMES)
   expect_true(all(CCX_ENSO_PARAMS %in% CCX_PARAM_NAMES))
   expect_false("gamma_enso" %in% CCX_PARAM_NAMES)

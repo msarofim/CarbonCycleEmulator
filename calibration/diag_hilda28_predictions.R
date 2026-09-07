@@ -43,8 +43,7 @@ cat(sprintf("  |prior_z| > 2: %s\n", if (length(big)) paste(sprintf("%s %+.2f", 
 mk_v <- function(p, pmv, src) { v <- list(p = p, pm = pmv, luc_scale = pmv$luc_scale, bomb_total = pmv$bomb_total,
   sigma_d14c = pmv$sigma_d14c, rep_dC = pmv$rep_dC, grad_off_co2 = pmv$grad_off_co2, grad_off_d13c = pmv$grad_off_d13c, src = src); v }
 pb <- ccx_apply_structure(ccx_default_params(), "hilda"); pb$pump_mode <- best$pump_mode
-for (n in intersect(names(pb), CCX_PARAM_NAMES)) pb[[n]] <- pm[[n]]
-pb <- ccx_set_enso(pb, pm)
+pb <- ccx_overlay_par(pb, pm)   # migrates, copies, asserts nothing deleted (the lint's idiom)
 vB <- mk_v(pb, pm, "hilda28 best")
 v0 <- dg_vector(CCX_MODE_CANONICAL); v0$p$hs_frac <- 0
 tg7 <- dg_gcb_target(DG_SINK_WIN); ob5 <- dg_obs_gate5(); sp5 <- dg_obs_gate5_spread()

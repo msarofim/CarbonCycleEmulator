@@ -1,0 +1,302 @@
+alpha-as: .................................
+artificial-sink: ..............................
+carbonate: ....SS...
+climate: ..................................
+conservation: ...........
+constants: ..........................................................................................................................................................................................................................................................................................................................
+conveyor: ............................W...W...W...
+d14c-mid: ............W..........
+d14c-profile-gnorm: ......................W.........
+d14c-profile-mvn: ..............W..........
+emission-seasonality: .........................................
+enso-demean: .......W..1
+enso-split: ....................................................2.....
+ent-seas-fitted: .........................................................
+fertilisation: ............................
+fluxes: ................W......
+forcing: ..........................W.......W.W.W............W.....
+gate-bounds: .........................................................S......................................................
+gradient: ..............................
+hilda-boxes: ..........................WWW......................
+hs-asx-frac: .........WW..WWW....
+joos-irf: ......................
+kz-profile: ......W........WWW............
+likelihood: ............W........................................W.W.....WWW..WWW...........................................................................W.................................................................................................
+luc-nh-share: ......................
+luc-permanence: ............
+luc-scale: ...........WW................................................
+mechanisms: .......................................................
+mode-decode: .3....45..6..
+mode-file: .........................7.....S
+ocean-advection: ...W...WW..WW.WW......W...WW.........WWW.................................
+overlay-idiom-lint: 8.9.....
+parity: .....W.....................W..........W.W...................
+pin-family: ..........................................
+prior-z: ...............................
+pulse: .........................
+pump-conveyor: .......................
+pump: .......W.......................
+q-attachment: ...................
+seas-isotope: .....
+seas-lag-split: ..........................a.......b
+sigma-inflation: ..........................
+so-entrainment: W......W.....W....W..W..W...........W.
+spinup: ..................
+spo-constants-tie: .............................................................
+stability: ..........W.W.W.W.W...W...W...W...W...WWW.WW..WW..
+volcanic-diffuse: ............
+
+══ Skipped ═════════════════════════════════════════════════════════════════════
+1. pCO2 matches seacarb across the DIC x T operating range ('test-carbonate.R:17:3') - Reason: {seacarb} is not installed
+
+2. Revelle factor matches seacarb and rises with DIC ('test-carbonate.R:36:3') - Reason: {seacarb} is not installed
+
+3. ccx_overlay_par() refuses to delete a parameter, and repairs the lag ('test-gate-bounds.R:207:3') - Reason: canonical mode is not pre-split
+
+4. the free-vs-pinned comparison has POWER, or says that it does not ('test-mode-file.R:222:3') - Reason: 1 arm in the registry: the free-vs-pinned comparison cannot fail and is reported DARK rather than green. It regains power when a second arm lands -- a 26-parameter PINNED refit is the thing that would do it.
+
+══ Warnings ════════════════════════════════════════════════════════════════════
+1. R and C++ agree with the conveyor on, in every config ('test-conveyor.R:215:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+2. R and C++ agree with the conveyor on, in every config ('test-conveyor.R:215:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+3. R and C++ agree with the conveyor on, in every config ('test-conveyor.R:215:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+4. the rows are absent without `d14c_mid`, Gaussian with it, and decompose ('test-d14c-mid.R:70:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+5. the rows replace the three level rows, decompose, and fall back when an input is absent ('test-d14c-profile-gnorm.R:69:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+6. switched ON the row replaces the three and moves the total by exactly their difference ('test-d14c-profile-mvn.R:79:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+7. SPAN-INVARIANCE: the offset does not depend on the years requested ('test-enso-demean.R:74:3') - window starts at 1980 with 215.6 GtC of land-use carbon already emitted, so the land's equilibrium is 10.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+8. gross fluxes dwarf the net, which is the point of the trace ('test-fluxes.R:197:3') - window starts at 2015 with 275.6 GtC of land-use carbon already emitted, so the land's equilibrium is 12.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+9. emission hemispheric splits sum to the global total ('test-forcing.R:42:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+10. bomb 14C total is set by the prior, not by the provisional shape ('test-forcing.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+11. bomb 14C total is set by the prior, not by the provisional shape ('test-forcing.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+12. bomb 14C total is set by the prior, not by the provisional shape ('test-forcing.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+13. the C++ forcing column contract is positional and complete ('test-forcing.R:137:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+14. R and C++ agree with the boxes on ('test-hilda-boxes.R:96:3') - window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+15. R and C++ agree with the boxes on ('test-hilda-boxes.R:98:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+16. R and C++ agree with the boxes on ('test-hilda-boxes.R:98:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+17. the atmosphere's bomb curve sees it, through the C++ transient ('test-hs-asx-frac.R:56:5') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+18. the atmosphere's bomb curve sees it, through the C++ transient ('test-hs-asx-frac.R:56:5') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+19. R and C++ agree at 0.5 ('test-hs-asx-frac.R:67:3') - window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+20. R and C++ agree at 0.5 ('test-hs-asx-frac.R:69:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+21. R and C++ agree at 0.5 ('test-hs-asx-frac.R:69:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+22. f = 1 and ABSENCE reproduce the model bit for bit -- spinup and transient ('test-kz-profile.R:66:3') - window starts at 1955 with 168.6 GtC of land-use carbon already emitted, so the land's equilibrium is 7.9 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+23. R and C++ agree at f = 0.5 with the HS boxes on ('test-kz-profile.R:97:3') - window starts at 1850 with 41.8 GtC of land-use carbon already emitted, so the land's equilibrium is 2.0 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+24. R and C++ agree at f = 0.5 with the HS boxes on ('test-kz-profile.R:99:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+25. R and C++ agree at f = 0.5 with the HS boxes on ('test-kz-profile.R:99:3') - Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+26. the fast model-side reduction equals the general estimator ('test-likelihood.R:81:3') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+27. the d13C seasonal cycle is scored, and through the NEP harmonic ('test-likelihood.R:349:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+28. the d13C seasonal cycle is scored, and through the NEP harmonic ('test-likelihood.R:349:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+29. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+30. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+31. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+32. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+33. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+34. the seasonal statistic constrains amplitude and phase ('test-likelihood.R:420:5') - window starts at 1950 with 158.7 GtC of land-use carbon already emitted, so the land's equilibrium is 7.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+35. the excess-14C term refuses to score off a wrong baseline ('test-likelihood.R:722:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+36. the PRE-WINDOW cumulative scales too ('test-luc-scale.R:47:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+37. the PRE-WINDOW cumulative scales too ('test-luc-scale.R:48:3') - window starts at 1900 with 44.0 GtC of land-use carbon already emitted, so the land's equilibrium is 2.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+38. w_up = 0 is the pure-diffusion model, exactly ('test-ocean-advection.R:84:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+39. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:99:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+40. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:100:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+41. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:104:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+42. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:104:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+43. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:106:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+44. MUTATION: w_up > 0 does change the answer ('test-ocean-advection.R:106:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+45. R and C++ agree with overturning on ('test-ocean-advection.R:138:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+46. with NO interior source, reversing the circulation ties EVERY column ('test-ocean-advection.R:176:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+47. with NO interior source, reversing the circulation ties EVERY column ('test-ocean-advection.R:177:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+48. with the pump ON, TOTAL CARBON is still invariant and the ISOTOPES are not ('test-ocean-advection.R:235:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+49. with the pump ON, TOTAL CARBON is still invariant and the ISOTOPES are not ('test-ocean-advection.R:236:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+50. with the pump ON, TOTAL CARBON is still invariant and the ISOTOPES are not ('test-ocean-advection.R:237:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+51. multi-decade trajectories agree to roundoff ('test-parity.R:109:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+52. parity holds with the frozen-Revelle switch engaged ('test-parity.R:163:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+53. frozen Revelle does what it claims, and only that ('test-parity.R:210:3') - window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+54. the C++ core conserves carbon exactly, independently of R ('test-parity.R:222:3') - window starts at 1800 with 15.6 GtC of land-use carbon already emitted, so the land's equilibrium is 0.7 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+55. pump_grad = 0 emits NOTHING -- the no-pump model is bit-reproduced ('test-pump.R:52:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+56. P0.1 -- at zero amplitude the channel is absent, bit for bit ('test-so-entrainment.R:80:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+57. P0.1 -- and bit for bit in the C++ core too ('test-so-entrainment.R:97:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+58. P0.2 -- R and C++ are the same model with the channel ON ('test-so-entrainment.R:107:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+59. P0.2 -- and the channel is not a no-op in EITHER core ('test-so-entrainment.R:122:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+60. P0.3 -- seas_drivers = 0 kills the channel, hold_climate does NOT ('test-so-entrainment.R:136:5') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+61. P0.3 -- ccx_hold_climate() holds every climate FORCING COLUMN ('test-so-entrainment.R:156:3') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+62. the entrainment channel is CONSERVATIVE, and rectifies no more than
+           the seasonal SST term the model already accepts ('test-so-entrainment.R:212:3') - window starts at 1960 with 179.8 GtC of land-use carbon already emitted, so the land's equilibrium is 8.4 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+63. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:63:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+64. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:65:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+65. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:63:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+66. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:65:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+67. no NAs anywhere in or far beyond the prior's support ('test-stability.R:74:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+68. no NAs anywhere in or far beyond the prior's support ('test-stability.R:74:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+69. no NAs anywhere in or far beyond the prior's support ('test-stability.R:74:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+70. no NAs anywhere in or far beyond the prior's support ('test-stability.R:74:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+71. no NAs anywhere in or far beyond the prior's support ('test-stability.R:74:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+72. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:87:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+73. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:87:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+74. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:87:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+75. the auto substep count is accurate, not merely stable ('test-stability.R:100:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+76. the auto substep count is accurate, not merely stable ('test-stability.R:101:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+77. the auto substep count is accurate, not merely stable ('test-stability.R:100:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+78. the auto substep count is accurate, not merely stable ('test-stability.R:101:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+══ Failed ══════════════════════════════════════════════════════════════════════
+── 1. Error ('test-enso-demean.R:116:3'): PRICED: the demean flag is still worth
+Error in `ccx_par_to_unc(md$par_mode)`: ccx_par_to_unc(): p lacks parameters this build fits: kz_deep_frac, hs_asx_frac, h_hs. It was written under a different parameter set -- bring it forward with ccx_migrate_par_set() first.
+Backtrace:
+    ▆
+ 1. └─global ccx_par_to_unc(md$par_mode) at test-enso-demean.R:116:3
+
+── 2. Error ('test-enso-split.R:236:3'): ccx_migrate_par_set reproduces the LEGA
+Error in `ccx_par_to_unc(mig)`: ccx_par_to_unc(): 1 parameter(s) lie OUTSIDE their transform's domain and encode to a non-finite value: kz_deep_frac = 1 (tr = logit). A value the model can RUN is not automatically a point of the FITTED space -- a migrated ancestor whose mechanism was OFF is the usual case. Seed the coordinate at its table init if you meant this vector as a START point; measure at it directly if you meant it as a vector to RUN.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_identical(ccx_par_to_unc(mig), ccx_par_to_unc(p_hand)) at test-enso-split.R:236:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_par_to_unc(mig)
+
+── 3. Error ('test-mode-decode.R:44:30'): the FIXTURE really is a mis-decoding f
+Error in `names(u) <- CCX_PARAM_NAMES`: 'names' attribute [29] must be the same length as the vector [26]
+
+── 4. Error ('test-mode-decode.R:61:30'): the band-blind idiom really is wrong, 
+Error in `names(u) <- CCX_PARAM_NAMES`: 'names' attribute [29] must be the same length as the vector [26]
+
+── 5. Failure ('test-mode-decode.R:75:3'): ccx_check_mode_decode ERRORS on a mis
+`ccx_check_mode_decode(md_overridden)` threw an error with unexpected message.
+Expected match: "does NOT decode to its own stored par_mode"
+Actual message: "this mode file was fitted on a DIFFERENT parameter set (26 names vs this build's 29), so 'does it decode to its own par_mode' is not a question this build can answer. Refit, or read it with ccx_mode_params()."
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_error(...) at test-mode-decode.R:75:3
+ 2. │ └─testthat:::quasi_capture(...)
+ 3. │   ├─testthat (local) .capture(...)
+ 4. │   │ └─base::withCallingHandlers(...)
+ 5. │   └─rlang::eval_bare(quo_get_expr(.quo), quo_get_env(.quo))
+ 6. └─global ccx_check_mode_decode(md_overridden)
+
+── 6. Error ('test-mode-decode.R:90:3'): the CANONICAL mode decodes cleanly -- i
+Error in `ccx_check_mode_decode(md)`: this mode file was fitted on a DIFFERENT parameter set (26 names vs this build's 29), so 'does it decode to its own par_mode' is not a question this build can answer. Refit, or read it with ccx_mode_params().
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_true(ccx_check_mode_decode(md)) at test-mode-decode.R:90:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_check_mode_decode(md)
+
+── 7. Failure ('test-mode-file.R:159:5'): every named mode is on disk and carrie
+Expected `md$param_names` to be identical to `CCX_PARAM_NAMES`.
+Differences:
+Lengths differ: 26 is not 29
+mode ent26 was fitted on a different parameter set
+
+── 8. Failure ('test-overlay-idiom-lint.R:102:3'): no NEW site copies a fitted s
+Expected `novel` to equal `character(0)`.
+Differences:
+Lengths differ: 2 is not 0
+these files copy a fitted set with a bare intersect() loop and are not in the 2026-09-02 baseline. Use ccx_overlay_par(p, pm), which migrates, copies, and asserts the overlay deleted nothing: diag_hilda28_basins.R, diag_hilda28_predictions.R
+
+── 9. Failure ('test-overlay-idiom-lint.R:122:3'): the occurrence count is a rat
+Expected `n` <= `OI_BASELINE_N`.
+Actual comparison: 63 > 61
+Difference: 2 > 0
+
+── 10. Error ('test-seas-lag-split.R:150:3'): ccx_migrate_par_set reproduces the
+Error in `ccx_par_to_unc(mig)`: ccx_par_to_unc(): 1 parameter(s) lie OUTSIDE their transform's domain and encode to a non-finite value: kz_deep_frac = 1 (tr = logit). A value the model can RUN is not automatically a point of the FITTED space -- a migrated ancestor whose mechanism was OFF is the usual case. Seed the coordinate at its table init if you meant this vector as a START point; measure at it directly if you meant it as a vector to RUN.
+Backtrace:
+    ▆
+ 1. ├─testthat::expect_identical(ccx_par_to_unc(mig), ccx_par_to_unc(p_hand)) at test-seas-lag-split.R:150:3
+ 2. │ └─testthat::quasi_label(enquo(object), label)
+ 3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 4. └─global ccx_par_to_unc(mig)
+  ... and 1 more
+
+
+Maximum number of 10 failures reached, some test results may be missing.
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+SUITE: pass 1992 fail 4 skip 4 warn 78
+                         file
+234        test-mode-decode.R
+240          test-mode-file.R
+250 test-overlay-idiom-lint.R
+252 test-overlay-idiom-lint.R
+                                                                  test failed
+234                ccx_check_mode_decode ERRORS on a mis-decoding file      1
+240 every named mode is on disk and carries THIS BUILD's parameter set      1
+250       no NEW site copies a fitted set with a bare intersect() loop      1
+252            the occurrence count is a ratchet that can only go down      1

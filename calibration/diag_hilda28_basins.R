@@ -25,7 +25,7 @@ mu <- c(tgm$slabs$target, tgd$target); sd_ind <- c(tgm$slabs$sd, tgd$sd)
 mk_v <- function(p, pmv) list(p = p, pm = pmv, luc_scale = pmv$luc_scale, bomb_total = pmv$bomb_total, sigma_d14c = pmv$sigma_d14c,
                               rep_dC = pmv$rep_dC, grad_off_co2 = pmv$grad_off_co2, grad_off_d13c = pmv$grad_off_d13c)
 v_of <- function(st) { pm <- st$par_mode; p <- ccx_apply_structure(ccx_default_params(), "hilda"); p$pump_mode <- st$pump_mode
-  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]; mk_v(ccx_set_enso(p, pm), pm) }
+  mk_v(ccx_overlay_par(p, pm), pm) }   # migrates, copies, asserts nothing deleted (the lint's idiom)
 with_obj <- function(mvn, block, expr) { o1 <- LIK_USE_D14C_PROFILE_MVN; o2 <- LIK_D14C_PROFILE_BLOCK
   assign("LIK_USE_D14C_PROFILE_MVN", mvn, envir = globalenv()); assign("LIK_D14C_PROFILE_BLOCK", block, envir = globalenv())
   on.exit({ assign("LIK_USE_D14C_PROFILE_MVN", o1, envir = globalenv()); assign("LIK_D14C_PROFILE_BLOCK", block <- o2, envir = globalenv()) }, add = TRUE)
