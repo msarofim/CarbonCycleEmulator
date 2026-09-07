@@ -2,6 +2,61 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-07 — ⛔ **THE HILDA REFIT CONVERGED, AND IT REJECTS THE STRUCTURE'S PREMISE: R1, R2, R3, R5 FAIL. Objective #9's correlation made a 50 ‰-too-young deep ocean cost 5 log-units.**
+
+Job `17072999`: **46/46 COMPLETED, exit 0, every task converged in cycle 2** (1–2 h each, not 4).
+`calibration/output/multistart_20260907_hilda28/` (+ `summary.csv`); scored by
+`calibration/diag_hilda28_predictions.R` and `diag_hilda28_basins.R` (logs + rds `_20260907`).
+
+**The landscape: 10 basins, one winner reached from 26 starts, and it is not the structure.**
+| basin (logpost) | n | f | K_deep | `hs_asx` | `h_ml` | profile A/B/deep | zA/zdeep (indep sd) | contrast z |
+|---|---|---|---|---|---|---|---|---|
+| **−1472.72** | 26 | **0.81** | 5566 | **0.220** | **44** | −112 / −123 / −134 | **+4.2 / +4.1** | +2.7 |
+| −1477.16 | 5 | 0.93 | 5526 | 0.238 | 150 | −115 / −126 / −137 | +4.0 / +3.8 | +2.7 |
+| −1511.67 | 8 | **0.006** | 86 | 0.377 | 37 | −186 / −197 / −199 | −1.3 / **−2.3** | +0.4 |
+| −1517 to −1536 | 7 | 0.007–0.010 | 60–69 | 0.44–0.55 | 184–200 | ~−190 / −200 / −200 | −1.5 / −2.4 | +0.3 |
+
+The winner keeps HILDA's conduit (declared) but sets **K nearly uniform (f 0.81), shuts the cold box's
+air–sea exchange to the box floor (0.22 vs the observational 0.653, −4.3 sd; R7 "not at a bound"
+passes by 2 %), collapses `h_ml` 134 → 44 m**, and leaves the whole interior **50 ‰ too young** (every
+level +4σ on the independent sds). The structural family (f ≈ 0.006, K_deep 60–86 — far BELOW
+HILDA's 465 and 09-06c's 309) gets the contrast right and the level 2σ too OLD, and is 39–63 worse.
+
+**Predictions** (`prereg_2026-09-07_hilda_refit_run.md`): **R1 FAIL** (f 0.81; factor 0.22),
+**R2 FAIL** (levels +3.6/+3.2/+3.1 on the bootstrap sds, contrast +2.7), **R3 FAIL** (`d14c_NH`
+−2.8), R4 PASS (−3.9 — but only because the winner is not structural; the structural family's
+pump-δ¹³C row is **−21.9**, the "artefact nuisances recover" claim FAILS there), **R5 FAIL** (gain
++22.9 < the row's own +28.9 — the entire advantage is the profile row; every other stream nets −6),
+R6 PASS (`kz` 6847, 21 % into the box), R7 PASS (by 2 %).
+
+**⭐⭐ THE MECHANISM, MEASURED (`diag_hilda28_basins.R`): the ranking FLIPS with the objective.**
+| likelihood (no prior) | #9-60 (as ruled) | independent rows (#8) | #9-30 |
+|---|---|---|---|
+| winner (f 0.81) | **−1436.5** (row −19.5, rest −1417.0) | −1451.6 (row −34.6) | −1437.3 |
+| `ent26` column, structure OFF | −1459.4 (row **−48.5**, rest **−1411.0**) | **−1431.3** (row −20.3) | −1450.2 |
+| structural (f 0.006) | −1468.3 (row −17.5, rest −1450.8) | −1465.8 | −1472.0 |
+
+Under #9 the winner beats `ent26` by 23; under the independent rows `ent26` beats it by 20. And it is
+the CORRELATION, not the wider bootstrap variances: with the rows' own sds on the diagonal and the
+0.98 correlation the winner's row is −16.7 (cheaper still), the column's −48.3; with the bootstrap
+variances and NO correlation, winner −27.3 / column −17.9. **A 0.98 correlation turns three level
+errors into one common-mode event: the winner's +50 ‰ common shift costs 15 log-units LESS than
+counted three times — and shape errors become expensive, which is why the column's row is −48.**
+That was the design's intent for the contrast; its flip side — the level collapsing to one datum —
+was not pre-registered, and it decided the survey. ⚠ [[verify_the_quantity_not_the_word]]: "the
+contrast row" was built as a contrast row; what it also did was DE-WEIGHT THE LEVEL 3×.
+
+**What the structural family pays for, per stream vs `ent26` (#9-60):** `ocean_grad_d13c` **−21.9**,
+`ocean_grad_dic` −6.0, `ocean_grad_alk` −5.8, `d14c_NH` −4.8, sink −2.2 — the PUMP'S GRADIENT ROWS:
+a deep K of 60–86 m²/yr under the pump overshoots every surface-deep gradient. The 09-06c estimate
+that the structure's unrecovered cost would be "−60 to −80, mostly CO₂ level and bomb" was wrong in
+both size and location.
+
+⛔ **Nothing adopted; `CCX_MODE_CANONICAL` stays `ent26`.** The survey falsifies the hypothesis
+that HILDA's structure at its declared values can hold the profile AND the rest — and it exposes an
+objective-#9 property that must be ruled on before any refit is read: see the handoff §3 for the
+tests (h_hs decoupled from h_ml; the exchange floor lowered; the level's weight under #9).
+
 ## 2026-09-06d (ii) — **THE RULING, THE AUDIT, AND THE LAUNCH PREP: 28 PARAMETERS, #9 ON, `kz` RE-BISECTED ON 36 BOXES**
 
 **Marcus ruled** on `prereg_2026-09-07_hilda_refit_design.md` §7: (1) objective #9 ON, 60° block;

@@ -1,0 +1,73 @@
+CCX_PROJ_DIR  /scratch/ms17839/CarbonCycleEmulator
+CCX_MS_OUTDIR /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260907_hilda28
+host cs603.hpc.nyu.edu  task 1  2026-09-06T17:49:35-04:00
+run-time inputs present: 1/1. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 180 (default 180)
+SEEDING ent_seas_amp_SH for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 10.9524.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the incumbent feasibility: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+NOTE the incumbent reference was FITTED under kz [3942.5, 6528], the shipped table is kz [1161.6, 27808].
+     Feasible, so it is a legal start; its own stored logpost is on a different scale.
+SEEDING ent_seas_amp_SH for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 10.9524.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the new basin feasibility: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+NOTE the new basin reference was FITTED under kz [3942.5, 6528], the shipped table is kz [1161.6, 27808].
+     Feasible, so it is a legal start; its own stored logpost is on a different scale.
+SEEDING ent_seas_amp_SH for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 10.9524.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the incumbent start: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+SEEDING ent_seas_amp_SH for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 10.9524.
+     The ancestor held no opinion about this coordinate.
+SEEDING kz_deep_frac for the new basin start: the migration filled 1 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.05.
+     The ancestor held no opinion about this coordinate.
+
+======================================================================
+DISPERSED MULTI-START, id 1, arm N, 28 parameters
+  host cs603.hpc.nyu.edu   R 4.5.1   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 180 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 1.0452, pooled over the 21 coordinates at least one of
+    them FITTED; over all 28 it would be 0.9052, diluted by the 7 migrated in BOTH:
+    gamma_enso_land_NH, gamma_enso_land_SH, gamma_enso_ocn_NH, gamma_enso_ocn_SH, ent_seas_amp_SH, kz_deep_frac, hs_asx_frac)
+  out /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260907_hilda28/start_001.rds
+======================================================================
+  structure: 'hilda' (hs_frac=0.16, u_hs=38, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253)
+start point: reference: INCUMBENT (08-30 landed), MIGRATED -- not a mode of this space (0 draws), log-post there = -2099.5623
+PORT GATE (a) at the incumbent reference point: here -2099.5623127133 vs MacBook-Pro-2.local@ce3d20b -2099.5623127148,
+              rel 7.10e-13 (tol 1e-08)
+PORT GATE (a) PASSED.
+measured 0.1522 s/eval (median of 5; range 0.1452-0.2163) => one 6000-eval restart
+  projects to 15.2 min; wall budget 180 min, of which 21.7 min is RESERVED for the
+  BFGS polish (100 iterations)
+[001] cycle 1 restart  1: log-post =   -1516.1739 (gain   583.3884) evals 6001  16.4 min
+[001] cycle 1 restart  2: log-post =   -1505.0720 (gain    11.1019) evals 12002  33.0 min
+[001] cycle 1 restart  3: log-post =   -1503.7430 (gain     1.3291) evals 18003  49.7 min
+[001] cycle 1 polish: log-post = -1472.7605 (gain 30.9824)
+[001] === cycle 1 total gain 626.8018 (log-post -1472.7605, 25424 evals, 72.3 min) ===
+[001] cycle 2 restart  1: log-post =   -1472.7605 (gain     0.0000) evals 31029  88.0 min
+[001] cycle 2 restart  2: log-post =   -1472.7605 (gain     0.0000) evals 34118  96.8 min
+[001] cycle 2 polish: SHORTENED to maxit 383 by the wall budget
+[001] cycle 2 polish: log-post = -1472.7605 (gain 0.0000)
+[001] === cycle 2 total gain 0.0000 (log-post -1472.7605, 34428 evals, 97.7 min) ===
+
+[001] FINAL log-post -1472.7605  (CONVERGED, 5 restarts, 34428 evals, 97.8 min)
+[001] eval rate 0.1291 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[001] PORT GATE (b) ordering: final -1472.7605 >= start -2099.5623. OK
+[001] for reference: the mode FILE stores -1547.1579; the difference from
+      this run's start value is objective drift, not a port defect.
+======================================================================
+done 2026-09-06T19:27:27-04:00

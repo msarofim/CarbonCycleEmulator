@@ -1,0 +1,56 @@
+
+=== HILDA REFIT (job 17072999): 46 starts, 10 distinct basins (2 dp) ===
+     logpost   n       f  K_deep  hs_asx       kz   h_ml
+    -1472.72  20  0.8131    5567   0.220     6846   43.9
+    -1472.76   6  0.8088    5562   0.220     6877   40.2
+    -1477.16   5  0.9341    5526   0.238     5916  150.4
+    -1511.67   7  0.0063      86   0.377    13719   37.3
+    -1511.98   1  0.0063      85   0.376    13454   43.8
+    -1517.57   1  0.0097      69   0.547     7077  199.6
+    -1519.91   3  0.0077      60   0.455     7859  190.4
+    -1519.92   1  0.0074      60   0.440     8108  184.4
+    -1535.83   1  0.0092      67   0.551     7231  199.6
+    -1557.43   1  0.8172    5586   0.220     6836   47.0
+
+BEST: id 12, logpost -1472.7229
+  kz_deep_frac       0.8129  prior_z  +0.89
+  hs_asx_frac        0.2198  prior_z  -2.29
+  kz              6847.2869  prior_z  -0.79
+  h_ml              43.8916  prior_z  -1.39
+  k_w             2175.5475  prior_z  +0.93
+  tau_ex             0.9084  prior_z  -1.43
+  pump_grad        353.3299  prior_z  +1.66
+  q10                1.1450  prior_z  -2.23
+  beta_max           0.6243  prior_z  -0.81
+  fert_k           253.6032  prior_z  -1.19
+  npp_frac_NH        0.6018  prior_z  +0.08
+  K_deep = f * kz = 5566.2 m2/yr (HILDA's K0 465)
+  |prior_z| > 2: q10 -2.23, hs_asx_frac -2.29, sst_seas_amp_NH -3.08, rep_dC +2.77
+
+  likelihood: best -1436.50 vs ent26 -1459.41  => +22.91;  profile row alone: +28.92
+  per-stream delta (best - ent26), |delta| > 1:
+    co2_seasonal_SPO            +1.29   (ent26     68.56)
+    d13c_seasonal_MLO           +3.62   (ent26    212.03)
+    co2_icecore                 -2.81   (ent26   -682.44)
+    d13c_level_MLO              +2.49   (ent26     73.10)
+    d13c_level_SPO              -1.10   (ent26     69.66)
+    d14c_NH                     -2.84   (ent26   -283.64)
+    d14c_profile_mvn           +28.92   (ent26    -48.45)
+    ocean_grad_dic              -2.44   (ent26     -4.30)
+    ocean_grad_d13c             -3.89   (ent26      1.20)
+    gcb_ocean_sink              +1.33   (ent26     -6.38)
+
+  profile: best A -112.5 B -123.0 deep -133.6  z +3.58/+3.21/+3.10  contrast z +2.71   (ent26: -125.9/-140.7/-156.1, contrast z +3.90)
+  HS -99.9 / HD -109.2 permil;  sink 3.12 (z7 -0.19) vs ent26 3.07 (z7 -0.32);  bomb z NH/SH +2.17/+1.43 vs +2.17/+1.42
+
+  PREDICTIONS (prereg_2026-09-07_hilda_refit_run.md):
+  R1 f < 0.3 and hs_asx within 2 sd (0.10) of 0.653, in [0.45, 0.85]: f 0.813, factor 0.220 (-4.33 sd)  -> FAIL
+  R2 profile levels and contrast inside 1 sigma: +3.58/+3.21/+3.10, contrast +2.71  -> FAIL
+  R3 sink and bomb streams within 2 of ent26: sink +1.33, d14c_NH -2.84, d14c_SH +0.16  -> FAIL
+  R4 pump-d13C gradient row within 5: -3.89  -> PASS
+  R5 likelihood gain +22.91 exceeds the profile row's own +28.92  -> FAIL
+  R6 kz interior (> 5% from each bound): kz 6847 at 21.3% of [1161.6, 27808]  -> PASS
+  R7 hs_asx_frac not at a bound [0.2, 2]: 0.220  -> PASS
+
+  ⛔ Nothing adopted. Promotion is Marcus's call.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/hilda28_predictions_20260907.rds

@@ -34,3 +34,18 @@ caveats; (3) `h_hs` **declared** (follows `h_ml`); (4) `hs_asx_frac`'s observati
 - The `kz` bracket is a support at fixed f; R6 tests it.
 - A refit's port gate compares against targets measured on the Mac at THIS commit and structure.
 - 09-06d audit: the R-path `ccx_run()` ocean inventory excluded HS/HD (fixed; the objective's C++ path never did).
+
+## SCORED 2026-09-07 (job 17072999, 46/46 converged) — `calibration/diag_hilda28_predictions.R`
+| | result | verdict |
+|---|---|---|
+| R1 | f **0.813**, `hs_asx_frac` **0.220** (−4.3 sd from 0.653; outside [0.45, 0.85]) | **FAIL** — and not the registered "u_hs absorbing" reading: the fit SHUT the exchange and flattened K |
+| R2 | levels +3.6 / +3.2 / +3.1 (bootstrap sds), contrast +2.7 | **FAIL** |
+| R3 | sink +1.3, `d14c_NH` **−2.8**, `d14c_SH` +0.2 | **FAIL** |
+| R4 | pump-δ¹³C row −3.9 | PASS (winner); the structural family is at −21.9 |
+| R5 | gain +22.9 vs the row's own +28.9 | **FAIL** — the whole gain is the row |
+| R6 | `kz` 6847, 21 % into [1161.6, 27808] | PASS |
+| R7 | 0.220 in [0.2, 2] | PASS by 2 % — effectively at the floor |
+
+**Unregistered property that decided the run:** #9's 0.98 correlation prices a COMMON level shift
+as one event (winner's +50 ‰: −19.5 vs −34.6 independent) and shape errors dearly (`ent26`: −48.5
+vs −20.3). The ranking `ent26` vs winner flips with the objective. See CHANGELOG 2026-09-07.
