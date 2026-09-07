@@ -2,6 +2,57 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-07d — ⭐⭐ **THE GRADIENT ROWS DIVIDED BY THE WRONG AREA (every HILDA-arm DIC/ALK gradient read 16 % low — FIXED, mutation-tested, round 2 re-scored); THE HS END-MEMBER PROBED AGAINST GLODAP'S HIGH-LATITUDE SURFACE: its DIC is RIGHT (2169 = cold equilibrium = the observed Southern-Ocean surface 2163), the DEEP below it lacks +116 to +185 µmol/kg — the "preformed end-member" option is REFUTED by the data, an HS pump's pre-check closes the gap at the observed magnitude. Options note for the ruling.**
+
+**The bug (found by reading the row code before pricing a mechanism).** `ccx_model_ocean_gradient()` and the
+ALK steady solve (`ccx_steady_profile_from_source()`, `ccx_model_ocean_alk_gradient()`) converted GtC → µmol/kg
+over the hemisphere area `a_oc`; the ML and interior boxes have spanned `a_ls = a_oc·(1 − hs_frac)` since
+2026-09-05. Identity at `hs_frac` 0, so ent26 and every test were exact and NOTHING FAILED; at 0.16 the DIC and
+ALK gradients were read 16 % low (δ¹³C is a ratio — exact). Same defect in `dg_gateG()`'s ML concentration and
+observed-inventory mass. Fixed with `ccx_column_area()` (falls back to `a_oc` when `a_ls` is absent);
+`tests/testthat/test-ocean-grad-area.R` — **3/3 fail on a scratch copy with the helper reverted, 3/3 pass on the
+fix**. Pre-fix scoring → `outputs/quarantine/20260907_grad_area_a_oc/` (README with the impact table); re-scored to
+the canonical names. **Impact at the round-2 winner: `ocean_grad_dic` −6.05 → −3.96, `ocean_grad_alk` −7.06 →
+−13.80 (the true ALK gradient is LARGER, so further from the observed +78.6), rest-of-likelihood −43.1 → −47.8;
+all eight verdicts unchanged.** The 09-07c "DIC 118 vs 221 / ALK 156 vs 95" were deflated reads (÷0.84 ⇒ ~140 /
+~186). ⚠ The fits of rounds 1 and 2 were optimised against the deflated rows — `pump_grad` at +3.2 prior-z is
+partly the optimiser compensating a 16 % smaller DIC gradient; only a refit under the corrected rows says how far
+the optimum moves. ⚠ A conversion that is the IDENTITY at the shipped default is untested where it matters —
+the same family as the `gamma_diff = 0` out-of-bounds read ([[default_off_hides_the_bug]]).
+
+**The probe (`calibration/diag_hs_endmember_probe.R`, log + rds `hs_endmember_probe_20260907`).** GLODAPv2.2023
+bottles (flag 2, ≤ 50 m surface, > 2000 m deep, |lat| ≥ 55 high, < 45 low; medians GENERATED in-script):
+
+| | LO surface | HI surface NH / SH | deep |
+|---|---|---|---|
+| DIC obs | 2017 | 2069 / **2163** | **2279** |
+| DIC model, winner (2008) | 2042 / 2058 (ML) | **2169 / 2169** (HS) | HD 2191 / 2194; bottom **2179 / 2183** |
+| DIC model, ent26 | 2043 / 2059 | – | 2255 / 2272 |
+| δ¹³C obs | +1.36 | **+1.31** | **+0.44** |
+| δ¹³C model, winner | +1.29 / +1.52 | **+1.88 / +2.04** | HD +1.72 / +1.87; bottom +1.88 / +2.03 |
+
+Contrasts: obs HI−LO DIC **+77 (SH +146)**, deep−HI **+185 (deep − SH surface +116)**, deep−LO +262; model winner
+HS−ML **+120**, bottom−HS **+12**, bottom−ML +131. δ¹³C: obs HI−LO −0.05, deep−HI **−0.87**; model HS−ML **+0.56**,
+bottom−HS **0.00**. **The model's HS DIC equals full air–sea equilibrium at `sst_hs` (2169, computed) and equals
+the observed Southern-Ocean surface.** So the end-member's DIC is not wrong; what is missing is the enrichment of
+the deep BELOW it — remineralised carbon in HS-derived water, +116 to +185 µmol/kg and −0.87 ‰ observed against
++12 and 0.00 in the model. HS δ¹³C is 0.6 ‰ too HEAVY (cold-equilibrium fractionation with no light upwelled
+carbon under it), the same statement in the isotope. Equilibration at the winner (thickness cancels, ratio 5.5):
+τ_res = `h_hs`/`u_hs` 10.5 yr, τ_DIC 4.8 yr (69 % equilibrated per pass), τ_iso 58 yr (15 %).
+
+**⇒ Option (b), a preformed-DIC/δ¹³C end-member for HS, is REFUTED as the fix: the observation puts the HS
+surface where the model already has it.** Option (a), an HS pump, has a pre-check that closes without tuning:
+an HS export at the LS pump's per-area rate (63 gC m⁻² yr⁻¹ at ent26's 19.1 GtC/yr ⇒ **3.64 GtC/yr** over
+`a_hs`) remineralised into HD, against the `u_hs` flush (38 m/yr × 5.78e13 m²), enriches HD by **+135 µmol/kg**
+(at a real-ocean 10 GtC/yr LS export: 1.90 GtC/yr ⇒ +70) — inside the observed +116 to +185. Design options,
+costs and the recommended protocol: `notes/options_2026-09-07d_hs_biology.md`. ⛔ Nothing adopted; the ruling is
+Marcus's. ⚠ Owed regardless: the pump and ALK solves should include the conduit (and any HS limb) in their
+operator — with the corrected rows ALK is now the second-largest loss.
+
+Memory: `INDEX_ccx_ocean_struct` was at 17.3 KB of 18 — SPLIT: circulation limbs / Fix B / the ocean's ENSO
+response / older candidates → new `INDEX_ccx_ocean_circ.md` (6.9 KB); `_struct` 13.4 KB; 40 links before and
+after, no orphans; registered in `MEMORY.md` and FaIRtoFrEDI `CLAUDE.md`.
+
 ## 2026-09-07c — ⭐⭐ **ROUND 2 CONVERGED: THE STRUCTURE NOW HOLDS THE Δ¹⁴C PROFILE (R1, R2, R6, R8 PASS) — AND BREAKS THE DIC / δ¹³C GRADIENTS (R3, R4, R5, R7 FAIL). The conduit's high-latitude water has no biology.**
 
 Job `17110417`: 46/46 COMPLETED, all converged. `calibration/output/multistart_20260907b_hilda29/`;
@@ -21,6 +72,8 @@ prior-z +3.2). Second family (13 starts, −1516.8): f 0.022, factor 0.70, `h_ml
 | R3 | sink and bomb within 2 of `ent26` | sink −0.8, `d14c_NH` **−4.1**, SH +1.1 | FAIL |
 | R4 | pump gradient rows within 5 each | δ¹³C **−27.6**, DIC −6.1, ALK −7.1 | FAIL |
 | R5 | gain exceeds the profile rows' own | +188 vs rows +231 ⇒ rest **−43** | FAIL |
+
+⚠ **2026-09-07d: the R4 DIC and ALK values and the −43 above were read under the AREA BUG (rows divided by `a_oc`, not `a_ls`); corrected: DIC −3.96, ALK −13.80, rest −47.8; verdicts unchanged. The "DIC 118 / ALK 156" below are deflated by 0.84. See 2026-09-07d.**
 | R6 | `kz` interior | 40 % | PASS |
 | R7 | `h_ml` back to 60–180, `h_hs` interior | **37 m**; 399 (79 %) | FAIL |
 | R8 | unimodal top | 28 starts, no rival within 5 | PASS |

@@ -977,6 +977,20 @@ ccx_ocean_sigma_eff <- function(row, h_ml) {
 #'   dg_export_field()'s output (GtC/yr, or mol-equivalents/yr for alkalinity).
 #' @return numeric, concentration DIFFERENCE from the mixed layer for each
 #'   interior box, in umol/kg. Element `nl` is the bottom box, i.e. the gradient.
+#' The area the LOW-LATITUDE column occupies, per hemisphere (2026-09-07d).
+#'
+#' Since the HILDA boxes (2026-09-05) the mixed layer and the interior boxes
+#' hold carbon over `a_ls = a_oc * (1 - hs_frac)`, not over the hemisphere
+#' total `a_oc` (R/model.R, `ml_mass_kg`, the pump's kappa, the conduit). Every
+#' GtC -> umol/kg conversion of a column box must divide by THIS area. The three
+#' gradient rows divided by `a_oc` until 2026-09-07d, so at hs_frac 0.16 every
+#' HILDA-arm DIC and ALK gradient was read 16 percent low (d13C, a ratio, was
+#' not). Falls back to `a_oc` for an aux built before `a_ls` existed, where the
+#' two are identical by construction.
+ccx_column_area <- function(aux, hemi) {
+  if (!is.null(aux$a_ls)) aux$a_ls[[hemi]] else aux$a_oc[[hemi]]
+}
+
 ccx_steady_profile_from_source <- function(S, p, aux, grid, hemi) {
   nl <- grid$nl
   stopifnot(length(S) == nl)
@@ -984,7 +998,7 @@ ccx_steady_profile_from_source <- function(S, p, aux, grid, hemi) {
   Fi <- numeric(nl)
   Fi[nl] <- -S[nl]
   for (k in seq.int(nl - 1L, 1L)) Fi[k] <- Fi[k + 1L] - S[k]
-  kappa <- aux$a_oc[[hemi]] * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
+  kappa <- ccx_column_area(aux, hemi) * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
   # cc[k+1] = cc[k] - F[k] dz_mid[k] / K_k, in GtC/m; /kappa/1e-6 -> umol/kg.
   # K_k is the interface's own diffusivity (2026-09-06b); uniform kz before.
   kzv <- if (is.null(aux$kz_int)) rep(p$kz, nl) else aux$kz_int
@@ -1015,7 +1029,7 @@ ccx_model_ocean_alk_gradient <- function(spin, pump = NULL) {
   for (h in HEMIS) {
     S <- LIK_ALK_PER_CARB * pump$S_carb[[h]] - LIK_ALK_NC_RATIO * pump$S_org[[h]]
     g <- ccx_steady_profile_from_source(S, p, aux, grid, h)[grid$nl]
-    m <- aux$a_oc[[h]] * grid$dz[grid$nl + 1L] * ccx_const("RHO_SEAWATER")
+    m <- ccx_column_area(aux, h) * grid$dz[grid$nl + 1L] * ccx_const("RHO_SEAWATER")
     num <- num + g * m; den <- den + m       # mass-weighted, as the obs is
   }
   num / den
@@ -1037,10 +1051,11 @@ ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
   if (!all(CCX_OCEAN_BOX_COLS %in% names(out))) return(NULL)
   at <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
   rho <- ccx_const("RHO_SEAWATER")
-  # kg of seawater in each hemisphere's ML and bottom box
+  # kg of seawater in each hemisphere's ML and bottom box -- over the LOW-
+  # LATITUDE column's area (ccx_column_area), which is what the boxes span.
   mass <- lapply(HEMIS, function(h)
-    c(ml = aux$a_oc[[h]] * grid$dz[1] * rho,
-      deep = aux$a_oc[[h]] * grid$dz[length(grid$dz)] * rho))
+    c(ml = ccx_column_area(aux, h) * grid$dz[1] * rho,
+      deep = ccx_column_area(aux, h) * grid$dz[length(grid$dz)] * rho))
   names(mass) <- HEMIS
   lay <- function(which, tt) {
     C   <- sum(vapply(HEMIS, function(h) at(paste0(which, "_C_",   h), tt), numeric(1)))

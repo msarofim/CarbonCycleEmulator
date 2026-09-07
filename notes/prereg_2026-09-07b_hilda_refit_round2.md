@@ -36,3 +36,6 @@ R1 PASS (f 0.009, factor 0.507), R2 PASS (−1.32 / +1.40 / +0.42), **R3 FAIL** 
 (δ¹³C −27.6, DIC −6.1, ALK −7.1), **R5 FAIL** (+188 vs rows +231; rest −43), R6 PASS, **R7 FAIL** (`h_ml` 37),
 R8 PASS (28 starts). The structure holds the Δ¹⁴C profile and breaks the DIC/δ¹³C gradients: the conduit's
 HS water has no biology (export 57 GtC/yr cannot rebuild a gradient it flushes). CHANGELOG 2026-09-07c.
+
+**RE-SCORED 2026-09-07d under the corrected gradient rows** (the rows had divided by `a_oc`, not `a_ls` — CHANGELOG 2026-09-07d):
+R4 δ¹³C −27.56, DIC **−3.96**, ALK **−13.80** (still FAIL); R5 +183.5 vs rows +231.3, rest **−47.8** (FAIL). Every other verdict unchanged.

@@ -34,3 +34,8 @@ not the cause); `ent26`'s 19 GtC/yr export vs ~10 observed is an unpriced pre-ex
 Torch: nothing running. Objective #10 ON (β 4, level σ 10.26), table 29 parameters, `hs_asx_frac`
 floor 0.02. Two mode-file tests fail on purpose (no 29-name canonical). `INDEX_ccx_ocean_struct` at
 ~17.3 KB — SPLIT next session (hard 18 KB).
+
+## ADDENDUM 2026-09-07d — the DIC/ALK numbers above were read under a bug
+The gradient rows divided by `a_oc` instead of `a_ls`; at `hs_frac` 0.16 the DIC and ALK gradients (118, 156) and their
+stream losses (−6.1, −7.1) are 16 % deflated reads. Corrected (CHANGELOG 2026-09-07d): DIC −3.96, ALK **−13.80**, rest **−47.8**;
+verdicts unchanged; δ¹³C −27.6 exact. Option (b) of §3 is REFUTED by the end-member probe; see `handoff_2026-09-07d_*`.

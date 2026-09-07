@@ -1024,14 +1024,18 @@ dg_gateG <- function(v, obs) {
                           bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
   st <- ccx_run_fast(sp, F)$state
   rho <- ccx_const("RHO_SEAWATER")
+  # Over the LOW-LATITUDE column's area: the ML box spans a_ls, not a_oc, once
+  # the HILDA boxes are on (2026-09-07d; read 16 percent low before).
   ml <- function(y, h) y[aux$idx[[h]]$ml, "C"] * aux$mol_per_GtC /
-          (aux$a_oc[[h]] * grid$dz[1] * rho) * 1e6
+          (ccx_column_area(aux, h) * grid$dz[1] * rho) * 1e6
   # AREA-WEIGHTED, because the observation is a global volume-weighted mean and
   # the two hemispheres differ by ~15 umol/kg (the model's solubility pump).
   aw <- function(y) (ml(y, "NH") * aux$a_oc$NH + ml(y, "SH") * aux$a_oc$SH) /
           (aux$a_oc$NH + aux$a_oc$SH)
   ix   <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$ml, aux$idx[[h]]$oc)))
-  mass <- (aux$a_oc$NH + aux$a_oc$SH) * grid$dz * rho
+  # the OBSERVED profile integrated over the same column area the model's `inv`
+  # spans (ml + oc boxes = the low-latitude column); a_oc before 2026-09-07d.
+  mass <- (ccx_column_area(aux, "NH") + ccx_column_area(aux, "SH")) * grid$dz * rho
   list(year = yr, surf = aw(st), surf_1750 = aw(sp$y),
        surf_NH = ml(st, "NH"), surf_SH = ml(st, "SH"),
        inv = sum(st[ix, "C"]), inv_1750 = sum(sp$y[ix, "C"]),

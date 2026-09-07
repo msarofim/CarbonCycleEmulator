@@ -1,0 +1,53 @@
+
+=== HILDA REFIT ROUND 2 (job 17110417): 46 starts, 5 basins ===
+ logpost  n id        f K_deep    asx   h_ml  h_hs    kz
+   -1508 28 44 0.008632  101.0 0.5066  37.10 398.5 11706
+   -1509  2 32 0.008710  100.0 0.5080  43.78 394.7 11483
+   -1517 13 12 0.021811  133.5 0.7017 199.63 311.3  6121
+   -1521  2  2 0.018259  120.3 0.6439 190.96 312.3  6587
+   -1521  1 24 0.017285  117.2 0.6306 185.17 315.8  6780
+
+BEST: id 44, logpost -1508.2405
+  kz_deep_frac       0.0086  prior_z  -2.68
+  hs_asx_frac        0.5066  prior_z  -0.69
+  h_hs             398.5562  prior_z  +0.80
+  kz             11705.7577  prior_z  -0.26
+  h_ml              37.1025  prior_z  -1.73
+  k_w             1783.1185  prior_z  +0.43
+  tau_ex             0.9192  prior_z  -1.39
+  pump_grad        524.3041  prior_z  +3.24
+  q10                1.1521  prior_z  -2.21
+  beta_max           0.6932  prior_z  -0.74
+  fert_k           292.3396  prior_z  -1.09
+  |prior_z| > 2: q10 -2.21, kz_deep_frac -2.68, pump_grad +3.24, sst_seas_amp_NH -2.95, rep_dC +3.38
+
+  logpost    id |       A       B    deep |  z_lev   z_AB   z_BD |      HS      HD |      lik   d_lik  d_rows  d_rest |  sink    z7
+  -1508.24   44 |  -179.4  -189.6  -191.0 |  -1.32  +1.40  +0.42 |  -118.3  -138.4 |  -1464.4  +188.2  +231.3   -43.1 |  3.01 -0.48
+  -1509.02   32 |  -179.6  -189.8  -191.2 |  -1.34  +1.40  +0.42 |  -118.4  -138.6 |  -1465.6  +187.0  +231.2   -44.2 |  3.01 -0.47
+  -1516.78   12 |  -177.6  -187.4  -188.8 |  -1.11  +1.23  +0.44 |  -111.4  -136.0 |  -1469.0  +183.6  +232.8   -49.2 |  3.07 -0.34
+  -1520.64    2 |  -179.5  -189.5  -190.8 |  -1.31  +1.30  +0.42 |  -114.7  -138.2 |  -1475.0  +177.6  +231.8   -54.2 |  3.07 -0.33
+  -1520.94   24 |  -179.9  -189.8  -191.2 |  -1.34  +1.32  +0.42 |  -115.3  -138.6 |  -1475.6  +177.0  +231.6   -54.6 |  3.07 -0.34
+  ent26 OFF   - |  -125.9  -140.7  -156.1 |  +3.14  +3.44  +3.90 |      NA      NA |  -1652.6    +0.0    +0.0    +0.0 |  3.07 -0.32
+
+  best vs ent26, per stream, |delta| > 1.5:
+    d13c_seasonal_MLO           +2.72   (ent26    212.03)
+    d14c_NH                     -4.10   (ent26   -283.64)
+    d14c_profile_level         +47.27   (ent26    -51.87)
+    d14c_profile_ab            +67.98   (ent26    -71.51)
+    d14c_profile_bd           +116.06   (ent26   -118.24)
+    ocean_grad_dic              -6.05   (ent26     -4.30)
+    ocean_grad_d13c            -27.56   (ent26      1.20)
+    ocean_grad_alk              -7.06   (ent26     -4.24)
+
+  PREDICTIONS (prereg_2026-09-07b_hilda_refit_round2.md):
+  R1 f < 0.3, hs_asx in [0.45, 0.85] and > 1.5x floor: f 0.009, factor 0.507 (-1.46 sd of 0.653 at sd 0.10)  -> PASS
+  R2 level, A-B, B-deep inside 2 sigma: -1.32 / +1.40 / +0.42  -> PASS
+  R3 sink and bomb within 2 of ent26: sink -0.77, d14c_NH -4.10, d14c_SH +1.13  -> FAIL
+  R4 pump gradient rows within 5 each: d13c -27.56, dic -6.05, alk -7.06  -> FAIL
+  R5 likelihood gain +188.18 exceeds the profile rows' own +231.31  -> FAIL
+  R6 kz interior: 11706 at 39.6% of [1161.6, 27808]  -> PASS
+  R7 h_ml in [60, 180] and h_hs interior: h_ml 37.1, h_hs 398.6 (79% of [20, 500])  -> FAIL
+  R8 unimodal top: best from 28 starts (>= 10), basins within 5: 2, max |df| 0.000  -> PASS
+
+  ⛔ Nothing adopted. Promotion is Marcus's call.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/hilda29_predictions_20260907.rds

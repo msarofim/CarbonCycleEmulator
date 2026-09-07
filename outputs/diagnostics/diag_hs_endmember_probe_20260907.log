@@ -1,0 +1,34 @@
+
+=== GLODAPv2.2023 bottles, flag 2, surface <= 50 m, deep > 2000 m, HI |lat| >= 55, LO |lat| < 45 ===
+  row          median     mean     sd      n     yr
+  dic_hi      2094.00  2068.93 111.33  22194   2008
+  dic_hi_NH   2069.25  2043.72 111.66  17494   2008
+  dic_hi_SH   2163.20  2162.76  30.82   4700   2008
+  dic_lo      2017.20  2013.58  67.74  31344   2009
+  dic_deep    2279.30  2271.43  63.79  91754   2008
+  talk_hi     2256.10  2217.62 122.83  25697   2007
+  talk_lo     2309.00  2305.90  67.14  37153   2007
+  talk_deep   2371.30  2374.87  40.88 103378   2008
+  d13c_hi        1.31     1.29   0.39   1040   2011
+  d13c_lo        1.36     1.36   0.35   2219   1996
+  d13c_deep      0.44     0.47   0.37   8007   2003
+  => observed HI - LO surface DIC +77 (SH +146); deep - HI +185; deep - LO +262 umol/kg
+  => observed HI - LO surface d13C -0.05; deep - HI -0.87; deep - LO -0.92 permil
+
+=== MODEL BOXES at 2008 (the DIC bottles' median year); umol/kg and permil; NH / SH ===
+  arm                    |        ML DIC        HS DIC        HD DIC    bottom DIC |     ML d13C     HS d13C     HD d13C    bot d13C | HS eq. DIC @sst_hs
+  ent26 OFF              |   2043/  2059     NA/    NA     NA/    NA   2255/  2272 | +1.11/+1.37    NA/   NA    NA/   NA +0.41/+0.64 |   2169 (ML eq   2054)
+  basin -1508.24 (n 28)  |   2042/  2058   2169/  2169   2191/  2194   2179/  2183 | +1.29/+1.52 +1.88/+2.04 +1.72/+1.87 +1.88/+2.03 |   2169 (ML eq   2054)
+  basin -1509.02 (n 2)   |   2041/  2058   2169/  2169   2191/  2195   2179/  2184 | +1.29/+1.52 +1.88/+2.04 +1.72/+1.87 +1.88/+2.03 |   2169 (ML eq   2054)
+  OBS (median)           |     2017 (LO)   2069/  2163             -   2279 (deep) |  +1.36 (LO)  +1.31 (HI)           - +0.44 (deep) |
+
+  READ IT AS: HS DIC vs the HI row (is the end-member's DIC too low?); HS d13C vs the HI row (is it too heavy?);
+  HS eq. DIC = full air-sea equilibrium at sst_hs with ALK_SURFACE -- HS above it means upwelled/undegassed water, below it means over-stripped.
+  d13C bottles are Suess-shifted and centred later than the DIC bottles; compare CONTRASTS (HI - LO, deep - HI) before levels.
+  ent26 OFF              model contrasts: HS-ML DIC     NA  bot-HS DIC     NA  bot-ML DIC   +212 | HS-ML d13C    NA  bot-HS d13C    NA  bot-ML d13C -0.72
+  basin -1508.24 (n 28)  model contrasts: HS-ML DIC   +120  bot-HS DIC    +12  bot-ML DIC   +131 | HS-ML d13C +0.56  bot-HS d13C -0.00  bot-ML d13C +0.55
+  basin -1509.02 (n 2)   model contrasts: HS-ML DIC   +120  bot-HS DIC    +12  bot-ML DIC   +132 | HS-ML d13C +0.55  bot-HS d13C -0.00  bot-ML d13C +0.55
+  GLODAP                 obs   contrasts: HI-LO DIC    +77  deep-HI DIC   +185  deep-LO DIC   +262 | HI-LO d13C -0.05  deep-HI d13C -0.87  deep-LO d13C -0.92
+
+  ⛔ Nothing adopted; a probe for the design ruling.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/hs_endmember_probe_20260907.rds
