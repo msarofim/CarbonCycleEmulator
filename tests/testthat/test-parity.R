@@ -127,8 +127,13 @@ test_that("multi-decade trajectories agree to roundoff", {
   # each implementation, positionally named from CCX_OCEAN_BOX_COLS on the C++
   # side, and the ocean gradient likelihood terms read them. A transposed pair
   # here would be invisible to every gate above, so they get their own.
-  for (cc in CCX_OCEAN_BOX_COLS)
+  for (cc in CCX_OCEAN_BOX_COLS) {
+    # hs_* columns are NA on BOTH sides with the HILDA boxes off (the box does
+    # not exist, 2026-09-07f); their structure-ON parity is asserted in
+    # test-hs-surface-rows.R.
+    if (all(is.na(rR$out[[cc]])) && all(is.na(rC$out[[cc]]))) next
     expect_lt(max(abs(rR$out[[cc]] - rC$out[[cc]])) / max(abs(rR$out[[cc]])), 1e-13)
+  }
   # ...and they must actually differ from each other, or a column-order bug that
   # filled all four with the same box would pass the line above.
   expect_gt(abs(rC$out$deep_C_NH[1] - rC$out$ml_C_NH[1]), 1)

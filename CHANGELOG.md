@@ -2,6 +2,49 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-07f — ⭐⭐ **ROUND 3 PREPARED (Marcus: literature prior, scored HS-surface rows, sweep, launch): `pump_hs_gcm2` gets a LOGNORMAL LITERATURE PRIOR (median 22.9 gC m⁻² yr⁻¹, Liniger 2025 / Arteaga 2019); OBJECTIVE #11 = the HS-surface DIC (SH 2163) and δ¹³C (+1.31) rows, scored at their epochs off NEW hs_* columns in both cores; the pre-launch sweep found the rows WEAK by construction and a NaN-guard regression the new columns would have caused.**
+
+**The prior** (`data-raw/build_hs_export_prior.R` → `data/obs_hs_export_prior.rds`): the polar-Antarctic-zone float export,
+Liniger et al. 2025 (GBC, 10.1029/2024GB008193; SO south of 30 °S total 2.69 ± 1.23 PgC/yr; PAZ 2.01 molC m⁻² yr⁻¹
+from DO changes over 100–500 m) and Arteaga et al. 2019 (GBC, 10.1029/2019GB006236; PAZ 1.80): median **22.9 gC m⁻²
+yr⁻¹**, log-sd 0.6 (2.5–97.5 %: 7–74), the width carrying the NH half of the box and the export horizon. The
+probe's observation-matched 60 sits at **+1.6σ** — the prior and the deep gradients will disagree, and that is the
+finding to read (prereg R10). `CCX_PARAM_TABLE$pump_hs_gcm2` init 22.9 (literal, tied to the product by test),
+prior read lazily (`ccx_hs_export_prior()`; the table is built before `R/paths.R` is sourced).
+
+**Objective #11** (`LIK_USE_HS_SURFACE`; `data-raw/build_hs_surface_targets.R` → `data/obs_hs_surface.rds`): `hs_surf_dic`
+= the SH high-latitude surface (|lat| ≥ 55, ≤ 50 m, flag 2) median **2163** at epoch 2008 — SH only, because the NH
+(2069) differs by ~94 µmol/kg of alkalinity/freshwater the model does not represent (C8); `hs_surf_d13c` = both
+hemispheres, **+1.31** at 2011. σ = sd(cluster means)/√n_clusters (clusters = year × 10° lon: 197 / 134) and
+σ_eff = √(σ² + sd_cluster²) = **24.0 µmol/kg / 0.31 ‰**, one cluster's worth of representation error, derived not
+typed. Model side: NEW `hs_C_*`, `hs_C13_*` in `CCX_OCEAN_BOX_COLS` (6 per hemisphere; C++ `out` 19 → 23, NA with
+the structure off; R path likewise; `ncol` asserted in `ccx_run_fast()`), `ccx_model_hs_surface()` at each row's own
+epoch (rows ABSENT with a warning if the run ends before it), `ccx_hs_surface_scored()` riding in the
+`ocean_grad` bundle (built BEFORE the gradient target's own absence returns), `sd_eff` required loudly.
+`tests/testthat/test-hs-surface-rows.R` (flag, product, columns R == C++, rows absent/present, values recomputed,
+mutation via the HS pump). At the round-2 winner the two rows cost **6.1** (HS δ¹³C +1.96 is 2.1σ heavy) and move the
+probe's scan optimum not at all (still 60 gC m⁻² yr⁻¹, +16.3; `diag_hs_pump_probe_20260907_obj11.log`).
+
+**⚠ What the NEW COLUMNS did, caught by parity.** With the structure off the hs_* columns are NA by contract, and
+`ccx_run_fast()`'s NaN-retry guard (`anyNA(r$out)`) read them as a blow-up and doubled the substeps to
+`CCX_SUBSTEPS_MAX` on EVERY structure-off run — R-vs-C++ parity broke at 1e-4 and looked like physics. Bisected by
+file group (stash), fixed with `ccx_out_na_guard_cols()` (physics columns only when the boxes are off); the same
+guard now serves `test-stability.R` and `test-ocean-advection.R`. ⇒ **A column that is NA by contract must be
+excluded from every NaN guard by NAME — an `anyNA(out)` is a gate whose scope changed under it.**
+
+**The pre-launch sweep (subagent, read-only) — acted on:** stale `port_targets.csv` (29 par) — re-cut at the launch
+commit; the two products were UNTRACKED and Torch cannot rebuild them (`data-raw/downloads` is not shipped) — added
+to git and to `CCX_RUN_INPUTS` (a missing surface product would have DROPPED two rows silently); `#11` shared the
+gradient target's absence switch — decoupled; `rule = 2` epoch clamp — rows absent with a warning instead;
+`sd_eff` guard; sbatch caption; two stale comments. **Recorded, not changed:** the #11 rows are WEAK (~2 log-units
+across the whole `pump_hs_gcm2` box against the δ¹³C gradient row's +27) — a tighter σ is a ruling, and the prereg
+says the rows record the surface rather than arbitrate the export; the HS carbonate limb has no alkalinity
+feedback (the LS convention); the δ¹³C target is a pooled median while the model value is carbon-weighted (the
+gradient rows' convention).
+
+**Launch:** prereg `notes/prereg_2026-09-07f_hs_pump_round3.md` (R1–R11), out `multistart_20260907f_hilda30/`; job
+and preflight ids in the 09-07f launch handoff.
+
 ## 2026-09-07e — ⭐⭐ **THE HS PUMP IS BUILT (both cores, bit-exact at 0, parity-tested) AND PROBED AT THE ROUND-2 WINNER: at the observation-sized 60 gC m⁻² yr⁻¹ (3.5 GtC/yr) HD − HS lands at +127 (observed +116–185), bottom − HS δ¹³C −0.70 (observed −0.87), the likelihood gains +17.2 with NOTHING refitted — but the pre-registered gate FAILS BY ITS LETTER (P3 +18.9 of 20; P6 HS surface δ¹³C moves the WRONG way). `pump_hs_gcm2` registered as the 30th parameter; round 3 DRAFTED, NOT launched.**
 
 **Ruling (Marcus):** "Scope the HS pump and move forward with it if it looks like a plausible fix."

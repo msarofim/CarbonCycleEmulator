@@ -875,6 +875,18 @@ ccx_model_d14c_slabs <- function(sp, slabs = NULL) {
 # to six decimals. An earlier comment here claimed folding would plant a kink in
 # the posterior's softest direction; that was WRONG and is withdrawn.
 LIK_USE_OCEAN_GRAD   <- TRUE
+# OBJECTIVE CHANGE #11 (2026-09-07f, Marcus: "scored rows"): the HILDA HS box's
+# SURFACE DIC (SH) and d13C (both hemispheres) against GLODAPv2.2023's
+# high-latitude surface bottles (data-raw/build_hs_surface_targets.R), each at
+# its own epoch. The end-member probe (09-07d) found HS DIC right and HS d13C
+# 0.6 permil too heavy; the HS pump moves the latter the WRONG way (09-07e), so
+# without these rows a refit could buy the deep gradients with the surface.
+# Rows are ABSENT (not zero) with the structure off or the product missing.
+# sigma_eff^2 = sd^2 (the cluster sampling error) + sd_cluster^2 (one cluster's
+# worth of representation error: a one-box cold surface against a zonal band
+# with a seasonal cycle and a 1972-2020 bottle spread) -- DERIVED from the
+# product, not typed.
+LIK_USE_HS_SURFACE   <- TRUE
 # ⚠ PROVENANCE ONLY, RETIRED 2026-08-28. Nothing may gate on this. It records
 # what the band WAS, so a reader of an older handoff, output or quarantined arm
 # can tell which regime that artifact was produced under.
@@ -1081,7 +1093,10 @@ ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
 #'   ccx_model_ocean_alk_gradient(). NULL until task 9.
 ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
   tg <- ccx_ocean_gradient_target()
-  if (is.null(tg)) return(NULL)
+  # objective #11 rides in this bundle but must NOT share the gradient target's
+  # absence switch (two unrelated observations, one NULL): built first.
+  hs_surf <- ccx_hs_surface_scored(out, spin)
+  if (is.null(tg)) return(if (is.null(hs_surf)) NULL else list(hs_surf = hs_surf))
   h <- spin$grid$h_ml
   # ⚠ NO BAND GATE. Retired 2026-08-28 when option 5 was adopted: the rows are
   # scored at EVERY h_ml, at sigma_eff(h). See LIK_USE_OCEAN_GRAD's block.
@@ -1094,7 +1109,7 @@ ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
   g3 <- ccx_model_ocean_gradient(out, spin$aux, spin$grid,
                                  list(surf = tg$d13c$epoch_surf,
                                       deep = tg$d13c$epoch_deep))
-  if (is.null(gd) || is.null(g3)) return(NULL)
+  if (is.null(gd) || is.null(g3)) return(if (is.null(hs_surf)) NULL else list(hs_surf = hs_surf))
   # Alkalinity needs no epoch: it has no transient in this model (no air-sea
   # flux, no anthropogenic source), so its profile is a steady-state function of
   # the export field alone.
@@ -1116,7 +1131,54 @@ ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
        alk = ccx_model_ocean_alk_gradient(spin, pump = pump),
        sd_eff = vapply(c("dic", "d13c", "alk"), ccx_ocean_sigma_eff, numeric(1),
                        h_ml = h),
-       h_ml = h)
+       h_ml = h,
+       # objective #11 rides in the same bundle: same call sites, same epoch
+       # discipline, absent (NULL) with the structure off.
+       hs_surf = hs_surf)
+}
+
+#' The HS-surface targets (objective #11), or NULL when the product is absent.
+ccx_hs_surface_target <- local({
+  cache <- NULL
+  function() {
+    if (!is.null(cache)) return(cache)
+    g <- tryCatch(readRDS(ccx_path("data", "obs_hs_surface.rds")), error = function(e) NULL)
+    if (is.null(g) || is.null(g$dic) || is.null(g$d13c)) return(NULL)
+    cache <<- g
+    g
+  }
+})
+
+#' The MODEL's HS-surface DIC (SH, umol/kg) and d13C (carbon-weighted over both
+#' hemispheres, permil), each read at ITS OWN epoch from the `out` series.
+#' NULL when the HS columns are absent or NA (structure off).
+ccx_model_hs_surface <- function(out, aux, epoch_dic, epoch_d13c) {
+  cols <- c("hs_C_NH", "hs_C13_NH", "hs_C_SH", "hs_C13_SH")
+  if (!all(cols %in% names(out)) || anyNA(out[["hs_C_SH"]])) return(NULL)
+  # A run that ends BEFORE the epoch would be read at its final value by
+  # rule = 2 -- silently. Rows ABSENT instead, with a warning naming it.
+  if (max(out$t) < max(epoch_dic, epoch_d13c) - 0.5) {
+    warning("ccx_model_hs_surface(): the run ends at ", max(out$t), ", before the HS-surface epochs (",
+            epoch_dic, " / ", epoch_d13c, "); the #11 rows are ABSENT for this run.")
+    return(NULL)
+  }
+  at <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
+  dic <- at("hs_C_SH", epoch_dic) * aux$mol_per_GtC / aux$hs_mass_kg[["SH"]] * 1e6
+  C   <- sum(vapply(HEMIS, function(h) at(paste0("hs_C_",   h), epoch_d13c), numeric(1)))
+  C13 <- sum(vapply(HEMIS, function(h) at(paste0("hs_C13_", h), epoch_d13c), numeric(1)))
+  list(dic = dic, d13c = 1000 * (C13 / C / ccx_const("R13_VPDB") - 1))
+}
+
+#' The HS-surface rows as the likelihood receives them: model values at the
+#' observations' epochs and the derived sigma_eff per row. NULL = rows absent.
+ccx_hs_surface_scored <- function(out, spin) {
+  tg <- ccx_hs_surface_target()
+  if (is.null(tg)) return(NULL)
+  m <- ccx_model_hs_surface(out, spin$aux, tg$dic$epoch, tg$d13c$epoch)
+  if (is.null(m)) return(NULL)
+  list(dic = m$dic, d13c = m$d13c,
+       sd_eff = c(dic  = sqrt(tg$dic$sd^2  + tg$dic$sd_cluster^2),
+                  d13c = sqrt(tg$d13c$sd^2 + tg$d13c$sd_cluster^2)))
 }
 
 #' Hemisphere-area weights for the Hua zones
@@ -1801,6 +1863,22 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
         if (!is.null(tg[[k[1]]]) && length(v) == 1L && is.finite(v))
           add(k[2], stats::dnorm(tg[[k[1]]]$target, v,
                                  ocean_grad$sd_eff[[k[1]]], log = TRUE))
+      }
+  }
+  # ---- objective #11: the HS SURFACE rows (2026-09-07f) ------------------
+  # Absent with the structure off (the box does not exist), with the product
+  # missing, or with the flag off -- never zero.
+  if (LIK_USE_HS_SURFACE && !is.null(ocean_grad) && !is.null(ocean_grad$hs_surf)) {
+    hs <- ocean_grad$hs_surf; tgh <- ccx_hs_surface_target()
+    if (!is.null(tgh) && is.null(hs$sd_eff))
+      stop("ccx_loglik(): `ocean_grad$hs_surf` carries no `sd_eff`. Build it with ",
+           "ccx_ocean_grad_scored(out, spin) / ccx_hs_surface_scored(); a hand-built list ",
+           "would score at an undefined sigma.")
+    if (!is.null(tgh))
+      for (k in list(c("dic", "hs_surf_dic"), c("d13c", "hs_surf_d13c"))) {
+        v <- hs[[k[1]]]
+        if (length(v) == 1L && is.finite(v))
+          add(k[2], stats::dnorm(tgh[[k[1]]]$target, v, hs$sd_eff[[k[1]]], log = TRUE))
       }
   }
 

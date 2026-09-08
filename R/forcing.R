@@ -911,7 +911,8 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
   # observations' epoch rather than at the run's end.
   for (cc in CCX_OCEAN_BOX_COLS) out[[cc]] <- NA_real_
   obox <- lapply(HEMIS, function(h)
-    c(ml = aux$idx[[h]]$ml, deep = utils::tail(aux$idx[[h]]$oc, 1)))
+    c(ml = aux$idx[[h]]$ml, deep = utils::tail(aux$idx[[h]]$oc, 1),
+      hs = if (isTRUE(aux$hs_on == 1L)) aux$idx[[h]]$hs else NA_integer_))
   names(obox) <- HEMIS
   gpp <- ccx_const("GtC_PER_PPM") / 2
   # Flux trace (R/fluxes.R): OPT-IN, and evaluated at each month's OPENING state
@@ -937,6 +938,10 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
       out[[paste0("ml_C13_", h)]][i] <- y[obox[[h]]["ml"],   "C13"]
       out[[paste0("deep_C_",   h)]][i] <- y[obox[[h]]["deep"], "C"]
       out[[paste0("deep_C13_", h)]][i] <- y[obox[[h]]["deep"], "C13"]
+      if (!is.na(obox[[h]]["hs"])) {              # the HS box exists only with the structure on
+        out[[paste0("hs_C_",   h)]][i] <- y[obox[[h]]["hs"], "C"]
+        out[[paste0("hs_C13_", h)]][i] <- y[obox[[h]]["hs"], "C13"]
+      }
     }
     y <- ccx_step_rk4(y, F$t[i], 1 / 12, p, ccx_forcing_at(F, i), grid, aux, substeps)
   }

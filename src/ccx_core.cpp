@@ -938,7 +938,7 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
   // business owning. R/likelihood.R converts. They are a TIME SERIES rather
   // than a final state because the gradient terms are scored at the
   // OBSERVATIONS' epoch (~2000, not the run's end year) -- Marcus 2026-08-16.
-  NumericMatrix out(n, 19);
+  NumericMatrix out(n, 23);   // 11 + 6 per hemisphere (CCX_OCEAN_BOX_COLS)
   const double gpp = A.gtc_per_ppm_hemi;
 
   std::vector<double> f(N_FORCING);
@@ -967,10 +967,19 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
     for (int hi = 0; hi < 2; ++hi) {
       const int base = hi * NPH;
       const int iml = base + IML, idp = base + IML + NL;
-      out(i, 11 + 4 * hi) = y[IX(iml, C)];
-      out(i, 12 + 4 * hi) = y[IX(iml, C13)];
-      out(i, 13 + 4 * hi) = y[IX(idp, C)];
-      out(i, 14 + 4 * hi) = y[IX(idp, C13)];
+      out(i, 11 + 6 * hi) = y[IX(iml, C)];
+      out(i, 12 + 6 * hi) = y[IX(iml, C13)];
+      out(i, 13 + 6 * hi) = y[IX(idp, C)];
+      out(i, 14 + 6 * hi) = y[IX(idp, C13)];
+      // the HS box (2026-09-07f): exists only with the structure on -- with it
+      // off IHS is past the state vector, so write NA rather than read it.
+      if (A.hs_on) {
+        out(i, 15 + 6 * hi) = y[IX(base + IHS, C)];
+        out(i, 16 + 6 * hi) = y[IX(base + IHS, C13)];
+      } else {
+        out(i, 15 + 6 * hi) = NA_REAL;
+        out(i, 16 + 6 * hi) = NA_REAL;
+      }
     }
 
     for (int j = 0; j < N_FORCING; ++j) f[j] = forcing(i, j);

@@ -35,7 +35,18 @@ CCX_RUN_INPUTS <- list(
        why     = "the industrial (reactor) 14C source, summed over 7 country files",
        symptom = paste("ccx_nuclear_c14_annual() warns 'No nuclear 14C files found;",
                        "industrial source set to zero' and the objective shifts by",
-                       "~1e-3 relative -- silently, and only in the 14C streams"))
+                       "~1e-3 relative -- silently, and only in the 14C streams")),
+  # 2026-09-07f: the two products round 3's objective and prior read. The
+  # surface product is tryCatch'ed to NULL by ccx_hs_surface_target(), so its
+  # absence would DROP two rows silently -- a different objective, no error.
+  list(path    = file.path("data", "obs_hs_surface.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "objective #11: the HS-surface DIC and d13C targets (GLODAPv2.2023)",
+       symptom = "hs_surf_dic / hs_surf_d13c are ABSENT from by_stream and the total is a different objective"),
+  list(path    = file.path("data", "obs_hs_export_prior.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "the lognormal literature prior on pump_hs_gcm2 (Liniger 2025, Arteaga 2019)",
+       symptom = "readRDS() errors inside the prior at the first log-posterior evaluation")
 )
 
 #' Stop unless every run-time input is present, naming the one that is not

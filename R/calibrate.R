@@ -70,6 +70,16 @@ NPP_FRAC_NH_SD <- 0.04
 # test-ent-seas-fitted.R ties it to log(1/ENT_SEAS_BAND_AREA_FRAC)/2.
 ENT_SEAS_LOGSD <- 0.49848
 
+#' The literature prior on the HS pump's export (data-raw/build_hs_export_prior.R),
+#' read lazily and cached: the table above is built before R/paths.R is sourced.
+ccx_hs_export_prior <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "obs_hs_export_prior.rds"))
+    cache
+  }
+})
+
 CCX_PARAM_TABLE <- list(
   # ---- CO2 fertilisation ---------------------------------------------
   # `beta` LEFT THE TABLE on 2026-08-14 when fert_form flipped to CCX_FERT_MM.
@@ -283,13 +293,25 @@ CCX_PARAM_TABLE <- list(
   # 60 gC m-2 yr-1 (3.5 GtC/yr) lands HD - HS at +127 and gains +17 log-units
   # with nothing refitted (diag_hs_pump_probe.R, prereg 09-07d). Box [0.5, 200]:
   # 0.5 = 0.03 GtC/yr, effectively OFF; 200 = 11.6 GtC/yr, above the whole real
-  # ocean's export. PRIOR UNIFORM ON THE BOX -- a literature prior (Southern-
-  # Ocean + subpolar export) is OWED and is Marcus's call; the init 60 is the
-  # observation-matched probe point, a START not a centre. An ancestor that ran
-  # 0 cannot be ENCODED under logit (lo 0.5) and is seeded at init by
-  # ccx_seed_unencodable(), the kz_deep_frac precedent.
-  pump_hs_gcm2 = list(tr = "logit", lo = 0.5, hi = 200, init = 60,
-                      prior = function(x) dunif(x, 0.5, 200, log = TRUE)),
+  # ocean's export.
+  # PRIOR: LITERATURE, LOGNORMAL (Marcus 2026-09-07f) -- built by
+  # data-raw/build_hs_export_prior.R from the float-based polar-Antarctic-zone
+  # export of Liniger et al. 2025 (2.01 molC m-2 yr-1) and Arteaga et al. 2019
+  # (1.80): median 22.9 gC m-2 yr-1, log-sd 0.6 (2.5-97.5 %: 7-74), the width
+  # carrying the NH subpolar half of the box and the export horizon (the box's
+  # own thickness, not the sources' 100-500 m). The probe's 60 sits at +1.6
+  # sigma: the data rows and this prior will disagree, and that is the finding
+  # to read, not to pre-empt. init = the prior median (a START, and NOT the
+  # probe point -- no centre off the code under test). An ancestor that ran 0
+  # cannot be ENCODED under logit (lo 0.5) and is seeded at init by
+  # ccx_seed_unencodable(), the kz_deep_frac precedent. The init is a LITERAL
+  # because this table is built before R/paths.R is sourced; it is TIED to the
+  # build product by tests/testthat/test-pump-hs.R (the ent_seas_amp_SH
+  # precedent), and the prior reads the product lazily through
+  # ccx_hs_export_prior().
+  pump_hs_gcm2 = list(tr = "logit", lo = 0.5, hi = 200, init = 22.9,
+                      prior = function(x) { pr <- ccx_hs_export_prior()
+                        dlnorm(x, log(pr$centre_gcm2), pr$log_sd, log = TRUE) }),
   # THE BIOLOGICAL PUMP'S MAGNITUDE -- the 20th parameter (Marcus 2026-08-16d).
   # The preindustrial surface-to-bottom DIC gradient the pump holds, umol/kg.
   # Everything else about the pump stays structural: the export SHAPE is GLODAP's
@@ -875,7 +897,7 @@ ccx_migrate_par_set <- function(p) {
     p$h_hs <- p$h_ml
     filled <- c(filled, "h_hs")
   }
-  # 2026-09-07e: pump_hs_gcm2 entered the table (29 -> 30). Absent = 0 = OFF in
+  # 2026-09-07e/f: pump_hs_gcm2 entered the table (29 -> 30). Absent = 0 = OFF in
   # the model's own contract (ccx_pump_export_hs(): NULL -> nothing emitted), so
   # 0 is what every ancestor RAN. 0 is below the box's floor and does not
   # ENCODE; ccx_seed_unencodable() seeds it at init for a START point.

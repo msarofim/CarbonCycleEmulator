@@ -110,11 +110,12 @@ mkdir -p logs calibration/output
 # The driver's checkpoint guard would REFUSE them by `param_names` -- correctly,
 # and loudly -- but a directory that cannot collide is the cleaner answer and
 # the guard is the backstop, not the plan.
-# 2026-09-07b: the HILDA-structure refit, round 2 (29 parameters, objective #10). CCX_MS_STRUCT selects
+# 2026-09-07f: the HILDA-structure refit, round 3 (30 parameters: + pump_hs_gcm2 with a literature prior;
+# objective #10 + #11 HS-surface rows; corrected gradient rows). CCX_MS_STRUCT selects
 # the declared structure in BOTH the driver and the port targets; the outdir
 # names the parameter set and the structure, as the 09-01k rule requires.
 export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260907b_hilda29}"
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260907f_hilda30}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.

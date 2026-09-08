@@ -38,6 +38,10 @@ run_at <- function(kz, h_ml = 75, substeps = "auto", retry_na = TRUE,
   ccx_run_fast(sp, F, substeps = substeps, retry_na = retry_na)
 }
 
+# hs_* columns are NA BY CONTRACT with the HILDA boxes off (2026-09-07f); a
+# blow-up is read off the PHYSICS columns, as ccx_run_fast()'s own guard does.
+ccx_phys <- function(out) out[, grep("^hs_", names(out), invert = TRUE, value = TRUE)]
+
 test_that("the controller is a no-op at every ordinary parameter value", {
   # The whole point of flooring at CCX_SUBSTEPS_MIN: switching the default to
   # "auto" must not change a single existing result. kz has to clear ~155,000
@@ -60,9 +64,9 @@ test_that("the criterion predicts where the OLD fixed-substep scheme broke", {
   # the negative real axis, not anything about the data or the physics.
   for (hm in c(30, 75)) {
     w <- kz_wall(hm, 4)
-    expect_false(anyNA(run_at(0.95 * w, hm, substeps = 4L, retry_na = FALSE)$out),
+    expect_false(anyNA(ccx_phys(run_at(0.95 * w, hm, substeps = 4L, retry_na = FALSE)$out)),
                  info = sprintf("h_ml %g: 0.95x the analytic wall must be stable", hm))
-    expect_true(anyNA(run_at(1.10 * w, hm, substeps = 4L, retry_na = FALSE)$out),
+    expect_true(anyNA(ccx_phys(run_at(1.10 * w, hm, substeps = 4L, retry_na = FALSE)$out)),
                 info = sprintf("h_ml %g: 1.10x the analytic wall must diverge", hm))
   }
 })
@@ -72,7 +76,7 @@ test_that("no NAs anywhere in or far beyond the prior's support", {
   # 175790 is the 2026-08-10 mode, which the old scheme could not evaluate.
   for (kz in c(4000, 37200, 175790, 4e5, 1e6)) {
     r <- run_at(kz)
-    expect_false(anyNA(r$out), info = sprintf("kz = %g", kz))
+    expect_false(anyNA(ccx_phys(r$out)), info = sprintf("kz = %g", kz))
     expect_gt(min(r$out$co2_NH), 0)
     expect_true(r$substeps >= CCX_SUBSTEPS_MIN)
   }
@@ -84,7 +88,7 @@ test_that("MUTATION: with the controller disabled, the same cases DO fail", {
   # NA retry) still produced finite output, the test above would be proving
   # nothing.
   fails <- vapply(c(175790, 4e5, 1e6),
-                  function(kz) anyNA(run_at(kz, substeps = 4L, retry_na = FALSE)$out),
+                  function(kz) anyNA(ccx_phys(run_at(kz, substeps = 4L, retry_na = FALSE)$out)),
                   logical(1))
   expect_true(all(fails))
 })

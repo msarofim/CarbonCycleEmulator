@@ -302,6 +302,11 @@ ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
       spin$y, ccx_cpp_par(spin$params), ccx_cpp_forcing(F), F$t,
       ccx_cpp_aux(spin$aux, spin$grid), as.integer(nsub))
     out <- as.data.frame(res$out)
+    # The C++ matrix width is a literal there; tie it to the R-side column
+    # vector LOUDLY (a mismatch used to be a positional mis-naming, not an error).
+    if (ncol(out) != 11L + length(CCX_OCEAN_BOX_COLS))
+      stop("ccx_run_fast(): the C++ out matrix has ", ncol(out), " columns; R expects ",
+           11L + length(CCX_OCEAN_BOX_COLS), " (11 + CCX_OCEAN_BOX_COLS). Rebuild the core.")
     names(out) <- c("co2_NH", "co2_SH", "d13c_NH", "d13c_SH",
                     "d14c_NH", "d14c_SH", "ocean_C", "land_C",
                     "ocean_C14", "land_C14", "atm_C14",
@@ -312,11 +317,23 @@ ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
     list(state = state, out = cbind(t = F$t, out), substeps = as.integer(nsub))
   }
   r <- one(ss)
-  while (retry_na && anyNA(r$out) && ss < CCX_SUBSTEPS_MAX) {
+  # The NaN guard reads the PHYSICS columns only: with the HILDA structure off
+  # the hs_* columns are NA BY CONTRACT (the box does not exist, 2026-09-07f),
+  # and reading them here doubled the substeps to CCX_SUBSTEPS_MAX on every
+  # structure-off run -- a 1e-4 R-vs-C++ parity break that looked like physics.
+  while (retry_na && anyNA(r$out[, ccx_out_na_guard_cols(r$out, spin$params)]) &&
+         ss < CCX_SUBSTEPS_MAX) {
     ss <- min(2L * ss, CCX_SUBSTEPS_MAX)
     r  <- one(ss)
   }
   r
+}
+
+#' The `out` columns a NaN guard may read: every column when the HILDA boxes
+#' are on, every column but the hs_* ones when they are off (those are NA by
+#' contract, not by blow-up). Use this wherever `anyNA(out)` stands guard.
+ccx_out_na_guard_cols <- function(out, p) {
+  if (ccx_hs_on(p)) names(out) else grep("^hs_", names(out), invert = TRUE, value = TRUE)
 }
 
 #' Single derivative via the C++ core (used by the parity gate)

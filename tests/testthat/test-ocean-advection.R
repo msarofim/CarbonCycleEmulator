@@ -187,13 +187,14 @@ test_that("with NO interior source, reversing the circulation ties EVERY column"
   # <= 2.9e-13, and only the BOTTOM-BOX ones differ (deep_C_NH by 3.68 GtC).
   # So the physics is untouched; the assertion's scope was wrong.
   deep_cols <- grep("^deep_", CCX_OCEAN_BOX_COLS, value = TRUE)
-  tied <- setdiff(names(out$run$out), deep_cols)
+  hs_cols   <- grep("^hs_",   CCX_OCEAN_BOX_COLS, value = TRUE)   # NA here: structure off (2026-09-07f)
+  tied <- setdiff(names(out$run$out), c(deep_cols, hs_cols))
   expect_equal(as.matrix(out$run$out[, tied]), as.matrix(up$run$out[, tied]),
                tolerance = 1e-8)
   # The MIXED LAYER tying is not incidental -- it is the mechanism claim above
   # ("air-sea acts at iml and nowhere else") measured directly, and it is a
   # stronger statement than the totals alone, which could tie by cancellation.
-  for (cc in setdiff(CCX_OCEAN_BOX_COLS, deep_cols))
+  for (cc in setdiff(CCX_OCEAN_BOX_COLS, c(deep_cols, hs_cols)))
     expect_lt(max(abs(out$run$out[[cc]] - up$run$out[[cc]])), 1e-8)
   # ...and the BOTTOM BOX must NOT tie, or the transpose symmetry would be
   # saying something far stronger than it does.
@@ -232,7 +233,7 @@ test_that("with the pump ON, TOTAL CARBON is still invariant and the ISOTOPES ar
   # GLOBAL parameter and both `w_out` limbs get the same speed, so no hemisphere
   # is ever swapped; both hemispheres break in the SAME direction, at the ratio
   # of their ocean areas (1.24 measured against 1.33).
-  a   <- run_w(0); stopifnot(!anyNA(a$run$out))
+  a   <- run_w(0); stopifnot(!anyNA(a$run$out[, grep("^hs_", names(a$run$out), invert = TRUE)]))   # hs_ cols are NA with the structure off (2026-09-07f)
   up  <- run_w(W_TEST)                       # pump ON -- the shipped default
   out <- run_w_out(W_TEST)
   expect_gt(ccx_default_params()$pump_grad, 0)   # or this test is the one above

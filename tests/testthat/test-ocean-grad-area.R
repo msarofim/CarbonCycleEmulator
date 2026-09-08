@@ -23,6 +23,7 @@ test_that("ccx_model_ocean_gradient reads a known concentration back exactly at 
     out[[paste0("deep_C_", h)]]   <- gtc(c_deep, aux$a_ls[[h]], grid$dz[3])
     out[[paste0("ml_C13_", h)]]   <- out[[paste0("ml_C_", h)]]   * ccx_const("R13_VPDB")
     out[[paste0("deep_C13_", h)]] <- out[[paste0("deep_C_", h)]] * ccx_const("R13_VPDB")
+    out[[paste0("hs_C_", h)]] <- NA_real_; out[[paste0("hs_C13_", h)]] <- NA_real_   # structure off (2026-09-07f)
   }
   g <- ccx_model_ocean_gradient(out, aux, grid, list(surf = 2000, deep = 2000))
   expect_equal(g$dic, c_deep - c_ml, tolerance = 1e-9)   # a_oc would give 0.84x

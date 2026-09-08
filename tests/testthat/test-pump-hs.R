@@ -96,3 +96,11 @@ test_that("invalid values error by name", {
   expect_error(ccx_spinup(hp_par(-1)), "pump_hs_gcm2")
   expect_error(ccx_spinup(hp_par(NA_real_)), "pump_hs_gcm2")
 })
+
+test_that("the table's init and prior are TIED to the literature build product", {
+  pr <- readRDS(ccx_path("data", "obs_hs_export_prior.rds")); s <- CCX_PARAM_TABLE$pump_hs_gcm2
+  expect_equal(s$init, pr$centre_gcm2, tolerance = 0.05 / pr$centre_gcm2)   # literal vs computed, to 0.05
+  for (x in c(7, 22.9, 60)) expect_equal(s$prior(x), dlnorm(x, log(pr$centre_gcm2), pr$log_sd, log = TRUE))
+  expect_gt(s$prior(pr$centre_gcm2), s$prior(60))                            # 60 is the probe point, not the centre
+  expect_true(all(c("L25", "A19") %in% names(pr$sources)))
+})
