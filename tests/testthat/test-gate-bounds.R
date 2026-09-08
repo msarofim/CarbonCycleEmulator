@@ -377,3 +377,49 @@ test_that("GATE S's knockout kills BOTH SH ocean limbs, and comes from the estim
   expect_true(all(unlist(DG_S_KO) == 0))
   expect_identical(DG_S_KO, SL_CASES$SH_ocean)
 })
+
+test_that("GATE L bounds the LAND share of a pulse against Joos's split, and fails at BOTH edges", {
+  source(skip_if_no_gates(), local = TRUE)
+  # the split is a partition: the three ensemble means sum to 100 %
+  expect_equal(sum(vapply(DG_L_RES, function(k) DG_L_JOOS[[k]][["mean"]], numeric(1))), 100)
+  expect_match(DG_L_JOOS$src, "Joos")
+  # the band is DERIVED from the constants, not typed
+  at <- function(land, ocean = 59, air = 25)
+    dg_gateL_verdict(list(share = c(land = land, ocean = ocean, air = air)))
+  v0 <- at(DG_L_JOOS$land[["mean"]])
+  expect_true(v0$pass); expect_equal(v0$z[["land"]], 0)
+  expect_equal(v0$lo, DG_L_JOOS$land[["mean"]] - DG_L_NSD * DG_L_JOOS$land[["sd"]])
+  expect_equal(v0$hi, DG_L_JOOS$land[["mean"]] + DG_L_NSD * DG_L_JOOS$land[["sd"]])
+  # inside by a hair passes, outside by a hair fails -- UPPER edge (the canonical's side)...
+  expect_true (at(v0$hi - 0.1)$pass)
+  expect_false(at(v0$hi + 0.1)$pass)
+  # ...and the LOWER edge (the land-off mutation's side)
+  expect_true (at(v0$lo + 0.1)$pass)
+  expect_false(at(v0$lo - 0.1)$pass)
+  expect_false(at(0)$pass)
+  # the verdict is on the LAND share; ocean and air are REPORTED (z carried, not gated)
+  expect_true(at(DG_L_JOOS$land[["mean"]], ocean = 0, air = 100)$pass)
+  expect_equal(length(at(16)$z), 3L)
+  expect_false(at(NA_real_)$pass)
+})
+
+test_that("GATE GL bounds the d13C gradient LEVEL on the observation's own se, both ways, at H's strictness", {
+  source(skip_if_no_gates(), local = TRUE)
+  expect_identical(DG_GL_NSD, DG_H_NSD)
+  ho <- dg_gateH_obs(ccx_prepare_obs())
+  o  <- ho$d13c
+  expect_equal(o$se, o$sd / sqrt(o$n_eff))
+  at <- function(m, ...) dg_gateGL_verdict(list(co2 = NA_real_, d13c = m), ho, ...)
+  v0 <- at(o$mean); expect_true(v0$pass); expect_equal(v0$z, 0); expect_equal(v0$ratio, 1)
+  expect_true (at(o$mean + (DG_GL_NSD - 0.1) * o$se)$pass)
+  expect_false(at(o$mean + (DG_GL_NSD + 0.1) * o$se)$pass)
+  expect_true (at(o$mean - (DG_GL_NSD - 0.1) * o$se)$pass)
+  expect_false(at(o$mean - (DG_GL_NSD + 0.1) * o$se)$pass)
+  # a 2x gradient (the canonical's class of miss) fails by a wide margin
+  expect_false(at(2 * o$mean)$pass); expect_gt(abs(at(2 * o$mean)$z), 5)
+  # the representation allowance WIDENS the se in quadrature, never narrows it
+  v1 <- at(2 * o$mean, rep_frac = 0.1)
+  expect_gt(v1$se, o$se); expect_equal(v1$se, sqrt(o$se^2 + (0.1 * o$mean)^2))
+  expect_lt(abs(v1$z), abs(at(2 * o$mean)$z))
+  expect_false(at(NA_real_)$pass)
+})

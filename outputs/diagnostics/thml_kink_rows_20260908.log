@@ -1,0 +1,97 @@
+total likelihood (dg rows) d2 along the grid; spike = |d2| > 3 x median:
+  h_ml  45.40  lik   -0.3856  d2  -0.0571
+  h_ml  45.65  lik   -0.3212  d2  -0.0498
+  h_ml  45.90  lik   -0.2600  d2  -0.0381
+  h_ml  46.15  lik   -0.2012  d2  -0.0338
+  h_ml  46.40  lik   -0.1445  d2  -0.0709
+  h_ml  46.65  lik   -0.0922  d2  -0.1110
+  h_ml  46.90  lik   -0.0468  d2  -0.1494
+  h_ml  47.15  lik   -0.0108  d2  -0.1550
+  h_ml  47.40  lik   +0.0155  d2  -0.1308
+  h_ml  47.65  lik   +0.0337  d2  -0.1053
+  h_ml  47.90  lik   +0.0453  d2  -0.0887
+  h_ml  48.15  lik   +0.0513  d2  -0.1131
+  h_ml  48.40  lik   +0.0503  d2  -0.1217
+  h_ml  48.65  lik   +0.0416  d2  -0.1275
+  h_ml  48.90  lik   +0.0250  d2  -0.1344
+  h_ml  49.15  lik   +0.0000  d2  -0.1791
+  h_ml  49.40  lik   -0.0362  d2  -0.2663
+  h_ml  49.65  lik   -0.0891  d2  -0.3551
+  h_ml  49.90  lik   -0.1641  d2  -0.6301  <-- SPIKE
+  h_ml  50.15  lik   -0.2785  d2  -1.1122  <-- SPIKE
+  h_ml  50.40  lik   -0.4625  d2  -0.5055  <-- SPIKE
+  h_ml  50.65  lik   -0.6780  d2  +0.2515
+  h_ml  50.90  lik   -0.8778  d2  +0.8963  <-- SPIKE
+  h_ml  51.15  lik   -1.0216  d2  +0.5913  <-- SPIKE
+  h_ml  51.40  lik   -1.1284  d2  +0.2802
+  h_ml  51.65  lik   -1.2177  d2  +0.0016
+  h_ml  51.90  lik   -1.3070  d2  -0.1941
+  h_ml  52.15  lik   -1.4083  d2  -0.0276
+  h_ml  52.40  lik   -1.5114  d2  -0.0179
+  h_ml  52.65  lik   -1.6156  d2  -0.0356
+  h_ml  52.90  lik   -1.7220  d2  -0.0310
+
+=== per-stream: the excursion of d2 inside the feature window (49.5-51.5 m) vs its median outside ===
+  ocean_grad_d13c        max|d2| in window   0.8830  median|d2| outside   0.0357  ratio    24.7  (row at mode -4.68)
+  ocean_grad_alk         max|d2| in window   0.0037  median|d2| outside   0.0002  ratio    15.9  (row at mode -4.17)
+  ocean_grad_dic         max|d2| in window   0.2069  median|d2| outside   0.0174  ratio    11.9  (row at mode -6.73)
+  d13c_level_MLO         max|d2| in window   0.0024  median|d2| outside   0.0017  ratio     1.4  (row at mode +73.34)
+  d13c_seasonal_MLO      max|d2| in window   0.0000  median|d2| outside   0.0000  ratio     1.3  (row at mode +214.57)
+  excess_c14_ocean       max|d2| in window   0.0000  median|d2| outside   0.0000  ratio     1.3  (row at mode -10.31)
+  d14c_intcal            max|d2| in window   0.0000  median|d2| outside   0.0000  ratio     1.3  (row at mode -670.56)
+  hs_surf_dic            max|d2| in window   0.0000  median|d2| outside   0.0000  ratio     1.3  (row at mode -4.27)
+  hs_surf_d13c           max|d2| in window   0.0001  median|d2| outside   0.0001  ratio     1.2  (row at mode -6.17)
+  d13c_level_SPO         max|d2| in window   0.0039  median|d2| outside   0.0035  ratio     1.1  (row at mode +69.79)
+  d14c_profile_ab        max|d2| in window   0.0011  median|d2| outside   0.0010  ratio     1.1  (row at mode -2.79)
+  d14c_profile_bd        max|d2| in window   0.0000  median|d2| outside   0.0000  ratio     1.1  (row at mode -2.19)
+  d13c_gradient          max|d2| in window   0.0000  median|d2| outside   0.0000  ratio     1.0  (row at mode +106.14)
+  gcb_land_sink          max|d2| in window   0.0000  median|d2| outside   0.0000  ratio     1.0  (row at mode -99.66)
+  d14c_SH                max|d2| in window   0.0085  median|d2| outside   0.0081  ratio     1.0  (row at mode -286.03)
+  d14c_NH                max|d2| in window   0.0083  median|d2| outside   0.0079  ratio     1.0  (row at mode -285.87)
+  co2_icecore            max|d2| in window   0.0010  median|d2| outside   0.0010  ratio     1.0  (row at mode -683.09)
+  co2_level_SPO          max|d2| in window   0.0352  median|d2| outside   0.0353  ratio     1.0  (row at mode -60.98)
+  co2_level_MLO          max|d2| in window   0.0367  median|d2| outside   0.0368  ratio     1.0  (row at mode -69.11)
+  d14c_profile_level     max|d2| in window   0.0001  median|d2| outside   0.0001  ratio     1.0  (row at mode -3.96)
+  gcb_ocean_sink         max|d2| in window   0.0008  median|d2| outside   0.0008  ratio     1.0  (row at mode -8.16)
+  co2_gradient           max|d2| in window   0.0000  median|d2| outside   0.0000  ratio     1.0  (row at mode -13.59)
+  d13c_seasonal_SPO      max|d2| in window   0.0000  median|d2| outside   0.0000  ratio     1.0  (row at mode +251.75)
+  co2_seasonal_SPO       max|d2| in window   0.0015  median|d2| outside   0.0016  ratio     0.9  (row at mode +69.19)
+  co2_seasonal_MLO       max|d2| in window   0.0010  median|d2| outside   0.0011  ratio     0.9  (row at mode -1.87)
+
+=== the top three rows along the grid (value minus the row's value at the mode) ===
+     h_ml        ocean_grad_d13c         ocean_grad_alk         ocean_grad_dic
+    45.15                +0.0286                -0.0023                +0.0526
+    45.40                +0.0196                -0.0022                +0.0495
+    45.65                +0.0120                -0.0021                +0.0475
+    45.90                +0.0069                -0.0020                +0.0463
+    46.15                +0.0053                -0.0018                +0.0453
+    46.40                +0.0077                -0.0017                +0.0445
+    46.65                +0.0120                -0.0016                +0.0436
+    46.90                +0.0157                -0.0015                +0.0426
+    47.15                +0.0174                -0.0014                +0.0404
+    47.40                +0.0186                -0.0012                +0.0353
+    47.65                +0.0190                -0.0011                +0.0289
+    47.90                +0.0183                -0.0009                +0.0233
+    48.15                +0.0159                -0.0008                +0.0201
+    48.40                +0.0115                -0.0007                +0.0182
+    48.65                +0.0063                -0.0006                +0.0155
+    48.90                +0.0018                -0.0004                +0.0103
+    49.15                +0.0000                +0.0000                +0.0000
+    49.40                +0.0004                +0.0006                -0.0177
+    49.65                -0.0040                +0.0013                -0.0411
+    49.90                -0.0208                +0.0020                -0.0681
+    50.15                -0.0671                +0.0027                -0.0990
+    50.40                -0.1685                +0.0035                -0.1380
+    50.65                -0.2935                +0.0043                -0.1789
+    50.90                -0.4025                +0.0050                -0.2138
+    51.15                -0.4619                +0.0054                -0.2357
+    51.40                -0.4887                +0.0057                -0.2471
+    51.65                -0.4974                +0.0058                -0.2527
+    51.90                -0.5008                +0.0060                -0.2573
+    52.15                -0.5077                +0.0062                -0.2645
+    52.40                -0.5102                +0.0064                -0.2716
+    52.65                -0.5084                +0.0065                -0.2780
+    52.90                -0.5037                +0.0067                -0.2834
+    53.15                -0.4961                +0.0068                -0.2874
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/thml_kink_rows_20260908.rds
+⛔ Nothing adopted.

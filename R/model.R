@@ -2141,7 +2141,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         ccx_const("CO2_PI_PPM") *
           (1 + aux$revelle0_hs * (dic_hs - aux$dic0_hs) / aux$dic0_hs)
       } else {
-        pco2_from_dic(dic_hs, ccx_const("ALK_SURFACE"), sst_hs, k = k_hs)
+        pco2_from_dic(dic_hs,
+                      if (is.null(aux$alk_hs)) ccx_const("ALK_SURFACE") else aux$alk_hs,
+                      sst_hs, k = k_hs)
       }
       gx_hs  <- aux$asx_hs[[h]] * p$k_w * k_hs$K0
       a_as_h <- ccx_alpha_as(sst_hs, aux)
@@ -2528,6 +2530,18 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   # paths cannot diverge in what they consider "preindustrial".
   sst_l <- list(NH = p$sst_NH, SH = p$sst_SH)
   alk   <- ccx_const("ALK_SURFACE")
+  # Per-box alkalinity for the COLD box (T-ALK, 2026-09-08g). `alk_hs` ABSENT
+  # or NULL = the one global constant for every box, BIT-EXACT (the absence
+  # contract every switch in this list uses). A finite value, mol/kg, is the
+  # HS surface alkalinity used by the HS preindustrial DIC (spinup.R), the
+  # frozen-Revelle references below and the live HS pCO2 in BOTH cores. A
+  # diagnostic switch, not a fitted parameter; errors by name, never clamps.
+  alk_hs <- if (is.null(p$alk_hs)) alk else {
+    if (!is.finite(p$alk_hs) || p$alk_hs <= 0)
+      stop("alk_hs must be a positive HS surface alkalinity in mol/kg; got ",
+           format(p$alk_hs))
+    p$alk_hs
+  }
   dic0  <- lapply(sst_l, function(T) ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk, T))
   rev0  <- lapply(HEMIS, function(h) revelle_factor(dic0[[h]], alk, sst_l[[h]]))
   names(rev0) <- HEMIS
@@ -2659,8 +2673,10 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   # HS's own preindustrial chemistry references, for the frozen-Revelle switch,
   # built on the SAME two solves the low-latitude pair uses so the cold box
   # cannot end up with a different notion of "preindustrial".
-  aux$dic0_hs     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk, aux$sst_hs)
-  aux$revelle0_hs <- revelle_factor(aux$dic0_hs, alk, aux$sst_hs)
+  # ...at the cold box's OWN alkalinity when `alk_hs` is set (2026-09-08g).
+  aux$alk_hs      <- alk_hs
+  aux$dic0_hs     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk_hs, aux$sst_hs)
+  aux$revelle0_hs <- revelle_factor(aux$dic0_hs, alk_hs, aux$sst_hs)
   # `hs_asx_frac` scales the EXCHANGE area only (2026-09-06); the HS mass and
   # the HS<->HD limb are untouched. Errors by name rather than clamping.
   fx <- if (is.null(p$hs_asx_frac)) 1 else p$hs_asx_frac

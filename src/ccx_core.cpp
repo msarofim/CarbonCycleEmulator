@@ -130,6 +130,7 @@ struct Aux {
   // also what sets NPH/NB above.
   int    hs_on;
   double hs_frac, h_hs, dz_hd, sst_hs, dic0_hs, revelle0_hs;
+  double alk_hs;   // the cold box's own alkalinity, mol/kg (2026-09-08g; = alk unless set)
   double a_ls[2], a_hs[2], hs_mass_kg[2], asx_hs[2];
   int pump_on;
   double pump_org[2][NL], pump_carb[2][NL];
@@ -674,7 +675,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
         pco2_hs = A.chi0 * (1.0 + A.revelle0_hs
                             * (dic_hs - A.dic0_hs) / A.dic0_hs);
       } else {
-        pco2_hs = pco2_from_dic_cpp(dic_hs, A.alk, sst_h, A, &K0h);
+        pco2_hs = pco2_from_dic_cpp(dic_hs, A.alk_hs, sst_h, A, &K0h);
       }
       const double gx_hs = A.asx_hs[hi] * P.k_w * K0h;
       double a_dn_h, a_up_h;
@@ -832,6 +833,7 @@ static Aux unpack_aux(const List& a) {
   A.hs_frac = a["hs_frac"]; A.h_hs = a["h_hs"];
   A.dz_hd = a["dz_hd"]; A.sst_hs = a["sst_hs"];
   A.dic0_hs = a["dic0_hs"]; A.revelle0_hs = a["revelle0_hs"];
+  A.alk_hs = a["alk_hs"];
   v = a["a_ls"];       A.a_ls[0] = v[0];       A.a_ls[1] = v[1];
   v = a["a_hs"];       A.a_hs[0] = v[0];       A.a_hs[1] = v[1];
   v = a["hs_mass_kg"]; A.hs_mass_kg[0] = v[0]; A.hs_mass_kg[1] = v[1];

@@ -1,0 +1,15 @@
+observed d13C gradient (MLO - SPO) -0.06675 permil, sd 0.0309, n 43, n_eff 40.6, se 0.00484, 1980-2023; CO2 +2.4253 ppm se 0.1991
+
+  hilda31          raw model gradient -0.13116 (ratio 1.965); fitted grad_off_d13c +0.06436 absorbs +0.06436 of the -0.06440 miss
+    GATE GL (se_obs 0.00484): z -13.31 -> FAIL | with the CO2 control's representation allowance (|1 - R_co2| = 0.084, se 0.00743): z -8.67 -> FAIL | GATE H contrast z +6.51 FAIL
+
+  column_control   raw model gradient -0.13144 (ratio 1.969); fitted grad_off_d13c +0.06464 absorbs +0.06464 of the -0.06468 miss
+    GATE GL (se_obs 0.00484): z -13.36 -> FAIL | with the CO2 control's representation allowance (|1 - R_co2| = 0.087, se 0.00757): z -8.54 -> FAIL | GATE H contrast z +6.55 FAIL
+
+  defaults         raw model gradient -0.18311 (ratio 2.743); fitted grad_off_d13c NA absorbs NA of the -0.11636 miss
+    GATE GL (se_obs 0.00484): z -24.04 -> FAIL | with the CO2 control's representation allowance (|1 - R_co2| = 0.270, se 0.01864): z -6.24 -> FAIL | GATE H contrast z +6.56 FAIL
+
+=== VERDICT === prediction 'FAIL at the canonical': z -13.31 -> CONFIRMED
+  CHOICE for Marcus: the gate proper bounds on the observation's se alone (the handoff's form); the representation-augmented form is REPORTED beside it. Both verdicts are printed above.
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/tg_gradient_level_gate_20260908.rds
+⛔ Nothing adopted.

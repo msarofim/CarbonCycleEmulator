@@ -60,6 +60,8 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     bomb_share_NH = aux$bomb_share_NH, nuc_share_NH = aux$nuc_share_NH,
     R13 = ccx_const("R13_VPDB"), R14STD = ccx_const("R14_STD"),
     lambda = ccx_const("LAMBDA_C14"), alk = ccx_const("ALK_SURFACE"),
+    # the cold box's own alkalinity (2026-09-08g); absent = the global constant
+    alk_hs = if (is.null(aux$alk_hs)) ccx_const("ALK_SURFACE") else aux$alk_hs,
     cK0 = cc$coefs$K0, cK1 = cc$coefs$K1, cK2 = cc$coefs$K2,
     cKb = cc$coefs$Kb, cKw = cc$coefs$Kw,
     t_centre = cc$t_centre, t_scale = cc$t_scale, boron = cc$boron_total,

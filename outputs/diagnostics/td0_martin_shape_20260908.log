@@ -1,0 +1,52 @@
+T-D0 at hilda31 (refit_20260908_hilda31 (logpost -1478.66), struct 'hilda'): h_ml 49.15, kz 11698, kz_deep_frac 0.0110, kz_zscale 253, pump_grad 261.96, pump_hs 91.1 gC/m2/yr
+GLODAP bottles (flag 2): deep > 2000 m d13C mean +0.473 median +0.436 sd 0.373 n 8007; high-lat (|lat| >= 55) surface <= 50 m mean +1.286 n 1040
+
+=== 1. THE SHAPES (DIC-excess profile, 0 at ML, 1 at the bottom) and the export they imply (SH) ===
+  layer (m)          glodap S GtC/yr martin_tail S GtC/yr martin_full S GtC/yr
+     49-101          0.2002    5.720     0.0724    2.521     0.0063    0.377
+    101-175          0.3764    9.012     0.1525    3.972     0.0115    0.163
+    175-277          0.5127    3.723     0.2145    1.641     0.0175    0.090
+    277-421          0.6316    1.681     0.2686    0.741     0.0259    0.056
+    421-622          0.7392    0.611     0.3175    0.269     0.0402    0.037
+    622-903          0.8632    0.292     0.3739    0.129     0.0701    0.025
+    903-1297         0.9776    0.091     0.4259    0.012     0.1474    0.018
+   1297-1848         1.0232    0.013     0.5579    0.009     0.3434    0.013
+   1848-2620         1.0138   -0.001     0.7674    0.006     0.6546    0.009
+   2620-3700         1.0101   -0.000     1.0000    0.018     1.0000    0.027
+  glodap       export NH 15.91 + SH 21.14 = 37.05 GtC/yr; below 1000 m 0.14 GtC/yr (0.4 %); HS pump (unchanged) 5.26 GtC/yr
+  martin_tail  export NH 7.01 + SH 9.32 = 16.33 GtC/yr; below 1000 m 0.07 GtC/yr (0.5 %); HS pump (unchanged) 5.26 GtC/yr
+  martin_full  export NH 0.61 + SH 0.81 = 1.43 GtC/yr; below 1000 m 0.11 GtC/yr (7.7 %); HS pump (unchanged) 5.26 GtC/yr
+
+=== 2. THE PREINDUSTRIAL COLUMN, by arm (umol/kg; d13C permil) ===
+  arm               ML      L1      L2     L10   HS/HD |  d13 ML  d13 L1 d13 L10  d13 HS  d13 HD |    step1    step2
+  glodap    NH    1990    2035    2084    2345 2104/2345 |   +2.40   +2.07   +1.16   +3.12   +1.16 |    +44.3    +93.7
+  glodap    SH    2007    2051    2101    2350 2105/2350 |   +2.57   +2.25   +1.29   +3.22   +1.29 |    +44.2    +93.5
+  martin_tail NH    1992    2013    2036    2316 2098/2312 |   +2.37   +2.22   +1.37   +3.21   +1.39 |    +20.8    +44.4
+  martin_tail SH    2009    2029    2053    2322 2099/2318 |   +2.55   +2.40   +1.49   +3.32   +1.52 |    +20.7    +44.2
+  martin_full NH    1993    1997    2001    2298 2094/2292 |   +2.35   +2.33   +1.50   +3.27   +1.54 |     +3.8     +8.3
+  martin_full SH    2009    2013    2018    2303 2095/2298 |   +2.53   +2.51   +1.63   +3.38   +1.67 |     +3.7     +8.0
+
+=== 3. OPTION C's DERIVED AMPLITUDE under each shape (the C x D interaction; umol/kg) ===
+  glodap       NH step1  +44.3 step2  +93.7  half-swing 0.198  amplitude [8.8, 13.6]
+  glodap       SH step1  +44.2 step2  +93.5  half-swing 0.239  amplitude [10.6, 16.5]
+  martin_tail  NH step1  +20.8 step2  +44.4  half-swing 0.198  amplitude [4.1, 6.4]  (step1 -53 %, amplitude -53 %)
+  martin_tail  SH step1  +20.7 step2  +44.2  half-swing 0.239  amplitude [5.0, 7.8]  (step1 -53 %, amplitude -53 %)
+  martin_full  NH step1   +3.8 step2   +8.3  half-swing 0.198  amplitude [0.8, 1.2]  (step1 -91 %, amplitude -91 %)
+  martin_full  SH step1   +3.7 step2   +8.0  half-swing 0.239  amplitude [0.9, 1.4]  (step1 -92 %, amplitude -92 %)
+
+=== 4. GATES and the HS surface rows ===
+  glodap       GATE Q mean +0.844 (NH +0.863 SH +0.826) n_sd 2.44 FAIL | GATE G z +1.57 PASS | GATE 7 ocean 2.98 land 3.38 PASS | HS surf DIC 2149 (obs 2163.2, z -0.58) d13C +2.41 (obs 1.31, z +3.59)
+  martin_tail  GATE Q mean +0.815 (NH +0.832 SH +0.798) n_sd 2.15 FAIL | GATE G z +1.62 PASS | GATE 7 ocean 2.99 land 3.38 PASS | HS surf DIC 2145 (obs 2163.2, z -0.76) d13C +2.48 (obs 1.31, z +3.81)
+  martin_full  GATE Q mean +0.796 (NH +0.812 SH +0.780) n_sd 1.96 PASS | GATE G z +1.66 PASS | GATE 7 ocean 3.00 land 3.38 PASS | HS surf DIC 2142 (obs 2163.2, z -0.87) d13C +2.52 (obs 1.31, z +3.96)
+
+=== 5. LIKELIHOOD by stream (rows with |d| > 2 vs glodap) ===
+  martin_tail  total -17.35: d13c_level_MLO -14.6; ocean_grad_d13c -6.5; d13c_level_SPO +5.7; d14c_NH -4.5; 
+  martin_full  total -47.30: d13c_level_MLO -28.6; ocean_grad_d13c -12.2; d14c_NH -11.3; d13c_level_SPO +6.1; co2_level_MLO -3.5; ocean_grad_dic +2.1; 
+
+=== 6. VERDICT against the pre-registered predictions ===
+  martin_tail  deep (bottom LS) d13C +1.22 -> +1.43 (+0.21; HD +1.22 -> +1.45) vs obs deep +0.47  P1 (>= 0.30 fall) FALSIFIED | Q 0.844 -> 0.815 P2 (falls) CONFIRMED | step1 -53 %  P3 (< -25 %) CONFIRMED | lik -17.3
+  martin_full  deep (bottom LS) d13C +1.22 -> +1.57 (+0.35; HD +1.22 -> +1.61) vs obs deep +0.47  P1 (>= 0.30 fall) FALSIFIED | Q 0.844 -> 0.796 P2 (falls) CONFIRMED | step1 -91 %  P3 (< -25 %) CONFIRMED | lik -47.3
+  C x D: the handoff's rule is that a step change > 25 % makes C and D ONE refit.
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/td0_martin_shape_20260908.rds
+⛔ Nothing adopted. The Martin shape lives in this session's override only.

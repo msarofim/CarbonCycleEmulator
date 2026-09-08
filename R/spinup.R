@@ -203,7 +203,9 @@ ccx_spinup <- function(p = ccx_default_params(),
     # hemispheres. ccx_c12_steady_conveyor() below finishes the job, and its
     # gate is widened to include this structure for that reason.
     if (!is.null(i$hs)) {
-      dic_h <- ccx_dic_for_pco2(chi0, ccx_const("ALK_SURFACE"), aux$sst_hs)
+      dic_h <- ccx_dic_for_pco2(chi0,
+                                if (is.null(aux$alk_hs)) ccx_const("ALK_SURFACE") else aux$alk_hs,
+                                aux$sst_hs)
       y[i$hs, "C"] <- dic_h * aux$hs_mass_kg[[h]] / aux$mol_per_GtC
       y[i$hd, "C"] <- dic_h * aux$a_hs[[h]] * aux$dz_hd *
                       ccx_const("RHO_SEAWATER") / aux$mol_per_GtC

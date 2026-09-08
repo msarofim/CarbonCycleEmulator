@@ -1,0 +1,29 @@
+sigma_rep table: h 30-200 m, 1 m grid, rows dic/d13c/alk; interpolation monoH.FC
+
+=== 1. The steps in the like-for-like target at the GLODAP bin edges (value at edge-1.5 m -> edge+1.5 m), and sigma_eff's relative change ===
+  edge  50 m  dic   lfl   253.3864 ->   249.9570   sigma_eff 32.3813 -> 30.3519 (-6.3 %)
+  edge  50 m  d13c  lfl    -0.9769 ->    -0.9651   sigma_eff 0.1609 -> 0.1526 (-5.1 %)
+  edge  50 m  alk   lfl    83.7590 ->    82.6008   sigma_eff 19.8820 -> 19.6129 (-1.4 %)
+  edge 100 m  dic   lfl   237.5676 ->   232.4748   sigma_eff 25.6373 -> 25.2547 (-1.5 %)
+  edge 100 m  d13c  lfl    -0.8991 ->    -0.8739   sigma_eff 0.1178 -> 0.1122 (-4.7 %)
+  edge 100 m  alk   lfl    79.3294 ->    78.3237   sigma_eff 19.2131 -> 19.2009 (-0.1 %)
+  edge 150 m  dic   lfl   222.5867 ->   218.3710   sigma_eff 27.3518 -> 29.2338 (+6.9 %)
+  edge 150 m  d13c  lfl    -0.8036 ->    -0.7853   sigma_eff 0.1254 -> 0.1347 (+7.5 %)
+  edge 150 m  alk   lfl    76.4010 ->    75.7564   sigma_eff 19.3237 -> 19.4074 (+0.4 %)
+  edge 200 m  dic   lfl   210.0466 ->   203.7036   sigma_eff 34.1948 -> 36.3066 (+6.2 %)
+  edge 200 m  d13c  lfl    -0.7295 ->    -0.7047   sigma_eff 0.1724 -> 0.1820 (+5.6 %)
+  edge 200 m  alk   lfl    75.2815 ->    75.0788   sigma_eff 19.4825 -> 19.5037 (+0.1 %)
+
+=== 2. At hilda31 (h_ml 49.15): the rows' z at the mode, and the shelf the 50 m step PREDICTS vs what the slice MEASURED ===
+  ocean_grad_dic   logL at mode  -6.731  sigma_eff 32.2466  |z| 2.16 | step 48.5 -> 51.5 m: sigma 32.3813 -> 30.3519; predicted d logL -0.258, measured -0.265
+  ocean_grad_d13c  logL at mode  -4.678  sigma_eff 0.1605  |z| 3.34 | step 48.5 -> 51.5 m: sigma 0.1609 -> 0.1526; predicted d logL -0.570, measured -0.500
+  ocean_grad_alk   logL at mode  -4.168  sigma_eff 19.8532  |z| 0.72 | step 48.5 -> 51.5 m: sigma 19.8820 -> 19.6129; predicted d logL +0.006, measured +0.006
+
+=== 3. Reading ===
+  The feature is a STEP in a data product (the like-for-like sigma table) at the 25 m GLODAP bin edge the mixed-layer base crosses,
+  rendered as a 1-2 m sigmoid by the Hermite interpolant. The shipped acceptance ('measured roughness at most 0.0734 log-units') was
+  priced at a mode where the rows' residuals were small; at hilda31 the d13C row is ~3 sigma out, so the same step costs ~0.5.
+  It is NOT the pump-shape kink family (hml_kinks; those stay gone) and NOT a model discontinuity: a sampler crosses a C1 shelf; a
+  Hessian step search does not. Whether to smooth or re-bin the table is a ruling (it changes the objective).
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/thml_sigma_step_20260908.rds
+⛔ Nothing adopted.

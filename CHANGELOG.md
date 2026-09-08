@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-08g — ⭐⭐ **PHASE 1 RAN: the seven cheap tests of handoff 09-08g §1, at the canonical `hilda31`, NOTHING ADOPTED (`notes/handoff_2026-09-08h_phase1_results.md`). Confirmed: T-L (GATE L FAILS, land 32.2 % of a pulse at 1000 yr vs Joos 16 ± 14, 1-sd bound), T-G (GATE GL FAILS, the δ¹³C gradient LEVEL 1.965×, z −13.3), T-ALK's "not a lever". Falsified, informatively: T-D0 (Martin lightens NOTHING — the deep gets HEAVIER, +1.22 → +1.43/+1.57 vs obs +0.47, because at the model's K(z) the Martin profile holds the gradient with a tenth of the export; the sub-ML step collapses −53/−91 % ⇒ C and D are ONE refit), T-hml (a 1.5 m shelf at h_ml 50 = the σ_rep table's 25 m bin-edge STEP, 0.5 log-units at |z| 3.3 — the Hessian instability reproduced exactly; not the model, not `hml_kinks`), T-I (the NH bomb peak is ALREADY 1 yr late; a delayed / reservoir NH input moves it LATER 1.0 yr/yr — option I ruled OUT; the miss needs faster early NH removal). T-A0: PARTLY — the sign FLIPS, but only at a modulated velocity W0·γ ≥ 2 m/yr (r +0.07 at 2 × 1, +0.09 at 4 × 0.5, +0.31 at 4 × 1 = 2.0× obs); the response is linear, -0.163 +0.100×(W0·γ) GtC/yr per index, so the observed +0.115 needs W0·γ ≈ 2.8 m/yr ≈ 26 Sv of MODULATED upwelling over the LS area — while the plain whole-column limb costs −135 / −596 / −1615 / −4001 log-units unrefitted at 0.5 / 1 / 2 / 4 m/yr (the one-step return to the bottom box floods the deep Δ¹⁴C rows). ⇒ the MECHANISM carries the sign; the whole-column LIMB cannot host it: B (a shallow tropical box) is the build.**
+
+**Shipped (all bit-identical at the canonical).** `alk_hs` — a per-box alkalinity for the COLD box in both cores
+(`ccx_prepare` + the live HS pCO₂ site, `spinup.R`, `cpp.R`, `ccx_core.cpp`), ABSENT = `ALK_SURFACE` bit-exact;
+`tests/testthat/test-alk-hs.R` (absence identity on state + transient, sign, R/C++ parity at an explicit value to
+1e-12, errors by name). **GATE L** `dg_gateL_partition()`/`dg_gateL_verdict()` (the IRF protocol's paired difference;
+ledger id "L"; bound 1 sd of the multi-model spread — a stated CHOICE, 2 sd would pass the canonical) and **GATE GL**
+`dg_gateGL_verdict()` (the raw gradient vs the observed mean's se from `dg_gateH_obs()`; `rep_frac` adds the CO₂
+control's representation allowance in quadrature, REPORTED not gated; ledger id "GL"), both kernel mutation-tested in
+`test-gate-bounds.R`. Ten scripts `calibration/diag_{td0_martin_shape, talk_hs_alkalinity, tl_land_share_gate,
+tg_gradient_level_gate, thml_profile, thml_kink_source, thml_kink_rows, thml_sigma_step, ti_bomb_nh_delay,
+ta0_enso_upwelling_sign}.R` → `outputs/diagnostics/*_20260908.{log,rds}`. Suite **2208 / 3 / 4 skip**, the three
+pre-existing (`test-alpha-as.R:116-117` gate Q deliberate, `test-seas-lag-split.R:199`).
+
+**T-D0** (`martin_tail` = GLODAP above the interface nearest 1000 m, Martin b = 0.858 below, flux-continuous;
+`martin_full` = Martin from the ML base; `pump_grad` held; the shape is a PROFILE, so Martin's flux at the interfaces
+is integrated with the model's own K(z)): export 37.05 → 16.33 → 1.43 GtC/yr; layer-1 step +44.3 → +20.8 → +3.8
+µmol/kg; C's derived amplitude SH [10.6, 16.5] → −53 % → −91 %; Q 2.44 → 2.15 → **1.96 PASS**; lik −17.3 / −47.3
+(`d13c_level_MLO`, `ocean_grad_d13c`, `d14c_NH`). ⇒ the assessment's option-F reading ("the deep lacks remineralised
+light carbon") is overturned: at PI the surface−deep δ¹³C gradient is already 1.24 ‰ vs the observed 0.86 and the
+whole ocean is ~1 ‰ heavy at every depth (high-lat surface bottles +1.29 vs model HS +3.2) — an air-sea EQUILIBRIUM
+question. ⚠ "below the GLODAP profile's span" was moot: the profile spans 0–3700 m and is flat below ~1000 m.
+**T-ALK**: the bottles say the SH high-latitude surface alkalinity is **2296** (n 5200), AT the model's 2300 — the
+handoff's 2256 was the ALL-latitude MEDIAN (NH 2198, freshwater); 0.85 µmol DIC per µmol ALK; Q −0.01σ at the SH
+value, −0.33σ at the NH's; every lower alkalinity moves the HS DIC row AWAY from 2163; closed, `alk_hs` stays off.
+**T-L**: canonical 23.0 / 40.3 / 43.1 / 32.2 % land at 20 / 100 / 300 / 1000 yr (the land DOES return carbon after
+300 yr); land-off (beta_max 0) 0 % fails the LOWER edge (power both ways); ent26 29.7 passes. **T-G**: raw −0.13116 vs
+−0.06675 ± 0.00484; −8.67 with the representation allowance; defaults 2.74×. **T-hml**: mode reproduces (diff 0);
+eps-scan −53.5/−57.7/−87.1/−37.8 reproduced; the shelf survives freezing the pump shape and the substep count; per
+stream `ocean_grad_d13c` (d2 ratio 24.7) + `_dic` (11.9); the table steps 50 m −5.1/−6.3 %, 100 m −4.7/−1.5, 150 m
++7.5/+6.9, 200 m +5.6/+6.2 (d13c/dic); predicted shelf −0.570/−0.258 vs measured −0.500/−0.265 ⇒ memory
+`sigma_table_step_scales_with_residual`. **T-I** (superposition of C++ runs, gated at 2.7e-12 ‰; share 0.9): NH peak
+1964.64 vs obs 1963.68; delay 0.25 … 2 yr → z +2.73 … +6.64 (1.00 yr/yr); reservoir τ 0.5–2 → +3.37 … +6.92 and the
+peak falls 827 → 683 ‰; the SH follows 1:1, the lag +0.04.
+
+**T-A0** (`diag_ta0_enso_upwelling_sign.R`, 12 pure-R runs ~100 s each + 4 C++ references): every arm's γ = 0 slope is the solubility-only −0.163 (the limb itself is ENSO-blind); the modulated limb moves it linearly, slope = -0.1627 +0.0997 × (W0·γ) GtC/yr per index unit (least squares over the 12 arms), sign flip at W0·γ ≈ 1.6, r ≥ +0.3 only at W0 4 / γ 1 (+0.235, 2.04× obs); the observed +0.1153 needs **W0·γ ≈ 2.8 m/yr = 26 Sv of modulated upwelling over the LS area** (2.99e+14 m²) — vs the real equatorial Pacific upwelling of a few tens of Sv (a RECOLLECTION). The plain limb's unrefitted price: **−135 / −596 / −1615 / −4001** at 0.5 / 1 / 2 / 4 m/yr (`d14c_profile_bd/ab/level`, then the CO₂ levels: the ML → bottom-box return loads the deep with modern ¹⁴C). Prediction PARTLY: the mechanism has the right sign at a volume comparable to the real one, but a whole-column upwelling-diffusion limb is the wrong host — **A as built is ruled out on the mean state; B (a shallow tropical upwelling box, returning to the thermocline, not the bottom) is the build**, and its size target is the 26 Sv above.
+
+**Rulings owed** (handoff §3): GATE L's bound (1 vs 2 sd); GATE GL's form; the σ_rep table (smooth / re-bin / leave — an
+objective change); A vs B; round 6's prereg with D's predictions on the GRADIENT and the EXPORT, not the deep level.
+
 ## 2026-09-08f — ⭐⭐⭐ **`hilda31` IS `CCX_MODE_CANONICAL` (Marcus: "adopt the round 5 winner as the canonical") — THE FIRST CANONICAL FITTED UNDER A STRUCTURE, and the mode file now CARRIES it. Then the ASSESSMENT: not yet acceptable — the ENSO ocean link is the same broken link as on 09-04; the ranked options are in `notes/assessment_2026-09-08_acceptable_state.md`.**
 
 **The adoption, and what it needed.** Every previous canonical was a column mode; every consumer overlaid `par_mode` onto

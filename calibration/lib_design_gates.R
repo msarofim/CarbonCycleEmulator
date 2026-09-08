@@ -420,7 +420,38 @@ DG_LEDGER <- list(
             (Joos publishes no 5-95 % at TH 300) and says so."),
        bound = "12a: Joos published 5-95 %. 12b: constructed band, stated.",
        scored = "NO -- the IRF is not a stream",
-       power  = "REAL, and 12b carries its OWN in-run mutation test.")
+       power  = "REAL, and 12b carries its OWN in-run mutation test."),
+  list(id = "L", what = "LAND share of a 100 GtC pulse at 1000 yr (T-L, 2026-09-08g)",
+       class = "MODEL ENSEMBLE (last-resort source class, named)",
+       src = "Joos et al. 2013 ACP 13:2793, abstract: at 1000 yr land 16 +/- 14 %, ocean 59 +/- 12 %, air 25 +/- 9 %",
+       bound = paste("|z_land| <= DG_L_NSD (1) against the MULTI-MODEL SPREAD, two-sided:",
+         "
+            the band is [2, 30] %. 1 sd, not 2, because the sd is a spread of",
+         "
+            models, not a measurement's sampling error -- a CHOICE, stated."),
+       scored = "NO -- no stream sees a pulse; the land sink rows see 2015-2023 only",
+       power  = paste("REAL in both directions: the canonical's land share at 100 yr",
+         "
+            (0.41, option H) is 2.5x the ensemble's 1000-yr share; a land-off",
+         "
+            arm (beta_max 0) must fail the LOWER edge. Kernel mutation-tested.")),
+  list(id = "GL", what = "interhemispheric d13C gradient LEVEL (T-G, 2026-09-08g), beside H",
+       class = "OBSERVATION", src = "MLO minus SPO annual d13C, 1980-2023, ccx_prepare_obs()",
+       bound = paste("|z| <= DG_GL_NSD (= DG_H_NSD, 2) against the observed mean's OWN",
+         "
+            sampling error se = sd/sqrt(n_eff) (dg_gateH_obs), the RAW model",
+         "
+            gradient, NEVER the fitted grad_off_d13c. A representation",
+         "
+            allowance |1 - R_co2| x |obs| can be added in quadrature",
+         "
+            (rep_frac); the gate proper uses 0 and REPORTS the other."),
+       scored = "PARTLY: d13c_gradient scores the SHAPE through a fitted offset, so the LEVEL is unscored",
+       power  = paste("REAL: the offset absorbs a 1.97x gradient invisibly (z +0.43 on the",
+         "
+            offset's prior); this gate gives that a threshold. Mutation-tested",
+         "
+            both ways on the kernel."))
 )
 
 #' Print the ledger. Called by the gate REPORTS so the numbers and their
@@ -1316,4 +1347,96 @@ dg_gateS_verdict <- function(g, lo = DG_S_LO, w = DG_S_LAG_MAX) {
        d_mo_vs_retired = ((g$mo - DG_S_OBS_RETIRED + 6) %% 12) - 6,
        # PRINTED BARE -- the pCO2 route supplies no amplitude comparator
        amp = g$amp)
+}
+
+
+# =====================================================================
+# GATE L: the LAND share of a 100 GtC pulse at 1000 yr, against Joos et al.
+# 2013's multi-model split (T-L, 2026-09-08g; option H's finding made a gate).
+#
+# Same protocol as the IRF comparison (gate 12): the historical run to
+# JOOS_REF_YEAR, the background CO2 HELD there by diagnosed emissions
+# (ccx_hold_forcing), the pulse added to the held state at its own isotopic
+# ratios (ccx_pulse_state), and the partition read as the PAIRED DIFFERENCE
+# pulse - baseline in each reservoir. The pulse is added at the reference
+# year's state (t = 0 of the series); the horizon counts from there.
+#
+# WHY A GATE ON THE LAND SHARE. The IRF miss is a comparison, not a gate
+# (09-04e). But option H (assessment 09-08f) found the model's 100-yr land
+# share 0.41 against an ensemble 1000-yr share of 0.16 +/- 0.14, and read the
+# short lifetime as a LAND-saturation question. A gate on the share makes the
+# next land change judged on it. The source class is the last-resort one --
+# another model's ensemble -- and the ledger says so.
+#
+# ⚠ THE BOUND IS 1 sd OF THE MULTI-MODEL SPREAD, two-sided. Not the 2 x se
+# every observational gate uses: this sd is a spread of models, not a sampling
+# error, and 2 sd of it ([-12, 44] %) would admit the canonical. A CHOICE,
+# stated here and in the ledger, for Marcus to ratify or move.
+# =====================================================================
+DG_L_HORIZON <- 1000
+DG_L_JOOS <- list(land  = c(mean = 16, sd = 14),
+                  ocean = c(mean = 59, sd = 12),
+                  air   = c(mean = 25, sd = 9),
+                  src = "Joos et al. 2013 ACP 13:2793, abstract (SOURCED, notes/assessment_2026-09-08_acceptable_state.md)")
+DG_L_NSD <- 1
+DG_L_RES <- c("land", "ocean", "air")
+DG_L_EXTRA_YR <- 10   # forcing built this far past the horizon so the read is interior
+
+dg_gateL_partition <- function(v, horizon = DG_L_HORIZON, pulse = JOOS_PULSE) {
+  spin <- ccx_spinup(v$p)
+  F_hist <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14 = spin$prod_c14,
+                              bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
+  sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, F_hist)$state
+  F_fwd <- suppressWarnings(ccx_build_forcing("historical",
+             c(JOOS_REF_YEAR, JOOS_REF_YEAR + horizon + DG_L_EXTRA_YR),
+             prod_c14 = spin$prod_c14, bomb_total_kmol = 0, luc_scale = v$luc_scale))
+  for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso", "c14_bomb", "c14_nuclear"))
+    F_fwd[[cc]] <- 0
+  F_fwd$gmst <- F_fwd$gmst[1]
+  F_hold <- ccx_hold_forcing(sp_ref, F_fwd, verbose = FALSE)
+  b <- ccx_run_fast(sp_ref, F_hold)$out
+  q <- ccx_run_fast(ccx_pulse_state(sp_ref, pulse), F_hold)$out
+  gpp <- ccx_const("GtC_PER_PPM")
+  d <- data.frame(t = b$t - b$t[1],
+                  air   = ((q$co2_NH + q$co2_SH) - (b$co2_NH + b$co2_SH)) / 2 * gpp,
+                  ocean = q$ocean_C - b$ocean_C,
+                  land  = q$land_C  - b$land_C)
+  d$closure <- (d$air + d$ocean + d$land) / pulse
+  at <- function(h) d[which.min(abs(d$t - h)), ]
+  share_at <- function(h) { r <- at(h); 100 * c(land = r$land, ocean = r$ocean, air = r$air) / pulse }
+  list(series = d, horizon = horizon, pulse = pulse, hold_dev = attr(F_hold, "dev"),
+       share = share_at(horizon), share_at = share_at, closure = at(horizon)$closure)
+}
+
+dg_gateL_verdict <- function(g, joos = DG_L_JOOS, n_sd = DG_L_NSD) {
+  z <- vapply(DG_L_RES, function(k) (g$share[[k]] - joos[[k]][["mean"]]) / joos[[k]][["sd"]], numeric(1))
+  list(share = g$share, z = z, n_sd = n_sd,
+       lo = joos$land[["mean"]] - n_sd * joos$land[["sd"]],
+       hi = joos$land[["mean"]] + n_sd * joos$land[["sd"]],
+       pass = is.finite(z[["land"]]) && abs(z[["land"]]) <= n_sd)
+}
+
+# =====================================================================
+# GATE GL: the interhemispheric d13C gradient LEVEL (T-G, 2026-09-08g).
+#
+# Beside gate H, which gates the CONTRAST R_d13c - R_co2 (transport cancels).
+# The d13c_gradient stream scores the gradient's SHAPE through a fitted
+# offset, so a 1.97x level miss costs the objective nothing visible
+# ([[ccx_offsets_absorb_the_errors]]). This gate reads the SAME raw model
+# gradient dg_gateH() reads (never grad_off_d13c) against the observed mean's
+# own sampling error from dg_gateH_obs(): the observation's number, not a
+# typed one. `rep_frac` adds a representation allowance rep_frac x |obs| in
+# quadrature -- the CO2 control's |1 - R_co2| is the measured size of what a
+# two-box gradient legitimately is not; the gate proper uses 0 and the report
+# prints the other.
+# =====================================================================
+DG_GL_NSD <- DG_H_NSD
+
+dg_gateGL_verdict <- function(g, ho, n_sd = DG_GL_NSD, rep_frac = 0) {
+  o <- ho$d13c; m <- g$d13c
+  se <- sqrt(o$se^2 + (rep_frac * o$mean)^2)
+  z  <- (m - o$mean) / se
+  list(model = m, obs = o$mean, se_obs = o$se, se = se, rep_frac = rep_frac,
+       ratio = m / o$mean, z = z, n_sd = n_sd,
+       pass = is.finite(z) && abs(z) <= n_sd)
 }

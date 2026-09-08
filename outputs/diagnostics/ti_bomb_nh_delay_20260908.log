@@ -1,0 +1,30 @@
+T-I at hilda31: bomb_share_NH 0.90, tau_ex 0.912, bomb total 118.4 kmol; forcing 3300 monthly rows 1750.04-2024.96
+GATE superposition NH: whole-column delay vs its four-part sum, max |diff| 2.66e-12 permil (tol 1e-06) -> PASS
+GATE superposition SH: whole-column delay vs its four-part sum, max |diff| 3.33e-12 permil (tol 1e-06) -> PASS
+
+observed: NH peak 1963.676 (855 permil), SH 1965.016 (660), lag 1.340; sd nh_t 0.444 sh_t 0.338 lag 0.494
+
+=== 1. PURE DELAY of the NH limb ===
+   delay   NH peak permil   SH peak permil    lag |   z NH   z SH  z lag gate 5
+    0.00  1964.639    864  1965.513    698  0.874 |  +2.17  +1.47  -0.94 FAIL
+    0.25  1964.887    866  1965.580    695  0.693 |  +2.73  +1.67  -1.31 FAIL
+    0.50  1965.142    868  1965.736    690  0.594 |  +3.30  +2.13  -1.51 FAIL
+    0.75  1965.391    869  1966.368    689  0.977 |  +3.86  +4.00  -0.73 FAIL
+    1.00  1965.624    868  1966.537    687  0.913 |  +4.39  +4.51  -0.86 FAIL
+    1.25  1965.874    865  1966.639    685  0.765 |  +4.95  +4.81  -1.16 FAIL
+    1.50  1966.132    864  1967.086    682  0.954 |  +5.54  +6.13  -0.78 FAIL
+    1.75  1966.385    863  1967.314    680  0.929 |  +6.11  +6.81  -0.83 FAIL
+    2.00  1966.621    861  1967.516    678  0.895 |  +6.64  +7.41  -0.90 FAIL
+
+=== 2. FIRST-ORDER RESERVOIR on the NH limb (e-folding tau) ===
+  tau 0.50  1965.171    827  1966.063    678  0.892 |  +3.37  +3.10  -0.91 FAIL
+  tau 1.00  1965.694    774  1966.618    647  0.924 |  +4.55  +4.75  -0.84 FAIL
+  tau 1.50  1966.257    723  1967.382    615  1.124 |  +5.82  +7.01  -0.44 FAIL
+  tau 2.00  1966.748    683  1967.681    586  0.933 |  +6.92  +7.89  -0.82 FAIL
+
+=== 3. VERDICT ===
+  identity (delay 0) reproduces the canonical's z NH +2.17 (scorecard +2.17)
+  prediction 'a 1-yr NH delay moves z NH to < +1': z +2.17 -> +4.39 (moved +2.22) -> FALSIFIED IN SIGN: the peak is sensitive to input timing (~1 yr per yr) but the model's peak is ALREADY LATE, so a reservoir -- which can only DELAY -- moves it the wrong way. Option I is ruled out as built; what the miss needs is FASTER early removal from the NH atmosphere (the exchange), not later input.
+  the direction: a LATER NH input makes the NH peak LATER (worse); the SH peak moves +1.024 yr per yr of NH delay, the lag +0.039
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/ti_bomb_nh_delay_20260908.rds
+⛔ Nothing adopted.

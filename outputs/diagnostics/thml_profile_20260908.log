@@ -1,0 +1,93 @@
+GATE: the stored mode reproduces: log-post -1478.659503 file -1478.659503 diff 0.000e+00
+h_ml at the mode 49.153 m (u -2.0638), band [30, 200], transform logit; prior lognormal (median 83.9)
+20 + 49 evaluations in 6 s
+
+=== 1. COARSE SLICE, +/- 20 m at 2 m (log-post minus the mode's) ===
+  h_ml   31.15    -20.217
+  h_ml   33.15    -15.383
+  h_ml   35.15    -11.608
+  h_ml   37.15     -8.442
+  h_ml   39.15     -5.854
+  h_ml   41.15     -3.778
+  h_ml   43.15     -2.132
+  h_ml   45.15     -0.998
+  h_ml   47.15     -0.265
+  h_ml   49.15     +0.000  <- mode
+  h_ml   51.15     -0.799
+  h_ml   53.15     -1.412
+  h_ml   55.15     -2.337
+  h_ml   57.15     -3.768
+  h_ml   59.15     -5.708
+  h_ml   61.15     -8.120
+  h_ml   63.15    -10.719
+  h_ml   65.15    -13.728
+  h_ml   67.15    -17.329
+  h_ml   69.15    -21.157
+  argmax on the union grid: h_ml 49.15 (mode 49.153; +0.000 log-units above the mode)
+
+=== 2. FINE SLICE, +/- 6 m at 0.25 m: value, first and second differences (per m, per m^2) ===
+  h_ml   43.15    -2.1319  d1  +0.7334  
+  h_ml   43.40    -1.9486  d1  +0.7063  d2  -0.1085
+  h_ml   43.65    -1.7720  d1  +0.6576  d2  -0.1949
+  h_ml   43.90    -1.6076  d1  +0.5859  d2  -0.2867
+  h_ml   44.15    -1.4611  d1  +0.5091  d2  -0.3070
+  h_ml   44.40    -1.3338  d1  +0.4598  d2  -0.1972
+  h_ml   44.65    -1.2189  d1  +0.4402  d2  -0.0785
+  h_ml   44.90    -1.1088  d1  +0.4417  d2  +0.0059
+  h_ml   45.15    -0.9984  d1  +0.4258  d2  -0.0636
+  h_ml   45.40    -0.8920  d1  +0.4089  d2  -0.0676
+  h_ml   45.65    -0.7897  d1  +0.3939  d2  -0.0601
+  h_ml   45.90    -0.6913  d1  +0.3818  d2  -0.0482
+  h_ml   46.15    -0.5958  d1  +0.3709  d2  -0.0437
+  h_ml   46.40    -0.5031  d1  +0.3507  d2  -0.0806
+  h_ml   46.65    -0.4154  d1  +0.3206  d2  -0.1204
+  h_ml   46.90    -0.3353  d1  +0.2810  d2  -0.1586
+  h_ml   47.15    -0.2650  d1  +0.2399  d2  -0.1641
+  h_ml   47.40    -0.2050  d1  +0.2050  d2  -0.1397
+  h_ml   47.65    -0.1538  d1  +0.1765  d2  -0.1140
+  h_ml   47.90    -0.1096  d1  +0.1522  d2  -0.0973
+  h_ml   48.15    -0.0716  d1  +0.1218  d2  -0.1215
+  h_ml   48.40    -0.0411  d1  +0.0893  d2  -0.1300
+  h_ml   48.65    -0.0188  d1  +0.0554  d2  -0.1356
+  h_ml   48.90    -0.0050  d1  +0.0198  d2  -0.1423
+  h_ml   49.15    +0.0000  d1  -0.0269  d2  -0.1870
+  h_ml   49.40    -0.0067  d1  -0.0954  d2  -0.2740
+  h_ml   49.65    -0.0306  d1  -0.1861  d2  -0.3626
+  h_ml   49.90    -0.0771  d1  -0.3454  d2  -0.6375  <-- SPIKE
+  h_ml   50.15    -0.1634  d1  -0.6253  d2  -1.1195  <-- SPIKE
+  h_ml   50.40    -0.3198  d1  -0.7535  d2  -0.5127  <-- SPIKE
+  h_ml   50.65    -0.5081  d1  -0.6924  d2  +0.2444
+  h_ml   50.90    -0.6812  d1  -0.4700  d2  +0.8894  <-- SPIKE
+  h_ml   51.15    -0.7987  d1  -0.3239  d2  +0.5845  <-- SPIKE
+  h_ml   51.40    -0.8797  d1  -0.2555  d2  +0.2735
+  h_ml   51.65    -0.9436  d1  -0.2568  d2  -0.0050
+  h_ml   51.90    -1.0078  d1  -0.3069  d2  -0.2006
+  h_ml   52.15    -1.0845  d1  -0.3154  d2  -0.0340
+  h_ml   52.40    -1.1634  d1  -0.3215  d2  -0.0242
+  h_ml   52.65    -1.2437  d1  -0.3319  d2  -0.0418
+  h_ml   52.90    -1.3267  d1  -0.3412  d2  -0.0371
+  h_ml   53.15    -1.4120  d1  -0.3399  d2  +0.0052
+  h_ml   53.40    -1.4970  d1  -0.3562  d2  -0.0654
+  h_ml   53.65    -1.5861  d1  -0.3927  d2  -0.1460
+  h_ml   53.90    -1.6842  d1  -0.4426  d2  -0.1993
+  h_ml   54.15    -1.7949  d1  -0.4792  d2  -0.1464
+  h_ml   54.40    -1.9147  d1  -0.5177  d2  -0.1540
+  h_ml   54.65    -2.0441  d1  -0.5603  d2  -0.1706
+  h_ml   54.90    -2.1842  d1  -0.6118  d2  -0.2059
+  h_ml   55.15    -2.3371               
+  second difference: median |d2| 0.1423, range [-1.1195, +0.8894], 5 point(s) above 3 x the median
+
+=== 3. THE HESSIAN'S OWN EPS SCAN, reproduced (central second difference in u at the mode) ===
+  eps 1e-03 (reach +0.017 m / -0.017 m): d2/du2   -53.473   (Hessian log: -53.5 at <= 3e-2, -57.7, -87.1, -37.8 at 3e-2, 1e-1, 3e-1)
+  eps 3e-03 (reach +0.051 m / -0.051 m): d2/du2   -53.478   (Hessian log: -53.5 at <= 3e-2, -57.7, -87.1, -37.8 at 3e-2, 1e-1, 3e-1)
+  eps 1e-02 (reach +0.171 m / -0.169 m): d2/du2   -53.565   (Hessian log: -53.5 at <= 3e-2, -57.7, -87.1, -37.8 at 3e-2, 1e-1, 3e-1)
+  eps 3e-02 (reach +0.516 m / -0.504 m): d2/du2   -57.655   (Hessian log: -53.5 at <= 3e-2, -57.7, -87.1, -37.8 at 3e-2, 1e-1, 3e-1)
+  eps 1e-01 (reach +1.766 m / -1.635 m): d2/du2   -87.132   (Hessian log: -53.5 at <= 3e-2, -57.7, -87.1, -37.8 at 3e-2, 1e-1, 3e-1)
+  eps 3e-01 (reach +5.720 m / -4.537 m): d2/du2   -37.807   (Hessian log: -53.5 at <= 3e-2, -57.7, -87.1, -37.8 at 3e-2, 1e-1, 3e-1)
+  fine-grid second difference at the mode -0.1870 per m^2 = -54.00 per u^2 (x (dh/du)^2, dh/du = 16.995)
+
+=== 4. VERDICT ===
+  prediction 'smooth, no kink': FALSIFIED -- spike(s) at h_ml 49.90, 50.15, 50.40, 50.90, 51.15
+  the eps-scan instability is a kink
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/thml_profile_20260908.rds
+⛔ Nothing adopted.

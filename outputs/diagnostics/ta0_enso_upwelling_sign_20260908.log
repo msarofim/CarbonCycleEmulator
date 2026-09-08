@@ -1,0 +1,27 @@
+GCB observed: slope +0.1153 +/- 0.0246 GtC/yr per index, r +0.488 (n 66)
+hilda31 full model: slope +0.0612 (r +0.233); solubility-only (gamma_enso_ocn 0): slope -0.1629 (r -0.525); co2 2020 414.99
+
+  W0 0.5 m/yr, gamma 0 (C++): slope -0.1629 (r -0.525), sink 2015-23 3.01 GtC/yr, co2 2020 414.06; lik -135.3 vs solubility-only [d14c_profile_bd -103.9, co2_level_MLO -16.8, ocean_grad_d13c -6.6, d14c_profile_ab -5.4, co2_level_SPO -5.1]
+    gamma 0.25: slope -0.1505 +/- 0.0323 (r -0.486)  = -1.31x obs; sink 3.03; lik +3.8 vs gamma 0; 109 s
+    gamma 0.50: slope -0.1382 +/- 0.0333 (r -0.444)  = -1.20x obs; sink 3.04; lik +6.5 vs gamma 0; 108 s
+    gamma 1.00: slope -0.1150 +/- 0.0357 (r -0.361)  = -1.00x obs; sink 3.06; lik +11.8 vs gamma 0; 105 s
+
+  W0 1.0 m/yr, gamma 0 (C++): slope -0.1628 (r -0.524), sink 2015-23 3.07 GtC/yr, co2 2020 413.14; lik -596.3 vs solubility-only [d14c_profile_bd -338.9, d14c_profile_ab -125.7, co2_level_MLO -57.9, co2_level_SPO -33.3, d14c_profile_level -23.4, ocean_grad_d13c -12.1, d13c_level_SPO -4.7, d13c_level_MLO +4.6, d14c_NH -3.1]
+    gamma 0.25: slope -0.1378 +/- 0.0334 (r -0.443)  = -1.20x obs; sink 3.10; lik +15.7 vs gamma 0; 104 s
+    gamma 0.50: slope -0.1130 +/- 0.0360 (r -0.353)  = -0.98x obs; sink 3.13; lik +27.2 vs gamma 0; 103 s
+    gamma 1.00: slope -0.0662 +/- 0.0418 (r -0.188)  = -0.57x obs; sink 3.16; lik +52.5 vs gamma 0; 105 s
+
+  W0 2.0 m/yr, gamma 0 (C++): slope -0.1628 (r -0.523), sink 2015-23 3.18 GtC/yr, co2 2020 411.35; lik -1615.2 vs solubility-only [d14c_profile_ab -494.4, d14c_profile_level -361.1, d14c_profile_bd -347.0, co2_level_MLO -206.9, co2_level_SPO -153.4, ocean_grad_d13c -19.4, d13c_level_SPO -11.3, d14c_NH -10.4, d14c_SH -10.1, d13c_level_MLO +8.2, ocean_grad_dic -6.5, co2_icecore -5.2]
+    gamma 0.25: slope -0.1121 +/- 0.0361 (r -0.350)  = -0.97x obs; sink 3.25; lik +55.1 vs gamma 0; 105 s
+    gamma 0.50: slope -0.0617 +/- 0.0425 (r -0.173)  = -0.54x obs; sink 3.31; lik +95.5 vs gamma 0; 101 s
+    gamma 1.00: slope +0.0335 +/- 0.0567 (r +0.071)  = 0.29x obs; sink 3.36; lik +195.7 vs gamma 0; 100 s
+
+  W0 4.0 m/yr, gamma 0 (C++): slope -0.1627 (r -0.519), sink 2015-23 3.40 GtC/yr, co2 2020 407.97; lik -4000.6 vs solubility-only [d14c_profile_level -1833.1, co2_level_MLO -738.9, co2_level_SPO -616.8, d14c_profile_ab -543.2, d14c_profile_bd -109.0, d14c_SH -37.9, d14c_NH -37.6, d13c_level_SPO -30.2, ocean_grad_d13c -24.6, co2_icecore -20.5, ocean_grad_dic -14.8, d13c_level_MLO +11.2, gcb_ocean_sink -5.4]
+    gamma 0.25: slope -0.0600 +/- 0.0422 (r -0.169)  = -0.52x obs; sink 3.52; lik +141.7 vs gamma 0; 100 s
+    gamma 0.50: slope +0.0422 +/- 0.0578 (r +0.088)  = 0.37x obs; sink 3.63; lik +240.9 vs gamma 0; 100 s
+    gamma 1.00: slope +0.2351 +/- 0.0885 (r +0.305)  = 2.04x obs; sink 3.75; lik +561.5 vs gamma 0; 100 s
+
+=== VERDICT ===
+  prediction 'r flips from -0.53 to >= +0.3 at gamma <= 0.5': PARTLY: the sign flips (max r +0.30 at W0 4 / gamma 1) but not to +0.3 at gamma <= 0.5
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/ta0_enso_upwelling_sign_20260908.rds
+⛔ Nothing adopted. w_up stays 0 in every mode file.
