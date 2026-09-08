@@ -70,6 +70,14 @@ test_that("R and C++ agree at 0.5", {
                ccx_deriv_fast(sp$y, 1850, p, fr, sp$grid, sp$aux), tolerance = 1e-10)
 })
 
+test_that("the prior is the measured exchange factor, tied to the product (09-08e)", {
+  obs <- readRDS(ccx_path("data", "obs_hs_exchange_factor.rds")); pr <- readRDS(ccx_path("data", "obs_hs_asx_prior.rds")); s <- CCX_PARAM_TABLE$hs_asx_frac
+  expect_equal(pr$centre, obs$factor)                                        # COMPUTED from the product, never re-typed
+  for (x in c(0.5, 0.653, 1.835)) expect_equal(s$prior(x), dlnorm(x, log(pr$centre), pr$log_sd, log = TRUE))
+  expect_gt(s$prior(pr$centre), s$prior(1.835))                             # round 4's compensator value is penalised
+  expect_equal(s$lo, 0.02); expect_equal(s$hi, 2.0)                          # the box is unchanged
+})
+
 test_that("invalid values error by name", {
   expect_error(ccx_spinup(hx_par(0)), "hs_asx_frac")
   expect_error(ccx_spinup(hx_par(-1)), "hs_asx_frac")

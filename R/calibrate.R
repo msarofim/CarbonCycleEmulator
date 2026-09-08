@@ -90,6 +90,13 @@ ccx_u_hs_prior <- local({
     cache
   }
 })
+ccx_hs_asx_prior <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "obs_hs_asx_prior.rds"))
+    cache
+  }
+})
 ccx_h_ml_prior <- local({
   cache <- NULL
   function() {
@@ -285,9 +292,9 @@ CCX_PARAM_TABLE <- list(
   # u_hs 09-08d) ----------
   # Marcus's ruling on prereg_2026-09-07 sec.3-4: HILDA's attachment, z_K,
   # tau_q, hs_frac and sst_hs are DECLARED (ccx_apply_structure() below); the
-  # deep floor f and the cold box's exchange-area factor are FITTED, with no
-  # prior beyond their box (dunif, as beta_max / kz); h_hs joined 09-07 and the
-  # flush u_hs 09-08d (with an observation prior, below).
+  # deep floor f is FITTED with no prior beyond its box (dunif, as beta_max /
+  # kz); the cold box's exchange-area factor got its OBSERVATION prior 09-08e;
+  # h_hs joined 09-07 and the flush u_hs 09-08d (with an observation prior, below).
   # ⚠ The design said "log scale, box"; this table has no log-spaced box, so
   # both are `logit` on the box with a uniform prior on the NATURAL scale. The
   # logit Jacobian pulls toward the box centre by ~1.7 log-units between
@@ -310,8 +317,17 @@ CCX_PARAM_TABLE <- list(
   # 0.220, effectively AT the floor, so the box was choosing the answer. If
   # the fit now drives it toward zero, that is a "the cold box wants no
   # air-sea exchange" signal to read, not a fit to adopt.
+  # hs_asx_frac: OBSERVATION PRIOR since 2026-09-08e (round 5). Round 4 freed
+  # u_hs and the fit rebuilt the modern sink HERE, 0.82 -> 1.83 (2.8x the value
+  # measured from ice x wind x Schmidt, 0.653, data/obs_hs_exchange_factor.rds)
+  # -- the factor had a box and no prior, so it was the free compensator. Now
+  # lognormal on the measured 0.653, log-sd 0.15 (a JUDGEMENT, ~2.5x the
+  # measured component spread; the hemispheric split 0.32/0.78 is a
+  # representation error, not carried), read lazily through ccx_hs_asx_prior().
+  # Box unchanged. 1.83 sits at z +6.9; round 3's 0.82 at +1.5.
   hs_asx_frac  = list(tr = "logit", lo = 0.02, hi = 2.0, init = 1.0,
-                      prior = function(x) dunif(x, 0.02, 2.0, log = TRUE)),
+                      prior = function(x) { pr <- ccx_hs_asx_prior()
+                        dlnorm(x, log(pr$centre), pr$log_sd, log = TRUE) }),
   # h_hs: the cold box's thickness, FITTED since 2026-09-07 (28 -> 29). It was
   # declared to FOLLOW h_ml (choice C2), which coupled the HS bomb capacity to
   # the low-latitude mixed layer; every basin of the first refit then moved

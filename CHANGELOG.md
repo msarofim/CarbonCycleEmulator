@@ -2,6 +2,25 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-08e — ⭐⭐ **ROUND 4 CUT AT WAVE 2 (Marcus) AND ROUND 5 DESIGNED: the cold box's exchange factor `hs_asx_frac` gets ITS observation (lognormal 0.653 × 0.15 log-sd, a stated JUDGEMENT width); THE question is where the modern sink goes once both the flush and the exchange are honest. 24-start array, one wave.**
+
+**Round 4's interim answer (10 of 46, wave 1; all CONVERGED 130–149 min):** `u_hs` went DOWN to 15 m/yr (z −1.48 below its
+own prior), likelihood +5–7 over round 3, export 61 (ratio 4.0 — the deep proportionality held), `h_ml` 50–58 / 156–176 in
+the two families — **and the sink was rebuilt in `hs_asx_frac` 0.82 → 1.83**, nearly its box top, 2.8× the measured 0.653
+([[ccx_hs_asx_obs_factor]]); `kz` +66 %, K_deep 224 → 101, sink 3.03 → 2.96, R8/R10 FAIL. The prereg's "observation holds"
+branch does not apply to a fit that moved the violation onto another observed quantity. Marcus: ten starts settle the finding;
+**the pending 26 tasks were cancelled at 10:50 EDT** (`scancel --state=PENDING 17185969`); ids 10–19 finish ~12:40 and close
+the round-4 record at 20 starts (6 fixed + 14 dispersed) — R7's power is reduced and the scorer says so.
+
+**Round 5** (`notes/prereg_2026-09-08e_round5_hs_asx_prior.md`, P1–P9): `data-raw/build_hs_asx_prior.R` → `data/obs_hs_asx_prior.rds`
+(centre = the product's `factor`, never re-typed; sampled spreads: windows 0.034, Schmidt-at-model-T 0.040, component 0.053,
+hemispheric 0.440 — the last is a REPRESENTATION error, not carried); `CCX_PARAM_TABLE$hs_asx_frac` prior lognormal
+(`ccx_hs_asx_prior()`, box unchanged); run-inputs entry; `test-hs-asx-frac.R` + `test-prior-z.R` cases. 1.83 at z +6.9; 0.82 at
++1.5; HILDA's 1 at +2.8. Routes priced in the prereg: `u_hs` back up (2.6 log-units), `k_w`/`kz`, the land, or no route.
+**Prediction: `u_hs` ≥ 33** (the cheapest priced route) with the likelihood within 5 of round 4. Array **24** (`0-23%24`, one
+wave ~2.5 h) — the empirical record (rounds 2–4, 40 dispersed draws each, zero new basins) licenses the cut, stated at P7.
+Outdir `multistart_20260908e_hilda31_asx`. LAUNCH_STATUS_PLACEHOLDER
+
 ## 2026-09-08d — ⭐⭐⭐ **RULED (Marcus): `u_hs` FREED under the observed overturning; `h_ml` freed under a prior spanning the Holte annual MEAN and MAX; the SEASONAL mixed layer SCOPED as the round-5 candidate; the WHOLE-MODEL SCORECARD at `ent26` vs the round-3 winner. Round 4 prepared (31 parameters) — launch recorded below when it happens.**
 
 **The ruling.** "Free u_hs. Either free h_ml or explore pinning it to a seasonal shape so that it can capture both the

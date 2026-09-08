@@ -220,7 +220,7 @@ MS_OUTDIR <- local({
   # says which set it holds is the answer that does not rely on a guard firing.
   if (is.na(d) || !nzchar(d))
     ccx_path("calibration", "output",
-             if (identical(Sys.getenv("CCX_MS_STRUCT", ""), "hilda")) "multistart_20260908d_hilda31"
+             if (identical(Sys.getenv("CCX_MS_STRUCT", ""), "hilda")) "multistart_20260908e_hilda31_asx"
              else "multistart_20260901_enso25")
   else d
 })

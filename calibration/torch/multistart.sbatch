@@ -117,8 +117,11 @@ mkdir -p logs calibration/output
 # 2026-09-08d: round 4 (31 parameters: + u_hs FREED under the observed overturning,
 # lognormal median 21.84 m/yr; h_ml's flat prior replaced by the Holte mean/max
 # lognormal). Round-3 checkpoints (30 names) are refused by the guard; new outdir.
+# 2026-09-08e: round 5 (31 parameters; + the OBSERVATION prior on hs_asx_frac, 0.653 x 0.15 log-sd:
+# round 4 rebuilt the sink there). 24 starts (6 fixed + 18 dispersed) at %24 -- one wave.
+#     sbatch --array=0-23%24 calibration/torch/multistart.sbatch
 export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260908d_hilda31}"
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260908e_hilda31_asx}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.

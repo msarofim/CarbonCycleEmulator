@@ -80,6 +80,10 @@ test_that("ccx_prior_z matches the analytic z for the two OBSERVATION lognormals
   expect_gt(abs(ccx_prior_z("h_ml", 39.8) - (log(39.8) - log(hp$centre_m)) / hp$log_sd), 0.02)   # the truncation IS visible
   for (x in c(12, 21.84, 38, 60))
     expect_equal(ccx_prior_z("u_hs", x), (log(x) - log(up$centre_m_yr)) / up$log_sd, tolerance = 1e-3, info = sprintf("u_hs at %g", x))
+  # hs_asx_frac (09-08e): box [0.02, 2.0] holds all the mass of a 0.15-wide lognormal at 0.653
+  ap <- readRDS(ccx_path("data", "obs_hs_asx_prior.rds"))
+  for (x in c(0.5, 0.653, 0.818, 1.835))
+    expect_equal(ccx_prior_z("hs_asx_frac", x), (log(x) - log(ap$centre)) / ap$log_sd, tolerance = 1e-3, info = sprintf("hs_asx_frac at %g", x))
 })
 
 test_that("ccx_prior_z resolves deep tails, which the linear-grid version could not", {
