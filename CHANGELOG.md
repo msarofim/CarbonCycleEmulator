@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-08j — **Handoff with the next-step recommendation** (`notes/handoff_2026-09-08j_next_step_recommendation.md`): rulings first (gate 5's statistic → the trough; the σ_rep table → re-bin on the model's layer edges; GL → the augmented form; the bomb delivery tail as a data check), then **round 6 = C ALONE** (the seasonal mixed layer with a derived amplitude; prereg P1–P7, no Joos row; Torch array), then B (sized by T-A0 at ~26 Sv modulated), then E; D shelved until E; A and I ruled out.
+
 ## 2026-09-08i — ⭐⭐ **THE CHEAP PROBES (Marcus: "do the cheap probes; do not use Joos as a scoring mechanism"): (1) GATE L DEMOTED to a comparison; (2) the ocean δ¹³C LEVEL decomposed — like-for-like the model's modern surface−deep gradient is 0.40 vs 0.89, too SMALL (T-D0's "already too large" was PI-vs-modern, RETRACTED at every quoting site); (3) K(z) has NO room and D NEEDS E (diffusive deep return 204× short of Martin's flux); (4) GATE 5's "NH peak +2.17σ late", carried since 09-02, is an ARGMAX ON A DOUBLE-PEAKED CURVE — the model's first-peak timing matches the observation to 0.00 yr.**
 
 **The ruling.** "Do not use Joos as a scoring mechanism: the long lifetime is meant to be an emergent property, not
