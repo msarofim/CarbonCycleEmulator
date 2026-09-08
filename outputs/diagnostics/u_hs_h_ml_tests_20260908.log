@@ -1,0 +1,109 @@
+winner: id 24, logpost -1481.2724, pump_hs_gcm2 137.54, h_ml 39.82, h_hs 400.2, u_hs (declared) 38
+HARNESS GATE: rebuilt logpost at the winner's u -1481.2724 vs stored -1481.2724 (diff -4.00e-11) -> PASS
+winner re-read: lik -1438.64 (logpost -1481.27), HS d13C +2.46, HD-HS 254, E_hs 7.94, E_ls 29.95 GtC/yr
+
+=== T1: profile in pump_hs_gcm2 at u_hs in { 38, 30, 24, 18 } m/yr (Sv = u_hs * a_hs / 3.156e13) ===
+   u_hs     Sv |    g_opt     E_hs     E_ls |     lp    lik |    HS13  HD-HS   cond |  z_lev   z_AB   z_BD |  sink  co2_20 | d_lik_vs_W
+     38   69.5 |    137.5     7.94    29.95 | -1481.3 -1438.6 |   +2.46    254   1.07 |  -0.50  +1.05  +0.68 |  3.03  417.21 |    -0.00
+     30   54.9 |    175.1    10.12    29.95 | -1524.7 -1479.9 |   +2.57    387   1.85 |  -1.14  +1.05  +0.69 |  2.97  418.26 |   -41.24
+     24   43.9 |    193.8    11.19    29.95 | -1647.6 -1600.8 |   +2.66    506   2.56 |  -1.74  +1.05  +0.69 |  2.90  419.26 |  -162.16
+     18   32.9 |    198.0    11.43    29.95 | -1917.6 -1869.5 |   +2.77    634   3.31 |  -2.45  +1.06  +0.70 |  2.82  420.59 |  -430.88
+  rows paying most at u_hs 24 vs the winner (|d| > 1):
+    co2_level_SPO             -65.98
+    co2_level_MLO             -45.22
+    ocean_grad_dic            -40.64
+    d14c_profile_level         -4.53
+    gcb_ocean_sink             -4.10
+    hs_surf_d13c               -2.69
+    ocean_grad_d13c            +2.55
+    co2_icecore                -1.97
+    d14c_SH                    +1.11
+
+=== T1(i) [post-hoc]: the flush at FIXED export 137.5 -- what u_hs alone does ===
+   u_hs |      lik    deep8     rest |  HD-HS   HS13   sink  co2_20   cond
+     38 |  -1438.6    -36.4  -1402.3 |    254  +2.46   3.03  417.21   1.07
+     30 |  -1488.9    -37.2  -1451.7 |    307  +2.49   2.95  418.53   1.38
+     24 |  -1627.4    -44.2  -1583.2 |    364  +2.52   2.88  419.72   1.72
+     18 |  -1919.8    -67.5  -1852.3 |    447  +2.58   2.79  421.16   2.21
+  rows at u_hs 24, fixed export (|d| > 2): co2_level_SPO -96.9; co2_level_MLO -72.3; ocean_grad_dic -11.9; ocean_grad_d13c +6.6; gcb_ocean_sink -5.3; co2_icecore -3.1; d14c_NH -2.1; 
+
+=== T1(ii) [post-hoc]: the export optimum against the 8 DEEP rows ALONE (the powered H1 test) ===
+   u_hs |    g_opt    deep8 |  HD-HS   HS13   cond |   g/u_hs
+     38 |    145.1    -36.2 |    267  +2.48   1.15 |     3.82
+     30 |    117.3    -35.7 |    265  +2.45   1.13 |     3.91
+     24 |     96.1    -35.4 |    260  +2.42   1.10 |     4.01
+     18 |     74.0    -36.4 |    251  +2.38   1.05 |     4.11
+
+=== T2: profile at h_hs 400.169 (winner) vs 75 (HILDA), u_hs 38 ===
+  h_hs   400: g_opt  137.5  lp -1481.27  lik -1438.64  HS13 +2.46  HD-HS 254  z -0.50/+1.05/+0.68
+  h_hs    75: g_opt  196.2  lp -1566.02  lik -1518.15  HS13 +2.51  HD-HS 357  z -0.87/+1.02/+0.68
+  T2(0) [post-hoc] h_hs 75 at the SAME export 137.5: HD-HS 254.3 vs 254.3 (steady state CANCELS), HS13 +2.40, sink 2.94 vs 3.03, co2_2020 419.06 vs 417.21, lik -106.59; rows |d| > 2: co2_level_SPO -58.3; co2_level_MLO -38.9; d14c_NH -9.8; d14c_SH +5.2; d13c_level_MLO -2.9; co2_icecore -2.4; d13c_level_SPO +2.2; 
+
+=== T3: conduit and flush carbon budget at the winner's preindustrial spinup (GtC/yr) ===
+  h dic_hs dic_hd cond_gross cond_net_int_to_hd flush_gross_hs_to_hd
+ NH   2105   2357      25.23            -0.4787                24.42
+ SH   2106   2361      33.64            -0.5886                32.47
+ flush_net_hs_to_hd  e_hs  e_ls ls_remin_below_1000
+             -2.932 3.411 12.86             0.08115
+             -3.945 4.533 17.09             0.10785
+  NET: HS pump into HD 7.94; returned HD->HS through the u_hs flush 6.88 (87 %); delivered HD->interior through the conduit 1.07 (13 %)
+
+=== T4: remineralisation below 1000 m ===
+  LS pump into layers below 1000 m: 0.189 GtC/yr of 29.95 exported; HS pump into HD (400-3700 m, one box): 7.94; total 8.13 vs literature 1.4 (Nowicki 2022 x Martin; the exponent is a RECOLLECTION) = 5.8x
+  ...but the carbon that REACHES the deep interior is the conduit's net 1.07 GtC/yr = 0.76x the literature number.
+
+=== T5 (observed LS annual MEAN): h_ml 39.8 -> 59.7 m, nothing refitted: lik -1461.77 (-23.13 vs winner), logpost -1503.43 (-22.16; h_ml prior-z at the winner -1.57) ===
+  HS13 +2.47, HD-HS 255, E_ls 32.05, sink 3.07 (+0.04), co2_2020 -0.70 ppm, RMS dCO2 1959-2024 0.46 ppm, z -0.45/+1.22/+0.70; rows |d| > 0.5:
+    co2_level_MLO             -10.98
+    d14c_SH                    -7.41
+    d13c_level_MLO             +4.83
+    d13c_level_SPO             -4.82
+    co2_level_SPO              -2.42
+    co2_seasonal_MLO           -1.93
+    d14c_NH                    +1.74
+    ocean_grad_d13c            -0.97
+    ocean_grad_dic             -0.77
+    d14c_profile_ab            -0.51
+
+=== T6 (observed LS annual MAXIMUM): h_ml 39.8 -> 118.1 m, nothing refitted: lik -1737.56 (-298.92 vs winner), logpost -1778.67 (-297.39; h_ml prior-z at the winner -1.57) ===
+  HS13 +2.47, HD-HS 256, E_ls 31.07, sink 3.17 (+0.14), co2_2020 -2.74 ppm, RMS dCO2 1959-2024 1.80 ppm, z -0.28/+1.78/+0.76; rows |d| > 0.5:
+    co2_level_MLO            -122.02
+    co2_level_SPO             -84.57
+    d14c_SH                   -45.01
+    d13c_level_SPO            -24.08
+    d14c_NH                   -11.97
+    d13c_level_MLO            +11.07
+    co2_seasonal_MLO           -7.02
+    d14c_profile_ab            -4.40
+    ocean_grad_d13c            -4.22
+    co2_seasonal_SPO           -2.64
+    ocean_grad_dic             -2.07
+    co2_icecore                -1.67
+    gcb_land_sink              +0.82
+    gcb_ocean_sink             -0.56
+
+=== T7: round 3's 40 m family vs its 180-200 m family, per stream (from the scorer's saved streams) ===
+  39.8 m (id 24) lik -1438.64 vs 184.3 m (id 38) lik -1442.90: diff +4.26 over 10 rows with |d| > 0.5 (largest d13c_seasonal_MLO +2.15; ocean_grad_d13c +1.30)
+    d13c_seasonal_MLO          +2.15
+    ocean_grad_d13c            +1.30
+    ocean_grad_dic             +1.18
+    d13c_seasonal_SPO          +1.16
+    co2_icecore                -1.07
+    hs_surf_d13c               +0.95
+    co2_seasonal_SPO           +0.92
+    gcb_ocean_sink             +0.73
+    d13c_level_SPO             -0.66
+    d14c_NH                    -0.61
+
+  PREDICTIONS (prereg_2026-09-08c_u_hs_h_ml_tests.md):
+  P1  g_opt at u_hs 24 in [74, 100] and at 18 in [55, 75]: 193.8, 198.0  -> FAIL
+  P2  HS d13C falls monotonically with u_hs: +2.46 > +2.57 > +2.66 > +2.77  -> FAIL
+  P3  conduit net HD->interior in [0.7, 1.4] at every u_hs: 1.07, 1.85, 2.56, 3.31  -> FAIL
+  P4  logpost falls below 38 and the loss at 24 < 100: -1481.3, -1524.7, -1647.6, -1917.6 (loss at 24 166.3)  -> FAIL
+  P5  g_opt at h_hs 75 within 10 % of 400: 196.2 vs 137.5 (+42.7 %)  -> FAIL
+  P6  T5 costs < 10 and ocean_grad_d13c pays most: cost 23.13, top row co2_level_MLO  -> FAIL
+  P7  T6 costs < 30 and sink/bomb rows move < 2: cost 298.92, moves gcb_ocean_sink -0.56, d14c_NH -11.97, d14c_SH -45.01  -> FAIL
+  P1b [POST-HOC, written after P1 failed] deep-rows-only g_opt at 24 in [74, 100] and g/u_hs constant to 10 %: 96.1; ratios 3.82, 3.91, 4.01, 4.11  -> PASS
+
+  ⛔ Nothing adopted. The ruling on u_hs and h_ml is Marcus's.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/u_hs_h_ml_tests_20260908.rds

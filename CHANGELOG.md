@@ -2,6 +2,53 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-08c — ⭐⭐⭐ **THE `u_hs` / `h_ml` TESTS T1–T7 (prereg 09-08c): ALL SEVEN PRE-REGISTERED PREDICTIONS FAILED, EVERY ONE THROUGH THE CO₂-LEVEL ROWS. Decomposed: THE 70 Sv FLUSH IS A SINK REQUIREMENT OF THE CO₂ RECORD, NOT A DEEP-GRADIENT ONE — at fixed export `u_hs` 38 → 24 m/yr costs 189 log-units (169 of them `co2_level_*`; sink 3.03 → 2.88 GtC/yr, +2.5 ppm at 2020), while against the 8 DEEP rows alone the export optimum IS proportional to `u_hs` (96 gC m⁻² yr⁻¹ at the observed 24). HS thickness CANCELS at steady state (not a bug). The Holte 2017 MLD climatology DOWNLOADED and COMPUTED: LS annual mean 59.7 m, max 118 — the fitted 40 m is a bomb + CO₂ capacity statement, and the refit-level cost of a thick mixed layer is only 4.3. Nothing adopted.**
+
+**The observation** (Marcus: "continue work, including downloading the Holte climatology"): `data-raw/download_mld_clim.R`
+(manifest `holte_mld_argo_clim`, 115,355,604 B, sha256 122afead…) → `data-raw/build_mld_targets.R` → `data/obs_mld.rds`.
+Monthly 1° bin-mean MLDs (density threshold `dt`, headline; hybrid algorithm `da` beside it), per cell the annual MEAN
+and the annual MAXIMUM of the 12 months, cos-lat weighted over the 12-month cells (18,611 of 34,887 sampled), boundary
+**57.14° DERIVED from `hs_frac` 0.16** (asin(1 − f)). LS: **59.7 m** mean (cell sd 30.3, median 52.4; `da` 53.2), **118.1**
+max (sd 83); bands 0–20° 43.6 / 69, 20–40° 56.9 / 119, 40–57° 92.8 / 203; boundary 50–60° moves the LS mean 56–61. HS
+115 / 268 on 12-month cells vs 75 / 142 any-month — a bracket (ice-covered cells lack winter; the strict subset is the
+ice-free N. Atlantic), and the algebra says HS thickness is not a lever anyway. `mld_*_max` (deepest single profile) is
+NOT the climatological winter maximum and is not used.
+
+**The tests** (`calibration/diag_u_hs_h_ml_tests.R` → `outputs/diagnostics/u_hs_h_ml_tests_20260908.{log,rds}`; every run
+0.5 s, Torch not considered; harness gate reproduces the winner's logpost to 4e-11):
+| test | result | prereg |
+|---|---|---|
+| T1 profile in `pump_hs_gcm2` at `u_hs` 38 / 30 / 24 / 18 (full objective) | g_opt **137.5 / 175 / 194 / 198** — RISES; lp −1481 / −1525 / −1648 / −1918; HD−HS 254 → 634; HS δ¹³C 2.46 → 2.77 | P1–P4 FAIL |
+| T1(i) FIXED export, `u_hs` alone (post-hoc) | 24 m/yr: −189 (co2_level_SPO −97, _MLO −72, ocean_grad_dic −12, sink −5); sink 3.03 → 2.88; +2.5 ppm 2020 | — |
+| T1(ii) the 8 DEEP rows alone (post-hoc, the powered H1 test) | g_opt **145 / 117 / 96 / 74**, ratio g/`u_hs` 3.82–4.11, HD−HS 251–267, HS δ¹³C 2.48 → 2.38 | P1b PASS |
+| T2 `h_hs` 75 vs 400, profile | 196 vs 137.5 (+43 %), lp −85 | P5 FAIL |
+| T2(0) `h_hs` 75 at the SAME export (post-hoc) | HD−HS **254.3 = 254.3** (cancels); −107 is transient: sink 3.03 → 2.94, +1.9 ppm 2020 | not a bug |
+| T3 conduit budget at spinup | HS export 7.94 GtC/yr: **6.88 (87 %) returns HD→HS through the flush, 1.07 (13 %) reaches the interior**; the conduit's NET flow is HD → interior | read |
+| T4 remineralisation below 1000 m | LS 0.19 of 29.95; total with HS 8.1 vs literature 1.4 (5.8×); what REACHES the deep interior 1.07 = 0.76× | read |
+| T5 `h_ml` 39.8 → 59.7, unrefitted | −23: co2_level_MLO −11, d14c_SH −7.4, d13c_level ±4.8; CO₂ −0.70 ppm at 2020 (RMS 0.46); ocean_grad_d13c −1.0 | P6 FAIL |
+| T6 `h_ml` → 118.1 | −299: co2_level −122 / −85, d14c_SH −45; CO₂ −2.7 ppm | P7 FAIL |
+| T7 round 3's 40 m vs 184 m family | **4.3** over ten rows ≤ 2.2 (d13c_seasonal_MLO largest, ocean_grad_d13c +1.3); the thick family compensates with kz 4475 / f 0.073 / k_w 1476 | read |
+
+**Reading.** (1) The seven failures have ONE cause, verified by decomposition: `co2_level_*` (σ 1 ppm × ~800 months) charge
+any unrefitted perturbation before a deep row can speak — a 0.46 ppm RMS shift costs 11, a 1.8 ppm shift 122. The tests
+as pre-registered had no power on H1/H2 ([[no_power_null]]); T1(ii) is the powered version and H1 HOLDS for the deep.
+(2) So the 70 Sv is what the CO₂ record demands of THIS structure: the HS flush carries 0.15 GtC/yr of the modern
+sink, standing in for the mode-water ventilation the LS column represents only by `kz`. Whether a refit can make that
+sink elsewhere is exactly round 4's question — the 09-06d scan (517 at half `u_hs`, f re-solved, no pump) says not
+easily. (3) `h_ml` is a true thickness (the interior grid barely moves: dz 52 → 51 at 118 m) and the 40 m is a bomb +
+CO₂ capacity statement; the refit-level cost of a thick mixed layer is 4.3, so an observation pin is cheap after refit.
+(4) The HS pump needs 7.9 GtC/yr because 87 % of it recirculates; the deep interior's actual supply, 1.07 GtC/yr, is
+the literature's order.
+
+**Ruling options (Marcus's).** `u_hs`: (b) FREE it with a lognormal prior centred on the observation (NADW + AABW 18–26
+m/yr ⇒ median 22, log-sd 0.3 = 12–40 at 2σ; the width is a choice) and READ whether it runs back to 38 against the
+prior — that is the informative round 4; (a) pin at 22 is predicted to cost ≥ 189 unrefitted and of order the 09-06d 517
+refitted; (c) leave 38 = accept a 70 Sv flush declared for the sink. `h_ml`: pin at 59.7 (annual mean) or 118 (max), or
+free with N(59.7, 30) from the cell spread — mean-vs-max is the ruling, expected refit cost ≤ ~4 either way. Still
+owed: a SOURCED Martin exponent (T4's 1.4 rests on a recollected 0.86).
+Tried and kept: the prereg's "ocean_grad_d13c is the `h_ml` lever" reading (09-07c) is RETRACTED by T5/T7 — the lever
+is the bomb and CO₂-level rows. Memory: [[ccx_u_hs_h_ml_tests]], [[overturning_and_mld_literature]] updated.
+
 ## 2026-09-08 — ⭐⭐⭐ **ROUND 3 CONVERGED (46/46): THE HS PUMP SUPPLIES THE DEEP BIOLOGY — δ¹³C row −27.6 → −7.0, ALK −13.8 → −0.1, LS export 73.6 → 29.9 GtC/yr, `pump_grad` +3.2σ → +0.7σ, rest-of-likelihood −47.8 → −9.0, profile inside 1σ — AT THE PRICE OF A COLD-BOX EXPORT 4× THE FLOAT PRIOR (137.5 gC m⁻² yr⁻¹ = 7.9 GtC/yr, +3.0σ) AND A COLD SURFACE δ¹³C +2.46 (z +3.8). R2, R4, R5, R8, R10, R11 PASS; R1, R3, R6, R7, R9 FAIL. The lever is the declared `u_hs` = 38 m/yr, a 70 Sv flush.**
 
 Job 17150003, `calibration/output/multistart_20260907f_hilda30/`, scored by `calibration/diag_hilda30_predictions.R`
