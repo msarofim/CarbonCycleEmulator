@@ -1,0 +1,49 @@
+
+=== HILDA REFIT ROUND 4 (multistart_20260908e_hilda31_asx): 24 starts, 8 basins ===
+ logpost  n id  u_hs  hs_g ratio       f    asx   h_ml  h_hs    kz
+   -1479 13  3 24.16 91.11 3.771 0.01100 0.7801  49.15 401.2 11699
+   -1479  1 19 23.69 89.35 3.772 0.01080 0.7846  54.65 398.6 11623
+   -1486  2 18 20.51 79.47 3.874 0.01270 0.9294 158.11 366.3  8741
+   -1486  1 15 20.51 79.12 3.858 0.01283 0.9332 160.87 365.3  8658
+   -1486  2  6 20.49 80.00 3.903 0.01244 0.9228 153.12 367.8  8899
+   -1486  1  2 20.51 78.60 3.832 0.01313 0.9410 166.48 363.5  8489
+   -1486  1 21 20.49 78.79 3.845 0.01297 0.9376 163.96 364.3  8570
+   -1486  3  4 20.52 77.50 3.777 0.01364 0.9536 175.78 360.3  8215
+
+BEST: id 3, logpost -1478.6595
+  u_hs 24.16 m/yr (44.2 Sv; prior z +0.42; 38 would be +2.29)   pump_hs 91.1 (z +2.30, ratio 3.77 x u_hs)   h_ml 49.2 (z -1.57)   f 0.0110  asx 0.780  h_hs 401  kz 11698
+
+round-4 leading start (id 3) re-scored under this build: lik -1433.27 (recorded -1433.27); its u_hs 15.27, hs_asx 1.835, kz 15058, k_w 1273, beta_max 0.692
+
+  logpost    id |   u_hs   hs_g   h_ml |      lik d_vs_r3 |  z_lev   z_AB   z_BD |   HS13  hsDIC |  sink   E_hs
+  -1478.66    3 |   24.2   91.1   49.2 | -1439.42   -6.15 |  -1.15  +1.24  +0.50 |  +2.41   2149 |  2.98   5.26
+  -1479.22   19 |   23.7   89.4   54.7 | -1440.49   -7.22 |  -1.17  +1.25  +0.49 |  +2.41   2149 |  2.98   5.16
+  -1485.50   18 |   20.5   79.5  158.1 | -1442.88   -9.61 |  -1.35  +1.24  +0.42 |  +2.41   2152 |  2.98   4.59
+  -1485.51   15 |   20.5   79.1  160.9 | -1442.69   -9.41 |  -1.35  +1.24  +0.42 |  +2.40   2152 |  2.99   4.57
+  -1485.53    6 |   20.5   80.0  153.1 | -1443.28  -10.01 |  -1.35  +1.25  +0.42 |  +2.41   2152 |  2.98   4.62
+  -1485.58    2 |   20.5   78.6  166.5 | -1442.30   -9.03 |  -1.35  +1.23  +0.42 |  +2.40   2152 |  2.99   4.54
+  -1485.59   21 |   20.5   78.8  164.0 | -1442.52   -9.25 |  -1.35  +1.23  +0.42 |  +2.40   2152 |  2.99   4.55
+  -1485.73    4 |   20.5   77.5  175.8 | -1441.64   -8.36 |  -1.35  +1.22  +0.42 |  +2.40   2153 |  2.99   4.48
+
+  best vs round-3 winner, per stream, |d| > 1.5:
+    d14c_NH                     -3.53
+    co2_icecore                 +1.64
+    d13c_level_MLO              -1.60
+
+  THE ROUTE (parameters moved > 30 % from round 4's leading start): u_hs +58 %, k_w +31 %, kz -22 %, beta_max +3 %, fert_k +4 %, hs_asx_frac -57 %, kz_deep_frac +64 %
+
+  PREDICTIONS (prereg_2026-09-08e_round5_hs_asx_prior.md):
+  P1  hs_asx_frac <= 0.88 (inside 2 sigma of 0.653): 0.780 (z +1.19)  -> PASS
+  P2  u_hs >= 33 (route a, the cheapest priced): 24.16 m/yr, prior z +0.42  -> FAIL   READING: a THIRD route (see THE ROUTE line) -- name it and price its observation
+  R2  pump_hs / u_hs in [3.6, 4.3]: 3.77  -> PASS
+  R3  h_ml in [50, 100]: 49.2 (z -1.57)  -> FAIL
+  R4  likelihood within 5 of round 3: -1439.42 vs -1433.27 (-6.15)  -> FAIL
+  R5  conditional (u_hs < 30 => HS d13C < +2.40): u_hs 24.2, HS d13C +2.41  -> FAIL
+  R6  profile rows inside 2 sigma: -1.15 / +1.24 / +0.50  -> PASS
+  R7  unimodal: best from 13 starts (>= 10), basins within 5 agree on u_hs to 5: 2 basins, max |du| 0.5  -> PASS
+  R8  sink and bomb rows within 2 of round 3: gcb_ocean_sink +0.29, d14c_NH -3.53, d14c_SH -1.08  -> FAIL
+  R9  RECORDED: HS d13C +2.41 (obs +1.31), HS DIC 2149 (obs 2163); gate Q -> diag_whole_model_scorecard.R
+  R10 kz_deep_frac / hs_asx_frac within 30 % of round 3: 0.0110 vs 0.0067, 0.780 vs 1.835  -> FAIL
+
+  ⛔ Nothing adopted. Promotion is Marcus's call.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/hilda31asx_predictions_20260908.rds

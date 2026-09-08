@@ -27,6 +27,16 @@ P3 ratio 3.6–4.3; P4 likelihood within 5 of −1433.3; P5 K_deep ≥ 150; P6 `
 ## 3. LAUNCH STATUS
 **LAUNCHED 2026-09-08 11:37 EDT: Torch job 17194179** (`sbatch --array=0-23%24 calibration/torch/multistart.sbatch` at launch commit **d65b299**, port targets committed after it). Setup gate PASSED (0.44 s/eval login node); preflight 17193798 **8/8 port VERIFIED rel ≤ 2.4e-12** (ids 0–5 fixed, 15/23 dispersed), compute nodes 0.14–0.30 s/eval. 20 of 24 started at once beside round 4's last wave (32-CPU QoS cap; 4 pend until ~12:40). Suite before launch: 2147 pass / 9 fail, the same nine pre-existing. Expect the array to drain by ~14:00–15:00 EDT; collect and score per the handoff §4.
 
+## 3b. RESULT (14:30 EDT) — see CHANGELOG 2026-09-08e (result) and [[ccx_round5_result]]
+24/24 CONVERGED. Winner id 3 (13 of 24): **`u_hs` 24.2 m/yr (44 Sv, z +0.42), `hs_asx_frac` 0.780 (z +1.2), `k_w` 1661 (+31 %,
+z +0.27), `h_ml` 49.2, `h_hs` 401, `kz` 11,698, K_deep 129, export 91 (z +2.3), ratio 3.77; likelihood −1439.4 (round 3 −1438.6;
+common rows −1429.0 vs −1427.6)**; second family `h_ml` 153–176 at −1485.5 (7 behind, `u_hs` 20.5). **P2 FAILED: the flush did
+not return to 38 — the 70 Sv was never a sink requirement; the sink went to `k_w`, inside its prior.** Gates as round 3; Q 2.44σ.
+⚠ **Round 4's wave 2 was killed by my re-ship** (`never_reship_mid_array`); its record is 10 starts.
+**Owed rulings:** (1) adopt the round-5 winner as the HILDA canonical? (2) round 6 = the seasonal mixed layer (option B) or the
+2 °C cold-box fractionation (gate Q + HS δ¹³C +2.41)? (3) the export's +2.3σ — a wider export prior (the 400 m-flux meaning) or
+leave it as the model's statement?
+
 ## 4. Collect and score
 ```
 ssh torch 'sacct -j <JOBID> -X --format=JobID,State,ExitCode,Elapsed | tail -30'

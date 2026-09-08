@@ -18,22 +18,29 @@ SC_GROUPS <- list(co2_level = "^co2_level_|^co2_icecore", co2_seasonal = "^co2_s
                   gradients = "gradient", bomb_d14c = "^d14c_(NH|SH)$", d14c_profile = "^d14c_profile_", excess_c14 = "excess", gcb_sinks = "^gcb_", ocean_deep = "^ocean_grad_|^hs_surf_")
 SC_PRIOR_STRAIN <- 2; SC_ENSO_WIN <- c(1959, 2024)
 SC_JOOS_HORIZON <- 300   # yr followed, as calibration/diag_joos_irf.R (JOOS_HORIZON lives there, not in R/joos_irf.R)
-SC_OUT <- ccx_path("outputs", "diagnostics", "whole_model_scorecard_20260908.rds")
+SC_OUT <- ccx_path("outputs", "diagnostics", if (nzchar(Sys.getenv("CCX_SC_EXTRA_DIR", ""))) "whole_model_scorecard_20260908e.rds" else "whole_model_scorecard_20260908.rds")
 mk_v <- function(p, pmv, src) list(p = p, pm = pmv, luc_scale = pmv$luc_scale, bomb_total = pmv$bomb_total, sigma_d14c = pmv$sigma_d14c, rep_dC = pmv$rep_dC, grad_off_co2 = pmv$grad_off_co2, grad_off_d13c = pmv$grad_off_d13c, src = src)
 vA <- dg_vector(CCX_MODE_CANONICAL); vA$p$hs_frac <- 0; vA$src <- paste("ent26", CCX_MODE_CANONICAL); zA <- vA$md$prior_z
 fs <- list.files(SC_HILDA_DIR, pattern = "^start_[0-9]+[.]rds$", full.names = TRUE); S <- lapply(fs, readRDS); best <- S[[which.max(vapply(S, `[[`, 0, "logpost"))]]
 pB <- ccx_apply_structure(ccx_default_params(), "hilda"); pB$pump_mode <- SC_ARM; vB <- mk_v(ccx_overlay_par(pB, best$par_mode), best$par_mode, sprintf("hilda30 winner id %d", best$id)); zB <- best$prior_z
-ARMS <- list(ent26 = vA, hilda30 = vB); obs <- ccx_prepare_obs()
+ARMS <- list(ent26 = vA, hilda30 = vB)
+# Optional third arm (2026-09-08e): the best start of another multistart directory, CCX_SC_EXTRA_DIR=<path>.
+SC_EXTRA <- Sys.getenv("CCX_SC_EXTRA_DIR", ""); zC <- NULL
+if (nzchar(SC_EXTRA)) { fsC <- list.files(SC_EXTRA, pattern = "^start_[0-9]+[.]rds$", full.names = TRUE); SC <- lapply(fsC, readRDS); bC <- SC[[which.max(vapply(SC, `[[`, 0, "logpost"))]]
+  pmC <- ccx_migrate_par_set(bC$par_mode); pC <- ccx_apply_structure(ccx_default_params(), "hilda"); pC$pump_mode <- SC_ARM
+  ARMS[[basename(SC_EXTRA)]] <- mk_v(ccx_overlay_par(pC, pmC), pmC, sprintf("%s best id %d", basename(SC_EXTRA), bC$id)); zC <- bC$prior_z
+  cat(sprintf("ARM C: %s (u_hs %.1f, hs_asx %.3f, k_w %.0f, h_ml %.1f, pump_hs %.1f)\n", ARMS[[3]]$src, pmC$u_hs, pmC$hs_asx_frac, pmC$k_w, pmC$h_ml, pmC$pump_hs_gcm2)) }
+obs <- ccx_prepare_obs()
 cat(sprintf("ARMS: A = %s (h_ml %.1f, %d par)   B = %s (h_ml %.1f, u_hs %g, pump_hs %.1f, %d par)\n", vA$src, vA$p$h_ml, length(vA$pm), vB$src, vB$p$h_ml, vB$p$u_hs, vB$p$pump_hs_gcm2, length(vB$pm)))
 R <- lapply(ARMS, dg_run); ST <- Map(dg_streams, R, ARMS)
 try_or <- function(expr, lab) tryCatch(expr, error = function(e) { cat(sprintf("  ⚠ %s FAILED: %s\n", lab, conditionMessage(e))); NULL })
 
 cat("\n=== 1. LIKELIHOOD BY STREAM GROUP (common rows; B's hs_surf rows shown separately) ===\n")
-common <- intersect(names(ST$ent26), names(ST$hilda30))
+common <- Reduce(intersect, lapply(ST, names))
 cat(sprintf("  %-14s %10s %10s %8s   rows\n", "group", "ent26", "hilda30", "B - A"))
-G <- lapply(SC_GROUPS, function(pat) { rows <- grep(pat, common, value = TRUE); c(A = sum(ST$ent26[rows]), B = sum(ST$hilda30[rows]), n = length(rows)) })
-for (g in names(G)) cat(sprintf("  %-14s %10.2f %10.2f %+8.2f   %s\n", g, G[[g]]["A"], G[[g]]["B"], G[[g]]["B"] - G[[g]]["A"], paste(grep(SC_GROUPS[[g]], common, value = TRUE), collapse = " ")))
-cat(sprintf("  %-14s %10.2f %10.2f %+8.2f\n", "TOTAL common", sum(ST$ent26[common]), sum(ST$hilda30[common]), sum(ST$hilda30[common]) - sum(ST$ent26[common])))
+G <- lapply(SC_GROUPS, function(pat) { rows <- grep(pat, common, value = TRUE); c(A = sum(ST$ent26[rows]), B = sum(ST$hilda30[rows]), C = if (length(ARMS) > 2) sum(ST[[3]][rows]) else NA, n = length(rows)) })
+for (g in names(G)) cat(sprintf("  %-14s %10.2f %10.2f %+8.2f %10s   %s\n", g, G[[g]]["A"], G[[g]]["B"], G[[g]]["B"] - G[[g]]["A"], if (is.na(G[[g]]["C"])) "" else sprintf("C %8.2f", G[[g]]["C"]), paste(grep(SC_GROUPS[[g]], common, value = TRUE), collapse = " ")))
+cat(sprintf("  %-14s %10.2f %10.2f %+8.2f %s\n", "TOTAL common", sum(ST$ent26[common]), sum(ST$hilda30[common]), sum(ST$hilda30[common]) - sum(ST$ent26[common]), if (length(ARMS) > 2) sprintf("C %8.2f", sum(ST[[3]][common])) else ""))
 extra <- setdiff(names(ST$hilda30), common); if (length(extra)) cat(sprintf("  B-only rows: %s\n", paste(sprintf("%s %.2f", extra, ST$hilda30[extra]), collapse = ", ")))
 
 cat("\n=== 2. GATES (09-04 ledger) ===\n")
@@ -75,7 +82,7 @@ IRF <- list(); for (a in names(ARMS)) { x <- try_or(irf_of(ARMS[[a]]), paste("IR
   if (!is.null(x)) cat(sprintf("  %-8s IRF(20) %.3f  IRF(100) %.3f  IRF(300) %.3f   (Joos 2013 multi-model: %.3f / %.3f / %.3f)\n", a, x["irf20"], x["irf100"], x["irf300"], joos_irf(20), joos_irf(100), joos_irf(300))) }
 
 cat(sprintf("\n=== 5. STRAINED PRIORS (|z| > %g) and the declared structure ===\n", SC_PRIOR_STRAIN))
-for (a in names(ARMS)) { z <- if (a == "ent26") zA else zB; if (is.null(z)) { cat(sprintf("  %-8s (no prior_z stored)\n", a)); next }
+for (a in names(ARMS)) { z <- if (a == "ent26") zA else if (a == "hilda30") zB else zC; if (is.null(z)) { cat(sprintf("  %-8s (no prior_z stored)\n", a)); next }
   big <- names(z)[abs(z) > SC_PRIOR_STRAIN]; cat(sprintf("  %-8s %s\n", a, if (length(big)) paste(sprintf("%s %+.2f", big, z[big]), collapse = ", ") else "none")) }
 cat(sprintf("  hilda30 declared: hs_frac %.2f, u_hs %g m/yr (= %.1f Sv over %.3g m2), tau_q %g yr, sst_hs %g C; fitted h_hs %.0f, pump_hs %.1f gC/m2/yr (prior-z %+.2f), hs_asx_frac %.2f\n",
             vB$p$hs_frac, vB$p$u_hs, vB$p$u_hs * (ccx_const("OCEAN_AREA_NH") + ccx_const("OCEAN_AREA_SH")) * vB$p$hs_frac / 3.156e13, (ccx_const("OCEAN_AREA_NH") + ccx_const("OCEAN_AREA_SH")) * vB$p$hs_frac, vB$p$tau_q, vB$p$sst_hs, vB$p$h_hs, vB$p$pump_hs_gcm2,

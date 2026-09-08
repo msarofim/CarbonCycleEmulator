@@ -2,6 +2,33 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-08e (result) — ⭐⭐⭐ **ROUND 5 IN (job 17194179, 24/24 CONVERGED 84–142 min, two basins, winner from 13 starts): WITH THE FLUSH AND THE EXCHANGE UNDER THEIR OBSERVATIONS THE MODEL MAKES THE MODERN SINK INSIDE EVERY PRIOR — `u_hs` 24.2 m/yr (44 Sv, z +0.42, AT the observation), `hs_asx_frac` 0.78 (z +1.2), `k_w` 1273 → 1661 (+31 %, z +0.27) carries the sink; likelihood −1439.4 = round 3 −0.8 (common rows −1429.0 vs −1427.6), the deep profile kept. P2 (`u_hs` ≥ 33) FAILS: THE 70 Sv FLUSH WAS NEVER A STRUCTURAL SINK REQUIREMENT — three knobs, the fit took the cheapest unpriced one each round. ⚠ ROUND 4's SECOND WAVE (ids 10–19) WAS KILLED BY MY RE-SHIP OF THE ROUND-5 BUNDLE; its record is 10 starts.**
+
+**Round 5** (`calibration/diag_hilda31asx_predictions.R` → `outputs/diagnostics/diag_hilda31asx_predictions_20260908.log` + rds;
+collect `collect_hilda31asx_20260908.log`): P1 PASS (0.780), **P2 FAIL** (24.2), P3 PASS (ratio 3.77), R3 FAIL by 0.8 m (49.2),
+P4 FAIL (−6.15 vs round 4's compensator fit; −0.8 vs round 3), R5 FAIL by 0.01 (HS δ¹³C +2.41), P6 PASS, P7 PASS (13/24; the
+second family `h_ml` 153–176 is 7 behind and agrees on `u_hs` 20.5), P8 FAIL (`d14c_NH` −3.5), P10 n/a. THE ROUTE vs round
+4: `u_hs` +58 %, `k_w` +31 %, `kz` −22 %, `hs_asx_frac` −57 %, `kz_deep_frac` +64 % (0.011, K_deep 129); land unmoved.
+Scorecard arm C (`whole_model_scorecard_20260908e.{log,rds}`): V −2.77 / H +6.51 / 5 +2.17 FAIL, G +1.57 / 7 / S PASS,
+**Q 2.44σ FAIL** (0.844 vs 0.60 ± 0.10), ENSO 0.53×, IRF(100) 0.279; strained priors `kz_deep_frac` −2.51, `pump_hs` +2.31,
+`sst_seas_amp_NH` −2.96, `rep_dC` +3.40, `q10` −2.22.
+
+**Reading.** The round-5 winner is the HILDA structure with every ocean structure quantity at or inside its observation
+(`u_hs`, `hs_asx_frac`, `h_ml` z −1.6, `h_hs` 401, `kz` interior) at ZERO transient cost relative to round 3, keeping the
++234 deep profile over `ent26`. Nothing on the pedagogical chain moved (the scorecard's ranking stands: Fix B > NH
+entrainment > δ¹³C gradient level > Q). The strains that remain name the next work: the export (+2.3σ, 5.3 GtC/yr) and the
+HS surface δ¹³C (+2.41 vs +1.31 — the 2 °C fractionation, now also gate Q), `sst_seas_amp_NH` (round 6 = the seasonal mixed
+layer, `notes/options_2026-09-08d_seasonal_h_ml.md`). **Adoption of the round-5 winner as the HILDA canonical is Marcus's
+call**; nothing adopted, canonical `ent26`.
+
+**Round 4 closed at 10 starts — and why.** Ids 10–19 (running since ~10:10) all FAILED between 12:03 and 12:42 with
+`Error: unexpected end of input` immediately after finishing cycle 2 (their cycle-2 log-posts −1474.21 / −1475.64 = wave 1's
+two basins, in `logs/ccx_multistart_17185969_1?.out`, no `start_*.rds`). Cause: I untarred the round-5 bundle into
+`/scratch/ms17839/CarbonCycleEmulator` at ~11:20 while they ran — a bulk edit under live Rscript parsers, the rule the
+09-07f handoff's gotcha 6 states and `never_edit_a_running_script` explains. Memory `never_reship_mid_array`. Their 20
+checkpoints are un-resumable under the changed objective. The round-4 record is therefore wave 1 (6 fixed + 4 dispersed);
+R7 unjudged; the finding (the sink moved to `hs_asx_frac`) was already unanimous across those ten.
+
 ## 2026-09-08e — ⭐⭐ **ROUND 4 CUT AT WAVE 2 (Marcus) AND ROUND 5 DESIGNED: the cold box's exchange factor `hs_asx_frac` gets ITS observation (lognormal 0.653 × 0.15 log-sd, a stated JUDGEMENT width); THE question is where the modern sink goes once both the flush and the exchange are honest. 24-start array, one wave.**
 
 **Round 4's interim answer (10 of 46, wave 1; all CONVERGED 130–149 min):** `u_hs` went DOWN to 15 m/yr (z −1.48 below its
