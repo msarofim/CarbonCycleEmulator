@@ -47,3 +47,17 @@ At 60 gC m⁻² yr⁻¹: −1458.8 (+16.3); the scan optimum is unchanged by the
 that is the `u_hs` = 38 m/yr flush (declared, HILDA's) or the horizon, and the next ruling is about those.
 **Adoption**: nothing here adopts; if R1–R3, R6, R9 pass, the mode is a CANDIDATE for `ccx_mode_file()` and the
 DESIGN-gate sweep, for Marcus.
+
+## SCORED 2026-09-08 (job 17150003, 46/46 COMPLETED, none failed) — `calibration/diag_hilda30_predictions.R`
+Winner **−1481.27 from 24 starts** (+6 in a near-twin at `h_ml` 43.8): `pump_hs_gcm2` **137.5** (7.94 GtC/yr, prior-z
++2.99), f 0.0247 (K_deep 224), `hs_asx_frac` 0.818, `h_ml` **39.8**, `h_hs` 400, `kz` 9047, `pump_grad` **276** (+0.68),
+LS net export **29.9** GtC/yr (round 2: 73.6). Second family (12 starts, −1486) at `h_ml` 180–199, f 0.07–0.09. EVERY basin
+puts the export at 136–142. Profile z **−0.50 / +1.05 / +0.68**. Common-row gain vs `ent26` +225.0 = profile rows +234.0,
+rest **−9.0** (round 2: −47.8): δ¹³C row −7.0 (was −27.6), DIC −3.2, ALK **−0.14** (was −13.8), `d14c_NH` −1.6.
+HS surface: DIC 2149 (z −0.6), δ¹³C **+2.46 (z +3.8)**. Sink 3.03.
+**R1 FAIL, R2 PASS, R3 FAIL (by 2), R4 PASS, R5 PASS, R6 FAIL, R7 FAIL, R8 PASS, R9 FAIL (recorded), R10 PASS, R11 PASS.**
+Collect: 40 dispersed starts reproduced and did not beat the best re-converged known basin (bound 0.5 log-units).
+Reading: the HS pump supplies the deep biology (R4, R5, the δ¹³C row's 20-unit recovery, rest −48 → −9) and pays with a
+cold-box export 4× the float prior and a cold surface δ¹³C 0.4 ‰ heavier still — the same lever: the declared `u_hs` = 38
+m/yr over 16 % of the ocean is a **70 Sv** two-way flush (38 × 5.78e13 m² / 3.156e13 m³ yr⁻¹ Sv⁻¹), and the export that
+holds the observed deep enrichment scales with it. ⛔ Nothing adopted; the ruling is Marcus's.

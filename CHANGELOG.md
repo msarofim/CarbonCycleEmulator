@@ -2,6 +2,38 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-08 — ⭐⭐⭐ **ROUND 3 CONVERGED (46/46): THE HS PUMP SUPPLIES THE DEEP BIOLOGY — δ¹³C row −27.6 → −7.0, ALK −13.8 → −0.1, LS export 73.6 → 29.9 GtC/yr, `pump_grad` +3.2σ → +0.7σ, rest-of-likelihood −47.8 → −9.0, profile inside 1σ — AT THE PRICE OF A COLD-BOX EXPORT 4× THE FLOAT PRIOR (137.5 gC m⁻² yr⁻¹ = 7.9 GtC/yr, +3.0σ) AND A COLD SURFACE δ¹³C +2.46 (z +3.8). R2, R4, R5, R8, R10, R11 PASS; R1, R3, R6, R7, R9 FAIL. The lever is the declared `u_hs` = 38 m/yr, a 70 Sv flush.**
+
+Job 17150003, `calibration/output/multistart_20260907f_hilda30/`, scored by `calibration/diag_hilda30_predictions.R`
+(log + rds `_20260908`), collect `collect_hilda30_20260908.log`.
+
+**One winner, one lever.** −1481.27 from **24 starts** (+6 near-twin): `pump_hs_gcm2` **137.5**, f 0.0247 (K_deep 224),
+`hs_asx_frac` 0.818 (the observational 0.653 is −1.6 sd; the fitted value moved back toward it from 0.507), `h_ml` **39.8**
+again, `h_hs` 400, `kz` 9047, `pump_grad` **276** (+0.68 — round 2's 524 was the optimiser fighting the conduit alone).
+Second family (12 starts, −1486) is the `h_ml` 180–199 twin, f 0.07–0.09. **Every basin, both families, puts the export at
+136–142** — the datum is unimodal in the new coordinate. Profile z −0.50 / +1.05 / +0.68.
+
+| | round 2 (corrected rows) | **round 3** | prediction |
+|---|---|---|---|
+| `ocean_grad_d13c` vs ent26 | −27.6 | **−7.0** | R3 FAIL (< 5) |
+| `ocean_grad_alk` | −13.8 | **−0.1** | R5 PASS |
+| `ocean_grad_dic` | −4.0 | −3.2 | – |
+| rest of common rows | −47.8 | **−9.0** | R6 FAIL |
+| LS net export, GtC/yr | 73.6 | **29.9** | R4 PASS |
+| HS export, GtC/yr | 0 | **7.9** (137.5 gC m⁻² yr⁻¹) | R1 FAIL; R10 PASS (+3.0σ) |
+| HS surface δ¹³C | +1.96 | **+2.46** | R9 FAIL (recorded) |
+| `h_ml` | 37 | 39.8 | R7 FAIL |
+
+**Reading.** The mechanism did exactly what the end-member probe said was missing, and the objective paid for it in
+the currency it was allowed to: the cold box now exports **4× the float-based polar export** and the export strips its
+surface δ¹³C 0.4 ‰ heavier still (the #11 rows, weak by construction, recorded it at z +3.8 and could not stop it).
+Both point at ONE declared quantity: `u_hs` = 38 m/yr over 16 % of the ocean is a **70 Sv** two-way flush of HD
+(38 × 5.78e13 m² / 3.156e13 m³ yr⁻¹ Sv⁻¹), and the export needed to hold the observed +116–185 µmol/kg deep enrichment
+scales with it. ⚠ My recollection (UNSOURCED) is that observed deep-water formation is of order half that. **Next ruling
+candidates:** (1) free `u_hs` (or pin it to an overturning observation) and re-read the export; (2) the T-dependent
+air–sea fractionation at 2 °C, if the HS surface stays heavy at a smaller export; (3) `h_ml` at 40 m in every HILDA
+round is a separate open item. ⛔ Nothing adopted; canonical `ent26`.
+
 ## 2026-09-07f — ⭐⭐ **ROUND 3 PREPARED (Marcus: literature prior, scored HS-surface rows, sweep, launch): `pump_hs_gcm2` gets a LOGNORMAL LITERATURE PRIOR (median 22.9 gC m⁻² yr⁻¹, Liniger 2025 / Arteaga 2019); OBJECTIVE #11 = the HS-surface DIC (SH 2163) and δ¹³C (+1.31) rows, scored at their epochs off NEW hs_* columns in both cores; the pre-launch sweep found the rows WEAK by construction and a NaN-guard regression the new columns would have caused.**
 
 **The prior** (`data-raw/build_hs_export_prior.R` → `data/obs_hs_export_prior.rds`): the polar-Antarctic-zone float export,
