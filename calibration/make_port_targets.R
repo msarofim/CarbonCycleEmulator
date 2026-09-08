@@ -122,5 +122,8 @@ cat(sprintf("\nPORT TARGETS written to %s\n\n", PT_OUT))
 print(tg[, c("name", "logpost", "stored", "offset")], row.names = FALSE)
 cat(sprintf("\n  arm %s, %d parameters, commit %s, host %s, R %s\n",
             PT_ARM, length(CCX_PARAM_NAMES), tg$commit[1], tg$host[1], tg$r_version[1]))
-cat("  ⚠ `stored` is each mode FILE's own logpost and is NOT the target: the\n")
-cat("    incumbent's -0.85 offset is objective drift, not a port defect.\n")
+cat("  ⚠ `stored` is each mode FILE's own logpost and is NOT the target: each\n")
+off <- tg$offset[!is.na(tg$offset)]; nm <- tg$name[!is.na(tg$offset)]
+cat(sprintf("    offset (%s) is objective drift since that file was fitted, not a port defect.\n",
+            paste(sprintf("%s %+.2f", nm, off), collapse = ", ")))
+cat("    (This line was a typed '-0.85' until 2026-09-07f; it is now GENERATED.)\n")
