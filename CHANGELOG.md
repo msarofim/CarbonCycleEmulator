@@ -42,8 +42,10 @@ says the rows record the surface rather than arbitrate the export; the HS carbon
 feedback (the LS convention); the δ¹³C target is a pooled median while the model value is carbon-weighted (the
 gradient rows' convention).
 
-**Launch:** prereg `notes/prereg_2026-09-07f_hs_pump_round3.md` (R1–R11), out `multistart_20260907f_hilda30/`; job
-and preflight ids in the 09-07f launch handoff.
+**Launched:** commit 4bef40e, targets 882de83; local preflight 0/1/2 rel ≤ 1.7e-14; Torch setup gate PASSED; preflight job
+**17149964** 8/8, port rel ≤ 2.4e-12, 0.14 s/eval; **production job 17150003, `--array=0-45%10`**, out
+`multistart_20260907f_hilda30/`; prereg `notes/prereg_2026-09-07f_hs_pump_round3.md` (R1–R11); handoff
+`notes/handoff_2026-09-07f_round3_launched.md`.
 
 ## 2026-09-07e — ⭐⭐ **THE HS PUMP IS BUILT (both cores, bit-exact at 0, parity-tested) AND PROBED AT THE ROUND-2 WINNER: at the observation-sized 60 gC m⁻² yr⁻¹ (3.5 GtC/yr) HD − HS lands at +127 (observed +116–185), bottom − HS δ¹³C −0.70 (observed −0.87), the likelihood gains +17.2 with NOTHING refitted — but the pre-registered gate FAILS BY ITS LETTER (P3 +18.9 of 20; P6 HS surface δ¹³C moves the WRONG way). `pump_hs_gcm2` registered as the 30th parameter; round 3 DRAFTED, NOT launched.**
 
