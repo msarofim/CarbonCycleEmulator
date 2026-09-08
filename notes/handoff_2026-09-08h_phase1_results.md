@@ -36,11 +36,10 @@ and is FLAT below ~1000 m (0.985 of its span by 1000–1250), which is what "99.
   full arm). **P3 ✓** the step collapses ⇒ **C and D are ONE refit** (handoff §3's rule, by a factor of two).
 - WHY: with the model's K(z) (11,698 at the ML base, 129 in the deep) the Martin profile holds the 262 µmol/kg gradient
   with a TENTH of the export — the gradient sits where K is small. Less export = less light carbon anywhere. The
-  assessment's option-F reading ("the deep lacks remineralised light carbon") does not survive: at PI the model's
-  surface−deep δ¹³C gradient is ALREADY too large (ML +2.40, bottom +1.16 ⇒ 1.24 ‰ vs the observed 0.86), and the whole
-  ocean is ~1 ‰ heavy at every depth (high-latitude surface bottles +1.29 vs model HS +3.2; deep +0.47 vs +1.2). Martin
-  shrinks the gradient toward the observation (1.00 tail / 0.85 full) while lifting the level. **The level is an air-sea
-  EQUILIBRIUM question (the alphas, the SST the equilibrium is taken at, the atmosphere's δ¹³C), not a pump question.**
+  ⛔ RETRACTED 2026-09-08h (`notes/handoff_2026-09-08i_cheap_probes.md` §1): the sentence that stood here compared the PI
+  model gradient (1.24) with MODERN bottles (0.86) — not like-for-like. At the bottles' epoch the model's surface−deep
+  gradient is 0.40 vs 0.89 observed, too SMALL: the deep DOES lack light carbon relative to the surface, and Martin at a
+  held `pump_grad` made it worse by starving the export. The assessment's option-F gradient reading stands.
 - The unrefitted price is on `d13c_level_MLO` (−14.6 / −28.6), `ocean_grad_d13c` (−6.5 / −12.2) and `d14c_NH`
   (−4.5 / −11.3): the export sets the Suess-effect uptake. The D refit will move `kz`, `kz_deep_frac`, `pump_grad` together.
 

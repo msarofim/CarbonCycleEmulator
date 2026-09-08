@@ -1,0 +1,39 @@
+canonical: tau_ex 0.912 yr, k_w 1661, h_ml 49.2 m, bomb_share_NH 0.90; NH peak 1964.639 (obs 1963.676, z +2.17), SH 1965.513 (z +1.47), lag 0.874 (obs 1.340, z -0.94)
+
+=== tau_ex ===
+         x    value |   NH peak   z NH |   SH peak   z SH |    lag  z lag |    d lik | rows |d| > 3 vs canonical
+      0.50    0.456 |  1964.643  +2.18 |  1965.114  +0.29 |  0.471  -1.76 |  -1382.1 | d14c_SH -8, co2_gradient -353, d13c_gradient -148, co2_level_MLO -14, co2_level_SPO -16
+      0.75    0.684 |  1964.640  +2.17 |  1965.234  +0.65 |  0.594  -1.51 |   -250.6 | d14c_NH +3, co2_gradient -95, d13c_gradient -37, co2_level_MLO -5, co2_level_SPO -5
+      1.00    0.912 |  1964.639  +2.17 |  1965.513  +1.47 |  0.874  -0.94 |     +0.0 | 
+      1.50    1.369 |  1964.638  +2.17 |  1965.618  +1.78 |  0.980  -0.73 |   -645.2 | d14c_NH -20, d14c_SH -6, co2_gradient -280, d13c_gradient -128, co2_level_MLO -5, co2_level_SPO -4
+      2.00    1.825 |  1964.640  +2.17 |  1965.698  +2.02 |  1.058  -0.57 |  -2272.6 | d14c_NH -54, d14c_SH -25, co2_gradient -1160, d13c_gradient -495, co2_level_MLO -29, co2_level_SPO -28
+
+=== k_w ===
+         x    value |   NH peak   z NH |   SH peak   z SH |    lag  z lag |    d lik | rows |d| > 3 vs canonical
+      0.75 1245.935 |  1964.650  +2.20 |  1965.590  +1.70 |  0.941  -0.81 |  -1904.7 | d14c_NH -721, d14c_SH -523, co2_level_MLO -12, co2_level_SPO -23
+      1.00 1661.247 |  1964.639  +2.17 |  1965.513  +1.47 |  0.874  -0.94 |     +0.0 | 
+      1.50 2491.871 |  1964.620  +2.13 |  1965.204  +0.56 |  0.584  -1.53 |  -2426.2 | d14c_NH -668, d14c_SH -956, co2_level_MLO -24, co2_level_SPO -10
+      2.00 3322.495 |  1964.606  +2.10 |  1965.126  +0.33 |  0.519  -1.66 |  -5746.2 | d14c_NH -1637, d14c_SH -2117, co2_level_MLO -50, co2_level_SPO -29
+      3.00 4983.742 |  1964.586  +2.05 |  1965.033  +0.05 |  0.447  -1.81 | -10625.0 | d14c_NH -2983, d14c_SH -3689, co2_level_MLO -86, co2_level_SPO -57, gcb_ocean_sink -6
+
+=== h_ml ===
+         x    value |   NH peak   z NH |   SH peak   z SH |    lag  z lag |    d lik | rows |d| > 3 vs canonical
+      0.60   29.492 |  1964.639  +2.17 |  1965.517  +1.48 |  0.878  -0.94 |    -18.0 | d14c_NH -4, d14c_SH +4, co2_level_MLO -3, co2_level_SPO -11
+      0.80   39.323 |  1964.639  +2.17 |  1965.515  +1.48 |  0.876  -0.94 |     -4.0 | co2_level_SPO -4
+      1.00   49.153 |  1964.639  +2.17 |  1965.513  +1.47 |  0.874  -0.94 |     +0.0 | 
+      1.50   73.730 |  1964.638  +2.17 |  1965.509  +1.46 |  0.871  -0.95 |    -32.8 | d14c_SH -9, co2_level_MLO -16, co2_level_SPO -5
+      2.00   98.307 |  1964.638  +2.17 |  1965.506  +1.45 |  0.868  -0.96 |   -120.8 | d14c_SH -20, co2_level_MLO -53, co2_level_SPO -30
+
+=== bomb_share_NH ===
+         x    value |   NH peak   z NH |   SH peak   z SH |    lag  z lag |    d lik | rows |d| > 3 vs canonical
+      0.80    0.800 |  1964.655  +2.21 |  1965.471  +1.35 |  0.816  -1.06 |     +0.5 | 
+      0.90    0.900 |  1964.639  +2.17 |  1965.513  +1.47 |  0.874  -0.94 |     +0.0 | 
+      1.00    1.000 |  1964.625  +2.14 |  1965.571  +1.65 |  0.947  -0.80 |     -9.1 | d14c_NH -7
+
+=== READING ===
+  tau_ex         d(z NH)/d ln(value) -0.00; never brings z NH below +1 in the scan
+  k_w            d(z NH)/d ln(value) -0.10; never brings z NH below +1 in the scan
+  h_ml           d(z NH)/d ln(value) -0.00; never brings z NH below +1 in the scan
+  bomb_share_NH  d(z NH)/d ln(value) -0.31; never brings z NH below +1 in the scan
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/nh_bomb_levers_20260908.rds
+⛔ Nothing adopted.

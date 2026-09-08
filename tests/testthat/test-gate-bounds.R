@@ -378,29 +378,19 @@ test_that("GATE S's knockout kills BOTH SH ocean limbs, and comes from the estim
   expect_identical(DG_S_KO, SL_CASES$SH_ocean)
 })
 
-test_that("GATE L bounds the LAND share of a pulse against Joos's split, and fails at BOTH edges", {
+test_that("L is a COMPARISON, not a gate: the verdict errors by name and dg_compareL() reports z's without a pass", {
   source(skip_if_no_gates(), local = TRUE)
+  # ⛔ RULED 2026-09-08h (Marcus): Joos is not a scoring mechanism -- the long
+  # lifetime is meant to be EMERGENT. A verdict must ERROR WITH THE REASON.
+  expect_error(dg_gateL_verdict(list(share = c(land = 16, ocean = 59, air = 25))), "COMPARISON, NOT A GATE")
+  expect_match(DG_L_COMPARISON, "emergent")
   # the split is a partition: the three ensemble means sum to 100 %
   expect_equal(sum(vapply(DG_L_RES, function(k) DG_L_JOOS[[k]][["mean"]], numeric(1))), 100)
   expect_match(DG_L_JOOS$src, "Joos")
-  # the band is DERIVED from the constants, not typed
-  at <- function(land, ocean = 59, air = 25)
-    dg_gateL_verdict(list(share = c(land = land, ocean = ocean, air = air)))
-  v0 <- at(DG_L_JOOS$land[["mean"]])
-  expect_true(v0$pass); expect_equal(v0$z[["land"]], 0)
-  expect_equal(v0$lo, DG_L_JOOS$land[["mean"]] - DG_L_NSD * DG_L_JOOS$land[["sd"]])
-  expect_equal(v0$hi, DG_L_JOOS$land[["mean"]] + DG_L_NSD * DG_L_JOOS$land[["sd"]])
-  # inside by a hair passes, outside by a hair fails -- UPPER edge (the canonical's side)...
-  expect_true (at(v0$hi - 0.1)$pass)
-  expect_false(at(v0$hi + 0.1)$pass)
-  # ...and the LOWER edge (the land-off mutation's side)
-  expect_true (at(v0$lo + 0.1)$pass)
-  expect_false(at(v0$lo - 0.1)$pass)
-  expect_false(at(0)$pass)
-  # the verdict is on the LAND share; ocean and air are REPORTED (z carried, not gated)
-  expect_true(at(DG_L_JOOS$land[["mean"]], ocean = 0, air = 100)$pass)
-  expect_equal(length(at(16)$z), 3L)
-  expect_false(at(NA_real_)$pass)
+  cmp <- dg_compareL(list(share = c(land = 16, ocean = 59, air = 25)))
+  expect_equal(unname(cmp$z), c(0, 0, 0)); expect_null(cmp$pass)
+  cmp2 <- dg_compareL(list(share = c(land = 30, ocean = 47, air = 23)))
+  expect_equal(cmp2$z[["land"]], 1); expect_equal(cmp2$z[["ocean"]], -1)
 })
 
 test_that("GATE GL bounds the d13C gradient LEVEL on the observation's own se, both ways, at H's strictness", {

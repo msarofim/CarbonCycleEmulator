@@ -1,0 +1,35 @@
+canonical (GLODAP shape): kz 11698, kz_deep_frac 0.0110 (K_deep 129), export 37.1 GtC/yr (0.1 below 1000 m), step1 +44.3, deep d13C +1.22, Q 2.44, lik -1439.42, deep rows -34.95
+
+=== martin_tail: kz_deep_frac scan at the canonical kz (lik and deep rows RELATIVE to the canonical) ===
+    frac  K_deep |  export  <1000 m |   step1  amp SH |  deep13C      Q   sink |    d lik  d deep8 | rows |d| > 3
+   0.011     129 |   16.33     0.07 |   +20.8     5.0 |    +1.43   2.15     NA |    -17.3     -5.4 | d13c_level_MLO -15, ocean_grad_d13c -7, d13c_level_SPO +6, d14c_NH -5
+   0.020     234 |   19.76     0.11 |   +24.7     5.9 |    +1.37   2.24     NA |    -15.9     -7.3 | d13c_level_MLO -10, d13c_level_SPO +5, ocean_grad_d13c -4, d14c_profile_ab -4, co2_level_MLO -4
+   0.050     585 |   23.76     0.20 |   +29.3     7.0 |    +1.27   2.41     NA |    -52.1    -29.1 | d14c_profile_ab -26, co2_level_MLO -18, co2_level_SPO -6, d14c_profile_bd -4, d13c_level_MLO -3
+   0.100    1170 |   25.60     0.34 |   +31.4     7.5 |    +1.19   2.60     NA |   -142.4    -45.2 | co2_level_MLO -59, co2_level_SPO -34, d14c_profile_ab -32, d14c_profile_bd -14, d14c_NH -3
+   0.200    2340 |   26.66     0.61 |   +32.7     7.8 |    +1.09   2.87     NA |   -453.1    -80.3 | co2_level_MLO -193, co2_level_SPO -142, d14c_profile_level -51, d14c_profile_bd -23, d14c_SH -15, d14c_NH -14, d13c_level_SPO -14, d14c_profile_ab -12, d13c_level_MLO +9, co2_icecore -5, ocean_grad_d13c +3
+   0.500    5849 |   27.36     1.43 |   +33.6     8.0 |    +0.95   3.40     NA |  -2319.3   -566.5 | co2_level_MLO -824, co2_level_SPO -693, d14c_profile_level -565, d14c_SH -84, d14c_NH -76, d13c_level_SPO -53, co2_icecore -23, d14c_profile_bd -11, gcb_ocean_sink -8, d13c_level_MLO +8, ocean_grad_d13c +5
+   1.000   11698 |   27.60     2.78 |   +34.0     8.1 |    +0.87   3.95     NA |  -6439.9  -1688.4 | co2_level_MLO -2176, co2_level_SPO -1915, d14c_profile_level -1696, d14c_SH -224, d14c_NH -207, d13c_level_SPO -117, co2_icecore -62, gcb_ocean_sink -36, d13c_level_MLO -14, ocean_grad_d13c +6, gcb_land_sink +3
+  best frac by the unrefitted likelihood: 0.02; kz x {0.5, 1, 2} there:
+    kz x 0.5: K_deep 117 | export 9.88 (<1000 m 0.05) | step1 +26.0 amp SH 6.2 | deep13C +1.43 Q 1.46 sink NA | d lik -1265.2 d deep8 -27.5
+    kz x 1.0: K_deep 234 | export 19.76 (<1000 m 0.11) | step1 +24.7 amp SH 5.9 | deep13C +1.37 Q 2.24 sink NA | d lik -15.9 d deep8 -7.3
+    kz x 2.0: K_deep 469 | export 39.52 (<1000 m 0.21) | step1 +23.9 amp SH 5.7 | deep13C +1.30 Q 2.96 sink NA | d lik -1393.8 d deep8 -139.4
+
+=== martin_full: kz_deep_frac scan at the canonical kz (lik and deep rows RELATIVE to the canonical) ===
+    frac  K_deep |  export  <1000 m |   step1  amp SH |  deep13C      Q   sink |    d lik  d deep8 | rows |d| > 3
+   0.011     129 |    1.43     0.11 |    +3.8     0.9 |    +1.57   1.96     NA |    -47.3    -11.0 | d13c_level_MLO -29, ocean_grad_d13c -12, d14c_NH -11, d13c_level_SPO +6, co2_level_MLO -4
+   0.020     234 |    2.26     0.17 |    +4.7     1.1 |    +1.52   2.02     NA |    -46.2    -12.3 | d13c_level_MLO -25, ocean_grad_d13c -10, d14c_NH -10, co2_level_MLO -7, d13c_level_SPO +6, d14c_profile_ab -3
+   0.050     585 |    4.55     0.35 |    +7.3     1.8 |    +1.41   2.18     NA |    -73.4    -29.4 | co2_level_MLO -23, d14c_profile_ab -22, d13c_level_MLO -17, co2_level_SPO -9, d13c_level_SPO +6, d14c_NH -6, ocean_grad_d13c -6, d14c_SH +3, d14c_profile_bd -3
+   0.100    1170 |    7.60     0.58 |   +10.9     2.6 |    +1.28   2.39     NA |   -152.0    -42.1 | co2_level_MLO -67, co2_level_SPO -40, d14c_profile_ab -27, d14c_profile_bd -13, d13c_level_MLO -7, d14c_NH -4, d13c_level_SPO +4, d14c_SH +3
+   0.200    2340 |   12.51     0.96 |   +16.5     4.0 |    +1.14   2.72     NA |   -453.7    -79.7 | co2_level_MLO -203, co2_level_SPO -150, d14c_profile_level -53, d14c_profile_bd -20, d14c_profile_ab -10, d14c_NH -10, d14c_SH -7, d13c_level_SPO -6, d13c_level_MLO +5, co2_icecore -5
+   0.500    5849 |   23.42     1.80 |   +29.2     7.0 |    +0.96   3.34     NA |  -2318.3   -574.0 | co2_level_MLO -831, co2_level_SPO -699, d14c_profile_level -573, d14c_SH -76, d14c_NH -70, d13c_level_SPO -47, co2_icecore -23, d14c_profile_bd -10, d13c_level_MLO +9, gcb_ocean_sink -8, ocean_grad_d13c +5
+   1.000   11698 |   36.57     2.81 |   +44.4    10.6 |    +0.87   3.95     NA |  -6440.5  -1688.2 | co2_level_MLO -2176, co2_level_SPO -1915, d14c_profile_level -1695, d14c_SH -225, d14c_NH -207, d13c_level_SPO -117, co2_icecore -62, gcb_ocean_sink -36, d13c_level_MLO -14, ocean_grad_d13c +6, gcb_land_sink +3
+  best frac by the unrefitted likelihood: 0.02; kz x {0.5, 1, 2} there:
+    kz x 0.5: K_deep 117 | export 1.13 (<1000 m 0.09) | step1 +6.4 amp SH 1.5 | deep13C +1.57 Q 1.27 sink NA | d lik -1343.0 d deep8 -34.1
+    kz x 1.0: K_deep 234 | export 2.26 (<1000 m 0.17) | step1 +4.7 amp SH 1.1 | deep13C +1.52 Q 2.02 sink NA | d lik -46.2 d deep8 -12.3
+    kz x 2.0: K_deep 469 | export 4.53 (<1000 m 0.35) | step1 +3.8 amp SH 0.9 | deep13C +1.45 Q 2.73 sink NA | d lik -1372.1 d deep8 -129.8
+
+=== READING ===
+  martin_tail: export crosses the literature 10.2 GtC/yr at kz_deep_frac ~ below the scan (every arm exports more); the unrefitted likelihood peaks at frac 0.02 (-15.9 vs canonical); there step1 +24.7 (canonical +44.3), deep d13C +1.37 (obs +0.47), below 1000 m 0.11 GtC/yr
+  diffusive-return capacity below 903 m at the canonical K (525 m2/yr): the observed deep DIC excess below there (6 umol/kg over 2797 m) carries 0.0041 GtC/yr; Martin at a 10.2 GtC/yr export puts 0.84 GtC/yr through that interface -> 204x short. A Martin D that delivers light carbon to the deep needs an ADVECTIVE return (option E); the profile form at a held gradient (T-D0) starves the export instead.
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/td0b_martin_kz_scan_20260908.rds
+⛔ Nothing adopted.

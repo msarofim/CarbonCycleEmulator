@@ -2,6 +2,41 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-08i — ⭐⭐ **THE CHEAP PROBES (Marcus: "do the cheap probes; do not use Joos as a scoring mechanism"): (1) GATE L DEMOTED to a comparison; (2) the ocean δ¹³C LEVEL decomposed — like-for-like the model's modern surface−deep gradient is 0.40 vs 0.89, too SMALL (T-D0's "already too large" was PI-vs-modern, RETRACTED at every quoting site); (3) K(z) has NO room and D NEEDS E (diffusive deep return 204× short of Martin's flux); (4) GATE 5's "NH peak +2.17σ late", carried since 09-02, is an ARGMAX ON A DOUBLE-PEAKED CURVE — the model's first-peak timing matches the observation to 0.00 yr.**
+
+**The ruling.** "Do not use Joos as a scoring mechanism: the long lifetime is meant to be an emergent property, not
+something we fit to." ⇒ GATE L (09-08g) is a COMPARISON: `dg_gateL_verdict()` ERRORS with `DG_L_COMPARISON`,
+`dg_compareL()` reports the z's, the ledger says why, `test-gate-bounds.R` asserts the error; `diag_tl_land_share_gate.R`
+prints the comparison (canonical +1.15 ensemble-sd, land-off −1.14, ent26 +0.98). Recorded in
+[[ccx_pedagogical_not_emulator]]. No probe below reads the IRF.
+
+**(1) `diag_d13c_ocean_level.R`.** Bottles generated from the CSV (LO surface +1.36 @1996, HI +1.29 @2011, deep +0.47
+@2003). Model at those epochs +1.60 / +2.41 / +1.20: surface +0.24 heavy, deep +0.73, **surface−deep 0.40 vs 0.89**.
+Pump off: deep +2.91 (the pump depletes it 1.71 where 2.20 is needed, 22 % short). T-independent alphas: −0.88 surface /
+−1.48 deep, gradient 1.00 — a uniform level shift overshooting by −0.75. PI departure from the Zhang equilibrium at each
+box's own T: warm ML +0.20 / +0.17 (pump on or off), cold box −0.63 (equilibrium +3.85 at 2 °C; the flush pulls it toward
+the deep). ⇒ the LEVEL sits between the two alpha pairs; the GRADIENT is the pump's deep delivery. **Retraction propagated**
+to `ccx_phase1_cheap_tests_20260908g`, `INDEX_ccx`, `handoff_2026-09-08h` §1.1 and the 09-08g entry above in one edit.
+
+**(2) `diag_td0b_martin_kz_scan.R`** (`lib_martin_shape.R` now shared with T-D0, which reproduces). kz_deep_frac
+0.011 → 0.02 / 0.05 / 0.1 / 0.2 / 0.5 / 1 under `martin_tail`: lik −16 / −52 / −142 / −453 / −2319 / −6440 (CO₂ levels,
+then the Δ¹⁴C profile); kz ×0.5 / ×2 at the best frac −1265 / −1394. The export never falls to the literature 10.2
+(every tail arm exports more; `martin_full` less). Arithmetic in-script: below the interface nearest 1000 m (903 m, K
+525 m²/yr) the observed deep DIC excess (6 µmol/kg over 2797 m) lets diffusion return **0.004 GtC/yr**; Martin at a
+10.2 GtC/yr export sends **0.84** through it — **204× short**. ⇒ a Martin D that delivers light carbon to the deep needs an
+ADVECTIVE return (E); the profile form at a held gradient (T-D0) starves the export instead. **C alone is the honest
+round-6 refit unless E is built first.**
+
+**(3) `diag_nh_bomb_levers.R` → `diag_gate5_bimodal.R`.** τ_ex ×0.5–2, k_w ×0.75–3, h_ml ×0.6–2, bomb_share 0.8–1.0: NONE
+moves the NH peak TIME (k_w ×3: 0.05 yr) while T-I moved it 1:1 with input timing. The curves: observed NH 853 @1963.71,
+trough 742 @1964.12, 840 @1964.54 (a double peak, 1.5 % apart, zonal spread 6.2 %); model 796 @1963.71, 745 @1964.04,
+864 @1964.62. `dg_peak()` is an argmax: it picks the 1963 lump in the observation and the 1964 lump in the model. **Peak-1
+timing: model − obs = 0.00 yr.** A +2 %/yr tilt of the OBSERVED series flips its own argmax to 1964.56. The real miss is
+the drop between the peaks (51 vs 111 ‰); k_w ×3 reaches 72 and narrows peak2−peak1 to +14 without flipping. The delivery
+series (Tans Table 2 quarterly, shaped by the observed record) puts 25 % of the total after 1965.5 and 14.6 % after
+1969.5 — a data question, flagged. Memory: [[ccx_gate5_argmax_on_bimodal]]; T-I's "faster early removal" WITHDRAWN.
+Gate 5's NH bound needs a statistic that is not an argmax — a ruling.
+
 ## 2026-09-08h — **The three 09-08g hygiene items (Marcus: "do the hygiene items"): the STRUCT-resolution ratchet lint, the promote script's missing profile rows (and a GATE 5 that can now fail), and the app's SEVEN-BOX diagram with the cold boxes' own numbers.**
 
 **1. `tests/testthat/test-mode-struct-lint.R`** — the `struct` class of bug ([[ccx_hilda31_adopted]]: a HILDA mode overlaid on
@@ -48,10 +83,10 @@ pre-existing (`test-alpha-as.R:116-117` gate Q deliberate, `test-seas-lag-split.
 `martin_full` = Martin from the ML base; `pump_grad` held; the shape is a PROFILE, so Martin's flux at the interfaces
 is integrated with the model's own K(z)): export 37.05 → 16.33 → 1.43 GtC/yr; layer-1 step +44.3 → +20.8 → +3.8
 µmol/kg; C's derived amplitude SH [10.6, 16.5] → −53 % → −91 %; Q 2.44 → 2.15 → **1.96 PASS**; lik −17.3 / −47.3
-(`d13c_level_MLO`, `ocean_grad_d13c`, `d14c_NH`). ⇒ the assessment's option-F reading ("the deep lacks remineralised
-light carbon") is overturned: at PI the surface−deep δ¹³C gradient is already 1.24 ‰ vs the observed 0.86 and the
-whole ocean is ~1 ‰ heavy at every depth (high-lat surface bottles +1.29 vs model HS +3.2) — an air-sea EQUILIBRIUM
-question. ⚠ "below the GLODAP profile's span" was moot: the profile spans 0–3700 m and is flat below ~1000 m.
+(`d13c_level_MLO`, `ocean_grad_d13c`, `d14c_NH`). ⇒ [⛔ RETRACTED 09-08i: the next clause compared the PI model with MODERN bottles] the assessment's option-F
+reading was said to be overturned by a PI gradient of 1.24 vs the observed 0.86; like-for-like at the bottles' epoch
+the model gradient is 0.40 vs 0.89, too SMALL — the deep does lack light carbon, and the held `pump_grad` starved the
+export (see 2026-09-08i). ⚠ "below the GLODAP profile's span" was moot: the profile spans 0–3700 m and is flat below ~1000 m.
 **T-ALK**: the bottles say the SH high-latitude surface alkalinity is **2296** (n 5200), AT the model's 2300 — the
 handoff's 2256 was the ALL-latitude MEDIAN (NH 2198, freshwater); 0.85 µmol DIC per µmol ALK; Q −0.01σ at the SH
 value, −0.33σ at the NH's; every lower alkalinity moves the HS DIC row AWAY from 2163; closed, `alk_hs` stays off.

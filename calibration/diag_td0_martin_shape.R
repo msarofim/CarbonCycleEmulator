@@ -47,27 +47,11 @@ TD0_C8_LAT_HI <- 55; TD0_C8_DEEP_M <- 2000; TD0_C8_SURF_M <- 50; TD0_C8_FLAG <- 
 TD0_C13_CSV   <- ccx_path("data-raw", "downloads", "glodap_c13c14_subset.csv")
 TD0_OUT <- ccx_path("outputs", "diagnostics", sprintf("td0_martin_shape_%s.rds", format(Sys.Date(), "%Y%m%d")))
 
-# ---- the switchable shape (session-local override of ccx_pump_shape) ------
-.td0_shape_glodap <- ccx_pump_shape
-TD0_ARM <- "glodap"; TD0_P <- NULL
-ccx_pump_shape <- function(grid) {
-  sh <- .td0_shape_glodap(grid)
-  if (identical(TD0_ARM, "glodap")) return(sh)
-  stopifnot(!is.null(TD0_P))
-  nl  <- grid$nl
-  zi  <- cumsum(grid$dz)[seq_len(nl)]          # interface depths; z_1 = h_ml
-  K   <- ccx_kz_profile(TD0_P, grid)           # the model's OWN K at each interface
-  dzm <- diff(grid$depth_mid)                  # == aux$dz_mid (asserted below)
-  Fg  <- K * diff(sh) / dzm                    # GLODAP-implied interface flux, shape units
-  ks  <- if (identical(TD0_ARM, "martin_full")) 1L else which.min(abs(zi - TD0_SPLICE_M))
-  Fm  <- Fg
-  Fs  <- if (ks == 1L) 1 else Fg[ks]           # flux-continuous at the splice
-  Fm[ks:nl] <- Fs * (zi[ks:nl] / zi[ks])^(-TD0_MARTIN_B)
-  s2 <- c(0, cumsum(Fm * dzm / K))
-  s2 / s2[length(s2)]
-}
+# ---- the switchable shape: calibration/lib_martin_shape.R (shared with the kz scan, 09-08h) ----
+source(ccx_path("calibration", "lib_martin_shape.R"))
+stopifnot(identical(MS_MARTIN_B, TD0_MARTIN_B), identical(MS_SPLICE_M, TD0_SPLICE_M), identical(MS_ARMS, TD0_ARMS))
 
-v   <- dg_vector(CCX_MODE_CANONICAL); TD0_P <- v$p
+v   <- dg_vector(CCX_MODE_CANONICAL); MS_P <- v$p
 obs <- ccx_prepare_obs()
 cat(sprintf("T-D0 at %s (%s, struct '%s'): h_ml %.2f, kz %.0f, kz_deep_frac %.4f, kz_zscale %g, pump_grad %.2f, pump_hs %.1f gC/m2/yr\n",
             CCX_MODE_CANONICAL, basename(v$src %||% ccx_mode_file()), attr(v$p, "struct"), v$p$h_ml, v$p$kz, v$p$kz_deep_frac, v$p$kz_zscale, v$p$pump_grad, v$p$pump_hs_gcm2))
@@ -105,7 +89,7 @@ amp_C <- function(B, h) {           # option C's derived amplitude, the options-
 }
 tg7 <- dg_gcb_target(DG_SINK_WIN)
 read_arm <- function(arm) {
-  TD0_ARM <<- arm
+  MS_ARM <<- arm
   r <- dg_run(v)
   stopifnot(isTRUE(all.equal(diff(r$sp$grid$depth_mid), r$sp$aux$dz_mid)))
   B  <- box_read(r$sp)
@@ -118,7 +102,7 @@ read_arm <- function(arm) {
   list(arm = arm, shape = ccx_pump_shape(r$sp$grid), B = B, st = st, lik = sum(unlist(st)), Q = q, G = gG, g7 = g7, hs = hs, E_hs = E_hs,
        amp = list(NH = amp_C(B, "NH"), SH = amp_C(B, "SH")))
 }
-RES <- setNames(lapply(TD0_ARMS, read_arm), TD0_ARMS); TD0_ARM <- "glodap"
+RES <- setNames(lapply(TD0_ARMS, read_arm), TD0_ARMS); MS_ARM <- "glodap"
 
 # ---- report ---------------------------------------------------------------
 G0 <- RES$glodap

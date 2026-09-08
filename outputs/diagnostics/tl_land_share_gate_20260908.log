@@ -5,25 +5,23 @@ GATE L at hilda31: Joos 2013 1000-yr split land 16 +/- 14, ocean 59 +/- 12, air 
       100 yr: land  40.3  ocean  31.3  air  28.4 %
       300 yr: land  43.1  ocean  36.6  air  20.3 %
      1000 yr: land  32.2  ocean  48.9  air  18.9 %
-    GATE L at 1000 yr: land 32.2 % -> z +1.15 (ocean z -0.84, air z -0.67) -> FAIL (UPPER edge)
+    COMPARISON L at 1000 yr: land 32.2 % (Joos 16 +/- 14: +1.15 sd), ocean -0.84 sd, air -0.67 sd -- REPORTED, not gated
 
   land_off       background held to 2.539 ppm; closure at 1000 yr 1.000000; 3 s
        20 yr: land   0.0  ocean  27.0  air  73.0 %
       100 yr: land   0.0  ocean  44.4  air  55.6 %
       300 yr: land   0.0  ocean  58.0  air  42.0 %
      1000 yr: land   0.0  ocean  70.4  air  29.6 %
-    GATE L at 1000 yr: land 0.0 % -> z -1.14 (ocean z +0.95, air z +0.51) -> FAIL (LOWER edge)
+    COMPARISON L at 1000 yr: land 0.0 % (Joos 16 +/- 14: -1.14 sd), ocean +0.95 sd, air +0.51 sd -- REPORTED, not gated
 
   column_control background held to 3.157 ppm; closure at 1000 yr 1.000000; 2 s
        20 yr: land  22.5  ocean  25.1  air  52.4 %
       100 yr: land  39.0  ocean  32.9  air  28.1 %
       300 yr: land  41.0  ocean  39.4  air  19.7 %
      1000 yr: land  29.7  ocean  52.4  air  17.9 %
-    GATE L at 1000 yr: land 29.7 % -> z +0.98 (ocean z -0.55, air z -0.79) -> PASS
+    COMPARISON L at 1000 yr: land 29.7 % (Joos 16 +/- 14: +0.98 sd), ocean -0.55 sd, air -0.79 sd -- REPORTED, not gated
 
-=== VERDICT ===
-  prediction 'the canonical FAILS, land > 30 % at 1000 yr': land 32.2 % -> CONFIRMED
-  mutation 'land-off fails the other way (< 2 %)': land 0.0 % -> PASS (the gate has power both ways)
-  at 2 sd of the ensemble spread the canonical would PASS (band [-12, 44]).
+=== READING (no verdict by ruling) ===
+  the canonical's land share at 1000 yr sits +1.15 ensemble-sd from Joos's mean; the land-off arm -1.14; the column control +0.98.
 saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/tl_land_share_gate_20260908.rds
-⛔ Nothing adopted.
+⛔ Nothing adopted; L is a comparison.

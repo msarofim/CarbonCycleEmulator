@@ -1,0 +1,34 @@
+GLODAPv2.2023 δ13C bottles (flag 2): LO surface (|lat| < 45, <= 50 m) +1.360 (n 2219, yr 1996); HI surface (|lat| >= 55) +1.286 (n 1040, yr 2011); deep (> 2000 m) +0.473 (n 8007, yr 2003)
+  observed surface-minus-deep: LO +0.887, HI +0.813 permil (the bottles are modern: the surface carries the Suess effect, the deep barely)
+
+equilibrium: δ_eq(T) = δ_atm + ε_DIC-g(T), ε = 0.0140 T x fCO3(0.082) + -0.1050 T + 10.5300  (Zhang 1995 via the model's constants); dε/dT -0.1039 permil/K; PI atmosphere -6.47
+
+=== 1. PREINDUSTRIAL: each box's δ13C against the equilibrium at ITS temperature (permil) ===
+  box (T)       | canonical      dep | pump_off      dep | alpha_tindep      dep |     both      dep
+  ML_NH   18 C  |   +2.395   +0.204 |   +2.423   +0.231 |   +1.580   -0.611 |   +1.613   -0.579
+  HS_NH    2 C  |   +3.116   -0.737 |   +3.043   -0.810 |   +1.469   -2.385 |   +1.338   -2.515
+  L1_NH         |   +2.073          |   +2.426          |   +1.253          |   +1.611         
+  L10_NH        |   +1.158          |   +2.876          |   -0.270          |   +1.412         
+  HD_NH         |   +1.158          |   +2.876          |   -0.270          |   +1.412         
+  ML_SH   16 C  |   +2.574   +0.175 |   +2.600   +0.200 |   +1.573   -0.826 |   +1.603   -0.796
+  HS_SH    2 C  |   +3.224   -0.630 |   +3.148   -0.706 |   +1.497   -2.357 |   +1.367   -2.486
+  L1_SH         |   +2.254          |   +2.603          |   +1.249          |   +1.602         
+  L10_SH        |   +1.286          |   +2.999          |   -0.247          |   +1.431         
+  HD_SH         |   +1.286          |   +2.999          |   -0.247          |   +1.431         
+  δ_eq at the ML: NH +2.192 (18 C), SH +2.399 (16 C); at the cold box +3.853 (2 C)
+  export (LS pump, GtC/yr): canonical 37.1; pump_off 0.0; alpha_tindep 37.1; both 0.0
+
+=== 2. AT THE BOTTLES' EPOCH: model vs observation, and the level/gradient split ===
+  canonical     atm -8.10 | ML(LS) +1.60 vs LO surf +1.36 (+0.24) | HS +2.41 vs HI surf +1.29 (+1.12) | deep +1.20 vs +0.47 (+0.73) | LEVEL (deep) +0.73, GRADIENT surf-deep model +0.40 vs obs +0.89 (-0.49) | Q 2.44 sd
+  pump_off      atm -8.13 | ML(LS) +1.57 vs LO surf +1.36 (+0.21) | HS +2.29 vs HI surf +1.29 (+1.00) | deep +2.91 vs +0.47 (+2.44) | LEVEL (deep) +2.44, GRADIENT surf-deep model -1.34 vs obs +0.89 (-2.23) | Q 2.50 sd
+  alpha_tindep  atm -8.09 | ML(LS) +0.72 vs LO surf +1.36 (-0.64) | HS +0.70 vs HI surf +1.29 (-0.59) | deep -0.28 vs +0.47 (-0.75) | LEVEL (deep) -0.75, GRADIENT surf-deep model +1.00 vs obs +0.89 (+0.11) | Q 6.33 sd
+  both          atm -8.13 | ML(LS) +0.69 vs LO surf +1.36 (-0.67) | HS +0.53 vs HI surf +1.29 (-0.76) | deep +1.40 vs +0.47 (+0.92) | LEVEL (deep) +0.92, GRADIENT surf-deep model -0.70 vs obs +0.89 (-1.59) | Q 6.22 sd
+
+=== 3. READING (the decomposition; no auto-verdict) ===
+  LIKE-FOR-LIKE at the bottles' epoch: surface +0.24 heavy, deep +0.73 heavy; surface-minus-deep +0.40 vs observed +0.89 -> the model's gradient is 0.49 too SMALL: the deep lacks light carbon RELATIVE to the surface.
+  (T-D0's 'gradient already too large' compared the PI model, +1.24, with modern bottles -- not like-for-like; RETRACTED here.)
+  THE PUMP: with it off the deep sits at +2.91 (the surface mixed down); the canonical pump depletes the deep by 1.71 permil; matching the observed deep at the model's surface would need 2.20 -> the pump's deep delivery is ~22 % short.
+  THE ALPHAS: the T-independent legacy pair shifts EVERY box by -0.88 (surface) / -1.48 (deep) and lands the gradient at +1.00 (obs +0.89) -- a uniform LEVEL shift that overshoots by -0.75 at the deep; the shipped T-dependent pair is +0.73 heavy at the deep. The truth sits between the two pairs' mean equilibrium; that is a constant, the deep's remaining excess is the pump's delivery.
+  PI departure from equilibrium at each box's own T: warm ML +0.20 / +0.17 (pump off +0.23 / +0.20): the warm surface is AT equilibrium to 0.2; cold box -0.63 (its equilibrium at 2 C is +3.85; it is pulled down by the flush from a deep at +1.29).
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/d13c_ocean_level_20260908.rds
+⛔ Nothing adopted.

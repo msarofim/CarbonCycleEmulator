@@ -421,8 +421,8 @@ DG_LEDGER <- list(
        bound = "12a: Joos published 5-95 %. 12b: constructed band, stated.",
        scored = "NO -- the IRF is not a stream",
        power  = "REAL, and 12b carries its OWN in-run mutation test."),
-  list(id = "L", what = "LAND share of a 100 GtC pulse at 1000 yr (T-L, 2026-09-08g)",
-       class = "MODEL ENSEMBLE (last-resort source class, named)",
+  list(id = "L", what = "LAND share of a 100 GtC pulse at 1000 yr (T-L, 2026-09-08g) -- ⛔ A COMPARISON, NOT A GATE (Marcus 2026-09-08h)",
+       class = "MODEL ENSEMBLE -- and that is why it is not a gate: 'do not use Joos as a scoring mechanism; the long lifetime is meant to be an EMERGENT property, not something we fit to'. dg_gateL_verdict() ERRORS; dg_compareL() reports the z's.",
        src = "Joos et al. 2013 ACP 13:2793, abstract: at 1000 yr land 16 +/- 14 %, ocean 59 +/- 12 %, air 25 +/- 9 %",
        bound = paste("|z_land| <= DG_L_NSD (1) against the MULTI-MODEL SPREAD, two-sided:",
          "
@@ -1378,8 +1378,11 @@ DG_L_JOOS <- list(land  = c(mean = 16, sd = 14),
                   ocean = c(mean = 59, sd = 12),
                   air   = c(mean = 25, sd = 9),
                   src = "Joos et al. 2013 ACP 13:2793, abstract (SOURCED, notes/assessment_2026-09-08_acceptable_state.md)")
-DG_L_NSD <- 1
+DG_L_NSD <- 1            # kept for the comparison's z-band label only
 DG_L_RES <- c("land", "ocean", "air")
+DG_L_COMPARISON <- paste("COMPARISON, NOT A GATE (Marcus 2026-09-08h): 'Do not use Joos as a scoring",
+                         "mechanism: the long lifetime is meant to be an emergent property, not something",
+                         "we fit to.' Use dg_compareL() for the reported z's; nothing passes or fails here.")
 DG_L_EXTRA_YR <- 10   # forcing built this far past the horizon so the read is interior
 
 dg_gateL_partition <- function(v, horizon = DG_L_HORIZON, pulse = JOOS_PULSE) {
@@ -1408,13 +1411,15 @@ dg_gateL_partition <- function(v, horizon = DG_L_HORIZON, pulse = JOOS_PULSE) {
        share = share_at(horizon), share_at = share_at, closure = at(horizon)$closure)
 }
 
-dg_gateL_verdict <- function(g, joos = DG_L_JOOS, n_sd = DG_L_NSD) {
+# The REPORTED comparison: where the model's pulse partition sits against the
+# ensemble's, in the ensemble's own sd units. No `pass` field, by ruling.
+dg_compareL <- function(g, joos = DG_L_JOOS) {
   z <- vapply(DG_L_RES, function(k) (g$share[[k]] - joos[[k]][["mean"]]) / joos[[k]][["sd"]], numeric(1))
-  list(share = g$share, z = z, n_sd = n_sd,
-       lo = joos$land[["mean"]] - n_sd * joos$land[["sd"]],
-       hi = joos$land[["mean"]] + n_sd * joos$land[["sd"]],
-       pass = is.finite(z[["land"]]) && abs(z[["land"]]) <= n_sd)
+  list(share = g$share, z = z, joos = joos, src = joos$src)
 }
+# A verdict must ERROR WITH THE REASON, the way gate 4 and a retired mode name
+# do, not return a plausible pass/fail (the silent-gate family).
+dg_gateL_verdict <- function(...) stop("GATE L: ", DG_L_COMPARISON)
 
 # =====================================================================
 # GATE GL: the interhemispheric d13C gradient LEVEL (T-G, 2026-09-08g).

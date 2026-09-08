@@ -1,5 +1,5 @@
 # =====================================================================
-# T-L (handoff 2026-09-08g §1): GATE L -- the LAND share of a 100 GtC pulse at
+# T-L (handoff 2026-09-08g §1): COMPARISON L (a gate until the 09-08h ruling) -- the LAND share of a 100 GtC pulse at
 # 100 and 1000 yr against Joos et al. 2013's multi-model split, at the
 # canonical hilda31, with its mutation arm (land CO2 fertilisation OFF).
 #
@@ -27,19 +27,18 @@ arm_of <- function(a) switch(a,
 cat(sprintf("GATE L at %s: Joos 2013 1000-yr split land %g +/- %g, ocean %g +/- %g, air %g +/- %g %% (%s); bound |z_land| <= %g -> [%g, %g] %%\n",
             CCX_MODE_CANONICAL, DG_L_JOOS$land[["mean"]], DG_L_JOOS$land[["sd"]], DG_L_JOOS$ocean[["mean"]], DG_L_JOOS$ocean[["sd"]], DG_L_JOOS$air[["mean"]], DG_L_JOOS$air[["sd"]], DG_L_JOOS$src, DG_L_NSD,
             DG_L_JOOS$land[["mean"]] - DG_L_NSD * DG_L_JOOS$land[["sd"]], DG_L_JOOS$land[["mean"]] + DG_L_NSD * DG_L_JOOS$land[["sd"]]))
+# ⛔ RULED 2026-09-08h (Marcus), after this script first ran: "Do not use Joos as a scoring
+# mechanism: the long lifetime is meant to be an emergent property, not something we fit to."
+# GATE L is therefore a COMPARISON: the partition and its z's are REPORTED; nothing passes.
 RES <- list()
 for (a in TL_ARMS) {
-  t0 <- Sys.time(); g <- dg_gateL_partition(arm_of(a)); vd <- dg_gateL_verdict(g)
-  RES[[a]] <- list(g = g[setdiff(names(g), "share_at")], shares = t(vapply(TL_HORIZONS, g$share_at, numeric(3))), verdict = vd)
+  t0 <- Sys.time(); g <- dg_gateL_partition(arm_of(a)); cm <- dg_compareL(g)
+  RES[[a]] <- list(g = g[setdiff(names(g), "share_at")], shares = t(vapply(TL_HORIZONS, g$share_at, numeric(3))), compare = cm)
   cat(sprintf("\n  %-14s background held to %.3f ppm; closure at %d yr %.6f; %.0f s\n", a, g$hold_dev, DG_L_HORIZON, g$closure, as.numeric(Sys.time() - t0, units = "secs")))
   for (k in seq_along(TL_HORIZONS)) cat(sprintf("    %5d yr: land %5.1f  ocean %5.1f  air %5.1f %%\n", TL_HORIZONS[k], RES[[a]]$shares[k, "land"], RES[[a]]$shares[k, "ocean"], RES[[a]]$shares[k, "air"]))
-  cat(sprintf("    GATE L at %d yr: land %.1f %% -> z %+.2f (ocean z %+.2f, air z %+.2f) -> %s%s\n", DG_L_HORIZON, vd$share[["land"]], vd$z[["land"]], vd$z[["ocean"]], vd$z[["air"]], if (vd$pass) "PASS" else "FAIL",
-              if (!vd$pass) sprintf(" (%s edge)", if (vd$z[["land"]] > 0) "UPPER" else "LOWER") else ""))
+  cat(sprintf("    COMPARISON L at %d yr: land %.1f %% (Joos %g +/- %g: %+.2f sd), ocean %+.2f sd, air %+.2f sd -- REPORTED, not gated\n", DG_L_HORIZON, cm$share[["land"]], DG_L_JOOS$land[["mean"]], DG_L_JOOS$land[["sd"]], cm$z[["land"]], cm$z[["ocean"]], cm$z[["air"]]))
 }
-cat("\n=== VERDICT ===\n")
-vc <- RES$canonical$verdict; vm <- RES$land_off$verdict
-cat(sprintf("  prediction 'the canonical FAILS, land > %g %% at %d yr': land %.1f %% -> %s\n", vc$hi, DG_L_HORIZON, vc$share[["land"]], if (!vc$pass && vc$z[["land"]] > 0) "CONFIRMED" else if (vc$pass) "FALSIFIED (it passes: H's reading is wrong)" else "FAILS, but at the LOWER edge"))
-cat(sprintf("  mutation 'land-off fails the other way (< %g %%)': land %.1f %% -> %s\n", vm$lo, vm$share[["land"]], if (!vm$pass && vm$z[["land"]] < 0) "PASS (the gate has power both ways)" else "THE MUTATION DID NOT FAIL THE LOWER EDGE -- the gate is blind there"))
-cat(sprintf("  at 2 sd of the ensemble spread the canonical would %s (band [%g, %g]).\n", if (abs(vc$z[["land"]]) <= 2) "PASS" else "still FAIL", DG_L_JOOS$land[["mean"]] - 2 * DG_L_JOOS$land[["sd"]], DG_L_JOOS$land[["mean"]] + 2 * DG_L_JOOS$land[["sd"]]))
-saveRDS(list(arms = RES, horizons = TL_HORIZONS, joos = DG_L_JOOS, n_sd = DG_L_NSD, mode = CCX_MODE_CANONICAL, date = Sys.time()), TL_OUT)
-cat(sprintf("saved %s\n⛔ Nothing adopted.\n", TL_OUT))
+cat("\n=== READING (no verdict by ruling) ===\n")
+cat(sprintf("  the canonical's land share at %d yr sits %+.2f ensemble-sd from Joos's mean; the land-off arm %+.2f; the column control %+.2f.\n", DG_L_HORIZON, RES$canonical$compare$z[["land"]], RES$land_off$compare$z[["land"]], RES$column_control$compare$z[["land"]]))
+saveRDS(list(arms = RES, horizons = TL_HORIZONS, joos = DG_L_JOOS, mode = CCX_MODE_CANONICAL, date = Sys.time()), TL_OUT)
+cat(sprintf("saved %s\n⛔ Nothing adopted; L is a comparison.\n", TL_OUT))
