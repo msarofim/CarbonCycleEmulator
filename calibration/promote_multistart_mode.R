@@ -164,7 +164,13 @@ streams <- local({
              list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
                   grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c),
              luc = el, deep = sp$diagnostics$d14c_bottom_box,
-             ocean_grad = ccx_ocean_grad_scored(r$out, sp), by_stream = TRUE)
+             ocean_grad = ccx_ocean_grad_scored(r$out, sp), by_stream = TRUE,
+             # the profile D14C bundle (#8/#9, 2026-09-06): its three rows REPLACE
+             # the bottom-box row `d14c_deep_ocean` (23 -> 25 streams). Absent
+             # until 2026-09-08g, so every promoted `streams` field before that
+             # carried the old row instead, and GATE 5's printed residual
+             # silently absorbed the 4.75 log-unit difference at hilda31.
+             d14c_mid = ccx_model_d14c_slabs(sp))
 })
 st <- unlist(streams)
 cat(sprintf("%d streams, total %.4f\n", length(st), sum(st)))
@@ -176,9 +182,20 @@ sep("GATE 5: the streams sum to the likelihood half of the logpost")
 # and the reference comes from the OBJECTIVE, which reaches the likelihood by a
 # different path. This is the check the luc_scale-squared bug failed.
 pri <- lp0 - sum(st)
-cat(sprintf("sum(streams) %.6f ; logpost %.6f ; implied prior+jacobian %.6f\n",
-            sum(st), lp0, pri))
+# The prior + Jacobian, RECOMPUTED from the table the objective was built on
+# (the same formula ccx_make_logpost() sums; the band re-imposition above, when
+# it applies, has already replaced h_ml's prior there). Until 2026-09-08g this
+# residual was only PRINTED, so a missing stream could hide in it -- and the
+# three profile rows did, for two adoptions.
+pj <- sum(vapply(CCX_PARAM_NAMES, function(n) { s <- CCX_PARAM_TABLE[[n]]
+  s$prior(pm[[n]]) + .log_jac(u[[match(n, CCX_PARAM_NAMES)]], s) }, numeric(1)))
+cat(sprintf("sum(streams) %.6f ; logpost %.6f ; implied prior+jacobian %.6f ; recomputed prior+jacobian %.6f ; gap %.3e (tol %g)\n",
+            sum(st), lp0, pri, pj, pri - pj, PMM_LP_TOL))
 if (!is.finite(pri)) stop("non-finite prior residual -- the decomposition is wrong")
+if (abs(pri - pj) > PMM_LP_TOL)
+  stop("GATE 5: the streams do not sum to the likelihood half of the logpost (gap ",
+       format(pri - pj, digits = 3), "): a stream is missing from the decomposition ",
+       "or the prior is not the one the objective used.")
 
 # ---------------------------------------------------------------------
 sep("the h_ml KINK MAP -- derived from the shape function, not typed")

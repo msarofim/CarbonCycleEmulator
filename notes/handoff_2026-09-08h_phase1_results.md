@@ -139,5 +139,6 @@ Session wrapper on the pure-R `ccx_deriv()` (bit-parity with C++ to 3e-13 ppm): 
 (1) GATE L's bound: 1 sd of the model spread (FAIL) vs 2 sd (PASS). (2) GATE GL's form: observation se alone vs with the
 representation allowance (both FAIL). (3) The σ_rep table: smooth across bin edges / re-bin / leave (an objective change).
 (4) Option A vs B in the light of §1.7. (5) Round 6's prereg (C + D) with D's predictions rewritten per §2.1.
-(6) The remaining 09-08g hygiene: the ratchet lint on the ~55 direct `readRDS(ccx_mode_file())` overlays, the promote
-script's `streams` field, the app's 7-box diagram — none touched this session.
+(6) ✅ The 09-08g hygiene is DONE (CHANGELOG 09-08h): `test-mode-struct-lint.R` (29 files / 32 sites, convert on touch);
+the promote script carries the profile rows and GATE 5 can fail (mutation-tested, −4.75 caught); the seven-box diagram
+draws the cold boxes with their own numbers from a per-edge flux trace, and the "−40 to the deep" arrow is fixed.

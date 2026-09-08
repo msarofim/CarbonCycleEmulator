@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-08h — **The three 09-08g hygiene items (Marcus: "do the hygiene items"): the STRUCT-resolution ratchet lint, the promote script's missing profile rows (and a GATE 5 that can now fail), and the app's SEVEN-BOX diagram with the cold boxes' own numbers.**
+
+**1. `tests/testthat/test-mode-struct-lint.R`** — the `struct` class of bug ([[ccx_hilda31_adopted]]: a HILDA mode overlaid on
+`ccx_default_params()` runs as a column, −2.3e7) as a RATCHET in the shape of `test-overlay-idiom-lint.R`: the rule is
+file-level and literal — contains `readRDS(ccx_mode_file` and never calls `ccx_mode_base(` — with SUBSET / NO-STALE /
+NO-GROWTH assertions and a temp-file mutation test that the rule fires on the pattern and is silenced by the resolver.
+Baseline **29 files / 32 occurrences** (`paths.R` exempt; `test-mode-decode.R` carries two on one line). CONVERT ON TOUCH,
+as ruled for the overlay idiom 09-02; the count can only fall.
+
+**2. `calibration/promote_multistart_mode.R`** — the `streams` field now passes `d14c_mid = ccx_model_d14c_slabs(sp)`, so
+the profile bundle (#8/#9) REPLACES the bottom-box row `d14c_deep_ocean` (23 → 25 streams) as the objective has done since
+09-06. GATE 5 ("the streams sum to the likelihood half") only PRINTED its residual before; it now RECOMPUTES the prior +
+Jacobian from the table and stops at `PMM_LP_TOL` (1e-5). Mutation-tested at `hilda31` (scratch replication of the block):
+with the rows, gap −3.0e-10 PASS; without, gap −4.754 FAIL — the difference the old form silently absorbed for two
+adoptions (the shipped `hilda31` file's `streams` still has 23 rows; a re-promotion would carry 25). Not re-promoted.
+
+**3. The seven-box diagram** (`app/R/plots.R` `plot_box_diagram()`, called from `server.R`; `fmt_gtc()` moved beside it).
+The recorder (`ccx_deriv(record = TRUE)`, the diagnostic path only) now also keeps PER-EDGE sums (`edges`, `pump_edges`),
+and `R/fluxes.R` derives `CCX_FLUX_HS` — `hs_as_down`, `hs_as_up`, `hs_pump`, `hs_hd_net`, `hd_int_net` — from them
+(NOT channels: the channels fold HS into "ml" and HD into "int" by design so `ocean_net` stays right; zero with the
+structure off). `test-fluxes.R` +1: the edge sums reproduce `dy[, "C"]` to 1e-12 in both structures, the HS flows sit
+inside their channels, and with the flush OFF (`u_hs` 0) `hs_hd_net` equals `hs_pump` exactly. With `hs_frac > 0` the
+diagram draws the cold surface and cold deep boxes on the right with their own arrows (air ↔ cold sea 22 / 20, sinks
+net 2 of which 5.3 export, cold deep → interior 1 GtC/yr at 2024) and the warm air-sea arrows show the warm share (90 /
+89, not the channel totals 112 / 109). ⚠ Exposed and fixed in passing: the "to the deep" arrow had read **−40** since
+the pump shipped, because the pump's export is its own channel and `ml_int` is the diffusive RETURN; it now shows the
+net (+3) with both parts named. Rendered and inspected in both forms (5-box at `hs_frac` 0, 7-box at 0.16).
+
 ## 2026-09-08g — ⭐⭐ **PHASE 1 RAN: the seven cheap tests of handoff 09-08g §1, at the canonical `hilda31`, NOTHING ADOPTED (`notes/handoff_2026-09-08h_phase1_results.md`). Confirmed: T-L (GATE L FAILS, land 32.2 % of a pulse at 1000 yr vs Joos 16 ± 14, 1-sd bound), T-G (GATE GL FAILS, the δ¹³C gradient LEVEL 1.965×, z −13.3), T-ALK's "not a lever". Falsified, informatively: T-D0 (Martin lightens NOTHING — the deep gets HEAVIER, +1.22 → +1.43/+1.57 vs obs +0.47, because at the model's K(z) the Martin profile holds the gradient with a tenth of the export; the sub-ML step collapses −53/−91 % ⇒ C and D are ONE refit), T-hml (a 1.5 m shelf at h_ml 50 = the σ_rep table's 25 m bin-edge STEP, 0.5 log-units at |z| 3.3 — the Hessian instability reproduced exactly; not the model, not `hml_kinks`), T-I (the NH bomb peak is ALREADY 1 yr late; a delayed / reservoir NH input moves it LATER 1.0 yr/yr — option I ruled OUT; the miss needs faster early NH removal). T-A0: PARTLY — the sign FLIPS, but only at a modulated velocity W0·γ ≥ 2 m/yr (r +0.07 at 2 × 1, +0.09 at 4 × 0.5, +0.31 at 4 × 1 = 2.0× obs); the response is linear, -0.163 +0.100×(W0·γ) GtC/yr per index, so the observed +0.115 needs W0·γ ≈ 2.8 m/yr ≈ 26 Sv of MODULATED upwelling over the LS area — while the plain whole-column limb costs −135 / −596 / −1615 / −4001 log-units unrefitted at 0.5 / 1 / 2 / 4 m/yr (the one-step return to the bottom box floods the deep Δ¹⁴C rows). ⇒ the MECHANISM carries the sign; the whole-column LIMB cannot host it: B (a shallow tropical box) is the build.**
 
 **Shipped (all bit-identical at the canonical).** `alk_hs` — a per-box alkalinity for the COLD box in both cores

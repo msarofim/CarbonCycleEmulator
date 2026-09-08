@@ -273,3 +273,98 @@ plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
          caption = app_provenance_caption()) +
     theme_ccx()
 }
+
+
+#' The box diagram ("Under the hood"). ARROWS CARRY THEIR FLUXES (2026-08-13):
+#' unlabelled arrows were the single biggest pedagogical gap in the app -- the
+#' entire "CO2 only lasts 5 years" lesson is that photosynthesis and air-sea
+#' exchange are ~70 and ~95 GtC/yr while emissions are ~11 and the net imbalance
+#' ~5, and an arrow without a number cannot say that. Numbers come from the
+#' flux trace (R/fluxes.R), i.e. from the model's own tap, never a typed table.
+#'
+#' THE SEVEN-BOX FORM (2026-09-08g). With the HILDA structure on (`p$hs_frac >
+#' 0`) each hemisphere also has a cold high-latitude surface box and a cold
+#' deep box; they are drawn on the right with their OWN numbers from the
+#' per-edge trace (`CCX_FLUX_HS`), and the low-latitude air-sea arrows show the
+#' warm share only (the channel totals include the cold box by design).
+#'
+#' @param fx one row of the annual flux trace (APP_FLUX_NOW)
+#' @param stock the last row of the historical run's `out`
+#' @param p the app's parameter list (for `hs_frac`)
+fmt_gtc <- function(x) sprintf("%s GtC", format(round(x), big.mark = ","))
+
+plot_box_diagram <- function(fx, stock, p) {
+  hs_on <- isTRUE(p$hs_frac > 0)
+  boxes <- data.frame(
+    x = c(2, 1, 3, 5, 5), y = c(4, 2.4, 2.4, 3.0, 1.2),
+    lab = c("Atmosphere", "Vegetation\n(leaves + wood)", "Soil\n(fast + slow)",
+            "Ocean\nmixed layer", "Deep ocean\n(10 layers)"),
+    col = c(PAL[["atm"]], PAL[["land"]], PAL[["land"]], PAL[["ocean"]], PAL[["ocean"]]))
+  as_down <- fx$as_down - if (hs_on) fx$hs_as_down else 0
+  as_up   <- fx$as_up   - if (hs_on) fx$hs_as_up   else 0
+  # x/xend/yend and the flux each segment carries, kept in ONE table so a
+  # moved arrow cannot end up with another arrow's number.
+  arrows_df <- data.frame(
+    x    = c(2,   1,   3,   2.6, 5,   5,   2.0),
+    xend = c(1,   3,   2,   4.6, 2.6, 5,   2.0),
+    y    = c(3.7, 2.4, 2.7, 3.75, 3.15, 2.6, 4.7),
+    yend = c(2.8, 2.4, 3.7, 3.05, 4.05, 1.7, 4.3),
+    # "to the deep" is the NET surface-to-interior transfer: the diffusive return
+    # (`ml_int`, negative = upward) PLUS the biological pump's export (`pump`, a
+    # channel of its own). Shown as one net number with the export named, so the
+    # arrow cannot read "-40 to the deep" (which it did until 2026-09-08g).
+    val  = c(fx$gpp, fx$litter, fx$rh + fx$luc, as_down, as_up, fx$ml_int + fx$pump, fx$foss),
+    hj   = c(1.15, 0.5, -0.1, 0.5, 0.5, -0.15, -0.2),
+    vj   = c(0.5,  -0.6, 0.5, 1.5, -1.0, 0.5, 0.5),
+    nm   = c("photosynthesis", "litterfall", "respiration",
+             if (hs_on) "air to warm sea" else "air to sea",
+             if (hs_on) "warm sea to air" else "sea to air",
+             sprintf("to the deep, net\n(%.0f down as the biological\npump, %.0f back up by mixing)", fx$pump, -fx$ml_int),
+             "fossil fuels"))
+  xmax <- 6.1
+  if (hs_on) {
+    xmax <- 7.9
+    # The cold boxes sit to the right; their air-sea pair leaves the atmosphere
+    # ABOVE the warm pair (y 4.12 / 3.92 against 3.75) so the two pairs never
+    # cross, and their labels are pushed to the right-hand end of the arrows.
+    boxes <- rbind(boxes, data.frame(
+      x = c(6.9, 6.9), y = c(3.5, 1.2),
+      lab = c(sprintf("Cold surface\n(high latitude, %.0f%%)", 100 * p$hs_frac), "Cold deep\nocean"),
+      col = c(PAL[["ocean"]], PAL[["ocean"]])))
+    arrows_df <- rbind(arrows_df, data.frame(
+      x    = c(2.6, 6.45, 6.9, 6.3),
+      xend = c(6.45, 2.6, 6.9, 5.6),
+      y    = c(4.12, 3.42, 3.1, 1.35),
+      yend = c(3.62, 3.92, 1.7, 1.35),
+      val  = c(fx$hs_as_down, fx$hs_as_up, fx$hs_hd_net, fx$hd_int_net),
+      hj   = c(-0.55, -0.55, -0.15, 0.5),
+      vj   = c(-0.5, 1.5, 0.5, -0.6),
+      nm   = c("air to cold sea", "cold sea to air",
+               sprintf("sinks, net (of which\n%.1f biological export)", fx$hs_pump), "cold deep to interior")))
+  }
+  arrows_df$lab <- sprintf("%.0f\n%s", arrows_df$val, arrows_df$nm)
+  ggplot() +
+    geom_segment(data = arrows_df, aes(x, y, xend = xend, yend = yend),
+                 arrow = arrow(length = unit(0.16, "cm"), type = "closed"),
+                 colour = "grey45", linewidth = 0.5) +
+    geom_text(data = arrows_df,
+              aes((x + xend) / 2, (y + yend) / 2, label = lab, hjust = hj, vjust = vj),
+              size = 2.9, colour = "grey20", lineheight = 0.9) +
+    geom_label(data = boxes, aes(x, y, label = lab, fill = I(col)),
+               colour = "white", fontface = "bold", size = 3.4,
+               label.padding = unit(0.4, "lines"), label.r = unit(0.15, "lines")) +
+    annotate("text", x = xmax / 2, y = 0.70, size = 3.1, colour = "grey35", lineheight = 1.05,
+             label = sprintf(paste0("Arrows are flows in GtC per year (%d). Stocks today: ",
+                                    "atmosphere %s, land %s, ocean %s.\n",
+                                    "Each box exists twice — once per hemisphere.%s"),
+                             fx$year,
+                             fmt_gtc(stock$co2_global * ccx_const("GtC_PER_PPM")),
+                             fmt_gtc(stock$land_C), fmt_gtc(stock$ocean_C),
+                             if (hs_on) " The cold boxes are the high-latitude ocean; the warm arrows exclude them." else "")) +
+    annotate("text", x = xmax / 2, y = 0.18, size = 3.2, colour = "grey20", fontface = "bold", lineheight = 1.05,
+             label = sprintf(paste0("Photosynthesis and the sea move %.0f GtC a year in and out of the air, ",
+                                    "so an average CO₂ molecule\nstays only ~%.1f years. ",
+                                    "The ADDED carbon still takes centuries to go."),
+                             fx$atm_out, fx$tau_turn)) +
+    xlim(0.1, xmax) + ylim(0, 4.9) + theme_void()
+}

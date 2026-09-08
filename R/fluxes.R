@@ -73,6 +73,41 @@ CCX_FLUX_DERIVED <- c(
   tau_turn  = "Atmospheric turnover time (yr)"
 )
 
+# The cold boxes' OWN flows (2026-09-08g), derived from the per-edge sums the
+# recorder keeps beside the channels. NOT channels: the channels fold HS into
+# "ml" and HD into "int" so the derived net ocean uptake stays right (see
+# ccx_flux_boxclass()); these exist so the app's diagram can draw the two cold
+# boxes with numbers from the model's own tap. Zero, not NA, with the structure
+# off, so annual means and the completeness test need no special case.
+#   hs_as_down / hs_as_up  gross air-sea into / out of the HS boxes (inside as_down/as_up)
+#   hs_pump                the HS biological export HS -> HD (inside `pump`)
+#   hs_hd_net              NET HS -> HD carbon, flush + pump (inside ml_int)
+#   hd_int_net             NET HD -> low-latitude interior, the conduit (inside int_exch)
+CCX_FLUX_HS <- c(
+  hs_as_down = "Air to cold surface (gross)",
+  hs_as_up   = "Cold surface to air (gross)",
+  hs_pump    = "Cold-box biological export",
+  hs_hd_net  = "Cold surface to cold deep (net)",
+  hd_int_net = "Cold deep to interior (net)"
+)
+
+ccx_flux_hs_derive <- function(edges, pump_edges, aux) {
+  z <- stats::setNames(numeric(length(CCX_FLUX_HS)), names(CCX_FLUX_HS))
+  if (is.null(edges)) return(z)
+  ix <- lapply(HEMIS, function(h) aux$idx[[h]])
+  if (is.null(ix[[1]]$hs)) return(z)
+  hs <- vapply(ix, `[[`, integer(1), "hs") + 1L
+  hd <- vapply(ix, `[[`, integer(1), "hd") + 1L
+  at <- vapply(ix, `[[`, integer(1), "atm") + 1L
+  oc <- unlist(lapply(ix, `[[`, "oc")) + 1L
+  z[["hs_as_down"]] <- sum(edges[at, hs])
+  z[["hs_as_up"]]   <- sum(edges[hs, at])
+  z[["hs_pump"]]    <- sum(pump_edges[hs, hd])
+  z[["hs_hd_net"]]  <- sum(edges[hs, hd]) - sum(edges[hd, hs])
+  z[["hd_int_net"]] <- sum(edges[hd, oc]) - sum(edges[oc, hd])
+  z
+}
+
 #' Reservoir class of every box, in state-vector order
 #'
 #' Computed from aux$idx rather than from box names, so it cannot drift out of
@@ -143,7 +178,8 @@ ccx_flux_channel <- function(from, to, lab, cls, atmN) {
 #' itself, which is the point.
 ccx_flux_snapshot <- function(y, t, p, forc, grid, aux) {
   dy <- ccx_deriv(y, t, p, forc, grid, aux, record = TRUE)
-  ccx_flux_derive(attr(dy, "fluxes")$channels, y, aux)
+  fl <- attr(dy, "fluxes")
+  c(ccx_flux_derive(fl$channels, y, aux), ccx_flux_hs_derive(fl$edges, fl$pump_edges, aux))
 }
 
 #' Append the derived quantities to a channel vector
@@ -179,7 +215,7 @@ ccx_flux_derive <- function(ch, y, aux) {
 #' plots cannot show anyway.
 ccx_flux_trace <- function(y_list, F, p, grid, aux) {
   n <- length(y_list)
-  nm <- c(names(CCX_FLUX_CHANNELS), names(CCX_FLUX_DERIVED))
+  nm <- c(names(CCX_FLUX_CHANNELS), names(CCX_FLUX_DERIVED), names(CCX_FLUX_HS))
   m <- matrix(NA_real_, n, length(nm), dimnames = list(NULL, nm))
   for (i in seq_len(n))
     m[i, ] <- ccx_flux_snapshot(y_list[[i]], F$t[i], p, ccx_forcing_at(F, i),

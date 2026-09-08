@@ -1371,6 +1371,13 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     .net <- numeric(nb)
     .cls <- ccx_flux_boxclass(aux, nb)
     .atmN <- aux$idx$NH$atm
+    # PER-EDGE sums (2026-09-08g), row = from (+1; row 1 = external), col = to.
+    # The channels MERGE the cold boxes into their classes by design (HS is
+    # "ml", HD is "int"), so nothing downstream could draw the HS/HD arrows
+    # with their own numbers. `.pump` keeps the labelled pump edges apart from
+    # the flush that shares the HS->HD endpoint pair (ccx_flux_hs_derive()).
+    .edges <- matrix(0, nb + 1L, nb + 1L)
+    .pump  <- matrix(0, nb + 1L, nb + 1L)
   }
   .rec <- function(from, to, F_C, lab) {
     cs <- ccx_flux_channel(from, to, lab, .cls, .atmN)
@@ -1383,6 +1390,8 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     .fx[[cs$ch]] <<- .fx[[cs$ch]] + if (cs$ch == "int_exch") abs(F_C) else cs$sign * F_C
     if (from > 0L) .net[from] <<- .net[from] - F_C
     .net[to] <<- .net[to] + F_C
+    .edges[from + 1L, to + 1L] <<- .edges[from + 1L, to + 1L] + F_C
+    if (identical(lab, "pump")) .pump[from + 1L, to + 1L] <<- .pump[from + 1L, to + 1L] + F_C
     invisible(NULL)
   }
 
@@ -2322,7 +2331,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 
   dy[, "C14"] <- dy[, "C14"] - ccx_const("LAMBDA_C14") * y[, "C14"]
 
-  if (record) attr(dy, "fluxes") <- list(channels = .fx, boxnet = .net)
+  if (record) attr(dy, "fluxes") <- list(channels = .fx, boxnet = .net, edges = .edges, pump_edges = .pump)
   dy
 }
 

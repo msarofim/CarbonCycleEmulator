@@ -210,3 +210,39 @@ test_that("an unclassified flux fails loudly rather than being absorbed", {
   cls <- c("atm", "veg", "mystery")
   expect_null(ccx_flux_channel(2L, 3L, NULL, cls, 1L))
 })
+
+test_that("the per-edge sums reproduce the box net exactly, and the cold boxes' own flows are read from them", {
+  # the column model: the edge columns exist, are ZERO, and the identity holds
+  p <- test_p(); s <- ccx_spinup(p)
+  F <- suppressWarnings(ccx_build_forcing("historical", c(1750, 1760), prod_c14 = s$prod_c14))
+  dy <- ccx_deriv(s$y, F$t[7], p, ccx_forcing_at(F, 7), s$grid, s$aux, record = TRUE)
+  fl <- attr(dy, "fluxes"); nb <- nrow(s$y)
+  expect_equal(dim(fl$edges), c(nb + 1L, nb + 1L))
+  expect_equal(colSums(fl$edges)[-1] - rowSums(fl$edges)[-1], unname(dy[, "C"]), tolerance = 1e-12)
+  expect_equal(sum(fl$pump_edges), fl$channels[["pump"]], tolerance = 1e-12)
+  hs0 <- ccx_flux_hs_derive(fl$edges, fl$pump_edges, s$aux)
+  expect_named(hs0, names(CCX_FLUX_HS)); expect_true(all(hs0 == 0))
+  # the HILDA structure: the HS flows are inside their channels, never beyond them
+  ph <- ccx_apply_structure(test_p(), "hilda"); ph$pump_hs_gcm2 <- 50
+  sh <- ccx_spinup(ph)
+  Fh <- suppressWarnings(ccx_build_forcing("historical", c(1750, 1760), prod_c14 = sh$prod_c14))
+  dyh <- suppressWarnings(ccx_deriv(sh$y, Fh$t[7], ph, ccx_forcing_at(Fh, 7), sh$grid, sh$aux, record = TRUE))
+  flh <- attr(dyh, "fluxes"); ch <- flh$channels
+  expect_equal(colSums(flh$edges)[-1] - rowSums(flh$edges)[-1], unname(dyh[, "C"]), tolerance = 1e-12)
+  hs <- ccx_flux_hs_derive(flh$edges, flh$pump_edges, sh$aux)
+  expect_gt(hs[["hs_as_down"]], 0); expect_gt(hs[["hs_as_up"]], 0); expect_gt(hs[["hs_pump"]], 0)
+  expect_lt(hs[["hs_as_down"]], ch[["as_down"]]); expect_lt(hs[["hs_as_up"]], ch[["as_up"]])
+  expect_lte(hs[["hs_pump"]], ch[["pump"]] + 1e-12)
+  # hs_hd_net is the pump PLUS the flush's net (which returns carbon upward, so
+  # the net can sit BELOW the export). MUTATION: with the flush OFF (u_hs 0) the
+  # pump is the only HS -> HD edge and the two must be identical.
+  pf <- ph; pf$u_hs <- 0; sf <- ccx_spinup(pf)
+  dyf <- ccx_deriv(sf$y, Fh$t[7], pf, ccx_forcing_at(Fh, 7), sf$grid, sf$aux, record = TRUE)
+  hsf <- ccx_flux_hs_derive(attr(dyf, "fluxes")$edges, attr(dyf, "fluxes")$pump_edges, sf$aux)
+  expect_equal(hsf[["hs_hd_net"]], hsf[["hs_pump"]], tolerance = 1e-12)
+  expect_gt(hsf[["hs_pump"]], 0)
+  # and the trace carries the columns (the pure-R carbonate path warns below 2 C: pre-existing)
+  tr <- suppressWarnings(ccx_run(sh, Fh, fluxes = TRUE))$fluxes
+  expect_true(all(names(CCX_FLUX_HS) %in% names(tr)))
+  expect_true(all(is.finite(tr$hs_as_down)))
+})
