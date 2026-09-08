@@ -19,7 +19,7 @@ hemispheric 0.440 — the last is a REPRESENTATION error, not carried); `CCX_PAR
 +1.5; HILDA's 1 at +2.8. Routes priced in the prereg: `u_hs` back up (2.6 log-units), `k_w`/`kz`, the land, or no route.
 **Prediction: `u_hs` ≥ 33** (the cheapest priced route) with the likelihood within 5 of round 4. Array **24** (`0-23%24`, one
 wave ~2.5 h) — the empirical record (rounds 2–4, 40 dispersed draws each, zero new basins) licenses the cut, stated at P7.
-Outdir `multistart_20260908e_hilda31_asx`. LAUNCH_STATUS_PLACEHOLDER
+Outdir `multistart_20260908e_hilda31_asx`. **LAUNCHED 2026-09-08 11:37 EDT: Torch job 17194179** (`sbatch --array=0-23%24 calibration/torch/multistart.sbatch` at launch commit **d65b299**, port targets committed after it). Setup gate PASSED (0.44 s/eval login node); preflight 17193798 **8/8 port VERIFIED rel ≤ 2.4e-12** (ids 0–5 fixed, 15/23 dispersed), compute nodes 0.14–0.30 s/eval. 20 of 24 started at once beside round 4's last wave (32-CPU QoS cap; 4 pend until ~12:40). Suite before launch: 2147 pass / 9 fail, the same nine pre-existing. Expect the array to drain by ~14:00–15:00 EDT; collect and score per the handoff §4.
 
 ## 2026-09-08d — ⭐⭐⭐ **RULED (Marcus): `u_hs` FREED under the observed overturning; `h_ml` freed under a prior spanning the Holte annual MEAN and MAX; the SEASONAL mixed layer SCOPED as the round-5 candidate; the WHOLE-MODEL SCORECARD at `ent26` vs the round-3 winner. Round 4 prepared (31 parameters) — launch recorded below when it happens.**
 
