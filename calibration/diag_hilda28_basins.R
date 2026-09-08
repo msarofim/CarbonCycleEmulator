@@ -46,7 +46,7 @@ for (k in seq_along(fam)) { st <- fam[[k]]; pm <- st$par_mode; S <- score(v_of(s
   cat(sprintf("  %9.2f %3d %6.3f %6.0f %6.3f %5.1f | %7.1f %7.1f %7.1f %7.1f %6.1f | %+6.2f %+6.2f %+5.2f | %8.1f %7.1f %7.1f | %8.1f %7.1f | %8.1f %7.1f\n",
               st$logpost, st$id, pm$kz_deep_frac, pm$kz_deep_frac * pm$kz, pm$hs_asx_frac, pm$h_ml, S$lev[1], S$lev[2], S$lev[3], S$hs, S$hd,
               S$z_ind[1], S$z_ind[3], S$z_bd60, S$s60[["total"]], S$s60[["row"]], S$s60[["rest"]], S$sI[["total"]], S$sI[["row"]], S$s30[["total"]], S$s30[["row"]])) }
-v0 <- dg_vector(CCX_MODE_CANONICAL); v0$p$hs_frac <- 0; S0 <- score(v0, "ent26"); pm0 <- v0$p
+v0 <- dg_vector(CCX_MODE_COLUMN_CONTROL)   # ent26, the column control (09-08f: the canonical is HILDA); S0 <- score(v0, "ent26"); pm0 <- v0$p
 cat(sprintf("  %-9s %3s %6s %6s %6s %5.1f | %7.1f %7.1f %7.1f %7s %6s | %+6.2f %+6.2f %+5.2f | %8.1f %7.1f %7.1f | %8.1f %7.1f | %8.1f %7.1f\n",
             "ent26 OFF", "-", "-", "-", "-", pm0$h_ml, S0$lev[1], S0$lev[2], S0$lev[3], "-", "-", S0$z_ind[1], S0$z_ind[3], S0$z_bd60,
             S0$s60[["total"]], S0$s60[["row"]], S0$s60[["rest"]], S0$sI[["total"]], S0$sI[["row"]], S0$s30[["total"]], S0$s30[["row"]]))

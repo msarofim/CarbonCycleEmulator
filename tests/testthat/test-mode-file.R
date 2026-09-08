@@ -163,6 +163,11 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
     # the default band is off by ~1.1 (memory ccx_hml_band_provenance).
     expect_false(is.null(md$hml_bound),
                  info = paste("mode", a, "does not record its h_ml band"))
+    # THE STRUCTURE IS PROVENANCE TOO (2026-09-08f): a hilda mode consumed on
+    # ccx_default_params() runs as a column with nothing said.
+    expect_false(is.null(md$struct), info = paste("mode", a, "does not record its structure"))
+    expect_true(md$struct %in% c("", "hilda"))
+    expect_equal(ccx_mode_base(md)$hs_frac, if (identical(md$struct, "hilda")) 0.16 else 0)
   }
 })
 

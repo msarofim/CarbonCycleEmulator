@@ -175,6 +175,7 @@ if (JOOS_ARM != "defaults") {
   # measure gate 12 at, and JOOS_SRC below names it as migrated.
   .pm <- ccx_migrate_par_set(.md$par_mode)
   .mig <- attr(.pm, "migrated")
+  p0 <- ccx_mode_base(.md)                      # the file's own structure (2026-09-08f)
   for (n in intersect(names(p0), CCX_PARAM_NAMES)) p0[[n]] <- .pm[[n]]
   p0 <- ccx_set_enso(p0, .pm)
   p0$pump_mode  <- .md$pump_mode

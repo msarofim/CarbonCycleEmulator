@@ -28,7 +28,7 @@ UH_PROFILE_LOG_RANGE <- log(c(1, 199))          # pump_hs_gcm2 box is [0.5, 200]
 UH_PROFILE_TOL <- 1e-3
 UH_MLD <- readRDS(ccx_path("data", "obs_mld.rds"))
 UH_T5_H <- UH_MLD$ls$mean_dt$value; UH_T6_H <- UH_MLD$ls$max_dt$value   # READ from the product, not typed
-UH_LIT_REMIN_1000 <- 1.4                        # GtC/yr, Nowicki 2022 10.2 x Martin (b 0.86, RECOLLECTION) F(1000)/F(100) 0.138
+UH_LIT_REMIN_1000 <- 1.4                        # GtC/yr, Nowicki 2022 10.2 x Martin et al. 1987 (DSR 34:267; 1.53 (z/100)^-0.858, SOURCED 09-08f) F(1000)/F(100) 0.139
 UH_P1_BAND24 <- c(74, 100); UH_P1_BAND18 <- c(55, 75); UH_P3_BAND <- c(0.7, 1.4); UH_P4_MAX <- 100
 UH_P5_TOL <- 0.10; UH_P6_MAX <- 10; UH_P7_MAX <- 30; UH_P7_ROW_MAX <- 2
 UH_SINK_BOMB <- c("gcb_ocean_sink", "d14c_NH", "d14c_SH"); UH_BAD_ROWS_P6 <- c("d14c_NH", "d14c_SH", "co2_icecore", "co2_seasonal_MLO", "co2_seasonal_SPO", "d13c_seasonal_MLO", "d13c_seasonal_SPO", "gcb_ocean_sink")

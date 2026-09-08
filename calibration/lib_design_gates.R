@@ -468,6 +468,8 @@ dg_vector <- function(arm) {
                 src = "uncalibrated defaults", migrated = character(0), md = NULL))
   f  <- ccx_mode_file(arm)
   md <- readRDS(f)
+  # THE BASE IS THE FILE'S OWN STRUCTURE (2026-09-08f), not the column default.
+  p  <- ccx_mode_base(md)
   # ⚠ MIGRATE, THEN SAY SO. `ccx_migrate_par_set()` reads the model's own
   # absence contract (`ccx_seas_lag_p()`); it never hand-fills, and it ERRORS on
   # a name no stored field can supply. A migrated vector is a legitimate thing

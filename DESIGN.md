@@ -1196,6 +1196,12 @@ Rcpp with a bit-parity test against the R reference implementation (both stay in
 ## 6. Sanity gates (all must pass before headline claims)
 
 > ⛔⛔ **READ THIS BEFORE ANY TABLE BELOW — THE MODE THEY WERE MEASURED AT IS RETIRED.**
+> ⭐ **2026-09-08f: THE CANONICAL IS NOW `hilda31`** (31 parameters, HILDA structure; `ent26` retired to the column
+> control). Its ledger (`calibration/diag_whole_model_scorecard.R`, `outputs/diagnostics/whole_model_scorecard_20260908f.log`):
+> **G +1.57 / 7 / S (8.96 mo) PASS; V −2.77 / H +6.51 / 5 +2.17 FAIL; Q 0.844 vs 0.60 ± 0.10 FAIL (2.44σ) — new with the cold
+> box.** ENSO ocean 0.53× observed with the solubility-only path wrong-signed; IRF(100) 0.279 (a comparison). The verdict and
+> the ranked options are in `notes/assessment_2026-09-08_acceptable_state.md`. The `ent26` block below is provenance too.
+>
 > Every "STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE" block in §6 was measured at **`from90`**, which has since
 > been **QUARANTINED**: `ccx_mode_file()` **ERRORS on `from90` and `pin90` by name**, so none of
 > these blocks can be re-run as written. The canonical mode is **`ent26`** (adopted 2026-09-04).

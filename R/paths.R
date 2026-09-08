@@ -49,12 +49,27 @@ ccx_path <- function(...) file.path(ccx_root(), ...)
 # under the current objective); cycle 1's real result is in the `_progress.rds`
 # beside it. That arm was abandoned as a worse local optimum. Naming it here
 # would hand out the seed as if it were a mode.
-CCX_MODE_CANONICAL <- "ent26"
+# 2026-09-08f: `hilda31` -- the round-5 winner of the HILDA refit (31 parameters,
+# structure "hilda": HS/HD boxes, K(z), the HS pump, u_hs and hs_asx_frac under
+# their observations). ⚠ THE FIRST CANONICAL FITTED UNDER A STRUCTURE: the file
+# carries `struct`, and every consumer builds its base list through
+# ccx_mode_base(md) below, never ccx_default_params() (where hs_frac = 0 and the
+# vector would run as a column with nothing said).
+CCX_MODE_CANONICAL <- "hilda31"
 
 CCX_MODE_FILES <- c(
-  ent26 = file.path("calibration", "output", "refit_20260903_ent26",
-                    "mode_fit_pumpN.rds")
+  hilda31 = file.path("calibration", "output", "refit_20260908_hilda31",
+                      "mode_fit_pumpN.rds")
 )
+
+# THE COLUMN CONTROL. `ent26` (26 parameters, no structure) is retired from the
+# registry -- it is not a mode of this space -- but it stays the like-for-like
+# COLUMN comparison every HILDA-arc diagnostic scores against. It is resolved
+# by PATH (ccx_mode_file() accepts one), migrated on load, and its absent
+# `struct` means "" = the column, which is exactly what it was.
+CCX_MODE_COLUMN_CONTROL <- file.path("calibration", "output", "quarantine",
+                                     "20260908_hilda31_adopted", "refit_20260903_ent26",
+                                     "mode_fit_pumpN.rds")
 
 # WHICH ARMS ARE FREE -- AND WHY THE STORED logpost IS A TRAP ACROSS THEM.
 # The project rule is "the highest FREE arm wins regardless of name", and this
@@ -73,7 +88,7 @@ CCX_MODE_FILES <- c(
 # that as "pin90 wins" was wrong -- its objective carried a near-delta prior on
 # `fert_k` worth +11.6698 at fert_k = 90, putting it 11.56 BELOW on the
 # comparable scale. A stored number never decides an arm.
-CCX_MODE_PINNED <- c(ent26 = FALSE)
+CCX_MODE_PINNED <- c(hilda31 = FALSE)
 
 # The retired names, kept ONLY so that asking for one gets the reason rather
 # than a file-not-found. Everything here is quarantined and not comparable.
@@ -116,7 +131,14 @@ CCX_MODE_RETIRED <- c(
               "prior this project chose, at a fert_k this project chose -- so it is",
               "NOT preserved here; a pinned comparison needs a new 26-parameter",
               "pinned refit. Quarantined under",
-              "calibration/output/quarantine/20260903_ent26_adopted/")
+              "calibration/output/quarantine/20260903_ent26_adopted/"),
+  ent26  = paste("the 26-parameter COLUMN canonical from 2026-09-04 to 2026-09-08,",
+              "retired by the HILDA refit's parameter set (kz_deep_frac, hs_asx_frac,",
+              "h_hs, pump_hs_gcm2, u_hs: 26 -> 31; `81d164c`, `d65b299`) and the",
+              "adoption of the round-5 winner as `hilda31`. Not a mode of this space",
+              "and fitted under NO structure. It remains the like-for-like COLUMN",
+              "CONTROL, resolvable by path as CCX_MODE_COLUMN_CONTROL. Quarantined under",
+              "calibration/output/quarantine/20260908_hilda31_adopted/")
 )
 
 #' Absolute path to a fitted mode file, by name
@@ -206,6 +228,23 @@ ccx_mode_bands <- function(md) {
 #' `u_mode` under `md$hml_bound` if that is recorded.
 #'
 #' @param md a loaded mode file, or a mode name/path for `ccx_mode_file()`
+#' The STRUCTURE a mode file was fitted under, and the base list it needs
+#'
+#' `struct` is recorded by run_dispersed_multistart.R (from 2026-09-08f) and
+#' carried by promote_multistart_mode.R; a file without it was fitted under no
+#' structure ("" = the 32-box column), which is what every pre-09-08f file was.
+#' `ccx_mode_base()` is the ONE place a consumer turns a mode file into the
+#' base parameter list -- the precedent is `pump_mode`, which every consumer
+#' already carries out of the file by hand; `struct` is the same kind of thing.
+ccx_mode_struct <- function(md) {
+  if (is.character(md)) md <- readRDS(ccx_mode_file(md))
+  if (is.null(md$struct)) "" else md$struct
+}
+ccx_mode_base <- function(md) {
+  if (is.character(md)) md <- readRDS(ccx_mode_file(md))
+  ccx_apply_structure(ccx_default_params(), ccx_mode_struct(md))
+}
+
 ccx_mode_params <- function(md = CCX_MODE_CANONICAL) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   if (!is.null(md$par_mode)) return(md$par_mode)

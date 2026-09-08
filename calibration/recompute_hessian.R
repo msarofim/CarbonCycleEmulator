@@ -108,14 +108,16 @@ nm <- md$param_names
 ccx_require_param_set(md, "recompute_hessian.R")
 
 # ---- the band the mode was FOUND under, from the file, not assumed -----
-if (!is.null(md$hml_bound)) {
+# ⚠ ONLY when the recorded band DIFFERS from the shipped one (2026-09-08f): re-imposing
+# a uniform prior on the shipped band would replace h_ml's observation prior (09-08d).
+if (!is.null(md$hml_bound) && !isTRUE(all.equal(md$hml_bound, c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi)))) {
   CCX_PARAM_TABLE$h_ml$lo    <- md$hml_bound[1]
   CCX_PARAM_TABLE$h_ml$hi    <- md$hml_bound[2]
   CCX_PARAM_TABLE$h_ml$init  <- mean(md$hml_bound)
   CCX_PARAM_TABLE$h_ml$prior <-
     local({ b <- md$hml_bound; function(x) stats::dunif(x, b[1], b[2], log = TRUE) })
 }
-bp <- ccx_default_params()
+bp <- ccx_mode_base(md)                 # the file's own structure (2026-09-08f), never the column default
 if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
 lp <- ccx_make_logpost(base_params = bp)
 u  <- ccx_par_to_unc(md$par_mode)     # NEVER md$u_mode -- see the header

@@ -113,9 +113,11 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
   # ratified on. The mechanism is still worth 45 log-units.
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
-  u0 <- ccx_par_to_unc(md$par_mode)     # no migration: this IS a 26-par vector
+  u0 <- ccx_par_to_unc(md$par_mode)     # no migration: this IS a vector of the fitted space
   expect_true(all(is.finite(u0)))
-  bp <- ccx_default_params(); bp$pump_mode <- md$pump_mode
+  # THE FILE'S OWN STRUCTURE (2026-09-08f): the canonical is a HILDA mode; on the
+  # column default the same vector scores -2.3e7 and nothing below reproduces.
+  bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
   sc <- function(dm) { old <- FORC_ENSO_DEMEAN
     assign("FORC_ENSO_DEMEAN", dm, envir = globalenv())
     on.exit(assign("FORC_ENSO_DEMEAN", old, envir = globalenv()), add = TRUE)
@@ -134,10 +136,14 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
     assign("LIK_USE_D14C_MID", FALSE, envir = globalenv())
     on.exit(assign("LIK_USE_D14C_MID", old, envir = globalenv()), add = TRUE)
     ccx_make_logpost(base_params = bp)(u0) }
-  on_nomid <- sc_nomid()
+  # 2026-09-08f: a file that RECORDS its structure was promoted after #8/#9, so its
+  # stored logpost already carries the rows and must reproduce DIRECTLY; the
+  # rows-off form below is the repair for the pre-#8 files only.
+  post8 <- !is.null(md$struct)
+  on_nomid <- if (post8) on else sc_nomid()
   expect_equal(on_nomid, md$logpost, tolerance = 1e-5, scale = 1)
   tgm <- ccx_mid_d14c_target()
-  if (!is.null(tgm)) {
+  if (!is.null(tgm) && !post8) {
     pp  <- ccx_overlay_par(bp, ccx_unc_to_par(u0))
     sp  <- ccx_spinup(pp); mid <- ccx_model_d14c_slabs(sp); deep <- sp$diagnostics$d14c_bottom_box
     # OBJECTIVE #9 (2026-09-06d): with the MVN row ON, "rows off" also drops the
@@ -149,7 +155,11 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
   # ⚠ TOLERANCE = the project's existing "does this point reproduce" precision
   # (recompute_hessian.R GATE 1, promote_multistart_mode.R GATE 4), not a new
   # number chosen here.
-  expect_equal(on - off, 45.1618, tolerance = 1e-4, scale = 1)
+  # ⚠ RE-DERIVED 2026-09-08f at the hilda31 adoption: 45.1618 (ent26) -> 43.8367,
+  # measured with the structure-aware base (diff to the file 0.0e+00). The same
+  # expected direction as 56.48 -> 45.16: a refit absorbs part of the forcing's
+  # non-zero mean elsewhere, so the marginal value of demeaning shrinks a little.
+  expect_equal(on - off, 43.8367, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
   expect_gt(on - off, 1)

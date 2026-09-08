@@ -123,8 +123,13 @@ app_params <- local({
   for (mode_file in mode_files) {
     if (!file.exists(mode_file)) next
     md <- tryCatch(readRDS(mode_file), error = function(e) NULL)
-    if (is.null(md) || !identical(md$param_names, CCX_PARAM_NAMES)) next
+    if (is.null(md) || !identical(md$param_names, CCX_PARAM_NAMES)) {
+      message("app: skipping mode file ", basename(mode_file), ": it does not carry this build's parameter set")
+      next
+    }
     pm <- md$par_mode
+    # THE FILE'S OWN STRUCTURE (2026-09-08f): the canonical is a HILDA mode.
+    p <- ccx_mode_base(md)
     for (n in intersect(names(p), names(pm))) p[[n]] <- pm[[n]]
     p <- ccx_set_enso(p, pm)
     # `pump_mode` is a STRUCTURAL choice, not a fitted parameter, so it is not

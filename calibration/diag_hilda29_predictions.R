@@ -40,7 +40,7 @@ score <- function(v) { r <- dg_run(v); st <- dg_streams(r, v); sp <- r$sp; sl <-
   g7 <- dg_gate7(r); v7 <- dg_gate7_verdict(g7, tg7); v5 <- dg_gate5_verdict(dg_gate5(r), ob5, sp5)
   list(st = st, lev = lev, z = c(level = (mean(lev) - spec$level) / spec$level_sd, ab = ((lev[1] - lev[2]) - spec$ab) / spec$ab_sd, bd = ((lev[2] - lev[3]) - spec$bd) / spec$bd_sd),
        hs = sp$diagnostics$d14c_hs[["NH"]], hd = sp$diagnostics$d14c_hd[["NH"]], sink = g7$ocean, z7 = v7$z_ocean, z5 = c(v5$z[["nh_t"]], v5$z[["sh_t"]])) }
-v0 <- dg_vector(CCX_MODE_CANONICAL); v0$p$hs_frac <- 0; S0 <- score(v0)
+v0 <- dg_vector(CCX_MODE_COLUMN_CONTROL)   # ent26, the column control (09-08f: the canonical is HILDA); S0 <- score(v0)
 FAM <- lapply(seq_len(nrow(ag)), function(k) { st <- R[[which(tab$id == ag$id[k])]]; c(list(id = st$id, logpost = st$logpost, pm = st$par_mode), score(v_of(st))) })
 rowsum <- function(S, rows) sum(S$st[intersect(rows, names(S$st))])
 cat(sprintf("\n  %-9s %3s | %7s %7s %7s | %6s %6s %6s | %7s %7s | %8s %7s %7s %7s | %5s %5s\n", "logpost", "id", "A", "B", "deep", "z_lev", "z_AB", "z_BD", "HS", "HD", "lik", "d_lik", "d_rows", "d_rest", "sink", "z7"))

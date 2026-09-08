@@ -54,7 +54,7 @@ score <- function(v) { r <- dg_run(v); st <- dg_streams(r, v); sp <- r$sp; aux <
   list(st = st, lev = lev, z = c(level = (mean(lev) - spec$level) / spec$level_sd, ab = ((lev[1] - lev[2]) - spec$ab) / spec$ab_sd, bd = ((lev[2] - lev[3]) - spec$bd) / spec$bd_sd),
        hs = sp$diagnostics$d14c_hs[["NH"]], hd = sp$diagnostics$d14c_hd[["NH"]], sink = g7$ocean, z7 = v7$z_ocean, z5 = c(v5$z[["nh_t"]], v5$z[["sh_t"]]),
        hs_dic = if (is.null(hs)) NA else hs$dic, hs_d13c = if (is.null(hs)) NA else hs$d13c, e_ls = e_ls, e_hs = e_hs) }
-v0 <- dg_vector(CCX_MODE_CANONICAL); v0$p$hs_frac <- 0; S0 <- score(v0)
+v0 <- dg_vector(CCX_MODE_COLUMN_CONTROL)   # ent26, the column control (09-08f: the canonical is HILDA); S0 <- score(v0)
 FAM <- lapply(seq_len(nrow(ag)), function(k) { st <- R[[which(tab$id == ag$id[k])]]; c(list(id = st$id, logpost = st$logpost, pm = st$par_mode), score(v_of(st))) })
 common <- function(S) sum(S$st[setdiff(names(S$st), HP_HS_ROWS)])
 rowsum <- function(S, rows) sum(S$st[intersect(rows, names(S$st))])

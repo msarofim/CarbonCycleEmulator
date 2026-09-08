@@ -1209,9 +1209,12 @@ ccx_prior_z <- function(name, x, table = CCX_PARAM_TABLE) {
 #' @param arm a mode name known to `ccx_mode_file()` (default: the canonical
 #'   mode, `CCX_MODE_CANONICAL`), or a path to a mode file
 #' @param base parameter vector to overlay onto
-ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = ccx_default_params()) {
+ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
   f  <- ccx_mode_file(arm)
   md <- readRDS(f)
+  # THE BASE COMES FROM THE FILE'S OWN STRUCTURE (2026-09-08f): a hilda mode
+  # overlaid on ccx_default_params() would run as a column, silently.
+  if (is.null(base)) base <- ccx_mode_base(md)
   if (!identical(md$param_names, CCX_PARAM_NAMES))
     stop("mode file '", basename(f), "' was fitted on a different parameter set (",
          length(md$param_names), " names, this build has ", length(CCX_PARAM_NAMES),

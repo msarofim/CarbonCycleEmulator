@@ -45,7 +45,7 @@ mk_v <- function(p, pmv, src) { v <- list(p = p, pm = pmv, luc_scale = pmv$luc_s
 pb <- ccx_apply_structure(ccx_default_params(), "hilda"); pb$pump_mode <- best$pump_mode
 pb <- ccx_overlay_par(pb, pm)   # migrates, copies, asserts nothing deleted (the lint's idiom)
 vB <- mk_v(pb, pm, "hilda28 best")
-v0 <- dg_vector(CCX_MODE_CANONICAL); v0$p$hs_frac <- 0
+v0 <- dg_vector(CCX_MODE_COLUMN_CONTROL)   # ent26, the column control (09-08f: the canonical is HILDA)
 tg7 <- dg_gcb_target(DG_SINK_WIN); ob5 <- dg_obs_gate5(); sp5 <- dg_obs_gate5_spread()
 pc <- ccx_profile_d14c_cov(HP_COV_BLOCK); tgm <- ccx_mid_d14c_target(); tgd <- ccx_deep_d14c_target()
 se_bd <- pc$se[["BD"]]; obs_bd <- pc$contrast_obs[["BD"]]

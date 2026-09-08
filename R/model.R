@@ -2170,10 +2170,10 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         ph <- aux$pump_hs[[h]]
         sc_hs <- if (identical(p$pump_mode, "D")) y[ihs, "C"] / aux$hs_C0[[h]] else 1
         add_flux(ihs, ihd, ph$org * sc_hs,
-                 alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump_hs",
+                 alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",     # the biological-pump CHANNEL (09-08f: "pump_hs" was no channel and broke the flux trace)
                  alpha13_signed = TRUE)
         add_flux(ihs, ihd, ph$carb * sc_hs,
-                 alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump_hs",
+                 alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump",
                  alpha13_signed = TRUE)
       }
 

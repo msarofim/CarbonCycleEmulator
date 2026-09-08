@@ -70,8 +70,10 @@ SL_CASES_27Q <- c("NH_origin", "SH_land", "SH_ocean")
 #' @param pv a named list/vector of parameter values (any vintage)
 #' @param pump_mode the arm the vector was fitted under -- READ from its own
 #'   mode file by the caller, never assumed
-sl_overlay <- function(pv, pump_mode) {
-  p <- ccx_default_params()
+sl_overlay <- function(pv, pump_mode, struct = "") {
+  # `struct` (2026-09-08f): the structure label the vector was fitted under
+  # (ccx_mode_struct(md)); "" = the column, as every pre-09-08f caller meant.
+  p <- ccx_apply_structure(ccx_default_params(), struct)
   for (n in intersect(names(p), names(pv))) p[[n]] <- pv[[n]]
   miss <- CCX_PARAM_NAMES[!(CCX_PARAM_NAMES %in% names(pv))]
   if (length(miss)) {
@@ -97,8 +99,8 @@ sl_overlay <- function(pv, pump_mode) {
 #' Run the model at one parameter vector and return the scored seasonal vectors
 #' @param base_mods overrides applied to EVERY run, before the per-case ones --
 #'   for holding a mechanism at a stated value across a whole comparison
-sl_run <- function(pv, ent, pump_mode, obs, years, mods = list(), base_mods = list()) {
-  p <- sl_overlay(pv, pump_mode)
+sl_run <- function(pv, ent, pump_mode, obs, years, mods = list(), base_mods = list(), struct = "") {
+  p <- sl_overlay(pv, pump_mode, struct)
   p <- ccx_set_enso(p, pv)
   p$ent_seas_amp_SH <- ent
   for (n in names(base_mods)) p[[n]] <- base_mods[[n]]
@@ -136,10 +138,10 @@ sl_ratio_at <- function(b, obsv, st) {
 #'
 #' Each limb is BASE MINUS the run with that driver set zeroed -- so it is the
 #' contribution that driver makes to SPO, as a VECTOR, not a local amplitude.
-sl_score <- function(pv, ent, pump_mode, obs, obsv, years, base_mods = list()) {
-  b <- sl_run(pv, ent, pump_mode, obs, years, base_mods = base_mods)
+sl_score <- function(pv, ent, pump_mode, obs, obsv, years, base_mods = list(), struct = "") {
+  b <- sl_run(pv, ent, pump_mode, obs, years, base_mods = base_mods, struct = struct)
   d <- lapply(SL_CASES, function(m)
-              b$co2_SPO - sl_run(pv, ent, pump_mode, obs, years, m, base_mods)$co2_SPO)
+              b$co2_SPO - sl_run(pv, ent, pump_mode, obs, years, m, base_mods, struct = struct)$co2_SPO)
   list(total_v = b$co2_SPO, dec_v = d,
        total = c(amp = sl_amp(b$co2_SPO), mo = sl_ang_mo(b$co2_SPO)),
        dec = lapply(d, function(v) c(amp = sl_amp(v), mo = sl_ang_mo(v))),

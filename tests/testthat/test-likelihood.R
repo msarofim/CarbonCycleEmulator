@@ -448,7 +448,7 @@ test_that("the deep ocean is where GLODAP puts it -- the OBSERVABLE kz stands in
   tg <- ccx_deep_d14c_target()
   skip_if(is.null(tg), "no sourced deep-D14C target on this install")
   md <- readRDS(ccx_mode_file())
-  p  <- ccx_overlay_par(ccx_default_params(), md$par_mode)
+  p  <- ccx_overlay_par(ccx_mode_base(md), md$par_mode)   # the file's own structure (09-08f)
   p$pump_mode <- md$pump_mode
   deep <- ccx_spinup(p)$diagnostics$d14c_bottom_box
   expect_true(is.finite(deep))

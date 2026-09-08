@@ -31,7 +31,11 @@ args <- commandArgs(trailingOnly = TRUE)
   if (length(h)) sub(paste0("^--", k, "="), "", h[1]) else d
 }
 # ---- labels derive from named constants (project rule) --------------
-PMM_SRC_NAME   <- "ent26"                          # the arc this mode comes from
+PMM_SRC_NAME   <- .arg("name", "ent26")            # the arc this mode comes from
+# THE STRUCTURE (2026-09-08f). Start files record `struct` from 09-08f on; older
+# ones do not, and for those the label MUST be given on the command line and is
+# then ASSERTED by GATE 4 (a wrong label does not reproduce the logpost).
+PMM_STRUCT     <- .arg("struct", NA_character_)
 PMM_SRC_DIR    <- .arg("outdir", ccx_path("calibration", "output",
                                           "multistart_20260903_ent26"))
 PMM_DEST_DIR   <- .arg("dest",   ccx_path("calibration", "output",
@@ -98,14 +102,26 @@ sep("GATE 4: the point reproduces its own logpost, under the band it RECORDS")
 # ⚠ NEVER `best$u_mode` -- `u_mode` is band-dependent and `par_mode` is not
 # ([[ccx_hml_band_provenance]]). Re-encode from par_mode under the file's own
 # hml_bound, exactly as recompute_hessian.R does, and refuse if it disagrees.
-if (!is.null(best$hml_bound)) {
+# ⚠ ONLY when the recorded band DIFFERS from the shipped one (the from90 [85, 120]
+# case). Re-imposing a UNIFORM prior on the shipped band would replace h_ml's
+# observation prior (09-08d) and change the objective -- and then nothing reproduces.
+if (!is.null(best$hml_bound) && !isTRUE(all.equal(best$hml_bound, c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi)))) {
   CCX_PARAM_TABLE$h_ml$lo    <- best$hml_bound[1]
   CCX_PARAM_TABLE$h_ml$hi    <- best$hml_bound[2]
   CCX_PARAM_TABLE$h_ml$init  <- mean(best$hml_bound)
   CCX_PARAM_TABLE$h_ml$prior <-
     local({ b <- best$hml_bound; function(x) stats::dunif(x, b[1], b[2], log = TRUE) })
 }
-bp <- ccx_default_params()
+st_rec <- unique(vapply(S, function(s) if (is.null(s$struct)) NA_character_ else s$struct, character(1)))
+if (length(st_rec) != 1L) stop("the starts disagree on their structure label: ", paste(st_rec, collapse = ", "))
+if (is.na(st_rec)) {
+  if (is.na(PMM_STRUCT)) stop("these starts record no structure; pass --struct=\"\" (column) or --struct=hilda")
+  cat(sprintf("structure ASSERTED from --struct='%s' (the starts predate the label; GATE 4 checks it)\n", PMM_STRUCT))
+} else {
+  if (!is.na(PMM_STRUCT) && !identical(PMM_STRUCT, st_rec)) stop("--struct='", PMM_STRUCT, "' but the starts record '", st_rec, "'")
+  PMM_STRUCT <- st_rec; cat(sprintf("structure RECORDED in the starts: '%s'\n", PMM_STRUCT))
+}
+bp <- ccx_apply_structure(ccx_default_params(), PMM_STRUCT)
 bp$pump_mode <- best$pump_mode
 lpf <- ccx_make_logpost(base_params = bp)
 u   <- ccx_par_to_unc(best$par_mode)
@@ -194,7 +210,7 @@ sep("writing the mode file")
 # Hessian, and inventing one here would hand out a Laplace covariance nobody
 # measured. `recompute_hessian.R --update` fills it in, after its own gates.
 out <- list(
-  pump_mode = best$pump_mode, u_mode = u, par_mode = pm, logpost = lp0,
+  pump_mode = best$pump_mode, struct = PMM_STRUCT, u_mode = u, par_mode = pm, logpost = lp0,
   logpost_init = best$logpost_start, trace = best$trace,
   streams = streams, n_eval = best$n_eval, minutes = best$minutes,
   seed = best$seed, param_names = CCX_PARAM_NAMES, prior_z = best$prior_z,

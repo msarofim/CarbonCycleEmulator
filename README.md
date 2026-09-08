@@ -19,8 +19,11 @@ undergraduate environmental studies).
 ## Status
 
 Model core, calibration and app are **built and running end to end**. The current calibrated
-vector (`ent26`, adopted 2026-09-04) is a **26-parameter maximum-a-posteriori fit**, located
-by multistart optimisation of the posterior; the test suite is 1757 checks.
+vector (`hilda31`, adopted 2026-09-08) is a **31-parameter maximum-a-posteriori fit** under the
+HILDA high-latitude ocean structure (a cold surface box and a cold deep box per hemisphere, a
+biological pump in both columns, the flush and the cold-box gas exchange under observation priors),
+located by multistart optimisation of the posterior; the test suite is ~2,150 checks (2026-09-08).
+The previous column fit (`ent26`, 26 parameters, 2026-09-04) is kept as the like-for-like column control.
 
 **It is a single best fit, not a posterior.** No MCMC has been run, no posterior ensemble is
 shipped, and **the app therefore shows no uncertainty bands** — it says so in-product. A

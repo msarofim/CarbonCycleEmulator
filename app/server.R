@@ -254,10 +254,15 @@ function(input, output, session) {
                lineheight = 1.05,
                label = sprintf(paste0("Arrows are flows in GtC per year (%d). Stocks today: ",
                                       "atmosphere %s, land %s, ocean %s.\n",
-                                      "Each box exists twice \u2014 once per hemisphere."),
+                                      "Each box exists twice \u2014 once per hemisphere.%s"),
                                fx$year,
                                fmt_gtc(stock$co2_global * ccx_const("GtC_PER_PPM")),
-                               fmt_gtc(stock$land_C), fmt_gtc(stock$ocean_C))) +
+                               fmt_gtc(stock$land_C), fmt_gtc(stock$ocean_C),
+                               # 2026-09-08f: the canonical is a HILDA mode -- a cold surface box
+                               # and a cold deep box per hemisphere exist and are NOT drawn yet.
+                               if (isTRUE(app_params$p$hs_frac > 0))
+                                 sprintf(" Plus a high-latitude surface box and deep box per hemisphere (%.0f%% of the ocean; not drawn).", 100 * app_params$p$hs_frac)
+                               else "")) +
       annotate("text", x = 3.1, y = 0.18, size = 3.2, colour = "grey20",
                fontface = "bold", lineheight = 1.05,
                label = sprintf(paste0("Photosynthesis and the sea move %.0f GtC a year in and out of the air, ",

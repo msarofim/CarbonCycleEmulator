@@ -783,6 +783,9 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             trace = trace, n_eval = n_eval, minutes = elapsed_min(),
             sec_per_eval = MS_SEC_PER_EVAL, restart_min = restart_min,
             prior_z = zs, param_names = CCX_PARAM_NAMES, pump_mode = MS_ARM,
+            # RECORDED (2026-09-08f) so a promoted mode carries the structure it
+            # was fitted under; consumed by promote_multistart_mode.R / ccx_mode_base().
+            struct = MS_STRUCT,
             # RECORDED **AND** READ by collect_dispersed_multistart.R's VERDICT.
             # ⛔ THE BOUND ON "did this start reach that one" IS THIS OPTIMISER'S
             # OWN CONVERGENCE TOLERANCE, and the only file that knows it is the

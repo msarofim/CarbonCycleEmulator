@@ -74,7 +74,7 @@ read_boxes <- function(v, yr) {
   eq <- tryCatch(c(hs = ccx_dic_for_pco2(pco2, ccx_const("ALK_SURFACE"), aux$sst_hs) * 1e6, ml_NH = ccx_dic_for_pco2(pco2, ccx_const("ALK_SURFACE"), aux$sst$NH) * 1e6), error = function(e) c(hs = NA, ml_NH = NA))
   list(pi = one(sp$y), now = one(st), yr = yr, pco2 = pco2, eq_dic = eq, sst_hs = aux$sst_hs, sst_ml = unlist(aux$sst))
 }
-arms <- list(); v0 <- dg_vector(CCX_MODE_CANONICAL); v0$p$hs_frac <- 0
+arms <- list(); v0 <- dg_vector(CCX_MODE_COLUMN_CONTROL)   # ent26, the column control (09-08f: the canonical is HILDA)
 arms[["ent26 OFF"]] <- v0
 for (k in seq_len(nrow(ag))) arms[[sprintf("basin %.2f (n %d)", ag$logpost[k], ag$n[k])]] <- v_of(R[[ag$i[k]]])
 RES <- lapply(arms, read_boxes, yr = yr_dic)

@@ -2,6 +2,57 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-08f — ⭐⭐⭐ **`hilda31` IS `CCX_MODE_CANONICAL` (Marcus: "adopt the round 5 winner as the canonical") — THE FIRST CANONICAL FITTED UNDER A STRUCTURE, and the mode file now CARRIES it. Then the ASSESSMENT: not yet acceptable — the ENSO ocean link is the same broken link as on 09-04; the ranked options are in `notes/assessment_2026-09-08_acceptable_state.md`.**
+
+**The adoption, and what it needed.** Every previous canonical was a column mode; every consumer overlaid `par_mode` onto
+`ccx_default_params()` (hs_frac = 0), so a HILDA mode consumed that way runs as a column WITH NOTHING SAID — measured: the
+same vector scores **−23,306,061** as a column vs −1439.42 with its structure (`diag_adoption_read_hilda31.R`). The survey
+(subagent, 09-08f) found the structural difference is ONE scalar (`hs_frac` 0 → 0.16) and four base-list builders. Fix,
+design (a): **`struct` is recorded** by the driver (`run_dispersed_multistart.R` `res$struct`) and carried by
+`promote_multistart_mode.R` (`--struct` for pre-09-08f starts, ASSERTED by GATE 4: a wrong label does not reproduce);
+**`ccx_mode_struct()` / `ccx_mode_base(md)`** in `R/paths.R` are the ONE place a mode file becomes a base list, and
+`ccx_load_mode()`, `dg_vector()`, `app/global.R`, `sl_overlay()`/`sl_run()`/`sl_score()` (`struct` threaded),
+`diag_joos_irf.R`, `recompute_hessian.R`, `test-likelihood.R`, `test-enso-demean.R` go through it. `test-mode-file.R`
+asserts every registered mode records `struct` and that the resolver honours it. ⚠ `promote_multistart_mode.R` and
+`recompute_hessian.R` re-imposed a UNIFORM `h_ml` prior from the recorded band unconditionally — under the 09-08d
+observation prior that changes the objective and nothing reproduces; now only when the band DIFFERS from the shipped one.
+Promotion: `calibration/output/refit_20260908_hilda31/mode_fit_pumpN.rds` from id 3 of 24 (GATE 4 diff −2.7e-10; the
+`streams` field omits the three profile rows — the promote script's decomposition predates #9; noted, not fixed).
+`ent26` → `CCX_MODE_RETIRED` (cause `81d164c` + `d65b299`), quarantined under
+`calibration/output/quarantine/20260908_hilda31_adopted/`, and kept resolvable BY PATH as **`CCX_MODE_COLUMN_CONTROL`** —
+the six diagnostics that meant "the column control" by `dg_vector(CCX_MODE_CANONICAL); v0$p$hs_frac <- 0` now say so.
+
+**Two defects the adoption exposed.** (1) ⛔ **The HS pump's export was UNRECORDABLE**: `add_flux(..., lab = "pump_hs")` named
+no channel in `CCX_FLUX_CHANNELS`, so `ccx_run(fluxes = TRUE)` died in `.rec` — the app's box diagram, the pedagogy's own
+flux trace, had never run with the structure ON ([[default_off_hides_the_bug]]). Fixed: the label is `"pump"` (it IS export;
+`test-fluxes.R` 23/23). (2) The app's diagram has no cold boxes; the caption now says so when `hs_frac > 0` (a 7-box diagram is
+owed). The app resolves the HILDA mode (`posterior mode`, hs_frac 0.16, u_hs 24.2).
+
+**Tests.** The nine failures carried since round 3 (mode-file, mode-decode ×4, enso-demean, enso-split, seas-lag-split ×2)
+PASS or reduce to one pre-existing error (`test-seas-lag-split.R:199`, the 08-30 arm files' un-encodable seed). Two edits
+under the adoption, flagged: `test-enso-demean.R`'s priced gap **re-derived 45.1618 → 43.8367** at `hilda31` (the same move
+the 09-04 adoption made, 56.48 → 45.16; base via `ccx_mode_base`; a file that records `struct` reproduces DIRECTLY, the
+rows-off form is for pre-#8 files). ⛔ **NOT edited and now RED: `test-alpha-as.R:104` asserts GATE Q PASSES at the shipped
+mode — it FAILS at `hilda31` (2.44σ; retired pair 6.33σ, the 3× discrimination also fails).** That is the adopted
+canonical's own defect (the 2 °C cold box, option D/F below), reported, not silenced.
+
+**Adoption read** (`diag_adoption_read_hilda31.R` → `outputs/diagnostics/adoption_read_hilda31_20260908.{log,rds}`): streams
+provenance PASS (22 rows to 1.4e-10); GATE S 8.96 mo PASS; SPO SH-land limb **1.66×** the inverted land (ent26 1.68×),
+SH-ocean 0.415 @ 8.96, δ¹³C-per-ppm SPO 1.19 / MLO 0.97 — the seasonal link unchanged. Hessian: `recompute_hessian.R --update`
+(log `recompute_hessian_hilda31_20260908.log`). **Hessian at `hilda31` (`recompute_hessian.R --update`): −H positive-definite, condition number 3.6e5 (ent26 7.4e4), and `h_ml` is STEP-UNSTABLE again (12.5 % disagreement between neighbouring steps vs the 2 % tolerance; ent26 1.2 %) — the posterior-readiness statement made at ent26 does NOT carry over unexamined.** Scorecard arm C = the canonical (`whole_model_scorecard_20260908f.log`).
+
+**THE ASSESSMENT** (`notes/assessment_2026-09-08_acceptable_state.md`, judged on [[ccx_pedagogical_not_emulator]]):
+**NOT YET ACCEPTABLE — one chain link is broken and it is the ENSO ocean sign** (0.53× obs, solubility-only r −0.52
+cancelled by fitted γ), unchanged since 09-04; the ocean arc bought the deep and every structural quantity is now
+observation-consistent, and it added gate Q. Two diagnostics run for it: **F** — the heavy cold surface (+2.41) is the
+2 °C EQUILIBRIUM fractionation (T-independent alphas: +0.70 and gate Q wrong-signed), and the whole model ocean is
+0.4–1.3 ‰ heavy at PI (ML +2.57, HS +3.22, deep +1.29 vs ~+0.4) because the deep lacks remineralised light carbon (HS pump
+off makes it HEAVIER); **H** — the pulse partition at 100 yr is air 0.28 / ocean 0.32 / **land 0.41**; Joos 2013's own
+1000-yr split is ocean 59 ± 12 % / land 16 ± 14 % / air 25 ± 9 % (p. 2793, abstract — SOURCED), so the short lifetime is a
+LAND question. Martin et al. 1987's exponent SOURCED (1.53 (z/100)^−0.858, DSR 34:267). Options ranked A–J with a test each;
+recommended: F/H/G this week, **A (ENSO-modulated upwelling limb) before B (tropical box)**, **C + D (seasonal mixed layer +
+Martin remineralisation) as round 6**, E (the ventilation limb) as the research direction.
+
 ## 2026-09-08e (result) — ⭐⭐⭐ **ROUND 5 IN (job 17194179, 24/24 CONVERGED 84–142 min, two basins, winner from 13 starts): WITH THE FLUSH AND THE EXCHANGE UNDER THEIR OBSERVATIONS THE MODEL MAKES THE MODERN SINK INSIDE EVERY PRIOR — `u_hs` 24.2 m/yr (44 Sv, z +0.42, AT the observation), `hs_asx_frac` 0.78 (z +1.2), `k_w` 1273 → 1661 (+31 %, z +0.27) carries the sink; likelihood −1439.4 = round 3 −0.8 (common rows −1429.0 vs −1427.6), the deep profile kept. P2 (`u_hs` ≥ 33) FAILS: THE 70 Sv FLUSH WAS NEVER A STRUCTURAL SINK REQUIREMENT — three knobs, the fit took the cheapest unpriced one each round. ⚠ ROUND 4's SECOND WAVE (ids 10–19) WAS KILLED BY MY RE-SHIP OF THE ROUND-5 BUNDLE; its record is 10 starts.**
 
 **Round 5** (`calibration/diag_hilda31asx_predictions.R` → `outputs/diagnostics/diag_hilda31asx_predictions_20260908.log` + rds;
