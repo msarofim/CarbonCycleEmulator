@@ -20,3 +20,7 @@ data-raw/downloads/*
 !data-raw/downloads/seasonality_fossil.csv
 src/*.o
 src/*.so
+
+# testthat scratch (the "check" reporter writes these; never repo state)
+tests/testthat/_problems/
+tests/testthat/testthat-problems.rds
