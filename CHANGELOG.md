@@ -2,6 +2,66 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-08d — ⭐⭐⭐ **RULED (Marcus): `u_hs` FREED under the observed overturning; `h_ml` freed under a prior spanning the Holte annual MEAN and MAX; the SEASONAL mixed layer SCOPED as the round-5 candidate; the WHOLE-MODEL SCORECARD at `ent26` vs the round-3 winner. Round 4 prepared (31 parameters) — launch recorded below when it happens.**
+
+**The ruling.** "Free u_hs. Either free h_ml or explore pinning it to a seasonal shape so that it can capture both the
+annual mean and the annual max. Also, continue to judge the model overall in the context of the overall goals."
+
+**`u_hs` FITTED (30 → 31).** `CCX_PARAM_TABLE$u_hs` after `h_hs`: logit [5, 150] m/yr, prior lognormal median **21.84**,
+log-sd **0.242** — `data-raw/build_u_hs_prior.R` → `data/obs_u_hs_prior.rds` from NADW 18 Sv + AABW 16–29 Sv (Talley 2013;
+Lumpkin & Speer 2007 via Cessi 2019) over the model's own HS area (5.776e13 m²) = 18.6–25.7 m/yr; width = the bracket's
+log half-width ⊕ AABW's relative error × its share. The former declared 38 sits at **z +2.29**. Removed from
+`CCX_STRUCT_HILDA`; `CCX_U_HS_DECLARED` (38) is what `ccx_migrate_par_set()` fills for every ancestor (it ENCODES, so the
+seeder is a no-op and every reference start begins AT 38 — the contest with the prior IS the experiment). Both cores
+already read `u_hs` from the per-draw list. `tests/testthat/test-u-hs-fitted.R` (5 tests / 67 assertions: table + product
+tie, `h_ml` prior tie, migration + encode, mutation in both cores, objective reads the vector); counts 30 → 31 in
+`test-ent-seas-fitted.R` / `test-likelihood.R`; `lib_run_inputs.R` +2 products; `caveats_declared_parameters.md` row
+rewritten FITTED. `diag_u_hs_h_ml_tests.R` repointed at the constant.
+
+**`h_ml` PRIOR** (box unchanged [30, 200]): lognormal median **83.9 m**, log-sd **0.341** — `data-raw/build_h_ml_prior.R` →
+`data/obs_h_ml_prior.rds`: the LS annual mean 59.7 and annual max 118 ARE the 16/84 % points, so the prior ENCODES the
+mean-vs-max ambiguity a seasonal mixed layer would resolve instead of resolving it by fiat. 39.8 sits at z −2.19,
+`ent26`'s 134 at +1.37. ⚠ Two priors changed ⇒ every stored logpost moves; compare on LIKELIHOOD.
+
+**The seasonal mixed layer, SCOPED not built** (`notes/options_2026-09-08d_seasonal_h_ml.md`). The model already carries
+the mechanism in disguise: `ent_seas_amp_SH` is a FITTED sinusoidal DIC anomaly (winner 21.2 µmol/kg; prior 10.95) with
+no link to how deep the mixed layer goes, SH only — while the NH holds the worst seasonal strain (`sst_seas_amp_NH`
+z −2.83 / −3.91). The Holte product's monthly cycle (added to `data/obs_mld.rds` as `$seasonal`): NH 30 → 83 m (Feb),
+SH 36 → 114 m (Aug), per-cell entrainment fraction 0.26–0.65 / 0.20–0.68. With the winner's sub-ML DIC step (+42 to
++97 µmol/kg) the DERIVED amplitude pre-checks to **SH 10–17, NH 8–14 µmol/kg** — the observed order with nothing tuned.
+Option (B): replace the fitted amplitude with `(C₁ − C_ml)(t) × f(month)` in both hemispheres, carrying the ¹³C step
+(the isotopic discriminant solubility cannot fake); `ent_seas_amp_SH` retires. Predictions P1–P5 drafted; build after
+round 4 so the `u_hs` answer stays attributable.
+
+**THE SCORECARD** (`calibration/diag_whole_model_scorecard.R` → `outputs/diagnostics/whole_model_scorecard_20260908.{log,rds}`):
+| | `ent26` (column) | round-3 winner (HILDA) |
+|---|---|---|
+| likelihood, common rows | −1652.6 | **−1427.6** (+225: profile rows +234; ocean_deep −10; hs_surf −11; all transient groups within ±3) |
+| GATE V variability | FAIL −2.67 | FAIL −2.74 |
+| GATE H δ¹³C gradient contrast | FAIL +6.55 (δ¹³C gradient 1.97×) | FAIL +6.50 |
+| GATE 5 bomb NH peak | FAIL +2.17σ late | FAIL +2.17 |
+| GATE G surface DIC | PASS −0.06 | PASS +1.68 |
+| GATE Q air-sea δ¹³C diseq. (0.60 ± 0.10) | PASS 0.727 (1.27σ) | **FAIL 0.817 (2.17σ)** — NEW |
+| GATE 7 sinks | PASS | PASS |
+| GATE S SPO ocean phase | PASS 8.87 mo | PASS 8.93 |
+| ENSO ocean slope / obs | 0.47× (solubility-only r −0.52, WRONG SIGN) | 0.44× (−0.53) |
+| IRF(100) vs Joos 0.409 | 0.276 | 0.275 |
+| strained priors (|z| > 2) | q10 −2.2, sst_seas_amp_NH −3.9, rep_dC +3.4 | q10 −2.2, kz_deep_frac −2.1, pump_hs +3.0, sst_seas_amp_NH −2.8, rep_dC +3.5 |
+**Reading against the goals.** The ocean-structure arc has bought exactly what it was built for — the deep Δ¹⁴C profile,
+the deep gradients' source, a cold box that is the observed end-member — and NOTHING on the transient chain: seasonal
+phase (S) passes at both, the hemispheric δ¹³C contrast (H) fails at both, the bomb NH peak (5) is late at both,
+variability (V) short at both, the ENSO ocean path wrong-signed at both, the IRF unmoved. It ADDED one failure (Q: the
+2 °C cold box makes the mean air-sea δ¹³C disequilibrium 0.82 vs 0.60 — the round-3 handoff's "2 °C fractionation"
+item, now with a gate on it). ⇒ For the pedagogical chain the live defects are, in order: the ENSO ocean sign (Fix B,
+structural, unchanged since 09-04), the NH seasonal strain (which option B addresses mechanically), the δ¹³C gradient
+level (H, an objective gap: the gradient rows score variation not level), and now Q. Round 4 answers a physical-
+intuition question (is a 70 Sv flush a sink requirement?); it does not touch the chain.
+
+**Round 4 prepared** (`notes/prereg_2026-09-08d_round4_u_hs_freed.md`, R1–R10; THE question: does `u_hs` run back to
+38? reading fixed at ≥ 33 / ≤ 27). Outdir `multistart_20260908d_hilda31` (three sites); port targets re-cut at 31 par
+(`make_port_targets.R`: cold −16042.27, incumbent −2091.89, new_basin −2137.05 — the incumbent moved −4.0 from round 3's
+−2087.86 by the two priors); sbatch caption. Local preflights and the launch are recorded below.
+
 ## 2026-09-08c — ⭐⭐⭐ **THE `u_hs` / `h_ml` TESTS T1–T7 (prereg 09-08c): ALL SEVEN PRE-REGISTERED PREDICTIONS FAILED, EVERY ONE THROUGH THE CO₂-LEVEL ROWS. Decomposed: THE 70 Sv FLUSH IS A SINK REQUIREMENT OF THE CO₂ RECORD, NOT A DEEP-GRADIENT ONE — at fixed export `u_hs` 38 → 24 m/yr costs 189 log-units (169 of them `co2_level_*`; sink 3.03 → 2.88 GtC/yr, +2.5 ppm at 2020), while against the 8 DEEP rows alone the export optimum IS proportional to `u_hs` (96 gC m⁻² yr⁻¹ at the observed 24). HS thickness CANCELS at steady state (not a bug). The Holte 2017 MLD climatology DOWNLOADED and COMPUTED: LS annual mean 59.7 m, max 118 — the fitted 40 m is a bomb + CO₂ capacity statement, and the refit-level cost of a thick mixed layer is only 4.3. Nothing adopted.**
 
 **The observation** (Marcus: "continue work, including downloading the Holte climatology"): `data-raw/download_mld_clim.R`

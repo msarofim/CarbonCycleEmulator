@@ -51,11 +51,35 @@ test_that("ccx_prior_z matches the analytic z for the normal prior", {
 })
 
 test_that("ccx_prior_z is right for a uniform prior under the logit transform", {
-  # h_ml is dunif(30, 200): the prior CDF is linear in x, so z = qnorm((x-30)/170)
-  # -- and this is the case the transform could most easily get wrong, because
-  # the Jacobian is what makes the pushforward non-uniform.
-  for (x in c(35, 87.56224, 120, 195))
-    expect_equal(ccx_prior_z("h_ml", x), stats::qnorm((x - 30) / 170), tolerance = 1e-3)
+  # RE-TARGETED 2026-09-08d: this read h_ml, whose prior became the Holte
+  # mean/max lognormal that day (Marcus's ruling; see the next test). h_hs is
+  # dunif(20, 500) under the same logit transform, so it carries the SAME
+  # claim: the prior CDF is linear in x, z = qnorm((x-20)/480) -- the case the
+  # transform could most easily get wrong, because the Jacobian is what makes
+  # the pushforward non-uniform.
+  for (x in c(25, 75, 260, 495))
+    expect_equal(ccx_prior_z("h_hs", x), stats::qnorm((x - 20) / 480), tolerance = 1e-3)
+})
+
+test_that("ccx_prior_z matches the analytic z for the two OBSERVATION lognormals under a logit box (09-08d)", {
+  # h_ml (box [30, 200]) and u_hs (box [5, 150]) carry lognormal priors read
+  # from build products; the box truncates the density but the z the screen
+  # reports is the UNTRUNCATED family's, as for every other lognormal above.
+  # ⚠ THE BOX TRUNCATES. The screen integrates the prior INSIDE the logit box,
+  # so it reports the z of the TRUNCATED family: z_t = qnorm((F(x) - F(lo)) /
+  # (F(hi) - F(lo))). For u_hs the box [5, 150] holds all the mass (z_lo -6.1,
+  # z_hi +8.0) and the two agree to 1e-3; for h_ml the box [30, 200] clips
+  # ~0.7 % (z_lo -3.02, z_hi +2.55) and the truncated z differs from the plain
+  # one by up to 0.03 sd at the box's edges -- real, small, and documented here
+  # rather than hidden in a loose tolerance.
+  hp <- readRDS(ccx_path("data", "obs_h_ml_prior.rds")); up <- readRDS(ccx_path("data", "obs_u_hs_prior.rds"))
+  z_trunc <- function(x, mu, sd, lo, hi) { F <- function(v) stats::pnorm((log(v) - mu) / sd)
+    stats::qnorm((F(x) - F(lo)) / (F(hi) - F(lo))) }
+  for (x in c(39.8, 59.7, 83.9, 118, 134.15))
+    expect_equal(ccx_prior_z("h_ml", x), z_trunc(x, log(hp$centre_m), hp$log_sd, 30, 200), tolerance = 2e-3, info = sprintf("h_ml at %g", x))
+  expect_gt(abs(ccx_prior_z("h_ml", 39.8) - (log(39.8) - log(hp$centre_m)) / hp$log_sd), 0.02)   # the truncation IS visible
+  for (x in c(12, 21.84, 38, 60))
+    expect_equal(ccx_prior_z("u_hs", x), (log(x) - log(up$centre_m_yr)) / up$log_sd, tolerance = 1e-3, info = sprintf("u_hs at %g", x))
 })
 
 test_that("ccx_prior_z resolves deep tails, which the linear-grid version could not", {

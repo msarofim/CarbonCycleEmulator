@@ -80,6 +80,28 @@ ccx_hs_export_prior <- local({
   }
 })
 
+#' The OBSERVATION priors on the cold box's flush and the mixed-layer thickness
+#' (2026-09-08d, Marcus: "free u_hs"; "either free h_ml or ..."), the same lazy
+#' idiom: data-raw/build_u_hs_prior.R and data-raw/build_h_ml_prior.R.
+ccx_u_hs_prior <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "obs_u_hs_prior.rds"))
+    cache
+  }
+})
+ccx_h_ml_prior <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "obs_h_ml_prior.rds"))
+    cache
+  }
+})
+#' The value the HILDA structure DECLARED for u_hs before it was fitted (HILDA
+#' Table 1, K(z) version: 38 +/- 17 m/yr) -- what every ancestor RAN, so it is
+#' what ccx_migrate_par_set() fills; the fitted search starts there too.
+CCX_U_HS_DECLARED <- 38
+
 CCX_PARAM_TABLE <- list(
   # ---- CO2 fertilisation ---------------------------------------------
   # `beta` LEFT THE TABLE on 2026-08-14 when fert_form flipped to CCX_FERT_MM.
@@ -116,8 +138,18 @@ CCX_PARAM_TABLE <- list(
                      prior = function(x) dlnorm(x, log(2.0), 0.25, log = TRUE)),
   k_w         = list(tr = "log",   init = 1500,
                      prior = function(x) dlnorm(x, log(1500), 0.4, log = TRUE)),
+  # h_ml: OBSERVATION PRIOR since 2026-09-08d (Marcus). The box [30, 200] stays;
+  # the flat density inside it is replaced by a lognormal whose 16 % / 84 %
+  # points ARE the two defensible readings of the Holte 2017 Argo climatology
+  # for a time-constant thickness -- the LS annual MEAN (59.7 m) and the LS
+  # annual MAXIMUM (118 m) -- median 83.9, log-sd 0.341, both COMPUTED from
+  # data/obs_mld.rds by data-raw/build_h_ml_prior.R and read lazily through
+  # ccx_h_ml_prior(). The prior ENCODES the mean-vs-max ambiguity a seasonal
+  # mixed layer would resolve (notes/options_2026-09-08d_seasonal_h_ml.md).
+  # ⚠ Every stored logpost moves with this change; compare on LIKELIHOOD.
   h_ml        = list(tr = "logit", lo = 30,  hi = 200,   init = 75,
-                     prior = function(x) dunif(x, 30, 200, log = TRUE)),
+                     prior = function(x) { pr <- ccx_h_ml_prior()
+                       dlnorm(x, log(pr$centre_m), pr$log_sd, log = TRUE) }),
   # OCEAN VENTILATION, BOUNDED (2026-08-12, Marcus). kz was log-transformed with
   # a lognormal prior and no bound; the 17-parameter mode ran it to 10,686, which
   # puts the deep ocean at -129.9 permil against an observed -150 to -200. One
@@ -249,11 +281,13 @@ CCX_PARAM_TABLE <- list(
   # would start the cold control with the deep far too young.
   kz          = list(tr = "logit", lo = 1161.6, hi = 27808.0, init = 5683.5,
                      prior = function(x) dunif(x, 1161.6, 27808.0, log = TRUE)),
-  # ---- THE TWO FITTED STRUCTURE PARAMETERS (2026-09-06d; 26 -> 28) ----------
+  # ---- THE FITTED STRUCTURE PARAMETERS (2026-09-06d; 26 -> 28; h_hs 09-07;
+  # u_hs 09-08d) ----------
   # Marcus's ruling on prereg_2026-09-07 sec.3-4: HILDA's attachment, z_K,
-  # u_hs, tau_q, hs_frac, sst_hs and h_hs are DECLARED (ccx_apply_structure()
-  # below); the deep floor f and the cold box's exchange-area factor are
-  # FITTED, with no prior beyond their box (dunif, as beta_max / h_ml / kz).
+  # tau_q, hs_frac and sst_hs are DECLARED (ccx_apply_structure() below); the
+  # deep floor f and the cold box's exchange-area factor are FITTED, with no
+  # prior beyond their box (dunif, as beta_max / kz); h_hs joined 09-07 and the
+  # flush u_hs 09-08d (with an observation prior, below).
   # ⚠ The design said "log scale, box"; this table has no log-spaced box, so
   # both are `logit` on the box with a uniform prior on the NATURAL scale. The
   # logit Jacobian pulls toward the box centre by ~1.7 log-units between
@@ -286,6 +320,24 @@ CCX_PARAM_TABLE <- list(
   # control only -- a migrated ancestor starts at ITS OWN h_ml, what it ran).
   h_hs         = list(tr = "logit", lo = 20, hi = 500, init = 75,
                       prior = function(x) dunif(x, 20, 500, log = TRUE)),
+  # u_hs: THE COLD BOX'S FLUSH, FITTED since 2026-09-08d (30 -> 31; Marcus:
+  # "free u_hs") -- the HS <-> HD exchange velocity in m/yr over the HS area
+  # (38 m/yr = a 70 Sv two-way flush). HILDA declared 38 +/- 17 from a 1992
+  # fit to 1970s GEOSECS 14C; the 09-08c tests showed the CO2-LEVEL rows, not
+  # the deep, hold it there (fixed export: 24 m/yr costs 189, sink 3.03 -> 2.88),
+  # while the deep rows alone want the HS export proportional to it. Box
+  # [5, 150]: 5 is a flush too slow to ventilate HD on any GEOSECS timescale,
+  # 150 is 4x HILDA's. Prior LOGNORMAL on the OBSERVED deep-water formation,
+  # NADW + AABW 34-47 Sv (Talley 2013; Lumpkin & Speer 2007 via Cessi 2019)
+  # = 18.6-25.7 m/yr over the model's own HS area: median 21.84, log-sd 0.242,
+  # COMPUTED by data-raw/build_u_hs_prior.R, read lazily through
+  # ccx_u_hs_prior(); the declared 38 sits at z +2.29. The init is a LITERAL
+  # tied to the product by tests/testthat/test-u-hs-fitted.R. ⚠ Migrated
+  # ancestors carry 38 (what they RAN), which ENCODES, so the search STARTS at
+  # 38 and the prior pulls toward 22 -- that contest IS round 4's question.
+  u_hs         = list(tr = "logit", lo = 5, hi = 150, init = 21.84,
+                      prior = function(x) { pr <- ccx_u_hs_prior()
+                        dlnorm(x, log(pr$centre_m_yr), pr$log_sd, log = TRUE) }),
   # pump_hs_gcm2: THE HIGH-LATITUDE PUMP, FITTED since 2026-09-07e (29 -> 30) --
   # HS export per unit area in gC m-2 yr-1, remineralised in HD (pays choice C9).
   # The end-member probe put HS's DIC AT the observed high-latitude surface and
@@ -905,6 +957,14 @@ ccx_migrate_par_set <- function(p) {
     p$pump_hs_gcm2 <- 0
     filled <- c(filled, "pump_hs_gcm2")
   }
+  # 2026-09-08d: u_hs entered the table (30 -> 31). Every ancestor RAN the
+  # structure's declared 38 (CCX_U_HS_DECLARED; the column ancestors carry the
+  # same 38 from ccx_default_params()), which is interior to the box and
+  # ENCODES, so ccx_seed_unencodable() is a no-op here (the h_hs situation).
+  if ("u_hs" %in% absent) {
+    p$u_hs <- CCX_U_HS_DECLARED
+    filled <- c(filled, "u_hs")
+  }
 
   still <- setdiff(absent, filled)
   if (length(still))
@@ -1392,10 +1452,12 @@ ccx_hessian_per_direction <- function(lp, u, verbose = TRUE) {
 #' which structure the objective was measured on. `struct` is the label the
 #' run carries (`CCX_MS_STRUCT`): "" = the 32-box column exactly as before;
 #' "hilda" = the declared values below. Anything else is an error by name.
-#' The two FITTED structure parameters (kz_deep_frac, hs_asx_frac) are NOT
-#' set here: they come from the vector, through CCX_PARAM_TABLE.
+#' The four FITTED structure parameters (kz_deep_frac, hs_asx_frac, h_hs, and
+#' since 2026-09-08d u_hs) are NOT set here: they come from the vector, through
+#' CCX_PARAM_TABLE. u_hs's former declared value is CCX_U_HS_DECLARED (38),
+#' which the migration fills for ancestors and ccx_default_params() carries.
 #' Sources: notes/caveats_declared_parameters.md (each value's provenance).
-CCX_STRUCT_HILDA <- list(hs_frac = 0.16, u_hs = 38, tau_q = 538, sst_hs = 2,
+CCX_STRUCT_HILDA <- list(hs_frac = 0.16, tau_q = 538, sst_hs = 2,
                          q_attach_from = 1L, kz_zscale = 253)
 ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
   if (identical(struct, "")) return(structure(p, struct = ""))

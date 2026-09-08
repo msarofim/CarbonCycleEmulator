@@ -125,5 +125,5 @@ cat(sprintf("\n  arm %s, %d parameters, commit %s, host %s, R %s\n",
 cat("  ⚠ `stored` is each mode FILE's own logpost and is NOT the target: each\n")
 off <- tg$offset[!is.na(tg$offset)]; nm <- tg$name[!is.na(tg$offset)]
 cat(sprintf("    offset (%s) is objective drift since that file was fitted, not a port defect.\n",
-            paste(sprintf("%s %+.2f", nm, off), collapse = ", ")))
+            paste(sprintf("%s %+.2f", nm, as.numeric(off)), collapse = ", ")))   # offset is FORMATTED text in tg
 cat("    (This line was a typed '-0.85' until 2026-09-07f; it is now GENERATED.)\n")

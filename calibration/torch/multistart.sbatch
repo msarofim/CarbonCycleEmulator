@@ -114,8 +114,11 @@ mkdir -p logs calibration/output
 # objective #10 + #11 HS-surface rows; corrected gradient rows). CCX_MS_STRUCT selects
 # the declared structure in BOTH the driver and the port targets; the outdir
 # names the parameter set and the structure, as the 09-01k rule requires.
+# 2026-09-08d: round 4 (31 parameters: + u_hs FREED under the observed overturning,
+# lognormal median 21.84 m/yr; h_ml's flat prior replaced by the Holte mean/max
+# lognormal). Round-3 checkpoints (30 names) are refused by the guard; new outdir.
 export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260907f_hilda30}"
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260908d_hilda31}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.

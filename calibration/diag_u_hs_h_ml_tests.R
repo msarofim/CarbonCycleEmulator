@@ -40,15 +40,15 @@ UH_OUT <- ccx_path("outputs", "diagnostics", "u_hs_h_ml_tests_20260908.rds")
 
 fs <- list.files(UH_DIR, pattern = "^start_[0-9]+[.]rds$", full.names = TRUE)
 S <- lapply(fs, readRDS); best <- S[[which.max(vapply(S, `[[`, 0, "logpost"))]]; pm0 <- best$par_mode
-cat(sprintf("winner: id %d, logpost %.4f, pump_hs_gcm2 %.2f, h_ml %.2f, h_hs %.1f, u_hs (declared) %g\n", best$id, best$logpost, pm0$pump_hs_gcm2, pm0$h_ml, pm0$h_hs, CCX_STRUCT_HILDA$u_hs))
-base_p <- function(u_hs = CCX_STRUCT_HILDA$u_hs) { bp <- ccx_default_params(); bp$pump_mode <- UH_ARM; bp <- ccx_apply_structure(bp, "hilda"); bp$u_hs <- u_hs; bp }
+cat(sprintf("winner: id %d, logpost %.4f, pump_hs_gcm2 %.2f, h_ml %.2f, h_hs %.1f, u_hs (declared) %g\n", best$id, best$logpost, pm0$pump_hs_gcm2, pm0$h_ml, pm0$h_hs, CCX_U_HS_DECLARED))
+base_p <- function(u_hs = CCX_U_HS_DECLARED) { bp <- ccx_default_params(); bp$pump_mode <- UH_ARM; bp <- ccx_apply_structure(bp, "hilda"); bp$u_hs <- u_hs; bp }
 LP <- list(); lp_of <- function(u_hs) { k <- as.character(u_hs); if (is.null(LP[[k]])) LP[[k]] <<- ccx_make_logpost(base_params = base_p(u_hs)); LP[[k]] }
 lp0 <- lp_of(38)(best$u_mode)
 cat(sprintf("HARNESS GATE: rebuilt logpost at the winner's u %.4f vs stored %.4f (diff %.2e) -> %s\n", lp0, best$logpost, lp0 - best$logpost, if (abs(lp0 - best$logpost) < UH_GATE_TOL) "PASS" else "FAIL"))
 if (abs(lp0 - best$logpost) >= UH_GATE_TOL) stop("harness gate failed: the objective is not round 3's")
 
 mk_v <- function(p, pmv) list(p = p, pm = pmv, luc_scale = pmv$luc_scale, bomb_total = pmv$bomb_total, sigma_d14c = pmv$sigma_d14c, rep_dC = pmv$rep_dC, grad_off_co2 = pmv$grad_off_co2, grad_off_d13c = pmv$grad_off_d13c)
-v_of <- function(pm, u_hs = CCX_STRUCT_HILDA$u_hs) mk_v(ccx_overlay_par(base_p(u_hs), pm), pm)
+v_of <- function(pm, u_hs = CCX_U_HS_DECLARED) mk_v(ccx_overlay_par(base_p(u_hs), pm), pm)
 spec <- ccx_profile_d14c_spec(); tgh <- ccx_hs_surface_target(); tg7 <- dg_gcb_target(DG_SINK_WIN)
 umol <- function(aux, c_gtc_m3) c_gtc_m3 * aux$mol_per_GtC / ccx_const("RHO_SEAWATER") * 1e6
 conduit <- function(sp, p) { aux <- sp$aux; grid <- sp$grid; y <- sp$y

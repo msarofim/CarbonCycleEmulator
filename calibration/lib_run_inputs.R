@@ -46,6 +46,16 @@ CCX_RUN_INPUTS <- list(
   list(path    = file.path("data", "obs_hs_export_prior.rds"),
        kind    = "file", pattern = NULL,
        why     = "the lognormal literature prior on pump_hs_gcm2 (Liniger 2025, Arteaga 2019)",
+       symptom = "readRDS() errors inside the prior at the first log-posterior evaluation"),
+  # 2026-09-08d: the two OBSERVATION priors round 4 reads (u_hs freed; h_ml's
+  # flat density replaced). Same failure mode as the export prior above.
+  list(path    = file.path("data", "obs_u_hs_prior.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "the lognormal observation prior on u_hs (NADW + AABW formation, Talley 2013 / Lumpkin & Speer 2007)",
+       symptom = "readRDS() errors inside the prior at the first log-posterior evaluation"),
+  list(path    = file.path("data", "obs_h_ml_prior.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "the lognormal observation prior on h_ml (Holte 2017 Argo MLD: annual mean 59.7 / max 118 m as the 16/84 % points)",
        symptom = "readRDS() errors inside the prior at the first log-posterior evaluation")
 )
 

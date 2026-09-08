@@ -17,7 +17,7 @@
 
 test_that("ent_seas_amp_SH is fitted, and its init is TIED to the derived constant", {
   expect_true("ent_seas_amp_SH" %in% CCX_PARAM_NAMES)
-  expect_identical(length(CCX_PARAM_NAMES), 30L)   # 26 -> 28 on 2026-09-06d (kz_deep_frac, hs_asx_frac); 29 on 09-07 (h_hs); 30 on 09-07e (pump_hs_gcm2)
+  expect_identical(length(CCX_PARAM_NAMES), 31L)   # 26 -> 28 on 2026-09-06d (kz_deep_frac, hs_asx_frac); 29 on 09-07 (h_hs); 30 on 09-07e (pump_hs_gcm2); 31 on 09-08d (u_hs)
   # THE DRIFT THIS CLOSES. `init` is a literal because CCX_PARAM_TABLE is built
   # before ccx_const() exists, so the prior's CENTRE and its STARTING POINT are
   # written in two places. Same guard as pump_grad and npp_frac_NH carry.

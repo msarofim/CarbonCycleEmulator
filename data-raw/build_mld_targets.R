@@ -84,6 +84,17 @@ out <- list(
   bands = do.call(rbind, lapply(MLD_BANDS, function(b) { r <- region(b[1], b[2], TRUE); data.frame(
     lat_lo = b[1], lat_hi = b[2], mean_dt = wstats(FIELDS$mean_dt, r)$value, max_dt = wstats(FIELDS$max_dt, r)$value,
     mean_da = wstats(FIELDS$mean_da, r)$value, n_cells = sum(is.finite(FIELDS$mean_dt) & r)) })),
+  # THE SEASONAL SHAPE (added 2026-09-08d, options_2026-09-08d_seasonal_h_ml.md): per hemisphere, the
+  # area-weighted monthly threshold MLD over the 12-month LS cells, and the PER-CELL entrainment
+  # fraction f = (h_m - h_min)/h_m averaged the same way -- the dilution-honest driver for a derived
+  # entrainment mechanism. `hmin` is each cell's own annual minimum.
+  seasonal = local({ hmin <- apply(arr$dt, c(2, 3), min, na.rm = TRUE); hmin[nmon < MLD_STRICT_N] <- NA
+    lat_signed <- matrix(lat, length(lon), length(lat), byrow = TRUE)
+    one <- function(hem) { m <- nmon == MLD_STRICT_N & (if (hem == "NH") lat_signed >= 0 & lat_signed < MLD_LAT_HS else lat_signed < 0 & lat_signed > -MLD_LAT_HS)
+      h <- vapply(1:12, function(k) { x <- arr$dt[k, , ]; ok <- is.finite(x) & m; sum(x[ok] * W[ok]) / sum(W[ok]) }, 0)
+      f <- vapply(1:12, function(k) { x <- (arr$dt[k, , ] - hmin) / arr$dt[k, , ]; ok <- is.finite(x) & m; sum(x[ok] * W[ok]) / sum(W[ok]) }, 0)
+      list(h_m = h, f_ent = f, h_mean = mean(h), h_max = max(h), month_max = which.max(h), f_max = max(f), f_min = min(f), n_cells = sum(m & is.finite(hmin))) }
+    list(NH = one("NH"), SH = one("SH"), def = "dt; f_ent = per-cell (h_m - h_min)/h_m, cos-lat mean over 12-month LS cells") }),
   coverage = list(cells_sampled = sum(nmon >= 1), cells_strict = sum(nmon == MLD_STRICT_N), finite_frac = mean(is.finite(arr$dt))),
   consts = list(hs_frac = MLD_HS_FRAC, lat_hs = MLD_LAT_HS, strict_months = MLD_STRICT_N, defs = MLD_DEFS, stats = MLD_STATS,
                 weighting = "cos(lat) per 1-deg cell; sd_cell = area-weighted sd across cells (representation spread)"),
@@ -97,5 +108,7 @@ for (rg in c("ls", "ls_anymonth", "hs", "hs_anymonth")) for (f in names(FIELDS))
   cat(sprintf("  %-12s %-9s | %7.1f %7.1f %7.1f %7.1f %7.1f %6d\n", rg, f, r$value, r$sd_cell, r$median, r$q25, r$q75, r$n_cells)) }
 cat("\n  boundary sensitivity (strict cells, threshold MLD):\n"); print(out$boundary_sens, row.names = FALSE, digits = 4)
 cat("\n  zonal bands (strict cells):\n"); print(out$bands, row.names = FALSE, digits = 4)
+for (hem in c("NH", "SH")) { z <- out$seasonal[[hem]]
+  cat(sprintf("\n  seasonal %s: h_m %s | mean %.1f max %.1f (month %d); f_ent %s | %.3f-%.3f\n", hem, paste(sprintf("%.0f", z$h_m), collapse = " "), z$h_mean, z$h_max, z$month_max, paste(sprintf("%.2f", z$f_ent), collapse = " "), z$f_min, z$f_max)) }
 cat(sprintf("\n  MODEL: h_ml fitted 39.8 (every HILDA round) / 134 (ent26 column); h_hs 400 (round 3).\n"))
 saveRDS(out, ccx_path("data", "obs_mld.rds")); cat("saved data/obs_mld.rds\n")
