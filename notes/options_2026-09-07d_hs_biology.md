@@ -51,3 +51,8 @@ Both fits optimised against DIC/ALK rows deflated by 0.84. The verdicts do not m
 and the 57 GtC/yr export are partly the optimiser's compensation; the true ALK gradient at the winner is ~186 vs
 +78.6 observed. Any refit — with or without (a) — must run under the corrected rows; the round-2 start files stay
 where they are as the record of what the bugged objective found (README in the quarantine directory).
+
+## STATUS 2026-09-07e
+(a) BUILT and PROBED — `pump_hs_gcm2`; at 60 gC m⁻² yr⁻¹ the deep enrichment and the δ¹³C contrast land at the observed magnitude and the
+likelihood gains +17 unrefitted, but the prereg gate fails by its letter (P3 +18.9/20; HS surface δ¹³C wrong-signed). Round 3 drafted, not launched
+(`prereg_2026-09-07e_hs_pump_round3_DRAFT.md`). CHANGELOG 2026-09-07e.

@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-07e — ⭐⭐ **THE HS PUMP IS BUILT (both cores, bit-exact at 0, parity-tested) AND PROBED AT THE ROUND-2 WINNER: at the observation-sized 60 gC m⁻² yr⁻¹ (3.5 GtC/yr) HD − HS lands at +127 (observed +116–185), bottom − HS δ¹³C −0.70 (observed −0.87), the likelihood gains +17.2 with NOTHING refitted — but the pre-registered gate FAILS BY ITS LETTER (P3 +18.9 of 20; P6 HS surface δ¹³C moves the WRONG way). `pump_hs_gcm2` registered as the 30th parameter; round 3 DRAFTED, NOT launched.**
+
+**Ruling (Marcus):** "Scope the HS pump and move forward with it if it looks like a plausible fix."
+
+**Built.** `pump_hs_gcm2` (`ccx_default_params()`, default 0): HS export per unit area, gC m⁻² yr⁻¹, remineralised
+in HD on the LS pump's two limbs (`pump_carb_frac`, `PUMP_EPS13_*`, ¹⁴C unfractionated, DIC-limited scaling
+against `hs_C0` under mode D). `ccx_pump_export_hs()` sizes it (`aux$pump_hs`, NULL when off); R emission beside
+the `u_hs` limb; C++ twin (`pump_hs_on/org/carb`, `hs_C0` in `Aux`). `tests/testthat/test-pump-hs.R`: default 0
+and absence bit-exact, inert with HS off, size = g·a_hs/1e15, MUTATION (HD − HS DIC rises, HD δ¹³C falls), R-vs-C++
+parity at 60, errors by name. ⚠ First build sized it RELATIVE to the LS pump's net export; that field is **73.6
+GtC/yr at the winner** (~4× the real ocean), so "1× the LS rate" meant 14 GtC/yr from the cold box and the first
+run overshot P1 3–4× (+443). Re-parameterised ABSOLUTE before the second run; both runs and the reason are in the
+prereg's amendment. ⚠ LS pump OFF + HS pump ON makes the conveyor 12C Newton singular — not a supported state,
+not chased.
+
+**Probe (`calibration/diag_hs_pump_probe.R`, prereg `prereg_2026-09-07d_hs_pump_probe.md`), winner id 44, nothing refitted:**
+
+| gC m⁻² yr⁻¹ | GtC/yr | HD − HS DIC | bot − HS δ¹³C | HS δ¹³C | Δlik | δ¹³C row | DIC row | z_level |
+|---|---|---|---|---|---|---|---|---|
+| 0 | 0 | +23 | 0.00 | +1.96 | 0 | 0 | 0 | −1.32 |
+| 30 | 1.73 | +75 | −0.36 | +2.02 | +12.5 | +11.1 | +2.9 | −1.51 |
+| **60** | **3.47** | **+127** | **−0.70** | **+2.08** | **+17.2** | **+18.9** | **+3.8** | **−1.70** |
+| 90 | 5.20 | +179 | −1.03 | +2.14 | +14.1 | +24.0 | +2.7 | −1.89 |
+| 120 | 6.93 | +231 | −1.34 | +2.21 | +2.8 | +26.6 | −0.4 | −2.08 |
+
+Observed: deep − high-lat surface **+116 (SH) / +185**, δ¹³C **−0.87**, HS surface δ¹³C **+1.31**. At 60: **P1
+PASS, P2 PASS, P3 FAIL (+18.9 < 20), P4 PASS, P5 PASS, P6 FAIL (+1.96 → +2.08, away from +1.31), P7 PASS ⇒ the
+"plausible fix" gate (P1, P2, P3, P5) FAILS by one log-unit on P3.** Reading: the mechanism supplies exactly the
+missing deep enrichment at the observed magnitude, and the likelihood optimum in the scan (60) is the
+observation-matched point without being told so. The one thing it moves the wrong way is the HS SURFACE δ¹³C —
+export strips light carbon from HS faster than HD's lightening returns through `u_hs` — which is the open defect
+the end-member probe already showed (HS 0.6 ‰ too heavy) and a candidate objective row (#11).
+
+**Registered (29 → 30).** `CCX_PARAM_TABLE$pump_hs_gcm2` logit on [0.5, 200], uniform prior (a literature prior is
+OWED — Marcus's call), init 60; migration contract absent → 0 (what every ancestor ran), unencodable → seeded at
+init (verified on start 44: "migrated 0 → seeded 60, encodes finite"). Count tests 29 → 30. Mode-file tests still
+fail on purpose (no 30-name canonical). **Round 3 drafted in `notes/prereg_2026-09-07e_hs_pump_round3_DRAFT.md` —
+open choices: the prior, objective #11 (HS-surface rows), the launch. NOT launched: the probe's own gate failed.**
+⛔ Nothing adopted; canonical `ent26`.
+
 ## 2026-09-07d — ⭐⭐ **THE GRADIENT ROWS DIVIDED BY THE WRONG AREA (every HILDA-arm DIC/ALK gradient read 16 % low — FIXED, mutation-tested, round 2 re-scored); THE HS END-MEMBER PROBED AGAINST GLODAP'S HIGH-LATITUDE SURFACE: its DIC is RIGHT (2169 = cold equilibrium = the observed Southern-Ocean surface 2163), the DEEP below it lacks +116 to +185 µmol/kg — the "preformed end-member" option is REFUTED by the data, an HS pump's pre-check closes the gap at the observed magnitude. Options note for the ruling.**
 
 **The bug (found by reading the row code before pricing a mechanism).** `ccx_model_ocean_gradient()` and the

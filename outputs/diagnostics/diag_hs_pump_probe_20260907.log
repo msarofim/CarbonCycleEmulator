@@ -1,0 +1,34 @@
+winner id 44, logpost -1508.24
+
+=== HS PUMP at the winner: boxes at 2008 (hemisphere means), umol/kg and permil ===
+  gCm2 |   E_hs   E_ls |     ML     HS     HD    bot |   ML13   HS13   HD13  bot13 |   HD-HS  bot-HS  bot-ML | HS-ML13 bot-HS13
+     0 |   0.00   73.6 |   2050   2169   2192   2181 |  +1.40  +1.96  +1.80  +1.96 |     +23     +12    +131 |   +0.56   -0.00
+    15 |   0.87   73.6 |   2050   2168   2217   2205 |  +1.40  +1.99  +1.65  +1.81 |     +49     +38    +155 |   +0.59   -0.18
+    30 |   1.73   73.6 |   2050   2166   2241   2229 |  +1.39  +2.02  +1.50  +1.66 |     +75     +63    +179 |   +0.63   -0.36
+    45 |   2.60   73.6 |   2051   2164   2265   2253 |  +1.38  +2.05  +1.36  +1.52 |    +101     +89    +203 |   +0.67   -0.53
+    60 |   3.47   73.6 |   2051   2162   2289   2277 |  +1.38  +2.08  +1.22  +1.38 |    +127    +115    +226 |   +0.71   -0.70
+    90 |   5.20   73.6 |   2052   2159   2337   2325 |  +1.36  +2.14  +0.96  +1.12 |    +179    +167    +274 |   +0.78   -1.03
+   120 |   6.93   73.6 |   2052   2155   2385   2373 |  +1.35  +2.21  +0.71  +0.86 |    +231    +218    +321 |   +0.86   -1.34
+  OBS: HI surface 2069 NH / 2163 SH, deep 2279 (deep - SH surface +116, deep - HI median +185); d13C HI +1.31, deep +0.44 (-0.87)
+
+=== streams vs off (objective #10) ===
+  gCm2 |      lik   d_lik |  g_d13c   g_dic   g_alk |  z_lev   z_AB   z_BD | d_sink d_c14N d_c14S |  sink
+     0 |  -1469.0    +0.0 |   +0.00   +0.00   +0.00 |  -1.32  +1.40  +0.42 |  +0.00  +0.00  +0.00 |  3.01
+    15 |  -1461.8    +7.2 |   +5.99   +1.72   +0.00 |  -1.41  +1.39  +0.42 |  +0.12  -0.06  -0.01 |  3.01
+    30 |  -1456.6   +12.5 |  +11.10   +2.93   +0.00 |  -1.51  +1.38  +0.42 |  +0.24  -0.13  -0.03 |  3.02
+    45 |  -1453.2   +15.8 |  +15.40   +3.63   +0.00 |  -1.60  +1.37  +0.42 |  +0.36  -0.21  -0.04 |  3.02
+    60 |  -1451.8   +17.2 |  +18.94   +3.82   +0.00 |  -1.70  +1.36  +0.42 |  +0.48  -0.29  -0.06 |  3.03
+    90 |  -1454.9   +14.1 |  +23.99   +2.71   +0.00 |  -1.89  +1.34  +0.42 |  +0.71  -0.50  -0.09 |  3.04
+   120 |  -1466.2    +2.8 |  +26.63   -0.39   +0.00 |  -2.08  +1.33  +0.42 |  +0.93  -0.74  -0.12 |  3.06
+
+=== PREDICTIONS at 60 gC m-2 yr-1 = 3.47 GtC/yr (the scan point with HD - HS nearest the P1 window centre; prereg_2026-09-07d amendment) ===
+  P1 HD - HS DIC in [70, 185]: +127  -> PASS
+  P2 bottom - HS d13C <= -0.5: -0.70  -> PASS
+  P3 ocean_grad_d13c improves >= 20: +18.94  -> FAIL
+  P4 ocean_grad_dic improves >= 2: +3.82  -> PASS
+  P5 profile rows inside 2 sigma: -1.70 / +1.36 / +0.42  -> PASS
+  P6 HS d13C falls >= 0.2 toward +1.31: +1.96 -> +2.08  -> FAIL
+  P7 sink and bomb within 2 of off: sink +0.48, d14c_NH -0.29, d14c_SH -0.06  -> PASS
+  PLAUSIBLE FIX (P1, P2, P3, P5): FAIL
+  ⛔ Nothing adopted; nothing refitted.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/hs_pump_probe_20260907.rds

@@ -1,0 +1,28 @@
+winner id 44, logpost -1508.24
+
+=== HS PUMP at the winner: boxes at 2008 (hemisphere means), umol/kg and permil ===
+   rel |   E_hs   E_ls |     ML     HS     HD    bot |   ML13   HS13   HD13  bot13 |   HD-HS  bot-HS  bot-ML | HS-ML13 bot-HS13
+   0.0 |   0.00   73.6 |   2050   2169   2192   2181 |  +1.40  +1.96  +1.80  +1.96 |     +23     +12    +131 |   +0.56   -0.00
+   0.5 |   7.01   73.6 |   2052   2155   2388   2375 |  +1.35  +2.21  +0.70  +0.85 |    +233    +221    +323 |   +0.86   -1.36
+   1.0 |  14.02   73.6 |   2055   2137   2580   2566 |  +1.30  +2.47  -0.19  -0.04 |    +443    +429    +512 |   +1.16   -2.50
+   2.0 |  28.03   73.6 |   2059   2093   2956   2939 |  +1.24  +3.02  -1.49  -1.34 |    +863    +846    +880 |   +1.79   -4.36
+  OBS: HI surface 2069 NH / 2163 SH, deep 2279 (deep - SH surface +116, deep - HI median +185); d13C HI +1.31, deep +0.44 (-0.87)
+
+=== streams vs rel 0 (objective #10) ===
+   rel |      lik   d_lik |  g_d13c   g_dic   g_alk |  z_lev   z_AB   z_BD | d_sink d_c14N d_c14S |  sink
+   0.0 |  -1469.0    +0.0 |   +0.00   +0.00   +0.00 |  -1.32  +1.40  +0.42 |  +0.00  +0.00  +0.00 |  3.01
+   0.5 |  -1466.9    +2.1 |  +26.69   -0.58   +0.00 |  -2.09  +1.33  +0.42 |  +0.94  -0.75  -0.13 |  3.06
+   1.0 |  -1609.5  -140.5 |  +19.05  -33.43   +0.00 |  -2.84  +1.26  +0.42 |  +1.50  -2.04  -0.15 |  3.12
+   2.0 |  -2591.4 -1122.3 |  -38.98 -189.36   +0.00 |  -4.30  +1.13  +0.42 |  -2.02  -5.99  +0.83 |  3.33
+
+=== PREDICTIONS at rel 1.0 (prereg_2026-09-07d_hs_pump_probe.md) ===
+  P1 HD - HS DIC in [70, 185]: +443  -> FAIL
+  P2 bottom - HS d13C <= -0.5: -2.50  -> PASS
+  P3 ocean_grad_d13c improves >= 20: +19.05  -> FAIL
+  P4 ocean_grad_dic improves >= 2: -33.43  -> FAIL
+  P5 profile rows inside 2 sigma: -2.84 / +1.26 / +0.42  -> FAIL
+  P6 HS d13C falls >= 0.2 toward +1.31: +1.96 -> +2.47  -> FAIL
+  P7 sink and bomb within 2 of rel 0: sink +1.50, d14c_NH -2.04, d14c_SH -0.15  -> FAIL
+  PLAUSIBLE FIX (P1, P2, P3, P5): FAIL
+  ⛔ Nothing adopted; nothing refitted.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/hs_pump_probe_20260907.rds

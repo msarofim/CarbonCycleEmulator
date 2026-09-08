@@ -1065,6 +1065,21 @@ ccx_default_params <- function() {
     # CO2 record with nothing refitted, but a refit has `beta_max` and `kz` free
     # and could reallocate all of it, so banking it here would be premature.
     pump_mode = "N",
+    # THE HIGH-LATITUDE PUMP (2026-09-07d; pays choice C9 of
+    # notes/prereg_2026-09-05_hilda_boxes.md). HS export PER UNIT AREA, in
+    # gC m-2 yr-1, remineralised in HD (one box) on the LS pump's two limbs, same
+    # fractionation, same carbonate share. ABSOLUTE, not relative to the LS
+    # field: the first probe sized it as a fraction of the LS pump's net export
+    # and that field is 73.6 GtC/yr at the round-2 winner (~4x the real ocean),
+    # so "1x the LS rate" meant 14 GtC/yr from the cold box and overshot the
+    # observed deep enrichment 3-4x (diag_hs_pump_probe.R, first run). A number
+    # in gC m-2 yr-1 is what the Southern-Ocean export literature reports and
+    # what a prior can be put on. The end-member probe showed HS's DIC already
+    # equals the observed high-latitude surface and the deep BELOW it lacks the
+    # +116-185 umol/kg / -0.87 permil of remineralised carbon this supplies.
+    # 0 = OFF, BIT-EXACT: aux$pump_hs is NULL and nothing is emitted (the
+    # is.null(aux$pump) contract). Inert with the HS boxes off.
+    pump_hs_gcm2 = 0,
     # ---- THE CONVEYOR (Marcus 2026-08-13, built after the configuration red
     # team in notes/redteam_2026-08-13_conveyor_configurations.md) ----------
     # NH sinking -> deep interhemispheric flow -> SH upwelling -> surface
@@ -2142,6 +2157,22 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         add_flux(ihd, ihs, p$u_hs * y[ihd, "C"] / aux$dz_hd)
       }
 
+      # (b') THE HS PUMP (2026-09-07d): export from HS, remineralised in HD.
+      #      Same two limbs and fractionation as the LS pump, 14C unfractionated,
+      #      DIC-limited scaling against HS's own preindustrial carbon under
+      #      pump_mode "D". `is.null(aux$pump_hs)` (pump_hs_gcm2 = 0 or HS off)
+      #      emits nothing -- bit-exact off.
+      if (!is.null(aux$pump_hs)) {
+        ph <- aux$pump_hs[[h]]
+        sc_hs <- if (identical(p$pump_mode, "D")) y[ihs, "C"] / aux$hs_C0[[h]] else 1
+        add_flux(ihs, ihd, ph$org * sc_hs,
+                 alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump_hs",
+                 alpha13_signed = TRUE)
+        add_flux(ihs, ihd, ph$carb * sc_hs,
+                 alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump_hs",
+                 alpha13_signed = TRUE)
+      }
+
       # (c) HD <-> INTERIOR, volume-proportional over every interior layer.
       #     HILDA's q is "assumed independent of depth" and their Interior is
       #     one advective-diffusive continuum, so the discretisation of that is
@@ -2639,7 +2670,38 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   # times per RK4 substep. NULL when pump_grad == 0, which is what makes the
   # pure-diffusion model bit-reproduced rather than reproduced to an epsilon.
   aux$pump <- ccx_pump_export(p, aux, grid)
+  # THE HS PUMP (2026-09-07d), sized off the LS field just solved, and HS's
+  # preindustrial carbon for its DIC-limited mode. Both present unconditionally
+  # in the sense the C++ needs: pump_hs is NULL when off (and packed as zeros),
+  # hs_C0 is always a number (0 with the boxes off, where nothing reads it).
+  aux$hs_C0   <- stats::setNames(lapply(HEMIS, function(h)
+    aux$dic0_hs * aux$hs_mass_kg[[h]] / aux$mol_per_GtC), HEMIS)
+  aux$pump_hs <- ccx_pump_export_hs(p, aux, grid)
   aux
+}
+
+#' The HS pump's export, per hemisphere, in GtC/yr from HS into HD (2026-09-07d).
+#'
+#' `pump_hs_gcm2` is the HS export PER UNIT AREA in gC m-2 yr-1, so each
+#' hemisphere's flux is `pump_hs_gcm2 * a_hs / 1e15` GtC/yr, split by
+#' `pump_carb_frac`. Absolute rather than relative to the LS field (see the
+#' parameter's own comment in ccx_default_params()).
+#'
+#' @return NULL when off (`pump_hs_gcm2` 0 or absent, or the HS boxes off) -- and
+#'   NULL is what makes ccx_deriv() emit nothing, so the 09-05 structure is
+#'   bit-reproduced. Otherwise list(NH = list(org =, carb =), SH = ...).
+ccx_pump_export_hs <- function(p, aux, grid) {
+  g <- if (is.null(p$pump_hs_gcm2)) 0 else p$pump_hs_gcm2
+  if (!is.finite(g) || g < 0)
+    stop("pump_hs_gcm2 must be a finite non-negative export in gC m-2 yr-1; got ", format(p$pump_hs_gcm2))
+  if (!isTRUE(g > 0) || aux$hs_on != 1L) return(NULL)
+  fc <- p$pump_carb_frac
+  out <- lapply(HEMIS, function(h) {
+    E <- g * aux$a_hs[[h]] / 1e15                                   # gC/m2/yr * m2 -> GtC/yr
+    list(org = E * (1 - fc), carb = E * fc)
+  })
+  names(out) <- HEMIS
+  out
 }
 
 # ---------------------------------------------------------------------

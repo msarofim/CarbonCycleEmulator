@@ -135,6 +135,11 @@ struct Aux {
   double pump_org[2][NL], pump_carb[2][NL];
   double ml_C0[2];                  // preindustrial ML carbon, DIC-limited mode
   double alpha_pump_org, alpha_pump_carb;   // 13C fractionation, per limb
+  // THE HS PUMP (2026-09-07d): HS -> HD export per hemisphere, GtC/yr, SOLVED in
+  // R (ccx_pump_export_hs) off the LS field; pump_hs_on = 0 emits nothing.
+  int    pump_hs_on;
+  double pump_hs_org[2], pump_hs_carb[2];
+  double hs_C0[2];                  // preindustrial HS carbon, DIC-limited mode
 };
 
 static inline void ccx_alpha_as(double sst, const Aux &A,
@@ -684,6 +689,16 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
         add_flux(ihd, ihs, P.u_hs * y[IX(ihd, C)] / A.dz_hd, 1.0);
       }
 
+      // (b') THE HS PUMP (2026-09-07d): HS -> HD, two limbs, the LS pump's
+      //      fractionation, DIC-limited scaling against HS's own preindustrial
+      //      carbon in mode D. pump_hs_on = 0 emits nothing. See the R twin.
+      if (A.pump_hs_on) {
+        const double sch = (P.pump_mode == 1)
+          ? y[IX(ihs, C)] / A.hs_C0[hi] : 1.0;
+        add_flux(ihs, ihd, A.pump_hs_org[hi] * sch, A.alpha_pump_org, true);
+        add_flux(ihs, ihd, A.pump_hs_carb[hi] * sch, A.alpha_pump_carb, true);
+      }
+
       // (c) HD <-> interior, volume-proportional: Q_k = a_ls * dz_k / tau_q,
       //     so the layer -> HD limb is exactly y_k / tau_q. The areas do NOT
       //     cancel on the other limb -- this and the conveyor's
@@ -821,6 +836,10 @@ static Aux unpack_aux(const List& a) {
   v = a["a_hs"];       A.a_hs[0] = v[0];       A.a_hs[1] = v[1];
   v = a["hs_mass_kg"]; A.hs_mass_kg[0] = v[0]; A.hs_mass_kg[1] = v[1];
   v = a["asx_hs"];     A.asx_hs[0] = v[0];     A.asx_hs[1] = v[1];
+  A.pump_hs_on = a["pump_hs_on"];
+  v = a["pump_hs_org"];  A.pump_hs_org[0] = v[0];  A.pump_hs_org[1] = v[1];
+  v = a["pump_hs_carb"]; A.pump_hs_carb[0] = v[0]; A.pump_hs_carb[1] = v[1];
+  v = a["hs_C0"];        A.hs_C0[0] = v[0];        A.hs_C0[1] = v[1];
   return A;
 }
 

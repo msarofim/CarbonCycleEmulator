@@ -87,7 +87,13 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     hs_mass_kg = c(aux$hs_mass_kg$NH, aux$hs_mass_kg$SH),
     asx_hs = c(aux$asx_hs$NH, aux$asx_hs$SH),
     h_hs = aux$h_hs, dz_hd = aux$dz_hd, sst_hs = aux$sst_hs,
-    dic0_hs = aux$dic0_hs, revelle0_hs = aux$revelle0_hs
+    dic0_hs = aux$dic0_hs, revelle0_hs = aux$revelle0_hs,
+    # THE HS PUMP (2026-09-07d): two scalars per hemisphere, ZERO-FILLED when
+    # off; `pump_hs_on` gates the flux on both sides, like `pump_on`.
+    pump_hs_on = as.integer(!is.null(aux$pump_hs)),
+    pump_hs_org  = if (is.null(aux$pump_hs)) numeric(2) else c(aux$pump_hs$NH$org,  aux$pump_hs$SH$org),
+    pump_hs_carb = if (is.null(aux$pump_hs)) numeric(2) else c(aux$pump_hs$NH$carb, aux$pump_hs$SH$carb),
+    hs_C0 = if (is.null(aux$hs_C0)) numeric(2) else c(aux$hs_C0$NH, aux$hs_C0$SH)
   )
 }
 

@@ -276,6 +276,20 @@ CCX_PARAM_TABLE <- list(
   # control only -- a migrated ancestor starts at ITS OWN h_ml, what it ran).
   h_hs         = list(tr = "logit", lo = 20, hi = 500, init = 75,
                       prior = function(x) dunif(x, 20, 500, log = TRUE)),
+  # pump_hs_gcm2: THE HIGH-LATITUDE PUMP, FITTED since 2026-09-07e (29 -> 30) --
+  # HS export per unit area in gC m-2 yr-1, remineralised in HD (pays choice C9).
+  # The end-member probe put HS's DIC AT the observed high-latitude surface and
+  # the deep +12 above it against an observed +116-185; at the round-2 winner
+  # 60 gC m-2 yr-1 (3.5 GtC/yr) lands HD - HS at +127 and gains +17 log-units
+  # with nothing refitted (diag_hs_pump_probe.R, prereg 09-07d). Box [0.5, 200]:
+  # 0.5 = 0.03 GtC/yr, effectively OFF; 200 = 11.6 GtC/yr, above the whole real
+  # ocean's export. PRIOR UNIFORM ON THE BOX -- a literature prior (Southern-
+  # Ocean + subpolar export) is OWED and is Marcus's call; the init 60 is the
+  # observation-matched probe point, a START not a centre. An ancestor that ran
+  # 0 cannot be ENCODED under logit (lo 0.5) and is seeded at init by
+  # ccx_seed_unencodable(), the kz_deep_frac precedent.
+  pump_hs_gcm2 = list(tr = "logit", lo = 0.5, hi = 200, init = 60,
+                      prior = function(x) dunif(x, 0.5, 200, log = TRUE)),
   # THE BIOLOGICAL PUMP'S MAGNITUDE -- the 20th parameter (Marcus 2026-08-16d).
   # The preindustrial surface-to-bottom DIC gradient the pump holds, umol/kg.
   # Everything else about the pump stays structural: the export SHAPE is GLODAP's
@@ -860,6 +874,14 @@ ccx_migrate_par_set <- function(p) {
     if (is.null(p$h_ml)) stop("ccx_migrate_par_set(): h_hs absent and no h_ml to follow.")
     p$h_hs <- p$h_ml
     filled <- c(filled, "h_hs")
+  }
+  # 2026-09-07e: pump_hs_gcm2 entered the table (29 -> 30). Absent = 0 = OFF in
+  # the model's own contract (ccx_pump_export_hs(): NULL -> nothing emitted), so
+  # 0 is what every ancestor RAN. 0 is below the box's floor and does not
+  # ENCODE; ccx_seed_unencodable() seeds it at init for a START point.
+  if ("pump_hs_gcm2" %in% absent) {
+    p$pump_hs_gcm2 <- 0
+    filled <- c(filled, "pump_hs_gcm2")
   }
 
   still <- setdiff(absent, filled)
