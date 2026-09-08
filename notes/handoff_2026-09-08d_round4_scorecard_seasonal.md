@@ -71,7 +71,7 @@ since 09-04) > the NH seasonal strain (option B addresses it mechanically) > the
 parameters" section is the natural cut).
 
 ## 6. LAUNCH STATUS
-LAUNCH_STATUS_PLACEHOLDER
+**LAUNCHED 2026-09-08 ~08:10 EDT: Torch job 17185969** (`sbatch --array=0-45%10 calibration/torch/multistart.sbatch` from `/scratch/ms17839/CarbonCycleEmulator` at launch commit **81d164c**, port targets 63324fa). Setup gate PASSED (0.37 s/eval on the login node); preflight array 17185953 **8/8 COMPLETED, port VERIFIED rel ≤ 2.4e-12** (ids 0–5 seeded, 25/45 dispersed). Budget as round 3 (3 × 6000 × 6, wall 180 min); round 3 took ≈ 9 h end-to-end at `%10`, so expect the array to drain by ~17:00–18:00 EDT. Collect with the §7 commands; score with `calibration/diag_hilda31_predictions.R` (smoke-tested on round 3: reproduces −1438.64).
 
 ## 7. Collect (after the array drains; from the Mac, never rsync from inside an ssh session)
 ```
