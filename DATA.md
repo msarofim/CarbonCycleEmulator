@@ -741,8 +741,8 @@ rescores the de-biasing's cost at a range of bomb-window representation errors:
 
 ⇒ **the penalty shrinks by only 21–25 %. It does not vanish and does not change sign.** Ruling 4's
 −92.7 is **NOT** an artifact of an over-tight target. ⚠ Why so robust: the cost is dominated by the
-SH (−69.5), where the de-biasing acts through the **pre-1963 dump** — a level shift sustained across
-many years, which a per-observation σ cannot absorb the way it would a single outlying year.
+SH (−69.5). ~~The de-biasing acts through the pre-1963 dump, a level shift sustained across many
+years.~~ ⛔ **CORRECTED 2026-09-09e — "the pre-1963 dump" WAS WRONG, and the correction matters.** Localised per year (`diag_debias_penalty_by_year.R`, self-checked against `ccx_loglik`s own stream totals): the dump years 1955–62 carry only **−22.0** of the −92.7, and just **−5.5** of the SH’s −69.5. **POST-1970 carries −49.9 (54 %), of which the SH is −45.4 (65 % of its total)** — *outside* the bomb window, at **σ ≈ 7 ‰, not 25 ‰**, in the years where Graven and Hua agree to 2–3 ‰. The worst SH years are 1971 (−9.50), 1972 (−8.09), 1973 (−6.60), and the model was **already z +4.31 / +3.14 / +1.81 too LOW there BEFORE the de-biasing**, going to **+6.13 / +5.10 / +4.06** after. ⇒ the de-biasing **deepens a pre-existing post-peak SH deficit** in the BEST-observed part of the record — not, as this text said, a level shift in the least-observed one.
 ⚠ **47 is an upper bound, not an estimate:** the Graven−Hua difference is ANTISYMMETRIC and is
 itself a PARTITION disagreement, i.e. the same KIND of error the 25 was calibrated for, so treating
 them as independent double-counts.

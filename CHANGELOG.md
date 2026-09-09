@@ -2,6 +2,35 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09e — ⭐⭐ **The −92.7 falls MOSTLY AFTER 1970, in the BEST-observed part of the record — not in the pre-1963 dump, as I had said twice the same day. And the model was ALREADY 4.3σ out there before the de-biasing.**
+
+`calibration/diag_debias_penalty_by_year.R` (+ `.rds`). Per-year loglik contributions to `d14c_NH` / `d14c_SH` under both forcing arms, reconstructed exactly as `R/likelihood.R` scores them. ⭐ **SELF-CHECKED: the per-year sums reproduce `ccx_loglik()`'s own stream totals exactly** — without that pin this is a second copy of an estimator, free to drift silently.
+
+| era | NH | SH | both | obs SH Δ¹⁴C |
+|---|---|---|---|---|
+| pre-1955 | −0.17 | −0.20 | −0.37 | −29 to −16 |
+| 1955–62 (the "dump") | −16.53 | −5.48 | **−22.02** | −11 to +244 |
+| 1963–65 (peak) | +0.32 | −12.52 | −12.21 | +380 to +646 |
+| 1966–70 | −2.33 | −5.84 | −8.17 | +518 to +628 |
+| **post-1970** | −4.51 | **−45.40** | **−49.91** | +11 to +501 |
+| **TOTAL** | −23.22 | −69.45 | −92.68 | |
+
+**⛔ THIS RETRACTS 09-09d's OWN EXPLANATION**, propagated the same pass to DATA.md §9c, the 09-09d entry above and [[ccx_bomb_rep_sensitivity]]. That entry said the cost "acts through the **pre-1963 dump** — a level shift sustained over many years". Measured: **the dump carries −22.0 of −92.7 and only −5.5 of the SH's −69.5**. ⇒ **twice in one day the mechanism was asserted from where the FORCING CHANGED rather than from where the COST LANDED, and both times it was wrong.**
+
+**⇒ 54 % of the cost, and 65 % of the SH's, is AFTER 1970** — *outside* `LIK_D14C_BOMB_WIN`, scored at **σ ≈ 7 ‰ not 25 ‰**, in exactly the years [[ccx_graven_vs_hua]] finds the two compilations agreeing to **2–3 ‰**. **The penalty is charged in the BEST-observed part of the record, not the least** — which also explains why widening the bomb window recovered only 21–25 % (09-09d): most of the cost was never inside it.
+
+**⭐ AND THE MODEL WAS ALREADY OUT THERE**, z = (obs − model)/σ on the worst SH years:
+
+| year | Δ logL | z PRE | z POST | σ |
+|---|---|---|---|---|
+| 1971 | −9.50 | **+4.31** | **+6.13** | 7.2 |
+| 1972 | −8.09 | +3.14 | +5.10 | 7.3 |
+| 1973 | −6.60 | +1.81 | +4.06 | 7.2 |
+
+The model sits **4.3σ BELOW the observed SH Δ¹⁴C in 1971 before any de-biasing.** ⇒ the correction **deepens a pre-existing post-peak SH deficit** rather than creating one — and the fit could not close that deficit at the OLD forcing either, which **bounds how much a refit can be expected to absorb.** (NH's own worst years, 1962/1961, ARE the dump; NH post-1970 is only −4.51.)
+
+**⇒ THE STRONGEST OBSERVATIONAL ARGUMENT AGAINST RULING 4 YET FOUND**, and the opposite of what 09-09d's reading implied. ⚠ Still a FIXED-VECTOR measurement; a refit is still owed either way. ⛔ **Nothing adopted; this localises a cost, it does not judge one.**
+
 ## 2026-09-09d — ⛔⛔ **RETRACTION: the "3–11× understatement" used a denominator the objective does not use. The bomb window is scored at σ_eff 25.7 ‰, already ~7× Hua's own sd — and widening it further removes only 21–25 % of ruling 4's penalty.**
 
 **Marcus:** *"My lean is to use the best data, which would mean including the correction. Are there any reasons to think that uncertainty in other data is more than the original studies reported? I don't want to over fit to data which might be flawed."* This is that audit. `calibration/diag_bomb_rep_sensitivity.R` (+ `.rds`); each arm run ONCE and rescored under every σ, since the model does not depend on it.
@@ -17,7 +46,7 @@ Project log: what was done, what was tried and abandoned, and why.
 | 40 (max Graven−Hua) | 40.4 | −14.32 | −58.75 | −73.13 |
 | 47 (√(25²+40²), independent-errors upper bound) | 47.4 | −12.67 | −56.78 | −69.51 |
 
-⇒ **the penalty shrinks by only 21–25 %. It does not vanish and does not change sign.** ⚠ **Why so robust:** the cost is dominated by the SH (−69.5), where the de-biasing acts through the **pre-1963 dump** — a level shift sustained over many years, which a per-observation σ cannot absorb the way it would a single outlying year. ⚠ **47 is an upper bound, not an estimate** — the Graven−Hua difference is ANTISYMMETRIC and is itself a PARTITION disagreement, the same KIND of error the 25 was calibrated for, so treating them as independent double-counts.
+⇒ **the penalty shrinks by only 21–25 %. It does not vanish and does not change sign.** ⚠ **Why so robust:** the cost is dominated by the SH (−69.5). ~~It acts through the pre-1963 dump, a level shift sustained over many years.~~ ⛔ **CORRECTED 2026-09-09e — "the pre-1963 dump" WAS WRONG, and the correction matters.** Localised per year (`diag_debias_penalty_by_year.R`, self-checked against `ccx_loglik`s own stream totals): the dump years 1955–62 carry only **−22.0** of the −92.7, and just **−5.5** of the SH’s −69.5. **POST-1970 carries −49.9 (54 %), of which the SH is −45.4 (65 % of its total)** — *outside* the bomb window, at **σ ≈ 7 ‰, not 25 ‰**, in the years where Graven and Hua agree to 2–3 ‰. The worst SH years are 1971 (−9.50), 1972 (−8.09), 1973 (−6.60), and the model was **already z +4.31 / +3.14 / +1.81 too LOW there BEFORE the de-biasing**, going to **+6.13 / +5.10 / +4.06** after. ⇒ the de-biasing **deepens a pre-existing post-peak SH deficit** in the BEST-observed part of the record — not, as this text said, a level shift in the least-observed one. ⚠ **47 is an upper bound, not an estimate** — the Graven−Hua difference is ANTISYMMETRIC and is itself a PARTITION disagreement, the same KIND of error the 25 was calibrated for, so treating them as independent double-counts.
 
 **THE WIDER AUDIT — is any other stream scored tighter than its source warrants?** Mostly no; the stack carries explicit allowances almost everywhere, each with a receipt: `co2_level` 1.0 ppm against a 0.39–0.59 NOAA-vs-SIO floor and **deliberately soft at χ²/dof ≈ 0.38**; `co2_gradient` 0.35 / `d13c_gradient` 0.025 measured against Scripps-vs-NOAA disagreement and floored by observational precision (χ²/dof ≈ 0.6); `co2_icecore` ⊕ 4.0 ppm; `gcb_land_sink` **×3.0** (`LIK_LAND_SINK_INFLATE`); `excess_c14_ocean` ⊕ a 0.15 shared method bias; `ocean_grad_*` ⊕ a σ_rep measured off GLODAP; `d14c_deep/mid` at a measured-consistent n_eff 20.
 
