@@ -719,12 +719,33 @@ scores. The entire isotopic constraint for 1950–1980 is Δ¹⁴C, from three s
    overlapping station and tree-ring measurements. It tests compilation, zonal aggregation,
    baseline convention and version drift, not sampling error.
 
-**The consequence for the likelihood.** `sigma_d14c` is fitted, but the *relative* weighting
-across years is set by the data, and Hua's 3.6 ‰ zonal sd understates the compilation-to-
-compilation spread by 3–11× in exactly 1963–1965 — the years that dominate the bomb constraint
-and the years the de-biasing moves. Any score difference concentrated in those years (the
-−92.7 log-units of `diag_bomb_debias_impact.R`, for one) is measured against a target that is
-more uncertain there than the objective believes.
+**The consequence for the likelihood — ⛔ RETRACTED AND CORRECTED 2026-09-09d.** This paragraph
+said Hua's 3.6 ‰ zonal sd "understates the compilation-to-compilation spread by 3–11× in exactly
+1963–1965", and concluded the −92.7 was "measured against a target more uncertain than the
+objective believes". **3.6 ‰ IS NOT THE DENOMINATOR THE OBJECTIVE USES.** Design note 3 in
+`R/likelihood.R` has added **`LIK_D14C_REP_BOMB` = 25 ‰ in quadrature over 1955–1970** since
+August, for precisely this class of error. MEASURED on the scored annual stream: **σ_eff =
+25.7–25.8 ‰ in 1963–65** (rep 25 ⊕ fitted `sigma_d14c` 5.45) against 6.9–7.4 ‰ outside — the bomb
+window was already inflated **~7×** over Hua's own sd before Graven was acquired, and the real
+shortfall at the peak is **~1.55×**.
+
+**And the corrected conclusion is the opposite one.** `calibration/diag_bomb_rep_sensitivity.R`
+rescores the de-biasing's cost at a range of bomb-window representation errors:
+
+| `LIK_D14C_REP_BOMB` | σ_eff at 1964 | d14c_NH | d14c_SH | all streams |
+|---|---|---|---|---|
+| **25 (shipped)** | 25.7 | −23.22 | −69.45 | **−92.74** |
+| 32 | 32.5 | −17.61 | −62.69 | −80.37 |
+| 40 (max Graven−Hua) | 40.4 | −14.32 | −58.75 | −73.13 |
+| 47 (= √(25²+40²), independent-errors upper bound) | 47.4 | −12.67 | −56.78 | −69.51 |
+
+⇒ **the penalty shrinks by only 21–25 %. It does not vanish and does not change sign.** Ruling 4's
+−92.7 is **NOT** an artifact of an over-tight target. ⚠ Why so robust: the cost is dominated by the
+SH (−69.5), where the de-biasing acts through the **pre-1963 dump** — a level shift sustained across
+many years, which a per-observation σ cannot absorb the way it would a single outlying year.
+⚠ **47 is an upper bound, not an estimate:** the Graven−Hua difference is ANTISYMMETRIC and is
+itself a PARTITION disagreement, i.e. the same KIND of error the 25 was calibrated for, so treating
+them as independent double-counts.
 
 ## 10. Excess radiocarbon budget — Naegler & Levin (2006)
 

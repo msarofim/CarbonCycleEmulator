@@ -2,6 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09d — ⛔⛔ **RETRACTION: the "3–11× understatement" used a denominator the objective does not use. The bomb window is scored at σ_eff 25.7 ‰, already ~7× Hua's own sd — and widening it further removes only 21–25 % of ruling 4's penalty.**
+
+**Marcus:** *"My lean is to use the best data, which would mean including the correction. Are there any reasons to think that uncertainty in other data is more than the original studies reported? I don't want to over fit to data which might be flawed."* This is that audit. `calibration/diag_bomb_rep_sensitivity.R` (+ `.rds`); each arm run ONCE and rescored under every σ, since the model does not depend on it.
+
+**⛔ THE RETRACTION.** DATA.md §9c, CHANGELOG 09-09, [[ccx_graven_vs_hua]] and my own 09-09c summary all said Graven shows *"Hua's 3.6 ‰ understates the systematic uncertainty by 3–11× in exactly the years the bomb constraint dominates"* — and I told Marcus this "actively defuses" counter-measurements (1) and (2). **3.6 ‰ is not the denominator the objective uses.** `R/likelihood.R` design note 3 has added **`LIK_D14C_REP_BOMB` = 25 ‰ in quadrature over 1955–1970** since August, for precisely this class of error: *"aggregating them to two hemispheric boxes has no uniquely right weighting … otherwise the bomb peak would dominate the posterior on the strength of a weighting choice."* MEASURED on the scored annual stream: **σ_eff 25.7–25.8 ‰ in 1963–65**, against 6.9–7.4 outside. The window was already inflated **~7×** over Hua's sd *before Graven was acquired*; the real shortfall at the peak is **~1.55×**. Retracted at every quoting site in one pass per [[retraction_in_place_does_not_propagate]]: DATA.md §9c, `ccx_graven_vs_hua`, `ccx_debias_invalidates_hilda31`, `INDEX_ccx_gates`.
+
+**AND THE CORRECTED CONCLUSION IS THE OPPOSITE ONE.**
+
+| `LIK_D14C_REP_BOMB` | σ_eff @1964 | d14c_NH | d14c_SH | **all streams** |
+|---|---|---|---|---|
+| **25 (shipped)** | 25.7 | −23.22 | −69.45 | **−92.74** |
+| 32 | 32.5 | −17.61 | −62.69 | −80.37 |
+| 40 (max Graven−Hua) | 40.4 | −14.32 | −58.75 | −73.13 |
+| 47 (√(25²+40²), independent-errors upper bound) | 47.4 | −12.67 | −56.78 | −69.51 |
+
+⇒ **the penalty shrinks by only 21–25 %. It does not vanish and does not change sign.** ⚠ **Why so robust:** the cost is dominated by the SH (−69.5), where the de-biasing acts through the **pre-1963 dump** — a level shift sustained over many years, which a per-observation σ cannot absorb the way it would a single outlying year. ⚠ **47 is an upper bound, not an estimate** — the Graven−Hua difference is ANTISYMMETRIC and is itself a PARTITION disagreement, the same KIND of error the 25 was calibrated for, so treating them as independent double-counts.
+
+**THE WIDER AUDIT — is any other stream scored tighter than its source warrants?** Mostly no; the stack carries explicit allowances almost everywhere, each with a receipt: `co2_level` 1.0 ppm against a 0.39–0.59 NOAA-vs-SIO floor and **deliberately soft at χ²/dof ≈ 0.38**; `co2_gradient` 0.35 / `d13c_gradient` 0.025 measured against Scripps-vs-NOAA disagreement and floored by observational precision (χ²/dof ≈ 0.6); `co2_icecore` ⊕ 4.0 ppm; `gcb_land_sink` **×3.0** (`LIK_LAND_SINK_INFLATE`); `excess_c14_ocean` ⊕ a 0.15 shared method bias; `ocean_grad_*` ⊕ a σ_rep measured off GLODAP; `d14c_deep/mid` at a measured-consistent n_eff 20.
+
+**Three places where it may still be understated, none yet acted on:**
+1. ⚠ **`gcb_ocean_sink` = 0.4 GtC/yr, UNINFLATED**, while the land sink gets ×3.0 — and gate 7's own ledger calls the source MIXED: *"the ocean sink is a product of ocean biogeochemistry MODELS and the land sink is a RESIDUAL of the budget, so this is not a clean observation."* **A model-derived target at its stated σ with no allowance is the clearest asymmetry in the stack.**
+2. ⚠ **`excess_c14_ocean`'s target-set choice** (`table4_obs_range` vs the ~3× tighter `table2_peacock`) is **worth ~130 log-units** and is FLAGGED, NOT SETTLED (DATA.md §10).
+3. ⚠ **The mid-century ice discrepancy window (1935–1960) is a knob defaulted OFF** (`CCX_ICE_DISCREPANCY = 1`) ⇒ [[default_off_hides_the_bug]].
+
+**⛔ NOTHING ADOPTED.** Choosing a rep value is an objective change and a Marcus ruling. ⇒ [[ccx_bomb_rep_sensitivity]].
+
 ## 2026-09-09c — ⛔ **The N&L ocean inventory CANNOT arbitrate ruling 4 — measured, not assumed. And the LUC ¹⁴C leak DATA.md §10 records at 23.9 / 28.3 kmol is ~0 at the canonical: that text is STALE.**
 
 **The proposal, and why it was worth trying.** Of ruling 4's four counter-measurements only one is both physical and refit-independent: budget-closing λ 0.1996 → 0.3490 /yr, so gross air-sea exchange at Tans' own Broecker flux covers **75 % → 43 %**. Whether 43 % is implausible is an argument about the ocean/land split of bomb-¹⁴C removal — and my case for ocean dominance was **recall of the standard picture, not a citation** (on GROSS fluxes GPP ~120 GtC/yr exceeds Broecker's ~82, so the ordering is not self-evident). N&L 2006 Table 4's observation-based **ocean** inventories at GEOSECS (1975) and WOCE (1995) looked like the way to settle it on an observation. `calibration/diag_debias_ocean_inventory_power.R` (+ `.log`, `.rds`).
