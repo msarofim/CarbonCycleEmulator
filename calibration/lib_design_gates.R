@@ -69,6 +69,22 @@ DG_BOMB_NH_PEAK <- 853.2; DG_BOMB_NH_YR <- 1963.708
 DG_BOMB_SH_PEAK <- 659.4; DG_BOMB_SH_YR <- 1965.042
 DG_BOMB_LAG     <- 1.33
 DG_EFOLD_FLOOR  <- 20                # permil, the > 20 permil window DESIGN names
+# ⭐ RULING 1 (Marcus, 2026-09-09): GATE 5's NH STATISTIC IS THE TROUGH DEPTH,
+# and the first-peak time is REPORTED rather than gated. WHY: the observed NH
+# aggregate is DOUBLE-PEAKED (the 1963 and 1964 spring stratospheric intrusions)
+# and its two maxima differ by 2.4 %, so `dg_peak()`'s argmax flips between lumps
+# under a trivial perturbation of either curve. The model reproduces the double
+# peak and merely picks the OTHER lump, which is where the old "+2.17 sigma late"
+# came from -- an argmax on a bimodal curve, not a timing error
+# ([[ccx_gate5_argmax_on_bimodal]], diag_gate5_bimodal.R 2026-09-08h). The trough
+# DEPTH is the same curve's shape read by a statistic that cannot flip.
+# ⚠ THE WINDOWS ARE THE ONES THE 09-08h MEASUREMENT WAS MADE ON, carried over
+# unchanged so the promoted gate reports the number that diagnostic reported.
+# They deliberately OVERLAP at the shoulders: each is a bracket for its own
+# extremum, not a partition of the interval.
+DG_G5_W1 <- c(1963.3, 1964.05)       # first (1963 intrusion) peak, yr
+DG_G5_WT <- c(1963.9, 1964.45)       # the inter-peak trough
+DG_G5_W2 <- c(1964.3, 1965.1)        # second (1964 intrusion) peak
 
 # GATE 7 -- GCB 2025 decade means and stated 1 sigma.
 #
@@ -268,15 +284,31 @@ DG_LEDGER <- list(
          "
             SH peaks AFTER NH, NH peak HIGHER than SH -- the bomb source",
          "
-            was northern. DISTRIBUTIONAL: |z| <= DG_G5_NSD on peak times",
+            was northern. DISTRIBUTIONAL: |z| <= DG_G5_NSD, against a sigma",
          "
-            and lag, against a sigma DERIVED by leave-one-zone-out on the",
+            DERIVED by leave-one-zone-out on the observed aggregate (Hua",
          "
-            observed aggregate (Hua publishes none). ⚠ That sigma is the",
+            publishes none). ⭐ RULING 1 (2026-09-09): the NH member of that",
          "
-            aggregate's sensitivity to its own zonal composition, not a",
+            set is the inter-peak TROUGH DEPTH (obs 111.3 permil, sigma",
          "
-            measurement error, and rests on few draws."),
+            33.8), NOT the argmax peak time, which on a double-peaked curve",
+         "
+            flips lumps; SH peak time and the lag are unchanged. The NH",
+         "
+            first-peak time is REPORTED. ⭐ The ruling's premise is",
+         "
+            MEASURED by this same spread: the argmax time's zonal sd is",
+         "
+            0.444 yr against the first peak's 0.042 yr, 10x tighter.",
+         "
+            ⚠ That sigma is the aggregate's sensitivity to its own zonal",
+         "
+            composition, not a measurement error, and rests on few draws --",
+         "
+            33.8 on 111.3 is a 30 % tolerance from 4 draws, an ORDER OF",
+         "
+            MAGNITUDE, not a calibrated standard error."),
        scored = "STREAM yes, FUNCTIONAL no (likelihood scores levels)",
        power  = paste("MODERATE, and the best-sourced gate here: a different",
          "
@@ -437,15 +469,23 @@ DG_LEDGER <- list(
             arm (beta_max 0) must fail the LOWER edge. Kernel mutation-tested.")),
   list(id = "GL", what = "interhemispheric d13C gradient LEVEL (T-G, 2026-09-08g), beside H",
        class = "OBSERVATION", src = "MLO minus SPO annual d13C, 1980-2023, ccx_prepare_obs()",
-       bound = paste("|z| <= DG_GL_NSD (= DG_H_NSD, 2) against the observed mean's OWN",
+       bound = paste("|z| <= DG_GL_NSD (= DG_H_NSD, 2) on the RAW model gradient,",
          "
-            sampling error se = sd/sqrt(n_eff) (dg_gateH_obs), the RAW model",
+            NEVER the fitted grad_off_d13c. ⭐ RULING 3 (2026-09-09): the",
          "
-            gradient, NEVER the fitted grad_off_d13c. A representation",
+            se is the AUGMENTED one -- the observed mean's own sampling",
          "
-            allowance |1 - R_co2| x |obs| can be added in quadrature",
+            error se = sd/sqrt(n_eff) (dg_gateH_obs) with the CO2 control's",
          "
-            (rep_frac); the gate proper uses 0 and REPORTS the other."),
+            measured representation allowance |1 - R_co2| x |obs| added in",
+         "
+            QUADRATURE, DERIVED from the same (g, ho) and never typed. The",
+         "
+            bare-se z (the bound until 09-09) is REPORTED as z_bare. ⚠ The",
+         "
+            canonical moves z -13 -> z -9 and still FAILS: an allowance that",
+         "
+            could not change the verdict is the honest kind."),
        scored = "PARTLY: d13c_gradient scores the SHAPE through a fitted offset, so the LEVEL is unscored",
        power  = paste("REAL: the offset absorbs a 1.97x gradient invisibly (z +0.43 on the",
          "
@@ -673,6 +713,30 @@ dg_efold <- function(t, v, tpk) {
   if (sum(k) < 5) return(NA_real_)
   -1 / stats::coef(stats::lm(log(v[k]) ~ t[k]))[[2]]
 }
+#' The NH double-peak shape: peak 1, the trough, peak 2, and the DROP between.
+#'
+#' ⭐ PROMOTED from diag_gate5_bimodal.R 2026-09-09 under ruling 1. It was that
+#' diagnostic's local `feat()`; the moment the gate scores the same quantity, a
+#' second copy is the caption-sync bug class this file exists to prevent, so the
+#' diagnostic now calls THIS. Plain windowed extrema, NOT `dg_peak()`'s parabolic
+#' refinement: the refinement is for a peak TIME, and what the gate reads here is
+#' a DEPTH, whose sub-sample interpolation would be a different estimator on the
+#' model and the observation (the two are on different time grids).
+#' @return named numeric: p1_t, p1_v, tr_t, tr_v, p2_t, p2_v, drop, p2_minus_p1
+dg_nh_shape <- function(t, v) {
+  w <- function(win, f) {
+    k <- t >= win[1] & t <= win[2]
+    if (!any(k)) return(c(t = NA_real_, v = NA_real_))
+    i <- which(k)[f(v[k])]
+    c(t = t[i], v = v[i])
+  }
+  p1 <- w(DG_G5_W1, which.max)
+  tr <- w(DG_G5_WT, which.min)
+  p2 <- w(DG_G5_W2, which.max)
+  c(p1_t = p1[["t"]], p1_v = p1[["v"]], tr_t = tr[["t"]], tr_v = tr[["v"]],
+    p2_t = p2[["t"]], p2_v = p2[["v"]],
+    drop = p1[["v"]] - tr[["v"]], p2_minus_p1 = p2[["v"]] - p1[["v"]])
+}
 dg_obs_bomb <- local({
   z <- as.data.frame(readRDS(ccx_path("data", "obs_d14c_zonal.rds")))
   w <- ccx_zone_weights()
@@ -695,13 +759,18 @@ dg_gate5 <- function(r) {
     p <- dg_peak(o$t, v)
     c(p, efold = dg_efold(o$t, v, p[["t"]]))
   })
+  # RULING 1: the NH shape rides ALONG the NH peak entry, so every caller that
+  # already indexes pk$NH[["t"]] keeps working and nothing needs a second lookup.
+  pk$NH <- c(pk$NH, dg_nh_shape(o$t, o$d14c_NH))
   list(pk = pk, lag = pk$SH[["t"]] - pk$NH[["t"]])
 }
 #' The observed hemispheric bomb peaks, under the SAME estimator as the model
 dg_obs_gate5 <- function() {
-  lapply(dg_obs_bomb, function(x) {
+  ob <- lapply(dg_obs_bomb, function(x) {
     p <- dg_peak(x$t, x$v); c(p, efold = dg_efold(x$t, x$v, p[["t"]]))
   })
+  ob$NH <- c(ob$NH, dg_nh_shape(dg_obs_bomb$NH$t, dg_obs_bomb$NH$v))
+  ob
 }
 
 # ---- GATE 7: sinks (same construction as diag_app_params.R) ---------
@@ -913,7 +982,11 @@ DG_G5_NSD <- 2      # harmonised with DG_Q_NSD and DG_G7_NSD, 2026-09-02
 dg_obs_gate5_spread <- function() {
   w  <- ccx_zone_weights()
   z  <- as.data.frame(readRDS(ccx_path("data", "obs_d14c_zonal.rds")))
-  agg <- function(ww) {
+  # `shape` is NH-only ON PURPOSE: DG_G5_W1/WT/W2 bracket the NH double peak, and
+  # the SH curve has no second lump for them to bracket. Computing it there would
+  # ship a number with no referent, which is how an unread field becomes a quoted
+  # one.
+  agg <- function(ww, shape = FALSE) {
     zz <- z[z$zone %in% names(ww), ]
     tt <- sort(unique(zz$decimal_date))
     m <- vapply(names(ww), function(nm) {
@@ -922,7 +995,7 @@ dg_obs_gate5_spread <- function() {
     }, numeric(length(tt)))
     v <- as.vector(m %*% (ww[colnames(m)] / sum(ww)))
     p <- dg_peak(tt, v)
-    c(p, efold = dg_efold(tt, v, p[["t"]]))
+    c(p, efold = dg_efold(tt, v, p[["t"]]), if (shape) dg_nh_shape(tt, v))
   }
   # ⚠ EACH HEMISPHERE'S SPREAD IS TAKEN OVER ITS OWN DISTINCT DRAWS, and that
   # matters. Pooling the NH quantities over all (NH-drop x SH-drop) COMBINATIONS
@@ -932,14 +1005,19 @@ dg_obs_gate5_spread <- function() {
   # function of both, so only the lag is taken over the combinations.
   drop_sets <- function(ww) c(list(ww), lapply(names(ww), function(nm)
     ww[setdiff(names(ww), nm)]))
-  nh <- lapply(drop_sets(w$NH), agg)
+  nh <- lapply(drop_sets(w$NH), agg, shape = TRUE)
   sh <- lapply(drop_sets(w$SH), agg)
   get <- function(l, f) vapply(l, function(x) x[[f]], numeric(1))
   lag <- as.vector(outer(get(sh, "t"), get(nh, "t"), `-`))
   list(sd = c(nh_t = stats::sd(get(nh, "t")), nh_v = stats::sd(get(nh, "v")),
               sh_t = stats::sd(get(sh, "t")), sh_v = stats::sd(get(sh, "v")),
               lag  = stats::sd(lag),
-              nh_efold = stats::sd(get(nh, "efold"))),
+              nh_efold = stats::sd(get(nh, "efold")),
+              # RULING 1: the trough DEPTH's tolerance comes from the SAME
+              # leave-one-zone-out construction as every other gate-5 sigma --
+              # observation first, and scaled to the quantity it tests.
+              nh_drop = stats::sd(get(nh, "drop")),
+              nh_p1_t = stats::sd(get(nh, "p1_t"))),
        n = c(nh = length(nh), sh = length(sh), lag = length(lag)),
        nh = nh, sh = sh)
 }
@@ -950,12 +1028,24 @@ dg_obs_gate5_spread <- function() {
 #' @param sp the list from dg_obs_gate5_spread()
 dg_gate5_verdict <- function(g5, ob, sp) {
   lag_obs <- ob$SH[["t"]] - ob$NH[["t"]]
-  z <- c(nh_t = (g5$pk$NH[["t"]] - ob$NH[["t"]]) / sp$sd[["nh_t"]],
-         sh_t = (g5$pk$SH[["t"]] - ob$SH[["t"]]) / sp$sd[["sh_t"]],
-         lag  = (g5$lag - lag_obs)              / sp$sd[["lag"]])
+  # ⭐ RULING 1 (2026-09-09): the NH z is the TROUGH DEPTH, not the argmax time.
+  # `nh_t` is GONE from the judged set -- an argmax on a bimodal curve is not a
+  # timing measurement, and keeping it alongside would let the gate fail on the
+  # artifact the ruling exists to remove.
+  z <- c(nh_drop = (g5$pk$NH[["drop"]] - ob$NH[["drop"]]) / sp$sd[["nh_drop"]],
+         sh_t    = (g5$pk$SH[["t"]]    - ob$SH[["t"]])    / sp$sd[["sh_t"]],
+         lag     = (g5$lag - lag_obs)                     / sp$sd[["lag"]])
+  # REPORTED, NOT GATED (ruling 1's second half). The first-peak time is the
+  # timing statistic that survives the bimodality; the argmax is kept beside it
+  # only so a reader of an older handoff can see which lump each curve chose.
+  rep <- c(nh_p1_t_model = g5$pk$NH[["p1_t"]], nh_p1_t_obs = ob$NH[["p1_t"]],
+           nh_p1_t_z     = (g5$pk$NH[["p1_t"]] - ob$NH[["p1_t"]]) /
+                           sp$sd[["nh_p1_t"]],
+           nh_argmax_model = g5$pk$NH[["t"]], nh_argmax_obs = ob$NH[["t"]],
+           nh_drop_model = g5$pk$NH[["drop"]], nh_drop_obs = ob$NH[["drop"]])
   ord <- c(sh_after_nh = g5$lag > 0,
            nh_peak_higher = g5$pk$NH[["v"]] > g5$pk$SH[["v"]])
-  list(z = z, ord = ord,
+  list(z = z, ord = ord, reported = rep,
        pass = all(abs(z) <= DG_G5_NSD) && all(ord),
        pass_z = all(abs(z) <= DG_G5_NSD), pass_ord = all(ord))
 }
@@ -1432,16 +1522,44 @@ dg_gateL_verdict <- function(...) stop("GATE L: ", DG_L_COMPARISON)
 # own sampling error from dg_gateH_obs(): the observation's number, not a
 # typed one. `rep_frac` adds a representation allowance rep_frac x |obs| in
 # quadrature -- the CO2 control's |1 - R_co2| is the measured size of what a
-# two-box gradient legitimately is not; the gate proper uses 0 and the report
-# prints the other.
+# two-box gradient legitimately is not.
+#
+# ⭐ RULING 3 (Marcus, 2026-09-09): THE GATE PROPER IS THE AUGMENTED FORM, and
+# the bare-se z is what gets REPORTED beside it -- the exact reverse of the
+# 09-08g arrangement, which shipped with the choice explicitly deferred ("CHOICE
+# for Marcus" in diag_tg_gradient_level_gate.R). Bounding on the observation's
+# sampling error ALONE asks a two-box model to reproduce an MLO-minus-SPO
+# gradient to the precision of the station record, which charges the model for
+# something no two-box gradient can be: a station pair is not a hemispheric
+# mean. The CO2 arm MEASURES that discrepancy on a tracer whose gradient the
+# model has no isotopic freedom to bend, so |1 - R_co2| is a representation
+# allowance taken from an OBSERVATION under the same estimator, not a typed
+# tolerance ([[threshold_from_obs_or_law]], [[tolerance_scaled_to_spread]]).
+# ⚠ IT IS AN ALLOWANCE, NOT AN EXCUSE: it moves the canonical from z -13 to
+# z -9. The gate still FAILS, and by a wide margin -- which is the point. A
+# weakening that cannot change the verdict is the honest kind.
+# ⚠ AND IT IS DERIVED, NEVER TYPED ([[derived_must_mean_computed]]): rep_frac
+# is COMPUTED from the same (g, ho) the gate is reading. Passing rep_frac
+# explicitly overrides it, which is what the report and the mutation tests do.
 # =====================================================================
 DG_GL_NSD <- DG_H_NSD
 
-dg_gateGL_verdict <- function(g, ho, n_sd = DG_GL_NSD, rep_frac = 0) {
+#' The CO2 control's measured representation size, |1 - R_co2|.
+#' @return a non-negative scalar; NA if the control's CO2 arm is absent.
+dg_gl_rep_frac <- function(g, ho) abs(1 - g$co2 / ho$co2$mean)
+
+dg_gateGL_verdict <- function(g, ho, n_sd = DG_GL_NSD, rep_frac = NULL) {
   o <- ho$d13c; m <- g$d13c
+  derived <- is.null(rep_frac)
+  if (derived) rep_frac <- dg_gl_rep_frac(g, ho)
   se <- sqrt(o$se^2 + (rep_frac * o$mean)^2)
   z  <- (m - o$mean) / se
   list(model = m, obs = o$mean, se_obs = o$se, se = se, rep_frac = rep_frac,
+       rep_frac_derived = derived, R_co2 = g$co2 / ho$co2$mean,
        ratio = m / o$mean, z = z, n_sd = n_sd,
+       # REPORTED BESIDE IT (ruling 3's second half): the bare-se z, which was
+       # the gate until 2026-09-09. Printed so the size of the allowance is
+       # always visible next to the verdict it produced.
+       z_bare = (m - o$mean) / o$se,
        pass = is.finite(z) && abs(z) <= n_sd)
 }

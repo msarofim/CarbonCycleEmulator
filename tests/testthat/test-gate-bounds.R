@@ -109,6 +109,35 @@ test_that("GATE 5's derived sigma is positive, finite, and rests on stated draws
   # than the data warrants. Guard the property rather than the number.
   expect_gt(sp$sd[["nh_t"]], 0.9 * stats::sd(vapply(sp$nh, function(x) x[["t"]],
                                                     numeric(1))) - 1e-12)
+  # ⭐ RULING 1 (2026-09-09): the TROUGH DEPTH's sigma comes off the SAME
+  # leave-one-zone-out draws, so it must be present, positive and finite too.
+  expect_true(is.finite(sp$sd[["nh_drop"]])); expect_gt(sp$sd[["nh_drop"]], 0)
+  expect_true(is.finite(sp$sd[["nh_p1_t"]])); expect_gt(sp$sd[["nh_p1_t"]], 0)
+  # ⭐ AND THE RULING'S OWN PREMISE, ASSERTED RATHER THAN QUOTED: the argmax
+  # time flips between the two lumps under a zonal drop, the first-peak time
+  # cannot. If that ever stops being true the ruling's justification is gone and
+  # this must say so. MEASURED 2026-09-09: 0.444 yr vs 0.042 yr.
+  expect_gt(sp$sd[["nh_t"]], 3 * sp$sd[["nh_p1_t"]])
+})
+
+test_that("GATE 5's NH shape kernel reads the double peak, and is the ONLY copy", {
+  source(skip_if_no_gates(), local = TRUE)
+  ob <- dg_obs_gate5()
+  # The observed NH aggregate is double-peaked with the FIRST lump higher; the
+  # trough sits between the two windows. These orderings are the structure the
+  # trough statistic reads, so they are asserted, not assumed.
+  expect_gt(ob$NH[["p1_v"]], ob$NH[["tr_v"]])
+  expect_gt(ob$NH[["p2_v"]], ob$NH[["tr_v"]])
+  expect_gt(ob$NH[["p1_v"]], ob$NH[["p2_v"]])       # first higher, by 2.4 %
+  expect_lt(ob$NH[["p1_t"]], ob$NH[["tr_t"]])
+  expect_lt(ob$NH[["tr_t"]], ob$NH[["p2_t"]])
+  expect_equal(ob$NH[["drop"]], ob$NH[["p1_v"]] - ob$NH[["tr_v"]])
+  # MUTATION on the kernel: flatten the curve and the drop must collapse to 0.
+  t <- ob$NH[["p1_t"]] + seq(0, 1.5, by = 1 / 12)
+  expect_equal(dg_nh_shape(t, rep(500, length(t)))[["drop"]], 0)
+  # and deepen a synthetic trough and the drop must follow it, one for one
+  v <- rep(500, length(t)); v[which.min(abs(t - 1964.125))] <- 400
+  expect_equal(dg_nh_shape(t, v)[["drop"]], 100)
 })
 
 test_that("GATE 5 fails a shifted peak and an inverted ordering, and passes the truth", {
@@ -116,17 +145,52 @@ test_that("GATE 5 fails a shifted peak and an inverted ordering, and passes the 
   ob <- dg_obs_gate5(); sp <- dg_obs_gate5_spread()
   # A synthetic gate-5 result built FROM the observation: the model that is
   # exactly right must pass, which is the direction a failing gate cannot show.
-  mk <- function(dnh = 0, dsh = 0, vnh = ob$NH[["v"]], vsh = ob$SH[["v"]])
-    list(pk = list(NH = c(t = ob$NH[["t"]] + dnh, v = vnh),
+  # ⭐ RULING 1: the NH member of the judged set is the TROUGH DEPTH, so the
+  # synthetic model must carry one. `ddrop` mutates it; `dnh` moves only the
+  # argmax time, which after the ruling must NOT be able to fail the gate.
+  mk <- function(dnh = 0, dsh = 0, ddrop = 0,
+                 vnh = ob$NH[["v"]], vsh = ob$SH[["v"]])
+    list(pk = list(NH = c(t = ob$NH[["t"]] + dnh, v = vnh,
+                          drop = ob$NH[["drop"]] + ddrop,
+                          p1_t = ob$NH[["p1_t"]]),
                    SH = c(t = ob$SH[["t"]] + dsh, v = vsh)),
          lag = (ob$SH[["t"]] + dsh) - (ob$NH[["t"]] + dnh))
   expect_true(dg_gate5_verdict(mk(), ob, sp)$pass)
 
-  # push the NH peak out past the bound and it must fail, on the z and not the
+  # push the TROUGH out past the bound and it must fail, on the z and not the
   # ordering -- a mutation that trips the wrong clause is not a test of this one
-  big <- (DG_G5_NSD + 1) * sp$sd[["nh_t"]]
-  v <- dg_gate5_verdict(mk(dnh = big, dsh = big), ob, sp)
+  big_d <- (DG_G5_NSD + 1) * sp$sd[["nh_drop"]]
+  v <- dg_gate5_verdict(mk(ddrop = -big_d), ob, sp)
   expect_false(v$pass); expect_false(v$pass_z); expect_true(v$pass_ord)
+  expect_lt(v$z[["nh_drop"]], -DG_G5_NSD)
+  # a too-DEEP trough must fail too: this is a two-sided bound, not a floor
+  expect_false(dg_gate5_verdict(mk(ddrop = big_d), ob, sp)$pass)
+
+  # ⛔ AND THE RULING'S POINT, AS A MUTATION: an NH argmax that has jumped to the
+  # other lump -- the exact artifact that produced the retired "+2.17 sigma
+  # late" -- must NOT fail the gate any more. The jump is the observed lump
+  # spacing, taken from the observation rather than typed.
+  lump <- ob$NH[["p2_t"]] - ob$NH[["p1_t"]]
+  vj <- dg_gate5_verdict(mk(dnh = lump), ob, sp)
+  expect_true(vj$pass)
+  expect_equal(unname(vj$z[["nh_drop"]]), 0)      # the NH statistic does not move
+  # ⚠ BUT THE LAG STILL INHERITS THE ARGMAX. Ruling 1 removed `nh_t` from the
+  # judged set; it did NOT redefine `lag`, which is still SH argmax minus NH
+  # argmax, so a lump flip still perturbs it -- here by 1.86 of its sigma, inside
+  # the bound but not zero. Recorded, not silently fixed: redefining the lag on
+  # the first-peak time is a methodological choice, not a consequence of this
+  # ruling. If a future NH lump spacing makes this exceed DG_G5_NSD the gate
+  # would fail on the artifact again, and this assertion is what would say so.
+  expect_lt(abs(vj$z[["lag"]]), DG_G5_NSD)
+  expect_gt(abs(vj$z[["lag"]]), 0)
+  expect_false("nh_t" %in% names(dg_gate5_verdict(mk(), ob, sp)$z))
+  # the first-peak time is REPORTED, so it must be there and be finite
+  expect_true(is.finite(dg_gate5_verdict(mk(), ob, sp)$reported[["nh_p1_t_z"]]))
+
+  # the SH peak time is unchanged by ruling 1 and must still be able to fail
+  big <- (DG_G5_NSD + 1) * sp$sd[["sh_t"]]
+  v <- dg_gate5_verdict(mk(dsh = big), ob, sp)
+  expect_false(v$pass); expect_false(v$pass_z)
 
   # ORDERING CLAUSE, which needs no sigma: put the SH peak BEFORE the NH one.
   # The bomb source was northern, so this is unphysical at any tolerance.
@@ -399,7 +463,15 @@ test_that("GATE GL bounds the d13C gradient LEVEL on the observation's own se, b
   ho <- dg_gateH_obs(ccx_prepare_obs())
   o  <- ho$d13c
   expect_equal(o$se, o$sd / sqrt(o$n_eff))
-  at <- function(m, ...) dg_gateGL_verdict(list(co2 = NA_real_, d13c = m), ho, ...)
+  # ⭐ RULING 3 (2026-09-09): the gate is the AUGMENTED form and rep_frac is
+  # DERIVED from the CO2 control, so the synthetic must carry a co2 arm. Giving
+  # it the observed CO2 gradient makes R_co2 = 1 and rep_frac = 0 EXACTLY, which
+  # is what lets the bare-se assertions below still be exact -- a perfect
+  # control reduces the augmented gate to the bare one, and that is a property
+  # worth asserting rather than a convenience.
+  at <- function(m, ...) dg_gateGL_verdict(list(co2 = ho$co2$mean, d13c = m), ho, ...)
+  expect_equal(at(o$mean)$rep_frac, 0); expect_true(at(o$mean)$rep_frac_derived)
+  expect_equal(at(o$mean)$se, o$se)
   v0 <- at(o$mean); expect_true(v0$pass); expect_equal(v0$z, 0); expect_equal(v0$ratio, 1)
   expect_true (at(o$mean + (DG_GL_NSD - 0.1) * o$se)$pass)
   expect_false(at(o$mean + (DG_GL_NSD + 0.1) * o$se)$pass)
@@ -412,4 +484,25 @@ test_that("GATE GL bounds the d13C gradient LEVEL on the observation's own se, b
   expect_gt(v1$se, o$se); expect_equal(v1$se, sqrt(o$se^2 + (0.1 * o$mean)^2))
   expect_lt(abs(v1$z), abs(at(2 * o$mean)$z))
   expect_false(at(NA_real_)$pass)
+
+  # ⭐ RULING 3, MUTATION-TESTED. Detune the CO2 control and the DERIVED
+  # allowance must (a) equal |1 - R_co2| exactly, (b) widen the se, (c) shrink
+  # |z| -- and (d) the bare-se z must be REPORTED unchanged beside it, so the
+  # size of the allowance is always legible next to the verdict.
+  bad <- function(f, m = 2 * o$mean)
+    dg_gateGL_verdict(list(co2 = f * ho$co2$mean, d13c = m), ho)
+  v2 <- bad(1.3)
+  expect_equal(v2$rep_frac, 0.3); expect_true(v2$rep_frac_derived)
+  expect_equal(v2$se, sqrt(o$se^2 + (0.3 * o$mean)^2))
+  expect_gt(v2$se, o$se)
+  expect_lt(abs(v2$z), abs(v2$z_bare))
+  expect_equal(v2$z_bare, (2 * o$mean - o$mean) / o$se)
+  # the allowance is |1 - R_co2|, so a control wrong the OTHER way widens it too
+  expect_equal(bad(0.7)$rep_frac, 0.3)
+  # ⛔ AND IT MUST NOT BE ABLE TO RESCUE THE CANONICAL'S CLASS OF MISS. A 2x
+  # gradient fails at every control detuning up to 30 %: an allowance that could
+  # flip the verdict would be an excuse, not a representation error.
+  for (f in c(1, 1.05, 1.1, 1.2, 1.3)) expect_false(bad(f)$pass)
+  # an ABSENT control must not silently become a passing gate (silent-gate family)
+  expect_false(dg_gateGL_verdict(list(co2 = NA_real_, d13c = o$mean), ho)$pass)
 })

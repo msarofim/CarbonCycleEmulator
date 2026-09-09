@@ -2,6 +2,51 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09b — ⭐ **RULINGS 1 and 3 IMPLEMENTED (the objective-neutral pair). Gate 5's NH statistic is the TROUGH DEPTH and it VINDICATES the ruling — the model's first-peak time matches the observation to 0.0008 σ where the retired argmax said "+2.17 σ late". Gate GL bounds on the augmented form at z −8.67. Both mutation-tested; no logpost moves.**
+
+**Why these two and not ruling 2.** Marcus, on being asked: *"Definitely do 1 and 3. If 2 is a definite improvement, then do it now too, unless the attribution would be valuable for the pedagogy of the final website."* Rulings 1 and 3 live entirely in `calibration/lib_design_gates.R` — gates are diagnostic-side, so **no stored logpost moves and no refit is owed**. Ruling 2 is in `R/likelihood.R` and IS an objective change; it is held so it does not become unattributable alongside the unsettled ruling 4 (§ below).
+
+**RULING 1 — gate 5's NH statistic is the inter-peak TROUGH DEPTH; the first-peak time is REPORTED.** `dg_nh_shape()` and the windows `DG_G5_W1/WT/W2` are **PROMOTED** out of `diag_gate5_bimodal.R`'s local `feat()` into `lib_design_gates.R`, and the diagnostic now delegates to it — the moment a gate scores a statistic, a second copy of that statistic is the caption-sync bug class this file exists to prevent. The shape rides along the `pk$NH` entry so every existing `pk$NH[["t"]]` caller is untouched. Plain windowed extrema, **not** `dg_peak()`'s parabolic refinement: the refinement is for a peak TIME, and model and observation sit on different time grids, so sub-sample interpolation of a DEPTH would be two estimators.
+
+- **The sigma is DERIVED by the same leave-one-zone-out construction as every other gate-5 sigma** — observation first, scaled to the quantity it tests. Observed drop **111.34 ‰**, σ **33.83 ‰** (4 draws).
+- ⭐⭐ **THE RULING'S PREMISE, MEASURED RATHER THAN ASSERTED:** the argmax time's zonal spread is **0.444 yr** against the first-peak time's **0.042 yr** — **10× tighter**. The argmax flips lumps under a single dropped zone; the first peak cannot. This is now an assertion in `test-gate-bounds.R` (`nh_t > 3 × nh_p1_t`), so if it ever stops being true the ruling's justification fails loudly.
+- ⭐⭐ **AND THE VERDICT VINDICATES IT.** At `hilda31` the model's **first-peak time matches the observation to z +0.0008** — the retired argmax statistic reported "+2.17 σ late". **The NH bomb timing was never wrong.** The miss is entirely the depth.
+- ⚠ **`lag` STILL INHERITS THE ARGMAX.** Ruling 1 removed `nh_t` from the judged set; it did NOT redefine the lag, which is still SH argmax − NH argmax, so a lump flip still moves it (measured: 1.86 σ, inside the bound). **Recorded, not silently fixed** — redefining the lag on the first-peak time is a methodological choice, not a consequence of this ruling. Asserted in the test so a future flip past DG_G5_NSD fails rather than passes.
+- **Mutation-tested** both ways: the trough must fail too-shallow AND too-deep (a two-sided bound, not a floor); a flattened curve must give drop 0 and a synthetic 100 ‰ notch must give drop 100; and **an NH argmax jumped a whole lump must NOT fail the gate any more** — the artifact the ruling exists to remove.
+
+**RULING 3 — gate GL bounds on the AUGMENTED (CO₂-control) form.** `dg_gateGL_verdict()`'s `rep_frac` default flips from `0` to **DERIVED**: `dg_gl_rep_frac()` computes `|1 − R_co2|` from the same `(g, ho)` the gate is reading ([[derived_must_mean_computed]] — never typed). The bare-se z, the bound until today, is now REPORTED as `z_bare`. The 09-08g diagnostic shipped with this choice explicitly deferred ("CHOICE for Marcus"); its two arms swapped roles.
+
+| arm | bare-se z (retired) | **augmented z (THE GATE)** | \|1 − R_co2\| | verdict |
+|---|---|---|---|---|
+| `hilda31` (canonical) | −13.31 | **−8.67** | 0.084 | **FAIL** |
+| `column_control` | −13.36 | −8.54 | 0.087 | FAIL |
+| `defaults` | −24.04 | −6.24 | 0.270 | FAIL |
+
+⚠ **The allowance cannot rescue the verdict, and that is the point** — mutation-tested: a 2× gradient fails at every control detuning up to 30 %. A weakening that could flip the verdict would be an excuse, not a representation error. Bounding on the station pair's sampling error ALONE charged a two-box model for something no two-box gradient can be; the CO₂ arm measures that on a tracer the model has no isotopic freedom to bend.
+
+**⛔ A SILENT ZERO-LENGTH PRINT, found while measuring.** The pre-de-biasing product carries **no `t2_high_bias_divisor` field at all** (it predates the knob), so `attr(b, "provenance")$t2_high_bias_divisor` is `NULL` — and **`sprintf("%.2f", NULL)` returns a zero-length vector, which `cat()` prints as NOTHING**. An entire diagnostic line vanished with no error. It is the same invisibility class as the landmine `test-bomb-source-provenance.R` was written for. Guard NULLs to `NA_real_` before any `sprintf` that feeds a `cat`.
+
+**⭐ AND A DECISION-RELEVANT MEASUREMENT FOR RULING 4** (both arms at `hilda31`, forcing file swapped with a `tryCatch(finally=)` + md5 restore assertion, per [[rscript_top_level_on_exit]]):
+
+| forcing | NH trough | z vs obs 111.3 (σ 33.8) | ruling-1 verdict | first-peak z |
+|---|---|---|---|---|
+| **pre-de-biasing** (`main`) | 50.5 | **−1.80** | **PASS** | +0.0008 |
+| **de-biased** (÷1.20, live) | 24.9 | **−2.55** | **FAIL** | +0.0008 |
+
+⇒ under the newly-ruled statistic the de-biasing **flips gate 5's verdict**. ⚠ **But softly, and it must be read that way**: σ 33.8 on 4 draws is a 30 % tolerance the ledger itself calls an order of magnitude, not a calibrated standard error, and both arms sit on the SAME side of the observation (too shallow) — the bound merely happens to fall between them. The de-biasing does not touch the timing in either arm.
+
+**Suite:** gate-bounds file 173 pass / 0 fail (was 169). The 5 red tests are unchanged and all pre-existing: `test-alpha-as.R:116,117`, `test-seas-lag-split.R:199`, and the two ruling-4 provenance guards `test-enso-demean.R:144,162` — **not to be "fixed"**; they are the ledger saying a refit is owed if ruling 4 stands.
+
+**⭐ RULING 2 — CLOSED WITH NO OBJECTIVE CHANGE (Marcus, 2026-09-09b: *"Leave it"*).** Asked whether ruling 2 was "a definite improvement", I measured it and it is not — **the ruling rests on a description that does not match the builder**:
+
+1. **"Re-bin on the model's own layer edges" is ALREADY the construction.** `data-raw/build_glodap_sigma_rep.R:135` calls `ccx_ocean_grid(h)` and reads the like-for-like target on the model's own box edges, on a **1 m grid over `h_ml`'s whole support**. There is no 25 m binning in the code to remove.
+2. **The steps are GLODAP's BOTTLE DEPTHS, not a convention.** MEASURED on the shipped table: the largest 1 m jumps in all three rows sit at h = **30, 40, 49/50, 74/75, 98/99/100, 149/150, 198/199** — GLODAP's standard sampling depths. As the top box edge sweeps past one, a clump of bottles moves between the surface and deep averages. That is discreteness in **where the ocean was actually sampled**, and smoothing it would lay a convention over real data.
+3. **Smoothing was already tried and REJECTED on measurement** (builder header, 08-28): a moving average "at every width deviated from the raw curve by MORE than the jumps it removed (0.131 vs 0.090 at w = 11 m)", because the curve has a narrow V-bottom at the crossing that averaging lifts ⇒ [[smoother_wider_than_feature]].
+
+⇒ of the 09-08j menu *smooth / re-bin / leave*, **"re-bin" IS the status quo and "smooth" is already refuted**. ⚠ **And the premise is worth re-reading too:** [[sigma_table_step_scales_with_residual]] records that **a sampler crosses a C1 shelf, a Laplace step-search does not** — so "the σ_rep shelf blocks the posterior" is an argument about the SAMPLER CHOICE, not about the table. **No stored logpost moves; nothing is owed.**
+
+**⛔ NOTHING ADOPTED.** Ruling 4 remains open with Marcus. Rulings 1 and 3 are gate-side; ruling 2 is closed without change ⇒ **the three objective-neutral rulings are DONE and round 6's prereg is unblocked on everything except ruling 4.**
+
 ## 2026-09-09 — ⭐⭐ **RULINGS 1–4 taken; ruling 4 (the Tans de-biasing) APPLIED, then measured, and the measurement CUTS AGAINST IT; GRAVEN ACQUIRED and it says Hua's bomb-window sd is 3–11× too small.**
 
 **The four rulings (Marcus).** (1) gate 5's NH statistic → the **trough depth**, first-peak time reported; (2) the σ_rep table → **re-bin on the model's own layer edges**; (3) GL's bound → the **augmented (CO₂-control) form, z −9**; (4) the Tans ~20 % high-bias caveat → **APPLY it** (against my recommendation of an off-by-default arm). Only (4) is implemented so far; (1)–(3) are still owed.

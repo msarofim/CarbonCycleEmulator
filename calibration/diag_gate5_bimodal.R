@@ -13,13 +13,15 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
-G5_W1 <- c(1963.3, 1964.05); G5_WT <- c(1963.9, 1964.45); G5_W2 <- c(1964.3, 1965.1)   # peak 1 / trough / peak 2 windows, yr
+# ⭐ 2026-09-09, RULING 1: the windows and the feature kernel MOVED into
+# lib_design_gates.R (DG_G5_W1/WT/W2, dg_nh_shape) because gate 5 now SCORES the
+# trough depth. This file keeps its local `feat()` name but delegates, so the
+# diagnostic and the gate can never report the same statistic at two values.
+G5_W1 <- DG_G5_W1; G5_WT <- DG_G5_WT; G5_W2 <- DG_G5_W2                                # peak 1 / trough / peak 2 windows, yr
 G5_TILT <- c(-0.05, -0.03, -0.02, 0, 0.02, 0.03, 0.05)                                 # per yr about 1964.15, applied to the OBSERVED series
 G5_LEVERS <- list(tau_ex = c(0.5, 1, 2), k_w = c(1, 2, 3), h_ml = c(1, 2))
 G5_OUT <- ccx_path("outputs", "diagnostics", sprintf("gate5_bimodal_%s.rds", format(Sys.Date(), "%Y%m%d")))
-feat <- function(t, v) { w <- function(win, f) { k <- t >= win[1] & t <= win[2]; i <- which(k)[f(v[k])]; c(t = t[i], v = v[i]) }
-  p1 <- w(G5_W1, which.max); tr <- w(G5_WT, which.min); p2 <- w(G5_W2, which.max)
-  c(p1_t = p1[["t"]], p1_v = p1[["v"]], tr_t = tr[["t"]], tr_v = tr[["v"]], p2_t = p2[["t"]], p2_v = p2[["v"]], drop = p1[["v"]] - tr[["v"]], p2_minus_p1 = p2[["v"]] - p1[["v"]], argmax_t = dg_peak(t, v)[["t"]]) }
+feat <- function(t, v) c(dg_nh_shape(t, v), argmax_t = dg_peak(t, v)[["t"]])
 ob <- dg_obs_bomb$NH; fo <- feat(ob$t, ob$v)
 v <- dg_vector(CCX_MODE_CANONICAL); r <- dg_run(v); fm <- feat(r$out$t, r$out$d14c_NH)
 ob5 <- dg_obs_gate5(); sp5 <- dg_obs_gate5_spread()
