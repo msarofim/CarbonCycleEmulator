@@ -44,6 +44,14 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     # otherwise hand the core whatever was in that buffer before.
     kz_int = if (is.null(aux$kz_int))
       stop("aux lacks kz_int -- build it with ccx_prepare() (2026-09-06b)") else aux$kz_int,
+    # SEASONAL MIXED LAYER (round 6). Sent zero-filled when off -- the pump_org
+    # precedent -- so a stale draw cannot leave a live field behind, and the two
+    # cores agree bit for bit at seas_ml = 0.
+    seas_ml = as.integer(!is.null(aux$mld_coef)),
+    mld_a = if (is.null(aux$mld_coef)) numeric(12) else
+              unlist(lapply(HEMIS, function(h) aux$mld_coef[[h]]$a), use.names = FALSE),
+    mld_b = if (is.null(aux$mld_coef)) numeric(12) else
+              unlist(lapply(HEMIS, function(h) aux$mld_coef[[h]]$b), use.names = FALSE),
     a_oc = c(aux$a_oc$NH, aux$a_oc$SH),
     dic0 = c(aux$dic0$NH, aux$dic0$SH),
     revelle0 = c(aux$revelle0$NH, aux$revelle0$SH),
@@ -197,17 +205,10 @@ ccx_cpp_par <- function(p) {
   # parity test exists to prevent, and parity cannot see a run nobody compares.
   # So this STOPS rather than falling back. Remove when ccx_core.cpp carries the
   # mechanism and test-parity.R covers it at seas_ml = 1.
-  # ⚠ The test is ccx_seas_ml_on(), NOT `seas_ml > 0`: the mechanism is only
-  # ACTIVE when `seas_drivers` is also on. ccx_spinup() sets seas_drivers = 0 and
-  # then solves its equilibrium through THIS path, so a guard on the raw flag
-  # would refuse to spin up a seasonal-ML parameter set at all -- which is how
-  # this was found. That the spinup is aseasonal is the design (no periodic
-  # spinup is needed); here it also makes the C++ core safe to use for it.
+  # SEASONAL MIXED LAYER: the C++ twin EXISTS as of 2026-09-09o, so the guard
+  # that used to stop here is gone and test-parity.R covers the mechanism at an
+  # explicit seas_ml = 1. Absence still means 0 = OFF = bit-identical.
   if (is.null(p$seas_ml)) p$seas_ml <- 0
-  if (ccx_seas_ml_on(p))
-    stop("the C++ core has no seasonal mixed layer yet (seas_ml = ", p$seas_ml,
-         ", seas_drivers = ", p$seas_drivers, "). Run the R core (ccx_run), or ",
-         "set seas_ml = 0. See notes/prereg_2026-09-09g_round6_seasonal_ml.md step 2.")
   if (is.null(p$tau_ex_seas_amp)) p$tau_ex_seas_amp <- 0
   if (is.null(p$tau_ex_seas_phase)) p$tau_ex_seas_phase <- 0
   .lagp <- ccx_seas_lag_p(p)

@@ -3008,21 +3008,33 @@ ccx_advection_eigbound <- function(w_up, grid, p = NULL) {
 #' Substeps needed to keep the explicit interior transport stable over one step
 #' @param dt master step, years (1/12 for the monthly integrator)
 ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
-  # ⚠ SEASONAL MIXED LAYER: TAKE THE BOUND AT THE THINNEST ML, NOT THE MEAN.
+  # ⚠⚠ SEASONAL MIXED LAYER: THE BOUND MUST BE TAKEN AT **BOTH** EXTREMES OF THE
+  # CYCLE, AND TAKING ONLY ONE IS A BUG THIS FUNCTION SHIPPED WITH ON 2026-09-09i.
+  #
   # Both bounds go as 1/dz -- diffusion as kz/(dz_k dz_mid_k), advection as
-  # w/dz_k -- and the SUMMER mixed layer thins to 26-30 m against a 49 m annual
-  # mean at the canonical, tightening both by ~1.7x. Sizing on the annual-mean
-  # grid would silently UNDER-resolve half of every year. Evaluated on the
-  # thinnest grid, which is the conservative direction.
+  # w/dz_k -- but the two thicknesses that matter move in OPPOSITE directions:
+  #   * the SUMMER (thinnest) mixed layer, 26-30 m against a 49 m annual mean,
+  #     tightens the bound on the MIXED LAYER itself;
+  #   * the WINTER (deepest) mixed layer squeezes LAYER 1, because layer 1
+  #     absorbs the whole excursion -- at h_ml 75 it is compressed to 0.8 m,
+  #     1.5 % of its annual mean, and the DIFFUSION bound there is fierce.
+  # The 09-09i version evaluated only the thin extreme, which is the one that
+  # does NOT bind: it returned 4 substeps where 19 were needed at h_ml 75, and
+  # the under-resolved integration then diverged -- caught by test-parity.R,
+  # because near-singular arithmetic amplifies roundoff differently in the two
+  # cores. ⛔ A stability bound that looks at one end of a cycle is not a bound.
+  .grids <- list(grid)
   if (ccx_seas_ml_on(p)) {
-    .fmin <- min(vapply(HEMIS, function(h) min(ccx_mld_shape()[[h]]$f_month),
-                        numeric(1)))
-    grid  <- ccx_grid_at_h_ml(grid, grid$h_ml * .fmin)
+    .sh <- ccx_mld_shape()
+    .fs <- c(min(vapply(HEMIS, function(h) min(.sh[[h]]$f_month), numeric(1))),
+             max(vapply(HEMIS, function(h) max(.sh[[h]]$f_month), numeric(1))))
+    .grids <- lapply(.fs, function(f) ccx_grid_at_h_ml(grid, grid$h_ml * f))
   }
   # The bound is taken at the LARGEST interface K, which is kz itself at the
   # ML base for every admissible kz_deep_frac -- conservative for the rest.
-  lam <- ccx_diffusion_eigmax(max(ccx_kz_profile(p, grid)), grid) +
-    ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), grid, p)
+  lam <- max(vapply(.grids, function(g)
+    ccx_diffusion_eigmax(max(ccx_kz_profile(p, g)), g) +
+      ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), g, p), numeric(1)))
   need <- dt * lam / (CCX_STAB_SAFETY * CCX_RK4_STAB_LIMIT)
   as.integer(min(max(CCX_SUBSTEPS_MIN, ceiling(need)), CCX_SUBSTEPS_MAX))
 }

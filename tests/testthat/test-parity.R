@@ -353,3 +353,84 @@ test_that("the single-step flat forcing vector is complete, and AOD reaches the 
     expect_equal(fn(sp$y, t_aod, p_abs,  f_aod, sp$grid, sp$aux),
                  fn(sp$y, t_aod, p_expl, f_aod, sp$grid, sp$aux), tolerance = 1e-12)
 })
+
+# =====================================================================
+# THE SEASONAL MIXED LAYER (round 6, 2026-09-09o) -- prereg P11.
+#
+# Until this file covered it, R/cpp.R had to STOP at seas_ml > 0: the C++ core
+# would otherwise have run the ASEASONAL mixed layer and returned a number that
+# looks fine and is wrong. ⭐ Parity cannot see a run nobody compares, so the
+# guard was the only thing standing between that and a silent divergence.
+#
+# THE TOLERANCE IS DERIVED FROM THE FLUX COUNT, NOT FITTED TO WHAT PASSED --
+# the 2026-08-16e discipline. The mechanism adds TWO add_flux terms per
+# hemisphere (entrainment and detrainment, resolved per direction). MEASURED
+# peak gross entrainment throughput at the canonical is 1203 GtC/yr -- large
+# because it is a two-way SEASONAL exchange that nets to zero over the year,
+# exactly as the air-sea gross limbs are. So the reassociation bound is
+#     n_terms * eps * throughput = 2 * 2.22e-16 * 1203 = 5.34e-13 GtC/yr,
+# i.e. ~5.3e-14 relative against a max|dC/dt| of order 10 GtC/yr. The
+# trajectory tolerances below sit at 1e-13, INSIDE that bound and far below any
+# real porting error, which shows at 1e-2 or worse.
+# =====================================================================
+
+test_that("the seasonal mixed layer agrees between the cores at seas_ml = 1", {
+  skip_if_no_cpp()
+  # ⚠ EXPLICIT seas_ml = 1. A mechanism defaulted off is untested where it
+  # matters, and at seas_ml = 0 this test would be re-running the one above.
+  p <- pf$p; p$seas_drivers <- 1; p$seas_ml <- 1
+  sp <- ccx_spinup(p)
+  F  <- ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14)
+  rR <- ccx_run(sp, F)
+  rC <- ccx_run_fast(sp, F)
+  expect_lt(max(abs(rR$out$co2_NH - rC$out$co2_NH)) / max(abs(rR$out$co2_NH)), 1e-13)
+  expect_lt(max(abs(rR$out$co2_SH - rC$out$co2_SH)) / max(abs(rR$out$co2_SH)), 1e-13)
+  # BOTH isotopes, because entrainment is the mechanism's whole isotopic point:
+  # it carries 13C AND 14C from the source box, which the retired pCO2-side shim
+  # could not do. A port that dropped either would pass on CO2 alone.
+  expect_lt(max(abs(rR$out$d13c_NH - rC$out$d13c_NH)), 1e-9)
+  expect_lt(max(abs(rR$out$d14c_NH - rC$out$d14c_NH)), 1e-8)
+  expect_lt(max(abs(rR$out$ocean_C - rC$out$ocean_C)) / max(abs(rR$out$ocean_C)), 1e-13)
+  # The MIXED-LAYER stocks specifically: this is the box the mechanism moves,
+  # and a hemisphere swap in the Fourier coefficients would be invisible in the
+  # global totals above while being catastrophic here.
+  for (cc in CCX_OCEAN_BOX_COLS) {
+    # hs_* columns are NA on BOTH sides with the HILDA boxes off, as in the
+    # structure-agnostic test above -- `pf$p` is the DEFAULTS, where hs_frac = 0.
+    if (all(is.na(rR$out[[cc]])) && all(is.na(rC$out[[cc]]))) next
+    expect_lt(max(abs(rR$out[[cc]] - rC$out[[cc]])) / max(abs(rR$out[[cc]])), 1e-12)
+  }
+})
+
+test_that("seas_ml = 1 is a DIFFERENT trajectory from seas_ml = 0 in BOTH cores", {
+  skip_if_no_cpp()
+  # ⛔ Without this, the test above would pass for the wrong reason if the C++
+  # marshalling silently sent seas_ml = 0: both cores would run the aseasonal
+  # model and agree perfectly. This is the mutation that catches that.
+  p0 <- pf$p; p0$seas_drivers <- 1; p0$seas_ml <- 0
+  p1 <- p0; p1$seas_ml <- 1
+  s0 <- ccx_spinup(p0); s1 <- ccx_spinup(p1)
+  F  <- ccx_build_forcing("historical", c(1900, 1980), prod_c14 = s0$prod_c14)
+  c0 <- ccx_run_fast(s0, F)$out$co2_SH
+  c1 <- ccx_run_fast(s1, F)$out$co2_SH
+  expect_gt(max(abs(c1 - c0)), 1e-6)
+  # and the R core must see the SAME difference, not merely some difference
+  r0 <- ccx_run(s0, F)$out$co2_SH
+  r1 <- ccx_run(s1, F)$out$co2_SH
+  expect_lt(max(abs((c1 - c0) - (r1 - r0))) / max(abs(r1 - r0)), 1e-10)
+})
+
+test_that("the two hemispheres are in ANTIPHASE in the C++ core, not swapped", {
+  skip_if_no_cpp()
+  # A transposed pair of Fourier coefficient blocks in unpack_aux() would give
+  # the SH the NH's winter. Every global total would survive it; the sign of the
+  # hemispheric difference would not.
+  p <- pf$p; p$seas_drivers <- 1; p$seas_ml <- 1
+  sp <- ccx_spinup(p)
+  F  <- ccx_build_forcing("historical", c(1900, 1905), prod_c14 = sp$prod_c14)
+  o  <- ccx_run_fast(sp, F)$out
+  keep <- F$t >= 1903 & F$t < 1904
+  mo <- function(x) which.max(x[keep])
+  expect_false(mo(o$ml_C_NH) == mo(o$ml_C_SH))
+})
+

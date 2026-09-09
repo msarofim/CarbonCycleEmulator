@@ -89,6 +89,15 @@ struct Aux {
   double gtc_per_ppm_hemi, chi0, mol_per_GtC;
   double npp0[2], veg0[2], land0[2], ml_mass_kg[2], asx[2], sst[2];
   double dz[NL + 1], dz_mid[NL];
+  // SEASONAL MIXED LAYER (round 6, 2026-09-09). Twin of R's aux$mld_coef.
+  // `seas_ml` is the switch; mld_a/mld_b are the 6 Fourier harmonics of the
+  // MEAN-PRESERVING depth shape, per hemisphere. Sent zero-filled when off, so
+  // a stale draw cannot leave a live field behind (the pump_org precedent).
+  // ⚠ THE INTERIOR GRID DOES NOT MOVE: only the ML/layer-1 boundary does, and
+  // layer 1 absorbs the whole excursion, so dz[0] + dz[1] is conserved and
+  // dz_mid[0] is invariant. kz_int stays at its annual-mean values.
+  int seas_ml;
+  double mld_a[2][6], mld_b[2][6];
   // Per-interface diffusivity (2026-09-06b): K at the base of layer k. Twin of
   // R's aux$kz_int; rep(kz, NL) at the default kz_deep_frac = 1, so P.kz below
   // is read but the operator uses THIS.
@@ -344,6 +353,21 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   for (int i = 0; i < NB * 3; ++i) dy[i] = 0.0;
 
   // flux helper: source-ratio transport, applied antisymmetrically
+  // SEASONAL MIXED-LAYER SHAPE -- twin of ccx_mld_eval() in R/model.R, written
+  // in the same order and associativity so the two cores agree to roundoff.
+  // Periodic with period 1, so `t` is used directly: no modulo, which would put
+  // a kink at the new year.
+  auto mld_eval = [&](int hi, double tt, double *f, double *dfdt) {
+    double sf = 1.0, sd = 0.0;                       // a0 = 1 by construction
+    for (int k = 1; k <= 6; ++k) {
+      const double ang = 2.0 * M_PI * k * tt;
+      const double ca = std::cos(ang), sa = std::sin(ang);
+      sf += A.mld_a[hi][k - 1] * ca + A.mld_b[hi][k - 1] * sa;
+      sd += 2.0 * M_PI * k * (-A.mld_a[hi][k - 1] * sa + A.mld_b[hi][k - 1] * ca);
+    }
+    *f = sf; *dfdt = sd;
+  };
+
   auto add_flux = [&](int from, int to, double F, double alpha13,
                       bool alpha13_signed = false) {
     if (F == 0.0) return;
@@ -395,6 +419,29 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     const int base = hi * NPH;
     const int iatm = base, ilef = base + 1, iwod = base + 2;
     const int isf = base + 3, iss = base + 4, iml = base + IML;
+
+    // ---- SEASONAL MIXED LAYER: this hemisphere's geometry NOW -------
+    // Twin of the block in R/model.R. `dzl`/`dzml` are rebuilt from A every
+    // iteration, never assigned over A: the hemispheres are in ANTIPHASE (NH
+    // deepest Feb, SH Aug), so state leaking across iterations would give the
+    // SH the NH's winter. With the mechanism off these ARE A's own values and
+    // every number below is bit-identical to the pre-round-6 core.
+    double dzl[NL + 1], dzml[NL], ml_mass, h_ml_t, dh_ml_dt;
+    for (int i = 0; i <= NL; ++i) dzl[i] = A.dz[i];
+    for (int i = 0; i < NL; ++i)  dzml[i] = A.dz_mid[i];
+    ml_mass = A.ml_mass_kg[hi]; h_ml_t = A.dz[0]; dh_ml_dt = 0.0;
+    if (A.seas_ml != 0) {
+      double f, dfdt;
+      mld_eval(hi, t, &f, &dfdt);
+      h_ml_t   = A.dz[0] * f;            // m, mean-preserving by construction
+      dh_ml_dt = A.dz[0] * dfdt;         // m/yr, > 0 deepening
+      dzl[1]   = dzl[1] + (dzl[0] - h_ml_t);   // layer 1 absorbs the excursion
+      dzl[0]   = h_ml_t;
+      // dz[0] + dz[1] is conserved, so dz_mid[0] is INVARIANT; only dz_mid[1]
+      // moves. Recomputed in full rather than patched, so it cannot drift.
+      for (int i = 0; i < NL; ++i) dzml[i] = (dzl[i] + dzl[i + 1]) / 2.0;
+      ml_mass = A.ml_mass_kg[hi] * f;    // mass tracks thickness
+    }
 
     const double chi = y[IX(iatm, C)] / A.gtc_per_ppm_hemi;
 
@@ -531,7 +578,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // not a second ocean column; reaches the atmosphere through the existing
     // evasion limb and is therefore ocean-signatured). A sine peaks a quarter
     // cycle after its zero crossing, so peak month M is phase M/12 - 1/4.
-    const double dic_ml = y[IX(iml, C)] * A.mol_per_GtC / A.ml_mass_kg[hi]
+    const double dic_ml = y[IX(iml, C)] * A.mol_per_GtC / ml_mass
       + ((P.seas_drivers > 0 && hi == 1 && P.ent_seas_amp_SH != 0.0)
          ? P.ent_seas_amp_SH * 1e-6
            * std::sin(2.0 * M_PI * (t - (ENT_SEAS_PEAK_MO / 12.0 - 0.25)))
@@ -576,11 +623,31 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       const int a = base + IML + kk;
       const int b = base + IML + kk + 1;
       for (int tr = 0; tr < 3; ++tr) {
-        const double Ft = A.kz_int[kk] * (y[IX(a, tr)] / A.dz[kk] - y[IX(b, tr)] / A.dz[kk + 1])
-                          / A.dz_mid[kk];
+        const double Ft = A.kz_int[kk] * (y[IX(a, tr)] / dzl[kk] - y[IX(b, tr)] / dzl[kk + 1])
+                          / dzml[kk];
         dy[IX(a, tr)] -= Ft;
         dy[IX(b, tr)] += Ft;
       }
+    }
+
+    // ---- SEASONAL ENTRAINMENT / DETRAINMENT -- twin of R/model.R -----
+    // A deepening mixed layer swallows layer-1 water AT LAYER-1
+    // CONCENTRATIONS; a shoaling one leaves its own water behind at ML
+    // concentrations. Same form as the w_up limbs below: a thickness rate over
+    // the SOURCE box's thickness.
+    // ⛔ TWO EXPLICIT LIMBS, NOT ONE SIGNED FLUX -- the reverse limb draws from
+    // a DIFFERENT box, so a signed flux would take its isotopic ratio from the
+    // wrong source half the year, and add_flux's antisymmetry hides that from
+    // every conservation gate (the 2026-08-25e seasonal-NEP bug).
+    // ⭐ alpha13 = 1 DELIBERATELY: entrainment is physical transport, not a
+    // fractionating exchange, so add_flux takes 13C AND 14C from the source box
+    // for free. Adding a 14C fractionation here would double-count ~17 permil.
+    if (dh_ml_dt > 0.0) {
+      add_flux(base + IML + 1, iml,
+               y[IX(base + IML + 1, C)] * dh_ml_dt / dzl[1], 1.0);   // entrainment
+    } else if (dh_ml_dt < 0.0) {
+      add_flux(iml, base + IML + 1,
+               y[IX(iml, C)] * (-dh_ml_dt) / dzl[0], 1.0);           // detrainment
     }
 
     // the biological pump: mixed layer -> every interior box, TWO LIMBS that
@@ -612,9 +679,9 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       for (int kk = 0; kk < NL; ++kk) {
         const int a = base + IML + kk;
         const int b = base + IML + kk + 1;
-        add_flux(b, a, P.w_up * y[IX(b, C)] / A.dz[kk + 1], 1.0);
+        add_flux(b, a, P.w_up * y[IX(b, C)] / dzl[kk + 1], 1.0);
       }
-      add_flux(iml, base + IML + NL, P.w_up * y[IX(iml, C)] / A.dz[0], 1.0);
+      add_flux(iml, base + IML + NL, P.w_up * y[IX(iml, C)] / dzl[0], 1.0);
     }
 
     // outcropping: the non-local limb runs UPWARD -- deep box to mixed layer in
@@ -623,11 +690,11 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // arrives at the surface and what happens to the deep 14C age.
     if (P.w_out[hi] > 0.0) {
       const int ideep = base + IML + NL;
-      add_flux(ideep, iml, P.w_out[hi] * y[IX(ideep, C)] / A.dz[NL], 1.0);
+      add_flux(ideep, iml, P.w_out[hi] * y[IX(ideep, C)] / dzl[NL], 1.0);
       for (int kk = 0; kk < NL; ++kk) {
         const int a = base + IML + kk;
         const int b = base + IML + kk + 1;
-        add_flux(a, b, P.w_out[hi] * y[IX(a, C)] / A.dz[kk], 1.0);
+        add_flux(a, b, P.w_out[hi] * y[IX(a, C)] / dzl[kk], 1.0);
       }
     }
 
@@ -641,15 +708,15 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
         if (P.conv_descent == 1) {
           for (int kk = 0; kk < s_sink; ++kk)
             add_flux(base + IML + kk, base + IML + kk + 1,
-                     w * y[IX(base + IML + kk, C)] / A.dz[kk], 1.0);
+                     w * y[IX(base + IML + kk, C)] / dzl[kk], 1.0);
         } else {
           add_flux(iml, base + IML + s_sink,
-                   w * y[IX(iml, C)] / A.dz[0], 1.0);
+                   w * y[IX(iml, C)] / dzl[0], 1.0);
         }
       } else {
         for (int kk = 0; kk < s_sink; ++kk)
           add_flux(base + IML + kk + 1, base + IML + kk,
-                   w * y[IX(base + IML + kk + 1, C)] / A.dz[kk + 1], 1.0);
+                   w * y[IX(base + IML + kk + 1, C)] / dzl[kk + 1], 1.0);
       }
     }
 
@@ -715,7 +782,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
         const double conc_hd = y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd);
         for (int kk = kfrom - 1; kk < NL; ++kk) {
           const int ik = base + IML + 1 + kk;
-          add_flux(ihd, ik, A.a_ls[hi] * A.dz[kk + 1] / P.tau_q * conc_hd, 1.0);
+          add_flux(ihd, ik, A.a_ls[hi] * dzl[kk + 1] / P.tau_q * conc_hd, 1.0);
           add_flux(ik, ihd, y[IX(ik, C)] / P.tau_q, 1.0);
         }
       }
@@ -766,12 +833,17 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     const double Q   = P.q_conv * SV_TO_M3YR;
     const int deep_dn = h_down * NPH + IML + s_sink;
     const int deep_up = h_up   * NPH + IML + s_sink;
+    // ⚠ OUTSIDE the hemisphere loop, so `dzl` is not available and would be the
+    // WRONG hemisphere's anyway: this needs the UP hemisphere's own mixed-layer
+    // thickness at time t. Twin of the .h_up branch in R/model.R.
+    double h_up_ml = A.dz[0];
+    if (A.seas_ml != 0) { double f, d_; mld_eval(h_up, t, &f, &d_); h_up_ml = A.dz[0] * f; }
     add_flux(deep_dn, deep_up,
              Q * y[IX(deep_dn, C)] / (A.a_oc[h_down] * A.dz[s_sink]), 1.0);
     const int ml_dn = h_down * NPH + IML;
     const int ml_up = h_up   * NPH + IML;
     add_flux(ml_up, ml_dn,
-             Q * y[IX(ml_up, C)] / (A.a_oc[h_up] * A.dz[0]), 1.0);
+             Q * y[IX(ml_up, C)] / (A.a_oc[h_up] * h_up_ml), 1.0);
   }
 
   // 14C sources and decay
@@ -802,6 +874,11 @@ static Aux unpack_aux(const List& a) {
   v = a["dz"];         for (int i = 0; i <= NL; ++i) A.dz[i] = v[i];
   v = a["dz_mid"];     for (int i = 0; i < NL; ++i)  A.dz_mid[i] = v[i];
   v = a["kz_int"];     for (int i = 0; i < NL; ++i)  A.kz_int[i] = v[i];
+  A.seas_ml = a["seas_ml"];
+  v = a["mld_a"];
+  for (int h = 0; h < 2; ++h) for (int k = 0; k < 6; ++k) A.mld_a[h][k] = v[h * 6 + k];
+  v = a["mld_b"];
+  for (int h = 0; h < 2; ++h) for (int k = 0; k < 6; ++k) A.mld_b[h][k] = v[h * 6 + k];
   v = a["dic0"];       A.dic0[0] = v[0];       A.dic0[1] = v[1];
   v = a["revelle0"];   A.revelle0[0] = v[0];   A.revelle0[1] = v[1];
   v = a["pco2_0"];     A.pco2_0[0] = v[0];     A.pco2_0[1] = v[1];
