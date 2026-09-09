@@ -220,6 +220,15 @@ struct Par {
   // are PRECOMPUTED here on the 12 month midpoints -- exactly the definition
   // ccx_seas_norms() uses in R; a continuous-integral norm would break parity.
   int    seas_drivers;
+  // ⛔ THE SEASONAL MIXED LAYER'S GATE, RESOLVED IN R (2026-09-09t). Until
+  // today this core gated it on A.seas_ml -- i.e. on whether `aux` carried
+  // harmonics -- while R gated on ccx_seas_ml_on(p). ccx_spinup() builds
+  // `aux` from the un-zeroed `p` and only THEN sets seas_drivers = 0, so the
+  // zeroing was honoured by R and IGNORED here, and the "aseasonal"
+  // preindustrial equilibrium carried ~1940 GtC less ocean carbon. The gate
+  // is now computed ONCE, by the same function the R core uses, and shipped.
+  // A.seas_ml survives only as a DATA-PRESENCE conjunct.
+  int    seas_ml_on;
   double seas_T_amp[2], seas_lag_p[2];   // lag per hemisphere since 2026-08-31
   double sst_seas_amp[2];
   // Southern-Ocean entrainment channel (2026-08-27g, version 4a). SH only --
@@ -430,7 +439,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     for (int i = 0; i <= NL; ++i) dzl[i] = A.dz[i];
     for (int i = 0; i < NL; ++i)  dzml[i] = A.dz_mid[i];
     ml_mass = A.ml_mass_kg[hi]; h_ml_t = A.dz[0]; dh_ml_dt = 0.0;
-    if (A.seas_ml != 0) {
+    if (A.seas_ml != 0 && P.seas_ml_on != 0) {
       double f, dfdt;
       mld_eval(hi, t, &f, &dfdt);
       h_ml_t   = A.dz[0] * f;            // m, mean-preserving by construction
@@ -837,7 +846,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // WRONG hemisphere's anyway: this needs the UP hemisphere's own mixed-layer
     // thickness at time t. Twin of the .h_up branch in R/model.R.
     double h_up_ml = A.dz[0];
-    if (A.seas_ml != 0) { double f, d_; mld_eval(h_up, t, &f, &d_); h_up_ml = A.dz[0] * f; }
+    if (A.seas_ml != 0 && P.seas_ml_on != 0) { double f, d_; mld_eval(h_up, t, &f, &d_); h_up_ml = A.dz[0] * f; }
     add_flux(deep_dn, deep_up,
              Q * y[IX(deep_dn, C)] / (A.a_oc[h_down] * A.dz[s_sink]), 1.0);
     const int ml_dn = h_down * NPH + IML;
@@ -955,6 +964,7 @@ static Par unpack_par(const List& p) {
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];
   P.seas_drivers = (int) p["seas_drivers"];
+  P.seas_ml_on   = (int) p["seas_ml_on"];   // resolved by ccx_cpp_par()
   P.seas_T_amp[0] = p["seas_T_amp_NH"]; P.seas_T_amp[1] = p["seas_T_amp_SH"];
   // ccx_cpp_par() guarantees both fields are present, resolving absence through
   // ccx_seas_lag_p() -- the SAME function the R core uses. Do not add a

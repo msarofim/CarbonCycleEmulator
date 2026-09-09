@@ -108,6 +108,22 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
 }
 
 #' Parameters in the flat form the C++ unpacks
+#' Refuse a `p`/`aux` pair that disagrees about the seasonal mixed layer.
+#'
+#' ⛔ The 2026-09-09t defect had a mirror image: `p` says the mechanism is ON
+#' while `aux` was prepared from a list that said OFF, so `mld_a`/`mld_b` ship
+#' zero-filled and the core would run f = 0 -- a mixed layer of zero thickness --
+#' rather than error. `ccx_prepare()` builds `mld_coef` under the SAME predicate
+#' the gate now uses, so the two can only disagree when an `aux` is reused across
+#' a parameter change. That is worth a loud stop, not a silent zero.
+ccx_seas_ml_marshal_check <- function(p, aux) {
+  if (ccx_seas_ml_on(p) && is.null(aux$mld_coef))
+    stop("ccx: `p` says the seasonal mixed layer is ON (ccx_seas_ml_on) but `aux` ",
+         "carries no `mld_coef` -- this aux was prepared from a DIFFERENT parameter ",
+         "list. Rebuild it with ccx_prepare(p). (2026-09-09t: one mechanism, one gate.)")
+  invisible(TRUE)
+}
+
 ccx_cpp_par <- function(p) {
   # ⚠ RESOLVED THROUGH ccx_gamma_enso(), NOT with four literals here -- the same
   # rule seas_lag_p follows twenty lines down, and for the same reason: the R
@@ -125,6 +141,18 @@ ccx_cpp_par <- function(p) {
   # core as the nutrient-limited model rather than as garbage.
   p$pump_mode <- if (identical(p$pump_mode, "D")) 1L else 0L
   if (is.null(p$revelle_frozen)) p$revelle_frozen <- 0
+  # ⛔⛔ THE SEASONAL MIXED LAYER'S GATE, RESOLVED HERE AND NOWHERE ELSE
+  # (2026-09-09t). Until today the C++ gated it on `aux$mld_coef`'s PRESENCE
+  # while R gated on ccx_seas_ml_on(p) -- two gates for one mechanism. Because
+  # ccx_spinup() builds `aux` from the un-zeroed `p` and only THEN sets
+  # seas_drivers = 0, the zeroing was honoured by R and IGNORED by C++: every
+  # equilibrium solve runs through the C++ path, so the "aseasonal"
+  # preindustrial equilibrium was the one that balances a spurious entrainment
+  # limb frozen at the spinup epoch (-1940.2 GtC of ocean carbon at hilda31).
+  # SAME RULE AS gamma_enso ABOVE AND seas_lag_p BELOW: the predicate is
+  # computed by the function the R core itself calls, so the two cores cannot
+  # hold a second opinion about whether the mechanism is on.
+  p$seas_ml_on <- as.integer(ccx_seas_ml_on(p))
   # Volcanic diffuse-light fertilisation, added 2026-08-29 and ADOPTED at 0.25
   # the same day. Defaults to the SAME named constant ccx_default_params() uses,
   # so a hand-built parameter list cannot reach the core with a different
@@ -259,7 +287,7 @@ ccx_cpp_par <- function(p) {
       "gamma_enso_ocn_NH", "gamma_enso_ocn_SH",
       "seas_amp_NH", "seas_amp_SH",
       "seas_phase_NH", "seas_phase_SH",
-      "seas_drivers", "seas_T_amp_NH", "seas_T_amp_SH",
+      "seas_drivers", "seas_ml_on", "seas_T_amp_NH", "seas_T_amp_SH",
       "seas_lag_p_NH", "seas_lag_p_SH",
       "sst_seas_amp_NH", "sst_seas_amp_SH", "ent_seas_amp_SH",
       "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
@@ -317,6 +345,7 @@ ccx_cpp_forcing <- function(F) {
 #'   caller's `anyNA` -> -Inf guard must not double as a prior bound.
 ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
   ccx_load_cpp()
+  ccx_seas_ml_marshal_check(spin$params, spin$aux)
   ss <- ccx_resolve_substeps(substeps, spin$params, spin$grid)
   one <- function(nsub) {
     res <- .ccx_cpp_env$ccx_run_cpp(
@@ -393,6 +422,7 @@ ccx_deriv_fast <- function(y, t, p, forc, grid, aux) {
          "CCX_FORCING_COLS declares ", length(CCX_FORCING_COLS),
          ". The C++ indexes by position -- a mismatch reads past the buffer. ",
          "A column was appended to CCX_FORCING_COLS without extending this builder.")
+  ccx_seas_ml_marshal_check(p, aux)
   d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, ccx_cpp_par(p), f, ccx_cpp_aux(aux, grid))
   dimnames(d) <- dimnames(y)
   d

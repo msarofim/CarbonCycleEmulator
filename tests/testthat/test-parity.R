@@ -434,3 +434,74 @@ test_that("the two hemispheres are in ANTIPHASE in the C++ core, not swapped", {
   expect_false(mo(o$ml_C_NH) == mo(o$ml_C_SH))
 })
 
+
+# =====================================================================
+# ⛔⛔ THE MUTATE-AFTER-PREPARE PARITY TESTS (2026-09-09t)
+#
+# THE DEFECT THESE EXIST FOR. The seasonal mixed layer was gated on TWO
+# different objects: R on `ccx_seas_ml_on(p)` (which requires seas_drivers > 0),
+# C++ on `as.integer(!is.null(aux$mld_coef))` -- a function of `aux` ALONE.
+# `ccx_spinup()` builds `aux` from the un-zeroed `p` and only THEN sets
+# seas_drivers = 0, so the zeroing was honoured by R and IGNORED by C++, and
+# every equilibrium solve runs through the C++ path. The "aseasonal"
+# preindustrial equilibrium came back carrying 1940.2 GtC less ocean carbon,
+# and P10/P11/P12/P1c were all produced on top of it.
+#
+# ⭐ WHY EVERY EXISTING PARITY TEST WAS BLIND TO IT: they compare the two cores
+# at ONE (p, aux) pair. This bug needs `p` MUTATED AFTER ccx_prepare() -- which
+# is exactly, and only, what ccx_spinup() does. A parity test that never mutates
+# `p` after building `aux` verifies that the cores agree about a configuration;
+# it cannot verify that they agree about WHAT THE CONFIGURATION IS.
+#
+# ⚠ MUTATION-TESTED 2026-09-09t by restoring the pre-fix gate in ccx_cpp_par()
+# (dropping the seas_drivers conjunct): tests 1 and 2 FAIL, test 3 passes (it
+# guards the mirror case, which that mutation does not touch -- test 3's own
+# mutation is removing the ccx_seas_ml_marshal_check() call, under which it fails).
+# =====================================================================
+
+# The forcing a single-step deriv comparison needs: a named list of SCALARS,
+# the convention used throughout this file -- not a ccx_build_forcing() table.
+.seas_ml_forc <- function(prod_c14)
+  list(e_foss = list(NH = 8, SH = 0.4), e_luc = list(NH = 0.6, SH = 0.5),
+       cum_luc = list(NH = 120, SH = 80),
+       gmst = 1.1, enso = 0.7, c14_bomb = 1200, c14_nuclear = 40,
+       c14_cosmo = prod_c14, d13c_foss = -27.6)
+
+test_that("mutating p after ccx_prepare() does not desync the two cores", {
+  skip_if_no_cpp()
+  p   <- pf$p; p$seas_drivers <- 1; p$seas_ml <- 1
+  aux <- ccx_prepare(p)                 # aux built with the mechanism ON
+  expect_false(is.null(aux$mld_coef))
+  p0  <- p; p0$seas_drivers <- 0        # ...then p says OFF, as ccx_spinup does
+  expect_false(ccx_seas_ml_on(p0))
+
+  sp   <- ccx_spinup(p0)
+  forc <- .seas_ml_forc(sp$prod_c14)
+  # ⭐ THE POINT: `aux` says ON, `p0` says OFF. Both cores must obey `p0`.
+  dR <- unlist(ccx_deriv(sp$y, 1980.5, p0, forc, aux$grid, aux))
+  dC <- unlist(ccx_deriv_fast(sp$y, 1980.5, p0, forc, aux$grid, aux))
+  expect_lt(max(abs(dR - dC)), 1e-9)    # pre-fix: ~2.3e3 GtC/yr on the ML rows
+})
+
+test_that("the spinup equilibrium does not depend on seas_ml -- it is aseasonal", {
+  skip_if_no_cpp()
+  # ⭐ THE OUTCOME TEST, stated in the quantity that was wrong. ccx_spinup()
+  # zeroes seas_drivers, so its equilibrium is DEFINED to be the aseasonal one
+  # and seas_ml must not move it AT ALL. Pre-fix: -1940.2 GtC of ocean carbon.
+  p  <- pf$p; p$seas_drivers <- 1
+  ys <- lapply(c(0, 1), function(sm) { q <- p; q$seas_ml <- sm; ccx_spinup(q)$y })
+  expect_identical(ys[[1]], ys[[2]])
+})
+
+test_that("a p/aux pair that disagrees about seas_ml is REFUSED, not run silently", {
+  skip_if_no_cpp()
+  # The mirror image: `aux` prepared OFF while `p` says ON would ship zero-filled
+  # harmonics and run f = 0 -- a mixed layer of zero thickness -- rather than error.
+  p_off <- pf$p; p_off$seas_drivers <- 1; p_off$seas_ml <- 0
+  aux   <- ccx_prepare(p_off)
+  expect_true(is.null(aux$mld_coef))
+  p_on  <- p_off; p_on$seas_ml <- 1
+  sp    <- ccx_spinup(p_off)
+  forc  <- .seas_ml_forc(sp$prod_c14)
+  expect_error(ccx_deriv_fast(sp$y, 1980.5, p_on, forc, aux$grid, aux), "mld_coef")
+})

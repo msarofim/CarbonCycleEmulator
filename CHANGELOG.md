@@ -2,6 +2,58 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09u — ✅ **THE BLOCKER IS FIXED AND THE CONTAMINATED OUTPUTS ARE QUARANTINED. ONE MECHANISM, ONE GATE: the seasonal mixed layer's predicate is now resolved ONCE, in R, and both cores read it.**
+
+**THE FIX.** `ccx_cpp_par()` now ships `p$seas_ml_on <- as.integer(ccx_seas_ml_on(p))` — the
+predicate computed by **the same function the R core itself calls** — through `Par`, and both C++
+gate sites (`src/ccx_core.cpp:442` the geometry/entrainment block, `:849` the conveyor's up-hemisphere
+mixed layer) now read `A.seas_ml != 0 && P.seas_ml_on != 0`. **`A.seas_ml` survives only as a
+DATA-PRESENCE conjunct.** This is the same rule `gamma_enso` and `seas_lag_p` already follow, and the
+file already stated the reason: *"a second opinion about absence is exactly the defect that cost
+0.647 GtC/yr on 2026-08-30."*
+⚠ **`seas_ml_on` also had to be added to `ccx_cpp_par()`'s CURATED RETURN LIST** — the function ends
+in an explicit `p[c(...)]` subset, so injecting the field without naming it there reached the core as
+an out-of-bounds read, not as a value. A curated marshalling list is a second place absence is
+decided; both had to be edited.
+
+⭐ **THE MIRROR CASE IS NOW REFUSED, LOUDLY.** `ccx_seas_ml_marshal_check(p, aux)` (`R/cpp.R:119`,
+called from `ccx_run_fast` and `ccx_deriv_fast`) stops when `p` says ON while `aux` carries no
+`mld_coef` — which would otherwise ship zero-filled harmonics and run **f = 0, a mixed layer of zero
+thickness**, rather than error. `ccx_prepare()` is the ONLY builder of `mld_coef` (`R/model.R:2867`)
+and both R consumers sit behind the same predicate, so this closes the only desync route.
+
+✅ **VERIFIED IN THE QUANTITY THAT WAS WRONG.** The spinup equilibrium is now **bit-identical**
+regardless of `seas_ml` (`max|Δ|` over all 36×3 state = **0**), and it lands on the `seas_ml = 0`
+value **37 894.163 GtC** — the correct aseasonal equilibrium, not a compromise between the two.
+Pre-fix it was **35 953.939, a −1 940.224 GtC** displacement.
+
+⭐ **THREE REGRESSION TESTS, AND THEY ARE MUTATION-TESTED** (`tests/testthat/test-parity.R`):
+(1) **mutate `p` AFTER `ccx_prepare()`** and demand the cores still agree — **the test the whole
+existing parity suite was structurally blind to**, because it compares ONE `(p, aux)` pair while this
+bug requires `p` mutated after `aux` is built, which is exactly and only what `ccx_spinup()` does;
+(2) the **spinup equilibrium must not depend on `seas_ml` at all** (the outcome test, stated in the
+quantity that moved); (3) a disagreeing `p`/`aux` pair is **refused**, not run silently.
+✅ **BOTH MUTATIONS RUN AND CONFIRMED, not merely named.** **Mutation A** — restore the pre-fix gate
+by dropping the `seas_drivers` conjunct — gives **FAIL 2 / PASS 76**, failing exactly
+`test-parity.R:483` (1) and `:493` (2) while (3) correctly survives, since that mutation does not
+touch the marshal check. **Mutation B** — remove the `ccx_seas_ml_marshal_check()` call from
+`ccx_deriv_fast` — gives **FAIL 1 / PASS 77**, failing exactly `:506` (3). ⇒ **each test fails for
+its own reason and no other**, which is what separates three gates from one gate and two passengers.
+⛔ **AND THE FIRST DRAFT OF TWO OF THEM WAS NOT A GATE AT ALL** — they passed a `ccx_build_forcing()`
+TABLE where a single-step deriv wants a named list of SCALARS, so they ERRORED under mutation instead
+of failing, which is a broken test wearing a passing mutation's clothes. Rewritten to the file's own
+`.seas_ml_forc()` convention and re-mutated. **A mutation test that ERRORS has not been passed.**
+
+⛔ **QUARANTINE: `outputs/quarantine/20260909t_seas_ml_spinup_leak/`** (README names the bug, the
+files, and the canonical replacement path). **Nine files, five diagnostics** — `p12_compensator`,
+`p12_streams` (derived from p12's rds, so it inherits), `p1c_dpco2`, `seas_ml_probe`,
+`seas_ml_convergence`. **NOT quarantined: `seasonal_ml_geometry_20260909.*`** — pure geometry,
+verified to contain no `ccx_spinup`/`ccx_run` call, so the P8 bound and the layer-1 arithmetic in it
+stand. ⚠ **"It ran in the R core" is NOT an exemption**: every one of these takes its initial state
+from `ccx_spinup()`, which uses the C++ path regardless of which core then integrates.
+⛔ **NOT YET REGENERATED — that is the next session's first task**, and until then P10/P11/P12/P1c
+have **no** canonical values.
+
 ## 2026-09-09t — ⛔⛔ **WHOLE-MODEL CODE REVIEW (Marcus's 09-09s instruction). THE REFIT IS BLOCKED: `ccx_spinup()` SOLVES THE PREINDUSTRIAL EQUILIBRIUM WITH THE SEASONAL MIXED LAYER ON, BECAUSE THE TWO CORES GATE `seas_ml` ON DIFFERENT OBJECTS. EVERY `seas_ml = 1` RESULT OF 09-09 RESTS ON IT.**
 
 `notes/review_2026-09-09t_whole_model_code_review.md`. Nothing fixed — the instruction was review
