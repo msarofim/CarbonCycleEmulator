@@ -88,17 +88,49 @@ BOMB_T2_DROP_FIRST  <- as.logical(as.integer(Sys.getenv("CCX_BOMB_DROP_FIRST", "
                                 # because it decays a 1965-69 slope back through
                                 # the peak. Checked 2026-09-08,
                                 # calibration/diag_bomb_delivery_tail.R.
-BOMB_T2_HIGH_BIAS   <- as.numeric(Sys.getenv("CCX_BOMB_T2_BIAS", "1.20"))
+BOMB_T2_HIGH_BIAS   <- as.numeric(Sys.getenv("CCX_BOMB_T2_BIAS", "1.0"))
                                 # Tans p.133, his SECOND caveat on this table:
                                 # "Telegadas' aircraft data appear on average
                                 # ~20 % too high" against ground-based CO2
                                 # collections and against Ergin et al. (1970).
-                                # Table 2 is DIVIDED by this. Ruled APPLIED by
-                                # Marcus 2026-09-09; it was unapplied from this
-                                # file's creation through 6f2870a. The check
-                                # that surfaced it:
-                                # calibration/diag_bomb_delivery_tail.R.
-                                # CCX_BOMB_T2_BIAS=1 recovers the old behaviour.
+                                # Table 2 is DIVIDED by this.
+                                # ⛔⛔ RULED APPLIED (1.20) by Marcus 2026-09-09,
+                                # then REVERTED TO 1.0 by Marcus 2026-09-09f on
+                                # the evidence the application itself produced.
+                                # The mechanism is KEPT and is one env var away
+                                # (CCX_BOMB_T2_BIAS=1.20); only the DEFAULT moved.
+                                # WHY IT WAS REVERTED -- four measurements, of
+                                # which the third is the one that decided it:
+                                #  1. -92.74 loglik at hilda31 (fixed vector).
+                                #  2. gate 5's newly-ruled TROUGH flips PASS ->
+                                #     FAIL (z -1.80 -> -2.55); a SOFT flip.
+                                #  3. ⭐ THE COST IS NOT WHERE THE FORCING MOVED.
+                                #     Localised per year, 54 % of it (-49.9, of
+                                #     which the SH is -45.4) falls AFTER 1970 --
+                                #     OUTSIDE the bomb window, at sigma ~7 permil
+                                #     not 25, in the years Graven and Hua AGREE
+                                #     to 2-3 permil. The de-biasing degrades the
+                                #     fit in the BEST-observed part of the record,
+                                #     and deepens an SH deficit already at
+                                #     z +4.31 in 1971 BEFORE it was applied.
+                                #     calibration/diag_debias_penalty_by_year.R
+                                #  4. Budget-closing lambda 0.1996 -> 0.3490 /yr,
+                                #     so gross air-sea exchange at Tans' own
+                                #     Broecker flux covers 75 % -> 43 % of it --
+                                #     DATA.md sec.9 names that agreement as the
+                                #     main evidence the closure step is sound.
+                                # ⚠ WHAT DID *NOT* DECIDE IT: the -92.7 is NOT
+                                # an artifact of an over-tight target. The bomb
+                                # window is scored at sigma_eff 25.7 permil
+                                # (LIK_D14C_REP_BOMB 25 + fitted sigma_d14c),
+                                # ~7x Hua's own sd, and widening it to the full
+                                # Graven-Hua spread removes only 21-25 % of the
+                                # cost. calibration/diag_bomb_rep_sensitivity.R
+                                # ⚠ AND THE CAVEAT REMAINS TANS' OWN. Reverting
+                                # does not dispute that Telegadas may run ~20 %
+                                # high; it declines to route that disagreement
+                                # into the pre-1963 troposphere, which is the
+                                # only channel available and is unobserved.
                                 # Table 1 is NOT scaled: it is ground-based, and
                                 # this script never reads it anyway.
                                 # It does NOT change the 102 kmol total (Naegler

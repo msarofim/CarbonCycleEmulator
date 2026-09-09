@@ -46,7 +46,7 @@ BDT_DIVISOR <- if (is.null(prov0$t2_high_bias_divisor)) 1 else prov0$t2_high_bia
 t2 <- read.csv(BDT_T2_FILE, comment.char = "#")
 t2$kmol <- t2$inventory_1e26_atoms * 1e26 / BDT_NA_AVOGADRO / 1000 / BDT_DIVISOR
 cat(sprintf("Table 2 divisor in force: %.3f%s\n", BDT_DIVISOR,
-            if (BDT_DIVISOR == 1) " (de-biasing OFF)" else " (Tans high-bias, RULED APPLIED 2026-09-09)"))
+            if (BDT_DIVISOR == 1) " (de-biasing OFF -- RULED APPLIED then REVERTED to 1.0, Marcus 2026-09-09f)" else " (Tans high-bias ON; the DEFAULT is 1.0 since 2026-09-09f)"))
 cat(sprintf("Table 2: %d rows, %.3f to %.3f; last row label %-8s (a MONTH, not a quarter)\n",
             nrow(t2), t2$t_mid[1], t2$t_mid[nrow(t2)], t2$quarter[nrow(t2)]))
 
@@ -118,7 +118,7 @@ cat("\n--- Tans' OTHER caveat (p.133), currently unapplied anywhere ---\n")
 for (s in c(1, 1 / BDT_TANS_HIGH_BIAS))
   cat(sprintf("  Table 2 scaled x%.3f: I_t0 = %6.2f -> pre-1963.04 delivery %.1f %% of the total\n",
               s, impl * s, 100 * (BDT_TOTAL_REF - impl * s) / BDT_TOTAL_REF))
-cat(sprintf("  => a uniform %.0f %% de-biasing moves the pre/post-1963 SPLIT by %.1f points. A RULING, not a check.\n",
+cat(sprintf("  => a uniform %.0f %% de-biasing moves the pre/post-1963 SPLIT by %.1f points. RULED APPLIED 2026-09-09, then REVERTED to 1.0 on 09-09f (the cost falls post-1970, where the compilations agree).\n",
             100 * (BDT_TANS_HIGH_BIAS - 1),
             100 * ((BDT_TOTAL_REF - impl / BDT_TANS_HIGH_BIAS) - (BDT_TOTAL_REF - impl)) / BDT_TOTAL_REF))
 
@@ -150,4 +150,4 @@ saveRDS(list(table2 = t2, impl = impl, raw = raw, documented_backextrap = bx,
              readings = c(r1 = r1_pass, r2 = r2_pass, r3 = r3_pass), date = Sys.time()),
         BDT_OUT)
 cat(sprintf("\nsaved %s\n", BDT_OUT))
-cat("⛔ Nothing adopted. The de-biasing and the tau constant are RULINGS for Marcus.\n")
+cat("⛔ Nothing adopted here. The de-biasing is RULED AND CLOSED (applied 2026-09-09, REVERTED to 1.0 on 09-09f); the tau constant remains a RULING for Marcus.\n")

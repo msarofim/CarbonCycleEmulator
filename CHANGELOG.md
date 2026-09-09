@@ -2,6 +2,33 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09f — ⛔⛔ **RULING 4 REVERTED (Marcus). `BOMB_T2_HIGH_BIAS` default 1.20 → 1.0; the rebuilt product is BIT-IDENTICAL to `main` on every data column. The mechanism is KEPT, one env var away.**
+
+**Marcus:** *"So it seems like the factor of 1.2 creates inconsistencies with the independent compilations? If so, then revert to 1.0."*
+
+⚠ **The premise was corrected before acting, and the corrected version still supports the revert.** The ÷1.20 does **not** create an inconsistency *between* Graven and Hua — those two disagree with each other in 1963–65 either way, and the divisor does not touch that. What it does is make the **MODEL** fit the observed Δ¹⁴C record worse, and that cost lands **post-1970, in the years where the two compilations AGREE to 2–3 ‰** — i.e. it degrades agreement with the best-established part of the observations (09-09e). That, the trough flip, and the λ/Broecker degradation, against only Tans' own caveat in favour, is the case.
+
+**THE REVERT.** `data-raw/build_bomb_c14_source.R`: `BOMB_T2_HIGH_BIAS` default **1.20 → 1.0**, with the full four-measurement rationale written into the constant's own comment block so it cannot drift from the decision. ⭐ **The MECHANISM IS KEPT** — `CCX_BOMB_T2_BIAS=1.20 Rscript data-raw/build_bomb_c14_source.R` reproduces the applied arm exactly. Only the DEFAULT moved.
+
+**VERIFIED AGAINST `main`, not assumed.** The rebuilt product is **bit-identical to `main` on all four data columns** (`t`, `year`, `month`, `shape_per_yr`; max |diff| **0.000e+00**, `identical()` TRUE for each). Every provenance number returns: burden **65.9234** kmol, τ_tail **6.8746**, λ **0.1996 /yr**, pre-1963 delivered **36.0766** kmol, split **35 %**. ⭐ The ONLY difference from `main` is that the provenance now records `t2_high_bias_divisor = 1.0` **explicitly**, where `main` has no field at all — the divisor is now a stated choice rather than an absent one, which is what `test-bomb-source-provenance.R` exists to keep honest.
+
+**CONSEQUENCES, re-measured at 1.0:**
+
+| gate | de-biased (÷1.20) | **reverted (1.0)** |
+|---|---|---|
+| gate 5 NH trough | 24.9, z **−2.55 FAIL** | **50.5, z −1.80 PASS** |
+| gate 5 `sh_t` / `lag` | +0.76 / −1.43 | +1.47 / −0.94 |
+| gate 5 first-peak z | +0.0008 | +0.0008 |
+| **gate GL** | z −8.67 FAIL | **z −8.67 FAIL — UNCHANGED** |
+
+⭐ **Gate GL is DIVISOR-INVARIANT** (the bomb ¹⁴C source does not move the δ¹³C gradient), so **every ruling-3 number recorded in 09-09b stands as measured** and needed no correction. ⚠ Note `sh_t` was *better* under the de-biasing (+0.76 vs +1.47); it passes either way, and it is recorded rather than buried.
+
+**QUARANTINE — `outputs/quarantine/20260909_bomb_t2_debias/` + README**, per the standing rule (never delete pre-change outputs; never leave them at canonical paths). Moved: `gate5_bimodal_20260909.{rds,log}`, `tg_gradient_level_gate_20260909.rds`, `bomb_delivery_tail_20260909.{rds,log}` — all **single-arm results on a different model input**. ⛔ **NOT quarantined, deliberately:** `bomb_debias_impact`, `bomb_rep_sensitivity`, `debias_ocean_inventory_power`, `debias_penalty_by_year` (all carry **both arms by construction**) and `graven_vs_hua` (pure observation, no model). Those are **the provenance of the decision** and belong at canonical paths. Canonical replacements regenerated at 1.0.
+
+**⚠ WHAT THE REVERT DOES NOT CLAIM.** It does not dispute Tans' caveat that Telegadas may run ~20 % high — that caveat is his own and stands. It declines to route the Telegadas-vs-Naegler&Levin disagreement **into the pre-1963 troposphere**, which is the only channel available to it and is the least observed part of the record. And it does **not** rest on the −92.7 being an artifact of an over-tight target: 09-09d measured that it is not.
+
+**Suite back to the 3 pre-existing failures** (`test-alpha-as.R:116,117`, `test-seas-lag-split.R:199`); the two ruling-4 provenance guards `test-enso-demean.R:144,162` go GREEN, which is exactly what they were written to report. **No refit is owed. `hilda31` is canonical again and every stored logpost is valid.**
+
 ## 2026-09-09e — ⭐⭐ **The −92.7 falls MOSTLY AFTER 1970, in the BEST-observed part of the record — not in the pre-1963 dump, as I had said twice the same day. And the model was ALREADY 4.3σ out there before the de-biasing.**
 
 `calibration/diag_debias_penalty_by_year.R` (+ `.rds`). Per-year loglik contributions to `d14c_NH` / `d14c_SH` under both forcing arms, reconstructed exactly as `R/likelihood.R` scores them. ⭐ **SELF-CHECKED: the per-year sums reproduce `ccx_loglik()`'s own stream totals exactly** — without that pin this is a second copy of an estimator, free to drift silently.
