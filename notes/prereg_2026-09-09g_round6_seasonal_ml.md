@@ -256,12 +256,51 @@ if a future mode file sets `h_hs = 0`.
   the mechanism adds 2 limbs, so the reassociation bound is `n_terms × eps × throughput`.
   Until then `R/cpp.R` **STOPS** rather than silently running the aseasonal ML — parity cannot see
   a run nobody compares.
-- **P12 ⚠ THE COMPENSATOR MUST BECOME REDUNDANT — OWED.** If (A) is the physics `ent_seas_amp_SH`
-  was standing in for, then refitting with **both** active must drive the compensator **toward
-  zero**. If instead it stays large, (A) is an ADDITION to the shim rather than its **replacement**,
-  and retiring the parameter would not be justified. ⇒ this is the test that distinguishes "one
-  mechanism" from "two", and it is cheap: profile `ent_seas_amp_SH` at the canonical with
-  `seas_ml = 1`.
+- **P12 ✅ THE COMPENSATOR MUST BECOME REDUNDANT — EXECUTED, PASSES, and it found more than it
+  was asked.** `calibration/diag_p12_compensator_redundant.R` + `diag_p12_streams.R`.
+  ⛔ **P12 AS WRITTEN WAS NOT TESTABLE BY A REFIT, and that had to be caught first**:
+  `ent_seas_amp_SH` is `tr = "log"` with a lognormal prior centred 10.95, so **0 is unrepresentable
+  in the encoded space and has prior probability ZERO** — a refit can never reach it and a logpost
+  can never favour it ⇒ [[runnable_is_not_encodable]]. ⭐ But **0 IS representable in the MODEL**
+  (`R/model.R` skips the shim at exactly 0), so a **LIKELIHOOD PROFILE can visit the off state that
+  a refit cannot** — which makes the profile *more* informative here. **Scored on the likelihood,
+  never the logpost.** ⭐ One spinup served all 20 runs, **asserted not assumed** (max|diff| exactly
+  0): `seas_drivers = 0` at spinup switches both the shim and the mechanism off.
+
+  | | argmax `ent` | G = likelihood the compensator still BUYS |
+  |---|---|---|
+  | `seas_ml = 0` | **21.0** | **715.52** |
+  | `seas_ml = 1` | **8.0** | **116.58** |
+
+  ⇒ **G(on)/G(off) = 0.163**, and the preferred amplitude falls **21 → 8**. Arm 0 rises monotonically
+  across the grid; arm 1 has a clear **interior maximum at 8 and turns down** — the shape of genuine
+  partial substitution. ⇒ **PASS: retiring the parameter is supported.**
+
+  ⛔⛔ **AND THE BIG NUMBER BESIDE IT, WHICH THE VERDICT MUST NOT BURY: at each arm's own optimum
+  the mechanism is 647.7 log-units WORSE** (−2087.08 vs −1439.43). **The per-stream decomposition
+  says why, and it inverts the reading:**
+
+  | | SHIM (ent 0→21, `seas_ml` 0) | MECH (`seas_ml` 0→1, both at ent 0) |
+  |---|---|---|
+  | `co2_seasonal_SPO` | **+711.12** | **+518.47** |
+  | `co2_level_SPO` | −0.66 | **−265.76** |
+  | `co2_level_MLO` | +1.01 | **−248.62** |
+  | **TOTAL** | **+715.52** | **−48.71** |
+
+  ⭐ **The shim is a genuine seasonal-SPO compensator, not a general fudge** — **99.4 %** of its
+  value is `co2_seasonal_SPO` alone ⇒ option A is the **right class** of replacement.
+  ⭐⭐ **And the mechanism BUYS +518 on that very stream — 73 % of what the FITTED shim buys —
+  WITH NO FITTED AMPLITUDE.** That is the out-of-sample support criterion, and it is a far stronger
+  statement than P1's retired amplitude band ever made. It **pays −514 on the two CO₂ LEVEL rows**,
+  which is the whole of the net −48.7.
+  ⇒ ⭐ **THE MECHANISM IS NOT FAILING AT THE SEASONAL CYCLE. It is succeeding there and paying on
+  the MEAN CO₂ LEVEL** — the signature of the anthropogenic-uptake change **P10** already measured
+  (industrial NH drift 7.72 %, quiet window settled). **A level offset is the most REFITTABLE kind
+  of error** (`k_w`, `kz`, the pump, `fert_k`, all pinned at values tuned for the no-mechanism
+  configuration). Had it failed *on* the seasonal stream, no refit would help.
+  ⚠ **CONDITIONAL PROFILE**: the other 30 parameters are held, which attenuates the lever
+  ⇒ [[ccx_seas_slice_q10_leak]]. It **bounds** the question; the refit still owes the answer — and
+  now has a specific thing to be judged on.
 
 **Reported, never scored:** IRF(100), and the land share of a pulse — **comparisons** by the 09-04e
 ruling. ⛔ **No Joos row anywhere in this prereg.**

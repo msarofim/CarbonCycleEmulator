@@ -1,0 +1,39 @@
+P12 -- WHERE THE LIKELIHOOD SITS, BY STREAM 
+source: outputs/diagnostics/p12_compensator_20260909.rds (no model run here) 
+SHIM = seas_ml 0 at ent 21.0 minus ent 0   |   MECH = seas_ml 1 minus 0, BOTH at ent 0 
+ 
+  stream                             SHIM         MECH 
+  co2_seasonal_SPO                 711.12       518.47 
+  co2_icecore                        5.02        -2.84 
+  d13c_level_SPO                     1.09        -1.78 
+  co2_level_MLO                      1.01      -248.62 
+  d13c_level_MLO                    -0.98         2.81 
+  co2_level_SPO                     -0.66      -265.76 
+  co2_seasonal_MLO                  -0.47       -26.52 
+  ocean_grad_d13c                    0.34         0.13 
+  gcb_ocean_sink                    -0.30        -0.90 
+  d13c_seasonal_MLO                 -0.28         0.30 
+  d13c_seasonal_SPO                 -0.25        -0.51 
+  d14c_NH                            0.21         5.03 
+  TOTAL                            715.52       -48.71 
+ 
+⭐ THE SHIM IS A SEASONAL-SPO COMPENSATOR, NOT A GENERAL FUDGE: 
+   seasonal rows carry 710.11 of its 715.52 = 99.2 %, and `co2_seasonal_SPO` alone 711.12 (99.4 %) 
+   ⇒ option A is the RIGHT CLASS of replacement: the thing being replaced really is 
+     a Southern-Ocean seasonal channel. 
+ 
+⭐⭐ AND THE MECHANISM'S NET HIDES AN ENORMOUS INTERNAL SPLIT: 
+   it BUYS 518.47 on `co2_seasonal_SPO` -- 73 % of what the FITTED shim buys there -- 
+   with NO FITTED AMPLITUDE, which is the out-of-sample criterion; 
+   and it PAYS -514.38 on the CO2 LEVEL rows (co2_level_MLO, co2_level_SPO). 
+   NET -48.71. 
+ 
+⇒ THE MECHANISM IS NOT FAILING AT THE SEASONAL CYCLE. It is SUCCEEDING there and 
+  paying on the MEAN CO2 LEVEL -- which is the signature of the anthropogenic-uptake 
+  change P10 measured (industrial-window NH drift 7.72 % of amplitude, quiet window 
+  settled). ⭐ A LEVEL offset is the most REFITTABLE kind of error: it is controlled by 
+  k_w, kz, the pump and fert_k, all currently pinned at values tuned for the 
+  no-mechanism configuration. Had it failed ON the seasonal stream, no refit would help. 
+ 
+⚠ CONDITIONAL on the canonical's other 30 parameters. This says WHERE the value sits, 
+  not what a refit will do -- and it is what the refit must be judged on. 

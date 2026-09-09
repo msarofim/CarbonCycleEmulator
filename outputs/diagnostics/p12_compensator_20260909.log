@@ -1,0 +1,34 @@
+PREREG P12 -- does the seasonal mixed layer make the compensator REDUNDANT? 
+mode: hilda31 (refit_20260908_hilda31 (logpost -1478.66)) 
+⛔ scored on the LIKELIHOOD, never the logpost: ent_seas_amp_SH is tr='log' with a 
+   lognormal prior centred 10.95, so dlnorm(0) = 0 and a logpost can never favour OFF. 
+⚠ CONDITIONAL PROFILE, not a refit: the other 30 parameters are held, which ATTENUATES 
+   the lever. It BOUNDS the question; the refit still owes the final answer. 
+ 
+✅ ASSERTED: the spinup is IDENTICAL across arms (max|diff| 0.000e+00) -- seas_drivers = 0 
+   at spinup switches BOTH the shim and the seasonal ML off. One spinup, 20 runs. 
+ 
+LIKELIHOOD PROFILE over ent_seas_amp_SH (umol/kg), both arms 
+       ent      seas_ml = 0      seas_ml = 1     difference 
+       0.0       -2154.9481       -2203.6601       -48.7121 
+       2.0       -2026.6493       -2153.6226      -126.9733 
+       5.0       -1857.5963       -2104.5672      -246.9709 
+       8.0       -1716.8282       -2087.0758      -370.2477 
+      11.0       -1604.5814       -2101.5562      -496.9748 
+      14.0       -1521.0918       -2148.4154      -627.3236 
+      17.0       -1466.5940       -2228.0595      -761.4655 
+      19.0       -1446.4840       -2299.5692      -853.0851 
+      21.0       -1439.4319       -2385.9493      -946.5173 
+      25.0       -1464.7748       -2603.7962     -1139.0214 
+ 
+THE METRIC -- G = likelihood the COMPENSATOR still BUYS (best on the grid, minus OFF) 
+  seas_ml = 0 : argmax ent  21.0, G =   715.5161 
+  seas_ml = 1 : argmax ent   8.0, G =   116.5843 
+  G(on) / G(off) = 0.163 
+  for scale, the FITTED compensator sat at 21.2 (r3 winner) / 19.0 (ent26) 
+ 
+VERDICT (an ORDERING between two measured quantities): 
+  REDUNDANT -- the mechanism absorbs most of what the compensator bought; retiring the parameter is supported 
+⚠ Conditional profile. A refit can still move the answer, in EITHER direction. 
+ 
+wrote outputs/diagnostics/p12_compensator_20260909.rds 

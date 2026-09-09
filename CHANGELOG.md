@@ -2,6 +2,37 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09n — ⭐⭐ **P12 EXECUTED AND IT PASSES — but the per-stream decomposition is the real result: THE MECHANISM IS NOT FAILING AT THE SEASONAL CYCLE. It BUYS +518 there with no fitted amplitude and PAYS −514 on the CO₂ LEVEL.**
+
+**⛔ FIRST, P12 AS WRITTEN WAS NOT TESTABLE BY A REFIT, caught before measuring.** `ent_seas_amp_SH` is `tr = "log"` with a lognormal prior centred 10.95, so **0 is UNREPRESENTABLE in the encoded space and carries PRIOR PROBABILITY ZERO** — a refit can never reach it, and a logpost profile would have measured the prior's pull toward 10.95 and reported it as evidence FOR the compensator ⇒ [[runnable_is_not_encodable]]. ⭐ **But 0 IS representable in the MODEL** (`R/model.R` skips the shim at exactly 0), so a **LIKELIHOOD profile visits the off state a refit cannot** — the profile is *more* informative here than a refit. **Scored on the likelihood throughout.**
+
+**⭐ ONE SPINUP SERVED ALL 20 RUNS, ASSERTED NOT ASSUMED** (max|diff| exactly **0.000e+00**): `R/spinup.R:227` sets `seas_drivers <- 0`, which switches BOTH the shim and the seasonal mixed layer off, so neither can touch the preindustrial equilibrium.
+
+**THE RESULT.** Profile over `ent_seas_amp_SH` ∈ {0…25}, both arms, R core:
+
+| | argmax `ent` | G = likelihood the compensator still BUYS |
+|---|---|---|
+| `seas_ml = 0` | **21.0** (beside the fitted 21.2 / 19.0) | **715.52** |
+| `seas_ml = 1` | **8.0** | **116.58** |
+
+⇒ **G(on)/G(off) = 0.163** against a pre-registered 0.5, and the preferred amplitude falls **21 → 8**. Arm 0 rises monotonically across the grid; **arm 1 has an interior maximum at 8 and turns down** — the shape of genuine partial substitution, not of a broken mechanism. ⇒ **P12 PASSES: retiring the parameter is supported.**
+
+**⛔⛔ THE BIG NUMBER BESIDE IT, NOT BURIED: at each arm's own optimum the mechanism is 647.7 log-units WORSE** (−2087.08 vs −1439.43). **`calibration/diag_p12_streams.R` says why, and it INVERTS the reading:**
+
+| stream | SHIM (ent 0→21, `seas_ml` 0) | MECH (`seas_ml` 0→1, both at ent 0) |
+|---|---|---|
+| `co2_seasonal_SPO` | **+711.12** | **+518.47** |
+| `co2_level_SPO` | −0.66 | **−265.76** |
+| `co2_level_MLO` | +1.01 | **−248.62** |
+| **TOTAL** | **+715.52** | **−48.71** |
+
+⭐ **THE SHIM IS A GENUINE SEASONAL-SPO COMPENSATOR, NOT A GENERAL FUDGE — 99.4 % of its 715 is `co2_seasonal_SPO` alone.** ⇒ option A is the **right class** of replacement: the thing being replaced really is a Southern-Ocean seasonal channel.
+⭐⭐ **AND THE MECHANISM BUYS +518.47 ON THAT VERY STREAM — 73 % of what the FITTED shim buys — WITH NO FITTED AMPLITUDE.** That is the out-of-sample support criterion (the HS-pump standard), and it is a **far stronger statement than P1's retired amplitude band ever made**. The entire net −48.7 is the **−514 it pays on the two CO₂ LEVEL rows**.
+
+⇒ ⭐ **THE MECHANISM IS NOT FAILING AT THE SEASONAL CYCLE — IT IS SUCCEEDING THERE AND PAYING ON THE MEAN CO₂ LEVEL.** That is the signature of the anthropogenic-uptake change **P10** already measured independently (industrial-window NH drift 7.72 % of amplitude; quiet window SETTLED). **A level offset is the most REFITTABLE kind of error** — `k_w`, `kz`, the pump and `fert_k` are all pinned at values tuned for the no-mechanism configuration. ⛔ **Had it failed ON the seasonal stream, no refit would have helped**; failing on the level is the recoverable case, and it tells the refit exactly what it must fix.
+
+⚠ **CONDITIONAL PROFILE**: the other 30 parameters are held, which ATTENUATES the lever ⇒ [[ccx_seas_slice_q10_leak]]. It **bounds** the question; the refit still owes the answer — and now has a specific thing to be judged on.
+
 ## 2026-09-09m — ⭐⭐ **RULED (Marcus): P1's BAND IS RETIRED AS A GATE.** *"I'm fine getting rid of a pre-registered bound if and when we determine that the pre-registered bound was flawed in the first place."* **Replaced by two LAWS (both PASS) and one OBSERVATION (prepared, blocked). The round is no longer stopped at P1.**
 
 **RETIRED, NOT DELETED.** The band [10, 17] / [8, 14] is still computed and **REPORTED** in `diag_seas_ml_probe.R` (NH **10.23**, SH **9.79**) and decides nothing. The four reasons — all true independently of which side the model landed on, **three true the day the band was written** — are in `notes/options_2026-09-09l_p1_yardstick.md`: its SCALE leg is the code under test and FITTED; its upper edge assumes a layer-2 contact that does not occur; `f_ent × ΔC` is the wrong algebra for a moving boundary; and its target is **unobservable in principle**.
