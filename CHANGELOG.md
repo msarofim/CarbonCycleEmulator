@@ -2,6 +2,77 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09t — ⛔⛔ **WHOLE-MODEL CODE REVIEW (Marcus's 09-09s instruction). THE REFIT IS BLOCKED: `ccx_spinup()` SOLVES THE PREINDUSTRIAL EQUILIBRIUM WITH THE SEASONAL MIXED LAYER ON, BECAUSE THE TWO CORES GATE `seas_ml` ON DIFFERENT OBJECTS. EVERY `seas_ml = 1` RESULT OF 09-09 RESTS ON IT.**
+
+`notes/review_2026-09-09t_whole_model_code_review.md`. Nothing fixed — the instruction was review
+first, and several fixes move stored logposts or canonical artifacts. Baseline re-confirmed at
+`a73edb3`: suite **2381 / 3 / 4**, the three pre-existing.
+
+⭐ **THE BLOCKER, MEASURED.** R gates the mechanism on `ccx_seas_ml_on(p)` (`R/model.R:853`), which
+requires `p$seas_drivers > 0`; **C++ gates on `A.seas_ml`, and that flag is
+`as.integer(!is.null(aux$mld_coef))` (`R/cpp.R:50`) — a function of `aux` ALONE.** `ccx_spinup()`
+builds `aux` from the un-zeroed `p` (`R/spinup.R:151`) and only THEN zeroes `seas_drivers`
+(`:227`) — so **the zeroing is honoured by R and ignored by C++**, and every equilibrium solve runs
+through C++. At the canonical: R gate `FALSE`, C++ flag `1`, and the spinup's own "aseasonal"
+equilibrium moves **37 894.163 → 35 953.939 GtC ocean carbon, −1 940.2**, max state Δ 489.2.
+⛔ **P12's headline "pays −514 on the two CO₂ LEVEL rows" is the exact signature of a ~1 940 GtC
+deficit at t₀** — the 09-09n "most REFITTABLE kind of error" and 09-09k "changes anthropogenic
+uptake, a RESULT not a defect" readings must both be re-examined ⇒ [[explained_away_test]].
+⚠ **Parity could not see it**: `test-parity.R` compares one `(p, aux)` pair, and the divergence needs
+`p` mutated AFTER `ccx_prepare()` — which is exactly and only what `ccx_spinup()` does.
+⛔ **QUARANTINE the 09-09 `seas_ml = 1` outputs before regenerating.**
+
+⛔ **THE REFIT'S TARGET RESTED ON A RETRACTED NUMBER.** 09-09s/`CHANGELOG:32` aim the refit at
+"relaxing `sst_seas_amp_SH`, whose prior-z was −5.14". **Measured at `hilda31`: NH −2.96 (matching
+the handoff, which validates the estimator), SH +0.36** — 9 % ABOVE its centre, unstrained. **−5.14
+is pre-09-03 and THIS REPO ALREADY RECORDED ITS SUPERSESSION** — `CHANGELOG.md:2528` carries
+"P2 −5.14 → +0.24 ✅ the 5σ strain is GONE". ⇒ **there is no SH solubility strain to relax, and
+relaxing toward the prior would INCREASE the swing.** The SH over-swing is DIC-side
+(`ent_seas_amp_SH` 21.04 vs centre 10.95); **the live strain is the NH, the hemisphere the SH-only
+shim never served and the bi-hemispheric mechanism does.**
+
+⛔ **ROUND 6 IS INCOMPATIBLE WITH 61 % OF `h_ml`'s OWN PRIOR.** The guard STOPS at **76.146 m**
+(bisected; the approach is a cliff — residual `dz_1` 0.798 m at 75, 0.102 at 76). `h_ml`'s prior is
+lognormal centre **83.94**, log-sd 0.341 ⇒ **its MEDIAN is past the stop and P(> 76.146) = 61.3 %.**
+⭐⭐ **And the prior says so itself** (`R/calibrate.R:148-155`): its 16/84 points are the two readings
+**"for a time-constant thickness"**, and *"the prior ENCODES the mean-vs-max ambiguity a seasonal
+mixed layer would resolve"* — **round 6 discharges it, and nobody re-centred.** Re-centring on the LS
+mean 59.7 m drops exposure to 23.8 % (5–11 % at a narrower width).
+
+⭐ **A FACTOR OF TWO IN THE PRIOR CENTRE'S SST LEG.** `.ENT_SO_SST_AMP = 3.0` is labelled
+"half-amplitude" and **is the PEAK-TO-PEAK**: measured on the repo's own `sc_harm`, 40–90 S =
+**1.4995 half / 2.9990 p2p**, while SH hemispheric half **1.7464** reproduces the registered
+`SST_SEAS_AMP_SH_OBS = 1.74644` to 5 s.f. (the like-for-like validation). The consumer needs a
+half-amplitude — `ent_seas_amp_SH` is the coefficient of `sin()` in both cores. ⚠ The tell was the
+prose: *"the band swings harder than the hemisphere"* is **falsified** like-for-like (1.4995 <
+1.7464). ⛔ Reported-but-unverified: the pCO₂ leg is p2p AND per-cell, so the biases do **not**
+cancel and the centre is ~2.1–2.3× high. **Fix both legs in one edit, never one.**
+
+⚠ **P1c's STRUCTURAL DIAGNOSIS NAMES THE WRONG CAUSE.** 09-09r blamed "an SH-wide mean dominated by
+high-latitude winter mixing"; `obs_mld.rds$seasonal$def` says the driver is a **cos-lat mean over
+LS cells** (`lat_hs = 57.14`), and the SH LS band genuinely peaks in August. The comparison is still
+structural; the mechanism stated for it is not. ⭐ **The mask exposes a real gap: LS annual means are
+NH 49.1 / SH 68.0 m, the model has ONE scalar fitted at 49.15** ⇒ the SH mixed layer is **38 % too
+thin**, and 68.0/49.15 = 1.38× sits beside the observed 1.33× over-swing — **a hypothesis with a
+cheap test (per-hemisphere `h_ml`), to be run only after the blocker is fixed.**
+
+⚠ Also `[V]`: `test-seas-lag-split.R:199` hand-rolls a contract `ccx_seed_unencodable()` implements
+(two MORE coordinates sit on their logit rails: `kz_deep_frac = 1`, `pump_hs_gcm2 = 0`) — pre-existing,
+and it will re-break on every future parameter addition. The **app's prose** (`app/ui.R:265`) still
+teaches "a mixed layer over ten diffusive layers" while the diagram beside it was updated to the
+seven-box HILDA form — the taught model and the coded model differ, in a PEDAGOGICAL model.
+`sst_hs = 2 °C` sits exactly on the carbonate tables' lower edge; the suite emits **10 457** warnings.
+
+⚠ **`[R]` LEADS NOT VERIFIED BY ME** (marked as such throughout the note, verify before acting):
+F2 (a periodic spinup may be owed after all — this would REVERSE 09-09j/k, which argued from the very
+zeroing C++ ignores), F3 (continuous-vs-month-centre max leaves a 0.64 m window with negative
+`dz_1`), F4 (substeps still under-resolved; the honest claim is "the floor covers the canonical"),
+the canonical mode file's stored stream set being 4.75 log-units short with a printing-only adoption
+gate, `ccx_loglik()` returning a finite 0 when every stream vanishes, GATE Q having no
+`test-gate-bounds` coverage, and the `ml` box being **low-latitude for area/mass/carbon but
+hemispheric for temperature**. ⭐ `.ENT_DIC_SURF = 2150` is reportedly **RIGHT** as a band value —
+**acting on its own "5.6 % too high" flag would inject a 5 % error into a correct constant.**
+
 ## 2026-09-09s — **HANDOFF: `notes/handoff_2026-09-09s_round6_built_review_owed.md`. ⛔ RULED (Marcus): THE NEXT SESSION DOES A FULL CODE REVIEW FIRST — bugs, and anything inconsistent with physical understanding or PEDAGOGICAL usefulness. THE REFIT COMES ONLY AFTER THE CODE IS JUDGED CLEAN.**
 
 Round 6 (the seasonal mixed layer, option A) is **built in both cores**, parity holds, **suite 2381 / 3 / 4** (the three are the pre-existing set, unrelated to this session). **`hilda31` remains canonical, `seas_ml` remains DEFAULT 0, and no stored logpost moved.**
