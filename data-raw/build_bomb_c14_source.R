@@ -33,7 +33,10 @@
 #                    fit destroyed by forcing the flux to peak at Dec-62.
 #   1966.54-1969.54  one Table 2 interval (128 -> 86).
 #   pre-1963.04      ANNUAL totals from Table 1 plus budget closure (below).
-#   post-1969.54     exponential tail fitted to the late Table 2 points.
+#   post-1969.54     exponential tail. Its TOTAL is measured -- it is the last
+#                    reported stratospheric burden (14.28 kmol), independent of
+#                    BOMB_TOTAL_REF_KMOL -- and only its distribution in time
+#                    comes from the fit to the late Table 2 points.
 #
 # Budget closure for the pre-1963 total: the Table 2 series says how much was
 # still aloft at 1963.04; the rest of the Naegler & Levin total must already
@@ -69,9 +72,17 @@ BOMB_TOTAL_REF_KMOL <- 102      # Naegler & Levin (2006) central, 1945-1980.
 BOMB_T2_DROP_FIRST  <- as.logical(as.integer(Sys.getenv("CCX_BOMB_DROP_FIRST", "1")))
                                 # Tans p.133 calls the 12/62-2/63 inventory
                                 # "much too low" (early flights missed
-                                # high-latitude 14C). When TRUE its value is
-                                # replaced by a backward extrapolation of the
-                                # tail fit, raising the t0 burden.
+                                # high-latitude 14C), so 356 is a FLOOR on the
+                                # peak burden. When TRUE its value is replaced by
+                                # kmol[2] + (kmol[2] - kmol[3]) -- i.e. the
+                                # quarter before t0 is assumed to have released
+                                # about as much as the quarter after it --
+                                # raising the t0 burden to 397 units (+11.5 %).
+                                # ⚠ NOT a back-extrapolation of the tail fit:
+                                # that gives 36.2 kmol, 39 % BELOW the floor,
+                                # because it decays a 1965-69 slope back through
+                                # the peak. Checked 2026-09-08,
+                                # calibration/diag_bomb_delivery_tail.R.
 BOMB_PREBOMB_D14C   <- as.numeric(Sys.getenv("CCX_BOMB_PREBOMB", "-30"))
                                 # permil. Suess-depleted pre-bomb level, taken
                                 # as the Dec-1954 SH value of Tans Table 1 (the
@@ -150,8 +161,14 @@ t2 <- read.csv(BOMB_T2_FILE, comment.char = "#")
 t2$kmol <- t2$inventory_1e26_atoms * 1e26 / NA_AVOGADRO / 1000
 t0 <- t2$t_mid[1]
 
-# Exponential fit to the LATE points, used for (a) the post-1969 tail and
-# (b) back-extrapolating the known-low first point when BOMB_T2_DROP_FIRST.
+# Exponential fit to the LATE points, used for the post-1969 tail's SHAPE only.
+# (Its mass is not fitted: see the interval-totals block below -- what the Table 2
+# series has not released by the last measurement is, identically, the last
+# measured burden.) The first point's replacement does NOT use this fit; see
+# BOMB_T2_DROP_FIRST above.
+# ⚠ tau is weakly determined: 6.87 yr as built, 5.67 without the single 7/69 row
+# (which supplies 66 % of the fit's time baseline), and 5.54-7.13 across
+# BOMB_TAIL_FIT_FROM in [1964, 1966].
 lateR <- t2$t_mid >= BOMB_TAIL_FIT_FROM
 lf <- lm(log(t2$kmol[lateR]) ~ t2$t_mid[lateR])
 tau_tail <- -1 / coef(lf)[2]
