@@ -1,0 +1,17 @@
+SEASONAL MIXED LAYER -- GEOMETRY PRE-CHECK (round 6, option A) 
+mode file : /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20260908_hilda31/mode_fit_pumpN.rds 
+fitted h_ml = 49.153 m | h_hs = 401.146 m | N_INTERIOR = 10 
+HS box follows h_ml? no  (h_hs is pinned; the seasonal ML leaves it alone) 
+layer-1 base = 101.4 m (ML base 49.2 m, dz_1 52.3 m) 
+ 
+3b. MEAN-PRESERVING excursion at the canonical 
+  NH: ML 29.7 -> 82.7 m (max month 2) vs layer-1 base 101.4 m | punches layer 1? no 
+  SH: ML 26.3 -> 82.5 m (max month 8) vs layer-1 base 101.4 m | punches layer 1? no 
+ 
+3c. STOPPING CONDITION (prereg P8) -- fitted h_ml above which the winter ML 
+    punches layer 1, so single-layer entrainment becomes INVALID: 
+  NH: max/mean 1.6817 -> bound 76.1 m | margin from the canonical 27.0 m 
+  SH: max/mean 1.6779 -> bound 76.6 m | margin from the canonical 27.4 m 
+  ent26's h_ml was 134.15 m -- ABOVE the tightest bound. The bound is not hypothetical. 
+ 
+wrote outputs/diagnostics/seasonal_ml_geometry_20260909.rds 
