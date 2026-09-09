@@ -14,6 +14,25 @@ estimator: magnitude of the MEAN harmonic vector, area-weighted, month CENTRES
   SO 60-90S                 25.19         7.79     172800 
   NH all (0-90N)             1.77         8.14     518400 
  
+WHICH ESTIMATOR PRODUCED `.ENT_SO_PCO2_AMP` = 19.45 ? 
+  (1) harmonic of the AREA-MEAN series    16.26 uatm   <- GATE S's phase uses this 
+  (2) AREA-MEAN of PER-CELL amplitudes    19.68 uatm   <- PHASE-BLIND 
+  the constant is closest to (2). 
+⛔ ⇒ THE PROJECT'S AMPLITUDE CONSTANT AND ITS PHASE CONSTANT COME FROM TWO 
+   DIFFERENT CONVENTIONS ON THE SAME PRODUCT AND BAND -- [[amp_definition_mismatch]]. 
+⭐ AND THE PHYSICS PICKS ONE: `ent_seas_amp_SH` perturbs a SINGLE WELL-MIXED BOX, 
+   whose concentration is the AREA MEAN. For a box, the area mean of the anomaly IS 
+   the anomaly of the area mean, so (1) is correct and (2) overstates it: (2) averages 
+   |amplitude| and so discards the phase cancellation a box cannot avoid. 
+⚠ BUT DO NOT CORRECT ONE LEG OF A TWO-LEG SUM ALONE. The prior centre adds a 
+   SOLUBILITY term (46.95 uatm, from .ENT_SO_SST_AMP = 3.0 K) to this one, and that 
+   term's own convention -- per-cell or area-mean -- IS NOT STATED in constants.R. 
+   If it is also per-cell, the two biases partially CANCEL in the sum. Establish the 
+   SST leg's convention before changing either. 
+⇒ IMPACT IS SMALL EITHER WAY: swapping 19.45 -> 16.26 moves the in-band value 
+   29.68 -> 28.25 and the prior centre 10.95 -> 10.43, a 4.8 % change, because the 
+   SOLUBILITY term dominates the sum. A real defect, a modest number. 
+ 
 ⚠ RULINGS OWED BEFORE THIS BECOMES A GATE: 
   1. WHICH BAND maps to the model's SH mixed layer? The model's `ml` is the 
      LOW-LATITUDE surface box (hs_frac splits the high latitudes into `hs`), 

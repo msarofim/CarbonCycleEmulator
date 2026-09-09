@@ -2,6 +2,20 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09q — ✅ **THE 19.45-vs-16.26 DISCREPANCY IS RESOLVED: it is an ESTIMATOR SPLIT, and resolving it REMOVES A DEGREE OF FREEDOM from P1c's Ruling B.**
+
+**MEASURED, both estimators on the same band and the same file** (`calibration/diag_so_pco2_amplitude.R`, now carrying the comparison so it is reproducible): the **harmonic of the AREA-MEAN series** gives **16.26 µatm** (what GATE S's phase uses); the **AREA-MEAN of PER-CELL amplitudes**, which is phase-blind, gives **19.68**. `.ENT_SO_PCO2_AMP` ships **19.45** ⇒ **it is the per-cell reduction.**
+
+⛔ ⇒ **THE PROJECT'S AMPLITUDE CONSTANT AND ITS PHASE CONSTANT COME FROM TWO DIFFERENT CONVENTIONS ON THE SAME PRODUCT AND BAND** — [[amp_definition_mismatch]], a third incident.
+
+⭐⭐ **AND THE PHYSICS PICKS ONE, WHICH IS THE PART THAT GENERALISES.** `ent_seas_amp_SH` perturbs a **SINGLE WELL-MIXED BOX**, whose concentration is the **area mean** — and for a box the area mean of the anomaly **IS** the anomaly of the area mean. So **(1) is correct**, and (2) overstates it by averaging `|amplitude|`, discarding exactly the phase cancellation a single box cannot avoid. ⇒ **The estimator is NOT a free choice in P1c's Ruling B: any observation compared against a well-mixed box must be reduced AREA-MEAN-FIRST.** One degree of freedom removed from that ruling.
+
+⚠ **BUT THE CONSTANT IS NOT BEING CHANGED, AND THE REASON IS A DISCIPLINE, NOT CAUTION: DO NOT CORRECT ONE LEG OF A TWO-LEG SUM ALONE.** The prior centre adds a **solubility term (46.95 µatm**, from `.ENT_SO_SST_AMP` = 3.0 K, "the 40–90 S BAND, ERSSTv5") to the observed one, and **that leg's own convention — per-cell or area-mean — is NOT STATED in `constants.R`**. If it is also per-cell the two biases partially **cancel**. Establish the SST leg's convention first.
+
+⇒ **IMPACT IS MODEST, said plainly:** 19.45 → 16.26 moves the in-band value **29.68 → 28.25** and the prior centre **10.95 → 10.43**, a **4.8 %** change, because the **solubility term dominates the sum**. **A real defect, a small number.** ⚠ It touches P12's reading (10.95 is the centre that profile was set against), and `ent_seas_amp_SH` is being retired anyway, which bounds it further.
+
+⚠ **PROCESS NOTE: this ran to completion in the background after I had already reported it as timed out and unresolved.** The result was there; I had stopped looking. ⇒ **check a backgrounded job's output before calling its question open.**
+
 ## 2026-09-09o — ⭐⭐ **P11 DONE: the C++ twin carries the seasonal mixed layer, parity holds — AND THE PARITY TEST IMMEDIATELY CAUGHT A REAL BUG IN MY OWN 09-09i SUBSTEP FIX.** Suite **2381 / 3 / 4**, back to the pre-existing three.
 
 **THE PORT.** `src/ccx_core.cpp` gains `mld_eval()` (twin of `ccx_mld_eval`, same order and associativity), the per-hemisphere local geometry `dzl`/`dzml`/`ml_mass`, and the two entrainment limbs at `alpha13 = 1`. `Aux` carries `seas_ml` plus the 6 Fourier harmonics per hemisphere, **zero-filled when off** (the `pump_org` precedent, so a stale draw cannot leave a live field behind). The R/cpp.R **STOP guard is removed** — it existed only because parity could not see a run nobody compares, and now it can.

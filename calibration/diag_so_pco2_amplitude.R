@@ -107,6 +107,50 @@ rows <- lapply(names(SP_BANDS), function(bn) {
 })
 tab <- do.call(rbind, rows)
 
+## ---- WHICH ESTIMATOR PRODUCED `.ENT_SO_PCO2_AMP` = 19.45? ------------------
+# R/constants.R carries 19.45 as the observed 40-90 S amplitude "from the same
+# product" -- against the 16.26 above, a 20 % gap on the SAME band and the SAME
+# file. Two numbers for one quantity is a defect whichever is right, so this
+# identifies the split rather than picking a winner by preference.
+GATE_S_CONST <- 19.45
+sel <- which(plat >= -90 & plat < -40); w <- awt(plat[sel], dlat)
+ser <- vapply(seq_len(12), function(m) {
+  sl <- pco2[, sel, m]; ok <- is.finite(sl)
+  wm <- matrix(rep(w, each = nrow(sl)), nrow = nrow(sl))
+  sum(sl[ok] * wm[ok]) / sum(wm[ok])
+}, numeric(1))
+# PER-CELL amplitudes, vectorised: project every cell onto the same two basis
+# vectors at once, so this is the identical estimator applied cell-wise.
+tt  <- (seq_len(12) - 0.5) / 12
+cub <- matrix(pco2[, sel, ], ncol = 12)
+keep <- stats::complete.cases(cub)
+aa <- 2 * (cub[keep, ] %*% sin(2 * pi * tt)) / 12
+bb <- 2 * (cub[keep, ] %*% cos(2 * pi * tt)) / 12
+wcell <- matrix(rep(w, each = dim(pco2)[1]), ncol = 1)[keep]
+A_area <- amp(harm(ser))
+A_cell <- sum(2 * sqrt(aa^2 + bb^2) * wcell) / sum(wcell)
+say("")
+say("WHICH ESTIMATOR PRODUCED `.ENT_SO_PCO2_AMP` = %.2f ?", GATE_S_CONST)
+say("  (1) harmonic of the AREA-MEAN series   %6.2f uatm   <- GATE S's phase uses this",
+    A_area)
+say("  (2) AREA-MEAN of PER-CELL amplitudes   %6.2f uatm   <- PHASE-BLIND", A_cell)
+say("  the constant is closest to (%d).", if (abs(A_cell - GATE_S_CONST) <
+    abs(A_area - GATE_S_CONST)) 2L else 1L)
+say("⛔ ⇒ THE PROJECT'S AMPLITUDE CONSTANT AND ITS PHASE CONSTANT COME FROM TWO")
+say("   DIFFERENT CONVENTIONS ON THE SAME PRODUCT AND BAND -- [[amp_definition_mismatch]].")
+say("⭐ AND THE PHYSICS PICKS ONE: `ent_seas_amp_SH` perturbs a SINGLE WELL-MIXED BOX,")
+say("   whose concentration is the AREA MEAN. For a box, the area mean of the anomaly IS")
+say("   the anomaly of the area mean, so (1) is correct and (2) overstates it: (2) averages")
+say("   |amplitude| and so discards the phase cancellation a box cannot avoid.")
+say("⚠ BUT DO NOT CORRECT ONE LEG OF A TWO-LEG SUM ALONE. The prior centre adds a")
+say("   SOLUBILITY term (46.95 uatm, from .ENT_SO_SST_AMP = 3.0 K) to this one, and that")
+say("   term's own convention -- per-cell or area-mean -- IS NOT STATED in constants.R.")
+say("   If it is also per-cell, the two biases partially CANCEL in the sum. Establish the")
+say("   SST leg's convention before changing either.")
+say("⇒ IMPACT IS SMALL EITHER WAY: swapping 19.45 -> 16.26 moves the in-band value")
+say("   29.68 -> 28.25 and the prior centre 10.95 -> 10.43, a 4.8 %% change, because the")
+say("   SOLUBILITY term dominates the sum. A real defect, a modest number.")
+
 say("")
 say("⚠ RULINGS OWED BEFORE THIS BECOMES A GATE:")
 say("  1. WHICH BAND maps to the model's SH mixed layer? The model's `ml` is the")

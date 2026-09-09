@@ -118,22 +118,38 @@ box's area, in the way GATE S's own record states its caveats.
 
 ---
 
-## 3. ⚠ AN UNRESOLVED 20 % DISCREPANCY THAT RULING A INHERITS
-`R/constants.R` already carries **`.ENT_SO_PCO2_AMP <- 19.45`**, commented as the *"OBSERVED 40-90 S
-pCO2 seasonal amplitude (Landschutzer/Laruelle NCEI 0209633), the same product CCX_ENT_SEAS_PEAK_MO's
-7.50 comes from"* — **the same band and the same product as my 16.26**.
+## 3. ✅ RESOLVED — THE 20 % DISCREPANCY IS AN ESTIMATOR SPLIT, AND IT REMOVES A DEGREE OF FREEDOM
+`R/constants.R` carries **`.ENT_SO_PCO2_AMP <- 19.45`**, commented as the observed 40–90 °S
+amplitude *from the same product* — against the **16.26** above. **MEASURED, both estimators on the
+same band and file** (`calibration/diag_so_pco2_amplitude.R`):
 
-⛔ **Two numbers for one quantity, 20 % apart, and the difference is not explained anywhere.** The
-most likely cause is the estimator: an **area-weighted mean of PER-CELL amplitudes** is phase-blind
-and always ≥ the **magnitude of the harmonic of the area-mean series**, which is what GATE S's phase
-uses and what `diag_so_pco2_amplitude.R` computes. That is precisely [[amp_definition_mismatch]],
-whose record notes it has already bitten twice.
-⚠ **It is not cosmetic: `.ENT_SO_PCO2_AMP` feeds `ENT_SEAS_AMP_SH_INBAND` and
-`ENT_SEAS_AMP_SH_DERIV`, i.e. the PRIOR CENTRE 10.95 for `ent_seas_amp_SH`** — the parameter P12 is
-about. ⇒ **Resolve which estimator produced 19.45 BEFORE ruling A**, because whichever is chosen
-becomes the convention for both.
+| estimator | value |
+|---|---|
+| **(1) harmonic of the AREA-MEAN series** — what GATE S's phase uses | **16.26 µatm** |
+| **(2) AREA-MEAN of PER-CELL amplitudes** — phase-blind | **19.68 µatm** |
+| `.ENT_SO_PCO2_AMP` as shipped | **19.45** ⇒ it is **(2)** |
 
----
+⛔ ⇒ **THE PROJECT'S AMPLITUDE CONSTANT AND ITS PHASE CONSTANT COME FROM TWO DIFFERENT CONVENTIONS
+ON THE SAME PRODUCT AND THE SAME BAND** — [[amp_definition_mismatch]], a third incident.
+
+⭐⭐ **AND THE PHYSICS PICKS ONE, WHICH IS WHY THIS MATTERS BEYOND THE CONSTANT.**
+`ent_seas_amp_SH` perturbs a **SINGLE WELL-MIXED BOX**, whose concentration is the **area mean**. For
+a box, the area mean of the anomaly **IS** the anomaly of the area mean, so **(1) is correct**;
+(2) averages `|amplitude|` and so discards exactly the phase cancellation a single box cannot avoid.
+⇒ **The estimator is NOT a free choice in Ruling B either: any observation compared against a
+well-mixed box must be reduced AREA-MEAN-FIRST.** That removes a degree of freedom from P1c.
+
+⚠ **BUT DO NOT CORRECT ONE LEG OF A TWO-LEG SUM ALONE.** The prior centre adds a **solubility** term
+(**46.95 µatm**, from `.ENT_SO_SST_AMP` = 3.0 K, "the 40–90 S BAND, ERSSTv5") to the observed one,
+and **that term's own convention — per-cell or area-mean — is NOT STATED in `constants.R`**. If it
+is also per-cell, the two biases partially **cancel** in the sum. **Establish the SST leg's
+convention before changing either.**
+
+⇒ **IMPACT IS MODEST EITHER WAY, and that is worth saying plainly**: swapping 19.45 → 16.26 moves
+the in-band value **29.68 → 28.25** and the prior centre **10.95 → 10.43**, a **4.8 %** change —
+because the **solubility term dominates the sum**, not the observed amplitude. **A real defect, a
+small number.** ⚠ It still touches P12's reading, since 10.95 is the centre that profile was set
+against; and `ent_seas_amp_SH` is being retired anyway, which bounds the consequence further.
 
 ## 4. RULING B — what quantity, and what the model must expose
 
@@ -178,8 +194,9 @@ none either.** So B1/B2 need a new output column, `pco2_ml_NH/SH`, per month.
 ---
 
 ## 5. What I would do, in order
-1. **Resolve §3's 19.45-vs-16.26 estimator question.** It is cheap, it is a prerequisite for A, and
-   it touches the prior centre of the parameter P12 is about.
+1. ✅ **DONE — §3's estimator question is resolved**: 19.45 is the phase-blind per-cell reduction,
+   the area-mean harmonic (16.26) is what a well-mixed box requires, and the propagated effect on the
+   prior centre is 4.8 %. ⚠ **Still owed before changing the constant**: the SST leg's convention.
 2. **Expose `pco2_ml` in both cores** with a parity assertion (B2's prerequisite; no physics moves).
 3. **Run A1 as a REPORTED comparison**, alongside A2 for reference, and let the pair speak: if A1
    fails on phase while A2 passes, that is the structural finding, stated as such.
