@@ -148,23 +148,58 @@ if a future mode file sets `h_hs = 0`.
 
 **Probed UNREFITTED at `hilda31` first** (the T-D0 pattern — probe before any Torch array):
 
-- **P1 (sizing, now EMERGENT not imposed).** The seasonal ML DIC anomaly the mechanism *produces*
-  lands in **[10, 17] µmol/kg (SH)** and **[8, 14] (NH)** — against the fitted compensator's 21.2
-  (round-3 winner) / 19.0 (`ent26`) and its prior centre 10.95. ⛔ Outside those, the mechanism is
-  not the compensator's physics and the round stops before the refit.
-  ⚠ Model-conditional: the sub-ML gradient (+42 µmol/kg into layer 1) is itself fitted.
-  ⛔⛔ **EXECUTED 2026-09-09j** (`calibration/diag_seas_ml_probe.R`): **NH 10.23 PASS, SH 9.79 —
-  FAIL against the 10.0 floor by 2.1 %.** By this prereg that STOPS the round before the refit, and
-  it is recorded as a FAIL; **the band is not widened after the fact.** ✅ **And it is NOT an
-  integrator artefact** — P9 below finds it converged (SH 9.791 → 9.829 from 4 to 16 substeps,
-  0.38 %). Both hemispheres land at the observed order untuned, below the compensator they replace,
-  and peak in the right months (NH Feb, SH Aug).
-  ⚠⚠ **THE BAND ITSELF IS UNDER REVIEW AS A YARDSTICK, and this was my error in writing it.** It
-  comes from the 09-08d pre-check for **OPTION B**: half the **per-cell entrainment fraction
-  `f_ent`** swing (SH 0.239) × ΔC. Option A runs on the **mean-preserving DEPTH RATIO**
-  `h_m/mean(h_m)` (SH half-swing **0.5715**) — **a different quantity** ⇒
-  [[verify_the_quantity_not_the_word]]. ⛔ Not used to overturn the verdict: **whether P1's band is
-  the right like-for-like test for (A) is MARCUS'S RULING**, and until he rules the FAIL stands.
+- **P1 ⛔⛔ RETIRED AS A GATE (Marcus, 2026-09-09m)** — *"I'm fine getting rid of a pre-registered
+  bound if and when we determine that the pre-registered bound was flawed in the first place."*
+  The band [10, 17] / [8, 14] is **still computed and REPORTED** (NH **10.23**, SH **9.79**;
+  converged — P9) but **decides nothing**. Why, from `notes/options_2026-09-09l_p1_yardstick.md` —
+  all four true independently of which side the model landed on, and **three true the day the band
+  was written**: (a) its SCALE leg (ΔC 42–70) is the **CODE UNDER TEST**, and **fitted**; (b) its
+  upper edge assumes the winter ML reaches layer 2, which it **does not** (82.7 / 82.5 m against a
+  layer-1 base of 101.4) — the measured step is a **point, +44.2**; (c) `f_ent × ΔC` is the **wrong
+  algebra** for a moving boundary (P1a); (d) its target — the ON-minus-OFF difference — is
+  **UNOBSERVABLE IN PRINCIPLE**, since nature runs no `seas_ml = 0` arm.
+  ⭐ **Replaced by two ORDERINGS (P1a, P1b) and, once unblocked, one OBSERVATION (P1c).**
+
+- **P1a ✅ BELOW THE UNDAMPED MOVING-BOUNDARY BOUND — a LAW. PASS.** Entrainment gives
+  `dc/dt = (dh/dt)(c₁−c)/h` while deepening and **zero while shoaling** (detrainment sheds water at
+  the ML's own concentration, moving stock and mass together). Integrating, `(c₁−c) ∝ 1/h`, so
+  **Δc(pk-pk) = (c₁ − c_min)(1 − h_min/h_max)** — undamped, because a real DIC anomaly is relaxed
+  toward the atmosphere and the retired shim never had to survive that. **MEASURED: bound 14.20 (NH)
+  / 15.06 (SH) half-amplitude; emergent 10.23 / 9.79; ratio 0.72 / 0.65 — inside (0, 1) in both.**
+  ⭐ An ordering between two **measured** quantities, not an invented threshold. Mutation-tested.
+- **P1b ✅ THE ANOMALY MUST PEAK AT MAXIMUM MIXED-LAYER DEPTH — a LAW. PASS.** The concentration
+  rises only while the layer deepens. **NH month 2, SH month 8 — both match `h_max` exactly.**
+  Hemisphere- and sign-specific: a backwards-wired limb fails it. Mutation-tested.
+- **P1c ⛔ THE OBSERVATIONAL TEST — PREPARED, BLOCKED ON TWO RULINGS.** On **GATE S's own template**
+  (classed "OBSERVATION + LAW", **no model in the loop**): the Landschutzer/Laruelle **SOM-FFN**
+  climatology (NCEI **0209633**) is **already local** and carries the amplitude of the same first
+  harmonic as GATE S's phase. **EXTRACTED** (`calibration/diag_so_pco2_amplitude.R`), same masks and
+  same estimator — the magnitude of the **mean harmonic vector**, never the mean of per-month
+  magnitudes:
+
+  | band | amp (µatm) | peak month |
+  |---|---|---|
+  | **SO 40–90 °S** (GATE S's band) | **16.26** | **7.50** |
+  | SO 60–90 °S | 25.19 | 7.79 |
+  | SO 40–60 °S | 11.31 | 7.10 |
+  | SH 30–40 °S | 22.19 | 1.28 |
+  | SH subtrop 0–30 °S | 12.62 | 1.43 |
+  | **SH all (0–90 °S)** | **3.69** | 1.20 |
+  | NH all | 1.77 | 8.14 |
+
+  ⭐ The 40–90 °S phase **7.50** sits beside GATE S's **7.41**; not identical, and it should not be
+  — GATE S uses the air-sea **DIFFERENCE**, this is ocean pCO₂ alone. They agree closely because the
+  SH atmospheric cycle (~1 ppm) is small against the ocean's 16 µatm. ⛔⛔ **AND THE AGGREGATION
+  HAZARD IS NOW QUANTIFIED: the hemispheric mean is 3.69 µatm against the Southern Ocean's 16.26 —
+  a 4.4× cancellation**, because the subtropics (peak Jan) and the Southern Ocean (peak Jul) are in
+  ANTIPHASE. Picking the wrong band moves the target by **4.4×**. This is the same hazard that bit
+  GATE S, whose SH-area-mean bracket excluded the right answer while containing the pre-fix model.
+  **BLOCKED ON:** (1) **which band maps to the model's `ml` box** — it is the LOW-LATITUDE surface
+  box, since `hs_frac` splits the high latitudes into `hs`; **reuse GATE S's settled convention, do
+  not invent a second**; and (2) **the model does not expose mixed-layer pCO₂** — `ccx_run()$out`
+  carries `ml_C`/`ml_C13` and the flux trace carries none, so that output must be added first.
+  ⛔ **pCO₂ IS NOT FLUX**: these may not be quoted as flux amplitudes.
+
 - **P2 ⭐ LOAD-BEARING.** On refit, `sst_seas_amp_NH`'s prior-z relaxes from **−2.96** to **inside
   2σ**. The NH analogue of 09-03's P2, and the reason the round exists. ⛔ If it does not relax, the
   NH strain is not seasonal entrainment.

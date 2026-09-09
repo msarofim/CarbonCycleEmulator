@@ -1,0 +1,30 @@
+OBSERVED surface-ocean pCO2 SEASONAL AMPLITUDE (first harmonic) 
+product : data-raw/downloads/MPI-ULB-SOM_FFN_clim.nc 
+source  : Landschutzer, Laruelle, Roobaert & Regnier (2020), ESSD 12:2537, 
+          NOAA NCEI Accession 0209633, doi:10.25921/qb25-f418 
+estimator: magnitude of the MEAN harmonic vector, area-weighted, month CENTRES 
+⭐ same product, masks and estimator as GATE S's phase -- one convention, not two 
+ 
+  band                 amp (uatm)   peak month    n cells 
+  SH all (0-90S)             3.69         1.20     518400 
+  SH subtrop 0-30S          12.62         1.43     172800 
+  SH 30-40S                 22.19         1.28      57600 
+  SO 40-90S                 16.26         7.50     288000 
+  SO 40-60S                 11.31         7.10     115200 
+  SO 60-90S                 25.19         7.79     172800 
+  NH all (0-90N)             1.77         8.14     518400 
+ 
+⚠ RULINGS OWED BEFORE THIS BECOMES A GATE: 
+  1. WHICH BAND maps to the model's SH mixed layer? The model's `ml` is the 
+     LOW-LATITUDE surface box (hs_frac splits the high latitudes into `hs`), 
+     so this is a real choice -- and it is the choice that BIT GATE S, whose 
+     SH-area-mean bracket EXCLUDED the right answer while CONTAINING the 
+     pre-fix model. Reuse GATE S's settled convention; do not invent a second. 
+  2. THE MODEL SIDE DOES NOT EXIST YET: ccx_run()$out carries ml_C and ml_C13 
+     but NO mixed-layer pCO2, and neither does the flux trace. That output 
+     must be added before any comparison can be made. 
+⛔ pCO2 IS NOT FLUX. These are pCO2 amplitudes and may not be quoted as flux 
+   amplitudes: F = k*K0*dpCO2 and neither the wind seasonality in k nor the 
+   temperature seasonality in K0 is present here. 
+ 
+wrote outputs/diagnostics/so_pco2_amplitude_20260909.rds 

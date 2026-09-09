@@ -2,6 +2,31 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09m — ⭐⭐ **RULED (Marcus): P1's BAND IS RETIRED AS A GATE.** *"I'm fine getting rid of a pre-registered bound if and when we determine that the pre-registered bound was flawed in the first place."* **Replaced by two LAWS (both PASS) and one OBSERVATION (prepared, blocked). The round is no longer stopped at P1.**
+
+**RETIRED, NOT DELETED.** The band [10, 17] / [8, 14] is still computed and **REPORTED** in `diag_seas_ml_probe.R` (NH **10.23**, SH **9.79**) and decides nothing. The four reasons — all true independently of which side the model landed on, **three true the day the band was written** — are in `notes/options_2026-09-09l_p1_yardstick.md`: its SCALE leg is the code under test and FITTED; its upper edge assumes a layer-2 contact that does not occur; `f_ent × ΔC` is the wrong algebra for a moving boundary; and its target is **unobservable in principle**.
+
+**⭐ P1a — BELOW THE UNDAMPED MOVING-BOUNDARY BOUND. A LAW. PASS.** `Δc(pk-pk) = (c₁ − c_min)(1 − h_min/h_max)`, from `dc/dt = (dh/dt)(c₁−c)/h` while deepening and **zero while shoaling**. MEASURED: bound **14.20 (NH) / 15.06 (SH)** half-amplitude, emergent **10.23 / 9.79**, ratio **0.72 / 0.65** — inside (0, 1) both. An **ordering between two measured quantities**, not an invented threshold.
+**⭐ P1b — THE ANOMALY MUST PEAK AT `h_max`. A LAW. PASS.** NH month **2**, SH month **8**, both exact. Hemisphere- and sign-specific: a backwards-wired limb fails it.
+**Both MUTATION-TESTED** (`test-seas-ml.R`): the bound is DERIVED not typed (recomputed from the shipped shape and the measured step), scales linearly in ΔC, vanishes for a flat climatology; an amplitude at or above the bound, a sign flip, and a zero are all REJECTED; a half-year-rolled shape fails P1b, and the two hemispheres are asserted NOT to share a peak month.
+⛔ **Neither law is a substitute for an observation** — they cannot reject a model that is merely the WRONG SIZE, only one wrong in SIGN, PHASE, or by more than a factor. Said so at the gate.
+
+**⭐⭐ P1c — THE OBSERVATIONAL REPLACEMENT IS PREPARED, AND THE PRODUCT WAS ALREADY LOCAL.** `calibration/diag_so_pco2_amplitude.R`, on **GATE S's own template** (classed "OBSERVATION + LAW", **no model in the loop**): the Landschutzer/Laruelle **SOM-FFN** climatology (NCEI **0209633**, `MPI-ULB-SOM_FFN_clim.nc`, already in `data-raw/downloads/`) carries the **amplitude** of the same first harmonic GATE S reads for its phase. Extracted with the **identical masks and estimator** — the magnitude of the **mean harmonic vector**, never the mean of per-month magnitudes ([[amp_definition_mismatch]], which bit twice):
+
+| band | amp (µatm) | peak mo | | band | amp (µatm) | peak mo |
+|---|---|---|---|---|---|---|
+| **SO 40–90 °S** | **16.26** | **7.50** | | SH 30–40 °S | 22.19 | 1.28 |
+| SO 60–90 °S | 25.19 | 7.79 | | SH subtrop 0–30 °S | 12.62 | 1.43 |
+| SO 40–60 °S | 11.31 | 7.10 | | **SH all (0–90 °S)** | **3.69** | 1.20 |
+
+⭐ The 40–90 °S phase **7.50** sits beside GATE S's **7.41** — **not identical, and it should not be**: GATE S uses the air-sea DIFFERENCE, this is ocean pCO₂ alone; they agree closely because the SH atmospheric cycle (~1 ppm) is small against the ocean's 16 µatm. **A corroboration, not a re-derivation.**
+
+**⛔⛔ AND THE AGGREGATION HAZARD IS NOW QUANTIFIED: the hemispheric mean is 3.69 µatm against the Southern Ocean's 16.26 — a 4.4× CANCELLATION**, because the subtropics (peak Jan) and the Southern Ocean (peak Jul) are in ANTIPHASE. **Picking the wrong band moves the target by 4.4×.** Same hazard that bit GATE S, whose SH-area-mean bracket EXCLUDED the right answer while CONTAINING the pre-fix model's 4.16.
+
+**P1c IS BLOCKED ON TWO THINGS, both named at the gate:** (1) **which band maps to the model's `ml`** — it is the **LOW-LATITUDE** surface box, since `hs_frac` splits the high latitudes into `hs`; ⛔ **reuse GATE S's settled convention, do not invent a second**; and (2) ⛔ **the model does not expose mixed-layer pCO₂** — `ccx_run()$out` carries `ml_C` / `ml_C13`, the flux trace carries none, so that diagnostic output must be added before any comparison exists. ⛔ **pCO₂ IS NOT FLUX**; these may not be quoted as flux amplitudes (`F = k·K0·ΔpCO₂`, and neither the wind seasonality in `k` nor the temperature seasonality in `K0` is present).
+
+⇒ **ROUND STATE: no longer stopped at P1.** What remains before a refit: **P12** (does `ent_seas_amp_SH` go to zero? — the untested "one mechanism, not two" question), the **C++ twin** (P11), and P1c's two rulings.
+
 ## 2026-09-09l — **IS P1's BAND THE RIGHT YARDSTICK FOR OPTION A? `notes/options_2026-09-09l_p1_yardstick.md`. Ruling owed; nothing changed, the pre-registered FAIL stands.**
 
 **THE BAND DECOMPOSED BY SOURCE**, which is what decides its standing: the `f_ent` half-swing (SH **0.239**, NH **0.1975**) is a real **OBSERVATION** (Holte Argo); **ΔC = 42–70 µmol/kg is the CODE UNDER TEST** and a **FITTED** quantity (the LS pump, `kz`). ⇒ the band's SCALE is set by the leg the standing rule forbids — *"another model" NEVER means the code under test* — and doubling `pump_grad` would double the band.

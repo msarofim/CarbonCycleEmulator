@@ -5,13 +5,29 @@ h_ml 49.153 m | probe window 1990-2000 | ⚠ UNREFITTED: nothing here is a fit
 running arm seas_ml = 0 (spinup + 10 yr, R core) ... 
 running arm seas_ml = 1 ... 
  
-P1 -- the ADDED seasonal ML DIC anomaly (on minus off), umol/kg 
-  hem        amp    band lo    band hi   verdict        peak month 
-  NH       10.23        8.0       14.0   PASS           2 
-  SH        9.79       10.0       17.0   *** FAIL ***   8 
+REPORTED -- the ADDED seasonal ML DIC anomaly (on minus off), umol/kg 
+  hem        amp   retired band   in band?   peak month 
+  NH       10.23   [  8.0, 14.0]        yes   2 
+  SH        9.79   [ 10.0, 17.0]         no   8 
+  ⚠ THE BAND IS REPORTED, NOT ENFORCED (retired as a gate 2026-09-09m). 
+  for scale, the FITTED compensator this replaces: r3 winner 21.2, ent26 19.0, centre 10.95 
  
-for scale, the FITTED compensator this replaces: r3 winner 21.2, ent26 19.0, prior centre 10.95 
-⭐ P1 asks the mechanism to be SMALLER than the compensator and to reach the observed order. 
+P1a -- BELOW THE UNDAMPED MOVING-BOUNDARY BOUND (a LAW, not a fitted band) 
+  hem  dC(L1-ML) 1-hmin/hmax        bound   emergent    ratio 
+  NH        44.3     0.6405        14.20      10.23    0.721 
+  SH        44.2     0.6809        15.06       9.79    0.650 
+    VERDICT: PASS -- emergent amplitude is positive and below the undamped bound in BOTH hemispheres 
  
-P1 VERDICT: *** FAIL -- the round STOPS here, before the refit *** 
+P1b -- THE ANOMALY MUST PEAK AT MAXIMUM MIXED-LAYER DEPTH (a LAW) 
+  NH  h_max month  2 | anomaly peak month  2 | match 
+  SH  h_max month  8 | anomaly peak month  8 | match 
+    VERDICT: PASS in both hemispheres 
+ 
+⛔ NEITHER P1a NOR P1b IS A SUBSTITUTE FOR AN OBSERVATION. They are orderings 
+   the physics gives free, and they cannot reject a model that is merely the 
+   WRONG SIZE -- only one that is wrong in SIGN, PHASE or by more than a 
+   factor. The observational test (SOM-FFN pCO2 amplitude, GATE S's product 
+   and convention) is prepared in calibration/diag_so_pco2_amplitude.R and is 
+   BLOCKED on: (1) the band-to-box aggregation ruling, (2) the model exposing 
+   mixed-layer pCO2, which no run output currently carries. 
 wrote outputs/diagnostics/seas_ml_probe_20260909.rds 

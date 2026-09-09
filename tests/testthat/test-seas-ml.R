@@ -238,3 +238,58 @@ test_that("entrainment carries the SOURCE box's signature, in the right directio
   expect_lt(d2[i_ml, "C"], 0)
   expect_equal(d2[i_ml, "C13"] - r13_ml * d2[i_ml, "C"], 0, tolerance = 1e-10)
 })
+
+# ---------------------------------------------------------------------
+# 6. THE LAW-BASED CHECKS THAT REPLACED P1's RETIRED BAND (2026-09-09m)
+#
+# Marcus retired P1's band as a gate: its scale leg was the code under test, its
+# upper edge assumed a geometry that does not occur, its algebra was the wrong
+# form for a moving boundary, and its target is unobservable in principle. What
+# decides now are two ORDERINGS from the physics -- the standing rule's last
+# resort when no external number is available. They are evaluated in
+# calibration/diag_seas_ml_probe.R; their FORMULAE are mutation-tested here,
+# because a gate that passes is not a gate that works.
+# ---------------------------------------------------------------------
+
+# The bound, written ONCE here in the same form the probe uses:
+#   dc(peak-to-trough) = (c1 - c_min) * (1 - h_min/h_max);  half-amplitude = /2
+ml_bound <- function(dC, f_month) dC * (1 - min(f_month) / max(f_month)) / 2
+
+test_that("P1a's undamped bound has the value the moving-boundary algebra gives", {
+  co <- ccx_mld_shape()
+  # DERIVED, not typed: recomputed from the shipped shape and the measured step.
+  expect_equal(ml_bound(44.3, co$NH$f_month), 14.20, tolerance = 5e-3)
+  expect_equal(ml_bound(44.2, co$SH$f_month), 15.06, tolerance = 5e-3)
+  # It must scale LINEARLY in the DIC step -- the property that makes it a bound
+  # on the mechanism rather than on the fit.
+  expect_equal(ml_bound(88.4, co$SH$f_month), 2 * ml_bound(44.2, co$SH$f_month))
+  # A layer with NO seasonal cycle entrains nothing and the bound vanishes.
+  expect_equal(ml_bound(44.2, rep(1, 12)), 0)
+})
+
+test_that("P1a REJECTS an amplitude at or above the undamped bound (mutation)", {
+  co    <- ccx_mld_shape()
+  bound <- ml_bound(44.2, co$SH$f_month)
+  in_range <- function(amp) amp > 0 && amp < bound
+  expect_true(in_range(9.79))            # the measured value passes
+  # THE MUTATIONS: an undamped-or-worse amplitude, and a sign error.
+  expect_false(in_range(bound))          # exactly at the bound is NOT below it
+  expect_false(in_range(bound * 1.01))
+  expect_false(in_range(-9.79))          # wrong sign
+  expect_false(in_range(0))
+})
+
+test_that("P1b REJECTS a peak that does not fall at maximum mixed-layer depth (mutation)", {
+  co <- ccx_mld_shape()
+  # The law: concentration rises only while the layer DEEPENS and is flat while
+  # it shoals, so the anomaly peaks at h_max. Hemisphere- and sign-specific.
+  expect_equal(which.max(co$NH$f_month), 2L)
+  expect_equal(which.max(co$SH$f_month), 8L)
+  # THE MUTATION: a shape rolled half a year puts the peak in the wrong season,
+  # which is exactly what a backwards-wired limb would produce.
+  rolled <- co$SH$f_month[c(7:12, 1:6)]
+  expect_false(which.max(rolled) == which.max(co$SH$f_month))
+  # and the two hemispheres must NOT share a peak month -- they are in antiphase
+  expect_false(which.max(co$NH$f_month) == which.max(co$SH$f_month))
+})
+
