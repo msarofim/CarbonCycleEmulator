@@ -2,6 +2,60 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09w — ⭐ **§7 SETTLED BY COMPUTATION: THE CANONICAL MODE'S `logpost` IS VALID, ITS `streams` FIELD IS STALE BY 4.7543. ⛔ AND THE 09-09v REBUTTAL OF THE REVIEW WAS WRONG — IT NAMED A GAP "THE LOG-PRIOR" WITHOUT COMPUTING IT.**
+
+`calibration/diag_mode_streams_provenance.R` (new, reads only). The 09-09t review reported the
+canonical mode file's stored stream decomposition as **"4.75 log-units short of its own stored
+logpost"**. The 09-09v handoff pushed back: it measured the 23 stored rows at **−1434.670** against
+the stored logpost **−1478.660** and called the **43.99** gap *"the log-prior, as expected, and NOT
+the review's claimed 4.75 short."*
+
+⛔ **THAT GAP WAS NEVER COMPUTED — it was inferred from its plausible size** ⇒
+[[derived_must_mean_computed]]. The prior leg of `ccx_make_logpost()` is a pure function of `u` and
+`CCX_PARAM_TABLE`, so it settles without running the model:
+
+| quantity | value |
+|---|---|
+| log-prior at `u_mode` (shipped table **and** the mode's own `h_ml`/`kz` bands, identical) | **−39.234715** |
+| stored `logpost` | −1478.659503 |
+| ⇒ the loglik the file implies | **−1439.424788** |
+| sum of the **stored** 23 rows | −1434.670486 (**+4.7543** off) |
+| sum of the **recomputed** 25 rows | **−1439.424788** (off by **1.27e−10**) |
+
+**⭐ THE REVIEW WAS RIGHT AND THE REBUTTAL WAS WRONG. 4.7543 is exactly the number it named.**
+
+### But the consequence is the BENIGN one of the two, and that also had to be measured
+Two readings fit the same file with opposite costs: if the log-prior were 43.99 the stored logpost
+was built from the stored stream set, the refit ran under an objective this build no longer has, and
+a **refit** is owed. It is 39.23. So:
+- ✅ **The stored `logpost` IS today's objective. `hilda31` is a mode of this space. NO REFIT IS
+  OWED, nothing is quarantined, no stored logpost moves.** The review's *"if verified this is a
+  second quarantine-and-regenerate obligation"* does **not** follow.
+- ⛔ **Only the `streams` FIELD is stale** — it carries the retired `d14c_deep_ocean` (−4.1833) where
+  the objective scored the three `d14c_profile_*` rows (−8.9376, GNORM on since 09-07). The **22
+  common rows agree to 1.38e−10**, so the model and every other term are identical; the defect is
+  confined to the ¹⁴C profile leg of one reporting field that **13 sites read**.
+- The repo already owns the contract for this: `calibration/repair_arm_streams.R`
+  (`streams` / `streams_as_fitted` / `streams_provenance`). ⭐ And this case is **cleaner than the
+  08-22 one it was built for**: there the repaired file deliberately held two vintages because the
+  logpost was on an older objective. Here the logpost reconciles exactly, so the repaired file would
+  hold **one**. **Repairing a canonical artifact is Marcus's ruling; it is not taken.**
+
+### ⭐ A SILENT GATE, NAMED AND MUTATION-TESTED
+`diag_adoption_read_hilda31.R:29` exists to gate exactly this — the file's streams against a
+recomputation at the resolved vector. It `intersect()`s the name sets first and reports
+`max|diff|`, then only `cat()`s the leftovers. **On the live defect it returns 1.4e−10 and PASSES.**
+A file that has LOST a row and gained a retired one in its place is invisible to it — the
+[[gate_reads_its_own_output]] family's shape, in the name set rather than the path. The new script
+asserts on `setequal(names)` and mutation-tests it: identity → PASS, a row deleted → FAIL, a row
+moved +1 → FAIL, the live defect → FAIL, and the intersect-gate's **silence is itself asserted** so
+it cannot be quietly repaired without this script noticing.
+
+⚠ **Nothing load-bearing moves.** P12's −514 is on `co2_level_MLO`/`SPO`, both COMMON rows, agreeing
+to 1e−10 — the F2 / periodic-spinup finding is untouched. ⛔ Reads only: no prior moved, no constant
+changed, no artifact repaired. **Rulings owed: now FIVE** (`notes/handoff_2026-09-09v...` §6, plus
+the `streams` repair).
+
 ## 2026-09-09v — ⭐ **THE FIVE RE-RUNS ARE DONE. FOUR WERE NEVER CONTAMINATED, P1c WAS, AND THE −514 LEVEL PENALTY HAS A MEASURED PHYSICAL CAUSE. ⛔ F2 IS CONFIRMED: THE ASEASONAL SPINUP IS *NOT* A POINT ON THE SEASONAL ORBIT, SO 09-09j/k IS REVERSED AND A PERIODIC SPINUP IS OWED.**
 
 **SUITE FIRST, as 09-09u instructed: 2387 pass / 3 fail / 4 skip.** The three are exactly the
