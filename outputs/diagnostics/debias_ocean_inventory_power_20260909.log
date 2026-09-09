@@ -1,0 +1,50 @@
+mode hilda31; excess is TOTAL-minus-natural (baseline A), the definition N&L's OBSERVATIONS use
+
+de-biased   divisor 1.2  bomb_total 118.4 kmol | ocean excess 1975  61.41  1995  81.54 kmol
+pre-debias  divisor NA   bomb_total 118.4 kmol | ocean excess 1975  59.54  1995  81.18 kmol
+
+restore verified (md5 matches the file this script started with)
+
+=== THE POWER, in the OBSERVATION's own units ===
+
+  target set 'table4_obs_range'  (the DEFAULT; the choice between sets is FLAGGED, not settled -- DATA.md sec.10)
+    1975 obs 40.7-56.5 (half-width 7.9) | pre  59.54 OUTSIDE | de-biased  61.41 OUTSIDE | ARM SHIFT +1.866 kmol = 23.6 % of the half-width
+    1995 obs 43.8-59.0 (half-width 7.6) | pre  81.18 OUTSIDE | de-biased  81.54 OUTSIDE | ARM SHIFT +0.358 kmol = 4.7 % of the half-width
+
+  target set 'table2_peacock'  (one method, ~3x tighter)
+    1975 obs 39.6-48.2 (half-width 4.3) | pre  59.54 OUTSIDE | de-biased  61.41 OUTSIDE | ARM SHIFT +1.866 kmol = 43.4 % of the half-width
+    1995 obs 54.0-59.0 (half-width 2.5) | pre  81.18 OUTSIDE | de-biased  81.54 OUTSIDE | ARM SHIFT +0.358 kmol = 14.3 % of the half-width
+
+=== THE CONFOUNDS, MEASURED before any reading ===
+  1975  model (pre-arm) +3.0 kmol above the observed upper bound 56.5
+         undeclared-14C leak here: -0.11 kmol
+         if bomb_total were scaled to N&L's prior top (x 0.886): 52.7 kmol -> INSIDE
+  1995  model (pre-arm) +22.2 kmol above the observed upper bound 59.0
+         undeclared-14C leak here: -0.00 kmol
+         if bomb_total were scaled to N&L's prior top (x 0.886): 71.9 kmol -> still OUTSIDE
+  fitted bomb_total 118.4 kmol vs N&L's 99.3-104.9 prior (+13.5, +12.9 % above its top)
+  ⛔ THE LUC 14C LEAK IS NOT A CONFOUND HERE, CONTRARY TO DATA.md sec.10's third trap,
+   which records 23.9 kmol at 1975 and 28.3 at 1995. MEASURED at this mode it is ~0.
+   Either the leak was fixed after that text was written or it is mode-dependent;
+   EITHER WAY THE DATA.md NUMBERS ARE STALE for the canonical and must not be quoted.
+
+=== READING ===
+  ⛔ THE OBSERVATION CANNOT RANK THE TWO ARMS.
+   Both sit OUTSIDE every target set at both years, on the SAME side, by +3.0 (1975)
+   and +22.2 (1995) kmol -- while the ARMS differ by only +1.87 and +0.36. A target that
+   rejects both arms equally ranks neither, and would report 'no difference' identically
+   whether or not one existed. [[no_power_null]]
+   ⛔ AND THE OFFSET IS NOT EVIDENCE ABOUT BOMB UPTAKE. The fitted bomb_total sits 12.9 %
+   above the top of N&L's OWN production prior, and scaling it back to that top brings
+   1975 inside the observed range -- so the 1975 miss is an AMPLITUDE excursion, not an
+   ocean-uptake error, and it is common to both arms.
+   ⇒ THE N&L OCEAN INVENTORY CANNOT SETTLE RULING 4, nor the 75 % -> 43 % lambda
+   question. The information about the delivery SHAPE lives in the atmospheric d14c
+   TRAJECTORY -- which carried -92.68 of the -92.74 -- not in a 1975/1995 integral that
+   has averaged the transient away.
+   ⚠ SEPARATE, AND NOT WHAT THIS SCRIPT WAS BUILT TO ASK: 1995 stays outside even after
+   the bomb_total rescale (~72 vs an upper bound of 59). This IS a scored stream
+   (excess_c14_ocean, table4_obs_range, rep_frac 0.15), so the fit already sees it --
+   check the arc state before treating it as new.
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/debias_ocean_inventory_power_20260909.rds
+⛔ Nothing adopted; this is a POWER measurement, not a test.

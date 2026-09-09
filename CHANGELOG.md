@@ -2,6 +2,176 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09f — ⛔⛔ **RULING 4 REVERTED (Marcus). `BOMB_T2_HIGH_BIAS` default 1.20 → 1.0; the rebuilt product is BIT-IDENTICAL to `main` on every data column. The mechanism is KEPT, one env var away.**
+
+**Marcus:** *"So it seems like the factor of 1.2 creates inconsistencies with the independent compilations? If so, then revert to 1.0."*
+
+⚠ **The premise was corrected before acting, and the corrected version still supports the revert.** The ÷1.20 does **not** create an inconsistency *between* Graven and Hua — those two disagree with each other in 1963–65 either way, and the divisor does not touch that. What it does is make the **MODEL** fit the observed Δ¹⁴C record worse, and that cost lands **post-1970, in the years where the two compilations AGREE to 2–3 ‰** — i.e. it degrades agreement with the best-established part of the observations (09-09e). That, the trough flip, and the λ/Broecker degradation, against only Tans' own caveat in favour, is the case.
+
+**THE REVERT.** `data-raw/build_bomb_c14_source.R`: `BOMB_T2_HIGH_BIAS` default **1.20 → 1.0**, with the full four-measurement rationale written into the constant's own comment block so it cannot drift from the decision. ⭐ **The MECHANISM IS KEPT** — `CCX_BOMB_T2_BIAS=1.20 Rscript data-raw/build_bomb_c14_source.R` reproduces the applied arm exactly. Only the DEFAULT moved.
+
+**VERIFIED AGAINST `main`, not assumed.** The rebuilt product is **bit-identical to `main` on all four data columns** (`t`, `year`, `month`, `shape_per_yr`; max |diff| **0.000e+00**, `identical()` TRUE for each). Every provenance number returns: burden **65.9234** kmol, τ_tail **6.8746**, λ **0.1996 /yr**, pre-1963 delivered **36.0766** kmol, split **35 %**. ⭐ The ONLY difference from `main` is that the provenance now records `t2_high_bias_divisor = 1.0` **explicitly**, where `main` has no field at all — the divisor is now a stated choice rather than an absent one, which is what `test-bomb-source-provenance.R` exists to keep honest.
+
+**CONSEQUENCES, re-measured at 1.0:**
+
+| gate | de-biased (÷1.20) | **reverted (1.0)** |
+|---|---|---|
+| gate 5 NH trough | 24.9, z **−2.55 FAIL** | **50.5, z −1.80 PASS** |
+| gate 5 `sh_t` / `lag` | +0.76 / −1.43 | +1.47 / −0.94 |
+| gate 5 first-peak z | +0.0008 | +0.0008 |
+| **gate GL** | z −8.67 FAIL | **z −8.67 FAIL — UNCHANGED** |
+
+⭐ **Gate GL is DIVISOR-INVARIANT** (the bomb ¹⁴C source does not move the δ¹³C gradient), so **every ruling-3 number recorded in 09-09b stands as measured** and needed no correction. ⚠ Note `sh_t` was *better* under the de-biasing (+0.76 vs +1.47); it passes either way, and it is recorded rather than buried.
+
+**QUARANTINE — `outputs/quarantine/20260909_bomb_t2_debias/` + README**, per the standing rule (never delete pre-change outputs; never leave them at canonical paths). Moved: `gate5_bimodal_20260909.{rds,log}`, `tg_gradient_level_gate_20260909.rds`, `bomb_delivery_tail_20260909.{rds,log}` — all **single-arm results on a different model input**. ⛔ **NOT quarantined, deliberately:** `bomb_debias_impact`, `bomb_rep_sensitivity`, `debias_ocean_inventory_power`, `debias_penalty_by_year` (all carry **both arms by construction**) and `graven_vs_hua` (pure observation, no model). Those are **the provenance of the decision** and belong at canonical paths. Canonical replacements regenerated at 1.0.
+
+**⚠ WHAT THE REVERT DOES NOT CLAIM.** It does not dispute Tans' caveat that Telegadas may run ~20 % high — that caveat is his own and stands. It declines to route the Telegadas-vs-Naegler&Levin disagreement **into the pre-1963 troposphere**, which is the only channel available to it and is the least observed part of the record. And it does **not** rest on the −92.7 being an artifact of an over-tight target: 09-09d measured that it is not.
+
+**Suite back to the 3 pre-existing failures** (`test-alpha-as.R:116,117`, `test-seas-lag-split.R:199`); the two ruling-4 provenance guards `test-enso-demean.R:144,162` go GREEN, which is exactly what they were written to report. **No refit is owed. `hilda31` is canonical again and every stored logpost is valid.**
+
+## 2026-09-09e — ⭐⭐ **The −92.7 falls MOSTLY AFTER 1970, in the BEST-observed part of the record — not in the pre-1963 dump, as I had said twice the same day. And the model was ALREADY 4.3σ out there before the de-biasing.**
+
+`calibration/diag_debias_penalty_by_year.R` (+ `.rds`). Per-year loglik contributions to `d14c_NH` / `d14c_SH` under both forcing arms, reconstructed exactly as `R/likelihood.R` scores them. ⭐ **SELF-CHECKED: the per-year sums reproduce `ccx_loglik()`'s own stream totals exactly** — without that pin this is a second copy of an estimator, free to drift silently.
+
+| era | NH | SH | both | obs SH Δ¹⁴C |
+|---|---|---|---|---|
+| pre-1955 | −0.17 | −0.20 | −0.37 | −29 to −16 |
+| 1955–62 (the "dump") | −16.53 | −5.48 | **−22.02** | −11 to +244 |
+| 1963–65 (peak) | +0.32 | −12.52 | −12.21 | +380 to +646 |
+| 1966–70 | −2.33 | −5.84 | −8.17 | +518 to +628 |
+| **post-1970** | −4.51 | **−45.40** | **−49.91** | +11 to +501 |
+| **TOTAL** | −23.22 | −69.45 | −92.68 | |
+
+**⛔ THIS RETRACTS 09-09d's OWN EXPLANATION**, propagated the same pass to DATA.md §9c, the 09-09d entry above and [[ccx_bomb_rep_sensitivity]]. That entry said the cost "acts through the **pre-1963 dump** — a level shift sustained over many years". Measured: **the dump carries −22.0 of −92.7 and only −5.5 of the SH's −69.5**. ⇒ **twice in one day the mechanism was asserted from where the FORCING CHANGED rather than from where the COST LANDED, and both times it was wrong.**
+
+**⇒ 54 % of the cost, and 65 % of the SH's, is AFTER 1970** — *outside* `LIK_D14C_BOMB_WIN`, scored at **σ ≈ 7 ‰ not 25 ‰**, in exactly the years [[ccx_graven_vs_hua]] finds the two compilations agreeing to **2–3 ‰**. **The penalty is charged in the BEST-observed part of the record, not the least** — which also explains why widening the bomb window recovered only 21–25 % (09-09d): most of the cost was never inside it.
+
+**⭐ AND THE MODEL WAS ALREADY OUT THERE**, z = (obs − model)/σ on the worst SH years:
+
+| year | Δ logL | z PRE | z POST | σ |
+|---|---|---|---|---|
+| 1971 | −9.50 | **+4.31** | **+6.13** | 7.2 |
+| 1972 | −8.09 | +3.14 | +5.10 | 7.3 |
+| 1973 | −6.60 | +1.81 | +4.06 | 7.2 |
+
+The model sits **4.3σ BELOW the observed SH Δ¹⁴C in 1971 before any de-biasing.** ⇒ the correction **deepens a pre-existing post-peak SH deficit** rather than creating one — and the fit could not close that deficit at the OLD forcing either, which **bounds how much a refit can be expected to absorb.** (NH's own worst years, 1962/1961, ARE the dump; NH post-1970 is only −4.51.)
+
+**⇒ THE STRONGEST OBSERVATIONAL ARGUMENT AGAINST RULING 4 YET FOUND**, and the opposite of what 09-09d's reading implied. ⚠ Still a FIXED-VECTOR measurement; a refit is still owed either way. ⛔ **Nothing adopted; this localises a cost, it does not judge one.**
+
+## 2026-09-09d — ⛔⛔ **RETRACTION: the "3–11× understatement" used a denominator the objective does not use. The bomb window is scored at σ_eff 25.7 ‰, already ~7× Hua's own sd — and widening it further removes only 21–25 % of ruling 4's penalty.**
+
+**Marcus:** *"My lean is to use the best data, which would mean including the correction. Are there any reasons to think that uncertainty in other data is more than the original studies reported? I don't want to over fit to data which might be flawed."* This is that audit. `calibration/diag_bomb_rep_sensitivity.R` (+ `.rds`); each arm run ONCE and rescored under every σ, since the model does not depend on it.
+
+**⛔ THE RETRACTION.** DATA.md §9c, CHANGELOG 09-09, [[ccx_graven_vs_hua]] and my own 09-09c summary all said Graven shows *"Hua's 3.6 ‰ understates the systematic uncertainty by 3–11× in exactly the years the bomb constraint dominates"* — and I told Marcus this "actively defuses" counter-measurements (1) and (2). **3.6 ‰ is not the denominator the objective uses.** `R/likelihood.R` design note 3 has added **`LIK_D14C_REP_BOMB` = 25 ‰ in quadrature over 1955–1970** since August, for precisely this class of error: *"aggregating them to two hemispheric boxes has no uniquely right weighting … otherwise the bomb peak would dominate the posterior on the strength of a weighting choice."* MEASURED on the scored annual stream: **σ_eff 25.7–25.8 ‰ in 1963–65**, against 6.9–7.4 outside. The window was already inflated **~7×** over Hua's sd *before Graven was acquired*; the real shortfall at the peak is **~1.55×**. Retracted at every quoting site in one pass per [[retraction_in_place_does_not_propagate]]: DATA.md §9c, `ccx_graven_vs_hua`, `ccx_debias_invalidates_hilda31`, `INDEX_ccx_gates`.
+
+**AND THE CORRECTED CONCLUSION IS THE OPPOSITE ONE.**
+
+| `LIK_D14C_REP_BOMB` | σ_eff @1964 | d14c_NH | d14c_SH | **all streams** |
+|---|---|---|---|---|
+| **25 (shipped)** | 25.7 | −23.22 | −69.45 | **−92.74** |
+| 32 | 32.5 | −17.61 | −62.69 | −80.37 |
+| 40 (max Graven−Hua) | 40.4 | −14.32 | −58.75 | −73.13 |
+| 47 (√(25²+40²), independent-errors upper bound) | 47.4 | −12.67 | −56.78 | −69.51 |
+
+⇒ **the penalty shrinks by only 21–25 %. It does not vanish and does not change sign.** ⚠ **Why so robust:** the cost is dominated by the SH (−69.5). ~~It acts through the pre-1963 dump, a level shift sustained over many years.~~ ⛔ **CORRECTED 2026-09-09e — "the pre-1963 dump" WAS WRONG, and the correction matters.** Localised per year (`diag_debias_penalty_by_year.R`, self-checked against `ccx_loglik`s own stream totals): the dump years 1955–62 carry only **−22.0** of the −92.7, and just **−5.5** of the SH’s −69.5. **POST-1970 carries −49.9 (54 %), of which the SH is −45.4 (65 % of its total)** — *outside* the bomb window, at **σ ≈ 7 ‰, not 25 ‰**, in the years where Graven and Hua agree to 2–3 ‰. The worst SH years are 1971 (−9.50), 1972 (−8.09), 1973 (−6.60), and the model was **already z +4.31 / +3.14 / +1.81 too LOW there BEFORE the de-biasing**, going to **+6.13 / +5.10 / +4.06** after. ⇒ the de-biasing **deepens a pre-existing post-peak SH deficit** in the BEST-observed part of the record — not, as this text said, a level shift in the least-observed one. ⚠ **47 is an upper bound, not an estimate** — the Graven−Hua difference is ANTISYMMETRIC and is itself a PARTITION disagreement, the same KIND of error the 25 was calibrated for, so treating them as independent double-counts.
+
+**THE WIDER AUDIT — is any other stream scored tighter than its source warrants?** Mostly no; the stack carries explicit allowances almost everywhere, each with a receipt: `co2_level` 1.0 ppm against a 0.39–0.59 NOAA-vs-SIO floor and **deliberately soft at χ²/dof ≈ 0.38**; `co2_gradient` 0.35 / `d13c_gradient` 0.025 measured against Scripps-vs-NOAA disagreement and floored by observational precision (χ²/dof ≈ 0.6); `co2_icecore` ⊕ 4.0 ppm; `gcb_land_sink` **×3.0** (`LIK_LAND_SINK_INFLATE`); `excess_c14_ocean` ⊕ a 0.15 shared method bias; `ocean_grad_*` ⊕ a σ_rep measured off GLODAP; `d14c_deep/mid` at a measured-consistent n_eff 20.
+
+**Three places where it may still be understated, none yet acted on:**
+1. ⚠ **`gcb_ocean_sink` = 0.4 GtC/yr, UNINFLATED**, while the land sink gets ×3.0 — and gate 7's own ledger calls the source MIXED: *"the ocean sink is a product of ocean biogeochemistry MODELS and the land sink is a RESIDUAL of the budget, so this is not a clean observation."* **A model-derived target at its stated σ with no allowance is the clearest asymmetry in the stack.**
+2. ⚠ **`excess_c14_ocean`'s target-set choice** (`table4_obs_range` vs the ~3× tighter `table2_peacock`) is **worth ~130 log-units** and is FLAGGED, NOT SETTLED (DATA.md §10).
+3. ⚠ **The mid-century ice discrepancy window (1935–1960) is a knob defaulted OFF** (`CCX_ICE_DISCREPANCY = 1`) ⇒ [[default_off_hides_the_bug]].
+
+**⛔ NOTHING ADOPTED.** Choosing a rep value is an objective change and a Marcus ruling. ⇒ [[ccx_bomb_rep_sensitivity]].
+
+## 2026-09-09c — ⛔ **The N&L ocean inventory CANNOT arbitrate ruling 4 — measured, not assumed. And the LUC ¹⁴C leak DATA.md §10 records at 23.9 / 28.3 kmol is ~0 at the canonical: that text is STALE.**
+
+**The proposal, and why it was worth trying.** Of ruling 4's four counter-measurements only one is both physical and refit-independent: budget-closing λ 0.1996 → 0.3490 /yr, so gross air-sea exchange at Tans' own Broecker flux covers **75 % → 43 %**. Whether 43 % is implausible is an argument about the ocean/land split of bomb-¹⁴C removal — and my case for ocean dominance was **recall of the standard picture, not a citation** (on GROSS fluxes GPP ~120 GtC/yr exceeds Broecker's ~82, so the ordering is not self-evident). N&L 2006 Table 4's observation-based **ocean** inventories at GEOSECS (1975) and WOCE (1995) looked like the way to settle it on an observation. `calibration/diag_debias_ocean_inventory_power.R` (+ `.log`, `.rds`).
+
+**⛔ POWER FIRST, and the power is absent.** The by-stream decomposition of the −92.74 already on disk says the whole effect is atmospheric: `d14c_SH` **−69.452**, `d14c_NH` **−23.224**, `excess_c14_ocean` **−0.063** — the target quantity carries **0.07 %** of it. Measured directly (both arms at `hilda31`, forcing swapped under `tryCatch(finally=)` + an md5 restore assertion; the scored definition, total-minus-natural on baseline A, verified against `R/likelihood.R:1777` so the comparison is like-for-like):
+
+| year | obs (`table4_obs_range`) | pre-de-biasing | de-biased | **arm shift** |
+|---|---|---|---|---|
+| 1975 | 40.7–56.5 (½w 7.9) | 59.54 OUTSIDE | 61.41 OUTSIDE | **+1.87** |
+| 1995 | 43.8–59.0 (½w 7.6) | 81.18 OUTSIDE | 81.54 OUTSIDE | **+0.36** |
+
+⇒ **both arms sit outside every target set, at both years, on the SAME side, by +3.0 and +22.2 kmol, while the arms differ by 1.87 and 0.36.** A target that rejects both arms equally **ranks neither** ⇒ [[no_power_null]]. Reported against BOTH target sets, since the `table4_obs_range` / `table2_peacock` choice is worth ~130 log-units and is **flagged, not settled** (DATA.md §10).
+
+**And the offset is not evidence about bomb uptake either.** The fitted `bomb_total` is **118.4 kmol against N&L's own 99.3–104.9 production prior (+12.9 % above its top)**; scaling to that top brings 1975 to 52.7 = **INSIDE**. So the 1975 miss is an AMPLITUDE excursion common to both arms, not an ocean-uptake error.
+
+**⛔ AND A STALE DOC, FOUND BY MEASURING A CONFOUND INSTEAD OF QUOTING IT.** I wrote the LUC ¹⁴C leak into the script as a confound on DATA.md §10's authority ("our excess exceeds the bomb input by **23.9 kmol at 1975 and 28.3 at 1995**"). **Measured at `hilda31` by §10's own derivation it is −0.11 and −0.00 kmol.** Either the leak was fixed after that text was written or it is mode-dependent; **either way §10's numbers must not be quoted for the canonical.** The script now measures the leak rather than citing it ⇒ [[derived_must_mean_computed]]. My own confound claim was wrong for one iteration and is corrected in place.
+
+**⚠ FLAGGED, NOT CHASED — not what this script was built to ask.** 1995 stays outside even after the `bomb_total` rescale (~71.9 vs an upper bound of 59.0). This IS a scored stream, so the fit already sees it; **check the arc state before treating it as new.**
+
+**⇒ RULING 4 STAYS A JUDGEMENT ON TANS' OWN CAVEAT.** The three usable observational readings are: the gate-5 trough (a SOFT flip, and Graven is annual so it cannot arbitrate a within-year feature), the λ/Broecker split (physical, refit-independent, but resting on an uncited ordering), and now this — which has no power. **No refit has been run under the changed input; every stored logpost predates it.**
+
+## 2026-09-09b — ⭐ **RULINGS 1 and 3 IMPLEMENTED (the objective-neutral pair). Gate 5's NH statistic is the TROUGH DEPTH and it VINDICATES the ruling — the model's first-peak time matches the observation to 0.0008 σ where the retired argmax said "+2.17 σ late". Gate GL bounds on the augmented form at z −8.67. Both mutation-tested; no logpost moves.**
+
+**Why these two and not ruling 2.** Marcus, on being asked: *"Definitely do 1 and 3. If 2 is a definite improvement, then do it now too, unless the attribution would be valuable for the pedagogy of the final website."* Rulings 1 and 3 live entirely in `calibration/lib_design_gates.R` — gates are diagnostic-side, so **no stored logpost moves and no refit is owed**. Ruling 2 is in `R/likelihood.R` and IS an objective change; it is held so it does not become unattributable alongside the unsettled ruling 4 (§ below).
+
+**RULING 1 — gate 5's NH statistic is the inter-peak TROUGH DEPTH; the first-peak time is REPORTED.** `dg_nh_shape()` and the windows `DG_G5_W1/WT/W2` are **PROMOTED** out of `diag_gate5_bimodal.R`'s local `feat()` into `lib_design_gates.R`, and the diagnostic now delegates to it — the moment a gate scores a statistic, a second copy of that statistic is the caption-sync bug class this file exists to prevent. The shape rides along the `pk$NH` entry so every existing `pk$NH[["t"]]` caller is untouched. Plain windowed extrema, **not** `dg_peak()`'s parabolic refinement: the refinement is for a peak TIME, and model and observation sit on different time grids, so sub-sample interpolation of a DEPTH would be two estimators.
+
+- **The sigma is DERIVED by the same leave-one-zone-out construction as every other gate-5 sigma** — observation first, scaled to the quantity it tests. Observed drop **111.34 ‰**, σ **33.83 ‰** (4 draws).
+- ⭐⭐ **THE RULING'S PREMISE, MEASURED RATHER THAN ASSERTED:** the argmax time's zonal spread is **0.444 yr** against the first-peak time's **0.042 yr** — **10× tighter**. The argmax flips lumps under a single dropped zone; the first peak cannot. This is now an assertion in `test-gate-bounds.R` (`nh_t > 3 × nh_p1_t`), so if it ever stops being true the ruling's justification fails loudly.
+- ⭐⭐ **AND THE VERDICT VINDICATES IT.** At `hilda31` the model's **first-peak time matches the observation to z +0.0008** — the retired argmax statistic reported "+2.17 σ late". **The NH bomb timing was never wrong.** The miss is entirely the depth.
+- ⚠ **`lag` STILL INHERITS THE ARGMAX.** Ruling 1 removed `nh_t` from the judged set; it did NOT redefine the lag, which is still SH argmax − NH argmax, so a lump flip still moves it (measured: 1.86 σ, inside the bound). **Recorded, not silently fixed** — redefining the lag on the first-peak time is a methodological choice, not a consequence of this ruling. Asserted in the test so a future flip past DG_G5_NSD fails rather than passes.
+- **Mutation-tested** both ways: the trough must fail too-shallow AND too-deep (a two-sided bound, not a floor); a flattened curve must give drop 0 and a synthetic 100 ‰ notch must give drop 100; and **an NH argmax jumped a whole lump must NOT fail the gate any more** — the artifact the ruling exists to remove.
+
+**RULING 3 — gate GL bounds on the AUGMENTED (CO₂-control) form.** `dg_gateGL_verdict()`'s `rep_frac` default flips from `0` to **DERIVED**: `dg_gl_rep_frac()` computes `|1 − R_co2|` from the same `(g, ho)` the gate is reading ([[derived_must_mean_computed]] — never typed). The bare-se z, the bound until today, is now REPORTED as `z_bare`. The 09-08g diagnostic shipped with this choice explicitly deferred ("CHOICE for Marcus"); its two arms swapped roles.
+
+| arm | bare-se z (retired) | **augmented z (THE GATE)** | \|1 − R_co2\| | verdict |
+|---|---|---|---|---|
+| `hilda31` (canonical) | −13.31 | **−8.67** | 0.084 | **FAIL** |
+| `column_control` | −13.36 | −8.54 | 0.087 | FAIL |
+| `defaults` | −24.04 | −6.24 | 0.270 | FAIL |
+
+⚠ **The allowance cannot rescue the verdict, and that is the point** — mutation-tested: a 2× gradient fails at every control detuning up to 30 %. A weakening that could flip the verdict would be an excuse, not a representation error. Bounding on the station pair's sampling error ALONE charged a two-box model for something no two-box gradient can be; the CO₂ arm measures that on a tracer the model has no isotopic freedom to bend.
+
+**⛔ A SILENT ZERO-LENGTH PRINT, found while measuring.** The pre-de-biasing product carries **no `t2_high_bias_divisor` field at all** (it predates the knob), so `attr(b, "provenance")$t2_high_bias_divisor` is `NULL` — and **`sprintf("%.2f", NULL)` returns a zero-length vector, which `cat()` prints as NOTHING**. An entire diagnostic line vanished with no error. It is the same invisibility class as the landmine `test-bomb-source-provenance.R` was written for. Guard NULLs to `NA_real_` before any `sprintf` that feeds a `cat`.
+
+**⭐ AND A DECISION-RELEVANT MEASUREMENT FOR RULING 4** (both arms at `hilda31`, forcing file swapped with a `tryCatch(finally=)` + md5 restore assertion, per [[rscript_top_level_on_exit]]):
+
+| forcing | NH trough | z vs obs 111.3 (σ 33.8) | ruling-1 verdict | first-peak z |
+|---|---|---|---|---|
+| **pre-de-biasing** (`main`) | 50.5 | **−1.80** | **PASS** | +0.0008 |
+| **de-biased** (÷1.20, live) | 24.9 | **−2.55** | **FAIL** | +0.0008 |
+
+⇒ under the newly-ruled statistic the de-biasing **flips gate 5's verdict**. ⚠ **But softly, and it must be read that way**: σ 33.8 on 4 draws is a 30 % tolerance the ledger itself calls an order of magnitude, not a calibrated standard error, and both arms sit on the SAME side of the observation (too shallow) — the bound merely happens to fall between them. The de-biasing does not touch the timing in either arm.
+
+**Suite:** gate-bounds file 173 pass / 0 fail (was 169). The 5 red tests are unchanged and all pre-existing: `test-alpha-as.R:116,117`, `test-seas-lag-split.R:199`, and the two ruling-4 provenance guards `test-enso-demean.R:144,162` — **not to be "fixed"**; they are the ledger saying a refit is owed if ruling 4 stands.
+
+**⭐ RULING 2 — CLOSED WITH NO OBJECTIVE CHANGE (Marcus, 2026-09-09b: *"Leave it"*).** Asked whether ruling 2 was "a definite improvement", I measured it and it is not — **the ruling rests on a description that does not match the builder**:
+
+1. **"Re-bin on the model's own layer edges" is ALREADY the construction.** `data-raw/build_glodap_sigma_rep.R:135` calls `ccx_ocean_grid(h)` and reads the like-for-like target on the model's own box edges, on a **1 m grid over `h_ml`'s whole support**. There is no 25 m binning in the code to remove.
+2. **The steps are GLODAP's BOTTLE DEPTHS, not a convention.** MEASURED on the shipped table: the largest 1 m jumps in all three rows sit at h = **30, 40, 49/50, 74/75, 98/99/100, 149/150, 198/199** — GLODAP's standard sampling depths. As the top box edge sweeps past one, a clump of bottles moves between the surface and deep averages. That is discreteness in **where the ocean was actually sampled**, and smoothing it would lay a convention over real data.
+3. **Smoothing was already tried and REJECTED on measurement** (builder header, 08-28): a moving average "at every width deviated from the raw curve by MORE than the jumps it removed (0.131 vs 0.090 at w = 11 m)", because the curve has a narrow V-bottom at the crossing that averaging lifts ⇒ [[smoother_wider_than_feature]].
+
+⇒ of the 09-08j menu *smooth / re-bin / leave*, **"re-bin" IS the status quo and "smooth" is already refuted**. ⚠ **And the premise is worth re-reading too:** [[sigma_table_step_scales_with_residual]] records that **a sampler crosses a C1 shelf, a Laplace step-search does not** — so "the σ_rep shelf blocks the posterior" is an argument about the SAMPLER CHOICE, not about the table. **No stored logpost moves; nothing is owed.**
+
+**⛔ NOTHING ADOPTED.** Ruling 4 remains open with Marcus. Rulings 1 and 3 are gate-side; ruling 2 is closed without change ⇒ **the three objective-neutral rulings are DONE and round 6's prereg is unblocked on everything except ruling 4.**
+
+## 2026-09-09 — ⭐⭐ **RULINGS 1–4 taken; ruling 4 (the Tans de-biasing) APPLIED, then measured, and the measurement CUTS AGAINST IT; GRAVEN ACQUIRED and it says Hua's bomb-window sd is 3–11× too small.**
+
+**The four rulings (Marcus).** (1) gate 5's NH statistic → the **trough depth**, first-peak time reported; (2) the σ_rep table → **re-bin on the model's own layer edges**; (3) GL's bound → the **augmented (CO₂-control) form, z −9**; (4) the Tans ~20 % high-bias caveat → **APPLY it** (against my recommendation of an off-by-default arm). Only (4) is implemented so far; (1)–(3) are still owed.
+
+**Ruling 4 implemented.** `BOMB_T2_HIGH_BIAS` (env `CCX_BOMB_T2_BIAS`, default **1.20**) divides Tans Table 2 at the point of conversion, so burden, quarter-on-quarter releases and residual tail mass scale together and the budget still closes on 102 kmol. Pre/post-1963.04 split moves **35.4 % → 46.1 %**; burden 65.92 → 54.94 kmol; tail 14.28 → 11.90; τ unchanged at 6.87 (a uniform scale shifts a log-linear intercept, not its slope). Table 1 is NOT scaled — it is ground-based, and the script never reads it (a third stale-doc instance, corrected: the header and the `method` string both credited Table 1 for the pre-1963 apportionment, which actually comes from the concentration record).
+
+**⛔ THREE MEASUREMENTS SAY THE DUMP IS TOO LARGE.** (a) `diag_bomb_debias_impact.R`: at the canonical `hilda31`, loglik **−1439.42 → −1532.16, −92.74**, *entirely* in `d14c_SH` (−69.45) and `d14c_NH` (−23.22). ⚠ A MATCHED EVALUATION AT A FIXED VECTOR, NOT A REFIT — hilda31 was fitted under the pre forcing. (b) `diag_gate5_bimodal.R` re-run: the **newly-ruled trough statistic gets WORSE**, drop **51 → 25** against an observed 111; the inter-peak tilt improves (+68 → +37 vs obs −13). (c) budget-closing **λ 0.1996 → 0.3490 /yr (5.01 → 2.87 yr)**, so gross air-sea exchange at Tans' own Broecker flux covers **75 % → 43 %** of it — and DATA.md §9 names that very agreement as *"the main evidence that the budget-closure step is sound"*. **The de-biasing breaks the construction's own stated primary validation.**
+
+**Why it can act at all.** De-biasing is a NO-OP unless Table 2 and the 102 kmol total come from different sources: scale both and the unit-integral shape is unchanged. So the whole effect is the Telegadas-vs-Naegler&Levin disagreement, dumped into the pre-1963 troposphere — which is why SH (little bomb signal then) is hit 3× harder than NH.
+
+**GRAVEN ACQUIRED** (`data-raw/download_graven_isotopes.R`, upserts MANIFEST, both files SHA256-verified against ESGF's published checksums). ⚠ **DATA.md claimed since 2026-08-10 that Graven was "retained as a δ¹³C cross-check" — NO FILE EXISTED.** And what ESGF now serves is the SUCCESSOR vintage: **CMIP7/C4MIP ImperialCollege-3-0 v20250502, 1700–2023**, Δ¹⁴C on **4 equal-area bands** and δ¹³C **global-mean only** — not the CMIP6 v1.2.0 (1850–2015, 3 zones) of the 2017 paper. Never label it "Graven et al. 2017 data".
+
+**⭐⭐ AND IT CHANGES THE PICTURE.** `diag_graven_vs_hua.R`, area-weighted hemispheres, calendar-year means, 1950–1980: outside the peak the two agree to ~2–3 ‰; in **1963–65 they diverge to 40 ‰ = 11× Hua's own median zonal sd (3.6 ‰)**. The disagreement is **ANTISYMMETRIC** (NH +4.91, SH −4.87 mean) with debiased shape correlation **0.999** ⇒ the two compilations agree on the transient and disagree on the **HEMISPHERIC PARTITION**. At 1963 the NH−SH gradient is **361.4 vs 303.7, a 19 % difference** in exactly what constrains the source's NH/SH split. ⚠ Graven is an independent COMPILATION, not an independent observing system. ⇒ **Hua's 3.6 ‰ understates the systematic uncertainty by 3–11× in precisely the years the de-biasing moves and the bomb constraint dominates.** Full audit in **DATA.md §9c**, incl. the finding that there is **NO δ¹³C observation of any kind in 1950–1980** (flask starts 1977.2; ice cores have zero samples there) and that the "56–60 % still aloft" reading recomputes as `59.12/[99.3,104.9]` — the RAW, UNRAISED point, which neither judgement call nor both together returns to.
+
+**⛔ A SILENT STATE LEAK, FOUND AND FIXED.** `diag_bomb_debias_impact.R` swapped the forcing file per arm and restored via **top-level `on.exit()` — which NEVER FIRES in an Rscript** (it is a function-frame facility; verified against an in-function `on.exit` and a `tryCatch(finally=)` in the same script). The restore silently did not happen and left the live product as whatever the LAST arm staged. It went unnoticed because that arm happened to match HEAD, so `git status` was clean and I reported the tree as de-biased when it was not. Now `tryCatch(finally=)` **plus a SHA256 assertion that the restore actually landed**. The measurement itself is unaffected: each arm staged its own file and printed the divisor it read back (1.20 / 1.00).
+
+**And the landmine it left: a guard for it.** The builder said /1.20 while the shipped product carried no divisor at all, and nothing could see it — the product is internally consistent either way, so a check reading only the product is BLIND. `tests/testthat/test-bomb-source-provenance.R` compares the product's recorded divisor against the **builder script's declared default**, parsed from the source. **Mutation-tested**: staging the pre-de-biasing product makes it fail (1 failed / 4 passed) and restoring makes it pass (0 / 5).
+
+**Also:** `diag_bomb_delivery_tail.R` is now divisor-aware (reads it back from the product, so the check tracks the builder rather than asserting a constant of its own) and reports units in Table 2's own printed frame; a typed `(14.28 kmol)` was removed from the builder header before the divisor could make it drift.
+
+**⛔ NOTHING ADOPTED beyond ruling 4's mechanism.** Whether to keep `BOMB_T2_HIGH_BIAS = 1.20` is back with Marcus on the new evidence; rulings 1–3 are unimplemented; no refit has been run under the changed input, so **every stored logpost predates it**.
+
 ## 2026-09-08k — **The bomb-delivery data check (handoff 09-08j §3.4) — the builder is SOUND, two of its comments were NOT.** `calibration/diag_bomb_delivery_tail.R` (+ `outputs/diagnostics/bomb_delivery_tail_20260908.{rds,log}`). Three checkable readings, all holding, with a mutation arm that fails as it must.
 
 **READING 1 — the first-point replacement is right; its documentation was wrong.** `BOMB_T2_DROP_FIRST` raises the 12/62-2/63 burden from the raw 356 units (59.12 kmol) to 397 (65.92 kmol, **+11.5 %**) by assuming the quarter before t0 released about as much as the quarter after it (`kmol[2] + (kmol[2]-kmol[3])`). That respects Tans p.133, which calls the value "much too low" and so makes 356 a **FLOOR**. ⛔ But **two comments** — the constant's own declaration and the `lf` fit block — described it as "a backward extrapolation of the tail fit". The code has never done that, and it would be wrong if it did: back-extrapolating the 1965-69 decay to t0 gives **36.23 kmol, 39 % BELOW the floor**, because it decays a late slope back through the peak. Both comments corrected in place, plus the header's interval-preference list; no behaviour change, product byte-identical (not rebuilt).
