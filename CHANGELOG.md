@@ -2,6 +2,21 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09i — ⭐⭐ **ROUND 6'S STATED MAIN RISK IS RETIRED: the periodic spinup is probably NOT needed. And the substep bound must be taken at the THINNEST mixed layer, not the mean.**
+
+**⭐⭐ NO PERIODIC SPINUP.** `R/spinup.R:227` sets `p0$seas_drivers <- 0` — **the spinup is aseasonal by construction**, and every existing seasonal mechanism (seasonal SST, the land drivers, the `ent_seas_amp_SH` shim) already lives under that one switch *precisely so the spinup's zeroing covers it* and `seas_drivers = 0` stays the **exact** aseasonal model. ⇒ **Put the seasonal mixed layer under the SAME switch and the spinup needs no change at all**; the seasonal cycle equilibrates in the transient on ML timescales (months). This follows the model's own established convention rather than inventing one, and it removes what the 09-09g prereg called "the main cost and the main risk of the round". ⚠ **The one thing to CHECK, not assume:** unlike the pCO₂-side shim, option A moves **real carbon** seasonally, so it rectifies onto the annual-mean state — **measure the annual-mean drift in the transient**; a periodic steady state becomes necessary only if it fails to settle. With the spinup unmoved the per-evaluation cost should be essentially flat, since 84 % of an evaluation IS the spinup ⇒ [[ccx_spinup_is_the_cost]].
+
+**⚠ THE SUBSTEP BOUND MOVES THE OTHER WAY.** `ccx_substeps_for()` sizes stability from `kz / (dz_k · dz_mid_k)` and `w / dz_k` on a grid built at the **annual mean**, but the summer mixed layer thins to **26–30 m** against that **49 m** mean — tightening both bounds. ⇒ take the bound on the grid at **`min(h_ml(t))`**, the conservative direction, one line. ⛔ Left at the mean it would silently under-resolve the summer ML.
+
+**✅ AND THE CHANGE IS MORE CONTAINED THAN FEARED — three structural facts, read out of the source:**
+- Diffusion is computed **inline per step** from `grid$dz[kk]`, `grid$dz[kk+1]`, `aux$dz_mid[kk]` (`R/model.R:1958`), **not** from a precomputed matrix. A time-varying `dz` flows through it naturally. (`ccx_diffusion_eigmax()` builds a matrix, but only to size the substep count.)
+- ⭐ **`dz_ML + dz_1` is conserved by construction** — layer 1 absorbs exactly what the ML gains — so **`dz_mid[1]` is INVARIANT** and only `dz_mid[2]` varies. Two thicknesses move; one combination does not.
+- ⛔ **`kz_int` must be computed ONCE at the annual mean and held.** `ccx_kz_profile()` anchors on `grid$h_ml` (`K(h_ml) = kz` exactly); the interior interfaces do **not** move, so their `K` must not either, while the ML base keeps `K = kz` by the anchor convention. Recomputing it per month would wobble the interior diffusivity for no physical reason.
+
+**The entrainment limbs take the model's existing advective form**: `F_C = y[oc1,"C"] · (dh/dt) / dz_oc1(t)` when deepening, `F_C = y[ml,"C"] · (−dh/dt) / dz_ml(t)` when shoaling — the same shape as the `w_up` limbs at `R/model.R:2051`, through `add_flux`, **resolved per direction** (never one signed flux) and at **`alpha13 = 1`**: entrainment is physical transport, not a fractionating exchange, so `add_flux` takes both isotopes from the source box for free.
+
+⛔ **STILL NOTHING BUILT.** Prereg updated to all of the above.
+
 ## 2026-09-09h — ⭐⭐ **ROUND 6 RULED (Marcus): build OPTION A, the REAL seasonal mixed layer, with a MEAN-PRESERVING shape. And the geometry pre-check says (A) is TRACTABLE at the canonical — with one hard bound that `ent26` would have violated.**
 
 **THE TWO RULINGS.** (1) **Build (A)** — a true time-varying mixed layer that entrains real water — **not** the derived-amplitude shim (B), because B's isotopic discriminant is compromised before it runs (09-09g). (2) **The shape is MEAN-PRESERVING**: `h_ml(t)` is the MLD climatology scaled so its **annual mean is the fitted `h_ml`**; the annual-mean entrainment effect is already inside the fitted `h_ml`, pump and `kz`, so any other normalisation double-counts it. Prereg rewritten to both: `notes/prereg_2026-09-09g_round6_seasonal_ml.md`.

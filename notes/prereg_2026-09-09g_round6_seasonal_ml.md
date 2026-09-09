@@ -17,9 +17,10 @@ Read first: `notes/options_2026-09-08d_seasonal_h_ml.md`, `notes/handoff_2026-09
 Memory: [[ccx_seasonal_h_ml_option]], [[ccx_pedagogical_not_emulator]], [[ccx_gate_s_ocean_phase]],
 [[default_off_hides_the_bug]], [[never_reship_mid_array]], [[consider_torch_first]].
 
-**⛔ NOTHING BUILT YET.** Every model number below is GENERATED at `hilda31` by
-`scratch/geom{,2,3}.R`-class one-liners quoted inline; every observation number is from
-`data/obs_mld.rds$seasonal` (Holte Argo product, built 09-08d).
+**⛔ NOTHING BUILT YET.** Every model number in §3 is GENERATED at `hilda31` by
+**`calibration/diag_seasonal_ml_geometry.R`** (→ `outputs/diagnostics/seasonal_ml_geometry_20260909.{rds,log}`),
+which is committed and re-runnable; every observation number is from `data/obs_mld.rds$seasonal`
+(Holte Argo product, built 09-08d).
 
 ---
 
@@ -111,14 +112,32 @@ if a future mode file sets `h_hs = 0`.
    signed flux, which is the 2026-08-25e seasonal-NEP bug and no conservation gate can see it.
    These limbs carry **`alpha13 = 1`**: entrainment is physical transport, not a fractionating
    exchange.
-2. **Box mass must track thickness.** `ml_mass_kg` is currently a scalar per hemisphere
+2. ⚠ **The SUBSTEP BOUND must be taken at the THINNEST ML, not the mean.** `ccx_substeps_for()`
+   sizes stability from `kz / (dz_k * dz_mid_k)` and `w / dz_k` on a grid built at the annual mean;
+   the summer ML thins to **26–30 m** against that 49 m mean, tightening both. Compute the bound on
+   the grid at `min(h_ml(t))` — the conservative direction, and one line.
+   ✅ Contained, because only two thicknesses move and one combination does not: `dz_ML + dz_1` is
+   **conserved by construction**, so `dz_mid[1] = (dz_ML + dz_1)/2` is **invariant**; only
+   `dz_mid[2]` varies. And `kz_int` must be computed **once at the annual mean** and held — the
+   interior interfaces do not move, so their `K` must not either, while the ML base keeps
+   `K = kz` by the anchor convention.
+3. **Box mass must track thickness.** `ml_mass_kg` is currently a scalar per hemisphere
    (`R/model.R:2587`, `A * grid$h_ml * RHO_SEAWATER`) and is the denominator of
    `dic_ml <- y[iml,"C"] * mol_per_GtC / ml_mass_kg` (`R/model.R:1833`). It becomes a function of
    `t`. ⛔ **Getting the mass right but not the transfer (or vice versa) silently manufactures or
-   destroys DIC** — the conservation assertion in §6.3 is what catches it.
-3. **A PERIODIC spinup.** Today's spinup zeroes seasonality and solves a fixed point
-   (`ccx_spinup()`); (A) needs a **periodic steady state** — iterate a full year to a year-over-year
-   tolerance. **This is the main cost and the main risk of the round.**
+   destroys DIC** — the conservation assertion in §6.4 is what catches it.
+4. ⭐⭐ **A PERIODIC SPINUP IS PROBABLY NOT NEEDED — the round's stated main risk is retired.**
+   `R/spinup.R:227` sets `p0$seas_drivers <- 0`: the spinup is **aseasonal by construction**, and
+   every existing seasonal mechanism (seasonal SST, the land drivers, the `ent_seas_amp_SH` shim)
+   already lives under that one switch precisely so the spinup's zeroing covers it and
+   `seas_drivers = 0` stays the **exact** aseasonal model. ⇒ **Put the seasonal ML under the SAME
+   switch** and the spinup keeps its existing fixed point; the seasonal cycle equilibrates in the
+   transient on ML timescales (months).
+   ⚠ **The one thing to CHECK, not assume:** unlike the pCO₂-side shim, (A) moves **real carbon**
+   seasonally, so it rectifies onto the annual-mean state. The model already accepts that class of
+   rectification as physics (seasonal SST, the fertilisation rectifier). **Measure the annual-mean
+   drift over the first decades of the transient**; only if it fails to settle does a periodic
+   steady state become necessary. ⇒ **The round is materially cheaper than §6 first scoped it.**
 
 ---
 
@@ -164,7 +183,9 @@ ruling. ⛔ **No Joos row anywhere in this prereg.**
 1. **Grid decoupling** (§3a): interior grid from the annual-mean `h_ml`; ML/layer-1 boundary moves.
 2. **Both cores**, R `ccx_deriv` and `src/ccx_core.cpp`: `h_ml(t)`, time-varying `ml_mass_kg`, the
    two entrainment limbs at `alpha13 = 1`.
-3. **Periodic spinup** (§4.3) — the risk item; do it before the probe, not after.
+3. **Put the mechanism under `seas_drivers`** (§4.3) — the spinup then needs NO change. ⭐ Measure
+   the annual-mean rectification drift in the transient and report it; build a periodic steady state
+   **only if** that measurement says the aseasonal fixed point will not do.
 4. **Tests BEFORE the probe.** R/C++ **parity**; a **mutation test at an explicit non-zero seasonal
    amplitude** ([[default_off_hides_the_bug]] — a mechanism defaulted off is untested where it
    matters); ⭐ a **conservation assertion that total C, C13 and C14 are unchanged by a full
@@ -174,9 +195,10 @@ ruling. ⛔ **No Joos row anywhere in this prereg.**
 5. **Probe unrefitted at `hilda31`:** P1, P3, P6, P7, gate S. **Stop here if P1 fails.**
 6. **Refit on Torch.** ⭐ **Verdict said out loud** ([[consider_torch_first]]): a **30-parameter
    multistart is a Torch array, not a laptop job** — 24 starts, one wave, ~2.5 h on the 09-08e
-   recipe. ⚠ The periodic spinup may raise the per-evaluation cost materially
-   ([[ccx_spinup_is_the_cost]]: 84 % of an evaluation is already the spinup) — **re-time a single
-   evaluation before sizing the array.** Port targets committed at the launch commit; preflight 8/8;
+   recipe. ⭐ With the spinup unchanged (§4.3) the per-evaluation cost should be **essentially flat** —
+   84 % of an evaluation is the spinup ([[ccx_spinup_is_the_cost]]) and the spinup does not move.
+   ⚠ **Re-time a single evaluation anyway before sizing the array**; the transient gains two flux
+   limbs and a tighter substep bound (§4.4). Port targets committed at the launch commit; preflight 8/8;
    ⛔ **NEVER re-ship the bundle mid-array** ([[never_reship_mid_array]]).
 7. Score against P1–P8. **Adoption is Marcus's call.** Then the whole-model scorecard arm.
 
