@@ -1,0 +1,32 @@
+P1c -- AIR-SEA dpCO2, MODEL vs OBSERVATION. ⛔ A COMPARISON, NOT A GATE. 
+rulings: A1 (SH 0-90 S, the driver's own aggregation) is PRIMARY; A2 (40-90 S) is REFERENCE. 
+quantity: dpCO2 = ocean pCO2 - atmospheric CO2, GATE S's own quantity (ruling B2). 
+estimator: AREA-MEAN first, then ONE harmonic -- a well-mixed box has an area-mean 
+           concentration, so a per-cell amplitude mean is the WRONG reduction. 
+ 
+observed atmospheric SPO harmonic: amp 1.170 ppm, peak month 9.01 (n = 49 yr) 
+ 
+running the model (spinup + 95 yr, R core, both arms) ... 
+ 
+SH dpCO2 -- amplitude (uatm) and peak month 
+                                            amp    peak mo 
+  MODEL, seas_ml = 0                      20.57       6.24 
+  MODEL, seas_ml = 1                      40.76       6.83 
+  OBS A1 (0 to 90 S)  <- THE RULING        4.47       1.61 
+  OBS A2 (40 to 90 S)  (reference)        15.46       7.39 
+ 
+AGAINST THE RULED TARGET (A1, the whole SH ocean): 
+  amplitude  model 40.76 vs obs 4.47  -> ratio 9.11 
+  phase      model 6.83 vs obs 1.61  -> 5.22 months apart 
+FOR REFERENCE ONLY (A2, GATE S's 40-90 S band): 
+  amplitude  ratio 2.64 | phase 0.57 months apart 
+ 
+⛔ NO VERDICT IS RETURNED. If the model sits close to A2 and far from A1, that is the 
+   STRUCTURAL finding the ruling was expected to expose: a LOW-LATITUDE box (84 % of 
+   the SH ocean) carrying a HIGH-LATITUDE seasonal cycle, because the MLD climatology 
+   driving it is an SH-wide mean dominated by high-latitude winter mixing. It would 
+   NOT be a falsification of entrainment. 
+⚠ The two observed regimes are ANTIPHASE (subtropics peak Jan, Southern Ocean Jul-Aug), 
+   so A1's amplitude is a 4.4x CANCELLATION of A2's and is fragile by construction. 
+ 
+wrote outputs/diagnostics/p1c_dpco2_20260909.rds 

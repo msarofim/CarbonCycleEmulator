@@ -2,6 +2,28 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09r — ⭐⭐ **P1c RUN AS A REPORTED COMPARISON (rulings A1 + B2 taken). THE PREDICTED STRUCTURAL FINDING LANDED — AND IT BROUGHT A SHARPER ONE: THE MODEL OVER-SWINGS AGAINST *BOTH* BANDS, AND `seas_ml` DOUBLES IT.**
+
+**RULINGS IMPLEMENTED.** **A1**: the model's SH `ml` is compared against the observation aggregated **the same way the model's own driver was** — the whole SH ocean, 0–90 °S. **A2 (GATE S's 40–90 °S) is reported ALONGSIDE, reference only.** **B2**: the quantity is the **air-sea ΔpCO₂**, GATE S's own, so amplitude and phase come from ONE quantity. Estimator **AREA-MEAN-FIRST** (09-09q: a well-mixed box has an area-mean concentration). `calibration/diag_p1c_dpco2_comparison.R`.
+
+**⭐ THE MODEL SIDE IS RECORDED, NOT RECOMPUTED.** `ccx_deriv(record = TRUE)` now stashes `pco2_ml` and `sst_ml`; reconstructing them outside the deriv would be a **SECOND ESTIMATOR** free to drift (the seasonal SST construction, the seasonal ML mass and the frozen-Revelle branch all feed it). ⭐ **No `out` column was added and the C++ was not touched** — so there is no cross-core column to desync, `record` is FALSE on every calibration path, and no stored logpost can move. ⚠ **This is a DIFFERENT design from the "expose in both cores with a parity assertion" I recommended**, and it is simpler for a reason worth stating: the parity concern was about an OUTPUT COLUMN present in one core and absent or transposed in the other, and with no column there is nothing to desync — the physics is already parity-tested.
+⛔ **AND IT MUST BE READ FROM A SETTLED TRANSIENT.** At a midwinter step from the ASEASONAL spinup state the NH mixed layer is 1.68× its mean mass while its carbon is still the annual-mean value, and `pco2_ml` reads **138 µatm instead of ~280**. That is an initialisation transient, not the seasonal cycle; the diagnostic integrates to 1994 first.
+
+**THE RESULT — SH air-sea ΔpCO₂:**
+
+| | amp (µatm) | peak month |
+|---|---|---|
+| MODEL, `seas_ml` = 0 | **20.57** | 6.24 |
+| MODEL, `seas_ml` = 1 | **40.76** | 6.83 |
+| **OBS A1 (0–90 °S) — THE RULING** | **4.47** | **1.61** |
+| OBS A2 (40–90 °S) — reference | 15.46 | 7.39 |
+
+⭐⭐ **THE STRUCTURAL FINDING LANDED AS PREDICTED, and the numbers are unambiguous: against A1 the model is 9.11× in amplitude and 5.22 MONTHS out of phase; against A2 it is 0.57 months out — nearly in phase.** ⇒ **the model's LOW-latitude box (84 % of the SH ocean) is carrying the HIGH-latitude regime**, because the MLD climatology driving it is an SH-wide mean dominated by high-latitude winter mixing. ⛔ **This is NOT a falsification of entrainment** — it is a true statement about the box structure, which is why A1 was run as a COMPARISON and returns no verdict.
+
+**⛔⛔ AND THE UNEXPECTED PART, WHICH IS UNFLATTERING AND MATTERS MORE: THE MODEL OVER-SWINGS AGAINST *BOTH* BANDS.** Even at `seas_ml = 0` it is **20.57 vs A2's 15.46 = 1.33×**; turning the mechanism on takes it to **40.76 = 2.64×**. ⇒ **`seas_ml` roughly DOUBLES an already-too-large seasonal ΔpCO₂ cycle.**
+⭐ **The likely reading ties this straight back to P12 and P2, and it is testable rather than rhetorical:** at the UNREFITTED canonical the model carries **both** the fitted solubility compensator (`sst_seas_amp_SH`, the very parameter that had prior-z **−5.14** because it was standing in for entrainment) **and** the new mechanism — and they ADD. That is P12's "one mechanism, not two" showing up in an OBSERVABLE for the first time, and it is exactly what **P2** (the load-bearing prediction that the strained solubility amplitude RELAXES on refit) says the refit must give back.
+⇒ **The refit is now the decisive step, and this comparison tells it what it must achieve: cut the SH ΔpCO₂ amplitude by ~2.6× against A2 by relaxing the fitted solubility amplitude, without giving back P12's +518 on `co2_seasonal_SPO`.**
+
 ## 2026-09-09q — ✅ **THE 19.45-vs-16.26 DISCREPANCY IS RESOLVED: it is an ESTIMATOR SPLIT, and resolving it REMOVES A DEGREE OF FREEDOM from P1c's Ruling B.**
 
 **MEASURED, both estimators on the same band and the same file** (`calibration/diag_so_pco2_amplitude.R`, now carrying the comparison so it is reproducible): the **harmonic of the AREA-MEAN series** gives **16.26 µatm** (what GATE S's phase uses); the **AREA-MEAN of PER-CELL amplitudes**, which is phase-blind, gives **19.68**. `.ENT_SO_PCO2_AMP` ships **19.45** ⇒ **it is the per-cell reduction.**

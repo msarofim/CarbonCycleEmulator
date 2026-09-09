@@ -1498,6 +1498,15 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # the flush that shares the HS->HD endpoint pair (ccx_flux_hs_derive()).
     .edges <- matrix(0, nb + 1L, nb + 1L)
     .pump  <- matrix(0, nb + 1L, nb + 1L)
+    # MIXED-LAYER pCO2 AND SST, per hemisphere (2026-09-09r). Recorded rather
+    # than recomputed by any caller: `pco2_ml` is the model's own air-sea
+    # driving quantity and reconstructing it outside the deriv would be a SECOND
+    # ESTIMATOR, free to drift from this one (the seasonal SST construction, the
+    # seasonal mixed-layer mass and the frozen-Revelle branch all feed it).
+    # ⭐ Nothing is exposed in ccx_run()'s `out`, so no output column exists to
+    # desync between the two cores, and `record` is FALSE on every calibration
+    # path -- this cannot touch a stored logpost.
+    .pml <- .sstl <- stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS)
   }
   .rec <- function(from, to, F_C, lab) {
     cs <- ccx_flux_channel(from, to, lab, .cls, .atmN)
@@ -2008,6 +2017,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     } else {
       pco2_from_dic(dic_ml, ccx_const("ALK_SURFACE"), sst, k = k)
     }
+    if (record) { .pml[[h]] <- pco2_ml; .sstl[[h]] <- sst }
     pco2_at <- chi                                                  # ppm ~ uatm at 1 atm
     # GROSS both ways (see add_flux header): invasion and evasion separately.
     gx <- aux$asx[[h]] * p$k_w * k$K0
@@ -2503,7 +2513,8 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 
   dy[, "C14"] <- dy[, "C14"] - ccx_const("LAMBDA_C14") * y[, "C14"]
 
-  if (record) attr(dy, "fluxes") <- list(channels = .fx, boxnet = .net, edges = .edges, pump_edges = .pump)
+  if (record) attr(dy, "fluxes") <- list(channels = .fx, boxnet = .net, edges = .edges,
+                                         pump_edges = .pump, pco2_ml = .pml, sst_ml = .sstl)
   dy
 }
 
