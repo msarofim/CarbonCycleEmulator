@@ -32,11 +32,16 @@
 #                    quarters of 1963), which an earlier smooth two-exponential
 #                    fit destroyed by forcing the flux to peak at Dec-62.
 #   1966.54-1969.54  one Table 2 interval (128 -> 86).
-#   pre-1963.04      ANNUAL totals from Table 1 plus budget closure (below).
+#   pre-1963.04      budget closure (below) sets the BLOCK total; the split
+#                    between years comes from the observed concentration record,
+#                    NOT from Table 1, which this script never reads.
 #   post-1969.54     exponential tail. Its TOTAL is measured -- it is the last
-#                    reported stratospheric burden (14.28 kmol), independent of
+#                    reported stratospheric burden, independent of
 #                    BOMB_TOTAL_REF_KMOL -- and only its distribution in time
-#                    comes from the fit to the late Table 2 points.
+#                    comes from the fit to the late Table 2 points. (No value
+#                    typed here: BOMB_T2_HIGH_BIAS scales it. The script prints
+#                    it, and diag_bomb_delivery_tail.R recomputes it.)
+#   NOTE            Table 2 is divided by BOMB_T2_HIGH_BIAS before any of this.
 #
 # Budget closure for the pre-1963 total: the Table 2 series says how much was
 # still aloft at 1963.04; the rest of the Naegler & Levin total must already
@@ -83,6 +88,23 @@ BOMB_T2_DROP_FIRST  <- as.logical(as.integer(Sys.getenv("CCX_BOMB_DROP_FIRST", "
                                 # because it decays a 1965-69 slope back through
                                 # the peak. Checked 2026-09-08,
                                 # calibration/diag_bomb_delivery_tail.R.
+BOMB_T2_HIGH_BIAS   <- as.numeric(Sys.getenv("CCX_BOMB_T2_BIAS", "1.20"))
+                                # Tans p.133, his SECOND caveat on this table:
+                                # "Telegadas' aircraft data appear on average
+                                # ~20 % too high" against ground-based CO2
+                                # collections and against Ergin et al. (1970).
+                                # Table 2 is DIVIDED by this. Ruled APPLIED by
+                                # Marcus 2026-09-09; it was unapplied from this
+                                # file's creation through 6f2870a. The check
+                                # that surfaced it:
+                                # calibration/diag_bomb_delivery_tail.R.
+                                # CCX_BOMB_T2_BIAS=1 recovers the old behaviour.
+                                # Table 1 is NOT scaled: it is ground-based, and
+                                # this script never reads it anyway.
+                                # It does NOT change the 102 kmol total (Naegler
+                                # & Levin's, absorbed by the fitted bomb_total)
+                                # -- it changes the pre/post-1963 SPLIT, i.e.
+                                # the delivery SHAPE.
 BOMB_PREBOMB_D14C   <- as.numeric(Sys.getenv("CCX_BOMB_PREBOMB", "-30"))
                                 # permil. Suess-depleted pre-bomb level, taken
                                 # as the Dec-1954 SH value of Tans Table 1 (the
@@ -159,6 +181,13 @@ N14 <- (d14c_ex / 1000) * (mol_air_trop * chi * 1e-6) * ccx_const("R14_STD") / 1
 # =====================================================================
 t2 <- read.csv(BOMB_T2_FILE, comment.char = "#")
 t2$kmol <- t2$inventory_1e26_atoms * 1e26 / NA_AVOGADRO / 1000
+# Tans' ~20 % high bias, applied uniformly so that the burden, the
+# quarter-on-quarter releases and the residual tail mass scale together and the
+# budget still closes on BOMB_TOTAL_REF_KMOL.
+t2$kmol <- t2$kmol / BOMB_T2_HIGH_BIAS
+if (BOMB_T2_HIGH_BIAS != 1)
+  cat(sprintf("Table 2 de-biased by /%.2f (Tans p.133, on average ~20 %% too high)\n",
+              BOMB_T2_HIGH_BIAS))
 t0 <- t2$t_mid[1]
 
 # Exponential fit to the LATE points, used for the post-1969 tail's SHAPE only.
@@ -305,9 +334,10 @@ out <- data.frame(t = mt, year = floor(mt),
                   shape_per_yr = shape)
 attr(out, "provenance") <- list(
   source = "Tans (1981) SCOPE 16 Tables 1-2 (Table 2 after Telegadas 1971); sub-annual shape from Hua et al. 2022 observed D14C",
-  method = "interval totals from inventory data (Table 2 quarterly where available, budget-closed Table 1 annual before 1963); within-interval shape from concentration-implied delivery dN14/dt + lambda*N14",
+  method = "interval totals from inventory data (Table 2 quarterly where available, budget-closed annual before 1963, apportioned by the concentration record; Table 1 is NOT read by this script); within-interval shape from concentration-implied delivery dN14/dt + lambda*N14",
   t0 = t0, burden_t0_kmol = I_t0, tau_tail = tau_tail,
   dropped_first_point = BOMB_T2_DROP_FIRST,
+  t2_high_bias_divisor = BOMB_T2_HIGH_BIAS,
   pre1963 = list(delivered_kmol = D_pre, lambda_per_yr = lambda,
                  lambda_ocean_only = lambda_as,
                  prebomb_baseline_permil = BOMB_PREBOMB_D14C,

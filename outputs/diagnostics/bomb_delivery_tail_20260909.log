@@ -1,0 +1,43 @@
+
+=== BOMB DELIVERY TAIL: does Tans Table 2 support the builder? ===
+Table 2 divisor in force: 1.200 (Tans high-bias, RULED APPLIED 2026-09-09)
+Table 2: 16 rows, 1963.042 to 1969.542; last row label 7/69     (a MONTH, not a quarter)
+
+--- READING 1: the first-point replacement ---
+  raw (Tans' FLOOR)                      49.26 kmol (356 units)
+  IMPLEMENTED  kmol[2]+(kmol[2]-kmol[3])  54.94 kmol (331 units, +11.5 % on the floor)
+  DOCUMENTED   tail fit back to t0        30.20 kmol (39 % BELOW the floor)
+  => READING 1 HOLDS: the implemented method respects the floor; the DOCUMENTED one does NOT.
+  ⚠ Two builder comments describe the DOCUMENTED method. The code does not implement it,
+    and it would be wrong if it did (it back-extrapolates a 1965-69 decay through the peak).
+
+--- READING 2: the tail's MASS is measured, not extrapolated ---
+  tail mass at ref=102: 11.9005 kmol | at ref=150: 11.9005 kmol | final inventory 11.9005
+  => READING 2 HOLDS: the tail carries exactly the last measured burden (11.7 % of 102),
+     independent of BOMB_TOTAL_REF_KMOL. tau spreads it in time; it does not size it.
+
+--- READING 3: tau is weakly determined ---
+  as built: tau = 6.875 yr on 8 points (adj R2 0.9791)
+  drop the single 7/69 row: tau = 5.671 yr (-17.5 %) -- it supplies 66 % of the fit's time baseline
+  BOMB_TAIL_FIT_FROM = 1964.0 -> tau = 5.539 yr
+  BOMB_TAIL_FIT_FROM = 1964.5 -> tau = 6.710 yr
+  BOMB_TAIL_FIT_FROM = 1965.0 -> tau = 6.875 yr
+  BOMB_TAIL_FIT_FROM = 1965.5 -> tau = 7.120 yr
+  BOMB_TAIL_FIT_FROM = 1966.0 -> tau = 7.134 yr
+  => READING 3 HOLDS: the constant alone spans 5.539-7.134 yr (23 % of tau).
+
+--- Tans' OTHER caveat (p.133), currently unapplied anywhere ---
+  Table 2 scaled x1.000: I_t0 =  54.94 -> pre-1963.04 delivery 46.1 % of the total
+  Table 2 scaled x0.833: I_t0 =  45.78 -> pre-1963.04 delivery 55.1 % of the total
+  => a uniform 20 % de-biasing moves the pre/post-1963 SPLIT by 9.0 points. A RULING, not a check.
+
+--- the built product (handoff 09-08i quoted 25 % and 14.6 %) ---
+  delivery after 1965.5: 21.2 %
+  delivery after 1969.5: 12.2 %
+  provenance: t0 1963.042, burden 54.94, tau 6.875, dropped_first TRUE, built 2026-09-09
+  ✅ the shipped product reproduces from the CSV at the committed constants.
+
+--- MUTATION: BOMB_T2_DROP_FIRST off -> first point 49.26; READING 1 FAILS, as it must ---
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/bomb_delivery_tail_20260909.rds
+⛔ Nothing adopted. The de-biasing and the tau constant are RULINGS for Marcus.

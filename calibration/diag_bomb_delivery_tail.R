@@ -30,7 +30,10 @@ BDT_TOTAL_REF    <- 102          # kmol, Naegler & Levin (2006) -- the builder's
 BDT_TAIL_FROM    <- 1965.0       # the builder's BOMB_TAIL_FIT_FROM
 BDT_TAIL_FROM_ALT<- c(1964.0, 1964.5, 1965.0, 1965.5, 1966.0)   # its sensitivity sweep
 BDT_REF_ALT      <- 150          # a DIFFERENT reference total, to prove READING 2's independence
-BDT_TANS_HIGH_BIAS<- 1.20        # Tans p.133: Telegadas' aircraft data average ~20 % TOO HIGH
+BDT_TANS_HIGH_BIAS<- 1.20        # Tans p.133: Telegadas' aircraft data average ~20 % TOO HIGH.
+                                 # RULED APPLIED 2026-09-09; the builder now divides Table 2 by it.
+                                 # Read back from the product so this check tracks the builder
+                                 # rather than asserting a constant of its own.
 BDT_SHARE_CUTS   <- c(1965.5, 1969.5)   # the two cuts handoff 09-08i quotes
 BDT_NA_AVOGADRO  <- 6.02214076e23
 BDT_OUT <- ccx_path("outputs", "diagnostics",
@@ -38,8 +41,12 @@ BDT_OUT <- ccx_path("outputs", "diagnostics",
 
 cat("\n=== BOMB DELIVERY TAIL: does Tans Table 2 support the builder? ===\n")
 
+prov0 <- attr(readRDS(BDT_BUILT_FILE), "provenance")
+BDT_DIVISOR <- if (is.null(prov0$t2_high_bias_divisor)) 1 else prov0$t2_high_bias_divisor
 t2 <- read.csv(BDT_T2_FILE, comment.char = "#")
-t2$kmol <- t2$inventory_1e26_atoms * 1e26 / BDT_NA_AVOGADRO / 1000
+t2$kmol <- t2$inventory_1e26_atoms * 1e26 / BDT_NA_AVOGADRO / 1000 / BDT_DIVISOR
+cat(sprintf("Table 2 divisor in force: %.3f%s\n", BDT_DIVISOR,
+            if (BDT_DIVISOR == 1) " (de-biasing OFF)" else " (Tans high-bias, RULED APPLIED 2026-09-09)"))
 cat(sprintf("Table 2: %d rows, %.3f to %.3f; last row label %-8s (a MONTH, not a quarter)\n",
             nrow(t2), t2$t_mid[1], t2$t_mid[nrow(t2)], t2$quarter[nrow(t2)]))
 
@@ -58,10 +65,14 @@ raw  <- t2$kmol[1]
 # documented (in TWO comments of the builder): back-extrapolate the tail fit to t0
 bx   <- exp(fit0$cf[1] + fit0$cf[2] * t2$t_mid[1])
 cat("\n--- READING 1: the first-point replacement ---\n")
-cat(sprintf("  raw (Tans' FLOOR)                     %6.2f kmol (%d units)\n",
-            raw, t2$inventory_1e26_atoms[1]))
-cat(sprintf("  IMPLEMENTED  kmol[2]+(kmol[2]-kmol[3]) %6.2f kmol (%.0f units, %+.1f %% on the floor)\n",
-            impl, impl * 1000 * BDT_NA_AVOGADRO / 1e26, 100 * (impl / raw - 1)))
+# units are ALWAYS reported in Table 2's own printed frame (i.e. multiplied back
+# through the divisor), so they stay comparable to the CSV whatever BDT_DIVISOR is.
+as_units <- function(k) k * BDT_DIVISOR * 1000 * BDT_NA_AVOGADRO / 1e26
+cat(sprintf("  raw (Tans' FLOOR)                     %6.2f kmol (%.0f units as printed)\n",
+            raw, as_units(raw)))
+stopifnot(isTRUE(all.equal(as_units(raw), as.numeric(t2$inventory_1e26_atoms[1]))))
+cat(sprintf("  IMPLEMENTED  kmol[2]+(kmol[2]-kmol[3]) %6.2f kmol (%.0f units as printed, %+.1f %% on the floor)\n",
+            impl, as_units(impl), 100 * (impl / raw - 1)))
 cat(sprintf("  DOCUMENTED   tail fit back to t0       %6.2f kmol (%.0f %% BELOW the floor)\n",
             bx, 100 * (1 - bx / raw)))
 r1_pass <- impl > raw

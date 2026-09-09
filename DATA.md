@@ -555,7 +555,7 @@ delivery.
 | Reference | What it gives | Verdict |
 |---|---|---|
 | **Tans 1981**, SCOPE 16 pp. 131–157, Tables 1 & 2 | T2: stratospheric ¹⁴C inventory, quarterly Dec 62 – Aug 66 + Jul 69 (after Telegadas 1971). T1: tropospheric Δ¹⁴C NH/SH/global, annual Dec 1954–1977 | **This is the source function.** Tans p.133: the input of bomb ¹⁴C to the troposphere equals the stratospheric decrease |
-| **Graven et al. 2017**, GMD 10:4405 | Atmospheric Δ¹⁴C **and δ¹³C**, 3 zones (30–90°N / 30°S–30°N / 30–90°S), annual 1850–2015; input4MIPs doi:10.22033/ESGF/input4MIPs.1601 and .1602 | **Not a bomb source** — an observation product, and coarser than the Hua et al. 2022 5-zone monthly record already in `obs_d14c_zonal.rds`. Retained as a δ¹³C cross-check back to 1850 |
+| **Graven et al. 2017**, GMD 10:4405 | Atmospheric Δ¹⁴C **and δ¹³C**; the 2017 paper describes CMIP6 v1.2.0, 3 zones, annual 1850–2015 | **Not a bomb source** — an observation product. ⚠ **This row said "retained as a δ¹³C cross-check" from 2026-08-10 to 2026-09-09 while NO FILE EXISTED on disk.** Now ACQUIRED (`data-raw/download_graven_isotopes.R`), but as the **successor vintage**: input4MIPs **CMIP7/C4MIP ImperialCollege-3-0 v20250502, 1700–2023**, Δ¹⁴C on **4 equal-area zonal bands** (−90/−30/0/30/90) and δ¹³C **global-mean only**. Do NOT cite it as "Graven et al. 2017" data — see §9c |
 
 ### The construction (`data-raw/build_bomb_c14_source.R`)
 
@@ -566,8 +566,11 @@ interval total comes from Tans' independent compilation.
 
 - **Interval totals, annual.** From 1963.04 on, each year's total is the Table 2
   stratospheric decrease. Before that, the totals come from budget closure: the Table 2
-  series says 65.92 kmol was still aloft at 1963.04, so the remaining **36.08 kmol (35 %)
-  of the Naegler & Levin total had already reached the troposphere**. That pins the
+  series says **54.94 kmol** was still aloft at 1963.04, so the remaining **47.06 kmol (46 %)
+  of the Naegler & Levin total had already reached the troposphere**. ⚠ These are at
+  `BOMB_T2_HIGH_BIAS = 1.20` (Tans' ~20 % high-bias correction, ruled applied 2026-09-09).
+  At the pre-2026-09-09 default of 1.0 they read 65.92 kmol aloft and 36.08 (35 %) delivered.
+  **Every number in this section moves with that divisor** — the script prints them all. That pins the
   pre-1963 integral with no test-yield inventory at all. Past the last Table 2 point the
   remainder decays at the τ = 6.87 yr fitted to its late points.
 
@@ -594,11 +597,14 @@ interval total comes from Tans' independent compilation.
   so the spring maximum survives. The window is immaterial to results: 3, 5 and 9 months
   agree to <1 %.
 
-**Uptake is not a small correction.** Of the 36.08 kmol delivered before 1963, only 21.57
+**Uptake is not a small correction.** Of the 47.06 kmol delivered before 1963, only 21.57
 kmol was still airborne — 40 % had already gone to ocean and biosphere. λ is not tuned: it
 is the unique value closing the measured budget, in closed form.
 
-**Independent check on λ.** Budget closure gives **λ = 0.1996 /yr (5.01 yr)**. Gross
+**Independent check on λ. ⚠ THIS CHECK DEGRADED WHEN THE DE-BIASING WAS APPLIED.** At
+`BOMB_T2_HIGH_BIAS = 1.20` budget closure gives **λ = 0.3490 /yr (2.87 yr)** and gross air-sea
+exchange covers only **43 %** of it. The figures below are the pre-de-biasing values, and they are
+what the paragraph's conclusion was based on. Budget closure gives **λ = 0.1996 /yr (5.01 yr)**. Gross
 air-sea exchange alone, built from Tans' own 19 mol/m²/yr (Broecker et al. 1978) at the
 1962 disequilibrium, gives **0.1495 /yr (6.69 yr)** — 75 % of it, with the terrestrial
 biosphere as the remainder. Two independent routes agreeing to 25 %, with the right sign
@@ -648,7 +654,8 @@ Both are exposed as environment overrides so they can be measured, not argued:
 - The Part A/Part B join step is down from **4.5× to 1.6×** in one month, and what remains
   is defensible as real acceleration (the autumn-1962 tests descending in spring 1963)
   rather than a method switch.
-- Tans' own caveats carry over: Telegadas' aircraft data may run ~20 % high; the
+- Tans' own caveats: Telegadas' aircraft data may run ~20 % high — **APPLIED since 2026-09-09
+  as `BOMB_T2_HIGH_BIAS`, Marcus's ruling; see §9c for the evidence bearing on it**; the
   Dec 62 – Feb 63 point is a floor (it is raised, not dropped, since it sets the pre/post
   split); French and Chinese tests after 1963 add production the "input = stratospheric
   decrease" identity does not capture.
@@ -660,6 +667,64 @@ Both are exposed as environment overrides so they can be measured, not argued:
 - `bomb_total` remains a **calibrated** parameter with the Naegler & Levin prior; the
   stored series is normalised to unit integral, so it still cannot set the amplitude.
 
+
+### 9c. What isotopic data actually exists for the bomb window (audit, 2026-09-09)
+
+Marcus, on being shown that the Tans de-biasing had a large effect: *"Check all the isotopic
+data for that period: I would like to use the best observations, but am concerned about
+inconsistent approaches between them."* This is that audit.
+
+| dataset | coverage of 1950–1980 | role |
+|---|---|---|
+| `obs_d14c_zonal` (Hua et al. 2022, 5 zones, monthly) | **1800 obs**, median zonal sd **3.6 ‰** | **both** the source function's sub-annual shape **and** the `d14c_NH`/`d14c_SH` scoring streams |
+| Tans 1981 Table 2 (Telegadas 1971, aircraft) | 16 numbers, 1963.04–1969.54 | sets `I_t0` and the post-1963 annual totals |
+| Naegler & Levin 2006 | 1975 / 1995 only | sets the 102 kmol total ⇒ the pre-1963 residual |
+| `obs_d14c_intcal20` | **ends 1950** | pre-bomb only |
+| `obs_d14c_station_validation` | **1999–2007** | cannot test this era despite being held out |
+| `obs_d13c_monthly` (flask) | **starts 1977.2** | outside the window |
+| `obs_icecore` δ¹³C / CO₂ samples | **zero samples in 1950–1980** | contributes nothing here |
+
+**There is no δ¹³C observation of any kind in the bomb window** from the records the model
+scores. The entire isotopic constraint for 1950–1980 is Δ¹⁴C, from three sources.
+
+**Four inconsistencies of approach.**
+
+1. **Telegadas (1971, aircraft) and N&L (2006, budget closure) are combined multiplicatively**,
+   35 years and two methods apart, and their disagreement has exactly one place to go: the
+   pre-1963 residual. This is the *only* channel through which `BOMB_T2_HIGH_BIAS` acts — scale
+   *both* and the unit-integral shape does not move at all. Applying 20 % to one and not the
+   other asserts a 20 % disagreement and dumps all of it into the pre-1963 troposphere.
+2. **`obs_d14c_zonal` is both input and target.** Documented above and confined to sub-annual
+   timescales, but it means the bomb window cannot independently test sub-annual ocean exchange.
+3. **The "56–60 % still aloft" reading is the RAW, UNRAISED point.** It recomputes exactly as
+   `59.12 / [99.3, 104.9]` = 56.4–59.5 %. The two judgement calls then push in opposite
+   directions and neither combination lands back in it: `DROP_FIRST` alone gives 62.8–66.4 %
+   (above), de-biasing alone 47.0–49.6 % (below), both together 52.4–55.3 % (below).
+4. **Graven and Hua disagree by up to 11× Hua's own stated sd, antisymmetrically.**
+   `calibration/diag_graven_vs_hua.R`, area-weighted hemispheres, calendar-year means:
+
+   | | 1962 | 1963 | 1964 | 1965 | 1968 | 1976 |
+   |---|---|---|---|---|---|---|
+   | NH, Graven − Hua (‰) | −1.1 | **+29.2** | **+39.9** | **+17.9** | +3.1 | +3.3 |
+   | SH, Graven − Hua (‰) | −1.6 | **−28.6** | **−40.3** | **−28.5** | −6.0 | +1.4 |
+
+   Outside the peak they agree to ~2–3 ‰. The debiased shape correlation is **0.999** in both
+   hemispheres, and the NH and SH biases are equal and opposite (+4.9 / −4.9 ‰ mean). ⇒ **the
+   two compilations agree on the transient and disagree on the HEMISPHERIC PARTITION.** At 1963
+   the NH−SH gradient is **361.4 (Graven) vs 303.7 (Hua)**, a **19 % difference** in precisely
+   the quantity that constrains the bomb source's NH/SH split. Graven's SH peaks in 1966, Hua's
+   in 1965.
+
+   ⚠ **Graven is NOT an independent observing system** — it is an independent *compilation* of
+   overlapping station and tree-ring measurements. It tests compilation, zonal aggregation,
+   baseline convention and version drift, not sampling error.
+
+**The consequence for the likelihood.** `sigma_d14c` is fitted, but the *relative* weighting
+across years is set by the data, and Hua's 3.6 ‰ zonal sd understates the compilation-to-
+compilation spread by 3–11× in exactly 1963–1965 — the years that dominate the bomb constraint
+and the years the de-biasing moves. Any score difference concentrated in those years (the
+−92.7 log-units of `diag_bomb_debias_impact.R`, for one) is measured against a target that is
+more uncertain there than the objective believes.
 
 ## 10. Excess radiocarbon budget — Naegler & Levin (2006)
 

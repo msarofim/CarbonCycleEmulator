@@ -1,0 +1,29 @@
+=== 1. The two peaks and the trough (NH, permil) ===
+  observed peak1 1963.71 (853)  trough 1964.12 (742)  peak2 1964.54 (840)  drop 111  peak2-peak1 -13  argmax -> 1963.68
+  model    peak1 1963.71 (811)  trough 1964.04 (786)  peak2 1964.62 (848)  drop 25  peak2-peak1 +37  argmax -> 1964.64
+  peak-1 timing: model minus obs +0.00 yr (+0.00 of gate 5's nh_t sd 0.444); peak-2 timing +0.08 yr; the argmax difference +0.96 yr is the two curves choosing DIFFERENT lumps
+
+=== 2. The statistic's fragility: tilt the OBSERVED series by (1 + s (t - 1964.15)) and re-read its argmax ===
+  tilt -0.05/yr (peak2/peak1 ratio 0.944): argmax 1963.67
+  tilt -0.03/yr (peak2/peak1 ratio 0.960): argmax 1963.67
+  tilt -0.02/yr (peak2/peak1 ratio 0.968): argmax 1963.67
+  tilt +0.00/yr (peak2/peak1 ratio 0.985): argmax 1963.68
+  tilt +0.02/yr (peak2/peak1 ratio 1.001): argmax 1964.56
+  tilt +0.03/yr (peak2/peak1 ratio 1.010): argmax 1964.56
+  tilt +0.05/yr (peak2/peak1 ratio 1.027): argmax 1964.57
+  (the observed peak-1/peak-2 heights differ by 1.5 %; the zonal spread on nh_v is 53 permil = 6.2 % -- the observed argmax is itself a coin toss between lumps, which is what the 0.44-yr nh_t spread records)
+
+=== 3. Do the removal levers change the SHAPE (trough depth, peak2 - peak1)? ===
+  tau_ex  x 0.5: peak1 752 @ 1963.71  trough 733  peak2 804 @ 1964.62  drop 18 (obs 111)  peak2-peak1 +53 (obs -13)  argmax 1964.65
+  tau_ex  x 1.0: peak1 811 @ 1963.71  trough 786  peak2 848 @ 1964.62  drop 25 (obs 111)  peak2-peak1 +37 (obs -13)  argmax 1964.64
+  tau_ex  x 2.0: peak1 887 @ 1963.71  trough 868  peak2 927 @ 1964.62  drop 20 (obs 111)  peak2-peak1 +40 (obs -13)  argmax 1964.63
+  k_w     x 1.0: peak1 811 @ 1963.71  trough 786  peak2 848 @ 1964.62  drop 25 (obs 111)  peak2-peak1 +37 (obs -13)  argmax 1964.64
+  k_w     x 2.0: peak1 721 @ 1963.71  trough 685  peak2 729 @ 1964.62  drop 36 (obs 111)  peak2-peak1 +8 (obs -13)  argmax 1964.59
+  k_w     x 3.0: peak1 663 @ 1963.71  trough 620  peak2 655 @ 1964.54  drop 43 (obs 111)  peak2-peak1 -9 (obs -13)  argmax 1963.69
+  h_ml    x 1.0: peak1 811 @ 1963.71  trough 786  peak2 848 @ 1964.62  drop 25 (obs 111)  peak2-peak1 +37 (obs -13)  argmax 1964.64
+  h_ml    x 2.0: peak1 810 @ 1963.71  trough 785  peak2 847 @ 1964.62  drop 25 (obs 111)  peak2-peak1 +37 (obs -13)  argmax 1964.64
+
+=== 4. READING ===
+  Gate 5's 'NH peak +2.17 sigma late' is the argmax choosing the 1964 lump in the model and the 1963 lump in the observation. The model's peak-1 timing is +0.00 yr from the observed. The miss is the SHAPE: the observed curve drops 111 between the peaks, the model 25; no removal lever in the scan reproduces that drop, so the model's atmosphere holds too much of the 1963 delivery into 1964 -- either the delivery series' 1963-Q4/1964-Q1 share (Tans Table 2 quarterly intervals, shaped by the observed record) or a removal path the scan does not touch (the NH land's fast pools). The gate needs a statistic that is not an argmax on a bimodal curve: peak-1 time, the trough depth, or the curve RMS the d14c_NH stream already scores.
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/gate5_bimodal_20260909.rds
+⛔ Nothing adopted.
