@@ -769,6 +769,120 @@ ccx_ocean_grid <- function(h_ml, total_depth = ccx_const("OCEAN_DEPTH"),
 }
 
 # ---------------------------------------------------------------------
+# SEASONAL MIXED LAYER (round 6, 2026-09-09j). Marcus ruled OPTION A: the
+# mixed layer actually deepens and shoals and ENTRAINS REAL WATER, rather
+# than the pCO2-side `ent_seas_amp_SH` shim, which moves no carbon and so
+# carries NO isotopic signature in either isotope (add_flux takes r13 from
+# the SOURCE box). See notes/prereg_2026-09-09g_round6_seasonal_ml.md.
+#
+# TWO STRUCTURAL RULES, both measured before they were coded:
+#  (a) THE SHAPE IS MEAN-PRESERVING (the ruling). h_ml(t) is the Holte MLD
+#      climatology scaled so its annual mean is EXACTLY the fitted `h_ml`.
+#      The annual-mean entrainment effect is already inside the fitted
+#      h_ml, the pump and kz; any other normalisation double-counts it.
+#  (b) THE INTERIOR GRID DOES NOT MOVE. ccx_ocean_grid() derives EVERY
+#      interior thickness from h_ml, so feeding it a time-varying h_ml
+#      would breathe the whole column seasonally -- the 1314-1861 m NADW
+#      layer included -- and re-anchor K(z), which pins K(h_ml) = kz
+#      exactly. Only the ML/layer-1 boundary moves; LAYER 1 ABSORBS THE
+#      WHOLE EXCURSION, so dz_ML + dz_1 is CONSERVED BY CONSTRUCTION and
+#      dz_mid[1] is INVARIANT. kz_int stays at its annual-mean values.
+# ---------------------------------------------------------------------
+
+#' Discrete Fourier coefficients of a 12-month climatology, normalised to mean 1
+#'
+#' A full 6-harmonic series on 12 monthly values, NOT a 1-2 harmonic fit: the
+#' MLD cycle is markedly asymmetric (fast spring restratification, slow autumn
+#' deepening) and we have the real data, so we interpolate it rather than
+#' approximate it. Reconstruction is exact at the month centres to ~1e-15 and
+#' the CONTINUOUS annual mean is exactly 1, so the mean-preserving ruling holds
+#' between the sample points and not merely on them.
+#'
+#' The months are treated as CENTRES, tau = (m - 1/2)/12. With that half-integer
+#' sampling the Nyquist term must be counted ONCE, not twice -- without the
+#' halving the reconstruction is only good to 2e-3, which would show up as a
+#' spurious sub-monthly wiggle in dh/dt rather than as an obvious error.
+ccx_mld_fourier <- function(h_m) {
+  n <- length(h_m)
+  if (n != 12L) stop("ccx_mld_fourier: expected 12 monthly values, got ", n)
+  f   <- h_m / mean(h_m)                 # mean EXACTLY 1 -- the ruling
+  tau <- (seq_len(n) - 0.5) / n          # month CENTRES, fractions of a year
+  kk  <- seq_len(n %/% 2)
+  a <- vapply(kk, function(k) 2 / n * sum(f * cos(2 * pi * k * tau)), numeric(1))
+  b <- vapply(kk, function(k) 2 / n * sum(f * sin(2 * pi * k * tau)), numeric(1))
+  a[length(kk)] <- a[length(kk)] / 2     # Nyquist counted once
+  b[length(kk)] <- b[length(kk)] / 2
+  list(a0 = 1, a = a, b = b, k = kk, f_month = f)
+}
+
+#' The shape and its time derivative at time `t` (years). Periodic with period 1,
+#' so `t` is used directly -- no modulo, which would put a kink at the new year.
+ccx_mld_eval <- function(co, t) {
+  ang <- 2 * pi * co$k * t
+  list(f    = co$a0 + sum(co$a * cos(ang) + co$b * sin(ang)),
+       dfdt = sum(2 * pi * co$k * (-co$a * sin(ang) + co$b * cos(ang))))
+}
+
+#' The per-hemisphere seasonal shapes, read lazily and cached (the same idiom as
+#' ccx_h_ml_prior()) -- ccx_prepare() runs once per evaluation and must not do
+#' file I/O each time.
+ccx_mld_shape <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) {
+      seas <- readRDS(ccx_path("data", "obs_mld.rds"))$seasonal
+      cache <<- stats::setNames(lapply(HEMIS, function(h)
+        ccx_mld_fourier(seas[[h]]$h_m)), HEMIS)
+    }
+    cache
+  }
+})
+
+#' The grid with the ML/layer-1 boundary moved to `h`, the interior UNCHANGED.
+#' dz_ML + dz_1 is conserved, which is what makes dz_mid[1] invariant.
+ccx_grid_at_h_ml <- function(grid, h) {
+  grid$dz[2] <- grid$dz[2] + (grid$dz[1] - h)
+  grid$dz[1] <- h
+  grid
+}
+
+#' Is the seasonal mixed layer active? It sits under the SAME `seas_drivers`
+#' switch as every other seasonal mechanism, so ccx_spinup()'s zeroing covers it
+#' and seas_drivers = 0 remains the EXACT aseasonal model -- which is why no
+#' periodic spinup is needed.
+ccx_seas_ml_on <- function(p) {
+  isTRUE(p$seas_drivers > 0) && !is.null(p$seas_ml) && isTRUE(p$seas_ml > 0)
+}
+
+#' THE GEOMETRY STOPPING CONDITION (prereg P8), asserted rather than assumed
+#'
+#' Layer 1 absorbs the whole seasonal excursion, so the design is only valid
+#' while the winter mixed layer stays INSIDE layer 1. It does at the canonical
+#' (fitted h_ml 49.15 m, ML max 82.7 m, layer-1 base 101.4 m -- 27 m of margin),
+#' but max/mean of the climatology is ~1.68 while layer 1's base grows only
+#' ~0.99 x h_ml + a constant, so the two cross at h_ml ~= 76 m.
+#'
+#' ⛔ THIS IS NOT HYPOTHETICAL: `ent26`'s h_ml was 134.15 m. A refit that walks
+#' h_ml up would silently read carbon out of a layer the mixed layer has already
+#' swallowed, so this STOPS rather than clamping -- a clamp would turn a design
+#' violation into a quiet bias. See calibration/diag_seasonal_ml_geometry.R.
+ccx_seas_ml_guard <- function(grid) {
+  co   <- ccx_mld_shape()
+  base <- cumsum(grid$dz)[2]                      # layer-1 base, annual mean
+  for (h in HEMIS) {
+    h_max <- grid$h_ml * max(co[[h]]$f_month)
+    if (h_max >= base)
+      stop(sprintf(paste0("ccx_seas_ml_guard: the %s winter mixed layer reaches %.1f m ",
+                          "but layer 1's base is at %.1f m (h_ml = %.2f). Layer 1 can no ",
+                          "longer absorb the seasonal excursion, so single-layer ",
+                          "entrainment is INVALID here -- see prereg P8. The bound is ",
+                          "h_ml ~ 76 m; ent26 sat at 134.15 m."),
+                  h, h_max, base, grid$h_ml))
+  }
+  co
+}
+
+# ---------------------------------------------------------------------
 # Parameters
 # ---------------------------------------------------------------------
 #' Default (central) parameter set. Everything a calibration would vary lives
@@ -1185,6 +1299,12 @@ ccx_default_params <- function() {
     # THE DRIVER PATH'S KNOBS (see CCX_SEAS_PHI_EFF block for the physics and
     # the offline provenance of the inits).
     seas_drivers = CCX_SEAS_DRIVERS_DEFAULT,
+    # SEASONAL MIXED LAYER (round 6). 0 = OFF and the model is bit-identical to
+    # the pre-round-6 one; 1 = h_ml deepens and shoals on the Holte climatology
+    # and entrains real water. Default OFF while the mechanism is being built --
+    # ⚠ a mechanism defaulted off is UNTESTED WHERE IT MATTERS, so it is
+    # exercised at an explicit non-zero value in tests/testthat/test-seas-ml.R.
+    seas_ml      = 0,
     seas_T_amp_NH = 12,   # K, seasonal land temperature half-amplitude
     seas_T_amp_SH = 6,
     # PER-HEMISPHERE since 2026-08-31; see CCX_SEAS_LAG_P_DEFAULT and
@@ -1523,6 +1643,26 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     iml  <- aux$idx[[h]]$ml
     ioc  <- aux$idx[[h]]$oc
 
+    # ---- SEASONAL MIXED LAYER (round 6): this hemisphere's geometry NOW ----
+    # `gr` is rebuilt from the UNTOUCHED `grid` every iteration, never assigned
+    # over it: the two hemispheres are in ANTIPHASE (NH deepest in Feb, SH in
+    # Aug), so a shadow that leaked across iterations would give the SH the NH's
+    # winter. When the mechanism is off, gr IS grid and every number below is
+    # bit-identical to the pre-round-6 model.
+    if (ccx_seas_ml_on(p)) {
+      .ev      <- ccx_mld_eval(aux$mld_coef[[h]], t)
+      h_ml_t   <- grid$h_ml * .ev$f            # m, mean-preserving by construction
+      dh_ml_dt <- grid$h_ml * .ev$dfdt         # m/yr, > 0 deepening
+      gr       <- ccx_grid_at_h_ml(grid, h_ml_t)
+      # dz_ML + dz_1 is conserved, so dz_mid[1] is INVARIANT; only dz_mid[2]
+      # moves. Recomputed in full rather than patched, so it cannot drift.
+      dzm      <- (gr$dz[-length(gr$dz)] + gr$dz[-1]) / 2
+      ml_mass  <- aux$ml_mass_kg[[h]] * .ev$f  # mass tracks thickness
+    } else {
+      h_ml_t <- grid$h_ml; dh_ml_dt <- 0
+      gr <- grid; dzm <- aux$dz_mid; ml_mass <- aux$ml_mass_kg[[h]]
+    }
+
     chi <- y[iatm, "C"] / aux$gtc_per_ppm_hemi          # ppm in this hemisphere
 
     # ---- land -------------------------------------------------------
@@ -1830,7 +1970,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       sst <- sst + (if (h == "NH") 1 else -1) * a_s *
              sin(2 * pi * (t - (3.5 + CCX_SST_SEAS_LAG) / 12))
     }
-    dic_ml <- y[iml, "C"] * aux$mol_per_GtC / aux$ml_mass_kg[[h]]   # mol/kg
+    dic_ml <- y[iml, "C"] * aux$mol_per_GtC / ml_mass         # mol/kg
     # SOUTHERN-OCEAN ENTRAINMENT CHANNEL (2026-08-27g, 4a). SH only; see
     # CCX_ENT_SEAS_PEAK_MO for the measurement and the NH control that says
     # the NH gets no twin. Under the SAME seas_drivers switch as every other
@@ -1955,8 +2095,35 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # default kz_deep_frac = 1 every entry IS p$kz, bit for bit.
     col <- c(iml, ioc)
     for (kk in seq_len(grid$nl)) {
-      add_diffusion(col[kk], col[kk + 1], grid$dz[kk], grid$dz[kk + 1], aux$dz_mid[kk],
+      add_diffusion(col[kk], col[kk + 1], gr$dz[kk], gr$dz[kk + 1], dzm[kk],
                     aux$kz_int[kk])
+    }
+
+    # ---- SEASONAL ENTRAINMENT / DETRAINMENT (round 6, option A) -------
+    # THE MECHANISM. A deepening mixed layer swallows layer-1 water AT LAYER-1
+    # CONCENTRATIONS; a shoaling one leaves its own water behind at ML
+    # concentrations. Same form as the w_up limbs above -- a thickness rate over
+    # the SOURCE box's thickness -- so it is the model's existing advective
+    # idiom, not a new one.
+    #
+    # ⛔ TWO EXPLICIT LIMBS, NOT ONE SIGNED FLUX. The reverse limb draws from a
+    # DIFFERENT box, so a single signed flux would take its isotopic ratio from
+    # the wrong source half the year. add_flux's own guard would not see it --
+    # the function is antisymmetric, so 13C is conserved for any alpha and a
+    # conservation gate is blind to a mis-partition. This is the 2026-08-25e
+    # seasonal-NEP bug, resolved at the call site the way that bug taught.
+    #
+    # ⭐ alpha13 IS LEFT AT ITS DEFAULT OF 1, AND THAT IS THE POINT.
+    # Entrainment is physical transport, not a fractionating exchange: the water
+    # arrives with whatever it was carrying. add_flux then takes 13C AND 14C
+    # from the source box for free and correctly -- which is exactly what the
+    # pCO2-side shim could not do, and why option A was ruled over it. ⛔ Adding
+    # a 14C fractionation here would double-count ~17 permil (~3x sigma_d14c):
+    # the model stores Delta-14C, already normalised to alpha14 = alpha13^2.
+    if (dh_ml_dt > 0) {
+      add_flux(ioc[1], iml, y[ioc[1], "C"] * dh_ml_dt / gr$dz[2])   # entrainment
+    } else if (dh_ml_dt < 0) {
+      add_flux(iml, ioc[1], y[iml, "C"] * (-dh_ml_dt) / gr$dz[1])   # detrainment
     }
 
     # ---- the biological pump: mixed layer -> interior, per box --------
@@ -2048,9 +2215,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # convention `revelle_frozen` uses above.
     if (isTRUE(p$w_up > 0)) {
       for (kk in seq_len(grid$nl)) {                       # upwelling limb
-        add_flux(col[kk + 1], col[kk], p$w_up * y[col[kk + 1], "C"] / grid$dz[kk + 1])
+        add_flux(col[kk + 1], col[kk], p$w_up * y[col[kk + 1], "C"] / gr$dz[kk + 1])
       }
-      add_flux(iml, col[grid$nl + 1], p$w_up * y[iml, "C"] / grid$dz[1])  # sinking
+      add_flux(iml, col[grid$nl + 1], p$w_up * y[iml, "C"] / gr$dz[1])  # sinking
     }
 
     # ---- ocean outcropping: the non-local limb runs UPWARD ------------
@@ -2081,9 +2248,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     w_out <- if (h == "NH") p$w_out_NH else p$w_out_SH
     if (isTRUE(w_out > 0)) {
       ideep <- col[grid$nl + 1]
-      add_flux(ideep, iml, w_out * y[ideep, "C"] / grid$dz[grid$nl + 1])  # outcrop
+      add_flux(ideep, iml, w_out * y[ideep, "C"] / gr$dz[grid$nl + 1])  # outcrop
       for (kk in seq_len(grid$nl)) {                       # distributed return
-        add_flux(col[kk], col[kk + 1], w_out * y[col[kk], "C"] / grid$dz[kk])
+        add_flux(col[kk], col[kk + 1], w_out * y[col[kk], "C"] / gr$dz[kk])
       }
     }
 
@@ -2106,9 +2273,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         # removes the advectively dead interior Config A leaves behind.
         if (cg$distributed) {
           for (kk in seq_len(cg$s))
-            add_flux(col[kk], col[kk + 1], w * y[col[kk], "C"] / grid$dz[kk])
+            add_flux(col[kk], col[kk + 1], w * y[col[kk], "C"] / gr$dz[kk])
         } else {
-          add_flux(iml, col[cg$s + 1], w * y[iml, "C"] / grid$dz[1])
+          add_flux(iml, col[cg$s + 1], w * y[iml, "C"] / gr$dz[1])
         }
       } else {
         # UPWELLING, always broad and distributed -- the return limb of the real
@@ -2116,7 +2283,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         # to the mixed layer; layers BELOW it are left to diffusion, which is
         # the abyss Config C deliberately does not ventilate.
         for (kk in seq_len(cg$s))
-          add_flux(col[kk + 1], col[kk], w * y[col[kk + 1], "C"] / grid$dz[kk + 1])
+          add_flux(col[kk + 1], col[kk], w * y[col[kk + 1], "C"] / gr$dz[kk + 1])
       }
     }
 
@@ -2219,7 +2386,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         conc_hd <- y[ihd, "C"] / (aux$a_hs[[h]] * aux$dz_hd)           # GtC/m3
         for (kk in seq.int(kfrom, grid$nl)) {
           add_flux(ihd, ioc[kk],
-                   aux$a_ls[[h]] * grid$dz[kk + 1] / p$tau_q * conc_hd)
+                   aux$a_ls[[h]] * gr$dz[kk + 1] / p$tau_q * conc_hd)
           add_flux(ioc[kk], ihd, y[ioc[kk], "C"] / p$tau_q)
         }
       }
@@ -2314,8 +2481,13 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     i_deep_up <- aux$idx[[cg$up]]$oc[cg$s]
     add_flux(i_deep_dn, i_deep_up,
              cg$Q * y[i_deep_dn, "C"] / (aux$a_oc[[cg$down]] * grid$dz[cg$s + 1]))
+    # ⚠ This limb is OUTSIDE the hemisphere loop, so it cannot use `gr` -- it
+    # needs the UP hemisphere's own mixed-layer thickness at time t, which is
+    # not the one the loop last held.
+    .h_up <- if (ccx_seas_ml_on(p))
+               grid$h_ml * ccx_mld_eval(aux$mld_coef[[cg$up]], t)$f else grid$dz[1]
     add_flux(aux$idx[[cg$up]]$ml, aux$idx[[cg$down]]$ml,
-             cg$Q * y[aux$idx[[cg$up]]$ml, "C"] / (aux$a_oc[[cg$up]] * grid$dz[1]))
+             cg$Q * y[aux$idx[[cg$up]]$ml, "C"] / (aux$a_oc[[cg$up]] * .h_up))
   }
 
   # ---- 14C sources (mol/yr -> GtC-equivalent units) and decay ---------
@@ -2677,6 +2849,11 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # Per-interface diffusivity (2026-09-06b). Present unconditionally so both
     # cores read the same vector; rep(kz, nl) at the default.
     kz_int      = ccx_kz_profile(p, grid),
+    # SEASONAL MIXED-LAYER SHAPES (round 6). NULL when the mechanism is off, so
+    # nothing is read and nothing is carried. `kz_int` above is computed ONCE at
+    # the ANNUAL-MEAN grid and HELD: the interior interfaces do not move, so
+    # their K must not either, while the ML base keeps K = kz by the anchor.
+    mld_coef    = if (ccx_seas_ml_on(p)) ccx_seas_ml_guard(grid) else NULL,
     grid = grid
   )
   # HS's own preindustrial chemistry references, for the frozen-Revelle switch,
@@ -2831,6 +3008,17 @@ ccx_advection_eigbound <- function(w_up, grid, p = NULL) {
 #' Substeps needed to keep the explicit interior transport stable over one step
 #' @param dt master step, years (1/12 for the monthly integrator)
 ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
+  # ⚠ SEASONAL MIXED LAYER: TAKE THE BOUND AT THE THINNEST ML, NOT THE MEAN.
+  # Both bounds go as 1/dz -- diffusion as kz/(dz_k dz_mid_k), advection as
+  # w/dz_k -- and the SUMMER mixed layer thins to 26-30 m against a 49 m annual
+  # mean at the canonical, tightening both by ~1.7x. Sizing on the annual-mean
+  # grid would silently UNDER-resolve half of every year. Evaluated on the
+  # thinnest grid, which is the conservative direction.
+  if (ccx_seas_ml_on(p)) {
+    .fmin <- min(vapply(HEMIS, function(h) min(ccx_mld_shape()[[h]]$f_month),
+                        numeric(1)))
+    grid  <- ccx_grid_at_h_ml(grid, grid$h_ml * .fmin)
+  }
   # The bound is taken at the LARGEST interface K, which is kz itself at the
   # ML base for every admissible kz_deep_frac -- conservative for the rest.
   lam <- ccx_diffusion_eigmax(max(ccx_kz_profile(p, grid)), grid) +

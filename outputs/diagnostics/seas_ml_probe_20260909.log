@@ -1,0 +1,17 @@
+ROUND 6 -- PREDICTION P1, unrefitted at the canonical 
+mode file : /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20260908_hilda31/mode_fit_pumpN.rds 
+h_ml 49.153 m | probe window 1990-2000 | ⚠ UNREFITTED: nothing here is a fit 
+ 
+running arm seas_ml = 0 (spinup + 10 yr, R core) ... 
+running arm seas_ml = 1 ... 
+ 
+P1 -- the ADDED seasonal ML DIC anomaly (on minus off), umol/kg 
+  hem        amp    band lo    band hi   verdict        peak month 
+  NH       10.23        8.0       14.0   PASS           2 
+  SH        9.79       10.0       17.0   *** FAIL ***   8 
+ 
+for scale, the FITTED compensator this replaces: r3 winner 21.2, ent26 19.0, prior centre 10.95 
+⭐ P1 asks the mechanism to be SMALLER than the compensator and to reach the observed order. 
+ 
+P1 VERDICT: *** FAIL -- the round STOPS here, before the refit *** 
+wrote outputs/diagnostics/seas_ml_probe_20260909.rds 

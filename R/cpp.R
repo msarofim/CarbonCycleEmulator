@@ -190,6 +190,24 @@ ccx_cpp_par <- function(p) {
   # cannot drift apart about what absence means -- the gamma_diff failure of
   # 2026-08-30. Legacy `seas_lag_p` lists are carried by its own fallback.
   # diagnostic seasonal exchange; absence = 0 = OFF in BOTH cores
+  # ⛔ THE SEASONAL MIXED LAYER (round 6) HAS NO C++ TWIN YET. Absence = 0 = OFF,
+  # which is bit-identical in both cores; but if it is ON, the C++ core would
+  # silently run the ASEASONAL mixed layer and return a number that looks fine
+  # and is wrong. A silent divergence between the two cores is exactly what the
+  # parity test exists to prevent, and parity cannot see a run nobody compares.
+  # So this STOPS rather than falling back. Remove when ccx_core.cpp carries the
+  # mechanism and test-parity.R covers it at seas_ml = 1.
+  # ⚠ The test is ccx_seas_ml_on(), NOT `seas_ml > 0`: the mechanism is only
+  # ACTIVE when `seas_drivers` is also on. ccx_spinup() sets seas_drivers = 0 and
+  # then solves its equilibrium through THIS path, so a guard on the raw flag
+  # would refuse to spin up a seasonal-ML parameter set at all -- which is how
+  # this was found. That the spinup is aseasonal is the design (no periodic
+  # spinup is needed); here it also makes the C++ core safe to use for it.
+  if (is.null(p$seas_ml)) p$seas_ml <- 0
+  if (ccx_seas_ml_on(p))
+    stop("the C++ core has no seasonal mixed layer yet (seas_ml = ", p$seas_ml,
+         ", seas_drivers = ", p$seas_drivers, "). Run the R core (ccx_run), or ",
+         "set seas_ml = 0. See notes/prereg_2026-09-09g_round6_seasonal_ml.md step 2.")
   if (is.null(p$tau_ex_seas_amp)) p$tau_ex_seas_amp <- 0
   if (is.null(p$tau_ex_seas_phase)) p$tau_ex_seas_phase <- 0
   .lagp <- ccx_seas_lag_p(p)
