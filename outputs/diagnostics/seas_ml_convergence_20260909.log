@@ -1,0 +1,32 @@
+ROUND 6 -- substep convergence and annual-mean rectification 
+mode file : /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20260908_hilda31/mode_fit_pumpN.rds 
+h_ml 49.153 m | ccx_substeps_for at seas_ml 0 / 1 : 4 / 4  (CCX_SUBSTEPS_MIN = 4) 
+ 
+(1) SUBSTEP CONVERGENCE -- P1's amplitude (umol/kg) vs substeps 
+    substeps      NH amp     SH amp 
+    4             10.235      9.791 
+    8             10.256      9.827 
+    16            10.257      9.829 
+    worst |4 - 16| / 16 = 0.382 %  (tolerance 1.0 % of the amplitude) 
+    VERDICT: CONVERGED at the shipped substep count -- P1 is NOT measuring the integrator 
+ 
+(2) ANNUAL-MEAN RECTIFICATION -- LEVEL, TREND, and WHICH HYPOTHESIS THE TREND SUPPORTS 
+ 
+  [quiet window 1750-1850] 
+    hem   1st decade  last decade  trend /century |trend| vs amp 
+    NH        -3.983        1.976         -0.3858          3.84 % 
+    SH        -8.681        1.806          0.3086          3.07 % 
+ 
+  [industrial window 1900-2000] 
+    hem   1st decade  last decade  trend /century |trend| vs amp 
+    NH        -4.043        1.708         -0.7750          7.72 % 
+    SH        -8.607        1.562         -0.1115          1.11 % 
+ 
+  ⭐ THE QUIET WINDOW IS THE ONE THAT DECIDES THE SPINUP. 
+  quiet      settled? TRUE   -> NO SPIN-IN: the aseasonal spinup STANDS, no periodic spinup owed 
+  industrial settled? FALSE  -> the mechanism CHANGES ANTHROPOGENIC UPTAKE (real physics, not a spinup fault) 
+  ⚠ A quiet-settled / industrial-drifting pair is the EXPECTED and ACCEPTABLE outcome: 
+    it says the seasonal mixed layer alters how the ocean takes up anthropogenic carbon, 
+    which is a RESULT to report, not a numerical defect to fix. 
+ 
+wrote outputs/diagnostics/seas_ml_convergence_20260909.rds 

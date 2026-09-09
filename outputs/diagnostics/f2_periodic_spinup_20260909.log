@@ -1,0 +1,38 @@
+REVIEW LEAD F2 -- is a PERIODIC spinup owed for the seasonal mixed layer? 
+mode file : /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20260908_hilda31/mode_fit_pumpN.rds 
+h_ml 49.153 m | ent_seas_amp_SH forced to 0 on BOTH arms | quiet run 1750-2250 
+substeps: seas_ml 0 / 1 = 4 / 4 
+ 
+ANNUAL-MEAN GLOBAL CO2 IN A QUIET RUN, ppm (anomaly from CO2_PI_PPM = 276.880) 
+    year    seas_ml = 0    seas_ml = 1       on - off 
+    1750        -0.0297        19.9387        19.9683 
+    1751        -0.0111        13.2981        13.3092 
+    1755        -0.0188         5.0087         5.0275 
+    1760        -0.0272         3.2863         3.3135 
+    1770        -0.0303         2.5091         2.5394 
+    1800        -0.0269         2.3673         2.3942 
+    1850        -0.0225         2.4484         2.4709 
+    1950        -0.0172         2.4715         2.4887 
+    2050        -0.0136         2.4574         2.4710 
+    2150        -0.0115         2.4451         2.4566 
+    2249        -0.0104         2.4403         2.4507 
+ 
+THE TWO ORDERINGS 
+  (i) EXCURSION from the run's own first year, ppm 
+      seas_ml = 0 :   +0.0206   <- the model's aseasonal drift = the NOISE FLOOR 
+      seas_ml = 1 :  -17.5863 
+      ratio on/off = 855.25 
+  (ii) START-OF-RUN OFFSET the mechanism imposes at t0, ppm 
+      annual mean 1750, on minus off :  +19.9683 
+      annual mean 2249, on minus off :   +2.4506 
+      the CHANGE in that offset across 500 yr :  -17.5177 
+ 
+⚠ F2 AS REPORTED claims '+19.6 ppm shock at 1750 decaying over centuries'. 
+  Read the (i) ratio and the (ii) change together: 
+   * on/off ratio ~1 AND a near-zero change  -> the aseasonal spinup IS on the 
+     seasonal orbit; 09-09j/k's conclusion SURVIVES its premise being fixed. 
+   * a large excursion decaying over the window -> SPIN-IN; a periodic 
+     (limit-cycle) spinup is owed and round 6's cost changes. 
+   * a large but FLAT offset -> a rectified LEVEL shift, not spin-in: real 
+     physics the refit must absorb, not a spinup defect. 
+wrote outputs/diagnostics/f2_periodic_spinup_20260909.rds 

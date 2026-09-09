@@ -2,6 +2,140 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09v — ⭐ **THE FIVE RE-RUNS ARE DONE. FOUR WERE NEVER CONTAMINATED, P1c WAS, AND THE −514 LEVEL PENALTY HAS A MEASURED PHYSICAL CAUSE. ⛔ F2 IS CONFIRMED: THE ASEASONAL SPINUP IS *NOT* A POINT ON THE SEASONAL ORBIT, SO 09-09j/k IS REVERSED AND A PERIODIC SPINUP IS OWED.**
+
+**SUITE FIRST, as 09-09u instructed: 2387 pass / 3 fail / 4 skip.** The three are exactly the
+pre-existing set (`test-alpha-as.R:116,117`, `test-seas-lag-split.R:199`); +6 passes over 09-09t's
+2381 are the fix's own new parity tests. No regression.
+
+**THE FIX IS VERIFIED IN THE QUANTITY THAT WAS WRONG.** One probe
+(`calibration/diag_seas_ml_spinup_leak_probe.R`) run in two frozen trees differing only by the
+documented one-line mutation: pre-fix the `seas_ml = 1` spinup sits at 35 953.939 GtC of ocean carbon
+against 37 894.163 (**−1 940.224**, reproducing the review to the digit); post-fix every arm is
+**bit-identical** at 37 894.163, `max|dy| = 0` over all 36×3 state.
+
+### ⛔ THE QUARANTINE OVER-COLLECTED — four of the five files were never contaminated
+The contradiction that exposed it: **P12's own log asserts the two spinups were bit-identical**
+(`stopifnot(all.equal(..., tolerance = 0))`, printed `0.000e+00`) — which is impossible under the
+leak. Under the pre-fix mutation that same assertion evaluates **FALSE** and the script would have
+halted. It did not. Resolved three ways, the third a measurement:
+
+1. **`git show 62966de:src/ccx_core.cpp | grep -c seas_ml` → 0.** The C++ core carried no seasonal
+   mixed layer until `4189ff9`, **16:33**.
+2. At that commit `ccx_cpp_par()` **hard-stopped** on `ccx_seas_ml_on(p)`. `ccx_spinup()`'s zeroing
+   meant the equilibrium solve never tripped it — and was therefore correctly aseasonal. **The R
+   gate was the only gate, and it was right.**
+3. **The re-runs, diffed against the quarantine.** `seas_ml_convergence` (13:01), `seas_ml_probe`
+   (14:34), `p12_compensator` (15:18) and `p12_streams` (15:20) all came back **BIT-IDENTICAL**.
+   Only `p1c_dpco2` (16:43) moved.
+
+⭐ **AND THE 09-09t READING OF P12/P10 WAS [[explained_away_test]] RUN BACKWARDS.** The quarantine
+README claimed P12's *"−514 on the two CO₂ LEVEL rows"* and P10's *"changes anthropogenic uptake"*
+were *"the exact signature of a ~1940 GtC deficit"*. **A real result was explained away by a bug that
+had not yet been written.** The 09-09t note warned against reading two agreeing diagnostics as
+corroboration when they share a cause; the symmetric error is reading them as sharing a *defect*.
+
+### ⭐ WHAT THE −514 ACTUALLY IS — measured, not argued
+New diagnostic `calibration/diag_f2_periodic_spinup.R`: a QUIET run (zero fossil, zero LUC flux
+**and stock**, held climate, zero AOD — `test-conveyor.R`'s own construction) from the aseasonal
+spinup, `ent_seas_amp_SH = 0` on both arms so the shim cannot confound it.
+
+| | seas_ml = 0 | seas_ml = 1 | on − off |
+|---|---|---|---|
+| 1750 | −0.030 | **+19.939** | **+19.968** |
+| 1770 | −0.030 | +2.509 | +2.539 |
+| 2249 | −0.010 | +2.440 | +2.451 |
+| excursion from year 1 | **+0.021** (noise floor) | **−17.586** | ratio **855×** |
+
+**Two components, not one:** a SPIN-IN transient (~17.5 ppm, e-folding a few years, gone by 1770)
+and a RECTIFIED LEVEL OFFSET (+2.4–2.5 ppm, flat within 0.07 ppm for 480 years).
+
+⭐ **The transient cannot be the level-row penalty**: `co2_level_MLO`/`SPO` score **1959–2025 /
+1962–2023**, ~190 yr after it has decayed. It lands on `co2_icecore` (1703–1996), which P12 measured
+at only **−2.84** — consistent with that stream's wide σ.
+⭐ **The flat offset is the right epoch AND the right size.** At the shipped `LIK_CO2_REP_ERR = 1.0`
+ppm over n = 126 annual points, P12's measured **−514.38** corresponds to a uniform offset of
+**+2.857 ppm**. F2's preindustrial residual is **+2.45**; the remainder is P10's industrial-era
+uptake change. ⇒ **P10 and P12 are ONE finding, and it is physics.** P12's own conclusion — *"a LEVEL
+offset is the most REFITTABLE kind of error"* — stands, and now has a mechanism and a magnitude.
+⚠ P10's "quiet window SETTLED = TRUE" and F2's "+2.45 ppm flat offset" are **the same finding read
+two ways and they agree**: P10 measured the TREND, F2 the LEVEL, and P10's own code comment insists
+on exactly that distinction.
+
+### ⛔ F2 CONFIRMED — 09-09j/k IS REVERSED, A PERIODIC SPINUP IS OWED
+09-09j/k concluded "no periodic spinup is needed" and argued it **by construction** from the
+`seas_drivers` zeroing the C++ ignored. The premise was false; the conclusion does not survive it.
+The measurement above is an independent reproduction of review §8's reported "+19.6 ppm shock at
+1750" — **+19.94 ppm**, by a different construction (quiet forcing, not historical).
+
+⚠⚠ **WHAT IS *NOT* SETTLED, and must not be assumed either way: whether a periodic (limit-cycle)
+spinup would remove the +2.45 ppm offset and with it most of the −514.** It removes the transient,
+which costs almost nothing. For the offset there is a real argument in **both** directions — the
+spinup PINS atmospheric CO₂ to `CO2_PI_PPM`, so a limit-cycle solve might absorb the offset into the
+ocean state instead of leaving it in the air. **Building one is the test; do not price round 6 on a
+guess.**
+
+### P1c — the only genuinely quarantined output, and the leak was HIDING the problem
+| | pre-fix | post-fix |
+|---|---|---|
+| SH ΔpCO₂ amplitude, `seas_ml = 1` | 40.76 µatm | **54.04 µatm** |
+| ratio vs A1 (0–90 S, the ruling) | 9.11 | **12.09** |
+| ratio vs A2 (40–90 S, reference) | 2.64 | **3.50** |
+| peak month | 6.83 | 6.79 |
+
+⛔ **The refit's amplitude-cut task is HARDER than 09-09s thought** — 3.50× against the A2 band, not
+2.64×. Phase barely moves, so the structural finding (one SH surface box cannot carry two antiphase
+regimes) is untouched.
+
+### REVIEW §4 — the SST leg CONFIRMED, the pCO₂ leg REFUTED, and the centre re-derived
+Reproduced independently from ERSSTv5 with the repo's own `sc_harm` and cos-lat weighting.
+**VALIDATION:** the SH hemispheric half-amplitude comes back **1.7464 K**, reproducing the registered
+`SST_SEAS_AMP_SH_OBS = 1.74644` to 5 s.f., so the band row is like-for-like.
+
+| region | half-amp | p2p |
+|---|---|---|
+| SH hemisphere | 1.7464 | 3.4928 |
+| **BAND 40–90 S** | **1.4995** | **2.9990** ⇒ the shipped `.ENT_SO_SST_AMP = 3.0` |
+| NH hemisphere | 2.2374 | 4.4748 |
+
+✅ `.ENT_SO_SST_AMP = 3.0` **is the PEAK-TO-PEAK, labelled "half-amplitude"** — a true factor of 2.
+✅ `R/constants.R:41-42`'s *"the band … swings harder than the hemisphere"* is **FALSIFIED**
+like-for-like: 1.4995 < 1.7464. It only reads true comparing a p2p against a half-amp.
+⛔ **BUT REVIEW §4's SECOND LEG IS WRONG.** It reported `.ENT_SO_PCO2_AMP = 19.45` as *also* p2p, so
+that "the two biases run the same way on top of a shared factor of 2" and the centre is "≈2.1–2.3×
+too large". **The repo's own uncontaminated 09-09 obs run
+(`outputs/diagnostics/so_pco2_amplitude_20260909.log`) refutes it**: the per-cell *harmonic*
+amplitude is **19.68** against the shipped 19.45 — a p2p would be ≈39. Its defect is the
+per-cell-vs-area-mean split (19.45 → 16.26), worth 4.8 %, **not** a factor of 2.
+
+**Re-derived by COMPUTATION, not prose arithmetic:**
+
+| case | in-band | centre | × shipped | fitted 21.04 ÷ centre |
+|---|---|---|---|---|
+| shipped (3.0 p2p, 19.45 per-cell) | 29.6812 | 10.9524 | 1.000 | 1.92 |
+| SST leg fixed only | 19.1840 | 7.0789 | 0.646 | 2.97 |
+| **both legs fixed (1.4995 half, 16.26 area-mean)** | **17.7581** | **6.5528** | **0.598** | **3.21** |
+| review §4's assumption (both p2p) | 14.8371 | 5.4749 | 0.500 | 3.84 |
+
+⇒ the shim sits at **3.21×** its corrected centre, not 1.92× and not ~4×. **The review's DIRECTION
+survives — retiring the shim is better supported than shipped — but its MAGNITUDE was overstated.**
+⚠ **NOT ACTED ON.** Changing `.ENT_SO_SST_AMP` moves `ent_seas_amp_SH`'s prior centre, and whether
+the pCO₂ leg takes 16.26 (area-mean, box-consistent, and what the SST leg uses) or 19.68 (per-cell)
+is a **ruling the 09-09 log itself flags as owed**. Marcus's call.
+
+### Also checked
+- `so_pco2_amplitude_20260909` ran at **16:36 — inside the contaminated window** and was NOT
+  quarantined. Verified 09-09v: observation-only, no `ccx_spinup`/`ccx_run` call. Correctly excluded.
+- The canonical mode file stores **23** stream rows summing to −1434.670 against a stored logpost of
+  −1478.660 (gap 43.99 = the log-prior, as expected), and it does carry `d14c_deep_ocean` with no
+  `d14c_mid_*` profile rows. ⚠ **The review's "4.75 log-units short" claim is NOT verified** — it
+  needs a loglik at the mode, which was not run. Still open, still review §10 item 6.
+
+### NOT DONE, deliberately
+No refit. No prior re-centred. No constant changed. `hilda31` still canonical, `seas_ml` still
+DEFAULT 0, no stored logpost moved. Every item above that would move a prior, a constant or a
+canonical artifact is left for Marcus.
+
 ## 2026-09-09u — ✅ **THE BLOCKER IS FIXED AND THE CONTAMINATED OUTPUTS ARE QUARANTINED. ONE MECHANISM, ONE GATE: the seasonal mixed layer's predicate is now resolved ONCE, in R, and both cores read it.**
 
 **THE FIX.** `ccx_cpp_par()` now ships `p$seas_ml_on <- as.integer(ccx_seas_ml_on(p))` — the
