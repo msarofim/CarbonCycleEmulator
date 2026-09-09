@@ -181,9 +181,11 @@ is a **ruling the 09-09 log itself flags as owed**. Marcus's call.
 - `so_pco2_amplitude_20260909` ran at **16:36 — inside the contaminated window** and was NOT
   quarantined. Verified 09-09v: observation-only, no `ccx_spinup`/`ccx_run` call. Correctly excluded.
 - The canonical mode file stores **23** stream rows summing to −1434.670 against a stored logpost of
-  −1478.660 (gap 43.99 = the log-prior, as expected), and it does carry `d14c_deep_ocean` with no
-  `d14c_mid_*` profile rows. ⚠ **The review's "4.75 log-units short" claim is NOT verified** — it
-  needs a loglik at the mode, which was not run. Still open, still review §10 item 6.
+  −1478.660 ~~(gap 43.99 = the log-prior, as expected)~~, and it does carry `d14c_deep_ocean` with no
+  `d14c_mid_*` profile rows. ~~⚠ **The review's "4.75 log-units short" claim is NOT verified**~~
+  ⛔⛔ **RETRACTED 09-09w: the 43.99 was never computed. The log-prior is −39.2347, and the review's
+  4.7543 is exact.** ✅ The stored `logpost` is nonetheless valid — it IS today's objective — so the
+  defect is the stale `streams` FIELD alone and **no refit is owed**. See the 09-09w entry.
 
 ### NOT DONE, deliberately
 No refit. No prior re-centred. No constant changed. `hilda31` still canonical, `seas_ml` still

@@ -17,7 +17,10 @@ Memory: [[quarantine_blast_radius_is_a_timeline]], [[ccx_f2_periodic_spinup_owed
    (§6) and every one is Marcus's.** Ask before touching them.
 2. If a ruling comes back: **build the periodic spinup first** (§4). It is the only owed item whose
    answer changes round 6's *cost*, and it is unresolved in BOTH directions.
-3. Still open from the review and NOT verified: the mode file's stream set (§7).
+3. ~~Still open from the review and NOT verified: the mode file's stream set (§7).~~ ✅ **DONE
+   09-09w** — and it RETRACTED §7's own rebuttal: the review's 4.7543 was exact, the log-prior is
+   −39.2347, but the stored `logpost` is valid and **no refit is owed**. ⛔ **The `streams` repair
+   is a FIFTH ruling** — §6 says four; read it as five.
 
 ## 1. STATE OF THE TREE
 - **`main`**, tree **clean**, not pushed (no remote). This session's commit: **`f3ff278`**
@@ -151,11 +154,18 @@ shim is better supported than the shipped 1.92× implied — but its MAGNITUDE w
    3.21× rather than 1.92×.
 
 ## 7. OWED FROM THE REVIEW, STILL NOT DONE
-- ⚠ **The mode file's stream set — NOT VERIFIED.** Measured: it stores **23** rows summing to
-  **−1434.670** against a stored logpost **−1478.660**; that **43.99** gap is the **log-prior**, as
-  expected, and is NOT the review's claimed "4.75 log-units short". It does carry `d14c_deep_ocean`
-  with no `d14c_mid_*` profile rows, which matches the review's description of a stale producer.
-  **Settling it needs a loglik at the mode, which was not run.** Review §10 item 6.
+- ⛔⛔ **RETRACTED AND SETTLED 2026-09-09w — THIS PARAGRAPH WAS WRONG.** ~~that **43.99** gap is the
+  **log-prior**, as expected, and is NOT the review's claimed "4.75 log-units short"~~ — **the gap
+  was never computed.** The log-prior at `u_mode` is **−39.2347** (three lines, no model run), so
+  `logpost − logprior = −1439.4248` = the **recomputed 25-row** sum to **1.27e−10**, and the stored
+  23 rows are **+4.7543** off. **The review's number was exact.** ✅ But the consequence is the
+  benign branch, also measured: the stored `logpost` **IS** today's objective, `hilda31` is a mode of
+  this space, **no refit is owed** — only the `streams` FIELD is stale (retired `d14c_deep_ocean`
+  −4.1833 where the objective scored three `d14c_profile_*` rows, −8.9376; the 22 common rows agree
+  to 1.38e−10). ⇒ CHANGELOG **09-09w**, `calibration/diag_mode_streams_provenance.R`,
+  [[residual_named_not_computed]]. **The repair is a FIFTH ruling owed to Marcus.**
+  *(The measured facts in the original — 23 rows, −1434.670, the `d14c_deep_ocean`-without-profile
+  stream set — were all correct; only the ATTRIBUTION of the leftover was invented.)*
 - The other §8 leads (F3 the guard's month-centre max, F4 substeps, GATE Q's missing
   `test-gate-bounds` coverage, `ccx_loglik()`'s finite 0) — untouched, still `[R]`.
 - §6/§7 pedagogy: the app prose (`app/ui.R:265` still says "a mixed layer over ten diffusive
