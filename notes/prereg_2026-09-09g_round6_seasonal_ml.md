@@ -126,7 +126,10 @@ if a future mode file sets `h_hs = 0`.
    `dic_ml <- y[iml,"C"] * mol_per_GtC / ml_mass_kg` (`R/model.R:1833`). It becomes a function of
    `t`. ⛔ **Getting the mass right but not the transfer (or vice versa) silently manufactures or
    destroys DIC** — the conservation assertion in §6.4 is what catches it.
-4. ⭐⭐ **A PERIODIC SPINUP IS PROBABLY NOT NEEDED — the round's stated main risk is retired.**
+4. ⭐⭐ **A PERIODIC SPINUP IS NOT NEEDED — CONFIRMED TWICE (09-09j), the round's stated main risk
+   is retired.** By construction (the C++ guard's first firing showed `ccx_spinup()` solves through
+   that path at `seas_drivers = 0`) and by measurement (**P10**: the quiet-window rectification is
+   settled).
    `R/spinup.R:227` sets `p0$seas_drivers <- 0`: the spinup is **aseasonal by construction**, and
    every existing seasonal mechanism (seasonal SST, the land drivers, the `ent_seas_amp_SH` shim)
    already lives under that one switch precisely so the spinup's zeroing covers it and
@@ -150,6 +153,18 @@ if a future mode file sets `h_hs = 0`.
   (round-3 winner) / 19.0 (`ent26`) and its prior centre 10.95. ⛔ Outside those, the mechanism is
   not the compensator's physics and the round stops before the refit.
   ⚠ Model-conditional: the sub-ML gradient (+42 µmol/kg into layer 1) is itself fitted.
+  ⛔⛔ **EXECUTED 2026-09-09j** (`calibration/diag_seas_ml_probe.R`): **NH 10.23 PASS, SH 9.79 —
+  FAIL against the 10.0 floor by 2.1 %.** By this prereg that STOPS the round before the refit, and
+  it is recorded as a FAIL; **the band is not widened after the fact.** ✅ **And it is NOT an
+  integrator artefact** — P9 below finds it converged (SH 9.791 → 9.829 from 4 to 16 substeps,
+  0.38 %). Both hemispheres land at the observed order untuned, below the compensator they replace,
+  and peak in the right months (NH Feb, SH Aug).
+  ⚠⚠ **THE BAND ITSELF IS UNDER REVIEW AS A YARDSTICK, and this was my error in writing it.** It
+  comes from the 09-08d pre-check for **OPTION B**: half the **per-cell entrainment fraction
+  `f_ent`** swing (SH 0.239) × ΔC. Option A runs on the **mean-preserving DEPTH RATIO**
+  `h_m/mean(h_m)` (SH half-swing **0.5715**) — **a different quantity** ⇒
+  [[verify_the_quantity_not_the_word]]. ⛔ Not used to overturn the verdict: **whether P1's band is
+  the right like-for-like test for (A) is MARCUS'S RULING**, and until he rules the FAIL stands.
 - **P2 ⭐ LOAD-BEARING.** On refit, `sst_seas_amp_NH`'s prior-z relaxes from **−2.96** to **inside
   2σ**. The NH analogue of 09-03's P2, and the reason the round exists. ⛔ If it does not relax, the
   NH strain is not seasonal entrainment.
@@ -159,8 +174,12 @@ if a future mode file sets `h_hs = 0`.
 - **P4 ⭐ THE DISCRIMINANT — and under (A) it is GENUINELY TESTABLE.** The `d13c_seasonal_*` rows
   **IMPROVE or HOLD**: entrainment brings isotopically light water up in winter, a signal solubility
   cannot produce. ⛔ **If they PAY, the mechanism is wrong in the isotope and (A) is refuted.**
-- **P5 (Δ¹⁴C, free and unfudged).** The seasonal Δ¹⁴C signature appears with **no ¹⁴C fractionation
-  term added anywhere**. The `d14c_*` rows move by **less than `sigma_d14c`** — entrainment is a
+- **P5 (Δ¹⁴C, free and unfudged).** ✅ **FIRST HALF VERIFIED 09-09j**: the signature appears with
+  **no ¹⁴C fractionation term added anywhere** — the entrainment limbs run at `alpha13 = 1` and
+  `add_flux` carries Δ¹⁴C unfractionated by the α₁₄ = α₁₃² convention; `test-seas-ml.R` asserts the
+  ML's ¹⁴C **ratio** is pulled toward layer 1's older water while deepening and not while shoaling.
+  ⚠ **Second half still owed** (the rows' movement). The seasonal Δ¹⁴C signature appears with
+  **no ¹⁴C fractionation term added anywhere**. The `d14c_*` rows move by **less than `sigma_d14c`** — entrainment is a
   surface-cycle mechanism and must not disturb the bomb constraint.
 - **P6 (no free lunch).** `co2_seasonal_SPO` / `co2_seasonal_MLO` move by **less** than the fitted
   21.2 compensator would predict — the mechanism is *smaller* than the thing it replaces — and the
@@ -169,9 +188,45 @@ if a future mode file sets `h_hs = 0`.
 - **P7 ⭐ NOT A DEEP LEVER IN DISGUISE.** The **modern** surface−deep δ¹³C gradient (**0.40** at
   `hilda31`) does not move by more than the `ocean_grad_d13c` row's σ_eff (**0.16**).
   ⚠ **Modern, like-for-like — never the PI number** ([[ccx_cheap_probes_20260908h]]'s retraction).
-- **P8 ⛔ GEOMETRY STOPPING CONDITION (§3c).** The refitted `h_ml` stays **below 76.1 m**. If it
-  crosses, the winter ML punches layer 1, single-layer entrainment is **invalid**, and the round
-  **stops and reports** rather than adopting. ⚠ `ent26` sat at 134 m — this can happen.
+- **P8 ⛔ GEOMETRY STOPPING CONDITION (§3c) — ✅ NO LONGER A PREDICTION, IT IS AN ENFORCED GATE.**
+  The refitted `h_ml` must stay **below 76.1 m**; past it the winter ML punches layer 1 and
+  single-layer entrainment is **invalid**. Implemented as `ccx_seas_ml_guard()`, which **STOPS
+  rather than clamping** — a clamp would turn a design violation into a quiet bias — and is
+  **mutation-tested** at `h_ml` 90 and at `ent26`'s **134.15**. ⇒ a refit cannot cross it silently.
+
+**ADDED 2026-09-09j — four pre-checks this list did not have, two already executed:**
+
+- **P9 ✅ SUBSTEP CONVERGENCE — EXECUTED, CONVERGED.** `ccx_substeps_for()` bounds diffusion and
+  advection, but the model's own substepping rationale is the **air-sea timescale `h_ml/k_w`, which
+  shrinks with the mixed layer**: 0.0296 yr (10.8 d) at the annual mean but **0.0158 yr (5.8 d) at
+  the summer minimum (26.3 m)**, against a substep of 30/4 = 7.6 d — so in summer the ML
+  equilibrates **faster than a substep resolves**, and the eigenvalue bound cannot see it (it
+  returns 4 either way, because `CCX_SUBSTEPS_MIN = 4` is the floor; the §4.2 change is therefore
+  **inert at the canonical**). MEASURED: P1's amplitude moves **0.38 %** from 4 to 16 substeps,
+  against a **1 %** tolerance scaled to P1's own band width. ⇒ **P1 is measuring the model, not the
+  integrator.**
+- **P10 ✅ THE RECTIFICATION SETTLES — EXECUTED, and it needed TWO WINDOWS to be answerable.**
+  Option A moves real carbon, so it rectifies onto the annual mean. A trend in the on-minus-off
+  difference over an **industrial** window has two causes needing opposite responses — **spin-in**
+  (a periodic spinup is owed) or **a change in anthropogenic uptake** (real physics) — and one
+  window reports them identically. ⛔ A first version measured only 1900–2000, got "still drifting",
+  and could not tell which. MEASURED on both: **QUIET (1750–1850, near-zero emissions) is SETTLED**
+  — trend/century 3.84 % (NH) / 3.07 % (SH) of the seasonal amplitude, inside the 5 % ordering ⇒
+  **no spin-in; the aseasonal spinup STANDS and no periodic spinup is owed** (the §4.4 claim, now
+  measured rather than argued). ⚠ **The NH margin is thin (3.84 % against 5 %) — re-measure after
+  any refit that moves `h_ml`.** **INDUSTRIAL NH drifts at 7.72 %** ⇒ **the seasonal mixed layer
+  changes how the ocean takes up anthropogenic carbon — a RESULT to report, not a defect to fix.**
+- **P11 ⛔ C++ PARITY AT `seas_ml = 1` — OWED, and blocked on the twin.** The tolerance is
+  **derived from the flux count**, never fitted to a measurement (the 2026-08-16e discipline):
+  the mechanism adds 2 limbs, so the reassociation bound is `n_terms × eps × throughput`.
+  Until then `R/cpp.R` **STOPS** rather than silently running the aseasonal ML — parity cannot see
+  a run nobody compares.
+- **P12 ⚠ THE COMPENSATOR MUST BECOME REDUNDANT — OWED.** If (A) is the physics `ent_seas_amp_SH`
+  was standing in for, then refitting with **both** active must drive the compensator **toward
+  zero**. If instead it stays large, (A) is an ADDITION to the shim rather than its **replacement**,
+  and retiring the parameter would not be justified. ⇒ this is the test that distinguishes "one
+  mechanism" from "two", and it is cheap: profile `ent_seas_amp_SH` at the canonical with
+  `seas_ml = 1`.
 
 **Reported, never scored:** IRF(100), and the land share of a pulse — **comparisons** by the 09-04e
 ruling. ⛔ **No Joos row anywhere in this prereg.**

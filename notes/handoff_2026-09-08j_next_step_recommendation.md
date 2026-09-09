@@ -1,4 +1,9 @@
 # Handoff — 2026-09-08j. WHERE THE MODEL STANDS after Phase 1 and the cheap probes, and the RECOMMENDED next step: round 6 = OPTION C ALONE (the seasonal mixed layer, derived amplitude), with the three rulings and one data check done first; B after C; E as the structural build D and the gradient both need; D shelved until E.
+# ⛔⛔ **STATUS 2026-09-09j — READ THIS FIRST. THE RULINGS ARE ALL CLOSED AND §5's BUILD INSTRUCTION IS OBSOLETE.**
+# **§3's four rulings: ALL TAKEN AND CLOSED 09-09** (1 and 3 implemented gate-side; 2 closed with NO change; 4 applied, measured, then REVERTED to 1.0). **No refit is owed and `hilda31` stays canonical.**
+# **§5.3 SAYS TO BUILD OPTION B — DO NOT.** Marcus ruled **OPTION A** (the true time-varying mixed layer) on 09-09h, because B is pCO₂-side, moves no carbon, and so carries **no isotopic signature in either isotope**: its P4 is compromised before it runs. **A is BUILT in the R core (09-09j, `799249c`).**
+# **§5.5's Torch sizing is also premature**: the round is stopped at P1 pending a ruling on P1's band, and the **C++ twin is not built**.
+# ⇒ **The live documents are `notes/prereg_2026-09-09g_round6_seasonal_ml.md` (P1–P8, build order) and CHANGELOG 09-09g→09-09j.** Everything below is provenance for how the round was chosen.
 # **Every model number here is GENERATED at the canonical `hilda31` by scripts named in the 09-08h/i handoffs (`outputs/diagnostics/*_20260908.*`). The two recollections (Hoffert 1980's 4 m/yr; equatorial upwelling "tens of Sv") are labelled where used.**
 
 Read first: `notes/handoff_2026-09-08i_cheap_probes.md` (the probes), `notes/handoff_2026-09-08h_phase1_results.md`
@@ -35,7 +40,15 @@ and the Joos ruling), [[ccx_seasonal_h_ml_option]].
    export: "no ocean upwelling/ventilation" (E).
 5. **Alkalinity is closed**; T-hml's shelf is the σ_rep table; gate L and the IRF are comparisons.
 
-## 3. Rulings owed BEFORE the next build (an hour of Marcus's time; each changes a number or a gate)
+## 3. ⛔ CLOSED 2026-09-09 — Rulings owed BEFORE the next build
+> All four were taken and are closed; **none left an objective change, so no refit is owed.**
+> (1) gate 5 → TROUGH DEPTH: **implemented** gate-side. (2) the σ_rep table: **closed with NO
+> change** — the ruling named what `R/likelihood.R` already did. (3) GL → the AUGMENTED bound:
+> **implemented** gate-side; GL still FAILS z −8.67 and is divisor-invariant. (4) the Tans ÷1.20:
+> **applied, measured, then REVERTED to 1.0** — the cost falls post-1970 where the compilations
+> agree. Ledger: `INDEX_ccx_gates.md`.
+
+## 3. (closed) Rulings owed BEFORE the next build
 1. **Gate 5's NH statistic** — first-peak time (matches to 0.00 yr), trough depth (51 vs 111: FAIL), or drop the time
    bound and let the `d14c_NH` stream carry the shape. My recommendation: the trough depth as the bound (it is the miss),
    first-peak time reported.
@@ -74,7 +87,9 @@ design is unconstrained without B's shallow return in place; B is E's first inst
    - P7: the modern surface−deep δ¹³C gradient (0.40 at `hilda31`) does not move by more than the `ocean_grad_d13c`
      row's σ_eff (0.16) — entrainment is a surface-cycle mechanism and must not be a deep lever in disguise.
    - No Joos row anywhere in the prereg (ruled). IRF reported after, as a comparison.
-3. **Build** option B of the 09-08d note: replace the fitted `ent_seas_amp_SH` with `(C₁ − C_ml)(t) × f_h(month)` in both
+3. ⛔ **OBSOLETE — DO NOT FOLLOW. Marcus ruled OPTION A on 09-09h and it is BUILT (R core).** The
+   instruction below builds the pCO₂-side shim, which carries no isotopic signature in either
+   isotope. Kept only to show what was superseded. ~~**Build** option B of the 09-08d note:~~ replace the fitted `ent_seas_amp_SH` with `(C₁ − C_ml)(t) × f_h(month)` in both
    hemispheres, ¹³C carried, from `data/obs_mld.rds$seasonal` (the two 12-month `f_ent` rows already exist). Both cores
    (R `ccx_deriv`, `src/ccx_core.cpp`), one expression each; parity test; a mutation test at an explicit non-zero
    amplitude ([[default_off_hides_the_bug]]). 31 → 30 parameters; comparable on LIKELIHOOD only.

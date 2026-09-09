@@ -105,6 +105,22 @@ test_that("moving the ML base conserves dz_ML + dz_1 and leaves the interior alo
   expect_false(isTRUE(all.equal(dzm2[2], dzm[2])))
 })
 
+test_that("a following high-latitude box takes the ANNUAL-MEAN h_ml, not the seasonal one", {
+  # h_hs <= 0 means "follow the low-latitude mixed layer" (choice C2). At the
+  # canonical h_hs is PINNED at 401 m so this never arises -- but it is a
+  # property of the MODE FILE, not of the model, and a future canonical could
+  # set it to 0. If it did, the HILDA surface box must NOT start breathing with
+  # the seasons: only the ML/layer-1 boundary moves, by construction.
+  # MEASURED at 49.153 m (the annual mean) rather than assumed.
+  p <- ccx_default_params()
+  p$h_ml <- 49.153; p$seas_drivers <- 1; p$seas_ml <- 1; p$h_hs <- 0
+  aux <- ccx_prepare(p)
+  expect_equal(aux$grid$h_ml, 49.153)
+  # and the interior grid is built at the annual mean, unmoved by the mechanism
+  p0 <- p; p0$seas_ml <- 0
+  expect_equal(ccx_prepare(p0)$grid$dz, aux$grid$dz)
+})
+
 # ---------------------------------------------------------------------
 # 3. THE P8 GUARD -- MUTATION-TESTED: break what it guards, confirm it fails
 # ---------------------------------------------------------------------

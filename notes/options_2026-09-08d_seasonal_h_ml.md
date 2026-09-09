@@ -1,5 +1,6 @@
 # OPTIONS — a SEASONAL mixed-layer thickness for CCX (2026-09-08d). Marcus: "either free `h_ml` or explore pinning it to a seasonal shape so that it can capture both the annual mean and the annual max."
-# **⛔ Nothing built. Every model number is GENERATED at the round-3 winner (id 24) from `outputs/diagnostics/u_hs_h_ml_tests_20260908.rds` / the winner's spinup; every observation number is from `data/obs_mld.rds` or computed from the Holte product in this note's own one-liners. Ruling owed.**
+# **⛔ STATUS SUPERSEDED 2026-09-09j: the ruling was TAKEN (option A, mean-preserving) and A IS BUILT in the R core. This note is now PROVENANCE — the live document is `notes/prereg_2026-09-09g_round6_seasonal_ml.md`. Three of its pre-checks are annotated OBSOLETE or UNDER REVIEW below (§2 twice, §3 (A)'s cost, §4, §5); read those markers before quoting anything here.**
+# **Every model number below is GENERATED at the round-3 winner (id 24, `h_ml` 39.8) from `outputs/diagnostics/u_hs_h_ml_tests_20260908.rds` — ⚠ NOT at the canonical `hilda31` (`h_ml` 49.153), which is why the §2 geometry reading did not survive. Observation numbers are from `data/obs_mld.rds`.**
 
 ## 0. What the question really is
 The model has ONE time-constant `h_ml` and the observation has two numbers for it — the LS annual mean **59.7 m**
@@ -35,8 +36,23 @@ registered driver 7.50; the NH peak is Jan–Feb.
 |---|---|---|---|---|---|
 | NH DIC, µmol/kg | 1990 | 2033 | 2087 | **+42** | +97 |
 | SH | 2007 | 2049 | 2104 | **+42** | +97 |
-A winter mixed layer of 83 (NH) / 114 m (SH) reaches through layer 1 into layer 2, so the entrained water is +42 to
-~+70 µmol/kg above the mixed layer. **Pre-check of the seasonal DIC amplitude the mechanism implies** (half the
+⛔⛔ **OBSOLETE 2026-09-09j — DO NOT QUOTE THIS SENTENCE.** ~~A winter mixed layer of 83 (NH) /
+114 m (SH) reaches through layer 1 into layer 2~~, so the entrained water is +42 to ~+70 µmol/kg
+above the mixed layer. **It does NOT reach layer 2.** That reading used the RAW observed depths at
+the round-3 winner's `h_ml` **39.8**. Under Marcus's **MEAN-PRESERVING** ruling at the canonical
+`hilda31` (`h_ml` **49.153**), the winter ML reaches **82.7 m (NH) / 82.5 m (SH)** against a layer-1
+base of **101.4 m** — it stays **INSIDE LAYER 1**, which is what makes option A tractable with
+single-layer entrainment. MEASURED by `calibration/diag_seasonal_ml_geometry.R`. ⚠ It DOES punch
+layer 1 once fitted `h_ml` > **76.1 m**, which is prereg P8 and is now an enforced gate.
+⇒ the entrained water is layer-1 water at **+42** µmol/kg; the +97 (layer 2) does not apply.
+
+⚠ **AND THE PRE-CHECK BELOW IS UNDER REVIEW AS A YARDSTICK** (2026-09-09j). It sizes (B)'s SHIM
+AMPLITUDE from the **per-cell entrainment fraction `f_ent`** (SH half-swing 0.239). Option A is
+driven by the **mean-preserving DEPTH RATIO** `h_m/mean(h_m)` (SH half-swing **0.5715**) — a
+DIFFERENT QUANTITY. The bands still stand as (B)'s pre-check; whether they are the right
+like-for-like test for (A)'s EMERGENT anomaly is an open ruling ⇒ [[verify_the_quantity_not_the_word]].
+
+**Pre-check of the seasonal DIC amplitude the mechanism implies** (half the
 f-swing × ΔC): SH (0.680 − 0.202)/2 × 42–70 = **10–17 µmol/kg**; NH (0.652 − 0.257)/2 × 42–70 = **8–14 µmol/kg**.
 Against: the fitted SH amplitude 21.2 (winner) / 19.0 (`ent26`), the prior centre 10.95, the in-band observation
 29.68 before dilution. ⇒ **The mechanism sizes to the observed order with nothing tuned** — the same out-of-sample
@@ -44,7 +60,13 @@ support criterion the HS pump met ([[ccx_hs_pump_probe]]). ⚠ These are first-p
 gradient; the gradient itself is a fitted quantity (the LS pump, `kz`), so the number is model-conditional.
 
 ## 3. The options
-**(A) A true time-varying mixed layer.** `h_ml(t)` follows the monthly climatology per hemisphere (scaled so its
+**(A) A true time-varying mixed layer. ⭐ RULED AND BUILT (R core) 2026-09-09j.**
+⛔ **Its cost line below is OBSOLETE.** "Cost: days; risk: the spinup" assumed a PERIODIC steady
+state. Not needed: `R/spinup.R:227` sets `seas_drivers <- 0`, so the spinup is aseasonal by
+construction and every seasonal mechanism already lives under that switch for exactly that reason —
+confirmed by construction when the C++ guard fired (`ccx_spinup()` solves through the C++ path at
+`seas_drivers = 0`). ⚠ Also note the interior grid must be DECOUPLED from the moving base: only the
+ML/layer-1 boundary moves. `h_ml(t)` follows the monthly climatology per hemisphere (scaled so its
 annual mean is the fitted or pinned `h_ml`); the first interior layer absorbs the change; entrainment when deepening
 brings layer-1 water (C, ¹³C, ¹⁴C) into the ML at layer-1 concentrations; detrainment when shoaling leaves ML water
 below. Both cores (R `ccx_deriv`, C++ `ccx_core.cpp`), the spinup (a periodic steady state — today's spinup zeroes
@@ -60,7 +82,16 @@ LIKELIHOOD only). Cost: one day incl. tests; both cores touch one expression eac
 **(C) Free `h_ml` with a prior spanning both readings** (no mechanism): lognormal, median √(59.7 × 118) = 83.9 m,
 log-sd ln(118/59.7)/2 = 0.341 so the mean and the max are ±1σ. Cheapest; answers nothing about the seasonal cycle.
 
-## 4. Pre-registered predictions for (B), to be written into the prereg BEFORE it is built
+## 4. ⛔ SUPERSEDED 2026-09-09h — predictions for (B), WHICH IS NOT BEING BUILT
+> **Marcus ruled OPTION (A)**, the true time-varying mixed layer, because (B) is **pCO₂-side**: it
+> moves no carbon, `add_flux` takes r13 from the SOURCE box, so (B) carries **no isotopic signature
+> in either isotope** and its P4 — the discriminant — is compromised **before it runs**.
+> ⇒ **The live prediction list is `notes/prereg_2026-09-09g_round6_seasonal_ml.md` §5 (P1–P8).**
+> The five below are kept as provenance for where those came from; **do not execute them**, and note
+> that P1's band in particular was derived HERE for (B)'s shim amplitude and is under review as a
+> yardstick for (A). ⚠ P1/P2/P3/P4 below correspond to the prereg's P1/P2/P3/P4; its P5–P8 are new.
+
+## 4. (superseded) Pre-registered predictions for (B)
 - P1 at the winner, unrefitted, SH amplitude lands in [10, 17]; the `co2_seasonal_SPO` / `d13c_seasonal_SPO` rows move
   by < the fitted shim's 21.2 would predict (the mechanism is smaller than the compensator).
 - P2 the NH gains an amplitude in [8, 14] peaking Jan–Feb, and `sst_seas_amp_NH`'s strain (−2.83) RELAXES on refit —
@@ -70,7 +101,12 @@ log-sd ln(118/59.7)/2 = 0.341 so the mean and the max are ±1σ. Cheapest; answe
   if they PAY, the mechanism is wrong in the isotope and (B) is refuted as built.
 - P5 IRF(100) reported, not gated (a comparison since 09-04e).
 
-## 5. Recommendation
+## 5. ⛔ SUPERSEDED 2026-09-09h — Recommendation
+> The recommendation below ("(B) is the round-5 candidate; (A) only if (B)'s isotope test fails")
+> **was overtaken**: (B)'s isotope test cannot be run at all, so "only if it fails" was too weak a
+> trigger. Round 6 = **(A)**, built in the R core 2026-09-09j.
+
+## 5. (superseded) Recommendation
 Round 4 (launching now) carries `u_hs` freed and `h_ml` under option (C)'s prior — the ruling Marcus gave, and it
 keeps round 4 a ONE-question experiment (does `u_hs` run back to 38?). **(B) is the round-5 candidate**: build it
 after round 4 is read, prereg P1–P5 first, probe unrefitted at the round-4 winner, then refit. (A) only if (B)'s
