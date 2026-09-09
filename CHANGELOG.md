@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09s — **HANDOFF: `notes/handoff_2026-09-09s_round6_built_review_owed.md`. ⛔ RULED (Marcus): THE NEXT SESSION DOES A FULL CODE REVIEW FIRST — bugs, and anything inconsistent with physical understanding or PEDAGOGICAL usefulness. THE REFIT COMES ONLY AFTER THE CODE IS JUDGED CLEAN.**
+
+Round 6 (the seasonal mixed layer, option A) is **built in both cores**, parity holds, **suite 2381 / 3 / 4** (the three are the pre-existing set, unrelated to this session). **`hilda31` remains canonical, `seas_ml` remains DEFAULT 0, and no stored logpost moved.**
+
+⭐ **The handoff's review section is built from THIS SESSION'S OWN DEFECT RATE**, which is the honest prior: four defects found, three of them mine, and **every one was the same family — a quantity that looked plausible but was not the quantity intended.** It names the places already proved fragile (`ccx_substeps_for()`, which I got wrong twice; the P8 guard, whose bound is necessary and **not sufficient**; the new `record` stash; the unstated convention on `.ENT_SO_SST_AMP`) and separates them from the **pedagogical** questions a bug hunt would miss — whether `ent_seas_amp_SH` still deserves to exist, what `sst_seas_amp_*` physically are given P1c shows the model over-swings 1.33× *before* the mechanism is on, and ⚠ **what the `ml` box's identity actually is**, since three rulings now depend on an answer that is written down nowhere.
+
+**The refit's target is now specific, which it was not before today:** cut the SH ΔpCO₂ amplitude ~2.6× against A2 by relaxing the fitted solubility amplitude, **without** giving back P12's +518 on `co2_seasonal_SPO`, and recovering the −514 on the CO₂ LEVEL rows. 31 → 30 parameters, comparable on **likelihood only**, and a **Torch array, not a laptop job**.
+
 ## 2026-09-09r — ⭐⭐ **P1c RUN AS A REPORTED COMPARISON (rulings A1 + B2 taken). THE PREDICTED STRUCTURAL FINDING LANDED — AND IT BROUGHT A SHARPER ONE: THE MODEL OVER-SWINGS AGAINST *BOTH* BANDS, AND `seas_ml` DOUBLES IT.**
 
 **RULINGS IMPLEMENTED.** **A1**: the model's SH `ml` is compared against the observation aggregated **the same way the model's own driver was** — the whole SH ocean, 0–90 °S. **A2 (GATE S's 40–90 °S) is reported ALONGSIDE, reference only.** **B2**: the quantity is the **air-sea ΔpCO₂**, GATE S's own, so amplitude and phase come from ONE quantity. Estimator **AREA-MEAN-FIRST** (09-09q: a well-mixed box has an area-mean concentration). `calibration/diag_p1c_dpco2_comparison.R`.
