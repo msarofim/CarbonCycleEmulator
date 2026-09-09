@@ -2,6 +2,27 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09c — ⛔ **The N&L ocean inventory CANNOT arbitrate ruling 4 — measured, not assumed. And the LUC ¹⁴C leak DATA.md §10 records at 23.9 / 28.3 kmol is ~0 at the canonical: that text is STALE.**
+
+**The proposal, and why it was worth trying.** Of ruling 4's four counter-measurements only one is both physical and refit-independent: budget-closing λ 0.1996 → 0.3490 /yr, so gross air-sea exchange at Tans' own Broecker flux covers **75 % → 43 %**. Whether 43 % is implausible is an argument about the ocean/land split of bomb-¹⁴C removal — and my case for ocean dominance was **recall of the standard picture, not a citation** (on GROSS fluxes GPP ~120 GtC/yr exceeds Broecker's ~82, so the ordering is not self-evident). N&L 2006 Table 4's observation-based **ocean** inventories at GEOSECS (1975) and WOCE (1995) looked like the way to settle it on an observation. `calibration/diag_debias_ocean_inventory_power.R` (+ `.log`, `.rds`).
+
+**⛔ POWER FIRST, and the power is absent.** The by-stream decomposition of the −92.74 already on disk says the whole effect is atmospheric: `d14c_SH` **−69.452**, `d14c_NH` **−23.224**, `excess_c14_ocean` **−0.063** — the target quantity carries **0.07 %** of it. Measured directly (both arms at `hilda31`, forcing swapped under `tryCatch(finally=)` + an md5 restore assertion; the scored definition, total-minus-natural on baseline A, verified against `R/likelihood.R:1777` so the comparison is like-for-like):
+
+| year | obs (`table4_obs_range`) | pre-de-biasing | de-biased | **arm shift** |
+|---|---|---|---|---|
+| 1975 | 40.7–56.5 (½w 7.9) | 59.54 OUTSIDE | 61.41 OUTSIDE | **+1.87** |
+| 1995 | 43.8–59.0 (½w 7.6) | 81.18 OUTSIDE | 81.54 OUTSIDE | **+0.36** |
+
+⇒ **both arms sit outside every target set, at both years, on the SAME side, by +3.0 and +22.2 kmol, while the arms differ by 1.87 and 0.36.** A target that rejects both arms equally **ranks neither** ⇒ [[no_power_null]]. Reported against BOTH target sets, since the `table4_obs_range` / `table2_peacock` choice is worth ~130 log-units and is **flagged, not settled** (DATA.md §10).
+
+**And the offset is not evidence about bomb uptake either.** The fitted `bomb_total` is **118.4 kmol against N&L's own 99.3–104.9 production prior (+12.9 % above its top)**; scaling to that top brings 1975 to 52.7 = **INSIDE**. So the 1975 miss is an AMPLITUDE excursion common to both arms, not an ocean-uptake error.
+
+**⛔ AND A STALE DOC, FOUND BY MEASURING A CONFOUND INSTEAD OF QUOTING IT.** I wrote the LUC ¹⁴C leak into the script as a confound on DATA.md §10's authority ("our excess exceeds the bomb input by **23.9 kmol at 1975 and 28.3 at 1995**"). **Measured at `hilda31` by §10's own derivation it is −0.11 and −0.00 kmol.** Either the leak was fixed after that text was written or it is mode-dependent; **either way §10's numbers must not be quoted for the canonical.** The script now measures the leak rather than citing it ⇒ [[derived_must_mean_computed]]. My own confound claim was wrong for one iteration and is corrected in place.
+
+**⚠ FLAGGED, NOT CHASED — not what this script was built to ask.** 1995 stays outside even after the `bomb_total` rescale (~71.9 vs an upper bound of 59.0). This IS a scored stream, so the fit already sees it; **check the arc state before treating it as new.**
+
+**⇒ RULING 4 STAYS A JUDGEMENT ON TANS' OWN CAVEAT.** The three usable observational readings are: the gate-5 trough (a SOFT flip, and Graven is annual so it cannot arbitrate a within-year feature), the λ/Broecker split (physical, refit-independent, but resting on an uncited ordering), and now this — which has no power. **No refit has been run under the changed input; every stored logpost predates it.**
+
 ## 2026-09-09b — ⭐ **RULINGS 1 and 3 IMPLEMENTED (the objective-neutral pair). Gate 5's NH statistic is the TROUGH DEPTH and it VINDICATES the ruling — the model's first-peak time matches the observation to 0.0008 σ where the retired argmax said "+2.17 σ late". Gate GL bounds on the augmented form at z −8.67. Both mutation-tested; no logpost moves.**
 
 **Why these two and not ruling 2.** Marcus, on being asked: *"Definitely do 1 and 3. If 2 is a definite improvement, then do it now too, unless the attribution would be valuable for the pedagogy of the final website."* Rulings 1 and 3 live entirely in `calibration/lib_design_gates.R` — gates are diagnostic-side, so **no stored logpost moves and no refit is owed**. Ruling 2 is in `R/likelihood.R` and IS an objective change; it is held so it does not become unattributable alongside the unsettled ruling 4 (§ below).
