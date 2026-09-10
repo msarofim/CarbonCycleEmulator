@@ -2,6 +2,53 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-10 (2) — ⭐⭐ **THE ROUND-6 REFIT LANDED AND IT BEATS `hilda31` BY +9.09 LOG-UNITS: −1480.5404 against the incumbent's −1489.6284, with SIX STARTS AGREEING TO 0.0039. ⚠ BUT 22 OF 24 RAN OUT OF TIME RATHER THAN CONVERGING, SO EVERY NUMBER IS A LOWER BOUND. NOTHING ADOPTED.**
+
+Job **`17318015`** (partition `cs`), 24/24 **COMPLETED**, 252–293 min per task (median 269),
+**502,860 objective evaluations** in total. Results pulled to
+`calibration/output/multistart_20260909x_hilda31_periodic/`, ranked by
+`collect_dispersed_multistart.R`.
+
+### THE RESULT
+| | logpost |
+|---|---|
+| **BEST FOUND** (id 0, the COLD hand-set init) | **−1480.5404** |
+| incumbent `hilda31`, re-scored under the ADOPTED objective | −1489.6284 |
+| **GAIN** | **+9.0880** |
+
+⭐ **AND IT IS NOT ONE LUCKY START: 11 of 24 beat the incumbent, and the top SIX agree to 0.0039
+log-units** (ids 0, 3, 7, 6, 8, 22 — a reference start, a seeded carry and four dispersed draws
+landing on the same point from different places). ⚠ **The comparison is like-for-like and that was
+checked, not assumed**: `hilda31`'s `u_mode` scores **−1489.6284 on BOTH** its own base list and the
+array's (`ccx_default_params()` + hilda), with **no differing non-fitted parameter**
+⇒ [[like_for_like_forcing]].
+
+⭐ **THE CONCERN THAT `hilda31` WAS NOT AMONG THE STARTS DID NOT BITE.** It was flagged before
+submission and left unruled, so the round-5 start set ran unchanged — and the survey found a better
+point anyway, from the COLD init of all places.
+
+### ⚠⚠ WHAT THE RUN DOES **NOT** ESTABLISH
+- ⛔ **22 of 24 tasks ended `out_of_time`, only 2 CONVERGED.** Every logpost above is therefore a
+  **LOWER BOUND** — the optimiser was still descending when the wall budget stopped it. The true
+  optimum of this objective is at least 9.09 better than `hilda31` and probably more.
+- ⛔ **THE BASIN COUNT IS WEAK AND THE COLLECTOR SAYS SO**: "1 DISTINCT BASIN among the **2 finished
+  starts**" — the clustering only consumes CONVERGED starts, so with 2 of them the count is barely
+  determined. ⚠ The RANKING nonetheless shows **two clear groups**, ~−1480.54 (11 starts) and
+  ~−1490.9 (8 starts), **10.4 log-units apart**, with a tail at −1494 / −1497 / −1545 / −1617.
+- ⚠ **A survey bounds what N starts at ONE dispersion found; it is not proof no better basin exists**
+  ⇒ [[no_power_null]]. The collector prints this itself.
+- ENSO seeding was worth **+0.0273** at the incumbent and **+0.0153** at the new basin — i.e.
+  negligible at this resolution.
+
+### ⛔ NOTHING IS ADOPTED, AND TWO THINGS ARE OWED
+1. **Promotion is Marcus's ruling.** `promote_multistart_mode.R` would write the new canonical mode —
+   and note its **GATE 5 was repaired for the adopted spinup on 09-10**, so it will now reconcile;
+   before that fix it would have failed on a correct arm *after* the array had already run.
+2. **ROUND 2 IS INDICATED AND IS NOT THIS ARRAY RESUBMITTED** — with 22 of 24 out of time, the
+   designed second round (the fixed starts plus round 1's best dispersed ids, resumed from their
+   checkpoints) is exactly what converts these lower bounds into converged modes. ⚠ Resuming the same
+   outdir RESUMES from checkpoints, which is the intended behaviour here rather than a hazard.
+
 ## 2026-09-10 — ⭐⭐ **THE ROUND-6 REFIT IS SUBMITTED ON TORCH UNDER THE ADOPTED PERIODIC SPINUP: job `17316364`, 24 starts, all RUNNING. THE PRE-SUBMISSION REVIEW FOUND TWO MORE SCRIPTS PINNING THE OLD SPINUP — ONE OF WHICH WOULD HAVE FAILED ITS OWN GATE 5 *AFTER* THE ARRAY FINISHED.**
 
 Marcus: *"Check the model and launch code and then submit on torch."*
