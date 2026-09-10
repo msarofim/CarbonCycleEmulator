@@ -57,11 +57,14 @@
 #   * passes available inside the budget: 300/108 = 2.8 at the worst rate and
 #     300/59.4 = 5.0 at the best, which is what CCX_MS_RESTARTS = 3 wants.
 #
-# ⚠ 06:00:00 IS THE QoS CEILING, NOT A PREFERENCE -- VERIFIED ON THE MACHINE
-# rather than read off this comment ([[runnable_is_not_undrivable]]): `sacctmgr
-# show qos` gives cpu_short MaxWall 06:00:00, MaxTRESPU cpu=32,mem=120G. That
-# TRES cap is also why the array throttle is %24 and not higher: 24 tasks x
-# --mem=4G = 96G fits 120G, while %32 would request 128G and never start.
+# ⚠ 06:00:00 WAS THE QoS CEILING UNDER `cpu_short` (MaxWall 06:00:00, MaxTRESPU
+# cpu=32,mem=120G, verified with `sacctmgr show qos` rather than read off a
+# comment). ⛔ ON `cs` IT IS NOT A CEILING AT ALL -- that partition has QoS=N/A
+# and MaxTime=UNLIMITED, so the account's `normal` QoS applies with no wall cap.
+# The 6 h request is KEPT DELIBERATELY: the arithmetic above is derived against
+# it, and a longer wall would need the restart/polish budget re-derived, not just
+# the number raised. Likewise `%24` is now the DESIGN's start count rather than
+# the 120G memory cap that forced it under cpu_short.
 #
 # MEMORY. --mem=4G against a MEASURED peak RSS of 213 MB for a full task
 # (2026-09-01, /usr/bin/time -l): 19x headroom, deliberately generous because
@@ -70,35 +73,44 @@
 # =====================================================================
 #SBATCH --job-name=ccx_multistart
 #SBATCH --account=torch_pr_1041_general
-#SBATCH --partition=cpu_short
+#SBATCH --partition=cs
 #SBATCH --time=06:00:00
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
-# ⛔⛔ GPU NODES ARE EXCLUDED, AND THIS IS A MEASUREMENT, NOT A PREFERENCE
-# (2026-09-10). `cpu_short` spans 186 CPU nodes (`cs*`, AvailableFeatures=(null))
-# and 74 GPU NODES (`gl*` cuda,l40s and `gr*` cuda,rtx6000). On 2026-09-10 SLURM
-# placed 20 of 24 tasks on gr105 and THIS SERIAL, SINGLE-THREADED JOB GOT 13-18 %
-# OF A CORE THERE, against ~50 % on the CPU node cs608 -- measured as dCPU over a
-# 471 s window at 9-17 min in, so steady state and not startup. Neither node was
-# oversubscribed by SLURM (cs608 128/128 alloc load 101; gr105 98/128 load 78), so
-# the throttle is not core contention; the likely mechanism is cgroup CPU share
-# reserved for GPU jobs, which is INFERRED and not verified.
-# ⇒ the array was cancelled and resubmitted with this exclusion
-# ⇒ [[eta_in_days_is_not_a_slow_run]] ("read the meter at ~5 min and requeue").
+# ⛔⛔ PARTITION `cs`, NOT `cpu_short`, AND THIS IS A MEASUREMENT (2026-09-10).
+# `cpu_short` spans 186 CPU nodes (`cs*`, AvailableFeatures=(null)) and 74 GPU
+# NODES (`gl*` cuda,l40s and `gr*` cuda,rtx6000). SLURM placed 20 of 24 tasks on
+# gr105 and THIS SERIAL, SINGLE-THREADED JOB GOT 13-18 % OF A CORE THERE, against
+# ~50 % on the CPU node cs608 -- measured as dCPU over a 471 s window at 9-17 min
+# in, so steady state and not startup. Neither node was oversubscribed by SLURM
+# (cs608 128/128 alloc, load 101; gr105 98/128, load 78), so it is NOT core
+# contention; cgroup CPU share reserved for GPU jobs is the likely mechanism,
+# which is INFERRED and NOT verified. Array 17316364 was cancelled and
+# resubmitted here ⇒ [[eta_in_days_is_not_a_slow_run]] ("read the meter at ~5 min
+# and requeue rather than wait").
 #
-# ⚠ NOT A CORRECTNESS ISSUE, and that was checked rather than assumed: the PORT
-# GATE passed on all 24 tasks INCLUDING the 20 on gr105, rel 3.92e-10 against a
-# 1e-8 tolerance. Same arch, same compiled core -- only throughput differs.
-# ⚠ NOR A PREEMPTION ISSUE: `cpu_short` is PreemptMode=OFF at PriorityTier=10000,
-# the top tier, so a GPU job cannot evict these tasks. Checked, not guessed.
+# ⛔ WHY THE PARTITION AND NOT `--exclude`: THE CLUSTER REFUSES `--exclude`.
+#     sbatch: error: ** Please do note --exclude=... Please report back to hpc@nyu.edu
+# A site job_submit plugin rejects it outright, so the submission FAILS rather
+# than degrades. SLURM also has no negative `--constraint`, and the CPU nodes
+# advertise NO feature to select positively on -- so choosing a GPU-free
+# PARTITION is the only mechanism left. `cs` is exactly the 186 CPU nodes.
 #
-# ⛔ THE NODE LIST IS THE VOLATILE PART OF THIS FIX -- REGENERATE IT rather than
-# trusting it if the cluster changes. SLURM has no negative `--constraint`, and
-# the CPU nodes advertise NO feature to select positively on, so an explicit
-# exclusion is the only precise form available:
-#     sinfo -p cpu_short -h -o "%n %f" | awk '$2 ~ /cuda/ {print $1}' | paste -sd,
-# On 2026-09-10 that yields exactly gl001-gl068 and gr101-gr106.
-#SBATCH --exclude=gl[001-068],gr[101-106]
+# ⚠⚠ WHAT CHANGING PARTITION COSTS, checked rather than assumed:
+#   * `cs` has QoS=N/A, so the account's `normal` QoS applies -- NO MaxWall and
+#     NO MaxTRESPU. `cpu_short`'s QoS caps (MaxWall 06:00:00, cpu=32, mem=120G)
+#     DO NOT BIND HERE. ⇒ the `--time=06:00:00` below is now our own choice, not
+#     a ceiling, and the `%24` throttle is now a DESIGN choice (24 starts), not
+#     the 120G memory cap that forced it under cpu_short.
+#   * PriorityTier 1000 against cpu_short's 10000, so `cs` may queue longer.
+#     PreemptMode=OFF, so these jobs are still NOT preemptible.
+#   * TRES=cpu=23552 over 184 nodes; 6,819 CPUs were idle at resubmission.
+#
+# ⚠ THE GPU PLACEMENT WAS NEVER A CORRECTNESS ISSUE, and that was checked: the
+# PORT GATE passed on all 24 tasks INCLUDING the 20 on gr105, rel 3.92e-10
+# against a 1e-8 tolerance. Same arch, same compiled core -- only throughput.
+# ⚠ NOR A PREEMPTION ISSUE: cpu_short is PreemptMode=OFF at PriorityTier=10000.
+#
 #SBATCH --output=/scratch/ms17839/CarbonCycleEmulator/logs/%x_%A_%a.out
 #SBATCH --error=/scratch/ms17839/CarbonCycleEmulator/logs/%x_%A_%a.err
 
