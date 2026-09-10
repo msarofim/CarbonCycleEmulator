@@ -27,13 +27,34 @@ test_that("u_hs is in the table, adjacent to h_hs, with the ruled box and the pr
   expect_equal(CCX_U_HS_DECLARED, 38)
 })
 
-test_that("h_ml's prior is the Holte mean/max lognormal, tied to the product", {
+test_that("h_ml's prior is centred on the Holte ANNUAL MEAN, tied to the product", {
+  # ⭐⭐ RE-CENTRED 2026-09-09w (ruled by Marcus). Until then the centre was the
+  # GEOMETRIC MEAN of the two readings (83.94 m), a deliberate encoding of the
+  # mean-vs-max ambiguity that a seasonal mixed layer would resolve. ROUND 6
+  # BUILT that mixed layer, so the ambiguity is DISCHARGED and the constant is
+  # the annual MEAN. This test asserted the RETIRED encoding and is updated to
+  # the ruled one -- the assertions below are the same three in kind (centre,
+  # width, and the prior actually wired to the product), re-pointed.
   pr <- readRDS(ccx_path("data", "obs_h_ml_prior.rds")); s <- CCX_PARAM_TABLE$h_ml
-  expect_equal(pr$centre_m, sqrt(pr$readings_m[["mean"]] * pr$readings_m[["max"]]))
+  expect_equal(pr$centre_m, pr$readings_m[["mean"]])
+  expect_equal(pr$centre_retired_m, sqrt(pr$readings_m[["mean"]] * pr$readings_m[["max"]]))
+  # ⚠ THE WIDTH IS UNCHANGED AND THAT IS A FLAGGED CHOICE, NOT A DERIVATION --
+  # it still spans an ambiguity that no longer exists, and the 23.8 % exposure
+  # Marcus ruled on was computed at THIS width. Asserted so a future re-derivation
+  # is a deliberate act rather than a drift.
   expect_equal(pr$log_sd, log(pr$readings_m[["max"]] / pr$readings_m[["mean"]]) / 2)
   for (x in c(40, 59.7, 118)) expect_equal(s$prior(x), dlnorm(x, log(pr$centre_m), pr$log_sd, log = TRUE))
-  # the two readings are the 16 % / 84 % points BY CONSTRUCTION
-  expect_equal(s$prior(pr$readings_m[["mean"]]) - s$prior(pr$centre_m), s$prior(pr$readings_m[["max"]]) - s$prior(pr$centre_m) + log(pr$readings_m[["max"]] / pr$readings_m[["mean"]]), tolerance = 1e-10)
+  # ⛔ THE POINT OF THE RE-CENTRING, ASSERTED: exposure past P8's stopping
+  # condition. This replaces the 16/84 % symmetry the geometric mean gave, and it
+  # is the property the ruling was actually about -- ~3 starts in 5 were dying at
+  # the guard. Both numbers COMPUTED by data-raw/build_h_ml_prior.R.
+  expect_equal(pr$p8_stop_m, 76.146)
+  expect_equal(pr$p8_exposure, 1 - plnorm(pr$p8_stop_m, log(pr$centre_m), pr$log_sd), tolerance = 1e-12)
+  expect_lt(pr$p8_exposure, 0.30)                       # was 0.613 at the retired centre
+  expect_gt(pr$p8_exposure_retired, 0.55)               # and the retired centre still fails it
+  # MUTATION: the exposure check must reject the retired centre, or it has no
+  # power over the very change it was written for ([[mutation_test_gates]]).
+  expect_gt(1 - plnorm(pr$p8_stop_m, log(pr$centre_retired_m), pr$log_sd), 0.30)
   expect_equal(s$lo, 30); expect_equal(s$hi, 200)                              # the box is unchanged
 })
 

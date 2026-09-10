@@ -51,13 +51,39 @@ test_that("the derived centre is the IN-BAND value diluted onto the SH box", {
   # time. The remaining inputs are module-locals with no public name, so
   # transcribing them here is an INDEPENDENT check that the arithmetic has not
   # drifted, which is the whole point of a derivation test.
-  inband <- (3.0 * ccx_const("SST_PCO2_SENSITIVITY") * 370 + 19.45) / 370 * 2150 / 13
-  expect_equal(ccx_const("ENT_SEAS_AMP_SH_INBAND"), inband, tolerance = 1e-10)
+  # ⭐ VALUES UPDATED 2026-09-09w, TRANSCRIPTION KEPT (ruled by Marcus). Both
+  # band inputs moved from typed literals in constants.R to data/ products:
+  #   .ENT_SO_SST_AMP   3.0   -> 1.499498  K     (3.0 was the band P2P wearing
+  #                                               the label "half-amplitude")
+  #   .ENT_SO_PCO2_AMP  19.45 -> 16.258289 uatm  (19.45 was the PER-CELL
+  #                                               reduction; a well-mixed BOX
+  #                                               needs the AREA-MEAN harmonic)
+  # ⚠ They are TRANSCRIBED here rather than read from the products ON PURPOSE:
+  # reading them would only verify that this test opens the same file
+  # constants.R opens, which is a tautology. An independent copy is what makes
+  # this a derivation check. The cost is accepted and named: **if either product
+  # is rebuilt to a different number, THIS TEST FAILS** -- which is the intended
+  # alarm, not a maintenance defect. The product row below says which file.
+  ENT_SO_SST_AMP_XCRIBED  <- 1.499498     # data/obs_so_sst_seas_amp.rds
+  ENT_SO_PCO2_AMP_XCRIBED <- 16.258289    # data/obs_so_pco2_seas_amp.rds
+  inband <- (ENT_SO_SST_AMP_XCRIBED * ccx_const("SST_PCO2_SENSITIVITY") * 370 +
+             ENT_SO_PCO2_AMP_XCRIBED) / 370 * 2150 / 13
+  # the transcription carries 6 decimals, so agreement is asked to the precision
+  # a 6-decimal literal can actually deliver, not to 1e-10 ([[derived_must_mean_computed]])
+  expect_equal(ccx_const("ENT_SEAS_AMP_SH_INBAND"), inband, tolerance = 1e-6)
+  # ⛔ AND THE TRANSCRIPTION MUST STILL BE THE PRODUCT'S OWN NUMBER. This is the
+  # half that keeps a stale transcription from passing quietly: it fails if a
+  # product is rebuilt and this file is not updated with it.
+  expect_equal(readRDS(ccx_path("data", "obs_so_sst_seas_amp.rds"))$band_half_amp_K,
+               ENT_SO_SST_AMP_XCRIBED, tolerance = 5e-7)
+  expect_equal(readRDS(ccx_path("data", "obs_so_pco2_seas_amp.rds"))$band_amp_uatm,
+               ENT_SO_PCO2_AMP_XCRIBED, tolerance = 5e-7)
   # ⛔ AND THE COEFFICIENT MUST NOT SILENTLY FORK AGAIN: if someone re-types it
   # in the chain, this stops agreeing with the registry.
   expect_equal(ccx_const("ENT_SEAS_AMP_SH_INBAND") /
-                 ((3.0 * ccx_const("SST_PCO2_SENSITIVITY") * 370 + 19.45) / 370),
-               2150 / 13, tolerance = 1e-10)
+                 ((ENT_SO_SST_AMP_XCRIBED * ccx_const("SST_PCO2_SENSITIVITY") * 370 +
+                   ENT_SO_PCO2_AMP_XCRIBED) / 370),
+               2150 / 13, tolerance = 1e-6)
   # the area fraction is REGISTERED, so it cannot go on being a free literal
   expect_true("ENT_SEAS_BAND_AREA_FRAC" %in% names(CCX_CONSTANTS))
   # ⚠ and it is PROVISIONAL -- a geographic area ratio with no cited source --

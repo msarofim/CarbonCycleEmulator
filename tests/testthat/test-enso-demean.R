@@ -141,7 +141,37 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
   # rows-off form below is the repair for the pre-#8 files only.
   post8 <- !is.null(md$struct)
   on_nomid <- if (post8) on else sc_nomid()
-  expect_equal(on_nomid, md$logpost, tolerance = 1e-5, scale = 1)
+  # ⛔⛔ REPAIRED 2026-09-09w, AND NOT BY RE-BASELINING ([[stale_fixture_repair]]).
+  # This line compared the harness against the file's STORED ABSOLUTE LOGPOST,
+  # and the 09-09w prior re-centrings (ent_seas_amp_SH's centre 10.95 -> 6.5525,
+  # h_ml's 83.94 -> 59.69 m) moved that logpost by -0.811 while the harness and
+  # the vector stayed identical. It failed on a perfectly correct arm -- the
+  # THIRD instance of [[compare_gaps_not_absolute_logposts]] in this repo.
+  #
+  # THE REPAIR IS THE IDENTITY THE CROSS-CHECK ACTUALLY WANTS, and it is immune
+  # to any prior move: the harness's logpost MINUS the log-prior at the same
+  # point must equal the file's own stored per-stream LIKELIHOOD. That is
+  # strictly STRONGER than the old form -- it pins 25 rows' sum rather than one
+  # total -- and it still fails the moment the harness scores a different
+  # vector, which is the whole purpose of the cross-check.
+  #
+  # ⚠ The prior leg is TRANSCRIBED here rather than imported, deliberately and
+  # on the same grounds as test-ent-seas-fitted.R's transcription: an
+  # independent copy is what makes this a check rather than a tautology.
+  # `ccx_make_logpost()`'s own prior leg is these three lines.
+  ed_logprior <- function(u) { names(u) <- CCX_PARAM_NAMES; pv <- ccx_unc_to_par(u)
+    lp <- 0; for (n in CCX_PARAM_NAMES) { s <- CCX_PARAM_TABLE[[n]]
+      lp <- lp + s$prior(pv[[n]]) + .log_jac(u[[n]], s) }; lp }
+  ed_lp  <- ed_logprior(u0)
+  ed_lik <- sum(unlist(md$streams))
+  expect_equal(on_nomid - ed_lp, ed_lik, tolerance = 1e-5, scale = 1)
+  # MUTATION: the identity must FAIL on a moved likelihood and on a moved
+  # prior-leg, or it is not a check ([[mutation_test_gates]]).
+  expect_false(isTRUE(all.equal(on_nomid - ed_lp, ed_lik + 1, tolerance = 1e-5, scale = 1)))
+  expect_false(isTRUE(all.equal(on_nomid - (ed_lp + 1), ed_lik, tolerance = 1e-5, scale = 1)))
+  # ⭐ AND the stored logpost is still reported, as PROVENANCE rather than as a
+  # gate: it is stale by exactly the prior shift until the refit re-runs.
+  expect_true(is.finite(md$logpost))
   tgm <- ccx_mid_d14c_target()
   if (!is.null(tgm) && !post8) {
     pp  <- ccx_overlay_par(bp, ccx_unc_to_par(u0))
