@@ -269,7 +269,10 @@ if ("read" %in% PRA_STAGE) {
     q
   })
   og <- local({
-    sp <- ccx_spinup(p_full)
+    # ⛔ `CCX_OBJECTIVE_SPINUP` (2026-09-09x): `ocean_grad` is scored FROM the
+    # spinup, so it must be the spinup the objective uses or the adopted mode's
+    # gradient rows describe a state the fit never saw ⇒ [[two_gates_one_mechanism]].
+    sp <- CCX_OBJECTIVE_SPINUP(p_full)
     F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
                             bomb_total_kmol = 102)
     F$c14_cosmo <- sp$prod_c14

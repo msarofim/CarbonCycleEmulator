@@ -150,7 +150,17 @@ pm <- best$par_mode
 p_mode <- ccx_overlay_par(bp, pm)
 p_mode$pump_mode <- best$pump_mode
 streams <- local({
-  sp <- ccx_spinup(p_mode)
+  # ⛔ `CCX_OBJECTIVE_SPINUP`, NOT `ccx_spinup` (2026-09-09x). This reconstruction
+  # must score the SAME STATE the objective does, or GATE 5 below -- which
+  # compares `lp0 - sum(st)` against the recomputed prior -- fails on a correct
+  # arm, and every promoted `streams` field is written from the wrong spinup.
+  # ⚠⚠ ONLY the spinup is shared. The REST of this block stays a HAND-BUILT
+  # reconstruction on purpose: GATE 5's power is that `streams` reaches the
+  # likelihood by a DIFFERENT PATH than the objective does, and that is the check
+  # the luc_scale-squared bug failed. Routing it through
+  # `ccx_make_logpost(by_stream = TRUE)` would make GATE 5 a SELF-COMPARISON
+  # ⇒ [[gate_reads_its_own_output]]. Same state, different path.
+  sp <- CCX_OBJECTIVE_SPINUP(p_mode)
   F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
                          bomb_total_kmol = 102)
   F$c14_cosmo <- sp$prod_c14
