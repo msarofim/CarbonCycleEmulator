@@ -24,8 +24,8 @@ tar czf "$OUT" \
   R src data tests \
   data-raw/downloads/nuclear14c \
   calibration/*.R calibration/torch \
-  calibration/output/refit_20260831_seas_lag_split \
-  calibration/output/polish_20260831_probe_basin
+  calibration/output/refit_20260910_hilda31_periodic \
+  calibration/output/quarantine/20260910_periodic_spinup_adopted
 echo "bundle: $OUT  ($(du -h "$OUT" | cut -f1))"
 echo
 echo "  scp $OUT torch:/scratch/ms17839/"
