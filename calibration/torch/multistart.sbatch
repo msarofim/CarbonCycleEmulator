@@ -192,6 +192,14 @@ export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
 # second basin (164 m) are both INFEASIBLE there, so the reference set in the
 # driver / make_port_targets.R has to be re-ruled before a seas_ml = 1 array.
 export CCX_MS_SEAS_ML="${CCX_MS_SEAS_ML:-1}"
+# ⭐ THE DISPERSION IS SET EXPLICITLY FOR ROUND 6 (2026-09-10, ruled). The driver
+# measures its default sd from the u-space separation of its two reference
+# modes, and those are now `hilda31p` and `hilda31` -- the same basin's
+# before/after, a few tenths apart -- so the measured value would survey almost
+# nothing. 1.0452 is the sd the 09-08e and 09-10 arrays ran at (measured then
+# between the 08-30 incumbent and the 08-31e basin over the fitted pool), i.e.
+# the dispersion that found the current canonical. The outdir names it.
+export CCX_MS_SPREAD="${CCX_MS_SPREAD:-1.0452}"
 # ⭐⭐ 2026-09-09x: THE OBJECTIVE'S **SPINUP** CHANGED -- the PERIODIC (limit-cycle)
 # spinup was adopted (Marcus), so `ccx_make_logpost()` now seeds every transient
 # from `ccx_periodic_spinup()`. ⛔⛔ THE PARAMETER SET IS UNCHANGED AT 31 NAMES,
@@ -203,7 +211,7 @@ export CCX_MS_SEAS_ML="${CCX_MS_SEAS_ML:-1}"
 # 2026-09-10: `_seasml${CCX_MS_SEAS_ML}` -- seas_ml moves the objective at a CONSTANT
 # 31 names, so the directory must say it; the seas_ml = 0 rounds live in
 # multistart_20260909x_hilda31_periodic (no suffix -- it predates the axis).
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260910_hilda31p_periodic_seasml${CCX_MS_SEAS_ML}}"
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260910_round6_seasml${CCX_MS_SEAS_ML}_sd${CCX_MS_SPREAD}}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.
@@ -239,7 +247,7 @@ case "$CCX_MS_OUTDIR" in
 esac
 echo "CCX_PROJ_DIR  $CCX_PROJ_DIR"
 echo "CCX_MS_OUTDIR $CCX_MS_OUTDIR"
-echo "CCX_MS_STRUCT $CCX_MS_STRUCT   CCX_MS_SEAS_ML $CCX_MS_SEAS_ML"
+echo "CCX_MS_STRUCT $CCX_MS_STRUCT   CCX_MS_SEAS_ML $CCX_MS_SEAS_ML   CCX_MS_SPREAD $CCX_MS_SPREAD"
 
 # MEASURED 2026-09-01: `Rscript --vanilla` implies --no-environ, which suppresses
 # .Renviron FILES but NOT an exported R_LIBS_USER -- the library still lands in

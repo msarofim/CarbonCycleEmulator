@@ -31,10 +31,13 @@ ccx_require_run_inputs()   # BEFORE the wall budget, and before any target is wr
 
 PT_ARM  <- "N"
 PT_OUT  <- ccx_path("calibration", "torch", "port_targets.csv")
+# ⛔ RE-RULED 2026-09-10 (round 6): the 08-31e new basin is -Inf at seas_ml = 1
+# (h_ml 143.9 m vs the ~75 m P8 wall). MUST MATCH run_dispersed_multistart.R's
+# MS_REF_INC / MS_REF_NEW -- the names are the driver's port-target KEYS.
 PT_REFS <- c(
   cold      = NA,   # the hand-set init; no file
-  incumbent = "calibration/output/refit_20260831_seas_lag_split/from90/mode_fit_pumpN.rds",
-  new_basin = "calibration/output/polish_20260831_probe_basin/from90/mode_fit_pumpN.rds"
+  incumbent = "calibration/output/refit_20260910_hilda31_periodic/mode_fit_pumpN.rds",   # hilda31p
+  new_basin = CCX_MODE_HILDA31_QUARANTINED                                                # hilda31, by path
 )
 
 bp <- ccx_default_params(); bp$pump_mode <- PT_ARM

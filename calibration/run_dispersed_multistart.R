@@ -22,8 +22,8 @@
 #
 # THE SIX FIXED STARTS. Ids 0-5 are not dispersed:
 #   id 0  the COLD hand-set init            -- the control the refits all quote
-#   id 1  the INCUMBENT (08-30 landed), migrated
-#   id 2  the NEW BASIN (08-31e polished), migrated
+#   id 1  the INCUMBENT -- since 2026-09-10 `hilda31p` (see MS_REF_INC below)
+#   id 2  the NEW BASIN -- since 2026-09-10 `hilda31`, by path (see MS_REF_NEW)
 #   id 3  the INCUMBENT + the ocean ENSO pair at the objective's own conditional
 #         optimum
 #   id 4  the NEW BASIN + the same
@@ -109,8 +109,23 @@ MS_PENALTY    <- 1e6          # finite stand-in for -Inf, as the serial driver
 MS_TOL        <- 1e-4         # a restart gaining less than this stops the cycle
 MS_CYCLE_TOL  <- 0.5          # = ARM_CYCLE_TOL; a cycle below this is CONVERGED
 MS_DRAW_TRIES <- 200          # redraws allowed before a start is declared dead
-MS_REF_INC    <- "calibration/output/refit_20260831_seas_lag_split/from90/mode_fit_pumpN.rds"
-MS_REF_NEW    <- "calibration/output/polish_20260831_probe_basin/from90/mode_fit_pumpN.rds"
+# ⛔⛔ RE-RULED 2026-09-10 FOR ROUND 6 (Marcus: "follow the recommendation"). At
+# `seas_ml = 1` the P8 geometry guard makes the objective -Inf above h_ml ~ 75 m,
+# and the 08-31e new-basin reference sat at 143.9 m (the 09-10 second basin at
+# 164 m) -- infeasible, so ids 2/4/5 would have been born dead and the port
+# target for `new_basin` could not be written ⇒ [[ccx_seas_ml_p8_wall_blocks_reference_set]].
+# The references are now the two 31-parameter HILDA modes, both feasible at
+# either `seas_ml` (h_ml 44.09 / 49.15 m), in-space, needing NO migration:
+#   INCUMBENT = `hilda31p` (canonical, refitted under the periodic spinup)
+#   NEW BASIN = `hilda31`  (the pre-adoption canonical, quarantined, by PATH)
+# ⚠ They are ~9 log-units and small parameter moves apart, so the MEASURED
+# dispersion between them is far smaller than the 1.0452 the 09-08e/09-10 arrays
+# used; the sbatch therefore sets CCX_MS_SPREAD EXPLICITLY (to that 1.0452, its
+# provenance stated there) and names it in the outdir, as the stop() below asks.
+MS_REF_INC    <- "calibration/output/refit_20260910_hilda31_periodic/mode_fit_pumpN.rds"
+MS_REF_NEW    <- CCX_MODE_HILDA31_QUARANTINED
+MS_REF_INC_LABEL <- "INCUMBENT = hilda31p (09-10 canonical, periodic spinup, seas_ml 0)"
+MS_REF_NEW_LABEL <- "NEW BASIN = hilda31 (09-08f canonical, aseasonal spinup, quarantined; by path)"
 # ⚠ THESE THREE NAMES ARE ALSO THE PORT-TARGET KEYS in calibration/torch/
 # port_targets.csv, so this vector may not be extended with ids that have no
 # target row -- the seeded ids below are deliberately NOT in it, and the port
@@ -367,10 +382,10 @@ ms_start <- function(id) {
   if (id == MS_REF_IDS[["cold"]])
     return(list(u = U_COLD, kind = "reference: COLD hand-set init", draws = 0L, ref = NA_real_))
   if (id == MS_REF_IDS[["incumbent"]])
-    return(list(u = U_INC, kind = "reference: INCUMBENT (08-30 landed), MIGRATED -- not a mode of this space",
+    return(list(u = U_INC, kind = paste("reference:", MS_REF_INC_LABEL),
                 draws = 0L, ref = .mdI$logpost))
   if (id == MS_REF_IDS[["new_basin"]])
-    return(list(u = U_NEW, kind = "reference: NEW BASIN (08-31e polished), MIGRATED -- not a mode of this space",
+    return(list(u = U_NEW, kind = paste("reference:", MS_REF_NEW_LABEL),
                 draws = 0L, ref = .mdN$logpost))
   # ---- THE SEEDED STARTS. ⚠ SEEDED IN PARAMETER SPACE, THEN ENCODED, never by
   # adding to `u`: the ENSO entries happen to be `tr = "id"` today, so the two
@@ -389,11 +404,11 @@ ms_start <- function(id) {
          "branch that builds it. Add one beside the others.")
   if (identical(.sk, "inc_enso"))
     return(list(u = ccx_par_to_unc(ms_seed_ocn(P_INC, MS_ENSO_OCN_OPT)),
-                kind = sprintf("seeded: INCUMBENT + ocean ENSO %+0.3f each (objective's conditional optimum)",
+                kind = sprintf("seeded: INCUMBENT with the ocean ENSO pair SET to %+0.3f each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here)",
                                MS_ENSO_OCN_OPT), draws = 0L, ref = NA_real_))
   if (identical(.sk, "new_enso"))
     return(list(u = ccx_par_to_unc(ms_seed_ocn(P_NEW, MS_ENSO_OCN_OPT)),
-                kind = sprintf("seeded: NEW BASIN + ocean ENSO %+0.3f each (objective's conditional optimum)",
+                kind = sprintf("seeded: NEW BASIN with the ocean ENSO pair SET to %+0.3f each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here)",
                                MS_ENSO_OCN_OPT), draws = 0L, ref = NA_real_))
   if (identical(.sk, "new_obs"))
     return(list(u = ccx_par_to_unc(ms_seed_land(ms_seed_ocn(P_NEW, MS_ENSO_OCN_OBS),
