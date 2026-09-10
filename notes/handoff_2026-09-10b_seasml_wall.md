@@ -13,7 +13,7 @@
 - ✅ **Suite 12,990 / 2 failed / 1 error / 4 skipped** = the pre-existing set (alpha-as GATE Q; seas-lag-split migration).
 - ✅ `port_targets.csv` regenerated at **`seas_ml = 0`** (logposts byte-identical to 09-09x's) and now carries a `seas_ml` column.
 - ⚠ `tests/testthat/test-mode-file.R:187` still asserts "largest STORED logpost" against its own comment (:175–179). Passes with one registered arm only. **Ruling owed; not repaired.**
-- ⚠ Root `MEMORY.md` is **19,218 B, OVER its 18,432 hard ceiling**. Restructure owed (Marcus's call what stays).
+- ✅ ~~Root `MEMORY.md` is 19,218 B, OVER its hard ceiling~~ — **WRONG, a `wc -c` mismeasurement** (the fourth; [[memory_budget_is_content_not_file]]). Content is **13,137 B**: 7 % over the 12,288 soft target, well under the 18,432 hard. Nothing owed; a merge pass when convenient.
 
 ## 2. THE CAPABILITY, AS BUILT (so the next run cannot repeat 09-10's silent default)
 - `ccx_apply_structure(p, struct, seas_ml)` — sets `p$seas_ml` AND `attr(, "seas_ml")`; default `CCX_MS_SEAS_ML` ("0"); 0/1 only, errors by name.

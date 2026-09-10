@@ -82,6 +82,12 @@ HARD WALL at ≈ 75 m inside the [30, 200] band. Consequences, none of which the
 against the mechanism ([[like_for_like_forcing]]); it is what P2/P12 refit for.
 **Options for the reference set are Marcus's call** (see the handoff); none taken.
 
+### ⚠ Correction (same day): the root `MEMORY.md` is NOT over its ceiling
+The 09-10 handoff's "18,197 B of 18,432" and this session's "19,218 B, OVER" were both `wc -c` on a file
+whose rules header is ~6 KB of comment. **Content is 13,137 B** — 7 % over the 12,288 soft target, 29 %
+under the hard ceiling. No restructure owed. The header's own "check with `wc -c`" line caused it and is
+replaced ⇒ [[memory_budget_is_content_not_file]] (fourth occurrence).
+
 ### Suite
 **12,990 expectations / 400 tests: 2 failed, 1 error, 4 skipped** (`stop_on_failure = FALSE`, `failed`
 and `error` read as separate columns) — the SAME pre-existing set as before the repoint:
