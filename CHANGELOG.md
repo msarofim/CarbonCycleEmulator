@@ -54,6 +54,31 @@ accumulation). ⚠ Its MUTATION at 1e3× still passed — the measured residual 
 floor — so **the first mutation was itself a no-power assertion**; resized to 1e6× off the measured
 headroom ⇒ [[no_power_null]].
 
+### ⭐ PORT TARGETS REGENERATED — AND THE ADOPTION IS **NOT** A CONSTANT OFFSET
+`calibration/torch/port_targets.csv` re-measured under the adopted objective (the file's own header
+says to, whenever the objective changes). ⚠ **It must be generated with `CCX_MS_STRUCT=hilda`
+EXPORTED**: `make_port_targets.R` reads the structure from that variable and `ccx_apply_structure()`
+defaults to `""` = the COLUMN model, while the sbatch defaults the same variable to `hilda`. Generated
+with it unset, the run produced COLUMN targets at the cold init (**−5,436,208**) and I first read that
+5.4e6 as an adoption catastrophe — it was a column model being compared against hilda targets, a
+like-for-like violation of my own ⇒ [[like_for_like_forcing]]. ✅ **The driver HARD-VALIDATES the
+`struct` column** (`run_dispersed_multistart.R:546`), so the mismatch would have been refused at the
+port gate rather than silently fitted; the file records the label and the consumer checks it.
+
+| reference point | 09-08 target (aseasonal) | 09-09x (periodic) | delta |
+|---|---|---|---|
+| `cold` (`ccx_init_unc()`) | −16,044.65 | **−16,211.88** | **−167.24** |
+| `incumbent` | −2,094.27 | **−2,005.57** | **+88.70** |
+| `new_basin` | −2,139.43 | **−1,995.02** | **+144.41** |
+
+⭐⭐ **SO THE ADOPTION IS A RESHAPING, NOT A SHIFT — and at BOTH fitted reference modes it makes the
+objective BETTER**, while it costs −167 at the hand-set cold init and −10.158 at `hilda31`. ⚠ Those
+four numbers are at four DIFFERENT points, none of them a periodic-spinup optimum, so none of them is
+a like-for-like verdict; what they establish is that the change is **not a near-constant offset** and
+therefore cannot be corrected for arithmetically. Only the refit answers direction. ⚠ The recorded
+`offset` against each file's own stored logpost also SHRANK (incumbent −547.11 → −458.42, new_basin
+−643.42 → −499.01).
+
 ### THE SUITE, AND THE FOUR RED TESTS ARE **NOT** TOUCHED
 **PASS 2433 / FAIL 7 / ERROR 1 / SKIP 4**, against a pre-adoption baseline of **2397 / 2 / 1 / 4**.
 It reconciles exactly: **2397 + 41 new − 5 newly-failing = 2433.**
