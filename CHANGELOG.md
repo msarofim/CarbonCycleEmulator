@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-10 (7) — ⭐⭐ **ROUND 6 IS RUNNING (job `17343694`, 24 starts at `seas_ml = 1`) ON A RE-RULED REFERENCE SET. ⛔ THREE TASKS DIED ON THE INFEASIBLE-STEP PENALTY PLATEAU AND REPORTED SUCCESS — FIXED, REQUEUED FROM A SEPARATE TREE (`17345351`). `test-mode-file.R:187` RESOLVED BY OPTION 2.**
+
+### The ruling (Marcus: "follow the recommendation") and what it measured
+`MS_REF_INC` / `PT_REFS$incumbent` := **`hilda31p`** (through the registry), `MS_REF_NEW` /
+`PT_REFS$new_basin` := **`hilda31`** by path (`CCX_MODE_HILDA31_QUARANTINED`). Their measured u-space
+separation is **0.0993** — a tenth of the 1.0452 the 09-08e/09-10 arrays dispersed at — so
+`multistart.sbatch` sets **`CCX_MS_SPREAD = 1.0452` explicitly** and the outdir names it
+(`multistart_20260910_round6_seasml1_sd1.0452`). Port targets at `seas_ml = 1`: cold **−35189.6886**,
+incumbent **−1634.6809**, new_basin **−1683.3287**. Local preflight ids 0–6/12/20 all finite (dispersed
+draws needed 3–6 redraws — the wall rejecting `h_ml` > ~75 m); **Torch preflight `17343493` 8/8 on
+`cs*`, port rel ≤ 2.8e−9, s/eval 0.71–1.07** — inside the envelope the 6 h / 300 min / `%24` arithmetic
+was derived on, so nothing re-derived. ⚠ The ~3× `seas_ml = 1` cost feared on 09-09x is **≈1.2×**.
+Production `sbatch --array=0-23%24`, 24/24 RUNNING on cs620/627/635/675/715, zero GPU nodes.
+
+### ⛔ THE DEFECT THE WAVE EXPOSED: a fixed penalty is a BASIN for a bad start
+Ids **9 / 12 / 23** (starts −7.4e6 / −5.4e6 / −4.0e6) "COMPLETED, CONVERGED" in 2.5 min at
+**exactly −1,000,000** = the `MS_PENALTY` plateau: an infeasible NM step returned 1e6, which as a
+log-post of −1e6 BEATS such a start, and the simplex collapsed onto it. PORT GATE (b) (final ≥ start)
+passed, exit 0. Never bit at `seas_ml = 0` because there was no wall to step into.
+**Fix (`d164abd`)**: penalty derived from the start, `max(1e6, 10 × |start|)`; the final `u` re-scored
+under `lp_fun` and required finite and equal to `−best` (`dead` recorded, then fatal → SLURM FAILED);
+the collector excludes dead files. **Proof**: id 9 locally with the fix **−7.43e6 → −1500.03** (one
+400-eval restart + polish, 14 min, `dead = FALSE`) — the first `seas_ml = 1` point on record, and
+unconverged it is already 135 above the unrefitted `hilda31p`; the collector on the three dead files
+excludes all three. ⇒ [[penalty_must_lose_to_the_start]].
+**Requeue**: the fixed bundle went to a **SEPARATE tree** `CarbonCycleEmulator_r6fix`
+([[never_reship_mid_array]] — 21 tasks were reading the old driver); dead files moved to
+`<outdir>/dead_20260910_penalty_plateau/`; `sbatch --array=9,12,23` with `CCX_PROJ` on the new tree and
+`CCX_MS_OUTDIR` the original (+`_EXTERNAL=1`): derived penalties printed (−7.4e7 / −5.4e7 / −4.0e7),
+same start points, port gate passed. ⚠ **Id 13 (start −2.36e6) is the one survivor exposed to the
+trap**; the collector will refuse it if it dies. The other 20 start above −1e6 and cannot be caught.
+⚠ Several first restarts were SHORTENED (maxit 2483–5721) by the startup-inflated s/eval — a cost to
+the first climb only; later restarts re-project from the optimiser's own rate.
+
+### `test-mode-file.R:187` — option 2 (Marcus)
+Every FREE arm's `par_mode` is re-scored under today's objective through its own base list and the
+canonical must win on that; its stored logpost must also reproduce (1e−5). The comment and the
+assertion now say the same thing. The round-6 references resolve through `CCX_MODE_FILES` rather than
+a literal (the same file's hardcoded-path lint caught it). Suite file: 45 / 0 / 0 / 1 skipped.
+
 ## 2026-09-10 (6) — ⭐⭐ **STEPS 1–3 OF THE 09-10 HANDOFF ARE DONE: HESSIAN at the new mode; `hilda31p` IS CANONICAL and `hilda31` QUARANTINED; `seas_ml` IS NOW A RECORDED, GATED AXIS OF THE OBJECTIVE LABEL. ⛔⛔ STEP 4 (the round-6 refit) IS BLOCKED ON A RULING: AT `seas_ml = 1` THE OBJECTIVE IS −Inf ABOVE h_ml ≈ 75 m, AND TWO OF THE THREE PORT-TARGET REFERENCE POINTS — AND THE WHOLE SECOND BASIN — SIT THERE.**
 
 ### STEP 1 — the Hessian (`fa0e7cf`)
