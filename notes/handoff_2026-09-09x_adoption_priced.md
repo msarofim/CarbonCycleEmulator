@@ -1,5 +1,10 @@
 # Handoff — 2026-09-09x. **THE ADOPTION RULING IS PRICED BUT STILL UNRULED. ⭐⭐ COST IS ~3× AND AFFORDABLE (≈5 h/start), BUT THE "NO-OP AT `seas_ml` = 0" EXPECTATION IS REFUTED — ADOPTION MOVES THE COLUMN ERA BY −10.158 IN LIKELIHOOD. AND THE OFF-ORBIT DEFECT IS SEASONALITY ITSELF, SO IT PREDATES ROUND 6 AND THE 08-18 DRIVER PATH. THE DUPLICATED DIAGNOSTICS BLOCK IS FIXED. NOTHING ADOPTED; NO DEFAULT CHANGED.**
 
+> ⛔⛔ **SUPERSEDED THE SAME DAY BY `handoff_2026-09-09x_adoption_taken.md`.** Marcus ruled **ADOPT**
+> after reading these measurements, so every line below saying the adoption was NOT taken, the ruling
+> STILL OWED, or `spinup_fn` defaulting to `ccx_spinup` describes the **pre-ruling** state. The
+> MEASUREMENTS stand; the STATE does not ⇒ [[retraction_in_place_does_not_propagate]].
+
 > ⚠ This header states what is DONE. For live state read `CHANGELOG.md` **09-09x** and
 > **`INDEX_ccx_seas_ml.md`**, not this line ⇒ [[status_field_carries_the_query]].
 

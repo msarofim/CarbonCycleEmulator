@@ -27,9 +27,17 @@ Read first: **CHANGELOG 09-09x (2)** then **09-09x** — every number with its d
 3. ⛔ **RULING A's ratification at the re-priced demean gap** (43.8367 → 63.7282, +45 %). Marcus's.
 4. Untouched review leads, still `[R]`: F3, F4, GATE Q's missing `test-gate-bounds` coverage,
    `ccx_loglik()`'s finite 0, and the §6/§7 pedagogy items from the 09-09t review.
-5. ⚠ **Two memory-budget restructures are owed and both are Marcus's call about what stays**: root
-   `MEMORY.md` **17,921 B of 18,432** (untouched today) and `INDEX_ccx_seas_ml.md` **~17.4 KB of
-   18,432**. CONTENT bytes, comment blocks stripped ⇒ [[memory_budget_is_content_not_file]].
+5. ⛔ **THE ROOT `MEMORY.md` RESTRUCTURE IS THE ONE MEMORY ITEM STILL OWED, AND IT IS MARCUS'S CALL
+   ABOUT WHAT STAYS**: **18,197 B of an 18,432 hard ceiling — 235 B left.** (It was 17,921; today's
+   276 B is the standing warning that the objective's spinup changed, which auto-loads and is worth
+   its space.) ⚠ CONTENT bytes, `<!-- -->` stripped ⇒ [[memory_budget_is_content_not_file]].
+   ✅ **`INDEX_ccx_seas_ml.md` is NO LONGER a problem** — it went 56 B OVER its hard ceiling and was
+   **SPLIT** (09-09x): the CLOSED build arc is now `INDEX_ccx_seas_ml_arch.md`, leaving **8,083** and
+   **12,835 B**, both under the 14 KB soft target. Registered in the project `CLAUDE.md` and the root;
+   straddlers named in `_arch`'s header; a 22-term orphan sweep found nothing lost.
+   ⚠⚠ **THE LESSON, because I relearned it the hard way twice in one hour**: at the hard ceiling,
+   **SPLIT — do not compress.** Both of my "reclaim" edits made the file BIGGER, which is exactly what
+   [[memory_index_split_beats_trim]] records.
 
 ## 1. STATE OF THE TREE
 - **`CarbonCycleEmulator/main`, no remote.** This session, oldest first: `50f0105` (adopt) →
