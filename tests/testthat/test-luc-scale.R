@@ -218,7 +218,14 @@ test_that("ccx_scaled_forcing reproduces ccx_make_logpost's likelihood exactly",
   p <- ccx_default_params()
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
   p <- ccx_set_enso(p, pv)
-  sp <- ccx_spinup(p)
+  # ⛔ `CCX_OBJECTIVE_SPINUP`, NOT `ccx_spinup`. This reconstruction has to score
+  # the SAME state the objective does, and on 2026-09-09x the objective's spinup
+  # became the PERIODIC one -- at which point this line silently scored a
+  # different spinup and the test failed by 101 log-units. The subject of this
+  # test is `ccx_scaled_forcing`, not the spinup, so reading the objective's own
+  # name preserves its power exactly and cannot desync again
+  # ⇒ [[two_gates_one_mechanism]].
+  sp <- CCX_OBJECTIVE_SPINUP(p)
   SF <- ccx_scaled_forcing(sp, luc_scale = pv$luc_scale, bomb_total = pv$bomb_total)
   o  <- ccx_run_fast(sp, SF$F)$out
   ll_rec <- ccx_loglik(o, ccx_prepare_obs(),

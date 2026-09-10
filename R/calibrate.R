@@ -1520,7 +1520,7 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
 #'   The default is FALSE, so no sampler path changes and no stored number moves.
 #'
 #' @param spinup_fn the spinup the objective seeds its transient from.
-#'   ⭐⭐ **DEFAULT `ccx_periodic_spinup` SINCE 2026-09-09x — ADOPTED, ruled by
+#'   ⭐⭐ **DEFAULT `CCX_OBJECTIVE_SPINUP` = `ccx_periodic_spinup` SINCE 2026-09-09x — ADOPTED, ruled by
 #'   Marcus** once the three CHECK-FIRST items were measured
 #'   (`calibration/diag_periodic_spinup_adoption.R`). The aseasonal fixed point
 #'   `ccx_spinup` is the other admissible value and remains reachable, which is
@@ -1545,7 +1545,7 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
 ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
                              verbose = FALSE,
                              base_params = ccx_default_params(),
-                             spinup_fn = ccx_periodic_spinup, by_stream = FALSE) {
+                             spinup_fn = CCX_OBJECTIVE_SPINUP, by_stream = FALSE) {
   if (!is.function(spinup_fn))
     stop("ccx_make_logpost(): `spinup_fn` must be a function with ccx_spinup()'s ",
          "contract (returns $y, $params, $aux, $grid, $prod_c14, $diagnostics).")

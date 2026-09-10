@@ -32,9 +32,27 @@
 # behind. See calibration/torch/README.md, "Two rounds, and the second is not
 # the first repeated".
 #
+# ⛔⛔ 2026-09-09x -- THE WALL ARITHMETIC BELOW IS **STALE AND MUST BE RE-MEASURED
+# BEFORE THE NEXT PRODUCTION SUBMISSION.** Adopting the periodic spinup made every
+# objective evaluation ~2.9-3.1x more expensive AT `seas_ml` = 1 (measured on the
+# Mac, calibration/diag_periodic_spinup_adoption.R). If that factor carries to a
+# Torch node, the projection `p` goes from ~37 min to ~111 min, and the restart
+# guard -- which starts a restart only while `elapsed + 1.5p` still fits
+# CCX_MS_WALL_MIN -- could then fire only in the first ~14 min. The multi-restart
+# design would silently collapse to a single pass. ⚠ THAT IS NOT A TIMEOUT and
+# would NOT announce itself: the task still exits 0.
+#
+# ⛔ DO NOT SCALE THE MAC FACTOR ONTO A NODE. Ruled 2026-09-09x: run the PREFLIGHT
+# first and size --time / CCX_MS_WALL_MIN from what the node actually measures
+# ⇒ [[eta_in_days_is_not_a_slow_run]] ("read the meter at ~5 min"),
+# [[threshold_from_obs_or_law]]. The preflight command is in the block above; it
+# exits 0 without optimising, so it prices the EVALUATION, which is what the
+# projection is built from.
+#
 # WALL -- THE ARITHMETIC, BECAUSE A TIMEOUT COSTS FAIRSHARE AND A CLEAN EXIT
 # DOES NOT. This job REQUESTS 4 h = 240 min (--time above), which is the cap the
-# arithmetic below is against. ⚠ THAT IS A REQUEST, NOT THE PARTITION'S CEILING:
+# arithmetic below is against. ⚠ THE NUMBERS IN THIS BLOCK ARE THE PRE-ADOPTION
+# ONES and are retained only so the re-derivation has something to be against. ⚠ THAT IS A REQUEST, NOT THE PARTITION'S CEILING:
 # cpu_short's QoS allows 6 h at cpu=32 per user [[torch_qos_is_the_real_cap]], so
 # a round 2 may raise --time and re-derive this block. The task's OWN budget
 # (CCX_MS_WALL_MIN) is 180, so it stops the optimiser, checkpoints and exits 0
@@ -121,7 +139,15 @@ mkdir -p logs calibration/output
 # round 4 rebuilt the sink there). 24 starts (6 fixed + 18 dispersed) at %24 -- one wave.
 #     sbatch --array=0-23%24 calibration/torch/multistart.sbatch
 export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260908e_hilda31_asx}"
+# ⭐⭐ 2026-09-09x: THE OBJECTIVE'S **SPINUP** CHANGED -- the PERIODIC (limit-cycle)
+# spinup was adopted (Marcus), so `ccx_make_logpost()` now seeds every transient
+# from `ccx_periodic_spinup()`. ⛔⛔ THE PARAMETER SET IS UNCHANGED AT 31 NAMES,
+# WHICH IS EXACTLY THE 09-02 HAZARD THIS BLOCK WAS WRITTEN ABOUT: the driver's
+# checkpoint guard refuses a mismatched `param_names`, and it would NOT refuse the
+# 09-08e files -- their 31 names are identical. What protects us is the
+# `ref_logpost` stamp, which moved; the NEW OUTDIR is the clean answer and the
+# guard is the backstop, not the plan. The name says `periodic` for that reason.
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260909x_hilda31_periodic}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.

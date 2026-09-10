@@ -54,6 +54,53 @@ accumulation). ⚠ Its MUTATION at 1e3× still passed — the measured residual 
 floor — so **the first mutation was itself a no-power assertion**; resized to 1e6× off the measured
 headroom ⇒ [[no_power_null]].
 
+### ✅ THE FOUR RED TESTS, RULED AND REPAIRED — SUITE BACK TO THE PRE-EXISTING SET
+Marcus ruled **update all four, flag Ruling A separately.** **PASS 2443 / FAIL 2 / ERROR 1 / SKIP 4**
+— the 2 failures and 1 error are EXACTLY the long-standing pre-existing set (`test-alpha-as.R:116,117`
+and the `test-seas-lag-split.R:199` error). **+46 passes over the 2397 baseline**: 43 from the new
+`test-spinup-diagnostics.R` and the remainder from assertions the four repairs added. No test was
+edited merely to pass; each keeps its power and each gained a mutation.
+
+⭐⭐ **THE STRUCTURAL FIX, because the four failures were ONE cause: `CCX_OBJECTIVE_SPINUP`.**
+All four hand-built paths had hard-coded `ccx_spinup()` while reconstructing something the objective
+computes. There is now **ONE NAME** for "the spinup the objective uses" — read by
+`ccx_make_logpost()`'s own default AND by every reconstruction — so flipping it again cannot silently
+desync a reconstruction from the thing it reconstructs ⇒ [[two_gates_one_mechanism]]. A path that
+deliberately wants the aseasonal spinup names `ccx_spinup` explicitly, which then READS as the
+deliberate choice it is. ⛔ It is defined in `R/periodic_spinup.R`, not `calibrate.R`: the alphabetical
+bootstrap sources `calibrate.R` first, so a binding made there would evaluate before the function
+exists — the objective can still DEFAULT to it because a default argument resolves at CALL time.
+
+| test | repair | how its power was kept |
+|---|---|---|
+| `test-luc-scale.R:221` | reads `CCX_OBJECTIVE_SPINUP` | its subject is `ccx_scaled_forcing`, not the spinup; the exact-reproduction claim is unchanged |
+| `test-d14c-mid.R:110` | reads `CCX_OBJECTIVE_SPINUP` | the mid rows come off the spinup STATE, so the expectation must be built from the objective's own |
+| `test-enso-demean.R:167` | scored at the **FILE'S VINTAGE** (`spinup_fn = ccx_spinup`) | ⭐ **NOT re-baselined.** `md$streams` is an ASEASONAL-era artifact, so the like-for-like way to ask "does the harness reproduce this file" is to score the vector THE WAY THE FILE WAS FITTED ⇒ [[like_for_like_forcing]], [[stale_fixture_repair]]. **Reproduces to 1.3e−10**, still pins 25 rows' sum. **A CONVERSE assertion was added — the ADOPTED objective must NOT reproduce it** — so the vintage distinction cannot be decoration. |
+| `test-enso-demean.R:192` | **BOTH vintages asserted** | 43.8367 (aseasonal) **and** 63.7282 (periodic), so the test **PINS THE RE-PRICING** rather than swapping one literal for another. The aseasonal figure is unchanged from Ruling A's ratification and still reproduces exactly, which is what makes the new figure a measured MOVE and not a lost baseline. |
+
+### ⛔ OPEN FOR MARCUS — RULING A's RATIFICATION AT THE RE-PRICED GAP
+**The ENSO-demeaning flag was worth 43.8367 and is worth 63.7282 under the adopted objective** (+19.89,
+a 45 % increase). **Ruling A was ratified on 43.84.** The direction is *toward* the mechanism being
+worth more, so the ratification is unlikely to be threatened — but it rested on a number that has
+moved, and this is recorded rather than absorbed. **Not settled here.**
+
+### ⚠ TWO ITEMS THE TORCH PREP TURNED UP, BOTH RECORDED IN `multistart.sbatch`
+1. ⛔ **THE NEW OUTDIR IS LOAD-BEARING AND THE CHECKPOINT GUARD IS *NOT* SUFFICIENT HERE.** The
+   parameter set is UNCHANGED at 31 names, so the driver's `param_names` guard would **NOT** refuse the
+   09-08e checkpoints — only the moved `ref_logpost` stamp does. This is precisely the 09-02 hazard the
+   sbatch's own header was written about (the objective moving at a CONSTANT name count), so the outdir
+   is `multistart_20260909x_hilda31_periodic` and the guard is the backstop, not the plan.
+2. ⛔ **THE WALL ARITHMETIC IS MARKED STALE, NOT RE-GUESSED.** At ~3x per evaluation the projection `p`
+   goes ~37 → ~111 min, which would let the restart guard fire only in the first ~14 min and collapse
+   the multi-restart design **silently — the task still exits 0, so it is not a timeout and would not
+   announce itself.** Ruled: PREFLIGHT on a node first, size `--time`/`CCX_MS_WALL_MIN` from what the
+   node measures, do not scale the Mac factor ⇒ [[eta_in_days_is_not_a_slow_run]].
+3. ⚠ **`make_bundle.sh` does not ship `calibration/output/refit_20260908_hilda31`** — the CANONICAL
+   mode. `R/` travels wholesale so the promoted spinup does, but the refit's fixed starts are the 08-30
+   incumbent and the 08-31e new basin, **neither of which is the current canonical mode.** Adding
+   `hilda31` as a start (and to the bundle) is recommended since the refit is meant to supersede it;
+   flagged, NOT taken.
+
 ### ⭐ PORT TARGETS REGENERATED — AND THE ADOPTION IS **NOT** A CONSTANT OFFSET
 `calibration/torch/port_targets.csv` re-measured under the adopted objective (the file's own header
 says to, whenever the objective changes). ⚠ **It must be generated with `CCX_MS_STRUCT=hilda`
@@ -79,7 +126,7 @@ therefore cannot be corrected for arithmetically. Only the refit answers directi
 `offset` against each file's own stored logpost also SHRANK (incumbent −547.11 → −458.42, new_basin
 −643.42 → −499.01).
 
-### THE SUITE, AND THE FOUR RED TESTS ARE **NOT** TOUCHED
+### THE SUITE, AND THE FOUR RED TESTS AS FIRST REPORTED (⭐ RULED AND REPAIRED — see above)
 **PASS 2433 / FAIL 7 / ERROR 1 / SKIP 4**, against a pre-adoption baseline of **2397 / 2 / 1 / 4**.
 It reconciles exactly: **2397 + 41 new − 5 newly-failing = 2433.**
 ⚠ **PRE-EXISTING and unchanged**: `test-alpha-as.R:116,117` (2 failures) and the

@@ -118,11 +118,19 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
   # THE FILE'S OWN STRUCTURE (2026-09-08f): the canonical is a HILDA mode; on the
   # column default the same vector scores -2.3e7 and nothing below reproduces.
   bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
-  sc <- function(dm) { old <- FORC_ENSO_DEMEAN
+  # ⚠ THE SPINUP IS AN ARGUMENT SINCE 2026-09-09x, because this test makes TWO
+  # different claims and they need DIFFERENT vintages. The PRICE of the flag is a
+  # property of today's objective; the CROSS-CHECK against the mode file is a
+  # property of the objective the FILE WAS FITTED UNDER, which is the aseasonal
+  # one. Scoring both the same way is what broke this test on adoption
+  # ⇒ [[like_for_like_forcing]].
+  sc <- function(dm, sf = CCX_OBJECTIVE_SPINUP) { old <- FORC_ENSO_DEMEAN
     assign("FORC_ENSO_DEMEAN", dm, envir = globalenv())
     on.exit(assign("FORC_ENSO_DEMEAN", old, envir = globalenv()), add = TRUE)
-    ccx_make_logpost(base_params = bp)(u0) }
+    ccx_make_logpost(base_params = bp, spinup_fn = sf)(u0) }
   off <- sc(FALSE); on <- sc(TRUE)
+  # the same two, at the FILE's vintage, for the cross-check below only
+  off_ase <- sc(FALSE, ccx_spinup); on_ase <- sc(TRUE, ccx_spinup)
   # CROSS-CHECK, and it is what makes the gap trustworthy rather than circular:
   # with the flag ON -- the SHIPPED state -- the harness must reproduce the mode
   # file's OWN stored logpost. If it does not, the two scorings are not of the
@@ -132,15 +140,16 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
   # DERIVED, not re-baselined ([[stale_fixture_repair]]): score the same vector
   # with the rows switched off and require THAT to reproduce the file; then
   # require the difference to be exactly the two rows' own Gaussians.
-  sc_nomid <- function() { old <- LIK_USE_D14C_MID
+  sc_nomid <- function(sf = CCX_OBJECTIVE_SPINUP) { old <- LIK_USE_D14C_MID
     assign("LIK_USE_D14C_MID", FALSE, envir = globalenv())
     on.exit(assign("LIK_USE_D14C_MID", old, envir = globalenv()), add = TRUE)
-    ccx_make_logpost(base_params = bp)(u0) }
+    ccx_make_logpost(base_params = bp, spinup_fn = sf)(u0) }
   # 2026-09-08f: a file that RECORDS its structure was promoted after #8/#9, so its
   # stored logpost already carries the rows and must reproduce DIRECTLY; the
   # rows-off form below is the repair for the pre-#8 files only.
   post8 <- !is.null(md$struct)
-  on_nomid <- if (post8) on else sc_nomid()
+  on_nomid     <- if (post8) on     else sc_nomid()
+  on_nomid_ase <- if (post8) on_ase else sc_nomid(ccx_spinup)
   # ⛔⛔ REPAIRED 2026-09-09w, AND NOT BY RE-BASELINING ([[stale_fixture_repair]]).
   # This line compared the harness against the file's STORED ABSOLUTE LOGPOST,
   # and the 09-09w prior re-centrings (ent_seas_amp_SH's centre 10.95 -> 6.5525,
@@ -164,18 +173,32 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
       lp <- lp + s$prior(pv[[n]]) + .log_jac(u[[n]], s) }; lp }
   ed_lp  <- ed_logprior(u0)
   ed_lik <- sum(unlist(md$streams))
-  expect_equal(on_nomid - ed_lp, ed_lik, tolerance = 1e-5, scale = 1)
+  # ⛔⛔ SCORED WITH `ccx_spinup`, AND THAT IS THE REPAIR (2026-09-09x). The
+  # 09-09w repair made this identity immune to a PRIOR move but NOT to an
+  # OBJECTIVE move, and adopting the periodic spinup moved the objective: it
+  # failed by exactly -10.158 on a perfectly correct arm -- the FOURTH instance
+  # of [[compare_gaps_not_absolute_logposts]]. ⚠ NOT re-baselined: `md$streams`
+  # is an ASEASONAL-ERA artifact, so the like-for-like way to ask "does the
+  # harness reproduce this file" is to score the vector THE WAY THE FILE WAS
+  # FITTED ⇒ [[like_for_like_forcing]], [[stale_fixture_repair]]. Measured: the
+  # two agree to 1.3e-10. The check keeps ALL its power -- it still pins 25 rows'
+  # sum and still fails the moment the harness scores a different vector.
+  expect_equal(on_nomid_ase - ed_lp, ed_lik, tolerance = 1e-5, scale = 1)
   # MUTATION: the identity must FAIL on a moved likelihood and on a moved
   # prior-leg, or it is not a check ([[mutation_test_gates]]).
-  expect_false(isTRUE(all.equal(on_nomid - ed_lp, ed_lik + 1, tolerance = 1e-5, scale = 1)))
-  expect_false(isTRUE(all.equal(on_nomid - (ed_lp + 1), ed_lik, tolerance = 1e-5, scale = 1)))
+  expect_false(isTRUE(all.equal(on_nomid_ase - ed_lp, ed_lik + 1, tolerance = 1e-5, scale = 1)))
+  expect_false(isTRUE(all.equal(on_nomid_ase - (ed_lp + 1), ed_lik, tolerance = 1e-5, scale = 1)))
+  # ⭐ AND THE ADOPTED objective must NOT reproduce it, or `spinup_fn` is not
+  # reaching the model and the vintage distinction above is decoration.
+  expect_false(isTRUE(all.equal(on_nomid - ed_lp, ed_lik, tolerance = 1e-5, scale = 1)))
   # ⭐ AND the stored logpost is still reported, as PROVENANCE rather than as a
   # gate: it is stale by exactly the prior shift until the refit re-runs.
   expect_true(is.finite(md$logpost))
   tgm <- ccx_mid_d14c_target()
   if (!is.null(tgm) && !post8) {
     pp  <- ccx_overlay_par(bp, ccx_unc_to_par(u0))
-    sp  <- ccx_spinup(pp); mid <- ccx_model_d14c_slabs(sp); deep <- sp$diagnostics$d14c_bottom_box
+    # the objective's own spinup: `on`/`on_nomid` are scored with it (09-09x)
+    sp  <- CCX_OBJECTIVE_SPINUP(pp); mid <- ccx_model_d14c_slabs(sp); deep <- sp$diagnostics$d14c_bottom_box
     # OBJECTIVE #9 (2026-09-06d): with the MVN row ON, "rows off" also drops the
     # row (it contains the mid rows), leaving the deep Gaussian; the difference
     # is then (MVN row - deep Gaussian). Derived from the switch, not typed.
@@ -189,8 +212,20 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
   # measured with the structure-aware base (diff to the file 0.0e+00). The same
   # expected direction as 56.48 -> 45.16: a refit absorbs part of the forcing's
   # non-zero mean elsewhere, so the marginal value of demeaning shrinks a little.
-  expect_equal(on - off, 43.8367, tolerance = 1e-4, scale = 1)
+  #
+  # ⭐⭐ RE-PRICED 2026-09-09x BY THE SPINUP ADOPTION: 43.8367 -> 63.7282. BOTH
+  # vintages are asserted, so this test now PINS THE RE-PRICING ITSELF rather
+  # than swapping one literal for another -- the aseasonal figure is unchanged
+  # from what Ruling A was ratified on, and it still reproduces exactly, which is
+  # what makes the new figure a measured MOVE rather than a lost baseline.
+  # ⚠⚠ RULING A WAS RATIFIED ON 43.84. Whether its ratification survives at
+  # 63.73 is a question FOR MARCUS and is flagged in CHANGELOG 09-09x (2); this
+  # test records the number, it does not settle the ruling.
+  expect_equal(on     - off,     63.7282, tolerance = 1e-4, scale = 1)
+  expect_equal(on_ase - off_ase, 43.8367, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
   expect_gt(on - off, 1)
+  # ... and the two vintages must genuinely DIFFER, or `spinup_fn` is inert here.
+  expect_gt(abs((on - off) - (on_ase - off_ase)), 1)
 })

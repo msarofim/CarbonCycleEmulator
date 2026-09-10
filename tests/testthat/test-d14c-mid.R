@@ -107,7 +107,12 @@ test_that("the objective carries the rows: switching them off moves the logpost 
   on <- sc(TRUE); off <- sc(FALSE)
   tg  <- ccx_mid_d14c_target()
   pp  <- ccx_overlay_par(ccx_default_params(), ccx_unc_to_par(u0))
-  sp  <- ccx_spinup(pp); mid <- ccx_model_d14c_slabs(sp); deep <- sp$diagnostics$d14c_bottom_box
+  # ⛔ `CCX_OBJECTIVE_SPINUP`: the mid rows are read off the spinup STATE, so this
+  # expectation must be built from the same spinup `ccx_make_logpost()` used for
+  # `on`/`off` above. Hard-coding `ccx_spinup()` here made this fail by -857 the
+  # moment the objective's spinup was adopted (2026-09-09x)
+  # ⇒ [[two_gates_one_mechanism]].
+  sp  <- CCX_OBJECTIVE_SPINUP(pp); mid <- ccx_model_d14c_slabs(sp); deep <- sp$diagnostics$d14c_bottom_box
   rows <- ccx_profile_rows_delta(mid, deep)   # what switching the mid rows OFF removes
   expect_equal(on - off, rows, tolerance = 1e-6, scale = 1)
   expect_gt(abs(rows), 0.1)   # and they are not a vanishing constant

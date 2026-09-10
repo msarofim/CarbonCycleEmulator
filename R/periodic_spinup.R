@@ -246,3 +246,18 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
                        pin = "annual-mean atmospheric CO2, d13C and D14C",
                        seeded_from = if (is.null(seed)) "ccx_spinup" else "caller"))
 }
+
+# ⭐⭐ THE ONE NAME FOR "THE SPINUP THE OBJECTIVE USES", and it exists because
+# adoption broke four tests that had each hard-coded `ccx_spinup()` in a
+# hand-built reconstruction of the objective's scoring path. Every such path --
+# `ccx_make_logpost()`'s own default included -- now reads THIS, so flipping the
+# objective's spinup cannot silently desync a reconstruction from the thing it
+# reconstructs ⇒ [[two_gates_one_mechanism]]. A test or diagnostic that
+# deliberately wants the ASEASONAL spinup names `ccx_spinup` explicitly, which
+# then reads as the deliberate choice it is.
+# ⛔ Defined HERE and not in `calibrate.R`: the alphabetical `list.files("R")`
+# bootstrap sources `calibrate.R` FIRST, so a binding to `ccx_periodic_spinup`
+# made there would be evaluated before the function exists. `ccx_make_logpost()`
+# can still DEFAULT to it because a default argument is resolved at CALL time.
+CCX_OBJECTIVE_SPINUP <- ccx_periodic_spinup
+
