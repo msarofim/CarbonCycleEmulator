@@ -32,39 +32,36 @@
 # behind. See calibration/torch/README.md, "Two rounds, and the second is not
 # the first repeated".
 #
-# ⛔⛔ 2026-09-09x -- THE WALL ARITHMETIC BELOW IS **STALE AND MUST BE RE-MEASURED
-# BEFORE THE NEXT PRODUCTION SUBMISSION.** Adopting the periodic spinup made every
-# objective evaluation ~2.9-3.1x more expensive AT `seas_ml` = 1 (measured on the
-# Mac, calibration/diag_periodic_spinup_adoption.R). If that factor carries to a
-# Torch node, the projection `p` goes from ~37 min to ~111 min, and the restart
-# guard -- which starts a restart only while `elapsed + 1.5p` still fits
-# CCX_MS_WALL_MIN -- could then fire only in the first ~14 min. The multi-restart
-# design would silently collapse to a single pass. ⚠ THAT IS NOT A TIMEOUT and
-# would NOT announce itself: the task still exits 0.
+# WALL -- RE-DERIVED 2026-09-10 FROM A PREFLIGHT MEASURED ON THE NODES, not from
+# the Mac. Adopting the periodic spinup (2026-09-09x) made every evaluation ~3x
+# more expensive, which invalidated the pre-adoption arithmetic that stood here.
+# ⛔ The failure it would have caused is SILENT: the restart guard starts a
+# restart only while `elapsed + 1.5p` still fits CCX_MS_WALL_MIN, so a `p` that
+# grows past ~2/3 of the budget collapses the multi-restart design to a single
+# pass -- and the task still EXITS 0. Not a timeout, and nothing announces it.
 #
-# ⛔ DO NOT SCALE THE MAC FACTOR ONTO A NODE. Ruled 2026-09-09x: run the PREFLIGHT
-# first and size --time / CCX_MS_WALL_MIN from what the node actually measures
-# ⇒ [[eta_in_days_is_not_a_slow_run]] ("read the meter at ~5 min"),
-# [[threshold_from_obs_or_law]]. The preflight command is in the block above; it
-# exits 0 without optimising, so it prices the EVALUATION, which is what the
-# projection is built from.
+# MEASURED (preflight job 17316317, ids 0-5,12,20, 2026-09-10, cs608 + gr105):
+#   0.5938 - 1.0796 s/eval  =>  a 6000-eval pass (CCX_MS_MAXIT) takes 59.4 - 108.0 min.
+#   Port VERIFIED on all 8 tasks, rel 3.0e-10 to 5.4e-09.
 #
-# WALL -- THE ARITHMETIC, BECAUSE A TIMEOUT COSTS FAIRSHARE AND A CLEAN EXIT
-# DOES NOT. This job REQUESTS 4 h = 240 min (--time above), which is the cap the
-# arithmetic below is against. ⚠ THE NUMBERS IN THIS BLOCK ARE THE PRE-ADOPTION
-# ONES and are retained only so the re-derivation has something to be against. ⚠ THAT IS A REQUEST, NOT THE PARTITION'S CEILING:
-# cpu_short's QoS allows 6 h at cpu=32 per user [[torch_qos_is_the_real_cap]], so
-# a round 2 may raise --time and re-derive this block. The task's OWN budget
-# (CCX_MS_WALL_MIN) is 180, so it stops the optimiser, checkpoints and exits 0
-# with ~57 min to spare -- "OUT OF TIME" is a normal exit here, NOT a SLURM kill,
-# and re-submitting the same array RESUMES each task from its checkpoint.
+# THE ARITHMETIC, at the WORST measured rate (p = 108.0 min), which is the one
+# that has to hold:
+#   * budget CCX_MS_WALL_MIN = 300 of a 360 min request (--time=06:00:00).
+#   * the guard can still START a restart up to elapsed = 300 - 1.5p = 138 min,
+#     so restarts are reachable rather than shut out (at WALL_MIN 180 they were
+#     shut out after 18 min -- that is why 180 is no longer used).
+#   * a restart begun at the limit and actually taking k x p ends at
+#     300 + (k - 1.5)p; reaching the 360 cap needs k = 2.06, i.e. a TWOFOLD
+#     overrun of a measured projection. The worst contention ever measured on
+#     this model is 1.61x, so the cap is not reachable on any observed behaviour.
+#   * passes available inside the budget: 300/108 = 2.8 at the worst rate and
+#     300/59.4 = 5.0 at the best, which is what CCX_MS_RESTARTS = 3 wants.
 #
-#   worst case: the guard starts a restart only if elapsed + 1.5 x projection
-#   still fits 180, so a restart can begin at 180 - 1.5p and, if it actually
-#   takes k x p, ends at 180 + (k - 1.5)p. With p ~ 37 min (6,000 evals at the
-#   ~0.37 s/eval a 2x-slower-than-Mac node implies) it takes k > 3.0 -- a
-#   THREEFOLD overrun of a measured projection -- to reach the 240 min cap.
-#   The worst contention ever measured on this model was 1.61x.
+# ⚠ 06:00:00 IS THE QoS CEILING, NOT A PREFERENCE -- VERIFIED ON THE MACHINE
+# rather than read off this comment ([[runnable_is_not_undrivable]]): `sacctmgr
+# show qos` gives cpu_short MaxWall 06:00:00, MaxTRESPU cpu=32,mem=120G. That
+# TRES cap is also why the array throttle is %24 and not higher: 24 tasks x
+# --mem=4G = 96G fits 120G, while %32 would request 128G and never start.
 #
 # MEMORY. --mem=4G against a MEASURED peak RSS of 213 MB for a full task
 # (2026-09-01, /usr/bin/time -l): 19x headroom, deliberately generous because
@@ -74,7 +71,7 @@
 #SBATCH --job-name=ccx_multistart
 #SBATCH --account=torch_pr_1041_general
 #SBATCH --partition=cpu_short
-#SBATCH --time=04:00:00
+#SBATCH --time=06:00:00
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
 #SBATCH --output=/scratch/ms17839/CarbonCycleEmulator/logs/%x_%A_%a.out
@@ -138,6 +135,11 @@ mkdir -p logs calibration/output
 # 2026-09-08e: round 5 (31 parameters; + the OBSERVATION prior on hs_asx_frac, 0.653 x 0.15 log-sd:
 # round 4 rebuilt the sink there). 24 starts (6 fixed + 18 dispersed) at %24 -- one wave.
 #     sbatch --array=0-23%24 calibration/torch/multistart.sbatch
+# 2026-09-10: ROUND 6 under the ADOPTED PERIODIC SPINUP. 24 starts (6 fixed + 18
+# dispersed) at %24, one wave, --time and CCX_MS_WALL_MIN re-derived from the
+# preflight above. Objective: MAP as usual (Marcus 09-09x -- "likelihood-only"
+# meant COMPARE on likelihood, not fit without priors); 31 par, ent_seas_amp_SH KEPT.
+#     sbatch --array=0-23%24 calibration/torch/multistart.sbatch
 export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
 # ⭐⭐ 2026-09-09x: THE OBJECTIVE'S **SPINUP** CHANGED -- the PERIODIC (limit-cycle)
 # spinup was adopted (Marcus), so `ccx_make_logpost()` now seeds every transient
@@ -193,7 +195,7 @@ echo "CCX_MS_OUTDIR $CCX_MS_OUTDIR"
 # and cost 11 h vs 2 h17 elsewhere when they oversubscribe. [[pin_blas_threads]]
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 
-export CCX_MS_WALL_MIN="${CCX_MS_WALL_MIN:-180}"        # 3 h of the 4 h cap; see WALL above
+export CCX_MS_WALL_MIN="${CCX_MS_WALL_MIN:-300}"        # 5 h of the 6 h cap; see WALL above
 export CCX_MS_RESTARTS="${CCX_MS_RESTARTS:-3}"
 export CCX_MS_CYCLES="${CCX_MS_CYCLES:-6}"
 export CCX_MS_MAXIT="${CCX_MS_MAXIT:-6000}"
