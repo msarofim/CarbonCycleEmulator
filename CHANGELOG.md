@@ -2,6 +2,82 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-10 — ⭐⭐ **THE ROUND-6 REFIT IS SUBMITTED ON TORCH UNDER THE ADOPTED PERIODIC SPINUP: job `17316364`, 24 starts, all RUNNING. THE PRE-SUBMISSION REVIEW FOUND TWO MORE SCRIPTS PINNING THE OLD SPINUP — ONE OF WHICH WOULD HAVE FAILED ITS OWN GATE 5 *AFTER* THE ARRAY FINISHED.**
+
+Marcus: *"Check the model and launch code and then submit on torch."*
+
+### ⛔ THE REVIEW FOUND TWO MORE `ccx_spinup()` PINS, BOTH POST-RUN — i.e. BOTH WOULD HAVE BITTEN LATE
+The four that adoption broke on 09-09x were the ones tests covered. These two are in scripts the suite
+does not exercise, and both would have failed **after** ~5 h × 24 tasks had already been spent:
+- **`promote_multistart_mode.R:153`** writes the promoted mode's `streams` field. Its **GATE 5**
+  compares `lp0 − sum(st)` against the recomputed prior — with `st` from the aseasonal spinup and
+  `lp0` from the adopted objective, **GATE 5 would have FAILED on a correct arm**.
+  ⚠⚠ **ONLY THE SPINUP WAS SHARED.** The rest of that block stays a HAND-BUILT reconstruction *on
+  purpose*: GATE 5's power is that `streams` reaches the likelihood by a **DIFFERENT PATH** than the
+  objective, which is the check the `luc_scale`-squared bug failed. Routing it through the new
+  `ccx_make_logpost(by_stream = TRUE)` would have made GATE 5 a **SELF-COMPARISON**
+  ⇒ [[gate_reads_its_own_output]]. **Same state, different path.**
+- **`run_post_refit_adoption.R:272`** scores `ocean_grad` off the spinup, so the adopted mode's
+  gradient rows would have described a state the fit never saw.
+
+✅ **The driver itself is clean**: it reaches the objective only through `ccx_make_logpost()`
+(`run_dispersed_multistart.R:318`), so it picked up the adopted spinup with no edit, and its
+**`ref_logpost` checkpoint guard** (line 452) refuses the 09-08e files — which matters because the
+parameter set is UNCHANGED at 31 names, so the `param_names` guard would NOT have caught them.
+
+### ✅ THE RISK THE NEW −Inf GUARD ACTUALLY POSED, MEASURED BEFORE SPENDING HPC TIME
+A convergence guard that rejects a start is a **DEAD TASK**. On 12 draws at the **hilda** structure
+(the one the array runs): **FINITE 12/12, no −Inf**, Newton converging in **3–4 of PS_MAXIT = 40**
+(10× headroom), 0.190 s/eval median. ⚠ The first cut of that check ran on the **COLUMN** model because
+`CCX_MS_STRUCT` was unset — the same trap as the port targets the day before
+⇒ [[port_targets_need_the_struct_var]]. Re-run on hilda before being believed.
+
+### ⭐ THE PREFLIGHT, AND THE WALL RE-DERIVED FROM IT (job `17316317`, ids 0-5,12,20)
+**Port VERIFIED on all 8 tasks, rel 3.0e−10 to 5.4e−09** — the regenerated hilda port targets
+reproduce on the node, so every start is optimising the same objective the Mac measured. Reference
+points came back at **−16211.8842 / −2005.5734 / −1995.0241**, matching the CSV.
+
+| measured on cs608 + gr105 | |
+|---|---|
+| **0.5938 – 1.0796 s/eval** | ⇒ a 6000-eval pass (`CCX_MS_MAXIT`) takes **59.4 – 108.0 min** |
+
+⛔ **THAT CONFIRMED THE CONCERN AND IT WAS NOT COSMETIC.** At the worst rate, the old
+`CCX_MS_WALL_MIN = 180` shuts the restart guard out after **18 min** (it starts a restart only while
+`elapsed + 1.5p` still fits the budget) — the multi-restart design collapses to a single pass **and the
+task still exits 0.** Not a timeout; nothing announces it.
+⇒ **`--time` 04:00:00 → 06:00:00 and `CCX_MS_WALL_MIN` 180 → 300.** At 300/360 a restart can still
+begin at **138 min**, and reaching the cap needs a **2.06× overrun** of a measured projection against a
+**worst-ever-observed contention of 1.61×**. Passes inside the budget: **2.8** at the worst rate,
+**5.0** at the best — which is what `CCX_MS_RESTARTS = 3` wants.
+⚠ **06:00:00 IS THE QoS CEILING, VERIFIED ON THE MACHINE and not read off the comment that asserted
+it** ⇒ [[runnable_is_not_undrivable]]: `sacctmgr` gives `cpu_short` **MaxWall 06:00:00, MaxTRESPU
+cpu=32, mem=120G**. ⭐ **That TRES cap is also why the throttle stays `%24`** — 24 × `--mem=4G` = 96G
+fits 120G, while `%32` would request **128G and never start**. The concurrency limit was inherited from
+round 5 by imitation; it is now derived.
+
+### THE SUBMISSION
+`sbatch --array=0-23%24 calibration/torch/multistart.sbatch` — **no command-line overrides**, so what
+runs is exactly what is in git. **Job `17316364`, 24/24 RUNNING, 0 pending.**
+Outdir **`multistart_20260909x_hilda31_periodic`** — it names the **OBJECTIVE**, not just the 31-name
+parameter set, which is the 09-02 rule (the objective moved three times at a constant name count).
+Objective: **MAP as usual** (ruled 09-09x — "likelihood-only" meant COMPARE on likelihood), 31 par,
+`ent_seas_amp_SH` KEPT.
+### ✅ THE METER AT ~5 MIN, BECAUSE 24 CONCURRENT TASKS CAN CONTEND WHERE 8 CANNOT
+⇒ [[eta_in_days_is_not_a_slow_run]] ("read the meter at ~5 min"). Under the full 24-way wave:
+**0.9794 s/eval** (median of 5; range 0.6254–3.9874, the high tail being first-call warmup — the
+driver takes the MEDIAN), i.e. **inside the preflight's own 0.5938–1.0796 band. Contention did NOT
+blow up.** `PORT GATE (a) PASSED` on the production tasks too, rel **3.92e−10** against tol 1e−08.
+Projection **97.9 min** per 6000-eval restart.
+
+⚠ **AND THE DRIVER RESERVES 45 min OF THE 300 FOR THE BFGS POLISH (100 iterations)**, which my
+hand-derivation had not carried: the budget available to restarts is **255**, not 300, so it is
+**2.6 passes** at this rate and **2.36** at the preflight's worst — still ≥ 2, and a restart can still
+BEGIN at `300 − 1.5 × 97.9 = 153 min`. The sizing holds, but the reserved polish is the term to carry
+next time ⇒ [[verify_the_quantity_not_the_word]].
+
+⚠ **`hilda31` is NOT among the fixed starts and NOT in the bundle** — flagged 09-09x, NOT ruled, so the
+round-5 start set (6 fixed + 18 dispersed) was used unchanged rather than altered silently.
+
 ## 2026-09-09x (2) — ⭐⭐ **ADOPTED (Marcus): THE PERIODIC SPINUP IS NOW THE OBJECTIVE'S SPINUP. PROMOTED TO `R/periodic_spinup.R`, DEFAULT FLIPPED. ⛔⛔ AND MY CONVERGENCE GUARD GATED THE WRONG QUANTITY — IT RETURNED −Inf ON CONVERGED SOLVES AND TWO REPO TESTS CAUGHT IT. SUITE 2433 / 7 FAIL / 1 ERROR, WITH 4 PREVIOUSLY-PASSING TESTS RED AND **NOT** TOUCHED.**
 
 Marcus ruled **adopt, then refit under it**, after the 09-09x checks (entry below) priced it.
