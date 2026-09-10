@@ -1,0 +1,85 @@
+PERIODIC SPINUP -- ADOPTION CHECKS (cost, the seas_ml = 0 no-op, diagnostics) 
+mode hilda31 | h_ml 49.153 | seas_ml 0 
+stored logpost -1478.659503  (STALE by the 09-09w prior shift -- compare on LIKELIHOOD) 
+
+== CHECK 2 (first, because it decides what CHECK 1 is even pricing) == 
+What `ccx_spinup()` zeroes in its p0, at THIS mode: 
+  seas_amp_NH    = 12   (zeroed in p0) 
+  seas_amp_SH    = 2   (zeroed in p0) 
+  seas_drivers   = 1   (zeroed in p0) 
+  seas_ml        = 0   (zeroed in p0 -- and the only one the handoff names) 
+  ⇒ 3 of the 3 OTHER seasonal paths are ON at seas_ml = 0. 
+  ⇒ the periodic solve at seas_ml = 0 is NOT the same problem as the 
+    aseasonal one, so bit-identity is structurally unavailable. Measure the size. 
+
+periodic solve at seas_ml = 0: 3 Newton iterations, 0.125 s warm, max|Phi(y)-y| = 9.663e-12 
+  the aseasonal spinup it is seeded from: 0.034 s warm 
+  max|dy|            6.969115e-01 GtC   (BIT-IDENTICAL would be 0) 
+  max relative       3.497166e-02 
+  CO2 ppm   aseasonal 276.880000 -> periodic 276.880000  (delta +0.000000 ppm) 
+  ocean GtC aseasonal 37894.1630 -> periodic 37893.2491  (delta -0.9139) 
+  prod_c14  aseasonal 415.861951 -> periodic 415.860811 
+
+-- what adoption costs the OBJECTIVE at this mode, by stream -- 
+  likelihood  aseasonal -1439.424788 -> periodic -1449.582691   (delta -10.157904) 
+  log-prior   -40.045695 on BOTH arms (the prior does not read the spinup): confirmed 
+  the 8 largest per-stream shifts (periodic - aseasonal): 
+    d13c_level_SPO                -16.732   (69.79 -> 53.05) 
+    d13c_level_MLO                 +8.282   (73.34 -> 81.62) 
+    co2_icecore                    -1.016   (-683.09 -> -684.10) 
+    co2_level_MLO                  -0.675   (-69.11 -> -69.78) 
+    co2_level_SPO                  +0.560   (-60.98 -> -60.42) 
+    hs_surf_d13c                   -0.276   (-6.17 -> -6.45) 
+    d14c_intcal                    -0.252   (-670.56 -> -670.82) 
+    d14c_NH                        -0.241   (-285.87 -> -286.11) 
+  sum of all shifts -10.157904  (= the likelihood delta above: reconciles) 
+
+== CHECK 1 -- COST, inside the objective == 
+  per evaluation   aseasonal 0.0912 s   periodic 0.2071 s   FACTOR 2.27x 
+  decomposition, all WARM: aseasonal spinup 0.0337 + periodic increment 0.0911 
+    the periodic solve is 60 % of the periodic evaluation (must be < 100) 
+
+  -- the same cost at seas_ml = 1 (the refit's own arm) -- 
+    Newton iterations 6 (vs 3 at seas_ml = 0) 
+    per evaluation   aseasonal 0.0988 s   periodic 0.2759 s   FACTOR 2.79x 
+  arithmetic at seas_ml = 0: 36 boxes ⇒ 37 one-year runs per Newton iteration, 3 iterations, 
+    + 2 x 37 for the two isotope monodromies (FIXED, outside the loop) = 187 integrations 
+  arithmetic at seas_ml = 1: 36 boxes ⇒ 37 one-year runs per Newton iteration, 6 iterations, 
+    + 2 x 37 for the two isotope monodromies (FIXED, outside the loop) = 298 integrations 
+
+  the mode file's OWN refit cost: 36569 evaluations in 99.2 minutes (0.1628 s/eval) 
+  ⇒ the SAME search under the periodic spinup, at the REFIT'S OWN arm's factor 
+    (x2.79 measured at seas_ml = 1): 277.1 minutes = 4.62 h 
+  ⚠ that is ONE start. A Torch ARRAY multiplies it by the start count, 
+    and the measured s/eval above differs from the refit's own 0.1628 s/eval 
+    because that run predates the C++ core and this machine -- read the FACTOR, not the absolute. 
+
+== CHECK 3 -- the periodic object's diagnostics are its OWN == 
+  Both spinups now route through ccx_spinup_diagnostics() (09-09x). 
+  The sharpest previously-stale pair, production, must agree with $prod_c14: 
+    $prod_c14 415.860811   vs  $diagnostics$prod_c14_mol_yr 415.860811  -> AGREE 
+    MUTATION (the pre-09-09x inherited list): 415.860811 vs 415.861951 -> STALE (want STALE) 
+  ⇒ the check HAS POWER: it separates the two forms. 
+  every field recomputed, none inherited: 19 fields, and d13c_atm/land differ from the seed: 
+    d13c_atm   seed -6.469000 -> periodic -6.455401 
+    land_C_GtC seed 2130.0000 -> periodic 2129.0493 
+
+== CHECK 4 -- which seasonal path is it, and one dead-knob gate == 
+  as fitted -- DRIVER path (seas_drivers 1) dLL   -10.158 | d13C rows   -8.450 (SPO  -16.732, MLO   +8.282) 
+  SINE path instead (seas_drivers = 0, amps 12/2) dLL   -10.520 | d13C rows  -10.060 (SPO  -18.385, MLO   +8.325) 
+  BOTH paths off (the identity)        dLL    -0.000 | d13C rows   +0.000 (SPO   -0.000, MLO   +0.000) 
+  ⇒ identity arm |d13C shift| 2.141e-08; the two live arms are -8.450 and -10.060 
+  ⇒ THE GATE HAS POWER (it separates the arms by >8 orders), and the answer is 
+    SEASONALITY ITSELF, not a particular path: the two paths give -10.16 and -10.52, within 4 % of each other. 
+  ⛔ SO THIS DEFECT PREDATES ROUND 6 **AND** THE 2026-08-18 DRIVER PATH. 
+    It is a property of seeding a SEASONAL model from an ASEASONAL fixed point. 
+  dead-knob gate: seas_amp 12/2 -> 7/7 at seas_drivers = 1 
+    logpost -1479.470483350 -> -1479.470483350 (delta 0.000e+00) -> INERT, as model.R:1295 claims 
+    MUTATION at seas_drivers = 0: -2983.820669 -> -4838.757617 (delta -1854.936948) -> LIVE (want LIVE) 
+  ⇒ CONFIRMED both ways: `seas_amp_NH = 12` / `seas_amp_SH = 2` in the canonical 
+    mode's base list are DEAD VALUES at seas_drivers = 1. Read as the model's 
+    seasonal amplitude they are wrong ⇒ [[verify_the_quantity_not_the_word]]. 
+  ⚠ OPEN: whether the d13C split is the driver climatology's own hemispheric 
+    asymmetry. The live knobs are FITTED, so base_params cannot move them. 
+
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/periodic_adoption_20260909x.rds 

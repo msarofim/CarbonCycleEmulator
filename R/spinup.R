@@ -136,6 +136,129 @@ ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
 # ⇒ Stored logposts, port targets and checkpoint `ref_logpost` stamps all remain
 #   valid: every one of those gates is 1e-8 relative and this is 8e-14.
 
+# ---------------------------------------------------------------------
+#' THE spinup diagnostics, computed ONCE for both spinups
+#'
+#' WHY THIS IS A FUNCTION AND NOT A BLOCK INSIDE `ccx_spinup()`. There are now
+#' TWO spinups -- the aseasonal fixed point here and the periodic (limit-cycle)
+#' solve in `R/periodic_spinup.R` -- and the second was built by
+#' inheriting the first's `$diagnostics` list and overwriting the six fields it
+#' recomputed. Everything else silently carried the SEED's value: `d13c_atm`,
+#' `d14c_atm`, every deep/bottom/HS D14C row, the land inventories, and -- the
+#' sharpest of them -- `prod_c14_mol_yr` and `prod_ratio`, which disagreed with
+#' the object's OWN `$prod_c14` because the periodic solve re-solves production.
+#' A caller could read a plausible number that belonged to a different state.
+#' ⇒ ONE producer, ONE definition of every row that is a pure function of the
+#' state ([[two_gates_one_mechanism]] -- the same defect family as the 09-09t
+#' leak, where two cores read two different objects).
+#'
+#' ⚠ THE TWO ESTIMATOR-DEPENDENT ROWS ARE REQUIRED ARGUMENTS, NOT DEFAULTS.
+#' `residuals` and `co2_ppm` mean genuinely different things in the two solves --
+#' an instantaneous |dy/dt| against |Phi(y) - y| over one period, and an
+#' instantaneous atmospheric burden against an ANNUAL MEAN over the orbit. A
+#' default for either would let one caller inherit the other's convention, which
+#' is exactly the failure this refactor exists to remove
+#' ⇒ [[verify_the_quantity_not_the_word]]. Every OTHER row is a pure function of
+#' `(y, prod, aux, grid)` and is computed here for both.
+#'
+#' @param y     state matrix
+#' @param prod  the 14C production this state was solved at, mol/yr
+#' @param residuals named list(C=, C13=, C14=) -- the CALLER's own convergence
+#'   measure, on the caller's own definition.
+#' @param co2_ppm the CALLER's own atmospheric CO2 estimator, ppm.
+ccx_spinup_diagnostics <- function(y, prod, aux, grid, residuals, co2_ppm) {
+  if (!all(c("C", "C13", "C14") %in% names(residuals)))
+    stop("ccx_spinup_diagnostics(): `residuals` needs elements C, C13 and C14 ",
+         "-- the caller's own convergence measure, since the two spinups do not ",
+         "share a definition of one.")
+  if (!is.numeric(co2_ppm) || length(co2_ppm) != 1L || !is.finite(co2_ppm))
+    stop("ccx_spinup_diagnostics(): `co2_ppm` must be the caller's own single ",
+         "finite atmospheric estimator; there is deliberately no default.")
+
+  atm_idx <- c(aux$idx$NH$atm, aux$idx$SH$atm)
+  d14c_atm <- 1000 * (sum(y[atm_idx, "C14"]) / sum(y[atm_idx, "C"]) - 1)
+  d13c_atm <- 1000 * (sum(y[atm_idx, "C13"]) /
+                        (sum(y[atm_idx, "C"]) * ccx_const("R13_VPDB")) - 1)
+  # HS and HD ARE ocean carbon and belong in the inventory; `$hs`/`$hd` are NULL
+  # when the structure is off, and c() drops them, so this is the same vector.
+  ocean_idx <- unlist(lapply(HEMIS, function(h)
+    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd)))
+  deep_idx  <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 3)))
+  bot_idx   <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 1)))
+
+  # canonical cosmogenic production, for comparison ONLY
+  P_canon <- 2.04 * (5.1e14 * 1e4) * 365.25 * 86400 / 6.02214076e23
+
+  list(
+    max_abs_dCdt      = residuals$C,
+    max_abs_dC13dt    = residuals$C13,
+    max_abs_dC14dt    = residuals$C14,
+    co2_ppm           = co2_ppm,
+    d13c_atm          = d13c_atm,
+    d14c_atm          = d14c_atm,
+    d14c_deep_ocean   = 1000 * (sum(y[deep_idx, "C14"]) / sum(y[deep_idx, "C"]) - 1),
+    # SPLIT PER HEMISPHERE 2026-08-13, before the conveyor was wired up. The
+    # combined figure above averages BOTH columns' bottom three layers, which
+    # is meaningless under a conveyor: the ventilated end should come out
+    # YOUNG and the far end OLD -- the observed young-North-Atlantic /
+    # old-deep-Pacific pattern, and a structural improvement on anything the
+    # model has managed. Reading the average would hide exactly the signal the
+    # reverse-conveyor gate is testing for. The combined value is kept because
+    # every pre-conveyor result and the kz bracket were derived from it.
+    d14c_deep_by_hemi = vapply(HEMIS, function(h) {
+      k <- tail(aux$idx[[h]]$oc, 3)
+      1000 * (sum(y[k, "C14"]) / sum(y[k, "C"]) - 1)
+    }, numeric(1)),
+    # THE BOTTOM BOX ALONE, added 2026-08-14 -- and it is a DIFFERENT LAYER
+    # from the two above, which is why it exists.
+    #
+    # At h_ml 75 the 11-box column puts box 11 at 2627.2-3700 m, and that is
+    # the layer data-raw/build_glodap_deep_targets.R measured GLODAPv2 over.
+    # `d14c_deep_ocean` and `d14c_deep_by_hemi` average the bottom THREE
+    # interior boxes, i.e. 1313.6-3700 m -- a genuinely shallower and better
+    # ventilated slab. The two are 13-20 permil apart across the kz bracket
+    # (kz 5000: -186.4 here against -170.1 there), so scoring the GLODAP
+    # 2627-3700 m mean against the 3-box average would be a layer mismatch of
+    # ~1.6 sigma. The build script's header asserted they were the same layer;
+    # they are not, and that claim is corrected there.
+    #
+    # The transient run moves this by 0.04 permil between 1750 and 2024 at
+    # default kz (measured, calibration/diag_deep_d14c_term.R), so the
+    # preindustrial steady state IS the right thing to score modern bottle
+    # data against and no transient integration is needed for it.
+    #
+    # The two older diagnostics are kept unchanged: every pre-2026-08-14
+    # result and the kz bracket itself were derived from them.
+    d14c_bottom_box   = 1000 * (sum(y[bot_idx, "C14"]) / sum(y[bot_idx, "C"]) - 1),
+    d14c_bottom_by_hemi = vapply(HEMIS, function(h) {
+      k <- tail(aux$idx[[h]]$oc, 1)
+      1000 * (sum(y[k, "C14"]) / sum(y[k, "C"]) - 1)
+    }, numeric(1)),
+    # THE HIGH-LATITUDE BOXES, reported SEPARATELY and NOT folded into any row
+    # above. `d14c_bottom_box` is the quantity every iso-deep protocol in this
+    # repo re-solves kz against, and the kz bracket was derived from it; a
+    # structural change that quietly redefined it would make every stored
+    # number non-comparable in exactly the way nothing would catch.
+    # NA when the structure is off, so a caller cannot read a stale 0 as data.
+    d14c_hs = if (aux$hs_on == 1L) vapply(HEMIS, function(h) {
+      k <- aux$idx[[h]]$hs; 1000 * (y[k, "C14"] / y[k, "C"] - 1)
+    }, numeric(1)) else stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS),
+    d14c_hd = if (aux$hs_on == 1L) vapply(HEMIS, function(h) {
+      k <- aux$idx[[h]]$hd; 1000 * (y[k, "C14"] / y[k, "C"] - 1)
+    }, numeric(1)) else stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS),
+    ocean_C_GtC       = sum(y[ocean_idx, "C"]),
+    land_C_GtC        = sum(y[unlist(lapply(HEMIS, function(h)
+                          aux$idx[[h]]$land)), "C"]),
+    veg_C_GtC         = sum(y[unlist(lapply(HEMIS, function(h)
+                          c(aux$idx[[h]]$leaf, aux$idx[[h]]$wood))), "C"]),
+    soil_slow_C_GtC   = sum(y[unlist(lapply(HEMIS, function(h)
+                          aux$idx[[h]]$soil_slow)), "C"]),
+    prod_c14_mol_yr   = prod,
+    prod_canonical    = P_canon,
+    prod_ratio        = prod / P_canon
+  )
+}
+
 #' Preindustrial steady state
 #'
 #' @param p     parameter list
@@ -278,90 +401,22 @@ ccx_spinup <- function(p = ccx_default_params(),
   y[, "C14"] <- prod * u
 
   # ---- diagnostics ----------------------------------------------------
+  # Every row that is a pure function of the state comes from the ONE producer
+  # `ccx_spinup_diagnostics()`, shared with the periodic spinup. The two rows
+  # that are estimator-dependent are supplied HERE, on THIS solve's own
+  # definitions: an instantaneous derivative, and the instantaneous atmospheric
+  # burden (which on an aseasonal fixed point is trivially also its annual mean).
   resid <- ccx_deriv_fast(y, 1750, p0, zero_forc(prod), grid, aux)
-  d14c_atm <- 1000 * (sum(y[atm_idx, "C14"]) / sum(y[atm_idx, "C"]) - 1)
-  d13c_atm <- 1000 * (sum(y[atm_idx, "C13"]) /
-                        (sum(y[atm_idx, "C"]) * ccx_const("R13_VPDB")) - 1)
-  # HS and HD ARE ocean carbon and belong in the inventory; `$hs`/`$hd` are NULL
-  # when the structure is off, and c() drops them, so this is the same vector.
-  ocean_idx <- unlist(lapply(HEMIS, function(h)
-    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd)))
-  deep_idx  <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 3)))
-  bot_idx   <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 1)))
-
-  # canonical cosmogenic production, for comparison ONLY
-  P_canon <- 2.04 * (5.1e14 * 1e4) * 365.25 * 86400 / 6.02214076e23
 
   list(
     y = y, prod_c14 = prod, aux = aux, grid = grid, params = p,
-    diagnostics = list(
-      max_abs_dCdt      = max(abs(resid[, "C"])),
-      max_abs_dC13dt    = max(abs(resid[, "C13"])),
-      max_abs_dC14dt    = max(abs(resid[, "C14"])),
-      co2_ppm           = sum(y[atm_idx, "C"]) / ccx_const("GtC_PER_PPM"),
-      d13c_atm          = d13c_atm,
-      d14c_atm          = d14c_atm,
-      d14c_deep_ocean   = 1000 * (sum(y[deep_idx, "C14"]) / sum(y[deep_idx, "C"]) - 1),
-      # SPLIT PER HEMISPHERE 2026-08-13, before the conveyor was wired up. The
-      # combined figure above averages BOTH columns' bottom three layers, which
-      # is meaningless under a conveyor: the ventilated end should come out
-      # YOUNG and the far end OLD -- the observed young-North-Atlantic /
-      # old-deep-Pacific pattern, and a structural improvement on anything the
-      # model has managed. Reading the average would hide exactly the signal the
-      # reverse-conveyor gate is testing for. The combined value is kept because
-      # every pre-conveyor result and the kz bracket were derived from it.
-      d14c_deep_by_hemi = vapply(HEMIS, function(h) {
-        k <- tail(aux$idx[[h]]$oc, 3)
-        1000 * (sum(y[k, "C14"]) / sum(y[k, "C"]) - 1)
-      }, numeric(1)),
-      # THE BOTTOM BOX ALONE, added 2026-08-14 -- and it is a DIFFERENT LAYER
-      # from the two above, which is why it exists.
-      #
-      # At h_ml 75 the 11-box column puts box 11 at 2627.2-3700 m, and that is
-      # the layer data-raw/build_glodap_deep_targets.R measured GLODAPv2 over.
-      # `d14c_deep_ocean` and `d14c_deep_by_hemi` average the bottom THREE
-      # interior boxes, i.e. 1313.6-3700 m -- a genuinely shallower and better
-      # ventilated slab. The two are 13-20 permil apart across the kz bracket
-      # (kz 5000: -186.4 here against -170.1 there), so scoring the GLODAP
-      # 2627-3700 m mean against the 3-box average would be a layer mismatch of
-      # ~1.6 sigma. The build script's header asserted they were the same layer;
-      # they are not, and that claim is corrected there.
-      #
-      # The transient run moves this by 0.04 permil between 1750 and 2024 at
-      # default kz (measured, calibration/diag_deep_d14c_term.R), so the
-      # preindustrial steady state IS the right thing to score modern bottle
-      # data against and no transient integration is needed for it.
-      #
-      # The two older diagnostics are kept unchanged: every pre-2026-08-14
-      # result and the kz bracket itself were derived from them.
-      d14c_bottom_box   = 1000 * (sum(y[bot_idx, "C14"]) / sum(y[bot_idx, "C"]) - 1),
-      d14c_bottom_by_hemi = vapply(HEMIS, function(h) {
-        k <- tail(aux$idx[[h]]$oc, 1)
-        1000 * (sum(y[k, "C14"]) / sum(y[k, "C"]) - 1)
-      }, numeric(1)),
-      # THE HIGH-LATITUDE BOXES, reported SEPARATELY and NOT folded into any row
-      # above. `d14c_bottom_box` is the quantity every iso-deep protocol in this
-      # repo re-solves kz against, and the kz bracket was derived from it; a
-      # structural change that quietly redefined it would make every stored
-      # number non-comparable in exactly the way nothing would catch.
-      # NA when the structure is off, so a caller cannot read a stale 0 as data.
-      d14c_hs = if (aux$hs_on == 1L) vapply(HEMIS, function(h) {
-        k <- aux$idx[[h]]$hs; 1000 * (y[k, "C14"] / y[k, "C"] - 1)
-      }, numeric(1)) else stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS),
-      d14c_hd = if (aux$hs_on == 1L) vapply(HEMIS, function(h) {
-        k <- aux$idx[[h]]$hd; 1000 * (y[k, "C14"] / y[k, "C"] - 1)
-      }, numeric(1)) else stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS),
-      ocean_C_GtC       = sum(y[ocean_idx, "C"]),
-      land_C_GtC        = sum(y[unlist(lapply(HEMIS, function(h)
-                            aux$idx[[h]]$land)), "C"]),
-      veg_C_GtC         = sum(y[unlist(lapply(HEMIS, function(h)
-                            c(aux$idx[[h]]$leaf, aux$idx[[h]]$wood))), "C"]),
-      soil_slow_C_GtC   = sum(y[unlist(lapply(HEMIS, function(h)
-                            aux$idx[[h]]$soil_slow)), "C"]),
-      prod_c14_mol_yr   = prod,
-      prod_canonical    = P_canon,
-      prod_ratio        = prod / P_canon
-    )
+    diagnostics = ccx_spinup_diagnostics(
+      y, prod, aux, grid,
+      residuals = list(C   = max(abs(resid[, "C"])),
+                       C13 = max(abs(resid[, "C13"])),
+                       C14 = max(abs(resid[, "C14"]))),
+      co2_ppm   = sum(y[c(aux$idx$NH$atm, aux$idx$SH$atm), "C"]) /
+                    ccx_const("GtC_PER_PPM"))
   )
 }
 

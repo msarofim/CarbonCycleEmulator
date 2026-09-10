@@ -2,7 +2,7 @@
 # diag_periodic_spinup.R -- DOES A PERIODIC SPINUP REMOVE THE +2.45 ppm
 # RECTIFIED OFFSET, OR MERELY RELOCATE IT?
 #
-# Ruled by Marcus 2026-09-09w. This is the measurement `lib_periodic_spinup.R`
+# Ruled by Marcus 2026-09-09w. This is the measurement `R/periodic_spinup.R`
 # was built for, and the question is open in BOTH directions: the spinup PINS
 # atmospheric CO2, so a limit-cycle solve may absorb the offset into the OCEAN
 # state instead of leaving it in the air ⇒ [[ccx_f2_periodic_spinup_owed]].
@@ -31,7 +31,8 @@
 # =====================================================================
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
-source(ccx_path("calibration", "lib_periodic_spinup.R"))
+# `ccx_periodic_spinup()` lives in `R/periodic_spinup.R` since its adoption
+# 09-09x and is sourced by the R/ bootstrap above -- no second copy.
 source(ccx_path("calibration", "lib_design_gates.R"))
 
 # ---- named constants: every label, gate and filename derives from these
@@ -67,7 +68,16 @@ say("  converged in %d iterations, %.2f s | max|Phi(y) - y| = %.3e",
 
 # ---- GATE P1: it IS a fixed point of the one-year map (an IDENTITY) --
 say("\n== GATE P1 -- is the periodic state a fixed point of Phi? (identity; tol = solver's own PS_TOL) ==")
-gate_p1 <- function(sp) sp$periodic$resid_state < PS_TOL
+# ⛔ CORRECTED 2026-09-09x: this compared `resid_state` -- a max over all three
+# tracers with NO pin substitution -- against `PS_TOL`, which is the CARBON
+# NEWTON's absolute tolerance. It PASSED here (9.663e-12) but only because this
+# mode's raw atmospheric one-period change happened to be small: at
+# `ccx_init_unc()` the same quantity is 1.354e-09 on a 3.9e+04 GtC inventory
+# (3.5e-14 RELATIVE, a floating-point floor) and the comparison FAILS a converged
+# solve ⇒ [[verify_the_quantity_not_the_word]]. The solver's own criterion is
+# `resid_carbon`; the state residual is reported, and judged RELATIVE to the
+# inventory it sits on.
+gate_p1 <- function(sp) sp$periodic$resid_carbon < PS_TOL
 say("  periodic state : max|Phi(y) - y| = %.3e  -> %s",
     sp_per$periodic$resid_state, if (gate_p1(sp_per)) "PASS" else "FAIL")
 # MUTATION: the ASEASONAL state must FAIL this gate, or the gate has no power.

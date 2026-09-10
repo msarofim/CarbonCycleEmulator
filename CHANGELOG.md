@@ -2,6 +2,208 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09x (2) — ⭐⭐ **ADOPTED (Marcus): THE PERIODIC SPINUP IS NOW THE OBJECTIVE'S SPINUP. PROMOTED TO `R/periodic_spinup.R`, DEFAULT FLIPPED. ⛔⛔ AND MY CONVERGENCE GUARD GATED THE WRONG QUANTITY — IT RETURNED −Inf ON CONVERGED SOLVES AND TWO REPO TESTS CAUGHT IT. SUITE 2433 / 7 FAIL / 1 ERROR, WITH 4 PREVIOUSLY-PASSING TESTS RED AND **NOT** TOUCHED.**
+
+Marcus ruled **adopt, then refit under it**, after the 09-09x checks (entry below) priced it.
+⇒ [[ccx_periodic_adoption_priced]].
+
+### WHAT ADOPTION CONSISTS OF
+- `calibration/lib_periodic_spinup.R` → **`R/periodic_spinup.R`** via `git mv`, so `git log --follow`
+  keeps the provenance. Every stale path reference in prose was fixed **in the same pass** — a
+  retraction made in one place does not propagate ⇒ [[retraction_in_place_does_not_propagate]].
+- **`ccx_make_logpost()`'s `spinup_fn` now DEFAULTS to `ccx_periodic_spinup`.** `ccx_spinup` remains
+  reachable and is how a pre-adoption number is reproduced — pass it EXPLICITLY and say so.
+- **`verbose` now defaults FALSE** on the periodic spinup. It was TRUE: as a diagnostic that printed a
+  3–6 line Newton trace per call, and as the objective's spinup it would print one per evaluation.
+- ⛔⛔ **EVERY STORED `logpost`, `prior_z`, PORT TARGET AND CHECKPOINT `ref_logpost` IS NOW
+  NON-COMPARABLE.** This is the SECOND re-baselining after 09-09w's prior shift, and unlike that one
+  **it moves the LIKELIHOOD.** ⚠ `calibration/torch/port_targets.csv` is therefore STALE (measured
+  09-08 at `d65b299` under the aseasonal spinup) and **every Torch array task would fail the port
+  gate** — which is the gate working. It must be regenerated before any refit.
+
+### ⛔⛔ THE GUARD BUG, AND IT IS THE SESSION'S OWN THROUGH-LINE FOR THE THIRD TIME
+A non-converged periodic solve only **warns**, and a warning is not a return value, so the flip came
+with a guard rejecting one. **The guard gated `resid_state` against `PS_TOL`, and those are not the
+same quantity.** `PS_TOL` is the **CARBON NEWTON's** absolute tolerance and `resid_carbon` is the
+residual of the vector the Newton drives — one row of which is the **ANNUAL-MEAN PIN** rather than a
+period-to-period difference. `resid_state` is `max|Φ(y) − y|` over every row and all three tracers with
+**no pin substitution**, so the atmosphere row's raw one-period return sits inside it and is
+constrained only in annual mean.
+
+**MEASURED at `ccx_init_unc()` + the luc/bomb perturbation:**
+
+| | |
+|---|---|
+| `resid_carbon` (what PS_TOL is FOR) | **3.7124e−10 — CONVERGED**, in 3 iterations |
+| `resid_state` (max over all 3 tracers, no pin) | **1.3540e−09 — above PS_TOL** |
+| carbon inventory | 3.9004e+04 GtC ⇒ the state residual is **3.5e−14 RELATIVE** |
+| C13 / C14 residuals | 2.84e−14 / 6.82e−13 — **not** the max; the max is CARBON's own |
+
+⇒ **a floating-point floor on a 4e+04 GtC box, not a convergence failure.** The guard returned
+**−Inf** on a perfectly good arm — **the 2026-08-11 failure reincarnated: a posterior truncated by
+numerics wearing a prior's clothes.** ⭐ **Caught by `test-luc-scale.R` and `test-d14c-mid.R`, which
+went NaN/−Inf rather than merely moving** — the tell was that the numbers were not *different*, they
+were *absent* ⇒ [[verify_the_quantity_not_the_word]]. Fixed to gate `resid_carbon`.
+⚠ **And the same mismatch was already in the 09-09w code**: `diag_periodic_spinup.R`'s **GATE P1**
+compared `resid_state` to `PS_TOL` too. It PASSED there (9.663e−12) only because that mode's raw
+atmospheric return happened to be small — an invalid threshold that had not yet been reached.
+Corrected, with the verdict unchanged. ⛔ My own new test asserted the absolute form as well and would
+have RATIFIED the guard bug; it now asserts `resid_carbon < PS_TOL` plus a **relative** bound derived
+from two measured quantities (`PS_TOL` / inventory = 2.6e−14, times 100 for the map's own RK4
+accumulation). ⚠ Its MUTATION at 1e3× still passed — the measured residual sits ~1300× below the
+floor — so **the first mutation was itself a no-power assertion**; resized to 1e6× off the measured
+headroom ⇒ [[no_power_null]].
+
+### THE SUITE, AND THE FOUR RED TESTS ARE **NOT** TOUCHED
+**PASS 2433 / FAIL 7 / ERROR 1 / SKIP 4**, against a pre-adoption baseline of **2397 / 2 / 1 / 4**.
+It reconciles exactly: **2397 + 41 new − 5 newly-failing = 2433.**
+⚠ **PRE-EXISTING and unchanged**: `test-alpha-as.R:116,117` (2 failures) and the
+`test-seas-lag-split.R:199` **ERROR**.
+
+⛔ **A METHOD NOTE THAT COST A MISCOUNT: `as.data.frame(test_dir())` HAS SEPARATE `failed` AND `error`
+COLUMNS, AND AN ERROR IS NOT A FAILURE.** Summing `failed` alone reported "FAIL 2" for a baseline the
+repo has always called **FAIL 3** — `test-seas-lag-split.R:199` is an error. The counting driver now
+reports both and their sum ⇒ [[verify_the_quantity_not_the_word]].
+
+Per `~/.claude/CLAUDE.md` a previously passing test is **REPORTED, not edited to pass.** The four are
+reported to Marcus and left red; all four are ONE class — **a hand-built path that pins the spinup or
+a stored absolute number**:
+
+| test | what it asserts | why it is red |
+|---|---|---|
+| `test-luc-scale.R:235` | `ccx_scaled_forcing` reproduces the objective's likelihood **exactly** | its reconstruction calls **`ccx_spinup(p)`** at line 221 while the objective now uses the periodic one ⇒ off by **101**. Its subject is `ccx_scaled_forcing`, not the spinup. |
+| `test-d14c-mid.R:112` | switching the mid rows off moves the logpost by their Gaussians | line 110 builds the expectation from **`ccx_spinup(pp)`**; the mid rows come from the spinup STATE ⇒ off by **−857**. |
+| `test-enso-demean.R:167` | harness logpost − log-prior == the file's stored per-stream **likelihood** | off by **−10.2**, the adoption shift. ⚠ **The 09-09w repair made this immune to a PRIOR move but NOT to an OBJECTIVE move** — the FOURTH instance of [[compare_gaps_not_absolute_logposts]]. |
+| `test-enso-demean.R:192` | the demean flag is worth **43.8367** | now **63.7**, a real **re-pricing**: +19.9. ⚠⚠ **Ruling A was ratified on 43.84**, so this is a substantive number for Marcus, not a fixture. |
+
+⭐ **The systemic reading: adoption exposed every place a test or diagnostic REBUILDS the objective's
+scoring path with its own spinup call.** That is the same pattern as the ten `calibration/` sites that
+re-assemble `ccx_loglik(by_stream = TRUE)` by hand, one of which was found on 09-09w omitting
+`d14c_mid`. The `by_stream` argument added earlier today exists to retire exactly this.
+
+## 2026-09-09x — ⭐⭐ **THE ADOPTION RULING IS PRICED: COST IS ~3x AND AFFORDABLE, BUT THE "NO-OP AT `seas_ml` = 0" EXPECTATION IS REFUTED — ADOPTION MOVES THE COLUMN ERA BY −10.158 IN LIKELIHOOD. AND THE OFF-ORBIT DEFECT IS SEASONALITY ITSELF, SO IT PREDATES ROUND 6 AND THE 08-18 DRIVER PATH.**
+
+`notes/handoff_2026-09-09w_rulings_taken.md` §6 leaves ONE ruling owed and it GATES THE REFIT:
+should the PERIODIC spinup become **the OBJECTIVE's** spinup? That ruling is Marcus's and is **STILL
+OWED**. What is done here is the three CHECK-FIRST items the handoff lists, none of which depend on
+the answer, plus the code fix owed regardless. ⛔⛔ **THIS ENTRY'S ORIGINAL "nothing is adopted; no
+default is changed" NO LONGER HOLDS — Marcus RULED ADOPT the same day, and the flip is recorded in the
+09-09x (2) entry above. Everything below describes the CHECKS, which stand; the state they describe
+does not.** ⇒ [[retraction_in_place_does_not_propagate]].
+Measured by `calibration/diag_periodic_spinup_adoption.R`
+(`outputs/diagnostics/periodic_adoption_20260909x.rds`).
+
+### ⛔⛔ CHECK 2 — THE NO-OP EXPECTATION IS STRUCTURALLY WRONG, AND THIS IS THE HEADLINE
+The handoff asks that at `seas_ml = 0` the periodic spinup be gated **BIT-IDENTICAL**, "or every
+column-era result moves." **It cannot be, and not because of a bug.** `ccx_spinup()` zeroes **FOUR**
+seasonal paths in its `p0` — `seas_amp_NH`, `seas_amp_SH`, `seas_drivers` **and** `seas_ml` — and the
+expectation names only the fourth. At the canonical mode the driver path is **ON** (`seas_drivers`
+= 1), so at `seas_ml = 0` the model still has a full seasonal cycle and the aseasonal fixed point is
+still **not a point on its orbit** ⇒ [[verify_the_quantity_not_the_word]]. So the question is not
+*whether* the column era moves but *by how much*, and it is measured:
+
+| at the canonical mode (`seas_ml` = 0), aseasonal → periodic | |
+|---|---|
+| max\|dy\| | **0.697 GtC** (3.50 % relative) — bit-identity would be 0 |
+| CO2 | 276.880000 → 276.880000 ppm, **delta exactly 0** (it is PINNED) |
+| ocean carbon | 37894.1630 → 37893.2491 GtC (**−0.9139**) |
+| **likelihood** | **−1439.424788 → −1449.582691, delta −10.157904** |
+| log-prior | −40.045695 on **both** arms (the prior does not read the spinup) |
+
+⭐ **AND IT IS NOT DIFFUSE — 25 streams and TWO carry it, with OPPOSITE SIGNS:**
+`d13c_level_SPO` **−16.732** (69.79 → 53.05) against `d13c_level_MLO` **+8.282** (73.34 → 81.62),
+net −8.450; every other stream is ≤ 1.02. **This is an INTERHEMISPHERIC d13C shift**, and the
+per-stream shifts sum to the total exactly (reconciliation asserted, not eyeballed).
+
+⚠⚠ **WHAT THIS IS NOT.** It is **NOT** evidence the periodic spinup is worse. The mode was FITTED
+under the aseasonal spinup, so re-scoring it under a different spinup at the *old optimum* is not a
+comparison ⇒ [[like_for_like_forcing]]. What it establishes is **non-comparability**: adoption is a
+**THIRD re-baselining** on top of the 09-09w prior shift (−0.811), and it moves the **column era**,
+not merely the `seas_ml = 1` arm. Whether the periodic spinup fits BETTER can only be answered by a
+refit under it.
+
+### ⭐⭐ CHECK 4 — THE MECHANISM IS SEASONALITY ITSELF, NOT A PATH
+| arm at `seas_ml` = 0 | delta likelihood | d13C rows |
+|---|---|---|
+| as fitted — **DRIVER** path (`seas_drivers` = 1) | **−10.158** | −8.450 |
+| the **SINE** path instead (`seas_drivers` = 0, amps 12/2) | **−10.520** | −10.060 |
+| **BOTH paths off** (the IDENTITY) | **−0.000** | **+2.1e−08** |
+
+The identity is exact at the solver's tolerance and separates the arms by **>8 orders**, so the gate
+has POWER ⇒ [[threshold_from_obs_or_law]], [[no_power_null]]. The two live paths agree to **4 %**.
+⛔ **So the off-orbit defect is a property of seeding a SEASONAL model from an ASEASONAL fixed point,
+whichever path supplies the seasonality — it PREDATES round 6 AND the 2026-08-18 driver path.** That
+reframes adoption: it is not "changing the objective for round 6", it is correcting a spinup that was
+never on the model's own orbit. ⚠ **OPEN**: whether the d13C split is the driver climatology's own
+hemispheric asymmetry. The live asymmetric knobs (`seas_T_amp_*`, `seas_lag_p_*`, `sst_seas_amp_*`)
+are **FITTED**, so a `base_params` override is silently discarded and testing it means moving `u`.
+
+### ✅ CHECK 1 — COST, AND IT IS THE CHEAP SIDE OF THE HANDOFF'S WORRY
+Measured **inside `ccx_make_logpost()`**, not in a standalone diagnostic.
+
+| | aseasonal | periodic | factor |
+|---|---|---|---|
+| per evaluation, `seas_ml` = 0 | 0.0906 s | 0.1952 s | **2.15x** |
+| per evaluation, `seas_ml` = 1 (**the refit's own arm**) | 0.0943 s | 0.2712 s | **~2.9–3.1x** |
+
+Newton iterations **6 at `seas_ml` = 1 against 3 at 0** — the seed is ~20 ppm off the orbit there
+against 0.7 GtC here — which is the whole reason the factor differs, so the `seas_ml` = 0 figure must
+not be used to price the refit. 36 boxes ⇒ 37 one-year integrations per iteration, **+ 2 x 37 for the
+two isotope monodromies (a FIXED cost outside the loop)** = 187 integrations at `seas_ml` = 0 and
+**298** at 1. Decomposition, all warm: aseasonal spinup 0.035 s + periodic increment 0.101 s, the
+solve being 70 % of the periodic evaluation.
+⭐ **Priced off the mode file's OWN refit — 36,569 evaluations in 99.2 min — the same search costs
+~303 min = ~5.05 h for ONE start** ⇒ [[eta_in_days_is_not_a_slow_run]]. ⚠ A Torch ARRAY multiplies
+that by the start count, and the absolute s/eval differs from that run's 0.1628 (different machine
+and pre-C++-core): **read the FACTOR, not the absolute.**
+
+### ✅ CHECK 3 — THE DUPLICATED DIAGNOSTICS BLOCK, FIXED (owed regardless of the ruling)
+`ccx_periodic_spinup()` inherited `sp0$diagnostics` and overwrote **six** fields; the other **13**
+silently carried the ASEASONAL SEED's value — `d13c_atm`, `d14c_atm`, every deep/bottom/HS D14C row,
+the land inventories, and sharpest of all **`prod_c14_mol_yr`/`prod_ratio`, which CONTRADICTED the
+object's own `$prod_c14`** because the periodic solve re-solves production (415.860811 against the
+seed's 415.861951). ⇒ **`ccx_spinup_diagnostics()` in `R/spinup.R` is now the ONE producer both
+spinups call** ⇒ [[two_gates_one_mechanism]]. The two **estimator-dependent** rows are **REQUIRED
+ARGUMENTS with no defaults** — `residuals` (an instantaneous \|dy/dt\| against \|Phi(y) − y\| over one
+period) and `co2_ppm` (an instantaneous burden against an ANNUAL MEAN) genuinely differ between the
+two solves, and a default would let one caller inherit the other's convention, which is the failure
+being removed. Mutation-tested: the pre-fix inherited list is shown to FAIL the production check.
+✅ **The aseasonal path is verified to have moved NOTHING** — the objective at `hilda31`'s `u_mode`
+returns likelihood **−1439.424788** and log-prior **−40.045695**, i.e. **−1479.470483**, matching
+09-09w's post-prior-shift figures to all printed digits.
+
+### ⚠ TWO NEW ARGUMENTS ON `ccx_make_logpost()`, AND NEITHER MOVES A NUMBER
+- **`spinup_fn = ccx_spinup`** — so the periodic spinup can be scored against **the objective** with
+  no second copy of the scoring path. ⛔ **Changing this DEFAULT is ADOPTION and is Marcus's ruling**;
+  it must never be flipped as a side effect of another change.
+- **`by_stream = FALSE`** — TRUE returns the same scalar with the breakdown on `attr(, "streams")`,
+  from the objective's OWN `ccx_loglik()` call. **Ten diagnostics in `calibration/` re-assemble that
+  call by hand, and on 09-09w one of them (`repair_arm_streams.R`) was found to have been omitting
+  `d14c_mid`** — i.e. producing a stream set for a different objective than the one being fitted. A
+  breakdown taken off the scored call cannot drift from it.
+
+### ⭐ A DEAD PARAMETER, FOUND BY A TEST OF MINE THAT HAD NO POWER
+`seas_amp_NH = 12` / `seas_amp_SH = 2` in the canonical mode's base list are **DEAD VALUES** at
+`seas_drivers = 1` — R/model.R:1291-1296 says so ("THE SINE'S KNOBS, live only at seas_drivers = 0")
+and **nothing tested it**. Now gated **both ways**: symmetrising them to 7/7 moves the objective by
+**exactly 0** at `seas_drivers = 1`, and by **−1854.94** at `seas_drivers = 0` (want LIVE). ⚠ Anyone
+reading 12/2 as "the model's seasonal amplitude" at this mode is reading a number the model ignores.
+
+### ⛔ AND MY OWN TWO ERRORS THIS SESSION, BOTH THE SESSION'S OWN THROUGH-LINE
+Recorded because they are the 09-09w family — *a quantity that looked plausible but was not the
+quantity intended* — and both were caught by their own printed output rather than by a gate:
+1. **"the periodic solve was 130 % of the evaluation containing it"** — an impossibility. A single
+   **COLD** solve timing compared against a **WARM** per-evaluation average. Fixed by routing every
+   timing through one warm-first helper and asserting `t_solve < t_eval` (a part cannot exceed its
+   whole).
+2. **A NULL WITH NO POWER, reported as a result.** The first cut of CHECK 4 "tested" the hemispheric
+   asymmetry by symmetrising `seas_amp_*` and got a figure **identical in every printed digit** to
+   the as-fitted arm — which I first read as "100 % of it", i.e. as a finding. It was a dead
+   parameter ⇒ [[no_power_null]]. The suspicious exactness was the tell ⇒ the "suspicious uniformity
+   ≈ bug signal" rule in `~/.claude/CLAUDE.md`. Kept as the dead-knob GATE above rather than deleted.
+   ⚠ The corrected arm then ALSO failed its first identity — `seas_drivers = 0` does not remove
+   seasonality, it hands it to the sine — which is how the "seasonality itself" finding was found.
+
 ## 2026-09-09w (2) — ⭐⭐ **ALL FOUR RULINGS TAKEN. THE PERIODIC SPINUP REMOVES 99.6 % OF P12's −514 AND THE 09-09v "P12 IS PHYSICS" READING IS RETRACTED. BOTH PRIOR LEGS RE-CENTRED; THE SHIM IS NOW A STRAINED PRIOR AT z +2.34.**
 
 Marcus ruled all four owed items (`notes/handoff_2026-09-09v...` §6, plus the `streams` repair

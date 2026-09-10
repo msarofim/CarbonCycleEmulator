@@ -1507,9 +1507,48 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
   structure(p, struct = "hilda")
 }
 
+#' @param by_stream FALSE (default) returns the bare scalar the sampler expects.
+#'   TRUE returns that SAME scalar with the per-stream breakdown attached as
+#'   `attr(, "streams")`, taken from THE OBJECTIVE'S OWN `ccx_loglik()` call.
+#'
+#'   ⚠ WHY THIS EXISTS RATHER THAN A HAND-REBUILT CALL. Ten diagnostics in
+#'   `calibration/` re-assemble `ccx_loglik(..., by_stream = TRUE)` themselves,
+#'   and on 2026-09-09w one of them (`repair_arm_streams.R`) was found to have
+#'   been silently omitting `d14c_mid` -- so it had been producing a stream set
+#'   for a DIFFERENT objective than the one being fitted. A breakdown that comes
+#'   off the scored call cannot drift from it ⇒ [[two_gates_one_mechanism]].
+#'   The default is FALSE, so no sampler path changes and no stored number moves.
+#'
+#' @param spinup_fn the spinup the objective seeds its transient from.
+#'   ⭐⭐ **DEFAULT `ccx_periodic_spinup` SINCE 2026-09-09x — ADOPTED, ruled by
+#'   Marcus** once the three CHECK-FIRST items were measured
+#'   (`calibration/diag_periodic_spinup_adoption.R`). The aseasonal fixed point
+#'   `ccx_spinup` is the other admissible value and remains reachable, which is
+#'   how a pre-adoption number is reproduced.
+#'
+#'   ⛔⛔ **THE ADOPTION MOVED THE OBJECTIVE, SO EVERY STORED `logpost`,
+#'   `prior_z`, PORT TARGET AND CHECKPOINT `ref_logpost` IS NON-COMPARABLE WITH A
+#'   RUN OF THIS FUNCTION TODAY.** At `hilda31` the likelihood goes
+#'   −1439.424788 → −1449.582691 (−10.157904). ⚠ That is NOT evidence the
+#'   periodic spinup fits worse: the mode was FITTED under the aseasonal one, so
+#'   scoring it there is not like-for-like ⇒ [[like_for_like_forcing]]. Only a
+#'   refit under this spinup can say. **A refit under each is NOT comparable with
+#'   the other — pick before launching.** To reproduce a pre-09-09x number, pass
+#'   `spinup_fn = ccx_spinup` EXPLICITLY and say so at the call site.
+#'
+#'   ⚠ WHY IT IS AN ARGUMENT AT ALL rather than a hard-wired call: so either
+#'   spinup can be scored by **THE** objective, with no second copy of the
+#'   scoring path. Re-scoring by hand — rebuilding forcing, transient and the
+#'   `ccx_loglik()` call in a diagnostic — is a second definition of the
+#'   objective, the defect family the 2026-09-09t leak belongs to
+#'   ⇒ [[two_gates_one_mechanism]].
 ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
                              verbose = FALSE,
-                             base_params = ccx_default_params()) {
+                             base_params = ccx_default_params(),
+                             spinup_fn = ccx_periodic_spinup, by_stream = FALSE) {
+  if (!is.function(spinup_fn))
+    stop("ccx_make_logpost(): `spinup_fn` must be a function with ccx_spinup()'s ",
+         "contract (returns $y, $params, $aux, $grid, $prod_c14, $diagnostics).")
   ccx_load_cpp()
   # Built once at a REFERENCE bomb total; the bomb column scales linearly with
   # the total, so a draw only rescales it rather than rebuilding the table.
@@ -1555,8 +1594,35 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
     p <- ccx_set_enso(p, pv)
 
-    sp <- tryCatch(ccx_spinup(p), error = function(e) NULL)
+    # `spinup_fn`, not `ccx_spinup` by name: see the argument's own block. The
+    # DEFAULT is ccx_spinup, so this line is a substitution and not a change.
+    sp <- tryCatch(spinup_fn(p), error = function(e) NULL)
     if (is.null(sp) || !is.finite(sp$prod_c14) || sp$prod_c14 <= 0) return(-Inf)
+    # A PERIODIC spinup that did not converge only WARNS, and a warning is not a
+    # return value -- so without this the sampler would score a state that is not
+    # on any orbit. Gated on the ABSENCE contract this repo uses elsewhere: the
+    # aseasonal spinup has no `$periodic` field and is untouched by this branch.
+    #
+    # ⛔⛔ IT GATES `resid_carbon`, **NOT** `resid_state`, AND THAT DISTINCTION IS
+    # THE WHOLE POINT. `PS_TOL` is the CARBON NEWTON's tolerance -- the thing the
+    # solver actually drives -- and `resid_carbon` is the residual of the vector it
+    # drives, one row of which is the ANNUAL-MEAN PIN rather than a period-to-period
+    # difference. `resid_state` is `max|Phi(y) - y|` over every row and all three
+    # tracers with NO pin substitution, so the atmosphere row's raw one-period
+    # change sits in it and is constrained only in annual mean.
+    # ⚠ MEASURED at `ccx_init_unc()` + a luc/bomb perturbation: `resid_carbon`
+    # 3.71e-10 (CONVERGED) while `resid_state` was 1.354e-09 -- above PS_TOL, on a
+    # 3.90e+04 GtC inventory, i.e. **3.5e-14 RELATIVE**, a floating-point floor and
+    # not a convergence failure. The first cut of this guard gated `resid_state` and
+    # returned -Inf on that perfectly good arm, which is the 2026-08-11 failure
+    # reincarnated: a POSTERIOR TRUNCATED BY NUMERICS WEARING A PRIOR'S CLOTHES.
+    # It broke test-luc-scale.R and test-d14c-mid.R and was caught by them
+    # ⇒ [[verify_the_quantity_not_the_word]].
+    # ⚠ It converges in 3-6 iterations against PS_MAXIT = 40, so a firing here is a
+    # signal worth investigating rather than a routine rejection.
+    if (!is.null(sp$periodic) &&
+        (!is.finite(sp$periodic$resid_carbon) || sp$periodic$resid_carbon >= PS_TOL))
+      return(-Inf)
 
     F <- base_forcing
     F$c14_cosmo <- sp$prod_c14
@@ -1608,9 +1674,15 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     ll <- ccx_loglik(r$out, obs, err, luc = eluc,
                      deep = sp$diagnostics$d14c_bottom_box,
                      ocean_grad = ccx_ocean_grad_scored(r$out, sp),
-                     d14c_mid = ccx_model_d14c_slabs(sp))
+                     d14c_mid = ccx_model_d14c_slabs(sp),
+                     by_stream = by_stream)
+    # With by_stream the SAME call returns the named vector; the objective is its
+    # sum, and the breakdown rides as an attribute so the scalar contract holds.
+    st <- NULL
+    if (by_stream) { st <- ll; ll <- sum(ll) }
     if (verbose) cat(sprintf("  ll %.1f  prior %.1f\n", ll, lp))
     if (!is.finite(ll)) return(-Inf)
+    if (by_stream) return(structure(lp + ll, streams = st, loglik = ll, logprior = lp))
     lp + ll
   }
 }

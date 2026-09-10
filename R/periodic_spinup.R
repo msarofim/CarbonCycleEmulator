@@ -1,5 +1,5 @@
 # =====================================================================
-# lib_periodic_spinup.R -- a PERIODIC (limit-cycle) spinup: the state y* with
+# periodic_spinup.R -- a PERIODIC (limit-cycle) spinup: the state y* with
 #   Phi(y*) = y*,   Phi = the model's ONE-YEAR flow map,
 # as against `ccx_spinup()`'s ASEASONAL fixed point, which solves dy/dt = 0 at a
 # SINGLE instant with every seasonal driver switched off.
@@ -45,8 +45,35 @@
 # 09-09t leak's whole mechanism ⇒ [[two_gates_one_mechanism]]. Nothing is
 # mutated here: one parameter list, one `ccx_prepare()`, one gate.
 #
-# Sourced by calibration/diag_periodic_spinup.R. Promotion into R/ is a separate
-# step and is NOT taken here.
+# ⭐⭐ PROMOTED INTO `R/` AND **ADOPTED AS THE OBJECTIVE'S SPINUP**, 2026-09-09x,
+# ruled by Marcus after the three CHECK-FIRST items were measured
+# (`calibration/diag_periodic_spinup_adoption.R`) ⇒ [[ccx_periodic_adoption_priced]].
+# It was `calibration/lib_periodic_spinup.R` until then; `git log --follow` has the
+# provenance. `ccx_make_logpost()`'s `spinup_fn` now DEFAULTS to this function.
+#
+# ⛔⛔ WHAT ADOPTION COST, MEASURED AND NOT ASSUMED:
+#   * ~2.15x per objective evaluation at `seas_ml` = 0 and ~2.9-3.1x at
+#     `seas_ml` = 1 (6 Newton iterations against 3), i.e. ~5.05 h for ONE refit
+#     start priced off the mode file's own 36,569 evals / 99.2 min.
+#   * EVERY STORED `logpost`, `prior_z`, PORT TARGET and checkpoint `ref_logpost`
+#     IS NOW NON-COMPARABLE. At `hilda31` the likelihood moves
+#     -1439.424788 -> -1449.582691 (-10.157904), concentrated in TWO of 25
+#     streams with OPPOSITE signs (`d13c_level_SPO` -16.732,
+#     `d13c_level_MLO` +8.282). ⚠ That is NOT evidence this spinup fits worse --
+#     the mode was FITTED under the aseasonal one, so it is not a like-for-like
+#     comparison ⇒ [[like_for_like_forcing]]. Only a refit under THIS spinup can
+#     say. A refit under the aseasonal seed and one under this are NOT comparable.
+#
+# ⚠ AND THERE IS NO "BIT-IDENTICAL AT `seas_ml` = 0" GATE, because there cannot
+# be. `ccx_spinup()` zeroes FOUR seasonal paths in its `p0` -- `seas_amp_NH`,
+# `seas_amp_SH`, `seas_drivers` AND `seas_ml` -- so at `seas_ml` = 0 the model
+# still has a full seasonal cycle to rectify. The gate that IS available, and is
+# in `test-spinup-diagnostics.R`, is the one with ALL FOUR off: then there is no
+# seasonality, the one-year map's fixed point and the instantaneous fixed point
+# are the SAME STATE, and the two spinups must agree at solver tolerance.
+# MEASURED: 2.1e-08 with all off, against -10.158 with the driver path live and
+# -10.520 with the legacy sine live -- so the defect this file fixes is
+# SEASONALITY ITSELF and PREDATES both round 6 and the 2026-08-18 driver path.
 # =====================================================================
 
 # ---- named constants -------------------------------------------------
@@ -98,7 +125,11 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
                                 chi0  = ccx_const("CO2_PI_PPM"),
                                 d13c0 = ccx_const("D13C_PI"),
                                 d14c0 = ccx_const("D14C_PI"),
-                                seed = NULL, verbose = TRUE) {
+                                # ⛔ FALSE since adoption (09-09x): this is now
+                                # called once per objective evaluation, and the
+                                # per-iteration Newton trace would flood a refit
+                                # of tens of thousands of evaluations.
+                                seed = NULL, verbose = FALSE) {
   sp0  <- if (is.null(seed)) ccx_spinup(p, chi0, d13c0, d14c0) else seed
   aux  <- sp0$aux; grid <- sp0$grid
   # ⛔ THE ONE INVARIANT THIS FILE EXISTS TO KEEP: `aux` must be prepared from
@@ -183,20 +214,29 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
   prod <- c14_target_atm / sum(u[atm])
   y[, "C14"] <- prod * u
 
-  # ---- 3. diagnostics, on the SAME contract ccx_spinup() returns -----
+  # ---- 3. diagnostics, from the SAME PRODUCER `ccx_spinup()` uses -----
+  # ⛔ THIS USED TO INHERIT `sp0$diagnostics` AND OVERWRITE SIX FIELDS. Every
+  # other row then silently carried the ASEASONAL SEED's value -- `d13c_atm`,
+  # `d14c_atm`, all the deep/bottom/HS D14C rows, the land inventories, and
+  # worst, `prod_c14_mol_yr`/`prod_ratio`, which contradicted this object's own
+  # `$prod_c14` because production is RE-SOLVED above. Fixed 2026-09-09x by
+  # routing both spinups through `ccx_spinup_diagnostics()`: one definition of
+  # every state-derived row, and the two ESTIMATOR-DEPENDENT rows passed
+  # explicitly, on THIS solve's own conventions
+  # ⇒ [[two_gates_one_mechanism]], [[verify_the_quantity_not_the_word]].
   Ffin <- ps_year_forcing(prod)
   rfin <- ps_phi(y, p, aux, grid, Ffin)
   per_resid <- max(abs(rfin$state - y))
-  ocean_idx <- unlist(lapply(HEMIS, function(h)
-    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd)))
-  bot_idx <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 1)))
-  d <- sp0$diagnostics
-  d$max_abs_dCdt   <- max(abs(rfin$state[, "C"]   - y[, "C"]))
-  d$max_abs_dC13dt <- max(abs(rfin$state[, "C13"] - y[, "C13"]))
-  d$max_abs_dC14dt <- max(abs(rfin$state[, "C14"] - y[, "C14"]))
-  d$co2_ppm        <- mean(rfin$out$co2_NH + rfin$out$co2_SH) / 2
-  d$d14c_bottom_box <- 1000 * (sum(y[bot_idx, "C14"]) / sum(y[bot_idx, "C"]) - 1)
-  d$ocean_C_GtC    <- sum(y[ocean_idx, "C"])
+  d <- ccx_spinup_diagnostics(
+    y, prod, aux, grid,
+    # |Phi(y) - y| over ONE PERIOD, not an instantaneous |dy/dt|: on a limit
+    # cycle the instantaneous derivative is NOT zero and never becomes zero.
+    residuals = list(C   = max(abs(rfin$state[, "C"]   - y[, "C"])),
+                     C13 = max(abs(rfin$state[, "C13"] - y[, "C13"])),
+                     C14 = max(abs(rfin$state[, "C14"] - y[, "C14"]))),
+    # the ANNUAL MEAN over the orbit -- the quantity the 12C pin is stated on.
+    # The start-of-year instant differs from it by the seasonal amplitude.
+    co2_ppm   = mean(rfin$out$co2_NH + rfin$out$co2_SH) / 2)
 
   list(y = y, prod_c14 = prod, aux = aux, grid = grid, params = p,
        diagnostics = d,
