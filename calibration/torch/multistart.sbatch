@@ -74,6 +74,31 @@
 #SBATCH --time=06:00:00
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
+# ⛔⛔ GPU NODES ARE EXCLUDED, AND THIS IS A MEASUREMENT, NOT A PREFERENCE
+# (2026-09-10). `cpu_short` spans 186 CPU nodes (`cs*`, AvailableFeatures=(null))
+# and 74 GPU NODES (`gl*` cuda,l40s and `gr*` cuda,rtx6000). On 2026-09-10 SLURM
+# placed 20 of 24 tasks on gr105 and THIS SERIAL, SINGLE-THREADED JOB GOT 13-18 %
+# OF A CORE THERE, against ~50 % on the CPU node cs608 -- measured as dCPU over a
+# 471 s window at 9-17 min in, so steady state and not startup. Neither node was
+# oversubscribed by SLURM (cs608 128/128 alloc load 101; gr105 98/128 load 78), so
+# the throttle is not core contention; the likely mechanism is cgroup CPU share
+# reserved for GPU jobs, which is INFERRED and not verified.
+# ⇒ the array was cancelled and resubmitted with this exclusion
+# ⇒ [[eta_in_days_is_not_a_slow_run]] ("read the meter at ~5 min and requeue").
+#
+# ⚠ NOT A CORRECTNESS ISSUE, and that was checked rather than assumed: the PORT
+# GATE passed on all 24 tasks INCLUDING the 20 on gr105, rel 3.92e-10 against a
+# 1e-8 tolerance. Same arch, same compiled core -- only throughput differs.
+# ⚠ NOR A PREEMPTION ISSUE: `cpu_short` is PreemptMode=OFF at PriorityTier=10000,
+# the top tier, so a GPU job cannot evict these tasks. Checked, not guessed.
+#
+# ⛔ THE NODE LIST IS THE VOLATILE PART OF THIS FIX -- REGENERATE IT rather than
+# trusting it if the cluster changes. SLURM has no negative `--constraint`, and
+# the CPU nodes advertise NO feature to select positively on, so an explicit
+# exclusion is the only precise form available:
+#     sinfo -p cpu_short -h -o "%n %f" | awk '$2 ~ /cuda/ {print $1}' | paste -sd,
+# On 2026-09-10 that yields exactly gl001-gl068 and gr101-gr106.
+#SBATCH --exclude=gl[001-068],gr[101-106]
 #SBATCH --output=/scratch/ms17839/CarbonCycleEmulator/logs/%x_%A_%a.out
 #SBATCH --error=/scratch/ms17839/CarbonCycleEmulator/logs/%x_%A_%a.err
 
