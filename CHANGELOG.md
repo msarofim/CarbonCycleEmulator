@@ -62,18 +62,35 @@ Outdir **`multistart_20260909x_hilda31_periodic`** — it names the **OBJECTIVE*
 parameter set, which is the 09-02 rule (the objective moved three times at a constant name count).
 Objective: **MAP as usual** (ruled 09-09x — "likelihood-only" meant COMPARE on likelihood), 31 par,
 `ent_seas_amp_SH` KEPT.
-### ✅ THE METER AT ~5 MIN, BECAUSE 24 CONCURRENT TASKS CAN CONTEND WHERE 8 CANNOT
-⇒ [[eta_in_days_is_not_a_slow_run]] ("read the meter at ~5 min"). Under the full 24-way wave:
-**0.9794 s/eval** (median of 5; range 0.6254–3.9874, the high tail being first-call warmup — the
-driver takes the MEDIAN), i.e. **inside the preflight's own 0.5938–1.0796 band. Contention did NOT
-blow up.** `PORT GATE (a) PASSED` on the production tasks too, rel **3.92e−10** against tol 1e−08.
-Projection **97.9 min** per 6000-eval restart.
+### ⛔ THE METER AT ~5 MIN — AND THE FIRST READING OF IT WAS WRONG, BECAUSE IT WAS **ONE TASK**
+⇒ [[eta_in_days_is_not_a_slow_run]] ("read the meter at ~5 min"). ✅ **`PORT GATE (a) PASSED` on all
+24**, at all three reference points, matching the Mac to ~1e−10 relative — every start is optimising
+the same objective.
 
-⚠ **AND THE DRIVER RESERVES 45 min OF THE 300 FOR THE BFGS POLISH (100 iterations)**, which my
-hand-derivation had not carried: the budget available to restarts is **255**, not 300, so it is
-**2.6 passes** at this rate and **2.36** at the preflight's worst — still ≥ 2, and a restart can still
-BEGIN at `300 − 1.5 × 97.9 = 153 min`. The sizing holds, but the reserved polish is the term to carry
-next time ⇒ [[verify_the_quantity_not_the_word]].
+⛔⛔ **RETRACTED: "0.9794 s/eval, inside the preflight band, so contention did NOT blow up."** That was
+a spot check of a SINGLE task read as if it characterised the fleet. **Across all 24: min 0.5718,
+MEDIAN 1.2062, max 3.2466 s/eval** — the median is ~**2× the preflight band** (0.5938–1.0796) and the
+worst task is **3× the preflight's worst**. ⚠ **A SINGLE SAMPLE OF A DISTRIBUTION IS NOT ITS
+STATISTIC**, and the two tasks I happened to read (0.9794, 0.6986) straddled the truth from both sides
+⇒ [[verify_the_quantity_not_the_word]].
+
+**WHAT IT MEANS FOR THE BUDGET** (255 min available after the 45 min BFGS-polish reserve):
+
+| s/eval | 6000-eval pass | passes in 255 min |
+|---|---|---|
+| 0.5718 (best) | 57.2 min | 4.5 |
+| **1.2062 (median)** | **120.6 min** | **2.1** |
+| 3.2466 (worst) | **324.7 min** | **0.8 — cannot finish ONE pass** |
+
+⭐ **NOT A DEFECT AND NOT AN INTERVENTION.** The design's documented behaviour is that a task out of
+budget stops the optimiser, CHECKPOINTS and exits 0 ("OUT OF TIME is a normal exit here"), and a
+re-submission RESUMES from the checkpoint — so a slow task does less work, it does not lose work. The
+`--time` 6 h request is untouched by this: the budget guard is `CCX_MS_WALL_MIN`, well inside it.
+⚠ **AND THE MEASUREMENT IS TAKEN AT THE NOISIEST MOMENT** — all 24 tasks start, compile and read
+inputs simultaneously, so this may be startup contention rather than steady state. `cpu_short` is a
+SHARED partition (`sinfo` shows `mix`), and our own tasks cannot oversubscribe each other since
+OMP/OPENBLAS/MKL are pinned to 1. **Re-read the meter later rather than concluding from the startup
+window.**
 
 ⚠ **`hilda31` is NOT among the fixed starts and NOT in the bundle** — flagged 09-09x, NOT ruled, so the
 round-5 start set (6 fixed + 18 dispersed) was used unchanged rather than altered silently.
