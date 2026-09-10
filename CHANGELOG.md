@@ -2,6 +2,48 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-10 (4) — ⭐⭐ **ROUND 2 IS DONE AND THE REFIT IS SETTLED: ALL 14 RESUBMITTED STARTS CONVERGED, EIGHT OF THEM ONTO THE SAME POINT. BEST = −1480.5404, BEATING `hilda31` BY +9.0880. TWO DISTINCT BASINS. ⛔ NOTHING ADOPTED — PROMOTION IS A RULING.**
+
+Job **`17325832`**, 14/14 **COMPLETED and CONVERGED** — against round 1's 2 of 24. Two more restarts
+on top of the checkpoints was the right dose: tasks finished in **57–254 min** inside a 300 min
+budget, so **budget stopped being the binding constraint and convergence became it.**
+
+### THE RESULT, AND IT IS NOW CONVERGED RATHER THAN A LOWER BOUND
+| | logpost | starts |
+|---|---|---|
+| **BASIN 1 — the answer** | **−1480.5404** | **8 converge to it EXACTLY** (ids 0, 3, 6, 7, 8, 13, 16, 22), + 1, 19 at −1480.5677 and 9 at −1481.4752 ⇒ **11 in basin** |
+| BASIN 2 | −1490.9480 / −1490.9633 | 3 (ids 2, 4, 5) |
+| incumbent `hilda31`, same objective | −1489.6284 | — |
+
+⭐⭐ **BASIN 1 BEATS THE INCUMBENT BY +9.0880 LOG-UNITS**, and **eight independent starts** — the COLD
+hand-set init, an ENSO-seeded carry of the old incumbent, and six dispersed draws — reach it **to four
+decimals**. ⚠ **BASIN 2 IS 1.32 log-units WORSE than `hilda31`**, so the adopted objective does not
+merely shift the landscape: `hilda31` sits BETWEEN the two basins, nearer the worse one. That is the
+same re-ranking the 09-09x port targets showed (cold −167, `hilda31` −10.16, incumbent +88.7,
+new_basin +144.4) ⇒ **an offset could not have predicted this and none was assumed.**
+
+### ⚠ WHAT THE COLLECTOR ACTUALLY CERTIFIES, AND WHAT IT DOES NOT
+- **`⇒ 2 DISTINCT BASINS among the 14 finished starts`**, at a cluster radius of **1.4549 = 0.25 × the
+  MEASURED inter-basin separation** — the survey's own resolution, not an invented number. ⭐ Round 1
+  could say almost nothing here ("1 distinct basin among the **2** finished starts"); the count is
+  meaningful only now that 14 have converged.
+- ⚠ **The 10 rows still marked `TIME` are ROUND-1 LEFTOVERS** — deliberately not resubmitted, since
+  each was 10.2–136.1 behind and its basin already identified. The collector **excludes them from the
+  basin count and keeps them in the table**, which is the correct treatment and not an omission.
+- ⛔ **"18 dispersed starts REPRODUCED, and did not beat, the best re-converged known basin."** ⚠ **A
+  survey bounds what N starts at ONE dispersion found; it is NOT proof that no better basin exists**
+  ⇒ [[no_power_null]]. The collector prints this itself and it is not softened here.
+- ENSO seeding is worth **+0.0273** at the incumbent and **+0.0153** at the new basin — negligible at
+  this resolution, and unchanged from round 1.
+- Port VERIFIED on the three reference points at rel **5.4e−09 / 3.0e−10 / 3.9e−10**.
+
+### ⛔ WHAT IS OWED
+**Promotion is Marcus's ruling** and nothing here takes it. `promote_multistart_mode.R` would write the
+new canonical mode; its **GATE 5 was repaired for the adopted spinup on 09-10**, so it will reconcile —
+before that fix it would have failed on a correct arm *after* both rounds had run. ⚠ Also still open:
+**Ruling A's ratification at the re-priced demean gap (43.8367 → 63.7282)**, and the root `MEMORY.md`
+restructure.
+
 ## 2026-09-10 (3) — **ROUND 2 SUBMITTED: job `17325832`, 14 tasks, RESUMING FROM ROUND 1's CHECKPOINTS AT CYCLE 2. Its job is CONVERGENCE, because 22 of 24 round-1 tasks ended out of time.**
 
 Per `calibration/torch/README.md`, *"Two rounds, and the second is not the first repeated"*: **the six
