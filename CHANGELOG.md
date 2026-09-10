@@ -135,6 +135,26 @@ but `PreemptMode=OFF`.
 24 port gates passed**, rate **median 0.7035 s/eval (min 0.5327, max 1.6178)** against the GPU run's
 1.2062 / 3.2466 — back inside the preflight's own 0.5938–1.0796 band.
 
+✅ **AND THE FIX IS CONFIRMED ON THE STATISTIC THAT MATTERS, AT A MATCHED WINDOW.** ⚠ The first
+`cs` reading (median 57.0 %) was taken at elapsed **2:13→7:16** against the GPU run's **8:56→16:47** —
+**not like-for-like**, since startup depresses the early one ⇒ [[like_for_like_forcing]]. Re-measured
+at **7:59→13:00**:
+
+| ΔCPU / Δelapsed, matched window | min | median | max |
+|---|---|---|---|
+| `gr105` (GPU node), 20 tasks | 13 % | ~16 % | 18 % |
+| **`cs` nodes, 24 tasks** | **41.3 %** | **55.3 %** | **65.0 %** |
+
+⇒ **a 3.4× improvement**, and the 55 % is **REPRODUCIBLE** rather than noise: the 4 tasks that landed
+on `cs608` during the GPU run measured ~50 % on the same statistic. ⚠⚠ **BUT IT IS NOT ~100 %, AND
+THAT RESIDUAL GAP IS UNEXPLAINED** — candidates are a memory-bandwidth-bound RK4 inner loop, `sstat`
+sampling granularity, or checkpoint I/O; **none tested.** It is recorded as an open observation rather
+than waved through, because ~55 % looks like this workload's ceiling on `cs` and a future session
+sizing a run should not assume a full core.
+⭐ **The run is nevertheless well sized**: at the measured median **0.7035 s/eval** a 6000-eval pass
+takes **70.4 min** against the **255 min** available after the polish reserve ⇒ **~3.6 passes**, which
+comfortably supports `CCX_MS_RESTARTS = 3`.
+
 ⚠ **ALLOCATION IS BILLED ON ALLOCATED TRES × ELAPSED** (no `TRESBillingWeights` on either partition),
 so a throttled core costs the same as a busy one: the GPU placement would have spent ~120 core-hours
 to do ~25 core-hours of work and left most tasks short of a single 6000-eval pass — which would have
