@@ -1498,13 +1498,41 @@ ccx_hessian_per_direction <- function(lp, u, verbose = TRUE) {
 #' Sources: notes/caveats_declared_parameters.md (each value's provenance).
 CCX_STRUCT_HILDA <- list(hs_frac = 0.16, tau_q = 538, sst_hs = 2,
                          q_attach_from = 1L, kz_zscale = 253)
-ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
-  if (identical(struct, "")) return(structure(p, struct = ""))
+#' @param seas_ml the SEASONAL MIXED LAYER switch (round 6), the SECOND axis of
+#'   the objective label beside `struct` (2026-09-10). ⛔ WHY IT IS HERE AND NOT
+#'   LEFT TO `ccx_default_params()`: `seas_ml` is a BASE parameter, not a fitted
+#'   name, so it is invisible to `u`, absent from a mode file's `par_mode`, and
+#'   silently takes its default (0 = OFF) in any driver that builds from
+#'   `ccx_default_params()`. That is exactly what happened to the 2026-09-10
+#'   refit (jobs 17318015 + 17325832): nobody specified it, the default carried,
+#'   and both rounds fitted the shipped model with the mechanism OFF -- so the
+#'   result is a new baseline and NOT the round-6 test it was launched as
+#'   ⇒ [[ccx_refit_ran_at_seas_ml_0]], [[default_off_hides_the_bug]].
+#'   Routing it through the SAME function as `struct` means every consumer that
+#'   already builds its base list here (the driver, make_port_targets.R, the
+#'   promoter, `ccx_mode_base()`) carries it without a second call to forget.
+#'   It reaches the model as `p$seas_ml` and the label as `attr(, "seas_ml")`,
+#'   which the driver RECORDS in every start file and the port gate VALIDATES
+#'   against `port_targets.csv` -- recorded AND read, the `CCX_MS_STRUCT` pattern.
+#'   Accepts 0/1 (numeric or the env var's "0"/"1"); anything else is an error
+#'   by name, never a coercion.
+ccx_parse_seas_ml <- function(seas_ml) {
+  v <- as.character(seas_ml)
+  if (length(v) != 1L || is.na(v) || !grepl("^[01]$", v))
+    stop("ccx_apply_structure(): `seas_ml` must be 0 (OFF) or 1 (ON); got '",
+         paste(seas_ml, collapse = ","), "' (CCX_MS_SEAS_ML if it came from the environment).")
+  as.integer(v)
+}
+ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
+                                seas_ml = Sys.getenv("CCX_MS_SEAS_ML", "0")) {
+  seas_ml <- ccx_parse_seas_ml(seas_ml)
+  p$seas_ml <- seas_ml
+  if (identical(struct, "")) return(structure(p, struct = "", seas_ml = seas_ml))
   if (!identical(struct, "hilda"))
     stop("ccx_apply_structure(): unknown structure label '", struct,
          "'. Known: \"\" (column) and \"hilda\".")
   for (n in names(CCX_STRUCT_HILDA)) p[[n]] <- CCX_STRUCT_HILDA[[n]]
-  structure(p, struct = "hilda")
+  structure(p, struct = "hilda", seas_ml = seas_ml)
 }
 
 #' @param by_stream FALSE (default) returns the bare scalar the sampler expects.

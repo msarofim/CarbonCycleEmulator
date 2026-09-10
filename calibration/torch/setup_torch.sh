@@ -47,6 +47,8 @@ fi
 export R_LIBS_USER=/scratch/ms17839/Rlibs/4.5
 # 2026-09-06d: the HILDA-structure refit; must match multistart.sbatch and the CSV.
 export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
+# 2026-09-10: the seasonal-mixed-layer axis; must match multistart.sbatch and the CSV.
+export CCX_MS_SEAS_ML="${CCX_MS_SEAS_ML:-1}"
 mkdir -p "$R_LIBS_USER" logs
 
 # ⛔ EVERY R SNIPPET BELOW GOES THROUGH A FILE, NEVER `Rscript -e`
@@ -108,6 +110,10 @@ if (!identical(as.integer(r$n_par[1]), length(CCX_PARAM_NAMES)))
 if (!identical(r$struct[1], Sys.getenv("CCX_MS_STRUCT", "")))
   stop("port_targets.csv was made with structure '", r$struct[1], "'; CCX_MS_STRUCT here is '",
        Sys.getenv("CCX_MS_STRUCT", ""), "'.")
+if (is.null(r$seas_ml) || !identical(ccx_parse_seas_ml(r$seas_ml[1]),
+                                     ccx_parse_seas_ml(Sys.getenv("CCX_MS_SEAS_ML", "0"))))
+  stop("port_targets.csv was made at seas_ml '", r$seas_ml[1], "'; CCX_MS_SEAS_ML here is '",
+       Sys.getenv("CCX_MS_SEAS_ML", "0"), "'.")
 t0 <- Sys.time(); ccx_load_cpp()
 cat(sprintf("C++ core compiled in %.1f s\n",
             as.numeric(difftime(Sys.time(), t0, units = "secs"))))

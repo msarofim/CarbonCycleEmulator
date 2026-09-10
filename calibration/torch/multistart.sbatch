@@ -178,6 +178,20 @@ mkdir -p logs calibration/output
 # meant COMPARE on likelihood, not fit without priors); 31 par, ent_seas_amp_SH KEPT.
 #     sbatch --array=0-23%24 calibration/torch/multistart.sbatch
 export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
+# ⛔⛔ 2026-09-10: THE SEASONAL MIXED LAYER IS THE SECOND LABEL AXIS, AND IT IS
+# THE ONE THIS FILE FORGOT. Jobs 17318015 + 17325832 were launched as the
+# ROUND-6 refit and ran BOTH rounds at seas_ml = 0, because `seas_ml` is a base
+# parameter (not a fitted name), the driver built a bare ccx_default_params(),
+# and nothing here said otherwise. The result is the new seas_ml = 0 baseline,
+# `hilda31p`; the round-6 refit is the one THIS setting runs. The driver now
+# REFUSES to start with the variable unset, records it in every start file, and
+# the port gate refuses a port_targets.csv measured at the other value -- so
+# the CSV must be regenerated with CCX_MS_SEAS_ML=1 before this can pass.
+# ⚠ AT seas_ml = 1 THE OBJECTIVE IS -Inf WHEREVER h_ml EXCEEDS ~76 m (the P8
+# geometry guard): the 08-31e new-basin reference (143.9 m) and the 09-10
+# second basin (164 m) are both INFEASIBLE there, so the reference set in the
+# driver / make_port_targets.R has to be re-ruled before a seas_ml = 1 array.
+export CCX_MS_SEAS_ML="${CCX_MS_SEAS_ML:-1}"
 # ⭐⭐ 2026-09-09x: THE OBJECTIVE'S **SPINUP** CHANGED -- the PERIODIC (limit-cycle)
 # spinup was adopted (Marcus), so `ccx_make_logpost()` now seeds every transient
 # from `ccx_periodic_spinup()`. ⛔⛔ THE PARAMETER SET IS UNCHANGED AT 31 NAMES,
@@ -186,7 +200,10 @@ export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
 # 09-08e files -- their 31 names are identical. What protects us is the
 # `ref_logpost` stamp, which moved; the NEW OUTDIR is the clean answer and the
 # guard is the backstop, not the plan. The name says `periodic` for that reason.
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260909x_hilda31_periodic}"
+# 2026-09-10: `_seasml${CCX_MS_SEAS_ML}` -- seas_ml moves the objective at a CONSTANT
+# 31 names, so the directory must say it; the seas_ml = 0 rounds live in
+# multistart_20260909x_hilda31_periodic (no suffix -- it predates the axis).
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260910_hilda31p_periodic_seasml${CCX_MS_SEAS_ML}}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.
@@ -222,6 +239,7 @@ case "$CCX_MS_OUTDIR" in
 esac
 echo "CCX_PROJ_DIR  $CCX_PROJ_DIR"
 echo "CCX_MS_OUTDIR $CCX_MS_OUTDIR"
+echo "CCX_MS_STRUCT $CCX_MS_STRUCT   CCX_MS_SEAS_ML $CCX_MS_SEAS_ML"
 
 # MEASURED 2026-09-01: `Rscript --vanilla` implies --no-environ, which suppresses
 # .Renviron FILES but NOT an exported R_LIBS_USER -- the library still lands in

@@ -121,7 +121,16 @@ if (is.na(st_rec)) {
   if (!is.na(PMM_STRUCT) && !identical(PMM_STRUCT, st_rec)) stop("--struct='", PMM_STRUCT, "' but the starts record '", st_rec, "'")
   PMM_STRUCT <- st_rec; cat(sprintf("structure RECORDED in the starts: '%s'\n", PMM_STRUCT))
 }
-bp <- ccx_apply_structure(ccx_default_params(), PMM_STRUCT)
+# THE SEASONAL MIXED LAYER (2026-09-10). Start files record `seas_ml` from
+# 09-10 on; older ones do not, and for those 0 is a FACT, not a default: the
+# driver had no way to set it before 09-10 ⇒ [[ccx_refit_ran_at_seas_ml_0]].
+# GATE 4 (the logpost reproduces) checks the label either way.
+sm_rec <- unique(vapply(S, function(s) if (is.null(s$seas_ml)) NA_integer_ else ccx_parse_seas_ml(s$seas_ml), integer(1)))
+if (length(sm_rec) != 1L) stop("the starts disagree on seas_ml: ", paste(sm_rec, collapse = ", "))
+PMM_SEAS_ML <- if (is.na(sm_rec)) 0L else sm_rec
+cat(sprintf("seas_ml %s: %d (%s)\n", if (is.na(sm_rec)) "INFERRED from the starts' age" else "RECORDED in the starts",
+            PMM_SEAS_ML, if (PMM_SEAS_ML == 1L) "the seasonal mixed layer ON -- round 6" else "OFF -- the shipped model"))
+bp <- ccx_apply_structure(ccx_default_params(), PMM_STRUCT, seas_ml = PMM_SEAS_ML)
 bp$pump_mode <- best$pump_mode
 lpf <- ccx_make_logpost(base_params = bp)
 u   <- ccx_par_to_unc(best$par_mode)
@@ -237,7 +246,8 @@ sep("writing the mode file")
 # Hessian, and inventing one here would hand out a Laplace covariance nobody
 # measured. `recompute_hessian.R --update` fills it in, after its own gates.
 out <- list(
-  pump_mode = best$pump_mode, struct = PMM_STRUCT, u_mode = u, par_mode = pm, logpost = lp0,
+  pump_mode = best$pump_mode, struct = PMM_STRUCT, seas_ml = PMM_SEAS_ML,
+  u_mode = u, par_mode = pm, logpost = lp0,
   logpost_init = best$logpost_start, trace = best$trace,
   streams = streams, n_eval = best$n_eval, minutes = best$minutes,
   seed = best$seed, param_names = CCX_PARAM_NAMES, prior_z = best$prior_z,

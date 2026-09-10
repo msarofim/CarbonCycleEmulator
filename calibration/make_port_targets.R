@@ -38,7 +38,27 @@ PT_REFS <- c(
 )
 
 bp <- ccx_default_params(); bp$pump_mode <- PT_ARM
-bp <- ccx_apply_structure(bp)   # 2026-09-06d: the SAME definition the driver uses (CCX_MS_STRUCT)
+# 2026-09-06d: the SAME definition the driver uses, selected by CCX_MS_STRUCT --
+# ⛔ and since 2026-09-10 BOTH label variables must be SET, or this stops. Unset,
+# CCX_MS_STRUCT silently yielded the COLUMN model while the sbatch defaulted to
+# hilda, and the cold target read -5,436,208 against hilda's -16,211.88 -- a
+# ~330x gap that reads exactly like a catastrophic objective regression
+# ⇒ [[port_targets_need_the_struct_var]]. CCX_MS_SEAS_ML has the same shape
+# with a quieter symptom: unset = 0 = the shipped model, and a round-6 run at
+# seas_ml = 1 would then be gated against the wrong objective -- or, if the run
+# were ALSO unset, both would agree at 0 and the round-6 refit would silently
+# repeat the 09-10 one ⇒ [[ccx_refit_ran_at_seas_ml_0]].
+#     CCX_MS_STRUCT=hilda CCX_MS_SEAS_ML=1 Rscript calibration/make_port_targets.R
+.pt_env_required <- function(k) {
+  v <- Sys.getenv(k, NA_character_)
+  if (is.na(v)) stop("make_port_targets.R: ", k, " is NOT SET. State the objective's label ",
+                     "explicitly, e.g. CCX_MS_STRUCT=hilda CCX_MS_SEAS_ML=1 Rscript ",
+                     "calibration/make_port_targets.R -- an unset value records the WRONG ",
+                     "objective and the consumer cannot tell.")
+  v
+}
+bp <- ccx_apply_structure(bp, .pt_env_required("CCX_MS_STRUCT"), .pt_env_required("CCX_MS_SEAS_ML"))
+cat(sprintf("objective label: struct '%s', seas_ml %d\n", attr(bp, "struct"), attr(bp, "seas_ml")))
 lp <- ccx_make_logpost(base_params = bp)
 .ship <- lapply(CCX_PARAM_TABLE, function(s) c(s$lo, s$hi))
 
@@ -93,6 +113,17 @@ rows <- lapply(names(PT_REFS), function(nm) {
   if (!identical(lp(u), v))
     stop("the objective is not a pure function of u on this machine; a port ",
          "gate against it would be meaningless.")
+  # ⛔ A NON-FINITE TARGET IS NOT A TARGET (2026-09-10). At seas_ml = 1 the P8
+  # geometry guard (ccx_seas_ml_guard) makes the objective -Inf wherever h_ml
+  # exceeds ~76 m, and the 08-31e new-basin reference sits at 143.9 m: it is
+  # INFEASIBLE under that objective, and a gate against -Inf can neither pass
+  # nor fail (rel = NaN). Refuse to write it; the reference SET has to change,
+  # and that is a ruling, not something this script papers over.
+  if (!is.finite(v))
+    stop("the objective is ", v, " at the '", nm, "' reference point (h_ml = ",
+         signif(ccx_unc_to_par(u)$h_ml, 4), " m) under struct '", attr(bp, "struct"),
+         "' / seas_ml ", attr(bp, "seas_ml"), ". That point is infeasible under this ",
+         "objective and cannot be a port target; PT_REFS must name a feasible one.")
   data.frame(name = nm, logpost = sprintf("%.10f", v),
              stored = if (is.na(stored)) NA_character_ else sprintf("%.10f", stored),
              offset = if (is.na(stored)) NA_character_ else sprintf("%+.10f", v - stored),
@@ -102,6 +133,7 @@ tg <- do.call(rbind, rows)
 tg$arm       <- PT_ARM
 tg$n_par     <- length(CCX_PARAM_NAMES)
 tg$struct    <- attr(bp, "struct")            # "" = column, "hilda" = the declared structure
+tg$seas_ml   <- attr(bp, "seas_ml")           # 0 = the shipped model, 1 = round 6 (2026-09-10); READ by the driver's port gate
 # ⭐ THE TABLE THESE TARGETS WERE MEASURED UNDER, recorded so a consumer can
 # REFUSE a stale target instead of silently comparing across two tables. A
 # widened bracket shifts every logpost by a reparameterisation constant, so a
@@ -120,8 +152,8 @@ dir.create(dirname(PT_OUT), recursive = TRUE, showWarnings = FALSE)
 utils::write.csv(tg, PT_OUT, row.names = FALSE)
 cat(sprintf("\nPORT TARGETS written to %s\n\n", PT_OUT))
 print(tg[, c("name", "logpost", "stored", "offset")], row.names = FALSE)
-cat(sprintf("\n  arm %s, %d parameters, commit %s, host %s, R %s\n",
-            PT_ARM, length(CCX_PARAM_NAMES), tg$commit[1], tg$host[1], tg$r_version[1]))
+cat(sprintf("\n  arm %s, %d parameters, struct '%s', seas_ml %d, commit %s, host %s, R %s\n",
+            PT_ARM, length(CCX_PARAM_NAMES), tg$struct[1], tg$seas_ml[1], tg$commit[1], tg$host[1], tg$r_version[1]))
 cat("  ⚠ `stored` is each mode FILE's own logpost and is NOT the target: each\n")
 off <- tg$offset[!is.na(tg$offset)]; nm <- tg$name[!is.na(tg$offset)]
 cat(sprintf("    offset (%s) is objective drift since that file was fitted, not a port defect.\n",

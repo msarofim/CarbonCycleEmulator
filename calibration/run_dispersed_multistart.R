@@ -220,8 +220,11 @@ MS_OUTDIR <- local({
   # says which set it holds is the answer that does not rely on a guard firing.
   if (is.na(d) || !nzchar(d))
     ccx_path("calibration", "output",
-             if (identical(Sys.getenv("CCX_MS_STRUCT", ""), "hilda")) "multistart_20260908e_hilda31_asx"
-             else "multistart_20260901_enso25")
+             paste0(if (identical(Sys.getenv("CCX_MS_STRUCT", ""), "hilda")) "multistart_20260908e_hilda31_asx"
+                    else "multistart_20260901_enso25",
+                    # 2026-09-10: seas_ml changes the OBJECTIVE at a constant 31 names, which
+                    # the param_names guard cannot see; the directory must say it.
+                    if (identical(Sys.getenv("CCX_MS_SEAS_ML", "0"), "1")) "_seasml1" else ""))
   else d
 })
 dir.create(MS_OUTDIR, recursive = TRUE, showWarnings = FALSE)
@@ -312,9 +315,33 @@ cat(sprintf("  out %s\n%s\n", MS_OUT, strrep("=", 70)))
 bp <- ccx_default_params(); bp$pump_mode <- MS_ARM
 # THE DECLARED STRUCTURE (2026-09-06d): one definition, shared with
 # make_port_targets.R, selected by CCX_MS_STRUCT ("" = column, "hilda").
-bp <- ccx_apply_structure(bp); MS_STRUCT <- attr(bp, "struct")
+# ⛔⛔ AND THE SEASONAL MIXED LAYER (2026-09-10), selected by CCX_MS_SEAS_ML, and
+# BOTH MUST BE SET EXPLICITLY -- an unset variable is an ERROR here, not a
+# default. The 09-10 refit (17318015 + 17325832) ran BOTH rounds with the
+# mechanism OFF because this line built a bare `ccx_default_params()` and nobody
+# had to say what `seas_ml` was; the result was launched as the round-6 test and
+# turned out to be a new seas_ml = 0 baseline ⇒ [[ccx_refit_ran_at_seas_ml_0]].
+# `ccx_apply_structure()` itself keeps a default (0) for library callers and
+# `ccx_mode_base()`; THE DRIVER refuses to guess, because a guess here costs
+# 24 x 5 h of fairshare before anyone can see it was wrong. The same rule now
+# binds CCX_MS_STRUCT, whose unset-means-column default is the
+# [[port_targets_need_the_struct_var]] footgun in make_port_targets.R.
+.ms_env_required <- function(k) {
+  v <- Sys.getenv(k, NA_character_)
+  if (is.na(v)) stop("run_dispersed_multistart.R: ", k, " is NOT SET. The objective's ",
+                     "label must be stated explicitly (multistart.sbatch exports it); an ",
+                     "unset value is how the 2026-09-10 refit ran at seas_ml = 0 unnoticed.")
+  v
+}
+MS_STRUCT_ENV  <- .ms_env_required("CCX_MS_STRUCT")
+MS_SEAS_ML_ENV <- .ms_env_required("CCX_MS_SEAS_ML")
+bp <- ccx_apply_structure(bp, MS_STRUCT_ENV, MS_SEAS_ML_ENV)
+MS_STRUCT <- attr(bp, "struct"); MS_SEAS_ML <- attr(bp, "seas_ml")
 cat(sprintf("  structure: '%s'%s\n", MS_STRUCT,
             if (nzchar(MS_STRUCT)) paste0(" (", paste(sprintf("%s=%s", names(CCX_STRUCT_HILDA), CCX_STRUCT_HILDA), collapse = ", "), ")") else " (32-box column)"))
+cat(sprintf("  seasonal mixed layer: seas_ml = %d (%s; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)\n",
+            MS_SEAS_ML, if (MS_SEAS_ML == 1L) "ON -- round 6" else "OFF -- the shipped model"))
+stopifnot(identical(bp$seas_ml, MS_SEAS_ML))   # the label IS the model's switch, not a note beside it
 lp_fun <- ccx_make_logpost(base_params = bp)
 n_eval <- 0L
 neg_lp <- function(u) {
@@ -543,10 +570,26 @@ local({
   # those are refused like a missing bracket.
   if (is.null(r$struct) || is.na(r$struct[1]))
     stop("port targets file records no structure label; re-run make_port_targets.R.")
-  if (!identical(as.character(r$struct[1]), Sys.getenv("CCX_MS_STRUCT", "")))
+  if (!identical(as.character(r$struct[1]), MS_STRUCT))
     stop("port targets were measured with structure '", r$struct[1], "'; this run has '",
-         Sys.getenv("CCX_MS_STRUCT", ""), "'. Re-run make_port_targets.R under the run's CCX_MS_STRUCT.")
+         MS_STRUCT, "'. Re-run make_port_targets.R under the run's CCX_MS_STRUCT.")
+  # AND AT THIS `seas_ml` (2026-09-10): the switch moves the objective by ~150
+  # log-units at the 09-10 mode and by -Inf wherever h_ml exceeds the P8 guard,
+  # at a CONSTANT parameter set -- so `n_par` cannot see it and only this column
+  # can. A CSV without it predates the capability and is refused like a missing
+  # bracket: "written before the field existed" and "written at the other
+  # setting" are indistinguishable from here ⇒ [[ccx_refit_ran_at_seas_ml_0]].
+  if (is.null(r$seas_ml) || is.na(r$seas_ml[1]))
+    stop("port targets file records no `seas_ml` column; re-run make_port_targets.R ",
+         "with CCX_MS_SEAS_ML set to this run's value (", MS_SEAS_ML, ").")
+  if (!identical(ccx_parse_seas_ml(r$seas_ml[1]), MS_SEAS_ML))
+    stop("port targets were measured at seas_ml = ", r$seas_ml[1], "; this run has seas_ml = ",
+         MS_SEAS_ML, ". Re-run make_port_targets.R under the run's CCX_MS_SEAS_ML.")
   tgt <- as.numeric(r$logpost[1])
+  if (!is.finite(tgt))
+    stop("port target for '", nm, "' is ", r$logpost[1], " -- that reference point is ",
+         "INFEASIBLE under this objective (at seas_ml = 1 the P8 guard makes h_ml above ",
+         "~76 m -Inf). A gate against it cannot pass or fail; change the reference set.")
   # THE VALUE THIS TASK EVALUATES AT THE REFERENCE POINT. For ids 0-2 that IS
   # their own start point and is already in hand; for a dispersed id it is a
   # point this task never visits, so evaluate it -- one call, and the whole
@@ -786,6 +829,10 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             # RECORDED (2026-09-08f) so a promoted mode carries the structure it
             # was fitted under; consumed by promote_multistart_mode.R / ccx_mode_base().
             struct = MS_STRUCT,
+            # RECORDED (2026-09-10) for the same reason and the same consumers:
+            # a promoted mode must carry the seasonal-mixed-layer setting it was
+            # fitted at, or ccx_mode_base() scores it on the other objective.
+            seas_ml = MS_SEAS_ML,
             # RECORDED **AND** READ by collect_dispersed_multistart.R's VERDICT.
             # ⛔ THE BOUND ON "did this start reach that one" IS THIS OPTIMISER'S
             # OWN CONVERGENCE TOLERANCE, and the only file that knows it is the

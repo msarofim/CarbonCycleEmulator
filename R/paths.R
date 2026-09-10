@@ -228,9 +228,19 @@ ccx_mode_struct <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   if (is.null(md$struct)) "" else md$struct
 }
+#' `seas_ml` is recorded by run_dispersed_multistart.R from 2026-09-10 on and
+#' carried by promote_multistart_mode.R. A file without it was fitted with the
+#' seasonal mixed layer OFF -- which is a FACT about every earlier file (the
+#' driver had no way to switch it on until 09-10, [[ccx_refit_ran_at_seas_ml_0]]),
+#' not a default being trusted. `hilda31` and the 09-10 `hilda31p` are both 0.
+ccx_mode_seas_ml <- function(md) {
+  if (is.character(md)) md <- readRDS(ccx_mode_file(md))
+  if (is.null(md$seas_ml)) 0L else ccx_parse_seas_ml(md$seas_ml)
+}
 ccx_mode_base <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
-  ccx_apply_structure(ccx_default_params(), ccx_mode_struct(md))
+  ccx_apply_structure(ccx_default_params(), ccx_mode_struct(md),
+                      seas_ml = ccx_mode_seas_ml(md))
 }
 
 ccx_mode_params <- function(md = CCX_MODE_CANONICAL) {
