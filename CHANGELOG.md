@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-10 (3) — **ROUND 2 SUBMITTED: job `17325832`, 14 tasks, RESUMING FROM ROUND 1's CHECKPOINTS AT CYCLE 2. Its job is CONVERGENCE, because 22 of 24 round-1 tasks ended out of time.**
+
+Per `calibration/torch/README.md`, *"Two rounds, and the second is not the first repeated"*: **the six
+fixed ids plus round 1's best dispersed ids, same command, same output directory, each task resuming
+from its own checkpoint.**
+
+### THE SELECTION, DERIVED FROM `summary.csv` RATHER THAN EYEBALLED
+`--array=0-9,13,16,19,22%14` = **fixed 0–5 + the best 8 dispersed (6, 7, 8, 9, 13, 16, 19, 22)**,
+whose logposts span **−1480.540 to −1481.475** — all within **0.93** of the best.
+
+⛔ **10 dispersed starts DROPPED, behind by 10.2 / 10.4 / 10.4 / 10.9 / 11.4 / 12.3 / 13.8 / 17.0 /
+64.5 / 136.1 log-units.** ⚠ The nearest of them is **not** noise — at 10.2–11.4 it is the SECOND
+BASIN, which is already carried into round 2 by **fixed ids 2, 4 and 5** (the `new_basin` references
+and their ENSO-seeded carries, which land at ≈ −1490.95). So the second basin is still represented;
+what is dropped is its REDUNDANT dispersed copies, plus the −1545 / −1617 tail. Converging a start
+whose basin is already identified as worse costs a full task and changes no verdict.
+
+### WHAT WAS CHECKED BEFORE SUBMITTING
+- **No code drift since the last ship** (`git diff e03f6a4..HEAD` over `R/ src/ data/ calibration/`
+  is empty) ⇒ **the bundle was NOT re-shipped**, which is also the safe side of
+  [[never_reship_mid_array]]. The objective round 2 optimises is bit-for-bit round 1's.
+- **All 14 checkpoints present** on `/scratch` before submission.
+- Queue empty; ✅ placement **8 nodes, all `cs*`, ZERO GPU nodes**.
+- ✅ **THE RESUME GUARD ACCEPTED THEM**: tasks report *"…but this run CONTINUES from the checkpoint at
+  −1480.5404, cycle 2"* (and −1480.5438, −1480.5443, −1480.5677, −1480.9119). That guard compares the
+  checkpoint's stored `ref_logpost` against this run's, so its acceptance is positive evidence the
+  objective has not moved between the rounds.
+
+### ⚠ THE WALL IS DELIBERATELY UNCHANGED
+`--time=06:00:00`, `CCX_MS_WALL_MIN=300`. The doctrine says *same command*, and the arithmetic is
+derived against those numbers — raising the budget would mean re-deriving the restart/polish split,
+not just changing a figure. Each task now has **~600 min in total across the two rounds**, and round 1
+showed gains decelerating hard (id 0: **+14682**, then **+21.7**), so convergence rather than budget
+is expected to be the binding constraint this time. ⛔ **Nothing is adopted; promotion remains a
+ruling.**
+
 ## 2026-09-10 (2) — ⭐⭐ **THE ROUND-6 REFIT LANDED AND IT BEATS `hilda31` BY +9.09 LOG-UNITS: −1480.5404 against the incumbent's −1489.6284, with SIX STARTS AGREEING TO 0.0039. ⚠ BUT 22 OF 24 RAN OUT OF TIME RATHER THAN CONVERGING, SO EVERY NUMBER IS A LOWER BOUND. NOTHING ADOPTED.**
 
 Job **`17318015`** (partition `cs`), 24/24 **COMPLETED**, 252–293 min per task (median 269),
