@@ -12,7 +12,20 @@ Read first: **CHANGELOG 09-09x (2)** then **09-09x** — every number with its d
 ---
 
 ## 0. WHAT THE NEXT SESSION SHOULD DO
-1. ⛔⛔ **THE REFIT, AND IT NEEDS TWO THINGS FIRST.** (a) A **PREFLIGHT** batch on Torch to measure the
+
+> ⭐⭐ **UPDATE 2026-09-10 — THE REFIT IS SUBMITTED AND RUNNING: job `17318015`, 24/24 on partition
+> `cs`.** Item 1 below is DONE; read `CHANGELOG.md` **2026-09-10** for it. ⛔ **`cpu_short` PUT 20 OF
+> 24 TASKS ON A GPU NODE where this job got 13–18 % of a core**; the first array (`17316364`) was
+> cancelled and resubmitted on `cs`. ⛔ **`--exclude` IS REFUSED BY THE CLUSTER** — a GPU-free
+> PARTITION is the only mechanism. ⚠ **`cs` has `QoS=N/A`**, so `cpu_short`'s caps (6 h; cpu=32,
+> mem=120G) DO NOT BIND — the 6 h wall and `%24` are now deliberate choices, kept because the
+> restart/polish arithmetic is derived against them.
+> **WHEN IT LANDS**: `collect_dispersed_multistart.R`, then `promote_multistart_mode.R` (whose GATE 5
+> was repaired for the adopted spinup on 09-10 — it would otherwise have failed AFTER the run).
+> ⛔ **Round 2 is NOT this array resubmitted** — fixed starts plus round 1's best dispersed ids only.
+
+1. ✅ **DONE 09-10 — THE REFIT IS RUNNING.** (Original text kept below for its preconditions.)
+   ⛔⛔ **THE REFIT, AND IT NEEDS TWO THINGS FIRST.** (a) A **PREFLIGHT** batch on Torch to measure the
    per-evaluation cost ON A NODE — ruled 09-09x, because scaling the Mac's ~3× onto a node is exactly
    what [[eta_in_days_is_not_a_slow_run]] forbids; (b) **Marcus's authenticated channel** (VPN, gateway
    password, Duo, a Microsoft device code at `login.torch`) — the constraint is AUTHENTICATION, not
