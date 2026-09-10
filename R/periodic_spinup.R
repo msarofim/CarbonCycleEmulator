@@ -261,3 +261,20 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
 # can still DEFAULT to it because a default argument is resolved at CALL time.
 CCX_OBJECTIVE_SPINUP <- ccx_periodic_spinup
 
+#' The LABEL of a spinup function, for RECORDING into a mode file (2026-09-10).
+#' A promoted mode's `streams` are computed under `CCX_OBJECTIVE_SPINUP`, and a
+#' consumer that wants to reproduce them like-for-like must score the vector
+#' the way the file was fitted ⇒ [[like_for_like_forcing]]. Until 09-10 nothing
+#' in the file said which spinup that was, and test-enso-demean.R had to hard-
+#' code `ccx_spinup` for the aseasonal-era canonical; the label makes the file
+#' self-describing. Two admissible values, matched by identity of the function.
+ccx_spinup_label <- function(fn = CCX_OBJECTIVE_SPINUP) {
+  if (identical(fn, ccx_periodic_spinup)) return("periodic")
+  if (identical(fn, ccx_spinup))          return("aseasonal")
+  stop("ccx_spinup_label(): not one of the two admissible spinups (ccx_periodic_spinup, ccx_spinup).")
+}
+ccx_spinup_from_label <- function(label) {
+  switch(as.character(label), periodic = ccx_periodic_spinup, aseasonal = ccx_spinup,
+         stop("ccx_spinup_from_label(): unknown spinup label '", label, "'."))
+}
+

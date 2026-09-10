@@ -43,11 +43,20 @@
 # carries `struct`, and every consumer builds its base list through
 # ccx_mode_base(md) below, never ccx_default_params() (where hs_frac = 0 and the
 # vector would run as a column with nothing said).
-CCX_MODE_CANONICAL <- "hilda31"
+# 2026-09-10: `hilda31p` -- the SAME 31-parameter HILDA space, REFITTED under the
+# PERIODIC spinup adopted 09-09x (`50f0105`) and the 09-09w priors. Torch arrays
+# 17318015 + 17325832: 14/14 round-2 starts converged, 8 onto this point to four
+# decimals, logpost -1480.540424, +9.0880 over `hilda31` RE-SCORED on the same
+# objective (never over its stored -1478.66, which is in another objective's
+# units ⇒ [[compare_gaps_not_absolute_logposts]]). ⚠ Fitted at `seas_ml = 0`,
+# exactly as `hilda31` was: this is the SHIPPED model's mode under the adopted
+# spinup, NOT a round-6 result ⇒ [[ccx_refit_ran_at_seas_ml_0]]. The file records
+# `struct`, and ccx_mode_seas_ml() reads its absent `seas_ml` as the 0 it was.
+CCX_MODE_CANONICAL <- "hilda31p"
 
 CCX_MODE_FILES <- c(
-  hilda31 = file.path("calibration", "output", "refit_20260908_hilda31",
-                      "mode_fit_pumpN.rds")
+  hilda31p = file.path("calibration", "output", "refit_20260910_hilda31_periodic",
+                       "mode_fit_pumpN.rds")
 )
 
 # THE COLUMN CONTROL. `ent26` (26 parameters, no structure) is retired from the
@@ -58,6 +67,16 @@ CCX_MODE_FILES <- c(
 CCX_MODE_COLUMN_CONTROL <- file.path("calibration", "output", "quarantine",
                                      "20260908_hilda31_adopted", "refit_20260903_ent26",
                                      "mode_fit_pumpN.rds")
+
+# THE PRE-ADOPTION HILDA CONTROL (2026-09-10). `hilda31` is retired from the
+# registry -- its stored logpost is in the ASEASONAL objective's units and may
+# not sit beside `hilda31p`'s -- but it is the point Ruling A's demean flag was
+# RATIFIED at (43.8367, aseasonal) and where the adoption's apparent re-pricing
+# (63.7282) was measured; both stay asserted from this path by
+# test-enso-demean.R, as facts about THIS file and not about the canonical.
+CCX_MODE_HILDA31_QUARANTINED <- file.path("calibration", "output", "quarantine",
+                                          "20260910_periodic_spinup_adopted",
+                                          "refit_20260908_hilda31", "mode_fit_pumpN.rds")
 
 # WHICH ARMS ARE FREE -- AND WHY THE STORED logpost IS A TRAP ACROSS THEM.
 # The project rule is "the highest FREE arm wins regardless of name", and this
@@ -76,7 +95,7 @@ CCX_MODE_COLUMN_CONTROL <- file.path("calibration", "output", "quarantine",
 # that as "pin90 wins" was wrong -- its objective carried a near-delta prior on
 # `fert_k` worth +11.6698 at fert_k = 90, putting it 11.56 BELOW on the
 # comparable scale. A stored number never decides an arm.
-CCX_MODE_PINNED <- c(hilda31 = FALSE)
+CCX_MODE_PINNED <- c(hilda31p = FALSE)
 
 # The retired names, kept ONLY so that asking for one gets the reason rather
 # than a file-not-found. Everything here is quarantined and not comparable.
@@ -126,7 +145,16 @@ CCX_MODE_RETIRED <- c(
               "adoption of the round-5 winner as `hilda31`. Not a mode of this space",
               "and fitted under NO structure. It remains the like-for-like COLUMN",
               "CONTROL, resolvable by path as CCX_MODE_COLUMN_CONTROL. Quarantined under",
-              "calibration/output/quarantine/20260908_hilda31_adopted/")
+              "calibration/output/quarantine/20260908_hilda31_adopted/"),
+  hilda31 = paste("the 31-parameter HILDA canonical from 2026-09-08f to 2026-09-10, fitted",
+              "under the ASEASONAL spinup and the pre-09-09w priors. Retired by the",
+              "adoption of the PERIODIC spinup as the objective's (`50f0105`, 09-09x,",
+              "Marcus's ruling) and the refit under it, promoted as `hilda31p`. SUPERSEDED,",
+              "not defective: its stored logpost -1478.66 is in another objective's units",
+              "and beats -1480.54 only on paper; re-scored like-for-like it is -1489.63,",
+              "9.088 behind. Still the pre-adoption control, resolvable by path as",
+              "CCX_MODE_HILDA31_QUARANTINED. Quarantined under",
+              "calibration/output/quarantine/20260910_periodic_spinup_adopted/")
 )
 
 #' Absolute path to a fitted mode file, by name
@@ -236,6 +264,16 @@ ccx_mode_struct <- function(md) {
 ccx_mode_seas_ml <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   if (is.null(md$seas_ml)) 0L else ccx_parse_seas_ml(md$seas_ml)
+}
+#' The SPINUP a mode file's `streams` and `logpost` were computed under. Recorded
+#' by promote_multistart_mode.R from 2026-09-10 on; an absent field means the
+#' aseasonal `ccx_spinup` -- a FACT about every file promoted before 09-09x's
+#' adoption, not a default (the one post-adoption file promoted without the
+#' field, `hilda31p`, had it stamped in by calibration/stamp_mode_spinup.R after
+#' GATE 5 had already proved its streams periodic).
+ccx_mode_spinup <- function(md) {
+  if (is.character(md)) md <- readRDS(ccx_mode_file(md))
+  if (is.null(md$spinup)) "aseasonal" else md$spinup
 }
 ccx_mode_base <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))

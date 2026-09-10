@@ -247,6 +247,10 @@ sep("writing the mode file")
 # measured. `recompute_hessian.R --update` fills it in, after its own gates.
 out <- list(
   pump_mode = best$pump_mode, struct = PMM_STRUCT, seas_ml = PMM_SEAS_ML,
+  # THE SPINUP VINTAGE (2026-09-10): `streams` below and `lp0` are computed under
+  # CCX_OBJECTIVE_SPINUP, and a consumer reproducing them like-for-like needs to
+  # know which one that was ⇒ ccx_mode_spinup(), [[like_for_like_forcing]].
+  spinup = ccx_spinup_label(CCX_OBJECTIVE_SPINUP),
   u_mode = u, par_mode = pm, logpost = lp0,
   logpost_init = best$logpost_start, trace = best$trace,
   streams = streams, n_eval = best$n_eval, minutes = best$minutes,

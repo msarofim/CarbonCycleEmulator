@@ -2,6 +2,93 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-10 (6) — ⭐⭐ **STEPS 1–3 OF THE 09-10 HANDOFF ARE DONE: HESSIAN at the new mode; `hilda31p` IS CANONICAL and `hilda31` QUARANTINED; `seas_ml` IS NOW A RECORDED, GATED AXIS OF THE OBJECTIVE LABEL. ⛔⛔ STEP 4 (the round-6 refit) IS BLOCKED ON A RULING: AT `seas_ml = 1` THE OBJECTIVE IS −Inf ABOVE h_ml ≈ 75 m, AND TWO OF THE THREE PORT-TARGET REFERENCE POINTS — AND THE WHOLE SECOND BASIN — SIT THERE.**
+
+### STEP 1 — the Hessian (`fa0e7cf`)
+`recompute_hessian.R --update` on `refit_20260910_hilda31_periodic/mode_fit_pumpN.rds`. GATE 1
+reproduced to **0.000e+00**. **−H positive-definite, condition 3.635e+05, log|−H| 164.977**
+(`hilda31`: 3.613e+05 / 165.126). **One unstable direction, `h_ml`** (eps/3–3eps 15.75 %, sd
+0.169 unc ≈ ±2.18 m) — the SAME single flag `hilda31`'s Hessian carried, so pre-existing, not
+new. Strongest correlations unchanged in kind: `beta_max`–`fert_k` +0.989, `npp_frac_NH`–
+`seas_lag_p_NH` +0.938, `fert_k`–`luc_scale` −0.918, `sst_seas_amp_SH`–`ent_seas_amp_SH` +0.902.
+
+### STEP 3 (done BEFORE step 2, because it is pure engineering) — `seas_ml` as the second label axis (`db7c355`)
+`ccx_apply_structure(p, struct, seas_ml)` now sets **`p$seas_ml` AND `attr(, "seas_ml")`**, default
+from `CCX_MS_SEAS_ML` ("0"), erroring by name on anything but 0/1. `ccx_mode_seas_ml(md)` /
+`ccx_mode_base(md)` carry a file's recorded value (absent = 0, a FACT about every pre-09-10 file).
+**The driver REQUIRES `CCX_MS_STRUCT` and `CCX_MS_SEAS_ML` to be SET** (unset = stop, not default —
+the unset-means-column default was the [[port_targets_need_the_struct_var]] footgun and the
+unset-means-0 default was [[ccx_refit_ran_at_seas_ml_0]]), prints the setting, RECORDS `seas_ml` in
+every start file, GATES `port_targets.csv` on its new `seas_ml` column, and refuses a non-finite
+target. `make_port_targets.R` requires both, writes the column, and **REFUSES to write a −Inf
+target**. The promoter reads `seas_ml` from the starts and records it; the sbatch / `setup_torch.sh`
+export it (default **1**, the round-6 arc) and the outdir is `multistart_20260910_hilda31p_periodic_seasml${CCX_MS_SEAS_ML}`.
+**Mutation-tested by hand**: unset var → stop; the old column-less CSV → stop; a `seas_ml = 1` run
+against a `seas_ml = 0` CSV → stop; `seas_ml = 1` targets → refused at `new_basin`, CSV untouched;
+0-vs-0 → `PORT GATE (a) PASSED`, rel 2.1e−15. `port_targets.csv` regenerated at `seas_ml = 0`:
+**logposts byte-identical** to the 09-09x file. `tests/testthat/test-seas-ml-label.R` (67 expectations).
+
+### STEP 2 — the repoint, done by hand (not via `run_post_refit_adoption.R`, which is hardcoded to the 08-28 arc)
+Stages in the documented order: **quarantine → repoint → tests.** `refit_20260908_hilda31/` →
+`calibration/output/quarantine/20260910_periodic_spinup_adopted/` with a README naming the CAUSE as
+the spinup adoption (`50f0105`), not a bug. `R/paths.R`: **`CCX_MODE_CANONICAL = "hilda31p"`**,
+`CCX_MODE_FILES` / `CCX_MODE_PINNED` re-keyed, `hilda31` added to `CCX_MODE_RETIRED` with its own
+cause and path, and **`CCX_MODE_HILDA31_QUARANTINED`** added beside the column control so the
+ratification pin can still be asserted from it by path. The 24 `hilda31` literals were swept: all
+but one are comments or diagnostics whose subject IS `hilda31` (left); the driver's default outdir
+now names `hilda31p_periodic`.
+⭐ **THE SPINUP VINTAGE IS NOW RECORDED IN THE MODE FILE**: `ccx_spinup_label()` /
+`ccx_spinup_from_label()` (`R/periodic_spinup.R`), the promoter writes `spinup =`, and
+`ccx_mode_spinup(md)` reads it (absent = aseasonal = a fact about every pre-09-09x file). `hilda31p`
+was promoted before the field existed, so `calibration/stamp_mode_spinup.R` stamped it —
+**after proving it**: the stored logpost reproduces under `periodic` to 0.00e+00 and NOT under
+`aseasonal` (−6.67); the mutation (stamping `hilda31` as periodic) is refused.
+**`test-enso-demean.R`'s PRICED test is now TWO tests**: the canonical carries the live price
+**45.1896** and its cross-check under ITS OWN vintage; `hilda31`, by path, carries the ratification
+pin **43.8367** (aseasonal) and the **63.7282** artifact (periodic) — all four re-measured today and
+reproduced to 1e−4; `hilda31p` under the aseasonal spinup reads 27.04, a cross-vintage number of no
+standing, reported not asserted.
+⚠ **`test-mode-file.R:187` still asserts the largest STORED logpost while its own comment (:175–179)
+says it never does.** It passes now only because the registry has ONE entry. Raised, not repaired —
+which of the two is wrong is a ruling.
+
+### ⛔⛔ STEP 4 IS BLOCKED — THE `seas_ml = 1` OBJECTIVE HAS A FEASIBILITY BOUNDARY INSIDE THE BAND, AND THE REFERENCE SET CROSSES IT
+Measured today with the new capability, `struct = hilda`, arm N, periodic spinup:
+
+| point | h_ml (m) | `seas_ml = 0` | `seas_ml = 1` |
+|---|---|---|---|
+| cold init | 75.00 | −16211.884 | −35189.689 |
+| `hilda31` | 49.15 | −1489.628 | −1683.329 |
+| **`hilda31p`** | 44.09 | **−1480.540** | **−1634.681** |
+| 08-30 incumbent (port target) | 35.25 | −2005.573 | −2217.276 |
+| **08-31e new_basin (port target)** | **143.92** | −1995.024 | **−Inf** |
+| **09-10 basin 2** (ids 2/4/5) | **163.85** | −1490.948 | **−Inf** |
+
+Scanning `h_ml` at the `hilda31p` vector: **finite to 74 m (−1917), −6.4e8 at 75 m, −Inf from 76 m** —
+the P8 geometry guard (`ccx_seas_ml_guard`, "the winter mixed layer must stay inside layer 1") is a
+HARD WALL at ≈ 75 m inside the [30, 200] band. Consequences, none of which the handoff anticipated:
+1. **`make_port_targets.R` at `seas_ml = 1` refuses** (correctly) at `new_basin`. `PT_REFS` /
+   `MS_REF_NEW` must name a feasible point, and **the 09-10 second basin cannot be it** — it lives
+   at 164 m, i.e. **basin 2 does not exist under the round-6 objective.**
+2. **Fixed starts 2, 4, 5** (the new-basin family) would be born at −Inf: `best = Inf`, and the
+   port gate's `rel` is NaN → the task dies. Half the fixed set.
+3. **The cold init (h_ml 75)** is finite but on the wall (−35189, and −6.4e8 at the same h_ml from
+   the mode); the dispersed draws are re-drawn until finite (`MS_DRAW_TRIES` 200), so they survive,
+   but any draw's h_ml above ~75 m is rejected — the effective prior on h_ml is TRUNCATED at the
+   wall, which the Holte lognormal (centre 59.69 m) does not know.
+4. The dispersion `MS_SPREAD` is measured from the u-space separation of `MS_REF_INC` and
+   `MS_REF_NEW`; replacing those changes the survey's scale.
+⚠ Also measured: `hilda31p` UNREFITTED at `seas_ml = 1` costs **154 log-units** — not evidence
+against the mechanism ([[like_for_like_forcing]]); it is what P2/P12 refit for.
+**Options for the reference set are Marcus's call** (see the handoff); none taken.
+
+### Suite
+**12,990 expectations / 400 tests: 2 failed, 1 error, 4 skipped** (`stop_on_failure = FALSE`, `failed`
+and `error` read as separate columns) — the SAME pre-existing set as before the repoint:
+`test-alpha-as.R` GATE Q (red at the canonical, deliberately; now 6.35 vs 3 × 2.40 at `hilda31p`) and
+`test-seas-lag-split.R`'s 08-30 migration error. Nothing new red; `test-seas-ml-label.R` (67) and
+the two rebuilt `test-enso-demean.R` tests (23) green.
+
 ## 2026-09-10 (5) — ⭐⭐ **THE NEW MODE IS PROMOTED (all gates pass, GATE 5 included). ⛔⛔ BUT IT WAS FITTED WITH `seas_ml = 0`, SO IT IS A NEW BASELINE AND *NOT* THE ROUND-6 REFIT — THAT ONE IS STILL OWED. ✅ AND RULING A IS RESOLVED: THE 63.73 WAS A STALE-MODE ARTIFACT; REFITTED IT IS 45.19.**
 
 `promote_multistart_mode.R` → **`calibration/output/refit_20260910_hilda31_periodic/mode_fit_pumpN.rds`**.

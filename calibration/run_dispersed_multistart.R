@@ -220,7 +220,7 @@ MS_OUTDIR <- local({
   # says which set it holds is the answer that does not rely on a guard firing.
   if (is.na(d) || !nzchar(d))
     ccx_path("calibration", "output",
-             paste0(if (identical(Sys.getenv("CCX_MS_STRUCT", ""), "hilda")) "multistart_20260908e_hilda31_asx"
+             paste0(if (identical(Sys.getenv("CCX_MS_STRUCT", ""), "hilda")) "multistart_20260910_hilda31p_periodic"
                     else "multistart_20260901_enso25",
                     # 2026-09-10: seas_ml changes the OBJECTIVE at a constant 31 names, which
                     # the param_names guard cannot see; the directory must say it.
