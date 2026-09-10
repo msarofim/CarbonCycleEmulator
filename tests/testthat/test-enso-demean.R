@@ -218,9 +218,17 @@ test_that("PRICED: the demean flag is still worth what Ruling A was ratified on"
   # than swapping one literal for another -- the aseasonal figure is unchanged
   # from what Ruling A was ratified on, and it still reproduces exactly, which is
   # what makes the new figure a measured MOVE rather than a lost baseline.
-  # ⚠⚠ RULING A WAS RATIFIED ON 43.84. Whether its ratification survives at
-  # 63.73 is a question FOR MARCUS and is flagged in CHANGELOG 09-09x (2); this
-  # test records the number, it does not settle the ruling.
+  # ✅ RESOLVED 2026-09-10, AND THE 63.73 WAS A STALE-MODE ARTIFACT. Ruling A was
+  # ratified on 43.8367; the periodic spinup appeared to re-price the flag to
+  # 63.7282 -- but that was measured at `hilda31`, a mode fitted under the OTHER
+  # spinup. Re-measured at the mode REFITTED under the adopted objective the gap
+  # is **45.1896**, i.e. back beside the 43.84 it was ratified on (and beside the
+  # 45.16 of the ent26 era). ⇒ **RULING A'S RATIFICATION IS NOT THREATENED.**
+  # ⚠ The 63.7282 asserted below is still a TRUE fact about `hilda31` under the
+  # adopted objective, which is why it stays; it is simply not the flag's value
+  # at a mode of this objective ⇒ [[like_for_like_forcing]]. The pattern this
+  # file's own header describes -- "a refit absorbs part of the forcing's
+  # non-zero mean elsewhere" -- is exactly what happened, again.
   expect_equal(on     - off,     63.7282, tolerance = 1e-4, scale = 1)
   expect_equal(on_ase - off_ase, 43.8367, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could

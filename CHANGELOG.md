@@ -2,6 +2,67 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-10 (5) — ⭐⭐ **THE NEW MODE IS PROMOTED (all gates pass, GATE 5 included). ⛔⛔ BUT IT WAS FITTED WITH `seas_ml = 0`, SO IT IS A NEW BASELINE AND *NOT* THE ROUND-6 REFIT — THAT ONE IS STILL OWED. ✅ AND RULING A IS RESOLVED: THE 63.73 WAS A STALE-MODE ARTIFACT; REFITTED IT IS 45.19.**
+
+`promote_multistart_mode.R` → **`calibration/output/refit_20260910_hilda31_periodic/mode_fit_pumpN.rds`**.
+GATE 3 DERIVED the best converged start (id 6, −1480.540424) rather than taking a typed id; GATE 4
+reproduced its logpost to **−8.3e−08**; ⭐ **GATE 5 PASSED** — `sum(streams) −1441.701546`, implied
+prior+jacobian **−38.838878**, recomputed **−38.838878**, gap **−1.2e−09**. That is the gate repaired
+on 09-10 for the adopted spinup; **unrepaired it would have failed here, after both rounds had run.**
+0 `h_ml` kinks in band. ⛔ `CCX_MODE_CANONICAL` is still `hilda31` — repointing is a separate ruling.
+
+### ⛔⛔ THE FINDING THAT CHANGES WHAT THIS RESULT MEANS: `seas_ml = 0`
+`ccx_default_params()$seas_ml` is **0**, **`seas_ml` is NOT a fitted name**, and
+`run_dispersed_multistart.R:312` builds its base as a bare `ccx_default_params()` with no override —
+and neither the sbatch nor the driver has any `seas_ml` handling at all. **So both rounds ran with the
+SEASONAL MIXED LAYER SWITCHED OFF.**
+
+⇒ **What this refit IS**: the correct new mode of the **SHIPPED** model (which is `seas_ml = 0`) under
+the ADOPTED periodic spinup. ✅ `hilda31` was **also** `seas_ml = 0`, so the comparison is genuinely
+like-for-like and the **+9.0880** gain stands as a strict improvement of the shipped model.
+⛔ **What it is NOT**: a test of round 6. The mechanism was never on, so:
+- **P2 ("the NH strain relaxes") WAS NOT TESTED.** `sst_seas_amp_NH` sits at **z −2.89** (from −2.96)
+  — that is the strain WITHOUT the mechanism, and says nothing about whether the mechanism relieves it.
+- **P12's retirement question IS NOT ANSWERED.** `ent_seas_amp_SH` fell only **21.038 → 18.695**
+  (z +2.34 → +2.10, still **2.85×** its corrected centre of 6.5525). The thing that was supposed to
+  substitute for the shim was switched off, so its survival here is not evidence either way.
+⚠ **Nobody specified `seas_ml` for the refit and the driver defaults it to 0** — the round-6 refit
+needs it set explicitly, and there is currently no mechanism in the driver or sbatch to do so.
+
+### ✅ RULING A — RESOLVED, AND THE RE-PRICING WAS AN ARTIFACT
+| where the demean flag was measured | gap |
+|---|---|
+| `hilda31`, aseasonal spinup (what Ruling A was ratified on) | **43.8367** |
+| `hilda31`, ADOPTED spinup | 63.7282 |
+| **the mode REFITTED under the adopted spinup** | **45.1896** |
+
+⇒ **the 63.73 was measured at a mode fitted under the OTHER spinup.** Refitted, the flag is worth
+**45.19** — beside the 43.84 it was ratified on, and beside the **45.16** of the ent26 era.
+⭐ **RULING A'S RATIFICATION IS NOT THREATENED**, and the mechanism is exactly the one
+`test-enso-demean.R`'s own header describes: *a refit absorbs part of the forcing's non-zero mean
+elsewhere.* ⚠ The 63.7282 remains a TRUE fact about `hilda31` under the adopted objective and stays
+asserted; it is simply not the flag's value at a mode OF that objective ⇒ [[like_for_like_forcing]].
+**The open question in the test comment is closed in the same edit** ⇒ [[retraction_in_place_does_not_propagate]].
+
+### ⚠ WHAT THE NEW MODE STILL DOES NOT FIT — SIX PRIORS BEYOND 2σ
+| parameter | z (new) | was | note |
+|---|---|---|---|
+| `rep_dC` | **+3.15** | +3.40 | the worst strain in the model, and it BARELY MOVED |
+| `sst_seas_amp_NH` | **−2.89** | −2.96 | the NH strain round 6 exists to relieve — untested here |
+| `kz_deep_frac` | **−2.46** | −2.51 | |
+| `pump_hs_gcm2` | **+2.39** | +2.31 | got WORSE |
+| `q10` | **−2.24** | −2.22 | got WORSE |
+| `ent_seas_amp_SH` | **+2.10** | +2.34 | the shim, still 2.85× its centre |
+
+⭐ **THE REFIT IS ALMOST ENTIRELY AN INTERHEMISPHERIC δ¹³C RE-BALANCE.** Of the **+7.8811** likelihood
+gain, `d13c_level_SPO` contributes **+15.548** and `d13c_level_MLO` **−8.127** — net **+7.42, i.e.
+94 %** — and **no other stream moves by more than 0.74.** That is the mirror image of what adoption
+cost at `hilda31` (SPO −16.73, MLO +8.28): **the refit buys back the δ¹³C gradient the periodic spinup
+disturbed, and a little more.** ⇒ the periodic spinup and the interhemispheric δ¹³C split are the SAME
+axis, which is a physical statement worth its own test.
+⚠ Parameters moved little otherwise (largest: `sst_seas_amp_SH` 11.4 %, `h_ml` 49.15 → **44.09**,
+`ent_seas_amp_SH` 11.1 %) — consistent with a re-balance rather than a relocation.
+
 ## 2026-09-10 (4) — ⭐⭐ **ROUND 2 IS DONE AND THE REFIT IS SETTLED: ALL 14 RESUBMITTED STARTS CONVERGED, EIGHT OF THEM ONTO THE SAME POINT. BEST = −1480.5404, BEATING `hilda31` BY +9.0880. TWO DISTINCT BASINS. ⛔ NOTHING ADOPTED — PROMOTION IS A RULING.**
 
 Job **`17325832`**, 14/14 **COMPLETED and CONVERGED** — against round 1's 2 of 24. Two more restarts
