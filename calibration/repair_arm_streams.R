@@ -28,6 +28,16 @@
 # differ from its as-fitted ones by ~-8244 log-units, dominated by
 # co2_seasonal_MLO. Repairing the luc term does not make the arms like-for-like.
 #
+# ⛔⛔ THIS SCRIPT IS ITSELF A STALE PRODUCER (found 2026-09-09w). Its ccx_loglik()
+# call below passes NO `d14c_mid`, so it reproduces the PRE-PROFILE decomposition:
+# `d14c_deep_ocean` where today's objective scores three `d14c_profile_*` rows (GNORM
+# on since 2026-09-07). Re-running it would REINTRODUCE, on whatever file it touched,
+# exactly the defect that `calibration/repair_canonical_streams.R` was written to undo.
+# It is left unedited because both its arms are RETIRED and its own already-repaired
+# guard stops it re-running. ⭐ If you ever need it again, take the producer from
+# `dg_streams()` (calibration/lib_design_gates.R) -- the SAME one the adoption gate
+# uses -- rather than the call below.
+#
 # Usage:  Rscript calibration/repair_arm_streams.R [--dry-run]
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)

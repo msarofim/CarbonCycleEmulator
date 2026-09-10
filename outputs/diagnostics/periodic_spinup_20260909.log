@@ -1,0 +1,65 @@
+PERIODIC SPINUP -- does the limit cycle REMOVE the offset, or RELOCATE it? 
+mode hilda31 | h_ml 49.153 | ent_seas_amp_SH forced 0 on every arm 
+
+== 1. the solve == 
+  converged in 6 iterations, 0.35 s | max|Phi(y) - y| = 5.457e-12 
+
+== GATE P1 -- is the periodic state a fixed point of Phi? (identity; tol = solver's own PS_TOL) == 
+  periodic state : max|Phi(y) - y| = 5.457e-12  -> PASS 
+  MUTATION aseasonal state: max|Phi(y) - y| = 1.023e+02 -> FAIL (want FAIL) 
+  ⇒ the gate has POWER: it separates the two states by 13.3 orders of magnitude. 
+
+== 2. the QUIET run (1750-2250), the SAME construction F2 used == 
+  arm                         1750     1770     1800     1900     2000     2249 
+  seas_ml 0, aseasonal     276.850  276.850  276.853  276.860  276.865  276.870 
+  seas_ml 1, aseasonal     296.819  279.389  279.247  279.351  279.345  279.320 
+  seas_ml 1, PERIODIC      276.880  276.880  276.880  276.880  276.880  276.880 
+ 
+  seas_ml 0, aseasonal   excursion   0.0212 ppm | drift(end-start)  +0.0193 ppm 
+  seas_ml 1, aseasonal   excursion  17.5863 ppm | drift(end-start) -17.4984 ppm 
+  seas_ml 1, PERIODIC    excursion   0.0000 ppm | drift(end-start)  -0.0000 ppm 
+
+== GATE P2 -- is the quiet run from the PERIODIC state flat? == 
+  the FLOOR is not a judgement: it is the SAME excursion measured on the 
+  seas_ml = 0 arm, the configuration test-conveyor.R already gates. 
+  seas_ml 0, aseasonal   excursion   0.0212 vs floor 0.0212 -> PASS 
+  seas_ml 1, aseasonal   excursion  17.5863 vs floor 0.0212 -> FAIL 
+  seas_ml 1, PERIODIC    excursion   0.0000 vs floor 0.0212 -> PASS 
+  ⇒ the gate has POWER: the known-bad arm FAILS it and the control PASSES. 
+
+== 3. removed, or relocated? == 
+  ⛔ Reported as an ORDERING between measured quantities. No pass/fail. 
+  settled ATMOSPHERIC offset vs the seas_ml = 0 control: 
+    aseasonal seed   +2.4507 ppm   (F2 measured +2.4507) 
+    PERIODIC  seed   +0.0104 ppm 
+  spinup OCEAN carbon (GtC): 
+    seas_ml 0, aseasonal      37894.163  (   +0.000 vs the seas_ml 0 control) 
+    seas_ml 1, aseasonal      37894.163  (   +0.000 vs the seas_ml 0 control) 
+    seas_ml 1, PERIODIC       37833.869  (  -60.294 vs the seas_ml 0 control) 
+ 
+  ⇒ the air kept +0.4 % of the aseasonal offset; the ocean moved -60.294 GtC. 
+    READ IT AS: |air| shrank AND |ocean| grew  => RELOCATED, the pin absorbed it. 
+                |air| shrank AND |ocean| flat  => REMOVED. 
+
+== 4. the objective, re-scored from each spinup (1750-2024) == 
+  ⚠ LIKELIHOOD only -- the prior is identical across arms and cancels 
+    ([[compare_gaps_not_absolute_logposts]]). 
+  arm                      total logL 
+  seas_ml 0, aseasonal      -2154.948 
+  seas_ml 1, aseasonal      -2203.660 
+  seas_ml 1, PERIODIC       -1691.445 
+ 
+  BY STREAM, PERIODIC minus seas_ml 1 aseasonal (the question round 6 asks): 
+    co2_level_SPO              +265.760 
+    co2_level_MLO              +246.774 
+    d13c_level_SPO              -14.344 
+    d14c_SH                      +8.483 
+    co2_seasonal_MLO             +5.686 
+    co2_icecore                  +4.623 
+    d13c_level_MLO               +4.593 
+    d14c_NH                      -3.960 
+ 
+  ⇒ the CO2 LEVEL rows move +512.53 of the -514.38 P12 attributed to this offset (99.6 %). 
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/periodic_spinup_20260909.rds
+  ⛔ Adopts nothing: no prior moved, no constant changed, no artifact repaired. 

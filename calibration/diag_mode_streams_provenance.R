@@ -32,15 +32,15 @@
 # outputs/diagnostics/. Usage: Rscript calibration/diag_mode_streams_provenance.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 
 # ---- named constants: every label below derives from these ----------
 MS_MODE      <- CCX_MODE_CANONICAL
-MS_RECOMP    <- ccx_path("outputs", "diagnostics",
-                         "adoption_read_hilda31_20260908.rds")
 MS_OUT       <- ccx_path("outputs", "diagnostics",
                          "mode_streams_provenance_20260909.rds")
 MS_TOL_ROW   <- 1e-6    # per-row agreement on the COMMON rows
 MS_TOL_RECON <- 1e-4    # logpost - logprior vs a candidate loglik
+MS_STRUCT_MIN <- 1e5    # a column-resolved hilda vector must be WORSE by at least this
 
 md <- readRDS(ccx_mode_file(MS_MODE))
 cat(sprintf("MODE %s (%d par, struct '%s')\n  %s\n",
@@ -79,7 +79,12 @@ cat(sprintf("  stored logpost %.6f  ->  the loglik it implies = %.6f\n",
 
 # ---- 2. the two candidate stream sets ---------------------------------
 fil <- unlist(md$streams)
-rec <- unlist(readRDS(MS_RECOMP)$new$streams)
+# ⛔ RECOMPUTED HERE, not lifted from a sibling artifact. A diagnostic that reads
+# another script's saved streams inherits whatever vector THAT script resolved,
+# and cannot tell a stale field from a mis-resolved recomputation
+# ([[derived_must_mean_computed]], [[draws_match_gate]]).
+v   <- dg_vector(MS_MODE)
+rec <- unlist(dg_streams(dg_run(v), v))
 cat(sprintf("\n== 2. the two candidate decompositions ==\n  FILE       %2d rows, sum %.6f  (gap to implied loglik %+.6f)\n  RECOMPUTED %2d rows, sum %.6f  (gap to implied loglik %+.6f)\n",
             length(fil), sum(fil), sum(fil) - ll_implied,
             length(rec), sum(rec), sum(rec) - ll_implied))
@@ -95,55 +100,112 @@ cat(sprintf("  the %d COMMON rows agree to %.2e -- the model and the other %d te
 stopifnot(worst < MS_TOL_ROW)
 
 # ---- 3. THE VERDICT ----------------------------------------------------
-recon_file <- abs(sum(fil) - ll_implied) < MS_TOL_RECON
-recon_rec  <- abs(sum(rec) - ll_implied) < MS_TOL_RECON
+# ⚠ THE HISTORICAL DEFECT IS PRESERVED, NOT RE-DERIVED. Once
+# calibration/repair_canonical_streams.R has run, the live `streams` is correct
+# and there is no defect left in the file to demonstrate on. The pre-repair set
+# survives as `streams_as_fitted` (and byte-identically in the quarantine), and
+# THAT is what sections 3 and 4 below exercise -- a gate must be pointed at the
+# quarantine copy, never at a path its own repair rewrote
+# ([[gate_reads_its_own_output]]).
+stale <- if (!is.null(md$streams_as_fitted)) unlist(md$streams_as_fitted) else NULL
+recon <- function(s) abs(sum(s) - ll_implied) < MS_TOL_RECON
+same  <- function(a, b) setequal(names(a), names(b)) &&
+                        max(abs(a[names(b)] - b)) < MS_TOL_ROW
 cat("\n== 3. verdict ==\n")
-if (recon_rec && !recon_file) {
-  cat(sprintf("  ✅ THE STORED logpost IS TODAY'S OBJECTIVE. logpost - logprior reproduces the\n     RECOMPUTED sum to %.2e. The mode is a mode of this space; NO REFIT IS OWED.\n",
-              abs(sum(rec) - ll_implied)))
-  cat(sprintf("  ⛔ THE STORED `streams` FIELD IS STALE by %.4f log-units: it carries the retired\n     `%s` row where the objective scored %s.\n     Repairable in place by calibration/repair_arm_streams.R's contract\n     (streams / streams_as_fitted / streams_provenance). ONE vintage, not two --\n     unlike the 2026-08-22 repair, the logpost here needs no caveat.\n",
-              sum(rec) - sum(fil), paste(only_fil, collapse = " "),
-              paste(only_rec, collapse = " ")))
-} else if (recon_file && !recon_rec) {
-  cat("  ⛔ THE STORED logpost WAS BUILT FROM THE STORED STREAM SET -- the refit ran under\n     an objective this build no longer has. A REFIT IS OWED; this is not a reporting bug.\n")
+if (recon(rec) && same(rec, fil)) {
+  cat(sprintf("  ✅ HEALTHY. The live `streams` matches a recomputation at the resolved vector\n     (%d rows, max|diff| %.2e) AND reconciles with logpost - logprior to %.2e.\n",
+              length(fil), max(abs(rec[names(fil)] - fil)), abs(sum(rec) - ll_implied)))
+  if (!is.null(md$streams_provenance))
+    cat(sprintf("     Repaired %s (%s); pre-repair set kept as `streams_as_fitted`.\n",
+                md$streams_provenance$recomputed_on, md$streams_provenance$recomputed_at))
+} else if (recon(rec) && !recon(fil)) {
+  cat(sprintf("  ⛔ THE `streams` FIELD IS STALE by %.4f log-units, but the stored `logpost`\n     IS today's objective (reproduced to %.2e), so NO REFIT IS OWED.\n     Repair with calibration/repair_canonical_streams.R.\n",
+              sum(rec) - sum(fil), abs(sum(rec) - ll_implied)))
+  cat(sprintf("     gained %s | lost %s\n", paste(only_rec, collapse = " "),
+              paste(only_fil, collapse = " ")))
+} else if (recon(fil) && !recon(rec)) {
+  cat("  ⛔⛔ THE STORED logpost WAS BUILT FROM THE STORED STREAM SET -- the refit ran under\n     an objective this build no longer has. A REFIT IS OWED; this is not a reporting bug.\n")
 } else {
   cat(sprintf("  ⚠ NEITHER candidate reconciles (file %+.4f, recomputed %+.4f). A third\n     objective vintage is in play; do not price anything on this file.\n",
               sum(fil) - ll_implied, sum(rec) - ll_implied))
 }
+if (!is.null(stale)) {
+  cat(sprintf("\n  THE DEFECT THIS FILE WAS WRITTEN FOR, from the preserved `streams_as_fitted`:\n    %d rows, sum %.6f -> SHORT BY %.4f log-units against the implied loglik.\n    carried %s (%.4f) where the objective scored %s (%.4f).\n",
+              length(stale), sum(stale), sum(stale) - ll_implied,
+              paste(setdiff(names(stale), names(rec)), collapse = " "),
+              sum(stale[setdiff(names(stale), names(rec))]),
+              paste(setdiff(names(rec), names(stale)), collapse = " "),
+              sum(rec[setdiff(names(rec), names(stale))])))
+}
+
+# ---- 3b. WAS THE RECOMPUTATION RESOLVED UNDER THE FILE'S OWN STRUCTURE? --
+# The other way a "recomputed" stream set can be wrong, and it is not visible in
+# the totals: a hilda mode resolved as a COLUMN is a well-formed 25-row set at a
+# catastrophically different likelihood (CHANGELOG 09-08f). `ccx_mode_base(md)`
+# is the ONE resolver (R/paths.R); this contrasts it against the column to show
+# the check has POWER rather than asserting the resolver was used.
+cat("\n== 3b. the recomputation was resolved under the file's own structure ==\n")
+p_str <- ccx_overlay_par(ccx_mode_base(md), ccx_mode_params(md))
+p_col <- ccx_overlay_par(ccx_apply_structure(ccx_default_params(), ""), ccx_mode_params(md))
+p_col$pump_mode <- md$pump_mode
+v_col <- v; v_col$p <- p_col
+rec_col <- unlist(dg_streams(dg_run(v_col), v_col))
+cat(sprintf("  struct '%s' -> hs_frac %.2f | resolved likelihood %.4f\n",
+            ccx_mode_struct(md), p_str$hs_frac, sum(rec)))
+cat(sprintf("  the SAME vector as a COLUMN -> hs_frac %g | likelihood %.2f (%+.1f)\n",
+            p_col$hs_frac, sum(rec_col), sum(rec_col) - sum(rec)))
+cat(sprintf("  -> the structure is worth %.3e log-units here: %s\n",
+            abs(sum(rec_col) - sum(rec)),
+            if (abs(sum(rec_col) - sum(rec)) > MS_STRUCT_MIN) "the check HAS POWER" else "NO POWER"))
+stopifnot(p_str$hs_frac > 0, p_col$hs_frac == 0,
+          abs(sum(rec_col) - sum(rec)) > MS_STRUCT_MIN)
 
 # ---- 4. the SILENT GATE, named and MUTATION-TESTED ---------------------
-# The adoption diagnostic's provenance gate compares only intersect(names) and
-# reports max|diff|. Under exactly the defect above it returns 1.4e-10 and PASSES.
+# The adoption diagnostic's provenance gate compared only intersect(names) and
+# reported max|diff|. Under the defect above it returns ~1e-10 and PASSES.
+# ⚠ EXERCISED ON THE PRESERVED STALE SET, not on the live field: after the
+# repair the live field is correct, and a gate demonstrated only against a
+# defect that no longer exists is a gate nobody can check.
 cat("\n== 4. the gate that should have caught this ==\n")
 gate_intersect <- function(a, b) { k <- intersect(names(a), names(b))
                                    max(abs(a[k] - b[k])) < MS_TOL_ROW }
 gate_nameset   <- function(a, b) setequal(names(a), names(b)) &&
                                    max(abs(a[names(b)] - b)) < MS_TOL_ROW
-cat(sprintf("  intersect-gate on the LIVE defect : %s  <- SILENT\n",
-            if (gate_intersect(rec, fil)) "PASS" else "FAIL"))
-cat(sprintf("  name-set  gate on the LIVE defect : %s\n",
+if (!is.null(stale)) {
+  cat(sprintf("  on the HISTORICAL defect (streams_as_fitted):  intersect-gate %s  <- SILENT | name-set gate %s\n",
+              if (gate_intersect(rec, stale)) "PASS" else "FAIL",
+              if (gate_nameset(rec, stale)) "PASS" else "FAIL"))
+  stopifnot(gate_intersect(rec, stale), !gate_nameset(rec, stale))
+}
+cat(sprintf("  on the LIVE field:                            intersect-gate %s | name-set gate %s\n",
+            if (gate_intersect(rec, fil)) "PASS" else "FAIL",
             if (gate_nameset(rec, fil)) "PASS" else "FAIL"))
 # MUTATION TEST: the name-set gate must PASS on an honest pair and FAIL on a
-# broken one, or it is not a gate ([[mutation_test_gates]]).
-mut_drop <- rec[setdiff(names(rec), only_rec[1])]
+# broken one, or it is not a gate ([[mutation_test_gates]]). The mutants are
+# built from the RECOMPUTED set so they exist whatever state the file is in --
+# a mutation test that depends on the bug still being present is not a test.
+mut_drop <- rec[-1]
 mut_move <- rec; mut_move[[1]] <- mut_move[[1]] + 1
-cat(sprintf("  MUTATION  identity pair  -> %s (want PASS)\n",
-            if (gate_nameset(rec, rec)) "PASS" else "FAIL"))
-cat(sprintf("  MUTATION  a row DELETED  -> %s (want FAIL)\n",
-            if (gate_nameset(rec, mut_drop)) "PASS" else "FAIL"))
-cat(sprintf("  MUTATION  a row MOVED +1 -> %s (want FAIL)\n",
-            if (gate_nameset(rec, mut_move)) "PASS" else "FAIL"))
+mut_sub  <- rec[-1]; mut_sub[["a_retired_row"]] <- rec[[1]]   # the SUBSTITUTION case
+cat(sprintf("  MUTATION  identity pair    -> %s (want PASS)\n", if (gate_nameset(rec, rec)) "PASS" else "FAIL"))
+cat(sprintf("  MUTATION  a row DELETED    -> %s (want FAIL)\n", if (gate_nameset(rec, mut_drop)) "PASS" else "FAIL"))
+cat(sprintf("  MUTATION  a row MOVED +1   -> %s (want FAIL)\n", if (gate_nameset(rec, mut_move)) "PASS" else "FAIL"))
+cat(sprintf("  MUTATION  a row SUBSTITUTED-> name-set %s (want FAIL) | intersect %s (want PASS = the blind spot)\n",
+            if (gate_nameset(rec, mut_sub)) "PASS" else "FAIL",
+            if (gate_intersect(rec, mut_sub)) "PASS" else "FAIL"))
 stopifnot(gate_nameset(rec, rec), !gate_nameset(rec, mut_drop),
-          !gate_nameset(rec, mut_move), !gate_nameset(rec, fil),
-          gate_intersect(rec, fil))   # the silent gate's silence, asserted
+          !gate_nameset(rec, mut_move), !gate_nameset(rec, mut_sub),
+          gate_intersect(rec, mut_sub))   # the silent gate's silence, asserted
+cat("  ⇒ SUBSTITUTION is the case the intersect-gate cannot see, and it is the case a\n     changed objective produces.\n")
 
 saveRDS(list(mode = MS_MODE, file = ccx_mode_file(MS_MODE),
              logpost = md$logpost, logprior = lp_band,
              loglik_implied = ll_implied,
              streams_file = fil, streams_recomputed = rec,
              only_in_file = only_fil, only_in_recomputed = only_rec,
-             stale_by = sum(rec) - sum(fil),
-             reconciles = c(file = recon_file, recomputed = recon_rec),
+             streams_stale = stale,
+             stale_by = if (is.null(stale)) 0 else sum(rec) - sum(stale),
+             reconciles = c(file = recon(fil), recomputed = recon(rec)),
              measured_on = as.character(Sys.Date()),
              commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE),
                                error = function(e) NA_character_)), MS_OUT)

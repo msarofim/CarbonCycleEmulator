@@ -27,8 +27,29 @@ cat(sprintf("  canonical: hs_frac %.2f  u_hs %.2f  tau_q %g  hs_asx_frac %.3f  h
 stopifnot(vN$p$hs_frac == 0.16, vO$p$hs_frac == 0)
 cat("\n== 2. streams PROVENANCE: recomputed at the resolved vector vs the file's own ==\n")
 rN <- dg_run(vN); stN <- dg_streams(rN, vN); fst <- unlist(mdN$streams); common <- intersect(names(stN), names(fst)); d <- stN[common] - fst[common]
-if (length(common) < length(stN)) cat(sprintf("  ⚠ %d recomputed rows have no counterpart in the file: %s\n", length(stN) - length(common), paste(setdiff(names(stN), common), collapse = " ")))
+# ⛔ THE NAME SET IS GATED FIRST, AND THIS IS THE POINT (2026-09-09w). Until then
+# this check `intersect()`ed the two sets and reported max|diff| over the
+# SURVIVORS, printing the leftovers with a ⚠ that no stopifnot read. A max|diff|
+# over an intersection CANNOT FAIL ON A SUBSTITUTION, only on a movement -- and a
+# substitution is exactly what a changed objective produces. The canonical file
+# carried the retired `d14c_deep_ocean` where the objective scored three
+# `d14c_profile_*` rows; this gate returned 1.4e-10 and PASSED at adoption, and
+# 13 sites read the stale field for the next day. ⇒ [[intersect_is_a_silent_default]],
+# calibration/diag_mode_streams_provenance.R (which mutation-tests the replacement).
+ar_nameset_ok <- setequal(names(stN), names(fst))
+cat(sprintf("  NAME SET: recomputed %d vs file %d -> %s\n", length(stN), length(fst),
+            if (ar_nameset_ok) "PASS" else "FAIL"))
+if (!ar_nameset_ok) cat(sprintf("    in RECOMPUTED only: %s\n    in FILE only      : %s\n",
+                                paste(setdiff(names(stN), names(fst)), collapse = " "),
+                                paste(setdiff(names(fst), names(stN)), collapse = " ")))
 cat(sprintf("  max |recomputed - file| over %d rows: %.2e  -> %s (sum recomputed %.4f, file %.4f)\n", length(d), max(abs(d)), if (max(abs(d)) < AR_STREAM_TOL) "PASS" else "FAIL", sum(stN), sum(unlist(mdN$streams))))
+# A stale `streams` field is a REPAIR obligation (calibration/repair_canonical_streams.R),
+# not something to read past. Fail loudly on EITHER leg.
+if (!ar_nameset_ok || max(abs(d)) >= AR_STREAM_TOL)
+  stop("the canonical mode file's `streams` field does not match a recomputation at its own ",
+       "resolved vector. Run calibration/diag_mode_streams_provenance.R to say WHICH of the two ",
+       "failures this is -- a stale reporting field (repairable) or a logpost on a different ",
+       "objective (a refit obligation).")
 pcol <- ccx_apply_structure(ccx_default_params(), ""); pcol$pump_mode <- mdN$pump_mode; pcol <- ccx_overlay_par(pcol, mdN$par_mode)
 vcol <- vN; vcol$p <- pcol; stC <- dg_streams(dg_run(vcol), vcol)
 cat(sprintf("  the SAME vector resolved as a COLUMN (the failure the resolver prevents): likelihood %.2f vs %.2f (%+.1f); profile rows %+.1f\n", sum(stC), sum(stN), sum(stC) - sum(stN), sum(stC[grep("d14c_profile", names(stC))]) - sum(stN[grep("d14c_profile", names(stN))])))
