@@ -84,6 +84,19 @@ for (nm in names(CO_REF_IDS)) {
               else "*** NOT VERIFIED ***"))
 }
 
+# ⛔ DEAD TASKS (2026-09-10): a start whose reported optimum is not a finite point
+# of the objective (it ended on the penalty plateau) is REFUSED, not ranked --
+# three of them in 17343694 reported "CONVERGED" at exactly -1e6. Files written
+# before the field existed carry no `dead`; for those the plateau value itself
+# is the tell, so both are checked.
+.dead <- vapply(R, function(r) isTRUE(r$dead) || isTRUE(all.equal(r$logpost, -1e6)), logical(1))
+if (any(.dead)) {
+  cat(sprintf("  *** %d DEAD task(s) EXCLUDED (optimum not a finite point of the objective): ids %s -- re-run them
+",
+              sum(.dead), paste(vapply(R[.dead], function(r) r$id, integer(1)), collapse = ", ")))
+  R <- R[!.dead]
+  if (!length(R)) stop("every start in this directory is DEAD; nothing to rank. Re-run them from a driver with the derived penalty (2026-09-10).")
+}
 fin  <- vapply(R, function(r) r$logpost, numeric(1))
 conv <- vapply(R, function(r) isTRUE(r$converged), logical(1))
 oot  <- vapply(R, function(r) isTRUE(r$out_of_time), logical(1))

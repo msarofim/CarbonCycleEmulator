@@ -105,7 +105,19 @@ ccx_require_run_inputs()   # BEFORE the wall budget, and before any target is wr
 # ---- named constants ------------------------------------------------
 MS_ARM        <- "N"          # the shipped arm; see run_modefind_pump_arms.R
 MS_SEED_BASE  <- 2026
-MS_PENALTY    <- 1e6          # finite stand-in for -Inf, as the serial driver
+# ⛔⛔ THE PENALTY MUST BE WORSE THAN THE START, AND A FIXED 1e6 IS NOT (2026-09-10,
+# round-6 array 17343694, ids 9/12/23). Three dispersed starts sat at -7.4e6 /
+# -5.4e6 / -4.0e6, Nelder-Mead stepped into the infeasible region (the seas_ml=1
+# P8 wall and non-converging periodic spinups return -Inf), the wrapper handed
+# back 1e6 -- which as a log-post of -1e6 is BETTER than the start -- and the
+# simplex collapsed onto that flat plateau: "gain 6428918.8", "CONVERGED" at
+# exactly -1000000.0000, PORT GATE (b) satisfied, exit 0, in 2.3 minutes. A DEAD
+# task that reported success. So: MS_PENALTY_FLOOR is the old constant, and the
+# penalty actually used is set AFTER the start is evaluated, at 10 x |start|, so
+# no feasible point in play can lose to an infeasible one. The final point is
+# then GATED below: it must be FINITE under the objective itself.
+MS_PENALTY_FLOOR <- 1e6       # finite stand-in for -Inf, as the serial driver
+MS_PENALTY    <- MS_PENALTY_FLOOR   # re-set at the start point; see MS_PENALTY_MULT
 MS_TOL        <- 1e-4         # a restart gaining less than this stops the cycle
 MS_CYCLE_TOL  <- 0.5          # = ARM_CYCLE_TOL; a cycle below this is CONVERGED
 MS_DRAW_TRIES <- 200          # redraws allowed before a start is declared dead
@@ -457,6 +469,13 @@ MS_PREFLIGHT <- nzchar(Sys.getenv("CCX_MS_PREFLIGHT", ""))
 # ---- resume, if this task has already run part of its budget ---------
 st <- ms_start(MS_ID)
 u <- st$u; best <- -lp_fun(u)
+# THE PENALTY, DERIVED FROM THE START (see MS_PENALTY_FLOOR): strictly worse than
+# any value the search begins from, so an infeasible step can never look like a
+# gain. `neg_lp` reads MS_PENALTY at call time, so this assignment reaches it.
+MS_PENALTY_MULT <- 10
+MS_PENALTY <- max(MS_PENALTY_FLOOR, MS_PENALTY_MULT * abs(best))
+cat(sprintf("infeasible-step penalty: log-post %.4g (= max(%.0e, %d x |start|)); the start beats it by construction\n",
+            -MS_PENALTY, MS_PENALTY_FLOOR, MS_PENALTY_MULT))
 # ⭐ THE FIXED REFERENCE POINT'S VALUE, CAPTURED BEFORE ANY RESUME CAN MOVE IT.
 # ⛔ THE BUG THIS KILLS (found 2026-09-01 by re-submitting reference id 1):
 # PORT GATE (a) used to read whatever the run STARTED FROM, which after a
@@ -837,9 +856,18 @@ pm <- ccx_unc_to_par(u)
 zs <- vapply(CCX_PARAM_NAMES,
              function(n) tryCatch(ccx_prior_z(n, pm[[n]]), error = function(e) NA_real_),
              numeric(1))
+# DEAD-TASK CHECK (2026-09-10): the point this task reports must be a point OF
+# THE OBJECTIVE -- finite under lp_fun itself, and equal to what the optimiser
+# says. A best on the penalty plateau is not a result; before this check it was
+# written as converged = TRUE and exited 0 (ids 9/12/23 of 17343694). RECORDED
+# in the file (so the collector can refuse it) AND fatal below (so SLURM says FAILED).
+.final_lp <- lp_fun(u)
+dead <- !is.finite(.final_lp) || abs(.final_lp - (-best)) > MS_EVAL_TOL * max(1, abs(best))
+if (dead) converged <- FALSE
 
 res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -best,
-            logpost_start = trace$logpost[1], converged = converged,
+            logpost_start = trace$logpost[1], converged = converged, dead = dead,
+            final_lp_check = .final_lp,
             out_of_time = out_of_time, cycles = if (exists("cyc")) cyc else 0L,
             restarts_done = restarts_done,
             trace = trace, n_eval = n_eval, minutes = elapsed_min(),
@@ -906,6 +934,13 @@ if (n_eval > 0L && sum(restart_min) > 0) {
               MS_ID, MS_SEC_PER_EVAL))
 }
 
+# ---- DEAD-TASK GATE: fatal, AFTER the file is written (see `dead` above).
+if (dead)
+  stop("DEAD TASK id ", MS_ID, ": the reported optimum ", sprintf("%.4f", -best),
+       " is not a finite point of the objective (lp_fun there = ", .final_lp,
+       "). The search ended on the infeasible-step penalty plateau; this is a ",
+       "failure, not a convergence. Its start file has been written for the ",
+       "post-mortem but must NOT be collected as a basin.")
 # ---- PORT GATE (b): an ORDERING, which is the only claim available about an
 # OPTIMISED value. A maximiser that returns less than it was handed is broken,
 # and that is true of every start, not only the reference ones -- so this one
