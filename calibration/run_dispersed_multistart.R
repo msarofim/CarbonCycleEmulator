@@ -122,7 +122,11 @@ MS_DRAW_TRIES <- 200          # redraws allowed before a start is declared dead
 # dispersion between them is far smaller than the 1.0452 the 09-08e/09-10 arrays
 # used; the sbatch therefore sets CCX_MS_SPREAD EXPLICITLY (to that 1.0452, its
 # provenance stated there) and names it in the outdir, as the stop() below asks.
-MS_REF_INC    <- "calibration/output/refit_20260910_hilda31_periodic/mode_fit_pumpN.rds"
+# Resolved THROUGH THE REGISTRY, not as a literal (test-mode-file.R's lint):
+# a registered name that is later retired fails here by NAME, with the reason.
+MS_REF_INC    <- CCX_MODE_FILES[["hilda31p"]]
+if (is.null(MS_REF_INC)) stop("MS_REF_INC: 'hilda31p' is no longer in CCX_MODE_FILES -- ",
+                              "re-rule the round-6 reference set (see MS_REF_INC_LABEL).")
 MS_REF_NEW    <- CCX_MODE_HILDA31_QUARANTINED
 MS_REF_INC_LABEL <- "INCUMBENT = hilda31p (09-10 canonical, periodic spinup, seas_ml 0)"
 MS_REF_NEW_LABEL <- "NEW BASIN = hilda31 (09-08f canonical, aseasonal spinup, quarantined; by path)"

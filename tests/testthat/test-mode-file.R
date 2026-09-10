@@ -171,20 +171,43 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
   }
 })
 
-test_that("the canonical mode is a FREE arm, and stored logposts do not decide it", {
+test_that("the canonical mode is a FREE arm, and wins among free arms RE-SCORED on today's objective", {
   # THE TRAP THIS ENCODES. A reader compares two STORED logposts and picks the
-  # wrong arm, because a pinned arm's objective carries a near-delta prior the
-  # free arm's does not. The project rule is "the highest FREE arm wins
-  # regardless of name", so what is asserted is that the canonical mode is FREE
-  # -- never that its stored number is the largest.
+  # wrong arm -- because a pinned arm's objective carries a near-delta prior the
+  # free arm's does not (`pin90`, 2026-08), OR because the two arms were fitted
+  # under different objectives (`hilda31` -1478.66 vs `hilda31p` -1480.54 on
+  # 2026-09-10: the OLDER one "wins" on paper and is 9.09 BEHIND like-for-like).
+  # A stored logpost is a number in the units of the objective that produced
+  # it; nothing in the registry says which objective that was
+  # ⇒ [[compare_gaps_not_absolute_logposts]].
+  #
+  # ⛔ UNTIL 2026-09-10 THE LINE BELOW COMPARED STORED NUMBERS, while this very
+  # comment said "never that its stored number is the largest" -- the two
+  # contradicted each other, invisibly, because the registry had held ONE arm
+  # since 09-04. Resolved on Marcus's ruling (option 2): every FREE arm's
+  # `par_mode` is RE-SCORED under TODAY'S objective, through the file's own
+  # base list, and the canonical must win on THAT. The comparison is then in
+  # one set of units by construction, immune to objective moves, and still
+  # fails the day a registered free arm genuinely beats the canonical.
   expect_true(CCX_MODE_CANONICAL %in% names(CCX_MODE_FILES))
   expect_setequal(names(CCX_MODE_PINNED), names(CCX_MODE_FILES))
   expect_false(CCX_MODE_PINNED[[CCX_MODE_CANONICAL]])
 
-  lp <- vapply(names(CCX_MODE_FILES),
-               function(a) readRDS(ccx_mode_file(a))$logpost, numeric(1))
+  skip_if_no_cpp()
   free <- names(CCX_MODE_FILES)[!CCX_MODE_PINNED[names(CCX_MODE_FILES)]]
-  expect_equal(CCX_MODE_CANONICAL, free[which.max(lp[free])])
+  rescored <- vapply(free, function(a) {
+    md <- readRDS(ccx_mode_file(a))
+    bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
+    ccx_make_logpost(base_params = bp)(ccx_par_to_unc(md$par_mode))
+  }, numeric(1))
+  expect_true(all(is.finite(rescored)))
+  expect_equal(CCX_MODE_CANONICAL, free[which.max(rescored)])
+  # the canonical's OWN stored logpost must be a value of today's objective --
+  # a canonical fitted under a superseded objective is exactly the state the
+  # 09-10 quarantine exists to prevent (tolerance = the reproduction precision
+  # of recompute_hessian.R GATE 1 / promote GATE 4).
+  expect_equal(rescored[[CCX_MODE_CANONICAL]],
+               readRDS(ccx_mode_file())$logpost, tolerance = 1e-5, scale = 1)
 
   # =================================================================
   # ⛔ THE PIN_PRIOR_CREDIT ASSERTION IS GONE, 2026-09-04, AND THIS SAYS WHY

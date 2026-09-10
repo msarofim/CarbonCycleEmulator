@@ -36,7 +36,7 @@ PT_OUT  <- ccx_path("calibration", "torch", "port_targets.csv")
 # MS_REF_INC / MS_REF_NEW -- the names are the driver's port-target KEYS.
 PT_REFS <- c(
   cold      = NA,   # the hand-set init; no file
-  incumbent = "calibration/output/refit_20260910_hilda31_periodic/mode_fit_pumpN.rds",   # hilda31p
+  incumbent = CCX_MODE_FILES[["hilda31p"]],   # hilda31p, through the registry (not a literal)
   new_basin = CCX_MODE_HILDA31_QUARANTINED                                                # hilda31, by path
 )
 
