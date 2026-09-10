@@ -95,6 +95,51 @@ window.**
 ⚠ **`hilda31` is NOT among the fixed starts and NOT in the bundle** — flagged 09-09x, NOT ruled, so the
 round-5 start set (6 fixed + 18 dispersed) was used unchanged rather than altered silently.
 
+### ⛔⛔ THE ARRAY WAS CANCELLED AND RESUBMITTED: `cpu_short` PUT 20 OF 24 TASKS ON A **GPU NODE**, WHERE THIS JOB GOT **13–18 % OF A CORE**
+Job `17316364` cancelled (Marcus), resubmitted as **`17318015` on partition `cs`**.
+
+⭐ **THE DIAGNOSIS TURNED ON MEASURING THE RIGHT QUANTITY, AND THE FIRST TWO I READ WERE WRONG.** The
+startup `s/eval` line looked survivable (fleet median 1.2062) and cumulative `AveCPU` looked alarming
+(17–49 %) but is dragged down by startup. The decisive statistic is **ΔCPU over a fixed window** —
+efficiency *now*, not averaged over the startup storm:
+
+| over a 471 s window, 9→17 min in | ΔCPU / Δelapsed |
+|---|---|
+| 4 tasks on **cs608** (a CPU node) | **~50 %** of a core |
+| 20 tasks on **gr105** (a GPU node) | **13–18 %** |
+
+⇒ **steady state, not startup**, and it matched the cumulative figures almost exactly.
+⛔ **`cpu_short` SPANS 186 CPU NODES AND 74 GPU NODES** (`gl*` cuda,l40s; `gr*` cuda,rtx6000) and SLURM
+had packed us onto one of the six `gr` nodes. ⚠ Neither node was oversubscribed by SLURM (cs608
+128/128 alloc, load 101; gr105 98/128, load 78), so this is **NOT core contention**; cgroup CPU share
+reserved for GPU jobs is the likely mechanism, **INFERRED and NOT verified**.
+
+✅ **WHAT IT WAS NOT, both checked rather than assumed:**
+- **NOT correctness** — the port gate passed on all 24 tasks **including the 20 on gr105**, rel
+  **3.92e−10** against a 1e−8 tolerance. Same arch, same compiled core; only throughput differed.
+- **NOT preemption** — `cpu_short` is `PreemptMode=OFF` at `PriorityTier=10000`, the top tier (cluster
+  `PreemptType=preempt/partition_prio`). A GPU job could not have evicted us.
+
+⛔ **AND `--exclude` IS REFUSED BY THE CLUSTER**, which killed the obvious fix outright rather than
+degrading it: `sbatch: error: ** Please do note --exclude=... Please report back to hpc@nyu.edu`.
+SLURM has no negative `--constraint` and the CPU nodes advertise **no feature** to select positively
+on ⇒ **a GPU-free PARTITION is the only mechanism left.** ⚠ Changing partition changes the limits the
+wall arithmetic was derived against, so they were re-checked: **`cs` has `QoS=N/A`**, so the account's
+`normal` QoS applies with **no MaxWall and no MaxTRESPU** — `cpu_short`'s caps (6 h; cpu=32,
+mem=120G) **do not bind there**. ⇒ the 6 h request is now *our choice* rather than a ceiling, and
+`%24` is the *design's* start count rather than the memory cap that forced it; **both kept**, because
+the restart/polish arithmetic is derived against them. `cs` is `PriorityTier` 1000 (may queue longer)
+but `PreemptMode=OFF`.
+
+✅ **THE RESULT, `17318015`**: 24/24 RUNNING across **12 nodes** (against 2 before), all `cs*`, **all
+24 port gates passed**, rate **median 0.7035 s/eval (min 0.5327, max 1.6178)** against the GPU run's
+1.2062 / 3.2466 — back inside the preflight's own 0.5938–1.0796 band.
+
+⚠ **ALLOCATION IS BILLED ON ALLOCATED TRES × ELAPSED** (no `TRESBillingWeights` on either partition),
+so a throttled core costs the same as a busy one: the GPU placement would have spent ~120 core-hours
+to do ~25 core-hours of work and left most tasks short of a single 6000-eval pass — which would have
+made the planned *selective* round 2 impossible and forced a full repeat.
+
 ## 2026-09-09x (2) — ⭐⭐ **ADOPTED (Marcus): THE PERIODIC SPINUP IS NOW THE OBJECTIVE'S SPINUP. PROMOTED TO `R/periodic_spinup.R`, DEFAULT FLIPPED. ⛔⛔ AND MY CONVERGENCE GUARD GATED THE WRONG QUANTITY — IT RETURNED −Inf ON CONVERGED SOLVES AND TWO REPO TESTS CAUGHT IT. SUITE 2433 / 7 FAIL / 1 ERROR, WITH 4 PREVIOUSLY-PASSING TESTS RED AND **NOT** TOUCHED.**
 
 Marcus ruled **adopt, then refit under it**, after the 09-09x checks (entry below) priced it.
