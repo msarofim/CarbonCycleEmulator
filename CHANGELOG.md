@@ -135,6 +135,16 @@ rewriting them is a decision, not a repair.
 
 ⚠ **PRE-EXISTING and unchanged**: `test-alpha-as.R:116,117`, `test-seas-lag-split.R:199`.
 
+✅ **AFTER the five updates: PASS 2397 / FAIL 3 / SKIP 4** — the 3 are exactly that pre-existing
+set. **+10 passes over 09-09v's 2387** are the mutation-test assertions the rewrites added.
+
+⚠ **A METHOD NOTE, because it cost two 15-minute runs: `testthat::test_dir()` RAISES on any
+failure**, so a driver of the form `r <- test_dir(...); cat(summary(r))` **halts before it prints**
+and yields no counts at all — twice today it looked like a slow run and was neither. Pass
+`stop_on_failure = FALSE` when the counts are the point, or parse the `reporter = "summary"` log
+that has already been produced. ⭐ The second run was pure waste: the failure LIST was already in
+hand from the first, and only the tallies were missing.
+
 ### ⭐ AND A BOOTSTRAP HAZARD CLOSED: `R/aaa_root.R`
 Promoting the two constants to data/ products needed `ccx_path()` at SOURCE time, and the
 alphabetical `list.files("R", ...)` bootstrap sources `calibrate.R` and `constants.R` **before**
