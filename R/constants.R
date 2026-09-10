@@ -35,12 +35,44 @@
 # `source`, i.e. it was labelled "derived" while being an independent copy --
 # THE EXACT LAMBDA_C14 BUG this file's header warns about. Computing it moved
 # the number 30 -> 29.68, which is the drift a typed "derived" value hides.
-.ENT_SO_SST_AMP   <- 3.0      # K, seasonal SST half-amplitude of the 40-90 S
-                              # BAND (ERSSTv5). ⚠ NOT SST_SEAS_AMP_SH_OBS
-                              # (1.746 K), which is the SH HEMISPHERIC MEAN and
-                              # a different quantity -- the band is colder and
-                              # swings harder than the hemisphere containing it.
-                              # Named apart so the two are never conflated.
+# ⛔⛔ BOTH BAND AMPLITUDES BELOW ARE NOW READ FROM data/ PRODUCTS, NOT TYPED
+# (2026-09-09w, ruled by Marcus). The two legs of this chain were each wrong in
+# a DIFFERENT way, and both were invisible because the number was a literal:
+#   SST  -- the typed 3.0 was the BAND PEAK-TO-PEAK carrying the label
+#           "half-amplitude". A true factor of 2, flagged by the 09-09t review
+#           and confirmed by recomputation. The band half-amp is 1.4995 K.
+#           ⛔ AND THE COMMENT THAT STOOD HERE -- "the band is colder and swings
+#           HARDER than the hemisphere containing it" -- IS FALSIFIED
+#           like-for-like: 1.4995 < 1.7464. It read true only by comparing a
+#           p2p against a half-amp ⇒ [[like_for_like_forcing]].
+#   pCO2 -- the typed 19.45 was the PER-CELL harmonic reduction. A well-mixed
+#           BOX needs the harmonic of the AREA-MEAN series, 16.26 uatm, which is
+#           also what the SST leg uses ⇒ [[amp_definition_mismatch]] (third
+#           incident). ⚠ The review ALSO called this leg a p2p and that is
+#           REFUTED -- a p2p would be ~39; its defect was 4.8 %, not 2x.
+# ⇒ The two legs are now like-for-like: both BAND, both HALF-AMPLITUDE, both
+#   read from a product with a reproduction gate ([[derived_must_mean_computed]]).
+# ⚠ SOURCE ORDER, and it is HANDLED rather than worked around. constants.R
+# sorts BEFORE paths.R under the alphabetical `list.files("R", ...)` bootstrap,
+# and the registry below needs a FINITE number at source time
+# (test-constants.R asserts `is.finite(k$value)` on every entry), so a lazy
+# accessor of the `ccx_h_ml_prior()` kind is not available here. `ccx_path()` is
+# therefore hoisted into R/aaa_root.R, which sorts first. ⛔ Do NOT replace this
+# with a relative "data/..." path: testthat runs from tests/testthat/ and the
+# app from app/, and that fallback took the whole suite down on 09-09w.
+.ccx_obs_rds <- function(f) readRDS(ccx_path("data", f))
+.ENT_SO_SST_AMP   <- .ccx_obs_rds("obs_so_sst_seas_amp.rds")$band_half_amp_K
+                              # K, seasonal SST HALF-amplitude of the 40-90 S
+                              # BAND (ERSSTv5 1975-2024, cos-lat weighted, first
+                              # annual harmonic), COMPUTED by
+                              # data-raw/build_so_sst_seas_amp.R, whose GATE 1
+                              # reproduces the registered SST_SEAS_AMP_SH_OBS
+                              # (1.74644) from the same product to 1.9e-05 --
+                              # so the band row is like-for-like with the
+                              # hemispheric constant beside it, not a second
+                              # convention. ⚠ NOT SST_SEAS_AMP_SH_OBS, which is
+                              # the SH HEMISPHERIC MEAN: named apart so the two
+                              # are never conflated.
 .ENT_PCO2_DLNDT   <- .SST_PCO2_DLNDT   # ⛔ NOT re-typed: this IS
                               # SST_PCO2_SENSITIVITY, which was already
                               # registered, and the 2026-09-03 audit caught this
@@ -53,9 +85,19 @@
                               # back-of-envelope PRIOR CENTRE and never applied
                               # inside the model.
 .ENT_PCO2_REF     <- 370      # uatm, reference surface pCO2 the % is taken on
-.ENT_SO_PCO2_AMP  <- 19.45    # uatm, OBSERVED 40-90 S pCO2 seasonal amplitude
+.ENT_SO_PCO2_AMP  <- .ccx_obs_rds("obs_so_pco2_seas_amp.rds")$band_amp_uatm
+                              # uatm, OBSERVED 40-90 S pCO2 seasonal amplitude
                               # (Landschutzer/Laruelle NCEI 0209633), the same
-                              # product CCX_ENT_SEAS_PEAK_MO's 7.50 comes from
+                              # product CCX_ENT_SEAS_PEAK_MO's 7.50 comes from.
+                              # The harmonic of the AREA-MEAN series (16.26),
+                              # which is what a well-mixed BOX requires; the
+                              # per-cell reduction is 19.68 and the shipped
+                              # literal was 19.45. Promoted from the diagnostic
+                              # by data-raw/build_so_pco2_seas_amp.R.
+                              # ⛔ NEVER the SH hemispheric row (3.69): that is a
+                              # 4.4x ANTIPHASE cancellation between a thermal
+                              # subtropical limb and the Southern Ocean.
+                              # ⚠ pCO2, NOT flux -- no k or K0 seasonality.
 .ENT_DIC_SURF     <- 2150     # umol/kg, surface DIC. ⚠ UNCITED, and it sits
                               # ~5.6 % above the GLODAP surface value GATE G
                               # scores against (~2035). Left as inherited rather

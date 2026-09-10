@@ -125,13 +125,30 @@ if (recon(rec) && same(rec, fil)) {
               paste(only_fil, collapse = " ")))
 } else if (recon(fil) && !recon(rec)) {
   cat("  ⛔⛔ THE STORED logpost WAS BUILT FROM THE STORED STREAM SET -- the refit ran under\n     an objective this build no longer has. A REFIT IS OWED; this is not a reporting bug.\n")
+} else if (same(rec, fil)) {
+  # ⛔ THE CASE [[compare_gaps_not_absolute_logposts]] PREDICTS, and it arrived
+  # the same day this file was written. The streams still match a recomputation
+  # at the resolved vector, so the LIKELIHOOD is intact and the objective has
+  # NOT moved; what moved is a PRIOR, which shifts the stored `logpost` while
+  # leaving every stream where it was. Diagnosing this as "a third objective
+  # vintage" would indict a correct file for a property of its producer.
+  cat(sprintf("  ⚠ A PRIOR HAS MOVED SINCE THIS MODE WAS FITTED -- the objective has NOT.\n"))
+  cat(sprintf("     The %d streams still match a recomputation to %.2e, so the LIKELIHOOD\n     (%.6f) is intact; it is the stored `logpost` that is stale, by exactly the\n     prior shift: %+.6f log-units.\n",
+              length(fil), max(abs(rec[names(fil)] - fil)), sum(rec), ll_implied - sum(rec)))
+  cat(sprintf("     stored logpost %.6f | under TODAY'S priors this vector scores %.6f\n",
+              md$logpost, sum(rec) + lp_band))
+  cat("     ⇒ COMPARE ON LIKELIHOOD, not on the stored logpost, until the refit re-runs.\n")
 } else {
-  cat(sprintf("  ⚠ NEITHER candidate reconciles (file %+.4f, recomputed %+.4f). A third\n     objective vintage is in play; do not price anything on this file.\n",
+  cat(sprintf("  ⛔ NEITHER candidate reconciles (file %+.4f, recomputed %+.4f) AND the file's\n     streams do not match a recomputation. Both a prior and the objective may have\n     moved; do not price anything on this file.\n",
               sum(fil) - ll_implied, sum(rec) - ll_implied))
 }
 if (!is.null(stale)) {
-  cat(sprintf("\n  THE DEFECT THIS FILE WAS WRITTEN FOR, from the preserved `streams_as_fitted`:\n    %d rows, sum %.6f -> SHORT BY %.4f log-units against the implied loglik.\n    carried %s (%.4f) where the objective scored %s (%.4f).\n",
-              length(stale), sum(stale), sum(stale) - ll_implied,
+  # ⚠ MEASURED AGAINST THE RECOMPUTED STREAMS, NOT against `ll_implied`. The
+  # shortfall is a property of the STREAM SET and must not move when a prior
+  # does; quoting it against the implied loglik made the historical 4.7543 read
+  # as 3.9433 the moment the 09-09w priors landed.
+  cat(sprintf("\n  THE DEFECT THIS FILE WAS WRITTEN FOR, from the preserved `streams_as_fitted`:\n    %d rows, sum %.6f -> SHORT BY %.4f log-units against the recomputed set.\n    carried %s (%.4f) where the objective scored %s (%.4f).\n",
+              length(stale), sum(stale), sum(stale) - sum(rec),
               paste(setdiff(names(stale), names(rec)), collapse = " "),
               sum(stale[setdiff(names(stale), names(rec))]),
               paste(setdiff(names(rec), names(stale)), collapse = " "),

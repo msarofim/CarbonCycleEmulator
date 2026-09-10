@@ -6,25 +6,13 @@
 # directories but must reach the same data/ files.
 # =====================================================================
 
-REPO_MARKER <- "DESIGN.md"
-
-#' Absolute path to the repository root
-#' @param start directory to search upward from
-ccx_root <- function(start = getwd()) {
-  d <- normalizePath(start, mustWork = FALSE)
-  for (i in 1:10) {
-    if (file.exists(file.path(d, REPO_MARKER))) return(d)
-    parent <- dirname(d)
-    if (identical(parent, d)) break
-    d <- parent
-  }
-  stop("Could not locate the CarbonCycleEmulator root (no '", REPO_MARKER,
-       "' found above '", start, "').")
-}
-
-#' Build a path relative to the repository root
-#' @param ... path components, e.g. ccx_path("data", "obs_co2_monthly.rds")
-ccx_path <- function(...) file.path(ccx_root(), ...)
+# ⛔ THE ROOT RESOLVER MOVED TO R/aaa_root.R (2026-09-09w). `REPO_MARKER`,
+# `ccx_root()` and `ccx_path()` used to live here, but the alphabetical
+# `list.files("R", ...)` bootstrap sources `calibrate.R` and `constants.R`
+# BEFORE `paths.R`, so a constant that reads a data/ product at source time
+# could not resolve a path. They are hoisted to a file that sorts first; see its
+# header. Everything else about paths -- the canonical mode, the retired arms,
+# mode decoding and the band contract -- stays here.
 
 # =====================================================================
 # THE CANONICAL MODE — ONE NAME, RESOLVED HERE (2026-08-27)

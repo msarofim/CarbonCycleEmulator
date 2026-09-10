@@ -2,6 +2,151 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-09w (2) — ⭐⭐ **ALL FOUR RULINGS TAKEN. THE PERIODIC SPINUP REMOVES 99.6 % OF P12's −514 AND THE 09-09v "P12 IS PHYSICS" READING IS RETRACTED. BOTH PRIOR LEGS RE-CENTRED; THE SHIM IS NOW A STRAINED PRIOR AT z +2.34.**
+
+Marcus ruled all four owed items (`notes/handoff_2026-09-09v...` §6, plus the `streams` repair
+raised by the 09-09w audit as a fifth). All four are taken; **nothing is refitted.**
+
+### ⭐⭐ RULING 1a — THE PERIODIC SPINUP, AND IT REVERSES THE 09-09v READING OF P12
+`calibration/lib_periodic_spinup.R` solves **Φ(y\*) = y\*** on the one-year map: a Newton on the
+carbon block (which carries the nonlinearity), then the isotope **MONODROMY** built exactly, since
+both isotopes enter linearly once the carbon orbit is fixed — the same split `ccx_spinup()` already
+makes, with the one-year map in place of the instantaneous Jacobian. The pins are `ccx_spinup()`'s
+own pins moved from an **instant** to an **ANNUAL MEAN**. `aux` is prepared from the SAME `p` that is
+integrated, and that invariant is **asserted**, because it is the 09-09t leak's exact mechanism
+⇒ [[two_gates_one_mechanism]].
+
+Measured by `calibration/diag_periodic_spinup.R`. **Neither gate's threshold is invented**: GATE P1
+is an IDENTITY at the solver's own tolerance, GATE P2's floor is the SAME excursion measured on the
+`seas_ml = 0` arm — a co-located instrument, not a guess ⇒ [[threshold_from_obs_or_law]]. Both are
+mutation-tested and both are shown to have POWER (the known-bad arm fails each).
+
+| quiet run, 1750–2250 | excursion | drift |
+|---|---|---|
+| `seas_ml` 0, aseasonal (**the floor**) | 0.0212 ppm | +0.0193 |
+| `seas_ml` 1, aseasonal | **17.5863 ppm** | −17.4984 |
+| `seas_ml` 1, **PERIODIC** | **0.0000 ppm** | −0.0000 |
+
+| settled atmospheric offset vs the `seas_ml` 0 control | |
+|---|---|
+| aseasonal seed | **+2.4507 ppm** (= F2's own number, reproduced) |
+| **PERIODIC seed** | **+0.0104 ppm** — **0.4 % kept** |
+
+⛔⛔ **AND THE OBJECTIVE. P12's −514.38 IS REPRODUCED HERE TO 0.003** as the level-row cost on the
+aseasonal seed (**−514.383**, a gate in the script, not a coincidence read afterwards). The periodic
+seed **returns +512.53 of it — 99.6 %**; the CO₂ level rows go to **−132.29** against the
+`seas_ml = 0` arm's **−130.44**.
+
+⛔ **SO "P10 AND P12 ARE ONE FINDING AND IT IS PHYSICS" (09-09v) IS RETRACTED FOR P12.** The −514 was
+the **aseasonal seed**, not physics. There is no separate industrial-uptake component in those rows,
+and the +2.45-vs-+2.857 arithmetic that inferred one does not survive — that gap was never a second
+physical term. ⚠ **P10's own finding (the mechanism changes anthropogenic uptake) is untouched**;
+what is withdrawn is the claim that P12 measured the same thing.
+
+⭐ **What is REAL and unrefitted, after the seed is fixed**: `ocean_grad_dic` **−21.3**,
+`co2_seasonal_MLO` **−20.8**, `d13c_level_SPO` **−16.1**. And the mechanism buys **+515.2** on
+`co2_seasonal_SPO` **with no fitted amplitude**, so unrefitted it is **+463.5 BETTER** than
+`seas_ml = 0`, where on the aseasonal seed it was **48.7 WORSE**. ⚠⚠ **UNREFITTED, and with
+`ent_seas_amp_SH` FORCED TO 0 on every arm — not a refit result and not to be quoted as one.**
+⛔ **Adopting the periodic spinup as the OBJECTIVE's spinup is a FURTHER step and is NOT taken.**
+
+### RULING 1b — the canonical `streams` field, repaired
+`calibration/repair_canonical_streams.R`, under `repair_arm_streams.R`'s contract, quarantining the
+pre-repair copy to `20260909w_d14c_profile_rows_missing/`. **It REFUSES TO WRITE unless
+`logpost − logprior` reconciles with the recomputed sum** — a file that does not reconcile is a refit
+obligation, not a stale field — and that gate is mutation-tested. **ONE vintage, not two.** The
+silent gate that let it through (`diag_adoption_read_hilda31.R:29`, `intersect()` before `max|diff|`)
+now asserts `setequal(names)` and stops; `repair_arm_streams.R` carries a banner saying it is itself
+a stale producer.
+
+### ⭐ RULINGS 2 + 3 — BOTH PRIOR LEGS, AND BOTH ARE NOW READ FROM PRODUCTS
+⛔ **Neither is re-typed at a corrected value** — that is the same defect at a better number
+⇒ [[derived_must_mean_computed]]. Both `.ENT_SO_*` now read `data/` products:
+
+| | was | now | built by |
+|---|---|---|---|
+| `.ENT_SO_SST_AMP` | 3.0 (the band **P2P**, labelled half-amp) | **1.499498** K | `data-raw/build_so_sst_seas_amp.R` |
+| `.ENT_SO_PCO2_AMP` | 19.45 (the **per-cell** reduction) | **16.258289** µatm | `data-raw/build_so_pco2_seas_amp.R` |
+| ⇒ `ENT_SEAS_AMP_SH_INBAND` | 29.68 | **17.7574** | computed |
+| ⇒ `ENT_SEAS_AMP_SH_DERIV` (**the prior centre**) | 10.95 | **6.5525** | computed |
+
+⭐ **The SST builder's GATE 1 is the point**: it reproduces the already-registered
+`SST_SEAS_AMP_SH_OBS = 1.74644` from the same product, mask, window and estimator to **1.9e−05**, and
+**FAILS on the p2p and on the band row** — so the band figure is like-for-like with the hemispheric
+constant beside it rather than a second convention. ✅ It also **FALSIFIES the comment that stood in
+`constants.R`**: "the band swings harder than the hemisphere" is **1.4995 < 1.7464**, true only by
+comparing a p2p against a half-amp ⇒ [[like_for_like_forcing]], [[amp_definition_mismatch]] (third
+incident). ⚠ The review's claim that the pCO₂ leg was ALSO a p2p stays **REFUTED** — its defect was
+4.8 %, not 2×.
+
+**`h_ml`'s prior RE-CENTRED on the LS annual mean**, `data-raw/build_h_ml_prior.R`: centre
+**83.94 → 59.69 m**. Round 6 BUILT the seasonal mixed layer, so the mean-vs-max ambiguity the prior
+existed to encode is **DISCHARGED**; keeping the geometric-mean centre would be a prior compensating
+for a mechanism the model now has. Exposure past P8's 76.146 m stop: **61.3 % → 23.8 %** (~3 starts
+in 5 were dying at the guard). ⚠⚠ **The WIDTH is deliberately UNCHANGED and that is a FLAGGED
+CHOICE, not a derivation** — it still spans an ambiguity that no longer exists, and the 23.8 % Marcus
+ruled on was computed at this width. Re-deriving it is a SECOND methodological move and is not taken.
+
+### ⚠ WHAT THE PRIOR MOVES COST, MEASURED
+| | old | new |
+|---|---|---|
+| log-prior at `hilda31`'s `u_mode` | −39.234715 | **−40.045695** (**−0.8110**) |
+| likelihood | −1439.424788 | **unchanged** (neither constant enters the model) |
+| `h_ml` prior-z | −1.577 | **−0.57** |
+| `ent_seas_amp_SH` prior-z | +1.310 | **+2.34** ⇒ **now a strained prior** |
+
+⛔ **So every stored `logpost` and every stored `prior_z` is STALE by exactly the prior shift.
+COMPARE ON LIKELIHOOD until the refit re-runs.** The shim at **3.21×** its corrected centre is the
+same statement in ratio form; **retiring it remains Marcus's call after the refit** (ruled: keep
+31 par, because P12's own optimum is an INTERIOR max at `ent` = 8, not 0 — the mechanism partially
+substitutes, and fitting 31 lets the data answer rather than assuming it).
+
+### ⭐ AND THE GATE THAT PREDICTED ITS OWN FAILURE
+Moving a prior broke the reconciliation gate written earlier the same day — the case
+[[compare_gaps_not_absolute_logposts]] describes exactly ("the gate printed FAIL on two perfectly
+correct arms"). `diag_mode_streams_provenance.R` now separates the two: when the streams still match
+a recomputation but the total does not reconcile, it reports **"A PRIOR HAS MOVED — the objective has
+NOT"**, names the shift (**+0.810980**), and says to compare on likelihood. ⚠ The historical 4.7543
+shortfall is now measured **against the recomputed stream set**, not against the implied loglik —
+quoted the old way it silently became 3.9433 the moment the priors landed.
+⛔ Also found: **`test-mode-struct-lint.R`'s literal rule is evaded by splitting the call across two
+statements** (`f <- ccx_mode_file(...)` then `readRDS(f)`). `repair_canonical_streams.R` does exactly
+that and is benign — it resolves through `dg_vector()` — but the lint could not have told.
+
+### ⛔ THE SUITE IS RED ON FIVE TESTS, AND THAT IS THE RULED CHANGE ARRIVING — NOT A REGRESSION
+**2387 → 9 failures: 3 pre-existing + 1 REAL BUG (fixed) + 5 that encode the SUPERSEDED contract.**
+⛔ **The five are NOT touched.** Per `~/.claude/CLAUDE.md`, a previously passing test is reported,
+not edited to pass — and each of these asserts a contract Marcus has just ruled changed, so
+rewriting them is a decision, not a repair.
+
+✅ **THE ONE REAL BUG, and its guard worked exactly as designed.**
+`test-ent-seas-fitted.R:27` ties `CCX_PARAM_TABLE$ent_seas_amp_SH$init` to
+`ENT_SEAS_AMP_SH_DERIV` at the TYPED PRECISION. The centre moved and `init` did not: **drift
+4.3999**, caught the same day ⇒ [[derived_must_mean_computed]]. FIXED IN THE CODE
+(`init` 10.952353 → **6.552465**), not in the test. ⚠ It stays a literal because
+`CCX_PARAM_TABLE` is built in `calibrate.R`, which the alphabetical bootstrap sources BEFORE
+`constants.R`; the `prior` closure beside it CAN call `ccx_const()` because it runs later.
+
+| # | test | asserts | why it is red |
+|---|---|---|---|
+| 3 | `test-enso-demean.R:144` | `on_nomid == md$logpost` | off by **exactly −0.811**, the prior shift. ⭐ **THE THIRD INSTANCE of [[compare_gaps_not_absolute_logposts]]** — "never gate on a STORED absolute logpost; restate it as a GAP". |
+| 5, 6 | `test-ent-seas-fitted.R:55,58` | re-derives INBAND from a **transcribed** `3.0` and `19.45` | the transcription is DELIBERATE ("an INDEPENDENT check that the arithmetic has not drifted"). Both inputs are now data/ products. ⚠ Re-transcribing keeps the independence but must be redone whenever a product rebuilds; reading the products destroys it. **A real choice.** |
+| 8, 9 | `test-u-hs-fitted.R:32,36` | `centre_m == sqrt(mean·max)`, and the two readings are the 16/84 % points | asserts the **retired ambiguity encoding**. The centre is now the MEAN, so the geometric-mean symmetry no longer holds by construction. |
+
+⚠ **PRE-EXISTING and unchanged**: `test-alpha-as.R:116,117`, `test-seas-lag-split.R:199`.
+
+### ⭐ AND A BOOTSTRAP HAZARD CLOSED: `R/aaa_root.R`
+Promoting the two constants to data/ products needed `ccx_path()` at SOURCE time, and the
+alphabetical `list.files("R", ...)` bootstrap sources `calibrate.R` and `constants.R` **before**
+`paths.R`. ⛔ The first attempt worked around it with a relative `"data/..."` fallback and **took
+the entire suite down** — `paths.R`'s own header says why: testthat runs from `tests/testthat/`
+and the app from `app/`. ⇒ `REPO_MARKER`, `ccx_root()` and `ccx_path()` are **hoisted to
+`R/aaa_root.R`**, which sorts before everything. Verified resolving from the repo root, from
+`tests/testthat/` and from `app/`. **The name is load-bearing; nothing else belongs in that file.**
+⛔ Also found: **`test-mode-struct-lint.R`'s literal rule is EVADED by splitting the call across two
+statements** (`f <- ccx_mode_file(...)` then `readRDS(f)`). `repair_canonical_streams.R` does
+exactly that and is benign — it resolves through `dg_vector()` — but the lint could not have told.
+
 ## 2026-09-09w — ⭐ **§7 SETTLED BY COMPUTATION: THE CANONICAL MODE'S `logpost` IS VALID, ITS `streams` FIELD IS STALE BY 4.7543. ⛔ AND THE 09-09v REBUTTAL OF THE REVIEW WAS WRONG — IT NAMED A GAP "THE LOG-PRIOR" WITHOUT COMPUTING IT.**
 
 `calibration/diag_mode_streams_provenance.R` (new, reads only). The 09-09t review reported the

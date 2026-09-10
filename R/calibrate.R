@@ -147,13 +147,26 @@ CCX_PARAM_TABLE <- list(
                      prior = function(x) dlnorm(x, log(1500), 0.4, log = TRUE)),
   # h_ml: OBSERVATION PRIOR since 2026-09-08d (Marcus). The box [30, 200] stays;
   # the flat density inside it is replaced by a lognormal whose 16 % / 84 %
-  # points ARE the two defensible readings of the Holte 2017 Argo climatology
+  # points WERE the two defensible readings of the Holte 2017 Argo climatology
   # for a time-constant thickness -- the LS annual MEAN (59.7 m) and the LS
   # annual MAXIMUM (118 m) -- median 83.9, log-sd 0.341, both COMPUTED from
   # data/obs_mld.rds by data-raw/build_h_ml_prior.R and read lazily through
-  # ccx_h_ml_prior(). The prior ENCODES the mean-vs-max ambiguity a seasonal
+  # ccx_h_ml_prior(). The prior ENCODED the mean-vs-max ambiguity a seasonal
   # mixed layer would resolve (notes/options_2026-09-08d_seasonal_h_ml.md).
+  #
+  # ⭐⭐ RE-CENTRED ON THE ANNUAL MEAN 59.7 m, 2026-09-09w (ruled by Marcus).
+  # Round 6 BUILT that seasonal mixed layer, so the ambiguity is DISCHARGED and
+  # the constant is the annual MEAN; keeping the geometric-mean centre would be
+  # a prior compensating for a mechanism the model now has. It was also costing
+  # starts: P8 stops at 76.146 m and 61.3 % of the old prior lay past it, ITS
+  # MEDIAN 83.94 INCLUDED, so ~3 starts in 5 died at the guard. Now 23.8 %.
+  # ⚠ The WIDTH is deliberately UNCHANGED and is a FLAGGED CHOICE, not a
+  # derivation -- it still spans an ambiguity that no longer exists. See the
+  # header of data-raw/build_h_ml_prior.R.
   # ⚠ Every stored logpost moves with this change; compare on LIKELIHOOD.
+  # MEASURED at the canonical mode: log-prior -39.2347 -> -40.0457 (-0.8110)
+  # with BOTH 09-09w prior moves; the likelihood is untouched at -1439.4248.
+  # h_ml's own z goes -1.577 -> -0.57; ent_seas_amp_SH's +1.310 -> +2.34.
   h_ml        = list(tr = "logit", lo = 30,  hi = 200,   init = 75,
                      prior = function(x) { pr <- ccx_h_ml_prior()
                        dlnorm(x, log(pr$centre_m), pr$log_sd, log = TRUE) }),
@@ -562,7 +575,14 @@ CCX_PARAM_TABLE <- list(
   # not a defect to route around. ⚠ `tau_ex_seas_amp` is STILL implemented,
   # defaulted 0 and unfitted; it was deliberately NOT freed here, so that P2 has
   # one mechanism to attribute to.
-  ent_seas_amp_SH = list(tr = "log", init = 10.952353,
+  # ⚠ `init` MOVED 10.952353 -> 6.552465 ON 2026-09-09w, with the prior centre it
+  # must track. It stays a LITERAL only because CCX_PARAM_TABLE is built in this
+  # file, which the alphabetical bootstrap sources BEFORE constants.R, so
+  # `ccx_const()` does not exist yet -- the `prior` closure below CAN call it
+  # because it runs later. test-ent-seas-fitted.R:27 ties the two at the typed
+  # precision (half a unit in the sixth decimal) and CAUGHT this drift on the day
+  # the centre moved, which is exactly the guard working ⇒ [[derived_must_mean_computed]].
+  ent_seas_amp_SH = list(tr = "log", init = 6.552465,
                      prior = function(x) dlnorm(x, log(ccx_const("ENT_SEAS_AMP_SH_DERIV")),
                                                 ENT_SEAS_LOGSD, log = TRUE)),
   # ENSO, FOUR COEFFICIENTS SINCE 2026-09-01 (Marcus's design call). GtC/yr per
