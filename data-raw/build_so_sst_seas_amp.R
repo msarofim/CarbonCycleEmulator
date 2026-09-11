@@ -37,6 +37,12 @@ SO_BAND     <- c(-90, -40)            # the entrainment band, GATE S's own conve
 SO_OUT      <- ccx_path("data", "obs_so_sst_seas_amp.rds")
 SO_GATE_REF <- ccx_const("SST_SEAS_AMP_SH_OBS")   # 1.74644 K, already shipped
 SO_GATE_TOL <- 5e-5                   # 5 s.f. on a 5-s.f. registered constant
+# OPTION B (2026-09-11, prereg ruling 3): the HS box (`ml_hi`) gets an SST seasonal amplitude PINNED
+# to the observation, per hemisphere, over the box's OWN cap -- poleward of the boundary DERIVED from
+# hs_frac (57.14 deg at 0.16, as data-raw/build_mld_targets.R), with the LS cap (0-57) beside it for
+# the reader and the 40-deg convention for comparison with GATE S. The rows above are NOT touched.
+SO_LAT_HS   <- asin(1 - CCX_STRUCT_HILDA$hs_frac) * 180 / pi   # DERIVED: 57.14 deg
+SO_LAT_40   <- 40
 
 # the harmonic estimator, verbatim in substance from build_seasonal_climatology.R
 so_harm <- function(v) {
@@ -95,7 +101,28 @@ cat(sprintf("\n  the shipped .ENT_SO_SST_AMP = 3.0 is the BAND P2P (%.4f), not i
 cat(sprintf("  and 'the band swings harder than the hemisphere' is FALSE like-for-like: %.4f < %.4f\n",
             h_band$half_amp, h_SH$half_amp))
 
-out <- list(band_half_amp_K = h_band$half_amp, band_p2p_K = h_band$p2p,
+# ---- OPTION B: the per-hemisphere caps ---------------------------------
+so_cap <- function(hem, lo, hi) {
+  sel <- if (hem == "NH") which(lat >= lo & lat < hi) else which(lat <= -lo & lat > -hi)
+  h <- so_harm(so_clim(sel)); h$lat <- c(lo, hi); h$n_lat <- length(sel); h
+}
+caps <- list(hs_NH = so_cap("NH", SO_LAT_HS, 90), hs_SH = so_cap("SH", SO_LAT_HS, 90),
+             ls_NH = so_cap("NH", 0, SO_LAT_HS), ls_SH = so_cap("SH", 0, SO_LAT_HS),
+             pole40_NH = so_cap("NH", SO_LAT_40, 90), pole40_SH = so_cap("SH", SO_LAT_40, 90))
+cat(sprintf("
+  OPTION B caps (HS/LS boundary derived from hs_frac %.2f = %.2f deg):
+", CCX_STRUCT_HILDA$hs_frac, SO_LAT_HS))
+for (n in names(caps)) { h <- caps[[n]]
+  cat(sprintf("  %-10s [%5.2f, %2g) | mean SST %6.2f C | half-amp %6.4f K | p2p %6.4f | peak month %5.2f
+",
+              n, h$lat[1], h$lat[2], h$mean, h$half_amp, h$p2p, h$peak_month)) }
+# the caps must tile the hemisphere: an area-weighted recombination is a sanity check, not a gate
+cat(sprintf("  (model sst_hs is %g C; the LS caps are what the fitted sst_seas_amp_NH/SH stand beside)
+", CCX_STRUCT_HILDA$sst_hs))
+
+out <- list(caps = lapply(caps, function(h) h[c("mean", "half_amp", "p2p", "peak_month", "lat", "clim")]),
+            lat_hs = SO_LAT_HS,
+            band_half_amp_K = h_band$half_amp, band_p2p_K = h_band$p2p,
             band_peak_month = h_band$peak_month, band_lat = SO_BAND,
             sh_half_amp_K = h_SH$half_amp, nh_half_amp_K = h_NH$half_amp,
             gate_ref = SO_GATE_REF, gate_abs_diff = gate_z, window = SO_WIN,

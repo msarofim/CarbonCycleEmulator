@@ -52,6 +52,13 @@ MLD_BANDS     <- list(c(0, 20), c(20, 40), c(40, MLD_LAT_HS), c(MLD_LAT_HS, 70),
 MLD_DEFS      <- c(dt = "density threshold (0.03 kg m-3 from 10 m)", da = "hybrid algorithm (Holte & Talley 2009)")
 MLD_STATS     <- c(mean = "annual mean of the 12 monthly bin means", max = "annual maximum of the 12 monthly bin means")
 MLD_STRICT_N  <- 12L                                          # months required for the headline cells
+# OPTION B (2026-09-11, prereg_2026-09-11_option_b_ml_box.md ruling 1: `ml_hi` IS the HS box): the
+# seasonal shape POLEWARD of the HS/LS boundary, for `seas_ml` on the cold box. Two masks are carried
+# because the prereg said "poleward of ~40 deg, ~16 %" and those are NOT the same cap -- 16 % of a
+# hemisphere is poleward of 57.14 deg; 40 deg (GATE S's Southern-Ocean convention) is 36 %. Which one
+# `ml_hi` IS is a ruling; both shapes are built so it can be taken on numbers. ⚠ The existing
+# `seasonal` (LS cells, 0-57 deg) is what the canonical `seas_ml` reads and is NOT touched.
+MLD_LAT_SO    <- 40                                            # GATE S / P1c's Southern-Ocean edge
 MLD_CITE      <- "Holte et al. (2017) GRL 44:5618-5626, doi:10.1002/2017GL073426; Argo_mixedlayers_monthlyclim_04142022.nc"
 
 nc <- nc_open(MLD_NC)
@@ -75,6 +82,23 @@ wstats <- function(x, m) {
 region <- function(lo, hi, strict) L >= lo & L < hi & (if (strict) nmon == MLD_STRICT_N else nmon >= 1L)
 one_region <- function(lo, hi, strict) lapply(FIELDS, wstats, m = region(lo, hi, strict))
 
+# THE SEASONAL SHAPE (added 2026-09-08d, options_2026-09-08d_seasonal_h_ml.md; generalised to a
+# latitude WINDOW 2026-09-11 for option B, the LS call bit-identical): per hemisphere, the area-weighted
+# monthly threshold MLD over the 12-month cells in [lo, hi), and the PER-CELL entrainment fraction
+# f = (h_m - h_min)/h_m averaged the same way -- the dilution-honest driver for a derived entrainment
+# mechanism. `hmin` is each cell's own annual minimum.
+seasonal_window <- function(lo, hi, label) {
+  hmin <- apply(arr$dt, c(2, 3), min, na.rm = TRUE); hmin[nmon < MLD_STRICT_N] <- NA
+  lat_signed <- matrix(lat, length(lon), length(lat), byrow = TRUE)
+  one <- function(hem) {
+    m <- nmon == MLD_STRICT_N & (if (hem == "NH") lat_signed >= lo & lat_signed < hi else lat_signed < -lo & lat_signed > -hi)
+    h <- vapply(1:12, function(k) { x <- arr$dt[k, , ]; ok <- is.finite(x) & m; sum(x[ok] * W[ok]) / sum(W[ok]) }, 0)
+    f <- vapply(1:12, function(k) { x <- (arr$dt[k, , ] - hmin) / arr$dt[k, , ]; ok <- is.finite(x) & m; sum(x[ok] * W[ok]) / sum(W[ok]) }, 0)
+    list(h_m = h, f_ent = f, h_mean = mean(h), h_max = max(h), month_max = which.max(h), f_max = max(f), f_min = min(f), n_cells = sum(m & is.finite(hmin))) }
+  list(NH = one("NH"), SH = one("SH"), lat = c(lo, hi),
+       def = sprintf("dt; f_ent = per-cell (h_m - h_min)/h_m, cos-lat mean over 12-month %s cells [%g, %g) deg", label, lo, hi))
+}
+
 out <- list(
   ls = one_region(0, MLD_LAT_HS, TRUE),  ls_anymonth = one_region(0, MLD_LAT_HS, FALSE),
   hs = one_region(MLD_LAT_HS, 90, TRUE), hs_anymonth = one_region(MLD_LAT_HS, 90, FALSE),
@@ -84,17 +108,13 @@ out <- list(
   bands = do.call(rbind, lapply(MLD_BANDS, function(b) { r <- region(b[1], b[2], TRUE); data.frame(
     lat_lo = b[1], lat_hi = b[2], mean_dt = wstats(FIELDS$mean_dt, r)$value, max_dt = wstats(FIELDS$max_dt, r)$value,
     mean_da = wstats(FIELDS$mean_da, r)$value, n_cells = sum(is.finite(FIELDS$mean_dt) & r)) })),
-  # THE SEASONAL SHAPE (added 2026-09-08d, options_2026-09-08d_seasonal_h_ml.md): per hemisphere, the
-  # area-weighted monthly threshold MLD over the 12-month LS cells, and the PER-CELL entrainment
-  # fraction f = (h_m - h_min)/h_m averaged the same way -- the dilution-honest driver for a derived
-  # entrainment mechanism. `hmin` is each cell's own annual minimum.
-  seasonal = local({ hmin <- apply(arr$dt, c(2, 3), min, na.rm = TRUE); hmin[nmon < MLD_STRICT_N] <- NA
-    lat_signed <- matrix(lat, length(lon), length(lat), byrow = TRUE)
-    one <- function(hem) { m <- nmon == MLD_STRICT_N & (if (hem == "NH") lat_signed >= 0 & lat_signed < MLD_LAT_HS else lat_signed < 0 & lat_signed > -MLD_LAT_HS)
-      h <- vapply(1:12, function(k) { x <- arr$dt[k, , ]; ok <- is.finite(x) & m; sum(x[ok] * W[ok]) / sum(W[ok]) }, 0)
-      f <- vapply(1:12, function(k) { x <- (arr$dt[k, , ] - hmin) / arr$dt[k, , ]; ok <- is.finite(x) & m; sum(x[ok] * W[ok]) / sum(W[ok]) }, 0)
-      list(h_m = h, f_ent = f, h_mean = mean(h), h_max = max(h), month_max = which.max(h), f_max = max(f), f_min = min(f), n_cells = sum(m & is.finite(hmin))) }
-    list(NH = one("NH"), SH = one("SH"), def = "dt; f_ent = per-cell (h_m - h_min)/h_m, cos-lat mean over 12-month LS cells") }),
+  # THE SEASONAL SHAPE -- see seasonal_window() above. `seasonal` is the LS one the canonical reads.
+  seasonal    = seasonal_window(0, MLD_LAT_HS, "LS"),
+  # OPTION B: the same construction poleward of the boundary (the HS box, 16 %) and poleward of 40 deg
+  # (GATE S's Southern Ocean, 36 %); the 40-57 band is the difference between the two rulings.
+  seasonal_hs = seasonal_window(MLD_LAT_HS, 90, "HS"),
+  seasonal_so = seasonal_window(MLD_LAT_SO, 90, "poleward-of-40"),
+  seasonal_40_57 = seasonal_window(MLD_LAT_SO, MLD_LAT_HS, "40-57 band"),
   coverage = list(cells_sampled = sum(nmon >= 1), cells_strict = sum(nmon == MLD_STRICT_N), finite_frac = mean(is.finite(arr$dt))),
   consts = list(hs_frac = MLD_HS_FRAC, lat_hs = MLD_LAT_HS, strict_months = MLD_STRICT_N, defs = MLD_DEFS, stats = MLD_STATS,
                 weighting = "cos(lat) per 1-deg cell; sd_cell = area-weighted sd across cells (representation spread)"),
@@ -110,5 +130,8 @@ cat("\n  boundary sensitivity (strict cells, threshold MLD):\n"); print(out$boun
 cat("\n  zonal bands (strict cells):\n"); print(out$bands, row.names = FALSE, digits = 4)
 for (hem in c("NH", "SH")) { z <- out$seasonal[[hem]]
   cat(sprintf("\n  seasonal %s: h_m %s | mean %.1f max %.1f (month %d); f_ent %s | %.3f-%.3f\n", hem, paste(sprintf("%.0f", z$h_m), collapse = " "), z$h_mean, z$h_max, z$month_max, paste(sprintf("%.2f", z$f_ent), collapse = " "), z$f_min, z$f_max)) }
+for (rg in c("seasonal_hs", "seasonal_so", "seasonal_40_57")) for (hem in c("NH", "SH")) { z <- out[[rg]][[hem]]
+  cat(sprintf("\n  %s %s (n %d): h_m %s | mean %.1f max %.1f (month %d) max/mean %.2f; f_ent %.3f-%.3f\n", rg, hem, z$n_cells,
+              paste(sprintf("%.0f", z$h_m), collapse = " "), z$h_mean, z$h_max, z$month_max, z$h_max / z$h_mean, z$f_min, z$f_max)) }
 cat(sprintf("\n  MODEL: h_ml fitted 39.8 (every HILDA round) / 134 (ent26 column); h_hs 400 (round 3).\n"))
 saveRDS(out, ccx_path("data", "obs_mld.rds")); cat("saved data/obs_mld.rds\n")
