@@ -2,6 +2,49 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-11 (4) — ⛔⛔⛔ **THE ROUND-6 P7 VERDICT RESTS ON AN OBSERVABLE ARTEFACT: the ocean-gradient row divides INSTANT box carbon by the ANNUAL-MEAN box mass, which is exact only for a time-constant box. At `seas_ml = 1` the surface DIC reads 157 µmol/kg LOW at the GLODAP epoch (early November, f 0.885 / 0.919); under an annual-mean read the round-6 DIC gradient is 226 vs target 233, not 385. Round 6 was FITTED against the corrupted row. The "refuted as built" ruling is UNSUPPORTED pending a re-fit under a corrected observable. Build of option B PAUSED at the R side.**
+
+Found while wiring the HS box's time-varying mass for option B (the same question had to be
+answered for `hs_mass_kg`). `calibration/diag_seasonal_box_observable_artefact.R` →
+`multistart_20260910_round6_seasml1_sd1.0452/seasonal_box_observable_artefact.log`. The objective's
+read reproduces the P7 record exactly (302 → 385, −0.309 → +0.018), so this is the same path.
+
+| surface DIC | `hilda31p` | round 6 | Δ |
+|---|---|---|---|
+| **A** instant C / annual-mean mass — the objective (`ccx_model_ocean_gradient`) | 2046.0 | **1889.1** | **−156.9** |
+| **B** instant C / instant mass | 2046.0 | 2089.6 | +43.6 |
+| **C** annual mean of the instant concentration | 2047.1 | 2048.0 | **+0.9** |
+
+Deep box: DIC 2347.8 → 2274.4 (−73), δ¹³C 1.242 → 1.615 (+0.37). The surface δ¹³C moved only +0.047.
+Gradient under each read (target 233 / −0.861): A 302 → **385**; B 302 → 185; **C 301 → 226**.
+⇒ The DIC half of P7 is the artefact outright. The δ¹³C half is the DEEP box moving — the refit
+(`pump_grad` 255.5 → 280.1, deep DIC −73) reshuffled the deep to cancel a surface row reading 157
+low. **Round 6's −17.8 likelihood, its P7 FAIL, its P2/P12 reads and its "priors +6.2" are all
+properties of a fit to a corrupted objective**, not of the mechanism ([[implausible_result_is_bug]];
+the `ccx_grad_rows_area_bug` precedent: "rounds 1–2 were FITTED against the deflated rows").
+
+**Same construction elsewhere**: `dg_gateG` (`lib_design_gates.R:1188`, the Dec-31 STATE over the
+mean mass — NH f ≈ 1.5 in January, so +50 % at `seas_ml = 1`) and `ccx_model_hs_surface`
+(`likelihood.R:1166`, `hs_mass_kg` annual mean — hits `seas_ml = 2` directly). Every observable
+that turns box carbon into a concentration needs the box's mass AT THAT TIME, or an annual mean.
+
+**Not changed yet — a ruling (Marcus):** (a) read **B** (instant/instant): `seas_ml = 0` bit-identical,
+but an instant read of a seasonal quantity against a climatological target is a PHASE artefact of
+its own (+44 at round 6); (b) read **C** (annual mean over the epoch year): like-for-like with GLODAP's
+climatology, but moves the canonical's row by ~1 µmol/kg (0.03 σ_eff) and −0.005 ‰ — every stored
+logpost moves by a hair ("compare on likelihood"). Recommendation: **C**, priced at the canonical.
+Then: round 6 is NOT re-read, it is **RE-FIT** under the corrected objective (its deep was moved by
+the artefact); GATE P7 keeps its bound but its power test (`test-gate-p7.R`) pins numbers that are
+now known to be the artefact and must be re-pinned to the corrected read. **The 09-11 (2) ruling
+"refuted as built" is WITHDRAWN as a finding about the mechanism**; the P1c box-identity argument
+and Fix B still motivate option B on their own.
+
+**State of the build**: R side of `seas_ml = 2` (HS seasonal geometry, entrainment limbs, guard,
+per-box shape reader) is written and is bit-exact at 0/1 by construction (every new branch is
+gated on `seas_ml == 2`, which the parser still refuses); the C++ twin, the parser, the tests and
+the `h_hs` prior are NOT built. Paused here because a seasonal HS box would be scored by the same
+defective HS-surface row.
+
 ## 2026-09-11 (3) — ⭐⭐ **OPTION B: THE FOUR RULINGS ARE TAKEN (`ml_hi` IS THE HS BOX; a LIMB on `ml_lo` first; `ml_lo` keeps the fitted SST sines, `ml_hi` gets `seas_ml` + a PINNED SST amplitude; `ent_seas_amp_SH` stays fitted) AND THE DATA TASK IS DONE. Two design facts the build must respect: the HS cap is 57.14°, not 40°; `h_hs` is 417 m against an observed 103–128 m mixed layer.**
 
 ### Suite first (the handoff's first instruction)
