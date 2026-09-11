@@ -13,9 +13,12 @@ D <- "calibration/output/multistart_20260910_round6_seasml1_sd1.0452"
 b1 <- readRDS(file.path(D, "start_004.rds")); b2 <- readRDS(file.path(D, "start_001.rds")); b3 <- readRDS(file.path(D, "start_009.rds"))
 md <- readRDS(ccx_mode_file())   # hilda31p, seas_ml 0
 cat(sprintf("basin1 id4 %.4f seas_ml %d struct %s | basin2 id1 %.4f | basin3 id9 %.4f | hilda31p %.4f\n", b1$logpost, b1$seas_ml, b1$struct, b2$logpost, b3$logpost, md$logpost))
-score <- function(pm, seas_ml) { bp <- ccx_apply_structure(ccx_default_params(), "hilda", seas_ml = seas_ml); bp$pump_mode <- "N"
-  v <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(ccx_par_to_unc(pm)); list(lp = as.numeric(v), st = unlist(attr(v, "streams"))) }
-s0 <- score(md$par_mode, 0); s1 <- score(b1$par_mode, 1); s2 <- score(b2$par_mode, 1)
+# each file's OWN structure and seas_ml through the one resolver (converted 2026-09-11 on touch --
+# test-mode-struct-lint.R; round6_read.log reproduced under the conversion)
+score <- function(mdx) { bp <- ccx_mode_base(mdx); bp$pump_mode <- mdx$pump_mode
+  v <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(ccx_par_to_unc(mdx$par_mode)); list(lp = as.numeric(v), st = unlist(attr(v, "streams"))) }
+stopifnot(ccx_mode_seas_ml(md) == 0L, ccx_mode_seas_ml(b1) == 1L, ccx_mode_seas_ml(b2) == 1L)
+s0 <- score(md); s1 <- score(b1); s2 <- score(b2)
 cat(sprintf("\nreproduce: hilda31p %.6f (file %.6f) | basin1 %.6f (file %.6f) | basin2 %.6f (file %.6f)\n", s0$lp, md$logpost, s1$lp, b1$logpost, s2$lp, b2$logpost))
 cat(sprintf("\nLIKELIHOOD (sum of streams): hilda31p(seas_ml0) %.4f | basin1(seas_ml1) %.4f  d=%+.4f | basin2 %.4f  d=%+.4f\n", sum(s0$st), sum(s1$st), sum(s1$st)-sum(s0$st), sum(s2$st), sum(s2$st)-sum(s0$st)))
 cat(sprintf("PRIOR+JAC: hilda31p %.4f | basin1 %.4f | basin2 %.4f\n", s0$lp-sum(s0$st), s1$lp-sum(s1$st), s2$lp-sum(s2$st)))

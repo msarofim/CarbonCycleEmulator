@@ -34,8 +34,10 @@ test_that("GATE P7 has POWER: the round-6 seas_ml = 1 mode FAILS it against hild
   skip_if_no_cpp()
   r6 <- ccx_path("calibration", "output", "multistart_20260910_round6_seasml1_sd1.0452", "start_004.rds")
   skip_if_not(file.exists(r6), "round-6 start file not present")
-  grad_at <- function(pm, seas_ml) {
-    bp <- ccx_apply_structure(ccx_default_params(), "hilda", seas_ml = seas_ml); bp$pump_mode <- "N"
+  # each file's OWN structure and seas_ml through the one resolver (test-mode-struct-lint.R)
+  grad_at <- function(mdx) {
+    pm <- mdx$par_mode
+    bp <- ccx_mode_base(mdx); bp$pump_mode <- mdx$pump_mode
     p <- ccx_overlay_par(bp, pm); sp <- CCX_OBJECTIVE_SPINUP(p)
     F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0, bomb_total_kmol = 102)
     F$c14_cosmo <- sp$prod_c14; F$c14_bomb <- F$c14_bomb * (pm$bomb_total / 102)
@@ -44,8 +46,9 @@ test_that("GATE P7 has POWER: the round-6 seas_ml = 1 mode FAILS it against hild
     ccx_ocean_grad_scored(ccx_run_fast(sp, F)$out, sp)
   }
   md <- readRDS(ccx_mode_file()); s4 <- readRDS(r6)
-  expect_identical(ccx_mode_seas_ml(md), 0L); expect_identical(s4$seas_ml, 1L)
-  g0 <- grad_at(md$par_mode, 0); g1 <- grad_at(s4$par_mode, 1)
+  expect_identical(ccx_mode_seas_ml(md), 0L); expect_identical(ccx_mode_seas_ml(s4), 1L)
+  expect_identical(ccx_mode_struct(md), "hilda"); expect_identical(ccx_mode_struct(s4), "hilda")
+  g0 <- grad_at(md); g1 <- grad_at(s4)
   v <- dg_gateP7_verdict(g0, g1)
   expect_false(v$pass)
   expect_gt(v$ratio_d13c, 1.5)                         # 2.0x on 2026-09-11

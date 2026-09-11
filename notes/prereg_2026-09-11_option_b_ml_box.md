@@ -43,6 +43,25 @@ seasonal driver each box gets (SST amplitude per box; the sine path retires?); (
 `ent_seas_amp_SH` survives the build at all (P12 says the mechanism takes half; the rest may be `ml_hi`'s
 own entrainment once the box is right).
 
+## 2a. THE FOUR RULINGS — TAKEN 2026-09-11 (Marcus, each on the recommendation; the facts each rested on are cited)
+1. **`ml_hi` IS the existing HS box.** Facts: HS is already per-hemisphere, `hs_frac = 0.16` of each hemisphere's
+   ocean area (= the ~16 % poleward of ~40°), with its own `alk_hs`, `sst_hs` (2 °C), its own pump (`pump_hs_gcm2`)
+   and a fitted `h_hs` over HD (`src/ccx_core.cpp:732-800`). The 09-05 "⚠ NO SEASONAL CYCLE ON THIS BOX" rule
+   (`R/model.R:2317`, written to keep fitted LS mechanisms out of a structural test) is LIFTED for `seas_ml`:
+   the mechanism moves the HS/HD boundary (`h_hs` ↔ `dz_hd`) mean-preservingly, exactly as it moves ML/layer-1
+   today. `ml_lo` = the existing LS mixed layer with `seas_ml` OFF. No new state.
+2. **Fix B = a Niño3.4-modulated upwelling LIMB on `ml_lo` first, with a thermocline return** (T-A0's "B");
+   a dedicated equatorial box ONLY if PB1 fails on magnitude. Arithmetic: the reservoir's 13.15 µatm over 4.1 %
+   of area is the same air-sea flux as 0.64 µatm over `ml_lo`'s 84 % (flux linear in area × ΔpCO₂), so a limb
+   can carry the MAGNITUDE; what it cannot do is make the +55.5 µatm reservoir representable — accepted for now.
+3. **Drivers: `ml_lo` keeps the fitted SST sines (`sst_seas_amp_NH/SH`); `ml_hi` gets `seas_ml` off a
+   POLEWARD-masked Holte MLD climatology PLUS an SST seasonal amplitude PINNED to an observation** (the
+   poleward-of-40° SST cycle — a data task beside the MLD one), NOT fitted. No new free parameter beyond the
+   build; the 09-05 rule's point (no fitted amplitude inside a structural test) is kept.
+4. **`ent_seas_amp_SH` STAYS FITTED in the first B refit; PB3 reads where it goes** (≤ 1.5× centre or → 0).
+   Retiring it first would make the test blind ([[no_power_null]]): a free parameter that goes to zero is the
+   evidence that `ml_hi`'s entrainment does the shim's job.
+
 ## 3. PREREGISTERED PREDICTIONS (state the sign and the bound BEFORE any run; amendments dated)
 - **P7′ (the reason this note exists).** With `seas_ml = 1` on `ml_hi` only, **GATE P7 PASSES**: the modern
   surface−deep δ¹³C gradient moves by **< sd_eff (0.16)** from its `seas_ml = 0` value at the same vector,
