@@ -62,6 +62,19 @@ own entrainment once the box is right).
    Retiring it first would make the test blind ([[no_power_null]]): a free parameter that goes to zero is the
    evidence that `ml_hi`'s entrainment does the shim's job.
 
+## 2b. TWO MORE RULINGS — TAKEN 2026-09-11, on the facts the data task found (CHANGELOG 09-11 (3))
+5. **GATE S's convention is RE-CUT to 57–90 °S for the `ml_hi` read** (ruling: "take (a)"). The prereg's
+   "poleward of ~40°, ~16 %" was two caps — 16 % of a hemisphere is poleward of 57.14° (`asin(1 − hs_frac)`),
+   40° is 36 % — and ruling 1 puts `ml_hi` at 57°+. PB2 is amended accordingly (below); the 40–90 °S row
+   stays as the shipped GATE S at the canonical, reported beside it, never substituted.
+6. **`h_hs` goes under the HS Holte prior, as 09-08d did for `h_ml`** (ruling: "follow 09-08d"): lognormal,
+   centred between the observed 57°+ annual MEAN and MAX (NH 128 / 307, SH 103 / 154), log-sd from the
+   mean-vs-max spread, built by the same idiom (`data-raw/build_h_ml_prior.R` → a computed product, never a
+   typed number). At `hilda31p` `h_hs` is 417 m; **PREDICTION (added here, before any run): the pin costs
+   < 5 log-units on the CO₂ rows** (09-08c: HS thickness cancels at steady state; the −107 at 75 m was
+   transient inventory). If it costs more, HS thickness is a lever this structure did not declare — report,
+   do not retune.
+
 ## 3. PREREGISTERED PREDICTIONS (state the sign and the bound BEFORE any run; amendments dated)
 - **P7′ (the reason this note exists).** With `seas_ml = 1` on `ml_hi` only, **GATE P7 PASSES**: the modern
   surface−deep δ¹³C gradient moves by **< sd_eff (0.16)** from its `seas_ml = 0` value at the same vector,
@@ -73,7 +86,8 @@ own entrainment once the box is right).
   doing the cancelling). Net sensitivity within 2 se of +0.1153 GtC/yr per index unit.
 - **PB2 (P1c resolved by construction).** The SH ocean seasonal ΔpCO₂ shows TWO regimes: `ml_lo` peaks
   near Jan (thermal), `ml_hi` near Aug (DIC); the hemispheric mean cancels toward the observed 3.69 µatm
-  while GATE S (the Southern-Ocean phase, [7.41, 10.41]) still passes on `ml_hi`.
+  while GATE S's phase window, **re-cut to the 57–90 °S product (ruling 5, amended 2026-09-11)**, passes on
+  `ml_hi`. The 40–90 °S GATE S stays reported at the canonical; it is not `ml_hi`'s region.
 - **PB3 (P2/P12 again, and they must do BETTER than round 6, not merely as well).** `sst_seas_amp_NH` inside
   2σ; `ent_seas_amp_SH` within 1.5× its centre (round 6: 1.45×) or retired.
 - **PB4 (the deep is untouched).** `d14c_profile_*` and `d14c_mid` rows move by < 1 log-unit each; GATE 7

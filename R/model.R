@@ -826,15 +826,26 @@ ccx_mld_eval <- function(co, t) {
 #' The per-hemisphere seasonal shapes, read lazily and cached (the same idiom as
 #' ccx_h_ml_prior()) -- ccx_prepare() runs once per evaluation and must not do
 #' file I/O each time.
+#' `box` selects the climatology (OPTION B, 2026-09-11): "ls" = the low-latitude
+#' cells (|lat| < 57.14 deg, what round 6 ran on -- `seasonal`); "hs" = the cells
+#' POLEWARD of the HS/LS boundary (`seasonal_hs`, the cold box's own cycle:
+#' NH max/mean 2.39 in March from the ice-free N Atlantic cells, SH 1.49 in
+#' August). Both come from data-raw/build_mld_targets.R; the LS entry is
+#' bit-identical to the pre-B product.
 ccx_mld_shape <- local({
-  cache <- NULL
-  function() {
-    if (is.null(cache)) {
-      seas <- readRDS(ccx_path("data", "obs_mld.rds"))$seasonal
-      cache <<- stats::setNames(lapply(HEMIS, function(h)
+  cache <- list()
+  function(box = "ls") {
+    if (!box %in% c("ls", "hs")) stop("ccx_mld_shape(): box must be \"ls\" or \"hs\"; got ", box)
+    if (is.null(cache[[box]])) {
+      obs  <- readRDS(ccx_path("data", "obs_mld.rds"))
+      seas <- if (box == "ls") obs$seasonal else obs$seasonal_hs
+      if (is.null(seas)) stop("ccx_mld_shape(): data/obs_mld.rds carries no `",
+                              if (box == "ls") "seasonal" else "seasonal_hs",
+                              "` -- rebuild with Rscript data-raw/build_mld_targets.R")
+      cache[[box]] <<- stats::setNames(lapply(HEMIS, function(h)
         ccx_mld_fourier(seas[[h]]$h_m)), HEMIS)
     }
-    cache
+    cache[[box]]
   }
 })
 
@@ -853,6 +864,23 @@ ccx_grid_at_h_ml <- function(grid, h) {
 ccx_seas_ml_on <- function(p) {
   isTRUE(p$seas_drivers > 0) && !is.null(p$seas_ml) && isTRUE(p$seas_ml > 0)
 }
+#' WHICH BOX the seasonal mixed layer sits on (OPTION B, 2026-09-11; prereg
+#' `notes/prereg_2026-09-11_option_b_ml_box.md`, ruling 1). `seas_ml` is now
+#' 0 = OFF, 1 = the LOW-LATITUDE mixed layer (round 6 as built -- REFUTED on
+#' GATE P7 but kept reachable, so its record reproduces), 2 = the HIGH-LATITUDE
+#' box HS ONLY (the cold box deepens and shoals on its own poleward Holte
+#' climatology and entrains HD water; the LS mixed layer is time-constant). A
+#' value of 2 with the HILDA structure off is an ERROR, not a silent 0: there is
+#' no HS box to put it on.
+ccx_seas_ml_ls_on <- function(p) ccx_seas_ml_on(p) && isTRUE(p$seas_ml == 1)
+ccx_seas_ml_hs_on <- function(p) {
+  if (!(ccx_seas_ml_on(p) && isTRUE(p$seas_ml == 2))) return(FALSE)
+  if (!ccx_hs_on(p))
+    stop("seas_ml = 2 puts the seasonal mixed layer on the HS box, but the HILDA ",
+         "structure is OFF (hs_frac absent or 0) -- there is no HS box. Apply the ",
+         "structure (ccx_apply_structure(p, \"hilda\", seas_ml = 2)) or use 0/1.")
+  TRUE
+}
 
 #' THE GEOMETRY STOPPING CONDITION (prereg P8), asserted rather than assumed
 #'
@@ -866,8 +894,29 @@ ccx_seas_ml_on <- function(p) {
 #' h_ml up would silently read carbon out of a layer the mixed layer has already
 #' swallowed, so this STOPS rather than clamping -- a clamp would turn a design
 #' violation into a quiet bias. See calibration/diag_seasonal_ml_geometry.R.
+#' THE HS GEOMETRY CONDITION (option B). HD is everything below HS, so the
+#' winter cold box can never outgrow its column; what CAN go wrong is the
+#' SUMMER box: at the NH shape's f_min 0.078 a 175 m h_hs is 13.7 m in June,
+#' and below CCX_SEAS_ML_HS_MIN_M the u_hs exchange rate (u_hs / h_hs_t) and
+#' the air-sea rate on that sliver outrun the substep bound. Stops, as the LS
+#' guard does -- a clamp would turn a design violation into a quiet bias.
+CCX_SEAS_ML_HS_MIN_M <- 5
+ccx_seas_ml_hs_guard <- function(h_hs, dz_total) {
+  co <- ccx_mld_shape("hs")
+  for (h in HEMIS) {
+    h_min <- h_hs * min(co[[h]]$f_month); h_max <- h_hs * max(co[[h]]$f_month)
+    if (h_max >= dz_total)
+      stop(sprintf("ccx_seas_ml_hs_guard: the %s winter cold box reaches %.1f m but the column is %.1f m deep (h_hs = %.2f).", h, h_max, dz_total, h_hs))
+    if (h_min < CCX_SEAS_ML_HS_MIN_M)
+      stop(sprintf(paste0("ccx_seas_ml_hs_guard: the %s summer cold box thins to %.1f m ",
+                          "(h_hs = %.2f x f_min %.3f), below the %g m floor -- the HS <-> HD ",
+                          "exchange and air-sea rates on that sliver are not resolved."),
+                   h, h_min, h_hs, min(co[[h]]$f_month), CCX_SEAS_ML_HS_MIN_M))
+  }
+  co
+}
 ccx_seas_ml_guard <- function(grid) {
-  co   <- ccx_mld_shape()
+  co   <- ccx_mld_shape("ls")
   base <- cumsum(grid$dz)[2]                      # layer-1 base, annual mean
   for (h in HEMIS) {
     h_max <- grid$h_ml * max(co[[h]]$f_month)
@@ -1658,7 +1707,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # Aug), so a shadow that leaked across iterations would give the SH the NH's
     # winter. When the mechanism is off, gr IS grid and every number below is
     # bit-identical to the pre-round-6 model.
-    if (ccx_seas_ml_on(p)) {
+    if (ccx_seas_ml_ls_on(p)) {
       .ev      <- ccx_mld_eval(aux$mld_coef[[h]], t)
       h_ml_t   <- grid$h_ml * .ev$f            # m, mean-preserving by construction
       dh_ml_dt <- grid$h_ml * .ev$dfdt         # m/yr, > 0 deepening
@@ -2306,6 +2355,20 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       ihs <- aux$idx[[h]]$hs
       ihd <- aux$idx[[h]]$hd
 
+      # ---- OPTION B (2026-09-11): the cold box's geometry NOW. With seas_ml = 2
+      # HS deepens and shoals on its own poleward Holte climatology, HD absorbs
+      # the excursion (the column depth is conserved), and HS's mass tracks its
+      # thickness. Twin of the LS block at the top of the loop, and of the C++.
+      # With the mechanism off these ARE aux's own values, bit for bit.
+      h_hs_t <- aux$h_hs; dz_hd_t <- aux$dz_hd; hs_mass_t <- aux$hs_mass_kg[[h]]; dh_hs_dt <- 0
+      if (ccx_seas_ml_hs_on(p)) {
+        .evh      <- ccx_mld_eval(aux$mld_hs_coef[[h]], t)
+        h_hs_t    <- aux$h_hs * .evh$f              # m, mean-preserving
+        dh_hs_dt  <- aux$h_hs * .evh$dfdt           # m/yr, > 0 deepening
+        dz_hd_t   <- aux$dz_hd + (aux$h_hs - h_hs_t)
+        hs_mass_t <- aux$hs_mass_kg[[h]] * .evh$f
+      }
+
       # (a) AIR-SEA, on exactly the law the mixed layer uses. HILDA assumes the
       #     gas exchange coefficient PER UNIT AREA is the same in high and low
       #     latitudes (their Table 1, g_l = g_h), justified by sea ice
@@ -2321,7 +2384,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       sst_hs <- aux$sst_hs +
         (if (isTRUE(p$sst_obs > 0) && !is.null(sa) && is.finite(sa)) sa
          else p$sst_scale * forc$gmst)
-      dic_hs <- y[ihs, "C"] * aux$mol_per_GtC / aux$hs_mass_kg[[h]]   # mol/kg
+      dic_hs <- y[ihs, "C"] * aux$mol_per_GtC / hs_mass_t             # mol/kg
       k_hs   <- carb_constants(sst_hs)
       pco2_hs <- if (isTRUE(p$revelle_frozen > 0)) {
         ccx_const("CO2_PI_PPM") *
@@ -2345,8 +2408,20 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #     interface would transport no isotope at all -- which is precisely
       #     the quantity this structure exists to move.
       if (p$u_hs != 0) {
-        add_flux(ihs, ihd, p$u_hs * y[ihs, "C"] / aux$h_hs)
-        add_flux(ihd, ihs, p$u_hs * y[ihd, "C"] / aux$dz_hd)
+        add_flux(ihs, ihd, p$u_hs * y[ihs, "C"] / h_hs_t)
+        add_flux(ihd, ihs, p$u_hs * y[ihd, "C"] / dz_hd_t)
+      }
+
+      # (b'') SEASONAL ENTRAINMENT / DETRAINMENT ON THE COLD BOX (option B).
+      #      The LS mechanism's two explicit limbs, verbatim in form: a deepening
+      #      HS swallows HD water AT HD CONCENTRATION, a shoaling one leaves its
+      #      own water behind at HS concentration. alpha13 = 1 -- physical
+      #      transport, 13C and 14C ride along from the source box. Emits nothing
+      #      unless seas_ml = 2 (dh_hs_dt is exactly 0 otherwise).
+      if (dh_hs_dt > 0) {
+        add_flux(ihd, ihs, y[ihd, "C"] * dh_hs_dt / dz_hd_t)     # entrainment
+      } else if (dh_hs_dt < 0) {
+        add_flux(ihs, ihd, y[ihs, "C"] * (-dh_hs_dt) / h_hs_t)   # detrainment
       }
 
       # (b') THE HS PUMP (2026-09-07d): export from HS, remineralised in HD.
@@ -2393,7 +2468,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
           stop("q_attach_from must be an integer in 1..", grid$nl,
                " (the interior layer where HD attaches); got ",
                format(p$q_attach_from))
-        conc_hd <- y[ihd, "C"] / (aux$a_hs[[h]] * aux$dz_hd)           # GtC/m3
+        conc_hd <- y[ihd, "C"] / (aux$a_hs[[h]] * dz_hd_t)             # GtC/m3
         for (kk in seq.int(kfrom, grid$nl)) {
           add_flux(ihd, ioc[kk],
                    aux$a_ls[[h]] * gr$dz[kk + 1] / p$tau_q * conc_hd)
@@ -2494,7 +2569,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # ⚠ This limb is OUTSIDE the hemisphere loop, so it cannot use `gr` -- it
     # needs the UP hemisphere's own mixed-layer thickness at time t, which is
     # not the one the loop last held.
-    .h_up <- if (ccx_seas_ml_on(p))
+    .h_up <- if (ccx_seas_ml_ls_on(p))
                grid$h_ml * ccx_mld_eval(aux$mld_coef[[cg$up]], t)$f else grid$dz[1]
     add_flux(aux$idx[[cg$up]]$ml, aux$idx[[cg$down]]$ml,
              cg$Q * y[aux$idx[[cg$up]]$ml, "C"] / (aux$a_oc[[cg$up]] * .h_up))
@@ -2864,7 +2939,10 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # nothing is read and nothing is carried. `kz_int` above is computed ONCE at
     # the ANNUAL-MEAN grid and HELD: the interior interfaces do not move, so
     # their K must not either, while the ML base keeps K = kz by the anchor.
-    mld_coef    = if (ccx_seas_ml_on(p)) ccx_seas_ml_guard(grid) else NULL,
+    mld_coef    = if (ccx_seas_ml_ls_on(p)) ccx_seas_ml_guard(grid) else NULL,
+    # OPTION B (2026-09-11): the HS box's own shape when seas_ml = 2. Mutually
+    # exclusive with mld_coef by construction (one box carries the cycle).
+    mld_hs_coef = if (ccx_seas_ml_hs_on(p)) ccx_seas_ml_hs_guard(h_hs, sum(grid$dz)) else NULL,
     grid = grid
   )
   # HS's own preindustrial chemistry references, for the frozen-Revelle switch,
@@ -3035,8 +3113,8 @@ ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
   # because near-singular arithmetic amplifies roundoff differently in the two
   # cores. ⛔ A stability bound that looks at one end of a cycle is not a bound.
   .grids <- list(grid)
-  if (ccx_seas_ml_on(p)) {
-    .sh <- ccx_mld_shape()
+  if (ccx_seas_ml_ls_on(p)) {
+    .sh <- ccx_mld_shape("ls")
     .fs <- c(min(vapply(HEMIS, function(h) min(.sh[[h]]$f_month), numeric(1))),
              max(vapply(HEMIS, function(h) max(.sh[[h]]$f_month), numeric(1))))
     .grids <- lapply(.fs, function(f) ccx_grid_at_h_ml(grid, grid$h_ml * f))
