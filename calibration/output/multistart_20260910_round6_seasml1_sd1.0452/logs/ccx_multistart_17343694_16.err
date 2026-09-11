@@ -1,0 +1,15 @@
+Warning messages:
+1: In spinup_fn(p) :
+  periodic spinup: carbon did not converge, |resid| = 1.310e-06
+2: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 1.109e+06
+3: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 2.947e-02
+4: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 1.469e-06
+5: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 3.685e+05
+6: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 2.947e+09
+7: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 3.221e+05

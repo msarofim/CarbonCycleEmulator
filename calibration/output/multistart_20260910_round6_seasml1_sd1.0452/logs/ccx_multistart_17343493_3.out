@@ -1,0 +1,33 @@
+CCX_PROJ_DIR  /scratch/ms17839/CarbonCycleEmulator
+CCX_MS_OUTDIR /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260910_round6_seasml1_sd1.0452
+CCX_MS_STRUCT hilda   CCX_MS_SEAS_ML 1   CCX_MS_SPREAD 1.0452
+host cs620.hpc.nyu.edu  task 3  2026-09-10T18:03:50-04:00
+run-time inputs present: 6/6. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.09932718)
+
+======================================================================
+DISPERSED MULTI-START, id 3, arm N, 31 parameters
+  host cs620.hpc.nyu.edu   R 4.5.1   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.0993, pooled over the 31 coordinates at least one of
+    them FITTED; over all 31 it would be 0.0993, diluted by the 0 migrated in BOTH:
+    none)
+  out /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260910_round6_seasml1_sd1.0452/start_003.rds
+======================================================================
+  structure: 'hilda' (hs_frac=0.16, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+start point: seeded: INCUMBENT with the ocean ENSO pair SET to +0.100 each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here) (0 draws), log-post there = -1636.0212
+PORT GATE (a) at the new_basin reference point: here -1683.3286647498 vs MacBook-Pro-2.local@28dc3e0 -1683.3286632772,
+              rel 8.75e-10 (tol 1e-08)  [this task's own start is elsewhere]
+PORT GATE (a) PASSED.
+measured 0.7379 s/eval (median of 5; range 0.7214-0.7624) => one 6000-eval restart
+  projects to 73.8 min; wall budget 300 min, of which 45.0 min is RESERVED for the
+  BFGS polish (100 iterations)
+PREFLIGHT id 003 on cs620.hpc.nyu.edu: start SEEDED, log-post -1636.0212, 0 draws, port VERIFIED rel 8.7e-10,
+             0.7379 s/eval => a 6000-eval restart takes 73.8 min of a 300 min budget. LAUNCHABLE.
+done 2026-09-10T18:04:00-04:00

@@ -1,0 +1,9 @@
+⚠ CCX_MS_OUTDIR is OUTSIDE /scratch/ms17839/CarbonCycleEmulator_r6fix, allowed by CCX_MS_OUTDIR_EXTERNAL=1:
+  /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260910_round6_seasml1_sd1.0452
+Warning messages:
+1: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 1.407e-05
+2: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 5.984e-09
+3: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 4.746e-08

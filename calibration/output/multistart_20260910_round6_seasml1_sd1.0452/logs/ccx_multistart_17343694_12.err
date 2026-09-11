@@ -1,0 +1,3 @@
+Warning message:
+In spinup_fn(p) :
+  periodic spinup: carbon did not converge, |resid| = 2.736e+06

@@ -1,0 +1,3 @@
+Warning message:
+In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0)) :
+  conveyor 12C spinup did not converge: |resid| = 1.860e+07
