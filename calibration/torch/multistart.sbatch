@@ -211,7 +211,14 @@ export CCX_MS_SPREAD="${CCX_MS_SPREAD:-1.0452}"
 # 2026-09-10: `_seasml${CCX_MS_SEAS_ML}` -- seas_ml moves the objective at a CONSTANT
 # 31 names, so the directory must say it; the seas_ml = 0 rounds live in
 # multistart_20260909x_hilda31_periodic (no suffix -- it predates the axis).
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260910_round6_seasml${CCX_MS_SEAS_ML}_sd${CCX_MS_SPREAD}}"
+# 2026-09-11 (5): ROUND 6b -- the SAME arm re-fitted under the corrected
+# concentration observables (annual mean over the box's mass at the time,
+# [[seasonal_box_observable_artefact]]). Same 31 names, same seas_ml = 1, same
+# spread; the OBJECTIVE moved (+20.7 on the incumbent target at seas_ml = 1),
+# so the 09-10 round-6 checkpoints are another objective's and the directory
+# says so. port_targets.csv regenerated at seas_ml = 1 on the Mac, commit c0bf185.
+#     sbatch --array=0-23%24 calibration/torch/multistart.sbatch
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260911_round6b_seasml${CCX_MS_SEAS_ML}_sd${CCX_MS_SPREAD}}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.
