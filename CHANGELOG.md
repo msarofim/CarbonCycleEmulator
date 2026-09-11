@@ -2,6 +2,39 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-11 (2) — ⭐⭐⭐ **RULED (Marcus): ROUND 6 IS REFUTED AS BUILT, THE MECHANISM IS RETAINED; THE ARC CLOSES ON THIS RECORD; `hilda31p` STAYS CANONICAL; OPTION B (LATITUDE STRUCTURE FOR THE MIXED LAYER) IS THE NEXT ROUND. GATE P7 IS PROMOTED TO THE LEDGER.**
+
+Marcus: *"Move forward with the recommendation."* — on the 09-11 read: P7 fails at 2× its bound, the
+−17.8 is the two gradient rows, P2 misses as written, P12 half; the likely cause is the P1c box identity.
+
+### What is now in the tree
+- **GATE P7** in `calibration/lib_design_gates.R` (`DG_LEDGER` id "P7", `dg_gateP7_verdict()`): *a surface
+  mechanism must not be a vertical-gradient lever* — |Δ(modern surface−deep δ¹³C gradient)| ≤ the
+  `ocean_grad_d13c` row's own sd_eff at the OFF arm (0.163, observation-derived, never typed); the DIC
+  move REPORTED in its own sd_eff, not gated. `tests/testthat/test-gate-p7.R`: kernel mutation-tested
+  (identity / at-bound / past-bound both ways / NA / DIC-never-decides / OFF-arm sigma), and POWER on the
+  record: the round-6 mode vs `hilda31p`, scored through `ccx_ocean_grad_scored()`, FAILS at ratio 2.0
+  and reproduces −0.309 → +0.018 / 302 → 385 to 3 dp. **Any future `seas_ml` re-test passes this gate
+  or does not ship.**
+- **`seas_ml` stays BUILT, GATED and DEFAULT-OFF** (`ccx_default_params()$seas_ml = 0`; the driver and
+  port targets carry the label; the periodic spinup stays adopted). Nothing is torn out.
+- **`notes/prereg_2026-09-11_option_b_ml_box.md`** — the design note for B: the hypothesis (round 6's
+  P7 failure and the ENSO sign error share ONE cause: no latitude structure in the mixed layer), the
+  scope (`ml_lo` / `ml_hi` per hemisphere; Fix B's tropical limb on `ml_lo`; `seas_ml` on `ml_hi` only,
+  driven by a POLEWARD MLD climatology), the four RULINGS owed before building, and **P7′ + PB1–PB6
+  preregistered** — P7′ being the whole point: with the box right, `seas_ml = 1` must pass GATE P7, and if
+  it does not the entrainment formulation itself is wrong.
+- **`rep_dC` +3.17** is written down as the strain no ocean option addresses ⇒ [[ccx_rep_dc_co2_bias]].
+
+### Round 6, the closing tally (for the arc record; details in the entries below and `INDEX_ccx_seas_ml`)
+Built 09-09g→x (option A, mean-preserving, periodic spinup adopted); the spinup adoption re-baselined the
+objective and the 09-10 refit turned out to be the `seas_ml = 0` baseline (`hilda31p`, +9.09 over
+`hilda31`); the capability was built and gated 09-10; the reference set re-ruled around the P8 wall; the
+fixed-penalty plateau defect found and fixed; round 6 proper ran 09-10/11 (24 + 14 starts, ~150 core-h)
+and converged at −1492.16. Verdict: **prior relief bought with the vertical gradients — refuted on P7.**
+Cost of the arc: ~190 core-hours on `cs`, four days. What it leaves: a real mechanism waiting for the
+right box, a gate that will know when it has one, and a periodic spinup that was overdue anyway.
+
 ## 2026-09-11 — ⭐⭐⭐ **ROUND 6 IS IN: THE `seas_ml = 1` REFIT CONVERGED AT −1492.1591. ON LIKELIHOOD IT IS −17.8 BEHIND `hilda31p`, AND EVERY BIT OF THAT IS THE TWO OCEAN-GRADIENT ROWS; THE PRIORS GAIN +6.2. P2 RELAXED (z −2.89 → −2.07), P12 HALF-RETIRED (`ent_seas_amp_SH` 18.7 → 9.5). ⛔ NOTHING ADOPTED — WHETHER THE MECHANISM SHIPS IS A MODEL-STRUCTURE RULING.**
 
 Round 2 = job **`17354346`**, 14 tasks (fixed 0–5 + dispersed 8/9/10/12/18/19/21/22) resumed from

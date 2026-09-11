@@ -491,8 +491,43 @@ DG_LEDGER <- list(
          "
             offset's prior); this gate gives that a threshold. Mutation-tested",
          "
-            both ways on the kernel."))
+            both ways on the kernel.")),
+  list(id = "P7", what = "a SURFACE mechanism must not be a VERTICAL-GRADIENT lever (round-6 prereg P7, promoted 2026-09-11)",
+       class = "OBSERVATION-DERIVED sigma, ORDERING on the model's own move",
+       src = "the ocean_grad_d13c row's sigma_eff (GLODAP gradient target, option-5 inflation), ccx_ocean_grad_scored()",
+       bound = paste("|d13C gradient(mechanism ON) - d13C gradient(OFF)| <= sd_eff at the OFF arm;",
+         "
+            both gradients MODERN and like-for-like (same vector, same spinup, the",
+         "
+            objective's own scorer). The DIC gradient's move is REPORTED beside it",
+         "
+            in the same units (its own sd_eff) and not gated -- one bound, one claim."),
+       scored = "YES (the rows are in the objective) -- which is why a refit can BUY prior relief by moving them; this gate asks the move by name",
+       power  = paste("REAL, and it decided a round: the seas_ml = 1 refit (2026-09-11) moved the",
+         "
+            gradient +0.327 against sd_eff 0.163 (-0.309 -> +0.018, target -0.861)",
+         "
+            and was REFUTED on it; the DIC gradient went 302 -> 385 (target 233).",
+         "
+            Any future re-test of seas_ml (e.g. on a high-latitude ML box, option B)",
+         "
+            passes this gate or does not ship. Mutation-tested on the kernel."))
 )
+
+#' GATE P7 -- the verdict kernel. `g_off` / `g_on` are the scored gradient lists
+#' from ccx_ocean_grad_scored() at the mechanism-OFF and mechanism-ON arms of the
+#' SAME vector (or the two modes of a before/after refit, stated as such).
+#' The bound is the OFF arm's own sd_eff for d13c -- an observation-derived
+#' sigma, never a typed number. DIC is reported in its own sd_eff, not gated.
+dg_gateP7_verdict <- function(g_off, g_on) {
+  sd13 <- g_off$sd_eff[["d13c"]]; sddic <- g_off$sd_eff[["dic"]]
+  d13 <- g_on$d13c - g_off$d13c; ddic <- g_on$dic - g_off$dic
+  list(d13c_off = g_off$d13c, d13c_on = g_on$d13c, move_d13c = d13, sd_eff_d13c = sd13,
+       ratio_d13c = abs(d13) / sd13,
+       dic_off = g_off$dic, dic_on = g_on$dic, move_dic = ddic, sd_eff_dic = sddic,
+       ratio_dic = abs(ddic) / sddic,
+       pass = is.finite(d13) && is.finite(sd13) && sd13 > 0 && abs(d13) <= sd13)
+}
 
 #' Print the ledger. Called by the gate REPORTS so the numbers and their
 #' provenance never drift apart -- the caption-sync rule applied to gates.
