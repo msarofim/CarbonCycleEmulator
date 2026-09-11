@@ -52,11 +52,16 @@ test_that("GATE P7 has POWER: the round-6 seas_ml = 1 mode FAILS it against hild
   v <- dg_gateP7_verdict(g0, g1)
   expect_false(v$pass)
   expect_gt(v$ratio_d13c, 1.5)                         # 2.0x on 2026-09-11
-  # the record the ruling was taken on (CHANGELOG 2026-09-11), to 3 dp
-  expect_equal(v$d13c_off, -0.309, tolerance = 2e-3, scale = 1)
-  expect_equal(v$d13c_on,   0.018, tolerance = 2e-3, scale = 1)
-  expect_equal(v$dic_off,  302,    tolerance = 1,    scale = 1)
-  expect_equal(v$dic_on,   385,    tolerance = 1,    scale = 1)
+  # RE-PINNED 2026-09-11 (5) to the ANNUAL-MEAN read ([[seasonal_box_observable_artefact]]).
+  # The 09-11 (2) record (-0.309 -> +0.018, DIC 302 -> 385) was the instant-over-mean-mass
+  # artefact. Under the corrected observable the round-6 DIC gradient is AT the target
+  # (226 vs 233) and only the d13C half fails -- and that half is the UNREFIT mode's deep
+  # box, moved by the fit to cancel the artefact, not a property of the mechanism. This
+  # pins the RECORD at that mode; it is re-pinned again when round 6 is refit.
+  expect_equal(v$d13c_off, -0.300, tolerance = 2e-3, scale = 1)
+  expect_equal(v$d13c_on,   0.031, tolerance = 2e-3, scale = 1)
+  expect_equal(v$dic_off,  300,    tolerance = 1,    scale = 1)
+  expect_equal(v$dic_on,   227,    tolerance = 1,    scale = 1)
   # and the target, for the reader: the model was already too weak on d13c
   tg <- ccx_ocean_gradient_target()
   expect_lt(abs(v$d13c_off - tg$d13c$target), abs(v$d13c_on - tg$d13c$target))   # ON is FURTHER from obs

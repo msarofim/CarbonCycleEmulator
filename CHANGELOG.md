@@ -2,6 +2,67 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-11 (5) — ⭐⭐ **RULED (Marcus): "ANNUAL MEAN OF THE CONCENTRATION." Every concentration observable now reads a box over its mass AT THE TIME, per hemisphere, averaged over the 12 month-centres of the year centred on the epoch, then combined with fixed (annual-mean-mass) weights. Priced −0.0957 at `hilda31p` and restamped into the file with its history; round 6 re-read: DIC gradient 300 → 227 (AT the target 233), δ¹³C −0.300 → +0.031 (the unrefit deep). Round 6 must be RE-FIT.**
+
+### The read (`R/likelihood.R`)
+`ccx_epoch_year_samples(epoch)` = 12 month-centres centred on the epoch (`LIK_ANNUAL_MEAN_N`);
+`ccx_box_mass_at(aux, grid, which, h, t)` = the box's mass then — `ml` via `aux$mld_coef`, `hs` via
+`aux$mld_hs_coef` (option B's field), `deep` constant — reading only what `ccx_prepare()` built;
+`ccx_box_annual_conc()` = per hemisphere the annual mean of C(t)/M(t) and of the instant δ¹³C, then
+DIC volume-weighted and δ¹³C carbon-weighted across hemispheres with the ANNUAL-MEAN masses as
+fixed weights. ⚠ The first cut combined the hemispheres at each instant (total C / total M) —
+that double-weights each hemisphere's winter (they are antiphase) and read the synthetic box 13.8
+µmol/kg high; a gridded climatology is a time mean AT A PLACE. Fixed before pricing.
+Consumers: `ccx_model_ocean_gradient`, `ccx_model_hs_surface` (SH DIC, both-hemisphere δ¹³C),
+`dg_gateG` (the final year's 12 month-centres instead of the Dec-31 state).
+
+### Guard: `tests/testthat/test-seasonal-box-observable.R` (15), MUTATION-TESTED
+A synthetic box with a seasonal mass AND a concentration that cycles in phase with it (annual mean
+exactly c): the shipped read returns c to 0.01 µmol/kg (daily grid; chord error 0.003); **the
+mean-mass mutant fails (1) and the instant mutant fails (2)**. ⚠ With a CONSTANT concentration
+the mean-mass mutant PASSES — annual-mean-over-mean-mass is exact then, because f has mean 1 —
+which is why the synthetic concentration cycles. A test that could not see its own mutation is
+not a guard ([[mutation_test_gates]]).
+
+### Price, and what moved
+| | likelihood before → after | Δ | rows |
+|---|---|---|---|
+| `hilda31p` | −1441.7015 → −1441.7972 | **−0.0957** | grad_dic +0.089, grad_d13c −0.190, hs_dic −0.0005, hs_d13c +0.005 |
+| `hilda31` (quarantined; the ratification fixture) | −1439.4248 → −1439.5184 | −0.0936 | same shape |
+Both files RESTAMPED by NEW `calibration/restamp_mode_objective.R`: the measured LIKELIHOOD move must
+equal the priced one to 1e−4 or it refuses (it gates on the streams, not the logpost, because a stored
+logpost also carries prior drift — `hilda31`'s sits −0.8110 behind on the 09-09w re-centring, and the
+restamp brought that current too: logpost −1478.6595 → −1479.5641, decomposed and recorded).
+`objective_history` inside each file keeps the old streams/logpost, the reason, the commit.
+Re-pinned (re-priced, not re-baselined; the reason in each test's comment): `test-enso-demean`
+45.1896 → **45.1848**, 43.8367 → **43.8318**, 63.7282 → **63.7234**; `test-hs-surface-rows` hand
+recompute → the annual mean (and asserts it is NOT the instant); `test-gate-p7` pins → the corrected
+record. `calibration/torch/port_targets.csv` regenerated at `seas_ml = 1`: the incumbent target
+(`hilda31p`'s vector scored at `seas_ml = 1`) moved **−1634.68 → −1614.01 (+20.7)** — that is how much the
+artefact was charging the unrefit canonical under the seasonal box; the `stored` offsets (−133.37 /
+−182.17) are drift, not defects.
+`refit_20260910_hilda31_periodic/…_hess.rds` still records the pre-restamp logpost as its reference —
+a provenance note, not repaired (the Hessian itself does not move at 1e−1).
+
+### Round 6 re-read under the corrected observable (`round6_p7_annualmean.log`)
+| | DIC gradient (233) | δ¹³C gradient (−0.861) |
+|---|---|---|
+| `hilda31p` | 300.4 (z +2.05) | −0.300 (z +3.44) |
+| round 6 b1, UNREFIT | **227.2 (z −0.18)** | +0.031 (z +5.55) |
+Likelihood re-scored: −1449.56 vs −1441.80 = **−7.8** (was −17.8), now ~all on `ocean_grad_d13c`
+(−15.1 vs −5.0) with the DIC row BETTER than the canonical (−4.4 vs −6.5). The δ¹³C half is the
+deep box the fit moved to cancel the artefact (`pump_grad` 255 → 280, deep δ¹³C +0.37) and can
+only be judged after a REFIT. **GATE P7's mechanism verdict is OPEN.**
+
+### Suite
+**13,028 / 406: 2 failed, 1 error, 4 skipped** — the pre-existing pair only (GATE Q at the canonical; the
+08-30 migration error). `test-seasonal-box-observable` (15) new.
+
+### Next
+1. Re-fit round 6 on Torch under this objective (`CCX_MS_SEAS_ML=1`, references `hilda31p`/`hilda31`,
+   the CSV is current) — then P7 on the refit mode, re-pin `test-gate-p7`.
+2. Option B resumes only after that read (its HS box is scored by the same, now-correct, HS row).
+
 ## 2026-09-11 (4) — ⛔⛔⛔ **THE ROUND-6 P7 VERDICT RESTS ON AN OBSERVABLE ARTEFACT: the ocean-gradient row divides INSTANT box carbon by the ANNUAL-MEAN box mass, which is exact only for a time-constant box. At `seas_ml = 1` the surface DIC reads 157 µmol/kg LOW at the GLODAP epoch (early November, f 0.885 / 0.919); under an annual-mean read the round-6 DIC gradient is 226 vs target 233, not 385. Round 6 was FITTED against the corrupted row. The "refuted as built" ruling is UNSUPPORTED pending a re-fit under a corrected observable. Build of option B PAUSED at the R side.**
 
 Found while wiring the HS box's time-varying mass for option B (the same question had to be

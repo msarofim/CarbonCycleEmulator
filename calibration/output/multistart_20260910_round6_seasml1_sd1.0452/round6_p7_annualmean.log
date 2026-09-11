@@ -1,0 +1,5 @@
+target: dic 233.1  d13c -0.861
+hilda31p   h_ml 44.09  DIC grad    300.4 (z +2.05, sd_eff 32.9)   d13C grad -0.2998 (z +3.44, sd_eff 0.163)
+round6 b1  h_ml 48.66  DIC grad    227.2 (z -0.18, sd_eff 32.4)   d13C grad 0.0312 (z +5.55, sd_eff 0.161)
+round6 b2  h_ml 44.10  DIC grad    226.5 (z -0.20, sd_eff 32.9)   d13C grad 0.0351 (z +5.49, sd_eff 0.163)
+P7: modern d13C gradient moved +0.3310 (bound: sd_eff 0.163)

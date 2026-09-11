@@ -1059,24 +1059,83 @@ ccx_model_ocean_alk_gradient <- function(spin, pump = NULL) {
 #'   CCX_OCEAN_BOX_COLS. Its ABSENCE is what skips the terms.
 #' @param aux,grid  from the spinup, for the box volumes.
 #' @param epoch list(surf, deep) decimal years; each layer is read at its own.
+#' ⛔⛔ A BOX'S CONCENTRATION IS ITS CARBON OVER ITS MASS **AT THAT TIME**, AND A
+#' CLIMATOLOGICAL TARGET IS MET BY AN **ANNUAL MEAN** (RULED 2026-09-11 (4)).
+#'
+#' Until 2026-09-11 every concentration observable here read the INSTANT box
+#' carbon at the observation's epoch over the ANNUAL-MEAN box mass. Exact while
+#' every box was time-constant -- the model's whole life until round 6 -- and
+#' silently wrong the moment one was not: at `seas_ml = 1` the low-latitude mixed
+#' layer holds 0.885 (NH) / 0.919 (SH) of its mean mass at the DIC epoch (early
+#' November), so its surface DIC read 157 umol/kg LOW and the gradient 157 too
+#' STEEP. Round 6 was FITTED against that row; its P7 "302 -> 385" was the
+#' artefact and its d13C half was the deep box compensating it
+#' ([[seasonal_box_observable_artefact]], diag_seasonal_box_observable_artefact.R).
+#'
+#' THE READ NOW: the concentration at each of LIK_ANNUAL_MEAN_N month-centres of
+#' the year CENTRED on the epoch, each over the box's mass at that instant, then
+#' the plain mean -- like-for-like with a gridded climatology (GLODAP's product
+#' is an annual field, not a November one). d13C is the mean of the instant
+#' ratios for the same reason. For a time-constant box the mass factor is 1 and
+#' the annual mean differs from the instant read only by the box's own seasonal
+#' cycle (SST, the entrainment shim): ~1 umol/kg / 0.005 permil at hilda31p --
+#' PRICED in CHANGELOG 2026-09-11 (5); every stored logpost moves by that hair.
+#' `out` at an annual cadence (tests) is read at rule = 2, so a constant
+#' series returns itself exactly.
+LIK_ANNUAL_MEAN_N <- 12L
+ccx_epoch_year_samples <- function(epoch)
+  epoch - 0.5 + (seq_len(LIK_ANNUAL_MEAN_N) - 0.5) / LIK_ANNUAL_MEAN_N
+
+#' The mass (kg) of a hemisphere's box AT time t, honouring a seasonal box.
+#' `which` = "ml" (the low-latitude mixed layer: seasonal when aux$mld_coef is
+#' present), "deep" (the bottom box, constant), "hs" (the cold box: seasonal
+#' when aux$mld_hs_coef is present). Reads ONLY what ccx_prepare() built, so it
+#' cannot hold a second opinion about whether a box is seasonal
+#' ([[two_gates_one_mechanism]]).
+ccx_box_mass_at <- function(aux, grid, which, h, t) {
+  rho <- ccx_const("RHO_SEAWATER")
+  switch(which,
+    ml   = ccx_column_area(aux, h) * grid$dz[1] * rho *
+             (if (is.null(aux$mld_coef)) 1 else ccx_mld_eval(aux$mld_coef[[h]], t)$f),
+    deep = ccx_column_area(aux, h) * grid$dz[length(grid$dz)] * rho,
+    hs   = aux$hs_mass_kg[[h]] *
+             (if (is.null(aux$mld_hs_coef)) 1 else ccx_mld_eval(aux$mld_hs_coef[[h]], t)$f),
+    stop("ccx_box_mass_at(): unknown box '", which, "'"))
+}
+
+#' Annual-mean concentration (umol/kg) and d13C (permil) of a box over the
+#' year centred on `epoch`. PER HEMISPHERE FIRST: each hemisphere's
+#' concentration at each sample is its carbon over ITS mass then, and the
+#' annual mean is taken there -- a gridded climatology is a time mean AT A
+#' PLACE, not a mass-weighted mean across places that are in antiphase (the
+#' two hemispheres' winters would otherwise carry double weight). Then the
+#' hemispheres are combined with FIXED weights, their annual-mean masses,
+#' exactly as the time-constant observable always did: DIC volume-weighted,
+#' d13C carbon-weighted. `hemis` restricts the combination (the HS-surface DIC
+#' row is SH-only). For a time-constant box this IS the old formula applied
+#' to the annual-mean state.
+ccx_box_annual_conc <- function(out, aux, grid, which, epoch, hemis = HEMIS) {
+  at <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
+  tt <- ccx_epoch_year_samples(epoch)
+  per_h <- vapply(hemis, function(h) {
+    C   <- at(paste0(which, "_C_",   h), tt)
+    C13 <- at(paste0(which, "_C13_", h), tt)
+    M   <- vapply(tt, function(t1) ccx_box_mass_at(aux, grid, which, h, t1), numeric(1))
+    c(dic  = mean(C * aux$mol_per_GtC / M * 1e6),
+      d13c = mean(1000 * (C13 / C / ccx_const("R13_VPDB") - 1)),
+      w    = mean(M))                                   # the fixed weight: annual-mean mass
+  }, numeric(3))
+  w <- per_h["w", ]; dic <- per_h["dic", ]; d13c <- per_h["d13c", ]
+  c(dic  = sum(w * dic) / sum(w),
+    d13c = sum(w * dic * d13c) / sum(w * dic))
+}
+
 ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
   if (!all(CCX_OCEAN_BOX_COLS %in% names(out))) return(NULL)
-  at <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
-  rho <- ccx_const("RHO_SEAWATER")
-  # kg of seawater in each hemisphere's ML and bottom box -- over the LOW-
-  # LATITUDE column's area (ccx_column_area), which is what the boxes span.
-  mass <- lapply(HEMIS, function(h)
-    c(ml = ccx_column_area(aux, h) * grid$dz[1] * rho,
-      deep = ccx_column_area(aux, h) * grid$dz[length(grid$dz)] * rho))
-  names(mass) <- HEMIS
-  lay <- function(which, tt) {
-    C   <- sum(vapply(HEMIS, function(h) at(paste0(which, "_C_",   h), tt), numeric(1)))
-    C13 <- sum(vapply(HEMIS, function(h) at(paste0(which, "_C13_", h), tt), numeric(1)))
-    M   <- sum(vapply(HEMIS, function(h) mass[[h]][[which]], numeric(1)))
-    c(dic  = C * aux$mol_per_GtC / M * 1e6,
-      d13c = 1000 * (C13 / C / ccx_const("R13_VPDB") - 1))
-  }
-  s <- lay("ml", epoch$surf); b <- lay("deep", epoch$deep)
+  # ANNUAL MEANS over each layer's own epoch year, each box over its mass AT THE
+  # TIME (2026-09-11 (4)); the boxes span the LOW-LATITUDE column's area.
+  s <- ccx_box_annual_conc(out, aux, grid, "ml",   epoch$surf)
+  b <- ccx_box_annual_conc(out, aux, grid, "deep", epoch$deep)
   list(dic = unname(b["dic"] - s["dic"]), d13c = unname(b["d13c"] - s["d13c"]))
 }
 
@@ -1162,11 +1221,11 @@ ccx_model_hs_surface <- function(out, aux, epoch_dic, epoch_d13c) {
             epoch_dic, " / ", epoch_d13c, "); the #11 rows are ABSENT for this run.")
     return(NULL)
   }
-  at <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
-  dic <- at("hs_C_SH", epoch_dic) * aux$mol_per_GtC / aux$hs_mass_kg[["SH"]] * 1e6
-  C   <- sum(vapply(HEMIS, function(h) at(paste0("hs_C_",   h), epoch_d13c), numeric(1)))
-  C13 <- sum(vapply(HEMIS, function(h) at(paste0("hs_C13_", h), epoch_d13c), numeric(1)))
-  list(dic = dic, d13c = 1000 * (C13 / C / ccx_const("R13_VPDB") - 1))
+  # ANNUAL MEANS, the cold box over its mass AT THE TIME (2026-09-11 (4); a
+  # seasonal HS is exactly what option B builds). DIC is the SH row; d13C both.
+  dic  <- ccx_box_annual_conc(out, aux, aux$grid, "hs", epoch_dic,  hemis = "SH")[["dic"]]
+  d13c <- ccx_box_annual_conc(out, aux, aux$grid, "hs", epoch_d13c)[["d13c"]]
+  list(dic = dic, d13c = d13c)
 }
 
 #' The HS-surface rows as the likelihood receives them: model values at the

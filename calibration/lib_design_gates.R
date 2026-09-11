@@ -1180,22 +1180,27 @@ dg_gateG <- function(v, obs) {
   yr   <- round(obs$epoch_mean)
   F  <- ccx_build_forcing("historical", c(DG_YEARS[1], yr), prod_c14 = sp$prod_c14,
                           bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
-  st <- ccx_run_fast(sp, F)$state
+  r  <- ccx_run_fast(sp, F); st <- r$state; out <- r$out
   rho <- ccx_const("RHO_SEAWATER")
   # Over the LOW-LATITUDE column's area: the ML box spans a_ls, not a_oc, once
   # the HILDA boxes are on (2026-09-07d; read 16 percent low before).
+  # ⛔ AND AS AN ANNUAL MEAN OVER THE FINAL YEAR, each box over its mass AT THE
+  # TIME (2026-09-11 (4)): the Dec-31 STATE over the annual-mean mass read a
+  # seasonal mixed layer ~50 % high (NH f ~ 1.5 in January). The 1750 value is
+  # the spinup's -- aseasonal by construction, so its instant read is exact.
   ml <- function(y, h) y[aux$idx[[h]]$ml, "C"] * aux$mol_per_GtC /
           (ccx_column_area(aux, h) * grid$dz[1] * rho) * 1e6
+  ml_ann <- function(h) ccx_box_annual_conc(out, aux, grid, "ml", floor(max(out$t)) + 0.5, hemis = h)[["dic"]]   # the final year's 12 month-centres, on the output grid
   # AREA-WEIGHTED, because the observation is a global volume-weighted mean and
   # the two hemispheres differ by ~15 umol/kg (the model's solubility pump).
-  aw <- function(y) (ml(y, "NH") * aux$a_oc$NH + ml(y, "SH") * aux$a_oc$SH) /
-          (aux$a_oc$NH + aux$a_oc$SH)
+  aw <- function(nh, sh) (nh * aux$a_oc$NH + sh * aux$a_oc$SH) / (aux$a_oc$NH + aux$a_oc$SH)
   ix   <- unlist(lapply(HEMIS, function(h) c(aux$idx[[h]]$ml, aux$idx[[h]]$oc)))
   # the OBSERVED profile integrated over the same column area the model's `inv`
   # spans (ml + oc boxes = the low-latitude column); a_oc before 2026-09-07d.
   mass <- (ccx_column_area(aux, "NH") + ccx_column_area(aux, "SH")) * grid$dz * rho
-  list(year = yr, surf = aw(st), surf_1750 = aw(sp$y),
-       surf_NH = ml(st, "NH"), surf_SH = ml(st, "SH"),
+  surf_NH <- ml_ann("NH"); surf_SH <- ml_ann("SH")
+  list(year = yr, surf = aw(surf_NH, surf_SH), surf_1750 = aw(ml(sp$y, "NH"), ml(sp$y, "SH")),
+       surf_NH = surf_NH, surf_SH = surf_SH,
        inv = sum(st[ix, "C"]), inv_1750 = sum(sp$y[ix, "C"]),
        inv_obs = sum(obs$profile$dic * 1e-6 * mass / aux$mol_per_GtC))
 }

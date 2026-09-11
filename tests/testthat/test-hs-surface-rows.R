@@ -62,9 +62,14 @@ test_that("rows are absent with the structure off, present with it on, and equal
   expect_null(ccx_ocean_grad_scored(off$out, off$sp)$hs_surf)
   on <- hr_run(hr_par()); g <- ccx_ocean_grad_scored(on$out, on$sp); hs <- g$hs_surf
   expect_false(is.null(hs)); tg <- ccx_hs_surface_target(); aux <- on$sp$aux
-  # recompute DIC at the epoch by hand
-  C <- stats::approx(on$out$t, on$out$hs_C_SH, xout = tg$dic$epoch, rule = 2)$y
-  expect_equal(hs$dic, C * aux$mol_per_GtC / aux$hs_mass_kg$SH * 1e6, tolerance = 1e-12)
+  # recompute DIC by hand: the ANNUAL MEAN over the epoch year (2026-09-11 (5)),
+  # 12 month-centres, each over the box's mass then (constant here: no seasonal HS)
+  tt <- ccx_epoch_year_samples(tg$dic$epoch)
+  C <- stats::approx(on$out$t, on$out$hs_C_SH, xout = tt, rule = 2)$y
+  expect_equal(hs$dic, mean(C * aux$mol_per_GtC / aux$hs_mass_kg$SH * 1e6), tolerance = 1e-12)
+  # and it is NOT the instant read (the retired form) -- the box has its own seasonal cycle
+  C1 <- stats::approx(on$out$t, on$out$hs_C_SH, xout = tg$dic$epoch, rule = 2)$y
+  expect_false(isTRUE(all.equal(hs$dic, C1 * aux$mol_per_GtC / aux$hs_mass_kg$SH * 1e6, tolerance = 1e-6)))
   expect_true(hs$dic > 1900 && hs$dic < 2400)                # a surface-ocean number
   expect_equal(unname(hs$sd_eff[["dic"]]), sqrt(tg$dic$sd^2 + tg$dic$sd_cluster^2))
   expect_equal(unname(hs$sd_eff[["d13c"]]), sqrt(tg$d13c$sd^2 + tg$d13c$sd_cluster^2))

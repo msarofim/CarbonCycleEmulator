@@ -176,7 +176,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 45.1896 under the adopted objective", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth 45.1848 under the adopted objective", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -186,8 +186,12 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 45.1896 under 
   edm_crosscheck(md, r)
   # ⚠ TOLERANCE = the project's existing "does this point reproduce" precision
   # (recompute_hessian.R GATE 1, promote_multistart_mode.R GATE 4), not a new
-  # number chosen here. Measured 2026-09-10 at `hilda31p` (CHANGELOG 09-10 (5)).
-  expect_equal(r$on_periodic - r$off_periodic, 45.1896, tolerance = 1e-4, scale = 1)
+  # number chosen here. Measured 2026-09-10 at `hilda31p` (CHANGELOG 09-10 (5)):
+  # 45.1896. RE-PRICED 2026-09-11 (5) to 45.1848 (-0.0048) when the gradient and
+  # HS-surface rows became ANNUAL MEANS over the box's mass at the time
+  # ([[seasonal_box_observable_artefact]]) -- an objective move, priced -0.0957
+  # at this mode and restamped into the file (calibration/restamp_mode_objective.R).
+  expect_equal(r$on_periodic - r$off_periodic, 45.1848, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
   expect_gt(r$on_periodic - r$off_periodic, 1)
@@ -197,7 +201,7 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 45.1896 under 
   expect_gt(abs((r$on_periodic - r$off_periodic) - (r$on_aseasonal - r$off_aseasonal)), 1)
 })
 
-test_that("RATIFICATION PIN at `hilda31` (retired, by path): 43.8367 aseasonal, and the 63.7282 artifact", {
+test_that("RATIFICATION PIN at `hilda31` (retired, by path): 43.8318 aseasonal, and the 63.7234 artifact", {
   skip_if_no_cpp()
   md <- readRDS(ccx_path(CCX_MODE_HILDA31_QUARANTINED))
   expect_identical(ccx_mode_spinup(md), "aseasonal")   # unrecorded = pre-09-09x = a fact
@@ -206,8 +210,10 @@ test_that("RATIFICATION PIN at `hilda31` (retired, by path): 43.8367 aseasonal, 
   # 43.8367 is what Ruling A was ratified on at the 09-08f adoption (45.1618 at
   # ent26 before it); it still reproduces exactly, which is what makes 63.7282
   # a measured MOVE rather than a lost baseline -- and 45.1896 above a RETURN.
-  expect_equal(r$on_aseasonal - r$off_aseasonal, 43.8367, tolerance = 1e-4, scale = 1)
-  expect_equal(r$on_periodic  - r$off_periodic,  63.7282, tolerance = 1e-4, scale = 1)
+  # 43.8367 / 63.7282 until 2026-09-11 (5); -0.0049 each under the annual-mean
+  # read (the file restamped, likelihood -0.0937, with its history kept inside it).
+  expect_equal(r$on_aseasonal - r$off_aseasonal, 43.8318, tolerance = 1e-4, scale = 1)
+  expect_equal(r$on_periodic  - r$off_periodic,  63.7234, tolerance = 1e-4, scale = 1)
   expect_gt(r$on_aseasonal - r$off_aseasonal, 1)
   expect_gt(abs((r$on_periodic - r$off_periodic) - (r$on_aseasonal - r$off_aseasonal)), 1)
 })
