@@ -2,6 +2,60 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-11 — ⭐⭐⭐ **ROUND 6 IS IN: THE `seas_ml = 1` REFIT CONVERGED AT −1492.1591. ON LIKELIHOOD IT IS −17.8 BEHIND `hilda31p`, AND EVERY BIT OF THAT IS THE TWO OCEAN-GRADIENT ROWS; THE PRIORS GAIN +6.2. P2 RELAXED (z −2.89 → −2.07), P12 HALF-RETIRED (`ent_seas_amp_SH` 18.7 → 9.5). ⛔ NOTHING ADOPTED — WHETHER THE MECHANISM SHIPS IS A MODEL-STRUCTURE RULING.**
+
+Round 2 = job **`17354346`**, 14 tasks (fixed 0–5 + dispersed 8/9/10/12/18/19/21/22) resumed from
+round 1's checkpoints, from the FIXED driver (shipped into the main tree with `squeue` empty). **The
+resume guard accepted all 14** — the `ref_logpost` stamp matched to 1e−8, which is the measurement
+that the penalty fix left the objective untouched. **9 CONVERGED** (the five warm starts in 71–108 min;
+8/10/19/9 in ~270); ids 18/21/22 ended out of time AT the best value. Outputs, both collector logs and
+`round6_read.log` are under `calibration/output/multistart_20260910_round6_seasml1_sd1.0452/`.
+
+### THE MODE, and a sub-basin that is one flat direction
+| basin | logpost | starts | differs by |
+|---|---|---|---|
+| **1** | **−1492.1591** | 2, 4, 5 (conv, the `hilda31` family) + 18, 21, 22 (TIME, at the value) | — |
+| 2 | −1492.3020 | 1, 3 (the `hilda31p` family), 8, 10, 19 (all conv) | **`h_ml` only**: 44.10 vs 48.66 m (every other parameter within 5 %) |
+| 3 | −1494.5491 | 9 (conv) | |
+The 0.143 between basins 1 and 2 survived two extra restarts from both sides, so it is real — but it is
+the Hessian's flat `h_ml` direction, not a second solution. **18 dispersed starts reproduced, and did
+not beat, the known basin** (the collector's verdict, at the 0.5 cycle tolerance). ENSO seeding worth 0.
+
+### THE COMPARISON THE 09-09x RULING ASKED FOR (`diag_round6_read.R`, scored THROUGH the objective)
+| | `hilda31p` (`seas_ml` 0) | round 6 (`seas_ml` 1, basin 1) | Δ |
+|---|---|---|---|
+| **likelihood** (Σ 25 streams) | −1441.7015 | **−1459.4907** | **−17.79** |
+| prior + jacobian | −38.8389 | −32.6684 | **+6.17** |
+| posterior | −1480.5404 | −1492.1591 | −11.62 |
+⭐ **THE WHOLE LIKELIHOOD COST IS TWO ROWS**: `ocean_grad_d13c` **−9.21** (−4.82 → −14.03) and
+`ocean_grad_dic` **−8.86** (−6.60 → −15.45). No other stream moves past |1.3| (`d13c_seasonal_MLO`
+−1.26, `hs_surf_d13c` +1.19, `d13c_seasonal_SPO` +0.93, `co2_seasonal_MLO` −0.84, `co2_gradient` +0.53).
+⇒ **The seasonal mixed layer relieves the priors and pays for it on the VERTICAL GRADIENTS** — the rows
+the HILDA arc was built to buy. A mechanism that entrains real seasonal water into the mixed layer
+steepens the DIC and δ¹³C gradients the model already fits too weakly (09-08h: like-for-like the
+gradient is 0.40 vs 0.89, "the deep lacks light carbon") — a physical statement worth its own test.
+
+### THE P2 / P12 READS (prior z from the start files' own `prior_z`)
+| parameter | `hilda31p` | round 6 | value |
+|---|---|---|---|
+| `sst_seas_amp_NH` (**P2**) | −2.89 | **−2.07** | 1.086 → 1.335 (+23 %) — RELAXED, still past 2σ |
+| `ent_seas_amp_SH` (**P12**) | +2.10 | **+0.75** | **18.69 → 9.51**, **1.45×** its centre 6.5525 (was 2.85×) — HALF-RETIRED |
+| `pump_hs_gcm2` | +2.39 | +1.54 | 95.7 → 57.8 (−40 %) |
+| `rep_dC` | +3.15 | **+3.17** | UNMOVED — the worst strain in the model, untouched by everything since 09-08 |
+| `q10` | −2.24 | −2.14 | |
+| `kz_deep_frac` | −2.46 | −2.63 | worse |
+Other moves: `gamma_enso_ocn_SH` **−54 %** (0.092 → 0.042), `h_ml` +10 % (44.1 → 48.7), `pump_grad` +10 %.
+⇒ **P2: the mechanism takes a third of the NH strain. P12: it takes about half the shim's job.** Neither
+prediction is falsified and neither is fully realised.
+
+### ⛔ WHAT IS OWED
+**A ruling**: `seas_ml = 1` as the shipped model is a MODEL-STRUCTURE change (+6.2 on priors, two
+preregistered strains relieved, −17.8 on likelihood concentrated in two rows). If ruled in: promote id 4
+(`promote_multistart_mode.R --outdir=... --dest=calibration/output/refit_20260911_round6_seasml1`; it
+records `seas_ml` = 1 and `spinup`), `recompute_hessian.R --update`, then the repoint by the 09-10
+procedure. If not: `hilda31p` stays and the round-6 arc closes with this record. Either way the
+gradient-rows finding wants a test before it becomes a footnote.
+
 ## 2026-09-10 (7) — ⭐⭐ **ROUND 6 IS RUNNING (job `17343694`, 24 starts at `seas_ml = 1`) ON A RE-RULED REFERENCE SET. ⛔ THREE TASKS DIED ON THE INFEASIBLE-STEP PENALTY PLATEAU AND REPORTED SUCCESS — FIXED, REQUEUED FROM A SEPARATE TREE (`17345351`). `test-mode-file.R:187` RESOLVED BY OPTION 2.**
 
 ### The ruling (Marcus: "follow the recommendation") and what it measured
