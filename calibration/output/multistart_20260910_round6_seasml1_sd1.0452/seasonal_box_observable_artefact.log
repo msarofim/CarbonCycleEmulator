@@ -1,0 +1,24 @@
+out cadence (yr): 0.08333333 0.08333333 0.08333333 
+SURFACE DIC (umol/kg) and d13C (permil) at the gradient epochs:
+hilda31p (seas_ml 0):
+                        dic  d13c
+A_instant_meanmass 2045.984 1.551
+B_instant_instmass 2045.984 1.551
+C_annual_mean      2047.076 1.546
+round 6 (seas_ml 1):
+                        dic  d13c
+A_instant_meanmass 1889.088 1.597
+B_instant_instmass 2089.578 1.597
+C_annual_mean      2047.964 1.570
+
+surface DIC shift r6 - hilda31p: A (objective) -156.9 | B (instant mass) +43.6 | C (annual mean) +0.9
+surface d13C shift r6 - hilda31p: A +0.047 | B +0.047 | C +0.024
+NH f at dic epoch 0.885 
+SH f at dic epoch 0.919 
+
+DEEP: hilda31p dic 2347.8 d13c 1.242 | round6 dic 2274.4 d13c 1.615  (shift -73.4 / +0.373)
+GRADIENT deep - surf under each observable (target dic 233 d13c -0.861 ):
+  A_instant_meanmass   hilda31p dic 301.8 d13c -0.309 | round6 dic 385.3 d13c +0.018 | P7 d13c move +0.327 (bound 0.163) dic move +83.5
+  B_instant_instmass   hilda31p dic 301.8 d13c -0.309 | round6 dic 184.8 d13c +0.018 | P7 d13c move +0.327 (bound 0.163) dic move -117.0
+  C_annual_mean        hilda31p dic 300.7 d13c -0.304 | round6 dic 226.4 d13c +0.045 | P7 d13c move +0.349 (bound 0.163) dic move -74.3
+pump_grad hilda31p 255.5374 round6 280.1182 | k_w 1666 1643 | h_ml 44.09 48.66
