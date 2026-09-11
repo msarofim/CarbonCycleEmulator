@@ -2,6 +2,45 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-11 (7) — ⭐⭐⭐ **ROUND 6b IS IN: the seasonal mixed layer (`seas_ml = 1`), refitted under the corrected observables, converges at −1475.4579 — likelihood EQUAL to `hilda31p` (−0.61 on the mode's basin, +0.23 on the h_ml-49.8 basin; both inside the optimiser's 0.5 convergence bound), priors +5.8, GATE P7 PASSES (−0.028 vs bound 0.163, toward the observation), P2 INSIDE 2σ (z −2.89 → −1.73), P12 to 1.25× its centre. Every round-6 prereg condition that the artefact "failed" is met. ⛔ NOTHING ADOPTED — promotion is a model-structure ruling (Marcus).**
+
+Round 1 job 17367892 (24 starts, all out of time at 3 restarts), round 2 job 17379055 (17 resumed; **8 CONVERGED**).
+Collector: **18 dispersed starts reproduced and did not beat** the best re-converged basin. `round6b_read.log`,
+`round6b_p7.log`, `collect_round2.log`, `summary.csv` under `multistart_20260911_round6b_seasml1_sd1.0452/`
+(NEW `diag_round6b_read.R`, `diag_round6b_p7_gradient.R` — the round-6 diags pointed at 6b).
+
+### The basins — one flat direction again, and it is `h_ml`
+| basin | logpost | starts | h_ml | likelihood vs `hilda31p` (−1441.797) | prior+jac |
+|---|---|---|---|---|---|
+| **1 (mode)** | **−1475.4579** | 5, 22 conv; 0, 7 at the value | **64.84** | −1442.411 (**−0.61**) | −33.05 (+5.8) |
+| 2 | −1475.8811 | 1, 2, 3, 4, 18 conv | 49.76 | −1441.571 (**+0.23**) | −34.31 (+4.5) |
+| 3 | −1475.6029 | 9 conv (19 at −1475.61) | — | — | — |
+Every other parameter within 5 % across basins 1/2 (largest: `sst_seas_amp_*` −8 %, `ent_seas_amp_SH` +17 %).
+⚠ Basin 1 sits at h_ml 64.8 m, ~10 m under the P8 wall (75–76 m); basin 2 has the better LIKELIHOOD. The
+Hessian's `h_ml` direction should be read before any promotion (recompute_hessian.R on the chosen start).
+
+### The likelihood comparison the 09-09x ruling asks for (basin 1 − `hilda31p`; |Δ| > 0.5 only)
+`ocean_grad_dic` −0.82, `ocean_grad_d13c` −0.75, `co2_seasonal_MLO` −0.63, `d13c_seasonal_SPO` +0.54. Sum −0.61.
+Nothing else moves past 0.5. ⇒ **the seasonal mixed layer is a likelihood-neutral mechanism that relieves
+three priors**; contrast round 6 under the corrupted row: −17.8, all on the two gradient rows.
+
+### The prereg reads (P2 / P7 / P12 / P6)
+- **P7 PASS**: δ¹³C gradient −0.300 → **−0.327** (move −0.028, bound 0.163, **toward** −0.861); DIC 300 → 304
+  (+4, a tenth of sd_eff). `test-gate-p7.R` now carries this as the verdict on the record (3rd test, 5 exp.) beside
+  the power proof on the 09-10 mode (which the corrected read still fails at +0.331 — the artefact-fitted deep).
+- **P2 CLOSED**: `sst_seas_amp_NH` z **−2.89 → −1.73** (1.086 → 1.451 K; the LS-cap observation is 2.25).
+- **P12**: `ent_seas_amp_SH` **18.69 → 8.16**, z +0.44, **1.25×** its corrected centre 6.5525 (round 6 read 1.45×).
+- **P6 (no free lunch)**: `co2_seasonal_MLO` −0.63, `d13c_seasonal_SPO` +0.54 — inside 1 log-unit each.
+- Unmoved strains: `rep_dC` +3.11, `q10` −2.11, `kz_deep_frac` −2.38, `pump_hs_gcm2` +2.39.
+- Moves: `h_ml` +47 % (44.1 → 64.8), `gamma_enso_ocn_SH` −52 % (0.092 → 0.045), `gamma_enso_ocn_NH` +12 %.
+
+### What this settles, and what it does not
+The 09-11 (2) "refuted as built" is now formally REVERSED as a finding about the mechanism: the whole of it
+was the observable artefact. Option B's motivation (P1c box identity, Fix B) stands on its own; its P7′
+prediction is no longer the reason to build it. **Promotion of the round-6b mode (id 5, or id 1 on
+likelihood) is Marcus's ruling**; if ruled, `promote_multistart_mode.R` on the 6b outdir (records `seas_ml` 1
+and `spinup`), then Hessian, then repoint.
+
 ## 2026-09-11 (6) — ⭐⭐ **ROUND 6b, PRELIMINARY (round 2 still draining): the seasonal mixed layer under the corrected observable PASSES GATE P7 — the modern δ¹³C gradient moves −0.028 (bound 0.163, 0.17×), TOWARD the observation. The 09-11 (2) refutation was entirely the artefact.**
 
 Job 17367892 (24 starts, all out of time at 3 restarts) + round 2 job 17379055 (17 resumed; 5 CONVERGED so

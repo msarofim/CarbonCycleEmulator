@@ -1,0 +1,47 @@
+CCX_PROJ_DIR  /scratch/ms17839/CarbonCycleEmulator
+CCX_MS_OUTDIR /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260911_round6b_seasml1_sd1.0452
+CCX_MS_STRUCT hilda   CCX_MS_SEAS_ML 1   CCX_MS_SPREAD 1.0452
+host cs648.hpc.nyu.edu  task 6  2026-09-11T07:34:07-04:00
+run-time inputs present: 6/6. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.09932718)
+
+======================================================================
+DISPERSED MULTI-START, id 6, arm N, 31 parameters
+  host cs648.hpc.nyu.edu   R 4.5.1   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.0993, pooled over the 31 coordinates at least one of
+    them FITTED; over all 31 it would be 0.0993, diluted by the 0 migrated in BOTH:
+    none)
+  out /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260911_round6b_seasml1_sd1.0452/start_006.rds
+======================================================================
+  structure: 'hilda' (hs_frac=0.16, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -1e+06 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: dispersed about the COLD init, sd 1.0452 (4 draws), log-post there = -89479.1470
+PORT GATE (a) at the new_basin reference point: here -1661.7358103049 vs MacBook-Pro-2.local@8a990c1 -1661.7358088282,
+              rel 8.89e-10 (tol 1e-08)  [this task's own start is elsewhere]
+PORT GATE (a) PASSED.
+measured 0.9227 s/eval (median of 5; range 0.9093-1.2846) => one 6000-eval restart
+  projects to 92.3 min; wall budget 300 min, of which 45.0 min is RESERVED for the
+  BFGS polish (100 iterations)
+[006] cycle 1 restart  1: log-post =   -1887.4491 (gain 87591.6979) evals 6001  156.0 min
+[006] cycle 1 restart  2: SHORTENED to maxit 2539 by the wall budget
+[006] cycle 1 restart  2: log-post =   -1714.8817 (gain   172.5674) evals 8541  226.3 min
+[006] cycle 1 restart  3: SHORTENED to maxit 691 by the wall budget
+[006] cycle 1 restart  3: log-post =   -1695.2476 (gain    19.6342) evals 9233  243.6 min
+[006] cycle 1 polish: SHORTENED to maxit 38 by the wall budget
+[006] cycle 1 polish: log-post = -1532.7833 (gain 162.4642)
+[006] === cycle 1 total gain 87946.3637 (log-post -1532.7833, 11800 evals, 307.7 min) ===
+[006] === cycle 2 total gain 0.0000 (log-post -1532.7833, 11800 evals, 307.7 min) ===
+*** [006] WALL BUDGET 300 min REACHED -- checkpointed, NOT converged.
+
+[006] FINAL log-post -1532.7833  (OUT OF TIME, 3 restarts, 11800 evals, 307.9 min)
+[006] eval rate 2.4024 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[006] PORT GATE (b) ordering: final -1532.7833 >= start -89479.1470. OK
+======================================================================
+done 2026-09-11T12:42:11-04:00

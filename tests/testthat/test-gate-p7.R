@@ -66,3 +66,28 @@ test_that("GATE P7 has POWER: the round-6 seas_ml = 1 mode FAILS it against hild
   tg <- ccx_ocean_gradient_target()
   expect_lt(abs(v$d13c_off - tg$d13c$target), abs(v$d13c_on - tg$d13c$target))   # ON is FURTHER from obs
 })
+
+test_that("THE VERDICT ON THE RECORD (2026-09-11 (7)): the round-6b mode -- the same arm REFITTED under the corrected observable -- PASSES GATE P7", {
+  skip_if_no_cpp()
+  r6b <- ccx_path("calibration", "output", "multistart_20260911_round6b_seasml1_sd1.0452", "start_005.rds")
+  skip_if_not(file.exists(r6b), "round-6b start file not present")
+  grad_at <- function(mdx) {
+    pm <- mdx$par_mode
+    bp <- ccx_mode_base(mdx); bp$pump_mode <- mdx$pump_mode
+    p <- ccx_overlay_par(bp, pm); sp <- CCX_OBJECTIVE_SPINUP(p)
+    F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0, bomb_total_kmol = 102)
+    F$c14_cosmo <- sp$prod_c14; F$c14_bomb <- F$c14_bomb * (pm$bomb_total / 102)
+    for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH")) F[[cc]] <- F[[cc]] * pm$luc_scale
+    attr(F, "luc_scale") <- pm$luc_scale
+    ccx_ocean_grad_scored(ccx_run_fast(sp, F)$out, sp)
+  }
+  md <- readRDS(ccx_mode_file()); s5 <- readRDS(r6b)
+  expect_identical(ccx_mode_seas_ml(s5), 1L)
+  v <- dg_gateP7_verdict(grad_at(md), grad_at(s5))
+  expect_true(v$pass)
+  expect_lt(v$ratio_d13c, 0.25)                        # 0.17x on 2026-09-11 (7)
+  expect_equal(v$d13c_on, -0.327, tolerance = 2e-3, scale = 1)   # TOWARD the target (-0.861), from -0.300
+  expect_equal(v$dic_on,  304,    tolerance = 1,    scale = 1)
+  # the same gate, same read, still FAILS the artefact-fitted 09-10 mode (the test above):
+  # that is the gate's power, and this is its verdict on the mechanism.
+})

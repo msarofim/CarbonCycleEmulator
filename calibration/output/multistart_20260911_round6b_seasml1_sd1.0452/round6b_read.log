@@ -1,0 +1,50 @@
+basin1 id5 -1475.4579 seas_ml 1 struct hilda | basin2 id1 -1475.8811 | basin3 id9 -1475.6029 | hilda31p -1480.6361
+
+reproduce: hilda31p -1480.636125 (file -1480.636125) | basin1 -1475.457904 (file -1475.457903) | basin2 -1475.881141 (file -1475.881141)
+
+LIKELIHOOD (sum of streams): hilda31p(seas_ml0) -1441.7972 | basin1(seas_ml1) -1442.4106  d=-0.6133 | basin2 -1441.5707  d=+0.2266
+PRIOR+JAC: hilda31p -38.8389 | basin1 -33.0473 | basin2 -34.3105
+
+stream deltas basin1 - hilda31p (|d| > 0.5):
+  ocean_grad_dic           -0.822   (-6.505 -> -7.327)
+  ocean_grad_d13c          -0.754   (-5.011 -> -5.765)
+  co2_seasonal_MLO         -0.632   (-1.489 -> -2.121)
+  d13c_seasonal_SPO        +0.535   (251.112 -> 251.647)
+
+PRIOR z beyond 2 sigma, and the P2 / P12 reads:
+  q10                z: hilda31p  -2.24  basin1  -2.11  basin2  -2.14   value:    1.1426 ->    1.1815 (+3.4%)
+  h_ml               z: hilda31p  -0.96  basin1  +0.22  basin2  -0.58   value:   44.0909 ->   64.8429 (+47.1%)
+  kz_deep_frac       z: hilda31p  -2.46  basin1  -2.38  basin2  -2.40   value:    0.0120 ->    0.0135 (+13.1%)
+  pump_hs_gcm2       z: hilda31p  +2.39  basin1  +2.39  basin2  +2.41   value:   95.7327 ->   95.4814 (-0.3%)
+  sst_seas_amp_NH    z: hilda31p  -2.89  basin1  -1.73  basin2  -2.04   value:    1.0863 ->    1.4513 (+33.6%)
+  ent_seas_amp_SH    z: hilda31p  +2.10  basin1  +0.44  basin2  +0.75   value:   18.6949 ->    8.1630 (-56.3%)
+  rep_dC             z: hilda31p  +3.15  basin1  +3.11  basin2  +3.13   value:    3.1481 ->    3.1094 (-1.2%)
+
+ent_seas_amp_SH: 8.1630 (basin1) / 9.5438 (basin2) vs corrected centre 6.5525 -> 1.25x / 1.46x
+
+largest parameter moves basin1 vs hilda31p:
+  ent_seas_amp_SH      -56.3%  (18.69 -> 8.163)
+  gamma_enso_ocn_SH    -51.5%  (0.09222 -> 0.04475)
+  h_ml                 +47.1%  (44.09 -> 64.84)
+  sst_seas_amp_NH      +33.6%  (1.086 -> 1.451)
+  kz_deep_frac         +13.1%  (0.01198 -> 0.01354)
+  gamma_enso_ocn_NH    +11.5%  (0.3056 -> 0.3407)
+  sst_seas_amp_SH       +9.4%  (1.694 -> 1.852)
+  kz                    -7.8%  (1.155e+04 -> 1.065e+04)
+
+basin1 vs basin2 parameter differences > 1%:
+  k_w                   +1.2%  (1627 vs 1647)
+  h_ml                 -23.3%  (64.84 vs 49.76)
+  kz                    +4.1%  (1.065e+04 vs 1.108e+04)
+  kz_deep_frac          -3.0%  (0.01354 vs 0.01314)
+  hs_asx_frac           -2.5%  (0.7896 vs 0.7702)
+  h_hs                  +1.7%  (410.5 vs 417.6)
+  u_hs                  +3.5%  (24.77 vs 25.63)
+  pump_hs_gcm2          +1.2%  (95.48 vs 96.59)
+  seas_T_amp_SH         -1.2%  (3.525 vs 3.483)
+  sst_seas_amp_NH       -7.5%  (1.451 vs 1.342)
+  sst_seas_amp_SH       -8.0%  (1.852 vs 1.704)
+  ent_seas_amp_SH      +16.9%  (8.163 vs 9.544)
+  gamma_enso_ocn_NH     +1.5%  (0.3407 vs 0.3457)
+  gamma_enso_ocn_SH     +4.6%  (0.04475 vs 0.04681)
+  grad_off_co2          -2.0%  (0.203 vs 0.199)
