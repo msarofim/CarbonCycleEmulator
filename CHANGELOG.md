@@ -48,6 +48,21 @@ Other moves: `gamma_enso_ocn_SH` **−54 %** (0.092 → 0.042), `h_ml` +10 % (44
 ⇒ **P2: the mechanism takes a third of the NH strain. P12: it takes about half the shim's job.** Neither
 prediction is falsified and neither is fully realised.
 
+### ⛔ P7 FAILS, AND IT IS THE DECISIVE READ (`diag_round6_p7_gradient.R` → `round6_p7.log`)
+P7 was preregistered as "NOT A DEEP LEVER IN DISGUISE": the modern surface−deep δ¹³C gradient must
+not move by more than the row's σ_eff (0.163). **It moved +0.327 — 2× the bound.**
+| | target | `hilda31p` | round 6 |
+|---|---|---|---|
+| δ¹³C gradient | −0.861 | −0.309 (z +3.4) | **+0.018 (z +5.5)** — the gradient is GONE |
+| DIC gradient | 233 | 302 (z +2.1) | **385 (z +4.7)** |
+Both away from the observation: the seasonal mixed layer HOMOGENISES the isotope gradient between the
+surface and layer 1 while STEEPENING the DIC one. That is the −17.8. ⚠ **P2 also misses as written**
+("inside 2σ"): z −2.07. P4 is mixed (`d13c_seasonal_MLO` −1.26, SPO +0.93). P6 holds. P12 half.
+⇒ **On the prereg's own discriminants the mechanism AS BUILT is refuted on P7**, and the P1c
+box-identity finding (a LOW-latitude `ml` box given a HIGH-latitude MLD cycle) is the likely reason:
+a single hemispheric ML box entrains a high-latitude fraction of its column every winter over an
+84 %-subtropical area. Inference, not measured — the measured part is the gradient table.
+
 ### ⛔ WHAT IS OWED
 **A ruling**: `seas_ml = 1` as the shipped model is a MODEL-STRUCTURE change (+6.2 on priors, two
 preregistered strains relieved, −17.8 on likelihood concentrated in two rows). If ruled in: promote id 4
