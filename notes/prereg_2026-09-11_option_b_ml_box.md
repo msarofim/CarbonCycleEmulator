@@ -75,6 +75,17 @@ own entrainment once the box is right).
    transient inventory). If it costs more, HS thickness is a lever this structure did not declare — report,
    do not retune.
 
+## 2c. ⛔ AMENDMENT 2026-09-11 (4)/(5): §0's items 1–3 are RETRACTED as findings about the mechanism
+The ocean-gradient row read INSTANT box carbon over the ANNUAL-MEAN mass — exact for a time-constant
+box, 157 µmol/kg low for the seasonal one at the GLODAP epoch. Round 6 was FITTED against that row; its
+"DIC 302 → 385" was the artefact (annual-mean read: 226 vs 233) and its δ¹³C half is the deep box the fit
+moved to cancel it ⇒ [[seasonal_box_observable_artefact]], CHANGELOG 09-11 (4)–(5). **RULED (Marcus): annual
+mean of the concentration over the mass at the time**, shipped `c0bf185`, priced −0.0957 at `hilda31p`.
+**Round 6b** (the same arm under the corrected objective) = Torch job 17367892, outdir
+`multistart_20260911_round6b_seasml1_sd1.0452`. **P7's verdict on the LS mechanism, and therefore whether
+option B's P7′ is even the right first gate, waits on that refit.** §1's hypothesis stands on P1c and Fix B
+alone until then. The build is PAUSED at the R side (`seas_ml = 2` unreachable, commit `5ed31cf`).
+
 ## 3. PREREGISTERED PREDICTIONS (state the sign and the bound BEFORE any run; amendments dated)
 - **P7′ (the reason this note exists).** With `seas_ml = 1` on `ml_hi` only, **GATE P7 PASSES**: the modern
   surface−deep δ¹³C gradient moves by **< sd_eff (0.16)** from its `seas_ml = 0` value at the same vector,
