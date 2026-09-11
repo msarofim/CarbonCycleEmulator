@@ -2,6 +2,23 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-11 (6) — ⭐⭐ **ROUND 6b, PRELIMINARY (round 2 still draining): the seasonal mixed layer under the corrected observable PASSES GATE P7 — the modern δ¹³C gradient moves −0.028 (bound 0.163, 0.17×), TOWARD the observation. The 09-11 (2) refutation was entirely the artefact.**
+
+Job 17367892 (24 starts, all out of time at 3 restarts) + round 2 job 17379055 (17 resumed; 5 CONVERGED so
+far: ids 1–4 at **−1475.8811**, id 5 at **−1475.4579**; 9/18/22 within 0.5 and still moving; 12 tasks running
+at 17:25 EDT). `hilda31p` restamped is −1480.6361 ⇒ the arm is **+5.2 on posterior**; the LIKELIHOOD
+comparison and the collector's basin table wait on the drain.
+
+P7 read of the two converged basins (`diag_round6_p7_gradient.R` pointed at the 6b outdir, `start_005`/`start_001`):
+| | h_ml | DIC gradient (233) | δ¹³C gradient (−0.861) |
+|---|---|---|---|
+| `hilda31p` | 44.09 | 300.4 (z +2.05) | −0.300 (z +3.44) |
+| 6b id 5 | **64.84** | 304.2 (z +2.47) | **−0.327** (z +3.68) |
+| 6b id 1 | 49.76 | 301.3 (z +2.14) | −0.311 (z +3.43) |
+**P7: −0.0276 on δ¹³C (bound 0.163) — PASS, and the sign is toward the target.** DIC +4 / +1, inside a tenth
+of its sd_eff. ⇒ the mechanism is NOT a vertical-gradient lever; what round 6 showed was a fit to the artefact.
+⚠ id 5 sits at h_ml 64.8 m, 10 m under the P8 wall (75–76) — read the Hessian's `h_ml` direction at collection.
+
 ## 2026-09-11 (5) — ⭐⭐ **RULED (Marcus): "ANNUAL MEAN OF THE CONCENTRATION." Every concentration observable now reads a box over its mass AT THE TIME, per hemisphere, averaged over the 12 month-centres of the year centred on the epoch, then combined with fixed (annual-mean-mass) weights. Priced −0.0957 at `hilda31p` and restamped into the file with its history; round 6 re-read: DIC gradient 300 → 227 (AT the target 233), δ¹³C −0.300 → +0.031 (the unrefit deep). Round 6 must be RE-FIT.**
 
 ### The read (`R/likelihood.R`)
