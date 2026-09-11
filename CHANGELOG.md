@@ -2,6 +2,73 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-11 (3) — ⭐⭐ **OPTION B: THE FOUR RULINGS ARE TAKEN (`ml_hi` IS THE HS BOX; a LIMB on `ml_lo` first; `ml_lo` keeps the fitted SST sines, `ml_hi` gets `seas_ml` + a PINNED SST amplitude; `ent_seas_amp_SH` stays fitted) AND THE DATA TASK IS DONE. Two design facts the build must respect: the HS cap is 57.14°, not 40°; `h_hs` is 417 m against an observed 103–128 m mixed layer.**
+
+### Suite first (the handoff's first instruction)
+**13,010 expectations / 402 tests: 4 failed, 1 error, 4 skipped** (`stop_on_failure = FALSE`). The
+pre-existing pair (`test-alpha-as` GATE Q, deliberately red at the canonical; `test-seas-lag-split`'s
+08-30 migration error) **plus ONE NEW RED: `test-mode-struct-lint.R`** — the ratchet on
+`readRDS(ccx_mode_file` without `ccx_mode_base(`. It caught the three files written 09-11:
+`diag_round6_read.R`, `diag_round6_p7_gradient.R`, `test-gate-p7.R`, each hand-building
+`ccx_apply_structure(ccx_default_params(), "hilda", seas_ml = …)` — exactly the pattern the lint's
+own comment names. **Converted on touch**: each file now resolves ITS OWN `struct` / `seas_ml` /
+`pump_mode` through `ccx_mode_base(mdx)` (both `hilda31p` and the round-6 start files carry the
+fields; `hilda31p` has no `seas_ml` field and the resolver's documented 0L is the fact). Proof the
+conversion changed nothing: `round6_read.log` and `round6_p7.log` re-run **identical**;
+`test-gate-p7` 20/20, the lint 5/5. Commit `4d816b3`.
+
+### The four rulings (Marcus, each on the recommendation; recorded in the prereg §2a)
+1. **`ml_hi` = the existing HS box.** It is already per-hemisphere, `hs_frac` 0.16 of each hemisphere's
+   ocean, own `alk_hs` / `sst_hs` (2 °C) / pump / fitted `h_hs`, sitting over HD. The 09-05 "no seasonal
+   cycle on this box" isolation rule is lifted for `seas_ml` (which moves the HS/HD boundary
+   mean-preservingly, as it moves ML/layer-1 today). `ml_lo` = the LS mixed layer with `seas_ml` OFF.
+2. **Fix B = a Niño3.4-modulated upwelling LIMB on `ml_lo` with a thermocline return** (T-A0's "B");
+   an equatorial box only if PB1 fails on magnitude. Arithmetic: 13.15 µatm over 4.1 % of area is the
+   same air-sea flux as 0.64 µatm over `ml_lo`'s 84 %, so a limb can carry the magnitude; the reservoir
+   itself stays unrepresentable.
+3. **Drivers**: `ml_lo` keeps the fitted `sst_seas_amp_NH/SH`; `ml_hi` gets `seas_ml` off a POLEWARD Holte
+   climatology plus an SST amplitude PINNED to the observation — no new fitted parameter.
+4. **`ent_seas_amp_SH` stays fitted** in the first B refit so PB3 can read where it goes; retiring it
+   first would make the test blind.
+
+### The data task (commit `1730fbd`; every shipped row bit-identical, checked before/after)
+- `data-raw/build_mld_targets.R`: `seasonal_window(lo, hi)`; the canonical `seasonal` (LS, what
+  `seas_ml` reads) NH/SH **identical**; new `seasonal_hs` (57.14°+), `seasonal_so` (40°+),
+  `seasonal_40_57`. Threshold MLD, 12-month strict cells, cos-lat weighted:
+
+  | cap | NH | SH |
+  |---|---|---|
+  | **HS 57°+** | n 539, mean **128**, max **307** (Mar), max/mean **2.39**, f_ent 0.08–0.90 | n 527, mean **103**, max **154** (Aug), 1.49, f_ent 0.17–0.70 |
+  | 40°+ | n 2151, mean 78, max 172 (Feb), 2.20 | n 4000, mean 104, max 183 (Aug), 1.75 |
+  | 40–57 band | n 1612, mean 68, max 146 (Feb), 2.16 | n 3473, mean 105, max 186 (Aug), 1.78 |
+  | LS 0–57 (canonical) | mean 49, max 83 (Feb), 1.68 | mean 68, max 114 (Aug), 1.68 |
+
+  ⚠ The NH 57°+ strict cells are the ice-free N Atlantic (the builder's own bracket warning) —
+  a deep-convection shape, not a hemispheric-cap one.
+- `data-raw/build_so_sst_seas_amp.R`: per-hemisphere caps from ERSSTv5 1975–2024, first harmonic.
+  **HS 57°+: NH half-amp 2.15 K (mean 1.72 °C), SH 0.99 K (mean −0.05 °C)**; LS 0–57: NH 2.25, SH 1.81;
+  40°+: NH 3.60, SH 1.4995 (= the GATE S band row, reproduced). GATE 1 still passes. `sst_hs` = 2 °C
+  sits between the two observed cap means.
+
+### ⚠ Two design facts, found by the data task, that the prereg did not carry
+1. **"Poleward of ~40°, ~16 %" is two different caps.** 16 % of a hemisphere is poleward of **57.14°**
+   (`asin(1 − 0.16)`); 40° is 36 %. Ruling 1 (HS box = `ml_hi`) settles `ml_hi` at 57°+ — so
+   **GATE S's 40–90 °S product is NOT `ml_hi`'s region**, and PB2 ("GATE S still passes on `ml_hi`")
+   needs either a 57–90 °S re-cut of the gate's convention or an explicit like-for-like caveat.
+   The SH 40°+ and 40–57 shapes are nearly the same (the band dominates by area); the 57°+ shape is
+   shallower in max (154 vs 183) with the same August peak.
+2. **`h_hs` at `hilda31p` is 417 m; the observed HS annual-mean MLD is 103–128 m.** A mean-preserving
+   `seas_ml` multiplier on `h_hs` would swing the NH cold box 65 → 1000 m — `h_hs` is HILDA's cold
+   reservoir thickness, not a mixed-layer depth. For `seas_ml` on HS to mean "winter entrainment",
+   `h_hs` must sit under the HS Holte prior (mean 103–128 / max 154–307), the same move made for
+   `h_ml` on 09-08d. 09-08c says HS thickness cancels at steady state (−107 at 75 m was transient
+   inventory), so the pin is cheap on the CO₂ rows — that is a PREDICTION for the build, not a
+   measurement.
+
+### Not done
+The build itself (both cores, parity, the guards, the limb) — weeks-scale per the 09-08j scoping.
+`rep_dC` +3.17 still untouched.
+
 ## 2026-09-11 (2) — ⭐⭐⭐ **RULED (Marcus): ROUND 6 IS REFUTED AS BUILT, THE MECHANISM IS RETAINED; THE ARC CLOSES ON THIS RECORD; `hilda31p` STAYS CANONICAL; OPTION B (LATITUDE STRUCTURE FOR THE MIXED LAYER) IS THE NEXT ROUND. GATE P7 IS PROMOTED TO THE LEDGER.**
 
 Marcus: *"Move forward with the recommendation."* — on the 09-11 read: P7 fails at 2× its bound, the
