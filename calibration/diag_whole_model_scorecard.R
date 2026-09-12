@@ -59,7 +59,8 @@ for (a in names(ARMS)) { st <- ARMS[[a]]$md$streams
   if (is.null(st)) { cat(sprintf("  %-8s no stored streams in the file\n", a)); next }
   cm <- intersect(names(st), names(ST[[a]])); d <- sum(ST[[a]][cm]) - sum(unlist(st[cm])); REPRO[[a]] <- c(stored = sum(unlist(st[cm])), now = sum(ST[[a]][cm]), diff = d, n = length(cm))
   cat(sprintf("  %-8s stored %.4f  recomputed %.4f  diff %+.2e over %d rows  -> %s\n", a, sum(unlist(st[cm])), sum(ST[[a]][cm]), d, length(cm),
-              if (abs(d) <= SC_REPRO_TOL) "REPRODUCES" else "⚠ DOES NOT REPRODUCE (objective moved since the file was stamped, or the wrong spinup)")) }
+              if (abs(d) <= SC_REPRO_TOL) "REPRODUCES" else if (length(ARMS[[a]]$migrated)) "MIGRATED file: its stored streams are PROVENANCE (restamp_mode_objective.R cannot encode a pre-migration vector); not gated" else "⚠ DOES NOT REPRODUCE (objective moved since the file was stamped, or the wrong spinup)"))
+  dropped <- c(setdiff(names(st), cm), setdiff(names(ST[[a]]), cm)); if (length(dropped)) cat(sprintf("           rows not in both (excluded from the sum): %s\n", paste(dropped, collapse = " "))) }
 
 cat("\n=== 1. LIKELIHOOD BY STREAM GROUP (common rows; rows absent from an arm shown after) ===\n")
 common <- Reduce(intersect, lapply(ST, names)); an <- names(ARMS)

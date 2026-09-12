@@ -14,7 +14,7 @@
 # a single instant, returns something other than the constant. Test 2 shows
 # the old read failing on the same data.
 # =====================================================================
-.sbo_synth <- function(seasonal) {
+.sbo_synth <- function(seasonal, cadence = c("monthly", "daily")) {
   rho <- ccx_const("RHO_SEAWATER"); mol <- 1e15 / 12.011
   grid <- list(dz = c(50, 100, 200))
   a_oc <- list(NH = 1.5e14, SH = 2.1e14)
@@ -27,12 +27,16 @@
   aux$hs_mass_kg <- list(NH = 1e17, SH = 2e17)
   if (seasonal) aux$mld_hs_coef <- lapply(h_m, ccx_mld_fourier)
   c_ml <- 2000; c_deep <- 2233; c_hs <- 2160
-  # DAILY cadence: the read interpolates the (curved) carbon series linearly at
-  # its own sample times, so a monthly synthetic grid leaves a 0.02 % chord
-  # error that would masquerade as a defect; the model's own monthly output
-  # carries the same chord error, and that is what the loose tolerance in
-  # ccx_epoch_year_samples' consumers is for.
-  t <- seq(1995, 2005, by = 1 / 365)
+  # CADENCE (2026-09-12). The reader now takes the model's OWN ROWS nearest each
+  # month-centre (ruled: "read the actual model rows"), so the exact case is the
+  # MONTHLY grid at the month-centres -- the model's own cadence, where the
+  # Fourier shape is mean-preserving over exactly those 12 samples. A DAILY
+  # grid is kept as the second case: its nearest rows sit up to half a day off
+  # the centres, so a concentration that CYCLES reads back its constant only to
+  # ~2e-5 relative (0.04 umol/kg on 2160) -- a property of the sub-monthly
+  # grid, not of the reader, and asserted at that looser tolerance.
+  cadence <- match.arg(cadence)
+  t <- if (cadence == "monthly") 1995 + (seq_len(10 * 12) - 0.5) / 12 else seq(1995, 2005, by = 1 / 365)
   out <- data.frame(t = t)
   # The seasonal box's CONCENTRATION also cycles, in phase with its mass (a real
   # mixed layer is DIC-richer when deep). Its annual mean is exactly c_* because
@@ -52,14 +56,20 @@
 }
 
 test_that("a SEASONAL box with a constant concentration reads back that constant, exactly, in both observables", {
-  z <- .sbo_synth(TRUE)
+  # EXACT on the model's own monthly cadence (the reader takes the rows themselves)
+  z <- .sbo_synth(TRUE, cadence = "monthly")
   g <- ccx_model_ocean_gradient(z$out, z$aux, z$grid, list(surf = 1999.836, deep = 2002.369))
-  # 0.01 umol/kg ABSOLUTE: the daily chord error is ~0.003; the retired read is off by ~200
-  expect_equal(g$dic, z$c_deep - z$c_ml, tolerance = 0.01, scale = 1)
+  expect_equal(g$dic, z$c_deep - z$c_ml, tolerance = 1e-9, scale = 1)   # the retired read is off by ~200
   expect_equal(g$d13c, 0, tolerance = 1e-9)
   hs <- ccx_model_hs_surface(z$out, z$aux, 2002.5, 2002.5)
-  expect_equal(hs$dic, z$c_hs, tolerance = 0.01, scale = 1)
+  expect_equal(hs$dic, z$c_hs, tolerance = 1e-9, scale = 1)
   expect_equal(hs$d13c, 0, tolerance = 1e-9)
+  # and on a DAILY grid the nearest rows are within half a day of the centres:
+  # a cycling concentration reads back to ~2e-5 relative, never worse
+  zd <- .sbo_synth(TRUE, cadence = "daily")
+  gd <- ccx_model_ocean_gradient(zd$out, zd$aux, zd$grid, list(surf = 1999.836, deep = 2002.369))
+  expect_equal(gd$dic, zd$c_deep - zd$c_ml, tolerance = 0.1, scale = 1)
+  expect_equal(ccx_model_hs_surface(zd$out, zd$aux, 2002.5, 2002.5)$dic, zd$c_hs, tolerance = 0.1, scale = 1)
   # and the shape really is seasonal on this data: the NH ML mass swings 0.6-1.7x
   f <- vapply(1:12, function(m) ccx_mld_eval(z$aux$mld_coef$NH, 2000 + (m - 0.5) / 12)$f, 0)
   expect_gt(max(f), 1.5); expect_lt(min(f), 0.7)

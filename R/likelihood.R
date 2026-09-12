@@ -1115,12 +1115,22 @@ ccx_box_mass_at <- function(aux, grid, which, h, t) {
 #' row is SH-only). For a time-constant box this IS the old formula applied
 #' to the annual-mean state.
 ccx_box_annual_conc <- function(out, aux, grid, which, epoch, hemis = HEMIS) {
-  at <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
+  # ⭐ RULED 2026-09-12 (Marcus): READ THE MODEL'S OWN ROWS. For each of the 12
+  # month-centres of the epoch year take the NEAREST written row and the box
+  # mass AT THAT ROW'S OWN TIME -- carbon over mass at the same instant. Until
+  # then carbon was linearly INTERPOLATED to off-grid instants while the mass
+  # was evaluated exactly there; with the mixed layer's f spanning 0.6-1.7 the
+  # two were not like-for-like (1.39 umol/kg = 0.05 sigma_eff on the DIC row
+  # at hilda31s). On the objective's monthly grid the rows ARE the month
+  # centres; on a finer grid (the synthetic tests) the nearest row is within
+  # half a step.
   tt <- ccx_epoch_year_samples(epoch)
+  j  <- vapply(tt, function(t1) which.min(abs(out$t - t1)), integer(1))
+  tj <- out$t[j]
   per_h <- vapply(hemis, function(h) {
-    C   <- at(paste0(which, "_C_",   h), tt)
-    C13 <- at(paste0(which, "_C13_", h), tt)
-    M   <- vapply(tt, function(t1) ccx_box_mass_at(aux, grid, which, h, t1), numeric(1))
+    C   <- out[[paste0(which, "_C_",   h)]][j]
+    C13 <- out[[paste0(which, "_C13_", h)]][j]
+    M   <- vapply(tj, function(t1) ccx_box_mass_at(aux, grid, which, h, t1), numeric(1))
     c(dic  = mean(C * aux$mol_per_GtC / M * 1e6),
       d13c = mean(1000 * (C13 / C / ccx_const("R13_VPDB") - 1)),
       w    = mean(M))                                   # the fixed weight: annual-mean mass
@@ -1810,8 +1820,15 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   }
 
   # ---- IntCal20 pre-bomb Suess decline -------------------------------
+  # ⭐ RULED 2026-09-12 (Marcus): the window ENDS WHERE HUA BEGINS. data-raw's
+  # own note reads "Hua et al. starts 1941, which leaves 1750-1941 ...
+  # unconstrained. IntCal20 covers it" -- the intent was complementary
+  # coverage, but the window ran to 1950 and scored 1941-1949 TWICE (IntCal20
+  # tree rings and Hua's NH pre-bomb compilation, which draws on the same
+  # tree-ring records). The end year is READ from the Hua rows, never typed.
   if (!is.null(obs$intcal)) {
-    ic <- obs$intcal[obs$intcal$year >= 1750 & obs$intcal$year < 1950, ]
+    ic_end <- if (!is.null(obs$d14_nh_ann)) min(obs$d14_nh_ann$year) else 1950
+    ic <- obs$intcal[obs$intcal$year >= 1750 & obs$intcal$year < ic_end, ]
     mod <- interp("d14c_NH", ic$year + 0.5)
     add("d14c_intcal", sum(stats::dnorm(ic$d14c, mod,
                            sqrt(ic$err^2 + LIK_D14C_REP_OTHER^2), log = TRUE)))

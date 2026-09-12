@@ -58,10 +58,12 @@ test_that("GATE P7 has POWER: the round-6 seas_ml = 1 mode FAILS it against hild
   # (226 vs 233) and only the d13C half fails -- and that half is the UNREFIT mode's deep
   # box, moved by the fit to cancel the artefact, not a property of the mechanism. This
   # pins the RECORD at that mode; it is re-pinned again when round 6 is refit.
-  expect_equal(v$d13c_off, -0.300, tolerance = 2e-3, scale = 1)
-  expect_equal(v$d13c_on,   0.031, tolerance = 2e-3, scale = 1)
+  # RE-PINNED 2026-09-12 (rulings 4+5): the reader takes the model's own rows and
+  # the periodic spinup pins annual means; -0.300/+0.031/300/227 -> the values below.
+  expect_equal(v$d13c_off, -0.301, tolerance = 2e-3, scale = 1)
+  expect_equal(v$d13c_on,   0.029, tolerance = 2e-3, scale = 1)
   expect_equal(v$dic_off,  300,    tolerance = 1,    scale = 1)
-  expect_equal(v$dic_on,   227,    tolerance = 1,    scale = 1)
+  expect_equal(v$dic_on,   229,    tolerance = 1,    scale = 1)
   # and the target, for the reader: the model was already too weak on d13c
   tg <- ccx_ocean_gradient_target()
   expect_lt(abs(v$d13c_off - tg$d13c$target), abs(v$d13c_on - tg$d13c$target))   # ON is FURTHER from obs
@@ -86,8 +88,8 @@ test_that("THE VERDICT ON THE RECORD (2026-09-11 (7)): the round-6b mode -- the 
   v <- dg_gateP7_verdict(grad_at(md), grad_at(s5))
   expect_true(v$pass)
   expect_lt(v$ratio_d13c, 0.25)                        # 0.17x on 2026-09-11 (7)
-  expect_equal(v$d13c_on, -0.327, tolerance = 2e-3, scale = 1)   # TOWARD the target (-0.861), from -0.300
-  expect_equal(v$dic_on,  304,    tolerance = 1,    scale = 1)
+  expect_equal(v$d13c_on, -0.330, tolerance = 2e-3, scale = 1)   # TOWARD the target (-0.861), from -0.301 (re-pinned 09-12; was -0.327 / 304)
+  expect_equal(v$dic_on,  306,    tolerance = 1,    scale = 1)
   # the same gate, same read, still FAILS the artefact-fitted 09-10 mode (the test above):
   # that is the gate's power, and this is its verdict on the mechanism.
 })

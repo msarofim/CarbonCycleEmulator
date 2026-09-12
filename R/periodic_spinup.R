@@ -39,6 +39,15 @@
 #   13C   the ANNUAL-MEAN atmospheric d13C, on the same grounds (the map is
 #         singular without it: 13C is conserved).
 #   14C   production solved to hit the ANNUAL-MEAN atmospheric Delta14C.
+# ⛔ UNTIL 2026-09-12 ONLY THE 12C PIN WAS THE MEAN: the 13C row pinned the
+# START-OF-PERIOD NH atmospheric 13C and the 14C scale the start-of-period
+# total, so the preindustrial d13C level the level rows inherit was the JANUARY
+# value (-6.4690 = D13C_PI at the instant, annual mean -6.4436, +0.025 permil
+# at hilda31s). RULED (Marcus) and fixed: both isotope pins are now the annual
+# mean of the atmospheric tracer over the 12 monthly rows of the orbit --
+# affine in the initial isotope vector given the fixed carbon orbit, so the
+# monodromy columns carry their year-means (`Mbar`, `bbar`) at no extra cost;
+# 14C needs ONE extra one-year run (the unit-production orbit's mean).
 #
 # ⚠ `aux` IS PREPARED FROM THE SAME `p` THAT IS INTEGRATED. `ccx_spinup()`
 # builds `aux` from `p` and then integrates with a mutated `p0`, which is the
@@ -187,31 +196,46 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
   # Phi_iso(c) = M c + b, affine because the isotope enters ccx_deriv linearly
   # and the carbon orbit is now fixed. Same idiom as R/spinup.R's iso_operator(),
   # one period instead of one instant.
-  ps_monodromy <- function(tracer, Fm) {
+  # `atm_of(out)` is the tracer's ATMOSPHERIC MASS row by row over the year;
+  # its year-mean is affine in the initial vector too, so the same runs that
+  # build M and b build `Mbar` and `bbar` for the annual-mean pin.
+  ps_monodromy <- function(tracer, Fm, atm_of) {
     y0 <- y; y0[, tracer] <- 0
-    b  <- ps_phi(y0, p, aux, grid, Fm)$state[, tracer]
-    M  <- matrix(0, nb, nb)
+    r0 <- ps_phi(y0, p, aux, grid, Fm)
+    b  <- r0$state[, tracer]; bbar <- mean(atm_of(r0$out))
+    M  <- matrix(0, nb, nb); Mbar <- numeric(nb)
     for (j in seq_len(nb)) {
       yj <- y0; yj[j, tracer] <- 1
-      M[, j] <- ps_phi(yj, p, aux, grid, Fm)$state[, tracer] - b
+      rj <- ps_phi(yj, p, aux, grid, Fm)
+      M[, j] <- rj$state[, tracer] - b
+      Mbar[j] <- mean(atm_of(rj$out)) - bbar
     }
-    list(M = M, b = b)
+    list(M = M, b = b, Mbar = Mbar, bbar = bbar, out0 = r0$out)
   }
+  gpph <- aux$gtc_per_ppm_hemi; R13 <- ccx_const("R13_VPDB")
+  # the NH atmospheric 13C mass, exactly, from the out columns: (1 + d/1000) R C
+  atm13_NH <- function(o) (1 + o$d13c_NH / 1000) * R13 * o$co2_NH * gpph
 
   # 13C: (M - I) c = -b is singular (13C is conserved over the period), so pin
-  # the scale on one row, exactly as the aseasonal solve does.
-  o13 <- ps_monodromy("C13", F)
+  # the scale on one row -- the ANNUAL MEAN of the NH atmospheric 13C over the
+  # orbit, = R13 (1 + d13c0/1000) x the annual-mean NH atmospheric carbon.
+  o13 <- ps_monodromy("C13", F, atm13_NH)
   A13 <- o13$M - diag(nb); rhs <- -o13$b
-  target13 <- y[iatmN, "C"] * ccx_const("R13_VPDB") * (1 + d13c0 / 1000)
-  A13[iatmN, ] <- 0; A13[iatmN, iatmN] <- 1; rhs[iatmN] <- target13
+  target13 <- mean(o13$out0$co2_NH) * gpph * R13 * (1 + d13c0 / 1000)
+  A13[iatmN, ] <- o13$Mbar; rhs[iatmN] <- target13 - o13$bbar
   y[, "C13"] <- solve(A13, rhs)
 
-  # 14C: linear in production, so solve at unit production and rescale.
-  o14 <- ps_monodromy("C14", ps_year_forcing(1))
+  # 14C: linear in production, so solve at unit production, run that periodic
+  # orbit once, and scale production so its ANNUAL-MEAN total atmospheric 14C
+  # is (1 + d14c0/1000) x the annual-mean atmospheric carbon.
+  F1  <- ps_year_forcing(1)
+  o14 <- ps_monodromy("C14", F1, function(o) o$atm_C14)
   A14 <- o14$M - diag(nb)
   u   <- solve(A14, -o14$b)
-  c14_target_atm <- sum(y[atm, "C"]) * (1 + d14c0 / 1000)
-  prod <- c14_target_atm / sum(u[atm])
+  yu  <- y; yu[, "C14"] <- u
+  ou  <- ps_phi(yu, p, aux, grid, F1)$out
+  c14_target_atm <- mean(ou$co2_NH + ou$co2_SH) * gpph * (1 + d14c0 / 1000)
+  prod <- c14_target_atm / mean(ou$atm_C14)
   y[, "C14"] <- prod * u
 
   # ---- 3. diagnostics, from the SAME PRODUCER `ccx_spinup()` uses -----
