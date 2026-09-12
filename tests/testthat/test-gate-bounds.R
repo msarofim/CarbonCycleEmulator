@@ -154,7 +154,8 @@ test_that("GATE 5 fails a shifted peak and an inverted ordering, and passes the 
                           drop = ob$NH[["drop"]] + ddrop,
                           p1_t = ob$NH[["p1_t"]]),
                    SH = c(t = ob$SH[["t"]] + dsh, v = vsh)),
-         lag = (ob$SH[["t"]] + dsh) - (ob$NH[["t"]] + dnh))
+         # the lag is on the FIRST-PEAK time (ruled 2026-09-12), as dg_gate5()
+         lag = (ob$SH[["t"]] + dsh) - ob$NH[["p1_t"]])
   expect_true(dg_gate5_verdict(mk(), ob, sp)$pass)
 
   # push the TROUGH out past the bound and it must fail, on the z and not the
@@ -174,15 +175,12 @@ test_that("GATE 5 fails a shifted peak and an inverted ordering, and passes the 
   vj <- dg_gate5_verdict(mk(dnh = lump), ob, sp)
   expect_true(vj$pass)
   expect_equal(unname(vj$z[["nh_drop"]]), 0)      # the NH statistic does not move
-  # ⚠ BUT THE LAG STILL INHERITS THE ARGMAX. Ruling 1 removed `nh_t` from the
-  # judged set; it did NOT redefine `lag`, which is still SH argmax minus NH
-  # argmax, so a lump flip still perturbs it -- here by 1.86 of its sigma, inside
-  # the bound but not zero. Recorded, not silently fixed: redefining the lag on
-  # the first-peak time is a methodological choice, not a consequence of this
-  # ruling. If a future NH lump spacing makes this exceed DG_G5_NSD the gate
-  # would fail on the artifact again, and this assertion is what would say so.
-  expect_lt(abs(vj$z[["lag"]]), DG_G5_NSD)
-  expect_gt(abs(vj$z[["lag"]]), 0)
+  # ⭐ AND THE LAG NO LONGER INHERITS THE ARGMAX (ruled 2026-09-12): it is SH
+  # peak minus NH FIRST-PEAK time in dg_gate5(), the spread and the verdict, so
+  # a lump flip leaves it EXACTLY unmoved (it moved 1.86 sigma before).
+  expect_equal(unname(vj$z[["lag"]]), 0)
+  # ... and the spread's lag sigma is built on the same statistic
+  expect_true(is.finite(sp$sd[["lag"]]) && sp$sd[["lag"]] > 0)
   expect_false("nh_t" %in% names(dg_gate5_verdict(mk(), ob, sp)$z))
   # the first-peak time is REPORTED, so it must be there and be finite
   expect_true(is.finite(dg_gate5_verdict(mk(), ob, sp)$reported[["nh_p1_t_z"]]))
@@ -301,8 +299,10 @@ test_that("GATE H bounds the gradient CONTRAST, keeps its CO2 control, and canno
   # typed. If either side is ever re-typed as a literal this fails.
   expect_equal(ho$co2$mean,  mean(obs$co2_grad$grad[is.finite(obs$co2_grad$grad)]))
   expect_equal(ho$d13c$mean, mean(obs$d13c_grad$grad[is.finite(obs$d13c_grad$grad)]))
-  expect_equal(ho$co2$se,  ho$co2$sd  / sqrt(ho$co2$n_eff))
-  expect_equal(ho$d13c$se, ho$d13c$sd / sqrt(ho$d13c$n_eff))
+  # the se is on the RESIDUAL sd (ruled 2026-09-12), never the raw trended sd
+  expect_equal(ho$co2$se,  ho$co2$sd_resid  / sqrt(ho$co2$n_eff))
+  expect_equal(ho$d13c$se, ho$d13c$sd_resid / sqrt(ho$d13c$n_eff))
+  expect_lt(ho$co2$sd_resid, ho$co2$sd)      # the trend is NOT charged to the noise
   # n_eff is a CORRECTION, never a licence: it may not exceed n.
   expect_lte(ho$co2$n_eff,  ho$co2$n)
   expect_lte(ho$d13c$n_eff, ho$d13c$n)
@@ -349,12 +349,14 @@ test_that("GATE H bounds the gradient CONTRAST, keeps its CO2 control, and canno
   expect_equal(g1$co2,  g2$co2)
   expect_equal(g1$d13c, g2$d13c)
 
-  # (6) ⭐ THE CO2 CONTROL PASSES ON ITS OWN LEVEL AT THE CANONICAL MODE. This
-  # is what licenses reading the contrast at all: a gate whose control also
-  # fails cannot separate a transport error from an isotopic one.
+  # (6) ⚠ THE CO2 CONTROL'S OWN LEVEL IS REPORTED, AND IT IS OUT (ruled
+  # 2026-09-12: under the residual se it reads -3.6 se, 0.916x observed -- an
+  # 8 % transport/representation miss). The claim that survives is an ORDERING:
+  # the d13C arm's miss is several times the control's, so the contrast is not
+  # driven by the shared transport error.
   vd <- dg_gateH_verdict(g1, ho)
-  expect_lt(abs(vd$z_level_co2), DG_H_NSD)
-  # ...and the d13C arm is the one that is out, by a lot.
+  expect_gt(abs(vd$z_level_co2), DG_H_NSD)
+  expect_gt(abs(vd$z_level_d13c), 4 * abs(vd$z_level_co2))
   expect_gt(abs(vd$z_level_d13c), 5)
   expect_false(vd$pass)
 })
@@ -483,7 +485,7 @@ test_that("GATE GL bounds the d13C gradient LEVEL on the observation's own se, b
   expect_identical(DG_GL_NSD, DG_H_NSD)
   ho <- dg_gateH_obs(ccx_prepare_obs())
   o  <- ho$d13c
-  expect_equal(o$se, o$sd / sqrt(o$n_eff))
+  expect_equal(o$se, o$sd_resid / sqrt(o$n_eff))   # residual sd (ruled 2026-09-12)
   # ⭐ RULING 3 (2026-09-09): the gate is the AUGMENTED form and rep_frac is
   # DERIVED from the CO2 control, so the synthetic must carry a co2 arm. Giving
   # it the observed CO2 gradient makes R_co2 = 1 and rep_frac = 0 EXACTLY, which

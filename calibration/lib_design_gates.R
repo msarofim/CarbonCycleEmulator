@@ -32,7 +32,14 @@
 
 # ---- labels derive from named constants (project rule) --------------
 DG_BOMB_REF  <- 102                  # = BOMB_REF in ccx_make_logpost()
-DG_YEARS     <- c(1750, 2024)
+DG_YEARS     <- c(1750, 2025)   # ⭐ RULED 2026-09-12 (Marcus): the gate run extends
+                                 # through 2025 so the 2025.0 year boundary is INTERIOR
+                                 # and the 2024 stock increments are interpolated, not
+                                 # extrapolated (flat growth vs linear stocks disagreed by
+                                 # 0.97 GtC/yr in 2024 -- the December seasonal slope).
+                                 # 2025 is a FORCING-HELD year (emissions/GMST end 2024)
+                                 # and is never a year of the annual series:
+DG_SINK_LAST <- DG_YEARS[2] - 1L # the last calendar year the annual readers report.
 
 # GATE 4 -- GCB 2025 airborne fraction (DESIGN sec.6 gate 4)
 DG_AF_WIN     <- c(1959, 2024)
@@ -625,8 +632,12 @@ dg_spinup <- function(v) {
 
 dg_run <- function(v) {
   sp <- dg_spinup(v)
-  F  <- ccx_build_forcing("historical", DG_YEARS, prod_c14 = sp$prod_c14,
-                          bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
+  # the final DG_YEARS year is forcing-held BY DESIGN (see DG_SINK_LAST); the
+  # builder's "held FLAT" warning is muffled here and nowhere else.
+  F  <- withCallingHandlers(
+    ccx_build_forcing("historical", DG_YEARS, prod_c14 = sp$prod_c14,
+                      bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale),
+    warning = function(w) if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning"))
   list(sp = sp, F = F, out = ccx_run_fast(sp, F)$out)
 }
 
@@ -646,9 +657,15 @@ dg_run <- function(v) {
 # COEFFICIENTS; it is a check of the model STATE they produce. Said here rather
 # than discovered later. [[threshold_from_obs_or_law]]
 #
-# ⚠ AND IT IS AN AREA-UNWEIGHTED TWO-BOX MEAN against a global observational
-# estimate. The hemispheric pair is returned so a caller can see the spread,
-# which is comparable to the observational sigma.
+# ⭐ RULED 2026-09-12 (Marcus): the statistic is the CALENDAR-YEAR MEAN over
+# the model's own 12 monthly rows of DG_Q_YEAR, and the two boxes are combined
+# with their AREA weights. Until then it read ONE instant (t = 1995.000, i.e.
+# December 1994) and the verdict moved with the month: at hilda31s n_sd ranged
+# 2.18-3.62 over the year (instant 2.63), and at ent26 it crossed the PASS
+# line (0.85-2.29) -- the surface d13C cycle is 0.17 permil p2p against a
+# sigma of 0.10. The hemispheric pair is returned so a caller can see the
+# spread. Quay's estimate is a global one, so the boxes are weighted by the
+# area each represents (ccx_column_area).
 DG_Q_YEAR <- ccx_const("AIRSEA_D13C_DISEQ_YEAR")
 DG_Q_OBS  <- ccx_const("AIRSEA_D13C_DISEQ_OBS")
 DG_Q_SD   <- ccx_const("AIRSEA_D13C_DISEQ_SD")
@@ -658,9 +675,13 @@ DG_Q_NSD  <- 2      # how many observational sigma the gate allows. A DISTRIBUTI
 
 dg_gateQ <- function(r, v) {
   o <- r$out; aux <- r$sp$aux
-  j <- which.min(abs(o$t - DG_Q_YEAR))
+  # the 12 month-centre rows of calendar year DG_Q_YEAR, on the model's own grid
+  tt <- ccx_epoch_year_samples(DG_Q_YEAR + 0.5)
+  j  <- vapply(tt, function(t1) which.min(abs(o$t - t1)), integer(1))
+  if (max(abs(o$t[j] - tt)) > 1e-6)
+    stop("GATE Q: the run has no monthly rows over calendar year ", DG_Q_YEAR, ".")
   d <- vapply(HEMIS, function(h) {
-    # surface DIC d13C, from the state
+    # surface DIC d13C, from the state, month by month
     d_ml  <- 1000 * (o[[paste0("ml_C13_", h)]][j] /
                      (o[[paste0("ml_C_", h)]][j] * ccx_const("R13_VPDB")) - 1)
     # ⛔ THE EQUILIBRIUM OFFSET COMES FROM THE MEASUREMENT, NOT FROM THE MODEL.
@@ -674,10 +695,13 @@ dg_gateQ <- function(r, v) {
     # the legacy one was known to fail.
     eps_dicg <- ccx_const("ALPHA_AS_ZHANG_A") * aux$sst[[h]] * ccx_const("ALPHA_AS_FCO3") +
                 ccx_const("ALPHA_AS_ZHANG_B") * aux$sst[[h]] + ccx_const("ALPHA_AS_ZHANG_C")
-    (d_ml - eps_dicg) - o[[paste0("d13c_", h)]][j]
+    mean((d_ml - eps_dicg) - o[[paste0("d13c_", h)]][j])
   }, 0)
-  n_sd <- abs(mean(d) - DG_Q_OBS) / DG_Q_SD
-  list(year = DG_Q_YEAR, by_hemi = d, mean = mean(d), obs = DG_Q_OBS,
+  w <- vapply(HEMIS, function(h) ccx_column_area(aux, h), 0); w <- w / sum(w)
+  m <- sum(w * d)
+  n_sd <- abs(m - DG_Q_OBS) / DG_Q_SD
+  list(year = DG_Q_YEAR, months = o$t[j], by_hemi = d, w = w, mean = m,
+       mean_unweighted = mean(d), obs = DG_Q_OBS,
        sd = DG_Q_SD, n_sd = n_sd, pass = n_sd <= DG_Q_NSD)
 }
 
@@ -693,7 +717,7 @@ dg_gateQ <- function(r, v) {
 # estimator below can be applied to the OBSERVATIONS with the same code path.
 dg_af_annual_model <- function(r) {
   o <- r$out
-  yrs <- sort(unique(floor(o$t + 1e-9))); bnd <- c(yrs, max(yrs) + 1L)
+  yrs <- sort(unique(floor(o$t + 1e-9))); yrs <- yrs[yrs <= DG_SINK_LAST]; bnd <- c(yrs, max(yrs) + 1L)
   atm <- stats::approx(o$t, (o$co2_NH + o$co2_SH) / 2 * DG_GtC_PER_PPM,
                        xout = bnd, rule = 2)$y
   el <- ccx_forcing_eluc_annual(r$F)
@@ -816,7 +840,11 @@ dg_gate5 <- function(r) {
   # RULING 1: the NH shape rides ALONG the NH peak entry, so every caller that
   # already indexes pk$NH[["t"]] keeps working and nothing needs a second lookup.
   pk$NH <- c(pk$NH, dg_nh_shape(o$t, o$d14c_NH))
-  list(pk = pk, lag = pk$SH[["t"]] - pk$NH[["t"]])
+  # ⭐ RULED 2026-09-12 (Marcus): the LAG is SH peak minus the NH FIRST-PEAK time,
+  # not minus the NH argmax -- the argmax picks whichever lump is higher (the
+  # 1964 one in the model, the 1963 one in the observation), so the lag's z
+  # flipped sign with the lump (-0.95 argmax / +1.7 first peak on 09-12).
+  list(pk = pk, lag = pk$SH[["t"]] - pk$NH[["p1_t"]])
 }
 #' The observed hemispheric bomb peaks, under the SAME estimator as the model
 dg_obs_gate5 <- function() {
@@ -847,7 +875,10 @@ dg_obs_gate5 <- function() {
 #' @return list(year, land, ocean, growth_ppm)
 dg_annual_sinks <- function(r) {
   o <- r$out
-  yrs <- sort(unique(floor(o$t + 1e-9))); bnd <- c(yrs, max(yrs) + 1L)
+  # years through DG_SINK_LAST only: a DG_YEARS run carries one forcing-held year
+  # past it so that the final boundary is interior (2026-09-12); a shorter run
+  # still gets its last year by the linear end extrapolation below.
+  yrs <- sort(unique(floor(o$t + 1e-9))); yrs <- yrs[yrs <= DG_SINK_LAST]; bnd <- c(yrs, max(yrs) + 1L)
   tt <- o$t; n <- length(tt)
   stock <- function(v) {
     y  <- stats::approx(tt, v, xout = bnd)$y
@@ -1062,7 +1093,7 @@ dg_obs_gate5_spread <- function() {
   nh <- lapply(drop_sets(w$NH), agg, shape = TRUE)
   sh <- lapply(drop_sets(w$SH), agg)
   get <- function(l, f) vapply(l, function(x) x[[f]], numeric(1))
-  lag <- as.vector(outer(get(sh, "t"), get(nh, "t"), `-`))
+  lag <- as.vector(outer(get(sh, "t"), get(nh, "p1_t"), `-`))   # first-peak time (09-12)
   list(sd = c(nh_t = stats::sd(get(nh, "t")), nh_v = stats::sd(get(nh, "v")),
               sh_t = stats::sd(get(sh, "t")), sh_v = stats::sd(get(sh, "v")),
               lag  = stats::sd(lag),
@@ -1081,7 +1112,7 @@ dg_obs_gate5_spread <- function() {
 #' @param ob the list from dg_obs_gate5()
 #' @param sp the list from dg_obs_gate5_spread()
 dg_gate5_verdict <- function(g5, ob, sp) {
-  lag_obs <- ob$SH[["t"]] - ob$NH[["t"]]
+  lag_obs <- ob$SH[["t"]] - ob$NH[["p1_t"]]   # first-peak time (09-12), as dg_gate5()
   # ⭐ RULING 1 (2026-09-09): the NH z is the TROUGH DEPTH, not the argmax time.
   # `nh_t` is GONE from the judged set -- an argmax on a bimodal curve is not a
   # timing measurement, and keeping it alongside would let the gate fail on the
@@ -1246,8 +1277,15 @@ dg_gateG_verdict <- function(g, obs, n_eff = DG_GD_NEFF) {
 # (memory ccx_hml_band_provenance), so a logpost comparison would indict the
 # product for a property of the producer. par_mode is band-safe.
 dg_streams <- function(r, v) {
-  o <- r$out
-  eluc <- ccx_forcing_eluc_annual(r$F)
+  # ⛔ SCORE THE OBJECTIVE'S OWN SPAN. DG_YEARS runs one forcing-held year past
+  # the record (2026-09-12) so the annual readers' final boundary is interior;
+  # the objective was fitted to DG_SINK_LAST, and scoring the held year with it
+  # moved every arm ~-2.6 log-units off its stored streams (the scorecard's §0
+  # guard caught it). Truncate BOTH the output and the forcing to that span.
+  keep <- r$out$t < DG_SINK_LAST + 1
+  o <- r$out[keep, ]
+  Fk <- r$F[r$F$t < DG_SINK_LAST + 1, ]
+  eluc <- ccx_forcing_eluc_annual(Fk)
   err <- list(sigma_d14c = v$sigma_d14c, rep_dC = v$rep_dC,
               grad_off_co2 = v$grad_off_co2, grad_off_d13c = v$grad_off_d13c)
   ccx_loglik(o, ccx_prepare_obs(), err, luc = eluc,
@@ -1293,16 +1331,24 @@ dg_streams <- function(r, v) {
 # transport -- it is in the isotopic source or the air-sea disequilibrium.
 #
 # THE BOUND IS THE OBSERVATIONS' OWN SAMPLING ERROR, NOT A CHOSEN TOLERANCE.
-# Each observed mean carries se = sd / sqrt(n_eff), with n_eff from the lag-1
-# autocorrelation of the DETRENDED series (the gradients trend as emissions
-# grow, and charging that trend to the noise would inflate n_eff's correction).
+# Each observed mean carries se = sd_resid / sqrt(n_eff): BOTH the sd and the
+# n_eff come from the DETRENDED series (the gradients trend as emissions grow,
+# and charging that trend to the noise would inflate n_eff's correction).
+# ⭐ RULED 2026-09-12 (Marcus): until then the sd was of the RAW trended series
+# while n_eff was from the residual -- 3.4x too wide for CO2 (0.927 vs 0.273)
+# and 1.6x for d13C. With the consistent se the CO2 CONTROL is itself out at
+# -3.6 se (0.916x observed), so the "control passes" claim below is WITHDRAWN:
+# the control is an 8 % transport/representation miss, significant at the
+# station record's precision, and what the CONTRAST then isolates is the part
+# of the d13C miss that is not that. The raw sd is kept as `sd` for reporting.
 # The two ratios' errors propagate in quadrature. ⚠ The model side is
 # DETERMINISTIC at a fixed vector and contributes no term -- said out loud
 # because a missing error bar on one side is easy to forget.
 #
-# ⭐ AND THE CO2 ARM IS A REAL CONTROL, NOT DECORATION: at `ent26` it reads
-# -1.06 se on its own level and PASSES, so this gate is demonstrably not
-# rejecting everything it is shown. test-gate-bounds.R asserts that.
+# ⚠ THE CO2 ARM'S OWN LEVEL is REPORTED (z_level_co2): -3.6 se at every arm
+# under the residual se (it read -1.06 under the raw sd). It is far smaller
+# than the d13C arm's (-22), which test-gate-bounds.R asserts; it no longer
+# "passes".
 #
 # ⛔ IT READS THE **RAW** MODEL GRADIENT AND NEVER THE FITTED OFFSET. Adding the
 # offset would feed the compensator back in and the gate could never fail
@@ -1330,8 +1376,9 @@ dg_gateH_obs <- function(obs = ccx_prepare_obs()) {
     ok <- is.finite(g$grad)
     x <- g$grad[ok]; t <- g$year[ok]
     n_eff <- dg_neff_ar1(x, t)
-    list(mean = mean(x), sd = stats::sd(x), n = length(x), n_eff = n_eff,
-         se = stats::sd(x) / sqrt(n_eff), year = t)
+    sd_resid <- stats::sd(stats::residuals(stats::lm(x ~ t)))
+    list(mean = mean(x), sd = stats::sd(x), sd_resid = sd_resid, n = length(x),
+         n_eff = n_eff, se = sd_resid / sqrt(n_eff), year = t)
   }
   list(co2 = f(obs$co2_grad), d13c = f(obs$d13c_grad))
 }
