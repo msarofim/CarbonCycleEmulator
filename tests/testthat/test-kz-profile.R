@@ -33,7 +33,7 @@ kp_par <- function(f = NULL, zs = NULL, hs = FALSE) {
   p <- ccx_default_params()
   if (!is.null(f))  p$kz_deep_frac <- f
   if (!is.null(zs)) p$kz_zscale <- zs
-  if (hs) { p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2 }
+  if (hs) p <- ccx_apply_structure(p, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12) }
   p
 }
 zero_forcing <- function(sp) list(

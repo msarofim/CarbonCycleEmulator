@@ -267,7 +267,8 @@ cat("    the evasion limb sends ISOTOPICALLY HEAVIER carbon up in local summer;\
 cat("    the atmosphere INTEGRATES that, so its anomaly lags the SST peak by a\n")
 cat("    quarter cycle. The model's SST peaks at month 3.5 + CCX_SST_SEAS_LAG + 3\n")
 cat("    in the NH and six months later in the SH (the sign flip at model.R:1421).\n")
-mdl <- sl_run(md$par_mode, 0, md$pump_mode, obs, AP_YEARS)
+mdl <- sl_run(md$par_mode, 0, md$pump_mode, obs, AP_YEARS, struct = ccx_mode_struct(md),
+              seas_ml = ccx_mode_seas_ml(md), spinup = ccx_spinup_from_label(ccx_mode_spinup(md)))   # the file's own labels (2026-09-12)
 SST_PEAK <- c(NH = 3.5 + CCX_SST_SEAS_LAG + 3, SH = 3.5 + CCX_SST_SEAS_LAG + 3 + 6)
 cat(sprintf("\n  %-4s %10s %6s | %10s %6s | %10s %6s | %10s %6s | %8s\n", "hem",
             "model", "mo", "observed", "mo", "RESIDUAL", "mo", "omitted", "mo", "|term|/"))

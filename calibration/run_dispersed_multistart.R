@@ -136,12 +136,20 @@ MS_DRAW_TRIES <- 200          # redraws allowed before a start is declared dead
 # provenance stated there) and names it in the outdir, as the stop() below asks.
 # Resolved THROUGH THE REGISTRY, not as a literal (test-mode-file.R's lint):
 # a registered name that is later retired fails here by NAME, with the reason.
-MS_REF_INC    <- CCX_MODE_FILES[["hilda31p"]]
-if (is.null(MS_REF_INC)) stop("MS_REF_INC: 'hilda31p' is no longer in CCX_MODE_FILES -- ",
-                              "re-rule the round-6 reference set (see MS_REF_INC_LABEL).")
-MS_REF_NEW    <- CCX_MODE_HILDA31_QUARANTINED
-MS_REF_INC_LABEL <- "INCUMBENT = hilda31p (09-10 canonical, periodic spinup, seas_ml 0)"
-MS_REF_NEW_LABEL <- "NEW BASIN = hilda31 (09-08f canonical, aseasonal spinup, quarantined; by path)"
+# ⛔⛔ RE-RULED 2026-09-12 FOR ROUND 7 (the refit under the 09-12 objective: annual-mean
+# isotope pins, row-read concentrations, IntCal to 1941, no pre-run ice rows; Marcus:
+# "start the refit"). INCUMBENT = `hilda31s` (the canonical, seas_ml 1, h_ml 64.8 --
+# 10 m under the P8 wall); NEW BASIN = `hilda31p` (the registered seas_ml 0 control,
+# h_ml 44.1, feasible at seas_ml 1 and a different basin of h_ml). Both through the
+# registry. `hilda31` (quarantined, aseasonal) is no longer a reference.
+MS_REF_INC    <- CCX_MODE_FILES[["hilda31s"]]
+if (is.null(MS_REF_INC)) stop("MS_REF_INC: 'hilda31s' is no longer in CCX_MODE_FILES -- ",
+                              "re-rule the round-7 reference set (see MS_REF_INC_LABEL).")
+MS_REF_NEW    <- CCX_MODE_FILES[["hilda31p"]]
+if (is.null(MS_REF_NEW)) stop("MS_REF_NEW: 'hilda31p' is no longer in CCX_MODE_FILES -- ",
+                              "re-rule the round-7 reference set (see MS_REF_NEW_LABEL).")
+MS_REF_INC_LABEL <- "INCUMBENT = hilda31s (09-11 canonical, periodic spinup, seas_ml 1; restamped 09-12)"
+MS_REF_NEW_LABEL <- "NEW BASIN = hilda31p (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)"
 # ⚠ THESE THREE NAMES ARE ALSO THE PORT-TARGET KEYS in calibration/torch/
 # port_targets.csv, so this vector may not be extended with ids that have no
 # target row -- the seeded ids below are deliberately NOT in it, and the port

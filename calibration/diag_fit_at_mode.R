@@ -96,7 +96,10 @@ for (st in c("MLO", "SPO")) {                                   # CO2 seasonal a
       c(rep(o$sd_a, sum(g)), rep(o$sd_b, sum(g))), "ppm (harmonic a,b)")
 }
 # Law Dome is 66.7 S -> co2_SH. Was co2_NH here until 2026-08-22 (`d6adb58`).
-put("co2_icecore", obs$ice$CO2ppm, interp("co2_SH", obs$ice$year), obs$ice$sd, "ppm")
+# Only samples inside the run (2026-09-12, review A11): the objective no longer scores
+# the nine 1703-1749 rows by rule-2 extrapolation to the first row, so neither does this.
+ice_in <- obs$ice$year >= floor(min(out$t) + 1e-9)
+put("co2_icecore", obs$ice$CO2ppm[ice_in], interp("co2_SH", obs$ice$year[ice_in]), obs$ice$sd[ice_in], "ppm")
 for (st in c("MLO", "SPO")) {                                   # d13C level
   o <- obs$d13_ann[[st]]; mm <- ms$d13[[st]]
   k <- match(o$year, mm$year); g <- !is.na(k)

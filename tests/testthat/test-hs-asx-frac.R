@@ -20,7 +20,7 @@
 
 hx_par <- function(fx = NULL, hs = TRUE) {
   p <- ccx_default_params()
-  if (hs) { p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2 }
+  if (hs) p <- ccx_apply_structure(p, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12) }
   if (!is.null(fx)) p$hs_asx_frac <- fx
   p
 }

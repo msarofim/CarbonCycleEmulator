@@ -26,7 +26,7 @@
 
 qa_par <- function(attach = NULL) {
   p <- ccx_default_params()
-  p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2
+  p <- ccx_apply_structure(p, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12)
   if (!is.null(attach)) p$q_attach_from <- attach
   p
 }

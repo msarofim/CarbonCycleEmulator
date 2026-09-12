@@ -218,7 +218,16 @@ export CCX_MS_SPREAD="${CCX_MS_SPREAD:-1.0452}"
 # so the 09-10 round-6 checkpoints are another objective's and the directory
 # says so. port_targets.csv regenerated at seas_ml = 1 on the Mac, commit c0bf185.
 #     sbatch --array=0-23%24 calibration/torch/multistart.sbatch
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260911_round6b_seasml${CCX_MS_SEAS_ML}_sd${CCX_MS_SPREAD}}"
+# 2026-09-12: ROUND 7 -- the REFIT UNDER THE 09-12 OBJECTIVE (rulings (c)+(d): annual-mean
+# isotope pins in the periodic spinup, concentrations read on the model's own rows, the IntCal
+# window ending at 1941, no pre-run ice rows; +43.2 on the incumbent's stored logpost across
+# the two restamps). Same 31 names, same seas_ml = 1, same spread; references RE-RULED to
+# hilda31s (incumbent) / hilda31p (new basin), both registered; port_targets.csv regenerated
+# at seas_ml = 1 on the Mac. The R core is 1.5x faster than round 6b (marshal-once, bit-identical),
+# so the wall arithmetic above is now conservative.
+#     CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 calibration/torch/multistart.sbatch
+#     sbatch --array=0-23%24 calibration/torch/multistart.sbatch
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260912_round7_seasml${CCX_MS_SEAS_ML}_sd${CCX_MS_SPREAD}}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.

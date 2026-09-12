@@ -21,7 +21,7 @@
 HP_G <- 60                                  # gC m-2 yr-1, the tested export
 hp_par <- function(g = NULL, hs = TRUE) {
   p <- ccx_default_params()
-  if (hs) { p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2 }
+  if (hs) p <- ccx_apply_structure(p, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12) }
   if (!is.null(g)) p$pump_hs_gcm2 <- g
   p
 }

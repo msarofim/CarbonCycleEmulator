@@ -64,10 +64,11 @@ GI_EQP_LON_W   <- c(140, -70)          # the widened control
 # varies ~2 %/K, so a 2 K error moves the B3 swing ~4 % and cannot move a verdict
 # that turns on a factor of several. Declared here rather than at its use.
 GI_EQP_SST_C   <- 27.0
-# Gate V's deficit, from its own record -- not recomputed here under another
-# smoothing choice ([[ccx_gate_v_variability]]).
-GI_V_OBS_SD    <- 0.911
-GI_V_MOD_SD    <- 0.698
+# Gate V's deficit, THROUGH GATE V'S OWN ESTIMATOR (dg_gateV_obs / dg_gateV), never a
+# typed literal: the 0.911 / 0.698 that stood here were the 09-04 read and went stale
+# when the gate moved to the residual dof (2026-09-12). Assigned after v_can exists.
+GI_V_OBS_SD    <- NULL
+GI_V_MOD_SD    <- NULL
 
 sep <- function(s) cat(sprintf("\n\n=== %s ===\n", s))
 harm <- function(x) {
@@ -207,6 +208,7 @@ cat("      two antiphase limbs that 2026-08-27f measured. Same reading, independ
 
 sep("A4 -- THE NARROWED BRACKET (WEAKER BY CONSTRUCTION; NEVER FAILS THE GATE)")
 v_can <- dg_vector(CCX_MODE_CANONICAL)
+GI_V_OBS_SD <- dg_gateV_obs()$sd; GI_V_MOD_SD <- dg_gateV(dg_run(v_can))$sd_model
 GI_ARM_LABEL <- sprintf("model, %s", CCX_MODE_CANONICAL)   # the arm v_can resolves; never a literal
 tau_ex <- v_can$p$tau_ex
 w_ang  <- 2 * pi / 12                            # per month

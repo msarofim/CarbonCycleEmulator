@@ -48,7 +48,7 @@ test_that("hs_frac = 0 is BIT-EXACT, with every HL parameter set", {
 
 test_that("the boxes appear, are named, and carry carbon when the switch is on", {
   p <- ccx_default_params()
-  p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2
+  p <- ccx_apply_structure(p, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12)
   aux <- ccx_prepare(p)
   expect_identical(aux$hs_on, 1L)
   bn <- ccx_box_names(aux$grid$nl, TRUE)
@@ -70,7 +70,7 @@ test_that("the boxes appear, are named, and carry carbon when the switch is on",
 
 test_that("the spinup still converges, and carbon still closes, with the boxes on", {
   p <- ccx_default_params()
-  p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2
+  p <- ccx_apply_structure(p, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12)
   sp <- ccx_spinup(p)
   # the analytic 12C equilibrium is NOT a fixed point once HS sits at a
   # different temperature from the mixed layer, so this also asserts that the
@@ -91,7 +91,7 @@ test_that("R and C++ agree with the boxes on", {
   # 32-box model; this is the 36-box one, and the two cores index it
   # independently -- a stride disagreement is silent garbage, not an error.
   p <- ccx_default_params()
-  p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2
+  p <- ccx_apply_structure(p, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12)
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", c(1850, 1851), prod_c14 = sp$prod_c14)
   fr <- ccx_forcing_at(F, 1L)
@@ -117,7 +117,7 @@ test_that("EVERY limb is mutation-tested: break it and the model must move", {
   # measured and found nothing -- the standing no_power_null discipline. Each
   # limb is switched off ON ITS OWN and the deep Delta14C must respond.
   base <- ccx_default_params()
-  base$hs_frac <- 0.16; base$u_hs <- 38; base$tau_q <- 538; base$sst_hs <- 2
+  base <- ccx_apply_structure(base, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12)
   d_on <- ccx_spinup(base)$diagnostics$d14c_bottom_box
 
   # (a) the conduit
@@ -152,7 +152,7 @@ test_that("HS under-equilibrates, which is the whole reason it is a box", {
   # out substantially DEPLETED relative to the low-latitude mixed layer. This is
   # emergent: no HS observable is in the likelihood and nothing is fitted to one.
   p <- ccx_default_params()
-  p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2
+  p <- ccx_apply_structure(p, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12)
   d <- ccx_spinup(p)$diagnostics
   sp <- ccx_spinup(p)
   ml <- 1000 * (sp$y[sp$aux$idx$NH$ml, "C14"] / sp$y[sp$aux$idx$NH$ml, "C"] - 1)
@@ -175,7 +175,7 @@ test_that("h_hs = 0 means FOLLOW h_ml, and absence means the same thing", {
   # The absence contract, for the parameter added 2026-09-05b. A list written
   # before it existed must reach both cores as the 09-05 structure.
   p <- ccx_default_params()
-  p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2
+  p <- ccx_apply_structure(p, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12)
   expect_identical(p$h_hs, 0)
   q <- p; q$h_hs <- NULL
   r <- p; r$h_hs <- ccx_ocean_grid(p$h_ml)$h_ml
@@ -197,7 +197,7 @@ test_that("HS's Delta14C is INVARIANT to its thickness, because the h cancels", 
   # reach for "make HS thinner" deserves to be told in one second rather than
   # after a spinup sweep. See notes/collect_2026-09-05bc_hs_endmember.md sec.1.
   base <- ccx_default_params()
-  base$hs_frac <- 0.16; base$u_hs <- 38; base$tau_q <- 538; base$sst_hs <- 2
+  base <- ccx_apply_structure(base, "hilda")   # the declared HILDA block, through the ONE resolver (2026-09-12)
   thick <- base; thick$h_hs <- 150
   thin  <- base; thin$h_hs  <- 50
   hs <- function(p) ccx_spinup(p)$diagnostics$d14c_hs[["NH"]]

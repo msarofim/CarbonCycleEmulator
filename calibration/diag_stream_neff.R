@@ -204,9 +204,13 @@ neff_residuals <- function(file) {
     g <- is.finite(mg)
     put(paste0(q$nm, "_gradient"), q$og$year[g], q$og$grad[g] - (mg[g] + q$off), q$sd)
   }
-  put("co2_icecore", OBS$ice$year,
-      OBS$ice$CO2ppm - stats::approx(o$t, o$co2_SH, xout = OBS$ice$year, rule = 2)$y,
-      OBS$ice$sd)
+  # Only samples inside the run (2026-09-12, review A11): the objective no longer scores
+  # the nine 1703-1749 rows by rule-2 extrapolation, and they were all residuals against
+  # ONE constant first-row value -- pure scatter at the head of the series, biasing rho.
+  ice_in <- OBS$ice$year >= floor(min(o$t) + 1e-9)
+  put("co2_icecore", OBS$ice$year[ice_in],
+      OBS$ice$CO2ppm[ice_in] - stats::approx(o$t, o$co2_SH, xout = OBS$ice$year[ice_in], rule = 2)$y,
+      OBS$ice$sd[ice_in])
   for (hh in c("NH", "SH")) {
     ob <- if (hh == "NH") OBS$d14_nh_ann else OBS$d14_sh_ann
     m  <- ms$d14[[hh]]
