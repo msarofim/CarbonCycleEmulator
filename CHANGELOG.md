@@ -2,6 +2,48 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-11 (8) — ⭐⭐⭐ **ADOPTED (Marcus: "Promote 1"): `hilda31s` IS CANONICAL — the 31-par HILDA space with the SEASONAL MIXED LAYER ON (`seas_ml` 1), periodic spinup, under the corrected observables. logpost −1475.457904; Hessian PD, cond 3.4e5, NOTHING step-unstable (`h_ml` 64.8 ± 2.3 m). `hilda31p` stays REGISTERED as the `seas_ml` = 0 control. Memory tree cleaned: `INDEX_ccx` split.**
+
+### The three steps
+1. **Promote** — `promote_multistart_mode.R --name=hilda31s --outdir=multistart_20260911_round6b_seasml1_sd1.0452
+   --dest=refit_20260911_hilda31_seasml1` (`promote.log`): GATE 1–2 pass; GATE 3 DERIVED id 5 (8/24 converged,
+   runners-up 22/9/18 within 0.42); GATE 4 reproduces to −4.7e−7 under the band the file records [30, 200];
+   GATE 5 streams −1442.410566 + prior/jac −33.047337 = logpost, gap 3.8e−7; 0 `h_ml` kinks. Records `struct`
+   hilda, **`seas_ml` 1**, `spinup` periodic, `pump_mode` N.
+2. **Hessian** — `recompute_hessian.R --update` (`hessian.log`): GATE 1 reproduces to 0; **−H positive-definite,
+   cond 3.425e5; no parameter past the 2 % step tolerance** (`h_ml` 0.16 % — the "`h_ml` unstable" flag that
+   `hilda31` and `hilda31p` both carried is GONE); `h_ml` **64.843 ± 2.338 m**, so the P8 wall (75–76 m) is 4σ out.
+3. **Repoint** (`R/paths.R`) — `CCX_MODE_CANONICAL = "hilda31s"`; `CCX_MODE_FILES` = hilda31s + **hilda31p** (both
+   free: test-mode-file's option-2 re-score must have the canonical WIN on today's objective, −1475.46 vs
+   −1480.64 — and with two FREE arms the free-vs-pinned comparison now has POWER, re-expressed there); NEW
+   **`CCX_MODE_SEASML0_CONTROL = "hilda31p"`** — every ON-vs-OFF reader (`test-gate-p7`, `diag_round6*_read`,
+   `diag_round6*_p7_gradient`, `diag_seasonal_box_observable_artefact`) takes the OFF arm by that name, never
+   through the default `ccx_mode_file()`, which is now the ON arm.
+
+### Re-pinned / re-expressed (each with its reason in the test)
+- `test-enso-demean`: the flag is worth **43.9113** at `hilda31s`; the 45.1848 kept as a pin at the control.
+- `test-seas-ml-label`: the canonical records `seas_ml` 1, the control 0 (absent → 0); the "label is felt"
+  test reads the control (ON-vs-ON would feel nothing).
+- `test-mode-file`: two free arms give the comparison power; a pinned arm is the other way, not the only one.
+- **Suite under the repoint: 13,044 / 407 — 2 failed, 1 error, 3 skipped** (the pre-existing pair: GATE Q at the
+  canonical, now 6.38 vs 3 × 2.42, deliberately red; the 08-30 migration error). The mode-file power test is no
+  longer skipped — it runs on two free arms.
+
+### Memory tree (Marcus: "clean memory")
+- **`INDEX_ccx` SPLIT** at 17,549 B (1 KB under its hard ceiling): the CLOSED MODE LINEAGE (`ent26` → `hilda31`
+  → `hilda31p`, the 09-09 rulings, the seven-changes stack, the 21-par ancestors, suite counts, the retired
+  round-6 reading) → NEW **`INDEX_ccx_arch_modes.md`** (11.2 KB); `INDEX_ccx` now 9.1 KB with a LIVE STATE
+  block (`hilda31s`). Split line LIVE vs LINEAGE stated in both; registered in `FaIRtoFrEDI/CLAUDE.md`
+  (`7832847`); recorded in `memory_index_split_history`. Snapshot `../memory_backup_20260911/`.
+- NEW `ccx_hilda31s_adopted`, `ccx_round6b_result`, `ccx_option_b_rulings`, `seasonal_box_observable_artefact`;
+  SUPERSEDED banners on `ccx_hilda31p_adopted`, `ccx_hilda31_adopted`; RETRACTION banners on
+  `ccx_round6_result` and in `INDEX_ccx_seas_ml` (now archive-bound); `INDEX_ccx_ocean_struct`'s live block
+  brought to option B; `INDEX_ccx_gates` P7 line carries the 6b PASS; `INDEX_conv` gained the
+  "audit every observable when a box becomes seasonal" rule; root `MEMORY.md` routes to `hilda31s`.
+- Audit: 0 orphans, 0 dangling links (two `[[n]]`/`[[links]]` hits are code and prose, not links), every
+  `name:` = filename. Over SOFT (under hard): `INDEX_cmp_pulse` 17.1 KB, `INDEX_slr` 15.1, `INDEX_diag` 15.1,
+  `INDEX_ais` 15.0, `INDEX_ccx_arch` 14.6 — split when convenient, `_cmp_pulse` first.
+
 ## 2026-09-11 (7) — ⭐⭐⭐ **ROUND 6b IS IN: the seasonal mixed layer (`seas_ml = 1`), refitted under the corrected observables, converges at −1475.4579 — likelihood EQUAL to `hilda31p` (−0.61 on the mode's basin, +0.23 on the h_ml-49.8 basin; both inside the optimiser's 0.5 convergence bound), priors +5.8, GATE P7 PASSES (−0.028 vs bound 0.163, toward the observation), P2 INSIDE 2σ (z −2.89 → −1.73), P12 to 1.25× its centre. Every round-6 prereg condition that the artefact "failed" is met. ⛔ NOTHING ADOPTED — promotion is a model-structure ruling (Marcus).**
 
 Round 1 job 17367892 (24 starts, all out of time at 3 restarts), round 2 job 17379055 (17 resumed; **8 CONVERGED**).

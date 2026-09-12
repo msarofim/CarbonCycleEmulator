@@ -11,7 +11,7 @@
 suppressMessages(for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)); ccx_load_cpp()
 D <- "calibration/output/multistart_20260910_round6_seasml1_sd1.0452"
 b1 <- readRDS(file.path(D, "start_004.rds")); b2 <- readRDS(file.path(D, "start_001.rds")); b3 <- readRDS(file.path(D, "start_009.rds"))
-md <- readRDS(ccx_mode_file())   # hilda31p, seas_ml 0
+md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))   # hilda31p, seas_ml 0
 cat(sprintf("basin1 id4 %.4f seas_ml %d struct %s | basin2 id1 %.4f | basin3 id9 %.4f | hilda31p %.4f\n", b1$logpost, b1$seas_ml, b1$struct, b2$logpost, b3$logpost, md$logpost))
 # each file's OWN structure and seas_ml through the one resolver (converted 2026-09-11 on touch --
 # test-mode-struct-lint.R; round6_read.log reproduced under the conversion)

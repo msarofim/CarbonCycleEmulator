@@ -52,12 +52,30 @@
 # exactly as `hilda31` was: this is the SHIPPED model's mode under the adopted
 # spinup, NOT a round-6 result ⇒ [[ccx_refit_ran_at_seas_ml_0]]. The file records
 # `struct`, and ccx_mode_seas_ml() reads its absent `seas_ml` as the 0 it was.
-CCX_MODE_CANONICAL <- "hilda31p"
+# 2026-09-11 (8): `hilda31s` -- the SAME 31-parameter HILDA space with the SEASONAL
+# MIXED LAYER ON (`seas_ml` 1), refitted under the corrected concentration
+# observables (annual mean over the box's mass at the time, 09-11 (5)). Torch
+# arrays 17367892 + 17379055: 8/24 converged, 18 dispersed reproduced the basin,
+# logpost -1475.457904; on LIKELIHOOD equal to `hilda31p` (-0.61 / +0.23 across
+# the two h_ml basins, inside the 0.5 convergence bound), priors +5.8, GATE P7
+# PASS, P2 inside 2 sigma, P12 1.25x. Hessian PD, cond 3.4e5, NOTHING
+# step-unstable (h_ml 64.8 +/- 2.3 m, the P8 wall 4 sigma out). Promoted on
+# Marcus's ruling ("Promote 1"). `hilda31p` STAYS REGISTERED as the free
+# `seas_ml` = 0 control: every seasonal-ML diagnostic scores against it, and the
+# 09-10 rule that the canonical must WIN on today's objective is what keeps the
+# pair honest (test-mode-file.R option 2).
+CCX_MODE_CANONICAL <- "hilda31s"
 
 CCX_MODE_FILES <- c(
+  hilda31s = file.path("calibration", "output", "refit_20260911_hilda31_seasml1",
+                       "mode_fit_pumpN.rds"),
   hilda31p = file.path("calibration", "output", "refit_20260910_hilda31_periodic",
                        "mode_fit_pumpN.rds")
 )
+# THE seas_ml = 0 CONTROL, by name: the diagnostics that compare the seasonal
+# mixed layer ON vs OFF read the OFF arm here rather than through the default
+# ccx_mode_file(), which from 09-11 (8) is the ON arm.
+CCX_MODE_SEASML0_CONTROL <- "hilda31p"
 
 # THE COLUMN CONTROL. `ent26` (26 parameters, no structure) is retired from the
 # registry -- it is not a mode of this space -- but it stays the like-for-like
@@ -95,7 +113,7 @@ CCX_MODE_HILDA31_QUARANTINED <- file.path("calibration", "output", "quarantine",
 # that as "pin90 wins" was wrong -- its objective carried a near-delta prior on
 # `fert_k` worth +11.6698 at fert_k = 90, putting it 11.56 BELOW on the
 # comparable scale. A stored number never decides an arm.
-CCX_MODE_PINNED <- c(hilda31p = FALSE)
+CCX_MODE_PINNED <- c(hilda31s = FALSE, hilda31p = FALSE)
 
 # The retired names, kept ONLY so that asking for one gets the reason rather
 # than a file-not-found. Everything here is quarantined and not comparable.

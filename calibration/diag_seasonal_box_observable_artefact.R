@@ -52,7 +52,7 @@ surf <- function(r, seas) {
         B_instant_instmass = c(inst_m(tg$dic$epoch_surf)["dic"], inst_m(tg$d13c$epoch_surf)["d13c"]),
         C_annual_mean      = c(ann(tg$dic$epoch_surf)["dic"], ann(tg$d13c$epoch_surf)["d13c"]))
 }
-r0 <- run_at(readRDS(ccx_mode_file())); r1 <- run_at(readRDS(file.path(D, "start_004.rds")))
+r0 <- run_at(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))); r1 <- run_at(readRDS(file.path(D, "start_004.rds")))
 s0 <- surf(r0, FALSE); s1 <- surf(r1, TRUE)
 cat("out cadence (yr):", diff(r1$out$t)[1:3], "\n")
 cat("SURFACE DIC (umol/kg) and d13C (permil) at the gradient epochs:\n")

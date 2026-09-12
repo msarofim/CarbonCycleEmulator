@@ -28,10 +28,10 @@ grad_at <- function(mdx) {
   r <- ccx_run_fast(sp, F); og <- ccx_ocean_grad_scored(r$out, sp)
   c(dic = og$dic, d13c = og$d13c, sd_dic = og$sd_eff[["dic"]], sd_d13c = og$sd_eff[["d13c"]], h_ml = sp$grid$h_ml)
 }
-g0 <- grad_at(readRDS(ccx_mode_file()))
+g0 <- grad_at(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)))
 g1 <- grad_at(readRDS(file.path(D, "start_004.rds")))
 g2 <- grad_at(readRDS(file.path(D, "start_001.rds")))
-stopifnot(ccx_mode_seas_ml(readRDS(ccx_mode_file())) == 0L, readRDS(file.path(D, "start_004.rds"))$seas_ml == 1L)
+stopifnot(ccx_mode_seas_ml(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))) == 0L, readRDS(file.path(D, "start_004.rds"))$seas_ml == 1L)
 cat(sprintf("target: dic %.4g  d13c %.4g\n", tg$dic$target, tg$d13c$target))
 for (nm in c("hilda31p","round6 b1","round6 b2")) { g <- list(g0,g1,g2)[[match(nm, c("hilda31p","round6 b1","round6 b2"))]]
   cat(sprintf("%-10s h_ml %5.2f  DIC grad %8.4g (z %+.2f, sd_eff %.3g)   d13C grad %6.4f (z %+.2f, sd_eff %.3g)\n", nm, g["h_ml"], g["dic"], (g["dic"]-tg$dic$target)/g["sd_dic"], g["sd_dic"], g["d13c"], (g["d13c"]-tg$d13c$target)/g["sd_d13c"], g["sd_d13c"])) }

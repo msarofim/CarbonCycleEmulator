@@ -45,7 +45,7 @@ test_that("GATE P7 has POWER: the round-6 seas_ml = 1 mode FAILS it against hild
     attr(F, "luc_scale") <- pm$luc_scale
     ccx_ocean_grad_scored(ccx_run_fast(sp, F)$out, sp)
   }
-  md <- readRDS(ccx_mode_file()); s4 <- readRDS(r6)
+  md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)); s4 <- readRDS(r6)
   expect_identical(ccx_mode_seas_ml(md), 0L); expect_identical(ccx_mode_seas_ml(s4), 1L)
   expect_identical(ccx_mode_struct(md), "hilda"); expect_identical(ccx_mode_struct(s4), "hilda")
   g0 <- grad_at(md); g1 <- grad_at(s4)
@@ -81,7 +81,7 @@ test_that("THE VERDICT ON THE RECORD (2026-09-11 (7)): the round-6b mode -- the 
     attr(F, "luc_scale") <- pm$luc_scale
     ccx_ocean_grad_scored(ccx_run_fast(sp, F)$out, sp)
   }
-  md <- readRDS(ccx_mode_file()); s5 <- readRDS(r6b)
+  md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)); s5 <- readRDS(r6b)
   expect_identical(ccx_mode_seas_ml(s5), 1L)
   v <- dg_gateP7_verdict(grad_at(md), grad_at(s5))
   expect_true(v$pass)

@@ -176,7 +176,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 45.1848 under the adopted objective", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth 43.9113 under the adopted objective (hilda31s); 45.1848 at the seas_ml 0 control", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -191,7 +191,12 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 45.1848 under 
   # HS-surface rows became ANNUAL MEANS over the box's mass at the time
   # ([[seasonal_box_observable_artefact]]) -- an objective move, priced -0.0957
   # at this mode and restamped into the file (calibration/restamp_mode_objective.R).
-  expect_equal(r$on_periodic - r$off_periodic, 45.1848, tolerance = 1e-4, scale = 1)
+  # 2026-09-11 (8): the canonical is `hilda31s` (seasonal mixed layer ON); the flag is
+  # worth 43.9113 there. The 45.1848 is kept as a pin at the seas_ml = 0 CONTROL, by
+  # name -- a second point where the flag's price is asserted, not a lost baseline.
+  expect_equal(r$on_periodic - r$off_periodic, 43.9113, tolerance = 1e-4, scale = 1)
+  r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)))
+  expect_equal(r0$on_periodic - r0$off_periodic, 45.1848, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
   expect_gt(r$on_periodic - r$off_periodic, 1)

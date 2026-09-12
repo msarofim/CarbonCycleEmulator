@@ -63,16 +63,23 @@ test_that("ccx_mode_base() honours a recorded seas_ml and reads an absent one as
   # everything else in the hilda base is untouched by the switch
   b0$seas_ml <- NULL; b1$seas_ml <- NULL; attr(b1, "seas_ml") <- attr(b0, "seas_ml")
   expect_identical(b0, b1)
-  # the canonical mode file on disk records what it was fitted at, and it is 0
+  # the mode files on disk record what they were fitted at: the canonical
+  # `hilda31s` (09-11 (8)) at 1, the seas_ml = 0 CONTROL `hilda31p` at 0 (an
+  # absent field, read as the 0 it was)
   md <- readRDS(ccx_mode_file())
-  expect_identical(ccx_mode_seas_ml(md), 0L)
-  expect_identical(ccx_mode_base(md)$seas_ml, 0L)
+  expect_identical(ccx_mode_seas_ml(md), 1L)
+  expect_identical(ccx_mode_base(md)$seas_ml, 1L)
+  md0 <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))
+  expect_null(md0$seas_ml); expect_identical(ccx_mode_seas_ml(md0), 0L)
+  expect_identical(ccx_mode_base(md0)$seas_ml, 0L)
   expect_error(ccx_mode_seas_ml(list(seas_ml = "2")), "must be 0")
 })
 
 test_that("the label reaches the objective: seas_ml = 1 is felt at the mode and is -Inf above the P8 guard", {
   skip_if_no_cpp()
-  md <- readRDS(ccx_mode_file())
+  # the seas_ml = 0 CONTROL, by name: from 09-11 (8) the canonical is the ON arm,
+  # and ON-vs-ON would feel nothing
+  md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))
   b0 <- ccx_mode_base(md); b0$pump_mode <- md$pump_mode
   b1 <- b0; b1 <- ccx_apply_structure(b1, ccx_mode_struct(md), seas_ml = 1); b1$pump_mode <- md$pump_mode
   lp0 <- ccx_make_logpost(base_params = b0); lp1 <- ccx_make_logpost(base_params = b1)

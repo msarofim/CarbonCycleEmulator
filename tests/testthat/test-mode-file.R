@@ -252,6 +252,12 @@ test_that("the free-vs-pinned comparison has POWER, or says that it does not", {
                        "fail and is reported DARK rather than green. It regains power",
                        "when a second arm lands -- a 26-parameter PINNED refit is the",
                        "thing that would do it."), n))
-  expect_true(any(CCX_MODE_PINNED[names(CCX_MODE_FILES)]),
-              info = "more than one arm, but none is pinned -- nothing tests the trap")
+  # 2026-09-11 (8): the second arm LANDED, and it is FREE (`hilda31p`, the seas_ml = 0
+  # control, beside the canonical `hilda31s`). The re-scored comparison above now has
+  # power with two FREE arms -- which.max over two re-scored values can pick the
+  # wrong one -- so the trap is tested; a PINNED arm is the other way to give it
+  # power, not the only one. Re-expressed, not re-baselined.
+  n_free <- sum(!CCX_MODE_PINNED[names(CCX_MODE_FILES)])
+  expect_true(n_free >= 2L || any(CCX_MODE_PINNED[names(CCX_MODE_FILES)]),
+              info = "more than one arm, but only one is free and none is pinned -- nothing tests the trap")
 })
