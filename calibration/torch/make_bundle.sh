@@ -25,6 +25,7 @@ tar czf "$OUT" \
   data-raw/downloads/nuclear14c \
   calibration/*.R calibration/torch \
   calibration/output/refit_20260910_hilda31_periodic \
+  calibration/output/refit_20260911_hilda31_seasml1 \
   calibration/output/quarantine/20260910_periodic_spinup_adopted
 echo "bundle: $OUT  ($(du -h "$OUT" | cut -f1))"
 echo

@@ -49,3 +49,18 @@ artefact; the δ¹³C half (−0.300 → +0.031) is the DEEP box the fit moved (
 - Quote any round-6 (09-10) number as a property of the seasonal mixed layer.
 - Ship a bundle while 17367892 runs. Re-run `make_port_targets.R` before any `seas_ml = 0` array.
 - Add a `seas_ml = 2` parser value without the C++ twin and parity test in the same commit.
+
+---
+## POST-SCRIPT (same day, evening) — ROUND 6b IS IN AND ADOPTED; `hilda31s` IS CANONICAL
+- Round 2 (17379055): 8 converged; mode **−1475.4579** (id 5, h_ml 64.8), second basin −1475.8811 (h_ml 49.8);
+  18 dispersed reproduced. **Likelihood EQUAL to `hilda31p` (−0.61 / +0.23), priors +5.8, P7 PASS (−0.028 vs
+  0.163, toward obs), P2 inside 2σ, P12 1.25×** — CHANGELOG 09-11 (7), [[ccx_round6b_result]].
+- **Marcus: "Promote 1 and clean memory."** Promoted (5 gates) → Hessian (PD, cond 3.4e5, NOTHING step-unstable,
+  h_ml ± 2.3 m) → repointed: `CCX_MODE_CANONICAL = "hilda31s"`, `hilda31p` registered as
+  **`CCX_MODE_SEASML0_CONTROL`** — CHANGELOG 09-11 (8), commit `2fe2ec6`, [[ccx_hilda31s_adopted]].
+  Suite 13,044/407, the pre-existing pair only.
+- Memory: `INDEX_ccx` split → `INDEX_ccx_arch_modes.md` (registered in `FaIRtoFrEDI/CLAUDE.md` `7832847`);
+  banners/retractions propagated; 0 orphans / 0 dangling. Over-soft indexes listed in CHANGELOG (8).
+- ⚠ For the NEXT Torch array: the driver's reference set is still `hilda31p` / `hilda31` — add `hilda31s`
+  (and regenerate `port_targets.csv` at the array's `seas_ml`) before launching. `make_bundle.sh` ships the
+  new refit dir. Option B: P7′ is no longer its motivation; P1c + Fix B remain; build paused at the R side.
