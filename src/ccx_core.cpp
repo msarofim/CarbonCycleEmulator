@@ -3,8 +3,9 @@
 //
 // R/model.R is the REFERENCE IMPLEMENTATION and stays authoritative for
 // readability and for what the model means. This file exists only because the
-// pure-R version runs a 350-year monthly integration in minutes per run in R -- ~500 s for 1750-2024 at the 2026-09 canonical (review B3; the 26 s dated from the 2026-08 aseasonal model)
-// budget for MCMC. Any change to the physics must be made in BOTH, and
+// pure-R version runs a 1750-2024 monthly integration in ~500 s at the
+// 2026-09 canonical (review B3, 2026-09-12; the "26 s" this line once quoted
+// dated from the 2026-08 aseasonal model) against a 50 ms budget for MCMC. Any change to the physics must be made in BOTH, and
 // test-parity.R gates them against each other.
 //
 // PARITY DISCIPLINE. Expressions here are written in the same order and the
