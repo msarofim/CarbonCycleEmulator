@@ -2,6 +2,37 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-12 — ⭐⭐⭐ **THE FULL MODEL EVALUATION OF `hilda31s` (the first task owed by handoff 09-11c): `notes/assessment_2026-09-12_hilda31s.md`. VERDICT: NOT YET ACCEPTABLE — the seasonal mixed layer moved the seasonal link (a real NH entrainment channel, the SH DIC side 62 % real water, two strains gone, P7 PASS) and touched nothing on the release blocker: the ENSO ocean path is still wrong-signed (solubility-only r −0.525) and net 0.57× observed; H +6.52σ / GL −8.68; Q 2.41 → 2.63σ. TWO EVALUATION-MACHINERY DEFECTS FOUND AND FIXED (objective-neutral): the scorecard spun every arm up ASEASONALLY (2447 log-units off the mode at `hilda31s`), and GATE S's knockout was BLIND to the third SH-ocean limb (read 4.53 mo FAIL; the whole limb is 8.96 PASS). ADOPTED NOTHING.**
+
+### The scorecard, re-pointed (`calibration/diag_whole_model_scorecard.R` → `outputs/diagnostics/whole_model_scorecard_20260911.{log,rds}`; the tag is `Sys.Date()` at launch, 23:50 on 09-11)
+Arms: A `ent26` (column control, by path), B **`hilda31p` by name** (`CCX_MODE_SEASML0_CONTROL`), C **`hilda31s`** (canonical). Gates V, H, **GL**, 5, G, Q, 7, S, **P7** (C vs B); comparisons 12 (IRF) and **L** (pulse partition at 100 and 1000 yr); the ENSO slope; the stream groups (+ `hs_surface`); the strained priors from each file's `prior_z`.
+- ⛔ **EVERY ARM WAS BEING SPUN UP ASEASONALLY.** `dg_run`, `dg_gateG`, `dg_gateL_partition` (`lib_design_gates.R`) and the scorecard's IRF block called `ccx_spinup()`. A file promoted since 09-09x was fitted under `ccx_periodic_spinup`; at `seas_ml` 1 the aseasonal read is not a small miss: **`hilda31s` −3889.6 vs stored −1442.4** (the 09-09t leak's mechanism). `dg_vector()` now records the file's `spinup` label and `dg_spinup(v)` applies it everywhere a gate spins up (a hand-built vector defaults to aseasonal, as every pre-09-09x vector meant). **New section 0 PROVES each arm reproduces its stored streams**: `hilda31p` +1.1e−9, `hilda31s` +1.7e−11, `ent26` −6.9e−3 (the objective moved under it since 09-03; reported). Cost: the periodic spinup is 0.3 s; the whole scorecard 16 s.
+  - ⚠ The one off-mode number already on the record: GATE Q at the canonical "6.38 vs 3 × 2.42" (09-11 (8), `test-alpha-as`) — on-mode it is **6.2 vs 3 × 2.63**, same verdict, the pair stays deliberately red. No output file carried the off-mode read; the 09-08 scorecard logs are aseasonal-fitted arms and stand.
+  - `dg_gateG`'s 1750 surface value (reported, never in the verdict) was still an instant read over the mean mass; it is now the first output year's annual mean by the same reader as the epoch value ([[seasonal_box_observable_artefact]]).
+- ⛔ **GATE S FIRED ON ITS OWN BLIND SPOT.** At `hilda31s` the ledger's knockout (`SL_CASES$SH_ocean` = SST sine + entrainment shim) read the SPO ocean limb at **0.410 ppm @ 4.53 mo → FAIL (−2.88 mo)**. The mechanism added a THIRD SH-ocean seasonal driver the knockout never touched, so the gate read the residual of a partial cancellation. Distinguishing tests (scratch, reproduced below): knockout + `seas_ml` 0 → **0.465 @ 8.96 PASS**; the mechanism's own limb 0.824 @ 9.68; hemisphere-clean (a diagnostic-only override zeroing the NH MLD harmonics; the model has no per-hemisphere handle) **0.451 @ 9.41 PASS**, the NH mixed layer's leak into SPO being 0.107 @ 6.43. ⇒ the 27g bug's class, one limb later. **Fixed in the shared estimator**: `SL_CASES$SH_ocean` gains `seas_ml = 0` (a no-op at every `seas_ml` 0 arm, so the three diagnostics that consume it are unchanged); `test-gate-bounds` guards three names AND a power test at a `seas_ml` 1 canonical (the switch moves the limb by > 1 month; the record 8.96 / 4.53 pinned). **Mutation-tested**: dropping the switch fails both (names; 0.0 ≤ 1.0). ⚠ OWED: a per-hemisphere handle (assessment option M); `NH_origin` cannot include the NH mixed layer until then, so the 27q decomposition is incomplete at `seas_ml` 1.
+
+### The scorecard at three arms (A / B / C)
+| | `ent26` | `hilda31p` | `hilda31s` |
+|---|---|---|---|
+| likelihood, common rows | −1652.58 | −1430.97 | −1431.40 (C−B: gradients +0.47, d13c_seasonal +0.58, co2_seasonal −0.61, **ocean_deep −1.78**) |
+| V / H / GL | FAIL −2.67 / +6.55 / −8.54 | −2.72 / +6.53 / −8.72 | **−2.63 / +6.52 / −8.68** (all FAIL) |
+| 5 (trough form) / G / Q / 7 / S | PASS −1.79 / PASS −0.08 / PASS 1.27 / PASS / PASS 8.87 | PASS −1.81 / PASS +1.56 / **FAIL 2.41** / PASS / PASS 8.95 | PASS −1.79 / PASS **+1.24** / **FAIL 2.63** / PASS / **PASS 8.96** |
+| P7 (C vs B) | — | — | **PASS**: −0.300 → −0.327, 0.17× the bound, toward −0.861; DIC 300 → 304 |
+| ENSO slope ÷ obs (solubility-only r) | 0.47× (−0.522) | 0.53× (−0.523) | **0.57× (−0.525)**; γ NH 0.341 / SH 0.045 |
+| IRF(20/100/300) | 0.484 / 0.276 / 0.196 | 0.481 / 0.279 / 0.202 | 0.480 / **0.279** / 0.202 |
+| L split @100 / @1000 yr (land/ocean/air %) | 39/33/28; 30/52/18 | 40/32/28; 32/49/19 | 40/31/28; **32/49/19** (z vs Joos +1.16 / −0.84 / −0.68) |
+| strained priors | q10 −2.24, sst_NH −3.91, rep_dC +3.39 | + kz_deep −2.46, pump_hs +2.39, sst_NH −2.89, ent_SH +2.10, rep_dC +3.15 | **q10 −2.11, kz_deep −2.38, pump_hs +2.39, rep_dC +3.11** (four, from six) |
+
+### The chain reads behind the note (scratch scripts; every number generated this session)
+- SPO ocean limb ANATOMY at `hilda31s`: SST sine **0.898 @ 4.13** opposed by entrained water **0.824 @ 9.68** + shim **0.503 @ 9.80** → net 0.465 @ 8.96. At `hilda31p`: SST 0.817 @ 4.01 vs shim 1.142 @ 9.69 → 0.365. ⇒ the shim carries **38 %** of the DIC side (was 100 %); the ratio thermal : DIC is UNGATED (assessment option K).
+- MLO: the NH mixed layer contributes **0.631 @ 3.82** in phase with the 6.87 cycle — the "NH has no entrainment channel" finding (09-03) is closed mechanically.
+- What the ML shows: h(t) 35–109 m about 64.8; DIC cycle **±13 µmol/kg** (NH max Feb, SH max Aug); surface δ¹³C ±0.07–0.08 ‰ (control: ±2, ±0.01). ⚠ The 09-11c handoff's "±40 µmol/kg" does not reproduce under the annual-mean reader; the prereg's untuned 8–17 does.
+- Pulse partition at Joos's own 1000-yr horizon is INSIDE the ensemble spread (land +1.16σ); the lifetime miss is the first century (IRF(100) 0.279).
+- ⚠ Two estimators disagree on `ent26`'s solubility-only r: −0.432 (09-04g diag, in memory) vs −0.522 (scorecard). Same sign; not arbitrated (option N).
+
+### Tests
+`test-gate-bounds` 178 pass (+5), `test-alpha-as` the pre-existing red pair (numbers moved), `test-gate-p7` 25, `test-mode-struct-lint` 5, `test-seasonal-box-observable` 15. Full suite not re-run this session.
+
 ## 2026-09-11 (8) — ⭐⭐⭐ **ADOPTED (Marcus: "Promote 1"): `hilda31s` IS CANONICAL — the 31-par HILDA space with the SEASONAL MIXED LAYER ON (`seas_ml` 1), periodic spinup, under the corrected observables. logpost −1475.457904; Hessian PD, cond 3.4e5, NOTHING step-unstable (`h_ml` 64.8 ± 2.3 m). `hilda31p` stays REGISTERED as the `seas_ml` = 0 control. Memory tree cleaned: `INDEX_ccx` split.**
 
 ### The three steps

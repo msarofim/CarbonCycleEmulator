@@ -50,7 +50,20 @@ sl_vec    <- function(amp, mo) { th <- 2 * pi * mo / 12
 SL_CASES <- list(
   NH_origin = list(seas_npp_amp_NH = 0, seas_T_amp_NH = 0, sst_seas_amp_NH = 0),
   SH_land   = list(seas_npp_amp_SH = 0, seas_T_amp_SH = 0),
-  SH_ocean  = list(sst_seas_amp_SH = 0, ent_seas_amp_SH = 0),
+  # ⛔ THE THIRD LIMB (2026-09-12). With the seasonal mixed layer ON (seas_ml 1,
+  # canonical since hilda31s) the SH ocean has THREE seasonal drivers: the SST
+  # sine, the pCO2-side entrainment shim, and the mixed layer's own entrainment
+  # of real water. A knockout of the first two alone reads the residual of a
+  # partial cancellation -- at hilda31s 0.410 ppm @ 4.53 mo at SPO, OUTSIDE
+  # gate S's bracket -- when the whole limb is 0.465 @ 8.96, inside it. The
+  # 27g bug's exact class ("a one-limb knockout gates a limb that is not the
+  # one named"), one limb later. ⚠ `seas_ml` is a WHOLE-MODEL switch: this
+  # knockout also removes the NH mixed layer's leak into SPO (0.107 ppm @ 6.43,
+  # measured 09-12 with a per-hemisphere override; hemisphere-clean the limb is
+  # 0.451 @ 9.41). A per-hemisphere handle on the MLD cycle is OWED; until it
+  # exists the NH_origin case below does NOT include the NH mixed layer, so the
+  # three-limb decomposition is not complete at seas_ml = 1.
+  SH_ocean  = list(sst_seas_amp_SH = 0, ent_seas_amp_SH = 0, seas_ml = 0),
   ENSO      = setNames(as.list(rep(0, length(CCX_ENSO_PARAMS))), CCX_ENSO_PARAMS))
 
 # The three limbs 27q decomposed into, named so a caller can ask for its own

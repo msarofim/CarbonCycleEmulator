@@ -430,16 +430,37 @@ test_that("GATE S is an INTERVAL from an OBSERVATION plus a LAW, and it still fi
   expect_true(dg_gateS_verdict(mk(CCX_ENT_SEAS_PEAK_MO))$pass)
 })
 
-test_that("GATE S's knockout kills BOTH SH ocean limbs, and comes from the estimator", {
+test_that("GATE S's knockout kills ALL THREE SH ocean limbs, and comes from the estimator", {
   source(skip_if_no_gates(), local = TRUE)
   # ⚠ THE 27g BUG, GUARDED STRUCTURALLY. `sst_seas_amp_SH = 0` alone leaves the
   # entrainment limb running, and this gate is built to be run with that channel
   # switched ON -- so a one-limb knockout would gate a limb that is not the one
   # named. Guard the NAMES, and guard that they are TAKEN from the shared
   # estimator rather than retyped beside it.
-  expect_setequal(names(DG_S_KO), c("sst_seas_amp_SH", "ent_seas_amp_SH"))
+  # ⛔ AND THE THIRD LIMB (2026-09-12): with the seasonal mixed layer ON the
+  # two-name knockout read 0.410 ppm @ 4.53 mo at hilda31s -- a FAIL that was the
+  # gate's blind spot, not the model's phase (the whole limb is 0.465 @ 8.96).
+  expect_setequal(names(DG_S_KO), c("sst_seas_amp_SH", "ent_seas_amp_SH", "seas_ml"))
   expect_true(all(unlist(DG_S_KO) == 0))
   expect_identical(DG_S_KO, SL_CASES$SH_ocean)
+})
+
+test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonical the switch moves the limb by months", {
+  source(skip_if_no_gates(), local = TRUE)
+  md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
+  skip_if_not(identical(ccx_mode_seas_ml(md), 1L), "canonical has seas_ml OFF; the third limb is absent")
+  obs <- ccx_prepare_obs(); v <- dg_vector(CCX_MODE_CANONICAL)
+  full  <- dg_gateS_verdict(dg_gateS(v, obs))
+  blind <- local({ ko <- DG_S_KO; ko$seas_ml <- NULL
+    base <- dg_spo_vec(v, obs); vk <- v; for (n in names(ko)) vk$p[[n]] <- ko[[n]]
+    d <- base - dg_spo_vec(vk, obs); list(amp = sl_amp(d), mo = sl_ang_mo(d)) })
+  # the switch is load-bearing: without it the gate reads a different limb, by months
+  expect_gt(abs(dg_mo_diff(full$mo, blind$mo)), 1)
+  # THE RECORD (2026-09-12, hilda31s): whole limb 0.465 @ 8.96 PASS; the blind read 0.410 @ 4.53 FAIL
+  expect_true(full$pass)
+  expect_equal(full$mo,  8.96, tolerance = 0.05, scale = 1)
+  expect_equal(blind$mo, 4.53, tolerance = 0.05, scale = 1)
+  expect_false(dg_gateS_verdict(list(mo = blind$mo, amp = blind$amp))$pass)
 })
 
 test_that("L is a COMPARISON, not a gate: the verdict errors by name and dg_compareL() reports z's without a pass", {

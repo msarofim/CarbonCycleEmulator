@@ -571,6 +571,7 @@ dg_vector <- function(arm) {
   p <- ccx_default_params()
   if (identical(arm, "defaults"))
     return(list(p = p, luc_scale = 1, bomb_total = DG_BOMB_REF,
+                spinup = ccx_spinup, spinup_label = "aseasonal",
                 src = "uncalibrated defaults", migrated = character(0), md = NULL))
   f  <- ccx_mode_file(arm)
   md <- readRDS(f)
@@ -594,9 +595,19 @@ dg_vector <- function(arm) {
   # ccx_par_to_unc()/the objective take. Handing `p` to the objective raises
   # "lacks parameters this build fits"; handing `pm` to ccx_spinup() dies
   # cryptically. Both are returned, named for what they are.
+  # ⭐ THE SPINUP IS THE FILE'S OWN (2026-09-12). A mode promoted since 09-09x
+  # was fitted under the PERIODIC spinup, and its `streams` reproduce only under
+  # it: at `hilda31s` (seas_ml 1) the aseasonal ccx_spinup() puts the vector
+  # 2447 log-units off its own mode (-3889.6 vs the stored -1442.4) -- the
+  # 09-09t leak's exact mechanism, a seasonal mixed layer started from an
+  # aseasonal equilibrium. Every gate that spins up takes dg_spinup(v) below, so
+  # an arm is always measured where it was fitted ([[like_for_like_forcing]]);
+  # an absent field means the aseasonal spinup, as ccx_mode_spinup() says.
   list(p = p, pm = pm, luc_scale = pm$luc_scale, bomb_total = pm$bomb_total,
        sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
        grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c,
+       spinup = ccx_spinup_from_label(ccx_mode_spinup(md)),
+       spinup_label = ccx_mode_spinup(md),
        md = md, migrated = mig,
        src = sprintf("%s (logpost %.2f%s)", basename(dirname(f)), md$logpost,
                      if (length(mig)) sprintf(", MIGRATED %d->%d",
@@ -604,8 +615,16 @@ dg_vector <- function(arm) {
                                               length(CCX_PARAM_NAMES)) else ""))
 }
 
+#' The spinup an arm was FITTED under, applied to its own parameter list. A
+#' vector built by hand (no `spinup` field) gets the aseasonal ccx_spinup(),
+#' which is what every such vector meant before 09-09x.
+dg_spinup <- function(v) {
+  fn <- if (is.null(v$spinup)) ccx_spinup else v$spinup
+  fn(v$p)
+}
+
 dg_run <- function(v) {
-  sp <- ccx_spinup(v$p)
+  sp <- dg_spinup(v)
   F  <- ccx_build_forcing("historical", DG_YEARS, prod_c14 = sp$prod_c14,
                           bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
   list(sp = sp, F = F, out = ccx_run_fast(sp, F)$out)
@@ -1174,7 +1193,7 @@ dg_gateG_obs <- function(grid) {
 #' The model side of GATE G at one arm, AT THE OBSERVATION'S OWN EPOCH
 #' @param v a dg_vector(); @param obs a dg_gateG_obs()
 dg_gateG <- function(v, obs) {
-  sp   <- ccx_spinup(v$p)
+  sp   <- dg_spinup(v)
   aux  <- sp$aux
   grid <- ccx_ocean_grid(v$p$h_ml)
   yr   <- round(obs$epoch_mean)
@@ -1186,8 +1205,11 @@ dg_gateG <- function(v, obs) {
   # the HILDA boxes are on (2026-09-07d; read 16 percent low before).
   # ⛔ AND AS AN ANNUAL MEAN OVER THE FINAL YEAR, each box over its mass AT THE
   # TIME (2026-09-11 (4)): the Dec-31 STATE over the annual-mean mass read a
-  # seasonal mixed layer ~50 % high (NH f ~ 1.5 in January). The 1750 value is
-  # the spinup's -- aseasonal by construction, so its instant read is exact.
+  # seasonal mixed layer ~50 % high (NH f ~ 1.5 in January). The 1750 value
+  # (REPORTED only, never in the verdict) is the FIRST OUTPUT YEAR's annual
+  # mean by the same reader (2026-09-12): under the periodic spinup the spinup
+  # state is one PHASE of a seasonal box, and an instant read over the mean mass
+  # there is the same construction the epoch read retired.
   ml <- function(y, h) y[aux$idx[[h]]$ml, "C"] * aux$mol_per_GtC /
           (ccx_column_area(aux, h) * grid$dz[1] * rho) * 1e6
   ml_ann <- function(h) ccx_box_annual_conc(out, aux, grid, "ml", floor(max(out$t)) + 0.5, hemis = h)[["dic"]]   # the final year's 12 month-centres, on the output grid
@@ -1199,7 +1221,8 @@ dg_gateG <- function(v, obs) {
   # spans (ml + oc boxes = the low-latitude column); a_oc before 2026-09-07d.
   mass <- (ccx_column_area(aux, "NH") + ccx_column_area(aux, "SH")) * grid$dz * rho
   surf_NH <- ml_ann("NH"); surf_SH <- ml_ann("SH")
-  list(year = yr, surf = aw(surf_NH, surf_SH), surf_1750 = aw(ml(sp$y, "NH"), ml(sp$y, "SH")),
+  ml_1750 <- function(h) ccx_box_annual_conc(out, aux, grid, "ml", floor(min(out$t)) + 0.5, hemis = h)[["dic"]]
+  list(year = yr, surf = aw(surf_NH, surf_SH), surf_1750 = aw(ml_1750("NH"), ml_1750("SH")),
        surf_NH = surf_NH, surf_SH = surf_SH,
        inv = sum(st[ix, "C"]), inv_1750 = sum(sp$y[ix, "C"]),
        inv_obs = sum(obs$profile$dic * 1e-6 * mass / aux$mol_per_GtC))
@@ -1442,7 +1465,10 @@ dg_spo_vec <- function(v, obs) {
 
 #' GATE S's model side: the SH-OCEAN limb of SPO, by knockout
 #'
-#' The limb is BASE MINUS the run with both SH ocean drivers zeroed -- the
+#' The limb is BASE MINUS the run with EVERY SH ocean seasonal driver zeroed
+#' (the SST sine, the entrainment shim, and -- since 2026-09-12 -- the seasonal
+#' mixed layer itself, `seas_ml`; see SL_CASES$SH_ocean for why and for the
+#' hemisphere caveat) -- the
 #' contribution those drivers make to SPO, as a VECTOR. Limbs are vectors: an
 #' amplitude that grows while the phase stays antiphase makes the cancellation
 #' WORSE, not better ([[ccx_seas_2x2_admissible]]).
@@ -1516,7 +1542,7 @@ DG_L_COMPARISON <- paste("COMPARISON, NOT A GATE (Marcus 2026-09-08h): 'Do not u
 DG_L_EXTRA_YR <- 10   # forcing built this far past the horizon so the read is interior
 
 dg_gateL_partition <- function(v, horizon = DG_L_HORIZON, pulse = JOOS_PULSE) {
-  spin <- ccx_spinup(v$p)
+  spin <- dg_spinup(v)
   F_hist <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14 = spin$prod_c14,
                               bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
   sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, F_hist)$state

@@ -1,0 +1,33 @@
+# Handoff — 2026-09-12. **THE FULL EVALUATION OF `hilda31s` IS DONE** (`notes/assessment_2026-09-12_hilda31s.md`; CHANGELOG 2026-09-12; memory [[ccx_assessment_20260912]]). **Verdict: NOT YET ACCEPTABLE — the seasonal mixed layer moved the seasonal link and nothing on the release blocker (the ENSO ocean sign).** Two evaluation-machinery defects were found and fixed. NOTHING ADOPTED. Next: N → A's unrefitted probe → C′ on Torch → M.
+
+> Self-contained. Read the assessment note §1–§4 for every number; `INDEX_ccx.md` (live line updated), `INDEX_ccx_gates.md`
+> (the 09-12 ledger line), `INDEX_ccx_seas.md` (GATE S), `INDEX_conv.md` (two new rules). Previous handoff: `handoff_2026-09-11c_…`.
+
+## 1. WHAT THIS SESSION DID (CarbonCycleEmulator, one commit)
+| step | outcome |
+|---|---|
+| scorecard re-pointed | `calibration/diag_whole_model_scorecard.R`: arms `ent26` (path) / `hilda31p` (by name, `CCX_MODE_SEASML0_CONTROL`) / `hilda31s`; + GL, P7, L; + §0 reproduction guard. 16 s. → `outputs/diagnostics/whole_model_scorecard_20260911.{log,rds}` (tag = launch date) |
+| ⛔ FOUND + FIXED | every gate spun arms up ASEASONALLY (`ccx_spinup()` in `dg_run`/`dg_gateG`/`dg_gateL_partition`/IRF); `hilda31s` read −3889.6 vs stored −1442.4. `dg_vector()` records the file's spinup; `dg_spinup(v)` everywhere. GATE Q's 2.42 (09-11 (8)) was that read; on-mode 2.63 |
+| ⛔ FOUND + FIXED | GATE S's knockout blind to the third limb: 0.410 @ 4.53 FAIL vs whole limb 0.465 @ 8.96 PASS (hemisphere-clean 0.451 @ 9.41). `SL_CASES$SH_ocean` += `seas_ml = 0`; `test-gate-bounds` +5 (names + power), mutation-tested |
+| the note | 09-08 five-part form; options re-ranked: **A** (Niño3.4 limb, option B ruling 2) first, **C′** (pin the shim to 0), **M** (per-hemisphere MLD handle), **K** (gate thermal:DIC ratio; needs a SOURCE), D, B, E; **I retired** (GATE 5 passes), G built (GL) |
+| tests | gate-bounds 178, alpha-as pre-existing red pair (6.2 vs 3 × 2.63), gate-p7 25, mode-struct-lint 5, seasonal-box-observable 15. **Full suite NOT re-run** — run it first next session |
+
+## 2. NEXT (in order; each is a session or less)
+1. **Suite first** (expect the pre-existing pair; `test-gate-bounds` now runs the model twice more).
+2. **N** — arbitrate the two ENSO estimators (`diag_gateS_indep_and_fixB.R` PART B −0.432 vs the scorecard −0.522 at `ent26`): same arm, diff the annualisation/window/detrend. An hour.
+3. **A's UNREFITTED probe** at `hilda31s` (prereg first): scale the interior → ML exchange by (1 − γ·Niño3.4), γ ≥ 0; does the solubility-only r flip from −0.525 to ≥ +0.3 at the γ the +55 µatm reservoir implies ([[ccx_fixB_reservoir_priced]])? This decides whether the limb suffices or the box is needed.
+4. **C′** concurrently on Torch: `hilda31s` refit with `ent_seas_amp_SH` pinned to 0 (`seas_ml` 1). Read GATE S (must pass), `co2/d13c_seasonal_SPO` (≤ 1 log-unit each), the thermal:DIC anatomy before/after. ⚠ Reference set: add `hilda31s`; regenerate `port_targets.csv` at `seas_ml` 1 (handoff 09-11c §4).
+5. **M** — a per-hemisphere knockout handle on the MLD cycle (zero one hemisphere's harmonics in `ccx_prepare`, R + C++ parity); then re-read GATE S hemisphere-clean through it (the override read 0.451 @ 9.41 must reproduce) and complete the 27q decomposition (`NH_origin` + the NH ML).
+
+## 3. NON-OBVIOUS STATE
+- ⚠ **`dg_vector()` vectors now carry `$spinup`/`$spinup_label`; a hand-built vector (no field) is spun up ASEASONALLY** — as every pre-09-09x vector meant. Any diagnostic that builds `v` by hand for a periodic-fitted mode must set `v$spinup <- ccx_periodic_spinup` or it reads off-mode.
+- ⚠ **`SL_CASES$SH_ocean` now switches `seas_ml` off — for BOTH hemispheres.** At a `seas_ml` 0 arm it is a no-op (the three consuming diagnostics are unchanged). `NH_origin` does NOT include the NH mixed layer.
+- ⚠ The 09-11c handoff's "ML DIC cycle ±40 µmol/kg" does not reproduce: ±13 (NH max Feb / SH max Aug) under the annual-mean reader.
+- ⚠ `R/model.R` `ccx_seas_ml_on()` comment still says "which is why no periodic spinup is needed" — stale since 09-09x (option J).
+- `dg_gateG`'s 1750 surface value is now the first output year's annual mean (reported only).
+- Torch queue: nothing launched this session.
+
+## 4. ⛔ WHAT I WOULD NOT DO
+- Quote any gate number for a periodic-fitted mode from a script that still calls `ccx_spinup()` directly (grep before trusting: `grep -n "ccx_spinup(" calibration/*.R`).
+- Build option B before A's probe has an answer; adopt K without its source.
+- Read GATE S at `seas_ml` 1 with a knockout that omits the switch, or quote the hemisphere-clean number as the gate's (it is an override read until M).
