@@ -447,8 +447,8 @@ test_that("GATE S's knockout kills ALL THREE SH ocean limbs, and comes from the 
 
 test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonical the switch moves the limb by months", {
   source(skip_if_no_gates(), local = TRUE)
-  md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
-  skip_if_not(identical(ccx_mode_seas_ml(md), 1L), "canonical has seas_ml OFF; the third limb is absent")
+  # the resolver takes a NAME (test-mode-struct-lint.R: no direct readRDS of a mode file here)
+  skip_if_not(identical(ccx_mode_seas_ml(CCX_MODE_CANONICAL), 1L), "canonical has seas_ml OFF; the third limb is absent")
   obs <- ccx_prepare_obs(); v <- dg_vector(CCX_MODE_CANONICAL)
   full  <- dg_gateS_verdict(dg_gateS(v, obs))
   blind <- local({ ko <- DG_S_KO; ko$seas_ml <- NULL
