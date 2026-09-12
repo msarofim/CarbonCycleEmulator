@@ -588,6 +588,29 @@ ccx_seas_norms <- function(p) {
   })
 }
 
+#' The norms COMPUTED ONCE in ccx_prepare() and read by ccx_deriv() (2026-09-12,
+#' review B3). ccx_deriv() used to call ccx_seas_norms(p) up to FOUR times per
+#' derivative -- two hemispheres' 720-point insolation and q10 means each time,
+#' 29 % of the seasonal R derivative. `aux$seas_norm` now carries them with a KEY
+#' of every parameter they depend on, and ccx_deriv() recomputes from `p` when
+#' the key does not match: the R core's contract stays "the norms of the `p` it
+#' was handed" (which is what the C++ twin computes in unpack_par), so a `p`
+#' mutated after ccx_prepare() -- test-parity.R does exactly that -- still gets
+#' its own norms, bit for bit, from the same function.
+ccx_seas_norm_key <- function(p) {
+  lag <- ccx_seas_lag_p(p)
+  c(p$q10, p$seas_T_amp_NH, p$seas_T_amp_SH, lag[["NH"]], lag[["SH"]],
+    CCX_SEAS_PHI_EFF[["NH"]], CCX_SEAS_PHI_EFF[["SH"]], CCX_SEAS_T_LAG)
+}
+ccx_seas_norms_keyed <- function(p) {
+  v <- ccx_seas_norms(p); v$key <- ccx_seas_norm_key(p); v
+}
+ccx_seas_norms_for <- function(p, aux) {
+  sn <- aux$seas_norm
+  if (!is.null(sn) && identical(sn$key, ccx_seas_norm_key(p))) return(sn)
+  ccx_seas_norms(p)
+}
+
 # ---------------------------------------------------------------------
 # CO2 fertilisation: the functional FORM
 # ---------------------------------------------------------------------
@@ -812,8 +835,20 @@ ccx_mld_fourier <- function(h_m) {
   b <- vapply(kk, function(k) 2 / n * sum(f * sin(2 * pi * k * tau)), numeric(1))
   a[length(kk)] <- a[length(kk)] / 2     # Nyquist counted once
   b[length(kk)] <- b[length(kk)] / 2
-  list(a0 = 1, a = a, b = b, k = kk, f_month = f)
+  co <- list(a0 = 1, a = a, b = b, k = kk, f_month = f)
+  # The CONTINUOUS extremes of the interpolant, on a fine grid (2026-09-12,
+  # review A16). The 6-harmonic interpolant through 12 month-centre samples
+  # OVERSHOOTS the samples between them by ~0.6 % (SH max 1.6876 against the
+  # sampled 1.6779), so the integrated mixed layer is thinner in summer and
+  # deeper in winter than `f_month` says. A guard that reads the samples reads
+  # a bound the integration exceeds; ccx_seas_ml_guard() reads these instead.
+  tt <- (seq_len(CCX_MLD_FINE_GRID) - 0.5) / CCX_MLD_FINE_GRID
+  ff <- vapply(tt, function(t) ccx_mld_eval(co, t)$f, numeric(1))
+  co$f_min <- min(ff); co$f_max <- max(ff)
+  co$t_min <- tt[which.min(ff)]; co$t_max <- tt[which.max(ff)]
+  co
 }
+CCX_MLD_FINE_GRID <- 1200L   # points per year for the continuous extremes above
 
 #' The shape and its time derivative at time `t` (years). Periodic with period 1,
 #' so `t` is used directly -- no modulo, which would put a kink at the new year.
@@ -859,8 +894,12 @@ ccx_grid_at_h_ml <- function(grid, h) {
 
 #' Is the seasonal mixed layer active? It sits under the SAME `seas_drivers`
 #' switch as every other seasonal mechanism, so ccx_spinup()'s zeroing covers it
-#' and seas_drivers = 0 remains the EXACT aseasonal model -- which is why no
-#' periodic spinup is needed.
+#' and seas_drivers = 0 remains the EXACT aseasonal model. ⚠ That is NOT a
+#' reason no periodic spinup is needed (the 09-09j/k claim that used to stand
+#' here): with the drivers ON the aseasonal fixed point is not a point on the
+#' seasonal orbit -- +19.94 ppm at 1750, a +2.45 ppm rectified offset -- and
+#' since 2026-09-09x the objective's spinup IS the periodic one
+#' (`CCX_OBJECTIVE_SPINUP` = ccx_periodic_spinup; R/periodic_spinup.R).
 ccx_seas_ml_on <- function(p) {
   isTRUE(p$seas_drivers > 0) && !is.null(p$seas_ml) && isTRUE(p$seas_ml > 0)
 }
@@ -919,14 +958,17 @@ ccx_seas_ml_guard <- function(grid) {
   co   <- ccx_mld_shape("ls")
   base <- cumsum(grid$dz)[2]                      # layer-1 base, annual mean
   for (h in HEMIS) {
-    h_max <- grid$h_ml * max(co[[h]]$f_month)
+    # the CONTINUOUS maximum of the interpolant the integrator actually sees,
+    # not the deepest of the 12 samples (~0.6 % shallower; review A16, 09-12)
+    h_max <- grid$h_ml * co[[h]]$f_max
     if (h_max >= base)
       stop(sprintf(paste0("ccx_seas_ml_guard: the %s winter mixed layer reaches %.1f m ",
-                          "but layer 1's base is at %.1f m (h_ml = %.2f). Layer 1 can no ",
-                          "longer absorb the seasonal excursion, so single-layer ",
-                          "entrainment is INVALID here -- see prereg P8. The bound is ",
-                          "h_ml ~ 76 m; ent26 sat at 134.15 m."),
-                  h, h_max, base, grid$h_ml))
+                          "(continuous max of the interpolant, f_max %.4f; the deepest ",
+                          "monthly sample is %.4f) but layer 1's base is at %.1f m ",
+                          "(h_ml = %.2f). Layer 1 can no longer absorb the seasonal ",
+                          "excursion, so single-layer entrainment is INVALID here -- see ",
+                          "prereg P8. The bound is h_ml ~ 76 m; ent26 sat at 134.15 m."),
+                  h, h_max, co[[h]]$f_max, max(co[[h]]$f_month), base, grid$h_ml))
   }
   co
 }
@@ -1527,6 +1569,9 @@ ccx_default_params <- function() {
 ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   dy <- y * 0
   nb <- nrow(y)
+  # the seasonal-driver norms, ONCE per derivative (review B3): from
+  # aux$seas_norm when it was prepared from this `p`, else recomputed from `p`.
+  .snorm <- if (isTRUE(p$seas_drivers > 0)) ccx_seas_norms_for(p, aux) else NULL
 
   # --- optional flux tap (R/fluxes.R) ---------------------------------
   # OFF by default and behind a single branch inside add_flux/add_source, so
@@ -1944,7 +1989,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # 2026-08-18 before any refit ran. The norm needs no sign: the annual
       # mean of q10^(A sin) equals that of q10^(-A sin) by symmetry.
       sgn  <- if (h == "NH") 1 else -1
-      nrm  <- ccx_seas_norms(p)[[h]]
+      nrm  <- .snorm[[h]]
       q10f <- q10f * p$q10^(sgn * a_t * sin(2 * pi * (t - (3.5 + CCX_SEAS_T_LAG) / 12)) / 10) / nrm$r
     }
     add_flux(isf, iatm, (y[isf, "C"] / p$tau_soil_fast) * q10f)
@@ -1957,7 +2002,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # effective latitude, unit annual mean. The amplitude is NOT a knob: it
       # is the model's own NPP, so fertilisation grows the cycle and clearing
       # shrinks it -- the old npp/npp0 scaling, now carried by npp itself.
-      nrm  <- ccx_seas_norms(p)[[h]]
+      nrm  <- .snorm[[h]]
       seas <- (if (h == "NH") p$seas_npp_amp_NH else p$seas_npp_amp_SH) * npp *
         (ccx_insol(CCX_SEAS_PHI_EFF[[h]], t - ccx_seas_lag_p(p)[[h]] / 12) / nrm$n - 1)
     } else {
@@ -2358,8 +2403,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # ---- OPTION B (2026-09-11): the cold box's geometry NOW. With seas_ml = 2
       # HS deepens and shoals on its own poleward Holte climatology, HD absorbs
       # the excursion (the column depth is conserved), and HS's mass tracks its
-      # thickness. Twin of the LS block at the top of the loop, and of the C++.
-      # With the mechanism off these ARE aux's own values, bit for bit.
+      # thickness. Twin of the LS block at the top of the loop. ⛔ There is NO
+      # C++ twin of THIS block: option B was paused at commit 5ed31cf before it
+      # was ported, and ccx_seas_ml_marshal_check() refuses seas_ml = 2 on the
+      # C++ path for that reason. With the mechanism off these ARE aux's own
+      # values, bit for bit.
       h_hs_t <- aux$h_hs; dz_hd_t <- aux$dz_hd; hs_mass_t <- aux$hs_mass_kg[[h]]; dh_hs_dt <- 0
       if (ccx_seas_ml_hs_on(p)) {
         .evh      <- ccx_mld_eval(aux$mld_hs_coef[[h]], t)
@@ -2911,8 +2959,11 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # held survives as CCX_ENSO_SHARE_LEGACY, read ONLY by ccx_gamma_enso()'s
     # legacy branch. Removed rather than left inert -- a field nothing reads is
     # how a stale opinion outlives the mechanism that used it.
-    bomb_share_NH = 0.9,
-    nuc_share_NH  = 0.95,
+    # the NAMED shares R/forcing.R declares (same values as the literals that
+    # sat here until 2026-09-12; pointed at the constants so the two cannot
+    # drift apart)
+    bomb_share_NH = FORC_BOMB_NH_SHARE,
+    nuc_share_NH  = FORC_NUC_NH_SHARE,
     # Ocean areas, needed by the conveyor's interhemispheric limbs: those are
     # the only fluxes in the model where the hemisphere's area does NOT cancel
     # between source and sink, so they need a true per-volume concentration.
@@ -2943,6 +2994,10 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # OPTION B (2026-09-11): the HS box's own shape when seas_ml = 2. Mutually
     # exclusive with mld_coef by construction (one box carries the cycle).
     mld_hs_coef = if (ccx_seas_ml_hs_on(p)) ccx_seas_ml_hs_guard(h_hs, sum(grid$dz)) else NULL,
+    # the seasonal-driver norms, keyed on the parameters they depend on, so
+    # ccx_deriv() reads them instead of recomputing (review B3, 2026-09-12).
+    # NULL under the sine path, where nothing reads them.
+    seas_norm   = if (isTRUE(p$seas_drivers > 0)) ccx_seas_norms_keyed(p) else NULL,
     grid = grid
   )
   # HS's own preindustrial chemistry references, for the frozen-Revelle switch,
@@ -3115,6 +3170,12 @@ ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
   .grids <- list(grid)
   if (ccx_seas_ml_ls_on(p)) {
     .sh <- ccx_mld_shape("ls")
+    # ⚠ DELIBERATELY the 12 SAMPLED extremes, not the interpolant's continuous
+    # ones (`$f_min`/`$f_max`, ~0.6 % beyond the samples: SH max 1.6876 vs
+    # 1.6779; review A16, 2026-09-12). Reading the continuous extremes here
+    # could change the substep count, and a substep change alters EVERY
+    # trajectory and moves the objective -- so it is a RULING, not a tidy-up,
+    # and is left as shipped. The GUARD (ccx_seas_ml_guard) does read them.
     .fs <- c(min(vapply(HEMIS, function(h) min(.sh[[h]]$f_month), numeric(1))),
              max(vapply(HEMIS, function(h) max(.sh[[h]]$f_month), numeric(1))))
     .grids <- lapply(.fs, function(f) ccx_grid_at_h_ml(grid, grid$h_ml * f))

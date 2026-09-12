@@ -556,13 +556,19 @@ CCX_PARAM_TABLE <- list(
   # doing entrainment's job. P1 (the limb's PHASE, now scored by GATE S) and P3
   # (`npp_frac_NH` back inside its bounds) are corroboration, not the test.
   #
-  # THE PRIOR CENTRE IS DERIVED, NOT CHOSEN: ENT_SEAS_AMP_SH_DERIV = 10.9524
-  # umol/kg is the in-band 29.68 diluted onto the SH box by the registered
-  # 40-90 S ocean-area fraction. ⭐ BOTH ARE COMPUTED from named inputs since
-  # the 2026-09-03 provenance audit -- they were typed answers with the
-  # arithmetic in prose, which is how 30 and 11.07 had already drifted from
-  # their own chain (29.68 and 10.9524). The WIDTH is derived too, from the
-  # no-dilution ceiling -- see ENT_SEAS_LOGSD above.
+  # THE PRIOR CENTRE IS DERIVED, NOT CHOSEN: ENT_SEAS_AMP_SH_DERIV is
+  # ENT_SEAS_AMP_SH_INBAND diluted onto the SH box by the registered 40-90 S
+  # ocean-area fraction ENT_SEAS_BAND_AREA_FRAC (R/constants.R). ⭐ BOTH ARE
+  # COMPUTED from named inputs since the 2026-09-03 provenance audit -- they
+  # were typed answers with the arithmetic in prose, which is how two typed
+  # copies had already drifted from their own chain -- and the inputs moved
+  # AGAIN on 2026-09-09w (the band SST half-amplitude and band pCO2 amplitude
+  # are read from data/ products since then), so NO VALUE IS TYPED HERE
+  # (2026-09-12, review C; the numbers that stood in this comment were the
+  # pre-09-09w ones). Print ccx_const("ENT_SEAS_AMP_SH_DERIV") for the live
+  # centre, which the `init` below must equal -- test-ent-seas-fitted.R ties
+  # them. The WIDTH is derived too, from the no-dilution ceiling -- see
+  # ENT_SEAS_LOGSD above.
   # `init` is typed literally because CCX_PARAM_TABLE is built before ccx_const()
   # exists; test-likelihood.R ties each literal to its constant, as seas_T_amp_*
   # and PUMP_GRAD_OBS already are.
@@ -1580,9 +1586,11 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
   ccx_load_cpp()
   # Built once at a REFERENCE bomb total; the bomb column scales linearly with
   # the total, so a draw only rescales it rather than rebuilding the table.
-  BOMB_REF <- 102
+  # CCX_BOMB_REF (R/constants.R), not a local literal: the local `BOMB_REF <-
+  # 102` that stood here outlived the 2026-08-22 promotion that constants.R
+  # records as having removed it (review C, 2026-09-12). Numerically identical.
   base_forcing <- ccx_build_forcing("historical", years, prod_c14 = 0,
-                                    bomb_total_kmol = BOMB_REF)
+                                    bomb_total_kmol = CCX_BOMB_REF)
   # Land-use is rescaled per draw as a COLUMN multiply rather than by rebuilding
   # the forcing, which would cost more than the model run. Exact, because
   # ccx_build_forcing() applies luc_scale to the annual series and every
@@ -1623,7 +1631,9 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     p <- ccx_set_enso(p, pv)
 
     # `spinup_fn`, not `ccx_spinup` by name: see the argument's own block. The
-    # DEFAULT is ccx_spinup, so this line is a substitution and not a change.
+    # DEFAULT is CCX_OBJECTIVE_SPINUP = ccx_periodic_spinup since 2026-09-09x
+    # (it WAS ccx_spinup when this line was written, and the comment said so
+    # until 2026-09-12): a caller that wants the aseasonal spinup must pass it.
     sp <- tryCatch(spinup_fn(p), error = function(e) NULL)
     if (is.null(sp) || !is.finite(sp$prod_c14) || sp$prod_c14 <= 0) return(-Inf)
     # A PERIODIC spinup that did not converge only WARNS, and a warning is not a
@@ -1654,7 +1664,7 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
 
     F <- base_forcing
     F$c14_cosmo <- sp$prod_c14
-    F$c14_bomb  <- base_forcing$c14_bomb * (pv$bomb_total / BOMB_REF)
+    F$c14_bomb  <- base_forcing$c14_bomb * (pv$bomb_total / CCX_BOMB_REF)
     .cols <- LUC_SCALER$cols(pv$luc_scale)
     for (cc in CCX_LUC_COLS) F[[cc]] <- .cols[[cc]]
     attr(F, "luc_scale") <- pv$luc_scale
@@ -1717,15 +1727,45 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
 
 # ---- MCMC driver -----------------------------------------------------
 #' Run adaptive-Metropolis chains
+#'
+#' ⛔ SAMPLES THE CANONICAL MODE'S STRUCTURE, NOT THE COLUMN (2026-09-12, review
+#' A14). Until then this called ccx_make_logpost(years, obs) with the default
+#' `base_params = ccx_default_params()` -- the COLUMN structure at the
+#' environment's seas_ml default (0) -- so calibration/run_pilot.R would have
+#' sampled a model that no mode file describes. The base parameters (struct,
+#' seas_ml, pump_mode) now come from a MODE FILE, default the canonical, the
+#' spinup defaults to the objective's, and the labels that say WHAT was sampled
+#' ride in the returned object (same field names as a mode file), so the saved
+#' output is self-describing ([[like_for_like_forcing]]).
 #' @param n_iter iterations per chain
 #' @param n_chains number of chains (dispersed starts)
 #' @param seed base RNG seed; chain i uses seed + i
+#' @param mode mode name or path (ccx_mode_file()): supplies struct, seas_ml
+#'   and pump_mode via ccx_mode_base() + the file's `pump_mode`.
+#' @param base_params override of the model list the fitted names overlay;
+#'   NULL (default) = the mode file's.
+#' @param spinup_fn default CCX_OBJECTIVE_SPINUP; warns if the mode file was
+#'   fitted under a different spinup, because its draws would then not be
+#'   like-for-like with the file's own `streams`.
 ccx_run_mcmc <- function(n_iter = 5000, n_chains = 4, seed = 2026,
-                         years = c(1750, 2024), adapt_frac = 0.5, acc_rate = 0.234) {
+                         years = c(1750, 2024), adapt_frac = 0.5, acc_rate = 0.234,
+                         mode = CCX_MODE_CANONICAL, base_params = NULL,
+                         spinup_fn = CCX_OBJECTIVE_SPINUP) {
   if (!requireNamespace("adaptMCMC", quietly = TRUE))
     stop("adaptMCMC required: install.packages('adaptMCMC')")
+  md <- readRDS(ccx_mode_file(mode))
+  if (is.null(base_params)) {
+    base_params <- ccx_mode_base(md)
+    # pump_mode is NOT part of ccx_apply_structure(); every consumer sets it
+    # from the file by name (the precedent at ccx_mode_overlay_params).
+    if (!is.null(md$pump_mode)) base_params$pump_mode <- md$pump_mode
+  }
+  if (!identical(ccx_spinup_label(spinup_fn), ccx_mode_spinup(md)))
+    warning("ccx_run_mcmc(): sampling under the '", ccx_spinup_label(spinup_fn),
+            "' spinup while mode '", mode, "' was fitted under '",
+            ccx_mode_spinup(md), "'; the draws are not like-for-like with its streams.")
   obs <- ccx_prepare_obs()
-  lp  <- ccx_make_logpost(years, obs)
+  lp  <- ccx_make_logpost(years, obs, base_params = base_params, spinup_fn = spinup_fn)
   init <- ccx_init_unc()
 
   chains <- lapply(seq_len(n_chains), function(i) {
@@ -1740,7 +1780,11 @@ ccx_run_mcmc <- function(n_iter = 5000, n_chains = 4, seed = 2026,
     res
   })
   list(chains = chains, param_names = CCX_PARAM_NAMES, n_iter = n_iter,
-       years = years, seed = seed)
+       years = years, seed = seed,
+       # WHAT WAS SAMPLED (2026-09-12): the labels a consumer needs to score
+       # these draws like-for-like. Same field names as a mode file.
+       mode = mode, struct = ccx_mode_struct(md), seas_ml = ccx_mode_seas_ml(md),
+       pump_mode = base_params$pump_mode, spinup = ccx_spinup_label(spinup_fn))
 }
 
 #' Convert chains to natural-scale draws, dropping burn-in

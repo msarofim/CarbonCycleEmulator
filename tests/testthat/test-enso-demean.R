@@ -123,7 +123,10 @@ test_that("SPAN-INVARIANCE: the offset does not depend on the years requested", 
 # or `spinup_fn` is not reaching the model and the vintage distinction is
 # decoration.
 # ---------------------------------------------------------------------
-edm_price <- function(md) {
+# the observations, built once per file (review B4): ccx_make_logpost()'s default
+# rebuilds them on every closure
+edm_obs <- local({ o <- NULL; function() { if (is.null(o)) o <<- ccx_prepare_obs(); o } })
+edm_price <- function(md, spinups = c("periodic", "aseasonal")) {
   u0 <- ccx_par_to_unc(md$par_mode)     # no migration: a vector of the fitted space
   expect_true(all(is.finite(u0)))
   # THE FILE'S OWN STRUCTURE (2026-09-08f): on the column default the same
@@ -132,14 +135,20 @@ edm_price <- function(md) {
   sc <- function(dm, sf) { old <- FORC_ENSO_DEMEAN
     assign("FORC_ENSO_DEMEAN", dm, envir = globalenv())
     on.exit(assign("FORC_ENSO_DEMEAN", old, envir = globalenv()), add = TRUE)
-    ccx_make_logpost(base_params = bp, spinup_fn = sf)(u0) }
-  own   <- ccx_spinup_from_label(ccx_mode_spinup(md))
-  other <- ccx_spinup_from_label(setdiff(c("periodic", "aseasonal"), ccx_mode_spinup(md)))
-  list(u0 = u0, bp = bp,
-       on_own = sc(TRUE, own), off_own = sc(FALSE, own),
-       on_other = sc(TRUE, other), off_other = sc(FALSE, other),
-       on_periodic  = sc(TRUE, ccx_periodic_spinup), off_periodic  = sc(FALSE, ccx_periodic_spinup),
-       on_aseasonal = sc(TRUE, ccx_spinup),          off_aseasonal = sc(FALSE, ccx_spinup))
+    ccx_make_logpost(obs = edm_obs(), base_params = bp, spinup_fn = sf)(u0) }
+  # FOUR distinct scorings, not eight (review B4, 2026-09-12): `own`/`other` are
+  # ALIASES of the periodic/aseasonal pair, resolved from the spinup the file
+  # RECORDS, and a caller that reads one vintage asks for only that one.
+  own <- ccx_mode_spinup(md); other <- setdiff(c("periodic", "aseasonal"), own)
+  stopifnot(own %in% spinups)
+  r <- list(u0 = u0, bp = bp)
+  for (s in spinups) {
+    r[[paste0("on_",  s)]] <- sc(TRUE,  ccx_spinup_from_label(s))
+    r[[paste0("off_", s)]] <- sc(FALSE, ccx_spinup_from_label(s))
+  }
+  r$on_own   <- r[[paste0("on_",  own)]];   r$off_own   <- r[[paste0("off_", own)]]
+  r$on_other <- r[[paste0("on_",  other)]]; r$off_other <- r[[paste0("off_", other)]]
+  r
 }
 # CROSS-CHECK, and it is what makes the gap trustworthy rather than circular:
 # with the flag ON -- the SHIPPED state -- the harness, scored under the file's
@@ -176,7 +185,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 32.5460 under the adopted objective (hilda31s); 35.1749 at the seas_ml 0 control", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth 32.5483 under the adopted objective (hilda31s); 35.1773 at the seas_ml 0 control", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -200,9 +209,11 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 32.5460 under 
   # preindustrial d13C level by +0.025 permil, and the demean flag's ENSO-driven
   # d13C trajectory is priced against that level (the aseasonal price at the
   # quarantined hilda31 moved +0.0003 under the same rulings). Both files restamped.
-  expect_equal(r$on_periodic - r$off_periodic, 32.5460, tolerance = 1e-4, scale = 1)
-  r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)))
-  expect_equal(r0$on_periodic - r0$off_periodic, 35.1749, tolerance = 1e-4, scale = 1)
+  # 09-12 (d): +0.0023 at every file from review A12 (the D14C edge years 1941/2019 scored
+  # over their OBSERVED months) -- 32.5460 -> 32.5483, 35.1749 -> 35.1773.
+  expect_equal(r$on_periodic - r$off_periodic, 32.5483, tolerance = 1e-4, scale = 1)
+  r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
+  expect_equal(r0$on_periodic - r0$off_periodic, 35.1773, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
   expect_gt(r$on_periodic - r$off_periodic, 1)
@@ -212,7 +223,7 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 32.5460 under 
   expect_gt(abs((r$on_periodic - r$off_periodic) - (r$on_aseasonal - r$off_aseasonal)), 1)
 })
 
-test_that("RATIFICATION PIN at `hilda31` (retired, by path): 43.8321 aseasonal, and the 53.5199 artifact", {
+test_that("RATIFICATION PIN at `hilda31` (retired, by path): 43.8344 aseasonal, and the 53.5222 artifact", {
   skip_if_no_cpp()
   md <- readRDS(ccx_path(CCX_MODE_HILDA31_QUARANTINED))
   expect_identical(ccx_mode_spinup(md), "aseasonal")   # unrecorded = pre-09-09x = a fact
@@ -228,8 +239,9 @@ test_that("RATIFICATION PIN at `hilda31` (retired, by path): 43.8321 aseasonal, 
   # orbit to pin) while the PERIODIC artifact moved 63.7234 -> 53.5199: that -10.2 IS
   # ruling 4's interaction with the demean flag, the same -10/-11 the two registered
   # files show. The file is restamped (+30.6090, history kept).
-  expect_equal(r$on_aseasonal - r$off_aseasonal, 43.8321, tolerance = 1e-4, scale = 1)
-  expect_equal(r$on_periodic  - r$off_periodic,  53.5199, tolerance = 1e-4, scale = 1)
+  # 09-12 (d): +0.0023 each from review A12 (observed-month D14C edge years).
+  expect_equal(r$on_aseasonal - r$off_aseasonal, 43.8344, tolerance = 1e-4, scale = 1)
+  expect_equal(r$on_periodic  - r$off_periodic,  53.5222, tolerance = 1e-4, scale = 1)
   expect_gt(r$on_aseasonal - r$off_aseasonal, 1)
   expect_gt(abs((r$on_periodic - r$off_periodic) - (r$on_aseasonal - r$off_aseasonal)), 1)
 })

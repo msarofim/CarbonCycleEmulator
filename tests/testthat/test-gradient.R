@@ -28,12 +28,6 @@
 #      NOT -- so a future refactor that quietly neuters it gets caught.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 GR_YEARS <- c(1750, 2024)
 GR_SIG3  <- list(sigma_co2 = 1.5, sigma_d13c = 0.44, sigma_d14c = 5)
 # DESIGN sec.6 gate 9, decadal, seasonally adjusted
@@ -43,7 +37,15 @@ GR_GATE9_TOL <- 0.03            # ppm; the measured worst decade is 0.02
 
 gr_obs <- local({ o <- NULL; function() { if (is.null(o)) o <<- ccx_prepare_obs(); o } })
 
+# memoised on the parameter list, like gr_obs (review B4, 2026-09-12): the default
+# run was made five times
+gr_memo <- new.env()
 gr_run <- function(p = ccx_default_params()) {
+  k <- paste(deparse(p, control = "exact"), collapse = "")
+  if (is.null(gr_memo[[k]])) gr_memo[[k]] <- gr_run_raw(p)
+  gr_memo[[k]]
+}
+gr_run_raw <- function(p = ccx_default_params()) {
   sp <- ccx_spinup(p)
   F  <- ccx_build_forcing("historical", GR_YEARS, prod_c14 = sp$prod_c14)
   o  <- ccx_run_fast(sp, F)$out

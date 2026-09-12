@@ -15,12 +15,6 @@
 #      magnitudes, not just signs.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 # ---- 1. the estimator ------------------------------------------------
 
 test_that("ccx_year_harmonic recovers a known level, trend and harmonic", {
@@ -66,6 +60,7 @@ test_that("the level estimate is immune to partial month coverage", {
 
 test_that("years below the month threshold are dropped, not fitted", {
   t <- c(2000 + (seq_len(12) - 0.5) / 12, 2001 + (seq_len(4) - 0.5) / 12)
+  set.seed(20260912)                     # seeded immediately before the draw (review A15)
   v <- stats::rnorm(length(t))
   h <- ccx_year_harmonic(t, v)
   expect_equal(h$year, 2000)
@@ -450,7 +445,10 @@ test_that("the deep ocean is where GLODAP puts it -- the OBSERVABLE kz stands in
   md <- readRDS(ccx_mode_file())
   p  <- ccx_overlay_par(ccx_mode_base(md), md$par_mode)   # the file's own structure (09-08f)
   p$pump_mode <- md$pump_mode
-  deep <- ccx_spinup(p)$diagnostics$d14c_bottom_box
+  # under the FILE'S OWN spinup (periodic since 09-09x), not ccx_spinup(): the
+  # canonical was fitted under it, and the aseasonal read is off-mode (review
+  # A15; 0.25 permil = 0.024 sigma here, but the number under test is the mode's)
+  deep <- ccx_spinup_from_label(ccx_mode_spinup(md))(p)$diagnostics$d14c_bottom_box
   expect_true(is.finite(deep))
   z <- (deep - tg$target) / tg$sd
   # ⚠ MEASURED +1.86 at `ent26` on 2026-09-04: INSIDE, but on the young/

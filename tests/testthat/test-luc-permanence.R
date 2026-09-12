@@ -12,12 +12,6 @@
 # no observation and no fit, so it cannot be satisfied by re-tuning anything.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 LP_PULSE  <- 100      # GtC
 LP_YEAR   <- 1760     # leaves 264 yr of response inside the standard record
 LP_YRS    <- c(1750, 2024)

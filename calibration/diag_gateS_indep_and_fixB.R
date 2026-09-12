@@ -32,9 +32,15 @@ GI_PCO2   <- "data-raw/downloads/MPI-ULB-SOM_FFN_clim.nc"
 GI_ERSST  <- "data-raw/downloads/ersst_v5_sst_mnmean.nc"
 GI_WINDOW <- LIK_SEAS_WINDOW
 # The gate's own target and CI, read from the SAME registry the gate reads.
-GI_S_OBS  <- DG_S_OBS
-GI_S_LO   <- DG_S_OBS_LO
-GI_S_HI   <- DG_S_OBS_HI
+# ⚠ These are the gate's target AS PRE-REGISTERED (09-04g): the inverted SPO
+# ocean phase 8.52 [7.82, 9.20]. GATE S rebased the next day (09-04h) onto the
+# [DG_S_LO, DG_S_HI] arc and lib_design_gates.R now carries the inversion only
+# as DG_S_OBS_RETIRED, so the three old names no longer existed and this file
+# could not run. Re-pointed 2026-09-12 to the SAME NUMBERS under their registry
+# names; PART A corroborates the retired target, as pre-registered.
+GI_S_OBS  <- DG_S_OBS_RETIRED
+GI_S_LO   <- ccx_const("SPO_SEAS_OCEAN_PHASE_INV_LO")
+GI_S_HI   <- ccx_const("SPO_SEAS_OCEAN_PHASE_INV_HI")
 # The model's PRE-FIX SH ocean limb -- the defect gate S was created to catch.
 # Two estimators, both carried so neither is silently preferred.
 GI_PREFIX_LIMB <- 3.35    # lib_seas_limbs.R estimator, handoff 2026-09-03
@@ -201,6 +207,7 @@ cat("      two antiphase limbs that 2026-08-27f measured. Same reading, independ
 
 sep("A4 -- THE NARROWED BRACKET (WEAKER BY CONSTRUCTION; NEVER FAILS THE GATE)")
 v_can <- dg_vector(CCX_MODE_CANONICAL)
+GI_ARM_LABEL <- sprintf("model, %s", CCX_MODE_CANONICAL)   # the arm v_can resolves; never a literal
 tau_ex <- v_can$p$tau_ex
 w_ang  <- 2 * pi / 12                            # per month
 lag_tau <- atan(w_ang * tau_ex * 12) / (2 * pi) * 12
@@ -330,13 +337,16 @@ cat("  the code comment says carries the WRONG SIGN. Quoting gamma alone against
 cat("  NET observed sink is not like-for-like ([[like_for_like_forcing]]), so the\n")
 cat("  model side is measured the way the observation was: regress the model's own\n")
 cat("  annual ocean uptake on the SAME index with the SAME year term.\n\n")
-# Model ocean uptake = d(ocean_C)/dt, sign +ve = uptake, to match GCB ocean_sink.
+# Model ocean uptake, sign +ve = uptake, to match GCB ocean_sink -- THE
+# SCORECARD'S ESTIMATOR, dg_annual_sinks(): the ocean stock differenced Jan 1 ->
+# Jan 1, i.e. the CALENDAR-YEAR sink GCB reports. ⛔ Until 2026-09-12 (review
+# A9) this differenced ANNUAL-MEAN stocks -- an increment centred at y - 0.5 and
+# labelled y, half a year early against the index -- and read the solubility-
+# only r at ent26 as -0.432 where the calendar-year estimator reads -0.52. The
+# two ENSO estimators differed in NOTHING else (assessment option N, resolved).
 mod_sink <- function(v) {
-  o  <- dg_run(v)$out
-  yy <- floor(o$t)
-  ag <- stats::aggregate(ocean_C ~ yy, data = data.frame(yy = yy, ocean_C = o$ocean_C),
-                         FUN = mean)
-  data.frame(year = ag$yy[-1], ocean_sink = diff(ag$ocean_C))
+  a <- dg_annual_sinks(dg_run(v))
+  data.frame(year = a$year, ocean_sink = a$ocean)
 }
 slope_on_enso <- function(df) {
   m <- merge(df, en_ann, by = "year")
@@ -353,16 +363,16 @@ v_off <- v_can
 v_off$p$gamma_enso_ocn_NH <- 0; v_off$p$gamma_enso_ocn_SH <- 0
 arms <- list(`GCB (observed)` = c(beta = beta, se = se,
                                   r = stats::cor(residuals(stats::lm(ocean_sink ~ year, mg)),
-                                                 mg$nino34_anom), n = nrow(mg)),
-             `model, ent26`   = slope_on_enso(mod_sink(v_can)),
-             `model, patch OFF` = slope_on_enso(mod_sink(v_off)))
+                                                 mg$nino34_anom), n = nrow(mg)))
+arms[[GI_ARM_LABEL]]       <- slope_on_enso(mod_sink(v_can))   # was the literal `model, ent26` (09-12)
+arms[["model, patch OFF"]] <- slope_on_enso(mod_sink(v_off))
 cat(sprintf("  %-20s %12s %10s %8s %5s\n", "arm", "slope", "se", "r", "n"))
 for (nm in names(arms)) {
   a <- arms[[nm]]
   cat(sprintf("  %-20s %+12.4f %10.4f %+8.3f %5.0f\n", nm, a[["beta"]], a[["se"]],
               a[["r"]], a[["n"]]))
 }
-b_on <- arms[["model, ent26"]][["beta"]]; b_off <- arms[["model, patch OFF"]][["beta"]]
+b_on <- arms[[GI_ARM_LABEL]][["beta"]]; b_off <- arms[["model, patch OFF"]][["beta"]]
 cat(sprintf("\n  the SOLUBILITY-ONLY path (patch off): r %+.3f -- the code comment's\n",
             arms[["model, patch OFF"]][["r"]]))
 cat("  WRONG-SIGN claim, re-measured at the CURRENT mode rather than recalled.\n")

@@ -193,9 +193,11 @@ test_that("ccx_scaled_forcing reproduces ccx_make_logpost's likelihood exactly",
   # objective, which is the property that actually has to hold.
   #
   # Evaluated at a u WE choose (the default init) rather than at a stored
-  # u_mode: u_mode decodes under the refit's h_ml bound [85,120], which
-  # ccx_default_params() cannot reconstruct, so comparing there would indict the
-  # product for a property of the producer (memory ccx_hml_band_provenance).
+  # u_mode: a u_mode decodes under ITS FILE'S h_ml band -- the 08-25f pump
+  # refits' [85,120] override, which ccx_default_params() cannot reconstruct
+  # (memory ccx_hml_band_provenance). The canonical now decodes on the shipped
+  # [30,200], but a chosen u keeps this test independent of whichever band a
+  # future file records.
   #
   # AND IT IS EVALUATED OFF THE INIT, WHICH IS THE WHOLE POINT. `luc_scale`'s
   # init is exactly 1 and `bomb_total`'s is exactly the reference 102, so at the

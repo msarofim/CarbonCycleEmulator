@@ -13,6 +13,22 @@
 # =====================================================================
 source(ccx_path("calibration", "lib_design_gates.R"))
 
+# each file's OWN structure and seas_ml through the one resolver (test-mode-struct-lint.R).
+# HOISTED 2026-09-12 (review B4): it was defined identically inside both power tests,
+# and the seas_ml = 0 control's gradient was read twice; p7_g0() reads it once.
+grad_at <- function(mdx) {
+  pm <- mdx$par_mode
+  bp <- ccx_mode_base(mdx); bp$pump_mode <- mdx$pump_mode
+  p <- ccx_overlay_par(bp, pm); sp <- CCX_OBJECTIVE_SPINUP(p)
+  F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0, bomb_total_kmol = 102)
+  F$c14_cosmo <- sp$prod_c14; F$c14_bomb <- F$c14_bomb * (pm$bomb_total / 102)
+  for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH")) F[[cc]] <- F[[cc]] * pm$luc_scale
+  attr(F, "luc_scale") <- pm$luc_scale
+  ccx_ocean_grad_scored(ccx_run_fast(sp, F)$out, sp)
+}
+p7_g0 <- local({ g <- NULL; function() {
+  if (is.null(g)) g <<- grad_at(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))); g } })
+
 gp7 <- function(d13c, dic, sd13 = 0.163, sddic = 32.9)
   list(d13c = d13c, dic = dic, sd_eff = c(dic = sddic, d13c = sd13))
 
@@ -34,21 +50,10 @@ test_that("GATE P7 has POWER: the round-6 seas_ml = 1 mode FAILS it against hild
   skip_if_no_cpp()
   r6 <- ccx_path("calibration", "output", "multistart_20260910_round6_seasml1_sd1.0452", "start_004.rds")
   skip_if_not(file.exists(r6), "round-6 start file not present")
-  # each file's OWN structure and seas_ml through the one resolver (test-mode-struct-lint.R)
-  grad_at <- function(mdx) {
-    pm <- mdx$par_mode
-    bp <- ccx_mode_base(mdx); bp$pump_mode <- mdx$pump_mode
-    p <- ccx_overlay_par(bp, pm); sp <- CCX_OBJECTIVE_SPINUP(p)
-    F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0, bomb_total_kmol = 102)
-    F$c14_cosmo <- sp$prod_c14; F$c14_bomb <- F$c14_bomb * (pm$bomb_total / 102)
-    for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH")) F[[cc]] <- F[[cc]] * pm$luc_scale
-    attr(F, "luc_scale") <- pm$luc_scale
-    ccx_ocean_grad_scored(ccx_run_fast(sp, F)$out, sp)
-  }
   md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)); s4 <- readRDS(r6)
   expect_identical(ccx_mode_seas_ml(md), 0L); expect_identical(ccx_mode_seas_ml(s4), 1L)
   expect_identical(ccx_mode_struct(md), "hilda"); expect_identical(ccx_mode_struct(s4), "hilda")
-  g0 <- grad_at(md); g1 <- grad_at(s4)
+  g0 <- p7_g0(); g1 <- grad_at(s4)
   v <- dg_gateP7_verdict(g0, g1)
   expect_false(v$pass)
   expect_gt(v$ratio_d13c, 1.5)                         # 2.0x on 2026-09-11
@@ -73,19 +78,9 @@ test_that("THE VERDICT ON THE RECORD (2026-09-11 (7)): the round-6b mode -- the 
   skip_if_no_cpp()
   r6b <- ccx_path("calibration", "output", "multistart_20260911_round6b_seasml1_sd1.0452", "start_005.rds")
   skip_if_not(file.exists(r6b), "round-6b start file not present")
-  grad_at <- function(mdx) {
-    pm <- mdx$par_mode
-    bp <- ccx_mode_base(mdx); bp$pump_mode <- mdx$pump_mode
-    p <- ccx_overlay_par(bp, pm); sp <- CCX_OBJECTIVE_SPINUP(p)
-    F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0, bomb_total_kmol = 102)
-    F$c14_cosmo <- sp$prod_c14; F$c14_bomb <- F$c14_bomb * (pm$bomb_total / 102)
-    for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH")) F[[cc]] <- F[[cc]] * pm$luc_scale
-    attr(F, "luc_scale") <- pm$luc_scale
-    ccx_ocean_grad_scored(ccx_run_fast(sp, F)$out, sp)
-  }
   md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)); s5 <- readRDS(r6b)
   expect_identical(ccx_mode_seas_ml(s5), 1L)
-  v <- dg_gateP7_verdict(grad_at(md), grad_at(s5))
+  v <- dg_gateP7_verdict(p7_g0(), grad_at(s5))
   expect_true(v$pass)
   expect_lt(v$ratio_d13c, 0.25)                        # 0.17x on 2026-09-11 (7)
   expect_equal(v$d13c_on, -0.330, tolerance = 2e-3, scale = 1)   # TOWARD the target (-0.861), from -0.301 (re-pinned 09-12; was -0.327 / 304)

@@ -210,10 +210,11 @@ test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
   # The migration must hold no opinion of its own: it reads ccx_gamma_enso(),
   # the one resolver both cores go through. A migrated legacy list must encode
   # IDENTICALLY to one whose four fields were set by hand. Not close: identical.
-  # ⚠ ccx_mode_params() is itself a PRE-split list -- the canonical mode
-  # predates both this split and the seas_lag_p one -- so "an ancestor current
-  # in every other respect" has to be constructed, or this test measures the
-  # lag migration instead.
+  # ⚠ ccx_mode_params() is a POST-split 31-parameter list -- the canonical
+  # carries the four gamma_enso_* names AND the seas_lag_p pair (this comment
+  # said it predated both splits until 2026-09-12) -- so "an ancestor current in
+  # every other respect" has to be CONSTRUCTED from it, or there is nothing to
+  # migrate.
   p <- ccx_migrate_par_set(ccx_mode_params()); attr(p, "migrated") <- NULL
   p_old <- p[setdiff(names(p), CCX_ENSO_PARAMS)]
   p_old$gamma_enso <- 0.85119

@@ -20,18 +20,22 @@
 #      raw fire shape would overstate the correction ~4.6x.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
 skip_if_no_seasonality <- function()
   skip_if(is.null(ccx_emission_seasonality()),
           "data/forcing_emission_seasonality.rds absent")
 
 ES_YEARS <- c(1750, 2024)
 
+# the on/off forcing pair, built once per file (review B4, 2026-09-12): four
+# blocks rebuilt it. Keyed on the OTHER forcing flag too, so a block that toggles
+# it can never be served a forcing built under a different one.
+es_memo <- new.env()
 es_forcing <- function(on) {
+  k <- paste(on, FORC_USE_LUC_NH_SHARE_TS)
+  if (is.null(es_memo[[k]])) es_memo[[k]] <- es_forcing_raw(on)
+  es_memo[[k]]
+}
+es_forcing_raw <- function(on) {
   old <- FORC_USE_EMIS_SEASONALITY
   on.exit(assign("FORC_USE_EMIS_SEASONALITY", old, envir = globalenv()))
   assign("FORC_USE_EMIS_SEASONALITY", on, envir = globalenv())

@@ -15,12 +15,6 @@
 # asserted here so the correct control (seas_drivers) is the one that is used.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 ent_p <- local({ p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5)); p })
 
 # ⛔ THE OFF-STATE IS NAMED, NOT INHERITED (2026-09-04). Until the `ent26`

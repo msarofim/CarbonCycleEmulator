@@ -8,12 +8,6 @@
 # recorded in CHANGELOG) so a wrong index or dropped term cannot pass.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 pf <- local({
   p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   list(p = p)

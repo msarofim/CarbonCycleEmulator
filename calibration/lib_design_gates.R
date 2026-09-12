@@ -1,5 +1,10 @@
 # =====================================================================
-# lib_design_gates.R -- the DESIGN sec.6 gate 4 / 5 / 7 KERNELS, in one place.
+# lib_design_gates.R -- the DESIGN sec.6 GATE KERNELS, in one place.
+#   LIVE gates (DG_LEDGER, 2026-09-12): V, H, GL, 5, G, Q, 7, S, P7.
+#   COMPARISONS, not gates: 12 (the Joos IRF) and L (the pulse partition).
+#   RETIRED: 4 (2026-09-04; dg_gate4_verdict() errors by name, the AF is still
+#   printed). The 'gate 4 / 5 / 7' this header named until 09-12 is the 08-31f
+#   founding set, kept in the paragraph below as history.
 #
 # WHY THIS FILE EXISTS (2026-08-31f). These estimators were written inside
 # `diag_design_gates_at_mode.R` and were about to be written a SECOND time, in
@@ -214,17 +219,23 @@ DG_LEDGER <- list(
        class = "OBSERVATION", src = "GCB 2025 annual budget",
        bound = paste("DISTRIBUTIONAL, |z| <= DG_V_NSD (2), TWO-SIDED, against",
          "
-            the OBSERVED sd's OWN sampling error sd/sqrt(2(n-1)) =",
+            the OBSERVED sd's OWN sampling error sd/sqrt(2 nu), nu the",
          "
-            0.080 GtC/yr -- derived from the observation, not chosen,",
+            RESIDUAL dof n - (DG_V_DF + 1) = 62 (dg_v_sd, 09-12; both",
          "
-            and MC-validated to three decimals."),
+            used n - 1 = 65 until then, 0.080) = 0.084 GtC/yr -- derived",
+         "
+            from the observation, not chosen, and MC-validated."),
        scored = "NO. co2_level_* scores LEVELS at a soft 1.0 ppm sigma; nothing",
        power  = paste("REAL, and it is the only gate that tests a SECOND-ORDER",
          "
-            observation. ent26 reads -2.67 sigma (0.698 vs 0.911",
+            observation. On the 09-12 cut (run to 2025, dof se) ent26",
          "
-            GtC/yr), defaults -3.42. The model's variability should",
+            reads -2.53 (0.721 vs 0.933 GtC/yr), hilda31p -2.57,",
+         "
+            hilda31s -2.48; it read -2.67 (0.698 vs 0.911), defaults",
+         "
+            -3.42, on the 09-04 cut. The model's variability should",
          "
             come from observed TEMPERATURE, VOLCANIC AOD via diffuse",
          "
@@ -244,11 +255,17 @@ DG_LEDGER <- list(
          "
             R_d13c - R_co2, against the OBSERVED means' OWN sampling",
          "
-            error se = sd/sqrt(n_eff) propagated in quadrature. n_eff",
+            error se = sd_resid/sqrt(n_eff) propagated in quadrature,",
          "
-            is from the DETRENDED lag-1 autocorrelation (the gradients",
+            BOTH from the DETRENDED series (the gradients trend as",
          "
-            trend as emissions grow). ⚠ The model side is",
+            emissions grow). ⭐ RE-CUT 2026-09-12: until then the sd was",
+         "
+            of the RAW trended gradient over a residual n_eff -- 3.4x",
+         "
+            too wide for CO2 (0.927 vs 0.273), 1.6x for d13C. ⚠ The",
+         "
+            model side is",
          "
             DETERMINISTIC and contributes no error term."),
        scored = paste("NO -- and this is the whole point. Both gradient streams",
@@ -272,11 +289,21 @@ DG_LEDGER <- list(
          "
             alike and cancels in the contrast; the CO2 arm absorbs it.",
          "
-            ⭐ That control PASSES on its own level at ent26 (-1.06",
+            ⚠ WITHDRAWN 2026-09-12: 'that control PASSES on its own level",
          "
-            se), so the gate is not rejecting everything it is shown.",
+            at ent26 (-1.06 se)' was the raw-sd reading; on the residual",
          "
-            ent26 reads z +6.55, defaults +6.56 -- calibration moved",
+            se the CO2 control is ITSELF out at z_level -3.5 to -3.6 at",
+         "
+            every arm (0.913-0.916x observed) -- an 8 % transport /",
+         "
+            representation miss, significant at the station record's",
+         "
+            precision -- so the contrast isolates the part of the d13C",
+         "
+            miss that is NOT that. ent26 reads z +11.65, hilda31s +11.59",
+         "
+            (+6.55 / +6.56 defaults on the raw sd) -- calibration moved",
          "
             the contrast 1.473 -> 1.056 but not its significance.",
          "
@@ -301,9 +328,15 @@ DG_LEDGER <- list(
          "
             33.8), NOT the argmax peak time, which on a double-peaked curve",
          "
-            flips lumps; SH peak time and the lag are unchanged. The NH",
+            flips lumps; the SH peak time is unchanged. ⭐ THE LAG IS SH",
          "
-            first-peak time is REPORTED. ⭐ The ruling's premise is",
+            PEAK TIME MINUS THE NH FIRST-PEAK TIME (2026-09-12, review",
+         "
+            A4): on the argmax it inherited the lump flip ruling 1 removed",
+         "
+            from nh_t (z -0.95 on the 1964 lump vs +1.7 on the first",
+         "
+            peak). The NH first-peak time is REPORTED. ⭐ The ruling's premise is",
          "
             MEASURED by this same spread: the argmax time's zonal sd is",
          "
@@ -346,7 +379,19 @@ DG_LEDGER <- list(
             is not worth chasing in a refit.")),
   list(id = "Q", what = "air-sea d13C disequilibrium, 1995",
        class = "OBSERVATION", src = "Quay et al. 2003 (0.60 +- 0.10 permil)",
-       bound = "n_sd <= DG_Q_NSD, a distributional claim on the stated sigma",
+       bound = paste("n_sd <= DG_Q_NSD, a distributional claim on the stated sigma.",
+         "
+            ⭐ RE-CUT 2026-09-12 (Marcus): the statistic is the CALENDAR-YEAR",
+         "
+            MEAN over the 12 monthly rows of DG_Q_YEAR, the two boxes",
+         "
+            AREA-WEIGHTED (ccx_column_area; a_oc NH 0.429). Until then it",
+         "
+            read ONE instant (t = 1995.000 = Dec 1994) and the verdict was",
+         "
+            phase-dependent: over the year hilda31s n_sd 2.18-3.62 (instant",
+         "
+            2.63), ent26 0.85-2.29 -- across the PASS line."),
        scored = "NO -- ocean d13C is scored as a GRADIENT; d13c_level_* are atmospheric",
        power  = paste("REAL, AND THE ONLY ONE. Nothing constrains absolute",
          "
@@ -447,7 +492,27 @@ DG_LEDGER <- list(
          "
             it. \u26a0 The observed ocean phase rests on a pCO2 product,",
          "
-            which omits the seasonality of gas transfer and K0.")),
+            which omits the seasonality of gas transfer and K0.",
+         "
+            \u2b50 THE KNOCKOUT HAS THREE LIMBS since 2026-09-12: the SST",
+         "
+            sine, the entrainment shim, and the seasonal mixed layer",
+         "
+            itself (`seas_ml` 0 in SL_CASES$SH_ocean). Two limbs alone at",
+         "
+            hilda31s read 0.410 ppm @ 4.53 mo -- OUTSIDE the arc -- for a",
+         "
+            whole limb of 0.465 @ 8.96. \u26a0 `seas_ml` is a WHOLE-MODEL",
+         "
+            switch, so the knockout also removes the NH mixed layer's leak",
+         "
+            into SPO (0.107 ppm @ 6.43; hemisphere-clean the limb is 0.451",
+         "
+            @ 9.41): a per-hemisphere MLD handle is OWED, and until it",
+         "
+            exists the three-limb decomposition is not complete at",
+         "
+            seas_ml = 1.")),
   list(id = "12/12b", what = "Joos IRF: integrated pulse response, and the tail",
        class = "MODEL", src = paste(
          "Joos et al. 2013 multi-model mean, vintage 2013.",
@@ -490,7 +555,9 @@ DG_LEDGER <- list(
          "
             bare-se z (the bound until 09-09) is REPORTED as z_bare. ⚠ The",
          "
-            canonical moves z -13 -> z -9 and still FAILS: an allowance that",
+            canonical moves z -13 -> z -9 (on the residual se of 09-12:",
+         "
+            bare -21.6 -> -10.1) and still FAILS: an allowance that",
          "
             could not change the verdict is the honest kind."),
        scored = "PARTLY: d13c_gradient scores the SHAPE through a fitted offset, so the LEVEL is unscored",
@@ -510,15 +577,27 @@ DG_LEDGER <- list(
          "
             in the same units (its own sd_eff) and not gated -- one bound, one claim."),
        scored = "YES (the rows are in the objective) -- which is why a refit can BUY prior relief by moving them; this gate asks the move by name",
-       power  = paste("REAL, and it decided a round: the seas_ml = 1 refit (2026-09-11) moved the",
+       power  = paste("REAL, and it decided a round TWICE. 09-11 (2): the seas_ml = 1 refit",
          "
-            gradient +0.327 against sd_eff 0.163 (-0.309 -> +0.018, target -0.861)",
+            read as moving the gradient +0.327 against sd_eff 0.163 and was",
          "
-            and was REFUTED on it; the DIC gradient went 302 -> 385 (target 233).",
+            'REFUTED' -- ⛔ RETRACTED: that read was an OBSERVABLE ARTEFACT, a",
          "
-            Any future re-test of seas_ml (e.g. on a high-latitude ML box, option B)",
+            seasonal box read over its annual-mean mass rather than its mass",
          "
-            passes this gate or does not ship. Mutation-tested on the kernel."))
+            at the time ([[seasonal_box_observable_artefact]]). 09-11 (7),",
+         "
+            round 6b, like-for-like: hilda31s PASSES at -0.028 (-0.029 after",
+         "
+            the 09-12 restamp; OFF -0.301 -> ON -0.330) vs bound 0.163,",
+         "
+            target -0.861, while the artefact-fitted 09-10 mode still FAILS",
+         "
+            it -- that is the gate's POWER. DIC 300 -> 306 (target 233),",
+         "
+            reported. Any future re-test of seas_ml passes this gate or does",
+         "
+            not ship. Mutation-tested on the kernel."))
 )
 
 #' GATE P7 -- the verdict kernel. `g_off` / `g_on` are the scored gradient lists
@@ -982,8 +1061,12 @@ dg_gate4_verdict <- function(g4) stop(DG_G4_RETIRED, call. = FALSE)
 # i.e. the verdict does not turn on it.
 #
 # THE BOUND IS DERIVED FROM THE OBSERVATION ITSELF, not chosen. The sampling
-# error of an sd on n independent draws is sd / sqrt(2(n-1)) -- 0.080 GtC/yr here
-# -- and a matched Monte Carlo returns 0.080 to three decimals. So the gate is a
+# error of a residual sd on nu degrees of freedom is sd / sqrt(2 nu), and nu is
+# the RESIDUAL dof of the AF(t) regression, n - (DG_V_DF + 1) = 62 -- see
+# dg_v_sd() -- giving 0.084 GtC/yr here. ⚠ Until 2026-09-12 (review A7) both
+# the sd and the se used n - 1 = 65 (0.080), which understates a residual sd by
+# sqrt(65/62) and its se by 65/62; the matched Monte Carlo that returned 0.080
+# was matched to THAT form (white draws, no regression). So the gate is a
 # DISTRIBUTIONAL claim at the observation's own sigma, |z| <= DG_V_NSD, two-sided:
 # too MUCH interannual variance is as wrong as too little.
 # ⚠ The observed anomaly is white (lag-1 rho +0.014), which is what makes
@@ -1020,16 +1103,31 @@ dg_v_anom <- function(a, df = DG_V_DF, win = DG_V_WIN) {
   stats::residuals(stats::lm(gr ~ 0 + em + I(em * splines::ns(yr, df = df))))
 }
 
+#' The residual sd of dg_v_anom() on its DEGREES OF FREEDOM, and that dof
+#'
+#' ⭐ 2026-09-12 (review A7). `dg_v_anom()` is the residual of a least-squares
+#' fit with DG_V_DF + 1 coefficients (`em`, and the DG_V_DF columns of
+#' `em * ns(yr)`), so E[sum(e^2)] = sigma^2 * nu with nu = n - (DG_V_DF + 1)
+#' = 62 on 1959-2024 -- not the n - 1 = 65 that stats::sd() divides by. Hence
+#' sigma_hat = sqrt(sum(e^2) / nu) (the lm's own `sigma`; the residual mean is
+#' not removed -- there is no intercept, and mean(e) is -0.002 GtC/yr on the
+#' obs) and, for Gaussian residuals, se(sigma_hat) = sigma_hat / sqrt(2 nu).
+#' With n - 1 the sd was understated by sqrt(65/62) (2.4 %) and the se by
+#' 65/62 (4.8 %). Applied IDENTICALLY to the model and the observation, so the
+#' z's shrink by the ratio, ~2.4 % (hilda31s -2.54 -> -2.48).
+dg_v_dof <- function(n, df = DG_V_DF) n - (df + 1)
+dg_v_sd  <- function(e, df = DG_V_DF) sqrt(sum(e^2) / dg_v_dof(length(e), df))
+
 dg_gateV <- function(r, df = DG_V_DF) {
   e <- dg_v_anom(dg_af_annual_model(r), df = df)
-  list(sd = stats::sd(e), rho = stats::acf(e, plot = FALSE, lag.max = 1)$acf[2],
-       n = length(e), df = df)
+  list(sd = dg_v_sd(e, df), rho = stats::acf(e, plot = FALSE, lag.max = 1)$acf[2],
+       n = length(e), dof = dg_v_dof(length(e), df), df = df)
 }
 
 dg_gateV_obs <- function(df = DG_V_DF) {
   e <- dg_v_anom(DG_AF_OBS_ANNUAL, df = df)
-  n <- length(e); sd <- stats::sd(e)
-  list(sd = sd, se = sd / sqrt(2 * (n - 1)), n = n,
+  n <- length(e); nu <- dg_v_dof(n, df); sd <- dg_v_sd(e, df)
+  list(sd = sd, se = sd / sqrt(2 * nu), n = n, dof = nu,
        rho = stats::acf(e, plot = FALSE, lag.max = 1)$acf[2], df = df)
 }
 
@@ -1223,14 +1321,24 @@ dg_gateG_obs <- function(grid) {
 
 #' The model side of GATE G at one arm, AT THE OBSERVATION'S OWN EPOCH
 #' @param v a dg_vector(); @param obs a dg_gateG_obs()
-dg_gateG <- function(v, obs) {
-  sp   <- dg_spinup(v)
+#' @param r an existing dg_run(v) of the SAME v (2026-09-12, review B5). With it
+#'   the SPINUP is reused (deterministic; identical to the bit, measured) and
+#'   the surface reads come off the long run's own epoch-year rows, which equal
+#'   the short run's exactly (diff 0.0 at all three arms, 09-12). ⚠ The short
+#'   run to the epoch year is STILL made when `r` is given: `inv`, `inv_1750`
+#'   and `uptake` are END-OF-RUN INSTANT states (the state matrix at t = yr + 1)
+#'   and the output holds only month-centred rows, so the long run cannot
+#'   supply them; an annual-mean inventory would be a DIFFERENT estimator, and
+#'   this item's contract is bit-identity. What `r` saves is the spinup.
+dg_gateG <- function(v, obs, r = NULL) {
+  sp   <- if (is.null(r)) dg_spinup(v) else r$sp
   aux  <- sp$aux
   grid <- ccx_ocean_grid(v$p$h_ml)
   yr   <- round(obs$epoch_mean)
   F  <- ccx_build_forcing("historical", c(DG_YEARS[1], yr), prod_c14 = sp$prod_c14,
                           bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
-  r  <- ccx_run_fast(sp, F); st <- r$state; out <- r$out
+  rs <- ccx_run_fast(sp, F); st <- rs$state
+  out <- if (is.null(r)) rs$out else r$out     # the epoch year's rows are the same rows
   rho <- ccx_const("RHO_SEAWATER")
   # Over the LOW-LATITUDE column's area: the ML box spans a_ls, not a_oc, once
   # the HILDA boxes are on (2026-09-07d; read 16 percent low before).
@@ -1243,7 +1351,7 @@ dg_gateG <- function(v, obs) {
   # there is the same construction the epoch read retired.
   ml <- function(y, h) y[aux$idx[[h]]$ml, "C"] * aux$mol_per_GtC /
           (ccx_column_area(aux, h) * grid$dz[1] * rho) * 1e6
-  ml_ann <- function(h) ccx_box_annual_conc(out, aux, grid, "ml", floor(max(out$t)) + 0.5, hemis = h)[["dic"]]   # the final year's 12 month-centres, on the output grid
+  ml_ann <- function(h) ccx_box_annual_conc(out, aux, grid, "ml", yr + 0.5, hemis = h)[["dic"]]   # the EPOCH year's 12 month-centres, on the output grid (= the short run's final year)
   # AREA-WEIGHTED, because the observation is a global volume-weighted mean and
   # the two hemispheres differ by ~15 umol/kg (the model's solubility pump).
   aw <- function(nh, sh) (nh * aux$a_oc$NH + sh * aux$a_oc$SH) / (aux$a_oc$NH + aux$a_oc$SH)
@@ -1276,7 +1384,9 @@ dg_gateG_verdict <- function(g, obs, n_eff = DG_GD_NEFF) {
 # renormalises the PRIOR and is not reconstructible from ccx_default_params()
 # (memory ccx_hml_band_provenance), so a logpost comparison would indict the
 # product for a property of the producer. par_mode is band-safe.
-dg_streams <- function(r, v) {
+#' @param obs the obs bundle. The default re-reads it (cached); a caller that
+#'   holds several arms passes its own once (2026-09-12, review B5).
+dg_streams <- function(r, v, obs = ccx_prepare_obs()) {
   # ⛔ SCORE THE OBJECTIVE'S OWN SPAN. DG_YEARS runs one forcing-held year past
   # the record (2026-09-12) so the annual readers' final boundary is interior;
   # the objective was fitted to DG_SINK_LAST, and scoring the held year with it
@@ -1288,7 +1398,7 @@ dg_streams <- function(r, v) {
   eluc <- ccx_forcing_eluc_annual(Fk)
   err <- list(sigma_d14c = v$sigma_d14c, rep_dC = v$rep_dC,
               grad_off_co2 = v$grad_off_co2, grad_off_d13c = v$grad_off_d13c)
-  ccx_loglik(o, ccx_prepare_obs(), err, luc = eluc,
+  ccx_loglik(o, obs, err, luc = eluc,
              deep = r$sp$diagnostics$d14c_bottom_box,
              ocean_grad = ccx_ocean_grad_scored(o, r$sp), by_stream = TRUE,
              d14c_mid = ccx_model_d14c_slabs(r$sp))
@@ -1385,8 +1495,12 @@ dg_gateH_obs <- function(obs = ccx_prepare_obs()) {
 
 #' GATE H's model side: the RAW MLO-SPO gradient means, on the observed years
 #' @param v a dg_vector(); @param obs a ccx_prepare_obs(); @param ho a dg_gateH_obs()
-dg_gateH <- function(v, obs, ho = dg_gateH_obs(obs)) {
-  ms <- ccx_model_stats(dg_run(v)$out, obs)
+#' @param r an existing dg_run(v) of the SAME v, reused instead of re-run
+#'   (2026-09-12, review B5); NULL runs it. The run is deterministic, so the
+#'   two paths are bit-identical (the scorecard's logs were diffed).
+dg_gateH <- function(v, obs, ho = dg_gateH_obs(obs), r = NULL) {
+  if (is.null(r)) r <- dg_run(v)
+  ms <- ccx_model_stats(r$out, obs)
   f <- function(mod, g) {
     mg <- mod$MLO$level[match(g$year, mod$MLO$year)] -
           mod$SPO$level[match(g$year, mod$SPO$year)]
@@ -1408,8 +1522,10 @@ dg_gateH_verdict <- function(g, ho, n_sd = DG_H_NSD) {
   z  <- d / se
   list(R_co2 = R_co2, R_d13c = R_d13c, se_co2 = s_co2, se_d13c = s_d13c,
        d = d, se = se, z = z, n_sd = n_sd, pass = abs(z) <= n_sd,
-       # REPORTED BESIDE IT: each arm's own level miss, in its own se. The CO2
-       # arm is the control and is expected to pass on its own terms too.
+       # REPORTED BESIDE IT: each arm's own level miss, in its own se. ⚠ The
+       # CO2 arm is the control, and on the residual se (2026-09-12) it is
+       # itself out at -3.6 se at every arm: the "control passes" claim is
+       # WITHDRAWN -- see the header.
        z_level_co2  = (g$co2  - ho$co2$mean)  / ho$co2$se,
        z_level_d13c = (g$d13c - ho$d13c$mean) / ho$d13c$se,
        mod_co2 = g$co2, mod_d13c = g$d13c,
@@ -1497,13 +1613,17 @@ DG_S_OBS_RETIRED <- ccx_const("SPO_SEAS_OCEAN_PHASE_INV")
 # ratio, rather than kept against a number that is now provenance.
 DG_S_KO <- SL_CASES$SH_ocean
 
-#' Signed CIRCULAR difference between two months of year, in (-6, +6]
-#' Months are an angle: 11.9 and 0.1 are 0.2 months apart, not 11.8.
+#' Signed CIRCULAR difference between two months of year, in [-6, +6)
+#' Months are an angle: 11.9 and 0.1 are 0.2 months apart, not 11.8. ⚠ A
+#' HALF-CYCLE returns -6, not +6 (`(a - b + 6) %% 12` is 0 there). The doc said
+#' (-6, +6] until 2026-09-12; the CODE is what is kept, because
+#' dg_gateS_verdict()'s d_lo / d_hi use the same arithmetic and moving the
+#' boundary here alone would leave the two disagreeing at exactly one angle.
 dg_mo_diff <- function(a, b) ((a - b + 6) %% 12) - 6
 
 #' The SPO CO2 first-harmonic vector at one dg_vector(), as (a, b)
-dg_spo_vec <- function(v, obs) {
-  r  <- dg_run(v)
+dg_spo_vec <- function(v, obs, r = NULL) {
+  if (is.null(r)) r <- dg_run(v)     # reuse a held run of the SAME v (09-12, B5)
   ms <- ccx_model_stats(r$out, obs)
   h  <- ms$co2_seas$SPO
   if (is.null(h)) stop("GATE S: the run returned no SPO seasonal harmonic.")
@@ -1520,8 +1640,10 @@ dg_spo_vec <- function(v, obs) {
 #' amplitude that grows while the phase stays antiphase makes the cancellation
 #' WORSE, not better ([[ccx_seas_2x2_admissible]]).
 #' @param v a dg_vector(); @param obs a ccx_prepare_obs()
-dg_gateS <- function(v, obs) {
-  base <- dg_spo_vec(v, obs)
+#' @param r an existing dg_run(v) for the BASE arm (2026-09-12, review B5); the
+#'   knockout arm is always run
+dg_gateS <- function(v, obs, r = NULL) {
+  base <- dg_spo_vec(v, obs, r)
   vk   <- v
   for (n in names(DG_S_KO)) vk$p[[n]] <- DG_S_KO[[n]]
   ko   <- dg_spo_vec(vk, obs)

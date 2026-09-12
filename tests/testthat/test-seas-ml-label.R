@@ -86,9 +86,11 @@ test_that("the label reaches the objective: seas_ml = 1 is felt at the mode and 
   u <- ccx_par_to_unc(md$par_mode)
   v0 <- lp0(u); v1 <- lp1(u)
   # ⚠ v0 is NOT asserted against md$logpost: a stored logpost is in the units of
-  # the objective that produced it, and `hilda31`'s predates the 09-09x spinup
-  # adoption ([[compare_gaps_not_absolute_logposts]]). Reproduction is
-  # test-mode-file.R's business.
+  # the objective that produced it, and the file read here is `hilda31p` -- fitted
+  # under the PERIODIC spinup, and restamped since as the objective moved (the
+  # 09-11 (5) annual-mean read, the 09-12 rulings)
+  # ([[compare_gaps_not_absolute_logposts]]). Reproduction is test-mode-file.R's
+  # business.
   expect_true(is.finite(v0)); expect_true(is.finite(v1))
   expect_false(isTRUE(all.equal(v0, v1)))              # the mechanism is FELT
   # above the geometry guard the objective is -Inf: the 08-31e new-basin

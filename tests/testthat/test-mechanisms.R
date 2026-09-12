@@ -8,13 +8,15 @@
 # because a switch pointing the wrong way teaches the opposite of the physics.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
+# file-level memo keyed on (off, years, scen) (review B4, 2026-09-12): the base
+# run was made five times and every single-switch run at least twice
+mech_memo <- new.env()
 mech_run <- function(off = character(), years = c(1750, 2100), scen = "ssp245") {
+  k <- paste(c("off:", off, "yrs:", years, scen), collapse = "|")
+  if (is.null(mech_memo[[k]])) mech_memo[[k]] <- mech_run_raw(off, years, scen)
+  mech_memo[[k]]
+}
+mech_run_raw <- function(off = character(), years = c(1750, 2100), scen = "ssp245") {
   p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
   F0 <- suppressWarnings(ccx_build_forcing(scen, years, prod_c14 = 0))
   m <- ccx_apply_mechanisms(p, F0, off)

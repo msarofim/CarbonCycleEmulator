@@ -16,12 +16,6 @@
 # pass for the trivial reason that the case was never unstable.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 # analytic kz at which a FIXED substep count goes unstable, from the same
 # eigenvalue the controller uses (safety margin removed, so this is the edge)
 kz_wall <- function(h_ml, substeps) {

@@ -306,22 +306,35 @@ ccx_annual_to_monthly <- function(years, values, out_years, method = c("spline",
 #' Sums every annual file in data-raw/downloads/nuclear14c. Coverage is
 #' incomplete by construction (e.g. USA reports only 2010-2023), so this is a
 #' LOWER BOUND on the true industrial source -- stated in DATA.md, not hidden.
-ccx_nuclear_c14_annual <- function(dir = ccx_path("data-raw", "downloads", "nuclear14c")) {
-  fs <- list.files(dir, pattern = "csv$", full.names = TRUE)
-  if (length(fs) == 0) {
-    warning("No nuclear 14C files found; industrial source set to zero.")
-    return(data.frame(year = integer(0), mol_per_yr = numeric(0)))
+#'
+#' CACHED per directory (2026-09-12, review B1): every `ccx_build_forcing()`
+#' re-read the whole CSV directory, and the periodic spinup built three
+#' forcings per objective evaluation -- `read.table`/`scan` were 12 % of an
+#' evaluation. Same `local({cache})` idiom as ccx_emission_seasonality(). The
+#' empty-directory warning path is NOT cached, so it still warns every call.
+ccx_nuclear_c14_annual <- local({
+  cache <- list()
+  function(dir = ccx_path("data-raw", "downloads", "nuclear14c")) {
+    key <- as.character(dir)
+    if (!is.null(cache[[key]])) return(cache[[key]])
+    fs <- list.files(dir, pattern = "csv$", full.names = TRUE)
+    if (length(fs) == 0) {
+      warning("No nuclear 14C files found; industrial source set to zero.")
+      return(data.frame(year = integer(0), mol_per_yr = numeric(0)))
+    }
+    d <- do.call(rbind, lapply(fs, function(f) {
+      x <- utils::read.csv2(f, stringsAsFactors = FALSE)
+      data.frame(year = suppressWarnings(as.integer(x$Year)),
+                 GBq  = suppressWarnings(as.numeric(x$C14_tot_GBq)))
+    }))
+    d <- d[!is.na(d$year) & !is.na(d$GBq), ]
+    agg <- aggregate(GBq ~ year, data = d, FUN = sum)
+    v <- data.frame(year = agg$year,
+                    mol_per_yr = agg$GBq * ccx_const("MOL_C14_PER_GBq"))
+    cache[[key]] <<- v
+    v
   }
-  d <- do.call(rbind, lapply(fs, function(f) {
-    x <- utils::read.csv2(f, stringsAsFactors = FALSE)
-    data.frame(year = suppressWarnings(as.integer(x$Year)),
-               GBq  = suppressWarnings(as.numeric(x$C14_tot_GBq)))
-  }))
-  d <- d[!is.na(d$year) & !is.na(d$GBq), ]
-  agg <- aggregate(GBq ~ year, data = d, FUN = sum)
-  data.frame(year = agg$year,
-             mol_per_yr = agg$GBq * ccx_const("MOL_C14_PER_GBq"))
-}
+})
 
 # ---------------------------------------------------------------------
 #' Bomb 14C DELIVERY to the troposphere, monthly, mol 14C/yr

@@ -19,8 +19,9 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
 args <- commandArgs(trailingOnly = TRUE)
-REPILOT_MODE_FILE <- if (length(args)) args[1] else
-  file.path("calibration", "output", "mode_fit_bombwin.rds")
+# DEFAULT IS THE CANONICAL MODE FILE (2026-09-12, review A14); the typed
+# mode_fit_bombwin.rds it replaced is a retired column-era file.
+REPILOT_MODE_FILE <- if (length(args)) ccx_mode_file(args[1]) else ccx_mode_file()
 REPILOT_N_ITER    <- 1500     # matched to the original pilot
 REPILOT_N_CHAINS  <- 4        # matched
 REPILOT_SEED      <- 2026     # matched
@@ -56,13 +57,28 @@ if (isTRUE(md$pd)) {
       sprintf("%.4g", max(sdv)), "\n", sep = "")
 }
 
-lp <- ccx_make_logpost()
+# THE OBJECTIVE THE FILE WAS FITTED UNDER (2026-09-12, review A14): its own
+# structure, seas_ml and pump_mode, and its own spinup by label. The bare
+# `ccx_make_logpost()` that stood here scored the COLUMN model at seas_ml 0,
+# so the chains would have sampled a posterior the mode file does not describe.
+REPILOT_BASE <- ccx_mode_base(md)
+if (!is.null(md$pump_mode)) REPILOT_BASE$pump_mode <- md$pump_mode
+REPILOT_SPINUP <- ccx_spinup_from_label(ccx_mode_spinup(md))
+lp <- ccx_make_logpost(base_params = REPILOT_BASE, spinup_fn = REPILOT_SPINUP)
+cat(sprintf("mode: struct %s, seas_ml %s, pump_mode %s, spinup %s\n",
+            ccx_mode_struct(md), ccx_mode_seas_ml(md), REPILOT_BASE$pump_mode,
+            ccx_mode_spinup(md)))
+# The start is the file's PARAMETER vector re-encoded in the CURRENT band, not
+# its stored `u_mode` (R/paths.R: u_mode is meaningless without its band).
+# ⚠ `md$cov` / `md$sd_unc` are in the file's OWN u-band; they scale the
+# proposal only, so a band change degrades mixing rather than the target.
+REPILOT_U0 <- ccx_par_to_unc(ccx_mode_params(md))
 cat(sprintf("\nrepilot: %d iters x %d chains, seed %d, dispersion %.1f posterior sd\n",
             REPILOT_N_ITER, REPILOT_N_CHAINS, REPILOT_SEED, REPILOT_DISPERSE))
 t0 <- Sys.time()
 chains <- lapply(seq_len(REPILOT_N_CHAINS), function(i) {
   set.seed(REPILOT_SEED + i)
-  st <- md$u_mode + REPILOT_DISPERSE * sdv * stats::rnorm(length(sdv))
+  st <- REPILOT_U0 + REPILOT_DISPERSE * sdv * stats::rnorm(length(sdv))
   names(st) <- CCX_PARAM_NAMES
   res <- adaptMCMC::MCMC(lp, n = REPILOT_N_ITER, init = st, scale = Sig,
                          adapt = floor(REPILOT_ADAPT_FRAC * REPILOT_N_ITER),
@@ -74,7 +90,10 @@ chains <- lapply(seq_len(REPILOT_N_CHAINS), function(i) {
 el <- as.numeric(difftime(Sys.time(), t0, units = "mins"))
 fit <- list(chains = chains, param_names = CCX_PARAM_NAMES, n_iter = REPILOT_N_ITER,
             years = c(1750, 2024), seed = REPILOT_SEED, mode_file = REPILOT_MODE_FILE,
-            proposal = Sig, minutes = el)
+            proposal = Sig, minutes = el,
+            # WHAT WAS SAMPLED (2026-09-12): same field names as a mode file.
+            struct = ccx_mode_struct(md), seas_ml = ccx_mode_seas_ml(md),
+            pump_mode = REPILOT_BASE$pump_mode, spinup = ccx_spinup_label(REPILOT_SPINUP))
 saveRDS(fit, REPILOT_OUT)
 
 # ---- diagnostics -----------------------------------------------------

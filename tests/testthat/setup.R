@@ -25,3 +25,11 @@ skip_if_no_cpp <- function() {
   ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
   if (!ok) testthat::skip("C++ core failed to compile")
 }
+
+# Shared skip: the FaIR-derived climate module is a built data product
+# (data-raw/build_climate_module.R). MOVED HERE 2026-09-12 from test-climate.R and
+# test-pulse.R, where it was defined twice, identically.
+skip_if_no_climate <- function() {
+  if (!file.exists(ccx_path("data", CLIMATE_MODULE_FILE)))
+    testthat::skip("climate module not built (data-raw/build_climate_module.R)")
+}

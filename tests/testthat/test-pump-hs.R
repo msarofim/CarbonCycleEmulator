@@ -18,11 +18,6 @@
 #   * invalid values error by name.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
 HP_G <- 60                                  # gC m-2 yr-1, the tested export
 hp_par <- function(g = NULL, hs = TRUE) {
   p <- ccx_default_params()

@@ -94,12 +94,15 @@ test_that("the CANONICAL mode decodes cleanly -- it was fitted on the shipped ba
 
 test_that("decoding under the recorded band is what reproduces par_mode", {
   i <- match("h_ml", CCX_PARAM_NAMES)
-  inv <- function(u, lo, hi) lo + (hi - lo) / (1 + exp(-u))
   md <- md_overridden
-  # the recorded band reproduces par_mode; the shipped one does not
-  expect_equal(unname(inv(md$u_mode[i], md$hml_bound[1], md$hml_bound[2])),
-               md$par_mode[["h_ml"]], tolerance = 1e-8)
-  expect_false(isTRUE(all.equal(unname(inv(md$u_mode[i], CCX_PARAM_TABLE$h_ml$lo,
-                                          CCX_PARAM_TABLE$h_ml$hi)),
-                                md$par_mode[["h_ml"]], tolerance = 1e-6)))
+  # ⚠ THROUGH THE CODE'S OWN TRANSFORM, not a formula typed here. Until
+  # 2026-09-12 this block decoded with a local `inv()` that was the SAME formula
+  # the fixture above is built with, so its first assertion could not fail
+  # (review A15). `.from_unc()` is the decoder ccx_unc_to_par() applies: fed the
+  # RECORDED band it must reproduce par_mode, and on the SHIPPED table it must not.
+  s_rec <- CCX_PARAM_TABLE$h_ml; s_rec$lo <- md$hml_bound[1]; s_rec$hi <- md$hml_bound[2]
+  expect_equal(unname(.from_unc(md$u_mode[i], s_rec)), md$par_mode[["h_ml"]], tolerance = 1e-8)
+  u <- md$u_mode; names(u) <- CCX_PARAM_NAMES
+  expect_false(isTRUE(all.equal(ccx_unc_to_par(u)[["h_ml"]], md$par_mode[["h_ml"]],
+                                tolerance = 1e-6)))
 })

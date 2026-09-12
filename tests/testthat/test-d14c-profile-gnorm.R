@@ -15,11 +15,6 @@
 #     costs > 100 log-units more than a profile at the targets; the column's
 #     contrasts cost > 50 (both were < 50 under the forms they beat).
 # =====================================================================
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
 skip_if_no_spec <- function() skip_if(is.null(ccx_profile_d14c_spec()), "profile spec inputs absent")
 with_beta <- function(beta, expr) {
   old <- LIK_D14C_PROFILE_BETA

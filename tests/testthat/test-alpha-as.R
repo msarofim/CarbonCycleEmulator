@@ -11,12 +11,6 @@
 # between the two settings as well as the values themselves.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 AA_T <- c(5, 16, 18, 21)          # inside Zhang's stated 5-25 degC
 aa_aux <- function(td) ccx_prepare(within(ccx_default_params(), alpha_as_tdep <- td))
 

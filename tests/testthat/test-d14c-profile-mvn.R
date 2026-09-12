@@ -16,11 +16,6 @@
 #     (MVN row - the three Gaussians): nothing else in the objective changes.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
 skip_if_no_prof <- function() skip_if(is.null(ccx_profile_d14c_cov()) || is.null(ccx_mid_d14c_target()) ||
                                         is.null(ccx_deep_d14c_target()), "profile covariance build product absent")
 # 2026-09-07: the MVN form is SUPERSEDED by the generalised-normal rows (#10);

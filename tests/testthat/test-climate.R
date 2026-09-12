@@ -8,12 +8,17 @@
 # FaIR's own forcing, and (c) leave the observational period alone.
 # =====================================================================
 
-# skip_if_no_cpp() moved to setup.R on 2026-08-16 -- defined here it existed
-# only for files that ran after this one.
-skip_if_no_climate <- function() {
-  if (!file.exists(ccx_path("data", CLIMATE_MODULE_FILE)))
-    skip("climate module not built (data-raw/build_climate_module.R)")
-}
+# skip_if_no_cpp() moved to setup.R on 2026-08-16 (defined here it existed only for
+# files that ran after this one); skip_if_no_climate() followed it there 2026-09-12.
+
+# FILE-LEVEL FIXTURES (review B4, 2026-09-12): the same spinup was built in four
+# blocks and the SSP5-8.5 coupled run in two (three runs). Lazy, so a machine
+# without the C++ core or the climate module still SKIPS rather than errors.
+cl_sp <- local({ s <- NULL; function() {
+  if (is.null(s)) { p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5)); s <<- ccx_spinup(p) }
+  s } })
+cl_run585 <- local({ r <- NULL; function() {
+  if (is.null(r)) r <<- ccx_run_coupled(cl_sp(), "ssp585", c(1750, 2100)); r } })
 
 test_that("the impulse response reproduces FaIR's own GMST", {
   skip_if_no_climate()
@@ -76,9 +81,8 @@ test_that("erf_co2 really is a function of concentration alone", {
 test_that("a future run warms, instead of holding 2024 flat", {
   skip_if_no_cpp(); skip_if_no_climate()
   # The regression test for the actual bug.
-  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
-  sp <- ccx_spinup(p)
-  r <- ccx_run_coupled(sp, "ssp585", c(1750, 2100))
+  sp <- cl_sp()
+  r <- cl_run585()
   cl <- r$climate
   t2024 <- cl$gmst[cl$year == 2024]
   t2100 <- cl$gmst[cl$year == 2100]
@@ -87,7 +91,7 @@ test_that("a future run warms, instead of holding 2024 flat", {
   expect_lte(r$iterations, CLIM_MAX_ITER)
   # and the ordering across scenarios is the physical one
   temps <- vapply(c("ssp119", "ssp245", "ssp585"), function(s) {
-    z <- ccx_run_coupled(sp, s, c(1750, 2100))$climate
+    z <- if (s == "ssp585") cl_run585()$climate else ccx_run_coupled(sp, s, c(1750, 2100))$climate
     z$gmst[z$year == 2100]
   }, numeric(1))
   expect_true(all(diff(temps) > 0))
@@ -95,8 +99,7 @@ test_that("a future run warms, instead of holding 2024 flat", {
 
 test_that("the splice leaves the observational record untouched", {
   skip_if_no_cpp(); skip_if_no_climate()
-  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
-  sp <- ccx_spinup(p)
+  sp <- cl_sp()
   r <- ccx_run_coupled(sp, "historical", c(1750, 2024))
   g <- as.data.frame(readRDS(ccx_path("data", "forcing_gmst.rds")))
   m <- merge(r$climate[, c("year", "gmst")], g, by = "year")
@@ -110,9 +113,8 @@ test_that("the carbon-climate feedback is actually engaged", {
   # one pass and many passes would agree. Measured difference on SSP5-8.5 at
   # 2100 is ~111 ppm and ~0.3 C -- large enough that an accidental decoupling
   # cannot hide.
-  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
-  sp <- ccx_spinup(p)
-  on  <- ccx_run_coupled(sp, "ssp585", c(1750, 2100))$climate
+  sp <- cl_sp()
+  on  <- cl_run585()$climate
   off <- ccx_run_coupled(sp, "ssp585", c(1750, 2100), max_iter = 1L)$climate
   k <- on$year == 2100
   expect_gt(on$co2_ppm[k] - off$co2_ppm[k], 30)
@@ -126,8 +128,7 @@ test_that("caller-supplied emissions override the scenario, conserving totals", 
   em <- data.frame(year = yrs,
                    fossil_GtC = ifelse(yrs < 2000, 0, 5),
                    luc_GtC = 0)
-  p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5))
-  sp <- ccx_spinup(p)
+  sp <- cl_sp()
   F <- suppressWarnings(
     ccx_build_forcing("ssp245", c(1750, 2100), prod_c14 = sp$prod_c14,
                       emissions = em))

@@ -41,12 +41,6 @@
 #   4. R AND C++ AGREE. New code in both files.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 Q_TEST   <- 20            # Sv, inside the observed overturning range
 CONV_YRS <- c(1750, 1850)
 CONFIGS  <- list(A = list(sink = N_INTERIOR, desc = 0L),

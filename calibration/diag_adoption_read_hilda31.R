@@ -11,6 +11,11 @@
 # (a column-resolved hilda vector fails this by ~200 on the profile rows);
 # (3) the seasonal limbs like-for-like (GATE S; the SH-land knockout ratio), the
 # link the whole-model scorecard could not measure; (4) the headline numbers.
+# ⚠ 2026-09-12 (review A8): the limbs in (3) are read under EACH FILE'S OWN
+# spinup and seas_ml (sl_score's `spinup` / `seas_ml`, from ccx_mode_spinup /
+# ccx_mode_seas_ml); until then sl_run() spun up aseasonally with the mixed
+# layer off, which at the periodic-fitted hilda31s is off-mode (the 2447
+# log-unit mechanism) and drops the third SH ocean limb.
 # Adopts nothing further. Usage: Rscript calibration/diag_adoption_read_hilda31.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
@@ -59,7 +64,9 @@ for (lab in c("NEW", "OLD")) { v <- if (lab == "NEW") vN else vO; md <- if (lab 
   g <- dg_gateS(v, obs); vd <- dg_gateS_verdict(g)
   cat(sprintf("  %s GATE S: SPO ocean limb %.3f ppm @ month %.2f, bracket [%.2f, %.2f] -> %s\n", lab, g$amp, g$mo, vd$lo, vd$hi, if (vd$pass) "PASS" else "FAIL"))
   pv <- v$pm; obsv <- sl_obs_vectors(obs)
-  sc <- tryCatch(sl_score(pv, pv$ent_seas_amp_SH, md$pump_mode, obs, obsv, DG_YEARS, struct = ccx_mode_struct(md)), error = function(e) { cat("  sl_score failed:", conditionMessage(e), "\n"); NULL })
+  sc <- tryCatch(sl_score(pv, pv$ent_seas_amp_SH, md$pump_mode, obs, obsv, DG_YEARS, struct = ccx_mode_struct(md),
+                          seas_ml = ccx_mode_seas_ml(md), spinup = ccx_spinup_from_label(ccx_mode_spinup(md))),
+                 error = function(e) { cat("  sl_score failed:", conditionMessage(e), "\n"); NULL })
   if (!is.null(sc)) { l <- sc$dec$SH_land; o <- sc$dec$SH_ocean; cat(sprintf("  %s SPO total %.3f ppm @ %.2f; SH-land limb %.4f @ %.2f = %.2fx the inverted land %.3f; SH-ocean limb %.4f @ %.2f; d13C-per-ppm ratio SPO %.2f MLO %.2f\n", lab, sc$total[["amp"]], sc$total[["mo"]], l[["amp"]], l[["mo"]], l[["amp"]] / AR_LAND_AMP_OBS, AR_LAND_AMP_OBS, o[["amp"]], o[["mo"]], sc$r_SPO, sc$r_MLO)) } }
 cat("\n== 4. headline ==\n")
 zN <- mdN$prior_z; big <- names(zN)[abs(zN) > 2]

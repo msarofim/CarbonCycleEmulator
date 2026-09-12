@@ -27,16 +27,18 @@
 #      analytic 12C equilibrium stand unchanged (spinup.R, ocean block).
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 W_TEST <- 4          # m/yr, the classical upwelling-diffusion value
 YRS    <- c(1900, 1960)
 
+# memoised on (w, years, grad) (review B4, 2026-09-12): run_w(0) and run_w(W_TEST)
+# were each made four times
+adv_memo <- new.env()
 run_w <- function(w, years = YRS, grad = NULL) {
+  k <- paste(w, paste(years, collapse = ":"), if (is.null(grad)) "NULL" else grad)
+  if (is.null(adv_memo[[k]])) adv_memo[[k]] <- run_w_raw(w, years, grad)
+  adv_memo[[k]]
+}
+run_w_raw <- function(w, years = YRS, grad = NULL) {
   p <- ccx_default_params(); p <- ccx_set_enso(p, list(gamma_enso = 0.5)); p$w_up <- w
   if (!is.null(grad)) p$pump_grad <- grad
   s <- ccx_spinup(p)

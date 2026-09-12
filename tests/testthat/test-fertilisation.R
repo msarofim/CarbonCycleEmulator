@@ -20,12 +20,6 @@
 # NOT here: they cost minutes each and live in calibration/diag_fert_*.R.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 FT_CHI_NOW  <- 388
 FT_CHI_HIGH <- 1998
 FT_NPP0     <- 60

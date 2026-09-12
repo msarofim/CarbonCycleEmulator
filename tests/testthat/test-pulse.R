@@ -15,16 +15,6 @@
 # one, and if it is not there, it has not been checked.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-skip_if_no_climate <- function() {
-  if (!file.exists(ccx_path("data", CLIMATE_MODULE_FILE)))
-    skip("climate module not built (data-raw/build_climate_module.R)")
-}
-
 PULSE_YEAR <- 2050
 PULSE_SPAN <- c(1750, 2300)
 
@@ -47,6 +37,9 @@ pulse_pair <- function(gtc, bg = "ssp245", pyear = PULSE_YEAR, yrs = PULSE_SPAN)
        d_temp = q$gmst - b$gmst)
 }
 
+# the 100 GtC pulse pair, run once per file (review B4, 2026-09-12): three blocks read it
+pp100 <- local({ r <- NULL; function() { if (is.null(r)) r <<- pulse_pair(100); r } })
+
 test_that("a zero pulse reproduces the baseline exactly", {
   skip_if_no_cpp(); skip_if_no_climate()
   # The single most important test in the file. If a zero perturbation moves the
@@ -59,7 +52,7 @@ test_that("a zero pulse reproduces the baseline exactly", {
 
 test_that("the pulse response flips sign and scales", {
   skip_if_no_cpp(); skip_if_no_climate()
-  up <- pulse_pair(100); dn <- pulse_pair(-100); db <- pulse_pair(200)
+  up <- pp100(); dn <- pulse_pair(-100); db <- pulse_pair(200)
   i <- which(up$year == 2100)
   expect_gt(up$d_ppm[i], 0)
   expect_lt(dn$d_ppm[i], 0)
@@ -77,7 +70,7 @@ test_that("the pulse response flips sign and scales", {
 
 test_that("the pulse decays, monotonically, and never fully disappears", {
   skip_if_no_cpp(); skip_if_no_climate()
-  r <- pulse_pair(100)
+  r <- pp100()
   k <- r$year > PULSE_YEAR
   f <- r$frac[k]
   expect_lt(f[length(f)], f[1])                     # it decays
@@ -216,7 +209,7 @@ test_that("a pulse warms, and the warming outlives the century", {
   # The coupled runner must propagate the pulse all the way to temperature --
   # this is what a prescribed GMST path could not do, and the reason the climate
   # module exists at all.
-  r <- pulse_pair(100)
+  r <- pp100()
   i100 <- which(r$year == PULSE_YEAR + 100)
   i250 <- which(r$year == PULSE_YEAR + 250)
   expect_gt(r$d_temp[i100], 0.02)

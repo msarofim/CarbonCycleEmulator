@@ -2,11 +2,6 @@
 # (30 -> 31) under an OBSERVATION prior, and h_ml's flat prior became the
 # Holte-2017 mean/max lognormal the same day. Modelled on test-pump-hs.R and
 # test-ent-seas-fitted.R.
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
 uh_par <- function(u = NULL) {
   p <- ccx_default_params(); p$hs_frac <- 0.16; p$u_hs <- 38; p$tau_q <- 538; p$sst_hs <- 2
   if (!is.null(u)) p$u_hs <- u

@@ -19,14 +19,19 @@
 # x2.0). Both are needed and neither substitutes for the other.
 # =====================================================================
 
-skip_if_no_gates <- function() {
-  f <- ccx_path("calibration", "lib_design_gates.R")
-  skip_if_not(file.exists(f), "lib_design_gates.R not present")
-  f
-}
+# SOURCED ONCE, AT FILE SCOPE (2026-09-12, review B4). Every block used to
+# `source(skip_if_no_gates(), local = TRUE)`, and the gate lib calls
+# ccx_prepare_obs() and sources lib_seas_limbs.R at source time -- 14 blocks, 14
+# rebuilds. The skip semantics are KEPT: the lib is sourced only if present, and
+# every block still calls skip_if_no_gates() so a checkout without it SKIPS
+# rather than errors (test-gate-p7.R sources unconditionally; this file does not).
+GATES_LIB <- ccx_path("calibration", "lib_design_gates.R")
+if (file.exists(GATES_LIB)) source(GATES_LIB, local = TRUE)
+skip_if_no_gates <- function()
+  skip_if_not(file.exists(GATES_LIB), "lib_design_gates.R not present")
 
 test_that("GATE 4 is RETIRED, and says so by name rather than scoring", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   # ⛔ RETIRED 2026-09-04 (Marcus). The ordering this block used to mutation-test
   # -- sd(model decadal AF) >= sd(GCB decadal AF) -- is gone: its numerator was a
   # scored stream, its denominator a model input, 70 % of its target's variance
@@ -40,17 +45,20 @@ test_that("GATE 4 is RETIRED, and says so by name rather than scoring", {
 })
 
 test_that("GATE V's bound is DERIVED from the observation, and fails in BOTH directions", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   ov <- dg_gateV_obs()
   # ONE STRICTNESS across the distributional gates.
   expect_identical(DG_V_NSD, DG_Q_NSD)
-  # THE SIGMA IS THE OBSERVED sd's OWN SAMPLING ERROR, not a chosen tolerance.
-  expect_equal(ov$se, ov$sd / sqrt(2 * (ov$n - 1)))
+  # THE SIGMA IS THE OBSERVED sd's OWN SAMPLING ERROR, not a chosen tolerance --
+  # on the RESIDUAL dof nu = n - (DG_V_DF + 1) (2026-09-12, review A7): the
+  # anomaly is taken about a fitted smooth with DG_V_DF + 1 parameters.
+  expect_equal(ov$dof, ov$n - (DG_V_DF + 1))
+  expect_equal(ov$se, ov$sd / sqrt(2 * ov$dof))
   expect_gt(ov$sd, 0); expect_gt(ov$se, 0); expect_gt(ov$n, 50)
-  # ...and that analytic form is VALIDATED AGAINST A MATCHED MONTE CARLO, which
-  # is the standing rule for any analytic se this project acts on.
+  # ...and that analytic form is VALIDATED AGAINST A DESIGN-MATCHED MONTE CARLO,
+  # which is the standing rule for any analytic se this project acts on.
   set.seed(20260904)
-  mc <- stats::sd(replicate(2000, stats::sd(stats::rnorm(ov$n, 0, ov$sd))))
+  mc <- stats::sd(replicate(2000, sqrt(sum(stats::rnorm(ov$dof, 0, ov$sd)^2) / ov$dof)))
   expect_lt(abs(mc - ov$se) / ov$se, 0.06)
   # MUTATION, BOTH DIRECTIONS -- the claim is two-sided: too MUCH interannual
   # variance is as wrong as too little.
@@ -60,7 +68,7 @@ test_that("GATE V's bound is DERIVED from the observation, and fails in BOTH dir
   expect_true( at(ov$sd + (DG_V_NSD - 0.1) * ov$se)$pass)
   expect_false(at(ov$sd - (DG_V_NSD + 0.5) * ov$se)$pass)   # too SMOOTH
   expect_false(at(ov$sd + (DG_V_NSD + 0.5) * ov$se)$pass)   # too NOISY
-  # THE OBSERVED ANOMALY IS WHITE, which is what makes sqrt(2(n-1)) the right
+  # THE OBSERVED ANOMALY IS WHITE, which is what makes sqrt(2 nu) the right
   # denominator. If a GCB vintage change made it autocorrelated, the bound would
   # be wrong and this must fail rather than let it pass silently.
   expect_lt(abs(ov$rho), 0.2)
@@ -70,7 +78,7 @@ test_that("GATE V's bound is DERIVED from the observation, and fails in BOTH dir
 })
 
 test_that("GATE 4's observed vector is COMPUTED, and the retired literals were a DIFFERENT estimator", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   a <- DG_AF_OBS_ANNUAL
   # 1. THE GATE SCORES AT THE MODEL'S OWN ESTIMATOR. dg_gate4() computes the
   #    model's decadal AF as a ratio of decade sums, so the observed side must be
@@ -93,7 +101,7 @@ test_that("GATE 4's observed vector is COMPUTED, and the retired literals were a
 })
 
 test_that("GATE 5's derived sigma is positive, finite, and rests on stated draws", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   sp <- dg_obs_gate5_spread()
   expect_true(all(is.finite(sp$sd)))
   expect_true(all(sp$sd > 0))
@@ -121,7 +129,7 @@ test_that("GATE 5's derived sigma is positive, finite, and rests on stated draws
 })
 
 test_that("GATE 5's NH shape kernel reads the double peak, and is the ONLY copy", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   ob <- dg_obs_gate5()
   # The observed NH aggregate is double-peaked with the FIRST lump higher; the
   # trough sits between the two windows. These orderings are the structure the
@@ -141,7 +149,7 @@ test_that("GATE 5's NH shape kernel reads the double peak, and is the ONLY copy"
 })
 
 test_that("GATE 5 fails a shifted peak and an inverted ordering, and passes the truth", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   ob <- dg_obs_gate5(); sp <- dg_obs_gate5_spread()
   # A synthetic gate-5 result built FROM the observation: the model that is
   # exactly right must pass, which is the direction a failing gate cannot show.
@@ -201,7 +209,7 @@ test_that("GATE 5 fails a shifted peak and an inverted ordering, and passes the 
 })
 
 test_that("GATE 7 judges at the objective's sigmas, and can still fail", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   # THE SIGMAS ARE THE OBJECTIVE'S, NOT THIS FILE'S. If R/likelihood.R changes
   # either one, this must fail rather than let the gate drift away from the fit.
   expect_equal(DG_G7_LAND_SD, LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE)
@@ -228,7 +236,7 @@ test_that("GATE 7 judges at the objective's sigmas, and can still fail", {
 })
 
 test_that("GATE G bounds the SURFACE LEVEL and not the inventory, and can fail", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   expect_identical(DG_GD_NSD, DG_Q_NSD)      # one strictness across the four
   expect_identical(DG_GD_NEFF, LIK_D14C_DEEP_NEFF)   # the ruled convention, not a new number
 
@@ -265,8 +273,15 @@ test_that("ccx_overlay_par() refuses to delete a parameter, and repairs the lag"
   # gamma_enso_* names, and the model then runs on ccx_default_params()' NAMED
   # DEFAULTS with nothing said -- lag 2.25 where the mode says 1.7677.
   # ⚠ ccx_set_enso() is NOT a fix for it: it repairs the ENSO names only.
-  pm <- ccx_mode_params()                       # the canonical pre-split ancestor
-  skip_if_not("seas_lag_p" %in% names(pm), "canonical mode is not pre-split")
+  # ⚠ THE CANONICAL IS POST-SPLIT (31 parameters, seas_lag_p_NH/SH), so the
+  # pre-split ancestor is CONSTRUCTED from it exactly as test-seas-lag-split.R
+  # does: drop the pair, put back the legacy scalar. Until 2026-09-12 this block
+  # `skip_if_not("seas_lag_p" %in% names(pm))` -- false of every post-split
+  # canonical -- so the ONE regression test for the live bug never ran (review A10).
+  pm <- ccx_migrate_par_set(ccx_mode_params()); attr(pm, "migrated") <- NULL
+  pm <- pm[setdiff(names(pm), c("seas_lag_p_NH", "seas_lag_p_SH"))]
+  pm$seas_lag_p <- 1.7502
+  expect_false(any(c("seas_lag_p_NH", "seas_lag_p_SH") %in% names(pm)))   # or (a) has no power
   d <- ccx_default_params()
 
   # (a) the bare idiom really does delete, and really does change the lag
@@ -291,7 +306,7 @@ test_that("ccx_overlay_par() refuses to delete a parameter, and repairs the lag"
 })
 
 test_that("GATE H bounds the gradient CONTRAST, keeps its CO2 control, and cannot read its own offset", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   obs <- ccx_prepare_obs()
   ho  <- dg_gateH_obs(obs)
 
@@ -362,7 +377,7 @@ test_that("GATE H bounds the gradient CONTRAST, keeps its CO2 control, and canno
 })
 
 test_that("GATE S is an INTERVAL from an OBSERVATION plus a LAW, and it still fires on 3.35", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   # ⛔⛔ REBASED 2026-09-04h. This block used to assert a Gaussian bound derived
   # from SPO_SEAS_OCEAN_PHASE_INV's bootstrap CI. That target is RETIRED -- the
   # two-signature inversion that produced it cannot be run at the canonical
@@ -433,7 +448,7 @@ test_that("GATE S is an INTERVAL from an OBSERVATION plus a LAW, and it still fi
 })
 
 test_that("GATE S's knockout kills ALL THREE SH ocean limbs, and comes from the estimator", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   # ⚠ THE 27g BUG, GUARDED STRUCTURALLY. `sst_seas_amp_SH = 0` alone leaves the
   # entrainment limb running, and this gate is built to be run with that channel
   # switched ON -- so a one-limb knockout would gate a limb that is not the one
@@ -448,7 +463,7 @@ test_that("GATE S's knockout kills ALL THREE SH ocean limbs, and comes from the 
 })
 
 test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonical the switch moves the limb by months", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   # the resolver takes a NAME (test-mode-struct-lint.R: no direct readRDS of a mode file here)
   skip_if_not(identical(ccx_mode_seas_ml(CCX_MODE_CANONICAL), 1L), "canonical has seas_ml OFF; the third limb is absent")
   obs <- ccx_prepare_obs(); v <- dg_vector(CCX_MODE_CANONICAL)
@@ -466,7 +481,7 @@ test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonic
 })
 
 test_that("L is a COMPARISON, not a gate: the verdict errors by name and dg_compareL() reports z's without a pass", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   # ⛔ RULED 2026-09-08h (Marcus): Joos is not a scoring mechanism -- the long
   # lifetime is meant to be EMERGENT. A verdict must ERROR WITH THE REASON.
   expect_error(dg_gateL_verdict(list(share = c(land = 16, ocean = 59, air = 25))), "COMPARISON, NOT A GATE")
@@ -481,7 +496,7 @@ test_that("L is a COMPARISON, not a gate: the verdict errors by name and dg_comp
 })
 
 test_that("GATE GL bounds the d13C gradient LEVEL on the observation's own se, both ways, at H's strictness", {
-  source(skip_if_no_gates(), local = TRUE)
+  skip_if_no_gates()
   expect_identical(DG_GL_NSD, DG_H_NSD)
   ho <- dg_gateH_obs(ccx_prepare_obs())
   o  <- ho$d13c

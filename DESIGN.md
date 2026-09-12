@@ -66,13 +66,25 @@ Per hemisphere *h* ∈ {N, S}, per isotope *i* ∈ {12, 13, 14}, carbon mass in 
 - **Atmosphere** `M_atm[h,i]` — one well-mixed tropospheric box per hemisphere. No explicit
   stratosphere in v1; bomb ¹⁴C enters through a first-order delay kernel (τ_strat [CAL]),
   upgradeable to explicit strat boxes if the 1963–66 peak shape demands it (§10).
-- **Land** `C_veg[h,i]`, `C_soil[h,i]` — two pools per hemisphere. These are *effective
-  responsive* stocks, not literal global inventories; documented as such in the app.
+- **Land** `C_leaf[h,i]`, `C_wood[h,i]`, `C_soil_fast[h,i]`, `C_soil_slow[h,i]` — **four
+  pools per hemisphere** (spec corrected to the code 2026-09-12; the code has been four-pool
+  since 2026-08-12). Two pools cannot hold the observed carbon stock and the observed bomb-¹⁴C
+  inventory at once (Naegler & Levin 2006 Table 4: 21.7 kmol in a 2200 PgC biosphere at 1975;
+  `calibration/diag_land_structure.R`, `diag_land_topology.R`): fast pools cycle the bomb ¹⁴C
+  straight back while a large passive soil holds carbon that barely sees it. These are
+  *effective responsive* stocks, not literal global inventories; documented as such in the app.
+  Topology in `R/model.R`'s header; the two-pool equations of §3.3 are the v0 form.
 - **Ocean** `C_ml[h,i]` (mixed layer) + `C_z[h, z, i]`, z = 1…10 interior layers with
   thickness increasing downward to a mean full depth ≈ 3700 m [VERIFY]. Interior layers
   exchange by vertical eddy diffusion only; no advective overturning loop in v1 (§10).
+  **HILDA structure (the canonical `hilda31s` mode since 2026-09-11):** adds a high-latitude
+  surface box `C_hs[h,i]` and a high-latitude deep box `C_hd[h,i]` per hemisphere beside the
+  low-latitude column (`ccx_apply_structure(p, "hilda")`; §3.4 and `INDEX_ccx_ocean_struct`).
 
-State dimension: 2 hemispheres × 3 isotopes × (1 atm + 2 land + 11 ocean) = **84 states**.
+State dimension (measured on the code 2026-09-12, `dim(spinup$y)`): column configuration
+2 hemispheres × 3 isotopes × (1 atm + 4 land + 11 ocean) = 16 boxes/hemisphere = **96 states**;
+HILDA configuration 18 boxes/hemisphere = **108 states**. (The "2 land + 11 ocean = 84" that
+stood here was the v0 spec and had not been updated for the 2026-08-12 land change.)
 
 ### 3.2 Atmosphere
 
@@ -91,7 +103,14 @@ d M_atm[h]/dt =
 
 - **NPP with CO₂ fertilization:** NPP[h] = NPP₀[h] · (1 + β · ln(χ[h]/χ₀)), β [CAL].
   NPP₀ global ≈ 60 GtC/yr [VERIFY], split N/S by land productivity share [VERIFY].
-- **Pools:** dC_veg/dt = NPP − C_veg/τ_veg;  dC_soil/dt = C_veg/τ_veg − R_het.
+- **Pools (v0 form, superseded — see §3.1):** dC_veg/dt = NPP − C_veg/τ_veg;
+  dC_soil/dt = C_veg/τ_veg − R_het.
+  **What the code integrates (four pools, since 2026-08-12; spec note added 2026-09-12):** NPP
+  is split between `leaf` (τ ≈ 1 yr) and `wood` (τ ≈ 20 yr); their litter is split by
+  `litter_slow_frac` between `soil_fast` (τ_soil_fast = 2 yr) and `soil_slow` (τ_soil_slow =
+  500 yr); both soil pools respire to the atmosphere with the Q10 factor
+  (`R/model.R`, `add_flux(isf/iss, iatm, C/τ · q10f)`). Steady-state pool sizes follow from
+  NPP₀, the split and the turnover times exactly as for the two-pool form.
 - **Heterotrophic respiration:** R_het = (C_soil/τ_soil) · Q10^(ΔT_GMST/10), Q10 [CAL].
   Preindustrial steady state (R_het = NPP₀) sets pool sizes: C_veg = NPP₀·τ_veg,
   C_soil = NPP₀·τ_soil. τ_veg, τ_soil fixed [VERIFY], chosen so effective stocks are

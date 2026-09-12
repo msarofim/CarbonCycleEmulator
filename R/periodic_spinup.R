@@ -98,7 +98,16 @@ PS_MONTHS   <- 12L       # rows in the one-year forcing = months
 #' `calibration/diag_f2_periodic_spinup.R` use: zero fossil, zero LUC flux AND
 #' stock, held climate, zero bomb/nuclear 14C, zero AOD. `years` spans ONE year
 #' so `ccx_run_fast()` returns the state one period on.
-ps_year_forcing <- function(prod_c14, year0 = 1750) {
+#'
+#' @param quiet an already-built quiet year (`ps_year_forcing(0)`) to COPY
+#'   instead of rebuilding from disk. The three tables a spinup needs (at 0,
+#'   1 and `prod` mol/yr) differ in the `c14_cosmo` column ONLY -- checked
+#'   column by column on 2026-09-12 before this argument existed: `identical()`
+#'   on every other column, and `identical()` on the whole table after the
+#'   overwrite -- so the copy is the rebuild, byte for byte, without the three
+#'   `ccx_build_forcing()` disk reads per evaluation (review B1).
+ps_year_forcing <- function(prod_c14, year0 = 1750, quiet = NULL) {
+  if (!is.null(quiet)) { quiet$c14_cosmo <- prod_c14; return(quiet) }
   F <- ccx_build_forcing("historical", c(year0, year0 + 1), prod_c14 = 0,
                          bomb_total_kmol = 0)
   F <- F[seq_len(PS_MONTHS), , drop = FALSE]      # exactly one period
@@ -113,10 +122,18 @@ ps_year_forcing <- function(prod_c14, year0 = 1750) {
 #' One period of the flow, from an arbitrary state
 #'
 #' `ccx_run_fast()` reads only `$y`, `$params`, `$aux`, `$grid` off its first
-#' argument (R/cpp.R:348-353), so a shim is the whole wrapper -- no second copy
-#' of the runner, which is what the marshalling gate exists to protect.
-ps_phi <- function(y, p, aux, grid, F) {
-  ccx_run_fast(list(y = y, params = p, aux = aux, grid = grid), F)
+#' argument, so a shim is the whole wrapper -- no second copy of the runner,
+#' which is what the marshalling gate exists to protect.
+#'
+#' With `prep` (a `ccx_run_prepare()` of the SAME `p`/`aux`/`grid`) the call
+#' goes through `ccx_run_prepared()`: the same core entry point, the same
+#' NA-retry, the same marshal gate (taken once, when `prep` was built), without
+#' re-marshalling `p`/`aux` and re-resolving the substep count on every one of
+#' the ~300 one-year calls a solve makes (review 2026-09-12, B1). `F` may be a
+#' forcing table or a `ccx_cpp_forcing_prep()` of one.
+ps_phi <- function(y, p, aux, grid, F, prep = NULL) {
+  if (is.null(prep)) return(ccx_run_fast(list(y = y, params = p, aux = aux, grid = grid), F))
+  ccx_run_prepared(y, prep, F)
 }
 
 #' The full-year trajectory, for the annual means the pins are stated on
@@ -157,13 +174,20 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
   c_atm_target <- chi0 * aux$gtc_per_ppm_hemi * length(atm)
   prod  <- sp0$prod_c14
 
+  # Marshalled ONCE for the whole solve (review B1): one `p`, one `aux`, one
+  # substep count, one marshal-gate verdict, for every one-year call below.
+  # The quiet year is built from disk ONCE and copied for the three
+  # productions the solve needs (see ps_year_forcing).
+  prep <- ccx_run_prepare(list(y = sp0$y, params = p, aux = aux, grid = grid))
+  Fq   <- ps_year_forcing(0)
+
   # ---- 1. CARBON: Newton on the one-year map ------------------------
   # residual = Phi(y)_C - y_C, one row replaced by the ANNUAL-MEAN atmospheric
   # carbon pin. Both isotopes ride along untouched; 12C does not read them.
-  F <- ps_year_forcing(prod)
+  F <- ccx_cpp_forcing_prep(ps_year_forcing(prod, quiet = Fq))
   ps_resid_C <- function(cv) {
     yy <- sp0$y; yy[, "C"] <- cv
-    r  <- ps_phi(yy, p, aux, grid, F)
+    r  <- ps_phi(yy, p, aux, grid, F, prep)
     res <- r$state[, "C"] - cv
     # the ANNUAL MEAN, not the endpoint: `out`'s co2_* columns are the monthly
     # trajectory over the period just integrated.
@@ -201,12 +225,12 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
   # build M and b build `Mbar` and `bbar` for the annual-mean pin.
   ps_monodromy <- function(tracer, Fm, atm_of) {
     y0 <- y; y0[, tracer] <- 0
-    r0 <- ps_phi(y0, p, aux, grid, Fm)
+    r0 <- ps_phi(y0, p, aux, grid, Fm, prep)
     b  <- r0$state[, tracer]; bbar <- mean(atm_of(r0$out))
     M  <- matrix(0, nb, nb); Mbar <- numeric(nb)
     for (j in seq_len(nb)) {
       yj <- y0; yj[j, tracer] <- 1
-      rj <- ps_phi(yj, p, aux, grid, Fm)
+      rj <- ps_phi(yj, p, aux, grid, Fm, prep)
       M[, j] <- rj$state[, tracer] - b
       Mbar[j] <- mean(atm_of(rj$out)) - bbar
     }
@@ -228,12 +252,12 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
   # 14C: linear in production, so solve at unit production, run that periodic
   # orbit once, and scale production so its ANNUAL-MEAN total atmospheric 14C
   # is (1 + d14c0/1000) x the annual-mean atmospheric carbon.
-  F1  <- ps_year_forcing(1)
+  F1  <- ccx_cpp_forcing_prep(ps_year_forcing(1, quiet = Fq))
   o14 <- ps_monodromy("C14", F1, function(o) o$atm_C14)
   A14 <- o14$M - diag(nb)
   u   <- solve(A14, -o14$b)
   yu  <- y; yu[, "C14"] <- u
-  ou  <- ps_phi(yu, p, aux, grid, F1)$out
+  ou  <- ps_phi(yu, p, aux, grid, F1, prep)$out
   c14_target_atm <- mean(ou$co2_NH + ou$co2_SH) * gpph * (1 + d14c0 / 1000)
   prod <- c14_target_atm / mean(ou$atm_C14)
   y[, "C14"] <- prod * u
@@ -248,8 +272,8 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
   # every state-derived row, and the two ESTIMATOR-DEPENDENT rows passed
   # explicitly, on THIS solve's own conventions
   # ⇒ [[two_gates_one_mechanism]], [[verify_the_quantity_not_the_word]].
-  Ffin <- ps_year_forcing(prod)
-  rfin <- ps_phi(y, p, aux, grid, Ffin)
+  Ffin <- ps_year_forcing(prod, quiet = Fq)
+  rfin <- ps_phi(y, p, aux, grid, Ffin, prep)
   per_resid <- max(abs(rfin$state - y))
   d <- ccx_spinup_diagnostics(
     y, prod, aux, grid,

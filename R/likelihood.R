@@ -93,8 +93,12 @@
 # below is calibrated against.
 LIK_ZONE_BOUNDS_NH <- c(40, 15)      # degrees N
 LIK_ZONE_BOUNDS_SH <- c(15)          # degrees S, SH3/SH1-2 split
-LIK_D14C_REP_BOMB  <- 25             # permil, 1955-1970 (weighting spread)
+LIK_D14C_REP_BOMB  <- 25             # permil, inside LIK_D14C_BOMB_WIN (weighting spread)
 LIK_D14C_REP_OTHER <- 4              # permil, elsewhere
+# Applied as `t >= 1955 & t <= 1970` on MONTH-CENTRE decimal t (ccx_prepare_obs),
+# so the window is CALENDAR 1955-1969, 180 months: the first 1970 month centre
+# is 1970.042 > 1970 and no 1970 month is inside. Comment corrected 2026-09-12
+# (review C); the code is unchanged and every stored logpost stands.
 LIK_D14C_BOMB_WIN  <- c(1955, 1970)
 # THE WHOLE sd OF THE CO2 LEVEL STREAM, since 2026-08-15 (review item 6b).
 # It was the fixed half of sqrt(sigma_co2^2 + LIK_CO2_REP_ERR^2); `sigma_co2`
@@ -151,11 +155,18 @@ LIK_D13C_REP_ERR   <- 0.05           # permil
 # SKIPS the offset rather than defaulting it to zero -- except that here zero IS
 # the no-offset behaviour, so absence and zero coincide numerically. The
 # contract is kept anyway so every pre-2026-08-18 caller reproduces exactly.
-LIK_REP_SOURCE_D13C <- -26.5         # permil, fossil+respired excess carbon.
-                                     # Midpoint of [-25 respired, -28 fossil];
-                                     # the bracket moves the conversion by 8 %,
-                                     # far below the 30x this term is used to
-                                     # adjudicate.
+# ⚠ PROVISIONAL, UNCITED (flagged 2026-09-12, review C; CLAUDE.md rule 2). The
+# value is the midpoint of a recollected bracket -- ~-25 permil for respired
+# C3-biosphere carbon, ~-28 for the fossil-fuel mix -- and NEITHER endpoint has
+# a paper + table behind it, so it is deliberately NOT in R/constants.R's
+# registry as "cited": promoting it there without a receipt would launder a
+# recollection into a citation. It stays here, marked, until both endpoints
+# are sourced (candidates to check, not citations: Andres et al. 2000 Tellus B
+# for the fossil mix; a C3/C4-weighted respiration signature for the land).
+# Its leverage is small: the bracket moves the conversion by 8 %, far below the
+# 30x this term is used to adjudicate.
+LIK_REP_SOURCE_D13C <- -26.5         # permil, fossil+respired excess carbon,
+                                     # midpoint of [-25 respired, -28 fossil].
 LIK_LAND_SINK_INFLATE <- 3.0         # multiplier on GCB land-sink sigma (Q1)
 
 # ---- the mid-century discrepancy window (2026-08-23) ----------------
@@ -397,9 +408,14 @@ LIK_GCB_FOSS_FRAC  <- 0.05           # fraction, 1 sigma
 #
 # (a) WHAT IS "NATURAL"? The observational excess is total minus a
 #     pre-anthropogenic natural component. The model's counterpart is the run
-#     minus its own 1750 steady state, and the run's FIRST ROW *is* that steady
-#     state by construction -- so the baseline is free, with no counterfactual
-#     run and no doubling of the MCMC cost. Measured against the alternative (a
+#     minus its own 1750 spinup state, and the run's FIRST ROW *is* that state
+#     by construction -- so the baseline is free, with no counterfactual run
+#     and no doubling of the MCMC cost. ⚠ WHICH state depends on the spinup:
+#     under the aseasonal ccx_spinup it is the fixed point exactly; under
+#     CCX_OBJECTIVE_SPINUP (the PERIODIC spinup, since 2026-09-09x) the first
+#     row is the JANUARY INSTANT (first month-centre) of the periodic orbit,
+#     not the orbit's annual mean. For the ocean 14C inventory the two differ
+#     by 0.0014 sigma (review 2026-09-12) -- stated, not corrected. Measured against the alternative (a
 #     full no-fossil / no-LUC / no-bomb / no-nuclear counterfactual carrying the
 #     observed GMST and ENSO) the two differ by 0.27 kmol at 1975 and 0.58 at
 #     1995 -- under 1 % of the excess, against a ~16 kmol observational spread.
@@ -450,9 +466,11 @@ LIK_USE_EXCESS_C14 <- TRUE
 # practical consequence is that this decision is CHEAPER than the review's
 # ordering assumed: it is not a blocker on the refit.
 LIK_EXCESS_C14_TARGET <- "table4_obs_range"
-# The run's first row is the preindustrial steady state only if the run starts
-# here. The term is SKIPPED, not silently mis-baselined, if it does not; the
-# standard pipeline is gated by test-likelihood.R to make sure it is present.
+# The run's first row is the preindustrial spinup state (the January instant
+# of the periodic orbit under CCX_OBJECTIVE_SPINUP; see (a) above) only if the
+# run starts here. The term is SKIPPED, not silently mis-baselined, if it does
+# not; the standard pipeline is gated by test-likelihood.R to make sure it is
+# present.
 LIK_EXCESS_C14_BASE_YEAR <- 1750
 # Shared definitional/representation error, as a fraction of the target. Applied
 # as a RANK-ONE common term across the two years rather than in quadrature per
@@ -892,11 +910,15 @@ LIK_USE_HS_SURFACE   <- TRUE
 # can tell which regime that artifact was produced under.
 LIK_OCEAN_GRAD_HML_OK_RETIRED <- c(85, 120)   # m; the skip option 5 replaced
 # Alkalinity stoichiometry, for the third row (Marcus 2026-08-16b). CaCO3
-# dissolution adds 2 mol alkalinity per mol C; soft-tissue remineralisation
-# releases nitrate and so REMOVES ~1 mol per mol N. WORKING VALUES, not fitted,
-# and the N:C is an Anderson-Sarmiento-type recollection rather than a citation.
+# dissolution adds 2 mol alkalinity per mol C (the charge balance of CO3^2-,
+# a definition rather than a measurement); soft-tissue remineralisation
+# releases nitrate and so REMOVES ~1 mol per mol N. The N:C is READ FROM THE
+# REGISTRY since 2026-09-12 (review C): it was a typed 16/117 described as a
+# "recollection", and it is now the CITED Anderson & Sarmiento (1994)
+# remineralisation ratio (see ALK_NC_RATIO in R/constants.R, sourced before
+# this file under the alphabetical bootstrap).
 LIK_ALK_PER_CARB <- 2
-LIK_ALK_NC_RATIO <- 16 / 117          # ~0.137 mol N per mol C
+LIK_ALK_NC_RATIO <- ccx_const("ALK_NC_RATIO")   # mol N per mol C, 16/117
 
 #' Ocean DIC / d13C gradient targets, from the GLODAPv2 build product.
 #'
@@ -1086,6 +1108,16 @@ LIK_ANNUAL_MEAN_N <- 12L
 ccx_epoch_year_samples <- function(epoch)
   epoch - 0.5 + (seq_len(LIK_ANNUAL_MEAN_N) - 0.5) / LIK_ANNUAL_MEAN_N
 
+#' RUN-END GUARD (2026-09-12, review A16). TRUE when `out` reaches the LAST
+#' sample of the epoch year(s), i.e. when ccx_box_annual_conc() can read every
+#' one of the LIK_ANNUAL_MEAN_N instants without approx()'s rule = 2 holding
+#' the run's final row across the missing months. Shared by the HS-surface and
+#' ocean-gradient readers so the two cannot carry different thresholds: a run
+#' that ends early makes the rows ABSENT with a warning, never a held endpoint.
+#' A no-op on the objective (runs end 2024; every epoch <= 2003).
+.ccx_run_covers_epoch <- function(out, epoch)
+  max(out$t) >= max(ccx_epoch_year_samples(max(unlist(epoch)))) - 1e-9
+
 #' The mass (kg) of a hemisphere's box AT time t, honouring a seasonal box.
 #' `which` = "ml" (the low-latitude mixed layer: seasonal when aux$mld_coef is
 #' present), "deep" (the bottom box, constant), "hs" (the cold box: seasonal
@@ -1142,6 +1174,15 @@ ccx_box_annual_conc <- function(out, aux, grid, which, epoch, hemis = HEMIS) {
 
 ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
   if (!all(CCX_OCEAN_BOX_COLS %in% names(out))) return(NULL)
+  # A run that ends BEFORE the epoch would be read at its final value by
+  # rule = 2 -- silently. Rows ABSENT instead, with a warning naming it (the
+  # guard ccx_model_hs_surface() already had; added here 2026-09-12, review A16).
+  if (!.ccx_run_covers_epoch(out, c(epoch$surf, epoch$deep))) {
+    warning("ccx_model_ocean_gradient(): the run ends at ", max(out$t),
+            ", before the gradient epochs (surf ", epoch$surf, " / deep ", epoch$deep,
+            "); the ocean_grad rows are ABSENT for this run.")
+    return(NULL)
+  }
   # ANNUAL MEANS over each layer's own epoch year, each box over its mass AT THE
   # TIME (2026-09-11 (4)); the boxes span the LOW-LATITUDE column's area.
   s <- ccx_box_annual_conc(out, aux, grid, "ml",   epoch$surf)
@@ -1225,8 +1266,10 @@ ccx_model_hs_surface <- function(out, aux, epoch_dic, epoch_d13c) {
   cols <- c("hs_C_NH", "hs_C13_NH", "hs_C_SH", "hs_C13_SH")
   if (!all(cols %in% names(out)) || anyNA(out[["hs_C_SH"]])) return(NULL)
   # A run that ends BEFORE the epoch would be read at its final value by
-  # rule = 2 -- silently. Rows ABSENT instead, with a warning naming it.
-  if (max(out$t) < max(epoch_dic, epoch_d13c) - 0.5) {
+  # rule = 2 -- silently. Rows ABSENT instead, with a warning naming it. The
+  # bound is the epoch year's LAST sample (shared helper, 2026-09-12): the older
+  # `max(epoch) - 0.5` let a run ending inside the epoch year through.
+  if (!.ccx_run_covers_epoch(out, c(epoch_dic, epoch_d13c))) {
     warning("ccx_model_hs_surface(): the run ends at ", max(out$t), ", before the HS-surface epochs (",
             epoch_dic, " / ", epoch_d13c, "); the #11 rows are ABSENT for this run.")
     return(NULL)
@@ -1401,6 +1444,9 @@ ccx_prepare_obs <- function() {
   # independent observations would massively overweight the pre-1958 record.
   ico <- as.data.frame(ice$co2_samples)
   names(ico)[names(ico) == "age_CO2"] <- "year"
+  # Kept from 1700 for the diagnostics and the app; the LIKELIHOOD scores only
+  # the samples inside the run (ccx_loglik(), review A11 2026-09-12), so this
+  # 1700 is a plotting window, not the scoring cut.
   ico <- ico[!is.na(ico$year) & !is.na(ico$CO2ppm) & ico$year >= 1700, ]
   ico$sd <- sqrt(pmax(ico$CO2err, 0.5)^2 + LIK_ICE_REP_ERR^2)
 
@@ -1712,8 +1758,18 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
           obs$ice$year <= LIK_ICE_DISCREPANCY_WIN[2]
     ice_sd[kd] <- ice_sd[kd] * LIK_ICE_DISCREPANCY_INFLATE
   }
-  mod <- interp("co2_SH", obs$ice$year)
-  add("co2_icecore", sum(stats::dnorm(obs$ice$CO2ppm, mod, ice_sd, log = TRUE)))
+  # ⛔ ONLY SAMPLES INSIDE THE RUN (2026-09-12, review A11). obs$ice keeps every
+  # Law Dome sample from 1700 for the diagnostics and the app, but the run
+  # starts at min(out$t): `interp()`'s rule = 2 scored the nine 1703-1749
+  # samples against the run's FIRST ROW (the January instant of the spinup
+  # orbit) -- a silent extrapolation, and near-circular, since CO2_PI_PPM is
+  # itself the 1745-1755 mean. The cut is the run's OWN first calendar year,
+  # read from `out`, never a typed 1750. Moved the objective by ~-0.0009 at the
+  # 09-11 modes (measured, CHANGELOG 2026-09-12).
+  in_run <- obs$ice$year >= floor(min(out$t) + 1e-9)
+  mod <- interp("co2_SH", obs$ice$year[in_run])
+  add("co2_icecore", sum(stats::dnorm(obs$ice$CO2ppm[in_run], mod, ice_sd[in_run],
+                                      log = TRUE)))
 
   # ---- d13C annual level ---------------------------------------------
   # Level here; the SEASONAL cycle is scored by its own term since 2026-08-18
@@ -1809,14 +1865,39 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # ---- D14C annual means, with representation error -------------------
   # Model side is its own annual MEAN, not a mid-year sample: the observation is
   # a mean, and during the bomb rise the two differ by several permil.
+  #
+  # PARTIAL-YEAR ROWS (2026-09-12, review A12). Hua et al. (2022) is MONTHLY,
+  # and its edge years are incomplete -- NH 1941 Mar-Dec, SH 1941 Jun-Dec, both
+  # 2019 Jan-May -- so the observed "annual" value there is the mean of the
+  # covered months while the model's `m$mean` was the full-year mean: 0.96
+  # permil (0.14 sigma) on SH 2019, 0.49 on NH 1941. The model is now averaged
+  # over EXACTLY the observed months of an incomplete year, read from the
+  # monthly frame the annual rows were built from (obs$d14_nh / obs$d14_sh,
+  # month = round((t - year) * 12 + 0.5)); complete years keep `m$mean`. The
+  # months are recovered from the obs bundle, so the data build is untouched.
+  # ABSENCE CONTRACT: a bundle without the monthly frame, or an `out` that is
+  # not on the monthly grid (annual-cadence test fixtures), keeps the full-year
+  # mean -- the pre-2026-09-12 behaviour, so older fixtures reproduce.
   for (hh in c("NH", "SH")) {
     o <- if (hh == "NH") obs$d14_nh_ann else obs$d14_sh_ann
     m <- ms$d14[[hh]]
     if (is.null(m)) next
     k <- match(o$year, m$year); good <- !is.na(k)
     sd <- sqrt(o$sd[good]^2 + err$sigma_d14c^2)
+    pred <- m$mean[k[good]]
+    mon  <- if (hh == "NH") obs$d14_nh else obs$d14_sh
+    if (!is.null(mon) && !is.null(o$n) && any(o$n[good] < 12L)) {
+      col <- out[[paste0("d14c_", hh)]]
+      oy <- floor(mon$t + 1e-9); om <- round((mon$t - oy) * 12 + 0.5)
+      my <- floor(out$t + 1e-9); mm <- round((out$t - my) * 12 + 0.5)
+      for (y in o$year[good][o$n[good] < 12L]) {
+        sel <- my == y & mm %in% om[oy == y]
+        # every observed month must have exactly one model row, else fall back
+        if (sum(sel) == sum(oy == y)) pred[o$year[good] == y] <- mean(col[sel])
+      }
+    }
     add(paste0("d14c_", hh),
-        sum(stats::dnorm(o$value[good], m$mean[k[good]], sd, log = TRUE)))
+        sum(stats::dnorm(o$value[good], pred, sd, log = TRUE)))
   }
 
   # ---- IntCal20 pre-bomb Suess decline -------------------------------
@@ -1836,8 +1917,10 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
 
   # ---- ocean excess 14C inventory (design note 5) ---------------------
   # The only term that prices the ocean 14C sink directly. Excess is measured
-  # against the run's OWN first row, which is the 1750 steady state by
-  # construction -- so this costs no extra integration.
+  # against the run's OWN first row, which is the 1750 spinup state by
+  # construction (the JANUARY INSTANT of the periodic orbit under
+  # CCX_OBJECTIVE_SPINUP, 0.0014 sigma from the orbit's annual mean -- see
+  # LIK_USE_EXCESS_C14's block (a)) -- so this costs no extra integration.
   if (LIK_USE_EXCESS_C14 && !is.null(obs$excess_c14) &&
       !is.null(out$ocean_C14)) {
     e   <- obs$excess_c14

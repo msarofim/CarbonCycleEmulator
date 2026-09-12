@@ -71,8 +71,10 @@ ccx_dic_for_pco2 <- function(pco2_target, alk, sst) {
 #' The 13C/14C solves downstream need no change: they invert whatever linear
 #' operator the carbon field presents, exactly as before.
 ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
-                                    tol = 1e-9, maxit = 30L) {
+                                    tol = 1e-9, maxit = 30L, prep = NULL) {
   boxes <- seq_len(nrow(y))
+  # flattened ONCE: the forcing is constant across the ~70 derivative calls
+  fv <- ccx_cpp_forcing_vec(forc)
   atm   <- c(aux$idx$NH$atm, aux$idx$SH$atm)
   # Global preindustrial CO2 is the physical pin. The interhemispheric SPLIT is
   # not pinned -- it is what has to move, and forbidding it is what left the
@@ -81,7 +83,7 @@ ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
 
   resid <- function(cv) {
     yy <- y; yy[, "C"] <- cv
-    r  <- ccx_deriv_fast(yy, 1750, p0, forc, grid, aux)[, "C"]
+    r  <- ccx_deriv_fast(yy, 1750, p0, fv, grid, aux, prep = prep)[, "C"]
     # The operator conserves carbon, so the steady-state system is rank
     # deficient by one. Trade one equation for the pin; the dropped row is then
     # implied by the other 31 plus conservation.
@@ -135,6 +137,13 @@ ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
 # evaluation 0.1404 -> 0.0483 s (**2.9x**).
 # ⇒ Stored logposts, port targets and checkpoint `ref_logpost` stamps all remain
 #   valid: every one of those gates is 1e-8 relative and this is 8e-14.
+#
+# MARSHALLED ONCE (2026-09-12, review B2). Each of those ~190 calls re-ran
+# `ccx_cpp_par(p0)` and `ccx_cpp_aux(aux, grid)` -- about half the spinup's
+# wall time. `ccx_deriv_prepare()` builds both once from the SAME `(p0, aux,
+# grid)` and the calls pass the prepared pair; the forcing is flattened once
+# per constant forcing. The bytes reaching `ccx_deriv_cpp` are unchanged, so
+# this is bit-identical by construction and was measured so at hilda31s/p.
 
 # ---------------------------------------------------------------------
 #' THE spinup diagnostics, computed ONCE for both spinups
@@ -348,6 +357,8 @@ ccx_spinup <- function(p = ccx_default_params(),
   # and leaving them on makes the isotope operator singular.
   p0$seas_amp_NH <- 0; p0$seas_amp_SH <- 0
   p0$seas_drivers <- 0
+  # the marshalled (p0, aux, grid), built once for every derivative call below
+  prep <- ccx_deriv_prepare(p0, aux, grid)
 
   # Finish the 12C state when the conveyor couples the two columns. The analytic
   # equilibrium above is only a starting guess then -- see the function header.
@@ -361,19 +372,20 @@ ccx_spinup <- function(p = ccx_default_params(),
   # on an already-exact fixed point, which is why the branch is gated rather than
   # unconditional: the no-pump, no-conveyor model stays bit-identical.
   if (!is.null(ccx_conveyor_geom(p, grid)) || !is.null(aux$pump) || aux$hs_on == 1L)
-    y <- ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0))
+    y <- ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0), prep = prep)
 
   nb <- nrow(y)
 
   # ---- helper: linear operator of ccx_deriv acting on one isotope -----
   # dy_iso/dt = A %*% y_iso + b, exact because the isotope enters linearly.
   iso_operator <- function(tracer, forc) {
+    fv <- ccx_cpp_forcing_vec(forc)
     y0 <- y; y0[, tracer] <- 0
-    b  <- ccx_deriv_fast(y0, 1750, p0, forc, grid, aux)[, tracer]
+    b  <- ccx_deriv_fast(y0, 1750, p0, fv, grid, aux, prep = prep)[, tracer]
     A  <- matrix(0, nb, nb)
     for (j in seq_len(nb)) {
       yj <- y0; yj[j, tracer] <- 1
-      A[, j] <- ccx_deriv_fast(yj, 1750, p0, forc, grid, aux)[, tracer] - b
+      A[, j] <- ccx_deriv_fast(yj, 1750, p0, fv, grid, aux, prep = prep)[, tracer] - b
     }
     list(A = A, b = b)
   }
@@ -406,7 +418,7 @@ ccx_spinup <- function(p = ccx_default_params(),
   # that are estimator-dependent are supplied HERE, on THIS solve's own
   # definitions: an instantaneous derivative, and the instantaneous atmospheric
   # burden (which on an aseasonal fixed point is trivially also its annual mean).
-  resid <- ccx_deriv_fast(y, 1750, p0, zero_forc(prod), grid, aux)
+  resid <- ccx_deriv_fast(y, 1750, p0, zero_forc(prod), grid, aux, prep = prep)
 
   list(
     y = y, prod_c14 = prod, aux = aux, grid = grid, params = p,

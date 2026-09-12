@@ -8,8 +8,15 @@
 #   "provisional" a working value NOT yet traced to a source -- must not
 #                 survive into published results
 #
-# ccx_check_constants() lists anything still provisional. Calibration and
-# headline runs are gated on that list being empty for the constants they use.
+# ccx_check_constants() lists anything still provisional. ⚠ NOTHING GATES ON
+# THAT LIST BEING EMPTY (header corrected 2026-09-12, review C -- the text that
+# stood here claimed calibration and headline runs were gated on it, and no
+# such gate exists). What IS true: tests/testthat/test-constants.R keeps the
+# list as a LEDGER -- a pinned expected set that fails when an entry is added
+# or retired without the test being updated deliberately -- and most of the
+# entries on it are read from fitted code today. The ledger keeps that
+# VISIBLE; it does not refuse it. "Must not survive into published results"
+# is the standard, enforced by reading the ledger, not by a gate.
 # This exists because "small", "standard" and "canonical" have already been
 # wrong once in this project (the nuclear-industry 14C term).
 # =====================================================================
@@ -676,32 +683,45 @@ CCX_CONSTANTS <- list(
   ENT_SEAS_BAND_AREA_FRAC = list(
     value = .ENT_BAND_AREA_FR, units = "fraction, dimensionless",
     status = "provisional",
-    source = paste("⛔ RETIRED 2026-09-04h. The two-signature inversion that produced this number CANNOT BE RUN at the canonical mode: the 2026-09-02 temperature-dependent air-sea 13C alphas make the ocean limb's isotopic signature ROTATE seasonally, so it is no longer the signed SCALAR the method assumes, and all four ocean channels now fail the inversion's own antiphase gate (s_O = NaN). Setting alpha_as_tdep=0 restores it and reproduces this value exactly, so the cause is isolated -- but that reverts a model improvement. PROVENANCE ONLY: do not use as a live target. Gate S was rebased on the independent pCO2 route (SO_DPCO2_PEAK_MO). ",
-                   "⛔ RETIRED 2026-09-04h. The two-signature inversion that produced this number CANNOT BE RUN at the canonical mode: the 2026-09-02 temperature-dependent air-sea 13C alphas make the ocean limb's isotopic signature ROTATE seasonally, so it is no longer the signed SCALAR the method assumes, and all four ocean channels now fail the inversion's own antiphase gate (s_O = NaN). Setting alpha_as_tdep=0 restores it and reproduces this value exactly, so the cause is isolated -- but that reverts a model improvement. PROVENANCE ONLY: do not use as a live target. Gate S was rebased on the independent pCO2 route (SO_DPCO2_PEAK_MO). ",
-                   "Ocean area of the 40-90 S band as a fraction of TOTAL SH",
-                   "ocean area, from the 2026-08-27g entrainment pre-check's",
-                   "own area weighting. ⚠ PROVISIONAL: it is a GEOGRAPHIC area",
-                   "ratio and NEEDS a cited source, exactly as OCEAN_AREA_NH/SH",
-                   "do. It was a free-floating literal in three files until",
+    source = paste("LIVE GEOGRAPHIC RATIO: the ocean area of the 40-90 S band",
+                   "as a fraction of TOTAL SH ocean area, from the 2026-08-27g",
+                   "entrainment pre-check's own area weighting. It multiplies",
+                   "ENT_SEAS_AMP_SH_INBAND to give the prior centre",
+                   "ENT_SEAS_AMP_SH_DERIV, and 1/it is the no-dilution limit",
+                   "(every SH ocean square metre behaving like the observed",
+                   "band) that sets the PRIOR WIDTH ENT_SEAS_LOGSD in",
+                   "R/calibrate.R. ⚠ PROVISIONAL: a GEOGRAPHIC area ratio that",
+                   "NEEDS a cited source, exactly as OCEAN_AREA_NH/SH do. It",
+                   "was a free-floating literal in three files until",
                    "2026-09-03; registering it is what makes the two entries",
-                   "below computable rather than typed.",
-                   "⭐ It also sets the PRIOR WIDTH: 1/this is the no-dilution",
-                   "limit, i.e. every SH ocean square metre behaving like the",
-                   "observed band. See ENT_SEAS_LOGSD in R/calibrate.R.")),
+                   "below computable rather than typed. (The 'RETIRED",
+                   "2026-09-04h two-signature inversion' boilerplate that was",
+                   "pasted into this entry twice belonged to the",
+                   "SPO_SEAS_OCEAN_PHASE_INV entries above and was removed",
+                   "2026-09-12; nothing about this constant is retired.)")),
   ENT_SEAS_AMP_SH_INBAND = list(
     value = (.ENT_SO_SST_AMP * .ENT_PCO2_DLNDT * .ENT_PCO2_REF + .ENT_SO_PCO2_AMP) /
             .ENT_PCO2_REF * .ENT_DIC_SURF / .ENT_REVELLE,
     units = "umol/kg, half-amplitude, WITHIN the 40-90 S band",
     status = "derived",
     source = paste("COMPUTED from the named inputs at the head of this file, not",
-                   "typed. The Southern Ocean's own solubility cycle has to be",
-                   "OVERCOME before the observed signal is left, and the two are",
-                   "close to antiphase: solubility =",
-                   ".ENT_SO_SST_AMP x .ENT_PCO2_DLNDT x .ENT_PCO2_REF = 46.95",
-                   "uatm at month 1.94, against an OBSERVED 19.45 uatm at month",
-                   "7.50, so entrainment carries 66.40 uatm in band. Through the",
-                   "buffer factor that is dDIC = (66.40/370) x 2150 / 13 =",
-                   "29.68 umol/kg.",
+                   "typed: (.ENT_SO_SST_AMP x .ENT_PCO2_DLNDT x .ENT_PCO2_REF",
+                   "+ .ENT_SO_PCO2_AMP) / .ENT_PCO2_REF x .ENT_DIC_SURF /",
+                   ".ENT_REVELLE. The Southern Ocean's own solubility cycle",
+                   "(the first product, in uatm) has to be OVERCOME before the",
+                   "observed pCO2 amplitude (.ENT_SO_PCO2_AMP) is left, and the",
+                   "two are close to antiphase -- the band SST and band pCO2",
+                   "peak about half a year apart (the `band_peak_month` fields",
+                   "of obs_so_sst_seas_amp.rds and obs_so_pco2_seas_amp.rds,",
+                   "the products the two inputs are read from) -- so",
+                   "entrainment carries their SUM in band; the buffer factor",
+                   "then converts uatm to umol/kg of DIC.",
+                   "⛔ NO VALUE IS TYPED HERE (2026-09-12, review C): the prose",
+                   "used to walk the arithmetic with numbers whose inputs moved",
+                   "on 2026-09-09w, and had drifted. Print",
+                   "ccx_const('ENT_SEAS_AMP_SH_INBAND') for the live value;",
+                   "tests/testthat/test-ent-seas-fitted.R re-derives it from",
+                   "the same inputs.",
                    "⚠ This is the IN-BAND value and NOT the parameter -- see",
                    "ENT_SEAS_AMP_SH_DERIV, which dilutes it onto the SH box.",
                    "⚠ The near-antiphase geometry is what licenses ADDING the",
@@ -716,15 +736,38 @@ CCX_CONSTANTS <- list(
                    "COMPUTED from the same named inputs, never re-typed from",
                    "the in-band number. `ent_seas_amp_SH` perturbs the WHOLE SH",
                    "mixed layer, so the band value must be diluted onto the box",
-                   "before it can be a prior centre. Gives 10.95 umol/kg.",
+                   "before it can be a prior centre. Print",
+                   "ccx_const('ENT_SEAS_AMP_SH_DERIV') for the live value: the",
+                   "`init` literal of ent_seas_amp_SH in R/calibrate.R must",
+                   "equal it and test-ent-seas-fitted.R ties the two (the",
+                   "typed value that stood here was the pre-2026-09-09w one).",
                    "⚠ It INHERITS a provisional input (the area fraction) and",
                    "the pCO2 product's own caveat: that product omits the",
                    "seasonality of gas transfer and K0.",
                    "⚠ The recorded plausibility band 'far outside ~5-30 is a",
-                   "fudge factor' MIXES the two scales -- 30 is the in-band",
-                   "value, ~11 the box mean -- which is why both are registered",
+                   "fudge factor' MIXES the two scales -- its upper end is the",
+                   "IN-BAND scale, the box mean is ENT_SEAS_BAND_AREA_FRAC of",
+                   "it -- which is why both are registered",
                    "separately and why the prior width is NOT read off that",
                    "band's unsourced lower endpoint.")),
+  # ---- Remineralisation N:C for the alkalinity row (registered 2026-09-12) --
+  # Was a typed `16 / 117` in R/likelihood.R described as "an
+  # Anderson-Sarmiento-type recollection rather than a citation" (review C);
+  # the citation was checked against the published abstract on 2026-09-12 and
+  # the value moved here. R/likelihood.R reads it as LIK_ALK_NC_RATIO.
+  ALK_NC_RATIO = list(
+    value = 16 / 117, units = "mol N per mol C, organic-matter remineralisation",
+    status = "cited",
+    source = paste("Anderson, L. A. & Sarmiento, J. L. (1994), Redfield ratios",
+                   "of remineralization determined by nutrient data analysis,",
+                   "Global Biogeochemical Cycles 8(1), 65-80,",
+                   "doi:10.1029/93GB03318. Abstract: P : N : C_org : -O2 =",
+                   "1 : 16 +/- 1 : 117 +/- 14 : 170 +/- 10 between 400 and",
+                   "4000 m, approximately constant with depth and basin",
+                   "(denitrification-corrected). Used ONLY by the alkalinity",
+                   "gradient row: soft-tissue remineralisation removes ~1 mol",
+                   "alkalinity per mol N released, so N:C converts the organic",
+                   "export to its alkalinity debit.")),
   # ---- Schmidt number of CO2 in seawater (2026-09-06, for hs_asx_frac) ----
   # Sc(t) = A + B t + C t^2 + D t^3 + E t^4, t in degC, salinity 35, as FIVE
   # scalar entries (the registry's contract is one finite number per entry;

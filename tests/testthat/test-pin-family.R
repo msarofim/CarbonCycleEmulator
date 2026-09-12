@@ -37,7 +37,7 @@ test_that("on a log parameter the general form IS the old lognormal", {
   # dlnorm(x, log(val), sd); if this drifts, those runs stop reproducing.
   for (nm in c("luc_scale", "sigma_d14c", "q10", "k_w")) {
     s <- CCX_PARAM_TABLE[[nm]]
-    skip_if_not(identical(s$tr, "log"))
+    expect_identical(s$tr, "log", info = nm)   # was skip_if_not() inside the loop (review A15)
     val <- s$init
     xs  <- val * c(0.9, 0.99, 0.999, 1, 1.001, 1.05, 1.5)
     expect_equal(pin_prior(val, s)(xs),

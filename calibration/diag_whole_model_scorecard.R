@@ -15,6 +15,10 @@
 # periodic-fitted seas_ml = 1 mode that reads 2447 log-units off the mode.
 # Section 0 PROVES each arm reproduces its own stored streams before anything
 # is read off it ([[like_for_like_forcing]]).
+# ⚠ ONE RUN PER ARM (2026-09-12, review B5): R[[a]] is handed to dg_streams,
+# dg_gateH, dg_gateS (base arm) and dg_gateG (spinup + surface reads) through
+# their `r =` argument; only the knockout arms (gate S, the ENSO patch-off) and
+# gate G's end-of-epoch state still run. Logs diffed bit-identical at the change.
 # Every gate the ledger keeps (V, H, 5, G, Q, 7, S, GL, P7), the two
 # COMPARISONS (12 = the Joos IRF, L = the pulse partition), the ENSO ocean slope
 # (full and solubility-only, the 09-04g estimator), the likelihood by stream
@@ -50,7 +54,7 @@ cat("ARMS (each spun up as its file records):\n")
 for (a in names(ARMS)) { v <- ARMS[[a]]
   cat(sprintf("  %-8s %s   struct %s, seas_ml %d, spinup %s, %d par, h_ml %.1f%s\n", a, v$src, arm_struct(v), ccx_mode_seas_ml(v$md), v$spinup_label, length(v$pm), v$p$h_ml,
               if (arm_struct(v) == "hilda") sprintf(", u_hs %.1f, hs_asx %.3f, h_hs %.0f, pump_hs %.1f, k_w %.0f", v$p$u_hs, v$p$hs_asx_frac, v$p$h_hs, v$p$pump_hs_gcm2, v$p$k_w) else "")) }
-R <- lapply(ARMS, dg_run); ST <- Map(dg_streams, R, ARMS); GR <- lapply(R, function(r) ccx_ocean_grad_scored(r$out, r$sp))
+R <- lapply(ARMS, dg_run); ST <- Map(dg_streams, R, ARMS, MoreArgs = list(obs = obs)); GR <- lapply(R, function(r) ccx_ocean_grad_scored(r$out, r$sp))
 try_or <- function(expr, lab) tryCatch(expr, error = function(e) { cat(sprintf("  ⚠ %s FAILED: %s\n", lab, conditionMessage(e))); NULL })
 
 cat(sprintf("\n=== 0. EACH ARM REPRODUCES ITS OWN STORED STREAMS (tol %g; the like-for-like guard) ===\n", SC_REPRO_TOL))
@@ -78,20 +82,20 @@ cat("\n=== 2. GATES (the ledger, INDEX_ccx_gates) ===\n")
 verd <- list()
 OV <- dg_gateV_obs(); for (a in an) { gv <- dg_gateV(R[[a]]); vd <- dg_gateV_verdict(gv, OV); verd[[a]]$V <- vd
   cat(sprintf("  GATE V  %-8s sd %.3f vs obs %.3f ± %.3f  ratio %.2f  z %+.2f  -> %s\n", a, vd$sd_model, OV$sd, OV$se, vd$ratio, vd$z, if (vd$pass) "PASS" else "FAIL (too smooth)")) }
-OH <- dg_gateH_obs(obs); GH <- list(); for (a in an) { gh <- dg_gateH(ARMS[[a]], obs, OH); GH[[a]] <- gh; vd <- dg_gateH_verdict(gh, OH); verd[[a]]$H <- vd
+OH <- dg_gateH_obs(obs); GH <- list(); for (a in an) { gh <- dg_gateH(ARMS[[a]], obs, OH, r = R[[a]]); GH[[a]] <- gh; vd <- dg_gateH_verdict(gh, OH); verd[[a]]$H <- vd
   cat(sprintf("  GATE H  %-8s R_co2 %.3f (z_level %+.2f) R_d13c %.3f (z_level %+.2f)  contrast z %+.2f  -> %s\n", a, vd$R_co2, vd$z_level_co2, vd$R_d13c, vd$z_level_d13c, vd$z, if (vd$pass) "PASS" else "FAIL")) }
 for (a in an) { vd <- dg_gateGL_verdict(GH[[a]], OH); verd[[a]]$GL <- vd
   cat(sprintf("  GATE GL %-8s d13C gradient %.4f vs obs %.4f ± %.4f (ratio %.2f); rep_frac %.3f (derived from R_co2 %.3f) -> se %.4f, z %+.2f (bare z %+.2f)  -> %s\n", a, vd$model, vd$obs, vd$se_obs, vd$ratio, vd$rep_frac, vd$R_co2, vd$se, vd$z, vd$z_bare, if (vd$pass) "PASS" else "FAIL")) }
 ob5 <- dg_obs_gate5(); sp5 <- dg_obs_gate5_spread(); for (a in an) { vd <- dg_gate5_verdict(dg_gate5(R[[a]]), ob5, sp5); verd[[a]]$G5 <- vd
   num <- vapply(vd$z, function(x) is.finite(x), TRUE)
   cat(sprintf("  GATE 5  %-8s %s; orderings %s  -> %s\n", a, paste(sprintf("%s z %+.2f", names(vd$z)[num], vd$z[num]), collapse = ", "), paste(sprintf("%s %s", names(vd$ord), ifelse(unlist(vd$ord), "ok", "VIOL")), collapse = " "), if (vd$pass) "PASS" else "FAIL")) }
-for (a in an) { vd <- try_or({ gr <- ccx_ocean_grid(ARMS[[a]]$p$h_ml); og <- dg_gateG_obs(gr); dg_gateG_verdict(dg_gateG(ARMS[[a]], og), og) }, paste("gate G", a)); verd[[a]]$G <- vd
+for (a in an) { vd <- try_or({ gr <- ccx_ocean_grid(ARMS[[a]]$p$h_ml); og <- dg_gateG_obs(gr); dg_gateG_verdict(dg_gateG(ARMS[[a]], og, r = R[[a]]), og) }, paste("gate G", a)); verd[[a]]$G <- vd
   if (!is.null(vd)) cat(sprintf("  GATE G  %-8s %s  -> %s\n", a, paste(sprintf("%s %s", names(vd)[vapply(vd, function(x) is.numeric(x) && length(x) == 1, TRUE)], sapply(vd[vapply(vd, function(x) is.numeric(x) && length(x) == 1, TRUE)], function(x) sprintf("%.3g", x))), collapse = ", "), if (isTRUE(vd$pass)) "PASS" else "FAIL")) }
 for (a in an) { q <- dg_gateQ(R[[a]], ARMS[[a]]); verd[[a]]$Q <- q
   cat(sprintf("  GATE Q  %-8s air-sea d13C diseq NH %+.3f SH %+.3f mean %+.3f vs %.2f ± %.2f  n_sd %.2f  -> %s\n", a, q$by_hemi[["NH"]], q$by_hemi[["SH"]], q$mean, DG_Q_OBS, DG_Q_SD, q$n_sd, if (q$pass) "PASS" else "FAIL")) }
 tg7 <- dg_gcb_target(DG_SINK_WIN); for (a in an) { g7 <- dg_gate7(R[[a]]); vd <- dg_gate7_verdict(g7, tg7); verd[[a]]$G7 <- vd
   cat(sprintf("  GATE 7  %-8s ocean %.2f (z %+.2f) land %.2f (z %+.2f) GtC/yr  -> %s\n", a, g7$ocean, vd$z_ocean, g7$land, vd$z_land, if (isTRUE(vd$pass)) "PASS" else "FAIL")) }
-for (a in an) { vd <- try_or({ g <- dg_gateS(ARMS[[a]], obs); dg_gateS_verdict(g) }, paste("gate S", a)); verd[[a]]$S <- vd
+for (a in an) { vd <- try_or({ g <- dg_gateS(ARMS[[a]], obs, r = R[[a]]); dg_gateS_verdict(g) }, paste("gate S", a)); verd[[a]]$S <- vd
   if (!is.null(vd)) cat(sprintf("  GATE S  %-8s SPO ocean limb %.3f ppm @ month %.2f, bracket [%.2f, %.2f]  -> %s\n", a, vd$amp, vd$mo, vd$lo, vd$hi, if (vd$pass) "PASS" else sprintf("FAIL (%+.2f mo)", vd$d_mo))) }
 # GATE P7: the seasonal mixed layer (ON = arm C) must not be a vertical-gradient lever against its OFF control (arm B).
 tgP <- ccx_ocean_gradient_target()

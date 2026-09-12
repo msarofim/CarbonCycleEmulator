@@ -16,11 +16,6 @@
 #     exactly their Gaussians).
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
 skip_if_no_mid <- function() skip_if(is.null(ccx_mid_d14c_target()), "intermediate build product absent")
 # The fixture helper now lives in R/likelihood.R as ccx_profile_rows_delta()
 # (2026-09-07): ONE source for the objective and every fixture.

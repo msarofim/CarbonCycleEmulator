@@ -7,7 +7,7 @@
 
 ## What this project is
 
-Simple calibrated global carbon cycle model (2 hemispheres, monthly, 2-pool land,
+Simple calibrated global carbon cycle model (2 hemispheres, monthly, 4-pool land,
 box-diffusion ocean, ¹²C/¹³C/¹⁴C) + public RShiny communication app for an
 undergrad-environmental-studies audience. **DESIGN.md is the authoritative spec** — read
 it before touching model structure, and log spec changes in CHANGELOG.md.

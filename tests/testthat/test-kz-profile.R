@@ -29,12 +29,6 @@
 #   * the substep bound is unchanged at f = 1 and never smaller at f < 1.
 # =====================================================================
 
-skip_if_no_cpp <- function() {
-  skip_if_not_installed("Rcpp")
-  ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
-  if (!ok) skip("C++ core failed to compile")
-}
-
 kp_par <- function(f = NULL, zs = NULL, hs = FALSE) {
   p <- ccx_default_params()
   if (!is.null(f))  p$kz_deep_frac <- f

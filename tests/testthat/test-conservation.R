@@ -93,10 +93,10 @@ test_that("14C decays at exactly the right rate with transport switched off", {
   expect_lt(abs(ccx_total(y) / ccx_total(s$y) - 1), 1e-12)
 })
 
-test_that("a zero-length run is a no-op, and Delta14C of standard carbon is 0", {
-  s <- test_state()
-  expect_equal(1000 * (s$y[1, "C14"] / s$y[1, "C"] - 1), 0)
-})
+# DELETED 2026-09-12 (review A15): "a zero-length run is a no-op, and Delta14C
+# of standard carbon is 0" asserted C14/C == 1 on a fixture that had just set
+# `C14 <- C * 1.0` three lines earlier -- a tautology on the fixture, and no run
+# of any length was made. The decay test above is the one that reads that ratio.
 
 test_that("ocean grid is exactly the stated depth and monotonically coarsening", {
   g <- ccx_ocean_grid(75)

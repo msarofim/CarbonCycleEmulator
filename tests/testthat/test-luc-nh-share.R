@@ -35,7 +35,17 @@ skip_if_no_share <- function()
 LNS_YEARS <- c(1750, 2024)
 LNS_WINDOW_START <- 1900          # the windowed-run case, for tests 2 and 4
 
+# the on/off forcing pair, built once per file (review B4, 2026-09-12): tests
+# 1a-1d rebuilt it. ⚠ Keyed on the SEASONALITY flag as well as `on` and the span:
+# test 1c's `flat` arm is built under FORC_USE_EMIS_SEASONALITY = FALSE and must
+# never be served the default-flag forcing.
+lns_memo <- new.env()
 lns_forcing <- function(on, years = LNS_YEARS) {
+  k <- paste(on, paste(years, collapse = ":"), FORC_USE_EMIS_SEASONALITY)
+  if (is.null(lns_memo[[k]])) lns_memo[[k]] <- lns_forcing_raw(on, years)
+  lns_memo[[k]]
+}
+lns_forcing_raw <- function(on, years = LNS_YEARS) {
   old <- FORC_USE_LUC_NH_SHARE_TS
   on.exit(assign("FORC_USE_LUC_NH_SHARE_TS", old, envir = globalenv()))
   assign("FORC_USE_LUC_NH_SHARE_TS", on, envir = globalenv())

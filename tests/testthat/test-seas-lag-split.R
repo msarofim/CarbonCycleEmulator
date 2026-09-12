@@ -130,10 +130,11 @@ test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
   # means -- it reads ccx_seas_lag_p(), the one resolver both cores go through.
   # So a migrated legacy list must encode IDENTICALLY to one whose hemispheres
   # were set to the legacy scalar by hand. Not "close": identical.
-  # ⚠ ccx_mode_params() is a PRE-split list on EVERY split this build carries --
-  # the canonical mode predates the 08-31 lag split AND the 09-01 ENSO one -- so
-  # "an ancestor current in every other respect" has to be constructed, or this
-  # test measures whichever migration happens to be newest instead of the lag.
+  # ⚠ ccx_mode_params() is a POST-split 31-parameter list -- the canonical
+  # carries seas_lag_p_NH/SH AND the four gamma_enso_* names (this comment said
+  # it predated both splits until 2026-09-12) -- so "an ancestor current in every
+  # other respect" has to be CONSTRUCTED from it by dropping the pair, or this
+  # test has nothing to migrate.
   # UPDATED 2026-09-01: it used to migrate straight from ccx_mode_params(), which
   # made `migrated` exactly the lag pair only while the lag was the ONLY split.
   p <- ccx_migrate_par_set(ccx_mode_params()); attr(p, "migrated") <- NULL

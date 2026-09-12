@@ -11,9 +11,17 @@
 # mutation-tested ⇒ [[mutation_test_gates]].
 # =====================================================================
 
+# FILE-LEVEL FIXTURES (review B4, 2026-09-12): the default aseasonal spinup was
+# built in three blocks and the canonical objective evaluated in two.
+sd_sp <- local({ s <- NULL; function() { if (is.null(s)) s <<- ccx_spinup(ccx_default_params()); s } })
+sd_mode <- local({ m <- NULL; function() {
+  if (is.null(m)) { md <- readRDS(ccx_mode_file()); base <- ccx_mode_base(md)
+    m <<- list(md = md, base = base, u = md$u_mode,
+               plain = ccx_make_logpost(base_params = base)(md$u_mode)) }
+  m } })
+
 test_that("ccx_spinup_diagnostics() REFUSES the estimator-dependent rows it cannot default", {
-  p  <- ccx_default_params()
-  sp <- ccx_spinup(p)
+  sp <- sd_sp()
   ok <- list(C = 0, C13 = 0, C14 = 0)
   # the happy path first, so a refusal below cannot be the state's fault
   expect_type(ccx_spinup_diagnostics(sp$y, sp$prod_c14, sp$aux, sp$grid, ok, 277), "list")
@@ -29,8 +37,7 @@ test_that("ccx_spinup_diagnostics() REFUSES the estimator-dependent rows it cann
 })
 
 test_that("ccx_spinup() itself goes through the producer, and has not diverged from it", {
-  p  <- ccx_default_params()
-  sp <- ccx_spinup(p)
+  sp <- sd_sp()
   d  <- sp$diagnostics
   # rebuild from the producer on the SAME state, passing back the two rows the
   # producer cannot know. Every OTHER row must match exactly, or ccx_spinup()
@@ -49,7 +56,7 @@ test_that("ccx_spinup() itself goes through the producer, and has not diverged f
 test_that("the PERIODIC spinup's diagnostics are its OWN, not the seed's", {
   # in R/ since adoption 09-09x; the bootstrap has already sourced it.
   p  <- ccx_default_params()
-  sp_ase <- ccx_spinup(p)
+  sp_ase <- sd_sp()
   sp_per <- ccx_periodic_spinup(p, seed = sp_ase, verbose = FALSE)
 
   # the field SET must be identical, or the objective could read a row off one
@@ -96,12 +103,10 @@ test_that("the PERIODIC spinup's diagnostics are its OWN, not the seed's", {
 })
 
 test_that("`spinup_fn` DEFAULTS to the PERIODIC spinup since adoption (09-09x)", {
-  md   <- readRDS(ccx_mode_file())
-  base <- ccx_mode_base(md)
-  u    <- md$u_mode
+  m <- sd_mode(); base <- m$base; u <- m$u
   # ⭐ THE ADOPTION ITSELF, asserted. Ruled by Marcus 09-09x; before that the
   # default was `ccx_spinup`. Naming the new default must be a no-op...
-  plain <- ccx_make_logpost(base_params = base)(u)
+  plain <- m$plain
   named <- ccx_make_logpost(base_params = base, spinup_fn = ccx_periodic_spinup)(u)
   expect_identical(plain, named)
   # ...and the ASEASONAL spinup must give a DIFFERENT, still-reachable number, or
@@ -113,10 +118,7 @@ test_that("`spinup_fn` DEFAULTS to the PERIODIC spinup since adoption (09-09x)",
 })
 
 test_that("`by_stream` does not move the scalar, and its parts sum to the whole", {
-  md   <- readRDS(ccx_mode_file())
-  base <- ccx_mode_base(md)
-  u    <- md$u_mode
-  plain <- ccx_make_logpost(base_params = base)(u)
+  m <- sd_mode(); base <- m$base; u <- m$u; plain <- m$plain
   v     <- ccx_make_logpost(base_params = base, by_stream = TRUE)(u)
   expect_equal(as.numeric(v), as.numeric(plain), tolerance = 0)
   st <- attr(v, "streams")

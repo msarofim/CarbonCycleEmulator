@@ -4,32 +4,32 @@ ARMS (each spun up as its file records):
   hilda31s hilda31s (canonical, CCX_MODE_CANONICAL)   struct hilda, seas_ml 1, spinup periodic, 31 par, h_ml 64.8, u_hs 24.8, hs_asx 0.790, h_hs 411, pump_hs 95.5, k_w 1627
 
 === 0. EACH ARM REPRODUCES ITS OWN STORED STREAMS (tol 0.001; the like-for-like guard) ===
-  ent26    stored -1410.9591  recomputed -1380.3033  diff +3.07e+01 over 20 rows  -> MIGRATED file: its stored streams are PROVENANCE (restamp_mode_objective.R cannot encode a pre-migration vector); not gated
+  ent26    stored -1410.9591  recomputed -1359.1544  diff +5.18e+01 over 20 rows  -> MIGRATED file: its stored streams are PROVENANCE (restamp_mode_objective.R cannot encode a pre-migration vector); not gated
            rows not in both (excluded from the sum): d14c_deep_ocean d14c_profile_level d14c_profile_ab d14c_profile_bd
-  hilda31p stored -1417.3713  recomputed -1417.3713  diff -3.14e-08 over 25 rows  -> REPRODUCES
-  hilda31s stored -1420.3139  recomputed -1420.3139  diff +3.46e-06 over 25 rows  -> REPRODUCES
+  hilda31p stored -1396.2609  recomputed -1396.2609  diff -3.14e-08 over 25 rows  -> REPRODUCES
+  hilda31s stored -1399.2047  recomputed -1399.2047  diff +3.46e-06 over 25 rows  -> REPRODUCES
 
 === 1. LIKELIHOOD BY STREAM GROUP (common rows; rows absent from an arm shown after) ===
   group               ent26  hilda31p  hilda31s       B-A       C-B   rows
-  co2_level         -812.79   -815.22   -814.84     -2.43     +0.38   co2_level_MLO co2_level_SPO co2_icecore
+  co2_level         -791.56   -793.99   -793.61     -2.43     +0.38   co2_level_MLO co2_level_SPO co2_icecore
   co2_seasonal        67.65     67.77     67.16     +0.13     -0.61   co2_seasonal_MLO co2_seasonal_SPO
   d13c_level         142.76    135.58    133.66     -7.18     -1.92   d13c_level_MLO d13c_level_SPO
   d13c_seasonal      464.03    465.99    466.56     +1.96     +0.57   d13c_seasonal_MLO d13c_seasonal_SPO
   gradients           92.00     92.38     92.85     +0.38     +0.46   co2_gradient d13c_gradient
-  bomb_d14c         -570.96   -571.18   -570.98     -0.22     +0.21   d14c_NH d14c_SH
+  bomb_d14c         -571.05   -571.30   -571.10     -0.26     +0.20   d14c_NH d14c_SH
   d14c_profile      -241.61     -9.16     -9.39   +232.45     -0.23   d14c_profile_level d14c_profile_ab d14c_profile_bd
   excess_c14         -10.35    -10.20    -10.19     +0.14     +0.01   excess_c14_ocean
   gcb_sinks         -104.92   -107.07   -107.00     -2.15     +0.07   gcb_ocean_sink gcb_land_sink
   ocean_deep          -7.35    -15.59    -17.45     -8.24     -1.86   ocean_grad_dic ocean_grad_d13c ocean_grad_alk
-  TOTAL common     -1621.91  -1406.79  -1409.59   +215.12     -2.80
+  TOTAL common     -1600.76  -1385.68  -1388.49   +215.08     -2.81
   hilda31p-only rows: hs_surf_dic -4.30, hs_surf_d13c -6.28
   hilda31s-only rows: hs_surf_dic -4.29, hs_surf_d13c -6.43
-  rows not common to every arm: hs_surf_dic hs_surf_d13c  (TOTAL incl. them: ent26 -1621.91, hilda31p -1417.37, hilda31s -1420.31)
+  rows not common to every arm: hs_surf_dic hs_surf_d13c  (TOTAL incl. them: ent26 -1600.76, hilda31p -1396.26, hilda31s -1399.20)
 
 === 2. GATES (the ledger, INDEX_ccx_gates) ===
-  GATE V  ent26    sd 0.704 vs obs 0.911 ± 0.080  ratio 0.77  z -2.59  -> FAIL (too smooth)
-  GATE V  hilda31p sd 0.701 vs obs 0.911 ± 0.080  ratio 0.77  z -2.63  -> FAIL (too smooth)
-  GATE V  hilda31s sd 0.708 vs obs 0.911 ± 0.080  ratio 0.78  z -2.54  -> FAIL (too smooth)
+  GATE V  ent26    sd 0.721 vs obs 0.933 ± 0.084  ratio 0.77  z -2.53  -> FAIL (too smooth)
+  GATE V  hilda31p sd 0.718 vs obs 0.933 ± 0.084  ratio 0.77  z -2.57  -> FAIL (too smooth)
+  GATE V  hilda31s sd 0.725 vs obs 0.933 ± 0.084  ratio 0.78  z -2.48  -> FAIL (too smooth)
   GATE H  ent26    R_co2 0.913 (z_level -3.60) R_d13c 1.969 (z_level -21.70)  contrast z +11.65  -> FAIL
   GATE H  hilda31p R_co2 0.916 (z_level -3.49) R_d13c 1.968 (z_level -21.69)  contrast z +11.61  -> FAIL
   GATE H  hilda31s R_co2 0.916 (z_level -3.49) R_d13c 1.963 (z_level -21.57)  contrast z +11.59  -> FAIL

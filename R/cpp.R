@@ -116,7 +116,18 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
 #' rather than error. `ccx_prepare()` builds `mld_coef` under the SAME predicate
 #' the gate now uses, so the two can only disagree when an `aux` is reused across
 #' a parameter change. That is worth a loud stop, not a silent zero.
+#'
+#' ⛔ `seas_ml` = 2 (OPTION B, the cycle on the HS box) HAS NO C++ TWIN: commit
+#' 5ed31cf paused option B before the core was ported, so `ccx_core.cpp` carries
+#' no `mld_hs_coef` and would silently run the aseasonal cold box. That is a
+#' DIFFERENT condition from the 09-09t leak and used to be reported with the
+#' leak's message (an aux prepared for seas_ml = 2 legitimately has no
+#' `mld_coef`; it has `mld_hs_coef`). Named for what it is since 2026-09-12.
 ccx_seas_ml_marshal_check <- function(p, aux) {
+  if (ccx_seas_ml_on(p) && isTRUE(p$seas_ml == 2))
+    stop("ccx: seas_ml = 2 (option B, the seasonal cycle on the HS box) has NO C++ ",
+         "twin -- src/ccx_core.cpp carries no `mld_hs_coef` (option B was paused at ",
+         "commit 5ed31cf). Run the R core (ccx_run / ccx_deriv), or use seas_ml = 0/1.")
   if (ccx_seas_ml_on(p) && is.null(aux$mld_coef))
     stop("ccx: `p` says the seasonal mixed layer is ON (ccx_seas_ml_on) but `aux` ",
          "carries no `mld_coef` -- this aux was prepared from a DIFFERENT parameter ",
@@ -226,16 +237,10 @@ ccx_cpp_par <- function(p) {
   # cannot drift apart about what absence means -- the gamma_diff failure of
   # 2026-08-30. Legacy `seas_lag_p` lists are carried by its own fallback.
   # diagnostic seasonal exchange; absence = 0 = OFF in BOTH cores
-  # ⛔ THE SEASONAL MIXED LAYER (round 6) HAS NO C++ TWIN YET. Absence = 0 = OFF,
-  # which is bit-identical in both cores; but if it is ON, the C++ core would
-  # silently run the ASEASONAL mixed layer and return a number that looks fine
-  # and is wrong. A silent divergence between the two cores is exactly what the
-  # parity test exists to prevent, and parity cannot see a run nobody compares.
-  # So this STOPS rather than falling back. Remove when ccx_core.cpp carries the
-  # mechanism and test-parity.R covers it at seas_ml = 1.
-  # SEASONAL MIXED LAYER: the C++ twin EXISTS as of 2026-09-09o, so the guard
-  # that used to stop here is gone and test-parity.R covers the mechanism at an
-  # explicit seas_ml = 1. Absence still means 0 = OFF = bit-identical.
+  # SEASONAL MIXED LAYER (seas_ml = 1): the C++ twin EXISTS as of 2026-09-09o and
+  # test-parity.R covers the mechanism at an explicit seas_ml = 1. Absence still
+  # means 0 = OFF = bit-identical. (seas_ml = 2 has no twin and is refused by
+  # ccx_seas_ml_marshal_check() above.)
   if (is.null(p$seas_ml)) p$seas_ml <- 0
   if (is.null(p$tau_ex_seas_amp)) p$tau_ex_seas_amp <- 0
   if (is.null(p$tau_ex_seas_phase)) p$tau_ex_seas_phase <- 0
@@ -344,13 +349,46 @@ ccx_cpp_forcing <- function(F) {
 #'   model failure, not an integrator artefact -- which is the whole point: a
 #'   caller's `anyNA` -> -Inf guard must not double as a prior bound.
 ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
+  ccx_run_prepared(spin$y, ccx_run_prepare(spin, substeps), F, retry_na = retry_na)
+}
+
+#' The MARSHALLED arguments of `ccx_run_fast()`, built ONCE for many runs
+#'
+#' `ccx_periodic_spinup()` calls the one-year map ~260-300 times per objective
+#' evaluation with the SAME `params`/`aux`/`grid` and a different `y`, and each
+#' call re-ran `ccx_cpp_par()`, `ccx_cpp_aux()` and the substep resolution
+#' (an eigenvalue bound) -- 23 % of every evaluation (review 2026-09-12, B1).
+#' This marshals once; `ccx_run_prepared()` runs from it. `ccx_run_fast()` is
+#' now the one-shot composition of the two, so there is ONE marshalling path
+#' and the numbers that reach the core are the same bytes either way.
+#'
+#' ⚠ A prepared object is bound to the `params`/`aux`/`grid` it was built from.
+#' It carries the marshal gate's verdict for THAT pair; reusing it after a
+#' parameter change is the 09-09t leak's mechanism, so build it where you
+#' build `aux` and let it go out of scope with it.
+ccx_run_prepare <- function(spin, substeps = "auto") {
   ccx_load_cpp()
   ccx_seas_ml_marshal_check(spin$params, spin$aux)
-  ss <- ccx_resolve_substeps(substeps, spin$params, spin$grid)
+  list(par = ccx_cpp_par(spin$params),
+       aux = ccx_cpp_aux(spin$aux, spin$grid),
+       ss  = ccx_resolve_substeps(substeps, spin$params, spin$grid),
+       box_names = ccx_box_names(spin$grid$nl, ccx_hs_on(spin$params)),
+       hs_on = ccx_hs_on(spin$params))
+}
+
+#' A forcing table marshalled ONCE for many `ccx_run_prepared()` calls
+ccx_cpp_forcing_prep <- function(F) {
+  structure(list(mat = ccx_cpp_forcing(F), t = F$t), class = "ccx_cpp_forcing")
+}
+
+#' Run the core from prepared arguments. Same return shape as `ccx_run_fast()`,
+#' the SAME NA-retry semantics (doubling substeps up to CCX_SUBSTEPS_MAX), and
+#' the same guard columns. `F` is a forcing table or a `ccx_cpp_forcing_prep()`.
+ccx_run_prepared <- function(y, prep, F, retry_na = TRUE) {
+  Fm <- if (inherits(F, "ccx_cpp_forcing")) F else ccx_cpp_forcing_prep(F)
+  ss <- prep$ss
   one <- function(nsub) {
-    res <- .ccx_cpp_env$ccx_run_cpp(
-      spin$y, ccx_cpp_par(spin$params), ccx_cpp_forcing(F), F$t,
-      ccx_cpp_aux(spin$aux, spin$grid), as.integer(nsub))
+    res <- .ccx_cpp_env$ccx_run_cpp(y, prep$par, Fm$mat, Fm$t, prep$aux, as.integer(nsub))
     out <- as.data.frame(res$out)
     # The C++ matrix width is a literal there; tie it to the R-side column
     # vector LOUDLY (a mismatch used to be a positional mis-naming, not an error).
@@ -362,17 +400,17 @@ ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
                     "ocean_C14", "land_C14", "atm_C14",
                     CCX_OCEAN_BOX_COLS)
     state <- res$state
-    dimnames(state) <- list(
-      ccx_box_names(spin$grid$nl, ccx_hs_on(spin$params)), CCX_TRACERS)
-    list(state = state, out = cbind(t = F$t, out), substeps = as.integer(nsub))
+    dimnames(state) <- list(prep$box_names, CCX_TRACERS)
+    list(state = state, out = cbind(t = Fm$t, out), substeps = as.integer(nsub))
   }
   r <- one(ss)
   # The NaN guard reads the PHYSICS columns only: with the HILDA structure off
   # the hs_* columns are NA BY CONTRACT (the box does not exist, 2026-09-07f),
   # and reading them here doubled the substeps to CCX_SUBSTEPS_MAX on every
   # structure-off run -- a 1e-4 R-vs-C++ parity break that looked like physics.
-  while (retry_na && anyNA(r$out[, ccx_out_na_guard_cols(r$out, spin$params)]) &&
-         ss < CCX_SUBSTEPS_MAX) {
+  guard_cols <- if (prep$hs_on) names(r$out) else
+    grep("^hs_", names(r$out), invert = TRUE, value = TRUE)
+  while (retry_na && anyNA(r$out[, guard_cols]) && ss < CCX_SUBSTEPS_MAX) {
     ss <- min(2L * ss, CCX_SUBSTEPS_MAX)
     r  <- one(ss)
   }
@@ -386,9 +424,40 @@ ccx_out_na_guard_cols <- function(out, p) {
   if (ccx_hs_on(p)) names(out) else grep("^hs_", names(out), invert = TRUE, value = TRUE)
 }
 
-#' Single derivative via the C++ core (used by the parity gate)
-ccx_deriv_fast <- function(y, t, p, forc, grid, aux) {
+#' The MARSHALLED `p`/`aux` of `ccx_deriv_fast()`, built ONCE for many calls
+#'
+#' `ccx_spinup()` makes ~190 single-derivative calls per solve on ONE
+#' `(p0, aux, grid)` and each re-marshalled both lists -- about half of the
+#' spinup's wall time (review 2026-09-12, B2). Same binding caveat as
+#' `ccx_run_prepare()`: it is tied to the pair it was built from.
+ccx_deriv_prepare <- function(p, aux, grid) {
   ccx_load_cpp()
+  ccx_seas_ml_marshal_check(p, aux)
+  list(par = ccx_cpp_par(p), aux = ccx_cpp_aux(aux, grid))
+}
+
+#' Single derivative via the C++ core (used by the parity gate and the spinup)
+#'
+#' @param forc a point-forcing list, or the flat numeric vector
+#'   `ccx_cpp_forcing_vec()` builds from one (the spinup flattens its three
+#'   constant forcings once).
+#' @param prep an optional `ccx_deriv_prepare(p, aux, grid)`; when given, `p`,
+#'   `grid` and `aux` are not re-marshalled (they must be the same objects).
+ccx_deriv_fast <- function(y, t, p, forc, grid, aux, prep = NULL) {
+  ccx_load_cpp()
+  f <- if (is.numeric(forc)) forc else ccx_cpp_forcing_vec(forc)
+  if (is.null(prep)) {
+    ccx_seas_ml_marshal_check(p, aux)
+    prep <- list(par = ccx_cpp_par(p), aux = ccx_cpp_aux(aux, grid))
+  }
+  d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, prep$par, f, prep$aux)
+  dimnames(d) <- dimnames(y)
+  d
+}
+
+#' A point forcing flattened into the vector the C++ derivative indexes by
+#' POSITION against CCX_FORCING_COLS
+ccx_cpp_forcing_vec <- function(forc) {
   cl <- ccx_forcing_cum_luc(forc)
   f <- c(forc$e_foss$NH, forc$e_foss$SH, forc$e_luc$NH, forc$e_luc$SH,
          forc$gmst, forc$enso, forc$c14_bomb, forc$c14_nuclear, forc$c14_cosmo,
@@ -422,8 +491,5 @@ ccx_deriv_fast <- function(y, t, p, forc, grid, aux) {
          "CCX_FORCING_COLS declares ", length(CCX_FORCING_COLS),
          ". The C++ indexes by position -- a mismatch reads past the buffer. ",
          "A column was appended to CCX_FORCING_COLS without extending this builder.")
-  ccx_seas_ml_marshal_check(p, aux)
-  d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, ccx_cpp_par(p), f, ccx_cpp_aux(aux, grid))
-  dimnames(d) <- dimnames(y)
-  d
+  f
 }

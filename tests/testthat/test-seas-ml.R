@@ -107,7 +107,7 @@ test_that("moving the ML base conserves dz_ML + dz_1 and leaves the interior alo
 
 test_that("a following high-latitude box takes the ANNUAL-MEAN h_ml, not the seasonal one", {
   # h_hs <= 0 means "follow the low-latitude mixed layer" (choice C2). At the
-  # canonical h_hs is PINNED at 401 m so this never arises -- but it is a
+  # canonical h_hs is FITTED (410.5 m at hilda31s, band [20, 500]) so this never arises -- but it is a
   # property of the MODE FILE, not of the model, and a future canonical could
   # set it to 0. If it did, the HILDA surface box must NOT start breathing with
   # the seasons: only the ML/layer-1 boundary moves, by construction.
@@ -127,7 +127,8 @@ test_that("a following high-latitude box takes the ANNUAL-MEAN h_ml, not the sea
 test_that("the P8 geometry guard passes at the canonical and FIRES past the bound", {
   p <- ccx_default_params(); p$seas_drivers <- 1; p$seas_ml <- 1
   p$h_ml <- 49.153
-  expect_silent(invisible(ccx_prepare(p)))               # canonical: 27 m of margin
+  expect_silent(invisible(ccx_prepare(p)))               # 49.153 m: ~27 m of margin to the ~76 m bound
+  # (the canonical hilda31s sits at h_ml 64.84 m, ~11 m inside the same bound)
   # THE MUTATION: ent26 sat at 134.15 m, so this is a state the fitter can reach.
   p$h_ml <- 90
   expect_error(ccx_prepare(p), "winter mixed layer reaches")
