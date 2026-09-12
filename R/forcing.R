@@ -129,6 +129,18 @@ FORC_ENSO_PRE1948  <- 0      # Nino 3.4 starts 1948; no ENSO term before that.
                              # NEUTRAL -- it is the 1948-2024 mean state. Before
                              # it, zero was +0.218 degC of El Nino relative to
                              # the index's own mean.
+FORC_ENSO_POST     <- 0      # ⛔ AFTER THE RECORD THE ANOMALY IS TAPERED TO THIS,
+                             # NOT HELD (Marcus 2026-09-12: "taper ENSO to zero").
+                             # Until 09-12 `approx(rule = 2)` held the LAST
+                             # OBSERVED MONTH (+1.79 in 2026) for every later
+                             # year -- at the hilda31s coefficients a permanent
+                             # +1.98 GtC/yr land source and +0.69 ocean uptake,
+                             # net +1.29 GtC/yr into the atmosphere in every SSP,
+                             # coupled run and app run. The taper's e-folding time
+                             # is the index's OWN, measured from its autocorrelation
+                             # at build time (ccx_enso_efold_yr(), not a typed
+                             # number): an anomaly of +1.79 is at 1/e after ~7 mo
+                             # and gone within ~2 yr, as an observed event would be.
 # ---- RULING A, ADOPTED 2026-09-02 (Marcus) --------------------------
 # ⭐ THE MEAN OF THE Nino 3.4 INDEX IS A BASE-PERIOD CONVENTION, NOT A SIGNAL,
 # AND IT IS REMOVED. `build_calibration_data.R` pins ENSO_CLIM_BASE to the WMO
@@ -423,6 +435,27 @@ ccx_bomb_c14_annual_SUPERSEDED <- function(total_kmol = 102, years = 1945:1980) 
 #'   which is what makes the equivalent post-hoc column rescale used inside
 #'   ccx_make_logpost() exact (gated by test-luc-scale.R).
 #' @return data.frame, one row per month, with everything ccx_deriv() needs
+#' The Nino 3.4 anomaly's own e-folding time, in years, from its autocorrelation
+#'
+#' The lag at which the monthly ACF first falls below 1/e, linearly
+#' interpolated between the bracketing lags. DERIVED FROM THE DATA, never
+#' typed ([[threshold_from_obs_or_law]]): on the 1948-2026 record it is ~0.6 yr
+#' (between lags 7 and 8). ⚠ NOT the AR(1) lag-1 fit (-1/log(r1) = 1.29 yr on
+#' the same record): ENSO is quasi-periodic, its ACF is not an exponential, and
+#' the lag-1 fit overstates the persistence of a 2-7 yr oscillation by ~2x
+#' (the ACF is 0.03 at 12 months and negative by 18).
+#' @param x the monthly anomaly series (NA rows removed)
+ccx_enso_efold_yr <- function(x) {
+  x <- x[is.finite(x)]
+  r <- stats::acf(x, lag.max = 60, plot = FALSE)$acf[-1]
+  k <- which(r < exp(-1))[1]
+  if (is.na(k)) stop("ccx_enso_efold_yr(): the ACF never falls below 1/e within 60 months.")
+  # lag k-1 is the last one >= 1/e, lag k the first below; interpolate between
+  lag <- if (k == 1L) k * (r[1] - exp(-1)) / (r[1] - exp(-1)) else
+    (k - 1) + (r[k - 1] - exp(-1)) / (r[k - 1] - r[k])
+  lag / 12
+}
+
 ccx_build_forcing <- function(scenario = "historical",
                               years = c(1750, 2024),
                               prod_c14 = NA_real_,
@@ -711,6 +744,16 @@ ccx_build_forcing <- function(scenario = "historical",
   en_t <- en$year + (en$month - 0.5) / 12
   enso <- stats::approx(en_t, en$nino34_anom, xout = t, rule = 2)$y
   enso[yv < min(en$year)] <- FORC_ENSO_PRE1948
+  # ⛔ TAPER, NOT A HOLD, past the record (FORC_ENSO_POST above). Exponential on
+  # the index's own e-folding time from its last observed month; rule = 2 has
+  # already placed that month's value on every later t, so the taper multiplies
+  # it. Inside the record nothing changes.
+  k_post <- t > max(en_t)
+  if (any(k_post)) {
+    tau <- ccx_enso_efold_yr(en$nino34_anom)
+    enso[k_post] <- FORC_ENSO_POST +
+      (enso[k_post] - FORC_ENSO_POST) * exp(-(t[k_post] - max(en_t)) / tau)
+  }
 
   # ---- 14C sources ---------------------------------------------------
   nuc <- ccx_nuclear_c14_annual()

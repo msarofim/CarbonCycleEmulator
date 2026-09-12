@@ -66,6 +66,35 @@ test_that("gap rules are applied where the records genuinely start", {
   expect_true(all(F$c14_bomb >= 0))
 })
 
+test_that("past the ENSO record the anomaly TAPERS to FORC_ENSO_POST on the index's own e-folding time, and is not held", {
+  # ⛔ THE 2026-09-12 BUG: rule = 2 held the last observed month (+1.79 in 2026)
+  # for every later year -- a permanent net +1.3 GtC/yr source in every future
+  # run at the mode's coefficients. The tail twin of the gap-rule test above.
+  en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds"))); en <- en[!is.na(en$nino34_anom), ]
+  t_last <- max(en$year + (en$month - 0.5) / 12)
+  F <- suppressWarnings(ccx_build_forcing("ssp245", c(1750, 2100), prod_c14 = 360))
+  post <- F$t > t_last
+  expect_true(any(post))
+  # (1) the e-folding time is DERIVED from the data and is the empirical 1/e crossing,
+  #     not the AR(1) lag-1 fit (which overstates it ~2x on this record)
+  tau <- ccx_enso_efold_yr(en$nino34_anom)
+  r <- stats::acf(en$nino34_anom, lag.max = 24, plot = FALSE)$acf[-1]
+  expect_gt(tau, 0.3); expect_lt(tau, 1)                       # ~0.6 yr on the 1948-2026 record
+  expect_lt(tau, -1 / log(r[1]) / 12)                           # below the AR(1) fit
+  expect_gte(r[floor(tau * 12)], exp(-1)); expect_lt(r[ceiling(tau * 12)], exp(-1))
+  # (2) the tail is an exponential from the last observed value toward FORC_ENSO_POST
+  last <- F$enso[which(!post)[sum(!post)]]
+  expect_equal(F$enso[post], FORC_ENSO_POST + (last - FORC_ENSO_POST) * exp(-(F$t[post] - t_last) / tau), tolerance = 1e-10)
+  # (3) it is gone well within the century: |enso| < 1e-6 from 2040 on, sd 0 over 2050-2100
+  expect_lt(max(abs(F$enso[F$t >= 2040] - FORC_ENSO_POST)), 1e-6)
+  expect_equal(stats::sd(F$enso[F$t >= 2050]), 0, tolerance = 1e-12)
+  # (4) inside the record nothing changed: the historical build is bit-identical over its span
+  H <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 360)
+  expect_identical(F$enso[F$t <= 2024.99], H$enso)
+  # (5) MUTATION: a flat hold would fail (2) and (3)
+  expect_false(isTRUE(all.equal(F$enso[post], rep(last, sum(post)), tolerance = 1e-6)))
+})
+
 test_that("bomb 14C total is set by the prior, not by the provisional shape", {
   # The shape is normalised to unit integral, so the placeholder cannot set the
   # magnitude -- only the (citable) total can.
