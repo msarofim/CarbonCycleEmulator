@@ -31,3 +31,9 @@
 - Quote any gate number for a periodic-fitted mode from a script that still calls `ccx_spinup()` directly (grep before trusting: `grep -n "ccx_spinup(" calibration/*.R`).
 - Build option B before A's probe has an answer; adopt K without its source.
 - Read GATE S at `seas_ml` 1 with a knockout that omits the switch, or quote the hemisphere-clean number as the gate's (it is an override read until M).
+
+## POST-SCRIPT (later 09-12): the review's seven rulings are IMPLEMENTED (CHANGELOG 09-12 (b), (c); commits `b6ab0a9`, `60a0f01`, `917964b`)
+- ENSO forcing tapers to zero past the record (7.0-mo e-folding from its own ACF). Gate re-cuts: Q annual mean + area weights (**2.89**), H/GL on the residual sd (**+11.6 / −10.1**; the CO₂ control is −3.6 se — its "passes" claim withdrawn), 5's lag on the first-peak time (**+1.72**), the gate run to 2025 (`DG_SINK_LAST`).
+- ⛔ **THE OBJECTIVE MOVED and both registered files are RESTAMPED: `hilda31s` −1453.361237, `hilda31p` −1456.210225** (annual-mean isotope pins; the reader on the model's rows; IntCal ends 1941). Demean price 43.91 → **32.55**. **A REFIT IS OWED** — `hilda31s` is the mode of yesterday's objective; the δ¹³C level rows moved −17/+8 at it. Next Torch array: reference set + `hilda31s`, `port_targets.csv` at `seas_ml` 1, and read the level rows first.
+- §2's order stands (suite → N is RESOLVED → A's probe → C′ → M), with the refit now FIRST if a Torch slot is free — C′ can ride in the same array (pin `ent_seas_amp_SH` to 0 as a second arm).
+- Still unapplied from the review: A10/A15 test repairs, B4 suite fixtures, B1–B3 objective/derivative overhead, the doc rot (§C), A12's partial-year edge months, A14 (the MCMC driver's base params).
