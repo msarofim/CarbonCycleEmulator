@@ -2,6 +2,31 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-13 (e) — ⭐⭐ **T-A1: OPTION A's UNREFITTED PROBE at `hilda30c` — the Niño3.4-modulated limb on `ml_lo` WITH A THERMOCLINE (layer-1) RETURN is RIGHT-SIGNED, LINEAR and CHEAP, and 4× TOO WEAK: gain 0.0250 GtC/yr per (m/yr) per index unit (T-A0's whole-column limb: 0.100); the sign flips only at γ_A 6.8 m/yr (65 Sv per index unit) and the observed slope needs 11.4 m/yr = 109 Sv per index unit — 4× the 26 Sv T-A0 called the obs-implied modulation. The price is POSITIVE (+5.1 log-units at 8 m/yr, all `gcb_ocean_sink`), so the anomaly is free and the MAGNITUDE is what is absent. NOTHING ADOPTED; the limb's RETURN DEPTH is the open design axis.**
+
+Prereg `notes/prereg_2026-09-13e_optionA_nino34_thermocline_limb.md` (written first), script `calibration/diag_ta1_enso_thermocline_limb.R`, log + rds `outputs/diagnostics/ta1_enso_thermocline_limb_20260913.{log,rds}`. Owed by the 09-12 assessment §4 (option A, "prereg first") and handoff 09-13 (d) §4; = option B's ruling 2 probed without a refit and without touching either core (the T-A0 device: a session wrapper on the pure-R `ccx_deriv()`).
+
+### The limb, and why its mean is already in the model
+A two-way exchange V between the mixed layer and layer 1 (V·C₁/dz₁ up, V·C_ml/dz_ml down) IS the model's interface diffusion `F = K (C_ml/dz_ml − C₁/dz₁)/dz_mid` with V = K/dz_mid, tracer by tracer. So the limb's MEAN is the fitted `kz` and only the anomaly is added: **V_eff = V0 − γ_A·Niño3.4**, applied to `aux$kz_int[1]` per deriv call; **V0 = 10964.4 / 58.645 = 187.0 m/yr** at hilda30c; A_ls 3.032e14 m² so 1 m/yr = 9.6 Sv; the floor cannot bind below γ_A 83 m/yr. Both hemispheres equally. Spinup = the file's own periodic one (`dg_spinup`), taken before the wrapper. Estimator = the scorecard's (09-04g).
+
+### Results (prereg P0–P5)
+| id | prediction | result |
+|---|---|---|
+| **P0** | γ_A 0 through R == C++; scorecard reads reproduced | **PASS**: max |Δco2| 1.8e-12 ppm; full +0.0674 (0.58×), solubility-only r −0.527 — both to 0.0 vs the 09-13 (d) scorecard rds. 87 s per R run |
+| **P1** | annual-mean layer-1 − ML DIC > 0 in both hemispheres (1959–2024, each box over its mass at the time) | **PASS**: NH **+46.8**, SH **+45.5** µmol/kg ⇒ supply anomaly 0.172 GtC/yr per (m/yr) per index at 100 % conversion (the obs slope would need 0.7 m/yr at that efficiency) |
+| **P2** | r flips −0.527 → ≥ +0.3 at γ_A ≤ 3 m/yr | **PARTLY**: slope = −0.1696 + **0.0250**·γ_A (R² 1.00000 on 0..4); r −0.339 at 3, −0.259 at 4, **+0.121 at 8**; sign flip at **6.77 m/yr (65.1 Sv per index)**; the obs slope +0.1153 at **11.38 m/yr (109.3 Sv)** |
+| **P3** | γ_A −1 mirrors +1 | **PASS**: +0.0250 / +0.0250, asymmetry 0.0 % |
+| **P4** | price at the obs-matching γ_A > −10 | **NOT READ on the scan** (11.4 is off it) — but the price is **POSITIVE and monotone**: +0.54 / +1.05 / +1.99 / +2.80 / +3.50 / **+5.07** at 0.5 / 1 / 2 / 3 / 4 / 8 m/yr, all on `gcb_ocean_sink` (+5.66 at 8; no other row > 1); the 2015–23 sink 2.95 → 2.98 (mean state untouched, as designed). T-A0's plain limb: −135 at 0.5 m/yr |
+| **P5** | gain within 2× of T-A0's 0.100 | **FAIL**: 0.0250 = **0.25×** |
+
+### Reading — the return depth is the whole difference, and it is a design axis, not a knob
+The anomaly delivers 0.172 GtC/yr per (m/yr) into the mixed layer and **14.5 %** of it reaches the atmosphere within the year. A layer-1 return is undone by the layer-1 ↔ ML coupling itself: the same V0 = 187 m/yr that makes the limb's mean "already fitted" re-equilibrates a ML deficit against layer 1 in dz_ml/V0 ≈ 0.35 yr — the water taken from layer 1 is the water that flows straight back. T-A0's whole-column limb (0.100 per m/yr) drew the SAME layer-1 water into the ML but returned the ML's water to the BOTTOM box and refilled layer 1 from layer 2: the deficit propagated down the column instead of closing across one interface (⚠ T-A0 did not record its contrast, so its ~58 % is inferred at THIS contrast — a like-for-like caveat). ⇒ **the limb's efficiency is set by WHERE its return attaches**, and the two probes bracket it: layer 1 (free, 4× too weak) and the bottom (right size, −135 on the Δ¹⁴C profile). The real reservoir sits between — the equatorial thermocline is deeper and DIC-richer than a 52 m layer at 65–117 m. ⚠ 109 Sv per index unit is 4× T-A0's obs-implied 26 Sv (both MODEL-DERIVED scales, labelled); my recollection — UNSOURCED — is that the whole equatorial Pacific upwelling is of order tens of Sv, so a modulation of 109 Sv per index unit is not a physical γ.
+
+### What this settles and what it does not
+- **Settled:** the sign IS reachable by upwelling suppression with a shallow return (linear, right-signed, cheap — the objective's ENSO-year rows PAY for it: +5 log-units unrefitted), so Fix B's mechanism is right; the layer-1 return cannot carry the MAGNITUDE.
+- **Not settled (a probe, not a ruling):** the return depth. The obvious next probe (T-A2, ~90 s a run) scans the return layer k ∈ {2, 3, 4} at a fixed γ_A with a MEAN W0 (for k ≥ 2 the mean is NOT in `kz`, so the mean state moves and the Δ¹⁴C rows price it — T-A0's trade-off, at shallower depths) to find where efficiency crosses the price. Whether that or a dedicated equatorial cell (ruling 2's fallback "only if PB1 fails on magnitude" — which it now has) is the build is **Marcus's call**.
+- `gamma_enso_ocn_*` is NOT retired; nothing in either core moved; M (per-hemisphere MLD handle) is still next in the handoff order.
+
 ## 2026-09-13 (d) — ⭐⭐⭐ **ADOPTED (Marcus: "Promote C′ id 1", then "Repoint"): `hilda30c` IS CANONICAL — THE PROJECT'S FIRST PINNED CANONICAL. The `hilda31s2` space with the pCO₂-side entrainment shim `ent_seas_amp_SH` PINNED to 0 (30 free names). Pinned logpost −1426.242817 (⛔ not comparable to a free arm's); likelihood on the 25 common rows −1392.02 = −2.53 vs the parent `hilda31s2` (all on `d13c_seasonal_SPO`), +4.24 vs the control `hilda31p`. h_ml 65.23 ± 2.40 m. `hilda31s2` STAYS REGISTERED as the free parent; nothing quarantined; the shim is PINNED, not RETIRED.**
 
 ### The three machinery edits FIRST (handoff §3) — a pinned canonical is a thing three consumers had never seen

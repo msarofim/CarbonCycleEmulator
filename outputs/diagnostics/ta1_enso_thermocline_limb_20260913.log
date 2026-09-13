@@ -1,0 +1,26 @@
+arm hilda30c: refit_20260913_hilda30_cprime_pin_ent0 (logpost -1426.24, PINNED ent_seas_amp_SH=0 -- logpost not comparable to a free arm)
+  pins: ent_seas_amp_SH=0; migrated: none; spinup: periodic
+GCB observed: slope +0.1153 +/- 0.0246 GtC/yr per index, r +0.488 (n 66)
+hilda30c full model: slope +0.0674 (r +0.254) = 0.58x obs; solubility-only (gamma_enso_ocn 0): slope -0.1696 (r -0.527); lik -1392.02 / -1397.84
+  V0 = kz_int[1]/dz_mid[1] = 10964.4 / 58.645 = 187.0 m/yr; A_ls (both hemispheres) 3.032e+14 m2: 1 m/yr = 9.6 Sv; floor binds at gamma_A > 83 m/yr (|Nino3.4| max 2.24)
+  P0 vs scorecard 09-13 (d): full slope +0.0674 vs +0.0674 (d +0.0e+00); solubility-only r -0.527 vs -0.527 (d +0.0e+00): REPRODUCED
+
+P0 R-vs-C++ at gamma_A 0: max |d co2| 1.82e-12 ppm (PASS); R slope -0.1696 (r -0.527); 87 s per R run
+P1 annual-mean layer-1 minus ML DIC, 1959-2024: NH +46.8, SH +45.5 umol/kg -> PASS (the thermocline is DIC-richer); supply anomaly at 100% conversion 0.172 GtC/yr per (m/yr) per index (obs slope needs 0.7 m/yr at that efficiency)
+  gamma_A -1.00 m/yr (-9.6 Sv per index): slope -0.1946 +/- 0.0329 (r -0.574) = -1.69x obs; sink 2015-23 2.95; lik -1.17 vs gamma 0 [gcb_ocean_sink -1.09]; 87 s
+  gamma_A +0.50 m/yr (+4.8 Sv per index): slope -0.1571 +/- 0.0323 (r -0.501) = -1.36x obs; sink 2015-23 2.95; lik +0.54 vs gamma 0 [no row > 1]; 87 s
+  gamma_A +1.00 m/yr (+9.6 Sv per index): slope -0.1446 +/- 0.0321 (r -0.473) = -1.25x obs; sink 2015-23 2.96; lik +1.05 vs gamma 0 [gcb_ocean_sink +1.01]; 87 s
+  gamma_A +2.00 m/yr (+19.2 Sv per index): slope -0.1196 +/- 0.0318 (r -0.411) = -1.04x obs; sink 2015-23 2.96; lik +1.99 vs gamma 0 [gcb_ocean_sink +1.93]; 87 s
+  gamma_A +3.00 m/yr (+28.8 Sv per index): slope -0.0945 +/- 0.0315 (r -0.339) = -0.82x obs; sink 2015-23 2.96; lik +2.80 vs gamma 0 [gcb_ocean_sink +2.77]; 86 s
+  gamma_A +4.00 m/yr (+38.4 Sv per index): slope -0.0694 +/- 0.0312 (r -0.259) = -0.60x obs; sink 2015-23 2.96; lik +3.50 vs gamma 0 [gcb_ocean_sink +3.52]; 87 s
+  gamma_A +8.00 m/yr (+76.9 Sv per index): slope +0.0310 +/- 0.0307 (r +0.121) = 0.27x obs; sink 2015-23 2.98; lik +5.07 vs gamma 0 [gcb_ocean_sink +5.66]; 88 s
+
+=== VERDICTS (prereg 2026-09-13e) ===
+  slope = -0.1696 +0.0250 x gamma_A (R2 1.00000 on 0..4); sign flips at gamma_A 6.77 m/yr (65.1 Sv per index); obs slope at 11.38 m/yr (109.3 Sv)
+  P2 'r flips from -0.527 to >= +0.3 at gamma_A <= 3': PARTLY: the sign flips (max r +0.12 at gamma_A 8) but not to +0.3 by 3 m/yr
+  P3 mirror: d slope +1 +0.0250 vs -1 +0.0250 (asymmetry 0.0%): PASS (linear)
+  P4 unrefitted price at the obs-matching gamma_A 11.38: off the scan log-units vs solubility-only (bound -10): NOT READ  [T-A0's plain limb: -135 at 0.5 m/yr]
+  P5 gain 0.0250 GtC/yr per (m/yr) per index vs T-A0's 0.100 (within 2x): FAIL
+  P1 contrast NH +46.8 / SH +45.5 umol/kg: PASS
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/ta1_enso_thermocline_limb_20260913.rds 
+EXIT 0
