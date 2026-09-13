@@ -43,12 +43,12 @@ untouched original. My prereg-time "4 % of the excursion" was wrong by (excursio
   named lacks: the upwelled water arrives at 27 °C at once (real EUC water surfaces cold), no pump in the cell, `k_eq` fixed.
   **The array reads this, not the probe.**
 
-## 4. Next session — ONE RULING, then the array
+## 4. Next session — the array
 1. **RULED (Marcus, 09-13 h): the table change goes in the ARRAY-LAUNCH COMMIT, not before.** Until then `w_eq`/`gamma_eq` stay base parameters and the suite stays green. At launch: put `w_eq` (logit [5, 60], prior N(27, 3) via `obs_eq_cell$w0_prior`, init 27) and `gamma_eq` (id [0, 2],
-   flat, init 1) into `CCX_PARAM_TABLE` NOW — which reddens `test-mode-file`'s "carries THIS BUILD's parameter set" (31 vs 33 names)
-   until the array's mode is promoted (the 09-08d precedent) — or only in the array-launch commit. Either way: migration contract
-   (absent = 0 = what ancestors RAN; 0 is unencodable under the logit box ⇒ `ccx_seed_unencodable()` starts at init),
-   `test-ent-seas-fitted` 31 → 33, `CCX_PARAM_NAMES` consumers.
+   flat, init 1) into `CCX_PARAM_TABLE` with the migration contract (absent = 0 = what ancestors RAN; 0 is unencodable under the
+   logit box ⇒ `ccx_seed_unencodable()` starts at init), `test-ent-seas-fitted` 31 → 33, the `CCX_PARAM_NAMES` consumers. Expect
+   `test-mode-file`'s "carries THIS BUILD's parameter set" (31 vs 33 names) red from that commit until the array's mode is promoted
+   (the 09-08d precedent) — accepted by the ruling, not a defect.
 2. The array: 32 free names, `CCX_MS_STRUCT=hilda_eq`, `CCX_MS_SEAS_ML=1`, pins `ent_seas_amp_SH = 0`; `make_port_targets.R` /
    `run_dispersed_multistart.R` must accept the new label (grep `"hilda"` literals); `test-mode-file` allows `struct %in% c("", "hilda")`
    and asserts `hs_frac` — extend to `hilda_eq` at promotion. ⚠ Consider Torch first (standing rule); the C++ periodic spinup
