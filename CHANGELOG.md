@@ -2,6 +2,38 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-13 (f) — ⭐⭐⭐ **T-A2 (Marcus: "Run the T-A2 scan first"): THE LIMB'S RETURN DEPTH DECIDES IT. A Niño3.4-modulated exchange between the mixed layer and LAYER 2 (117–190 m) carries the WHOLE observed ENSO ocean response at 2.73 m/yr = 26 Sv per index unit with a POSITIVE unrefitted price (+3.09); layer 1 needs 109 Sv (T-A1); every return below ~300 m leaks the index's decadal structure into the CO₂ LEVEL rows at equal ENSO slope (−14 at k 4, −52 at k 6, −59 at the bottom). Efficiency is 0.15 at layer 1, 0.29 at layer 2, then flat at 0.34–0.36 — the layer-1 short circuit is interface-specific; below it the gain is the contrast. GLODAP's equatorial-Pacific source water (100–200 m, +115 to +176 µmol/kg over the surface) sits between the model's layer 2 (+97) and layer 3 (+135). NOTHING ADOPTED; the equatorial cell is SCOPED in `notes/scoping_2026-09-13_equatorial_cell.md`.**
+
+Prereg `notes/prereg_2026-09-13f_ta2_return_depth_scan.md` (written first); `calibration/diag_ta2_enso_return_depth.R` (stage 1 = the scan, stage 2 `TA2_STAGE=matched` = each depth at ITS obs-matching γ_A); logs + rds `outputs/diagnostics/ta2_enso_return_depth{,_matched}_20260913.*`. Anomaly-only (`ΔV = −γ_A·Niño3.4`, each tracer on its own gradient between the ML and layer k) — no mean W0, because the periodic spinup integrates in C++ and T-A0's table shows the GAIN depends on W0·γ alone (R² 0.9996 across W0 0.5–4; the γ = 0 intercepts at W0 0.5/1/2/4 differ by 1e-4). k = 1 reproduced T-A1 exactly (−0.0945 / +2.80 — P0 PASS). 87 s a run, 13 runs.
+
+### Stage 1 — the scan at γ_A = 3 m/yr (contrast = annual-mean layer-k − ML DIC, 1959–2024, each box over its mass at the time)
+| k | depth m | contrast µmol/kg | gain GtC/yr per (m/yr)/index | efficiency | obs needs (Sv/index) | Δlik at γ 3 |
+|---|---|---|---|---|---|---|
+| 1 | 65–117 | +46 | 0.025 | 0.146 | 109 | +2.8 |
+| **2** | **117–190** | **+97** | **0.104** | **0.287** | **26.2** | **+2.4** |
+| 3 | 190–292 | +135 | 0.182 | 0.363 | 15.0 | −24 |
+| 4 | 292–435 | +172 | 0.230 | 0.359 | 11.9 | −96 |
+| 5 / 6 / 8 | 435–1856 | +202 / +238 / +297 | 0.256 / 0.299 / 0.372 | 0.34 | 10.7 / 9.2 / 7.4 | −232 / −486 / −874 |
+| 10 | 2624–3700 | +302 | 0.378 | 0.335 | 7.2 | −903 |
+P1 PASS (contrast monotone). **P2 FAIL** (efficiency is NOT flat: 0.146 → 0.287 → ~0.35) — T-A1's "the layer-1 coupling refills the deficit" is right for layer 1 ONLY; from layer 2 down the return water is not the water that flows straight back, and the gain is the contrast. **P3 FAIL**: a DIRECT bottom exchange gains 0.378, 3.8× T-A0's whole-column 0.100 — T-A0's cascade delivered LAYER-1 water to the ML (its "26 Sv" was a bottom-return number only by coincidence of the cascade). **P4 FAIL for k ≥ 3** at γ 3 — but that γ over-drives the deep returns 3–8× the observed slope, so stage 2.
+
+### Stage 2 — each depth at its obs-matching γ_A (the like-for-like price, [[like_for_like_forcing]])
+| k | γ_A m/yr (Sv/index) | slope (×obs) | r | Δlik | CO₂-level rows | `gcb_ocean_sink` | max ¹⁴C row |
+|---|---|---|---|---|---|---|---|
+| **2** | **2.73 (26.2)** | 1.00 | +0.348 | **+3.09** | −1.45 | +5.63 | 0.68 |
+| 3 | 1.56 (15.0) | 1.00 | +0.284 | −0.93 | −4.65 | +3.90 | 1.11 |
+| 4 | 1.24 (11.9) | 1.00 | +0.247 | −10.7 | −13.7 | +2.43 | 1.89 |
+| 6 | 0.95 (9.2) | 1.03 | +0.248 | −49.8 | −51.8 | +2.74 | 2.85 |
+| 10 | 0.75 (7.2) | 1.02 | +0.246 | −59.4 | −59.2 | +2.44 | 3.71 |
+**Reading.** At EQUAL interannual slope the deep returns still pay on the CO₂ LEVEL rows and their r falls (0.35 → 0.25): the Niño3.4 record has decadal structure (mean +0.042 over 1959–2024 against an exactly demeaned forcing — first non-zero 1948), and water NOT upwelled from a deep box stays there, so the low-frequency part of the anomaly INTEGRATES into the atmospheric level; a shallow return lets the column re-equilibrate it. ⇒ **the return must be SHALLOW — the thermocline, not the deep — for a reason the interannual regression cannot see.** The one confounder: the anomaly-only limb has no mean W0, so its floor never binds; with a mean W0 ≥ |ΔV| the flux never reverses and the linear response is the same (T-A0), but the mean state moves — priced only with the limb in the core.
+
+### The observation the return layer is chosen against (GLODAP, `glodap_dic_talk_subset.csv`, flag 2, 1973–2021 bottles — raw, so the surface carries a ~50-yr anthropogenic smear, labelled)
+Equatorial Pacific 5 °S–5 °N, 160 °E–80 °W (the Fix B mask; 10,568 bottles), median DIC minus the 0–50 m median (1982.9): **50–100 m +29 (n 1072), 100–150 +115 (1065), 150–200 +176 (703), 200–300 +223 (838)**, 300–400 +253, 400–600 +277, >1000 +350. The 5–30° column both hemispheres (the model's `ml_lo` analogue): +32 / +72 / +107 / +121 at the same bins. ⇒ the real equatorial source water (the EUC, 100–200 m) is **+115 to +176** over its surface, i.e. between the model's layer 2 (+97) and layer 3 (+135) — the model's own low-latitude column at 117–290 m is the right water, and it needs **15–26 Sv per index unit** of modulation there. ⚠ Whether 15–26 Sv per Niño3.4 unit is a physical modulation of equatorial upwelling is NOT established here — it needs a transport source (an EUC / STC transport estimate and its ENSO variation); my recollection of "tens of Sv" is UNSOURCED and stays out of any claim.
+
+### What this settles and what it leaves to the ruling
+- Settled: the mechanism (upwelling suppression) is right-signed, linear, and CHEAP at a thermocline return; the layer-1 return (T-A1) was the wrong depth, not the wrong idea; the deep return is wrong for a decadal reason. Ruling 2's fallback ("an equatorial box ONLY if PB1 fails on magnitude") is therefore NOT triggered by magnitude — a limb on `ml_lo` at layer 2 carries it.
+- Open (Marcus): (a) **"lite"** — a mean + modulated limb `ml_lo` ↔ layer 2 in both cores (two parameters, W0 and γ; W0 un-gateable — no observable distinguishes it from `kz` at the mean state) vs (b) **the equatorial cell** — scoped in `notes/scoping_2026-09-13_equatorial_cell.md`, which makes the +55.5 µatm reservoir REPRESENTABLE and therefore makes W0 an OBSERVED quantity. Neither is built; `gamma_enso_ocn_*` is not retired.
+
 ## 2026-09-13 (e) — ⭐⭐ **T-A1: OPTION A's UNREFITTED PROBE at `hilda30c` — the Niño3.4-modulated limb on `ml_lo` WITH A THERMOCLINE (layer-1) RETURN is RIGHT-SIGNED, LINEAR and CHEAP, and 4× TOO WEAK: gain 0.0250 GtC/yr per (m/yr) per index unit (T-A0's whole-column limb: 0.100); the sign flips only at γ_A 6.8 m/yr (65 Sv per index unit) and the observed slope needs 11.4 m/yr = 109 Sv per index unit — 4× the 26 Sv T-A0 called the obs-implied modulation. The price is POSITIVE (+5.1 log-units at 8 m/yr, all `gcb_ocean_sink`), so the anomaly is free and the MAGNITUDE is what is absent. NOTHING ADOPTED; the limb's RETURN DEPTH is the open design axis.**
 
 Prereg `notes/prereg_2026-09-13e_optionA_nino34_thermocline_limb.md` (written first), script `calibration/diag_ta1_enso_thermocline_limb.R`, log + rds `outputs/diagnostics/ta1_enso_thermocline_limb_20260913.{log,rds}`. Owed by the 09-12 assessment §4 (option A, "prereg first") and handoff 09-13 (d) §4; = option B's ruling 2 probed without a refit and without touching either core (the T-A0 device: a session wrapper on the pure-R `ccx_deriv()`).

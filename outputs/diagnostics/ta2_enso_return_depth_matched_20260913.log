@@ -1,0 +1,17 @@
+arm hilda30c: refit_20260913_hilda30_cprime_pin_ent0 (logpost -1426.24, PINNED ent_seas_amp_SH=0 -- logpost not comparable to a free arm)
+  pins: ent_seas_amp_SH=0; migrated: none; spinup: periodic
+GCB observed: slope +0.1153 +/- 0.0246 GtC/yr per index, r +0.488 (n 66)
+hilda30c solubility-only: slope -0.1696 (r -0.527), lik -1397.84; A_ls 3.032e+14 m2 (1 m/yr = 9.6 Sv)
+  layers at the fitted h_ml (annual-mean geometry): ML 0-65 m ; k1 65-117, k2 117-190, k3 190-292, k4 292-435, k5 435-635, k6 635-915, k7 915-1307, k8 1307-1856, k9 1856-2624, k10 2624-3700
+
+=== STAGE 2: each return depth at ITS obs-matching gamma_A (from the scan) -- like-for-like prices ===
+  k  2 ( 117- 190 m) at gamma_A 2.73 m/yr (26.2 Sv per index): slope +0.1153 (r +0.348) = 1.00x obs; lik +3.09 [CO2-level rows -1.45; gcb_ocean_sink +5.63; max |14C row| 0.68] [gcb_ocean_sink +5.63, co2_level_MLO -1.10, co2_seasonal_SPO -1.06, co2_icecore -0.96, d14c_NH +0.68, co2_level_SPO +0.60]; 87 s
+  k  3 ( 190- 292 m) at gamma_A 1.56 m/yr (15.0 Sv per index): slope +0.1153 (r +0.284) = 1.00x obs; lik -0.93 [CO2-level rows -4.65; gcb_ocean_sink +3.90; max |14C row| 1.11] [gcb_ocean_sink +3.90, co2_level_MLO -2.75, co2_icecore -1.68, d14c_NH +1.11, co2_seasonal_SPO -0.62]; 88 s
+  k  4 ( 292- 435 m) at gamma_A 1.24 m/yr (11.9 Sv per index): slope +0.1154 (r +0.247) = 1.00x obs; lik -10.69 [CO2-level rows -13.74; gcb_ocean_sink +2.43; max |14C row| 1.89] [co2_level_MLO -7.22, co2_icecore -3.42, co2_level_SPO -3.09, gcb_ocean_sink +2.43, d14c_NH +1.89]; 88 s
+  k  6 ( 635- 915 m) at gamma_A 0.95 m/yr (9.2 Sv per index): slope +0.1190 (r +0.248) = 1.03x obs; lik -49.84 [CO2-level rows -51.79; gcb_ocean_sink +2.74; max |14C row| 2.85] [co2_level_MLO -21.95, co2_level_SPO -20.03, co2_icecore -9.81, d14c_NH +2.85, gcb_ocean_sink +2.74, d13c_level_SPO -2.64, d14c_SH -2.40, d13c_level_MLO +0.90, co2_seasonal_MLO +0.57]; 88 s
+  k 10 (2624-3700 m) at gamma_A 0.75 m/yr (7.2 Sv per index): slope +0.1177 (r +0.246) = 1.02x obs; lik -59.40 [CO2-level rows -59.15; gcb_ocean_sink +2.44; max |14C row| 3.71] [co2_level_SPO -25.16, co2_level_MLO -23.44, co2_icecore -10.56, d13c_level_SPO -4.56, d14c_SH -3.71, d14c_NH +3.07, gcb_ocean_sink +2.44, d13c_level_MLO +2.14]; 88 s
+
+  READING: at equal ENSO response the price differs only through the decadal leak of the index into the CO2 level rows and the 14C rows;
+  the Sv per index unit each depth needs is the physical discriminant, against GLODAP's equatorial source-water contrast.
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/ta2_enso_return_depth_matched_20260913.rds 
+EXIT 0
