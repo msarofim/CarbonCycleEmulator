@@ -195,7 +195,7 @@ CCX_MODE_RETIRED <- c(
               "(-1475.46 -> -1453.36 -> -1432.25; annual-mean isotope pins, row-read",
               "concentrations, IntCal to 1941, no pre-run ice rows, observed-month D14C",
               "edge years). Retired by the ROUND-7 refit under that objective, promoted as",
-              "`hilda31s2` (-1423.5675, +8.68, same h_ml). SUPERSEDED, not defective. Still",
+              "`hilda31s2` (`9bc7031`; -1423.5675, +8.68, same h_ml). SUPERSEDED, not defective. Still",
               "resolvable by path as CCX_MODE_HILDA31S_QUARANTINED. Quarantined under",
               "calibration/output/quarantine/20260913_round7_adopted/")
 )

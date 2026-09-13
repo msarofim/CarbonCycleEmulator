@@ -2,6 +2,24 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-13 — ⭐⭐⭐ **ADOPTED (Marcus: "Promote id 1, run the Hessian, and repoint"): `hilda31s2` IS CANONICAL — the 31-par HILDA / `seas_ml` 1 space refitted under the 09-12 objective (round 7). logpost −1423.567516; Hessian PD, cond 3.36e5, max step-instability 0.49 % (`h_ml` 64.82 ± 2.43 m). `hilda31s` retired and quarantined; `hilda31p` stays the `seas_ml` 0 control. Commits `9bc7031` + this.**
+
+### The three steps
+1. **Promote** — `promote_multistart_mode.R --outdir=multistart_20260912_round7_seasml1_sd1.0452 --dest=refit_20260912_hilda31_seasml1_round7` (`promote.log`): GATE 1–2 pass; GATE 3 DERIVED id 1 (12/24 converged; runners-up 3/14/20 within 6e−6); GATE 4 reproduces under the recorded band [30, 200]; GATE 5 streams −1389.483617 + prior/jac −34.083899 = logpost, gap 8.3e−8; 0 `h_ml` kinks. Records `struct` hilda, `seas_ml` 1, `spinup` periodic, `pump_mode` N.
+2. **Hessian** — `recompute_hessian.R --update` (`hessian.log`): GATE 1 reproduces; −H positive-definite, cond **3.357e5**; per-direction steps at 0.1 posterior sd, worst eps/3-vs-3eps drift 0.49 % (tolerance 2 %); `h_ml` **64.820 ± 2.431 m**, the P8 wall (~75 m) 4σ out.
+3. **Repoint** (`R/paths.R`) — `CCX_MODE_CANONICAL = "hilda31s2"`; `CCX_MODE_FILES` = hilda31s2 + hilda31p (both free); `CCX_MODE_PINNED` likewise; `hilda31s` → `CCX_MODE_RETIRED` with its cause (superseded, not defective) and **`CCX_MODE_HILDA31S_QUARANTINED`** by path (quarantine `20260913_round7_adopted/refit_20260911_hilda31_seasml1/`, README). Driver + `make_port_targets.R` incumbent → `hilda31s2`; `port_targets.csv` regenerated (incumbent −1423.5675, offset +0.000).
+
+### Re-pinned (each with its reason in the test)
+- `test-enso-demean`: the flag is worth **42.5817** at `hilda31s2` (was 32.5483 at the restamped-but-unrefit `hilda31s`; 43.91 at the 09-11 mode — the 09-12 (c) drop to 32.5 was ruling 4's interaction with a mode that had not yet moved, and the refit brought it back). 35.1773 kept at the control.
+- `test-gate-bounds` GATE S power test: 0.472 @ 8.96 PASS / blind 0.425 @ 4.51 (pinned 4.52 ± 0.05).
+- Every other canonical-naming file green: mode-file 55 (after the retirement entry got its commit hash, the lint requires one), gate-p7 25, seas-ml-label 70, seas-ml 98, mode-struct-lint 5, spinup-diagnostics 43, luc-scale 61, likelihood 244, mode-decode 15, prior-z 45; `test-alpha-as` the deliberately-red GATE Q pair (6.1 vs 3 × 2.88).
+
+### Scorecard at `hilda31s2` (`outputs/diagnostics/whole_model_scorecard_20260913.{log,rds}`; §0 reproduces to 1.7e−10)
+Nothing on the chain moved: V −2.55 FAIL · H +11.58 FAIL · GL −10.12 FAIL · 5 PASS (lag +1.72) · G +1.24 PASS · **Q 2.88 FAIL** · 7 PASS · S 0.472 @ 8.96 PASS · P7 PASS (−0.301 → −0.337, 0.22×, toward obs) · ENSO 0.57× (solubility-only r −0.528) · IRF 0.279 · L @1000 land 32 / ocean 49 / air 19. Strains: `rep_dC` **+3.40** (was 3.11 — the ice/level re-absorption pushed the CO₂ offset back up), `kz_deep_frac` −2.45, `pump_hs` +2.31, `q10` −2.10. Common rows −1389.48 (control −1396.26, ent26 −1600.76). `u_hs` 23.6, `h_hs` 392, `hs_asx` 0.81.
+
+### Next
+C′ (the shim `ent_seas_amp_SH` pinned to 0) as its own array against `hilda31s2`; A's unrefitted probe (the Niño3.4 limb); M (the per-hemisphere MLD handle). The 09-12 assessment's verdict stands: the ENSO link is the blocker.
+
 ## 2026-09-12 (f) — ⭐⭐ **ROUND 7 IS IN, BOTH ROUNDS: 12 of 24 starts CONVERGED (round 2, job `17496954`, resumed from checkpoints after a 6-h queue wait on `cs`); the basin is −1423.5675 at the incumbent's own h_ml (64.8 m), +8.68 above the restamped `hilda31s`, reached to four decimals by ids 1, 3, 14, 20; a second h_ml basin (49.7 m) at −1423.92, 0.35 behind. 18 dispersed starts reproduced and did not beat it. ⛔ NOTHING ADOPTED — promotion is Marcus's ruling.**
 
 - Round 1 (job `17490222`, 24 starts, 24/24 exit 0) drove every start to its third restart and out of the 300-min budget: all TIME-flagged, but ids 1/3/14/20 already agreed to 4 dp and the incumbent-basin restart gains had collapsed (id 1: 7.5 → 0.86 → 0.16, polish 0.19). Round 2 (ids 0–6, 10, 14, 15, 20, 22; each RESUMED at cycle 2 from its own checkpoint, port gate rel ≤ 4.5e−9 on every task) converged all 12 in 30–164 min at **zero further gain** on the basin-1 starts (id 1 gain 0.0000). The floor was found in round 1; round 2 supplies the CONVERGED flag `promote_multistart_mode.R`'s GATE 3 requires.

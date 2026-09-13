@@ -40,3 +40,6 @@
 
 ## POST-SCRIPT 2 (late 09-12): ROUND 7 IS RUNNING — job `17490222` on Torch (CHANGELOG 09-12 (e))
 24 starts at %24 on `cs`, all running on cs700 at submission; preflight `17490208` 8/8 clean, port gate rel ≤ 4.5e−9. References `hilda31s` (id 1) / `hilda31p` (id 2, −1567.99 at seas_ml 1). Outdir `multistart_20260912_round7_seasml1_sd1.0452`. **Next session: `squeue -u ms17839`; when drained, `collect_dispersed_multistart.R` on the outdir; compare on LIKELIHOOD vs the restamped `hilda31s` (−1399.2047 common rows); δ¹³C level rows first; promotion is a ruling.** The review's remaining items are all applied (09-12 (d)); the HILDA blocks consolidated; the two ice diagnostics converted.
+
+## POST-SCRIPT 3 (2026-09-13): `hilda31s2` ADOPTED (CHANGELOG 09-13; `9bc7031` +)
+Round 7 promoted (id 1), Hessian PD cond 3.36e5 (h_ml 64.82 ± 2.43), repointed. `hilda31s` retired + quarantined (`CCX_MODE_HILDA31S_QUARANTINED`); `hilda31p` the control. Demean 42.5817. Scorecard 09-13: the chain unchanged (Q 2.88, H +11.6, ENSO r −0.528). **Next: C′ (`ent_seas_amp_SH` pinned to 0) as its own array vs `hilda31s2` — reference set is already hilda31s2 / hilda31p; regenerate `port_targets.csv` after any objective change; then A's Niño3.4-limb probe, then M.** Fairshare was 0.20 on 09-12; a 6-h queue wait on `cs` is now the observed cost of an array.
