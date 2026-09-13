@@ -83,7 +83,13 @@ SL_CASES_27Q <- c("NH_origin", "SH_land", "SH_ocean")
 #' @param pv a named list/vector of parameter values (any vintage)
 #' @param pump_mode the arm the vector was fitted under -- READ from its own
 #'   mode file by the caller, never assumed
-sl_overlay <- function(pv, pump_mode, struct = "", seas_ml = NULL) {
+sl_overlay <- function(pv, pump_mode, struct = "", seas_ml = NULL, pins = NULL) {
+  # `pins` (2026-09-13): the pins the vector was fitted under (ccx_mode_pins(md));
+  # a PINNED name is HELD, not absent, so it is written into `pv` here before the
+  # absence test below can hand it to the migration contract (which would fill
+  # the pre-09-03 meaning and call the vector migrated). A caller resolving a
+  # mode file can equivalently pass ccx_mode_par_with_pins(md) as `pv`.
+  for (n in names(pins)) pv[[n]] <- pins[[n]]
   # `struct` (2026-09-08f): the structure label the vector was fitted under
   # (ccx_mode_struct(md)); "" = the column, as every pre-09-08f caller meant.
   # `seas_ml` (2026-09-12, review A8): the mixed-layer switch the vector was

@@ -1151,6 +1151,14 @@ ccx_require_param_set <- function(md, what) {
   nm <- md$param_names
   if (identical(nm, CCX_PARAM_NAMES)) return(invisible(TRUE))
   extra <- setdiff(nm, CCX_PARAM_NAMES); missing <- setdiff(CCX_PARAM_NAMES, nm)
+  # A PINNED file (2026-09-13) is this build's set MINUS its pins: the consumer
+  # must ccx_apply_pins(ccx_mode_pins(md)) BEFORE this check, so say so rather
+  # than reporting the held name as "lacking".
+  if (length(md$pins) && identical(nm, setdiff(CCX_PARAM_NAMES, names(md$pins))))
+    stop(what, ": this mode file is a PINNED arm (", ccx_pin_label(md$pins),
+         ", ", length(nm), " free names) and its pins are not applied in this process. ",
+         "Call ccx_apply_pins(ccx_mode_pins(md)) first (and unpin with the object it ",
+         "returns before scoring a FREE file), then score on the reduced set.")
   stop(what, ": this mode file was fitted on a DIFFERENT parameter set (",
        length(nm), " names, this build fits ", length(CCX_PARAM_NAMES), ").",
        if (length(extra)) paste0(" It carries retired names: ",
@@ -1317,7 +1325,11 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
   # THE BASE COMES FROM THE FILE'S OWN STRUCTURE (2026-09-08f): a hilda mode
   # overlaid on ccx_default_params() would run as a column, silently.
   if (is.null(base)) base <- ccx_mode_base(md)
-  if (!identical(md$param_names, CCX_PARAM_NAMES))
+  # a PINNED file (2026-09-13) carries this build's set MINUS its pins; the held
+  # values come back through ccx_mode_par_with_pins() so the overlay below never
+  # assigns NULL (which would DELETE the name and drop the model onto its absence
+  # default). Before this line hilda30c, the first pinned canonical, was refused here.
+  if (!identical(md$param_names, setdiff(CCX_PARAM_NAMES, names(md$pins))))
     stop("mode file '", basename(f), "' was fitted on a different parameter set (",
          length(md$param_names), " names, this build has ", length(CCX_PARAM_NAMES),
          "); refusing to overlay it silently.",
@@ -1338,7 +1350,7 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
                   " it is the 21-vs-22 `u_mode` DECODING that is invalid, so warm-start",
                   " from `par_mode` and refit rather than decoding `u_mode`.")
          else "")
-  pm <- md$par_mode
+  pm <- ccx_mode_par_with_pins(md)
   p  <- base
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
   # THROUGH THE RESOLVER: a pre-2026-09-01 `par_mode` carries the retired

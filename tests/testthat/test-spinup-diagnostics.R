@@ -15,7 +15,10 @@
 # built in three blocks and the canonical objective evaluated in two.
 sd_sp <- local({ s <- NULL; function() { if (is.null(s)) s <<- ccx_spinup(ccx_default_params()); s } })
 sd_mode <- local({ m <- NULL; function() {
-  if (is.null(m)) { md <- readRDS(ccx_mode_file()); base <- ccx_mode_base(md)
+  # the nearest FREE registered mode (09-13 (d)): these tests are about the objective's
+  # spinup default and by_stream, not the canonical, and a PINNED canonical's u_mode is
+  # 30 long -- it would need its pins applied for every call this fixture memoises
+  if (is.null(m)) { md <- readRDS(ccx_mode_file(ccx_mode_free_name())); base <- ccx_mode_base(md)
     m <<- list(md = md, base = base, u = md$u_mode,
                plain = ccx_make_logpost(base_params = base)(md$u_mode)) }
   m } })

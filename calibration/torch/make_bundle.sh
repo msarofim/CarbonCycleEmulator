@@ -37,6 +37,7 @@ tar czf "$OUT" \
   calibration/*.R calibration/torch \
   calibration/output/refit_20260910_hilda31_periodic \
   calibration/output/refit_20260912_hilda31_seasml1_round7 \
+  calibration/output/refit_20260913_hilda30_cprime_pin_ent0 \
   calibration/output/quarantine/20260910_periodic_spinup_adopted \
   calibration/output/quarantine/20260913_round7_adopted
 echo "bundle: $OUT  ($(du -h "$OUT" | cut -f1))"

@@ -152,13 +152,28 @@ MS_DRAW_TRIES <- 200          # redraws allowed before a start is declared dead
 # h_ml 44.1, feasible at seas_ml 1 and a different basin of h_ml). Both through the
 # registry. `hilda31` (quarantined, aseasonal) is no longer a reference.
 # 2026-09-13: round 7 ADOPTED as `hilda31s2`; the incumbent for the NEXT array is that file.
-MS_REF_INC    <- CCX_MODE_FILES[["hilda31s2"]]
-if (is.null(MS_REF_INC)) stop("MS_REF_INC: 'hilda31s2' is no longer in CCX_MODE_FILES -- ",
+# 2026-09-13 (d): the canonical is PINNED (`hilda30c`, ent_seas_amp_SH = 0). THE INCUMBENT
+# FOLLOWS THE ARRAY'S OWN PINS: an array run under the canonical's pins takes the
+# canonical; a FREE array takes the registered free PARENT (`hilda31s2`), because a
+# 30-name vector is not a point of the 31-name space (its shim would migrate to 0 and be
+# SEEDED at the table init -- a start, not the incumbent). Any other pin set is a new
+# objective with no incumbent on disk: stop, rather than warm-start from the wrong one.
+MS_REF_INC_NAME <- if (identical(ccx_pin_label(MS_PINS), ccx_pin_label(CCX_MODE_CANONICAL_PINS))) {
+  CCX_MODE_CANONICAL
+} else if (is.null(MS_PINS)) {
+  if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT
+} else stop("MS_REF_INC: no registered incumbent for pins '", ccx_pin_label(MS_PINS),
+            "' (the canonical's are '", ccx_pin_label(CCX_MODE_CANONICAL_PINS),
+            "'); rule the reference set for this pin before launching.")
+MS_REF_INC    <- CCX_MODE_FILES[[MS_REF_INC_NAME]]
+if (is.null(MS_REF_INC)) stop("MS_REF_INC: '", MS_REF_INC_NAME, "' is not in CCX_MODE_FILES -- ",
                               "re-rule the reference set (see MS_REF_INC_LABEL).")
 MS_REF_NEW    <- CCX_MODE_FILES[["hilda31p"]]
 if (is.null(MS_REF_NEW)) stop("MS_REF_NEW: 'hilda31p' is no longer in CCX_MODE_FILES -- ",
                               "re-rule the round-7 reference set (see MS_REF_NEW_LABEL).")
-MS_REF_INC_LABEL <- "INCUMBENT = hilda31s2 (09-13 canonical: round 7 under the 09-12 objective, periodic spinup, seas_ml 1)"
+MS_REF_INC_LABEL <- sprintf("INCUMBENT = %s (%s; 09-12 objective, periodic spinup, seas_ml 1)", MS_REF_INC_NAME,
+                            if (identical(MS_REF_INC_NAME, CCX_MODE_CANONICAL)) "the canonical, under this array's pins"
+                            else "the free parent of the pinned canonical: this array is FREE")
 MS_REF_NEW_LABEL <- "NEW BASIN = hilda31p (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)"
 # ⚠ THESE THREE NAMES ARE ALSO THE PORT-TARGET KEYS in calibration/torch/
 # port_targets.csv, so this vector may not be extended with ids that have no
@@ -300,7 +315,7 @@ for (.r in list(list("incumbent", .mdI), list("new basin", .mdN))) {
   # kz_deep_frac is 1 -- what it RAN -- and 1 is the box's upper bound, so the
   # unseeded vector is infeasible by construction and the seed is what makes
   # it a start point. (The P_INC/P_NEW below seed again; same numbers.)
-  .pm <- ccx_seed_unencodable(ccx_migrate_par_set(.r[[2]]$par_mode), paste(.r[[1]], "feasibility"))
+  .pm <- ccx_seed_unencodable(ccx_migrate_par_set(ccx_mode_par_with_pins(.r[[2]])), paste(.r[[1]], "feasibility"))
   .bad <- Filter(function(n) {
     b <- .ship[[n]]
     !is.null(b) && all(is.finite(b)) && (.pm[[n]] <= b[1] || .pm[[n]] >= b[2])
@@ -315,8 +330,8 @@ for (.r in list(list("incumbent", .mdI), list("new basin", .mdN))) {
                 .r[[1]], paste(.r[[2]]$kz_bracket, collapse = ", "),
                 paste(.ship$kz, collapse = ", ")))
 }
-P_INC <- ccx_migrate_par_set(.mdI$par_mode)
-P_NEW <- ccx_migrate_par_set(.mdN$par_mode)
+P_INC <- ccx_migrate_par_set(ccx_mode_par_with_pins(.mdI))   # a pinned file's held name is HELD, not absent (09-13 (d))
+P_NEW <- ccx_migrate_par_set(ccx_mode_par_with_pins(.mdN))
 # ---- SEED A COORDINATE THE MIGRATION COULD ONLY FILL WITH ITS OFF STATE ----
 # `ent_seas_amp_SH` entered CCX_PARAM_TABLE on 2026-09-03 with `tr = "log"`.
 # ccx_migrate_par_set() fills it with 0 -- WHAT THE ANCESTOR RAN, which is the

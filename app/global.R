@@ -123,11 +123,14 @@ app_params <- local({
   for (mode_file in mode_files) {
     if (!file.exists(mode_file)) next
     md <- tryCatch(readRDS(mode_file), error = function(e) NULL)
-    if (is.null(md) || !identical(md$param_names, CCX_PARAM_NAMES)) {
+    # a PINNED canonical (2026-09-13, hilda30c) carries the set MINUS its pins;
+    # the held value comes back through ccx_mode_par_with_pins(). Before this
+    # line the app would have SKIPPED the canonical and shipped the fallback.
+    if (is.null(md) || !identical(md$param_names, setdiff(CCX_PARAM_NAMES, names(md$pins)))) {
       message("app: skipping mode file ", basename(mode_file), ": it does not carry this build's parameter set")
       next
     }
-    pm <- md$par_mode
+    pm <- ccx_mode_par_with_pins(md)
     # THE FILE'S OWN STRUCTURE (2026-09-08f): the canonical is a HILDA mode.
     p <- ccx_mode_base(md)
     for (n in intersect(names(p), names(pm))) p[[n]] <- pm[[n]]

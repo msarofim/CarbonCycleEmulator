@@ -36,9 +36,17 @@ PT_OUT  <- ccx_path("calibration", "torch", "port_targets.csv")
 # ⛔ RE-RULED 2026-09-10 (round 6): the 08-31e new basin is -Inf at seas_ml = 1
 # (h_ml 143.9 m vs the ~75 m P8 wall). MUST MATCH run_dispersed_multistart.R's
 # MS_REF_INC / MS_REF_NEW -- the names are the driver's port-target KEYS.
+# 2026-09-13 (d): the incumbent FOLLOWS THE PINS, exactly as the driver's MS_REF_INC does
+# (the two must agree, or the port gate compares two different points): the canonical
+# `hilda30c` under its own pins, the free parent `hilda31s2` for a free run.
+PT_INC_NAME <- if (identical(ccx_pin_label(PT_PINS), ccx_pin_label(CCX_MODE_CANONICAL_PINS))) {
+  CCX_MODE_CANONICAL
+} else if (is.null(PT_PINS)) {
+  if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT
+} else stop("no registered incumbent for pins '", ccx_pin_label(PT_PINS), "'; rule the reference set first.")
 PT_REFS <- c(
   cold      = NA,   # the hand-set init; no file
-  incumbent = CCX_MODE_FILES[["hilda31s2"]],  # the canonical (round 7, adopted 2026-09-13), through the registry
+  incumbent = CCX_MODE_FILES[[PT_INC_NAME]],  # through the registry; see PT_INC_NAME
   new_basin = CCX_MODE_FILES[["hilda31p"]]    # the seas_ml 0 control, through the registry; feasible at seas_ml 1
 )
 
@@ -84,7 +92,7 @@ rows <- lapply(names(PT_REFS), function(nm) {
     # [[gate_bound_matches_its_claim]] -- the bound must match the claim, and the
     # claim that actually needs guarding is that the CONSUMER of this file runs
     # the same table, which is why the bracket is now RECORDED in the CSV.
-    pmv <- ccx_migrate_par_set(md$par_mode)
+    pmv <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))   # a held name is not absent (09-13 (d))
     # SEED BEFORE the feasibility check (2026-09-06d): kz_deep_frac migrates to
     # 1 = its box's upper bound, so the unseeded ancestor is infeasible by
     # construction; the seed (table init, printed by name) is the start point.

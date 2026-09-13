@@ -156,8 +156,14 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
     f <- ccx_mode_file(a)
     expect_true(file.exists(f), info = paste("mode", a, "is named but missing:", f))
     md <- readRDS(f)
-    expect_identical(md$param_names, CCX_PARAM_NAMES,
+    # A PINNED arm (2026-09-13) carries the build's set MINUS its pins, and its
+    # `pins` names only fitted names of this build; a free arm carries the set.
+    expect_identical(md$param_names, setdiff(CCX_PARAM_NAMES, names(md$pins)),
                      info = paste("mode", a, "was fitted on a different parameter set"))
+    expect_identical(!is.null(md$pins) && length(md$pins) > 0, unname(CCX_MODE_PINNED[[a]]),
+                     info = paste("mode", a, ": the file's `pins` and CCX_MODE_PINNED disagree"))
+    expect_true(all(names(md$pins) %in% CCX_PARAM_NAMES),
+                info = paste("mode", a, "pins a name this build does not fit"))
     # THE BAND IS PART OF THE VECTOR'S PROVENANCE, not housekeeping: the driver
     # overrides CCX_PARAM_TABLE$h_ml in-process, and a logpost recomputed under
     # the default band is off by ~1.1 (memory ccx_hml_band_provenance).
@@ -171,43 +177,110 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
   }
 })
 
-test_that("the canonical mode is a FREE arm, and wins among free arms RE-SCORED on today's objective", {
+test_that("the canonical wins among FREE arms re-scored on today's objective, or is a PINNED arm whose pin the registry names and whose parent is the best free arm", {
   # THE TRAP THIS ENCODES. A reader compares two STORED logposts and picks the
   # wrong arm -- because a pinned arm's objective carries a near-delta prior the
   # free arm's does not (`pin90`, 2026-08), OR because the two arms were fitted
   # under different objectives (`hilda31` -1478.66 vs `hilda31p` -1480.54 on
-  # 2026-09-10: the OLDER one "wins" on paper and is 9.09 BEHIND like-for-like).
+  # 2026-09-10: the OLDER one "wins" on paper and is 9.09 BEHIND like-for-like),
+  # OR -- since 2026-09-13 -- because a PINNED arm's logpost carries NO prior and
+  # NO Jacobian for the held name and is in no free arm's units at all.
   # A stored logpost is a number in the units of the objective that produced
   # it; nothing in the registry says which objective that was
-  # ⇒ [[compare_gaps_not_absolute_logposts]].
+  # ⇒ [[compare_gaps_not_absolute_logposts]], [[ccx_pinned_arms]].
   #
   # ⛔ UNTIL 2026-09-10 THE LINE BELOW COMPARED STORED NUMBERS, while this very
   # comment said "never that its stored number is the largest" -- the two
   # contradicted each other, invisibly, because the registry had held ONE arm
   # since 09-04. Resolved on Marcus's ruling (option 2): every FREE arm's
   # `par_mode` is RE-SCORED under TODAY'S objective, through the file's own
-  # base list, and the canonical must win on THAT. The comparison is then in
-  # one set of units by construction, immune to objective moves, and still
-  # fails the day a registered free arm genuinely beats the canonical.
+  # base list, and the best free arm is found on THAT.
+  #
+  # ⭐ 2026-09-13 (Marcus's ruling, "Promote C' id 1"): THE CANONICAL MAY BE A
+  # PINNED ARM. The 09-04 registry note wrote "the canonical is a free arm" when
+  # no pin existed and the only pinned comparison (`pin90`) was a near-delta
+  # prior. A real pin (ccx_apply_pins) is different in kind: it holds a fitted
+  # name at a stated value with no prior term, and the project uses it as a
+  # RETIREMENT-IN-WAITING -- `ent_seas_amp_SH`, the pCO2-side entrainment shim,
+  # pinned to 0 so the real seasonal mixed layer carries the SH DIC side alone.
+  # Retiring the name from the table is a larger change (the seas_ml 0 control
+  # `hilda31p` carries the shim at 18.7 and would become unscorable), so the
+  # pin is the honest interim. What this test now asserts is the RE-EXPRESSED
+  # rule, not a weakening:
+  #   (a) a pinned canonical is allowed ONLY when its file's `pins` names exactly
+  #       what the registry says it pins (CCX_MODE_CANONICAL_PINS) and the
+  #       registry names its free PARENT (CCX_MODE_PINNED_PARENT);
+  #   (b) among FREE arms re-scored on today's objective, the best is the
+  #       parent (a pinned canonical) or the canonical itself (a free one);
+  #   (c) the canonical beats the seas_ml 0 CONTROL on LIKELIHOOD over the
+  #       common stream rows -- the one scale a pinned and a free arm share --
+  #       and its PRICE against its free parent on the same scale is RECORDED
+  #       (printed), not gated: the ruling accepted it (-2.53 at C' id 1, all on
+  #       `d13c_seasonal_SPO`), and a gate on the model's own gap would be the
+  #       code under test setting its own bar ([[threshold_from_obs_or_law]]);
+  #   (d) the canonical's stored logpost reproduces under today's objective
+  #       WITH its pins applied.
   expect_true(CCX_MODE_CANONICAL %in% names(CCX_MODE_FILES))
   expect_setequal(names(CCX_MODE_PINNED), names(CCX_MODE_FILES))
-  expect_false(CCX_MODE_PINNED[[CCX_MODE_CANONICAL]])
+  canon_pinned <- CCX_MODE_PINNED[[CCX_MODE_CANONICAL]]
+  md_c <- readRDS(ccx_mode_file())
+  if (canon_pinned) {
+    expect_false(is.null(CCX_MODE_CANONICAL_PINS),
+                 info = "a pinned canonical must have its pins NAMED in the registry")
+    expect_equal(md_c$pins[names(CCX_MODE_CANONICAL_PINS)], CCX_MODE_CANONICAL_PINS,
+                 info = "the canonical file's pins are not the registry's")
+    expect_setequal(names(md_c$pins), names(CCX_MODE_CANONICAL_PINS))
+    expect_true(!is.null(CCX_MODE_PINNED_PARENT) && CCX_MODE_PINNED_PARENT %in% names(CCX_MODE_FILES),
+                info = "a pinned canonical must name a REGISTERED free parent")
+    expect_false(CCX_MODE_PINNED[[CCX_MODE_PINNED_PARENT]], info = "the parent must be a FREE arm")
+    # the parent is the same space with the pinned names FREE: it must carry them
+    md_p <- readRDS(ccx_mode_file(CCX_MODE_PINNED_PARENT))
+    expect_true(all(names(md_c$pins) %in% md_p$param_names))
+    expect_identical(md_p$param_names, CCX_PARAM_NAMES)
+  } else {
+    expect_null(CCX_MODE_CANONICAL_PINS); expect_null(CCX_MODE_PINNED_PARENT)
+    expect_null(md_c$pins)
+  }
 
   skip_if_no_cpp()
+  # (b) the free arms, re-scored -- every one on the FULL table (no pins live)
+  expect_null(CCX_PINS)
   free <- names(CCX_MODE_FILES)[!CCX_MODE_PINNED[names(CCX_MODE_FILES)]]
-  rescored <- vapply(free, function(a) {
-    md <- readRDS(ccx_mode_file(a))
+  score <- function(md) {
     bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
-    ccx_make_logpost(base_params = bp)(ccx_par_to_unc(md$par_mode))
-  }, numeric(1))
-  expect_true(all(is.finite(rescored)))
-  expect_equal(CCX_MODE_CANONICAL, free[which.max(rescored)])
-  # the canonical's OWN stored logpost must be a value of today's objective --
-  # a canonical fitted under a superseded objective is exactly the state the
-  # 09-10 quarantine exists to prevent (tolerance = the reproduction precision
-  # of recompute_hessian.R GATE 1 / promote GATE 4).
-  expect_equal(rescored[[CCX_MODE_CANONICAL]],
-               readRDS(ccx_mode_file())$logpost, tolerance = 1e-5, scale = 1)
+    ccx_make_logpost(base_params = bp, by_stream = TRUE)(ccx_par_to_unc(md$par_mode))
+  }
+  rescored <- lapply(free, function(a) score(readRDS(ccx_mode_file(a)))); names(rescored) <- free
+  lp_free <- vapply(rescored, as.numeric, numeric(1))
+  expect_true(all(is.finite(lp_free)))
+  best_free <- free[which.max(lp_free)]
+  expect_equal(best_free, if (canon_pinned) CCX_MODE_PINNED_PARENT else CCX_MODE_CANONICAL)
+
+  # (d) the canonical reproduces its stored logpost under ITS pins (applied, then
+  # restored with the object ccx_apply_pins() returned -- CCX_PINS is process-global)
+  if (canon_pinned) {
+    rm <- ccx_apply_pins(ccx_mode_pins(md_c)); on.exit(ccx_unpin_params(rm), add = TRUE)
+    sc_c <- score(md_c)
+    ccx_unpin_params(rm); rm <- list()
+  } else sc_c <- rescored[[CCX_MODE_CANONICAL]]
+  # tolerance = the reproduction precision of recompute_hessian.R GATE 1 / promote GATE 4
+  expect_equal(as.numeric(sc_c), md_c$logpost, tolerance = 1e-5, scale = 1)
+
+  # (c) LIKELIHOOD on the common rows: the canonical beats the seas_ml 0 control;
+  # its price against the parent is recorded
+  lik <- function(sc) attr(sc, "streams")
+  common <- Reduce(intersect, c(list(names(lik(sc_c))), lapply(rescored, function(r) names(lik(r)))))
+  L <- c(vapply(rescored, function(r) sum(lik(r)[common]), numeric(1)),
+         setNames(sum(lik(sc_c)[common]), CCX_MODE_CANONICAL))
+  expect_gt(L[[CCX_MODE_CANONICAL]], L[[CCX_MODE_SEASML0_CONTROL]],
+            label = sprintf("canonical likelihood %.4f vs the seas_ml 0 control %.4f (%d common rows)",
+                            L[[CCX_MODE_CANONICAL]], L[[CCX_MODE_SEASML0_CONTROL]], length(common)))
+  if (canon_pinned)
+    cat(sprintf("\n  [test-mode-file] PINNED canonical %s: likelihood %.4f on %d common rows; parent %s %.4f (price %+.4f, RECORDED not gated); control %s %.4f (%+.4f)\n",
+                CCX_MODE_CANONICAL, L[[CCX_MODE_CANONICAL]], length(common), CCX_MODE_PINNED_PARENT,
+                L[[CCX_MODE_PINNED_PARENT]], L[[CCX_MODE_CANONICAL]] - L[[CCX_MODE_PINNED_PARENT]],
+                CCX_MODE_SEASML0_CONTROL, L[[CCX_MODE_SEASML0_CONTROL]],
+                L[[CCX_MODE_CANONICAL]] - L[[CCX_MODE_SEASML0_CONTROL]]))
 
   # =================================================================
   # ⛔ THE PIN_PRIOR_CREDIT ASSERTION IS GONE, 2026-09-04, AND THIS SAYS WHY
@@ -228,14 +301,8 @@ test_that("the canonical mode is a FREE arm, and wins among free arms RE-SCORED 
   # at a fert_k this project chose. A threshold taken from the code under test
   # can never reject that code ([[threshold_from_obs_or_law]]); it re-baselines.
   # So it retired with `pin90` rather than being carried forward or re-measured,
-  # and the +11.6698 is deliberately NOT preserved anywhere.
-  #
-  # ⚠ WHAT IS GENUINELY LOST, stated rather than glossed: with one arm in the
-  # registry the free-vs-pinned comparison above has NO POWER -- `free` is a
-  # single name and which.max() over one element cannot fail. It regains power
-  # when a second arm lands, and a 26-parameter PINNED refit is the thing that
-  # would do it. Until then this is a gate that says nothing, and saying so is
-  # the point ([[no_power_null]]).
+  # and the +11.6698 is deliberately NOT preserved anywhere. The 09-13 price of
+  # C' (-2.53 likelihood) is printed above for the same reason it is not gated.
   # =================================================================
 })
 

@@ -105,6 +105,14 @@ sep <- function(s) cat(sprintf("\n%s\n%s\n", s, strrep("-", nchar(s))))
 
 md <- readRDS(HESS_MODE_FILE)
 nm <- md$param_names
+# PINS (2026-09-13): a pinned arm's file records `pins`; apply them BEFORE the
+# parameter-set check and the encode, so that a 30-name `par_mode` is scored on
+# the 30-name space it was fitted in. Without this, ccx_par_to_unc() dies with
+# "p lacks parameters this build fits: <pinned name>". ccx_mode_base(md) carries
+# the held value. The Hessian is then (n - #pins) square, and `pins` is recorded
+# in the hess file so a reader knows which space it is in.
+HESS_PINS <- ccx_mode_pins(md)
+invisible(ccx_apply_pins(HESS_PINS))
 ccx_require_param_set(md, "recompute_hessian.R")
 
 # ---- the band the mode was FOUND under, from the file, not assumed -----
@@ -126,6 +134,10 @@ lp0 <- lp(u)
 sep("GATE 1: the stored mode reproduces at the point this Hessian is taken")
 cat(sprintf("mode file  %s\n", HESS_MODE_FILE))
 cat(sprintf("pump_mode  %s\n", if (is.null(md$pump_mode)) "(default)" else md$pump_mode))
+cat(sprintf("pins       %s   (%d free names)\n",
+            if (is.null(HESS_PINS)) "(none: a free arm)"
+            else paste(sprintf("%s = %g", names(HESS_PINS), HESS_PINS), collapse = ", "),
+            length(nm)))
 cat(sprintf("h_ml band  %s\n", if (is.null(md$hml_bound)) "(table default)"
                                else sprintf("[%g, %g] (from the file)", md$hml_bound[1],
                                             md$hml_bound[2])))
@@ -279,6 +291,7 @@ if (pd) {
 out <- list(mode_file = HESS_MODE_FILE, logpost = lp0,
             par_mode = md$par_mode, u_mode = u,
             hml_bound = md$hml_bound, pump_mode = md$pump_mode,
+            pins = HESS_PINS, param_names = nm,
             hessian = H, cov = Sigma, cor = Cor, sd_unc = sdv, pd = pd,
             logdet_negH = if (pd) sum(log(-ev$values)) else NA_real_,
             eigen = ev, hess_eps = EPSV, hess_eps_unstable = failed,

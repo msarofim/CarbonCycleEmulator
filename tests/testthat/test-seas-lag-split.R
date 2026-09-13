@@ -115,7 +115,7 @@ test_that("a stored vector ENCODES with a named refusal, not an index from vappl
   # ⚠ the FITTED list, not ccx_default_params(): the two carry different names
   # and merging them silently drops bomb_total/luc_scale (memory
   # ccx_two_param_lists). Encoding is defined on the fitted set.
-  p <- ccx_mode_params()
+  p <- ccx_mode_params(ccx_mode_free_name())   # a FREE file: an ancestor built from the PINNED canonical would carry the shim at 0 and not encode (09-13 (d))
   p_old <- p[setdiff(names(p), c("seas_lag_p_NH", "seas_lag_p_SH"))]
   p_old$seas_lag_p <- 1.7502
 
@@ -137,7 +137,7 @@ test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
   # test has nothing to migrate.
   # UPDATED 2026-09-01: it used to migrate straight from ccx_mode_params(), which
   # made `migrated` exactly the lag pair only while the lag was the ONLY split.
-  p <- ccx_migrate_par_set(ccx_mode_params()); attr(p, "migrated") <- NULL
+  p <- ccx_migrate_par_set(ccx_mode_params(ccx_mode_free_name())); attr(p, "migrated") <- NULL
   p_old <- p[setdiff(names(p), c("seas_lag_p_NH", "seas_lag_p_SH"))]
   p_old$seas_lag_p <- 1.7502
 
@@ -157,7 +157,7 @@ test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
 test_that("migration REFUSES a list that carries no lag at all", {
   # Filling from CCX_SEAS_LAG_P_DEFAULT would turn a warm start into an
   # invented coordinate wearing a fitted vector's name.
-  p <- ccx_migrate_par_set(ccx_mode_params()); attr(p, "migrated") <- NULL
+  p <- ccx_migrate_par_set(ccx_mode_params(ccx_mode_free_name())); attr(p, "migrated") <- NULL
   p_none <- p[setdiff(names(p), c("seas_lag_p_NH", "seas_lag_p_SH", "seas_lag_p"))]
   expect_error(ccx_migrate_par_set(p_none), "not a fitted ancestor")
 })

@@ -475,9 +475,12 @@ test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonic
   expect_gt(abs(dg_mo_diff(full$mo, blind$mo)), 1)
   # THE RECORD (2026-09-12, hilda31s): whole limb 0.465 @ 8.96 PASS; the blind read 0.410 @ 4.53 FAIL.
   # At hilda31s2 (09-13): 0.472 @ 8.96 / 0.425 @ 4.51 -- same phases within the tolerance.
+  # At hilda30c (09-13 (d), the shim PINNED at 0): whole limb 0.357 @ 8.92 PASS; the blind
+  # read moves to @ 4.13 -- with the shim gone the blind knockout is the SST sine ALONE
+  # (0.63 @ 4.1 in the C' anatomy), so the blind phase IS the thermal phase. Still FAIL.
   expect_true(full$pass)
-  expect_equal(full$mo,  8.96, tolerance = 0.05, scale = 1)
-  expect_equal(blind$mo, 4.52, tolerance = 0.05, scale = 1)
+  expect_equal(full$mo,  8.92, tolerance = 0.05, scale = 1)
+  expect_equal(blind$mo, 4.13, tolerance = 0.05, scale = 1)
   expect_false(dg_gateS_verdict(list(mo = blind$mo, amp = blind$amp))$pass)
 })
 

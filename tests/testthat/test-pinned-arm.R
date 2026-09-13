@@ -10,7 +10,13 @@
 #       stored LIKELIHOOD (streams) to 1e-6 -- and pinned at 0 it does NOT.
 #       The pinned arm's logpost is NOT comparable (no prior term for the held
 #       name): the test asserts that too, so nobody reads it as a comparison.
+#   ⚠ (3) needs a FREE file that CARRIES the shim (2026-09-13, the promotion of
+#       C' made the canonical itself the pinned arm): it reads the registered
+#       free PARENT when the canonical is pinned, else the canonical.
 # =====================================================================
+# the free 31-name file the identity test is run against
+pa_free_file <- function() ccx_mode_file(
+  if (!is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_PINNED_PARENT else CCX_MODE_CANONICAL)
 
 test_that("ccx_parse_pins reads name=value specs and refuses bad ones", {
   expect_null(ccx_parse_pins(""))
@@ -34,7 +40,7 @@ test_that("ccx_apply_pins shrinks the fitted set for EVERY consumer, and ccx_unp
   expect_equal(CCX_PINS, c(ent_seas_amp_SH = 0))
   # the consumers
   expect_length(ccx_init_unc(), n0 - 1L)
-  md <- readRDS(ccx_mode_file())
+  md <- readRDS(pa_free_file())
   u <- ccx_par_to_unc(md$par_mode)            # the extra name in the file is simply ignored
   expect_length(u, n0 - 1L); expect_true(all(is.finite(u)))
   expect_false("ent_seas_amp_SH" %in% names(ccx_unc_to_par(u)))
@@ -47,10 +53,11 @@ test_that("ccx_apply_pins shrinks the fitted set for EVERY consumer, and ccx_unp
   expect_null(CCX_PINS)
 })
 
-test_that("pinned AT the canonical's fitted shim the streams REPRODUCE; pinned at 0 they do not; the logpost is not comparable", {
+test_that("pinned AT a free file's fitted shim the streams REPRODUCE; pinned at 0 they do not; the logpost is not comparable", {
   skip_if_no_cpp()
-  md <- readRDS(ccx_mode_file())
+  md <- readRDS(pa_free_file())
   fitted <- md$par_mode$ent_seas_amp_SH
+  expect_true(is.numeric(fitted) && fitted > 0)   # a FREE file carries the shim
   score <- function(pin) {
     rm <- ccx_apply_pins(c(ent_seas_amp_SH = pin)); on.exit(ccx_unpin_params(rm), add = TRUE)
     bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode; bp$ent_seas_amp_SH <- pin

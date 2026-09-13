@@ -547,6 +547,13 @@ ccx_set_enso <- function(p, src) {
 #' @return `p` with the fitted names overlaid, same length as it went in
 ccx_overlay_par <- function(p, pm) {
   n0 <- names(p)
+  # A PINNED base (ccx_mode_base() of a pinned mode file, 2026-09-13) names the
+  # held values in attr(p, "pins"); a pinned name is HELD, not absent, so it is
+  # written into `pm` here BEFORE the migration can read it as absent and fill
+  # the absence contract's meaning instead (for `ent_seas_amp_SH` that is 0 --
+  # C''s pin, by coincidence -- and the vector would print as MIGRATED).
+  pins <- attr(p, "pins")
+  for (n in names(pins)) if (is.null(pm[[n]])) pm[[n]] <- pins[[n]]
   if (!isTRUE(attr(pm, "migrated_done"))) {
     pm <- ccx_migrate_par_set(pm)
     attr(pm, "migrated_done") <- TRUE

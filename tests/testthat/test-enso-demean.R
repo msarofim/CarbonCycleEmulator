@@ -127,6 +127,9 @@ test_that("SPAN-INVARIANCE: the offset does not depend on the years requested", 
 # rebuilds them on every closure
 edm_obs <- local({ o <- NULL; function() { if (is.null(o)) o <<- ccx_prepare_obs(); o } })
 edm_price <- function(md, spinups = c("periodic", "aseasonal")) {
+  # a PINNED file (2026-09-13) is encoded on ITS reduced space: apply its pins,
+  # and restore with the object ccx_apply_pins() returned (CCX_PINS is process-global)
+  rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   u0 <- ccx_par_to_unc(md$par_mode)     # no migration: a vector of the fitted space
   expect_true(all(is.finite(u0)))
   # THE FILE'S OWN STRUCTURE (2026-09-08f): on the column default the same
@@ -166,6 +169,9 @@ edm_logprior <- function(u) { names(u) <- CCX_PARAM_NAMES; pv <- ccx_unc_to_par(
   lp <- 0; for (n in CCX_PARAM_NAMES) { s <- CCX_PARAM_TABLE[[n]]
     lp <- lp + s$prior(pv[[n]]) + .log_jac(u[[n]], s) }; lp }
 edm_crosscheck <- function(md, r) {
+  # the prior leg is summed over the file's OWN fitted names: a pinned file's
+  # reduced set, under its pins (2026-09-13)
+  rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   ed_lp  <- edm_logprior(r$u0)
   ed_lik <- sum(unlist(md$streams))
   # OBJECTIVE CHANGE #8 (2026-09-06): the two intermediate D14C rows were added
@@ -185,7 +191,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 42.5817 under the adopted objective (hilda31s2); 35.1773 at the seas_ml 0 control", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth 43.1079 under the adopted objective (hilda30c); 35.1773 at the seas_ml 0 control", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -215,7 +221,12 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 42.5817 under 
   # 42.5817 -- the flag's price at a mode fitted under the annual-mean pins, vs 32.55 at
   # the restamped-but-unrefit hilda31s (the -10 was ruling 4's interaction with a mode
   # that had not yet moved; see 09-12 (c)). 35.1773 stays the pin at the control.
-  expect_equal(r$on_periodic - r$off_periodic, 42.5817, tolerance = 1e-4, scale = 1)
+  # 2026-09-13 (d): the canonical is `hilda30c` (C′: the shim PINNED at 0, 30 free names; edm_price
+  # applies the file's pins): 43.1079 -- +0.53 over the parent hilda31s2's 42.5817, measured, not
+  # explained; the flag's price is a property of the ENSO-driven d13C trajectory, which the pin
+  # barely touches. 42.5817 stays a fact about hilda31s2 (the registered free parent, no longer
+  # asserted here); 35.1773 stays the pin at the control.
+  expect_equal(r$on_periodic - r$off_periodic, 43.1079, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
   expect_equal(r0$on_periodic - r0$off_periodic, 35.1773, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could

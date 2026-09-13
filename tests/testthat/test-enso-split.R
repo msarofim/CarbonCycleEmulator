@@ -215,7 +215,7 @@ test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
   # said it predated both splits until 2026-09-12) -- so "an ancestor current in
   # every other respect" has to be CONSTRUCTED from it, or there is nothing to
   # migrate.
-  p <- ccx_migrate_par_set(ccx_mode_params()); attr(p, "migrated") <- NULL
+  p <- ccx_migrate_par_set(ccx_mode_params(ccx_mode_free_name())); attr(p, "migrated") <- NULL
   p_old <- p[setdiff(names(p), CCX_ENSO_PARAMS)]
   p_old$gamma_enso <- 0.85119
 
@@ -240,7 +240,7 @@ test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
 test_that("migration REFUSES a list that carries no ENSO response at all", {
   # Filling from CCX_GAMMA_ENSO_DEFAULT would turn a warm start into an
   # invented coordinate wearing a fitted vector's name.
-  p <- ccx_migrate_par_set(ccx_mode_params()); attr(p, "migrated") <- NULL
+  p <- ccx_migrate_par_set(ccx_mode_params(ccx_mode_free_name())); attr(p, "migrated") <- NULL
   p_none <- p[setdiff(names(p), c(CCX_ENSO_PARAMS, "gamma_enso"))]
   expect_error(ccx_migrate_par_set(p_none), "not a fitted ancestor")
 })
@@ -252,7 +252,7 @@ test_that("a stored vector decodes and encodes under ITS OWN names", {
   u_old$gamma_enso <- 0
   expect_error(ccx_unc_to_par(u_old), "different parameter set")
 
-  p <- ccx_migrate_par_set(ccx_mode_params()); attr(p, "migrated") <- NULL
+  p <- ccx_migrate_par_set(ccx_mode_params(ccx_mode_free_name())); attr(p, "migrated") <- NULL
   p_old <- p[setdiff(names(p), CCX_ENSO_PARAMS)]
   p_old$gamma_enso <- 0.85119
   err <- tryCatch(ccx_par_to_unc(p_old), error = conditionMessage)

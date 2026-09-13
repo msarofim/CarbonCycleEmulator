@@ -668,7 +668,11 @@ dg_vector <- function(arm) {
   # a name no stored field can supply. A migrated vector is a legitimate thing
   # to MEASURE a gate at -- it is not a mode of this build's space, and every
   # caller must print `$migrated` so the reader knows which it is looking at.
-  pm <- ccx_migrate_par_set(md$par_mode)
+  # ⚠ A PINNED name is HELD, not absent (2026-09-13): fill it from the file's
+  # own `pins` BEFORE the migration looks, or a pinned canonical prints
+  # "MIGRATED 30->31" on every scorecard line. ccx_mode_base(md) already carries
+  # the same value in `p`; `pm` here carries it too, so the two lists agree.
+  pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))
   mig <- attr(pm, "migrated")
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
   p <- ccx_set_enso(p, pm)
@@ -694,8 +698,12 @@ dg_vector <- function(arm) {
        grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c,
        spinup = ccx_spinup_from_label(ccx_mode_spinup(md)),
        spinup_label = ccx_mode_spinup(md),
-       md = md, migrated = mig,
-       src = sprintf("%s (logpost %.2f%s)", basename(dirname(f)), md$logpost,
+       md = md, migrated = mig, pins = ccx_mode_pins(md),
+       src = sprintf("%s (logpost %.2f%s%s)", basename(dirname(f)), md$logpost,
+                     # a PINNED arm's stored logpost carries no prior/Jacobian for
+                     # the held name: comparable on LIKELIHOOD only ([[ccx_pinned_arms]])
+                     if (length(md$pins)) sprintf(", PINNED %s -- logpost not comparable to a free arm",
+                                                  paste(sprintf("%s=%g", names(md$pins), md$pins), collapse = ",")) else "",
                      if (length(mig)) sprintf(", MIGRATED %d->%d",
                                               length(md$param_names),
                                               length(CCX_PARAM_NAMES)) else ""))

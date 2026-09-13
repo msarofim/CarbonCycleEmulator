@@ -73,9 +73,32 @@
 # second basin at h_ml 49.7 sits 0.35 behind. Hessian PD, cond 3.36e5,
 # h_ml 64.82 +/- 2.43. Promoted on Marcus's ruling ("Promote id 1, run the
 # Hessian, and repoint"). `hilda31p` STAYS the registered seas_ml = 0 control.
-CCX_MODE_CANONICAL <- "hilda31s2"
+# 2026-09-13 (d): `hilda30c` -- THE FIRST PINNED CANONICAL. The SAME HILDA /
+# seas_ml 1 space and the SAME 09-12 objective as `hilda31s2`, with the pCO2-side
+# entrainment SHIM `ent_seas_amp_SH` PINNED to 0 (ccx_apply_pins; 30 free names):
+# assessment 09-12 option C', asking whether the real seasonal mixed layer carries
+# the SH ocean limb's DIC side on its own. It does: Torch job 17681685, 24 starts,
+# 4 CONVERGED; promoted start id 3 (= id 1 to 4 dp; ids 0/6 TIME at the same
+# point), pinned logpost -1426.242817, streams -1392.0158. ⚠ THAT LOGPOST IS NOT
+# COMPARABLE TO A FREE ARM'S (no prior term, no Jacobian for the held name); on
+# LIKELIHOOD over the 25 common rows it is -1392.02 vs `hilda31s2` -1389.48
+# (-2.53, of which d13c_seasonal_SPO -1.88) and vs `hilda31p` -1396.26 (+4.24).
+# The price against the parent is ACCEPTED by the ruling and RECORDED, not gated
+# (test-mode-file). h_ml 65.23 +/- 2.40 m (Hessian PD, cond 3.31e5; h_ml's step
+# drift 3.81 % over eps/3-3eps -- the plateau 1e-3..1e-2 is flat to 0.5 %, the
+# 3 eps leg touches the same roll-off hilda31s2 has); sst_seas_amp_SH 1.288 +/-
+# 0.188 -- CONFIDENTLY off its observation 1.746 (2.4 posterior sd), the thing the
+# shim was standing in for. Promoted on Marcus's rulings ("Promote C' id 1";
+# "Repoint"). `hilda31s2` STAYS REGISTERED as the FREE PARENT (the pinned arm's
+# meaning is its likelihood price against that file); `hilda31p` stays the seas_ml
+# = 0 control. Nothing is quarantined: the parent is not superseded. The shim is
+# PINNED, not RETIRED from the table -- retirement would make `hilda31p` (shim
+# 18.7 at seas_ml 0) unscorable; a later ruling.
+CCX_MODE_CANONICAL <- "hilda30c"
 
 CCX_MODE_FILES <- c(
+  hilda30c = file.path("calibration", "output", "refit_20260913_hilda30_cprime_pin_ent0",
+                       "mode_fit_pumpN.rds"),
   hilda31s2 = file.path("calibration", "output", "refit_20260912_hilda31_seasml1_round7",
                         "mode_fit_pumpN.rds"),
   hilda31p = file.path("calibration", "output", "refit_20260910_hilda31_periodic",
@@ -113,24 +136,47 @@ CCX_MODE_HILDA31S_QUARANTINED <- file.path("calibration", "output", "quarantine"
                                            "20260913_round7_adopted",
                                            "refit_20260911_hilda31_seasml1", "mode_fit_pumpN.rds")
 
-# WHICH ARMS ARE FREE -- AND WHY THE STORED logpost IS A TRAP ACROSS THEM.
-# The project rule is "the highest FREE arm wins regardless of name", and this
-# vector records which arms may be compared on their stored value at all.
+# WHICH ARMS ARE PINNED -- AND WHY THE STORED logpost IS A TRAP ACROSS THEM.
+# A stored logpost is a number in the units of the objective that produced it,
+# and a PINNED arm's objective is not a free arm's: compare PINNED vs FREE on
+# LIKELIHOOD (the stream rows), never on the stored value.
 #
-# ⚠ AS OF 2026-09-04 THERE IS EXACTLY ONE ARM, AND THAT IS NOT A SIMPLIFICATION
-# TO BE COMFORTABLE ABOUT. The pinned comparison (`pin90`) retired with the
-# 21-parameter set; nothing has refit a pinned arm at 26 parameters, so the
-# free-vs-pinned check this vector exists to express currently has nothing to
-# compare. A one-entry registry cannot catch the trap it was built for -- it is
-# a gate with no power ([[no_power_null]]), not a gate that passes -- and it
-# starts working again the day a second arm lands, not before.
+# WHAT A PIN IS (2026-09-13, ccx_apply_pins in R/calibrate.R): a fitted name
+# REMOVED from the fitted set and HELD at a stated value in the base list. It has
+# NO prior term and NO Jacobian for the held name, so the pinned objective is
+# the full objective's conditional slice at the pinned value minus the held
+# name's own prior -- a constant, which is exactly why the stored logposts of a
+# pinned and a free arm are in different units. The file records `pins`;
+# ccx_mode_base() carries the value; ccx_mode_pins() reads it.
 #
-# THE TRAP ITSELF, kept because it is what the vector is FOR: `pin90`'s stored
-# logpost was -1544.50, HIGHER than the then-canonical -1544.615, and reading
-# that as "pin90 wins" was wrong -- its objective carried a near-delta prior on
-# `fert_k` worth +11.6698 at fert_k = 90, putting it 11.56 BELOW on the
-# comparable scale. A stored number never decides an arm.
-CCX_MODE_PINNED <- c(hilda31s2 = FALSE, hilda31p = FALSE)
+# WHAT A PIN IS NOT: `pin90` (2026-08, retired). That was a near-delta PRIOR on
+# `fert_k`, worth +11.6698 at fert_k = 90; its stored logpost -1544.50 read
+# HIGHER than the then-canonical -1544.615 and was 11.56 BELOW on the comparable
+# scale. The trap is the same in both cases -- a stored number never decides an
+# arm -- but a real pin has no prior credit to subtract; it has a likelihood
+# price to measure (test-mode-file measures it and prints it).
+#
+# 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
+# the free-vs-pinned comparison it exists to express had no power
+# ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
+CCX_MODE_PINNED <- c(hilda30c = TRUE, hilda31s2 = FALSE, hilda31p = FALSE)
+# A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
+# registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
+# and its free PARENT: the same space with the pinned names free, kept
+# registered because the pinned arm's meaning is its LIKELIHOOD price against
+# that file. Both NULL while the canonical is free. The pin is a
+# RETIREMENT-IN-WAITING: `ent_seas_amp_SH` leaves the table only once the
+# seas_ml 0 control can be scored without it.
+CCX_MODE_CANONICAL_PINS  <- c(ent_seas_amp_SH = 0)
+CCX_MODE_PINNED_PARENT   <- "hilda31s2"
+#' The registered FREE mode nearest the canonical: the canonical itself when it
+#' is free, its parent when it is pinned. For a consumer that needs a vector
+#' ENCODABLE on the full table (an ancestor constructed by dropping names, a
+#' template for a 31-name start) -- a pinned canonical's held name is 0 under
+#' `tr = "log"` and cannot be encoded without its pins.
+ccx_mode_free_name <- function() {
+  if (isTRUE(CCX_MODE_PINNED[[CCX_MODE_CANONICAL]])) CCX_MODE_PINNED_PARENT else CCX_MODE_CANONICAL
+}
 
 # The retired names, kept ONLY so that asking for one gets the reason rather
 # than a file-not-found. Everything here is quarantined and not comparable.
@@ -326,6 +372,10 @@ ccx_mode_base <- function(md) {
   # record; a consumer that wants to SCORE such a file must also ccx_apply_pins()
   # first, or ccx_par_to_unc() will look for a name the fit never carried.
   for (n in names(md$pins)) p[[n]] <- md$pins[[n]]
+  # ... and the base CARRIES the pins as an attribute, so the canonical idiom
+  # `ccx_overlay_par(ccx_mode_base(md), md$par_mode)` (lint-enforced) can tell a
+  # HELD name from an ABSENT one without every caller repeating it.
+  if (length(md$pins)) attr(p, "pins") <- md$pins
   p
 }
 #' The pins a mode file was fitted under (NULL = a free arm). Read, never inferred.
@@ -333,10 +383,38 @@ ccx_mode_pins <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   md$pins
 }
+#' The file's `par_mode` with its PINNED names filled in from `pins` (2026-09-13).
+#'
+#' A pinned name is HELD, not ABSENT. `ccx_migrate_par_set()` tests absence
+#' against the build's full table, so a 30-name pinned `par_mode` handed to it
+#' under the 31-name table would be MIGRATED: the absence contract for
+#' `ent_seas_amp_SH` fills 0 (the pre-09-03 meaning) and flags the file
+#' "MIGRATED 30->31" -- which for C' happens to be the pinned value, and for any
+#' other pin would be WRONG. Every consumer that overlays a mode file's vector on
+#' a model list (dg_vector, sl_overlay, the scorecard's extra arm) goes through
+#' this, so the held value comes from the file's own record and the migration
+#' sees nothing absent. ⚠ The result is NOT encodable on the reduced space (it
+#' carries the held name); to ENCODE, ccx_apply_pins(ccx_mode_pins(md)) first and
+#' hand ccx_par_to_unc() the bare `md$par_mode`.
+ccx_mode_par_with_pins <- function(md) {
+  if (is.character(md)) md <- readRDS(ccx_mode_file(md))
+  pm <- md$par_mode
+  for (n in names(md$pins)) {
+    if (!is.null(pm[[n]]) && !isTRUE(all.equal(pm[[n]], md$pins[[n]])))
+      stop("ccx_mode_par_with_pins(): `par_mode` carries ", n, " = ", pm[[n]],
+           " but the file pins it at ", md$pins[[n]], " -- the file is internally inconsistent.")
+    pm[[n]] <- md$pins[[n]]
+  }
+  pm
+}
 
 ccx_mode_params <- function(md = CCX_MODE_CANONICAL) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
-  if (!is.null(md$par_mode)) return(md$par_mode)
+  # WITH the file's pins (2026-09-13): the vector the mode RAN at, held names
+  # included, so a consumer that overlays or migrates it sees nothing absent. To
+  # ENCODE a pinned file, ccx_apply_pins(ccx_mode_pins(md)) first -- under the
+  # reduced table ccx_par_to_unc() ignores the held name it carries.
+  if (!is.null(md$par_mode)) return(ccx_mode_par_with_pins(md))
   # same rule as ccx_adopt_mode_band(): the file's own names, not the build's
   u <- md$u_mode
   .nm <- if (!is.null(md$param_names)) md$param_names else CCX_PARAM_NAMES
@@ -379,7 +457,9 @@ ccx_check_mode_decode <- function(md = CCX_MODE_CANONICAL, tol = 1e-8) {
   # only the second -- so say the first plainly and decline.
   u <- md$u_mode
   .nm <- if (!is.null(md$param_names)) md$param_names else CCX_PARAM_NAMES
-  if (!identical(.nm, CCX_PARAM_NAMES))
+  # a PINNED file (2026-09-13) carries the build's set MINUS its pins, and every
+  # name it does carry is in the table, so it decodes on its own names
+  if (!identical(.nm, setdiff(CCX_PARAM_NAMES, names(md$pins))))
     stop("this mode file was fitted on a DIFFERENT parameter set (",
          length(.nm), " names vs this build's ", length(CCX_PARAM_NAMES),
          "), so 'does it decode to its own par_mode' is not a question this ",

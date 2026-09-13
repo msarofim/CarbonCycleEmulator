@@ -27,7 +27,7 @@
 MD_OVERRIDE_BAND <- c(85, 120)
 md_overridden <- local({
   md <- readRDS(ccx_mode_file())
-  i  <- match("h_ml", CCX_PARAM_NAMES)
+  i  <- match("h_ml", md$param_names)   # the FILE's own names: a pinned file's u_mode is shorter than the table (09-13 (d))
   b  <- MD_OVERRIDE_BAND
   md$hml_bound <- b
   md$par_mode[["h_ml"]] <- unname(b[1] + (b[2] - b[1]) / (1 + exp(-md$u_mode[i])))
@@ -40,8 +40,8 @@ test_that("the FIXTURE really is a mis-decoding file -- or nothing below is test
   # vacuously. Asserted, not assumed.
   expect_false(isTRUE(all.equal(MD_OVERRIDE_BAND,
                                c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi))))
-  i <- match("h_ml", CCX_PARAM_NAMES)
-  u <- md_overridden$u_mode; names(u) <- CCX_PARAM_NAMES
+  i <- match("h_ml", md_overridden$param_names)
+  u <- md_overridden$u_mode; names(u) <- md_overridden$param_names
   expect_gt(abs(ccx_unc_to_par(u)[["h_ml"]] - md_overridden$par_mode[["h_ml"]]), 10)
 })
 
@@ -58,7 +58,7 @@ test_that("ccx_mode_params returns the depth the refit actually found", {
 })
 
 test_that("the band-blind idiom really is wrong, and only for h_ml", {
-  u <- md_overridden$u_mode; names(u) <- CCX_PARAM_NAMES
+  u <- md_overridden$u_mode; names(u) <- md_overridden$param_names
   pv <- ccx_unc_to_par(u)
   differing <- Filter(function(n) {
     a <- pv[[n]]; b <- md_overridden$par_mode[[n]]
@@ -88,13 +88,13 @@ test_that("the CANONICAL mode decodes cleanly -- it was fitted on the shipped ba
   expect_equal(md$hml_bound, c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi),
                tolerance = 1e-12)
   expect_true(ccx_check_mode_decode(md))
-  u <- md$u_mode; names(u) <- CCX_PARAM_NAMES
+  u <- md$u_mode; names(u) <- md$param_names
   expect_equal(ccx_unc_to_par(u)[["h_ml"]], md$par_mode[["h_ml"]], tolerance = 1e-8)
 })
 
 test_that("decoding under the recorded band is what reproduces par_mode", {
-  i <- match("h_ml", CCX_PARAM_NAMES)
   md <- md_overridden
+  i <- match("h_ml", md$param_names)
   # ⚠ THROUGH THE CODE'S OWN TRANSFORM, not a formula typed here. Until
   # 2026-09-12 this block decoded with a local `inv()` that was the SAME formula
   # the fixture above is built with, so its first assertion could not fail
@@ -102,7 +102,7 @@ test_that("decoding under the recorded band is what reproduces par_mode", {
   # RECORDED band it must reproduce par_mode, and on the SHIPPED table it must not.
   s_rec <- CCX_PARAM_TABLE$h_ml; s_rec$lo <- md$hml_bound[1]; s_rec$hi <- md$hml_bound[2]
   expect_equal(unname(.from_unc(md$u_mode[i], s_rec)), md$par_mode[["h_ml"]], tolerance = 1e-8)
-  u <- md$u_mode; names(u) <- CCX_PARAM_NAMES
+  u <- md$u_mode; names(u) <- md$param_names
   expect_false(isTRUE(all.equal(ccx_unc_to_par(u)[["h_ml"]], md$par_mode[["h_ml"]],
                                 tolerance = 1e-6)))
 })

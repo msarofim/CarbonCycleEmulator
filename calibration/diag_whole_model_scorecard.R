@@ -35,7 +35,10 @@ SC_PRIOR_STRAIN <- 2; SC_ENSO_WIN <- c(1959, 2024)
 SC_JOOS_HORIZON <- 300   # yr followed, as calibration/diag_joos_irf.R (JOOS_HORIZON lives there, not in R/joos_irf.R)
 SC_L_HORIZONS <- c(100, 1000)   # the pulse partition read at both: the 09-08f table (100) and Joos 2013's own horizon (DG_L_HORIZON)
 SC_REPRO_TOL <- 1e-3    # log-units: an arm must reproduce its file's stored streams to this before it is read
-SC_TAG <- format(Sys.Date(), "%Y%m%d")
+# DATE + CANONICAL (2026-09-13 (d)): two scorecards on one day at two canonicals
+# (hilda31s2 in the morning, hilda30c after the repoint) collided on a date-only
+# tag and the second silently overwrote the first's .rds (restored from git).
+SC_TAG <- sprintf("%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL)
 SC_OUT <- ccx_path("outputs", "diagnostics", sprintf("whole_model_scorecard_%s.rds", SC_TAG))
 vA <- dg_vector(SC_ARM_A); vA$src <- sprintf("%s (column control, quarantined)", SC_ARM_A_NAME)
 vB <- dg_vector(SC_ARM_B); vB$src <- sprintf("%s (seas_ml 0 control, CCX_MODE_SEASML0_CONTROL)", SC_ARM_B)
@@ -45,14 +48,15 @@ ARMS <- list(vA, vB, vC); names(ARMS) <- c(SC_ARM_A_NAME, SC_ARM_B, SC_ARM_C)
 # A start file records no spinup label; it is scored under CCX_OBJECTIVE_SPINUP and SAYS so.
 SC_EXTRA <- Sys.getenv("CCX_SC_EXTRA_DIR", "")
 if (nzchar(SC_EXTRA)) { fsC <- list.files(SC_EXTRA, pattern = "^start_[0-9]+[.]rds$", full.names = TRUE); SC <- lapply(fsC, readRDS); bC <- SC[[which.max(vapply(SC, `[[`, 0, "logpost"))]]
-  pmC <- ccx_migrate_par_set(bC$par_mode); pC <- ccx_mode_base(bC); pC$pump_mode <- bC$pump_mode
+  pmC <- ccx_migrate_par_set(ccx_mode_par_with_pins(bC)); pC <- ccx_mode_base(bC); pC$pump_mode <- bC$pump_mode   # a start file records `pins` too (09-13)
   ARMS[[basename(SC_EXTRA)]] <- list(p = ccx_overlay_par(pC, pmC), pm = pmC, luc_scale = pmC$luc_scale, bomb_total = pmC$bomb_total, sigma_d14c = pmC$sigma_d14c, rep_dC = pmC$rep_dC, grad_off_co2 = pmC$grad_off_co2, grad_off_d13c = pmC$grad_off_d13c,
-                                    spinup = CCX_OBJECTIVE_SPINUP, spinup_label = ccx_spinup_label(CCX_OBJECTIVE_SPINUP), md = bC, src = sprintf("%s best id %d (start file; spinup = objective's)", basename(SC_EXTRA), bC$id)) }
+                                    spinup = CCX_OBJECTIVE_SPINUP, spinup_label = ccx_spinup_label(CCX_OBJECTIVE_SPINUP), md = bC, pins = bC$pins, src = sprintf("%s best id %d (start file; spinup = objective's%s)", basename(SC_EXTRA), bC$id, if (length(bC$pins)) paste0("; PINNED ", ccx_pin_label(bC$pins)) else "")) }
 obs <- ccx_prepare_obs()
 arm_struct <- function(v) { s <- ccx_mode_struct(v$md); if (!nzchar(s)) "column" else s }
 cat("ARMS (each spun up as its file records):\n")
 for (a in names(ARMS)) { v <- ARMS[[a]]
-  cat(sprintf("  %-8s %s   struct %s, seas_ml %d, spinup %s, %d par, h_ml %.1f%s\n", a, v$src, arm_struct(v), ccx_mode_seas_ml(v$md), v$spinup_label, length(v$pm), v$p$h_ml,
+  cat(sprintf("  %-8s %s   struct %s, seas_ml %d, spinup %s, %d par%s, h_ml %.1f%s\n", a, v$src, arm_struct(v), ccx_mode_seas_ml(v$md), v$spinup_label, length(v$pm) - length(v$pins),
+              if (length(v$pins)) sprintf(" + %d PINNED (%s)", length(v$pins), paste(sprintf("%s=%g", names(v$pins), v$pins), collapse = ",")) else "", v$p$h_ml,
               if (arm_struct(v) == "hilda") sprintf(", u_hs %.1f, hs_asx %.3f, h_hs %.0f, pump_hs %.1f, k_w %.0f", v$p$u_hs, v$p$hs_asx_frac, v$p$h_hs, v$p$pump_hs_gcm2, v$p$k_w) else "")) }
 R <- lapply(ARMS, dg_run); ST <- Map(dg_streams, R, ARMS, MoreArgs = list(obs = obs)); GR <- lapply(R, function(r) ccx_ocean_grad_scored(r$out, r$sp))
 try_or <- function(expr, lab) tryCatch(expr, error = function(e) { cat(sprintf("  ⚠ %s FAILED: %s\n", lab, conditionMessage(e))); NULL })
