@@ -2,6 +2,22 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-13 (c) — ⭐⭐⭐ **C′ IS IN: WITH THE SHIM PINNED TO 0 THE REAL SEASONAL MIXED LAYER CARRIES THE SH OCEAN LIMB'S DIC SIDE. Price of the shim: −2.5 to −2.7 log-units of LIKELIHOOD, almost all of it ONE row (`d13c_seasonal_SPO` −1.9 / −2.1); GATE S PASSES (0.36–0.37 ppm @ 8.9–9.0 mo); the SPO total 1.139 @ 9.04 vs obs 1.170 @ 9.01. Job `17681685`, 24/24 exit 0, 4 CONVERGED (the rest TIME); outdir `multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452`. ⛔ NOTHING ADOPTED — retiring the shim is a MODEL-STRUCTURE ruling, and a pinned canonical would be the first.**
+
+| | `hilda31s2` (shim 8.01) | C′ id 1 (basin 1, h_ml 65.2) | C′ id 5 (best, h_ml **72.8**) |
+|---|---|---|---|
+| likelihood, common rows | −1389.48 | −1392.02 (**−2.53**) | −1392.19 (**−2.71**) |
+| pinned logpost (NOT comparable) | — | −1426.24 conv | −1426.04 TIME |
+| rows > 0.3 | | `d13c_seasonal_SPO` −1.88, `ocean_grad_alk` −0.93, `d14c_NH` −0.42, `hs_surf_d13c` +0.34 | `d13c_seasonal_SPO` −2.08, `ocean_grad_alk` −0.79, `d13c_seasonal_MLO` +0.63, `d14c_NH` −0.50 |
+| SPO anatomy: SST sine / entrained / shim → limb | 0.90 @ 4.1 / 0.82 @ 9.7 / 0.50 @ 9.8 → 0.465 @ 8.96 | 0.63 @ 4.1 / **0.96 @ 9.7** / — → 0.357 @ 8.92 | 0.67 @ 4.2 / **1.03 @ 9.7** / — → 0.368 @ 9.03 |
+| `sst_seas_amp_SH` (obs 1.81) | 1.85 | **1.29 (−31 %)** | 1.37 (−26 %) |
+| moved > 5 % | | `pump_grad` +14, `gamma_enso_ocn_SH` +14, `sst_NH` +6, `pump_hs` −5 | `h_ml` +12, `pump_grad` +12, `sst_NH` +9, `kz_deep_frac` −6 |
+| GATE Q | 2.88 | 2.94 | 2.98 |
+
+- **Reading.** The fit replaces the pCO₂-side shim with MORE entrained water (0.82 → 0.96–1.03 ppm at SPO) and LESS thermal amplitude (`sst_seas_amp_SH` 1.85 → 1.29–1.37, now 25–30 % UNDER the observed 1.81 rather than at it), and pays 2 log-units on the SPO seasonal δ¹³C row — the isotopic signature of entrained water is not quite the shim's. Two right-signed mechanisms, no shim, the phase inside GATE S, the total amplitude 3 % under obs. ⚠ `sst_seas_amp_SH` going 26–31 % under its observation is the thing to weigh: the shim was standing in for something, and removing it moves a constrained parameter off its constraint (the prior z should be read at promotion).
+- **Basins**: id 5 / 10 (−1426.04, h_ml 72.8 — **2 m under the P8 wall**, a hazard for any posterior sample) and ids 0/1/3/6 (−1426.24, h_ml 65.2, CONVERGED) are inside the 0.5 convergence bound of each other; a second h_ml basin at −1428.69 (49–50 m) is 2.65 behind. 12 starts inside 0.5 of the best; the dispersed tail as before.
+- **What promotion would need** (a ruling, not done): the shim RETIRED from the model, not just pinned — a 30-parameter space; a round-2 resume for the CONVERGED flag on the basin-1 ids; the choice between the 65 m and 73 m sub-basins (the 73 m one abuts the wall); `CCX_MODE_PINNED` TRUE for the first time. Collector `collect_round1.log`, `summary.csv`.
+
 ## 2026-09-13 (b) — ⭐⭐ **PINNED ARMS EXIST, AND C′ IS STAGED ON TORCH: `ent_seas_amp_SH` (the pCO₂-side entrainment shim) PINNED TO 0 against `hilda31s2`, 30 free parameters (Marcus: "Do it. I am okay with waiting"). Preflight job `17681611` queued on `cs`. Commits `f65c960`, and the bundle fix after it.**
 
 - **The mechanism** (`R/calibrate.R`): `ccx_apply_pins(c(name = value))` removes the name from `CCX_PARAM_TABLE` / `CCX_PARAM_NAMES` in the table's own environment and records `CCX_PINS`; `ccx_unpin_params()` restores the ORIGINAL order; `ccx_parse_pins("name=value,…")` and `ccx_pin_label()`. A pin has NO prior term and NO Jacobian for the held name, so **a pinned arm's logpost is NOT comparable to a free arm's — compare on LIKELIHOOD**. This is what `CCX_MODE_PINNED` (R/paths.R) was always meant to record; `pin90` was a near-delta PRIOR, not a pin. `ccx_mode_base()` now carries a file's recorded `pins` in the base; `ccx_mode_pins()` reads them.
