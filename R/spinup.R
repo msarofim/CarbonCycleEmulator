@@ -191,7 +191,7 @@ ccx_spinup_diagnostics <- function(y, prod, aux, grid, residuals, co2_ppm) {
   # HS and HD ARE ocean carbon and belong in the inventory; `$hs`/`$hd` are NULL
   # when the structure is off, and c() drops them, so this is the same vector.
   ocean_idx <- unlist(lapply(HEMIS, function(h)
-    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd)))
+    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd, aux$idx[[h]]$eq)))
   deep_idx  <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 3)))
   bot_idx   <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 1)))
 
@@ -282,7 +282,7 @@ ccx_spinup <- function(p = ccx_default_params(),
 
   aux  <- ccx_prepare(p)
   grid <- aux$grid
-  y    <- ccx_new_state(grid$nl, ccx_hs_on(p))
+  y    <- ccx_new_state(grid$nl, ccx_hs_on(p), ccx_eq_on(p))
 
   # ---- 12C: analytic equilibrium -------------------------------------
   for (h in HEMIS) {
@@ -324,7 +324,12 @@ ccx_spinup <- function(p = ccx_default_params(),
     # spurious d13C drift).
     dic <- ccx_dic_for_pco2(chi0, ccx_const("ALK_SURFACE"), aux$sst[[h]])
     y[i$ml, "C"] <- dic * aux$ml_mass_kg[[h]] / aux$mol_per_GtC
+    # GtC per metre of the INTERIOR column. With the equatorial cell on (D1,
+    # 2026-09-13g) the mixed layer covers a_ml < a_ls, so "the ML's carbon per
+    # metre" is scaled up by a_ls/a_ml to be the interior's; with the cell
+    # off the ratio is not formed and this is the 09-13d line, bit for bit.
     conc <- y[i$ml, "C"] / grid$dz[1]
+    if (aux$eq_on == 1L) conc <- conc * (aux$a_ls[[h]] / aux$a_ml[[h]])
     y[i$oc, "C"] <- conc * grid$dz[-1]
 
     # THE HIGH-LATITUDE COLUMN, when it exists: HS in Henry equilibrium with the
@@ -341,6 +346,16 @@ ccx_spinup <- function(p = ccx_default_params(),
       y[i$hs, "C"] <- dic_h * aux$hs_mass_kg[[h]] / aux$mol_per_GtC
       y[i$hd, "C"] <- dic_h * aux$a_hs[[h]] * aux$dz_hd *
                       ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
+    }
+
+    # THE EQUATORIAL CELL, when it exists: in Henry equilibrium with the
+    # atmosphere at ITS OWN temperature and alkalinity (the HS idiom). A
+    # STARTING GUESS only -- the cell is warmer than the mixed layer, so the
+    # loop sees a real gradient and ccx_c12_steady_conveyor() finishes it;
+    # its gate below includes the cell for that reason (prereg 09-13g, (b)).
+    if (!is.null(i$eq)) {
+      dic_e <- ccx_dic_for_pco2(chi0, aux$alk_eq, aux$sst_eq)
+      y[i$eq, "C"] <- dic_e * aux$eq_mass_kg[[h]] / aux$mol_per_GtC
     }
   }
 
@@ -371,7 +386,8 @@ ccx_spinup <- function(p = ccx_default_params(),
   # one therefore needs the full-state Newton solve. With both off it is a no-op
   # on an already-exact fixed point, which is why the branch is gated rather than
   # unconditional: the no-pump, no-conveyor model stays bit-identical.
-  if (!is.null(ccx_conveyor_geom(p, grid)) || !is.null(aux$pump) || aux$hs_on == 1L)
+  if (!is.null(ccx_conveyor_geom(p, grid)) || !is.null(aux$pump) || aux$hs_on == 1L ||
+      aux$eq_on == 1L)
     y <- ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0), prep = prep)
 
   nb <- nrow(y)

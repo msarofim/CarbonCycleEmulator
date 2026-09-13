@@ -106,7 +106,8 @@ test_that("R and C++ agree with the boxes on", {
   # substep and warns each time it dips below 2 C (the documented extrapolation,
   # handoff 09-06b); the C++ path does not. Silenced HERE only -- the stocks are the test.
   rR <- suppressWarnings(ccx_run(sp, F))
-  expect_false(anyNA(r$out))
+  # the eq_* columns are NA BY CONTRACT with the equatorial cell off (2026-09-13g)
+  expect_false(anyNA(r$out[, ccx_out_na_guard_cols(r$out, p)]))
   for (cc in c("ocean_C", "ocean_C14", "co2_NH", "co2_SH"))
     expect_lt(max(abs(rR$out[[cc]] - r$out[[cc]])) / max(abs(r$out[[cc]])), 1e-12)
   expect_identical(rownames(r$state)[sp$aux$idx$NH$hs], "NH_hs")

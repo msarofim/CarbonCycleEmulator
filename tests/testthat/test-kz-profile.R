@@ -94,7 +94,7 @@ test_that("R and C++ agree at f = 0.5 with the HS boxes on", {
   dC <- ccx_deriv_fast(sp$y, 1850, p, fr, sp$grid, sp$aux)
   expect_equal(dR, dC, tolerance = 1e-10)
   r <- ccx_run_fast(sp, F)
-  expect_false(anyNA(r$out))
+  expect_false(anyNA(r$out[, ccx_out_na_guard_cols(r$out, p)]))   # eq_* NA by contract (cell off, 2026-09-13g)
   # and the C++ core is genuinely reading the profile, not P.kz: a different f
   # must give a different derivative through the C++ path
   p2 <- kp_par(0.9, 253, hs = TRUE); sp2 <- ccx_spinup(p2)

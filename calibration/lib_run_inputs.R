@@ -60,7 +60,15 @@ CCX_RUN_INPUTS <- list(
   list(path    = file.path("data", "obs_h_ml_prior.rds"),
        kind    = "file", pattern = NULL,
        why     = "the lognormal observation prior on h_ml (Holte 2017 Argo MLD: annual mean 59.7 / max 118 m as the 16/84 % points)",
-       symptom = "readRDS() errors inside the prior at the first log-posterior evaluation")
+       symptom = "readRDS() errors inside the prior at the first log-posterior evaluation"),
+  # 2026-09-13g: the equatorial cell's product -- its PINNED GEOMETRY (the
+  # "hilda_eq" structure reads it), the B1 reservoir target (tryCatch'ed to
+  # NULL by ccx_eq_b1_target(), so absence would DROP the row silently) and the
+  # W0 prior on w_eq.
+  list(path    = file.path("data", "obs_eq_cell.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "the equatorial cell: eq_frac / h_eq / sst_eq / alk_eq geometry, the B1 +55.47 uatm target, the N(27, 3) Sv W0 prior",
+       symptom = "ccx_apply_structure('hilda_eq') errors; or with a hilda run, nothing -- the eq_b1 row is simply ABSENT from by_stream")
 )
 
 #' Stop unless every run-time input is present, naming the one that is not

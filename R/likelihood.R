@@ -905,6 +905,25 @@ LIK_USE_OCEAN_GRAD   <- TRUE
 # with a seasonal cycle and a 1972-2020 bottle spread) -- DERIVED from the
 # product, not typed.
 LIK_USE_HS_SURFACE   <- TRUE
+# OBJECTIVE CHANGE -- THE B1 RESERVOIR ROW (2026-09-13g, ruling 4: "B1 SCORES").
+# The equatorial cells' area-weighted annual pCO2 MINUS the area-weighted
+# annual pCO2 over ALL surface boxes (ml, hs, eq; both hemispheres), averaged
+# over LIK_EQ_B1_YEARS, against the SOM-FFN climatology's +55.47 uatm
+# (data/obs_eq_cell.rds $b1; data-raw/build_eq_cell_targets.R) at sigma 6.77
+# (ruling 5: the mask-sensitivity FLOOR -- the product carries no uncertainty
+# field). WHY IT HAS POWER ON W0: at w_eq = 0 the cell IS the mixed layer and
+# the contrast is ~0 (z ~ -8); together with the N(27, 3) Sv prior on `w_eq`
+# it is the second, independent constraint on one parameter, so it can REJECT
+# the cell, not just tune it (prereg 09-13g §3, PE8). Rows are ABSENT (not
+# zero) with the cell off, with the product missing, or with the flag off.
+LIK_USE_EQ_B1        <- TRUE
+# The averaging window of the model's B1 contrast, calendar years inclusive.
+# The contrast is invariant to the epoch to first order (both sides ride the
+# atmosphere) and the product states no normalisation year (CHANGELOG 09-04g
+# B1c); 2000-2015 is the prereg's choice and sits inside the climatology's
+# own span. The row reads the run's monthly rows of these years (the
+# ccx_epoch_year_samples() idiom), so it needs the run to reach the LAST one.
+LIK_EQ_B1_YEARS      <- c(2000L, 2015L)
 # ⚠ PROVENANCE ONLY, RETIRED 2026-08-28. Nothing may gate on this. It records
 # what the band WAS, so a reader of an older handoff, output or quarantined arm
 # can tell which regime that artifact was produced under.
@@ -1024,6 +1043,12 @@ ccx_ocean_sigma_eff <- function(row, h_ml) {
 ccx_column_area <- function(aux, hemi) {
   if (!is.null(aux$a_ls)) aux$a_ls[[hemi]] else aux$a_oc[[hemi]]
 }
+#' The MIXED LAYER's own area (2026-09-13g, choice D1): `a_ml = a_ls - a_eq` with
+#' the equatorial cell on, the column area otherwise. Falls back through
+#' ccx_column_area() for an aux built before `a_ml` existed.
+ccx_ml_area <- function(aux, hemi) {
+  if (!is.null(aux$a_ml)) aux$a_ml[[hemi]] else ccx_column_area(aux, hemi)
+}
 
 ccx_steady_profile_from_source <- function(S, p, aux, grid, hemi) {
   nl <- grid$nl
@@ -1124,14 +1149,18 @@ ccx_epoch_year_samples <- function(epoch)
 #' when aux$mld_hs_coef is present). Reads ONLY what ccx_prepare() built, so it
 #' cannot hold a second opinion about whether a box is seasonal
 #' ([[two_gates_one_mechanism]]).
+#' + "eq" (the equatorial cell, 2026-09-13g: constant, its own thickness).
+#' ⚠ "ml" is over the MIXED LAYER'S OWN area since the cell (choice D1):
+#' `aux$a_ml`, which is `a_ls` itself with the cell off, so nothing moves there.
 ccx_box_mass_at <- function(aux, grid, which, h, t) {
   rho <- ccx_const("RHO_SEAWATER")
   switch(which,
-    ml   = ccx_column_area(aux, h) * grid$dz[1] * rho *
+    ml   = ccx_ml_area(aux, h) * grid$dz[1] * rho *
              (if (is.null(aux$mld_coef)) 1 else ccx_mld_eval(aux$mld_coef[[h]], t)$f),
     deep = ccx_column_area(aux, h) * grid$dz[length(grid$dz)] * rho,
     hs   = aux$hs_mass_kg[[h]] *
              (if (is.null(aux$mld_hs_coef)) 1 else ccx_mld_eval(aux$mld_hs_coef[[h]], t)$f),
+    eq   = aux$eq_mass_kg[[h]],
     stop("ccx_box_mass_at(): unknown box '", which, "'"))
 }
 
@@ -1171,9 +1200,52 @@ ccx_box_annual_conc <- function(out, aux, grid, which, epoch, hemis = HEMIS) {
   c(dic  = sum(w * dic) / sum(w),
     d13c = sum(w * dic * d13c) / sum(w * dic))
 }
+#' The three weighted SUMS behind ccx_box_annual_conc() (2026-09-13g), so a
+#' caller can combine several box kinds on the SAME weights without re-deriving
+#' them (ccx_surface_annual_conc()). Same per-hemisphere arithmetic, same
+#' samples; kept beside the reader rather than as an attribute on its value so
+#' the value stays a bare named pair (tests compare it identically).
+.ccx_box_annual_sums <- function(out, aux, grid, which, epoch, hemis = HEMIS) {
+  tt <- ccx_epoch_year_samples(epoch)
+  j  <- vapply(tt, function(t1) which.min(abs(out$t - t1)), integer(1))
+  tj <- out$t[j]
+  per_h <- vapply(hemis, function(h) {
+    C   <- out[[paste0(which, "_C_",   h)]][j]
+    C13 <- out[[paste0(which, "_C13_", h)]][j]
+    M   <- vapply(tj, function(t1) ccx_box_mass_at(aux, grid, which, h, t1), numeric(1))
+    c(dic  = mean(C * aux$mol_per_GtC / M * 1e6),
+      d13c = mean(1000 * (C13 / C / ccx_const("R13_VPDB") - 1)),
+      w    = mean(M))
+  }, numeric(3))
+  w <- per_h["w", ]; dic <- per_h["dic", ]; d13c <- per_h["d13c", ]
+  c(w = sum(w), wd = sum(w * dic), wdd = sum(w * dic * d13c))
+}
 
+#' The SURFACE as the gradient row reads it: the mixed layer alone when the
+#' equatorial cell is absent -- the SAME call as before 2026-09-13g, bit for bit
+#' -- and the mass-weighted mean over `ml` + `eq` when it exists (RULING 3,
+#' 09-13g: the area-weighted surface reader). The GLODAP surface bottles the
+#' target is cut from include the tropics, so a model with a tropical box must
+#' present the SAME mixture. Weights are each box's annual-mean mass, the
+#' convention ccx_box_annual_conc() already uses across hemispheres.
+ccx_surface_annual_conc <- function(out, aux, grid, epoch) {
+  eq_cols <- paste0("eq_C_", HEMIS)
+  if (!all(eq_cols %in% names(out)) || anyNA(out[[eq_cols[1]]]))
+    return(ccx_box_annual_conc(out, aux, grid, "ml", epoch))
+  ss <- .ccx_box_annual_sums(out, aux, grid, "ml", epoch) +
+        .ccx_box_annual_sums(out, aux, grid, "eq", epoch)
+  c(dic  = unname(ss["wd"]  / ss["w"]),
+    d13c = unname(ss["wdd"] / ss["wd"]))
+}
+
+# The columns the GRADIENT row reads. The rest of CCX_OCEAN_BOX_COLS (hs_*,
+# eq_*, *_pco2_*) are OPTIONAL to this reader -- NA or absent when the box does
+# not exist -- so a hand-built `out` from before they existed still reads.
+# (A function, not a vector: this file is sourced before R/model.R defines HEMIS.)
+ccx_ocean_grad_cols <- function() unlist(lapply(HEMIS, function(h)
+  paste0(c("ml_C_", "ml_C13_", "deep_C_", "deep_C13_"), h)))
 ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
-  if (!all(CCX_OCEAN_BOX_COLS %in% names(out))) return(NULL)
+  if (!all(ccx_ocean_grad_cols() %in% names(out))) return(NULL)
   # A run that ends BEFORE the epoch would be read at its final value by
   # rule = 2 -- silently. Rows ABSENT instead, with a warning naming it (the
   # guard ccx_model_hs_surface() already had; added here 2026-09-12, review A16).
@@ -1185,7 +1257,9 @@ ccx_model_ocean_gradient <- function(out, aux, grid, epoch) {
   }
   # ANNUAL MEANS over each layer's own epoch year, each box over its mass AT THE
   # TIME (2026-09-11 (4)); the boxes span the LOW-LATITUDE column's area.
-  s <- ccx_box_annual_conc(out, aux, grid, "ml",   epoch$surf)
+  # The SURFACE is `ml` + the equatorial cell by mass when the cell exists
+  # (ruling 3, 2026-09-13g), the mixed layer alone -- bit for bit -- otherwise.
+  s <- ccx_surface_annual_conc(out, aux, grid, epoch$surf)
   b <- ccx_box_annual_conc(out, aux, grid, "deep", epoch$deep)
   list(dic = unname(b["dic"] - s["dic"]), d13c = unname(b["d13c"] - s["d13c"]))
 }
@@ -1206,7 +1280,16 @@ ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
   # objective #11 rides in this bundle but must NOT share the gradient target's
   # absence switch (two unrelated observations, one NULL): built first.
   hs_surf <- ccx_hs_surface_scored(out, spin)
-  if (is.null(tg)) return(if (is.null(hs_surf)) NULL else list(hs_surf = hs_surf))
+  # ... and the B1 reservoir row (2026-09-13g), on the same footing: its own
+  # observation, its own absence switch, riding in this bundle so every one of
+  # the ~80 `ccx_ocean_grad_scored(out, spin)` call sites carries it.
+  eq_b1 <- ccx_eq_b1_scored(out, spin)
+  extras <- function() {
+    x <- list(hs_surf = hs_surf, eq_b1 = eq_b1)
+    x <- x[!vapply(x, is.null, logical(1))]
+    if (length(x)) x else NULL
+  }
+  if (is.null(tg)) return(extras())
   h <- spin$grid$h_ml
   # ⚠ NO BAND GATE. Retired 2026-08-28 when option 5 was adopted: the rows are
   # scored at EVERY h_ml, at sigma_eff(h). See LIK_USE_OCEAN_GRAD's block.
@@ -1219,7 +1302,7 @@ ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
   g3 <- ccx_model_ocean_gradient(out, spin$aux, spin$grid,
                                  list(surf = tg$d13c$epoch_surf,
                                       deep = tg$d13c$epoch_deep))
-  if (is.null(gd) || is.null(g3)) return(if (is.null(hs_surf)) NULL else list(hs_surf = hs_surf))
+  if (is.null(gd) || is.null(g3)) return(extras())
   # Alkalinity needs no epoch: it has no transient in this model (no air-sea
   # flux, no anthropogenic source), so its profile is a steady-state function of
   # the export field alone.
@@ -1244,7 +1327,9 @@ ccx_ocean_grad_scored <- function(out, spin, pump = NULL) {
        h_ml = h,
        # objective #11 rides in the same bundle: same call sites, same epoch
        # discipline, absent (NULL) with the structure off.
-       hs_surf = hs_surf)
+       hs_surf = hs_surf,
+       # the B1 reservoir row (2026-09-13g), likewise absent with the cell off
+       eq_b1 = eq_b1)
 }
 
 #' The HS-surface targets (objective #11), or NULL when the product is absent.
@@ -1291,6 +1376,75 @@ ccx_hs_surface_scored <- function(out, spin) {
   list(dic = m$dic, d13c = m$d13c,
        sd_eff = c(dic  = sqrt(tg$dic$sd^2  + tg$dic$sd_cluster^2),
                   d13c = sqrt(tg$d13c$sd^2 + tg$d13c$sd_cluster^2)))
+}
+
+# ---- THE B1 RESERVOIR ROW (the equatorial cell, 2026-09-13g) ----------------
+#' The B1 target, or NULL when the product is absent (the hs_surface idiom).
+#' `target` +55.47 uatm, `sd` 6.77 (ruling 5) -- read, never typed.
+ccx_eq_b1_target <- local({
+  cache <- NULL
+  function() {
+    if (!is.null(cache)) return(cache)
+    g <- tryCatch(readRDS(ccx_path("data", "obs_eq_cell.rds")), error = function(e) NULL)
+    if (is.null(g) || is.null(g$b1) || is.null(g$b1$value) || is.null(g$b1$sd_mask)) return(NULL)
+    cache <<- list(target = g$b1$value, sd = g$b1$sd_mask, by_hemi = g$b1$by_hemi,
+                   def = g$b1$def, source = g$b1$source)
+    cache
+  }
+})
+
+#' The MODEL's B1 contrast, uatm: the cells' area-weighted annual-mean pCO2
+#' minus the area-weighted annual-mean pCO2 over EVERY surface box, averaged
+#' over the years in LIK_EQ_B1_YEARS. NULL when the eq columns are absent or NA
+#' (the cell does not exist).
+#'
+#' The pCO2 columns are the DERIVATIVE'S OWN values at each month's opening
+#' state (CCX_OCEAN_BOX_COLS' note), so this reader carries no carbonate call of
+#' its own: it is an area-weighted average of numbers the core already
+#' integrated with (P0e holds the column to ccx_deriv(record = TRUE)'s value).
+#' Weights are the boxes' AREAS -- the observation is an area-weighted mean of
+#' a gridded field -- constant in time, so the per-year means are taken per
+#' box first and combined once. The per-hemisphere halves ride along as
+#' `by_hemi` for the PE9 check (NOT scored: the modelled halves are equal by
+#' construction, one velocity and near-equal areas).
+ccx_model_eq_b1 <- function(out, aux, years = LIK_EQ_B1_YEARS) {
+  eq_cols <- paste0("eq_pco2_", HEMIS)
+  if (!all(eq_cols %in% names(out)) || anyNA(out[[eq_cols[1]]])) return(NULL)
+  yrs <- seq.int(years[1], years[2])
+  if (!.ccx_run_covers_epoch(out, max(yrs))) {
+    warning("ccx_model_eq_b1(): the run ends at ", max(out$t), ", before the B1 window ",
+            years[1], "-", years[2], "; the eq_b1 row is ABSENT for this run.")
+    return(NULL)
+  }
+  # the sampled rows: each year's 12 month-centres, nearest written row
+  j <- unlist(lapply(yrs, function(yr)
+    vapply(ccx_epoch_year_samples(yr), function(t1) which.min(abs(out$t - t1)), integer(1))))
+  # per-box window means and areas, in CCX_SURFACE_BOXES x HEMIS order; a box
+  # that does not exist (hs with HILDA off) has NA pCO2 and zero area and is
+  # dropped from the mean rather than poisoning it
+  area <- function(b, h) switch(b, ml = ccx_ml_area(aux, h), hs = aux$a_hs[[h]],
+                                eq = aux$a_eq[[h]])
+  m <- list(); a <- list()
+  for (b in CCX_SURFACE_BOXES) for (h in HEMIS) {
+    col <- out[[paste0(b, "_pco2_", h)]]
+    if (is.null(col) || anyNA(col[j])) next
+    m[[paste(b, h)]] <- mean(col[j]); a[[paste(b, h)]] <- area(b, h)
+  }
+  m <- unlist(m); a <- unlist(a)
+  is_eq <- grepl("^eq ", names(m))
+  cell <- sum(a[is_eq] * m[is_eq]) / sum(a[is_eq])
+  all  <- sum(a * m) / sum(a)
+  half <- vapply(HEMIS, function(h) m[[paste("eq", h)]] - all, numeric(1))
+  list(value = cell - all, cell = cell, surface = all, by_hemi = half)
+}
+
+#' The B1 row as the likelihood receives it. NULL = row absent.
+ccx_eq_b1_scored <- function(out, spin) {
+  tg <- ccx_eq_b1_target()
+  if (is.null(tg)) return(NULL)
+  m <- ccx_model_eq_b1(out, spin$aux)
+  if (is.null(m)) return(NULL)
+  list(value = m$value, by_hemi = m$by_hemi, sd_eff = tg$sd)
 }
 
 #' Hemisphere-area weights for the Hua zones
@@ -2039,6 +2193,20 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
         if (length(v) == 1L && is.finite(v))
           add(k[2], stats::dnorm(tgh[[k[1]]]$target, v, hs$sd_eff[[k[1]]], log = TRUE))
       }
+  }
+
+  # ---- THE B1 RESERVOIR ROW (the equatorial cell, 2026-09-13g) -----------
+  # Absent with the cell off (the box does not exist), with the product
+  # missing, or with the flag off -- never zero. One Gaussian at the product's
+  # mask-sensitivity floor (ruling 5), attached by ccx_eq_b1_scored().
+  if (LIK_USE_EQ_B1 && !is.null(ocean_grad) && !is.null(ocean_grad$eq_b1)) {
+    eb <- ocean_grad$eq_b1; tgb <- ccx_eq_b1_target()
+    if (!is.null(tgb) && is.null(eb$sd_eff))
+      stop("ccx_loglik(): `ocean_grad$eq_b1` carries no `sd_eff`. Build it with ",
+           "ccx_ocean_grad_scored(out, spin) / ccx_eq_b1_scored(); a hand-built list ",
+           "would score at an undefined sigma.")
+    if (!is.null(tgb) && length(eb$value) == 1L && is.finite(eb$value))
+      add("eq_b1", stats::dnorm(tgb$target, eb$value, eb$sd_eff, log = TRUE))
   }
 
   # ---- GCB sinks: PARTITION only -------------------------------------

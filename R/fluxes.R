@@ -55,6 +55,12 @@ CCX_FLUX_CHANNELS <- c(
   pump     = "Biological pump (export)",
   int_exch = "Interior ocean exchange (gross)",
   conv_ml  = "Conveyor surface limb",
+  # THE EQUATORIAL CELL'S surface-divergence limb, cell -> mixed layer
+  # (2026-09-13g), LABELLED at the call site: both boxes are class "ml", so
+  # without the label it would land in conv_ml. Its two companion limbs
+  # (layer k_eq -> cell, ML -> layer k_eq) classify into ml_int on their own,
+  # which keeps "surface ocean to deep (net)" right under the cell.
+  eq_ml    = "Equatorial cell to surface (gross)",
   ihx_NS   = "Atmosphere NH to SH (gross)",
   ihx_SN   = "Atmosphere SH to NH (gross)"
 )
@@ -131,6 +137,9 @@ ccx_flux_boxclass <- function(aux, nb) {
     # same call, and the same reason, as the artificial sink and the ENSO limbs.
     if (!is.null(ix$hs)) cls[ix$hs] <- "ml"
     if (!is.null(ix$hd)) cls[ix$hd] <- "int"
+    # The equatorial cell (2026-09-13g) is a SURFACE box on the same reasoning
+    # as HS: atm<->eq is genuinely air-sea and belongs in as_down/as_up.
+    if (!is.null(ix$eq)) cls[ix$eq] <- "ml"
   }
   if (anyNA(cls)) stop("ccx_flux_boxclass: unclassified box(es) at ",
                        paste(which(is.na(cls)), collapse = ", "))

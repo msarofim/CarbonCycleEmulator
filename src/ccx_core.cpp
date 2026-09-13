@@ -39,6 +39,8 @@ using namespace Rcpp;
 // Box layout, per hemisphere, in state order -- MUST match ccx_box_names():
 //   0 atm | 1 leaf | 2 wood | 3 soil_fast | 4 soil_slow | 5 ml | 6..15 interior
 //   16 hs | 17 hd                      <- ONLY when the HILDA structure is on
+//   18 eq  (or 16 with HILDA off)      <- ONLY when the equatorial cell is on
+//                                         (2026-09-13g); IEQ is set at runtime
 //
 // ⚠ THE STRIDE IS RUNTIME, NOT COMPILE-TIME, SINCE 2026-09-05. The
 // high-latitude boxes are ABSENT rather than empty when hs_frac = 0: carrying
@@ -56,6 +58,9 @@ static const int NL = 10;          // ocean interior layers
 static const int IML = 5;          // mixed layer, relative to the hemisphere base
 static const int IHS = IML + NL + 1;   // high-latitude surface (= 16), if present
 static const int IHD = IHS + 1;        // high-latitude deep     (= 17), if present
+static int IEQ = -1;                   // the equatorial cell, RUNTIME (2026-09-13g):
+                                       // IHD + 1 with HILDA on, IHS's slot with it
+                                       // off; -1 = absent. Set by unpack_aux().
 static const int C = 0, C13 = 1, C14 = 2;
 
 // Forcing columns, and the ceiling on the cleared fraction. BOTH are duplicated
@@ -151,6 +156,14 @@ struct Aux {
   int    pump_hs_on;
   double pump_hs_org[2], pump_hs_carb[2];
   double hs_C0[2];                  // preindustrial HS carbon, DIC-limited mode
+  // THE EQUATORIAL UPWELLING CELL (2026-09-13g). Twin of the block in R's
+  // ccx_prepare(); sent unconditionally, zero-filled when off. `eq_on` gates
+  // every flux on both cores and, with hs_on, sets the stride. `a_ml` is the
+  // mixed layer's OWN area (choice D1: a_ls - a_eq; == a_ls with the cell off).
+  int    eq_on;
+  double a_ml[2], a_eq[2], eq_mass_kg[2], asx_eq[2], eq_w_share[2];
+  double h_eq, sst_eq, sst_eq_enso, alk_eq, dic0_eq, revelle0_eq;
+  int    k_eq;                      // 1-BASED as in R
 };
 
 static inline void ccx_alpha_as(double sst, const Aux &A,
@@ -171,6 +184,8 @@ static inline void ccx_alpha_as(double sst, const Aux &A,
 struct Par {
   double beta, q10, k_w, kz, w_up, w_out[2], tau_ex;
   double u_hs, tau_q;        // HILDA HS<->HD and HD<->interior (2026-09-05)
+  double w_eq, gamma_eq;     // the equatorial cell's whole-band Sv and its
+                             // Nino3.4 modulation (2026-09-13g)
   double q_attach_from;      // shallowest interior layer HD attaches to,
                              // 1-BASED as in R. 1 = every layer = HILDA's
                              // depth-independent q (2026-09-05f)
@@ -358,9 +373,17 @@ inline double pco2_from_dic_cpp(double dic, double alk, double T,
 }
 
 // ---- derivative -----------------------------------------------------
+// `pco2_rec` (2026-09-13g): OPTIONAL, may be nullptr. When given, the surface
+// pCO2 of each surface box at THIS evaluation is written to it in the order
+// [ml_NH, hs_NH, eq_NH, ml_SH, hs_SH, eq_SH] (CCX_SURFACE_BOXES per
+// hemisphere), NA_REAL where the box does not exist. ccx_run_cpp() reads it
+// off the FIRST RK4 stage of each month -- the same (y, t, f) the `out` row
+// records -- so the exported columns are the derivative's own numbers, not a
+// second estimator (twin of ccx_deriv(record = TRUE)'s pco2_* in R).
 static void deriv(const double* y, double t, const Par& P, const double* f,
-                  const Aux& A, double* dy) {
+                  const Aux& A, double* dy, double* pco2_rec = nullptr) {
   for (int i = 0; i < NB * 3; ++i) dy[i] = 0.0;
+  if (pco2_rec) for (int i = 0; i < 6; ++i) pco2_rec[i] = NA_REAL;
 
   // flux helper: source-ratio transport, applied antisymmetrically
   // SEASONAL MIXED-LAYER SHAPE -- twin of ccx_mld_eval() in R/model.R, written
@@ -445,7 +468,11 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       mld_eval(hi, t, &f, &dfdt);
       h_ml_t   = A.dz[0] * f;            // m, mean-preserving by construction
       dh_ml_dt = A.dz[0] * dfdt;         // m/yr, > 0 deepening
-      dzl[1]   = dzl[1] + (dzl[0] - h_ml_t);   // layer 1 absorbs the excursion
+      // layer 1 absorbs the excursion -- as a VOLUME under the equatorial
+      // cell (D1, 2026-09-13g): share = a_ml / a_ls; twin of R's
+      // ccx_grid_at_h_ml(share), which carries why this is a correctness term
+      if (A.eq_on) dzl[1] = dzl[1] + (dzl[0] - h_ml_t) * (A.a_ml[hi] / A.a_ls[hi]);
+      else         dzl[1] = dzl[1] + (dzl[0] - h_ml_t);
       dzl[0]   = h_ml_t;
       // dz[0] + dz[1] is conserved, so dz_mid[0] is INVARIANT; only dz_mid[1]
       // moves. Recomputed in full rather than patched, so it cannot drift.
@@ -601,6 +628,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     } else {
       pco2_ml = pco2_from_dic_cpp(dic_ml, A.alk, sst, A, &K0);
     }
+    if (pco2_rec) pco2_rec[3 * hi + 0] = pco2_ml;
     const double gx = A.asx[hi] * P.k_w * K0;
     // alpha13_signed reason (a): one-way by construction -- gx > 0 always, so
     // these go negative only when pCO2 does, i.e. in a diverging intermediate
@@ -629,11 +657,17 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
 
     // interior diffusion, per tracer on its own gradient, at the interface's
     // own K (A.kz_int, 2026-09-06b; == P.kz everywhere at the default)
+    // THE ML / LAYER-1 INTERFACE UNDER THE EQUATORIAL CELL (2026-09-13g, D1):
+    // layer 1 enters with the EFFECTIVE thickness dz_1 * a_ls/a_ml -- twin of
+    // the R block, which carries the derivation. Not formed with the cell off.
+    const double r1 = A.eq_on ? A.a_ls[hi] / A.a_ml[hi] : 1.0;
+    const double dz1_eff = A.eq_on ? dzl[1] * r1 : dzl[1];
     for (int kk = 0; kk < NL; ++kk) {
       const int a = base + IML + kk;
       const int b = base + IML + kk + 1;
+      const double dzb = (kk == 0) ? dz1_eff : dzl[kk + 1];
       for (int tr = 0; tr < 3; ++tr) {
-        const double Ft = A.kz_int[kk] * (y[IX(a, tr)] / dzl[kk] - y[IX(b, tr)] / dzl[kk + 1])
+        const double Ft = A.kz_int[kk] * (y[IX(a, tr)] / dzl[kk] - y[IX(b, tr)] / dzb)
                           / dzml[kk];
         dy[IX(a, tr)] -= Ft;
         dy[IX(b, tr)] += Ft;
@@ -652,9 +686,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // ⭐ alpha13 = 1 DELIBERATELY: entrainment is physical transport, not a
     // fractionating exchange, so add_flux takes 13C AND 14C from the source box
     // for free. Adding a 14C fractionation here would double-count ~17 permil.
+    // (the same effective layer-1 thickness under the equatorial cell, D1)
     if (dh_ml_dt > 0.0) {
       add_flux(base + IML + 1, iml,
-               y[IX(base + IML + 1, C)] * dh_ml_dt / dzl[1], 1.0);   // entrainment
+               y[IX(base + IML + 1, C)] * dh_ml_dt / dz1_eff, 1.0);  // entrainment
     } else if (dh_ml_dt < 0.0) {
       add_flux(iml, base + IML + 1,
                y[IX(iml, C)] * (-dh_ml_dt) / dzl[0], 1.0);           // detrainment
@@ -754,6 +789,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       } else {
         pco2_hs = pco2_from_dic_cpp(dic_hs, A.alk_hs, sst_h, A, &K0h);
       }
+      if (pco2_rec) pco2_rec[3 * hi + 1] = pco2_hs;
       const double gx_hs = A.asx_hs[hi] * P.k_w * K0h;
       double a_dn_h, a_up_h;
       ccx_alpha_as(sst_h, A, &a_dn_h, &a_up_h);
@@ -796,6 +832,45 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
           add_flux(ik, ihd, y[IX(ik, C)] / P.tau_q, 1.0);
         }
       }
+    }
+
+    // ---- THE EQUATORIAL UPWELLING CELL (2026-09-13g) -- twin of the block
+    // in R/model.R, which carries the reasoning (prereg 09-13g §2). eq_on = 0
+    // emits nothing and the box does not exist.
+    if (A.eq_on) {
+      const int ieq = base + IEQ;
+      const int keq = A.k_eq;                       // 1-based, as in R
+      const int iup = base + IML + keq;             // interior layer keq
+      // (a) the three-limb loop, one volume flux W round it, each limb W x
+      //     the SOURCE box's per-volume concentration (three different areas,
+      //     nothing cancels). Association order mirrors the R exactly.
+      const double fac = 1.0 - P.gamma_eq * enso;
+      const double W = P.w_eq * SV_TO_M3YR * A.eq_w_share[hi] * ((fac > 0.0) ? fac : 0.0);
+      if (W > 0.0) {
+        add_flux(iup, ieq, W * y[IX(iup, C)] / (A.a_ls[hi] * dzl[keq]), 1.0);      // upwelling
+        add_flux(ieq, iml, W * y[IX(ieq, C)] / (A.a_eq[hi] * A.h_eq), 1.0);         // surface divergence
+        add_flux(iml, iup, W * y[IX(iml, C)] / (A.a_ml[hi] * dzl[0]), 1.0);         // subduction
+      }
+      // (b) air-sea on the cell at its own SST (+ the hemisphere's anomaly +
+      //     its own Nino3.4 slope) and alkalinity; the HS idiom.
+      const double sst_e = A.sst_eq
+        + ((P.sst_obs > 0 && !std::isnan(sst_an)) ? sst_an : P.sst_scale * gmst)
+        + A.sst_eq_enso * enso;
+      const double dic_eq = y[IX(ieq, C)] * A.mol_per_GtC / A.eq_mass_kg[hi];
+      double K0e, pco2_eq;
+      if (P.revelle_frozen > 0.0) {
+        K0e = K0_only(sst_e, A);
+        pco2_eq = A.chi0 * (1.0 + A.revelle0_eq
+                            * (dic_eq - A.dic0_eq) / A.dic0_eq);
+      } else {
+        pco2_eq = pco2_from_dic_cpp(dic_eq, A.alk_eq, sst_e, A, &K0e);
+      }
+      if (pco2_rec) pco2_rec[3 * hi + 2] = pco2_eq;
+      const double gx_eq = A.asx_eq[hi] * P.k_w * K0e;
+      double a_dn_e, a_up_e;
+      ccx_alpha_as(sst_e, A, &a_dn_e, &a_up_e);
+      add_flux(iatm, ieq, gx_eq * chi,     a_dn_e, true);
+      add_flux(ieq, iatm, gx_eq * pco2_eq, a_up_e, true);
     }
 
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
@@ -870,7 +945,12 @@ static Aux unpack_aux(const List& a) {
   Aux A;
   // FIRST, because it sets the stride every index below depends on.
   A.hs_on = a["hs_on"];
-  NPH = A.hs_on ? (IHD + 1) : (IML + NL + 1);
+  // SECOND, for the same reason: the equatorial cell (2026-09-13g) appends
+  // one box per hemisphere after hs/hd (or after the interior when HILDA is
+  // off), so IEQ and the stride depend on both switches.
+  A.eq_on = a["eq_on"];
+  IEQ = A.eq_on ? (A.hs_on ? IHD + 1 : IML + NL + 1) : -1;
+  NPH = (A.hs_on ? (IHD + 1) : (IML + NL + 1)) + (A.eq_on ? 1 : 0);
   NB  = 2 * NPH;
   A.gtc_per_ppm_hemi = a["gtc_per_ppm_hemi"];
   A.chi0 = a["chi0"]; A.mol_per_GtC = a["mol_per_GtC"];
@@ -929,6 +1009,15 @@ static Aux unpack_aux(const List& a) {
   v = a["pump_hs_org"];  A.pump_hs_org[0] = v[0];  A.pump_hs_org[1] = v[1];
   v = a["pump_hs_carb"]; A.pump_hs_carb[0] = v[0]; A.pump_hs_carb[1] = v[1];
   v = a["hs_C0"];        A.hs_C0[0] = v[0];        A.hs_C0[1] = v[1];
+  // the equatorial cell (2026-09-13g); eq_on was read at the top
+  v = a["a_ml"];        A.a_ml[0] = v[0];        A.a_ml[1] = v[1];
+  v = a["a_eq"];        A.a_eq[0] = v[0];        A.a_eq[1] = v[1];
+  v = a["eq_mass_kg"];  A.eq_mass_kg[0] = v[0];  A.eq_mass_kg[1] = v[1];
+  v = a["asx_eq"];      A.asx_eq[0] = v[0];      A.asx_eq[1] = v[1];
+  v = a["eq_w_share"];  A.eq_w_share[0] = v[0];  A.eq_w_share[1] = v[1];
+  A.h_eq = a["h_eq"]; A.sst_eq = a["sst_eq"]; A.sst_eq_enso = a["sst_eq_enso"];
+  A.alk_eq = a["alk_eq"]; A.k_eq = a["k_eq"];
+  A.dic0_eq = a["dic0_eq"]; A.revelle0_eq = a["revelle0_eq"];
   return A;
 }
 
@@ -951,6 +1040,7 @@ static Par unpack_par(const List& p) {
   // "a pre-dated parameter list must still reach the core as a model"
   // fallback lives; read unconditionally here, as every field is.
   P.u_hs = p["u_hs"]; P.tau_q = p["tau_q"];
+  P.w_eq = p["w_eq"]; P.gamma_eq = p["gamma_eq"];   // the equatorial cell (2026-09-13g)
   P.q_attach_from = p["q_attach_from"];
   P.q_conv = p["q_conv"];
   P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];
@@ -1028,7 +1118,8 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
   // business owning. R/likelihood.R converts. They are a TIME SERIES rather
   // than a final state because the gradient terms are scored at the
   // OBSERVATIONS' epoch (~2000, not the run's end year) -- Marcus 2026-08-16.
-  NumericMatrix out(n, 23);   // 11 + 6 per hemisphere (CCX_OCEAN_BOX_COLS)
+  NumericMatrix out(n, 33);   // 11 + 11 per hemisphere (CCX_OCEAN_BOX_COLS)
+  double pco2_rec[6];
   const double gpp = A.gtc_per_ppm_hemi;
 
   std::vector<double> f(N_FORCING);
@@ -1057,19 +1148,30 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
     for (int hi = 0; hi < 2; ++hi) {
       const int base = hi * NPH;
       const int iml = base + IML, idp = base + IML + NL;
-      out(i, 11 + 6 * hi) = y[IX(iml, C)];
-      out(i, 12 + 6 * hi) = y[IX(iml, C13)];
-      out(i, 13 + 6 * hi) = y[IX(idp, C)];
-      out(i, 14 + 6 * hi) = y[IX(idp, C13)];
+      out(i, 11 + 11 * hi) = y[IX(iml, C)];
+      out(i, 12 + 11 * hi) = y[IX(iml, C13)];
+      out(i, 13 + 11 * hi) = y[IX(idp, C)];
+      out(i, 14 + 11 * hi) = y[IX(idp, C13)];
       // the HS box (2026-09-07f): exists only with the structure on -- with it
       // off IHS is past the state vector, so write NA rather than read it.
       if (A.hs_on) {
-        out(i, 15 + 6 * hi) = y[IX(base + IHS, C)];
-        out(i, 16 + 6 * hi) = y[IX(base + IHS, C13)];
+        out(i, 15 + 11 * hi) = y[IX(base + IHS, C)];
+        out(i, 16 + 11 * hi) = y[IX(base + IHS, C13)];
       } else {
-        out(i, 15 + 6 * hi) = NA_REAL;
-        out(i, 16 + 6 * hi) = NA_REAL;
+        out(i, 15 + 11 * hi) = NA_REAL;
+        out(i, 16 + 11 * hi) = NA_REAL;
       }
+      // the equatorial cell (2026-09-13g), likewise
+      if (A.eq_on) {
+        out(i, 17 + 11 * hi) = y[IX(base + IEQ, C)];
+        out(i, 18 + 11 * hi) = y[IX(base + IEQ, C13)];
+      } else {
+        out(i, 17 + 11 * hi) = NA_REAL;
+        out(i, 18 + 11 * hi) = NA_REAL;
+      }
+      // columns 19..21 (+ 11*hi) -- ml_pco2 / hs_pco2 / eq_pco2 -- are filled
+      // below off the month's FIRST RK4 stage, which is the derivative at
+      // exactly this (y, t, forcing row).
     }
 
     for (int j = 0; j < N_FORCING; ++j) f[j] = forcing(i, j);
@@ -1078,7 +1180,10 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
     double tt = times[i];
     const double h = (1.0 / 12.0) / substeps;
     for (int s = 0; s < substeps; ++s) {
-      deriv(y.data(), tt, P, f.data(), A, k1.data());
+      deriv(y.data(), tt, P, f.data(), A, k1.data(), (s == 0) ? pco2_rec : nullptr);
+      if (s == 0)
+        for (int hi = 0; hi < 2; ++hi)
+          for (int b = 0; b < 3; ++b) out(i, 19 + b + 11 * hi) = pco2_rec[3 * hi + b];
       for (int q = 0; q < NS; ++q) tmp[q] = y[q] + h / 2.0 * k1[q];
       deriv(tmp.data(), tt + h / 2.0, P, f.data(), A, k2.data());
       for (int q = 0; q < NS; ++q) tmp[q] = y[q] + h / 2.0 * k2[q];

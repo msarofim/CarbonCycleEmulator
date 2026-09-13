@@ -103,7 +103,23 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     pump_hs_on = as.integer(!is.null(aux$pump_hs)),
     pump_hs_org  = if (is.null(aux$pump_hs)) numeric(2) else c(aux$pump_hs$NH$org,  aux$pump_hs$SH$org),
     pump_hs_carb = if (is.null(aux$pump_hs)) numeric(2) else c(aux$pump_hs$NH$carb, aux$pump_hs$SH$carb),
-    hs_C0 = if (is.null(aux$hs_C0)) numeric(2) else c(aux$hs_C0$NH, aux$hs_C0$SH)
+    hs_C0 = if (is.null(aux$hs_C0)) numeric(2) else c(aux$hs_C0$NH, aux$hs_C0$SH),
+    # THE EQUATORIAL CELL (2026-09-13g). Sent UNCONDITIONALLY, zero-filled when
+    # off, for the same reason as every structural field above; `eq_on` is
+    # read SECOND on the C++ side (after hs_on) because it also sets the box
+    # stride. `a_ml` is the mixed layer's OWN area (choice D1) -- equal to a_ls
+    # with the cell off. An aux built before the cell existed carries none of
+    # these; ccx_prepare() is the one builder, so LOUD rather than defaulted.
+    eq_on = if (is.null(aux$eq_on))
+      stop("aux lacks eq_on -- build it with ccx_prepare() (2026-09-13g)") else as.integer(aux$eq_on),
+    a_ml = c(aux$a_ml$NH, aux$a_ml$SH),
+    a_eq = c(aux$a_eq$NH, aux$a_eq$SH),
+    eq_mass_kg = c(aux$eq_mass_kg$NH, aux$eq_mass_kg$SH),
+    asx_eq = c(aux$asx_eq$NH, aux$asx_eq$SH),
+    eq_w_share = c(aux$eq_w_share$NH, aux$eq_w_share$SH),
+    h_eq = aux$h_eq, sst_eq = aux$sst_eq, sst_eq_enso = aux$sst_eq_enso,
+    alk_eq = aux$alk_eq, k_eq = as.integer(aux$k_eq),
+    dic0_eq = aux$dic0_eq, revelle0_eq = aux$revelle0_eq
   )
 }
 
@@ -183,6 +199,11 @@ ccx_cpp_par <- function(p) {
   # via ccx_hs_on()) means the boxes are absent, and these two are then inert.
   if (is.null(p$u_hs))  p$u_hs  <- 0
   if (is.null(p$tau_q)) p$tau_q <- 0
+  # The equatorial cell's two fitted names (2026-09-13g): absence = 0 = the
+  # loop OFF / no modulation, inert while eq_frac = 0 (in the aux, via
+  # ccx_eq_on()) says the box is absent. Same contract as u_hs / tau_q.
+  if (is.null(p$w_eq))     p$w_eq     <- 0
+  if (is.null(p$gamma_eq)) p$gamma_eq <- 0
   # q_attach_from (2026-09-05f): 1 = every interior layer = HILDA's
   # depth-independent q, so a parameter list written before that date reaches
   # BOTH cores as the 09-05 structure. Same absence contract as h_hs.
@@ -284,6 +305,7 @@ ccx_cpp_par <- function(p) {
   p[c("beta", "fert_form", "beta_max", "fert_k",
       "q10", "k_w", "kz", "w_up", "w_out_NH", "w_out_SH", "tau_ex",
       "u_hs", "tau_q", "q_attach_from",   # HILDA HS/HD (2026-09-05, -05f)
+      "w_eq", "gamma_eq",                 # the equatorial cell (2026-09-13g)
       "q_conv", "conv_sink", "conv_descent", "conv_reverse", "pump_mode",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
@@ -372,8 +394,8 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
   list(par = ccx_cpp_par(spin$params),
        aux = ccx_cpp_aux(spin$aux, spin$grid),
        ss  = ccx_resolve_substeps(substeps, spin$params, spin$grid),
-       box_names = ccx_box_names(spin$grid$nl, ccx_hs_on(spin$params)),
-       hs_on = ccx_hs_on(spin$params))
+       box_names = ccx_box_names(spin$grid$nl, ccx_hs_on(spin$params), ccx_eq_on(spin$params)),
+       hs_on = ccx_hs_on(spin$params), eq_on = ccx_eq_on(spin$params))
 }
 
 #' A forcing table marshalled ONCE for many `ccx_run_prepared()` calls
@@ -408,8 +430,10 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE) {
   # the hs_* columns are NA BY CONTRACT (the box does not exist, 2026-09-07f),
   # and reading them here doubled the substeps to CCX_SUBSTEPS_MAX on every
   # structure-off run -- a 1e-4 R-vs-C++ parity break that looked like physics.
-  guard_cols <- if (prep$hs_on) names(r$out) else
-    grep("^hs_", names(r$out), invert = TRUE, value = TRUE)
+  # ... and the eq_* columns likewise with the equatorial cell off (2026-09-13g).
+  guard_cols <- names(r$out)
+  if (!prep$hs_on) guard_cols <- grep("^hs_", guard_cols, invert = TRUE, value = TRUE)
+  if (!isTRUE(prep$eq_on)) guard_cols <- grep("^eq_", guard_cols, invert = TRUE, value = TRUE)
   while (retry_na && anyNA(r$out[, guard_cols]) && ss < CCX_SUBSTEPS_MAX) {
     ss <- min(2L * ss, CCX_SUBSTEPS_MAX)
     r  <- one(ss)
@@ -421,7 +445,10 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE) {
 #' are on, every column but the hs_* ones when they are off (those are NA by
 #' contract, not by blow-up). Use this wherever `anyNA(out)` stands guard.
 ccx_out_na_guard_cols <- function(out, p) {
-  if (ccx_hs_on(p)) names(out) else grep("^hs_", names(out), invert = TRUE, value = TRUE)
+  cols <- names(out)
+  if (!ccx_hs_on(p)) cols <- grep("^hs_", cols, invert = TRUE, value = TRUE)
+  if (!ccx_eq_on(p)) cols <- grep("^eq_", cols, invert = TRUE, value = TRUE)   # the cell (2026-09-13g)
+  cols
 }
 
 #' The MARSHALLED `p`/`aux` of `ccx_deriv_fast()`, built ONCE for many calls

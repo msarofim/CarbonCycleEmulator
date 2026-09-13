@@ -54,10 +54,24 @@ HEMIS      <- c("NH", "SH")
 # (ml_C, ml_C13, deep_C, deep_C13) for NH then SH. test-parity.R gates it.
 # + the HIGH-LATITUDE SURFACE box (2026-09-07f, objective #11): hs_C / hs_C13
 # per hemisphere, NA when the HILDA boxes are off (the box does not exist).
-# SIX per hemisphere now; the C++ fill is 11 + 6*hi and its matrix is 11 + 12
-# wide, asserted in ccx_run_fast().
+# + the EQUATORIAL CELL (2026-09-13g, prereg_2026-09-13g): eq_C / eq_C13 per
+# hemisphere, NA when the cell is off -- and the SURFACE pCO2 of every surface
+# box (ml / hs / eq, uatm, NA where the box does not exist), for the B1
+# reservoir row. ⚠ THE pCO2 COLUMNS ARE THE DERIVATIVE'S OWN VALUES, not a
+# reader's reconstruction: the R path takes them from ccx_deriv(record = TRUE)
+# at each month's opening state, the C++ from the SAME `deriv()` call that is
+# the first RK4 stage of that month (same y, same t, same forcing row), so
+# neither core carries a second estimator of the air-sea driving quantity
+# (the 2026-09-09r concern) and test-parity.R holds the two together.
+# ELEVEN per hemisphere now; the C++ fill is 11 + 11*hi and its matrix is
+# 11 + 22 wide, asserted in ccx_run_fast().
 CCX_OCEAN_BOX_COLS <- unlist(lapply(HEMIS, function(h)
-  paste0(c("ml_C_", "ml_C13_", "deep_C_", "deep_C13_", "hs_C_", "hs_C13_"), h)))
+  paste0(c("ml_C_", "ml_C13_", "deep_C_", "deep_C13_", "hs_C_", "hs_C13_",
+           "eq_C_", "eq_C13_", "ml_pco2_", "hs_pco2_", "eq_pco2_"), h)))
+# The surface boxes whose pCO2 the B1 row reads, in the order the columns and
+# the C++ recorder use. ONE vector so the reader, the R output fill and the
+# C++ `pco2_rec` slot order cannot disagree.
+CCX_SURFACE_BOXES <- c("ml", "hs", "eq")
 
 # 1 Sv = 1e6 m3/s. The conveyor is parameterised by VOLUME flux because the two
 # hemispheres have different ocean areas -- see ccx_default_params()$q_conv.
@@ -757,11 +771,41 @@ ccx_luc_pool_shares <- function(p) {
 #' both isotope operators SINGULAR (all-zero rows and columns), so "off" has to
 #' mean absent, not present-and-empty. It also keeps the incumbent's state
 #' vector literally identical, which is what makes `hs_frac = 0` bit-exact.
-ccx_box_names <- function(nl = N_INTERIOR, hs = FALSE) {
+#'
+#' + THE EQUATORIAL CELL (2026-09-13g, `eq = TRUE`): ONE more box per
+#' hemisphere, appended AFTER `hs`/`hd` (or after the interior column when the
+#' HILDA structure is off), so again no existing index moves. 19 boxes per
+#' hemisphere with both structures on, 38 total. Same absence contract: off
+#' means ABSENT (see ccx_eq_on()).
+ccx_box_names <- function(nl = N_INTERIOR, hs = FALSE, eq = FALSE) {
   unlist(lapply(HEMIS, function(h)
     c(paste0(h, "_atm"), paste0(h, "_", CCX_LAND_POOLS),
       paste0(h, "_ml"), paste0(h, "_oc", seq_len(nl)),
-      if (hs) c(paste0(h, "_hs"), paste0(h, "_hd")))))
+      if (hs) c(paste0(h, "_hs"), paste0(h, "_hd")),
+      if (eq) paste0(h, "_eq"))))
+}
+
+#' Is the EQUATORIAL UPWELLING CELL on for this parameter set? (2026-09-13g)
+#'
+#' ONE RESOLVER, the ccx_hs_on() idiom: TRUE iff BOTH `eq_frac_NH` and
+#' `eq_frac_SH` are finite and > 0. Absence (a list built before 2026-09-13g)
+#' and 0 mean the same thing -- no boxes.
+#'
+#' ⛔ THE MIRROR-CELL CONTRACT (ruling 1, 09-13g): the cell is built as MIRROR
+#' CELLS with ONE fitted parameter set, so a MIXED pair -- one hemisphere > 0,
+#' the other 0 -- is an ERROR by name, not a one-cell model. Both cores resolve
+#' through this function (ccx_cpp_aux() ships aux$eq_on), so neither can hold a
+#' second opinion about it.
+ccx_eq_on <- function(p) {
+  on <- vapply(HEMIS, function(h) {
+    v <- p[[paste0("eq_frac_", h)]]
+    !is.null(v) && is.finite(v) && v > 0
+  }, logical(1))
+  if (xor(on[["NH"]], on[["SH"]]))
+    stop("ccx_eq_on(): eq_frac_NH = ", format(p$eq_frac_NH), " and eq_frac_SH = ",
+         format(p$eq_frac_SH), " -- the equatorial cell is built as MIRROR CELLS ",
+         "with one parameter set (ruling 1, 2026-09-13g); set both > 0 or both 0.")
+  all(on)
 }
 
 #' Is the high-latitude (HILDA HS/HD) structure on for this parameter set?
@@ -778,8 +822,8 @@ ccx_hs_on <- function(p) {
 CCX_TRACERS <- c("C", "C13", "C14")
 
 #' Build an empty state: matrix [box x tracer]
-ccx_new_state <- function(nl = N_INTERIOR, hs = FALSE) {
-  bn <- ccx_box_names(nl, hs)
+ccx_new_state <- function(nl = N_INTERIOR, hs = FALSE, eq = FALSE) {
+  bn <- ccx_box_names(nl, hs, eq)
   matrix(0, nrow = length(bn), ncol = length(CCX_TRACERS),
          dimnames = list(bn, CCX_TRACERS))
 }
@@ -893,8 +937,21 @@ ccx_mld_shape <- local({
 
 #' The grid with the ML/layer-1 boundary moved to `h`, the interior UNCHANGED.
 #' dz_ML + dz_1 is conserved, which is what makes dz_mid[1] invariant.
-ccx_grid_at_h_ml <- function(grid, h) {
-  grid$dz[2] <- grid$dz[2] + (grid$dz[1] - h)
+#' @param share the fraction of the mixed layer's excursion VOLUME that layer 1
+#'   absorbs per unit of ITS OWN area: 1 (the default, every result before
+#'   2026-09-13g) when the two boxes share one area; `a_ml / a_ls` under the
+#'   equatorial cell (choice D1), where the ML covers only `a_ml` of layer 1's
+#'   `a_ls`. ⚠ NOT a refinement -- a CORRECTNESS term: with share = 1 under the
+#'   cell, layer 1 lost a_ls x dh of volume against a_ml x dh of carbon every
+#'   winter and its concentration read +37 % at the winter minimum (dz_1 ~ 7 m),
+#'   which the diffusively locked ML inherited: the ML pCO2 cycle went 15 ->
+#'   110 uatm p2p and co2_seasonal_SPO paid -500 log-units UNREFITTED, with the
+#'   loop OFF (calibration/diag_eq_cell_probe.R, first run 2026-09-13g). The
+#'   volume-conserving form makes the ML's gain and layer 1's loss the same
+#'   volume. `share == 1` takes the original line, untouched.
+ccx_grid_at_h_ml <- function(grid, h, share = 1) {
+  grid$dz[2] <- if (share == 1) grid$dz[2] + (grid$dz[1] - h)
+                else grid$dz[2] + (grid$dz[1] - h) * share
   grid$dz[1] <- h
   grid
 }
@@ -1244,6 +1301,72 @@ ccx_default_params <- function() {
                           # (Waters et al. 2014, seacarb k1k2 = "w14"), which
                           # would move LS pCO2 by +0.14 % at 18 degC and so is a
                           # separate, measured decision -- NOT a silent refit.
+    # ---- THE EQUATORIAL UPWELLING CELL (Fix B proper, built 2026-09-13g) --
+    # notes/prereg_2026-09-13g_equatorial_cell_build.md; the six rulings of
+    # 09-13g in CHANGELOG. WHAT IT IS: one thin warm surface box per hemisphere
+    # (`eq`, the 5S-5N Pacific cold tongue's half) fed by UPWELLING from
+    # interior layer `k_eq`, draining by surface divergence into the mixed
+    # layer, which returns the same volume to layer `k_eq` by subduction -- a
+    # three-limb loop, `oc[k_eq] -> eq -> ml -> oc[k_eq]`, each limb W x the
+    # SOURCE's per-volume concentration, so a uniform column is an exact fixed
+    # point (contract (a)). The cell has its OWN air-sea exchange at its own
+    # SST and alkalinity, no pump, no seasonal cycle, no diffusion. W is
+    # modulated by Nino3.4: W(t) = W x max(0, 1 - gamma_eq x enso), the T-A0
+    # floor form (El Nino SUPPRESSES upwelling) -- which is the right-SIGNED
+    # ocean ENSO path the model has lacked (INDEX_ccx_ocean_circ: every built
+    # lever is dead on sign; the +55.5 uatm reservoir has nowhere to live in
+    # two hemispheric boxes).
+    #
+    # THE SWITCH IS THE `eq_frac_*` PAIR, and 0 means ABSENT (ccx_eq_on()):
+    # ccx_box_names() returns no `eq` box and not one line of the cell's code
+    # runs, so every result before 2026-09-13g is bit-reproduced. ⛔ A MIXED
+    # pair errors by name (ruling 1: mirror cells, one parameter set).
+    #
+    # THE GEOMETRY IS OBSERVED, PINNED STRUCTURE, NEVER FITTED, and the values
+    # are NOT typed here: ccx_apply_structure(p, "hilda_eq") reads them from
+    # data/obs_eq_cell.rds (data-raw/build_eq_cell_targets.R) -- eq_frac from
+    # the SOM-FFN mask, h_eq the Holte annual mean (ruling 6), sst_eq and its
+    # Nino3.4 slope from ERSSTv5, alk_eq from GLODAP. The zeros below are the
+    # OFF state; with the cell on, ccx_prepare() refuses a non-positive h_eq /
+    # alk_eq or an sst_eq outside the carbonate tables' 2-35 degC by name.
+    eq_frac_NH  = 0,      # the cell's share of EACH hemisphere's ocean area
+    eq_frac_SH  = 0,      #   (0.0480 / 0.0356 observed; NOT equal -- the
+                          #   band is NH-heavy in AREA and SH-heavy in pCO2)
+    h_eq        = 0,      # m, the cell's thickness (44.2 observed)
+    sst_eq      = 0,      # degC, the cell's annual-mean SST (27.04 observed);
+                          #   the cell warms with its hemisphere's anomaly AND
+    sst_eq_enso = 0,      #   by this many K per Nino3.4 unit (0.97 observed):
+                          #   sst_eq(t) = sst_eq + sst_anom_h + sst_eq_enso*enso.
+                          #   ⚠ The cell's OWN solubility term, wrong-signed
+                          #   for the sink and SMALL by prediction N1.
+    alk_eq      = 0,      # umol/kg, the cell's surface alkalinity (2296 obs.)
+    k_eq        = 2L,     # the interior layer the cell upwells FROM and the
+                          #   mixed layer subducts TO. RULING 2 (09-13g): LAYER
+                          #   2 ALONE (117-190 m at hilda30c's grid) -- T-A2
+                          #   (CHANGELOG 09-13f) found it carries the whole
+                          #   observed ENSO slope at 26 Sv per index with a
+                          #   positive price, where layer 1 needs 109 Sv and
+                          #   every return below ~300 m leaks the index's
+                          #   decadal structure into the CO2 LEVEL rows.
+                          #   Structural, range-checked by name (1..nl) like
+                          #   q_attach_from; NOT fitted.
+    # THE TWO FITTED NAMES of the cell (one set for both hemispheres):
+    w_eq        = 0,      # Sv, the WHOLE-BAND mean upwelling volume flux (both
+                          #   cells together), split by area so both cells see
+                          #   the SAME upwelling velocity (63 m/yr at 27 Sv).
+                          #   Observed 24-30 Sv across 50 m (Meinen, McPhaden &
+                          #   Johnson 2001, JPO 31:3230); prior N(27, 3) Sv,
+                          #   ruling 4, carried by data/obs_eq_cell.rds
+                          #   $w0_prior. 0 here = the loop OFF (the cell then
+                          #   exchanges with the atmosphere only) -- not a
+                          #   physical value; a start point is the table init.
+    gamma_eq    = 0,      # per Nino3.4 unit: W(t) = W * max(0, 1 - gamma_eq *
+                          #   enso). 0 = a MEAN cell with no ENSO modulation
+                          #   (prediction N1's negative control). The observed
+                          #   1997-99 swing brackets 0.5-0.9 per index against
+                          #   W0 (14-25 Sv per index / 24-30 Sv); T-A2's
+                          #   requirement is ~1.0. The floor binds at
+                          #   enso = 1/gamma_eq.
     # ---- THE BIOLOGICAL PUMP (task 9, ported 2026-08-16 from the shim in
     # calibration/pump_shim.R) --------------------------------------------
     # THE PUMP SHIPS ON, AND `pump_grad` IS A FITTED PARAMETER (Marcus
@@ -1608,6 +1731,10 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # desync between the two cores, and `record` is FALSE on every calibration
     # path -- this cannot touch a stored logpost.
     .pml <- .sstl <- stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS)
+    # ... and the OTHER surface boxes' pCO2 (2026-09-13g): the cold box and the
+    # equatorial cell, NA where the box does not exist. ccx_run() writes all
+    # three into `out` (ml_pco2_ / hs_pco2_ / eq_pco2_) for the B1 row.
+    .phs <- .peq <- stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS)
   }
   .rec <- function(from, to, F_C, lab) {
     cs <- ccx_flux_channel(from, to, lab, .cls, .atmN)
@@ -1763,9 +1890,14 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       .ev      <- ccx_mld_eval(aux$mld_coef[[h]], t)
       h_ml_t   <- grid$h_ml * .ev$f            # m, mean-preserving by construction
       dh_ml_dt <- grid$h_ml * .ev$dfdt         # m/yr, > 0 deepening
-      gr       <- ccx_grid_at_h_ml(grid, h_ml_t)
+      # Under the equatorial cell (D1) layer 1 absorbs the ML's excursion as a
+      # VOLUME over its larger area: share = a_ml / a_ls (see the helper).
+      gr       <- ccx_grid_at_h_ml(grid, h_ml_t,
+                                   share = if (aux$eq_on == 1L) aux$a_ml[[h]] / aux$a_ls[[h]] else 1)
       # dz_ML + dz_1 is conserved, so dz_mid[1] is INVARIANT; only dz_mid[2]
       # moves. Recomputed in full rather than patched, so it cannot drift.
+      # (Under the cell dz_1 moves by share x the excursion and dz_mid[1] by
+      # (1 - share)/2 of it -- the geometric centre distance for the ML-area part.)
       dzm      <- (gr$dz[-length(gr$dz)] + gr$dz[-1]) / 2
       ml_mass  <- aux$ml_mass_kg[[h]] * .ev$f  # mass tracks thickness
     } else {
@@ -2204,10 +2336,22 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # conservative, and each flux is applied to both layers by add_flux.
     # K_k is the interface's own value from aux$kz_int (2026-09-06b); at the
     # default kz_deep_frac = 1 every entry IS p$kz, bit for bit.
+    # ⚠ THE ML / LAYER-1 INTERFACE UNDER THE EQUATORIAL CELL (2026-09-13g,
+    # choice D1). The mixed layer covers `a_ml` and layer 1 covers `a_ls`, so
+    # "area cancels" no longer holds at THIS one interface: the flux through
+    # the contact area a_ml is
+    #     F = a_ml K (C_ml/(a_ml h) - C_1/(a_ls dz_1)) / dz_mid
+    #       = K (C_ml/h - C_1/(dz_1 * a_ls/a_ml)) / dz_mid,
+    # i.e. layer 1 enters with the EFFECTIVE thickness dz_1 * a_ls/a_ml. A
+    # uniform-concentration column is still exactly flux-free (P0g). The
+    # interior interfaces are untouched (both boxes on a_ls). With the cell
+    # off the ratio is not formed at all -- bit-exact.
     col <- c(iml, ioc)
+    .r1 <- if (aux$eq_on == 1L) aux$a_ls[[h]] / aux$a_ml[[h]] else 1
     for (kk in seq_len(grid$nl)) {
-      add_diffusion(col[kk], col[kk + 1], gr$dz[kk], gr$dz[kk + 1], dzm[kk],
-                    aux$kz_int[kk])
+      add_diffusion(col[kk], col[kk + 1], gr$dz[kk],
+                    if (kk == 1L && aux$eq_on == 1L) gr$dz[2] * .r1 else gr$dz[kk + 1],
+                    dzm[kk], aux$kz_int[kk])
     }
 
     # ---- SEASONAL ENTRAINMENT / DETRAINMENT (round 6, option A) -------
@@ -2231,8 +2375,15 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # pCO2-side shim could not do, and why option A was ruled over it. ⛔ Adding
     # a 14C fractionation here would double-count ~17 permil (~3x sigma_d14c):
     # the model stores Delta-14C, already normalised to alpha14 = alpha13^2.
+    # Under the equatorial cell (D1) the entrained VOLUME is a_ml x dh/dt at
+    # layer 1's concentration C_1/(a_ls dz_1(t)) -- the same effective-thickness
+    # factor `.r1` the diffusive interface uses; detrainment leaves ML water
+    # at ML concentration and needs none. Layer 1's dz_1(t) already carries
+    # the excursion as a VOLUME (ccx_grid_at_h_ml's `share`), so the carbon
+    # entrained and the volume lost are the same water.
     if (dh_ml_dt > 0) {
-      add_flux(ioc[1], iml, y[ioc[1], "C"] * dh_ml_dt / gr$dz[2])   # entrainment
+      add_flux(ioc[1], iml, y[ioc[1], "C"] * dh_ml_dt /
+                 (if (aux$eq_on == 1L) gr$dz[2] * .r1 else gr$dz[2]))   # entrainment
     } else if (dh_ml_dt < 0) {
       add_flux(iml, ioc[1], y[iml, "C"] * (-dh_ml_dt) / gr$dz[1])   # detrainment
     }
@@ -2530,6 +2681,74 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
           add_flux(ioc[kk], ihd, y[ioc[kk], "C"] / p$tau_q)
         }
       }
+      if (record) .phs[[h]] <- pco2_hs
+    }
+
+    # ---- THE EQUATORIAL UPWELLING CELL (Fix B proper, 2026-09-13g) ----
+    # notes/prereg_2026-09-13g_equatorial_cell_build.md §2. A thin warm
+    # surface box per hemisphere beside the mixed layer, fed from interior
+    # layer `k_eq` and drained into the mixed layer, which returns the volume
+    # to `k_eq`. `eq_frac = 0` emits NOTHING and the box does not exist, so
+    # the 09-13d model is bit-reproduced. See ccx_default_params() for what
+    # the cell is and why layer 2.
+    if (aux$eq_on == 1L) {
+      ieq <- aux$idx[[h]]$eq
+      keq <- aux$k_eq
+      iup <- ioc[keq]
+
+      # (a) THE THREE-LIMB LOOP. ONE volume flux W (m3/yr) runs round it:
+      #     W_h(t) = w_eq [Sv] x this hemisphere's AREA share x the ENSO
+      #     factor max(0, 1 - gamma_eq x enso) -- the T-A0 floor form; El
+      #     Nino (enso > 0) SUPPRESSES the upwelling, and the floor binds at
+      #     enso = 1/gamma_eq. Every limb is W x the SOURCE box's true
+      #     per-volume concentration -- the conduit's lesson: these three
+      #     boxes have three DIFFERENT areas (a_ls, a_eq, a_ml) and nothing
+      #     cancels. A uniform column with the cell at the same concentration
+      #     then has ZERO advective tendency (contract (a), P0g), and volume
+      #     is conserved round the loop by construction. alpha13 = 1 on all
+      #     three: bulk transport, 13C and 14C ride along from the source (⛔
+      #     no 14C fractionation -- the model stores Delta14C).
+      #     `gr$dz[keq + 1]` and `gr$dz[1]` are the thicknesses NOW: layer 1
+      #     and the ML move under seas_ml; layer 2 does not.
+      #     `lab = "eq_ml"` on the cell -> ML limb ONLY: the other two are
+      #     int -> ml / ml -> int and classify into ml_int on their own, which
+      #     keeps "surface ocean to deep (net)" right; the cell -> ML limb
+      #     would otherwise land in conv_ml (both boxes are class "ml").
+      W <- p$w_eq * CCX_SV_TO_M3YR * aux$eq_w_share[[h]] *
+           max(0, 1 - p$gamma_eq * forc$enso)
+      if (W > 0) {
+        add_flux(iup, ieq, W * y[iup, "C"] / (aux$a_ls[[h]] * gr$dz[keq + 1]))   # upwelling
+        add_flux(ieq, iml, W * y[ieq, "C"] / (aux$a_eq[[h]] * aux$h_eq),
+                 lab = "eq_ml")                                                  # surface divergence
+        add_flux(iml, iup, W * y[iml, "C"] / (aux$a_ml[[h]] * gr$dz[1]))         # subduction
+      }
+
+      # (b) AIR-SEA on the cell, the HS idiom: its OWN annual-mean SST plus its
+      #     hemisphere's anomaly plus its OWN Nino3.4 slope (the cell WARMS in
+      #     El Nino -- the wrong-signed local solubility term, predicted SMALL,
+      #     N1), its OWN alkalinity, the model's k_w, exchanging with ITS
+      #     hemisphere's atmosphere. No seasonal cycle on this box. The
+      #     frozen-Revelle branch is mirrored so the switch keeps its meaning.
+      sst_eq_t <- aux$sst_eq +
+        (if (isTRUE(p$sst_obs > 0) && !is.null(sa) && is.finite(sa)) sa
+         else p$sst_scale * forc$gmst) +
+        aux$sst_eq_enso * forc$enso
+      dic_eq <- y[ieq, "C"] * aux$mol_per_GtC / aux$eq_mass_kg[[h]]          # mol/kg
+      kc_eq  <- carb_constants(sst_eq_t)
+      pco2_eq <- if (isTRUE(p$revelle_frozen > 0)) {
+        ccx_const("CO2_PI_PPM") *
+          (1 + aux$revelle0_eq * (dic_eq - aux$dic0_eq) / aux$dic0_eq)
+      } else {
+        pco2_from_dic(dic_eq, aux$alk_eq, sst_eq_t, k = kc_eq)
+      }
+      gx_eq  <- aux$asx_eq[[h]] * p$k_w * kc_eq$K0
+      a_as_e <- ccx_alpha_as(sst_eq_t, aux)
+      # alpha13_signed, reason (a): one-way by construction, as the ML's limbs
+      add_flux(iatm, ieq, gx_eq * pco2_at, alpha13 = a_as_e$down,
+               alpha13_signed = TRUE)                                  # invasion
+      add_flux(ieq, iatm, gx_eq * pco2_eq, alpha13 = a_as_e$up,
+               alpha13_signed = TRUE)                                  # evasion
+      if (record) .peq[[h]] <- pco2_eq
     }
 
     # ---- prescribed emissions ---------------------------------------
@@ -2644,7 +2863,8 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   dy[, "C14"] <- dy[, "C14"] - ccx_const("LAMBDA_C14") * y[, "C14"]
 
   if (record) attr(dy, "fluxes") <- list(channels = .fx, boxnet = .net, edges = .edges,
-                                         pump_edges = .pump, pco2_ml = .pml, sst_ml = .sstl)
+                                         pump_edges = .pump, pco2_ml = .pml, sst_ml = .sstl,
+                                         pco2_hs = .phs, pco2_eq = .peq)
   dy
 }
 
@@ -2812,7 +3032,8 @@ ccx_kz_profile <- function(p, grid) {
 
 ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   hs_on <- ccx_hs_on(p)
-  bn  <- ccx_box_names(grid$nl, hs_on)
+  eq_on <- ccx_eq_on(p)
+  bn  <- ccx_box_names(grid$nl, hs_on, eq_on)
   idx <- lapply(HEMIS, function(h) {
     v <- list(
       atm  = which(bn == paste0(h, "_atm")),
@@ -2822,6 +3043,7 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
       v$hs <- which(bn == paste0(h, "_hs"))
       v$hd <- which(bn == paste0(h, "_hd"))
     }
+    if (eq_on) v$eq <- which(bn == paste0(h, "_eq"))
     for (pool in CCX_LAND_POOLS) v[[pool]] <- which(bn == paste0(h, "_", pool))
     # every land index in state order, for the callers that want the land as a
     # whole (spinup diagnostics, forcing.R's budget split)
@@ -2844,6 +3066,46 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
           else grid$h_ml
   a_ls <- lapply(a_oc, function(A) A * (1 - f_hs))
   a_hs <- lapply(a_oc, function(A) A * f_hs)
+  # THE EQUATORIAL CELL'S AREA -- DESIGN CHOICE D1 (prereg 09-13g §1), stated:
+  # the cell takes its area from the MIXED LAYER ONLY. `a_ml = a_ls - a_eq` is
+  # what the ML's mass, its exchange area and its diffusive/entrainment contact
+  # with layer 1 follow; the INTERIOR column keeps `a_ls` -- the thermocline
+  # under the cold tongue IS the low-latitude thermocline and the cell has no
+  # deep box of its own (HS has HD, which is why `a_ls` shrinks for HS's whole
+  # column). The cell's only interior contact is the advective loop. PE5 is
+  # where D1 would show if wrong. The pump is sized on the INTERIOR field and
+  # stays on `a_ls` (it holds the interior gradient, not the ML's).
+  # ⚠ With the cell OFF, `a_ml` IS `a_ls` -- the same object, not a_ls - 0 --
+  # so every downstream quantity is bit-identical to the 09-13d model.
+  a_eq <- if (eq_on) list(NH = a_oc$NH * p$eq_frac_NH, SH = a_oc$SH * p$eq_frac_SH)
+          else list(NH = 0, SH = 0)
+  a_ml <- if (eq_on) list(NH = a_ls$NH - a_eq$NH, SH = a_ls$SH - a_eq$SH) else a_ls
+  if (eq_on) {
+    # the cell's pinned geometry, range-checked by name -- never clamped
+    if (!is.finite(p$h_eq) || p$h_eq <= 0)
+      stop("h_eq must be a positive cell thickness in m when the equatorial cell is on; got ",
+           format(p$h_eq))
+    if (!is.finite(p$sst_eq) || p$sst_eq < 2 || p$sst_eq > 35)
+      stop("sst_eq must lie inside the carbonate tables' 2-35 degC when the cell is on; got ",
+           format(p$sst_eq))
+    if (!is.finite(p$alk_eq) || p$alk_eq <= 0)
+      stop("alk_eq must be a positive surface alkalinity in umol/kg when the cell is on; got ",
+           format(p$alk_eq))
+    if (is.null(p$sst_eq_enso) || !is.finite(p$sst_eq_enso))
+      stop("sst_eq_enso must be a finite K-per-index slope when the cell is on; got ",
+           format(p$sst_eq_enso))
+    keq <- as.integer(p$k_eq)
+    if (!is.finite(keq) || keq < 1L || keq > grid$nl)
+      stop("k_eq must be an integer in 1..", grid$nl,
+           " (the interior layer the cell upwells from); got ", format(p$k_eq))
+    if (p$h_eq >= sum(grid$dz[seq_len(keq + 1L)]))
+      stop("h_eq (", format(p$h_eq), " m) reaches below the base of layer k_eq = ", keq,
+           " (", format(sum(grid$dz[seq_len(keq + 1L)])), " m): the cell would upwell from ",
+           "water it already occupies.")
+    if (any(unlist(a_ml) <= 0))
+      stop("eq_frac leaves the mixed layer with no area: a_ml = ",
+           paste(format(unlist(a_ml)), collapse = " / "))
+  }
   npp0 <- list(NH = ccx_const("NPP_GLOBAL_PI") * p$npp_frac_NH,
                SH = ccx_const("NPP_GLOBAL_PI") * (1 - p$npp_frac_NH))
 
@@ -2897,7 +3159,10 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
                          (1 - p$litter_slow_frac) * p$tau_soil_fast +
                          p$litter_slow_frac * p$tau_soil_slow)),
     sst         = list(NH = p$sst_NH, SH = p$sst_SH),
-    ml_mass_kg  = lapply(a_ls, function(A) A * grid$h_ml * ccx_const("RHO_SEAWATER")),
+    # `a_ml`, NOT `a_ls`, since the equatorial cell (2026-09-13g, choice D1):
+    # the mixed layer's mass, its preindustrial carbon and its exchange area
+    # are the ML's OWN. Identical to a_ls with the cell off (same object).
+    ml_mass_kg  = lapply(a_ml, function(A) A * grid$h_ml * ccx_const("RHO_SEAWATER")),
     # Preindustrial mixed-layer CARBON, GtC. Only the DIC-limited pump reads it,
     # as the denominator of its export scaling, and it is computed here so the
     # two pump modes cannot disagree about what "preindustrial" means.
@@ -2906,10 +3171,10 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # silently reads NULL. (The neighbouring entries get their names from the
     # named list they map over; this one has nothing to inherit from.)
     ml_C0       = stats::setNames(lapply(HEMIS, function(h)
-                    dic0[[h]] * a_ls[[h]] * grid$h_ml * ccx_const("RHO_SEAWATER") /
+                    dic0[[h]] * a_ml[[h]] * grid$h_ml * ccx_const("RHO_SEAWATER") /
                       ccx_const("MOL_C_PER_GtC")), HEMIS),
     # air-sea prefactor: A [m2] * K0 [mol/(kg atm)] * rho [kg/m3] -> GtC/(yr uatm)
-    asx = lapply(a_ls, function(A)
+    asx = lapply(a_ml, function(A)
       A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC")),
     dz_mid = (grid$dz[-length(grid$dz)] + grid$dz[-1]) / 2,
     alpha_photo = 1 - 18 / 1000,     # provisional, see constants.R note
@@ -2990,6 +3255,28 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     hs_mass_kg  = lapply(a_hs, function(A) A * h_hs * ccx_const("RHO_SEAWATER")),
     dz_hd       = sum(grid$dz) - h_hs,
     sst_hs      = if (is.null(p$sst_hs)) 2 else p$sst_hs,
+    # ---- THE EQUATORIAL CELL (2026-09-13g) -------------------------------
+    # Present unconditionally, as every structural field is: `eq_on` gates the
+    # flux on BOTH cores; the rest are the OFF values (zeros) when the cell is
+    # absent, so a fixed C++ struct never reads stale memory. `a_ml` is carried
+    # for the likelihood's mixed-layer mass (ccx_box_mass_at) and the ML-layer-1
+    # interface ratio in the deriv.
+    eq_on       = as.integer(eq_on),
+    a_ml        = a_ml,
+    a_eq        = a_eq,
+    h_eq        = if (eq_on) p$h_eq else 0,
+    eq_mass_kg  = lapply(a_eq, function(A) A * (if (eq_on) p$h_eq else 0) *
+                                              ccx_const("RHO_SEAWATER")),
+    asx_eq      = lapply(a_eq, function(A)
+                    A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC")),
+    sst_eq      = if (eq_on) p$sst_eq else 0,
+    sst_eq_enso = if (eq_on) p$sst_eq_enso else 0,
+    alk_eq      = if (eq_on) p$alk_eq * 1e-6 else 0,      # umol/kg -> mol/kg, the carbonate routine's unit
+    k_eq        = if (eq_on) as.integer(p$k_eq) else 0L,
+    # W is split by AREA so both cells see the same upwelling VELOCITY (prereg
+    # §1): W_h = w_eq * Sv * eq_w_share[h]. The share is geometry, computed once.
+    eq_w_share  = if (eq_on) lapply(a_eq, function(A) A / (a_eq$NH + a_eq$SH))
+                  else list(NH = 0, SH = 0),
     # Per-interface diffusivity (2026-09-06b). Present unconditionally so both
     # cores read the same vector; rep(kz, nl) at the default.
     kz_int      = ccx_kz_profile(p, grid),
@@ -3014,6 +3301,15 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   aux$alk_hs      <- alk_hs
   aux$dic0_hs     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk_hs, aux$sst_hs)
   aux$revelle0_hs <- revelle_factor(aux$dic0_hs, alk_hs, aux$sst_hs)
+  # The equatorial cell's own preindustrial chemistry references (frozen-Revelle
+  # branch and the spinup's starting guess), on the same solve; 0 when off so
+  # the C++ struct reads a number rather than stale memory.
+  if (eq_on) {
+    aux$dic0_eq     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), aux$alk_eq, aux$sst_eq)
+    aux$revelle0_eq <- revelle_factor(aux$dic0_eq, aux$alk_eq, aux$sst_eq)
+  } else {
+    aux$dic0_eq <- 0; aux$revelle0_eq <- 0
+  }
   # `hs_asx_frac` scales the EXCHANGE area only (2026-09-06); the HS mass and
   # the HS<->HD limb are untouched. Errors by name rather than clamping.
   fx <- if (is.null(p$hs_asx_frac)) 1 else p$hs_asx_frac
@@ -3156,6 +3452,32 @@ ccx_advection_eigbound <- function(w_up, grid, p = NULL) {
   2 * max(w / grid$dz)
 }
 
+# The largest |Nino3.4| the stability bound allows for. A BOUND, not an
+# observation: the forcing's monthly index spans about -2.5..+2.9 over
+# 1870-2024; the floor form 1 - gamma_eq * enso is largest at the most
+# NEGATIVE index (La Nina strengthens the upwelling), so this sizes the fastest
+# drain the cell can ever see. Conservative by construction.
+CCX_ENSO_ABS_MAX_FOR_STABILITY <- 3
+
+#' The equatorial cell's contribution to the explicit-transport stability bound
+#'
+#' The cell is the smallest, fastest-turning box in the ocean: at 27 Sv its
+#' drain rate is W_h / (a_eq h_eq) ~ 1.3 /yr, and La Nina multiplies it by
+#' up to 1 + gamma_eq * |enso|. Same 2 x rate form as ccx_advection_eigbound().
+#' Returns EXACTLY 0 with the cell off or w_eq = 0, so nothing changes there.
+ccx_eq_cell_eigbound <- function(p) {
+  if (!ccx_eq_on(p)) return(0)
+  w <- if (is.null(p$w_eq)) 0 else p$w_eq
+  if (!isTRUE(w > 0)) return(0)
+  g <- if (is.null(p$gamma_eq)) 0 else p$gamma_eq
+  a_eq <- c(ccx_const("OCEAN_AREA_NH") * p$eq_frac_NH, ccx_const("OCEAN_AREA_SH") * p$eq_frac_SH)
+  # W_h = w * share_h, share_h = a_eq_h / sum(a_eq) => W_h / a_eq_h = w / sum(a_eq)
+  # for BOTH hemispheres (equal velocity by construction)
+  rate <- w * CCX_SV_TO_M3YR / sum(a_eq) / p$h_eq *
+          (1 + abs(g) * CCX_ENSO_ABS_MAX_FOR_STABILITY)
+  2 * rate
+}
+
 #' Substeps needed to keep the explicit interior transport stable over one step
 #' @param dt master step, years (1/12 for the monthly integrator)
 ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
@@ -3192,6 +3514,11 @@ ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
   lam <- max(vapply(.grids, function(g)
     ccx_diffusion_eigmax(max(ccx_kz_profile(p, g)), g) +
       ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), g, p), numeric(1)))
+  # + the EQUATORIAL CELL's own drain rate (2026-09-13g), folded in for the
+  # reason the conveyor's was: a stability check that ignored a first-order
+  # advective term would be worse than none. Exactly 0 with the cell off, so
+  # the substep count -- and with it every trajectory -- is unchanged there.
+  lam <- lam + ccx_eq_cell_eigbound(p)
   need <- dt * lam / (CCX_STAB_SAFETY * CCX_RK4_STAB_LIMIT)
   as.integer(min(max(CCX_SUBSTEPS_MIN, ceiling(need)), CCX_SUBSTEPS_MAX))
 }
@@ -3209,10 +3536,14 @@ ccx_resolve_substeps <- function(substeps, p, grid, dt = 1 / 12) {
 #' The air-sea exchange timescale is h_ml / k_w ~ 75/1500 = 0.05 yr ~ 18 days,
 #' i.e. SHORTER than the monthly master step, so substepping is required for
 #' accuracy (not for conservation, which holds exactly at any step -- see header).
-ccx_step_rk4 <- function(y, t, dt, p, forc, grid, aux, substeps = 4L) {
+#' @param k1 OPTIONAL: the derivative at (y, t) already evaluated by the
+#'   caller (ccx_run() records the surface pCO2 off it, 2026-09-13g). Used for
+#'   the FIRST substep's first stage only; numerically identical to evaluating
+#'   it here, since ccx_deriv(record = TRUE) computes the same dy.
+ccx_step_rk4 <- function(y, t, dt, p, forc, grid, aux, substeps = 4L, k1 = NULL) {
   h <- dt / substeps
   for (s in seq_len(substeps)) {
-    k1 <- ccx_deriv(y,             t,           p, forc, grid, aux)
+    k1 <- if (s == 1L && !is.null(k1)) k1 else ccx_deriv(y, t, p, forc, grid, aux)
     k2 <- ccx_deriv(y + h / 2 * k1, t + h / 2,  p, forc, grid, aux)
     k3 <- ccx_deriv(y + h / 2 * k2, t + h / 2,  p, forc, grid, aux)
     k4 <- ccx_deriv(y + h * k3,     t + h,      p, forc, grid, aux)

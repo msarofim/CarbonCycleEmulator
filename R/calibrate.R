@@ -1592,6 +1592,38 @@ ccx_hessian_per_direction <- function(lp, u, verbose = TRUE) {
 #' Sources: notes/caveats_declared_parameters.md (each value's provenance).
 CCX_STRUCT_HILDA <- list(hs_frac = 0.16, tau_q = 538, sst_hs = 2,
                          q_attach_from = 1L, kz_zscale = 253)
+#' The equatorial cell's data product (data-raw/build_eq_cell_targets.R), read
+#' lazily and cached -- the ccx_u_hs_prior() idiom. It carries the cell's PINNED
+#' GEOMETRY (ccx_struct_hilda_eq()), the B1 reservoir target (R/likelihood.R) and
+#' the W0 prior (CCX_PARAM_TABLE$w_eq), so no number of the cell is typed twice.
+ccx_eq_cell_obs <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "obs_eq_cell.rds"))
+    cache
+  }
+})
+#' THE "hilda_eq" STRUCTURE (2026-09-13g): HILDA's declared block PLUS the
+#' equatorial cell's OBSERVED geometry, every value read from the product --
+#' eq_frac from the SOM-FFN mask (per hemisphere, of the MODEL's hemispheric
+#' area), h_eq the Holte annual mean (ruling 6), sst_eq and its Nino3.4 slope
+#' from ERSSTv5 (both hemispheres together: ONE parameter set, ruling 1), alk_eq
+#' the GLODAP surface target, k_eq = 2 (ruling 2). `w_eq` and `gamma_eq` are
+#' NOT set here: they are the cell's two FITTED names and come from the vector.
+#' A function, not a literal list, because the table is built before R/paths.R
+#' is sourced (the prior-loader precedent).
+CCX_EQ_K_EQ <- 2L
+ccx_struct_hilda_eq <- function() {
+  o <- ccx_eq_cell_obs()
+  c(CCX_STRUCT_HILDA,
+    list(eq_frac_NH  = unname(o$eq_frac$value[["NH"]]),   # the prereg's $value: band area /
+         eq_frac_SH  = unname(o$eq_frac$value[["SH"]]),   #   the product's OWN hemispheric area
+         h_eq        = o$h_eq$both$mean_dt,
+         sst_eq      = o$sst_eq$both$annual_mean_C,
+         sst_eq_enso = o$sst_eq$both$beta_monthly,
+         alk_eq      = o$alk_eq$both$target,
+         k_eq        = CCX_EQ_K_EQ))
+}
 #' @param seas_ml the SEASONAL MIXED LAYER switch (round 6), the SECOND axis of
 #'   the objective label beside `struct` (2026-09-10). ⛔ WHY IT IS HERE AND NOT
 #'   LEFT TO `ccx_default_params()`: `seas_ml` is a BASE parameter, not a fitted
@@ -1622,11 +1654,12 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
   seas_ml <- ccx_parse_seas_ml(seas_ml)
   p$seas_ml <- seas_ml
   if (identical(struct, "")) return(structure(p, struct = "", seas_ml = seas_ml))
-  if (!identical(struct, "hilda"))
+  if (!struct %in% c("hilda", "hilda_eq"))
     stop("ccx_apply_structure(): unknown structure label '", struct,
-         "'. Known: \"\" (column) and \"hilda\".")
-  for (n in names(CCX_STRUCT_HILDA)) p[[n]] <- CCX_STRUCT_HILDA[[n]]
-  structure(p, struct = "hilda", seas_ml = seas_ml)
+         "'. Known: \"\" (column), \"hilda\" and \"hilda_eq\" (HILDA + the equatorial cell, 2026-09-13g).")
+  blk <- if (identical(struct, "hilda")) CCX_STRUCT_HILDA else ccx_struct_hilda_eq()
+  for (n in names(blk)) p[[n]] <- blk[[n]]
+  structure(p, struct = struct, seas_ml = seas_ml)
 }
 
 #' @param by_stream FALSE (default) returns the bare scalar the sampler expects.
