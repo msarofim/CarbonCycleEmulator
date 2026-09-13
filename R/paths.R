@@ -64,11 +64,20 @@
 # `seas_ml` = 0 control: every seasonal-ML diagnostic scores against it, and the
 # 09-10 rule that the canonical must WIN on today's objective is what keeps the
 # pair honest (test-mode-file.R option 2).
-CCX_MODE_CANONICAL <- "hilda31s"
+# 2026-09-13: `hilda31s2` -- the SAME 31-parameter HILDA / seas_ml 1 space REFITTED
+# under the 09-12 objective (annual-mean isotope pins, row-read concentrations,
+# IntCal to 1941, no pre-run ice rows, observed-month D14C edge years). Round 7:
+# 24 dispersed starts + a checkpoint resume, 12 CONVERGED, ids 1/3/14/20 at
+# -1423.5675 to 4 dp (+8.68 over the restamped hilda31s: exactly the two d13C
+# level rows the objective change had cost), h_ml UNCHANGED at 64.82 m; a
+# second basin at h_ml 49.7 sits 0.35 behind. Hessian PD, cond 3.36e5,
+# h_ml 64.82 +/- 2.43. Promoted on Marcus's ruling ("Promote id 1, run the
+# Hessian, and repoint"). `hilda31p` STAYS the registered seas_ml = 0 control.
+CCX_MODE_CANONICAL <- "hilda31s2"
 
 CCX_MODE_FILES <- c(
-  hilda31s = file.path("calibration", "output", "refit_20260911_hilda31_seasml1",
-                       "mode_fit_pumpN.rds"),
+  hilda31s2 = file.path("calibration", "output", "refit_20260912_hilda31_seasml1_round7",
+                        "mode_fit_pumpN.rds"),
   hilda31p = file.path("calibration", "output", "refit_20260910_hilda31_periodic",
                        "mode_fit_pumpN.rds")
 )
@@ -96,6 +105,14 @@ CCX_MODE_HILDA31_QUARANTINED <- file.path("calibration", "output", "quarantine",
                                           "20260910_periodic_spinup_adopted",
                                           "refit_20260908_hilda31", "mode_fit_pumpN.rds")
 
+# THE 09-11 SEASONAL-ML CANONICAL (2026-09-13). `hilda31s` is retired from the
+# registry -- its stored streams are the 09-11 objective's, restamped twice --
+# but it is the file the round-6b P7 record and the 09-12 evaluation were read
+# at, and stays resolvable by path for any like-for-like read against them.
+CCX_MODE_HILDA31S_QUARANTINED <- file.path("calibration", "output", "quarantine",
+                                           "20260913_round7_adopted",
+                                           "refit_20260911_hilda31_seasml1", "mode_fit_pumpN.rds")
+
 # WHICH ARMS ARE FREE -- AND WHY THE STORED logpost IS A TRAP ACROSS THEM.
 # The project rule is "the highest FREE arm wins regardless of name", and this
 # vector records which arms may be compared on their stored value at all.
@@ -113,7 +130,7 @@ CCX_MODE_HILDA31_QUARANTINED <- file.path("calibration", "output", "quarantine",
 # that as "pin90 wins" was wrong -- its objective carried a near-delta prior on
 # `fert_k` worth +11.6698 at fert_k = 90, putting it 11.56 BELOW on the
 # comparable scale. A stored number never decides an arm.
-CCX_MODE_PINNED <- c(hilda31s = FALSE, hilda31p = FALSE)
+CCX_MODE_PINNED <- c(hilda31s2 = FALSE, hilda31p = FALSE)
 
 # The retired names, kept ONLY so that asking for one gets the reason rather
 # than a file-not-found. Everything here is quarantined and not comparable.
@@ -172,7 +189,15 @@ CCX_MODE_RETIRED <- c(
               "and beats -1480.54 only on paper; re-scored like-for-like it is -1489.63,",
               "9.088 behind. Still the pre-adoption control, resolvable by path as",
               "CCX_MODE_HILDA31_QUARANTINED. Quarantined under",
-              "calibration/output/quarantine/20260910_periodic_spinup_adopted/")
+              "calibration/output/quarantine/20260910_periodic_spinup_adopted/"),
+  hilda31s = paste("the 31-parameter HILDA / seas_ml 1 canonical from 2026-09-11 (8) to",
+              "2026-09-13, fitted under the 09-11 objective and RESTAMPED twice on 09-12",
+              "(-1475.46 -> -1453.36 -> -1432.25; annual-mean isotope pins, row-read",
+              "concentrations, IntCal to 1941, no pre-run ice rows, observed-month D14C",
+              "edge years). Retired by the ROUND-7 refit under that objective, promoted as",
+              "`hilda31s2` (-1423.5675, +8.68, same h_ml). SUPERSEDED, not defective. Still",
+              "resolvable by path as CCX_MODE_HILDA31S_QUARANTINED. Quarantined under",
+              "calibration/output/quarantine/20260913_round7_adopted/")
 )
 
 #' Absolute path to a fitted mode file, by name

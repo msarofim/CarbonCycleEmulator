@@ -36,7 +36,7 @@ PT_OUT  <- ccx_path("calibration", "torch", "port_targets.csv")
 # MS_REF_INC / MS_REF_NEW -- the names are the driver's port-target KEYS.
 PT_REFS <- c(
   cold      = NA,   # the hand-set init; no file
-  incumbent = CCX_MODE_FILES[["hilda31s"]],   # ROUND 7 (2026-09-12): the canonical, through the registry
+  incumbent = CCX_MODE_FILES[["hilda31s2"]],  # the canonical (round 7, adopted 2026-09-13), through the registry
   new_basin = CCX_MODE_FILES[["hilda31p"]]    # the seas_ml 0 control, through the registry; feasible at seas_ml 1
 )
 

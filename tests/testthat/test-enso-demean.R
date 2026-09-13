@@ -185,7 +185,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 32.5483 under the adopted objective (hilda31s); 35.1773 at the seas_ml 0 control", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth 42.5817 under the adopted objective (hilda31s2); 35.1773 at the seas_ml 0 control", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -211,7 +211,11 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 32.5483 under 
   # quarantined hilda31 moved +0.0003 under the same rulings). Both files restamped.
   # 09-12 (d): +0.0023 at every file from review A12 (the D14C edge years 1941/2019 scored
   # over their OBSERVED months) -- 32.5460 -> 32.5483, 35.1749 -> 35.1773.
-  expect_equal(r$on_periodic - r$off_periodic, 32.5483, tolerance = 1e-4, scale = 1)
+  # 2026-09-13: the canonical is `hilda31s2` (round 7, a MODE of the 09-12 objective):
+  # 42.5817 -- the flag's price at a mode fitted under the annual-mean pins, vs 32.55 at
+  # the restamped-but-unrefit hilda31s (the -10 was ruling 4's interaction with a mode
+  # that had not yet moved; see 09-12 (c)). 35.1773 stays the pin at the control.
+  expect_equal(r$on_periodic - r$off_periodic, 42.5817, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
   expect_equal(r0$on_periodic - r0$off_periodic, 35.1773, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could

@@ -473,10 +473,11 @@ test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonic
     d <- base - dg_spo_vec(vk, obs); list(amp = sl_amp(d), mo = sl_ang_mo(d)) })
   # the switch is load-bearing: without it the gate reads a different limb, by months
   expect_gt(abs(dg_mo_diff(full$mo, blind$mo)), 1)
-  # THE RECORD (2026-09-12, hilda31s): whole limb 0.465 @ 8.96 PASS; the blind read 0.410 @ 4.53 FAIL
+  # THE RECORD (2026-09-12, hilda31s): whole limb 0.465 @ 8.96 PASS; the blind read 0.410 @ 4.53 FAIL.
+  # At hilda31s2 (09-13): 0.472 @ 8.96 / 0.425 @ 4.51 -- same phases within the tolerance.
   expect_true(full$pass)
   expect_equal(full$mo,  8.96, tolerance = 0.05, scale = 1)
-  expect_equal(blind$mo, 4.53, tolerance = 0.05, scale = 1)
+  expect_equal(blind$mo, 4.52, tolerance = 0.05, scale = 1)
   expect_false(dg_gateS_verdict(list(mo = blind$mo, amp = blind$amp))$pass)
 })
 

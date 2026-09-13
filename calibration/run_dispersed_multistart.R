@@ -142,13 +142,14 @@ MS_DRAW_TRIES <- 200          # redraws allowed before a start is declared dead
 # 10 m under the P8 wall); NEW BASIN = `hilda31p` (the registered seas_ml 0 control,
 # h_ml 44.1, feasible at seas_ml 1 and a different basin of h_ml). Both through the
 # registry. `hilda31` (quarantined, aseasonal) is no longer a reference.
-MS_REF_INC    <- CCX_MODE_FILES[["hilda31s"]]
-if (is.null(MS_REF_INC)) stop("MS_REF_INC: 'hilda31s' is no longer in CCX_MODE_FILES -- ",
-                              "re-rule the round-7 reference set (see MS_REF_INC_LABEL).")
+# 2026-09-13: round 7 ADOPTED as `hilda31s2`; the incumbent for the NEXT array is that file.
+MS_REF_INC    <- CCX_MODE_FILES[["hilda31s2"]]
+if (is.null(MS_REF_INC)) stop("MS_REF_INC: 'hilda31s2' is no longer in CCX_MODE_FILES -- ",
+                              "re-rule the reference set (see MS_REF_INC_LABEL).")
 MS_REF_NEW    <- CCX_MODE_FILES[["hilda31p"]]
 if (is.null(MS_REF_NEW)) stop("MS_REF_NEW: 'hilda31p' is no longer in CCX_MODE_FILES -- ",
                               "re-rule the round-7 reference set (see MS_REF_NEW_LABEL).")
-MS_REF_INC_LABEL <- "INCUMBENT = hilda31s (09-11 canonical, periodic spinup, seas_ml 1; restamped 09-12)"
+MS_REF_INC_LABEL <- "INCUMBENT = hilda31s2 (09-13 canonical: round 7 under the 09-12 objective, periodic spinup, seas_ml 1)"
 MS_REF_NEW_LABEL <- "NEW BASIN = hilda31p (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)"
 # ⚠ THESE THREE NAMES ARE ALSO THE PORT-TARGET KEYS in calibration/torch/
 # port_targets.csv, so this vector may not be extended with ids that have no
