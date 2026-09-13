@@ -320,8 +320,18 @@ ccx_mode_spinup <- function(md) {
 }
 ccx_mode_base <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
-  ccx_apply_structure(ccx_default_params(), ccx_mode_struct(md),
-                      seas_ml = ccx_mode_seas_ml(md))
+  p <- ccx_apply_structure(ccx_default_params(), ccx_mode_struct(md),
+                           seas_ml = ccx_mode_seas_ml(md))
+  # PINNED arms (2026-09-13): the held values live in the BASE, by the file's own
+  # record; a consumer that wants to SCORE such a file must also ccx_apply_pins()
+  # first, or ccx_par_to_unc() will look for a name the fit never carried.
+  for (n in names(md$pins)) p[[n]] <- md$pins[[n]]
+  p
+}
+#' The pins a mode file was fitted under (NULL = a free arm). Read, never inferred.
+ccx_mode_pins <- function(md) {
+  if (is.character(md)) md <- readRDS(ccx_mode_file(md))
+  md$pins
 }
 
 ccx_mode_params <- function(md = CCX_MODE_CANONICAL) {

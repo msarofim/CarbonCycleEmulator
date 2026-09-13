@@ -99,6 +99,15 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
+# ---- PINS (2026-09-13). CCX_MS_PIN="name=value[,name=value]" holds fitted names at
+# values and REMOVES them from the fitted set for this whole process (ccx_apply_pins);
+# "" = a free arm. Applied before anything reads CCX_PARAM_NAMES. Recorded in every
+# checkpoint and start file, in the outdir name, and GATED against the port targets
+# (a CSV measured with other pins is another objective).
+MS_PINS <- ccx_parse_pins(Sys.getenv("CCX_MS_PIN", ""))
+invisible(ccx_apply_pins(MS_PINS))
+if (length(MS_PINS)) cat(sprintf("PINNED (removed from the fitted set, held in the base): %s -> %d free parameters\n",
+                                 paste(sprintf("%s = %s", names(MS_PINS), MS_PINS), collapse = ", "), length(CCX_PARAM_NAMES)))
 source(ccx_path("calibration", "lib_run_inputs.R"))
 ccx_require_run_inputs()   # BEFORE the wall budget, and before any target is written
 
@@ -264,7 +273,8 @@ MS_OUTDIR <- local({
                     else "multistart_20260901_enso25",
                     # 2026-09-10: seas_ml changes the OBJECTIVE at a constant 31 names, which
                     # the param_names guard cannot see; the directory must say it.
-                    if (identical(Sys.getenv("CCX_MS_SEAS_ML", "0"), "1")) "_seasml1" else ""))
+                    if (identical(Sys.getenv("CCX_MS_SEAS_ML", "0"), "1")) "_seasml1" else "",
+                    ccx_pin_label(MS_PINS)))
   else d
 })
 dir.create(MS_OUTDIR, recursive = TRUE, showWarnings = FALSE)
@@ -376,6 +386,7 @@ bp <- ccx_default_params(); bp$pump_mode <- MS_ARM
 MS_STRUCT_ENV  <- .ms_env_required("CCX_MS_STRUCT")
 MS_SEAS_ML_ENV <- .ms_env_required("CCX_MS_SEAS_ML")
 bp <- ccx_apply_structure(bp, MS_STRUCT_ENV, MS_SEAS_ML_ENV)
+for (n in names(MS_PINS)) bp[[n]] <- MS_PINS[[n]]     # the pinned value lives in the base
 MS_STRUCT <- attr(bp, "struct"); MS_SEAS_ML <- attr(bp, "seas_ml")
 cat(sprintf("  structure: '%s'%s\n", MS_STRUCT,
             if (nzchar(MS_STRUCT)) paste0(" (", paste(sprintf("%s=%s", names(CCX_STRUCT_HILDA), CCX_STRUCT_HILDA), collapse = ", "), ")") else " (32-box column)"))
@@ -632,6 +643,13 @@ local({
   if (!identical(ccx_parse_seas_ml(r$seas_ml[1]), MS_SEAS_ML))
     stop("port targets were measured at seas_ml = ", r$seas_ml[1], "; this run has seas_ml = ",
          MS_SEAS_ML, ". Re-run make_port_targets.R under the run's CCX_MS_SEAS_ML.")
+  # ⛔ AND UNDER THE SAME PINS (2026-09-13): a target measured on the free arm is
+  # another objective's number for a pinned run, and vice versa. A CSV without the
+  # column predates pins and is refused for a pinned run, accepted (as "no pins") for a free one.
+  csv_pins <- if (is.null(r$pins)) "" else if (is.na(r$pins[1])) "" else as.character(r$pins[1])
+  if (!identical(csv_pins, ccx_pin_label(MS_PINS)))
+    stop("port targets were measured with pins '", csv_pins, "'; this run has '", ccx_pin_label(MS_PINS),
+         "'. Re-run make_port_targets.R under the run's CCX_MS_PIN.")
   tgt <- as.numeric(r$logpost[1])
   if (!is.finite(tgt))
     stop("port target for '", nm, "' is ", r$logpost[1], " -- that reference point is ",
@@ -844,7 +862,7 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
   # comment-only commit would move [[threshold_from_obs_or_law]].
   saveRDS(list(id = MS_ID, u = u, best = best, cycle = cyc, trace = trace,
                n_eval = n_eval, seed = MS_SEED + MS_ID,
-               param_names = CCX_PARAM_NAMES, ref_logpost = MS_REF_LP), MS_CKPT)
+               param_names = CCX_PARAM_NAMES, ref_logpost = MS_REF_LP, pins = MS_PINS), MS_CKPT)
   # ⛔ A CYCLE THAT RAN NO RESTART IS NOT A CONVERGED CYCLE. It gained 0.0000
   # because nothing was tried, and `0 < MS_CYCLE_TOL` is true for exactly that
   # reason -- so the budget guard firing before the first restart used to print
@@ -889,6 +907,9 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             # a promoted mode must carry the seasonal-mixed-layer setting it was
             # fitted at, or ccx_mode_base() scores it on the other objective.
             seas_ml = MS_SEAS_ML,
+            # RECORDED (2026-09-13): the pins this start was fitted under (NULL = free).
+            # promote_multistart_mode.R applies them before GATE 1; ccx_mode_base() carries them.
+            pins = MS_PINS,
             # RECORDED **AND** READ by collect_dispersed_multistart.R's VERDICT.
             # ⛔ THE BOUND ON "did this start reach that one" IS THIS OPTIMISER'S
             # OWN CONVERGENCE TOLERANCE, and the only file that knows it is the

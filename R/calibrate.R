@@ -816,6 +816,82 @@ CCX_PARAM_TABLE <- list(
 
 CCX_PARAM_NAMES <- names(CCX_PARAM_TABLE)
 
+# ---- PINNED ARMS (2026-09-13) ----------------------------------------
+# A PIN removes a name from the FITTED set and carries its value in the base
+# parameters instead, so the objective is evaluated on the remaining names with
+# that coordinate held. This is what `CCX_MODE_PINNED` (R/paths.R) was always
+# meant to record and, until today, nothing could produce: `pin90` was a
+# near-delta PRIOR, which is not a pin (its +11.67 prior credit polluted every
+# comparison). A pin has NO prior term and NO Jacobian for the held name -- the
+# objective on the reduced set is exactly the full objective's conditional
+# slice at the pinned value, minus the held name's own prior, which is a
+# constant. ⚠ THAT CONSTANT IS WHY A PINNED ARM'S LOGPOST IS NOT COMPARABLE
+# TO A FREE ARM'S: compare on LIKELIHOOD (streams), never on the stored value.
+#
+# First use: C' -- `ent_seas_amp_SH` (the pCO2-side entrainment SHIM, which
+# moves no carbon) pinned to 0 against `hilda31s2`, to ask whether the real
+# seasonal mixed layer carries the SH ocean limb's DIC side on its own
+# (assessment 2026-09-12 option C'). Under `tr = "log"` 0 is off the support,
+# so a pin is the ONLY way to put the shim at 0.
+#
+# The globals are mutated IN THE ENVIRONMENT THE TABLE LIVES IN, so every
+# consumer (ccx_par_to_unc, ccx_unc_to_par, ccx_make_logpost's prior loop,
+# ccx_init_unc, ccx_migrate_par_set) sees the reduced set; ccx_unpin_params()
+# restores it (tests run in one process).
+#' @param pins a named numeric: value per pinned parameter name
+#' @return invisibly, the removed table entries (what ccx_unpin_params needs)
+ccx_apply_pins <- function(pins) {
+  if (is.null(pins) || !length(pins)) return(invisible(list()))
+  if (is.null(names(pins)) || any(!nzchar(names(pins))) || !is.numeric(pins))
+    stop("ccx_apply_pins(): `pins` must be a NAMED numeric vector, e.g. c(ent_seas_amp_SH = 0).")
+  env <- environment(ccx_apply_pins)
+  tab <- get("CCX_PARAM_TABLE", envir = env)
+  unknown <- setdiff(names(pins), names(tab))
+  if (length(unknown))
+    stop("ccx_apply_pins(): not a fitted parameter of this build: ", paste(unknown, collapse = ", "),
+         " (a pin holds a FITTED name; a base parameter is set on base_params directly).")
+  if (!all(is.finite(pins))) stop("ccx_apply_pins(): every pin value must be finite.")
+  removed <- tab[names(pins)]
+  tab[names(pins)] <- NULL
+  assign("CCX_PARAM_TABLE", tab, envir = env)
+  assign("CCX_PARAM_NAMES", names(tab), envir = env)
+  assign("CCX_PINS", pins, envir = env)
+  invisible(removed)
+}
+#' Restore the pinned names to the table, in their ORIGINAL order.
+ccx_unpin_params <- function(removed) {
+  if (!length(removed)) return(invisible(NULL))
+  env <- environment(ccx_apply_pins)
+  tab <- get("CCX_PARAM_TABLE", envir = env)
+  full <- c(tab, removed)
+  # the original order is CCX_PARAM_TABLE's definition order, which the tests
+  # and the mode files' `param_names` both depend on
+  ord <- .CCX_PARAM_ORDER[.CCX_PARAM_ORDER %in% names(full)]
+  assign("CCX_PARAM_TABLE", full[ord], envir = env)
+  assign("CCX_PARAM_NAMES", ord, envir = env)
+  assign("CCX_PINS", NULL, envir = env)
+  invisible(NULL)
+}
+.CCX_PARAM_ORDER <- CCX_PARAM_NAMES
+CCX_PINS <- NULL
+#' Parse a pin specification of the form "name=value[,name=value]" (CCX_MS_PIN).
+#' "" or NA means no pins. Values must parse as finite numbers.
+ccx_parse_pins <- function(spec) {
+  if (is.null(spec) || is.na(spec) || !nzchar(trimws(spec))) return(NULL)
+  parts <- strsplit(trimws(spec), ",", fixed = TRUE)[[1]]
+  kv <- strsplit(trimws(parts), "=", fixed = TRUE)
+  if (any(lengths(kv) != 2L))
+    stop("ccx_parse_pins(): expected name=value[,name=value]; got '", spec, "'.")
+  vals <- suppressWarnings(as.numeric(vapply(kv, `[[`, "", 2L)))
+  if (any(!is.finite(vals))) stop("ccx_parse_pins(): non-numeric pin value in '", spec, "'.")
+  stats::setNames(vals, trimws(vapply(kv, `[[`, "", 1L)))
+}
+#' The label a pin set contributes to an outdir / file name: "_pin_<name>=<value>".
+ccx_pin_label <- function(pins) {
+  if (is.null(pins) || !length(pins)) return("")
+  paste0("_pin_", paste(sprintf("%s=%s", names(pins), format(pins, trim = TRUE)), collapse = "_"))
+}
+
 # ---- transforms ------------------------------------------------------
 .to_unc <- function(v, s) switch(s$tr,
   log   = log(v),

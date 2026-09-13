@@ -26,6 +26,8 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
+PT_PINS <- ccx_parse_pins(Sys.getenv("CCX_MS_PIN", ""))   # same contract as the driver (2026-09-13)
+invisible(ccx_apply_pins(PT_PINS))
 source(ccx_path("calibration", "lib_run_inputs.R"))
 ccx_require_run_inputs()   # BEFORE the wall budget, and before any target is written
 
@@ -61,7 +63,8 @@ bp <- ccx_default_params(); bp$pump_mode <- PT_ARM
   v
 }
 bp <- ccx_apply_structure(bp, .pt_env_required("CCX_MS_STRUCT"), .pt_env_required("CCX_MS_SEAS_ML"))
-cat(sprintf("objective label: struct '%s', seas_ml %d\n", attr(bp, "struct"), attr(bp, "seas_ml")))
+for (n in names(PT_PINS)) bp[[n]] <- PT_PINS[[n]]
+cat(sprintf("objective label: struct '%s', seas_ml %d, pins '%s' (%d free parameters)\n", attr(bp, "struct"), attr(bp, "seas_ml"), ccx_pin_label(PT_PINS), length(CCX_PARAM_NAMES)))
 lp <- ccx_make_logpost(base_params = bp)
 .ship <- lapply(CCX_PARAM_TABLE, function(s) c(s$lo, s$hi))
 
@@ -137,6 +140,7 @@ tg$arm       <- PT_ARM
 tg$n_par     <- length(CCX_PARAM_NAMES)
 tg$struct    <- attr(bp, "struct")            # "" = column, "hilda" = the declared structure
 tg$seas_ml   <- attr(bp, "seas_ml")           # 0 = the shipped model, 1 = round 6 (2026-09-10); READ by the driver's port gate
+tg$pins      <- ccx_pin_label(PT_PINS)        # "" = free arm; READ by the driver's port gate (2026-09-13)
 # ⭐ THE TABLE THESE TARGETS WERE MEASURED UNDER, recorded so a consumer can
 # REFUSE a stale target instead of silently comparing across two tables. A
 # widened bracket shifts every logpost by a reparameterisation constant, so a

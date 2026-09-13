@@ -227,7 +227,19 @@ export CCX_MS_SPREAD="${CCX_MS_SPREAD:-1.0452}"
 # so the wall arithmetic above is now conservative.
 #     CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 calibration/torch/multistart.sbatch
 #     sbatch --array=0-23%24 calibration/torch/multistart.sbatch
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260912_round7_seasml${CCX_MS_SEAS_ML}_sd${CCX_MS_SPREAD}}"
+# 2026-09-13: ROUND 7 ADOPTED as hilda31s2. THE THIRD LABEL AXIS: CCX_MS_PIN holds fitted
+# names at values and removes them from the fitted set ("" = free arm; the driver,
+# make_port_targets.R and the port gate all read it, and the outdir carries it).
+#   C' -- the pCO2-side entrainment SHIM pinned to 0 against hilda31s2 (assessment
+#   2026-09-12 option C'; P12's original promise): does the real seasonal mixed layer
+#   carry the SH ocean limb's DIC side on its own? 30 free parameters; references
+#   hilda31s2 / hilda31p (both evaluated with the shim at 0); port_targets.csv
+#   regenerated on the Mac with CCX_MS_PIN=ent_seas_amp_SH=0.
+#     CCX_MS_PIN=ent_seas_amp_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 calibration/torch/multistart.sbatch
+#     CCX_MS_PIN=ent_seas_amp_SH=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
+export CCX_MS_PIN="${CCX_MS_PIN:-}"
+PIN_LABEL=""; if [ -n "$CCX_MS_PIN" ]; then PIN_LABEL="_pin_$(echo "$CCX_MS_PIN" | tr ',' '_')"; fi
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260913_cprime_seasml${CCX_MS_SEAS_ML}${PIN_LABEL}_sd${CCX_MS_SPREAD}}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.
@@ -263,7 +275,7 @@ case "$CCX_MS_OUTDIR" in
 esac
 echo "CCX_PROJ_DIR  $CCX_PROJ_DIR"
 echo "CCX_MS_OUTDIR $CCX_MS_OUTDIR"
-echo "CCX_MS_STRUCT $CCX_MS_STRUCT   CCX_MS_SEAS_ML $CCX_MS_SEAS_ML   CCX_MS_SPREAD $CCX_MS_SPREAD"
+echo "CCX_MS_STRUCT $CCX_MS_STRUCT   CCX_MS_SEAS_ML $CCX_MS_SEAS_ML   CCX_MS_SPREAD $CCX_MS_SPREAD   CCX_MS_PIN '${CCX_MS_PIN}'"
 
 # MEASURED 2026-09-01: `Rscript --vanilla` implies --no-environ, which suppresses
 # .Renviron FILES but NOT an exported R_LIBS_USER -- the library still lands in

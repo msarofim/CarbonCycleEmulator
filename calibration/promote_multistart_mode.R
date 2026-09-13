@@ -57,6 +57,14 @@ if (!length(fs)) stop("no start_*.rds under ", PMM_SRC_DIR)
 S <- lapply(fs, readRDS)
 
 # ---------------------------------------------------------------------
+# PINS (2026-09-13): a pinned arm's starts record `pins`; apply them so that GATE 1
+# compares against the REDUCED set, and carry them into the mode file (ccx_mode_base
+# holds them in the base; ccx_mode_params does not fit them).
+pin_rec <- unique(vapply(S, function(s) ccx_pin_label(s$pins), ""))
+if (length(pin_rec) != 1L) stop("the starts disagree on their pins: ", paste(pin_rec, collapse = " | "))
+PMM_PINS <- S[[1]]$pins
+invisible(ccx_apply_pins(PMM_PINS)); PMM_N_PAR <- length(CCX_PARAM_NAMES)
+if (length(PMM_PINS)) cat(sprintf("PINNED arm: %s (%d free parameters)\n", ccx_pin_label(PMM_PINS), PMM_N_PAR))
 sep("GATE 1: every start in this directory is on THIS build's parameter set")
 # ⚠ A 21- or 25-parameter start would promote silently into a 26-parameter
 # build and only fail later, at whichever diagnostic decoded it first.
@@ -131,6 +139,7 @@ PMM_SEAS_ML <- if (is.na(sm_rec)) 0L else sm_rec
 cat(sprintf("seas_ml %s: %d (%s)\n", if (is.na(sm_rec)) "INFERRED from the starts' age" else "RECORDED in the starts",
             PMM_SEAS_ML, if (PMM_SEAS_ML == 1L) "the seasonal mixed layer ON -- round 6" else "OFF -- the shipped model"))
 bp <- ccx_apply_structure(ccx_default_params(), PMM_STRUCT, seas_ml = PMM_SEAS_ML)
+for (n in names(PMM_PINS)) bp[[n]] <- PMM_PINS[[n]]
 bp$pump_mode <- best$pump_mode
 lpf <- ccx_make_logpost(base_params = bp)
 u   <- ccx_par_to_unc(best$par_mode)
@@ -264,6 +273,8 @@ out <- list(
   # h_ml kink check silently skip -- "no kinks, checked" and "never looked" must
   # not look the same ([[default_off_hides_the_bug]]).
   hml_kinks = PMM_KINKS,
+  # the pins this arm was fitted under (NULL = free); READ by ccx_mode_base()
+  pins = PMM_PINS,
   # PROVENANCE -- what this file is, so a reader never has to reconstruct it.
   promoted_from = list(dir = PMM_SRC_DIR, file = fs[which.max(
                          vapply(S, function(s) if (identical(s$id, best$id)) 1 else 0, numeric(1)))],
