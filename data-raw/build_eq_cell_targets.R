@@ -5,7 +5,7 @@
 # the CELL, mirror cells with ONE parameter set, k_eq = layer 2, area-weighted
 # surface reader).
 #
-# ONE product, six components, each with its own source and its own status
+# ONE product, six components + the W0 prior (w0_prior, the transport SOURCE), each with its own source and its own status
 # (an OBSERVATION the cell is pinned to, a TARGET row/gate, or a CHECK):
 #   eq_frac  the band's OCEAN area as a fraction of EACH hemisphere's ocean area
 #            (the cell's area parameter -- PINNED to this, never fitted), from the
@@ -249,7 +249,15 @@ out <- list(eq_frac = eq_frac, b1 = b1, h_eq = h_eq, sst_eq = sst_eq, alk_eq = a
             consts = list(lat = EQ_LAT, lon = EQ_LON, lon_wide = EQ_LON_WIDE, ml_lo_lat = EQ_ML_LO_LAT, surf_m = EQ_SURF_M, flag = EQ_FLAG_OK,
                           lon_bin = EQ_LON_BIN, dic_bins = EQ_DIC_BINS, sst_base = EQ_SST_BASE, sst_reg = EQ_SST_REG, strict_months = EQ_STRICT_N,
                           hemi_split = "lat > 0 is NH, lat <= 0 is SH (a cell centred on the equator counts as SH; ERSST has one such row)"),
-            scope = "notes/scoping_2026-09-13_equatorial_cell.md sec.5; rulings 2026-09-13 g: cell, mirror cells one parameter set, k_eq = 2, area-weighted surface reader",
-            transport_source = "NOT HERE: an EUC / STC transport and its ENSO variation is a LITERATURE source, tracked in the CHANGELOG; until cited, 26 Sv per index is a MODEL requirement",
+            scope = "notes/scoping_2026-09-13_equatorial_cell.md sec.5; rulings 2026-09-13 g: cell, mirror cells one parameter set, k_eq = 2, area-weighted surface reader, w_eq fitted with the Meinen prior, B1 sigma = sd_mask, h_eq = mean; prereg notes/prereg_2026-09-13g_equatorial_cell_build.md",
+            # THE TRANSPORT SOURCE (09-13 g): the prior on the cell's mean upwelling W0 = `w_eq`, carried HERE so
+            # calibrate.R reads it through a loader and never types the number (the ccx_u_hs_prior idiom).
+            w0_prior = list(mean_sv = 27, sd_sv = 3, range_sv = c(24, 30),
+                            def = "mean vertical transport across 50 m, 5S-5N: 24 +/- 3 Sv over 155-95W (1993-96) and ~30 Sv over 165E-95W (= ~60 Sv Ekman divergence half cancelled by geostrophic convergence); mean w 0.24e-5 m/s = 76 m/yr. Prior centre = the midpoint of the two boxes, sd = the stated +/- 3",
+                            interannual = list(p2p_sv = 50, def = "peak-to-peak cross-isotherm transport change between the 1997-98 El Nino and 1998-99 La Nina, 8S-8N (Meinen & McPhaden 2001, as quoted by Meinen et al. 2001)",
+                                               nino34_p2p_monthly = 3.49, nino34_p2p_annual = 2.00, per_index_sv = c(14, 25),
+                                               note = "on forcing_enso.rds's index: Jan 1998 +1.75 to Jan 1999 -1.74 monthly; 1997 +0.84 to 1999 -1.16 on annual means. Like-for-like caveats both ways (monthly p2p over-states an annual slope; the 8-deg box adds Sv)"),
+                            historical = "Quay et al. 1983 (bomb-14C budget) 26 +/- 7 Sv; Johnson et al. 2001 57 +/- 16 Sv (includes 1997-99); Kessler 2006 Prog. Oceanogr. 69:181-217 review: 30-50 Sv east-central Pacific",
+                            source = "Meinen C.S., McPhaden M.J., Johnson G.C. (2001) Vertical velocities and transports in the equatorial Pacific during 1993-99. J. Phys. Oceanogr. 31:3230-3248 (text extracted from the PMEL scan)"),
             built = format(Sys.time(), "%Y-%m-%d %H:%M"))
 saveRDS(out, ccx_path("data", "obs_eq_cell.rds")); cat("\nsaved data/obs_eq_cell.rds\n")
