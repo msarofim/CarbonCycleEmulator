@@ -1,4 +1,4 @@
-# Handoff — 2026-09-13 (h). **THE EQUATORIAL CELL IS BUILT (both cores, likelihood, 142 tests) and PROBED unrefitted: PE1 PASS at γ_eq ≈ 0.59 (16 Sv per index), PE6 PASS, N1 attributed, B1 +144 vs +55.5 (z +13). One bug fixed before any read. Nothing adopted. Next: Marcus's call on the parameter table, then the array.**
+# Handoff — 2026-09-13 (h). **THE EQUATORIAL CELL IS BUILT (both cores, likelihood, 142 tests) and PROBED unrefitted: PE1 PASS at γ_eq ≈ 0.59 (16 Sv per index), PE6 PASS, N1 attributed, B1 +144 vs +55.5 (z +13). One bug fixed before any read. Nothing adopted. Next: the array (the table change rides in its launch commit — ruled).**
 
 > Self-contained. CHANGELOG 09-13 (h); memory [[ccx_eq_cell_built_probe]] (in `INDEX_ccx_ocean_circ`; `INDEX_ccx` live line updated).
 > Previous: `handoff_2026-09-13g_eq_cell_ruled_prereg.md`; prereg `notes/prereg_2026-09-13g_equatorial_cell_build.md`.
@@ -44,7 +44,7 @@ untouched original. My prereg-time "4 % of the excursion" was wrong by (excursio
   **The array reads this, not the probe.**
 
 ## 4. Next session — ONE RULING, then the array
-1. **Ruling owed (Marcus):** put `w_eq` (logit [5, 60], prior N(27, 3) via `obs_eq_cell$w0_prior`, init 27) and `gamma_eq` (id [0, 2],
+1. **RULED (Marcus, 09-13 h): the table change goes in the ARRAY-LAUNCH COMMIT, not before.** Until then `w_eq`/`gamma_eq` stay base parameters and the suite stays green. At launch: put `w_eq` (logit [5, 60], prior N(27, 3) via `obs_eq_cell$w0_prior`, init 27) and `gamma_eq` (id [0, 2],
    flat, init 1) into `CCX_PARAM_TABLE` NOW — which reddens `test-mode-file`'s "carries THIS BUILD's parameter set" (31 vs 33 names)
    until the array's mode is promoted (the 09-08d precedent) — or only in the array-launch commit. Either way: migration contract
    (absent = 0 = what ancestors RAN; 0 is unencodable under the logit box ⇒ `ccx_seed_unencodable()` starts at init),
