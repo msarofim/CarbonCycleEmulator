@@ -1621,8 +1621,12 @@ ccx_default_params <- function() {
     # cross-equatorial exchange really is seasonal.
     tau_ex_seas_amp = 0,     # fractional amplitude on the RATE, |amp| < 1
     tau_ex_seas_phase = 0,   # months, peak-exchange phase
-    sst_NH    = 18,       # degC, hemispheric-mean SST (inside the K1/K2 fit range)
-    sst_SH    = 16,
+    sst_NH    = 18,       # degC, hemispheric-mean SST (inside the K1/K2 fit range).
+    sst_SH    = 16,       #   ⚠ TYPED, not measured: the whole-LS annual mean is
+                          #   23.0/19.4 (1991-2020; 22.3/18.7 re-based) -- the
+                          #   `hilda_c` block carries the measured pair (09-14 h).
+                          #   `alpha_photo_eps` (permil) is ABSENT here on purpose: absent = the
+                          #   ledger's ALPHA_PHOTO_EPS (ccx_prepare()); `hilda_c` sets it.
     sst_scale = 0.8,      # SST anomaly per unit GMST anomaly
     npp_frac_NH = 0.60,   # NH share of global NPP
     # THE SINE'S KNOBS, live only at seas_drivers = 0 (the escape hatch; see
@@ -3551,7 +3555,12 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     asx = lapply(a_ml, function(A)
       A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC")),
     dz_mid = (grid$dz[-length(grid$dz)] + grid$dz[-1]) / 2,
-    alpha_photo = 1 - ccx_const("ALPHA_PHOTO_EPS") / 1000,   # registered 2026-09-14 g (ledger: provisional, C3-only value)
+    # the terrestrial photosynthetic 13C discrimination, permil -> alpha. A BASE
+    # PARAMETER since 2026-09-14 h (the constants batch, ruled): absent = the
+    # ledger's ALPHA_PHOTO_EPS (18, the C3-only value every registered file ran
+    # at -- bit-exact), and the `hilda_c` structure block sets the biosphere-
+    # wide 15.6 (Marcus 09-14 h) without moving the ledger until a refit adopts.
+    alpha_photo = 1 - (if (is.null(p$alpha_photo_eps)) ccx_const("ALPHA_PHOTO_EPS") else p$alpha_photo_eps) / 1000,
     # AIR-SEA 13C FRACTIONATION -- TEMPERATURE-DEPENDENT SINCE 2026-09-02.
     #
     # Two limbs, because a single "net" alpha cannot represent a two-way gross

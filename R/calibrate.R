@@ -1892,6 +1892,44 @@ ccx_struct_hilda_tr <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
+#' THE "hilda_c" STRUCTURE (2026-09-14 h; the CONSTANTS BATCH the 09-14 g review
+#' ruled into the option-E refit, each value RULED by Marcus 09-14 h): the
+#' "hilda" block with three of its typed / derived constants replaced by
+#' MEASURED ones, every value read from data/obs_tr_box.rds (the same product
+#' and re-basing hilda_tr uses) or stated as a ruled choice:
+#'   sst_NH / sst_SH  <- the WHOLE-LS mixed layer's annual-mean SST (|lat| < 57.14,
+#'                       ERSSTv5 1991-2020, area-weighted), RE-BASED to 1850-1900 by
+#'                       the HadSST4 hemispheric anomaly: 22.3 / 18.7 for the typed
+#'                       18 / 16 (which were an effective equilibration temperature,
+#'                       ~4 K cold). ⚠ NOT hilda_tr's 17.18 / 15.35: that is the
+#'                       RESIDUAL ML (LS minus tr minus eq), the wrong box for a
+#'                       structure without the tropical box.
+#'   hs_frac          <- the ocean's ACTUAL fraction poleward of 57.14 deg, area-
+#'                       weighted over the two hemispheres (NH 0.126 / SH 0.130 ->
+#'                       0.128) for the uniform-sphere 0.16. ⚠ The BOUNDARY stays
+#'                       57.14 deg (the product's mask); only the AREA share moves.
+#'   alpha_photo_eps  <- 15.6 permil, the MID-BRACKET of the biosphere-wide value
+#'                       (Lloyd & Farquhar 1994 total 14.8 at 25 % C4; Still 2003 /
+#'                       Suits 2005 15-18 -> 14.8-16.5) for the C3-only 18 the
+#'                       ledger keeps (ALPHA_PHOTO_EPS stays provisional until a
+#'                       refit adopts). A RULED CHOICE, not a measurement.
+#' A NEW LABEL rather than an edit of CCX_STRUCT_HILDA: that block is what every
+#' registered mode's base is built from, and an in-place change would move them
+#' all without error. Under "hilda" every registered file stays bit-exact.
+CCX_ALPHA_PHOTO_EPS_BIOSPHERE <- 15.6   # permil; the ruled mid-bracket (09-14 h)
+ccx_struct_hilda_c <- function() {
+  o <- ccx_tr_box_obs()
+  g <- o$geom
+  a <- c(NH = g$NH$hemi_ocean_m2, SH = g$SH$hemi_ocean_m2)
+  blk <- CCX_STRUCT_HILDA
+  add <- list(sst_NH  = unname(g$NH$sst_ls_clim + o$rebase_C[["NH"]]),
+              sst_SH  = unname(g$SH$sst_ls_clim + o$rebase_C[["SH"]]),
+              hs_frac = unname(sum(a * c(g$NH$hs_frac, g$SH$hs_frac)) / sum(a)),
+              alpha_photo_eps = CCX_ALPHA_PHOTO_EPS_BIOSPHERE)
+  blk[names(add)] <- add
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
 #' @param seas_ml the SEASONAL MIXED LAYER switch (round 6), the SECOND axis of
 #'   the objective label beside `struct` (2026-09-10). ⛔ WHY IT IS HERE AND NOT
 #'   LEFT TO `ccx_default_params()`: `seas_ml` is a BASE parameter, not a fitted
@@ -1920,13 +1958,14 @@ ccx_parse_seas_ml <- function(seas_ml) {
 #' The structure labels the objective knows, and each one's DECLARED block --
 #' ONE dispatch (2026-09-14f), read by ccx_apply_structure(), the array driver's
 #' banner and the tests, so no consumer keeps its own list.
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr")
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
     "hilda"    = CCX_STRUCT_HILDA,
     "hilda_eq" = ccx_struct_hilda_eq(),
     "hilda_tr" = ccx_struct_hilda_tr(),
+    "hilda_c"  = ccx_struct_hilda_c(),             # hilda + the constants batch (2026-09-14 h)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -1978,7 +2017,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
   if (!struct %in% CCX_STRUCT_LABELS)
     stop("ccx_apply_structure(): unknown structure label '", struct,
          "'. Known: \"\" (column), \"hilda\", \"hilda_eq\" (HILDA + the equatorial cell, ",
-         "2026-09-13g) and \"hilda_tr\" (+ the tropical surface box, 2026-09-14f).")
+         "2026-09-13g), \"hilda_tr\" (+ the tropical surface box, 2026-09-14f) and ",
+         "\"hilda_c\" (hilda + the constants batch, 2026-09-14h).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)
