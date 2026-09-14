@@ -47,3 +47,15 @@ the LS mean SST is 22.8/19.7 (typed 18/16); at 26 °C `tr` = 0.389/0.225 of each
 −0.70 both hemispheres; the cell's 27.04 was not re-based — fix it in the `obs_eq_cell.rds` rebuild); areas on the SOM-FFN grid; the
 residual ML's `obs_mld` / `h_ml` prior recomputed on the new mask; `sst_NH/SH` sourced for the first time.
 **NEXT SESSION**: Marcus's isotherm → `build_tr_box_targets.R` (+ the `obs_eq_cell.rds` re-base) → the `hilda_tr` R side per the prereg §5 order.
+
+## 9. UPDATE 09-14 (e) — 26 °C RULED; THE PRODUCT IS BUILT (`2ea5ea5`)
+`data-raw/build_tr_box_targets.R` → `data/obs_tr_box.rds` (+ `.log`). SOM-FFN grid; every SST re-based to 1850–1900 (−0.702/−0.701).
+`tr_frac` 0.3966 / 0.2149; SST (PI) tr 27.24 / 27.18, **residual ML 17.18 / 15.35** (= the new `sst_NH/SH`), cell 26.57 / 26.09; MLD tr
+40.2 / 45.9, residual 57.9 / 77.1 (max 131 / 159); tr pCO₂ +6.7 / +8.8 over global (CHECK); GLODAP alk 2296 / 2306, DIC 1964 (cell 1982);
+β_ENSO +0.20 K/index (R side rules). ⚠ `hs_frac` 0.16 vs the ocean's 0.126 / 0.130 at 57.14° — a ruling owed, not touched.
+**NEXT SESSION = the `hilda_tr` build**, in this order (CHANGELOG 09-14 (e) §Next): box names + `ccx_tr_on()` + `ccx_struct_hilda_tr()`
+(reads the product; overrides `sst_NH/SH` with the residual's; `q_tr` = 0; `seas_ml` OFF on tr) → area partition (a_ml = a_ls − a_eq −
+a_tr; the D1 guard covers tr) → tr air–sea + diffusive interface to layer 1 over a_tr → the loop re-routed through tr → pCO₂ column →
+readers (`ccx_box_mass_at("tr")`, surface averages by area) → C++ twin → P0-style tests + N-T1 (`tr` merged into `ml` reproduces
++133 at 27 Sv) → unrefitted probe PT1/PT6 → the residual-ML `obs_mld`/`h_ml` prior on the new mask → array under `hilda_tr`.
+Start from HEAD; a build-tier prereg (hooks by file:line) first, as for the cell.
