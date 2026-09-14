@@ -2,6 +2,19 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-14 (h) — ⭐⭐ **RULINGS E1–E6 GIVEN (Marcus: "follow the recommendations; E4 Nowicki if it includes uncertainty bounds") and E4 RESOLVED BY MEASUREMENT: Nowicki et al. 2022's data release (124-member ensemble, per-cell mean + 25th/75th percentiles; figshare 19074521, 215 MB, md5 verified) integrated on its own grid reproduces the abstract's 10.2 PgC/yr (10.25) and its pathway shares; the LOW-LATITUDE export (|lat| < 57.14°, the model's LS column) is 9.08 PgC/yr with the sum-of-percentile-map bracket [8.12, 9.92] → the prior on `pump_export` is lognormal median 9.08, log-sd 0.148 (`data/obs_pump_export_prior.rds`). The option-E prereg is written (`notes/prereg_2026-09-14h_option_e_ventilation.md`); nothing built yet at this entry.**
+
+### E4 — the product (`data-raw/download_nowicki_bcp.R` → manifest `nowicki2022_bcp`; `data-raw/build_pump_export_prior.R` → `data/obs_pump_export_prior.rds`)
+- The paper text is behind Wiley's bot-check (not bypassed); the abstract (Semantic Scholar) gives only the ensemble MEAN, so the bounds come from the data release. Global 10.25 [9.09, 11.27]; grav 7.35 (fec 6.18 + agg 1.12) / migrant 1.00 / mixing 1.91 = 0.72 / 0.10 / 0.19 (abstract 0.70 / 0.10 / 0.20) — both CHECKED by `stop()` before the product is saved.
+- LS 9.08 [8.12, 9.92] at 29.3 gC m⁻² yr⁻¹ over 3.092e14 m²; NH 3.92 / SH 5.17 (the equatorial row split half-half); HS 1.17 at 24.8 gC m⁻² yr⁻¹ — vs the shipped HS prior's 22.9 (`obs_hs_export_prior.rds`, float-based): the two products agree. Nowicki's euphotic depth averages 67.6 m (the export horizon) vs `h_ml` 65.2 at the canonical.
+- ⚠ The bracket is the integral of PER-CELL percentile maps = an OUTER bound of the ensemble's IQR of the total (exact only if the members are comonotonic across cells), and it is ensemble-INTERNAL; the cross-method literature spread (5–13 global) is wider. The prior's 2σ (6.8–12.1 LS) is where the two meet. Stated in the product's `bounds_note`.
+- Nowicki's own gravitational POC profile attenuates with an effective Martin b = 0.744 (94 → 919 m), shallower than the sourced 0.858 the shape uses — recorded, not acted on.
+- ⚠ Today's solved field (45.5 GtC/yr) sits at z = +10.9 under this prior.
+
+### The prereg (`notes/prereg_2026-09-14h_option_e_ventilation.md`)
+- E1 prescribed × Martin behind a NEW `pump_field` switch (the scoping's "existing `pump_mode`" was wrong — that is the N/D law); E2 layers 1–3 thickness-weighted on the annual-mean grid; E3 one limb, `gamma_enso_ocn_*` pinned 0 for the array; E5 E first; E6 as scoped. Table 33 → 36 (`pump_export`, `w_e`, `gamma_e`); `pump_grad` pinned under `"martin"` with a logpost guard against fitting it free there. N-E1 RE-SCOPED (the Martin shape cannot reproduce the GLODAP field row-by-row at any export — the preview measured it).
+- Owed: the `w_e` prior's source (flat until then); the constants batch as separate commits before the start file.
+
 ## 2026-09-14 (g) — ⭐⭐ **REVIEW of the three open calls + a triage of 93 flagged non-physical behaviours (`notes/review_2026-09-14g_open_calls_and_nonphysics.md`), and THE PREVIEW it recommended, RUN: shrinking the pump's export field moves the cell's B1 by +1.54 µatm per GtC/yr — the 45 GtC/yr field is ~45 % of the +133 — but at the NO-pump limit `hilda_eq` still reads +74 (z +2.7): the other half is the kz coupling of every surface box to the cold mixed layer. `hilda_tr` + a Martin-tail export (17 GtC/yr) reads B1 +67.5 (z +1.8, PT1 would PASS) — but the tropical band stays +72 over global (obs +7.6) at every export, and the ENSO slope falls to 0.46× obs at γ 0.6. Unrefitted throughout; nothing adopted.**
 
 ### The review (§A the calls, §B the triage)
