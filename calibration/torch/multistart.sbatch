@@ -237,9 +237,30 @@ export CCX_MS_SPREAD="${CCX_MS_SPREAD:-1.0452}"
 #   regenerated on the Mac with CCX_MS_PIN=ent_seas_amp_SH=0.
 #     CCX_MS_PIN=ent_seas_amp_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 calibration/torch/multistart.sbatch
 #     CCX_MS_PIN=ent_seas_amp_SH=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
+# 2026-09-13 (i): THE EQUATORIAL CELL'S ARRAY (Fix B proper; prereg
+#   notes/prereg_2026-09-13g_equatorial_cell_build.md, built 09-13h). The structure label
+#   is `hilda_eq` -- HILDA's block PLUS the cell's observed geometry read from
+#   data/obs_eq_cell.rds (the bundle ships data/) -- and the table gained the cell's two
+#   fitted names w_eq / gamma_eq in the launch commit (31 -> 33; 32 free under the C'
+#   pin, which is KEPT: ent_seas_amp_SH = 0). Both reference files are 31-name vectors:
+#   the driver migrates the pair to 0 (what they RAN) and SEEDS it at init (27 Sv, 1 per
+#   index = the probe's PE1 point); dispersed starts draw the pair like every other
+#   coordinate. References hilda30c (incumbent, under the pin) / hilda31p (new basin).
+#   port_targets.csv regenerated on the Mac under this label (incumbent -1548.95 at the
+#   seeded point: -122.7 vs its stored logpost, of which ~-86 is the eq_b1 row at z +13
+#   -- the array's tension, PE8). Mac preflight ids 0/1/2/6: port VERIFIED rel <= 2.4e-14,
+#   0.195 s/eval (the cell costs nothing measurable over C'), so the 300/360 arithmetic
+#   above stands -- RE-READ IT from the Torch preflight before the wave, as always.
+#   ⛔ CCX_MS_STRUCT MUST BE GIVEN: the default below is still `hilda`, and a wave run
+#   without it would fit 33 names to a model in which the cell does not exist (the port
+#   gate refuses it in ~2 s -- the CSV says hilda_eq -- but only if the preflight is read).
+#     CCX_MS_STRUCT=hilda_eq CCX_MS_PIN=ent_seas_amp_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 calibration/torch/multistart.sbatch
+#     CCX_MS_STRUCT=hilda_eq CCX_MS_PIN=ent_seas_amp_SH=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
 export CCX_MS_PIN="${CCX_MS_PIN:-}"
 PIN_LABEL=""; if [ -n "$CCX_MS_PIN" ]; then PIN_LABEL="_pin_$(echo "$CCX_MS_PIN" | tr ',' '_')"; fi
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260913_cprime_seasml${CCX_MS_SEAS_ML}${PIN_LABEL}_sd${CCX_MS_SPREAD}}"
+# THE OUTDIR CARRIES EVERY LABEL AXIS (struct, seas_ml, pins, spread) since 2026-09-13 (i);
+# the C' directory predates the struct axis in the name (multistart_20260913_cprime_seasml1_pin_..._sd1.0452).
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260913_eqcell_${CCX_MS_STRUCT}_seasml${CCX_MS_SEAS_ML}${PIN_LABEL}_sd${CCX_MS_SPREAD}}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.

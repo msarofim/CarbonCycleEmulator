@@ -63,6 +63,46 @@ test_that("the cell ships OFF, off means ABSENT, and the geometry is READ not ty
   expect_identical(pe$w_eq, 0); expect_identical(pe$gamma_eq, 0)
 })
 
+test_that("R3: w_eq and gamma_eq are FITTED (31 -> 33), the W0 prior is the PRODUCT's, and a 31-name ancestor migrates to 0 and is SEEDED at init", {
+  # 2026-09-13i (the array-launch commit; ruled 09-13h). Adjacent, after u_hs --
+  # the other overturning transport -- so the u-vector's tail is the two cells.
+  expect_identical(length(CCX_PARAM_NAMES), 33L)
+  i <- match(c("u_hs", "w_eq", "gamma_eq"), CCX_PARAM_NAMES)
+  expect_identical(diff(i), c(1L, 1L))
+  o <- ccx_eq_cell_obs()$w0_prior
+  s <- CCX_PARAM_TABLE$w_eq
+  expect_identical(s$tr, "logit"); expect_identical(c(s$lo, s$hi), c(5, 60))
+  expect_identical(s$init, o$mean_sv)                          # literal vs product (ruling 4: 27 Sv)
+  for (x in c(8, 21, 27, 33, 50))                              # the prior IS N(27, 3), read not typed
+    expect_equal(s$prior(x), dnorm(x, o$mean_sv, o$sd_sv, log = TRUE))
+  expect_equal(s$prior(8) - s$prior(27), -0.5 * ((8 - 27) / 3)^2)   # z -6.3 at the W0 that hits B1 alone
+  g <- CCX_PARAM_TABLE$gamma_eq
+  expect_identical(g$tr, "logit"); expect_identical(c(g$lo, g$hi), c(0, 2)); expect_identical(g$init, 1)
+  expect_identical(g$prior(0.3), g$prior(1.7))                 # FLAT on the box
+  expect_identical(g$prior(2.5), -Inf)
+  # the migration: a vector without the pair (every registered mode) fills 0 =
+  # what it RAN (no loop), says so, and cannot encode -- both sit on a floor
+  anc <- ccx_unc_to_par(ccx_init_unc()); anc$w_eq <- NULL; anc$gamma_eq <- NULL
+  mig <- ccx_migrate_par_set(anc)
+  expect_setequal(attr(mig, "migrated"), c("w_eq", "gamma_eq"))
+  expect_identical(mig$w_eq, 0); expect_identical(mig$gamma_eq, 0)
+  expect_error(suppressWarnings(ccx_par_to_unc(mig)))
+  out <- capture.output(sd <- suppressWarnings(ccx_seed_unencodable(mig, "test")))
+  expect_true(any(grepl("SEEDING w_eq", out))); expect_true(any(grepl("SEEDING gamma_eq", out)))
+  expect_identical(sd$w_eq, 27); expect_identical(sd$gamma_eq, 1)
+  expect_true(all(is.finite(ccx_par_to_unc(sd))))
+  # the round trip at the table init reproduces the probe's PE1 point
+  back <- ccx_unc_to_par(ccx_init_unc())
+  expect_equal(back$w_eq, 27, tolerance = 1e-10); expect_equal(back$gamma_eq, 1, tolerance = 1e-10)
+  # and under "hilda" (eq_frac 0) the pair is inert: the deriv is bit-identical
+  # whatever they hold -- they are identifiable ONLY under hilda_eq
+  p0 <- ccx_apply_structure(ccx_default_params(), "hilda"); p1 <- p0; p1$w_eq <- 40; p1$gamma_eq <- 1.5
+  sp <- ccx_spinup(p0); sp1 <- ccx_spinup(p1)
+  expect_identical(sp1$y, sp$y)
+  expect_identical(ccx_deriv(sp$y, 1750, p1, zero_forc(sp$prod_c14, enso = 1), sp1$grid, sp1$aux),
+                   ccx_deriv(sp$y, 1750, p0, zero_forc(sp$prod_c14, enso = 1), sp$grid, sp$aux))
+})
+
 test_that("P0f MIRROR LINT: a mixed pair errors by name; order, stride and the area partition", {
   p <- ccx_default_params(); p$eq_frac_NH <- 0.05
   expect_error(ccx_eq_on(p), "MIRROR CELLS")
@@ -131,18 +171,34 @@ test_that("P0a NO-OP: eq_frac = 0 is BIT-EXACT with every cell parameter set, bo
   expect_identical(ra$substeps, rb$substeps)
 })
 
-test_that("P0a (canonical): hilda30c's stored logpost reproduces under this build", {
+test_that("P0a (canonical): hilda30c's stored LIKELIHOOD reproduces row by row under this build, and its logpost moves by EXACTLY the two new priors", {
   skip_if_no_cpp()
+  # 2026-09-13i: the table carries w_eq / gamma_eq (31 -> 33) and the registered
+  # files do not, so the 31-name vector is MIGRATED (0 = what it ran) and SEEDED
+  # at init (27 Sv, 1) -- the same path the array's incumbent start takes. Under
+  # "hilda" the cell is absent and the pair is INERT, so every one of the 25
+  # data rows must reproduce to the bit, and the whole shift in the logpost is
+  # the two priors at init plus their Jacobians -- a KNOWN constant, asserted,
+  # not a tolerance. (Until the array's mode is promoted the stored logpost
+  # itself does not reproduce -- the ruled 09-08d situation; test-mode-file
+  # says so for every registered file.)
   md <- readRDS(ccx_mode_file())
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
   expect_false(ccx_eq_on(bp))
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
-  sc <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(ccx_par_to_unc(md$par_mode))
+  new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))   # w_eq, gamma_eq
+  expect_setequal(new_names, c("w_eq", "gamma_eq"))
+  pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a"))
+  expect_true(all(new_names %in% attr(pm, "migrated")))
+  u  <- ccx_par_to_unc(pm)
+  sc <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(u)
   ccx_unpin_params(rm); rm <- list()
-  # the reproduction precision test-mode-file (d) holds the file to; and NO
-  # eq_b1 row exists at the canonical (the cell is absent there)
-  expect_equal(as.numeric(sc), md$logpost, tolerance = 1e-5, scale = 1)
-  expect_false("eq_b1" %in% names(attr(sc, "streams")))
+  st <- attr(sc, "streams")
+  expect_identical(st[names(md$streams)], md$streams)          # 25 rows, bit-exact
+  expect_false("eq_b1" %in% names(st))                          # no B1 row without a cell
+  shift <- sum(vapply(new_names, function(n) {
+    s <- CCX_PARAM_TABLE[[n]]; s$prior(pm[[n]]) + .log_jac(u[[n]], s) }, numeric(1)))
+  expect_equal(as.numeric(sc) - md$logpost, shift, tolerance = 1e-8, scale = 1)   # -0.8236 on 09-13i
 })
 
 test_that("the spinup converges with the cell on, and the cell sits ABOVE the mixed layer in pCO2", {

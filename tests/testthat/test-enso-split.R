@@ -215,7 +215,12 @@ test_that("ccx_migrate_par_set reproduces the LEGACY reading exactly", {
   # said it predated both splits until 2026-09-12) -- so "an ancestor current in
   # every other respect" has to be CONSTRUCTED from it, or there is nothing to
   # migrate.
-  p <- ccx_migrate_par_set(ccx_mode_params(ccx_mode_free_name())); attr(p, "migrated") <- NULL
+  # 2026-09-13i: the registered files predate w_eq / gamma_eq (31 -> 33); their
+  # migrated 0 sits on a box floor and cannot encode, so "current in every other
+  # respect" now includes SEEDING the pair at init (the driver's own start path).
+  # Fixture edit under the 09-13h ruling, flagged for veto; moot once the array's mode lands.
+  p <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(ccx_mode_params(ccx_mode_free_name())), "fixture"))
+  attr(p, "migrated") <- NULL
   p_old <- p[setdiff(names(p), CCX_ENSO_PARAMS)]
   p_old$gamma_enso <- 0.85119
 

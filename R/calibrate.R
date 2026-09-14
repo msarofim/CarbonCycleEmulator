@@ -367,6 +367,46 @@ CCX_PARAM_TABLE <- list(
   u_hs         = list(tr = "logit", lo = 5, hi = 150, init = 21.84,
                       prior = function(x) { pr <- ccx_u_hs_prior()
                         dlnorm(x, log(pr$centre_m_yr), pr$log_sd, log = TRUE) }),
+  # ---- THE EQUATORIAL UPWELLING CELL'S TWO FITTED NAMES (2026-09-13i; 31 -> 33)
+  # Fix B proper: mirror cells NH_eq / SH_eq under the "hilda_eq" structure
+  # label (prereg notes/prereg_2026-09-13g_equatorial_cell_build.md §1; built
+  # 09-13h). ONE parameter set for both cells (ruling 1). Both are BASE
+  # parameters with default 0 in ccx_default_params(): absent = 0 = no loop,
+  # which is what every ancestor RAN (the cell did not exist), so the
+  # migration contract below fills 0 and ccx_seed_unencodable() starts the
+  # search at init -- the pump_hs_gcm2 precedent. ⚠ Under "hilda" (eq_frac 0)
+  # neither name reaches the model; they are identifiable ONLY under hilda_eq.
+  #
+  # w_eq: the WHOLE-BAND mean upwelling volume flux, Sv, split between the two
+  # cells by area (equal velocity: 63 m/yr at 27 Sv). Box [5, 60]: 5 Sv is a
+  # fifth of the observed mean (effectively no cell); 60 Sv is above Johnson et
+  # al. 2001's 57 +/- 16, which INCLUDES the 1997-99 event. PRIOR: OBSERVATION,
+  # N(27, 3) Sv (ruling 4) -- Meinen, McPhaden & Johnson 2001 JPO 31:3230,
+  # 24 +/- 3 Sv over 155-95W and ~30 over 165E-95W across 50 m -- carried in
+  # obs_eq_cell.rds$w0_prior (data-raw/build_eq_cell_targets.R) and read
+  # lazily; the init is a LITERAL tied to the product by
+  # tests/testthat/test-eq-cell.R. B1 (the +55.5 uatm reservoir row, sigma
+  # 6.77) scores the SAME parameter from the other side, so the two can
+  # disagree (PE8) -- that disagreement is the array's finding, not something
+  # to pre-empt with a wider prior. The unrefitted probe (09-13h) read B1 at
+  # +144 at 27 Sv; W0 alone would need ~8 Sv (z -6) to reach +55.
+  w_eq         = list(tr = "logit", lo = 5, hi = 60, init = 27,
+                      prior = function(x) { pr <- ccx_eq_cell_obs()$w0_prior
+                        dnorm(x, pr$mean_sv, pr$sd_sv, log = TRUE) }),
+  # gamma_eq: the Nino3.4 modulation of the cell's transport, per index unit,
+  # W(t) = W x max(0, 1 - gamma_eq x enso) -- the T-A0 floor form (the loop is
+  # OFF at enso >= 1/gamma_eq). Box [0, 2] with a FLAT prior (prereg §1): 0 =
+  # a mean cell with no interannual signal (the N1 control); 2 = the loop
+  # shuts at a +0.5 index, well past the observed 1997-99 bracket of 14-25 Sv
+  # per index unit against 24-30 Sv (gamma ~0.5-1.0; PE7 reads [0.4, 1.1]).
+  # ⚠ The handoff wrote "id [0, 2]"; an `id` entry has no box in this table,
+  # and a hard box under `id` would be a -Inf cliff for Nelder-Mead, so the
+  # bounds are carried the way every other boxed name carries them -- logit --
+  # and the FLAT prior is the table's dunif-on-the-box idiom (beta_max, the
+  # deep floor). The migrated 0 sits ON the box's floor and does not encode;
+  # seeded at init 1 (the probe's PE1 point).
+  gamma_eq     = list(tr = "logit", lo = 0, hi = 2, init = 1,
+                      prior = function(x) dunif(x, 0, 2, log = TRUE)),
   # pump_hs_gcm2: THE HIGH-LATITUDE PUMP, FITTED since 2026-09-07e (29 -> 30) --
   # HS export per unit area in gC m-2 yr-1, remineralised in HD (pays choice C9).
   # The end-member probe put HS's DIC AT the observed high-latitude surface and
@@ -1082,6 +1122,17 @@ ccx_migrate_par_set <- function(p) {
   if ("u_hs" %in% absent) {
     p$u_hs <- CCX_U_HS_DECLARED
     filled <- c(filled, "u_hs")
+  }
+  # 2026-09-13i: w_eq and gamma_eq entered the table (31 -> 33), the equatorial
+  # cell's two fitted names. Absent = 0 = NO LOOP in the model's own contract
+  # (ccx_default_params(): both 0; ccx_cpp_par(): NULL -> 0), which is what
+  # every ancestor RAN -- under "hilda" the cell does not even exist. 0 is ON
+  # each box's floor (w_eq [5, 60], gamma_eq [0, 2]) and does not ENCODE;
+  # ccx_seed_unencodable() seeds both at init (27 Sv, 1 per index) for a START
+  # point -- the pump_hs_gcm2 precedent.
+  for (nm in c("w_eq", "gamma_eq")) if (nm %in% absent) {
+    p[[nm]] <- 0
+    filled <- c(filled, nm)
   }
 
   still <- setdiff(absent, filled)

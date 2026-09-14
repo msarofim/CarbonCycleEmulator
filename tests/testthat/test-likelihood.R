@@ -568,8 +568,10 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # 28 SINCE 2026-09-06d: kz_deep_frac and hs_asx_frac, the two FITTED
   # structure parameters of the HILDA refit (Marcus's ruling, prereg 09-07).
   # 29 SINCE 2026-09-07: h_hs fitted (decoupled from h_ml after the first refit).
-  expect_length(CCX_PARAM_NAMES, 31L)
-  expect_true(all(c("kz_deep_frac", "hs_asx_frac", "h_hs", "pump_hs_gcm2", "u_hs") %in% CCX_PARAM_NAMES))
+  # 33 SINCE 2026-09-13i: w_eq and gamma_eq, the equatorial cell's two fitted names
+  # (identifiable only under the "hilda_eq" structure label).
+  expect_length(CCX_PARAM_NAMES, 33L)
+  expect_true(all(c("kz_deep_frac", "hs_asx_frac", "h_hs", "pump_hs_gcm2", "u_hs", "w_eq", "gamma_eq") %in% CCX_PARAM_NAMES))
   expect_true("ent_seas_amp_SH" %in% CCX_PARAM_NAMES)
   expect_true(all(CCX_ENSO_PARAMS %in% CCX_PARAM_NAMES))
   expect_false("gamma_enso" %in% CCX_PARAM_NAMES)
