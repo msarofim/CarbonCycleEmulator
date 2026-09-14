@@ -119,3 +119,29 @@ R side (`model.R`: names, resolver, defaults, prepare/aux, deriv block, outputs,
 suite (the standing reds: the GATE Q pair + `test-seas-lag-split:205`) → `diag_tr_box_probe.R` (PT1, PT6, R3's read, PT7) → R5 → the array
 under `CCX_MS_STRUCT=hilda_tr CCX_MS_SEAS_ML=1 CCX_MS_PIN=ent_seas_amp_SH=0`, new `port_targets.csv`, proposed mode name `hilda30t` → PT2–PT5.
 Logs and rds under `outputs/diagnostics/tr_box_*_2026MMDD.*`.
+
+## 8. AMENDMENTS made DURING the build, before the transient probe ran (stamped 2026-09-14 f, commit `c4a13be`)
+Both were forced by the PI spinup picture at the canonical vector (an aseasonal `ccx_spinup()` read, not a PT number), and both are
+STATED choices with a knob, not silent resolutions:
+- **D2 — `tr` carries its AREA SHARE of the LS pump export** (`aux$ml_pump_share = a_ml/(a_ml + a_tr)`; the cell stays pump-free as
+  built, so `hilda_eq` reproduces). Measured before it: with the export drawn from the mixed layer alone (the prereg's literal "NO pump
+  on tr"), the residual ML — 40 % of the LS surface — sat at **194 / 240 µatm** at PI and `tr` at **360 / 396**: the pump's 50 GtC/yr
+  divergence field (sized on `a_ls`, which both boxes overlie) had one surface box to drain and one to outgas through. A per-area export
+  must be drawn per area. Priced: it moves `tr` from +73 to +68 over the global surface at PI (not the fix, the correction).
+- **R6 — `kz_tr_frac`** (structural; 1 = the tr–layer-1 interface at the ML base's own K, the design as RULED; 0 = no interface). Added
+  because at 1 the box sits **+68 µatm over the global surface at PI even with `w_eq` = 0** (obs +7.6): the interface's exchange, 5.6 /yr
+  at kz 11,300, exceeds the box's air–sea equilibration (4.7 /yr), so `tr` tracks layer 1's cold-equilibrated DIC. The probe scans
+  1 / 0.3 / 0.1 / 0. **A ruling owed.** ⚠ At 0.3 the box lands at +0.5 over global but B1 does not move (+132) and the likelihood
+  pays −119; at ≤ 0.1 the box is drained by its pump share (D2) with no resupply (−73 / −170 over global).
+- A naming trap fixed on the way: `aux$pump` is ABSENT when the pump is off and R's `$` partial-matched it to `pump_ml_share`; the
+  field is `ml_pump_share`. Never name an aux field `pump_*`.
+
+## 9. The probe's reading (2026-09-14 f; `outputs/diagnostics/tr_box_probe_20260914.log`) — PT1 FAILS, and the mechanism is measured
+At `start_011` (w_eq 27, γ 0.60): B1 **+101.6 (z +6.8)** as built vs the first build's +133.2; the mask change alone −4.9 on the common
+rows (B1 +132.1); `tr ≡ ml` (q_tr 1000 Sv) +100.2 — the whole B1 move is the "all-surface" mean rising by the tr box's own +68–80, not
+the cell's DIC falling. PT6 PASS (tr DIC 2009 vs 1963 ± 50, z +0.9 — the cluster σ hides the 46 µmol/kg that IS the +68). PT7: `sst_tr_enso`
+0.20 → 0 takes the ENSO slope from 1.53× to 2.50× obs. **Why the hypothesis fails as built: layer 2's diffusive exchange is 3.14 /yr
+against the loop's 0.045 /yr replacement (69×; NH, kz_int 9240 / 6961) — the DIC the cell exposes at 26 °C is set by pump + diffusion,
+not by what the loop returns.** The counterfactual's +61 (cell air–sea at the ML's SST) removed the T-exposure itself; no return-path
+design reproduces it. Design question for Marcus: a tropical COLUMN (tr over its own thermocline layers, the cell upwelling from the
+tropical layer 2) vs a kz lever on the cell's source; R5 and R6 rulings; the array is NOT launched.
