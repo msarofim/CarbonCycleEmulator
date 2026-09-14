@@ -30,3 +30,11 @@ Marcus ruled the `gamma_eq` prior FLAT. Preflight 17769390: 24/24 LAUNCHABLE, po
 **Wave = Torch job 17769990**, `--array=0-23%24`, 24/24 running from 06:58 EDT, tree `11e2b7a`, outdir
 `calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452`. Expect ~6 h; C′'s yield at this
 budget was 4 CONVERGED of 24 — a round 2 resumes the best ids from `summary.csv`, never the whole array. Then §5.
+
+## 7. UPDATE 09-14 (c) — the array is READ; the second build is SCOPED (`faddcfd`)
+Results committed under the outdir (+ Torch logs). Best −1450.518 (id 0 converged; 10 tasks), `w_eq` **10.72 Sv (z −5.4, PE8 FAIL)**,
+`gamma_eq` 0.600, PE1 on the vector 1.12× obs. `diag_eq_cell_levers.R`: at 27 Sv the excess (+133) is the T-term (+124/+159) — the
+ML's 18 °C DIC at 27 °C; T-term off ⇒ +61 (z +0.8). **Rulings taken: start from HEAD; `hilda30e` NOT promoted; own label.**
+**Prereg** `notes/prereg_2026-09-14c_equatorial_cell_tdic.md` (scoping tier): T1 = a TROPICAL SURFACE BOX `tr` the loop closes through;
+**R1–R4 owed** (T1 vs alternatives; the latitude bound; `seas_ml` on `tr`; `q_tr` fitted or structural). PT1–PT6 registered (PT3: γ
+drops to ~0.3, BELOW the observed bracket). Torch tree is still the launch bundle (fine; the next build re-bundles).
