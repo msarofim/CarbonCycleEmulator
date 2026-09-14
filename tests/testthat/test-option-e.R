@@ -55,6 +55,11 @@ test_that("the names ship OFF and their defaults are the 09-14 g model; the fiel
   expect_equal(CCX_PARAM_TABLE$pump_export$init, ccx_pump_export_prior()$centre_gtc, tolerance = 5e-3)
   expect_equal(CCX_PARAM_TABLE$pump_export$prior(9.08), dlnorm(9.08, log(ccx_pump_export_prior()$centre_gtc),
                                                                ccx_pump_export_prior()$log_sd, log = TRUE))
+  # ... and w_vent's init repeats ITS product's median (the subduction-rate bracket, 09-14 h)
+  expect_equal(CCX_PARAM_TABLE$w_vent$init, ccx_w_vent_prior()$centre_sv, tolerance = 5e-3)
+  expect_equal(CCX_PARAM_TABLE$w_vent$prior(200), dlnorm(200, log(ccx_w_vent_prior()$centre_sv), ccx_w_vent_prior()$log_sd, log = TRUE))
+  expect_gt(ccx_w_vent_prior()$log_sd, 0.5)                          # wide by design: two readings a factor 3 apart
+  expect_identical(c(CCX_PARAM_TABLE$w_vent$lo, CCX_PARAM_TABLE$w_vent$hi), c(0, 1500))
 })
 
 test_that("P0a NO-OP: names absent vs present at defaults is BIT-EXACT, and the loop is INERT under the solved field, both cores", {

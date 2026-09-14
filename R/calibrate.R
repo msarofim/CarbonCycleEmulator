@@ -91,6 +91,19 @@ ccx_pump_export_prior <- local({
   }
 })
 
+#' The LITERATURE prior on the ventilation loop's volume flux (option E; the
+#' prereg's owed source, discharged 2026-09-14 h): the global annual subduction
+#' rate into the permanent pycnocline outside the equatorial band, two readings
+#' a factor 3 apart (climatological ~160 Sv vs SODA 506 Sv), each at 1 sigma.
+#' data-raw/build_w_vent_prior.R. Same idiom.
+ccx_w_vent_prior <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "obs_w_vent_prior.rds"))
+    cache
+  }
+})
+
 #' The OBSERVATION priors on the cold box's flush and the mixed-layer thickness
 #' (2026-09-08d, Marcus: "free u_hs"; "either free h_ml or ..."), the same lazy
 #' idiom: data-raw/build_u_hs_prior.R and data-raw/build_h_ml_prior.R.
@@ -442,15 +455,25 @@ CCX_PARAM_TABLE <- list(
                       prior = function(x) { pr <- ccx_pump_export_prior()
                         dlnorm(x, log(pr$centre_gtc), pr$log_sd, log = TRUE) }),
   # w_vent: the mode-water loop's whole-LS subduction volume flux, Sv, split
-  # by a_ls share. Box [0, 60] (60 = the cell's ceiling; the loop and the cell
-  # are the same order of transport). ⚠ PRIOR OWED (prereg §5): no STC
-  # subduction transport is SOURCED in the repo, so the prior is FLAT on the
-  # box and the data rows -- the bomb 14C penetration and the deep d13C -- set
-  # it; the prereg says so. init 20 (T-A2's 26 Sv per index at layer 2 was
-  # the ENSO limb's gain; the mean is the array's question). 0 = OFF, on the
-  # floor, does not encode -> seeded at init for a START point.
-  w_vent       = list(tr = "logit", lo = 0, hi = 60, init = 20,
-                      prior = function(x) dunif(x, 0, 60, log = TRUE)),
+  # by a_ls share. PRIOR: LITERATURE (the prereg's owed source, discharged
+  # 09-14 h) -- the global annual SUBDUCTION rate from the mixed layer into the
+  # permanent pycnocline outside the equatorial band has two defensible
+  # readings a factor 3.2 apart: ~160 Sv from the climatologies (Qiu & Huang
+  # 1995; Karstensen & Quadfasel 2002) and 505.8 Sv from SODA year-by-year
+  # fields (Liu & Huang 2012 J. Climate 25:1096, who attribute the gap to the
+  # nonlinearity climatological-mean fields miss). Lognormal, geometric-mean
+  # centre 284 Sv, log-sd 0.575 (each reading at 1 sigma) -- the h_ml precedent
+  # -- COMPUTED by data-raw/build_w_vent_prior.R and read lazily; the init
+  # REPEATS the product's median (test-option-e.R ties the two). WIDE BY
+  # DESIGN: the mapping from the real subduction/obduction field to a closed
+  # one-column loop is itself uncertain; the data rows (bomb 14C, deep d13C)
+  # are meant to set it. Box [0, 1500] (2.5-97.5 % is 92-879). ⚠ Even at the
+  # climatological 160 Sv the loop replaces layers 1-3 at 0.07 /yr against the
+  # canonical kz's ~3 /yr: the ORDER says kz must fall (PE-1), not that the
+  # loop is small. 0 = OFF, on the floor, does not encode -> seeded at init.
+  w_vent       = list(tr = "logit", lo = 0, hi = 1500, init = 284,
+                      prior = function(x) { pr <- ccx_w_vent_prior()
+                        dlnorm(x, log(pr$centre_sv), pr$log_sd, log = TRUE) }),
   # gamma_vent: the loop's Nino3.4 modulation, W(t) = W max(0, 1 - gamma x
   # enso) -- the cell's floor form and the cell's box [0, 2], flat. One limb
   # carries the mean and the modulation (ruling E3), so `gamma_enso_ocn_*`

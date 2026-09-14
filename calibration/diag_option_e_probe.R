@@ -16,7 +16,7 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 PE_ARM   <- CCX_MODE_CANONICAL
 PE_EXPORT <- ccx_pump_export_prior()$centre_gtc     # 9.08, the prior's median
-PE_W     <- c(0, 10, 20, 40)                        # Sv
+PE_W     <- c(0, 40, 160, 284, 506)                 # Sv: 0, the first probe's top, the prior's two READINGS and its median
 PE_G     <- c(0, 0.5)                               # per Nino3.4 unit
 PE_OUT   <- ccx_path("outputs", "diagnostics", sprintf("option_e_probe_%s", format(Sys.Date(), "%Y%m%d")))
 sink_log <- file(paste0(PE_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE)
