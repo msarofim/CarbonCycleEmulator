@@ -38,3 +38,12 @@ ML's 18 °C DIC at 27 °C; T-term off ⇒ +61 (z +0.8). **Rulings taken: start f
 **Prereg** `notes/prereg_2026-09-14c_equatorial_cell_tdic.md` (scoping tier): T1 = a TROPICAL SURFACE BOX `tr` the loop closes through;
 **R1–R4 owed** (T1 vs alternatives; the latitude bound; `seas_ml` on `tr`; `q_tr` fitted or structural). PT1–PT6 registered (PT3: γ
 drops to ~0.3, BELOW the observed bracket). Torch tree is still the launch bundle (fine; the next build re-bundles).
+
+## 8. UPDATE 09-14 (d) — R1–R4 RULED; R2 MEASURED (`828a7e2`)
+T1 (no shim); the SST isotherm (value = Marcus's pick; **26 °C recommended**); `seas_ml` OFF then ON; `q_tr` 0 first, observation-based
+LATER (with the `seas_ml`-on test). `data-raw/diag_tr_box_bound_sensitivity.R` → `outputs/diagnostics/tr_box_bound_sensitivity_20260914.*`:
+the LS mean SST is 22.8/19.7 (typed 18/16); at 26 °C `tr` = 0.389/0.225 of each hemisphere at 27.9 °C, residual ML 17.7/16.1, MLD
+`tr` 41/45 m, residual 58/77 m. **Carry into the product build**: re-base every surface SST to 1850–1900 (HadSST 1991–2020 anomaly
+−0.70 both hemispheres; the cell's 27.04 was not re-based — fix it in the `obs_eq_cell.rds` rebuild); areas on the SOM-FFN grid; the
+residual ML's `obs_mld` / `h_ml` prior recomputed on the new mask; `sst_NH/SH` sourced for the first time.
+**NEXT SESSION**: Marcus's isotherm → `build_tr_box_targets.R` (+ the `obs_eq_cell.rds` re-base) → the `hilda_tr` R side per the prereg §5 order.
