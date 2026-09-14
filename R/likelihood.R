@@ -1599,7 +1599,9 @@ ccx_prepare_obs <- function() {
   if (!LIK_USE_BOMB_WINDOW) {
     drop <- function(x) x[x$t < LIK_BOMB_EXCLUDE[1] | x$t > LIK_BOMB_EXCLUDE[2], ]
     n0 <- nrow(d14_nh); d14_nh <- drop(d14_nh); d14_sh <- drop(d14_sh)
-    message(sprintf("D14C bomb window %d-%d EXCLUDED (%d of %d NH points dropped): the bomb injection shape is still provisional.",
+    # (this branch is dead at the default LIK_USE_BOMB_WINDOW = TRUE; the shape
+    # was superseded 2026-08-10 -- the message no longer claims it provisional)
+    message(sprintf("D14C bomb window %d-%d EXCLUDED (%d of %d NH points dropped) by LIK_USE_BOMB_WINDOW = FALSE.",
                     LIK_BOMB_EXCLUDE[1], LIK_BOMB_EXCLUDE[2], n0 - nrow(d14_nh), n0))
   }
 

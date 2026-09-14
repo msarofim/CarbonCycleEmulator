@@ -1214,39 +1214,36 @@ Rcpp with a bit-parity test against the R reference implementation (both stay in
 
 ## 6. Sanity gates (all must pass before headline claims)
 
-> ⛔⛔ **READ THIS BEFORE ANY TABLE BELOW — THE MODE THEY WERE MEASURED AT IS RETIRED.**
-> ⭐ **2026-09-08f: THE CANONICAL IS NOW `hilda31`** (31 parameters, HILDA structure; `ent26` retired to the column
-> control). Its ledger (`calibration/diag_whole_model_scorecard.R`, `outputs/diagnostics/whole_model_scorecard_20260908f.log`):
-> **G +1.57 / 7 / S (8.96 mo) PASS; V −2.77 / H +6.51 / 5 +2.17 FAIL; Q 0.844 vs 0.60 ± 0.10 FAIL (2.44σ) — new with the cold
-> box.** ENSO ocean 0.53× observed with the solubility-only path wrong-signed; IRF(100) 0.279 (a comparison). The verdict and
-> the ranked options are in `notes/assessment_2026-09-08_acceptable_state.md`. The `ent26` block below is provenance too.
+> ⭐⭐ **THE LIVE ACCEPTANCE LEDGER (rewritten 2026-09-14 g — option J of the 09-12 assessment; the canonical is `hilda30c`
+> since 2026-09-13 d).** Measured by `calibration/diag_whole_model_scorecard.R` →
+> `outputs/diagnostics/whole_model_scorecard_20260913_hilda30c.log` (arms: `ent26` column control, `hilda31p` `seas_ml` 0
+> control, `hilda30c` canonical; every arm spun up as its file records). The bounds and their provenance are the gate ledger
+> (memory `INDEX_ccx_gates.md`); the verdict and ranked options are `notes/assessment_2026-09-12_hilda31s.md`.
 >
-> Every "STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE" block in §6 was measured at **`from90`**, which has since
-> been **QUARANTINED**: `ccx_mode_file()` **ERRORS on `from90` and `pin90` by name**, so none of
-> these blocks can be re-run as written. The canonical mode is **`ent26`** (adopted 2026-09-04).
-> **The tables below are PROVENANCE. They are not the current acceptance criteria.**
+> | gate | what it tests | at `hilda30c` | verdict |
+> |---|---|---|---|
+> | **1–3** conservation, zero-emissions, paired pulse | mode-independent contracts | `tests/testthat/` (test-conservation, test-pulse, test-spinup) | ✅ hold |
+> | **5** bomb ¹⁴C (trough form, re-cut 09-12) | NH drop z −1.78, SH z +1.50, lag on the first-peak time z +1.74; orderings ok | | ✅ PASS |
+> | **7** sinks (GCB 2025, at the objective's own σ) | ocean 2.97 (z −0.57), land 3.39 (z +0.65) GtC/yr | | ✅ PASS |
+> | **G** ocean DIC inventory at the GLODAP epoch | z +1.21 (n_eff 20) | partly circular (the pump is solved to hold the gradient) | ✅ PASS |
+> | **S** SPO seasonal ocean limb | 0.357 ppm @ month 8.92, bracket [7.41, 10.41] | | ✅ PASS |
+> | **P7** a surface mechanism is not a vertical-gradient lever | −0.049 vs bound 0.163 (0.30×) | | ✅ PASS |
+> | **V** interannual CO₂ growth variability | sd 0.719 vs obs 0.933 ± 0.084 (0.77×), z −2.55 | non-blocking by ruling (points at the ENSO ocean path) | ⛔ FAIL |
+> | **H** hemispheric δ¹³C contrast vs the CO₂ control | R_co2 0.918, R_d13c 1.969, contrast z +11.59 | the transport-independent miss | ⛔ FAIL |
+> | **GL** MLO−SPO δ¹³C gradient level | −0.1314 vs −0.0668 ± 0.0030 (1.97×), z −10.34 (bare −21.7) | absorbed invisibly by `grad_off_d13c` | ⛔ FAIL |
+> | **Q** air–sea δ¹³C disequilibrium | +0.894 vs 0.60 ± 0.10, 2.94σ | shares a lineage with the Zhang alphas | ⛔ FAIL |
+> | ENSO → ocean (comparison, the release blocker) | solubility-only r −0.527; net 0.58× obs with the fitted `gamma_enso_ocn` | the equatorial-cell arc (09-13/14) is its fix | ⛔ open |
+> | **12 / L** CO₂ pulse IRF (comparison since 09-04e, not a gate) | IRF(100) 0.280 vs Joos 0.409; inside Joos's spread at 1000 yr | the land takes up too fast in the first century | reported |
 >
-> ⚠⚠ **They also straddle an OBJECTIVE CHANGE.** The 2026-09-02 T-dependent air-sea ¹³C alphas
-> (Zhang 1995) moved the objective by −4.84 log-units at the un-refitted mode. Every `from90`
-> number here predates it, so **a `from90` → `ent26` comparison is INDICATIVE, NOT like-for-like**;
-> only within-run contrasts (e.g. `ent26` vs defaults, measured in the same run) are.
+> **RETIRED gates, and why (do not re-run them as criteria):** **4** airborne-fraction smoothness — no power (a trend artefact,
+> 70 % noise; 09-04); **8** δ¹³C Suess and **10** natural Δ¹⁴C profile — restatements of scored rows (a gate cannot judge the
+> objective at its own σ; 09-02 ledger ruling). Their tables below are kept as PROVENANCE at the quarantined `from90`.
 >
-> **THE CURRENT LEDGER AT `ent26` — 4 PASS, 2 FAIL** (`diag_design_gates_at_mode.R`, log in the
-> refit dir). Adoption fixed the SEASONAL gates and moved **neither** standing failure:
->
-> | gate | at `ent26` | verdict |
-> |---|---|---|
-> | **7** sinks, ocean z | **−0.32** (defaults −1.44) | ✅ PASS |
-> | **Q** δ¹³C disequilibrium | **1.27** | ✅ PASS |
-> | **G** ocean DIC z @ GLODAP epoch | **−0.06** (defaults −1.62) | ✅ PASS |
-> | **S** | **+1.00** | ✅ PASS |
-> | **4** airborne fraction | level fine (**0.425** vs GCB 0.431); bound is on decadal SPREAD — **sd 0.025 vs GCB 0.051, ratio 0.48**, against **0.76 at defaults in the same run**. Culprit is the 2020s (model 0.40, GCB 0.50). | ⛔ **FAIL, margin WORSE** |
-> | **5** bomb ¹⁴C | NH peak **YEAR** z **+2.17** (was +2.15); SH improved +2.07 → **+1.42**, lag −0.48 → −0.97. The miss is the peak TIME. | ⛔ **FAIL** |
->
-> ⇒ **The two standing failures are INDEPENDENT of the seasonal work** — consistent with P5.
-> **OWED:** §6's acceptance criteria have not been rewritten at `ent26`; this block is the
-> stopgap that keeps them from being read as current. Items 1–3 (conservation, zero-emissions,
-> paired-pulse) are mode-independent and stand as written.
+> **The blocks below this line are PROVENANCE, not criteria.** Every "STATUS AT THE THEN-CANONICAL, NOW QUARANTINED MODE" was
+> measured at **`from90`** (quarantined; `ccx_mode_file()` errors on it by name) and predates the 2026-09-02 objective change
+> (the T-dependent air–sea ¹³C alphas, −4.84 log-units at the un-refitted mode), so a `from90` → today comparison is indicative,
+> not like-for-like. The 09-04 `ent26` block (4 PASS / 2 FAIL) and the 09-08f `hilda31` block that stood here are superseded by
+> the table above; both survive in git history and in `notes/assessment_2026-09-08_acceptable_state.md`.
 
 Adapted from the standing climate-modeling checklist. **Targets 4–8 below were computed
 from the acquired datasets** by `data-raw/build_calibration_data.R` (access date
