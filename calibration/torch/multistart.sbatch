@@ -276,11 +276,30 @@ export CCX_MS_SPREAD="${CCX_MS_SPREAD:-1.0452}"
 #   structural 0, R4). ⚠ Rulings R5 (sst_tr_enso on/0) and R6 (kz_tr_frac) are OWED before
 #   this array is launched; port_targets.csv must be regenerated under `hilda_tr` first.
 #     CCX_MS_STRUCT=hilda_tr CCX_MS_SEAS_ML=1 CCX_MS_PIN=ent_seas_amp_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-23 --time=00:15:00 calibration/torch/multistart.sbatch
+# 2026-09-14 (h): OPTION D + E's ARRAY (prereg notes/prereg_2026-09-14h_option_e_ventilation.md).
+#   THE FOURTH LABEL AXIS: CCX_MS_PUMP_FIELD = solved (every registered file; the default)
+#   | martin (the PRESCRIBED export on the Martin profile + the mode-water ventilation
+#   loop). Structure `hilda` (no cell -- ruling E5: E first, the cell re-read after),
+#   seas_ml 1, table 36 names; under "martin" the solved field's pump_grad and (ruling E3)
+#   gamma_enso_ocn_NH/SH do not reach the model and MUST be pinned (the driver refuses them
+#   free), so 32 free names. References hilda30c (incumbent: the canonical under this
+#   array's pins -- the extra pins hold inert names, ccx_pins_extend_canonical) / hilda31p.
+#   port_targets.csv regenerated on the Mac under this label at commit 0928beb+ (incumbent
+#   -2374.57 at the seeded point: -948 vs its stored logpost -- the option-E probe's price of
+#   the prescribed field at the canonical's kz; PE-1 says the refit moves kz > 2.7x). Mac
+#   preflight id 1: port VERIFIED rel 1.5e-14, 0.180 s/eval. The three new names are seeded
+#   at pump_export 9.08 (Nowicki), w_vent 284 Sv (the subduction bracket), gamma_vent 0.5.
+#   ⛔ Torch verdict, said aloud: 36 names x 24 starts x 3 restarts is the laptop's day -- Torch.
+#     CCX_MS_STRUCT=hilda CCX_MS_SEAS_ML=1 CCX_MS_PUMP_FIELD=martin CCX_MS_PIN=ent_seas_amp_SH=0,pump_grad=314.1031,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-23 --time=00:15:00 calibration/torch/multistart.sbatch
+#     CCX_MS_STRUCT=hilda CCX_MS_SEAS_ML=1 CCX_MS_PUMP_FIELD=martin CCX_MS_PIN=ent_seas_amp_SH=0,pump_grad=314.1031,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
+export CCX_MS_PUMP_FIELD="${CCX_MS_PUMP_FIELD:-solved}"
+FIELD_LABEL=""; if [ "$CCX_MS_PUMP_FIELD" = "martin" ]; then FIELD_LABEL="_martin"; fi
 export CCX_MS_PIN="${CCX_MS_PIN:-}"
 PIN_LABEL=""; if [ -n "$CCX_MS_PIN" ]; then PIN_LABEL="_pin_$(echo "$CCX_MS_PIN" | tr ',' '_')"; fi
 # THE OUTDIR CARRIES EVERY LABEL AXIS (struct, seas_ml, pins, spread) since 2026-09-13 (i);
 # the C' directory predates the struct axis in the name (multistart_20260913_cprime_seasml1_pin_..._sd1.0452).
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260913_eqcell_${CCX_MS_STRUCT}_seasml${CCX_MS_SEAS_ML}${PIN_LABEL}_sd${CCX_MS_SPREAD}}"
+# ... and the pump field since 2026-09-14 (h) (`_martin`; absent = solved, the older directories).
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260913_eqcell_${CCX_MS_STRUCT}_seasml${CCX_MS_SEAS_ML}${FIELD_LABEL}${PIN_LABEL}_sd${CCX_MS_SPREAD}}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.
@@ -316,7 +335,7 @@ case "$CCX_MS_OUTDIR" in
 esac
 echo "CCX_PROJ_DIR  $CCX_PROJ_DIR"
 echo "CCX_MS_OUTDIR $CCX_MS_OUTDIR"
-echo "CCX_MS_STRUCT $CCX_MS_STRUCT   CCX_MS_SEAS_ML $CCX_MS_SEAS_ML   CCX_MS_SPREAD $CCX_MS_SPREAD   CCX_MS_PIN '${CCX_MS_PIN}'"
+echo "CCX_MS_STRUCT $CCX_MS_STRUCT   CCX_MS_SEAS_ML $CCX_MS_SEAS_ML   CCX_MS_PUMP_FIELD $CCX_MS_PUMP_FIELD   CCX_MS_SPREAD $CCX_MS_SPREAD   CCX_MS_PIN '${CCX_MS_PIN}'"
 
 # MEASURED 2026-09-01: `Rscript --vanilla` implies --no-environ, which suppresses
 # .Renviron FILES but NOT an exported R_LIBS_USER -- the library still lands in

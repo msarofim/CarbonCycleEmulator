@@ -138,7 +138,14 @@ if (length(sm_rec) != 1L) stop("the starts disagree on seas_ml: ", paste(sm_rec,
 PMM_SEAS_ML <- if (is.na(sm_rec)) 0L else sm_rec
 cat(sprintf("seas_ml %s: %d (%s)\n", if (is.na(sm_rec)) "INFERRED from the starts' age" else "RECORDED in the starts",
             PMM_SEAS_ML, if (PMM_SEAS_ML == 1L) "the seasonal mixed layer ON -- round 6" else "OFF -- the shipped model"))
-bp <- ccx_apply_structure(ccx_default_params(), PMM_STRUCT, seas_ml = PMM_SEAS_ML)
+# THE PUMP FIELD (2026-09-14 h). Start files record `pump_field` from 09-14 h on;
+# older ones do not, and for those "solved" is a FACT (no other field existed),
+# the ccx_mode_pump_field() contract. Carried into the mode file below.
+pf_rec <- unique(vapply(S, function(s) if (is.null(s$pump_field)) NA_character_ else ccx_parse_pump_field(s$pump_field), character(1)))
+if (length(pf_rec) != 1L) stop("the starts disagree on pump_field: ", paste(pf_rec, collapse = ", "))
+PMM_PUMP_FIELD <- if (is.na(pf_rec)) "solved" else pf_rec
+cat(sprintf("pump_field %s: '%s'\n", if (is.na(pf_rec)) "INFERRED from the starts' age" else "RECORDED in the starts", PMM_PUMP_FIELD))
+bp <- ccx_apply_structure(ccx_default_params(), PMM_STRUCT, seas_ml = PMM_SEAS_ML, pump_field = PMM_PUMP_FIELD)
 for (n in names(PMM_PINS)) bp[[n]] <- PMM_PINS[[n]]
 bp$pump_mode <- best$pump_mode
 lpf <- ccx_make_logpost(base_params = bp)
@@ -256,6 +263,7 @@ sep("writing the mode file")
 # measured. `recompute_hessian.R --update` fills it in, after its own gates.
 out <- list(
   pump_mode = best$pump_mode, struct = PMM_STRUCT, seas_ml = PMM_SEAS_ML,
+  pump_field = PMM_PUMP_FIELD,   # (2026-09-14 h) read back by ccx_mode_pump_field() / ccx_mode_base()
   # THE SPINUP VINTAGE (2026-09-10): `streams` below and `lp0` are computed under
   # CCX_OBJECTIVE_SPINUP, and a consumer reproducing them like-for-like needs to
   # know which one that was ⇒ ccx_mode_spinup(), [[like_for_like_forcing]].

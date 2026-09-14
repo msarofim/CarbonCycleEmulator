@@ -1945,6 +1945,28 @@ ccx_parse_pump_field <- function(pump_field) {
          paste(pump_field, collapse = ","), "' (CCX_MS_PUMP_FIELD if it came from the environment).")
   v
 }
+#' The fitted names the model does NOT READ under a pump field (2026-09-14 h):
+#' under "martin" the solved field's `pump_grad` and, by ruling E3 (one limb
+#' subsumes option A), `gamma_enso_ocn_*`; under "solved" the loop's three. A
+#' free unidentified name is a flat likelihood direction and a singular
+#' Hessian, so the array driver refuses them FREE and the reference-set logic
+#' accepts them as EXTRA pins on the canonical's own.
+ccx_pump_field_inert <- function(pump_field) {
+  if (identical(ccx_parse_pump_field(pump_field), "martin")) c("pump_grad", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH")
+  else c("pump_export", "w_vent", "gamma_vent")
+}
+#' Does a pin set EXTEND the canonical's (same values on the canonical's pinned
+#' names) by nothing but names inert under `pump_field`? Then the canonical is
+#' the array's incumbent "under this array's pins" -- the 09-13 (d) rule, read
+#' for an array whose extra pins hold names the objective cannot see anyway.
+ccx_pins_extend_canonical <- function(pins, pump_field) {
+  cp <- CCX_MODE_CANONICAL_PINS
+  if (is.null(pins) || is.null(cp)) return(FALSE)
+  if (!all(names(cp) %in% names(pins))) return(FALSE)
+  if (!isTRUE(all.equal(unname(pins[names(cp)]), unname(cp)))) return(FALSE)
+  extra <- setdiff(names(pins), names(cp))
+  length(extra) > 0 && all(extra %in% ccx_pump_field_inert(pump_field))
+}
 ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
                                 seas_ml = Sys.getenv("CCX_MS_SEAS_ML", "0"),
                                 pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved")) {

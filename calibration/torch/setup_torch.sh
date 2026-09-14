@@ -49,6 +49,9 @@ export R_LIBS_USER=/scratch/ms17839/Rlibs/4.5
 export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
 # 2026-09-10: the seasonal-mixed-layer axis; must match multistart.sbatch and the CSV.
 export CCX_MS_SEAS_ML="${CCX_MS_SEAS_ML:-1}"
+# 2026-09-14 (h): the pump-field axis; solved = every registered file, martin = option D+E.
+export CCX_MS_PUMP_FIELD="${CCX_MS_PUMP_FIELD:-solved}"
+export CCX_MS_PIN="${CCX_MS_PIN:-}"
 mkdir -p "$R_LIBS_USER" logs
 
 # ⛔ EVERY R SNIPPET BELOW GOES THROUGH A FILE, NEVER `Rscript -e`
@@ -104,6 +107,10 @@ r  <- pt[pt$name == "cold", ]
 COLD_REF <- as.numeric(r$logpost[1])
 COLD_TOL <- 1e-8                # relative; = MS_EVAL_TOL in the driver
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+# THE PINS (2026-09-14 h; the gate never applied them, so under a pinned label its
+# n_par check compared the free table against a pinned CSV). Same contract as the driver.
+.pins <- ccx_parse_pins(Sys.getenv("CCX_MS_PIN", ""))
+if (length(.pins)) invisible(ccx_apply_pins(.pins))
 if (!identical(as.integer(r$n_par[1]), length(CCX_PARAM_NAMES)))
   stop("port_targets.csv was made on a ", r$n_par[1], "-parameter build; this one fits ",
        length(CCX_PARAM_NAMES), ". Re-run make_port_targets.R on the Mac and re-ship.")
@@ -114,11 +121,16 @@ if (is.null(r$seas_ml) || !identical(ccx_parse_seas_ml(r$seas_ml[1]),
                                      ccx_parse_seas_ml(Sys.getenv("CCX_MS_SEAS_ML", "0"))))
   stop("port_targets.csv was made at seas_ml '", r$seas_ml[1], "'; CCX_MS_SEAS_ML here is '",
        Sys.getenv("CCX_MS_SEAS_ML", "0"), "'.")
+.pf <- if (is.null(r$pump_field) || is.na(r$pump_field[1])) "solved" else as.character(r$pump_field[1])
+if (!identical(.pf, Sys.getenv("CCX_MS_PUMP_FIELD", "solved")))
+  stop("port_targets.csv was made under pump_field '", .pf, "'; CCX_MS_PUMP_FIELD here is '",
+       Sys.getenv("CCX_MS_PUMP_FIELD", "solved"), "'.")
 t0 <- Sys.time(); ccx_load_cpp()
 cat(sprintf("C++ core compiled in %.1f s\n",
             as.numeric(difftime(Sys.time(), t0, units = "secs"))))
 bp <- ccx_default_params(); bp$pump_mode <- "N"
-bp <- ccx_apply_structure(bp)   # CCX_MS_STRUCT, the same definition the driver uses
+bp <- ccx_apply_structure(bp)   # CCX_MS_STRUCT / _SEAS_ML / _PUMP_FIELD, the same definition the driver uses
+for (n in names(.pins)) bp[[n]] <- .pins[[n]]   # the pinned value lives in the base (the driver's idiom)
 cat(sprintf("structure '%s'; cold target %.4f from %s@%s (%d parameters)\n",
             attr(bp, "struct"), COLD_REF, r$host[1], r$commit[1], r$n_par[1]))
 stopifnot(is.list(bp), length(bp) > 1)   # the -e mangling, caught at the source

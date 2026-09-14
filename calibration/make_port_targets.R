@@ -39,7 +39,10 @@ PT_OUT  <- ccx_path("calibration", "torch", "port_targets.csv")
 # 2026-09-13 (d): the incumbent FOLLOWS THE PINS, exactly as the driver's MS_REF_INC does
 # (the two must agree, or the port gate compares two different points): the canonical
 # `hilda30c` under its own pins, the free parent `hilda31s2` for a free run.
-PT_INC_NAME <- if (identical(ccx_pin_label(PT_PINS), ccx_pin_label(CCX_MODE_CANONICAL_PINS))) {
+# 2026-09-14 (h): pins that EXTEND the canonical's by names the pump field does not
+# read (ccx_pins_extend_canonical) also take the canonical -- the E array's case.
+PT_INC_NAME <- if (identical(ccx_pin_label(PT_PINS), ccx_pin_label(CCX_MODE_CANONICAL_PINS)) ||
+                   ccx_pins_extend_canonical(PT_PINS, Sys.getenv("CCX_MS_PUMP_FIELD", "solved"))) {
   CCX_MODE_CANONICAL
 } else if (is.null(PT_PINS)) {
   if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT
@@ -70,9 +73,12 @@ bp <- ccx_default_params(); bp$pump_mode <- PT_ARM
                      "objective and the consumer cannot tell.")
   v
 }
-bp <- ccx_apply_structure(bp, .pt_env_required("CCX_MS_STRUCT"), .pt_env_required("CCX_MS_SEAS_ML"))
+# CCX_MS_PUMP_FIELD (2026-09-14 h) is NOT required: unset = "solved" is a FACT about
+# every registered file (ccx_mode_pump_field()), not a default; the E array sets "martin".
+bp <- ccx_apply_structure(bp, .pt_env_required("CCX_MS_STRUCT"), .pt_env_required("CCX_MS_SEAS_ML"),
+                          pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved"))
 for (n in names(PT_PINS)) bp[[n]] <- PT_PINS[[n]]
-cat(sprintf("objective label: struct '%s', seas_ml %d, pins '%s' (%d free parameters)\n", attr(bp, "struct"), attr(bp, "seas_ml"), ccx_pin_label(PT_PINS), length(CCX_PARAM_NAMES)))
+cat(sprintf("objective label: struct '%s', seas_ml %d, pump_field '%s', pins '%s' (%d free parameters)\n", attr(bp, "struct"), attr(bp, "seas_ml"), attr(bp, "pump_field"), ccx_pin_label(PT_PINS), length(CCX_PARAM_NAMES)))
 lp <- ccx_make_logpost(base_params = bp)
 .ship <- lapply(CCX_PARAM_TABLE, function(s) c(s$lo, s$hi))
 
@@ -148,6 +154,7 @@ tg$arm       <- PT_ARM
 tg$n_par     <- length(CCX_PARAM_NAMES)
 tg$struct    <- attr(bp, "struct")            # "" = column, "hilda" = the declared structure
 tg$seas_ml   <- attr(bp, "seas_ml")           # 0 = the shipped model, 1 = round 6 (2026-09-10); READ by the driver's port gate
+tg$pump_field <- attr(bp, "pump_field")       # "solved" / "martin" (2026-09-14 h); READ by the driver's port gate
 tg$pins      <- ccx_pin_label(PT_PINS)        # "" = free arm; READ by the driver's port gate (2026-09-13)
 # ⭐ THE TABLE THESE TARGETS WERE MEASURED UNDER, recorded so a consumer can
 # REFUSE a stale target instead of silently comparing across two tables. A

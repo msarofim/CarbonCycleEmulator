@@ -158,7 +158,10 @@ MS_DRAW_TRIES <- 200          # redraws allowed before a start is declared dead
 # 30-name vector is not a point of the 31-name space (its shim would migrate to 0 and be
 # SEEDED at the table init -- a start, not the incumbent). Any other pin set is a new
 # objective with no incumbent on disk: stop, rather than warm-start from the wrong one.
-MS_REF_INC_NAME <- if (identical(ccx_pin_label(MS_PINS), ccx_pin_label(CCX_MODE_CANONICAL_PINS))) {
+# 2026-09-14 (h): an array whose pins EXTEND the canonical's by names the pump field
+# does not read (ccx_pins_extend_canonical) also takes the canonical -- the E array.
+MS_REF_INC_NAME <- if (identical(ccx_pin_label(MS_PINS), ccx_pin_label(CCX_MODE_CANONICAL_PINS)) ||
+                       ccx_pins_extend_canonical(MS_PINS, Sys.getenv("CCX_MS_PUMP_FIELD", "solved"))) {
   CCX_MODE_CANONICAL
 } else if (is.null(MS_PINS)) {
   if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT
@@ -289,6 +292,8 @@ MS_OUTDIR <- local({
                     # 2026-09-10: seas_ml changes the OBJECTIVE at a constant 31 names, which
                     # the param_names guard cannot see; the directory must say it.
                     if (identical(Sys.getenv("CCX_MS_SEAS_ML", "0"), "1")) "_seasml1" else "",
+                    # 2026-09-14 h: the pump field changes the objective too; the directory says it.
+                    if (identical(Sys.getenv("CCX_MS_PUMP_FIELD", "solved"), "martin")) "_martin" else "",
                     ccx_pin_label(MS_PINS)))
   else d
 })
@@ -400,9 +405,28 @@ bp <- ccx_default_params(); bp$pump_mode <- MS_ARM
 }
 MS_STRUCT_ENV  <- .ms_env_required("CCX_MS_STRUCT")
 MS_SEAS_ML_ENV <- .ms_env_required("CCX_MS_SEAS_ML")
-bp <- ccx_apply_structure(bp, MS_STRUCT_ENV, MS_SEAS_ML_ENV)
+# THE PUMP FIELD'S CONSTRUCTION (option D + E, 2026-09-14 h): the THIRD axis of
+# the objective's label. NOT required in the environment -- unset = "solved" =
+# every registered file's field, which is a FACT about the model (no other
+# field existed before 09-14 h), not a default being trusted. The E array sets
+# CCX_MS_PUMP_FIELD=martin; recorded in every start file and gated against the
+# port targets exactly as seas_ml is.
+MS_PUMP_FIELD_ENV <- Sys.getenv("CCX_MS_PUMP_FIELD", "solved")
+bp <- ccx_apply_structure(bp, MS_STRUCT_ENV, MS_SEAS_ML_ENV, pump_field = MS_PUMP_FIELD_ENV)
 for (n in names(MS_PINS)) bp[[n]] <- MS_PINS[[n]]     # the pinned value lives in the base
-MS_STRUCT <- attr(bp, "struct"); MS_SEAS_ML <- attr(bp, "seas_ml")
+MS_STRUCT <- attr(bp, "struct"); MS_SEAS_ML <- attr(bp, "seas_ml"); MS_PUMP_FIELD <- attr(bp, "pump_field")
+# ⛔ UNDER "martin" THE SOLVED FIELD'S `pump_grad` DOES NOT REACH THE MODEL, and
+# under "solved" the loop's three names do not; a free unidentified name is a
+# flat likelihood direction and a singular Hessian. Refuse by name rather than
+# fit a parameter the objective cannot see (prereg 09-14h §2).
+.ms_inert <- ccx_pump_field_inert(MS_PUMP_FIELD)
+.ms_inert_free <- intersect(.ms_inert, CCX_PARAM_NAMES)
+if (length(.ms_inert_free))
+  stop("run_dispersed_multistart.R: under pump_field = \"", MS_PUMP_FIELD, "\" the name(s) ",
+       paste(.ms_inert_free, collapse = ", "), " do not reach the model (",
+       if (identical(MS_PUMP_FIELD, "martin")) "the prescribed field ignores pump_grad; ruling E3 subsumes option A"
+       else "the loop is absent under the solved field",
+       ") and must be PINNED (CCX_MS_PIN), not fitted.")
 # the banner prints the WHOLE declared block of the label, so a hilda_eq task's log
 # names the cell's geometry (eq_frac, h_eq, sst_eq, sst_eq_enso, alk_eq, k_eq) and is
 # distinguishable from a hilda task's on its own (review 2026-09-14)
@@ -414,6 +438,10 @@ cat(sprintf("  structure: '%s'%s\n", MS_STRUCT,
 cat(sprintf("  seasonal mixed layer: seas_ml = %d (%s; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)\n",
             MS_SEAS_ML, if (MS_SEAS_ML == 1L) "ON -- round 6" else "OFF -- the shipped model"))
 stopifnot(identical(bp$seas_ml, MS_SEAS_ML))   # the label IS the model's switch, not a note beside it
+cat(sprintf("  pump field: '%s' (%s; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)\n",
+            MS_PUMP_FIELD, if (identical(MS_PUMP_FIELD, "martin")) "PRESCRIBED export on the Martin profile + the ventilation loop -- option D+E"
+                           else "the SOLVED GLODAP-shape field -- every registered file"))
+stopifnot(identical(bp$pump_field, MS_PUMP_FIELD))
 lp_fun <- ccx_make_logpost(base_params = bp)
 n_eval <- 0L
 neg_lp <- function(u) {
@@ -664,6 +692,14 @@ local({
   if (!identical(ccx_parse_seas_ml(r$seas_ml[1]), MS_SEAS_ML))
     stop("port targets were measured at seas_ml = ", r$seas_ml[1], "; this run has seas_ml = ",
          MS_SEAS_ML, ". Re-run make_port_targets.R under the run's CCX_MS_SEAS_ML.")
+  # AND UNDER THIS PUMP FIELD (2026-09-14 h): the field moves the objective by
+  # ~900 log-units at the canonical vector (the option-E probe) at a constant
+  # name count; a CSV without the column predates the axis and is "solved" as
+  # a FACT (ccx_mode_pump_field()'s contract), refused only if it disagrees.
+  .pt_field <- if (is.null(r$pump_field) || is.na(r$pump_field[1])) "solved" else as.character(r$pump_field[1])
+  if (!identical(.pt_field, MS_PUMP_FIELD))
+    stop("port targets were measured under pump_field = '", .pt_field, "'; this run has '",
+         MS_PUMP_FIELD, "'. Re-run make_port_targets.R under the run's CCX_MS_PUMP_FIELD.")
   # ⛔ AND UNDER THE SAME PINS (2026-09-13): a target measured on the free arm is
   # another objective's number for a pinned run, and vice versa. A CSV without the
   # column predates pins and is refused for a pinned run, accepted (as "no pins") for a free one.
@@ -928,6 +964,9 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             # a promoted mode must carry the seasonal-mixed-layer setting it was
             # fitted at, or ccx_mode_base() scores it on the other objective.
             seas_ml = MS_SEAS_ML,
+            # RECORDED (2026-09-14 h): the pump field's construction this start was
+            # fitted under; ccx_mode_pump_field() reads an absent field as "solved".
+            pump_field = MS_PUMP_FIELD,
             # RECORDED (2026-09-13): the pins this start was fitted under (NULL = free).
             # promote_multistart_mode.R applies them before GATE 1; ccx_mode_base() carries them.
             pins = MS_PINS,
