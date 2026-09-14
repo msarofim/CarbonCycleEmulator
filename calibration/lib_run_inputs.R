@@ -68,7 +68,14 @@ CCX_RUN_INPUTS <- list(
   list(path    = file.path("data", "obs_eq_cell.rds"),
        kind    = "file", pattern = NULL,
        why     = "the equatorial cell: eq_frac / h_eq / sst_eq / alk_eq geometry, the B1 +55.47 uatm target, the N(27, 3) Sv W0 prior",
-       symptom = "ccx_apply_structure('hilda_eq') errors; or with a hilda run, nothing -- the eq_b1 row is simply ABSENT from by_stream")
+       symptom = "ccx_apply_structure('hilda_eq') errors; or with a hilda run, nothing -- the eq_b1 row is simply ABSENT from by_stream"),
+  # 2026-09-14e: the tropical surface box's product (prereg 09-14c option T1, the
+  # 26 C isotherm) -- tr_frac / SSTs (RE-BASED to 1850-1900) / MLD / alkalinity
+  # for the "hilda_tr" structure label once it is built.
+  list(path    = file.path("data", "obs_tr_box.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "the tropical surface box: tr_frac, the re-based SSTs of tr / the residual ML / the cell, Holte MLD on both masks, GLODAP alkalinity",
+       symptom = "ccx_apply_structure('hilda_tr') errors (once that label exists)")
 )
 
 #' Stop unless every run-time input is present, naming the one that is not

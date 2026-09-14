@@ -2,6 +2,27 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-14 (e) — ⭐⭐ **RULED (Marcus, "move forward with recommendations"): the 26 °C isotherm. THE TROPICAL BOX'S PRODUCT IS BUILT — `data-raw/build_tr_box_targets.R` → `data/obs_tr_box.rds` — on the SOM-FFN grid, every surface SST RE-BASED to 1850–1900. Two findings on the way: the residual mixed layer's PI-based SST is 17.2 / 15.4 (the typed 18 / 16 are +0.8 / +0.65 warm once the re-base is applied), and HILDA's HS box covers 12.6 / 13.0 % of each hemisphere's OCEAN, not `hs_frac`'s 16 % (57.14° was derived on a uniform sphere). Nothing built in the model; nothing adopted.**
+
+### The product (log: `data-raw/build_tr_box_targets.log`)
+| | NH | SH | |
+|---|---|---|---|
+| `tr_frac` (of the hemisphere's ocean; the cell's band REMOVED) | **0.3966** (to 29°N) | **0.2149** (to 23°S) | `eq_frac` reproduces 0.0480 / 0.0356 to 1e-6 (same grid) |
+| residual ML fraction | 0.4296 | 0.6191 | LS − tr − eq |
+| SST, 1991–2020 clim: tr / residual ML / cell / whole LS / HS | 27.94 / 17.89 / 27.28 / 23.02 / 1.73 | 27.88 / 16.05 / 26.80 / 19.43 / −0.09 | |
+| **SST re-based to 1850–1900** (HadSST4 anomaly −0.702 / −0.701): **tr / residual ML / cell** | **27.24 / 17.18 / 26.57** | **27.18 / 15.35 / 26.09** | what `hilda_tr` reads |
+| Holte MLD dt (mean / max): tr; residual ML | 40.2 / 66.8; 57.9 / 131.2 | 45.9 / 73.2; **77.1 / 158.7** | today's LS 59.7 / 118.1 |
+| pCO₂ minus the global surface (SOM-FFN; the B1 construction, a CHECK): tr; residual ML | +6.7; −8.8 | +8.8; −4.2 | the cell +55.5 ✓; global 367.3 |
+| GLODAP ≤ 50 m: alkalinity; DIC | 2296.2; 1964.0 | 2305.9; 1961.5 | both 2299.2; 1963.2 (the cell 2296 / 1982) |
+| the box's Niño3.4 SST slope (monthly) | +0.204 ± 0.011 K/index | +0.200 ± 0.013 | the cell +0.971; recorded for the R side to RULE on |
+- The residual ML's SST after re-basing is **17.2 / 15.4**, not 17.9 / 16.1: the 09-14 (d) "the typed 18 / 16 are right" holds on the raw climatology but the constants are treated as PI, so under `hilda_tr` `sst_NH/SH` become 17.18 / 15.35 — sourced for the first time, ~0.7 °C cooler than today. That moves the ML's Henry point by ~+6 µmol/kg of DIC: small, but a mean-state move every registered mode will feel; PT5's < 2 must be read with it priced separately (the unrefitted mask-change read, R3).
+- The tropical box's own reservoir is **+7 µatm** over the global surface (the tropics' +15.2 in the 09-04g analysis included the cell); its GLODAP surface DIC is **18 µmol/kg BELOW the cell's** (1964 vs 1982) — the cell holds upwelled DIC, the box holds warm-equilibrated DIC: exactly the pair the T1 loop needs.
+- ⚠ **`hs_frac` 0.16 vs the ocean's 0.126 / 0.130 poleward of 57.14°**: `build_mld_targets.R` derived 57.14° as the latitude poleward of which 16 % of a uniform SPHERE lies; the ocean is not uniform in latitude, so HILDA's HS box is ~25 % larger than the ocean inside its own mask (and the MLD / SST products built on the 57.14° mask describe a smaller area than the model gives them). Recorded, not changed: a structural constant of every registered mode — a ruling.
+- Manifest: `calibration/lib_run_inputs.R` names `data/obs_tr_box.rds`.
+
+### Next (the prereg's §5 order, a FRESH session — the cell's build precedent)
+The `hilda_tr` R side: `ccx_box_names(nl, hs, eq, tr)` (tr after eq; 40 boxes), `ccx_tr_on()`, `ccx_struct_hilda_tr()` reading this product (tr_frac, the three re-based SSTs, h_tr, alk_tr; `sst_NH/SH` OVERRIDDEN by the residual's), the ML's area partition (a_ml = a_ls − a_eq − a_tr; interior keeps a_ls — D1's idiom, and the D1 guard extends to `tr`), the box's own air–sea + a diffusive interface to layer 1 over a_tr (the ML idiom; `q_tr` = 0 by R4), the cell's loop re-routed `oc[k] → eq → tr → oc[k]`, `seas_ml` OFF on tr (R3), the pCO₂ output column, the readers (`ccx_box_mass_at("tr")`, `ccx_surface_annual_conc` + B1's "all surface" + `hs_surf` by area), the C++ twin, P0-style tests + N-T1, then the unrefitted probe (PT1, PT6). The residual ML's `obs_mld` / `h_ml` prior on the new mask is part of the same build (read from `h_ml_resid`).
+
 ## 2026-09-14 (d) — ⭐⭐ **RULINGS R1–R4 TAKEN (Marcus) for the second build, and R2's MEASUREMENT: the tropical box under the 25 / 26 / 27 °C isotherm and a ±20° control, with what the RESIDUAL mixed layer becomes. Finding: the LS mixed layer's climatological mean SST is 22.8 / 19.7 °C (NH / SH), not the typed 18 / 16 — and the 26 °C isotherm carves a tropical box (39 % / 23 % of each hemisphere at 27.9 °C) whose residual leaves the ML at 17.7 / 16.1: the typed constants turn out to describe the EXTRATROPICAL mixed layer. Recommendation for the isotherm: 26 °C. Nothing built.**
 
 ### The rulings (Marcus, 09-14 d)

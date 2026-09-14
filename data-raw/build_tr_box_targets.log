@@ -1,0 +1,24 @@
+== grid and areas (SOM-FFN 1 deg)
+  hemispheric ocean NH 1.543e+14 / SH 2.064e+14 m2 (= the eq_frac grid); model OCEAN_AREA_* 1.55e+14 / 2.06e+14 (provisional)
+== SST (ERSSTv5) and the 1850-1900 re-base (HadSST4)
+  re-base 1991-2020 -> 1850-1900: NH -0.702 / SH -0.701 C (HadSST4 hemispheric anomaly, sign flipped)
+  NH  tr_frac 0.3966 (to +29 deg) ml_frac 0.4296 eq_frac 0.0480 hs_frac 0.1258 | clim SST tr 27.94 ml 17.89 eq 27.28 ls 23.02 hs 1.73 | PI-based tr 27.24 ml 17.18 eq 26.57
+  SH  tr_frac 0.2149 (to -23 deg) ml_frac 0.6191 eq_frac 0.0356 hs_frac 0.1304 | clim SST tr 27.88 ml 16.05 eq 26.80 ls 19.43 hs -0.09 | PI-based tr 27.18 ml 15.35 eq 26.09
+  model today: sst_NH/SH 18 / 16 (typed, treated as PI), sst_hs 2, hilda_eq's sst_eq 27.04 (clim, NOT re-based)
+  ⚠ ocean poleward of 57.14 deg = 0.126 / 0.130 of each hemisphere's ocean vs hs_frac 0.16 (derived on a uniform sphere)
+== the box's Nino3.4 SST coefficient (for the R side to rule on; the ML uses the hemispheric anomaly only)
+  NH: ERSST-grid annual mean 27.93 C (seasonal half-amp 0.95) | beta monthly +0.204 +/- 0.011 K per index (r +0.51) | annual +0.270 +/- 0.049 (r +0.54)  [cell: +0.971]
+  SH: ERSST-grid annual mean 27.91 C (seasonal half-amp 1.13) | beta monthly +0.200 +/- 0.013 K per index (r +0.45) | annual +0.244 +/- 0.057 (r +0.44)  [cell: +0.971]
+== Holte MLD over tr and the residual ML (the h_ml / seas_ml products' new masks)
+  NH   tr: n 2877 mean  40.2 max  66.8 min  21.0 | residual ML: n 4156 mean  57.9 max 131.2 min  17.5   (today's LS: mean 59.7 max 118.1)
+  SH   tr: n 2014 mean  45.9 max  73.2 min  25.5 | residual ML: n 7548 mean  77.1 max 158.7 min  28.1   (today's LS: mean 59.7 max 118.1)
+  both tr: n 4891 mean  42.6 max  69.5 min  22.9 | residual ML: n 11704 mean  70.2 max 148.9 min  24.3   (today's LS: mean 59.7 max 118.1)
+== pCO2 climatology: tr minus the global surface (SOM-FFN), the B1 construction -- a CHECK, not a row
+  global surface 367.3 uatm; tr NH +6.7 / SH +8.8 / both +7.6; residual ML NH -8.8 / SH -4.2; the cell +55.5 (B1 +55.5 in the eq product)
+== GLODAPv2.2023 over the box (flag 2, <= 50 m)
+  NH   alk median 2296.2 (n 7108, clusters 238, sd 3.60) | DIC median 1964.0 (n 6691, sd 3.38)
+  SH   alk median 2305.9 (n 3095, clusters 143, sd 4.51) | DIC median 1961.5 (n 2903, sd 4.25)
+  both alk median 2299.2 (n 10203, clusters 294, sd 3.26) | DIC median 1963.2 (n 9594, sd 2.97)
+  (the cell: alk 2296.0, surface DIC 1982.2; model ALK_SURFACE 2300)
+
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/data/obs_tr_box.rds 
