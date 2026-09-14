@@ -2714,8 +2714,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #     int -> ml / ml -> int and classify into ml_int on their own, which
       #     keeps "surface ocean to deep (net)" right; the cell -> ML limb
       #     would otherwise land in conv_ml (both boxes are class "ml").
-      W <- p$w_eq * CCX_SV_TO_M3YR * aux$eq_w_share[[h]] *
-           max(0, 1 - p$gamma_eq * forc$enso)
+      # NULL -> 0, the C++ marshalling's contract (R/cpp.R): a hand-built list
+      # with the cell on but the pair deleted is "no loop", not an error here
+      # while the C++ core runs it (review 2026-09-14)
+      W <- (if (is.null(p$w_eq)) 0 else p$w_eq) * CCX_SV_TO_M3YR * aux$eq_w_share[[h]] *
+           max(0, 1 - (if (is.null(p$gamma_eq)) 0 else p$gamma_eq) * forc$enso)
       if (W > 0) {
         add_flux(iup, ieq, W * y[iup, "C"] / (aux$a_ls[[h]] * gr$dz[keq + 1]))   # upwelling
         add_flux(ieq, iml, W * y[ieq, "C"] / (aux$a_eq[[h]] * aux$h_eq),
@@ -3033,6 +3036,25 @@ ccx_kz_profile <- function(p, grid) {
 ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   hs_on <- ccx_hs_on(p)
   eq_on <- ccx_eq_on(p)
+  # ⛔ D1 IS CLOSED ONLY FOR THE CELL'S OWN LIMBS (review 2026-09-14, before the
+  # array). Under D1 the mixed layer covers a_ml = a_ls - a_eq while the interior
+  # keeps a_ls; the cell's loop books every limb as a VOLUME x the source's
+  # per-volume concentration, so it closes (P0g). The OLDER limbs that touch the
+  # mixed layer -- w_up's sinking leg, the w_out_* outcrop, the conveyor -- were
+  # written as `w x y[iml] / dz[1]`, i.e. volume w x a_ml against an interior leg
+  # of w x a_ls: with the cell on they leak w x a_eq x conc per year (measured
+  # 0.192 GtC/yr at w = 1 m/yr; 8.9e-16 with the cell off) and a uniform column
+  # is no longer a fixed point, so the spinup's Newton would land on a wrong
+  # equilibrium WITHOUT ERROR. None of the three is fitted or non-zero at any
+  # registered mode; refuse the combination by name rather than carry a latent
+  # closure defect into a structure that has a cell.
+  if (eq_on && (isTRUE(p$w_up > 0) || isTRUE(p$w_out_NH > 0) || isTRUE(p$w_out_SH > 0) ||
+                isTRUE(p$q_conv > 0)))
+    stop("ccx_prepare(): the equatorial cell (eq_frac > 0) cannot be combined with ",
+         "w_up / w_out_NH / w_out_SH / q_conv > 0: those limbs book their mixed-layer ",
+         "leg over a_ml and their interior leg over a_ls, which do not close under ",
+         "D1 (a_ml = a_ls - a_eq). Rewrite them as volume x source concentration ",
+         "(the cell's idiom, R/model.R eq block) before switching both on.")
   bn  <- ccx_box_names(grid$nl, hs_on, eq_on)
   idx <- lapply(HEMIS, function(h) {
     v <- list(

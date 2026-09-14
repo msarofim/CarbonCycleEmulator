@@ -83,7 +83,8 @@ test_that("the label reaches the objective: seas_ml = 1 is felt at the mode and 
   b0 <- ccx_mode_base(md); b0$pump_mode <- md$pump_mode
   b1 <- b0; b1 <- ccx_apply_structure(b1, ccx_mode_struct(md), seas_ml = 1); b1$pump_mode <- md$pump_mode
   lp0 <- ccx_make_logpost(base_params = b0); lp1 <- ccx_make_logpost(base_params = b1)
-  u <- ccx_par_to_unc(md$par_mode)
+  st <- ccx_mode_start(md, "seas-ml-label")   # migrated + seeded (the cell's pair, 09-13i); inert under "hilda"
+  u <- st$u
   v0 <- lp0(u); v1 <- lp1(u)
   # ⚠ v0 is NOT asserted against md$logpost: a stored logpost is in the units of
   # the objective that produced it, and the file read here is `hilda31p` -- fitted
@@ -95,7 +96,7 @@ test_that("the label reaches the objective: seas_ml = 1 is felt at the mode and 
   expect_false(isTRUE(all.equal(v0, v1)))              # the mechanism is FELT
   # above the geometry guard the objective is -Inf: the 08-31e new-basin
   # reference (143.9 m) and the 09-10 second basin (164 m) are INFEASIBLE here
-  pm <- md$par_mode; pm$h_ml <- 143.9
+  pm <- st$p; pm$h_ml <- 143.9
   expect_identical(lp1(ccx_par_to_unc(pm)), -Inf)
   expect_true(is.finite(lp0(ccx_par_to_unc(pm))))
 })

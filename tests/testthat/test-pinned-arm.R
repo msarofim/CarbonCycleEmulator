@@ -41,7 +41,7 @@ test_that("ccx_apply_pins shrinks the fitted set for EVERY consumer, and ccx_unp
   # the consumers
   expect_length(ccx_init_unc(), n0 - 1L)
   md <- readRDS(pa_free_file())
-  u <- ccx_par_to_unc(md$par_mode)            # the extra name in the file is simply ignored
+  u <- ccx_mode_start(md, "pinned-arm")$u     # the extra name in the file is simply ignored; the cell's pair seeded (09-13i)
   expect_length(u, n0 - 1L); expect_true(all(is.finite(u)))
   expect_false("ent_seas_amp_SH" %in% names(ccx_unc_to_par(u)))
   # unknown name errors; a base parameter is not a fitted name
@@ -62,7 +62,7 @@ test_that("pinned AT a free file's fitted shim the streams REPRODUCE; pinned at 
     rm <- ccx_apply_pins(c(ent_seas_amp_SH = pin)); on.exit(ccx_unpin_params(rm), add = TRUE)
     bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode; bp$ent_seas_amp_SH <- pin
     v <- ccx_make_logpost(base_params = bp, by_stream = TRUE,
-                          spinup_fn = ccx_spinup_from_label(ccx_mode_spinup(md)))(ccx_par_to_unc(md$par_mode))
+                          spinup_fn = ccx_spinup_from_label(ccx_mode_spinup(md)))(ccx_mode_start(md, "score")$u)
     list(lp = as.numeric(v), st = attr(v, "streams"))
   }
   at_fit <- score(fitted); at_0 <- score(0)

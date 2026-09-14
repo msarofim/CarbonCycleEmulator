@@ -158,8 +158,16 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
     md <- readRDS(f)
     # A PINNED arm (2026-09-13) carries the build's set MINUS its pins, and its
     # `pins` names only fitted names of this build; a free arm carries the set.
-    expect_identical(md$param_names, setdiff(CCX_PARAM_NAMES, names(md$pins)),
-                     info = paste("mode", a, "was fitted on a different parameter set"))
+    # 2026-09-13i: a registered file may LACK exactly the names in
+    # CCX_PARAM_ABSENT_OK (the cell's pair, which entered the table after every
+    # registered mode was fitted and is inert under their "hilda" structure);
+    # ccx_mode_carries_build() is that statement, order included. A file fitted
+    # under "hilda_eq" must carry them: its absent set is then empty.
+    expect_true(ccx_mode_carries_build(md),
+                info = paste("mode", a, "was fitted on a different parameter set"))
+    expect_true(all(ccx_mode_absent(md) %in% CCX_PARAM_ABSENT_OK), info = paste("mode", a))
+    if (identical(md$struct, "hilda_eq"))
+      expect_length(ccx_mode_absent(md), 0L)
     expect_identical(!is.null(md$pins) && length(md$pins) > 0, unname(CCX_MODE_PINNED[[a]]),
                      info = paste("mode", a, ": the file's `pins` and CCX_MODE_PINNED disagree"))
     expect_true(all(names(md$pins) %in% CCX_PARAM_NAMES),
@@ -172,8 +180,9 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
     # THE STRUCTURE IS PROVENANCE TOO (2026-09-08f): a hilda mode consumed on
     # ccx_default_params() runs as a column with nothing said.
     expect_false(is.null(md$struct), info = paste("mode", a, "does not record its structure"))
-    expect_true(md$struct %in% c("", "hilda"))
-    expect_equal(ccx_mode_base(md)$hs_frac, if (identical(md$struct, "hilda")) 0.16 else 0)
+    expect_true(md$struct %in% c("", "hilda", "hilda_eq"))   # hilda_eq = HILDA + the equatorial cell (09-13g)
+    expect_equal(ccx_mode_base(md)$hs_frac, if (md$struct %in% c("hilda", "hilda_eq")) 0.16 else 0)
+    if (identical(md$struct, "hilda_eq")) expect_true(ccx_eq_on(ccx_mode_base(md)))
   }
 })
 
@@ -236,7 +245,7 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
     # the parent is the same space with the pinned names FREE: it must carry them
     md_p <- readRDS(ccx_mode_file(CCX_MODE_PINNED_PARENT))
     expect_true(all(names(md_c$pins) %in% md_p$param_names))
-    expect_identical(md_p$param_names, CCX_PARAM_NAMES)
+    expect_true(ccx_mode_carries_build(md_p))   # the full set, or minus CCX_PARAM_ABSENT_OK only (09-13i)
   } else {
     expect_null(CCX_MODE_CANONICAL_PINS); expect_null(CCX_MODE_PINNED_PARENT)
     expect_null(md_c$pins)
@@ -246,9 +255,18 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
   # (b) the free arms, re-scored -- every one on the FULL table (no pins live)
   expect_null(CCX_PINS)
   free <- names(CCX_MODE_FILES)[!CCX_MODE_PINNED[names(CCX_MODE_FILES)]]
+  # 2026-09-13i: the registered files lack the cell's pair; ccx_mode_start()
+  # migrates (0 = what they ran), seeds the floor-sitting pair at init and
+  # encodes. The seed's prior + Jacobian is a KNOWN constant (`logpost_shift`),
+  # subtracted where a STORED logpost is reproduced; the free-arm ranking and the
+  # likelihood comparison are unaffected (every arm pays the same constant, and
+  # the streams are prior-free).
   score <- function(md) {
     bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
-    ccx_make_logpost(base_params = bp, by_stream = TRUE)(ccx_par_to_unc(md$par_mode))
+    st <- ccx_mode_start(md, "test-mode-file")
+    v  <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(st$u)
+    attr(v, "logpost_shift") <- st$logpost_shift
+    v
   }
   rescored <- lapply(free, function(a) score(readRDS(ccx_mode_file(a)))); names(rescored) <- free
   lp_free <- vapply(rescored, as.numeric, numeric(1))
@@ -263,8 +281,9 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
     sc_c <- score(md_c)
     ccx_unpin_params(rm); rm <- list()
   } else sc_c <- rescored[[CCX_MODE_CANONICAL]]
-  # tolerance = the reproduction precision of recompute_hessian.R GATE 1 / promote GATE 4
-  expect_equal(as.numeric(sc_c), md_c$logpost, tolerance = 1e-5, scale = 1)
+  # tolerance = the reproduction precision of recompute_hessian.R GATE 1 / promote GATE 4;
+  # minus the seeded pair's prior + Jacobian (-0.8236 on 09-13i; 0 once the file carries them)
+  expect_equal(as.numeric(sc_c) - attr(sc_c, "logpost_shift"), md_c$logpost, tolerance = 1e-5, scale = 1)
 
   # (c) LIKELIHOOD on the common rows: the canonical beats the seas_ml 0 control;
   # its price against the parent is recorded

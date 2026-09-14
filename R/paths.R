@@ -459,7 +459,9 @@ ccx_check_mode_decode <- function(md = CCX_MODE_CANONICAL, tol = 1e-8) {
   .nm <- if (!is.null(md$param_names)) md$param_names else CCX_PARAM_NAMES
   # a PINNED file (2026-09-13) carries the build's set MINUS its pins, and every
   # name it does carry is in the table, so it decodes on its own names
-  if (!identical(.nm, setdiff(CCX_PARAM_NAMES, names(md$pins))))
+  # ... and a file lacking only CCX_PARAM_ABSENT_OK names (2026-09-13i) decodes
+  # on the names it carries; ccx_unc_to_par() honours a partial named u.
+  if (!ccx_mode_carries_build(md))
     stop("this mode file was fitted on a DIFFERENT parameter set (",
          length(.nm), " names vs this build's ", length(CCX_PARAM_NAMES),
          "), so 'does it decode to its own par_mode' is not a question this ",

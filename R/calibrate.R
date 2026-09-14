@@ -378,7 +378,9 @@ CCX_PARAM_TABLE <- list(
   # neither name reaches the model; they are identifiable ONLY under hilda_eq.
   #
   # w_eq: the WHOLE-BAND mean upwelling volume flux, Sv, split between the two
-  # cells by area (equal velocity: 63 m/yr at 27 Sv). Box [5, 60]: 5 Sv is a
+  # cells by area (equal velocity: 27 Sv = 8.52e14 m3/yr over sum(a_eq) 1.477e13
+  # m2 = 57.7 m/yr -- the prereg's "63" was an arithmetic slip, caught by the
+  # 09-14 review; the CODE never carried it). Box [5, 60]: 5 Sv is a
   # fifth of the observed mean (effectively no cell); 60 Sv is above Johnson et
   # al. 2001's 57 +/- 16, which INCLUDES the 1997-99 event. PRIOR: OBSERVATION,
   # N(27, 3) Sv (ruling 4) -- Meinen, McPhaden & Johnson 2001 JPO 31:3230,
@@ -913,6 +915,67 @@ ccx_unpin_params <- function(removed) {
   invisible(NULL)
 }
 .CCX_PARAM_ORDER <- CCX_PARAM_NAMES
+
+# ---- NAMES A REGISTERED FILE MAY LACK (2026-09-13i) -------------------
+#' `w_eq` / `gamma_eq` entered the table on 2026-09-13i, AFTER every registered
+#' mode was fitted, and the equatorial cell they drive does not exist under those
+#' files' own structure ("hilda": eq_frac 0). A registered file lacking exactly
+#' these is therefore still THIS BUILD's vector in every coordinate the model
+#' READS: ccx_migrate_par_set() fills 0 = what it RAN, and its 25 stream
+#' likelihoods reproduce to the bit (test-eq-cell P0a). What does NOT carry over
+#' is the ENCODING: 0 sits on each box's floor, so a START point built from such
+#' a file is seeded at init (27 Sv, 1 per index) and its logpost moves by a KNOWN
+#' constant -- ccx_mode_start() returns both, and a test that reproduces a stored
+#' logpost subtracts it rather than loosening a tolerance.
+#' ⛔ This is NOT a general "tolerate any old file" switch: a name is listed here
+#' only while (a) it has a migration contract, (b) the registered files predate
+#' it, and (c) the model it drives is ABSENT under those files' own structure, so
+#' the migrated vector is the file's vector. A file fitted under "hilda_eq" MUST
+#' carry the pair (its param_names says so; the array's start files do). Shrink
+#' this set as files are refit or retired; empty it when none remain.
+CCX_PARAM_ABSENT_OK <- c("w_eq", "gamma_eq")
+
+#' The names this build fits that a mode file lacks, pins excluded
+ccx_mode_absent <- function(md)
+  setdiff(setdiff(CCX_PARAM_NAMES, names(md$pins)), md$param_names)
+
+#' Does a mode file carry THIS BUILD's parameter set? TRUE when its param_names
+#' equal the build's set minus its pins, or differ from it ONLY by names in
+#' CCX_PARAM_ABSENT_OK (order preserved). Every consumer that used to compare
+#' `identical(md$param_names, setdiff(CCX_PARAM_NAMES, names(md$pins)))` reads this.
+ccx_mode_carries_build <- function(md) {
+  want   <- setdiff(CCX_PARAM_NAMES, names(md$pins))
+  # a FREE file scored under pins applied IN-PROCESS carries the held name; the
+  # encoder ignores it (ccx_par_to_unc), so the comparison does too (test-pinned-arm)
+  have   <- setdiff(md$param_names, names(CCX_PINS))
+  absent <- setdiff(want, have)
+  identical(have, setdiff(want, absent)) && all(absent %in% CCX_PARAM_ABSENT_OK)
+}
+
+#' A mode file as a START POINT of this build's space: migrated (what it RAN),
+#' seeded where that does not encode, encoded, and the logpost shift the seeding
+#' costs -- the driver's own start path (run_dispersed_multistart.R), in one place.
+#' ⚠ A PINNED file must have its pins APPLIED (ccx_apply_pins(ccx_mode_pins(md)))
+#' before this is called, exactly as for ccx_par_to_unc(); the held name it
+#' carries is then ignored by the encoder.
+#' @param md a loaded mode file, or a mode name known to ccx_mode_file()
+#' @return list(p = the seeded vector, u = its encoding, absent = the names the
+#'   file lacked, logpost_shift = sum over `absent` of prior(seed) + log-Jacobian
+#'   -- the constant by which this build's logpost at `u` exceeds the file's own)
+ccx_mode_start <- function(md = CCX_MODE_CANONICAL, who = "mode start") {
+  if (is.character(md)) md <- readRDS(ccx_mode_file(md))   # a mode NAME, as ccx_mode_params()
+  if (!ccx_mode_carries_build(md))
+    stop("ccx_mode_start(): this mode file was fitted on a different parameter set (",
+         length(md$param_names), " names; this build fits ", length(CCX_PARAM_NAMES),
+         " and tolerates only ", paste(CCX_PARAM_ABSENT_OK, collapse = ", "), " absent).")
+  pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))
+  pm <- suppressWarnings(ccx_seed_unencodable(pm, who))
+  u  <- ccx_par_to_unc(pm)
+  absent <- intersect(attr(pm, "migrated"), CCX_PARAM_NAMES)
+  shift <- if (length(absent)) sum(vapply(absent, function(n) {
+    s <- CCX_PARAM_TABLE[[n]]; s$prior(pm[[n]]) + .log_jac(u[[n]], s) }, numeric(1))) else 0
+  list(p = pm, u = u, absent = absent, logpost_shift = shift)
+}
 CCX_PINS <- NULL
 #' Parse a pin specification of the form "name=value[,name=value]" (CCX_MS_PIN).
 #' "" or NA means no pins. Values must parse as finite numbers.
@@ -1380,7 +1443,10 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
   # values come back through ccx_mode_par_with_pins() so the overlay below never
   # assigns NULL (which would DELETE the name and drop the model onto its absence
   # default). Before this line hilda30c, the first pinned canonical, was refused here.
-  if (!identical(md$param_names, setdiff(CCX_PARAM_NAMES, names(md$pins))))
+  # A registered file may LACK the names in CCX_PARAM_ABSENT_OK (2026-09-13i):
+  # ccx_migrate_par_set() below fills what it RAN and the model it drives is
+  # absent under the file's own structure, so the loaded vector is the file's.
+  if (!ccx_mode_carries_build(md))
     stop("mode file '", basename(f), "' was fitted on a different parameter set (",
          length(md$param_names), " names, this build has ", length(CCX_PARAM_NAMES),
          "); refusing to overlay it silently.",
@@ -1402,6 +1468,7 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
                   " from `par_mode` and refit rather than decoding `u_mode`.")
          else "")
   pm <- ccx_mode_par_with_pins(md)
+  if (length(ccx_mode_absent(md))) pm <- ccx_migrate_par_set(pm)   # 0 = what it RAN, never a seed
   p  <- base
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
   # THROUGH THE RESOLVER: a pre-2026-09-01 `par_mode` carries the retired

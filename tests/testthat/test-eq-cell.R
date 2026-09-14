@@ -103,6 +103,26 @@ test_that("R3: w_eq and gamma_eq are FITTED (31 -> 33), the W0 prior is the PROD
                    ccx_deriv(sp$y, 1750, p0, zero_forc(sp$prod_c14, enso = 1), sp$grid, sp$aux))
 })
 
+test_that("review 09-14: D1 refuses the older ML-touching limbs by name, and a NULL pair is a w_eq = 0 cell in the R core too", {
+  # (1) w_up / w_out_* / q_conv book their ML leg over a_ml and the interior leg
+  # over a_ls -- they do not close under D1 (0.192 GtC/yr leak at 1 m/yr, measured)
+  q <- eq_par(seas_ml = 0)
+  for (nm in c("w_up", "w_out_NH", "w_out_SH", "q_conv")) {
+    q2 <- q; q2[[nm]] <- 1
+    expect_error(ccx_prepare(q2), "do not close under D1", info = nm)
+  }
+  expect_silent(invisible(ccx_prepare(q)))               # 0 / NULL: the combination is legal
+  # the cell OFF keeps every older limb usable
+  q0 <- ccx_apply_structure(ccx_default_params(), "hilda"); q0$w_up <- 1
+  expect_silent(invisible(ccx_prepare(q0)))
+  # (2) absence contract mirrored: the pair deleted == the pair at 0, both cores
+  qn <- q; qn$w_eq <- NULL; qn$gamma_eq <- NULL
+  q0 <- q; q0$w_eq <- 0
+  sp <- ccx_spinup(q0); F <- zero_forc(sp$prod_c14, enso = 1)
+  expect_identical(ccx_deriv(sp$y, 1750, qn, F, sp$grid, ccx_prepare(qn)),
+                   ccx_deriv(sp$y, 1750, q0, F, sp$grid, ccx_prepare(q0)))
+})
+
 test_that("P0f MIRROR LINT: a mixed pair errors by name; order, stride and the area partition", {
   p <- ccx_default_params(); p$eq_frac_NH <- 0.05
   expect_error(ccx_eq_on(p), "MIRROR CELLS")

@@ -130,7 +130,12 @@ edm_price <- function(md, spinups = c("periodic", "aseasonal")) {
   # a PINNED file (2026-09-13) is encoded on ITS reduced space: apply its pins,
   # and restore with the object ccx_apply_pins() returned (CCX_PINS is process-global)
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
-  u0 <- ccx_par_to_unc(md$par_mode)     # no migration: a vector of the fitted space
+  # 2026-09-13i: the registered files lack the cell's pair (CCX_PARAM_ABSENT_OK);
+  # ccx_mode_start() migrates (0 = what it ran), seeds the floor-sitting pair at
+  # init and encodes -- the driver's own start path. The pair is INERT under the
+  # files' "hilda" structure, and every assertion below is a GAP or subtracts the
+  # prior leg at this very point, so the seed's prior term cancels.
+  u0 <- ccx_mode_start(md, "edm_price")$u
   expect_true(all(is.finite(u0)))
   # THE FILE'S OWN STRUCTURE (2026-09-08f): on the column default the same
   # vector scores -2.3e7 and nothing below reproduces.

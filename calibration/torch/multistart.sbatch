@@ -177,7 +177,19 @@ mkdir -p logs calibration/output
 # preflight above. Objective: MAP as usual (Marcus 09-09x -- "likelihood-only"
 # meant COMPARE on likelihood, not fit without priors); 31 par, ent_seas_amp_SH KEPT.
 #     sbatch --array=0-23%24 calibration/torch/multistart.sbatch
-export CCX_MS_STRUCT="${CCX_MS_STRUCT:-hilda}"
+# ⛔ NO DEFAULT SINCE 2026-09-14: the structure label is the FIRST axis of the objective
+# and every array since round 5 has needed it stated. A default of `hilda` would have
+# let the eq-cell wave run 33 names against a model with no cell -- the port gate
+# refuses that in ~3 s, but a gate is the backstop, not the plan (the driver's rule).
+if [ -z "${CCX_MS_STRUCT:-}" ]; then
+  echo "multistart.sbatch: CCX_MS_STRUCT is NOT SET (hilda | hilda_eq). State the objective's label on the command line." >&2
+  exit 1
+fi
+export CCX_MS_STRUCT
+# a CCX_MS_ID exported in the submitting shell would reach every task through sbatch's
+# environment export and collapse the whole array onto ONE id and one checkpoint (the
+# driver reads CCX_MS_ID before SLURM_ARRAY_TASK_ID). Never inherit it here.
+unset CCX_MS_ID
 # ⛔⛔ 2026-09-10: THE SEASONAL MIXED LAYER IS THE SECOND LABEL AXIS, AND IT IS
 # THE ONE THIS FILE FORGOT. Jobs 17318015 + 17325832 were launched as the
 # ROUND-6 refit and ran BOTH rounds at seas_ml = 0, because `seas_ml` is a base
@@ -251,10 +263,11 @@ export CCX_MS_SPREAD="${CCX_MS_SPREAD:-1.0452}"
 #   -- the array's tension, PE8). Mac preflight ids 0/1/2/6: port VERIFIED rel <= 2.4e-14,
 #   0.195 s/eval (the cell costs nothing measurable over C'), so the 300/360 arithmetic
 #   above stands -- RE-READ IT from the Torch preflight before the wave, as always.
-#   ⛔ CCX_MS_STRUCT MUST BE GIVEN: the default below is still `hilda`, and a wave run
-#   without it would fit 33 names to a model in which the cell does not exist (the port
-#   gate refuses it in ~2 s -- the CSV says hilda_eq -- but only if the preflight is read).
-#     CCX_MS_STRUCT=hilda_eq CCX_MS_PIN=ent_seas_amp_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-5,25,45 --time=00:15:00 calibration/torch/multistart.sbatch
+#   ⛔ CCX_MS_STRUCT MUST BE GIVEN (no default since 09-14: the sbatch exits 1 without it).
+#   The preflight covers the PRODUCTION ids 0-23 (review 09-14: 25/45 exercised the draw
+#   path but never the 18 dispersed ids that actually run; a per-id draw failure would
+#   have surfaced only in the wave). 24 x ~3 min at --time=00:15:00.
+#     CCX_MS_STRUCT=hilda_eq CCX_MS_PIN=ent_seas_amp_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-23 --time=00:15:00 calibration/torch/multistart.sbatch
 #     CCX_MS_STRUCT=hilda_eq CCX_MS_PIN=ent_seas_amp_SH=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
 export CCX_MS_PIN="${CCX_MS_PIN:-}"
 PIN_LABEL=""; if [ -n "$CCX_MS_PIN" ]; then PIN_LABEL="_pin_$(echo "$CCX_MS_PIN" | tr ',' '_')"; fi

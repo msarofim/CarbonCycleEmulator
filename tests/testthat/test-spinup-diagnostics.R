@@ -18,9 +18,13 @@ sd_mode <- local({ m <- NULL; function() {
   # the nearest FREE registered mode (09-13 (d)): these tests are about the objective's
   # spinup default and by_stream, not the canonical, and a PINNED canonical's u_mode is
   # 30 long -- it would need its pins applied for every call this fixture memoises
+  # 2026-09-13i: the file's u_mode is 31 long against a 33-name build (the cell's
+  # pair, CCX_PARAM_ABSENT_OK); ccx_mode_start() migrates + seeds it -- these
+  # tests compare the objective against ITSELF at one point, so the point may be any
   if (is.null(m)) { md <- readRDS(ccx_mode_file(ccx_mode_free_name())); base <- ccx_mode_base(md)
-    m <<- list(md = md, base = base, u = md$u_mode,
-               plain = ccx_make_logpost(base_params = base)(md$u_mode)) }
+    u <- ccx_mode_start(md, "spinup-diagnostics")$u
+    m <<- list(md = md, base = base, u = u,
+               plain = ccx_make_logpost(base_params = base)(u)) }
   m } })
 
 test_that("ccx_spinup_diagnostics() REFUSES the estimator-dependent rows it cannot default", {
