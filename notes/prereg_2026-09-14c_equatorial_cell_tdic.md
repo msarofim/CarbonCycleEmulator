@@ -35,7 +35,8 @@ per °C; `k_eq` = 1 is worth −30; both −45 — each a quarter of the gap. **
 exchanges with: it must be equilibrated warm.** (The real band surface has DIC 1983 at 27 °C — GLODAP `obs_eq_cell$dic_eq$surface` —
 against the model's 1989 at 18 °C: the same DIC, ~9 °C apart, is the +130.)
 
-## 2. Design options (R1 — Marcus's ruling; my recommendation is T1)
+## 2. Design options — RULED 09-14 (d): R1 = T1; R2 = the isotherm (value: Marcus's pick after the measurement in CHANGELOG 09-14 (d); recommended 26 °C); R3 = `seas_ml` OFF first, ON as the registered follow-up; R4 = `q_tr` = 0 first, "structural from an observation" a LATER test paired with the `seas_ml`-on follow-up
+(The options as written before the rulings, for provenance:)
 - **T1 — a TROPICAL SURFACE BOX `tr` per hemisphere** (mirror boxes, one parameter set — the cell's own precedent): area from a mask
   (0–~20°, R2: the latitude bound, from the SST/ice climatology, not typed), SST the band's observed mean, own air–sea, own alkalinity
   (GLODAP), a seasonal cycle only if the data product has one (small in the tropics — R3: `seas_ml` on `tr` or not). The cell's loop

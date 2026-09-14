@@ -2,6 +2,29 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-14 (d) — ⭐⭐ **RULINGS R1–R4 TAKEN (Marcus) for the second build, and R2's MEASUREMENT: the tropical box under the 25 / 26 / 27 °C isotherm and a ±20° control, with what the RESIDUAL mixed layer becomes. Finding: the LS mixed layer's climatological mean SST is 22.8 / 19.7 °C (NH / SH), not the typed 18 / 16 — and the 26 °C isotherm carves a tropical box (39 % / 23 % of each hemisphere at 27.9 °C) whose residual leaves the ML at 17.7 / 16.1: the typed constants turn out to describe the EXTRATROPICAL mixed layer. Recommendation for the isotherm: 26 °C. Nothing built.**
+
+### The rulings (Marcus, 09-14 d)
+- **R1 = T1**, the tropical surface box the cell's loop closes through ("the physics as the driving motive"). The T2 shim is not built, not even as a diagnostic.
+- **R2 = the SST isotherm**, the sensitivity measured BEFORE the pick (below); ±20° run as a control. **The isotherm value is still Marcus's pick** (recommendation 26 °C).
+- **R3 = `seas_ml` OFF on `tr` in the first build, ON as the registered follow-up**, with the seasonal rows' movement under the mask change read on the unrefitted vector first.
+- **R4 = `q_tr` structural 0 in the first build** (the box coupled to the column by the ML idiom plus the loop); **"structural from an observation" is a LATER test, paired with the `seas_ml`-on follow-up** — Marcus wants to know whether it is a physical improvement over 0, not to assume it. Never fitted while B1 is the only row that sees it.
+
+### R2's measurement (`data-raw/diag_tr_box_bound_sensitivity.R` → `outputs/diagnostics/tr_box_bound_sensitivity_20260914.{log,csv,rds}`; ERSSTv5 1991–2020 annual-mean climatology, Argo/Holte MLD; LS = |lat| ≤ 57.14°, the cell's mask removed from `tr` as D1 removes it from the ML)
+| bound | hemi | `tr_frac` | `tr` SST | residual ML SST | reaches | MLD `tr` / residual |
+|---|---|---|---|---|---|---|
+| 25 °C | NH / SH | 0.436 / 0.271 | 27.7 / 27.5 | 16.8 / 15.4 | 30°N / 26°S | 41 / 60, 46 / 79 |
+| **26 °C** | NH / SH | **0.389 / 0.225** | **27.9 / 27.9** | **17.7 / 16.1** | 28°N / 22°S | 41 / 58, 45 / 77 |
+| 27 °C | NH / SH | 0.324 / 0.175 | 28.2 / 28.3 | 18.9 / 16.9 | 26°N / 20°S | 40 / 56, 45 / 75 |
+| ±20° | NH / SH | 0.381 / 0.282 | 27.8 / 27.0 | 18.1 / 15.4 | 20° | 41 / 58, 46 / 79 |
+Whole LS mean 22.78 / 19.70; HS mean 1.85 / −0.09 (`sst_hs` 2 ✓); the cell's band 27.45 / 26.77.
+- **Why 26 °C**: (a) the residual ML lands at 17.7 / 16.1 — the model's existing `sst_NH/SH` 18 / 16 within 0.3 °C, so the ML's Henry point and every registered file's mean state are nearly untouched (the smallest refit blast radius; PT5 realistic); (b) `tr` at 27.9 is within 0.9 °C of the cell's 27.04 — cell and tropical box nearly isothermal, which is exactly the T–DIC consistency the loop needs; (c) it reaches 28°N / 22°S, the STC subduction latitudes where the loop's `tr → oc[k]` return has its physical home. 25 °C cools the residual ML below today's constants (16.8 / 15.4), 27 °C warms it (18.9 / 16.9); both move the mean state more for no physical gain. ±20° has an SH box at 27.0 (cooler, the cold tongue's edge) and a residual ML at 15.4.
+- **The finding behind it**: the typed 18 / 16 are ~4 °C cold for the whole LS surface but RIGHT for its extratropical part. That is the T-term's other half — part of the +124 / +159 at 27 Sv is the ML being colder than the real low-latitude mean, and T1 at 26 °C resolves it by making the ML's constant true rather than by changing it.
+- **Two provenance items the product build must carry**: (i) ALL surface SSTs on ONE base — the SST anomaly forcing is on 1850–1900, so `tr`'s and the cell's climatological SSTs are re-based by the HadSST 1991–2020 anomaly (**−0.70 °C, both hemispheres**; the first build's `sst_eq` 27.04 was NOT re-based — the cell runs ~0.7 °C warm today, ~5 µatm on B1, small but wrong; fold the correction into the `obs_eq_cell.rds` rebuild); (ii) areas on the SOM-FFN grid (the `eq_frac` grid; ERSST's 2° cells over-count coastal ocean by 3.5 %) with SST regridded to it. (iii) The residual ML's Holte MLD is 58 / 77 m against today's single LS 59.7 — the SH residual deepens; with one `h_ml` for both hemispheres this is where option M (per-hemisphere MLD) starts to bind.
+
+### Next
+Marcus picks the isotherm → `data-raw/build_tr_box_targets.R` → `data/obs_tr_box.rds` (areas, SSTs re-based, alkalinity from GLODAP, MLD, the residual-ML products recomputed on the new mask: `sst_NH/SH` sourced for the first time, `obs_mld`/`h_ml` prior) → the R side under `hilda_tr`.
+
 ## 2026-09-14 (c) — ⭐⭐⭐ **THE FIRST ARRAY IS READ (Torch 17769990: 24/24 exit 0, 8 CONVERGED; best −1450.518 at `w_eq` 10.72 Sv = z −5.4 on Meinen, `gamma_eq` 0.600; PE8 FAIL, PE7 PASS-by-number, PE4 PASS, PE2 partial, common rows −0.46) and its lesson is MEASURED: at 27 Sv the cell's +133 µatm excess is the mixed layer's DIC exposed at 27 °C (T-term +124/+159), not upwelled carbon — with the T-term switched off Meinen's transport gives B1 +61 (z +0.8). Cold surfacing (7.9 µatm/°C) and `k_eq` = 1 (−30) are each a quarter of the gap. RULED (Marcus): start the second build from HEAD, do NOT promote `hilda30e`, own structure label, prereg written (`notes/prereg_2026-09-14c_equatorial_cell_tdic.md`, scoping tier: option T1 = a TROPICAL SURFACE BOX, rulings R1–R4 owed). Nothing adopted.**
 
 ### The array (`calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452/`, `collect_round1.log`, `summary.csv`, Torch logs)

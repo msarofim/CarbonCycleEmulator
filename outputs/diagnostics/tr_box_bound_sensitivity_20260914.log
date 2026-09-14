@@ -1,0 +1,17 @@
+ERSST grid 180 x 89; ocean fraction 0.686; hemispheric ocean area NH 1.601e+14 / SH 2.137e+14 m2 (product: 1.543e14 / 2.064e14; model OCEAN_AREA_* 1.55e+14 / 2.06e+14)
+
+bound    hemi  tr_frac   tr_SST resid_ML |   LS_SST   HS_SST   eq_SST |   MLD_tr MLD_resid
+iso25    NH    0.4364    27.68    16.78 |    22.78     1.85    27.45 |     41.0     59.8   (tr reaches +30 deg; eq_frac 0.0376)
+iso25    SH    0.2715    27.51    15.36 |    19.70    -0.09    26.77 |     45.8     79.3   (tr reaches -26 deg; eq_frac 0.0421)
+iso26    NH    0.3891    27.94    17.74 |    22.78     1.85    27.45 |     40.5     58.0   (tr reaches +28 deg; eq_frac 0.0376)
+iso26    SH    0.2254    27.91    16.14 |    19.70    -0.09    26.77 |     45.3     77.1   (tr reaches -22 deg; eq_frac 0.0421)
+iso27    NH    0.3236    28.23    18.89 |    22.78     1.85    27.45 |     40.0     56.1   (tr reaches +26 deg; eq_frac 0.0376)
+iso27    SH    0.1750    28.32    16.93 |    19.70    -0.09    26.77 |     44.6     74.9   (tr reaches -20 deg; eq_frac 0.0421)
+lat20    NH    0.3814    27.77    18.07 |    22.78     1.85    27.45 |     40.5     57.6   (tr reaches +20 deg; eq_frac 0.0376)
+lat20    SH    0.2818    26.99    15.40 |    19.70    -0.09    26.77 |     46.1     79.3   (tr reaches -20 deg; eq_frac 0.0421)
+
+model today: sst_NH/SH 18 / 16 (typed), sst_hs 2, sst_eq 27.04 (this climatology, NOT re-based to 1850-1900 -- the SST anomaly forcing is on 1850-1900); LS Holte h_ml obs mean 59.7
+the isotherm sensitivity, tr_frac and tr_sst, 25 -> 27 C:
+  NH: tr_frac 0.436 / 0.389 / 0.324; tr_sst 27.68 / 27.94 / 28.23; residual ML SST 16.78 / 17.74 / 18.89
+  SH: tr_frac 0.271 / 0.225 / 0.175; tr_sst 27.51 / 27.91 / 28.32; residual ML SST 15.36 / 16.14 / 16.93
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/tr_box_bound_sensitivity_20260914.{rds,csv} 
