@@ -273,8 +273,10 @@ test_that("P0c PARITY: R and C++ agree with the cell on -- derivative, transient
   }
   r  <- ccx_run_fast(sp, F)
   rR <- suppressWarnings(ccx_run(sp, F))
-  expect_false(anyNA(r$out))                        # every column live: both structures on
-  for (cc in setdiff(names(r$out), "t"))
+  live <- ccx_out_na_guard_cols(r$out, pe)          # every column live but the tropical box's (NA by contract under hilda_eq, 2026-09-14f)
+  expect_false(anyNA(r$out[, live]))
+  expect_true(all(is.na(r$out$tr_C_NH)))
+  for (cc in setdiff(live, "t"))
     expect_lt(max(abs(rR$out[[cc]] - r$out[[cc]])) / max(abs(r$out[[cc]])), 1e-12,
               label = paste("R vs C++ transient column", cc))
   expect_lt(max(abs(rR$state - r$state)) / max(abs(r$state)), 1e-12)
