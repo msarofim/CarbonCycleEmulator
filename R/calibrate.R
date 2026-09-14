@@ -1768,8 +1768,9 @@ ccx_tr_box_obs <- local({
 #'                       27.04, the un-re-based climatology, which hilda_eq
 #'                       KEEPS so the first array stays reproducible).
 #' Every surface SST in this structure is on the same 1850-1900 basis as the
-#' HadSST4 anomaly it is added to. `sst_tr_enso` ships the product's value
-#' (ruling R5 owed: on, or 0). A function, as ccx_struct_hilda_eq() is.
+#' HadSST4 anomaly it is added to, and every Nino3.4 SST slope is the EXCESS
+#' over that anomaly's own ENSO response (R5, resolved by measurement 09-14 g:
+#' tr ~0, the cell ~0.74). A function, as ccx_struct_hilda_eq() is.
 ccx_struct_hilda_tr <- function() {
   o <- ccx_tr_box_obs()
   w <- o$tr_frac$value / sum(o$tr_frac$value)            # area weights, both-hemisphere means
@@ -1780,7 +1781,12 @@ ccx_struct_hilda_tr <- function() {
          tr_frac_SH  = unname(o$tr_frac$value[["SH"]]),
          h_tr        = o$h_tr$both$mean,
          sst_tr      = unname(sum(w * o$sst$tr[c("NH", "SH")])),
-         sst_tr_enso = unname(sum(w * c(o$sst_enso$NH$beta_monthly, o$sst_enso$SH$beta_monthly))),
+         # THE EXCESS slope (2026-09-14 g, review §A1): the box's Nino3.4 SST
+         # response OVER the hemispheric HadSST4 anomaly every surface box
+         # already receives (absolute annual +0.27/+0.24 -> excess +0.002/+0.015:
+         # the band warms WITH its hemisphere, nothing local). The absolute
+         # monthly slope (0.20) double-counted the hemispheric response.
+         sst_tr_enso = unname(sum(w * c(o$sst_excess$tr$NH$beta_annual, o$sst_excess$tr$SH$beta_annual))),
          alk_tr      = o$alk_tr$both$target,
          # the overrides
          sst_NH      = unname(o$sst$ml[["NH"]]),
@@ -1788,6 +1794,13 @@ ccx_struct_hilda_tr <- function() {
          sst_eq      = {
            e <- ccx_eq_cell_obs()$eq_frac$value
            unname(sum(e / sum(e) * o$sst$eq[c("NH", "SH")]))
+         },
+         # ... and the cell's slope on the SAME footing under this label: the
+         # annual EXCESS (0.67/0.83 -> ~0.74) for hilda_eq's absolute monthly
+         # 0.97, which obs_eq_cell.rds keeps so the first array reproduces.
+         sst_eq_enso = {
+           e <- ccx_eq_cell_obs()$eq_frac$value
+           unname(sum(e / sum(e) * c(o$sst_excess$eq$NH$beta_annual, o$sst_excess$eq$SH$beta_annual)))
          })
   blk[names(add)] <- add
   stopifnot(!anyDuplicated(names(blk)))

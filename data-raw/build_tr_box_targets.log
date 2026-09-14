@@ -9,6 +9,9 @@
 == the box's Nino3.4 SST coefficient (for the R side to rule on; the ML uses the hemispheric anomaly only)
   NH: ERSST-grid annual mean 27.93 C (seasonal half-amp 0.95) | beta monthly +0.204 +/- 0.011 K per index (r +0.51) | annual +0.270 +/- 0.049 (r +0.54)  [cell: +0.971]
   SH: ERSST-grid annual mean 27.91 C (seasonal half-amp 1.13) | beta monthly +0.200 +/- 0.013 K per index (r +0.45) | annual +0.244 +/- 0.057 (r +0.44)  [cell: +0.971]
+== the EXCESS Nino3.4 SST slope over the hemispheric HadSST4 anomaly (what the model's SST already carries)
+  tr NH: absolute annual +0.270 -> EXCESS +0.002 +/- 0.022 K per index (r +0.01, 1948-2024; hemispheric +0.268 +/- 0.061) | cell NH: absolute +0.938 -> EXCESS +0.669 +/- 0.058
+  tr SH: absolute annual +0.244 -> EXCESS +0.015 +/- 0.022 K per index (r +0.08, 1948-2024; hemispheric +0.230 +/- 0.051) | cell SH: absolute +1.063 -> EXCESS +0.834 +/- 0.048
 == Holte MLD over tr and the residual ML (the h_ml / seas_ml products' new masks)
   NH   tr: n 2877 mean  40.2 max  66.8 min  21.0 | residual ML: n 4156 mean  57.9 max 131.2 min  17.5   (today's LS: mean 59.7 max 118.1)
   SH   tr: n 2014 mean  45.9 max  73.2 min  25.5 | residual ML: n 7548 mean  77.1 max 158.7 min  28.1   (today's LS: mean 59.7 max 118.1)

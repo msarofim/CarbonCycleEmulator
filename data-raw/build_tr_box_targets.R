@@ -136,12 +136,39 @@ sst_one <- function(m) {
   fm <- stats::lm(anom ~ nino34_anom, data = mg); ann <- stats::aggregate(cbind(anom, nino34_anom) ~ year, data = mg, FUN = mean); fa <- stats::lm(anom ~ nino34_anom, data = ann)
   list(annual_mean_C = mean(cm), clim_monthly_C = as.numeric(cm), seas_amp_C = (max(cm) - min(cm)) / 2,
        beta_monthly = unname(coef(fm)[2]), se_monthly = summary(fm)$coefficients[2, 2], r_monthly = stats::cor(mg$anom, mg$nino34_anom), n_monthly = nrow(mg),
-       beta_annual = unname(coef(fa)[2]), se_annual = summary(fa)$coefficients[2, 2], r_annual = stats::cor(ann$anom, ann$nino34_anom), n_annual = nrow(ann))
+       beta_annual = unname(coef(fa)[2]), se_annual = summary(fa)$coefficients[2, 2], r_annual = stats::cor(ann$anom, ann$nino34_anom), n_annual = nrow(ann),
+       annual = ann)
 }
 sst_tr <- lapply(tr_s, sst_one)
 for (h in names(HEMI)) { z <- sst_tr[[h]]
   cat(sprintf("  %s: ERSST-grid annual mean %.2f C (seasonal half-amp %.2f) | beta monthly %+.3f +/- %.3f K per index (r %+.2f) | annual %+.3f +/- %.3f (r %+.2f)  [cell: %+.3f]\n",
               h, z$annual_mean_C, z$seas_amp_C, z$beta_monthly, z$se_monthly, z$r_monthly, z$beta_annual, z$se_annual, z$r_annual, eqo$sst_eq$both$beta_monthly)) }
+
+# ---- THE EXCESS SLOPE (2026-09-14 g, review §A1): the box's Nino3.4 SST slope OVER the
+# hemispheric HadSST4 anomaly the model already adds to every surface box. The absolute
+# slope above double-counts that anomaly's own ENSO response (NH +0.112 / SH +0.092 K per
+# index, 1950-2024 -- measured in the review); the R side reads THIS for `sst_tr_enso`
+# and, under hilda_tr, for the cell's `sst_eq_enso` too (the cell's absolute slope is
+# kept in obs_eq_cell.rds so hilda_eq and the first array reproduce). ANNUAL, because
+# HadSST4 is annual: slope of (box annual anomaly - hemispheric annual anomaly, both
+# relative to the 1991-2020 mean) on the annual-mean Nino3.4 anomaly, same window.
+cat("== the EXCESS Nino3.4 SST slope over the hemispheric HadSST4 anomaly (what the model's SST already carries)\n")
+fs_h <- lapply(c("NH", "SH"), function(h) { a <- fs[[paste0("sst_anom_", h)]]; data.frame(year = fs$year, hemi = a - mean(a[fs$year >= TR_CLIM[1] & fs$year <= TR_CLIM[2]])) })
+names(fs_h) <- c("NH", "SH")
+excess_one <- function(ann, h) {
+  m <- merge(ann, fs_h[[h]], by = "year"); m$ex <- m$anom - m$hemi
+  f <- stats::lm(ex ~ nino34_anom, data = m); fh <- stats::lm(hemi ~ nino34_anom, data = m)
+  list(beta_annual = unname(coef(f)[2]), se_annual = summary(f)$coefficients[2, 2], r_annual = stats::cor(m$ex, m$nino34_anom), n_annual = nrow(m),
+       beta_hemi_annual = unname(coef(fh)[2]), se_hemi_annual = summary(fh)$coefficients[2, 2], years = range(m$year))
+}
+ex_tr <- lapply(names(HEMI), function(h) excess_one(sst_tr[[h]]$annual, h)); names(ex_tr) <- names(HEMI)
+ex_eq <- lapply(c("NH", "SH"), function(h) excess_one(eqo$sst_eq[[h]]$annual, h)); names(ex_eq) <- c("NH", "SH")
+for (h in names(HEMI)) cat(sprintf("  tr %s: absolute annual %+.3f -> EXCESS %+.3f +/- %.3f K per index (r %+.2f, %d-%d; hemispheric %+.3f +/- %.3f) | cell %s: absolute %+.3f -> EXCESS %+.3f +/- %.3f\n",
+                                   h, sst_tr[[h]]$beta_annual, ex_tr[[h]]$beta_annual, ex_tr[[h]]$se_annual, ex_tr[[h]]$r_annual, ex_tr[[h]]$years[1], ex_tr[[h]]$years[2],
+                                   ex_tr[[h]]$beta_hemi_annual, ex_tr[[h]]$se_hemi_annual, h, eqo$sst_eq[[h]]$beta_annual, ex_eq[[h]]$beta_annual, ex_eq[[h]]$se_annual))
+sst_excess <- list(tr = ex_tr, eq = ex_eq,
+                   def = "OLS slope on the annual-mean Nino3.4 anomaly of (the box's annual SST anomaly MINUS the hemispheric HadSST4 annual anomaly), both relative to the 1991-2020 mean; = the box's local ENSO SST response beyond what the model's hemispheric anomaly forcing already applies to every surface box. beta_hemi_annual is the hemispheric anomaly's own slope (the double-count the absolute slope carries). The cell's series is obs_eq_cell.rds $sst_eq$<h>$annual (unchanged product).",
+                   source = paste(CITE$sst, "|", CITE$sstf, "|", CITE$enso))
 
 # ---- MLD (Holte dt) over tr and over the RESIDUAL mixed layer --------------------------
 cat("== Holte MLD over tr and the residual ML (the h_ml / seas_ml products' new masks)\n")
@@ -196,6 +223,7 @@ obs <- list(
                          ls = c(NH = geom$NH$sst_ls_clim, SH = geom$SH$sst_ls_clim), hs = c(NH = geom$NH$sst_hs_clim, SH = geom$SH$sst_hs_clim)),
              def = sprintf("area-weighted annual-mean SST over each mask, %d-%d climatology, RE-BASED to %d-%d by the HadSST4 hemispheric anomaly (rebase_C); `clim` = un-re-based. The model's carbonate routine sees sst + forcing anomaly (on the same base)", TR_CLIM[1], TR_CLIM[2], TR_PI_BASE[1], TR_PI_BASE[2]),
              source = paste(CITE$sst, "|", CITE$sstf)),
+  sst_excess = sst_excess,
   sst_enso = c(sst_tr, list(def = "the box's OLS SST-anomaly slope on the Nino3.4 anomaly, the cell's idiom (build_eq_cell_targets.R); recorded for the R side to RULE on -- the ML uses the hemispheric anomaly only", source = paste(CITE$sst, "|", CITE$enso))),
   h_tr = c(h_tr, list(def = "Holte dt MLD over the tr mask: area-weighted mean over strict 12-month cells of the per-cell annual mean / max / min, and the monthly means", source = CITE$mld)),
   h_ml_resid = c(h_ml, list(def = "the SAME over the RESIDUAL mixed layer (LS minus tr minus eq): what obs_mld$ls and the h_ml prior become under hilda_tr", source = CITE$mld, today_ls = c(mean_dt = mlo$ls$mean_dt$value, max_dt = mlo$ls$max_dt$value))),

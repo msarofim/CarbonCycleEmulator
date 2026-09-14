@@ -63,7 +63,13 @@ test_that("the box ships OFF, off means ABSENT, and the structure is READ from t
   expect_identical(pt$alk_tr, o$alk_tr$both$target)
   w <- o$tr_frac$value / sum(o$tr_frac$value)
   expect_equal(pt$sst_tr, unname(sum(w * o$sst$tr[c("NH", "SH")])))
-  expect_equal(pt$sst_tr_enso, unname(sum(w * c(o$sst_enso$NH$beta_monthly, o$sst_enso$SH$beta_monthly))))
+  # R5 (09-14 g): the EXCESS slopes over the hemispheric anomaly, both boxes
+  expect_equal(pt$sst_tr_enso, unname(sum(w * c(o$sst_excess$tr$NH$beta_annual, o$sst_excess$tr$SH$beta_annual))))
+  expect_lt(abs(pt$sst_tr_enso), 0.05)                                  # the band warms WITH its hemisphere
+  ew0 <- e$eq_frac$value / sum(e$eq_frac$value)
+  expect_equal(pt$sst_eq_enso, unname(sum(ew0 * c(o$sst_excess$eq$NH$beta_annual, o$sst_excess$eq$SH$beta_annual))))
+  expect_lt(pt$sst_eq_enso, ccx_apply_structure(ccx_default_params(), "hilda_eq")$sst_eq_enso)   # excess < absolute
+  expect_gt(pt$sst_eq_enso, 0.5)
   # the three overrides: the residual ML's re-based SST and the re-based cell
   expect_identical(pt$sst_NH, unname(o$sst$ml[["NH"]]))
   expect_identical(pt$sst_SH, unname(o$sst$ml[["SH"]]))
@@ -71,9 +77,9 @@ test_that("the box ships OFF, off means ABSENT, and the structure is READ from t
   ew <- e$eq_frac$value / sum(e$eq_frac$value)
   expect_equal(pt$sst_eq, unname(sum(ew * o$sst$eq[c("NH", "SH")])))
   expect_lt(pt$sst_eq, ccx_apply_structure(ccx_default_params(), "hilda_eq")$sst_eq)   # re-based < un-re-based
-  # the cell's block rides along unchanged but for sst_eq; HILDA's too
+  # the cell's block rides along unchanged but for sst_eq and sst_eq_enso; HILDA's too
   pe <- ccx_apply_structure(ccx_default_params(), "hilda_eq")
-  for (n in c("eq_frac_NH", "eq_frac_SH", "h_eq", "sst_eq_enso", "alk_eq", "k_eq", "hs_frac", "tau_q"))
+  for (n in c("eq_frac_NH", "eq_frac_SH", "h_eq", "alk_eq", "k_eq", "hs_frac", "tau_q"))
     expect_identical(pt[[n]], pe[[n]], info = n)
   # no duplicated name in the block (the c()-of-two-lists trap)
   expect_false(anyDuplicated(names(ccx_struct_hilda_tr())) > 0)
@@ -363,8 +369,9 @@ test_that("EVERY limb is mutation-tested: break it and the model must move", {
   # (c) the lateral exchange: q_tr 0 -> 20 Sv must move the box
   q <- base; q$q_tr <- 20; r <- ccx_run_fast(ccx_spinup(q), F)
   expect_gt(abs(trp(r) - trp(ref)), 0.1)
-  # (d) the box's own solubility term (R5): sst_tr_enso 0 at the SAME spinup
-  q <- base; q$sst_tr_enso <- 0; sp <- ccx_spinup(q)
+  # (d) the box's own solubility term (R5): the excess slope is ~0 as built,
+  #     so the mutation SETS one (0.2, the absolute slope) at the SAME spinup
+  q <- base; q$sst_tr_enso <- 0.2; sp <- ccx_spinup(q)
   expect_identical(sp$y, sp0$y)                     # the spinup runs at enso = 0
   r <- ccx_run_fast(sp, F)
   expect_gt(max(abs(r$out$tr_pco2_NH - ref$out$tr_pco2_NH)), 0.05)
