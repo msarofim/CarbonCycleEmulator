@@ -12,7 +12,7 @@
 # diag_td0_martin_shape.R and diag_td0b_martin_kz_scan.R (2026-09-08h) so the
 # two cannot drift. Nothing here is adopted; nothing in R/ is touched.
 # =====================================================================
-MS_MARTIN_B <- 0.858
+MS_MARTIN_B <- ccx_const("MARTIN_B")   # registered R/constants.R 2026-09-14 h; was the literal 0.858
 MS_SPLICE_M <- 1000
 MS_ARMS     <- c("glodap", "martin_tail", "martin_full")
 if (!exists(".ms_shape_glodap", inherits = TRUE)) .ms_shape_glodap <- ccx_pump_shape

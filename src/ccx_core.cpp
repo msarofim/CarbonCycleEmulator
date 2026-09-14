@@ -174,6 +174,11 @@ struct Aux {
   // switches, sets the stride. `a_ml` above is now a_ls - a_eq - a_tr.
   int    tr_on;
   double a_tr[2], tr_mass_kg[2], asx_tr[2], tr_q_share[2];
+  // THE VENTILATION LOOP (option E, 2026-09-14 h): e_on gates it; k_e1..k_e2
+  // 1-BASED as in R; e_w the thickness weights (annual-mean grid, 0 outside
+  // the band); e_share the a_ls split of w_vent. Zero-filled when off.
+  int    e_on, k_e1, k_e2;
+  double e_w[NL], e_share[2];
   double h_tr, sst_tr, sst_tr_enso, alk_tr, dic0_tr, revelle0_tr;
   double ml_pump_share[2], tr_C0[2];   // choice D2: the ML's share of the LS export; tr's PI carbon
   double kz_tr;                        // the tr / layer-1 interface's K (R6); 0 = none
@@ -199,6 +204,8 @@ struct Par {
   double u_hs, tau_q;        // HILDA HS<->HD and HD<->interior (2026-09-05)
   double w_eq, gamma_eq;     // the equatorial cell's whole-band Sv and its
                              // Nino3.4 modulation (2026-09-13g)
+  double w_vent, gamma_vent;       // the ventilation loop's whole-LS Sv and its
+                             // Nino3.4 modulation (option E, 2026-09-14 h)
   double q_tr;               // the tropical box's lateral exchange, Sv
                              // (2026-09-14f; structural 0 under ruling R4)
   double q_attach_from;      // shallowest interior layer HD attaches to,
@@ -960,6 +967,22 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       }
     }
 
+    // ---- THE MODE-WATER VENTILATION LOOP (option E, 2026-09-14 h) -- twin
+    // of the block in R/model.R, which carries the reasoning (prereg 09-14h
+    // §1). e_on = 0 emits nothing. Association order mirrors the R exactly.
+    if (A.e_on) {
+      const double fac = 1.0 - P.gamma_vent * enso;
+      const double W = P.w_vent * SV_TO_M3YR * A.e_share[hi] * ((fac > 0.0) ? fac : 0.0);
+      if (W > 0.0) {
+        for (int kk = A.k_e1; kk <= A.k_e2; ++kk) {          // 1-based, as in R
+          const double Wk = W * A.e_w[kk - 1];
+          const int ik = base + IML + kk;                     // interior layer kk
+          add_flux(iml, ik, Wk * y[IX(iml, C)] / (A.a_ml[hi] * dzl[0]), 1.0);    // subduction
+          add_flux(ik, iml, Wk * y[IX(ik, C)] / (A.a_ls[hi] * dzl[kk]), 1.0);    // return
+        }
+      }
+    }
+
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
     // external to the modelled system; land-use change is not, so it is a
     // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
@@ -1123,6 +1146,10 @@ static Aux unpack_aux(const List& a) {
   v = a["ml_pump_share"]; A.ml_pump_share[0] = v[0]; A.ml_pump_share[1] = v[1];
   v = a["tr_C0"];         A.tr_C0[0] = v[0];         A.tr_C0[1] = v[1];
   A.kz_tr = a["kz_tr"];
+  // the ventilation loop (option E, 2026-09-14 h)
+  A.e_on = a["e_on"]; A.k_e1 = a["k_e1"]; A.k_e2 = a["k_e2"];
+  v = a["e_w"];       for (int k = 0; k < NL; ++k) A.e_w[k] = v[k];
+  v = a["e_share"];   A.e_share[0] = v[0];   A.e_share[1] = v[1];
   return A;
 }
 
@@ -1147,6 +1174,7 @@ static Par unpack_par(const List& p) {
   P.u_hs = p["u_hs"]; P.tau_q = p["tau_q"];
   P.w_eq = p["w_eq"]; P.gamma_eq = p["gamma_eq"];   // the equatorial cell (2026-09-13g)
   P.q_tr = p["q_tr"];                                // the tropical box (2026-09-14f)
+  P.w_vent = p["w_vent"]; P.gamma_vent = p["gamma_vent"];        // the ventilation loop (2026-09-14 h)
   P.q_attach_from = p["q_attach_from"];
   P.q_conv = p["q_conv"];
   P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];

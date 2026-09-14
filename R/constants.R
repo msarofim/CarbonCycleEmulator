@@ -261,6 +261,24 @@ CCX_CONSTANTS <- list(
                    "15-18 permil. IN USE: 18 (the C3-only value); the biosphere-wide",
                    "14.8-16.5 is the refit-batch revision (review 2026-09-14 g).")),
 
+  # ---- THE MARTIN REMINERALISATION EXPONENT (registered 2026-09-14 h, option
+  # D + E) ----
+  # The shape of the PRESCRIBED export field under `pump_field = "martin"`:
+  # F(z) = F(z_s) (z / z_s)^-b, the open-ocean composite of Martin et al. 1987.
+  # SOURCED from the paper text 2026-09-08f (memory overturning_and_mld_
+  # literature; handoff 09-08b): p. 273 / Fig. 5, "1.53 (z/100)^-0.858
+  # (r^2 = 0.81)", n = 48. Carried as a literal in calibration/lib_martin_shape.R
+  # from 09-08h until today; the library now reads it from here.
+  # ⚠ Nowicki et al. 2022's own gravitational POC profile attenuates with an
+  # effective b = 0.744 (94 -> 919 m, data-raw/build_pump_export_prior.R) --
+  # shallower. Recorded, not adopted: the shape's exponent is the sourced one.
+  MARTIN_B = list(
+    value = 0.858, units = "dimensionless",
+    status = "cited",
+    source = paste("Martin, Knauer, Karl & Broenkow (1987) Deep-Sea Res. 34(2):267-285,",
+                   "p. 273 / Fig. 5: open-ocean composite flux F(z) = 1.53 (z/100)^-0.858",
+                   "mol C m-2 yr-1 (r^2 = 0.81, n = 48). Read from the paper text 2026-09-08f.")),
+
   PUMP_EPS13_ORG = list(
     value = -20, units = "permil",
     status = "provisional",

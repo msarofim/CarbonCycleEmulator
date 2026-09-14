@@ -364,10 +364,19 @@ ccx_mode_spinup <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   if (is.null(md$spinup)) "aseasonal" else md$spinup
 }
+#' The pump field's construction a mode file was fitted under (option D + E,
+#' 2026-09-14 h). A file without the field was fitted with the SOLVED field --
+#' a FACT about every file promoted before 09-14 h (no other field existed),
+#' not a default being trusted.
+ccx_mode_pump_field <- function(md) {
+  if (is.character(md)) md <- readRDS(ccx_mode_file(md))
+  if (is.null(md$pump_field)) "solved" else ccx_parse_pump_field(md$pump_field)
+}
 ccx_mode_base <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   p <- ccx_apply_structure(ccx_default_params(), ccx_mode_struct(md),
-                           seas_ml = ccx_mode_seas_ml(md))
+                           seas_ml = ccx_mode_seas_ml(md),
+                           pump_field = ccx_mode_pump_field(md))
   # PINNED arms (2026-09-13): the held values live in the BASE, by the file's own
   # record; a consumer that wants to SCORE such a file must also ccx_apply_pins()
   # first, or ccx_par_to_unc() will look for a name the fit never carried.

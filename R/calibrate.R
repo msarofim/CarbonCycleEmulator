@@ -80,6 +80,17 @@ ccx_hs_export_prior <- local({
   }
 })
 
+#' The OBSERVATION prior on the low-latitude pump's PRESCRIBED export (option
+#' D + E, 2026-09-14 h; ruling E4): Nowicki et al. 2022's ensemble, integrated
+#' over the model's LS band by data-raw/build_pump_export_prior.R. Same idiom.
+ccx_pump_export_prior <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "obs_pump_export_prior.rds"))
+    cache
+  }
+})
+
 #' The OBSERVATION priors on the cold box's flush and the mixed-layer thickness
 #' (2026-09-08d, Marcus: "free u_hs"; "either free h_ml or ..."), the same lazy
 #' idiom: data-raw/build_u_hs_prior.R and data-raw/build_h_ml_prior.R.
@@ -408,6 +419,43 @@ CCX_PARAM_TABLE <- list(
   # deep floor). The migrated 0 sits ON the box's floor and does not encode;
   # seeded at init 1 (the probe's PE1 point).
   gamma_eq     = list(tr = "logit", lo = 0, hi = 2, init = 1,
+                      prior = function(x) dunif(x, 0, 2, log = TRUE)),
+  # ---- OPTION D + E (2026-09-14 h; notes/prereg_2026-09-14h_option_e_ventilation.md) ----
+  # Three names that reach the model ONLY under pump_field = "martin" (the
+  # prescribed-export field), where `pump_grad` is in turn INERT -- the
+  # w_eq-under-"hilda" contract, and the array pins the inert side.
+  #
+  # pump_export: the LS export in GtC/yr (both hemispheres, split by a_ls
+  # share), remineralised on the Martin profile below the mixed layer. PRIOR:
+  # OBSERVATION (ruling E4, Marcus 09-14 h: "Nowicki if it includes uncertainty
+  # bounds") -- Nowicki, DeVries & Siegel 2022's 124-member ensemble, integrated
+  # over the model's LS band (|lat| < 57.14) on its own grid: median 9.08, log-sd
+  # 0.148 from the sum-of-per-cell-p25/p75 bracket [8.12, 9.92] -- an OUTER
+  # bracket of the ensemble's IQR, and ensemble-INTERNAL (the cross-method
+  # literature spread 5-13 global is wider; the prior's 2 sigma 6.8-12.1 is
+  # where the two meet). data-raw/build_pump_export_prior.R; read lazily. The
+  # init REPEATS the product's median (the table is built before ccx_path()
+  # exists); test-option-e.R ties the two. Today's SOLVED field (45.5 GtC/yr)
+  # sits at z = +10.9 under this prior -- the prior is what breaks the
+  # kz / export / W_E degeneracy triangle, and it is meant to.
+  pump_export  = list(tr = "log", init = 9.08,
+                      prior = function(x) { pr <- ccx_pump_export_prior()
+                        dlnorm(x, log(pr$centre_gtc), pr$log_sd, log = TRUE) }),
+  # w_vent: the mode-water loop's whole-LS subduction volume flux, Sv, split
+  # by a_ls share. Box [0, 60] (60 = the cell's ceiling; the loop and the cell
+  # are the same order of transport). ⚠ PRIOR OWED (prereg §5): no STC
+  # subduction transport is SOURCED in the repo, so the prior is FLAT on the
+  # box and the data rows -- the bomb 14C penetration and the deep d13C -- set
+  # it; the prereg says so. init 20 (T-A2's 26 Sv per index at layer 2 was
+  # the ENSO limb's gain; the mean is the array's question). 0 = OFF, on the
+  # floor, does not encode -> seeded at init for a START point.
+  w_vent       = list(tr = "logit", lo = 0, hi = 60, init = 20,
+                      prior = function(x) dunif(x, 0, 60, log = TRUE)),
+  # gamma_vent: the loop's Nino3.4 modulation, W(t) = W max(0, 1 - gamma x
+  # enso) -- the cell's floor form and the cell's box [0, 2], flat. One limb
+  # carries the mean and the modulation (ruling E3), so `gamma_enso_ocn_*`
+  # are pinned at 0 in the E array (option A is subsumed).
+  gamma_vent   = list(tr = "logit", lo = 0, hi = 2, init = 0.5,
                       prior = function(x) dunif(x, 0, 2, log = TRUE)),
   # pump_hs_gcm2: THE HIGH-LATITUDE PUMP, FITTED since 2026-09-07e (29 -> 30) --
   # HS export per unit area in gC m-2 yr-1, remineralised in HD (pays choice C9).
@@ -933,7 +981,10 @@ ccx_unpin_params <- function(removed) {
 #' the migrated vector is the file's vector. A file fitted under "hilda_eq" MUST
 #' carry the pair (its param_names says so; the array's start files do). Shrink
 #' this set as files are refit or retired; empty it when none remain.
-CCX_PARAM_ABSENT_OK <- c("w_eq", "gamma_eq")
+CCX_PARAM_ABSENT_OK <- c("w_eq", "gamma_eq",
+                         # option D + E (2026-09-14 h): the three reach the model only
+                         # under pump_field = "martin"; every registered file is "solved"
+                         "pump_export", "w_vent", "gamma_vent")
 
 #' The names this build fits that a mode file lacks, pins excluded
 ccx_mode_absent <- function(md)
@@ -1194,6 +1245,18 @@ ccx_migrate_par_set <- function(p) {
   # ccx_seed_unencodable() seeds both at init (27 Sv, 1 per index) for a START
   # point -- the pump_hs_gcm2 precedent.
   for (nm in c("w_eq", "gamma_eq")) if (nm %in% absent) {
+    p[[nm]] <- 0
+    filled <- c(filled, nm)
+  }
+  # 2026-09-14 h: pump_export, w_vent and gamma_vent entered the table (33 ->
+  # 36), option D + E's three names. Absent = 0 = OFF in the model's own
+  # contract (ccx_default_params(): all 0; the loop and the prescribed field
+  # both emit nothing at 0), which is what every ancestor RAN -- and under
+  # every registered file's pump_field = "solved" none of the three reaches the
+  # model at all. 0 is on w_vent's / gamma_vent's floor and pump_export's log
+  # pole and does not ENCODE; ccx_seed_unencodable() seeds at init for a START
+  # point -- the w_eq precedent.
+  for (nm in c("pump_export", "w_vent", "gamma_vent")) if (nm %in% absent) {
     p[[nm]] <- 0
     filled <- c(filled, nm)
   }
@@ -1843,18 +1906,37 @@ ccx_struct_block <- function(struct) {
     "hilda_tr" = ccx_struct_hilda_tr(),
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
+#' The pump field's construction is the THIRD structure axis (option D + E,
+#' 2026-09-14 h): "solved" (every registered file) or "martin" (the prescribed
+#' export + the ventilation loop). Parsed like `seas_ml`, recorded in the mode
+#' file as `pump_field` (ccx_mode_pump_field()), read from CCX_MS_PUMP_FIELD by
+#' the array driver. It composes with EVERY structure label -- E's cell re-read
+#' (ruling E5) is "hilda_eq" + "martin" -- which is why it is an axis and not a
+#' fifth label.
+CCX_PUMP_FIELDS <- c("solved", "martin")
+ccx_parse_pump_field <- function(pump_field) {
+  v <- as.character(pump_field)
+  if (length(v) != 1L || is.na(v) || !v %in% CCX_PUMP_FIELDS)
+    stop("ccx_apply_structure(): `pump_field` must be one of ",
+         paste(shQuote(CCX_PUMP_FIELDS), collapse = ", "), "; got '",
+         paste(pump_field, collapse = ","), "' (CCX_MS_PUMP_FIELD if it came from the environment).")
+  v
+}
 ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
-                                seas_ml = Sys.getenv("CCX_MS_SEAS_ML", "0")) {
+                                seas_ml = Sys.getenv("CCX_MS_SEAS_ML", "0"),
+                                pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved")) {
   seas_ml <- ccx_parse_seas_ml(seas_ml)
   p$seas_ml <- seas_ml
-  if (identical(struct, "")) return(structure(p, struct = "", seas_ml = seas_ml))
+  pump_field <- ccx_parse_pump_field(pump_field)
+  p$pump_field <- pump_field
+  if (identical(struct, "")) return(structure(p, struct = "", seas_ml = seas_ml, pump_field = pump_field))
   if (!struct %in% CCX_STRUCT_LABELS)
     stop("ccx_apply_structure(): unknown structure label '", struct,
          "'. Known: \"\" (column), \"hilda\", \"hilda_eq\" (HILDA + the equatorial cell, ",
          "2026-09-13g) and \"hilda_tr\" (+ the tropical surface box, 2026-09-14f).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
-  structure(p, struct = struct, seas_ml = seas_ml)
+  structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)
 }
 
 #' @param by_stream FALSE (default) returns the bare scalar the sampler expects.

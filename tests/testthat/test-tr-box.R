@@ -85,7 +85,7 @@ test_that("the box ships OFF, off means ABSENT, and the structure is READ from t
   expect_false(anyDuplicated(names(ccx_struct_hilda_tr())) > 0)
   # the fitted names are NOT set by the structure; q_tr stays 0 (R4)
   expect_identical(pt$w_eq, 0); expect_identical(pt$gamma_eq, 0); expect_identical(pt$q_tr, 0)
-  expect_identical(length(CCX_PARAM_NAMES), 33L)                     # no new fitted name
+  expect_identical(length(CCX_PARAM_NAMES), 36L)                     # no new fitted name from THIS build (36 = 33 + option D+E's three, 2026-09-14 h)
 })
 
 test_that("P0f MIRROR LINT: a mixed pair errors by name; order, stride and the area partition; checks by name; the D1 guard", {
@@ -174,7 +174,7 @@ test_that("P0a (canonical): hilda30c's stored LIKELIHOOD reproduces row by row u
   expect_false(ccx_tr_on(bp)); expect_false(ccx_eq_on(bp))
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))
-  expect_setequal(new_names, c("w_eq", "gamma_eq"))          # NO new fitted name from this build
+  expect_setequal(new_names, c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent"))   # NO new fitted name from the tr build   # + option D+E's three (2026-09-14 h)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a-tr"))
   u  <- ccx_par_to_unc(pm)
   sc <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(u)

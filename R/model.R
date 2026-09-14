@@ -1490,6 +1490,36 @@ ccx_default_params <- function() {
     # CO2 record with nothing refitted, but a refit has `beta_max` and `kz` free
     # and could reallocate all of it, so banking it here would be premature.
     pump_mode = "N",
+    # ---- THE FIELD'S CONSTRUCTION (option D, 2026-09-14 h; ruling E1) ------
+    # "solved" = the field above: the divergence that holds the GLODAP shape
+    # against the model's own diffusion, sized by `pump_grad`. "martin" = a
+    # PRESCRIBED export `pump_export` (GtC/yr, the LS total, split by a_ls
+    # share) remineralised on a Martin profile F(z) = (z/h_ml)^-MARTIN_B below
+    # the mixed layer, the seafloor remainder deposited in the bottom layer;
+    # the gradient is then EMERGENT and `pump_grad` is IGNORED. ⚠ ORTHOGONAL to
+    # `pump_mode` (the N/D export LAW), which applies to either field. The
+    # solved field is a diffusive fixed-point construction: with an advective
+    # limb in the column (w_vent > 0) it is no longer the operator's fixed point,
+    # so ccx_prepare() refuses `w_vent > 0` under "solved" by name.
+    pump_field  = "solved",
+    pump_export = 0,      # GtC/yr, LS total; 0 under "martin" = NO pump (the
+                          #   pump_grad = 0 contract). Prior: Nowicki 2022's LS
+                          #   export, data/obs_pump_export_prior.rds (median 9.08).
+    # ---- THE MODE-WATER VENTILATION LOOP (option E, 2026-09-14 h; E2, E3) --
+    # The mixed layer subducts a volume flux W_E into interior layers
+    # k_e1..k_e2 (the ventilated thermocline, 65-292 m at the canonical grid)
+    # with thickness weights, and the same layers return the same volume to
+    # the mixed layer (the subtropical cells' upwelling). ONE limb carries the
+    # mean AND the Nino3.4 modulation, the cell's floor form:
+    #   W_E(t) = w_vent [Sv] x a_ls share_h x max(0, 1 - gamma_vent x enso).
+    # Every leg is W x the SOURCE's true per-volume concentration (D1 closes;
+    # a uniform column is a fixed point). Bulk, alpha = 1. 0 = OFF, emits
+    # NOTHING: the 09-14 g model is bit-reproduced. See the prereg,
+    # notes/prereg_2026-09-14h_option_e_ventilation.md.
+    w_vent     = 0,          # Sv, whole-LS; split by a_ls share
+    gamma_vent = 0,          # per Nino3.4 unit; El Nino (enso > 0) SUPPRESSES the loop
+    k_e1    = 1L,         # shallowest and deepest interior layers the loop
+    k_e2    = 3L,         #   ventilates (1-BASED); STRUCTURAL, not fitted (E2)
     # THE HIGH-LATITUDE PUMP (2026-09-07d; pays choice C9 of
     # notes/prereg_2026-09-05_hilda_boxes.md). HS export PER UNIT AREA, in
     # gC m-2 yr-1, remineralised in HD (one box) on the LS pump's two limbs, same
@@ -2948,6 +2978,33 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       }
     }
 
+    # ---- THE MODE-WATER VENTILATION LOOP (option E, 2026-09-14 h) --------
+    # notes/prereg_2026-09-14h_option_e_ventilation.md §1. The mixed layer
+    # SUBDUCTS a volume W_E into interior layers k_e1..k_e2 with thickness
+    # weights aux$e_w (the ventilated thermocline, E2), and the same layers
+    # RETURN the same volume to the mixed layer (the subtropical cells'
+    # upwelling). ONE limb carries the mean and the Nino3.4 modulation (E3),
+    # the cell's floor form: W_E(t) = w_vent x SV x a_ls share x max(0, 1 -
+    # gamma_vent x enso); El Nino suppresses the loop. Each leg is W x the
+    # SOURCE's true per-volume concentration -- the ML over a_ml and gr$dz[1]
+    # NOW (D1; seas_ml), layer k over a_ls and its own dz -- so a uniform
+    # column has zero tendency per box and volume is conserved round every
+    # pair. Bulk transport, alpha13 = 1 (⛔ no 14C fractionation). No labels:
+    # ml -> int / int -> ml classify into ml_int on their own, which is what
+    # keeps "surface ocean to deep (net)" right. w_vent = 0 emits NOTHING, so the
+    # 09-14 g model is bit-reproduced. The C++ block is the twin.
+    if (aux$e_on == 1L) {
+      W <- p$w_vent * CCX_SV_TO_M3YR * aux$e_share[[h]] *
+           max(0, 1 - (if (is.null(p$gamma_vent)) 0 else p$gamma_vent) * forc$enso)
+      if (W > 0) {
+        for (kk in seq.int(aux$k_e1, aux$k_e2)) {
+          Wk <- W * aux$e_w[kk]
+          add_flux(iml, ioc[kk], Wk * y[iml, "C"] / (aux$a_ml[[h]] * gr$dz[1]))          # subduction
+          add_flux(ioc[kk], iml, Wk * y[ioc[kk], "C"] / (aux$a_ls[[h]] * gr$dz[kk + 1]))  # return
+        }
+      }
+    }
+
     # ---- prescribed emissions ---------------------------------------
     # Fossil carbon comes from OUTSIDE the modelled system (geology), so it is a
     # true external source, and it is 14C-free.
@@ -3167,6 +3224,32 @@ ccx_pump_shape <- local({
 #'   reproduced rather than reproduced to within an epsilon. Otherwise
 #'   list(NH = list(org =, carb =), SH = ...).
 ccx_pump_export <- function(p, aux, grid) {
+  # THE PRESCRIBED FIELD (option D, 2026-09-14 h; ruling E1): `pump_export`
+  # GtC/yr over the LS column, split by a_ls share (Nowicki 2022's own LS
+  # split is 0.431 / 0.569 against the model's 0.429 / 0.571 -- the per-area
+  # export is the same number in both hemispheres). The export horizon is the
+  # ML base (Nowicki's euphotic depth averages 67.6 m; h_ml 65.2 at the
+  # canonical); below it the flux follows Martin, F(z) = (z / h_ml)^-MARTIN_B,
+  # so layer k remineralises F(z_{k-1}) - F(z_k) of the export and the BOTTOM
+  # layer also takes what would cross the seafloor (3.1 % at 3700 / 65 m):
+  # the budget closes without a sediment box, sum(S) = E exactly. NULL at
+  # pump_export = 0, the pump_grad = 0 contract. `pump_grad` is not read.
+  if (identical(p$pump_field, "martin")) {
+    E <- if (is.null(p$pump_export)) 0 else p$pump_export
+    if (!isTRUE(E > 0)) return(NULL)
+    zi <- cumsum(grid$dz)                                    # ML base, then every interface
+    Fz <- (zi / zi[1])^(-ccx_const("MARTIN_B"))              # Fz[1] = 1 at the ML base
+    frac <- -diff(Fz)                                        # remineralised per layer, nl of them
+    frac[grid$nl] <- frac[grid$nl] + Fz[grid$nl + 1]         # the seafloor remainder
+    fc <- p$pump_carb_frac
+    a_tot <- aux$a_ls$NH + aux$a_ls$SH
+    out <- lapply(HEMIS, function(h) {
+      S <- E * aux$a_ls[[h]] / a_tot * frac
+      list(org = S * (1 - fc), carb = S * fc)
+    })
+    names(out) <- HEMIS
+    return(out)
+  }
   if (!isTRUE(p$pump_grad > 0)) return(NULL)
   shape <- ccx_pump_shape(grid)
   if (is.null(shape)) return(NULL)
@@ -3309,6 +3392,42 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
           else list(NH = 0, SH = 0)
   a_ml <- if (eq_on || tr_on) list(NH = a_ls$NH - a_eq$NH - a_tr$NH,
                                    SH = a_ls$SH - a_eq$SH - a_tr$SH) else a_ls
+  # ---- OPTION D + E's guards (2026-09-14 h), by name, never clamped --------
+  pf <- if (is.null(p$pump_field)) "solved" else p$pump_field
+  if (!(is.character(pf) && length(pf) == 1L && pf %in% c("solved", "martin")))
+    stop("pump_field must be \"solved\" (the GLODAP-shape field held by pump_grad) or ",
+         "\"martin\" (a prescribed pump_export on a Martin profile); got ", format(pf))
+  if (identical(pf, "martin")) {
+    E <- if (is.null(p$pump_export)) 0 else p$pump_export
+    if (!is.finite(E) || E < 0)
+      stop("pump_export must be a finite non-negative LS export in GtC/yr under pump_field = ",
+           "\"martin\"; got ", format(p$pump_export))
+  }
+  w_vent <- if (is.null(p$w_vent)) 0 else p$w_vent
+  if (!is.finite(w_vent) || w_vent < 0)
+    stop("w_vent must be a finite non-negative volume flux in Sv; got ", format(p$w_vent))
+  # THE LOOP EXISTS ONLY UNDER THE PRESCRIBED FIELD. The solved field is the
+  # divergence that holds the GLODAP shape against DIFFUSION ALONE; with an
+  # advective limb in the column it is no longer the operator's fixed point
+  # and `pump_grad` would stop meaning what its name says (scoping 09-14 g
+  # §2). So under "solved" the loop is ABSENT and `w_vent` / `gamma_vent` are
+  # INERT -- the `w_eq`-under-"hilda" contract (the cell's names are inert
+  # while eq_frac = 0), NOT an error: the objective carries every table name
+  # under every structure, and a name that errors at every draw would break
+  # the fit rather than be unidentified by it. Tested bit-exact (P0a).
+  e_on <- identical(pf, "martin") && isTRUE(w_vent > 0)
+  if (e_on) {
+    g_e <- if (is.null(p$gamma_vent)) 0 else p$gamma_vent
+    if (!is.finite(g_e) || g_e < 0)
+      stop("gamma_vent must be a finite non-negative Nino3.4 slope; got ", format(p$gamma_vent))
+    ke1 <- if (is.null(p$k_e1)) 1L else as.integer(p$k_e1)
+    ke2 <- if (is.null(p$k_e2)) 3L else as.integer(p$k_e2)
+    if (!is.finite(ke1) || !is.finite(ke2) || ke1 < 1L || ke2 > grid$nl || ke1 > ke2)
+      stop("k_e1..k_e2 must be interior layers with 1 <= k_e1 <= k_e2 <= ", grid$nl,
+           " (the band the loop ventilates); got ", format(p$k_e1), "..", format(p$k_e2))
+  } else {
+    ke1 <- 1L; ke2 <- 1L
+  }
   if (eq_on) {
     # the cell's pinned geometry, range-checked by name -- never clamped
     if (!is.finite(p$h_eq) || p$h_eq <= 0)
@@ -3516,6 +3635,19 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # absent, so a fixed C++ struct never reads stale memory. `a_ml` is carried
     # for the likelihood's mixed-layer mass (ccx_box_mass_at) and the ML-layer-1
     # interface ratio in the deriv.
+    # ---- THE VENTILATION LOOP (option E, 2026-09-14 h) --------------------
+    # Present unconditionally, zero-filled when off (the cell's contract):
+    # `e_on` gates the flux on BOTH cores; `e_w` are the thickness weights over
+    # the ANNUAL-MEAN grid (stated in the prereg: layer 1's seasonal excursion
+    # does not move them), zero outside k_e1..k_e2 and summing to 1 inside;
+    # `e_share` splits w_vent by a_ls (equal subduction velocity).
+    e_on        = as.integer(e_on),
+    k_e1        = ke1,
+    k_e2        = ke2,
+    e_w         = { w <- numeric(grid$nl)
+                    if (e_on) { dzk <- grid$dz[seq.int(ke1, ke2) + 1L]; w[seq.int(ke1, ke2)] <- dzk / sum(dzk) }
+                    w },
+    e_share     = lapply(a_ls, function(A) A / (a_ls$NH + a_ls$SH)),
     eq_on       = as.integer(eq_on),
     a_ml        = a_ml,
     a_eq        = a_eq,
@@ -3808,6 +3940,35 @@ ccx_tr_box_eigbound <- function(p, grid) {
 # can size the residual mixed layer without repeating ccx_prepare())
 a_eq_of <- function(p, a_oc) if (ccx_eq_on(p)) a_oc * c(p$eq_frac_NH, p$eq_frac_SH) else c(0, 0)
 
+#' The ventilation loop's contribution to the stability bound (2026-09-14 h)
+#'
+#' Two rates per ventilated layer: the ML's drain W w_k / (a_ml h_ml) and the
+#' layer's W w_k / (a_ls dz_k); the ML's is the sum over the band. La Nina
+#' multiplies both by up to 1 + gamma_vent |enso|, the cell's form. Gershgorin
+#' 2 x rate. `grid` is the grid at ONE seasonal extreme (the caller passes
+#' each): the ML and layer 1 move under seas_ml. Exactly 0 at w_vent = 0.
+ccx_e_loop_eigbound <- function(p, grid) {
+  w <- if (is.null(p$w_vent)) 0 else p$w_vent
+  # the loop EXISTS only under the prescribed field (ccx_prepare's e_on)
+  if (!identical(p$pump_field, "martin") || !isTRUE(w > 0)) return(0)
+  g <- if (is.null(p$gamma_vent)) 0 else p$gamma_vent
+  ke1 <- if (is.null(p$k_e1)) 1L else as.integer(p$k_e1)
+  ke2 <- if (is.null(p$k_e2)) 3L else as.integer(p$k_e2)
+  a_oc <- c(ccx_const("OCEAN_AREA_NH"), ccx_const("OCEAN_AREA_SH"))
+  f_hs <- if (ccx_hs_on(p)) p$hs_frac else 0
+  a_ls <- a_oc * (1 - f_hs)
+  a_ml <- a_ls - a_eq_of(p, a_oc) - (if (ccx_tr_on(p)) a_oc * c(p$tr_frac_NH, p$tr_frac_SH) else c(0, 0))
+  # the weights on the ANNUAL-MEAN grid (as ccx_prepare builds them), the
+  # thicknesses NOW for the rates
+  g0  <- ccx_ocean_grid(p$h_ml)
+  dzk <- g0$dz[seq.int(ke1, ke2) + 1L]; wk <- dzk / sum(dzk)
+  # W_h / a_ls_h = w SV / sum(a_ls): equal velocity by construction
+  v <- w * CCX_SV_TO_M3YR / sum(a_ls)
+  rate <- max(v * max(a_ls / a_ml) / grid$dz[1],
+              max(v * wk / grid$dz[seq.int(ke1, ke2) + 1L]))
+  2 * rate * (1 + abs(g) * CCX_ENSO_ABS_MAX_FOR_STABILITY)
+}
+
 #' Substeps needed to keep the explicit interior transport stable over one step
 #' @param dt master step, years (1/12 for the monthly integrator)
 ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
@@ -3846,7 +4007,8 @@ ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
   lam <- max(vapply(.grids, function(g)
     ccx_diffusion_eigmax(max(ccx_kz_profile(p, g)), g) +
       ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), g, p) +
-      ccx_tr_box_eigbound(p, g), numeric(1)))
+      ccx_tr_box_eigbound(p, g) +
+      ccx_e_loop_eigbound(p, g), numeric(1)))   # the ventilation loop (2026-09-14 h); 0 at w_vent = 0
   # + the EQUATORIAL CELL's own drain rate (2026-09-13g), folded in for the
   # reason the conveyor's was: a stability check that ignored a first-order
   # advective term would be worse than none. Exactly 0 with the cell off, so

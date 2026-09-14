@@ -66,7 +66,7 @@ test_that("the cell ships OFF, off means ABSENT, and the geometry is READ not ty
 test_that("R3: w_eq and gamma_eq are FITTED (31 -> 33), the W0 prior is the PRODUCT's, and a 31-name ancestor migrates to 0 and is SEEDED at init", {
   # 2026-09-13i (the array-launch commit; ruled 09-13h). Adjacent, after u_hs --
   # the other overturning transport -- so the u-vector's tail is the two cells.
-  expect_identical(length(CCX_PARAM_NAMES), 33L)
+  expect_identical(length(CCX_PARAM_NAMES), 36L)   # 33 + option D+E's three (2026-09-14 h)
   i <- match(c("u_hs", "w_eq", "gamma_eq"), CCX_PARAM_NAMES)
   expect_identical(diff(i), c(1L, 1L))
   o <- ccx_eq_cell_obs()$w0_prior
@@ -207,7 +207,7 @@ test_that("P0a (canonical): hilda30c's stored LIKELIHOOD reproduces row by row u
   expect_false(ccx_eq_on(bp))
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))   # w_eq, gamma_eq
-  expect_setequal(new_names, c("w_eq", "gamma_eq"))
+  expect_setequal(new_names, c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent"))   # + option D+E's three (2026-09-14 h)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a"))
   expect_true(all(new_names %in% attr(pm, "migrated")))
   u  <- ccx_par_to_unc(pm)

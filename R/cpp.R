@@ -120,6 +120,13 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     h_eq = aux$h_eq, sst_eq = aux$sst_eq, sst_eq_enso = aux$sst_eq_enso,
     alk_eq = aux$alk_eq, k_eq = as.integer(aux$k_eq),
     dic0_eq = aux$dic0_eq, revelle0_eq = aux$revelle0_eq,
+    # THE VENTILATION LOOP (option E, 2026-09-14 h). Same contract: unconditional,
+    # zero-filled when off, LOUD if the aux predates it.
+    e_on = if (is.null(aux$e_on))
+      stop("aux lacks e_on -- build it with ccx_prepare() (2026-09-14 h)") else as.integer(aux$e_on),
+    k_e1 = as.integer(aux$k_e1), k_e2 = as.integer(aux$k_e2),
+    e_w = as.numeric(aux$e_w),
+    e_share = c(aux$e_share$NH, aux$e_share$SH),
     # THE TROPICAL SURFACE BOX (2026-09-14f). Same contract as the cell's
     # fields: unconditional, zero-filled when off, LOUD if the aux predates it;
     # `tr_on` is read THIRD on the C++ side because it also sets the stride.
@@ -221,6 +228,10 @@ ccx_cpp_par <- function(p) {
   # The tropical box's lateral exchange (2026-09-14f): absence = 0 = OFF, and
   # inert while tr_frac = 0 says the box is absent. Same contract.
   if (is.null(p$q_tr))     p$q_tr     <- 0
+  # The ventilation loop's two fitted names (option E, 2026-09-14 h): absence
+  # = 0 = OFF (aux$e_on, via ccx_prepare(), already says so). Same contract.
+  if (is.null(p$w_vent))      p$w_vent      <- 0
+  if (is.null(p$gamma_vent))  p$gamma_vent  <- 0
   # q_attach_from (2026-09-05f): 1 = every interior layer = HILDA's
   # depth-independent q, so a parameter list written before that date reaches
   # BOTH cores as the 09-05 structure. Same absence contract as h_hs.
@@ -324,6 +335,7 @@ ccx_cpp_par <- function(p) {
       "u_hs", "tau_q", "q_attach_from",   # HILDA HS/HD (2026-09-05, -05f)
       "w_eq", "gamma_eq",                 # the equatorial cell (2026-09-13g)
       "q_tr",                             # the tropical box (2026-09-14f)
+      "w_vent", "gamma_vent",                   # the ventilation loop (2026-09-14 h)
       "q_conv", "conv_sink", "conv_descent", "conv_reverse", "pump_mode",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
