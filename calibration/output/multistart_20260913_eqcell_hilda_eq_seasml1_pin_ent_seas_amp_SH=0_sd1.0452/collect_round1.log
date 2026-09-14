@@ -1,0 +1,57 @@
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 24 starts under
+  calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+==========================================================================
+  reference cold       id 0  logpost   -1450.5178  port VERIFIED (rel 1.1e-11)
+  reference incumbent  id 1  logpost   -1450.9615  port VERIFIED (rel 1.9e-10)
+  reference new_basin  id 2  logpost   -1453.5303  port VERIFIED (rel 2.2e-10)
+
+  8 of 24 starts CONVERGED, 16 ran out of wall time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.3286 = 0.25 x the measured inter-basin separation
+
+  ⇒ 2 DISTINCT BASINS among the 8 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min  kind
+      1     11     -1450.5177         0.0000       --    TIME    275  dispersed about the COLD init, sd 1.0452
+      2     19     -1450.5178        -0.0000       --    TIME    253  dispersed about the COLD init, sd 1.0452
+      3      5     -1450.5178        -0.0000       --    TIME    296  seeded: NEW BASIN + the OBSERVATION-implied partition (ocean +0.326 each, land x1.734)
+      4     15     -1450.5178        -0.0000       --    TIME    252  dispersed about the COLD init, sd 1.0452
+      5     17     -1450.5178        -0.0000       --    TIME    252  dispersed about the COLD init, sd 1.0452
+      6     10     -1450.5178        -0.0000       --    TIME    303  dispersed about the COLD init, sd 1.0452
+      7     18     -1450.5178        -0.0000       --    TIME    274  dispersed about the COLD init, sd 1.0452
+      8      0     -1450.5178        -0.0001        1    conv    263  reference: COLD hand-set init
+      9     13     -1450.5179        -0.0002       --    TIME    269  dispersed about the COLD init, sd 1.0452
+     10     22     -1450.5182        -0.0004       --    TIME    254  dispersed about the COLD init, sd 1.0452
+     11     21     -1450.6023        -0.0845       --    TIME    274  dispersed about the COLD init, sd 1.0452
+     12      4     -1450.6837        -0.1660        1    conv    213  seeded: NEW BASIN with the ocean ENSO pair SET to +0.100 each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here)
+     13      1     -1450.9615        -0.4437        1    conv    217  reference: INCUMBENT = hilda30c (the canonical, under this array's pins; 09-12 objective, periodic spinup, seas_ml 1)
+     14      9     -1450.9615        -0.4437       --    TIME    255  dispersed about the COLD init, sd 1.0452
+     15      3     -1450.9615        -0.4437        1    conv    207  seeded: INCUMBENT with the ocean ENSO pair SET to +0.100 each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here)
+     16     12     -1451.9173        -1.3995       --    TIME    304  dispersed about the COLD init, sd 1.0452
+     17      7     -1453.5303        -3.0126        2    conv    239  dispersed about the COLD init, sd 1.0452
+     18     16     -1453.5303        -3.0126        2    conv    256  dispersed about the COLD init, sd 1.0452
+     19      6     -1453.5303        -3.0126        2    conv    252  dispersed about the COLD init, sd 1.0452
+     20      2     -1453.5303        -3.0126        2    conv    200  reference: NEW BASIN = hilda31p (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)
+     21     20     -1458.8197        -8.3020       --    TIME    255  dispersed about the COLD init, sd 1.0452
+     22     23     -1462.7463       -12.2285       --    TIME    302  dispersed about the COLD init, sd 1.0452
+     23      8     -1467.2634       -16.7457       --    TIME    292  dispersed about the COLD init, sd 1.0452
+     24     14     -1492.0749       -41.5572       --    TIME    280  dispersed about the COLD init, sd 1.0452
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 11 at -1450.5177
+  TO BEAT         id 5 (seeded: NEW BASIN + the OBSERVATION-implied partition (ocean +0.326 each, land x1.734)) at -1450.5178
+  difference      +0.0000 log-units
+  BEST DISPERSED  id 11 at -1450.5177 (+0.0000 vs the benchmark), of 18 finished
+  VERDICT: 18 dispersed starts REPRODUCED, and did not beat, the best re-converged known
+           basin, at the optimiser's own convergence bound of 0.5 log-units.
+  ENSO seeding at the incumbent: -0.0000 log-units (-1450.9615 seeded vs -1450.9615 not)
+  ENSO seeding at the new_basin: +2.8466 log-units (-1450.6837 seeded vs -1453.5303 not)
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================

@@ -1,0 +1,72 @@
+CCX_PROJ_DIR  /scratch/ms17839/CarbonCycleEmulator
+CCX_MS_OUTDIR /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+CCX_MS_STRUCT hilda_eq   CCX_MS_SEAS_ML 1   CCX_MS_SPREAD 1.0452   CCX_MS_PIN 'ent_seas_amp_SH=0'
+host cs662.hpc.nyu.edu  task 3  2026-09-14T06:58:30-04:00
+PINNED (removed from the fitted set, held in the base): ent_seas_amp_SH = 0 -> 32 free parameters
+run-time inputs present: 7/7. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+SEEDING w_eq for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_eq for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_eq for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_eq for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.2323322)
+
+======================================================================
+DISPERSED MULTI-START, id 3, arm N, 32 parameters
+  host cs662.hpc.nyu.edu   R 4.5.1   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.2323, pooled over the 30 coordinates at least one of
+    them FITTED; over all 32 it would be 0.2250, diluted by the 2 migrated in BOTH:
+    w_eq, gamma_eq)
+  out /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452/start_003.rds
+======================================================================
+  structure: 'hilda_eq' (hs_frac=0.16, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, eq_frac_NH=0.048005, eq_frac_SH=0.035649, h_eq=44.234, sst_eq=27.045, sst_eq_enso=0.97147, alk_eq=2296, k_eq=2)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -1e+06 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: seeded: INCUMBENT with the ocean ENSO pair SET to +0.100 each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here) (0 draws), log-post there = -1542.9150
+PORT GATE (a) at the new_basin reference point: here -1699.3705324490 vs MacBook-Pro-2.local@cf1e380 -1699.3705320797,
+              rel 2.17e-10 (tol 1e-08)  [this task's own start is elsewhere]
+PORT GATE (a) PASSED.
+measured 0.4274 s/eval (median of 5; range 0.4197-1.1553) => one 6000-eval restart
+  projects to 42.7 min; wall budget 300 min, of which 45.0 min is RESERVED for the
+  BFGS polish (100 iterations)
+[003] cycle 1 restart  1: log-post =   -1455.5279 (gain    87.3871) evals 6001  46.4 min
+[003] cycle 1 restart  2: log-post =   -1454.3630 (gain     1.1649) evals 12002  91.1 min
+[003] cycle 1 restart  3: log-post =   -1452.9293 (gain     1.4337) evals 18003  136.6 min
+[003] cycle 1 polish: SHORTENED to maxit 235 by the wall budget
+[003] cycle 1 polish: log-post = -1450.9615 (gain 1.9678)
+[003] === cycle 1 total gain 91.9536 (log-post -1450.9615, 20880 evals, 158.3 min) ===
+[003] cycle 2 restart  1: log-post =   -1450.9615 (gain     0.0000) evals 24313  183.5 min
+[003] cycle 2 restart  2: log-post =   -1450.9615 (gain     0.0000) evals 27454  206.6 min
+[003] cycle 2 polish: SHORTENED to maxit 134 by the wall budget
+[003] === cycle 2 total gain 0.0000 (log-post -1450.9615, 27541 evals, 207.2 min) ===
+
+[003] FINAL log-post -1450.9615  (CONVERGED, 5 restarts, 27541 evals, 207.3 min)
+[003] eval rate 0.4025 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[003] PORT GATE (b) ordering: final -1450.9615 >= start -1542.9150. OK
+======================================================================
+done 2026-09-14T10:25:54-04:00
