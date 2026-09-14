@@ -24,3 +24,9 @@ Pump `kappa` on `a_ls` under D1 (unstated choice; PE5 confound); substep bound a
 
 ## 5. After the wave
 `CCX_MS_PIN=ent_seas_amp_SH=0 CCX_MS_OUTDIR=<dir> Rscript calibration/collect_dispersed_multistart.R` → `promote_multistart_mode.R --outdir=… --dest=refit_20260914_hilda30e_eqcell_pin_ent0` → `recompute_hessian.R --update` → repoint `R/paths.R` (the free-parent question is a RULING: no free `hilda_eq` parent exists; `test-mode-file` now accepts a parent that lacks only `CCX_PARAM_ABSENT_OK`) → `make_bundle.sh` dir → `port_targets.csv` → then PE2–PE5, PE7–PE8; PE9 once. Owed after: M, pin-vs-retire, option K, `OCEAN_AREA_*` provenance, the `diag_*.R` on `ccx_require_param_set`.
+
+## 6. UPDATE 09-14 (b) — LAUNCHED
+Marcus ruled the `gamma_eq` prior FLAT. Preflight 17769390: 24/24 LAUNCHABLE, port VERIFIED rel ≤ 2.2e-10, 0.43 / 0.52 / 0.94 s/eval.
+**Wave = Torch job 17769990**, `--array=0-23%24`, 24/24 running from 06:58 EDT, tree `11e2b7a`, outdir
+`calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452`. Expect ~6 h; C′'s yield at this
+budget was 4 CONVERGED of 24 — a round 2 resumes the best ids from `summary.csv`, never the whole array. Then §5.
