@@ -1,0 +1,20 @@
+vector: calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452/start_011.rds (logpost -1450.5177); w_eq 10.718 Sv, gamma_eq 0.6001; ML SST NH 18 / SH 16 C, cell 27.04 C
+target B1 +55.47 +/- 6.77 uatm; obs ENSO ocean slope +0.1153 GtC/yr per index (1959-2024)
+
+FIT: w_eq 10.72, gamma 0.600, k 2        B1  +73.4 (z +2.65)  PI cell-ML  +63.9  ENSO slope +0.129 = 1.12x obs (r +0.438)
+      decomposition, PI annual means (NH | SH): DIC ml 1989 | 2006, cell 1949 | 1953 umol/kg; excess +61 | +67 = T-term +125 | +160 + DIC-term -64 | -93 uatm
+w_eq 27 (prior mean), else the fit       B1 +133.2 (z +11.47)  PI cell-ML +122.1  ENSO slope +0.279 = 2.42x obs (r +0.676)
+      decomposition, PI annual means (NH | SH): DIC ml 1987 | 2005, cell 1980 | 1987 umol/kg; excess +116 | +128 = T-term +124 | +159 + DIC-term -8 | -31 uatm
+w_eq 27, cell 2 C colder                 B1 +116.9 (z +9.06)  PI cell-ML +105.9  ENSO slope +0.269 = 2.33x obs (r +0.669)
+      decomposition, PI annual means (NH | SH): DIC ml 1988 | 2005, cell 1988 | 1995 umol/kg; excess +100 | +112 = T-term +93 | +126 + DIC-term +7 | -14 uatm
+w_eq 27, cell 4 C colder                 B1 +101.5 (z +6.79)  PI cell-ML  +90.5  ENSO slope +0.258 = 2.24x obs (r +0.659)
+      decomposition, PI annual means (NH | SH): DIC ml 1988 | 2006, cell 1997 | 2003 umol/kg; excess +85 | +96 = T-term +65 | +94 + DIC-term +21 | +2 uatm
+w_eq 27, k_eq 1 (layer-1 source)         B1 +103.5 (z +7.08)  PI cell-ML  +92.2  ENSO slope +0.138 = 1.19x obs (r +0.473)
+      decomposition, PI annual means (NH | SH): DIC ml 1988 | 2006, cell 1964 | 1971 umol/kg; excess +87 | +98 = T-term +125 | +160 + DIC-term -38 | -62 uatm
+w_eq 27, k_eq 1, cell 2 C colder         B1  +88.2 (z +4.84)  PI cell-ML  +77.1  ENSO slope +0.127 = 1.10x obs (r +0.447)
+      decomposition, PI annual means (NH | SH): DIC ml 1989 | 2006, cell 1973 | 1979 umol/kg; excess +72 | +83 = T-term +94 | +126 + DIC-term -22 | -43 uatm
+w_eq 27, cell AT the ML's SST (the T-term switched off) B1  +60.7 (z +0.76)  PI cell-ML  +49.3  ENSO slope +0.218 = 1.89x obs (r +0.616)
+      decomposition, PI annual means (NH | SH): DIC ml 1989 | 2006, cell 2024 | 2030 umol/kg; excess +44 | +55 = T-term -12 | +12 + DIC-term +56 | +43 uatm
+
+READ: at W0 = 27 Sv the cell's excess is +133 uatm of which the T-term (the mixed layer's DIC exposed at 27.0 C instead of 18/16 C) is +124/+159; the cold-tongue proxy is worth 7.9 uatm per degC; k_eq = 1 is worth -30; both -45; the cell at the ML's own SST reads +61.
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/eq_cell_levers_20260914.{log,rds} 
