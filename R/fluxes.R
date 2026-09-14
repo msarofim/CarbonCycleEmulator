@@ -61,6 +61,12 @@ CCX_FLUX_CHANNELS <- c(
   # (layer k_eq -> cell, ML -> layer k_eq) classify into ml_int on their own,
   # which keeps "surface ocean to deep (net)" right under the cell.
   eq_ml    = "Equatorial cell to surface (gross)",
+  # THE TROPICAL BOX's lateral exchange with the residual mixed layer, `q_tr`
+  # (2026-09-14f; structural 0 under ruling R4, so this channel reads 0 until
+  # that later test). Labelled at the call site for the same reason as eq_ml.
+  # The cell -> tr limb keeps the eq_ml label ("to surface"); tr -> layer k_eq
+  # and the tr / layer-1 diffusion classify into ml_int on their own.
+  tr_ml    = "Tropical box to mixed layer (gross)",
   ihx_NS   = "Atmosphere NH to SH (gross)",
   ihx_SN   = "Atmosphere SH to NH (gross)"
 )
@@ -140,6 +146,8 @@ ccx_flux_boxclass <- function(aux, nb) {
     # The equatorial cell (2026-09-13g) is a SURFACE box on the same reasoning
     # as HS: atm<->eq is genuinely air-sea and belongs in as_down/as_up.
     if (!is.null(ix$eq)) cls[ix$eq] <- "ml"
+    # ... and the tropical surface box (2026-09-14f), likewise a SURFACE box.
+    if (!is.null(ix$tr)) cls[ix$tr] <- "ml"
   }
   if (anyNA(cls)) stop("ccx_flux_boxclass: unclassified box(es) at ",
                        paste(which(is.na(cls)), collapse = ", "))

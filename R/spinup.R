@@ -191,7 +191,8 @@ ccx_spinup_diagnostics <- function(y, prod, aux, grid, residuals, co2_ppm) {
   # HS and HD ARE ocean carbon and belong in the inventory; `$hs`/`$hd` are NULL
   # when the structure is off, and c() drops them, so this is the same vector.
   ocean_idx <- unlist(lapply(HEMIS, function(h)
-    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd, aux$idx[[h]]$eq)))
+    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd, aux$idx[[h]]$eq,
+      aux$idx[[h]]$tr)))
   deep_idx  <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 3)))
   bot_idx   <- unlist(lapply(HEMIS, function(h) tail(aux$idx[[h]]$oc, 1)))
 
@@ -282,7 +283,7 @@ ccx_spinup <- function(p = ccx_default_params(),
 
   aux  <- ccx_prepare(p)
   grid <- aux$grid
-  y    <- ccx_new_state(grid$nl, ccx_hs_on(p), ccx_eq_on(p))
+  y    <- ccx_new_state(grid$nl, ccx_hs_on(p), ccx_eq_on(p), ccx_tr_on(p))
 
   # ---- 12C: analytic equilibrium -------------------------------------
   for (h in HEMIS) {
@@ -357,6 +358,14 @@ ccx_spinup <- function(p = ccx_default_params(),
       dic_e <- ccx_dic_for_pco2(chi0, aux$alk_eq, aux$sst_eq)
       y[i$eq, "C"] <- dic_e * aux$eq_mass_kg[[h]] / aux$mol_per_GtC
     }
+    # THE TROPICAL SURFACE BOX (2026-09-14f), the same idiom: its own Henry
+    # point at its own SST and alkalinity as the starting guess; the diffusive
+    # interface with layer 1 and the loop see a real gradient, so the Newton
+    # solve below finishes it (its gate includes the box).
+    if (!is.null(i$tr)) {
+      dic_t <- ccx_dic_for_pco2(chi0, aux$alk_tr, aux$sst_tr)
+      y[i$tr, "C"] <- dic_t * aux$tr_mass_kg[[h]] / aux$mol_per_GtC
+    }
   }
 
   # ---- forcing at equilibrium: nothing external ----------------------
@@ -387,7 +396,7 @@ ccx_spinup <- function(p = ccx_default_params(),
   # on an already-exact fixed point, which is why the branch is gated rather than
   # unconditional: the no-pump, no-conveyor model stays bit-identical.
   if (!is.null(ccx_conveyor_geom(p, grid)) || !is.null(aux$pump) || aux$hs_on == 1L ||
-      aux$eq_on == 1L)
+      aux$eq_on == 1L || aux$tr_on == 1L)
     y <- ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0), prep = prep)
 
   nb <- nrow(y)

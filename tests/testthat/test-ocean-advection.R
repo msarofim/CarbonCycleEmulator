@@ -191,6 +191,7 @@ test_that("with NO interior source, reversing the circulation ties EVERY column"
   deep_cols <- grep("^deep_", CCX_OCEAN_BOX_COLS, value = TRUE)
   hs_cols   <- grep("^hs_",   CCX_OCEAN_BOX_COLS, value = TRUE)   # NA here: structure off (2026-09-07f)
   hs_cols   <- c(hs_cols, grep("^eq_", CCX_OCEAN_BOX_COLS, value = TRUE))   # ... and the cell off (2026-09-13g)
+  hs_cols   <- c(hs_cols, grep("^tr_", CCX_OCEAN_BOX_COLS, value = TRUE))   # ... and the tropical box off (2026-09-14f)
   tied <- setdiff(names(out$run$out), c(deep_cols, hs_cols))
   expect_equal(as.matrix(out$run$out[, tied]), as.matrix(up$run$out[, tied]),
                tolerance = 1e-8)
@@ -236,7 +237,7 @@ test_that("with the pump ON, TOTAL CARBON is still invariant and the ISOTOPES ar
   # GLOBAL parameter and both `w_out` limbs get the same speed, so no hemisphere
   # is ever swapped; both hemispheres break in the SAME direction, at the ratio
   # of their ocean areas (1.24 measured against 1.33).
-  a   <- run_w(0); stopifnot(!anyNA(a$run$out[, grep("^(hs|eq)_", names(a$run$out), invert = TRUE)]))   # hs_/eq_ cols are NA with the structures off (2026-09-07f, 09-13g)
+  a   <- run_w(0); stopifnot(!anyNA(a$run$out[, grep("^(hs|eq|tr)_", names(a$run$out), invert = TRUE)]))   # hs_/eq_/tr_ cols are NA with the structures off (2026-09-07f, 09-13g, 09-14f)
   up  <- run_w(W_TEST)                       # pump ON -- the shipped default
   out <- run_w_out(W_TEST)
   expect_gt(ccx_default_params()$pump_grad, 0)   # or this test is the one above

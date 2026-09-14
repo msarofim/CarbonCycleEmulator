@@ -1742,6 +1742,57 @@ ccx_struct_hilda_eq <- function() {
          alk_eq      = o$alk_eq$both$target,
          k_eq        = CCX_EQ_K_EQ))
 }
+#' The tropical box's data product (data-raw/build_tr_box_targets.R), read
+#' lazily and cached -- the ccx_eq_cell_obs() idiom. It carries the box's
+#' PINNED GEOMETRY and the three SST overrides of ccx_struct_hilda_tr(), plus
+#' PT6's DIC check target (calibration/diag_tr_box_probe.R).
+ccx_tr_box_obs <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "obs_tr_box.rds"))
+    cache
+  }
+})
+#' THE "hilda_tr" STRUCTURE (2026-09-14f, prereg_2026-09-14f): the "hilda_eq"
+#' block PLUS the tropical surface box's OBSERVED geometry, every value read
+#' from data/obs_tr_box.rds -- tr_frac from the 26 degC ERSSTv5 isotherm on the
+#' SOM-FFN grid (ruling R2, of the product's own hemispheric area, cell
+#' removed), h_tr the Holte annual mean (the h_eq convention), sst_tr and its
+#' Nino3.4 slope (both hemispheres area-weighted: ONE parameter set, R1),
+#' alk_tr the GLODAP <= 50 m target; q_tr STAYS the default 0 (R4).
+#' ⚠ THREE OVERRIDES ride with it, each a MEASUREMENT the typed value lacked:
+#'   sst_NH / sst_SH  <- the RESIDUAL mixed layer's SST (LS minus tr minus eq),
+#'                       re-based to 1850-1900: 17.18 / 15.35 for the typed 18 / 16
+#'                       (which were ~0.7 warm; the first SOURCED values);
+#'   sst_eq           <- the cell RE-BASED to 1850-1900 (26.33 for hilda_eq's
+#'                       27.04, the un-re-based climatology, which hilda_eq
+#'                       KEEPS so the first array stays reproducible).
+#' Every surface SST in this structure is on the same 1850-1900 basis as the
+#' HadSST4 anomaly it is added to. `sst_tr_enso` ships the product's value
+#' (ruling R5 owed: on, or 0). A function, as ccx_struct_hilda_eq() is.
+ccx_struct_hilda_tr <- function() {
+  o <- ccx_tr_box_obs()
+  w <- o$tr_frac$value / sum(o$tr_frac$value)            # area weights, both-hemisphere means
+  blk <- ccx_struct_hilda_eq()
+  # ⚠ ASSIGNED BY NAME, not c()'d: `sst_eq` is in both blocks and `[[` on a
+  # list with a duplicated name returns the FIRST -- the un-re-based value.
+  add <- list(tr_frac_NH  = unname(o$tr_frac$value[["NH"]]),
+         tr_frac_SH  = unname(o$tr_frac$value[["SH"]]),
+         h_tr        = o$h_tr$both$mean,
+         sst_tr      = unname(sum(w * o$sst$tr[c("NH", "SH")])),
+         sst_tr_enso = unname(sum(w * c(o$sst_enso$NH$beta_monthly, o$sst_enso$SH$beta_monthly))),
+         alk_tr      = o$alk_tr$both$target,
+         # the overrides
+         sst_NH      = unname(o$sst$ml[["NH"]]),
+         sst_SH      = unname(o$sst$ml[["SH"]]),
+         sst_eq      = {
+           e <- ccx_eq_cell_obs()$eq_frac$value
+           unname(sum(e / sum(e) * o$sst$eq[c("NH", "SH")]))
+         })
+  blk[names(add)] <- add
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
 #' @param seas_ml the SEASONAL MIXED LAYER switch (round 6), the SECOND axis of
 #'   the objective label beside `struct` (2026-09-10). ⛔ WHY IT IS HERE AND NOT
 #'   LEFT TO `ccx_default_params()`: `seas_ml` is a BASE parameter, not a fitted
@@ -1767,15 +1818,28 @@ ccx_parse_seas_ml <- function(seas_ml) {
          paste(seas_ml, collapse = ","), "' (CCX_MS_SEAS_ML if it came from the environment).")
   as.integer(v)
 }
+#' The structure labels the objective knows, and each one's DECLARED block --
+#' ONE dispatch (2026-09-14f), read by ccx_apply_structure(), the array driver's
+#' banner and the tests, so no consumer keeps its own list.
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr")
+ccx_struct_block <- function(struct) {
+  if (identical(struct, "")) return(list())        # the column: nothing declared
+  switch(struct,
+    "hilda"    = CCX_STRUCT_HILDA,
+    "hilda_eq" = ccx_struct_hilda_eq(),
+    "hilda_tr" = ccx_struct_hilda_tr(),
+    stop("ccx_struct_block(): unknown structure label '", struct, "'"))
+}
 ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
                                 seas_ml = Sys.getenv("CCX_MS_SEAS_ML", "0")) {
   seas_ml <- ccx_parse_seas_ml(seas_ml)
   p$seas_ml <- seas_ml
   if (identical(struct, "")) return(structure(p, struct = "", seas_ml = seas_ml))
-  if (!struct %in% c("hilda", "hilda_eq"))
+  if (!struct %in% CCX_STRUCT_LABELS)
     stop("ccx_apply_structure(): unknown structure label '", struct,
-         "'. Known: \"\" (column), \"hilda\" and \"hilda_eq\" (HILDA + the equatorial cell, 2026-09-13g).")
-  blk <- if (identical(struct, "hilda")) CCX_STRUCT_HILDA else ccx_struct_hilda_eq()
+         "'. Known: \"\" (column), \"hilda\", \"hilda_eq\" (HILDA + the equatorial cell, ",
+         "2026-09-13g) and \"hilda_tr\" (+ the tropical surface box, 2026-09-14f).")
+  blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml)
 }

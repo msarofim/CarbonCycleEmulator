@@ -1150,6 +1150,7 @@ ccx_epoch_year_samples <- function(epoch)
 #' cannot hold a second opinion about whether a box is seasonal
 #' ([[two_gates_one_mechanism]]).
 #' + "eq" (the equatorial cell, 2026-09-13g: constant, its own thickness).
+#' + "tr" (the tropical surface box, 2026-09-14f: constant, its own thickness).
 #' ⚠ "ml" is over the MIXED LAYER'S OWN area since the cell (choice D1):
 #' `aux$a_ml`, which is `a_ls` itself with the cell off, so nothing moves there.
 ccx_box_mass_at <- function(aux, grid, which, h, t) {
@@ -1161,6 +1162,7 @@ ccx_box_mass_at <- function(aux, grid, which, h, t) {
     hs   = aux$hs_mass_kg[[h]] *
              (if (is.null(aux$mld_hs_coef)) 1 else ccx_mld_eval(aux$mld_hs_coef[[h]], t)$f),
     eq   = aux$eq_mass_kg[[h]],
+    tr   = aux$tr_mass_kg[[h]],
     stop("ccx_box_mass_at(): unknown box '", which, "'"))
 }
 
@@ -1228,12 +1230,19 @@ ccx_box_annual_conc <- function(out, aux, grid, which, epoch, hemis = HEMIS) {
 #' target is cut from include the tropics, so a model with a tropical box must
 #' present the SAME mixture. Weights are each box's annual-mean mass, the
 #' convention ccx_box_annual_conc() already uses across hemispheres.
+#' + the TROPICAL BOX (2026-09-14f), on the same rule: every low-latitude
+#' surface box that EXISTS enters by mass; an absent one (NA columns) is not
+#' formed, so `hilda_eq` and the column read exactly as before.
 ccx_surface_annual_conc <- function(out, aux, grid, epoch) {
-  eq_cols <- paste0("eq_C_", HEMIS)
-  if (!all(eq_cols %in% names(out)) || anyNA(out[[eq_cols[1]]]))
+  present <- function(b) {
+    cols <- paste0(b, "_C_", HEMIS)
+    all(cols %in% names(out)) && !anyNA(out[[cols[1]]])
+  }
+  extra <- Filter(present, c("eq", "tr"))
+  if (length(extra) == 0L)
     return(ccx_box_annual_conc(out, aux, grid, "ml", epoch))
-  ss <- .ccx_box_annual_sums(out, aux, grid, "ml", epoch) +
-        .ccx_box_annual_sums(out, aux, grid, "eq", epoch)
+  ss <- .ccx_box_annual_sums(out, aux, grid, "ml", epoch)
+  for (b in extra) ss <- ss + .ccx_box_annual_sums(out, aux, grid, b, epoch)
   c(dic  = unname(ss["wd"]  / ss["w"]),
     d13c = unname(ss["wdd"] / ss["wd"]))
 }
@@ -1423,7 +1432,8 @@ ccx_model_eq_b1 <- function(out, aux, years = LIK_EQ_B1_YEARS) {
   # that does not exist (hs with HILDA off) has NA pCO2 and zero area and is
   # dropped from the mean rather than poisoning it
   area <- function(b, h) switch(b, ml = ccx_ml_area(aux, h), hs = aux$a_hs[[h]],
-                                eq = aux$a_eq[[h]])
+                                eq = aux$a_eq[[h]],
+                                tr = if (is.null(aux$a_tr)) 0 else aux$a_tr[[h]])   # 2026-09-14f
   m <- list(); a <- list()
   for (b in CCX_SURFACE_BOXES) for (h in HEMIS) {
     col <- out[[paste0(b, "_pco2_", h)]]

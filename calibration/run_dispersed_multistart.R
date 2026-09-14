@@ -406,7 +406,9 @@ MS_STRUCT <- attr(bp, "struct"); MS_SEAS_ML <- attr(bp, "seas_ml")
 # the banner prints the WHOLE declared block of the label, so a hilda_eq task's log
 # names the cell's geometry (eq_frac, h_eq, sst_eq, sst_eq_enso, alk_eq, k_eq) and is
 # distinguishable from a hilda task's on its own (review 2026-09-14)
-.ms_struct_blk <- if (identical(MS_STRUCT, "hilda_eq")) ccx_struct_hilda_eq() else if (nzchar(MS_STRUCT)) CCX_STRUCT_HILDA else NULL
+# ... and a hilda_tr task's names the tropical box's (tr_frac, h_tr, sst_tr, sst_tr_enso,
+# alk_tr) and the three SST overrides (2026-09-14f). ONE dispatch: ccx_struct_block().
+.ms_struct_blk <- if (nzchar(MS_STRUCT)) ccx_struct_block(MS_STRUCT) else NULL
 cat(sprintf("  structure: '%s'%s\n", MS_STRUCT,
             if (length(.ms_struct_blk)) paste0(" (", paste(sprintf("%s=%s", names(.ms_struct_blk), signif(unlist(.ms_struct_blk), 5)), collapse = ", "), ")") else " (32-box column)"))
 cat(sprintf("  seasonal mixed layer: seas_ml = %d (%s; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)\n",

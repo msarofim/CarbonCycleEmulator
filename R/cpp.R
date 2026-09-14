@@ -119,7 +119,21 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     eq_w_share = c(aux$eq_w_share$NH, aux$eq_w_share$SH),
     h_eq = aux$h_eq, sst_eq = aux$sst_eq, sst_eq_enso = aux$sst_eq_enso,
     alk_eq = aux$alk_eq, k_eq = as.integer(aux$k_eq),
-    dic0_eq = aux$dic0_eq, revelle0_eq = aux$revelle0_eq
+    dic0_eq = aux$dic0_eq, revelle0_eq = aux$revelle0_eq,
+    # THE TROPICAL SURFACE BOX (2026-09-14f). Same contract as the cell's
+    # fields: unconditional, zero-filled when off, LOUD if the aux predates it;
+    # `tr_on` is read THIRD on the C++ side because it also sets the stride.
+    tr_on = if (is.null(aux$tr_on))
+      stop("aux lacks tr_on -- build it with ccx_prepare() (2026-09-14f)") else as.integer(aux$tr_on),
+    a_tr = c(aux$a_tr$NH, aux$a_tr$SH),
+    tr_mass_kg = c(aux$tr_mass_kg$NH, aux$tr_mass_kg$SH),
+    asx_tr = c(aux$asx_tr$NH, aux$asx_tr$SH),
+    tr_q_share = c(aux$tr_q_share$NH, aux$tr_q_share$SH),
+    h_tr = aux$h_tr, sst_tr = aux$sst_tr, sst_tr_enso = aux$sst_tr_enso,
+    alk_tr = aux$alk_tr, dic0_tr = aux$dic0_tr, revelle0_tr = aux$revelle0_tr,
+    ml_pump_share = c(aux$ml_pump_share$NH, aux$ml_pump_share$SH),
+    tr_C0 = c(aux$tr_C0$NH, aux$tr_C0$SH),
+    kz_tr = aux$kz_tr
   )
 }
 
@@ -204,6 +218,9 @@ ccx_cpp_par <- function(p) {
   # ccx_eq_on()) says the box is absent. Same contract as u_hs / tau_q.
   if (is.null(p$w_eq))     p$w_eq     <- 0
   if (is.null(p$gamma_eq)) p$gamma_eq <- 0
+  # The tropical box's lateral exchange (2026-09-14f): absence = 0 = OFF, and
+  # inert while tr_frac = 0 says the box is absent. Same contract.
+  if (is.null(p$q_tr))     p$q_tr     <- 0
   # q_attach_from (2026-09-05f): 1 = every interior layer = HILDA's
   # depth-independent q, so a parameter list written before that date reaches
   # BOTH cores as the 09-05 structure. Same absence contract as h_hs.
@@ -306,6 +323,7 @@ ccx_cpp_par <- function(p) {
       "q10", "k_w", "kz", "w_up", "w_out_NH", "w_out_SH", "tau_ex",
       "u_hs", "tau_q", "q_attach_from",   # HILDA HS/HD (2026-09-05, -05f)
       "w_eq", "gamma_eq",                 # the equatorial cell (2026-09-13g)
+      "q_tr",                             # the tropical box (2026-09-14f)
       "q_conv", "conv_sink", "conv_descent", "conv_reverse", "pump_mode",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",
@@ -394,8 +412,10 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
   list(par = ccx_cpp_par(spin$params),
        aux = ccx_cpp_aux(spin$aux, spin$grid),
        ss  = ccx_resolve_substeps(substeps, spin$params, spin$grid),
-       box_names = ccx_box_names(spin$grid$nl, ccx_hs_on(spin$params), ccx_eq_on(spin$params)),
-       hs_on = ccx_hs_on(spin$params), eq_on = ccx_eq_on(spin$params))
+       box_names = ccx_box_names(spin$grid$nl, ccx_hs_on(spin$params), ccx_eq_on(spin$params),
+                                 ccx_tr_on(spin$params)),
+       hs_on = ccx_hs_on(spin$params), eq_on = ccx_eq_on(spin$params),
+       tr_on = ccx_tr_on(spin$params))
 }
 
 #' A forcing table marshalled ONCE for many `ccx_run_prepared()` calls
@@ -434,6 +454,7 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE) {
   guard_cols <- names(r$out)
   if (!prep$hs_on) guard_cols <- grep("^hs_", guard_cols, invert = TRUE, value = TRUE)
   if (!isTRUE(prep$eq_on)) guard_cols <- grep("^eq_", guard_cols, invert = TRUE, value = TRUE)
+  if (!isTRUE(prep$tr_on)) guard_cols <- grep("^tr_", guard_cols, invert = TRUE, value = TRUE)
   while (retry_na && anyNA(r$out[, guard_cols]) && ss < CCX_SUBSTEPS_MAX) {
     ss <- min(2L * ss, CCX_SUBSTEPS_MAX)
     r  <- one(ss)
@@ -448,6 +469,7 @@ ccx_out_na_guard_cols <- function(out, p) {
   cols <- names(out)
   if (!ccx_hs_on(p)) cols <- grep("^hs_", cols, invert = TRUE, value = TRUE)
   if (!ccx_eq_on(p)) cols <- grep("^eq_", cols, invert = TRUE, value = TRUE)   # the cell (2026-09-13g)
+  if (!ccx_tr_on(p)) cols <- grep("^tr_", cols, invert = TRUE, value = TRUE)   # the tropical box (2026-09-14f)
   cols
 }
 

@@ -63,15 +63,18 @@ HEMIS      <- c("NH", "SH")
 # the first RK4 stage of that month (same y, same t, same forcing row), so
 # neither core carries a second estimator of the air-sea driving quantity
 # (the 2026-09-09r concern) and test-parity.R holds the two together.
-# ELEVEN per hemisphere now; the C++ fill is 11 + 11*hi and its matrix is
-# 11 + 22 wide, asserted in ccx_run_fast().
+# + THE TROPICAL SURFACE BOX (2026-09-14f, prereg_2026-09-14f): tr_C / tr_C13
+# / tr_pco2 per hemisphere, NA when the box is off.
+# FOURTEEN per hemisphere now; the C++ fill is 11 + 14*hi and its matrix is
+# 11 + 28 wide, asserted in ccx_run_fast().
 CCX_OCEAN_BOX_COLS <- unlist(lapply(HEMIS, function(h)
   paste0(c("ml_C_", "ml_C13_", "deep_C_", "deep_C13_", "hs_C_", "hs_C13_",
-           "eq_C_", "eq_C13_", "ml_pco2_", "hs_pco2_", "eq_pco2_"), h)))
+           "eq_C_", "eq_C13_", "tr_C_", "tr_C13_",
+           "ml_pco2_", "hs_pco2_", "eq_pco2_", "tr_pco2_"), h)))
 # The surface boxes whose pCO2 the B1 row reads, in the order the columns and
 # the C++ recorder use. ONE vector so the reader, the R output fill and the
 # C++ `pco2_rec` slot order cannot disagree.
-CCX_SURFACE_BOXES <- c("ml", "hs", "eq")
+CCX_SURFACE_BOXES <- c("ml", "hs", "eq", "tr")
 
 # 1 Sv = 1e6 m3/s. The conveyor is parameterised by VOLUME flux because the two
 # hemispheres have different ocean areas -- see ccx_default_params()$q_conv.
@@ -777,12 +780,38 @@ ccx_luc_pool_shares <- function(p) {
 #' HILDA structure is off), so again no existing index moves. 19 boxes per
 #' hemisphere with both structures on, 38 total. Same absence contract: off
 #' means ABSENT (see ccx_eq_on()).
-ccx_box_names <- function(nl = N_INTERIOR, hs = FALSE, eq = FALSE) {
+#'
+#' + THE TROPICAL SURFACE BOX (2026-09-14f, `tr = TRUE`): one more box per
+#' hemisphere, appended AFTER `eq` (or wherever the count ends when the cell
+#' is off), so once more no existing index moves. 20 boxes per hemisphere with
+#' all three structures on, 40 total. Same absence contract (ccx_tr_on()).
+ccx_box_names <- function(nl = N_INTERIOR, hs = FALSE, eq = FALSE, tr = FALSE) {
   unlist(lapply(HEMIS, function(h)
     c(paste0(h, "_atm"), paste0(h, "_", CCX_LAND_POOLS),
       paste0(h, "_ml"), paste0(h, "_oc", seq_len(nl)),
       if (hs) c(paste0(h, "_hs"), paste0(h, "_hd")),
-      if (eq) paste0(h, "_eq"))))
+      if (eq) paste0(h, "_eq"),
+      if (tr) paste0(h, "_tr"))))
+}
+
+#' Is the TROPICAL SURFACE BOX on for this parameter set? (2026-09-14f)
+#'
+#' The ccx_eq_on() idiom, exactly: TRUE iff BOTH `tr_frac_NH` and `tr_frac_SH`
+#' are finite and > 0; absence and 0 mean no boxes; a MIXED pair is an ERROR by
+#' name (ruling R1, 2026-09-14d: mirror boxes, one parameter set). `tr` does
+#' NOT require the cell: with the cell off it is a passive warm surface box;
+#' with the cell on and `tr` off the cell's loop closes through the mixed layer
+#' -- the 2026-09-13g build, bit for bit.
+ccx_tr_on <- function(p) {
+  on <- vapply(HEMIS, function(h) {
+    v <- p[[paste0("tr_frac_", h)]]
+    !is.null(v) && is.finite(v) && v > 0
+  }, logical(1))
+  if (xor(on[["NH"]], on[["SH"]]))
+    stop("ccx_tr_on(): tr_frac_NH = ", format(p$tr_frac_NH), " and tr_frac_SH = ",
+         format(p$tr_frac_SH), " -- the tropical surface box is built as MIRROR BOXES ",
+         "with one parameter set (ruling R1, 2026-09-14d); set both > 0 or both 0.")
+  all(on)
 }
 
 #' Is the EQUATORIAL UPWELLING CELL on for this parameter set? (2026-09-13g)
@@ -822,8 +851,8 @@ ccx_hs_on <- function(p) {
 CCX_TRACERS <- c("C", "C13", "C14")
 
 #' Build an empty state: matrix [box x tracer]
-ccx_new_state <- function(nl = N_INTERIOR, hs = FALSE, eq = FALSE) {
-  bn <- ccx_box_names(nl, hs, eq)
+ccx_new_state <- function(nl = N_INTERIOR, hs = FALSE, eq = FALSE, tr = FALSE) {
+  bn <- ccx_box_names(nl, hs, eq, tr)
   matrix(0, nrow = length(bn), ncol = length(CCX_TRACERS),
          dimnames = list(bn, CCX_TRACERS))
 }
@@ -1367,6 +1396,63 @@ ccx_default_params <- function() {
                           #   W0 (14-25 Sv per index / 24-30 Sv); T-A2's
                           #   requirement is ~1.0. The floor binds at
                           #   enso = 1/gamma_eq.
+    # ---- THE TROPICAL SURFACE BOX (the cell's SECOND build, 2026-09-14f) --
+    # notes/prereg_2026-09-14f_tr_box_build.md; rulings R1-R4 of 09-14 (d).
+    # WHY: the first array (Torch 17769990) fitted w_eq at 10.7 Sv (z -5.4 on
+    # Meinen's 27 +/- 3) because at 27 Sv the cell's +133 uatm excess is the
+    # single 0-57 deg mixed layer's COLD-equilibrated DIC exposed at 27 degC
+    # (T-term +124/+159, measured: diag_eq_cell_levers.R). The lever is the
+    # DIC of the water the cell exchanges with -- it must be equilibrated
+    # WARM. So: one warm surface box `tr` per hemisphere (the >= 26 degC
+    # annual-mean SST isotherm inside the LS domain, cell removed -- R2), with
+    # its own air-sea at its own SST and alkalinity, a diffusive interface
+    # with layer 1 over its own area (the ML idiom, the same kz), NO seasonal
+    # cycle (R3), NO pump; and the cell's loop closes THROUGH it:
+    # oc[k_eq] -> eq -> tr -> oc[k_eq]. Its lateral exchange with the residual
+    # mixed layer, `q_tr`, is STRUCTURAL 0 first (R4); coded so the later
+    # observation-based test is one number away, never fitted while B1 is the
+    # only row that sees it.
+    #
+    # THE SWITCH IS THE `tr_frac_*` PAIR, 0 = ABSENT (ccx_tr_on()); a MIXED
+    # pair errors by name (mirror boxes). With it off nothing below runs and
+    # the 2026-09-13g model (`hilda_eq`) is bit-reproduced. The geometry is
+    # OBSERVED, PINNED STRUCTURE, never fitted, and NOT typed here:
+    # ccx_apply_structure(p, "hilda_tr") reads it from data/obs_tr_box.rds
+    # (data-raw/build_tr_box_targets.R) -- tr_frac from the ERSSTv5 isotherm on
+    # the SOM-FFN grid, h_tr the Holte annual mean, sst_tr (RE-BASED to
+    # 1850-1900 by HadSST4) and its Nino3.4 slope from ERSSTv5, alk_tr from
+    # GLODAP. That structure ALSO overrides sst_NH/sst_SH with the RESIDUAL
+    # mixed layer's re-based SST (17.18/15.35; the typed 18/16 were ~0.7 warm)
+    # and sst_eq with the re-based cell (26.33 for 27.04).
+    tr_frac_NH  = 0,      # the box's share of EACH hemisphere's ocean area
+    tr_frac_SH  = 0,      #   (0.3966 / 0.2149 observed at the 26 degC isotherm)
+    h_tr        = 0,      # m, the box's thickness (42.6 observed, Holte mean)
+    sst_tr      = 0,      # degC, annual-mean SST re-based to 1850-1900 (27.21);
+                          #   sst_tr(t) = sst_tr + sst_anom_h + sst_tr_enso*enso
+    sst_tr_enso = 0,      # K per Nino3.4 unit (0.202 observed). ⚠ R5, a
+                          #   ruling OWED before the array: the box's OWN
+                          #   solubility term (the cell's idiom) or 0 (the
+                          #   ML's). The structure ships the product's value;
+                          #   diag_tr_box_probe.R PT7 measures both.
+    alk_tr      = 0,      # umol/kg, the box's surface alkalinity (2299 obs.)
+    kz_tr_frac  = 1,      # the tropical box's vertical interface with layer 1
+                          #   carries kz_tr_frac x kz_int[1] (the ML base's K).
+                          #   1 = the ML idiom, the design as RULED (handoff
+                          #   09-14e §4.1); 0 = NO diffusive interface (the
+                          #   box touches the interior through the cell's loop
+                          #   only, the cell's own idiom). ⚠ R6, a ruling OWED
+                          #   (build note 09-14f): at 1 the box sits ~+60-100
+                          #   uatm over the atmosphere at PI even with w_eq =
+                          #   0 -- a solubility circulation ML -> layer 1 ->
+                          #   tr at the ML base's K -- against the observed
+                          #   band's +7.6 over the global mean; the probe
+                          #   measures 1 / 0.1 / 0. Structural, NOT fitted.
+    q_tr        = 0,      # Sv, the WHOLE-BAND lateral exchange volume tr <-> ml
+                          #   (both hemispheres, split by tr area), each way
+                          #   q x the SOURCE's per-volume concentration.
+                          #   RULING R4 (09-14d): STRUCTURAL 0 FIRST; an
+                          #   observation-based value is a LATER test paired
+                          #   with the seas_ml-on follow-up. NOT in the table.
     # ---- THE BIOLOGICAL PUMP (task 9, ported 2026-08-16 from the shim in
     # calibration/pump_shim.R) --------------------------------------------
     # THE PUMP SHIPS ON, AND `pump_grad` IS A FITTED PARAMETER (Marcus
@@ -1734,7 +1820,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # ... and the OTHER surface boxes' pCO2 (2026-09-13g): the cold box and the
     # equatorial cell, NA where the box does not exist. ccx_run() writes all
     # three into `out` (ml_pco2_ / hs_pco2_ / eq_pco2_) for the B1 row.
-    .phs <- .peq <- stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS)
+    .phs <- .peq <- .ptr <- stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS)
   }
   .rec <- function(from, to, F_C, lab) {
     cs <- ccx_flux_channel(from, to, lab, .cls, .atmN)
@@ -2433,12 +2519,40 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
         # and PUMP_EPS13_ORG is itself flagged "provisional, recollected, NEEDS
         # a cited source" in constants.R. Priced in
         # calibration/diag_pump_signed_alpha.R; Marcus's call.
-        add_flux(iml, ioc[kk], pf$org[kk] * sc,
-                 alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",
-                 alpha13_signed = TRUE)
-        add_flux(iml, ioc[kk], pf$carb[kk] * sc,
-                 alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump",
-                 alpha13_signed = TRUE)
+        if (aux$tr_on == 1L) {
+          # THE TROPICAL BOX CARRIES ITS AREA SHARE OF THE EXPORT (2026-09-14f,
+          # choice D2, prereg 09-14f §1 amendment). The field S[k] is sized on
+          # the INTERIOR column a_ls, which both surface boxes overlie; drawn
+          # from the mixed layer alone it drained a 40 %-of-area residual ML to
+          # ~195 uatm and made `tr` the pump's outgassing window (~400 uatm) at
+          # w_eq = 0 -- measured before any PT number was read. Nutrient-limited
+          # export is per unit area, so each box supplies its share of the
+          # surface it covers; the DIC-limited scale is each box's OWN. The
+          # cell (4 % of the area) stays pump-free as built (hilda_eq
+          # reproduces); with `tr` off the branch is not taken -- bit-exact.
+          itr <- aux$idx[[h]]$tr
+          f_ml <- aux$ml_pump_share[[h]]; f_tr <- 1 - f_ml
+          sc_t <- if (identical(p$pump_mode, "D")) y[itr, "C"] / aux$tr_C0[[h]] else 1
+          add_flux(iml, ioc[kk], pf$org[kk] * sc * f_ml,
+                   alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",
+                   alpha13_signed = TRUE)
+          add_flux(iml, ioc[kk], pf$carb[kk] * sc * f_ml,
+                   alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump",
+                   alpha13_signed = TRUE)
+          add_flux(itr, ioc[kk], pf$org[kk] * sc_t * f_tr,
+                   alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",
+                   alpha13_signed = TRUE)
+          add_flux(itr, ioc[kk], pf$carb[kk] * sc_t * f_tr,
+                   alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump",
+                   alpha13_signed = TRUE)
+        } else {
+          add_flux(iml, ioc[kk], pf$org[kk] * sc,
+                   alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",
+                   alpha13_signed = TRUE)
+          add_flux(iml, ioc[kk], pf$carb[kk] * sc,
+                   alpha13 = 1 + ccx_const("PUMP_EPS13_CARB") / 1000, lab = "pump",
+                   alpha13_signed = TRUE)
+        }
       }
     }
 
@@ -2721,9 +2835,21 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
            max(0, 1 - (if (is.null(p$gamma_eq)) 0 else p$gamma_eq) * forc$enso)
       if (W > 0) {
         add_flux(iup, ieq, W * y[iup, "C"] / (aux$a_ls[[h]] * gr$dz[keq + 1]))   # upwelling
-        add_flux(ieq, iml, W * y[ieq, "C"] / (aux$a_eq[[h]] * aux$h_eq),
-                 lab = "eq_ml")                                                  # surface divergence
-        add_flux(iml, iup, W * y[iml, "C"] / (aux$a_ml[[h]] * gr$dz[1]))         # subduction
+        if (aux$tr_on == 1L) {
+          # THE LOOP CLOSES THROUGH THE TROPICAL BOX (2026-09-14f, ruling R1):
+          # the cell diverges into `tr` and `tr` subducts to layer k_eq, so the
+          # water the cell exchanges with is WARM-equilibrated (the first
+          # array's lesson). Same volume W on every limb; same label on the
+          # cell's outflow (both boxes class "ml").
+          itr <- aux$idx[[h]]$tr
+          add_flux(ieq, itr, W * y[ieq, "C"] / (aux$a_eq[[h]] * aux$h_eq),
+                   lab = "eq_ml")                                                # surface divergence
+          add_flux(itr, iup, W * y[itr, "C"] / (aux$a_tr[[h]] * aux$h_tr))       # subduction
+        } else {
+          add_flux(ieq, iml, W * y[ieq, "C"] / (aux$a_eq[[h]] * aux$h_eq),
+                   lab = "eq_ml")                                                # surface divergence
+          add_flux(iml, iup, W * y[iml, "C"] / (aux$a_ml[[h]] * gr$dz[1]))       # subduction
+        }
       }
 
       # (b) AIR-SEA on the cell, the HS idiom: its OWN annual-mean SST plus its
@@ -2752,6 +2878,74 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       add_flux(ieq, iatm, gx_eq * pco2_eq, alpha13 = a_as_e$up,
                alpha13_signed = TRUE)                                  # evasion
       if (record) .peq[[h]] <- pco2_eq
+    }
+
+    # ---- THE TROPICAL SURFACE BOX (2026-09-14f) --------------------------
+    # notes/prereg_2026-09-14f_tr_box_build.md §2. A warm surface box per
+    # hemisphere beside the (now residual, ~26-57 deg) mixed layer. `tr_frac =
+    # 0` emits NOTHING and the box does not exist, so `hilda_eq` is
+    # bit-reproduced. See ccx_default_params() for what the box is and why.
+    if (aux$tr_on == 1L) {
+      itr <- aux$idx[[h]]$tr
+
+      # (a) AIR-SEA, the cell's idiom: its OWN annual-mean SST (re-based to
+      #     1850-1900) plus its hemisphere's anomaly plus its OWN Nino3.4
+      #     slope (⚠ R5: a ruling owed before the array -- the structure ships
+      #     the product's +0.20 K per index; 0 is the ML's idiom), its OWN
+      #     alkalinity, the model's k_w, with ITS hemisphere's atmosphere. No
+      #     seasonal cycle (R3), no entrainment shim, no pump. Frozen-Revelle
+      #     branch mirrored so the switch keeps its meaning.
+      sst_tr_t <- aux$sst_tr +
+        (if (isTRUE(p$sst_obs > 0) && !is.null(sa) && is.finite(sa)) sa
+         else p$sst_scale * forc$gmst) +
+        aux$sst_tr_enso * forc$enso
+      dic_tr <- y[itr, "C"] * aux$mol_per_GtC / aux$tr_mass_kg[[h]]          # mol/kg
+      kc_tr  <- carb_constants(sst_tr_t)
+      pco2_tr <- if (isTRUE(p$revelle_frozen > 0)) {
+        ccx_const("CO2_PI_PPM") *
+          (1 + aux$revelle0_tr * (dic_tr - aux$dic0_tr) / aux$dic0_tr)
+      } else {
+        pco2_from_dic(dic_tr, aux$alk_tr, sst_tr_t, k = kc_tr)
+      }
+      gx_tr  <- aux$asx_tr[[h]] * p$k_w * kc_tr$K0
+      a_as_t <- ccx_alpha_as(sst_tr_t, aux)
+      add_flux(iatm, itr, gx_tr * pco2_at, alpha13 = a_as_t$down,
+               alpha13_signed = TRUE)                                  # invasion
+      add_flux(itr, iatm, gx_tr * pco2_tr, alpha13 = a_as_t$up,
+               alpha13_signed = TRUE)                                  # evasion
+      if (record) .ptr[[h]] <- pco2_tr
+
+      # (b) THE DIFFUSIVE INTERFACE WITH LAYER 1, over the box's own area at
+      #     the ML base's own K (aux$kz_int[1]) -- the ML idiom. The two boxes
+      #     have DIFFERENT areas (a_tr vs a_ls), so as at the ML / layer-1
+      #     interface under D1 the flux through the contact area a_tr is
+      #         F = a_tr K (C_tr/(a_tr h_tr) - C_1/(a_ls dz_1)) / dz_mid_tr
+      #           = K (C_tr/h_tr - C_1/(dz_1 * a_ls/a_tr)) / dz_mid_tr,
+      #     layer 1 entering with the EFFECTIVE thickness dz_1 * a_ls/a_tr and
+      #     dz_mid_tr = (h_tr + dz_1)/2 the centre distance. dz_1 is layer 1's
+      #     thickness NOW (it moves under seas_ml). A uniform column is exactly
+      #     flux-free (P0g). ⛔ NOT folded into the column loop above: that
+      #     loop's ML entry is the residual mixed layer's own interface.
+      #     `kz_tr_frac` scales the interface's K (R6; 0 = no interface, and
+      #     the call is then not made at all).
+      if (aux$kz_tr > 0) {
+        .rt <- aux$a_ls[[h]] / aux$a_tr[[h]]
+        add_diffusion(itr, ioc[1], aux$h_tr, gr$dz[2] * .rt,
+                      (aux$h_tr + gr$dz[2]) / 2, aux$kz_tr)
+      }
+
+      # (c) LATERAL EXCHANGE with the residual mixed layer, `q_tr` (R4:
+      #     structural 0 first -- emits nothing at 0). Two limbs, each the
+      #     SOURCE's true per-volume concentration x the same volume, so a
+      #     uniform surface is a fixed point and volume is conserved; alpha 1
+      #     (bulk transport). Split by tr AREA like the cell's W. Its OWN
+      #     channel label (R/fluxes.R `tr_ml`): both boxes are class "ml" and
+      #     unlabelled it would land in conv_ml.
+      if (isTRUE(p$q_tr > 0)) {
+        Q <- p$q_tr * CCX_SV_TO_M3YR * aux$tr_q_share[[h]]
+        add_flux(itr, iml, Q * y[itr, "C"] / (aux$a_tr[[h]] * aux$h_tr), lab = "tr_ml")
+        add_flux(iml, itr, Q * y[iml, "C"] / (aux$a_ml[[h]] * gr$dz[1]),  lab = "tr_ml")
+      }
     }
 
     # ---- prescribed emissions ---------------------------------------
@@ -2867,7 +3061,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 
   if (record) attr(dy, "fluxes") <- list(channels = .fx, boxnet = .net, edges = .edges,
                                          pump_edges = .pump, pco2_ml = .pml, sst_ml = .sstl,
-                                         pco2_hs = .phs, pco2_eq = .peq)
+                                         pco2_hs = .phs, pco2_eq = .peq, pco2_tr = .ptr)
   dy
 }
 
@@ -3036,6 +3230,7 @@ ccx_kz_profile <- function(p, grid) {
 ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   hs_on <- ccx_hs_on(p)
   eq_on <- ccx_eq_on(p)
+  tr_on <- ccx_tr_on(p)
   # ⛔ D1 IS CLOSED ONLY FOR THE CELL'S OWN LIMBS (review 2026-09-14, before the
   # array). Under D1 the mixed layer covers a_ml = a_ls - a_eq while the interior
   # keeps a_ls; the cell's loop books every limb as a VOLUME x the source's
@@ -3048,14 +3243,17 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   # equilibrium WITHOUT ERROR. None of the three is fitted or non-zero at any
   # registered mode; refuse the combination by name rather than carry a latent
   # closure defect into a structure that has a cell.
-  if (eq_on && (isTRUE(p$w_up > 0) || isTRUE(p$w_out_NH > 0) || isTRUE(p$w_out_SH > 0) ||
-                isTRUE(p$q_conv > 0)))
-    stop("ccx_prepare(): the equatorial cell (eq_frac > 0) cannot be combined with ",
+  # ... and the SAME guard covers the tropical box (2026-09-14f): it too takes
+  # its area from the mixed layer (a_ml = a_ls - a_eq - a_tr).
+  if ((eq_on || tr_on) && (isTRUE(p$w_up > 0) || isTRUE(p$w_out_NH > 0) || isTRUE(p$w_out_SH > 0) ||
+                           isTRUE(p$q_conv > 0)))
+    stop("ccx_prepare(): the equatorial cell (eq_frac > 0) or the tropical box (tr_frac > 0) ",
+         "cannot be combined with ",
          "w_up / w_out_NH / w_out_SH / q_conv > 0: those limbs book their mixed-layer ",
          "leg over a_ml and their interior leg over a_ls, which do not close under ",
-         "D1 (a_ml = a_ls - a_eq). Rewrite them as volume x source concentration ",
+         "D1 (a_ml = a_ls - a_eq - a_tr). Rewrite them as volume x source concentration ",
          "(the cell's idiom, R/model.R eq block) before switching both on.")
-  bn  <- ccx_box_names(grid$nl, hs_on, eq_on)
+  bn  <- ccx_box_names(grid$nl, hs_on, eq_on, tr_on)
   idx <- lapply(HEMIS, function(h) {
     v <- list(
       atm  = which(bn == paste0(h, "_atm")),
@@ -3066,6 +3264,7 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
       v$hd <- which(bn == paste0(h, "_hd"))
     }
     if (eq_on) v$eq <- which(bn == paste0(h, "_eq"))
+    if (tr_on) v$tr <- which(bn == paste0(h, "_tr"))
     for (pool in CCX_LAND_POOLS) v[[pool]] <- which(bn == paste0(h, "_", pool))
     # every land index in state order, for the callers that want the land as a
     # whole (spinup diagnostics, forcing.R's budget split)
@@ -3101,7 +3300,15 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   # so every downstream quantity is bit-identical to the 09-13d model.
   a_eq <- if (eq_on) list(NH = a_oc$NH * p$eq_frac_NH, SH = a_oc$SH * p$eq_frac_SH)
           else list(NH = 0, SH = 0)
-  a_ml <- if (eq_on) list(NH = a_ls$NH - a_eq$NH, SH = a_ls$SH - a_eq$SH) else a_ls
+  # THE TROPICAL BOX'S AREA (2026-09-14f) comes out of the mixed layer on the
+  # same choice D1: a_ml = a_ls - a_eq - a_tr; the interior keeps a_ls; the
+  # box's only interior contacts are the loop's limbs and its own diffusive
+  # interface with layer 1 over a_tr. ⚠ With BOTH off, `a_ml` IS `a_ls` (the
+  # same object), so every registered mode is bit-identical.
+  a_tr <- if (tr_on) list(NH = a_oc$NH * p$tr_frac_NH, SH = a_oc$SH * p$tr_frac_SH)
+          else list(NH = 0, SH = 0)
+  a_ml <- if (eq_on || tr_on) list(NH = a_ls$NH - a_eq$NH - a_tr$NH,
+                                   SH = a_ls$SH - a_eq$SH - a_tr$SH) else a_ls
   if (eq_on) {
     # the cell's pinned geometry, range-checked by name -- never clamped
     if (!is.finite(p$h_eq) || p$h_eq <= 0)
@@ -3124,10 +3331,36 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
       stop("h_eq (", format(p$h_eq), " m) reaches below the base of layer k_eq = ", keq,
            " (", format(sum(grid$dz[seq_len(keq + 1L)])), " m): the cell would upwell from ",
            "water it already occupies.")
-    if (any(unlist(a_ml) <= 0))
-      stop("eq_frac leaves the mixed layer with no area: a_ml = ",
-           paste(format(unlist(a_ml)), collapse = " / "))
   }
+  if (tr_on) {
+    # the box's pinned geometry, range-checked by name -- never clamped
+    if (!is.finite(p$h_tr) || p$h_tr <= 0)
+      stop("h_tr must be a positive box thickness in m when the tropical box is on; got ",
+           format(p$h_tr))
+    if (!is.finite(p$sst_tr) || p$sst_tr < 2 || p$sst_tr > 35)
+      stop("sst_tr must lie inside the carbonate tables' 2-35 degC when the tropical box is on; got ",
+           format(p$sst_tr))
+    if (!is.finite(p$alk_tr) || p$alk_tr <= 0)
+      stop("alk_tr must be a positive surface alkalinity in umol/kg when the tropical box is on; got ",
+           format(p$alk_tr))
+    if (is.null(p$sst_tr_enso) || !is.finite(p$sst_tr_enso))
+      stop("sst_tr_enso must be a finite K-per-index slope when the tropical box is on; got ",
+           format(p$sst_tr_enso))
+    if (!is.null(p$q_tr) && (!is.finite(p$q_tr) || p$q_tr < 0))
+      stop("q_tr must be a finite non-negative lateral exchange in Sv; got ", format(p$q_tr))
+    if (!is.null(p$kz_tr_frac) && (!is.finite(p$kz_tr_frac) || p$kz_tr_frac < 0))
+      stop("kz_tr_frac must be a finite non-negative factor on the tr / layer-1 K; got ",
+           format(p$kz_tr_frac))
+    # the box sits BESIDE layer 1 and exchanges with it diffusively; deeper than
+    # the ML + layer 1 it would overlap the layer it is supposed to touch
+    if (p$h_tr >= grid$dz[1] + grid$dz[2])
+      stop("h_tr (", format(p$h_tr), " m) reaches below the base of layer 1 (",
+           format(grid$dz[1] + grid$dz[2]), " m): the tropical box would overlap the layer ",
+           "it exchanges with.")
+  }
+  if ((eq_on || tr_on) && any(unlist(a_ml) <= 0))
+    stop("eq_frac + tr_frac leave the mixed layer with no area: a_ml = ",
+         paste(format(unlist(a_ml)), collapse = " / "))
   npp0 <- list(NH = ccx_const("NPP_GLOBAL_PI") * p$npp_frac_NH,
                SH = ccx_const("NPP_GLOBAL_PI") * (1 - p$npp_frac_NH))
 
@@ -3299,6 +3532,33 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # §1): W_h = w_eq * Sv * eq_w_share[h]. The share is geometry, computed once.
     eq_w_share  = if (eq_on) lapply(a_eq, function(A) A / (a_eq$NH + a_eq$SH))
                   else list(NH = 0, SH = 0),
+    # ---- THE TROPICAL SURFACE BOX (2026-09-14f) --------------------------
+    # Present unconditionally, zero-filled when off, for the same reason as
+    # the cell's fields. `tr_q_share` splits `q_tr` by tr AREA (the cell's
+    # W idiom: both boxes see the same exchange velocity).
+    tr_on       = as.integer(tr_on),
+    a_tr        = a_tr,
+    h_tr        = if (tr_on) p$h_tr else 0,
+    tr_mass_kg  = lapply(a_tr, function(A) A * (if (tr_on) p$h_tr else 0) *
+                                              ccx_const("RHO_SEAWATER")),
+    asx_tr      = lapply(a_tr, function(A)
+                    A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC")),
+    sst_tr      = if (tr_on) p$sst_tr else 0,
+    sst_tr_enso = if (tr_on) p$sst_tr_enso else 0,
+    alk_tr      = if (tr_on) p$alk_tr * 1e-6 else 0,      # umol/kg -> mol/kg
+    tr_q_share  = if (tr_on) lapply(a_tr, function(A) A / (a_tr$NH + a_tr$SH))
+                  else list(NH = 0, SH = 0),
+    # the mixed layer's share of the LS pump export (choice D2): a_ml over the
+    # surface the pump's column has, a_ml + a_tr; 1 with the box off. ⛔ NOT
+    # named `pump_*`: with the pump OFF `aux$pump` is ABSENT and R's `$`
+    # partial-matched it to this field (found by test-tr-box's isolated-box test).
+    ml_pump_share = if (tr_on) stats::setNames(lapply(HEMIS, function(h)
+                      a_ml[[h]] / (a_ml[[h]] + a_tr[[h]])), HEMIS)
+                    else list(NH = 1, SH = 1),
+    # the tr / layer-1 interface's K (R6): kz_tr_frac x the ML base's own
+    # value; absent kz_tr_frac = 1 = the ML idiom; 0 off
+    kz_tr       = if (tr_on) (if (is.null(p$kz_tr_frac)) 1 else p$kz_tr_frac) *
+                             ccx_kz_profile(p, grid)[1] else 0,
     # Per-interface diffusivity (2026-09-06b). Present unconditionally so both
     # cores read the same vector; rep(kz, nl) at the default.
     kz_int      = ccx_kz_profile(p, grid),
@@ -3332,6 +3592,16 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   } else {
     aux$dic0_eq <- 0; aux$revelle0_eq <- 0
   }
+  # ... and the tropical box's (2026-09-14f), on the same solve.
+  if (tr_on) {
+    aux$dic0_tr     <- ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), aux$alk_tr, aux$sst_tr)
+    aux$revelle0_tr <- revelle_factor(aux$dic0_tr, aux$alk_tr, aux$sst_tr)
+  } else {
+    aux$dic0_tr <- 0; aux$revelle0_tr <- 0
+  }
+  # the box's preindustrial carbon, the DIC-limited pump's scale (D2); 0 off
+  aux$tr_C0 <- stats::setNames(lapply(HEMIS, function(h)
+    aux$dic0_tr * aux$tr_mass_kg[[h]] / aux$mol_per_GtC), HEMIS)
   # `hs_asx_frac` scales the EXCHANGE area only (2026-09-06); the HS mass and
   # the HS<->HD limb are untouched. Errors by name rather than clamping.
   fx <- if (is.null(p$hs_asx_frac)) 1 else p$hs_asx_frac
@@ -3500,6 +3770,44 @@ ccx_eq_cell_eigbound <- function(p) {
   2 * rate
 }
 
+#' The tropical surface box's contribution to the stability bound (2026-09-14f)
+#'
+#' Three explicit rates touch the box: its diffusive interface with layer 1
+#' (K/(h_tr dz_mid_tr) on the box, K/(dz_1_eff dz_mid_tr) on layer 1 with
+#' dz_1_eff = dz_1 * a_ls/a_tr -- the effective-thickness form the deriv uses),
+#' the cell's subduction limb draining it (W_h/(a_tr h_tr), La Nina-boosted like
+#' the cell's own bound), and the lateral exchange q_tr. Gershgorin 2 x rate,
+#' the form every bound here takes; conservative by construction. `grid` is
+#' the grid at ONE seasonal extreme (the caller passes each), because layer 1's
+#' thickness moves under seas_ml. Returns EXACTLY 0 with the box off, so no
+#' registered trajectory changes.
+ccx_tr_box_eigbound <- function(p, grid) {
+  if (!ccx_tr_on(p)) return(0)
+  a_oc <- c(ccx_const("OCEAN_AREA_NH"), ccx_const("OCEAN_AREA_SH"))
+  f_hs <- if (ccx_hs_on(p)) p$hs_frac else 0
+  a_ls <- a_oc * (1 - f_hs)
+  a_tr <- a_oc * c(p$tr_frac_NH, p$tr_frac_SH)
+  kz1  <- ccx_kz_profile(p, grid)[1] * (if (is.null(p$kz_tr_frac)) 1 else p$kz_tr_frac)
+  dzm  <- (p$h_tr + grid$dz[2]) / 2
+  rate <- max(kz1 / (p$h_tr * dzm), kz1 / (grid$dz[2] * max(a_ls / a_tr) * dzm))
+  w <- if (is.null(p$w_eq)) 0 else p$w_eq
+  if (ccx_eq_on(p) && isTRUE(w > 0)) {
+    g <- if (is.null(p$gamma_eq)) 0 else p$gamma_eq
+    a_eq <- a_oc * c(p$eq_frac_NH, p$eq_frac_SH)
+    # W_h / (a_tr_h h_tr) with W_h = w * a_eq_h / sum(a_eq)
+    rate <- rate + max(w * CCX_SV_TO_M3YR * a_eq / sum(a_eq) / a_tr) / p$h_tr *
+                   (1 + abs(g) * CCX_ENSO_ABS_MAX_FOR_STABILITY)
+  }
+  q <- if (is.null(p$q_tr)) 0 else p$q_tr
+  if (isTRUE(q > 0))
+    rate <- rate + q * CCX_SV_TO_M3YR / sum(a_tr) *
+                   max(1 / p$h_tr, max(a_tr) / min(a_ls - a_eq_of(p, a_oc) - a_tr) / grid$dz[1])
+  2 * rate
+}
+# the cell's areas, or zeros, for the bound above (a helper so the q_tr term
+# can size the residual mixed layer without repeating ccx_prepare())
+a_eq_of <- function(p, a_oc) if (ccx_eq_on(p)) a_oc * c(p$eq_frac_NH, p$eq_frac_SH) else c(0, 0)
+
 #' Substeps needed to keep the explicit interior transport stable over one step
 #' @param dt master step, years (1/12 for the monthly integrator)
 ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
@@ -3533,9 +3841,12 @@ ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
   }
   # The bound is taken at the LARGEST interface K, which is kz itself at the
   # ML base for every admissible kz_deep_frac -- conservative for the rest.
+  # + the TROPICAL BOX's rates (2026-09-14f) at each extreme -- its interface
+  # with layer 1 sees layer 1's thickness NOW; exactly 0 with the box off.
   lam <- max(vapply(.grids, function(g)
     ccx_diffusion_eigmax(max(ccx_kz_profile(p, g)), g) +
-      ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), g, p), numeric(1)))
+      ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), g, p) +
+      ccx_tr_box_eigbound(p, g), numeric(1)))
   # + the EQUATORIAL CELL's own drain rate (2026-09-13g), folded in for the
   # reason the conveyor's was: a stability check that ignored a first-order
   # advective term would be worse than none. Exactly 0 with the cell off, so

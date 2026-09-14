@@ -946,7 +946,8 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
   # 2026-09-06d: this line excluded them, so the R path's ocean_C / ocean_C14
   # disagreed with ccx_run_fast() by the HS+HD excess whenever hs_frac > 0.
   ocean <- unlist(lapply(HEMIS, function(h)
-    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd, aux$idx[[h]]$eq)))
+    c(aux$idx[[h]]$ml, aux$idx[[h]]$oc, aux$idx[[h]]$hs, aux$idx[[h]]$hd, aux$idx[[h]]$eq,
+      aux$idx[[h]]$tr)))          # + the tropical box (2026-09-14f; the C++ sums IML..NPH)
   land  <- unlist(lapply(HEMIS, function(h) aux$idx[[h]]$land))
 
   atm   <- c(atmN, atmS)
@@ -969,7 +970,8 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
   obox <- lapply(HEMIS, function(h)
     c(ml = aux$idx[[h]]$ml, deep = utils::tail(aux$idx[[h]]$oc, 1),
       hs = if (isTRUE(aux$hs_on == 1L)) aux$idx[[h]]$hs else NA_integer_,
-      eq = if (isTRUE(aux$eq_on == 1L)) aux$idx[[h]]$eq else NA_integer_))
+      eq = if (isTRUE(aux$eq_on == 1L)) aux$idx[[h]]$eq else NA_integer_,
+      tr = if (isTRUE(aux$tr_on == 1L)) aux$idx[[h]]$tr else NA_integer_))
   names(obox) <- HEMIS
   gpp <- ccx_const("GtC_PER_PPM") / 2
   # Flux trace (R/fluxes.R): OPT-IN, and evaluated at each month's OPENING state
@@ -1003,6 +1005,10 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
         out[[paste0("eq_C_",   h)]][i] <- y[obox[[h]]["eq"], "C"]
         out[[paste0("eq_C13_", h)]][i] <- y[obox[[h]]["eq"], "C13"]
       }
+      if (!is.na(obox[[h]]["tr"])) {              # the tropical box (2026-09-14f), likewise
+        out[[paste0("tr_C_",   h)]][i] <- y[obox[[h]]["tr"], "C"]
+        out[[paste0("tr_C13_", h)]][i] <- y[obox[[h]]["tr"], "C13"]
+      }
     }
     # THE SURFACE pCO2 COLUMNS (2026-09-13g) come from the DERIVATIVE'S OWN
     # record at this month's opening state -- the same (y, t, forcing) the
@@ -1017,6 +1023,7 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
       out[[paste0("ml_pco2_", h)]][i] <- .fl$pco2_ml[[h]]
       out[[paste0("hs_pco2_", h)]][i] <- .fl$pco2_hs[[h]]
       out[[paste0("eq_pco2_", h)]][i] <- .fl$pco2_eq[[h]]
+      out[[paste0("tr_pco2_", h)]][i] <- .fl$pco2_tr[[h]]
     }
     y <- ccx_step_rk4(y, F$t[i], 1 / 12, p, fi, grid, aux, substeps, k1 = k1)
   }

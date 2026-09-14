@@ -182,7 +182,7 @@ mkdir -p logs calibration/output
 # let the eq-cell wave run 33 names against a model with no cell -- the port gate
 # refuses that in ~3 s, but a gate is the backstop, not the plan (the driver's rule).
 if [ -z "${CCX_MS_STRUCT:-}" ]; then
-  echo "multistart.sbatch: CCX_MS_STRUCT is NOT SET (hilda | hilda_eq). State the objective's label on the command line." >&2
+  echo "multistart.sbatch: CCX_MS_STRUCT is NOT SET (hilda | hilda_eq | hilda_tr). State the objective's label on the command line." >&2
   exit 1
 fi
 export CCX_MS_STRUCT
@@ -269,6 +269,13 @@ export CCX_MS_SPREAD="${CCX_MS_SPREAD:-1.0452}"
 #   have surfaced only in the wave). 24 x ~3 min at --time=00:15:00.
 #     CCX_MS_STRUCT=hilda_eq CCX_MS_PIN=ent_seas_amp_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-23 --time=00:15:00 calibration/torch/multistart.sbatch
 #     CCX_MS_STRUCT=hilda_eq CCX_MS_PIN=ent_seas_amp_SH=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
+# 2026-09-14 (f): THE TROPICAL BOX'S ARRAY (the cell's second build; prereg
+#   notes/prereg_2026-09-14f_tr_box_build.md). Label `hilda_tr` = hilda_eq's block PLUS the
+#   box's geometry read from data/obs_tr_box.rds (in the bundle) and the three SST overrides
+#   (residual ML 17.18/15.35, cell re-based 26.33). NO new fitted name (33 stays 33; q_tr is
+#   structural 0, R4). ⚠ Rulings R5 (sst_tr_enso on/0) and R6 (kz_tr_frac) are OWED before
+#   this array is launched; port_targets.csv must be regenerated under `hilda_tr` first.
+#     CCX_MS_STRUCT=hilda_tr CCX_MS_SEAS_ML=1 CCX_MS_PIN=ent_seas_amp_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-23 --time=00:15:00 calibration/torch/multistart.sbatch
 export CCX_MS_PIN="${CCX_MS_PIN:-}"
 PIN_LABEL=""; if [ -n "$CCX_MS_PIN" ]; then PIN_LABEL="_pin_$(echo "$CCX_MS_PIN" | tr ',' '_')"; fi
 # THE OUTDIR CARRIES EVERY LABEL AXIS (struct, seas_ml, pins, spread) since 2026-09-13 (i);

@@ -35,7 +35,7 @@ run_at <- function(kz, h_ml = 75, substeps = "auto", retry_na = TRUE,
 # hs_* columns are NA BY CONTRACT with the HILDA boxes off (2026-09-07f); a
 # blow-up is read off the PHYSICS columns, as ccx_run_fast()'s own guard does.
 # ... and the eq_* columns likewise with the equatorial cell off (2026-09-13g).
-ccx_phys <- function(out) out[, grep("^(hs|eq)_", names(out), invert = TRUE, value = TRUE)]
+ccx_phys <- function(out) out[, grep("^(hs|eq|tr)_", names(out), invert = TRUE, value = TRUE)]   # NA by contract when off (+ tr, 2026-09-14f)
 
 test_that("the controller is a no-op at every ordinary parameter value", {
   # The whole point of flooring at CCX_SUBSTEPS_MIN: switching the default to

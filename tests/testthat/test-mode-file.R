@@ -166,7 +166,7 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
     expect_true(ccx_mode_carries_build(md),
                 info = paste("mode", a, "was fitted on a different parameter set"))
     expect_true(all(ccx_mode_absent(md) %in% CCX_PARAM_ABSENT_OK), info = paste("mode", a))
-    if (identical(md$struct, "hilda_eq"))
+    if (md$struct %in% c("hilda_eq", "hilda_tr"))
       expect_length(ccx_mode_absent(md), 0L)
     expect_identical(!is.null(md$pins) && length(md$pins) > 0, unname(CCX_MODE_PINNED[[a]]),
                      info = paste("mode", a, ": the file's `pins` and CCX_MODE_PINNED disagree"))
@@ -180,9 +180,10 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
     # THE STRUCTURE IS PROVENANCE TOO (2026-09-08f): a hilda mode consumed on
     # ccx_default_params() runs as a column with nothing said.
     expect_false(is.null(md$struct), info = paste("mode", a, "does not record its structure"))
-    expect_true(md$struct %in% c("", "hilda", "hilda_eq"))   # hilda_eq = HILDA + the equatorial cell (09-13g)
-    expect_equal(ccx_mode_base(md)$hs_frac, if (md$struct %in% c("hilda", "hilda_eq")) 0.16 else 0)
-    if (identical(md$struct, "hilda_eq")) expect_true(ccx_eq_on(ccx_mode_base(md)))
+    expect_true(md$struct %in% CCX_STRUCT_LABELS)   # "", hilda, hilda_eq (09-13g), hilda_tr (09-14f)
+    expect_equal(ccx_mode_base(md)$hs_frac, if (nzchar(md$struct)) 0.16 else 0)
+    if (md$struct %in% c("hilda_eq", "hilda_tr")) expect_true(ccx_eq_on(ccx_mode_base(md)))
+    if (identical(md$struct, "hilda_tr")) expect_true(ccx_tr_on(ccx_mode_base(md)))
   }
 })
 
