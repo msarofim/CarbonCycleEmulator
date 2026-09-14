@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-14 (b) — ⭐⭐⭐ **RULED (Marcus): `gamma_eq`'s prior stays FLAT on [0, 2] for this array. THE EQUATORIAL-CELL ARRAY IS LAUNCHED: Torch job 17769990, `--array=0-23%24`, 24/24 RUNNING at 06:58 EDT, launch tree `11e2b7a` (port_targets stamp `cf1e380`). Preflight 17769390 read first: 24/24 LAUNCHABLE, port VERIFIED rel ≤ 2.2e-10, node rate 0.43 / 0.52 / 0.94 s/eval (min/median/max) — inside the sbatch's 0.59–1.08 band, so the 300/360-min arithmetic stands unchanged.**
+- Command: `CCX_MS_STRUCT=hilda_eq CCX_MS_PIN=ent_seas_amp_SH=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch` from `/scratch/ms17839/CarbonCycleEmulator`; outdir `calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452`. Submitted by Claude over the live ControlMaster on Marcus's instruction ("keep the gamma_eq prior flat and launch").
+- What the wave answers (prereg §4, read on the promoted mode): PE2 (`gamma_enso_ocn_*` → 0 within 1 se), PE3 (GATE V ≥ 31 %), PE4 (CO₂-level rows < 2), PE5 (`kz`/`pump_grad`/deep Δ¹⁴C < 1σ), PE7 (γ_eq ∈ [0.4, 1.1] — the test the flat prior keeps honest), PE8 (`w_eq` in 21–33 Sv AND B1 |z| < 1.5 — the +144-vs-+55.5 tension); PE9 once, after.
+- Expected: ~4 of 24 CONVERGED inside 300 min was C′'s yield at the same budget; a round 2 (checkpoint resume of the best ids, NOT the whole array) is the documented follow-up.
+- Next session: collect → promote (`refit_20260914_hilda30e_eqcell_pin_ent0`) → Hessian → repoint (the free-parent question is a RULING) → PE reads.
+
 ## 2026-09-14 (a) — ⭐⭐ **PRE-LAUNCH REVIEW of the cell and the launch path (two independent read-only audits): NO run-class bug; one LATENT closure defect guarded by name (D1 vs `w_up`/`w_out_*`/`q_conv`), one absence-contract asymmetry fixed, one arithmetic slip corrected (57.7 not 63 m/yr); the launch kit hardened (no struct default, `CCX_MS_ID` unset, preflight = the production ids, the banner names the cell's geometry). THE 31-vs-33 INTERVAL IS CLOSED BY CONTRACT, not by waiting: `CCX_PARAM_ABSENT_OK` + `ccx_mode_carries_build()` + `ccx_mode_start()` — every registered file loads, scores and encodes again; suite GREEN but for the known pair + error. The `gamma_eq` prior question answered below (recommendation: keep FLAT for this array). Torch reconnected; NOT launched yet; nothing adopted.**
 
 ### The model review (`R/model.R`, `src/ccx_core.cpp`, `R/likelihood.R`, `R/spinup.R`; ~65 probes)
