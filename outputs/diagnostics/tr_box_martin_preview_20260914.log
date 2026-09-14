@@ -1,0 +1,15 @@
+vector start_011.rds; w_eq 27, gamma_eq 0.600; target B1 +55.47 +/- 6.77
+
+arm        struct    |  export K_deep |       B1        z  PI eq-g |  PI tr-g  PI ml-g  DIC oc2 |   ENSO/obs       r |      lik  d eq_b1
+glodap     hilda_eq  |    39.4    119 |   +133.2   +11.47   +120.9 |       NA     -1.2     2079 |      2.42x  +0.676 |     +0.0     +0.0
+glodap     hilda_tr  |    39.4    119 |   +101.6    +6.82    +91.1 |    +67.6    -36.7     2053 |      1.53x  +0.485 |    -75.6    +42.5
+martin_tail hilda_eq  |    17.0    119 |    +98.4    +6.33    +89.7 |       NA     +1.9     2037 |      1.33x  +0.500 |    -74.2    +45.7
+martin_tail hilda_tr  |    17.0    119 |    +67.5    +1.78    +60.8 |    +71.9    -34.4     2012 |      0.46x  +0.186 |   -210.3    +64.2
+martin_full hilda_eq  |     0.9    119 |    +73.9    +2.72    +68.0 |       NA     +3.9     2008 |      0.57x  +0.255 |   -280.3    +62.1
+martin_full hilda_tr  |     0.9    119 |    +43.6    -1.76    +39.7 |    +74.7    -32.9     1982 |     -0.28x  -0.123 |   -405.3    +64.2
+
+=== READING ===
+hilda_eq B1 across the export field: 39.4 GtC/yr -> +133.2 | 17.0 -> +98.4 | 0.9 -> +73.9  (slope +1.54 uatm per GtC/yr of export)
+hilda_tr B1: +101.6 | +67.5 | +43.6; tr - global +67.6 | +71.9 | +74.7 (obs +7.6)
+verdict: at the no-pump limit (martin_full) B1 is +73.9 on hilda_eq -- the root is NOT the export field alone: the diffusive exchange itself (kz) sets the cell's source
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/tr_box_martin_preview_20260914.{log,rds} 
