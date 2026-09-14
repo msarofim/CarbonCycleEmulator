@@ -3432,7 +3432,7 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     asx = lapply(a_ml, function(A)
       A * ccx_const("RHO_SEAWATER") / 1e6 / ccx_const("MOL_C_PER_GtC")),
     dz_mid = (grid$dz[-length(grid$dz)] + grid$dz[-1]) / 2,
-    alpha_photo = 1 - 18 / 1000,     # provisional, see constants.R note
+    alpha_photo = 1 - ccx_const("ALPHA_PHOTO_EPS") / 1000,   # registered 2026-09-14 g (ledger: provisional, C3-only value)
     # AIR-SEA 13C FRACTIONATION -- TEMPERATURE-DEPENDENT SINCE 2026-09-02.
     #
     # Two limbs, because a single "net" alpha cannot represent a two-way gross

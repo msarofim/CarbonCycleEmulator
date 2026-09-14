@@ -86,7 +86,7 @@ the 09-12 assessment, the gate ledger, the ocean and seasonal sub-indexes). Grou
 | # | what | why it matters to a student | fix / cost |
 |---|---|---|---|
 | 6 | "Biological pump (export)" reads **50.5 GtC/yr** in the flux trace / app | textbook 10 | = #1 |
-| 7 | GMST held FLAT past 2024 in every uncoupled future run (`forcing.R:722`); `d13c_foss` flat; LUC NH share frozen at 2018 | an SSP5-8.5 run at 2024 temperature "silently" — q10 and solubility feedbacks off | couple the app's scenarios to `climate.R` (it exists); a day |
+| 7 | GMST held FLAT past 2024 in a bare `ccx_build_forcing()` future (`forcing.R:722`); `d13c_foss` flat; LUC NH share frozen at 2018 | ⚠ CORRECTED after writing (09-14 g, checked `app/server.R:118-151`): the app's futures / stylised / pulse tabs ALL run through `app_run_coupled()` → `ccx_run_coupled()` (R/climate.R), which overwrites the column with the model's own temperature; the flat hold is a placeholder for direct callers only and warns once per build. NOT a live app liability; the `d13c_foss` / LUC-share holds remain (unscored past 2024) | nothing to build; the review's "a day" was wrong |
 | 8 | `gamma_enso_ocn` (a fitted additive term with no mechanism) in the canonical; the cell was meant to REPLACE it (PE2 partial: 0.34/0.05 → 0.20/0.13) | the ENSO panel's ocean response is a knob | retire with the cell once #1 lets the cell work |
 | 9 | `ent_seas_amp_SH` shim: PINNED at 0 in the canonical (C′) but the free parent carries 8.16 µmol/kg = 38 % of the SH DIC side; moves no carbon, no isotope | the SPO seasonal panel's anatomy | keep pinned; document that the control's shim is what makes it scorable; the ratio of the two right-signed SH limbs is ungated (option K) — needs a source |
 | 10 | `sst_seas_amp_SH` fitted 1.29 ± 0.19 vs observed 1.75 (2.4σ off, "confidently pulled down") | the SH seasonal SST is wrong by 26 % to make the ocean cycle fit | a mechanism (thermal:DIC ratio, option K) or pin to obs and price it |
@@ -118,6 +118,6 @@ the 09-12 assessment, the gate ledger, the ocean and seasonal sub-indexes). Grou
 1. **D + E on the pump / kz structure** (B1 #1) — the one change that touches B1, the deep gradient, the δ¹³C level, GATE H/GL and the pedagogy at once. Preview it with the one-afternoon T-D0 read in §A3 before committing.
 2. Then the **cell** (B1 #2) on the fixed column — re-run `diag_eq_cell_probe.R` and `diag_tr_box_probe.R` as they stand; decide T5 on those numbers.
 3. **The constants batch** (B1 #3, #5; B3 #19): `alpha_photo` registered, `sst_NH/SH`, `hs_frac`, a source per provisional constant — cheap, and they move the mean state, so they belong in the same refit as (1).
-4. **The app's future forcing** (B2 #7) — independent of everything else; a day.
+4. ~~The app's future forcing (B2 #7)~~ — withdrawn on checking: the app already runs its futures coupled (`ccx_run_coupled()`).
 5. The σ-audit rulings (B3 #20) and the documentation debt (B4 #24) — rulings and an hour of editing.
 Not worth doing: the kz lever on the cell (a shim), a fitted `kz_tr_frac` (fits a symptom), the T1 array (we know its answer).

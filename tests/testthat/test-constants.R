@@ -107,7 +107,13 @@ test_that("provisional constants are reported, not silently used", {
   # prior WIDTH (1/it is the no-dilution ceiling). ⚠ So both ENT_SEAS_AMP_SH_*
   # inherit this debt even though they are labelled "derived" -- the ledger is
   # the right place for that to stay visible.
-  expect_setequal(prov, c("OCEAN_AREA_NH", "OCEAN_AREA_SH", "OCEAN_DEPTH",
+  # ADDED 2026-09-14 g: ALPHA_PHOTO_EPS. The -18 permil terrestrial photosynthetic
+  # discrimination had been a literal in ccx_prepare()'s aux for the model's
+  # whole life, outside this ledger, citing a constants note that did not exist.
+  # Registered at its value with the source (Lloyd & Farquhar 1994: C3 17.8,
+  # total 14.8 at 25 % C4); PROVISIONAL because the value in use is the C3-only
+  # one and the biosphere-wide revision belongs to the next refit.
+  expect_setequal(prov, c("OCEAN_AREA_NH", "OCEAN_AREA_SH", "OCEAN_DEPTH", "ALPHA_PHOTO_EPS",
                           "ALK_SURFACE", "PUMP_EPS13_ORG", "PUMP_EPS13_CARB",
                           "RHO_SEAWATER", "NPP_GLOBAL_PI",
                           "SST_PCO2_SENSITIVITY", "NPP_FRAC_NH_ANCHOR_1750",

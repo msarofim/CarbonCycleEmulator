@@ -236,6 +236,31 @@ CCX_CONSTANTS <- list(
                    "likelihood target. The PRIOR CENTRE for the fitted",
                    "`pump_grad` (Marcus 2026-08-16d), NOT the value it takes.")),
 
+  # ---- TERRESTRIAL PHOTOSYNTHETIC 13C DISCRIMINATION (registered 2026-09-14 g) ----
+  # Carried since the model's first day as the literal `1 - 18/1000` in
+  # ccx_prepare()'s aux (`alpha_photo`), whose comment cited "the constants.R
+  # note" -- a note that never existed (review 09-14 g, root cause #3). The
+  # VALUE is the C3 GPP-weighted global mean; the WHOLE-biosphere value is
+  # lower because C4 plants (~25 % of GPP) discriminate ~3.6 permil:
+  #   Lloyd & Farquhar (1994) Oecologia 99:201-215, abstract: C3 GPP-weighted
+  #   17.8 permil (12.9 xerophytic woods/shrub to 19.6 cool deciduous forest);
+  #   C4 3.6; TOTAL 14.8 at 25 % C4. Later work brackets the total at 15-18
+  #   (Still et al. 2003 GBC 17:1006, C4 ~23 % of GPP; Suits et al. 2005 GBC
+  #   19:GB1017; Scholze et al. 2003 GRL 30:1097).
+  # STATUS PROVISIONAL DELIBERATELY: the number in use (18) is the C3-only
+  # value, ~3 permil ABOVE the biosphere-wide 14.8-16.5, and moving it re-scales
+  # the land sink's isotopic signature -- the quantity that separates land from
+  # ocean uptake in every d13C row -- so it belongs in the constants batch of the
+  # NEXT refit (review 09-14 g §B5 item 3), not in a point edit of the canonical.
+  ALPHA_PHOTO_EPS = list(
+    value = 18, units = "permil",
+    status = "provisional",
+    source = paste("Lloyd & Farquhar (1994) Oecologia 99:201-215: C3 GPP-weighted",
+                   "13C discrimination 17.8 permil; C4 3.6; total 14.8 at 25 % C4.",
+                   "Still et al. (2003) GBC 17:1006 / Suits et al. (2005) GBC 19:GB1017:",
+                   "15-18 permil. IN USE: 18 (the C3-only value); the biosphere-wide",
+                   "14.8-16.5 is the refit-batch revision (review 2026-09-14 g).")),
+
   PUMP_EPS13_ORG = list(
     value = -20, units = "permil",
     status = "provisional",
