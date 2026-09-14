@@ -30,7 +30,10 @@ Rscript --vanilla -e 'for (f in list.files("R", pattern = "R$", full.names = TRU
 # /tmp can then be shipped (2026-09-13: the round-7 adoption moved a directory and this list
 # was not updated; caught because the incumbent's file was absent on Torch). The check below
 # asserts them from the registry rather than trusting this list.
-tar czf "$OUT" \
+# COPYFILE_DISABLE: macOS tar otherwise stores com.apple.provenance xattrs, and GNU tar on
+# Torch prints "Ignoring unknown extended header keyword" ONCE PER FILE on extract -- 480
+# lines that buried the extract's real output on 2026-09-14 (i).
+COPYFILE_DISABLE=1 tar czf "$OUT" \
   DESIGN.md CLAUDE.md README.md DATA.md \
   R src data tests \
   data-raw/downloads/nuclear14c \
@@ -39,7 +42,18 @@ tar czf "$OUT" \
   calibration/output/refit_20260912_hilda31_seasml1_round7 \
   calibration/output/refit_20260913_hilda30_cprime_pin_ent0 \
   calibration/output/quarantine/20260910_periodic_spinup_adopted \
-  calibration/output/quarantine/20260913_round7_adopted
+  calibration/output/quarantine/20260913_round7_adopted \
+  calibration/output/quarantine/20260908_hilda31_adopted/refit_20260903_ent26
+# ⛔ THE MEMBERSHIP GATE (2026-09-14 i): the registry check above proves the files exist ON
+# THE MAC, not that they are IN the tarball -- and the column control (ent26, quarantined
+# 09-08) was absent from this list for six days while that check passed. A gate that reads
+# the list it is meant to guard is not a gate; this one reads the tarball.
+tar tzf "$OUT" > /tmp/ccx_bundle_list.txt
+Rscript --vanilla -e 'for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+  fs <- c(unname(CCX_MODE_FILES), CCX_MODE_COLUMN_CONTROL, CCX_MODE_HILDA31_QUARANTINED, CCX_MODE_HILDA31S_QUARANTINED)
+  inb <- readLines("/tmp/ccx_bundle_list.txt"); miss <- fs[!fs %in% inb]
+  if (length(miss)) stop("registry files NOT IN THE TARBALL: ", paste(miss, collapse = ", "))
+  cat("registry files in the tarball:", length(fs), "of", length(fs), "\n")'
 echo "bundle: $OUT  ($(du -h "$OUT" | cut -f1))"
 echo
 echo "  scp $OUT torch:/scratch/ms17839/"
