@@ -936,7 +936,12 @@ ccx_forcing_at <- function(F, i) {
 #'   that keeps the explicit diffusion term stable (see ccx_substeps_for()).
 #'   "auto" resolves to CCX_SUBSTEPS_MIN = 4 at every ordinary parameter value.
 #' @return list(state = final state, out = data.frame of monthly diagnostics)
-ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
+ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL) {
+  # `edge_fn(fl, y, t)` (2026-09-15b): an OPT-IN per-month hook on the
+  # derivative's recorded attribute at the month's OPENING state -- the same
+  # (y, t, forcing) the first RK4 stage evaluates. The caller keeps what it
+  # wants (a pathway sum, a state slice); the core stores nothing new by
+  # default. Diagnostic only; `out` and `state` are untouched by it.
   y <- spin$y; aux <- spin$aux; grid <- spin$grid; p <- spin$params
   substeps <- ccx_resolve_substeps(substeps, p, grid)
   n <- nrow(F)
@@ -979,6 +984,7 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
   # would differ only by within-month curvature, and paying for it on every
   # likelihood evaluation would be the wrong trade entirely.
   ystore <- if (fluxes) vector("list", n) else NULL
+  etrace <- if (!is.null(edge_fn)) vector("list", n) else NULL
   for (i in seq_len(n)) {
     if (fluxes) ystore[[i]] <- y
     out$co2_NH[i]  <- y[atmN, "C"] / gpp
@@ -1019,6 +1025,7 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
     fi <- ccx_forcing_at(F, i)
     k1 <- ccx_deriv(y, F$t[i], p, fi, grid, aux, record = TRUE)
     .fl <- attr(k1, "fluxes"); attr(k1, "fluxes") <- NULL
+    if (!is.null(edge_fn)) etrace[[i]] <- edge_fn(.fl, y, F$t[i])
     for (h in HEMIS) {
       out[[paste0("ml_pco2_", h)]][i] <- .fl$pco2_ml[[h]]
       out[[paste0("hs_pco2_", h)]][i] <- .fl$pco2_hs[[h]]
@@ -1029,6 +1036,7 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE) {
   }
   res <- list(state = y, out = out)
   if (fluxes) res$fluxes <- ccx_flux_trace(ystore, F, p, grid, aux)
+  if (!is.null(edge_fn)) res$edge_trace <- etrace
   res
 }
 

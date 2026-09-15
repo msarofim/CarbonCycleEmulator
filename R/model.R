@@ -1842,6 +1842,18 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # the flush that shares the HS->HD endpoint pair (ccx_flux_hs_derive()).
     .edges <- matrix(0, nb + 1L, nb + 1L)
     .pump  <- matrix(0, nb + 1L, nb + 1L)
+    # THE 14C EDGES (2026-09-15b, prereg_2026-09-15b_kz_pump_diagnosis.md
+    # sec.1): the same layout, holding the 14C-signal the tendency actually
+    # applies on each edge -- add_flux's `f14` (source ratio, unfractionated)
+    # and add_diffusion's own `tr == "C14"` pass. `.pump14` and `.diff14`
+    # keep the labelled pump edges and the diffusive edges apart from the
+    # rest, because the (ml, oc1) pair carries diffusion, entrainment AND
+    # pump and nothing downstream could split them otherwise. Recording
+    # only: no tendency reads these, and `record` is FALSE on every
+    # calibration path.
+    .edges14 <- matrix(0, nb + 1L, nb + 1L)
+    .pump14  <- matrix(0, nb + 1L, nb + 1L)
+    .diff14  <- matrix(0, nb + 1L, nb + 1L)
     # MIXED-LAYER pCO2 AND SST, per hemisphere (2026-09-09r). Recorded rather
     # than recomputed by any caller: `pco2_ml` is the model's own air-sea
     # driving quantity and reconstructing it outside the deriv would be a SECOND
@@ -1869,6 +1881,14 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     .net[to] <<- .net[to] + F_C
     .edges[from + 1L, to + 1L] <<- .edges[from + 1L, to + 1L] + F_C
     if (identical(lab, "pump")) .pump[from + 1L, to + 1L] <<- .pump[from + 1L, to + 1L] + F_C
+    invisible(NULL)
+  }
+  # the 14C tap: `kind` is "pump" (a labelled pump edge), "diff" (add_diffusion)
+  # or NULL (everything else); the channel sums are NOT touched here.
+  .rec14 <- function(from, to, F_14, kind = NULL) {
+    .edges14[from + 1L, to + 1L] <<- .edges14[from + 1L, to + 1L] + F_14
+    if (identical(kind, "pump")) .pump14[from + 1L, to + 1L] <<- .pump14[from + 1L, to + 1L] + F_14
+    if (identical(kind, "diff")) .diff14[from + 1L, to + 1L] <<- .diff14[from + 1L, to + 1L] + F_14
     invisible(NULL)
   }
 
@@ -1949,6 +1969,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # not a missing temperature dependence, and it would only become a question
     # if the model moved to ABSOLUTE 14C/C ratios -- a much larger change.
     f14 <- F_C * r14
+    if (record) .rec14(from, to, f14, if (identical(lab, "pump")) "pump" else NULL)
     dy[from, "C"]   <<- dy[from, "C"]   - F_C
     dy[to,   "C"]   <<- dy[to,   "C"]   + F_C
     dy[from, "C13"] <<- dy[from, "C13"] - f13
@@ -1967,6 +1988,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     for (tr in CCX_TRACERS) {
       F_t <- kz * (y[a, tr] / dz_a - y[b, tr] / dz_b) / dz_mid
       if (record && tr == "C" && F_t != 0) .rec(a, b, F_t, NULL)
+      if (record && tr == "C14" && F_t != 0) .rec14(a, b, F_t, "diff")
       dy[a, tr] <<- dy[a, tr] - F_t
       dy[b, tr] <<- dy[b, tr] + F_t
     }
@@ -3122,7 +3144,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
 
   if (record) attr(dy, "fluxes") <- list(channels = .fx, boxnet = .net, edges = .edges,
                                          pump_edges = .pump, pco2_ml = .pml, sst_ml = .sstl,
-                                         pco2_hs = .phs, pco2_eq = .peq, pco2_tr = .ptr)
+                                         pco2_hs = .phs, pco2_eq = .peq, pco2_tr = .ptr,
+                                         edges14 = .edges14, pump_edges14 = .pump14,
+                                         diff_edges14 = .diff14)
   dy
 }
 

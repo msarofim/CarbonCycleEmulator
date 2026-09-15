@@ -40,6 +40,53 @@ test_that("recording does not change the derivative", {
   expect_identical(a, b)
 })
 
+test_that("the 14C edge tap reproduces dy[, 'C14'] on every non-atmosphere box", {
+  # 2026-09-15b (prereg_2026-09-15b_kz_pump_diagnosis.md sec.1): the same
+  # load-bearing pattern as the first test, for the 14C-signal edges. A
+  # non-atmosphere box has no 14C source, so its recorded net inflow must
+  # equal its tendency PLUS its own decay, exactly up to the one floating
+  # subtraction of the decay term. Proves the tap is complete (no 14C
+  # tendency outside add_flux/add_diffusion) and faithful (nothing counted
+  # twice). Run on the HILDA structure so the HS/HD, flush, conduit and the
+  # seasonal mixed layer are all under the tap, at a bomb-era month so the
+  # 14C gradients are not preindustrial.
+  p <- ccx_apply_structure(test_p(), struct = "hilda", seas_ml = "1")
+  s <- ccx_spinup(p)
+  F <- suppressWarnings(ccx_build_forcing("historical", c(1750, 1970),
+                                          prod_c14 = s$prod_c14))
+  lam <- ccx_const("LAMBDA_C14")
+  for (i in c(7L, 2500L, 2600L)) {
+    y  <- s$y; if (i > 1L) y[, "C14"] <- y[, "C14"] * (1 + 0.2 * seq_len(nrow(y)) / nrow(y))
+    dy <- ccx_deriv(y, F$t[i], p, ccx_forcing_at(F, i), s$grid, s$aux, record = TRUE)
+    e  <- attr(dy, "fluxes")$edges14
+    net <- colSums(e)[-1] - rowSums(e)[-1]
+    atm <- c(s$aux$idx$NH$atm, s$aux$idx$SH$atm)
+    nb  <- setdiff(seq_len(nrow(y)), atm)
+    expect_equal(net[nb], unname(dy[nb, "C14"] + lam * y[nb, "C14"]), tolerance = 1e-12)
+    # the split matrices: an interior-interior pair carries ONLY diffusion
+    # under "hilda" (the conduit attaches HD, not oc_k, to oc_k), so the whole
+    # equals the diffusive part there exactly; and the pump edges are present.
+    d <- attr(dy, "fluxes")$diff_edges14; pu <- attr(dy, "fluxes")$pump_edges14
+    o2 <- s$aux$idx$NH$oc[2] + 1L; o3 <- s$aux$idx$NH$oc[3] + 1L
+    expect_identical(e[o2, o3], d[o2, o3]); expect_identical(e[o3, o2], d[o3, o2])
+    expect_true(e[o2, o3] != 0); expect_true(sum(pu != 0) > 0)
+  }
+})
+
+test_that("recording the 14C edges does not change the derivative or the trajectory", {
+  p <- ccx_apply_structure(test_p(), struct = "hilda", seas_ml = "1"); s <- ccx_spinup(p)
+  F <- suppressWarnings(ccx_build_forcing("historical", c(1750, 1760),
+                                          prod_c14 = s$prod_c14))
+  a <- ccx_deriv(s$y, F$t[7], p, ccx_forcing_at(F, 7), s$grid, s$aux)
+  b <- ccx_deriv(s$y, F$t[7], p, ccx_forcing_at(F, 7), s$grid, s$aux, record = TRUE)
+  attributes(b) <- attributes(a)
+  expect_identical(a, b)
+  keep <- function(fl, y, t) sum(fl$edges14)
+  r0 <- ccx_run(s, F); r1 <- ccx_run(s, F, edge_fn = keep)
+  expect_identical(r0$out, r1$out); expect_identical(r0$state, r1$state)
+  expect_length(r1$edge_trace, nrow(r0$out))
+})
+
 test_that("fluxes = TRUE does not change the trajectory", {
   p <- test_p(); s <- ccx_spinup(p)
   F <- suppressWarnings(ccx_build_forcing("historical", c(1750, 1760),
