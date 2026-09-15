@@ -2032,10 +2032,14 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       .ev      <- ccx_mld_eval(aux$mld_coef[[h]], t)
       h_ml_t   <- grid$h_ml * .ev$f            # m, mean-preserving by construction
       dh_ml_dt <- grid$h_ml * .ev$dfdt         # m/yr, > 0 deepening
-      # Under the equatorial cell (D1) layer 1 absorbs the ML's excursion as a
-      # VOLUME over its larger area: share = a_ml / a_ls (see the helper).
+      # Under the equatorial cell OR the tropical box (D1: a_ml = a_ls - a_eq
+      # - a_tr) layer 1 absorbs the ML's excursion as a VOLUME over its larger
+      # area: share = a_ml / a_ls (see the helper). Gated on `d1_on`, the SAME
+      # flag that shrinks a_ml -- the 09-15 (d) audit found this site (and the
+      # two below) gated on eq_on alone, so tr WITHOUT the cell created
+      # a_tr dh/dt of water each half-year.
       gr       <- ccx_grid_at_h_ml(grid, h_ml_t,
-                                   share = if (aux$eq_on == 1L) aux$a_ml[[h]] / aux$a_ls[[h]] else 1)
+                                   share = if (aux$d1_on == 1L) aux$a_ml[[h]] / aux$a_ls[[h]] else 1)
       # dz_ML + dz_1 is conserved, so dz_mid[1] is INVARIANT; only dz_mid[2]
       # moves. Recomputed in full rather than patched, so it cannot drift.
       # (Under the cell dz_1 moves by share x the excursion and dz_mid[1] by
@@ -2489,10 +2493,10 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # interior interfaces are untouched (both boxes on a_ls). With the cell
     # off the ratio is not formed at all -- bit-exact.
     col <- c(iml, ioc)
-    .r1 <- if (aux$eq_on == 1L) aux$a_ls[[h]] / aux$a_ml[[h]] else 1
+    .r1 <- if (aux$d1_on == 1L) aux$a_ls[[h]] / aux$a_ml[[h]] else 1
     for (kk in seq_len(grid$nl)) {
       add_diffusion(col[kk], col[kk + 1], gr$dz[kk],
-                    if (kk == 1L && aux$eq_on == 1L) gr$dz[2] * .r1 else gr$dz[kk + 1],
+                    if (kk == 1L && aux$d1_on == 1L) gr$dz[2] * .r1 else gr$dz[kk + 1],
                     dzm[kk], aux$kz_int[kk])
     }
 
@@ -2525,7 +2529,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # entrained and the volume lost are the same water.
     if (dh_ml_dt > 0) {
       add_flux(ioc[1], iml, y[ioc[1], "C"] * dh_ml_dt /
-                 (if (aux$eq_on == 1L) gr$dz[2] * .r1 else gr$dz[2]))   # entrainment
+                 (if (aux$d1_on == 1L) gr$dz[2] * .r1 else gr$dz[2]))   # entrainment
     } else if (dh_ml_dt < 0) {
       add_flux(iml, ioc[1], y[iml, "C"] * (-dh_ml_dt) / gr$dz[1])   # detrainment
     }
@@ -3702,6 +3706,14 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # the cell's fields. `tr_q_share` splits `q_tr` by tr AREA (the cell's
     # W idiom: both boxes see the same exchange velocity).
     tr_on       = as.integer(tr_on),
+    # D1 IS LIVE (audit 2026-09-15 d): the ONE flag every a_ls/a_ml correction
+    # reads -- the ML/layer-1 diffusion thickness, the seasonal excursion share,
+    # entrainment. It is TRUE exactly when a_ml above was shrunk (eq_on ||
+    # tr_on); the C++ core derives the same flag from the two marshalled
+    # switches (unpack_aux). Gating those sites on eq_on alone left `tr`
+    # without the cell -- a configuration ccx_tr_on() licenses -- with a
+    # non-flux-free uniform column (125 GtC/yr, test-tr-box P0g-tr).
+    d1_on       = as.integer(eq_on || tr_on),
     a_tr        = a_tr,
     h_tr        = if (tr_on) p$h_tr else 0,
     tr_mass_kg  = lapply(a_tr, function(A) A * (if (tr_on) p$h_tr else 0) *

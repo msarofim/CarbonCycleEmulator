@@ -174,6 +174,10 @@ struct Aux {
   // switches, sets the stride. `a_ml` above is now a_ls - a_eq - a_tr.
   int    tr_on;
   double a_tr[2], tr_mass_kg[2], asx_tr[2], tr_q_share[2];
+  // D1 IS LIVE (audit 2026-09-15 d): eq_on || tr_on -- the one flag every
+  // a_ls/a_ml correction reads (twin of R's aux$d1_on, derived here from the
+  // two marshalled switches rather than sent, so the two cannot disagree).
+  int    d1_on;
   // THE VENTILATION LOOP (option E, 2026-09-14 h): e_on gates it; k_e1..k_e2
   // 1-BASED as in R; e_w the thickness weights (annual-mean grid, 0 outside
   // the band); e_share the a_ls split of w_vent. Zero-filled when off.
@@ -493,7 +497,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       // layer 1 absorbs the excursion -- as a VOLUME under the equatorial
       // cell (D1, 2026-09-13g): share = a_ml / a_ls; twin of R's
       // ccx_grid_at_h_ml(share), which carries why this is a correctness term
-      if (A.eq_on) dzl[1] = dzl[1] + (dzl[0] - h_ml_t) * (A.a_ml[hi] / A.a_ls[hi]);
+      if (A.d1_on) dzl[1] = dzl[1] + (dzl[0] - h_ml_t) * (A.a_ml[hi] / A.a_ls[hi]);
       else         dzl[1] = dzl[1] + (dzl[0] - h_ml_t);
       dzl[0]   = h_ml_t;
       // dz[0] + dz[1] is conserved, so dz_mid[0] is INVARIANT; only dz_mid[1]
@@ -682,8 +686,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // THE ML / LAYER-1 INTERFACE UNDER THE EQUATORIAL CELL (2026-09-13g, D1):
     // layer 1 enters with the EFFECTIVE thickness dz_1 * a_ls/a_ml -- twin of
     // the R block, which carries the derivation. Not formed with the cell off.
-    const double r1 = A.eq_on ? A.a_ls[hi] / A.a_ml[hi] : 1.0;
-    const double dz1_eff = A.eq_on ? dzl[1] * r1 : dzl[1];
+    const double r1 = A.d1_on ? A.a_ls[hi] / A.a_ml[hi] : 1.0;
+    const double dz1_eff = A.d1_on ? dzl[1] * r1 : dzl[1];
     for (int kk = 0; kk < NL; ++kk) {
       const int a = base + IML + kk;
       const int b = base + IML + kk + 1;
@@ -1068,6 +1072,7 @@ static Aux unpack_aux(const List& a) {
     ITR = A.tr_on ? after_eq : -1;
     NPH = after_eq + (A.tr_on ? 1 : 0);
   }
+  A.d1_on = (A.eq_on || A.tr_on) ? 1 : 0;
   NB  = 2 * NPH;
   A.gtc_per_ppm_hemi = a["gtc_per_ppm_hemi"];
   A.chi0 = a["chi0"]; A.mol_per_GtC = a["mol_per_GtC"];

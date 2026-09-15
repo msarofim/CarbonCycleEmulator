@@ -352,6 +352,73 @@ test_that("P0g FIXED POINT: a uniform column with eq and tr at the same concentr
   for (h in HEMIS) expect_lt(d2[aux$idx[[h]]$tr, "C"], 0)
 })
 
+test_that("P0g-tr FIXED POINT with the CELL OFF (audit 2026-09-15 d): tr-only shrinks a_ml, so the ML/layer-1 interface, the seasonal excursion and entrainment must read a_ml too", {
+  # The 09-15 (d) flux audit: a_ml = a_ls - a_eq - a_tr is formed under
+  # eq_on || tr_on, but three sites gated the a_ls/a_ml correction on eq_on
+  # ALONE (the ML/layer-1 diffusion thickness, the seasonal-ML volume share,
+  # entrainment). With tr on and the cell off a uniform column was NOT
+  # flux-free (a permanent oc1 -> ml diffusive flux ~ K conc (a_ls - a_ml) /
+  # dz_mid) and the seasonal ML created a_tr dh/dt of water each half-year.
+  # Carbon stayed conserved (antisymmetric), so no conservation gate saw it.
+  pt <- tr_par(seas_ml = 1, w_eq = 0, gamma_eq = 0)
+  pt$eq_frac_NH <- 0; pt$eq_frac_SH <- 0; pt$q_tr <- 3
+  expect_false(ccx_eq_on(pt)); expect_true(ccx_tr_on(pt))
+  q <- pt; q$k_w <- 0; q$pump_grad <- 0; q$pump_hs_gcm2 <- 0
+  q$u_hs <- 0; q$tau_q <- 0; q$w_up <- 0; q$w_out_NH <- 0; q$w_out_SH <- 0
+  q <- ccx_set_enso(q, list(gamma_enso = 0)); q$gamma_diff <- 0
+  aq <- ccx_prepare(q); grid <- aq$grid
+  expect_lt(aq$a_ml$NH, aq$a_ls$NH)   # the partition IS reduced with the cell off
+  uni <- function(aux, conc = 2.1e-3) {
+    y <- ccx_new_state(grid$nl, TRUE, FALSE, TRUE)
+    for (h in HEMIS) {
+      i <- aux$idx[[h]]
+      y[i$atm, "C"] <- 600
+      y[i$ml, "C"] <- conc * aux$ml_mass_kg[[h]] / aux$mol_per_GtC
+      y[i$oc, "C"] <- conc * aux$a_ls[[h]] * grid$dz[-1] * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
+      y[i$tr, "C"] <- conc * aux$tr_mass_kg[[h]] / aux$mol_per_GtC
+      y[i$hs, "C"] <- conc * aux$hs_mass_kg[[h]] / aux$mol_per_GtC
+      y[i$hd, "C"] <- conc * aux$a_hs[[h]] * aux$dz_hd * ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
+      for (pool in CCX_LAND_POOLS) y[i[[pool]], "C"] <- 100
+    }
+    y[, "C13"] <- y[, "C"] * ccx_const("R13_VPDB"); y[, "C14"] <- y[, "C"]
+    y
+  }
+  ocean <- unlist(lapply(HEMIS, function(h) c(aq$idx[[h]]$ml, aq$idx[[h]]$oc, aq$idx[[h]]$tr)))
+  # (i) at the annual-mean ML (seasonal drivers off) the interface is flux-free
+  q0 <- q; q0$seas_drivers <- 0; a0 <- ccx_prepare(q0)
+  y  <- uni(a0)
+  d  <- ccx_deriv(y, 1750.25, q0, zero_forc_tr(0), a0$grid, a0)
+  expect_lt(max(abs(d[ocean, "C"])), 1e-12)
+  # (ii) with the seasonal ML on, at a mid-excursion instant, a uniform
+  #      column STAYS uniform: the only non-zero ocean tendency is the
+  #      entrainment pair, and it is exactly conc x (the volume that moved)
+  #      = conc x a_ml x dh/dt -- booked over a_ml, not a_ls. (Before the fix
+  #      it was conc x a_ls x dh/dt plus a spurious diffusive term: 595 GtC/yr
+  #      off at this instant.) The diffusion and the tr interface are silent.
+  a1 <- ccx_prepare(q); y1 <- uni(a1)
+  want <- numeric(nrow(y1))
+  for (h in HEMIS) {   # re-scale the ML and layer 1 to the mass AT THE TIME
+    i <- a1$idx[[h]]
+    ev <- ccx_mld_eval(a1$mld_coef[[h]], 1750.25)
+    expect_gt(abs(ev$f - 1), 0.05)   # a real excursion, not the mean
+    expect_gt(abs(ev$dfdt), 0.05)    # and a real rate
+    h_t <- grid$h_ml * ev$f
+    y1[i$ml, ] <- y1[i$ml, ] * ev$f
+    y1[i$oc[1], ] <- y1[i$oc[1], ] * (grid$dz[2] + (grid$dz[1] - h_t) * a1$a_ml[[h]] / a1$a_ls[[h]]) / grid$dz[2]
+    ent <- 2.1e-3 * a1$a_ml[[h]] * grid$h_ml * ev$dfdt * ccx_const("RHO_SEAWATER") / a1$mol_per_GtC
+    want[i$ml] <- ent; want[i$oc[1]] <- -ent
+  }
+  d1 <- ccx_deriv(y1, 1750.25, q, zero_forc_tr(0), a1$grid, a1)
+  expect_lt(max(abs(d1[ocean, "C"] - want[ocean])), 1e-9)
+  expect_gt(max(abs(want[ocean])), 1)   # POWER: the pair is not trivially small
+  skip_if_no_cpp()
+  dC0 <- ccx_deriv_fast(y, 1750.25, q0, zero_forc_tr(0), a0$grid, a0)
+  expect_lt(max(abs(dC0[ocean, "C"])), 1e-12)
+  dC1 <- ccx_deriv_fast(y1, 1750.25, q, zero_forc_tr(0), a1$grid, a1)
+  expect_lt(max(abs(dC1[ocean, "C"] - want[ocean])), 1e-9)
+  expect_lt(max(abs(dC1 - d1)), 1e-10)
+})
+
 test_that("EVERY limb is mutation-tested: break it and the model must move", {
   skip_if_no_cpp()
   base <- tr_par(seas_ml = 0)
