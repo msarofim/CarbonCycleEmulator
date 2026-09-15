@@ -57,7 +57,7 @@ test_that("the 14C edge tap reproduces dy[, 'C14'] on every non-atmosphere box",
   lam <- ccx_const("LAMBDA_C14")
   for (i in c(7L, 2500L, 2600L)) {
     y  <- s$y; if (i > 1L) y[, "C14"] <- y[, "C14"] * (1 + 0.2 * seq_len(nrow(y)) / nrow(y))
-    dy <- ccx_deriv(y, F$t[i], p, ccx_forcing_at(F, i), s$grid, s$aux, record = TRUE)
+    dy <- suppressWarnings(ccx_deriv(y, F$t[i], p, ccx_forcing_at(F, i), s$grid, s$aux, record = TRUE))
     e  <- attr(dy, "fluxes")$edges14
     net <- colSums(e)[-1] - rowSums(e)[-1]
     atm <- c(s$aux$idx$NH$atm, s$aux$idx$SH$atm)
@@ -82,7 +82,9 @@ test_that("recording the 14C edges does not change the derivative or the traject
   attributes(b) <- attributes(a)
   expect_identical(a, b)
   keep <- function(fl, y, t) sum(fl$edges14)
-  r0 <- ccx_run(s, F); r1 <- ccx_run(s, F, edge_fn = keep)
+  # the SST extrapolation warning fires per derivative call on this structure;
+  # it is not what this test is about
+  r0 <- suppressWarnings(ccx_run(s, F)); r1 <- suppressWarnings(ccx_run(s, F, edge_fn = keep))
   expect_identical(r0$out, r1$out); expect_identical(r0$state, r1$state)
   expect_length(r1$edge_trace, nrow(r0$out))
 })
