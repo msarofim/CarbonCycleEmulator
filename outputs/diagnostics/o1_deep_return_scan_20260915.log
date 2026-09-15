@@ -1,0 +1,316 @@
+== O1 deep-return probe at hilda30c (prereg 2026-09-15d) -- commit 1287b2e ==
+export 9.08 GtC/yr (martin); kz x 1/0.7/0.5/0.35/0.2; THC k 1/2/3/4/6/8/10 x W 10/20/30 Sv; STC k 1/2/3/4 x W 10/20/40 Sv; arm C = beta_max,fert_k,q10,kz_deep_frac,h_ml,k_w,bomb_total,sigma_d14c
+
+HARNESS GATE 1: dg streams at the canonical vs stored: sum -1392.0158 vs -1392.0158 -> PASS
+HARNESS GATE 2: martin, no limb: dlik -894.8 vs the E probe's D-alone -894.8 -> PASS
+HARNESS GATE 3: k inert at W = 0 (THC k1 vs k10, STC k2): 0.00e+00 / 0.00e+00 -> PASS
+
+== STAGE 1: 170 points ==
+CONTROL k0  W0  f1.00      | dlik     +0.0 | exc75/95  60.7/ 81.4 (z +1.5/+3.9) | DIC grad 302.8 (z +2.4) | PI L2/L6/bot-ML    +5/ +181/ +254 | bomb   +0.0 co2    +0.0 d14prof   +0.0 d13   +0.0 | sink 2.97 | ss 4 
+CONTROL k0  W0  f0.70      | dlik   -296.5 | exc75/95  59.5/ 79.6 (z +1.4/+3.7) | DIC grad 302.5 (z +2.4) | PI L2/L6/bot-ML    +1/ +185/ +256 | bomb  -41.5 co2  -214.0 d14prof   -6.0 d13  -24.0 | sink 2.81 | ss 4 
+CONTROL k0  W0  f0.50      | dlik  -1105.0 | exc75/95  58.4/ 77.9 (z +1.2/+3.5) | DIC grad 302.4 (z +2.4) | PI L2/L6/bot-ML    -2/ +191/ +257 | bomb -191.7 co2  -772.1 d14prof  -27.1 d13  -88.0 | sink 2.67 | ss 4 
+CONTROL k0  W0  f0.35      | dlik  -2498.2 | exc75/95  57.3/ 76.0 (z +1.1/+3.2) | DIC grad 302.7 (z +2.4) | PI L2/L6/bot-ML    -5/ +199/ +260 | bomb -487.1 co2 -1678.1 d14prof  -79.6 d13 -206.5 | sink 2.53 | ss 4 
+CONTROL k0  W0  f0.20      | dlik  -5688.4 | exc75/95  55.6/ 73.0 (z +0.9/+2.8) | DIC grad 304.2 (z +2.5) | PI L2/L6/bot-ML   -10/ +216/ +264 | bomb -1258.7 co2 -3581.4 d14prof -256.5 d13 -505.6 | sink 2.32 | ss 4 
+THC k1  W10 f1.00          | dlik   -980.3 | exc75/95  60.8/ 81.5 (z +1.5/+4.0) | DIC grad 290.2 (z +2.0) | PI L2/L6/bot-ML   -66/  +98/ +245 | bomb   -1.2 co2  -325.1 d14prof  -43.2 d13   -9.0 | sink 3.04 | ss 4 
+THC k2  W10 f1.00          | dlik   -981.3 | exc75/95  60.8/ 81.5 (z +1.5/+4.0) | DIC grad 290.2 (z +2.0) | PI L2/L6/bot-ML   -66/  +98/ +245 | bomb   -1.1 co2  -326.3 d14prof  -43.2 d13   -8.9 | sink 3.04 | ss 4 
+THC k3  W10 f1.00          | dlik   -983.5 | exc75/95  60.8/ 81.5 (z +1.5/+4.0) | DIC grad 290.2 (z +2.0) | PI L2/L6/bot-ML   -66/  +98/ +245 | bomb   -1.0 co2  -328.8 d14prof  -43.2 d13   -8.8 | sink 3.05 | ss 4 
+THC k4  W10 f1.00          | dlik   -989.3 | exc75/95  60.8/ 81.6 (z +1.5/+4.0) | DIC grad 290.1 (z +2.0) | PI L2/L6/bot-ML   -66/  +97/ +245 | bomb   -0.7 co2  -335.4 d14prof  -43.2 d13   -8.3 | sink 3.05 | ss 4 
+THC k6  W10 f1.00          | dlik  -1046.4 | exc75/95  60.9/ 81.9 (z +1.6/+4.0) | DIC grad 288.3 (z +1.9) | PI L2/L6/bot-ML   -67/  +90/ +243 | bomb   -2.0 co2  -395.7 d14prof  -42.5 d13   -5.0 | sink 3.08 | ss 4 
+THC k8  W10 f1.00          | dlik  -1104.7 | exc75/95  61.0/ 82.0 (z +1.6/+4.0) | DIC grad 279.7 (z +1.6) | PI L2/L6/bot-ML   -68/  +58/ +234 | bomb   -2.4 co2  -467.8 d14prof  -30.3 d13   -3.6 | sink 3.11 | ss 4 
+THC k10 W10 f1.00          | dlik  -1154.7 | exc75/95  61.0/ 82.0 (z +1.6/+4.0) | DIC grad 277.9 (z +1.6) | PI L2/L6/bot-ML   -68/  +57/ +232 | bomb   -2.4 co2  -465.8 d14prof  -82.4 d13   -3.8 | sink 3.11 | ss 4 
+THC k1  W20 f1.00          | dlik  -1413.4 | exc75/95  61.1/ 82.1 (z +1.6/+4.0) | DIC grad 249.4 (z +0.6) | PI L2/L6/bot-ML   -64/ +109/ +202 | bomb   -3.4 co2  -540.9 d14prof -260.9 d13   -6.0 | sink 3.15 | ss 4 
+THC k2  W20 f1.00          | dlik  -1416.7 | exc75/95  61.1/ 82.2 (z +1.6/+4.0) | DIC grad 249.4 (z +0.6) | PI L2/L6/bot-ML   -64/ +109/ +202 | bomb   -3.4 co2  -544.3 d14prof -260.9 d13   -5.9 | sink 3.15 | ss 4 
+THC k3  W20 f1.00          | dlik  -1425.5 | exc75/95  61.1/ 82.2 (z +1.6/+4.0) | DIC grad 249.3 (z +0.6) | PI L2/L6/bot-ML   -65/ +108/ +202 | bomb   -3.3 co2  -553.2 d14prof -261.1 d13   -5.7 | sink 3.15 | ss 4 
+THC k4  W20 f1.00          | dlik  -1451.3 | exc75/95  61.2/ 82.3 (z +1.6/+4.1) | DIC grad 249.2 (z +0.6) | PI L2/L6/bot-ML   -65/ +108/ +201 | bomb   -3.8 co2  -578.5 d14prof -261.7 d13   -4.9 | sink 3.16 | ss 4 
+THC k6  W20 f1.00          | dlik  -1695.3 | exc75/95  61.4/ 82.8 (z +1.6/+4.1) | DIC grad 246.5 (z +0.5) | PI L2/L6/bot-ML   -68/  +94/ +198 | bomb  -18.1 co2  -801.8 d14prof -271.2 d13   -1.2 | sink 3.22 | ss 4 
+THC k8  W20 f1.00          | dlik  -1949.7 | exc75/95  61.5/ 83.0 (z +1.6/+4.2) | DIC grad 236.6 (z +0.1) | PI L2/L6/bot-ML   -69/  +46/ +188 | bomb  -21.5 co2 -1036.9 d14prof -286.8 d13   -0.4 | sink 3.27 | ss 4 
+THC k10 W20 f1.00          | dlik  -2209.1 | exc75/95  61.5/ 83.0 (z +1.6/+4.2) | DIC grad 236.2 (z +0.1) | PI L2/L6/bot-ML   -69/  +46/ +188 | bomb  -21.2 co2 -1000.3 d14prof -583.7 d13   -0.5 | sink 3.26 | ss 4 
+THC k1  W30 f1.00          | dlik  -2253.2 | exc75/95  61.5/ 82.9 (z +1.6/+4.1) | DIC grad 216.9 (z -0.6) | PI L2/L6/bot-ML   -63/ +109/ +167 | bomb  -13.4 co2  -983.9 d14prof -646.1 d13   -3.1 | sink 3.26 | ss 4 
+THC k2  W30 f1.00          | dlik  -2259.9 | exc75/95  61.5/ 82.9 (z +1.6/+4.1) | DIC grad 216.9 (z -0.6) | PI L2/L6/bot-ML   -63/ +109/ +167 | bomb  -13.4 co2  -990.5 d14prof -646.3 d13   -3.0 | sink 3.26 | ss 4 
+THC k3  W30 f1.00          | dlik  -2280.3 | exc75/95  61.5/ 82.9 (z +1.6/+4.1) | DIC grad 216.8 (z -0.6) | PI L2/L6/bot-ML   -64/ +108/ +167 | bomb  -13.6 co2 -1010.1 d14prof -647.1 d13   -2.8 | sink 3.27 | ss 4 
+THC k4  W30 f1.00          | dlik  -2341.4 | exc75/95  61.6/ 83.0 (z +1.6/+4.2) | DIC grad 216.5 (z -0.6) | PI L2/L6/bot-ML   -65/ +107/ +166 | bomb  -15.7 co2 -1066.5 d14prof -649.9 d13   -2.1 | sink 3.28 | ss 4 
+THC k6  W30 f1.00          | dlik  -2893.7 | exc75/95  61.9/ 83.8 (z +1.7/+4.3) | DIC grad 213.6 (z -0.7) | PI L2/L6/bot-ML   -68/  +91/ +163 | bomb  -52.6 co2 -1540.2 d14prof -690.0 d13   -0.4 | sink 3.37 | ss 4 
+THC k8  W30 f1.00          | dlik  -3456.8 | exc75/95  62.1/ 84.1 (z +1.7/+4.3) | DIC grad 204.7 (z -1.0) | PI L2/L6/bot-ML   -70/  +37/ +153 | bomb  -61.4 co2 -1983.4 d14prof -796.2 d13   -1.7 | sink 3.43 | ss 4 
+THC k10 W30 f1.00          | dlik  -3930.8 | exc75/95  62.0/ 84.0 (z +1.7/+4.3) | DIC grad 205.6 (z -1.0) | PI L2/L6/bot-ML   -70/  +37/ +154 | bomb  -60.1 co2 -1846.4 d14prof -1410.7 d13   -1.2 | sink 3.41 | ss 4 
+THC k1  W10 f0.70          | dlik  -1758.0 | exc75/95  59.7/ 79.8 (z +1.4/+3.7) | DIC grad 301.1 (z +2.4) | PI L2/L6/bot-ML   -58/ +144/ +257 | bomb  -53.3 co2  -263.3 d14prof  -77.0 d13  -42.6 | sink 2.88 | ss 4 
+THC k2  W10 f0.70          | dlik  -1758.2 | exc75/95  59.7/ 79.8 (z +1.4/+3.7) | DIC grad 301.1 (z +2.4) | PI L2/L6/bot-ML   -58/ +144/ +257 | bomb  -53.0 co2  -263.9 d14prof  -77.0 d13  -42.5 | sink 2.89 | ss 4 
+THC k3  W10 f0.70          | dlik  -1755.1 | exc75/95  59.7/ 79.9 (z +1.4/+3.7) | DIC grad 301.0 (z +2.4) | PI L2/L6/bot-ML   -58/ +144/ +257 | bomb  -51.6 co2  -263.1 d14prof  -77.0 d13  -41.9 | sink 2.89 | ss 4 
+THC k4  W10 f0.70          | dlik  -1744.4 | exc75/95  59.7/ 79.9 (z +1.4/+3.8) | DIC grad 300.8 (z +2.4) | PI L2/L6/bot-ML   -59/ +143/ +256 | bomb  -47.3 co2  -258.8 d14prof  -77.0 d13  -40.0 | sink 2.89 | ss 4 
+THC k6  W10 f0.70          | dlik  -1696.6 | exc75/95  59.9/ 80.3 (z +1.4/+3.8) | DIC grad 298.2 (z +2.3) | PI L2/L6/bot-ML   -61/ +132/ +254 | bomb  -33.3 co2  -238.3 d14prof  -75.3 d13  -30.4 | sink 2.93 | ss 4 
+THC k8  W10 f0.70          | dlik  -1666.0 | exc75/95  59.9/ 80.4 (z +1.4/+3.8) | DIC grad 290.0 (z +2.0) | PI L2/L6/bot-ML   -62/  +95/ +245 | bomb  -33.8 co2  -238.0 d14prof  -49.2 d13  -27.4 | sink 2.96 | ss 4 
+THC k10 W10 f0.70          | dlik  -1724.8 | exc75/95  59.9/ 80.4 (z +1.4/+3.8) | DIC grad 289.3 (z +2.0) | PI L2/L6/bot-ML   -62/  +95/ +244 | bomb  -33.8 co2  -238.2 d14prof -107.6 d13  -27.8 | sink 2.96 | ss 4 
+THC k1  W20 f0.70          | dlik  -1881.3 | exc75/95  60.0/ 80.5 (z +1.4/+3.8) | DIC grad 257.2 (z +0.8) | PI L2/L6/bot-ML   -56/ +150/ +210 | bomb  -34.8 co2  -220.5 d14prof -274.2 d13  -33.7 | sink 2.99 | ss 4 
+THC k2  W20 f0.70          | dlik  -1883.6 | exc75/95  60.0/ 80.5 (z +1.4/+3.8) | DIC grad 257.2 (z +0.8) | PI L2/L6/bot-ML   -56/ +150/ +210 | bomb  -34.2 co2  -223.5 d14prof -274.3 d13  -33.4 | sink 2.99 | ss 4 
+THC k3  W20 f0.70          | dlik  -1885.4 | exc75/95  60.1/ 80.6 (z +1.5/+3.8) | DIC grad 257.1 (z +0.8) | PI L2/L6/bot-ML   -57/ +150/ +210 | bomb  -31.9 co2  -228.6 d14prof -274.5 d13  -32.4 | sink 3.00 | ss 4 
+THC k4  W20 f0.70          | dlik  -1888.9 | exc75/95  60.2/ 80.7 (z +1.5/+3.9) | DIC grad 256.8 (z +0.8) | PI L2/L6/bot-ML   -58/ +149/ +210 | bomb  -25.9 co2  -240.4 d14prof -275.4 d13  -29.4 | sink 3.01 | ss 4 
+THC k6  W20 f0.70          | dlik  -1987.7 | exc75/95  60.4/ 81.4 (z +1.5/+3.9) | DIC grad 252.9 (z +0.7) | PI L2/L6/bot-ML   -61/ +130/ +205 | bomb  -16.7 co2  -351.7 d14prof -287.3 d13  -15.7 | sink 3.08 | ss 4 
+THC k8  W20 f0.70          | dlik  -2090.2 | exc75/95  60.5/ 81.5 (z +1.5/+4.0) | DIC grad 244.3 (z +0.4) | PI L2/L6/bot-ML   -63/  +80/ +196 | bomb  -18.6 co2  -449.5 d14prof -294.6 d13  -12.0 | sink 3.13 | ss 4 
+THC k10 W20 f0.70          | dlik  -2454.2 | exc75/95  60.5/ 81.5 (z +1.5/+4.0) | DIC grad 245.2 (z +0.4) | PI L2/L6/bot-ML   -63/  +81/ +197 | bomb  -18.2 co2  -427.2 d14prof -681.0 d13  -12.7 | sink 3.12 | ss 4 
+THC k1  W30 f0.70          | dlik  -2376.4 | exc75/95  60.4/ 81.3 (z +1.5/+3.9) | DIC grad 222.6 (z -0.4) | PI L2/L6/bot-ML   -54/ +144/ +173 | bomb  -24.1 co2  -402.7 d14prof -607.1 d13  -23.7 | sink 3.12 | ss 4 
+THC k2  W30 f0.70          | dlik  -2383.0 | exc75/95  60.4/ 81.3 (z +1.5/+3.9) | DIC grad 222.5 (z -0.4) | PI L2/L6/bot-ML   -55/ +143/ +173 | bomb  -23.5 co2  -410.0 d14prof -607.3 d13  -23.4 | sink 3.12 | ss 4 
+THC k3  W30 f0.70          | dlik  -2398.4 | exc75/95  60.5/ 81.4 (z +1.5/+3.9) | DIC grad 222.4 (z -0.4) | PI L2/L6/bot-ML   -56/ +143/ +173 | bomb  -20.8 co2  -428.2 d14prof -608.5 d13  -22.1 | sink 3.12 | ss 4 
+THC k4  W30 f0.70          | dlik  -2442.5 | exc75/95  60.6/ 81.6 (z +1.5/+4.0) | DIC grad 222.0 (z -0.4) | PI L2/L6/bot-ML   -57/ +142/ +172 | bomb  -15.5 co2  -476.8 d14prof -612.7 d13  -18.7 | sink 3.14 | ss 4 
+THC k6  W30 f0.70          | dlik  -2858.9 | exc75/95  60.9/ 82.5 (z +1.6/+4.1) | DIC grad 218.0 (z -0.5) | PI L2/L6/bot-ML   -62/ +121/ +168 | bomb  -26.2 co2  -841.9 d14prof -665.1 d13   -5.8 | sink 3.24 | ss 4 
+THC k8  W30 f0.70          | dlik  -3201.9 | exc75/95  61.1/ 82.7 (z +1.6/+4.1) | DIC grad 210.8 (z -0.8) | PI L2/L6/bot-ML   -64/  +69/ +160 | bomb  -31.0 co2 -1084.4 d14prof -762.5 d13   -3.2 | sink 3.29 | ss 4 
+THC k10 W30 f0.70          | dlik  -3934.2 | exc75/95  61.0/ 82.6 (z +1.6/+4.1) | DIC grad 213.0 (z -0.7) | PI L2/L6/bot-ML   -64/  +70/ +163 | bomb  -29.5 co2  -979.7 d14prof -1601.7 d13   -3.9 | sink 3.27 | ss 4 
+THC k1  W10 f0.50          | dlik  -3676.2 | exc75/95  58.6/ 78.2 (z +1.3/+3.5) | DIC grad 311.5 (z +2.7) | PI L2/L6/bot-ML   -49/ +191/ +268 | bomb -187.1 co2  -568.4 d14prof -107.1 d13 -100.2 | sink 2.74 | ss 4 
+THC k2  W10 f0.50          | dlik  -3674.4 | exc75/95  58.6/ 78.2 (z +1.3/+3.5) | DIC grad 311.5 (z +2.7) | PI L2/L6/bot-ML   -49/ +191/ +268 | bomb -186.2 co2  -567.9 d14prof -107.1 d13  -99.9 | sink 2.74 | ss 4 
+THC k3  W10 f0.50          | dlik  -3660.6 | exc75/95  58.7/ 78.3 (z +1.3/+3.5) | DIC grad 311.4 (z +2.7) | PI L2/L6/bot-ML   -49/ +190/ +268 | bomb -181.9 co2  -560.1 d14prof -107.1 d13  -98.4 | sink 2.74 | ss 4 
+THC k4  W10 f0.50          | dlik  -3618.8 | exc75/95  58.7/ 78.4 (z +1.3/+3.6) | DIC grad 311.1 (z +2.7) | PI L2/L6/bot-ML   -50/ +189/ +268 | bomb -169.6 co2  -535.6 d14prof -107.0 d13  -94.1 | sink 2.75 | ss 4 
+THC k6  W10 f0.50          | dlik  -3441.2 | exc75/95  58.9/ 78.7 (z +1.3/+3.6) | DIC grad 307.4 (z +2.6) | PI L2/L6/bot-ML   -53/ +174/ +264 | bomb -138.8 co2  -412.4 d14prof -105.1 d13  -76.1 | sink 2.80 | ss 4 
+THC k8  W10 f0.50          | dlik  -3365.2 | exc75/95  58.9/ 78.8 (z +1.3/+3.6) | DIC grad 300.4 (z +2.3) | PI L2/L6/bot-ML   -54/ +137/ +256 | bomb -140.0 co2  -369.9 d14prof  -76.5 d13  -72.4 | sink 2.82 | ss 4 
+THC k10 W10 f0.50          | dlik  -3423.7 | exc75/95  58.9/ 78.8 (z +1.3/+3.6) | DIC grad 300.4 (z +2.3) | PI L2/L6/bot-ML   -54/ +137/ +256 | bomb -139.9 co2  -374.7 d14prof -129.8 d13  -72.9 | sink 2.82 | ss 4 
+THC k1  W20 f0.50          | dlik  -3463.9 | exc75/95  59.0/ 79.0 (z +1.3/+3.6) | DIC grad 264.6 (z +1.1) | PI L2/L6/bot-ML   -46/ +189/ +218 | bomb -141.2 co2  -256.2 d14prof -277.8 d13  -82.9 | sink 2.86 | ss 4 
+THC k2  W20 f0.50          | dlik  -3463.6 | exc75/95  59.0/ 79.0 (z +1.3/+3.6) | DIC grad 264.5 (z +1.1) | PI L2/L6/bot-ML   -46/ +189/ +218 | bomb -139.7 co2  -258.0 d14prof -277.9 d13  -82.3 | sink 2.86 | ss 4 
+THC k3  W20 f0.50          | dlik  -3449.3 | exc75/95  59.1/ 79.1 (z +1.3/+3.6) | DIC grad 264.4 (z +1.1) | PI L2/L6/bot-ML   -47/ +188/ +218 | bomb -132.4 co2  -253.5 d14prof -278.2 d13  -79.7 | sink 2.86 | ss 4 
+THC k4  W20 f0.50          | dlik  -3407.5 | exc75/95  59.2/ 79.3 (z +1.3/+3.7) | DIC grad 263.9 (z +1.1) | PI L2/L6/bot-ML   -49/ +187/ +217 | bomb -113.5 co2  -237.5 d14prof -279.4 d13  -72.6 | sink 2.88 | ss 4 
+THC k6  W20 f0.50          | dlik  -3320.6 | exc75/95  59.4/ 80.0 (z +1.4/+3.8) | DIC grad 258.8 (z +0.9) | PI L2/L6/bot-ML   -54/ +165/ +212 | bomb  -77.9 co2  -201.8 d14prof -293.9 d13  -46.3 | sink 2.96 | ss 4 
+THC k8  W20 f0.50          | dlik  -3335.4 | exc75/95  59.5/ 80.1 (z +1.4/+3.8) | DIC grad 252.3 (z +0.7) | PI L2/L6/bot-ML   -55/ +119/ +205 | bomb  -79.6 co2  -213.2 d14prof -302.9 d13  -40.9 | sink 2.99 | ss 4 
+THC k10 W20 f0.50          | dlik  -3784.9 | exc75/95  59.5/ 80.0 (z +1.4/+3.8) | DIC grad 254.0 (z +0.7) | PI L2/L6/bot-ML   -55/ +120/ +207 | bomb  -79.1 co2  -209.5 d14prof -755.6 d13  -42.3 | sink 2.98 | ss 4 
+THC k1  W30 f0.50          | dlik  -3604.3 | exc75/95  59.4/ 79.9 (z +1.4/+3.7) | DIC grad 227.8 (z -0.2) | PI L2/L6/bot-ML   -44/ +173/ +179 | bomb -103.1 co2  -168.3 d14prof -567.3 d13  -63.2 | sink 2.99 | ss 4 
+THC k2  W30 f0.50          | dlik  -3608.8 | exc75/95  59.5/ 79.9 (z +1.4/+3.8) | DIC grad 227.8 (z -0.2) | PI L2/L6/bot-ML   -44/ +173/ +179 | bomb -101.1 co2  -175.2 d14prof -567.6 d13  -62.4 | sink 2.99 | ss 4 
+THC k3  W30 f0.50          | dlik  -3608.6 | exc75/95  59.6/ 80.0 (z +1.4/+3.8) | DIC grad 227.6 (z -0.2) | PI L2/L6/bot-ML   -46/ +173/ +179 | bomb  -92.2 co2  -185.7 d14prof -569.3 d13  -59.2 | sink 3.00 | ss 4 
+THC k4  W30 f0.50          | dlik  -3610.0 | exc75/95  59.7/ 80.3 (z +1.4/+3.8) | DIC grad 227.0 (z -0.2) | PI L2/L6/bot-ML   -49/ +171/ +178 | bomb  -71.7 co2  -210.6 d14prof -575.2 d13  -50.9 | sink 3.02 | ss 4 
+THC k6  W30 f0.50          | dlik  -3836.2 | exc75/95  60.0/ 81.2 (z +1.4/+3.9) | DIC grad 222.0 (z -0.4) | PI L2/L6/bot-ML   -55/ +148/ +172 | bomb  -52.4 co2  -420.8 d14prof -639.1 d13  -23.9 | sink 3.13 | ss 4 
+THC k8  W30 f0.50          | dlik  -4026.1 | exc75/95  60.1/ 81.4 (z +1.5/+3.9) | DIC grad 217.3 (z -0.5) | PI L2/L6/bot-ML   -56/ +104/ +167 | bomb  -55.4 co2  -527.9 d14prof -724.5 d13  -19.0 | sink 3.17 | ss 4 
+THC k10 W30 f0.50          | dlik  -4973.3 | exc75/95  60.1/ 81.3 (z +1.5/+3.9) | DIC grad 220.2 (z -0.4) | PI L2/L6/bot-ML   -56/ +106/ +170 | bomb  -53.8 co2  -460.9 d14prof -1739.5 d13  -21.0 | sink 3.15 | ss 4 
+THC k1  W10 f0.35          | dlik  -7694.0 | exc75/95  57.5/ 76.5 (z +1.1/+3.3) | DIC grad 322.7 (z +3.1) | PI L2/L6/bot-ML   -36/ +241/ +280 | bomb -426.2 co2 -1228.2 d14prof -128.6 d13 -190.4 | sink 2.60 | ss 4 
+THC k2  W10 f0.35          | dlik  -7688.4 | exc75/95  57.6/ 76.5 (z +1.1/+3.3) | DIC grad 322.7 (z +3.1) | PI L2/L6/bot-ML   -36/ +241/ +280 | bomb -424.2 co2 -1225.5 d14prof -128.6 d13 -189.7 | sink 2.60 | ss 4 
+THC k3  W10 f0.35          | dlik  -7652.9 | exc75/95  57.6/ 76.6 (z +1.1/+3.3) | DIC grad 322.5 (z +3.1) | PI L2/L6/bot-ML   -37/ +241/ +280 | bomb -413.7 co2 -1204.2 d14prof -128.6 d13 -186.3 | sink 2.60 | ss 4 
+THC k4  W10 f0.35          | dlik  -7554.7 | exc75/95  57.7/ 76.8 (z +1.1/+3.3) | DIC grad 322.0 (z +3.1) | PI L2/L6/bot-ML   -39/ +239/ +279 | bomb -386.1 co2 -1143.7 d14prof -128.6 d13 -177.6 | sink 2.61 | ss 4 
+THC k6  W10 f0.35          | dlik  -7225.3 | exc75/95  57.8/ 77.1 (z +1.2/+3.4) | DIC grad 317.0 (z +2.9) | PI L2/L6/bot-ML   -43/ +220/ +274 | bomb -338.8 co2  -897.0 d14prof -127.4 d13 -149.0 | sink 2.66 | ss 4 
+THC k8  W10 f0.35          | dlik  -7140.2 | exc75/95  57.8/ 77.2 (z +1.2/+3.4) | DIC grad 312.2 (z +2.7) | PI L2/L6/bot-ML   -44/ +187/ +269 | bomb -340.5 co2  -838.9 d14prof -105.2 d13 -145.2 | sink 2.68 | ss 4 
+THC k10 W10 f0.35          | dlik  -7197.6 | exc75/95  57.8/ 77.2 (z +1.2/+3.4) | DIC grad 312.8 (z +2.8) | PI L2/L6/bot-ML   -44/ +188/ +270 | bomb -340.3 co2  -850.0 d14prof -150.8 d13 -146.0 | sink 2.67 | ss 4 
+THC k1  W20 f0.35          | dlik  -7090.3 | exc75/95  58.0/ 77.4 (z +1.2/+3.4) | DIC grad 272.3 (z +1.4) | PI L2/L6/bot-ML   -32/ +226/ +226 | bomb -341.5 co2  -605.5 d14prof -274.5 d13 -160.5 | sink 2.72 | ss 4 
+THC k2  W20 f0.35          | dlik  -7084.1 | exc75/95  58.0/ 77.4 (z +1.2/+3.4) | DIC grad 272.2 (z +1.4) | PI L2/L6/bot-ML   -33/ +226/ +227 | bomb -338.0 co2  -604.1 d14prof -274.6 d13 -159.3 | sink 2.72 | ss 4 
+THC k3  W20 f0.35          | dlik  -7036.2 | exc75/95  58.1/ 77.5 (z +1.2/+3.4) | DIC grad 272.0 (z +1.4) | PI L2/L6/bot-ML   -35/ +226/ +226 | bomb -320.3 co2  -580.0 d14prof -275.0 d13 -153.6 | sink 2.73 | ss 4 
+THC k4  W20 f0.35          | dlik  -6911.1 | exc75/95  58.2/ 77.8 (z +1.2/+3.5) | DIC grad 271.2 (z +1.3) | PI L2/L6/bot-ML   -38/ +223/ +225 | bomb -276.9 co2  -512.9 d14prof -276.5 d13 -139.2 | sink 2.75 | ss 4 
+THC k6  W20 f0.35          | dlik  -6605.0 | exc75/95  58.4/ 78.5 (z +1.2/+3.6) | DIC grad 265.0 (z +1.1) | PI L2/L6/bot-ML   -44/ +199/ +219 | bomb -215.3 co2  -299.9 d14prof -293.4 d13  -97.4 | sink 2.84 | ss 4 
+THC k8  W20 f0.35          | dlik  -6577.7 | exc75/95  58.5/ 78.6 (z +1.3/+3.6) | DIC grad 261.6 (z +1.0) | PI L2/L6/bot-ML   -45/ +164/ +215 | bomb -216.8 co2  -267.3 d14prof -305.9 d13  -91.5 | sink 2.86 | ss 4 
+THC k10 W20 f0.35          | dlik  -7106.4 | exc75/95  58.5/ 78.5 (z +1.2/+3.6) | DIC grad 263.9 (z +1.1) | PI L2/L6/bot-ML   -45/ +166/ +218 | bomb -216.0 co2  -286.0 d14prof -814.4 d13  -93.6 | sink 2.85 | ss 4 
+THC k1  W30 f0.35          | dlik  -6826.0 | exc75/95  58.4/ 78.4 (z +1.2/+3.5) | DIC grad 233.3 (z +0.0) | PI L2/L6/bot-ML   -30/ +200/ +184 | bomb -263.9 co2  -208.7 d14prof -526.4 d13 -126.6 | sink 2.86 | ss 4 
+THC k2  W30 f0.35          | dlik  -6824.7 | exc75/95  58.5/ 78.4 (z +1.2/+3.6) | DIC grad 233.2 (z +0.0) | PI L2/L6/bot-ML   -30/ +200/ +185 | bomb -259.3 co2  -213.2 d14prof -526.8 d13 -125.1 | sink 2.86 | ss 4 
+THC k3  W30 f0.35          | dlik  -6789.3 | exc75/95  58.6/ 78.5 (z +1.3/+3.6) | DIC grad 232.9 (z -0.0) | PI L2/L6/bot-ML   -34/ +199/ +184 | bomb -237.3 co2  -205.1 d14prof -529.2 d13 -118.0 | sink 2.87 | ss 4 
+THC k4  W30 f0.35          | dlik  -6707.1 | exc75/95  58.8/ 79.0 (z +1.3/+3.6) | DIC grad 232.0 (z -0.0) | PI L2/L6/bot-ML   -38/ +197/ +183 | bomb -188.8 co2  -181.9 d14prof -537.2 d13 -101.2 | sink 2.90 | ss 4 
+THC k6  W30 f0.35          | dlik  -6699.6 | exc75/95  59.1/ 79.9 (z +1.3/+3.7) | DIC grad 226.2 (z -0.2) | PI L2/L6/bot-ML   -46/ +173/ +177 | bomb -139.1 co2  -198.1 d14prof -611.3 d13  -57.5 | sink 3.02 | ss 4 
+THC k8  W30 f0.35          | dlik  -6782.7 | exc75/95  59.2/ 80.0 (z +1.3/+3.8) | DIC grad 224.9 (z -0.3) | PI L2/L6/bot-ML   -47/ +147/ +176 | bomb -141.0 co2  -221.6 d14prof -677.3 d13  -51.5 | sink 3.04 | ss 4 
+THC k10 W30 f0.35          | dlik  -7925.3 | exc75/95  59.1/ 79.9 (z +1.3/+3.7) | DIC grad 228.2 (z -0.2) | PI L2/L6/bot-ML   -47/ +149/ +179 | bomb -139.1 co2  -198.4 d14prof -1841.8 d13  -55.1 | sink 3.02 | ss 4 
+THC k1  W10 f0.20          | dlik -22408.3 | exc75/95  55.9/ 73.9 (z +0.9/+3.0) | DIC grad 340.4 (z +3.7) | PI L2/L6/bot-ML   -10/ +314/ +299 | bomb -1006.7 co2 -2808.2 d14prof -142.9 d13 -391.0 | sink 2.39 | ss 4 
+THC k2  W10 f0.20          | dlik -22392.0 | exc75/95  56.0/ 73.9 (z +0.9/+3.0) | DIC grad 340.3 (z +3.7) | PI L2/L6/bot-ML   -10/ +314/ +299 | bomb -1001.5 co2 -2799.0 d14prof -142.9 d13 -389.3 | sink 2.39 | ss 4 
+THC k3  W10 f0.20          | dlik -22287.3 | exc75/95  56.0/ 74.0 (z +0.9/+3.0) | DIC grad 339.9 (z +3.7) | PI L2/L6/bot-ML   -13/ +314/ +298 | bomb -969.4 co2 -2736.8 d14prof -143.0 d13 -380.0 | sink 2.40 | ss 4 
+THC k4  W10 f0.20          | dlik -22039.6 | exc75/95  56.1/ 74.3 (z +1.0/+3.0) | DIC grad 338.9 (z +3.7) | PI L2/L6/bot-ML   -16/ +311/ +297 | bomb -899.9 co2 -2582.6 d14prof -143.0 d13 -358.8 | sink 2.41 | ss 4 
+THC k6  W10 f0.20          | dlik -21506.5 | exc75/95  56.2/ 74.6 (z +1.0/+3.1) | DIC grad 332.2 (z +3.4) | PI L2/L6/bot-ML   -22/ +289/ +290 | bomb -840.3 co2 -2162.1 d14prof -143.5 d13 -313.6 | sink 2.47 | ss 4 
+THC k8  W10 f0.20          | dlik -21459.3 | exc75/95  56.3/ 74.6 (z +1.0/+3.1) | DIC grad 332.2 (z +3.4) | PI L2/L6/bot-ML   -22/ +275/ +290 | bomb -840.8 co2 -2128.3 d14prof -134.9 d13 -310.6 | sink 2.47 | ss 4 
+THC k10 W10 f0.20          | dlik -21521.1 | exc75/95  56.3/ 74.6 (z +1.0/+3.1) | DIC grad 333.2 (z +3.5) | PI L2/L6/bot-ML   -22/ +276/ +291 | bomb -840.2 co2 -2150.0 d14prof -174.2 d13 -311.7 | sink 2.47 | ss 4 
+THC k1  W20 f0.20          | dlik -21122.5 | exc75/95  56.4/ 74.9 (z +1.0/+3.1) | DIC grad 284.0 (z +1.8) | PI L2/L6/bot-ML    -3/ +272/ +239 | bomb -836.0 co2 -1650.3 d14prof -264.6 d13 -332.5 | sink 2.52 | ss 4 
+THC k2  W20 f0.20          | dlik -21099.2 | exc75/95  56.5/ 74.9 (z +1.0/+3.1) | DIC grad 283.9 (z +1.8) | PI L2/L6/bot-ML    -4/ +272/ +239 | bomb -826.7 co2 -1639.5 d14prof -264.7 d13 -329.5 | sink 2.53 | ss 4 
+THC k3  W20 f0.20          | dlik -20944.0 | exc75/95  56.6/ 75.2 (z +1.0/+3.1) | DIC grad 283.3 (z +1.7) | PI L2/L6/bot-ML   -10/ +271/ +239 | bomb -773.2 co2 -1554.7 d14prof -265.2 d13 -313.9 | sink 2.54 | ss 4 
+THC k4  W20 f0.20          | dlik -20602.4 | exc75/95  56.7/ 75.6 (z +1.0/+3.2) | DIC grad 281.9 (z +1.7) | PI L2/L6/bot-ML   -16/ +268/ +237 | bomb -666.1 co2 -1355.9 d14prof -267.2 d13 -280.3 | sink 2.57 | ss 4 
+THC k6  W20 f0.20          | dlik -20005.8 | exc75/95  57.0/ 76.2 (z +1.1/+3.3) | DIC grad 274.8 (z +1.4) | PI L2/L6/bot-ML   -25/ +245/ +230 | bomb -583.1 co2  -898.7 d14prof -285.6 d13 -215.7 | sink 2.66 | ss 4 
+THC k8  W20 f0.20          | dlik -19985.2 | exc75/95  57.0/ 76.2 (z +1.1/+3.3) | DIC grad 277.5 (z +1.5) | PI L2/L6/bot-ML   -24/ +244/ +232 | bomb -582.4 co2  -875.3 d14prof -297.5 d13 -210.0 | sink 2.67 | ss 4 
+THC k10 W20 f0.20          | dlik -20614.4 | exc75/95  57.0/ 76.2 (z +1.1/+3.3) | DIC grad 280.1 (z +1.6) | PI L2/L6/bot-ML   -24/ +246/ +235 | bomb -581.1 co2  -930.3 d14prof -868.6 d13 -213.7 | sink 2.65 | ss 4 
+THC k1  W30 f0.20          | dlik -20164.8 | exc75/95  57.0/ 76.1 (z +1.1/+3.2) | DIC grad 241.2 (z +0.3) | PI L2/L6/bot-ML    +1/ +228/ +193 | bomb -670.7 co2  -731.9 d14prof -471.3 d13 -267.0 | sink 2.68 | ss 4 
+THC k2  W30 f0.20          | dlik -20144.8 | exc75/95  57.0/ 76.1 (z +1.1/+3.3) | DIC grad 241.1 (z +0.3) | PI L2/L6/bot-ML    -1/ +228/ +193 | bomb -658.6 co2  -727.4 d14prof -471.9 d13 -263.3 | sink 2.68 | ss 4 
+THC k3  W30 f0.20          | dlik -19993.6 | exc75/95  57.2/ 76.4 (z +1.1/+3.3) | DIC grad 240.5 (z +0.3) | PI L2/L6/bot-ML    -9/ +227/ +193 | bomb -593.1 co2  -658.6 d14prof -475.7 d13 -244.4 | sink 2.70 | ss 4 
+THC k4  W30 f0.20          | dlik -19693.8 | exc75/95  57.4/ 77.0 (z +1.1/+3.4) | DIC grad 239.0 (z +0.2) | PI L2/L6/bot-ML   -18/ +224/ +191 | bomb -474.4 co2  -507.9 d14prof -487.7 d13 -206.0 | sink 2.75 | ss 4 
+THC k6  W30 f0.20          | dlik -19362.6 | exc75/95  57.7/ 77.8 (z +1.2/+3.5) | DIC grad 233.2 (z +0.0) | PI L2/L6/bot-ML   -27/ +207/ +185 | bomb -398.0 co2  -245.6 d14prof -570.4 d13 -139.2 | sink 2.86 | ss 4 
+THC k8  W30 f0.20          | dlik -19370.8 | exc75/95  57.7/ 77.8 (z +1.2/+3.5) | DIC grad 238.0 (z +0.2) | PI L2/L6/bot-ML   -26/ +220/ +190 | bomb -397.0 co2  -237.9 d14prof -596.6 d13 -133.1 | sink 2.86 | ss 4 
+THC k10 W30 f0.20          | dlik -20756.6 | exc75/95  57.7/ 77.7 (z +1.1/+3.5) | DIC grad 241.6 (z +0.3) | PI L2/L6/bot-ML   -26/ +223/ +193 | bomb -394.7 co2  -285.4 d14prof -1929.9 d13 -139.6 | sink 2.84 | ss 4 
+STC k1  W10 f1.00          | dlik   -895.4 | exc75/95  60.5/ 81.0 (z +1.5/+3.9) | DIC grad 340.7 (z +3.7) | PI L2/L6/bot-ML   -67/  +72/ +298 | bomb   -4.4 co2  -274.4 d14prof   +0.5 d13  -11.2 | sink 2.97 | ss 4 
+STC k2  W10 f1.00          | dlik   -895.8 | exc75/95  60.5/ 81.0 (z +1.5/+3.9) | DIC grad 340.6 (z +3.7) | PI L2/L6/bot-ML   -68/  +72/ +298 | bomb   -4.2 co2  -275.2 d14prof   +0.5 d13  -11.1 | sink 2.97 | ss 4 
+STC k3  W10 f1.00          | dlik   -895.8 | exc75/95  60.6/ 81.0 (z +1.5/+3.9) | DIC grad 340.5 (z +3.7) | PI L2/L6/bot-ML   -68/  +71/ +297 | bomb   -3.6 co2  -276.4 d14prof   +0.5 d13  -10.5 | sink 2.97 | ss 4 
+STC k4  W10 f1.00          | dlik   -896.5 | exc75/95  60.6/ 81.2 (z +1.5/+3.9) | DIC grad 340.0 (z +3.7) | PI L2/L6/bot-ML   -68/  +69/ +297 | bomb   -2.1 co2  -280.5 d14prof   +0.5 d13   -9.1 | sink 2.98 | ss 4 
+STC k1  W20 f1.00          | dlik   -895.9 | exc75/95  60.5/ 81.0 (z +1.5/+3.9) | DIC grad 340.7 (z +3.7) | PI L2/L6/bot-ML   -67/  +72/ +298 | bomb   -4.4 co2  -275.0 d14prof   +0.5 d13  -11.2 | sink 2.97 | ss 4 
+STC k2  W20 f1.00          | dlik   -896.8 | exc75/95  60.5/ 81.0 (z +1.5/+3.9) | DIC grad 340.6 (z +3.7) | PI L2/L6/bot-ML   -68/  +71/ +298 | bomb   -4.0 co2  -276.6 d14prof   +0.5 d13  -10.9 | sink 2.97 | ss 4 
+STC k3  W20 f1.00          | dlik   -897.2 | exc75/95  60.6/ 81.1 (z +1.5/+3.9) | DIC grad 340.2 (z +3.7) | PI L2/L6/bot-ML   -68/  +70/ +297 | bomb   -2.9 co2  -279.4 d14prof   +0.5 d13   -9.8 | sink 2.97 | ss 4 
+STC k4  W20 f1.00          | dlik   -902.5 | exc75/95  60.8/ 81.3 (z +1.5/+3.9) | DIC grad 339.3 (z +3.7) | PI L2/L6/bot-ML   -69/  +67/ +296 | bomb   -1.0 co2  -289.8 d14prof   +0.5 d13   -7.3 | sink 2.99 | ss 4 
+STC k1  W40 f1.00          | dlik   -897.0 | exc75/95  60.5/ 81.0 (z +1.5/+3.9) | DIC grad 340.7 (z +3.7) | PI L2/L6/bot-ML   -68/  +72/ +298 | bomb   -4.3 co2  -276.2 d14prof   +0.5 d13  -11.1 | sink 2.97 | ss 4 
+STC k2  W40 f1.00          | dlik   -898.9 | exc75/95  60.6/ 81.0 (z +1.5/+3.9) | DIC grad 340.4 (z +3.7) | PI L2/L6/bot-ML   -68/  +71/ +297 | bomb   -3.7 co2  -279.4 d14prof   +0.5 d13  -10.5 | sink 2.97 | ss 4 
+STC k3  W40 f1.00          | dlik   -901.2 | exc75/95  60.7/ 81.2 (z +1.5/+3.9) | DIC grad 339.8 (z +3.7) | PI L2/L6/bot-ML   -69/  +69/ +297 | bomb   -1.9 co2  -285.8 d14prof   +0.5 d13   -8.6 | sink 2.98 | ss 4 
+STC k4  W40 f1.00          | dlik   -923.4 | exc75/95  61.0/ 81.6 (z +1.6/+4.0) | DIC grad 338.2 (z +3.7) | PI L2/L6/bot-ML   -69/  +63/ +295 | bomb   -1.1 co2  -313.9 d14prof   +0.6 d13   -4.6 | sink 3.02 | ss 4 
+STC k1  W10 f0.70          | dlik  -1891.0 | exc75/95  59.4/ 79.3 (z +1.4/+3.7) | DIC grad 355.9 (z +4.3) | PI L2/L6/bot-ML   -60/ +114/ +314 | bomb  -76.0 co2  -431.4 d14prof   -5.0 d13  -48.9 | sink 2.80 | ss 4 
+STC k2  W10 f0.70          | dlik  -1885.8 | exc75/95  59.4/ 79.3 (z +1.4/+3.7) | DIC grad 355.8 (z +4.3) | PI L2/L6/bot-ML   -61/ +114/ +314 | bomb  -74.7 co2  -428.2 d14prof   -4.9 d13  -48.4 | sink 2.80 | ss 4 
+STC k3  W10 f0.70          | dlik  -1866.3 | exc75/95  59.5/ 79.3 (z +1.4/+3.7) | DIC grad 355.5 (z +4.3) | PI L2/L6/bot-ML   -61/ +113/ +314 | bomb  -70.0 co2  -415.9 d14prof   -4.8 d13  -46.4 | sink 2.81 | ss 4 
+STC k4  W10 f0.70          | dlik  -1814.9 | exc75/95  59.6/ 79.5 (z +1.4/+3.7) | DIC grad 354.7 (z +4.2) | PI L2/L6/bot-ML   -61/ +110/ +313 | bomb  -57.4 co2  -383.3 d14prof   -4.4 d13  -41.6 | sink 2.82 | ss 4 
+STC k1  W20 f0.70          | dlik  -1890.9 | exc75/95  59.4/ 79.3 (z +1.4/+3.7) | DIC grad 355.9 (z +4.3) | PI L2/L6/bot-ML   -61/ +114/ +314 | bomb  -75.8 co2  -431.6 d14prof   -5.0 d13  -48.8 | sink 2.80 | ss 4 
+STC k2  W20 f0.70          | dlik  -1880.9 | exc75/95  59.4/ 79.3 (z +1.4/+3.7) | DIC grad 355.7 (z +4.3) | PI L2/L6/bot-ML   -61/ +114/ +314 | bomb  -73.3 co2  -425.5 d14prof   -4.9 d13  -47.7 | sink 2.80 | ss 4 
+STC k3  W20 f0.70          | dlik  -1844.2 | exc75/95  59.6/ 79.4 (z +1.4/+3.7) | DIC grad 355.1 (z +4.2) | PI L2/L6/bot-ML   -62/ +112/ +313 | bomb  -64.4 co2  -402.3 d14prof   -4.7 d13  -44.1 | sink 2.81 | ss 4 
+STC k4  W20 f0.70          | dlik  -1756.4 | exc75/95  59.8/ 79.8 (z +1.4/+3.7) | DIC grad 353.6 (z +4.2) | PI L2/L6/bot-ML   -62/ +107/ +312 | bomb  -43.2 co2  -346.9 d14prof   -4.0 d13  -35.5 | sink 2.84 | ss 4 
+STC k1  W40 f0.70          | dlik  -1890.8 | exc75/95  59.4/ 79.3 (z +1.4/+3.7) | DIC grad 355.8 (z +4.3) | PI L2/L6/bot-ML   -61/ +114/ +314 | bomb  -75.5 co2  -432.1 d14prof   -5.0 d13  -48.7 | sink 2.80 | ss 4 
+STC k2  W40 f0.70          | dlik  -1871.6 | exc75/95  59.5/ 79.3 (z +1.4/+3.7) | DIC grad 355.5 (z +4.3) | PI L2/L6/bot-ML   -62/ +113/ +314 | bomb  -70.7 co2  -420.3 d14prof   -4.8 d13  -46.5 | sink 2.81 | ss 4 
+STC k3  W40 f0.70          | dlik  -1806.7 | exc75/95  59.7/ 79.6 (z +1.4/+3.7) | DIC grad 354.4 (z +4.2) | PI L2/L6/bot-ML   -63/ +110/ +312 | bomb  -55.1 co2  -379.2 d14prof   -4.4 d13  -39.9 | sink 2.83 | ss 4 
+STC k4  W40 f0.70          | dlik  -1677.5 | exc75/95  60.1/ 80.2 (z +1.5/+3.8) | DIC grad 351.8 (z +4.1) | PI L2/L6/bot-ML   -64/ +101/ +309 | bomb  -24.1 co2  -299.1 d14prof   -3.3 d13  -26.1 | sink 2.88 | ss 4 
+STC k1  W10 f0.50          | dlik  -4057.9 | exc75/95  58.3/ 77.6 (z +1.2/+3.4) | DIC grad 370.7 (z +4.8) | PI L2/L6/bot-ML   -52/ +161/ +330 | bomb -234.3 co2  -962.1 d14prof  -23.6 d13 -112.4 | sink 2.65 | ss 4 
+STC k2  W10 f0.50          | dlik  -4041.8 | exc75/95  58.4/ 77.6 (z +1.2/+3.5) | DIC grad 370.5 (z +4.8) | PI L2/L6/bot-ML   -53/ +161/ +330 | bomb -230.6 co2  -951.5 d14prof  -23.5 d13 -111.0 | sink 2.65 | ss 4 
+STC k3  W10 f0.50          | dlik  -3984.5 | exc75/95  58.5/ 77.7 (z +1.2/+3.5) | DIC grad 370.0 (z +4.8) | PI L2/L6/bot-ML   -53/ +159/ +329 | bomb -217.0 co2  -913.7 d14prof  -23.0 d13 -106.4 | sink 2.66 | ss 4 
+STC k4  W10 f0.50          | dlik  -3842.3 | exc75/95  58.6/ 78.0 (z +1.3/+3.5) | DIC grad 368.7 (z +4.7) | PI L2/L6/bot-ML   -54/ +155/ +328 | bomb -183.5 co2  -819.6 d14prof  -21.5 d13  -95.4 | sink 2.68 | ss 4 
+STC k1  W20 f0.50          | dlik  -4056.7 | exc75/95  58.3/ 77.6 (z +1.2/+3.4) | DIC grad 370.7 (z +4.8) | PI L2/L6/bot-ML   -52/ +161/ +330 | bomb -233.9 co2  -961.6 d14prof  -23.6 d13 -112.2 | sink 2.65 | ss 4 
+STC k2  W20 f0.50          | dlik  -4025.4 | exc75/95  58.4/ 77.7 (z +1.2/+3.5) | DIC grad 370.4 (z +4.8) | PI L2/L6/bot-ML   -54/ +160/ +330 | bomb -226.7 co2  -940.8 d14prof  -23.4 d13 -109.5 | sink 2.66 | ss 4 
+STC k3  W20 f0.50          | dlik  -3918.2 | exc75/95  58.6/ 77.9 (z +1.3/+3.5) | DIC grad 369.4 (z +4.7) | PI L2/L6/bot-ML   -55/ +158/ +329 | bomb -201.4 co2  -870.0 d14prof  -22.5 d13 -100.8 | sink 2.67 | ss 4 
+STC k4  W20 f0.50          | dlik  -3673.2 | exc75/95  58.8/ 78.4 (z +1.3/+3.6) | DIC grad 367.0 (z +4.7) | PI L2/L6/bot-ML   -55/ +149/ +326 | bomb -144.6 co2  -707.5 d14prof  -19.7 d13  -81.7 | sink 2.71 | ss 4 
+STC k1  W40 f0.50          | dlik  -4054.5 | exc75/95  58.4/ 77.6 (z +1.2/+3.4) | DIC grad 370.6 (z +4.8) | PI L2/L6/bot-ML   -53/ +161/ +330 | bomb -233.1 co2  -960.6 d14prof  -23.6 d13 -111.8 | sink 2.65 | ss 4 
+STC k2  W40 f0.50          | dlik  -3994.9 | exc75/95  58.5/ 77.7 (z +1.2/+3.5) | DIC grad 370.0 (z +4.8) | PI L2/L6/bot-ML   -55/ +160/ +329 | bomb -219.4 co2  -921.1 d14prof  -23.1 d13 -106.6 | sink 2.66 | ss 4 
+STC k3  W40 f0.50          | dlik  -3805.8 | exc75/95  58.8/ 78.1 (z +1.3/+3.5) | DIC grad 368.3 (z +4.7) | PI L2/L6/bot-ML   -57/ +154/ +327 | bomb -175.5 co2  -795.7 d14prof  -21.5 d13  -91.3 | sink 2.69 | ss 4 
+STC k4  W40 f0.50          | dlik  -3433.7 | exc75/95  59.2/ 79.0 (z +1.3/+3.6) | DIC grad 364.3 (z +4.6) | PI L2/L6/bot-ML   -58/ +140/ +323 | bomb  -91.6 co2  -547.7 d14prof  -17.2 d13  -61.5 | sink 2.75 | ss 4 
+STC k1  W10 f0.35          | dlik  -8406.2 | exc75/95  57.2/ 75.8 (z +1.1/+3.2) | DIC grad 387.0 (z +5.3) | PI L2/L6/bot-ML   -42/ +218/ +347 | bomb -507.6 co2 -1881.0 d14prof  -68.8 d13 -211.4 | sink 2.50 | ss 4 
+STC k2  W10 f0.35          | dlik  -8368.4 | exc75/95  57.3/ 75.9 (z +1.1/+3.2) | DIC grad 386.7 (z +5.3) | PI L2/L6/bot-ML   -43/ +217/ +347 | bomb -498.7 co2 -1856.0 d14prof  -68.4 d13 -208.4 | sink 2.50 | ss 4 
+STC k3  W10 f0.35          | dlik  -8237.9 | exc75/95  57.4/ 76.1 (z +1.1/+3.2) | DIC grad 385.9 (z +5.3) | PI L2/L6/bot-ML   -44/ +215/ +346 | bomb -466.2 co2 -1771.2 d14prof  -66.8 d13 -198.4 | sink 2.52 | ss 4 
+STC k4  W10 f0.35          | dlik  -7940.0 | exc75/95  57.6/ 76.5 (z +1.1/+3.3) | DIC grad 383.7 (z +5.2) | PI L2/L6/bot-ML   -44/ +208/ +344 | bomb -395.1 co2 -1575.1 d14prof  -61.6 d13 -176.8 | sink 2.54 | ss 4 
+STC k1  W20 f0.35          | dlik  -8403.3 | exc75/95  57.2/ 75.8 (z +1.1/+3.2) | DIC grad 386.9 (z +5.3) | PI L2/L6/bot-ML   -42/ +218/ +347 | bomb -506.8 co2 -1879.3 d14prof  -68.8 d13 -211.1 | sink 2.50 | ss 4 
+STC k2  W20 f0.35          | dlik  -8330.2 | exc75/95  57.3/ 75.9 (z +1.1/+3.2) | DIC grad 386.4 (z +5.3) | PI L2/L6/bot-ML   -44/ +217/ +347 | bomb -489.6 co2 -1831.0 d14prof  -68.0 d13 -205.2 | sink 2.51 | ss 4 
+STC k3  W20 f0.35          | dlik  -8089.3 | exc75/95  57.6/ 76.3 (z +1.1/+3.3) | DIC grad 384.8 (z +5.3) | PI L2/L6/bot-ML   -45/ +212/ +345 | bomb -430.3 co2 -1673.9 d14prof  -65.0 d13 -186.8 | sink 2.53 | ss 4 
+STC k4  W20 f0.35          | dlik  -7585.0 | exc75/95  57.9/ 77.0 (z +1.2/+3.4) | DIC grad 381.1 (z +5.1) | PI L2/L6/bot-ML   -47/ +199/ +341 | bomb -311.9 co2 -1340.2 d14prof  -56.3 d13 -150.0 | sink 2.58 | ss 4 
+STC k1  W40 f0.35          | dlik  -8397.9 | exc75/95  57.3/ 75.8 (z +1.1/+3.2) | DIC grad 386.9 (z +5.3) | PI L2/L6/bot-ML   -42/ +218/ +347 | bomb -505.3 co2 -1876.2 d14prof  -68.7 d13 -210.5 | sink 2.50 | ss 4 
+STC k2  W40 f0.35          | dlik  -8260.4 | exc75/95  57.4/ 76.0 (z +1.1/+3.2) | DIC grad 385.8 (z +5.3) | PI L2/L6/bot-ML   -46/ +215/ +346 | bomb -473.1 co2 -1785.2 d14prof  -67.2 d13 -199.3 | sink 2.51 | ss 4 
+STC k3  W40 f0.35          | dlik  -7845.1 | exc75/95  57.8/ 76.6 (z +1.2/+3.3) | DIC grad 383.1 (z +5.2) | PI L2/L6/bot-ML   -49/ +207/ +343 | bomb -372.7 co2 -1512.6 d14prof  -62.0 d13 -167.5 | sink 2.55 | ss 4 
+STC k4  W40 f0.35          | dlik  -7095.6 | exc75/95  58.4/ 77.8 (z +1.2/+3.5) | DIC grad 377.2 (z +5.0) | PI L2/L6/bot-ML   -50/ +186/ +337 | bomb -202.2 co2 -1012.2 d14prof  -49.0 d13 -112.3 | sink 2.64 | ss 4 
+STC k1  W10 f0.20          | dlik -23808.6 | exc75/95  55.6/ 73.1 (z +0.9/+2.9) | DIC grad 413.7 (z +6.3) | PI L2/L6/bot-ML   -19/ +318/ +376 | bomb -1163.0 co2 -3909.4 d14prof -218.2 d13 -433.2 | sink 2.28 | ss 4 
+STC k2  W10 f0.20          | dlik -23701.0 | exc75/95  55.7/ 73.2 (z +0.9/+2.9) | DIC grad 413.1 (z +6.3) | PI L2/L6/bot-ML   -22/ +317/ +375 | bomb -1135.3 co2 -3841.1 d14prof -216.3 d13 -424.6 | sink 2.29 | ss 4 
+STC k3  W10 f0.20          | dlik -23344.6 | exc75/95  55.9/ 73.5 (z +0.9/+2.9) | DIC grad 411.3 (z +6.2) | PI L2/L6/bot-ML   -24/ +312/ +373 | bomb -1038.9 co2 -3619.8 d14prof -208.5 d13 -397.6 | sink 2.31 | ss 4 
+STC k4  W10 f0.20          | dlik -22659.2 | exc75/95  56.1/ 74.1 (z +0.9/+3.0) | DIC grad 407.0 (z +6.0) | PI L2/L6/bot-ML   -25/ +298/ +368 | bomb -874.7 co2 -3178.7 d14prof -185.7 d13 -348.3 | sink 2.35 | ss 4 
+STC k1  W20 f0.20          | dlik -23802.7 | exc75/95  55.6/ 73.1 (z +0.9/+2.9) | DIC grad 413.7 (z +6.3) | PI L2/L6/bot-ML   -19/ +318/ +376 | bomb -1161.5 co2 -3905.8 d14prof -218.1 d13 -432.6 | sink 2.28 | ss 4 
+STC k2  W20 f0.20          | dlik -23597.3 | exc75/95  55.8/ 73.3 (z +0.9/+2.9) | DIC grad 412.6 (z +6.2) | PI L2/L6/bot-ML   -24/ +315/ +374 | bomb -1108.9 co2 -3775.2 d14prof -214.5 d13 -416.2 | sink 2.29 | ss 4 
+STC k3  W20 f0.20          | dlik -22960.0 | exc75/95  56.1/ 73.9 (z +1.0/+3.0) | DIC grad 409.3 (z +6.1) | PI L2/L6/bot-ML   -28/ +306/ +371 | bomb -938.5 co2 -3377.4 d14prof -200.6 d13 -368.0 | sink 2.33 | ss 4 
+STC k4  W20 f0.20          | dlik -21849.2 | exc75/95  56.5/ 74.9 (z +1.0/+3.1) | DIC grad 402.3 (z +5.9) | PI L2/L6/bot-ML   -29/ +283/ +363 | bomb -675.5 co2 -2657.8 d14prof -165.4 d13 -288.2 | sink 2.41 | ss 4 
+STC k1  W40 f0.20          | dlik -23791.2 | exc75/95  55.6/ 73.1 (z +0.9/+2.9) | DIC grad 413.6 (z +6.3) | PI L2/L6/bot-ML   -19/ +318/ +376 | bomb -1158.5 co2 -3898.8 d14prof -217.9 d13 -431.5 | sink 2.28 | ss 4 
+STC k2  W40 f0.20          | dlik -23414.9 | exc75/95  55.9/ 73.4 (z +0.9/+2.9) | DIC grad 411.5 (z +6.2) | PI L2/L6/bot-ML   -29/ +313/ +373 | bomb -1063.0 co2 -3658.9 d14prof -211.3 d13 -401.3 | sink 2.30 | ss 4 
+STC k3  W40 f0.20          | dlik -22371.4 | exc75/95  56.6/ 74.5 (z +1.0/+3.0) | DIC grad 406.1 (z +6.0) | PI L2/L6/bot-ML   -34/ +298/ +368 | bomb -789.9 co2 -3001.4 d14prof -188.9 d13 -322.3 | sink 2.37 | ss 4 
+STC k4  W40 f0.20          | dlik -20814.5 | exc75/95  57.1/ 76.1 (z +1.1/+3.3) | DIC grad 396.2 (z +5.7) | PI L2/L6/bot-ML   -35/ +264/ +357 | bomb -431.7 co2 -1980.4 d14prof -141.7 d13 -210.9 | sink 2.49 | ss 4 
+stage 1 done in 43 s
+
+== P1 (not inert where kz falls): |dlik(W=20) - dlik(W=0)| at f <= 0.5 ==
+  THC k1  f0.50: W0  -4059.1  W20  -3463.9  |diff|  595.1 -> MOVES
+  THC k1  f0.35: W0  -8409.0  W20  -7090.3  |diff| 1318.7 -> MOVES
+  THC k1  f0.20: W0 -23814.7  W20 -21122.5  |diff| 2692.2 -> MOVES
+  THC k2  f0.50: W0  -4059.1  W20  -3463.6  |diff|  595.5 -> MOVES
+  THC k2  f0.35: W0  -8409.0  W20  -7084.1  |diff| 1324.9 -> MOVES
+  THC k2  f0.20: W0 -23814.7  W20 -21099.2  |diff| 2715.5 -> MOVES
+  THC k3  f0.50: W0  -4059.1  W20  -3449.3  |diff|  609.8 -> MOVES
+  THC k3  f0.35: W0  -8409.0  W20  -7036.2  |diff| 1372.8 -> MOVES
+  THC k3  f0.20: W0 -23814.7  W20 -20944.0  |diff| 2870.7 -> MOVES
+  THC k4  f0.50: W0  -4059.1  W20  -3407.5  |diff|  651.5 -> MOVES
+  THC k4  f0.35: W0  -8409.0  W20  -6911.1  |diff| 1497.9 -> MOVES
+  THC k4  f0.20: W0 -23814.7  W20 -20602.4  |diff| 3212.3 -> MOVES
+  THC k6  f0.50: W0  -4059.1  W20  -3320.6  |diff|  738.5 -> MOVES
+  THC k6  f0.35: W0  -8409.0  W20  -6605.0  |diff| 1804.0 -> MOVES
+  THC k6  f0.20: W0 -23814.7  W20 -20005.8  |diff| 3808.9 -> MOVES
+  THC k8  f0.50: W0  -4059.1  W20  -3335.4  |diff|  723.7 -> MOVES
+  THC k8  f0.35: W0  -8409.0  W20  -6577.7  |diff| 1831.3 -> MOVES
+  THC k8  f0.20: W0 -23814.7  W20 -19985.2  |diff| 3829.5 -> MOVES
+  THC k10 f0.50: W0  -4059.1  W20  -3784.9  |diff|  274.2 -> MOVES
+  THC k10 f0.35: W0  -8409.0  W20  -7106.4  |diff| 1302.6 -> MOVES
+  THC k10 f0.20: W0 -23814.7  W20 -20614.4  |diff| 3200.3 -> MOVES
+  STC k1  f0.50: W0  -4059.1  W20  -4056.7  |diff|    2.3 -> inert
+  STC k1  f0.35: W0  -8409.0  W20  -8403.3  |diff|    5.7 -> MOVES
+  STC k1  f0.20: W0 -23814.7  W20 -23802.7  |diff|   12.0 -> MOVES
+  STC k2  f0.50: W0  -4059.1  W20  -4025.4  |diff|   33.7 -> MOVES
+  STC k2  f0.35: W0  -8409.0  W20  -8330.2  |diff|   78.8 -> MOVES
+  STC k2  f0.20: W0 -23814.7  W20 -23597.3  |diff|  217.4 -> MOVES
+  STC k3  f0.50: W0  -4059.1  W20  -3918.2  |diff|  140.8 -> MOVES
+  STC k3  f0.35: W0  -8409.0  W20  -8089.3  |diff|  319.7 -> MOVES
+  STC k3  f0.20: W0 -23814.7  W20 -22960.0  |diff|  854.7 -> MOVES
+  STC k4  f0.50: W0  -4059.1  W20  -3673.2  |diff|  385.9 -> MOVES
+  STC k4  f0.35: W0  -8409.0  W20  -7585.0  |diff|  824.0 -> MOVES
+  STC k4  f0.20: W0 -23814.7  W20 -21849.2  |diff| 1965.5 -> MOVES
+
+== P2 (return depth, THC at W 20): the CO2 rows by k ==
+  f1.00: k1 -541  k2 -544  k3 -553  k4 -578  k6 -802  k8 -1037  k10 -1000
+  f0.70: k1 -220  k2 -224  k3 -229  k4 -240  k6 -352  k8 -449  k10 -427
+  f0.50: k1 -256  k2 -258  k3 -254  k4 -238  k6 -202  k8 -213  k10 -209
+  f0.35: k1 -605  k2 -604  k3 -580  k4 -513  k6 -300  k8 -267  k10 -286
+  f0.20: k1 -1650  k2 -1640  k3 -1555  k4 -1356  k6 -899  k8 -875  k10 -930
+
+== P3: THC k1 W20 f1 (T-A0's geometry with HS water): dlik -1413.4, d14c_profile rows -260.9 vs T-A0's -135 / -104 -> FAIL (HS water does not help at this geometry) ==
+
+== STAGE 2: arm C re-optimisation ==
+SEEDING w_eq for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+HARNESS GATE 4: rebuilt logpost -1426.2428 (shift -3.5874) vs stored -1426.2428 -> PASS
+selected for arm C (best raw per arm x k; the control at every f):
+       arm  k  W    f   dlik_raw
+1      THC  1 10 1.00  -980.2623
+2      THC  2 10 1.00  -981.3242
+3      THC  3 10 1.00  -983.5088
+4      THC  4 10 1.00  -989.3121
+5      THC  6 10 1.00 -1046.3649
+6      THC  8 10 1.00 -1104.6942
+7      THC 10 10 1.00 -1154.7142
+8      STC  1 10 1.00  -895.3513
+9      STC  2 10 1.00  -895.7799
+10     STC  3 10 1.00  -895.7944
+11     STC  4 10 1.00  -896.5247
+12 CONTROL  0  0 1.00     0.0000
+13 CONTROL  0  0 0.70  -296.4530
+14 CONTROL  0  0 0.50 -1105.0494
+15 CONTROL  0  0 0.35 -2498.1674
+16 CONTROL  0  0 0.20 -5688.3550
+armC THC     k1  W10 f1.00: raw   -980.3 -> armC   -276.1 (1652 evals; kz_deep_frac 0.0689 h_ml 58.1 k_w 1680 bomb_total 119.0 sigma_d14c 5.46) | dlik   -276.1 | exc75/95  62.0/ 82.9 (z +1.7/+4.1) | DIC grad 269.4 (z +1.2) | PI L2/L6/bot-ML   -66/  +76/ +224 | bomb   -0.4 co2  -217.5 d14prof  -17.4 d13  -29.1 | sink 3.13 | ss 4  [388 s]
+        largest rows: co2_seasonal_SPO -207.5, d13c_seasonal_MLO -19.9, d14c_profile_level -17.6, d13c_level_MLO -15.6, ocean_grad_alk -11.4
+armC THC     k2  W10 f1.00: raw   -981.3 -> armC   -276.7 (1642 evals; kz_deep_frac 0.0689 h_ml 58.1 k_w 1680 bomb_total 119.0 sigma_d14c 5.46) | dlik   -276.7 | exc75/95  62.0/ 82.9 (z +1.7/+4.1) | DIC grad 269.4 (z +1.2) | PI L2/L6/bot-ML   -66/  +76/ +224 | bomb   -0.4 co2  -218.1 d14prof  -17.4 d13  -29.2 | sink 3.13 | ss 4  [387 s]
+        largest rows: co2_seasonal_SPO -208.1, d13c_seasonal_MLO -20.0, d14c_profile_level -17.6, d13c_level_MLO -15.6, ocean_grad_alk -11.4
+armC THC     k3  W10 f1.00: raw   -983.5 -> armC   -277.5 (1600 evals; kz_deep_frac 0.0688 h_ml 58.0 k_w 1679 bomb_total 119.0 sigma_d14c 5.46) | dlik   -277.5 | exc75/95  62.1/ 83.0 (z +1.7/+4.2) | DIC grad 269.3 (z +1.2) | PI L2/L6/bot-ML   -66/  +75/ +224 | bomb   -0.5 co2  -218.7 d14prof  -17.3 d13  -29.3 | sink 3.13 | ss 4  [360 s]
+        largest rows: co2_seasonal_SPO -208.6, d13c_seasonal_MLO -20.0, d14c_profile_level -17.6, d13c_level_MLO -15.7, ocean_grad_alk -11.4
+armC THC     k4  W10 f1.00: raw   -989.3 -> armC   -282.1 (1672 evals; kz_deep_frac 0.0710 h_ml 71.1 k_w 1674 bomb_total 119.6 sigma_d14c 5.58) | dlik   -282.1 | exc75/95  62.7/ 83.8 (z +1.8/+4.3) | DIC grad 280.3 (z +1.7) | PI L2/L6/bot-ML   -66/  +82/ +235 | bomb   -3.1 co2  -211.9 d14prof  -18.9 d13  -28.8 | sink 3.17 | ss 4  [401 s]
+        largest rows: co2_seasonal_SPO -201.9, d13c_seasonal_MLO -20.1, d14c_profile_level -19.3, ocean_grad_alk -19.2, d13c_level_MLO -15.3
+armC THC     k6  W10 f1.00: raw  -1046.4 -> armC   -289.9 (1614 evals; kz_deep_frac 0.0643 h_ml 54.6 k_w 1686 bomb_total 119.4 sigma_d14c 5.62) | dlik   -289.9 | exc75/95  62.4/ 83.5 (z +1.7/+4.2) | DIC grad 265.4 (z +1.1) | PI L2/L6/bot-ML   -67/  +68/ +220 | bomb   -3.4 co2  -226.5 d14prof  -18.8 d13  -29.2 | sink 3.16 | ss 4  [365 s]
+        largest rows: co2_seasonal_SPO -215.6, d13c_seasonal_MLO -20.7, d14c_profile_level -18.7, d13c_level_MLO -14.8, ocean_grad_alk -11.5
+armC THC     k8  W10 f1.00: raw  -1104.7 -> armC   -313.3 (1671 evals; kz_deep_frac 0.0526 h_ml 46.9 k_w 1686 bomb_total 119.0 sigma_d14c 5.55) | dlik   -313.3 | exc75/95  62.0/ 83.1 (z +1.7/+4.2) | DIC grad 253.5 (z +0.6) | PI L2/L6/bot-ML   -69/  +43/ +209 | bomb   -1.7 co2  -236.3 d14prof  -30.5 d13  -31.9 | sink 3.16 | ss 4  [407 s]
+        largest rows: co2_seasonal_SPO -224.0, d14c_profile_level -30.2, d13c_seasonal_MLO -21.2, d13c_level_MLO -17.5, ocean_grad_alk -12.5
+armC THC     k10 W10 f1.00: raw  -1154.7 -> armC   -318.6 (1579 evals; kz_deep_frac 0.0491 h_ml 44.0 k_w 1688 bomb_total 118.8 sigma_d14c 5.51) | dlik   -318.6 | exc75/95  61.9/ 82.8 (z +1.7/+4.1) | DIC grad 246.6 (z +0.4) | PI L2/L6/bot-ML   -69/  +39/ +202 | bomb   -0.9 co2  -239.1 d14prof  -33.1 d13  -32.3 | sink 3.15 | ss 4  [362 s]
+        largest rows: co2_seasonal_SPO -226.6, d14c_profile_level -30.3, d13c_seasonal_MLO -21.2, d13c_level_MLO -17.9, ocean_grad_alk -12.4
+armC STC     k1  W10 f1.00: raw   -895.4 -> armC   -285.9 (1633 evals; kz_deep_frac 0.0805 h_ml 55.2 k_w 1670 bomb_total 118.3 sigma_d14c 5.40) | dlik   -285.9 | exc75/95  61.1/ 81.7 (z +1.6/+4.0) | DIC grad 295.5 (z +2.1) | PI L2/L6/bot-ML   -67/  +55/ +252 | bomb   +1.6 co2  -222.8 d14prof  -33.0 d13  -25.3 | sink 3.04 | ss 4  [386 s]
+        largest rows: co2_seasonal_SPO -213.9, d14c_profile_ab -26.7, d13c_seasonal_MLO -19.4, d13c_level_MLO -10.9, d14c_profile_bd -7.1
+armC STC     k2  W10 f1.00: raw   -895.8 -> armC   -286.5 (1637 evals; kz_deep_frac 0.0803 h_ml 55.1 k_w 1670 bomb_total 118.3 sigma_d14c 5.40) | dlik   -286.5 | exc75/95  61.2/ 81.7 (z +1.6/+4.0) | DIC grad 295.5 (z +2.1) | PI L2/L6/bot-ML   -68/  +55/ +252 | bomb   +1.6 co2  -223.3 d14prof  -33.0 d13  -25.4 | sink 3.04 | ss 4  [365 s]
+        largest rows: co2_seasonal_SPO -214.3, d14c_profile_ab -26.6, d13c_seasonal_MLO -19.5, d13c_level_MLO -11.0, d14c_profile_bd -7.0
+armC STC     k3  W10 f1.00: raw   -895.8 -> armC   -287.2 (1667 evals; kz_deep_frac 0.0793 h_ml 54.9 k_w 1669 bomb_total 118.4 sigma_d14c 5.40) | dlik   -287.2 | exc75/95  61.2/ 81.8 (z +1.6/+4.0) | DIC grad 295.5 (z +2.1) | PI L2/L6/bot-ML   -68/  +55/ +252 | bomb   +1.4 co2  -223.8 d14prof  -32.8 d13  -25.5 | sink 3.04 | ss 4  [382 s]
+        largest rows: co2_seasonal_SPO -214.7, d14c_profile_ab -26.6, d13c_seasonal_MLO -19.5, d13c_level_MLO -11.1, d14c_profile_bd -6.9
+armC STC     k4  W10 f1.00: raw   -896.5 -> armC   -287.8 (1679 evals; kz_deep_frac 0.0676 h_ml 49.3 k_w 1669 bomb_total 118.2 sigma_d14c 5.42) | dlik   -287.8 | exc75/95  61.0/ 81.5 (z +1.6/+4.0) | DIC grad 293.0 (z +1.9) | PI L2/L6/bot-ML   -68/  +51/ +250 | bomb   +1.5 co2  -228.3 d14prof  -27.3 d13  -25.9 | sink 3.02 | ss 4  [395 s]
+        largest rows: co2_seasonal_SPO -218.9, d14c_profile_ab -23.6, d13c_seasonal_MLO -19.5, d13c_level_MLO -11.5, ocean_grad_alk -6.7
+armC CONTROL k0  W0  f1.00: raw     +0.0 -> armC     +0.0 (1017 evals; kz_deep_frac 0.0117 h_ml 65.2 k_w 1637 bomb_total 118.4 sigma_d14c 5.47) | dlik     +0.0 | exc75/95  60.7/ 81.4 (z +1.5/+3.9) | DIC grad 302.8 (z +2.4) | PI L2/L6/bot-ML    +5/ +181/ +254 | bomb   -0.0 co2    +0.0 d14prof   +0.0 d13   -0.0 | sink 2.97 | ss 4  [184 s]
+        largest rows: d13c_seasonal_MLO -0.0, d13c_level_SPO -0.0, co2_icecore -0.0, d14c_SH -0.0, d13c_seasonal_SPO -0.0
+armC CONTROL k0  W0  f0.70: raw   -296.5 -> armC    -19.2 (1622 evals; kz_deep_frac 0.0408 h_ml 71.9 k_w 1637 bomb_total 116.3 sigma_d14c 5.74) | dlik    -19.2 | exc75/95  58.6/ 78.3 (z +1.3/+3.5) | DIC grad 300.8 (z +2.4) | PI L2/L6/bot-ML    -1/ +180/ +252 | bomb   -1.0 co2    -4.8 d14prof   -2.8 d13   +0.2 | sink 2.82 | ss 4  [340 s]
+        largest rows: gcb_ocean_sink -6.9, d14c_SH -5.6, co2_seasonal_SPO -4.9, d13c_level_MLO -3.0, d14c_profile_ab -2.6
+armC CONTROL k0  W0  f0.50: raw  -1105.0 -> armC    -86.4 (1600 evals; kz_deep_frac 0.0334 h_ml 74.7 k_w 1652 bomb_total 114.2 sigma_d14c 7.47) | dlik    -86.4 | exc75/95  56.5/ 74.9 (z +1.0/+3.1) | DIC grad 301.5 (z +2.5) | PI L2/L6/bot-ML    -8/ +183/ +254 | bomb  -26.8 co2   -15.2 d14prof   -9.0 d13   -3.5 | sink 2.65 | ss 7  [401 s]
+        largest rows: d14c_SH -22.1, gcb_ocean_sink -21.1, co2_seasonal_SPO -13.5, d14c_profile_level -10.2, d13c_level_MLO -7.4
+armC CONTROL k0  W0  f0.35: raw  -2498.2 -> armC   -133.6 (1694 evals; kz_deep_frac 0.2985 h_ml 74.9 k_w 1657 bomb_total 113.4 sigma_d14c 7.00) | dlik   -133.6 | exc75/95  55.4/ 73.6 (z +0.9/+2.9) | DIC grad 294.3 (z +2.2) | PI L2/L6/bot-ML   -14/ +175/ +247 | bomb  -33.9 co2   -36.3 d14prof  -15.5 d13  -21.5 | sink 2.66 | ss 6  [369 s]
+        largest rows: d14c_SH -24.5, gcb_ocean_sink -21.4, d13c_level_MLO -21.3, co2_seasonal_SPO -11.6, co2_level_SPO -10.5
+armC CONTROL k0  W0  f0.20: raw  -5688.4 -> armC   -223.6 (1683 evals; kz_deep_frac 0.9900 h_ml 65.3 k_w 1704 bomb_total 111.3 sigma_d14c 9.61) | dlik   -223.6 | exc75/95  53.8/ 71.1 (z +0.7/+2.6) | DIC grad 291.3 (z +2.0) | PI L2/L6/bot-ML    -9/ +179/ +247 | bomb  -53.1 co2   -99.5 d14prof  -16.6 d13   -9.4 | sink 2.51 | ss 4  [399 s]
+        largest rows: co2_seasonal_SPO -96.1, gcb_ocean_sink -37.3, d14c_SH -32.6, d14c_NH -20.5, d14c_profile_bd -14.0
+
+== STAGE 3: tau_q x 0.5/2 at the best THC point (k1 W10 f1.00), raw path ==
+THC best, tau_q x0.5       | dlik  -1249.4 | exc75/95  61.0/ 82.0 (z +1.6/+4.0) | DIC grad 241.6 (z +0.3) | PI L2/L6/bot-ML   -65/  +94/ +194 | bomb   -2.3 co2  -511.3 d14prof -129.6 d13   -5.1 | sink 3.14 | ss 4 
+THC best, tau_q x2.0       | dlik  -1202.2 | exc75/95  60.6/ 81.2 (z +1.5/+3.9) | DIC grad 330.6 (z +3.4) | PI L2/L6/bot-ML   -66/ +100/ +287 | bomb   -2.1 co2  -277.7 d14prof -305.4 d13  -10.8 | sink 2.99 | ss 4 
+
+== THE DECISION RULE (a) |z exc1995| <= 1; (b) |z DIC grad| <= 1; (c) armC dlik >= CONTROL armC dlik at the same f; (d) PI layer 2 not inverted (L2 - ML >= 0) ==
+   arm  k  W f armC  control z_exc95 z_dic L2mML     a     b     c     d  PASS
+1  THC  1 10 1 -276 6.27e-05    4.15 1.220 -65.8 FALSE FALSE FALSE FALSE FALSE
+2  THC  2 10 1 -277 6.27e-05    4.15 1.218 -65.8 FALSE FALSE FALSE FALSE FALSE
+3  THC  3 10 1 -277 6.27e-05    4.15 1.213 -66.0 FALSE FALSE FALSE FALSE FALSE
+4  THC  4 10 1 -282 6.27e-05    4.26 1.676 -65.9 FALSE FALSE FALSE FALSE FALSE
+5  THC  6 10 1 -290 6.27e-05    4.23 1.074 -67.4 FALSE FALSE FALSE FALSE FALSE
+6  THC  8 10 1 -313 6.27e-05    4.17 0.625 -69.0 FALSE  TRUE FALSE FALSE FALSE
+7  THC 10 10 1 -319 6.27e-05    4.14 0.409 -69.5 FALSE  TRUE FALSE FALSE FALSE
+8  STC  1 10 1 -286 6.27e-05    3.99 2.078 -67.4 FALSE FALSE FALSE FALSE FALSE
+9  STC  2 10 1 -286 6.27e-05    3.99 2.076 -67.6 FALSE FALSE FALSE FALSE FALSE
+10 STC  3 10 1 -287 6.27e-05    4.00 2.075 -67.7 FALSE FALSE FALSE FALSE FALSE
+11 STC  4 10 1 -288 6.27e-05    3.96 1.861 -68.4 FALSE FALSE FALSE FALSE FALSE
+
+VERDICT: NO point passes (a)-(d): O1 is REFUTED AS BUILT under this probe; O2 (document) is the honest end state -- reported, not patched.
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/o1_deep_return_scan_20260915.{log,rds}

@@ -570,7 +570,7 @@ test_that("rho is gone and the parameter vector is self-consistent", {
   # 29 SINCE 2026-09-07: h_hs fitted (decoupled from h_ml after the first refit).
   # 33 SINCE 2026-09-13i: w_eq and gamma_eq, the equatorial cell's two fitted names
   # (identifiable only under the "hilda_eq" structure label).
-  expect_length(CCX_PARAM_NAMES, 36L)   # 33 + option D+E's three (2026-09-14 h)
+  expect_length(CCX_PARAM_NAMES, 37L)   # 36 + w_thc (O1 arm THC, 2026-09-15 d); 33 + option D+E's three (2026-09-14 h)
   expect_true(all(c("kz_deep_frac", "hs_asx_frac", "h_hs", "pump_hs_gcm2", "u_hs", "w_eq", "gamma_eq") %in% CCX_PARAM_NAMES))
   expect_true("ent_seas_amp_SH" %in% CCX_PARAM_NAMES)
   expect_true(all(CCX_ENSO_PARAMS %in% CCX_PARAM_NAMES))

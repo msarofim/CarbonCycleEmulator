@@ -85,7 +85,7 @@ test_that("the box ships OFF, off means ABSENT, and the structure is READ from t
   expect_false(anyDuplicated(names(ccx_struct_hilda_tr())) > 0)
   # the fitted names are NOT set by the structure; q_tr stays 0 (R4)
   expect_identical(pt$w_eq, 0); expect_identical(pt$gamma_eq, 0); expect_identical(pt$q_tr, 0)
-  expect_identical(length(CCX_PARAM_NAMES), 36L)                     # no new fitted name from THIS build (36 = 33 + option D+E's three, 2026-09-14 h)
+  expect_identical(length(CCX_PARAM_NAMES), 37L)                     # no new fitted name from THIS build (37 = 36 + w_thc, O1 arm THC 2026-09-15 d; 36 = 33 + option D+E's three, 2026-09-14 h)
 })
 
 test_that("P0f MIRROR LINT: a mixed pair errors by name; order, stride and the area partition; checks by name; the D1 guard", {

@@ -48,8 +48,8 @@ test_that("the names ship OFF and their defaults are the 09-14 g model; the fiel
   expect_true(ccx_eq_on(q))                                       # the axis composes with every label
   expect_identical(ccx_const("MARTIN_B"), 0.858)
   expect_identical(CCX_CONSTANTS$MARTIN_B$status, "cited")
-  expect_setequal(intersect(CCX_PARAM_NAMES, c("pump_export", "w_vent", "gamma_vent", "w_thc"))   # + O1 arm THC (2026-09-15 d),
-                  c("pump_export", "w_vent", "gamma_vent", "w_thc"))   # + O1 arm THC (2026-09-15 d)
+  expect_setequal(intersect(CCX_PARAM_NAMES, c("pump_export", "w_vent", "gamma_vent")),
+                  c("pump_export", "w_vent", "gamma_vent"))
   expect_true(all(c("pump_export", "w_vent", "gamma_vent") %in% CCX_PARAM_ABSENT_OK))
   # the table's init REPEATS the product's median (the table is built before ccx_path exists)
   expect_equal(CCX_PARAM_TABLE$pump_export$init, ccx_pump_export_prior()$centre_gtc, tolerance = 5e-3)
