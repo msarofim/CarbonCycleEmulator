@@ -1,0 +1,89 @@
+CCX_PROJ_DIR  /scratch/ms17839/CarbonCycleEmulator
+CCX_MS_OUTDIR /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+CCX_MS_STRUCT hilda_c   CCX_MS_SEAS_ML 1   CCX_MS_PUMP_FIELD martin   CCX_MS_SPREAD 1.0452   CCX_MS_PIN 'ent_seas_amp_SH=0,pump_grad=314.1031,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0'
+host cs734.hpc.nyu.edu  task 1  2026-09-15T01:12:59-04:00
+PINNED (removed from the fitted set, held in the base): ent_seas_amp_SH = 0, pump_grad = 314.1031, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0 -> 32 free parameters
+run-time inputs present: 8/8. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+SEEDING w_eq for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_eq for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_eq for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_eq for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.2414204)
+
+======================================================================
+DISPERSED MULTI-START, id 1, arm N, 32 parameters
+  host cs734.hpc.nyu.edu   R 4.5.1   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.2414, pooled over the 27 coordinates at least one of
+    them FITTED; over all 32 it would be 0.2218, diluted by the 5 migrated in BOTH:
+    w_eq, gamma_eq, pump_export, w_vent, gamma_vent)
+  out /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452/start_001.rds
+======================================================================
+  structure: 'hilda_c' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'martin' (PRESCRIBED export on the Martin profile + the ventilation loop -- option D+E; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -1e+06 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: reference: INCUMBENT = hilda30c (the canonical, under this array's pins; 09-12 objective, periodic spinup, seas_ml 1) (0 draws), log-post there = -2666.7198
+PORT GATE (a) at the incumbent reference point: here -2666.7197790059 vs MacBook-Pro-2.local@e6e0d4f -2666.7197215373,
+              rel 2.16e-08 (tol 1e-08)

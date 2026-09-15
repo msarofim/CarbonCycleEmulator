@@ -1,0 +1,8 @@
+Warning messages:
+1: In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+2: In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+Warning message:
+In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+Warning message:
+In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+There were 14 warnings (use warnings() to see them)

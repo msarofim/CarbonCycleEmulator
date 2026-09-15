@@ -1,0 +1,18 @@
+Warning messages:
+1: In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+2: In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+Warning message:
+In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+Warning message:
+In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+Warning messages:
+1: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 4.843e-07
+2: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 4.656e-08
+3: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 9.033e-03
+4: In spinup_fn(p) :
+  periodic spinup: carbon did not converge, |resid| = 4.716e+03
+5: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 2.654e-08

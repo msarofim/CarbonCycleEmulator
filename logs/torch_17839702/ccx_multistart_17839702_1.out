@@ -1,0 +1,120 @@
+CCX_PROJ_DIR  /scratch/ms17839/CarbonCycleEmulator
+CCX_MS_OUTDIR /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+CCX_MS_STRUCT hilda_c   CCX_MS_SEAS_ML 1   CCX_MS_PUMP_FIELD martin   CCX_MS_SPREAD 1.0452   CCX_MS_PIN 'ent_seas_amp_SH=0,pump_grad=314.1031,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0'
+host cs659.hpc.nyu.edu  task 1  2026-09-15T06:25:34-04:00
+PINNED (removed from the fitted set, held in the base): ent_seas_amp_SH = 0, pump_grad = 314.1031, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0 -> 32 free parameters
+run-time inputs present: 8/8. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+SEEDING w_eq for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_eq for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_eq for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_eq for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.2414204)
+
+======================================================================
+DISPERSED MULTI-START, id 1, arm N, 32 parameters
+  host cs659.hpc.nyu.edu   R 4.5.1   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.2414, pooled over the 27 coordinates at least one of
+    them FITTED; over all 32 it would be 0.2218, diluted by the 5 migrated in BOTH:
+    w_eq, gamma_eq, pump_export, w_vent, gamma_vent)
+  out /scratch/ms17839/CarbonCycleEmulator/calibration/output/multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452/start_001.rds
+======================================================================
+  structure: 'hilda_c' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'martin' (PRESCRIBED export on the Martin profile + the ventilation loop -- option D+E; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -1e+06 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: reference: INCUMBENT = hilda30c (the canonical, under this array's pins; 09-12 objective, periodic spinup, seas_ml 1) (0 draws), log-post there = -2666.7198
+PORT GATE (a) at the incumbent reference point: here -2666.7197790059 vs MacBook-Pro-2.local@e6e0d4f -2666.7197215373,
+              |diff| 5.747e-05 (rel 2.16e-08)
+              roundoff floor here: max |delta lp| 6.332e-05 over 12 perturbations of u by 1e-12 (median 2.632e-05; 0 non-finite)
+              bound = max(1e-08 x |target| = 2.667e-05, 3 x floor = 1.900e-04) = 1.900e-04; ceiling 1e-06 x |target| = 2.667e-03
+PORT GATE (a) PASSED.
+measured 0.4427 s/eval (median of 5; range 0.4359-0.4607) => one 6000-eval restart
+  projects to 44.3 min; wall budget 300 min, of which 45.0 min is RESERVED for the
+  BFGS polish (100 iterations)
+[001] cycle 1 restart  1: log-post =   -1505.0305 (gain  1161.6893) evals 6001  41.9 min
+[001] cycle 1 restart  2: log-post =   -1492.2054 (gain    12.8250) evals 12002  106.5 min
+[001] cycle 1 restart  3: log-post =   -1490.3427 (gain     1.8628) evals 18003  184.3 min
+[001] cycle 1 polish: SHORTENED to maxit 160 by the wall budget
+[001] cycle 1 polish: log-post = -1490.3427 (gain 0.0000)
+[001] === cycle 1 total gain 1176.3771 (log-post -1490.3427, 18360 evals, 188.6 min) ===
+[001] cycle 2 restart  1: SHORTENED to maxit 3413 by the wall budget
+[001] cycle 2 restart  1: log-post =   -1488.4996 (gain     1.8431) evals 21775  232.2 min
+[001] cycle 2 restart  2: SHORTENED to maxit 1173 by the wall budget
+[001] cycle 2 restart  2: log-post =   -1488.0014 (gain     0.4982) evals 22950  246.7 min
+[001] cycle 2 restart  3: SHORTENED to maxit 428 by the wall budget
+[001] cycle 2 restart  3: log-post =   -1488.0014 (gain     0.0000) evals 23381  251.6 min
+[001] cycle 2 polish: SHORTENED to maxit 67 by the wall budget
+[001] cycle 2 polish: log-post = -1488.0014 (gain 0.0000)
+[001] === cycle 2 total gain 2.3413 (log-post -1488.0014, 23560 evals, 253.8 min) ===
+[001] === cycle 3 total gain 0.0000 (log-post -1488.0014, 23560 evals, 253.8 min) ===
+*** [001] WALL BUDGET 300 min REACHED -- checkpointed, NOT converged.
+
+[001] FINAL log-post -1488.0014  (OUT OF TIME, 6 restarts, 23560 evals, 253.9 min)
+[001] eval rate 1.0312 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[001] PORT GATE (b) ordering: final -1488.0014 >= start -2666.7198. OK
+[001] for reference: the mode FILE stores -1426.2428; the difference from
+      this run's start value is objective drift, not a port defect.
+======================================================================
+done 2026-09-15T10:39:39-04:00

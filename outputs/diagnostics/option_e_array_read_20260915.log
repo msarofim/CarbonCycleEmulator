@@ -1,0 +1,52 @@
+
+==== canonical: refit_20260913_hilda30_cprime_pin_ent0 (logpost -1426.24, PINNED ent_seas_amp_SH=0 -- logpost not comparable to a free arm, MIGRATED 30->36)
+  struct hilda, seas_ml 1, pump_field solved; pins _pin_ent_seas_amp_SH=0
+  kz 10964 (deep frac 0.0117 -> 129), h_ml 65.2 m, substeps 4, export 45.46 GtC/yr (solved field, gross)
+  PI DIC minus ML (umol/kg, hemi mean): layer1 -168, layer2 +5, layer6 +181, bottom +254
+  modern surface-deep gradient: DIC 302.9 (target 233 +- 25.2, z +2.76), d13C -0.350 (target -0.861, z +4.58); deep D14C -190
+  ENSO ocean slope 0.067 = 0.58x obs, r +0.254
+  GATE GL (interhemispheric d13C level): model -0.1314 obs -0.0668 ratio 1.97x z -10.34 -> FAIL
+  loglik (25 rows) -1392.02; total logpost (own objective) -1426.2428 (stored)
+
+==== e_best: Torch 17839702 start_014 (logpost -1480.4720, dispersed about the COLD init, sd 1.0452)
+  struct hilda_c, seas_ml 1, pump_field martin; pins _pin_ent_seas_amp_SH=0.0000_pump_grad=314.1031_gamma_enso_ocn_NH=0.0000_gamma_enso_ocn_SH=0.0000
+  kz 8615 (deep frac 0.0887 -> 764), h_ml 38.2 m, substeps 4, export 8.35 GtC/yr, w_vent 243.4 Sv, gamma_vent 0.358
+  PI DIC minus ML (umol/kg, hemi mean): layer1 -138, layer2 -66, layer6 +79, bottom +311
+  modern surface-deep gradient: DIC 346.6 (target 233 +- 25.2, z +4.50), d13C -0.320 (target -0.861, z +4.85); deep D14C -169
+  ENSO ocean slope 0.042 = 0.36x obs, r +0.143
+  GATE GL (interhemispheric d13C level): model -0.1346 obs -0.0668 ratio 2.02x z -10.50 -> FAIL
+  loglik (25 rows) -1429.52; total logpost (own objective) -1480.4720
+
+==== e_incbasin: Torch 17839702 start_001 (logpost -1488.0014, reference: INCUMBENT = hilda30c (the canonical, under this array's pins; 09-12 objective, periodic spinup, seas_ml 1))
+  struct hilda_c, seas_ml 1, pump_field martin; pins _pin_ent_seas_amp_SH=0.0000_pump_grad=314.1031_gamma_enso_ocn_NH=0.0000_gamma_enso_ocn_SH=0.0000
+  kz 6811 (deep frac 0.1474 -> 1004), h_ml 74.8 m, substeps 10, export 6.62 GtC/yr, w_vent 217.3 Sv, gamma_vent 0.305
+  PI DIC minus ML (umol/kg, hemi mean): layer1 -200, layer2 -66, layer6 +93, bottom +304
+  modern surface-deep gradient: DIC 340.3 (target 233 +- 25.2, z +4.25), d13C -0.362 (target -0.861, z +4.48); deep D14C -168
+  ENSO ocean slope 0.053 = 0.46x obs, r +0.185
+  GATE GL (interhemispheric d13C level): model -0.1372 obs -0.0668 ratio 2.06x z -13.48 -> FAIL
+  loglik (25 rows) -1440.78; total logpost (own objective) -1488.0014
+
+==== PE READS (best start vs canonical; prereg §4) ====
+PE-1  kz at the ML base 8615 (canonical 10964, x1.27); requires < 4000 (> 2.7x): FAIL. Bomb rows d14c_NH+SH +0.82 vs the canonical (within 2 required): PASS
+PE-2  emergent DIC gradient 346.6 vs 233 +- 25.2 (z +4.50) at export 8.35 (prior 2sd 6.7-12.2): FAIL
+PE-4  d13C gradient |0.320| (canonical |0.350|; prereg: from 0.40 toward 0.89); GATE GL ratio 2.02x (canonical 1.97x; 'moves for the first time'): UNMOVED
+PE-5  ENSO ocean slope 0.36x obs (r +0.143) at gamma_vent 0.358, w_vent 243 Sv (canonical, option A: 0.58x, r +0.254)
+
+streams, best minus canonical (like-for-like, each under its own objective): total -37.5
+ d13c_seasonal_SPO     d13c_level_MLO     d13c_level_SPO  d13c_seasonal_MLO 
+             -9.27              -8.50              -6.04              -5.38 
+   d14c_profile_ab    d14c_profile_bd     ocean_grad_dic            d14c_SH 
+             -4.49              -3.11              -3.02              -2.60 
+      co2_gradient      co2_level_MLO   co2_seasonal_SPO        co2_icecore 
+             -2.18              -1.93              -1.15              -0.82 
+    ocean_grad_alk      co2_level_SPO        d14c_intcal      d13c_gradient 
+             -0.68              -0.47              -0.34              -0.26 
+  excess_c14_ocean        hs_surf_dic d14c_profile_level    ocean_grad_d13c 
+             -0.14              -0.12               0.31               0.73 
+      hs_surf_d13c      gcb_land_sink     gcb_ocean_sink            d14c_NH 
+              1.25               1.59               1.97               3.42 
+  co2_seasonal_MLO 
+              3.71 
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/option_e_array_read_20260915.rds 
+⛔ NOTHING IS ADOPTED; the mode is NOT promoted.

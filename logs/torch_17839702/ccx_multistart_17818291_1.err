@@ -1,0 +1,11 @@
+Warning messages:
+1: In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+2: In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+Warning message:
+In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+Warning message:
+In qlogis((v - s$lo)/(s$hi - s$lo)) : NaNs produced
+Error in eval(quote({ : 
+  PORT GATE (a) FAILED: this machine does not reproduce the objective at a FIXED point to 1e-08 relative. Every dispersed start in this array would then be optimising something other than the objective the reference modes were fitted on. STOP AND DIAGNOSE before submitting the survey.
+Calls: local -> eval.parent -> eval -> eval -> eval -> eval
+Execution halted
