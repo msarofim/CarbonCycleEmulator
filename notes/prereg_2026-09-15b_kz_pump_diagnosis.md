@@ -105,3 +105,22 @@ BECAUSE the partition moved (land substituting for ocean) or because the ocean's
   originally read the slab bomb-excess "against the rows"; that was a conflation and is replaced by the per-layer WHERE-IT-GOES
   read above. Consequence for the reading: the E array's −7.6 on the profile rows is a steady-state cost of deep K ×5.9, and
   PK-3 (the `kz_deep_frac` scan) is the probe that prices it — P3 stands.
+- **A2 (after the first PK-1 run, before any P-read; the run's log is `outputs/diagnostics/kz_pump_pathways_20260915.log`, first
+  attempt).** GATE PK-1g's tolerance reference was NOT like-for-like: the interior CARBON budget's net (~1 GtC/yr) is a ~2 %
+  residual of ~45 GtC/yr gross pump-in / diffusion-out terms, and the opening-state monthly rectangle rule misses ~50 % of it
+  (relative errors 0.33–0.52 at the four marks), while the ¹⁴C EXCESS budget has no such cancellation and closes to 0.1–0.5 %.
+  The carbon tap itself is COMPLETE (boxnet ≡ `dy[, "C"]` exactly at a `hilda30c` bomb-era state, checked directly). The gate
+  is re-derived as a tolerance SCALED TO THE QUANTITY IT RESOLVES: the ¹⁴C closure residual must be ≤ 0.1 × the SMALLEST
+  pathway's own cumulative contribution (so every share is resolved to a tenth of itself); the mutation (pump dropped) must
+  exceed that bound. The carbon closure is reported as a diagnostic alongside. No P-value was read before this amendment.
+- **A3 (POST-HOC — stamped after reading arms A/B of PK-2, log `outputs/diagnostics/kz_pump_scan_20260915.log`, first run).**
+  Arm B's read: the CO₂ rows recover (−0.2 at kz × 0.5), the δ¹³C level rows move −4.4 (P2B's δ¹³C prediction REFUTED), and the
+  charge that holds kz is the ATMOSPHERIC BOMB ROWS (−202 of −295) with `gcb_ocean_sink` −28 and `d14c_profile_level` −28 (the
+  latter a parametrisation coupling, K_deep = kz·f). Arm B held every ocean name. **Arm C added**: at kz × {0.5, 0.7, 1} the land
+  three PLUS `kz_deep_frac`, `h_ml`, `k_w`, `bomb_total`, `sigma_d14c` re-optimised — can the bomb rows be satisfied at low kz by
+  the SURFACE names alone, without a loop? **Prediction P2C (before the run):** at kz × 0.5 the bomb rows stay ≤ −100 (the
+  surface names recover less than half of −202: `h_ml` is a capacity the seasonal rows also price, 09-08c), `d14c_profile_level`
+  recovers to ≥ −5 (`kz_deep_frac` takes it), and the total stays ≤ −150. If the total at × 0.5 instead comes within 30 of the
+  mode, a lower-kz basin exists under the canonical structure and the mode is the finding. Also: the P4 statistic "δ¹³C of the
+  land uptake" is WITHDRAWN — it divides by a land ΔC that crosses zero along the scan (−23 → +17 GtC) and read +202 / −431 ‰; it
+  is replaced by the reservoirs' ¹³C-signal change in GtC-equivalent (`ΔC13/R_VPDB`), a magnitude with no denominator.
