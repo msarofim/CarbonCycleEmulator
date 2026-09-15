@@ -73,9 +73,10 @@ BECAUSE the partition moved (land substituting for ocean) or because the ocean's
   with no back-flux ceiling, flushed at 23.6 m/yr; the 09-06b "cold box takes too much" reading). If the HS route is > 35 %,
   the 09-14 (g) reading "diffusion carries the bomb ¹⁴C" is WRONG for the canonical and the structure question moves to the
   cold column. If the pump is > 20 %, the export IS a bomb-¹⁴C lever and the E result needs re-reading.
-- **P1b (mid-depth).** The slab-A/B (`d14c_profile_ab/bd` rows) bomb-excess inventory at 1995 arrives ≥ **70 %** by diffusion
-  from above, ≤ 30 % via the conduit (`hd → oc_k`). Basis: `tau_q` 538 yr on a_ls·dz_k volumes is 2–3 orders slower than
-  kz/dz² over the top 300 m.
+- **P1b (where it goes) — AMENDED before any run (§5).** By 1995 ≥ **80 %** of the ocean's bomb-excess ¹⁴C sits in the
+  ML + layers 1–4 (≤ 435 m) + HS + HD; of the excess that entered layers 1–4, ≥ **70 %** came by diffusion from above
+  (entrainment included), ≤ 30 % via the conduit (`hd → oc_k`). Basis: `tau_q` 538 yr on a_ls·dz_k volumes is 2–3 orders
+  slower than kz/dz² over the top 300 m.
 - **P2A (raw scan).** At kz × 0.5 the CO₂-level + ice-core rows carry the largest charge (the 09-08c behaviour); the bomb rows
   `d14c_NH + d14c_SH` charge ≥ **20** log-units combined (less ocean uptake ⇒ the 1965 atmospheric peak too high); the
   export halves to ~22.8 GtC/yr and the DIC-gradient row moves < 3 (the PI gradient is prescribed).
@@ -96,3 +97,11 @@ BECAUSE the partition moved (land substituting for ocean) or because the ocean's
   charge that a fourth name could absorb is over-stated. Arm B's ranking is a read of WHICH rows, not a price.
 - No σ changes, no new rows, no refit, no promotion. The scoping note that follows is the deliverable; the E array's
   `port_targets.csv` is stale for any other array and stays so until the next launch regenerates it.
+
+## 5. Amendments (stamped; the original text stays above where it is struck)
+- **A1 (before any run, after reading `ccx_model_d14c_slabs`, `R/likelihood.R:781`).** The `d14c_profile_ab/bd` rows read slabs
+  A = 1500–2000 m and B = 2000–2627 m FROM THE SPINUP STATE — steady-state NATURAL ¹⁴C, set by K_deep, the conduit and decay;
+  they are NOT bomb rows. The bomb rows are `d14c_NH/SH` (atmosphere) and `excess_c14_ocean` (the whole-ocean excess). P1b
+  originally read the slab bomb-excess "against the rows"; that was a conflation and is replaced by the per-layer WHERE-IT-GOES
+  read above. Consequence for the reading: the E array's −7.6 on the profile rows is a steady-state cost of deep K ×5.9, and
+  PK-3 (the `kz_deep_frac` scan) is the probe that prices it — P3 stands.
