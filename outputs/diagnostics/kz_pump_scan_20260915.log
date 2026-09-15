@@ -1,0 +1,235 @@
+== PK-2/3/4 the kz scan at hilda30c (prereg 2026-09-15b) ==
+kz x 0.35/0.5/0.7/1/1.4; kz_deep_frac canon/0.03/0.06/0.089/0.15; arm B re-optimises beta_max,fert_k,q10; gate tol 0.001
+
+SEEDING w_eq for the kz_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the kz_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the kz_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the kz_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the kz_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+HARNESS GATE: rebuilt logpost -1426.2428 (shift -2.0833) vs stored -1426.2428 -> PASS
+stored streams sum -1392.016 vs rebuilt -1392.016
+A kz x0.35 (3838): logpost -3925.36 (dlik -2498.17), export 15.9, ML exch 1.00/yr, DIC grad 302.7, sink 2.53, exc75/95 57.3/76.0, d13c_atm -8.629  [0 s]
+B kz x0.35: logpost -2147.18 (dlik -720.12) after 234 evals; beta_max 0.825 fert_k 309.9 q10 1.180; sink ocean/land 2.40/4.01; d13c_atm -8.543; dC ocean/land 177.9/17.3; light-13C excess ocean/land -7.53/-2.36 GtC-eq  [42 s]
+A kz x0.50 (5482): logpost -2531.83 (dlik -1105.05), export 22.7, ML exch 1.43/yr, DIC grad 302.4, sink 2.67, exc75/95 58.4/77.9, d13c_atm -8.589  [0 s]
+B kz x0.50: logpost -1721.28 (dlik -294.58) after 190 evals; beta_max 0.785 fert_k 305.0 q10 1.181; sink ocean/land 2.58/3.81; d13c_atm -8.532; dC ocean/land 190.1/4.7; light-13C excess ocean/land -7.89/-2.02 GtC-eq  [35 s]
+A kz x0.70 (7675): logpost -1722.93 (dlik -296.45), export 31.8, ML exch 2.01/yr, DIC grad 302.5, sink 2.81, exc75/95 59.5/79.6, d13c_atm -8.554  [0 s]
+B kz x0.70: logpost -1500.56 (dlik -74.14) after 422 evals; beta_max 0.749 fert_k 302.2 q10 1.180; sink ocean/land 2.76/3.61; d13c_atm -8.524; dC ocean/land 202.7/-8.3; light-13C excess ocean/land -8.24/-1.67 GtC-eq  [78 s]
+A kz x1.00 (10964): logpost -1426.24 (dlik +0.00), export 45.5, ML exch 2.87/yr, DIC grad 302.8, sink 2.97, exc75/95 60.7/81.4, d13c_atm -8.520  [0 s]
+B kz x1.00: logpost -1426.24 (dlik +0.00) after 386 evals; beta_max 0.712 fert_k 301.7 q10 1.179; sink ocean/land 2.97/3.39; d13c_atm -8.520; dC ocean/land 217.2/-23.0; light-13C excess ocean/land -8.64/-1.28 GtC-eq  [72 s]
+A kz x1.40 (15350): logpost -1705.08 (dlik -278.91), export 63.6, ML exch 4.01/yr, DIC grad 303.2, sink 3.13, exc75/95 61.7/83.0, d13c_atm -8.490  [0 s]
+B kz x1.40: logpost -1497.30 (dlik -71.08) after 250 evals; beta_max 0.681 fert_k 304.3 q10 1.176; sink ocean/land 3.19/3.17; d13c_atm -8.518; dC ocean/land 232.0/-37.7; light-13C excess ocean/land -9.03/-0.89 GtC-eq  [50 s]
+
+GATE PK-2g: arm B at kz x 1 reproduces the stored logpost: -1426.2428 vs -1426.2428 (|diff| 7.13e-07 vs 0.001) -> PASS
+
+-- arm A (raw): the 25 rows, delta vs the canonical --
+                      0.35     0.5     0.7 1     1.4
+co2_level_MLO      -782.08 -351.43  -90.36 0 -114.87
+co2_level_SPO      -826.42 -391.04 -116.20 0  -78.99
+co2_seasonal_MLO      2.41    2.59    1.82 0   -2.54
+co2_seasonal_SPO    -46.36  -20.21   -5.89 0    0.07
+d13c_seasonal_MLO    -0.88   -0.61   -0.32 0    0.29
+d13c_seasonal_SPO     0.48    0.33    0.17 0   -0.14
+co2_icecore         -24.58  -11.27   -3.04 0   -3.35
+d13c_level_MLO     -157.34  -78.99  -29.59 0   10.33
+d13c_level_SPO      -47.72   -8.20    5.90 0  -20.99
+co2_gradient         -1.08   -0.70   -0.35 0    0.31
+d13c_gradient        -0.99   -0.53   -0.21 0    0.06
+d14c_NH            -275.53 -116.58  -31.13 0  -16.11
+d14c_SH            -211.52  -75.13  -10.40 0  -34.05
+d14c_intcal           0.84    0.59    0.31 0   -0.31
+excess_c14_ocean      1.23    0.83    0.44 0   -0.42
+d14c_profile_level  -74.16  -27.55   -7.27 0    1.11
+d14c_profile_ab      -5.49    0.46    1.26 0  -24.29
+d14c_profile_bd       0.03    0.03    0.03 0   -0.18
+ocean_grad_dic        0.00    0.03    0.03 0   -0.03
+ocean_grad_d13c     -12.02   -7.14   -3.28 0    2.38
+ocean_grad_alk        0.00    0.00    0.00 0    0.00
+hs_surf_dic           0.05    0.03    0.02 0   -0.02
+hs_surf_d13c         -0.68   -0.44   -0.22 0    0.20
+gcb_ocean_sink      -33.74  -18.38   -7.26 0    1.79
+gcb_land_sink        -2.61   -1.74   -0.90 0    0.83
+
+-- arm B (land-compensated): the 25 rows, delta vs the canonical --
+                      0.35     0.5    0.7 1    1.4
+co2_level_MLO        -2.88   -1.32  -0.44 0   0.06
+co2_level_SPO        -0.81   -0.49  -0.27 0   0.33
+co2_seasonal_MLO     -1.72   -0.73  -0.26 0   0.45
+co2_seasonal_SPO    -42.19  -19.10  -5.81 0   0.00
+d13c_seasonal_MLO     0.92    1.35   1.06 0  -1.66
+d13c_seasonal_SPO    -0.18   -0.06   0.00 0  -0.04
+co2_icecore           2.42    1.65   0.86 0  -0.78
+d13c_level_MLO      -16.41   -7.72  -2.69 0   0.49
+d13c_level_SPO        4.54    3.31   1.45 0  -0.09
+co2_gradient         -2.87   -1.74  -0.80 0   0.53
+d13c_gradient        -0.75   -0.39  -0.15 0   0.02
+d14c_NH            -287.68 -122.65 -33.15 0 -16.73
+d14c_SH            -220.93  -79.14 -11.24 0 -35.94
+d14c_intcal           0.70    0.48   0.25 0  -0.24
+excess_c14_ocean      1.39    0.96   0.51 0  -0.52
+d14c_profile_level  -74.16  -27.55  -7.27 0   1.11
+d14c_profile_ab      -5.49    0.46   1.26 0 -24.29
+d14c_profile_bd       0.03    0.03   0.03 0  -0.18
+ocean_grad_dic       -0.20   -0.11  -0.05 0   0.04
+ocean_grad_d13c      -9.91   -5.95  -2.77 0   2.08
+ocean_grad_alk        0.00    0.00   0.00 0   0.00
+hs_surf_dic           0.01    0.00   0.00 0   0.00
+hs_surf_d13c         -1.17   -0.76  -0.39 0   0.35
+gcb_ocean_sink      -51.10  -27.74 -10.69 0   1.10
+gcb_land_sink       -11.68   -7.37  -3.58 0   2.84
+
+-- arm A table --
+   fac    kz logpost    dlik export ml_exch dic_grad sink_ocean sink_land
+1 0.35  3838   -3925 -2498.2  15.91   1.003    302.7      2.527     3.538
+2 0.50  5482   -2532 -1105.0  22.73   1.433    302.4      2.670     3.490
+3 0.70  7675   -1723  -296.5  31.82   2.006    302.5      2.813     3.442
+4 1.00 10964   -1426     0.0  45.46   2.866    302.8      2.974     3.387
+5 1.40 15350   -1705  -278.9  63.65   4.013    303.2      3.133     3.333
+  exc1975 exc1995 d13c_atm ocean.dC ocean.dC13eq ocean.light_excess land.dC
+1   57.29   75.98   -8.629    186.9        179.0             -7.916  -10.55
+2   58.43   77.85   -8.589    196.6        188.5             -8.158  -14.52
+3   59.52   79.59   -8.554    206.4        198.0             -8.391  -18.51
+4   60.67   81.38   -8.520    217.2        208.6             -8.640  -22.97
+5   61.72   83.00   -8.490    227.9        219.0             -8.874  -27.33
+  land.dC13eq land.light_excess
+1      -12.26            -1.711
+2      -16.09            -1.569
+3      -19.94            -1.431
+4      -24.25            -1.281
+5      -28.47            -1.139
+
+-- arm B table --
+           fac    kz logpost       dlik beta_max fert_k   q10 n_eval export
+function  0.35  3838   -2147 -7.201e+02   0.8250  309.9 1.180    234  15.91
+function1 0.50  5482   -1721 -2.946e+02   0.7849  305.0 1.181    190  22.73
+function2 0.70  7675   -1501 -7.414e+01   0.7486  302.2 1.180    422  31.82
+function3 1.00 10964   -1426  7.113e-05   0.7124  301.7 1.179    386  45.46
+function4 1.40 15350   -1497 -7.108e+01   0.6810  304.3 1.176    250  63.65
+          ml_exch dic_grad sink_ocean sink_land exc1975 exc1995 d13c_atm
+function    1.003    305.2      2.402     4.013   56.70   75.18   -8.543
+function1   1.433    304.1      2.580     3.811   58.00   77.27   -8.532
+function2   2.006    303.3      2.764     3.610   59.28   79.26   -8.524
+function3   2.866    302.8      2.974     3.387   60.67   81.38   -8.520
+function4   4.013    302.4      3.186     3.170   61.99   83.36   -8.518
+          ocean.dC ocean.dC13eq ocean.light_excess land.dC land.dC13eq
+function     177.9        170.4             -7.533  17.336      14.976
+function1    190.1        182.2             -7.887   4.676       2.658
+function2    202.7        194.5             -8.242  -8.256      -9.927
+function3    217.2        208.6             -8.640 -22.966     -24.247
+function4    232.0        222.9             -9.032 -37.703     -38.597
+          land.light_excess
+function             -2.360
+function1            -2.017
+function2            -1.671
+function3            -1.281
+function4            -0.894
+
+== P2A (raw, kz x 0.5) ==
+largest charges: co2_level_SPO -391.0, co2_level_MLO -351.4, d14c_NH -116.6, d13c_level_MLO -79.0, d14c_SH -75.1
+CO2-level+icecore rows -753.7 (predicted the largest block); bomb rows -191.7 (predicted <= -20) -> PASS; export 22.7 (predicted ~22.8); ocean_grad_dic +0.03 (predicted |.| < 3) -> PASS
+
+== P2B (land-compensated, kz x 0.5) -- THE READ ==
+largest charges: d14c_NH -122.7, d14c_SH -79.1, gcb_ocean_sink -27.7, d14c_profile_level -27.5, co2_seasonal_SPO -19.1, d13c_level_MLO -7.7
+CO2-level+icecore rows -0.2 (predicted within 10 of the canonical) -> PASS
+d13c_level rows -4.4 (predicted <= -20; < 5 in magnitude would mean NOT the kz constraint) -> REFUTED: the d13C level rows do not hold kz
+bomb rows -201.8 (predicted <= -10) -> PASS; gcb_ocean_sink -27.7 (predicted <= -5) -> PASS
+the total, arm B at kz x 0.5: -294.6 log-units; at kz x 0.35: -720.1; at kz x 1.4: -71.1
+
+== P4 (mechanism, arm B) ==
+kz x0.35: dC ocean 177.9 land 17.3 GtC (1750-2025); 13C-signal change ocean 170.4 land 15.0 GtC-eq (light excess -7.53 / -2.36); d13c_atm(2010) -8.543
+kz x0.50: dC ocean 190.1 land 4.7 GtC (1750-2025); 13C-signal change ocean 182.2 land 2.7 GtC-eq (light excess -7.89 / -2.02); d13c_atm(2010) -8.532
+kz x0.70: dC ocean 202.7 land -8.3 GtC (1750-2025); 13C-signal change ocean 194.5 land -9.9 GtC-eq (light excess -8.24 / -1.67); d13c_atm(2010) -8.524
+kz x1.00: dC ocean 217.2 land -23.0 GtC (1750-2025); 13C-signal change ocean 208.6 land -24.2 GtC-eq (light excess -8.64 / -1.28); d13c_atm(2010) -8.520
+kz x1.40: dC ocean 232.0 land -37.7 GtC (1750-2025); 13C-signal change ocean 222.9 land -38.6 GtC-eq (light excess -9.03 / -0.89); d13c_atm(2010) -8.518
+
+== arm C (A3): land three + kz_deep_frac, h_ml, k_w, bomb_total, sigma_d14c re-optimised ==
+C kz x0.50: logpost -1511.64 (dlik -86.37) after 1576 evals; kz_deep_frac 0.0334 (K_deep 183) h_ml 74.7 k_w 1652 bomb_total 114.2 sigma_d14c 7.47 beta_max 0.706; bomb rows -26.8; profile_level -10.2; sink -21.1; largest: d14c_SH -22.1, gcb_ocean_sink -21.1, co2_seasonal_SPO -13.5, d14c_profile_level -10.2, d13c_level_MLO -7.4  [382 s]
+C kz x0.70: logpost -1443.82 (dlik -19.18) after 1594 evals; kz_deep_frac 0.0408 (K_deep 313) h_ml 71.9 k_w 1637 bomb_total 116.3 sigma_d14c 5.74 beta_max 0.736; bomb rows -1.0; profile_level +0.1; sink -6.9; largest: gcb_ocean_sink -6.9, d14c_SH -5.6, co2_seasonal_SPO -4.9, d13c_level_MLO -3.0, d14c_profile_ab -2.6  [328 s]
+C kz x1.00: logpost -1426.24 (dlik +0.00) after 1017 evals; kz_deep_frac 0.0117 (K_deep 129) h_ml 65.2 k_w 1637 bomb_total 118.4 sigma_d14c 5.47 beta_max 0.712; bomb rows -0.0; profile_level +0.0; sink +0.0; largest: d13c_seasonal_MLO -0.0, d13c_level_SPO -0.0, co2_icecore -0.0, d14c_SH -0.0, d13c_seasonal_SPO -0.0  [183 s]
+GATE PK-2g (arm C): at kz x 1, -1426.2428 vs stored -1426.2428 (|diff| 8.73e-07) -> PASS
+P2C at kz x 0.5: bomb rows -26.8 (predicted <= -100) -> FAIL; d14c_profile_level -10.2 (predicted >= -5) -> FAIL; total -86.4 (predicted <= -150) -> FAIL (holds, but less than predicted)
+
+-- arm C rows --
+                      0.5   0.7 1
+co2_level_MLO        0.18 -0.33 0
+co2_level_SPO       -0.63  0.00 0
+co2_seasonal_MLO     0.08  0.17 0
+co2_seasonal_SPO   -13.47 -4.94 0
+d13c_seasonal_MLO    2.74  1.47 0
+d13c_seasonal_SPO    0.22  0.16 0
+co2_icecore         -0.25  0.92 0
+d13c_level_MLO      -7.36 -2.95 0
+d13c_level_SPO       1.19  1.60 0
+co2_gradient        -1.12 -0.56 0
+d13c_gradient       -0.26 -0.10 0
+d14c_NH             -4.77  4.59 0
+d14c_SH            -22.08 -5.57 0
+d14c_intcal          0.34  0.20 0
+excess_c14_ocean     1.43  0.73 0
+d14c_profile_level -10.24  0.12 0
+d14c_profile_ab      1.26 -2.56 0
+d14c_profile_bd      0.00 -0.37 0
+ocean_grad_dic      -0.05  0.05 0
+ocean_grad_d13c     -6.64 -2.27 0
+ocean_grad_alk      -0.01  0.00 0
+hs_surf_dic          0.00  0.00 0
+hs_surf_d13c        -0.60 -0.13 0
+gcb_ocean_sink     -21.08 -6.88 0
+gcb_land_sink       -5.26 -2.51 0
+
+-- arm C table --
+          fac    kz logpost       dlik n_eval beta_max kz_deep_frac  h_ml  k_w
+function  0.5  5482   -1512 -8.637e+01   1576   0.7060      0.03339 74.70 1652
+function1 0.7  7675   -1444 -1.918e+01   1594   0.7364      0.04076 71.92 1637
+function2 1.0 10964   -1426  6.268e-05   1017   0.7124      0.01174 65.23 1637
+          bomb_total sigma_d14c
+function       114.2      7.471
+function1      116.3      5.736
+function2      118.4      5.472
+
+== PK-3: kz_deep_frac at the canonical kz (arm A) ==
+f 0.0117 (K_deep 129): logpost -1426.24 (dlik +0.00); export 45.5; DIC grad 302.8; largest: co2_level_MLO +0.0, co2_level_SPO +0.0, co2_seasonal_MLO +0.0, co2_seasonal_SPO +0.0
+f 0.0300 (K_deep 329): logpost -1443.44 (dlik -18.49); export 45.5; DIC grad 301.8; largest: d14c_profile_ab -16.5, co2_level_MLO -3.9, d13c_level_SPO -1.7, d14c_profile_bd -0.8
+f 0.0600 (K_deep 658): logpost -1495.57 (dlik -71.38); export 45.5; DIC grad 300.2; largest: d14c_profile_ab -42.9, co2_level_MLO -17.3, d14c_profile_bd -6.1, co2_level_SPO -5.9
+f 0.0890 (K_deep 976): logpost -1547.80 (dlik -124.00); export 45.5; DIC grad 298.7; largest: d14c_profile_ab -49.1, co2_level_MLO -37.6, co2_level_SPO -19.3, d14c_profile_bd -13.7
+f 0.1500 (K_deep 1645): logpost -1683.51 (dlik -260.19); export 45.5; DIC grad 295.9; largest: co2_level_MLO -99.3, co2_level_SPO -66.2, d14c_profile_ab -35.6, d14c_profile_bd -25.5
+P3: f = 0.089 unrefitted costs -124.0 (predicted <= -20) -> PASS; led by d14c_profile_ab -49.1, co2_level_MLO -37.6, co2_level_SPO -19.3
+
+-- PK-3 rows --
+                   canon   0.03   0.06  0.089   0.15
+co2_level_MLO          0  -3.85 -17.33 -37.63 -99.31
+co2_level_SPO          0   0.43  -5.95 -19.30 -66.18
+co2_seasonal_MLO       0   0.09   0.22   0.34   0.55
+co2_seasonal_SPO       0  -0.02  -0.05  -0.08  -0.15
+d13c_seasonal_MLO      0   0.01   0.04   0.06   0.10
+d13c_seasonal_SPO      0   0.00   0.01   0.02   0.03
+co2_icecore            0  -0.03  -0.30  -0.81  -2.48
+d13c_level_MLO         0   1.94   4.58   6.57   9.31
+d13c_level_SPO         0  -1.70  -4.77  -7.98 -15.32
+co2_gradient           0   0.03   0.08   0.13   0.21
+d13c_gradient          0   0.02   0.04   0.05   0.07
+d14c_NH                0  -0.37  -1.74  -3.86 -10.47
+d14c_SH                0  -0.65  -2.52  -5.15 -12.89
+d14c_intcal            0  -0.03  -0.08  -0.13  -0.22
+excess_c14_ocean       0  -0.04  -0.11  -0.17  -0.30
+d14c_profile_level     0   1.08   1.12   0.51 -10.70
+d14c_profile_ab        0 -16.48 -42.89 -49.08 -35.59
+d14c_profile_bd        0  -0.80  -6.09 -13.67 -25.47
+ocean_grad_dic         0   0.08   0.21   0.33   0.55
+ocean_grad_d13c        0   0.91   2.12   3.03   4.37
+ocean_grad_alk         0   0.00   0.00   0.00   0.00
+hs_surf_dic            0   0.00  -0.01  -0.02  -0.03
+hs_surf_d13c           0   0.20   0.44   0.63   0.91
+gcb_ocean_sink         0   0.59   1.30   1.75   2.02
+gcb_land_sink          0   0.12   0.29   0.46   0.77
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/kz_pump_scan_20260915.{log,rds}
