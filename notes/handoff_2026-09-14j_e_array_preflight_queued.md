@@ -1,4 +1,4 @@
-# Handoff — 2026-09-14 (j) → 09-15. **The E array is ON TORCH: setup gate PASSED; preflight 17818291 RAN after 4.7 h queued — 23/24 LAUNCHABLE at 0.48–0.55 s/eval, id 1 FAILED port gate (a) at the INCUMBENT by rel 2.16e-8 vs 1e-8. DIAGNOSED (HEAD `f66449f`): NOT a broken port — the objective's own roundoff floor at that point is 20–40× the other references' and the 5.7e-5 diff sits inside it. GATE-DESIGN RULING OWED. The WAVE IS NOT SUBMITTED. Nothing adopted; `hilda30c` canonical.**
+# Handoff — 2026-09-14 (j) → 09-15. **The E array is ON TORCH: setup gate PASSED; preflight 17818291 RAN after 4.7 h queued — 23/24 LAUNCHABLE at 0.48–0.55 s/eval, id 1 FAILED port gate (a) at the INCUMBENT by rel 2.16e-8 vs 1e-8. DIAGNOSED (HEAD `f66449f`): NOT a broken port — the objective's own roundoff floor at that point is 20–40× the other references' and the 5.7e-5 diff sits inside it. Marcus RULED option A (built `bf03507`, mutation-tested); id 1 re-preflight PASSED; **THE WAVE IS SUBMITTED: Torch job 17839702**. Nothing adopted; `hilda30c` canonical.**
 
 > Self-contained. HEAD = `efeaaaa` + this note. CHANGELOG 09-14 (i). Memory: [[ccx_option_e_built_probe]] (in `INDEX_ccx_ocean_cell`).
 > ⚠ root `MEMORY.md` is 18.28 KB of an 18.43 KB hard ceiling: RESTRUCTURE THE ROOT before adding a line.
@@ -39,7 +39,7 @@ on the cell array; size the wave's wall on THIS). ⚠ Reason it queued: `cs` had
 PriorityTier 1000; our fairshare 0.19 after the cell wave's 108 CPU-h. This morning's jobs started in 1 s. `--exclude` is refused
 by the site; `cpu_short` puts serial jobs on GPU nodes at 13–18 % of a core (measured 09-10) — stay on `cs`.
 
-## 3. THE WAVE (only after 24/24 exit 0 and the port lines read)
+## 3. THE WAVE — SUBMITTED 09-15 as job 17839702 (24 tasks, cs, 6 h wall). Collect when `sacct -j 17839702` shows 24 COMPLETED:
 ```
 cd /scratch/ms17839/CarbonCycleEmulator
 CCX_MS_STRUCT=hilda_c CCX_MS_SEAS_ML=1 CCX_MS_PUMP_FIELD=martin CCX_MS_PIN=ent_seas_amp_SH=0,pump_grad=314.1031,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
