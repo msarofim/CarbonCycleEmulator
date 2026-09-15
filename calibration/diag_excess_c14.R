@@ -16,6 +16,14 @@
 #   [3] BOMB-ONLY vs TOTAL.      Naegler & Levin's model partition sums exactly
 #       to their cumulative bomb input, i.e. it is a paired difference; their
 #       OBSERVATIONS are total-minus-natural. Does the choice matter?
+#       ⛔ RETRACTED 2026-09-15 (f): the inference "sums exactly => paired" has
+#       NO POWER -- total-minus-pre-bomb ALSO sums to input minus decay (natural
+#       production balances natural decay; the Suess redistribution only moves
+#       atoms between rows). Measured at hilda30c: the two framings' sums agree
+#       to 0.03 kmol. Naegler (2009, Tellus B 61:372, eq. 1) defines EXCESS as
+#       total minus the 1940s mean for every reservoir and says that is what
+#       'bomb' 14C means in the earlier studies. Primary framing is now
+#       total-minus-1940s: calibration/diag_o6_bomb_partition_hilda30c.R.
 #   [4] UNITS CROSS-CHECK.       rebuild the ATMOSPHERIC excess from the CO2 and
 #       D14C observations alone and compare to N&L's observed troposphere. This
 #       is the only row where their number and ours meet with no model between

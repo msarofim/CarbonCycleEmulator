@@ -21,6 +21,13 @@
 # The comparison is the PAIRED (bomb-on minus bomb-off) difference, because
 # N&L's Table 4 model partition sums exactly to their cumulative bomb input,
 # i.e. theirs is a paired difference too (established in diag_excess_c14.R [3]).
+# ⛔ THAT INFERENCE IS RETRACTED (2026-09-15 f): both framings sum to the input
+# minus decay, so the sum test has no power; Naegler (2009) defines excess as
+# total minus the 1940s. The paired framing moves ~11 kmol (1995) from the
+# atmosphere row to the land row relative to the source's framing, so the
+# "+0 / +10 % biosphere" verdict below is FRAMING-DEPENDENT. This script is
+# also STALE on the mode loader (calibration/output/mode_fit.rds, ccx_spinup);
+# the live read is calibration/diag_o6_bomb_partition_hilda30c.R.
 #
 # ANSWERED, 2026-08-12. It is a partition error, and it is now CLOSED. The
 # biosphere ran 51-58 % long and the troposphere 40-44 % short at both years;
