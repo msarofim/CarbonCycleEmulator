@@ -235,7 +235,9 @@ MS_TARGETS    <- "calibration/torch/port_targets.csv"
 # ([[gate_bound_matches_its_claim]]):
 #   (a) the START value is an EVALUATION of one fixed point, so machine A and
 #       machine B must agree to floating-point, and the bound is RELATIVE and
-#       tight. This is what actually catches a bad port -- a different BLAS, a
+#       tight -- tight meaning ABOVE THE OBJECTIVE'S OWN ROUNDOFF FLOOR AT THAT
+#       POINT, which is measured, not assumed (2026-09-15; MS_PORT_FLOOR_* below).
+#       This is what actually catches a bad port -- a different BLAS, a
 #       different libm, a half-copied data file.
 #   (b) the FINAL value is the result of an OPTIMISATION from that point, so the
 #       only claim available is an ORDERING: it may not come back WORSE than
@@ -243,7 +245,31 @@ MS_TARGETS    <- "calibration/torch/port_targets.csv"
 # The old single 1.0-log-unit bound was neither: it compared an optimised value
 # against the mode file's STORED logpost, 85 % of which the incumbent's known
 # -0.85 objective-drift offset spent before the port was even considered.
-MS_EVAL_TOL   <- 1e-8         # relative, on a pure evaluation identity
+MS_EVAL_TOL   <- 1e-8         # relative, on a pure evaluation identity -- the FLOOR of gate (a)'s bound
+# ⭐ GATE (a)'S BOUND IS DERIVED FROM A MEASURED ROUNDOFF FLOOR, NOT TYPED (2026-09-15;
+# Marcus ruled option A). The E array's preflight 17818291 failed gate (a) on ONE task
+# of 24 -- the incumbent reference, rel 2.16e-8 -- while the cold and new-basin
+# references reproduced at 1e-11 on the same nodes. Tested on BOTH machines: no
+# discrete choice flipped (same substeps, same Newton iteration count with the
+# identical residual history; Torch self-reproduces to 1e-14). What flipped the gate
+# was the OBJECTIVE'S OWN ROUNDOFF FLOOR, which is POINT-DEPENDENT: perturbing u by
+# 1e-12 relative moved the logpost by up to 3.5e-5 (Mac) / 8.7e-5 (Torch) at the
+# incumbent vs 2e-6 / 6e-6 at the other two, FLAT across eps 1e-12..1e-8 (a floor, not a
+# gradient), carried by the d13C level rows. A fixed 1e-8 (2.7e-5 absolute there) sat
+# BELOW that floor and failed on noise. So the bound is now
+#     tol_abs = max(MS_EVAL_TOL * |target|, MS_PORT_FLOOR_K * floor)
+# with `floor` = max |lp(u') - lp(u)| over MS_PORT_FLOOR_N SEEDED perturbations
+# u' = u * (1 +- MS_PORT_FLOOR_EPS) of one coordinate, measured HERE at the reference
+# point -- and a HARD CEILING MS_PORT_TOL_CEIL relative, so a real break (a missing
+# input ~ 1e-3 relative; the 09-01 ent26 false-broken-port was -Inf) still fails and a
+# pathologically noisy point is REPORTED rather than waved through. Every number is
+# printed. ⇒ [[port_gate_tolerance_below_roundoff_floor]]. ⛔ Raising MS_EVAL_TOL by
+# hand was option (C), the loosen-to-pass anti-pattern, and was rejected.
+MS_PORT_FLOOR_N    <- 12L         # perturbations; the 09-15 diagnostic used 12
+MS_PORT_FLOOR_EPS  <- 1e-12       # relative, one coordinate at a time (~1e4 ulp)
+MS_PORT_FLOOR_K    <- 3           # safety over the measured max |delta|
+MS_PORT_TOL_CEIL   <- 1e-6        # relative ceiling on tol_abs; a real break is >= 1e-3
+MS_PORT_FLOOR_SEED <- 20260915L   # the floor's own RNG stream; the driver's is saved and restored
 
 .env_num <- function(nm, default) {
   v <- Sys.getenv(nm, NA_character_)
@@ -718,17 +744,45 @@ local({
   # justification for doing so is that it is cheap.
   here <- if (identical(MS_ID, unname(MS_REF_IDS[[nm]]))) MS_REF_LP
           else lp_fun(switch(nm, cold = U_COLD, incumbent = U_INC, new_basin = U_NEW))
-  rel <- abs(here - tgt) / max(abs(tgt), 1e-12)
-  cat(sprintf("PORT GATE (a) at the %s reference point: here %.10f vs %s@%s %.10f,\n              rel %.2e (tol %.0e)%s\n",
-              nm, here, r$host[1], r$commit[1], tgt, rel, MS_EVAL_TOL,
+  u_ref <- switch(nm, cold = U_COLD, incumbent = U_INC, new_basin = U_NEW)
+  # THE MEASURED FLOOR (2026-09-15; see MS_PORT_FLOOR_* above): the objective's own
+  # roundoff sensitivity AT THIS POINT, ON THIS MACHINE. Its RNG stream is private so
+  # the driver's dispersion / restart streams are untouched by adding this step.
+  .had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
+  .saved <- if (.had_seed) get(".Random.seed", envir = globalenv()) else NULL
+  set.seed(MS_PORT_FLOOR_SEED)
+  .floor_d <- vapply(seq_len(MS_PORT_FLOOR_N), function(k) {
+    du <- u_ref; j <- sample(length(du), 1L)
+    du[j] <- du[j] * (1 + sample(c(-1, 1), 1L) * MS_PORT_FLOOR_EPS)
+    lp_fun(du) - here
+  }, numeric(1))
+  if (.had_seed) assign(".Random.seed", .saved, envir = globalenv()) else rm(".Random.seed", envir = globalenv())
+  fl <- max(abs(.floor_d))
+  diff_abs <- abs(here - tgt)
+  rel      <- diff_abs / max(abs(tgt), 1e-12)
+  tol_abs  <- max(MS_EVAL_TOL * max(abs(tgt), 1e-12), MS_PORT_FLOOR_K * fl)
+  ceil_abs <- MS_PORT_TOL_CEIL * max(abs(tgt), 1e-12)
+  cat(sprintf("PORT GATE (a) at the %s reference point: here %.10f vs %s@%s %.10f,\n              |diff| %.3e (rel %.2e)%s\n",
+              nm, here, r$host[1], r$commit[1], tgt, diff_abs, rel,
               if (identical(MS_ID, unname(MS_REF_IDS[[nm]]))) "" else "  [this task's own start is elsewhere]"))
-  if (rel > MS_EVAL_TOL)
-    stop("PORT GATE (a) FAILED: this machine does not reproduce the objective ",
-         "at a FIXED point to ", MS_EVAL_TOL, " relative. Every dispersed start ",
-         "in this array would then be optimising something other than the ",
-         "objective the reference modes were fitted on. STOP AND DIAGNOSE ",
+  cat(sprintf("              roundoff floor here: max |delta lp| %.3e over %d perturbations of u by %.0e (median %.3e; %d non-finite)\n",
+              fl, MS_PORT_FLOOR_N, MS_PORT_FLOOR_EPS, median(abs(.floor_d)), sum(!is.finite(.floor_d))))
+  cat(sprintf("              bound = max(%.0e x |target| = %.3e, %g x floor = %.3e) = %.3e; ceiling %.0e x |target| = %.3e\n",
+              MS_EVAL_TOL, MS_EVAL_TOL * abs(tgt), MS_PORT_FLOOR_K, MS_PORT_FLOOR_K * fl, tol_abs, MS_PORT_TOL_CEIL, ceil_abs))
+  if (!is.finite(fl) || tol_abs > ceil_abs)
+    stop("PORT GATE (a) CANNOT BE APPLIED: the objective's own roundoff floor at the ", nm,
+         " reference point (", format(fl, digits = 3), ") puts the bound above its ceiling (",
+         format(ceil_abs, digits = 3), " = ", MS_PORT_TOL_CEIL, " relative). The point is too ",
+         "noisy to gate a port on; re-rule the reference set (or find out WHY it is that noisy) ",
          "before submitting the survey.")
-  MS_PORT <<- list(checked = TRUE, target = tgt, rel = rel)
+  if (diff_abs > tol_abs)
+    stop("PORT GATE (a) FAILED: this machine does not reproduce the objective ",
+         "at a FIXED point to within ", format(tol_abs, digits = 3), " (= max(", MS_EVAL_TOL,
+         " relative, ", MS_PORT_FLOOR_K, " x the measured roundoff floor ", format(fl, digits = 3),
+         ")). Every dispersed start in this array would then be optimising something other ",
+         "than the objective the reference modes were fitted on. STOP AND DIAGNOSE ",
+         "before submitting the survey.")
+  MS_PORT <<- list(checked = TRUE, target = tgt, rel = rel, diff = diff_abs, floor = fl, tol = tol_abs)
   cat("PORT GATE (a) PASSED.\n")
 })
 
@@ -791,7 +845,7 @@ if (MS_PREFLIGHT) {
               if (MS_ID >= MS_DISPERSED_FROM) "dispersed"
               else if (MS_ID %in% MS_SEED_IDS) "SEEDED" else "REFERENCE", MS_START_LP,
               st$draws, if (st$draws == 1L) "" else "s",
-              if (isTRUE(MS_PORT$checked)) sprintf("VERIFIED rel %.1e", MS_PORT$rel)
+              if (isTRUE(MS_PORT$checked)) sprintf("VERIFIED rel %.1e (floor %.1e, bound %.1e)", MS_PORT$rel, MS_PORT$floor, MS_PORT$tol)
               else "NOT VERIFIED",
               MS_SEC_PER_EVAL, MS_MAXIT, MS_SEC_PER_EVAL * MS_MAXIT / 60, MS_WALL_MIN))
   if (!isTRUE(MS_PORT$checked))
@@ -993,7 +1047,9 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             enso_seed = c(ocn_opt = MS_ENSO_OCN_OPT, ocn_obs = MS_ENSO_OCN_OBS,
                           land_obs_mult = MS_ENSO_LAND_OBS),
             port_checked = MS_PORT$checked, port_target = MS_PORT$target,
-            port_rel = MS_PORT$rel, ref_logpost = MS_REF_LP, resumed = MS_RESUMED,
+            port_rel = MS_PORT$rel, port_diff = MS_PORT$diff,
+            port_floor = MS_PORT$floor, port_tol = MS_PORT$tol,   # the MEASURED floor + derived bound (2026-09-15)
+            ref_logpost = MS_REF_LP, resumed = MS_RESUMED,
             # RECORDED **AND** RESTORED: these are the fields ccx_mode_bands()
             # reads. [[recorded_but_never_restored]] -- a band written by a
             # producer and consumed by no reader decoded 26 % wrong for a
