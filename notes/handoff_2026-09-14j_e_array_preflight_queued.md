@@ -1,4 +1,4 @@
-# Handoff — 2026-09-14 (j). **The E array is ON TORCH: bundle shipped, setup gate PASSED (cold −16020.0717, rel 3.5e-11), preflight 17818291 (ids 0–23) SUBMITTED and QUEUED on `cs` — pending on Priority for > 1.5 h at FairShare 0.193. The WAVE IS NOT SUBMITTED. Nothing adopted; `hilda30c` canonical.**
+# Handoff — 2026-09-14 (j) → 09-15. **The E array is ON TORCH: setup gate PASSED; preflight 17818291 RAN after 4.7 h queued — 23/24 LAUNCHABLE at 0.48–0.55 s/eval, id 1 FAILED port gate (a) at the INCUMBENT by rel 2.16e-8 vs 1e-8. DIAGNOSED (HEAD `f66449f`): NOT a broken port — the objective's own roundoff floor at that point is 20–40× the other references' and the 5.7e-5 diff sits inside it. GATE-DESIGN RULING OWED. The WAVE IS NOT SUBMITTED. Nothing adopted; `hilda30c` canonical.**
 
 > Self-contained. HEAD = `efeaaaa` + this note. CHANGELOG 09-14 (i). Memory: [[ccx_option_e_built_probe]] (in `INDEX_ccx_ocean_cell`).
 > ⚠ root `MEMORY.md` is 18.28 KB of an 18.43 KB hard ceiling: RESTRUCTURE THE ROOT before adding a line.
@@ -14,6 +14,20 @@
    `64636af1…` matches the Mac). `setup_torch.sh` under the four env vars: Rcpp 1.1.0, C++ 30.8 s, **GATE PASSED rel 3.46e-11**,
    32 parameters, `hilda_c`. Login-node 1.91 s/eval = contention (load 52), NOT a sizing number.
 4. Preflight submitted verbatim from the sbatch's 09-14 (h) block → **job 17818291**, `--array=0-23 --time=00:15:00`, `cs`.
+
+## 1b. THE PREFLIGHT RESULT AND ITS DIAGNOSIS (09-15, `f66449f`; CHANGELOG 09-14 (i) last three bullets)
+- 23/24 exit 0, port rel 1.5e-11…3.5e-11, 0.48–0.55 s/eval on cs734/735/737 (id 0 on cs670 0.96) ⇒ a 6000-eval restart ≈ 50 min of the 300-min budget.
+- id 1 (the only task that tests the INCUMBENT target): Torch −2666.7197790059 vs Mac −2666.7197215373 → rel 2.16e-8 > 1e-8, `stop()`.
+- Tests run (Mac AND Torch, `calibration/diag_port_gate_id1_20260914.R`): substeps 4 on both; Newton 6 iterations with the identical
+  residual history on both; Torch self-reproduces to 1e-14 ⇒ NO discrete flip. Roundoff-scale perturbation (u·(1±1e-12)) moves the
+  logpost by max 3.5e-5 (Mac) / 8.7e-5 (Torch) at the incumbent vs 2e-6 / 6e-6 at the other two points — FLAT across ε 1e-12…1e-8
+  (a floor). Carried by the δ¹³C level rows (MLO 2.5e-5, SPO 1.2e-5); the periodic spinup STATE moves ≤ 3e-11 (not the source).
+  WHY this point is 20–40× noisier is OPEN.
+- ⇒ the gate's fixed 1e-8 (2.7e-5 absolute here) is below the objective's measured floor at that point. RULING OWED: (A, recommended)
+  measure the floor at the reference point in the driver and gate on max(1e-8·|tgt|, 3×floor) with a ~1e-6 relative ceiling,
+  mutation-tested against a real break (nuclear14c absent); (B) re-rule the incumbent reference; (C) raise MS_EVAL_TOL — no.
+- After the ruling: patch driver → re-ship (make_bundle → scp → extract) → re-run the preflight for id 1 only
+  (`--array=1`) → then the wave (§3). `port_targets.csv` needs NO regeneration (the targets are right; the tolerance is the question).
 
 ## 2. STATE ON TORCH (check first)
 ```
