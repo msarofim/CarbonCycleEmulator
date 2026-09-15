@@ -48,8 +48,8 @@ test_that("the names ship OFF and their defaults are the 09-14 g model; the fiel
   expect_true(ccx_eq_on(q))                                       # the axis composes with every label
   expect_identical(ccx_const("MARTIN_B"), 0.858)
   expect_identical(CCX_CONSTANTS$MARTIN_B$status, "cited")
-  expect_setequal(intersect(CCX_PARAM_NAMES, c("pump_export", "w_vent", "gamma_vent")),
-                  c("pump_export", "w_vent", "gamma_vent"))
+  expect_setequal(intersect(CCX_PARAM_NAMES, c("pump_export", "w_vent", "gamma_vent", "w_thc"))   # + O1 arm THC (2026-09-15 d),
+                  c("pump_export", "w_vent", "gamma_vent", "w_thc"))   # + O1 arm THC (2026-09-15 d)
   expect_true(all(c("pump_export", "w_vent", "gamma_vent") %in% CCX_PARAM_ABSENT_OK))
   # the table's init REPEATS the product's median (the table is built before ccx_path exists)
   expect_equal(CCX_PARAM_TABLE$pump_export$init, ccx_pump_export_prior()$centre_gtc, tolerance = 5e-3)
@@ -89,7 +89,7 @@ test_that("P0a (canonical): hilda30c's stored LIKELIHOOD reproduces row by row; 
   expect_identical(bp$pump_field, "solved")
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))
-  expect_setequal(new_names, c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent"))
+  expect_setequal(new_names, c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc"))   # + O1 arm THC (2026-09-15 d)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a-e"))
   expect_identical(pm$w_vent, CCX_PARAM_TABLE$w_vent$init)          # seeded: 0 is on the floor
   u  <- ccx_par_to_unc(pm)

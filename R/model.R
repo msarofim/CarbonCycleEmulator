@@ -1520,6 +1520,20 @@ ccx_default_params <- function() {
     gamma_vent = 0,          # per Nino3.4 unit; El Nino (enso > 0) SUPPRESSES the loop
     k_e1    = 1L,         # shallowest and deepest interior layers the loop
     k_e2    = 3L,         #   ventilates (1-BASED); STRUCTURAL, not fitted (E2)
+    # ---- THE HS-ROUTE DEEP RETURN (option O1, arm THC, 2026-09-15 d) -------
+    # The thermohaline overturning as a MEAN limb: LS mixed layer -> HS
+    # (poleward surface transport) -> HD (deep-water formation) -> the bottom
+    # of the LS column -> UP through every interface below the return layer
+    # k_thc -> from layer k_thc into the mixed layer. One volume W per
+    # hemisphere (w_thc [Sv] split by a_hs), every leg W x the SOURCE box's
+    # per-volume concentration (D1 closes; a uniform column is a fixed point).
+    # Bulk, alpha = 1, no ENSO term. Lives ONLY under pump_field = "martin"
+    # (the solved field is diffusion's fixed point) and ONLY with the HS boxes
+    # (hs_frac > 0; errors by name otherwise). 0 = OFF, emits NOTHING. See
+    # notes/prereg_2026-09-15d_o1_deep_return_probe.md §1-2.
+    w_thc   = 0,          # Sv, both hemispheres; split by a_hs share
+    k_thc   = 1L,         # the RETURN layer (1-BASED); 1 = the full Munk
+                          #   column; STRUCTURAL, not fitted (the k_e1 idiom)
     # THE HIGH-LATITUDE PUMP (2026-09-07d; pays choice C9 of
     # notes/prereg_2026-09-05_hilda_boxes.md). HS export PER UNIT AREA, in
     # gC m-2 yr-1, remineralised in HD (one box) on the LS pump's two limbs, same
@@ -3035,6 +3049,34 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       }
     }
 
+    # ---- THE HS-ROUTE DEEP RETURN (option O1 arm THC, 2026-09-15 d) -------
+    # notes/prereg_2026-09-15d_o1_deep_return_probe.md §1. The overturning as
+    # a MEAN limb, one volume W_h = w_thc x SV x a_hs share per hemisphere,
+    # five legs, EACH W_h x the SOURCE box's per-volume concentration (the
+    # cell's idiom: D1 closes, a uniform column is a fixed point, volume in =
+    # out at every box): (1) ml -> hs, the poleward surface transport, over
+    # a_ml and the ML's thickness NOW; (2) hs -> hd, deep-water formation,
+    # over HS's thickness NOW (option B's h_hs_t; = aux$h_hs otherwise);
+    # (3) hd -> the BOTTOM layer; (4) up through every interface BELOW the
+    # return layer k_thc, over each layer's own dz NOW; (5) layer k_thc -> ml.
+    # k_thc = 1 is the full Munk column. Bulk, alpha13 = 1, no 14C
+    # fractionation, no ENSO term. Unlike w_up / w_out / q_conv the SINKING
+    # water is HS water, not LS mixed-layer water -- the premise the probe
+    # tests (P3). w_thc = 0 emits NOTHING. The C++ block is the twin.
+    if (aux$thc_on == 1L) {
+      W <- p[["w_thc"]] * CCX_SV_TO_M3YR * aux$thc_share[[h]]
+      if (W > 0) {
+        ihs <- aux$idx[[h]]$hs; ihd <- aux$idx[[h]]$hd; kt <- aux$k_thc
+        add_flux(iml, ihs, W * y[iml, "C"] / (aux$a_ml[[h]] * gr$dz[1]))            # (1) poleward
+        add_flux(ihs, ihd, W * y[ihs, "C"] / (aux$a_hs[[h]] * h_hs_t))              # (2) sinking
+        add_flux(ihd, ioc[grid$nl], W * y[ihd, "C"] / (aux$a_hs[[h]] * dz_hd_t))    # (3) the abyss
+        if (kt < grid$nl) for (jj in seq.int(grid$nl - 1L, kt)) {                   # (4) upwelling below k
+          add_flux(ioc[jj + 1L], ioc[jj], W * y[ioc[jj + 1L], "C"] / (aux$a_ls[[h]] * gr$dz[jj + 2L]))
+        }
+        add_flux(ioc[kt], iml, W * y[ioc[kt], "C"] / (aux$a_ls[[h]] * gr$dz[kt + 1L]))   # (5) the return
+      }
+    }
+
     # ---- prescribed emissions ---------------------------------------
     # Fossil carbon comes from OUTSIDE the modelled system (geology), so it is a
     # true external source, and it is 14C-free.
@@ -3460,6 +3502,21 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   } else {
     ke1 <- 1L; ke2 <- 1L
   }
+  # ---- THE HS-ROUTE DEEP RETURN's guards (option O1 arm THC, 2026-09-15 d) --
+  # Same contract as the loop above: INERT under "solved" (not an error), by
+  # name for everything else. It ROUTES THROUGH the HS/HD boxes, so without
+  # them it is an ERROR by name, not an inert switch -- a limb whose closing
+  # leg does not exist would not conserve volume.
+  w_thc <- if (is.null(p[["w_thc"]])) 0 else p[["w_thc"]]
+  if (!is.finite(w_thc) || w_thc < 0)
+    stop("w_thc must be a finite non-negative overturning in Sv; got ", format(p[["w_thc"]]))
+  thc_on <- identical(pf, "martin") && isTRUE(w_thc > 0)
+  if (thc_on && !hs_on)
+    stop("w_thc > 0 needs the HILDA high-latitude boxes (hs_frac > 0): the limb sinks ",
+         "through HS -> HD and has no closing leg without them")
+  kthc <- if (is.null(p[["k_thc"]])) 1L else as.integer(p[["k_thc"]])
+  if (thc_on && (!is.finite(kthc) || kthc < 1L || kthc > grid$nl))
+    stop("k_thc must be an interior layer in 1..", grid$nl, " (the return layer); got ", format(p[["k_thc"]]))
   if (eq_on) {
     # the cell's pinned geometry, range-checked by name -- never clamped
     if (!is.finite(p$h_eq) || p$h_eq <= 0)
@@ -3685,6 +3742,12 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
                     if (e_on) { dzk <- grid$dz[seq.int(ke1, ke2) + 1L]; w[seq.int(ke1, ke2)] <- dzk / sum(dzk) }
                     w },
     e_share     = lapply(a_ls, function(A) A / (a_ls$NH + a_ls$SH)),
+    # ---- THE HS-ROUTE DEEP RETURN (option O1 arm THC, 2026-09-15 d) -------
+    # Unconditional, zero-filled when off: `thc_on` gates the limb on BOTH
+    # cores; `k_thc` the return layer; `thc_share` splits w_thc by a_hs.
+    thc_on      = as.integer(thc_on),
+    k_thc       = if (thc_on) kthc else 1L,
+    thc_share   = lapply(a_hs, function(A) A / (a_hs$NH + a_hs$SH)),
     eq_on       = as.integer(eq_on),
     a_ml        = a_ml,
     a_eq        = a_eq,
@@ -3992,6 +4055,25 @@ a_eq_of <- function(p, a_oc) if (ccx_eq_on(p)) a_oc * c(p$eq_frac_NH, p$eq_frac_
 #' multiplies both by up to 1 + gamma_vent |enso|, the cell's form. Gershgorin
 #' 2 x rate. `grid` is the grid at ONE seasonal extreme (the caller passes
 #' each): the ML and layer 1 move under seas_ml. Exactly 0 at w_vent = 0.
+#' The HS-route deep return's Gershgorin bound (2026-09-15 d): the limb drains
+#' every box it touches at W_h / volume -- the ML (over a_ml and h_ml NOW),
+#' HS (a_hs h_hs), HD (a_hs dz_hd) and each interior layer from the return
+#' layer down (a_ls dz_j). 2 x the largest. `grid` is one seasonal extreme (the
+#' caller passes each). Exactly 0 at w_thc = 0 or under the solved field.
+ccx_thc_eigbound <- function(p, grid) {
+  w <- if (is.null(p[["w_thc"]])) 0 else p[["w_thc"]]
+  if (!identical(p$pump_field, "martin") || !isTRUE(w > 0) || !ccx_hs_on(p)) return(0)
+  kt <- if (is.null(p[["k_thc"]])) 1L else as.integer(p[["k_thc"]])
+  a_oc <- c(ccx_const("OCEAN_AREA_NH"), ccx_const("OCEAN_AREA_SH"))
+  f_hs <- p$hs_frac; a_hs <- a_oc * f_hs; a_ls <- a_oc * (1 - f_hs)
+  a_ml <- a_ls - a_eq_of(p, a_oc) - (if (ccx_tr_on(p)) a_oc * c(p$tr_frac_NH, p$tr_frac_SH) else c(0, 0))
+  h_hs <- if (!is.null(p$h_hs) && is.finite(p$h_hs) && p$h_hs > 0) p$h_hs else p$h_ml
+  dz_hd <- sum(grid$dz) - h_hs
+  Wh <- w * CCX_SV_TO_M3YR * a_hs / sum(a_hs)
+  rate <- max(Wh / (a_ml * grid$dz[1]), Wh / (a_hs * h_hs), Wh / (a_hs * dz_hd),
+              max(outer(Wh / a_ls, 1 / grid$dz[seq.int(kt, grid$nl) + 1L])))
+  2 * rate
+}
 ccx_e_loop_eigbound <- function(p, grid) {
   w <- if (is.null(p$w_vent)) 0 else p$w_vent
   # the loop EXISTS only under the prescribed field (ccx_prepare's e_on)
@@ -4053,7 +4135,8 @@ ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
     ccx_diffusion_eigmax(max(ccx_kz_profile(p, g)), g) +
       ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), g, p) +
       ccx_tr_box_eigbound(p, g) +
-      ccx_e_loop_eigbound(p, g), numeric(1)))   # the ventilation loop (2026-09-14 h); 0 at w_vent = 0
+      ccx_e_loop_eigbound(p, g) +                # the ventilation loop (2026-09-14 h); 0 at w_vent = 0
+      ccx_thc_eigbound(p, g), numeric(1)))       # the HS-route deep return (2026-09-15 d); 0 at w_thc = 0
   # + the EQUATORIAL CELL's own drain rate (2026-09-13g), folded in for the
   # reason the conveyor's was: a stability check that ignored a first-order
   # advective term would be worse than none. Exactly 0 with the cell off, so

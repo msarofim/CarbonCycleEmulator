@@ -480,6 +480,14 @@ CCX_PARAM_TABLE <- list(
   # are pinned at 0 in the E array (option A is subsumed).
   gamma_vent   = list(tr = "logit", lo = 0, hi = 2, init = 0.5,
                       prior = function(x) dunif(x, 0, 2, log = TRUE)),
+  # w_thc: THE HS-ROUTE DEEP RETURN (option O1 arm THC, 2026-09-15 d) -- the
+  # overturning as a mean limb, Sv both hemispheres, split by a_hs. Reaches the
+  # model only under pump_field = "martin" WITH the HS boxes. Box [0, 60] and a
+  # FLAT prior for the probe; ⚠ PRIOR SOURCE OWED before any array frees it (an
+  # observed overturning strength with a bracket, the E4 standard). 0 = OFF, on
+  # the floor, does not encode -> seeded at init.
+  w_thc        = list(tr = "logit", lo = 0, hi = 60, init = 20,
+                      prior = function(x) dunif(x, 0, 60, log = TRUE)),
   # pump_hs_gcm2: THE HIGH-LATITUDE PUMP, FITTED since 2026-09-07e (29 -> 30) --
   # HS export per unit area in gC m-2 yr-1, remineralised in HD (pays choice C9).
   # The end-member probe put HS's DIC AT the observed high-latitude surface and
@@ -1007,7 +1015,9 @@ ccx_unpin_params <- function(removed) {
 CCX_PARAM_ABSENT_OK <- c("w_eq", "gamma_eq",
                          # option D + E (2026-09-14 h): the three reach the model only
                          # under pump_field = "martin"; every registered file is "solved"
-                         "pump_export", "w_vent", "gamma_vent")
+                         "pump_export", "w_vent", "gamma_vent",
+                         # option O1 arm THC (2026-09-15 d): likewise "martin"-only
+                         "w_thc")
 
 #' The names this build fits that a mode file lacks, pins excluded
 ccx_mode_absent <- function(md)
@@ -1279,7 +1289,7 @@ ccx_migrate_par_set <- function(p) {
   # model at all. 0 is on w_vent's / gamma_vent's floor and pump_export's log
   # pole and does not ENCODE; ccx_seed_unencodable() seeds at init for a START
   # point -- the w_eq precedent.
-  for (nm in c("pump_export", "w_vent", "gamma_vent")) if (nm %in% absent) {
+  for (nm in c("pump_export", "w_vent", "gamma_vent", "w_thc")) if (nm %in% absent) {
     p[[nm]] <- 0
     filled <- c(filled, nm)
   }
@@ -1992,7 +2002,7 @@ ccx_parse_pump_field <- function(pump_field) {
 #' accepts them as EXTRA pins on the canonical's own.
 ccx_pump_field_inert <- function(pump_field) {
   if (identical(ccx_parse_pump_field(pump_field), "martin")) c("pump_grad", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH")
-  else c("pump_export", "w_vent", "gamma_vent")
+  else c("pump_export", "w_vent", "gamma_vent", "w_thc")
 }
 #' Does a pin set EXTEND the canonical's (same values on the canonical's pinned
 #' names) by nothing but names inert under `pump_field`? Then the canonical is

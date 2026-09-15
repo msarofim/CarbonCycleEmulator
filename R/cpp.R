@@ -127,6 +127,11 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     k_e1 = as.integer(aux$k_e1), k_e2 = as.integer(aux$k_e2),
     e_w = as.numeric(aux$e_w),
     e_share = c(aux$e_share$NH, aux$e_share$SH),
+    # THE HS-ROUTE DEEP RETURN (option O1 arm THC, 2026-09-15 d). Same contract.
+    thc_on = if (is.null(aux$thc_on))
+      stop("aux lacks thc_on -- build it with ccx_prepare() (2026-09-15 d)") else as.integer(aux$thc_on),
+    k_thc = as.integer(aux$k_thc),
+    thc_share = c(aux$thc_share$NH, aux$thc_share$SH),
     # THE TROPICAL SURFACE BOX (2026-09-14f). Same contract as the cell's
     # fields: unconditional, zero-filled when off, LOUD if the aux predates it;
     # `tr_on` is read THIRD on the C++ side because it also sets the stride.
@@ -231,6 +236,7 @@ ccx_cpp_par <- function(p) {
   # The ventilation loop's two fitted names (option E, 2026-09-14 h): absence
   # = 0 = OFF (aux$e_on, via ccx_prepare(), already says so). Same contract.
   if (is.null(p$w_vent))      p$w_vent      <- 0
+  if (is.null(p[["w_thc"]]))  p[["w_thc"]]  <- 0   # the HS-route deep return (2026-09-15 d)
   if (is.null(p$gamma_vent))  p$gamma_vent  <- 0
   # q_attach_from (2026-09-05f): 1 = every interior layer = HILDA's
   # depth-independent q, so a parameter list written before that date reaches
@@ -336,6 +342,7 @@ ccx_cpp_par <- function(p) {
       "w_eq", "gamma_eq",                 # the equatorial cell (2026-09-13g)
       "q_tr",                             # the tropical box (2026-09-14f)
       "w_vent", "gamma_vent",                   # the ventilation loop (2026-09-14 h)
+      "w_thc",                                  # the HS-route deep return (2026-09-15 d)
       "q_conv", "conv_sink", "conv_descent", "conv_reverse", "pump_mode",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",

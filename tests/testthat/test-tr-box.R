@@ -174,7 +174,7 @@ test_that("P0a (canonical): hilda30c's stored LIKELIHOOD reproduces row by row u
   expect_false(ccx_tr_on(bp)); expect_false(ccx_eq_on(bp))
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))
-  expect_setequal(new_names, c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent"))   # NO new fitted name from the tr build   # + option D+E's three (2026-09-14 h)
+  expect_setequal(new_names, c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc"))   # + O1 arm THC (2026-09-15 d)   # NO new fitted name from the tr build   # + option D+E's three (2026-09-14 h)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a-tr"))
   u  <- ccx_par_to_unc(pm)
   sc <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(u)

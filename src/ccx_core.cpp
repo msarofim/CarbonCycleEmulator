@@ -183,6 +183,10 @@ struct Aux {
   // the band); e_share the a_ls split of w_vent. Zero-filled when off.
   int    e_on, k_e1, k_e2;
   double e_w[NL], e_share[2];
+  // THE HS-ROUTE DEEP RETURN (option O1 arm THC, 2026-09-15 d): thc_on gates
+  // it; k_thc the return layer, 1-BASED as in R; thc_share the a_hs split.
+  int    thc_on, k_thc;
+  double thc_share[2];
   double h_tr, sst_tr, sst_tr_enso, alk_tr, dic0_tr, revelle0_tr;
   double ml_pump_share[2], tr_C0[2];   // choice D2: the ML's share of the LS export; tr's PI carbon
   double kz_tr;                        // the tr / layer-1 interface's K (R6); 0 = none
@@ -210,6 +214,8 @@ struct Par {
                              // Nino3.4 modulation (2026-09-13g)
   double w_vent, gamma_vent;       // the ventilation loop's whole-LS Sv and its
                              // Nino3.4 modulation (option E, 2026-09-14 h)
+  double w_thc;              // the HS-route deep return, Sv both hemispheres
+                             // (option O1 arm THC, 2026-09-15 d)
   double q_tr;               // the tropical box's lateral exchange, Sv
                              // (2026-09-14f; structural 0 under ruling R4)
   double q_attach_from;      // shallowest interior layer HD attaches to,
@@ -987,6 +993,27 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       }
     }
 
+    // ---- THE HS-ROUTE DEEP RETURN (option O1 arm THC, 2026-09-15 d) -- twin
+    // of the block in R/model.R, which carries the reasoning (prereg 09-15d
+    // §1). thc_on = 0 emits nothing. Five legs, each W x the source box's
+    // per-volume concentration; association order mirrors the R exactly.
+    // HS / HD thicknesses are the fixed A.h_hs / A.dz_hd (option B, the
+    // seasonal HS, is R-only and refused on this path).
+    if (A.thc_on) {
+      const double W = P.w_thc * SV_TO_M3YR * A.thc_share[hi];
+      if (W > 0.0) {
+        const int ihs = base + IHS, ihd = base + IHD, kt = A.k_thc;
+        add_flux(iml, ihs, W * y[IX(iml, C)] / (A.a_ml[hi] * dzl[0]), 1.0);              // (1) poleward
+        add_flux(ihs, ihd, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.h_hs), 1.0);              // (2) sinking
+        add_flux(ihd, base + IML + NL, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd), 1.0); // (3) the abyss
+        for (int jj = NL - 1; jj >= kt; --jj) {                                          // (4) upwelling below k (1-based jj)
+          const int ifrom = base + IML + jj + 1, ito = base + IML + jj;
+          add_flux(ifrom, ito, W * y[IX(ifrom, C)] / (A.a_ls[hi] * dzl[jj + 1]), 1.0);
+        }
+        add_flux(base + IML + kt, iml, W * y[IX(base + IML + kt, C)] / (A.a_ls[hi] * dzl[kt]), 1.0);  // (5) the return
+      }
+    }
+
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
     // external to the modelled system; land-use change is not, so it is a
     // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
@@ -1155,6 +1182,8 @@ static Aux unpack_aux(const List& a) {
   A.e_on = a["e_on"]; A.k_e1 = a["k_e1"]; A.k_e2 = a["k_e2"];
   v = a["e_w"];       for (int k = 0; k < NL; ++k) A.e_w[k] = v[k];
   v = a["e_share"];   A.e_share[0] = v[0];   A.e_share[1] = v[1];
+  A.thc_on = a["thc_on"]; A.k_thc = a["k_thc"];                    // the HS-route deep return (2026-09-15 d)
+  v = a["thc_share"]; A.thc_share[0] = v[0]; A.thc_share[1] = v[1];
   return A;
 }
 
@@ -1180,6 +1209,7 @@ static Par unpack_par(const List& p) {
   P.w_eq = p["w_eq"]; P.gamma_eq = p["gamma_eq"];   // the equatorial cell (2026-09-13g)
   P.q_tr = p["q_tr"];                                // the tropical box (2026-09-14f)
   P.w_vent = p["w_vent"]; P.gamma_vent = p["gamma_vent"];        // the ventilation loop (2026-09-14 h)
+  P.w_thc = p["w_thc"];                                          // the HS-route deep return (2026-09-15 d)
   P.q_attach_from = p["q_attach_from"];
   P.q_conv = p["q_conv"];
   P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];

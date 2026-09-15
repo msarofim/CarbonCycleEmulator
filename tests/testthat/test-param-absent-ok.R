@@ -47,7 +47,7 @@ test_that("ccx_mode_start: migrated (what it ran), seeded, encoded; the shift is
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   out <- capture.output(st <- ccx_mode_start(md, "test"))
   expect_true(any(grepl("SEEDING", out)))
-  expect_setequal(st$absent, c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent"))   # + option D+E's three (2026-09-14 h)
+  expect_setequal(st$absent, c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc"))   # + O1 arm THC (2026-09-15 d)   # + option D+E's three (2026-09-14 h)
   expect_length(st$u, length(CCX_PARAM_NAMES)); expect_true(all(is.finite(st$u)))
   for (n in st$absent) expect_equal(st$p[[n]], CCX_PARAM_TABLE[[n]]$init)
   hand <- sum(vapply(st$absent, function(n) { s <- CCX_PARAM_TABLE[[n]]
