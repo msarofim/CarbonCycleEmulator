@@ -964,6 +964,36 @@ ccx_mld_shape <- local({
   }
 })
 
+#' The HS pump's seasonal shape (option O5b, 2026-09-16 b): the CMIP6 epc100
+#' ensemble-median unit-mean 12-month shape of the HS boxes' export, per
+#' hemisphere, as ccx_mld_fourier() coefficients -- read lazily and cached (the
+#' ccx_mld_shape() idiom; ccx_prepare() must not do file I/O per evaluation).
+#' Source: data/obs_export_seasonal_shape_cmip6.rds (20 models, 1995-2014;
+#' data-raw/build_cmip6_export_seasonal_shape.py + build_export_seasonal_prior.R).
+#' MODELS, NOT OBSERVATIONS -- the 08-27 provenance class of the land NPP shape.
+#' The median of unit-mean shapes is not itself unit-mean (0.934 / 0.941);
+#' ccx_mld_fourier() renormalises, so the factor's continuous mean is exactly 1.
+ccx_export_hs_seas_shape <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) {
+      src <- readRDS(ccx_path("data", "obs_export_seasonal_shape_cmip6.rds"))
+      co <- stats::setNames(lapply(HEMIS, function(h) {
+        sh <- src$shape[[paste0(h, "_HS")]]
+        if (is.null(sh) || length(sh$median) != 12L)
+          stop("ccx_export_hs_seas_shape(): data/obs_export_seasonal_shape_cmip6.rds carries no 12-month `shape$",
+               h, "_HS$median` -- rebuild with data-raw/build_export_seasonal_prior.R")
+        ccx_mld_fourier(sh$median)
+      }), HEMIS)
+      for (h in HEMIS) if (co[[h]]$f_min <= 0)
+        stop("ccx_export_hs_seas_shape(): the ", h, " HS shape's interpolant goes to ", format(co[[h]]$f_min),
+             " -- at amp 1 the export would reverse; the [0, 1] box is no longer sufficient")
+      cache <<- co
+    }
+    cache
+  }
+})
+
 #' The grid with the ML/layer-1 boundary moved to `h`, the interior UNCHANGED.
 #' dz_ML + dz_1 is conserved, which is what makes dz_mid[1] invariant.
 #' @param share the fraction of the mixed layer's excursion VOLUME that layer 1
@@ -1547,6 +1577,28 @@ ccx_default_params <- function() {
     # See notes/prereg_2026-09-15f_o5_seasonal_export.md.
     pump_seas_amp = 0,    # fraction of the mean export; 1 = fully seasonal
     pump_seas_lag = 0,    # months from the SST convention's mid-summer peak
+    # ---- O5b: THE HIGH-LATITUDE PUMP ON THE DATA'S RECTIFIED BLOOM (2026-09-16 b)
+    # The HS boxes' export is a rectified bloom (CMIP6 epc100, 20 models,
+    # peak/mean ~3, winter ~0.02 of the mean; confirmed by satellite NPP) that
+    # O5's sine on [0, 1] cannot carry. With pump_hs_seas_amp > 0 the HS pump
+    # follows, INSTEAD of the LS sine,
+    #   s_hs,h(t) = 1 + pump_hs_seas_amp x (F_h(t - pump_hs_seas_lag/12) - 1),
+    # F_h = the 6-harmonic Fourier interpolant (ccx_mld_fourier(), the round-6
+    # idiom: exact at the month centres, continuous mean EXACTLY 1) of the
+    # hemisphere's unit-mean ensemble-median HS shape in
+    # data/obs_export_seasonal_shape_cmip6.rds, read once through
+    # ccx_export_hs_seas_shape(). amp in [0, 1]: 1 = the CMIP6 shape; the
+    # interpolant's continuous minimum is +0.017 (NH) / +0.009 (SH), so the
+    # export never reverses. Zero-mean anomaly: the annual-mean HS export is
+    # unchanged. Lag in months, the pump_seas_lag sign convention (positive =
+    # later). PRECEDENCE: at 0 the HS pump carries O5's sine exactly as built
+    # (bit-exact); > 0 replaces the sine on the HS pump only -- the LS pump
+    # never reads these names. The coefficients ride in aux (per hemisphere,
+    # built whenever the HS pump is on); the SWITCH is this value on p, so both
+    # cores obey p and never aux's presence (the 09-09t class). STRUCTURAL, not
+    # in the table. See notes/prereg_2026-09-16b_o5b_hs_seasonal_export.md.
+    pump_hs_seas_amp = 0, # fraction of the CMIP6 shape's anomaly; 1 = the shape
+    pump_hs_seas_lag = 0, # months, positive = later
     # THE HIGH-LATITUDE PUMP (2026-09-07d; pays choice C9 of
     # notes/prereg_2026-09-05_hilda_boxes.md). HS export PER UNIT AREA, in
     # gC m-2 yr-1, remineralised in HD (one box) on the LS pump's two limbs, same
@@ -2849,7 +2901,16 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #      emits nothing -- bit-exact off.
       if (!is.null(aux$pump_hs)) {
         ph <- aux$pump_hs[[h]]
-        sc_hs <- (if (identical(p$pump_mode, "D")) y[ihs, "C"] / aux$hs_C0[[h]] else 1) * s_pump   # x the seasonal export factor (O5)
+        # O5b (2026-09-16 b): the HS pump's OWN seasonal factor -- the data's
+        # rectified shape -- replaces the LS sine when pump_hs_seas_amp > 0;
+        # at 0 it is s_pump exactly (O5 as built, bit-exact). Gated on p, not
+        # on aux's coefficients (the 09-09t class). The C++ block is the twin.
+        phs_amp <- if (is.null(p$pump_hs_seas_amp)) 0 else p$pump_hs_seas_amp
+        s_hs <- if (phs_amp > 0 && isTRUE(p$seas_drivers > 0)) {
+          1 + phs_amp * (ccx_mld_eval(aux$hs_export_seas_coef[[h]],
+                                      t - (if (is.null(p$pump_hs_seas_lag)) 0 else p$pump_hs_seas_lag) / 12)$f - 1)
+        } else s_pump
+        sc_hs <- (if (identical(p$pump_mode, "D")) y[ihs, "C"] / aux$hs_C0[[h]] else 1) * s_hs   # x the seasonal export factor (O5 / O5b)
         add_flux(ihs, ihd, ph$org * sc_hs,
                  alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",     # the biological-pump CHANNEL (09-08f: "pump_hs" was no channel and broke the flux trace)
                  alpha13_signed = TRUE)
@@ -3548,6 +3609,17 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   ps_lag <- if (is.null(p$pump_seas_lag)) 0 else p$pump_seas_lag
   if (!is.finite(ps_lag))
     stop("pump_seas_lag must be a finite number of months; got ", format(p$pump_seas_lag))
+  # ---- O5b's guards (2026-09-16 b): by name, never clamped -----------------
+  phs_amp <- if (is.null(p$pump_hs_seas_amp)) 0 else p$pump_hs_seas_amp
+  if (!is.finite(phs_amp) || phs_amp < 0 || phs_amp > 1)
+    stop("pump_hs_seas_amp must be a finite fraction in [0, 1] (1 = the CMIP6 shape; the export never reverses); got ",
+         format(p$pump_hs_seas_amp))
+  phs_lag <- if (is.null(p$pump_hs_seas_lag)) 0 else p$pump_hs_seas_lag
+  if (!is.finite(phs_lag))
+    stop("pump_hs_seas_lag must be a finite number of months; got ", format(p$pump_hs_seas_lag))
+  if (phs_amp > 0 && !(hs_on && isTRUE((if (is.null(p$pump_hs_gcm2)) 0 else p$pump_hs_gcm2) > 0)))
+    stop("pump_hs_seas_amp > 0 needs the HS pump (hs_frac > 0 and pump_hs_gcm2 > 0): there is no ",
+         "high-latitude export for the seasonal shape to modulate")
   if (eq_on) {
     # the cell's pinned geometry, range-checked by name -- never clamped
     if (!is.finite(p$h_eq) || p$h_eq <= 0)
@@ -3893,6 +3965,11 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   aux$hs_C0   <- stats::setNames(lapply(HEMIS, function(h)
     aux$dic0_hs * aux$hs_mass_kg[[h]] / aux$mol_per_GtC), HEMIS)
   aux$pump_hs <- ccx_pump_export_hs(p, aux, grid)
+  # O5b (2026-09-16 b): the HS pump's seasonal shape coefficients, per
+  # hemisphere, built whenever the HS pump is on (a cached read; nothing is
+  # emitted unless p$pump_hs_seas_amp > 0). NULL when the HS pump is off, and
+  # packed as zeros for the C++ -- the mld_coef precedent.
+  aux$hs_export_seas_coef <- if (is.null(aux$pump_hs)) NULL else ccx_export_hs_seas_shape()
   aux
 }
 

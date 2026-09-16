@@ -104,6 +104,15 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     pump_hs_org  = if (is.null(aux$pump_hs)) numeric(2) else c(aux$pump_hs$NH$org,  aux$pump_hs$SH$org),
     pump_hs_carb = if (is.null(aux$pump_hs)) numeric(2) else c(aux$pump_hs$NH$carb, aux$pump_hs$SH$carb),
     hs_C0 = if (is.null(aux$hs_C0)) numeric(2) else c(aux$hs_C0$NH, aux$hs_C0$SH),
+    # O5b (2026-09-16 b): the HS pump's seasonal shape, 6 Fourier harmonics per
+    # hemisphere (the mld_a/mld_b precedent), ZERO-FILLED when the HS pump is
+    # off. `pump_hs_seas_on` says the coefficients are DATA-PRESENT; the switch
+    # that emits anything is P.pump_hs_seas_amp > 0, on p, in both cores.
+    pump_hs_seas_on = as.integer(!is.null(aux$hs_export_seas_coef)),
+    phs_a = if (is.null(aux$hs_export_seas_coef)) numeric(12) else
+              unlist(lapply(HEMIS, function(h) aux$hs_export_seas_coef[[h]]$a), use.names = FALSE),
+    phs_b = if (is.null(aux$hs_export_seas_coef)) numeric(12) else
+              unlist(lapply(HEMIS, function(h) aux$hs_export_seas_coef[[h]]$b), use.names = FALSE),
     # THE EQUATORIAL CELL (2026-09-13g). Sent UNCONDITIONALLY, zero-filled when
     # off, for the same reason as every structural field above; `eq_on` is
     # read SECOND on the C++ side (after hs_on) because it also sets the box
@@ -239,6 +248,8 @@ ccx_cpp_par <- function(p) {
   if (is.null(p[["w_thc"]]))  p[["w_thc"]]  <- 0   # the HS-route deep return (2026-09-15 d)
   if (is.null(p$pump_seas_amp)) p$pump_seas_amp <- 0   # the seasonal export (2026-09-15 f): absence = 0 = OFF
   if (is.null(p$pump_seas_lag)) p$pump_seas_lag <- 0
+  if (is.null(p$pump_hs_seas_amp)) p$pump_hs_seas_amp <- 0   # O5b (2026-09-16 b): absence = 0 = OFF
+  if (is.null(p$pump_hs_seas_lag)) p$pump_hs_seas_lag <- 0
   if (is.null(p$gamma_vent))  p$gamma_vent  <- 0
   # q_attach_from (2026-09-05f): 1 = every interior layer = HILDA's
   # depth-independent q, so a parameter list written before that date reaches
@@ -346,6 +357,7 @@ ccx_cpp_par <- function(p) {
       "w_vent", "gamma_vent",                   # the ventilation loop (2026-09-14 h)
       "w_thc",                                  # the HS-route deep return (2026-09-15 d)
       "pump_seas_amp", "pump_seas_lag",         # the seasonal export (2026-09-15 f; structural)
+      "pump_hs_seas_amp", "pump_hs_seas_lag",   # O5b, the HS pump's own shape (2026-09-16 b; structural)
       "q_conv", "conv_sink", "conv_descent", "conv_reverse", "pump_mode",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",

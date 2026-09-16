@@ -161,6 +161,12 @@ struct Aux {
   int    pump_hs_on;
   double pump_hs_org[2], pump_hs_carb[2];
   double hs_C0[2];                  // preindustrial HS carbon, DIC-limited mode
+  // O5b (2026-09-16 b): the HS pump's seasonal SHAPE, 6 Fourier harmonics per
+  // hemisphere -- twin of R's aux$pump_hs_seas_coef (the mld_a/mld_b idiom),
+  // zero-filled when the HS pump is off. pump_hs_seas_on is DATA PRESENCE
+  // only; the switch that emits anything is P.pump_hs_seas_amp > 0.
+  int    pump_hs_seas_on;
+  double phs_a[2][6], phs_b[2][6];
   // THE EQUATORIAL UPWELLING CELL (2026-09-13g). Twin of the block in R's
   // ccx_prepare(); sent unconditionally, zero-filled when off. `eq_on` gates
   // every flux on both cores and, with hs_on, sets the stride. `a_ml` is the
@@ -218,6 +224,9 @@ struct Par {
                              // (option O1 arm THC, 2026-09-15 d)
   double pump_seas_amp, pump_seas_lag;   // the seasonal export factor (option O5,
                              // 2026-09-15 f): amp in [0, 1], lag in months
+  double pump_hs_seas_amp, pump_hs_seas_lag;   // O5b (2026-09-16 b): the HS pump on
+                             // the data's rectified shape; amp in [0, 1], lag in
+                             // months. > 0 REPLACES the O5 sine on the HS pump.
   double q_tr;               // the tropical box's lateral exchange, Sv
                              // (2026-09-14f; structural 0 under ruling R4)
   double q_attach_from;      // shallowest interior layer HD attaches to,
@@ -433,6 +442,17 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       sd += 2.0 * M_PI * k * (-A.mld_a[hi][k - 1] * sa + A.mld_b[hi][k - 1] * ca);
     }
     *f = sf; *dfdt = sd;
+  };
+  // O5b (2026-09-16 b): the HS pump's seasonal shape at time tt -- twin of
+  // ccx_mld_eval(aux$pump_hs_seas_coef[[h]], tt)$f, the SAME order and
+  // associativity as mld_eval above so the cores agree to roundoff.
+  auto phs_eval = [&](int hi, double tt) {
+    double sf = 1.0;                                 // a0 = 1 by construction
+    for (int k = 1; k <= 6; ++k) {
+      const double ang = 2.0 * M_PI * k * tt;
+      sf += A.phs_a[hi][k - 1] * std::cos(ang) + A.phs_b[hi][k - 1] * std::sin(ang);
+    }
+    return sf;
   };
 
   auto add_flux = [&](int from, int to, double F, double alpha13,
@@ -863,8 +883,14 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       //      fractionation, DIC-limited scaling against HS's own preindustrial
       //      carbon in mode D. pump_hs_on = 0 emits nothing. See the R twin.
       if (A.pump_hs_on) {
+        // O5b (2026-09-16 b): the HS pump's OWN factor -- the data's rectified
+        // shape -- replaces the LS sine when pump_hs_seas_amp > 0; at 0 it is
+        // s_pump exactly (O5 as built, bit-exact). Gated on P, not on A.
+        const double s_hs = (P.pump_hs_seas_amp > 0.0 && P.seas_drivers > 0)
+          ? 1.0 + P.pump_hs_seas_amp * (phs_eval(hi, t - P.pump_hs_seas_lag / 12.0) - 1.0)
+          : s_pump;
         const double sch = ((P.pump_mode == 1)
-          ? y[IX(ihs, C)] / A.hs_C0[hi] : 1.0) * s_pump;   // x the seasonal export factor (O5)
+          ? y[IX(ihs, C)] / A.hs_C0[hi] : 1.0) * s_hs;     // x the seasonal export factor (O5 / O5b)
         add_flux(ihs, ihd, A.pump_hs_org[hi] * sch, A.alpha_pump_org, true);
         add_flux(ihs, ihd, A.pump_hs_carb[hi] * sch, A.alpha_pump_carb, true);
       }
@@ -1167,6 +1193,9 @@ static Aux unpack_aux(const List& a) {
   v = a["pump_hs_org"];  A.pump_hs_org[0] = v[0];  A.pump_hs_org[1] = v[1];
   v = a["pump_hs_carb"]; A.pump_hs_carb[0] = v[0]; A.pump_hs_carb[1] = v[1];
   v = a["hs_C0"];        A.hs_C0[0] = v[0];        A.hs_C0[1] = v[1];
+  A.pump_hs_seas_on = a["pump_hs_seas_on"];                                        // O5b (2026-09-16 b)
+  v = a["phs_a"]; for (int h = 0; h < 2; ++h) for (int k = 0; k < 6; ++k) A.phs_a[h][k] = v[h * 6 + k];
+  v = a["phs_b"]; for (int h = 0; h < 2; ++h) for (int k = 0; k < 6; ++k) A.phs_b[h][k] = v[h * 6 + k];
   // the equatorial cell (2026-09-13g); eq_on was read at the top
   v = a["a_ml"];        A.a_ml[0] = v[0];        A.a_ml[1] = v[1];
   v = a["a_eq"];        A.a_eq[0] = v[0];        A.a_eq[1] = v[1];
@@ -1220,6 +1249,7 @@ static Par unpack_par(const List& p) {
   P.w_vent = p["w_vent"]; P.gamma_vent = p["gamma_vent"];        // the ventilation loop (2026-09-14 h)
   P.w_thc = p["w_thc"];                                          // the HS-route deep return (2026-09-15 d)
   P.pump_seas_amp = p["pump_seas_amp"]; P.pump_seas_lag = p["pump_seas_lag"];   // the seasonal export (2026-09-15 f)
+  P.pump_hs_seas_amp = p["pump_hs_seas_amp"]; P.pump_hs_seas_lag = p["pump_hs_seas_lag"];   // O5b (2026-09-16 b)
   P.q_attach_from = p["q_attach_from"];
   P.q_conv = p["q_conv"];
   P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];
