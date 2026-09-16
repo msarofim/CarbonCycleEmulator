@@ -237,6 +237,8 @@ ccx_cpp_par <- function(p) {
   # = 0 = OFF (aux$e_on, via ccx_prepare(), already says so). Same contract.
   if (is.null(p$w_vent))      p$w_vent      <- 0
   if (is.null(p[["w_thc"]]))  p[["w_thc"]]  <- 0   # the HS-route deep return (2026-09-15 d)
+  if (is.null(p$pump_seas_amp)) p$pump_seas_amp <- 0   # the seasonal export (2026-09-15 f): absence = 0 = OFF
+  if (is.null(p$pump_seas_lag)) p$pump_seas_lag <- 0
   if (is.null(p$gamma_vent))  p$gamma_vent  <- 0
   # q_attach_from (2026-09-05f): 1 = every interior layer = HILDA's
   # depth-independent q, so a parameter list written before that date reaches
@@ -343,6 +345,7 @@ ccx_cpp_par <- function(p) {
       "q_tr",                             # the tropical box (2026-09-14f)
       "w_vent", "gamma_vent",                   # the ventilation loop (2026-09-14 h)
       "w_thc",                                  # the HS-route deep return (2026-09-15 d)
+      "pump_seas_amp", "pump_seas_lag",         # the seasonal export (2026-09-15 f; structural)
       "q_conv", "conv_sink", "conv_descent", "conv_reverse", "pump_mode",
       "npp_leaf_frac", "tau_leaf", "tau_wood",
       "litter_slow_frac", "tau_soil_fast", "tau_soil_slow",

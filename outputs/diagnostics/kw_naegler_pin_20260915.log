@@ -1,0 +1,47 @@
+== the k_w test at hilda30c -- commit 6e68ff4 ==
+canonical k_w 1636.8 m/yr = 18.67 cm/h; Naegler 2009 16.5 (spread 3.2): z +0.68; pin at 16.5 cm/h = 1446.4 m/yr (x0.8837)
+HARNESS GATE 1: dg streams vs stored: -1392.0158 vs -1392.0158 -> PASS
+canonical                          | dlik    +0.0 | exc75/95  60.7/ 81.4 (z95 +3.9; row  +0.0) | bomb   +0.0 co2   +0.0 d14prof  +0.0 d13  +0.0 | sink 2.97 
+
+== the k_w PROFILE, raw ==
+k_w 15.0 cm/h (x0.803) raw         | dlik -1078.8 | exc75/95  55.3/ 78.2 (z95 +3.5; row  +0.6) | bomb -702.0 co2  -21.2 d14prof -19.8 d13 -340.2 | sink 2.96 
+k_w 16.5 cm/h (x0.884) raw         | dlik  -325.3 | exc75/95  57.7/ 79.7 (z95 +3.7; row  +0.3) | bomb -208.3 co2   -6.3 d14prof  -6.2 d13 -107.3 | sink 2.97 
+k_w 18.7 cm/h (x1.001) raw         | dlik    -0.0 | exc75/95  60.7/ 81.4 (z95 +3.9; row  -0.0) | bomb   -0.1 co2   +0.0 d14prof  +0.0 d13  +0.1 | sink 2.97 
+k_w 21.0 cm/h (x1.125) raw         | dlik  -252.2 | exc75/95  63.4/ 82.8 (z95 +4.1; row  -0.3) | bomb -176.1 co2   -4.5 d14prof  +1.2 d13 -69.7 | sink 2.98 
+raw elasticity of the 1995 inventory to k_w: 0.17 (1 = proportional; Naegler's I_E ~ k would be ~1, Krakauer < 1)
+SEEDING w_eq for the kw_pin: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the kw_pin: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the kw_pin: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the kw_pin: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the kw_pin: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the kw_pin: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+HARNESS GATE 4: rebuilt logpost -1426.2428 (shift -3.5874) vs stored -1426.2428 -> PASS
+
+== ARM C ==
+k_w canonical, armC (PK-2g harness) (armC -0.0 raw +0.0) | dlik    -0.0 | exc75/95  60.7/ 81.4 (z95 +3.9; row  +0.0) | bomb   +0.0 co2   +0.0 d14prof  -0.0 d13  -0.0 | sink 2.97  | 870 evals; kz 10964 kz_deep_frac 0.0117 h_ml 65.2 bomb_total 118.4 sigma_d14c 5.47 beta_max 0.712
+        largest rows: d13c_seasonal_MLO -0.0, co2_icecore -0.0, d13c_level_MLO -0.0, d13c_seasonal_SPO -0.0, d14c_profile_ab -0.0
+        [161 s] PK-2g: |armC - raw| = 1.88e-06 -> PASS
+k_w 16.5 cm/h, armC (kz held) (armC -99.3 raw -325.3) | dlik   -99.3 | exc75/95  55.1/ 75.9 (z95 +3.2; row  +1.2) | bomb  -11.8 co2  -13.4 d14prof  -6.1 d13 -68.8 | sink 2.93  | 1360 evals; kz 10964 kz_deep_frac 0.0129 h_ml 66.3 bomb_total 112.8 sigma_d14c 6.54 beta_max 0.825
+        largest rows: d13c_level_MLO -68.3, co2_level_MLO -10.8, d14c_NH -10.5, d14c_profile_level -5.2, co2_level_SPO -2.5
+        [295 s]
+k_w 16.5 cm/h, armC+ (kz free) (armC -99.4 raw -325.3) | dlik   -99.4 | exc75/95  55.0/ 75.7 (z95 +3.2; row  +1.2) | bomb  -10.7 co2  -13.5 d14prof  -6.3 d13 -68.9 | sink 2.92  | 1590 evals; kz 10702 kz_deep_frac 0.0141 h_ml 67.5 bomb_total 112.7 sigma_d14c 6.46 beta_max 0.826
+        largest rows: d13c_level_MLO -68.5, co2_level_MLO -10.9, d14c_NH -9.9, d14c_profile_level -5.3, co2_level_SPO -2.5
+        [339 s]
+
+== THE DECISION RULE: k_w IS a lever iff the 1995 inventory drops >= 5 kmol at a cost <= 20 log-units after arm C ==
+raw: drop 1.7 kmol (cost -325.3); armC kz held: drop 5.5 kmol (cost -99.3); armC+ kz free: drop 5.6 kmol (cost -99.4; kz 10964 -> 10702)
+VERDICT: k_w at Naegler's 16.5 cm/h is NOT a lever on the 1995 inventory under this rule (armC drop 5.5 kmol, cost -99.3).
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/kw_naegler_pin_20260915.{log,rds}

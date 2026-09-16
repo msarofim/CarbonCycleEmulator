@@ -216,6 +216,8 @@ struct Par {
                              // Nino3.4 modulation (option E, 2026-09-14 h)
   double w_thc;              // the HS-route deep return, Sv both hemispheres
                              // (option O1 arm THC, 2026-09-15 d)
+  double pump_seas_amp, pump_seas_lag;   // the seasonal export factor (option O5,
+                             // 2026-09-15 f): amp in [0, 1], lag in months
   double q_tr;               // the tropical box's lateral exchange, Sv
                              // (2026-09-14f; structural 0 under ruling R4)
   double q_attach_from;      // shallowest interior layer HD attaches to,
@@ -734,15 +736,22 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // than fitted (DESIGN sec.5.2d). 14C rides both limbs UNFRACTIONATED, by the
     // Stuiver-Polach convention -- which is what add_flux already does.
     // pump_on = 0 emits nothing, so the no-pump model is bit-reproduced.
+    // the seasonal export factor (option O5, 2026-09-15 f): twin of the R
+    // block; exactly 1.0 at pump_seas_amp = 0 (bit-exact). Multiplies every
+    // pump limb, LS and HS.
+    const double s_pump = (P.pump_seas_amp > 0.0 && P.seas_drivers > 0)
+      ? 1.0 + P.pump_seas_amp * (hi == 0 ? 1.0 : -1.0)
+          * std::sin(2.0 * M_PI * (t - (3.5 + P.pump_seas_lag) / 12.0))
+      : 1.0;
     if (A.pump_on) {
-      const double sc = (P.pump_mode == 1)
-        ? y[IX(iml, C)] / A.ml_C0[hi] : 1.0;
+      const double sc = ((P.pump_mode == 1)
+        ? y[IX(iml, C)] / A.ml_C0[hi] : 1.0) * s_pump;
       if (A.tr_on) {
         // the tropical box carries its AREA SHARE of the export (2026-09-14f,
         // choice D2) -- twin of the R branch, which carries the measurement
         const int itr = base + ITR;
         const double f_ml = A.ml_pump_share[hi], f_tr = 1.0 - f_ml;
-        const double sc_t = (P.pump_mode == 1) ? y[IX(itr, C)] / A.tr_C0[hi] : 1.0;
+        const double sc_t = ((P.pump_mode == 1) ? y[IX(itr, C)] / A.tr_C0[hi] : 1.0) * s_pump;
         for (int kk = 0; kk < NL; ++kk) {
           const int b = base + IML + 1 + kk;
           add_flux(iml, b, A.pump_org[hi][kk] * sc * f_ml, A.alpha_pump_org, true);
@@ -854,8 +863,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       //      fractionation, DIC-limited scaling against HS's own preindustrial
       //      carbon in mode D. pump_hs_on = 0 emits nothing. See the R twin.
       if (A.pump_hs_on) {
-        const double sch = (P.pump_mode == 1)
-          ? y[IX(ihs, C)] / A.hs_C0[hi] : 1.0;
+        const double sch = ((P.pump_mode == 1)
+          ? y[IX(ihs, C)] / A.hs_C0[hi] : 1.0) * s_pump;   // x the seasonal export factor (O5)
         add_flux(ihs, ihd, A.pump_hs_org[hi] * sch, A.alpha_pump_org, true);
         add_flux(ihs, ihd, A.pump_hs_carb[hi] * sch, A.alpha_pump_carb, true);
       }
@@ -1210,6 +1219,7 @@ static Par unpack_par(const List& p) {
   P.q_tr = p["q_tr"];                                // the tropical box (2026-09-14f)
   P.w_vent = p["w_vent"]; P.gamma_vent = p["gamma_vent"];        // the ventilation loop (2026-09-14 h)
   P.w_thc = p["w_thc"];                                          // the HS-route deep return (2026-09-15 d)
+  P.pump_seas_amp = p["pump_seas_amp"]; P.pump_seas_lag = p["pump_seas_lag"];   // the seasonal export (2026-09-15 f)
   P.q_attach_from = p["q_attach_from"];
   P.q_conv = p["q_conv"];
   P.conv_sink = p["conv_sink"]; P.conv_descent = p["conv_descent"];

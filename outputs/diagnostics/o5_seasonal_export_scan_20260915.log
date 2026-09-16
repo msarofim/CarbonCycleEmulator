@@ -1,0 +1,82 @@
+== O5 seasonal-export probe at hilda30c (prereg 2026-09-15f) -- commit 6e68ff4 ==
+export 9.08 GtC/yr (martin); amp 0/0.25/0.5/0.75/1 x lag -2/0/2 mo; control (solved) amp 0.5/1; arm C = beta_max,fert_k,q10,kz_deep_frac,h_ml,k_w,bomb_total,sigma_d14c
+
+obs SPO first harmonic: amp 0.585 ppm, phase 5.99 mo (a -0.585 +- 0.122, b 0.004 +- 0.125, 49 yr); MLO amp 3.377 ppm
+HARNESS GATE 1: dg streams at the canonical vs stored: sum -1392.0158 vs -1392.0158 -> PASS
+canonical (solved)       | dlik     +0.0 | SPO    +0.0 MLO   +0.0 | SPO harm 0.569 ppm @ +5.96 mo (MLO 3.441) | co2lev    +0.0 bomb   +0.0 d14prof  +0.0 d13  +0.0 | L2/L6-ML   +5/+181 | exc95  81.4 (z +3.9) | sink 2.97 
+martin 9.08, amp 0       | dlik   -894.8 | SPO  -252.0 MLO  -17.7 | SPO harm 0.248 ppm @ -4.99 mo (MLO 3.150) | co2lev    -1.3 bomb   -4.4 d14prof  +0.5 d13 -11.2 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+HARNESS GATE 2: martin amp 0 dlik -894.8 vs A2's -894.8 -> PASS
+GATE 0: SPO amplitude obs 0.585 / canonical 0.569 / martin-9.08 0.248 ppm; phase obs +5.99 / canonical +5.96 / martin -4.99 mo; the martin deficit is 0.321 ppm (55 % of obs)
+
+== STAGE 1: 17 points ==
+martin amp 0.00 lag -2   | dlik   -894.8 | SPO  -252.0 MLO  -17.7 | SPO harm 0.248 ppm @ -4.99 mo (MLO 3.150) | co2lev    -1.3 bomb   -4.4 d14prof  +0.5 d13 -11.2 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.25 lag -2   | dlik   -854.1 | SPO  -213.1 MLO  -16.0 | SPO harm 0.282 ppm @ -5.07 mo (MLO 3.176) | co2lev    -1.2 bomb   -4.4 d14prof  +0.5 d13 -11.1 | L2/L6-ML  -68/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.50 lag -2   | dlik   -818.4 | SPO  -178.5 MLO  -15.0 | SPO harm 0.317 ppm @ -5.14 mo (MLO 3.203) | co2lev    -1.2 bomb   -4.4 d14prof  +0.5 d13 -11.0 | L2/L6-ML  -68/ +71 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.75 lag -2   | dlik   -787.5 | SPO  -148.2 MLO  -14.5 | SPO harm 0.352 ppm @ -5.19 mo (MLO 3.229) | co2lev    -1.1 bomb   -4.3 d14prof  +0.5 d13 -10.9 | L2/L6-ML  -68/ +71 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 1.00 lag -2   | dlik   -761.5 | SPO  -122.1 MLO  -14.7 | SPO harm 0.387 ppm @ -5.23 mo (MLO 3.255) | co2lev    -1.1 bomb   -4.3 d14prof  +0.5 d13 -10.8 | L2/L6-ML  -68/ +71 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.00 lag +0   | dlik   -894.8 | SPO  -252.0 MLO  -17.7 | SPO harm 0.248 ppm @ -4.99 mo (MLO 3.150) | co2lev    -1.3 bomb   -4.4 d14prof  +0.5 d13 -11.2 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.25 lag +0   | dlik   -847.5 | SPO  -211.1 MLO  -11.9 | SPO harm 0.259 ppm @ -5.27 mo (MLO 3.175) | co2lev    -1.2 bomb   -4.4 d14prof  +0.5 d13 -11.2 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.50 lag +0   | dlik   -806.3 | SPO  -175.3 MLO   -7.1 | SPO harm 0.274 ppm @ -5.53 mo (MLO 3.201) | co2lev    -1.2 bomb   -4.3 d14prof  +0.5 d13 -11.1 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.75 lag +0   | dlik   -771.1 | SPO  -144.4 MLO   -3.4 | SPO harm 0.294 ppm @ -5.76 mo (MLO 3.227) | co2lev    -1.1 bomb   -4.2 d14prof  +0.5 d13 -11.0 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 1.00 lag +0   | dlik   -741.8 | SPO  -118.6 MLO   -0.7 | SPO harm 0.317 ppm @ -5.95 mo (MLO 3.253) | co2lev    -1.0 bomb   -4.2 d14prof  +0.5 d13 -10.9 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.00 lag +2   | dlik   -894.8 | SPO  -252.0 MLO  -17.7 | SPO harm 0.248 ppm @ -4.99 mo (MLO 3.150) | co2lev    -1.3 bomb   -4.4 d14prof  +0.5 d13 -11.2 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.25 lag +2   | dlik   -890.5 | SPO  -251.8 MLO  -14.1 | SPO harm 0.223 ppm @ -5.21 mo (MLO 3.149) | co2lev    -1.3 bomb   -4.4 d14prof  +0.5 d13 -11.3 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.50 lag +2   | dlik   -892.2 | SPO  -256.1 MLO  -12.0 | SPO harm 0.202 ppm @ -5.49 mo (MLO 3.149) | co2lev    -1.3 bomb   -4.4 d14prof  +0.5 d13 -11.3 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 0.75 lag +2   | dlik   -899.8 | SPO  -264.9 MLO  -11.3 | SPO harm 0.186 ppm @ -5.82 mo (MLO 3.149) | co2lev    -1.3 bomb   -4.3 d14prof  +0.5 d13 -11.3 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 1.00 lag +2   | dlik   -913.4 | SPO  -278.1 MLO  -12.2 | SPO harm 0.176 ppm @ +5.81 mo (MLO 3.149) | co2lev    -1.3 bomb   -4.3 d14prof  +0.5 d13 -11.4 | L2/L6-ML  -66/ +73 | exc95  81.0 (z +3.9) | sink 2.96 
+solved amp 0.50 lag +0   | dlik   -223.1 | SPO  -191.7 MLO  -33.2 | SPO harm 0.860 ppm @ +5.43 mo (MLO 3.679) | co2lev    -0.4 bomb   -0.1 d14prof  -0.0 d13  -0.5 | L2/L6-ML   +5/+181 | exc95  81.4 (z +3.9) | sink 2.97 
+solved amp 1.00 lag +0   | dlik   -899.3 | SPO  -764.1 MLO -136.8 | SPO harm 1.175 ppm @ +5.17 mo (MLO 3.918) | co2lev    -1.5 bomb   -0.3 d14prof  -0.0 d13  -1.3 | L2/L6-ML   +6/+181 | exc95  81.4 (z +3.9) | sink 2.96 
+stage 1 done in 4 s
+
+== the SPO row across the grid (martin), dlik vs the canonical; the amp-0 row is A2 ==
+  amp lag   dlik    spo      mlo spo_amp spo_phase    co2     L2
+ 0.00  -2 -894.8 -252.0 -17.6601  0.2483    -4.988 -1.309 -67.38
+ 0.25  -2 -854.1 -213.1 -16.0157  0.2824    -5.072 -1.241 -67.56
+ 0.50  -2 -818.4 -178.5 -14.9705  0.3170    -5.137 -1.177 -67.74
+ 0.75  -2 -787.5 -148.2 -14.5213  0.3518    -5.190 -1.118 -67.92
+ 1.00  -2 -761.5 -122.1 -14.6647  0.3869    -5.233 -1.063 -68.10
+ 0.00   0 -894.8 -252.0 -17.6601  0.2483    -4.988 -1.309 -67.38
+ 0.25   0 -847.5 -211.1 -11.8963  0.2586    -5.273 -1.236 -67.32
+ 0.50   0 -806.3 -175.3  -7.1425  0.2740    -5.531 -1.168 -67.26
+ 0.75   0 -771.1 -144.4  -3.3999  0.2937    -5.757 -1.105 -67.20
+ 1.00   0 -741.8 -118.6  -0.6698  0.3170    -5.953 -1.046 -67.14
+ 0.00   2 -894.8 -252.0 -17.6601  0.2483    -4.988 -1.309 -67.38
+ 0.25   2 -890.5 -251.8 -14.0765  0.2234    -5.211 -1.303 -67.14
+ 0.50   2 -892.2 -256.1 -11.9727  0.2022    -5.485 -1.297 -66.90
+ 0.75   2 -899.8 -264.9 -11.3497  0.1860    -5.815 -1.290 -66.65
+ 1.00   2 -913.4 -278.1 -12.2085  0.1762     5.806 -1.282 -66.41
+
+best total: amp 1.00 lag +0 (dlik -741.8, SPO -118.6); best SPO row: amp 1.00 lag +0 (SPO -118.6, dlik -741.8)
+
+== STAGE 2: arm C re-optimisation (best total point; martin amp 0 as its baseline) ==
+SEEDING w_eq for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+HARNESS GATE 4: rebuilt logpost -1426.2428 (shift -3.5874) vs stored -1426.2428 -> PASS
+armC amp 0.00 lag +0: raw   -894.8 -> armC   -288.6 (SPO -252.0 -> -205.9; 1433 evals; kz_deep_frac 0.1005 h_ml 71.1 k_w 1669 bomb_total 119.2 sigma_d14c 5.43) | dlik   -288.6 | SPO  -205.9 MLO   -4.0 | SPO harm 0.280 ppm @ -5.15 mo (MLO 3.262) | co2lev    -3.0 bomb   -0.8 d14prof -43.2 d13 -24.2 | L2/L6-ML  -67/ +61 | exc95  83.0 (z +4.2) | sink 3.11  [270 s]
+        largest rows: co2_seasonal_SPO -205.9, d14c_profile_ab -31.3, d13c_seasonal_MLO -19.2, d14c_profile_bd -10.7, d13c_level_MLO -10.2
+armC amp 1.00 lag +0: raw   -741.8 -> armC   -125.7 (SPO -118.6 -> -88.7; 1674 evals; kz_deep_frac 0.0501 h_ml 32.0 k_w 1701 bomb_total 117.7 sigma_d14c 5.68) | dlik   -125.7 | SPO   -88.7 MLO   +1.3 | SPO harm 0.358 ppm @ -5.80 mo (MLO 3.337) | co2lev    -2.1 bomb   -0.9 d14prof -14.1 d13 -10.1 | L2/L6-ML  -71/ +41 | exc95  80.4 (z +3.8) | sink 2.93  [406 s]
+        largest rows: co2_seasonal_SPO -88.7, d14c_profile_ab -13.1, d13c_seasonal_MLO -7.2, d13c_level_MLO -6.5, d14c_SH -5.0
+
+== THE DECISION RULE: (a) SPO recovers >= 50 % of its martin-9.08 cost (-252.0 -> >= -126.0); (b) martin total improves >= 100 over amp 0 (-894.8); (c) after arm C the SPO gain over the amp-0 arm-C point survives ==
+(a) best SPO -118.6 vs -126.0 -> PASS;  (b) best total -741.8 vs amp-0 -894.8, gain +152.9 -> PASS;  (c) arm C: amp-0 SPO -205.9 / best-point SPO -88.7, totals -288.6 / -125.7 -> PASS
+layer-2 inversion (READ, predicted to persist): martin amp 0 -67; best point -67; canonical +5
+
+VERDICT: O5 PASSES its preregistered rule (a)-(c)
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/o5_seasonal_export_scan_20260915.{log,rds}

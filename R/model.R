@@ -1534,6 +1534,19 @@ ccx_default_params <- function() {
     w_thc   = 0,          # Sv, both hemispheres; split by a_hs share
     k_thc   = 1L,         # the RETURN layer (1-BASED); 1 = the full Munk
                           #   column; STRUCTURAL, not fitted (the k_e1 idiom)
+    # ---- THE SEASONAL EXPORT (option O5, 2026-09-15 f) ---------------------
+    # Export production peaks in local summer. Every pump limb (the LS pump's
+    # org + carb legs from BOTH surface boxes, and the HS pump) is multiplied by
+    #   s_h(t) = 1 + pump_seas_amp x sigma_h x sin(2 pi (t - (3.5 + pump_seas_lag)/12)),
+    # sigma_NH = +1, sigma_SH = -1 -- the SST convention (lag 0 peaks mid-July
+    # NH / mid-January SH). ZERO-MEAN by construction, so the annual-mean export
+    # is unchanged; amp in [0, 1] so the export never reverses (ccx_prepare()
+    # refuses outside by name). Applies under EITHER field, under the
+    # `seas_drivers` switch like every seasonal term. STRUCTURAL names,
+    # not in the table (the k_thc idiom); 0 = OFF emits NOTHING (bit-exact).
+    # See notes/prereg_2026-09-15f_o5_seasonal_export.md.
+    pump_seas_amp = 0,    # fraction of the mean export; 1 = fully seasonal
+    pump_seas_lag = 0,    # months from the SST convention's mid-summer peak
     # THE HIGH-LATITUDE PUMP (2026-09-07d; pays choice C9 of
     # notes/prereg_2026-09-05_hilda_boxes.md). HS export PER UNIT AREA, in
     # gC m-2 yr-1, remineralised in HD (one box) on the LS pump's two limbs, same
@@ -2569,12 +2582,23 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     #
     # `is.null(aux$pump)` emits nothing at all, so the no-pump model is BIT-
     # reproduced. Same contract as w_up = 0 below.
+    # THE SEASONAL EXPORT FACTOR (option O5, 2026-09-15 f): one number per
+    # hemisphere and instant, multiplying every pump limb below (LS and HS).
+    # Exactly 1 at pump_seas_amp = 0 -- the multiplication by 1 is bit-exact.
+    # The C++ block is the twin.
+    # Under the SAME seas_drivers switch as every other seasonal term (the
+    # aseasonal spinup evaluates the deriv with the drivers off).
+    ps_amp <- if (is.null(p$pump_seas_amp)) 0 else p$pump_seas_amp
+    s_pump <- if (ps_amp > 0 && isTRUE(p$seas_drivers > 0)) {
+      1 + ps_amp * (if (h == "NH") 1 else -1) *
+        sin(2 * pi * (t - (3.5 + (if (is.null(p$pump_seas_lag)) 0 else p$pump_seas_lag)) / 12))
+    } else 1
     if (!is.null(aux$pump)) {
       pf <- aux$pump[[h]]
       # NUTRIENT-LIMITED ("N"): export mass fixed, the standard steady-pump
       # assumption. DIC-LIMITED ("D"): export scales with the mixed layer's
       # carbon, the ONLY channel through which the pump touches uptake.
-      sc <- if (identical(p$pump_mode, "D")) y[iml, "C"] / aux$ml_C0[[h]] else 1
+      sc <- (if (identical(p$pump_mode, "D")) y[iml, "C"] / aux$ml_C0[[h]] else 1) * s_pump
       for (kk in seq_len(grid$nl)) {
         # alpha13_signed: GRANDFATHERED 2026-08-25e, BEHAVIOUR UNCHANGED, AND
         # OPEN. `S[k]` is built in ccx_pump_export() as the DIVERGENCE of the
@@ -2606,7 +2630,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
           # reproduces); with `tr` off the branch is not taken -- bit-exact.
           itr <- aux$idx[[h]]$tr
           f_ml <- aux$ml_pump_share[[h]]; f_tr <- 1 - f_ml
-          sc_t <- if (identical(p$pump_mode, "D")) y[itr, "C"] / aux$tr_C0[[h]] else 1
+          sc_t <- (if (identical(p$pump_mode, "D")) y[itr, "C"] / aux$tr_C0[[h]] else 1) * s_pump
           add_flux(iml, ioc[kk], pf$org[kk] * sc * f_ml,
                    alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",
                    alpha13_signed = TRUE)
@@ -2825,7 +2849,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #      emits nothing -- bit-exact off.
       if (!is.null(aux$pump_hs)) {
         ph <- aux$pump_hs[[h]]
-        sc_hs <- if (identical(p$pump_mode, "D")) y[ihs, "C"] / aux$hs_C0[[h]] else 1
+        sc_hs <- (if (identical(p$pump_mode, "D")) y[ihs, "C"] / aux$hs_C0[[h]] else 1) * s_pump   # x the seasonal export factor (O5)
         add_flux(ihs, ihd, ph$org * sc_hs,
                  alpha13 = 1 + ccx_const("PUMP_EPS13_ORG") / 1000, lab = "pump",     # the biological-pump CHANNEL (09-08f: "pump_hs" was no channel and broke the flux trace)
                  alpha13_signed = TRUE)
@@ -3517,6 +3541,13 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   kthc <- if (is.null(p[["k_thc"]])) 1L else as.integer(p[["k_thc"]])
   if (thc_on && (!is.finite(kthc) || kthc < 1L || kthc > grid$nl))
     stop("k_thc must be an interior layer in 1..", grid$nl, " (the return layer); got ", format(p[["k_thc"]]))
+  # ---- THE SEASONAL EXPORT's guards (option O5, 2026-09-15 f) ------------
+  ps_amp <- if (is.null(p$pump_seas_amp)) 0 else p$pump_seas_amp
+  if (!is.finite(ps_amp) || ps_amp < 0 || ps_amp > 1)
+    stop("pump_seas_amp must be a finite fraction in [0, 1] (the export never reverses); got ", format(p$pump_seas_amp))
+  ps_lag <- if (is.null(p$pump_seas_lag)) 0 else p$pump_seas_lag
+  if (!is.finite(ps_lag))
+    stop("pump_seas_lag must be a finite number of months; got ", format(p$pump_seas_lag))
   if (eq_on) {
     # the cell's pinned geometry, range-checked by name -- never clamped
     if (!is.finite(p$h_eq) || p$h_eq <= 0)
