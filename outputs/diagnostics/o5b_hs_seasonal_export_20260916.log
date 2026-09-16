@@ -1,0 +1,65 @@
+== O5b: the HS pump on the rectified bloom, at hilda30c (prereg 2026-09-16 b) -- commit 0b38756 ==
+LS sine at the source: amp 0.50 lag -1; HS amp grid {0, 0.25, 0.5, 0.75, 1} x lag {-1, 0, 1}; export 9.08; arm C h_ml band [42.5, 200]
+SO pCO2 obs (SO 40-90S): 16.3 uatm @ month 7.5
+
+GATE 0: obs SPO first harmonic 0.585 ppm @ +5.99 mo
+HARNESS GATE 1: -1392.0158 vs -1392.0158 -> PASS
+the canonical's HS SH pCO2 first harmonic: 0.53 uatm @ month 9.7 (obs 16.3 @ 7.5)
+HARNESS GATE 2: O5 cell raw -797.6 vs the 2x2's -797.6 -> PASS
+
+== STAGE 1: raw grid (martin 9.08, LS sine at the source) ==
+O5 source, HS amp 0        | dlik   -797.6 | SPO  -164.0 (0.302 ppm @ -5.36, d 0.65 mo) MLO   -9.3 | HS pCO2 SH   3.6 uatm @  9.0 (NH  2.5 @  2.8) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.0 
+HS amp 0.25 lag -1         | dlik   -802.4 | SPO  -168.3 (0.300 ppm @ -5.34, d 0.68 mo) MLO   -9.9 | HS pCO2 SH   2.6 uatm @  9.0 (NH  1.5 @  2.6) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.0 
+HS amp 0.50 lag -1         | dlik   -794.2 | SPO  -161.3 (0.302 ppm @ -5.39, d 0.63 mo) MLO   -8.7 | HS pCO2 SH   4.8 uatm @  8.9 (NH  3.6 @  2.7) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.0 
+HS amp 0.75 lag -1         | dlik   -786.3 | SPO  -154.7 (0.304 ppm @ -5.44, d 0.57 mo) MLO   -7.5 | HS pCO2 SH   6.9 uatm @  8.9 (NH  5.7 @  2.7) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.0 
+HS amp 1.00 lag -1         | dlik   -778.7 | SPO  -148.3 (0.307 ppm @ -5.49, d 0.52 mo) MLO   -6.4 | HS pCO2 SH   9.0 uatm @  8.9 (NH  7.8 @  2.7) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.0 
+HS amp 0.25 lag +0         | dlik   -805.2 | SPO  -171.1 (0.296 ppm @ -5.34, d 0.68 mo) MLO   -9.9 | HS pCO2 SH   2.7 uatm @  9.8 (NH  1.5 @  4.0) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.0 
+HS amp 0.50 lag +0         | dlik   -799.9 | SPO  -167.1 (0.294 ppm @ -5.40, d 0.62 mo) MLO   -8.6 | HS pCO2 SH   4.8 uatm @  9.8 (NH  3.6 @  3.9) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.0 
+HS amp 0.75 lag +0         | dlik   -794.9 | SPO  -163.4 (0.293 ppm @ -5.45, d 0.56 mo) MLO   -7.5 | HS pCO2 SH   6.9 uatm @  9.8 (NH  5.7 @  3.8) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.0 
+HS amp 1.00 lag +0         | dlik   -790.3 | SPO  -160.0 (0.292 ppm @ -5.51, d 0.50 mo) MLO   -6.5 | HS pCO2 SH   9.1 uatm @  9.9 (NH  7.8 @  3.8) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.1 
+HS amp 0.25 lag +1         | dlik   -809.9 | SPO  -175.5 (0.292 ppm @ -5.32, d 0.69 mo) MLO  -10.2 | HS pCO2 SH   2.6 uatm @ 10.6 (NH  1.8 @  5.3) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.0 
+HS amp 0.50 lag +1         | dlik   -809.2 | SPO  -175.8 (0.287 ppm @ -5.37, d 0.64 mo) MLO   -9.3 | HS pCO2 SH   4.7 uatm @ 10.7 (NH  3.9 @  5.0) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.0 
+HS amp 0.75 lag +1         | dlik   -808.8 | SPO  -176.3 (0.282 ppm @ -5.42, d 0.60 mo) MLO   -8.4 | HS pCO2 SH   6.8 uatm @ 10.8 (NH  5.9 @  4.9) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.1 
+HS amp 1.00 lag +1         | dlik   -808.8 | SPO  -177.1 (0.277 ppm @ -5.46, d 0.55 mo) MLO   -7.7 | HS pCO2 SH   9.0 uatm @ 10.8 (NH  8.0 @  4.8) LS ML SH  8.3 @  2.2 | exc95 z +3.9 | L2  -68 | d14prof   +0.5 bomb  -4.3 d13  -11.1 
+
+== CONTROL: the canonical (solved field, its own HS pump; fitted at amp 0 -- a cost is expected, not a criterion) ==
+canonical, HS amp 0.5      | dlik     -6.1 | SPO    -1.0 (0.572 ppm @ +5.90, d 0.08 mo) MLO   +1.2 | HS pCO2 SH   4.8 uatm @  9.8 (NH  3.7 @  3.9) LS ML SH 10.7 @  7.5 | exc95 z +3.9 | L2   +5 | d14prof   +0.0 bomb  -0.1 d13   -0.1 
+canonical, HS amp 1.0      | dlik     -7.7 | SPO    -3.1 (0.576 ppm @ +5.84, d 0.14 mo) MLO   +1.5 | HS pCO2 SH   9.2 uatm @  9.9 (NH  7.9 @  3.8) LS ML SH 10.7 @  7.5 | exc95 z +3.9 | L2   +5 | d14prof   +0.0 bomb  -0.1 d13   -0.1 
+
+P1 (amp 1 lag 0, raw): SPO amplitude 0.302 -> 0.292 ppm (gain -0.010; predicted <= +0.05) | P2: SPO row -164.0 -> -160.0 (+4.0; predicted +30..+60), total +7.2 (predicted +20..+60) | P3: HS SH pCO2 0.53 -> 9.06 uatm @ month 9.9 (predicted 6-12 @ 8-11)
+best raw grid point: HS amp 1.00 lag -1 (dlik -778.7)
+
+== STAGE 2: arm C (the PK-2 eight), h_ml band set in process to [42.5, 200] AFTER gate 4 ==
+SEEDING w_eq for the o5b: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the o5b: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the o5b: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the o5b: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the o5b: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the o5b: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+HARNESS GATE 4: -1426.2428 vs -1426.2428 -> PASS
+h_ml band now [42.5, 200] (shipped [30, 200]); the like-for-like dlik below is on the LIKELIHOOD streams, so the band's Jacobian does not enter
+armC O5 source, HS amp 0 (raw -797.6) | dlik   -194.9 | SPO  -140.0 (0.334 ppm @ -5.35, d 0.66 mo) MLO   +0.9 | HS pCO2 SH   3.5 uatm @  9.0 (NH  2.4 @  2.8) LS ML SH  8.5 @  2.4 | exc95 z +4.0 | L2  -68 | d14prof  -28.2 bomb  +1.1 d13  -18.3
+        armC dlik -194.9 | h_ml 48.8 kz_deep_frac 0.0721 k_w 1686 bomb_total 118.4 sigma_d14c 5.45 beta_max 0.744 | 1664 evals [393 s] | largest: co2_seasonal_SPO -140.0, d14c_profile_ab -23.6, d13c_seasonal_MLO -14.5, d13c_level_MLO -7.6
+armC HS amp 1.00 lag -1 (raw -778.7) | dlik   -179.7 | SPO  -127.5 (0.336 ppm @ -5.46, d 0.55 mo) MLO   +1.2 | HS pCO2 SH   8.8 uatm @  8.9 (NH  7.5 @  2.7) LS ML SH  8.5 @  2.4 | exc95 z +4.0 | L2  -68 | d14prof  -27.8 bomb  +0.9 d13  -16.2
+        armC dlik -179.7 | h_ml 48.4 kz_deep_frac 0.0714 k_w 1690 bomb_total 118.4 sigma_d14c 5.47 beta_max 0.742 | 1628 evals [386 s] | largest: co2_seasonal_SPO -127.5, d14c_profile_ab -23.3, d13c_seasonal_MLO -12.9, d13c_level_MLO -6.9
+armC HS amp 1.00 lag +0 (raw -790.3) | dlik   -191.2 | SPO  -137.8 (0.321 ppm @ -5.47, d 0.54 mo) MLO   -0.2 | HS pCO2 SH   8.8 uatm @  9.9 (NH  7.6 @  3.8) LS ML SH  8.5 @  2.4 | exc95 z +4.0 | L2  -68 | d14prof  -27.4 bomb  +1.1 d13  -16.5
+        armC dlik -191.2 | h_ml 47.9 kz_deep_frac 0.0704 k_w 1687 bomb_total 118.3 sigma_d14c 5.46 beta_max 0.744 | 1642 evals [383 s] | largest: co2_seasonal_SPO -137.8, d14c_profile_ab -23.1, d13c_seasonal_MLO -13.0, d13c_level_MLO -7.5
+
+== THE RULE: PASS iff after arm C (a) SPO amp >= 0.46 ppm, (b) HS SH pCO2 amp <= 33 uatm, (c) SPO phase within 1 mo of obs, (d) dlik >= O5 cell + 20; PARTIAL iff (b), (d) and the SPO amp gains >= 0.03 ppm ==
+HS amp 1.00 lag -1         armC dlik -179.7 vs O5 cell -194.9 | SPO amp 0.336 (gain +0.002) fail | HS pCO2 8.8 PASS | phase d 0.55 PASS | (d) fail => REFUTED
+HS amp 1.00 lag +0         armC dlik -191.2 vs O5 cell -194.9 | SPO amp 0.321 (gain -0.013) fail | HS pCO2 8.8 PASS | phase d 0.54 PASS | (d) fail => REFUTED
+VERDICT: O5b REFUTED
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/o5b_hs_seasonal_export_20260916.{log,rds}
