@@ -2090,13 +2090,20 @@ ccx_pump_field_inert <- function(pump_field) {
 #' names) by nothing but names inert under `pump_field`? Then the canonical is
 #' the array's incumbent "under this array's pins" -- the 09-13 (d) rule, read
 #' for an array whose extra pins hold names the objective cannot see anyway.
-ccx_pins_extend_canonical <- function(pins, pump_field) {
+#' ... and, since 2026-09-16 (f), by the equatorial cell's two names when the
+#' array's STRUCTURE has no cell (`w_eq` / `gamma_eq` are inert at eq_frac 0;
+#' the E array fitted them free and they sat on their prior). `struct` follows
+#' the same env var every consumer reads.
+ccx_pins_extend_canonical <- function(pins, pump_field, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
   cp <- CCX_MODE_CANONICAL_PINS
   if (is.null(pins) || is.null(cp)) return(FALSE)
   if (!all(names(cp) %in% names(pins))) return(FALSE)
   if (!isTRUE(all.equal(unname(pins[names(cp)]), unname(cp)))) return(FALSE)
   extra <- setdiff(names(pins), names(cp))
-  length(extra) > 0 && all(extra %in% ccx_pump_field_inert(pump_field))
+  inert <- ccx_pump_field_inert(pump_field)
+  if (!ccx_eq_on(ccx_apply_structure(ccx_default_params(), struct, seas_ml = "0", pump_field = pump_field)))
+    inert <- c(inert, "w_eq", "gamma_eq")
+  length(extra) > 0 && all(extra %in% inert)
 }
 ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
                                 seas_ml = Sys.getenv("CCX_MS_SEAS_ML", "0"),

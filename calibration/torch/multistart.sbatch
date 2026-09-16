@@ -296,6 +296,10 @@ export CCX_MS_SPREAD="${CCX_MS_SPREAD:-1.0452}"
 #   ⛔ Torch verdict, said aloud: 36 names x 24 starts x 3 restarts is the laptop's day -- Torch.
 #     CCX_MS_STRUCT=hilda_c CCX_MS_SEAS_ML=1 CCX_MS_PUMP_FIELD=martin CCX_MS_PIN=ent_seas_amp_SH=0,pump_grad=314.1031,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-23 --time=00:15:00 calibration/torch/multistart.sbatch
 #     CCX_MS_STRUCT=hilda_c CCX_MS_SEAS_ML=1 CCX_MS_PUMP_FIELD=martin CCX_MS_PIN=ent_seas_amp_SH=0,pump_grad=314.1031,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
+#   2026-09-16 (f) -- THE HYGIENE-BATCH REFIT (objective #12, the solved field, hilda_c; the canonical's pin
+#   plus the six names inert without the cell / under the solved field, 30 free = the canonical's set):
+#     CCX_MS_STRUCT=hilda_c CCX_MS_SEAS_ML=1 CCX_MS_PIN=ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-23 --time=00:15:00 calibration/torch/multistart.sbatch
+#     CCX_MS_STRUCT=hilda_c CCX_MS_SEAS_ML=1 CCX_MS_PIN=ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
 export CCX_MS_PUMP_FIELD="${CCX_MS_PUMP_FIELD:-solved}"
 FIELD_LABEL=""; if [ "$CCX_MS_PUMP_FIELD" = "martin" ]; then FIELD_LABEL="_martin"; fi
 export CCX_MS_PIN="${CCX_MS_PIN:-}"
@@ -303,7 +307,12 @@ PIN_LABEL=""; if [ -n "$CCX_MS_PIN" ]; then PIN_LABEL="_pin_$(echo "$CCX_MS_PIN"
 # THE OUTDIR CARRIES EVERY LABEL AXIS (struct, seas_ml, pins, spread) since 2026-09-13 (i);
 # the C' directory predates the struct axis in the name (multistart_20260913_cprime_seasml1_pin_..._sd1.0452).
 # ... and the pump field since 2026-09-14 (h) (`_martin`; absent = solved, the older directories).
-export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_20260913_eqcell_${CCX_MS_STRUCT}_seasml${CCX_MS_SEAS_ML}${FIELD_LABEL}${PIN_LABEL}_sd${CCX_MS_SPREAD}}"
+# 2026-09-16 (f): the date/arc prefix is CCX_MS_TAG (default = today's date), not a typed
+# "20260913_eqcell" -- that string named the cell array and would have labelled the
+# hygiene-batch refit as it. A round-2 RESUME must pass the round-1 tag (or CCX_MS_OUTDIR)
+# so it lands in the same directory; the driver refuses a checkpoint from another set anyway.
+export CCX_MS_TAG="${CCX_MS_TAG:-$(date +%Y%m%d)}"
+export CCX_MS_OUTDIR="${CCX_MS_OUTDIR:-$CCX_PROJ_DIR/calibration/output/multistart_${CCX_MS_TAG}_${CCX_MS_STRUCT}_seasml${CCX_MS_SEAS_ML}${FIELD_LABEL}${PIN_LABEL}_sd${CCX_MS_SPREAD}}"
 
 # NYU's /etc/bashrc references an unbound BASHRCSOURCED; without the sandwich
 # `set -u` kills the job at startup.

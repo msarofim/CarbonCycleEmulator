@@ -313,8 +313,12 @@ MS_OUTDIR <- local({
   # says which set it holds is the answer that does not rely on a guard firing.
   if (is.na(d) || !nzchar(d))
     ccx_path("calibration", "output",
-             paste0(if (identical(Sys.getenv("CCX_MS_STRUCT", ""), "hilda")) "multistart_20260910_hilda31p_periodic"
-                    else "multistart_20260901_enso25",
+             # 2026-09-16 f: the label DERIVES from the struct env var and the
+             # date -- the two typed labels here covered "hilda" and "" only, so
+             # a hilda_c array without CCX_MS_OUTDIR would have landed in
+             # `multistart_20260901_enso25`, the 22-parameter era's name.
+             paste0("multistart_", format(Sys.Date(), "%Y%m%d"), "_",
+                    (function(st) if (nzchar(st)) st else "column")(Sys.getenv("CCX_MS_STRUCT", "")),
                     # 2026-09-10: seas_ml changes the OBJECTIVE at a constant 31 names, which
                     # the param_names guard cannot see; the directory must say it.
                     if (identical(Sys.getenv("CCX_MS_SEAS_ML", "0"), "1")) "_seasml1" else "",
@@ -453,6 +457,17 @@ if (length(.ms_inert_free))
        if (identical(MS_PUMP_FIELD, "martin")) "the prescribed field ignores pump_grad; ruling E3 subsumes option A"
        else "the loop is absent under the solved field",
        ") and must be PINNED (CCX_MS_PIN), not fitted.")
+# ... and the SAME rule for the equatorial cell's two names under a structure
+# WITHOUT the cell (2026-09-16 f): `w_eq` / `gamma_eq` do not reach the model
+# when eq_frac = 0, so a free pair is a likelihood-flat direction held only by
+# its prior -- the E array (hilda_c, 09-15) fitted them free and they sat at
+# the prior's centre (27.13 Sv, 1.00) for 32 wasted dimensions of Hessian.
+if (!ccx_eq_on(bp)) {
+  .ms_cell_free <- intersect(c("w_eq", "gamma_eq"), CCX_PARAM_NAMES)
+  if (length(.ms_cell_free))
+    stop("run_dispersed_multistart.R: under struct \"", MS_STRUCT, "\" (no equatorial cell) the name(s) ",
+         paste(.ms_cell_free, collapse = ", "), " do not reach the model and must be PINNED (CCX_MS_PIN), not fitted.")
+}
 # the banner prints the WHOLE declared block of the label, so a hilda_eq task's log
 # names the cell's geometry (eq_frac, h_eq, sst_eq, sst_eq_enso, alk_eq, k_eq) and is
 # distinguishable from a hilda task's on its own (review 2026-09-14)
