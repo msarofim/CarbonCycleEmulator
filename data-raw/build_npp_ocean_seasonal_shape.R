@@ -39,8 +39,13 @@ for (y in NP_YEARS) for (m in 1:12) {
     if (system2("gunzip", c("-f", shQuote(gz))) != 0) { cat(sprintf("  %s: gunzip FAILED, skipped\n", fn)); next }
   }
   r <- rast(hd); v <- values(r, mat = FALSE); v[v == NP_FILL | !is.finite(v)] <- NA
-  if (is.null(W)) {   # geometry once: rows are latitude bands from 90N down, cols longitude
-    nr <- nrow(r); nc <- ncol(r); lat_c <- 90 - (seq_len(nr) - 0.5) * 180 / nr
+  if (is.null(W)) {   # geometry once. ⚠ terra hands these HDF4 rows SOUTH-FIRST (row 1 = 90S):
+    # the first pass (09-16) assumed north-first and flipped the hemispheres. GATED below on
+    # the physics -- a JANUARY file has no data poleward of ~70N (polar night) and data at 57S.
+    nr <- nrow(r); nc <- ncol(r); lat_c <- -90 + (seq_len(nr) - 0.5) * 180 / nr
+    if (m == 1) { mm <- matrix(v, nr, nc, byrow = TRUE); n_arctic <- sum(is.finite(mm[lat_c > 75, ])); n_so <- sum(is.finite(mm[abs(lat_c + 57) < 1, ]))
+      if (!(n_arctic == 0 && n_so > 1000)) stop(sprintf("row-order gate FAILED: January file has %d finite Arctic cells and %d at 57S", n_arctic, n_so))
+      cat(sprintf("row-order gate PASS (January: %d Arctic cells, %d at 57S)\n", n_arctic, n_so)) }
     dlat <- pi / nr; dlon <- 2 * pi / nc; R <- 6371000
     area_row <- R^2 * cos(lat_c * pi / 180) * dlat * dlon                       # m2 per cell, by row
     LAT <- matrix(lat_c, nr, nc); AREA <- matrix(area_row, nr, nc)

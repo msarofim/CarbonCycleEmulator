@@ -1,0 +1,34 @@
+== O5 arm C with h_ml PINNED at hilda30c -- commit b80b783 ==
+SEEDING w_eq for the o5_hml: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the o5_hml: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the o5_hml: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the o5_hml: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the o5_hml: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the o5_hml: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+HARNESS GATE 4: rebuilt logpost -1426.2428 (shift -3.5874) vs stored -1426.2428 -> PASS
+h_ml canonical = 65.2 m, amp 0: raw   -894.8 -> armC   -287.0 | SPO  -208.0 | SPO harm 0.280 ppm @ -5.13 mo | L2-ML  -67 | kz_deep_frac 0.0945 k_w 1669 bomb_total 118.9 sigma_d14c 5.43 beta_max 0.743 | 1206 evals [223 s]
+        largest rows: co2_seasonal_SPO -208.0, d14c_profile_ab -29.9, d13c_seasonal_MLO -19.6, d13c_level_MLO -10.4, d14c_profile_bd -9.6
+h_ml canonical = 65.2 m, amp 1: raw   -741.8 -> armC   -163.2 | SPO  -103.7 | SPO harm 0.334 ppm @ -5.97 mo | L2-ML  -66 | kz_deep_frac 0.0963 k_w 1690 bomb_total 119.5 sigma_d14c 5.45 beta_max 0.733 | 1656 evals [351 s]
+        largest rows: co2_seasonal_SPO -103.7, d14c_profile_ab -29.6, d14c_profile_bd -9.9, d13c_seasonal_MLO -8.3, ocean_grad_alk -5.6
+h_ml prior16 = 42.5 m, amp 0: raw   -618.5 -> armC   -286.5 | SPO  -222.1 | SPO harm 0.274 ppm @ -5.05 mo | L2-ML  -69 | kz_deep_frac 0.0602 k_w 1670 bomb_total 117.5 sigma_d14c 5.44 beta_max 0.756 | 1651 evals [339 s]
+        largest rows: co2_seasonal_SPO -222.1, d14c_profile_ab -19.3, d13c_seasonal_MLO -19.1, d13c_level_MLO -12.2, ocean_grad_alk -5.6
+h_ml prior16 = 42.5 m, amp 1: raw   -439.6 -> armC   -134.9 | SPO   -92.9 | SPO harm 0.349 ppm @ -5.88 mo | L2-ML  -69 | kz_deep_frac 0.0638 k_w 1697 bomb_total 118.3 sigma_d14c 5.54 beta_max 0.743 | 1587 evals [330 s]
+        largest rows: co2_seasonal_SPO -92.9, d14c_profile_ab -20.0, d13c_seasonal_MLO -7.3, d13c_level_MLO -5.7, ocean_grad_alk -4.5
+
+== THE RULE: the O5 gain survives if (amp 1 - amp 0) at pinned h_ml keeps >= 50 % of the free-h_ml gain (162.9) ==
+h_ml canonical (65.2 m): amp 0 -287.0 -> amp 1 -163.2, gain +123.8 = 76 % of the free gain -> SURVIVES; the thin ML bought +37.5 of O5's -125.7 at amp 1
+h_ml prior16 (42.5 m): amp 0 -286.5 -> amp 1 -134.9, gain +151.7 = 93 % of the free gain -> SURVIVES; the thin ML bought +9.2 of O5's -125.7 at amp 1
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/o5_hml_pinned_armc_20260916.{log,rds}
