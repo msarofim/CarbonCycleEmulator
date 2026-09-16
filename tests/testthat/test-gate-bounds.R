@@ -231,8 +231,12 @@ test_that("GATE 7 judges at the objective's sigmas, and can still fail", {
   expect_false(bad_o$pass)
 
   # and the BARE-sigma readout, which every pre-2026-09-02 result used, must
-  # still be reported and must be the stricter of the two
-  expect_gt(abs(bad_l$z_land_bare), abs(bad_l$z_land))
+  # still be reported; it is the stricter of the two exactly when the objective
+  # inflates the land sigma (x3 until objective #12, 2026-09-16 e) and EQUAL to
+  # it when it does not (LIK_LAND_SINK_INFLATE = 1 since #12: both halves at
+  # GCB's stated sigma) -- the readout tracks the objective, never diverges from it
+  expect_gte(abs(bad_l$z_land_bare), abs(bad_l$z_land))
+  expect_equal(abs(bad_l$z_land_bare) / abs(bad_l$z_land), LIK_LAND_SINK_INFLATE, tolerance = 1e-8)
 })
 
 test_that("GATE G bounds the SURFACE LEVEL and not the inventory, and can fail", {
