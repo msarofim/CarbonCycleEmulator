@@ -55,7 +55,15 @@
 - Avenues, ranked: (1) the Niño3.4 LAYER-2 RETURN LIMB as a REFIT (T-A2: the whole observed slope at 26 Sv/index, +3.09 unrefitted);
   (2) the hygiene batch first — DONE except the refit; (3) an advective-return ocean = the next model class; then option K, option B, G′.
 
-## 4. NEXT STEP — the refit (Torch; not launched; Marcus launches or rules)
+## 4. NEXT STEP — the refit: STAGED AND LAUNCHABLE (09-16 f), blocked only on Torch authentication
+- DONE 09-16 (f): port targets under the full pin set (30 free), Mac preflight ids 1/2 PASSED, bundle at `/tmp/ccx_torch_bundle.tar.gz`
+  (rebuild with `bash calibration/torch/make_bundle.sh` if the tree moves), both commands in `multistart.sbatch`'s header. BatchMode ssh to
+  `torch` exits 255 — no live ControlMaster; Marcus opens the channel (VPN + gateway + Duo + device code), then either runs the three
+  commands or tells Claude to ("submitted by Claude over the live ControlMaster on Marcus's instruction" is the 09-14 precedent).
+- Sequence: `scp /tmp/ccx_torch_bundle.tar.gz torch:/scratch/ms17839/` → untar into `/scratch/ms17839/CarbonCycleEmulator` → PREFLIGHT
+  array (15 min, 24 tasks) → read 24/24 `PORT GATE (a) PASSED` + `LAUNCHABLE` → the wave `--array=0-23%24`, 6 h wall, `cs`.
+- Pins: `ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0`; struct `hilda_c`; seas_ml 1; field solved.
+### (the original §4 text, still the read plan)
 - Structure `hilda_c`, `seas_ml` 1, the canonical's pins (`ent_seas_amp_SH = 0`; `CCX_MS_PIN` as the 09-13 d array), objective #12,
   incumbent start `hilda30c`, new-basin `hilda31p`. Steps: regenerate port targets with the pins → bundle (`calibration/torch/make_bundle.sh`,
   ships `nuclear14c`) → submit `multistart.sbatch` → the port gate must PASS on Torch before anything is read. Say the Torch verdict out
