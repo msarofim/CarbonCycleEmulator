@@ -2191,7 +2191,15 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # regrowth against slow passive-soil drainage -- not an artefact. It nets
     # to zero in total carbon by construction; its TIMING is a model claim and
     # is what test-luc-permanence.R measures rather than assumes.
-    cleared <- min(p$f_luc_perm * ccx_forcing_cum_luc(forc)[[h]] / aux$land0[[h]],
+    # ABSENCE = CCX_F_LUC_PERM_DEFAULT, the C++ side's resolver (R/cpp.R). Until
+    # 2026-09-16 (c) an absent f_luc_perm made `NULL * x` numeric(0) and
+    # min(numeric(0), 0.9) = 0.9 -- the R core silently ran 90 % of the land
+    # CLEARED while the C++ ran ~14 % (found by the 09-16 c adversarial review;
+    # dC/dt[NH leaf] -4.1 vs +8.9 GtC/yr). Default lists always carry the
+    # field, so no registered result was touched; hand-built lists on the R
+    # path (the flux trace, the PK diagnostics) were exposed.
+    f_perm  <- if (is.null(p$f_luc_perm)) CCX_F_LUC_PERM_DEFAULT else p$f_luc_perm
+    cleared <- min(f_perm * ccx_forcing_cum_luc(forc)[[h]] / aux$land0[[h]],
                    CCX_LUC_CLEARED_MAX)
     npp0_h  <- aux$npp0[[h]] * (1 - cleared)
     veg0_h  <- aux$veg0[[h]] * (1 - cleared)

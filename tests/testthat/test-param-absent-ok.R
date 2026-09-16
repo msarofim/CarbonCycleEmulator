@@ -68,3 +68,19 @@ test_that("ccx_mode_start: migrated (what it ran), seeded, encoded; the shift is
   for (n in intersect(md$param_names, names(L$p))) expect_identical(L$p[[n]], md$par_mode[[n]])   # the error-model names ride in L$err
   expect_identical(L$err$sigma_d14c, md$par_mode$sigma_d14c)
 })
+
+test_that("f_luc_perm ABSENT resolves to CCX_F_LUC_PERM_DEFAULT in the R core, as in the C++ (09-16 c review, finding 2)", {
+  skip_if_no_cpp()
+  p <- ccx_apply_structure(ccx_default_params(), "hilda", seas_ml = 1)
+  sp <- suppressWarnings(ccx_spinup(p))
+  F  <- ccx_build_forcing("historical", c(1990, 1992), prod_c14 = sp$prod_c14)   # cum_luc is large here
+  fr <- ccx_forcing_at(F, 3L)
+  q <- p; q$f_luc_perm <- NULL
+  dR <- ccx_deriv(sp$y, F$t[3], q, fr, sp$grid, sp$aux)
+  dC <- ccx_deriv_fast(sp$y, F$t[3], q, fr, sp$grid, sp$aux)
+  expect_lt(max(abs(dR - dC)) / max(abs(dR)), 1e-10)
+  # and the absent read equals the explicit default -- never the 0.9 ceiling
+  r <- p; r$f_luc_perm <- CCX_F_LUC_PERM_DEFAULT
+  expect_identical(dR, ccx_deriv(sp$y, F$t[3], r, fr, sp$grid, sp$aux))
+})
+
