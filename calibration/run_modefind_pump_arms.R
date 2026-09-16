@@ -752,7 +752,7 @@ arm_fit <- function(mode) {
     ccx_loglik(r$out, ccx_prepare_obs(),
                list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
                     grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c),
-               luc = el, deep = sp$diagnostics$d14c_bottom_box,
+               luc = el, deep = ccx_d14c_deep_read(sp),
                ocean_grad = ccx_ocean_grad_scored(r$out, sp), by_stream = TRUE)
   }, error = function(e) { cat("per-stream decomposition failed:", conditionMessage(e), "\n"); NULL })
 

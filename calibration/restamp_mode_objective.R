@@ -34,10 +34,21 @@ RS_FILE <- args[1]; RS_EXPECT <- as.numeric(args[2]); RS_REASON <- args[3]
 RS_TOL  <- 1e-4                          # the priced delta is quoted to 4 dp
 md <- readRDS(RS_FILE)
 bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
-u  <- ccx_par_to_unc(md$par_mode)
+# 2026-09-16 (d): a PINNED file has its pins applied first, and a file written
+# under an older parameter set is brought forward by ccx_mode_start() (migrated
+# + seeded, the encoding every gate 4 uses) -- the bare ccx_par_to_unc(par_mode)
+# refuses both. The seeding shift and the h_ml band term ride in the logpost
+# and are reported as prior drift below; the gate is on the STREAMS.
+rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
+invisible(utils::capture.output(st0 <- ccx_mode_start(md, "restamp"))); u <- st0$u
 v  <- ccx_make_logpost(base_params = bp, by_stream = TRUE,
                        spinup_fn = ccx_spinup_from_label(ccx_mode_spinup(md)))(u)
-lp_new <- as.numeric(v); st_new <- attr(v, "streams")
+# The stored logpost stays in the FILE'S OWN coordinates: today's likelihood +
+# the priors on ITS names under ITS recorded band. ccx_mode_start()'s shift is
+# exactly what this build adds on top (the seeded absent names' prior legs and
+# the h_ml band term), so it is removed here -- otherwise every gate 4 (`v -
+# shift == md$logpost`) would fail by the shift after the restamp.
+lp_new <- as.numeric(v) - st0$logpost_shift; st_new <- attr(v, "streams")
 lik_old <- sum(unlist(md$streams)); lik_new <- sum(unlist(st_new))
 delta   <- lik_new - lik_old                      # the LIKELIHOOD move -- what is gated
 d_lp    <- lp_new - md$logpost                    # the logpost move = likelihood + prior drift

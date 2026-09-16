@@ -234,7 +234,7 @@ test_that("ccx_scaled_forcing reproduces ccx_make_logpost's likelihood exactly",
                        list(sigma_d14c = pv$sigma_d14c, rep_dC = pv$rep_dC,
                             grad_off_co2 = pv$grad_off_co2,
                             grad_off_d13c = pv$grad_off_d13c),
-                       luc = SF$eluc, deep = sp$diagnostics$d14c_bottom_box,
+                       luc = SF$eluc, deep = ccx_d14c_deep_read(sp),
                        ocean_grad = ccx_ocean_grad_scored(o, sp),
                        # objective change #8 (2026-09-06): the objective carries the
                        # two intermediate D14C rows, so the reconstruction must too

@@ -198,7 +198,7 @@ streams <- local({
   ccx_loglik(r$out, ccx_prepare_obs(),
              list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
                   grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c),
-             luc = el, deep = sp$diagnostics$d14c_bottom_box,
+             luc = el, deep = ccx_d14c_deep_read(sp),
              ocean_grad = ccx_ocean_grad_scored(r$out, sp), by_stream = TRUE,
              # the profile D14C bundle (#8/#9, 2026-09-06): its three rows REPLACE
              # the bottom-box row `d14c_deep_ocean` (23 -> 25 streams). Absent

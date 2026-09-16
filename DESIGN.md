@@ -1274,6 +1274,25 @@ Rcpp with a bit-parity test against the R reference implementation (both stay in
 > "martin"` and the structural names it accumulated (`w_thc`, `pump_seas_*`, `pump_hs_seas_*`) remain in both cores, bit-exact
 > at 0, as the instrument this statement was measured with.
 >
+> ⚠ **OBJECTIVE CHANGE #12 (2026-09-16 d, the HYGIENE BATCH; Marcus: "do (a) for #1 and the most defensible choices for the rest").**
+> Five items, each with a reproduction switch and a per-item price at every registered mode
+> (`outputs/diagnostics/hygiene_batch_price_20260916.log`): (i) the deep and slab Δ¹⁴C rows read EVERY box in their depth
+> window — HD included under HILDA — where they read the LS column only against an all-cell GLODAP target (`LIK_D14C_EVERY_BOX`;
+> +2.3 at the canonical, all three rows toward the target); (ii) the land-sink σ at GCB's stated 0.5 GtC/yr with NO ×3 multiplier,
+> symmetric with the ocean row (`LIK_LAND_SINK_INFLATE` 3 → 1; **−27.0** at the canonical, the whole batch's cost: the land sits
+> +1.0 GtC/yr over GCB 2015–24 and the row now says so — the refit's question); (iii) Naegler 2009's net-CO₂-uptake correction on the
+> excess-¹⁴C centres, 1975 ×1.03 / 1995 ×1.08, because the model's row CONTAINS that component (`LIK_EXCESS_C14_UPTAKE_CORR`; +1.2;
+> the target set stays `table4_obs_range` for the reason recorded in `R/likelihood.R`); (iv) the pre-1850 SST anomaly at the
+> product's 1850–1900 mean instead of the single year 1850 (`FORC_SST_PRE1850_MEAN`; +0.6, mostly `co2_icecore`); (v) `h_hs` under
+> the Holte HS prior (lognormal, median 175 m, log-sd 0.42 — the HS annual mean 115 and max 268 as its 16/84 % points; a PRIOR
+> move only: −1.7 at the canonical's 393 m). Two σ-audit items CLOSED without change, by the receipts already in the code:
+> `CCX_ICE_DISCREPANCY` stays OFF (the plateau is the ice record's second-best era; the misfit is in the wings) and the excess-¹⁴C
+> target set stays wide (method spread is not measurement noise). The three registered files and the ratification pin's file are
+> RESTAMPED (likelihood −22.76 / −22.53 / −18.88 / −21.62; history kept inside each). **Every number in the ledger above was
+> measured under the pre-#12 objective; gate 7's land verdict in particular is now z +2.0 at the row's own σ. The refit owed on
+> #12 runs under `hilda_c` (the 09-14 h constants: `hs_frac` 0.128, whole-LS SSTs 22.3/18.7, `alpha_photo_eps` 15.6) and the `u_hs`
+> prior converts its Sv bracket at the LIVE `hs_frac` (21.8 → 27.3 m/yr there).**
+>
 > **RETIRED gates, and why (do not re-run them as criteria):** **4** airborne-fraction smoothness — no power (a trend artefact,
 > 70 % noise; 09-04); **8** δ¹³C Suess and **10** natural Δ¹⁴C profile — restatements of scored rows (a gate cannot judge the
 > objective at its own σ; 09-02 ledger ruling). Their tables below are kept as PROVENANCE at the quarantined `from90`.

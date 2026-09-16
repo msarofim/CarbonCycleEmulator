@@ -231,9 +231,13 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 43.1079 under 
   # explained; the flag's price is a property of the ENSO-driven d13C trajectory, which the pin
   # barely touches. 42.5817 stays a fact about hilda31s2 (the registered free parent, no longer
   # asserted here); 35.1773 stays the pin at the control.
-  expect_equal(r$on_periodic - r$off_periodic, 43.1079, tolerance = 1e-4, scale = 1)
+  # 2026-09-16 (d), the objective-hygiene batch: 43.1079 -> 49.7606 (+6.65) and the control
+  # 35.1773 -> 41.6102 (+6.43). The move is the LAND-SINK sigma (GCB's 0.5, no x3): the flag
+  # acts through the ENSO land term, whose row is now 3x stronger; the other four items
+  # move it < 0.1 (hygiene_batch_price_20260916). Files restamped, history kept inside them.
+  expect_equal(r$on_periodic - r$off_periodic, 49.7606, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
-  expect_equal(r0$on_periodic - r0$off_periodic, 35.1773, tolerance = 1e-4, scale = 1)
+  expect_equal(r0$on_periodic - r0$off_periodic, 41.6102, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
   expect_gt(r$on_periodic - r$off_periodic, 1)
@@ -260,8 +264,9 @@ test_that("RATIFICATION PIN at `hilda31` (retired, by path): 43.8344 aseasonal, 
   # ruling 4's interaction with the demean flag, the same -10/-11 the two registered
   # files show. The file is restamped (+30.6090, history kept).
   # 09-12 (d): +0.0023 each from review A12 (observed-month D14C edge years).
-  expect_equal(r$on_aseasonal - r$off_aseasonal, 43.8344, tolerance = 1e-4, scale = 1)
-  expect_equal(r$on_periodic  - r$off_periodic,  53.5222, tolerance = 1e-4, scale = 1)
+  # 09-16 (d): +6.5590 / +6.5633 from the hygiene batch (the land-sink sigma; file restamped -21.6168 on the likelihood).
+  expect_equal(r$on_aseasonal - r$off_aseasonal, 50.3934, tolerance = 1e-4, scale = 1)
+  expect_equal(r$on_periodic  - r$off_periodic,  60.0855, tolerance = 1e-4, scale = 1)
   expect_gt(r$on_aseasonal - r$off_aseasonal, 1)
   expect_gt(abs((r$on_periodic - r$off_periodic) - (r$on_aseasonal - r$off_aseasonal)), 1)
 })

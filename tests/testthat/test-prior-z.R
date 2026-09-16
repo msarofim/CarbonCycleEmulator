@@ -51,14 +51,20 @@ test_that("ccx_prior_z matches the analytic z for the normal prior", {
 })
 
 test_that("ccx_prior_z is right for a uniform prior under the logit transform", {
-  # RE-TARGETED 2026-09-08d: this read h_ml, whose prior became the Holte
-  # mean/max lognormal that day (Marcus's ruling; see the next test). h_hs is
-  # dunif(20, 500) under the same logit transform, so it carries the SAME
-  # claim: the prior CDF is linear in x, z = qnorm((x-20)/480) -- the case the
-  # transform could most easily get wrong, because the Jacobian is what makes
-  # the pushforward non-uniform.
-  for (x in c(25, 75, 260, 495))
-    expect_equal(ccx_prior_z("h_hs", x), stats::qnorm((x - 20) / 480), tolerance = 1e-3)
+  # RE-TARGETED 2026-09-08d (h_ml -> h_hs) and again 2026-09-16 d (h_hs -> fert_k):
+  # h_hs went under the Holte HS lognormal in the hygiene batch, so the uniform-
+  # under-logit claim now reads fert_k, dunif(20, 2000) on a logit box. The
+  # claim is unchanged: the prior CDF is linear in x, z = qnorm((x-lo)/(hi-lo))
+  # -- the case the transform could most easily get wrong, because the Jacobian
+  # is what makes the pushforward non-uniform.
+  s <- CCX_PARAM_TABLE$fert_k; expect_identical(s$tr, "logit")
+  for (x in c(30, 300, 1200, 1990))
+    expect_equal(ccx_prior_z("fert_k", x), stats::qnorm((x - s$lo) / (s$hi - s$lo)), tolerance = 1e-3)
+  # and h_hs now carries the Holte HS lognormal (observation prior, 09-16 d)
+  hp <- ccx_h_hs_prior()
+  z_trunc <- function(x, mu, sd, lo, hi) { F <- function(v) stats::pnorm((log(v) - mu) / sd); stats::qnorm((F(x) - F(lo)) / (F(hi) - F(lo))) }
+  for (x in c(75, 115, 175, 268, 393))
+    expect_equal(ccx_prior_z("h_hs", x), z_trunc(x, log(hp$centre_m), hp$log_sd, 20, 500), tolerance = 2e-3, info = sprintf("h_hs at %g", x))
 })
 
 test_that("ccx_prior_z matches the analytic z for the two OBSERVATION lognormals under a logit box (09-08d)", {

@@ -69,7 +69,7 @@ for (arm in RS_ARMS) {
                            luc_scale = M$luc_scale, bomb_total = M$bomb_total)
   o  <- ccx_run_fast(sp, SF$F)$out
   now <- ccx_loglik(o, ccx_prepare_obs(), M$err, luc = SF$eluc,
-                    deep = sp$diagnostics$d14c_bottom_box,
+                    deep = ccx_d14c_deep_read(sp),
                     ocean_grad = ccx_ocean_grad_scored(o, sp), by_stream = TRUE)
 
   was <- unlist(md$streams); nowv <- unlist(now)

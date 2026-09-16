@@ -128,6 +128,18 @@ ccx_h_ml_prior <- local({
     cache
   }
 })
+#' The OBSERVATION prior on h_hs (2026-09-16 d): the Holte HS mixed layer's
+#' annual MEAN (115 m) and MAX (268 m) as the 16 / 84 % points of a lognormal
+#' -- the original h_ml construction, because the HS box's own seasonal cycle
+#' (option B) is off at the canonical, so the mean-vs-max ambiguity stands.
+#' data-raw/build_h_hs_prior.R; the same lazy idiom as ccx_h_ml_prior().
+ccx_h_hs_prior <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "obs_h_hs_prior.rds"))
+    cache
+  }
+})
 #' The value the HILDA structure DECLARED for u_hs before it was fitted (HILDA
 #' Table 1, K(z) version: 38 +/- 17 m/yr) -- what every ancestor RAN, so it is
 #' what ccx_migrate_par_set() fills; the fitted search starts there too.
@@ -389,10 +401,20 @@ CCX_PARAM_TABLE <- list(
   # declared to FOLLOW h_ml (choice C2), which coupled the HS bomb capacity to
   # the low-latitude mixed layer; every basin of the first refit then moved
   # h_ml to an extreme (37-47 or 184-200 m). Box [20, 500] (the 09-06c
-  # identifiability run's), uniform; init 75 = HILDA's (one remove, the cold
-  # control only -- a migrated ancestor starts at ITS OWN h_ml, what it ran).
+  # identifiability run's); init 75 = HILDA's (one remove, the cold control
+  # only -- a migrated ancestor starts at ITS OWN h_ml, what it ran).
+  # ⭐ OBSERVATION PRIOR since 2026-09-16 (d) (the hygiene batch; the 09-08d /
+  # 09-11 (3) ruling "must go under the HS Holte prior", never built until the
+  # 09-16 c review named it): lognormal, median 175.4 m, log-sd 0.422 -- the
+  # Holte HS annual MEAN 115 m and MAX 268 m as its 16 / 84 % points, COMPUTED
+  # by data-raw/build_h_hs_prior.R and read lazily through ccx_h_hs_prior().
+  # The canonical's 393 m sits at z +1.91 (it was FLAT-prior free); re-centre
+  # on the MEAN when option B (the HS seasonal cycle) is adopted, as h_ml's
+  # was on 09-09w. Every stored logpost moves by this prior's value at its
+  # h_hs minus the flat density's; the likelihood is untouched.
   h_hs         = list(tr = "logit", lo = 20, hi = 500, init = 75,
-                      prior = function(x) dunif(x, 20, 500, log = TRUE)),
+                      prior = function(x) { pr <- ccx_h_hs_prior()
+                        dlnorm(x, log(pr$centre_m), pr$log_sd, log = TRUE) }),
   # u_hs: THE COLD BOX'S FLUSH, FITTED since 2026-09-08d (30 -> 31; Marcus:
   # "free u_hs") -- the HS <-> HD exchange velocity in m/yr over the HS area
   # (38 m/yr = a 70 Sv two-way flush). HILDA declared 38 +/- 17 from a 1992
@@ -408,9 +430,19 @@ CCX_PARAM_TABLE <- list(
   # tied to the product by tests/testthat/test-u-hs-fitted.R. ⚠ Migrated
   # ancestors carry 38 (what they RAN), which ENCODES, so the search STARTS at
   # 38 and the prior pulls toward 22 -- that contest IS round 4's question.
+  # ⚠ THE PRIOR IS ON A VOLUME FLUX (Sv); the parameter is a VELOCITY over the
+  # model's HS area (2026-09-16 d, review contradiction 1). The product stores
+  # the m/yr centre at the hs_frac it was built with (0.16); under a structure
+  # with another hs_frac ("hilda_c", 0.128) the same Sv is hs_frac_built/hs_frac
+  # times the velocity -- 21.84 -> 27.3 m/yr. The prior therefore takes the
+  # parameter LIST as an optional second argument and converts at the live
+  # area; without it (an old caller, ccx_prior_z) it is the product's own.
+  # .ccx_prior_eval() dispatches on the arity, so one-argument priors are
+  # untouched. Under "hilda" (every registered mode) this is bit-exact.
   u_hs         = list(tr = "logit", lo = 5, hi = 150, init = 21.84,
-                      prior = function(x) { pr <- ccx_u_hs_prior()
-                        dlnorm(x, log(pr$centre_m_yr), pr$log_sd, log = TRUE) }),
+                      prior = function(x, p = NULL) { pr <- ccx_u_hs_prior()
+                        hf <- if (!is.null(p) && is.numeric(p$hs_frac) && is.finite(p$hs_frac) && p$hs_frac > 0) p$hs_frac else pr$hs_frac
+                        dlnorm(x, log(pr$centre_m_yr * pr$hs_frac / hf), pr$log_sd, log = TRUE) }),
   # ---- THE EQUATORIAL UPWELLING CELL'S TWO FITTED NAMES (2026-09-13i; 31 -> 33)
   # Fix B proper: mirror cells NH_eq / SH_eq under the "hilda_eq" structure
   # label (prereg notes/prereg_2026-09-13g_equatorial_cell_build.md §1; built
@@ -1075,9 +1107,13 @@ ccx_mode_start <- function(md = CCX_MODE_CANONICAL, who = "mode start") {
   pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))
   pm <- suppressWarnings(ccx_seed_unencodable(pm, who))
   u  <- ccx_par_to_unc(pm)
+  # the FULL list (structure + fitted values) for the priors that read the
+  # structure (u_hs's live hs_frac, 2026-09-16 d) -- the mode's own base
+  p_full <- tryCatch(ccx_mode_base(md), error = function(e) list())
+  for (n in names(pm)) p_full[[n]] <- pm[[n]]
   absent <- intersect(attr(pm, "migrated"), CCX_PARAM_NAMES)
   shift <- if (length(absent)) sum(vapply(absent, function(n) {
-    s <- CCX_PARAM_TABLE[[n]]; s$prior(pm[[n]]) + .log_jac(u[[n]], s) }, numeric(1))) else 0
+    s <- CCX_PARAM_TABLE[[n]]; .ccx_prior_eval(s, pm[[n]], p_full) + .log_jac(u[[n]], s) }, numeric(1))) else 0
   # THE BAND TERM (2026-09-16 b). A file fitted under a recorded bracket
   # (ccx_mode_bands(): hml_bound / kz_bracket) that differs from the LIVE table
   # was scored with THAT bracket's logit Jacobian; this build scores the same
@@ -1129,6 +1165,15 @@ ccx_pin_label <- function(pins) {
 
 # log|d natural / d unconstrained| -- the Jacobian. Omitting this reshapes the
 # priors without any error being raised, so it is applied explicitly.
+# Evaluate a table prior at a natural value, passing the parameter LIST to the
+# priors that take one (2026-09-16 d: u_hs's Sv-to-m/yr conversion needs the
+# live hs_frac). One-argument priors are called as before. Every prior
+# evaluation in R/ goes through here; a hand-rolled `s$prior(x)` in a
+# diagnostic still works and silently gets the product's own area.
+.ccx_prior_eval <- function(s, x, p = NULL) {
+  if (length(formals(s$prior)) >= 2L) s$prior(x, p) else s$prior(x)
+}
+
 .log_jac <- function(u, s) switch(s$tr,
   log   = u,
   logit = log(s$hi - s$lo) + plogis(u, log.p = TRUE) + plogis(-u, log.p = TRUE),
@@ -1475,14 +1520,14 @@ CCX_PRIOR_Z_SCAN_STEP <- 0.05    # coarse-scan spacing; << the 0.22 narrowest pr
 CCX_PRIOR_Z_HALF      <- 40      # fine-grid half-window about the prior mode
 CCX_PRIOR_Z_STEP      <- 0.002   # fine-grid spacing
 
-ccx_prior_z <- function(name, x, table = CCX_PARAM_TABLE) {
+ccx_prior_z <- function(name, x, table = CCX_PARAM_TABLE, p = NULL) {
   s <- table[[name]]
   if (is.null(s)) stop("no such parameter: ", name)
   ux <- .to_unc(x, s)
   if (!is.finite(ux)) return(NA_real_)
   # log prior density in the UNCONSTRAINED coordinate, Jacobian included
   ld <- function(u) vapply(u, function(w) {
-    v <- s$prior(.from_unc(w, s)) + .log_jac(w, s)
+    v <- .ccx_prior_eval(s, .from_unc(w, s), p) + .log_jac(w, s)
     if (is.finite(v)) v else -Inf
   }, numeric(1))
   # the prior's own mode, found without assuming it is anywhere near x
@@ -2140,9 +2185,12 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     pv <- ccx_unc_to_par(u)
 
     lp <- 0
+    # the structure + this draw's values, for the priors that read the
+    # structure (u_hs's live hs_frac, 2026-09-16 d); base_params carries it
+    p_pr <- base_params; for (n in names(pv)) p_pr[[n]] <- pv[[n]]
     for (n in CCX_PARAM_NAMES) {
       s <- CCX_PARAM_TABLE[[n]]
-      lp <- lp + s$prior(pv[[n]]) + .log_jac(u[[n]], s)
+      lp <- lp + .ccx_prior_eval(s, pv[[n]], p_pr) + .log_jac(u[[n]], s)
     }
     if (!is.finite(lp)) return(-Inf)
 
@@ -2247,8 +2295,10 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # fixed-depth-vs-model-box mismatch, and it attaches that sigma as `sd_eff`.
     # `d14c_mid` (2026-09-06): the two intermediate slabs, from the SAME spinup
     # as `deep`, on the same steady-state grounds.
+    # `deep` reads EVERY box in the bottom layer's window since 2026-09-16 (d)
+    # (HD included under HILDA; review finding 1) -- see ccx_d14c_window_read().
     ll <- ccx_loglik(r$out, obs, err, luc = eluc,
-                     deep = sp$diagnostics$d14c_bottom_box,
+                     deep = ccx_d14c_deep_read(sp),
                      ocean_grad = ccx_ocean_grad_scored(r$out, sp),
                      d14c_mid = ccx_model_d14c_slabs(sp),
                      by_stream = by_stream)

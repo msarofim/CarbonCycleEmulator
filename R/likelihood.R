@@ -167,7 +167,16 @@ LIK_D13C_REP_ERR   <- 0.05           # permil
 # 30x this term is used to adjudicate.
 LIK_REP_SOURCE_D13C <- -26.5         # permil, fossil+respired excess carbon,
                                      # midpoint of [-25 respired, -28 fossil].
-LIK_LAND_SINK_INFLATE <- 3.0         # multiplier on GCB land-sink sigma (Q1)
+# 3.0 -> 1.0 on 2026-09-16 (d), the hygiene batch (Marcus: "the most defensible
+# choices"). DESIGN sec.9 Q1 made the land sink a SOFT constraint on the
+# argument that it is the budget's residual; GCB's stated +/-0.5 already IS the
+# uncertainty of the quantity GCB reports (DGVM-based since GCB 2017), and the
+# ocean row was never inflated -- the one ad-hoc multiplier in the stack, and
+# the 09-16 c review's reading of it: "buys CO2 accuracy with partition error"
+# (land +1.0 GtC/yr over GCB 2015-24, z +2.0 at the bare sigma, +0.65 at x3).
+# Both rows now sit at the SOURCE's own 1 sigma, no multiplier. Priced at the
+# canonical in CHANGELOG 09-16 (d); set 3.0 to reproduce pre-09-16 d.
+LIK_LAND_SINK_INFLATE <- 1.0         # multiplier on GCB land-sink sigma (Q1; 3.0 until 09-16 d)
 
 # ---- the mid-century discrepancy window (2026-08-23) ----------------
 # OFF by default. See the block in ccx_loglik() for what it is and why it is
@@ -466,6 +475,21 @@ LIK_USE_EXCESS_C14 <- TRUE
 # practical consequence is that this decision is CHEAPER than the review's
 # ordering assumed: it is not a blocker on the refit.
 LIK_EXCESS_C14_TARGET <- "table4_obs_range"
+# THE NET-CO2-UPTAKE CORRECTION (2026-09-16 d, the hygiene batch; read from
+# Naegler 2009, Tellus B 61:372, doi:10.1111/j.1600-0889.2008.00408.x, on 09-15).
+# The Peacock 2004 / Key 2004 inventories behind BOTH target sets are "bomb"
+# 14C = total minus the natural (pre-1950s) field and NEGLECT the excess 14C
+# the ocean took up with the anthropogenic CO2 itself; Naegler 2009 sizes that
+# component at +3 % of the inventory in 1975 and +8 % in 1995. The MODEL's row
+# is total minus its 1750 state (note (a) above) and therefore CONTAINS that
+# component -- so the target the model is scored against must too. Applied as
+# a multiplicative factor per year to the CENTRE only (the half-widths stay:
+# the correction is a bias, and the method spread the wide set carries already
+# exceeds it). Moves the 1995 target 51.4 -> 55.5 kmol, the 1975 one 48.6 ->
+# 50.1; at the canonical the row's z falls from +3.9 to ~+3.4. The 09-15 (f)
+# O6 read recorded this as "not applied"; applied here by ruling ("the most
+# defensible choice", Marcus 09-16 d). Set both to 1 to reproduce pre-09-16 d.
+LIK_EXCESS_C14_UPTAKE_CORR <- c(`1975` = 1.03, `1995` = 1.08)
 # The run's first row is the preindustrial spinup state (the January instant
 # of the periodic orbit under CCX_OBJECTIVE_SPINUP; see (a) above) only if the
 # run starts here. The term is SKIPPED, not silently mis-baselined, if it does
@@ -784,23 +808,66 @@ ccx_model_d14c_slabs <- function(sp, slabs = NULL) {
     if (is.null(tg)) return(NULL)
     slabs <- tg$slabs
   }
+  v <- vapply(seq_len(nrow(slabs)), function(i)
+    ccx_d14c_window_read(sp, slabs$top[i], slabs$bot[i]), numeric(1))
+  stats::setNames(v, slabs$name)
+}
+
+#' The model's Delta14C over a depth window, EVERY box that occupies it
+#'
+#' The carbon-weighted Delta14C of all the water the model holds between `top`
+#' and `bot` metres: each low-latitude interior layer by its overlap fraction,
+#' AND -- since 2026-09-16 (d), the whole-model review's finding 1 -- the HILDA
+#' deep box HD by ITS overlap fraction (HD is one well-mixed box from h_hs to
+#' the bottom under the HS area, so the fraction of its carbon inside the
+#' window is the depth fraction). Until then the deep row (`d14c_bottom_box`)
+#' and the two slabs read the LS column ONLY, while their GLODAP targets are
+#' the volume-weighted mean of EVERY cell in the window, high latitudes
+#' included: under `hilda30c` HD sits at -137.5 permil against the LS bottom's
+#' -190.3, and the LS-only read was 8.4 / 6.6 / 8.2 permil OLDER than the
+#' model's own deep water on the deep / A / B rows (0.82 / 0.49 / 0.60 sigma,
+#' all one sign) -- a bias on exactly the rows that steer kz, kz_deep_frac,
+#' u_hs and tau_q. With the HILDA boxes OFF this is the pre-09-16 read to the
+#' bit. `sp$diagnostics$d14c_bottom_box` keeps the LS-only quantity, for the kz
+#' bracket's provenance only; the objective no longer scores it.
+# ---- OBJECTIVE CHANGE #12 (2026-09-16 d): THE HYGIENE BATCH -- five items, one per switch:
+# LIK_D14C_EVERY_BOX (here), LIK_LAND_SINK_INFLATE 3 -> 1, LIK_EXCESS_C14_UPTAKE_CORR,
+# FORC_SST_PRE1850_MEAN (R/forcing.R), and h_hs's Holte prior (R/calibrate.R). Priced per item at
+# every registered mode in outputs/diagnostics/hygiene_batch_price_20260916.log; DESIGN sec.6.
+LIK_D14C_EVERY_BOX <- TRUE   # FALSE = the pre-09-16 d LS-only read (for pricing / reproduction only)
+ccx_d14c_window_read <- function(sp, top, bot, every_box = LIK_D14C_EVERY_BOX) {
   grid <- sp$grid; aux <- sp$aux; y <- sp$y
   zb  <- cumsum(grid$dz)                    # bottom of ML, then of interior 1..nl
   ztp <- c(0, zb[-length(zb)])              # top of each
-  v <- vapply(seq_len(nrow(slabs)), function(i) {
-    a <- slabs$top[i]; b <- slabs$bot[i]
-    num <- 0; den <- 0
-    for (h in HEMIS) for (k in seq_len(grid$nl)) {
-      ov <- max(0, min(b, zb[k + 1]) - max(a, ztp[k + 1]))
+  num <- 0; den <- 0
+  for (h in HEMIS) {
+    for (k in seq_len(grid$nl)) {
+      ov <- max(0, min(bot, zb[k + 1]) - max(top, ztp[k + 1]))
       if (ov <= 0) next
       fr <- ov / grid$dz[k + 1]
       ix <- aux$idx[[h]]$oc[k]
       num <- num + fr * y[ix, "C14"]; den <- den + fr * y[ix, "C"]
     }
-    if (den <= 0) return(NA_real_)
-    1000 * (num / den - 1)
-  }, numeric(1))
-  stats::setNames(v, slabs$name)
+    if (every_box && isTRUE(aux$hs_on == 1L) && !is.null(aux$idx[[h]]$hd)) {
+      hd_top <- aux$h_hs; hd_bot <- aux$h_hs + aux$dz_hd
+      ov <- max(0, min(bot, hd_bot) - max(top, hd_top))
+      if (ov > 0) {
+        fr <- ov / aux$dz_hd
+        ix <- aux$idx[[h]]$hd
+        num <- num + fr * y[ix, "C14"]; den <- den + fr * y[ix, "C"]
+      }
+    }
+  }
+  if (den <= 0) return(NA_real_)
+  1000 * (num / den - 1)
+}
+
+#' The deep row's model quantity: the window of the LS column's BOTTOM layer,
+#' read with every box that occupies it (see ccx_d14c_window_read). Equals
+#' `sp$diagnostics$d14c_bottom_box` exactly when the HILDA boxes are off.
+ccx_d14c_deep_read <- function(sp) {
+  zb <- cumsum(sp$grid$dz); n <- length(zb)
+  ccx_d14c_window_read(sp, zb[n - 1], zb[n])
 }
 
 # ---------------------------------------------------------------------
@@ -1552,6 +1619,13 @@ ccx_excess_c14_target <- function(exc, which = LIK_EXCESS_C14_TARGET,
   if (is.null(exc) || is.null(exc$targets) || is.null(exc$targets[[which]])) return(NULL)
   d <- as.data.frame(exc$targets[[which]])
   d <- d[order(d$year), ]
+  # the net-CO2-uptake correction, by year (LIK_EXCESS_C14_UPTAKE_CORR); a
+  # year the table lacks is an error by name, never a silent 1
+  corr <- LIK_EXCESS_C14_UPTAKE_CORR[as.character(d$year)]
+  if (anyNA(corr))
+    stop("ccx_excess_c14_target(): no net-CO2-uptake correction for year(s) ",
+         paste(d$year[is.na(corr)], collapse = ", "), " in LIK_EXCESS_C14_UPTAKE_CORR")
+  d$centre <- d$centre * unname(corr)
   rep <- rep_frac * d$centre
   S   <- diag(d$half_width^2, nrow = nrow(d)) + outer(rep, rep)
   list(year = d$year, centre = d$centre, half_width = d$half_width, rep = rep,

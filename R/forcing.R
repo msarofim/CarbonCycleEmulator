@@ -81,6 +81,7 @@ FORC_FOSS_NH_SHARE <- 0.9201 # fossil CO2 emitted in the NH. MEASURED (Marcus,
 # aerosols), not warming-level dependence, so constant-forward is the honest
 # simple rule; a CMIP6-derived warming-level scaling can replace this function
 # without touching anything else. Marcus 2026-08-18: HadSST4; constant ratios.
+FORC_SST_PRE1850_MEAN <- TRUE   # FALSE = the pre-09-16 d single-year-1850 hold (for pricing / reproduction only)
 CCX_SST_RATIO_NH <- 0.819
 CCX_SST_RATIO_SH <- 0.762
 CCX_SST_SPLICE_YR <- 10
@@ -1072,6 +1073,15 @@ ccx_sst_anom_from_gmst <- function(F) {
     ratio <- if (h == "NH") CCX_SST_RATIO_NH else CCX_SST_RATIO_SH
     ocol  <- so[[paste0("sst_anom_", h)]]
     v <- stats::approx(so$year + 0.5, ocol, xout = F$t, rule = 2)$y
+    # BEFORE THE RECORD (2026-09-16 d, review finding 5): `rule = 2` held the
+    # SINGLE YEAR 1850 (-0.042 / -0.044 K) back to 1750 -- the single-year
+    # baseline the standing rule forbids -- while GMST is 0 pre-1850
+    # (FORC_GMST_PRE1850) and the periodic spinup runs at 0: every surface box
+    # started the transient 0.04 K colder than its spun-up orbit, a ~0.5 uatm,
+    # ~0.05 ppm step at 1850. The product is re-based to 1850-1900, so its
+    # 1850-1900 mean IS the pre-record value (~0), consistent with GMST.
+    before <- F$year < min(so$year)
+    if (FORC_SST_PRE1850_MEAN && any(before)) v[before] <- mean(ocol[so$year <= min(so$year) + 50])
     beyond <- F$year > last
     if (any(beyond)) {
       seam_o <- mean(ocol[so$year > last - CCX_SST_SPLICE_YR])

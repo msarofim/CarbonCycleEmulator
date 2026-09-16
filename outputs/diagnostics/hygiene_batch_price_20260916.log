@@ -1,0 +1,31 @@
+== the hygiene batch, priced (commit 1f62f4b) ==
+
+-- hilda30c (stored logpost -1426.2428, stored likelihood -1392.0158) --
+HARNESS GATE (all switches OLD): likelihood reproduces to +0.000000 -> PASS
+  D14C alone: likelihood   +2.3182 | d14c_profile_level +1.101, d14c_profile_ab +1.204, d14c_profile_bd +0.013
+  GCB  alone: likelihood  -26.9533 | gcb_land_sink -26.953
+  EXC  alone: likelihood   +1.1692 | excess_c14_ocean +1.169
+  SST  alone: likelihood   +0.5873 | co2_level_MLO +0.049, co2_level_SPO -0.124, co2_seasonal_MLO -0.002, co2_seasonal_SPO +0.001, d13c_seasonal_MLO +0.002, d13c_seasonal_SPO -0.000, co2_icecore +0.696, d13c_level_MLO +0.046, d13c_level_SPO -0.040, co2_gradient -0.002, d13c_gradient -0.000, d14c_NH +0.032, d14c_SH -0.029, d14c_intcal -0.084, excess_c14_ocean +0.007, ocean_grad_dic +0.002, ocean_grad_d13c +0.001, hs_surf_dic +0.000, hs_surf_d13c -0.001, gcb_ocean_sink +0.017, gcb_land_sink +0.015
+  ALL together: likelihood  -22.7561 (sum of singles  -22.8786; interaction +0.1224) | logpost -1431.8804 -> -1454.6365 (prior move +0.0000, of which h_hs prior -1.6883)
+
+-- hilda31s2 (stored logpost -1423.5675, stored likelihood -1389.4836) --
+HARNESS GATE (all switches OLD): likelihood reproduces to -0.000000 -> PASS
+  D14C alone: likelihood   +2.0943 | d14c_profile_level +0.920, d14c_profile_ab +1.160, d14c_profile_bd +0.014
+  GCB  alone: likelihood  -26.5012 | gcb_land_sink -26.501
+  EXC  alone: likelihood   +1.1661 | excess_c14_ocean +1.166
+  SST  alone: likelihood   +0.5894 | co2_level_MLO +0.054, co2_level_SPO -0.125, co2_seasonal_MLO -0.001, co2_seasonal_SPO +0.001, d13c_seasonal_MLO +0.002, d13c_seasonal_SPO -0.000, co2_icecore +0.696, d13c_level_MLO +0.045, d13c_level_SPO -0.039, co2_gradient -0.002, d13c_gradient -0.000, d14c_NH +0.032, d14c_SH -0.030, d14c_intcal -0.084, excess_c14_ocean +0.007, ocean_grad_dic +0.002, ocean_grad_d13c +0.001, hs_surf_dic +0.000, hs_surf_d13c -0.001, gcb_ocean_sink +0.016, gcb_land_sink +0.015
+  ALL together: likelihood  -22.5294 (sum of singles  -22.6514; interaction +0.1220) | logpost -1429.1897 -> -1451.7191 (prior move +0.0000, of which h_hs prior -1.6665)
+
+-- hilda31p (stored logpost -1435.0997, stored likelihood -1396.2609) --
+HARNESS GATE (all switches OLD): likelihood reproduces to +0.000000 -> PASS
+  D14C alone: likelihood   +2.2051 | d14c_profile_level +1.024, d14c_profile_ab +1.165, d14c_profile_bd +0.016
+  GCB  alone: likelihood  -23.0293 | gcb_land_sink -23.029
+  EXC  alone: likelihood   +1.1435 | excess_c14_ocean +1.144
+  SST  alone: likelihood   +0.6848 | co2_level_MLO +0.037, co2_level_SPO -0.145, co2_seasonal_MLO +0.004, co2_seasonal_SPO +0.001, d13c_seasonal_MLO +0.001, d13c_seasonal_SPO -0.000, co2_icecore +0.774, d13c_level_MLO +0.072, d13c_level_SPO -0.015, co2_gradient -0.002, d13c_gradient -0.000, d14c_NH +0.032, d14c_SH -0.029, d14c_intcal -0.083, excess_c14_ocean +0.007, ocean_grad_dic +0.001, ocean_grad_d13c +0.001, hs_surf_dic +0.000, hs_surf_d13c -0.001, gcb_ocean_sink +0.016, gcb_land_sink +0.015
+  ALL together: likelihood  -18.8767 (sum of singles  -18.9958; interaction +0.1191) | logpost -1442.8139 -> -1461.6906 (prior move +0.0000, of which h_hs prior -2.0220)
+
+== RESTAMP DELTAS (likelihood, the number restamp_mode_objective.R is handed) ==
+hilda30c   -22.7561
+hilda31s2  -22.5294
+hilda31p   -18.8767
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/hygiene_batch_price_20260916.{log,rds}
