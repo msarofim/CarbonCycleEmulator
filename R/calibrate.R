@@ -133,6 +133,10 @@ ccx_h_ml_prior <- local({
 #' what ccx_migrate_par_set() fills; the fitted search starts there too.
 CCX_U_HS_DECLARED <- 38
 
+# h_ml's box floor (2026-09-16 b, Marcus): the Holte prior's 16 % point --
+# ccx_h_ml_prior()$q[2] = 42.52 m (exp(log 59.69 - 0.341) = 42.44) -- to 0.1 m.
+# Read by CCX_PARAM_TABLE$h_ml below; test-hml-floor.R holds it to the prior.
+CCX_HML_FLOOR_M <- 42.5
 CCX_PARAM_TABLE <- list(
   # ---- CO2 fertilisation ---------------------------------------------
   # `beta` LEFT THE TABLE on 2026-08-14 when fert_form flipped to CCX_FERT_MM.
@@ -191,7 +195,23 @@ CCX_PARAM_TABLE <- list(
   # MEASURED at the canonical mode: log-prior -39.2347 -> -40.0457 (-0.8110)
   # with BOTH 09-09w prior moves; the likelihood is untouched at -1439.4248.
   # h_ml's own z goes -1.577 -> -0.57; ent_seas_amp_SH's +1.310 -> +2.34.
-  h_ml        = list(tr = "logit", lo = 30,  hi = 200,   init = 75,
+  #
+  # ⭐ THE BOX FLOOR IS THE PRIOR'S 16 % POINT, 42.5 m, SINCE 2026-09-16 (b)
+  # (ruled by Marcus; was 30). The E array (09-15) and the O5 arm-C probes
+  # (09-15 g) bought their rows with h_ml on the 30-m floor -- the prior's
+  # ~3rd percentile, a mixed layer no Holte reading supports -- and the floor
+  # measured 09-16 showed O5 keeps 93 % of its gain at 42.5 m. CCX_HML_FLOOR_M
+  # below is that point; test-hml-floor.R asserts it against ccx_h_ml_prior()
+  # so the two cannot drift apart. ⚠ A LOGIT BAND CHANGE MOVES EVERY STORED
+  # LOGPOST by the Jacobian difference (canonical -0.362, hilda31s2 -0.368,
+  # hilda31p -2.105 -- it sits 1.6 m above the new floor); the LIKELIHOOD is
+  # untouched. ccx_mode_start() carries the difference in `logpost_shift` when a
+  # file's recorded `hml_bound` differs from the live table, so every gate-4
+  # reproduction still closes without restamping the files. Compare on
+  # likelihood, as always. The array driver takes its band from THIS table
+  # (run_dispersed_multistart.R `.ship`), so port_targets.csv must be
+  # regenerated with it (calibration/make_port_targets.R).
+  h_ml        = list(tr = "logit", lo = CCX_HML_FLOOR_M,  hi = 200,   init = 75,
                      prior = function(x) { pr <- ccx_h_ml_prior()
                        dlnorm(x, log(pr$centre_m), pr$log_sd, log = TRUE) }),
   # OCEAN VENTILATION, BOUNDED (2026-08-12, Marcus). kz was log-transformed with
@@ -1058,7 +1078,24 @@ ccx_mode_start <- function(md = CCX_MODE_CANONICAL, who = "mode start") {
   absent <- intersect(attr(pm, "migrated"), CCX_PARAM_NAMES)
   shift <- if (length(absent)) sum(vapply(absent, function(n) {
     s <- CCX_PARAM_TABLE[[n]]; s$prior(pm[[n]]) + .log_jac(u[[n]], s) }, numeric(1))) else 0
-  list(p = pm, u = u, absent = absent, logpost_shift = shift)
+  # THE BAND TERM (2026-09-16 b). A file fitted under a recorded bracket
+  # (ccx_mode_bands(): hml_bound / kz_bracket) that differs from the LIVE table
+  # was scored with THAT bracket's logit Jacobian; this build scores the same
+  # natural value with the live one. The prior density is on the natural scale
+  # and does not move; the Jacobian does, by .log_jac(live) - .log_jac(recorded).
+  # Added when the h_ml floor moved 30 -> 42.5 m, so every gate-4 reproduction
+  # closes without restamping the files. Only logit transforms have a band.
+  band_shift <- 0
+  for (bn in names(ccx_mode_bands(md))) {
+    s <- CCX_PARAM_TABLE[[bn]]
+    if (is.null(s) || !identical(s$tr, "logit") || !bn %in% names(u) || bn %in% names(CCX_PINS)) next
+    rec <- ccx_mode_bands(md)[[bn]]
+    if (isTRUE(all.equal(rec, c(s$lo, s$hi)))) next
+    s_rec <- s; s_rec$lo <- rec[1]; s_rec$hi <- rec[2]
+    u_rec <- qlogis((pm[[bn]] - s_rec$lo) / (s_rec$hi - s_rec$lo))
+    band_shift <- band_shift + .log_jac(u[[bn]], s) - .log_jac(u_rec, s_rec)
+  }
+  list(p = pm, u = u, absent = absent, logpost_shift = shift + band_shift, band_shift = band_shift)
 }
 CCX_PINS <- NULL
 #' Parse a pin specification of the form "name=value[,name=value]" (CCX_MS_PIN).

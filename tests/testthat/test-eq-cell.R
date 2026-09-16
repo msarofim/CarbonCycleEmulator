@@ -218,7 +218,12 @@ test_that("P0a (canonical): hilda30c's stored LIKELIHOOD reproduces row by row u
   expect_false("eq_b1" %in% names(st))                          # no B1 row without a cell
   shift <- sum(vapply(new_names, function(n) {
     s <- CCX_PARAM_TABLE[[n]]; s$prior(pm[[n]]) + .log_jac(u[[n]], s) }, numeric(1)))
-  expect_equal(as.numeric(sc) - md$logpost, shift, tolerance = 1e-8, scale = 1)   # -0.8236 on 09-13i
+  # 2026-09-16 b: plus the h_ml BAND TERM -- the file was fitted under [30, 200], the table's floor
+  # is CCX_HML_FLOOR_M; the Jacobian difference is a KNOWN constant too (ccx_mode_start()$band_shift,
+  # test-hml-floor.R), computed here by hand from the recorded band so the two cannot drift.
+  s_h <- CCX_PARAM_TABLE$h_ml; s_rec <- s_h; s_rec$lo <- md$hml_bound[1]; s_rec$hi <- md$hml_bound[2]
+  band <- .log_jac(u[["h_ml"]], s_h) - .log_jac(.to_unc(pm[["h_ml"]], s_rec), s_rec)
+  expect_equal(as.numeric(sc) - md$logpost, shift + band, tolerance = 1e-8, scale = 1)   # -0.8236 on 09-13i, -0.362 more since 09-16 b
 })
 
 test_that("the spinup converges with the cell on, and the cell sits ABOVE the mixed layer in pCO2", {

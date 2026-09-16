@@ -58,7 +58,7 @@ now <- dg_streams(dg_run(v), v)
 rc_logprior <- function(u) { names(u) <- CCX_PARAM_NAMES; pv <- ccx_unc_to_par(u)
   lp <- 0; for (n in CCX_PARAM_NAMES) { s <- CCX_PARAM_TABLE[[n]]
     lp <- lp + s$prior(pv[[n]]) + .log_jac(u[[n]], s) }; lp }
-ccx_check_mode_decode(md); invisible(ccx_adopt_mode_band(md))
+invisible(ccx_adopt_mode_band(md)); ccx_check_mode_decode(md)   # adopt the recorded band FIRST (09-16 b: the shipped floor moved), then check under it
 lp  <- rc_logprior(md$u_mode)
 ll_implied <- md$logpost - lp
 

@@ -78,18 +78,29 @@ test_that("ccx_check_mode_decode ERRORS on a mis-decoding file", {
   expect_true(ccx_check_mode_decode(list(u_mode = rep(0, length(CCX_PARAM_NAMES)))))
 })
 
-test_that("the CANONICAL mode decodes cleanly -- it was fitted on the shipped band", {
-  # ⭐ THE ASSERTION THE ADOPTION EARNED. `ent26` came off the dispersed
-  # multistart, which does not override `h_ml`, so the band-provenance trap is
-  # simply absent from the file the whole repo resolves. This is the statement
-  # that would fail if a future refit reintroduced an in-process override and
-  # nobody said so.
+test_that("the CANONICAL mode decodes cleanly UNDER ITS RECORDED BAND; band-blind it does NOT, since the 09-16 floor", {
+  # Until 2026-09-16 (b) this asserted that the canonical was fitted on the
+  # SHIPPED band, so the band-blind idiom happened to be right for it. The h_ml
+  # floor then moved 30 -> 42.5 m (CCX_HML_FLOOR_M) and every file fitted before
+  # it records the OLD band -- so the band-blind decode of the canonical's
+  # u_mode is now wrong by ~15 % in h_ml, exactly the trap this file exists to
+  # kill, and the invariant is the stronger one: the recorded band is honoured
+  # (ccx_mode_params(), ccx_adopt_mode_band()) and the band-blind check ERRORS
+  # rather than passing quietly. A future refit ON the shipped band records it
+  # and takes the first branch.
   md <- readRDS(ccx_mode_file())
-  expect_equal(md$hml_bound, c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi),
-               tolerance = 1e-12)
-  expect_true(ccx_check_mode_decode(md))
-  u <- md$u_mode; names(u) <- md$param_names
-  expect_equal(ccx_unc_to_par(u)[["h_ml"]], md$par_mode[["h_ml"]], tolerance = 1e-8)
+  ship <- c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi)
+  expect_equal(ccx_mode_params(md)[["h_ml"]], md$par_mode[["h_ml"]], tolerance = 1e-8)
+  if (isTRUE(all.equal(md$hml_bound, ship))) {
+    expect_true(ccx_check_mode_decode(md))
+  } else {
+    expect_error(ccx_check_mode_decode(md), "does NOT decode to its own stored par_mode")
+    old <- ccx_adopt_mode_band(md)
+    on.exit(for (nm in names(old)) CCX_PARAM_TABLE[[nm]] <<- old[[nm]], add = TRUE)
+    expect_true(ccx_check_mode_decode(md))
+    u <- md$u_mode; names(u) <- md$param_names
+    expect_equal(ccx_unc_to_par(u)[["h_ml"]], md$par_mode[["h_ml"]], tolerance = 1e-8)
+  }
 })
 
 test_that("decoding under the recorded band is what reproduces par_mode", {

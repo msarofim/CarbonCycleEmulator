@@ -65,10 +65,9 @@ if (!identical(md$param_names, CCX_PARAM_NAMES))
   stop("this mode file was fitted on a DIFFERENT parameter set (",
        length(md$param_names), " vs ", length(CCX_PARAM_NAMES),
        "); the question this script asks is not answerable against it.")
-ccx_check_mode_decode(md)
-
 lp_shipped <- ms_logprior(md$u_mode)
 old_band <- ccx_adopt_mode_band(md)     # h_ml / kz bands as the refit ran them
+ccx_check_mode_decode(md)               # under the RECORDED band (09-16 b: the shipped floor moved, so band-blind this errors on every pre-floor file)
 lp_band <- ms_logprior(md$u_mode)
 cat(sprintf("\n== 1. the log-prior, COMPUTED ==\n  shipped table %.6f | mode's own bands %.6f (recorded: %s)\n",
             lp_shipped, lp_band,

@@ -50,7 +50,7 @@ test_that("h_ml's prior is centred on the Holte ANNUAL MEAN, tied to the product
   # MUTATION: the exposure check must reject the retired centre, or it has no
   # power over the very change it was written for ([[mutation_test_gates]]).
   expect_gt(1 - plnorm(pr$p8_stop_m, log(pr$centre_retired_m), pr$log_sd), 0.30)
-  expect_equal(s$lo, 30); expect_equal(s$hi, 200)                              # the box is unchanged
+  expect_equal(s$lo, CCX_HML_FLOOR_M); expect_equal(s$hi, 200)                 # the floor is the prior's 16 % point (09-16 b); test-hml-floor.R ties it to the product
 })
 
 test_that("a 30-parameter ancestor migrates u_hs to the declared 38 -- what it RAN -- and still ENCODES", {

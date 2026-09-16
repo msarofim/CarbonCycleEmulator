@@ -487,10 +487,12 @@ ccx_check_mode_decode <- function(md = CCX_MODE_CANONICAL, tol = 1e-8) {
   }
   if (length(bad))
     stop("this mode file does NOT decode to its own stored par_mode under the ",
-         "SHIPPED CCX_PARAM_TABLE:\n  ", paste(bad, collapse = "\n  "),
-         "\nUse ccx_mode_params() -- see the note above it in R/paths.R. ",
-         "For h_ml this is the in-process refit band (md$hml_bound = ",
-         paste(md$hml_bound, collapse = ", "), ").")
+         "CURRENT CCX_PARAM_TABLE:\n  ", paste(bad, collapse = "\n  "),
+         "\nUse ccx_mode_params(), or ccx_adopt_mode_band() BEFORE this check -- see the ",
+         "note above ccx_mode_params() in R/paths.R. For h_ml this is the band the ",
+         "refit ran under (md$hml_bound = ", paste(md$hml_bound, collapse = ", "),
+         "); since 2026-09-16 (b) the shipped floor is CCX_HML_FLOOR_M, so every ",
+         "file fitted before it differs here.")
   invisible(TRUE)
 }
 

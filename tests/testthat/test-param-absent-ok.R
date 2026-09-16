@@ -52,8 +52,10 @@ test_that("ccx_mode_start: migrated (what it ran), seeded, encoded; the shift is
   for (n in st$absent) expect_equal(st$p[[n]], CCX_PARAM_TABLE[[n]]$init)
   hand <- sum(vapply(st$absent, function(n) { s <- CCX_PARAM_TABLE[[n]]
     s$prior(s$init) + .log_jac(.to_unc(s$init, s), s) }, numeric(1)))
-  expect_equal(st$logpost_shift, hand, tolerance = 1e-12)
-  expect_lt(st$logpost_shift, 0)                       # -0.8236 on 09-13i: a price, never a credit
+  # 2026-09-16 b: the shift also carries the BAND TERM (the file's recorded h_ml band vs the live
+  # table's, test-hml-floor.R); the seeding leg is what is asserted here.
+  expect_equal(st$logpost_shift - st$band_shift, hand, tolerance = 1e-12)
+  expect_lt(st$logpost_shift - st$band_shift, 0)       # -0.8236 on 09-13i: a price, never a credit
   # the file's OWN coordinates are untouched by the start
   for (n in setdiff(md$param_names, st$absent)) expect_identical(st$p[[n]], md$par_mode[[n]])
   # ccx_load_mode() RUNS the file (0 = no loop), it does not seed: the loaded

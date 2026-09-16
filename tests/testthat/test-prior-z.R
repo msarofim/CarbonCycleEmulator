@@ -75,9 +75,14 @@ test_that("ccx_prior_z matches the analytic z for the two OBSERVATION lognormals
   hp <- readRDS(ccx_path("data", "obs_h_ml_prior.rds")); up <- readRDS(ccx_path("data", "obs_u_hs_prior.rds"))
   z_trunc <- function(x, mu, sd, lo, hi) { F <- function(v) stats::pnorm((log(v) - mu) / sd)
     stats::qnorm((F(x) - F(lo)) / (F(hi) - F(lo))) }
-  for (x in c(39.8, 59.7, 83.9, 118, 134.15))
-    expect_equal(ccx_prior_z("h_ml", x), z_trunc(x, log(hp$centre_m), hp$log_sd, 30, 200), tolerance = 2e-3, info = sprintf("h_ml at %g", x))
-  expect_gt(abs(ccx_prior_z("h_ml", 39.8) - (log(39.8) - log(hp$centre_m)) / hp$log_sd), 0.02)   # the truncation IS visible
+  # The box is READ from the table (2026-09-16 b: the floor moved 30 -> CCX_HML_FLOOR_M = 42.5, the
+  # prior's 16 % point, so the truncation now clips ~16 % below and the truncated z differs from
+  # the plain one by ~0.2 sd at the centre -- larger, and still asserted rather than tolerated).
+  bx <- CCX_PARAM_TABLE$h_ml; expect_identical(bx$lo, CCX_HML_FLOOR_M)
+  for (x in c(45, 59.7, 83.9, 118, 134.15))
+    expect_equal(ccx_prior_z("h_ml", x), z_trunc(x, log(hp$centre_m), hp$log_sd, bx$lo, bx$hi), tolerance = 2e-3, info = sprintf("h_ml at %g", x))
+  expect_gt(abs(ccx_prior_z("h_ml", 45) - (log(45) - log(hp$centre_m)) / hp$log_sd), 0.02)   # the truncation IS visible
+  expect_true(is.na(ccx_prior_z("h_ml", 39.8)))                                               # below the floor: no z, never a clamp
   for (x in c(12, 21.84, 38, 60))
     expect_equal(ccx_prior_z("u_hs", x), (log(x) - log(up$centre_m_yr)) / up$log_sd, tolerance = 1e-3, info = sprintf("u_hs at %g", x))
   # hs_asx_frac (09-08e): box [0.02, 2.0] holds all the mass of a 0.15-wide lognormal at 0.653
