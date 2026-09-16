@@ -2208,6 +2208,14 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # was truncated by numerics wearing a prior's clothes. See test-stability.R.
     r <- tryCatch(ccx_run_fast(sp, F), error = function(e) NULL)
     if (is.null(r) || anyNA(r$out$co2_NH)) return(-Inf)
+    # 2026-09-16 (d): a transient that had to ESCALATE its substeps ran at a
+    # different count from the spinup that seeded it, and that mixed-count
+    # number is 3-13 log-units off a consistent evaluation (review finding 3).
+    # The auto controller (ccx_substeps_for, test-stability.R) is the defence
+    # against the integrator's limit; the retry is a diagnostic convenience,
+    # never an objective value. -Inf here means "not evaluable at a consistent
+    # count", and it is recorded so a mode-finder cannot climb into it quietly.
+    if (isTRUE(r$retried)) return(-Inf)
 
     # NOTE THE ABSENCE OF sigma_co2. Retired 2026-08-15; ccx_loglik() still
     # honours the field if it is supplied, so the objective omits it EXPLICITLY

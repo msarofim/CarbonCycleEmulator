@@ -423,6 +423,7 @@ ccx_cpp_forcing <- function(F) {
 #'   model failure, not an integrator artefact -- which is the whole point: a
 #'   caller's `anyNA` -> -Inf guard must not double as a prior bound.
 ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
+  if (!inherits(F, "ccx_cpp_forcing")) F <- ccx_fill_prod_c14(F, spin)   # finding 6 (09-16 d); see R/forcing.R
   ccx_run_prepared(spin$y, ccx_run_prepare(spin, substeps), F, retry_na = retry_na)
 }
 
@@ -477,8 +478,19 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE) {
                     CCX_OCEAN_BOX_COLS)
     state <- res$state
     dimnames(state) <- list(prep$box_names, CCX_TRACERS)
-    list(state = state, out = cbind(t = Fm$t, out), substeps = as.integer(nsub))
+    list(state = state, out = cbind(t = Fm$t, out), substeps = as.integer(nsub),
+         # ⚠ THE COUNT THE CALLER ASKED FOR (2026-09-16 d). A retry below runs
+         # the transient at a HIGHER count than the spinup that produced `y`,
+         # and the fixed point of the 4-step map is NOT on the 64-step orbit:
+         # measured at the canonical, a transient-only refinement manufactures
+         # -3.0 log-units at h_ml 65.2 and -13.5 at 71.0 while the like-for-like
+         # integrator error is <= 0.15 (review 09-16 c, finding 3). So a
+         # retried result is a DIFFERENT NUMBER, not a more accurate one; the
+         # objective refuses it (ccx_make_logpost) and the periodic spinup's
+         # one-year map never retries. `retried` says which happened.
+         substeps_requested = as.integer(ss0), retried = nsub != ss0)
   }
+  ss0 <- ss
   r <- one(ss)
   # The NaN guard reads the PHYSICS columns only: with the HILDA structure off
   # the hs_* columns are NA BY CONTRACT (the box does not exist, 2026-09-07f),

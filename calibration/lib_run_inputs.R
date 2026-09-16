@@ -75,7 +75,28 @@ CCX_RUN_INPUTS <- list(
   list(path    = file.path("data", "obs_tr_box.rds"),
        kind    = "file", pattern = NULL,
        why     = "the tropical surface box: tr_frac, the re-based SSTs of tr / the residual ML / the cell, Holte MLD on both masks, GLODAP alkalinity",
-       symptom = "ccx_apply_structure('hilda_tr') errors (once that label exists)")
+       symptom = "ccx_apply_structure('hilda_tr') errors (once that label exists)"),
+  # 2026-09-16 (d), review finding 7: the four data products the OBJECTIVE and the
+  # PUMP read through `tryCatch(readRDS(...), error = function(e) NULL)`. Absent or
+  # corrupt, each degrades SILENTLY into a different model: no pump with
+  # pump_grad > 0 still set (the solved field cannot be built), or dropped
+  # gradient rows, or a quiet stratosphere, or no fossil seasonality.
+  list(path    = file.path("data", "obs_glodap_deep.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "the GLODAP deep targets: the pump's SOLVED field (ccx_pump_shape) and the DIC/d13C/ALK gradient targets (ccx_ocean_gradient_target)",
+       symptom = "aux$pump is NULL with pump_grad > 0 -- the biological pump silently OFF -- and the ocean_grad_* rows are ABSENT from by_stream"),
+  list(path    = file.path("data", "obs_glodap_intermediate.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "objective #8's intermediate D14C slab targets (d14c_profile_ab / _bd)",
+       symptom = "the two slab rows are ABSENT from by_stream"),
+  list(path    = file.path("data", "forcing_emission_seasonality.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "the fossil + fire monthly seasonality shapes ccx_emission_seasonality() applies to the annual emissions",
+       symptom = "emissions go in FLAT within the year; the seasonal CO2 rows shift with nothing said"),
+  list(path    = file.path("data", "forcing_volcanic_aod.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "the stratospheric AOD forcing behind the diffuse-light fertilisation term (gamma_diff)",
+       symptom = "a quiet stratosphere: Pinatubo's growth anomaly disappears from the transient")
 )
 
 #' Stop unless every run-time input is present, naming the one that is not

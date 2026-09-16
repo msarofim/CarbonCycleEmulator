@@ -132,8 +132,11 @@ ps_year_forcing <- function(prod_c14, year0 = 1750, quiet = NULL) {
 #' the ~300 one-year calls a solve makes (review 2026-09-12, B1). `F` may be a
 #' forcing table or a `ccx_cpp_forcing_prep()` of one.
 ps_phi <- function(y, p, aux, grid, F, prep = NULL) {
-  if (is.null(prep)) return(ccx_run_fast(list(y = y, params = p, aux = aux, grid = grid), F))
-  ccx_run_prepared(y, prep, F)
+  # retry_na = FALSE (2026-09-16 d): every one-year call of a solve must run at
+  # the SAME count, or the fixed point being solved for is a mixture of maps
+  # (review finding 3). An NA here is a spinup failure and surfaces as one.
+  if (is.null(prep)) return(ccx_run_fast(list(y = y, params = p, aux = aux, grid = grid), F, retry_na = FALSE))
+  ccx_run_prepared(y, prep, F, retry_na = FALSE)
 }
 
 #' The full-year trajectory, for the annual means the pins are stated on

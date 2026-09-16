@@ -1066,14 +1066,17 @@ CCX_SEAS_ML_HS_MIN_M <- 5
 ccx_seas_ml_hs_guard <- function(h_hs, dz_total) {
   co <- ccx_mld_shape("hs")
   for (h in HEMIS) {
-    h_min <- h_hs * min(co[[h]]$f_month); h_max <- h_hs * max(co[[h]]$f_month)
+    # the interpolant's CONTINUOUS extremes, as the LS guard reads them (review
+    # A16; aligned 09-16 d, finding 7) -- the 6-harmonic curve undershoots the
+    # sampled HS NH minimum by ~3 % (0.1529 vs 0.1580)
+    h_min <- h_hs * co[[h]]$f_min; h_max <- h_hs * co[[h]]$f_max
     if (h_max >= dz_total)
       stop(sprintf("ccx_seas_ml_hs_guard: the %s winter cold box reaches %.1f m but the column is %.1f m deep (h_hs = %.2f).", h, h_max, dz_total, h_hs))
     if (h_min < CCX_SEAS_ML_HS_MIN_M)
       stop(sprintf(paste0("ccx_seas_ml_hs_guard: the %s summer cold box thins to %.1f m ",
                           "(h_hs = %.2f x f_min %.3f), below the %g m floor -- the HS <-> HD ",
                           "exchange and air-sea rates on that sliver are not resolved."),
-                   h, h_min, h_hs, min(co[[h]]$f_month), CCX_SEAS_ML_HS_MIN_M))
+                   h, h_min, h_hs, co[[h]]$f_min, CCX_SEAS_ML_HS_MIN_M))
   }
   co
 }
@@ -3503,6 +3506,16 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
          "leg over a_ml and their interior leg over a_ls, which do not close under ",
          "D1 (a_ml = a_ls - a_eq - a_tr). Rewrite them as volume x source concentration ",
          "(the cell's idiom, R/model.R eq block) before switching both on.")
+  # ... and the CONVEYOR under HILDA (review 09-16 c, finding 7): its legs divide
+  # by a_oc, the whole ocean, while the boxes they move through are a_ls / a_ml
+  # (both cores agree), so with hs_frac > 0 the declared q_conv actually moves
+  # q_conv x (1 - hs_frac) Sv. Falsified twice, "not to be shipped" (DESIGN
+  # 3.4a D); no registered mode carries it. Refused by name so nobody reads a
+  # Sv off it under the structure every registered mode now has.
+  if (hs_on && isTRUE(p$q_conv > 0))
+    stop("ccx_prepare(): q_conv > 0 cannot be combined with the HILDA boxes (hs_frac > 0): the ",
+         "conveyor's legs are per a_oc while the boxes are a_ls / a_ml, so the declared Sv is ",
+         "wrong by (1 - hs_frac). The conveyor is retired (DESIGN 3.4a D).")
   bn  <- ccx_box_names(grid$nl, hs_on, eq_on, tr_on)
   idx <- lapply(HEMIS, function(h) {
     v <- list(
@@ -3698,6 +3711,13 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     if (!is.finite(p$alk_hs) || p$alk_hs <= 0)
       stop("alk_hs must be a positive HS surface alkalinity in mol/kg; got ",
            format(p$alk_hs))
+    # THE UNITS TRAP (review 09-16 c, finding 7): `alk_hs` is in mol/kg like
+    # ALK_SURFACE, while its siblings `alk_eq` / `alk_tr` are in umol/kg. A
+    # value above 0.01 mol/kg (10,000 umol/kg; seawater is ~2.3e-3) can only be
+    # a umol/kg number handed to the wrong box -- refused by name.
+    if (p$alk_hs > 0.01)
+      stop("alk_hs is in mol/kg (ALK_SURFACE's unit; seawater ~2.3e-3) but got ", format(p$alk_hs),
+           " -- that looks like umol/kg, the unit of alk_eq / alk_tr. Divide by 1e6.")
     p$alk_hs
   }
   dic0  <- lapply(sst_l, function(T) ccx_dic_for_pco2(ccx_const("CO2_PI_PPM"), alk, T))

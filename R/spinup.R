@@ -330,7 +330,10 @@ ccx_spinup <- function(p = ccx_default_params(),
     # metre" is scaled up by a_ls/a_ml to be the interior's; with the cell
     # off the ratio is not formed and this is the 09-13d line, bit for bit.
     conc <- y[i$ml, "C"] / grid$dz[1]
-    if (aux$eq_on == 1L) conc <- conc * (aux$a_ls[[h]] / aux$a_ml[[h]])
+    # `d1_on`, not `eq_on` (review 09-16 c, finding 7): the tropical box ALONE
+    # also shrinks a_ml below a_ls (the 09-15 d audit's class); the Newton
+    # absorbed the wrong guess, so no result moved -- the guess is now right.
+    if (isTRUE(aux$d1_on == 1L)) conc <- conc * (aux$a_ls[[h]] / aux$a_ml[[h]])
     y[i$oc, "C"] <- conc * grid$dz[-1]
 
     # THE HIGH-LATITUDE COLUMN, when it exists: HS in Henry equilibrium with the

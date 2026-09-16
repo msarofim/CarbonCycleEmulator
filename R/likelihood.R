@@ -2015,7 +2015,15 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
                          off = err$grad_off_co2,  sd = LIK_GRAD_CO2_SD),
                     list(nm = "d13c", obs_g = obs$d13c_grad, mod = ms$d13,
                          off = err$grad_off_d13c, sd = LIK_GRAD_D13C_SD))) {
-      if (is.null(sp$off) || !is.finite(sp$off)) next
+      # NULL = the caller OPTED OUT of the row (the old fixtures do; by_stream then
+      # lacks it and the caller knows). A NON-FINITE offset is a broken decode,
+      # never a choice -- until 2026-09-16 (d) it dropped the row as silently as
+      # NULL did (review finding 7); it errors by name now.
+      if (is.null(sp$off)) next
+      if (!is.finite(sp$off))
+        stop("ccx_loglik(): err$grad_off_", sp$nm, " is ", format(sp$off),
+             " -- a non-finite offset drops the ", sp$nm, " gradient row and silently changes the objective. ",
+             "Pass a finite value, or NULL to opt out of the row explicitly.")
       A <- sp$mod$MLO; B <- sp$mod$SPO
       if (is.null(A) || is.null(B) || is.null(sp$obs_g) || !nrow(sp$obs_g)) next
       mg <- A$level[match(sp$obs_g$year, A$year)] -

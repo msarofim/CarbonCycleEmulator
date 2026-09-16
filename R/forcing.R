@@ -800,7 +800,7 @@ ccx_build_forcing <- function(scenario = "historical",
     cum_luc_SH = cum_luc_SH,
     gmst = gm, enso = enso, d13c_foss = d13c_foss,
     c14_bomb = c14_bomb, c14_nuclear = c14_nuc,
-    c14_cosmo = rep(prod_c14, n),
+    c14_cosmo = rep(prod_c14, n),   # NA here is filled from the spinup by the runners (ccx_fill_prod_c14, 09-16 d)
     # VOLCANIC stratospheric AOD, hemispheric (2026-08-29). ZERO outside the
     # series' coverage -- which means ZERO BEFORE 1850, so Laki 1783 and
     # TAMBORA 1815 are absent and any pre-1850 volcanic claim is unsupported.
@@ -936,7 +936,24 @@ ccx_forcing_at <- function(F, i) {
 #'   that keeps the explicit diffusion term stable (see ccx_substeps_for()).
 #'   "auto" resolves to CCX_SUBSTEPS_MIN = 4 at every ordinary parameter value.
 #' @return list(state = final state, out = data.frame of monthly diagnostics)
+#' Fill an unset cosmogenic-14C production from the spinup that seeds the run
+#'
+#' `ccx_build_forcing()` defaults `prod_c14` to NA (the production is a property
+#' of the SPINUP, which balances it against decay), and until 2026-09-16 (d) a
+#' bare `ccx_run(spin, ccx_build_forcing())` returned valid CO2 / d13C and an
+#' ALL-NA Delta14C with nothing said (review finding 6). Every calibration path
+#' sets `F$c14_cosmo <- sp$prod_c14` by hand; this does the same thing for the
+#' bare call, and only when the column is entirely NA -- a partly-set column
+#' is the caller's and is left alone. Both runners call it.
+ccx_fill_prod_c14 <- function(F, spin) {
+  if (!is.null(F$c14_cosmo) && all(is.na(F$c14_cosmo)) &&
+      is.numeric(spin$prod_c14) && length(spin$prod_c14) == 1L && is.finite(spin$prod_c14))
+    F$c14_cosmo <- rep(spin$prod_c14, nrow(F))
+  F
+}
+
 ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL) {
+  F <- ccx_fill_prod_c14(F, spin)
   # `edge_fn(fl, y, t)` (2026-09-15b): an OPT-IN per-month hook on the
   # derivative's recorded attribute at the month's OPENING state -- the same
   # (y, t, forcing) the first RK4 stage evaluates. The caller keeps what it
