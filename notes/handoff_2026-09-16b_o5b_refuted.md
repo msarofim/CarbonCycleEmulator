@@ -39,9 +39,10 @@ O5b: "yes: prereg, build, probe". `h_ml`'s box floor → 42.5 m (the Holte prior
    committed tree (with the inputs): **3674 / 2 / 6 + 1 error = the standing reds only** (`outputs/diagnostics/suite_20260916b_counts.log`).
 
 ## 3. Open, and the rulings owed
-- **The honest next candidate is on the LS SH mixed layer's seasonal pCO₂ phase** (winter under the solved field, summer under martin),
-  i.e. the sub-ML gradient the martin field inverts — not more high-latitude export. No prereg written; Marcus's call whether to pursue the
-  martin arc further or park it (⇒ O2's DESIGN §6 statement).
+- **RULED 09-16 (c): the martin arc is PARKED; O2's statement is WRITTEN in DESIGN §6** (the limitation of the model class; the solved
+  field stays canonical; the martin machinery stays in both cores at 0). The LS SH mixed-layer phase reading is recorded in
+  `INDEX_ccx_ocean_pump.md` as the fact a future session must not lose; a class with an advective return is the next MODEL, not a refit.
+- Memory clean done 09-16 (c): `INDEX_ccx` 12.4 KB, root 11.98 KB; five indexes over soft flagged in the CHANGELOG (split, don't trim).
 - THC parked (`w_thc` prior source still owed if ever revived). T5 / the cell / `hilda_c` arm still parked.
 - The 1995 bomb inventory z +4 everywhere and the layer-2 inversion under martin: unmoved by every candidate.
 - `INDEX_ccx.md` is 16.7 KB (soft 14): merge before the next add.

@@ -1232,8 +1232,47 @@ Rcpp with a bit-parity test against the R reference implementation (both stay in
 > | **H** hemispheric δ¹³C contrast vs the CO₂ control | R_co2 0.918, R_d13c 1.969, contrast z +11.59 | the transport-independent miss | ⛔ FAIL |
 > | **GL** MLO−SPO δ¹³C gradient level | −0.1314 vs −0.0668 ± 0.0030 (1.97×), z −10.34 (bare −21.7) | absorbed invisibly by `grad_off_d13c` | ⛔ FAIL |
 > | **Q** air–sea δ¹³C disequilibrium | +0.894 vs 0.60 ± 0.10, 2.94σ | shares a lineage with the Zhang alphas | ⛔ FAIL |
-> | ENSO → ocean (comparison, the release blocker) | solubility-only r −0.527; net 0.58× obs with the fitted `gamma_enso_ocn` | the equatorial-cell arc (09-13/14) is its fix | ⛔ open |
+> | ENSO → ocean (comparison, the release blocker) | solubility-only r −0.527; net 0.58× obs with the fitted `gamma_enso_ocn` | the equatorial-cell arc (09-13/14) reached the slope but not the reservoir (`hilda30e` not promoted); parked with the pump-structure arc below | ⛔ open |
 > | **12 / L** CO₂ pulse IRF (comparison since 09-04e, not a gate) | IRF(100) 0.280 vs Joos 0.409; inside Joos's spread at 1000 yr | the land takes up too fast in the first century | reported |
+>
+>
+> ⭐⭐ **A KNOWN LIMITATION OF THE MODEL CLASS, STATED (2026-09-16 c, Marcus: "park it and write O2's design statement"; option O2 of
+> `notes/scoping_2026-09-15c_kz_pump_structure.md`).** CCX's ocean is a diffusive column (a mixed layer over ten layers exchanged by an
+> eddy diffusivity `kz` with a HILDA high-latitude box, plus a biological pump) with **no advective deep return**. Under that
+> class, one object sets three things at once, and the measurements below (all at the canonical `hilda30c`, on the Mac, 09-15 c →
+> 09-16 b; the arc's index is memory `INDEX_ccx_ocean_pump.md`) show that it cannot hold the observed ocean at the observed rates:
+>
+> 1. **Diffusion is the bomb-¹⁴C carrier** — at 1975 diffusion + entrainment at the mixed-layer base carry 70 % of the bomb ¹⁴C
+>    into the interior, the pump 19 %, the HS route 12 % (the ¹⁴C edge recorder, `calibration/diag_kz_pump_pathways.R`). The
+>    atmospheric bomb rows therefore hold `kz` at **10,964 m² yr⁻¹** at the mixed-layer base (kz × 0.5 costs −295 with the CO₂
+>    record held by the land; −86 with the ¹⁴C nuisances freed).
+> 2. **At that `kz` the export must be large.** The pump's field is SOLVED to hold GLODAP's vertical DIC and δ¹³C gradients against
+>    diffusion, and at kz 10,964 the solution is **45 GtC yr⁻¹** of export — against 5–13 observed (Nowicki 2022: 9.08
+>    [8.12, 9.92]). No scored row constrains the export's magnitude along `kz`; it is a consequence of the class, not a fit.
+> 3. **Prescribing the observed export breaks the gradient.** With the pump PRESCRIBED at Nowicki's 9.08 GtC yr⁻¹ (a Martin
+>    profile, `pump_field = "martin"`) and nothing else changed, the sub-mixed-layer DIC INVERTS (layer 2 sits ~67 µmol kg⁻¹
+>    BELOW the mixed layer at PI) and the objective loses ~895 log-units, ~250 of them on the South Pole seasonal CO₂ row — because
+>    under this class the SH seasonal CO₂ amplitude is the seasonal mixed layer entraining the sub-ML gradient that diffusion at the
+>    observed export can no longer maintain.
+>
+> **Every candidate that tried to make the prescribed export viable inside the class was measured and none closed it**: a mean deep
+> return through the thermocline (O1; every return depth priced, refuted as built), the HS-route overturning (THC; independent of
+> the rest, a net cost, parked), the bomb budget's land share (O6; a quarter of the 1995 inventory overshoot), a seasonal export
+> (O5; recovers the SPO phase and a third of its amplitude — the best prescribed-export configuration measured, −195 log-units
+> against the canonical), and the high-latitude pump on the CMIP6 rectified bloom (O5b; ≤ 0.04 ppm at SPO by an air–sea bound
+> stated before the run, measured +0.002). Two facts moved under none of them: the layer-2 inversion under the prescribed field,
+> and the **1995 ocean bomb-¹⁴C inventory at z ≈ +4 in every configuration, the canonical included** (the ocean drains the
+> atmosphere too fast: the atmosphere's 1995 share of the bomb excess is 18 % against Naegler & Levin's 22 %).
+>
+> **What this means for the reader of any CCX product.** (a) The shipped ocean's export (45 GtC yr⁻¹) is a *diagnostic of the
+> column's diffusivity*, not an estimate of ocean export production; do not quote it as one. (b) Every warm-surface excess
+> (the tropical box at +68 µatm over the global mean, the equatorial cell's +144 for an observed +55) is the same object seen from
+> the surface — the pump-plus-diffusion field's cold-equilibrated DIC exposed in a warm box — and is why the ENSO → ocean row
+> above stays open. (c) A class with an advective return (an upwelling–diffusion column, the HILDA conveyor, or a 2-D
+> circulation) resolves 1–3 by construction; that is the next model, not a refit of this one, and the pedagogy constraint
+> (§3.4a, 2026-08-15) places it out of v1 unless an observation forces it. (d) The solved field stays canonical; `pump_field =
+> "martin"` and the structural names it accumulated (`w_thc`, `pump_seas_*`, `pump_hs_seas_*`) remain in both cores, bit-exact
+> at 0, as the instrument this statement was measured with.
 >
 > **RETIRED gates, and why (do not re-run them as criteria):** **4** airborne-fraction smoothness — no power (a trend artefact,
 > 70 % noise; 09-04); **8** δ¹³C Suess and **10** natural Δ¹⁴C profile — restatements of scored rows (a gate cannot judge the
