@@ -35,8 +35,8 @@ O5b: "yes: prereg, build, probe". `h_ml`'s box floor → 42.5 m (the Holte prior
 6. **The suite trap.** First suite (frozen copy WITHOUT `data-raw/downloads`): 3637 / 20 / 6 + 1 — twenty "canonical streams reproduce"
    failures incl. files that passed in the tree. A/B on a worktree at the pre-O5b commit: same failures; real tree: PASS; inputs md5-identical.
    Cause: `ccx_nuclear_c14_annual()` reads the gitignored `data-raw/downloads/nuclear14c/` at run time and silently zeroes the source (the
-   three ¹⁴C rows move 0.37 / 1.23 / 0.02). `tests/testthat/setup.R` now runs `ccx_require_run_inputs()` first. Second suite (with the
-   inputs, current tree): the counts are in CHANGELOG 09-16 (b).
+   three ¹⁴C rows move 0.37 / 1.23 / 0.02). `tests/testthat/setup.R` now runs `ccx_require_run_inputs()` first. Counting run on the
+   committed tree (with the inputs): **3674 / 2 / 6 + 1 error = the standing reds only** (`outputs/diagnostics/suite_20260916b_counts.log`).
 
 ## 3. Open, and the rulings owed
 - **The honest next candidate is on the LS SH mixed layer's seasonal pCO₂ phase** (winter under the solved field, summer under martin),
