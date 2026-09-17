@@ -1,0 +1,26 @@
+arm hilda30h: refit_20260917_hilda30h_obj12_hilda_c (logpost -1434.73, PINNED ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0 -- logpost not comparable to a free arm)
+  pins: ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0; migrated: none; spinup: periodic
+GCB observed: slope +0.1153 +/- 0.0246 GtC/yr per index, r +0.488 (n 66)
+hilda30h solubility-only: slope -0.1873 (r -0.572), lik -1405.82; A_ls 3.146e+14 m2 (1 m/yr = 10.0 Sv)
+  layers at the fitted h_ml (annual-mean geometry): ML 0-65 m ; k1 65-117, k2 117-190, k3 190-292, k4 292-435, k5 435-635, k6 635-915, k7 915-1307, k8 1307-1856, k9 1856-2624, k10 2624-3700
+  k  1 (  65- 117 m): contrast NH  +46.0 SH  +44.5 umol/kg -> supply 0.175 GtC/yr per (m/yr); slope -0.1181 (r -0.417); GAIN 0.0231, efficiency 0.132; obs needs gamma_A 13.12 m/yr = 130.8 Sv per index; lik +2.49 (max |d14c row| 0.11) [gcb_ocean_sink +2.55]; 94 s
+  k  2 ( 117- 190 m): contrast NH  +93.8 SH  +92.5 umol/kg -> supply 0.360 GtC/yr per (m/yr); slope +0.0936 (r +0.310); GAIN 0.0936, efficiency 0.260; obs needs gamma_A 3.23 m/yr = 32.2 Sv per index; lik +3.44 (max |d14c row| 0.59) [gcb_ocean_sink +5.85, co2_seasonal_SPO -1.77, co2_icecore -0.91, co2_level_SPO +0.80, gcb_land_sink +0.70, d14c_NH +0.59, co2_gradient -0.55]; 95 s
+  k  3 ( 190- 292 m): contrast NH +128.7 SH +127.2 umol/kg -> supply 0.495 GtC/yr per (m/yr); slope +0.3231 (r +0.533); GAIN 0.1701, efficiency 0.344; obs needs gamma_A 1.78 m/yr = 17.7 Sv per index; lik -15.32 (max |d14c row| 1.60) [co2_level_MLO -5.01, gcb_ocean_sink -4.04, co2_icecore -2.81, co2_seasonal_SPO -2.57, d14c_NH +1.60, gcb_land_sink +1.54, co2_level_SPO -1.40, co2_gradient -1.13, co2_seasonal_MLO -0.54]; 95 s
+  k  4 ( 292- 435 m): contrast NH +163.5 SH +161.8 umol/kg -> supply 0.630 GtC/yr per (m/yr); slope +0.4709 (r +0.515); GAIN 0.2194, efficiency 0.348; obs needs gamma_A 1.38 m/yr = 13.8 Sv per index; lik -72.52 (max |d14c row| 3.33) [gcb_ocean_sink -26.04, co2_level_MLO -22.87, co2_level_SPO -14.52, co2_icecore -7.70, d14c_NH +3.33, co2_seasonal_SPO -2.63, gcb_land_sink +2.50, co2_gradient -1.59, d13c_level_SPO -0.93, d13c_level_MLO -0.92, d14c_SH -0.90]; 95 s
+  k  5 ( 435- 635 m): contrast NH +192.4 SH +190.3 umol/kg -> supply 0.741 GtC/yr per (m/yr); slope +0.5442 (r +0.516); GAIN 0.2438, efficiency 0.329; obs needs gamma_A 1.24 m/yr = 12.4 Sv per index; lik -190.67 (max |d14c row| 4.73) [co2_level_MLO -69.97, co2_level_SPO -54.80, gcb_ocean_sink -42.89, co2_icecore -18.58, d14c_NH +4.73, d14c_SH -3.75, co2_seasonal_SPO -2.82, gcb_land_sink +2.78, d13c_level_SPO -2.50, d13c_level_MLO -1.68, co2_gradient -1.43]; 95 s
+  k  6 ( 635- 915 m): contrast NH +229.0 SH +225.5 umol/kg -> supply 0.879 GtC/yr per (m/yr); slope +0.6637 (r +0.540); GAIN 0.2837, efficiency 0.323; obs needs gamma_A 1.07 m/yr = 10.6 Sv per index; lik -456.93 (max |d14c row| 9.56) [co2_level_MLO -173.87, co2_level_SPO -159.96, gcb_ocean_sink -69.78, co2_icecore -38.11, d14c_SH -9.56, d13c_level_SPO -6.37, d14c_NH +4.34, co2_seasonal_SPO -3.37, gcb_land_sink +1.63, co2_gradient -1.16, d13c_level_MLO -0.99]; 95 s
+  k  8 (1307-1856 m): contrast NH +308.1 SH +294.6 umol/kg -> supply 1.164 GtC/yr per (m/yr); slope +0.9355 (r +0.575); GAIN 0.3742, efficiency 0.322; obs needs gamma_A 0.81 m/yr = 8.1 Sv per index; lik -991.85 (max |d14c row| 22.45) [co2_level_MLO -376.45, co2_level_SPO -371.86, gcb_ocean_sink -132.36, co2_icecore -65.19, d14c_SH -22.45, d13c_level_SPO -17.59, co2_seasonal_SPO -5.02, co2_gradient -1.60, d13c_level_MLO +1.40, co2_seasonal_MLO -1.08, gcb_land_sink -0.95, d14c_NH +0.90]; 95 s
+  k 10 (2624-3700 m): contrast NH +319.6 SH +303.7 umol/kg -> supply 1.203 GtC/yr per (m/yr); slope +0.9736 (r +0.578); GAIN 0.3870, efficiency 0.322; obs needs gamma_A 0.78 m/yr = 7.8 Sv per index; lik -1057.41 (max |d14c row| 25.05) [co2_level_MLO -399.65, co2_level_SPO -394.15, gcb_ocean_sink -143.13, co2_icecore -67.96, d14c_SH -25.05, d13c_level_SPO -19.88, co2_seasonal_SPO -5.25, co2_gradient -1.66, co2_seasonal_MLO -1.18, d13c_level_MLO +1.15, gcb_land_sink -1.03, ocean_grad_dic +0.73]; 95 s
+
+=== VERDICTS (prereg 2026-09-13f) ===
+  P0 k=1 reproduces T-A1 (slope -0.1181 / lik +2.49 vs -0.0945 / +2.80): FAIL -- the limb is not T-A1's
+  P1 contrast monotone in k (+45, +93, +128, +163, +191, +227, +301, +312): PASS
+  P2 efficiency in [0.10, 0.20] at every k (0.132, 0.260, 0.344, 0.348, 0.329, 0.323, 0.322, 0.322): FAIL (the return depth matters beyond the contrast)
+  P3 bottom-return gain 0.3870 in [0.08, 0.13] (T-A0's 0.100 from a DIRECT exchange): FAIL
+  P4 price positive at every k and no 14C row > 1 (dlik +2.5/+3.4/-15.3/-72.5/-190.7/-456.9/-991.9/-1057.4; max 14C 0.11/0.59/1.60/3.33/4.73/9.56/22.45/25.05): FAIL
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/ta2_enso_return_depth_20260917.rds 
+
+real	12m39.715s
+user	12m36.544s
+sys	0m2.421s
+EXIT 0
