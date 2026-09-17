@@ -180,7 +180,7 @@ if (is.null(MS_REF_NEW)) stop("MS_REF_NEW: '", MS_REF_NEW_NAME, "' is no longer 
 MS_REF_INC_LABEL <- sprintf("INCUMBENT = %s (%s; objective #12, periodic spinup, evaluated at seas_ml %s)",
                             MS_REF_INC_NAME, .ms_ref$why, Sys.getenv("CCX_MS_SEAS_ML", "UNSET"))
 MS_REF_NEW_LABEL <- sprintf("NEW BASIN = %s (%s; registered, evaluated at seas_ml %s)", MS_REF_NEW_NAME,
-                            if (identical(MS_REF_NEW_NAME, CCX_MODE_CONTROL)) "seas_ml 0 control, periodic spinup"
+                            if (identical(MS_REF_NEW_NAME, CCX_MODE_SEASML0_CONTROL)) "seas_ml 0 control, periodic spinup"
                             else "the free parent, the other h_ml basin",
                             Sys.getenv("CCX_MS_SEAS_ML", "UNSET"))
 # ⚠ THESE THREE NAMES ARE ALSO THE PORT-TARGET KEYS in calibration/torch/

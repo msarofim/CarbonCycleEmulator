@@ -218,7 +218,8 @@ CCX_MODE_PINNED_PARENT   <- "hilda31s2"
 # beats it" would have no power on the seasonal question ([[no_power_null]]). An
 # array under these pins at seas_ml 0 takes the control as its incumbent
 # (ccx_ms_reference_set); at seas_ml 1 it is the free parent's arm.
-CCX_MODE_CONTROL         <- "hilda31p"
+# (The control's NAME is CCX_MODE_SEASML0_CONTROL above -- one name, not two; a duplicate
+# CCX_MODE_CONTROL lived here for a morning on 09-17 j.)
 CCX_MODE_CONTROL_PINS    <- CCX_MODE_CANONICAL_PINS[setdiff(names(CCX_MODE_CANONICAL_PINS), "ent_seas_amp_SH")]
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector

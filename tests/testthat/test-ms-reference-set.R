@@ -20,9 +20,9 @@ test_that("the control's pin set is the canonical's without the shim, and the co
   expect_true(!is.null(ms_cp) && "ent_seas_amp_SH" %in% names(ms_cp))
   expect_identical(names(ms_ctl), setdiff(names(ms_cp), "ent_seas_amp_SH"))
   expect_equal(unname(ms_ctl), unname(ms_cp[names(ms_ctl)]))
-  expect_true(CCX_MODE_CONTROL %in% names(CCX_MODE_FILES))
-  expect_false(CCX_MODE_PINNED[[CCX_MODE_CONTROL]], info = "the control is a FREE arm (its shim is fitted)")
-  md <- readRDS(ccx_mode_file(CCX_MODE_CONTROL))
+  expect_true(CCX_MODE_SEASML0_CONTROL %in% names(CCX_MODE_FILES))
+  expect_false(CCX_MODE_PINNED[[CCX_MODE_SEASML0_CONTROL]], info = "the control is a FREE arm (its shim is fitted)")
+  md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))
   expect_true(is.finite(md$par_mode[["ent_seas_amp_SH"]]) && md$par_mode[["ent_seas_amp_SH"]] > 0,
               info = "the control CARRIES the shim, non-zero")
 })
@@ -30,7 +30,7 @@ test_that("the control's pin set is the canonical's without the shim, and the co
 test_that("the five branches return the ruled pairs", {
   withr::local_envvar(CCX_MS_STRUCT = "hilda_c", CCX_MS_PUMP_FIELD = "solved")
   r1 <- ccx_ms_reference_set(ms_cp, "1")
-  expect_identical(r1$incumbent, CCX_MODE_CANONICAL); expect_identical(r1$new_basin, CCX_MODE_CONTROL)
+  expect_identical(r1$incumbent, CCX_MODE_CANONICAL); expect_identical(r1$new_basin, CCX_MODE_SEASML0_CONTROL)
   r1b <- ccx_ms_reference_set(ms_cp, "0")          # the canonical's pins at seas_ml 0: still the canonical
   expect_identical(r1b$incumbent, CCX_MODE_CANONICAL)
   # a REAL extension: under the martin field `pump_grad` is inert (the E array's case)
@@ -39,11 +39,11 @@ test_that("the five branches return the ruled pairs", {
   expect_error(ccx_ms_reference_set(c(ms_cp, pump_grad = 314.1031), "1", pump_field = "solved"),
                "no registered incumbent")   # not inert under the solved field
   r3 <- ccx_ms_reference_set(NULL, "1")
-  expect_identical(r3$incumbent, CCX_MODE_PINNED_PARENT); expect_identical(r3$new_basin, CCX_MODE_CONTROL)
+  expect_identical(r3$incumbent, CCX_MODE_PINNED_PARENT); expect_identical(r3$new_basin, CCX_MODE_SEASML0_CONTROL)
   r4 <- ccx_ms_reference_set(ms_ctl, "0")
-  expect_identical(r4$incumbent, CCX_MODE_CONTROL); expect_identical(r4$new_basin, CCX_MODE_PINNED_PARENT)
+  expect_identical(r4$incumbent, CCX_MODE_SEASML0_CONTROL); expect_identical(r4$new_basin, CCX_MODE_PINNED_PARENT)
   r5 <- ccx_ms_reference_set(ms_ctl, "1")
-  expect_identical(r5$incumbent, CCX_MODE_PINNED_PARENT); expect_identical(r5$new_basin, CCX_MODE_CONTROL)
+  expect_identical(r5$incumbent, CCX_MODE_PINNED_PARENT); expect_identical(r5$new_basin, CCX_MODE_SEASML0_CONTROL)
   for (r in list(r1, r2, r3, r4, r5)) {
     expect_true(all(c(r$incumbent, r$new_basin) %in% names(CCX_MODE_FILES)))
     expect_false(identical(r$incumbent, r$new_basin), info = "ids 1 and 2 must be different points")

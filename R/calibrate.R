@@ -2127,17 +2127,17 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
   seas_ml <- ccx_parse_seas_ml(seas_ml)
   same <- function(a, b) identical(ccx_pin_label(a), ccx_pin_label(b))
   if (same(pins, CCX_MODE_CANONICAL_PINS) || ccx_pins_extend_canonical(pins, pump_field, struct)) {
-    list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_CONTROL,
+    list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the canonical, under this array's pins")
   } else if (is.null(pins)) {
     list(incumbent = if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT,
-         new_basin = CCX_MODE_CONTROL,
+         new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the free parent of the pinned canonical: this array is FREE")
   } else if (same(pins, CCX_MODE_CONTROL_PINS) && seas_ml == 0L) {
-    list(incumbent = CCX_MODE_CONTROL, new_basin = CCX_MODE_PINNED_PARENT,
+    list(incumbent = CCX_MODE_SEASML0_CONTROL, new_basin = CCX_MODE_PINNED_PARENT,
          why = "the seas_ml-0 CONTROL, refit under its own arm (the inert pins, shim free)")
   } else if (same(pins, CCX_MODE_CONTROL_PINS) && seas_ml == 1L) {
-    list(incumbent = CCX_MODE_PINNED_PARENT, new_basin = CCX_MODE_CONTROL,
+    list(incumbent = CCX_MODE_PINNED_PARENT, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the free parent, under the inert pins")
   } else stop("ccx_ms_reference_set(): no registered incumbent for pins '", ccx_pin_label(pins),
               "' at seas_ml ", seas_ml, " (the canonical's are '", ccx_pin_label(CCX_MODE_CANONICAL_PINS),
