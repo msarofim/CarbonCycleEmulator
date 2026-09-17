@@ -2165,6 +2165,10 @@ ccx_l2_on <- function(p) {
 #'                             the round-6b pair)
 #'   the CONTROL's pins, seas_ml 1
 #'                          -> incumbent the free parent; new basin the control
+#'   the LAYER-2 LIMB's pins (the canonical's + the shim at 0), a structure
+#'   WITH the limb, seas_ml 1 (2026-09-17 k)
+#'                          -> incumbent the canonical; new basin the control
+#'                             (each at its point, shim zeroed, w_enso_l2 seeded)
 #'   anything else          -> stop: a new objective with no incumbent on disk.
 ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved"),
                                  struct = Sys.getenv("CCX_MS_STRUCT", "")) {
@@ -2183,9 +2187,25 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
   } else if (same(pins, CCX_MODE_CONTROL_PINS) && seas_ml == 1L) {
     list(incumbent = CCX_MODE_PINNED_PARENT, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the free parent, under the inert pins")
+  } else if (same(pins, CCX_MODE_L2_ARM_PINS)) {
+    # the layer-2 limb's arm (2026-09-17 k): the canonical's pins + the shim OFF, the
+    # limb's w_enso_l2 fitted in its place -- only under a structure that HAS the limb,
+    # and at seas_ml 1 (prereg s4 PA). Both references are evaluated at THEIR point
+    # with the shim zeroed and w_enso_l2 seeded: starts, not modes of this arm.
+    bp <- ccx_apply_structure(ccx_default_params(), struct, seas_ml = "0", pump_field = pump_field)
+    if (!ccx_l2_on(bp))
+      stop("ccx_ms_reference_set(): the limb's pins '", ccx_pin_label(pins), "' under struct '", struct,
+           "' (k_l2 = 0, no layer-2 limb): the shim would be OFF with nothing in its place -- an ",
+           "unruled arm. Use a structure with the limb (\"hilda_cl2\") or the canonical's pins.")
+    if (seas_ml != 1L)
+      stop("ccx_ms_reference_set(): the limb's arm is preregistered at seas_ml 1 (the canonical's ",
+           "seasonal mixed layer); seas_ml ", seas_ml, " is not a ruled arm.")
+    list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
+         why = "the canonical with the shim pinned OFF and the layer-2 limb's w_enso_l2 in its place")
   } else stop("ccx_ms_reference_set(): no registered incumbent for pins '", ccx_pin_label(pins),
               "' at seas_ml ", seas_ml, " (the canonical's are '", ccx_pin_label(CCX_MODE_CANONICAL_PINS),
               "', the control's '", ccx_pin_label(CCX_MODE_CONTROL_PINS),
+              "', the layer-2 limb's '", ccx_pin_label(CCX_MODE_L2_ARM_PINS),
               "'); rule the reference set for this pin before launching.")
 }
 ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),

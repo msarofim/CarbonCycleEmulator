@@ -221,6 +221,17 @@ CCX_MODE_PINNED_PARENT   <- "hilda31s2"
 # (The control's NAME is CCX_MODE_SEASML0_CONTROL above -- one name, not two; a duplicate
 # CCX_MODE_CONTROL lived here for a morning on 09-17 j.)
 CCX_MODE_CONTROL_PINS    <- CCX_MODE_CANONICAL_PINS[setdiff(names(CCX_MODE_CANONICAL_PINS), "ent_seas_amp_SH")]
+# THE LAYER-2 LIMB'S ARM (2026-09-17 k, prereg notes/prereg_2026-09-17k_l2_enso_limb_refit.md
+# s4 PA): the canonical's 7 pins PLUS the ocean ENSO shim `gamma_enso_ocn_NH/SH` held at 0
+# (29 free + w_enso_l2 = 29 fitted names), under a structure WITH the limb (k_l2 > 0:
+# `hilda_cl2`, or a sibling label at another return layer) at seas_ml 1. The limb
+# REPLACES the shim, so the shim is pinned OFF and the limb's one name is fitted.
+# An array under these pins takes the canonical as its incumbent (the canonical's own
+# point with the shim zeroed and w_enso_l2 seeded at the table init -- a start, not a
+# mode of the arm) and the seas_ml-0 control as its new basin, likewise
+# (ccx_ms_reference_set). Under a structure WITHOUT the limb these pins are an
+# UNRULED arm (the shim off and nothing in its place) and are refused.
+CCX_MODE_L2_ARM_PINS     <- c(CCX_MODE_CANONICAL_PINS, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0)
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
 #' ENCODABLE on the full table (an ancestor constructed by dropping names, a
