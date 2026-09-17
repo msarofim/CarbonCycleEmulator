@@ -222,8 +222,14 @@ pri <- lp0 - sum(st)
 # it applies, has already replaced h_ml's prior there). Until 2026-09-08g this
 # residual was only PRINTED, so a missing stream could hide in it -- and the
 # three profile rows did, for two adoptions.
+# ⚠ AT THE STRUCTURE THE OBJECTIVE READ (2026-09-17). ccx_make_logpost() evaluates
+# every prior at `base_params` + the draw, because u_hs's Sv-to-m/yr centre
+# converts at the LIVE hs_frac (09-16 d). A bare `s$prior(x)` here converts at the
+# built 0.16, and under `hilda_c` (0.128) this gate then FAILED a correct point
+# by 0.27 -- the first hilda_c promotion, 09-17 (h). Same list, same dispatch.
+p_pr <- bp; for (n in names(pm)) p_pr[[n]] <- pm[[n]]
 pj <- sum(vapply(CCX_PARAM_NAMES, function(n) { s <- CCX_PARAM_TABLE[[n]]
-  s$prior(pm[[n]]) + .log_jac(u[[match(n, CCX_PARAM_NAMES)]], s) }, numeric(1)))
+  .ccx_prior_eval(s, pm[[n]], p_pr) + .log_jac(u[[match(n, CCX_PARAM_NAMES)]], s) }, numeric(1)))
 cat(sprintf("sum(streams) %.6f ; logpost %.6f ; implied prior+jacobian %.6f ; recomputed prior+jacobian %.6f ; gap %.3e (tol %g)\n",
             sum(st), lp0, pri, pj, pri - pj, PMM_LP_TOL))
 if (!is.finite(pri)) stop("non-finite prior residual -- the decomposition is wrong")

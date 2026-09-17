@@ -94,10 +94,35 @@
 # = 0 control. Nothing is quarantined: the parent is not superseded. The shim is
 # PINNED, not RETIRED from the table -- retirement would make `hilda31p` (shim
 # 18.7 at seas_ml 0) unscorable; a later ruling.
-CCX_MODE_CANONICAL <- "hilda30c"
+# 2026-09-17 (h): `hilda30h` -- THE HYGIENE-BATCH REFIT, and the first canonical on
+# the `hilda_c` STRUCTURE (hs_frac 0.128 = the ocean's actual fraction poleward of
+# 57.14 deg, whole-LS SSTs 22.3/18.7, alpha_photo_eps 15.6; DESIGN sec.6) and the
+# first FITTED under OBJECTIVE #12 (the 09-16 e batch: every-box D14C rows, the
+# land-sink sigma at GCB's 0.5 with no x3, Naegler's net-uptake correction, the
+# pre-1850 SST mean, h_hs under its Holte prior). SAME 30 free names as hilda30c:
+# the pin set is the canonical's shim pin + the SIX names inert under this
+# structure and the solved field (w_eq, gamma_eq without the cell; pump_export,
+# w_vent, gamma_vent, w_thc without the martin field) -- held, not fitted, with
+# no prior term. Run on the MAC (Torch fairshare 0.21), 24 starts, 23 CONVERGED;
+# promoted start id 20 (ids 1/3/17 to 1e-5), pinned logpost -1434.725087,
+# streams -1400.3026 -- vs the restamped hilda30c on ITS OWN structure -1414.77
+# (+14.47 on the 25 common rows): the land sink 3.39 -> 3.12 GtC/yr (GCB 2.41;
+# the row +59.4) paid by co2_icecore -13.4, d13c_seasonal_MLO -14.0, d13c_level
+# -8.3, the bomb rows -8.6; beta_max 1.37, fert_k 855, luc_scale 0.83, kz 13,966
+# (x1.27), h_hs 269 m, h_ml 64.67 +/- 2.81. The chain (H / GL / Q FAIL, the DIC
+# gradient z +3.1) did NOT move. A second basin at h_ml 49.9 sits 0.45 behind
+# (+1.47 on likelihood, -1.9 on priors) -- the round-6b pair again. Hessian PD,
+# cond 2.46e5; gamma_enso_ocn_SH sits AT 0 = the KINK between the two limbs
+# (ccx_core.cpp: > 0 the downward limb, < 0 the upward), so ITS Laplace sd is
+# not a curvature. Promoted on Marcus's ruling ("Promote"). `hilda31s2` STAYS the
+# registered free PARENT (on `hilda`: the pinned arm's likelihood price against
+# it now straddles the structure change as well as the pin -- it is RECORDED,
+# not gated); `hilda31p` stays the seas_ml = 0 control -- its refit under #12 /
+# hilda_c is OWED. hilda30c is retired to CCX_MODE_HILDA30C_QUARANTINED below.
+CCX_MODE_CANONICAL <- "hilda30h"
 
 CCX_MODE_FILES <- c(
-  hilda30c = file.path("calibration", "output", "refit_20260913_hilda30_cprime_pin_ent0",
+  hilda30h = file.path("calibration", "output", "refit_20260917_hilda30h_obj12_hilda_c",
                        "mode_fit_pumpN.rds"),
   hilda31s2 = file.path("calibration", "output", "refit_20260912_hilda31_seasml1_round7",
                         "mode_fit_pumpN.rds"),
@@ -136,6 +161,16 @@ CCX_MODE_HILDA31S_QUARANTINED <- file.path("calibration", "output", "quarantine"
                                            "20260913_round7_adopted",
                                            "refit_20260911_hilda31_seasml1", "mode_fit_pumpN.rds")
 
+# THE PRE-HYGIENE-BATCH CANONICAL (2026-09-17 h). `hilda30c` is retired from the
+# registry -- it is a mode of the `hilda` structure under objective #11, restamped
+# (not refit) under #12, and the canonical is now on `hilda_c` -- but it is the
+# point every 09-13 -> 09-16 read was taken at (the O1/O5/O6/k_w probes, the
+# whole-model review, the batch's own pricing) and stays resolvable by path for a
+# like-for-like read against them. Its stored streams are objective #12's.
+CCX_MODE_HILDA30C_QUARANTINED <- file.path("calibration", "output", "quarantine",
+                                           "20260917_hilda30h_adopted",
+                                           "refit_20260913_hilda30_cprime_pin_ent0", "mode_fit_pumpN.rds")
+
 # WHICH ARMS ARE PINNED -- AND WHY THE STORED logpost IS A TRAP ACROSS THEM.
 # A stored logpost is a number in the units of the objective that produced it,
 # and a PINNED arm's objective is not a free arm's: compare PINNED vs FREE on
@@ -159,7 +194,7 @@ CCX_MODE_HILDA31S_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
-CCX_MODE_PINNED <- c(hilda30c = TRUE, hilda31s2 = FALSE, hilda31p = FALSE)
+CCX_MODE_PINNED <- c(hilda30h = TRUE, hilda31s2 = FALSE, hilda31p = FALSE)
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
 # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
 # and its free PARENT: the same space with the pinned names free, kept
@@ -167,7 +202,12 @@ CCX_MODE_PINNED <- c(hilda30c = TRUE, hilda31s2 = FALSE, hilda31p = FALSE)
 # that file. Both NULL while the canonical is free. The pin is a
 # RETIREMENT-IN-WAITING: `ent_seas_amp_SH` leaves the table only once the
 # seas_ml 0 control can be scored without it.
-CCX_MODE_CANONICAL_PINS  <- c(ent_seas_amp_SH = 0)
+# 2026-09-17 (h): the shim pin + the six names INERT under hilda_c / the solved
+# field. They are pinned so that the fitted set is the canonical's 30 (the
+# driver refuses a free w_eq/gamma_eq without the cell); their values are the
+# table's off-state / prior centres and move nothing in the model.
+CCX_MODE_CANONICAL_PINS  <- c(ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08,
+                              w_vent = 0, gamma_vent = 0, w_thc = 0)
 CCX_MODE_PINNED_PARENT   <- "hilda31s2"
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
