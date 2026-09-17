@@ -217,3 +217,36 @@ a price the refit can plausibly re-balance (the level rows, ~2 log-units each). 
 preregistered (the array then measures how far above the bracket the refit lands); (b) **k = 3** (recommended: the only
 layer that puts the bracket and the slope in the same place; PA3's level-row bound stays the test); (c) both, two waves.
 Nothing is launched until ruled.
+
+## 8. THE RETURN LAYER RULED (2026-09-17 l; nothing above is edited)
+**Ruling (Marcus):** the array runs at **k = 3** (§7 option b), and the layer is part of the LABEL — a second structure
+label **`hilda_cl3`** beside `hilda_cl2`, both read from one table `CCX_L2_RETURN_LAYERS = c(hilda_cl2 = 2, hilda_cl3 = 3)`
+(`ccx_struct_hilda_cl(label)`; `CCX_L2_RETURN_LAYER` retired), so every array, port target and output directory names its
+layer and the k = 2 probe stays reproducible by label. The probe reads the label (`L2_STRUCT`, default `hilda_cl3`; the `L2_K`
+override retired) and under `hilda_cl3` reproduces the §7 `_k3` run **line for line** (19.3 [17.6, 21.0]; r +0.317 at 18.7;
+−4.95 at 18.7): `outputs/diagnostics/l2_enso_limb_probe_hilda_cl3_20260917.{log,rds}`. `test-l2-enso-limb` 159/0 (P0b–P0d at
+`hilda_cl3`, P0e at both layers with the layer's box and `dz` indexed from the table).
+
+**The array as staged (PA, §4, unchanged in every rule; only the label moves):** `CCX_MS_STRUCT=hilda_cl3 CCX_MS_SEAS_ML=1
+CCX_MS_PIN=<the canonical's 7>,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0` (`CCX_MODE_L2_ARM_PINS`; 29 free), reference set
+through `ccx_ms_reference_set()`'s new branch (incumbent the canonical, new basin the control; refused under a structure without
+the limb or at seas_ml 0). Port targets: cold −34419.2447, incumbent `hilda30h` **−1437.9769** (offset −3.25 = the shim off +
+`w_enso_l2` seeded 18.7 at k 3, unrefitted; the likelihood part is the probe's −4.95), new basin `hilda31p` −1959.2532. Frozen
+tree `~/ccx_frozen/20260917l_l2_limb_array/` (commit `d84b7aa`); Mac preflight **24/24 LAUNCHABLE, worst port rel 2.5e-14,
+0.21–0.49 s/eval (8 at once, cold compile in the 0.49)**; all 24 start values distinct. Launcher `launch_l2_array.sh` staged,
+**NOT armed** — the night after the control wave is read (Marcus 09-17 k), Torch if the channel opens.
+
+**One driver defect found by the preflight and fixed before the stage** (`run_dispersed_multistart.R`): the ENSO-seeded starts
+(ids 3/4/5) seed `gamma_enso_ocn_*` in the parameter list, and under an arm that PINS the pair the seed is silently dropped at
+encoding — ids 3 and 4 DUPLICATED ids 1 and 2 to the digit while their label said "the pair SET to +0.100". The E array (the
+same pins under martin) carried the same two duplicates. Now the seed follows the arm: pair free → the pair; pair pinned + limb
+on → `w_enso_l2` at the edges of Meinen's per-index bracket from the product (id 3 incumbent at 25, id 4 new basin at 14, id 5
+the observation partition at 25); pair pinned, no limb → nothing, and the label says the start equals its reference. Limb-arm
+ids 3/4/5 now −1443.16 / −1958.00 / −2048.81. **PA6's expectation (the two seeded ocean starts) is therefore read on
+`w_enso_l2`, not on the pair.**
+
+**Read plan for the array** (§4 PA1–PA6 as written; PA7 is already answered by §7 — the k = 2 sensitivity is the probe): PASS iff
+14 ≤ ŵ ≤ 25 with the slope in [0.066, 0.165], r > +0.25, likelihood ≥ −1401.3; PARTIAL 25 < ŵ ≤ 40; REFUTED otherwise. Two rows to
+read explicitly beyond §4: **`co2_gradient`** (the shim's second job, §7 finding 2 — the equal-split limb cannot buy it; if the
+row stays −1.6 the refit will have paid it elsewhere) and **`co2_level_MLO`** (PA3's bound at k = 3 is the live test — the
+probe's −1.9 at 18.7 is inside it, −2.7 at 25 is not).
