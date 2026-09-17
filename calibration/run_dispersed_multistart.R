@@ -1006,8 +1006,16 @@ if (out_of_time)
 
 names(u) <- CCX_PARAM_NAMES
 pm <- ccx_unc_to_par(u)
+# THE STAMP READS THE STRUCTURE THE FIT READ (2026-09-17). The objective
+# evaluates every prior at `bp` + the draw (u_hs's Sv-to-m/yr centre converts at
+# the LIVE hs_frac, 2026-09-16 d); this stamp passed no list, so ccx_prior_z()
+# fell back to the built 0.16 and every hilda_c start file recorded u_hs at
+# z +0.16 where the objective had scored it at -0.75. The fit was right (the
+# logpost closes to loglik + logprior at the live list to 1e-4); the LABEL was
+# wrong. Same base + this draw's values, exactly as ccx_make_logpost() does.
+p_stamp <- bp; for (n in names(pm)) p_stamp[[n]] <- pm[[n]]
 zs <- vapply(CCX_PARAM_NAMES,
-             function(n) tryCatch(ccx_prior_z(n, pm[[n]]), error = function(e) NA_real_),
+             function(n) tryCatch(ccx_prior_z(n, pm[[n]], p = p_stamp), error = function(e) NA_real_),
              numeric(1))
 # DEAD-TASK CHECK (2026-09-10): the point this task reports must be a point OF
 # THE OBJECTIVE -- finite under lp_fun itself, and equal to what the optimiser
