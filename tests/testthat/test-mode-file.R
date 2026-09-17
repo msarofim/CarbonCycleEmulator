@@ -181,7 +181,9 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
     # ccx_default_params() runs as a column with nothing said.
     expect_false(is.null(md$struct), info = paste("mode", a, "does not record its structure"))
     expect_true(md$struct %in% CCX_STRUCT_LABELS)   # "", hilda, hilda_eq (09-13g), hilda_tr (09-14f)
-    expect_equal(ccx_mode_base(md)$hs_frac, if (nzchar(md$struct)) 0.16 else 0)
+    # 2026-09-17 (h): hs_frac is the STRUCTURE's declared value (hilda 0.16; hilda_c 0.128 = the
+    # ocean's actual fraction poleward of 57.14 deg), read from the block, never typed here
+    expect_equal(ccx_mode_base(md)$hs_frac, if (nzchar(md$struct)) ccx_struct_block(md$struct)$hs_frac else 0)
     if (md$struct %in% c("hilda_eq", "hilda_tr")) expect_true(ccx_eq_on(ccx_mode_base(md)))
     if (identical(md$struct, "hilda_tr")) expect_true(ccx_tr_on(ccx_mode_base(md)))
   }
@@ -245,7 +247,9 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
     expect_false(CCX_MODE_PINNED[[CCX_MODE_PINNED_PARENT]], info = "the parent must be a FREE arm")
     # the parent is the same space with the pinned names FREE: it must carry them
     md_p <- readRDS(ccx_mode_file(CCX_MODE_PINNED_PARENT))
-    expect_true(all(names(md_c$pins) %in% md_p$param_names))
+    # 2026-09-17 (h): a pin may also be one of the INERT names the parent is allowed to lack
+    # (CCX_PARAM_ABSENT_OK): hilda30h pins the six the hilda_c / solved-field structure never reads
+    expect_true(all(names(md_c$pins) %in% c(md_p$param_names, CCX_PARAM_ABSENT_OK)))
     expect_true(ccx_mode_carries_build(md_p))   # the full set, or minus CCX_PARAM_ABSENT_OK only (09-13i)
   } else {
     expect_null(CCX_MODE_CANONICAL_PINS); expect_null(CCX_MODE_PINNED_PARENT)

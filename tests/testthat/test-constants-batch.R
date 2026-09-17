@@ -38,7 +38,10 @@ test_that("alpha_photo_eps: absent = the ledger's 18 (bit-exact for every regist
   q <- p; q$alpha_photo_eps <- 15.6
   expect_identical(ccx_prepare(q)$alpha_photo, 1 - 15.6 / 1000)
   md <- readRDS(ccx_mode_file()); bp <- ccx_mode_base(md)
-  expect_false("alpha_photo_eps" %in% names(bp)); expect_identical(attr(bp, "struct"), "hilda")
+  # 2026-09-17 (h): the canonical is hilda30h on `hilda_c`, which SETS the constant (15.6); a hilda
+  # file leaves it absent (= the ledger's 18). Either way the base says which structure it is.
+  expect_identical(attr(bp, "struct"), ccx_mode_struct(md))
+  if (identical(ccx_mode_struct(md), "hilda_c")) expect_identical(bp$alpha_photo_eps, 15.6) else expect_false("alpha_photo_eps" %in% names(bp))
 })
 
 test_that("the batch is LIVE: each item moves the PI state on its own, and all three together", {

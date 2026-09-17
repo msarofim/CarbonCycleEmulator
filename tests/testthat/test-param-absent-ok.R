@@ -43,7 +43,11 @@ test_that("the list is LIVE: every listed name is absent from at least one regis
 })
 
 test_that("ccx_mode_start: migrated (what it ran), seeded, encoded; the shift is the prior leg at the seed", {
-  md <- readRDS(ccx_mode_file())
+  # 2026-09-17 (h): the canonical (hilda30h) PINS the six inert names, so nothing is absent there and
+  # ccx_mode_start() has nothing to seed. The property under test -- a registered file that LACKS
+  # names is migrated, seeded at the table init, and shifted by exactly their prior leg -- is read
+  # at the registered FREE PARENT (hilda31s2, a hilda file that lacks all six).
+  md <- readRDS(ccx_mode_file(ccx_mode_free_name()))
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   out <- capture.output(st <- ccx_mode_start(md, "test"))
   expect_true(any(grepl("SEEDING", out)))
@@ -62,8 +66,14 @@ test_that("ccx_mode_start: migrated (what it ran), seeded, encoded; the shift is
   # vector is the file's own structure (ccx_mode_base) plus the file's own values
   ccx_unpin_params(rm); rm <- list()
   L <- ccx_load_mode()
-  expect_identical(L$p$w_eq, 0); expect_identical(L$p$gamma_eq, 0); expect_false(ccx_eq_on(L$p))
-  b <- ccx_mode_base(md)
+  # ccx_load_mode() loads the CANONICAL (hilda30h since 09-17 h), so the comparison below is against
+  # ITS file, not the parent read above. At hilda30h w_eq / gamma_eq are PINNED at 27 / 1 in the
+  # base -- INERT without the cell (measured: the logpost is bit-identical at 0/0 and at 60/3), so
+  # the model must still be OFF; a canonical that lacks them instead runs the migration's 0.
+  md_c <- readRDS(ccx_mode_file())
+  expect_false(ccx_eq_on(L$p))
+  if (is.null(md_c$pins[["w_eq"]])) { expect_identical(L$p$w_eq, 0); expect_identical(L$p$gamma_eq, 0) }
+  md <- md_c; b <- ccx_mode_base(md)
   expect_identical(L$p$hs_frac, b$hs_frac); expect_identical(L$p$eq_frac_NH, b$eq_frac_NH)
   for (n in intersect(md$param_names, names(L$p))) expect_identical(L$p[[n]], md$par_mode[[n]])   # the error-model names ride in L$err
   expect_identical(L$err$sigma_d14c, md$par_mode$sigma_d14c)

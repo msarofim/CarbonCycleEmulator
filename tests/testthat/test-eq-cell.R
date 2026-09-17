@@ -191,7 +191,7 @@ test_that("P0a NO-OP: eq_frac = 0 is BIT-EXACT with every cell parameter set, bo
   expect_identical(ra$substeps, rb$substeps)
 })
 
-test_that("P0a (canonical): hilda30c's stored LIKELIHOOD reproduces row by row under this build, and its logpost moves by EXACTLY the two new priors", {
+test_that("P0a (canonical): the canonical's stored LIKELIHOOD reproduces row by row under this build, and its logpost moves by EXACTLY the two new priors", {
   skip_if_no_cpp()
   # 2026-09-13i: the table carries w_eq / gamma_eq (31 -> 33) and the registered
   # files do not, so the 31-name vector is MIGRATED (0 = what it ran) and SEEDED
@@ -207,7 +207,10 @@ test_that("P0a (canonical): hilda30c's stored LIKELIHOOD reproduces row by row u
   expect_false(ccx_eq_on(bp))
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))   # w_eq, gamma_eq
-  expect_setequal(new_names, c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc"))   # + O1 arm THC (2026-09-15 d)   # + option D+E's three (2026-09-14 h)
+  # 2026-09-17 (h): the canonical (hilda30h, hilda_c) PINS the six inert names instead of lacking
+  # them -- either way none is FITTED at the canonical, and a pinned one contributes no prior leg
+  six <- c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc")   # + O1 arm THC (2026-09-15 d)   # + option D+E's three (2026-09-14 h)
+  expect_setequal(union(new_names, intersect(names(md$pins), six)), six)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a"))
   expect_true(all(new_names %in% attr(pm, "migrated")))
   u  <- ccx_par_to_unc(pm)

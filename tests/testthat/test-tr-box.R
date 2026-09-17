@@ -167,14 +167,16 @@ test_that("P0a NO-OP: tr_frac = 0 is BIT-EXACT with hilda_eq with every tr param
   expect_identical(ra$substeps, rb$substeps)
 })
 
-test_that("P0a (canonical): hilda30c's stored LIKELIHOOD reproduces row by row under this build", {
+test_that("P0a (canonical): the canonical's stored LIKELIHOOD reproduces row by row under this build", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
   expect_false(ccx_tr_on(bp)); expect_false(ccx_eq_on(bp))
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))
-  expect_setequal(new_names, c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc"))   # + O1 arm THC (2026-09-15 d)   # NO new fitted name from the tr build   # + option D+E's three (2026-09-14 h)
+  # 2026-09-17 (h): absent (a hilda file) or PINNED (hilda30h) -- not fitted either way
+  six <- c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc")
+  expect_setequal(union(new_names, intersect(names(md$pins), six)), six)   # + O1 arm THC (2026-09-15 d)   # NO new fitted name from the tr build   # + option D+E's three (2026-09-14 h)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a-tr"))
   u  <- ccx_par_to_unc(pm)
   sc <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(u)

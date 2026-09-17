@@ -170,14 +170,18 @@ edm_price <- function(md, spinups = c("periodic", "aseasonal")) {
 # ⚠ The prior leg is TRANSCRIBED rather than imported, deliberately, as in
 # test-ent-seas-fitted.R: an independent copy is what makes this a check.
 # `ccx_make_logpost()`'s own prior leg is these three lines.
-edm_logprior <- function(u) { names(u) <- CCX_PARAM_NAMES; pv <- ccx_unc_to_par(u)
+# 2026-09-17 (h): the priors that READ THE STRUCTURE (u_hs's Sv-to-m/yr centre at the live hs_frac,
+# 09-16 d) are evaluated on the base + the draw, exactly as ccx_make_logpost() does; the bare
+# `s$prior(x)` form converted at the built 0.16 and missed a correct hilda_c point by 0.27.
+edm_logprior <- function(u, bp) { names(u) <- CCX_PARAM_NAMES; pv <- ccx_unc_to_par(u)
+  p_pr <- bp; for (n in names(pv)) p_pr[[n]] <- pv[[n]]
   lp <- 0; for (n in CCX_PARAM_NAMES) { s <- CCX_PARAM_TABLE[[n]]
-    lp <- lp + s$prior(pv[[n]]) + .log_jac(u[[n]], s) }; lp }
+    lp <- lp + .ccx_prior_eval(s, pv[[n]], p_pr) + .log_jac(u[[n]], s) }; lp }
 edm_crosscheck <- function(md, r) {
   # the prior leg is summed over the file's OWN fitted names: a pinned file's
   # reduced set, under its pins (2026-09-13)
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
-  ed_lp  <- edm_logprior(r$u0)
+  ed_lp  <- edm_logprior(r$u0, r$bp)
   ed_lik <- sum(unlist(md$streams))
   # OBJECTIVE CHANGE #8 (2026-09-06): the two intermediate D14C rows were added
   # AFTER the pre-09-08f files were stored; a file that RECORDS its structure
@@ -196,7 +200,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 43.1079 under the adopted objective (hilda30c); 35.1773 at the seas_ml 0 control", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth 17.5455 under the adopted objective (hilda30h); 41.6102 at the seas_ml 0 control", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -235,7 +239,14 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 43.1079 under 
   # 35.1773 -> 41.6102 (+6.43). The move is the LAND-SINK sigma (GCB's 0.5, no x3): the flag
   # acts through the ENSO land term, whose row is now 3x stronger; the other four items
   # move it < 0.1 (hygiene_batch_price_20260916). Files restamped, history kept inside them.
-  expect_equal(r$on_periodic - r$off_periodic, 49.7606, tolerance = 1e-4, scale = 1)
+  # 2026-09-17 (h): the canonical is `hilda30h` -- the FIRST mode FITTED under the batch's objective
+  # (#12) and on hilda_c: 49.7606 -> 17.5455 (-32.2). MEASURED at the promoted file, not explained
+  # in full: the flag acts through the ENSO coefficients, and the refit under the land-sink row at
+  # GCB's bare sigma shrank gamma_enso_land NH/SH 0.70/0.40 -> 0.55/0.22 and put gamma_enso_ocn_SH
+  # at 0 (the two-limb kink) -- roughly the (gamma)^2 scaling of a price on an ENSO-driven
+  # trajectory -- and GATE V got worse (0.77 -> 0.59x). 49.7606 stays a fact about the quarantined
+  # hilda30c; 41.6102 stays the pin at the control (unrefit under #12 -- its refit is owed).
+  expect_equal(r$on_periodic - r$off_periodic, 17.5455, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
   expect_equal(r0$on_periodic - r0$off_periodic, 41.6102, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
