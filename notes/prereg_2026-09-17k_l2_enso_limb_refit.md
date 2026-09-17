@@ -176,3 +176,44 @@ Rulings R1–R6 → param table + structure constants + `CCX_PARAM_ABSENT_OK` �
 port targets → bundle → frozen tree → Mac preflight 24/24 → the wave (after the control wave is read) → collect → PA1–PA6 →
 PA7 → the ruling. Every gate reads the canonical THROUGH the registry ([[ccx_canonical_mode_one_place]]); every number in the
 read carries the arm's label (struct, seas_ml, pins, `k_l2`, `w0_l2`) and the commit.
+
+## 7. AMENDMENT after the build and the unrefitted probe (same day; nothing above is edited)
+**Built** (`fd61c02`): rulings R1–R6 taken as recommended. One deviation from §2: the two structure constants live in
+`ccx_default_params()` (`k_l2` **0** = absent, `w0_l2` 27) and the new label **`hilda_cl2`** = `hilda_c` + `k_l2` 2, so every
+registered structure keeps the limb ABSENT and `w_enso_l2` INERT there (⇒ `CCX_PARAM_ABSENT_OK`, pinned in any array without the
+limb; the driver refuses it free under `k_l2` = 0). P0a–P0f: `test-l2-enso-limb.R` 112/0 (both cores; the canonical's 25 rows
+bit-exact; parity 1e-10; the floor and the physical unit asserted against `w × SV × ½ × (c_k − c_ml)`).
+
+**Probed** (`calibration/diag_l2_enso_limb_probe.R` → `outputs/diagnostics/l2_enso_limb_probe_20260917{,_k3}.{log,rds}`, 6 s each):
+gate 1 reproduces (5.8e-11); N1 reproduces the 09-17 scan's solubility-only line (−0.1873 / −0.572 / −1405.82) exactly; the
+UNCLIPPED form at 25 Sv/index (+0.0467) reproduces the T-A2 R-wrapper's gain — the C++ build agrees with the independent
+session device.
+
+**Two findings the pre-check (§1) did not anticipate:**
+1. **The floor costs a THIRD of the response at k = 2.** At 25 Sv/index the clipped slope is +0.0314 vs +0.0467 unclipped
+   (32.7 % apart) although the floor binds in only 7.9 % of months — those months are the large El Niños that carry the
+   regression. So the observed slope is reached at **37.0 Sv/index [33.8, 40.1]** with the floor (32 linear), r flips at 22.2,
+   and Meinen's bracket [14, 25] delivers only [−0.55, +0.19]× obs. **PE1 FAILS at k = 2** on two of three clauses (r at 18.7
+   = −0.063; the need 37.0 outside [28, 36]); PE2 PASSES (level rows −0.42 / −0.14 / −0.42 at 25). The pre-check's band
+   [29.7, 35.0] was the LINEAR need; the floor's clipping was measured (§0 R1) but its leverage on the regression was not.
+2. **`co2_gradient` is −1.6 at EVERY w** (k = 2 and k = 3 alike): the shim's inverted split (NH 0.36 / SH 0.00) was buying
+   the interhemispheric CO₂ gradient row, which an equal-split limb (R5) cannot. A second thing the shim did that the review
+   did not name.
+
+**The k = 3 sensitivity (PA7, run unrefitted now because it costs 6 s):** the observed slope at **19.3 Sv/index [17.6, 21.0]** —
+INSIDE the bracket; r +0.317 at 18.7; the floor 6–10 % apart from linear (it binds in 4 % of months at the need); price vs the
+canonical **−5.0 at 18.7** (`co2_level_MLO` −1.9, `co2_gradient` −1.7, `co2_icecore` −1.3, ocean sink −0.8), vs −15.3 in the
+T-A2 scan at an OVERDRIVEN 3 m/yr; at 25 it is −10.3 and PE2 fails (`co2_level_MLO` −2.7). The two layers at a glance:
+
+| k | need (Sv/index) | inside 14–25? | Δlik vs canonical at the need | level rows at the need |
+|---|---|---|---|---|
+| 2 (117–190 m) | 37.0 [33.8, 40.1] | NO | ≈ −3 | inside 2 |
+| 3 (190–292 m) | 19.3 [17.6, 21.0] | YES | ≈ −5.5 | `co2_level_MLO` ≈ −2 |
+
+**What this changes (a RULING, not a decision taken here):** ruling R2 (k = 2, the review's geometry) was taken on the pre-check's
+32.2; with the floor the layer-2 limb cannot reach the observed sensitivity inside the observed modulation even before the refit
+trades anything, which is the PARTIAL branch of §4 PA1 predicted with near certainty. Layer 3 reaches it inside the bracket at
+a price the refit can plausibly re-balance (the level rows, ~2 log-units each). Options for the array: (a) k = 2 as
+preregistered (the array then measures how far above the bracket the refit lands); (b) **k = 3** (recommended: the only
+layer that puts the bracket and the slope in the same place; PA3's level-row bound stays the test); (c) both, two waves.
+Nothing is launched until ruled.

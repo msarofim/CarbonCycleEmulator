@@ -1,0 +1,29 @@
+arm hilda30h: refit_20260917_hilda30h_obj12_hilda_c (logpost -1434.73, PINNED ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0 -- logpost not comparable to a free arm, MIGRATED 30->38)
+  pins: ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0; migrated: w_enso_l2; spinup: periodic
+the limb's structure 'hilda_cl2': k_l2 3, w0_l2 27 Sv (obs_eq_cell.rds$w0_prior$mean_sv)
+GCB observed: slope +0.1153 +/- 0.0246 GtC/yr per index, r +0.488 (n 66)
+gate 1: the canonical's 25 rows reproduce to 5.8e-11 (lik -1400.3026); ENSO slope +0.0402 (r +0.154); GATE V sd 0.553
+
+N1 solubility-only (shim 0, limb 0): slope -0.1873 (r -0.572), lik -1405.82; vs the 09-17 scan -0.1873 / -0.572 / -1405.82 -> REPRODUCES
+the shim's worth at the canonical: +5.52 (canonical -1400.30 vs solubility-only -1405.82)
+
+w          slope       se       r  dlik_can  dlik_sol     V_sd  floor  rows |d| > 0.5 vs the canonical
+   0.0   -0.1873   0.0318  -0.572     -5.52     +0.00    0.655  0.000  gcb_ocean_sink -4.65, co2_gradient -1.55, co2_seasonal_MLO +1.03, co2_seasonal_SPO +0.60, co2_level_SPO -0.57
+  14.0   +0.0494   0.0396  +0.149     -2.63     +2.89    0.564  0.010  co2_gradient -1.66, co2_level_MLO -1.33, co2_icecore -0.86, co2_seasonal_MLO +0.78, d13c_level_MLO -0.56
+  18.7   +0.1227   0.0442  +0.317     -4.95     +0.57    0.543  0.036  co2_level_MLO -1.89, co2_gradient -1.70, co2_icecore -1.34, gcb_ocean_sink -0.82, co2_seasonal_MLO +0.69, d13c_level_MLO -0.57, d14c_NH +0.53, gcb_land_sink +0.51
+  25.0   +0.2129   0.0504  +0.451    -10.26     -4.74    0.522  0.079  gcb_ocean_sink -3.40, co2_level_MLO -2.71, co2_icecore -2.15, co2_gradient -1.75, co2_level_SPO -1.51, d14c_NH +0.86, gcb_land_sink +0.66, co2_seasonal_SPO -0.62, co2_seasonal_MLO +0.60, d13c_level_MLO -0.53
+  32.0   +0.3012   0.0568  +0.533    -18.39    -12.87    0.507  0.134  gcb_ocean_sink -7.29, co2_level_MLO -3.77, co2_level_SPO -3.41, co2_icecore -3.29, co2_gradient -1.79, d14c_NH +1.25, co2_seasonal_SPO -0.85, gcb_land_sink +0.74
+  40.0   +0.3917   0.0636  +0.589    -30.55    -25.03    0.498  0.180  gcb_ocean_sink -12.66, co2_level_SPO -6.68, co2_level_MLO -5.55, co2_icecore -4.80, co2_gradient -1.83, d14c_NH +1.70, co2_seasonal_SPO -1.09, gcb_land_sink +0.71
+
+slope = -0.1648 + 0.01449 x w (R2 0.99196); the OBSERVED slope is reached at w = 19.3 Sv per index [17.6, 21.0] at GCB's +/-1 se
+r flips sign at w = 11.4; Meinen's bracket [14, 25] reaches slope [+0.0381, +0.1975] = [0.33, 1.71]x obs
+floor vs linear at w 25.0: slope +0.2129 vs +0.2370 (10.2 % apart), lik -1410.56 vs -1412.28; the floor binds in 7.9 % of months
+floor vs linear at w 19.3: slope +0.1321 vs +0.1408 (6.2 % apart), lik -1405.68 vs -1406.23; the floor binds in 4.0 % of months
+
+=== VERDICTS (prereg 2026-09-17k, unrefitted) ===
+  PE1 slope monotone in w: PASS; r positive by 18.7 (+0.317): PASS; the observed slope reached within [28, 36] (19.3): FAIL
+  PE2 CO2-level rows at w 25 within 2 log-units of the canonical: FAIL (co2_level_MLO -2.71, co2_level_SPO -1.51, co2_icecore -2.15)
+  N1 reproduces the 09-17 scan's solubility-only line: PASS
+  the PRE-CHECK's prediction (the need at [29.7, 35.0]): measured 19.3
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/l2_enso_limb_probe_20260917_k3.rds (0.1 min)
+EXIT 0
