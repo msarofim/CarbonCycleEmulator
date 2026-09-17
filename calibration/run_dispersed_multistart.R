@@ -160,24 +160,29 @@ MS_DRAW_TRIES <- 200          # redraws allowed before a start is declared dead
 # objective with no incumbent on disk: stop, rather than warm-start from the wrong one.
 # 2026-09-14 (h): an array whose pins EXTEND the canonical's by names the pump field
 # does not read (ccx_pins_extend_canonical) also takes the canonical -- the E array.
-MS_REF_INC_NAME <- if (identical(ccx_pin_label(MS_PINS), ccx_pin_label(CCX_MODE_CANONICAL_PINS)) ||
-                       ccx_pins_extend_canonical(MS_PINS, Sys.getenv("CCX_MS_PUMP_FIELD", "solved"))) {
-  CCX_MODE_CANONICAL
-} else if (is.null(MS_PINS)) {
-  if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT
-} else stop("MS_REF_INC: no registered incumbent for pins '", ccx_pin_label(MS_PINS),
-            "' (the canonical's are '", ccx_pin_label(CCX_MODE_CANONICAL_PINS),
-            "'); rule the reference set for this pin before launching.")
+# 2026-09-17 (j): the rule lives in ONE function, ccx_ms_reference_set() (R/calibrate.R),
+# read here and by make_port_targets.R; the control's arm (the inert pins, shim FREE,
+# seas_ml 0) takes `hilda31p` as its incumbent and the free parent as its new basin.
+# (.ms_env_required is defined further down, beside the structure block; an unset value
+# stops THERE with the driver's own message -- here it is passed through as NA and
+# ccx_parse_seas_ml() names it.)
+.ms_ref <- ccx_ms_reference_set(MS_PINS, Sys.getenv("CCX_MS_SEAS_ML", NA_character_))
+MS_REF_INC_NAME <- .ms_ref$incumbent
+MS_REF_NEW_NAME <- .ms_ref$new_basin
 MS_REF_INC    <- CCX_MODE_FILES[[MS_REF_INC_NAME]]
 if (is.null(MS_REF_INC)) stop("MS_REF_INC: '", MS_REF_INC_NAME, "' is not in CCX_MODE_FILES -- ",
                               "re-rule the reference set (see MS_REF_INC_LABEL).")
-MS_REF_NEW    <- CCX_MODE_FILES[["hilda31p"]]
-if (is.null(MS_REF_NEW)) stop("MS_REF_NEW: 'hilda31p' is no longer in CCX_MODE_FILES -- ",
-                              "re-rule the round-7 reference set (see MS_REF_NEW_LABEL).")
-MS_REF_INC_LABEL <- sprintf("INCUMBENT = %s (%s; 09-12 objective, periodic spinup, seas_ml 1)", MS_REF_INC_NAME,
-                            if (identical(MS_REF_INC_NAME, CCX_MODE_CANONICAL)) "the canonical, under this array's pins"
-                            else "the free parent of the pinned canonical: this array is FREE")
-MS_REF_NEW_LABEL <- "NEW BASIN = hilda31p (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)"
+MS_REF_NEW    <- CCX_MODE_FILES[[MS_REF_NEW_NAME]]
+if (is.null(MS_REF_NEW)) stop("MS_REF_NEW: '", MS_REF_NEW_NAME, "' is no longer in CCX_MODE_FILES -- ",
+                              "re-rule the reference set (see MS_REF_NEW_LABEL).")
+# The labels read the run's own CCX_MS_SEAS_ML: until 09-17 (j) they TYPED "seas_ml 1",
+# true of every array to date and false of the control refit.
+MS_REF_INC_LABEL <- sprintf("INCUMBENT = %s (%s; objective #12, periodic spinup, evaluated at seas_ml %s)",
+                            MS_REF_INC_NAME, .ms_ref$why, Sys.getenv("CCX_MS_SEAS_ML", "UNSET"))
+MS_REF_NEW_LABEL <- sprintf("NEW BASIN = %s (%s; registered, evaluated at seas_ml %s)", MS_REF_NEW_NAME,
+                            if (identical(MS_REF_NEW_NAME, CCX_MODE_CONTROL)) "seas_ml 0 control, periodic spinup"
+                            else "the free parent, the other h_ml basin",
+                            Sys.getenv("CCX_MS_SEAS_ML", "UNSET"))
 # ⚠ THESE THREE NAMES ARE ALSO THE PORT-TARGET KEYS in calibration/torch/
 # port_targets.csv, so this vector may not be extended with ids that have no
 # target row -- the seeded ids below are deliberately NOT in it, and the port

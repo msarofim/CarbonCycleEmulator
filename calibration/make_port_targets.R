@@ -41,17 +41,15 @@ PT_OUT  <- ccx_path("calibration", "torch", "port_targets.csv")
 # `hilda30c` under its own pins, the free parent `hilda31s2` for a free run.
 # 2026-09-14 (h): pins that EXTEND the canonical's by names the pump field does not
 # read (ccx_pins_extend_canonical) also take the canonical -- the E array's case.
-PT_INC_NAME <- if (identical(ccx_pin_label(PT_PINS), ccx_pin_label(CCX_MODE_CANONICAL_PINS)) ||
-                   ccx_pins_extend_canonical(PT_PINS, Sys.getenv("CCX_MS_PUMP_FIELD", "solved"))) {
-  CCX_MODE_CANONICAL
-} else if (is.null(PT_PINS)) {
-  if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT
-} else stop("no registered incumbent for pins '", ccx_pin_label(PT_PINS), "'; rule the reference set first.")
+# 2026-09-17 (j): ONE rule, ccx_ms_reference_set() (R/calibrate.R), shared with the driver.
+.pt_ref <- ccx_ms_reference_set(PT_PINS, Sys.getenv("CCX_MS_SEAS_ML", NA_character_))
+PT_INC_NAME <- .pt_ref$incumbent; PT_NEW_NAME <- .pt_ref$new_basin
 PT_REFS <- c(
   cold      = NA,   # the hand-set init; no file
-  incumbent = CCX_MODE_FILES[[PT_INC_NAME]],  # through the registry; see PT_INC_NAME
-  new_basin = CCX_MODE_FILES[["hilda31p"]]    # the seas_ml 0 control, through the registry; feasible at seas_ml 1
+  incumbent = CCX_MODE_FILES[[PT_INC_NAME]],  # through the registry; see ccx_ms_reference_set
+  new_basin = CCX_MODE_FILES[[PT_NEW_NAME]]   # the other reference; feasible at either seas_ml
 )
+cat(sprintf("reference set: incumbent %s, new basin %s (%s)\n", PT_INC_NAME, PT_NEW_NAME, .pt_ref$why))
 
 bp <- ccx_default_params(); bp$pump_mode <- PT_ARM
 # 2026-09-06d: the SAME definition the driver uses, selected by CCX_MS_STRUCT --

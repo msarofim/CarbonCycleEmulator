@@ -37,7 +37,7 @@ COPYFILE_DISABLE=1 tar czf "$OUT" \
   DESIGN.md CLAUDE.md README.md DATA.md \
   R src data tests \
   data-raw/downloads/nuclear14c \
-  calibration/*.R calibration/torch \
+  calibration/*.R calibration/torch calibration/mac \
   calibration/output/refit_20260910_hilda31_periodic \
   calibration/output/refit_20260912_hilda31_seasml1_round7 \
   calibration/output/refit_20260917_hilda30h_obj12_hilda_c \

@@ -2105,6 +2105,45 @@ ccx_pins_extend_canonical <- function(pins, pump_field, struct = Sys.getenv("CCX
     inert <- c(inert, "w_eq", "gamma_eq")
   length(extra) > 0 && all(extra %in% inert)
 }
+#' THE REFERENCE SET of a dispersed multistart -- which registered file is the
+#' INCUMBENT (id 1) and which the NEW BASIN (id 2) for an array's pins and
+#' seas_ml -- in ONE place (2026-09-17 j). Until today run_dispersed_multistart.R
+#' and make_port_targets.R each carried a copy of this if-chain under a comment
+#' saying they MUST MATCH; the three names are the port-target KEYS, so a
+#' mismatch is a port gate comparing two different points. Rules, in order:
+#'   the canonical's own pins, or pins that EXTEND them by inert names
+#'                          -> incumbent the canonical; new basin the control
+#'   no pins (a FREE array) -> incumbent the free parent (or the canonical when
+#'                          free); new basin the control
+#'   the CONTROL's pins (the inert names, shim free), seas_ml 0
+#'                          -> incumbent the control; new basin the free parent
+#'                             (the same 31-name space, the other h_ml basin --
+#'                             the round-6b pair)
+#'   the CONTROL's pins, seas_ml 1
+#'                          -> incumbent the free parent; new basin the control
+#'   anything else          -> stop: a new objective with no incumbent on disk.
+ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved"),
+                                 struct = Sys.getenv("CCX_MS_STRUCT", "")) {
+  seas_ml <- ccx_parse_seas_ml(seas_ml)
+  same <- function(a, b) identical(ccx_pin_label(a), ccx_pin_label(b))
+  if (same(pins, CCX_MODE_CANONICAL_PINS) || ccx_pins_extend_canonical(pins, pump_field, struct)) {
+    list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_CONTROL,
+         why = "the canonical, under this array's pins")
+  } else if (is.null(pins)) {
+    list(incumbent = if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT,
+         new_basin = CCX_MODE_CONTROL,
+         why = "the free parent of the pinned canonical: this array is FREE")
+  } else if (same(pins, CCX_MODE_CONTROL_PINS) && seas_ml == 0L) {
+    list(incumbent = CCX_MODE_CONTROL, new_basin = CCX_MODE_PINNED_PARENT,
+         why = "the seas_ml-0 CONTROL, refit under its own arm (the inert pins, shim free)")
+  } else if (same(pins, CCX_MODE_CONTROL_PINS) && seas_ml == 1L) {
+    list(incumbent = CCX_MODE_PINNED_PARENT, new_basin = CCX_MODE_CONTROL,
+         why = "the free parent, under the inert pins")
+  } else stop("ccx_ms_reference_set(): no registered incumbent for pins '", ccx_pin_label(pins),
+              "' at seas_ml ", seas_ml, " (the canonical's are '", ccx_pin_label(CCX_MODE_CANONICAL_PINS),
+              "', the control's '", ccx_pin_label(CCX_MODE_CONTROL_PINS),
+              "'); rule the reference set for this pin before launching.")
+}
 ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
                                 seas_ml = Sys.getenv("CCX_MS_SEAS_ML", "0"),
                                 pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved")) {

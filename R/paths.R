@@ -209,6 +209,17 @@ CCX_MODE_PINNED <- c(hilda30h = TRUE, hilda31s2 = FALSE, hilda31p = FALSE)
 CCX_MODE_CANONICAL_PINS  <- c(ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08,
                               w_vent = 0, gamma_vent = 0, w_thc = 0)
 CCX_MODE_PINNED_PARENT   <- "hilda31s2"
+# THE seas_ml-0 CONTROL AND ITS ARM (2026-09-17 j). The registered control `hilda31p`
+# has the shim FREE (18.69): the seasonal mixed layer is what REPLACED the shim, so
+# the canonical pins it and the control keeps it. Its arm is therefore the canonical's
+# INERT pins WITHOUT the shim pin (31 free). ⛔ A control with the shim pinned AND the
+# ML off has no mechanism for the SPO seasonal amplitude at all -- measured at
+# hilda31p's point: -368 on co2_seasonal_SPO by construction -- and "the canonical
+# beats it" would have no power on the seasonal question ([[no_power_null]]). An
+# array under these pins at seas_ml 0 takes the control as its incumbent
+# (ccx_ms_reference_set); at seas_ml 1 it is the free parent's arm.
+CCX_MODE_CONTROL         <- "hilda31p"
+CCX_MODE_CONTROL_PINS    <- CCX_MODE_CANONICAL_PINS[setdiff(names(CCX_MODE_CANONICAL_PINS), "ent_seas_amp_SH")]
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
 #' ENCODABLE on the full table (an ancestor constructed by dropping names, a
