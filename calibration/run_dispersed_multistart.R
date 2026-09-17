@@ -506,8 +506,32 @@ neg_lp <- function(u) {
 # an array of 8 or in an array of 400, and a failed task can be requeued without
 # changing what it was. That is the property `set.seed(ARM_SEED)` gives the
 # serial driver, carried over to a fan-out.
-ms_seed_ocn <- function(p, x) {
-  p$gamma_enso_ocn_NH <- x; p$gamma_enso_ocn_SH <- x; p
+# ⚠ THE OCEAN-ENSO SEED SEEDS WHAT THIS ARM FITS (2026-09-17 l). Under an arm that
+# PINS the ocean pair (the E array under martin; the limb's arm), setting
+# gamma_enso_ocn_* here is silently DROPPED by ccx_par_to_unc() (a pinned name is
+# not encoded) -- ids 3/4 then DUPLICATE ids 1/2 while their label says "the pair
+# SET to +0.100" (found at the limb arm's preflight: id 3 = id 1 to the digit; the
+# E array's ids 3/4 were the same duplicates). So: with the pair FREE, seed the pair;
+# with the pair PINNED and the LIMB ON, seed the limb's w_enso_l2 at an edge of
+# Meinen's per-index bracket (the product, obs_eq_cell.rds; `edge` "hi" = 25 for the
+# incumbent-side start, "lo" = 14 for the new-basin-side, so the two seeded starts
+# bracket the init 18.7 the references sit at); with the pair pinned and NO limb,
+# nothing can be seeded -- say so in the label rather than run a duplicate.
+.ms_ocn_pinned <- all(c("gamma_enso_ocn_NH", "gamma_enso_ocn_SH") %in% names(MS_PINS))
+.ms_limb_on    <- ccx_l2_on(bp)                       # bp = the run's own base (structure applied above)
+MS_L2_SEED_SV <- ccx_eq_cell_obs()$w0_prior$interannual$per_index_sv   # c(14, 25) Sv per index, Meinen 2001
+ms_seed_ocn <- function(p, x, edge = c("hi", "lo")) {
+  edge <- match.arg(edge)
+  if (!.ms_ocn_pinned) { p$gamma_enso_ocn_NH <- x; p$gamma_enso_ocn_SH <- x; return(p) }
+  if (.ms_limb_on) { p$w_enso_l2 <- if (edge == "hi") max(MS_L2_SEED_SV) else min(MS_L2_SEED_SV); return(p) }
+  p                                                    # pinned, no limb: nothing to seed
+}
+ms_seed_ocn_label <- function(x, edge = c("hi", "lo")) {
+  edge <- match.arg(edge)
+  if (!.ms_ocn_pinned) return(sprintf("the ocean ENSO pair SET to %+0.3f each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here)", x))
+  if (.ms_limb_on) return(sprintf("the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to %g Sv per index (the %s edge of Meinen's bracket)",
+                                  if (edge == "hi") max(MS_L2_SEED_SV) else min(MS_L2_SEED_SV), if (edge == "hi") "HIGH" else "LOW"))
+  "the ocean ENSO pair PINNED and no limb: NOTHING seeded -- this start EQUALS the reference it is named for"
 }
 ms_seed_land <- function(p, m) {
   p$gamma_enso_land_NH <- p$gamma_enso_land_NH * m
@@ -538,18 +562,18 @@ ms_start <- function(id) {
     stop("MS_SEED_IDS names id ", id, " as '", .sk, "' but ms_start() has no ",
          "branch that builds it. Add one beside the others.")
   if (identical(.sk, "inc_enso"))
-    return(list(u = ccx_par_to_unc(ms_seed_ocn(P_INC, MS_ENSO_OCN_OPT)),
-                kind = sprintf("seeded: INCUMBENT with the ocean ENSO pair SET to %+0.3f each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here)",
-                               MS_ENSO_OCN_OPT), draws = 0L, ref = NA_real_))
+    return(list(u = ccx_par_to_unc(ms_seed_ocn(P_INC, MS_ENSO_OCN_OPT, "hi")),
+                kind = paste("seeded: INCUMBENT with", ms_seed_ocn_label(MS_ENSO_OCN_OPT, "hi")),
+                draws = 0L, ref = NA_real_))
   if (identical(.sk, "new_enso"))
-    return(list(u = ccx_par_to_unc(ms_seed_ocn(P_NEW, MS_ENSO_OCN_OPT)),
-                kind = sprintf("seeded: NEW BASIN with the ocean ENSO pair SET to %+0.3f each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here)",
-                               MS_ENSO_OCN_OPT), draws = 0L, ref = NA_real_))
+    return(list(u = ccx_par_to_unc(ms_seed_ocn(P_NEW, MS_ENSO_OCN_OPT, "lo")),
+                kind = paste("seeded: NEW BASIN with", ms_seed_ocn_label(MS_ENSO_OCN_OPT, "lo")),
+                draws = 0L, ref = NA_real_))
   if (identical(.sk, "new_obs"))
-    return(list(u = ccx_par_to_unc(ms_seed_land(ms_seed_ocn(P_NEW, MS_ENSO_OCN_OBS),
+    return(list(u = ccx_par_to_unc(ms_seed_land(ms_seed_ocn(P_NEW, MS_ENSO_OCN_OBS, "hi"),
                                                 MS_ENSO_LAND_OBS)),
-                kind = sprintf("seeded: NEW BASIN + the OBSERVATION-implied partition (ocean %+0.3f each, land x%.3f)",
-                               MS_ENSO_OCN_OBS, MS_ENSO_LAND_OBS),
+                kind = sprintf("seeded: NEW BASIN + the OBSERVATION-implied partition (%s; land x%.3f)",
+                               ms_seed_ocn_label(MS_ENSO_OCN_OBS, "hi"), MS_ENSO_LAND_OBS),
                 draws = 0L, ref = NA_real_))
   # ⛔ AN ID BELOW THE DISPERSED FLOOR THAT MATCHED NOTHING ABOVE IS A GAP IN
   # THIS FUNCTION, NOT A DISPERSED START. Falling through would silently turn a
