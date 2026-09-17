@@ -1,7 +1,9 @@
 # =====================================================================
-# THE LAYER-2 NINO3.4 LIMB (review avenue 1, 2026-09-17 k): `w_enso_l2` [Sv per
+# THE NINO3.4 RETURN LIMB (review avenue 1, 2026-09-17 k): `w_enso_l2` [Sv per
 # index unit], structure constants `k_l2` (0 = absent) and `w0_l2` (the floor's
-# mean), the "hilda_cl2" label. notes/prereg_2026-09-17k_l2_enso_limb_refit.md
+# mean), the "hilda_cl2" (k 2) and "hilda_cl3" (k 3; the array's, ruled 09-17 l)
+# labels, whose layers live in ONE table (CCX_L2_RETURN_LAYERS).
+# notes/prereg_2026-09-17k_l2_enso_limb_refit.md
 # §2, P0 -- the contracts, gated BEFORE any science number is read:
 #   P0a ABSENT       the name absent, present at 0, and present with k_l2 = 0
 #                    are bit-exact with the canonical's model, both cores; the
@@ -45,6 +47,16 @@ test_that("the name ships OFF (k_l2 = 0), the label sets the two constants from 
   expect_true("w_enso_l2" %in% CCX_PARAM_NAMES); expect_true("w_enso_l2" %in% CCX_PARAM_ABSENT_OK)
   expect_identical(which(CCX_PARAM_NAMES == "w_enso_l2"), which(CCX_PARAM_NAMES == "w_thc") + 1L)   # appended after w_thc
   expect_true("hilda_cl2" %in% CCX_STRUCT_LABELS)
+  # the second label (ruled 09-17 l): layer 3, everything else hilda_cl2's; the layer
+  # table is the ONE source, and every label in it is a registered structure
+  expect_identical(CCX_L2_RETURN_LAYERS, c(hilda_cl2 = 2L, hilda_cl3 = 3L))
+  expect_true(all(names(CCX_L2_RETURN_LAYERS) %in% CCX_STRUCT_LABELS))
+  q3 <- ccx_apply_structure(p, "hilda_cl3", seas_ml = 1)
+  expect_identical(attr(q3, "struct"), "hilda_cl3"); expect_identical(q3$k_l2, 3L); expect_true(ccx_l2_on(q3))
+  q2 <- ccx_apply_structure(p, "hilda_cl2", seas_ml = 1); q2$k_l2 <- NULL; q3b <- q3; q3b$k_l2 <- NULL
+  expect_identical(q2[order(names(q2))], q3b[order(names(q3b))])                  # the layer is the ONLY difference
+  for (lab in names(CCX_L2_RETURN_LAYERS)) expect_identical(ccx_struct_block(lab)$k_l2, CCX_L2_RETURN_LAYERS[[lab]])
+  expect_error(ccx_struct_hilda_cl("hilda_cl9"), "subscript out of bounds")
   # no existing name is a PREFIX of the new one and vice versa (the w_e -> w_eq incident)
   others <- setdiff(CCX_PARAM_NAMES, "w_enso_l2")
   expect_false(any(startsWith("w_enso_l2", others))); expect_false(any(startsWith(others, "w_enso_l2")))
@@ -97,13 +109,15 @@ test_that("P0a (canonical): the canonical's stored LIKELIHOOD reproduces row by 
   expect_identical(st[names(md$streams)], md$streams)                  # 25 rows, bit-exact: the seeded name is INERT
 })
 
-test_that("P0b SPINUP, P0c CONSERVATION, P0d PARITY with the limb ON at both seasonal states; the limb MOVES the transient", {
+test_that("P0b SPINUP, P0c CONSERVATION, P0d PARITY with the limb ON at both seasonal states and BOTH return layers; the limb MOVES the transient", {
   skip_if_no_cpp()
-  for (seas in c(0, 1)) {
-    p <- l2_par(seas_ml = seas, w = 25); q <- p; q$w_enso_l2 <- 0
+  # hilda_cl2 at both seasonal states; hilda_cl3 at the array's (seas_ml 1)
+  for (arm in list(c("hilda_cl2", 0), c("hilda_cl2", 1), c("hilda_cl3", 1))) {
+    lab <- arm[1]; seas <- as.numeric(arm[2])
+    p <- l2_par(struct = lab, seas_ml = seas, w = 25); q <- p; q$w_enso_l2 <- 0
     sp <- ccx_spinup(p); sq <- ccx_spinup(q)
     expect_identical(sp$y, sq$y)                                       # P0b: enso = 0 in the spinup -> no limb
-    expect_identical(sp$aux$l2_on, 1L); expect_identical(sp$aux$k_l2, 2L)
+    expect_identical(sp$aux$l2_on, 1L); expect_identical(sp$aux$k_l2, CCX_L2_RETURN_LAYERS[[lab]])
     expect_equal(sp$aux$l2_share$NH + sp$aux$l2_share$SH, 1, tolerance = 1e-14)
     F  <- ccx_build_forcing("historical", c(1996, 1999), prod_c14 = sp$prod_c14)   # the 1997-98 event
     for (i in c(1L, 19L)) { fr <- ccx_forcing_at(F, i)
@@ -128,33 +142,36 @@ test_that("P0b SPINUP, P0c CONSERVATION, P0d PARITY with the limb ON at both sea
   }
 })
 
-test_that("P0e THE FLOOR: sign, the linear regime, the floor at enso >= w0/w_enso, and the k_l2 boxes are the only ones touched", {
-  p <- l2_par(seas_ml = 0, w = 25); sp <- ccx_spinup(p); q <- p; q$w_enso_l2 <- 0; aq <- ccx_prepare(q)
+test_that("P0e THE FLOOR: sign, the linear regime, the floor at enso >= w0/w_enso, and the k_l2 boxes are the only ones touched -- at BOTH return layers", {
+ for (lab in names(CCX_L2_RETURN_LAYERS)) {
+  p <- l2_par(struct = lab, seas_ml = 0, w = 25); sp <- ccx_spinup(p); q <- p; q$w_enso_l2 <- 0; aq <- ccx_prepare(q)
+  k <- CCX_L2_RETURN_LAYERS[[lab]]; expect_identical(sp$aux$k_l2, k)
   d_at <- function(e, pp = p, aux = sp$aux) ccx_deriv(sp$y, 1900.2, pp, zero_forc_l2(sp$prod_c14, enso = e), sp$grid, aux)
   d0 <- d_at(0, q, aq)
   for (h in HEMIS) {
-    ix <- sp$aux$idx[[h]]; iml <- ix$ml; ik <- ix$oc[2]
+    ix <- sp$aux$idx[[h]]; iml <- ix$ml; ik <- ix$oc[k]
     dn <- d_at(0.5) - d0; dl <- d_at(-0.5) - d0
-    # El Nino: carbon LEAVES the ML for layer 2 (less supply); La Nina the reverse; nothing else moves
+    # El Nino: carbon LEAVES the ML for layer k (less supply); La Nina the reverse; nothing else moves
     expect_lt(dn[iml, "C"], 0); expect_gt(dn[ik, "C"], 0); expect_gt(dl[iml, "C"], 0); expect_lt(dl[ik, "C"], 0)
     expect_equal(dn[iml, "C"], -dn[ik, "C"], tolerance = 1e-12)
-    touched <- which(abs(dn[, "C"]) > 0); expect_setequal(touched, c(sp$aux$idx$NH$ml, sp$aux$idx$NH$oc[2], sp$aux$idx$SH$ml, sp$aux$idx$SH$oc[2]))
+    touched <- which(abs(dn[, "C"]) > 0); expect_setequal(touched, c(sp$aux$idx$NH$ml, sp$aux$idx$NH$oc[k], sp$aux$idx$SH$ml, sp$aux$idx$SH$oc[k]))
     # the linear regime: the anomaly at 0.5 is exactly half the anomaly at 1.0 (both below the floor 27/25 = 1.08)
     expect_equal(d_at(1.0)[iml, "C"] - d0[iml, "C"], 2 * dn[iml, "C"], tolerance = 1e-12)
-    # the physical unit: at enso = 1 the exchange anomaly is -w_enso_l2 Sv split equally
-    conc <- sp$y[ik, "C"] / (sp$aux$a_ls[[h]] * sp$grid$dz[3]) - sp$y[iml, "C"] / (sp$aux$a_ml[[h]] * sp$grid$dz[1])
+    # the physical unit: at enso = 1 the exchange anomaly is -w_enso_l2 Sv split equally, on layer k's gradient
+    conc <- sp$y[ik, "C"] / (sp$aux$a_ls[[h]] * sp$grid$dz[k + 1]) - sp$y[iml, "C"] / (sp$aux$a_ml[[h]] * sp$grid$dz[1])
     expect_equal(d_at(1.0)[iml, "C"] - d0[iml, "C"], -25 * CCX_SV_TO_M3YR * 0.5 * conc, tolerance = 1e-12)
     # the FLOOR: beyond enso = w0/w_enso the anomaly is -w0 x share and stops growing
     expect_equal(d_at(1.08)[iml, "C"], d_at(2.0)[iml, "C"], tolerance = 1e-12)
     expect_equal(d_at(2.0)[iml, "C"] - d0[iml, "C"], -27 * CCX_SV_TO_M3YR * 0.5 * conc, tolerance = 1e-12)
   }
   # the isotopes ride the same volumes on their own gradients (a k-ratio anomaly, not the ML's)
-  dn <- d_at(0.5) - d0; iml <- sp$aux$idx$NH$ml; ik <- sp$aux$idx$NH$oc[2]
+  dn <- d_at(0.5) - d0; iml <- sp$aux$idx$NH$ml; ik <- sp$aux$idx$NH$oc[k]
   r13 <- function(i) sp$y[i, "C13"] / sp$y[i, "C"]
   expect_false(isTRUE(all.equal(dn[iml, "C13"] / dn[iml, "C"], r13(iml), tolerance = 1e-6)))   # not the ML's own ratio
   # MUTATION of the floor: with w0_l2 huge the floor never binds and the 2.0 point is linear
   w <- p; w$w0_l2 <- 1e6; aw <- ccx_prepare(w)
   expect_equal(d_at(2.0, w, aw)[iml, "C"] - d0[iml, "C"], 4 * (d_at(0.5, w, aw)[iml, "C"] - d0[iml, "C"]), tolerance = 1e-9)
+ }
 })
 
 test_that("P0f REFUSALS by name, the exclusions, and the driver-side inert rule", {

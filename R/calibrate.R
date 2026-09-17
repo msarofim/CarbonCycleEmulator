@@ -2069,24 +2069,30 @@ ccx_parse_seas_ml <- function(seas_ml) {
 #' The structure labels the objective knows, and each one's DECLARED block --
 #' ONE dispatch (2026-09-14f), read by ccx_apply_structure(), the array driver's
 #' banner and the tests, so no consumer keeps its own list.
-#' THE "hilda_cl2" STRUCTURE (2026-09-17 k): hilda_c + the layer-2 Nino3.4 limb
-#' (review avenue 1; notes/prereg_2026-09-17k_l2_enso_limb_refit.md). Two
-#' structure constants, never fitted: k_l2 = 2 (117-190 m at the canonical's
-#' grid; ruling R2) and w0_l2 = the Meinen 2001 mean upwelling from
+#' THE "hilda_cl2" / "hilda_cl3" STRUCTURES (2026-09-17 k / l): hilda_c + the
+#' Nino3.4 return LIMB (review avenue 1; notes/prereg_2026-09-17k_l2_enso_limb_refit.md).
+#' Two structure constants, never fitted: k_l2 = the RETURN LAYER the limb
+#' exchanges the mixed layer with -- 2 (117-190 m at the canonical's grid;
+#' ruling R2 as preregistered) or 3 (190-292 m; the s7 amendment, RULED 09-17 l
+#' after the unrefitted probe: at k = 2 the floor clips a third of the response
+#' and the observed slope needs 37 Sv/index, above Meinen's 14-25; at k = 3 it
+#' needs 19.3, inside) -- and w0_l2 = the Meinen 2001 mean upwelling from
 #' obs_eq_cell.rds$w0_prior (27 Sv; ruling R1 -- it sets the limb's FLOOR only).
-#' A NEW LABEL, not an edit of hilda_c: every registered file is bit-exact under
-#' its own label. (The prereg placed the constants in CCX_STRUCT_HILDA; they are
-#' here instead so hilda / hilda_c stay k_l2 = 0 -- the limb ABSENT -- and the
-#' registered files stay untouched.)
-CCX_L2_RETURN_LAYER <- 2L
-ccx_struct_hilda_cl2 <- function() {
+#' THE LAYER IS PART OF THE LABEL (ruled 09-17 l): one table, CCX_L2_RETURN_LAYERS,
+#' is the only place a layer number lives, so every array, port target and output
+#' directory NAMES its layer and a k = 2 read is reproducible by label. NEW LABELS,
+#' not an edit of hilda_c: every registered file is bit-exact under its own label
+#' (hilda / hilda_c stay k_l2 = 0 -- the limb ABSENT).
+CCX_L2_RETURN_LAYERS <- c(hilda_cl2 = 2L, hilda_cl3 = 3L)
+ccx_struct_hilda_cl <- function(label) {
+  k <- CCX_L2_RETURN_LAYERS[[label]]          # errors by name on an unknown label
   blk <- ccx_struct_hilda_c()
-  add <- list(k_l2 = CCX_L2_RETURN_LAYER, w0_l2 = unname(ccx_eq_cell_obs()$w0_prior$mean_sv))
+  add <- list(k_l2 = k, w0_l2 = unname(ccx_eq_cell_obs()$w0_prior$mean_sv))
   blk[names(add)] <- add
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", "hilda_cl2")
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS))
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2094,7 +2100,8 @@ ccx_struct_block <- function(struct) {
     "hilda_eq" = ccx_struct_hilda_eq(),
     "hilda_tr" = ccx_struct_hilda_tr(),
     "hilda_c"  = ccx_struct_hilda_c(),             # hilda + the constants batch (2026-09-14 h)
-    "hilda_cl2" = ccx_struct_hilda_cl2(),          # hilda_c + the layer-2 Nino3.4 limb (2026-09-17 k)
+    "hilda_cl2" = ccx_struct_hilda_cl("hilda_cl2"),  # hilda_c + the Nino3.4 limb returning from layer 2 (2026-09-17 k)
+    "hilda_cl3" = ccx_struct_hilda_cl("hilda_cl3"),  # ... from layer 3 (ruled 2026-09-17 l; the array's label)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2220,8 +2227,9 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
     stop("ccx_apply_structure(): unknown structure label '", struct,
          "'. Known: \"\" (column), \"hilda\", \"hilda_eq\" (HILDA + the equatorial cell, ",
          "2026-09-13g), \"hilda_tr\" (+ the tropical surface box, 2026-09-14f), ",
-         "\"hilda_c\" (hilda + the constants batch, 2026-09-14h) and \"hilda_cl2\" ",
-         "(hilda_c + the layer-2 Nino3.4 limb, 2026-09-17k).")
+         "\"hilda_c\" (hilda + the constants batch, 2026-09-14h), \"hilda_cl2\" ",
+         "(hilda_c + the Nino3.4 limb returning from layer 2, 2026-09-17k) and \"hilda_cl3\" ",
+         "(the limb returning from layer 3, 2026-09-17l).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)

@@ -11,7 +11,7 @@
 # =====================================================================
 
 test_that("hilda_c is a registered label, its block derives from the product, and hilda's block is untouched", {
-  expect_identical(CCX_STRUCT_LABELS, c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", "hilda_cl2"))   # + the layer-2 limb (2026-09-17 k)
+  expect_identical(CCX_STRUCT_LABELS, c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", "hilda_cl2", "hilda_cl3"))   # + the layer-2 limb (2026-09-17 k)
   blk <- ccx_struct_block("hilda_c"); o <- ccx_tr_box_obs(); g <- o$geom
   expect_identical(CCX_STRUCT_HILDA$hs_frac, 0.16)                         # the registered modes' base
   expect_identical(CCX_STRUCT_HILDA$sst_NH, NULL)                          # hilda declares no SST

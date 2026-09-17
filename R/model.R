@@ -1582,8 +1582,9 @@ ccx_default_params <- function() {
     # concentrations (the interior-diffusion idiom; bulk, alpha = 1, no 14C
     # fractionation). STRUCTURAL SWITCH: k_l2 = 0 (every registered structure)
     # = the limb ABSENT and w_enso_l2 INERT (the w_vent-under-"solved" contract);
-    # the "hilda_cl2" label sets k_l2 = 2, w0_l2 = 27 Sv (Meinen 2001 through
-    # obs_eq_cell.rds). notes/prereg_2026-09-17k_l2_enso_limb_refit.md §2.
+    # the "hilda_cl2" / "hilda_cl3" labels set k_l2 = 2 / 3 (CCX_L2_RETURN_LAYERS,
+    # R/calibrate.R; k = 3 is the array's, ruled 09-17 l), w0_l2 = 27 Sv (Meinen
+    # 2001 through obs_eq_cell.rds). notes/prereg_2026-09-17k_l2_enso_limb_refit.md §2, §7.
     w_enso_l2 = 0,        # Sv per Nino3.4 unit, whole band, split equally (R5)
     k_l2      = 0L,       # the RETURN layer (1-BASED); 0 = ABSENT; STRUCTURAL
     w0_l2     = 27,       # Sv, the mean upwelling that sets the FLOOR only; STRUCTURAL

@@ -1,8 +1,10 @@
 # =====================================================================
-# THE LAYER-2 NINO3.4 LIMB, UNREFITTED PROBE at the canonical (prereg
-# notes/prereg_2026-09-17k_l2_enso_limb_refit.md §4 PE1-PE2, N1).
+# THE NINO3.4 RETURN LIMB, UNREFITTED PROBE at the canonical (prereg
+# notes/prereg_2026-09-17k_l2_enso_limb_refit.md §4 PE1-PE2, N1; §7 PA7).
 #
-# WHAT: the canonical's own vector under struct "hilda_cl2" (k_l2 2, w0_l2 27 Sv)
+# WHAT: the canonical's own vector under the limb's structure label (L2_STRUCT env;
+# default "hilda_cl3", the ARRAY's label ruled 09-17 l -- "hilda_cl2" is the
+# preregistered k = 2; the label carries k_l2 through CCX_L2_RETURN_LAYERS, w0_l2 27 Sv)
 # with the shim gamma_enso_ocn_* SET TO 0 and w_enso_l2 on the prereg's grid --
 # nothing refit. Read: the 09-04g ENSO regression of the annual ocean sink on
 # Nino3.4 (year term, 1959-2024), the likelihood on the 25 rows against the
@@ -17,11 +19,14 @@
 # lik -1405.82.
 #
 # Every number below is computed here; every label derives from the constants.
-# Usage: Rscript calibration/diag_l2_enso_limb_probe.R      (~3 min, C++ core)
+# Usage: [L2_STRUCT=hilda_cl2] Rscript calibration/diag_l2_enso_limb_probe.R   (~6 s, C++ core)
+# (09-17 k the layer was an L2_K env override on the k-2 label, output suffix "_k3";
+#  09-17 l it is the LABEL, and the output name carries the label.)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
-L2_STRUCT   <- "hilda_cl2"
+L2_STRUCT   <- Sys.getenv("L2_STRUCT", "hilda_cl3")   # the limb's label; the layer is the label's (CCX_L2_RETURN_LAYERS)
+stopifnot(L2_STRUCT %in% names(CCX_L2_RETURN_LAYERS))
 L2_GRID     <- c(0, 14, 18.7, 25, 32, 40)          # Sv per index; 0 = N1; 14-25 = Meinen's bracket; 32 = the scan's need; 40 = the REFUTED line
 L2_BRACKET  <- c(14, 25)                            # obs_eq_cell.rds$w0_prior$per_index_sv
 L2_WIN      <- c(1959, 2024)                        # = SC_ENSO_WIN, the 09-04g estimator's window
@@ -31,7 +36,7 @@ L2_REF_SOL  <- c(slope = -0.1873, r = -0.572, lik = -1405.82); L2_REF_TOL <- c(s
 L2_PE1_REACH <- c(28, 36)                           # prereg §4 PE1: the observed slope reached within this Sv/index band
 L2_PE2_ROWS <- c("co2_level_MLO", "co2_level_SPO", "co2_icecore"); L2_PE2_TOL <- 2     # log-units at w = 25
 L2_ROW_SHOW <- 0.5
-L2_OUT <- ccx_path("outputs", "diagnostics", sprintf("l2_enso_limb_probe_%s.rds", format(Sys.Date(), "%Y%m%d")))
+L2_OUT <- ccx_path("outputs", "diagnostics", sprintf("l2_enso_limb_probe_%s_%s.rds", L2_STRUCT, format(Sys.Date(), "%Y%m%d")))
 t0 <- Sys.time()
 
 v <- dg_vector(CCX_MODE_CANONICAL); obs <- ccx_prepare_obs()
@@ -40,9 +45,8 @@ cat(sprintf("arm %s: %s\n  pins: %s; migrated: %s; spinup: %s\n", CCX_MODE_CANON
             if (length(v$migrated)) paste(v$migrated, collapse = ",") else "none", v$spinup_label))
 stopifnot(!ccx_l2_on(v$p))                          # every registered structure: k_l2 = 0
 blk <- ccx_struct_block(L2_STRUCT)
-# L2_K (env, optional): the return-layer SENSITIVITY (prereg PA7, run unrefitted here): overrides k_l2; the output name says so
-L2_K_ENV <- Sys.getenv("L2_K", ""); if (nzchar(L2_K_ENV)) { blk$k_l2 <- as.integer(L2_K_ENV); L2_OUT <- sub("\\.rds$", sprintf("_k%d.rds", blk$k_l2), L2_OUT) }
-cat(sprintf("the limb's structure '%s': k_l2 %d, w0_l2 %g Sv (obs_eq_cell.rds$w0_prior$mean_sv)\n", L2_STRUCT, blk$k_l2, blk$w0_l2))
+stopifnot(identical(blk$k_l2, CCX_L2_RETURN_LAYERS[[L2_STRUCT]]))   # the label IS the layer
+cat(sprintf("the limb's structure '%s': k_l2 %d (CCX_L2_RETURN_LAYERS), w0_l2 %g Sv (obs_eq_cell.rds$w0_prior$mean_sv)\n", L2_STRUCT, blk$k_l2, blk$w0_l2))
 
 en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds"))); en_ann <- stats::aggregate(nino34_anom ~ year, data = en, FUN = mean, na.rm = TRUE)
 g <- obs$gcb; mg <- merge(g[, c("year", "ocean_sink")], en_ann, by = "year"); mg <- mg[stats::complete.cases(mg) & mg$year >= L2_WIN[1] & mg$year <= L2_WIN[2], ]
