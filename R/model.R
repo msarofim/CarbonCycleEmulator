@@ -1567,6 +1567,26 @@ ccx_default_params <- function() {
     w_thc   = 0,          # Sv, both hemispheres; split by a_hs share
     k_thc   = 1L,         # the RETURN layer (1-BASED); 1 = the full Munk
                           #   column; STRUCTURAL, not fitted (the k_e1 idiom)
+    # ---- THE LAYER-2 NINO3.4 LIMB (review avenue 1, 2026-09-17 k) ----------
+    # The ANOMALY of an equatorial-upwelling exchange between the low-latitude
+    # mixed layer and interior layer k_l2, T-A2's geometry with the cell's floor:
+    #   dV_h(t) = w0_l2 [Sv] x share_h x (max(0, 1 - gamma x enso(t)) - 1),
+    #   gamma   = w_enso_l2 / w0_l2,
+    # so dV = -w_enso_l2 x enso while the floor is slack and -w0_l2 x share
+    # beyond it (upwelling cannot go negative). NO MEAN LIMB: the mean exchange
+    # is what the fitted kz already carries (T-A2: the gain is a function of the
+    # anomaly W0 x gamma alone), and a mean limb on the solved pump field would
+    # not be the operator's fixed point (the w_vent contract above). Zero at
+    # enso = 0, so the periodic spinup is untouched. Each tracer moves on its own
+    # gradient, F = dV x (c_k - c_ml) on the two boxes' true per-volume
+    # concentrations (the interior-diffusion idiom; bulk, alpha = 1, no 14C
+    # fractionation). STRUCTURAL SWITCH: k_l2 = 0 (every registered structure)
+    # = the limb ABSENT and w_enso_l2 INERT (the w_vent-under-"solved" contract);
+    # the "hilda_cl2" label sets k_l2 = 2, w0_l2 = 27 Sv (Meinen 2001 through
+    # obs_eq_cell.rds). notes/prereg_2026-09-17k_l2_enso_limb_refit.md §2.
+    w_enso_l2 = 0,        # Sv per Nino3.4 unit, whole band, split equally (R5)
+    k_l2      = 0L,       # the RETURN layer (1-BASED); 0 = ABSENT; STRUCTURAL
+    w0_l2     = 27,       # Sv, the mean upwelling that sets the FLOOR only; STRUCTURAL
     # ---- THE SEASONAL EXPORT (option O5, 2026-09-15 f) ---------------------
     # Export production peaks in local summer. Every pump limb (the LS pump's
     # org + carb legs from BOTH surface boxes, and the HS pump) is multiplied by
@@ -3145,6 +3165,37 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       }
     }
 
+    # ---- THE LAYER-2 NINO3.4 LIMB (review avenue 1, 2026-09-17 k) ----------
+    # notes/prereg_2026-09-17k_l2_enso_limb_refit.md §2; the rationale is on
+    # the defaults in ccx_default_params(). The ANOMALY of an upwelling
+    # exchange with layer k_l2, the cell's floor form minus its mean:
+    #   dV = w0_l2 x SV x share_h x (max(0, 1 - (w_enso_l2 / w0_l2) x enso) - 1)
+    # <= 0 in El Nino (less supply to the ML -> lower pCO2 -> MORE uptake, the
+    # observed sign). Each tracer on its own gradient between the two boxes'
+    # true per-volume concentrations (ML over a_ml and gr$dz[1] NOW; layer k
+    # over a_ls and its own dz) -- exactly T-A2's device
+    # (calibration/diag_ta2_enso_return_depth.R) and the interior-diffusion
+    # idiom: antisymmetric, so every tracer is conserved; bulk, no
+    # fractionation. NOT through add_flux: a negative flux there takes the
+    # ratio from the RECEIVING box, and the anomaly of a REDUCED exchange must
+    # remove layer-k-ratio carbon from the ML's inflow. Not in the flux trace
+    # (ml <-> interior only; ocean_net is untouched). l2_on = 0 emits NOTHING.
+    # The C++ block is the twin.
+    if (aux$l2_on == 1L) {
+      fac <- max(0, 1 - (p[["w_enso_l2"]] / aux$w0_l2) * forc$enso)
+      dV  <- aux$w0_l2 * CCX_SV_TO_M3YR * aux$l2_share[[h]] * (fac - 1)
+      if (dV != 0) {
+        ik <- ioc[aux$k_l2]
+        Vk <- aux$a_ls[[h]] * gr$dz[aux$k_l2 + 1]
+        Vm <- aux$a_ml[[h]] * gr$dz[1]
+        for (tr in CCX_TRACERS) {
+          F_t <- dV * (y[ik, tr] / Vk - y[iml, tr] / Vm)
+          dy[ik, tr]  <- dy[ik, tr]  - F_t
+          dy[iml, tr] <- dy[iml, tr] + F_t
+        }
+      }
+    }
+
     # ---- THE HS-ROUTE DEEP RETURN (option O1 arm THC, 2026-09-15 d) -------
     # notes/prereg_2026-09-15d_o1_deep_return_probe.md §1. The overturning as
     # a MEAN limb, one volume W_h = w_thc x SV x a_hs share per hemisphere,
@@ -3623,6 +3674,24 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   kthc <- if (is.null(p[["k_thc"]])) 1L else as.integer(p[["k_thc"]])
   if (thc_on && (!is.finite(kthc) || kthc < 1L || kthc > grid$nl))
     stop("k_thc must be an interior layer in 1..", grid$nl, " (the return layer); got ", format(p[["k_thc"]]))
+  # ---- THE LAYER-2 NINO3.4 LIMB's guards (2026-09-17 k) ------------------
+  # k_l2 is the STRUCTURAL switch: 0 = absent (w_enso_l2 inert, not an error --
+  # the objective carries every table name under every structure); otherwise an
+  # interior layer, refused by name outside 1..nl. Two upwelling representations
+  # on one column are refused: the cell (eq_on) and the E loop (e_on).
+  kl2 <- if (is.null(p[["k_l2"]])) 0L else as.integer(p[["k_l2"]])
+  if (!is.finite(kl2) || kl2 < 0L || kl2 > grid$nl)
+    stop("k_l2 must be 0 (the limb absent) or an interior layer in 1..", grid$nl, "; got ", format(p[["k_l2"]]))
+  w_l2 <- if (is.null(p[["w_enso_l2"]])) 0 else p[["w_enso_l2"]]
+  if (!is.finite(w_l2) || w_l2 < 0)
+    stop("w_enso_l2 must be a finite non-negative Nino3.4 modulation in Sv per index; got ", format(p[["w_enso_l2"]]))
+  w0l2 <- if (is.null(p[["w0_l2"]])) 27 else p[["w0_l2"]]
+  if (kl2 > 0L && (!is.finite(w0l2) || w0l2 <= 0))
+    stop("w0_l2 must be a finite positive mean upwelling in Sv (it sets the limb's floor); got ", format(p[["w0_l2"]]))
+  l2_on <- kl2 > 0L && isTRUE(w_l2 > 0)
+  if (l2_on && (eq_on || e_on))
+    stop("the layer-2 Nino3.4 limb (k_l2 > 0, w_enso_l2 > 0) cannot run with the equatorial cell or the ",
+         "ventilation loop on: two upwelling representations on one column")
   # ---- THE SEASONAL EXPORT's guards (option O5, 2026-09-15 f) ------------
   ps_amp <- if (is.null(p$pump_seas_amp)) 0 else p$pump_seas_amp
   if (!is.finite(ps_amp) || ps_amp < 0 || ps_amp > 1)
@@ -3879,6 +3948,14 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     thc_on      = as.integer(thc_on),
     k_thc       = if (thc_on) kthc else 1L,
     thc_share   = lapply(a_hs, function(A) A / (a_hs$NH + a_hs$SH)),
+    # ---- THE LAYER-2 NINO3.4 LIMB (2026-09-17 k) --------------------------
+    # Unconditional, zero-filled when off: `l2_on` gates the limb on BOTH cores;
+    # `k_l2` the return layer (1-based); `w0_l2` the floor's mean; `l2_share`
+    # the EQUAL split of the whole-band Sv (ruling R5).
+    l2_on       = as.integer(l2_on),
+    k_l2        = if (l2_on) kl2 else 1L,
+    w0_l2       = w0l2,
+    l2_share    = list(NH = 0.5, SH = 0.5),
     eq_on       = as.integer(eq_on),
     a_ml        = a_ml,
     a_eq        = a_eq,

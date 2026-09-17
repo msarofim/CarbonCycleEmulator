@@ -540,6 +540,19 @@ CCX_PARAM_TABLE <- list(
   # the floor, does not encode -> seeded at init.
   w_thc        = list(tr = "logit", lo = 0, hi = 60, init = 20,
                       prior = function(x) dunif(x, 0, 60, log = TRUE)),
+  # w_enso_l2: THE LAYER-2 NINO3.4 LIMB (review avenue 1, 2026-09-17 k) -- the
+  # Nino3.4 modulation of equatorial upwelling in Sv PER INDEX UNIT, whole band,
+  # split equally; the limb's floor is w0_l2 = 27 Sv (Meinen, McPhaden & Johnson
+  # 2001 through obs_eq_cell.rds$w0_prior), a structure constant. Reaches the
+  # model only under a structure with k_l2 > 0 ("hilda_cl2"); INERT (k_l2 = 0)
+  # under every registered file's structure, so it is in CCX_PARAM_ABSENT_OK and
+  # PINNED in any array without the limb. Box [0, 60] = 2.4x the observed bracket's
+  # top (14-25 Sv/index, the 1997-99 swing) and 1.9x the unrefitted need at
+  # hilda30h (32.2); FLAT by ruling R3 (the 09-14 b gamma_eq precedent: the
+  # bracket is the VERDICT, not the prior). Init = the bracket's geometric centre.
+  # 0 = OFF, on the floor, does not encode -> seeded at init.
+  w_enso_l2    = list(tr = "logit", lo = 0, hi = 60, init = 18.7,
+                      prior = function(x) dunif(x, 0, 60, log = TRUE)),
   # pump_hs_gcm2: THE HIGH-LATITUDE PUMP, FITTED since 2026-09-07e (29 -> 30) --
   # HS export per unit area in gC m-2 yr-1, remineralised in HD (pays choice C9).
   # The end-member probe put HS's DIC AT the observed high-latitude surface and
@@ -1069,7 +1082,10 @@ CCX_PARAM_ABSENT_OK <- c("w_eq", "gamma_eq",
                          # under pump_field = "martin"; every registered file is "solved"
                          "pump_export", "w_vent", "gamma_vent",
                          # option O1 arm THC (2026-09-15 d): likewise "martin"-only
-                         "w_thc")
+                         "w_thc",
+                         # the layer-2 Nino3.4 limb (2026-09-17 k): reaches the model only
+                         # under k_l2 > 0 ("hilda_cl2"); every registered file has k_l2 = 0
+                         "w_enso_l2")
 
 #' The names this build fits that a mode file lacks, pins excluded
 ccx_mode_absent <- function(md)
@@ -1375,6 +1391,9 @@ ccx_migrate_par_set <- function(p) {
     p[[nm]] <- 0
     filled <- c(filled, nm)
   }
+  # 2026-09-17 k: w_enso_l2 entered the table (36 -> 37). Absent = 0 = OFF, and
+  # under every registered file's structure (k_l2 = 0) the limb is absent anyway.
+  if ("w_enso_l2" %in% absent) { p[["w_enso_l2"]] <- 0; filled <- c(filled, "w_enso_l2") }
 
   still <- setdiff(absent, filled)
   if (length(still))
@@ -2050,7 +2069,24 @@ ccx_parse_seas_ml <- function(seas_ml) {
 #' The structure labels the objective knows, and each one's DECLARED block --
 #' ONE dispatch (2026-09-14f), read by ccx_apply_structure(), the array driver's
 #' banner and the tests, so no consumer keeps its own list.
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c")
+#' THE "hilda_cl2" STRUCTURE (2026-09-17 k): hilda_c + the layer-2 Nino3.4 limb
+#' (review avenue 1; notes/prereg_2026-09-17k_l2_enso_limb_refit.md). Two
+#' structure constants, never fitted: k_l2 = 2 (117-190 m at the canonical's
+#' grid; ruling R2) and w0_l2 = the Meinen 2001 mean upwelling from
+#' obs_eq_cell.rds$w0_prior (27 Sv; ruling R1 -- it sets the limb's FLOOR only).
+#' A NEW LABEL, not an edit of hilda_c: every registered file is bit-exact under
+#' its own label. (The prereg placed the constants in CCX_STRUCT_HILDA; they are
+#' here instead so hilda / hilda_c stay k_l2 = 0 -- the limb ABSENT -- and the
+#' registered files stay untouched.)
+CCX_L2_RETURN_LAYER <- 2L
+ccx_struct_hilda_cl2 <- function() {
+  blk <- ccx_struct_hilda_c()
+  add <- list(k_l2 = CCX_L2_RETURN_LAYER, w0_l2 = unname(ccx_eq_cell_obs()$w0_prior$mean_sv))
+  blk[names(add)] <- add
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", "hilda_cl2")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2058,6 +2094,7 @@ ccx_struct_block <- function(struct) {
     "hilda_eq" = ccx_struct_hilda_eq(),
     "hilda_tr" = ccx_struct_hilda_tr(),
     "hilda_c"  = ccx_struct_hilda_c(),             # hilda + the constants batch (2026-09-14 h)
+    "hilda_cl2" = ccx_struct_hilda_cl2(),          # hilda_c + the layer-2 Nino3.4 limb (2026-09-17 k)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2101,9 +2138,16 @@ ccx_pins_extend_canonical <- function(pins, pump_field, struct = Sys.getenv("CCX
   if (!isTRUE(all.equal(unname(pins[names(cp)]), unname(cp)))) return(FALSE)
   extra <- setdiff(names(pins), names(cp))
   inert <- ccx_pump_field_inert(pump_field)
-  if (!ccx_eq_on(ccx_apply_structure(ccx_default_params(), struct, seas_ml = "0", pump_field = pump_field)))
-    inert <- c(inert, "w_eq", "gamma_eq")
+  bp <- ccx_apply_structure(ccx_default_params(), struct, seas_ml = "0", pump_field = pump_field)
+  if (!ccx_eq_on(bp)) inert <- c(inert, "w_eq", "gamma_eq")
+  if (!ccx_l2_on(bp)) inert <- c(inert, "w_enso_l2")     # the limb absent (k_l2 = 0), 2026-09-17 k
   length(extra) > 0 && all(extra %in% inert)
+}
+#' Is the layer-2 Nino3.4 limb PRESENT under a base list (k_l2 > 0)? The
+#' structural switch; w_enso_l2 is inert when FALSE (2026-09-17 k).
+ccx_l2_on <- function(p) {
+  k <- p[["k_l2"]]
+  !is.null(k) && is.finite(k) && k > 0
 }
 #' THE REFERENCE SET of a dispersed multistart -- which registered file is the
 #' INCUMBENT (id 1) and which the NEW BASIN (id 2) for an array's pins and
@@ -2155,8 +2199,9 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
   if (!struct %in% CCX_STRUCT_LABELS)
     stop("ccx_apply_structure(): unknown structure label '", struct,
          "'. Known: \"\" (column), \"hilda\", \"hilda_eq\" (HILDA + the equatorial cell, ",
-         "2026-09-13g), \"hilda_tr\" (+ the tropical surface box, 2026-09-14f) and ",
-         "\"hilda_c\" (hilda + the constants batch, 2026-09-14h).")
+         "2026-09-13g), \"hilda_tr\" (+ the tropical surface box, 2026-09-14f), ",
+         "\"hilda_c\" (hilda + the constants batch, 2026-09-14h) and \"hilda_cl2\" ",
+         "(hilda_c + the layer-2 Nino3.4 limb, 2026-09-17k).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)

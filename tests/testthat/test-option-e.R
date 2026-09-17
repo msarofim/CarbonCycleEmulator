@@ -90,7 +90,7 @@ test_that("P0a (canonical): the canonical's stored LIKELIHOOD reproduces row by 
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))
   # 2026-09-17 (h): absent (a hilda file) or PINNED (hilda30h) -- not fitted either way
-  six <- c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc")   # + O1 arm THC (2026-09-15 d)
+  six <- c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc", "w_enso_l2")   # + the layer-2 limb w_enso_l2 (2026-09-17 k)   # + O1 arm THC (2026-09-15 d)
   expect_setequal(union(new_names, intersect(names(md$pins), six)), six)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a-e"))
   if ("w_vent" %in% new_names) expect_identical(pm$w_vent, CCX_PARAM_TABLE$w_vent$init)   # seeded: 0 is on the floor

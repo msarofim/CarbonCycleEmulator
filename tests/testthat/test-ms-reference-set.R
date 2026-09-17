@@ -25,6 +25,7 @@ test_that("the control's pin set is the canonical's without the shim, and the co
   md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))
   expect_true(is.finite(md$par_mode[["ent_seas_amp_SH"]]) && md$par_mode[["ent_seas_amp_SH"]] > 0,
               info = "the control CARRIES the shim, non-zero")
+  expect_identical(ccx_mode_base(md)$seas_ml, 0L)                     # the base through ccx_mode_base(): seas_ml OFF
 })
 
 test_that("the five branches return the ruled pairs", {

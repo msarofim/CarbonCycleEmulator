@@ -66,7 +66,7 @@ test_that("the cell ships OFF, off means ABSENT, and the geometry is READ not ty
 test_that("R3: w_eq and gamma_eq are FITTED (31 -> 33), the W0 prior is the PRODUCT's, and a 31-name ancestor migrates to 0 and is SEEDED at init", {
   # 2026-09-13i (the array-launch commit; ruled 09-13h). Adjacent, after u_hs --
   # the other overturning transport -- so the u-vector's tail is the two cells.
-  expect_identical(length(CCX_PARAM_NAMES), 37L)   # 36 + w_thc (O1 arm THC, 2026-09-15 d); 33 + option D+E's three (2026-09-14 h)
+  expect_identical(length(CCX_PARAM_NAMES), 38L)   # + the layer-2 limb w_enso_l2 (2026-09-17 k)   # 36 + w_thc (O1 arm THC, 2026-09-15 d); 33 + option D+E's three (2026-09-14 h)
   i <- match(c("u_hs", "w_eq", "gamma_eq"), CCX_PARAM_NAMES)
   expect_identical(diff(i), c(1L, 1L))
   o <- ccx_eq_cell_obs()$w0_prior
@@ -209,7 +209,7 @@ test_that("P0a (canonical): the canonical's stored LIKELIHOOD reproduces row by 
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))   # w_eq, gamma_eq
   # 2026-09-17 (h): the canonical (hilda30h, hilda_c) PINS the six inert names instead of lacking
   # them -- either way none is FITTED at the canonical, and a pinned one contributes no prior leg
-  six <- c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc")   # + O1 arm THC (2026-09-15 d)   # + option D+E's three (2026-09-14 h)
+  six <- c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc", "w_enso_l2")   # + the layer-2 limb w_enso_l2 (2026-09-17 k)   # + O1 arm THC (2026-09-15 d)   # + option D+E's three (2026-09-14 h)
   expect_setequal(union(new_names, intersect(names(md$pins), six)), six)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a"))
   expect_true(all(new_names %in% attr(pm, "migrated")))

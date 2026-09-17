@@ -473,6 +473,10 @@ if (!ccx_eq_on(bp)) {
     stop("run_dispersed_multistart.R: under struct \"", MS_STRUCT, "\" (no equatorial cell) the name(s) ",
          paste(.ms_cell_free, collapse = ", "), " do not reach the model and must be PINNED (CCX_MS_PIN), not fitted.")
 }
+# ... and the layer-2 Nino3.4 limb's name under a structure with k_l2 = 0 (2026-09-17 k)
+if (!ccx_l2_on(bp) && "w_enso_l2" %in% CCX_PARAM_NAMES)
+  stop("run_dispersed_multistart.R: under struct \"", MS_STRUCT, "\" (k_l2 = 0, no layer-2 limb) ",
+       "w_enso_l2 does not reach the model and must be PINNED (CCX_MS_PIN), not fitted.")
 # the banner prints the WHOLE declared block of the label, so a hilda_eq task's log
 # names the cell's geometry (eq_frac, h_eq, sst_eq, sst_eq_enso, alk_eq, k_eq) and is
 # distinguishable from a hilda task's on its own (review 2026-09-14)

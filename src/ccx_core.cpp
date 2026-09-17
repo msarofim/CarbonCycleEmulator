@@ -189,6 +189,10 @@ struct Aux {
   // the band); e_share the a_ls split of w_vent. Zero-filled when off.
   int    e_on, k_e1, k_e2;
   double e_w[NL], e_share[2];
+  // THE LAYER-2 NINO3.4 LIMB (2026-09-17 k): l2_on gates it; k_l2 1-BASED as in
+  // R; w0_l2 the floor's mean (Sv); l2_share the equal split. Zero-filled when off.
+  int    l2_on, k_l2;
+  double w0_l2, l2_share[2];
   // THE HS-ROUTE DEEP RETURN (option O1 arm THC, 2026-09-15 d): thc_on gates
   // it; k_thc the return layer, 1-BASED as in R; thc_share the a_hs split.
   int    thc_on, k_thc;
@@ -222,6 +226,8 @@ struct Par {
                              // Nino3.4 modulation (option E, 2026-09-14 h)
   double w_thc;              // the HS-route deep return, Sv both hemispheres
                              // (option O1 arm THC, 2026-09-15 d)
+  double w_enso_l2;          // the layer-2 Nino3.4 limb, Sv per index unit
+                             // (review avenue 1, 2026-09-17 k)
   double pump_seas_amp, pump_seas_lag;   // the seasonal export factor (option O5,
                              // 2026-09-15 f): amp in [0, 1], lag in months
   double pump_hs_seas_amp, pump_hs_seas_lag;   // O5b (2026-09-16 b): the HS pump on
@@ -1028,6 +1034,27 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       }
     }
 
+    // ---- THE LAYER-2 NINO3.4 LIMB (review avenue 1, 2026-09-17 k) -- twin of
+    // the block in R/model.R, which carries the reasoning (prereg 09-17k §2).
+    // l2_on = 0 emits nothing. Per tracer on its own gradient, NOT add_flux
+    // (a negative add_flux takes the ratio from the receiving box). Association
+    // order mirrors the R exactly.
+    if (A.l2_on) {
+      const double fac0 = 1.0 - (P.w_enso_l2 / A.w0_l2) * enso;
+      const double fac  = (fac0 > 0.0) ? fac0 : 0.0;
+      const double dV   = A.w0_l2 * SV_TO_M3YR * A.l2_share[hi] * (fac - 1.0);
+      if (dV != 0.0) {
+        const int ik = base + IML + A.k_l2;                  // interior layer k_l2 (1-based)
+        const double Vk = A.a_ls[hi] * dzl[A.k_l2];
+        const double Vm = A.a_ml[hi] * dzl[0];
+        for (int tr = 0; tr < 3; ++tr) {
+          const double Ft = dV * (y[IX(ik, tr)] / Vk - y[IX(iml, tr)] / Vm);
+          dy[IX(ik, tr)]  -= Ft;
+          dy[IX(iml, tr)] += Ft;
+        }
+      }
+    }
+
     // ---- THE HS-ROUTE DEEP RETURN (option O1 arm THC, 2026-09-15 d) -- twin
     // of the block in R/model.R, which carries the reasoning (prereg 09-15d
     // §1). thc_on = 0 emits nothing. Five legs, each W x the source box's
@@ -1222,6 +1249,8 @@ static Aux unpack_aux(const List& a) {
   v = a["e_share"];   A.e_share[0] = v[0];   A.e_share[1] = v[1];
   A.thc_on = a["thc_on"]; A.k_thc = a["k_thc"];                    // the HS-route deep return (2026-09-15 d)
   v = a["thc_share"]; A.thc_share[0] = v[0]; A.thc_share[1] = v[1];
+  A.l2_on = a["l2_on"]; A.k_l2 = a["k_l2"]; A.w0_l2 = a["w0_l2"];   // the layer-2 Nino3.4 limb (2026-09-17 k)
+  v = a["l2_share"];  A.l2_share[0] = v[0];  A.l2_share[1] = v[1];
   return A;
 }
 
@@ -1248,6 +1277,7 @@ static Par unpack_par(const List& p) {
   P.q_tr = p["q_tr"];                                // the tropical box (2026-09-14f)
   P.w_vent = p["w_vent"]; P.gamma_vent = p["gamma_vent"];        // the ventilation loop (2026-09-14 h)
   P.w_thc = p["w_thc"];                                          // the HS-route deep return (2026-09-15 d)
+  P.w_enso_l2 = p["w_enso_l2"];                                  // the layer-2 Nino3.4 limb (2026-09-17 k)
   P.pump_seas_amp = p["pump_seas_amp"]; P.pump_seas_lag = p["pump_seas_lag"];   // the seasonal export (2026-09-15 f)
   P.pump_hs_seas_amp = p["pump_hs_seas_amp"]; P.pump_hs_seas_lag = p["pump_hs_seas_lag"];   // O5b (2026-09-16 b)
   P.q_attach_from = p["q_attach_from"];

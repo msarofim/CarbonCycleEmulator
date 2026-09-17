@@ -52,7 +52,7 @@ test_that("the box ships OFF, off means ABSENT, and the structure is READ from t
   expect_false(ccx_tr_on(p))
   expect_null(ccx_prepare(p)$idx$NH$tr)
   # the labels the objective knows, in ONE place
-  expect_identical(CCX_STRUCT_LABELS, c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c"))   # + the constants batch (2026-09-14 h)
+  expect_identical(CCX_STRUCT_LABELS, c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", "hilda_cl2"))   # + the constants batch (2026-09-14 h)
   expect_error(ccx_apply_structure(ccx_default_params(), "hilda_xx"), "unknown structure label")
   o  <- ccx_tr_box_obs(); e <- ccx_eq_cell_obs()
   pt <- ccx_apply_structure(ccx_default_params(), "hilda_tr")
@@ -85,7 +85,7 @@ test_that("the box ships OFF, off means ABSENT, and the structure is READ from t
   expect_false(anyDuplicated(names(ccx_struct_hilda_tr())) > 0)
   # the fitted names are NOT set by the structure; q_tr stays 0 (R4)
   expect_identical(pt$w_eq, 0); expect_identical(pt$gamma_eq, 0); expect_identical(pt$q_tr, 0)
-  expect_identical(length(CCX_PARAM_NAMES), 37L)                     # no new fitted name from THIS build (37 = 36 + w_thc, O1 arm THC 2026-09-15 d; 36 = 33 + option D+E's three, 2026-09-14 h)
+  expect_identical(length(CCX_PARAM_NAMES), 38L)   # + the layer-2 limb w_enso_l2 (2026-09-17 k)                     # no new fitted name from THIS build (37 = 36 + w_thc, O1 arm THC 2026-09-15 d; 36 = 33 + option D+E's three, 2026-09-14 h)
 })
 
 test_that("P0f MIRROR LINT: a mixed pair errors by name; order, stride and the area partition; checks by name; the D1 guard", {
@@ -175,7 +175,7 @@ test_that("P0a (canonical): the canonical's stored LIKELIHOOD reproduces row by 
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))
   # 2026-09-17 (h): absent (a hilda file) or PINNED (hilda30h) -- not fitted either way
-  six <- c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc")
+  six <- c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc", "w_enso_l2")   # + the layer-2 limb w_enso_l2 (2026-09-17 k)
   expect_setequal(union(new_names, intersect(names(md$pins), six)), six)   # + O1 arm THC (2026-09-15 d)   # NO new fitted name from the tr build   # + option D+E's three (2026-09-14 h)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a-tr"))
   u  <- ccx_par_to_unc(pm)
