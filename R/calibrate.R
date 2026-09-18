@@ -2139,11 +2139,18 @@ ccx_pump_field_inert <- function(pump_field) {
 #' the E array fitted them free and they sat on their prior). `struct` follows
 #' the same env var every consumer reads.
 ccx_pins_extend_canonical <- function(pins, pump_field, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
-  cp <- CCX_MODE_CANONICAL_PINS
-  if (is.null(pins) || is.null(cp)) return(FALSE)
-  if (!all(names(cp) %in% names(pins))) return(FALSE)
-  if (!isTRUE(all.equal(unname(pins[names(cp)]), unname(cp)))) return(FALSE)
-  extra <- setdiff(names(pins), names(cp))
+  ccx_pins_extend(pins, CCX_MODE_CANONICAL_PINS, pump_field, struct)
+}
+#' Does `pins` equal `base` PLUS names that are INERT under this field / structure?
+#' (2026-09-18: generalised from the canonical-only form so the CONTROL's arm can
+#' carry `w_enso_l2 = 0` under a limb-less structure -- the name entered the table
+#' 09-17 k and the driver refuses it free without the limb.) Inert = the pump field's
+#' unread names, the cell's pair without the cell, the limb's name without the limb.
+ccx_pins_extend <- function(pins, base, pump_field, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
+  if (is.null(pins) || is.null(base)) return(FALSE)
+  if (!all(names(base) %in% names(pins))) return(FALSE)
+  if (!isTRUE(all.equal(unname(pins[names(base)]), unname(base)))) return(FALSE)
+  extra <- setdiff(names(pins), names(base))
   inert <- ccx_pump_field_inert(pump_field)
   bp <- ccx_apply_structure(ccx_default_params(), struct, seas_ml = "0", pump_field = pump_field)
   if (!ccx_eq_on(bp)) inert <- c(inert, "w_eq", "gamma_eq")
@@ -2188,10 +2195,10 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
     list(incumbent = if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT,
          new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the free parent of the pinned canonical: this array is FREE")
-  } else if (same(pins, CCX_MODE_CONTROL_PINS) && seas_ml == 0L) {
+  } else if ((same(pins, CCX_MODE_CONTROL_PINS) || ccx_pins_extend(pins, CCX_MODE_CONTROL_PINS, pump_field, struct)) && seas_ml == 0L) {
     list(incumbent = CCX_MODE_SEASML0_CONTROL, new_basin = CCX_MODE_PINNED_PARENT,
          why = "the seas_ml-0 CONTROL, refit under its own arm (the inert pins, shim free)")
-  } else if (same(pins, CCX_MODE_CONTROL_PINS) && seas_ml == 1L) {
+  } else if ((same(pins, CCX_MODE_CONTROL_PINS) || ccx_pins_extend(pins, CCX_MODE_CONTROL_PINS, pump_field, struct)) && seas_ml == 1L) {
     list(incumbent = CCX_MODE_PINNED_PARENT, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the free parent, under the inert pins")
   } else if (same(pins, CCX_MODE_L2_ARM_PINS)) {

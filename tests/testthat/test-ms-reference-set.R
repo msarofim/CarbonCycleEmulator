@@ -49,6 +49,10 @@ test_that("the five branches return the ruled pairs", {
   expect_identical(r4$incumbent, CCX_MODE_SEASML0_CONTROL); expect_identical(r4$new_basin, CCX_MODE_PINNED_PARENT)
   r5 <- ccx_ms_reference_set(ms_ctl, "1")
   expect_identical(r5$incumbent, CCX_MODE_PINNED_PARENT); expect_identical(r5$new_basin, CCX_MODE_SEASML0_CONTROL)
+  # 09-18: the control's pins EXTENDED by the limb's name (inert without the limb) are still the control's arm
+  r5b <- ccx_ms_reference_set(c(ms_ctl, w_enso_l2 = 0), "1"); expect_identical(r5b, r5)
+  r4b <- ccx_ms_reference_set(c(ms_ctl, w_enso_l2 = 0), "0"); expect_identical(r4b, r4)
+  expect_error(ccx_ms_reference_set(c(ms_ctl, w_enso_l2 = 0), "1", struct = "hilda_cl3"), "no registered incumbent")   # not inert WITH the limb
   for (r in list(r1, r2, r3, r4, r5)) {
     expect_true(all(c(r$incumbent, r$new_basin) %in% names(CCX_MODE_FILES)))
     expect_false(identical(r$incumbent, r$new_basin), info = "ids 1 and 2 must be different points")

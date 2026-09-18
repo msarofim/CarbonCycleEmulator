@@ -307,6 +307,9 @@ export CCX_MS_SPREAD="${CCX_MS_SPREAD:-1.0452}"
 #   w_enso_l2 fitted in its place = 29 free; incumbent the canonical, new basin the control -- CCX_MODE_L2_ARM_PINS):
 #     CCX_MS_STRUCT=hilda_cl3 CCX_MS_SEAS_ML=1 CCX_MS_PIN=ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 CCX_MS_PREFLIGHT=1 sbatch --array=0-23 --time=00:15:00 calibration/torch/multistart.sbatch
 #     CCX_MS_STRUCT=hilda_cl3 CCX_MS_SEAS_ML=1 CCX_MS_PIN=ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
+#   2026-09-18 (c) -- THE FREE PARENT's REFIT under #12 / hilda_c (ML ON, SHIM FREE; the six inert pins + w_enso_l2 = 0
+#   (inert without the limb); 31 free) -- test (a) of the control result: separates "the seasonal ML costs" from "the pin costs":
+#     CCX_MS_STRUCT=hilda_c CCX_MS_SEAS_ML=1 CCX_MS_PIN=w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,w_enso_l2=0 sbatch --array=0-23%24 calibration/torch/multistart.sbatch
 export CCX_MS_PUMP_FIELD="${CCX_MS_PUMP_FIELD:-solved}"
 FIELD_LABEL=""; if [ "$CCX_MS_PUMP_FIELD" = "martin" ]; then FIELD_LABEL="_martin"; fi
 export CCX_MS_PIN="${CCX_MS_PIN:-}"
