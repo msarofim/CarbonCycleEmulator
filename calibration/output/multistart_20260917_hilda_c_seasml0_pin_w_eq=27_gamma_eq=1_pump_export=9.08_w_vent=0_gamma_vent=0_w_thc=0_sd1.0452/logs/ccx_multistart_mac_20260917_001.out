@@ -1,0 +1,55 @@
+task 1  2026-09-17T17:48:52-0400
+PINNED (removed from the fitted set, held in the base): w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0 -> 31 free parameters
+run-time inputs present: 13/13. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+NOTE the incumbent reference was FITTED under kz [1161.6, 27808], the shipped table is kz [1161.6, 27808].
+     Feasible, so it is a legal start; its own stored logpost is on a different scale.
+NOTE the new basin reference was FITTED under kz [1161.6, 27808], the shipped table is kz [1161.6, 27808].
+     Feasible, so it is a legal start; its own stored logpost is on a different scale.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.5340724)
+
+======================================================================
+DISPERSED MULTI-START, id 1, arm N, 31 parameters
+  host MacBook-Pro-2.local   R 4.5.3   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.5341, pooled over the 31 coordinates at least one of
+    them FITTED; over all 31 it would be 0.5341, diluted by the 0 migrated in BOTH:
+    none)
+  out /Users/MarcusMarcus/ccx_frozen/20260917j_control_refit/calibration/output/multistart_20260917_hilda_c_seasml0_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452/start_001.rds
+======================================================================
+  structure: 'hilda_c' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6)
+  seasonal mixed layer: seas_ml = 0 (OFF -- the shipped model; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'solved' (the SOLVED GLODAP-shape field -- every registered file; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -1e+06 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: reference: INCUMBENT = hilda31p (the seas_ml-0 CONTROL, refit under its own arm (the inert pins, shim free); objective #12, periodic spinup, evaluated at seas_ml 0) (0 draws), log-post there = -1797.5605
+PORT GATE (a) at the incumbent reference point: here -1797.5604932354 vs MacBook-Pro-2.local@8015bb4 -1797.5604932354,
+              |diff| 1.978e-11 (rel 1.10e-14)
+              roundoff floor here: max |delta lp| 7.262e-07 over 12 perturbations of u by 1e-12 (median 2.093e-07; 0 non-finite)
+              bound = max(1e-08 x |target| = 1.798e-05, 3 x floor = 2.179e-06) = 1.798e-05; ceiling 1e-06 x |target| = 1.798e-03
+PORT GATE (a) PASSED.
+measured 0.2215 s/eval (median of 5; range 0.2059-0.3321) => one 6000-eval restart
+  projects to 22.1 min; wall budget 300 min, of which 34.9 min is RESERVED for the
+  BFGS polish (100 iterations)
+[001] cycle 1 restart  1: log-post =   -1437.8542 (gain   359.7063) evals 6002  20.8 min
+[001] cycle 1 restart  2: log-post =   -1437.3874 (gain     0.4669) evals 12004  41.0 min
+[001] cycle 1 restart  3: log-post =   -1436.6668 (gain     0.7205) evals 18006  61.1 min
+[001] cycle 1 polish: log-post = -1427.3003 (gain 9.3665)
+[001] === cycle 1 total gain 370.2602 (log-post -1427.3003, 21618 evals, 73.4 min) ===
+[001] cycle 2 restart  1: log-post =   -1427.3003 (gain     0.0000) evals 24901  84.7 min
+[001] cycle 2 restart  2: log-post =   -1427.3003 (gain     0.0000) evals 28187  96.0 min
+[001] === cycle 2 total gain 0.0000 (log-post -1427.3003, 28270 evals, 96.3 min) ===
+Warning message:
+In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 3.099e-05
+
+[001] FINAL log-post -1427.3003  (CONVERGED, 5 restarts, 28270 evals, 96.4 min)
+[001] eval rate 0.1775 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[001] PORT GATE (b) ordering: final -1427.3003 >= start -1797.5605. OK
+[001] for reference: the mode FILE stores -1455.9984; the difference from
+      this run's start value is objective drift, not a port defect.
+======================================================================
+done 2026-09-17T19:25:23-0400 exit 0

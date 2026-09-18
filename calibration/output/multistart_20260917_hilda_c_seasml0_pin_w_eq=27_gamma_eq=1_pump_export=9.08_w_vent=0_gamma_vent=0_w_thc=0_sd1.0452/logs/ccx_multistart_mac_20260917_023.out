@@ -1,0 +1,63 @@
+task 23  2026-09-17T21:54:00-0400
+PINNED (removed from the fitted set, held in the base): w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0 -> 31 free parameters
+run-time inputs present: 13/13. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+NOTE the incumbent reference was FITTED under kz [1161.6, 27808], the shipped table is kz [1161.6, 27808].
+     Feasible, so it is a legal start; its own stored logpost is on a different scale.
+NOTE the new basin reference was FITTED under kz [1161.6, 27808], the shipped table is kz [1161.6, 27808].
+     Feasible, so it is a legal start; its own stored logpost is on a different scale.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.5340724)
+
+======================================================================
+DISPERSED MULTI-START, id 23, arm N, 31 parameters
+  host MacBook-Pro-2.local   R 4.5.3   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.5341, pooled over the 31 coordinates at least one of
+    them FITTED; over all 31 it would be 0.5341, diluted by the 0 migrated in BOTH:
+    none)
+  out /Users/MarcusMarcus/ccx_frozen/20260917j_control_refit/calibration/output/multistart_20260917_hilda_c_seasml0_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452/start_023.rds
+======================================================================
+  structure: 'hilda_c' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6)
+  seasonal mixed layer: seas_ml = 0 (OFF -- the shipped model; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'solved' (the SOLVED GLODAP-shape field -- every registered file; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -4.012e+07 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: dispersed about the COLD init, sd 1.0452 (1 draw), log-post there = -4011649.9835
+PORT GATE (a) at the new_basin reference point: here -2095.4685581237 vs MacBook-Pro-2.local@8015bb4 -2095.4685581237,
+              |diff| 3.956e-11 (rel 1.89e-14)  [this task's own start is elsewhere]
+              roundoff floor here: max |delta lp| 7.449e-06 over 12 perturbations of u by 1e-12 (median 9.112e-07; 0 non-finite)
+              bound = max(1e-08 x |target| = 2.095e-05, 3 x floor = 2.235e-05) = 2.235e-05; ceiling 1e-06 x |target| = 2.095e-03
+PORT GATE (a) PASSED.
+measured 0.2180 s/eval (median of 5; range 0.2081-0.2195) => one 6000-eval restart
+  projects to 21.8 min; wall budget 300 min, of which 34.3 min is RESERVED for the
+  BFGS polish (100 iterations)
+[023] cycle 1 restart  1: log-post =   -3075.8761 (gain 4008574.1074) evals 6002  20.7 min
+[023] cycle 1 restart  2: log-post =   -1912.0681 (gain  1163.8079) evals 12004  41.4 min
+[023] cycle 1 restart  3: log-post =   -1774.8833 (gain   137.1848) evals 18006  61.8 min
+[023] cycle 1 polish: log-post = -1480.2171 (gain 294.6661)
+[023] === cycle 1 total gain 4010169.7663 (log-post -1480.2171, 27012 evals, 88.0 min) ===
+[023] cycle 2 restart  1: log-post =   -1480.2171 (gain     0.0000) evals 29216  93.1 min
+[023] cycle 2 restart  2: log-post =   -1480.2171 (gain     0.0000) evals 32330  100.2 min
+[023] === cycle 2 total gain 0.0000 (log-post -1480.2171, 32414 evals, 100.4 min) ===
+Warning messages:
+1: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 2.441e-03
+2: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 1.831e-04
+3: In spinup_fn(p) :
+  periodic spinup: carbon did not converge, |resid| = 2.877e+05
+4: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 2.060e-05
+5: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 4.768e-07
+6: In spinup_fn(p) :
+  periodic spinup: carbon did not converge, |resid| = 6.413e+04
+
+[023] FINAL log-post -1480.2171  (CONVERGED, 5 restarts, 32414 evals, 100.5 min)
+[023] eval rate 0.1371 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[023] PORT GATE (b) ordering: final -1480.2171 >= start -4011649.9835. OK
+======================================================================
+done 2026-09-17T23:34:35-0400 exit 0

@@ -1,0 +1,55 @@
+task 6  2026-09-17T17:48:52-0400
+PINNED (removed from the fitted set, held in the base): w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0 -> 31 free parameters
+run-time inputs present: 13/13. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+NOTE the incumbent reference was FITTED under kz [1161.6, 27808], the shipped table is kz [1161.6, 27808].
+     Feasible, so it is a legal start; its own stored logpost is on a different scale.
+NOTE the new basin reference was FITTED under kz [1161.6, 27808], the shipped table is kz [1161.6, 27808].
+     Feasible, so it is a legal start; its own stored logpost is on a different scale.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.5340724)
+
+======================================================================
+DISPERSED MULTI-START, id 6, arm N, 31 parameters
+  host MacBook-Pro-2.local   R 4.5.3   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.5341, pooled over the 31 coordinates at least one of
+    them FITTED; over all 31 it would be 0.5341, diluted by the 0 migrated in BOTH:
+    none)
+  out /Users/MarcusMarcus/ccx_frozen/20260917j_control_refit/calibration/output/multistart_20260917_hilda_c_seasml0_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452/start_006.rds
+======================================================================
+  structure: 'hilda_c' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6)
+  seasonal mixed layer: seas_ml = 0 (OFF -- the shipped model; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'solved' (the SOLVED GLODAP-shape field -- every registered file; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -4.748e+06 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: dispersed about the COLD init, sd 1.0452 (1 draw), log-post there = -474848.1910
+PORT GATE (a) at the new_basin reference point: here -2095.4685581237 vs MacBook-Pro-2.local@8015bb4 -2095.4685581237,
+              |diff| 3.956e-11 (rel 1.89e-14)  [this task's own start is elsewhere]
+              roundoff floor here: max |delta lp| 7.449e-06 over 12 perturbations of u by 1e-12 (median 9.112e-07; 0 non-finite)
+              bound = max(1e-08 x |target| = 2.095e-05, 3 x floor = 2.235e-05) = 2.235e-05; ceiling 1e-06 x |target| = 2.095e-03
+PORT GATE (a) PASSED.
+measured 0.2408 s/eval (median of 5; range 0.2121-0.3315) => one 6000-eval restart
+  projects to 24.1 min; wall budget 300 min, of which 37.9 min is RESERVED for the
+  BFGS polish (100 iterations)
+[006] cycle 1 restart  1: log-post =   -1571.9028 (gain 473276.2882) evals 6002  20.8 min
+[006] cycle 1 restart  2: log-post =   -1457.9607 (gain   113.9421) evals 12004  41.0 min
+[006] cycle 1 restart  3: log-post =   -1448.0884 (gain     9.8723) evals 18006  61.2 min
+[006] cycle 1 polish: log-post = -1434.4052 (gain 13.6832)
+[006] === cycle 1 total gain 473413.7859 (log-post -1434.4052, 22719 evals, 77.0 min) ===
+[006] cycle 2 restart  1: log-post =   -1434.4052 (gain     0.0000) evals 25621  86.7 min
+[006] cycle 2 restart  2: log-post =   -1434.4052 (gain     0.0000) evals 29074  98.2 min
+[006] === cycle 2 total gain 0.0000 (log-post -1434.4052, 29158 evals, 98.5 min) ===
+Warning messages:
+1: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 1.354e-07
+2: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 9.632e-05
+
+[006] FINAL log-post -1434.4052  (CONVERGED, 5 restarts, 29158 evals, 98.6 min)
+[006] eval rate 0.1696 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[006] PORT GATE (b) ordering: final -1434.4052 >= start -474848.1910. OK
+======================================================================
+done 2026-09-17T19:27:36-0400 exit 0
