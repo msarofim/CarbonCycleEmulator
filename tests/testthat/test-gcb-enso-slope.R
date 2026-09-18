@@ -48,10 +48,12 @@ ges_toggle <- function(on, f) { old <- LIK_USE_GCB_ENSO_SLOPE; assign("LIK_USE_G
 test_that("(3) ADDITIVE: the 25 pre-#13 rows are bit-identical; the row is absent OFF, absent without a target, one finite number ON", {
   st_on  <- ges_toggle(TRUE,  function() unlist(dg_streams(ges_r, ges_v, obs = ges_obs)))
   st_off <- ges_toggle(FALSE, function() unlist(dg_streams(ges_r, ges_v, obs = ges_obs)))
-  old <- names(ges_v$md$streams)
+  old <- setdiff(names(ges_v$md$streams), "gcb_ocean_enso_slope")   # the 25 pre-#13 rows (the file is #13-stamped since 09-18 e)
+  expect_length(old, 25L)
   expect_false("gcb_ocean_enso_slope" %in% names(st_off)); expect_true("gcb_ocean_enso_slope" %in% names(st_on))
   expect_identical(st_on[old], st_off[old])
-  expect_equal(unname(st_on[old]), unname(unlist(ges_v$md$streams[old])), tolerance = 1e-9)   # the canonical's stored 25 (a #12 file)
+  expect_equal(unname(st_on[old]), unname(unlist(ges_v$md$streams[old])), tolerance = 1e-9)   # the canonical's stored 25
+  expect_equal(st_on[["gcb_ocean_enso_slope"]], ges_v$md$streams[["gcb_ocean_enso_slope"]], tolerance = 1e-9)   # and its stored row
   expect_true(is.finite(st_on[["gcb_ocean_enso_slope"]])); expect_identical(sum(!is.na(st_on)), length(old) + 1L)
   o2 <- ges_obs; o2$enso_slope <- NULL
   st_no <- ges_toggle(TRUE, function() unlist(dg_streams(ges_r, ges_v, obs = o2)))

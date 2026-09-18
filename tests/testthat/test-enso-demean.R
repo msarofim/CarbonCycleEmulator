@@ -200,7 +200,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 17.5455 under the adopted objective (hilda30h); 41.6102 at the seas_ml 0 control", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth 17.4739 under the adopted objective (#13, hilda30h); 41.5433 at the seas_ml 0 control", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -246,9 +246,12 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 17.5455 under 
   # at 0 (the two-limb kink) -- roughly the (gamma)^2 scaling of a price on an ENSO-driven
   # trajectory -- and GATE V got worse (0.77 -> 0.59x). 49.7606 stays a fact about the quarantined
   # hilda30c; 41.6102 stays the pin at the control (unrefit under #12 -- its refit is owed).
-  expect_equal(r$on_periodic - r$off_periodic, 17.5455, tolerance = 1e-4, scale = 1)
+  # 2026-09-18 (e): objective #13 adds the GCB ENSO ocean-slope row; the demean flag changes the
+  # FORCING the model's ocean sink responds to, so the row differs by ~0.07 between the two
+  # scorings: 17.5455 -> 17.4739 (canonical), 41.6102 -> 41.5433 (control). Files restamped.
+  expect_equal(r$on_periodic - r$off_periodic, 17.4739, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
-  expect_equal(r0$on_periodic - r0$off_periodic, 41.6102, tolerance = 1e-4, scale = 1)
+  expect_equal(r0$on_periodic - r0$off_periodic, 41.5433, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
   expect_gt(r$on_periodic - r$off_periodic, 1)
@@ -258,7 +261,7 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 17.5455 under 
   expect_gt(abs((r$on_periodic - r$off_periodic) - (r$on_aseasonal - r$off_aseasonal)), 1)
 })
 
-test_that("RATIFICATION PIN at `hilda31` (retired, by path): 43.8344 aseasonal, and the 53.5222 artifact", {
+test_that("RATIFICATION PIN at `hilda31` (retired, by path): 50.3262 aseasonal, and the 60.0184 artifact (#13)", {
   skip_if_no_cpp()
   md <- readRDS(ccx_path(CCX_MODE_HILDA31_QUARANTINED))
   expect_identical(ccx_mode_spinup(md), "aseasonal")   # unrecorded = pre-09-09x = a fact
@@ -276,8 +279,9 @@ test_that("RATIFICATION PIN at `hilda31` (retired, by path): 43.8344 aseasonal, 
   # files show. The file is restamped (+30.6090, history kept).
   # 09-12 (d): +0.0023 each from review A12 (observed-month D14C edge years).
   # 09-16 (d): +6.5590 / +6.5633 from the hygiene batch (the land-sink sigma; file restamped -21.6168 on the likelihood).
-  expect_equal(r$on_aseasonal - r$off_aseasonal, 50.3934, tolerance = 1e-4, scale = 1)
-  expect_equal(r$on_periodic  - r$off_periodic,  60.0855, tolerance = 1e-4, scale = 1)
+  # 09-18 (e): -0.0672 / -0.0671 from objective #13's ENSO-slope row (file restamped +0.3630 on the likelihood).
+  expect_equal(r$on_aseasonal - r$off_aseasonal, 50.3262, tolerance = 1e-4, scale = 1)
+  expect_equal(r$on_periodic  - r$off_periodic,  60.0184, tolerance = 1e-4, scale = 1)
   expect_gt(r$on_aseasonal - r$off_aseasonal, 1)
   expect_gt(abs((r$on_periodic - r$off_periodic) - (r$on_aseasonal - r$off_aseasonal)), 1)
 })

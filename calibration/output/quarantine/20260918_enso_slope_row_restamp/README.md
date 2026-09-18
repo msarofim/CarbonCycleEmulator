@@ -10,3 +10,4 @@ observational constraint, add it to the objective"). Measured likelihood moves
 +0.1153 +/- 0.0246, z -3.08), hilda31s2 +0.7692, hilda31p +0.3912. The restamped files carry the history inside
 `objective_history`. Canonical post-restamp path: the same `calibration/output/<dir>/mode_fit_pumpN.rds`.
 To reproduce a #12 number: set `LIK_USE_GCB_ENSO_SLOPE <- FALSE` (or read these copies' streams).
+- Also the ratification pin's quarantined `hilda31` (quarantine/20260910_periodic_spinup_adopted/refit_20260908_hilda31): +0.3630 (its pre-#13 copy in refit_20260908_hilda31_prerestamp/).
