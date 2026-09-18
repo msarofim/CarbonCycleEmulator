@@ -400,6 +400,50 @@ LIK_ICE_REP_ERR <- 4.0               # ppm, added in quadrature
 # Q1's inflation multiplier still rides on top (LIK_LAND_SINK_INFLATE).
 LIK_GCB_OCEAN_SD   <- 0.4            # GtC/yr, GCB 2025 stated ocean-sink 1 sigma
 LIK_GCB_LAND_SD    <- 0.5            # GtC/yr, GCB 2025 stated land-sink 1 sigma
+
+# ---- OBJECTIVE CHANGE #13 (2026-09-18 e): THE GCB ENSO OCEAN-SLOPE ROW -------
+# `gcb_ocean_enso_slope`: the regression coefficient of the annual ocean sink on
+# the annual-mean Nino3.4 anomaly (year term; the 09-04g estimator that every ENSO
+# diagnostic and the T-A2 / limb probes read), model vs GCB, one Gaussian at the
+# OBSERVED regression's own standard error.
+# WHY (Marcus 09-18: "is the GCB regression slope an important observational
+# constraint? If so, add it to the objective"): the ENSO ocean sign is the release
+# blocker (Fix B), and the limb array of 09-18 showed the objective has almost NO
+# POWER on it -- `gcb_ocean_sink` scores the sink year by year at sigma 0.4 GtC/yr,
+# a LEVEL sigma (the products disagree on the level), so a 0.11 GtC/yr-per-index
+# response moved that row by < 1 log-unit across the whole probe grid; the refit
+# set w_enso_l2 to 10.9 (0.09x the observed slope) at no likelihood cost, and the
+# shim before it to 0.35x. A well-determined DERIVED statistic of a series whose
+# level is loose is encoded as its own row -- the co2_gradient idiom. The obs
+# slope +0.1153 +/- 0.0246 GtC/yr per index (1959-2024, n 66) is a 4.7-sigma
+# signal in GCB's ocean sink (the GOBM / pCO2-product mean; the pCO2 products are
+# SOCAT-based). ONE estimator for both sides: ccx_enso_slope(); the obs target is
+# built in ccx_prepare_obs() from the same forcing_enso.rds the model is driven by.
+# FALSE = objective #12 (for pricing / reproduction only). Priced at every
+# registered mode in outputs/diagnostics/enso_slope_row_price_20260918.log.
+LIK_USE_GCB_ENSO_SLOPE <- TRUE
+LIK_ENSO_SLOPE_WIN     <- c(1959L, 2024L)   # = the 09-04g estimator's window (SC_ENSO_WIN)
+LIK_ENSO_SLOPE_MIN_N   <- 30L               # fewer years than this: the row is ABSENT, never zero
+#' The ENSO slope of an annual sink series: coefficient on the annual-mean
+#' Nino3.4 anomaly in sink ~ year + nino34 over the window. Returns
+#' c(slope, se, r, n); NA with fewer than LIK_ENSO_SLOPE_MIN_N years. `idx` is
+#' the annual index data.frame(year, nino34) from ccx_enso_annual_index().
+ccx_enso_slope <- function(year, sink, idx, win = LIK_ENSO_SLOPE_WIN) {
+  d <- merge(data.frame(year = year, sink = sink), idx, by = "year")
+  d <- d[is.finite(d$sink) & d$year >= win[1] & d$year <= win[2], ]
+  if (nrow(d) < LIK_ENSO_SLOPE_MIN_N) return(c(slope = NA_real_, se = NA_real_, r = NA_real_, n = nrow(d)))
+  f <- stats::lm(sink ~ year + nino34, data = d)
+  c(slope = unname(coef(f)[["nino34"]]), se = summary(f)$coefficients["nino34", 2],
+    r = stats::cor(stats::residuals(stats::lm(sink ~ year, d)), d$nino34), n = nrow(d))
+}
+#' The annual-mean Nino3.4 anomaly from the forcing product, UNDEMEANED (a
+#' regression with a year term is invariant to the index's mean).
+ccx_enso_annual_index <- function() {
+  en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
+  en <- en[!is.na(en$nino34_anom), ]
+  a <- stats::aggregate(nino34_anom ~ year, data = en, FUN = mean)
+  data.frame(year = as.integer(a$year), nino34 = a$nino34_anom)
+}
 # GCB 2025 stated 1 sigma on E_LUC, GtC/yr. Not used in the likelihood -- it is
 # the receipt behind the luc_scale prior in calibrate.R, kept beside its
 # siblings so the four numbers stay together and traceable to one header.
@@ -1737,8 +1781,15 @@ ccx_prepare_obs <- function() {
   co2_grad  <- ccx_pair_grad(co2_ann$MLO, co2_ann$SPO)
   d13c_grad <- ccx_pair_grad(d13_ann$MLO, d13_ann$SPO)
 
+  # ---- THE GCB ENSO OCEAN SLOPE (objective #13, 2026-09-18 e) ---------
+  # The observed regression, on the same estimator and the same index the model
+  # row uses (ccx_enso_slope / ccx_enso_annual_index); its se is the row's sigma.
+  enso_idx <- ccx_enso_annual_index()
+  enso_slope <- ccx_enso_slope(gcb$year, gcb$ocean_sink, enso_idx)
+
   list(co2 = co2, d13 = d13, d14_nh = d14_nh, d14_sh = d14_sh,
        ice = ico, gcb = gcb, intcal = ic20, weights = w,
+       enso_idx = enso_idx, enso_slope = enso_slope,
        co2_ann = co2_ann, d13_ann = d13_ann, co2_seas = co2_seas,
        d13_seas = d13_seas,
        co2_grad = co2_grad, d13c_grad = d13c_grad,
@@ -2362,6 +2413,18 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
       add("gcb_land_sink",
           sum(stats::dnorm(g$land_sink, g$land + g$eluc,
                            LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE, log = TRUE)))
+    }
+    # ---- the ENSO ocean slope (objective #13, 2026-09-18 e; see LIK_USE_GCB_ENSO_SLOPE) --
+    # The MODEL's own calendar-year ocean flux (the series above, over the model's
+    # whole run, not only GCB's years) regressed on the annual index with the SAME
+    # estimator as the obs target. ABSENT (never zero) when the run is too short
+    # for the window, when obs carries no target (an old fixture), or with the
+    # switch off -- a missing row is a warning in dg_streams, a zero is a lie.
+    if (LIK_USE_GCB_ENSO_SLOPE && !is.null(obs$enso_slope) && is.finite(obs$enso_slope[["slope"]])) {
+      ms <- ccx_enso_slope(flux$year, flux$ocean, obs$enso_idx)
+      if (is.finite(ms[["slope"]]))
+        add("gcb_ocean_enso_slope",
+            stats::dnorm(obs$enso_slope[["slope"]], ms[["slope"]], obs$enso_slope[["se"]], log = TRUE))
     }
   }
   if (by_stream) return(unlist(parts))

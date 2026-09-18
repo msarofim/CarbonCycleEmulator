@@ -57,7 +57,9 @@ cat(sprintf("%s: likelihood %.6f -> %.6f (delta %+.6f; expected %+.4f) | logpost
 if (abs(delta - RS_EXPECT) > RS_TOL)
   stop("the measured LIKELIHOOD move does not match the priced one (|", format(delta - RS_EXPECT), "| > ", RS_TOL,
        "). Price the change in the CHANGELOG first; this script does not absorb drift.")
-moved <- names(st_new)[abs(unlist(st_new) - unlist(md$streams[names(st_new)])) > 1e-6]
+# a row NEW to the objective (an added stream, #13) has no old value: name it as new rather than NA
+new_rows <- setdiff(names(st_new), names(md$streams)); old_rows <- intersect(names(st_new), names(md$streams))
+moved <- c(old_rows[abs(unlist(st_new[old_rows]) - unlist(md$streams[old_rows])) > 1e-6], if (length(new_rows)) paste0("NEW:", new_rows))
 cat("  rows that moved:", paste(sprintf("%s %+.4f", moved, unlist(st_new[moved]) - unlist(md$streams[moved])), collapse = ", "), "\n")
 md$objective_history <- c(md$objective_history, list(list(
   date = format(Sys.Date()), reason = RS_REASON, logpost_before = md$logpost, logpost_after = lp_new,

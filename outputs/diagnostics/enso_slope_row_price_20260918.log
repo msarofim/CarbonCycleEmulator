@@ -1,0 +1,14 @@
+THE ROW: GCB ocean sink ~ year + Nino3.4 (annual means), 1959-2024: slope +0.1153 +/- 0.0246 (r +0.488, n 66); sigma = the se
+
+arm          struct     seas_ml      model          z      row    lik #12    lik #13     stored
+hilda30h     hilda_c          1    +0.0397      -3.08   -1.947 -1400.3026 -1402.2491 -1400.3026
+hilda31s2    hilda            1    +0.0659      -2.01    0.769 -1412.0130 -1411.2439 -1412.0130
+hilda31p     hilda            0    +0.0615      -2.19    0.391 -1415.1376 -1414.7464 -1415.1376
+control_c1   hilda_c          0    +0.0362      -3.22   -2.391 -1389.9948 -1392.3857          -
+limb_a1      hilda_cl3        1    +0.0098      -4.29   -6.422 -1400.4646 -1406.8864          -
+
+  (the model slope is recovered from the row assuming the model is BELOW the obs, which every arm here is; 'stored' = the file's #12 streams, reproduced to 1e-3 before pricing)
+
+RESTAMP deltas for the registered files (= the row): hilda30h -1.9466, hilda31s2 +0.7692, hilda31p +0.3912
+the canonical beats the registered control under #13 by +12.50 (was +14.84 under #12); the refit control c1 beats the canonical by +9.86 under #13 (was +10.31)
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/enso_slope_row_price_20260918.{log,rds}
