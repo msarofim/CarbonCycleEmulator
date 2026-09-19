@@ -1,0 +1,49 @@
+SEASONAL ML HEMISPHERE SPLIT  2026-09-19 14:18:21
+  canonical hilda30e (ML on, shim pinned), fp1 = test (a) id 18 (ML on, shim free), control hilda31pe (ML off)
+  knock-out verified: a flattened hemisphere evaluates to f = 1, dfdt = 0 at 48 phases; the other hemisphere is bit-identical to production
+  the LS climatology's excursion: NH f in [0.603, 1.682] (max at tau 0.12), SH f in [0.535, 1.688] (max at tau 0.65)
+
+=== 0. THE TWO REGISTERED FILES REPRODUCE THEIR STORED STREAMS (with the production shape) ===
+  canonical  stored -1397.9253 recomputed -1397.9253 diff -3.52e-11 over 26 rows -> REPRODUCES
+  control    stored -1387.7128 recomputed -1387.7128 diff -9.94e-11 over 26 rows -> REPRODUCES
+
+=== 1. THE SCAN: each fitted point x {full, NH flat, SH flat, both flat}; likelihood on the 26 rows ===
+  arm                         total   NH seas   SH seas grad rows     other  d13c_MLO   co2_MLO  d13c_SPO
+  control                  -1387.71    207.63    320.38     75.87  -1991.59    208.16     -0.53    251.06
+  canonical:full           -1397.93    198.48    319.66     74.39  -1990.45    200.91     -2.43    250.13
+  canonical:NH_flat        -1445.79    159.32    311.06     74.53  -1990.70    199.98    -40.66    250.25
+  canonical:SH_flat        -1832.33    196.65   -109.47     74.58  -1994.09    200.37     -3.72    250.75
+  canonical:both_flat      -1834.32    178.85    -92.96     74.70  -1994.91    199.46    -20.61    250.91
+  fp1:full                 -1398.09    200.22    321.42     75.84  -1995.57    201.99     -1.77    251.82
+  fp1:NH_flat              -1415.77    186.93    317.44     75.91  -1996.05    201.33    -14.41    251.88
+  fp1:SH_flat              -1598.02    201.11    122.01     75.93  -1997.06    201.61     -0.50    252.05
+  fp1:both_flat            -1595.27    195.76    130.69     76.00  -1997.72    200.96     -5.20    252.13
+  (26 common rows; 'other' = the 17 rows outside the seasonal and gradient sets)
+
+=== 2. WHAT EACH KNOCK-OUT RECOVERS, against the control (ML off, its own point) ===
+  at canonical's point: full ML minus control = -10.21 on 26 rows (NH seasonal -9.15, SH seasonal -0.72, gradients -1.48)
+    NH_flat    vs full:  -47.86 total; NH seasonal -39.16 (d13c_MLO  -0.93, co2_MLO -38.22); SH seasonal  -8.60; gradients  +0.14; other  -0.25 -> -428 % of the gap to the control recovered on the NH rows
+    SH_flat    vs full: -434.40 total; NH seasonal  -1.83 (d13c_MLO  -0.54, co2_MLO  -1.29); SH seasonal -429.12; gradients  +0.19; other  -3.63 -> -20 % of the gap to the control recovered on the NH rows
+    both_flat  vs full: -436.40 total; NH seasonal -19.63 (d13c_MLO  -1.46, co2_MLO -18.17); SH seasonal -412.62; gradients  +0.31; other  -4.46 -> -215 % of the gap to the control recovered on the NH rows
+  at fp1's point: full ML minus control = -10.38 on 26 rows (NH seasonal -7.41, SH seasonal +1.04, gradients -0.03)
+    NH_flat    vs full:  -17.68 total; NH seasonal -13.29 (d13c_MLO  -0.65, co2_MLO -12.64); SH seasonal  -3.98; gradients  +0.07; other  -0.48 -> -180 % of the gap to the control recovered on the NH rows
+    SH_flat    vs full: -199.93 total; NH seasonal  +0.89 (d13c_MLO  -0.38, co2_MLO  +1.26); SH seasonal -199.41; gradients  +0.09; other  -1.49 -> 12 % of the gap to the control recovered on the NH rows
+    both_flat  vs full: -197.18 total; NH seasonal  -4.46 (d13c_MLO  -1.03, co2_MLO  -3.44); SH seasonal -190.72; gradients  +0.16; other  -2.15 -> -60 % of the gap to the control recovered on the NH rows
+
+=== 3. GATE S and the SPO ocean limb (the mechanism's own product) ===
+  GATE S  control                SPO ocean limb 0.311 ppm @ month 8.70  -> PASS
+  GATE S  canonical:full         SPO ocean limb 0.327 ppm @ month 8.45  -> PASS
+  GATE S  canonical:NH_flat      SPO ocean limb 0.294 ppm @ month 9.22  -> PASS
+  GATE S  canonical:SH_flat      SPO ocean limb 0.791 ppm @ month 4.35  -> FAIL (-3.06 mo)
+  GATE S  canonical:both_flat    SPO ocean limb 0.734 ppm @ month 4.07  -> FAIL (-3.34 mo)
+  GATE S  fp1:full               SPO ocean limb 0.419 ppm @ month 8.54  -> PASS
+  GATE S  fp1:NH_flat            SPO ocean limb 0.399 ppm @ month 8.93  -> PASS
+  GATE S  fp1:SH_flat            SPO ocean limb 0.420 ppm @ month 4.87  -> FAIL (-2.54 mo)
+  GATE S  fp1:both_flat          SPO ocean limb 0.357 ppm @ month 4.58  -> FAIL (-2.83 mo)
+
+=== 4. VERDICT (conditional; a refit under the winning form is the next step) ===
+  NH gap recovered by NH_flat: canonical -428 %, fp1 -180 %
+  -> H_mech: the NH knock-out recovers little -- the cost is the entrainment itself; the ruling is keep (mechanism) vs drop (fit)
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/seas_ml_hemisphere_split_20260919.{log,rds}
+⛔ NOTHING IS ADOPTED.
