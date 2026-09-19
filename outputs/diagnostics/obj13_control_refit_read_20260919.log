@@ -1,0 +1,208 @@
+OBJECTIVE #13 REFIT READ -- the CONTROL arm  2026-09-19 13:20:50
+  the control arm's refit under objective #13 (Mac, frozen tree ~/ccx_frozen/20260918f_control_obj13_refit; chained after test (a))
+  dir calibration/output/multistart_20260918_hilda_c_seasml0_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+  collector: 24 starts, 24 converged, 2 basins; best id 11 logpost -1425.0156
+  arms from the collector: w1 = id 11 (basin 1, logpost -1425.0156, CONVERGED); w2 = id 22 (basin 2, logpost -1432.0375, CONVERGED)
+
+=== A. THE BASINS IN u-SPACE ===
+  w1 (id 11) vs id 1 (the incumbent's own convergence): RMS |du| 0.0007, max |du| 0.0027 at fert_k -> SAME basin
+  w1 vs w2 (id 22, -7.02): RMS |du| 0.7351; the coordinates that separate them (|du| > 0.3):
+    h_ml                 du -4.016   w1      49.49   w2        156
+    kz                   du +0.545   w1  1.454e+04   w2  1.099e+04
+    u_hs                 du +0.325   w1      24.15   w2      19.36
+    pump_hs_gcm2         du +0.310   w1      90.34   w2      75.37
+  w1 vs w1b (id 14, -0.35, the h_ml sub-mode): RMS |du| 0.1116; |du| > 0.3:
+    h_ml                 du -0.616   w1      49.49   w1b      54.97
+  w1 vs c1 (the same arm's #12 fit): the values that differ by > 5 %:
+    gamma_enso_ocn_NH    w1     0.4216   c1     0.3438
+    gamma_enso_ocn_SH    w1    0.06323   c1    0.02056
+
+=== B. PARAMETERS (value, prior z) ===
+  name                                    canonical                           c1                          fp1                           w1                           w2                          w1b
+  beta_max                         1.3664   z -0.11               1.35   z -0.13             1.3634   z -0.11              1.356   z -0.12             1.3402   z -0.13             1.3577   z -0.12
+  fert_k                           855.06   z -0.20             847.21   z -0.21             853.56   z -0.20             851.97   z -0.20             845.48   z -0.21             853.27   z -0.20
+  q10                              1.1163   z -2.33             1.0904   z -2.43             1.1138   z -2.34               1.09   z -2.43             1.0871   z -2.44             1.0898   z -2.43
+  kz                                13966   z -0.05              14506   z +0.00              14602   z +0.01              14540   z +0.01              10995   z -0.33              14419   z -0.01
+  kz_deep_frac                  0.0082178   z -2.72          0.0081035   z -2.73          0.0084104   z -2.70          0.0080449   z -2.74           0.008022   z -2.74          0.0078726   z -2.76
+  h_hs                             269.46   z +1.04             275.17   z +1.09              272.1   z +1.06             273.58   z +1.08             253.07   z +0.89             272.08   z +1.06
+  u_hs                             22.694   z +0.16             24.454   z -0.44             23.819   z -0.55             24.151   z -0.49             19.359   z -1.41             23.569   z -0.60
+  h_ml                             64.667   z +0.04             49.496   z -1.01             49.378   z -1.02             49.494   z -1.01             155.99   z +2.79             54.973   z -0.55
+  ent_seas_amp_SH                       0                       18.028   z +2.03             9.1321   z +0.67             18.017   z +2.03             17.143   z +1.93             17.944   z +2.02
+  sst_seas_amp_NH                  2.4415   z +0.35             1.7098   z -1.08             2.1621   z -0.14             1.7109   z -1.07             1.5482   z -1.47             1.6958   z -1.11
+  sst_seas_amp_SH                  1.3466   z -1.04             1.7399   z -0.01             1.7531   z +0.02             1.7396   z -0.02             1.7348   z -0.03             1.7393   z -0.02
+  pump_hs_gcm2                     89.273   z +2.27             91.403   z +2.31             96.488   z +2.41             90.341   z +2.29             75.374   z +1.99             88.137   z +2.25
+  pump_grad                        290.41   z +0.88             289.27   z +0.86             258.46   z +0.41             289.45   z +0.87             302.12   z +1.04             291.65   z +0.90
+  hs_asx_frac                     0.77239   z +1.12             0.7287   z +0.73            0.77413   z +1.13            0.73276   z +0.77            0.85233   z +1.78            0.73372   z +0.78
+  k_w                              1892.5   z +0.58             1930.7   z +0.63             1905.6   z +0.60             1927.7   z +0.63             1836.7   z +0.51             1922.9   z +0.62
+  tau_ex                          0.87711   z -1.57            0.87289   z -1.59            0.87826   z -1.57            0.87256   z -1.59            0.86764   z -1.62            0.87235   z -1.60
+  rep_dC                            3.556   z +3.56             3.5177   z +3.52             3.5608   z +3.56             3.5146   z +3.51             3.5336   z +3.53             3.5161   z +3.52
+  bomb_total                       120.46   z +1.66             120.59   z +1.67             120.52   z +1.67             120.57   z +1.67              120.6   z +1.67             120.55   z +1.67
+  sigma_d14c                       5.8266   z +0.22             5.8515   z +0.22              5.832   z +0.22             5.8444   z +0.22             5.8041   z +0.21             5.8421   z +0.22
+  luc_scale                       0.83163   z -0.66            0.82916   z -0.67            0.83176   z -0.66            0.82793   z -0.67            0.83274   z -0.65            0.82795   z -0.67
+  grad_off_co2                    0.20875   z +0.42            0.21316   z +0.43             0.2124   z +0.42             0.2136   z +0.43            0.21571   z +0.43            0.21371   z +0.43
+  grad_off_d13c                  0.067329   z +0.45           0.067103   z +0.45           0.067073   z +0.45           0.067107   z +0.45           0.067107   z +0.45            0.06711   z +0.45
+  gamma_enso_land_NH              0.55396   z +0.28            0.54758   z +0.27            0.55377   z +0.28            0.56463   z +0.28            0.60773   z +0.30            0.56565   z +0.28
+  gamma_enso_land_SH              0.21785   z +0.11            0.23422   z +0.12            0.21794   z +0.11            0.23752   z +0.12            0.20088   z +0.10            0.23696   z +0.12
+  gamma_enso_ocn_NH                0.3595   z +0.18            0.34376   z +0.17            0.36666   z +0.18            0.42156   z +0.21            0.42758   z +0.21            0.41888   z +0.21
+  gamma_enso_ocn_SH           -2.0413e-07   z -0.00           0.020559   z +0.01         -0.0023342   z -0.00           0.063229   z +0.03          0.0061842   z +0.00           0.062304   z +0.03
+  canonical  struct 'hilda_c' seas_ml 1 pins _pin_ent_seas_amp_SH=0.00_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00
+  c1         struct 'hilda_c' seas_ml 0 pins _pin_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00
+  fp1        struct 'hilda_c' seas_ml 1 pins _pin_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_w_enso_l2=0.00
+  w1         struct 'hilda_c' seas_ml 0 pins _pin_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_w_enso_l2=0.00
+  w2         struct 'hilda_c' seas_ml 0 pins _pin_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_w_enso_l2=0.00
+  w1b        struct 'hilda_c' seas_ml 0 pins _pin_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_w_enso_l2=0.00
+  THE SHIM ent_seas_amp_SH (the tell): canonical 0.000, c1 18.028, fp1 9.132, w1 18.017, w2 17.143, w1b 17.944
+  h_ml: canonical 64.7, c1 49.5, fp1 49.4, w1 49.5, w2 156.0, w1b 55.0 (box floor 42.5)
+  sst_seas_amp_NH (c1 1.71 / fp1 2.16 / canonical 2.44): canonical 2.441, c1 1.710, fp1 2.162, w1 1.711, w2 1.548, w1b 1.696
+  strained priors (|z| > 2) canonical  q10 -2.33, kz_deep_frac -2.72, pump_hs_gcm2 +2.27, rep_dC +3.56
+  strained priors (|z| > 2) c1         q10 -2.43, kz_deep_frac -2.73, pump_hs_gcm2 +2.31, ent_seas_amp_SH +2.03, rep_dC +3.52
+  strained priors (|z| > 2) fp1        q10 -2.34, kz_deep_frac -2.70, pump_hs_gcm2 +2.41, rep_dC +3.56
+  strained priors (|z| > 2) w1         q10 -2.43, kz_deep_frac -2.74, pump_hs_gcm2 +2.29, ent_seas_amp_SH +2.03, rep_dC +3.51
+  strained priors (|z| > 2) w2         q10 -2.44, h_ml +2.79, kz_deep_frac -2.74, rep_dC +3.53
+  strained priors (|z| > 2) w1b        q10 -2.43, kz_deep_frac -2.76, pump_hs_gcm2 +2.25, ent_seas_amp_SH +2.02, rep_dC +3.52
+
+=== 0. BOTH REGISTERED FILES REPRODUCE THEIR STORED STREAMS (the like-for-like guard) ===
+  canonical  stored -1402.2491 recomputed -1402.2491 diff +3.71e-11 over 26 rows -> REPRODUCES
+  c1   start file logpost -1427.3003 (on its own tree/objective; final_lp_check -1427.3); the LIKELIHOOD below is recomputed under today's build
+  fp1  start file logpost -1431.1482 (on its own tree/objective; final_lp_check -1431.148); the LIKELIHOOD below is recomputed under today's build
+  w1   start file logpost -1425.0156 (on its own tree/objective; final_lp_check -1425.016); the LIKELIHOOD below is recomputed under today's build
+  w2   start file logpost -1432.0375 (on its own tree/objective; final_lp_check -1432.038); the LIKELIHOOD below is recomputed under today's build
+  w1b  start file logpost -1425.3704 (on its own tree/objective; final_lp_check -1425.37); the LIKELIHOOD below is recomputed under today's build
+  the #13 row gcb_ocean_enso_slope is present in: canonical, c1, fp1, w1, w2, w1b
+
+=== 1. LIKELIHOOD BY STREAM GROUP -- the 25 #12 rows (common, the #13 row set aside) ===
+  group           canonical        c1       fp1        w1        w2       w1b    w1-can     w1-c1   rows
+  co2_level         -806.45   -807.06   -806.80   -807.21   -805.58   -807.14     -0.76     -0.15   co2_level_MLO co2_level_SPO co2_icecore
+  co2_seasonal        67.46     69.04     67.83     68.79     69.11     68.82     +1.33     -0.25   co2_seasonal_MLO co2_seasonal_SPO
+  d13c_level         135.10    135.29    135.02    135.20    135.74    135.24     +0.10     -0.09   d13c_level_MLO d13c_level_SPO
+  d13c_seasonal      450.99    459.17    453.81    459.22    456.34    459.06     +8.22     +0.04   d13c_seasonal_MLO d13c_seasonal_SPO
+  gradients           92.34     92.13     92.26     92.20     92.11     92.18     -0.14     +0.07   co2_gradient d13c_gradient
+  bomb_d14c         -580.82   -581.39   -580.81   -581.25   -580.82   -581.22     -0.43     +0.14   d14c_NH d14c_SH
+  d14c_profile        -8.51     -8.49     -8.43     -8.50     -8.65     -8.58     +0.01     -0.01   d14c_profile_level d14c_profile_ab d14c_profile_bd
+  excess_c14          -9.83     -9.85     -9.84     -9.85     -9.89     -9.84     -0.02     +0.01   excess_c14_ocean
+  gcb_sinks          -74.12    -74.20    -73.96    -74.44    -74.00    -74.49     -0.31     -0.24   gcb_ocean_sink gcb_land_sink
+  ocean_deep         -18.08    -16.35    -16.42    -16.33    -18.20    -17.09     +1.76     +0.03   ocean_grad_dic ocean_grad_d13c ocean_grad_alk
+  hs                  -7.35     -7.15     -7.58     -7.14     -7.19     -7.11     +0.20     +0.01   hs_surf_dic hs_surf_d13c
+  TOTAL #12        -1400.30  -1389.99  -1396.01  -1390.45  -1392.17  -1391.32     +9.85     -0.46   (25 rows, #12)
+  gcb_ocean_enso_slope      -1.95     -2.39     -2.09      2.74      2.75      2.74   (the #13 row alone; NA = absent)
+  TOTAL #13        -1402.25  -1392.39  -1398.09  -1387.71  -1389.42  -1388.58    +14.54     +4.67   (26 rows, #13)
+  cross-check against the 09-18 reads (#12, 25 rows): canonical -1400.3026 (was -1400.3026), c1 -1389.9948 (was -1389.9948), fp1 -1396.0060 (was -1396.01)
+
+  every #13 row, w1 (this wave) minus c1 (the same arm's #12 fit -- what the row moved and what it cost), sorted:
+    co2_seasonal_MLO          co2_icecore       gcb_ocean_sink 
+               -0.23                -0.23                -0.20 
+      d13c_level_SPO        gcb_land_sink       d13c_level_MLO 
+               -0.07                -0.04                -0.02 
+    co2_seasonal_SPO      d14c_profile_ab       ocean_grad_alk 
+               -0.02                -0.01                 0.00 
+         d14c_intcal   d14c_profile_level      d14c_profile_bd 
+                0.00                 0.00                 0.00 
+         hs_surf_dic    d13c_seasonal_SPO         hs_surf_d13c 
+                0.00                 0.00                 0.01 
+    excess_c14_ocean      ocean_grad_d13c       ocean_grad_dic 
+                0.01                 0.01                 0.02 
+       co2_level_SPO        d13c_gradient    d13c_seasonal_MLO 
+                0.02                 0.03                 0.04 
+        co2_gradient        co2_level_MLO              d14c_NH 
+                0.04                 0.05                 0.06 
+             d14c_SH gcb_ocean_enso_slope 
+                0.08                 5.13 
+
+  every #13 row, w1 minus canonical (the registered canonical, #13-stamped), sorted:
+         co2_icecore     co2_seasonal_SPO              d14c_NH 
+               -0.60                -0.31                -0.29 
+      d13c_level_SPO       gcb_ocean_sink        gcb_land_sink 
+               -0.20                -0.16                -0.15 
+             d14c_SH         co2_gradient          d14c_intcal 
+               -0.14                -0.11                -0.11 
+       co2_level_SPO        co2_level_MLO        d13c_gradient 
+               -0.10                -0.06                -0.03 
+    excess_c14_ocean      d14c_profile_bd      d14c_profile_ab 
+               -0.02                 0.00                 0.00 
+         hs_surf_dic   d14c_profile_level       ocean_grad_alk 
+                0.00                 0.01                 0.03 
+        hs_surf_d13c       d13c_level_MLO       ocean_grad_dic 
+                0.20                 0.30                 0.81 
+     ocean_grad_d13c    d13c_seasonal_SPO     co2_seasonal_MLO 
+                0.92                 0.93                 1.64 
+gcb_ocean_enso_slope    d13c_seasonal_MLO 
+                4.69                 7.29 
+
+  every #13 row, w1 minus c1 (the #12 refit control), sorted:
+    co2_seasonal_MLO          co2_icecore       gcb_ocean_sink 
+               -0.23                -0.23                -0.20 
+      d13c_level_SPO        gcb_land_sink       d13c_level_MLO 
+               -0.07                -0.04                -0.02 
+    co2_seasonal_SPO      d14c_profile_ab       ocean_grad_alk 
+               -0.02                -0.01                 0.00 
+         d14c_intcal   d14c_profile_level      d14c_profile_bd 
+                0.00                 0.00                 0.00 
+         hs_surf_dic    d13c_seasonal_SPO         hs_surf_d13c 
+                0.00                 0.00                 0.01 
+    excess_c14_ocean      ocean_grad_d13c       ocean_grad_dic 
+                0.01                 0.01                 0.02 
+       co2_level_SPO        d13c_gradient    d13c_seasonal_MLO 
+                0.02                 0.03                 0.04 
+        co2_gradient        co2_level_MLO              d14c_NH 
+                0.04                 0.05                 0.06 
+             d14c_SH gcb_ocean_enso_slope 
+                0.08                 5.13 
+
+  THE QUESTION (#13): w1 minus c1 on the row +5.13, on the other 25 rows -0.46; w1 minus canonical on 26 rows +14.54; w1 minus c1 on 26 rows +4.67
+  -> BOUGHT the slope at ~no cost on the 25
+  AIC-style: c1 / fp1 / the control and free-parent arms fit 31 names, the canonical's arm 30 -- one log-unit per name is the conventional allowance
+
+=== 2. THE LAND SINK (gate 7) ===
+  GCB target over 2015-2023 (n 9): ocean 3.20 (gate sd 0.40), land 2.41 (gate sd 0.50) GtC/yr; gate bound 2 sd
+  GATE 7  canonical  ocean 3.11 (z -0.23) land 3.12 (z +1.43; +0.71 GtC/yr vs GCB) ; rows gcb_land_sink -67.28 gcb_ocean_sink -6.84  -> PASS
+  GATE 7  c1         ocean 3.11 (z -0.23) land 3.13 (z +1.43; +0.72 GtC/yr vs GCB) ; rows gcb_land_sink -67.39 gcb_ocean_sink -6.81  -> PASS
+  GATE 7  fp1        ocean 3.11 (z -0.22) land 3.12 (z +1.43; +0.71 GtC/yr vs GCB) ; rows gcb_land_sink -67.23 gcb_ocean_sink -6.73  -> PASS
+  GATE 7  w1         ocean 3.12 (z -0.21) land 3.12 (z +1.42; +0.71 GtC/yr vs GCB) ; rows gcb_land_sink -67.43 gcb_ocean_sink -7.01  -> PASS
+  GATE 7  w2         ocean 3.13 (z -0.19) land 3.10 (z +1.38; +0.69 GtC/yr vs GCB) ; rows gcb_land_sink -66.14 gcb_ocean_sink -7.86  -> PASS
+  GATE 7  w1b        ocean 3.12 (z -0.22) land 3.12 (z +1.42; +0.71 GtC/yr vs GCB) ; rows gcb_land_sink -67.43 gcb_ocean_sink -7.06  -> PASS
+
+=== 3. THE ENSO OCEAN SLOPE (the #13 row's quantity, read at every arm) ===
+  canonical  slope +0.0402 +- 0.0311 (0.35x obs +0.1153 +- 0.0246; z -3.05)  r +0.154  n 66   GATE V sd 0.553 vs obs 0.933 +- 0.084 (z -4.54)   gamma_enso_ocn NH +0.359 SH -0.000
+  c1         slope +0.0370 +- 0.0308 (0.32x obs +0.1153 +- 0.0246; z -3.19)  r +0.144  n 66   GATE V sd 0.548 vs obs 0.933 +- 0.084 (z -4.59)   gamma_enso_ocn NH +0.344 SH +0.021
+  fp1        slope +0.0391 +- 0.0307 (0.34x obs +0.1153 +- 0.0246; z -3.10)  r +0.152  n 66   GATE V sd 0.552 vs obs 0.933 +- 0.084 (z -4.55)   gamma_enso_ocn NH +0.367 SH -0.002
+  w1         slope +0.1084 +- 0.0323 (0.94x obs +0.1153 +- 0.0246; z -0.28)  r +0.374  n 66   GATE V sd 0.528 vs obs 0.933 +- 0.084 (z -4.83)   gamma_enso_ocn NH +0.422 SH +0.063
+  w2         slope +0.1091 +- 0.0345 (0.95x obs +0.1153 +- 0.0246; z -0.25)  r +0.355  n 66   GATE V sd 0.534 vs obs 0.933 +- 0.084 (z -4.76)   gamma_enso_ocn NH +0.428 SH +0.006
+  w1b        slope +0.1083 +- 0.0325 (0.94x obs +0.1153 +- 0.0246; z -0.28)  r +0.372  n 66   GATE V sd 0.529 vs obs 0.933 +- 0.084 (z -4.82)   gamma_enso_ocn NH +0.419 SH +0.062
+
+=== 4. GATES H / GL / Q / S (the ledger's idioms) ===
+  GATE H  canonical  R_co2 0.913 (z_level -3.59) R_d13c 2.009 (z_level -22.60)  contrast z +11.86  -> FAIL
+  GATE H  c1         R_co2 0.911 (z_level -3.66) R_d13c 2.006 (z_level -22.53)  contrast z +11.87  -> FAIL
+  GATE H  fp1        R_co2 0.912 (z_level -3.65) R_d13c 2.005 (z_level -22.52)  contrast z +11.86  -> FAIL
+  GATE H  w1         R_co2 0.911 (z_level -3.67) R_d13c 2.006 (z_level -22.53)  contrast z +11.87  -> FAIL
+  GATE H  w2         R_co2 0.910 (z_level -3.71) R_d13c 2.006 (z_level -22.53)  contrast z +11.88  -> FAIL
+  GATE H  w1b        R_co2 0.911 (z_level -3.67) R_d13c 2.006 (z_level -22.53)  contrast z +11.87  -> FAIL
+  GATE GL canonical  d13C gradient -0.1341 vs obs -0.0668 +- 0.0030 (ratio 2.01) z -10.34  -> FAIL
+  GATE GL c1         d13C gradient -0.1339 vs obs -0.0668 +- 0.0030 (ratio 2.01) z -10.14  -> FAIL
+  GATE GL fp1        d13C gradient -0.1339 vs obs -0.0668 +- 0.0030 (ratio 2.01) z -10.16  -> FAIL
+  GATE GL w1         d13C gradient -0.1339 vs obs -0.0668 +- 0.0030 (ratio 2.01) z -10.12  -> FAIL
+  GATE GL w2         d13C gradient -0.1339 vs obs -0.0668 +- 0.0030 (ratio 2.01) z -10.04  -> FAIL
+  GATE GL w1b        d13C gradient -0.1339 vs obs -0.0668 +- 0.0030 (ratio 2.01) z -10.12  -> FAIL
+  GATE Q  canonical  air-sea d13C diseq mean +0.907 vs 0.60 +- 0.10  n_sd 3.07  -> FAIL
+  GATE Q  c1         air-sea d13C diseq mean +0.891 vs 0.60 +- 0.10  n_sd 2.91  -> FAIL
+  GATE Q  fp1        air-sea d13C diseq mean +0.893 vs 0.60 +- 0.10  n_sd 2.93  -> FAIL
+  GATE Q  w1         air-sea d13C diseq mean +0.893 vs 0.60 +- 0.10  n_sd 2.93  -> FAIL
+  GATE Q  w2         air-sea d13C diseq mean +0.938 vs 0.60 +- 0.10  n_sd 3.38  -> FAIL
+  GATE Q  w1b        air-sea d13C diseq mean +0.896 vs 0.60 +- 0.10  n_sd 2.96  -> FAIL
+  GATE S  canonical  SPO ocean limb 0.327 ppm @ month 8.46, bracket [7.41, 10.41]  -> PASS
+  GATE S  c1         SPO ocean limb 0.312 ppm @ month 8.70, bracket [7.41, 10.41]  -> PASS
+  GATE S  fp1        SPO ocean limb 0.419 ppm @ month 8.54, bracket [7.41, 10.41]  -> PASS
+  GATE S  w1         SPO ocean limb 0.311 ppm @ month 8.70, bracket [7.41, 10.41]  -> PASS
+  GATE S  w2         SPO ocean limb 0.279 ppm @ month 8.69, bracket [7.41, 10.41]  -> PASS
+  GATE S  w1b        SPO ocean limb 0.310 ppm @ month 8.69, bracket [7.41, 10.41]  -> PASS
+  (gradient rows) canonical  d13C -0.342 (target -0.861) DIC 311.9 (target 233.1 +- 25.2, z +3.12)
+  (gradient rows) c1         d13C -0.334 (target -0.861) DIC 309.5 (target 233.1 +- 25.2, z +3.03)
+  (gradient rows) fp1        d13C -0.316 (target -0.861) DIC 312.5 (target 233.1 +- 25.2, z +3.14)
+  (gradient rows) w1         d13C -0.334 (target -0.861) DIC 309.2 (target 233.1 +- 25.2, z +3.01)
+  (gradient rows) w2         d13C -0.378 (target -0.861) DIC 316.9 (target 233.1 +- 25.2, z +3.32)
+  (gradient rows) w1b        d13C -0.341 (target -0.861) DIC 309.0 (target 233.1 +- 25.2, z +3.01)
+
+=== 5. OWED, NOT READ HERE ===
+  the RULINGS (09-18 g): the seasonal ML as mechanism vs fit; the control's registration; and, if no #13 arm buys the slope, the limb hilda_cl3 under #13 (prereg 09-17 k s4).
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/obj13_control_refit_read_20260919.{log,rds}
+⛔ NOTHING IS ADOPTED; no mode is promoted.
