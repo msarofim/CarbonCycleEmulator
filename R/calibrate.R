@@ -2093,7 +2093,7 @@ ccx_struct_hilda_cl <- function(label) {
   blk
 }
 #' THE "hilda_cs" STRUCTURE (2026-09-19 l; Marcus: "do the test" / "yes"): hilda_c
-#' with the seasonal mixed layer's NH CYCLE FLATTENED (seas_ml_nh = 0 -- the ML
+#' with the seasonal mixed layer's NH CYCLE FLATTENED (ml_nh_cycle = 0 -- the ML
 #' entrains in the SH only; R/model.R ccx_seas_ml_shapes). Ruling 1's test in its
 #' REFIT form: whether the ML's ~6-10 log-unit price against ML-off, all on the NH
 #' seasonal rows, is the mechanism's or its NH driver's. A NEW LABEL, not an edit
@@ -2101,7 +2101,7 @@ ccx_struct_hilda_cl <- function(label) {
 #' (at 0 the flag is inert and the block equals hilda_c's for the model).
 ccx_struct_hilda_cs <- function() {
   blk <- ccx_struct_hilda_c()
-  blk$seas_ml_nh <- 0L
+  blk$ml_nh_cycle <- 0L
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }

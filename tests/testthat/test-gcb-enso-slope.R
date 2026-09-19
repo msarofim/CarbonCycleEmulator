@@ -52,8 +52,13 @@ test_that("(3) ADDITIVE: the 25 pre-#13 rows are bit-identical; the row is absen
   expect_length(old, 25L)
   expect_false("gcb_ocean_enso_slope" %in% names(st_off)); expect_true("gcb_ocean_enso_slope" %in% names(st_on))
   expect_identical(st_on[old], st_off[old])
-  expect_equal(unname(st_on[old]), unname(unlist(ges_v$md$streams[old])), tolerance = 1e-9)   # the canonical's stored 25
-  expect_equal(st_on[["gcb_ocean_enso_slope"]], ges_v$md$streams[["gcb_ocean_enso_slope"]], tolerance = 1e-9)   # and its stored row
+  # 2026-09-19 (m): the stored streams are the OBJECTIVE's path (encode -> decode -> run); this test's are the
+  # diagnostics' path (par_mode -> dg_run). The encode/decode round trip moves a parameter by ~1 ulp and the
+  # periodic spinup's tolerance-terminated iteration amplifies that to ~1e-8 RELATIVE on a row (6e-6 on
+  # d13c_level_MLO at hilda30e; 6e-11 at hilda30h, whose values round-tripped exactly). The bit-identity
+  # claim of this test is st_on vs st_off (above); against the stored file the bound is the round trip's.
+  expect_equal(unname(st_on[old]), unname(unlist(ges_v$md$streams[old])), tolerance = 1e-6)   # the canonical's stored 25
+  expect_equal(st_on[["gcb_ocean_enso_slope"]], ges_v$md$streams[["gcb_ocean_enso_slope"]], tolerance = 1e-6)   # and its stored row
   expect_true(is.finite(st_on[["gcb_ocean_enso_slope"]])); expect_identical(sum(!is.na(st_on)), length(old) + 1L)
   o2 <- ges_obs; o2$enso_slope <- NULL
   st_no <- ges_toggle(TRUE, function() unlist(dg_streams(ges_r, ges_v, obs = o2)))

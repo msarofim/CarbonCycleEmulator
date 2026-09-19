@@ -1089,12 +1089,12 @@ ccx_mld_flat <- function(co) {
   z
 }
 #' The per-hemisphere shapes the aux CARRIES under `p`: the LS climatology, with
-#' the NH flattened when p$seas_ml_nh == 0 (the "hilda_cs" label). ONE place, read
+#' the NH flattened when p$ml_nh_cycle == 0 (the "hilda_cs" label). ONE place, read
 #' by ccx_prepare(); the guard (below) still reads the PRODUCTION shape, so the
 #' P8 geometry bound is judged on the deeper of the two hemispheres regardless --
 #' a flat NH can only be shallower than the bound it is judged against.
 ccx_seas_ml_shapes <- function(p, co) {
-  if (!is.null(p$seas_ml_nh) && isTRUE(p$seas_ml_nh == 0)) co$NH <- ccx_mld_flat(co$NH)
+  if (!is.null(p$ml_nh_cycle) && isTRUE(p$ml_nh_cycle == 0)) co$NH <- ccx_mld_flat(co$NH)
   co
 }
 ccx_seas_ml_guard <- function(grid) {
@@ -1772,13 +1772,17 @@ ccx_default_params <- function() {
     # entrainment) while the SH cycle runs -- the "hilda_cs" label (ccx_struct_hilda_cs).
     # Mean-preserving by construction (the flat set's a0 is the same 1), so the
     # annual-mean grid, kz_int and the periodic spinup's geometry are untouched.
+    # ⛔ NOT NAMED `seas_ml_*` (2026-09-19 m): R's `$` PARTIAL-MATCHES, so on a pre-round-6
+    # list with `seas_ml` REMOVED, `p$seas_ml` silently returned this flag's 1 and switched the
+    # mechanism ON (test-seas-ml's bit-identity test caught it). No structural name may
+    # extend another name's prefix -- test-seas-ml-hemi asserts it for this one.
     # STRUCTURAL, never fitted; inert at seas_ml 0 (nothing reads it). Why: test (a)
     # and the #13 refits put the ML's whole ~6-10 log-unit price on the NH seasonal
     # rows while the mechanism was motivated by the SH (P1c: a low-latitude box given a
     # high-latitude cycle) -- the conditional knock-out (diag_seas_ml_hemisphere_split.R)
     # could not separate "the mechanism costs" from "its NH driver costs"; a REFIT
     # under this label can. seas_ml 2 (option B, the HS box) does not read it.
-    seas_ml_nh   = 1L,
+    ml_nh_cycle   = 1L,
     seas_T_amp_NH = 12,   # K, seasonal land temperature half-amplitude
     seas_T_amp_SH = 6,
     # PER-HEMISPHERE since 2026-08-31; see CCX_SEAS_LAG_P_DEFAULT and

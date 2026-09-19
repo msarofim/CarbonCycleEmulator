@@ -1,7 +1,7 @@
 # =====================================================================
 # test-seas-ml-hemi.R -- the "hilda_cs" structure (2026-09-19 l): the seasonal mixed
-# layer with its NH CYCLE FLAT (seas_ml_nh = 0), ruling 1's test in its refit form.
-#   (1) the label is registered and its block differs from hilda_c's by seas_ml_nh only
+# layer with its NH CYCLE FLAT (ml_nh_cycle = 0), ruling 1's test in its refit form.
+#   (1) the label is registered and its block differs from hilda_c's by ml_nh_cycle only
 #   (2) the flat shape: f = 1 and dfdt = 0 at every phase; the continuous extremes 1
 #   (3) under hilda_cs / seas_ml 1 the aux's NH coefficients ARE the flat set and the
 #       SH's are BIT-IDENTICAL to hilda_c's; under hilda_c both are the production shape
@@ -20,14 +20,21 @@ ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 SMH_KNOCKOUT_LOG <- ccx_path("outputs", "diagnostics", "seas_ml_hemisphere_split_20260919.rds")
 SMH_PHASES <- (seq_len(48) - 0.5) / 48
 
-test_that("(1) hilda_cs is registered and is hilda_c + seas_ml_nh = 0, nothing else", {
+test_that("(1) hilda_cs is registered and is hilda_c + ml_nh_cycle = 0, nothing else", {
   expect_true("hilda_cs" %in% CCX_STRUCT_LABELS)
   b0 <- ccx_struct_block("hilda_c"); b1 <- ccx_struct_block("hilda_cs")
-  expect_identical(setdiff(names(b1), names(b0)), "seas_ml_nh")
-  expect_identical(b1$seas_ml_nh, 0L)
+  expect_identical(setdiff(names(b1), names(b0)), "ml_nh_cycle")
+  expect_identical(b1$ml_nh_cycle, 0L)
   for (n in names(b0)) expect_identical(b1[[n]], b0[[n]], info = n)
-  expect_identical(ccx_default_params()$seas_ml_nh, 1L)      # every registered file: the NH cycle ON
+  expect_identical(ccx_default_params()$ml_nh_cycle, 1L)      # every registered file: the NH cycle ON
   expect_error(ccx_apply_structure(ccx_default_params(), "hilda_csx"), "unknown structure label")
+  # THE PARTIAL-MATCH TRAP (09-19 m): the flag was first named `seas_ml_nh`, and on a list with
+  # `seas_ml` removed `p$seas_ml` partial-matched it and turned the mechanism ON. No parameter
+  # name may extend `seas_ml` as a prefix; and a list WITHOUT seas_ml must read the ML as OFF.
+  nm <- names(ccx_default_params())
+  expect_false(any(nm != "seas_ml" & startsWith(nm, "seas_ml")))
+  p_bare <- ccx_default_params(); p_bare$seas_drivers <- 1; p_bare$seas_ml <- NULL
+  expect_true(is.null(p_bare$seas_ml)); expect_false(ccx_seas_ml_on(p_bare))
 })
 
 test_that("(2) the flat shape evaluates to f = 1, dfdt = 0 at every phase", {
@@ -67,7 +74,7 @@ test_that("(5) the label reproduces the session knock-out at the canonical's poi
   obs <- ccx_prepare_obs(); v <- dg_vector(CCX_MODE_CANONICAL)
   # the canonical's OWN point, re-labelled hilda_cs: the same numbers, the NH cycle flat
   v$p <- ccx_apply_structure(v$p, "hilda_cs", seas_ml = "1", pump_field = ccx_mode_pump_field(v$md))
-  for (n in intersect(names(v$p), CCX_PARAM_NAMES)) v$p[[n]] <- v$pm[[n]]
+  v$p <- ccx_overlay_par(v$p, v$pm)                                   # the fitted values back over the re-labelled base (the lint-enforced idiom)
   for (n in names(ccx_mode_pins(v$md))) v$p[[n]] <- ccx_mode_pins(v$md)[[n]]
   st <- dg_streams(dg_run(v), v, obs = obs)
   got <- sum(st[ko$common])
