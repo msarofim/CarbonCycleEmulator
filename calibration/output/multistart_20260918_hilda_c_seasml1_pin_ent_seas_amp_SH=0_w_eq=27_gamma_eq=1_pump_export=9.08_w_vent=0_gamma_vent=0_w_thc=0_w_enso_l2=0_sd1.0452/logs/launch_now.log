@@ -1,0 +1,35 @@
+firing 2026-09-18T20:42:25-0400
+CCX_PROJ_DIR  /Users/MarcusMarcus/ccx_frozen/20260918f_canonical_obj13_refit
+CCX_MS_OUTDIR /Users/MarcusMarcus/ccx_frozen/20260918f_canonical_obj13_refit/calibration/output/multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+CCX_MS_STRUCT hilda_c   CCX_MS_SEAS_ML 1   CCX_MS_PUMP_FIELD solved   CCX_MS_SPREAD 1.0452   CCX_MS_PIN 'ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,w_enso_l2=0'
+WALL_MIN 300  RESTARTS 3  CYCLES 6  MAXIT 6000   mode wave   ids [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 ]   8 at once
+host MacBook-Pro-2.local  started 2026-09-18T20:42:25-0400  uptime: 20:42  up 22 days, 22 hrs, 4 users, load averages: 1.63 1.80 2.09
+already running at launch (>20% CPU), so a slow eval rate is read as CONTENTION first:
+all tasks finished 2026-09-19T07:26:14-0400
+exit codes (id rc):
+0 0
+1 0
+2 0
+3 0
+4 0
+5 0
+6 0
+7 0
+8 0
+9 0
+10 0
+11 0
+12 0
+13 0
+14 0
+15 0
+16 0
+17 0
+18 0
+19 0
+20 0
+21 0
+22 0
+23 0
+non-zero exits: 0
+launcher exit 0 2026-09-19T07:26:14-0400

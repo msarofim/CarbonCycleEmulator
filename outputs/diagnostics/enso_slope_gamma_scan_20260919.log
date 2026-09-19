@@ -1,0 +1,19 @@
+ENSO SLOPE vs THE OCEAN ENSO PAIR, at hilda30h's point  2026-09-19 07:33:28
+  obs slope +0.1153 +- 0.0246; T-A2 solubility-only slope at this mode -0.1873
+  canonical as stored                gNH +0.3595 gSH -0.00000  slope +0.0402 (0.35x)  row -1.95  other 25 rows -1400.30
+  NH -> w1's only                    gNH +0.4516 gSH -0.00000  slope +0.0985 (0.85x)  row +2.54  other 25 rows -1400.65
+  SH -> w1's only                    gNH +0.3595 gSH +0.01531  slope +0.0493 (0.43x)  row -0.88  other 25 rows -1400.32
+  both -> w1's pair                  gNH +0.4516 gSH +0.01531  slope +0.1076 (0.93x)  row +2.73  other 25 rows -1400.75
+  NH -> 0.30, SH 0                   gNH +0.3000 gSH +0.00000  slope +0.0026 (0.02x)  row -7.84  other 25 rows -1400.46
+  NH -> 0.40, SH 0                   gNH +0.4000 gSH +0.00000  slope +0.0659 (0.57x)  row +0.72  other 25 rows -1400.37
+  NH -> 0.50, SH 0                   gNH +0.5000 gSH +0.00000  slope +0.1292 (1.12x)  row +2.64  other 25 rows -1401.13
+  NH -> 0.60, SH 0                   gNH +0.6000 gSH +0.00000  slope +0.1924 (1.67x)  row -2.08  other 25 rows -1402.74
+  NH as stored, SH -> -0.02          gNH +0.3595 gSH -0.02000  slope +0.0284 (0.25x)  row -3.54  other 25 rows -1400.32
+  NH as stored, SH -> +0.02          gNH +0.3595 gSH +0.02000  slope +0.0520 (0.45x)  row -0.58  other 25 rows -1400.32
+  NH as stored, SH -> +0.05          gNH +0.3595 gSH +0.05000  slope +0.0697 (0.60x)  row +1.03  other 25 rows -1400.41
+
+  the slope is LINEAR in gamma_enso_ocn_NH over [0.30, 0.60]: +0.6328 per unit, intercept -0.1873 (max residual 1.0e-06)
+  the intercept vs the T-A2 solubility-only slope -0.1873: AGREE (< 0.01) -- the shim ADDS a linear term to the solubility slope; the canonical's 0.36 sat where they nearly cancel
+  the other 25 rows across the NH grid: range -1400.37 .. -1402.74 (2.37 log-units) -- the objective WITHOUT the row is flat in this coordinate, which is why it was never set (09-18 b/e)
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/enso_slope_gamma_scan_20260919.{log,rds}
