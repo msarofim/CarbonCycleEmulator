@@ -2165,11 +2165,19 @@ ccx_pins_extend <- function(pins, base, pump_field, struct = Sys.getenv("CCX_MS_
   if (!all(names(base) %in% names(pins))) return(FALSE)
   if (!isTRUE(all.equal(unname(pins[names(base)]), unname(base)))) return(FALSE)
   extra <- setdiff(names(pins), names(base))
+  length(extra) > 0 && all(extra %in% ccx_inert_names(pump_field, struct))
+}
+#' The fitted names a structure / pump field does NOT read -- ONE place (2026-09-19 m;
+#' the same list ccx_pins_extend() had inline): the field's unread names, the cell's
+#' pair without the cell, the limb's name without the limb. A pin on one of these holds
+#' a coordinate the objective cannot see, so a file whose pins are ALL inert is a FREE
+#' arm of the reduced space (ccx_mode_pinned) -- hilda31pe's case.
+ccx_inert_names <- function(pump_field, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
   inert <- ccx_pump_field_inert(pump_field)
   bp <- ccx_apply_structure(ccx_default_params(), struct, seas_ml = "0", pump_field = pump_field)
   if (!ccx_eq_on(bp)) inert <- c(inert, "w_eq", "gamma_eq")
   if (!ccx_l2_on(bp)) inert <- c(inert, "w_enso_l2")     # the limb absent (k_l2 = 0), 2026-09-17 k
-  length(extra) > 0 && all(extra %in% inert)
+  inert
 }
 #' Is the layer-2 Nino3.4 limb PRESENT under a base list (k_l2 > 0)? The
 #' structural switch; w_enso_l2 is inert when FALSE (2026-09-17 k).

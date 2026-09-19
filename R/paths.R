@@ -497,6 +497,19 @@ ccx_mode_base <- function(md) {
   if (length(md$pins)) attr(p, "pins") <- md$pins
   p
 }
+#' Is a mode file a PINNED arm -- does it hold a name its own structure / pump field
+#' READS? (2026-09-19 m.) A file whose pins are all INERT (ccx_inert_names: the six
+#' unread names + the limb's, under hilda_c / solved) is a FREE arm of the reduced
+#' space: nothing the objective sees is held, its likelihood is the free arm's, and
+#' CCX_MODE_PINNED says FALSE for it (hilda31pe: seven inert pins, the shim fitted).
+#' The canonical hilda30e holds the shim, which the model reads -- PINNED. test-mode-file
+#' compares this to CCX_MODE_PINNED; a consumer still APPLIES a file's pins to encode it.
+ccx_mode_pinned <- function(md) {
+  pins <- ccx_mode_pins(md)
+  if (is.null(pins) || !length(pins)) return(FALSE)
+  inert <- ccx_inert_names(ccx_mode_pump_field(md), ccx_mode_struct(md))
+  any(!names(pins) %in% inert)
+}
 #' The pins a mode file was fitted under (NULL = a free arm). Read, never inferred.
 ccx_mode_pins <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))

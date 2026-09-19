@@ -49,10 +49,13 @@ test_that("the five branches return the ruled pairs", {
   expect_identical(r4$incumbent, CCX_MODE_SEASML0_CONTROL); expect_identical(r4$new_basin, CCX_MODE_PINNED_PARENT)
   r5 <- ccx_ms_reference_set(ms_ctl, "1")
   expect_identical(r5$incumbent, CCX_MODE_PINNED_PARENT); expect_identical(r5$new_basin, CCX_MODE_SEASML0_CONTROL)
-  # 09-18: the control's pins EXTENDED by the limb's name (inert without the limb) are still the control's arm
-  r5b <- ccx_ms_reference_set(c(ms_ctl, w_enso_l2 = 0), "1"); expect_identical(r5b, r5)
-  r4b <- ccx_ms_reference_set(c(ms_ctl, w_enso_l2 = 0), "0"); expect_identical(r4b, r4)
-  expect_error(ccx_ms_reference_set(c(ms_ctl, w_enso_l2 = 0), "1", struct = "hilda_cl3"), "no registered incumbent")   # not inert WITH the limb
+  # 09-18: the control's pins EXTENDED by the limb's name (inert without the limb) were the control's arm;
+  # 09-19 (m): the limb's name is now IN the canonical's (and so the control's) pins, so the same call is
+  # the base set itself -- and under a structure WITH the limb that held name is not inert: refused
+  expect_true("w_enso_l2" %in% names(ms_ctl))
+  # ... and a pin set that IS a registered set resolves under any structure (same() reads no struct): under
+  # hilda_cl3 the control's pins hold the limb OFF -- a limb-less arm by pin, the free parent's, not refused
+  r5c <- ccx_ms_reference_set(ms_ctl, "1", struct = "hilda_cl3"); expect_identical(r5c, r5)
   for (r in list(r1, r2, r3, r4, r5)) {
     expect_true(all(c(r$incumbent, r$new_basin) %in% names(CCX_MODE_FILES)))
     expect_false(identical(r$incumbent, r$new_basin), info = "ids 1 and 2 must be different points")
@@ -72,8 +75,11 @@ test_that("MUTATION: a foreign pin set, a moved shim value, and a bad seas_ml ar
 
 test_that("the layer-2 limb's arm: the canonical / the control under hilda_cl2 at seas_ml 1; refused without the limb or at seas_ml 0", {
   ms_l2 <- CCX_MODE_L2_ARM_PINS
-  expect_identical(names(ms_l2), c(names(ms_cp), "gamma_enso_ocn_NH", "gamma_enso_ocn_SH"))
-  expect_equal(unname(ms_l2[names(ms_cp)]), unname(ms_cp))
+  # 09-19 (m): the canonical's pins hold w_enso_l2; the limb's arm FITS it, so its set is the canonical's minus that name
+  ms_cp_l2 <- ms_cp[setdiff(names(ms_cp), "w_enso_l2")]
+  expect_identical(names(ms_l2), c(names(ms_cp_l2), "gamma_enso_ocn_NH", "gamma_enso_ocn_SH"))
+  expect_equal(unname(ms_l2[names(ms_cp_l2)]), unname(ms_cp_l2))
+  expect_false("w_enso_l2" %in% names(ms_l2))
   expect_equal(unname(ms_l2[c("gamma_enso_ocn_NH", "gamma_enso_ocn_SH")]), c(0, 0))
   withr::local_envvar(CCX_MS_STRUCT = "hilda_cl2", CCX_MS_PUMP_FIELD = "solved")
   r8 <- ccx_ms_reference_set(ms_l2, "1")

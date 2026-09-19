@@ -200,7 +200,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 17.4739 under the adopted objective (#13, hilda30h); 41.5433 at the seas_ml 0 control", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth 17.1138 under the adopted objective (#13, hilda30e); 17.8469 at the seas_ml 0 control hilda31pe", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -249,9 +249,15 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 17.4739 under 
   # 2026-09-18 (e): objective #13 adds the GCB ENSO ocean-slope row; the demean flag changes the
   # FORCING the model's ocean sink responds to, so the row differs by ~0.07 between the two
   # scorings: 17.5455 -> 17.4739 (canonical), 41.6102 -> 41.5433 (control). Files restamped.
-  expect_equal(r$on_periodic - r$off_periodic, 17.4739, tolerance = 1e-4, scale = 1)
+  # 2026-09-19 (j): the canonical is `hilda30e` (the #13 REFIT: gamma_enso_ocn_NH 0.36 -> 0.45, SH 0 -> 0.015,
+  # nothing else moved): 17.4739 -> 17.1138 (-0.36 -- the flag acts through the ENSO coefficients, and the
+  # ocean pair grew). The CONTROL is now `hilda31pe` (the control's #13 refit on hilda_c, ML off, shim free):
+  # 41.5433 (hilda31p, a `hilda` mode never refit under hilda_c) -> 17.8469 -- a DIFFERENT point on a
+  # different structure, not a drift: its gamma_enso_land NH/SH 0.57/0.24 sit beside the canonical's 0.58/0.21
+  # (hilda31p carried 0.69/0.43), and the demean price scales with the land pair. Both MEASURED at the promoted files.
+  expect_equal(r$on_periodic - r$off_periodic, 17.1138, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
-  expect_equal(r0$on_periodic - r0$off_periodic, 41.5433, tolerance = 1e-4, scale = 1)
+  expect_equal(r0$on_periodic - r0$off_periodic, 17.8469, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
   expect_gt(r$on_periodic - r$off_periodic, 1)

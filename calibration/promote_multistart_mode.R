@@ -151,6 +151,7 @@ bp$pump_mode <- best$pump_mode
 lpf <- ccx_make_logpost(base_params = bp)
 u   <- ccx_par_to_unc(best$par_mode)
 lp0 <- lpf(u)
+lpf_by_stream <- ccx_make_logpost(base_params = bp, by_stream = TRUE)   # the objective's OWN decomposition, stored below (09-19 m)
 cat(sprintf("h_ml band  [%g, %g] (from the start file)\n",
             best$hml_bound[1], best$hml_bound[2]))
 cat(sprintf("log-post   %.6f   file %.6f   diff %.3e\n",
@@ -276,7 +277,15 @@ out <- list(
   spinup = ccx_spinup_label(CCX_OBJECTIVE_SPINUP),
   u_mode = u, par_mode = pm, logpost = lp0,
   logpost_init = best$logpost_start, trace = best$trace,
-  streams = streams, n_eval = best$n_eval, minutes = best$minutes,
+  # ⚠ THE STORED `streams` ARE THE OBJECTIVE'S OWN (2026-09-19 m), not the hand-built
+  # reconstruction GATE 5 checked them against. The hand path is gate 5's POWER
+  # (a different route to the same likelihood) and stays above; but every consumer
+  # that pins md$streams bit-for-bit -- the P0a tests, edm_crosscheck, test-mode-file,
+  # the restamp tool -- compares against ccx_make_logpost(by_stream = TRUE)'s
+  # attr, and the two paths agree only to ~1e-9 relative (6e-6 on a row at
+  # hilda30e). Both 09-19 j promotions had to be re-recorded by the restamp tool
+  # for that reason; a file written from the objective's path needs no restamp.
+  streams = attr(lpf_by_stream(u), "streams"), n_eval = best$n_eval, minutes = best$minutes,
   seed = best$seed, param_names = CCX_PARAM_NAMES, prior_z = best$prior_z,
   kz_bracket = c(CCX_PARAM_TABLE$kz$lo, CCX_PARAM_TABLE$kz$hi),
   hml_bound = best$hml_bound,

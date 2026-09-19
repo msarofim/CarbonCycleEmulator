@@ -98,8 +98,11 @@ test_that("P0a (canonical): the canonical's stored LIKELIHOOD reproduces row by 
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
   expect_false(ccx_l2_on(bp))                                          # every registered structure: k_l2 = 0
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
+  # 2026-09-19 (m): the canonical (hilda30e) now HOLDS w_enso_l2 among its pins (inert under hilda_c),
+  # so nothing in the table is new to its file; the limb's name is a pin, not an absence
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))
-  expect_identical(new_names, "w_enso_l2")
+  expect_length(new_names, 0L)
+  expect_true("w_enso_l2" %in% names(md$pins)); expect_identical(unname(md$pins[["w_enso_l2"]]), 0)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a-l2"))
   expect_identical(pm$w_enso_l2, CCX_PARAM_TABLE$w_enso_l2$init)      # seeded: 0 is on the floor
   u  <- ccx_par_to_unc(pm)
@@ -188,9 +191,14 @@ test_that("P0f REFUSALS by name, the exclusions, and the driver-side inert rule"
   v <- l2_par(pump_field = "martin"); v$pump_export <- 9.08; v$w_vent <- 20
   expect_error(ccx_prepare(v), "ventilation loop")
   # the inert rule the reference set and the driver read
-  expect_true(ccx_pins_extend_canonical(c(CCX_MODE_CANONICAL_PINS, w_enso_l2 = 0), "solved", struct = "hilda_c"))
-  expect_false(ccx_pins_extend_canonical(c(CCX_MODE_CANONICAL_PINS, w_enso_l2 = 0), "solved", struct = "hilda_cl2"))
-  expect_true(ccx_pins_extend_canonical(c(CCX_MODE_CANONICAL_PINS, w_enso_l2 = 5), "solved", struct = "hilda_c"))    # an INERT name's value cannot matter
+  # 2026-09-19 (m): w_enso_l2 is IN the canonical's pins now, so "extend by it" is the base set; the
+  # inert-extension rule is exercised on the canonical's pins WITHOUT it as the base
+  cp7 <- CCX_MODE_CANONICAL_PINS[setdiff(names(CCX_MODE_CANONICAL_PINS), "w_enso_l2")]
+  expect_true(ccx_pins_extend(c(cp7, w_enso_l2 = 0), cp7, "solved", struct = "hilda_c"))
+  expect_false(ccx_pins_extend(c(cp7, w_enso_l2 = 0), cp7, "solved", struct = "hilda_cl2"))
+  expect_true(ccx_pins_extend(c(cp7, w_enso_l2 = 5), cp7, "solved", struct = "hilda_c"))    # an INERT name's value cannot matter
+  expect_true("w_enso_l2" %in% ccx_inert_names("solved", "hilda_c")); expect_false("w_enso_l2" %in% ccx_inert_names("solved", "hilda_cl2"))
+  expect_false(ccx_pins_extend_canonical(CCX_MODE_CANONICAL_PINS, "solved", struct = "hilda_c"))   # the base set itself is not an EXTENSION (same() handles it)
   moved <- CCX_MODE_CANONICAL_PINS; moved[["w_thc"]] <- 5
-  expect_false(ccx_pins_extend_canonical(c(moved, w_enso_l2 = 0), "solved", struct = "hilda_c"))                     # a moved CANONICAL pin is not an extension
+  expect_false(ccx_pins_extend(c(moved[setdiff(names(moved), "w_enso_l2")], w_enso_l2 = 0), cp7, "solved", struct = "hilda_c"))   # a moved CANONICAL pin is not an extension
 })

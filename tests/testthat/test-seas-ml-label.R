@@ -69,9 +69,13 @@ test_that("ccx_mode_base() honours a recorded seas_ml and reads an absent one as
   md <- readRDS(ccx_mode_file())
   expect_identical(ccx_mode_seas_ml(md), 1L)
   expect_identical(ccx_mode_base(md)$seas_ml, 1L)
+  # 2026-09-19 (m): the control is hilda31pe, which RECORDS seas_ml 0; the absent-field case
+  # (read as the 0 it was) is the quarantined hilda31p, by path
   md0 <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))
-  expect_null(md0$seas_ml); expect_identical(ccx_mode_seas_ml(md0), 0L)
+  expect_identical(md0$seas_ml, 0L); expect_identical(ccx_mode_seas_ml(md0), 0L)
   expect_identical(ccx_mode_base(md0)$seas_ml, 0L)
+  md_old <- readRDS(ccx_path(CCX_MODE_HILDA31P_QUARANTINED))
+  expect_null(md_old$seas_ml); expect_identical(ccx_mode_seas_ml(md_old), 0L)
   expect_error(ccx_mode_seas_ml(list(seas_ml = "2")), "must be 0")
 })
 
@@ -82,6 +86,8 @@ test_that("the label reaches the objective: seas_ml = 1 is felt at the mode and 
   md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))
   b0 <- ccx_mode_base(md); b0$pump_mode <- md$pump_mode
   b1 <- b0; b1 <- ccx_apply_structure(b1, ccx_mode_struct(md), seas_ml = 1); b1$pump_mode <- md$pump_mode
+  for (n in names(ccx_mode_pins(md))) b1[[n]] <- ccx_mode_pins(md)[[n]]   # apply_structure rebuilt the list; the held names go back
+  rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)   # hilda31pe holds seven inert names (09-19 m)
   lp0 <- ccx_make_logpost(base_params = b0); lp1 <- ccx_make_logpost(base_params = b1)
   st <- ccx_mode_start(md, "seas-ml-label")   # migrated + seeded (the cell's pair, 09-13i); inert under "hilda"
   u <- st$u

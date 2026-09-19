@@ -168,8 +168,12 @@ test_that("every named mode is on disk and carries THIS BUILD's parameter set", 
     expect_true(all(ccx_mode_absent(md) %in% CCX_PARAM_ABSENT_OK), info = paste("mode", a))
     if (md$struct %in% c("hilda_eq", "hilda_tr"))
       expect_length(ccx_mode_absent(md), 0L)
-    expect_identical(!is.null(md$pins) && length(md$pins) > 0, unname(CCX_MODE_PINNED[[a]]),
+    # 2026-09-19 (m): PINNED = the file holds a name its structure READS (ccx_mode_pinned); a
+    # file whose pins are all INERT (hilda31pe: the six unread names + the limb's) is a FREE arm
+    expect_identical(ccx_mode_pinned(md), unname(CCX_MODE_PINNED[[a]]),
                      info = paste("mode", a, ": the file's `pins` and CCX_MODE_PINNED disagree"))
+    if (!is.null(md$pins) && !ccx_mode_pinned(md))
+      expect_true(all(names(md$pins) %in% ccx_inert_names(ccx_mode_pump_field(md), ccx_mode_struct(md))), info = paste("mode", a))
     expect_true(all(names(md$pins) %in% CCX_PARAM_NAMES),
                 info = paste("mode", a, "pins a name this build does not fit"))
     # THE BAND IS PART OF THE VECTOR'S PROVENANCE, not housekeeping: the driver
@@ -257,7 +261,8 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
   }
 
   skip_if_no_cpp()
-  # (b) the free arms, re-scored -- every one on the FULL table (no pins live)
+  # (b) the free arms, re-scored -- on the FULL table (no pins live at entry); a free arm
+  # that HOLDS inert names (hilda31pe, 09-19 m) is encoded with them applied and restored
   expect_null(CCX_PINS)
   free <- names(CCX_MODE_FILES)[!CCX_MODE_PINNED[names(CCX_MODE_FILES)]]
   # 2026-09-13i: the registered files lack the cell's pair; ccx_mode_start()
@@ -268,8 +273,11 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
   # the streams are prior-free).
   score <- function(md) {
     bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
+    .todo <- ccx_mode_pins(md); .todo <- .todo[names(.todo) %in% CCX_PARAM_NAMES]   # the file's pins not already live
+    .rm <- if (length(.todo)) ccx_apply_pins(.todo) else list()
     st <- ccx_mode_start(md, "test-mode-file")
     v  <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(st$u)
+    ccx_unpin_params(.rm)
     attr(v, "logpost_shift") <- st$logpost_shift
     v
   }
@@ -277,7 +285,12 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
   lp_free <- vapply(rescored, as.numeric, numeric(1))
   expect_true(all(is.finite(lp_free)))
   best_free <- free[which.max(lp_free)]
-  expect_equal(best_free, if (canon_pinned) CCX_MODE_PINNED_PARENT else CCX_MODE_CANONICAL)
+  # ⛔ NAMED RED #1 by ruling (Marcus 2026-09-19, ruling 2 = "b"): the best FREE arm is the seas_ml-0 CONTROL
+  # hilda31pe (its #13 refit on hilda_c, -1425.02), not the registered parent hilda31s2 (a `hilda` / #12 fit,
+  # restamped, never refit under hilda_c or #13; the free-parent #13 tree is staged). This expectation stays
+  # AS WRITTEN and RED until the seasonal-ML ruling (the hilda_cs refit) and a free-parent refit resolve it.
+  expect_equal(best_free, if (canon_pinned) CCX_MODE_PINNED_PARENT else CCX_MODE_CANONICAL,
+               label = sprintf("best free arm %s (logposts: %s) -- NAMED RED by ruling 09-19 (b) while it is the control", best_free, paste(sprintf("%s %.4f", free, lp_free), collapse = ", ")))
 
   # (d) the canonical reproduces its stored logpost under ITS pins (applied, then
   # restored with the object ccx_apply_pins() returned -- CCX_PINS is process-global)
@@ -296,8 +309,14 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
   common <- Reduce(intersect, c(list(names(lik(sc_c))), lapply(rescored, function(r) names(lik(r)))))
   L <- c(vapply(rescored, function(r) sum(lik(r)[common]), numeric(1)),
          setNames(sum(lik(sc_c)[common]), CCX_MODE_CANONICAL))
+  # ⛔ NAMED RED #2 by ruling (Marcus 2026-09-19, ruling 2 = "b"): the control hilda31pe (ML OFF, shim free,
+  # 31 names, refit under #13) beats the canonical hilda30e (ML ON, shim pinned, 30 names, refit under #13) by
+  # ~10.2 on the 26 common rows -- refit against refit, under #12 (+10.31) and #13 alike. The gate is NOT
+  # re-ruled to pass (a gate chosen because the model passes it is not a gate); the red IS the open question:
+  # the seasonal mixed layer as a MECHANISM vs its price on the NH seasonal rows (d13c_seasonal_MLO,
+  # co2_seasonal_MLO). Resolution = the hilda_cs refit (the ML's NH cycle flat) and the ML ruling.
   expect_gt(L[[CCX_MODE_CANONICAL]], L[[CCX_MODE_SEASML0_CONTROL]],
-            label = sprintf("canonical likelihood %.4f vs the seas_ml 0 control %.4f (%d common rows)",
+            label = sprintf("canonical likelihood %.4f vs the seas_ml 0 control %.4f (%d common rows) -- NAMED RED by ruling 09-19 (b)",
                             L[[CCX_MODE_CANONICAL]], L[[CCX_MODE_SEASML0_CONTROL]], length(common)))
   if (canon_pinned)
     cat(sprintf("\n  [test-mode-file] PINNED canonical %s: likelihood %.4f on %d common rows; parent %s %.4f (price %+.4f, RECORDED not gated); control %s %.4f (%+.4f)\n",
