@@ -16,7 +16,7 @@ OUT=/tmp/ccx_torch_bundle.tar.gz
 rm -f "$OUT"     # never ship a stale tarball
 # assert every registry-named mode file exists (they are listed below by hand)
 Rscript --vanilla -e 'for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
-  fs <- c(unname(CCX_MODE_FILES), CCX_MODE_COLUMN_CONTROL, CCX_MODE_HILDA31_QUARANTINED, CCX_MODE_HILDA31S_QUARANTINED)
+  fs <- c(unname(CCX_MODE_FILES), CCX_MODE_COLUMN_CONTROL, CCX_MODE_HILDA31_QUARANTINED, CCX_MODE_HILDA31S_QUARANTINED, CCX_MODE_HILDA30C_QUARANTINED, CCX_MODE_HILDA30H_QUARANTINED, CCX_MODE_HILDA31P_QUARANTINED)
   miss <- fs[!file.exists(fs)]; if (length(miss)) stop("registry names missing files: ", paste(miss, collapse = ", "))
   cat("registry files present:", length(fs), "\n")' 
 # ⚠ `data-raw/downloads/nuclear14c` IS NOT OPTIONAL, and it is 428 KB of the
@@ -38,9 +38,10 @@ COPYFILE_DISABLE=1 tar czf "$OUT" \
   R src data tests \
   data-raw/downloads/nuclear14c \
   calibration/*.R calibration/torch calibration/mac \
-  calibration/output/refit_20260910_hilda31_periodic \
+  calibration/output/refit_20260919_hilda30e_obj13_hilda_c \
+  calibration/output/refit_20260919_hilda31pe_obj13_hilda_c_seasml0 \
   calibration/output/refit_20260912_hilda31_seasml1_round7 \
-  calibration/output/refit_20260917_hilda30h_obj12_hilda_c \
+  calibration/output/quarantine/20260919_hilda30e_adopted \
   calibration/output/quarantine/20260917_hilda30h_adopted/refit_20260913_hilda30_cprime_pin_ent0 \
   calibration/output/quarantine/20260910_periodic_spinup_adopted \
   calibration/output/quarantine/20260913_round7_adopted \
@@ -51,7 +52,7 @@ COPYFILE_DISABLE=1 tar czf "$OUT" \
 # the list it is meant to guard is not a gate; this one reads the tarball.
 tar tzf "$OUT" > /tmp/ccx_bundle_list.txt
 Rscript --vanilla -e 'for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
-  fs <- c(unname(CCX_MODE_FILES), CCX_MODE_COLUMN_CONTROL, CCX_MODE_HILDA31_QUARANTINED, CCX_MODE_HILDA31S_QUARANTINED)
+  fs <- c(unname(CCX_MODE_FILES), CCX_MODE_COLUMN_CONTROL, CCX_MODE_HILDA31_QUARANTINED, CCX_MODE_HILDA31S_QUARANTINED, CCX_MODE_HILDA30C_QUARANTINED, CCX_MODE_HILDA30H_QUARANTINED, CCX_MODE_HILDA31P_QUARANTINED)
   inb <- readLines("/tmp/ccx_bundle_list.txt"); miss <- fs[!fs %in% inb]
   if (length(miss)) stop("registry files NOT IN THE TARBALL: ", paste(miss, collapse = ", "))
   cat("registry files in the tarball:", length(fs), "of", length(fs), "\n")'
