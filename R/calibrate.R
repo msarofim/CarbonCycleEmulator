@@ -2092,7 +2092,20 @@ ccx_struct_hilda_cl <- function(label) {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS))
+#' THE "hilda_cs" STRUCTURE (2026-09-19 l; Marcus: "do the test" / "yes"): hilda_c
+#' with the seasonal mixed layer's NH CYCLE FLATTENED (seas_ml_nh = 0 -- the ML
+#' entrains in the SH only; R/model.R ccx_seas_ml_shapes). Ruling 1's test in its
+#' REFIT form: whether the ML's ~6-10 log-unit price against ML-off, all on the NH
+#' seasonal rows, is the mechanism's or its NH driver's. A NEW LABEL, not an edit
+#' of hilda_c (every registered file stays bit-exact); meaningful only at seas_ml 1
+#' (at 0 the flag is inert and the block equals hilda_c's for the model).
+ccx_struct_hilda_cs <- function() {
+  blk <- ccx_struct_hilda_c()
+  blk$seas_ml_nh <- 0L
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2102,6 +2115,7 @@ ccx_struct_block <- function(struct) {
     "hilda_c"  = ccx_struct_hilda_c(),             # hilda + the constants batch (2026-09-14 h)
     "hilda_cl2" = ccx_struct_hilda_cl("hilda_cl2"),  # hilda_c + the Nino3.4 limb returning from layer 2 (2026-09-17 k)
     "hilda_cl3" = ccx_struct_hilda_cl("hilda_cl3"),  # ... from layer 3 (ruled 2026-09-17 l; the array's label)
+    "hilda_cs"  = ccx_struct_hilda_cs(),           # hilda_c + the seasonal ML's NH cycle FLAT (2026-09-19 l)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2236,7 +2250,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "2026-09-13g), \"hilda_tr\" (+ the tropical surface box, 2026-09-14f), ",
          "\"hilda_c\" (hilda + the constants batch, 2026-09-14h), \"hilda_cl2\" ",
          "(hilda_c + the Nino3.4 limb returning from layer 2, 2026-09-17k) and \"hilda_cl3\" ",
-         "(the limb returning from layer 3, 2026-09-17l).")
+         "(the limb returning from layer 3, 2026-09-17l), \"hilda_cs\" (hilda_c with the ",
+         "seasonal mixed layer's NH cycle FLAT, 2026-09-19l).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)

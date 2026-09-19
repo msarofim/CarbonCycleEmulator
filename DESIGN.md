@@ -163,6 +163,16 @@ d M_atm[h]/dt =
   Oeschger 1975 / Siegenthaler & Joos 1992]).
 - Total ocean DIC inventory at spinup should land near the ~38,000 GtC canonical figure
   [VERIFY]; reported in the app as a stock.
+- **The seasonal mixed layer's NH cycle is a STRUCTURE AXIS since 2026-09-19 (l)** — `seas_ml_nh`
+  (1 = the NH mixed layer follows its Holte climatology like the SH: every registered file;
+  0 = the NH shape flattened to its annual mean, no NH entrainment, the SH cycle unchanged),
+  carried by the label **`hilda_cs`** = `hilda_c` + `seas_ml_nh` 0 (`R/calibrate.R`
+  `ccx_struct_hilda_cs()`; `R/model.R` `ccx_mld_flat()` / `ccx_seas_ml_shapes()`). Mean-preserving,
+  so the annual-mean grid, `kz_int`, the P8 guard and the substep bound are untouched; inert at
+  `seas_ml` 0. **Why:** the round-6 mechanism's whole ~6–10 log-unit price against ML-off lands
+  on the NH seasonal rows while its motivation was the SH (P1c); a conditional knock-out could
+  not separate the mechanism from its NH driver, so the test is a REFIT under this label
+  (CHANGELOG 09-19 (k), (l)). A ruling on the mechanism follows that refit; nothing shipped changes.
 
 ### 3.4a Candidate ocean structures — the open list (added 2026-08-15, Marcus)
 

@@ -1080,6 +1080,23 @@ ccx_seas_ml_hs_guard <- function(h_hs, dz_total) {
   }
   co
 }
+#' The FLAT shape: the same Fourier set with every harmonic zeroed -- f = 1,
+#' dfdt = 0 at every phase, the continuous extremes 1 -- so a hemisphere given it
+#' keeps its annual-mean mixed layer and entrains nothing (2026-09-19 l).
+ccx_mld_flat <- function(co) {
+  z <- co; z$a[] <- 0; z$b[] <- 0; z$a0 <- 1; z$f_month[] <- 1
+  z$f_min <- 1; z$f_max <- 1; z$t_min <- 0; z$t_max <- 0
+  z
+}
+#' The per-hemisphere shapes the aux CARRIES under `p`: the LS climatology, with
+#' the NH flattened when p$seas_ml_nh == 0 (the "hilda_cs" label). ONE place, read
+#' by ccx_prepare(); the guard (below) still reads the PRODUCTION shape, so the
+#' P8 geometry bound is judged on the deeper of the two hemispheres regardless --
+#' a flat NH can only be shallower than the bound it is judged against.
+ccx_seas_ml_shapes <- function(p, co) {
+  if (!is.null(p$seas_ml_nh) && isTRUE(p$seas_ml_nh == 0)) co$NH <- ccx_mld_flat(co$NH)
+  co
+}
 ccx_seas_ml_guard <- function(grid) {
   co   <- ccx_mld_shape("ls")
   base <- cumsum(grid$dz)[2]                      # layer-1 base, annual mean
@@ -1749,6 +1766,19 @@ ccx_default_params <- function() {
     # ⚠ a mechanism defaulted off is UNTESTED WHERE IT MATTERS, so it is
     # exercised at an explicit non-zero value in tests/testthat/test-seas-ml.R.
     seas_ml      = 0,
+    # THE NH CYCLE OF THE SEASONAL MIXED LAYER (2026-09-19 l; ruling 1's test). 1 = the
+    # NH mixed layer follows its Holte climatology like the SH (every registered file);
+    # 0 = the NH shape is FLATTENED to its annual mean (f = 1, dh/dt = 0: no NH
+    # entrainment) while the SH cycle runs -- the "hilda_cs" label (ccx_struct_hilda_cs).
+    # Mean-preserving by construction (the flat set's a0 is the same 1), so the
+    # annual-mean grid, kz_int and the periodic spinup's geometry are untouched.
+    # STRUCTURAL, never fitted; inert at seas_ml 0 (nothing reads it). Why: test (a)
+    # and the #13 refits put the ML's whole ~6-10 log-unit price on the NH seasonal
+    # rows while the mechanism was motivated by the SH (P1c: a low-latitude box given a
+    # high-latitude cycle) -- the conditional knock-out (diag_seas_ml_hemisphere_split.R)
+    # could not separate "the mechanism costs" from "its NH driver costs"; a REFIT
+    # under this label can. seas_ml 2 (option B, the HS box) does not read it.
+    seas_ml_nh   = 1L,
     seas_T_amp_NH = 12,   # K, seasonal land temperature half-amplitude
     seas_T_amp_SH = 6,
     # PER-HEMISPHERE since 2026-08-31; see CCX_SEAS_LAG_P_DEFAULT and
@@ -4015,7 +4045,7 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # nothing is read and nothing is carried. `kz_int` above is computed ONCE at
     # the ANNUAL-MEAN grid and HELD: the interior interfaces do not move, so
     # their K must not either, while the ML base keeps K = kz by the anchor.
-    mld_coef    = if (ccx_seas_ml_ls_on(p)) ccx_seas_ml_guard(grid) else NULL,
+    mld_coef    = if (ccx_seas_ml_ls_on(p)) ccx_seas_ml_shapes(p, ccx_seas_ml_guard(grid)) else NULL,
     # OPTION B (2026-09-11): the HS box's own shape when seas_ml = 2. Mutually
     # exclusive with mld_coef by construction (one box carries the cycle).
     mld_hs_coef = if (ccx_seas_ml_hs_on(p)) ccx_seas_ml_hs_guard(h_hs, sum(grid$dz)) else NULL,
