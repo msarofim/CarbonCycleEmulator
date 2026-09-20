@@ -1,0 +1,143 @@
+L2 ARRAY READ (the limb on hilda_cs)  2026-09-20 17:02:38
+  Mac wave 2026-09-20 07:01 -> 17:01 (frozen tree ~/ccx_frozen/20260920p_limb_on_hilda_cs = the bundle at a15652e; objective #13; the limb on hilda_cs)
+  dir /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20260920_hilda_csl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+
+=== A. THE SUB-MODES IN u-SPACE ===
+  a1 vs a2: RMS |du| 0.1477; |du| > 0.15: h_ml +0.77
+  a1 vs a3: RMS |du| 0.1424; |du| > 0.15: h_ml -0.69, kz_deep_frac +0.20
+  a2 vs a3: RMS |du| 0.2889; |du| > 0.15: h_ml -1.46, kz_deep_frac +0.32, sst_seas_amp_SH -0.25, w_enso_l2 -0.20, u_hs +0.18
+
+=== B. PARAMETERS (value, prior z) ===
+  name                                    canonical                           a1                           a2                           a3
+  w_enso_l2                             0                       13.706   z -0.74             12.914   z -0.79             15.065   z -0.67
+  gamma_enso_ocn_NH               0.43779   z +0.22                  0                            0                            0          
+  gamma_enso_ocn_SH              0.041962   z +0.02                  0                            0                            0          
+  gamma_enso_land_NH              0.57435   z +0.29            0.48125   z +0.24            0.48162   z +0.24            0.48251   z +0.24
+  gamma_enso_land_SH              0.22763   z +0.11            0.31499   z +0.16            0.31737   z +0.16            0.31153   z +0.16
+  h_ml                             58.037   z -0.34             57.299   z -0.39             49.732   z -0.98             69.545   z +0.28
+  kz                                14398   z -0.01              14502   z +0.00              14545   z +0.01              14434   z -0.00
+  kz_deep_frac                  0.0074408   z -2.81          0.0073329   z -2.83          0.0076136   z -2.79          0.0069063   z -2.89
+  pump_grad                        329.96   z +1.39             327.62   z +1.36             334.65   z +1.45             318.33   z +1.25
+  pump_hs_gcm2                       80.6   z +2.10             78.814   z +2.06             80.084   z +2.09             76.737   z +2.02
+  h_hs                             273.27   z +1.07             268.69   z +1.03             274.44   z +1.09             259.83   z +0.95
+  u_hs                             22.809   z -0.73             21.812   z -0.92             22.836   z -0.73             20.235   z -1.23
+  beta_max                         1.3406   z -0.13             1.3094   z -0.16             1.3142   z -0.16             1.3057   z -0.16
+  fert_k                           840.02   z -0.22             824.59   z -0.24             827.95   z -0.23             822.68   z -0.24
+  q10                              1.0957   z -2.41             1.0945   z -2.41             1.0877   z -2.44              1.103   z -2.38
+  sst_seas_amp_NH                  1.6814   z -1.14             1.6894   z -1.12              1.724   z -1.04             1.6445   z -1.23
+  sst_seas_amp_SH                  1.4314   z -0.80             1.4088   z -0.86             1.2721   z -1.27             1.6256   z -0.29
+  k_w                              1916.2   z +0.61             1912.3   z +0.61             1923.5   z +0.62             1893.7   z +0.58
+  tau_ex                          0.87587   z -1.58            0.87515   z -1.58              0.871   z -1.60            0.87983   z -1.56
+  rep_dC                           3.4812   z +3.48             3.5153   z +3.52             3.5088   z +3.51             3.5234   z +3.52
+  bomb_total                       120.56   z +1.67             120.42   z +1.66             120.42   z +1.66             120.42   z +1.66
+  sigma_d14c                       5.8515   z +0.22             5.7805   z +0.21             5.7823   z +0.21             5.7773   z +0.21
+  luc_scale                       0.82765   z -0.68            0.82142   z -0.70            0.82086   z -0.70              0.822   z -0.70
+  canonical  struct 'hilda_cs' seas_ml 1 k_l2 0 pins _pin_ent_seas_amp_SH=0.00_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_w_enso_l2=0.00
+  a1         struct 'hilda_csl3' seas_ml 1 k_l2 3 pins _pin_ent_seas_amp_SH=0.00_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_gamma_enso_ocn_NH=0.00_gamma_enso_ocn_SH=0.00
+  a2         struct 'hilda_csl3' seas_ml 1 k_l2 3 pins _pin_ent_seas_amp_SH=0.00_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_gamma_enso_ocn_NH=0.00_gamma_enso_ocn_SH=0.00
+  a3         struct 'hilda_csl3' seas_ml 1 k_l2 3 pins _pin_ent_seas_amp_SH=0.00_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_gamma_enso_ocn_NH=0.00_gamma_enso_ocn_SH=0.00
+  strained priors (|z| > 2) canonical  q10 -2.41, kz_deep_frac -2.81, pump_hs_gcm2 +2.10, rep_dC +3.48
+  strained priors (|z| > 2) a1         q10 -2.41, kz_deep_frac -2.83, pump_hs_gcm2 +2.06, rep_dC +3.52
+  strained priors (|z| > 2) a2         q10 -2.44, kz_deep_frac -2.79, pump_hs_gcm2 +2.09, rep_dC +3.51
+  strained priors (|z| > 2) a3         q10 -2.38, kz_deep_frac -2.89, pump_hs_gcm2 +2.02, rep_dC +3.52
+
+=== 0. THE CANONICAL REPRODUCES ITS STORED STREAMS; the starts' logposts reproduce ===
+  canonical stored -1390.2774 recomputed -1390.2774 diff -5.75e-11 over 26 rows -> REPRODUCES
+  a1   start file logpost -1425.3620 (final_lp_check -1425.362)
+  a2   start file logpost -1425.3786 (final_lp_check -1425.379)
+  a3   start file logpost -1426.8526 (final_lp_check -1426.853)
+
+=== 1. LIKELIHOOD BY STREAM GROUP (common rows) ===
+  group           canonical        a1        a2        a3    a1-can   rows
+  co2_level         -807.21   -810.63   -810.59   -810.74     -3.42   co2_level_MLO co2_level_SPO co2_icecore
+  co2_seasonal        68.64     68.88     68.99     68.80     +0.24   co2_seasonal_MLO co2_seasonal_SPO
+  d13c_level         135.83    134.95    134.85    135.14     -0.88   d13c_level_MLO d13c_level_SPO
+  d13c_seasonal      457.81    457.64    457.84    457.10     -0.17   d13c_seasonal_MLO d13c_seasonal_SPO
+  gradients           92.21     91.45     91.47     91.40     -0.76   co2_gradient d13c_gradient
+  bomb_d14c         -581.52   -580.24   -580.36   -580.06     +1.28   d14c_NH d14c_SH
+  d14c_profile        -8.74     -8.80     -8.63     -9.12     -0.06   d14c_profile_level d14c_profile_ab d14c_profile_bd
+  excess_c14          -9.84     -9.80     -9.79     -9.80     +0.05   excess_c14_ocean
+  gcb_sinks          -71.84    -69.85    -69.69    -70.21     +1.99   gcb_ocean_sink gcb_land_sink gcb_ocean_enso_slope
+  ocean_deep         -17.68    -17.44    -16.88    -18.00     +0.24   ocean_grad_dic ocean_grad_d13c ocean_grad_alk
+  hs                  -6.82     -6.84     -6.76     -6.95     -0.02   hs_surf_dic hs_surf_d13c
+  TOTAL common     -1390.28  -1391.81  -1390.71  -1393.60     -1.53
+
+  every common row, a1 minus canonical (sorted):
+         co2_icecore        co2_level_MLO       d13c_level_SPO 
+               -2.10                -0.77                -0.61 
+       co2_level_SPO     co2_seasonal_SPO         co2_gradient 
+               -0.55                -0.50                -0.40 
+       d13c_gradient       d13c_level_MLO    d13c_seasonal_MLO 
+               -0.36                -0.28                -0.20 
+gcb_ocean_enso_slope      d14c_profile_ab          d14c_intcal 
+               -0.10                -0.05                -0.03 
+        hs_surf_d13c   d14c_profile_level      d14c_profile_bd 
+               -0.02                -0.01                 0.00 
+         hs_surf_dic       ocean_grad_dic    d13c_seasonal_SPO 
+                0.00                 0.02                 0.03 
+    excess_c14_ocean       ocean_grad_alk      ocean_grad_d13c 
+                0.05                 0.08                 0.14 
+      gcb_ocean_sink              d14c_SH     co2_seasonal_MLO 
+                0.39                 0.49                 0.75 
+             d14c_NH        gcb_land_sink 
+                0.79                 1.70 
+
+=== 2. THE ENSO OCEAN SLOPE (the 09-04g estimator: annual ocean sink ~ year + Nino3.4, 1959-2024) and GATE V ===
+  GCB observed: slope +0.1153 +/- 0.0246 GtC/yr per index, r +0.488 (n 66); PA1 band [0.066, 0.165]
+  canonical  w_enso_l2   0.00  slope +0.1083 +/- 0.0329 (0.94x obs)  r +0.368   GATE V sd 0.532 vs obs 0.933 +/- 0.084 (z -4.79)
+  a1         w_enso_l2  13.71  slope +0.1027 +/- 0.0423 (0.89x obs)  r +0.281   GATE V sd 0.548 vs obs 0.933 +/- 0.084 (z -4.60)
+  a2         w_enso_l2  12.91  slope +0.1041 +/- 0.0407 (0.90x obs)  r +0.295   GATE V sd 0.543 vs obs 0.933 +/- 0.084 (z -4.66)
+  a3         w_enso_l2  15.07  slope +0.0993 +/- 0.0449 (0.86x obs)  r +0.257   GATE V sd 0.556 vs obs 0.933 +/- 0.084 (z -4.49)
+
+=== 3. THE LAPLACE SD OF w_enso_l2 AT a1 (full per-direction Hessian on the 29-name space) ===
+  logpost at a1's vector: harness -1425.3620 vs start file -1425.3620 (diff +0.00e+00)
+  Hessian 29x29 in 10.0 min; -H positive definite: TRUE (min eigen 0.944, cond 2.4e+05); unstable directions: none
+  w_enso_l2 = 13.71 Sv per index, +/- 1 Laplace sd on the logit scale -> [11.70, 15.95] (marginal, from the inverse Hessian); diagonal-only sd would give [12.61, 14.87]
+  correlation of w_enso_l2 with: kz +0.36, hs_asx_frac +0.36, h_ml +0.18, u_hs -0.33, sst_seas_amp_SH -0.40, pump_grad -0.79
+
+=== 4. PA3-PA5: the level rows, the deep names, the land pair vs the canonical ===
+  PA3 FAIL: co2_level_MLO -0.77, co2_level_SPO -0.55, co2_icecore -2.10; d13c_level_MLO -0.28, d13c_level_SPO -0.61
+  PA4 kz             canonical   1.44e+04  a1   1.45e+04   du +0.015 = +0.09 canonical sd -> ok
+  PA4 pump_grad      canonical        330  a1      327.6   du -0.007 = -0.06 canonical sd -> ok
+  PA4 kz_deep_frac   canonical   0.007441  a1   0.007333   du -0.045 = -0.04 canonical sd -> ok
+  PA4 rows (a1 - canonical, log-units): d14c_profile_level -0.01, d14c_profile_ab -0.05, d14c_profile_bd +0.00, ocean_grad_dic +0.02  [the prereg's '1 posterior sigma' has no row-level sd; read as a magnitude]
+  PA5 gamma_enso_land_NH   canonical 0.5743  a1 0.4812   du -0.093 = -0.56 canonical sd -> ok
+  PA5 gamma_enso_land_SH   canonical 0.2276  a1 0.3150   du +0.087 = +0.52 canonical sd -> ok
+
+=== 5. PA6: the demean flag's price at a1 (test-enso-demean's scoring, transcribed) ===
+  demean ON -1425.3620, OFF -1434.3863 -> price 9.0242 (at hilda30s 17.7133; PA6 bound >= 30) -> FAIL
+
+=== 6. GATE 7 and the chain (H / GL / Q / S), for the record ===
+  GATE 7  canonical  ocean 3.11 (z -0.23) land 3.12 (z +1.42) -> PASS
+  GATE 7  a1         ocean 3.13 (z -0.18) land 3.09 (z +1.36) -> PASS
+  GATE 7  a2         ocean 3.13 (z -0.19) land 3.10 (z +1.37) -> PASS
+  GATE 7  a3         ocean 3.14 (z -0.16) land 3.08 (z +1.34) -> PASS
+  GATE H  canonical  R_co2 0.911 R_d13c 2.003 contrast z +11.86 -> FAIL
+  GATE H  a1         R_co2 0.911 R_d13c 2.001 contrast z +11.85 -> FAIL
+  GATE H  a2         R_co2 0.912 R_d13c 2.004 contrast z +11.85 -> FAIL
+  GATE H  a3         R_co2 0.909 R_d13c 1.996 contrast z +11.84 -> FAIL
+  GATE GL canonical  ratio 2.00 z -10.03 -> FAIL
+  GATE GL a1         ratio 2.00 z -10.03 -> FAIL
+  GATE GL a2         ratio 2.00 z -10.14 -> FAIL
+  GATE GL a3         ratio 2.00 z -9.85 -> FAIL
+  GATE Q  canonical  mean +0.909 n_sd 3.09 -> FAIL
+  GATE Q  a1         mean +0.915 n_sd 3.15 -> FAIL
+  GATE Q  a2         mean +0.911 n_sd 3.11 -> FAIL
+  GATE Q  a3         mean +0.922 n_sd 3.22 -> FAIL
+  GATE S  canonical  SPO limb 0.286 ppm @ 8.98 [7.41, 10.41] -> PASS
+  GATE S  a1         SPO limb 0.280 ppm @ 8.96 [7.41, 10.41] -> PASS
+  GATE S  a2         SPO limb 0.249 ppm @ 8.74 [7.41, 10.41] -> PASS
+  GATE S  a3         SPO limb 0.315 ppm @ 9.21 [7.41, 10.41] -> PASS
+
+=== VERDICT (prereg 2026-09-17k s4 PA1, in the physical unit) ===
+  w_enso_l2 13.71 [11.70, 15.95] Sv/index vs Meinen [14, 25]: BELOW the bracket
+  slope +0.1027 in [0.066, 0.165]: PASS;  r +0.281 > 0.25: PASS;  likelihood -1391.81 >= -1391.3: FAIL (canonical -1390.28; a1 - canonical -1.53)
+  PA2 GATE V sd 0.548 >= 0.603: FAIL (soft)
+  PA3 FAIL   PA4 names PASS   PA5 PASS   PA6 FAIL
+  PA1 -> REFUTED (as the prereg's rule reads)
+  NOTE the prereg names only PASS / PARTIAL-ABOVE / REFUTED; a fitted value BELOW the bracket is the REFUTED branch by the rule's letter,
+       but it is a different finding from 'above 40': the refit wants LESS limb than the observation needs, not more.
+  Promotion is a ruling in every branch; nothing is adopted here.
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/l2_array_read_csl3_20260920.{log,rds}
+⛔ NOTHING IS ADOPTED; no mode is promoted.
