@@ -1,0 +1,39 @@
+d13C GRADIENT LEVERS, one coordinate at a time at hilda29l's point  2026-09-20 18:44:30
+  refit_20260920_hilda29l_obj13_hilda_csl3 (logpost -1425.36, PINNED ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 -- logpost not comparable to a free arm)
+  obs gradients: CO2 +2.4253 +- 0.0587 ppm; d13C -0.0668 +- 0.0030 permil; gate Q obs 0.60 +- 0.10
+  canonical: ra_ratio 0 (model default; not in the table), k_w 1912.3, npp_frac_NH 0.59, grad_off_d13c +0.0668
+
+[0] the canonical as stored (must reproduce the 09-20 scorecard: R_co2 0.911, R_d13c 2.001, zH +11.85, GL z -10.03, Q 3.15 sd, lik -1391.81)
+  canonical as stored            R_co2 0.911 R_d13c 2.001 zH +11.85 | GL z -10.03 | Q +0.915 (3.15 sd) | Suess obs-mod +0.206 drift +0.047 | lvl   68.2/  66.8 seas  207.9/ 249.8 grad  106.2 d14c  -290.0/ -290.2 | lik -1391.81
+
+[1] ra_ratio -- the land's GROSS isotope loop (net carbon flux unchanged by construction)
+  ra_ratio 0.25                  R_co2 0.911 R_d13c 1.999 zH +11.83 | GL z -10.00 | Q +0.910 (3.10 sd) | Suess obs-mod +0.196 drift +0.046 | lvl   73.8/  60.6 seas  209.0/ 249.9 grad  106.2 d14c  -284.8/ -310.9 | lik -1406.60
+  ra_ratio 0.50                  R_co2 0.911 R_d13c 1.997 zH +11.83 | GL z  -9.99 | Q +0.907 (3.07 sd) | Suess obs-mod +0.189 drift +0.046 | lvl   76.5/  55.1 seas  209.9/ 250.0 grad  106.2 d14c  -304.1/ -347.8 | lik -1464.51
+  ra_ratio 1.00                  R_co2 0.911 R_d13c 1.996 zH +11.82 | GL z  -9.98 | Q +0.903 (3.03 sd) | Suess obs-mod +0.181 drift +0.045 | lvl   78.7/  46.8 seas  211.4/ 250.1 grad  106.2 d14c  -371.7/ -434.1 | lik -1623.09
+  ra_ratio 2.00                  R_co2 0.911 R_d13c 1.995 zH +11.81 | GL z  -9.96 | Q +0.900 (3.00 sd) | Suess obs-mod +0.172 drift +0.043 | lvl   79.4/  37.0 seas  213.0/ 250.4 grad  106.2 d14c  -512.2/ -577.2 | lik -1914.04
+  => R_d13c across ra_ratio [0, 2]: 2.001 -> 1.995 (-0.006); R_co2 0.911 -> 0.911; gate Q 3.15 -> 3.00 sd; Suess mean +0.206 -> +0.172; d14c_NH -222.1
+
+[2a] the fossil d13C signature, shifted on the forcing table (transient only)
+  d13c_foss -2 permil            R_co2 0.911 R_d13c 2.203 zH +12.82 | GL z -12.05 | Q +0.996 (3.96 sd) | Suess obs-mod +0.383 drift +0.141 | lvl -334.4/ -90.1 seas  208.1/ 249.7 grad  100.5 d14c  -290.0/ -290.2 | lik -1957.76
+  d13c_foss +2 permil            R_co2 0.911 R_d13c 1.798 zH +10.66 | GL z  -8.00 | Q +0.834 (2.34 sd) | Suess obs-mod +0.029 drift -0.047 | lvl  -81.6/-224.7 seas  207.5/ 249.9 grad   99.0 d14c  -290.0/ -290.2 | lik -1839.66
+
+[2b] the LUC hemispheric split SWAPPED (NH <-> SH) -- moves BOTH gradients if the split matters
+  LUC split swapped              R_co2 0.936 R_d13c 2.028 zH +11.70 | GL z -13.17 | Q +0.914 (3.14 sd) | Suess obs-mod +0.207 drift +0.049 | lvl   67.8/  66.1 seas  212.7/ 243.8 grad  107.8 d14c  -289.0/ -290.3 | lik -1422.26
+
+[3] k_w -- air-sea gross exchange (spinup sees it)
+  k_w x 0.5 (956 m/yr)           R_co2 0.909 R_d13c 1.912 zH +11.38 | GL z  -8.96 | Q +1.502 (9.02 sd) | Suess obs-mod +0.694 drift +0.244 | lvl -2348.1/-1762.6 seas  204.4/ 250.2 grad  104.6 d14c -4719.2/-4272.7 | lik -14773.98
+  k_w x 2.0 (3825 m/yr)          R_co2 0.912 R_d13c 2.043 zH +12.05 | GL z -10.56 | Q +0.500 (1.00 sd) | Suess obs-mod -0.122 drift -0.072 | lvl -651.7/-1012.0 seas  212.8/ 246.3 grad  106.0 d14c -1829.0/-2272.8 | lik -6888.15
+
+[4] RANKING by |R_d13c - 1| with R_co2 held (a lever that moves R_co2 by more than the CO2 control's se is transport, not isotopes)
+  d13c_foss +2 permil            |R_d13c-1| 0.798  dR_co2 +0.000  dlik -447.86  dQ -0.81 sd
+  k_w x 0.5 (956 m/yr)           |R_d13c-1| 0.912  dR_co2 -0.002  dlik -13382.17  dQ +5.87 sd
+  ra_ratio 2.00                  |R_d13c-1| 0.995  dR_co2 -0.000  dlik -522.23  dQ -0.15 sd
+  ra_ratio 1.00                  |R_d13c-1| 0.996  dR_co2 -0.000  dlik -231.28  dQ -0.12 sd
+  ra_ratio 0.50                  |R_d13c-1| 0.997  dR_co2 -0.000  dlik  -72.70  dQ -0.08 sd
+  ra_ratio 0.25                  |R_d13c-1| 0.999  dR_co2 +0.000  dlik  -14.80  dQ -0.05 sd
+  canonical as stored            |R_d13c-1| 1.001  dR_co2 +0.000  dlik   +0.00  dQ +0.00 sd
+  LUC split swapped              |R_d13c-1| 1.028  dR_co2 +0.025  dlik  -30.45  dQ -0.01 sd
+  k_w x 2.0 (3825 m/yr)          |R_d13c-1| 1.043  dR_co2 +0.001  dlik -5496.34  dQ -2.15 sd
+  d13c_foss -2 permil            |R_d13c-1| 1.203  dR_co2 +0.000  dlik -565.96  dQ +0.81 sd
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/d13c_gradient_levers_20260920.{log,rds}

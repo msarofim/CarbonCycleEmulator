@@ -1,0 +1,42 @@
+THE SHAPE OF THE d13C GRADIENT MISS, at hilda29l  2026-09-20 18:55:19
+  refit_20260920_hilda29l_obj13_hilda_csl3 (logpost -1425.36, PINNED ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 -- logpost not comparable to a free arm)
+
+[1] ADDITIVE vs MULTIPLICATIVE, on the years both stations have d13C (1980-2023, n 43)
+  by decade:
+  dec grad_co2 mod_co2 grad_d13c mod_d13c   resid  R_co2 R_d13c
+ 1980   1.9491  1.8518   -0.0274  -0.1097 -0.0823 0.9501 4.0017
+ 1990   2.3103  2.1131   -0.0575  -0.1208 -0.0634 0.9146 2.1026
+ 2000   2.7291  2.5344   -0.0701  -0.1357 -0.0657 0.9287 1.9366
+ 2010   3.6497  3.1623   -0.1010  -0.1558 -0.0548 0.8664 1.5423
+ 2020   3.9576  3.3144   -0.0845  -0.1579 -0.0734 0.8375 1.8690
+  residual ~ model CO2 gradient: intercept -0.0907 +- 0.0140 permil, slope +0.0095 +- 0.0055 permil/ppm (n_eff 40.1)
+  the model's own d13C-per-ppm signature across years: -0.0336 permil/ppm (obs: -0.0314)
+  => slope is 1.7 se from ADDITIVE (0) and 7.9 se from MULTIPLICATIVE (-0.0336). Mean residual -0.0668, sd 0.0196 permil; obs gradient sd 0.0309.
+  THE MISS IS A CONSTANT: the model's NH is 0.0668 permil TOO LIGHT relative to its SH, in every decade (R_d13c runs 4.0 -> 1.5 only because the observed gradient grew).
+  the model's preindustrial (1750-1800) gradient: CO2 +0.0772 ppm, d13C -0.00333 permil -- it has NO background offset.
+
+[2] IS THE OBSERVATION ROBUST? Scripps vs NOAA/INSTAAR on their overlap, same estimator (ccx_year_harmonic levels, differenced)
+  overlap 1994-2014 (n 20): Scripps -0.0750 +- 0.0042, NOAA -0.0757 +- 0.0031; NOAA - Scripps -0.0007 +- 0.0035 permil (-0.2 se); r = 0.59
+  => two independent labs agree on the gradient to 0.001 permil; the 0.067 permil offset is in the ATMOSPHERE, not in a station calibration.
+
+[3] THE MODEL'S ISOFLUX GAIN, measured: d13c_foss +2 permil on the forcing table (transient only)
+  mean fossil E_NH - E_SH over the obs years 6.44 GtC/yr -> isoflux change +12.9 GtC-permil/yr -> gradient change +0.0135 permil
+  GAIN = 0.00105 permil per (GtC-permil/yr). Two-box check: 1/(2 k C_hemi) with tau_ex 0.88 yr and C_hemi 403 GtC = 0.00109
+  => the 0.0668 permil offset needs a persistent NH-minus-SH isoflux asymmetry of +64 GtC-permil/yr that the model lacks.
+
+[4] THE MODEL'S OWN AIR-SEA DISEQUILIBRIUM ISOFLUX BY HEMISPHERE, calendar 1995 (Quay's definition: d13C of air in equilibrium with the box, minus the air)
+  NH ml  gross invasion  35.20 GtC/yr  disequilibrium +0.989 permil  isoflux  +34.82 GtC-permil/yr
+  NH hs  gross invasion   7.28 GtC/yr  disequilibrium -0.102 permil  isoflux   -0.74 GtC-permil/yr
+  SH ml  gross invasion  51.32 GtC/yr  disequilibrium +0.859 permil  isoflux  +44.08 GtC-permil/yr
+  SH hs  gross invasion   9.62 GtC/yr  disequilibrium +0.026 permil  isoflux   +0.25 GtC-permil/yr
+  model: gross invasion NH 42.5 / SH 60.9 GtC/yr; isoflux NH +34.1 / SH +44.3; ASYMMETRY -10.2 GtC-permil/yr -> -0.0108 permil of gradient (-16 % of the offset)
+
+[5] THE OBSERVATION-SIDE COUNTERPART: Quay 2003 Fig. 8's meridional disequilibrium, hemisphere-averaged (DIGITIZED + APPROXIMATE areas -- an order-of-magnitude pre-check)
+  area-weighted                  D_NH +1.27 D_SH +0.39 (global +0.75; Quay's +0.60) NH share of exchange 0.40; F_gross model 103 GtC/yr -> asymmetry +28.9 GtC-permil/yr -> +0.0303 permil (45 % of the offset)
+  area-weighted                  D_NH +1.27 D_SH +0.39 (global +0.75; Quay's +0.60) NH share of exchange 0.40; F_gross quay 74 GtC/yr -> asymmetry +20.7 GtC-permil/yr -> +0.0217 permil (32 % of the offset)
+  area x gas-exchange weighted   D_NH +1.13 D_SH -0.01 (global +0.41; Quay's +0.60) NH share of exchange 0.37; F_gross model 103 GtC/yr -> asymmetry +43.6 GtC-permil/yr -> +0.0457 permil (68 % of the offset)
+  area x gas-exchange weighted   D_NH +1.13 D_SH -0.01 (global +0.41; Quay's +0.60) NH share of exchange 0.37; F_gross quay 74 GtC/yr -> asymmetry +31.2 GtC-permil/yr -> +0.0327 permil (49 % of the offset)
+  vs the model's own asymmetry -10.2: the REAL ocean's meridional disequilibrium pattern (positive tropics, negative poleward of ~50 deg, Quay's Fig. 8 -- and 'a similar trend likely existed preindustrially', Quay para. 26)
+  is SH-light because the Southern Ocean is where the negative values are; the model's two columns are the SAME physics at two areas and produce an asymmetry of the WRONG SIGN.
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/d13c_gradient_offset_20260920.{log,rds}
