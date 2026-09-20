@@ -140,10 +140,26 @@
 # red IS the open question (the seasonal ML as mechanism vs its ~6-10 log-unit
 # price), which the NH/SH split test (ruling 1) is to inform. hilda30h and
 # hilda31p are retired to the *_QUARANTINED paths below.
-CCX_MODE_CANONICAL <- "hilda30e"
+# 2026-09-20 (o): `hilda30s` -- THE SAME 30 names and 8 pins as hilda30e, REFIT under the
+# "hilda_cs" STRUCTURE: the seasonal mixed layer's NH cycle FLAT (ml_nh_cycle 0; the
+# SH cycle on). Ruling 1's test (09-19 k/l -> 09-20 n) answered H_DRIVER: the ML's
+# ~6-10 log-unit price against ML-off was its NH DRIVER, not the mechanism -- with
+# the NH cycle flat the refit recovers d13c_seasonal_MLO entirely (200.91 -> 208.07;
+# the control 208.12) through sst_seas_amp_NH 2.44 -> 1.68 (= the control's 1.71),
+# and lands -1390.2774 on 26 rows / logpost -1425.056641: +7.65 over hilda30e on
+# the SAME scale, -2.56 under the control hilda31pe at ONE FEWER name. Slope 0.94x
+# kept (pair 0.44/0.04); gate S 0.286 @ 8.98 PASS; chain H / GL / Q FAIL, 7 PASS
+# unchanged; GATE V z -4.79. Wave id 0 (21/24 CONVERGED; the h_ml RIDGE 49.9 / 58.0
+# / 63.7 within 0.43: Hessian PD cond 2.42e5 but h_ml step-UNSTABLE at 3.0 %,
+# +/- 3.25 Laplace understates it -- recorded, not gated, the 09-10 / 09-17 i
+# precedent). Promoted on Marcus's ruling (09-20: "yes for all 3"). ⛔ THE NAMED
+# RED STANDS at -2.56: the control still beats the canonical on likelihood, by
+# ruling 2 (b) the gate is NOT re-cut to an AIC margin after the numbers are in.
+# hilda30e is retired to CCX_MODE_HILDA30E_QUARANTINED below.
+CCX_MODE_CANONICAL <- "hilda30s"
 
 CCX_MODE_FILES <- c(
-  hilda30e = file.path("calibration", "output", "refit_20260919_hilda30e_obj13_hilda_c",
+  hilda30s = file.path("calibration", "output", "refit_20260920_hilda30s_obj13_hilda_cs",
                        "mode_fit_pumpN.rds"),
   hilda31s2 = file.path("calibration", "output", "refit_20260912_hilda31_seasml1_round7",
                         "mode_fit_pumpN.rds"),
@@ -211,6 +227,12 @@ CCX_MODE_HILDA30H_QUARANTINED <- file.path("calibration", "output", "quarantine"
 CCX_MODE_HILDA31P_QUARANTINED <- file.path("calibration", "output", "quarantine",
                                            "20260919_hilda30e_adopted",
                                            "refit_20260910_hilda31_periodic", "mode_fit_pumpN.rds")
+# THE hilda_c CANONICAL (2026-09-20 o). `hilda30e` (09-19 j -> 09-20; the ML cycling
+# in BOTH hemispheres) is retired but resolvable by path: the 09-19 h -> 09-20 n reads
+# were taken at it, and it is the like-for-like "NH cycle on" arm of hilda30s.
+CCX_MODE_HILDA30E_QUARANTINED <- file.path("calibration", "output", "quarantine",
+                                           "20260920_hilda30s_adopted",
+                                           "refit_20260919_hilda30e_obj13_hilda_c", "mode_fit_pumpN.rds")
 
 # WHICH ARMS ARE PINNED -- AND WHY THE STORED logpost IS A TRAP ACROSS THEM.
 # A stored logpost is a number in the units of the objective that produced it,
@@ -235,7 +257,7 @@ CCX_MODE_HILDA31P_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
-CCX_MODE_PINNED <- c(hilda30e = TRUE, hilda31s2 = FALSE, hilda31pe = FALSE)
+CCX_MODE_PINNED <- c(hilda30s = TRUE, hilda31s2 = FALSE, hilda31pe = FALSE)
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
 # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
 # and its free PARENT: the same space with the pinned names free, kept
