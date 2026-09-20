@@ -49,7 +49,13 @@ test_that("the name ships OFF (k_l2 = 0), the label sets the two constants from 
   expect_true("hilda_cl2" %in% CCX_STRUCT_LABELS)
   # the second label (ruled 09-17 l): layer 3, everything else hilda_cl2's; the layer
   # table is the ONE source, and every label in it is a registered structure
-  expect_identical(CCX_L2_RETURN_LAYERS, c(hilda_cl2 = 2L, hilda_cl3 = 3L))
+  # 2026-09-20 (o): + hilda_csl3, the limb (layer 3) on hilda_cs (the shipped structure since hilda30s)
+  expect_identical(CCX_L2_RETURN_LAYERS, c(hilda_cl2 = 2L, hilda_cl3 = 3L, hilda_csl3 = 3L))
+  expect_identical(CCX_L2_BASE_STRUCT, c(hilda_cl2 = "hilda_c", hilda_cl3 = "hilda_c", hilda_csl3 = "hilda_cs"))
+  q3s <- ccx_apply_structure(p, "hilda_csl3", seas_ml = 1)
+  expect_identical(q3s$k_l2, 3L); expect_identical(q3s$ml_nh_cycle, 0L); expect_true(ccx_l2_on(q3s))
+  q3s$ml_nh_cycle <- NULL; q3c <- ccx_apply_structure(p, "hilda_cl3", seas_ml = 1); q3c$ml_nh_cycle <- NULL
+  expect_identical(q3s[order(names(q3s))], q3c[order(names(q3c))])            # the NH flag is the ONLY difference from hilda_cl3
   expect_true(all(names(CCX_L2_RETURN_LAYERS) %in% CCX_STRUCT_LABELS))
   q3 <- ccx_apply_structure(p, "hilda_cl3", seas_ml = 1)
   expect_identical(attr(q3, "struct"), "hilda_cl3"); expect_identical(q3$k_l2, 3L); expect_true(ccx_l2_on(q3))
@@ -201,4 +207,23 @@ test_that("P0f REFUSALS by name, the exclusions, and the driver-side inert rule"
   expect_false(ccx_pins_extend_canonical(CCX_MODE_CANONICAL_PINS, "solved", struct = "hilda_c"))   # the base set itself is not an EXTENSION (same() handles it)
   moved <- CCX_MODE_CANONICAL_PINS; moved[["w_thc"]] <- 5
   expect_false(ccx_pins_extend(c(moved[setdiff(names(moved), "w_enso_l2")], w_enso_l2 = 0), cp7, "solved", struct = "hilda_c"))   # a moved CANONICAL pin is not an extension
+})
+
+test_that("a file-HELD name this arm FITS is seeded, not fatal (2026-09-20 o): the canonical holds w_enso_l2 = 0 on the logit floor; the limb's arm fits it", {
+  md <- readRDS(ccx_mode_file())
+  skip_if_not("w_enso_l2" %in% names(ccx_mode_pins(md)), "the canonical does not hold w_enso_l2")
+  arm <- CCX_MODE_L2_ARM_PINS                                  # fits w_enso_l2, pins the ENSO pair
+  rm <- ccx_apply_pins(arm); on.exit(ccx_unpin_params(rm), add = TRUE)
+  pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))
+  expect_true("w_enso_l2" %in% attr(pm, "held_by_file"))
+  expect_false(is.finite(.to_unc(pm$w_enso_l2, CCX_PARAM_TABLE$w_enso_l2)))   # 0 is on the floor: unencodable
+  out <- capture.output(sd <- ccx_seed_unencodable(pm, "test"))
+  expect_identical(sd$w_enso_l2, CCX_PARAM_TABLE$w_enso_l2$init)
+  expect_true(any(grepl("HELD it at 0", out)))
+  expect_true(all(is.finite(ccx_par_to_unc(sd))))
+  # a held name this arm ALSO pins is untouched (the shim: held 0 by the file, pinned 0 by the arm)
+  expect_identical(sd$ent_seas_amp_SH, 0)
+  # MUTATION: a held value that DOES encode is left alone (no seeding message)
+  pm2 <- pm; pm2$w_enso_l2 <- 5
+  out2 <- capture.output(sd2 <- ccx_seed_unencodable(pm2, "test")); expect_identical(sd2$w_enso_l2, 5); expect_false(any(grepl("HELD", out2)))
 })

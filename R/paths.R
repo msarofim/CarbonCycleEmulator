@@ -559,6 +559,10 @@ ccx_mode_par_with_pins <- function(md) {
            " but the file pins it at ", md$pins[[n]], " -- the file is internally inconsistent.")
     pm[[n]] <- md$pins[[n]]
   }
+  # the names the FILE held, carried so a consumer that FITS one of them (an arm whose
+  # pins are not the file's -- the limb's arm at a canonical that holds w_enso_l2 = 0,
+  # 2026-09-20 o) can seed an unencodable held value instead of dying on it
+  attr(pm, "held_by_file") <- names(md$pins)
   pm
 }
 

@@ -1436,6 +1436,21 @@ ccx_seed_unencodable <- function(p, who = "start") {
                 nm, who, p[[nm]], s$tr, s$init))
     p[[nm]] <- s$init
   }
+  # A name the FILE HELD (its pins; ccx_mode_par_with_pins) that THIS ARM FITS -- still in
+  # the live table after ccx_apply_pins() -- at a value the transform cannot encode
+  # (2026-09-20 o: the canonical hilda30s holds w_enso_l2 = 0 on the logit floor; the
+  # limb's arm fits it). The held value was OFF, not an opinion: seed at the table init,
+  # loudly, exactly as an absent name is. A held name this arm ALSO pins is not in
+  # CCX_PARAM_NAMES and is left alone.
+  for (nm in setdiff(intersect(attr(p, "held_by_file"), CCX_PARAM_NAMES), attr(p, "migrated"))) {
+    s <- CCX_PARAM_TABLE[[nm]]
+    if (is.finite(.to_unc(p[[nm]], s))) next
+    cat(sprintf(paste0("SEEDING %s for the %s: the file HELD it at %g (a pin of the file, not of ",
+                       "this arm) --\n     which tr = \"%s\" cannot encode. Starting at the table ",
+                       "init %g.\n     The file held it OFF; this arm fits it.\n"),
+                nm, who, p[[nm]], s$tr, s$init))
+    p[[nm]] <- s$init
+  }
   p
 }
 
@@ -2083,10 +2098,15 @@ ccx_parse_seas_ml <- function(seas_ml) {
 #' directory NAMES its layer and a k = 2 read is reproducible by label. NEW LABELS,
 #' not an edit of hilda_c: every registered file is bit-exact under its own label
 #' (hilda / hilda_c stay k_l2 = 0 -- the limb ABSENT).
-CCX_L2_RETURN_LAYERS <- c(hilda_cl2 = 2L, hilda_cl3 = 3L)
+#' 2026-09-20 (o), ruling 3: "hilda_csl3" = the limb (k = 3) on top of hilda_cs -- the
+#' shipped structure since hilda30s (the seasonal ML's NH cycle flat). The BASE of each
+#' limb label is the second table; hilda_cl2 / hilda_cl3 stay on hilda_c (bit-exact for
+#' the 09-17 k/l probe and the 09-18 b array).
+CCX_L2_RETURN_LAYERS <- c(hilda_cl2 = 2L, hilda_cl3 = 3L, hilda_csl3 = 3L)
+CCX_L2_BASE_STRUCT   <- c(hilda_cl2 = "hilda_c", hilda_cl3 = "hilda_c", hilda_csl3 = "hilda_cs")
 ccx_struct_hilda_cl <- function(label) {
   k <- CCX_L2_RETURN_LAYERS[[label]]          # errors by name on an unknown label
-  blk <- ccx_struct_hilda_c()
+  blk <- switch(CCX_L2_BASE_STRUCT[[label]], hilda_c = ccx_struct_hilda_c(), hilda_cs = ccx_struct_hilda_cs())
   add <- list(k_l2 = k, w0_l2 = unname(ccx_eq_cell_obs()$w0_prior$mean_sv))
   blk[names(add)] <- add
   stopifnot(!anyDuplicated(names(blk)))
@@ -2115,6 +2135,7 @@ ccx_struct_block <- function(struct) {
     "hilda_c"  = ccx_struct_hilda_c(),             # hilda + the constants batch (2026-09-14 h)
     "hilda_cl2" = ccx_struct_hilda_cl("hilda_cl2"),  # hilda_c + the Nino3.4 limb returning from layer 2 (2026-09-17 k)
     "hilda_cl3" = ccx_struct_hilda_cl("hilda_cl3"),  # ... from layer 3 (ruled 2026-09-17 l; the array's label)
+    "hilda_csl3" = ccx_struct_hilda_cl("hilda_csl3"), # the limb (layer 3) on hilda_cs (2026-09-20 o, ruling 3)
     "hilda_cs"  = ccx_struct_hilda_cs(),           # hilda_c + the seasonal ML's NH cycle FLAT (2026-09-19 l)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
@@ -2259,7 +2280,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "\"hilda_c\" (hilda + the constants batch, 2026-09-14h), \"hilda_cl2\" ",
          "(hilda_c + the Nino3.4 limb returning from layer 2, 2026-09-17k) and \"hilda_cl3\" ",
          "(the limb returning from layer 3, 2026-09-17l), \"hilda_cs\" (hilda_c with the ",
-         "seasonal mixed layer's NH cycle FLAT, 2026-09-19l).")
+         "seasonal mixed layer's NH cycle FLAT, 2026-09-19l) and \"hilda_csl3\" (the limb from ",
+         "layer 3 on hilda_cs, 2026-09-20o).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)
