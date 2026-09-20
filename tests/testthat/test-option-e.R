@@ -223,7 +223,9 @@ test_that("N-E1 (re-scoped): at the export reproducing the canonical's PI bottom
   # the gradient, WORSE than hilda30c's) the same construction moves it 3.1: a MEASURED value at
   # the new canonical, recorded here as such -- option E is CLOSED (refuted 09-15 b), so this is
   # provenance of the matched-export read, not a bound on a live candidate.
-  expect_equal(abs(st1[["ocean_grad_dic"]] - st0[["ocean_grad_dic"]]), 3.1, tolerance = 0.15, scale = 1)
+  # At hilda30s (09-20 (o), hilda_cs: the ML's NH cycle flat, pump_grad 330 / pump_hs_gcm2 81 / h_ml 58):
+  # the same construction moves the row 0.43 -- back under 1, as at hilda30c. MEASURED, recorded.
+  expect_equal(abs(st1[["ocean_grad_dic"]] - st0[["ocean_grad_dic"]]), 0.43, tolerance = 0.15, scale = 1)
   cat(sprintf("\n  N-E1: export matching the canonical's PI bottom-minus-ML gradient (%.1f umol/kg): %.2f GtC/yr (the solved field: %.1f);\n        ocean_grad_dic %+.2f, ocean_grad_d13c %+.2f log-units vs the canonical\n",
               g0, E_match, sum(ccx_prepare(p0)$pump$NH$org + ccx_prepare(p0)$pump$NH$carb + ccx_prepare(p0)$pump$SH$org + ccx_prepare(p0)$pump$SH$carb),
               st1[["ocean_grad_dic"]] - st0[["ocean_grad_dic"]], st1[["ocean_grad_d13c"]] - st0[["ocean_grad_d13c"]]))

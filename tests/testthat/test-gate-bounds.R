@@ -484,9 +484,13 @@ test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonic
   # (0.63 @ 4.1 in the C' anatomy), so the blind phase IS the thermal phase. Still FAIL.
   # At hilda30h (09-17 (h), the hygiene-batch refit on hilda_c): whole limb 0.327 @ 8.46 PASS
   # (the scorecard's number); the blind read stays @ 4.13 within the tolerance.
+  # At hilda30e (09-19 (j), the #13 refit): unchanged, 0.327 @ 8.45. At hilda30s (09-20 (o), the hilda_cs
+  # structure -- the ML's NH cycle FLAT, the SH cycle on): whole limb 0.286 @ 8.98 PASS (the scorecard's
+  # number; the SPO limb is later by half a month with h_ml 58 and sst_seas_amp_NH 1.68), the blind read
+  # 0.767 @ 4.10 -- the thermal phase, as before.
   expect_true(full$pass)
-  expect_equal(full$mo,  8.46, tolerance = 0.05, scale = 1)
-  expect_equal(blind$mo, 4.13, tolerance = 0.05, scale = 1)
+  expect_equal(full$mo,  8.98, tolerance = 0.05, scale = 1)
+  expect_equal(blind$mo, 4.10, tolerance = 0.05, scale = 1)
   expect_false(dg_gateS_verdict(list(mo = blind$mo, amp = blind$amp))$pass)
 })
 

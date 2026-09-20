@@ -71,8 +71,10 @@ test_that("(5) the label reproduces the session knock-out at the canonical's poi
   skip_if_not(file.exists(SMH_KNOCKOUT_LOG), "the 09-19 knock-out record is absent")
   ko <- readRDS(SMH_KNOCKOUT_LOG)
   target <- ko$tot[["canonical:NH_flat"]]; full <- ko$tot[["canonical:full"]]
-  obs <- ccx_prepare_obs(); v <- dg_vector(CCX_MODE_CANONICAL)
-  # the canonical's OWN point, re-labelled hilda_cs: the same numbers, the NH cycle flat
+  # 2026-09-20 (o): the canonical is now hilda30s, ITSELF on hilda_cs; the knock-out was measured at
+  # hilda30e's point (hilda_c, both cycles), which is the quarantined file by path
+  obs <- ccx_prepare_obs(); v <- dg_vector(ccx_path(CCX_MODE_HILDA30E_QUARANTINED))   # by ABSOLUTE path (testthat runs from tests/testthat)
+  # hilda30e's OWN point, re-labelled hilda_cs: the same numbers, the NH cycle flat
   v$p <- ccx_apply_structure(v$p, "hilda_cs", seas_ml = "1", pump_field = ccx_mode_pump_field(v$md))
   v$p <- ccx_overlay_par(v$p, v$pm)                                   # the fitted values back over the re-labelled base (the lint-enforced idiom)
   for (n in names(ccx_mode_pins(v$md))) v$p[[n]] <- ccx_mode_pins(v$md)[[n]]

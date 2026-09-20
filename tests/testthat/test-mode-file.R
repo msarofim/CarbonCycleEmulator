@@ -309,15 +309,20 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
   common <- Reduce(intersect, c(list(names(lik(sc_c))), lapply(rescored, function(r) names(lik(r)))))
   L <- c(vapply(rescored, function(r) sum(lik(r)[common]), numeric(1)),
          setNames(sum(lik(sc_c)[common]), CCX_MODE_CANONICAL))
-  # ⛔ NAMED RED #2 by ruling (Marcus 2026-09-19, ruling 2 = "b"): the control hilda31pe (ML OFF, shim free,
-  # 31 names, refit under #13) beats the canonical hilda30e (ML ON, shim pinned, 30 names, refit under #13) by
-  # ~10.2 on the 26 common rows -- refit against refit, under #12 (+10.31) and #13 alike. The gate is NOT
-  # re-ruled to pass (a gate chosen because the model passes it is not a gate); the red IS the open question:
-  # the seasonal mixed layer as a MECHANISM vs its price on the NH seasonal rows (d13c_seasonal_MLO,
-  # co2_seasonal_MLO). Resolution = the hilda_cs refit (the ML's NH cycle flat) and the ML ruling.
-  expect_gt(L[[CCX_MODE_CANONICAL]], L[[CCX_MODE_SEASML0_CONTROL]],
-            label = sprintf("canonical likelihood %.4f vs the seas_ml 0 control %.4f (%d common rows) -- NAMED RED by ruling 09-19 (b)",
-                            L[[CCX_MODE_CANONICAL]], L[[CCX_MODE_SEASML0_CONTROL]], length(common)))
+  # ⛔ NAMED RED #2 (ruling 2 = "b", 2026-09-19; the MARGIN re-cut to AIC on Marcus's 2026-09-20 ruling "I like
+  # using AIC margins rather than straight [likelihood] margins"). The comparison is AIC on the common rows:
+  # AIC = 2k - 2L with k = the FITTED names of each arm (a pinned name is not fitted), so the canonical may
+  # trail the control by ONE log-unit per name it does not fit and still pass. History: at hilda30e (ML ON in
+  # both hemispheres, 30 names) the control hilda31pe (ML OFF, shim free, 31) led by 10.21 -> dAIC +18.4 for the
+  # control; at hilda30s (hilda_cs, the ML's NH cycle flat) it leads by 2.56 -> dAIC = 2*1 - 2*2.56 = -3.1,
+  # STILL the control's by 1.56 log-units net. The gate stays RED as the open question (the mechanism's last
+  # 2.6 on d13c_seasonal_SPO / ocean_grad_alk / co2_seasonal_MLO); it is not re-cut again to pass.
+  k_can <- length(readRDS(ccx_mode_file())$param_names); k_ctl <- length(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))$param_names)
+  aic <- function(L, k) 2 * k - 2 * L
+  d_aic <- aic(L[[CCX_MODE_CANONICAL]], k_can) - aic(L[[CCX_MODE_SEASML0_CONTROL]], k_ctl)   # < 0 = the canonical is preferred
+  expect_lte(d_aic, 0,
+             label = sprintf("dAIC canonical minus control %+.2f (likelihood %.4f on %d names vs %.4f on %d, %d common rows; a positive value is the control's lead in AIC units) -- NAMED RED by ruling",
+                             d_aic, L[[CCX_MODE_CANONICAL]], k_can, L[[CCX_MODE_SEASML0_CONTROL]], k_ctl, length(common)))
   if (canon_pinned)
     cat(sprintf("\n  [test-mode-file] PINNED canonical %s: likelihood %.4f on %d common rows; parent %s %.4f (price %+.4f, RECORDED not gated); control %s %.4f (%+.4f)\n",
                 CCX_MODE_CANONICAL, L[[CCX_MODE_CANONICAL]], length(common), CCX_MODE_PINNED_PARENT,
