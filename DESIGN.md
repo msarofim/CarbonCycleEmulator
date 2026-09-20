@@ -172,7 +172,7 @@ d M_atm[h]/dt =
   `seas_ml` 0. **Why:** the round-6 mechanism's whole ~6–10 log-unit price against ML-off lands
   on the NH seasonal rows while its motivation was the SH (P1c); a conditional knock-out could
   not separate the mechanism from its NH driver, so the test is a REFIT under this label
-  (CHANGELOG 09-19 (k), (l)). **Ruled 2026-09-20 (o): the refit answered H_driver (the NH seasonal δ¹³C recovered entirely, +7.65 on the same names), and `hilda_cs` is the SHIPPED structure — the canonical `hilda30s` entrains in the SH only.**
+  (CHANGELOG 09-19 (k), (l)). **Ruled 2026-09-20 (o): the refit answered H_driver (the NH seasonal δ¹³C recovered entirely, +7.65 on the same names), and `hilda_cs` is the SHIPPED structure — the canonical entrains in the SH only. Ruled 2026-09-20 (r): the layer-3 Niño3.4 RETURN LIMB (`hilda_csl3`, `w_enso_l2` 13.7 ± 2.1 Sv/index) replaces the ocean ENSO shim — the canonical `hilda29l`.**
 
 ### 3.4a Candidate ocean structures — the open list (added 2026-08-15, Marcus)
 

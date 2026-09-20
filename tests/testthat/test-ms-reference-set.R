@@ -22,8 +22,11 @@ ms_ctl <- CCX_MODE_CONTROL_PINS
 
 test_that("the control's pin set is the canonical's without the shim, and the control is registered and FREE", {
   expect_true(!is.null(ms_cp) && "ent_seas_amp_SH" %in% names(ms_cp))
-  expect_identical(names(ms_ctl), setdiff(names(ms_cp), "ent_seas_amp_SH"))
-  expect_equal(unname(ms_ctl), unname(ms_cp[names(ms_ctl)]))
+  # 2026-09-20 (r): the canonical is the LIMB arm (fits w_enso_l2, pins the ocean ENSO pair); the
+  # control has no limb (holds w_enso_l2 = 0) and fits the pair: the two sets differ by exactly those
+  expect_setequal(setdiff(names(ms_cp), names(ms_ctl)), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH"))
+  expect_identical(setdiff(names(ms_ctl), names(ms_cp)), "w_enso_l2")
+  shared <- intersect(names(ms_ctl), names(ms_cp)); expect_equal(unname(ms_ctl[shared]), unname(ms_cp[shared]))
   expect_true(CCX_MODE_SEASML0_CONTROL %in% names(CCX_MODE_FILES))
   expect_false(CCX_MODE_PINNED[[CCX_MODE_SEASML0_CONTROL]], info = "the control is a FREE arm (its shim is fitted)")
   md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))
@@ -33,7 +36,7 @@ test_that("the control's pin set is the canonical's without the shim, and the co
 })
 
 test_that("the five branches return the ruled pairs", {
-  withr::local_envvar(CCX_MS_STRUCT = "hilda_c", CCX_MS_PUMP_FIELD = "solved")
+  withr::local_envvar(CCX_MS_STRUCT = ccx_mode_struct(readRDS(ccx_mode_file())), CCX_MS_PUMP_FIELD = "solved")   # the canonical's OWN structure (09-20 r: hilda_csl3)
   r1 <- ccx_ms_reference_set(ms_cp, "1")
   expect_identical(r1$incumbent, CCX_MODE_CANONICAL); expect_identical(r1$new_basin, CCX_MODE_SEASML0_CONTROL)
   r1b <- ccx_ms_reference_set(ms_cp, "0")          # the canonical's pins at seas_ml 0: still the canonical
@@ -63,7 +66,7 @@ test_that("the five branches return the ruled pairs", {
 })
 
 test_that("MUTATION: a foreign pin set, a moved shim value, and a bad seas_ml are refused by name", {
-  withr::local_envvar(CCX_MS_STRUCT = "hilda_c", CCX_MS_PUMP_FIELD = "solved")
+  withr::local_envvar(CCX_MS_STRUCT = ccx_mode_struct(readRDS(ccx_mode_file())), CCX_MS_PUMP_FIELD = "solved")   # the canonical's OWN structure (09-20 r: hilda_csl3)
   expect_error(ccx_ms_reference_set(c(q10 = 2), "0"), "no registered incumbent")
   moved <- ms_cp; moved[["ent_seas_amp_SH"]] <- 5
   expect_error(ccx_ms_reference_set(moved, "1"), "no registered incumbent")
@@ -75,11 +78,9 @@ test_that("MUTATION: a foreign pin set, a moved shim value, and a bad seas_ml ar
 
 test_that("the layer-2 limb's arm: the canonical / the control under hilda_cl2 at seas_ml 1; refused without the limb or at seas_ml 0", {
   ms_l2 <- CCX_MODE_L2_ARM_PINS
-  # 09-19 (m): the canonical's pins hold w_enso_l2; the limb's arm FITS it, so its set is the canonical's minus that name
-  ms_cp_l2 <- ms_cp[setdiff(names(ms_cp), "w_enso_l2")]
-  expect_identical(names(ms_l2), c(names(ms_cp_l2), "gamma_enso_ocn_NH", "gamma_enso_ocn_SH"))
-  expect_equal(unname(ms_l2[names(ms_cp_l2)]), unname(ms_cp_l2))
-  expect_false("w_enso_l2" %in% names(ms_l2))
+  # 09-20 (r): the limb's arm IS the canonical's (hilda29l fits w_enso_l2 and pins the pair)
+  expect_identical(ms_l2, ms_cp)
+  expect_false("w_enso_l2" %in% names(ms_l2)); expect_true(all(c("gamma_enso_ocn_NH", "gamma_enso_ocn_SH") %in% names(ms_l2)))
   expect_equal(unname(ms_l2[c("gamma_enso_ocn_NH", "gamma_enso_ocn_SH")]), c(0, 0))
   withr::local_envvar(CCX_MS_STRUCT = "hilda_cl2", CCX_MS_PUMP_FIELD = "solved")
   r8 <- ccx_ms_reference_set(ms_l2, "1")
@@ -90,10 +91,14 @@ test_that("the layer-2 limb's arm: the canonical / the control under hilda_cl2 a
   r8b <- ccx_ms_reference_set(ms_l2, "1", struct = "hilda_cl2")
   expect_identical(r8b, r8)
   # MUTATION: the same pins under a structure WITHOUT the limb are an unruled arm
+  # (09-20 r: the refusal is now the general one -- a pin set that leaves an inert name FREE)
   expect_error(ccx_ms_reference_set(ms_l2, "1", struct = "hilda_c"), "no layer-2 limb")
   expect_error(ccx_ms_reference_set(ms_l2, "1", struct = "hilda"), "no layer-2 limb")
-  # MUTATION: the limb's arm at seas_ml 0 is not preregistered
-  expect_error(ccx_ms_reference_set(ms_l2, "0", struct = "hilda_cl2"), "seas_ml 1")
+  # the control's pins under a limb structure hold w_enso_l2 OFF -- allowed (nothing inert is free)
+  expect_silent(ccx_ms_reference_set(ms_ctl, "0", struct = "hilda_cl2"))
+  # (09-20 r: the limb's arm at seas_ml 0 resolves through the canonical branch now -- the seas_ml-1
+  # prereg refusal lived in the L2 branch, which the canonical's own pins no longer reach)
+  r8c <- ccx_ms_reference_set(ms_l2, "0", struct = "hilda_cl2"); expect_identical(r8c$incumbent, CCX_MODE_CANONICAL)
   # MUTATION: the shim pinned at a non-zero value is not the limb's arm
   moved <- ms_l2; moved[["gamma_enso_ocn_NH"]] <- 0.36
   expect_error(ccx_ms_reference_set(moved, "1", struct = "hilda_cl2"), "no registered incumbent")

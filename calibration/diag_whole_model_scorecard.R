@@ -114,8 +114,11 @@ g <- obs$gcb; mg <- merge(g[, c("year", "ocean_sink")], en_ann, by = "year"); mg
 fo <- stats::lm(ocean_sink ~ year + nino34_anom, data = mg); cat(sprintf("  GCB observed: slope %+.4f ± %.4f GtC/yr per index, r %+.3f (n %d)\n", coef(fo)[["nino34_anom"]], summary(fo)$coefficients["nino34_anom", 2], stats::cor(residuals(stats::lm(ocean_sink ~ year, mg)), mg$nino34_anom), nrow(mg)))
 enso_slope <- function(r) { s <- dg_annual_sinks(r); d <- merge(data.frame(year = s$year, oc = s$ocean), en_ann, by = "year"); d <- d[d$year >= SC_ENSO_WIN[1] & d$year <= SC_ENSO_WIN[2], ]
   f <- stats::lm(oc ~ year + nino34_anom, data = d); c(slope = coef(f)[["nino34_anom"]], se = summary(f)$coefficients["nino34_anom", 2], r = stats::cor(residuals(stats::lm(oc ~ year, d)), d$nino34_anom)) }
-ENSO <- list(); for (a in an) { full <- enso_slope(R[[a]]); v2 <- ARMS[[a]]; v2$p$gamma_enso_ocn_NH <- 0; v2$p$gamma_enso_ocn_SH <- 0; sol <- enso_slope(dg_run(v2)); ENSO[[a]] <- list(full = full, sol = sol)
-  cat(sprintf("  %-8s full model slope %+.4f ± %.4f (r %+.3f) = %.2fx obs;  solubility-only %+.4f (r %+.3f)  [gamma_enso_ocn NH %+.3f SH %+.3f]\n", a, full["slope"], full["se"], full["r"], full["slope"] / coef(fo)[["nino34_anom"]], sol["slope"], sol["r"], ARMS[[a]]$p$gamma_enso_ocn_NH, ARMS[[a]]$p$gamma_enso_ocn_SH)) }
+# the solubility-only knockout zeroes EVERY ocean ENSO mechanism: the shim pair AND, since 09-20 (r)
+# the canonical carries the layer-3 limb, w_enso_l2 (a knockout that misses a mechanism reads the
+# full model as "solubility-only" -- it did, for one scorecard, at hilda29l)
+ENSO <- list(); for (a in an) { full <- enso_slope(R[[a]]); v2 <- ARMS[[a]]; v2$p$gamma_enso_ocn_NH <- 0; v2$p$gamma_enso_ocn_SH <- 0; if (!is.null(v2$p$w_enso_l2)) v2$p$w_enso_l2 <- 0; sol <- enso_slope(dg_run(v2)); ENSO[[a]] <- list(full = full, sol = sol)
+  cat(sprintf("  %-8s full model slope %+.4f ± %.4f (r %+.3f) = %.2fx obs;  solubility-only %+.4f (r %+.3f)  [gamma_enso_ocn NH %+.3f SH %+.3f; w_enso_l2 %.2f]\n", a, full["slope"], full["se"], full["r"], full["slope"] / coef(fo)[["nino34_anom"]], sol["slope"], sol["r"], ARMS[[a]]$p$gamma_enso_ocn_NH, ARMS[[a]]$p$gamma_enso_ocn_SH, if (is.null(ARMS[[a]]$p$w_enso_l2)) 0 else ARMS[[a]]$p$w_enso_l2)) }
 
 cat("\n=== 4. COMPARISONS, NOT GATES (Marcus 09-08h: nothing from Joos may score the model) ===\n")
 irf_of <- function(v) { spin <- dg_spinup(v)

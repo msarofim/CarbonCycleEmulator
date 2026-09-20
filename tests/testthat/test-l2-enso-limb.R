@@ -67,7 +67,10 @@ test_that("the name ships OFF (k_l2 = 0), the label sets the two constants from 
   others <- setdiff(CCX_PARAM_NAMES, "w_enso_l2")
   expect_false(any(startsWith("w_enso_l2", others))); expect_false(any(startsWith(others, "w_enso_l2")))
   # a 37-name ancestor migrates to 0 and is SEEDED at init (0 sits on the floor)
-  anc <- readRDS(ccx_mode_file())$par_mode; expect_false("w_enso_l2" %in% names(anc))   # hilda30h predates the limb
+  # 2026-09-20 (r): the canonical hilda29l FITS w_enso_l2; the limb-less ancestor is hilda30s (quarantined, by
+  # path), which HELD it -- so the 37-name ancestor that predates the name is the quarantined hilda30h
+  anc_md <- readRDS(ccx_path(CCX_MODE_HILDA30H_QUARANTINED)); anc <- ccx_mode_par_with_pins(anc_md)
+  expect_false("w_enso_l2" %in% names(anc))                                            # hilda30h predates the limb
   mig <- ccx_migrate_par_set(anc); expect_identical(mig$w_enso_l2, 0); expect_true("w_enso_l2" %in% attr(mig, "migrated"))
   sd <- suppressWarnings(ccx_seed_unencodable(mig, "test")); expect_identical(sd$w_enso_l2, s$init)
 })
@@ -102,15 +105,16 @@ test_that("P0a (canonical): the canonical's stored LIKELIHOOD reproduces row by 
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
-  expect_false(ccx_l2_on(bp))                                          # every registered structure: k_l2 = 0
+  # 2026-09-20 (r): the canonical hilda29l IS the limb arm (hilda_csl3, k_l2 = 3): w_enso_l2 FITTED at
+  # 13.71, the ocean ENSO pair PINNED at 0. Nothing in the table is new to its file.
+  expect_true(ccx_l2_on(bp)); expect_identical(bp$k_l2, 3L)
   rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
-  # 2026-09-19 (m): the canonical (hilda30e) now HOLDS w_enso_l2 among its pins (inert under hilda_c),
-  # so nothing in the table is new to its file; the limb's name is a pin, not an absence
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))
   expect_length(new_names, 0L)
-  expect_true("w_enso_l2" %in% names(md$pins)); expect_identical(unname(md$pins[["w_enso_l2"]]), 0)
-  pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a-l2"))
-  expect_identical(pm$w_enso_l2, CCX_PARAM_TABLE$w_enso_l2$init)      # seeded: 0 is on the floor
+  expect_true("w_enso_l2" %in% md$param_names); expect_false("w_enso_l2" %in% names(md$pins))
+  expect_true(all(c("gamma_enso_ocn_NH", "gamma_enso_ocn_SH") %in% names(md$pins)))
+  pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(ccx_mode_par_with_pins(md)), "P0a-l2"))
+  expect_gt(pm$w_enso_l2, 10); expect_lt(pm$w_enso_l2, 20)                # the fitted value, not a seed
   u  <- ccx_par_to_unc(pm)
   sc <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(u)
   ccx_unpin_params(rm); rm <- list()

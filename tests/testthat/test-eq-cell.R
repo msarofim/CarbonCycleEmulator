@@ -209,7 +209,9 @@ test_that("P0a (canonical): the canonical's stored LIKELIHOOD reproduces row by 
   new_names <- setdiff(CCX_PARAM_NAMES, c(md$param_names, names(md$pins)))   # w_eq, gamma_eq
   # 2026-09-17 (h): the canonical (hilda30h, hilda_c) PINS the six inert names instead of lacking
   # them -- either way none is FITTED at the canonical, and a pinned one contributes no prior leg
-  six <- c("w_eq", "gamma_eq", "pump_export", "w_vent", "gamma_vent", "w_thc", "w_enso_l2")   # + the layer-2 limb w_enso_l2 (2026-09-17 k)   # + O1 arm THC (2026-09-15 d)   # + option D+E's three (2026-09-14 h)
+  # 2026-09-20 (r): DERIVED -- the names inert under the canonical's own structure / field (w_enso_l2 is
+  # FITTED under hilda_csl3, so it is not among them; it was, under hilda_c)
+  six <- ccx_inert_names(ccx_mode_pump_field(md), ccx_mode_struct(md))   # + the layer-2 limb w_enso_l2 (2026-09-17 k)   # + O1 arm THC (2026-09-15 d)   # + option D+E's three (2026-09-14 h)
   expect_setequal(union(new_names, intersect(names(md$pins), six)), six)
   pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "P0a"))
   expect_true(all(new_names %in% attr(pm, "migrated")))

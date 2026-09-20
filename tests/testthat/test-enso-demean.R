@@ -200,7 +200,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 17.7133 under the adopted objective (#13, hilda30s); 17.8469 at the seas_ml 0 control hilda31pe", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth 9.0242 under the adopted objective (#13, hilda29l); 17.8469 at the seas_ml 0 control hilda31pe", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -258,7 +258,12 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 17.7133 under 
   # 2026-09-20 (o): the canonical is `hilda30s` (hilda_cs: the ML's NH cycle flat; the ENSO pair 0.44/0.04):
   # 17.1138 -> 17.7133 (+0.60; the demean price now sits 0.13 from the control's 17.8469 -- the two arms'
   # ENSO coefficients are within a few percent of each other). MEASURED at the promoted file.
-  expect_equal(r$on_periodic - r$off_periodic, 17.7133, tolerance = 1e-4, scale = 1)
+  # 2026-09-20 (r): the canonical is `hilda29l` -- the ocean ENSO SHIM PAIR is PINNED at 0 and the layer-3
+  # LIMB (w_enso_l2 13.7) carries the ocean response: 17.7133 -> 9.0242. The demean flag acts through the
+  # ENSO COEFFICIENTS the forcing multiplies; the limb's response is clipped by its floor and enters the
+  # ocean as a volume exchange, not a coefficient on the index, so the flag's price halves (PA6's finding,
+  # l2_array_read_csl3_20260920). MEASURED at the promoted file.
+  expect_equal(r$on_periodic - r$off_periodic, 9.0242, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
   expect_equal(r0$on_periodic - r0$off_periodic, 17.8469, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could

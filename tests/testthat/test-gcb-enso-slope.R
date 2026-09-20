@@ -68,8 +68,10 @@ test_that("(3) ADDITIVE: the 25 pre-#13 rows are bit-identical; the row is absen
 })
 
 test_that("(4) DIRECTION: the limb at 18.7 (shim 0) beats the limb off (shim 0) on the new row, by more than on gcb_ocean_sink", {
-  base <- ges_v; base$p$gamma_enso_ocn_NH <- 0; base$p$gamma_enso_ocn_SH <- 0
-  blk <- ccx_struct_block("hilda_cl3")
+  # 2026-09-20 (r): the canonical carries the limb at its FITTED 13.7 (the row at its optimum -- 18.7 would
+  # cost); the direction test needs a LIMB-LESS base: hilda30s by path (hilda_cs, the shim pair fitted)
+  base <- dg_vector(ccx_path(CCX_MODE_HILDA30S_QUARANTINED)); base$p$gamma_enso_ocn_NH <- 0; base$p$gamma_enso_ocn_SH <- 0
+  blk <- ccx_struct_block("hilda_csl3")
   limb <- base; limb$p$k_l2 <- blk$k_l2; limb$p$w0_l2 <- blk$w0_l2; limb$p$w_enso_l2 <- 18.7
   st0 <- unlist(dg_streams(dg_run(base), base, obs = ges_obs)); st1 <- unlist(dg_streams(dg_run(limb), limb, obs = ges_obs))
   d_row <- st1[["gcb_ocean_enso_slope"]] - st0[["gcb_ocean_enso_slope"]]; d_sink <- st1[["gcb_ocean_sink"]] - st0[["gcb_ocean_sink"]]

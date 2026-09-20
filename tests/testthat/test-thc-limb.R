@@ -64,8 +64,9 @@ test_that("the names ship OFF; registration is complete; no name prefixes anothe
   # migration: a pre-build parameter set fills 0 and the canonical file still "carries the build"
   md <- readRDS(ccx_mode_file())
   expect_true(ccx_mode_carries_build(md))
-  pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(md$par_mode), "thc"))
-  expect_identical(pm$w_thc, CCX_PARAM_TABLE$w_thc$init)   # 0 is on the floor: seeded at init for a START point
+  rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)   # (09-20 r: a pinned file migrates WITH its pins)
+  pm <- suppressWarnings(ccx_seed_unencodable(ccx_migrate_par_set(ccx_mode_par_with_pins(md)), "thc"))
+  expect_identical(pm$w_thc, 0)                            # HELD at 0 by the canonical (a pin of the file and of this table)
 })
 
 test_that("P0a NO-OP: absent vs present-at-0 is BIT-EXACT; INERT under the solved field; the eigbound is exactly 0 off", {

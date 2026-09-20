@@ -2231,7 +2231,7 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
                                  struct = Sys.getenv("CCX_MS_STRUCT", "")) {
   seas_ml <- ccx_parse_seas_ml(seas_ml)
   same <- function(a, b) identical(ccx_pin_label(a), ccx_pin_label(b))
-  if (same(pins, CCX_MODE_CANONICAL_PINS) || ccx_pins_extend_canonical(pins, pump_field, struct)) {
+  res <- if (same(pins, CCX_MODE_CANONICAL_PINS) || ccx_pins_extend_canonical(pins, pump_field, struct)) {
     list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the canonical, under this array's pins")
   } else if (is.null(pins)) {
@@ -2264,6 +2264,21 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
               "', the control's '", ccx_pin_label(CCX_MODE_CONTROL_PINS),
               "', the layer-2 limb's '", ccx_pin_label(CCX_MODE_L2_ARM_PINS),
               "'); rule the reference set for this pin before launching.")
+  # 2026-09-20 (r): the canonical FITS w_enso_l2, so its pin set under a structure WITHOUT the limb
+  # would leave a name the structure never reads FREE -- the driver refuses such a name, and so
+  # does the reference set, by name (the L2 branch's "no layer-2 limb" refusal, generalised to
+  # every inert name: a registered pin set does not license an arm on a structure it does not fit)
+  # (applied AFTER the set is matched, so a foreign set still says "no registered incumbent")
+  if (!is.null(pins)) {
+    free_inert <- setdiff(ccx_inert_names(pump_field, struct), names(pins))
+    free_inert <- intersect(free_inert, CCX_PARAM_NAMES)
+    if (length(free_inert))
+      stop("ccx_ms_reference_set(): the pins '", ccx_pin_label(pins), "' under struct '", struct,
+           "' leave ", paste(free_inert, collapse = ", "), " FREE, which this structure never reads (",
+           if ("w_enso_l2" %in% free_inert) "no layer-2 limb: k_l2 = 0; " else "",
+           "an inert name fitted free is an unruled arm). Pin it, or use a structure that reads it.")
+  }
+  res
 }
 ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
                                 seas_ml = Sys.getenv("CCX_MS_SEAS_ML", "0"),

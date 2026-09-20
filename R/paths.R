@@ -156,10 +156,26 @@
 # RED STANDS at -2.56: the control still beats the canonical on likelihood, by
 # ruling 2 (b) the gate is NOT re-cut to an AIC margin after the numbers are in.
 # hilda30e is retired to CCX_MODE_HILDA30E_QUARANTINED below.
-CCX_MODE_CANONICAL <- "hilda30s"
+# 2026-09-20 (r): `hilda29l` -- THE LAYER-3 NINO3.4 RETURN LIMB ON THE SHIPPED STRUCTURE
+# (hilda_csl3 = hilda_cs + the limb, k_l2 = 3, w0_l2 = 27 Sv): the physical limb
+# `w_enso_l2` FITTED (13.71 +/- 2.13 Sv/index; Meinen's [14, 25] at 1 sd, 0.3 below at the
+# point) REPLACES the two-coefficient ocean ENSO shim, gamma_enso_ocn_NH/SH now PINNED at
+# 0. 29 names, 9 pins. Wave id 3 (22/24 CONVERGED; the h_ml ridge, w tracking it 12.9 /
+# 13.7 / 15.1). likelihood -1391.8051 on 26 rows, logpost -1425.362014; vs hilda30s
+# -1390.2774 at 30 names = dAIC +1.06 for the shim (a tie under the < 2 convention);
+# the ENSO ocean slope 0.89x GCB (r 0.28); gate S 0.280 @ 8.96 PASS; chain H / GL / Q
+# FAIL, 7 PASS unchanged; GATE V z -4.60 (the limb does not buy the variance either).
+# Hessian PD cond 2.40e5, NO unstable direction (h_ml 57.3 +/- 3.65 -- the ridge's
+# Laplace sd, understated). By prereg 09-17 k s4's letter the fitted value is the
+# REFUTED branch (below the bracket); adopted on Marcus's ruling (09-20: "Adopt the
+# limb") -- a mechanism at the edge of its observed range at AIC parity over two
+# unphysical coefficients. hilda30s is retired to CCX_MODE_HILDA30S_QUARANTINED.
+# ⛔ THE AIC GATE: the control hilda31pe (31 names, -1387.7128) leads by 4.09 at two
+# extra names -> dAIC = 2*2 - 2*4.09 = -4.18 -> +4.18 for the control: STILL a NAMED RED.
+CCX_MODE_CANONICAL <- "hilda29l"
 
 CCX_MODE_FILES <- c(
-  hilda30s = file.path("calibration", "output", "refit_20260920_hilda30s_obj13_hilda_cs",
+  hilda29l = file.path("calibration", "output", "refit_20260920_hilda29l_obj13_hilda_csl3",
                        "mode_fit_pumpN.rds"),
   hilda31s2 = file.path("calibration", "output", "refit_20260912_hilda31_seasml1_round7",
                         "mode_fit_pumpN.rds"),
@@ -233,6 +249,12 @@ CCX_MODE_HILDA31P_QUARANTINED <- file.path("calibration", "output", "quarantine"
 CCX_MODE_HILDA30E_QUARANTINED <- file.path("calibration", "output", "quarantine",
                                            "20260920_hilda30s_adopted",
                                            "refit_20260919_hilda30e_obj13_hilda_c", "mode_fit_pumpN.rds")
+# THE hilda_cs CANONICAL WITH THE SHIM (2026-09-20 r). `hilda30s` (09-20 o -> r) is retired
+# but resolvable by path: the like-for-like "shim" arm of hilda29l (the same structure less
+# the limb, the ocean ENSO pair fitted), and the point of the 09-20 (o)-(q) reads.
+CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine",
+                                           "20260920_hilda29l_adopted",
+                                           "refit_20260920_hilda30s_obj13_hilda_cs", "mode_fit_pumpN.rds")
 
 # WHICH ARMS ARE PINNED -- AND WHY THE STORED logpost IS A TRAP ACROSS THEM.
 # A stored logpost is a number in the units of the objective that produced it,
@@ -257,7 +279,7 @@ CCX_MODE_HILDA30E_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
-CCX_MODE_PINNED <- c(hilda30s = TRUE, hilda31s2 = FALSE, hilda31pe = FALSE)
+CCX_MODE_PINNED <- c(hilda29l = TRUE, hilda31s2 = FALSE, hilda31pe = FALSE)
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
 # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
 # and its free PARENT: the same space with the pinned names free, kept
@@ -272,8 +294,13 @@ CCX_MODE_PINNED <- c(hilda30s = TRUE, hilda31s2 = FALSE, hilda31pe = FALSE)
 # 2026-09-19 (j): + the layer-2 limb's `w_enso_l2` at 0 -- absent under hilda_c
 # (k_l2 = 0), pinned so the ENSO-seeded starts and the encoder never see a free
 # name the structure does not read (the 09-17 l seed defect). Eight pins, 30 free.
+# 2026-09-20 (r): the canonical is the LIMB arm -- w_enso_l2 is FITTED (dropped from the pins)
+# and the ocean ENSO shim pair gamma_enso_ocn_NH/SH is PINNED at 0 (the limb replaces it).
+# Nine pins, 29 free. The CONTROL's pins are named EXPLICITLY below (no longer "the canonical's
+# minus the shim"): the control has no limb, so it holds w_enso_l2 = 0 and FITS the pair.
 CCX_MODE_CANONICAL_PINS  <- c(ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08,
-                              w_vent = 0, gamma_vent = 0, w_thc = 0, w_enso_l2 = 0)
+                              w_vent = 0, gamma_vent = 0, w_thc = 0,
+                              gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0)
 CCX_MODE_PINNED_PARENT   <- "hilda31s2"
 # THE seas_ml-0 CONTROL AND ITS ARM (2026-09-17 j). The registered control `hilda31p`
 # has the shim FREE (18.69): the seasonal mixed layer is what REPLACED the shim, so
@@ -286,7 +313,8 @@ CCX_MODE_PINNED_PARENT   <- "hilda31s2"
 # (ccx_ms_reference_set); at seas_ml 1 it is the free parent's arm.
 # (The control's NAME is CCX_MODE_SEASML0_CONTROL above -- one name, not two; a duplicate
 # CCX_MODE_CONTROL lived here for a morning on 09-17 j.)
-CCX_MODE_CONTROL_PINS    <- CCX_MODE_CANONICAL_PINS[setdiff(names(CCX_MODE_CANONICAL_PINS), "ent_seas_amp_SH")]
+CCX_MODE_CONTROL_PINS    <- c(w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0,
+                              w_enso_l2 = 0)     # hilda31pe's file: the six inert + the limb's name held OFF; shim and pair FREE
 # THE LAYER-2 LIMB'S ARM (2026-09-17 k, prereg notes/prereg_2026-09-17k_l2_enso_limb_refit.md
 # s4 PA): the canonical's 7 pins PLUS the ocean ENSO shim `gamma_enso_ocn_NH/SH` held at 0
 # (29 free + w_enso_l2 = 29 fitted names), under a structure WITH the limb (k_l2 > 0:
@@ -299,8 +327,9 @@ CCX_MODE_CONTROL_PINS    <- CCX_MODE_CANONICAL_PINS[setdiff(names(CCX_MODE_CANON
 # UNRULED arm (the shim off and nothing in its place) and are refused.
 # (2026-09-19 j: the canonical's pins now hold `w_enso_l2` at 0; the limb's arm FITS
 # that name, so it is dropped from the pin set here -- the limb's 9 pins are unchanged.)
-CCX_MODE_L2_ARM_PINS     <- c(CCX_MODE_CANONICAL_PINS[setdiff(names(CCX_MODE_CANONICAL_PINS), "w_enso_l2")],
-                              gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0)
+# (2026-09-20 r: the limb's arm IS the canonical's now; kept as a name so the 09-17/18/20 array
+# records and ccx_ms_reference_set()'s limb branch read unchanged -- identical to CANONICAL_PINS.)
+CCX_MODE_L2_ARM_PINS     <- CCX_MODE_CANONICAL_PINS
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
 #' ENCODABLE on the full table (an ancestor constructed by dropping names, a
