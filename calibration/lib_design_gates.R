@@ -792,6 +792,118 @@ dg_gateQ <- function(r, v) {
        sd = DG_Q_SD, n_sd = n_sd, pass = n_sd <= DG_Q_NSD)
 }
 
+# ---- GATE D: the HEMISPHERIC air-sea d13C disequilibrium (2026-09-20 t) ----
+# WHY IT EXISTS. The MLO-SPO d13C gradient miss is a CONSTANT -0.0668 permil
+# offset, not a ratio ([[ccx_d13c_gradient_offset_additive]]): the real NH
+# atmosphere is heavier than the SH by that much independent of fossil fuel,
+# which needs a persistent NH-minus-SH ISOFLUX the model lacks. The ocean's
+# air-sea disequilibrium D (Quay 2003's definition: the d13C of air in
+# equilibrium with the surface water, minus the air) has a strong meridional
+# structure -- positive in the subtropics, NEGATIVE poleward of ~55 deg -- and
+# gate Q scores only its GLOBAL mean, so the model can (and does) sit at the
+# right global level with the hemispheres wrong. This gate scores the
+# HEMISPHERIC ASYMMETRY D_NH - D_SH, the quantity that drives the gradient.
+#
+# THE OBSERVATION is data/obs_hemi_diseq.rds, built by
+# data-raw/build_hemi_diseq_targets.R from GLODAPv2.2023 surface bottles on
+# Quay's definition (Zhang 1995 eps as the model carries it; the Scripps
+# station of the bottle's hemisphere in the bottle's year), band means
+# weighted by the ERSST ocean-area mask, cluster-bootstrap se. Its global
+# area x k mean reproduces Quay's 0.60 (0.545), which is what licenses it.
+# ⛔ NEVER TYPED HERE: every number comes from the artifact.
+#
+# THE CLAIM IS THE ASYMMETRY, AND ONLY THE ASYMMETRY, AREA-WEIGHTED -- the
+# like-for-like statistic against a model whose surface boxes ARE areas
+# (the ML column = |lat| < 55, the HS box = poleward; the eq/tr cells sit
+# inside the ML region). The four regional LEVELS are REPORTED beside it with
+# their own z and are NOT bounded: the global level is gate Q's claim, and a
+# one-box column's regional level carries representation error this gate
+# does not price. The k-weighted (isoflux) asymmetry is reported too, because
+# it is what the gradient actually feels; not gated, since the model's own
+# exchange weighting is its box areas x one k_w.
+#
+# LIKE-FOR-LIKE IN TIME: D drifts with the Suess rate, so the model's D is
+# averaged over the SAME YEARS the bottles sample, with the bottle-year
+# weights the artifact carries per region; each calendar year is the mean of
+# its 12 monthly rows (as gate Q, ruled 09-12).
+# BOUND: |z| <= DG_D_NSD on the observation's own bootstrap se of the
+# asymmetry. The model side is deterministic and contributes no error term.
+DG_D_NSD <- 2                  # harmonised with DG_Q_NSD across the family
+DG_D_OBS_FILE <- ccx_path("data", "obs_hemi_diseq.rds")
+
+dg_gateD_obs <- function(file = DG_D_OBS_FILE) {
+  if (!file.exists(file))
+    stop("GATE D: ", file, " is absent; run data-raw/build_hemi_diseq_targets.R")
+  o <- readRDS(file)
+  tg <- o$targets
+  list(hemi = list(NH = tg$NH_all_area, SH = tg$SH_all_area),
+       region = list(NH_ml = tg$NH_ml_area, NH_hs = tg$NH_hs_area,
+                     SH_ml = tg$SH_ml_area, SH_hs = tg$SH_hs_area),
+       hemi_k = list(NH = tg$NH_all_k, SH = tg$SH_all_k),
+       asym = o$asym$area, asym_se = o$asym$se_area,
+       asym_k = o$asym$k, asym_k_se = o$asym$se_k,
+       lat_hi = o$consts$lat_hi, built = o$provenance$built, file = file)
+}
+
+#' The model's D per surface box per calendar year (12-row means), Quay's definition
+dg_gateD_box_years <- function(r, v) {
+  o <- r$out; aux <- r$sp$aux
+  eps <- function(sst) ccx_const("ALPHA_AS_ZHANG_A") * sst * ccx_const("ALPHA_AS_FCO3") +
+                       ccx_const("ALPHA_AS_ZHANG_B") * sst + ccx_const("ALPHA_AS_ZHANG_C")
+  yr <- floor(o$t + 1e-9); full <- names(which(table(yr) == 12L)); years <- as.integer(full)
+  boxes <- c(ml = "asx", hs = "asx_hs", eq = "asx_eq", tr = "asx_tr")
+  res <- list()
+  for (h in HEMIS) for (b in names(boxes)) {
+    ax <- aux[[boxes[[b]]]]; if (is.null(ax) || is.null(ax[[h]]) || !isTRUE(ax[[h]] > 0)) next
+    cC <- o[[paste0(b, "_C_", h)]]; c13 <- o[[paste0(b, "_C13_", h)]]; if (is.null(cC)) next
+    sst_b <- if (b == "ml") aux$sst[[h]] else { x <- aux[[paste0("sst_", b)]]; if (is.list(x)) x[[h]] else x }
+    d_box <- 1000 * (c13 / (cC * ccx_const("R13_VPDB")) - 1)
+    D <- d_box - eps(sst_b) - o[[paste0("d13c_", h)]]
+    res[[paste(h, b, sep = "_")]] <- list(hemi = h, box = b, years = years,
+      D = vapply(years, function(y) mean(D[yr == y]), 0),
+      # the box's AREA share of its hemisphere's ocean (the ML region = ml + eq + tr)
+      area = if (b == "hs") aux$a_hs[[h]] else if (b == "ml") ccx_ml_area(aux, h)
+             else if (b == "eq") aux$a_eq[[h]] else aux$a_tr[[h]])
+  }
+  res
+}
+
+#' GATE D's model side: the two regional D's per hemisphere and the area-weighted
+#' hemispheric D, each averaged over the OBSERVATION's bottle years with its weights
+dg_gateD <- function(r, v, do = dg_gateD_obs()) {
+  bx <- dg_gateD_box_years(r, v)
+  wmean_years <- function(D, years, tg) {
+    w <- tg$year_weights[match(years, tg$years)]; ok <- is.finite(w) & w > 0
+    if (!any(ok)) stop("GATE D: the run has none of the observation's years.")
+    sum(D[ok] * w[ok]) / sum(w[ok])
+  }
+  region <- list(); hemi <- list()
+  for (h in HEMIS) {
+    ml_boxes <- bx[vapply(bx, function(x) x$hemi == h && x$box != "hs", TRUE)]
+    hs_box   <- bx[[paste(h, "hs", sep = "_")]]
+    tg_ml <- do$region[[paste0(h, "_ml")]]; tg_hs <- do$region[[paste0(h, "_hs")]]
+    a_ml <- sum(vapply(ml_boxes, `[[`, 0, "area"))
+    D_ml <- sum(vapply(ml_boxes, function(x) x$area * wmean_years(x$D, x$years, tg_ml), 0)) / a_ml
+    D_hs <- if (is.null(hs_box)) NA_real_ else wmean_years(hs_box$D, hs_box$years, tg_hs)
+    a_hs <- if (is.null(hs_box)) 0 else hs_box$area
+    region[[paste0(h, "_ml")]] <- D_ml; region[[paste0(h, "_hs")]] <- D_hs
+    hemi[[h]] <- if (a_hs > 0) (a_ml * D_ml + a_hs * D_hs) / (a_ml + a_hs) else D_ml
+  }
+  list(region = region, hemi = hemi, asym = hemi$NH - hemi$SH, lat_hi = do$lat_hi)
+}
+
+dg_gateD_verdict <- function(g, do = dg_gateD_obs(), n_sd = DG_D_NSD) {
+  z <- (g$asym - do$asym) / do$asym_se
+  zr <- vapply(names(g$region), function(k) if (is.finite(g$region[[k]])) (g$region[[k]] - do$region[[k]]$mean) / do$region[[k]]$se else NA_real_, 0)
+  zh <- vapply(HEMIS, function(h) (g$hemi[[h]] - do$hemi[[h]]$mean) / do$hemi[[h]]$se, 0)
+  list(asym = g$asym, obs_asym = do$asym, se = do$asym_se, z = z, n_sd = n_sd,
+       pass = is.finite(z) && abs(z) <= n_sd,
+       # REPORTED BESIDE IT, not bounded: the levels
+       hemi = unlist(g$hemi), obs_hemi = vapply(HEMIS, function(h) do$hemi[[h]]$mean, 0), z_hemi = zh,
+       region = unlist(g$region), obs_region = vapply(names(g$region), function(k) do$region[[k]]$mean, 0), z_region = zr,
+       obs_asym_k = do$asym_k, obs_asym_k_se = do$asym_k_se)
+}
+
 # ---- GATE 4: airborne fraction --------------------------------------
 # AF = atmospheric growth / total emissions, both from THIS run: the model's own
 # E_LUC carries luc_scale, so a fit that shrinks land use by 11 % shrinks the

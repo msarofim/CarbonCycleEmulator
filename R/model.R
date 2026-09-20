@@ -1991,6 +1991,16 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     .edges14 <- matrix(0, nb + 1L, nb + 1L)
     .pump14  <- matrix(0, nb + 1L, nb + 1L)
     .diff14  <- matrix(0, nb + 1L, nb + 1L)
+    # THE 13C EDGES (2026-09-20 t, the hemispheric isoflux budget behind
+    # [[ccx_d13c_gradient_offset_additive]]): the same layout, holding the 13C
+    # (state units: GtC x R13_VPDB x (1 + d13C/1000)) each edge actually
+    # carries -- add_flux's `f13` (source ratio x alpha13), add_diffusion's own
+    # `tr == "C13"` pass, and add_source's signature. Row 1 = external. With
+    # `.edges` beside it, every edge's carried d13C is readable and the
+    # atmosphere's isoflux budget decomposes by hemisphere and by process
+    # (calibration/diag_d13c_isoflux_budget.R). Recording only: no tendency
+    # reads it, `record` is FALSE on every calibration path (test-fluxes.R).
+    .edges13 <- matrix(0, nb + 1L, nb + 1L)
     # MIXED-LAYER pCO2 AND SST, per hemisphere (2026-09-09r). Recorded rather
     # than recomputed by any caller: `pco2_ml` is the model's own air-sea
     # driving quantity and reconstructing it outside the deriv would be a SECOND
@@ -2026,6 +2036,10 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     .edges14[from + 1L, to + 1L] <<- .edges14[from + 1L, to + 1L] + F_14
     if (identical(kind, "pump")) .pump14[from + 1L, to + 1L] <<- .pump14[from + 1L, to + 1L] + F_14
     if (identical(kind, "diff")) .diff14[from + 1L, to + 1L] <<- .diff14[from + 1L, to + 1L] + F_14
+    invisible(NULL)
+  }
+  .rec13 <- function(from, to, F_13) {
+    .edges13[from + 1L, to + 1L] <<- .edges13[from + 1L, to + 1L] + F_13
     invisible(NULL)
   }
 
@@ -2107,6 +2121,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # if the model moved to ABSOLUTE 14C/C ratios -- a much larger change.
     f14 <- F_C * r14
     if (record) .rec14(from, to, f14, if (identical(lab, "pump")) "pump" else NULL)
+    if (record) .rec13(from, to, f13)
     dy[from, "C"]   <<- dy[from, "C"]   - F_C
     dy[to,   "C"]   <<- dy[to,   "C"]   + F_C
     dy[from, "C13"] <<- dy[from, "C13"] - f13
@@ -2126,6 +2141,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       F_t <- kz * (y[a, tr] / dz_a - y[b, tr] / dz_b) / dz_mid
       if (record && tr == "C" && F_t != 0) .rec(a, b, F_t, NULL)
       if (record && tr == "C14" && F_t != 0) .rec14(a, b, F_t, "diff")
+      if (record && tr == "C13" && F_t != 0) .rec13(a, b, F_t)
       dy[a, tr] <<- dy[a, tr] - F_t
       dy[b, tr] <<- dy[b, tr] + F_t
     }
@@ -2135,6 +2151,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   # --- external source: enters one box, no counterpart ----------------
   add_source <- function(box, F_C, d13c, d14c) {
     if (record && F_C != 0) .rec(0L, box, F_C, NULL)
+    if (record && F_C != 0) .rec13(0L, box, F_C * ccx_const("R13_VPDB") * (1 + d13c / 1000))
     dy[box, "C"]   <<- dy[box, "C"]   + F_C
     dy[box, "C13"] <<- dy[box, "C13"] + F_C * ccx_const("R13_VPDB") * (1 + d13c / 1000)
     dy[box, "C14"] <<- dy[box, "C14"] + F_C * (1 + d14c / 1000)
@@ -3374,7 +3391,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
                                          pump_edges = .pump, pco2_ml = .pml, sst_ml = .sstl,
                                          pco2_hs = .phs, pco2_eq = .peq, pco2_tr = .ptr,
                                          edges14 = .edges14, pump_edges14 = .pump14,
-                                         diff_edges14 = .diff14)
+                                         diff_edges14 = .diff14, edges13 = .edges13)
   dy
 }
 

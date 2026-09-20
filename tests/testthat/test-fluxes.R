@@ -295,3 +295,40 @@ test_that("the per-edge sums reproduce the box net exactly, and the cold boxes' 
   expect_true(all(names(CCX_FLUX_HS) %in% names(tr)))
   expect_true(all(is.finite(tr$hs_as_down)))
 })
+
+test_that("the 13C edge tap reproduces dy[, 'C13'] on every box, exactly", {
+  # 2026-09-20 t: the same load-bearing pattern as the 14C tap, for the 13C each
+  # edge carries. 13C has no decay and the fossil source is IN the tap (row 1),
+  # so every box -- the atmosphere included -- must close exactly. Proves the tap
+  # is complete (no C13 tendency outside add_flux/add_diffusion/add_source) and
+  # faithful; it is what licenses reading the hemispheric isoflux budget from it.
+  p <- ccx_apply_structure(test_p(), struct = "hilda", seas_ml = "1")
+  s <- ccx_spinup(p)
+  F <- suppressWarnings(ccx_build_forcing("historical", c(1750, 1970),
+                                          prod_c14 = s$prod_c14))
+  for (i in c(7L, 2500L, 2600L)) {
+    y  <- s$y; if (i > 1L) y[, "C13"] <- y[, "C13"] * (1 - 0.01 * seq_len(nrow(y)) / nrow(y))
+    dy <- suppressWarnings(ccx_deriv(y, F$t[i], p, ccx_forcing_at(F, i), s$grid, s$aux, record = TRUE))
+    e  <- attr(dy, "fluxes")$edges13
+    net <- colSums(e)[-1] - rowSums(e)[-1]
+    expect_equal(net, unname(dy[, "C13"]), tolerance = 1e-12)
+    # the fossil source is a row-1 (external) 13C edge into the atmosphere at the
+    # forcing's own signature, and only after fossil emissions exist
+    atmN <- s$aux$idx$NH$atm + 1L
+    fc <- ccx_forcing_at(F, i)
+    if (fc$e_foss$NH > 0) {
+      d_carried <- 1000 * (e[1L, atmN] / (attr(dy, "fluxes")$edges[1L, atmN] * ccx_const("R13_VPDB")) - 1)
+      expect_equal(d_carried, ccx_forcing_d13c_foss(fc), tolerance = 1e-9)
+    } else expect_identical(e[1L, atmN], 0)
+  }
+})
+
+test_that("recording the 13C edges does not change the derivative", {
+  p <- ccx_apply_structure(test_p(), struct = "hilda", seas_ml = "1"); s <- ccx_spinup(p)
+  F <- suppressWarnings(ccx_build_forcing("historical", c(1750, 1760), prod_c14 = s$prod_c14))
+  a <- ccx_deriv(s$y, F$t[7], p, ccx_forcing_at(F, 7), s$grid, s$aux)
+  b <- ccx_deriv(s$y, F$t[7], p, ccx_forcing_at(F, 7), s$grid, s$aux, record = TRUE)
+  expect_true(!is.null(attr(b, "fluxes")$edges13))
+  attributes(b) <- attributes(a)
+  expect_identical(a, b)
+})

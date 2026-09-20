@@ -1,0 +1,34 @@
+THE ATMOSPHERE'S HEMISPHERIC 13C BUDGET at hilda29l  2026-09-20 19:22:08
+  refit_20260920_hilda29l_obj13_hilda_csl3 (logpost -1425.36, PINNED ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 -- logpost not comparable to a free arm)
+  window 1980-2023; gain 0.00105; the offset needs +64 GtC-permil/yr
+  R-core run with the edge hook: 3.3 min
+
+[1] WINDOW-MEAN ISOFLUX BY CLASS (GtC-permil/yr); asymmetry x gain = the class's share of the gradient
+  class             NH        SH     NH-SH  -> permil
+  fossil       -137.43    -12.02   -125.42    -0.1317
+  land_in      -582.70   -429.68   -153.03    -0.1607
+  land_out     +608.28   +441.88   +166.40    +0.1747
+  ocean_in       +4.89     -0.09     +4.97    +0.0052
+  ocean_out     +35.44    +52.17    -16.73    -0.0176
+  exchange      +61.07    -61.90   +122.97    +0.1291
+  SUM(no ex)    -71.54    +52.27   -123.80    -0.1300   (the model's gradient over the window: -0.1329; obs -0.0668)
+  closure: sum over ALL classes NH -10.463 SH -9.631 vs C d(delta)/dt NH -10.463 SH -9.631 (identical by construction of the tap)
+  two-box check: (asymmetry excl. exchange) x gain = -0.1300 vs the model's gradient -0.1329 -- AGREE (< 0.01 permil; the tendency term is the rest)
+
+[1b] THE CARBON FLUXES BEHIND THEM (GtC/yr, signed INTO the atmosphere; the net land / ocean SINK per hemisphere = -(in + out))
+  fossil         +7.00     +0.61
+  land_in       +38.43    +28.33
+  land_out      -39.27    -28.55
+  ocean_in      +42.28    +60.63
+  ocean_out     -43.40    -62.09
+  exchange       -3.03     +3.03
+  net LAND sink  NH +0.85 SH +0.23 (NH share 0.79);  net OCEAN sink NH +1.12 SH +1.45 (NH share 0.44)  [window mean 1980-2023]
+  the land's isotopic DISEQUILIBRIUM per unit gross flux (net isoflux / gross in): NH +0.665 SH +0.431 permil; the ocean's (net isoflux / gross evasion): NH +0.954 SH +0.859
+  moving 1 GtC/yr of NH sink from the ocean to the land at eps 18.0 is worth +18 GtC-permil/yr (+0.0189 permil) at a FIXED CO2 gradient
+
+[2] WHERE +64 GtC-permil/yr COULD COME FROM. Each class's NH-SH asymmetry above is what the model has; the offset is what the real atmosphere has beyond it.
+  fossil:    -125.4 -- E_NH-E_SH at (d13c_foss - d_atm); FORC_FOSS_NH_SHARE 0.920 is measured; only the signature moves it (+-2 permil = +-13)
+  land:      in -153.0 out +166.4 net +13.4 -- the NH-heavy land (npp_frac_NH 0.59) returns old (heavier) carbon and draws at -eps; a NET land sink S_h contributes ~+eps x S_h (eps 18.0): the model's NH-SH land-sink asymmetry is IN this number
+  ocean:     in +5.0 out -16.7 net -11.8 -- the air-sea disequilibrium isoflux by hemisphere (obs: data/obs_hemi_diseq.rds, GATE D)
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/d13c_isoflux_budget_20260920.{log,rds}

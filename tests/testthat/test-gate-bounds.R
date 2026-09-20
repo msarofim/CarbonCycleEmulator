@@ -558,3 +558,54 @@ test_that("GATE GL bounds the d13C gradient LEVEL on the observation's own se, b
   # an ABSENT control must not silently become a passing gate (silent-gate family)
   expect_false(dg_gateGL_verdict(list(co2 = NA_real_, d13c = o$mean), ho)$pass)
 })
+
+test_that("GATE D bounds the HEMISPHERIC disequilibrium asymmetry from the GLODAP artifact, and cannot read the model's own state for its bound", {
+  skip_if_no_gates()
+  skip_if_not(file.exists(DG_D_OBS_FILE), "data/obs_hemi_diseq.rds not built")
+  do <- dg_gateD_obs()
+  # (1) THE TARGET AND THE BOUND COME FROM THE ARTIFACT, never typed: the
+  # asymmetry equals the two hemispheric means' difference, the se is their
+  # bootstrap se in quadrature, and the artifact records its own seed.
+  o <- readRDS(DG_D_OBS_FILE)
+  expect_equal(do$asym, o$targets$NH_all_area$mean - o$targets$SH_all_area$mean)
+  expect_equal(do$asym_se, sqrt(o$targets$NH_all_area$se^2 + o$targets$SH_all_area$se^2))
+  expect_true(is.finite(o$provenance$seed))
+  expect_identical(DG_D_NSD, DG_Q_NSD)
+  # its global mean must reproduce Quay's independently published value, which
+  # is what licenses the artifact as an observation (0.60 +/- 0.10)
+  expect_lt(abs(o$global$k - ccx_const("AIRSEA_D13C_DISEQ_OBS")), ccx_const("AIRSEA_D13C_DISEQ_SD"))
+  # the meridional structure Quay describes: subtropics positive, poleward of 55 negative, in BOTH hemispheres
+  for (h in HEMIS) { expect_gt(do$region[[paste0(h, "_ml")]]$mean, 0); expect_lt(do$region[[paste0(h, "_hs")]]$mean, 0) }
+
+  # (2) an exact-match model passes with z 0
+  g_ok <- list(region = lapply(do$region, `[[`, "mean"), hemi = lapply(do$hemi, `[[`, "mean"),
+               asym = do$hemi$NH$mean - do$hemi$SH$mean, lat_hi = do$lat_hi)
+  v_ok <- dg_gateD_verdict(g_ok, do)
+  expect_equal(v_ok$z, 0); expect_true(v_ok$pass)
+  expect_equal(unname(v_ok$z_region), rep(0, 4))
+
+  # (3) ⭐ THE MUTATION THAT MATTERS: the hemispheres SWAPPED must fail, and in
+  # the NEGATIVE direction (the model's NH too light relative to its SH)
+  g_sw <- g_ok; g_sw$hemi <- list(NH = g_ok$hemi$SH, SH = g_ok$hemi$NH); g_sw$asym <- -g_ok$asym
+  v_sw <- dg_gateD_verdict(g_sw, do)
+  expect_false(v_sw$pass); expect_lt(v_sw$z, -DG_D_NSD)
+  # and a model with NO asymmetry (two identical columns) fails too -- the
+  # defect the gate exists for
+  g_0 <- g_ok; g_0$asym <- 0
+  expect_false(dg_gateD_verdict(g_0, do)$pass)
+
+  # (4) ⛔ THE MODEL SIDE CANNOT DEPEND ON THE FITTED OFFSETS
+  v  <- dg_vector(CCX_MODE_CANONICAL); r <- dg_run(v)
+  g1 <- dg_gateD(r, v, do)
+  v2 <- v; v2$grad_off_d13c <- 0; v2$grad_off_co2 <- 0; v2$p$grad_off_d13c <- 0
+  g2 <- dg_gateD(r, v2, do)
+  expect_equal(g1$asym, g2$asym)
+  # the model's hemispheric D is the AREA-weighted mean of its regional D's
+  # (ML region + HS box), so the two decompositions agree
+  a_hs <- r$sp$aux$a_hs$NH; a_ml <- ccx_ml_area(r$sp$aux, "NH") + r$sp$aux$a_eq$NH + r$sp$aux$a_tr$NH
+  expect_equal(g1$hemi$NH, (a_ml * g1$region$NH_ml + a_hs * g1$region$NH_hs) / (a_ml + a_hs))
+  # (5) the canonical's measured state: the gate must be able to FAIL it
+  # (the 09-20 s diagnosis: both columns at D ~ 0.9, asymmetry far below the observed)
+  vd <- dg_gateD_verdict(g1, do)
+  expect_true(is.finite(vd$z))
+})

@@ -260,6 +260,22 @@ cat("  ccx_alpha_as(), Zhang et al. (1995), adopted 2026-09-02 (6263bf6).\n")
 cat("  ⚠ AREA-UNWEIGHTED two-box mean against a global estimate; the hemispheric\n")
 cat("  pair is printed because its spread is comparable to the observational sigma.\n")
 
+# ---- GATE D: the HEMISPHERIC disequilibrium asymmetry (2026-09-20 t) ------
+DO <- dg_gateD_obs()
+cat(sprintf("\n=== GATE D: HEMISPHERIC AIR-SEA d13C DISEQUILIBRIUM ASYMMETRY (GLODAP bottles, %s; D_NH - D_SH obs %+.3f +/- %.3f permil area-weighted; k-weighted %+.3f +/- %.3f) ===\n",
+            DO$built, DO$asym, DO$asym_se, DO$asym_k, DO$asym_k_se))
+cat(sprintf("%-9s %8s %8s %8s %8s | %8s %8s %8s %8s  %s\n", "arm", "NH_ml", "NH_hs", "SH_ml", "SH_hs", "D_NH", "D_SH", "asym", "z", "verdict"))
+cat(sprintf("%-9s %8.3f %8.3f %8.3f %8.3f | %8.3f %8.3f %8.3f %8s  (observed)\n", "obs", DO$region$NH_ml$mean, DO$region$NH_hs$mean, DO$region$SH_ml$mean, DO$region$SH_hs$mean, DO$hemi$NH$mean, DO$hemi$SH$mean, DO$asym, ""))
+for (a in DG_ARMS) {
+  vd <- dg_gateD_verdict(dg_gateD(R[[a]], V[[a]], DO), DO)
+  cat(sprintf("%-9s %8.3f %8.3f %8.3f %8.3f | %8.3f %8.3f %8.3f %+8.2f  %s\n", a,
+              vd$region[["NH_ml"]], vd$region[["NH_hs"]], vd$region[["SH_ml"]], vd$region[["SH_hs"]],
+              vd$hemi[["NH"]], vd$hemi[["SH"]], vd$asym, vd$z,
+              if (vd$pass) "PASS" else sprintf("FAIL (|z| > %g)", DG_D_NSD)))
+}
+cat(sprintf("  the claim is the ASYMMETRY only, |z| <= %g on the observation's bootstrap se; the regional levels are reported, not bounded (gate Q owns the global level).\n", DG_D_NSD))
+cat("  the model's D is averaged over the bottles' own years per region (D drifts with the Suess rate).\n")
+
 DG_TGT <- dg_gcb_target(DG_SINK_WIN)
 cat(sprintf("\n=== GATE 7: SINKS %d-%d (GCB land %.3f+/-%.2f, ocean %.3f+/-%.2f; n = %d yr) ===\n",
             DG_SINK_WIN[1], DG_SINK_WIN[2], DG_TGT$land, DG_GCB_LAND_SD,
