@@ -1,0 +1,53 @@
+task 5  2026-09-19T14:25:47-0400
+PINNED (removed from the fitted set, held in the base): ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0, w_enso_l2 = 0 -> 30 free parameters
+run-time inputs present: 13/13. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.2472643)
+
+======================================================================
+DISPERSED MULTI-START, id 5, arm N, 30 parameters
+  host MacBook-Pro-2.local   R 4.5.3   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.2473, pooled over the 30 coordinates at least one of
+    them FITTED; over all 30 it would be 0.2473, diluted by the 0 migrated in BOTH:
+    none)
+  out /Users/MarcusMarcus/ccx_frozen/20260919l_hilda_cs_refit/calibration/output/multistart_20260919_hilda_cs_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452/start_005.rds
+======================================================================
+  structure: 'hilda_cs' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6, seas_ml_nh=0)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'solved' (the SOLVED GLODAP-shape field -- every registered file; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -1e+06 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: seeded: NEW BASIN + the OBSERVATION-implied partition (the ocean ENSO pair SET to +0.326 each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here); land x1.734) (0 draws), log-post there = -1533.2894
+PORT GATE (a) at the new_basin reference point: here -1496.3216709276 vs MacBook-Pro-2.local@f791a0d -1496.3216709276,
+              |diff| 3.297e-11 (rel 2.20e-14)  [this task's own start is elsewhere]
+              roundoff floor here: max |delta lp| 1.723e-08 over 12 perturbations of u by 1e-12 (median 7.199e-09; 0 non-finite)
+              bound = max(1e-08 x |target| = 1.496e-05, 3 x floor = 5.170e-08) = 1.496e-05; ceiling 1e-06 x |target| = 1.496e-03
+PORT GATE (a) PASSED.
+measured 0.3562 s/eval (median of 5; range 0.3291-0.3707) => one 6000-eval restart
+  projects to 35.6 min; wall budget 300 min, of which 45.0 min is RESERVED for the
+  BFGS polish (100 iterations)
+[005] cycle 1 restart  1: log-post =   -1429.1267 (gain   104.1626) evals 6001  32.6 min
+[005] cycle 1 restart  2: log-post =   -1426.8802 (gain     2.2466) evals 12002  65.8 min
+[005] cycle 1 restart  3: log-post =   -1426.0328 (gain     0.8474) evals 18003  99.9 min
+[005] cycle 1 polish: SHORTENED to maxit 368 by the wall budget
+[005] cycle 1 polish: log-post = -1425.2212 (gain 0.8116)
+[005] === cycle 1 total gain 108.0682 (log-post -1425.2212, 21018 evals, 117.2 min) ===
+[005] cycle 2 restart  1: log-post =   -1425.2212 (gain     0.0000) evals 24029  132.3 min
+[005] cycle 2 restart  2: log-post =   -1425.2212 (gain     0.0000) evals 27122  147.1 min
+[005] cycle 2 polish: SHORTENED to maxit 281 by the wall budget
+[005] === cycle 2 total gain 0.0000 (log-post -1425.2212, 27204 evals, 147.5 min) ===
+Warning messages:
+1: In spinup_fn(p) :
+  periodic spinup: carbon did not converge, |resid| = 3.298e-07
+2: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 1.397e-09
+
+[005] FINAL log-post -1425.2212  (CONVERGED, 5 restarts, 27204 evals, 147.6 min)
+[005] eval rate 0.2864 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[005] PORT GATE (b) ordering: final -1425.2212 >= start -1533.2894. OK
+======================================================================
+done 2026-09-19T16:53:33-0400 exit 0
