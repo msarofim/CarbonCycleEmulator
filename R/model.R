@@ -1610,6 +1610,35 @@ ccx_default_params <- function() {
     # intermediate water that has already aged) and NH layer k -> HS_NH. Same
     # volume closure (layer k: in W, out W). STRUCTURAL.
     kn_gthc = 0L,
+    # ---- THE SOUTHERN OCEAN ONE-PASS WINDOW (2026-09-21 e, option B-minimal)
+    # notes/prereg_2026-09-21e_so_window_probe.md §1. The Deacon cell as ONE
+    # SH-only limb of volume w_soc [Sv]: interior layer k_soc_up (CDW) ->
+    # HD_SH -> HS_SH (the outcrop: deep water reaches the cold surface box and
+    # leaves again) -> interior layer k_soc_dn (AAIW / AABW: the return is AT
+    # DEPTH, never into the mixed layer -- the loop's leg 6 is what lightened
+    # the SH ML with the cold box), with the SH column's interior transport
+    # from k_dn to k_up (upwelling if k_dn > k_up, downwelling if k_dn < k_up,
+    # none if equal) closing the volume. Each leg W x the SOURCE box's
+    # per-volume concentration over its OWN area and thickness (the cell's
+    # idiom; D1 closes; a uniform ocean is a fixed point). Bulk, alpha = 1, no
+    # ENSO term. NO NH leg, NO ML leg. Lives ONLY under pump_field = "martin"
+    # and ONLY with the HS boxes; refused beside q_conv / w_thc / w_gthc (one
+    # overturning representation per column). STRUCTURAL, not in the table;
+    # 0 = OFF, emits NOTHING. Built for the SO SURFACE (the SH cold box's D
+    # +0.14 vs the bottles' -1.06), explicitly NOT for gate D's asymmetry
+    # (NH-side, 09-21 c).
+    w_soc    = 0,         # Sv, the SH window's volume
+    k_soc_up = 8L,        # the SOURCE layer (1-BASED): 8 = 1302-1852 m, the CDW analogue
+    k_soc_dn = as.integer(N_INTERIOR),   # the RETURN layer: the bottom = AABW; 6-7 = AAIW
+    # The SH cold box's THICKNESS relative to h_hs (the handoff's "per-hemisphere
+    # h_hs"): the window's pass length is a_hs,SH x h_hs,SH / W, and this is the
+    # one lever that shortens the pass WITHOUT raising the volume the deep D14C
+    # rows see. HS mass, the u_hs rate, the air-sea e-folding and HD's thickness
+    # (the column depth is conserved) all follow. Named hs_h_*, not h_hs_*: h_hs
+    # is ABSENT-OK (0 = follow h_ml) and a name beginning with h_hs would
+    # partial-match p$h_hs through `$` on a list that lacks it (the 09-19 m
+    # trap). 1 = symmetric = every registered mode bit-exact. STRUCTURAL.
+    hs_h_fac_SH = 1,
     # ---- THE SH COLD BOX's OWN VENTILATION (2026-09-21 c, scoping) ---------
     # A hemispheric asymmetry in the HS <-> HD exchange: the SH cold box is the
     # Southern Ocean, the world's upwelling region, where surface residence is
@@ -2959,12 +2988,14 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # was ported, and ccx_seas_ml_marshal_check() refuses seas_ml = 2 on the
       # C++ path for that reason. With the mechanism off these ARE aux's own
       # values, bit for bit.
-      h_hs_t <- aux$h_hs; dz_hd_t <- aux$dz_hd; hs_mass_t <- aux$hs_mass_kg[[h]]; dh_hs_dt <- 0
+      # (2026-09-21 e) the thicknesses are PER HEMISPHERE (hs_h_fac_SH); the
+      # lists equal the scalar aux$h_hs / aux$dz_hd bit for bit at factor 1.
+      h_hs_t <- aux$thick_hs[[h]]; dz_hd_t <- aux$thick_hd[[h]]; hs_mass_t <- aux$hs_mass_kg[[h]]; dh_hs_dt <- 0
       if (ccx_seas_ml_hs_on(p)) {
         .evh      <- ccx_mld_eval(aux$mld_hs_coef[[h]], t)
-        h_hs_t    <- aux$h_hs * .evh$f              # m, mean-preserving
-        dh_hs_dt  <- aux$h_hs * .evh$dfdt           # m/yr, > 0 deepening
-        dz_hd_t   <- aux$dz_hd + (aux$h_hs - h_hs_t)
+        h_hs_t    <- aux$thick_hs[[h]] * .evh$f       # m, mean-preserving
+        dh_hs_dt  <- aux$thick_hs[[h]] * .evh$dfdt    # m/yr, > 0 deepening
+        dz_hd_t   <- aux$thick_hd[[h]] + (aux$thick_hs[[h]] - h_hs_t)
         hs_mass_t <- aux$hs_mass_kg[[h]] * .evh$f
       }
 
@@ -3359,6 +3390,36 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
           add_flux(ihd, ihs, W * y[ihd, "C"] / (aux$a_hs[[h]] * dz_hd_t))             # (5c) outcrop into the cold box
           add_flux(ihs, iml, W * y[ihs, "C"] / (aux$a_hs[[h]] * h_hs_t))              # (6) equatorward
         }
+      }
+    }
+
+    # ---- THE SOUTHERN OCEAN ONE-PASS WINDOW (2026-09-21 e, option B-minimal)
+    # notes/prereg_2026-09-21e_so_window_probe.md §1. SH ONLY. One volume
+    # W = w_soc x SV: (1) the SH column's interior transport from the return
+    # layer k_dn to the source layer k_up (upwelling oc[j+1] -> oc[j] if k_dn >
+    # k_up, downwelling oc[j] -> oc[j+1] if k_dn < k_up, nothing if equal);
+    # (2) oc[k_up] -> HD_SH, CDW into the SO deep box; (3) HD_SH -> HS_SH, the
+    # outcrop into the cold surface box -- the leg that does the work; (4) THE
+    # NEW LEG, HS_SH -> oc[k_dn]: the surface water returns AT DEPTH (AAIW /
+    # AABW), not into the mixed layer. Each leg W x the SOURCE box's per-volume
+    # concentration over its OWN area and thickness NOW (D1 closes, a uniform
+    # ocean is a fixed point, volume in = out at every box). Bulk, alpha13 = 1,
+    # no 14C fractionation, no ENSO term. Every leg classifies on its own
+    # (int_exch / ml_int): leg 4 is deliberately UNLABELLED so ml_int's net
+    # (surface -> deep) sees the window's up- and down-legs together, as it
+    # must. w_soc = 0 emits NOTHING. The C++ block is the twin.
+    if (aux$soc_on == 1L && h == "SH") {
+      W <- p[["w_soc"]] * CCX_SV_TO_M3YR
+      if (W > 0) {
+        ihs <- aux$idx[[h]]$hs; ihd <- aux$idx[[h]]$hd; ku <- aux$k_soc_up; kd <- aux$k_soc_dn
+        if (kd > ku) for (jj in seq.int(kd - 1L, ku)) {                                # (1a) upwelling, k_dn -> k_up
+          add_flux(ioc[jj + 1L], ioc[jj], W * y[ioc[jj + 1L], "C"] / (aux$a_ls[[h]] * gr$dz[jj + 2L]))
+        } else if (kd < ku) for (jj in seq.int(kd, ku - 1L)) {                          # (1b) downwelling, k_dn -> k_up
+          add_flux(ioc[jj], ioc[jj + 1L], W * y[ioc[jj], "C"] / (aux$a_ls[[h]] * gr$dz[jj + 1L]))
+        }
+        add_flux(ioc[ku], ihd, W * y[ioc[ku], "C"] / (aux$a_ls[[h]] * gr$dz[ku + 1L]))   # (2) CDW into the SO deep box
+        add_flux(ihd, ihs, W * y[ihd, "C"] / (aux$a_hs[[h]] * dz_hd_t))               # (3) the outcrop
+        add_flux(ihs, ioc[kd], W * y[ihs, "C"] / (aux$a_hs[[h]] * h_hs_t))            # (4) the return at depth
       }
     }
 
@@ -3878,6 +3939,27 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   kgnh <- if (is.null(p[["kn_gthc"]])) 0L else as.integer(p[["kn_gthc"]])
   if (gthc_on && (!is.finite(kgnh) || kgnh < 0L || kgnh > grid$nl))
     stop("kn_gthc must be 0 (the ML feeds HS_NH) or an interior layer in 1..", grid$nl, " (the NH subduction layer); got ", format(p[["kn_gthc"]]))
+  # ---- THE SOUTHERN OCEAN WINDOW's guards (2026-09-21 e) ------------------
+  # The w_gthc contract: ONE overturning representation per column.
+  w_soc <- if (is.null(p[["w_soc"]])) 0 else p[["w_soc"]]
+  if (!is.finite(w_soc) || w_soc < 0)
+    stop("w_soc must be a finite non-negative Southern Ocean window volume in Sv; got ", format(p[["w_soc"]]))
+  soc_on <- identical(pf, "martin") && isTRUE(w_soc > 0)
+  if (soc_on && !hs_on)
+    stop("w_soc > 0 needs the HILDA high-latitude boxes (hs_frac > 0): the window outcrops through HD_SH -> HS_SH; without them it has no legs")
+  if (soc_on && (isTRUE(p$q_conv > 0) || thc_on || gthc_on))
+    stop("w_soc > 0 beside q_conv > 0, w_thc > 0 or w_gthc > 0: two overturning representations on one column are refused")
+  ksup <- if (is.null(p[["k_soc_up"]])) 8L else as.integer(p[["k_soc_up"]])
+  ksdn <- if (is.null(p[["k_soc_dn"]])) grid$nl else as.integer(p[["k_soc_dn"]])
+  if (soc_on && (!is.finite(ksup) || ksup < 1L || ksup > grid$nl))
+    stop("k_soc_up must be an interior layer in 1..", grid$nl, " (the window's source layer); got ", format(p[["k_soc_up"]]))
+  if (soc_on && (!is.finite(ksdn) || ksdn < 1L || ksdn > grid$nl))
+    stop("k_soc_dn must be an interior layer in 1..", grid$nl, " (the window's return layer); got ", format(p[["k_soc_dn"]]))
+  hhS <- if (is.null(p[["hs_h_fac_SH"]])) 1 else p[["hs_h_fac_SH"]]
+  if (!is.finite(hhS) || hhS <= 0)
+    stop("hs_h_fac_SH must be a finite positive factor on the SH cold box's thickness; got ", format(p[["hs_h_fac_SH"]]))
+  if (hhS != 1 && ccx_seas_ml_hs_on(p))
+    stop("hs_h_fac_SH != 1 under the seasonal cold box (seas_ml 2, option B, R-only) is not ported: the HS shape guard reads one h_hs")
   # ---- THE LAYER-2 NINO3.4 LIMB's guards (2026-09-17 k) ------------------
   # k_l2 is the STRUCTURAL switch: 0 = absent (w_enso_l2 inert, not an error --
   # the objective carries every table name under every structure); otherwise an
@@ -4124,8 +4206,16 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # 75 m for BOTH surface boxes, ours is a fitted 134 m, and giving HS its own
     # depth would add a parameter to a structural test. HD is everything below.
     h_hs        = h_hs,
-    hs_mass_kg  = lapply(a_hs, function(A) A * h_hs * ccx_const("RHO_SEAWATER")),
+    # PER-HEMISPHERE thickness (2026-09-21 e): the SH cold box may be thinner by
+    # hs_h_fac_SH; HD absorbs the difference so each column spans the full
+    # depth. `h_hs` / `dz_hd` above STAY the scalar nominal (test helpers and
+    # calibration scripts read them); the CORE reads these lists, which equal
+    # the scalar bit for bit at factor 1.
+    thick_hs      = list(NH = h_hs, SH = h_hs * hhS),
+    hs_mass_kg  = list(NH = a_hs$NH * h_hs * ccx_const("RHO_SEAWATER"),
+                       SH = a_hs$SH * (h_hs * hhS) * ccx_const("RHO_SEAWATER")),
     dz_hd       = sum(grid$dz) - h_hs,
+    thick_hd     = list(NH = sum(grid$dz) - h_hs, SH = sum(grid$dz) - h_hs * hhS),
     sst_hs      = if (is.null(p$sst_hs)) 2 else p$sst_hs,
     # ---- THE EQUATORIAL CELL (2026-09-13g) -------------------------------
     # Present unconditionally, as every structural field is: `eq_on` gates the
@@ -4158,6 +4248,13 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     gthc_on     = as.integer(gthc_on),
     k_gthc      = if (gthc_on) kgthc else grid$nl,
     kn_gthc   = if (gthc_on) kgnh else 0L,       # T2: the NH subduction layer; 0 = the ML feeds HS directly
+    # ---- THE SOUTHERN OCEAN WINDOW (2026-09-21 e) ---------------------------
+    # Unconditional, zero-filled when off: `soc_on` gates the window on BOTH
+    # cores; `k_soc_up` the source layer, `k_soc_dn` the return layer.
+    soc_on      = as.integer(soc_on),
+    k_soc_up    = if (soc_on) ksup else 8L,
+    k_soc_dn    = if (soc_on) ksdn else grid$nl,
+    hs_h_fac_SH = hhS,                             # the SH cold box's thickness factor (2026-09-21 e); 1 = symmetric
     u_hs_fac_SH = ufS,                             # the SH cold box's own ventilation factor (2026-09-21 c); 1 = symmetric
     tau_q_fac_SH = tqS,                            # the SH deep box's own interior-exchange factor (2026-09-21 c); 1 = symmetric
     k_w_fac     = list(NH = 1, SH = kwS),          # the hemispheres' gas-exchange factors (2026-09-21 c)
@@ -4527,6 +4624,25 @@ ccx_gthc_eigbound <- function(p, grid) {
               max(W / (a_ls[2] * grid$dz[seq.int(kg, grid$nl) + 1L])))     # the SH layers k..nl
   2 * rate
 }
+#' The Southern Ocean window's Gershgorin bound (2026-09-21 e): W drains every
+#' SH box it touches at W / (area x thickness) -- the interior layers between
+#' k_soc_dn and k_soc_up (either order, both inclusive), HD_SH, HS_SH (at its
+#' OWN thickness, h_hs x hs_h_fac_SH). 2 x the largest. Exactly 0 at w_soc = 0
+#' or under the solved field.
+ccx_soc_eigbound <- function(p, grid) {
+  w <- if (is.null(p[["w_soc"]])) 0 else p[["w_soc"]]
+  if (!identical(p$pump_field, "martin") || !isTRUE(w > 0) || !ccx_hs_on(p)) return(0)
+  ku <- if (is.null(p[["k_soc_up"]])) 8L else as.integer(p[["k_soc_up"]])
+  kd <- if (is.null(p[["k_soc_dn"]])) grid$nl else as.integer(p[["k_soc_dn"]])
+  fS <- if (is.null(p[["hs_h_fac_SH"]])) 1 else p[["hs_h_fac_SH"]]
+  a_hs <- ccx_const("OCEAN_AREA_SH") * p$hs_frac; a_ls <- ccx_const("OCEAN_AREA_SH") * (1 - p$hs_frac)
+  h_hs <- (if (!is.null(p$h_hs) && is.finite(p$h_hs) && p$h_hs > 0) p$h_hs else p$h_ml) * fS
+  dz_hd <- sum(grid$dz) - h_hs
+  W <- w * CCX_SV_TO_M3YR
+  rate <- max(W / (a_hs * h_hs), W / (a_hs * dz_hd),
+              max(W / (a_ls * grid$dz[seq.int(min(ku, kd), max(ku, kd)) + 1L])))
+  2 * rate
+}
 ccx_e_loop_eigbound <- function(p, grid) {
   w <- if (is.null(p$w_vent)) 0 else p$w_vent
   # the loop EXISTS only under the prescribed field (ccx_prepare's e_on)
@@ -4590,7 +4706,8 @@ ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
       ccx_tr_box_eigbound(p, g) +
       ccx_e_loop_eigbound(p, g) +                # the ventilation loop (2026-09-14 h); 0 at w_vent = 0
       ccx_thc_eigbound(p, g) +                   # the HS-route deep return (2026-09-15 d); 0 at w_thc = 0
-      ccx_gthc_eigbound(p, g), numeric(1)))      # the global thermohaline loop (2026-09-20 v); 0 at w_gthc = 0
+      ccx_gthc_eigbound(p, g) +                  # the global thermohaline loop (2026-09-20 v); 0 at w_gthc = 0
+      ccx_soc_eigbound(p, g), numeric(1)))       # the Southern Ocean window (2026-09-21 e); 0 at w_soc = 0
   # + the EQUATORIAL CELL's own drain rate (2026-09-13g), folded in for the
   # reason the conveyor's was: a stability check that ignored a first-order
   # advective term would be worse than none. Exactly 0 with the cell off, so

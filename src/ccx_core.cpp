@@ -150,6 +150,7 @@ struct Aux {
   // also what sets NPH/NB above.
   int    hs_on;
   double hs_frac, h_hs, dz_hd, sst_hs, dic0_hs, revelle0_hs;
+  double thick_hs[2], thick_hd[2];   // PER-HEMISPHERE HS / HD thickness (2026-09-21 e, hs_h_fac_SH); = h_hs / dz_hd at factor 1
   double alk_hs;   // the cold box's own alkalinity, mol/kg (2026-09-08g; = alk unless set)
   double a_ls[2], a_hs[2], hs_mass_kg[2], asx_hs[2];
   int pump_on;
@@ -201,6 +202,7 @@ struct Aux {
   // SH return layer, 1-BASED as in R (NL = the bottom).
   int    gthc_on, k_gthc;
   int    kn_gthc;          // T2 (2026-09-21 b): the NH subduction layer; 0 = the ML feeds HS_NH
+  int    soc_on, k_soc_up, k_soc_dn;   // THE SOUTHERN OCEAN WINDOW (2026-09-21 e): SH only; source / return layers (1-based)
   double u_hs_fac_SH;        // the SH cold box's own ventilation factor (2026-09-21 c); 1 = symmetric
   double tau_q_fac_SH;       // likewise on the SH HD <-> interior exchange (tau_q / fac)
   double k_w_fac[2], k_w_fac_hs;   // the hemispheres' and the cold boxes' gas-exchange factors (2026-09-21 c)
@@ -235,6 +237,7 @@ struct Par {
   double w_thc;              // the HS-route deep return, Sv both hemispheres
                              // (option O1 arm THC, 2026-09-15 d)
   double w_gthc;             // the global thermohaline loop, ONE Sv volume
+  double w_soc;              // the Southern Ocean window's volume [Sv] (2026-09-21 e)
                              // (NH sinks, SH upwells; 2026-09-20 v)
   double w_enso_l2;          // the layer-2 Nino3.4 limb, Sv per index unit
                              // (review avenue 1, 2026-09-17 k)
@@ -892,8 +895,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       //     cancels within the column exactly as it does for w_up.
       if (P.u_hs != 0.0) {
         const double u_h = P.u_hs * (hi == 1 ? A.u_hs_fac_SH : 1.0);   // the SH cold box's own ventilation (2026-09-21 c)
-        add_flux(ihs, ihd, u_h * y[IX(ihs, C)] / A.h_hs, 1.0);
-        add_flux(ihd, ihs, u_h * y[IX(ihd, C)] / A.dz_hd, 1.0);
+        add_flux(ihs, ihd, u_h * y[IX(ihs, C)] / A.thick_hs[hi], 1.0);
+        add_flux(ihd, ihs, u_h * y[IX(ihd, C)] / A.thick_hd[hi], 1.0);
       }
 
       // (b') THE HS PUMP (2026-09-07d): HS -> HD, two limbs, the LS pump's
@@ -924,7 +927,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
         const int kfrom = (int) P.q_attach_from;
         if (kfrom < 1 || kfrom > NL)
           Rcpp::stop("q_attach_from must be in 1..%d; got %d", NL, kfrom);
-        const double conc_hd = y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd);
+        const double conc_hd = y[IX(ihd, C)] / (A.a_hs[hi] * A.thick_hd[hi]);
         const double tq = P.tau_q / (hi == 1 ? A.tau_q_fac_SH : 1.0);   // the SH deep box's own interior exchange (2026-09-21 c)
         for (int kk = kfrom - 1; kk < NL; ++kk) {
           const int ik = base + IML + 1 + kk;
@@ -1078,8 +1081,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       if (W > 0.0) {
         const int ihs = base + IHS, ihd = base + IHD, kt = A.k_thc;
         add_flux(iml, ihs, W * y[IX(iml, C)] / (A.a_ml[hi] * dzl[0]), 1.0);              // (1) poleward
-        add_flux(ihs, ihd, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.h_hs), 1.0);              // (2) sinking
-        add_flux(ihd, base + IML + NL, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd), 1.0); // (3) the abyss
+        add_flux(ihs, ihd, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.thick_hs[hi]), 1.0);              // (2) sinking
+        add_flux(ihd, base + IML + NL, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.thick_hd[hi]), 1.0); // (3) the abyss
         for (int jj = NL - 1; jj >= kt; --jj) {                                          // (4) upwelling below k (1-based jj)
           const int ifrom = base + IML + jj + 1, ito = base + IML + jj;
           add_flux(ifrom, ito, W * y[IX(ifrom, C)] / (A.a_ls[hi] * dzl[jj + 1]), 1.0);
@@ -1109,17 +1112,44 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
             add_flux(iml, ik, W * y[IX(iml, C)] / (A.a_ml[hi] * dzl[0]), 1.0);             // (1a) subduction into layer k
             add_flux(ik, ihs, W * y[IX(ik, C)] / (A.a_ls[hi] * dzl[kn]), 1.0);             // (1b) layer k -> the cold box
           }
-          add_flux(ihs, ihd, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.h_hs), 1.0);              // (2) NADW formation
-          add_flux(ihd, base + IML + NL, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd), 1.0); // (3) the abyss
+          add_flux(ihs, ihd, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.thick_hs[hi]), 1.0);              // (2) NADW formation
+          add_flux(ihd, base + IML + NL, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.thick_hd[hi]), 1.0); // (3) the abyss
         } else {
           for (int jj = NL - 1; jj >= kg; --jj) {                                          // (5a) upwelling below k (1-based jj)
             const int ifrom = base + IML + jj + 1, ito = base + IML + jj;
             add_flux(ifrom, ito, W * y[IX(ifrom, C)] / (A.a_ls[hi] * dzl[jj + 1]), 1.0);
           }
           add_flux(base + IML + kg, ihd, W * y[IX(base + IML + kg, C)] / (A.a_ls[hi] * dzl[kg]), 1.0);  // (5b) CDW into the SO deep box
-          add_flux(ihd, ihs, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd), 1.0);             // (5c) outcrop into the cold box
-          add_flux(ihs, iml, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.h_hs), 1.0);              // (6) equatorward
+          add_flux(ihd, ihs, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.thick_hd[hi]), 1.0);             // (5c) outcrop into the cold box
+          add_flux(ihs, iml, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.thick_hs[hi]), 1.0);              // (6) equatorward
         }
+      }
+    }
+
+    // ---- THE SOUTHERN OCEAN ONE-PASS WINDOW (2026-09-21 e) -- twin of the
+    // block in R/model.R, which carries the reasoning (prereg 09-21e §1). SH
+    // only (hi 1). soc_on = 0 emits nothing. (1) the interior transport from
+    // k_soc_dn to k_soc_up (up if k_dn > k_up, down if k_dn < k_up, none if
+    // equal); (2) oc[k_up] -> hd; (3) hd -> hs, the outcrop; (4) hs ->
+    // oc[k_dn], the return at depth. Association order mirrors the R exactly.
+    if (A.soc_on && hi == 1) {
+      const double W = P.w_soc * SV_TO_M3YR;
+      if (W > 0.0) {
+        const int ihs = base + IHS, ihd = base + IHD, ku = A.k_soc_up, kd = A.k_soc_dn;
+        if (kd > ku) {
+          for (int jj = kd - 1; jj >= ku; --jj) {                                          // (1a) upwelling k_dn -> k_up (1-based jj)
+            const int ifrom = base + IML + jj + 1, ito = base + IML + jj;
+            add_flux(ifrom, ito, W * y[IX(ifrom, C)] / (A.a_ls[hi] * dzl[jj + 1]), 1.0);
+          }
+        } else if (kd < ku) {
+          for (int jj = kd; jj <= ku - 1; ++jj) {                                          // (1b) downwelling k_dn -> k_up
+            const int ifrom = base + IML + jj, ito = base + IML + jj + 1;
+            add_flux(ifrom, ito, W * y[IX(ifrom, C)] / (A.a_ls[hi] * dzl[jj]), 1.0);
+          }
+        }
+        add_flux(base + IML + ku, ihd, W * y[IX(base + IML + ku, C)] / (A.a_ls[hi] * dzl[ku]), 1.0);   // (2) CDW into the SO deep box
+        add_flux(ihd, ihs, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.thick_hd[hi]), 1.0);          // (3) the outcrop
+        add_flux(ihs, base + IML + kd, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.thick_hs[hi]), 1.0);   // (4) the return at depth
       }
     }
 
@@ -1274,6 +1304,8 @@ static Aux unpack_aux(const List& a) {
   for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_carb[h][k] = v[h * NL + k];
   A.hs_frac = a["hs_frac"]; A.h_hs = a["h_hs"];
   A.dz_hd = a["dz_hd"]; A.sst_hs = a["sst_hs"];
+  v = a["thick_hs"];  A.thick_hs[0] = v[0];  A.thick_hs[1] = v[1];    // per-hemisphere thickness (2026-09-21 e)
+  v = a["thick_hd"]; A.thick_hd[0] = v[0]; A.thick_hd[1] = v[1];
   A.dic0_hs = a["dic0_hs"]; A.revelle0_hs = a["revelle0_hs"];
   A.alk_hs = a["alk_hs"];
   v = a["a_ls"];       A.a_ls[0] = v[0];       A.a_ls[1] = v[1];
@@ -1315,6 +1347,7 @@ static Aux unpack_aux(const List& a) {
   v = a["thc_share"]; A.thc_share[0] = v[0]; A.thc_share[1] = v[1];
   A.gthc_on = a["gthc_on"]; A.k_gthc = a["k_gthc"];                // the global thermohaline loop (2026-09-20 v)
   A.kn_gthc = a["kn_gthc"];                                    // T2 (2026-09-21 b)
+  A.soc_on = a["soc_on"]; A.k_soc_up = a["k_soc_up"]; A.k_soc_dn = a["k_soc_dn"];   // the Southern Ocean window (2026-09-21 e)
   A.u_hs_fac_SH = a["u_hs_fac_SH"];                            // 2026-09-21 c
   A.tau_q_fac_SH = a["tau_q_fac_SH"];
   v = a["k_w_fac"]; A.k_w_fac[0] = v[0]; A.k_w_fac[1] = v[1]; A.k_w_fac_hs = a["k_w_fac_hs"];
@@ -1348,6 +1381,7 @@ static Par unpack_par(const List& p) {
   P.w_vent = p["w_vent"]; P.gamma_vent = p["gamma_vent"];        // the ventilation loop (2026-09-14 h)
   P.w_thc = p["w_thc"];                                          // the HS-route deep return (2026-09-15 d)
   P.w_gthc = p["w_gthc"];                                        // the global thermohaline loop (2026-09-20 v)
+  P.w_soc = p["w_soc"];                                          // the Southern Ocean window (2026-09-21 e)
   P.w_enso_l2 = p["w_enso_l2"];                                  // the layer-2 Nino3.4 limb (2026-09-17 k)
   P.pump_seas_amp = p["pump_seas_amp"]; P.pump_seas_lag = p["pump_seas_lag"];   // the seasonal export (2026-09-15 f)
   P.pump_hs_seas_amp = p["pump_hs_seas_amp"]; P.pump_hs_seas_lag = p["pump_hs_seas_lag"];   // O5b (2026-09-16 b)

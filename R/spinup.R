@@ -348,7 +348,7 @@ ccx_spinup <- function(p = ccx_default_params(),
                                 if (is.null(aux$alk_hs)) ccx_const("ALK_SURFACE") else aux$alk_hs,
                                 aux$sst_hs)
       y[i$hs, "C"] <- dic_h * aux$hs_mass_kg[[h]] / aux$mol_per_GtC
-      y[i$hd, "C"] <- dic_h * aux$a_hs[[h]] * aux$dz_hd *
+      y[i$hd, "C"] <- dic_h * aux$a_hs[[h]] * (if (is.null(aux$thick_hd)) aux$dz_hd else aux$thick_hd[[h]]) *   # per-hemisphere HD thickness (2026-09-21 e)
                       ccx_const("RHO_SEAWATER") / aux$mol_per_GtC
     }
 

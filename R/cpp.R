@@ -97,6 +97,11 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     hs_mass_kg = c(aux$hs_mass_kg$NH, aux$hs_mass_kg$SH),
     asx_hs = c(aux$asx_hs$NH, aux$asx_hs$SH),
     h_hs = aux$h_hs, dz_hd = aux$dz_hd, sst_hs = aux$sst_hs,
+    # PER-HEMISPHERE HS / HD thickness (2026-09-21 e, hs_h_fac_SH): the core
+    # reads these; = the scalars above at factor 1. LOUD if the aux predates it.
+    thick_hs = if (is.null(aux$thick_hs))
+      stop("aux lacks thick_hs -- build it with ccx_prepare() (2026-09-21 e)") else c(aux$thick_hs$NH, aux$thick_hs$SH),
+    thick_hd = c(aux$thick_hd$NH, aux$thick_hd$SH),
     dic0_hs = aux$dic0_hs, revelle0_hs = aux$revelle0_hs,
     # THE HS PUMP (2026-09-07d): two scalars per hemisphere, ZERO-FILLED when
     # off; `pump_hs_on` gates the flux on both sides, like `pump_on`.
@@ -146,6 +151,10 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
       stop("aux lacks gthc_on -- build it with ccx_prepare() (2026-09-20 v)") else as.integer(aux$gthc_on),
     k_gthc = as.integer(aux$k_gthc),
     kn_gthc = if (is.null(aux$kn_gthc)) 0L else as.integer(aux$kn_gthc),   # T2 (2026-09-21 b)
+    # THE SOUTHERN OCEAN WINDOW (2026-09-21 e). Same contract.
+    soc_on = if (is.null(aux$soc_on))
+      stop("aux lacks soc_on -- build it with ccx_prepare() (2026-09-21 e)") else as.integer(aux$soc_on),
+    k_soc_up = as.integer(aux$k_soc_up), k_soc_dn = as.integer(aux$k_soc_dn),
     u_hs_fac_SH = if (is.null(aux$u_hs_fac_SH)) 1 else as.numeric(aux$u_hs_fac_SH),   # 2026-09-21 c
     tau_q_fac_SH = if (is.null(aux$tau_q_fac_SH)) 1 else as.numeric(aux$tau_q_fac_SH),
     k_w_fac = if (is.null(aux$k_w_fac)) c(1, 1) else c(aux$k_w_fac$NH, aux$k_w_fac$SH),
@@ -262,6 +271,7 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$w_vent))      p$w_vent      <- 0
   if (is.null(p[["w_thc"]]))  p[["w_thc"]]  <- 0   # the HS-route deep return (2026-09-15 d)
   if (is.null(p[["w_gthc"]])) p[["w_gthc"]] <- 0   # the global thermohaline loop (2026-09-20 v): absence = 0 = OFF (structural)
+  if (is.null(p[["w_soc"]]))  p[["w_soc"]]  <- 0   # the Southern Ocean window (2026-09-21 e): absence = 0 = OFF (structural)
   if (is.null(p[["w_enso_l2"]])) p[["w_enso_l2"]] <- 0   # the layer-2 Nino3.4 limb (2026-09-17 k): absence = 0 = OFF
   if (is.null(p$pump_seas_amp)) p$pump_seas_amp <- 0   # the seasonal export (2026-09-15 f): absence = 0 = OFF
   if (is.null(p$pump_seas_lag)) p$pump_seas_lag <- 0
@@ -374,6 +384,7 @@ ccx_cpp_par <- function(p) {
       "w_vent", "gamma_vent",                   # the ventilation loop (2026-09-14 h)
       "w_thc",                                  # the HS-route deep return (2026-09-15 d)
       "w_gthc",                                 # the global thermohaline loop (2026-09-20 v; structural)
+      "w_soc",                                  # the Southern Ocean window (2026-09-21 e; structural)
       "w_enso_l2",                              # the layer-2 Nino3.4 limb (2026-09-17 k)
       "pump_seas_amp", "pump_seas_lag",         # the seasonal export (2026-09-15 f; structural)
       "pump_hs_seas_amp", "pump_hs_seas_lag",   # O5b, the HS pump's own shape (2026-09-16 b; structural)

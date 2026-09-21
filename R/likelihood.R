@@ -893,10 +893,12 @@ ccx_d14c_window_read <- function(sp, top, bot, every_box = LIK_D14C_EVERY_BOX) {
       num <- num + fr * y[ix, "C14"]; den <- den + fr * y[ix, "C"]
     }
     if (every_box && isTRUE(aux$hs_on == 1L) && !is.null(aux$idx[[h]]$hd)) {
-      hd_top <- aux$h_hs; hd_bot <- aux$h_hs + aux$dz_hd
+      hh <- if (is.null(aux$thick_hs)) aux$h_hs else aux$thick_hs[[h]]          # per-hemisphere HS / HD thickness (2026-09-21 e)
+      dd <- if (is.null(aux$thick_hd)) aux$dz_hd else aux$thick_hd[[h]]
+      hd_top <- hh; hd_bot <- hh + dd
       ov <- max(0, min(bot, hd_bot) - max(top, hd_top))
       if (ov > 0) {
-        fr <- ov / aux$dz_hd
+        fr <- ov / dd
         ix <- aux$idx[[h]]$hd
         num <- num + fr * y[ix, "C14"]; den <- den + fr * y[ix, "C"]
       }
