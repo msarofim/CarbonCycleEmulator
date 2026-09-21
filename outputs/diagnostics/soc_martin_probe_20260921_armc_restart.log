@@ -1,0 +1,7 @@
+stored: W0 armC -378.1184  W5 (8,10) armC -344.5883 
+W0 from the W5 optimum: start dlik -436.2 -> -369.2 (1615 evals); kz_deep_frac 0.1182 h_ml 69.3 u_hs 11.4 h_hs 177; d14prof -36.5 co2 -261.8
+W5 from the W0 optimum: start dlik -409.1 -> -343.6 (1709 evals); kz_deep_frac 0.0883 h_ml 69.4 u_hs 10.0 h_hs 158; d14prof -7.3 co2 -265.2
+Warning message:
+In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 6.572e-04
+EXIT 0

@@ -1,0 +1,106 @@
+== SOUTHERN OCEAN WINDOW, martin probe at hilda29l (prereg 2026-09-21e) -- commit 94e24d5, 2026-09-21 10:05:54 ==
+export 9.08 GtC/yr (martin); W 0/5/10/15/20/30 Sv x geometry (8,10)/(8,6) x fac 1; arm C = beta_max,fert_k,q10,kz_deep_frac,h_ml,k_w,bomb_total,sigma_d14c,u_hs,pump_hs_gcm2,h_hs
+
+obs: gate D asym +0.286 +- 0.029 (NH ml +1.28 hs -0.48, SH ml +1.05 hs -1.06); gate Q 0.60 +- 0.10; MLO-SPO D14C 2001-2007 -1.53 +- 1.78 permil (n 7)
+
+HARNESS GATE 1: dg streams at the canonical vs stored: sum -1391.8051 vs -1391.8051 -> PASS
+canonical (solved): gate D asym +0.094 z -6.60 [NH ml +1.03 hs +0.03 | SH ml +0.91 hs +0.14]; gate Q 0.915 n_sd 3.15; MLO-SPO D14C -5.88; d13C grad resid -0.0668; hs d13C NH 2.11 SH 2.36; PI D14C hs -96/-95, SH bottom -190
+
+HARNESS GATE 2: (k_up, k_dn) inert at W = 0 ((8,10) vs (3,6), fac 1): 0.00e+00 -> PASS
+HARNESS GATE 3: martin / W = 0 / fac 1 dlik -933.7261 vs the loop probe's W = 0 -933.7261 (same frame, same canonical hilda29l): 0.0e+00 -> PASS
+W0 fac1          | dlik   -933.7 | D asym +0.092 z -6.68 [NHml +0.99 NHhs +0.13 | SHml +0.87 SHhs +0.23] | Q 0.875 n_sd 2.75 | hs13 2.18/2.42 | resid -0.0665 | D14 -5.92 | rows: co2 -314.3 bomb  -9.9 d14prof   +0.6 d13 -27.2 hs  -0.5/ -0.1 grad -525.6 exc  +0.1 | PI D14C hs -96/-95 SH hd -138 k6 -80 k8 -172 bot -189 NHbot -190 | PI d13C SH hs 3.06 hd 1.23 k6 1.66 k8 1.09 bot 0.97 | pass - yr h_hs,SH 269 ss 4 
+(the thin cold box ALONE, W = 0: fac 1 costs +0.0 vs fac 1 -- its own price, before any window)
+
+== STAGE 1: 11 points ==
+W0  (8,10) f1    | dlik   -933.7 | D asym +0.092 z -6.68 [NHml +0.99 NHhs +0.13 | SHml +0.87 SHhs +0.23] | Q 0.875 n_sd 2.75 | hs13 2.18/2.42 | resid -0.0665 | D14 -5.92 | rows: co2 -314.3 bomb  -9.9 d14prof   +0.6 d13 -27.2 hs  -0.5/ -0.1 grad -525.6 exc  +0.1 | PI D14C hs -96/-95 SH hd -138 k6 -80 k8 -172 bot -189 NHbot -190 | PI d13C SH hs 3.06 hd 1.23 k6 1.66 k8 1.09 bot 0.97 | pass - yr h_hs,SH 269 ss 4 
+W5  (8,10) f1    | dlik   -964.3 | D asym +0.082 z -7.03 [NHml +0.99 NHhs +0.13 | SHml +0.89 SHhs +0.20] | Q 0.884 n_sd 2.84 | hs13 2.18/2.38 | resid -0.0673 | D14 -5.85 | rows: co2 -342.4 bomb  -5.5 d14prof   -1.2 d13 -23.8 hs  -0.4/ -0.1 grad -534.4 exc  +0.1 | PI D14C hs -96/-99 SH hd -134 k6 -78 k8 -170 bot -161 NHbot -190 | PI d13C SH hs 2.96 hd 1.42 k6 1.73 k8 1.33 bot 1.66 | pass 45.0 yr h_hs,SH 269 ss 4 
+W10 (8,10) f1    | dlik  -1035.2 | D asym +0.074 z -7.31 [NHml +0.99 NHhs +0.13 | SHml +0.90 SHhs +0.19] | Q 0.891 n_sd 2.91 | hs13 2.18/2.36 | resid -0.0680 | D14 -5.81 | rows: co2 -407.7 bomb  -3.5 d14prof   -4.1 d13 -21.7 hs  -0.4/ -0.1 grad -541.2 exc  -0.0 | PI D14C hs -96/-101 SH hd -131 k6 -76 k8 -164 bot -147 NHbot -190 | PI d13C SH hs 2.90 hd 1.56 k6 1.79 k8 1.58 bot 1.99 | pass 22.5 yr h_hs,SH 269 ss 4 
+W15 (8,10) f1    | dlik  -1134.2 | D asym +0.067 z -7.54 [NHml +0.99 NHhs +0.13 | SHml +0.91 SHhs +0.18] | Q 0.897 n_sd 2.97 | hs13 2.18/2.35 | resid -0.0686 | D14 -5.78 | rows: co2 -502.5 bomb  -2.7 d14prof   -5.4 d13 -20.4 hs  -0.4/ -0.1 grad -545.5 exc  -0.1 | PI D14C hs -96/-103 SH hd -129 k6 -75 k8 -157 bot -139 NHbot -190 | PI d13C SH hs 2.85 hd 1.66 k6 1.83 k8 1.78 bot 2.18 | pass 15.0 yr h_hs,SH 269 ss 4 
+W20 (8,10) f1    | dlik  -1256.6 | D asym +0.061 z -7.74 [NHml +0.99 NHhs +0.13 | SHml +0.92 SHhs +0.18] | Q 0.902 n_sd 3.02 | hs13 2.18/2.35 | resid -0.0692 | D14 -5.76 | rows: co2 -621.1 bomb  -2.6 d14prof   -6.4 d13 -19.6 hs  -0.4/ -0.1 grad -548.1 exc  -0.1 | PI D14C hs -96/-105 SH hd -128 k6 -74 k8 -152 bot -134 NHbot -190 | PI d13C SH hs 2.81 hd 1.75 k6 1.87 k8 1.93 bot 2.29 | pass 11.3 yr h_hs,SH 269 ss 4 
+W30 (8,10) f1    | dlik  -1553.3 | D asym +0.052 z -8.04 [NHml +0.99 NHhs +0.13 | SHml +0.93 SHhs +0.18] | Q 0.909 n_sd 3.09 | hs13 2.19/2.34 | resid -0.0701 | D14 -5.73 | rows: co2 -910.0 bomb  -3.4 d14prof   -8.4 d13 -18.9 hs  -0.5/ -0.1 grad -550.9 exc  -0.2 | PI D14C hs -96/-107 SH hd -126 k6 -73 k8 -144 bot -128 NHbot -190 | PI d13C SH hs 2.75 hd 1.87 k6 1.91 k8 2.13 bot 2.41 | pass 7.5 yr h_hs,SH 269 ss 4 
+W5  (8,6) f1     | dlik  -1117.9 | D asym +0.081 z -7.05 [NHml +0.99 NHhs +0.13 | SHml +0.91 SHhs +0.07] | Q 0.896 n_sd 2.96 | hs13 2.18/2.25 | resid -0.0671 | D14 -5.88 | rows: co2 -332.2 bomb  -6.5 d14prof -173.6 d13 -25.1 hs  +0.2/ -0.1 grad -523.9 exc  +0.1 | PI D14C hs -96/-99 SH hd -135 k6 -77 k8 -146 bot -186 NHbot -190 | PI d13C SH hs 2.82 hd 1.21 k6 1.88 k8 1.28 bot 0.95 | pass 45.0 yr h_hs,SH 269 ss 4 
+W10 (8,6) f1     | dlik  -1579.4 | D asym +0.073 z -7.34 [NHml +0.99 NHhs +0.13 | SHml +0.93 SHhs -0.02] | Q 0.910 n_sd 3.10 | hs13 2.18/2.15 | resid -0.0676 | D14 -5.86 | rows: co2 -372.9 bomb  -4.9 d14prof -598.6 d13 -23.5 hs  +0.5/ -0.1 grad -523.3 exc  +0.0 | PI D14C hs -96/-100 SH hd -130 k6 -77 k8 -130 bot -181 NHbot -190 | PI d13C SH hs 2.67 hd 1.25 k6 2.01 k8 1.48 bot 0.99 | pass 22.5 yr h_hs,SH 269 ss 4 
+W15 (8,6) f1     | dlik  -2034.1 | D asym +0.066 z -7.57 [NHml +0.99 NHhs +0.13 | SHml +0.95 SHhs -0.08] | Q 0.920 n_sd 3.20 | hs13 2.18/2.09 | resid -0.0682 | D14 -5.85 | rows: co2 -435.3 bomb  -4.2 d14prof -992.7 d13 -22.4 hs  +0.7/ -0.1 grad -523.3 exc  -0.0 | PI D14C hs -96/-100 SH hd -125 k6 -78 k8 -120 bot -177 NHbot -190 | PI d13C SH hs 2.57 hd 1.31 k6 2.08 k8 1.63 bot 1.05 | pass 15.0 yr h_hs,SH 269 ss 4 
+W20 (8,6) f1     | dlik  -2381.5 | D asym +0.061 z -7.75 [NHml +0.99 NHhs +0.13 | SHml +0.96 SHhs -0.11] | Q 0.927 n_sd 3.27 | hs13 2.18/2.05 | resid -0.0686 | D14 -5.84 | rows: co2 -516.7 bomb  -4.0 d14prof -1259.1 d13 -21.6 hs  +0.8/ -0.1 grad -523.5 exc  -0.1 | PI D14C hs -96/-100 SH hd -122 k6 -79 k8 -113 bot -174 NHbot -190 | PI d13C SH hs 2.50 hd 1.37 k6 2.12 k8 1.75 bot 1.11 | pass 11.3 yr h_hs,SH 269 ss 4 
+W30 (8,6) f1     | dlik  -2826.0 | D asym +0.053 z -8.02 [NHml +0.99 NHhs +0.13 | SHml +0.97 SHhs -0.15] | Q 0.936 n_sd 3.36 | hs13 2.18/2.01 | resid -0.0694 | D14 -5.83 | rows: co2 -722.3 bomb  -4.4 d14prof -1496.0 d13 -20.6 hs  +0.9/ -0.1 grad -524.4 exc  -0.2 | PI D14C hs -96/-98 SH hd -116 k6 -81 k8 -105 bot -168 NHbot -190 | PI d13C SH hs 2.41 hd 1.48 k6 2.17 k8 1.90 bot 1.21 | pass 7.5 yr h_hs,SH 269 ss 4 
+stage 1 done in 2 s
+
+  W fac ku kd    dlik  D_asym    D_z     SHhs   SHml   NHhs Q_nsd    resid
+  0   1  8 10  -933.7 0.09196 -6.679  0.22671 0.8706 0.1319 2.749 -0.06654
+  5   1  8 10  -964.3 0.08176 -7.030  0.20136 0.8863 0.1315 2.842 -0.06734
+ 10   1  8 10 -1035.2 0.07355 -7.312  0.18765 0.8984 0.1314 2.914 -0.06803
+ 15   1  8 10 -1134.2 0.06680 -7.544  0.18125 0.9078 0.1316 2.971 -0.06864
+ 20   1  8 10 -1256.6 0.06117 -7.738  0.17936 0.9154 0.1320 3.017 -0.06918
+ 30   1  8 10 -1553.3 0.05229 -8.043  0.18271 0.9271 0.1330 3.090 -0.07011
+  5   1  8  6 -1117.9 0.08111 -7.052  0.07350 0.9060 0.1318 2.958 -0.06710
+ 10   1  8  6 -1579.4 0.07271 -7.341 -0.01906 0.9298 0.1318 3.099 -0.06765
+ 15   1  8  6 -2034.1 0.06617 -7.566 -0.07516 0.9462 0.1320 3.196 -0.06815
+ 20   1  8  6 -2381.5 0.06095 -7.745 -0.11003 0.9580 0.1323 3.267 -0.06862
+ 30   1  8  6 -2826.0 0.05310 -8.015 -0.14664 0.9740 0.1330 3.363 -0.06944
+    d14 hs14_SH  bot14 hs13_SH   d14prof    co2   pass
+ -5.915  -95.14 -188.8   2.417     0.580 -314.3     NA
+ -5.854  -98.61 -161.1   2.384    -1.179 -342.4 45.046
+ -5.812 -101.31 -147.1   2.364    -4.085 -407.7 22.523
+ -5.782 -103.38 -139.0   2.353    -5.391 -502.5 15.015
+ -5.760 -105.00 -134.0   2.346    -6.437 -621.1 11.261
+ -5.733 -107.33 -128.2   2.342    -8.431 -910.0  7.508
+ -5.882  -99.42 -185.9   2.253  -173.646 -332.2 45.046
+ -5.862 -100.34 -181.4   2.153  -598.552 -372.9 22.523
+ -5.850 -100.13 -177.2   2.092  -992.723 -435.3 15.015
+ -5.842  -99.56 -173.6   2.053 -1259.080 -516.7 11.261
+ -5.834  -98.28 -168.1   2.010 -1495.956 -722.3  7.508
+
+== THE PREDICTIONS (prereg s5), stage 1 -- every W > 0 point read RELATIVE to W = 0 at the SAME fac ==
+(8,10) fac 1 P1: SH hs D by W: +0.23 +0.20 +0.19 +0.18 +0.18 +0.18 -> NOT monotone; fall at W 15 = 0.045 (>= 0.3: FAILS -> inert on its target); NH hs D moves +0.000 -0.000 -0.000 -0.000 +0.000 +0.001
+(8,10) fac 1 P2: SH ml D moves by W: +0.000 +0.016 +0.028 +0.037 +0.045 +0.056 (within 0.05 everywhere: NO -> a misrouted leg, a BUG before a finding)
+(8,10) fac 1 P3: SH hs PI D14C by W: -95 -99 -101 -103 -105 -107 (falls >= 20 at W 15: FAILS); MLO-SPO D14C by W: -5.92 -5.85 -5.81 -5.78 -5.76 -5.73 (obs -1.53 +- 1.78; moves POSITIVE: yes, monotone)
+(8,10) fac 1 P4: SH hs d13C (1995) by W: 2.42 2.38 2.36 2.35 2.35 2.34 (target 1.31; falls >= 0.3 at W 15: FAILS); hs_surf_d13c row dlik: -0.5 -0.4 -0.4 -0.4 -0.4 -0.5
+(8,10) fac 1 P5: gate D asym by W: +0.092 +0.082 +0.074 +0.067 +0.061 +0.052; z: -6.68 -7.03 -7.31 -7.54 -7.74 -8.04 (predicted NOT to improve; improves by > 1: no, as predicted)
+(8,10) fac 1 P6: d13C gradient residual by W: -0.0665 -0.0673 -0.0680 -0.0686 -0.0692 -0.0701 (W0 -0.0665; within +-0.005 everywhere: yes, flat as predicted)
+(8,10) fac 1 P7: d14c profile + deep rows dlik by W: +0.6 -1.2 -4.1 -5.4 -6.4 -8.4 (rel. W0: +0.0 -1.8 -4.7 -6.0 -7.0 -9.0); SH bottom PI D14C: -189 -161 -147 -139 -134 -128 (target -175); free (>= -10) at W: 5,10,15,20,30
+(8,10) fac 1 P8: gate Q n_sd by W: 2.75 2.84 2.91 2.97 3.02 3.09 (predicted to worsen or stay)
+
+(8,6) fac 1 P1: SH hs D by W: +0.23 +0.07 -0.02 -0.08 -0.11 -0.15 -> MONOTONE FALL; fall at W 15 = 0.302 (>= 0.3: HOLDS); NH hs D moves +0.000 -0.000 -0.000 +0.000 +0.000 +0.001
+(8,6) fac 1 P2: SH ml D moves by W: +0.000 +0.035 +0.059 +0.076 +0.087 +0.103 (within 0.05 everywhere: NO -> a misrouted leg, a BUG before a finding)
+(8,6) fac 1 P3: SH hs PI D14C by W: -95 -99 -100 -100 -100 -98 (falls >= 20 at W 15: FAILS); MLO-SPO D14C by W: -5.92 -5.88 -5.86 -5.85 -5.84 -5.83 (obs -1.53 +- 1.78; moves POSITIVE: yes, monotone)
+(8,6) fac 1 P4: SH hs d13C (1995) by W: 2.42 2.25 2.15 2.09 2.05 2.01 (target 1.31; falls >= 0.3 at W 15: HOLDS); hs_surf_d13c row dlik: -0.5 +0.2 +0.5 +0.7 +0.8 +0.9
+(8,6) fac 1 P5: gate D asym by W: +0.092 +0.081 +0.073 +0.066 +0.061 +0.053; z: -6.68 -7.05 -7.34 -7.57 -7.75 -8.02 (predicted NOT to improve; improves by > 1: no, as predicted)
+(8,6) fac 1 P6: d13C gradient residual by W: -0.0665 -0.0671 -0.0676 -0.0682 -0.0686 -0.0694 (W0 -0.0665; within +-0.005 everywhere: yes, flat as predicted)
+(8,6) fac 1 P7: d14c profile + deep rows dlik by W: +0.6 -173.6 -598.6 -992.7 -1259.1 -1496.0 (rel. W0: +0.0 -174.2 -599.1 -993.3 -1259.7 -1496.5); SH bottom PI D14C: -189 -186 -181 -177 -174 -168 (target -175); free (>= -10) at W: NONE
+(8,6) fac 1 P8: gate Q n_sd by W: 2.75 2.96 3.10 3.20 3.27 3.36 (predicted to worsen or stay)
+
+
+== STAGE 2: arm C re-optimisation ==
+HARNESS GATE 4: rebuilt logpost -1425.3620 (shift +0.0000) vs stored -1425.3620 -> PASS
+selected for arm C (W = 0 per fac; the best raw W per (k_dn, fac)):
+ W ku kd fac   dlik_raw
+ 0  8 10   1  -933.7261
+ 5  8 10   1  -964.2506
+ 5  8  6   1 -1117.8702
+armC W0  (8,10) f1    : raw   -934.3 -> armC   -378.1 (1605 evals; kz_deep_frac 0.1053 h_ml 50.0 k_w 1918 bomb_total 118.8 sigma_d14c 5.51 q10 1.08; u_hs 13.5 pump_hs 138.5 h_hs 169) [392 s]
+                   | dlik   -378.2 | D asym +0.079 z -7.14 [NHml +0.91 NHhs +0.44 | SHml +0.81 SHhs +0.54] | Q 0.801 n_sd 2.01 | hs13 2.53/2.77 | resid -0.0667 | D14 -5.82 | rows: co2 -283.0 bomb  +6.9 d14prof  -29.6 d13 -12.1 hs  -3.5/ -1.2 grad  -6.8 exc  +0.4 | PI D14C hs -74/-74 SH hd -124 k6 -85 k8 -139 bot -169 NHbot -170 | PI d13C SH hs 3.60 hd 0.31 k6 1.35 k8 0.63 bot 0.22 | pass - yr h_hs,SH 169 ss 4
+        largest rows: co2_seasonal_SPO -269.4, gcb_ocean_enso_slope -44.8, ocean_grad_dic -13.4, d14c_profile_bd -13.0, co2_seasonal_MLO -12.7
+armC W5  (8,10) f1    : raw   -964.8 -> armC   -344.6 (1636 evals; kz_deep_frac 0.0906 h_ml 69.4 k_w 1912 bomb_total 119.2 sigma_d14c 5.46 q10 1.08; u_hs 10.4 pump_hs 138.4 h_hs 161) [416 s]
+                   | dlik   -344.6 | D asym +0.062 z -7.70 [NHml +0.90 NHhs +0.54 | SHml +0.84 SHhs +0.43] | Q 0.814 n_sd 2.14 | hs13 2.64/2.65 | resid -0.0675 | D14 -5.77 | rows: co2 -264.4 bomb  +4.6 d14prof   -8.4 d13 -14.0 hs  -3.3/ -0.9 grad -10.1 exc  +0.2 | PI D14C hs -71/-79 SH hd -124 k6 -84 k8 -139 bot -151 NHbot -178 | PI d13C SH hs 3.41 hd 0.34 k6 1.35 k8 0.70 bot 0.85 | pass 26.9 yr h_hs,SH 161 ss 4
+        largest rows: co2_seasonal_SPO -254.0, gcb_ocean_enso_slope -46.6, ocean_grad_dic -15.0, d13c_level_MLO -13.3, co2_seasonal_MLO -10.7
+armC W5  (8,6) f1    : raw  -1118.4 -> armC   -408.2 (1530 evals; kz_deep_frac 0.1355 h_ml 69.3 k_w 1910 bomb_total 119.4 sigma_d14c 5.52 q10 1.08; u_hs 9.6 pump_hs 131.3 h_hs 159) [299 s]
+                   | dlik   -408.2 | D asym +0.065 z -7.61 [NHml +0.91 NHhs +0.54 | SHml +0.87 SHhs +0.30] | Q 0.831 n_sd 2.31 | hs13 2.65/2.52 | resid -0.0676 | D14 -5.79 | rows: co2 -266.8 bomb  +2.7 d14prof  -66.3 d13 -17.2 hs  -2.5/ -0.8 grad -12.0 exc  +0.1 | PI D14C hs -64/-77 SH hd -122 k6 -81 k8 -126 bot -162 NHbot -166 | PI d13C SH hs 3.27 hd 0.16 k6 1.51 k8 0.73 bot 0.13 | pass 26.7 yr h_hs,SH 159 ss 4
+        largest rows: co2_seasonal_SPO -255.9, gcb_ocean_enso_slope -47.0, d14c_profile_ab -23.5, d14c_profile_bd -22.9, d14c_profile_level -19.9
+
+== THE REJECT RULE: promote to the refit tier only if at ONE point: P1 (SH hs D falls >= 0.3 at W 15, same fac), P2 (SH ml D within 0.05 -- else a BUG), P3 in direction (SH hs PI D14C older), P7 free (profile rows within -10 of the same-fac W 0) ==
+  W ku kd fac  D_SHhs D_SHml_mv hs14_SH  d14prof    P1    P2   P3    P7  PASS
+  5  8 10   1  0.2014    0.0157   -98.6    -1.76 FALSE  TRUE TRUE  TRUE FALSE
+ 10  8 10   1  0.1876    0.0277  -101.3    -4.66 FALSE  TRUE TRUE  TRUE FALSE
+ 15  8 10   1  0.1813    0.0372  -103.4    -5.97 FALSE  TRUE TRUE  TRUE FALSE
+ 20  8 10   1  0.1794    0.0448  -105.0    -7.02 FALSE  TRUE TRUE  TRUE FALSE
+ 30  8 10   1  0.1827    0.0565  -107.3    -9.01 FALSE FALSE TRUE  TRUE FALSE
+  5  8  6   1  0.0735    0.0354   -99.4  -174.23  TRUE  TRUE TRUE FALSE FALSE
+ 10  8  6   1 -0.0191    0.0592  -100.3  -599.13  TRUE FALSE TRUE FALSE FALSE
+ 15  8  6   1 -0.0752    0.0756  -100.1  -993.30  TRUE FALSE TRUE FALSE FALSE
+ 20  8  6   1 -0.1100    0.0874   -99.6 -1259.66  TRUE FALSE TRUE FALSE FALSE
+ 30  8  6   1 -0.1466    0.1034   -98.3 -1496.54  TRUE FALSE TRUE FALSE FALSE
+
+VERDICT: NO point passes P1 + P2 + P3 + P7 together: the window is RECORDED AND PARKED (the arm-C price above).
+⛔ Gate D's verdict (z -6.60) and the gradient offset (-0.0668) are option (C)'s named reds and are NOT touched by this probe under any outcome.
+
+saved /Users/MarcusMarcus/ccx_frozen/20260921e_soc_probe/outputs/diagnostics/soc_martin_probe_20260921.{log,rds}
