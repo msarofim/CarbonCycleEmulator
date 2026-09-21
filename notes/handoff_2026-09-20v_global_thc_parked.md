@@ -1,0 +1,25 @@
+# Handoff — 2026-09-20 (v). **THE GLOBAL THERMOHALINE LOOP IS BUILT, PROBED AND PARKED.** Canonical `hilda29l`, unchanged. Nothing running except the full-suite counting run (see §5).
+
+> Self-contained. Read first: CHANGELOG 09-20 (v) (every number), `notes/prereg_2026-09-20v_global_thc_probe.md` (P1–P7 and the reject rule), memory [[ccx_global_thc_loop_parked]] (`INDEX_ccx_ocean_circ.md`, the fourth dead limb), `outputs/diagnostics/gthc_martin_probe_20260920.log`. Handoff (u) is superseded by this file for the loop; its §1 (the three dead limbs) still stands.
+
+## 1. What was done
+1. **Built** `w_gthc` [Sv, ONE global volume] + `k_gthc` (SH return layer): ML_NH → HS_NH → HD_NH → NH bottom → SH bottom → up to layer k → HD_SH → HS_SH → ML_SH → ML_NH; each leg W × the source box's per-volume concentration over its OWN area; interhemispheric legs after the hemisphere loop, channel `gthc_ih`; martin only, `hs_frac > 0`, refused beside `q_conv` / `w_thc`; eigbound in the substep count; both cores. **STRUCTURAL, not in the table** (deviation from (u) §2, reasons in the prereg §2). `test-gthc-loop.R` 103/103; neighbours green. Commits `20d3af8` (build), `ed70d1d` (probe harness), + this session's CHANGELOG commit.
+2. **Probed** at `hilda29l`, martin, export 9.08, W ∈ {0, 5, 10, 15, 20, 30} × k ∈ {10, 8}; arm C at W 0 and W 5 (both k). Frozen copy `~/ccx_frozen/20260920v_gthc_probe` (disposable; `data-raw/downloads` symlinked — a frozen copy WITHOUT it loses the nuclear-¹⁴C files and shifts `d14c_NH/SH` by 0.5, caught by harness gate 1).
+3. **Verdict by the prereg's letter: PARKED.** P1 ✔ (SH cold box D +0.23 → −0.27 at 15 Sv), P2 ✘ (gate D z −6.68 → −7.21 (5) → −6.76 (15); right way only at 20–30 Sv at −6,000 to −11,000 total), P3 ✘ (gate Q 2.75 → 3.24 → 3.86), P6 ✘ (deep Δ¹⁴C rows −59 k10 / −27 k8 at 5 Sv; −2433 / −546 at 15), P7 ✘ (residual −0.0665 → −0.0673 → −0.0666: FLAT). P5 ✔ out of sample (MLO−SPO Δ¹⁴C −5.92 → −3.84 toward the held-out −1.53 ± 1.78). Arm C price −44.6 at 5 Sv; gate D unchanged there.
+
+## 2. The finding, in one paragraph
+All four regional disequilibria move TOWARD the bottles (NH ml +0.99 → 1.12 / obs 1.28; **NH hs +0.13 → −0.54 / obs −0.48**; SH ml +0.87 → 0.97 / obs 1.05; SH hs +0.23 → −0.27 / obs −1.06) — the loop does make the cold boxes un-equilibrated. But the NH cold box lightens MORE than the SH one (0.68 vs 0.50 at 15 Sv): one global volume flushes both cold boxes at the same rate (leg 1's ML water into HS_NH; leg 5's HD water into HS_SH), so the model's SH cold box stays heavier than its NH one at every W, where the bottles have it lighter by 0.58. The asymmetry gate D wants is NOT the overturning's at any volume the deep Δ¹⁴C rows admit. ⚠ Which leg carries the HS_NH lightening (residence time vs the ML inflow's δ¹³C) is UNMEASURED — the `.edges13` tap at W = 15 would say; not run because the loop is dead on P6 regardless.
+
+## 3. What is owed / open (nothing blocks)
+- **The ruling on gate D's mechanism is back to Marcus.** Circulation geometry is exhausted (four limbs). Candidates that remain, none scoped: (B) a hemisphere-resolved disequilibrium ROW in the objective (lets a refit trade `u_hs` / `tau_q` / the HS export per hemisphere — the asymmetry may be the HS boxes' own export / exchange, which the 4× HS export enrichment sets symmetrically today); (C) accept gate D as a named red beside the offset; or an SH-only, deep-Δ¹⁴C-neutral process (e.g. an SH `pump_hs` / `u_hs` asymmetry scan — cheap, structural, but a knob unless observed).
+- ⚠ **Gate Q weighting**: gate Q compares the model's AREA-weighted mean D to Quay's k-WEIGHTED 0.60; every regional level improving while Q worsens is that mismatch. Worth a gate-family note; not fixed.
+- The isoflux budget at W = 15 (3.3 min, R core) if the "why does HS_NH lighten" question is wanted answered.
+- Not owed while parked: table entry, cited prior (`data-raw/build_u_hs_prior.R`'s Talley 2013 NADW 18 Sv chain is the source when it is), port targets.
+
+## 4. Traps met this session
+- A frozen copy from `git archive` lacks the ignored `data-raw/downloads/*`; `ln -sfn <dir> downloads` NESTS when the target dir exists (tracked `MANIFEST.csv`) — link the entries, not the dir.
+- `N_INTERIOR` is the layer count; `k_gthc` defaults from it, never a literal 10.
+- The R-path `carb_constants(sst_hs)` "outside fitted range" warning at 1900 is PRE-EXISTING (fires at W = 0 too).
+
+## 5. State to carry
+`hilda29l` canonical (`hilda_csl3`, 29 names, 9 pins), control `hilda31pe`, free parent `hilda31s2` (stale); named reds: the AIC gate (+4.18), the stale parent. Gate D FAILS at every arm (z −6.60). The counting run `~/ccx_frozen/20260920v_gthc_probe/outputs/diagnostics/suite_20260920v_counts.log` was launched at the end of the session (PID in `run_suite.pid`); the (r) count was 3991/4/10+1 — copy the log into `outputs/diagnostics/` and record the count when it finishes. Frozen trees under `~/ccx_frozen/` disposable.
