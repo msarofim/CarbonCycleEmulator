@@ -1584,6 +1584,26 @@ ccx_default_params <- function() {
     w_thc   = 0,          # Sv, both hemispheres; split by a_hs share
     k_thc   = 1L,         # the RETURN layer (1-BASED); 1 = the full Munk
                           #   column; STRUCTURAL, not fitted (the k_e1 idiom)
+    # ---- THE GLOBAL THERMOHALINE LOOP (2026-09-20 v) -----------------------
+    # The overturning's HEMISPHERIC ASYMMETRY as one global MEAN limb of
+    # volume w_gthc [Sv]: NH sinking, SH upwelling. Seven legs, each W x the
+    # SOURCE box's per-volume concentration over the source's OWN area and
+    # thickness (the cell's idiom; D1 closes; a uniform ocean is a fixed
+    # point): ML_NH -> HS_NH -> HD_NH -> the NH bottom layer -> the SH bottom
+    # layer -> up through every SH interface below the return layer k_gthc ->
+    # HD_SH -> HS_SH (the Deacon cell: deep water outcrops in the SH cold box,
+    # the leg that does the work) -> ML_SH -> ML_NH. Bulk, alpha = 1, no ENSO
+    # term. Lives ONLY under pump_field = "martin" (the solved field is
+    # diffusion's fixed point) and ONLY with the HS boxes (hs_frac > 0; errors
+    # by name otherwise); refused beside q_conv or w_thc (two overturning
+    # representations on one column). STRUCTURAL, not in the table for the
+    # probe (the pump_seas_amp idiom); 0 = OFF, emits NOTHING. Built for GATE D
+    # (the cold boxes read isotopically EQUILIBRATED where the real polar
+    # surface is un-equilibrated upwelled deep water). See
+    # notes/prereg_2026-09-20v_global_thc_probe.md §1-2.
+    w_gthc  = 0,          # Sv, ONE global volume (NH sinks, SH upwells)
+    k_gthc  = as.integer(N_INTERIOR),   # the SH RETURN layer (1-BASED); the
+                          #   bottom = the abyssal return; STRUCTURAL (k_thc idiom)
     # ---- THE LAYER-2 NINO3.4 LIMB (review avenue 1, 2026-09-17 k) ----------
     # The ANOMALY of an equatorial-upwelling exchange between the low-latitude
     # mixed layer and interior layer k_l2, T-A2's geometry with the cell's floor:
@@ -3276,6 +3296,38 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       }
     }
 
+    # ---- THE GLOBAL THERMOHALINE LOOP, the within-column legs (2026-09-20 v)
+    # notes/prereg_2026-09-20v_global_thc_probe.md §1. ONE global volume
+    # W = w_gthc x SV; the NH SINKS (legs 1-3: ml -> hs -> hd -> the bottom
+    # layer) and the SH UPWELLS (leg 5: the bottom layer -> up through every
+    # interface below the return layer k_gthc -> layer k -> hd -> hs; leg 6:
+    # hs -> ml). Each leg W x the SOURCE box's per-volume concentration over
+    # the source's OWN area and thickness NOW (the cell's idiom: D1 closes, a
+    # uniform ocean is a fixed point, volume in = out at every box). The two
+    # INTERHEMISPHERIC legs (4: NH bottom -> SH bottom; 7: SH ml -> NH ml) are
+    # emitted AFTER the loop (the conveyor's site) because this loop sees one
+    # column. Bulk, alpha13 = 1, no 14C fractionation, no ENSO term. Unlike
+    # w_thc, only ONE hemisphere sinks -- the asymmetry gate D wants is the
+    # circulation's. w_gthc = 0 emits NOTHING. The C++ block is the twin.
+    if (aux$gthc_on == 1L) {
+      W <- p[["w_gthc"]] * CCX_SV_TO_M3YR
+      if (W > 0) {
+        ihs <- aux$idx[[h]]$hs; ihd <- aux$idx[[h]]$hd; kg <- aux$k_gthc
+        if (h == "NH") {
+          add_flux(iml, ihs, W * y[iml, "C"] / (aux$a_ml[[h]] * gr$dz[1]))            # (1) poleward
+          add_flux(ihs, ihd, W * y[ihs, "C"] / (aux$a_hs[[h]] * h_hs_t))              # (2) NADW formation
+          add_flux(ihd, ioc[grid$nl], W * y[ihd, "C"] / (aux$a_hs[[h]] * dz_hd_t))    # (3) the abyss
+        } else {
+          if (kg < grid$nl) for (jj in seq.int(grid$nl - 1L, kg)) {                   # (5a) upwelling below k
+            add_flux(ioc[jj + 1L], ioc[jj], W * y[ioc[jj + 1L], "C"] / (aux$a_ls[[h]] * gr$dz[jj + 2L]))
+          }
+          add_flux(ioc[kg], ihd, W * y[ioc[kg], "C"] / (aux$a_ls[[h]] * gr$dz[kg + 1L]))   # (5b) CDW into the SO deep box
+          add_flux(ihd, ihs, W * y[ihd, "C"] / (aux$a_hs[[h]] * dz_hd_t))             # (5c) outcrop into the cold box
+          add_flux(ihs, iml, W * y[ihs, "C"] / (aux$a_hs[[h]] * h_hs_t))              # (6) equatorward
+        }
+      }
+    }
+
     # ---- prescribed emissions ---------------------------------------
     # Fossil carbon comes from OUTSIDE the modelled system (geology), so it is a
     # true external source, and it is 14C-free.
@@ -3372,6 +3424,29 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
                grid$h_ml * ccx_mld_eval(aux$mld_coef[[cg$up]], t)$f else grid$dz[1]
     add_flux(aux$idx[[cg$up]]$ml, aux$idx[[cg$down]]$ml,
              cg$Q * y[aux$idx[[cg$up]]$ml, "C"] / (aux$a_oc[[cg$up]] * .h_up))
+  }
+
+  # ---- THE GLOBAL THERMOHALINE LOOP, the two INTERHEMISPHERIC legs (2026-09-20 v)
+  # Leg (4): the NH bottom layer -> the SH bottom layer, over the NH's a_ls
+  # and the bottom layer's dz (which does not move under seas_ml). Leg (7):
+  # the SH mixed layer -> the NH mixed layer, over the SH's a_ml and the SH
+  # ML's thickness at t -- evaluated HERE, outside the loop, because `gr` is
+  # the last hemisphere's (the conveyor's .h_up idiom). ⚠ The two hemispheres'
+  # areas differ, so per-volume concentration over the SOURCE's own area is
+  # the only consistent currency (finding 7 of the 09-16 c review was q_conv
+  # dividing by a_oc while the boxes are a_ls / a_ml). LABELLED gthc_ih: both
+  # endpoint pairs are int>int / ml>ml and unlabelled would land in int_exch /
+  # conv_ml. The C++ block is the twin.
+  if (aux$gthc_on == 1L) {
+    W <- p[["w_gthc"]] * CCX_SV_TO_M3YR
+    if (W > 0) {
+      ibN <- aux$idx$NH$oc[grid$nl]; ibS <- aux$idx$SH$oc[grid$nl]
+      add_flux(ibN, ibS, W * y[ibN, "C"] / (aux$a_ls$NH * grid$dz[grid$nl + 1L]), lab = "gthc_ih")   # (4) the deep limb
+      .h_S <- if (ccx_seas_ml_ls_on(p))
+                grid$h_ml * ccx_mld_eval(aux$mld_coef$SH, t)$f else grid$dz[1]
+      imS <- aux$idx$SH$ml; imN <- aux$idx$NH$ml
+      add_flux(imS, imN, W * y[imS, "C"] / (aux$a_ml$SH * .h_S), lab = "gthc_ih")                    # (7) the surface limb
+    }
   }
 
   # ---- 14C sources (mol/yr -> GtC-equivalent units) and decay ---------
@@ -3726,6 +3801,22 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   kthc <- if (is.null(p[["k_thc"]])) 1L else as.integer(p[["k_thc"]])
   if (thc_on && (!is.finite(kthc) || kthc < 1L || kthc > grid$nl))
     stop("k_thc must be an interior layer in 1..", grid$nl, " (the return layer); got ", format(p[["k_thc"]]))
+  # ---- THE GLOBAL THERMOHALINE LOOP's guards (2026-09-20 v) ---------------
+  # The w_thc contract, plus: ONE overturning representation per column --
+  # q_conv (the retired conveyor) and w_thc (the per-hemisphere limb) are
+  # refused by name beside it.
+  w_gthc <- if (is.null(p[["w_gthc"]])) 0 else p[["w_gthc"]]
+  if (!is.finite(w_gthc) || w_gthc < 0)
+    stop("w_gthc must be a finite non-negative overturning in Sv; got ", format(p[["w_gthc"]]))
+  gthc_on <- identical(pf, "martin") && isTRUE(w_gthc > 0)
+  if (gthc_on && !hs_on)
+    stop("w_gthc > 0 needs the HILDA high-latitude boxes (hs_frac > 0): the loop sinks ",
+         "through HS_NH -> HD_NH and upwells through HD_SH -> HS_SH; without them it has no legs")
+  if (gthc_on && (isTRUE(p$q_conv > 0) || thc_on))
+    stop("w_gthc > 0 beside q_conv > 0 or w_thc > 0: two overturning representations on one column are refused")
+  kgthc <- if (is.null(p[["k_gthc"]])) grid$nl else as.integer(p[["k_gthc"]])
+  if (gthc_on && (!is.finite(kgthc) || kgthc < 1L || kgthc > grid$nl))
+    stop("k_gthc must be an interior layer in 1..", grid$nl, " (the SH return layer); got ", format(p[["k_gthc"]]))
   # ---- THE LAYER-2 NINO3.4 LIMB's guards (2026-09-17 k) ------------------
   # k_l2 is the STRUCTURAL switch: 0 = absent (w_enso_l2 inert, not an error --
   # the objective carries every table name under every structure); otherwise an
@@ -4000,6 +4091,11 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     thc_on      = as.integer(thc_on),
     k_thc       = if (thc_on) kthc else 1L,
     thc_share   = lapply(a_hs, function(A) A / (a_hs$NH + a_hs$SH)),
+    # ---- THE GLOBAL THERMOHALINE LOOP (2026-09-20 v) ------------------------
+    # Unconditional, zero-filled when off: `gthc_on` gates the loop on BOTH
+    # cores; `k_gthc` the SH return layer (nl = the bottom).
+    gthc_on     = as.integer(gthc_on),
+    k_gthc      = if (gthc_on) kgthc else grid$nl,
     # ---- THE LAYER-2 NINO3.4 LIMB (2026-09-17 k) --------------------------
     # Unconditional, zero-filled when off: `l2_on` gates the limb on BOTH cores;
     # `k_l2` the return layer (1-based); `w0_l2` the floor's mean; `l2_share`
@@ -4339,6 +4435,26 @@ ccx_thc_eigbound <- function(p, grid) {
               max(outer(Wh / a_ls, 1 / grid$dz[seq.int(kt, grid$nl) + 1L])))
   2 * rate
 }
+#' The global thermohaline loop's Gershgorin bound (2026-09-20 v): one volume W
+#' drains every box it touches at W / (that box's area x thickness) -- the NH
+#' ML, HS, HD and bottom layer; the SH bottom-to-k layers, HD, HS and ML.
+#' 2 x the largest, `grid` at one seasonal extreme (the caller passes each).
+#' Exactly 0 at w_gthc = 0 or under the solved field.
+ccx_gthc_eigbound <- function(p, grid) {
+  w <- if (is.null(p[["w_gthc"]])) 0 else p[["w_gthc"]]
+  if (!identical(p$pump_field, "martin") || !isTRUE(w > 0) || !ccx_hs_on(p)) return(0)
+  kg <- if (is.null(p[["k_gthc"]])) grid$nl else as.integer(p[["k_gthc"]])
+  a_oc <- c(ccx_const("OCEAN_AREA_NH"), ccx_const("OCEAN_AREA_SH"))
+  f_hs <- p$hs_frac; a_hs <- a_oc * f_hs; a_ls <- a_oc * (1 - f_hs)
+  a_ml <- a_ls - a_eq_of(p, a_oc) - (if (ccx_tr_on(p)) a_oc * c(p$tr_frac_NH, p$tr_frac_SH) else c(0, 0))
+  h_hs <- if (!is.null(p$h_hs) && is.finite(p$h_hs) && p$h_hs > 0) p$h_hs else p$h_ml
+  dz_hd <- sum(grid$dz) - h_hs
+  W <- w * CCX_SV_TO_M3YR
+  rate <- max(W / (a_ml * grid$dz[1]), W / (a_hs * h_hs), W / (a_hs * dz_hd),
+              W / (a_ls[1] * grid$dz[grid$nl + 1L]),                       # the NH bottom layer
+              max(W / (a_ls[2] * grid$dz[seq.int(kg, grid$nl) + 1L])))     # the SH layers k..nl
+  2 * rate
+}
 ccx_e_loop_eigbound <- function(p, grid) {
   w <- if (is.null(p$w_vent)) 0 else p$w_vent
   # the loop EXISTS only under the prescribed field (ccx_prepare's e_on)
@@ -4401,7 +4517,8 @@ ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
       ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), g, p) +
       ccx_tr_box_eigbound(p, g) +
       ccx_e_loop_eigbound(p, g) +                # the ventilation loop (2026-09-14 h); 0 at w_vent = 0
-      ccx_thc_eigbound(p, g), numeric(1)))       # the HS-route deep return (2026-09-15 d); 0 at w_thc = 0
+      ccx_thc_eigbound(p, g) +                   # the HS-route deep return (2026-09-15 d); 0 at w_thc = 0
+      ccx_gthc_eigbound(p, g), numeric(1)))      # the global thermohaline loop (2026-09-20 v); 0 at w_gthc = 0
   # + the EQUATORIAL CELL's own drain rate (2026-09-13g), folded in for the
   # reason the conveyor's was: a stability check that ignored a first-order
   # advective term would be worse than none. Exactly 0 with the cell off, so

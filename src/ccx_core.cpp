@@ -197,6 +197,9 @@ struct Aux {
   // it; k_thc the return layer, 1-BASED as in R; thc_share the a_hs split.
   int    thc_on, k_thc;
   double thc_share[2];
+  // THE GLOBAL THERMOHALINE LOOP (2026-09-20 v): gthc_on gates it; k_gthc the
+  // SH return layer, 1-BASED as in R (NL = the bottom).
+  int    gthc_on, k_gthc;
   double h_tr, sst_tr, sst_tr_enso, alk_tr, dic0_tr, revelle0_tr;
   double ml_pump_share[2], tr_C0[2];   // choice D2: the ML's share of the LS export; tr's PI carbon
   double kz_tr;                        // the tr / layer-1 interface's K (R6); 0 = none
@@ -226,6 +229,8 @@ struct Par {
                              // Nino3.4 modulation (option E, 2026-09-14 h)
   double w_thc;              // the HS-route deep return, Sv both hemispheres
                              // (option O1 arm THC, 2026-09-15 d)
+  double w_gthc;             // the global thermohaline loop, ONE Sv volume
+                             // (NH sinks, SH upwells; 2026-09-20 v)
   double w_enso_l2;          // the layer-2 Nino3.4 limb, Sv per index unit
                              // (review avenue 1, 2026-09-17 k)
   double pump_seas_amp, pump_seas_lag;   // the seasonal export factor (option O5,
@@ -1076,6 +1081,34 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       }
     }
 
+    // ---- THE GLOBAL THERMOHALINE LOOP, the within-column legs (2026-09-20 v)
+    // -- twin of the block in R/model.R, which carries the reasoning (prereg
+    // 09-20v §1). gthc_on = 0 emits nothing. The NH (hi 0) SINKS: ml -> hs ->
+    // hd -> the bottom layer; the SH (hi 1) UPWELLS: bottom -> up to layer
+    // k_gthc -> hd -> hs -> ml. Each leg W x the source box's per-volume
+    // concentration; association order mirrors the R exactly. HS / HD
+    // thicknesses are the fixed A.h_hs / A.dz_hd (option B is R-only). The two
+    // interhemispheric legs are emitted after the loop.
+    if (A.gthc_on) {
+      const double W = P.w_gthc * SV_TO_M3YR;
+      if (W > 0.0) {
+        const int ihs = base + IHS, ihd = base + IHD, kg = A.k_gthc;
+        if (hi == 0) {
+          add_flux(iml, ihs, W * y[IX(iml, C)] / (A.a_ml[hi] * dzl[0]), 1.0);              // (1) poleward
+          add_flux(ihs, ihd, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.h_hs), 1.0);              // (2) NADW formation
+          add_flux(ihd, base + IML + NL, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd), 1.0); // (3) the abyss
+        } else {
+          for (int jj = NL - 1; jj >= kg; --jj) {                                          // (5a) upwelling below k (1-based jj)
+            const int ifrom = base + IML + jj + 1, ito = base + IML + jj;
+            add_flux(ifrom, ito, W * y[IX(ifrom, C)] / (A.a_ls[hi] * dzl[jj + 1]), 1.0);
+          }
+          add_flux(base + IML + kg, ihd, W * y[IX(base + IML + kg, C)] / (A.a_ls[hi] * dzl[kg]), 1.0);  // (5b) CDW into the SO deep box
+          add_flux(ihd, ihs, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd), 1.0);             // (5c) outcrop into the cold box
+          add_flux(ihs, iml, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.h_hs), 1.0);              // (6) equatorward
+        }
+      }
+    }
+
     // prescribed emissions -- see R/model.R for the reasoning. Fossil carbon is
     // external to the modelled system; land-use change is not, so it is a
     // TRANSFER out of the WOOD box (which carries wood's own 13C/14C ratios)
@@ -1132,6 +1165,23 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     const int ml_up = h_up   * NPH + IML;
     add_flux(ml_up, ml_dn,
              Q * y[IX(ml_up, C)] / (A.a_oc[h_up] * h_up_ml), 1.0);
+  }
+
+  // THE GLOBAL THERMOHALINE LOOP, the two INTERHEMISPHERIC legs (2026-09-20 v):
+  // (4) the NH bottom layer -> the SH bottom layer over the NH's a_ls and the
+  // bottom dz (fixed under seas_ml); (7) the SH mixed layer -> the NH mixed
+  // layer over the SH's a_ml and the SH ML's thickness at t (the conveyor's
+  // h_up_ml idiom). Twin of the block in R/model.R.
+  if (A.gthc_on) {
+    const double W = P.w_gthc * SV_TO_M3YR;
+    if (W > 0.0) {
+      const int ibN = IML + NL, ibS = NPH + IML + NL;
+      add_flux(ibN, ibS, W * y[IX(ibN, C)] / (A.a_ls[0] * A.dz[NL]), 1.0);            // (4) the deep limb
+      double h_S = A.dz[0];
+      if (A.seas_ml != 0 && P.seas_ml_on != 0) { double f, d_; mld_eval(1, t, &f, &d_); h_S = A.dz[0] * f; }
+      const int imS = NPH + IML, imN = IML;
+      add_flux(imS, imN, W * y[IX(imS, C)] / (A.a_ml[1] * h_S), 1.0);                 // (7) the surface limb
+    }
   }
 
   // 14C sources and decay
@@ -1249,6 +1299,7 @@ static Aux unpack_aux(const List& a) {
   v = a["e_share"];   A.e_share[0] = v[0];   A.e_share[1] = v[1];
   A.thc_on = a["thc_on"]; A.k_thc = a["k_thc"];                    // the HS-route deep return (2026-09-15 d)
   v = a["thc_share"]; A.thc_share[0] = v[0]; A.thc_share[1] = v[1];
+  A.gthc_on = a["gthc_on"]; A.k_gthc = a["k_gthc"];                // the global thermohaline loop (2026-09-20 v)
   A.l2_on = a["l2_on"]; A.k_l2 = a["k_l2"]; A.w0_l2 = a["w0_l2"];   // the layer-2 Nino3.4 limb (2026-09-17 k)
   v = a["l2_share"];  A.l2_share[0] = v[0];  A.l2_share[1] = v[1];
   return A;
@@ -1277,6 +1328,7 @@ static Par unpack_par(const List& p) {
   P.q_tr = p["q_tr"];                                // the tropical box (2026-09-14f)
   P.w_vent = p["w_vent"]; P.gamma_vent = p["gamma_vent"];        // the ventilation loop (2026-09-14 h)
   P.w_thc = p["w_thc"];                                          // the HS-route deep return (2026-09-15 d)
+  P.w_gthc = p["w_gthc"];                                        // the global thermohaline loop (2026-09-20 v)
   P.w_enso_l2 = p["w_enso_l2"];                                  // the layer-2 Nino3.4 limb (2026-09-17 k)
   P.pump_seas_amp = p["pump_seas_amp"]; P.pump_seas_lag = p["pump_seas_lag"];   // the seasonal export (2026-09-15 f)
   P.pump_hs_seas_amp = p["pump_hs_seas_amp"]; P.pump_hs_seas_lag = p["pump_hs_seas_lag"];   // O5b (2026-09-16 b)
