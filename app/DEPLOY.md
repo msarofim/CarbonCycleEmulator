@@ -23,7 +23,7 @@ The app reads from the repository root, so deploy the whole tree, not just `app/
 | `R/` | the model |
 | `src/ccx_core.cpp` | compiled at startup |
 | `data/*.rds` | observations, forcings, the FaIR climate module |
-| `calibration/output/refit_20260825f_from90/mode_fit_pumpN.rds` | **the parameter set the app runs on.** This is the canonical mode, resolved by `ccx_mode_file()` (`R/paths.R`), which is the ONE place its path is named — take the path from there rather than from this table. It moved here 2026-08-27; the old `pump_arms/mode_fit_pumpN.rds` was fitted before the seasonal-NEP isotope fix changed the objective and is quarantined. `mode_fit.rds` has never existed. Omit the file and the app falls back to uncalibrated defaults SILENTLY (the banner is the only report) |
+| `calibration/output/refit_20260920_hilda29l_obj13_hilda_csl3/mode_fit_pumpN.rds` | **the parameter set the app runs on.** This is the canonical mode, resolved by `ccx_mode_file()` (`R/paths.R`), which is the ONE place its path is named — take the path from there rather than from this table. It moved here 2026-08-27; the old `pump_arms/mode_fit_pumpN.rds` was fitted before the seasonal-NEP isotope fix changed the objective and is quarantined. `mode_fit.rds` has never existed. Omit the file and the app falls back to uncalibrated defaults SILENTLY (the banner is the only report) |
 | `DESIGN.md` | `.find_root()` locates the repo by looking for this file |
 
 `data-raw/` is **not** needed at runtime and is large. Exclude it.
@@ -35,13 +35,14 @@ at the top of every tab reports which one it landed on:
 
 1. `calibration/output/posterior_draws.rds` → "calibrated posterior"
 2. the first of `ccx_mode_file(CCX_MODE_CANONICAL)` (today
-   `calibration/output/refit_20260825f_from90/mode_fit_pumpN.rds`), then
-   `calibration/output/mode_fit.rds`, that exists AND carries a matching
-   21-name parameter vector → "posterior mode" (so a stale 18-parameter fit is
-   ignored rather than silently misaligned)
+   `calibration/output/refit_20260920_hilda29l_obj13_hilda_csl3/mode_fit_pumpN.rds`), then
+   `calibration/output/mode_fit.rds`, that exists AND carries this build's
+   parameter set (`ccx_mode_carries_build()`; a pinned canonical's held names
+   come back through `ccx_mode_par_with_pins()`) → "posterior mode" (so a stale
+   fit from an older parameter table is ignored rather than silently misaligned)
 3. otherwise → "uncalibrated defaults", with the warning styling
 
-**Two of the 21 fitted parameters are FORCING parameters** (`bomb_total`,
+**Two of the fitted names are FORCING parameters** (`bomb_total`,
 `luc_scale`), not model parameters, and `ccx_default_params()` has no slot for
 them. `app_build_forcing()` and `app_run_coupled()` in `global.R` exist to carry
 them onto every forcing the app builds; call those, never `ccx_build_forcing()`

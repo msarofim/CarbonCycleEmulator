@@ -18,12 +18,16 @@ undergraduate environmental studies).
 
 ## Status
 
-Model core, calibration and app are **built and running end to end**. The current calibrated
-vector (`hilda31`, adopted 2026-09-08) is a **31-parameter maximum-a-posteriori fit** under the
-HILDA high-latitude ocean structure (a cold surface box and a cold deep box per hemisphere, a
-biological pump in both columns, the flush and the cold-box gas exchange under observation priors),
-located by multistart optimisation of the posterior; the test suite is ~2,150 checks (2026-09-08).
-The previous column fit (`ent26`, 26 parameters, 2026-09-04) is kept as the like-for-like column control.
+**Product-ready as of 2026-09-21** (`notes/assessment_2026-09-21_product_ready.md`). Model core,
+calibration and app run end to end. The calibrated vector is **`hilda29l`**: a **29-parameter
+maximum-a-posteriori fit** (nine further names held at stated values) under the `hilda_csl3`
+structure — the HILDA high-latitude ocean (a cold surface box and a cold deep box per hemisphere,
+a biological pump in both columns), a seasonal mixed layer with a real entrainment channel, and a
+layer-3 Niño3.4 return limb that carries the ocean's ENSO response as an upwelling anomaly
+(13.7 ± 2.1 Sv per index, inside the observed bracket at one standard deviation) — located by
+dispersed multistart optimisation of the posterior under objective #13. The test suite is ~4,000
+checks. The seasonal-mixed-layer-off control (`hilda31pe`) and the column fit (`ent26`) are kept as
+like-for-like controls.
 
 **It is a single best fit, not a posterior.** No MCMC has been run, no posterior ensemble is
 shipped, and **the app therefore shows no uncertainty bands** — it says so in-product. A
@@ -38,18 +42,24 @@ benchmark, and it should not be used as a drop-in emulator for one.
 
 ### Known limitations, stated plainly
 
-- **The ocean's ENSO response is carried by a fitted coefficient, not by a mechanism.** The
-  model's only physical ENSO→ocean pathway is sea-surface-temperature solubility, which has
-  the *wrong sign*; fitted terms compensate for it, and the net response is about half the
-  observed sensitivity. The model has no tropical box, so the upwelling that actually drives
-  the observed signal is not representable. **Treat the app's ENSO switch as illustrative.**
-- **Interannual variability is about three-quarters of observed**, which is mostly downstream
-  of the point above.
+- **The hemispheric structure of the δ¹³C disequilibrium is not reproduced.** The model's
+  MLO−SPO δ¹³C gradient is twice the observed one (a constant −0.07 ‰ offset, with the CO₂
+  gradient right), and the surface-ocean disequilibrium asymmetry between the hemispheres is a
+  third of what the GLODAP bottles show. Both need an interhemispheric deep-ocean exchange
+  that a one-column-per-hemisphere ocean does not have; every transport tried within the
+  design moves the levels and not the asymmetry. The air-sea isotopic timescale is over-
+  determined by about 15 % between the surface disequilibrium and the atmospheric δ¹³C decline.
+- **Interannual variability is about 60 % of observed.** The ENSO *sensitivity* of the ocean
+  sink is 0.89× the Global Carbon Budget's, carried by the upwelling limb; the *variance* is
+  not, and no ocean-side mechanism tried reaches it. Treat the app's ENSO switch as a
+  sensitivity, not a reconstruction.
 - **The perturbation lifetime is shorter than the Joos et al. (2013) multi-model mean**
-  (IRF(100) 0.276 against 0.409), though the shape of the decay is within their band. Why is
-  an open question, not a tuned-away discrepancy.
-- Several calibration targets and constants are marked `provisional` in `R/constants.R`; the
-  label is carried explicitly rather than quietly.
+  (IRF(100) 0.28 against 0.41), though the 1000-year partition between land, ocean and air is
+  inside their band. Why is an open question, not a tuned-away discrepancy.
+- Eleven constants are marked `provisional` in `R/constants.R` (values inverted through the
+  model, held, or without a pinning source); the label is carried explicitly rather than quietly.
+  Five fitted names are stand-ins for mechanisms the design names but does not carry
+  (`notes/assessment_2026-09-21_product_ready.md` §4).
 
 | Document | Contents |
 |---|---|

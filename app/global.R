@@ -91,6 +91,7 @@ app_params <- local({
   for (.n in CCX_ENSO_PARAMS) p[[.n]] <- CCX_PARAM_TABLE[[.n]]$init
   src <- "uncalibrated defaults"
   status <- "provisional"
+  spinup_label <- "aseasonal"   # the defaults' spinup; a mode file overrides it with its own (below)
   # NO HARDCODED BIAS NUMBER. This string used to claim "about 27 ppm high",
   # which by 2026-08-12 was wrong in SIGN as well as magnitude -- it had been
   # written once and never re-derived while the LUC debit and the four-pool land
@@ -143,6 +144,12 @@ app_params <- local({
     p$pump_mode <- md$pump_mode
     bomb_total <- pm$bomb_total
     luc_scale  <- pm$luc_scale
+    # THE FILE'S OWN SPINUP (2026-09-21 h). Every mode since 09-09x is fitted under
+    # the PERIODIC spinup (a seasonal mixed layer spun to its own annual cycle);
+    # started from the aseasonal equilibrium instead, the canonical hilda29l runs
+    # 3-5 ppm HIGH over the whole record (+3.3 at 2024, measured) -- the 09-09t
+    # leak's mechanism, which the scorecard fixed on 09-12 and the app had not.
+    spinup_label <- ccx_mode_spinup(md)
     src <- "posterior mode"
     status <- "single best fit"
     # WHAT THIS SENTENCE MAY NOT SAY. Not "reproduces the record": the CO2 LEVEL
@@ -165,13 +172,19 @@ app_params <- local({
                     "parameter uncertainty.")
   }
   list(p = p, source = src, status = status, detail = detail,
-       bomb_total = bomb_total, luc_scale = luc_scale,
+       bomb_total = bomb_total, luc_scale = luc_scale, spinup_label = spinup_label,
        has_posterior = file.exists(post_file))
 })
 
 APP_PARAMS     <- app_params$p
 APP_BOMB_TOTAL <- app_params$bomb_total
 APP_LUC_SCALE  <- app_params$luc_scale
+# ONE spinup for every run the app makes -- the one the parameter set was fitted
+# under (periodic for every registered mode; aseasonal only for the defaults).
+# The counterfactual reruns below go through the same function, so a switched-off
+# mechanism is compared against the same equilibrium the base run started from.
+APP_SPINUP_LABEL <- app_params$spinup_label
+app_spinup <- ccx_spinup_from_label(APP_SPINUP_LABEL)
 
 #' Build a forcing with THIS APP'S fitted forcing parameters applied
 #'
@@ -205,7 +218,7 @@ app_run_coupled <- function(spin, scenario, years, ...) {
 # Startup state. The spinup and the historical run are the same for every
 # session and every default view, so they are computed once here.
 # ---------------------------------------------------------------------
-APP_SPIN <- ccx_spinup(APP_PARAMS)
+APP_SPIN <- app_spinup(APP_PARAMS)
 APP_OBS  <- ccx_prepare_obs()
 
 app_hist <- local({
@@ -246,7 +259,7 @@ app_run_mechanisms <- function(off = character(), years = APP_HIST_YEARS,
   F0 <- suppressWarnings(
     app_build_forcing(scenario, years, prod_c14 = 0))
   m <- ccx_apply_mechanisms(APP_PARAMS, F0, off)
-  sp <- ccx_spinup(m$p)
+  sp <- app_spinup(m$p)
   F <- m$F; F$c14_cosmo <- sp$prod_c14
   r <- ccx_run_fast(sp, F)
   r$out$co2_global <- (r$out$co2_NH + r$out$co2_SH) / 2
