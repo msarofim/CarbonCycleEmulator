@@ -28,6 +28,7 @@ SP_EXPORT  <- ccx_pump_export_prior()$centre_gtc          # 9.08, Nowicki's LS m
 SP_W       <- c(0, 5, 10, 15, 20, 30)                      # Sv, the SH window's volume
 SP_GEO     <- list(c(8L, 10L), c(8L, 6L))                  # (k_up, k_dn): CDW (1302-1852 m) in; the AABW (bottom) / AAIW (628-909 m) return
 SP_FAC     <- c(1, 1/3)                                    # hs_h_fac_SH: the SH cold box at h_hs / a third of it (the short pass)
+if (nzchar(Sys.getenv("SP_FAC1", ""))) SP_FAC <- 1          # fac 1 only: the stage-1 run showed fac 1/3 INERT by scaling (prereg s6) -- arm C at 1/3 would duplicate
 SP_LAND    <- c("beta_max", "fert_k", "q10")
 SP_SURF    <- c("kz_deep_frac", "h_ml", "k_w", "bomb_total", "sigma_d14c")
 SP_VENT    <- c("u_hs", "pump_hs_gcm2", "h_hs")            # T1's set: the HILDA ventilation free beside the window (they overlap by construction)
