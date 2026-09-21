@@ -32,8 +32,15 @@ GP_D14C_YEARS <- 2001:2007
 GP_P1_MIN_FALL <- 0.3; GP_P1_W <- 15                        # prereg P1: the SH cold box's D falls by >= 0.3 at W = 15
 GP_P6_FREE <- -10                                          # prereg P6: the profile rows within -10 of W = 0
 GP_SMOKE   <- nzchar(Sys.getenv("GP_SMOKE", ""))
+# T1 (Marcus 09-21, "Try T1"): arm C WITH the HILDA ventilation names free -- u_hs (the HS <-> HD
+# exchange velocity), pump_hs_gcm2 (the HS export) and h_hs (the cold box's thickness; all three set the
+# cold box's residence time, which leg 1 collapses). tau_q is STRUCTURAL (not in the table) and stays at
+# 538. Arm C at EVERY grid point (W {0, 5, 15} x k {10, 8}), not the best raw per k -- the question is
+# whether the ventilation retunes around the loop, at each W.
+GP_T1      <- nzchar(Sys.getenv("GP_T1", ""))
+if (GP_T1) { GP_ARMC <- c(GP_ARMC, "u_hs", "pump_hs_gcm2", "h_hs"); GP_W <- c(0, 5, 15) }
 if (GP_SMOKE) { GP_W <- c(0, 15); GP_K <- 10L; GP_NM_MAXIT <- 20; GP_BFGS_MAXIT <- 5 }
-GP_OUT     <- ccx_path("outputs", "diagnostics", sprintf("gthc_martin_probe_%s%s", format(Sys.Date(), "%Y%m%d"), if (GP_SMOKE) "_smoke" else ""))
+GP_OUT     <- ccx_path("outputs", "diagnostics", sprintf("gthc_martin_probe_%s%s%s", format(Sys.Date(), "%Y%m%d"), if (GP_T1) "_t1" else "", if (GP_SMOKE) "_smoke" else ""))
 sink_log <- file(paste0(GP_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE)
 on.exit({ sink(); close(sink_log) }, add = TRUE)
 GP_COMMIT <- if (file.exists("FROZEN_FROM_COMMIT.txt")) substr(trimws(readLines("FROZEN_FROM_COMMIT.txt")[1]), 1, 7) else   # a frozen copy has no .git
@@ -85,12 +92,13 @@ read_point <- function(v) {
        bomb = rows("^d14c_(NH|SH)$"), co2 = rows("^co2"), d14prof = rows("^d14c_(profile|deep)"), d13 = rows("^d13c"),
        hs_rows = c(d13 = unname(d["hs_surf_d13c"]), dic = unname(d["hs_surf_dic"])), grad_rows = rows("^ocean_grad"), exc = unname(d["excess_c14_ocean"]),
        vel_hs = v$p$w_gthc * CCX_SV_TO_M3YR / sp$aux$a_hs$NH,     # m/yr through the SINKING cold box (like-for-like with 09-15 d: w_thc / sum a_hs)
+       hs14 = vapply(HEMIS, function(h) { i <- sp$aux$idx[[h]]$hs; 1000 * (sp$y[i, "C14"] / sp$y[i, "C"] - 1) }, 0),   # the cold boxes' PI D14C (09-21: the residence-time read)
        substeps = ccx_substeps_for(v$p))
 }
-fmt <- function(lab, rp) sprintf("%-14s | dlik %+8.1f | D asym %+.3f z %+5.2f [NHml %+.2f NHhs %+.2f | SHml %+.2f SHhs %+.2f] | Q %.3f n_sd %.2f | hs13 %.2f/%.2f | resid %+.4f | D14 %+.2f | rows: co2 %+6.1f bomb %+5.1f d14prof %+6.1f d13 %+5.1f hs %+5.1f/%+5.1f grad %+5.1f exc %+5.1f | u_hs %.0f m/yr ss %d%s",
+fmt <- function(lab, rp) sprintf("%-14s | dlik %+8.1f | D asym %+.3f z %+5.2f [NHml %+.2f NHhs %+.2f | SHml %+.2f SHhs %+.2f] | Q %.3f n_sd %.2f | hs13 %.2f/%.2f | resid %+.4f | D14 %+.2f | rows: co2 %+6.1f bomb %+5.1f d14prof %+6.1f d13 %+5.1f hs %+5.1f/%+5.1f grad %+5.1f exc %+5.1f | PI hs D14C %+.0f/%+.0f | u_hs %.0f m/yr ss %d%s",
                                 lab, rp$dlik, rp$gD$asym, rp$gD$z, rp$gD$region[["NH_ml"]], rp$gD$region[["NH_hs"]], rp$gD$region[["SH_ml"]], rp$gD$region[["SH_hs"]],
                                 rp$gQ$mean, rp$gQ$n_sd, rp$hs13[["NH"]], rp$hs13[["SH"]], rp$resid, rp$d14,
-                                rp$co2, rp$bomb, rp$d14prof, rp$d13, rp$hs_rows[["d13"]], rp$hs_rows[["dic"]], rp$grad_rows, rp$exc, rp$vel_hs, rp$substeps,
+                                rp$co2, rp$bomb, rp$d14prof, rp$d13, rp$hs_rows[["d13"]], rp$hs_rows[["dic"]], rp$grad_rows, rp$exc, rp$hs14[["NH"]], rp$hs14[["SH"]], rp$vel_hs, rp$substeps,
                                 if (is.finite(rp$spin_resid) && rp$spin_resid >= PS_TOL) sprintf(" | SPINUP NOT CONVERGED resid %.1e", rp$spin_resid) else "")
 
 # HARNESS GATES 2/3: k inert at W = 0; the martin / no-loop D-alone printed beside the 09-15 d number
@@ -172,6 +180,7 @@ reopt_point <- function(W, k) {
                 read_point(vv) })
 }
 sel <- data.frame(W = 0, k = GP_K[1], dlik_raw = b0$dlik)
+if (GP_T1) { s <- tab1[tab1$W > 0 & is.finite(tab1$dlik), ]; sel <- rbind(sel, data.frame(W = s$W, k = s$k, dlik_raw = s$dlik)) } else
 for (k in GP_K) { s <- tab1[tab1$k == k & tab1$W > 0 & is.finite(tab1$dlik), ]; if (nrow(s)) { b <- s[which.max(s$dlik), ]; sel <- rbind(sel, data.frame(W = b$W, k = k, dlik_raw = b$dlik)) } }
 cat("selected for arm C (W = 0; the best raw W per k):\n"); print(sel, row.names = FALSE)
 S2 <- list()
@@ -180,8 +189,9 @@ for (i in seq_len(nrow(sel))) {
   r2 <- tryCatch(reopt_point(s$W, s$k), error = function(e) { cat(sprintf("armC W%g k%d FAILED: %s\n", s$W, s$k, conditionMessage(e))); NULL })
   if (is.null(r2)) next
   S2[[i]] <- r2
-  cat(sprintf("armC W%-2g k%-2d: raw %+8.1f -> armC %+8.1f (%d evals; kz_deep_frac %.4f h_ml %.1f k_w %.0f bomb_total %.1f sigma_d14c %.2f q10 %.2f) [%.0f s]\n  %s\n",
-              s$W, s$k, r2$dlik_raw, r2$dlik, r2$n_eval, r2$pm$kz_deep_frac, r2$pm$h_ml, r2$pm$k_w, r2$pm$bomb_total, r2$pm$sigma_d14c, r2$pm$q10, proc.time()[["elapsed"]] - t0,
+  cat(sprintf("armC W%-2g k%-2d: raw %+8.1f -> armC %+8.1f (%d evals; kz_deep_frac %.4f h_ml %.1f k_w %.0f bomb_total %.1f sigma_d14c %.2f q10 %.2f%s) [%.0f s]\n  %s\n",
+              s$W, s$k, r2$dlik_raw, r2$dlik, r2$n_eval, r2$pm$kz_deep_frac, r2$pm$h_ml, r2$pm$k_w, r2$pm$bomb_total, r2$pm$sigma_d14c, r2$pm$q10,
+              if (GP_T1) sprintf("; u_hs %.1f pump_hs %.1f h_hs %.0f", r2$pm$u_hs, r2$pm$pump_hs_gcm2, r2$pm$h_hs) else "", proc.time()[["elapsed"]] - t0,
               fmt("", r2$read)))
   cat(sprintf("        largest rows: %s\n", paste(sprintf("%s %+.1f", names(sort(r2$d))[1:5], sort(r2$d)[1:5]), collapse = ", ")))
 }

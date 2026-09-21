@@ -1,0 +1,84 @@
+== GLOBAL THC LOOP, martin probe at hilda29l (prereg 2026-09-20v) -- commit ed70d1d, 2026-09-21 06:39:14 ==
+export 9.08 GtC/yr (martin); W 0/5/15 Sv x k 10/8; arm C = beta_max,fert_k,q10,kz_deep_frac,h_ml,k_w,bomb_total,sigma_d14c,u_hs,pump_hs_gcm2,h_hs
+
+obs: gate D asym +0.286 +- 0.029 (NH ml +1.28 hs -0.48, SH ml +1.05 hs -1.06); gate Q 0.60 +- 0.10; MLO-SPO D14C 2001-2007 -1.53 +- 1.78 permil (n 7)
+
+HARNESS GATE 1: dg streams at the canonical vs stored: sum -1391.8051 vs -1391.8051 -> PASS
+canonical (solved): gate D asym +0.094 z -6.60 [NH ml +1.03 hs +0.03 | SH ml +0.91 hs +0.14]; gate Q 0.915 n_sd 3.15; MLO-SPO D14C -5.88; d13C grad resid -0.0668; hs d13C NH 2.11 SH 2.36
+
+HARNESS GATE 2: k inert at W = 0 (k10 vs k8): 0.00e+00 -> PASS
+HARNESS GATE 3 (printed, not asserted): martin, no loop, D-alone dlik -933.7 at hilda29l vs -894.8 at hilda30c (09-15 d)
+
+== STAGE 1: 5 points ==
+W0  k10        | dlik   -933.7 | D asym +0.092 z -6.68 [NHml +0.99 NHhs +0.13 | SHml +0.87 SHhs +0.23] | Q 0.875 n_sd 2.75 | hs13 2.18/2.42 | resid -0.0665 | D14 -5.92 | rows: co2 -314.3 bomb  -9.9 d14prof   +0.6 d13 -27.2 hs  -0.5/ -0.1 grad -525.6 exc  +0.1 | PI hs D14C -96/-95 | u_hs 0 m/yr ss 4 
+W5  k10        | dlik  -1070.5 | D asym +0.076 z -7.21 [NHml +1.04 NHhs -0.19 | SHml +0.92 SHhs +0.01] | Q 0.924 n_sd 3.24 | hs13 1.87/2.18 | resid -0.0673 | D14 -4.68 | rows: co2 -396.6 bomb  -7.8 d14prof  -59.4 d13 -25.1 hs  +1.4/ +0.0 grad -522.5 exc  +0.0 | PI hs D14C -61/-109 | u_hs 8 m/yr ss 4 
+W15 k10        | dlik  -4032.5 | D asym +0.089 z -6.76 [NHml +1.12 NHhs -0.54 | SHml +0.97 SHhs -0.27] | Q 0.986 n_sd 3.86 | hs13 1.54/1.89 | resid -0.0666 | D14 -3.84 | rows: co2 -989.6 bomb  -8.6 d14prof -2432.9 d13 -12.4 hs  +2.6/ +0.0 grad -525.5 exc  -0.2 | PI hs D14C -40/-103 | u_hs 24 m/yr ss 4 
+W5  k8         | dlik  -1038.0 | D asym +0.076 z -7.21 [NHml +1.04 NHhs -0.19 | SHml +0.92 SHhs +0.01] | Q 0.924 n_sd 3.24 | hs13 1.87/2.18 | resid -0.0673 | D14 -4.68 | rows: co2 -396.6 bomb  -7.8 d14prof  -27.0 d13 -25.1 hs  +1.4/ +0.0 grad -522.5 exc  +0.0 | PI hs D14C -61/-109 | u_hs 8 m/yr ss 4 
+W15 k8         | dlik  -2147.6 | D asym +0.089 z -6.77 [NHml +1.12 NHhs -0.54 | SHml +0.97 SHhs -0.27] | Q 0.987 n_sd 3.87 | hs13 1.54/1.89 | resid -0.0666 | D14 -3.83 | rows: co2 -991.3 bomb  -8.6 d14prof -546.2 d13 -12.4 hs  +2.6/ +0.0 grad -525.6 exc  -0.2 | PI hs D14C -40/-104 | u_hs 24 m/yr ss 4 
+stage 1 done in 1 s
+
+  W  k    dlik  D_asym    D_z      SHhs    NHhs Q_nsd    resid    d14  d14prof
+  0 10  -933.7 0.09196 -6.679  0.226710  0.1319 2.749 -0.06654 -5.915     0.58
+  5 10 -1070.5 0.07644 -7.213  0.006535 -0.1907 3.238 -0.06729 -4.678   -59.39
+ 15 10 -4032.5 0.08948 -6.764 -0.273702 -0.5441 3.865 -0.06663 -3.839 -2432.89
+  5  8 -1038.0 0.07648 -7.211  0.006218 -0.1907 3.238 -0.06729 -4.676   -27.00
+ 15  8 -2147.6 0.08936 -6.768 -0.273876 -0.5441 3.866 -0.06664 -3.829  -546.20
+    co2
+ -314.3
+ -396.6
+ -989.6
+ -396.6
+ -991.3
+
+== THE PREDICTIONS (prereg s4), stage 1 ==
+k10 P1: SH hs D by W: +0.23 +0.01 -0.27 -> MONOTONE FALL; fall at W 15 = 0.500 (>= 0.3: HOLDS); NH hs D moves -0.676 (within 0.2: NO)
+k10 P2: gate D z by W: -6.68 -7.21 -6.76 (|z| <= 2 at: none); SH ml D: +0.87 +0.92 +0.97 (obs +1.05)
+k10 P3: gate Q n_sd by W: 2.75 3.24 3.86 (falls from W0: NO)
+k10 P4: hs_surf_d13c row dlik by W: -0.5 +1.4 +2.6; hs d13C SH: 2.42 2.18 1.89 (target 1.31)
+k10 P5: model MLO-SPO D14C (2001-2007) by W: -5.92 -4.68 -3.84 (obs -1.53 +- 1.78, NH lower); predicted to move POSITIVE: yes
+k10 P6: d14c profile + deep rows dlik by W: +0.6 -59.4 -2432.9 (free, >= -10, at W: NONE -> dies on w_thc's rock)
+k10 P7: d13C gradient residual by W: -0.0665 -0.0673 -0.0666 (W0 -0.0665; closes 0.01-0.03 at W: none; FULL closure would be a finding)
+
+k8  P1: SH hs D by W: +0.23 +0.01 -0.27 -> MONOTONE FALL; fall at W 15 = 0.501 (>= 0.3: HOLDS); NH hs D moves -0.676 (within 0.2: NO)
+k8  P2: gate D z by W: -6.68 -7.21 -6.77 (|z| <= 2 at: none); SH ml D: +0.87 +0.92 +0.97 (obs +1.05)
+k8  P3: gate Q n_sd by W: 2.75 3.24 3.87 (falls from W0: NO)
+k8  P4: hs_surf_d13c row dlik by W: -0.5 +1.4 +2.6; hs d13C SH: 2.42 2.18 1.89 (target 1.31)
+k8  P5: model MLO-SPO D14C (2001-2007) by W: -5.92 -4.68 -3.83 (obs -1.53 +- 1.78, NH lower); predicted to move POSITIVE: yes
+k8  P6: d14c profile + deep rows dlik by W: +0.6 -27.0 -546.2 (free, >= -10, at W: NONE -> dies on w_thc's rock)
+k8  P7: d13C gradient residual by W: -0.0665 -0.0673 -0.0666 (W0 -0.0665; closes 0.01-0.03 at W: none; FULL closure would be a finding)
+
+== STAGE 2: arm C re-optimisation ==
+HARNESS GATE 4: rebuilt logpost -1425.3620 (shift +0.0000) vs stored -1425.3620 -> PASS
+selected for arm C (W = 0; the best raw W per k):
+  W  k   dlik_raw
+  0 10  -933.7261
+  5 10 -1070.4572
+ 15 10 -4032.5387
+  5  8 -1038.0197
+ 15  8 -2147.6140
+armC W0  k10: raw   -934.3 -> armC   -378.1 (1605 evals; kz_deep_frac 0.1053 h_ml 50.0 k_w 1918 bomb_total 118.8 sigma_d14c 5.51 q10 1.08; u_hs 13.5 pump_hs 138.5 h_hs 169) [396 s]
+                 | dlik   -378.2 | D asym +0.079 z -7.14 [NHml +0.91 NHhs +0.44 | SHml +0.81 SHhs +0.54] | Q 0.801 n_sd 2.01 | hs13 2.53/2.77 | resid -0.0667 | D14 -5.82 | rows: co2 -283.0 bomb  +6.9 d14prof  -29.6 d13 -12.1 hs  -3.5/ -1.2 grad  -6.8 exc  +0.4 | PI hs D14C -74/-74 | u_hs 0 m/yr ss 4
+        largest rows: co2_seasonal_SPO -269.4, gcb_ocean_enso_slope -44.8, ocean_grad_dic -13.4, d14c_profile_bd -13.0, co2_seasonal_MLO -12.7
+armC W5  k10: raw  -1071.0 -> armC   -425.7 (1734 evals; kz_deep_frac 0.0646 h_ml 69.4 k_w 1932 bomb_total 118.4 sigma_d14c 5.92 q10 1.08; u_hs 11.1 pump_hs 65.6 h_hs 85) [451 s]
+                 | dlik   -425.7 | D asym +0.100 z -6.41 [NHml +1.04 NHhs -0.27 | SHml +0.90 SHhs -0.06] | Q 0.911 n_sd 3.11 | hs13 1.83/2.14 | resid -0.0654 | D14 -4.73 | rows: co2 -330.4 bomb  +2.6 d14prof  -19.7 d13 -19.2 hs  +1.8/ -0.0 grad  -1.6 exc  +0.5 | PI hs D14C -45/-89 | u_hs 8 m/yr ss 4
+        largest rows: co2_seasonal_SPO -274.0, gcb_ocean_enso_slope -49.3, co2_gradient -41.4, d13c_level_MLO -20.0, d14c_profile_level -16.2
+armC W15 k10: raw  -4033.1 -> armC   -748.6 (1773 evals; kz_deep_frac 0.0686 h_ml 74.5 k_w 1944 bomb_total 120.3 sigma_d14c 8.16 q10 1.09; u_hs 10.6 pump_hs 39.2 h_hs 240) [867 s]
+                 | dlik   -748.6 | D asym +0.090 z -6.76 [NHml +1.15 NHhs -0.70 | SHml +1.00 SHhs -0.34] | Q 1.013 n_sd 4.13 | hs13 1.38/1.83 | resid -0.0670 | D14 -3.99 | rows: co2 -164.8 bomb -10.5 d14prof -459.1 d13 -34.2 hs  +2.8/ +0.1 grad -17.6 exc  -0.3 | PI hs D14C -32/-91 | u_hs 24 m/yr ss 16
+        largest rows: d14c_profile_level -386.8, co2_gradient -121.8, d14c_profile_bd -74.1, gcb_ocean_enso_slope -59.4, co2_seasonal_SPO -38.1
+armC W5  k8 : raw  -1038.6 -> armC   -437.2 (1645 evals; kz_deep_frac 0.0628 h_ml 69.4 k_w 1916 bomb_total 120.1 sigma_d14c 6.05 q10 1.08; u_hs 10.3 pump_hs 64.6 h_hs 426) [377 s]
+                 | dlik   -437.3 | D asym +0.104 z -6.28 [NHml +1.05 NHhs -0.11 | SHml +0.91 SHhs +0.06] | Q 0.918 n_sd 3.18 | hs13 1.96/2.25 | resid -0.0661 | D14 -4.77 | rows: co2 -326.1 bomb  -5.4 d14prof  -12.1 d13 -33.5 hs  +1.1/ -0.1 grad  -2.0 exc  +0.0 | PI hs D14C -46/-89 | u_hs 8 m/yr ss 4
+        largest rows: co2_seasonal_SPO -269.4, gcb_ocean_enso_slope -57.3, co2_gradient -39.1, d13c_level_MLO -30.9, d14c_profile_level -12.6
+armC W15 k8 : raw  -2148.2 -> armC   -837.4 (1657 evals; kz_deep_frac 0.0466 h_ml 48.9 k_w 1854 bomb_total 115.7 sigma_d14c 5.85 q10 1.09; u_hs 5.2 pump_hs 10.1 h_hs 108) [530 s]
+                 | dlik   -837.4 | D asym +0.075 z -7.25 [NHml +1.17 NHhs -0.90 | SHml +1.00 SHhs -0.38] | Q 1.025 n_sd 4.25 | hs13 1.18/1.78 | resid -0.0668 | D14 -4.01 | rows: co2 -366.0 bomb  +5.1 d14prof -316.1 d13 -65.1 hs  +2.9/ +0.1 grad -31.7 exc  +1.0 | PI hs D14C -28/-93 | u_hs 24 m/yr ss 4
+        largest rows: co2_seasonal_SPO -291.2, d14c_profile_level -246.8, d14c_profile_bd -66.9, d13c_level_MLO -62.0, co2_gradient -54.2
+
+== THE REJECT RULE: promote to the refit tier only if at ONE W: P1 (SH hs D falls >= 0.3 at W 15), P2-direction (|z| < 6.60), P3 (n_sd < 3.15), P6 free (profile rows within -10 of W 0) ==
+  W  k   D_z Q_nsd d14prof   P1    P2    P3    P6  PASS
+  5 10 -7.21  3.24   -60.0 TRUE FALSE FALSE FALSE FALSE
+ 15 10 -6.76  3.86 -2433.5 TRUE FALSE FALSE FALSE FALSE
+  5  8 -7.21  3.24   -27.6 TRUE FALSE FALSE FALSE FALSE
+ 15  8 -6.77  3.87  -546.8 TRUE FALSE FALSE FALSE FALSE
+
+VERDICT: NO W passes P1 + P2 + P3 + P6: the loop is RECORDED AND PARKED like w_thc (the arm-C price above).
+
+saved /Users/MarcusMarcus/ccx_frozen/20260920v_gthc_probe/outputs/diagnostics/gthc_martin_probe_20260921_t1.{log,rds}
