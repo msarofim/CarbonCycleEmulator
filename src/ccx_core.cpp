@@ -201,6 +201,9 @@ struct Aux {
   // SH return layer, 1-BASED as in R (NL = the bottom).
   int    gthc_on, k_gthc;
   int    kn_gthc;          // T2 (2026-09-21 b): the NH subduction layer; 0 = the ML feeds HS_NH
+  double u_hs_fac_SH;        // the SH cold box's own ventilation factor (2026-09-21 c); 1 = symmetric
+  double tau_q_fac_SH;       // likewise on the SH HD <-> interior exchange (tau_q / fac)
+  double k_w_fac[2], k_w_fac_hs;   // the hemispheres' and the cold boxes' gas-exchange factors (2026-09-21 c)
   double h_tr, sst_tr, sst_tr_enso, alk_tr, dic0_tr, revelle0_tr;
   double ml_pump_share[2], tr_C0[2];   // choice D2: the ML's share of the LS export; tr's PI carbon
   double kz_tr;                        // the tr / layer-1 interface's K (R6); 0 = none
@@ -695,7 +698,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       pco2_ml = pco2_from_dic_cpp(dic_ml, A.alk, sst, A, &K0);
     }
     if (pco2_rec) pco2_rec[4 * hi + 0] = pco2_ml;
-    const double gx = A.asx[hi] * P.k_w * K0;
+    const double gx = A.asx[hi] * P.k_w * A.k_w_fac[hi] * K0;   // k_w_fac (2026-09-21 c); 1 = bit-exact
     // alpha13_signed reason (a): one-way by construction -- gx > 0 always, so
     // these go negative only when pCO2 does, i.e. in a diverging intermediate
     // state the caller is about to reject. See R/model.R for the contract.
@@ -878,7 +881,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
         pco2_hs = pco2_from_dic_cpp(dic_hs, A.alk_hs, sst_h, A, &K0h);
       }
       if (pco2_rec) pco2_rec[4 * hi + 1] = pco2_hs;
-      const double gx_hs = A.asx_hs[hi] * P.k_w * K0h;
+      const double gx_hs = A.asx_hs[hi] * P.k_w * A.k_w_fac[hi] * A.k_w_fac_hs * K0h;
       double a_dn_h, a_up_h;
       ccx_alpha_as(sst_h, A, &a_dn_h, &a_up_h);
       add_flux(iatm, ihs, gx_hs * chi,     a_dn_h, true);
@@ -887,8 +890,9 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       // (b) HS <-> HD, two-way GROSS at u_hs m/yr over the HS area; the area
       //     cancels within the column exactly as it does for w_up.
       if (P.u_hs != 0.0) {
-        add_flux(ihs, ihd, P.u_hs * y[IX(ihs, C)] / A.h_hs, 1.0);
-        add_flux(ihd, ihs, P.u_hs * y[IX(ihd, C)] / A.dz_hd, 1.0);
+        const double u_h = P.u_hs * (hi == 1 ? A.u_hs_fac_SH : 1.0);   // the SH cold box's own ventilation (2026-09-21 c)
+        add_flux(ihs, ihd, u_h * y[IX(ihs, C)] / A.h_hs, 1.0);
+        add_flux(ihd, ihs, u_h * y[IX(ihd, C)] / A.dz_hd, 1.0);
       }
 
       // (b') THE HS PUMP (2026-09-07d): HS -> HD, two limbs, the LS pump's
@@ -920,10 +924,11 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
         if (kfrom < 1 || kfrom > NL)
           Rcpp::stop("q_attach_from must be in 1..%d; got %d", NL, kfrom);
         const double conc_hd = y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd);
+        const double tq = P.tau_q / (hi == 1 ? A.tau_q_fac_SH : 1.0);   // the SH deep box's own interior exchange (2026-09-21 c)
         for (int kk = kfrom - 1; kk < NL; ++kk) {
           const int ik = base + IML + 1 + kk;
-          add_flux(ihd, ik, A.a_ls[hi] * dzl[kk + 1] / P.tau_q * conc_hd, 1.0);
-          add_flux(ik, ihd, y[IX(ik, C)] / P.tau_q, 1.0);
+          add_flux(ihd, ik, A.a_ls[hi] * dzl[kk + 1] / tq * conc_hd, 1.0);
+          add_flux(ik, ihd, y[IX(ik, C)] / tq, 1.0);
         }
       }
     }
@@ -967,7 +972,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
         pco2_eq = pco2_from_dic_cpp(dic_eq, A.alk_eq, sst_e, A, &K0e);
       }
       if (pco2_rec) pco2_rec[4 * hi + 2] = pco2_eq;
-      const double gx_eq = A.asx_eq[hi] * P.k_w * K0e;
+      const double gx_eq = A.asx_eq[hi] * P.k_w * A.k_w_fac[hi] * K0e;
       double a_dn_e, a_up_e;
       ccx_alpha_as(sst_e, A, &a_dn_e, &a_up_e);
       add_flux(iatm, ieq, gx_eq * chi,     a_dn_e, true);
@@ -994,7 +999,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
         pco2_tr = pco2_from_dic_cpp(dic_tr, A.alk_tr, sst_t, A, &K0t);
       }
       if (pco2_rec) pco2_rec[4 * hi + 3] = pco2_tr;
-      const double gx_tr = A.asx_tr[hi] * P.k_w * K0t;
+      const double gx_tr = A.asx_tr[hi] * P.k_w * A.k_w_fac[hi] * K0t;
       double a_dn_t, a_up_t;
       ccx_alpha_as(sst_t, A, &a_dn_t, &a_up_t);
       add_flux(iatm, itr, gx_tr * chi,     a_dn_t, true);
@@ -1309,6 +1314,9 @@ static Aux unpack_aux(const List& a) {
   v = a["thc_share"]; A.thc_share[0] = v[0]; A.thc_share[1] = v[1];
   A.gthc_on = a["gthc_on"]; A.k_gthc = a["k_gthc"];                // the global thermohaline loop (2026-09-20 v)
   A.kn_gthc = a["kn_gthc"];                                    // T2 (2026-09-21 b)
+  A.u_hs_fac_SH = a["u_hs_fac_SH"];                            // 2026-09-21 c
+  A.tau_q_fac_SH = a["tau_q_fac_SH"];
+  v = a["k_w_fac"]; A.k_w_fac[0] = v[0]; A.k_w_fac[1] = v[1]; A.k_w_fac_hs = a["k_w_fac_hs"];
   A.l2_on = a["l2_on"]; A.k_l2 = a["k_l2"]; A.w0_l2 = a["w0_l2"];   // the layer-2 Nino3.4 limb (2026-09-17 k)
   v = a["l2_share"];  A.l2_share[0] = v[0];  A.l2_share[1] = v[1];
   return A;

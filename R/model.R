@@ -1610,6 +1610,20 @@ ccx_default_params <- function() {
     # intermediate water that has already aged) and NH layer k -> HS_NH. Same
     # volume closure (layer k: in W, out W). STRUCTURAL.
     kn_gthc = 0L,
+    # ---- THE SH COLD BOX's OWN VENTILATION (2026-09-21 c, scoping) ---------
+    # A hemispheric asymmetry in the HS <-> HD exchange: the SH cold box is the
+    # Southern Ocean, the world's upwelling region, where surface residence is
+    # short and the surface stays isotopically un-equilibrated (gate D: SH hs D
+    # -1.06 vs NH hs -0.48). u_hs_fac_SH multiplies u_hs in the SH only; 1 =
+    # symmetric = every registered mode bit-exact. STRUCTURAL for the scan.
+    u_hs_fac_SH = 1,
+    tau_q_fac_SH = 1,     # likewise on the SH HD <-> interior exchange (tau_q / fac); 1 = symmetric
+    pump_hs_fac_SH = 1,   # likewise on the SH cold box's EXPORT (the SO is HNLC; the HS export prior's
+                          #   centre is the PAZ, 23 gC/m2/yr, vs the fitted 78.8); 1 = symmetric
+    k_w_fac_SH = 1,       # the SH's gas-exchange velocity relative to the NH's (NCEP wind^2 in
+                          #   data/obs_hemi_diseq.rds band_weights: SH/NH 1.14); 1 = symmetric
+    k_w_fac_hs = 1,       # the COLD boxes' k_w relative to the warm ML's (HILDA assumed g_h = g_l;
+                          #   NCEP wind^2 says ~3.3x); applies to BOTH hemispheres; 1 = HILDA
     # ---- THE LAYER-2 NINO3.4 LIMB (review avenue 1, 2026-09-17 k) ----------
     # The ANOMALY of an equatorial-upwelling exchange between the low-latitude
     # mixed layer and interior layer k_l2, T-A2's geometry with the cell's floor:
@@ -2587,7 +2601,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     if (record) { .pml[[h]] <- pco2_ml; .sstl[[h]] <- sst }
     pco2_at <- chi                                                  # ppm ~ uatm at 1 atm
     # GROSS both ways (see add_flux header): invasion and evasion separately.
-    gx <- aux$asx[[h]] * p$k_w * k$K0
+    gx <- aux$asx[[h]] * p$k_w * aux$k_w_fac[[h]] * k$K0            # k_w_fac: the hemisphere's gas-exchange factor (2026-09-21 c); 1 = bit-exact
     # alpha13_signed, reason (a): ONE-WAY BY CONSTRUCTION. gx > 0 always, so
     # these go negative only when pCO2 itself does, i.e. in a diverging
     # intermediate state that ccx_run_fast() is about to reject. The two limbs
@@ -2973,7 +2987,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
                       if (is.null(aux$alk_hs)) ccx_const("ALK_SURFACE") else aux$alk_hs,
                       sst_hs, k = k_hs)
       }
-      gx_hs  <- aux$asx_hs[[h]] * p$k_w * k_hs$K0
+      gx_hs  <- aux$asx_hs[[h]] * p$k_w * aux$k_w_fac[[h]] * aux$k_w_fac_hs * k_hs$K0
       a_as_h <- ccx_alpha_as(sst_hs, aux)
       add_flux(iatm, ihs, gx_hs * pco2_at, alpha13 = a_as_h$down,
                alpha13_signed = TRUE)                                  # invasion
@@ -2987,8 +3001,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       #     interface would transport no isotope at all -- which is precisely
       #     the quantity this structure exists to move.
       if (p$u_hs != 0) {
-        add_flux(ihs, ihd, p$u_hs * y[ihs, "C"] / h_hs_t)
-        add_flux(ihd, ihs, p$u_hs * y[ihd, "C"] / dz_hd_t)
+        u_h <- p$u_hs * (if (h == "SH") aux$u_hs_fac_SH else 1)     # the SH cold box's own ventilation (2026-09-21 c); 1 = bit-exact
+        add_flux(ihs, ihd, u_h * y[ihs, "C"] / h_hs_t)
+        add_flux(ihd, ihs, u_h * y[ihd, "C"] / dz_hd_t)
       }
 
       # (b'') SEASONAL ENTRAINMENT / DETRAINMENT ON THE COLD BOX (option B).
@@ -3057,10 +3072,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
                " (the interior layer where HD attaches); got ",
                format(p$q_attach_from))
         conc_hd <- y[ihd, "C"] / (aux$a_hs[[h]] * dz_hd_t)             # GtC/m3
+        tq <- p$tau_q / (if (h == "SH") aux$tau_q_fac_SH else 1)       # the SH deep box's own interior exchange (2026-09-21 c); 1 = bit-exact
         for (kk in seq.int(kfrom, grid$nl)) {
           add_flux(ihd, ioc[kk],
-                   aux$a_ls[[h]] * gr$dz[kk + 1] / p$tau_q * conc_hd)
-          add_flux(ioc[kk], ihd, y[ioc[kk], "C"] / p$tau_q)
+                   aux$a_ls[[h]] * gr$dz[kk + 1] / tq * conc_hd)
+          add_flux(ioc[kk], ihd, y[ioc[kk], "C"] / tq)
         }
       }
       if (record) .phs[[h]] <- pco2_hs
@@ -3138,7 +3154,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       } else {
         pco2_from_dic(dic_eq, aux$alk_eq, sst_eq_t, k = kc_eq)
       }
-      gx_eq  <- aux$asx_eq[[h]] * p$k_w * kc_eq$K0
+      gx_eq  <- aux$asx_eq[[h]] * p$k_w * aux$k_w_fac[[h]] * kc_eq$K0
       a_as_e <- ccx_alpha_as(sst_eq_t, aux)
       # alpha13_signed, reason (a): one-way by construction, as the ML's limbs
       add_flux(iatm, ieq, gx_eq * pco2_at, alpha13 = a_as_e$down,
@@ -3175,7 +3191,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       } else {
         pco2_from_dic(dic_tr, aux$alk_tr, sst_tr_t, k = kc_tr)
       }
-      gx_tr  <- aux$asx_tr[[h]] * p$k_w * kc_tr$K0
+      gx_tr  <- aux$asx_tr[[h]] * p$k_w * aux$k_w_fac[[h]] * kc_tr$K0
       a_as_t <- ccx_alpha_as(sst_tr_t, aux)
       add_flux(iatm, itr, gx_tr * pco2_at, alpha13 = a_as_t$down,
                alpha13_signed = TRUE)                                  # invasion
@@ -3829,6 +3845,19 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   kgthc <- if (is.null(p[["k_gthc"]])) grid$nl else as.integer(p[["k_gthc"]])
   if (gthc_on && (!is.finite(kgthc) || kgthc < 1L || kgthc > grid$nl))
     stop("k_gthc must be an interior layer in 1..", grid$nl, " (the SH return layer); got ", format(p[["k_gthc"]]))
+  ufS <- if (is.null(p[["u_hs_fac_SH"]])) 1 else p[["u_hs_fac_SH"]]
+  if (!is.finite(ufS) || ufS <= 0)
+    stop("u_hs_fac_SH must be a finite positive factor on the SH cold box's exchange; got ", format(p[["u_hs_fac_SH"]]))
+  tqS <- if (is.null(p[["tau_q_fac_SH"]])) 1 else p[["tau_q_fac_SH"]]
+  if (!is.finite(tqS) || tqS <= 0)
+    stop("tau_q_fac_SH must be a finite positive factor on the SH deep box's interior exchange; got ", format(p[["tau_q_fac_SH"]]))
+  pfS <- if (is.null(p[["pump_hs_fac_SH"]])) 1 else p[["pump_hs_fac_SH"]]
+  if (!is.finite(pfS) || pfS < 0)
+    stop("pump_hs_fac_SH must be a finite non-negative factor on the SH cold box's export; got ", format(p[["pump_hs_fac_SH"]]))
+  kwS <- if (is.null(p[["k_w_fac_SH"]])) 1 else p[["k_w_fac_SH"]]
+  kwH <- if (is.null(p[["k_w_fac_hs"]])) 1 else p[["k_w_fac_hs"]]
+  if (!is.finite(kwS) || kwS <= 0 || !is.finite(kwH) || kwH <= 0)
+    stop("k_w_fac_SH / k_w_fac_hs must be finite positive gas-exchange factors; got ", format(p[["k_w_fac_SH"]]), " / ", format(p[["k_w_fac_hs"]]))
   kgnh <- if (is.null(p[["kn_gthc"]])) 0L else as.integer(p[["kn_gthc"]])
   if (gthc_on && (!is.finite(kgnh) || kgnh < 0L || kgnh > grid$nl))
     stop("kn_gthc must be 0 (the ML feeds HS_NH) or an interior layer in 1..", grid$nl, " (the NH subduction layer); got ", format(p[["kn_gthc"]]))
@@ -4112,6 +4141,10 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     gthc_on     = as.integer(gthc_on),
     k_gthc      = if (gthc_on) kgthc else grid$nl,
     kn_gthc   = if (gthc_on) kgnh else 0L,       # T2: the NH subduction layer; 0 = the ML feeds HS directly
+    u_hs_fac_SH = ufS,                             # the SH cold box's own ventilation factor (2026-09-21 c); 1 = symmetric
+    tau_q_fac_SH = tqS,                            # the SH deep box's own interior-exchange factor (2026-09-21 c); 1 = symmetric
+    k_w_fac     = list(NH = 1, SH = kwS),          # the hemispheres' gas-exchange factors (2026-09-21 c)
+    k_w_fac_hs  = kwH,                             # the cold boxes' extra factor
     # ---- THE LAYER-2 NINO3.4 LIMB (2026-09-17 k) --------------------------
     # Unconditional, zero-filled when off: `l2_on` gates the limb on BOTH cores;
     # `k_l2` the return layer (1-based); `w0_l2` the floor's mean; `l2_share`
@@ -4258,8 +4291,11 @@ ccx_pump_export_hs <- function(p, aux, grid) {
     stop("pump_hs_gcm2 must be a finite non-negative export in gC m-2 yr-1; got ", format(p$pump_hs_gcm2))
   if (!isTRUE(g > 0) || aux$hs_on != 1L) return(NULL)
   fc <- p$pump_carb_frac
+  fS <- if (is.null(p$pump_hs_fac_SH)) 1 else p$pump_hs_fac_SH   # the SH cold box's own export factor (2026-09-21 c); 1 = bit-exact
+  if (!is.finite(fS) || fS < 0)
+    stop("pump_hs_fac_SH must be a finite non-negative factor on the SH cold box's export; got ", format(p$pump_hs_fac_SH))
   out <- lapply(HEMIS, function(h) {
-    E <- g * aux$a_hs[[h]] / 1e15                                   # gC/m2/yr * m2 -> GtC/yr
+    E <- g * (if (h == "SH") fS else 1) * aux$a_hs[[h]] / 1e15   # gC/m2/yr * m2 -> GtC/yr
     list(org = E * (1 - fc), carb = E * fc)
   })
   names(out) <- HEMIS
