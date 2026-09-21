@@ -204,6 +204,7 @@ struct Aux {
   double u_hs_fac_SH;        // the SH cold box's own ventilation factor (2026-09-21 c); 1 = symmetric
   double tau_q_fac_SH;       // likewise on the SH HD <-> interior exchange (tau_q / fac)
   double k_w_fac[2], k_w_fac_hs;   // the hemispheres' and the cold boxes' gas-exchange factors (2026-09-21 c)
+  double h_ml_fac[2];              // the hemispheres' mean-ML-thickness factors (2026-09-21 d); folded into mld_eval
   double h_tr, sst_tr, sst_tr_enso, alk_tr, dic0_tr, revelle0_tr;
   double ml_pump_share[2], tr_C0[2];   // choice D2: the ML's share of the LS export; tr's PI carbon
   double kz_tr;                        // the tr / layer-1 interface's K (R6); 0 = none
@@ -449,7 +450,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   // Periodic with period 1, so `t` is used directly: no modulo, which would put
   // a kink at the new year.
   auto mld_eval = [&](int hi, double tt, double *f, double *dfdt) {
-    double sf = 1.0, sd = 0.0;                       // a0 = 1 by construction
+    double sf = 1.0, sd = 0.0;                       // a0 = 1 by construction; the mean factor A.h_ml_fac is applied at the USE sites, R's association
     for (int k = 1; k <= 6; ++k) {
       const double ang = 2.0 * M_PI * k * tt;
       const double ca = std::cos(ang), sa = std::sin(ang);
@@ -535,8 +536,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     if (A.seas_ml != 0 && P.seas_ml_on != 0) {
       double f, dfdt;
       mld_eval(hi, t, &f, &dfdt);
-      h_ml_t   = A.dz[0] * f;            // m, mean-preserving by construction
-      dh_ml_dt = A.dz[0] * dfdt;         // m/yr, > 0 deepening
+      h_ml_t   = A.dz[0] * A.h_ml_fac[hi] * f;      // m, mean-preserving by construction (about h_ml x factor; 2026-09-21 d)
+      dh_ml_dt = A.dz[0] * A.h_ml_fac[hi] * dfdt;   // m/yr, > 0 deepening
       // layer 1 absorbs the excursion -- as a VOLUME under the equatorial
       // cell (D1, 2026-09-13g): share = a_ml / a_ls; twin of R's
       // ccx_grid_at_h_ml(share), which carries why this is a correctness term
@@ -546,7 +547,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       // dz[0] + dz[1] is conserved, so dz_mid[0] is INVARIANT; only dz_mid[1]
       // moves. Recomputed in full rather than patched, so it cannot drift.
       for (int i = 0; i < NL; ++i) dzml[i] = (dzl[i] + dzl[i + 1]) / 2.0;
-      ml_mass = A.ml_mass_kg[hi] * f;    // mass tracks thickness
+      ml_mass = A.ml_mass_kg[hi] * A.h_ml_fac[hi] * f;    // mass tracks thickness (x the mean factor, R's association)
     }
 
     const double chi = y[IX(iatm, C)] / A.gtc_per_ppm_hemi;
@@ -1171,7 +1172,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // WRONG hemisphere's anyway: this needs the UP hemisphere's own mixed-layer
     // thickness at time t. Twin of the .h_up branch in R/model.R.
     double h_up_ml = A.dz[0];
-    if (A.seas_ml != 0 && P.seas_ml_on != 0) { double f, d_; mld_eval(h_up, t, &f, &d_); h_up_ml = A.dz[0] * f; }
+    if (A.seas_ml != 0 && P.seas_ml_on != 0) { double f, d_; mld_eval(h_up, t, &f, &d_); h_up_ml = A.dz[0] * A.h_ml_fac[h_up] * f; }
     add_flux(deep_dn, deep_up,
              Q * y[IX(deep_dn, C)] / (A.a_oc[h_down] * A.dz[s_sink]), 1.0);
     const int ml_dn = h_down * NPH + IML;
@@ -1191,7 +1192,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       const int ibN = IML + NL, ibS = NPH + IML + NL;
       add_flux(ibN, ibS, W * y[IX(ibN, C)] / (A.a_ls[0] * A.dz[NL]), 1.0);            // (4) the deep limb
       double h_S = A.dz[0];
-      if (A.seas_ml != 0 && P.seas_ml_on != 0) { double f, d_; mld_eval(1, t, &f, &d_); h_S = A.dz[0] * f; }
+      if (A.seas_ml != 0 && P.seas_ml_on != 0) { double f, d_; mld_eval(1, t, &f, &d_); h_S = A.dz[0] * A.h_ml_fac[1] * f; }
       const int imS = NPH + IML, imN = IML;
       add_flux(imS, imN, W * y[IX(imS, C)] / (A.a_ml[1] * h_S), 1.0);                 // (7) the surface limb
     }
@@ -1317,6 +1318,7 @@ static Aux unpack_aux(const List& a) {
   A.u_hs_fac_SH = a["u_hs_fac_SH"];                            // 2026-09-21 c
   A.tau_q_fac_SH = a["tau_q_fac_SH"];
   v = a["k_w_fac"]; A.k_w_fac[0] = v[0]; A.k_w_fac[1] = v[1]; A.k_w_fac_hs = a["k_w_fac_hs"];
+  v = a["h_ml_fac"]; A.h_ml_fac[0] = v[0]; A.h_ml_fac[1] = v[1];                                   // 2026-09-21 d
   A.l2_on = a["l2_on"]; A.k_l2 = a["k_l2"]; A.w0_l2 = a["w0_l2"];   // the layer-2 Nino3.4 limb (2026-09-17 k)
   v = a["l2_share"];  A.l2_share[0] = v[0];  A.l2_share[1] = v[1];
   return A;

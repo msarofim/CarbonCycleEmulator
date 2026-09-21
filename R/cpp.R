@@ -150,6 +150,7 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     tau_q_fac_SH = if (is.null(aux$tau_q_fac_SH)) 1 else as.numeric(aux$tau_q_fac_SH),
     k_w_fac = if (is.null(aux$k_w_fac)) c(1, 1) else c(aux$k_w_fac$NH, aux$k_w_fac$SH),
     k_w_fac_hs = if (is.null(aux$k_w_fac_hs)) 1 else as.numeric(aux$k_w_fac_hs),
+    h_ml_fac = if (is.null(aux$h_ml_fac)) c(1, 1) else c(aux$h_ml_fac$NH, aux$h_ml_fac$SH),   # 2026-09-21 d
     # THE LAYER-2 NINO3.4 LIMB (2026-09-17 k). Same contract.
     l2_on = if (is.null(aux$l2_on))
       stop("aux lacks l2_on -- build it with ccx_prepare() (2026-09-17 k)") else as.integer(aux$l2_on),

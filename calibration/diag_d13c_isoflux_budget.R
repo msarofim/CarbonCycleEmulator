@@ -28,11 +28,18 @@ IB_GAIN  <- 0.00105            # permil per GtC-permil/yr, MEASURED 09-20 s (d13
 IB_NEED  <- 0.0668 / IB_GAIN   # the offset's isoflux requirement
 IB_CLASSES <- c("fossil", "land_in", "land_out", "ocean_in", "ocean_out", "exchange")
 sink_log <- file(paste0(IB_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE); on.exit({ sink(); close(sink_log) }, add = TRUE)
-can <- dg_vector(CCX_MODE_CANONICAL); sp <- dg_spinup(can)
+can <- dg_vector(CCX_MODE_CANONICAL)
+# 2026-09-21 d (scoping 09-21 c, option A's second scan): an optional SH gas-exchange factor on the canonical's vector,
+# IB_KW_FAC_SH (NCEP wind^2 says 1.14); the output name carries it so the canonical's own budget is never overwritten.
+IB_KW_FAC_SH <- as.numeric(Sys.getenv("IB_KW_FAC_SH", "1"))
+if (IB_KW_FAC_SH != 1) { can$p$k_w_fac_SH <- IB_KW_FAC_SH; IB_OUT <- sprintf("%s_kwSH%g", IB_OUT, IB_KW_FAC_SH); sink(); close(sink_log)
+  sink_log <- file(paste0(IB_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE) }
+sp <- dg_spinup(can)
 F <- withCallingHandlers(ccx_build_forcing("historical", DG_YEARS, prod_c14 = sp$prod_c14, bomb_total_kmol = can$bomb_total, luc_scale = can$luc_scale),
                          warning = function(w) if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning"))
-cat(sprintf("THE ATMOSPHERE'S HEMISPHERIC 13C BUDGET at %s  %s\n  %s\n  window %d-%d; gain %.5f; the offset needs %+.0f GtC-permil/yr\n",
-            CCX_MODE_CANONICAL, format(Sys.time()), can$src, IB_WIN[1], IB_WIN[2], IB_GAIN, IB_NEED))
+cat(sprintf("THE ATMOSPHERE'S HEMISPHERIC 13C BUDGET at %s  %s\n  %s\n  window %d-%d; gain %.5f; the offset needs %+.0f GtC-permil/yr%s\n",
+            CCX_MODE_CANONICAL, format(Sys.time()), can$src, IB_WIN[1], IB_WIN[2], IB_GAIN, IB_NEED,
+            if (IB_KW_FAC_SH != 1) sprintf("\n  ** k_w_fac_SH = %g on the canonical's vector (option A scan, 09-21 d) **", IB_KW_FAC_SH) else ""))
 aux <- sp$aux; nb <- nrow(sp$y); cls <- ccx_flux_boxclass(aux, nb); R13 <- ccx_const("R13_VPDB")
 atm <- c(NH = aux$idx$NH$atm, SH = aux$idx$SH$atm)
 hook <- function(fl, y, t) {

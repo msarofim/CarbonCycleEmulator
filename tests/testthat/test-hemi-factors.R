@@ -7,7 +7,7 @@
 # vs 1 bit-exact on spinup / deriv / run_fast + the canonical's streams; guards by
 # name; R / C++ parity with every factor off 1; each factor MOVES the state.
 # =====================================================================
-HF_NAMES <- c("u_hs_fac_SH", "tau_q_fac_SH", "pump_hs_fac_SH", "k_w_fac_SH", "k_w_fac_hs")
+HF_NAMES <- c("u_hs_fac_SH", "tau_q_fac_SH", "pump_hs_fac_SH", "k_w_fac_SH", "k_w_fac_hs", "h_ml_fac_NH")   # + the NH mean-ML factor (09-21 d)
 hf_par <- function() { p <- ccx_apply_structure(ccx_default_params(), "hilda", seas_ml = 1); p$pump_hs_gcm2 <- 50; p }   # the HS pump ON, so its SH factor is live
 
 test_that("the factors ship at 1, absent = 1 is BIT-EXACT, the canonical's streams reproduce", {
@@ -33,9 +33,11 @@ test_that("the factors ship at 1, absent = 1 is BIT-EXACT, the canonical's strea
 test_that("guards by name; every factor moves the state; R / C++ parity with all five off 1", {
   p <- hf_par()
   for (n in HF_NAMES) { q <- p; q[[n]] <- -1; expect_error(ccx_prepare(q), n); q[[n]] <- NA_real_; expect_error(ccx_prepare(q), n) }
-  for (n in c("u_hs_fac_SH", "tau_q_fac_SH", "k_w_fac_SH", "k_w_fac_hs")) { q <- p; q[[n]] <- 0; expect_error(ccx_prepare(q), n) }
+  for (n in c("u_hs_fac_SH", "tau_q_fac_SH", "k_w_fac_SH", "k_w_fac_hs", "h_ml_fac_NH")) { q <- p; q[[n]] <- 0; expect_error(ccx_prepare(q), n) }
+  q <- p; q$h_ml_fac_NH <- 3;  expect_error(ccx_prepare(q), "layer 1")              # the seasonal guard, with the factor
+  q <- ccx_apply_structure(ccx_default_params(), "hilda", seas_ml = 0); q$h_ml_fac_NH <- 1.05; expect_error(ccx_prepare(q), "seas_ml")
   a <- ccx_spinup(p)
-  for (n in HF_NAMES) { q <- p; q[[n]] <- if (n == "pump_hs_fac_SH") 0.25 else 3
+  for (n in HF_NAMES) { q <- p; q[[n]] <- if (n == "pump_hs_fac_SH") 0.25 else if (n == "h_ml_fac_NH") 1.1 else 3
     expect_gt(max(abs(ccx_spinup(q)$y[, "C"] - a$y[, "C"])), 1e-4, label = n) }
   # the SH-only factors leave the NH cold box's PI state untouched only through the atmosphere (a second-order coupling):
   # the NH HS moves by far less than the SH HS under u_hs_fac_SH
@@ -43,7 +45,7 @@ test_that("guards by name; every factor moves the state; R / C++ parity with all
   expect_gt(abs(sq$y[ix$SH$hs, "C13"] / sq$y[ix$SH$hs, "C"] - a$y[ix$SH$hs, "C13"] / a$y[ix$SH$hs, "C"]),
             5 * abs(sq$y[ix$NH$hs, "C13"] / sq$y[ix$NH$hs, "C"] - a$y[ix$NH$hs, "C13"] / a$y[ix$NH$hs, "C"]))
   skip_if_no_cpp()
-  q <- p; q$u_hs_fac_SH <- 3; q$tau_q_fac_SH <- 2; q$pump_hs_fac_SH <- 0.4; q$k_w_fac_SH <- 1.3; q$k_w_fac_hs <- 2.5
+  q <- p; q$u_hs_fac_SH <- 3; q$tau_q_fac_SH <- 2; q$pump_hs_fac_SH <- 0.4; q$k_w_fac_SH <- 1.3; q$k_w_fac_hs <- 2.5; q$h_ml_fac_NH <- 1.1
   sp <- ccx_spinup(q)
   F <- suppressWarnings(ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14))
   for (i in c(1L, 7L)) { fr <- ccx_forcing_at(F, i)

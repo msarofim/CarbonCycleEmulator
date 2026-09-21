@@ -1624,6 +1624,11 @@ ccx_default_params <- function() {
                           #   data/obs_hemi_diseq.rds band_weights: SH/NH 1.14); 1 = symmetric
     k_w_fac_hs = 1,       # the COLD boxes' k_w relative to the warm ML's (HILDA assumed g_h = g_l;
                           #   NCEP wind^2 says ~3.3x); applies to BOTH hemispheres; 1 = HILDA
+    h_ml_fac_NH = 1,      # the NH mixed layer's ANNUAL-MEAN thickness relative to h_ml (the SH's
+                          #   stays h_ml): the option-A scan of scoping 09-21 c -- a longer isotopic
+                          #   memory for the NH surface. Rides on the seasonal-ML path (seas_ml on
+                          #   required when != 1; layer 1 absorbs the extra thickness as it absorbs
+                          #   the seasonal excursion). 1 = bit-exact.
     # ---- THE LAYER-2 NINO3.4 LIMB (review avenue 1, 2026-09-17 k) ----------
     # The ANOMALY of an equatorial-upwelling exchange between the low-latitude
     # mixed layer and interior layer k_l2, T-A2's geometry with the cell's floor:
@@ -2224,8 +2229,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # bit-identical to the pre-round-6 model.
     if (ccx_seas_ml_ls_on(p)) {
       .ev      <- ccx_mld_eval(aux$mld_coef[[h]], t)
-      h_ml_t   <- grid$h_ml * .ev$f            # m, mean-preserving by construction
-      dh_ml_dt <- grid$h_ml * .ev$dfdt         # m/yr, > 0 deepening
+      .fh      <- aux$h_ml_fac[[h]]            # the hemisphere's mean-thickness factor (2026-09-21 d); 1 = bit-exact
+      h_ml_t   <- grid$h_ml * .fh * .ev$f      # m, mean-preserving by construction (about h_ml x factor)
+      dh_ml_dt <- grid$h_ml * .fh * .ev$dfdt   # m/yr, > 0 deepening
       # Under the equatorial cell OR the tropical box (D1: a_ml = a_ls - a_eq
       # - a_tr) layer 1 absorbs the ML's excursion as a VOLUME over its larger
       # area: share = a_ml / a_ls (see the helper). Gated on `d1_on`, the SAME
@@ -2239,7 +2245,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       # (Under the cell dz_1 moves by share x the excursion and dz_mid[1] by
       # (1 - share)/2 of it -- the geometric centre distance for the ML-area part.)
       dzm      <- (gr$dz[-length(gr$dz)] + gr$dz[-1]) / 2
-      ml_mass  <- aux$ml_mass_kg[[h]] * .ev$f  # mass tracks thickness
+      ml_mass  <- aux$ml_mass_kg[[h]] * .fh * .ev$f  # mass tracks thickness
     } else {
       h_ml_t <- grid$h_ml; dh_ml_dt <- 0
       gr <- grid; dzm <- aux$dz_mid; ml_mass <- aux$ml_mass_kg[[h]]
@@ -3449,7 +3455,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # needs the UP hemisphere's own mixed-layer thickness at time t, which is
     # not the one the loop last held.
     .h_up <- if (ccx_seas_ml_ls_on(p))
-               grid$h_ml * ccx_mld_eval(aux$mld_coef[[cg$up]], t)$f else grid$dz[1]
+               grid$h_ml * aux$h_ml_fac[[cg$up]] * ccx_mld_eval(aux$mld_coef[[cg$up]], t)$f else grid$dz[1]
     add_flux(aux$idx[[cg$up]]$ml, aux$idx[[cg$down]]$ml,
              cg$Q * y[aux$idx[[cg$up]]$ml, "C"] / (aux$a_oc[[cg$up]] * .h_up))
   }
@@ -3471,7 +3477,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       ibN <- aux$idx$NH$oc[grid$nl]; ibS <- aux$idx$SH$oc[grid$nl]
       add_flux(ibN, ibS, W * y[ibN, "C"] / (aux$a_ls$NH * grid$dz[grid$nl + 1L]), lab = "gthc_ih")   # (4) the deep limb
       .h_S <- if (ccx_seas_ml_ls_on(p))
-                grid$h_ml * ccx_mld_eval(aux$mld_coef$SH, t)$f else grid$dz[1]
+                grid$h_ml * aux$h_ml_fac$SH * ccx_mld_eval(aux$mld_coef$SH, t)$f else grid$dz[1]
       imS <- aux$idx$SH$ml; imN <- aux$idx$NH$ml
       add_flux(imS, imN, W * y[imS, "C"] / (aux$a_ml$SH * .h_S), lab = "gthc_ih")                    # (7) the surface limb
     }
@@ -3854,6 +3860,17 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   pfS <- if (is.null(p[["pump_hs_fac_SH"]])) 1 else p[["pump_hs_fac_SH"]]
   if (!is.finite(pfS) || pfS < 0)
     stop("pump_hs_fac_SH must be a finite non-negative factor on the SH cold box's export; got ", format(p[["pump_hs_fac_SH"]]))
+  hfN <- if (is.null(p[["h_ml_fac_NH"]])) 1 else p[["h_ml_fac_NH"]]
+  if (!is.finite(hfN) || hfN <= 0)
+    stop("h_ml_fac_NH must be a finite positive factor on the NH mixed layer's mean thickness; got ", format(p[["h_ml_fac_NH"]]))
+  if (hfN != 1 && !ccx_seas_ml_ls_on(p))
+    stop("h_ml_fac_NH != 1 needs the seasonal mixed layer ON (seas_ml 1): the factor rides on that path")
+  if (hfN != 1) {   # the seasonal guard, with the factor: layer 1 must still absorb the NH winter excursion
+    co <- ccx_mld_shape("ls"); base <- cumsum(grid$dz)[2]
+    if (grid$h_ml * hfN * co$NH$f_max >= base)
+      stop(sprintf("h_ml_fac_NH %.3f: the NH winter mixed layer would reach %.1f m (h_ml %.2f x fac x f_max %.3f) but layer 1's base is at %.1f m",
+                   hfN, grid$h_ml * hfN * co$NH$f_max, grid$h_ml, co$NH$f_max, base))
+  }
   kwS <- if (is.null(p[["k_w_fac_SH"]])) 1 else p[["k_w_fac_SH"]]
   kwH <- if (is.null(p[["k_w_fac_hs"]])) 1 else p[["k_w_fac_hs"]]
   if (!is.finite(kwS) || kwS <= 0 || !is.finite(kwH) || kwH <= 0)
@@ -4144,6 +4161,7 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     u_hs_fac_SH = ufS,                             # the SH cold box's own ventilation factor (2026-09-21 c); 1 = symmetric
     tau_q_fac_SH = tqS,                            # the SH deep box's own interior-exchange factor (2026-09-21 c); 1 = symmetric
     k_w_fac     = list(NH = 1, SH = kwS),          # the hemispheres' gas-exchange factors (2026-09-21 c)
+    h_ml_fac    = list(NH = hfN, SH = 1),          # the hemispheres' mean-ML-thickness factors (2026-09-21 d)
     k_w_fac_hs  = kwH,                             # the cold boxes' extra factor
     # ---- THE LAYER-2 NINO3.4 LIMB (2026-09-17 k) --------------------------
     # Unconditional, zero-filled when off: `l2_on` gates the limb on BOTH cores;
