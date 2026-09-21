@@ -107,3 +107,19 @@ test_that("the layer-2 limb's arm: the canonical / the control under hilda_cl2 a
   r8c <- ccx_ms_reference_set(ms_cp, "1", struct = "hilda_cl2")
   expect_identical(r8c$incumbent, CCX_MODE_CANONICAL)
 })
+
+test_that("(9) the FREE PARENT of the limb canonical (2026-09-21 g): the six inert pins only, under a structure WITH the limb at seas_ml 1 -> the canonical / the control; refused without the limb and at seas_ml 0", {
+  fp <- CCX_MODE_FREE_PARENT_PINS
+  expect_setequal(names(fp), setdiff(names(CCX_MODE_CONTROL_PINS), "w_enso_l2"))           # the control's minus the limb's name
+  expect_setequal(names(fp), setdiff(names(CCX_MODE_CANONICAL_PINS), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH")))   # the canonical's minus its three real pins
+  expect_equal(unname(fp), unname(CCX_MODE_CANONICAL_PINS[names(fp)]))
+  r9 <- ccx_ms_reference_set(fp, "1", struct = "hilda_csl3")
+  expect_identical(r9$incumbent, CCX_MODE_CANONICAL); expect_identical(r9$new_basin, CCX_MODE_SEASML0_CONTROL)
+  expect_match(r9$why, "FREE PARENT")
+  # MUTATION: without the limb it is not this parent; at seas_ml 0 it is not a ruled arm
+  expect_error(ccx_ms_reference_set(fp, "1", struct = "hilda_cs"), "no layer-2 limb")
+  expect_error(ccx_ms_reference_set(fp, "0", struct = "hilda_csl3"), "seas_ml 0 is not a ruled arm")
+  # MUTATION: one inert pin moved is a foreign set
+  moved <- fp; moved[["w_eq"]] <- 30
+  expect_error(ccx_ms_reference_set(moved, "1", struct = "hilda_csl3"), "no registered incumbent")
+})

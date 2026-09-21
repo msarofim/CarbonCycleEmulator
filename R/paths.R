@@ -315,6 +315,15 @@ CCX_MODE_PINNED_PARENT   <- "hilda31s2"
 # CCX_MODE_CONTROL lived here for a morning on 09-17 j.)
 CCX_MODE_CONTROL_PINS    <- c(w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0,
                               w_enso_l2 = 0)     # hilda31pe's file: the six inert + the limb's name held OFF; shim and pair FREE
+# THE FREE PARENT OF THE LIMB CANONICAL (2026-09-21 g; Marcus: "follow the recommendations" --
+# the stale-parent red). hilda29l holds NINE pins; its free parent is hilda29l's OWN structure
+# (hilda_csl3, seas_ml 1) with only the SIX INERT names held -- the seasonal shim, the ocean ENSO
+# pair AND the limb's w_enso_l2 all FITTED (31 names). It prices the canonical's three real pins
+# under the live structure and objective, which the registered parent hilda31s2 (a `hilda` fit,
+# never refit under hilda_c / #13) cannot. Reference set: incumbent the canonical (its three
+# held names seeded from the table init, as the csl3 wave seeded w_enso_l2), new basin the
+# control (w_enso_l2 seeded). ONLY under a structure WITH the limb at seas_ml 1.
+CCX_MODE_FREE_PARENT_PINS <- c(w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0)
 # THE LAYER-2 LIMB'S ARM (2026-09-17 k, prereg notes/prereg_2026-09-17k_l2_enso_limb_refit.md
 # s4 PA): the canonical's 7 pins PLUS the ocean ENSO shim `gamma_enso_ocn_NH/SH` held at 0
 # (29 free + w_enso_l2 = 29 fitted names), under a structure WITH the limb (k_l2 > 0:

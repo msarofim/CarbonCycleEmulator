@@ -2259,6 +2259,20 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
            "seasonal mixed layer); seas_ml ", seas_ml, " is not a ruled arm.")
     list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the canonical with the shim pinned OFF and the layer-2 limb's w_enso_l2 in its place")
+  } else if (same(pins, CCX_MODE_FREE_PARENT_PINS)) {
+    # THE FREE PARENT OF THE LIMB CANONICAL (2026-09-21 g): the six inert names only -- the
+    # shim, the ocean ENSO pair and the limb's w_enso_l2 all fitted. Only where the limb
+    # exists (else w_enso_l2 would be a free name the structure never reads -- the inert
+    # refusal below would fire anyway; said here by name) and at seas_ml 1 (the canonical's).
+    bp <- ccx_apply_structure(ccx_default_params(), struct, seas_ml = "0", pump_field = pump_field)
+    if (!ccx_l2_on(bp))
+      stop("ccx_ms_reference_set(): the free-parent pins '", ccx_pin_label(pins), "' under struct '", struct,
+           "' (k_l2 = 0, no layer-2 limb): that is not the limb canonical's parent. Use its structure (\"hilda_csl3\").")
+    if (seas_ml != 1L)
+      stop("ccx_ms_reference_set(): the limb canonical's free parent is at seas_ml 1 (the canonical's ",
+           "seasonal mixed layer); seas_ml ", seas_ml, " is not a ruled arm.")
+    list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
+         why = "the FREE PARENT of the limb canonical: its structure, the six inert pins only, shim / pair / limb all fitted")
   } else stop("ccx_ms_reference_set(): no registered incumbent for pins '", ccx_pin_label(pins),
               "' at seas_ml ", seas_ml, " (the canonical's are '", ccx_pin_label(CCX_MODE_CANONICAL_PINS),
               "', the control's '", ccx_pin_label(CCX_MODE_CONTROL_PINS),
