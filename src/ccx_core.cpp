@@ -200,6 +200,7 @@ struct Aux {
   // THE GLOBAL THERMOHALINE LOOP (2026-09-20 v): gthc_on gates it; k_gthc the
   // SH return layer, 1-BASED as in R (NL = the bottom).
   int    gthc_on, k_gthc;
+  int    kn_gthc;          // T2 (2026-09-21 b): the NH subduction layer; 0 = the ML feeds HS_NH
   double h_tr, sst_tr, sst_tr_enso, alk_tr, dic0_tr, revelle0_tr;
   double ml_pump_share[2], tr_C0[2];   // choice D2: the ML's share of the LS export; tr's PI carbon
   double kz_tr;                        // the tr / layer-1 interface's K (R6); 0 = none
@@ -1094,7 +1095,14 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       if (W > 0.0) {
         const int ihs = base + IHS, ihd = base + IHD, kg = A.k_gthc;
         if (hi == 0) {
-          add_flux(iml, ihs, W * y[IX(iml, C)] / (A.a_ml[hi] * dzl[0]), 1.0);              // (1) poleward
+          const int kn = A.kn_gthc;
+          if (kn == 0) {
+            add_flux(iml, ihs, W * y[IX(iml, C)] / (A.a_ml[hi] * dzl[0]), 1.0);            // (1) poleward, from the ML
+          } else {                                                                         // T2: via aged interior water
+            const int ik = base + IML + kn;
+            add_flux(iml, ik, W * y[IX(iml, C)] / (A.a_ml[hi] * dzl[0]), 1.0);             // (1a) subduction into layer k
+            add_flux(ik, ihs, W * y[IX(ik, C)] / (A.a_ls[hi] * dzl[kn]), 1.0);             // (1b) layer k -> the cold box
+          }
           add_flux(ihs, ihd, W * y[IX(ihs, C)] / (A.a_hs[hi] * A.h_hs), 1.0);              // (2) NADW formation
           add_flux(ihd, base + IML + NL, W * y[IX(ihd, C)] / (A.a_hs[hi] * A.dz_hd), 1.0); // (3) the abyss
         } else {
@@ -1300,6 +1308,7 @@ static Aux unpack_aux(const List& a) {
   A.thc_on = a["thc_on"]; A.k_thc = a["k_thc"];                    // the HS-route deep return (2026-09-15 d)
   v = a["thc_share"]; A.thc_share[0] = v[0]; A.thc_share[1] = v[1];
   A.gthc_on = a["gthc_on"]; A.k_gthc = a["k_gthc"];                // the global thermohaline loop (2026-09-20 v)
+  A.kn_gthc = a["kn_gthc"];                                    // T2 (2026-09-21 b)
   A.l2_on = a["l2_on"]; A.k_l2 = a["k_l2"]; A.w0_l2 = a["w0_l2"];   // the layer-2 Nino3.4 limb (2026-09-17 k)
   v = a["l2_share"];  A.l2_share[0] = v[0];  A.l2_share[1] = v[1];
   return A;

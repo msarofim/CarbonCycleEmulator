@@ -58,7 +58,7 @@ test_that("the names ship OFF and STRUCTURAL; no name prefixes another; the cano
   expect_false("w_gthc" %in% CCX_PARAM_NAMES)                   # structural for the probe (prereg §2)
   expect_true("gthc_ih" %in% names(CCX_FLUX_CHANNELS))
   nm <- c(names(ccx_default_params()), CCX_PARAM_NAMES, names(ccx_prepare(p)))
-  for (new in c("w_gthc", "k_gthc", "gthc_on")) {
+  for (new in c("w_gthc", "k_gthc", "kn_gthc", "gthc_on")) {   # kn_gthc, not k_gthc_nh: a prefix of k_gthc would partial-match through `$` (the 09-19 m seas_ml trap)
     others <- setdiff(unique(nm), new)
     expect_false(any(startsWith(others, new)), info = new)
     expect_false(any(startsWith(new, others)), info = new)
@@ -210,4 +210,70 @@ test_that("P0f, THE MUTATION THAT MATTERS: with the loop on, the SH cold box's a
   # box) into HS_NH. Whether the NH box holds at the CANONICAL is prereg P1's question, read by the probe -- not
   # asserted here, where the structure is uncalibrated. What IS asserted: the loop is not a symmetric no-op.
   expect_gt(abs(d15[["NH"]] - d0[["NH"]]) + abs(d15[["SH"]] - d0[["SH"]]), 0.2)
+})
+
+# ---- T2 (2026-09-21 b, prereg s5): the NH sink fed from an aged interior layer, kn_gthc ----
+test_that("T2: kn_gthc = 0 is the (v) loop BIT-EXACT; the switch ships 0; guards by name; the eigbound gains layer k", {
+  p <- gthc_par(seas_ml = 1, w = 15, k = 10L)
+  expect_identical(ccx_default_params()$kn_gthc, 0L)
+  q <- p; q$kn_gthc <- NULL
+  a <- ccx_spinup(p); b <- ccx_spinup(q)
+  expect_identical(a$y, b$y); expect_identical(a$aux$kn_gthc, 0L)
+  F0 <- zero_forc_g(a$prod_c14, enso = 0.4)
+  expect_identical(ccx_deriv(a$y, 1900.2, q, F0, b$grid, b$aux), ccx_deriv(a$y, 1900.2, p, F0, a$grid, a$aux))
+  q <- p; q$kn_gthc <- 11L;  expect_error(ccx_prepare(q), "kn_gthc")
+  q <- p; q$kn_gthc <- -1L;  expect_error(ccx_prepare(q), "kn_gthc")
+  q <- p; q$kn_gthc <- 3L
+  expect_gt(ccx_gthc_eigbound(q, a$grid), 0); expect_gte(ccx_gthc_eigbound(q, a$grid), ccx_gthc_eigbound(p, a$grid))
+  # the switch is load-bearing: k_nh 3 and 0 give different equilibria
+  expect_gt(max(abs(ccx_spinup(q)$y[, "C"] - a$y[, "C"])), 1e-3)
+  skip_if_no_cpp()
+  F <- suppressWarnings(ccx_build_forcing("historical", c(1900, 1902), prod_c14 = a$prod_c14))
+  ra <- ccx_run_fast(a, F); rb <- ccx_run_fast(b, F)
+  expect_identical(ra$state, rb$state); expect_identical(ra$out, rb$out)
+})
+
+test_that("T2: P0c fixed point + P0e volume at k_nh in {1, 3, 6, 10}, both cores; POWER: layer k richer moves HS_NH and nothing else", {
+  p <- isolate_transport_g(gthc_par(seas_ml = 0, w = 25, k = 10L))
+  for (kn in c(1L, 3L, 6L, 10L)) {
+    p$kn_gthc <- kn; sp <- prep_g(p); y <- uniform_ocean_g(sp); oc <- ocean_rows_g(sp$aux)
+    d <- ccx_deriv(y, 1750.25, p, zero_forc_g(0), sp$grid, sp$aux)
+    expect_lt(max(abs(d[oc, "C"])), 1e-12); expect_lt(max(abs(d[oc, "C13"])), 1e-12)
+    if (requireNamespace("Rcpp", quietly = TRUE)) {
+      ok <- tryCatch({ ccx_load_cpp(); TRUE }, error = function(e) FALSE)
+      if (ok) { dC <- ccx_deriv_fast(y, 1750.25, p, zero_forc_g(0), sp$grid, sp$aux)
+                expect_lt(max(abs(dC[oc, "C"])), 1e-12); expect_lt(max(abs(dC - d)), 1e-14) }
+    }
+  }
+  p$kn_gthc <- 3L; p$kz <- 0; sp <- prep_g(p); y <- uniform_ocean_g(sp); y2 <- y   # kz 0: layer 3's diffusive neighbours would otherwise share the excess
+  ik <- sp$aux$idx$NH$oc[3]; ihs <- sp$aux$idx$NH$hs
+  y2[ik, ] <- y2[ik, ] * 1.1
+  d2 <- ccx_deriv(y2, 1750.25, p, zero_forc_g(0), sp$grid, sp$aux)
+  expect_lt(abs(d2[ihs, "C"] + d2[ik, "C"]), 1e-12); expect_gt(d2[ihs, "C"], 0)   # HS_NH gains what layer k loses through (1b)
+  expect_lt(abs(d2[sp$aux$idx$NH$ml, "C"]), 1e-12)                                # the ML's legs are all at uniform conc
+})
+
+test_that("T2: P0b conservation and P0d parity with k_nh = 3 and 6, both seasonal states", {
+  skip_if_no_cpp()
+  for (seas in c(0, 1)) for (kn in c(3L, 6L)) {
+    p <- gthc_par(seas_ml = seas, w = 15, k = 10L); p$kn_gthc <- kn
+    sp <- ccx_spinup(p)
+    F  <- suppressWarnings(ccx_build_forcing("historical", c(1900, 1903), prod_c14 = sp$prod_c14))
+    for (i in c(1L, 7L)) { fr <- ccx_forcing_at(F, i)
+      dR <- suppressWarnings(ccx_deriv(sp$y, F$t[i], p, fr, sp$grid, sp$aux))
+      dC <- ccx_deriv_fast(sp$y, F$t[i], p, fr, sp$grid, sp$aux)
+      expect_lt(max(abs(dR - dC)) / max(abs(dR)), 1e-10) }
+    r <- ccx_run_fast(sp, F); rR <- suppressWarnings(ccx_run(sp, F))
+    expect_lt(max(abs(rR$state - r$state)) / max(abs(r$state)), 1e-12)
+    F0 <- F; for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH")) F0[[cc]][] <- 0
+    r0 <- ccx_run_fast(sp, F0)
+    expect_lt(abs(sum(r0$state[, "C"]) - sum(sp$y[, "C"])) / sum(sp$y[, "C"]), 1e-10)
+  }
+})
+
+test_that("T2, the read that motivates it: at 15 Sv the NH cold box's PI D14C is OLDER when the sink is fed from layer 6 than from the ML", {
+  d14 <- function(sp, h) { i <- sp$aux$idx[[h]]$hs; 1000 * (sp$y[i, "C14"] / sp$y[i, "C"] - 1) }
+  p0 <- gthc_par(seas_ml = 0, w = 15, k = 10L); p6 <- p0; p6$kn_gthc <- 6L
+  s0 <- ccx_spinup(p0); s6 <- ccx_spinup(p6)
+  expect_lt(d14(s6, "NH"), d14(s0, "NH") - 5)
 })

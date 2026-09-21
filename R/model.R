@@ -1604,6 +1604,12 @@ ccx_default_params <- function() {
     w_gthc  = 0,          # Sv, ONE global volume (NH sinks, SH upwells)
     k_gthc  = as.integer(N_INTERIOR),   # the SH RETURN layer (1-BASED); the
                           #   bottom = the abyssal return; STRUCTURAL (k_thc idiom)
+    # T2 (2026-09-21 b, prereg s5): the NH SINK FED FROM AGED INTERIOR WATER.
+    # 0 = leg 1 is ML_NH -> HS_NH (the 09-20 v loop, bit-exact); k in 1..nl
+    # = leg 1 becomes ML_NH -> NH layer k (subduction into the subpolar mode /
+    # intermediate water that has already aged) and NH layer k -> HS_NH. Same
+    # volume closure (layer k: in W, out W). STRUCTURAL.
+    kn_gthc = 0L,
     # ---- THE LAYER-2 NINO3.4 LIMB (review avenue 1, 2026-09-17 k) ----------
     # The ANOMALY of an equatorial-upwelling exchange between the low-latitude
     # mixed layer and interior layer k_l2, T-A2's geometry with the cell's floor:
@@ -3314,7 +3320,13 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
       if (W > 0) {
         ihs <- aux$idx[[h]]$hs; ihd <- aux$idx[[h]]$hd; kg <- aux$k_gthc
         if (h == "NH") {
-          add_flux(iml, ihs, W * y[iml, "C"] / (aux$a_ml[[h]] * gr$dz[1]))            # (1) poleward
+          kn <- aux$kn_gthc
+          if (kn == 0L) {
+            add_flux(iml, ihs, W * y[iml, "C"] / (aux$a_ml[[h]] * gr$dz[1]))          # (1) poleward, from the ML
+          } else {                                                                    # T2 (09-21 b): via aged interior water
+            add_flux(iml, ioc[kn], W * y[iml, "C"] / (aux$a_ml[[h]] * gr$dz[1]))      # (1a) subduction into layer k
+            add_flux(ioc[kn], ihs, W * y[ioc[kn], "C"] / (aux$a_ls[[h]] * gr$dz[kn + 1L]))   # (1b) layer k -> the cold box
+          }
           add_flux(ihs, ihd, W * y[ihs, "C"] / (aux$a_hs[[h]] * h_hs_t))              # (2) NADW formation
           add_flux(ihd, ioc[grid$nl], W * y[ihd, "C"] / (aux$a_hs[[h]] * dz_hd_t))    # (3) the abyss
         } else {
@@ -3817,6 +3829,9 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   kgthc <- if (is.null(p[["k_gthc"]])) grid$nl else as.integer(p[["k_gthc"]])
   if (gthc_on && (!is.finite(kgthc) || kgthc < 1L || kgthc > grid$nl))
     stop("k_gthc must be an interior layer in 1..", grid$nl, " (the SH return layer); got ", format(p[["k_gthc"]]))
+  kgnh <- if (is.null(p[["kn_gthc"]])) 0L else as.integer(p[["kn_gthc"]])
+  if (gthc_on && (!is.finite(kgnh) || kgnh < 0L || kgnh > grid$nl))
+    stop("kn_gthc must be 0 (the ML feeds HS_NH) or an interior layer in 1..", grid$nl, " (the NH subduction layer); got ", format(p[["kn_gthc"]]))
   # ---- THE LAYER-2 NINO3.4 LIMB's guards (2026-09-17 k) ------------------
   # k_l2 is the STRUCTURAL switch: 0 = absent (w_enso_l2 inert, not an error --
   # the objective carries every table name under every structure); otherwise an
@@ -4096,6 +4111,7 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # cores; `k_gthc` the SH return layer (nl = the bottom).
     gthc_on     = as.integer(gthc_on),
     k_gthc      = if (gthc_on) kgthc else grid$nl,
+    kn_gthc   = if (gthc_on) kgnh else 0L,       # T2: the NH subduction layer; 0 = the ML feeds HS directly
     # ---- THE LAYER-2 NINO3.4 LIMB (2026-09-17 k) --------------------------
     # Unconditional, zero-filled when off: `l2_on` gates the limb on BOTH cores;
     # `k_l2` the return layer (1-based); `w0_l2` the floor's mean; `l2_share`
@@ -4444,6 +4460,7 @@ ccx_gthc_eigbound <- function(p, grid) {
   w <- if (is.null(p[["w_gthc"]])) 0 else p[["w_gthc"]]
   if (!identical(p$pump_field, "martin") || !isTRUE(w > 0) || !ccx_hs_on(p)) return(0)
   kg <- if (is.null(p[["k_gthc"]])) grid$nl else as.integer(p[["k_gthc"]])
+  kn <- if (is.null(p[["kn_gthc"]])) 0L else as.integer(p[["kn_gthc"]])
   a_oc <- c(ccx_const("OCEAN_AREA_NH"), ccx_const("OCEAN_AREA_SH"))
   f_hs <- p$hs_frac; a_hs <- a_oc * f_hs; a_ls <- a_oc * (1 - f_hs)
   a_ml <- a_ls - a_eq_of(p, a_oc) - (if (ccx_tr_on(p)) a_oc * c(p$tr_frac_NH, p$tr_frac_SH) else c(0, 0))
@@ -4452,6 +4469,7 @@ ccx_gthc_eigbound <- function(p, grid) {
   W <- w * CCX_SV_TO_M3YR
   rate <- max(W / (a_ml * grid$dz[1]), W / (a_hs * h_hs), W / (a_hs * dz_hd),
               W / (a_ls[1] * grid$dz[grid$nl + 1L]),                       # the NH bottom layer
+              if (kn > 0L) W / (a_ls[1] * grid$dz[kn + 1L]) else 0,          # T2: the NH subduction layer
               max(W / (a_ls[2] * grid$dz[seq.int(kg, grid$nl) + 1L])))     # the SH layers k..nl
   2 * rate
 }

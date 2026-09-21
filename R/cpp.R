@@ -145,6 +145,7 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     gthc_on = if (is.null(aux$gthc_on))
       stop("aux lacks gthc_on -- build it with ccx_prepare() (2026-09-20 v)") else as.integer(aux$gthc_on),
     k_gthc = as.integer(aux$k_gthc),
+    kn_gthc = if (is.null(aux$kn_gthc)) 0L else as.integer(aux$kn_gthc),   # T2 (2026-09-21 b)
     # THE LAYER-2 NINO3.4 LIMB (2026-09-17 k). Same contract.
     l2_on = if (is.null(aux$l2_on))
       stop("aux lacks l2_on -- build it with ccx_prepare() (2026-09-17 k)") else as.integer(aux$l2_on),
