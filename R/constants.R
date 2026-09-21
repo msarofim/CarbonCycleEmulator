@@ -196,18 +196,28 @@ CCX_CONSTANTS <- list(
   # ---- ocean geometry -------------------------------------------------
   OCEAN_AREA_NH = list(
     value = 1.55e14, units = "m2",
-    status = "provisional",
-    source = "Working value: NH ocean area. NEEDS a cited geographic source."),
+    status = "cited",
+    source = paste("Ocean = 60.7 % of the NH surface (Pidwirny 2006, Fundamentals of Physical",
+                   "Geography, ch. 8(o), physicalgeography.net; the figure every geographic",
+                   "reference carries) x a hemisphere's 2.551e14 m2 = 1.548e14, 1.55e14 to 3 s.f.;",
+                   "NH + SH = 3.61e14 vs Eakins & Sharman (2010, NOAA NGDC, Volumes of the",
+                   "World's Oceans from ETOPO1) 3.619e14 m2 (0.2 %). Cited 2026-09-21 h at the",
+                   "value it always had -- a value change is a model change, not a citation.")),
 
   OCEAN_AREA_SH = list(
     value = 2.06e14, units = "m2",
-    status = "provisional",
-    source = "Working value: SH ocean area (SH is ocean-dominated). NEEDS a cited source."),
+    status = "cited",
+    source = paste("Ocean = 80.9 % of the SH surface (Pidwirny 2006, as OCEAN_AREA_NH) x",
+                   "2.551e14 m2 = 2.064e14, 2.06e14 to 3 s.f.; the pair sums to Eakins &",
+                   "Sharman (2010)'s 3.619e14 within 0.2 %. Cited 2026-09-21 h, value unchanged.")),
 
   OCEAN_DEPTH = list(
     value = 3700, units = "m",
     status = "provisional",
-    source = "Working value: mean ocean depth. NEEDS a cited source."),
+    source = paste("Working value. Eakins & Sharman (2010, NOAA NGDC, ETOPO1): volume 1.335e9 km3",
+                   "over 3.619e8 km2 = 3690 m mean depth -- 0.3 % under the working 3700. STAYS",
+                   "provisional at 3700 (2026-09-21 h): the column depth sets every deep-row",
+                   "mass, so moving it is a model change and a restamp, not a citation.")),
 
   ALK_SURFACE = list(
     value = 2300e-6, units = "mol/kg",
@@ -297,7 +307,11 @@ CCX_CONSTANTS <- list(
 
   RHO_SEAWATER = list(
     value = 1025, units = "kg/m3",
-    status = "provisional", source = "Working value for surface seawater density."),
+    status = "cited",
+    source = paste("Surface seawater at S 35, T 15 degC, 0 dbar: 1025.97 kg/m3 by the UNESCO",
+                   "EOS-80 equation of state (Millero & Poisson 1981, Deep-Sea Res. 28A, 625-629;",
+                   "UNESCO Tech. Pap. Mar. Sci. 44, 1983) -- 1025 to the 0.1 % the model's",
+                   "mass bookkeeping resolves. Cited 2026-09-21 h, value unchanged.")),
 
   # ---- land -----------------------------------------------------------
   NPP_GLOBAL_PI = list(
@@ -553,10 +567,15 @@ CCX_CONSTANTS <- list(
   # ---- temperature ----------------------------------------------------
   SST_PCO2_SENSITIVITY = list(
     value = .SST_PCO2_DLNDT, units = "1/degC",
-    status = "provisional",
-    source = paste("d ln pCO2 / dT ~ 4.23 %/degC (Takahashi). NEEDS the exact citation;",
-                   "note the carbonate module already carries the full T dependence of",
-                   "K0/K1/K2, so check for DOUBLE COUNTING before applying this factor.")),
+    status = "data",
+    source = paste("Takahashi T., Olafsson J., Goddard J.G., Chipman D.W., Sutherland S.C.",
+                   "(1993), Global Biogeochem. Cycles 7(4), 843-878, doi:10.1029/93GB02263:",
+                   "d ln pCO2 / dT = 0.0423 +- 0.0002 per degC, a laboratory determination on",
+                   "North Atlantic surface water at eight temperatures, 2.1-24.5 degC (cited",
+                   "2026-09-21 h; was 'provisional -- NEEDS the exact citation'). ⚠ The",
+                   "carbonate module already carries the full T dependence of K0/K1/K2 --",
+                   "this constant is a CHECK quantity (gate route 1's out-of-sample 0.99x),",
+                   "never applied as a factor; check for DOUBLE COUNTING before it ever is.")),
 
   # ---- the SPO seasonal partition (registered 2026-09-02) -------------
   # WHY THEY ARE HERE. These four are the targets ~13 seasonal diagnostics

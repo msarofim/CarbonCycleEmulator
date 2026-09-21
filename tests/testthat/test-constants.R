@@ -113,10 +113,20 @@ test_that("provisional constants are reported, not silently used", {
   # Registered at its value with the source (Lloyd & Farquhar 1994: C3 17.8,
   # total 14.8 at 25 % C4); PROVISIONAL because the value in use is the C3-only
   # one and the biosphere-wide revision belongs to the next refit.
-  expect_setequal(prov, c("OCEAN_AREA_NH", "OCEAN_AREA_SH", "OCEAN_DEPTH", "ALPHA_PHOTO_EPS",
+  # RETIRED 2026-09-21 h: SST_PCO2_SENSITIVITY -- cited (Takahashi et al. 1993, GBC 7(4)
+  # 843-878, doi:10.1029/93GB02263, 0.0423 +- 0.0002 per degC); status "data". The
+  # freeze pass's one quick fix among the provisional set; the other fourteen are
+  # provisional for the reasons recorded above (inverted through the model, held, a
+  # C3-only value, no citation yet), none a lookup.
+  # RETIRED 2026-09-21 h (the freeze's citation pass): OCEAN_AREA_NH / _SH (Pidwirny's
+  # 60.7 / 80.9 %; the pair = Eakins & Sharman 2010 to 0.2 %) and RHO_SEAWATER (EOS-80)
+  # -- each cited at the value it always had. OCEAN_DEPTH stays: the cited 3690 is 0.3 %
+  # off the working 3700 and the value is a model change. ALK_SURFACE / NPP_GLOBAL_PI /
+  # PUMP_EPS13_* stay: no source found in the pass that pins the working value.
+  expect_setequal(prov, c("OCEAN_DEPTH", "ALPHA_PHOTO_EPS",
                           "ALK_SURFACE", "PUMP_EPS13_ORG", "PUMP_EPS13_CARB",
-                          "RHO_SEAWATER", "NPP_GLOBAL_PI",
-                          "SST_PCO2_SENSITIVITY", "NPP_FRAC_NH_ANCHOR_1750",
+                          "NPP_GLOBAL_PI",
+                          "NPP_FRAC_NH_ANCHOR_1750",
                           "ALPHA_AS_FCO3",
                           "ALPHA_AS_DOWN_LEGACY", "ALPHA_AS_UP_LEGACY",
                           "ENT_SEAS_BAND_AREA_FRAC"))
