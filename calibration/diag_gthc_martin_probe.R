@@ -36,7 +36,8 @@ if (GP_SMOKE) { GP_W <- c(0, 15); GP_K <- 10L; GP_NM_MAXIT <- 20; GP_BFGS_MAXIT 
 GP_OUT     <- ccx_path("outputs", "diagnostics", sprintf("gthc_martin_probe_%s%s", format(Sys.Date(), "%Y%m%d"), if (GP_SMOKE) "_smoke" else ""))
 sink_log <- file(paste0(GP_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE)
 on.exit({ sink(); close(sink_log) }, add = TRUE)
-GP_COMMIT <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+GP_COMMIT <- if (file.exists("FROZEN_FROM_COMMIT.txt")) substr(trimws(readLines("FROZEN_FROM_COMMIT.txt")[1]), 1, 7) else   # a frozen copy has no .git
+             tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
 cat(sprintf("== GLOBAL THC LOOP, martin probe at %s (prereg 2026-09-20v) -- commit %s, %s ==\n", GP_ARM, GP_COMMIT, format(Sys.time())))
 cat(sprintf("export %.2f GtC/yr (martin); W %s Sv x k %s; arm C = %s\n\n", GP_EXPORT,
             paste(GP_W, collapse = "/"), paste(GP_K, collapse = "/"), paste(GP_ARMC, collapse = ",")))
