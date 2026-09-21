@@ -67,12 +67,6 @@ CCX_FLUX_CHANNELS <- c(
   # The cell -> tr limb keeps the eq_ml label ("to surface"); tr -> layer k_eq
   # and the tr / layer-1 diffusion classify into ml_int on their own.
   tr_ml    = "Tropical box to mixed layer (gross)",
-  # THE GLOBAL THERMOHALINE LOOP's two INTERHEMISPHERIC legs (2026-09-20 v):
-  # NH bottom layer -> SH bottom layer, and SH mixed layer -> NH mixed layer.
-  # Labelled at the call site: the pairs are int>int / ml>ml and unlabelled
-  # would land in int_exch / conv_ml. The five within-column legs classify on
-  # their own (conv_ml, ml_int, int_exch), as w_thc's do. 0 until w_gthc > 0.
-  gthc_ih  = "Global overturning, interhemispheric limbs (gross)",
   ihx_NS   = "Atmosphere NH to SH (gross)",
   ihx_SN   = "Atmosphere SH to NH (gross)"
 )

@@ -31,9 +31,11 @@ sink_log <- file(paste0(IB_OUT, ".log"), open = "wt"); sink(sink_log, split = TR
 can <- dg_vector(CCX_MODE_CANONICAL)
 # 2026-09-21 d (scoping 09-21 c, option A's second scan): an optional SH gas-exchange factor on the canonical's vector,
 # IB_KW_FAC_SH (NCEP wind^2 says 1.14); the output name carries it so the canonical's own budget is never overwritten.
+# ⛔ 2026-09-21 (f) PRUNE: k_w_fac_SH no longer exists in the core (CHANGELOG 09-21 f); the tap is REFUSED by name
+# rather than silently inert -- a factor set on a pruned name would run the canonical and label it x1.14.
+# The 09-21 d output (`..._kwSH1.14`) stays in outputs/diagnostics/ as provenance; the code is at 206e3f0.
 IB_KW_FAC_SH <- as.numeric(Sys.getenv("IB_KW_FAC_SH", "1"))
-if (IB_KW_FAC_SH != 1) { can$p$k_w_fac_SH <- IB_KW_FAC_SH; IB_OUT <- sprintf("%s_kwSH%g", IB_OUT, IB_KW_FAC_SH); sink(); close(sink_log)
-  sink_log <- file(paste0(IB_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE) }
+if (IB_KW_FAC_SH != 1) stop("IB_KW_FAC_SH != 1: k_w_fac_SH was PRUNED 2026-09-21 (f); check out 206e3f0 to re-run the option-A tap")
 sp <- dg_spinup(can)
 F <- withCallingHandlers(ccx_build_forcing("historical", DG_YEARS, prod_c14 = sp$prod_c14, bomb_total_kmol = can$bomb_total, luc_scale = can$luc_scale),
                          warning = function(w) if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning"))

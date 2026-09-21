@@ -1,3 +1,9 @@
+# ⛔ ARCHIVED 2026-09-21 (f) -- PROVENANCE ONLY, WILL NOT RUN AT HEAD. This harness ran at 206e3f0 (and earlier);
+# the structural names it sets (w_gthc / k_gthc / kn_gthc, u_hs_fac_SH / tau_q_fac_SH / pump_hs_fac_SH / h_ml_fac_NH,
+# k_w_fac_SH / k_w_fac_hs, w_soc / k_soc_up / k_soc_dn / hs_h_fac_SH) were PRUNED from both cores in the 09-21 (f)
+# commit (CHANGELOG 09-21 f: the loop refuted as a class, the scans refuted, the window parked). Its outputs are in
+# outputs/diagnostics/ under the names in its header. To re-run: `git checkout 206e3f0` (a worktree), not this tree.
+# Sourced from calibration/ at the time; the relative paths below assume the repo root as cwd.
 # Restart test: arm C at W = 0 STARTED FROM the W 5 (8,10) optimum -- is the +33.5 a window effect or an optimiser basin?
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f); ccx_load_cpp()
 x <- readRDS("outputs/diagnostics/soc_martin_probe_20260921.rds")

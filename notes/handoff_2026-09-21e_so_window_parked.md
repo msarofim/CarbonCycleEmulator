@@ -1,5 +1,7 @@
 # Handoff — 2026-09-21 (e). **OPTION (B)-MINIMAL — THE SOUTHERN OCEAN ONE-PASS WINDOW — BUILT, PROBED, PARKED. It cannot make the SH cold box light: a one-column-per-hemisphere ocean gives a SO cell no old, light water to tap that is not its own return, and the cold box is already at HD's end-member. Option (C) — gate D (z −6.60) and the offset (−0.0668 ‰) as two named reds — is the arc's END STATE. Canonical `hilda29l`, unchanged. Arm C in §2; the post-probe exchange (why only the SH bottom went young; the recommendations) in §6 — read §6 first if picking this up cold.**
 
+> **STATUS 2026-09-21 (f): §6.1 EXECUTED — the prune landed (CHANGELOG 09-21 f; memory [[ccx_gate_d_arc_pruned]]): all thirteen switches incl. `k_w_fac_*` gone from both cores, `thick_*` kept, the four harnesses in `calibration/archive/`, `ccx_prepare()` refuses a pruned name at a live value, registered modes bit-reproduce. §6.2–6.4 unchanged.**
+
 > Self-contained. Read first: CHANGELOG 09-21 (e) (every number), `notes/prereg_2026-09-21e_so_window_probe.md` (P1–P8, the reject rule, §6 build notes), memory [[ccx_so_window_parked]] (routed in `INDEX_ccx_ocean_circ.md` and the gradient-arc line of `INDEX_ccx.md`). Handoff (d) is superseded by this file except its §3 owed list, carried in §4 below. ⚠ `~/.claude/CLAUDE.md` execution rules apply (frozen copy for long runs, `uptime`, `OMP_NUM_THREADS=1`; no RNG on any path here).
 
 ## 1. What was done (Marcus: "I think adding B is a good idea")
