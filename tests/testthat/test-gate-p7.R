@@ -7,7 +7,8 @@
 #       passes, a move just past it fails, a non-finite move fails;
 #   (2) the DIC move is reported in its own units and never decides `pass`;
 #   (3) POWER, measured on the record: the round-6 mode (start_004.rds, seas_ml
-#       1) against the canonical hilda31p (seas_ml 0), scored through the
+#       1) against hilda31p (seas_ml 0; the canonical of 09-11, read by its
+#       quarantine path since the 09-19 j repoint -- see P7_OFF_FILE), scored through the
 #       objective's own ccx_ocean_grad_scored(), FAILS the gate -- and the
 #       numbers reproduce the ones the ruling was taken on.
 # =====================================================================
@@ -26,8 +27,18 @@ grad_at <- function(mdx) {
   attr(F, "luc_scale") <- pm$luc_scale
   ccx_ocean_grad_scored(ccx_run_fast(sp, F)$out, sp)
 }
+# THE RECORD's CONTROL, BY PATH (re-pinned 2026-09-21 f). The 09-11 ruling was taken
+# against `hilda31p` (struct `hilda`, seas_ml 0). On 09-19 j the registered seas_ml-0
+# control was REPOINTED to `hilda31pe` (struct `hilda_c`, the refit control) and
+# `hilda31p` retired to its quarantine path; reading CCX_MODE_SEASML0_CONTROL here
+# then silently swapped the control under a POWER test whose numbers are the record's
+# (three reds in every counting run from 09-20 v). A power claim is about the pair it
+# was measured on, so the OFF arm is the quarantined `hilda31p` by path, not the live
+# control -- the live control is not the record and its gradient is not pinned here.
+P7_OFF_FILE <- ccx_path(CCX_MODE_HILDA31P_QUARANTINED)
+p7_md0 <- function() readRDS(P7_OFF_FILE)
 p7_g0 <- local({ g <- NULL; function() {
-  if (is.null(g)) g <<- grad_at(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))); g } })
+  if (is.null(g)) g <<- grad_at(p7_md0()); g } })
 
 gp7 <- function(d13c, dic, sd13 = 0.163, sddic = 32.9)
   list(d13c = d13c, dic = dic, sd_eff = c(dic = sddic, d13c = sd13))
@@ -50,7 +61,8 @@ test_that("GATE P7 has POWER: the round-6 seas_ml = 1 mode FAILS it against hild
   skip_if_no_cpp()
   r6 <- ccx_path("calibration", "output", "multistart_20260910_round6_seasml1_sd1.0452", "start_004.rds")
   skip_if_not(file.exists(r6), "round-6 start file not present")
-  md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)); s4 <- readRDS(r6)
+  skip_if_not(file.exists(P7_OFF_FILE), "the record's control (hilda31p, quarantined) not present")
+  md <- p7_md0(); s4 <- readRDS(r6)
   expect_identical(ccx_mode_seas_ml(md), 0L); expect_identical(ccx_mode_seas_ml(s4), 1L)
   expect_identical(ccx_mode_struct(md), "hilda"); expect_identical(ccx_mode_struct(s4), "hilda")
   g0 <- p7_g0(); g1 <- grad_at(s4)
@@ -78,7 +90,8 @@ test_that("THE VERDICT ON THE RECORD (2026-09-11 (7)): the round-6b mode -- the 
   skip_if_no_cpp()
   r6b <- ccx_path("calibration", "output", "multistart_20260911_round6b_seasml1_sd1.0452", "start_005.rds")
   skip_if_not(file.exists(r6b), "round-6b start file not present")
-  md <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)); s5 <- readRDS(r6b)
+  skip_if_not(file.exists(P7_OFF_FILE), "the record's control (hilda31p, quarantined) not present")
+  s5 <- readRDS(r6b)
   expect_identical(ccx_mode_seas_ml(s5), 1L)
   v <- dg_gateP7_verdict(p7_g0(), grad_at(s5))
   expect_true(v$pass)

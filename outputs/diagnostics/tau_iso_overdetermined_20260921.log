@@ -1,0 +1,137 @@
+== TAU_ISO OVER-DETERMINED? k_w x 0.75/0.8/0.85/0.9/0.95/1/1.05/1.1/1.15 at hilda29l -- commit c56c84f, 2026-09-21 13:03:19 ==
+profile sets: bomb = {bomb_total}; bomb_sig = {bomb_total,sigma_d14c}; armC = {beta_max,fert_k,q10,kz_deep_frac,h_ml,bomb_total,sigma_d14c}
+
+obs: ML D levels NH +1.278 +- 0.023 (n_bottles 1371, clusters 267), SH +1.055 +- 0.021 (1316, 289); gate D asym +0.286 +- 0.029
+
+HARNESS GATE 1: dg streams at the canonical vs stored: sum -1391.8051 vs -1391.8051 -> PASS
+canonical: k_w 1912.3 m/yr, h_ml 57.30 m; tau_iso NH 6.94 yr, SH 6.39 yr (ML carbon / gross PI invasion); ML D NH +1.033 SH +0.909 (obs +1.278 / +1.055); gate D z -6.60; bomb_total 120.4, sigma_d14c 5.78
+
+HARNESS GATE 2: k_w x1 reproduces the canonical: dlik +0.00e+00 -> PASS
+
+== STAGE 1 RAW: k_w x 0.75/0.8/0.85/0.9/0.95/1/1.05/1.1/1.15, everything else fixed ==
+raw x0.75        | dlik  -1861.5 | ML D NH +1.283 SH +1.148 (z  +0.2  +4.3) | gate D z -6.38 | tau_iso 9.25/8.52 yr | h_ml 57.3 k_w 1434 bomb 120.4 sig14 5.78 | rows: bomb -1171.4 d13lev -631.5 co2  -49.2 d14prof  -11.2 seas   -6.8 
+raw x0.80        | dlik  -1078.5 | ML D NH +1.224 SH +1.091 (z  -2.3  +1.7) | gate D z -6.42 | tau_iso 8.67/7.99 yr | h_ml 57.3 k_w 1530 bomb 120.4 sig14 5.78 | rows: bomb -672.1 d13lev -374.9 co2  -28.7 d14prof   -4.7 seas   -4.5 
+raw x0.85        | dlik   -551.7 | ML D NH +1.170 SH +1.040 (z  -4.6  -0.7) | gate D z -6.46 | tau_iso 8.16/7.52 yr | h_ml 57.3 k_w 1625 bomb 120.4 sig14 5.78 | rows: bomb -337.6 d13lev -199.0 co2  -15.0 d14prof   -1.5 seas   -2.7 
+raw x0.90        | dlik   -223.9 | ML D NH +1.121 SH +0.992 (z  -6.7  -2.9) | gate D z -6.51 | tau_iso 7.71/7.10 yr | h_ml 57.3 k_w 1721 bomb 120.4 sig14 5.78 | rows: bomb -131.9 d13lev  -86.4 co2   -6.4 d14prof   -0.3 seas   -1.4 
+raw x0.95        | dlik    -51.3 | ML D NH +1.075 SH +0.949 (z  -8.7  -4.9) | gate D z -6.55 | tau_iso 7.30/6.73 yr | h_ml 57.3 k_w 1817 bomb 120.4 sig14 5.78 | rows: bomb  -26.7 d13lev  -23.6 co2   -1.7 d14prof   +0.1 seas   -0.5 
+raw x1.00        | dlik     +0.0 | ML D NH +1.033 SH +0.909 (z -10.5  -6.8) | gate D z -6.60 | tau_iso 6.94/6.39 yr | h_ml 57.3 k_w 1912 bomb 120.4 sig14 5.78 | rows: bomb   +0.0 d13lev   +0.0 co2   +0.0 d14prof   +0.0 seas   +0.0 
+raw x1.05        | dlik    -43.4 | ML D NH +0.993 SH +0.872 (z -12.1  -8.5) | gate D z -6.65 | tau_iso 6.61/6.09 yr | h_ml 57.3 k_w 2008 bomb 120.4 sig14 5.78 | rows: bomb  -34.5 d13lev   -7.4 co2   -0.6 d14prof   -0.3 seas   +0.1 
+raw x1.10        | dlik   -160.6 | ML D NH +0.957 SH +0.838 (z -13.7 -10.1) | gate D z -6.70 | tau_iso 6.31/5.81 yr | h_ml 57.3 k_w 2104 bomb 120.4 sig14 5.78 | rows: bomb -116.4 d13lev  -39.2 co2   -3.1 d14prof   -0.6 seas   -0.2 
+raw x1.15        | dlik   -335.1 | ML D NH +0.923 SH +0.806 (z -15.2 -11.6) | gate D z -6.75 | tau_iso 6.03/5.56 yr | h_ml 57.3 k_w 2199 bomb 120.4 sig14 5.78 | rows: bomb -234.9 d13lev  -90.2 co2   -6.9 d14prof   -1.0 seas   -0.8 
+
+== STAGE 2 PROFILES: k_w PINNED at the scaled value, the set re-optimised (logpost; reads on likelihood) ==
+HARNESS GATE 3: rebuilt logpost -1425.3620 (shift +0.0000) vs stored -1425.3620 -> PASS
+-- set bomb = {bomb_total} --
+bomb x0.75       | dlik   -753.9 | ML D NH +1.283 SH +1.148 (z  +0.2  +4.3) | gate D z -6.38 | tau_iso 9.25/8.52 yr | h_ml 57.3 k_w 1434 bomb 107.5 sig14 5.78 | rows: bomb  -65.1 d13lev -631.5 co2  -49.2 d14prof  -11.2 seas   -6.8 [NA evals, 3 s]
+    largest rows: d13c_level_MLO -423.4, d13c_level_SPO -208.2, d14c_NH -44.1, co2_level_SPO -29.2
+bomb x0.80       | dlik   -441.5 | ML D NH +1.224 SH +1.091 (z  -2.3  +1.7) | gate D z -6.42 | tau_iso 8.67/7.99 yr | h_ml 57.3 k_w 1530 bomb 110.3 sig14 5.78 | rows: bomb  -36.2 d13lev -374.9 co2  -28.7 d14prof   -4.7 seas   -4.5 [NA evals, 3 s]
+    largest rows: d13c_level_MLO -269.1, d13c_level_SPO -105.8, d14c_NH -27.7, co2_level_SPO -18.3
+bomb x0.85       | dlik   -228.6 | ML D NH +1.170 SH +1.040 (z  -4.6  -0.7) | gate D z -6.46 | tau_iso 8.16/7.52 yr | h_ml 57.3 k_w 1625 bomb 113.0 sig14 5.78 | rows: bomb  -15.5 d13lev -199.0 co2  -15.0 d14prof   -1.5 seas   -2.7 [NA evals, 3 s]
+    largest rows: d13c_level_MLO -157.7, d13c_level_SPO -41.3, d14c_NH -15.2, co2_level_SPO -10.7
+bomb x0.90       | dlik    -94.1 | ML D NH +1.121 SH +0.992 (z  -6.7  -2.9) | gate D z -6.51 | tau_iso 7.71/7.10 yr | h_ml 57.3 k_w 1721 bomb 115.6 sig14 5.78 | rows: bomb   -2.8 d13lev  -86.4 co2   -6.4 d14prof   -0.3 seas   -1.4 [NA evals, 3 s]
+    largest rows: d13c_level_MLO -80.2, d14c_NH -6.6, d13c_level_SPO -6.2, co2_level_SPO -5.4
+bomb x0.95       | dlik    -22.0 | ML D NH +1.075 SH +0.949 (z  -8.7  -4.9) | gate D z -6.55 | tau_iso 7.30/6.73 yr | h_ml 57.3 k_w 1817 bomb 118.0 sig14 5.78 | rows: bomb   +2.2 d13lev  -23.6 co2   -1.7 d14prof   +0.1 seas   -0.5 [NA evals, 3 s]
+    largest rows: d13c_level_MLO -29.5, co2_level_SPO -2.0, d14c_NH -1.6, d13c_seasonal_MLO -0.3
+bomb x1.00       | dlik     +0.0 | ML D NH +1.033 SH +0.909 (z -10.5  -6.8) | gate D z -6.60 | tau_iso 6.94/6.39 yr | h_ml 57.3 k_w 1912 bomb 120.4 sig14 5.78 | rows: bomb   +0.0 d13lev   +0.0 co2   +0.0 d14prof   +0.0 seas   +0.0 [NA evals, 3 s]
+    largest rows: d14c_NH -0.0, excess_c14_ocean -0.0, co2_level_MLO +0.0, co2_level_SPO +0.0
+bomb x1.05       | dlik    -18.4 | ML D NH +0.993 SH +0.872 (z -12.1  -8.5) | gate D z -6.65 | tau_iso 6.61/6.09 yr | h_ml 57.3 k_w 2008 bomb 122.7 sig14 5.78 | rows: bomb   -9.1 d13lev   -7.4 co2   -0.6 d14prof   -0.3 seas   +0.1 [NA evals, 3 s]
+    largest rows: d13c_level_SPO -19.9, d14c_SH -7.4, d14c_NH -1.7, co2_level_MLO -1.3
+bomb x1.10       | dlik    -69.6 | ML D NH +0.957 SH +0.838 (z -13.7 -10.1) | gate D z -6.70 | tau_iso 6.31/5.81 yr | h_ml 57.3 k_w 2104 bomb 124.9 sig14 5.78 | rows: bomb  -24.6 d13lev  -39.2 co2   -3.1 d14prof   -0.6 seas   -0.2 [NA evals, 3 s]
+    largest rows: d13c_level_SPO -50.7, d14c_SH -18.2, d14c_NH -6.4, co2_level_MLO -3.2
+bomb x1.15       | dlik   -147.6 | ML D NH +0.923 SH +0.806 (z -15.2 -11.6) | gate D z -6.75 | tau_iso 6.03/5.56 yr | h_ml 57.3 k_w 2199 bomb 127.0 sig14 5.78 | rows: bomb  -46.1 d13lev  -90.2 co2   -6.9 d14prof   -1.0 seas   -0.8 [NA evals, 3 s]
+    largest rows: d13c_level_SPO -90.0, d14c_SH -32.2, d14c_NH -13.9, co2_level_MLO -5.6
+-- set bomb_sig = {bomb_total, sigma_d14c} --
+bomb_sig x0.75   | dlik   -730.6 | ML D NH +1.283 SH +1.148 (z  +0.2  +4.3) | gate D z -6.38 | tau_iso 9.25/8.52 yr | h_ml 57.3 k_w 1434 bomb 107.4 sig14 9.45 | rows: bomb  -41.7 d13lev -631.5 co2  -49.2 d14prof  -11.2 seas   -6.8 [136 evals, 29 s]
+    largest rows: d13c_level_MLO -423.4, d13c_level_SPO -208.2, co2_level_SPO -29.2, d14c_NH -27.6
+bomb_sig x0.80   | dlik   -431.4 | ML D NH +1.224 SH +1.091 (z  -2.3  +1.7) | gate D z -6.42 | tau_iso 8.67/7.99 yr | h_ml 57.3 k_w 1530 bomb 110.2 sig14 8.21 | rows: bomb  -26.0 d13lev -374.9 co2  -28.7 d14prof   -4.7 seas   -4.5 [115 evals, 24 s]
+    largest rows: d13c_level_MLO -269.1, d13c_level_SPO -105.8, d14c_NH -19.2, co2_level_SPO -18.3
+bomb_sig x0.85   | dlik   -225.6 | ML D NH +1.170 SH +1.040 (z  -4.6  -0.7) | gate D z -6.46 | tau_iso 8.16/7.52 yr | h_ml 57.3 k_w 1625 bomb 112.9 sig14 7.12 | rows: bomb  -12.5 d13lev -199.0 co2  -15.0 d14prof   -1.5 seas   -2.7 [94 evals, 19 s]
+    largest rows: d13c_level_MLO -157.7, d13c_level_SPO -41.3, d14c_NH -11.8, co2_level_SPO -10.7
+bomb_sig x0.90   | dlik    -93.7 | ML D NH +1.121 SH +0.992 (z  -6.7  -2.9) | gate D z -6.51 | tau_iso 7.71/7.10 yr | h_ml 57.3 k_w 1721 bomb 115.5 sig14 6.28 | rows: bomb   -2.4 d13lev  -86.4 co2   -6.4 d14prof   -0.3 seas   -1.4 [105 evals, 22 s]
+    largest rows: d13c_level_MLO -80.2, d13c_level_SPO -6.2, d14c_NH -5.7, co2_level_SPO -5.4
+bomb_sig x0.95   | dlik    -22.0 | ML D NH +1.075 SH +0.949 (z  -8.7  -4.9) | gate D z -6.55 | tau_iso 7.30/6.73 yr | h_ml 57.3 k_w 1817 bomb 118.0 sig14 5.79 | rows: bomb   +2.2 d13lev  -23.6 co2   -1.7 d14prof   +0.1 seas   -0.5 [100 evals, 24 s]
+    largest rows: d13c_level_MLO -29.5, co2_level_SPO -2.0, d14c_NH -1.5, d13c_seasonal_MLO -0.3
+bomb_sig x1.00   | dlik     -0.0 | ML D NH +1.033 SH +0.909 (z -10.5  -6.8) | gate D z -6.60 | tau_iso 6.94/6.39 yr | h_ml 57.3 k_w 1912 bomb 120.4 sig14 5.78 | rows: bomb   -0.0 d13lev   +0.0 co2   +0.0 d14prof   +0.0 seas   +0.0 [84 evals, 17 s]
+    largest rows: d14c_SH -0.0, co2_level_MLO +0.0, co2_level_SPO +0.0, co2_seasonal_MLO +0.0
+bomb_sig x1.05   | dlik    -18.1 | ML D NH +0.993 SH +0.872 (z -12.1  -8.5) | gate D z -6.65 | tau_iso 6.61/6.09 yr | h_ml 57.3 k_w 2008 bomb 122.7 sig14 6.25 | rows: bomb   -8.8 d13lev   -7.4 co2   -0.6 d14prof   -0.3 seas   +0.1 [100 evals, 21 s]
+    largest rows: d13c_level_SPO -19.9, d14c_SH -7.2, d14c_NH -1.6, co2_level_MLO -1.3
+bomb_sig x1.10   | dlik    -66.9 | ML D NH +0.957 SH +0.838 (z -13.7 -10.1) | gate D z -6.70 | tau_iso 6.31/5.81 yr | h_ml 57.3 k_w 2104 bomb 124.7 sig14 7.09 | rows: bomb  -21.9 d13lev  -39.2 co2   -3.1 d14prof   -0.6 seas   -0.2 [101 evals, 19 s]
+    largest rows: d13c_level_SPO -50.7, d14c_SH -16.0, d14c_NH -6.0, co2_level_MLO -3.2
+bomb_sig x1.15   | dlik   -138.6 | ML D NH +0.923 SH +0.806 (z -15.2 -11.6) | gate D z -6.75 | tau_iso 6.03/5.56 yr | h_ml 57.3 k_w 2199 bomb 126.7 sig14 8.18 | rows: bomb  -37.2 d13lev  -90.2 co2   -6.9 d14prof   -1.0 seas   -0.8 [95 evals, 20 s]
+    largest rows: d13c_level_SPO -90.0, d14c_SH -25.0, d14c_NH -12.2, co2_level_MLO -5.6
+-- set armC = {beta_max, fert_k, q10, kz_deep_frac, h_ml, bomb_total, sigma_d14c} --
+armC x0.75       | dlik   -567.7 | ML D NH +1.274 SH +1.139 (z  -0.2  +3.9) | gate D z -6.39 | tau_iso 9.72/8.96 yr | h_ml 60.2 k_w 1434 bomb 107.5 sig14 9.50 | rows: bomb  -42.2 d13lev -460.2 co2  -43.4 d14prof  -10.8 seas   -6.2 [1642 evals, 387 s]
+    largest rows: d13c_level_MLO -321.4, d13c_level_SPO -138.8, co2_level_MLO -28.3, d14c_NH -27.8
+armC x0.80       | dlik   -338.7 | ML D NH +1.217 SH +1.084 (z  -2.6  +1.4) | gate D z -6.43 | tau_iso 9.10/8.38 yr | h_ml 60.1 k_w 1530 bomb 110.3 sig14 8.23 | rows: bomb  -26.4 d13lev -272.3 co2  -27.1 d14prof   -4.8 seas   -4.4 [1597 evals, 423 s]
+    largest rows: d13c_level_MLO -205.5, d13c_level_SPO -66.8, d14c_NH -19.4, co2_level_MLO -18.7
+armC x0.85       | dlik   -179.0 | ML D NH +1.165 SH +1.034 (z  -4.8  -1.0) | gate D z -6.47 | tau_iso 8.49/7.82 yr | h_ml 59.6 k_w 1625 bomb 113.0 sig14 7.14 | rows: bomb  -12.7 d13lev -144.5 co2  -14.9 d14prof   -1.6 seas   -3.0 [1477 evals, 407 s]
+    largest rows: d13c_level_MLO -121.9, d13c_level_SPO -22.6, d14c_NH -11.9, co2_level_MLO -11.1
+armC x0.90       | dlik    -75.1 | ML D NH +1.117 SH +0.989 (z  -6.9  -3.1) | gate D z -6.51 | tau_iso 7.91/7.28 yr | h_ml 58.8 k_w 1721 bomb 115.6 sig14 6.28 | rows: bomb   -2.6 d13lev  -62.8 co2   -6.7 d14prof   -0.2 seas   -1.8 [1617 evals, 435 s]
+    largest rows: d13c_level_MLO -63.1, gcb_land_sink -6.2, d14c_NH -5.8, co2_level_MLO -5.6
+armC x0.95       | dlik    -17.8 | ML D NH +1.073 SH +0.947 (z  -8.7  -5.0) | gate D z -6.56 | tau_iso 7.40/6.81 yr | h_ml 58.0 k_w 1817 bomb 118.1 sig14 5.80 | rows: bomb   +2.1 d13lev  -17.2 co2   -1.9 d14prof   +0.2 seas   -0.8 [1599 evals, 412 s]
+    largest rows: d13c_level_MLO -23.8, gcb_land_sink -2.8, co2_level_MLO -2.0, d14c_NH -1.6
+armC x1.00       | dlik     +0.0 | ML D NH +1.033 SH +0.909 (z -10.5  -6.8) | gate D z -6.60 | tau_iso 6.94/6.39 yr | h_ml 57.3 k_w 1912 bomb 120.4 sig14 5.78 | rows: bomb   -0.0 d13lev   -0.0 co2   +0.0 d14prof   +0.0 seas   +0.0 [355 evals, 108 s]
+    largest rows: d13c_level_MLO -0.0, co2_icecore -0.0, d14c_NH -0.0, d13c_level_SPO -0.0
+armC x1.05       | dlik    -14.6 | ML D NH +0.995 SH +0.873 (z -12.1  -8.5) | gate D z -6.65 | tau_iso 6.53/6.01 yr | h_ml 56.6 k_w 2008 bomb 122.6 sig14 6.24 | rows: bomb   -8.6 d13lev   -5.7 co2   -0.3 d14prof   -0.5 seas   +0.6 [1594 evals, 430 s]
+    largest rows: d13c_level_SPO -16.9, d14c_SH -7.1, d14c_NH -1.5, co2_level_SPO -1.5
+armC x1.10       | dlik    -54.1 | ML D NH +0.959 SH +0.840 (z -13.6 -10.0) | gate D z -6.69 | tau_iso 6.10/5.62 yr | h_ml 55.4 k_w 2104 bomb 124.7 sig14 7.07 | rows: bomb  -21.5 d13lev  -29.7 co2   -2.5 d14prof   -0.9 seas   +0.9 [1582 evals, 427 s]
+    largest rows: d13c_level_SPO -42.0, d14c_SH -15.8, d14c_NH -5.7, co2_level_SPO -3.6
+armC x1.15       | dlik   -112.0 | ML D NH +0.926 SH +0.809 (z -15.0 -11.5) | gate D z -6.74 | tau_iso 5.77/5.31 yr | h_ml 54.8 k_w 2199 bomb 126.6 sig14 8.15 | rows: bomb  -36.6 d13lev  -68.5 co2   -5.8 d14prof   -1.3 seas   +1.1 [1573 evals, 478 s]
+    largest rows: d13c_level_SPO -73.6, d14c_SH -24.7, d14c_NH -11.8, co2_level_SPO -6.1
+
+== THE TABLE (dlik vs the canonical, likelihood; D = the ML air-sea d13C disequilibrium; tau in yr) ==
+  fac      raw raw_bomb raw_d13lev   D_NH   D_SH tau_NH       bomb bomb_D_NH
+ 0.75 -1861.49 -1171.42   -631.513 1.2829 1.1479  9.252 -7.539e+02    1.2829
+ 0.80 -1078.52  -672.07   -374.858 1.2241 1.0913  8.674 -4.415e+02    1.2241
+ 0.85  -551.68  -337.65   -198.993 1.1702 1.0396  8.163 -2.286e+02    1.1702
+ 0.90  -223.89  -131.91    -86.415 1.1206 0.9924  7.710 -9.414e+01    1.1206
+ 0.95   -51.33   -26.71    -23.596 1.0749 0.9490  7.304 -2.204e+01    1.0749
+ 1.00     0.00     0.00      0.000 1.0326 0.9090  6.939  4.986e-07    1.0326
+ 1.05   -43.37   -34.45     -7.365 0.9934 0.8721  6.608 -1.841e+01    0.9934
+ 1.10  -160.58  -116.38    -39.169 0.9569 0.8378  6.308 -6.964e+01    0.9569
+ 1.15  -335.14  -234.91    -90.239 0.9229 0.8060  6.034 -1.476e+02    0.9229
+ bomb_bomb   bomb_sig bomb_sig_D_NH bomb_sig_bomb       armC armC_D_NH
+     107.5 -7.306e+02        1.2829         107.4 -5.677e+02    1.2737
+     110.3 -4.314e+02        1.2241         110.2 -3.387e+02    1.2167
+     113.0 -2.256e+02        1.1702         112.9 -1.790e+02    1.1648
+     115.6 -9.372e+01        1.1206         115.5 -7.508e+01    1.1172
+     118.0 -2.204e+01        1.0749         118.0 -1.781e+01    1.0733
+     120.4 -9.132e-10        1.0326         120.4  2.992e-04    1.0326
+     122.7 -1.805e+01        0.9934         122.7 -1.459e+01    0.9949
+     124.9 -6.694e+01        0.9569         124.7 -5.412e+01    0.9593
+     127.0 -1.386e+02        0.9229         126.7 -1.120e+02    0.9261
+ armC_bomb armC_h_ml armC_tau_NH
+     107.5     60.22       9.723
+     110.3     60.12       9.101
+     113.0     59.60       8.492
+     115.6     58.78       7.909
+     118.1     58.03       7.397
+     120.4     57.30       6.939
+     122.6     56.58       6.526
+     124.7     55.40       6.099
+     126.6     54.79       5.770
+
+== AT k_w x0.85 (where the ML D levels sit on the bottles): the price and WHO PAYS IT ==
+  raw        dlik  -551.7 | bomb rows  -337.6 | d13c level rows  -199.0 | co2 rows  -15.0 | other   -0.0 | top: d14c_NH -223.6, d13c_level_MLO -157.7, d14c_SH -114.1
+  bomb       dlik  -228.6 | bomb rows   -15.5 | d13c level rows  -199.0 | co2 rows  -15.0 | other   +0.9 | top: d13c_level_MLO -157.7, d13c_level_SPO -41.3, d14c_NH -15.2
+  bomb_sig   dlik  -225.6 | bomb rows   -12.5 | d13c level rows  -199.0 | co2 rows  -15.0 | other   +0.9 | top: d13c_level_MLO -157.7, d13c_level_SPO -41.3, d14c_NH -11.8
+  armC       dlik  -179.0 | bomb rows   -12.7 | d13c level rows  -144.5 | co2 rows  -14.9 | other   -6.8 | top: d13c_level_MLO -121.9, d13c_level_SPO -22.6, d14c_NH -11.9
+
+== STAGE 3: the D row's pull (both ML levels; sigma ladder) on the deepest profile ==
+the armC profile alone: quadratic optimum k_w x1.005 (curvature -6625 per ln^2, max |resid| 5.7), spline optimum x1.000
+  (the raw scan's optimum: quadratic x1.005, spline x1.000)
+
+joint optimum of (profile + D row) along k_w, per sigma_D:
+ sigma_D row_at_x1 row_at_target joint_quad joint_spline quad_resid
+    0.02 -101.5790     -16.42016      0.959       0.9545      7.433
+    0.05  -16.2526      -2.62722      0.996       0.9917      5.939
+    0.10   -4.0632      -0.65681      1.003       0.9983      5.725
+    0.15   -1.8058      -0.29191      1.004       0.9993      5.686
+    0.20   -1.0158      -0.16420      1.004       0.9998      5.672
+    0.30   -0.4515      -0.07298      1.005       1.0002      5.662
+    0.50   -0.1625      -0.02627      1.005       1.0004      5.657
+
+THE CROSSING: the D row moves the joint optimum halfway to x0.85 (i.e. to x0.922) at sigma_D ~ outside the ladder
+the bottles' own cluster se is 0.023 / 0.021; the D row at that se, x1: -102, at x0.85: -16 (a pull of +85)
+
+saved /Users/MarcusMarcus/ccx_frozen/20260921f_tau_iso/outputs/diagnostics/tau_iso_overdetermined_20260921.{log,rds}

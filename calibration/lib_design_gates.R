@@ -381,6 +381,16 @@ DG_LEDGER <- list(
        class = "OBSERVATION", src = "Quay et al. 2003 (0.60 +- 0.10 permil)",
        bound = paste("n_sd <= DG_Q_NSD, a distributional claim on the stated sigma.",
          "
+            ⭐ RE-WEIGHTED 2026-09-21 (f): the four surface boxes' 1995 D's",
+         "
+            (gate D's regions) combined with the GLODAP bottles' NCEP-wind^2",
+         "
+            k-weights per box (Quay's 0.60 is exchange-weighted; the bottles",
+         "
+            give 0.545 k-weighted, 0.846 area-weighted). The ML-only",
+         "
+            area-weighted read below is returned as mean_area_ml, not scored.",
+         "
             ⭐ RE-CUT 2026-09-12 (Marcus): the statistic is the CALENDAR-YEAR",
          "
             MEAN over the 12 monthly rows of DG_Q_YEAR, the two boxes",
@@ -753,6 +763,17 @@ dg_run <- function(v) {
 # sigma of 0.10. The hemispheric pair is returned so a caller can see the
 # spread. Quay's estimate is a global one, so the boxes are weighted by the
 # area each represents (ccx_column_area).
+#
+# ⭐ RE-WEIGHTED 2026-09-21 (f) (handoff (d) s3's "gate Q's weighting", Marcus:
+# "do the housekeeping in s6.4"). Quay's global mean is EXCHANGE-weighted (k x
+# area per region), and the GLODAP bottles reproduce his 0.60 only under that
+# weighting (0.545 k-weighted vs 0.846 area-weighted, data/obs_hemi_diseq.rds).
+# The 09-12 statistic -- two warm ML boxes, area-weighted, NO cold box -- was
+# compared to it like-for-unlike, which is why the 09-20 v loop could move every
+# regional level TOWARD the bottles while gate Q WORSENED (n_sd 2.75 -> 4.37).
+# The gate now scores gate D's four regional D's for DG_Q_YEAR under the bottles'
+# own band k-weights per box (dg_gateQ_k_weights); the cold boxes are 16 % of the
+# area and 37 % of the exchange. The old read is returned as mean_area_ml.
 DG_Q_YEAR <- ccx_const("AIRSEA_D13C_DISEQ_YEAR")
 DG_Q_OBS  <- ccx_const("AIRSEA_D13C_DISEQ_OBS")
 DG_Q_SD   <- ccx_const("AIRSEA_D13C_DISEQ_SD")
@@ -760,7 +781,7 @@ DG_Q_NSD  <- 2      # how many observational sigma the gate allows. A DISTRIBUTI
                     # claim against a stated +- , so it is scaled to that sigma and
                     # to nothing else. [[gate_bound_matches_its_claim]]
 
-dg_gateQ <- function(r, v) {
+dg_gateQ <- function(r, v, do = dg_gateD_obs()) {
   o <- r$out; aux <- r$sp$aux
   # the 12 month-centre rows of calendar year DG_Q_YEAR, on the model's own grid
   tt <- ccx_epoch_year_samples(DG_Q_YEAR + 0.5)
@@ -785,11 +806,61 @@ dg_gateQ <- function(r, v) {
     mean((d_ml - eps_dicg) - o[[paste0("d13c_", h)]][j])
   }, 0)
   w <- vapply(HEMIS, function(h) ccx_column_area(aux, h), 0); w <- w / sum(w)
-  m <- sum(w * d)
-  n_sd <- abs(m - DG_Q_OBS) / DG_Q_SD
-  list(year = DG_Q_YEAR, months = o$t[j], by_hemi = d, w = w, mean = m,
+  m_area_ml <- sum(w * d)
+  # ⭐ RE-WEIGHTED 2026-09-21 (f): Quay's 0.60 is a GAS-EXCHANGE-WEIGHTED global mean
+  # (his eq. for the global disequilibrium weights each region by k x area), and the
+  # GLODAP bottles reproduce it ONLY under that weighting (0.545 k-weighted vs 0.846
+  # area-weighted, data/obs_hemi_diseq.rds $global). The statistic above -- the two
+  # warm ML boxes, area-weighted, no cold box -- was compared to it like-for-unlike,
+  # which is why every regional level could IMPROVE while gate Q WORSENED (09-20 v,
+  # CHANGELOG). The gate now takes gate D's four regional D's (the ML region = ml + eq
+  # + tr area-weighted within the hemisphere; the HS box) for DG_Q_YEAR and weights
+  # them by the bottles' own NCEP-wind^2 band weights summed over each box's latitude
+  # range (the cold boxes are 16 % of the area but 37 % of the exchange). The old
+  # ML-only area read is RETURNED beside it (mean_area_ml), never scored. The
+  # area-weighted all-box mean is compared to the bottles' area global as a second read.
+  bx <- dg_gateD_box_years(r, v)
+  reg <- list(); for (h in HEMIS) {
+    ml_boxes <- bx[vapply(bx, function(x) x$hemi == h && x$box != "hs", TRUE)]
+    Dy <- function(x) { k <- match(DG_Q_YEAR, x$years); if (is.na(k)) stop("GATE Q: no ", DG_Q_YEAR, " row for ", h); x$D[k] }
+    a_ml <- sum(vapply(ml_boxes, `[[`, 0, "area"))
+    reg[[paste0(h, "_ml")]] <- sum(vapply(ml_boxes, function(x) x$area * Dy(x), 0)) / a_ml
+    hs_box <- bx[[paste(h, "hs", sep = "_")]]
+    reg[[paste0(h, "_hs")]] <- if (is.null(hs_box)) NA_real_ else Dy(hs_box)
+  }
+  kw <- dg_gateQ_k_weights(do)
+  have <- vapply(names(reg), function(k) is.finite(reg[[k]]), TRUE)
+  if (!all(have)) {   # no cold box (hs_frac 0): its k-weight goes to the hemisphere's ML region, which then covers the band
+    for (h in HEMIS) if (!have[[paste0(h, "_hs")]]) { kw[[paste0(h, "_ml")]] <- kw[[paste0(h, "_ml")]] + kw[[paste0(h, "_hs")]]; kw[[paste0(h, "_hs")]] <- 0; reg[[paste0(h, "_hs")]] <- 0 }
+  }
+  wk <- unlist(kw[names(reg)]); wk <- wk / sum(wk); m_k <- sum(wk * unlist(reg))
+  wa <- unlist(dg_gateQ_area_weights(do, have)[names(reg)]); wa <- wa / sum(wa); m_area_all <- sum(wa * unlist(reg))
+  n_sd <- abs(m_k - DG_Q_OBS) / DG_Q_SD
+  list(year = DG_Q_YEAR, months = o$t[j], by_hemi = d, w = w,
+       mean = m_k, w_k = wk, region = unlist(reg),               # THE GATE: k-weighted over the four surface boxes vs Quay
+       mean_area_ml = m_area_ml,                                  # the pre-09-21 f statistic, for continuity (never scored)
+       mean_area_all = m_area_all, obs_area_all = do$global_area, # the second read: area-weighted vs the bottles' area global
+       obs_k_bottles = do$global_k,                               # the bottles under the gate's weighting (reproduces Quay)
        mean_unweighted = mean(d), obs = DG_Q_OBS,
        sd = DG_Q_SD, n_sd = n_sd, pass = n_sd <= DG_Q_NSD)
+}
+
+#' The bottles' NCEP-wind^2 k-weights per model surface box (2026-09-21 f): the band
+#' weights of data/obs_hemi_diseq.rds summed over each box's latitude range --
+#' |lat| < lat_hi is the hemisphere's ML region, >= lat_hi its cold box. READ from
+#' the file, never typed; the area column gives the like-for-like area weights.
+dg_gateQ_k_weights <- function(do = dg_gateD_obs(), col = "k") {
+  bw <- do$band_weights; lat <- as.numeric(rownames(bw))
+  out <- list()
+  for (h in HEMIS) { s <- if (h == "NH") lat > 0 else lat < 0
+    out[[paste0(h, "_ml")]] <- sum(bw[s & abs(lat) <  do$lat_hi, col])
+    out[[paste0(h, "_hs")]] <- sum(bw[s & abs(lat) >= do$lat_hi, col]) }
+  out
+}
+dg_gateQ_area_weights <- function(do = dg_gateD_obs(), have = NULL) {
+  aw <- dg_gateQ_k_weights(do, col = "area")
+  if (!is.null(have)) for (h in HEMIS) if (!isTRUE(have[[paste0(h, "_hs")]])) { aw[[paste0(h, "_ml")]] <- aw[[paste0(h, "_ml")]] + aw[[paste0(h, "_hs")]]; aw[[paste0(h, "_hs")]] <- 0 }
+  aw
 }
 
 # ---- GATE D: the HEMISPHERIC air-sea d13C disequilibrium (2026-09-20 t) ----
@@ -842,6 +913,8 @@ dg_gateD_obs <- function(file = DG_D_OBS_FILE) {
        hemi_k = list(NH = tg$NH_all_k, SH = tg$SH_all_k),
        asym = o$asym$area, asym_se = o$asym$se_area,
        asym_k = o$asym$k, asym_k_se = o$asym$se_k,
+       global_area = o$global$area, global_k = o$global$k,     # the bottles' GLOBAL mean under each weighting (gate Q reads both, 2026-09-21 f)
+       band_weights = o$band_weights,                           # 5-deg bands x {area, k}: the k column is NCEP wind^2 x area
        lat_hi = o$consts$lat_hi, built = o$provenance$built, file = file)
 }
 
