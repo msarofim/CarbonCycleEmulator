@@ -268,6 +268,49 @@ function(input, output, session) {
                Units = unname(unit[nm]), check.names = FALSE)
   }, striped = TRUE, width = "100%")
 
+  # ---- 7. Known issues (the beta review) -----------------------------
+  # Each panel is rendered ONLY when its tab is visible, which is what keeps the
+  # expensive cards (3-6, each needing a model run the app does not already
+  # have) off the startup path. withProgress gives the first view of the tab a
+  # reason for the wait instead of a blank panel.
+  rv_render <- function(f, label) renderPlot({
+    withProgress(message = label, value = NULL, f())
+  })
+  output$rv_repdc     <- rv_render(rv_plot_repdc,     "Comparing the model with Mauna Loa")
+  output$rv_gradient  <- rv_render(rv_plot_gradient,  "Measuring the north-south gradients")
+  output$rv_diseq     <- rv_render(rv_plot_diseq,     "Measuring the ocean's isotopic disequilibrium")
+  output$rv_variance  <- rv_render(rv_plot_variance,  "Measuring the year-to-year variability")
+  output$rv_enso      <- rv_render(rv_plot_enso,      "Running the model with its ENSO mechanisms off")
+  output$rv_irf       <- rv_render(rv_plot_irf,       "Releasing a pulse and following it")
+  output$rv_partition <- rv_render(rv_plot_partition, "Following the pulse for a thousand years")
+  output$rv_control   <- rv_render(rv_plot_control,   "Running the simpler control model")
+
+  # THE STAND-IN LIST IS GENERATED, NOT TYPED. Which names are held, and at what
+  # value, is a property of the mode file the app is running; a hand-kept table
+  # here would be a second claim about the model that nothing checks.
+  output$rv_shims <- renderTable({
+    x <- rv_stand_ins()
+    if (rv_failed(x) || !length(x$pins))
+      return(data.frame(Note = "The held-parameter list is unavailable in this build."))
+    data.frame(`Held parameter` = names(x$pins),
+               `Held at` = formatC(as.numeric(x$pins), digits = 4, format = "g"),
+               check.names = FALSE)
+  }, striped = TRUE, width = "100%")
+
+  output$rv_constants <- renderUI({
+    x <- rv_stand_ins()
+    if (rv_failed(x)) return(div(class = "caveat", x$msg))
+    tagList(
+      p(sprintf(paste("%d of the model's %d physical constants are still marked",
+                      "provisional \u2014 their values were inverted through the model,",
+                      "or held, rather than traced to a published measurement:"),
+                length(x$provisional), x$n_constants)),
+      p(tags$code(paste(x$provisional, collapse = ", "))),
+      if (!is.na(x$n_fitted))
+        p(tags$small(sprintf(paste("The running fit has %d free parameters;",
+                                   "the held names are listed above."), x$n_fitted))))
+  })
+
   output$h_data <- renderTable({
     data.frame(
       Record = c("Mauna Loa CO₂", "South Pole CO₂", "Law Dome ice cores",

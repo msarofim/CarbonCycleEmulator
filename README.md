@@ -18,6 +18,13 @@ undergraduate environmental studies).
 
 ## Status
 
+**Public beta `v1.0-hilda29l`, 2026-09-22.** The MODEL is frozen and tagged; what is
+under review is how much its remaining flaws matter. The app's seventh tab, **"Known
+issues"**, names each one, shows it measured by the running model, and asks whether it
+is a **deal-breaker, fixable, or acceptable** for a pedagogical model. Comments go to
+the Substack post the app links to; anyone whose comment changes the model or the
+write-up is credited in the acknowledgements.
+
 **Product-ready as of 2026-09-21** (`notes/assessment_2026-09-21_product_ready.md`). Model core,
 calibration and app run end to end. The calibrated vector is **`hilda29l`**: a **29-parameter
 maximum-a-posteriori fit** (nine further names held at stated values) under the `hilda_csl3`

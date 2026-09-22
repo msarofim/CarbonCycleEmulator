@@ -50,17 +50,41 @@ app_provenance_caption <- function(extra = NULL) {
 # ---------------------------------------------------------------------
 # Tab 1: the Keeling curve
 # ---------------------------------------------------------------------
-plot_keeling <- function(out, obs, yr_range, hemi = "both", show_obs = TRUE) {
+# ⭐ TWO MODEL LINES SINCE 2026-09-22, AND THE REASON IS LIKE-FOR-LIKE.
+# The likelihood never compared the model's hemispheric BOX to a station: it
+# compared `box - rep_dC`, a fitted station-vs-box representation offset applied
+# to CO2 and d13C together by mass balance (R/likelihood.R, LIK_REP_SOURCE_D13C).
+# Until now this panel drew the raw box against the station points, i.e. a
+# DIFFERENT comparison from the one that was scored -- about 4 ppm different, on
+# the app's flagship chart, where the scored CO2 level stream fits to a fraction
+# of that. So both are drawn: the solid line is what the calibration scored, the
+# faint one is the raw box it came from, and the caption names the offset and how
+# far outside its prior it sits. Dropping the faint line would turn a disclosed
+# stand-in into a display convention, which is the thing to avoid here; dropping
+# the solid one is what we had, which misreports the fit. Card 1 of the "Known
+# issues" tab carries the residual and asks whether the offset is acceptable.
+plot_keeling <- function(out, obs, yr_range, hemi = "both", show_obs = TRUE,
+                         rep_dC = APP_REP_DC) {
   k <- out$t >= yr_range[1] & out$t <= yr_range[2]
   d <- out[k, ]
+  off <- if (is.null(rep_dC) || !is.finite(rep_dC)) 0 else rep_dC
+  lab_n <- "Model, Northern Hemisphere"; lab_s <- "Model, Southern Hemisphere"
+  lab_nb <- "Model box, north"
+  lab_sb <- "Model box, south"
   series <- switch(hemi,
+    both = data.frame(t = rep(d$t, 2), co2 = c(d$co2_NH, d$co2_SH) - off,
+                      who = rep(c(lab_n, lab_s), each = nrow(d))),
+    NH   = data.frame(t = d$t, co2 = d$co2_NH - off, who = lab_n),
+    SH   = data.frame(t = d$t, co2 = d$co2_SH - off, who = lab_s))
+  raw <- switch(hemi,
     both = data.frame(t = rep(d$t, 2), co2 = c(d$co2_NH, d$co2_SH),
-                      who = rep(c("Model, Northern Hemisphere",
-                                  "Model, Southern Hemisphere"), each = nrow(d))),
-    NH   = data.frame(t = d$t, co2 = d$co2_NH, who = "Model, Northern Hemisphere"),
-    SH   = data.frame(t = d$t, co2 = d$co2_SH, who = "Model, Southern Hemisphere"))
+                      who = rep(c(lab_nb, lab_sb), each = nrow(d))),
+    NH   = data.frame(t = d$t, co2 = d$co2_NH, who = lab_nb),
+    SH   = data.frame(t = d$t, co2 = d$co2_SH, who = lab_sb))
 
   p <- ggplot(series, aes(t, co2, colour = who)) +
+    {if (off != 0) geom_line(data = raw, aes(t, co2, colour = who),
+                             linewidth = 0.5, alpha = 0.55)} +
     geom_line(linewidth = 0.6)
 
   if (show_obs) {
@@ -75,12 +99,22 @@ plot_keeling <- function(out, obs, yr_range, hemi = "both", show_obs = TRUE) {
                           size = 0.5, alpha = 0.7, inherit.aes = FALSE)
     }
   }
-  p + scale_colour_manual(values = c(
-        "Model, Northern Hemisphere" = PAL[["nh"]],
-        "Model, Southern Hemisphere" = PAL[["sh"]],
-        "Measured, Mauna Loa"        = "#7b241c",
-        "Measured, South Pole"       = "#1a5276")) +
-    labs(x = LAB_YEAR, y = LAB_CO2, caption = app_provenance_caption()) +
+  p + scale_colour_manual(values = stats::setNames(
+        c(PAL[["nh"]], PAL[["sh"]], "#7b241c", "#1a5276",
+          PAL[["nh"]], PAL[["sh"]]),
+        c(lab_n, lab_s, "Measured, Mauna Loa", "Measured, South Pole",
+          lab_nb, lab_sb))) +
+    guides(colour = guide_legend(nrow = 2, byrow = TRUE)) +
+    labs(x = LAB_YEAR, y = LAB_CO2,
+         caption = if (off != 0)
+           # wrap the ASSEMBLED caption: the provenance prefix is part of the
+           # first line's width (see rv_cap() in plots_review.R)
+           paste(strwrap(app_provenance_caption(sprintf(paste(
+             "Solid = what the calibration scored against these stations: the",
+             "hemispheric box minus a fitted station offset of %.2f ppm. Faint =",
+             "the box itself. Card 1 of Known issues has the residuals."), off)),
+             width = 95), collapse = "\n")
+           else app_provenance_caption()) +
     theme_ccx()
 }
 

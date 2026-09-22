@@ -1,10 +1,19 @@
 # =====================================================================
-# ui.R -- six tabs, per DESIGN section 7.
+# ui.R -- six teaching tabs (DESIGN section 7) plus, since 2026-09-22, a
+# SEVENTH for the beta review.
 #
 # Audience is introductory environmental science. The house style, from
 # CLAUDE.md: every panel opens with a one-sentence takeaway, units get a
 # tooltip, and anything a specialist would want goes in a collapsible so it does
 # not tax everyone else.
+#
+# ⭐ THE SEVENTH TAB HAS A DIFFERENT AUDIENCE ON PURPOSE. "Known issues" is
+# written for the people being asked to judge the model, not for the student:
+# it names each remaining flaw, shows it measured by the running model, and asks
+# whether it is a deal-breaker, fixable or acceptable. The six teaching tabs are
+# untouched by it, except where a flaw is VISIBLE on one of them -- there the
+# tab carries a one-line pointer to its card, because a reader who finds a
+# defect before the app admits to it has found a hidden defect.
 # =====================================================================
 
 # A unit gloss rendered as a dotted-underline tooltip.
@@ -24,9 +33,55 @@ info_box <- function(title, ...) {
 provenance_banner <- function() {
   cls <- if (app_params$has_posterior) "prov prov-ok" else "prov prov-warn"
   div(class = cls,
-      tags$strong(sprintf("Parameters: %s (%s).", app_params$source,
-                          app_params$status)),
-      " ", app_params$detail)
+      tags$strong(sprintf("%s %s \u2014 parameters: %s (%s).",
+                          toupper(APP_STAGE), APP_VERSION,
+                          app_params$source, app_params$status)),
+      " ", app_params$detail,
+      " ", APP_STAGE_NOTE,
+      " ", tags$em(sprintf("Reviewers: see the \u201c%s\u201d tab.", RV_TAB_TITLE)))
+}
+
+# Shown once, at the top of the first tab: the only place a first-time visitor
+# is told what they just waited for. Measured, not guessed -- see APP_WARMUP_NOTE.
+warmup_note <- function() div(class = "caveat", APP_WARMUP_NOTE)
+
+# A pointer FROM a teaching tab TO the card that owns a flaw visible on it.
+# Written as a function so the card number cannot be typed twice.
+see_card <- function(id, what) {
+  c_ <- rv_card(id)
+  div(class = "caveat",
+      tags$strong(sprintf("Known issue %d: ", c_$id)), what,
+      sprintf(" See \u201c%s\u201d \u2192 card %d, \u201c%s\u201d.",
+              RV_TAB_TITLE, c_$id, c_$title))
+}
+
+# ---- the review tab's furniture -------------------------------------
+review_ask_block <- function() {
+  tags$ul(class = "asklist", lapply(RV_ASK, function(a)
+    tags$li(tags$strong(a), " \u2014 ", RV_ASK_GLOSS[[a]])))
+}
+
+#' One card. `plot_id` NULL for a card with nothing to draw.
+review_card <- function(id, plot_id = NULL, plot_height = "330px",
+                        extra_plot_id = NULL, extra_height = "300px") {
+  c_ <- rv_card(id)
+  url <- rv_card_url(id)
+  div(class = "card-issue",
+      h4(sprintf("%d. %s", c_$id, c_$title)),
+      div(class = "card-class",
+          tags$strong(toupper(c_$class)), " \u2014 ", RV_CLASS_GLOSS[[c_$class]]),
+      p(c_$plain),
+      if (!is.null(plot_id)) plotOutput(plot_id, height = plot_height),
+      if (!is.null(extra_plot_id)) plotOutput(extra_plot_id, height = extra_height),
+      info_box("The detail behind this one", p(c_$detail)),
+      div(class = "card-ask", tags$strong("What I am asking: "), c_$ask),
+      if (is.null(url))
+        div(class = "caveat",
+            tags$strong("The comment link is not set in this build. "),
+            sprintf("Reply on the post and lead with \u201ccard %d\u201d.", c_$id))
+      else
+        p(tags$a(href = url, target = "_blank",
+                 sprintf("Comment on card %d \u2192", c_$id))))
 }
 
 navbarPage(
@@ -49,6 +104,13 @@ navbarPage(
                 padding: 8px 12px; border-radius: 3px; margin-top: 10px; }
       .readout { font-size: 1.5rem; font-weight: 700; color: #1b6ca8; }
       .readout-label { font-size: 0.85rem; color: #555; }
+      .card-issue { border: 1px solid #d5dbdb; border-radius: 5px;
+                    padding: 16px 18px; margin-bottom: 22px; background: #fff; }
+      .card-issue h4 { font-weight: 700; margin-bottom: 6px; }
+      .card-class { font-size: 0.82rem; color: #555; margin-bottom: 10px; }
+      .card-ask { background: #eef5fb; border-left: 4px solid #1b6ca8;
+                  padding: 9px 13px; margin-top: 12px; border-radius: 3px; }
+      .asklist { font-size: 0.95rem; }
     "))),
     div(style = "padding: 0 14px;", provenance_banner())
   ),
@@ -76,8 +138,13 @@ navbarPage(
       ),
       mainPanel(
         width = 9,
+        warmup_note(),
         takeaway(textOutput("k_takeaway", inline = TRUE)),
         plotOutput("k_plot", height = "380px"),
+        see_card(1, paste("Two model lines are drawn. The solid one is what the",
+                          "calibration actually scored against these measurements",
+                          "\u2014 the hemispheric box minus a fitted station offset",
+                          "\u2014 and the faint one is the box itself.")),
         hr(),
         h5("The seasonal cycle on its own"),
         p("Strip out the long-term rise and one year is left: the land",
@@ -177,6 +244,9 @@ navbarPage(
         takeaway(textOutput("i_takeaway", inline = TRUE)),
         h5("δ¹³C: the Suess effect"),
         plotOutput("i_d13c", height = "280px"),
+        see_card(2, paste("The model's north\u2013south \u03b4\u00b9\u00b3C difference is about",
+                          "twice the measured one. The trend at each station is",
+                          "right; the difference between them is not.")),
         hr(),
         h5("Δ¹⁴C: the bomb spike and how fast it drained away"),
         plotOutput("i_d14c", height = "300px"),
@@ -250,6 +320,44 @@ navbarPage(
                  p("So the honest reading is: you are changing CO₂ only, in a",
                    "world whose other greenhouse gases and pollutants follow the",
                    "background scenario you picked."))
+      )
+    )
+  ),
+
+  # ---- 7. Known issues (the beta review) ------------------------------
+  # Cards are rendered from RV_CARDS by stable id, so reordering this block
+  # cannot renumber a card somebody has already written a comment about.
+  tabPanel(
+    RV_TAB_TITLE,
+    fluidRow(
+      column(
+        9, offset = 0,
+        h3(sprintf("What this model gets wrong \u2014 and a question for you (%s %s)",
+                   APP_STAGE, APP_VERSION)),
+        p(RV_TAB_LEAD),
+        review_ask_block(),
+        div(class = "caveat", APP_FEEDBACK_HOW),
+        if (!app_link_ok(APP_FEEDBACK_URL))
+          div(class = "prov prov-warn",
+              tags$strong("This build has no comment link set. "),
+              "Set APP_FEEDBACK_URL in app/global.R before deploying."),
+        p(tags$small(paste("Every number below is measured by the model this app",
+                           "is running, not quoted from a note. The first time you",
+                           "open this tab some cards run the model again and take",
+                           "a few seconds."))),
+        hr(),
+        review_card(1, "rv_repdc",   "320px"),
+        review_card(2, "rv_gradient", "300px"),
+        review_card(3, "rv_diseq",   "320px"),
+        review_card(4, "rv_variance", "300px", "rv_enso", "320px"),
+        review_card(5, "rv_irf",     "320px", "rv_partition", "300px"),
+        review_card(6, "rv_control", "330px"),
+        review_card(7, NULL),
+        review_card(8, NULL),
+        div(class = "card-issue",
+            h4("The stand-ins and the provisional constants, listed"),
+            tableOutput("rv_shims"),
+            uiOutput("rv_constants"))
       )
     )
   ),

@@ -44,8 +44,43 @@ APP_SUBTITLE     <- "A calibrated carbon-cycle model you can take apart"
 APP_HIST_YEARS   <- c(1750, 2024)
 APP_FUTURE_YEARS <- c(1750, 2100)
 APP_PULSE_YEARS  <- c(1750, 2300)
-APP_REPO_URL     <- "https://github.com/msarofim/CarbonCycleEmulator"
 APP_AUTHOR       <- "Marcus C. Sarofim, NYU Marron Institute"
+
+# ---- THE BETA AND ITS REVIEW (2026-09-22) ---------------------------------
+# The model is frozen and tagged; what is under review is whether its remaining
+# flaws are deal-breakers, fixable or acceptable for a pedagogical model. The
+# "Known issues" tab asks that question card by card, so these constants are
+# what every label, banner and link in that tab derives from (project rule:
+# labels derive from named constants, never literals at the point of use).
+APP_VERSION      <- "v1.0-hilda29l"
+APP_STAGE        <- "beta"
+APP_STAGE_NOTE   <- paste("Beta. The model is frozen at this version; what is",
+                          "under review is how much its remaining flaws matter.",
+                          "Teaching software — not peer-reviewed, not for citation.")
+# ⚠ STARTUP IS SLOW AND THE USER MUST BE TOLD BEFORE THEY WAIT. Measured on an
+# M4: 73 s idle, 2.8 min under load (four Julia jobs). DEPLOY.md's older "~20 s"
+# was a warm-cache number. shinyapps.io cold-starts a fresh container per idle
+# process, so a visitor arriving from a post pays this.
+APP_WARMUP_NOTE  <- paste("First load compiles the model and runs a 1750 spin-up:",
+                          "allow up to three minutes. After that every panel is a",
+                          "live model run, not a stored picture.")
+
+# ⛔ BOTH URLS ARE PLACEHOLDERS UNTIL SET, AND THE APP SAYS SO ON SCREEN.
+# A dead link in a public beta costs exactly the feedback the beta exists to
+# collect, and a URL typed once into a tab is the kind of thing that ships
+# broken because nothing checks it. app_link_ok() below is that check; ui.R
+# renders a visible warning instead of a link when it fails.
+# APP_FEEDBACK_URL is the Substack post the review comments live under
+# (Marcus 2026-09-22: the feedback channel is the Substack post on the model).
+APP_FEEDBACK_URL <- "SET-BEFORE-DEPLOY"
+APP_REPO_URL     <- "SET-BEFORE-DEPLOY"
+APP_FEEDBACK_HOW <- paste("Comments are public on the post and I read all of",
+                          "them. Please lead your comment with the card number",
+                          "so the threads stay separable. Anyone whose comment",
+                          "changes the model or the write-up is credited in the",
+                          "acknowledgements.")
+app_link_ok <- function(u) is.character(u) && length(u) == 1L &&
+  nzchar(u) && !identical(u, "SET-BEFORE-DEPLOY")
 
 APP_SSPS <- c(
   "SSP1-1.9  (very low emissions)"  = "ssp119",
@@ -121,6 +156,15 @@ app_params <- local({
   # this block and passed to every ccx_build_forcing() call in the app.
   bomb_total <- CCX_PARAM_TABLE$bomb_total$init
   luc_scale  <- 1
+  # `rep_dC` IS A THIRD ONE, AND IT IS A DISPLAY PARAMETER AS WELL AS A
+  # LIKELIHOOD ONE (2026-09-22). It cannot move a trajectory -- that is why the
+  # comment above is right to drop it from `p` -- but it is the offset the
+  # likelihood applied when it compared the model BOX to the Mauna Loa STATION,
+  # so a panel that draws the raw box against station data is not drawing the
+  # comparison the fit was scored on. plot_keeling() now draws both, and needs
+  # the value. Defaults to the no-offset behaviour (zero = absent, the
+  # likelihood's own absence contract).
+  rep_dC <- 0
   for (mode_file in mode_files) {
     if (!file.exists(mode_file)) next
     md <- tryCatch(readRDS(mode_file), error = function(e) NULL)
@@ -144,6 +188,7 @@ app_params <- local({
     p$pump_mode <- md$pump_mode
     bomb_total <- pm$bomb_total
     luc_scale  <- pm$luc_scale
+    rep_dC     <- if (is.null(pm$rep_dC)) 0 else pm$rep_dC
     # THE FILE'S OWN SPINUP (2026-09-21 h). Every mode since 09-09x is fitted under
     # the PERIODIC spinup (a seasonal mixed layer spun to its own annual cycle);
     # started from the aseasonal equilibrium instead, the canonical hilda29l runs
@@ -153,11 +198,16 @@ app_params <- local({
     src <- "posterior mode"
     status <- "single best fit"
     # WHAT THIS SENTENCE MAY NOT SAY. Not "reproduces the record": the CO2 LEVEL
-    # streams are fitted through a free station-vs-box offset (`rep_dC`, +5.2 sd
-    # of its own prior at this mode), so the calibration constrains the SHAPE of
-    # the Keeling curve far more tightly than its absolute height, and the model
-    # box runs ~4 ppm above Mauna Loa on the panel next to this banner. See
-    # calibration/diag_rep_dC_shape.R.
+    # streams are fitted through a free station-vs-box offset (`rep_dC`), so the
+    # calibration constrains the SHAPE of the Keeling curve more tightly than its
+    # absolute height. See calibration/diag_rep_dC_shape.R.
+    # ⚠ CORRECTED 2026-09-22: this comment read "+5.2 sd of its own prior" and
+    # "the model box runs ~4 ppm above Mauna Loa". MEASURED at hilda29l, the
+    # offset is 3.515 ppm on a 1.0 ppm prior = 3.52 sd, and the raw box runs
+    # +3.40 ppm above Mauna Loa in the mean (RMS 0.73 ppm once the offset the
+    # likelihood applied is taken off). The "5.2" was the prior z 3.52 garbled;
+    # the scorecard's own strained-prior line has always said +3.52. No number
+    # is typed here any more -- card 1 of the review tab COMPUTES all three.
     detail <- paste0("Maximum-a-posteriori fit of ", length(CCX_PARAM_NAMES),
                      " parameters to CO₂, δ¹³C, Δ¹⁴C and Global Carbon Budget",
                      " sinks. A single best fit, not yet a posterior — no",
@@ -172,13 +222,16 @@ app_params <- local({
                     "parameter uncertainty.")
   }
   list(p = p, source = src, status = status, detail = detail,
-       bomb_total = bomb_total, luc_scale = luc_scale, spinup_label = spinup_label,
+       bomb_total = bomb_total, luc_scale = luc_scale, rep_dC = rep_dC,
+       spinup_label = spinup_label,
        has_posterior = file.exists(post_file))
 })
 
 APP_PARAMS     <- app_params$p
 APP_BOMB_TOTAL <- app_params$bomb_total
 APP_LUC_SCALE  <- app_params$luc_scale
+# The station-vs-box representation offset the likelihood scored through. ppm.
+APP_REP_DC     <- app_params$rep_dC
 # ONE spinup for every run the app makes -- the one the parameter set was fitted
 # under (periodic for every registered mode; aseasonal only for the defaults).
 # The counterfactual reruns below go through the same function, so a switched-off

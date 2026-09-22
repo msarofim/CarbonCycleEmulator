@@ -49,7 +49,7 @@ so the reviewer meets first what a student would meet first.
 
 | card | figure (new `plot_*`) | the number | the model's reason (one sentence) | class | the question, sharpened |
 |---|---|---|---|---|---|
-| **1 The model box sits above Mauna Loa** | Keeling panel with the residual (model − MLO) beneath it, `rep_dC` drawn as a dashed line | +5.2 ppm fitted offset, prior z +3.52; ~4 ppm visible on the default view | a two-box atmosphere has no Mauna Loa; the station sits below the hemispheric mean and the fit carries that as a representation offset | shim | is a fitted station offset acceptable in a teaching tool, and should the panel DRAW it (which exports a 3.5σ prior strain as a display convention) or show the gap? |
+| **1 The model box sits above Mauna Loa** | Keeling panel with the residual (model − MLO) beneath it, `rep_dC` drawn as a dashed line | fitted offset **3.515 ppm** on a 1.0 ppm prior = **z +3.52**; raw box **+3.40 ppm** above MLO in the mean, **RMS 0.73 ppm** once the offset is applied (all measured 09-22) | a two-box atmosphere has no Mauna Loa; the station sits below the hemispheric mean and the fit carries that as a representation offset | shim | is a fitted station offset acceptable in a teaching tool, and should the panel DRAW it (which exports a 3.5σ prior strain as a display convention) or show the gap? |
 | **2 The north–south δ¹³C gradient is twice observed** | MLO and SPO δ¹³C (obs + model) with the CO₂ gradient beside it | gradient −0.134 vs −0.067 ± 0.003 ‰ (2.00×), a constant offset; CO₂ gradient 0.91× | closing it needs a persistent NH−SH isoflux of ~+64 GtC‰/yr that a one-column-per-hemisphere ocean has no carrier for; every lever tried moves the level, not the gradient | structural | is a 2× hemispheric isotope gradient a deal-breaker when the CO₂ gradient and both Suess trends are right? what carrier would you expect? |
 | **3 The surface-ocean δ¹³C disequilibrium asymmetry** | NH/SH air-sea disequilibrium, model mixed layer and cold box vs the GLODAP bottles | asym +0.094 vs +0.286 ± 0.029 (z −6.60); the deficit is NH-side (+1.03 vs +1.28) | same structure as card 2; the air-sea isotopic timescale is over-determined by ~15 % between the bottles and the atmospheric decline | structural | same question as 2 — the two are one flaw with two observables; and would an interhemispheric deep exchange (a NEW model) be worth it for a teaching tool? |
 | **4 Year-to-year wobble is 60 % of observed** | detrended annual CO₂ growth rate, model vs obs, with the sd of each; beneath it ocean-uptake anomaly vs Niño3.4 with the slopes | sd 0.548 vs 0.933 ± 0.084 ppm/yr (0.59×); the ENSO SLOPE is 0.89× (+0.103 ± 0.042 vs +0.115 ± 0.025 GtC/yr per index) | the ENSO sensitivity is carried by a physical upwelling limb (13.7 ± 2.1 Sv per index, in the observed 14–25 bracket); the variance the record has beyond ENSO — volcanic, land — has no mechanism here | structural | the app's ENSO switch is a sensitivity, not a reconstruction: is that acceptable, or must a "what makes CO₂ wobble" tab reproduce the variance? |
@@ -91,7 +91,24 @@ This only works if the repo is public (§0 item 4a).
 5. Timed deploy; `DEPLOY.md` + README `Status` gain the beta label.
 6. A reviewer-facing README section: what we are asking, the eight questions, how to answer.
 
-## 4. Decisions — A and E SETTLED 09-22; B stands; C and D explained below
+## 4. ⭐ ALL FIVE DECISIONS SETTLED 09-22 — AND BUILT (CHANGELOG 09-22 (l))
+
+| | decision | Marcus, 09-22 | built |
+|---|---|---|---|
+| **A** | feedback channel | **the Substack post on the model.** Comments public there; credit in the acknowledgements | `APP_FEEDBACK_URL` + a per-card deep link; a visible warning until it is set |
+| **B** | the eight cards | **approved as drafted** | `RV_CARDS`, gated by `test-review-cards.R` |
+| **C** | the Keeling panel | **C2 + C3** | both model lines on the teaching tab; the residual pair on card 1 |
+| **D** | bands | **D1.** "D3 should wait until we have a final model, not a beta product" | banner only; card 7 states the posterior is deferred to the final model, and asks whether that is acceptable |
+| **E** | the audience | Substack / LinkedIn / Facebook / Bluesky followers, **"the only people commenting on the cards will be subject-matter experts"**; a couple of hundred reads in the first hours, click-through unknown; **the three-minute warm-up can be warned about in the post** | cards written in one technical register with a plain lede, not two; `APP_WARMUP_NOTE` on the first tab; the host's concurrency is on the DEPLOY checklist |
+
+⚠ **What E's answer changes from §4a's draft.** The expectation that only subject-matter experts
+comment removes the two-register requirement — the cards keep a plain opening sentence and put the
+mechanism in a collapsible, rather than being written twice. **It does NOT remove §4a item 2**: the
+response will still skew to the intuitive cards, so if the structural reds (2, 3) are what gate the
+paper, naming a few carbon-cycle colleagues in the post and asking them for 2, 3 and 6 specifically
+is still worth doing on top of the open call.
+
+### The original framing of the choices, kept for the record
 
 - **A — SETTLED: the feedback channel is Marcus's Substack post on the model.** ⇒ the repo does
   not have to be published for the channel to work, but §2's "how would a reviewer judge
@@ -147,18 +164,24 @@ It is tied across species deliberately: a **free** δ¹³C level offset would ha
 Suess overshoot whole and reported a good fit. Prior **N(0, 1.0 ppm)**, and the 1.0 is the
 repo's own station-vs-box scale with a receipt (co-located NOAA in-situ vs SIO flask at MLO
 disagree 0.39–0.59 ppm RMS over 702 months, so a station-vs-*box* term must exceed that). The
-MAP sits at **+5.2 ppm = z +3.52** — five times the scale the prior thinks representation is
-worth. That strain is card 1's content and is real.
+MAP sits at **3.515 ppm = z +3.52** — three and a half times the scale the prior thinks
+representation is worth. That strain is card 1's content and is real.
+⚠ **CORRECTION (09-22, measured).** The first cut of this note, and a comment in `app/global.R`,
+both said "+5.2". There is no 5.2 in this model: the offset is **3.515 ppm** and its prior z is
+**+3.52** — the z had been garbled into a ppm value and propagated. The scorecard's strained-prior
+line has always read `rep_dC +3.52`. Both places are corrected, and card 1 now computes all three
+numbers rather than quoting any.
 
 ⚠ **THE DISPLAY PROBLEM IS NOT THE STRAIN — IT IS THAT THE PANEL DRAWS A DIFFERENT COMPARISON
 FROM THE ONE THE FIT WAS SCORED ON.** `plot_keeling()` (`app/R/plots.R:53`) plots the raw box
 `d$co2_NH` against the MLO points. The likelihood scored `box − rep_dC` against those same
-points. The two comparisons differ by 5.2 ppm, so **the flagship panel is not like-for-like with
-the calibration**: it shows a ~4 ppm miss where the scored level stream fits to ~0.6 ppm.
+points. The two comparisons differ by 3.5 ppm, so **the flagship panel is not like-for-like with
+the calibration**: it shows a +3.40 ppm mean miss where the comparison that was scored sits
+at −0.12 ppm mean, 0.73 ppm RMS (measured 09-22).
 
 | option | what the panel shows | for | against |
 |---|---|---|---|
-| **C1 leave it** (current) | raw box vs station | nothing hidden; the gap is visible | the panel is not the comparison that was fitted; on an open social-media launch the top comment becomes "your model is 4 ppm high", which is a display artefact and crowds out the eight real cards |
+| **C1 leave it** (was current) | raw box vs station | nothing hidden; the gap is visible | the panel is not the comparison that was fitted; on an open launch the top comment becomes "your model is 3–4 ppm high", a display artefact that crowds out the eight real cards |
 | **C2 draw both lines** — box (light) **and** box − `rep_dC` labelled "model, as the station would measure it" (solid), caption naming the fitted offset and its 3.5σ | the scored comparison, plus the raw box beside it | like-for-like with the calibration; the strain is stated, not hidden; card 1 still owns the accounting | a reader who skips the caption sees a good fit and misses that the offset is fitted, not measured |
 | **C3 residual panel** — keep the box line, add model − MLO underneath with `rep_dC` as a horizontal line | the gap as the subject | most informative for a reviewer | costs vertical space on the default tab and asks a general audience to read a residual plot |
 
