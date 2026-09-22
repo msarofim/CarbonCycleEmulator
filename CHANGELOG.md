@@ -2,6 +2,27 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-22 (u) — **R2, THE SIDE TEST Marcus asked for: centre and width TOGETHER. Re-centring alone is inert and free (+0.05 ppm, +0.05 log-units). Tightening is the entire lever: −1.65 ppm and −17.6 log-units. And the two INTERACT — centring on the measured value makes the tightening 11 log-units cheaper, which is the part neither knob shows on its own. ⛔ Nothing adopted.** `calibration/diag_rep_dc_prior_centre_width.R`; run preserved at `outputs/diagnostics/rep_dc_prior_centre_width_20260922.log`.
+
+- **THE HARNESS IS GATED FIRST.** The rebuilt pinned objective reproduces the stored logpost to 1e-4 (−1425.3620 both). Without that every number below would describe a different posterior. The trial prior is applied by SUBTRACTING the shipped N(0, 1.0) term and ADDING the trial one per evaluation — `rep_dC` has `tr = "id"` so the swap is exact — and `CCX_PARAM_TABLE` is never mutated.
+- **MEASURED, 8 parameters re-optimised at each corner** (`rep_dC` + its 7 most correlated):
+
+| μ | σ | fitted `rep_dC` | shift | Δ loglik |
+|---|---|---|---|---|
+| 0 | 1.0 | 3.516 | — (baseline) | — |
+| **0.78** | **1.0** | **3.564** | **+0.049** | **+0.053** |
+| 0 | 0.5 | 2.945 | −0.571 | −2.65 |
+| 0.78 | 0.5 | 3.115 | −0.400 | −1.48 |
+| 0 | 0.2 | 1.390 | −2.125 | **−28.68** |
+| **0.78** | **0.2** | **1.865** | **−1.650** | **−17.62** |
+
+- ⭐ **RE-CENTRING ALONE IS INERT, NOW MEASURED AT THIS CANONICAL.** +0.049 ppm and the likelihood does not get worse. ⚠ This re-measures the 2026-08-23 finding rather than quoting it: that one was taken at the arm-N mode (`rep_dC` 5.18) and its likelihood-only optimum was **5.62 ppm**; here the profile puts it at **3.7** with curvature sd **0.30**. The old number was stale and the conclusion survives anyway.
+- ⭐⭐ **THE INTERACTION IS THE FINDING.** At σ = 0.2 the tightening costs **28.7** log-units centred at 0 but only **17.6** centred at the measured 0.78. So the centre is worth ~11 log-units — **but only once the width is tight.** Neither knob alone shows this, which is exactly why the question was worth asking. ⇒ if this prior is ever tightened it must be re-centred in the same move; and neither on its own is worth an objective change.
+- ⛔⛔ **WHO PAYS IS NOT WHO YOU WOULD GUESS, and it is the sharpest thing here.** Forcing `rep_dC` down does NOT hurt the station levels the prior is nominally about — `co2_level_MLO` **improves +0.92**, `co2_level_SPO` **+0.31**, `d13c_level_SPO` **+8.56**. The cost falls on **`co2_icecore` −13.45**, **`d14c_SH` −7.55** and **`d14c_NH` −3.12**. ⇒ the offset is held up by the **preindustrial ice anchor and the bomb-¹⁴C ventilation constraint**, not by the modern flask records. That is a much sharper statement of "structural, not representation" than the log-unit total alone, and it matches [[ccx_rep_dc_co2_bias]]'s ~9 ppm swing reached from the residual side.
+- ⚠ **THE CONJUGATE MAP IS NOT USABLE AND THE SCRIPT SAYS SO.** The analytic prediction (`xp = (xL/sL² + μ/σ²)/(1/sL² + 1/σ²)`) understates every measured shift, worst |difference| **0.58 ppm** against a 0.15 tolerance. The measured column is the answer; the analytic one is reported only so the gap is visible. **This is why part 3 exists** — a cheap formula on a 29-parameter posterior, at the corner where the prior is deliberately made to bite, is precisely where a linearisation fails.
+- ⚠ **ONLY 8 OF 29 PARAMETERS WERE FREE.** The shifts are LOWER bounds and the likelihood costs UPPER bounds: a full refit has more ways to absorb the change. Stated at the top of the table in the script's own output.
+- ⚠ **ONE HONEST FAILURE, FIXED:** the first run called a `ccx_logprior()` that does not exist. The likelihood now comes from the objective's own `attr(, "loglik")` (what `by_stream = TRUE` returns), so there is no second implementation of the prior to drift from the first.
+
 ## 2026-09-22 (t) — ⛔ **THE BOX DIAGRAM HAD NO LAND-USE ARROW. The flux was ADDED INTO the soil-to-atmosphere arrow under a label that said "respiration" — so the one flux the whole R1 convention argument is about was invisible on the page that explains the model.** Marcus: "can we split LUC from land uptake in the diagram?" Split.
 
 - **THE DEFECT.** `plot_box_diagram()` drew `fx$rh + fx$luc` on the soil→atmosphere arrow and named it **"respiration"**. At 2024 that is **69.6 + 1.0 GtC/yr**, so the printed number **rounds to 71 either way** — which is exactly why it could sit there unnoticed. ⚠ **`R/fluxes.R`'s own header already forbids this**: *"one endpoint PAIR carries two physically distinct processes that must not be merged … the land-use transfer against autotrophic respiration"*. The tap kept them separate; the diagram re-merged them.

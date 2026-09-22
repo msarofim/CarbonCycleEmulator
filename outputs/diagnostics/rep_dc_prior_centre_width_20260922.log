@@ -1,0 +1,79 @@
+=== HARNESS GATE ===
+  rebuilt -1425.3620 (shift +0.0000) vs stored -1425.3620 -> PASS
+
+=== 0. WHERE THE FIT IS NOW (hilda29l) ===
+  rep_dC = 3.5153 ppm; prior N(0, 1.00) => z = +3.52
+  MEASURED station-vs-hemisphere offset = +0.776 ppm (MBL zonal)
+
+=== 1. PROFILE (re-optimising bomb_total, hs_asx_frac, beta_max) ===
+  rep_dC   2.60   loglik     -1433.6027
+  rep_dC   2.80   loglik     -1428.2083
+  rep_dC   3.00   loglik     -1423.9490
+  rep_dC   3.20   loglik     -1420.8310
+  rep_dC   3.40   loglik     -1418.8662
+  rep_dC   3.60   loglik     -1418.0727
+  rep_dC   3.80   loglik     -1418.4742
+  rep_dC   4.00   loglik     -1420.0994
+  rep_dC   4.20   loglik     -1422.9815
+  rep_dC   4.40   loglik     -1427.1573
+
+  LIKELIHOOD-only optimum 3.624 ppm, curvature sd 0.183 ppm
+  the data are 5.5x TIGHTER than the shipped 1.0 ppm prior
+
+=== 2. ANALYTIC (conjugate) PREDICTION OF THE POSTERIOR MODE ===
+  xp = (xL/sL^2 + mu/sg^2) / (1/sL^2 + 1/sg^2)
+
+        mu    sigma      predicted      shift        new z
+      0.00     1.00          3.506     -0.009         3.51
+      0.00     0.50          3.195     -0.321         6.39
+      0.00     0.20          1.970     -1.545         9.85
+      0.78     1.00          3.531     +0.016         2.76
+      0.78     0.50          3.287     -0.229         5.02
+      0.78     0.20          2.324     -1.191         7.74
+
+=== 3. MEASURED: re-optimise 8 parameters at each corner ===
+  free: rep_dC, bomb_total, hs_asx_frac, beta_max, fert_k, u_hs, luc_scale, pump_hs_gcm2
+  ⚠ NOT all 29 -- the rest are held at the canonical, so a measured shift here
+    is a LOWER bound on what a full refit would do.
+
+      mu  sigma       rep_dC      shift  vs analytic         loglik    d(loglik)
+    0.00   1.00        3.516     +0.000        0.010      -1391.805       +0.000
+    0.00   0.50        2.945     -0.571       -0.250      -1394.456       -2.651
+    0.00   0.20        1.390     -2.125       -0.580      -1420.485      -28.680
+    0.78   1.00        3.564     +0.049        0.033      -1391.753       +0.053
+    0.78   0.50        3.115     -0.400       -0.171      -1393.280       -1.475
+    0.78   0.20        1.865     -1.650       -0.459      -1409.422      -17.617
+
+  analytic vs measured: worst |difference| 0.580 ppm (tolerance 0.15) -> ⚠ THE CONJUGATE MAP IS NOT USABLE -- quote the MEASURED column only
+
+=== 4. WHO PAYS, at mu = +0.776 / sigma = 0.20 (the defensible corner) ===
+  stream                      d(logL)
+  co2_icecore                  -13.45
+  d14c_SH                       -7.55
+  d14c_NH                       -3.12
+  d13c_level_MLO                -1.91
+  ocean_grad_dic                -1.65
+  d14c_intcal                   -0.94
+  hs_surf_d13c                  -0.83
+  excess_c14_ocean              -0.73
+  co2_seasonal_MLO              -0.41
+  gcb_ocean_enso_slope          -0.29
+  ocean_grad_d13c               -0.23
+  d13c_seasonal_SPO             -0.18
+  hs_surf_dic                   +0.06
+  d13c_gradient                 +0.09
+  co2_seasonal_SPO              +0.11
+  gcb_ocean_sink                +0.13
+  co2_level_SPO                 +0.31
+  co2_gradient                  +0.34
+  gcb_land_sink                 +0.63
+  co2_level_MLO                 +0.92
+  d14c_profile_ab               +1.14
+  d13c_seasonal_MLO             +1.35
+  d13c_level_SPO                +8.56
+  TOTAL                        -17.62
+
+  rep_dC 3.515 -> 1.865 ppm; likelihood -17.62 log-units.
+
+⛔ NOTHING HERE IS ADOPTED. Changing this prior is an OBJECTIVE change:
+   freeze record §4.1 -- a ruling, then a restamp of every mode.
