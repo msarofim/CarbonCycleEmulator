@@ -1,4 +1,4 @@
-# Handoff — 2026-09-22 (o). **Tier 1 and Tier 2 of Marcus's review are DONE and verified in a browser. The NOAA MBL zonal pull landed and RETRACTS two of the three failures (n) reported against `rep_dC` — the sign and the ordering were artifacts of comparing a global mean to a northern station. Only the ~4.5× magnitude survives, and it is now measured. Two decisions are waiting on Marcus: R3 (the rename / URL) and the Tier-3 priority order.**
+# Handoff — 2026-09-22 (o). **Marcus's 45-comment review is COMPLETE: Tier 1, Tier 2, R3 and all of Tier 3, every item verified in a browser. The app is now CarboTope. The NOAA MBL zonal pull landed and RETRACTS two of the three failures (n) reported against `rep_dC`. And the first Tier-3 chart falsified a claim the app itself was making, which is the best argument for having built it. What remains is R2 (an objective ruling), N5, and the four deploy-time settings.**
 
 > Self-contained. **Read first, in this order:** `notes/review_2026-09-22_marcus_app_comments.md`
 > (the 45-item triage, **§8b the status block**, **Appendix A** the first `rep_dC` result and
@@ -81,33 +81,48 @@ months in only 36 of 48 years, so annual means either truncate at 2020 or alias 
   two-step, errors loudly if the form changes, and writes three MANIFEST rows (URL, citation,
   date, SHA-256). **The previous pull was scratchpad-only; that gap is closed.**
 
-## 5. NEXT — and the first two are Marcus's, not mine
-1. ⏳ **R3 — the rename.** Left deliberately LAST of the edits. `APP_TITLE` is one constant, but
-   the **deployed URL** is decided at the same time and renaming after the post circulates is the
-   expensive direction. **Needs: app title only, or repo + URL too?**
-2. ⏳ **Tier 3 priority order.** My ordering, unchanged from (n): **C2 the year-over-year CO₂ chart
-   first** (it serves C1, C3 and card 4 at once, and is 08-29 spec ①b), then **F2** (pulse
-   partition panel — machinery exists; ⚠ must NOT share a caption with a label run,
-   [[pulse_label_vs_perturb]], 2.8× apart at 100 yr), **I1** (isotope hemisphere toggle), **C6**
-   (volcano/temperature switches — ⚠ **two** edits each per spec §3a: zero `aod_*` AND remove the
-   component from `gmst`/`sst_anom_*`, or the thermal half keeps running; the `gamma_diff` knockout
-   in §3 is the measured half of it), **N7** (over/undershoot years), **W2** (the LUC sign-change
-   date — **compute it, do not recall it**).
-3. ⏳ **R2 — `rep_dC`'s prior centre.** ⛔ An OBJECTIVE change (freeze record §4.1: a ruling, then
-   a restamp of every mode). The measurement is now in. **What it says:** re-centring on +0.78
-   moves the fit from z +3.52 to z +2.74 — **relieves 22 %, relabels 78 %** — and
+## 5. R3 and Tier 3 — RULED and BUILT (commits `a799dba`, `2a8141d`)
+**Marcus's rulings, taken during this session:**
+- **R3 — the rename is scoped to the TITLE and the DEPLOYED URL.** `APP_TITLE <- "CarboTope"`;
+  deploy target **`carbotope.shinyapps.io/carbotope`**, recorded in `app/DEPLOY.md`. **The repo
+  stays `CarbonCycleEmulator` and the code keeps `ccx_`** — neither is public-facing. ⭐ The URL
+  is the expensive half and must be set at the FIRST deploy.
+- **Tier 3 — all four, in order: C2, F2, I1, C6.** All built, all verified in a browser.
+
+⛔ **C2 EARNED ITS PLACE IMMEDIATELY BY FALSIFYING THE SENTENCE NEXT TO IT.** The ENSO blurb said
+*"switch it off and the wobbles go."* MEASURED 1959–2024: full model **0.269 ppm/yr** vs observed
+**0.435** (62 %); **ENSO −23 %, temperature −22 %, volcanic −8 %, all three together only −43 %.**
+Most of this model's wobble is the **prescribed emissions record's own year-to-year structure**
+(−19 % alone), and `ocean sink off` *increases* the scatter by 7 %. Blurb rewritten ⇒
+[[ccx_wobble_is_mostly_emissions]]. ⚠ Not gate V's estimator; never quote as the gate's
+decomposition.
+
+**Also done, unblocked, from the original Tier-3 list:**
+- **W2 — computed, and the PREMISE IS FALSE.** Land-use emissions are positive in **all 275
+  years**; there is no date on which deforestation became a net sink. What crosses is the land
+  AS A WHOLE: **1989** in GCB, **1971** in this model. The 18-year gap is the same story as the
+  model's high land sink (2015–24 residual 3.01 vs GCB 2.36; gate 7 z +1.36) and the note says
+  so on the page.
+
+**NOT built, and the only Tier-3 item left: N7** (commonalities among the years the model over-
+and undershoots the growth rate). The C2 panel is now the natural place for it.
+
+## 5b. NEXT — what is actually owed
+1. ⏳ **R2 — `rep_dC`'s prior centre.** ⛔ An OBJECTIVE change (freeze record §4.1: a ruling, then
+   a restamp of every mode). **The measurement is in** (§4). What it says: re-centring on +0.78
+   moves the fit z +3.52 → +2.74, **relieving 22 % and relabelling 78 %** — and
    [[ccx_rep_dc_prior]] already measured the centre as **nearly inert** (likelihood-only optimum
    5.62 ppm at curvature sd 0.097, ~10× tighter than the prior), so re-centring would barely move
-   the fit at all. **The WIDTH is the live question, not the centre**: a representation term's
-   defensible σ floor is ~0.2 ppm (Francey et al. 2019), 5× tighter than today's 1.0 ppm, at
-   which the same value sits at z +13.7. ⛔ And **>1/3 of the offset's value is isotopic**, so it
-   is never a CO₂-only ruling.
+   the fit at all. **The WIDTH is the live question**: a representation term's defensible σ floor
+   is ~0.2 ppm (Francey et al. 2019), 5× tighter than today's 1.0, at which the same value sits at
+   z +13.7. ⛔ >1/3 of the offset's value is isotopic — never a CO₂-only ruling.
+2. **N5** — the δ¹³C analogue of §4's CO₂ measurement, **not done**. Card 2 is scored net of
+   `grad_off_d13c`.
+3. **N7** — the last Tier-3 feature.
 4. **Before the post:** set `APP_FEEDBACK_URL` and `APP_REPO_URL` in `app/global.R` (both are
-   `SET-BEFORE-DEPLOY` and the app says so on screen); check the host's active-hours and
-   concurrency limits. ⚠ `calibration/lib_design_gates.R` is a **runtime dependency of the app**
-   and must ship — `app/DEPLOY.md`.
-5. **N5** (isotope station-vs-hemisphere offsets) is the δ¹³C analogue of the CO₂ measurement just
-   made and is **not done**. Card 2 is scored net of `grad_off_d13c`.
+   `SET-BEFORE-DEPLOY` and the app says so on screen); claim the **carbotope** shinyapps name;
+   check the host's active-hours and concurrency limits. ⚠ `calibration/lib_design_gates.R` is a
+   **runtime dependency of the app** and must ship — `app/DEPLOY.md`.
 
 ## 6. State to carry — non-obvious
 - ⚠ **`CarboTopeSubstack.docx` is in the repo root and Word has it OPEN** (`~$` lock file).
@@ -126,11 +141,23 @@ months in only 36 of 48 years, so annual means either truncate at 2020 or alias 
   items, that the old string is ABSENT and the new one PRESENT, with R comment lines stripped so a
   comment quoting the old text does not read as a miss. **Re-run that audit after any further copy
   work**; it is the reason this handoff can say "all of Tier 1 and 2" rather than "most of".
-- **SUITE: 4176 / 2.** Both failures **PRE-EXISTING, REPORTED, NOT TOUCHED**:
-  `test-mode-file.R:323` (the **NAMED AIC RED**, ΔAIC +4.18 for the control — a ruling, not a
-  regression) and `test-seas-lag-split.R:205` (the standing fixture error named in (k)). Neither
-  references `app/`. ⚠ Note this differs from (n)'s pair: `test-u-hs-fitted.R:87` reported as a
-  **WARNING** this run, not a failure.
+- ⛔ **`co2_global` IS NOT A COLUMN OF ANY RUN** ⇒ [[ccx_co2_global_not_a_column]]. `app/global.R`
+  attaches it by hand to TWO paths; every PULSE run has none. Reading it elsewhere gives NULL →
+  `numeric(0)` → **rows `rbind` drops SILENTLY**, and the F2 panel drew two of three bands with no
+  error. Use `ccx_global_co2()`. **A column one code path attaches is not a property of the
+  structure — grep the CONSTRUCTOR.**
+- ⚠ **ggplot captions CLIP; the (l) fix had only ever been applied to the REVIEW tab.**
+  `app_provenance_caption()` now wraps, so every panel is covered and it cannot be forgotten at a
+  call site.
+- ⚠ **`test-mode-struct-lint.R` is a LITERAL, FILE-LEVEL string match.** A comment that spells out
+  the pattern it rejects trips the gate. And `ccx_load_mode()` returns the likelihood parameters
+  under **`$err`**, not the top level — `lm$rep_dC` is NULL and fails as "argument is of length
+  zero", not as a wrong number.
+- **SUITE: 4181 / 2 after all of the above.** (Was 4176 / 2 at §2.) Both failures **PRE-EXISTING, REPORTED, NOT TOUCHED**:
+  Both failures **PRE-EXISTING, REPORTED, NOT TOUCHED**: `test-mode-file.R:323` (the **NAMED AIC
+  RED**, ΔAIC +4.18 for the control — a ruling, not a regression) and `test-seas-lag-split.R:205`
+  (the standing fixture error named in (k)). Neither references `app/`. ⚠ Differs from (n)'s pair:
+  `test-u-hs-fitted.R:87` reports as a **WARNING** now, not a failure.
 - **R4 is ruled and PROPAGATED**: the affiliation is off the app (`APP_AUTHOR` is the bare name),
   and the standing rule in `~/.claude/CLAUDE.md` now carries the professional/informal split
   rather than a single form.
