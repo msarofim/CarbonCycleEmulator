@@ -2271,7 +2271,9 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
     if (seas_ml != 1L)
       stop("ccx_ms_reference_set(): the limb canonical's free parent is at seas_ml 1 (the canonical's ",
            "seasonal mixed layer); seas_ml ", seas_ml, " is not a ruled arm.")
-    list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
+    # 09-22 (k): the parent is REGISTERED (hilda32f) -- it is its own incumbent now; the
+    # canonical (seeded) was the incumbent for the wave that produced it.
+    list(incumbent = CCX_MODE_PINNED_PARENT, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the FREE PARENT of the limb canonical: its structure, the six inert pins only, shim / pair / limb all fitted")
   } else stop("ccx_ms_reference_set(): no registered incumbent for pins '", ccx_pin_label(pins),
               "' at seas_ml ", seas_ml, " (the canonical's are '", ccx_pin_label(CCX_MODE_CANONICAL_PINS),

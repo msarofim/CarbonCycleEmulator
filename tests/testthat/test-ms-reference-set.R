@@ -114,7 +114,9 @@ test_that("(9) the FREE PARENT of the limb canonical (2026-09-21 g): the six ine
   expect_setequal(names(fp), setdiff(names(CCX_MODE_CANONICAL_PINS), c("ent_seas_amp_SH", "gamma_enso_ocn_NH", "gamma_enso_ocn_SH")))   # the canonical's minus its three real pins
   expect_equal(unname(fp), unname(CCX_MODE_CANONICAL_PINS[names(fp)]))
   r9 <- ccx_ms_reference_set(fp, "1", struct = "hilda_csl3")
-  expect_identical(r9$incumbent, CCX_MODE_CANONICAL); expect_identical(r9$new_basin, CCX_MODE_SEASML0_CONTROL)
+  # 09-22 (k): the parent is registered (hilda32f) and is its own incumbent; the canonical seeded the wave that made it
+  expect_identical(r9$incumbent, CCX_MODE_PINNED_PARENT); expect_identical(r9$new_basin, CCX_MODE_SEASML0_CONTROL)
+  expect_identical(CCX_MODE_PINNED_PARENT, "hilda32f"); expect_false(CCX_MODE_PINNED[["hilda32f"]])
   expect_match(r9$why, "FREE PARENT")
   # MUTATION: without the limb it is not this parent; at seas_ml 0 it is not a ruled arm
   expect_error(ccx_ms_reference_set(fp, "1", struct = "hilda_cs"), "no layer-2 limb")

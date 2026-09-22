@@ -173,9 +173,24 @@
 # ⛔ THE AIC GATE: the control hilda31pe (31 names, -1387.7128) leads by 4.09 at two
 # extra names -> dAIC = 2*2 - 2*4.09 = -4.18 -> +4.18 for the control: STILL a NAMED RED.
 CCX_MODE_CANONICAL <- "hilda29l"
-
+# 2026-09-22 (k): `hilda32f` -- THE FREE PARENT OF THE LIMB CANONICAL (Marcus: "Repoint").
+# hilda29l's OWN structure (hilda_csl3, seas_ml 1) with only the six inert names held: the
+# seasonal shim ent_seas_amp_SH (8.24), the ocean ENSO pair (NH 0.240, SH 0.001) and the
+# limb's w_enso_l2 (7.73) all FITTED, 32 names. The 09-21 Mac wave (24/24 converged, 17 on
+# this basin), promoted from id 15 (gates 3-5, gap 6e-8, 0 kinks); Hessian PD cond 2.46e5,
+# one direction unstable at the derived step (gamma_enso_ocn_SH, at ~0). Likelihood
+# -1386.1015 on 26 rows = THE BEST FREE ARM (the control -1387.7128, +1.61; dAIC -1.22);
+# the canonical's three pins cost 5.70 against it (dAIC +5.41 -- AIC does not buy the pins;
+# the canonical is the pinned arm by RULING, the limb's physicality over the shim's fit:
+# with the pair free the limb halves and the NH shim takes 0.24, one observable two
+# carriers). It REPLACES hilda31s2 as CCX_MODE_PINNED_PARENT (a `hilda` fit never refit
+# under hilda_c / #13, -1411.24 rescored; stays registered as provenance). test-mode-file's
+# named red #1 ("the parent is the best free arm") discharges here; red #2 (the AIC gate)
+# is untouched.
 CCX_MODE_FILES <- c(
   hilda29l = file.path("calibration", "output", "refit_20260920_hilda29l_obj13_hilda_csl3",
+                       "mode_fit_pumpN.rds"),
+  hilda32f = file.path("calibration", "output", "refit_20260922_hilda32f_obj13_hilda_csl3_free_parent",
                        "mode_fit_pumpN.rds"),
   hilda31s2 = file.path("calibration", "output", "refit_20260912_hilda31_seasml1_round7",
                         "mode_fit_pumpN.rds"),
@@ -279,7 +294,7 @@ CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
-CCX_MODE_PINNED <- c(hilda29l = TRUE, hilda31s2 = FALSE, hilda31pe = FALSE)
+CCX_MODE_PINNED <- c(hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
 # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
 # and its free PARENT: the same space with the pinned names free, kept
@@ -301,7 +316,7 @@ CCX_MODE_PINNED <- c(hilda29l = TRUE, hilda31s2 = FALSE, hilda31pe = FALSE)
 CCX_MODE_CANONICAL_PINS  <- c(ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08,
                               w_vent = 0, gamma_vent = 0, w_thc = 0,
                               gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0)
-CCX_MODE_PINNED_PARENT   <- "hilda31s2"
+CCX_MODE_PINNED_PARENT   <- "hilda32f"   # 2026-09-22 (k): the free parent on the canonical's own structure (was hilda31s2, 09-13 -> 09-22)
 # THE seas_ml-0 CONTROL AND ITS ARM (2026-09-17 j). The registered control `hilda31p`
 # has the shim FREE (18.69): the seasonal mixed layer is what REPLACED the shim, so
 # the canonical pins it and the control keeps it. Its arm is therefore the canonical's
