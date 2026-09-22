@@ -91,14 +91,112 @@ This only works if the repo is public (§0 item 4a).
 5. Timed deploy; `DEPLOY.md` + README `Status` gain the beta label.
 6. A reviewer-facing README section: what we are asking, the eight questions, how to answer.
 
-## 4. Decisions needed
-- **A** — the feedback channel: publish the repo + GitHub Issues (recommended), a form, or email.
-  (Publishing means the tag goes public as-is, with the CHANGELOG — that is the point.)
-- **B** — the eight cards: any to drop, any to add, the ordering.
-- **C** — card 1: draw `rep_dC` on the Keeling panel, or leave the gap and show the residual.
-- **D** — card 7: banner only, or a labelled Hessian band as an interim.
-- **E** — who the community is (a named list of reviewers vs an open link) — changes how
-  sharp the questions can be and whether the undergraduate tabs need a "reviewer mode" toggle.
+## 4. Decisions — A and E SETTLED 09-22; B stands; C and D explained below
+
+- **A — SETTLED: the feedback channel is Marcus's Substack post on the model.** ⇒ the repo does
+  not have to be published for the channel to work, but §2's "how would a reviewer judge
+  *fixable*" links (CHANGELOG, scoping notes) all point into a repo with **no remote**. Either
+  publish it (the links work) or drop §2's links and let each card carry the tried-and-failed
+  list as text. `APP_REPO_URL` in `app/global.R:47` currently points at a GitHub repo that does
+  not exist — **it must be fixed or removed before the app is public either way.**
+- **B — the eight cards: approved (Marcus 09-22).** Ordering and register change under E.
+- **E — SETTLED: the audience is Marcus's Substack / LinkedIn / Facebook / Bluesky followers.**
+  Open link, no named reviewer list. Consequences in §4a.
+- **C — the Keeling panel and `rep_dC`:** §4b.
+- **D — uncertainty bands:** §4c.
+
+### 4a. What an open social-media audience changes
+
+1. **Every card needs two registers.** The cards as drafted assume a reader who knows what a
+   δ¹³C gradient is. Each card gets a **plain headline question anyone can answer** plus a
+   collapsible with the number, the σ, and the mechanism. The three-way answer
+   (deal-breaker / fixable / acceptable) is answerable by a lay reader on cards 1, 4, 5, 7;
+   cards 2, 3, 6, 8 will effectively only be answered by colleagues.
+2. **Expect a skewed response.** Volume will land on the intuitive cards (1, 4, 5) and near zero
+   on 3 and 6. ⇒ if the structural reds (2, 3) are the ones whose verdict actually gates the
+   paper, an open call will not deliver it — **consider naming a handful of carbon-cycle
+   colleagues in the post and asking them for 2, 3 and 6 specifically**, on top of the open call.
+3. **One comment thread, eight questions, will tangle.** Number the cards in the app, and have
+   each card's button deep-link to the post's anchor for that card with "lead your comment with
+   **#N**". Alternative: a short form per card. Substack comments keep the discussion public and
+   attributable, which is worth more than tidy data here.
+4. **Say up front how answers will be used** — whether comments may be quoted and attributed in
+   the eventual write-up. Cheaper to state in the post than to ask retroactively.
+5. **The app goes public with the post.** ⚠ Check the shinyapps.io plan's active-hours and
+   concurrent-connection limits against a LinkedIn + Facebook + Bluesky push before announcing;
+   a cold start of 73 s idle (2.8 min under load) with a queue behind it is a bad first
+   impression, and the free tier's monthly active hours are finite. Time the real deploy, and
+   consider warming it before the post goes out.
+6. **"Not peer-reviewed, not for citation"** is already in Under the hood; it should also be in
+   the post and on the banner, because a public link travels away from both.
+
+### 4b. C — the Keeling panel: what the choice actually is
+
+**The mechanism.** The model's atmosphere is two hemispheric-mean boxes. Mauna Loa is a remote
+marine station; a hemispheric mean contains continental boundary-layer air the station never
+sees, carrying extra CO₂ that is isotopically light. `rep_dC` is **one** parameter that converts
+box to station for **both species at once** through mass balance (`R/likelihood.R`, the
+`LIK_REP_SOURCE_D13C` block):
+
+```
+predicted station CO2   = box CO2  − rep_dC
+predicted station δ13C  = box δ13C − rep_dC · (d_s − δ13C_box) / CO2_box
+```
+
+It is tied across species deliberately: a **free** δ¹³C level offset would have swallowed the
+Suess overshoot whole and reported a good fit. Prior **N(0, 1.0 ppm)**, and the 1.0 is the
+repo's own station-vs-box scale with a receipt (co-located NOAA in-situ vs SIO flask at MLO
+disagree 0.39–0.59 ppm RMS over 702 months, so a station-vs-*box* term must exceed that). The
+MAP sits at **+5.2 ppm = z +3.52** — five times the scale the prior thinks representation is
+worth. That strain is card 1's content and is real.
+
+⚠ **THE DISPLAY PROBLEM IS NOT THE STRAIN — IT IS THAT THE PANEL DRAWS A DIFFERENT COMPARISON
+FROM THE ONE THE FIT WAS SCORED ON.** `plot_keeling()` (`app/R/plots.R:53`) plots the raw box
+`d$co2_NH` against the MLO points. The likelihood scored `box − rep_dC` against those same
+points. The two comparisons differ by 5.2 ppm, so **the flagship panel is not like-for-like with
+the calibration**: it shows a ~4 ppm miss where the scored level stream fits to ~0.6 ppm.
+
+| option | what the panel shows | for | against |
+|---|---|---|---|
+| **C1 leave it** (current) | raw box vs station | nothing hidden; the gap is visible | the panel is not the comparison that was fitted; on an open social-media launch the top comment becomes "your model is 4 ppm high", which is a display artefact and crowds out the eight real cards |
+| **C2 draw both lines** — box (light) **and** box − `rep_dC` labelled "model, as the station would measure it" (solid), caption naming the fitted offset and its 3.5σ | the scored comparison, plus the raw box beside it | like-for-like with the calibration; the strain is stated, not hidden; card 1 still owns the accounting | a reader who skips the caption sees a good fit and misses that the offset is fitted, not measured |
+| **C3 residual panel** — keep the box line, add model − MLO underneath with `rep_dC` as a horizontal line | the gap as the subject | most informative for a reviewer | costs vertical space on the default tab and asks a general audience to read a residual plot |
+
+**Recommendation: C2 on the Keeling tab, C3 on card 1.** The undergraduate tab shows the
+comparison that was actually scored (with the raw box visible beside it, so nothing is
+concealed); the reviewer card carries the residual and the 3.5σ and asks whether a fitted
+station offset is acceptable in a teaching tool. ⚠ **C2 is a display change only — it changes
+no number in the model and no number in the fit.** The thing to guard against is the version of
+C2 that drops the raw box line: that one *would* be concealment.
+
+### 4c. D — bands: three options, and what is newly true
+
+**The state.** No posterior exists; the app runs a single MAP and the banner says so. The stored
+Hessian is **PD, condition number 2.4e5** at the canonical (2.46e5 at the free parent), with
+per-parameter standard errors (e.g. `h_ml` 57.3 ± 3.7 m, `w_enso_l2` 13.71 ± 2.13 Sv).
+
+⭐ **What changed: the two things that were named as blocking a posterior are gone at this
+canonical.** `ccx_hessian_is_the_blocker` recorded cond **1.11e6**, `h_ml` at a **hard bound
+1.5σ below the mode**, and `kz` railed. At `hilda29l`: cond 2.4e5, `h_ml` 57.3 ± 3.7 on a floor
+of 42.5 m = **4.0σ clear**, and no step-unstable direction (one exception reported: the free
+parent's `gamma_enso_ocn_SH`, which sits at ~0). ⇒ **"a posterior is not feasible" is no longer
+a true sentence**, and that matters for how card 7 is phrased.
+
+| option | what ships | for | against |
+|---|---|---|---|
+| **D1 banner only** (current) | single lines; the banner says no bands and why | honest; zero work; zero chance of a mislabelled band travelling as "the uncertainty" | a reviewer's reflex first question on a calibrated model is "with what uncertainty" — unanswered, it will absorb a share of the feedback that should have gone to the eight cards |
+| **D2 a Laplace band** — draw N from MVN(MAP, stored cov), run each, plot the envelope, labelled "parameter uncertainty at the mode, Gaussian approximation, **not** a posterior" | something to look at on every historical panel | cheap (the covariance is stored; N ≈ 200 runs); makes the tightly- vs loosely-constrained parts of the record visibly different | ⚠ a quadratic approximation at cond 2.4e5 means the band's **width is dominated by the directions the data constrains least — exactly where the Gaussian is worst**; draws in the transformed coordinates can land where the carbonate-range warning fires; and a band on a public chart *reads as* the uncertainty no matter what the label says |
+| **D3 run the MCMC** | the posterior DESIGN §5.3 calls for; real ribbons | answers card 7 rather than asking it; the blockers above are gone | **0.2712 s/eval** on the canonical arm ⇒ ~200k evals ≈ **15 h per chain**, 4 chains ≈ 15 h at 4-wide on the M4 or a Torch array — but the project has **never had a sampler converge**, so the risk is convergence in 29 dimensions, not compute. Weeks, not days. It changes no number in the model (same objective #13) |
+
+**Recommendation: D1 for the beta, and make D3 the actual question on card 7** — "would you
+want the posterior before you'd trust this, or is a single best fit acceptable for a teaching
+tool?" That is precisely a question the community should answer, because the answer costs weeks
+and nobody inside the project can price it.
+
+⚠ **If a band is wanted anyway, D2 must be MEASURED before it is shipped, not after**: draw 200,
+run them, and compare the band's width to the model−obs residuals on the same panel. **A band
+narrower than the residuals it is drawn over is not credible and must not ship.** Never ship an
+unmeasured band.
 
 ## 5. Not in the beta (parked)
 The 08-29 six-tab spec (`notes/spec_2026-08-29_app_six_tabs.md`): checkboxes need the GMST
