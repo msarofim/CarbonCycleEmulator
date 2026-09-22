@@ -58,12 +58,64 @@ CCX_MECHANISMS <- list(
   ),
   enso = list(
     label = "El Niño / La Niña",
+    # ⛔ "SWITCH IT OFF AND THE WOBBLES GO" WAS WRONG, AND THE CHART ADDED FOR
+    # Marcus's C2 is what exposed it -- which is the whole argument for adding
+    # it. MEASURED over 1959-2024, scatter about a 3-dof smooth of the annual
+    # growth rate: full model 0.269 ppm/yr against an observed 0.435 (62 %, the
+    # shortfall review card 4 reports). Knockouts: ENSO -23 %, temperature
+    # -22 %, volcanic light -8 %; ⚠ ALL THREE TOGETHER only -43 %, so most of
+    # this model's interannual wobble is not any of them -- it is the prescribed
+    # EMISSIONS record's own year-to-year structure (-19 % on its own).
+    # ⚠ This estimator is NOT gate V's (which regresses growth on emissions with
+    # a time-varying airborne fraction); the numbers are an app-level echo and
+    # must not be quoted as the gate's decomposition. That is
+    # calibration/diag_gateV_variability_drivers.R.
     blurb = paste("ENSO moves carbon in and out of tropical land, and in and",
-                  "out of the surface ocean, year by year.",
-                  "It is why the Keeling curve wobbles around its trend.",
-                  "Switch it off and the wobbles go."),
-    caveat = "Affects year-to-year variability, not the long-term trend.",
+                  "out of the surface ocean, year by year. It is the single",
+                  "largest reason the Keeling curve wobbles around its trend in",
+                  "this model — switch it off and about a quarter of the wobble",
+                  "goes with it."),
+    caveat = paste("Affects year-to-year variability, not the long-term trend.",
+                   "And it is not the whole story: even with El Niño, the",
+                   "warming response and the volcanic light effect ALL switched",
+                   "off, more than half the model's wobble remains — it comes",
+                   "from the year-to-year shape of the emissions record itself."),
     apply = function(p, F) { p <- ccx_set_enso(p, list(gamma_enso = 0)); list(p = p, F = F) }
+  ),
+  volcanic = list(
+    label = "Volcanic haze (the diffuse-light effect)",
+    blurb = paste("A big eruption puts a haze of sulphate high in the",
+                  "atmosphere. It scatters sunlight, which sounds bad for",
+                  "plants but is not: scattered light reaches leaves that",
+                  "would otherwise sit in shade, so the world's vegetation",
+                  "grows a little FASTER for a year or two and pulls extra",
+                  "CO₂ out of the air. Switch it off and the dips after",
+                  "eruptions get shallower."),
+    # ⛔ THE CAVEAT IS NOT OPTIONAL AND MAY NOT BE SHORTENED TO "volcanoes off".
+    # This switch removes the LIGHT path only. An eruption ALSO cools the planet,
+    # and this model does not compute its own temperature -- it is DRIVEN by the
+    # observed IGCC record, which already contains every historical eruption's
+    # cooling. Removing that would need a volcanic decomposition of the observed
+    # temperature, which this repo does not have. So the thermal half keeps
+    # running no matter what this switch is set to, and the panel says so.
+    # (Marcus review C6, 2026-09-22; spec 2026-08-29 §3a names both halves.)
+    caveat = paste("This removes the LIGHT effect only. Eruptions also COOL the",
+                   "planet, and this model is driven by the observed temperature",
+                   "record, which already contains that cooling — so the cooling",
+                   "half keeps running whatever this switch says. Use",
+                   "\u201cWarming's effect on the carbon cycle\u201d to remove the",
+                   "temperature pathway."),
+    apply = function(p, F) {
+      # BOTH, deliberately. Zeroing the AOD columns is the physical statement
+      # ("no volcanic aerosol") and would also catch a future consumer of them;
+      # zeroing gamma_diff catches a future consumer that reads the coefficient
+      # without the columns. Today `gamma_diff * aod` is the only term either
+      # appears in (R/model.R ~2304, src/ccx_core.cpp ~591), so they agree.
+      if (!is.null(F$aod_NH)) F$aod_NH <- 0
+      if (!is.null(F$aod_SH)) F$aod_SH <- 0
+      p$gamma_diff <- 0
+      list(p = p, F = F)
+    }
   ),
   ocean_sink = list(
     label = "The ocean sink",

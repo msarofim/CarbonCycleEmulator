@@ -118,6 +118,58 @@ function(input, output, session) {
     div(class = "caveat", tags$strong("Worth knowing: "), paste(cav, collapse = " "))
   })
 
+  # C2 (Marcus 2026-09-22). The growth-rate panel, with observations (C1) --
+  # the panel that makes the ENSO claim in the blurb checkable (C3).
+  output$c_growth <- renderPlot({
+    m <- CCX_MECHANISMS[[input$c_mech]]
+    plot_growth_rate(APP_HIST$out, cf_run()$out, APP_GCB,
+                     input$c_years, paste("Without:", m$label))
+  })
+
+  # MEASURED, not asserted: the scatter each series carries about its own
+  # decadal trend. A sentence claiming the wobbles shrink has to be a sentence
+  # that would change if they did not.
+  #
+  # ⛔ ALL THREE ARE MEASURED ON THE SAME YEARS, and the first version of this
+  # was not. The model runs from 1750 but GCB's atmospheric growth starts 1959,
+  # so a window of 1850-2024 gave the model 174 years and the observation 66 --
+  # and the model's pre-1959 growth is small and nearly smooth, which deflated
+  # its scatter and flattered the comparison. The window is now the INTERSECTION
+  # of the slider and the observed record, and the sentence says which years it
+  # used. (The standing like-for-like rule, ~/.claude/CLAUDE.md.)
+  output$c_growth_note <- renderText({
+    m <- CCX_MECHANISMS[[input$c_mech]]
+    yr <- c(max(input$c_years[1], min(APP_GCB$year)),
+            min(input$c_years[2], max(APP_GCB$year)))
+    if (diff(yr) < 12) return(paste("Choose a window of at least a dozen years",
+                                    "inside the measured record to compare the",
+                                    "year-to-year scatter."))
+    scatter <- function(g) {
+      g <- g[g$year >= yr[1] & g$year <= yr[2], ]
+      if (nrow(g) < 12) return(NA_real_)
+      stats::sd(stats::residuals(stats::lm(g ~ splines::ns(year, df = 3), data = g)))
+    }
+    mod_g <- function(o) {
+      g <- ccx_global_co2(o)
+      a <- stats::aggregate(list(co2 = g), list(year = floor(o$t)), mean)
+      n <- stats::aggregate(list(n = g), list(year = floor(o$t)), length)
+      a <- a[n$n == 12, ]
+      data.frame(year = a$year[-1], g = diff(a$co2))
+    }
+    a  <- scatter(mod_g(APP_HIST$out))
+    b  <- scatter(mod_g(cf_run()$out))
+    ob <- scatter(data.frame(year = APP_GCB$year,
+                             g = APP_GCB$atm_growth / ccx_const("GtC_PER_PPM")))
+    if (is.na(a) || is.na(b) || is.na(ob)) return("")
+    sprintf(paste("Over %d\u2013%d, the year-to-year scatter about the decadal trend is:",
+                  "full model %.2f ppm/yr, without \u201c%s\u201d %.2f (%s),",
+                  "and the measured record %.2f."),
+            yr[1], yr[2], a, m$label, b,
+            if (b < a) sprintf("%.0f %% less", 100 * (1 - b / a))
+            else sprintf("%.0f %% more", 100 * (b / a - 1)),
+            ob)
+  })
+
   output$c_takeaway <- renderText({
     m <- CCX_MECHANISMS[[input$c_mech]]
     a <- APP_HIST$out; b <- cf_run()$out
@@ -130,7 +182,12 @@ function(input, output, session) {
   })
 
   # ---- 4. Isotopes ---------------------------------------------------
-  output$i_d13c <- renderPlot(plot_d13c(APP_HIST$out, APP_OBS, input$i_years))
+  # I1 + the like-for-like fix: APP_REP_DC is the offset the likelihood applied,
+  # so the solid line is the comparison that was scored (same argument as the
+  # Keeling panel's two lines).
+  output$i_d13c <- renderPlot(
+    plot_d13c(APP_HIST$out, APP_OBS, input$i_years,
+              input$i_hemi %||% "both", APP_REP_DC))
   output$i_d14c <- renderPlot(plot_d14c(APP_HIST$out, APP_OBS, input$i_years))
 
   output$i_takeaway <- renderText({
@@ -229,6 +286,15 @@ function(input, output, session) {
               min(lo$gmst[nrow(lo)], hi$gmst[nrow(hi)]),
               max(lo$gmst[nrow(lo)], hi$gmst[nrow(hi)]))
     }
+  })
+
+  # F2 (Marcus 2026-09-22): the second pulse panel. Rendered only in the pulse
+  # lab, and only after the user has run one -- pulse_runs() is an eventReactive
+  # on the button, so it does not fire on tab entry.
+  output$f_partition <- renderPlot({
+    req(identical(input$f_mode, "Pulse lab"))
+    pr <- pulse_runs()
+    plot_pulse_partition(pr$base$out, pr$pulse$out, pr$gtc, pr$year)
   })
 
   output$f_notes <- renderUI({

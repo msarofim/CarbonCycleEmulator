@@ -25,6 +25,18 @@ LAB_D13C  <- "δ¹³C (‰)"
 LAB_D14C  <- "Δ¹⁴C (‰)"
 LAB_GTC   <- "Carbon (GtC)"
 LAB_TEMP  <- "Temperature above 1850–1900 (°C)"
+LAB_GROWTH <- "CO₂ growth (ppm per year)"
+# Named because this series has TWO possible observational sources and the panel
+# must say which it drew -- see plot_growth_rate().
+LAB_GROWTH_OBS  <- "Measured (Global Carbon Budget)"
+# ⛔ The sentence that keeps plot_pulse_partition() honest. See its roxygen.
+PULSE_PARTITION_NOTE <- paste("This is how much EXTRA carbon each reservoir holds because of",
+                              "the pulse \u2014 the difference between running with it and",
+                              "without. It is not a trace of where those particular molecules",
+                              "went, which is a different question with a different answer.")
+GROWTH_UNIT_NOTE <- paste("Annual means differenced. Measured growth is the Global Carbon",
+                          "Budget's atmospheric growth, converted GtC/yr ÷", 
+                          "GtC per ppm. Review card 4 scores the same series in GtC/yr.")
 
 theme_ccx <- function(base_size = 13) {
   theme_minimal(base_size = base_size) +
@@ -40,11 +52,21 @@ theme_ccx <- function(base_size = 13) {
     )
 }
 
+# ⛔ ggplot CAPTIONS CLIP, THEY DO NOT WRAP -- a caption longer than the panel
+# is silently truncated mid-sentence, and the provenance prefix below counts
+# toward line 1's width. The review tab learned this on 2026-09-22 (l) and
+# wrapped its own captions (rv_cap()); the TEACHING panels did not, and on
+# 2026-09-22 the pulse-partition panel's caption lost the clause that keeps it
+# honest ("it is not a trace of where those molecules went") to exactly this.
+# Wrapping here fixes every panel at once and cannot be forgotten at a call site.
+APP_CAP_WIDTH <- 150   # characters; the teaching panels are wider than the cards
+
 #' Standard annotation carried by every plot that uses model output
-app_provenance_caption <- function(extra = NULL) {
+app_provenance_caption <- function(extra = NULL, width = APP_CAP_WIDTH) {
   base <- sprintf("Model: %s (%s). Not peer-reviewed teaching software.",
                   app_params$source, app_params$status)
-  if (is.null(extra)) base else paste(base, extra, sep = "  ")
+  txt <- if (is.null(extra)) base else paste(base, extra, sep = "  ")
+  paste(strwrap(txt, width = width), collapse = "\n")
 }
 
 # ---------------------------------------------------------------------
@@ -279,20 +301,228 @@ plot_counterfactual <- function(base, alt, yr_range, label) {
     theme_ccx()
 }
 
+#' The global-mean CO2 of a run, whoever produced it
+#'
+#' ⛔ `co2_global` IS NOT A COLUMN OF EVERY RUN and assuming it is has already
+#' cost one silent bug. `ccx_run_fast()` / `ccx_run_coupled()` return `co2_NH`
+#' and `co2_SH`; `app/global.R` ATTACHES `co2_global` by hand to the historical
+#' run and to `app_run_mechanisms()` output, and the PULSE runs go through
+#' neither. Reading the column directly gave NULL there, the series became
+#' numeric(0), `rbind` dropped its rows without complaint, and a stacked-area
+#' panel drew two of its three bands. Derive it; do not trust the attachment.
+ccx_global_co2 <- function(o) {
+  if (!is.null(o$co2_global)) o$co2_global else (o$co2_NH + o$co2_SH) / 2
+}
+
+#' The year-over-year CO2 growth rate: model, counterfactual, and observed
+#'
+#' ⭐ ADDED 2026-09-22, Marcus review C2 (and 08-29 spec item ①b): "a useful
+#' additional chart would be the year-over-year increase in CO2: that would help
+#' show interannual variability and how ENSO years matter for that." It is the
+#' highest-value single addition in the review because it serves THREE comments
+#' at once -- C1 (put observations on this tab; the ENSO switch means nothing
+#' until you can see it move the model toward the data), C2 itself, and C3 ("switch
+#' it off and the wobbles go" is a claim about a quantity this tab never drew).
+#' Review card 4's variance shortfall is also a statement about THIS series.
+#'
+#' ⚠ UNITS ARE ppm/yr HERE AND GtC/yr ON REVIEW CARD 4, DELIBERATELY. ppm/yr is
+#' the number a reader has met ("CO2 rose 2.4 ppm last year"); card 4 reproduces
+#' GATE V, which is defined in GtC/yr, and re-expressing a gate to match a
+#' teaching panel would be the worse trade. Both axes say which they are, and
+#' GROWTH_UNIT_NOTE states the conversion on the panel itself.
+#'
+#' ⚠ THE OBSERVED SERIES IS GCB'S `atm_growth`, THE SAME SOURCE GATE V SCORES
+#' AGAINST (calibration/lib_design_gates.R, dg_annual_budget). Deriving a second
+#' "observed growth rate" from the station records would put two different
+#' observations under one name in one app -- the caption-sync bug class -- and
+#' they would not agree: `atm_growth` is a global mass budget, a station is a
+#' point. It is GtC/yr in the file and is divided by GtC_PER_PPM here.
+#'
+#' ⚠ THE MODEL SERIES IS A DIFFERENCE OF ANNUAL MEANS, not of monthly values at a
+#' fixed month. A December-to-December difference carries the seasonal cycle's own
+#' year-to-year wobble into what is supposed to be an ANNUAL growth rate; in the NH
+#' box that is the larger signal of the two.
+#'
+#' @param base model output (the full model)
+#' @param alt  model output with a mechanism removed, or NULL
+#' @param gcb  the GCB budget table (APP_GCB), or NULL to omit observations
+#' @param label the legend label for `alt`
+plot_growth_rate <- function(base, alt = NULL, gcb = NULL, yr_range = c(1960, 2024),
+                             label = "Mechanism off", show_obs = TRUE) {
+  ann <- function(o) {
+    g <- ccx_global_co2(o)
+    a <- stats::aggregate(list(co2 = g), list(year = floor(o$t)), mean)
+    n <- stats::aggregate(list(n = g), list(year = floor(o$t)), length)
+    a <- a[n$n == 12, ]                      # drop a partial first/last year
+    data.frame(year = a$year[-1], g = diff(a$co2))
+  }
+  b <- ann(base); b$who <- "Full model"
+  d <- b
+  if (!is.null(alt)) { x <- ann(alt); x$who <- label; d <- rbind(d, x) }
+  if (!is.null(gcb) && isTRUE(show_obs) && "atm_growth" %in% names(gcb)) {
+    o <- data.frame(year = gcb$year, g = gcb$atm_growth / ccx_const("GtC_PER_PPM"),
+                    who = LAB_GROWTH_OBS)
+    d <- rbind(d, o)
+  }
+  d <- d[d$year >= yr_range[1] & d$year <= yr_range[2], ]
+  cols <- stats::setNames(c(PAL[["model"]], PAL[["off"]], PAL[["obs"]]),
+                          c("Full model", label, LAB_GROWTH_OBS))
+  ggplot(d, aes(year, g, colour = who)) +
+    geom_line(linewidth = 0.7) +
+    geom_point(size = 0.8) +
+    scale_colour_manual(values = cols[names(cols) %in% unique(d$who)]) +
+    labs(x = LAB_YEAR, y = LAB_GROWTH,
+         caption = app_provenance_caption(GROWTH_UNIT_NOTE)) +
+    theme_ccx()
+}
+
+#' Where the pulse carbon ends up: share in air, land and ocean over time
+#'
+#' ⭐ ADDED 2026-09-22, Marcus review F2: "for the pulse lab, I would like a
+#' second panel showing where the pulse carbon ends up (e.g., percent
+#' atmosphere, land, ocean)."
+#'
+#' ⛔⛔ THE CAPTION IS LOAD-BEARING AND MAY NOT BE LOOSENED. This panel answers
+#' "how much ADDED carbon is in each reservoir", which is a PERTURBATION
+#' question -- the difference between a run with the pulse and the same run
+#' without. It does NOT answer "where did those molecules go", which is a LABEL
+#' question and has a different answer: the two are 2.8x apart at 100 years
+#' ([[pulse_label_vs_perturb]]). A caption that says "where the molecules went"
+#' over this chart would be wrong by that factor, and it is exactly the phrasing
+#' a reader reaches for.
+#'
+#' ⚠ THE LAND-USE CONVENTION DOES NOT ARISE HERE, and that is worth stating
+#' because it dominates the OTHER partition panel (plot_partition(), review R1).
+#' Both runs carry identical land-use forcing, so the LUC transfer cancels
+#' exactly in the difference. No term is added back.
+#'
+#' The closure residual is COMPUTED and shown rather than assumed: the three
+#' shares must add to 100 %, and a panel that silently did not would be
+#' reporting a leak as physics.
+plot_pulse_partition <- function(base, pulse, pulse_gtc, pulse_year,
+                                 yr_max = NULL) {
+  gp <- ccx_const("GtC_PER_PPM")
+  t  <- base$t
+  # ⛔ `co2_global` IS NOT A COLUMN OF EVERY RUN. `ccx_run_fast()` and
+  # `ccx_run_coupled()` return `co2_NH` / `co2_SH`; global.R ADDS `co2_global`
+  # by hand to the historical run and to `app_run_mechanisms()` output, and the
+  # PULSE runs never go through either. Reading it here returned NULL, so the
+  # atmosphere series was numeric(0), `rbind` silently dropped its rows, and the
+  # panel drew land and ocean stacking to ~80 % with no air band and no error.
+  # Found 2026-09-22 by looking at the rendered chart. Derive it here instead of
+  # trusting a column somebody else may or may not have attached.
+  d_atm   <- (ccx_global_co2(pulse) - ccx_global_co2(base)) * gp
+  d_land  <- pulse$land_C  - base$land_C
+  d_ocean <- pulse$ocean_C - base$ocean_C
+  k <- t >= pulse_year
+  if (!is.null(yr_max)) k <- k & t <= yr_max
+  sh <- function(v) 100 * v[k] / pulse_gtc
+  long <- rbind(
+    data.frame(t = t[k], pct = sh(d_atm),   where = "Still in the air"),
+    data.frame(t = t[k], pct = sh(d_land),  where = "Taken up by land"),
+    data.frame(t = t[k], pct = sh(d_ocean), where = "Taken up by the ocean"))
+  long$where <- factor(long$where, levels = c("Still in the air",
+                                              "Taken up by land",
+                                              "Taken up by the ocean"))
+  # THE CLOSURE IS A GATE, NOT A DECORATION. The three shares must add to 100 %;
+  # a panel that silently did not would be reporting a leak as physics. It is
+  # also what would have caught the missing-air-band bug above on its own --
+  # with the atmosphere dropped it is nowhere near 1.
+  #
+  # ⚠ MEASURED FROM AFTER THE PULSE HAS LANDED, and the first version was not.
+  # The pulse is released over a single year, so at t = pulse_year none of it is
+  # in yet, all three differences are 0, and closure is 0 -- which the check
+  # faithfully reported as a "100 % closure error". That is the RAMP, not a
+  # leak. The ramp still belongs on the CHART (a reader should see the pulse
+  # arrive); it does not belong in a conservation check. Hence two windows.
+  stopifnot(length(d_atm) == length(t), length(d_land) == length(t),
+            length(d_ocean) == length(t))
+  kc <- k & t >= pulse_year + 1
+  closure <- (d_atm + d_land + d_ocean)[kc] / pulse_gtc
+  resid <- if (any(kc)) 100 * max(abs(closure - 1)) else NA_real_
+  ggplot(long, aes(t, pct, fill = where)) +
+    geom_area(alpha = 0.9) +
+    scale_fill_manual(values = c("Still in the air" = PAL[["atm"]],
+                                 "Taken up by land" = PAL[["land"]],
+                                 "Taken up by the ocean" = PAL[["ocean"]])) +
+    labs(x = LAB_YEAR, y = sprintf("Share of the %g GtC pulse (%%)", pulse_gtc),
+         caption = app_provenance_caption(paste(
+           PULSE_PARTITION_NOTE,
+           if (is.na(resid))
+             "The window is too short to check that the three shares add up."
+           else sprintf(paste("The three add to 100 %% of the pulse to within",
+                              "%.2f %% at every step after it is released \u2014",
+                              "carbon is conserved, so this is a partition and",
+                              "not an estimate."), resid)))) +
+    theme_ccx()
+}
+
 # ---------------------------------------------------------------------
 # Tab 4: isotopes
 # ---------------------------------------------------------------------
-plot_d13c <- function(out, obs, yr_range) {
+#' The station-representation offset, converted to permil on the model's own state
+#'
+#' ⭐ THE SAME LIKE-FOR-LIKE FIX THE KEELING PANEL GOT ON 2026-09-22, applied to
+#' d13C (Marcus review I1 exposed it: showing the hemispheres separately makes
+#' the comparison visible, so it had better be the comparison that was scored).
+#' The likelihood never compared the model's d13C BOX to a station either: it
+#' compared `box - rep_dC * (d_s - d13c_box) / co2_box`, because `rep_dC` is one
+#' parameter tied across species by mass balance (R/likelihood.R, the
+#' LIK_REP_SOURCE_D13C block). ⚠ REPRODUCED HERE, NOT APPROXIMATED -- the
+#' conversion is evaluated on the model's OWN CO2 and d13C at each step, exactly
+#' as the likelihood does, so the faint and solid lines differ by what the fit
+#' actually saw and not by a constant chosen for the chart.
+ccx_d13c_station <- function(d13c_box, co2_box, rep_dC) {
+  if (is.null(rep_dC) || rep_dC == 0) return(d13c_box)
+  d13c_box - rep_dC * (LIK_REP_SOURCE_D13C - d13c_box) / co2_box
+}
+
+#' delta-13C, with a hemisphere toggle (Marcus review I1)
+#'
+#' ⭐ ADDED 2026-09-22: "we talk about the north-south difference, but we only
+#' show the global match. Could we show the two hemispheres separately? Maybe
+#' with a button like on the Keeling curve?" Both hemispheres were already in
+#' `out`; the panel simply never drew the southern one. Showing them is also
+#' what puts REVIEW CARD 2's flaw -- the model's north-south d13C difference is
+#' about twice the measured one -- where a reader can see it instead of only
+#' reading about it.
+plot_d13c <- function(out, obs, yr_range, hemi = "both", rep_dC = 0) {
   k <- out$t >= yr_range[1] & out$t <= yr_range[2]
-  o <- obs$d13[obs$d13$station == "MLO", ]
-  o <- o[o$decimal_date >= yr_range[1] & o$decimal_date <= yr_range[2], ]
-  ggplot(out[k, ], aes(t, d13c_NH)) +
-    geom_line(colour = PAL[["model"]], linewidth = 0.7) +
-    {if (nrow(o)) geom_point(data = o, aes(decimal_date, d13c),
-                             colour = PAL[["obs"]], size = 0.6, alpha = 0.7)} +
+  o_all <- obs$d13[obs$d13$decimal_date >= yr_range[1] &
+                   obs$d13$decimal_date <= yr_range[2], ]
+  arms <- list(NH = list(col = "d13c_NH", co2 = "co2_NH", st = "MLO",
+                         lab = "Northern box", olab = "Measured, Mauna Loa",
+                         pal = PAL[["nh"]], opal = "#7b241c"),
+               SH = list(col = "d13c_SH", co2 = "co2_SH", st = "SPO",
+                         lab = "Southern box", olab = "Measured, South Pole",
+                         pal = PAL[["sh"]], opal = "#1a5276"))
+  keep <- if (identical(hemi, "both")) c("NH", "SH") else hemi
+  mod <- NULL; raw <- NULL; pts <- NULL; cols <- c()
+  for (h in keep) {
+    a <- arms[[h]]
+    scored <- ccx_d13c_station(out[[a$col]][k], out[[a$co2]][k], rep_dC)
+    mod <- rbind(mod, data.frame(t = out$t[k], v = scored, who = a$lab))
+    raw <- rbind(raw, data.frame(t = out$t[k], v = out[[a$col]][k], who = a$lab))
+    oo <- o_all[o_all$station == a$st, ]
+    if (nrow(oo))
+      pts <- rbind(pts, data.frame(t = oo$decimal_date, v = oo$d13c, who = a$olab))
+    cols[a$lab] <- a$pal; cols[a$olab] <- a$opal
+  }
+  gap <- if (identical(hemi, "both")) {
+    n <- out$d13c_NH[k]; s <- out$d13c_SH[k]
+    sprintf(" The model's north-minus-south difference averages %+.2f\u2030 over this window \u2014 see Known issues, card 2.",
+            mean(n - s))
+  } else ""
+  ggplot(mod, aes(t, v, colour = who)) +
+    geom_line(data = raw, linewidth = 0.5, alpha = 0.35) +
+    geom_line(linewidth = 0.75) +
+    {if (!is.null(pts)) geom_point(data = pts, size = 0.5, alpha = 0.65)} +
+    scale_colour_manual(values = cols[names(cols) %in%
+                                      unique(c(mod$who, pts$who))]) +
     labs(x = LAB_YEAR, y = LAB_D13C,
-         caption = app_provenance_caption(
-           "Blue = model, dark = Mauna Loa measurements.")) +
+         caption = app_provenance_caption(paste0(
+           "Solid = the comparison the calibration scored (box minus the station offset of card 1); ",
+           "faint = the box itself; points = measurements.", gap))) +
     theme_ccx()
 }
 

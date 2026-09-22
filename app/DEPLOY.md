@@ -19,6 +19,18 @@ Such a session has two options, and the second is cleaner:
 2. start it from this repo directly with the command above and point the browser
    at `http://127.0.0.1:7788`.
 
+## The name and the URL (ruling R3, 2026-09-22)
+
+The app is **CarboTope**. `APP_TITLE` in `app/global.R` is the one constant every
+label derives from, so the rename is that line and nothing else in the code.
+
+⭐ **The deployed URL moves with it: `carbotope.shinyapps.io/carbotope`.** This is the
+part that is expensive to undo — renaming after the post circulates breaks every link
+anyone has shared — so set the account/app name at the FIRST deploy, not after.
+
+**Deliberately NOT renamed** (Marcus's scoping of R3): the repository stays
+`CarbonCycleEmulator` and the code keeps its `ccx_` prefix. Neither is public-facing.
+
 ## ⚠ BEFORE THE PUBLIC BETA GOES OUT
 
 The app ships as **beta `v1.0-hilda29l`**, and its seventh tab ("Known issues")

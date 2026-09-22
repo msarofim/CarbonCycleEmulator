@@ -39,7 +39,14 @@ ccx_load_cpp()
 # derives from these, so changing a window or a scenario cannot leave a stale
 # label behind (standing project rule).
 # ---------------------------------------------------------------------
-APP_TITLE        <- "The Carbon Cycle, Assembled"
+# ⚠ RENAMED 2026-09-22, ruling R3 (Marcus: "rename everything" -> scoped to the
+# TITLE and the DEPLOYED URL; the repo name and the `ccx_` code prefix stay).
+# Was "The Carbon Cycle, Assembled". ⭐ THE URL MOVES WITH IT and that is the
+# part that is expensive to undo -- renaming after the post circulates breaks
+# every link anyone has shared. Deploy target: carbotope.shinyapps.io/carbotope
+# (app/DEPLOY.md). Nothing else in the app types a name: every label derives
+# from APP_TITLE.
+APP_TITLE        <- "CarboTope"
 APP_SUBTITLE     <- "A calibrated carbon-cycle model you can take apart"
 APP_HIST_YEARS   <- c(1750, 2024)
 APP_FUTURE_YEARS <- c(1750, 2100)

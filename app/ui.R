@@ -233,6 +233,19 @@ navbarPage(
         takeaway(textOutput("c_takeaway", inline = TRUE)),
         plotOutput("c_plot", height = "400px"),
         uiOutput("c_caveat"),
+        # C1 + C2 + C3 (Marcus 2026-09-22). The level chart above cannot show
+        # what ENSO does -- a 1-2 ppm wobble is invisible against a 130 ppm rise
+        # -- so "switch it off and the wobbles go" was a claim the tab never
+        # drew. This is the panel that carries it, and it is also where the
+        # observations belong: the ENSO switch means nothing until you can see
+        # it move the model toward the data.
+        hr(),
+        h5("The same run, year by year"),
+        p("The chart above is the level. This one is how much CO₂ went up in",
+          "each single year — which is where the interannual wobbles live, and",
+          "where switching a mechanism off is actually visible."),
+        plotOutput("c_growth", height = "300px"),
+        textOutput("c_growth_note"),
         # C5 (Marcus 2026-09-22): "exactly one reason" was true of the
         # SECULAR sink and false as written -- the seasonal cycle is driven by
         # a prescribed seasonal light and temperature shape, not by CO₂.
@@ -257,6 +270,11 @@ navbarPage(
         width = 3,
         sliderInput("i_years", "Years shown", min = 1750, max = 2024,
                     value = c(1940, 2024), step = 1, sep = ""),
+        # I1 (Marcus 2026-09-22): the same control the Keeling tab has. The
+        # north-south difference is discussed on this tab and was never drawn.
+        radioButtons("i_hemi", "Hemisphere (\u03b4\u00b9\u00b3C)",
+                     c("Both" = "both", "Northern only" = "NH",
+                       "Southern only" = "SH")),
         info_box("What the two isotopes tell you",
                  p(tags$strong("δ¹³C"), " — plants prefer the lighter carbon-12,",
                    "so fossil fuels (ancient plants) are ¹³C-poor. Burning them",
@@ -339,6 +357,14 @@ navbarPage(
         width = 9,
         takeaway(textOutput("f_takeaway", inline = TRUE)),
         plotOutput("f_plot", height = "400px"),
+        # F2 (Marcus 2026-09-22): only in the pulse lab, and only once a pulse
+        # has been run. conditionalPanel keeps it out of the other two modes
+        # rather than rendering an empty box there.
+        conditionalPanel(
+          "input.f_mode == 'Pulse lab'",
+          hr(),
+          h5("Where the extra carbon ends up"),
+          plotOutput("f_partition", height = "300px")),
         uiOutput("f_notes"),
         # F1 (Marcus 2026-09-22): his reframing, used as supplied, and the
         # "honest reading" paragraph deleted as he asked.

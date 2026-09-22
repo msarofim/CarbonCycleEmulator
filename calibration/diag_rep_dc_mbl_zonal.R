@@ -111,8 +111,27 @@ chk <- function(lab, got, rng) cat(sprintf("    %-12s measured %+6.3f  vs publis
 chk("global-MLO", gm$mean, WU2024$gl_minus_mlo)
 chk("global-SPO", gs$mean, WU2024$gl_minus_spo)
 
-md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
-pm <- ccx_mode_par_with_pins(md)
+# ⚠ THE MODE IS RESOLVED THROUGH ccx_load_mode(), NOT BY READING THE FILE.
+# A direct read is the `struct` bug class -- a HILDA mode overlaid on
+# ccx_default_params() runs as a COLUMN, silently, and scores -23,306,061
+# instead of -1439 -- and test-mode-struct-lint.R is the RATCHET that stops the
+# count of such files growing. It caught this file on its first run. Nothing
+# here integrates the model, so the structure would not have bitten; conforming
+# is cheaper than an exemption, and the resolver also returns the four
+# LIKELIHOOD parameters (`rep_dC`, `grad_off_co2`, ...) that a bare intersect()
+# on the model parameters silently drops.
+# ⚠ THE LINT IS A LITERAL, FILE-LEVEL STRING MATCH, so this comment deliberately
+# does NOT spell out the call it is warning against: writing the pattern even
+# inside a comment that rejects it is enough to trip the gate.
+# ⚠ THE LIKELIHOOD PARAMETERS ARE UNDER `$err`, NOT AT THE TOP LEVEL -- they are
+# not model parameters and ccx_default_params() has no slot for them. Reading
+# `lm$rep_dC` returns NULL, which propagates as a zero-length offset and takes
+# out the sign/ordering comparisons below with "argument is of length zero"
+# rather than a wrong number. Asserted, so it cannot come back quietly.
+lm_ <- ccx_load_mode(CCX_MODE_CANONICAL)
+pm <- lm_$err
+stopifnot(is.numeric(pm$rep_dC), length(pm$rep_dC) == 1L,
+          is.numeric(pm$grad_off_co2), length(pm$grad_off_co2) == 1L)
 off_NH <- pm$rep_dC - pm$grad_off_co2 / 2
 off_SH <- pm$rep_dC + pm$grad_off_co2 / 2
 

@@ -40,8 +40,10 @@ rv_guard <- function(x, f) if (rv_failed(x)) rv_plot_unavailable(x$msg) else f(x
 # ~78 characters of provenance, so wrapping only the extra leaves a first line of
 # prefix + full width that clips exactly where the numbers are.
 RV_CAP_WIDTH <- 95
-rv_cap <- function(extra) paste(
-  strwrap(app_provenance_caption(extra), width = RV_CAP_WIDTH), collapse = "\n")
+# app_provenance_caption() wraps on its own since 2026-09-22 (the teaching
+# panels needed it too), so the width is passed rather than re-wrapped here --
+# one wrap, at the card's narrower measure.
+rv_cap <- function(extra) app_provenance_caption(extra, width = RV_CAP_WIDTH)
 
 # ---------------------------------------------------------------------
 # CARD 1 -- the residual against Mauna Loa, before and after the offset
