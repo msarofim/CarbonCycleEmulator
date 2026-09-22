@@ -125,15 +125,25 @@ and undershoots the growth rate). The C2 panel is now the natural place for it.
    the fit at all. **The WIDTH is the live question**: a representation term's defensible σ floor
    is ~0.2 ppm (Francey et al. 2019), 5× tighter than today's 1.0, at which the same value sits at
    z +13.7. ⛔ >1/3 of the offset's value is isotopic — never a CO₂-only ruling.
-2. ⛔ **N5 — STILL NOT DONE, and now SCOPED. NOAA publishes NO zonal/MBL reference for
-   δ¹³C** — measured, not assumed: `ghg.php?param=C13` returns an empty fragment with no
-   generated file, and the form's own parameter list is CO₂/CH₄/N₂O/SF₆. So the CO₂ trick of
-   §4 does not transfer. What DOES exist is **95 per-site δ¹³C flask records**
-   (`aftp/data/trace_gases/co2c13/flask/surface/`, `..._sil_month.txt`), so the hemispheric
-   mean has to be BUILT the way NOAA builds its CO₂ one — sine-latitude weighting over the
-   station network. ⚠ **That is a METHOD CHOICE, not a download**: which sites qualify, how to
-   weight them, how to treat gappy records. Per the standing rule it needs a ruling before it is
-   built, and it is the reason N5 is not simply "an hour's work" like the CO₂ side was.
+2. ⭐⭐ **N5 — DONE, and it is the biggest finding of the day** (CHANGELOG 09-22 (v);
+   `data-raw/build_hemispheric_flask_means.R`, `calibration/diag_rep_dc_d13c_hemispheric.R`,
+   run at `outputs/diagnostics/rep_dc_d13c_hemispheric_20260922.log`). Marcus's ruling: all
+   sites, poleward-weighted, gaps dropped. NOAA publishes **no zonal δ¹³C reference**
+   (measured), so the hemispheric mean is BUILT from **87 flask sites**; CO₂ is built the same
+   way from the same sites so the tie test compares chemistry, not networks.
+   - **The δ¹³C offset is HEMISPHERE-DEPENDENT: −0.092 ‰ (NH) vs −0.011 (SH), ~8× — and the
+     model's is COMMON-MODE** (−0.170 / −0.173), because `rep_dC` is one number. Ratios 1.8×
+     and 16.2×.
+   - ⛔⛔ **THE MASS-BALANCE TIE IS NOT SUPPORTED.** The signature that would reconcile the two
+     MEASURED offsets is **−35.1 ‰ north and −13.2 ‰ south** against the model's single
+     assumed **−26.5** (`LIK_REP_SOURCE_D13C`, **PROVISIONAL and UNCITED**). **No one value
+     describes both hemispheres** ⇒ the TIE is the defect, not just the magnitude. **First
+     observational test that constant has had.** ⇒ [[ccx_rep_dc_tie_unsupported]]
+   - ⚠ **The NH CO₂ offset is PRODUCT-DEPENDENT and "all sites" is why: +0.74 ppm marine-MBL vs
+     +1.29 all-sites flask** over the same months (continental sites). SH agrees (+0.79/+0.81).
+     **The headline CO₂ number stays the MBL one**; the flask pair is used only in the tie test.
+   - ⚠ Limits: δ¹³C stops **2014**; SH median 17 sites vs NH 39; gaps-dropped means network
+     turnover is in the month-to-month scatter. **Means over decades only, never trends.**
 3. **N7 — DONE** (`calibration/diag_growth_residual_years.R`, CHANGELOG 09-22 (u)/(v)). The
    misses are **not structured**: ENSO r −0.06 (p 0.62), volcanic AOD r +0.18 (p 0.16), year
    r −0.00 (p 1.00) on n = 66, every decade mean inside half a standard deviation. Largest
