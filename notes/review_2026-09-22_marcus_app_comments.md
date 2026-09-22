@@ -169,3 +169,91 @@ change, and it makes Marcus's requested deforestation note (§2) natural to add.
 - **R2 — `rep_dC`'s prior centre (N3).** Measure first (K3), then decide. **An objective change**: it restamps every mode and is on the freeze record's OUT list. Not to be done casually before a review.
 - **R3 — the rename (O1).** App title only, or repo/URL too? Decide before the post.
 - **R4 — affiliation (U3).** Drop "NYU Marron Institute" here only, or change the standing rule?
+
+
+---
+
+# APPENDIX A (2026-09-22) — the `rep_dC` research: FIRST RESULT, and it is a hard one
+
+Marcus asked for this after R1–R4. **Preliminary but strong: the fitted offset is the wrong SIGN
+and ~4× the MAGNITUDE of the observed station-vs-mean offset, and its hemispheric ORDERING is
+backwards.** Below, what is MEASURED, what is ESTIMATED, and what is still open.
+
+## A1. What the parameter is (measured, from the code)
+- The box is a **mass-weighted WHOLE-ATMOSPHERE hemispheric mean** — `gtc_per_ppm_hemi =
+  GtC_PER_PPM / 2`, *"each hemisphere holds half the atmosphere"* (`R/model.R:3874`). Not a
+  surface mean. The continental-boundary-layer argument in the likelihood's comments is weak
+  against a whole-column mean: the BL is roughly a tenth of atmospheric mass.
+- `rep_dC` is applied **identically to both stations** (`R/likelihood.R`, the
+  `for (st in c("MLO","SPO"))` loop): one common-mode offset for two hemispheres.
+- `rep_dC` and `grad_off_co2` **jointly** define per-hemisphere offsets. With
+  `station = box − rep_dC` and `obs_grad = box_grad + grad_off_co2`:
+  `off_SH − off_NH = grad_off_co2`. At the canonical → **off_NH ≈ +3.41, off_SH ≈ +3.62 ppm**,
+  confirmed by the direct residuals (**MLO +3.37, SPO +3.69**).
+- **Flat in time** (MLO +3.40 / +3.53 / +3.30 by era; SPO +3.58 / +3.69 / +3.76) ⇒ it is NOT
+  absorbing a growth or budget drift. A genuine constant.
+- **Worth 1306.9 log-units** at the canonical with one coordinate moved (no refit ⇒ an UPPER
+  bound). ⚠ **More than a third is ISOTOPIC** (`d13c_level_MLO` −361.0, `d13c_level_SPO` −163.3
+  vs `co2_level_SPO` −400.8, `co2_level_MLO` −381.8), because the parameter is tied across
+  species by mass balance. **R2 cannot be decided as a CO₂-only question.**
+
+## A2. What the observations say (MEASURED locally, re-derived — not transcribed)
+NOAA GML annual means, **global MBL-surface mean − Mauna Loa**, from
+`co2_annmean_gl.txt` and `co2_annmean_mlo.txt` (fetched 09-22, ~6 KB; re-derived in R):
+
+| 1980 | 1990 | 2000 | 2010 | 2020 | 2023 | 2024 |
+|---|---|---|---|---|---|---|
+| +0.15 | −0.39 | −0.75 | −1.35 | −1.77 | −1.73 | −1.82 |
+
+**mean 1980–2020 = −0.88 ppm**; 2001–2020 = −1.19; **negative in every year since 1981.**
+Independently corroborated by **Wu et al. (2024), ACP 24:1249–1264, doi:10.5194/acp-24-1249-2024**,
+which quotes global − MLO = **−0.46 to −0.88 ppm** (1980–2020) and global − SPO = **+1.91 to
++2.24 ppm**, across analysis methods, and finds the networks agree on the **growth rate** to
+<0.023 ppm/yr — i.e. the disagreement is in the LEVEL, which is exactly `rep_dC`'s axis.
+
+## A3. The confrontation
+| | NH | SH |
+|---|---|---|
+| **model needs** (`rep_dC` ± `grad_off_co2`/2) | **+3.41** | **+3.62** |
+| observed, hemispheric — ⚠ **ESTIMATED, see A4** | ~+0.9 | ~+0.3 |
+| observed, global (measured) | −0.88 vs MLO | +1.9 to +2.2 vs SPO |
+
+1. **Magnitude:** the model needs ~3–4× more offset than the observations support.
+2. **Sign:** the marine-surface global mean sits **below** MLO; `rep_dC` needs the box **above**
+   it. Nothing observational found pushes a hemispheric mean +3.5 ppm above Mauna Loa.
+3. **Ordering is backwards:** observations make the NH offset the larger one (MLO is south of
+   the NH centroid, in a hemisphere with a steep meridional gradient); the model has
+   **SH ≥ NH**. A single shared `rep_dC` is mis-specified by construction — the two hemispheres
+   do not have the same offset, and one of them does not even have the same sign at global scale.
+4. **The surface → mass-weighted correction makes it worse, not better.** Stratospheric CO₂ lags
+   the surface (mean age ~5 yr; **Andrews et al. 2001, doi:10.1029/2001JD000465**), so a
+   mass-weighted mean sits **below** a surface mean. That correction is NEGATIVE.
+
+## A4. ⚠ What is NOT established — do not quote A3's middle row as measured
+- The **hemispheric** offsets in A3 are **my arithmetic**, not a measurement: global−station
+  shifted by half an assumed ~3.5 ppm interhemispheric gradient. **The real measurement is the
+  NOAA MBL Reference zonal product**, which offers NH and SH means directly
+  (`gml.noaa.gov/ccgg/mbl/data.php`, Zonal → Northern/Southern Hemisphere, 1979–2025, text,
+  ~100 KB). ⚠ Its download form is AJAX and the direct URL was not recoverable from the served
+  HTML — it needs a browser session. **That is the next step, and it is cheap.**
+- **No published ppm value exists** for (hemispheric mass-weighted mean − MLO/SPO), nor for
+  (MBL surface mean − mass-weighted whole-atmosphere mean). Searched and not found; it has to be
+  computed. Pandey et al. (2024), AGU Advances, doi:10.1029/2023AV001145 frames exactly this
+  quantity but for **growth rates, not levels** (and was paywalled at 403).
+- **Circularity, which matters for which product to use next:** NOAA's global mean **EXCLUDES
+  Mauna Loa** (altitude site) — so MBL-mean − MLO is genuinely independent — but **INCLUDES South
+  Pole**, so the SH side is partly circular. CarbonTracker assimilates **both** MLO and SPO
+  (nighttime selection at mountain-top sites) and is fully circular here; CAMS EGG4 assimilates
+  only satellite XCO₂ and is the least circular 3-D option, but carries its own ±10 ppm
+  near-surface bias — larger than the effect being measured.
+- A defensible **σ floor** for a station-representation term: **~0.2 ppm**, the inter-network
+  spread on a station difference (**Francey et al. 2019, ACP 19:14741**, monthly sd 0.25 / 0.23 /
+  0.16 ppm for MLO−CGO / MLO−SPO / CGO−SPO). That is **5× tighter than the current 1.0 ppm prior**.
+
+## A5. Where this points (NOT a recommendation — R2 is Marcus's, and it is an objective change)
+The evidence so far says `rep_dC` is **not** a representation offset: it is a constant, nearly
+equal-in-both-hemispheres, ~3.5 ppm **level bias** in modern airborne CO₂ against an ice-core
+anchored preindustrial (~7.4 GtC of excess airborne carbon). Re-centring its prior would not fix
+that; it would move where the bias is booked. ⚠ And because a third of its value is isotopic,
+any change must be judged on **both** species at once. **Next step is A4's MBL zonal pull** — it
+converts A3's middle row from arithmetic into measurement, and it is an hour's work.
