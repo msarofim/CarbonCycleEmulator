@@ -183,3 +183,53 @@ test_that("the arity check REJECTS a helper left at the bottom of server.R", {
   expect_equal(got, c("a", "b"))          # the bug's own signature
   expect_true(is.function(source(tmp, local = new.env())$value))  # why is.function() missed it
 })
+
+# =====================================================================
+# THE STAND-IN LIST (card 8; Marcus 2026-09-22, review N12)
+#
+# The card used to name the SHIMS in prose while the table under it listed the
+# PINS, and presented the two as one list -- Marcus asked how they related and
+# the honest answer was that they are different things. They are now two
+# labelled tables with the overlap computed. RV_SHIMS is the one part that
+# CANNOT be derived (whether a fitted name is a stand-in is a judgement, taken
+# from the 2026-09-16 whole-model review), so it is the part that can go stale
+# the way the parameter label table did -- hence a gate, mutation-tested.
+# =====================================================================
+test_that("every stand-in names a parameter this build still carries", {
+  skip_if_no_review()
+  v <- get("rv_validate_shims", envir = .rv_env)
+  problems <- v(get("RV_SHIMS", envir = .rv_env), CCX_PARAM_NAMES)
+  expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("the stand-in list and the pin list are allowed to overlap, and do", {
+  skip_if_no_review()
+  shims <- names(get("RV_SHIMS", envir = .rv_env))
+  pins  <- names(CCX_MODE_CANONICAL_PINS)
+  # Not an assertion about WHICH names overlap -- that moves with the canonical
+  # and asserting it here would be a second claim about the mode file. What the
+  # card needs is that the two lists are genuinely different sets, so that
+  # presenting them as one was a real error and not pedantry.
+  expect_false(setequal(shims, pins))
+  expect_true(length(setdiff(shims, pins)) > 0)
+  expect_true(length(setdiff(pins, shims)) > 0)
+})
+
+test_that("the stand-in gate rejects a name that has left the parameter set", {
+  skip_if_no_review()
+  v <- get("rv_validate_shims", envir = .rv_env)
+  broken <- get("RV_SHIMS", envir = .rv_env)
+  broken[["a_name_that_left"]] <- "a stand-in for a parameter that is gone"
+  problems <- v(broken, CCX_PARAM_NAMES)
+  expect_true(any(grepl("a_name_that_left", problems)))
+})
+
+test_that("the stand-in gate rejects an unnamed or empty entry", {
+  skip_if_no_review()
+  v <- get("rv_validate_shims", envir = .rv_env)
+  b1 <- get("RV_SHIMS", envir = .rv_env); b1[["rep_dC"]] <- ""
+  expect_true(any(grepl("rep_dC", v(b1, CCX_PARAM_NAMES))))
+  b2 <- get("RV_SHIMS", envir = .rv_env); names(b2)[1] <- ""
+  expect_true(length(v(b2, CCX_PARAM_NAMES)) > 0)
+  expect_true(length(v(list(), CCX_PARAM_NAMES)) > 0)
+})

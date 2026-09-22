@@ -30,15 +30,29 @@ info_box <- function(title, ...) {
 
 # The provenance banner. Deliberately not dismissible: what the model is fitted
 # to changes what every number on every tab means.
+#
+# ⚠ SHORTENED 2026-09-22 (Marcus, review O2: "simplify yellow box text"). It
+# used to carry stage + version + source + status + the full fit description +
+# the beta note + the reviewer pointer, which is five sentences above every
+# tab. What is left is what a first-time reader needs before they read a
+# number: what this is, that it is one fit rather than a posterior, and where
+# the flaws are written down. The rest moved to "Under the hood" as
+# provenance_detail(), which is where someone who wants it will look.
 provenance_banner <- function() {
   cls <- if (app_params$has_posterior) "prov prov-ok" else "prov prov-warn"
   div(class = cls,
-      tags$strong(sprintf("%s %s \u2014 parameters: %s (%s).",
-                          toupper(APP_STAGE), APP_VERSION,
-                          app_params$source, app_params$status)),
-      " ", app_params$detail,
-      " ", APP_STAGE_NOTE,
+      tags$strong(sprintf("%s %s \u2014 %s.", toupper(APP_STAGE), APP_VERSION,
+                          app_params$status)),
+      " Teaching software \u2014 not peer-reviewed, not for citation.",
       " ", tags$em(sprintf("Reviewers: see the \u201c%s\u201d tab.", RV_TAB_TITLE)))
+}
+
+# What the banner used to carry, kept whole and moved off the top of every tab.
+provenance_detail <- function() {
+  tagList(
+    p(sprintf("Parameters: %s (%s).", app_params$source, app_params$status),
+      " ", app_params$detail),
+    p(APP_STAGE_NOTE))
 }
 
 # Shown once, at the top of the first tab: the only place a first-time visitor
@@ -141,10 +155,10 @@ navbarPage(
         warmup_note(),
         takeaway(textOutput("k_takeaway", inline = TRUE)),
         plotOutput("k_plot", height = "380px"),
-        see_card(1, paste("Two model lines are drawn. The solid one is what the",
-                          "calibration actually scored against these measurements",
-                          "\u2014 the hemispheric box minus a fitted station offset",
-                          "\u2014 and the faint one is the box itself.")),
+        # Marcus's own wording (2026-09-22, review K4), used as supplied.
+        see_card(1, paste("Two model lines are drawn. The solid one shows the",
+                          "model result including a fitted station offset. The",
+                          "faint one is the box before the offset.")),
         hr(),
         h5("The seasonal cycle on its own"),
         p("Strip out the long-term rise and one year is left: the land",
@@ -166,10 +180,18 @@ navbarPage(
         info_box("What the numbers mean",
                  p(gloss("GtC", "gigatonnes of carbon: a billion tonnes"),
                    " is the unit. One GtC is about 3.7 billion tonnes of CO₂."),
+                 # W4 (Marcus 2026-09-22): the old gloss called this "the single
+                 # most useful summary", which overclaims. It is a ratio of one
+                 # year's emissions to one year's uptake, so it moves with how
+                 # fast emissions are changing and how far the sinks are from
+                 # equilibrium -- not only with how good the sinks are.
                  p("The ", gloss("airborne fraction",
                                  "the share of everything ever emitted that is still in the air"),
-                   " is the single most useful summary: it says how much of the",
-                   "problem the land and ocean have absorbed for us."))
+                   " says how much of what we emitted stayed in the air. It is",
+                   "worth watching, but it is not a clean score for the sinks:",
+                   "it depends on how quickly emissions are changing and how far",
+                   "the land and ocean are from equilibrium, as well as on how",
+                   "much they take up."))
       ),
       mainPanel(
         width = 9,
@@ -211,11 +233,18 @@ navbarPage(
         takeaway(textOutput("c_takeaway", inline = TRUE)),
         plotOutput("c_plot", height = "400px"),
         uiOutput("c_caveat"),
+        # C5 (Marcus 2026-09-22): "exactly one reason" was true of the
+        # SECULAR sink and false as written -- the seasonal cycle is driven by
+        # a prescribed seasonal light and temperature shape, not by CO₂.
         info_box("Why there is no separate 'no land sink' switch",
-                 p("In this model the land takes up carbon for exactly one",
-                   "reason: plants grow faster when CO₂ is higher. There is no",
-                   "second land-uptake mechanism to remove, so offering two",
-                   "switches would imply a distinction the model does not have."))
+                 p("The land's long-term uptake in this model has one cause:",
+                   "plants grow faster when CO₂ is higher. There is no second",
+                   "long-term land-uptake mechanism to remove, so offering two",
+                   "switches would imply a distinction the model does not have."),
+                 p("The land does breathe in and out over the year as well, but",
+                   "that seasonal swing is driven by sunlight and temperature",
+                   "rather than by CO₂, and it very nearly cancels within each",
+                   "year. It is the seasonal cycle on the first tab."))
       )
     )
   ),
@@ -311,15 +340,14 @@ navbarPage(
         takeaway(textOutput("f_takeaway", inline = TRUE)),
         plotOutput("f_plot", height = "400px"),
         uiOutput("f_notes"),
+        # F1 (Marcus 2026-09-22): his reframing, used as supplied, and the
+        # "honest reading" paragraph deleted as he asked.
         info_box("Where the future temperature comes from",
-                 p("This model tracks carbon, not the whole climate system. Its",
-                   "CO₂ is turned into a temperature using a response fitted to",
-                   "FaIR, a widely used climate emulator. Everything that is not",
-                   "CO₂ — methane, aerosols, ozone — is held at that scenario's",
-                   "values and does not respond to anything you change here."),
-                 p("So the honest reading is: you are changing CO₂ only, in a",
-                   "world whose other greenhouse gases and pollutants follow the",
-                   "background scenario you picked."))
+                 p("Future scenario temperatures are a result of feeding scenario",
+                   "emissions through the FaIR model. The pulse lab and the",
+                   "build-your-own scenarios only allow changes to carbon",
+                   "emissions, not non-CO₂ greenhouse gases, aerosols, or ozone",
+                   "precursors."))
       )
     )
   ),
@@ -341,10 +369,12 @@ navbarPage(
           div(class = "prov prov-warn",
               tags$strong("This build has no comment link set. "),
               "Set APP_FEEDBACK_URL in app/global.R before deploying."),
-        p(tags$small(paste("Every number below is measured by the model this app",
-                           "is running, not quoted from a note. The first time you",
-                           "open this tab some cards run the model again and take",
-                           "a few seconds."))),
+        # N2 (Marcus 2026-09-22) applies here too: the "measured by the running
+        # model, not quoted from a note" claim is cut from BOTH places it was
+        # made (RV_TAB_LEAD was the other). What is left is the part a reader
+        # needs -- why the tab pauses on first view.
+        p(tags$small(paste("The first time you open this tab some cards run the",
+                           "model again and take a few seconds."))),
         hr(),
         review_card(1, "rv_repdc",   "320px"),
         review_card(2, "rv_gradient", "300px"),
@@ -356,6 +386,11 @@ navbarPage(
         review_card(8, NULL),
         div(class = "card-issue",
             h4("The stand-ins and the provisional constants, listed"),
+            # N12 (Marcus 2026-09-22): two lists, labelled, because they are
+            # two different things -- see card 8's detail.
+            h5("Stand-ins: fitted names that absorb a discrepancy"),
+            tableOutput("rv_standins"),
+            h5("Held: names the calibration was not allowed to move"),
             tableOutput("rv_shims"),
             uiOutput("rv_constants"))
       )
@@ -369,10 +404,16 @@ navbarPage(
       column(
         7,
         h4("What this model is"),
+        # U6 (Marcus 2026-09-22): the GOAL before the structure, his wording.
+        p("A carbon-cycle model able to duplicate observed hemispheric, seasonal",
+          "and isotopic patterns, integrated into a pedagogical framework."),
+        # U4 (Marcus 2026-09-22): "It carries all three carbon isotopes" became
+        # "All exchanges include all three isotopes"; the trailing clause cut.
         p("Two hemispheres, each with an atmosphere, a two-pool land biosphere,",
-          "and an ocean column of a mixed layer over ten diffusive layers.",
-          "Monthly steps from 1750. It carries all three carbon isotopes —",
-          "¹²C, ¹³C and ¹⁴C — which is what lets the isotope tab work."),
+          "and an ocean column of a mixed layer over ten diffusive layers, with",
+          "a cold high-latitude surface box and a deep box alongside it.",
+          "Monthly steps from 1750. All exchanges include all three carbon",
+          "isotopes — ¹²C, ¹³C and ¹⁴C."),
         plotOutput("h_diagram", height = "330px"),
         h4("Parameters"),
         p("These are the numbers the calibration fits. Everything else — ocean",
@@ -382,24 +423,49 @@ navbarPage(
       ),
       column(
         5,
+        # U2 (Marcus 2026-09-22): IGCC temperature used to sit in the table
+        # below, which says what the model is FITTED to. It is a driver. Two
+        # boxes now, and the driver list is what the Keeling tab's takeaway
+        # points at.
+        h4("What drives the model"),
+        p(tags$small("Prescribed inputs. The model is told these; it does not",
+                     "work them out.")),
+        tableOutput("h_drivers"),
         h4("What it is fitted to"),
+        p(tags$small("Observations the calibration scored the model against.")),
         tableOutput("h_data"),
         h4("What it cannot do"),
         tags$ul(
           tags$li("No methane, nitrous oxide, aerosols or ozone. Only CO₂."),
-          tags$li(paste("No ocean circulation — the deep ocean is reached by",
-                        "diffusion only, which is a real simplification of how",
-                        "carbon actually gets down there.")),
+          # U5/N6 (Marcus 2026-09-22): "No ocean circulation — diffusion only"
+          # was STALE. The canonical carries HILDA cold surface and deep boxes
+          # in each hemisphere, a biological pump in both columns, and an
+          # ENSO-driven upwelling limb. What it does NOT have is any deep
+          # exchange BETWEEN the hemispheres — they meet only in the air — and
+          # that is the honest sentence. The tropical box was explored and not
+          # adopted.
+          tags$li(paste("The two hemispheres meet only in the atmosphere. Carbon",
+                        "does move between the surface and the deep ocean — by",
+                        "mixing, by a biological pump, by sinking cold water at",
+                        "high latitudes, and by an upwelling limb that responds",
+                        "to El Niño — but there is no deep exchange from one",
+                        "hemisphere's ocean to the other's, and no tropical",
+                        "ocean box between them.")),
           tags$li(paste("Two land pools standing in for every ecosystem on",
                         "Earth. No fire, no permafrost, no nutrient limitation.")),
           tags$li(paste("Two boxes of atmosphere. Nothing about where in a",
                         "hemisphere anything happens.")),
           tags$li("Teaching software. Not peer-reviewed, not for citation.")
         ),
+        h4("Which numbers this app is running on"),
+        provenance_detail(),
         h4("Source"),
         p("Model, data-download scripts and the full decision log are in the",
           "repository, including what was tried and abandoned."),
         p(tags$a(href = APP_REPO_URL, target = "_blank", APP_REPO_URL)),
+        # U3 / ruling R4 (Marcus 2026-09-22): no institutional affiliation on
+        # this page. Marron Institute is for professional output — posters,
+        # talks, papers — and this app is Substack-facing.
         p(tags$small(APP_AUTHOR))
       )
     )

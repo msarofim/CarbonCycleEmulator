@@ -146,6 +146,31 @@ change, and it makes Marcus's requested deforestation note (§2) natural to add.
 
 ---
 
+## 8b. STATUS as of 2026-09-22 (o) — Tier 1 and Tier 2 are DONE
+
+**DONE and verified in a browser against the running app** (CHANGELOG 09-22 (o)):
+all of **Tier 1** — §0/W3/W6/W5 and R1 in (n); K1, K2, N8, N12, U1, U2, U5/N6, C5 in (o) — and
+all of **Tier 2** except O1: O2, K4, W1, W4, C4, F1, F3, N1, N2, N4, N9, N10, N11, U3, U4, U6.
+
+**Two of the Tier-1 items were not copy problems and did not get copy fixes.** U1 (the NA parameter
+table) and N12 (pins-vs-shims) were both hand-maintained tables drifting away from a moving model,
+so each now has a **gated** table — `app_validate_param_meta()` in `app/R/params_meta.R` and
+`rv_validate_shims()` in `app/R/review.R`, both mutation-tested. Rewriting either by hand would
+have bought a year at most.
+
+**N8 carries a measurement it did not have when this note was written.** `gamma_diff` = 0.25 is
+live, and a matched pair (0.25 vs 0, same spin-up function, same forcing) prices the
+AOD → diffuse-light → NPP path at **1.53 ppm** at its largest in 1991–95 and **−0.73 ppm** at 2024.
+
+**STILL OPEN:** **O1/R3** (the rename — left last on purpose: it decides the deployed URL),
+**Tier 3** (C2 first, then F2, I1, C6, N7, W2 — awaiting Marcus's priority order), and **R2 /
+K3 / N5**, which need the NOAA MBL **zonal** pull described in Appendix A §A4.
+
+**R4 is RULED AND PROPAGATED:** the affiliation is off the app, and the standing rule in
+`~/.claude/CLAUDE.md` now carries the professional/informal split rather than a single form.
+
+---
+
 ## 9. What I propose to do, in order
 
 **Tier 1 — the app is WRONG (do regardless).**

@@ -27,27 +27,33 @@
 
 # ---- named constants: every label on the tab derives from these -----
 RV_TAB_TITLE  <- "Known issues"
+# N2 (Marcus 2026-09-22): the "measured by the running model" sentence is cut
+# from the lead. It is true and it is why this tab cannot go stale, but it is
+# inside baseball for a reader. The DESIGN is unchanged -- every number below is
+# still computed by a run this app makes.
 RV_TAB_LEAD   <- paste("Eight things this model gets wrong, or does not do, or",
-                       "does on purpose in a way you might disagree with. Each",
-                       "one is measured below by the running model, not quoted",
-                       "from a note. For each, I want to know the same thing:")
+                       "does on purpose in a way you might disagree with. For",
+                       "each, I want to know the same thing:")
 RV_ASK        <- c("Deal-breaker", "Fixable", "Acceptable")
 RV_ASK_GLOSS  <- c(
   "Deal-breaker" = "this invalidates the lesson the model is built to teach",
   "Fixable"      = "worth the work, and here is the mechanism I would add",
   "Acceptable"   = "a real limitation, correctly disclosed, fine for a teaching model")
 RV_CLASS_GLOSS <- c(
-  structural = paste("a consequence of the model's SHAPE -- one ocean column per",
-                     "hemisphere, no interhemispheric deep exchange. Closing it",
-                     "means a different model, not a better fit."),
+  # U5/N6 (Marcus 2026-09-22): "one ocean column per hemisphere" read as "no
+  # ocean circulation", which is false at hilda29l. The limitation that is real
+  # is the INTERHEMISPHERIC one: the two oceans never touch.
+  structural = paste("a consequence of the model's SHAPE -- each hemisphere has",
+                     "its own ocean, and they exchange carbon only through the",
+                     "air. Closing it means a different model, not a better fit."),
   accounting = paste("the fit prefers a simpler version; a mechanism was kept",
                      "over the fit, on a judgement that is open to challenge."),
   shim       = paste("a fitted stand-in for a mechanism the model does not",
-                     "carry. It is named rather than hidden, which is the most",
-                     "that naming buys."),
-  comparison = paste("not a gate. Nothing from this source is allowed to score",
-                     "the model, so this is a difference reported, not a test",
-                     "failed."),
+                     "carry. It is named rather than hidden."),
+  # N9 (Marcus 2026-09-22): his wording, which is better than mine.
+  comparison = paste("we do not calibrate the model to match future projections,",
+                     "so it is not surprising that we might not match perfectly.",
+                     "But the long tail of carbon dioxide is robust."),
   gap        = "something the product does not have yet.",
   design     = "a choice made when the model was specified.")
 
@@ -57,6 +63,61 @@ RV_IRF_HORIZON   <- 1000    # yr followed for the partition (= DG_L_HORIZON)
 RV_IRF_READ      <- c(20, 100, 300)
 RV_SEAS_WINDOW   <- c(2000, 2024)   # the climatology window for the seasonal panels
 RV_GRAD_WINDOW   <- c(2000, 2024)   # where the MLO-SPO gradients are read
+
+# ---------------------------------------------------------------------
+# THE STAND-INS (card 8; Marcus 2026-09-22, review N12)
+#
+# ⚠ THIS IS A DIFFERENT LIST FROM THE PINS, and conflating them is the bug N12
+# caught. A PIN is generated -- it is a property of the mode file the app is
+# running, and rv_stand_ins() reads it off that file. A STAND-IN is a
+# JUDGEMENT: that a fitted name absorbs a discrepancy rather than representing
+# a process. Nothing in the parameter table records that judgement, so it is
+# written here, with its source, rather than derived.
+#
+# SOURCE: the whole-model review of 2026-09-16 (d),
+# notes/review_2026-09-16c_whole_model.md, which named five stand-ins over
+# seven parameter names. It is NOT re-derived here and must not be edited
+# without that note being edited too.
+#
+# THE GATE (rv_validate_shims) is what stops this going stale the way the
+# parameter label table did: every name here must still be one the build
+# carries. A name that leaves CCX_PARAM_NAMES fails the check rather than
+# quietly describing a parameter that no longer exists.
+RV_SHIM_SOURCE <- "the whole-model review of 2026-09-16"
+RV_SHIMS <- list(
+  rep_dC          = "converts the model's hemispheric box to a station reading",
+  grad_off_d13c   = "absorbs the north-south \u03b4\u00b9\u00b3C offset the model cannot produce",
+  sst_seas_amp_NH = "a seasonal sea-surface temperature the fit chooses instead of the observed one",
+  sst_seas_amp_SH = "the same, southern hemisphere",
+  ent_seas_amp_SH = "a seasonal entrainment amplitude standing in for a seasonal mixed layer",
+  gamma_enso_ocn_NH = "an ENSO ocean coefficient standing in for ocean transport",
+  gamma_enso_ocn_SH = "the same, southern hemisphere"
+)
+
+#' GATE: does the stand-in list still describe parameters this build carries?
+#'
+#' A function so tests/testthat/test-review-cards.R can MUTATION-TEST it.
+#'
+#' @param shims a list in RV_SHIMS' shape
+#' @param param_names the build's fitted names, i.e. `CCX_PARAM_NAMES`
+#' @return character(0) if valid, else one string per problem
+rv_validate_shims <- function(shims = RV_SHIMS, param_names) {
+  bad <- character(0)
+  if (!length(shims)) return("the stand-in list is empty")
+  if (is.null(names(shims)) || any(!nzchar(names(shims))))
+    bad <- c(bad, "every stand-in must be named for its parameter")
+  if (anyDuplicated(names(shims))) bad <- c(bad, "duplicate stand-in names")
+  for (n in names(shims))
+    if (!is.character(shims[[n]]) || length(shims[[n]]) != 1L || !nzchar(shims[[n]]))
+      bad <- c(bad, sprintf("%s: the description is missing or empty", n))
+  if (!missing(param_names)) {
+    gone <- setdiff(names(shims), param_names)
+    if (length(gone))
+      bad <- c(bad, sprintf("stand-in(s) naming a parameter this build does not carry: %s",
+                            paste(gone, collapse = ", ")))
+  }
+  bad
+}
 
 # ---------------------------------------------------------------------
 # Lazy machinery
@@ -283,7 +344,15 @@ rv_control <- function() rv_memo("control", function() {
 rv_stand_ins <- function() rv_memo("stand_ins", function() {
   v <- tryCatch(rv_arm(CCX_MODE_CANONICAL), error = function(e) NULL)
   pins <- if (is.null(v)) CCX_MODE_CANONICAL_PINS else v$pins
+  # THE OVERLAP IS COMPUTED, NOT DESCRIBED (N12). Which stand-ins the canonical
+  # currently holds at a value is a property of the mode file, and it has moved
+  # twice already: at hilda29l three of the seven are pinned at zero, i.e.
+  # switched off rather than fitted. A sentence claiming that would be a second
+  # claim about the model with nothing checking it.
   list(pins = pins,
+       shims = RV_SHIMS,
+       shim_problems = rv_validate_shims(RV_SHIMS, CCX_PARAM_NAMES),
+       shims_held = intersect(names(RV_SHIMS), names(pins)),
        provisional = ccx_check_constants(quiet = TRUE),
        n_constants = length(CCX_CONSTANTS),
        n_fitted = if (is.null(v)) NA_integer_ else length(v$md$param_names))
@@ -324,16 +393,17 @@ RV_CARDS <- list(
                      "constant offset, not a drift. The CO₂ gradient between the",
                      "same two stations is close to right."),
        detail = paste("Closing it needs a persistent north-minus-south isotopic",
-                      "flux the model has no carrier for: one ocean column per",
-                      "hemisphere, with no interhemispheric deep exchange, cannot",
-                      "produce one. Every lever tried moved the LEVELS of the two",
+                      "flux the model has no carrier for. Each hemisphere has its",
+                      "own ocean and they exchange only through the air, so",
+                      "nothing can carry an isotopic signal from one deep ocean",
+                      "to the other. Every lever tried moved the LEVELS of the two",
                       "hemispheres and not the DIFFERENCE between them. That the",
                       "CO₂ gradient is right while the isotopic one is not is the",
                       "diagnostic: the transport is not obviously wrong, the",
                       "isotopic loading of it is."),
        ask = paste("Is a 2x hemispheric isotope gradient a deal-breaker for a",
                    "model whose CO₂ gradient and both Suess trends are right?",
-                   "What carrier would you expect to close it?")),
+                   "What mechanism might help close it?")),
   list(id = 3, key = "diseq", class = "structural",
        title = "The ocean's north-south isotopic disequilibrium is too symmetric",
        plain = paste("The measured air-sea δ¹³C disequilibrium is much larger in",
@@ -369,10 +439,23 @@ RV_CARDS <- list(
                       "fitted coefficients that had been overturning a",
                       "wrong-signed solubility response, which is why the",
                       "mechanism was adopted even though it costs fit. On its own",
-                      "the solubility path still has the wrong sign. What is",
-                      "missing is the variance the record carries BEYOND ENSO --",
-                      "volcanic and land-side -- for which there is no mechanism",
-                      "here."),
+                      "the solubility path still has the wrong sign. The variance",
+                      "the record carries BEYOND ENSO is where the shortfall is,",
+                      # N8 (Marcus 2026-09-22): this card USED to say the
+                      # volcanic and land-side variance had "no mechanism here",
+                      # and that was my error -- `gamma_diff` = 0.25 is live in
+                      # ccx_default_params(), neither fitted nor pinned, and the
+                      # AOD -> diffuse-light -> NPP path runs. MEASURED at the
+                      # canonical: zeroing gamma_diff moves CO2 by 1.53 ppm at
+                      # its largest in 1991-95 and by -0.73 ppm at 2024. The
+                      # corrected statement is the more interesting one.
+                      "and the interesting part is that it is not all for want of",
+                      "a mechanism: the volcanic path IS here and running --",
+                      "stratospheric aerosol scatters sunlight, the model's plants",
+                      "use that diffuse light better, and switching the path off",
+                      "moves CO₂ by about one and a half parts per million in",
+                      "the years after Pinatubo. It is present and the total",
+                      "wobble is still short."),
        ask = paste("Is a model that gets the ENSO sensitivity right but 60 % of",
                    "the variance acceptable for teaching what makes CO₂ wobble?")),
   list(id = 5, key = "pulse", class = "comparison",
@@ -410,7 +493,7 @@ RV_CARDS <- list(
                       "the slack -- one observable with two possible carriers,",
                       "which is the whole argument for choosing on physicality",
                       "rather than on fit."),
-       ask = paste("When a named mechanism loses to a stand-in by a few AIC, is",
+       ask = paste("When a physical mechanism loses to a stand-in by a few AIC, is",
                    "keeping the mechanism the right call -- in a model whose",
                    "purpose is to teach mechanisms?")),
   list(id = 7, key = "bands", class = "gap",
@@ -440,13 +523,23 @@ RV_CARDS <- list(
                      "physical constants are still marked provisional -- their",
                      "values were inverted through the model or held, rather than",
                      "traced to a measurement."),
+       # N11 + N12 (Marcus 2026-09-22): the "most that naming buys" clause is
+       # cut, and the bigger fix -- the prose named the SHIMS while the table
+       # below listed the PINS, and the card presented them as one list. They
+       # are two different things; both are now shown, labelled, with the
+       # overlap COMPUTED rather than described (rv_stand_ins()).
        detail = paste("Each is named in the code and listed below rather than",
-                      "quietly absorbed, which is the most that naming buys: a",
-                      "named stand-in is still a stand-in. The ones that matter",
-                      "most for what this app claims are the station offset",
-                      "(card 1), the δ¹³C gradient offset (card 2 is scored net of",
-                      "it), and a seasonal sea-surface-temperature amplitude",
-                      "fitted well under the observed one."),
+                      "quietly absorbed. The two lists below are different things",
+                      "and it is worth keeping them apart. A STAND-IN is fitted",
+                      "freely and absorbs a discrepancy instead of representing a",
+                      "process; a HELD parameter is one the calibration is not",
+                      "allowed to move at all, carried at a stated number. Some",
+                      "names are in both -- a stand-in that was switched off by",
+                      "holding it at zero. The stand-ins that matter most for what",
+                      "this app claims are the station offset (card 1), the",
+                      "δ¹³C gradient offset (card 2 is scored net of it), and a",
+                      "seasonal sea-surface-temperature amplitude fitted well",
+                      "under the observed one."),
        ask = paste("Which of these would you want carried by a real mechanism",
                    "before you would use the model to teach from?"))
 )

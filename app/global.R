@@ -44,7 +44,11 @@ APP_SUBTITLE     <- "A calibrated carbon-cycle model you can take apart"
 APP_HIST_YEARS   <- c(1750, 2024)
 APP_FUTURE_YEARS <- c(1750, 2100)
 APP_PULSE_YEARS  <- c(1750, 2300)
-APP_AUTHOR       <- "Marcus C. Sarofim, NYU Marron Institute"
+# ⚠ NO INSTITUTIONAL AFFILIATION HERE, AND IT IS A RULING, NOT AN OVERSIGHT
+# (Marcus 2026-09-22, review U3 / ruling R4): "Marron Institute is for
+# professional output (posters, talks, papers), but not for Substack output,
+# comments on rules, or other less official output." This app is Substack-facing.
+APP_AUTHOR       <- "Marcus C. Sarofim"
 
 # ---- THE BETA AND ITS REVIEW (2026-09-22) ---------------------------------
 # The model is frozen and tagged; what is under review is whether its remaining
@@ -77,8 +81,9 @@ APP_REPO_URL     <- "SET-BEFORE-DEPLOY"
 APP_FEEDBACK_HOW <- paste("Comments are public on the post and I read all of",
                           "them. Please lead your comment with the card number",
                           "so the threads stay separable. Anyone whose comment",
-                          "changes the model or the write-up is credited in the",
-                          "acknowledgements.")
+                          "changes the model or the write-up will be credited",
+                          "in the acknowledgements for the tool and any potential",
+                          "future publication.")
 app_link_ok <- function(u) is.character(u) && length(u) == 1L &&
   nzchar(u) && !identical(u, "SET-BEFORE-DEPLOY")
 

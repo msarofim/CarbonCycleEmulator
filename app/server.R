@@ -43,10 +43,22 @@ function(input, output, session) {
     i0 <- which.min(abs(o$t - 1958)); i1 <- nrow(o)
     obs_mlo <- APP_OBS$co2[APP_OBS$co2$station == "MLO", ]
     last_obs <- mean(obs_mlo$co2_ppm[obs_mlo$year >= 2023])
-    sprintf(paste("Given only emissions, the model produces %.0f ppm in %d,",
-                  "rising to %.0f ppm today; the measured value is about %.0f ppm.",
-                  "Nothing here was tuned to the shape of this curve — the rise",
-                  "comes out of the carbon bookkeeping."),
+    # ⚠ WHAT THIS SENTENCE MAY NOT SAY (Marcus 2026-09-22, review K1/K2). It
+    # read "Given only emissions ... Nothing here was tuned to the shape of this
+    # curve", and both halves were false. The model is driven by emissions AND
+    # global temperature AND an ENSO index AND volcanic aerosol, all prescribed;
+    # and the CO₂ level and seasonal cycle at BOTH stations are rows of the
+    # objective, so this curve is among the things the calibration was scored
+    # against. The honest claim is narrower and still worth making: what the
+    # model is not told is how the carbon DIVIDES between air, land and ocean.
+    sprintf(paste("The model produces %.0f ppm in %d, rising to %.0f ppm today;",
+                  "the measured value is about %.0f ppm. It is not free of this",
+                  "record: the model is driven by emissions, global temperature,",
+                  "an ENSO index and volcanic aerosol, and the CO₂ level and",
+                  "seasonal cycle at both stations are among the things the",
+                  "calibration scored it against. What it is never told is how",
+                  "the emitted carbon divides between air, land and ocean —",
+                  "that comes out of the bookkeeping, and it is the next tab."),
             o$co2_NH[i0], floor(o$t[i0]), o$co2_NH[i1], last_obs)
   })
 
@@ -225,8 +237,7 @@ function(input, output, session) {
           tags$strong("How this is computed: "),
           "the model runs twice — once with the pulse and once without, from ",
           "identical starting conditions — and the difference between the two ",
-          "is the pulse's effect. Running only the pulse case would confound it ",
-          "with everything else happening in the scenario.")
+          "is the pulse's effect.")
     } else NULL
   })
 
@@ -240,54 +251,27 @@ function(input, output, session) {
   output$h_diagram <- renderPlot(
     plot_box_diagram(APP_FLUX_NOW, APP_HIST$out[nrow(APP_HIST$out), ], app_params$p))
 
-  output$h_params <- renderTable({
-    nm <- CCX_PARAM_NAMES
-    desc <- c(
-      # beta left CCX_PARAM_NAMES on 2026-08-14 with the flip to the saturating
-      # fertilisation form; its label is kept so the log form still renders if
-      # anyone runs the app against a pre-flip posterior.
-      beta = "CO₂ fertilisation strength",
-      beta_max = "CO₂ fertilisation, maximum boost",
-      fert_k = "CO₂ needed for half that boost",
-      q10 = "Soil respiration warming response",
-      k_w = "Air-sea gas transfer speed", h_ml = "Ocean mixed-layer depth",
-      kz = "Deep-ocean mixing rate", tau_ex = "Interhemispheric mixing time",
-      npp_frac_NH = "Northern share of plant growth",
-      seas_amp_NH = "Northern seasonal amplitude",
-      seas_amp_SH = "Southern seasonal amplitude",
-      seas_phase_NH = "Northern seasonal timing",
-      seas_phase_SH = "Southern seasonal timing",
-      gamma_enso_land_NH = "ENSO land sensitivity, north",
-      gamma_enso_land_SH = "ENSO land sensitivity, south",
-      gamma_enso_ocn_NH  = "ENSO ocean sensitivity, north",
-      gamma_enso_ocn_SH  = "ENSO ocean sensitivity, south",
-      tau_soil_fast = "Responsive soil turnover time",
-      bomb_total = "Total bomb ¹⁴C released",
-      # sigma_co2 left CCX_PARAM_NAMES on 2026-08-15 (review item 6b); the CO2
-      # level sd is now the fixed LIK_CO2_REP_ERR. Label kept on the same
-      # grounds as beta's above -- inert unless a pre-retirement posterior is
-      # loaded, and the global.R name guard rejects those anyway.
-      sigma_co2 = "CO₂ mismatch allowance", sigma_d13c = "δ¹³C mismatch allowance",
-      sigma_d14c = "Δ¹⁴C mismatch allowance")
-    unit <- c(beta = "—", beta_max = "—", fert_k = "ppm above preindustrial",
-              q10 = "—", k_w = "m/yr", h_ml = "m", kz = "m²/yr",
-              tau_ex = "yr", npp_frac_NH = "—", seas_amp_NH = "GtC/yr",
-              seas_amp_SH = "GtC/yr", seas_phase_NH = "month",
-              seas_phase_SH = "month",
-              gamma_enso_land_NH = "GtC/yr per index unit",
-              gamma_enso_land_SH = "GtC/yr per index unit",
-              gamma_enso_ocn_NH  = "GtC/yr per index unit",
-              gamma_enso_ocn_SH  = "GtC/yr per index unit",
-              tau_soil_fast = "yr", bomb_total = "kmol", sigma_co2 = "ppm",
-              sigma_d13c = "‰", sigma_d14c = "‰")
-    v <- vapply(nm, function(n) {
-      x <- APP_PARAMS[[n]]
-      if (is.null(x)) NA_real_ else as.numeric(x)
-    }, numeric(1))
-    data.frame(Parameter = unname(desc[nm]),
-               Value = ifelse(is.na(v), "—", formatC(v, digits = 3, format = "g")),
-               Units = unname(unit[nm]), check.names = FALSE)
-  }, striped = TRUE, width = "100%")
+  # THE LABEL TABLE IS GATED, NOT TYPED HERE (2026-09-22, Marcus review U1).
+  # It used to be a `desc`/`unit` pair written inline in this block, last
+  # updated in the ~22-name era, so most of the 38 rows printed NA. Both the
+  # table and the check that it covers CCX_PARAM_NAMES now live in
+  # app/R/params_meta.R, where tests/testthat/test-app-params-table.R can reach
+  # them without starting the app.
+  #
+  # ⚠ THE VALUE SOURCE IS NOT `APP_PARAMS` ALONE. Three fitted names have no
+  # slot in ccx_default_params() and are carried separately by global.R --
+  # `bomb_total` and `luc_scale` are FORCING parameters the app applies through
+  # app_build_forcing(), and `rep_dC` is the station offset the likelihood
+  # scored through. All three have a fitted value this app is running on, so
+  # printing them as "—" would understate what is known. The remaining
+  # likelihood-only names (the gradient offsets, sigma_d14c) genuinely are not
+  # carried, and print "—" correctly.
+  output$h_params <- renderTable(
+    app_param_table(CCX_PARAM_NAMES,
+                    c(APP_PARAMS, list(bomb_total = APP_BOMB_TOTAL,
+                                       luc_scale  = APP_LUC_SCALE,
+                                       rep_dC     = APP_REP_DC))),
+    striped = TRUE, width = "100%")
 
   # ---- 7. Known issues (the beta review) -----------------------------
   # Each panel is rendered ONLY when its tab is visible, which is what keeps the
@@ -309,12 +293,32 @@ function(input, output, session) {
   # THE STAND-IN LIST IS GENERATED, NOT TYPED. Which names are held, and at what
   # value, is a property of the mode file the app is running; a hand-kept table
   # here would be a second claim about the model that nothing checks.
+  # TWO TABLES, BECAUSE THEY ARE TWO LISTS (Marcus 2026-09-22, review N12).
+  # The card's prose named the STAND-INS and this table listed the PINS, and
+  # the tab presented them as one. The stand-in list is a judgement (RV_SHIMS,
+  # sourced to the 09-16 whole-model review and gated); the pin list is read
+  # off the mode file. Which stand-ins are currently HELD is computed.
+  output$rv_standins <- renderTable({
+    x <- rv_stand_ins()
+    if (rv_failed(x) || !length(x$shims))
+      return(data.frame(Note = "The stand-in list is unavailable in this build."))
+    if (length(x$shim_problems))
+      return(data.frame(Problem = c("The stand-in list does not match this build.",
+                                    x$shim_problems), check.names = FALSE))
+    held <- names(x$shims) %in% x$shims_held
+    data.frame(`Stand-in` = names(x$shims),
+               `What it stands in for` = unlist(x$shims, use.names = FALSE),
+               `In this fit` = ifelse(held, "held at a value (below)", "fitted freely"),
+               check.names = FALSE)
+  }, striped = TRUE, width = "100%")
+
   output$rv_shims <- renderTable({
     x <- rv_stand_ins()
     if (rv_failed(x) || !length(x$pins))
       return(data.frame(Note = "The held-parameter list is unavailable in this build."))
     data.frame(`Held parameter` = names(x$pins),
                `Held at` = formatC(as.numeric(x$pins), digits = 4, format = "g"),
+               `Also a stand-in` = ifelse(names(x$pins) %in% x$shims_held, "yes", ""),
                check.names = FALSE)
   }, striped = TRUE, width = "100%")
 
@@ -332,18 +336,40 @@ function(input, output, session) {
                                    "the held names are listed above."), x$n_fitted))))
   })
 
+  # TWO TABLES, NOT ONE (Marcus 2026-09-22, review U2). IGCC temperature sat in
+  # "What it is fitted to", which is wrong in the direction that matters: it is
+  # PRESCRIBED forcing, and listing a driver as a target overstates what the
+  # model derives for itself. Historical land-use change is a driver too. The
+  # split is also what makes the Keeling tab's corrected takeaway checkable --
+  # a reader can see the driver list it refers to.
+  output$h_drivers <- renderTable({
+    data.frame(
+      Driver = c("Fossil CO\u2082 emissions", "Land-use change CO\u2082",
+                 "Global mean temperature", "El Ni\u00f1o index (Ni\u00f1o 3.4)",
+                 "Volcanic aerosol", "Bomb and industrial \u00b9\u2074C"),
+      Covers = c("1750\u20132024", "1750\u20132024", "1850\u20132024",
+                 "1948\u2013present", "1850\u20132024", "1952\u20132023"),
+      Source = c("Global Carbon Budget 2025",
+                 "Global Carbon Budget 2025 (OSCAR v3.1 before 1850)",
+                 "IGCC", "NOAA PSL",
+                 "NASA GISS, CMIP7 stratospheric aerosol",
+                 "Tans (1981) / Naegler & Levin (2006); Laemmel et al. 2025"),
+      check.names = FALSE)
+  }, striped = TRUE, width = "100%")
+
   output$h_data <- renderTable({
     data.frame(
-      Record = c("Mauna Loa CO₂", "South Pole CO₂", "Law Dome ice cores",
-                 "Mauna Loa & South Pole δ¹³C", "Zonal Δ¹⁴C (Hua et al. 2022)",
-                 "IntCal20 tree-ring Δ¹⁴C", "Global Carbon Budget 2025",
-                 "IGCC temperature"),
-      Covers = c("1958–present", "1975–present", "1700–1978", "1977–2024",
-                 "1941–2019", "1750–1950", "1959–2024", "1850–2024"),
-      `Used for` = c("CO₂ level and seasonal cycle", "Southern CO₂ level",
-                     "Preindustrial CO₂", "The fossil fingerprint",
-                     "Ocean and land uptake speed", "Preindustrial ¹⁴C decline",
-                     "Splitting land from ocean uptake", "Driving the carbon cycle"),
+      Record = c("Mauna Loa CO\u2082", "South Pole CO\u2082", "Law Dome ice cores",
+                 "Mauna Loa & South Pole \u03b4\u00b9\u00b3C", "Zonal \u0394\u00b9\u2074C (Hua et al. 2022)",
+                 "IntCal20 tree-ring \u0394\u00b9\u2074C", "Global Carbon Budget 2025",
+                 "GLODAPv2.2023 ocean bottles"),
+      Covers = c("1958\u2013present", "1975\u2013present", "1700\u20131978", "1977\u20132024",
+                 "1941\u20132019", "1750\u20131950", "1959\u20132024", "depth climatology"),
+      `Used for` = c("CO\u2082 level and seasonal cycle", "Southern CO\u2082 level",
+                     "Preindustrial CO\u2082", "The fossil fingerprint",
+                     "Ocean and land uptake speed", "Preindustrial \u00b9\u2074C decline",
+                     "Splitting land from ocean uptake",
+                     "The ocean's interior carbon and \u03b4\u00b9\u00b3C"),
       check.names = FALSE)
   }, striped = TRUE, width = "100%")
 }
