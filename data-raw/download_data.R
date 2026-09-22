@@ -70,6 +70,57 @@ fetch("co2_spo",
       "NOAA GML Carbon Cycle Cooperative Global Air Sampling Network, South Pole (SPO) flask CO2.",
       "SH target; monthly flask means")
 
+#' Pull one NOAA MBL ZONAL reference series (2026-09-22)
+#'
+#' ⚠ THIS ONE NEEDS TWO REQUESTS, AND THAT IS WHY IT HAS ITS OWN HELPER. The
+#' download page (gml.noaa.gov/ccgg/mbl/data.php) is a form whose Submit is
+#' handled in JavaScript: it GETs `ghg.php` with the query, which GENERATES a
+#' file under `tmp/` with a per-request numeric id and returns an HTML fragment
+#' linking to it. There is no stable direct URL to the text file, so the id has
+#' to be read out of the fragment. `ghg.php` itself IS a plain GET, so no
+#' browser session is needed -- an earlier note said one was, and it does not.
+#'
+#' WHAT THE PRODUCT IS: the marine-boundary-layer reference, sine-latitude
+#' (i.e. AREA) weighted over the requested band, 48 samples/yr from 1979. It is
+#' a SURFACE mean over marine sites; it is NOT a mass-weighted whole-atmosphere
+#' mean, which matters for anything compared against the model's hemispheric
+#' box -- see calibration/diag_rep_dc_mbl_zonal.R.
+#'
+#' ⚠ CIRCULARITY, which is the reason the band matters: NOAA's MBL reference
+#' EXCLUDES Mauna Loa (an altitude site), so the NH band vs MLO is genuinely
+#' independent. It INCLUDES South Pole, so the SH band vs SPO is not.
+fetch_mbl_zonal <- function(key, min_lat, max_lat, dest, notes = "") {
+  base <- "https://gml.noaa.gov/ccgg/mbl/"
+  q <- sprintf(paste0("%sghg.php?hidden=true&param=CO2&reference_type=zonal",
+                      "&reference=%s%%2C%s&startyear=1979&startmonth=1",
+                      "&endyear=2025&endmonth=12"), base, min_lat, max_lat)
+  cat(sprintf("  ... %-14s %s\n", key, q))
+  frag <- paste(readLines(url(q), warn = FALSE), collapse = "\n")
+  m <- regmatches(frag, regexpr("tmp/co2_GHGreference\\.[0-9]+_zonal\\.txt", frag))
+  if (!length(m))
+    stop(sprintf("FAILED: %s -- ghg.php returned no tmp/ link (the form may have changed)", key))
+  dst <- file.path(DL_DIR, dest)
+  utils::download.file(paste0(base, m[1]), dst, quiet = TRUE, mode = "wb")
+  if (!file.exists(dst) || file.info(dst)$size < 5000)
+    stop(sprintf("FAILED: %s -- the generated file is empty or truncated", key))
+  record(key, dst, q,
+         paste("Lan, X., Tans, P., Thoning, K., & NOAA Global Monitoring Laboratory (2024).",
+               "NOAA Greenhouse Gas Marine Boundary Layer Reference - CO2. [Data set].",
+               "NOAA GML. doi:10.15138/DVNP-F961. CO2 on the X2019 scale."),
+         notes)
+}
+
+fetch_mbl_zonal("mbl_zonal_nh", 0, 90, "mbl_zonal_co2_NH.txt",
+  paste("MBL zonal reference, 0-90N, 1979-2025, 48/yr. EXCLUDES Mauna Loa, so",
+        "NH-minus-MLO is an independent comparison. For the rep_dC confrontation."))
+fetch_mbl_zonal("mbl_zonal_sh", -90, 0, "mbl_zonal_co2_SH.txt",
+  paste("MBL zonal reference, 90S-0. ⚠ INCLUDES South Pole, so SH-minus-SPO is",
+        "PARTLY CIRCULAR -- state it wherever the number is used."))
+fetch_mbl_zonal("mbl_zonal_gl", -90, 90, "mbl_zonal_co2_GL.txt",
+  paste("MBL global reference, 90S-90N. The cross-check against Wu et al. (2024),",
+        "ACP 24:1249, doi:10.5194/acp-24-1249-2024, which quotes global-MLO and",
+        "global-SPO independently."))
+
 # ---------------------------------------------------------------------
 # 2. Atmospheric CO2 + d13C — ice core / firn (pre-instrumental)
 # ---------------------------------------------------------------------

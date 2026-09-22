@@ -282,3 +282,85 @@ anchored preindustrial (~7.4 GtC of excess airborne carbon). Re-centring its pri
 that; it would move where the bias is booked. ⚠ And because a third of its value is isotopic,
 any change must be judged on **both** species at once. **Next step is A4's MBL zonal pull** — it
 converts A3's middle row from arithmetic into measurement, and it is an hour's work.
+
+---
+
+# APPENDIX B (2026-09-22 o) — the MBL ZONAL pull. **A4's middle row is now MEASUREMENT, and TWO OF A3's THREE CLAIMED FAILURES DO NOT SURVIVE IT.**
+
+A4 named this pull as the step that would convert A3's hemispheric row from arithmetic into
+measurement, and warned *"do not quote A3's middle row as measured."* That warning was right.
+Reproducible from `data-raw/download_data.R` (`fetch_mbl_zonal()`, three MANIFEST rows) and
+computed by **`calibration/diag_rep_dc_mbl_zonal.R`**.
+
+⚠ **A4 also said the download "needs a browser session." It does not.** The form's Submit is
+JavaScript, but it GETs a plain `ghg.php?...` endpoint that generates a `tmp/` file and returns
+a fragment linking to it. Two requests, no session. The browser was needed only to READ the
+endpoint out of the page once.
+
+## B1. What was measured
+NOAA MBL **zonal** reference, sine-latitude (area) weighted, 48/yr 1979–2025
+(**Lan, Tans, Thoning & NOAA GML 2024, doi:10.15138/DVNP-F961**, X2019 scale), minus the repo's
+**own** station series — the ones the likelihood scores `rep_dC` against — **matched month by
+month**. Not annual means: SPO's flask record carries 12 months in only 36 of its 48 years, so an
+annual comparison either truncates at 2020 or aliases a partial year's seasonal cycle into the
+level. `approx()` without `rule = 2`, so a month outside the reference window is dropped, never
+extrapolated.
+
+| MBL mean − station | mean (ppm) | sd(ann) | positive in | trend (ppm/decade) |
+|---|---|---|---|---|
+| **NH − MLO** | **+0.738** | 0.282 | **47/47 yr** | **−0.105 ± 0.026** |
+| **SH − SPO** | **+0.814** | 0.209 | **46/46 yr** | −0.012 ± 0.023 |
+| global − MLO | −0.639 | 0.526 | 5/47 yr | −0.348 ± 0.024 |
+| global − SPO | +2.165 | 0.529 | 46/46 yr | +0.281 ± 0.042 |
+
+**VALIDATED, not trusted.** The two quantities **Wu et al. (2024)** report independently both land
+inside their published ranges: global−MLO **−0.639** in [−0.88, −0.46]; global−SPO **+2.165** in
+[+1.91, +2.24]. The gate is in the diagnostic and prints INSIDE/OUTSIDE.
+
+## B2. The confrontation, with A3's claims marked
+| | NH | SH | A3 said | now |
+|---|---|---|---|---|
+| model needs (`rep_dC` ∓ `grad_off_co2`/2) | **+3.41** | **+3.62** | | |
+| **MBL zonal, MEASURED** | **+0.74** | **+0.81** | ~+0.9 / ~+0.3 (arithmetic) | measured |
+| ratio | **4.6×** | **4.5×** | "~3–4× too large" | **STANDS, and sharper** |
+| sign | + | + | **"the SIGN is wrong"** | ⛔ **RETRACTED** |
+| ordering | SH > NH | SH > NH | **"ordering is backwards"** | ⛔ **RETRACTED** |
+
+- ⛔ **THE SIGN CLAIM IS RETRACTED, and the way it went wrong is the standing like-for-like rule.**
+  A3 read the sign off **global − MLO** (−0.88): a *global* mean against a *northern* station. That
+  pair is not like-for-like — the global mean is dragged down by the southern hemisphere, and the
+  comparison the model makes is hemisphere-against-its-own-station. Measured properly, **both
+  hemispheric means sit ABOVE their station, in every one of 46–47 years.** `rep_dC`'s sign is the
+  physically expected one.
+- ⛔ **THE ORDERING CLAIM IS RETRACTED.** A3's ~+0.9 NH / ~+0.3 SH was the global number shifted by
+  half an *assumed* 3.5 ppm gradient — A4 flagged it as arithmetic and it was wrong. Measured,
+  **SH (+0.81) > NH (+0.74)**, which is the model's own ordering (3.62 > 3.41).
+- ✅ **THE MAGNITUDE CLAIM SURVIVES and is now the whole of the case: ~4.5×.**
+- **NEW, not in A3:** the NH offset **declines** at −0.105 ± 0.026 ppm/decade (4σ) while the model's
+  is a constant. ~0.5 ppm of drift over the record — small against the 2.7 ppm discrepancy, real.
+
+## B3. What it says about R2 — **a ruling input, not a recommendation**
+- Re-centring the prior on the measured offset (≈ **+0.78 ppm**) moves the fitted +3.515 from
+  **z +3.52 to z +2.74**: it **relieves 22 % of the strain and relabels the other 78 %.**
+  **+2.74 ppm ≈ 5.8 GtC of airborne carbon still unexplained.** Re-centring does not dissolve the
+  finding; it makes the residue smaller and better-founded.
+- ⚠ **THE WIDTH IS THE BIGGER QUESTION THAN THE CENTRE.** A station-representation term's defensible
+  σ floor is **~0.20 ppm** (Francey et al. 2019, ACP 19:14741) — **5× tighter than today's 1.0 ppm.**
+  At that width the same fitted value sits at **z +13.7**. Today's prior is wide enough to admit a
+  structural error wearing a representation term's clothes, which is exactly what `R/calibrate.R`
+  says the prior exists to resist.
+- ⛔ **STILL CANNOT BE DECIDED ON CO₂ ALONE.** `rep_dC` is tied across species by mass balance and
+  **more than a third of its 1306.9 log-units is isotopic** (A1). A CO₂-justified re-centring moves
+  the δ¹³C levels too.
+- ⚠ **CIRCULARITY IS ASYMMETRIC and the SH row is the weaker one.** NOAA's MBL reference **excludes
+  Mauna Loa** (altitude site) — so NH−MLO is genuinely independent — but **includes South Pole**.
+- ⚠ **SURFACE vs MASS-WEIGHTED IS STILL NOT MEASURED, and it cuts both ways.** The MBL product is a
+  marine *surface* mean; the model's box is converted as a *whole-atmosphere* mean
+  (`GtC_PER_PPM/2`). Stratospheric lag (mean age ~5 yr, Andrews et al. 2001) puts a mass-weighted
+  mean **below** a surface mean, which would widen the gap. ⚠ **But `R/model.R` gives each
+  hemisphere one well-mixed troposphere and NO stratosphere**, so what the box physically is may be
+  closer to a tropospheric mean than its own unit conversion claims. That is a modelling question,
+  not a measurement, and **nothing here settles it.**
+
+⛔ **Any change to this prior is an OBJECTIVE change** — freeze record §4.1: a ruling, then a restamp
+of every mode. **Not taken.**
