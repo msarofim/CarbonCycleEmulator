@@ -62,22 +62,46 @@ rv_plot_repdc <- function() rv_guard(rv_rep_dc(), function(x) {
     geom_hline(yintercept = 0, colour = "grey55", linewidth = 0.4) +
     geom_hline(yintercept = x$rep_dC, colour = RV_COL_BAD(),
                linetype = "dashed", linewidth = 0.5) +
+    # ⭐ THE MEASURED OFFSET, as a second reference line (Marcus 2026-09-22,
+    # K3/N3). The card's whole claim is that the fitted offset is much larger
+    # than the one that exists; drawing both is what lets a reader see the gap
+    # instead of being told about it. RV_REP_OBS_* are OBSERVATIONS and do not
+    # move with a refit; everything model-dependent below is computed.
+    geom_hline(yintercept = RV_REP_OBS_MEAN, colour = RV_COL_OBS(),
+               linetype = "dotted", linewidth = 0.6) +
     geom_point(size = 0.45, alpha = 0.6) +
-    # in the EMPTY BAND between the two point clouds, not on the dashed line,
-    # where it landed inside the upper cloud and was unreadable
+    # ⚠ TWO LABELS, TWO CORNERS. Both used to be anchored at the left: the
+    # fitted one in the EMPTY BAND between the point clouds (y = rep_dC/2,
+    # which is where that band happens to be) and the measured one on its own
+    # line just below it -- and with the measured line added on 2026-09-22 they
+    # overlapped and neither could be read. The fitted label keeps the band at
+    # the left; the measured one goes to the RIGHT edge, on its own line. They
+    # cannot collide because they share neither an x anchor nor a y.
+    # geom_label, not annotate("text"): the measured line sits INSIDE the lower
+    # point cloud, and only an opaque box is legible there.
     annotate("text", x = min(x$year), y = x$rep_dC / 2, hjust = 0, vjust = 0.5,
              size = 3.4, colour = RV_COL_BAD(),
              label = sprintf("fitted station offset %.2f ppm (prior sd %.1f ppm)",
                              x$rep_dC, x$prior_sd)) +
+    annotate("label", x = max(x$year), y = RV_REP_OBS_MEAN, hjust = 1, vjust = 0.5,
+             size = 3.1, colour = RV_COL_OBS(), fill = "white", alpha = 0.85,
+             label.size = 0, label.padding = unit(0.12, "lines"),
+             label = sprintf("measured offset %.2f ppm", RV_REP_OBS_MEAN)) +
     scale_colour_manual(values = stats::setNames(
       c(RV_COL_ALT(), RV_COL_MODEL()),
       c("Model box − Mauna Loa",
         "What the calibration scored (box − offset − Mauna Loa)"))) +
     guides(colour = guide_legend(nrow = 2)) +
     labs(x = LAB_YEAR, y = "Difference from Mauna Loa (ppm)",
-         caption = rv_cap(sprintf(
+         caption = rv_cap(sprintf(paste(
            "Means over %d monthly observations: box %+.2f ppm, scored %+.2f ppm (RMS %.2f).",
-           x$n, x$mean_box, x$mean_scored, x$rmse_scored))) +
+           "The fitted offset is %.1fx the measured one, an excess of %+.2f ppm",
+           "(about %.0f GtC of airborne carbon). The measured value is the NOAA",
+           "marine-boundary-layer reference minus these stations; it EXCLUDES Mauna",
+           "Loa, so the northern half of it is independent of this comparison."),
+           x$n, x$mean_box, x$mean_scored, x$rmse_scored,
+           x$rep_dC / RV_REP_OBS_MEAN, x$rep_dC - RV_REP_OBS_MEAN,
+           (x$rep_dC - RV_REP_OBS_MEAN) * ccx_const("GtC_PER_PPM")))) +
     theme_ccx()
 })
 
@@ -159,10 +183,20 @@ rv_plot_variance <- function() rv_guard(rv_variability(), function(x) {
     scale_colour_manual(values = stats::setNames(c(RV_COL_OBS(), RV_COL_MODEL()),
                                                  c("Measured", "Model"))) +
     labs(x = LAB_YEAR, y = "Growth-rate anomaly (GtC/yr)",
-         caption = rv_cap(sprintf(
+         caption = rv_cap(paste(sprintf(
            paste("Standard deviation: model %.3f against %.3f ± %.3f measured",
                  "— %.2f×. Same detrending applied to both."),
-           v$sd_model, v$sd_obs, v$se_obs, v$ratio))) +
+           v$sd_model, v$sd_obs, v$se_obs, v$ratio),
+           # N7 (Marcus 2026-09-22): "commonalities between the years it over-
+           # and undershoots?" The answer that matters is this one -- the model
+           # is MORE ENSO-correlated than the record is, so the variance it is
+           # missing is not ENSO-shaped. Computed, so it cannot go stale.
+           if (is.null(x$enso)) "" else sprintf(
+             paste("These anomalies track the El Niño index at r %+.2f for the model",
+                   "and %+.2f for the measurements (n = %d) — the model is if anything",
+                   "MORE El Niño-driven than the record, so what is missing from its",
+                   "variance is not El Niño-shaped."),
+             x$enso$r_model, x$enso$r_obs, x$enso$n)))) +
     theme_ccx()
 })
 

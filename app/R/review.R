@@ -120,6 +120,37 @@ rv_validate_shims <- function(shims = RV_SHIMS, param_names) {
 }
 
 # ---------------------------------------------------------------------
+# THE MEASURED STATION-vs-HEMISPHERE OFFSET (card 1; Marcus 2026-09-22, K3/N3)
+#
+# ⭐ THIS IS WHAT TURNS CARD 1 FROM "we fitted an offset" INTO "we fitted an
+# offset and here is the measured one" -- which is exactly what Marcus asked
+# for: "there should be an observed offset between Mauna Loa and hemispheric
+# average: are there other sources that we could use to estimate that offset and
+# compare it to the one that comes out of our model?"
+#
+# ⚠ WHY THESE ARE TYPED HERE RATHER THAN COMPUTED LIVE, when every other number
+# on this tab is computed. They are OBSERVATIONS, not model output: they do not
+# move when the model is refitted, which is the staleness this tab's design
+# guards against. And they CANNOT be computed in a deployment -- they come from
+# `data-raw/downloads/`, which is gitignored and does not ship. Typed, named,
+# and carrying the script that produced them and the product's DOI.
+#
+# ⛔ NOT in R/constants.R deliberately: that registry is the MODEL's physical
+# constants, and `ccx_check_constants()` feeds card 8's "N of M provisional"
+# readout. Adding two observational comparanda there would move a number on
+# another card for no reason.
+RV_REP_OBS_SOURCE <- paste("NOAA MBL zonal reference (Lan, Tans, Thoning & NOAA GML 2024,",
+                           "doi:10.15138/DVNP-F961) minus the station records the",
+                           "likelihood scores, matched month by month;",
+                           "calibration/diag_rep_dc_mbl_zonal.R")
+RV_REP_OBS_NH   <- 0.738   # ppm, MBL 0-90N  minus Mauna Loa, 1979-2025, positive in 47/47 yr
+RV_REP_OBS_SH   <- 0.814   # ppm, MBL 90S-0  minus South Pole, 1979-2024, positive in 46/46 yr
+RV_REP_OBS_MEAN <- (RV_REP_OBS_NH + RV_REP_OBS_SH) / 2
+# ⚠ The SH row is the weaker of the two: NOAA's MBL reference EXCLUDES Mauna Loa
+# (an altitude site) but INCLUDES South Pole, so NH-vs-MLO is independent and
+# SH-vs-SPO is partly circular. Said on the card, not just here.
+
+# ---------------------------------------------------------------------
 # Lazy machinery
 # ---------------------------------------------------------------------
 RV_CACHE <- new.env(parent = emptyenv())
@@ -239,11 +270,32 @@ rv_variability <- function() rv_memo("variability", function() {
   rv_need_gates()
   v <- rv_arm(CCX_MODE_CANONICAL); r <- rv_run(CCX_MODE_CANONICAL)
   gv <- dg_gateV(r); ov <- dg_gateV_obs()
-  list(model_anom = dg_v_anom(dg_af_annual_model(r)),
-       obs_anom   = dg_v_anom(DG_AF_OBS_ANNUAL),
-       years      = DG_AF_OBS_ANNUAL$year[DG_AF_OBS_ANNUAL$year >= DG_V_WIN[1] &
-                                          DG_AF_OBS_ANNUAL$year <= DG_V_WIN[2]],
-       verdict    = dg_gateV_verdict(gv, ov), gv = gv, ov = ov)
+  ma <- dg_v_anom(dg_af_annual_model(r))
+  oa <- dg_v_anom(DG_AF_OBS_ANNUAL)
+  yr <- DG_AF_OBS_ANNUAL$year[DG_AF_OBS_ANNUAL$year >= DG_V_WIN[1] &
+                              DG_AF_OBS_ANNUAL$year <= DG_V_WIN[2]]
+  # N7 (Marcus 2026-09-22): "commonalities between the years the model over- and
+  # undershoots?" The sharpest version of that question is whether what is
+  # MISSING from the model's variance is ENSO-shaped -- and it is not. Costs no
+  # extra run: both anomaly series are already here and the index is on disk.
+  # ⚠ ON THE GATE'S OWN ESTIMATOR (dg_v_anom: growth regressed on emissions with
+  # a time-varying airborne fraction, GtC/yr), NOT the ppm/yr spline the "What
+  # if…?" tab uses. The two agree qualitatively; their numbers are not
+  # interchangeable and neither may be quoted as the other.
+  ens <- tryCatch({
+    en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
+    ea <- stats::aggregate(nino34_anom ~ year, data = en, FUN = mean, na.rm = TRUE)
+    k <- match(yr, ea$year)
+    ok <- !is.na(k) & is.finite(ma) & is.finite(oa)
+    if (sum(ok) < 20) NULL else {
+      cm <- stats::cor.test(ma[ok], ea$nino34_anom[k[ok]])
+      co <- stats::cor.test(oa[ok], ea$nino34_anom[k[ok]])
+      list(n = sum(ok), r_model = unname(cm$estimate), p_model = cm$p.value,
+           r_obs = unname(co$estimate), p_obs = co$p.value)
+    }
+  }, error = function(e) NULL)
+  list(model_anom = ma, obs_anom = oa, years = yr, enso = ens,
+       verdict = dg_gateV_verdict(gv, ov), gv = gv, ov = ov)
 })
 
 rv_enso_slope <- function() rv_memo("enso_slope", function() {
@@ -383,9 +435,37 @@ RV_CARDS <- list(
                       "a good fit. The prior is N(0, 1 ppm) -- the repo's own",
                       "station-vs-box scale, itself larger than the 0.39-0.59 ppm",
                       "RMS between co-located instruments at Mauna Loa. The fitted",
-                      "value sits well outside that prior, which is the flag."),
-       ask = paste("Is a fitted station-vs-box offset acceptable in a teaching",
-                   "model, at this size? If not, what would you constrain it with?")),
+                      "value sits well outside that prior, which is the flag.",
+                      # K3/N3 (Marcus 2026-09-22): "is there an OBSERVED offset we
+                      # could compare ours against?" There is, and it is now on the
+                      # chart as well as in this text.
+                      # ⛔ OBSERVATIONAL FACTS ONLY IN THIS STATIC STRING. The
+                      # ratio and the excess depend on the FITTED value, which
+                      # moves with every refit -- they are computed on the chart
+                      # instead. A literal "3.515" here is the exact staleness
+                      # this tab exists to avoid, and it was written and removed
+                      # once already on 2026-09-22.
+                      sprintf(paste("\n\nAND THERE IS A MEASURED OFFSET TO COMPARE IT",
+                                    "AGAINST. Differencing the NOAA marine-boundary-layer",
+                                    "reference against these same two stations, month by",
+                                    "month, gives %+.2f ppm in the north and %+.2f ppm in",
+                                    "the south -- positive in every year of the record. So",
+                                    "the model's SIGN is the physically expected one, and",
+                                    "its north-south ORDERING is right too. What is not",
+                                    "right is the SIZE, and the chart above shows the gap:",
+                                    "the fitted offset is the upper dashed line, the",
+                                    "measured one the lower. Re-centring the prior on the",
+                                    "measured value would relabel most of that gap rather",
+                                    "than remove it."),
+                              RV_REP_OBS_NH, RV_REP_OBS_SH),
+                      sprintf(paste("\n\nSource: %s. One asymmetry worth knowing: that",
+                                    "reference EXCLUDES Mauna Loa, so the northern",
+                                    "comparison is independent, but it INCLUDES the South",
+                                    "Pole, so the southern one is partly circular."),
+                              RV_REP_OBS_SOURCE)),
+       ask = paste("The fit needs several times the station offset that is",
+                   "actually measured. Is a stand-in of that size acceptable in a",
+                   "teaching model -- and if not, what would you constrain it with?")),
   list(id = 2, key = "gradient", class = "structural",
        title = "The north-south δ¹³C gradient is twice the observed one",
        plain = paste("Between Mauna Loa and the South Pole, the model's δ¹³C",
@@ -455,9 +535,32 @@ RV_CARDS <- list(
                       "use that diffuse light better, and switching the path off",
                       "moves CO₂ by about one and a half parts per million in",
                       "the years after Pinatubo. It is present and the total",
-                      "wobble is still short."),
-       ask = paste("Is a model that gets the ENSO sensitivity right but 60 % of",
-                   "the variance acceptable for teaching what makes CO₂ wobble?")),
+                      "wobble is still short.",
+                      # N7 (Marcus 2026-09-22): "can we identify any commonalities
+                      # between the years the model overshoots the growth rate,
+                      # and/or between the years it undershoots?" Measured in
+                      # calibration/diag_growth_residual_years.R. The answer is
+                      # NO for all three candidates, on n = 66, and the useful
+                      # finding is the one in the chart caption. Qualitative here
+                      # on purpose -- the numbers are model-dependent and belong
+                      # where they are computed.
+                      "\n\nWE LOOKED FOR A PATTERN IN THE MISSES AND DID NOT FIND",
+                      "ONE. Year by year, the difference between the model's growth",
+                      "and the measured growth shows no usable association with the",
+                      "El Ni\u00f1o index, with volcanic aerosol, or with the decade:",
+                      "on sixty-six years none of the three reaches significance,",
+                      "and the decade averages all sit well inside one year's",
+                      "scatter. The single largest overshoot is 1991 -- the model",
+                      "does not draw down as much carbon after Pinatubo as the",
+                      "record does -- but 1983, the other big eruption, misses the",
+                      "other way, so even that is not a rule. What the caption",
+                      "above reports is the finding that survives: the model's",
+                      "variability is MORE El Ni\u00f1o-driven than the real record's,",
+                      "so the variance it lacks is of some other kind."),
+       ask = paste("Is a model that gets the ENSO sensitivity right but only part",
+                   "of the variance acceptable for teaching what makes CO₂ wobble?",
+                   "And if the missing variability is not El Ni\u00f1o, not volcanic and",
+                   "not a trend \u2014 what would you look for next?")),
   list(id = 5, key = "pulse", class = "comparison",
        title = "A pulse of CO₂ decays faster here than in the multi-model mean",
        plain = paste("Release a pulse and this model keeps less of it in the air",
