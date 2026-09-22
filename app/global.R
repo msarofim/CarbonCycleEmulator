@@ -113,6 +113,17 @@ APP_SSPS <- c(
 # Pulse size. 100 GtC is roughly a decade of current fossil emissions -- large
 # enough that the response is visible against the background without a log axis,
 # and a round number a student can hold onto.
+# ⚠ W2 (Marcus 2026-09-22): "a note that deforestation added to emissions up to
+# [DATE] but was a net sink after that." COMPUTED, not recalled -- and the
+# computation says the premise does not hold for this driver. Land-use emissions
+# are POSITIVE IN EVERY YEAR 1750-2024 (GCB 2025 bookkeeping + OSCAR before
+# 1850); they never turn negative, so there is no such date. What DOES cross is
+# the land AS A WHOLE, once growth elsewhere outweighs what clearing releases.
+# That crossing is what the note reports, and it is computed at render time from
+# the running model and from GCB, on this window.
+APP_LUC_SMOOTH_YR <- 11   # centred years; the land-sink series is noisy enough
+                          # that a single year's sign is meaningless
+
 APP_PULSE_GtC_DEFAULT <- 100
 APP_PULSE_YEAR_DEFAULT <- 2050
 

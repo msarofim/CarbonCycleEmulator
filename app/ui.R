@@ -206,6 +206,10 @@ navbarPage(
         ),
         br(),
         plotOutput("w_partition", height = "330px"),
+        # W2 (Marcus 2026-09-22). Computed, not recalled -- and the computation
+        # corrected the premise; see output$w_luc_note.
+        div(class = "caveat", tags$strong("About land use: "),
+            textOutput("w_luc_note", inline = TRUE)),
         hr(),
         fluidRow(
           column(6, h5("Airborne fraction"), plotOutput("w_af", height = "260px")),

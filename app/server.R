@@ -95,6 +95,43 @@ function(input, output, session) {
             fmt_gtc(s))
   })
 
+  # W2 (Marcus 2026-09-22), COMPUTED. He asked for a note that deforestation
+  # added to emissions up to some date and was a net sink after. ⚠ IT NEVER IS:
+  # land-use emissions are positive in every year of this driver. What crosses
+  # is the LAND AS A WHOLE. Both crossings are computed here -- the model's and
+  # the measured one -- because the difference between them is itself the
+  # honest disclosure (this model's land sink runs high against GCB, which is
+  # what gate 7 scores at z +1.36).
+  output$w_luc_note <- renderText({
+    k <- APP_LUC_SMOOTH_YR
+    cross <- function(year, v) {
+      sm <- stats::filter(v, rep(1 / k, k), sides = 2)
+      i <- which(!is.na(sm) & sm > 0)
+      if (!length(i)) return(NA_integer_)
+      # the FIRST year of the smoothable record is not a crossing -- it only
+      # means the series was already positive when the record began
+      if (i[1] == which(!is.na(sm))[1]) return(NA_integer_)
+      year[i[1]]
+    }
+    pt <- partition()
+    a <- stats::aggregate(list(g = pt$land_gross), list(year = floor(pt$t)), mean)
+    mod <- cross(a$year[-1], diff(a$g))
+    obs <- cross(APP_GCB$year, APP_GCB$land_sink - APP_GCB$luc)
+    paste(
+      sprintf(paste("Clearing land has ADDED carbon to the air in every year of",
+                    "this record \u2014 it has never been a net removal. What changed",
+                    "is the land as a whole: growth elsewhere eventually outweighed",
+                    "what clearing released.")),
+      if (is.na(obs)) "" else
+        sprintf(paste("In the measured budget the land crossed from a net source",
+                      "to a net sink around %d (%d-year average)."), obs, k),
+      if (is.na(mod)) "" else
+        sprintf(paste("This model crosses around %d \u2014 %s than the measurements,",
+                      "which is one of the places it runs a larger land sink than",
+                      "the Global Carbon Budget does."),
+                mod, if (!is.na(obs) && mod < obs) "earlier" else "later"))
+  })
+
   # ---- 3. Counterfactuals --------------------------------------------
   cf_run <- reactive({
     req(input$c_mech)
