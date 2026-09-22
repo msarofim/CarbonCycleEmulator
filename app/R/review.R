@@ -146,6 +146,22 @@ RV_REP_OBS_SOURCE <- paste("NOAA MBL zonal reference (Lan, Tans, Thoning & NOAA 
 RV_REP_OBS_NH   <- 0.738   # ppm, MBL 0-90N  minus Mauna Loa, 1979-2025, positive in 47/47 yr
 RV_REP_OBS_SH   <- 0.814   # ppm, MBL 90S-0  minus South Pole, 1979-2024, positive in 46/46 yr
 RV_REP_OBS_MEAN <- (RV_REP_OBS_NH + RV_REP_OBS_SH) / 2
+# ---- and the δ¹³C side of the same parameter (N5, 2026-09-22) -------
+# ⭐ `rep_dC` is ONE parameter tied across species by mass balance, so it also
+# fixes a δ¹³C station offset -- one nobody had ever compared with an
+# observation. NOAA publishes no zonal δ¹³C reference (measured: the MBL form
+# offers CO₂/CH₄/N₂O/SF₆ only), so the hemispheric mean is BUILT from 87 flask
+# sites by data-raw/build_hemispheric_flask_means.R on Marcus's ruling -- all
+# sites, latitude-band-area weighted, gaps dropped -- and CO₂ is built the same
+# way from the same sites so the two can be compared without comparing networks.
+RV_REP_OBS_D13C_NH <- -0.092  # permil, hemispheric mean minus MLO, 1989-2014
+RV_REP_OBS_D13C_SH <- -0.011  # permil, hemispheric mean minus SPO
+# ⛔ THE ASYMMETRY IS THE POINT: measured, the δ¹³C offset is ~8x larger in the
+# north than the south; the model's is the SAME in both (one common-mode
+# parameter). And the source signature that would reconcile the measured CO₂
+# and δ¹³C offsets is -35 permil in the north against -13 in the south, where
+# the model assumes a single -26.5 (LIK_REP_SOURCE_D13C, itself PROVISIONAL and
+# UNCITED). No one value can describe both hemispheres.
 # ⚠ The SH row is the weaker of the two: NOAA's MBL reference EXCLUDES Mauna Loa
 # (an altitude site) but INCLUDES South Pole, so NH-vs-MLO is independent and
 # SH-vs-SPO is partly circular. Said on the card, not just here.
@@ -458,6 +474,20 @@ RV_CARDS <- list(
                                     "measured value would relabel most of that gap rather",
                                     "than remove it."),
                               RV_REP_OBS_NH, RV_REP_OBS_SH),
+                      sprintf(paste("\n\nTHE SAME PARAMETER ALSO SETS A \u03b4\u00b9\u00b3C OFFSET,",
+                                    "because one number is tied across both species by",
+                                    "mass balance \u2014 and that side had never been checked",
+                                    "against an observation at all. Built from the flask",
+                                    "network, the measured \u03b4\u00b9\u00b3C offset is %+.3f permil in",
+                                    "the north and %+.3f in the south. The model's is the",
+                                    "same in both hemispheres, because it is one",
+                                    "common-mode number. Worse, the carbon signature that",
+                                    "would reconcile the measured CO\u2082 and \u03b4\u00b9\u00b3C offsets",
+                                    "is about \u221235 permil in the north and \u221213 in the",
+                                    "south, where the model assumes a single \u221226.5 \u2014 so no",
+                                    "one value describes both. The tie itself, not just its",
+                                    "size, is doing work it cannot support."),
+                              RV_REP_OBS_D13C_NH, RV_REP_OBS_D13C_SH),
                       sprintf(paste("\n\nSource: %s. One asymmetry worth knowing: that",
                                     "reference EXCLUDES Mauna Loa, so the northern",
                                     "comparison is independent, but it INCLUDES the South",
