@@ -132,3 +132,54 @@ test_that("the validator PASSES the shipped ledger it just rejected mutations of
   v <- get("rv_validate_cards", envir = .rv_env)
   expect_equal(v(get("RV_CARDS", envir = .rv_env), .rv_ui_text), character(0))
 })
+
+# =====================================================================
+# Gate: server.R's LAST TOP-LEVEL EXPRESSION IS THE SERVER FUNCTION.
+#
+# THE BUG THIS EXISTS FOR (2026-09-22, found by opening the app in a browser).
+# Shiny's two-file style takes `source("server.R")$value` as the server. A
+# utility defined at the BOTTOM of server.R therefore BECOMES the server:
+# `%||% <- function(a, b)` did, and every session died with
+#     Error in server(...) : unused arguments (input = ..., output = ...)
+# before one output rendered. The UI still built and every plot was simply
+# BLANK -- indistinguishable from a slow panel or an empty dataset.
+#
+# ⚠ AND THE CHECK THAT MISSED IT. An ad-hoc smoke test asserted
+# `is.function(source("server.R")$value)`, which was TRUE -- of the wrong
+# function. is.function() is not the property; the ARITY is. That is the
+# "a gate that passes is not a gate that works" failure, so this one asserts
+# the formals by name and is mutation-tested below.
+# =====================================================================
+
+.rv_server_R <- file.path(.rv_app_dir, "server.R")
+
+# The server function's required signature, by name and order.
+RV_SERVER_FORMALS <- c("input", "output", "session")
+
+#' The formals of the last top-level expression of an app file.
+#' @return character() if it is not a function at all
+rv_last_value_formals <- function(path) {
+  v <- source(path, local = new.env())$value
+  if (!is.function(v)) return(character())
+  names(formals(v))
+}
+
+test_that("server.R's last top-level value is the (input, output, session) server", {
+  skip_if_not(file.exists(.rv_server_R), "app/server.R is not present")
+  expect_equal(rv_last_value_formals(.rv_server_R), RV_SERVER_FORMALS)
+})
+
+test_that("the arity check REJECTS a helper left at the bottom of server.R", {
+  skip_if_not(file.exists(.rv_server_R), "app/server.R is not present")
+  # reproduce the exact 2026-09-22 bug in a copy: append the helper that used
+  # to live there, and confirm this gate fails rather than passing on
+  # is.function() the way the smoke test did
+  tmp <- tempfile(fileext = ".R")
+  on.exit(unlink(tmp), add = TRUE)
+  writeLines(c(readLines(.rv_server_R, warn = FALSE),
+               "`%||%` <- function(a, b) if (is.null(a)) b else a"), tmp)
+  got <- rv_last_value_formals(tmp)
+  expect_false(identical(got, RV_SERVER_FORMALS))
+  expect_equal(got, c("a", "b"))          # the bug's own signature
+  expect_true(is.function(source(tmp, local = new.env())$value))  # why is.function() missed it
+})

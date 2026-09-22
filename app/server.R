@@ -11,6 +11,22 @@
 # from the run they are looking at.
 # =====================================================================
 
+# ⛔ THIS HELPER MUST BE DEFINED **BEFORE** THE SERVER FUNCTION, AND THE SERVER
+# FUNCTION MUST BE THE LAST TOP-LEVEL EXPRESSION IN THIS FILE.
+#
+# Shiny's two-file app style takes `source("server.R")$value` -- the value of the
+# LAST top-level expression -- as the server. `%||%` used to sit at the BOTTOM of
+# this file, so Shiny received a two-argument helper instead of the server and
+# every session died with
+#     Error in server(...) : unused arguments (input = ..., output = ...)
+# before a single output rendered. The UI still built, the banner still showed,
+# and every plot was simply blank -- which reads as "slow" or "empty data", not
+# as a crash. Found 2026-09-22 by actually opening the app in a browser; the
+# smoke tests up to then had sourced global.R and never run a session.
+# test-review-cards.R now asserts this file's last value takes
+# (input, output, session), and mutation-tests that assertion.
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
 function(input, output, session) {
 
   # fmt_gtc() moved to app/R/plots.R (2026-09-08g): the diagram function needs it too
@@ -327,4 +343,3 @@ function(input, output, session) {
   }, striped = TRUE, width = "100%")
 }
 
-`%||%` <- function(a, b) if (is.null(a)) b else a

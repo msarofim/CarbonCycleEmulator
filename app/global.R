@@ -208,9 +208,21 @@ app_params <- local({
     # likelihood applied is taken off). The "5.2" was the prior z 3.52 garbled;
     # the scorecard's own strained-prior line has always said +3.52. No number
     # is typed here any more -- card 1 of the review tab COMPUTES all three.
-    detail <- paste0("Maximum-a-posteriori fit of ", length(CCX_PARAM_NAMES),
+    # ⚠ THE COUNT IS THE FILE'S OWN, NOT THE TABLE'S (corrected 2026-09-22).
+    # This read `length(CCX_PARAM_NAMES)` = 38, the size of the whole parameter
+    # TABLE, and printed "fit of 38 parameters" on the public banner while the
+    # canonical fits 29 with 9 held -- contradicting README, the freeze record
+    # and card 6 of the review tab, all of which say 29. Same failure as the
+    # deleted "about 27 ppm high" string two comments up: a label stating a
+    # computed quantity, computed from the wrong thing.
+    .n_fit <- length(md$param_names)
+    .n_pin <- length(ccx_mode_pins(md))
+    detail <- paste0("Maximum-a-posteriori fit of ", .n_fit,
                      " parameters to CO₂, δ¹³C, Δ¹⁴C and Global Carbon Budget",
-                     " sinks. A single best fit, not yet a posterior — no",
+                     " sinks",
+                     if (.n_pin) paste0(", with ", .n_pin,
+                                        " further values held at stated numbers") else "",
+                     ". A single best fit, not yet a posterior — no",
                      " uncertainty ranges are shown, and the fit constrains the",
                      " shape of these curves more tightly than their absolute",
                      " height.")
