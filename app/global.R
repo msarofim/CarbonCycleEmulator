@@ -201,13 +201,18 @@ app_params <- local({
     # streams are fitted through a free station-vs-box offset (`rep_dC`), so the
     # calibration constrains the SHAPE of the Keeling curve more tightly than its
     # absolute height. See calibration/diag_rep_dC_shape.R.
-    # ⚠ CORRECTED 2026-09-22: this comment read "+5.2 sd of its own prior" and
-    # "the model box runs ~4 ppm above Mauna Loa". MEASURED at hilda29l, the
-    # offset is 3.515 ppm on a 1.0 ppm prior = 3.52 sd, and the raw box runs
-    # +3.40 ppm above Mauna Loa in the mean (RMS 0.73 ppm once the offset the
-    # likelihood applied is taken off). The "5.2" was the prior z 3.52 garbled;
-    # the scorecard's own strained-prior line has always said +3.52. No number
-    # is typed here any more -- card 1 of the review tab COMPUTES all three.
+    # ⚠ RE-MEASURED 2026-09-22: this comment read "+5.2 sd of its own prior" and
+    # "the model box runs ~4 ppm above Mauna Loa". Both were STALE, not wrong
+    # when written: +5.176 was the value at the arm-N mode ([[ccx_rep_dc_co2_bias]],
+    # 08-21). At `hilda29l` the offset is 3.515 ppm and the raw box runs +3.40 ppm
+    # above Mauna Loa in the mean (RMS 0.73 ppm once the offset the likelihood
+    # applied is taken off).
+    # ⚠ NOTE the prior sd is 1.0 ppm (LIK_CO2_REP_ERR), so the offset in ppm and
+    # its prior z are NUMERICALLY THE SAME and the two are easy to confuse:
+    # 5.176 ppm = 5.18 sd then, 3.515 ppm = 3.52 sd now.
+    # No number is typed here any more -- card 1 of the review tab COMPUTES all
+    # three, which is the point: a mode-dependent value in a comment goes stale
+    # every refit.
     # ⚠ THE COUNT IS THE FILE'S OWN, NOT THE TABLE'S (corrected 2026-09-22).
     # This read `length(CCX_PARAM_NAMES)` = 38, the size of the whole parameter
     # TABLE, and printed "fit of 38 parameters" on the public banner while the
