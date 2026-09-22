@@ -1,0 +1,32 @@
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 24 starts under
+  calibration/output/multistart_20260921_hilda_csl3_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+==========================================================================
+  reference cold       id 0  logpost   -1423.6584  port VERIFIED (rel 1.2e-15)
+  reference incumbent  id 1  logpost   -1424.1583  port VERIFIED (rel 2.3e-14)
+  reference new_basin  id 2  logpost   -1423.6584  port VERIFIED (rel 1.2e-14)
+
+  24 of 24 starts CONVERGED, 0 ran out of wall time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.3763 = 0.25 x the measured inter-basin separation
+
+  ⇒ 4 DISTINCT BASINS among the 24 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min  kind
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 15 at -1423.6584
+  TO BEAT         id 4 (seeded: NEW BASIN with the ocean ENSO pair SET to +0.100 each (the 09-01 conditional optimum of the 08-31e basin; a perturbation here)) at -1423.6584
+  difference      +0.0000 log-units
+  BEST DISPERSED  id 15 at -1423.6584 (+0.0000 vs the benchmark), of 18 finished
+  VERDICT: 18 dispersed starts REPRODUCED, and did not beat, the best re-converged known
+  ENSO seeding at the incumbent: +0.0623 log-units (-1424.0960 seeded vs -1424.1583 not)
+  ENSO seeding at the new_basin: +0.0000 log-units (-1423.6584 seeded vs -1423.6584 not)
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to calibration/output/multistart_20260921_hilda_csl3_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================

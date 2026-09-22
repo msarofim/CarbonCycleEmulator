@@ -1,0 +1,70 @@
+task 18  2026-09-22T01:10:15-0400
+PINNED (removed from the fitted set, held in the base): w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0 -> 32 free parameters
+run-time inputs present: 13/13. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+SEEDING ent_seas_amp_SH for the incumbent feasibility: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "log" cannot encode. Starting at the table init 6.55246.
+     The file held it OFF; this arm fits it.
+SEEDING w_enso_l2 for the new basin feasibility: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The file held it OFF; this arm fits it.
+SEEDING ent_seas_amp_SH for the incumbent start: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "log" cannot encode. Starting at the table init 6.55246.
+     The file held it OFF; this arm fits it.
+SEEDING w_enso_l2 for the new basin start: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The file held it OFF; this arm fits it.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.2661092)
+
+======================================================================
+DISPERSED MULTI-START, id 18, arm N, 32 parameters
+  host MacBook-Pro-2.local   R 4.5.3   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.2661, pooled over the 32 coordinates at least one of
+    them FITTED; over all 32 it would be 0.2661, diluted by the 0 migrated in BOTH:
+    none)
+  out /Users/MarcusMarcus/ccx_frozen/20260921g_free_parent_refit/calibration/output/multistart_20260921_hilda_csl3_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452/start_018.rds
+======================================================================
+  structure: 'hilda_csl3' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6, ml_nh_cycle=0, k_l2=3, w0_l2=27)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'solved' (the SOLVED GLODAP-shape field -- every registered file; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -1.329e+06 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: dispersed about the COLD init, sd 1.0452 (2 draws), log-post there = -132939.1072
+PORT GATE (a) at the new_basin reference point: here -1785.8588977363 vs MacBook-Pro-2.local@00ead9f -1785.8588977363,
+              |diff| 2.115e-11 (rel 1.18e-14)  [this task's own start is elsewhere]
+              roundoff floor here: max |delta lp| 1.755e-08 over 12 perturbations of u by 1e-12 (median 6.670e-09; 0 non-finite)
+              bound = max(1e-08 x |target| = 1.786e-05, 3 x floor = 5.265e-08) = 1.786e-05; ceiling 1e-06 x |target| = 1.786e-03
+PORT GATE (a) PASSED.
+measured 0.1879 s/eval (median of 5; range 0.1859-0.1933) => one 6000-eval restart
+  projects to 18.8 min; wall budget 300 min, of which 30.5 min is RESERVED for the
+  BFGS polish (100 iterations)
+[018] cycle 1 restart  1: log-post =   -1897.9235 (gain 131041.1836) evals 6001  18.7 min
+[018] cycle 1 restart  2: log-post =   -1554.1691 (gain   343.7545) evals 12002  37.5 min
+[018] cycle 1 restart  3: log-post =   -1470.2372 (gain    83.9319) evals 18003  56.3 min
+[018] cycle 1 polish: log-post = -1423.6584 (gain 46.5788)
+[018] === cycle 1 total gain 131515.4488 (log-post -1423.6584, 25061 evals, 78.3 min) ===
+[018] cycle 2 restart  1: log-post =   -1423.6584 (gain     0.0000) evals 28392  88.7 min
+[018] cycle 2 restart  2: log-post =   -1423.6584 (gain     0.0000) evals 31797  99.4 min
+[018] cycle 2 polish: log-post = -1423.6584 (gain 0.0000)
+[018] === cycle 2 total gain 0.0000 (log-post -1423.6584, 31884 evals, 99.6 min) ===
+Warning messages:
+1: In spinup_fn(p) :
+  periodic spinup: carbon did not converge, |resid| = 4.021e+08
+2: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 5.549e-03
+3: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 7.749e-07
+4: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 7.428e+09
+5: In spinup_fn(p) :
+  periodic spinup: carbon did not converge, |resid| = 9.295e+03
+
+[018] FINAL log-post -1423.6584  (CONVERGED, 5 restarts, 31884 evals, 99.7 min)
+[018] eval rate 0.1455 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[018] PORT GATE (b) ordering: final -1423.6584 >= start -132939.1072. OK
+======================================================================
+done 2026-09-22T02:50:03-0400 exit 0
