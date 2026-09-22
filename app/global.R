@@ -62,9 +62,17 @@ APP_STAGE_NOTE   <- paste("Beta. The model is frozen at this version; what is",
                           "under review is how much its remaining flaws matter.",
                           "Teaching software — not peer-reviewed, not for citation.")
 # ⚠ STARTUP IS SLOW AND THE USER MUST BE TOLD BEFORE THEY WAIT. Measured on an
-# M4: 73 s idle, 2.8 min under load (four Julia jobs). DEPLOY.md's older "~20 s"
-# was a warm-cache number. shinyapps.io cold-starts a fresh container per idle
-# process, so a visitor arriving from a post pays this.
+# M4: 73 s idle, 116 s at load ~2.5 (2026-09-22), 2.8 min under load (four Julia
+# jobs). DEPLOY.md's older "~20 s" was a warm-cache number. shinyapps.io
+# cold-starts a fresh container per idle process, so a visitor arriving from a
+# post pays this.
+# ⚠ EVERY PROCESS START RECOMPILES THE C++ CORE, and that is most of the wait.
+# Rcpp::sourceCpp()'s cacheDir defaults to the R session's own tempdir, so
+# nothing is reused across starts -- a container is always a cold start. Once the
+# process is listening the first page is essentially instant: 0.4 s from navigate
+# to the takeaway text and the first rendered plot (measured 2026-09-22). So the
+# note below is about the PROCESS, not the page, and "three minutes" is kept as
+# an upper bound that covers the contended case rather than the best one.
 APP_WARMUP_NOTE  <- paste("First load compiles the model and runs a 1750 spin-up:",
                           "allow up to three minutes. After that every panel is a",
                           "live model run, not a stored picture.")

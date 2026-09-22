@@ -2,6 +2,12 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-22 (q) — **Start-up re-timed: 116 s to "Listening on" at load ~2.5, then 0.4 s to a rendered first page. The wait is the PROCESS, not the page — and it is a cold C++ compile every single time.**
+
+- **MEASURED**: process start (compile + spin-up + historical run + flux trace) **116 s** at load average 2.4–2.8; first page thereafter **403 ms** from navigate to takeaway text + first rendered plot; `curl` on the listening server **0.57 s**. Against the earlier points: **73 s idle**, **168 s under four Julia jobs**. ⚠ Not a truly idle machine — the desktop app was active — so this sits between the two, as expected.
+- ⚠ **EVERY PROCESS START RECOMPILES THE C++ CORE, and that is most of the 116 s.** `Rcpp::sourceCpp()`'s `cacheDir` defaults to the **R session's own tempdir**, so nothing survives a restart: a shinyapps.io container is always a cold start, and there is no warm case to hope for. Recorded in `app/global.R` next to the number.
+- **`APP_WARMUP_NOTE` KEPT AT "three minutes"** and deliberately not tightened. It is an upper bound and the contended case measured 168 s; shaving a public promise to match the best observation is the wrong direction for a beta whose visitors arrive in a burst from a post. The comment above it now carries all three measurements and says the note is about the PROCESS, not the page.
+
 ## 2026-09-22 (p) — ⛔⛔ **THE NOAA MBL ZONAL PULL LANDED, AND IT RETRACTS TWO OF THE THREE FAILURES (n) REPORTED AGAINST `rep_dC`. The SIGN claim and the ORDERING claim were both artifacts of comparing a GLOBAL mean against a NORTHERN station. What survives — measured, and now the whole of the case — is the MAGNITUDE: the model needs ~4.5× the offset that exists.** (n)'s §A4 flagged its own middle row as arithmetic and named this pull as the fix; it was right to. `calibration/diag_rep_dc_mbl_zonal.R`, Appendix B of the triage note.
 
 - **MEASURED** — NOAA MBL **zonal** reference (Lan, Tans, Thoning & NOAA GML 2024, **doi:10.15138/DVNP-F961**, X2019), sine-latitude weighted, minus the repo's OWN station series, **matched month by month**: **NH − MLO = +0.738 ppm** (sd(ann) 0.282, positive in **47/47** years), **SH − SPO = +0.814** (46/46). Global − MLO **−0.639**, global − SPO **+2.165**.
