@@ -597,6 +597,11 @@ plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
 #' @param p the app's parameter list (for `hs_frac`)
 fmt_gtc <- function(x) sprintf("%s GtC", format(round(x), big.mark = ","))
 
+# Characters per line in the diagram's two footnotes. Named because the footnote
+# grows whenever a mechanism is added to the model, and the failure mode is a
+# line that runs off BOTH panel edges rather than an error.
+DIAGRAM_NOTE_WIDTH <- 118
+
 plot_box_diagram <- function(fx, stock, p) {
   hs_on <- isTRUE(p$hs_frac > 0)
   boxes <- data.frame(
@@ -608,23 +613,46 @@ plot_box_diagram <- function(fx, stock, p) {
   as_up   <- fx$as_up   - if (hs_on) fx$hs_as_up   else 0
   # x/xend/yend and the flux each segment carries, kept in ONE table so a
   # moved arrow cannot end up with another arrow's number.
+  # ⛔ LAND CLEARING IS ITS OWN ARROW SINCE 2026-09-22 (Marcus). It used to be
+  # ADDED INTO the soil-to-atmosphere arrow -- `fx$rh + fx$luc` under a label
+  # that said "respiration" -- so the one flux the whole land-use convention
+  # argument is about (R1, 09-22: land use is an INTERNAL TRANSFER out of the
+  # land pool into the air) had no arrow anywhere on the diagram that explains
+  # the model. It is small, 1.0 against 69.6 GtC/yr, which is exactly why it
+  # could hide: the printed number rounds to 71 either way. R/fluxes.R's own
+  # header already says these two "must not be merged".
+  #
+  # ⚠ IT LEAVES BOTH LAND POOLS, NOT ONE. At `f_luc_wood` = 0 the debit is split
+  # pro rata by ccx_luc_pool_shares(): ~24 % from the vegetation boxes and ~76 %
+  # from the soils (70 % of the whole from the SLOW soil). Drawing one arrow per
+  # pool would put "0" and "1" on two arrows for a 1 GtC/yr flux, so it is ONE
+  # arrow rising from between the two land boxes -- the land as a whole -- and
+  # the footnote says which pools it comes out of. Placed in the empty wedge
+  # between photosynthesis and respiration, whose attachment points on the
+  # atmosphere are moved apart by 0.25 to open it.
   arrows_df <- data.frame(
-    x    = c(2,   1,   3,   2.6, 5,   5,   2.0),
-    xend = c(1,   3,   2,   4.6, 2.6, 5,   2.0),
-    y    = c(3.7, 2.4, 2.7, 3.75, 3.15, 2.6, 4.7),
-    yend = c(2.8, 2.4, 3.7, 3.05, 4.05, 1.7, 4.3),
+    x    = c(1.75, 1,   3,   2.6, 5,   5,   2.0, 2.0),
+    xend = c(1,    3,   2.25, 4.6, 2.6, 5,   2.0, 2.0),
+    y    = c(3.68, 2.4, 2.7, 3.75, 3.15, 2.6, 4.7, 2.55),
+    yend = c(2.8,  2.4, 3.68, 3.05, 4.05, 1.7, 4.3, 3.62),
     # "to the deep" is the NET surface-to-interior transfer: the diffusive return
     # (`ml_int`, negative = upward) PLUS the biological pump's export (`pump`, a
     # channel of its own). Shown as one net number with the export named, so the
     # arrow cannot read "-40 to the deep" (which it did until 2026-09-08g).
-    val  = c(fx$gpp, fx$litter, fx$rh + fx$luc, as_down, as_up, fx$ml_int + fx$pump, fx$foss),
-    hj   = c(1.15, 0.5, -0.1, 0.5, 0.5, -0.15, -0.2),
-    vj   = c(0.5,  -0.6, 0.5, 1.5, -1.0, 0.5, 0.5),
+    val  = c(fx$gpp, fx$litter, fx$rh, as_down, as_up, fx$ml_int + fx$pump,
+             fx$foss, fx$luc),
+    hj   = c(1.15, 0.5, -0.1, 0.5, 0.5, -0.15, -0.2, -0.12),
+    vj   = c(0.5,  -0.6, 0.5, 1.5, -1.0, 0.5, 0.5, 0.5),
+    # ⚠ THE NEW ARROW'S NAME IS READ FROM R/fluxes.R's CHANNEL TABLE, which
+    # states that nothing downstream may name a channel in prose without reading
+    # it from there. The older arrows predate that rule and keep their teaching
+    # words; a new one has no reason to add a second name for the same flux.
     nm   = c("photosynthesis", "litterfall", "respiration",
              if (hs_on) "air to warm sea" else "air to sea",
              if (hs_on) "warm sea to air" else "sea to air",
              sprintf("to the deep, net\n(%.0f down as the biological\npump, %.0f back up by mixing)", fx$pump, -fx$ml_int),
-             "fossil fuels"))
+             "fossil fuels",
+             tolower(CCX_FLUX_CHANNELS[["luc"]])))
   xmax <- 6.1
   if (hs_on) {
     xmax <- 7.9
@@ -646,6 +674,20 @@ plot_box_diagram <- function(fx, stock, p) {
       nm   = c("air to cold sea", "cold sea to air",
                sprintf("sinks, net (of which\n%.1f biological export)", fx$hs_pump), "cold deep to interior")))
   }
+  # ⚠ THE POOL SPLIT IS COMPUTED FROM THE SAME EXPRESSION THE MODEL USES
+  # (R/model.R's land-use block), not typed: `f_luc_wood` is a parameter and the
+  # pro-rata shares move with the pools' sizes, so a sentence naming "mostly the
+  # soil" has to be one that would change if that stopped being true.
+  luc_note <- local({
+    fw <- p$f_luc_wood
+    if (is.null(fw) || !is.finite(fw) || !is.finite(fx$luc) || fx$luc == 0) return("")
+    w <- if (fw >= 1) c(0, 1, 0, 0) else {
+      sh <- ccx_luc_pool_shares(p); v <- (1 - fw) * sh; v[2] <- v[2] + fw; v
+    }
+    veg <- w[1] + w[2]; soil <- w[3] + w[4]
+    sprintf(" Land-use change takes carbon out of the land pools themselves (%.0f%% soil, %.0f%% plants), not out of thin air.",
+            100 * soil, 100 * veg)
+  })
   arrows_df$lab <- sprintf("%.0f\n%s", arrows_df$val, arrows_df$nm)
   ggplot() +
     geom_segment(data = arrows_df, aes(x, y, xend = xend, yend = yend),
@@ -657,14 +699,22 @@ plot_box_diagram <- function(fx, stock, p) {
     geom_label(data = boxes, aes(x, y, label = lab, fill = I(col)),
                colour = "white", fontface = "bold", size = 3.4,
                label.padding = unit(0.4, "lines"), label.r = unit(0.15, "lines")) +
+    # ⚠ WRAPPED, NOT HAND-BROKEN. This footnote used to carry a literal "\n" at a
+    # point that happened to fit; adding the land-use clause (2026-09-22) pushed
+    # the second line past BOTH panel edges, because an annotate() label clips
+    # exactly as a caption does. strwrap() at a named measure means the next
+    # clause someone adds cannot do that again.
     annotate("text", x = xmax / 2, y = 0.70, size = 3.1, colour = "grey35", lineheight = 1.05,
-             label = sprintf(paste0("Arrows are flows in GtC per year (%d). Stocks today: ",
-                                    "atmosphere %s, land %s, ocean %s.\n",
-                                    "Each box exists twice — once per hemisphere.%s"),
-                             fx$year,
-                             fmt_gtc(stock$co2_global * ccx_const("GtC_PER_PPM")),
-                             fmt_gtc(stock$land_C), fmt_gtc(stock$ocean_C),
-                             if (hs_on) " The cold boxes are the high-latitude ocean; the warm arrows exclude them." else "")) +
+             label = paste(strwrap(sprintf(paste0(
+               "Arrows are flows in GtC per year (%d). Stocks today: ",
+               "atmosphere %s, land %s, ocean %s. ",
+               "Each box exists twice — once per hemisphere.%s"),
+               fx$year,
+               fmt_gtc(stock$co2_global * ccx_const("GtC_PER_PPM")),
+               fmt_gtc(stock$land_C), fmt_gtc(stock$ocean_C),
+               paste0(
+                 if (hs_on) " The cold boxes are the high-latitude ocean; the warm arrows exclude them." else "",
+                 luc_note)), width = DIAGRAM_NOTE_WIDTH), collapse = "\n")) +
     annotate("text", x = xmax / 2, y = 0.18, size = 3.2, colour = "grey20", fontface = "bold", lineheight = 1.05,
              label = sprintf(paste0("Photosynthesis and the sea move %.0f GtC a year in and out of the air, ",
                                     "so an average CO₂ molecule\nstays only ~%.1f years. ",
