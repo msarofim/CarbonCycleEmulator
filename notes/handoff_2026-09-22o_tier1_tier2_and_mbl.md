@@ -108,7 +108,16 @@ decomposition.
 and undershoots the growth rate). The C2 panel is now the natural place for it.
 
 ## 5b. NEXT — what is actually owed
-1. ⏳ **R2 — `rep_dC`'s prior centre.** ⛔ An OBJECTIVE change (freeze record §4.1: a ruling, then
+1. ⏳ **R2 — `rep_dC`'s prior. THE SIDE TEST IS DONE** (`diag_rep_dc_prior_centre_width.R`,
+   CHANGELOG 09-22 (u); run at `outputs/diagnostics/rep_dc_prior_centre_width_20260922.log`).
+   **Re-centring alone: +0.049 ppm, free.** **Tightening σ 1.0→0.2: −1.65 ppm at −17.6
+   log-units.** ⭐⭐ **They INTERACT** — the tightening costs 28.7 centred at 0 but 17.6 centred
+   at the measured 0.78, so **the centre matters only once the width is tight**; if it is ever
+   tightened it must be re-centred in the same move. ⛔⛔ **And who pays is NOT the station
+   levels** (`co2_level_MLO` +0.92, `co2_level_SPO` +0.31, `d13c_level_SPO` +8.56 all IMPROVE):
+   the cost is **`co2_icecore` −13.45** and **bomb-¹⁴C −10.7**. The offset is held up by the
+   preindustrial anchor and the ventilation constraint. **The measured offset is now ON CARD 1**,
+   as Marcus ruled. Remaining for R2 proper: ⛔ An OBJECTIVE change (freeze record §4.1: a ruling, then
    a restamp of every mode). **The measurement is in** (§4). What it says: re-centring on +0.78
    moves the fit z +3.52 → +2.74, **relieving 22 % and relabelling 78 %** — and
    [[ccx_rep_dc_prior]] already measured the centre as **nearly inert** (likelihood-only optimum
@@ -116,9 +125,22 @@ and undershoots the growth rate). The C2 panel is now the natural place for it.
    the fit at all. **The WIDTH is the live question**: a representation term's defensible σ floor
    is ~0.2 ppm (Francey et al. 2019), 5× tighter than today's 1.0, at which the same value sits at
    z +13.7. ⛔ >1/3 of the offset's value is isotopic — never a CO₂-only ruling.
-2. **N5** — the δ¹³C analogue of §4's CO₂ measurement, **not done**. Card 2 is scored net of
-   `grad_off_d13c`.
-3. **N7** — the last Tier-3 feature.
+2. ⛔ **N5 — STILL NOT DONE, and now SCOPED. NOAA publishes NO zonal/MBL reference for
+   δ¹³C** — measured, not assumed: `ghg.php?param=C13` returns an empty fragment with no
+   generated file, and the form's own parameter list is CO₂/CH₄/N₂O/SF₆. So the CO₂ trick of
+   §4 does not transfer. What DOES exist is **95 per-site δ¹³C flask records**
+   (`aftp/data/trace_gases/co2c13/flask/surface/`, `..._sil_month.txt`), so the hemispheric
+   mean has to be BUILT the way NOAA builds its CO₂ one — sine-latitude weighting over the
+   station network. ⚠ **That is a METHOD CHOICE, not a download**: which sites qualify, how to
+   weight them, how to treat gappy records. Per the standing rule it needs a ruling before it is
+   built, and it is the reason N5 is not simply "an hour's work" like the CO₂ side was.
+3. **N7 — DONE** (`calibration/diag_growth_residual_years.R`, CHANGELOG 09-22 (u)/(v)). The
+   misses are **not structured**: ENSO r −0.06 (p 0.62), volcanic AOD r +0.18 (p 0.16), year
+   r −0.00 (p 1.00) on n = 66, every decade mean inside half a standard deviation. Largest
+   single overshoot **1991** (the model under-draws after Pinatubo); **1983** misses the other
+   way, so not even volcanoes are a rule. ⭐ **The finding that survives is on card 4 and is
+   computed there:** the model's growth anomaly tracks the ENSO index MORE strongly (+0.39) than
+   the observed one does (+0.29) — **the variance it is missing is not ENSO-shaped.**
 4. **Before the post:** set `APP_FEEDBACK_URL` and `APP_REPO_URL` in `app/global.R` (both are
    `SET-BEFORE-DEPLOY` and the app says so on screen); claim the **carbotope** shinyapps name;
    check the host's active-hours and concurrency limits. ⚠ `calibration/lib_design_gates.R` is a
