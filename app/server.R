@@ -58,7 +58,7 @@ function(input, output, session) {
 
   output$w_partition <- renderPlot(plot_partition(partition(), input$w_years))
   output$w_af  <- renderPlot(plot_airborne_fraction(partition(), input$w_years))
-  output$w_gcb <- renderPlot(plot_gcb_bars(APP_HIST$out, APP_GCB))
+  output$w_gcb <- renderPlot(plot_gcb_bars(APP_HIST$out, APP_GCB, hist_F()))
 
   latest <- reactive({
     pt <- partition()
@@ -68,14 +68,19 @@ function(input, output, session) {
   output$w_land  <- renderText(fmt_gtc(latest()$land))
   output$w_ocean <- renderText(fmt_gtc(latest()$ocean))
 
+  # Marcus 2026-09-22 (W1): report each box, do not editorialise. The closure
+  # is stated because this panel's whole claim is that the three add up --
+  # and until 09-22 they did not (see partition_table()).
   output$w_takeaway <- renderText({
     d <- latest()
-    sprintf(paste("Of the %s of carbon emitted since 1750, %s of it — %s — is",
-                  "still in the air. The land and the ocean have quietly taken",
-                  "the rest, and they are the only reason the number is not far",
-                  "worse."),
-            fmt_gtc(d$emitted), fmt_pct(d$atmosphere / d$emitted),
-            fmt_gtc(d$atmosphere))
+    s <- d$atmosphere + d$land + d$ocean
+    sprintf(paste("Of the %s of carbon emitted since 1750, %s is still in the",
+                  "air, %s is in the land and %s is in the ocean — %s, %s and",
+                  "%s of the total. The three add back to %s."),
+            fmt_gtc(d$emitted), fmt_gtc(d$atmosphere), fmt_gtc(d$land),
+            fmt_gtc(d$ocean), fmt_pct(d$atmosphere / d$emitted),
+            fmt_pct(d$land / d$emitted), fmt_pct(d$ocean / d$emitted),
+            fmt_gtc(s))
   })
 
   # ---- 3. Counterfactuals --------------------------------------------

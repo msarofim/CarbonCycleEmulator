@@ -150,13 +150,39 @@ plot_seasonal <- function(out, obs, window = c(2000, 2024)) {
 # ---------------------------------------------------------------------
 # Tab 2: where does the carbon go
 # ---------------------------------------------------------------------
+# ⛔ THE LAND TERM IS THE **GCB CONVENTION** SINCE 2026-09-22 (Marcus's ruling
+# R1), AND WITHOUT IT THIS PANEL DID NOT BALANCE.
+#
+# Land-use emissions are an INTERNAL TRANSFER in this model: `e_luc` moves
+# carbon OUT of the land pool and into the air. So they cannot also be an
+# ADDITION to the atmosphere+land+ocean system -- only FOSSIL carbon is new to
+# it. Plotting the raw pool change against a dashed line that included land use
+# left the stack 237.6 GtC below the line at 2024 (32 % of cumulative
+# emissions), which is exactly cumulative LUC, and read as a mass-conservation
+# failure the model does not have: against cumulative FOSSIL the three areas
+# close to -1.05 GtC, i.e. 0.2 %.
+#
+# The fix is the convention the Global Carbon Budget itself uses, and the one
+# GATE 7 already scores against (`dg_annual_sinks()` adds `eluc` back the same
+# way): the LAND SINK is the residual terrestrial uptake EXCLUDING land-use
+# emissions, so land-use carbon appears once, on the emitted side. The three
+# terms then sum to TOTAL emissions, which is the budget a reader recognises.
+#
+# ⚠ `land_gross` keeps the raw pool change, because the two are different
+# quantities and a caller that wants the actual land stock must not silently
+# get the sink instead.
 partition_table <- function(out, F) {
   cum <- app_cumulative_emissions(F)
   atm0 <- out$co2_global[1] * ccx_const("GtC_PER_PPM")
   atm  <- out$co2_global * ccx_const("GtC_PER_PPM") - atm0
-  land <- out$land_C  - out$land_C[1]
+  land_gross <- out$land_C  - out$land_C[1]
   ocean <- out$ocean_C - out$ocean_C[1]
-  data.frame(t = out$t, emitted = cum, atmosphere = atm, land = land, ocean = ocean)
+  # cumulative land-use emissions on the model's own monthly grid, carrying the
+  # fitted `luc_scale` because it is applied to the forcing columns themselves
+  cum_luc <- cumsum((F$e_luc_NH + F$e_luc_SH) / 12)
+  data.frame(t = out$t, emitted = cum,
+             atmosphere = atm, land = land_gross + cum_luc, ocean = ocean,
+             land_gross = land_gross, cum_luc = cum_luc)
 }
 
 plot_partition <- function(pt, yr_range) {
@@ -175,7 +201,7 @@ plot_partition <- function(pt, yr_range) {
               linewidth = 0.7, colour = "grey20", linetype = "22") +
     annotate("text", x = yr_range[1] + 0.05 * diff(yr_range),
              y = max(d$emitted) * 0.93, hjust = 0, size = 3.4, colour = "grey20",
-             label = "dashed = total emitted") +
+             label = "dashed = total emitted (fossil + land use)") +
     scale_fill_manual(values = c("Stayed in the air" = PAL[["atm"]],
                                  "Taken up by land" = PAL[["land"]],
                                  "Taken up by the ocean" = PAL[["ocean"]])) +
@@ -198,12 +224,21 @@ plot_airborne_fraction <- function(pt, yr_range) {
     theme_ccx()
 }
 
-plot_gcb_bars <- function(out, gcb, window = c(2014, 2023)) {
+plot_gcb_bars <- function(out, gcb, F, window = c(2014, 2023)) {
   yr <- floor(out$t)
   ann <- stats::aggregate(cbind(ocean_C, land_C) ~ yr, data = out, FUN = mean)
   ann <- ann[order(ann$yr), ]
   ann$ocean_sink <- c(NA, diff(ann$ocean_C))
-  ann$land_sink  <- c(NA, diff(ann$land_C))
+  # ⛔ THE GCB CONVENTION, as in partition_table() above and in the gate. GCB's
+  # "land sink" is the RESIDUAL terrestrial sink, EXCLUDING land-use emissions;
+  # the raw pool change includes the LUC outflow, so comparing it with GCB's
+  # number was not like-for-like and made the model's land bar low by roughly
+  # the LUC flux (~1 GtC/yr recently). GATE 7 scores land 3.09 against GCB and
+  # PASSES precisely because dg_annual_sinks() adds `eluc` back; this panel did
+  # not, so the app and the gate disagreed about the same quantity.
+  eluc <- ccx_forcing_eluc_annual(F)
+  ann$land_sink <- c(NA, diff(ann$land_C)) +
+    eluc$eluc[match(ann$yr, eluc$year)]
   k <- ann$yr >= window[1] & ann$yr <= window[2]
   g <- gcb[gcb$year >= window[1] & gcb$year <= window[2], ]
   d <- rbind(
@@ -217,9 +252,14 @@ plot_gcb_bars <- function(out, gcb, window = c(2014, 2023)) {
               position = position_dodge(width = 0.7), vjust = -0.4, size = 3.4) +
     scale_fill_manual(values = c("This model" = PAL[["model"]],
                                  "Global Carbon Budget" = PAL[["obs"]])) +
+    # headroom for the dodged value labels, which left the panel before
+    # 2026-09-22 (vjust puts them above the bar with nothing reserved)
+    scale_y_continuous(expand = expansion(mult = c(0.02, 0.14))) +
     labs(x = NULL, y = "Average uptake (GtC per year)",
          subtitle = sprintf("%d–%d average", window[1], window[2]),
-         caption = app_provenance_caption()) +
+         caption = app_provenance_caption(
+           paste("Land sink on the Global Carbon Budget's convention: the",
+                 "residual terrestrial sink, excluding land-use emissions."))) +
     theme_ccx()
 }
 
