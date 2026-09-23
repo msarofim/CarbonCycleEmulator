@@ -361,6 +361,14 @@ navbarPage(
         width = 9,
         takeaway(textOutput("f_takeaway", inline = TRUE)),
         plotOutput("f_plot", height = "400px"),
+        # The splice caption (Marcus 2026-09-22). Every mode on this tab -- the
+        # scenarios, build-your-own and the pulse lab -- used to carry the
+        # SSP/LUH2 land-use history instead of the observed budget the Keeling
+        # tab draws, so this tab sat 12-14 ppm below that one at 2024 with
+        # nothing on the page to say why. The runs are spliced now
+        # (app_splice_history); this says so, because a handover the reader
+        # cannot see is the same problem one step further along.
+        div(class = "caveat", APP_SPLICE_NOTE),
         # F2 (Marcus 2026-09-22): only in the pulse lab, and only once a pulse
         # has been run. conditionalPanel keeps it out of the other two modes
         # rather than rendering an empty box there.

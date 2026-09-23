@@ -308,10 +308,20 @@ app_build_forcing <- function(scenario, years, ...) {
 #' without this they would silently run the calibrated PARAMETERS against an
 #' UNCALIBRATED forcing -- and disagree with the historical tab drawn two tabs
 #' to the left.
+#'
+#' IT ALSO SPLICES THE PAST (2026-09-22, Marcus's ruling). Every scenario the app
+#' runs carries the SSP/LUH2 harmonisation over the HISTORICAL period, which is a
+#' different land-use inventory from the GCB budget the Keeling tab draws and the
+#' model was fitted on -- 91.4 GtC less of it, so the futures tab sat 12.05 ppm
+#' below the historical tab at 2024 and the "What if..." tab 13.58 ppm below, with
+#' nothing on the page to say why (`calibration/diag_app_cross_tab_step.R`,
+#' CHANGELOG 09-22 (x)). Splicing here rather than at each of the four call sites
+#' is the same choke-point argument as the forcing parameters above.
 app_run_coupled <- function(spin, scenario, years, ...) {
   args <- list(...)
   if (is.null(args$bomb_total_kmol)) args$bomb_total_kmol <- APP_BOMB_TOTAL
   if (is.null(args$luc_scale))       args$luc_scale       <- APP_LUC_SCALE
+  args$emissions <- app_splice_history(args$emissions, scenario)
   do.call(ccx_run_coupled, c(list(spin, scenario, years), args))
 }
 
@@ -346,6 +356,58 @@ APP_EMIS_HIST <- as.data.frame(
   readRDS(file.path(CCX_ROOT, "data", "forcing_emissions_historical.rds")))
 APP_SSP_EMIS <- as.data.frame(
   readRDS(file.path(CCX_ROOT, "data", "ssp_emissions.rds")))
+
+# ---------------------------------------------------------------------
+# ONE PAST FOR EVERY TAB (2026-09-22, Marcus's ruling: splice + caption).
+# ---------------------------------------------------------------------
+# The observed budget runs out here; a scenario takes over after it. Read from
+# the data rather than typed, so a GCB update moves the handover and every label
+# below with it.
+APP_SPLICE_YEAR <- max(APP_EMIS_HIST$year)
+APP_SPLICE_NOTE <- sprintf(paste(
+  "History is the observed carbon budget (GCB) through %d on every tab; the",
+  "scenario takes over after that. Scenarios were written before %d, so where",
+  "one starts above or below today's emissions the model ramps between the two",
+  "across the gap to the scenario's next reported year rather than stepping."),
+  APP_SPLICE_YEAR, APP_SPLICE_YEAR)
+
+#' Replace a scenario's historical segment with the observed budget
+#'
+#' Returns an annual emissions table on a MIXED grid on purpose: the GCB years
+#' are annual, the scenario's own rows are kept at whatever years it reports
+#' (the SSPs are annual to 2015 and decadal after), and ccx_annual_to_monthly()
+#' interpolates across the join exactly as it already does between two decadal
+#' scenario nodes. So the handover is a ramp to the scenario's next node, not a
+#' one-year step -- which matters, because by the handover year the scenarios
+#' have diverged from the observed record by as much as 2.5 GtC/yr in either
+#' direction (measured at 2024: ssp119 -2.48, ssp585 +1.82 GtC/yr of fossil).
+#'
+#' @param em an emissions table a caller built (the stylised and pulse tabs), or
+#'   NULL for "the scenario's own", which is then read here so that path gets
+#'   spliced too.
+#' @param scenario the SSP whose future is wanted. "historical" is returned
+#'   untouched: it IS the observed budget.
+app_splice_history <- function(em, scenario) {
+  if (identical(scenario, "historical")) return(em)
+  if (is.null(em)) {
+    ssp <- APP_SSP_EMIS[APP_SSP_EMIS$scenario == scenario, ]
+    if (!nrow(ssp)) return(NULL)          # unknown scenario: let ccx_ handle it
+    em <- data.frame(year = ssp$year, fossil_GtC = ssp$fossil_GtC,
+                     luc_GtC = ssp$luc_GtC)
+  }
+  h <- APP_EMIS_HIST[APP_EMIS_HIST$year <= APP_SPLICE_YEAR,
+                     c("year", "fossil_GtC", "luc_GtC")]
+  fut <- em[em$year > APP_SPLICE_YEAR, c("year", "fossil_GtC", "luc_GtC")]
+  # A caller-built table already anchored to the observed record over history
+  # (app_stylised_emissions takes its fossil from there) still has the SSP's
+  # land use, so it is spliced like any other.
+  # `d13c_foss` is deliberately NOT carried across. ccx_build_forcing() falls
+  # back to the historical file's own column when the supplied table lacks it,
+  # which is exactly the series this splice would have passed; carrying it would
+  # instead put NAs on the scenario rows, which is worse.
+  out <- rbind(h, fut)
+  out[order(out$year), ]
+}
 APP_FAIR <- tryCatch(
   as.data.frame(readRDS(file.path(CCX_ROOT, "data", "forcing_climate_ssp.rds"))),
   error = function(e) NULL)

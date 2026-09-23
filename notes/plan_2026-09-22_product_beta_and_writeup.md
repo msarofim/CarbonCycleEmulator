@@ -61,7 +61,7 @@ so the reviewer meets first what a student would meet first.
 Cards 2–4 and 6 are the freeze record's four reds; 1, 5, 7, 8 are the flags a reviewer will
 raise unprompted, pre-empted.
 
-**Not on a card — MEASURED 09-22 (x), and it is WORSE than the item said.** There are **three**
+**Not on a card — MEASURED 09-22 (x) and FIXED 09-22 (y) (Marcus: splice + caption).** There are **three**
 histories on this app, not two (`calibration/diag_app_cross_tab_step.R`; log at
 `outputs/diagnostics/app_cross_tab_step_20260922.log`) ⇒ [[ccx_app_three_histories]]:
 
@@ -69,14 +69,20 @@ histories on this app, not two (`calibration/diag_app_cross_tab_step.R`; log at
 |---|---|---|---|
 | The Keeling Curve | historical (GCB) | **424.37 ppm** | — |
 | Futures | ssp245 (SSP/LUH2) | **412.33** | **−12.05** |
-| What if… | GCB fossil + SSP land-use | **410.79** | **−13.58** |
+| Futures › “Build your own” | GCB fossil + SSP land-use | **410.79** | **−13.58** |
 
-`app_stylised_emissions()` takes fossil from the GCB history and land-use from the SSP
-background for EVERY year, so the hybrid past is under all four stylised pathways — the `kind`
-switch only rewrites the future. The gap is **−91.4 GtC of land use**; verified to be the
-inventory and not a reading convention or a temperature difference. **A reviewer flipping tab 1
-→ tab 3 sees 13.6 ppm with nothing on the page to explain it.** ⏳ **RULING OPEN:** splice the
-SSP series onto the GCB history at the handover year, caption the discontinuity, or both.
+⚠ The third history is the Futures tab's **“Build your own”** pill, **not** the “What if…?” tab
+(which runs the mechanism switches on the historical scenario and never had a step).
+`app_stylised_emissions()` takes fossil from the GCB history and land-use from the SSP background
+for EVERY year, so the hybrid past is under all four stylised pathways — the `kind` switch only
+rewrites the future. The gap is **−91.4 GtC of land use**; verified to be the inventory and not a
+reading convention or a temperature difference.
+
+✅ **TAKEN: splice + caption.** `app_splice_history()` in `app/global.R`, called from
+`app_run_coupled()` so all four emissions paths get it. Both steps close to **0.00 ppm**; the
+join RAMPS to the scenario's next reported node (2030) using the interpolation already there.
+⛔ **ssp245 at 2100 moves 502.6 → 515.0 ppm** — card 5 and any futures figure must be read on the
+new basis.
 
 ## 2. What the reviewer needs to be ABLE to say "fixable"
 

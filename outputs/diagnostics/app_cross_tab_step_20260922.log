@@ -1,39 +1,55 @@
 =====================================================================
 APP CROSS-TAB STEP -- do the app's tabs agree about the past?
-  run       2026-09-22 20:14:42
+  run       2026-09-22 20:26:56
   mode      mode_fit_pumpN.rds  (struct hilda_csl3, 29 fitted names, promoted 2026-09-20)
   spinup    periodic
   params    posterior mode
-  commit    a5a7a46
+  commit    4e9baf3
   read year 2024; scenario ssp245; horizon 2100
 =====================================================================
 
 1. THE EMISSIONS INVENTORIES, cumulative GtC 1750-2024
   historical (GCB)        The Keeling Curve   fossil  423.8   LUC  278.6   total  702.4
   ssp245 (SSP/LUH2)       Futures             fossil  430.7   LUC  187.2   total  617.9
-  stylised hybrid         What if...          fossil  423.8   LUC  187.2   total  611.0
+  stylised hybrid         Futures > Build own  fossil  423.8   LUC  187.2   total  611.0
 
   differences against the historical (GCB) inventory:
     ssp245 (SSP/LUH2)       fossil   +6.9   LUC  -91.4   total  -84.5 GtC = -39.8 ppm if fully airborne
     stylised hybrid         fossil   +0.0   LUC  -91.4   total  -91.4 GtC = -43.0 ppm if fully airborne
 
 2. CO2 AT 2024, AS EACH TAB DRAWS IT
-  The Keeling Curve  (historical (GCB))   424.37 ppm
-  Futures            (ssp245          )   412.33 ppm   step -12.05 ppm
-  What if...         (stylised hybrid )   410.79 ppm   step -13.58 ppm
+  The Keeling Curve      (historical (GCB)      )   424.37 ppm
+  Futures                (ssp245                )  BEFORE  412.33  step -12.05   AFTER  424.37  step  -0.00
+  Futures > Build own    (GCB fossil + SSP LUC  )  BEFORE  410.79  step -13.58   AFTER  424.38  step  +0.00
+
+  GATE: worst step 13.58 ppm before, 0.00 after (0.0% of it left). PASS
 
   MLO/SPO station mean at 2024 (what the Keeling tab plots against): 420.97 ppm
   the model box is expected ABOVE it by rep_dC = 3.52 ppm, by construction
 
-3. THE STEP AT 2100 -- every future the app draws carries it
-  ssp245 at 2100: 502.6 ppm, carrying the -12.05 ppm deficit it inherited at 2024
+3. AT 2100 -- what the splice moves, and what it does not
+  ssp245: BEFORE 502.6 ppm   AFTER 515.0 ppm   +12.4 ppm
+  Futures > Build own: BEFORE 501.6 ppm   AFTER 514.8 ppm   +13.2 ppm
+  ⚠ EVERY SHIPPED FUTURES NUMBER MOVES BY THIS. A figure or a card
+    quoting a 2100 concentration from before 09-22 (y) is on the old basis.
 
-=====================================================================
-READING. The step is an EMISSIONS-INVENTORY difference, not a parameter
-difference: the same fitted vector and the same spinup draw both curves.
-The resolution is a ruling -- splice the SSP series onto the GCB history at
-the handover year, or caption the discontinuity on both tabs, or both.
-=====================================================================
+3b. THE JOIN at 2024 -- how far each scenario starts from the record
+  observed 2024: fossil 10.53   LUC 1.25 GtC/yr
+  ssp119   next reported year 2030: fossil -4.40   LUC -1.15 GtC/yr vs the record
+  ssp126   next reported year 2030: fossil -1.11   LUC -1.20 GtC/yr vs the record
+  ssp245   next reported year 2030: fossil +0.54   LUC -0.47 GtC/yr vs the record
+  ssp370   next reported year 2030: fossil +2.93   LUC -0.29 GtC/yr vs the record
+  ssp585   next reported year 2030: fossil +3.32   LUC -0.01 GtC/yr vs the record
 
 4. WARNINGS FROM app/global.R STARTUP: 21862, 1 distinct
   x21862 Temperature outside fitted range [2.0, 35.0] degC; extrapolating.
+
+=====================================================================
+READING. The step was an EMISSIONS-INVENTORY difference, not a parameter
+difference: the same fitted vector and the same spinup drew both curves.
+Marcus's ruling 09-22: SPLICE + CAPTION. The observed budget is now the
+past on every tab (app_splice_history), and APP_SPLICE_NOTE says so on the
+Futures tab. The join is a ramp to the scenario's next reported node, and
+3b prints how far that node is from the record -- which the splice does
+not hide and cannot fix: several SSPs no longer start where the world is.
+=====================================================================
