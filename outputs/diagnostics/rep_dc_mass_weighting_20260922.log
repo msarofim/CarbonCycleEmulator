@@ -1,0 +1,73 @@
+=====================================================================
+T3 -- THE SURFACE vs MASS-WEIGHTED TERM IN `rep_dC`
+  run     2026-09-22 21:06:06
+  commit  c09b15e
+  window  1989-2014
+=====================================================================
+
+0. WHAT THE MODEL'S BOX IS -- read off the code, not assumed
+  GtC_PER_PPM           2.1240  (cited)
+  GtC_PER_PPM_DERIVED   2.1295  from dry atmospheric mass 5.1352e18 kg
+  ⇒ the conversion is WHOLE-ATMOSPHERE mass, so the box's ppm is a
+    mass-weighted whole-atmosphere mean (R/model.R:3874).
+  ⛔ BUT R/forcing.R:347 calls the same box 'a single well-mixed TROPOSPHERE
+    per hemisphere with no stratospheric box' -- which is why the bomb-14C
+    input is a stratosphere-to-troposphere FLUX. Both are load-bearing.
+    The two readings differ by exactly the term computed below.
+
+1. f_strat -- the stratosphere's share of atmospheric mass   [DERIVED]
+  tropopause 100 hPa at the equator to 300 hPa at the pole   [ASSUMED]
+  area-weighted mean tropopause pressure  166.6 hPa
+  f_strat = p_trop / p_surf               0.1645
+  sensitivity: a FLAT tropopause at 100 hPa gives 0.0987; at 300 hPa gives 0.2961
+
+2. gamma -- the CO2 growth rate over the window             [OBSERVED]
+  MLO 1.866   SPO 1.808   mean 1.837 ppm/yr  (repo's own station series)
+
+3. D_strat = -f_strat * gamma * Gamma                       [Gamma ASSUMED]
+  Gamma = the MASS-WEIGHTED mean age of stratospheric air, carried as a band
+  Gamma 1.5 yr  ->  D_strat -0.45 ppm
+  Gamma 5.0 yr  ->  D_strat -1.51 ppm
+  band  [-0.45, -1.51] ppm, midpoint -0.98
+  ⚠ NEGATIVE: a mass-weighted mean sits BELOW a surface/tropospheric mean,
+    because the stratosphere is a few years behind a rising tracer.
+
+4. the continental term, at MASS share rather than AREA share
+  09-22 (z) measured the continental sites' effect at their AREA weight:
+    NH +0.493 ppm   SH -0.018 ppm
+  continental BL as a share of hemispheric mass: NH 0.058   SH 0.028  [ASSUMED]
+  ⚠ an ORDER-OF-MAGNITUDE bound, not a measurement: it rescales an
+    area-weighted network difference by a mass fraction, which is right to
+    within a factor of a few and no better. NH +0.029   SH -0.001 ppm
+
+5. ⭐ WHAT `rep_dC` SHOULD BE, and what it is
+                                                    NH        SH
+  marine hemispheric mean - station [OBSERVED]    +0.738    +0.814
+    + continental, at mass share [BOUND]        +0.029    -0.001
+    + stratospheric deficit, midpoint           -0.982    -0.982
+  = EXPECTED box - station                      -0.215    -0.168
+    (band over Gamma)                        -0.74/+0.31 -0.70/+0.36
+  MODEL box - station (rep_dC -/+ grad/2)       +3.408    +3.623
+  DISCREPANCY                                   +3.623    +3.791
+
+  for contrast, the discrepancy WITHOUT this term (marine offset alone):
+                                                +2.670    +2.809
+  ⇒ the mass-weighting term makes the residue 36% (NH) / 35% (SH) LARGER.
+
+6. AGAINST R2's CHEAPEST OPTION
+  NH: re-centring the prior on the measured offset moves it +0.74 ppm;
+      the mass-weighting term moves the TARGET -0.98 ppm the other way.
+      ratio 1.33 -- the term is LARGER than the whole relief re-centring buys.
+  SH: re-centring the prior on the measured offset moves it +0.81 ppm;
+      the mass-weighting term moves the TARGET -0.98 ppm the other way.
+      ratio 1.21 -- the term is LARGER than the whole relief re-centring buys.
+
+=====================================================================
+READING. The correction goes the WRONG WAY for `rep_dC`: it does not
+explain any of the offset, it enlarges what has to be explained -- and by
+more than re-centring the prior would relieve. So R2 should be ruled
+against the LARGER residue, not the smaller one. ⚠ Gamma is the weak input
+and is a BAND; an observational mass-weighted stratospheric age would
+close it, and is the one download that would sharpen this.
+⛔ Nothing adopted; no parameter and no prior is changed here.
+=====================================================================
