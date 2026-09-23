@@ -61,11 +61,22 @@ so the reviewer meets first what a student would meet first.
 Cards 2–4 and 6 are the freeze record's four reds; 1, 5, 7, 8 are the flags a reviewer will
 raise unprompted, pre-empted.
 
-**Not on a card, to re-measure first:** the 13.1 ppm step between the Keeling tab (GCB land-use
-history) and the Futures tab (LUH2/SSP history), measured 08-21 at an older vector
-([[ccx_app_beta_blockers]]). If it stands at `hilda29l` it is an app-internal inconsistency a
-reviewer WILL find by flipping tabs, and it belongs on the tab before the review opens — splice
-the SSP series onto the GCB history at 2020 rather than caption two histories.
+**Not on a card — MEASURED 09-22 (x), and it is WORSE than the item said.** There are **three**
+histories on this app, not two (`calibration/diag_app_cross_tab_step.R`; log at
+`outputs/diagnostics/app_cross_tab_step_20260922.log`) ⇒ [[ccx_app_three_histories]]:
+
+| tab | inventory | CO₂ 2024 | step |
+|---|---|---|---|
+| The Keeling Curve | historical (GCB) | **424.37 ppm** | — |
+| Futures | ssp245 (SSP/LUH2) | **412.33** | **−12.05** |
+| What if… | GCB fossil + SSP land-use | **410.79** | **−13.58** |
+
+`app_stylised_emissions()` takes fossil from the GCB history and land-use from the SSP
+background for EVERY year, so the hybrid past is under all four stylised pathways — the `kind`
+switch only rewrites the future. The gap is **−91.4 GtC of land use**; verified to be the
+inventory and not a reading convention or a temperature difference. **A reviewer flipping tab 1
+→ tab 3 sees 13.6 ppm with nothing on the page to explain it.** ⏳ **RULING OPEN:** splice the
+SSP series onto the GCB history at the handover year, caption the discontinuity, or both.
 
 ## 2. What the reviewer needs to be ABLE to say "fixable"
 
@@ -81,8 +92,8 @@ the level not the asymmetry" is a link, not a claim:
 This only works if the repo is public (§0 item 4a).
 
 ## 3. Build list (if approved) — in order
-1. Re-measure the cross-tab land-use step at `hilda29l` (one script; decides whether a fix
-   precedes the review).
+1. ~~Re-measure the cross-tab land-use step at `hilda29l`~~ **DONE 09-22 (x)** — and it found a
+   third history. The fix/caption is a RULING (§1); nothing is built.
 2. `app/R/plots_review.R` — the eight panels, each a function of the canonical run (+ the
    control for card 6, + Joos for card 5); labels from named constants (tag, mode, scorecard
    date) in `global.R`.
