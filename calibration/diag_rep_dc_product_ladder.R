@@ -67,7 +67,12 @@ ccx_load_cpp()
 # ---- NAMED CONSTANTS: every label, filename and column below derives from ----
 RPL_TAG        <- "rep_dc_product_ladder"
 RPL_DATE       <- "20260923"
-RPL_OUTDIR     <- file.path("outputs", "diagnostics", sprintf("%s_%s", RPL_TAG, RPL_DATE))
+# ⚠ RPL_OUTDIR is overridable ONLY so a reduced-budget SMOKE run cannot write
+# into the real run's directory and be collected as if it were one of its rungs.
+# A smoke job's artifact still stamps its own (smaller) budget, so the two could
+# be told apart after the fact -- but not before someone read the table.
+RPL_OUTDIR     <- Sys.getenv("RPL_OUTDIR",
+                    file.path("outputs", "diagnostics", sprintf("%s_%s", RPL_TAG, RPL_DATE)))
 RPL_LOG        <- file.path("outputs", "diagnostics", sprintf("%s_%s.log", RPL_TAG, RPL_DATE))
 
 RPL_MU_MEAS    <- 0.776    # MEASURED station-vs-hemisphere offset, MBL zonal (diag_rep_dc_mbl_zonal.R)
@@ -81,10 +86,17 @@ RPL_N_REP      <- 3        # perturbed replicates AT the canonical rung -> the n
 RPL_REP_FRAC   <- 0.25     # perturbation size, in units of each name's posterior sd
 RPL_SEED       <- 20260923 # ⚠ STAMPED INTO EVERY ARTIFACT, not just set here
 
-# ⚠ PROVISIONAL until the 09-23 recovery probe lands. The budget is the thing
-# the noise floor is most sensitive to: too small and every product "moves".
-RPL_NM_MAXIT   <- 6000     # Nelder-Mead budget, per stage, 28 free names
-RPL_BFGS_MAXIT <- 300
+# SIZED BY THE 09-23 RECOVERY PROBE: 2000 NM iterations on the 28 free names
+# cost 364 s, and NM started AT the canonical found nothing better (+0.0000),
+# which is the right answer and also an UNINFORMATIVE one -- a start already at
+# the optimum cannot measure recovery. That is what the PERTURBED replicates are
+# for, and why the budget is set from cost rather than from that probe's verdict.
+# The budget is the thing the noise floor is most sensitive to: too small and
+# every product "moves". ⚠ BFGS here is numeric-gradient on 28 names, so one
+# iteration costs 29 evaluations -- its budget is small for that reason, not
+# because the polish is unimportant.
+RPL_NM_MAXIT   <- as.integer(Sys.getenv("RPL_NM_MAXIT", "6000"))
+RPL_BFGS_MAXIT <- as.integer(Sys.getenv("RPL_BFGS_MAXIT", "100"))
 RPL_GATE_TOL   <- 1e-3     # harness must reproduce the stored logpost
 RPL_VEC_TOL    <- 1e-10    # the reconstructed gate vector must match dg_vector()
 
@@ -307,6 +319,14 @@ rpl_run_job <- function(k) {
                 units = "rep_dC ppm; partition %; sinks GtC/yr; gradients ppm and permil",
                 commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE),
                                   error = function(e) NA_character_),
+                # ⚠ A COMMIT ALONE IS NOT PROVENANCE IF THE TREE WAS DIRTY, and
+                # on the 09-23 run it WAS: the driver carried uncommitted edits
+                # (the RPL_OUTDIR override and the budget constant) through the
+                # whole wave, so its artifacts name a commit that does not fully
+                # describe the code that produced them. Recorded from here on.
+                tree_dirty = tryCatch(length(system("git status --porcelain -- calibration R",
+                                                    intern = TRUE)) > 0,
+                                      error = function(e) NA),
                 built = as.character(Sys.time())))
   saveRDS(out, file.path(RPL_OUTDIR, sprintf("job%02d_%s.rds", j$id, j$label)))
   cat(sprintf("  logpost %.4f  conv %d  %.1f min -> %s\n", o$value, o$conv, el,
