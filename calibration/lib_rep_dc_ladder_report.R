@@ -23,6 +23,23 @@
 #' @param n_rep   how many perturbed replicates were requested
 #' @param rungs   the ladder
 #' @param canon   index into `rungs` of the canonical rung
+# ⛔ TWO OF THE "PRODUCTS" ARE NOT PRODUCTS, and reporting them as flat would be
+# a false negative dressed as evidence (found 2026-09-23 on the smoke run, where
+# both read EXACTLY 0.0000 movement AND an exactly 0.0000 noise floor -- the
+# signature of an identity, not of a quantity that was measured and did not
+# move; [[suspicious uniformity]] in `~/.claude/CLAUDE.md`):
+#   `co2_pi`         -- the spinup is SOLVED to CO2_PI_PPM, so this is a
+#                       constraint the model satisfies, not an output it chooses.
+#   `part1000_close` -- the pulse partition's own mass-closure residual.
+# They are kept because a MOVE in either is a bug signal, and reported under
+# CHECKS where a reader cannot mistake "constant by construction" for "the
+# ladder has no effect on it".
+RPL_CHECKS <- c("co2_pi", "part1000_close")
+# If the replicates cannot get back to within this of the canonical logpost, the
+# "noise floor" is measuring an INADEQUATE OPTIMISER BUDGET, not optimiser noise,
+# and every /floor ratio below is against the wrong scale.
+RPL_FLOOR_SANE <- 5.0
+
 rpl_report <- function(dir, jobs, obs_sd, n_rep, rungs, canon) {
   fs <- list.files(dir, pattern = "^job[0-9]+_.*\\.rds$", full.names = TRUE)
   if (!length(fs)) stop("no job files in ", dir)
@@ -64,6 +81,15 @@ rpl_report <- function(dir, jobs, obs_sd, n_rep, rungs, canon) {
     for (n in prods)
       cat(sprintf("  %-16s %14.4f %14.4f\n", n, anchor[[n]], floor_v[[n]]))
     cat(sprintf("\n  logpost spread across replicates: %.4f log-units\n", floor_v[["logpost"]]))
+    if (!is.finite(floor_v[["logpost"]]) || floor_v[["logpost"]] > RPL_FLOOR_SANE) {
+      cat(sprintf("\n⛔⛔ THE BUDGET IS INADEQUATE AND THE FLOOR IS NOT A NOISE FLOOR.\n"))
+      cat(sprintf("   The replicates land %.2f log-units from the canonical (sane < %.1f), so they\n",
+                  floor_v[["logpost"]], RPL_FLOOR_SANE))
+      cat("   did not re-find the optimum. Every /floor ratio below is measured against\n")
+      cat("   UNDER-CONVERGENCE, not optimiser noise, and a product that clears it has not\n")
+      cat("   been shown to move. Re-run the replicates at a larger RPL_NM_MAXIT before\n")
+      cat("   reading any verdict from this table.\n")
+    }
   }
 
   # ---- the ladder ---------------------------------------------------
@@ -86,7 +112,7 @@ rpl_report <- function(dir, jobs, obs_sd, n_rep, rungs, canon) {
   cat(sprintf("  %-16s %12s %12s %10s %10s %12s\n",
               "product", "top", "bottom", "delta", "/floor", "/obs sigma"))
   verdict <- list()
-  for (n in setdiff(prods, c("rep_dC", "logpost", "loglik"))) {
+  for (n in setdiff(prods, c("rep_dC", "logpost", "loglik", RPL_CHECKS))) {
     d  <- pv[n, bot] - pv[n, top]
     fl <- floor_v[[n]]
     os <- if (n %in% names(obs_sd)) obs_sd[[n]] else NA_real_
@@ -102,6 +128,13 @@ rpl_report <- function(dir, jobs, obs_sd, n_rep, rungs, canon) {
   cat("            HAS NO POWER on that product; it has not been shown to move.\n")
   cat("  /obs sigma = |delta| in units of that product's own observational sigma,\n")
   cat("            where one exists. This is the 'would a reader notice' scale.\n")
+
+  # ---- the CHECKS, reported apart so they cannot be read as products -
+  cat("\n=== CHECKS (constant by construction -- a MOVE here is a bug, not a result) ===\n")
+  for (n in intersect(RPL_CHECKS, prods))
+    cat(sprintf("  %-16s %12.4f -> %12.4f  delta %+.3e  %s\n", n, pv[n, top], pv[n, bot],
+                pv[n, bot] - pv[n, top],
+                if (abs(pv[n, bot] - pv[n, top]) < 1e-6) "as expected" else "*** INVESTIGATE ***"))
 
   moved <- names(which(vapply(verdict, function(x) isTRUE(x[["per_floor"]] > 1), logical(1))))
   cat(sprintf("\n=== %d product(s) move by more than the noise floor: %s ===\n",
