@@ -2,6 +2,30 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-22 (x) — ⛔ **THE CROSS-TAB STEP RE-MEASURED AT `hilda29l`, AND THERE ARE THREE HISTORIES ON THIS APP, NOT TWO. The "What if…" tab takes fossil emissions from the GCB history and land-use from the SSP background, so its past matches NEITHER of the other two tabs — and it is the FURTHEST from the Keeling tab of the three.** `calibration/diag_app_cross_tab_step.R`; run at `outputs/diagnostics/app_cross_tab_step_20260922.log`. Build item 1 of `notes/plan_2026-09-22_product_beta_and_writeup.md` §3. ⛔ Nothing fixed — the resolution is a ruling.
+
+- **MEASURED at 2024, off the app's OWN startup** (`source("app/global.R")`, its spinup, its fitted forcing parameters, the same run helpers `server.R` calls):
+
+| tab | inventory | CO₂ 2024 | step vs Keeling |
+|---|---|---|---|
+| The Keeling Curve | historical (GCB) | **424.37 ppm** | — |
+| Futures | ssp245 (SSP/LUH2) | **412.33** | **−12.05 ppm** |
+| What if… | GCB fossil + SSP land-use | **410.79** | **−13.58 ppm** |
+
+- ⭐ **THE THIRD HISTORY IS NEW; gate 5 never looked at it.** `app_stylised_emissions()` takes `foss` from `APP_EMIS_HIST` and `luc` from the SSP background **for every year**, so the hybrid past is drawn on all four stylised pathways, not just one — the `kind` switch only rewrites the FUTURE segment. It carries the SSP's land-use deficit with none of the SSP's compensating fossil, which is why it is the worst of the three.
+- **The step is the INVENTORY, verified, not a parameter or a definition.** (1) Cumulative 1750–2024: GCB 423.8 fossil / 278.6 LUC; ssp245 430.7 / 187.2; hybrid 423.8 / 187.2 — **the whole gap is land-use, −91.4 GtC**, partly offset in ssp245 by +6.9 GtC of fossil. (2) Both curves are the SAME QUANTITY: `(co2_NH + co2_SH)/2` averaged over the calendar year in both paths (`R/climate.R:196`), so none of the step is a reading convention. (3) Both see the SAME TEMPERATURE over history — `ccx_run_coupled(gmst_obs = TRUE)` splices the IGCC observations the historical tab is driven with. (4) −84.5 GtC fully airborne would be −39.8 ppm; the realised −12.05 is **30 %** of that, the airborne fraction of a 270-year release, so the magnitude checks out against the arithmetic instead of only against itself.
+- **Down 1.05 ppm from the 08-21 measurement (13.1 → 12.05)**, at a different parameter vector and under the periodic spinup. Parameter-independent in mechanism, not in value.
+- ✅ **A like-for-like check that PASSES on the way past:** the Keeling tab's 424.37 reproduces the objective's periodic run to the digit (CHANGELOG 09-21 (i)), and the model box sits **+3.40 ppm** above the MLO/SPO station mean (420.97) against the fitted `rep_dC` = 3.52 — i.e. the app's own panel shows the offset the likelihood scored.
+- **The 21,862 startup warnings are ONE class and already priced.** The diagnostic captures rather than suppresses them (`withCallingHandlers`) and prints the distinct set: all of them are the carbonate constants extrapolating below 2 °C in the cold boxes, documented benign in 09-21 (i). *"There were 50 or more warnings"* is exactly the shape a second, real warning hides in — there isn't one.
+- ⏳ **THE RULING OWED:** splice the SSP series onto the GCB history at the handover year, or caption the discontinuity on the tabs, or both. A reviewer flipping between tab 1 and tab 3 sees 13.6 ppm with nothing on the page to explain it.
+
+## 2026-09-22 (w) — **The copy audit was SCRATCHPAD-ONLY, and re-running it as found reports 6 failures of 27 that are all R COMMENT LINES. It is a gated suite file now, with the comment strip the fixed version had.** `tests/testthat/test-app-review-copy.R`: 36 assertions, 4 mutation tests.
+
+- **WHY IT MATTERS THAT IT WAS LOST.** This audit is the only thing that caught the 09-22 (o) Python batch that reported three copy edits "ok" and then wrote nothing when a fourth assertion failed before `write()`. It lived in `/tmp` and did not survive the session — the same gap as (p)'s scratchpad-only MBL pull, closed the same way.
+- **The false-failure mode, measured: 6 of 27.** Six items are documented in the source by a comment that QUOTES the old wording (*"...the `No ocean circulation` claim is cut from BOTH places..."*). Matching raw source reads every one as a miss. Whole-line comments are stripped; a trailing `#` is not, because deciding whether it opens a comment or sits in a string needs a parser — if one ever trips a check, move the comment to its own line rather than weakening the strip.
+- ⚠ **One of the mutation tests requires the RAW source to fail MORE than the stripped source.** Without it the strip could quietly stop mattering (the comments get deleted) and nothing would say so — a gate whose mechanism is untested is [[mutation_test_gates]]'s case.
+- **Scope grew with the copy**: the audit's six files become eight (`app/R/plots.R`, `app/R/plots_review.R` joined when Tier 3 landed), read as one blob so an item moving between files is not a failure. C2's corrected wobble claim is item 28.
+
 ## 2026-09-22 (v) — **N5 BUILT, and it finds something the CO₂ side could not: the δ¹³C station offset is STRONGLY HEMISPHERE-DEPENDENT where the model's is common-mode, and the MASS-BALANCE TIE between the two species is not supported by observation.** Marcus's ruling: all sites, poleward-weighted, gaps dropped. `data-raw/build_hemispheric_flask_means.R`, `calibration/diag_rep_dc_d13c_hemispheric.R`; run at `outputs/diagnostics/rep_dc_d13c_hemispheric_20260922.log`.
 
 - ⛔ **NOAA PUBLISHES NO ZONAL δ¹³C REFERENCE** — measured, not assumed: the MBL form's parameter list is CO₂/CH₄/N₂O/SF₆ and `ghg.php?param=C13` returns an empty fragment with no generated file. So unlike the CO₂ case this could not be a download; the hemispheric mean had to be BUILT from the flask network.
