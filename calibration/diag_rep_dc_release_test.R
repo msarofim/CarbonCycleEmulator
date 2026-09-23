@@ -90,6 +90,11 @@ RT_ICE_PROBE_PPM <- 10      # ppm added to every ice sample
 RT_D14C_PROBE    <- 20      # permil added to both atmospheric d14C records
 RT_PROBE_MIN     <- 1.0     # the SHIPPED objective must move at least this much
 RT_PROBE_BLIND   <- 1e-9    # the ARM must move less than this
+# GATE INFEASIBLE's probe: names MEASURED to take the objective off-support at
+# this offset in unconstrained space (2026-09-23; `kz` does NOT and is excluded
+# for that reason -- a probe that stays feasible would test nothing).
+RT_INFEAS_NAMES  <- c("k_w", "h_ml", "tau_ex")
+RT_INFEAS_OFFSET <- 60
 
 # ---------------------------------------------------------------------
 # ARM A's SIGMA, MEASURED HERE. The ice record and the flask record overlap;
@@ -139,8 +144,23 @@ rt_logpost_for <- function(arm) {
   if (!length(drop)) return(function(u) lp1(u))
   function(u) {
     v <- lp1(u); s <- attr(v, "streams")
+    # ⛔⛔ AN INFEASIBLE POINT IS NOT A MISSING STREAM, AND CONFLATING THE TWO
+    # KILLED BOTH DROP ARMS ON THE 09-23 RUN (8 of 16 jobs; ~65 min in, after
+    # every gate had passed). `ccx_make_logpost()` returns a BARE -Inf with NO
+    # `streams` attribute whenever the optimiser proposes a vector the spinup
+    # cannot take -- measured: `k_w`, `h_ml` or `tau_ex` at +60 in unconstrained
+    # space all do it, while `kz` at +60 stays finite. With `s` NULL,
+    # `setdiff(drop, names(s))` reports EVERY dropped name as absent and the
+    # guard below stopped the run.
+    #   infeasible  -> return -Inf, which is what the optimiser is asking for.
+    #   misconfigured -> stop, but only where the question is meaningful: at a
+    #                    FEASIBLE point with a streams list that really lacks
+    #                    the name (a renamed row would otherwise drop nothing,
+    #                    silently, which is the defect the guard is FOR).
+    if (!is.finite(as.numeric(v)) || is.null(s)) return(-Inf)
     miss <- setdiff(drop, names(s))
-    if (length(miss)) stop("arm ", arm, ": stream(s) absent: ", paste(miss, collapse = ", "))
+    if (length(miss)) stop("arm ", arm, ": stream(s) absent at a FEASIBLE point: ",
+                           paste(miss, collapse = ", "))
     out <- as.numeric(v) - sum(unlist(s[drop]))
     attributes(out) <- attributes(v)[c("streams", "loglik", "logprior")]
     out
@@ -261,6 +281,27 @@ rt_gates <- function() {
                         "so it has no power to show the arm is blind to it")
     if (!ok_blind) stop("GATE DROP: arm ", a, " still responds to the block it claims to drop")
   }
+  # ---- GATE INFEASIBLE: the arms must SURVIVE what the optimiser will do ----
+  # ⛔ THE GATE ABOVE ONLY EVER EVALUATES AT u0, WHICH IS FEASIBLE BY
+  # CONSTRUCTION -- so it could not see the defect that actually stopped the
+  # 09-23 drop arms 65 minutes into their optimisations. A gate that only tests
+  # the point you already know works has no power over the points the optimiser
+  # will invent. [[no_power_null]]
+  cat("\n=== GATE INFEASIBLE (an arm must return -Inf, not error, off-support) ===\n")
+  for (nm in RT_INFEAS_NAMES) {
+    u_bad <- u0; u_bad[[nm]] <- u0[[nm]] + RT_INFEAS_OFFSET
+    stopifnot(!is.finite(as.numeric(lp1(u_bad))))   # the probe must really be off-support
+    for (a in RT_ARMS) {
+      got <- tryCatch(as.numeric(rt_logpost_for(a)(u_bad)),
+                      error = function(e) structure(NA_real_, msg = conditionMessage(e)))
+      ok <- is.na(got) == FALSE && !is.finite(got)
+      cat(sprintf("  %-14s at %s%+d: %-10s -> %s\n", a, nm, RT_INFEAS_OFFSET,
+                  if (is.na(got)) "ERROR" else format(got), if (ok) "PASS" else "*** FAIL ***"))
+      if (!ok) stop("arm ", a, " does not survive an off-support point: ",
+                    if (is.na(got)) attr(got, "msg") else got)
+    }
+  }
+
   # and the no-drop arm must be bit-identical to the shipped objective
   d_sh <- abs(as.numeric(rt_logpost_for("shipped")(u0)) - as.numeric(base))
   cat(sprintf("  %-14s %-32s |delta| %.3e -> %s\n", "shipped", "(must be the shipped objective)",
