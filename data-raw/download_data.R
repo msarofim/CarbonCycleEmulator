@@ -121,6 +121,73 @@ fetch_mbl_zonal("mbl_zonal_gl", -90, 90, "mbl_zonal_co2_GL.txt",
         "ACP 24:1249, doi:10.5194/acp-24-1249-2024, which quotes global-MLO and",
         "global-SPO independently."))
 
+#' Pull NOAA'S OWN LIST OF THE SITES THE CO2 MBL REFERENCE IS BUILT FROM (2026-09-22)
+#'
+#' WHY THIS EXISTS. The hemispheric flask means (data-raw/build_hemispheric_flask_means.R)
+#' are built on ALL 87 sites, per Marcus's ruling. That over-weights CONTINENTAL
+#' boundary-layer air relative to the MASS it represents -- the model's box is a
+#' mass-weighted hemisphere, and continental BL is roughly 6 % of NH atmospheric
+#' mass (land fraction x BL mass fraction) while latitude-band-area weighting
+#' gives it its AREA share. The marine subset is the other arm of that question.
+#'
+#' ⭐ THE CRITERION IS NOAA'S, NOT OURS. "Only sites where samples are
+#' predominantly of well-mixed marine boundary layer air representative of a
+#' large volume of the atmosphere are considered. Measurements from sites at
+#' altitude (e.g. Mauna Loa) and from sites close to anthropogenic and strong
+#' natural sources and sinks (e.g. Park Falls) are excluded." (gml.noaa.gov/ccgg/mbl/).
+#' Inventing a coastal/elevation rule here would be choosing the answer; using
+#' NOAA's own selection makes the marine arm like-for-like with the MBL zonal
+#' reference already downloaded above.
+#'
+#' ⚠ THE LIST IS THE CO2 ONE. The MBL form offers CO2/CH4/N2O/SF6 and no isotope
+#' (measured 2026-09-22 (v): `param=C13` returns an empty fragment), so there is
+#' no published d13C site selection. Applying the CO2 selection to d13C is a
+#' DECISION, and it is the defensible one: it is a statement about each SITE's
+#' air mass, not about which species is measured there.
+#'
+#' The page renders the selection as createMarker(lat, lon, '(CODE) Name', ...)
+#' calls in an inline script. Parsed here, and it errors loudly if the layout
+#' changes rather than silently writing a short list.
+fetch_mbl_sites <- function(key = "mbl_sites_co2", dest = "mbl_sites_co2.txt") {
+  u <- "https://gml.noaa.gov/ccgg/mbl/map.php?param=co2"
+  cat(sprintf("  ... %-14s %s\n", key, u))
+  h <- paste(readLines(url(u), warn = FALSE), collapse = "\n")
+  m <- regmatches(h, gregexpr(
+    "createMarker\\(\\s*-?[0-9.]+\\s*,\\s*-?[0-9.]+\\s*,\\s*'\\([A-Za-z0-9]+\\)", h))[[1]]
+  if (length(m) < 20)
+    stop(sprintf(paste("FAILED: %s -- parsed %d markers from the MBL site map;",
+                       "the page layout has changed and the list would be short."),
+                 key, length(m)))
+  parse1 <- function(x) {
+    p <- regmatches(x, gregexpr("-?[0-9.]+|\\([A-Za-z0-9]+\\)", x))[[1]]
+    data.frame(code = tolower(gsub("[()]", "", p[3])),
+               lat = as.numeric(p[1]), lon = as.numeric(p[2]),
+               stringsAsFactors = FALSE)
+  }
+  d <- do.call(rbind, lapply(m, parse1))
+  d <- d[!duplicated(d$code), ]
+  d <- d[order(d$code), ]
+  if (!"spo" %in% d$code || "mlo" %in% d$code)
+    stop(paste("FAILED: the parsed list must CONTAIN spo and EXCLUDE mlo --",
+               "NOAA's documented selection. It does not, so the parse is wrong",
+               "or the selection changed; either way, look before using it."))
+  dst <- file.path(DL_DIR, dest)
+  writeLines(c("# NOAA GML: the sites the CO2 Marine Boundary Layer reference is built from.",
+               sprintf("# %s  retrieved %s  %d sites", u, format(Sys.Date()), nrow(d)),
+               "# code lat lon",
+               sprintf("%s %.4f %.4f", d$code, d$lat, d$lon)), dst)
+  record(key, dst, u,
+         paste("NOAA GML Carbon Cycle Greenhouse Gases, Marine Boundary Layer",
+               "Reference site selection (gml.noaa.gov/ccgg/mbl/); selection",
+               "criteria per Lan et al. (2024), doi:10.15138/DVNP-F961."),
+         paste("The MBL site selection, used as the MARINE arm of the hemispheric",
+               "flask means. EXCLUDES Mauna Loa (altitude) and continental sites;",
+               "INCLUDES South Pole."))
+  invisible(d)
+}
+
+fetch_mbl_sites()
+
 # ---------------------------------------------------------------------
 # 2. Atmospheric CO2 + d13C — ice core / firn (pre-instrumental)
 # ---------------------------------------------------------------------

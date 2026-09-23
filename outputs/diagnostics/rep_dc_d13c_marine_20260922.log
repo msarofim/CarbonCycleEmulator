@@ -1,0 +1,94 @@
+=====================================================================
+N5, MARINE ARM -- does excluding the continental flasks change it?
+  run     2026-09-22 21:01:16
+  mode    hilda29l
+  commit  bba3ae9
+  seed    20260922, applied immediately before the block bootstrap (2000 draws)
+  sites   87 all / 39 in NOAA's CO2 MBL selection
+  arms    `equalarea`/`unweighted`/`coslat` = ALL sites (the ruling, primary). `*_mbl` = NOAA's own CO2 MBL site selection (gml.noaa.gov/ccgg/mbl/, see data-raw/downloads/mbl_sites_co2.txt) -- the MARINE arm. `*_mblx` = the marine arm with the comparison station itself removed (mlo from NH, spo from SH); NH *_mbl already excludes mlo, so NH *_mbl and *_mblx are identical BY CONSTRUCTION and SH is where this arm bites.
+=====================================================================
+
+model implies (common-mode, one `rep_dC` = +3.515 ppm): NH -0.1702   SH -0.1725 permil
+
+---------------------------------------------------------------------
+1. THE OFFSETS AND THE IMPLIED SIGNATURE, BY ARM (weighting: equalarea)
+---------------------------------------------------------------------
+  arm                     hem   n_mo  CO2 ppm      d13C   implied     model
+  all sites (the ruling)   NH    300   +1.288   -0.0922     -35.2   -0.1702
+                           SH    292   +0.766   -0.0110     -13.5   -0.1725
+  marine (NOAA MBL)        NH    300   +0.794   -0.0668     -39.9   -0.1702
+                           SH    292   +0.784   -0.0146     -15.1   -0.1725
+  marine, station out      NH    300   +0.794   -0.0668     -39.9   -0.1702
+                           SH    292   +0.784   -0.0151     -15.3   -0.1725
+
+  95% CI (block bootstrap by year, 2000 draws):
+    all sites (the ruling) NH  CO2 [+1.216, +1.364]  d13C [-0.1009, -0.0839]  signature [-38.5, -32.3]  (26 yr)
+                           SH  CO2 [+0.695, +0.839]  d13C [-0.0204, -0.0022]  signature [-18.1, -9.2]  (26 yr)
+    marine (NOAA MBL)      NH  CO2 [+0.703, +0.888]  d13C [-0.0756, -0.0588]  signature [-46.3, -34.7]  (26 yr)
+                           SH  CO2 [+0.718, +0.849]  d13C [-0.0243, -0.0054]  signature [-20.1, -10.6]  (26 yr)
+    marine, station out    NH  CO2 [+0.703, +0.885]  d13C [-0.0757, -0.0590]  signature [-46.5, -34.9]  (26 yr)
+                           SH  CO2 [+0.709, +0.852]  d13C [-0.0243, -0.0059]  signature [-20.1, -10.8]  (26 yr)
+
+---------------------------------------------------------------------
+2. EXTERNAL CHECK -- does the marine arm reproduce NOAA's MBL reference?
+---------------------------------------------------------------------
+  NH marine (NOAA MBL)      flask-marine +0.794  vs  MBL zonal +0.803 over the same months (n 312)  INSIDE the arm's 95% CI
+  NH marine, station out    flask-marine +0.794  vs  MBL zonal +0.803 over the same months (n 312)  INSIDE the arm's 95% CI
+  NH (for contrast)         all-sites    +1.288  vs  MBL zonal +0.803                        OUTSIDE
+    ⚠ the published 47-yr means are NH +0.738 / SH +0.814; this window's
+      value differs because the NH offset TRENDS (-0.105 ppm/decade).
+  SH marine (NOAA MBL)      flask-marine +0.784  vs  MBL zonal +0.857 over the same months (n 305)  OUTSIDE the arm's 95% CI
+  SH marine, station out    flask-marine +0.784  vs  MBL zonal +0.857 over the same months (n 305)  OUTSIDE the arm's 95% CI
+  SH (for contrast)         all-sites    +0.766  vs  MBL zonal +0.857                        OUTSIDE
+    ⚠ the published 47-yr means are NH +0.738 / SH +0.814; this window's
+      value differs because the NH offset TRENDS (-0.105 ppm/decade).
+
+---------------------------------------------------------------------
+3. THE MASS-BALANCE TIE, BY ARM (d_s = LIK_REP_SOURCE_D13C = -26.5 permil)
+---------------------------------------------------------------------
+  arm                     hem   predicted    measured meas/pred
+  all sites (the ruling)   NH     -0.0625     -0.0922       1.5
+                           SH     -0.0377     -0.0110       0.3
+  marine (NOAA MBL)        NH     -0.0386     -0.0668       1.7
+                           SH     -0.0386     -0.0146       0.4
+  marine, station out      NH     -0.0386     -0.0668       1.7
+                           SH     -0.0386     -0.0151       0.4
+
+  Does the assumed -26.5 permil sit inside each arm's 95% CI on the
+  signature that would reconcile the two MEASURED offsets?
+    all sites (the ruling) NH  [-38.5, -32.3]  EXCLUDES -26.5
+                           SH  [-18.1, -9.2]  EXCLUDES -26.5
+    marine (NOAA MBL)      NH  [-46.3, -34.7]  EXCLUDES -26.5
+                           SH  [-20.1, -10.6]  EXCLUDES -26.5
+    marine, station out    NH  [-46.5, -34.9]  EXCLUDES -26.5
+                           SH  [-20.1, -10.8]  EXCLUDES -26.5
+
+---------------------------------------------------------------------
+4. THE SIGNATURE UNDER ALL THREE WEIGHTINGS (the gap (v) left)
+---------------------------------------------------------------------
+  both species re-measured under each weighting, so the RATIO is consistent
+  arm                     hem   equalarea  unweighted      coslat
+  all sites (the ruling)   NH       -35.2       -34.5       -32.5
+                           SH       -13.5       -13.4       -10.7
+  marine (NOAA MBL)        NH       -39.9       -40.8       -35.5
+                           SH       -15.1       -15.3       -12.3
+  marine, station out      NH       -39.9       -40.8       -35.5
+                           SH       -15.3       -14.7       -12.3
+
+---------------------------------------------------------------------
+5. THE CONTINENTAL INCREMENT -- all-sites MINUS marine, as its own air mass
+---------------------------------------------------------------------
+  NH  increment: CO2 +0.493 ppm   d13C -0.0254 permil   signature -27.7  [-29.6, -25.6]  CONTAINS -26.5
+  SH  increment: CO2 -0.018 ppm   d13C +0.0036 permil   signature -82.7  [-516.8, +725.2]  UNINFORMATIVE -- interval 1242 permil wide (near-zero CO2 offset); no power
+
+  ⇒ read this against section 3. If the increment CONTAINS -26.5 while the
+    marine residual EXCLUDES it, then the continental sites are the part of
+    the network that OBEYS the model's tie, and removing them leaves the
+    part that does not -- which is the opposite of the expected direction.
+
+=====================================================================
+⛔ NOTHING ADOPTED. The all-sites arm is Marcus's ruling and remains the
+primary in the product; this measures what the other arm says. The two
+arms BRACKET what the model's mass-weighted box wants -- all-sites weights
+continental air above its mass share, MBL weights it at zero.
+=====================================================================

@@ -62,6 +62,45 @@ SPECIES <- list(
               out  = "obs_co2_hemispheric_flask.rds", lo = 200, hi = 600, unit = "ppm"))
 
 SITEPAGE <- "https://gml.noaa.gov/dv/site/?program=ccgg&type=Surface"
+# ---------------------------------------------------------------------
+# THE MARINE ARM (2026-09-22). Marcus's ruling is ALL SITES and that stays the
+# primary; this carries the other arm of the question beside it in the same
+# product, so the downstream tie test can be read both ways without a second
+# build and without either arm being the one somebody has to re-derive.
+#
+# WHY IT IS NOT A DETAIL: the model's box is a MASS-weighted hemisphere. NH
+# continental boundary-layer air is roughly 6 % of NH atmospheric mass (land
+# fraction ~0.39 x BL mass fraction ~0.15) while latitude-band-area weighting
+# gives it its AREA share -- so the all-sites mean weights continental air
+# several-fold above the mass it represents, and the MBL product weights it at
+# zero. The truth is between, nearer MBL. Carrying both measures the gap
+# instead of arguing about it.
+#
+# ⭐ THE SUBSET IS NOAA'S OWN (data-raw/downloads/mbl_sites_co2.txt, fetched by
+# download_data.R), never a coastal/elevation rule invented here.
+MBL_SITES_FILE <- file.path(.root, "data-raw", "downloads", "mbl_sites_co2.txt")
+# The stations the hemispheric mean is differenced against downstream. ⚠ The
+# all-sites NH mean CONTAINS Mauna Loa, i.e. the very station it is compared
+# with, which pulls the mean toward the station and SHRINKS the offset. NOAA's
+# MBL selection drops MLO (altitude) and so removes that for the NH on its own;
+# it KEEPS South Pole, so the SH arm carries the same self-inclusion and a third
+# arm measures it.
+SELF_STATION <- c(NH = "mlo", SH = "spo")
+
+MBL_CODES <- local({
+  if (!file.exists(MBL_SITES_FILE))
+    stop("the MBL site list is missing: ", MBL_SITES_FILE,
+         "\n  run data-raw/download_data.R (fetch_mbl_sites) first -- this build",
+         "\n  will NOT fall back to an invented marine rule.")
+  d <- utils::read.table(MBL_SITES_FILE, comment.char = "#",
+                         col.names = c("code", "lat", "lon"),
+                         stringsAsFactors = FALSE)
+  if (nrow(d) < 20 || !"spo" %in% d$code || "mlo" %in% d$code)
+    stop("the MBL site list is not what it should be (", nrow(d),
+         " sites, spo ", "spo" %in% d$code, ", mlo ", "mlo" %in% d$code, ")")
+  cat(sprintf("[mbl] %d sites in NOAA's CO2 MBL selection\n", nrow(d)))
+  sort(d$code)
+})
 NBAND    <- 12   # equal-area bands per hemisphere, in sin(lat)
 MIN_MONTHS <- 1  # "all sites" (Marcus): only a site with NO data is dropped
 # A record whose samples span more than this cannot be placed in a latitude band
@@ -148,14 +187,35 @@ build <- function(nm, codes) {
   edges <- seq(0, 1, length.out = NBAND + 1)
   dat$hemi <- ifelse(dat$lat >= 0, "NH", "SH")
   dat$band <- findInterval(pmin(abs(sin(dat$lat * pi / 180)), 1 - 1e-12), edges)
-  parts <- split(dat, interaction(dat$hemi, dat$year, dat$month, drop = TRUE))
   ea <- function(d) { bm <- stats::aggregate(value ~ band, data = d, FUN = mean); mean(bm$value) }
-  hm <- do.call(rbind, lapply(parts, function(d) data.frame(
-    hemi = d$hemi[1], year = d$year[1], month = d$month[1],
-    equalarea  = ea(d),
-    unweighted = mean(d$value),
-    coslat     = stats::weighted.mean(d$value, cos(d$lat * pi / 180)),
-    n_band = length(unique(d$band)), n_site = length(unique(d$code)))))
+
+  # One aggregation, run on each site subset. Every arm is EXACTLY the same
+  # estimator on a different network, which is what makes the arms comparable.
+  arm <- function(d0, suffix) {
+    if (!nrow(d0)) return(NULL)
+    parts <- split(d0, interaction(d0$hemi, d0$year, d0$month, drop = TRUE))
+    out <- do.call(rbind, lapply(parts, function(d) data.frame(
+      hemi = d$hemi[1], year = d$year[1], month = d$month[1],
+      equalarea  = ea(d),
+      unweighted = mean(d$value),
+      coslat     = stats::weighted.mean(d$value, cos(d$lat * pi / 180)),
+      n_band = length(unique(d$band)), n_site = length(unique(d$code)))))
+    if (nzchar(suffix))
+      names(out)[-(1:3)] <- paste0(names(out)[-(1:3)], suffix)
+    out[order(out$hemi, out$year, out$month), ]
+  }
+
+  hm <- arm(dat, "")
+  # MARINE arm, and MARINE MINUS THE STATION ITSELF. Merged on hemi/year/month,
+  # all.x = TRUE: a month with no marine site is NA in that arm rather than
+  # dropping the month from the primary, which would silently change the
+  # all-sites answer the ruling asked for.
+  d_mbl  <- dat[dat$code %in% MBL_CODES, ]
+  d_self <- d_mbl[d_mbl$code != SELF_STATION[d_mbl$hemi], ]
+  for (a in list(list(d_mbl, "_mbl"), list(d_self, "_mblx"))) {
+    z <- arm(a[[1]], a[[2]])
+    if (!is.null(z)) hm <- merge(hm, z, by = c("hemi", "year", "month"), all.x = TRUE)
+  }
   hm <- hm[order(hm$hemi, hm$year, hm$month), ]; rownames(hm) <- NULL
   attr(hm, "species")  <- nm
   attr(hm, "units")    <- sp$unit
@@ -170,6 +230,17 @@ build <- function(nm, codes) {
                                 "sensitivity to the wording.")
   attr(hm, "n_sites")  <- length(unique(dat$code))
   attr(hm, "sites")    <- sort(unique(dat$code))
+  # The marine arm's provenance travels IN the product, so a reader never has to
+  # take the script's word for which sites it is.
+  attr(hm, "arms") <- paste(
+    "`equalarea`/`unweighted`/`coslat` = ALL sites (the ruling, primary).",
+    "`*_mbl` = NOAA's own CO2 MBL site selection (gml.noaa.gov/ccgg/mbl/,",
+    "see data-raw/downloads/mbl_sites_co2.txt) -- the MARINE arm.",
+    "`*_mblx` = the marine arm with the comparison station itself removed",
+    "(mlo from NH, spo from SH); NH *_mbl already excludes mlo, so NH *_mbl and",
+    "*_mblx are identical BY CONSTRUCTION and SH is where this arm bites.")
+  attr(hm, "mbl_sites") <- sort(intersect(unique(dat$code), MBL_CODES))
+  attr(hm, "n_mbl")     <- length(attr(hm, "mbl_sites"))
   # ⚠ BOTH SPECIES ARE BUILT ON THIS SAME SET, so the tie test downstream is
   # comparing chemistry and not networks. Recorded in the product so a reader
   # does not have to take the script's word for it.
