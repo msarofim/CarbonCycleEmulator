@@ -61,7 +61,12 @@ xt <- function(fmt, ...) {
 xt("=====================================================================")
 xt("APP CROSS-TAB STEP -- do the app's tabs agree about the past?")
 xt("  run       %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
-xt_md <- readRDS(ccx_mode_file())
+# Provenance only -- the parameters come from the app's own resolution above.
+# Through ccx_load_mode(), not a direct read of the mode file: the direct form
+# is what test-mode-struct-lint.R ratchets against, rightly -- it is one line
+# away from running a HILDA mode as a column. (The lint is a LITERAL file-level
+# match, so a comment spelling out the rejected pattern trips it too. Do not.)
+xt_md <- ccx_load_mode()$md
 xt("  mode      %s  (struct %s, %d fitted names, promoted %s)",
    basename(ccx_mode_file()), xt_md$struct, length(xt_md$param_names),
    as.character(xt_md$promoted_on))
