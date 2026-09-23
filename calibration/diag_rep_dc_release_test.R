@@ -296,6 +296,12 @@ rt_run_job <- function(k) {
                 comparability = "logpost is comparable WITHIN an arm only; arms score different row sets",
                 commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE),
                                   error = function(e) NA_character_),
+                # ⚠ A commit alone is not provenance if the tree was dirty --
+                # the 09-23 T1 wave ran with uncommitted driver edits and its
+                # artifacts name a HEAD that does not fully describe them.
+                tree_dirty = tryCatch(length(system("git status --porcelain -- calibration R",
+                                                    intern = TRUE)) > 0,
+                                      error = function(e) NA),
                 built = as.character(Sys.time())))
   dir.create(RT_OUTDIR, showWarnings = FALSE, recursive = TRUE)
   saveRDS(out, file.path(RT_OUTDIR, sprintf("job%02d_%s.rds", j$id, j$label)))
