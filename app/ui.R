@@ -343,10 +343,7 @@ navbarPage(
             "Scenarios", br(),
             checkboxGroupInput("f_ssps", "Compare scenarios",
                                choices = APP_SSPS,
-                               selected = c("ssp126", "ssp245", "ssp585")),
-            radioButtons("f_yvar", "Show",
-                         c("CO₂ concentration" = "co2_ppm",
-                           "Temperature" = "gmst"))
+                               selected = c("ssp126", "ssp245", "ssp585"))
           ),
           tabPanel(
             "Build your own", br(),
@@ -377,7 +374,18 @@ navbarPage(
                      "takes the difference. That is the only honest way to ask",
                      "what one extra tonne does.")
           )
-        )
+        ),
+        # F4 (Marcus 2026-09-22). The radio used to live INSIDE the Scenarios
+        # pill, so the other two modes were stuck on whatever it happened to be
+        # set to -- build-your-own silently read it through `%||%`, and the
+        # pulse lab could not show temperature at all. It sits BELOW the pills
+        # now, which gives all three modes the same control from ONE input id.
+        # ⛔ Deliberately not three per-mode radios: duplicate ids are illegal
+        # in Shiny, and distinct ids would need syncing in both directions and
+        # would drift the moment one of the three grew a fourth choice.
+        hr(),
+        radioButtons("f_yvar", "Show", APP_FUTURE_YVARS,
+                     selected = APP_FUTURE_YVAR_DEFAULT)
       ),
       mainPanel(
         width = 9,

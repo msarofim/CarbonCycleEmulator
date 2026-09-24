@@ -367,7 +367,13 @@ function(input, output, session) {
   output$f_plot <- renderPlot({
     if (identical(input$f_mode, "Pulse lab")) {
       pr <- pulse_runs()
-      plot_pulse_decay(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc)
+      # F4: the same pair of runs, differenced two ways. Carbon is a SHARE of
+      # the pulse; temperature is degrees -- so they cannot share an axis, and
+      # the radio picks the panel rather than relabelling one.
+      if (identical(input$f_yvar, "gmst"))
+        plot_pulse_warming(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc)
+      else
+        plot_pulse_decay(pr$base$climate, pr$pulse$climate, pr$year, pr$gtc)
     } else if (identical(input$f_mode, "Build your own")) {
       r <- stylised_run()
       runs <- c(future_runs()[1], list(`Your scenario` = r))
@@ -385,12 +391,34 @@ function(input, output, session) {
       cb <- pr$base$climate; cp <- pr$pulse$climate
       ppm <- pr$gtc / ccx_const("GtC_PER_PPM")
       f <- function(y) (cp$co2_ppm[cp$year == y] - cb$co2_ppm[cb$year == y]) / ppm
+      dT <- function(y) cp$gmst[cp$year == y] - cb$gmst[cb$year == y]
       y1 <- pr$year + 100; y2 <- min(pr$year + 250, max(cb$year))
+      if (identical(input$f_yvar, "gmst")) {
+        # ⛔ WHICH ONE OUTLASTS THE OTHER IS MEASURED HERE, NOT ASSERTED.
+        # The textbook reading is that the warming holds up while the airborne
+        # fraction drains away -- but that is a claim about THIS model's
+        # climate module at THIS pulse size, and a sentence stating it
+        # unconditionally would go on stating it after a refit moved it. Both
+        # decays are normalised to their OWN value at y1, so the comparison is
+        # of shapes and the pulse size cancels out of it.
+        keep_T <- if (dT(y1) > 0) dT(y2) / dT(y1) else NA_real_
+        keep_C <- f(y2) / f(y1)
+        tail <- if (is.na(keep_T)) "" else sprintf(
+          paste(" Over that stretch the warming keeps %s of its century-later",
+                "value and the airborne carbon keeps %s, so the %s is the",
+                "longer-lived of the two."),
+          fmt_pct(keep_T), fmt_pct(keep_C),
+          if (keep_T > keep_C) "warming" else "carbon")
+        sprintf(paste0("Release %d GtC in %d and the world is %.2f °C warmer ",
+                       "a century later, and %.2f °C warmer after %d years.%s"),
+                pr$gtc, pr$year, dT(y1), dT(y2), y2 - pr$year, tail)
+      } else {
       sprintf(paste("Release %d GtC in %d and %s of it is still in the air a",
                     "century later; %s after %d years. Carbon dioxide is not a",
                     "pollutant that washes out — a large share of it is",
                     "effectively permanent on any human timescale."),
               pr$gtc, pr$year, fmt_pct(f(y1)), fmt_pct(f(y2)), y2 - pr$year)
+      }
     } else if (identical(input$f_mode, "Build your own")) {
       r <- stylised_run(); cl <- r$climate
       sprintf(paste("Your pathway reaches %.0f ppm and %+.1f °C by %d. Note how",

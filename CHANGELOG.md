@@ -2,6 +2,44 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (d) — ⭐ **F4 SHIPPED: the temperature/CO₂ radio now governs all three Futures modes.** ⭐⭐ **And building its gate found a REAL, PRE-EXISTING DEFECT: the pulse lab releases carbon BEFORE the year the slider says.** The artefact is acausal and confirmed; the numbers the tab quotes move by 0.05 percentage points, so they stand. **The fix is a methodological choice and is NOT taken here.**
+
+### F4, and why one input rather than three
+The radio lived **inside the Scenarios pill**, so the other two modes could not reach it: build-your-own silently read whatever Scenarios happened to be set to (`input$f_yvar %||% "co2_ppm"`), and the pulse lab could not show temperature at all. It now sits **below the pills**, which gives all three modes the same control from **one input id**. Duplicate ids are illegal in Shiny and distinct ids would need two-way syncing and would drift the moment one mode grew a fourth choice.
+
+- The pulse lab's two views are **differences of the same pair of runs**: `plot_pulse_decay()` draws the share of the pulse still airborne, `plot_pulse_warming()` (new) draws `pulse$gmst − base$gmst`. They cannot share an axis — one is a share, one is degrees — so the radio picks the panel rather than relabelling one.
+- The pulse takeaway now has a temperature branch. ⛔ **Which of the two is longer-lived is COMPUTED, not asserted.** The textbook reading is that the warming holds up while the airborne fraction drains away, but that is a claim about *this* climate module at *this* pulse size, and a sentence stating it unconditionally would keep stating it after a refit moved it. Both decays are normalised to their own value at +100 yr, so the pulse size cancels and only the shapes are compared.
+- Choices come from `APP_FUTURE_YVARS` in `global.R`; labels from `LAB_PULSE_AIRBORNE` / `LAB_PULSE_WARMING` in `plots.R` (standing rule: a label and the thing it labels share a constant).
+
+### ⭐⭐ The defect the gate found: a 2050 pulse changes CO₂ in 2049
+`tests/testthat/test-future-yvar.R` asked the question nobody had asked of this tab — **do the two runs agree BEFORE the pulse?** — and its first draft asserted zero, **as causality requires**. It failed.
+
+`calibration/diag_pulse_spline_ringing.R` measures it, built on the app's own parameters by **sourcing `app/global.R`** rather than rebuilding them (`ccx_diag_must_use_mode_base`), and anchored on the number the tab prints (**31.5 % airborne at 2150**, reproduced).
+
+| | |
+|---|---|
+| **Cause** | `ccx_annual_to_monthly()` interpolates annual emissions with a **NATURAL CUBIC SPLINE**, which is a **global** interpolant. The additive per-year correction fixes each year's **mean** — annual totals are exact to 2.7e-15 GtC/yr, so **the pulse size is not the bug** — but it does nothing about the **amplitude**. A one-year knot move rings through its neighbours with alternating sign. |
+| **Size, in emissions space** | within-year monthly swing of the difference: **68.2 GtC/yr in 2049**, *larger* than the **34.2** in the pulse year itself; decaying ~4× per year either side. |
+| **Size, in the answer** | **3.06 ppm of CO₂ and 0.003 °C appear in the 26 years before the release** (13 negative, 13 positive — ringing, not a leak) = **6.5 % of one pulse-ppm**. |
+| **Consequence** | Against a ring-free control (same carbon, same interpolator, spread over 10 years): **−0.05 pp** of airborne share at +100 yr, **−0.01 pp** at +250 yr, **−0.1 %** on the warming. ⇒ **the quoted numbers stand.** |
+| **Verdict** | A **causality violation** — the bound is ZERO and it comes from a law, not a tolerance — with a **presentational** consequence. |
+
+⚠ **The code documents this against itself.** `R/forcing.R:536` states the assumption the pulse breaks in as many words — that the interpolation "leaves every month of a year within a whisker of its annual mean" — and the `method = "constant"` branch exists *precisely* because a spline through the sharply peaked bomb-¹⁴C series undershot either side of the 1962 peak and clipping the negatives added 4.3 % to the total. **Same lesson, not yet applied to the pulse.**
+
+⚠ **The decay chart is clipped at the pulse year, so the reader never sees the bump.** The clip is doing the app a favour **by accident** — it was put there for a different reason, and `plot_pulse_warming()`'s docstring now says so rather than claiming the pre-pulse difference is a definitional zero. That claim was written in this session and **retracted in it**, by its own gate.
+
+### ⛔ The fix is NOT taken, and that is deliberate
+It has two candidate homes and they are not the same size:
+1. **The model's forcing path** (`ccx_annual_to_monthly`, or a `method` argument threaded through `ccx_build_forcing`) — every fitted value depends on this path. Objective **#13 is FROZEN** and the mode is tagged **`v1.0-hilda29l`**.
+2. **The app's pulse construction alone** — nothing else touches it, so it is free; but piecewise-constant emissions change the pulse lab's *background* within-year shape too, which is a change to what that tab is showing.
+
+Per the standing rule, a methodological choice of this kind is flagged and awaits direction.
+
+### Gate
+`test-future-yvar.R`, **26 assertions, mutation-tested both ways**. It pins (a) every radio value is a real `climate` column — ⚠ **measured**, and the failure is a red `shiny-output-error` box, *not* the silent empty panel first assumed; (b) the warming view draws GMST and is **provably not** the carbon series rescaled (correlation ≠ 1); (c) **the acausal ringing, ratcheted at 8 % of one pulse-ppm** — expressed as a share so it scales with the pulse rather than loosening if the default size changed — with `expect_gt(ring, 0)` so a *fix* also fails it and forces the ratchet down; (d) the takeaway's comparison clause is reachable. ⛔ **No magnitude is asserted in the gate**: it runs on `ccx_default_params()`, which is not the app's basis, so magnitudes live in the diagnostic, which is.
+
+Suite `app|review|driver|growth|future|mechanisms`: **267 / 0**.
+
 ## 2026-09-24 (c) — ⭐ **F2 SHIPPED AS NUMBERS ON THE SECOND PANEL, which is what Marcus asked for and what keeps the tab at three charts: "can the F2 residual numbers be a part of the 2nd panel?" They can.** Also: his Substack draft is gitignored so `git add -A` stops staging it.
 
 ### Why numbers on panel 2 rather than residual panels

@@ -26,6 +26,11 @@ LAB_D14C  <- "Δ¹⁴C (‰)"
 LAB_GTC   <- "Carbon (GtC)"
 LAB_TEMP  <- "Temperature above 1850–1900 (°C)"
 LAB_GROWTH <- "CO₂ growth (ppm per year)"
+# The pulse lab's two y axes (F4). Named because the radio that switches
+# between them is in ui.R and the sentence that describes them is in server.R:
+# three files, one fact, and the standing rule is that they share a constant.
+LAB_PULSE_AIRBORNE <- "Share of the pulse still in the air"
+LAB_PULSE_WARMING  <- "Extra warming caused by the pulse (°C)"
 # Named because this series has TWO possible observational sources and the panel
 # must say which it drew -- see plot_growth_rate().
 LAB_GROWTH_OBS  <- "Measured (Global Carbon Budget)"
@@ -696,7 +701,40 @@ plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
     geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
     geom_line(colour = PAL[["pulse"]], linewidth = 0.9) +
     scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
-    labs(x = LAB_YEAR, y = "Share of the pulse still in the air",
+    labs(x = LAB_YEAR, y = LAB_PULSE_AIRBORNE,
+         caption = app_provenance_caption()) +
+    theme_ccx()
+}
+
+#' The pulse lab's TEMPERATURE view (F4, Marcus 2026-09-22).
+#'
+#' The difference of the two runs' GMST, which is the only honest pulse
+#' temperature -- the same paired construction plot_pulse_decay() uses for the
+#' carbon, so the two views are differences of the SAME pair of runs and can be
+#' read against each other.
+#'
+#' ⚠ WHY THE SERIES IS CLIPPED AT THE PULSE YEAR. The honest answer, measured
+#' 2026-09-24: the pre-pulse difference is NOT zero, and the clip is hiding a
+#' real defect rather than a definitional one. `ccx_annual_to_monthly()`
+#' interpolates annual emissions with a NATURAL SPLINE, which is global, so a
+#' one-year pulse rings backwards through its neighbours -- up to 3.06 ppm of
+#' CO2 and 0.003 degC appear in the 26 years BEFORE the release, alternating in
+#' sign. That is acausal and it is an artefact of the interpolator.
+#' ⛔ The clip is kept because drawing it would invite the reader to interpret
+#' ringing as physics, but it is NOT a fix and must not be described as one.
+#' calibration/diag_pulse_spline_ringing.R measures both the artefact and its
+#' consequence: the answers the tab actually quotes move by 0.05 percentage
+#' points at +100 yr, so the numbers stand and the defect is presentational.
+#' The fix is Marcus's call -- it lives either in the model's forcing path or
+#' in the app's pulse construction, and only the second is free.
+plot_pulse_warming <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
+  d <- data.frame(year = base_cl$year,
+                  dT = pulse_cl$gmst - base_cl$gmst)
+  d <- d[d$year >= pulse_year, ]
+  ggplot(d, aes(year, dT)) +
+    geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
+    geom_line(colour = PAL[["pulse"]], linewidth = 0.9) +
+    labs(x = LAB_YEAR, y = LAB_PULSE_WARMING,
          caption = app_provenance_caption()) +
     theme_ccx()
 }

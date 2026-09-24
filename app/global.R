@@ -127,6 +127,17 @@ APP_LUC_SMOOTH_YR <- 11   # centred years; the land-sink series is noisy enough
 APP_PULSE_GtC_DEFAULT <- 100
 APP_PULSE_YEAR_DEFAULT <- 2050
 
+# F4 (Marcus 2026-09-22): "the temperature/CO2 radio button should be present
+# for the Build your own and Pulse lab too." ONE list of choices, named here,
+# because the radio is now read by three different plot branches and the
+# standing rule is that a label and the thing it labels come from the same
+# constant. The VALUES are the `climate` column names plot_future() indexes
+# with, which is why they are not prettier: `co2_ppm` and `gmst` have to match
+# ccx_run_coupled()'s data frame, and a typo here would draw an empty panel
+# rather than error (the failure mode test-future-yvar.R exists to reject).
+APP_FUTURE_YVARS <- c("CO₂" = "co2_ppm", "Temperature" = "gmst")
+APP_FUTURE_YVAR_DEFAULT <- "co2_ppm"
+
 # ---------------------------------------------------------------------
 # Which parameters is this app running on, and how well tested are they?
 # ---------------------------------------------------------------------
