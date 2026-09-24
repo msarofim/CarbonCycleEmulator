@@ -2,6 +2,45 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (l) — ⭐⭐ **FIXED: the pulse lab is now CAUSAL** (Marcus chose the app-only route). ⛔⛔ **And fixing the emissions interpolation was only HALF of it — there is a SECOND global spline in a pulse's causality chain, in the GMST feedback, and the first fix left it ringing.**
+
+### The fix, and why the default does not move
+`ccx_annual_to_monthly()` already had a `"constant"` method — exactly conserving, shape-preserving, and already used for bomb-¹⁴C for this very reason (a spline undershot either side of the 1962 peak). So the fix is an **opt-in**, not a new algorithm: `ccx_build_forcing(emis_method=)` and `ccx_run_coupled(interp_method=)`, both defaulting to `CCX_EMIS_METHOD_DEFAULT = "spline"`. The app's pulse lab sets `APP_PULSE_EMIS_METHOD` on **both arms** (or the pair would differ by the interpolation as well as by the pulse).
+⭐ **The `emissions-interp-constant` branch is now a DEFAULT change rather than a code change** — it is the same switch, so that branch's ledger is paid by flipping one constant when Marcus chooses.
+
+### ⛔⛔ The half that was nearly missed
+With the emissions fixed, the pre-pulse difference fell from a ringing to **3.48e-3 ppm** — which looks exactly like outer-loop convergence noise, and **the first draft of the gate tried to measure a noise floor and pass it.** It is not noise:
+
+| outer-loop `tol` | pre-pulse \|ΔCO₂\| |
+|---|---|
+| 1e-4 (shipped) | 3.481e-03 ppm |
+| 1e-5 | 3.481e-03 |
+| 1e-6 | 3.481e-03 |
+
+**It did not move when the tolerance was tightened 100×.** Convergence noise shrinks; an acausal path does not. The cause is `R/climate.R`'s feedback line — `F$gmst <- ccx_annual_to_monthly(yrs, gmst_path, yrs)` — the **same global spline**, so the post-pulse warming rings backwards into pre-pulse months, drives q10 respiration and SST solubility, and reappears as pre-pulse CO₂.
+
+With both fixed: **1.24e-07 ppm at the shipped tolerance, and EXACTLY 0.000 at tighter ones** — now the real signature of convergence noise.
+⚠ **The GMST path is NOT the objective's.** `ccx_run_coupled()` is the futures/pulse route; the objective runs 1750–2024 on observed IGCC GMST through `ccx_run_fast()` and never calls the climate module (09-24 g). **No stored logpost moves.**
+
+### Measured, both interpolations, pre-pulse (ssp245, 2050, 100 GtC)
+| | max \|Δ emissions\| | \|ΔCO₂\| uncoupled |
+|---|---|---|
+| spline | **52.6 GtC/yr** | **4.70 ppm** |
+| constant | **0.000** | **0.000** |
+
+### The gates, and what changed about them
+`test-future-yvar.R` (c) used to **ratchet the defect** at 0.08 of a pulse-ppm and say so, because a tolerance would have been a lie. It now asserts the real bound, at the level each layer is owed:
+- **(c)** the emissions handed to the model, and the CO₂ of the **uncoupled** run, are **bit-identical** before the pulse — plus a mutation guard that a pair which stopped responding would also be zero.
+- **(c2)** the **coupled** residual is asserted as a **LIMIT, not a size**: it must vanish as `tol` tightens. ⭐ **This is the test that caught the incomplete fix**, and asserting a small number instead would have passed the broken model.
+- **(c3)** the **default** path still rings, deliberately — so the unpaid half cannot be forgotten, and anyone who flips the default is told by a failing test that the ledger is due.
+⚠ The test now reads `APP_PULSE_EMIS_METHOD` out of `global.R` through the file's existing `.f4_const()` parse-tree helper, never retyped — a test exercising the default while the tab used something else would be the caption-sync bug class.
+
+**Mutation-tested both ways**: reverting the GMST half fails (c2) on all three assertions; reverting the emissions half fails (c) on both. Restored: **31/0**.
+
+Suite `climate|app|review|driver|growth|future|mechanisms|luc|forcing|stability`: **518 / 0** across 124 files (25 warnings, all the pre-existing 1900-start transient). ⛔ **This filter does not touch the four known reds — a green filter is not a green suite.**
+
+⚠ **The quoted pulse-tab numbers stood before this fix and still stand** (the artefact moved them ~0.05 pp); what changes is that the tab is now honest about what it is showing.
+
 ## 2026-09-24 (k) — **Figure: land uptake vs GCB, 5-yr smooth** (Marcus asked). `calibration/fig_land_sink_vs_gcb.R` → `calibration/output/figures/fig_land_sink_vs_gcb.png`.
 
 **Both conventions drawn, neither chosen silently** — "land uptake" is ambiguous and conflating the two is this project's own 32 % bug ([[ccx_app_luc_budget_convention]]). Panel A = **residual sink** (LUC outside; what GCB publishes and gate 7 scores), panel B = **net land flux** (LUC inside; the one that crosses zero). Raw annual underneath, **5-yr centred** mean bold. ⚠ 5 yr is **Marcus's request, not the app's `APP_LUC_SMOOTH_YR` = 11**; named in `FG_SMOOTH_YR`, and a gate checks the smoother drops exactly the `(n−1)/2` edge years the caption claims. Anchored on gate 7 = 3.09 before drawing, because **a figure is an assertion** and a wrong parameter build makes a wrong picture that looks fine.

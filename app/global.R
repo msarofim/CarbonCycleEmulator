@@ -135,6 +135,19 @@ APP_SSPS <- c(
 APP_LUC_SMOOTH_YR <- 11   # centred years; the land-sink series is noisy enough
                           # that a single year's sign is meaningless
 
+# ⛔ THE PULSE LAB RUNS ON CAUSAL INTERPOLATION, AND THE REST OF THE APP DOES NOT.
+# ccx_annual_to_monthly()'s default natural spline is a GLOBAL interpolant, so a
+# one-year pulse rings BACKWARDS: a 2050 pulse moved CO2 across the 26 years
+# before it ([[ccx_pulse_spline_ringing]]). The pulse lab is the one tab whose
+# whole claim is a DIFFERENCE between two runs, so an acausal pre-pulse
+# difference is not a rounding artefact there -- it is the tab being wrong about
+# what it is showing. "constant" is exactly conserving and shape-preserving.
+# ⚠ WHY NOT EVERYWHERE: the default is the frozen forcing path and every stored
+# logpost was produced under it (objective #13). Changing it globally is the
+# `emissions-interp-constant` branch's ledger, and Marcus chose the app-only fix
+# 2026-09-24. BOTH ARMS of the pair must use it or the runs differ by more than
+# the pulse.
+APP_PULSE_EMIS_METHOD <- "constant"
 APP_PULSE_GtC_DEFAULT <- 100
 APP_PULSE_YEAR_DEFAULT <- 2050
 

@@ -357,10 +357,15 @@ function(input, output, session) {
     pulse_em$fossil_GtC[pulse_em$year == input$p_year] <-
       pulse_em$fossil_GtC[pulse_em$year == input$p_year] + input$p_gtc
     list(
+      # ⚠ BOTH arms carry APP_PULSE_EMIS_METHOD, or the pair would differ by the
+      # interpolation as well as by the pulse -- which is the one thing this
+      # tab's difference is not allowed to contain.
       base  = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
-                              emissions = base_em),
+                              emissions = base_em,
+                              interp_method = APP_PULSE_EMIS_METHOD),
       pulse = app_run_coupled(APP_SPIN, input$p_bg, yrs, input$p_bg,
-                              emissions = pulse_em),
+                              emissions = pulse_em,
+                              interp_method = APP_PULSE_EMIS_METHOD),
       gtc = input$p_gtc, year = input$p_year)
   })
 

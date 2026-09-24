@@ -477,7 +477,9 @@ ccx_build_forcing <- function(scenario = "historical",
                               emissions = NULL,
                               luc_scale = 1,
                               sink_rate = CCX_ARTIFICIAL_SINK_RATE,
-                              sink_mode = CCX_ARTIFICIAL_SINK_MODE) {
+                              sink_mode = CCX_ARTIFICIAL_SINK_MODE,
+                              emis_method = CCX_EMIS_METHOD_DEFAULT) {
+  emis_method <- match.arg(emis_method, c("spline", "constant"))
 
   yrs <- seq(years[1], years[2])
   n   <- length(yrs) * 12
@@ -528,8 +530,22 @@ ccx_build_forcing <- function(scenario = "historical",
     stop("luc_scale must be a finite non-negative multiplier; got ", luc_scale)
   if (luc_scale != 1) e$luc_GtC <- e$luc_GtC * luc_scale
 
-  foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs)
-  luc  <- ccx_annual_to_monthly(e$year, e$luc_GtC,    yrs)
+  # ⛔⛔ THE SPLINE IS A GLOBAL INTERPOLANT, SO A ONE-YEAR SPIKE RINGS BACKWARDS.
+  # A 2050 pulse moved CO2 in 2049 and earlier -- 3.06 ppm over the 26 years
+  # BEFORE it ([[ccx_pulse_spline_ringing]], found 2026-09-24 by asking whether a
+  # paired experiment's arms agree BEFORE the perturbation; they did not).
+  # The additive correction below fixes each year's MEAN exactly and does NOT
+  # fix the AMPLITUDE, so the carbon is conserved while arriving at the wrong
+  # time. `method = "constant"` is exactly conserving AND shape-preserving --
+  # the same reason the bomb-14C series already uses it, where a spline
+  # undershot either side of the 1962 peak.
+  # ⚠ THE DEFAULT IS DELIBERATELY UNCHANGED. Flipping it here would re-baseline
+  # every stored logpost against a FROZEN objective (#13); that is the
+  # `emissions-interp-constant` branch's ledger to pay, and this parameter is
+  # the same switch, so that branch becomes a DEFAULT change rather than a code
+  # change. Callers that need causality -- the app's pulse lab -- opt in.
+  foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs, method = emis_method)
+  luc  <- ccx_annual_to_monthly(e$year, e$luc_GtC,    yrs, method = emis_method)
 
   # ---- WITHIN-YEAR SEASONALITY (2026-08-15, review item 5c) ----------
   # Until now both emission inputs reached the model with NO seasonal cycle:

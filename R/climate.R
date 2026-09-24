@@ -176,7 +176,9 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
                             bomb_total_kmol = eval(formals(ccx_build_forcing)$bomb_total_kmol),
                             luc_scale = eval(formals(ccx_build_forcing)$luc_scale),
                             tol = CLIM_TOL, max_iter = CLIM_MAX_ITER,
-                            substeps = "auto") {
+                            substeps = "auto",
+                            interp_method = CCX_EMIS_METHOD_DEFAULT) {
+  interp_method <- match.arg(interp_method, c("spline", "constant"))
   mod  <- ccx_climate_module()
   yrs  <- seq(years[1], years[2])
   erf_nc <- ccx_erf_nonco2(nonco2_scenario, yrs)
@@ -187,6 +189,7 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
   # reaches the caller.
   F <- withCallingHandlers(
     ccx_build_forcing(scenario, years, prod_c14 = spin$prod_c14,
+                      emis_method = interp_method,
                       emissions = emissions,
                       bomb_total_kmol = bomb_total_kmol,
                       luc_scale = luc_scale),
@@ -228,7 +231,19 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
 
     delta <- if (is.null(gmst_path)) Inf else max(abs(tnew - gmst_path))
     gmst_path <- tnew
-    F$gmst <- ccx_annual_to_monthly(yrs, gmst_path, yrs)
+    # ⛔⛔ THE FEEDBACK PATH RINGS TOO, AND FIXING ONLY THE EMISSIONS LEAVES IT.
+    # This is the SECOND global-spline interpolation in a pulse's causality
+    # chain: a post-pulse warming rings BACKWARDS into pre-pulse months here,
+    # drives q10 respiration and SST solubility, and reappears as a pre-pulse
+    # CO2 difference. Measured 2026-09-24: fixing the emissions alone left
+    # 3.48e-3 ppm before a 2050 pulse, and it did NOT shrink when the outer
+    # loop's tolerance was tightened 100x -- which is what proved it was a real
+    # acausal path and not convergence noise.
+    # ⚠ THIS IS NOT THE OBJECTIVE'S PATH. ccx_run_coupled() is the futures/pulse
+    # route; the objective runs 1750-2024 on observed IGCC GMST through
+    # ccx_run_fast() and never calls the climate module (CHANGELOG 09-24 g).
+    # So `interp_method` here moves app tabs only -- no stored logpost.
+    F$gmst <- ccx_annual_to_monthly(yrs, gmst_path, yrs, method = interp_method)
     # the observed-SST columns must FOLLOW the evolving gmst, or the coupled
     # future silently keeps build-time SST (see ccx_sst_anom_from_gmst)
     F <- ccx_sst_anom_from_gmst(F)

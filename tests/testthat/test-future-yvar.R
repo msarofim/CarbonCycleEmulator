@@ -70,6 +70,10 @@ local({
 .f4_global <- file.path(.root, "app", "global.R")
 YVARS   <- .f4_const("APP_FUTURE_YVARS", .f4_global)
 YDEFAULT <- .f4_const("APP_FUTURE_YVAR_DEFAULT", .f4_global)
+# The pulse lab's interpolation, read from the app's own constant by the same
+# route -- never retyped here, or the tab and its gate could drift apart.
+PULSE_METHOD <- .f4_const("APP_PULSE_EMIS_METHOD", .f4_global)
+stopifnot(is.character(PULSE_METHOD), length(PULSE_METHOD) == 1L)
 
 # ---- the pulse pair, built the way the app builds it ----------------
 .f4 <- local({
@@ -85,12 +89,19 @@ YDEFAULT <- .f4_const("APP_FUTURE_YVAR_DEFAULT", .f4_global)
   pulse_em <- base_em
   pulse_em$fossil_GtC[pulse_em$year == pyear] <-
     pulse_em$fossil_GtC[pulse_em$year == pyear] + gtc
-  list(
-    base  = suppressWarnings(
-      ccx_run_coupled(sp, "ssp245", yrs, emissions = base_em)$climate),
-    pulse = suppressWarnings(
-      ccx_run_coupled(sp, "ssp245", yrs, emissions = pulse_em)$climate),
-    year = pyear, gtc = gtc)
+  # ⚠ "the way the app builds it" INCLUDES ITS INTERPOLATION. The app's pulse
+  # lab opts into APP_PULSE_EMIS_METHOD (2026-09-24); a test that kept the
+  # DEFAULT here would be exercising a path the tab no longer uses, which is the
+  # caption-sync bug class -- the test would keep passing while the tab changed.
+  # Read from the app's own constant, never retyped.
+  run <- function(em, method) suppressWarnings(
+    ccx_run_coupled(sp, "ssp245", yrs, emissions = em, interp_method = method)$climate)
+  list(base_em = base_em, pulse_em = pulse_em,
+       base  = run(base_em,  PULSE_METHOD),
+       pulse = run(pulse_em, PULSE_METHOD),
+       base_default  = run(base_em,  CCX_EMIS_METHOD_DEFAULT),
+       pulse_default = run(pulse_em, CCX_EMIS_METHOD_DEFAULT),
+       year = pyear, gtc = gtc)
 })
 
 # ---- (a) every radio value is a real climate column -----------------
@@ -142,32 +153,77 @@ test_that("(b) a temperature view reading the CARBON column is REJECTED", {
   expect_false(isTRUE(all.equal(stats::cor(dw$y, dc$y), 1, tolerance = 1e-6)))
 })
 
-# ---- (c) the known pre-pulse artefact, ratcheted -------------------
-# ⛔ THE ONLY DEFENSIBLE BOUND HERE IS ZERO, and the model does not meet it.
-# Rather than write a tolerance that pretends otherwise, this pins the defect
-# at its measured size and says so. Expressed as a share of ONE PULSE-PPM so
-# the ratchet scales with the pulse rather than being an absolute ppm that
-# would silently loosen if the default pulse size changed
-# (~/.claude/CLAUDE.md, "scale a plausibility tolerance to the sampled spread").
-F4_PRE_PULSE_RING <- 0.08   # measured 0.065 on hilda29l, 2026-09-24
-
-test_that("(c) the acausal pre-pulse ringing has not grown", {
-  pre <- .f4$base$year < .f4$year
+# ---- (c) causality, asserted EXACTLY where exactness is owed --------
+# ⭐⭐ THE ONLY DEFENSIBLE BOUND IS ZERO, and as of 2026-09-24 the app MEETS it
+# where the fix can deliver it. This used to pin the defect at its measured size
+# (a ratchet) because a tolerance would have been a lie; the app now opts into
+# causal interpolation, so the ratchet is replaced by the real bound.
+# ⚠ THREE LEVELS, BECAUSE THEY ARE OWED DIFFERENT THINGS. The interpolation is
+# exact; the uncoupled run inherits that exactly; the COUPLED run additionally
+# carries the outer loop's convergence, which is not acausality and must not be
+# asserted away as if it were. Measured 2026-09-24: spline leaks 52.6 GtC/yr of
+# pre-pulse emissions and 4.70 ppm of pre-pulse CO2; constant leaks 0.000 of both.
+test_that("(c) the app's interpolation is EXACTLY causal: emissions and uncoupled CO2", {
+  sp  <- ccx_spinup(ccx_default_params())
+  mk  <- function(em) suppressWarnings(ccx_build_forcing(
+            "ssp245", c(1750, 2300), prod_c14 = sp$prod_c14,
+            emissions = em, emis_method = PULSE_METHOD))
+  Fb <- mk(.f4$base_em); Fp <- mk(.f4$pulse_em)
+  pre <- Fb$year < .f4$year
   expect_true(any(pre))
+  # 1. the emissions the model is HANDED are bit-identical before the pulse
+  expect_identical(max(abs((Fp$e_foss_NH + Fp$e_foss_SH)[pre] -
+                           (Fb$e_foss_NH + Fb$e_foss_SH)[pre])), 0)
+  # 2. and so is the CO2 of the run that has no outer loop to blur it
+  rb <- ccx_run_fast(sp, Fb); rp <- ccx_run_fast(sp, Fp)
+  k  <- floor(rb$out$t + 1e-9) < .f4$year
+  expect_identical(max(abs(((rp$out$co2_NH + rp$out$co2_SH) / 2 -
+                            (rb$out$co2_NH + rb$out$co2_SH) / 2)[k])), 0)
+  # MUTATION GUARD: a pair that stopped responding would also be zero before the
+  # pulse, so require a real signal after it.
+  expect_gt(max(abs(((rp$out$co2_NH + rp$out$co2_SH) / 2 -
+                     (rb$out$co2_NH + rb$out$co2_SH) / 2)[!k])), 1)
+})
+
+test_that("(c2) the COUPLED pair's pre-pulse residual VANISHES as the loop converges", {
+  # ⛔⛔ THIS IS THE TEST THAT CAUGHT THE INCOMPLETE FIX, and it is the reason it
+  # is written as a LIMIT rather than a tolerance. Fixing only the emissions
+  # interpolation left 3.48e-3 ppm before a 2050 pulse. That looked like
+  # convergence noise -- and the first attempt at this gate tried to measure a
+  # noise floor and pass it. It was NOT noise: it did not move when the outer
+  # loop's tolerance was tightened 100x, because a SECOND global spline (the
+  # GMST feedback in R/climate.R) was ringing backwards too.
+  # ⇒ The discriminating property is the LIMIT, not the size. Convergence noise
+  # shrinks with `tol`; an acausal path does not. Asserting a small number would
+  # have passed the broken model; asserting the limit does not.
+  sp  <- ccx_spinup(ccx_default_params()); yrs <- c(1750, 2300)
+  pre_resid <- function(tol) {
+    b <- suppressWarnings(ccx_run_coupled(sp, "ssp245", yrs, emissions = .f4$base_em,
+           interp_method = PULSE_METHOD, tol = tol))$climate
+    p <- suppressWarnings(ccx_run_coupled(sp, "ssp245", yrs, emissions = .f4$pulse_em,
+           interp_method = PULSE_METHOD, tol = tol))$climate
+    max(abs(p$co2_ppm[b$year < .f4$year] - b$co2_ppm[b$year < .f4$year]))
+  }
+  loose <- pre_resid(CLIM_TOL)
+  tight <- pre_resid(CLIM_TOL / 100)
+  expect_lt(loose, 1e-4)        # already negligible at the shipped tolerance
+  expect_identical(tight, 0)    # and EXACTLY zero once the loop is converged
+  expect_lte(tight, loose)      # monotone: tightening never makes it worse
+})
+
+# ⛔ AND THE DEFAULT PATH IS STILL ACAUSAL, DELIBERATELY. The forcing path is
+# frozen (objective #13) and flipping its default re-baselines every stored
+# logpost -- that is `emissions-interp-constant`'s ledger to pay, not this fix's.
+# This arm exists so the untaken half cannot be forgotten, and so that anyone who
+# DOES flip the default is told by a failing test that the ledger is now due.
+test_that("(c3) the DEFAULT interpolation still rings, and the app does not use it", {
+  pre <- .f4$base_default$year < .f4$year
   ppm <- .f4$gtc / ccx_const("GtC_PER_PPM")
-  ring <- max(abs(.f4$pulse$co2_ppm[pre] - .f4$base$co2_ppm[pre])) / ppm
-  # The defect is REAL -- this documents it rather than asserting it away.
-  expect_gt(ring, 0)
-  expect_lt(ring, F4_PRE_PULSE_RING)
-  # Its signature is a RINGING, not a leak: a leak would be one-signed.
-  d <- .f4$pulse$co2_ppm[pre] - .f4$base$co2_ppm[pre]
-  expect_true(any(d > 0) && any(d < 0))
-  # MUTATION: after the pulse the difference must be far LARGER than the
-  # artefact, or the ratchet above is measuring the signal rather than the
-  # noise and would pass on a model that had stopped responding at all.
-  post <- .f4$base$year > .f4$year
-  expect_gt(max(abs(.f4$pulse$co2_ppm[post] - .f4$base$co2_ppm[post])) / ppm,
-            10 * ring)
+  d <- .f4$pulse_default$co2_ppm[pre] - .f4$base_default$co2_ppm[pre]
+  expect_gt(max(abs(d)) / ppm, 0)          # the defect is real and unfixed there
+  expect_true(any(d > 0) && any(d < 0))    # a RINGING, not a one-signed leak
+  # The two methods must actually differ, or (c) passes for the wrong reason.
+  expect_false(identical(PULSE_METHOD, CCX_EMIS_METHOD_DEFAULT))
 })
 
 # ---- (d) the takeaway's comparison clause is reachable ---------------

@@ -905,3 +905,11 @@ ccx_check_constants <- function(quiet = FALSE) {
 # 2026-08-22 with the luc_scale double-scaling fix).
 CCX_BOMB_REF <- 102
 CCX_LUC_COLS <- c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH")
+
+# ⭐ HOW ANNUAL EMISSIONS ARE SPREAD ACROSS THE MONTHS OF THEIR YEAR.
+# "spline" is the incumbent and is what every stored logpost was produced
+# under, so it stays the default until the `emissions-interp-constant` branch
+# pays that ledger deliberately. "constant" is piecewise-constant within the
+# year: exactly conserving, shape-preserving, and CAUSAL -- a one-year pulse
+# cannot ring backwards into the years before it.
+CCX_EMIS_METHOD_DEFAULT <- "spline"
