@@ -2,6 +2,59 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (j) — ⭐⭐⭐ **THE GROWTH DEFICIT IS A ~1.6-se SIGNAL, AND WHAT THERE IS OF IT IS DECADAL, NOT THE KNOWN INTERANNUAL SHORTFALL.** ⛔ **The GATE V amplitude gap is quantitatively incapable of producing it — an order of magnitude too small, and the wrong sign.** ⛔⛔ **And the 1980s deficit of the same size is a DIFFERENT phenomenon, so it is not a precedent.**
+
+`calibration/diag_growth_deficit.R`. Three anchors, all reproduced before any arm was read: **gate 7 land 3.09**; **09-24 (i)'s window means −0.45 (2015–2023) / −0.91 (2020–2024)**, to 0.01, via a *second* construction of the model's growth (`dg_af_annual_model()` vs `dg_annual_sinks()` — two estimators of one quantity, gated to agree); and **GATE V** (model sd 0.548, obs 0.933, ratio 0.59, z −4.60, **FAIL** — reported, never chased, per Marcus 2026-09-04).
+
+### ⛔ FIRST, THE ERROR BAR — and it deflates the finding
+09-24 (i) called the deficit "persistent, median ≈ mean". **That was a statement about robustness to outliers, not about significance, and the significance question had not been asked.** Asked now, against the **deficit's own** year-to-year scatter (sd **0.864** GtC/yr, lag-1 ρ **−0.051**, so no effective-sample correction is owed):
+
+| window | deficit | sd of ONE year | **se of the mean** |
+|---|---|---|---|
+| 2015–2023 | −0.45 | 0.5 | **1.6** |
+| 2020–2024 | −0.91 | 1.1 | **2.4** |
+
+⇒ **2015–2023 is 1.6 se from zero.** ⛔ The scale is **measured on this record**, not a published σ typed from memory — GCB publishes one for the growth term but this repo has no citation for it, so it is not used ([[threshold_from_obs_or_law]]). **Everything below decomposes a weak signal, and decomposing it does not make it strong.**
+
+### The frequency split (GATE V's own `dg_v_anom()`, applied identically to both)
+| window | deficit | **DECADAL** | interannual |
+|---|---|---|---|
+| 1959–2024 | −0.05 | −0.04 | −0.01 |
+| **2015–2023** | −0.45 | **−0.48** | **+0.04** |
+| 2020–2024 | −0.91 | −0.71 | −0.20 |
+
+⇒ **the 2015–2023 deficit is entirely decadal; its interannual part is +0.04, i.e. nothing.**
+
+### ⭐⭐ And the GATE V shortfall CANNOT produce it
+Measured gain of the model's anomaly on the observed one: **β = 0.261 (95 % CI 0.131…0.391)**. A pure gain shortfall can manufacture a window bias of only `(β−1) × (that window's mean observed anomaly)`. The mean observed anomaly over 2015–2023 is **−0.12**, so the most it could produce is **+0.09** — **an order of magnitude too small, and POSITIVE, i.e. the wrong sign.** Actual interannual part: **+0.04**. ⇒ **excluded by arithmetic, not by a p-value.**
+
+⭐ **A genuinely new fact fell out: β = 0.261 against an sd ratio of 0.59.** GATE V's statistic is an **sd**, and an sd cannot tell "too small" from "out of phase". The model's anomaly correlates with the observed at **r = +0.44**, so less than half its amplitude is aligned. **A model could pass GATE V with sd ratio 1.0 and random phase** ([[two_statistics_can_be_blind]]). Not proposed as a new gate — recorded as what the existing one does not see.
+
+### ⛔ The decadal term is NOT all airborne fraction — `luc_scale` is inside it
+The model and GCB do not burn the same emissions (`luc_scale` = 0.8214), so `S = AF(y)·E` mixes two things. Separated:
+
+| window | DECADAL | **AF difference** | emissions input | AF model | AF obs |
+|---|---|---|---|---|---|
+| 1959–2024 | −0.04 | **+0.09** | −0.13 | 0.441 | 0.424 |
+| 2015–2023 | −0.48 | **−0.37** | −0.11 | 0.446 | **0.479** |
+| 2020–2024 | −0.71 | −0.61 | −0.10 | 0.446 | 0.499 |
+
+⭐⭐ **The AF difference FLIPS SIGN between the full record (+0.09, model absorbs less) and the recent window (−0.37, model absorbs more).** That oscillation **is** why 09-24 (i) found a level drift bounded by ±1.6 ppm with no trend: an oscillating AF difference cannot accumulate. **The two findings are one consistent picture, not two.**
+
+### ⛔⛔ The 1980s are NOT a precedent
+The 1980s deficit is **−0.44**, all but identical to 2015–2023's −0.45 — which invites reading the recent window as unremarkable. **Decomposed, they are different in kind:** the 1980s is **−0.12 decadal / −0.32 interannual**; 2015–2023 is **−0.48 decadal / +0.04 interannual**. ⚠ **Do not cite the 1980s as showing "this has happened before".** Same magnitude, different frequency band.
+
+### ⚠ 2020–2024 CANNOT BE ATTRIBUTED, and is not
+Walking the smoothing choice `DG_V_DF` over 2–5 (the gate's own robustness convention): 2015–2023 is stable (decadal **−0.38…−0.50**, interannual −0.07…+0.05) — **the verdict does not turn on the smoother.** 2020–2024 is **not**: decadal −0.46…−0.88, interannual −0.45…−0.03. Five years at the **end** of the record, where a spline is least constrained, and **2024 alone carries half of it** (−2.54; without it the window is −0.50). ⇒ **flagged, not attributed** — the same ruling 09-24 (h) gave it, now with the reason measured.
+
+### Gates, all four MUTATION-TESTED
+Anchor 1 (move gate 7's 3.09 → 3.50: **fails**); **anchor 2** (change the recorded −0.45 → −0.30: **fails** — this one is load-bearing, since it is what forces two independent constructions of the model's growth to agree); the frequency-split reconstruction (reverse the anomaly difference: **fails**); the AF/emissions reconstruction (drop the emissions term: **fails**).
+
+### ⇒ Verdict
+⛔ **Nothing here justifies a refit.** The signal is ~1.6 se; what there is of it is decadal and **oscillating in sign**, so it is not a level defect; and the one live mechanism — the GATE V interannual shortfall — is **excluded by arithmetic**.
+⚠ **Tried and abandoned:** the interannual-amplitude reading of the deficit, which was this session's own leading hypothesis on entry. It predicted the non-accumulation for free, which is why it was attractive; it fails on magnitude *and* sign. The non-accumulation is instead explained by the AF difference changing sign.
+⚠ No new gate is proposed. GATE V's phase blindness is **recorded, not acted on** — a gate is a DESIGN decision and this is not the session to take one.
+
 ## 2026-09-24 (i) — ⭐⭐⭐ **THE LAND-SINK "BIAS" IS NOT A MODEL DEFECT: IT IS GCB's OWN UNCLOSED IMBALANCE, MINUS the fitted `luc_scale`.** An exact identity closes to **3×10⁻¹⁴** and leaves **nothing unexplained** over the full record. ⛔ **And the handoff's premise was backwards — GCB's land sink is NOT the residual; the IMBALANCE is.** What survives is a *different*, smaller question about the last decade.
 
 `calibration/diag_land_sink_bias_budget.R`. ⚠ **Anchored on gate 7 before any arm was read**: model land **3.09**, ocean **3.13** GtC/yr over 2015–2023 ([[ccx_diag_must_use_mode_base]]). Mode `hilda29l`, logpost −1425.36, periodic spinup, `luc_scale` **0.8214**.
