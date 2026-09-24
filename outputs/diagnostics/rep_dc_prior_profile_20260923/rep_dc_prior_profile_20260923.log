@@ -1,0 +1,61 @@
+== rep_dc_prior_profile (T4p) == 2026-09-23 20:15:57 ==
+PROBE ONLY: no objective change, no mode file written, no model run.
+
+GATE PROV :  PASS
+            tree_dirty stamp: ABSENT | commit(s): 422e473
+            shipped prior: N(0, LIK_CO2_REP_ERR = 1.000), tr = 'id'
+
+CHECK     : REST identity closes to 0.00e+00 (an IDENTITY -- carries no evidence)
+            T1 convergence floor at the canonical rung: 2.03e-05 log-units (n = 3)
+
+GATE SHAPE: loglik AND REST must be strictly INCREASING and CONCAVE
+            loglik slope : 44.07 37.59 31.28 24.75 20.60 14.40 9.39 4.41
+            loglik curv  : -13.08 -12.61 -18.03 -8.30 -12.41 -10.02 -9.81
+            REST   slope : 50.99 43.98 37.06 31.51 25.78 19.41 13.20 6.82
+            REST   curv  : -14.13 -13.84 -15.35 -11.44 -12.74 -12.42 -12.56
+             PASS
+            curvature sd from this ladder 0.319 ppm vs (u)'s independent 0.300 -> 6 % apart
+
+BAR (not a gate): leave-one-out residuals on REST(r)
+            rung   0.776  resid   +0.2995
+            rung   1.000  resid   +0.1069
+            rung   1.500  resid   +0.3273
+            rung   2.000  resid   +0.4489
+            rung   2.500  resid   +0.3674
+            => interpolation bar on a reconstructed logpost: 0.449 log-units
+
+GATE DOMIN: T1's FULL-refit profile vs the 09-22 (u) 8-free refit, same pinned rep_dC
+            mu  0.00 sg 1.00  r  3.516  u_8free   -1391.805  T1_full   -1391.803  gap  +0.002  PASS
+            mu  0.00 sg 0.50  r  2.945  u_8free   -1394.456  T1_full   -1394.471  gap  -0.015  PASS (within the frozen interpolation tol)
+            mu  0.00 sg 0.20  r  1.390  u_8free   -1420.485  T1_full   -1418.799  gap  +1.686  PASS
+            mu  0.78 sg 0.50  r  3.115  u_8free   -1393.280  T1_full   -1393.397  gap  -0.117  PASS (within the frozen interpolation tol)
+            mu  0.78 sg 0.20  r  1.865  u_8free   -1409.422  T1_full   -1408.477  gap  +0.945  PASS
+             PASS
+
+== T4p: the fitted model under each CANDIDATE rep_dC prior ==
+   (dloglik is against the canonical's -1391.8032; the LIKELIHOOD is prior-free
+    and therefore the only quantity comparable ACROSS rows. A logpost is not.)
+
+    mu  sigma     rep_dC      +/-    dloglik    irf100  land1000   gateD_z  gateGL_z   af_all note
+ 0.000   1.00      3.516    0.000      +0.00    0.2833     33.53    -6.602   -10.026   0.4417 ⛔ AT A LADDER END -- NOT A NUMBER
+ 0.776   1.00      3.516    0.000      +0.00    0.2833     33.53    -6.602   -10.026   0.4417 ⛔ AT A LADDER END -- NOT A NUMBER
+-0.215   1.00      3.516    0.014      +0.00    0.2833     33.53    -6.602   -10.026   0.4417 ⛔ AT A LADDER END -- NOT A NUMBER
+ 0.000   0.50      2.883    0.124      -3.15    0.2864     33.40    -6.477    -9.582   0.4420 
+ 0.776   0.50      3.041    0.072      -2.01    0.2856     33.45    -6.510    -9.688   0.4420 
+-0.215   0.50      2.832    0.170      -3.58    0.2866     33.38    -6.467    -9.548   0.4421 
+ 0.000   0.20      1.258    0.008     -30.14    0.2940     32.48    -6.193    -8.770   0.4423 
+ 0.776   0.20      1.791    0.017     -18.16    0.2917     32.79    -6.266    -8.977   0.4422 
+-0.215   0.20      1.109    0.071     -33.90    0.2945     32.41    -6.172    -8.737   0.4424 
+
+== CHECKS (identities, never evidence of flatness) ==
+   mu  0.000 sigma 1.00 : co2_pi  276.8800  part1000_close  1.00000
+   mu  0.776 sigma 1.00 : co2_pi  276.8800  part1000_close  1.00000
+   mu -0.215 sigma 1.00 : co2_pi  276.8800  part1000_close  1.00000
+   mu  0.000 sigma 0.50 : co2_pi  276.8800  part1000_close  1.00000
+   mu  0.776 sigma 0.50 : co2_pi  276.8800  part1000_close  1.00000
+   mu -0.215 sigma 0.50 : co2_pi  276.8800  part1000_close  1.00000
+   mu  0.000 sigma 0.20 : co2_pi  276.8800  part1000_close  1.00000
+   mu  0.776 sigma 0.20 : co2_pi  276.8800  part1000_close  1.00000
+   mu -0.215 sigma 0.20 : co2_pi  276.8800  part1000_close  1.00000
+
+saved: outputs/diagnostics/rep_dc_prior_profile_20260923/rep_dc_prior_profile_20260923.rds
