@@ -97,6 +97,27 @@ copy states the current fact and carries **no fix history**.
 - **W4's ratchet entry is still flagged and unratified** — edited while correctly failing (C3
   superseded it). Marcus has not objected and has not ratified. Unchanged from 09-24 (a).
 
+## 5b. ⚠ THE FULL SUITE IS 4 RED AT `f04a585` — AND ALL FOUR ARE PRE-SESSION
+**Verified, not assumed**: rerun in a git WORKTREE at `1d52507` (the pre-session HEAD), where
+they reproduce with **identical line numbers and identical numbers**.
+
+| test | state |
+|---|---|
+| `test-mode-file.R:323` | dAIC canonical−control **+4.2 > 0** — explicitly **"NAMED RED by ruling"**, the `hilda32f` parent's recorded lead. Not a regression. |
+| `test-overlay-idiom-lint.R:102` and `:122` | **`diag_rep_dc_product_ladder.R`** carries the bare-`intersect()` overlay idiom; count **62 against baseline 61**. Fix = convert it to `ccx_overlay_par(p, pm)` and decrement `OI_BASELINE_N`. |
+| `test-seas-lag-split.R:205` | a migrated ancestor encodes **10 parameters outside their transform domain** (`h_ml`, `kz_deep_frac`, `w_eq`, …). |
+
+⛔ **DO NOT READ A GREEN `app|review` AS A GREEN SUITE.** That filter — 166/0 including the new
+driver gate — touches none of the four. The 09-24 (a) handoff's "117 / 0" was the FILTER, and
+this is the first full-suite run since.
+⚠ **A worktree needs `data-raw/downloads` SYMLINKED in**; it is gitignored and `setup.R` refuses
+to load without it.
+⚠ ⭐ **My own new diagnostic is NOT flagged by the overlay lint, and that is luck worth knowing**:
+the lint matches only lines containing `CCX_PARAM_NAMES`, and the app-idiom version I settled on
+uses `intersect(names(P0), names(pm))`. An earlier draft of mine DID use `CCX_PARAM_NAMES` and
+would have tripped it. **The lint has a blind spot for the `names(pm)` spelling of the same
+idiom** — worth widening when someone next touches it.
+
 ## 6. Memory written this session
 `ccx_enso_double_count_measured` (new — the F3 answer), `ccx_diag_must_use_mode_base` (new — the
 process trap, see below), `ccx_shiny_app` (F1 section appended), `INDEX_ccx_var` (F3),
