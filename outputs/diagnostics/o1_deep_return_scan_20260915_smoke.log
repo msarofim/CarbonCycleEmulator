@@ -1,0 +1,80 @@
+== O1 deep-return probe at hilda30c (prereg 2026-09-15d) -- commit 1287b2e ==
+export 9.08 GtC/yr (martin); kz x 1/0.5; THC k 1/6 x W 20 Sv; STC k 2 x W 20 Sv; arm C = beta_max,fert_k,q10,kz_deep_frac,h_ml,k_w,bomb_total,sigma_d14c
+
+HARNESS GATE 1: dg streams at the canonical vs stored: sum -1392.0158 vs -1392.0158 -> PASS
+HARNESS GATE 2: martin, no limb: dlik -894.8 vs the E probe's D-alone -894.8 -> PASS
+HARNESS GATE 3: k inert at W = 0 (THC k1 vs k10, STC k2): 0.00e+00 / 0.00e+00 -> PASS
+
+== STAGE 1: 8 points ==
+CONTROL k0  W0  f1.00      | dlik     +0.0 | exc75/95  60.7/ 81.4 (z +1.5/+3.9) | DIC grad 302.8 (z +2.4) | PI L2/L6/bot-ML    +5/ +181/ +254 | bomb   +0.0 co2    +0.0 d14prof   +0.0 d13   +0.0 | sink 2.97 | ss 4 
+CONTROL k0  W0  f0.50      | dlik  -1105.0 | exc75/95  58.4/ 77.9 (z +1.2/+3.5) | DIC grad 302.4 (z +2.4) | PI L2/L6/bot-ML    -2/ +191/ +257 | bomb -191.7 co2  -772.1 d14prof  -27.1 d13  -88.0 | sink 2.67 | ss 4 
+THC k1  W20 f1.00          | dlik  -1413.4 | exc75/95  61.1/ 82.1 (z +1.6/+4.0) | DIC grad 249.4 (z +0.6) | PI L2/L6/bot-ML   -64/ +109/ +202 | bomb   -3.4 co2  -540.9 d14prof -260.9 d13   -6.0 | sink 3.15 | ss 4 
+THC k6  W20 f1.00          | dlik  -1695.3 | exc75/95  61.4/ 82.8 (z +1.6/+4.1) | DIC grad 246.5 (z +0.5) | PI L2/L6/bot-ML   -68/  +94/ +198 | bomb  -18.1 co2  -801.8 d14prof -271.2 d13   -1.2 | sink 3.22 | ss 4 
+THC k1  W20 f0.50          | dlik  -3463.9 | exc75/95  59.0/ 79.0 (z +1.3/+3.6) | DIC grad 264.6 (z +1.1) | PI L2/L6/bot-ML   -46/ +189/ +218 | bomb -141.2 co2  -256.2 d14prof -277.8 d13  -82.9 | sink 2.86 | ss 4 
+THC k6  W20 f0.50          | dlik  -3320.6 | exc75/95  59.4/ 80.0 (z +1.4/+3.8) | DIC grad 258.8 (z +0.9) | PI L2/L6/bot-ML   -54/ +165/ +212 | bomb  -77.9 co2  -201.8 d14prof -293.9 d13  -46.3 | sink 2.96 | ss 4 
+STC k2  W20 f1.00          | dlik   -896.8 | exc75/95  60.5/ 81.0 (z +1.5/+3.9) | DIC grad 340.6 (z +3.7) | PI L2/L6/bot-ML   -68/  +71/ +298 | bomb   -4.0 co2  -276.6 d14prof   +0.5 d13  -10.9 | sink 2.97 | ss 4 
+STC k2  W20 f0.50          | dlik  -4025.4 | exc75/95  58.4/ 77.7 (z +1.2/+3.5) | DIC grad 370.4 (z +4.8) | PI L2/L6/bot-ML   -54/ +160/ +330 | bomb -226.7 co2  -940.8 d14prof  -23.4 d13 -109.5 | sink 2.66 | ss 4 
+stage 1 done in 2 s
+
+== P1 (not inert where kz falls): |dlik(W=20) - dlik(W=0)| at f <= 0.5 ==
+  THC k1  f0.50: W0  -4059.1  W20  -3463.9  |diff|  595.1 -> MOVES
+  THC k6  f0.50: W0  -4059.1  W20  -3320.6  |diff|  738.5 -> MOVES
+  STC k2  f0.50: W0  -4059.1  W20  -4025.4  |diff|   33.7 -> MOVES
+
+== P2 (return depth, THC at W 20): the CO2 rows by k ==
+  f1.00: k1 -541  k6 -802
+  f0.50: k1 -256  k6 -202
+
+== P3: THC k1 W20 f1 (T-A0's geometry with HS water): dlik -1413.4, d14c_profile rows -260.9 vs T-A0's -135 / -104 -> FAIL (HS water does not help at this geometry) ==
+
+== STAGE 2: arm C re-optimisation ==
+SEEDING w_eq for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the o1_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+HARNESS GATE 4: rebuilt logpost -1426.2428 (shift -3.5874) vs stored -1426.2428 -> PASS
+selected for arm C (best raw per arm x k; the control at every f):
+      arm k  W   f   dlik_raw
+1     THC 1 20 1.0 -1413.4410
+2     THC 6 20 1.0 -1695.3426
+3     STC 2 20 1.0  -896.7921
+4 CONTROL 0  0 1.0     0.0000
+5 CONTROL 0  0 0.5 -1105.0494
+armC THC     k1  W20 f1.00: raw  -1413.4 -> armC   -934.3 (53 evals; kz_deep_frac 0.0201 h_ml 64.2 k_w 1697 bomb_total 120.2 sigma_d14c 5.48) | dlik   -934.3 | exc75/95  63.5/ 84.7 (z +1.9/+4.4) | DIC grad 246.9 (z +0.5) | PI L2/L6/bot-ML   -64/ +105/ +201 | bomb   -2.8 co2  -349.3 d14prof -251.5 d13 -103.6 | sink 3.26 | ss 4  [23 s]
+        largest rows: ocean_grad_alk -224.2, co2_seasonal_SPO -166.4, d14c_profile_ab -116.7, d14c_profile_level -112.2, co2_level_SPO -76.4
+armC THC     k6  W20 f1.00: raw  -1695.3 -> armC  -1124.2 (53 evals; kz_deep_frac 0.0197 h_ml 64.4 k_w 1687 bomb_total 121.0 sigma_d14c 5.49) | dlik  -1124.2 | exc75/95  64.2/ 86.1 (z +2.0/+4.6) | DIC grad 243.5 (z +0.4) | PI L2/L6/bot-ML   -68/  +91/ +198 | bomb  -15.6 co2  -468.5 d14prof -260.9 d13 -139.4 | sink 3.37 | ss 4  [26 s]
+        largest rows: ocean_grad_alk -232.3, co2_seasonal_SPO -170.6, co2_level_SPO -125.9, d14c_profile_level -125.8, d14c_profile_ab -112.4
+armC STC     k2  W20 f1.00: raw   -896.8 -> armC   -447.1 (53 evals; kz_deep_frac 0.0241 h_ml 60.1 k_w 1736 bomb_total 118.4 sigma_d14c 5.46) | dlik   -447.1 | exc75/95  61.9/ 81.8 (z +1.7/+4.0) | DIC grad 328.0 (z +3.2) | PI L2/L6/bot-ML   -68/  +67/ +285 | bomb  -21.2 co2  -275.2 d14prof   -4.4 d13   -3.7 | sink 2.98 | ss 4  [23 s]
+        largest rows: co2_seasonal_SPO -260.5, ocean_grad_alk -138.2, d14c_SH -26.3, co2_seasonal_MLO -11.1, d14c_profile_ab -5.4
+armC CONTROL k0  W0  f1.00: raw     +0.0 -> armC     +0.0 (79 evals; kz_deep_frac 0.0117 h_ml 65.2 k_w 1637 bomb_total 118.4 sigma_d14c 5.47) | dlik     +0.0 | exc75/95  60.7/ 81.4 (z +1.5/+3.9) | DIC grad 302.8 (z +2.4) | PI L2/L6/bot-ML    +5/ +181/ +254 | bomb   -0.0 co2    +0.0 d14prof   +0.0 d13   -0.0 | sink 2.97 | ss 4  [23 s]
+        largest rows: d13c_seasonal_MLO -0.0, d14c_SH -0.0, d13c_level_SPO -0.0, co2_level_MLO -0.0, d13c_seasonal_SPO -0.0
+armC CONTROL k0  W0  f0.50: raw  -1105.0 -> armC   -341.7 (53 evals; kz_deep_frac 0.0118 h_ml 65.3 k_w 1701 bomb_total 114.6 sigma_d14c 11.26) | dlik   -341.7 | exc75/95  57.2/ 75.4 (z +1.1/+3.2) | DIC grad 303.5 (z +2.4) | PI L2/L6/bot-ML    -2/ +191/ +258 | bomb  -42.8 co2  -240.7 d14prof  -18.7 d13   -7.3 | sink 2.64 | ss 4  [22 s]
+        largest rows: co2_level_SPO -100.8, co2_level_MLO -74.0, co2_seasonal_SPO -34.4, co2_seasonal_MLO -28.1, d14c_SH -26.6
+
+== STAGE 3: tau_q x 0.5/2 at the best THC point (k1 W20 f1.00), raw path ==
+THC best, tau_q x0.5       | dlik  -1827.0 | exc75/95  61.3/ 82.6 (z +1.6/+4.1) | DIC grad 216.8 (z -0.6) | PI L2/L6/bot-ML   -64/  +99/ +167 | bomb   -9.0 co2  -844.3 d14prof -366.2 d13   -3.1 | sink 3.24 | ss 4 
+THC best, tau_q x2.0       | dlik  -1706.4 | exc75/95  61.0/ 81.9 (z +1.6/+4.0) | DIC grad 271.4 (z +1.3) | PI L2/L6/bot-ML   -65/ +116/ +225 | bomb   -1.9 co2  -418.8 d14prof -674.8 d13   -7.6 | sink 3.10 | ss 4 
+
+== THE DECISION RULE (a) |z exc1995| <= 1; (b) |z DIC grad| <= 1; (c) armC dlik >= CONTROL armC dlik at the same f; (d) PI layer 2 not inverted (L2 - ML >= 0) ==
+  arm k  W f  armC  control z_exc95 z_dic L2mML     a     b     c     d  PASS
+1 THC 1 20 1  -934 3.78e-06    4.38 0.477 -64.2 FALSE  TRUE FALSE FALSE FALSE
+2 THC 6 20 1 -1124 3.78e-06    4.57 0.360 -67.5 FALSE  TRUE FALSE FALSE FALSE
+3 STC 2 20 1  -447 3.78e-06    4.00 3.232 -67.9 FALSE FALSE FALSE FALSE FALSE
+
+VERDICT: NO point passes (a)-(d): O1 is REFUTED AS BUILT under this probe; O2 (document) is the honest end state -- reported, not patched.
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/o1_deep_return_scan_20260915_smoke.{log,rds}

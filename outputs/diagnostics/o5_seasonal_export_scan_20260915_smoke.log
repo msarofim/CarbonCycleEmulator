@@ -1,0 +1,55 @@
+== O5 seasonal-export probe at hilda30c (prereg 2026-09-15f) -- commit 6e68ff4 ==
+export 9.08 GtC/yr (martin); amp 0/1 x lag 0 mo; control (solved) amp 1; arm C = beta_max,fert_k,q10,kz_deep_frac,h_ml,k_w,bomb_total,sigma_d14c
+
+obs SPO first harmonic: amp 0.585 ppm, phase 5.99 mo (a -0.585 +- 0.122, b 0.004 +- 0.125, 49 yr); MLO amp 3.377 ppm
+HARNESS GATE 1: dg streams at the canonical vs stored: sum -1392.0158 vs -1392.0158 -> PASS
+canonical (solved)       | dlik     +0.0 | SPO    +0.0 MLO   +0.0 | SPO harm 0.569 ppm @ +5.96 mo (MLO 3.441) | co2lev    +0.0 bomb   +0.0 d14prof  +0.0 d13  +0.0 | L2/L6-ML   +5/+181 | exc95  81.4 (z +3.9) | sink 2.97 
+martin 9.08, amp 0       | dlik   -894.8 | SPO  -252.0 MLO  -17.7 | SPO harm 0.248 ppm @ -4.99 mo (MLO 3.150) | co2lev    -1.3 bomb   -4.4 d14prof  +0.5 d13 -11.2 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+HARNESS GATE 2: martin amp 0 dlik -894.8 vs A2's -894.8 -> PASS
+GATE 0: SPO amplitude obs 0.585 / canonical 0.569 / martin-9.08 0.248 ppm; phase obs +5.99 / canonical +5.96 / martin -4.99 mo; the martin deficit is 0.321 ppm (55 % of obs)
+
+== STAGE 1: 3 points ==
+martin amp 0.00 lag +0   | dlik   -894.8 | SPO  -252.0 MLO  -17.7 | SPO harm 0.248 ppm @ -4.99 mo (MLO 3.150) | co2lev    -1.3 bomb   -4.4 d14prof  +0.5 d13 -11.2 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+martin amp 1.00 lag +0   | dlik   -741.8 | SPO  -118.6 MLO   -0.7 | SPO harm 0.317 ppm @ -5.95 mo (MLO 3.253) | co2lev    -1.0 bomb   -4.2 d14prof  +0.5 d13 -10.9 | L2/L6-ML  -67/ +72 | exc95  81.0 (z +3.9) | sink 2.96 
+solved amp 1.00 lag +0   | dlik   -899.3 | SPO  -764.1 MLO -136.8 | SPO harm 1.175 ppm @ +5.17 mo (MLO 3.918) | co2lev    -1.5 bomb   -0.3 d14prof  -0.0 d13  -1.3 | L2/L6-ML   +6/+181 | exc95  81.4 (z +3.9) | sink 2.96 
+stage 1 done in 1 s
+
+== the SPO row across the grid (martin), dlik vs the canonical; the amp-0 row is A2 ==
+ amp lag   dlik    spo      mlo spo_amp spo_phase    co2     L2
+   0   0 -894.8 -252.0 -17.6601  0.2483    -4.988 -1.309 -67.38
+   1   0 -741.8 -118.6  -0.6698  0.3170    -5.953 -1.046 -67.14
+
+best total: amp 1.00 lag +0 (dlik -741.8, SPO -118.6); best SPO row: amp 1.00 lag +0 (SPO -118.6, dlik -741.8)
+
+== STAGE 2: arm C re-optimisation (best total point; martin amp 0 as its baseline) ==
+SEEDING w_eq for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 27.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_eq for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 1.
+     The ancestor held no opinion about this coordinate.
+SEEDING pump_export for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 9.08.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_vent for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 284.
+     The ancestor held no opinion about this coordinate.
+SEEDING gamma_vent for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_thc for the o5_scan: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 20.
+     The ancestor held no opinion about this coordinate.
+HARNESS GATE 4: rebuilt logpost -1426.2428 (shift -3.5874) vs stored -1426.2428 -> PASS
+armC amp 0.00 lag +0: raw   -894.8 -> armC   -441.6 (SPO -252.0 -> -259.9; 53 evals; kz_deep_frac 0.0245 h_ml 59.9 k_w 1746 bomb_total 118.8 sigma_d14c 5.45) | dlik   -441.6 | SPO  -259.9 MLO  -11.0 | SPO harm 0.246 ppm @ -4.94 mo (MLO 3.164) | co2lev    -1.1 bomb  -20.7 d14prof  -4.5 d13  -4.1 | L2/L6-ML  -67/ +67 | exc95  82.1 (z +4.0) | sink 2.98  [22 s]
+        largest rows: co2_seasonal_SPO -259.9, ocean_grad_alk -132.9, d14c_SH -25.7, co2_seasonal_MLO -11.0, d13c_level_SPO -5.6
+armC amp 1.00 lag +0: raw   -741.8 -> armC   -348.0 (SPO -118.6 -> -124.4; 54 evals; kz_deep_frac 0.0208 h_ml 62.9 k_w 1737 bomb_total 119.8 sigma_d14c 5.47) | dlik   -348.0 | SPO  -124.4 MLO   -2.6 | SPO harm 0.310 ppm @ -5.96 mo (MLO 3.235) | co2lev    -0.8 bomb   -9.9 d14prof  -2.7 d13  -0.4 | L2/L6-ML  -67/ +69 | exc95  82.8 (z +4.1) | sink 2.98  [22 s]
+        largest rows: ocean_grad_alk -200.9, co2_seasonal_SPO -124.4, d14c_SH -12.3, d13c_level_SPO -5.8, gcb_ocean_sink -4.3
+
+== THE DECISION RULE: (a) SPO recovers >= 50 % of its martin-9.08 cost (-252.0 -> >= -126.0); (b) martin total improves >= 100 over amp 0 (-894.8); (c) after arm C the SPO gain over the amp-0 arm-C point survives ==
+(a) best SPO -118.6 vs -126.0 -> PASS;  (b) best total -741.8 vs amp-0 -894.8, gain +152.9 -> PASS;  (c) arm C: amp-0 SPO -259.9 / best-point SPO -124.4, totals -441.6 / -348.0 -> PASS
+layer-2 inversion (READ, predicted to persist): martin amp 0 -67; best point -67; canonical +5
+
+VERDICT: O5 PASSES its preregistered rule (a)-(c)
+
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/o5_seasonal_export_scan_20260915_smoke.{log,rds}

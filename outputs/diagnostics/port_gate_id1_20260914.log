@@ -1,0 +1,10 @@
+run-time inputs present: 8/8. OK
+== cold: logpost -16020.0716736627 (Torch -16020.0716742163, diff +5.536e-07, rel 3.46e-11)
+   substeps 11; periodic spinup: 7 Newton iterations, resid history 1.66e+02 1.91e+01 2.86e+00 1.67e-01 6.04e-04 7.99e-09 3.64e-12, resid_carbon 3.638e-12 (PS_TOL 1.0e-09), resid_state 4.547e-12
+   roundoff-scale jumps (12 draws): max |d logpost| 2.146e-06, median 7.699e-07; values: +4.8e-09 +1.1e-06 +5.7e-07 -1.1e-06 -6.8e-07 -4.0e-08 -8.6e-07 +3.8e-07 -6.2e-07 -1.2e-06 +1.0e-06 +2.1e-06
+== incumbent: logpost -2666.7197215373 (Torch -2666.7197790059, diff +5.747e-05, rel 2.16e-08)
+   substeps 4; periodic spinup: 6 Newton iterations, resid history 1.41e+02 1.53e+01 1.97e+00 7.85e-02 1.34e-04 4.10e-10, resid_carbon 4.102e-10 (PS_TOL 1.0e-09), resid_state 4.102e-10
+   roundoff-scale jumps (12 draws): max |d logpost| 3.452e-05, median 1.595e-05; values: -7.9e-10 +1.9e-05 -1.4e-05 +3.4e-06 -3.5e-05 +3.3e-08 -1.9e-05 -1.8e-05 +9.3e-07 -8.5e-06 -2.3e-05 -2.8e-05
+== new_basin: logpost -2495.5813469139 (Torch -2495.5813468771, diff -3.685e-08, rel 1.48e-11)
+   substeps 4; periodic spinup: 6 Newton iterations, resid history 9.34e+01 1.17e+01 1.05e+00 2.16e-02 9.59e-06 9.09e-12, resid_carbon 9.095e-12 (PS_TOL 1.0e-09), resid_state 2.717e-11
+   roundoff-scale jumps (12 draws): max |d logpost| 6.159e-06, median 1.928e-06; values: -4.5e-10 +1.6e-06 +6.2e-06 +4.2e-06 +2.2e-06 +3.2e-08 +3.5e-06 +2.7e-06 +1.2e-06 +3.6e-07 -8.6e-07 +3.9e-06

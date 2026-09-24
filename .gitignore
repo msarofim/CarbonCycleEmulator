@@ -24,3 +24,6 @@ src/*.so
 # testthat scratch (the "check" reporter writes these; never repo state)
 tests/testthat/_problems/
 tests/testthat/testthat-problems.rds
+
+# Word lock files -- transient, never content (2026-09-24)
+~$*

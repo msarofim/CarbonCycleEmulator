@@ -1,0 +1,56 @@
+== THE SH COLD BOX'S OWN VENTILATION: u_hs_fac_SH x 1/2/4/8/16 at hilda29l (SOLVED field, the canonical itself) -- commit af5eb11, 2026-09-21 07:45:50 ==
+export 9.08 GtC/yr (martin); W 0/15 Sv x k 10; arm C = beta_max,fert_k,q10,kz_deep_frac,h_ml,k_w,bomb_total,sigma_d14c,u_hs,pump_hs_gcm2,h_hs
+
+obs: gate D asym +0.286 +- 0.029 (NH ml +1.28 hs -0.48, SH ml +1.05 hs -1.06); gate Q 0.60 +- 0.10; MLO-SPO D14C 2001-2007 -1.53 +- 1.78 permil (n 7)
+
+HARNESS GATE 1: dg streams at the canonical vs stored: sum -1391.8051 vs -1391.8051 -> PASS
+canonical (solved): gate D asym +0.094 z -6.60 [NH ml +1.03 hs +0.03 | SH ml +0.91 hs +0.14]; gate Q 0.915 n_sd 3.15; MLO-SPO D14C -5.88; d13C grad resid -0.0668; hs d13C NH 2.11 SH 2.36
+
+HARNESS GATE 2: u_hs_fac_SH = 1 reproduces the canonical: dlik +0.00e+00 -> PASS
+
+== STAGE 1: 5 points ==
+fac x1         | dlik     +0.0 | D asym +0.094 z -6.60 [NHml +1.03 NHhs +0.03 | SHml +0.91 SHhs +0.14] | Q 0.915 n_sd 3.15 | hs13 2.11/2.36 | resid -0.0668 | D14 -5.88 | rows: co2   +0.0 bomb  +0.0 d14prof   +0.0 d13  +0.0 hs  +0.0/ +0.0 grad  +0.0 exc  +0.0 | PI hs D14C -96/-95 | u_hs 0 m/yr ss 4 
+fac x2         | dlik   -101.4 | D asym +0.070 z -7.45 [NHml +1.03 NHhs +0.03 | SHml +0.95 SHhs +0.05] | Q 0.939 n_sd 3.39 | hs13 2.11/2.26 | resid -0.0684 | D14 -5.83 | rows: co2  -86.5 bomb -10.9 d14prof   +0.5 d13  +0.1 hs  +0.3/ +0.1 grad  -5.3 exc  -0.2 | PI hs D14C -96/-103 | u_hs 0 m/yr ss 4 
+fac x4         | dlik   -414.0 | D asym +0.051 z -8.09 [NHml +1.04 NHhs +0.03 | SHml +0.98 SHhs +0.02] | Q 0.956 n_sd 3.56 | hs13 2.11/2.21 | resid -0.0699 | D14 -5.84 | rows: co2 -376.2 bomb -23.4 d14prof   +0.7 d13  -1.1 hs  +0.3/ +0.1 grad -12.2 exc  -0.3 | PI hs D14C -96/-107 | u_hs 0 m/yr ss 4 
+fac x8         | dlik   -849.2 | D asym +0.039 z -8.50 [NHml +1.04 NHhs +0.03 | SHml +1.00 SHhs +0.01] | Q 0.967 n_sd 3.67 | hs13 2.11/2.20 | resid -0.0711 | D14 -5.87 | rows: co2 -791.5 bomb -31.7 d14prof   +0.7 d13  -2.6 hs  +0.3/ +0.1 grad -17.5 exc  -0.4 | PI hs D14C -96/-109 | u_hs 0 m/yr ss 4 
+fac x16        | dlik  -1254.1 | D asym +0.032 z -8.75 [NHml +1.04 NHhs +0.03 | SHml +1.01 SHhs +0.02] | Q 0.973 n_sd 3.73 | hs13 2.11/2.19 | resid -0.0719 | D14 -5.89 | rows: co2 -1182.8 bomb -36.1 d14prof   +0.8 d13  -3.7 hs  +0.3/ +0.1 grad -20.8 exc  -0.5 | PI hs D14C -96/-110 | u_hs 0 m/yr ss 4 
+stage 1 done in 1 s
+
+ W  k kn fac    dlik  D_asym    D_z    SHhs    NHhs Q_nsd    resid    d14
+ 0 10  0   1     0.0 0.09418 -6.602 0.13785 0.03239 3.149 -0.06680 -5.879
+ 0 10  0   2  -101.4 0.06968 -7.445 0.05314 0.03132 3.391 -0.06844 -5.828
+ 0 10  0   4  -414.0 0.05104 -8.086 0.02106 0.03170 3.560 -0.06995 -5.840
+ 0 10  0   8  -849.2 0.03894 -8.503 0.01400 0.03294 3.667 -0.07111 -5.870
+ 0 10  0  16 -1254.1 0.03185 -8.747 0.01520 0.03422 3.732 -0.07189 -5.894
+ d14prof      co2
+  0.0000     0.00
+  0.4515   -86.46
+  0.6557  -376.16
+  0.7419  -791.53
+  0.7658 -1182.79
+== STAGE 2: arm C re-optimisation ==
+HARNESS GATE 4: rebuilt logpost -1425.3620 (shift +0.0000) vs stored -1425.3620 -> PASS
+selected for arm C (W = 0; the best raw W per k):
+ W  k kn fac   dlik_raw
+ 0 10  0   1     0.0000
+ 0 10  0   2  -101.4165
+ 0 10  0   4  -413.9834
+ 0 10  0   8  -849.1569
+ 0 10  0  16 -1254.1221
+armC fac x1  : raw     +0.0 -> armC     +0.0 (44 evals; kz_deep_frac 0.0073 h_ml 57.3 k_w 1912 bomb_total 120.4 sigma_d14c 5.78 q10 1.09; u_hs 21.8 pump_hs 78.8 h_hs 269) [13 s]
+                 | dlik     +0.0 | D asym +0.094 z -6.60 [NHml +1.03 NHhs +0.03 | SHml +0.91 SHhs +0.14] | Q 0.915 n_sd 3.15 | hs13 2.11/2.36 | resid -0.0668 | D14 -5.88 | rows: co2   +0.0 bomb  +0.0 d14prof   +0.0 d13  +0.0 hs  +0.0/ +0.0 grad  +0.0 exc  +0.0 | PI hs D14C -96/-95 | u_hs 0 m/yr ss 4
+        largest rows: co2_level_MLO +0.0, co2_level_SPO +0.0, co2_seasonal_MLO +0.0, co2_seasonal_SPO +0.0, d13c_seasonal_MLO +0.0
+armC fac x2  : raw   -101.4 -> armC    -15.0 (55 evals; kz_deep_frac 0.0073 h_ml 57.3 k_w 1926 bomb_total 120.8 sigma_d14c 5.79 q10 1.09; u_hs 21.7 pump_hs 78.8 h_hs 269) [29 s]
+                 | dlik    -15.0 | D asym +0.069 z -7.46 [NHml +1.03 NHhs +0.04 | SHml +0.95 SHhs +0.06] | Q 0.939 n_sd 3.39 | hs13 2.11/2.25 | resid -0.0683 | D14 -5.81 | rows: co2   +3.4 bomb -11.2 d14prof   +0.5 d13  -7.0 hs  +0.3/ +0.1 grad  -5.7 exc  -0.3 | PI hs D14C -95/-103 | u_hs 0 m/yr ss 4
+        largest rows: ocean_grad_d13c -8.2, d14c_SH -7.9, d13c_level_MLO -6.6, d14c_NH -3.3, gcb_ocean_sink -3.3
+armC fac x4  : raw   -414.0 -> armC    -64.5 (54 evals; kz_deep_frac 0.0073 h_ml 57.3 k_w 2072 bomb_total 123.8 sigma_d14c 5.82 q10 1.09; u_hs 21.4 pump_hs 78.9 h_hs 268) [29 s]
+                 | dlik    -64.5 | D asym +0.049 z -8.14 [NHml +0.98 NHhs +0.04 | SHml +0.92 SHhs +0.03] | Q 0.906 n_sd 3.06 | hs13 2.14/2.24 | resid -0.0702 | D14 -5.82 | rows: co2   +2.6 bomb -43.7 d14prof   +0.7 d13  -7.6 hs  +0.2/ +0.1 grad -14.9 exc  -1.4 | PI hs D14C -90/-102 | u_hs 0 m/yr ss 4
+        largest rows: d14c_SH -34.3, ocean_grad_d13c -17.9, gcb_ocean_sink -14.0, d13c_level_SPO -11.7, d14c_NH -9.3
+armC fac x8  : raw   -849.2 -> armC   -129.2 (54 evals; kz_deep_frac 0.0073 h_ml 57.2 k_w 2143 bomb_total 124.9 sigma_d14c 5.85 q10 1.08; u_hs 21.3 pump_hs 78.9 h_hs 268) [29 s]
+                 | dlik   -129.2 | D asym +0.037 z -8.58 [NHml +0.96 NHhs +0.04 | SHml +0.92 SHhs +0.04] | Q 0.895 n_sd 2.95 | hs13 2.15/2.24 | resid -0.0717 | D14 -5.84 | rows: co2   +3.1 bomb -79.5 d14prof   +0.3 d13 -14.2 hs  +0.1/ +0.1 grad -22.3 exc  -1.9 | PI hs D14C -88/-102 | u_hs 0 m/yr ss 4
+        largest rows: d14c_SH -60.7, gcb_ocean_sink -29.0, ocean_grad_d13c -25.1, d14c_NH -18.8, d13c_level_SPO -17.0
+armC fac x16 : raw  -1254.1 -> armC   -146.6 (55 evals; kz_deep_frac 0.0073 h_ml 57.4 k_w 2033 bomb_total 124.7 sigma_d14c 5.80 q10 1.10; u_hs 22.0 pump_hs 78.9 h_hs 269) [29 s]
+                 | dlik   -146.6 | D asym +0.031 z -8.77 [NHml +1.01 NHhs +0.06 | SHml +0.97 SHhs +0.06] | Q 0.947 n_sd 3.47 | hs13 2.11/2.21 | resid -0.0719 | D14 -5.84 | rows: co2  -35.5 bomb -33.1 d14prof   +0.6 d13 -21.4 hs  +0.3/ +0.1 grad -25.6 exc  -1.9 | PI hs D14C -92/-106 | u_hs 0 m/yr ss 4
+        largest rows: gcb_ocean_sink -42.6, ocean_grad_d13c -28.1, d13c_level_MLO -24.2, d14c_SH -19.1, d14c_NH -14.0
+
+(no reject rule: a scoping scan -- read against the scoping note's predictions)
