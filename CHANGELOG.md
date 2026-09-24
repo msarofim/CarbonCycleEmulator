@@ -2,6 +2,52 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (m) — **REGROWTH TIER 1, STEP 1: the gross LUC split EXISTS, it closes against the model's own burnt input, and it is ASSERTED not measured.** ⛔⛔ **Two things the handoff did not know: "regrowth" is convention-dependent BY A FACTOR OF THREE, and the future decay does NOT fall out for free.**
+
+The handoff's §5 step 1 called acquisition "the risk — gross components are not in the repo". It is discharged: GCB 2025's **Land-Use Change Emissions** sheet carries the decomposition, on the same openclimatedata mirror as the three GCB files already in the manifest. `data-raw/download_gcb_luc_components.R` acquires four files (3-model mean + BLUE / OSCAR / LUCE) and **refuses to record a file whose own components do not reproduce its Net column**.
+
+    Net = deforestation (total) + forest regrowth (total) + other transitions
+        + peat drainage & peat fires + wood harvest & other forest management
+
+⚠ **The per-model files omit the peat column but their Net INCLUDES peat** — GCB adds ONE common peat estimate to each model. Tested without it, the closure residual is up to **0.72 GtC/yr**, which is the peat term, not an error in the sheet.
+
+### `calibration/diag_luc_gross_split.R` — three gates, all MUTATION-TESTED
+- **GATE 1** components (+ common peat) sum to Net: **1.0–2.0e-05** for all four (the sheet prints to ~5 dp). Mutation: halve one regrowth year → 0.424, fails.
+- **GATE 2** ⭐ the LUC sheet's Net and the model's prescribed net LUC are the **SAME NUMBERS** — max |diff| **exactly 0.0e+00** over 1959–2024. So the split un-nets **the model's own input**, and Tier 1 is arithmetic rather than a comparison of two products. Mutation: +0.01 on one prescribed year, fails.
+- **GATE 3** the handoff's required gate: `luc_scale × (gross + regrowth)` reconstructs the **burnt** `E_luc` to **2.2e-16**. ⚠ The halves must BOTH carry `luc_scale` (0.8214 at `hilda29l`) — mutation: scale only one half → 0.575, fails. ⇒ **no forcing the model sees changes; the no-refit claim holds.**
+
+### The number Marcus asked for (GCB 2025 3-model mean, GtC/yr)
+| window | net | deforestation | **regrowth** | other | peat | wood harvest |
+|---|---|---|---|---|---|---|
+| 1959–2024 | +1.69 | +1.87 | **−1.02** | +0.18 | +0.23 | +0.45 |
+| 1959–1968 | +1.90 | +1.84 | **−0.87** | +0.34 | +0.18 | +0.40 |
+| 2015–2024 | +1.37 | +1.90 | **−1.30** | +0.11 | +0.24 | +0.42 |
+
+Cumulative 1959–2024: gross source **+179.1**, regrowth **−67.3**, net **+111.8 GtC** ⇒ regrowth offsets **38 %** of the gross source over the record and **49 %** over 2015–2024.
+⚠ **The 3-model spread is not decoration**: over 2015–2024 the members run **−1.49 (OSCAR) / −1.41 (BLUE) / −0.99 (LUCE)** — a range of **38 % of the mean**. A reported regrowth number carries it.
+
+### ⛔⛔ THE CONVENTION TRAP — a factor of THREE, same model, same years
+OSCAR v3.1's workbook (**already in the repo**, already the source of the pre-1850 LUC segment) splits E_luc into E_positive / E_negative from **1701**, which is the obvious way to get a pre-1959 split. It is a **different quantity**:
+
+| 1959–2018, GtC/yr | value |
+|---|---|
+| OSCAR v3.1 `E_negative` | **−3.122** |
+| GCB 2025's OSCAR "forest regrowth (total)" | **−0.992** |
+| ratio | **3.15×** |
+
+GCB reports "wood harvest & other forest management" **NET of its own post-harvest regrowth**, so regrowth inside the harvest rotation never reaches GCB's regrowth column; OSCAR's `E_negative` counts every negative flux in the bookkeeping. **Not a vintage difference.** This is the same class as the project's own 32 % [[ccx_app_luc_budget_convention]] bug, and it is why the panel's headline number cannot be chosen silently.
+
+### ⛔ COVERAGE — the observed split covers a QUARTER of the model's land-use era
+The model burns **237.6 GtC** of net LUC over 1750–2024 at `luc_scale` 0.8214. Only **91.9 GtC (39 %)** falls in 1959–2024, where the split exists; **209 of 275 land-use years (76 %) have no published split.** Anything said about pre-1959 regrowth is an assumption.
+
+### ⛔⛔ AND THE FUTURE DECAY DOES NOT FALL OUT FOR FREE — the handoff's design note is WRONG
+It said the decay "falls out for free if regrowth is driven by past clearing: as LUC emissions go to zero in the SSPs, so does regrowth." Measured, the prescribed **net** land-use flux does not go to zero — it goes **NEGATIVE** in four of five scenarios (2100: ssp119 −0.65, ssp126 −0.79, ssp245 −1.31, ssp585 −0.42; only ssp370 stays positive at +0.73). In bookkeeping accounting a negative net flux means **gross regrowth has OVERTAKEN gross clearing**, which is the opposite of a regrowth term decaying away. ⇒ **a future regrowth path is a prescribed assumption in every scenario** and must be labelled as one.
+
+### ⚠ What Tier 1 still is
+**ASSERTED FROM GCB's BOOKKEEPING MODELS, NOT MEASURED BY CCX.** 09-24 (h) showed this record cannot see the split; Tier 1 imports it. The app must say so.
+
+**Four methodological choices are now in front of Marcus and are NOT being resolved silently** (which convention; what to do before 1959; what law the future path follows; whether the panel's headline is the mean or the model range). Nothing model-side has been touched.
+
 ## 2026-09-24 (l) — ⭐⭐ **FIXED: the pulse lab is now CAUSAL** (Marcus chose the app-only route). ⛔⛔ **And fixing the emissions interpolation was only HALF of it — there is a SECOND global spline in a pulse's causality chain, in the GMST feedback, and the first fix left it ringing.**
 
 ### The fix, and why the default does not move
