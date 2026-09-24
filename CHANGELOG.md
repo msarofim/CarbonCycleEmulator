@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (h) — ⭐⭐ **Q3/Q1 MEASURED FIRST, AND THE JUSTIFICATION DOES NOT SURVIVE.** The early source→sink crossing is real — and it is **fully explained by a constant land-sink bias**, so it is not evidence for a missing regrowth term. The discriminating test fails. ⛔ **A refit aimed at regrowth would be aimed at the wrong shape.**
+
+`calibration/diag_q3_regrowth_vs_fertilisation.R`. ⚠ **Anchored on gate 7 before any arm was read**: model land **3.09** GtC/yr over 2015–2023, exactly the gate's recorded value ([[ccx_diag_must_use_mode_base]]).
+
+### The hypothesis had two predictions. Only the non-discriminating one holds.
+**P1 — the model's land turns net-sink too early.** ✅ Reproduces: model **1970**, measured **1989**, **19 years** (11-yr centred means, the app's own `APP_LUC_SMOOTH_YR` convention; memory recorded 1971/18 yr, immaterially different).
+
+**P2 — the excess should be LARGEST EARLY and shrink**, because regrowth was small early and grew later. ⛔ **It does not.** Residual-sink excess by decade: +0.31, −0.01, +0.51, +0.16, +0.28, +0.30, (+1.04 for 2020–24). Mean **+0.32 GtC/yr**, trend **+0.0047/yr (95 % CI −0.0022…+0.0116)** — **indistinguishable from zero**, and the OLS CI is too narrow on an autocorrelated residual, so the true interval is wider still. The excess is **flat**.
+
+### ⭐⭐ And P1 is not independent evidence, because a CONSTANT bias produces it
+A uniform offset shifts a rising series' zero-crossing all by itself. Tested by removing it:
+
+| | |
+|---|---|
+| mean NET offset, 1959–2024 | **+0.62 GtC/yr** |
+| model crossing, offset removed | **1987** (was 1970) |
+| measured crossing | **1989** |
+| **residual gap** | **2 years** (was 19) |
+
+The measured net flux rises **+0.022 GtC/yr per year** over 1975–2005, so a +0.62 offset is worth **~29 years of timing on its own**. ⇒ **P1 and P2 are ONE fact, not two**, and the one fact is a level error.
+
+### ⛔ What this means for the refit
+On this record the defect looks like a land sink running **uniformly ~0.3–0.6 GtC/yr high**, not a missing process that grew with time. A regrowth pool costs a new land pool or flux, at least one new fitted name, and a **REFIT** against a **FROZEN objective #13** — and this says it would be spent on the wrong shape.
+⚠ **This is NOT a refutation of forest regrowth in nature**, and not a claim that separating the terms is wrong on physical grounds. It is the narrower, and cheaper, finding: **this record cannot see the signature that would justify the cost.** Q1 (the model high in the last decade) and Q3 (the early crossing) turn out to be **the same level error at two ends of the record**, which is exactly what Marcus suspected when he said to treat them as one investigation — but the shared cause is a bias, not a missing term.
+⚠ The **2020–2024** excess is much larger (+1.04 residual, +1.27 net) than any earlier decade. Five years, and GCB's most recent years are its least constrained. **Flagged, not interpreted.**
+
+⛔⛔ **TWO QUANTITIES, NEVER MIXED** ([[ccx_app_luc_budget_convention]], the project's own 32 % bug): **NET land flux** has land-use emissions INSIDE it (model = raw `land_C` change; measured = GCB `land_sink − luc`) and is what crosses zero; **RESIDUAL sink** has them OUTSIDE (model = `land_C` change **+ eluc`**; measured = GCB `land_sink`) and is what gate 7 scores and what Q1 is about. Both are reported separately throughout.
+
 ## 2026-09-24 (g) — ⭐⭐ **THE CLIMATE MODULE IS REBUILT ON calib 1.6.0** (Marcus). It had been on **1.4.5, built 2026-08-10** — eighteen days before the project standard moved. **No refit: the objective never touches it.** ⛔ And the rebuild surfaced a unit-string defect in our own `calibration_v160` payload that breaks ANY multi-scenario FaIR driver reading it.
 
 > ⚠ **(f) IS NOT MISSING** — it is on branch `emissions-interp-constant` (the piecewise-constant emissions interpolation), which is deliberately not on `main`. The letters are kept globally unique so the two interleave on merge.
