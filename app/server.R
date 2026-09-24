@@ -377,11 +377,15 @@ function(input, output, session) {
     } else if (identical(input$f_mode, "Build your own")) {
       r <- stylised_run()
       runs <- c(future_runs()[1], list(`Your scenario` = r))
-      plot_future(runs, input$f_yvar %||% "co2_ppm",
-                  if (identical(input$f_yvar, "gmst")) LAB_TEMP else LAB_CO2)
+      # F5: run 1750-2150, SHOW 1900-2150. The two spans are separate
+      # constants; see the note on APP_FUTURE_VIEW in global.R.
+      plot_future(runs, input$f_yvar %||% APP_FUTURE_YVAR_DEFAULT,
+                  if (identical(input$f_yvar, "gmst")) LAB_TEMP else LAB_CO2,
+                  view = APP_FUTURE_VIEW)
     } else {
       plot_future(future_runs(), input$f_yvar,
-                  if (identical(input$f_yvar, "gmst")) LAB_TEMP else LAB_CO2)
+                  if (identical(input$f_yvar, "gmst")) LAB_TEMP else LAB_CO2,
+                  view = APP_FUTURE_VIEW)
     }
   })
 
@@ -447,13 +451,27 @@ function(input, output, session) {
   })
 
   output$f_notes <- renderUI({
-    if (identical(input$f_mode, "Pulse lab")) {
+    how <- if (identical(input$f_mode, "Pulse lab")) {
       div(class = "caveat",
           tags$strong("How this is computed: "),
           "the model runs twice — once with the pulse and once without, from ",
           "identical starting conditions — and the difference between the two ",
           "is the pulse's effect.")
     } else NULL
+    # F5 (2026-09-24): the runs now reach 2150, which puts the stylised "+5 %
+    # per year" case 26x outside the range the CO2->forcing curve was fitted
+    # over. ccx_run_coupled() has always warned about this to the console; on
+    # a tab a student can drive there with one slider, the console is not
+    # where the warning belongs. CONDITIONAL -- nothing renders unless a run
+    # actually leaves the range. See app_erf_range_note() in global.R.
+    cls <- switch(input$f_mode %||% "Scenarios",
+                  "Pulse lab"     = list(pulse_runs()$pulse$climate),
+                  "Build your own" = list(stylised_run()$climate),
+                  lapply(future_runs(), `[[`, "climate"))
+    note <- app_erf_range_note(cls)
+    if (is.null(note)) how
+    else tagList(how, div(class = "caveat",
+                          tags$strong("Outside the fitted range: "), note))
   })
 
   # ---- 6. Under the hood ---------------------------------------------

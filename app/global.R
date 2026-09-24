@@ -49,7 +49,18 @@ ccx_load_cpp()
 APP_TITLE        <- "CarboTope"
 APP_SUBTITLE     <- "A calibrated carbon-cycle model you can take apart"
 APP_HIST_YEARS   <- c(1750, 2024)
-APP_FUTURE_YEARS <- c(1750, 2100)
+# F5 (Marcus 2026-09-22, APPROVED 09-24): Scenarios and Build-your-own show
+# 1900-2150. ⭐ THE RUN SPAN AND THE VIEW SPAN ARE DIFFERENT THINGS and the
+# distinction is load-bearing: the model must still START IN 1750, because a
+# run begun at 1900 inherits 88 GtC of land-use carbon already emitted while
+# ccx_spinup() hands it preindustrial stocks, and ccx_build_forcing() warns
+# about exactly that ("expect a start-up transient"). So the RUN is
+# 1750-2150 and only the PLOT is cropped to APP_FUTURE_VIEW.
+# ⚠ Cropping is done by FILTERING the data rather than by coord_cartesian(),
+# so the y scale trains on the years the reader can see; a zoom would keep
+# training it on 1750 and quietly widen every axis.
+APP_FUTURE_YEARS <- c(1750, 2150)
+APP_FUTURE_VIEW  <- c(1900, 2150)
 APP_PULSE_YEARS  <- c(1750, 2300)
 # ⚠ NO INSTITUTIONAL AFFILIATION HERE, AND IT IS A RULING, NOT AN OVERSIGHT
 # (Marcus 2026-09-22, review U3 / ruling R4): "Marron Institute is for
@@ -473,6 +484,48 @@ app_stylised_emissions <- function(kind, years, to_zero_year = 2060,
     scenario = stats::approx(bg$year, bg$fossil_GtC, xout = yrs[fut], rule = 2)$y
   )
   data.frame(year = yrs, fossil_GtC = foss, luc_GtC = luc)
+}
+
+# ---------------------------------------------------------------------
+# ⭐ WHEN A PATHWAY LEAVES THE RANGE THE FORCING CURVE WAS FITTED OVER
+# ---------------------------------------------------------------------
+# ccx_run_coupled() ALREADY warns about this -- to the R console, where no
+# reader of the app will ever see it. That was tolerable while the futures ran
+# to 2100; F5 takes them to 2150, and fifty more years of compounding takes
+# the build-your-own "+5 %/yr" case from 3,516 ppm (2.1x the fitted top) to
+# 44,172 ppm and +17.7 degC (26.2x). Measured 2026-09-24, both horizons.
+#
+# ⚠ The extrapolation is NOT new and F5 did not create it. What F5 changes is
+# its SIZE, and 26x is past the point where a silent console warning is an
+# honest way to handle it. The app's own stated principle (ui.R, on the
+# "Known issues" tab) is that a reader who finds a defect before the app
+# admits to it has found a HIDDEN defect.
+#
+# The note is CONDITIONAL and COMPUTED: it appears only when a run actually
+# leaves the range, and every number in it is read from the fitted module and
+# the run, so it cannot go stale when either moves.
+APP_ERF_RANGE <- ccx_climate_module()$co2_erf_range
+
+#' A caveat for pathways outside the fitted CO2->forcing range, or NULL
+#'
+#' @param cls a list of `climate` data frames (one per drawn run)
+#' @param rng,slack the fitted range and the slack ccx_run_coupled() itself
+#'   allows before warning. PARAMETERS, not globals reached from the body, so
+#'   the gate can hand this function a range and check both sides of the
+#'   threshold without standing the app up.
+#' @return a character string, or NULL when every run stays inside the range
+app_erf_range_note <- function(cls, rng = APP_ERF_RANGE,
+                               slack = CLIM_ERF_RANGE_SLACK) {
+  hi <- suppressWarnings(max(vapply(cls, function(cl) max(cl$co2_ppm), numeric(1))))
+  top <- rng[2]
+  if (!is.finite(hi) || hi <= top + slack) return(NULL)
+  sprintf(paste("This pathway reaches %s ppm. The curve turning CO₂ into warming",
+                "was fitted between %s and %s ppm, so past that the temperature",
+                "shown is an extrapolation — here it runs to %.0f times the",
+                "highest concentration the curve has ever seen. Read it as",
+                "“very large” rather than as a number."),
+          format(round(hi), big.mark = ","), format(round(rng[1]), big.mark = ","),
+          format(round(top), big.mark = ","), hi / top)
 }
 
 #' Cumulative emissions, GtC, from an assembled forcing table

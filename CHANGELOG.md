@@ -2,6 +2,35 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (e) — ⭐ **F5 SHIPPED: Scenarios and Build-your-own span 1900–2150, and the splice caption re-checked mid-frame reads correctly.** ⭐⭐ **Extending the horizon took the stylised "+5 %/yr" case from 2.1× to 26× outside the fitted CO₂→forcing range, so the console-only warning is now a caveat the reader can see.**
+
+### The run span and the view span are different things
+The model still **starts in 1750**. A run begun at 1900 inherits ~88 GtC of land-use carbon already emitted while `ccx_spinup()` hands it preindustrial stocks — `ccx_build_forcing()` warns about exactly that and the run still completes, so the failure would be a start-up transient inside a finished-looking chart. So `APP_FUTURE_YEARS` is **1750–2150** (the run) and `APP_FUTURE_VIEW` is **1900–2150** (the crop), as two constants.
+
+⚠ **The crop is a FILTER, not `coord_cartesian()`**, so the y scale trains on the years the reader can see. A zoom keeps training it on 1750 onward; mutation-tested, and the gate rejects the zoom (y range 1049 vs 0.1 on a run with an out-of-range pre-view segment).
+
+✅ **Marcus's flagged re-check passes**: the splice caption carries nothing positional — it names the handover **year** (`APP_SPLICE_YEAR`, read from the data), not its place in the frame — so it reads correctly with the splice at mid-frame. Verified in the browser: 2024 sits dead centre of 1900–2150 and the caption is unchanged. The scenario takeaway now reads **"By 2150 these scenarios span 367 to 1137 ppm and 1.6 to 5.7 °C"**, derived from the run rather than typed.
+
+### ⭐⭐ The extrapolation F5 made 26× worse
+`app_stylised_emissions()`'s `rate` branch compounds, so fifty more years is not a small change. **Measured at both horizons, 2026-09-24:**
+
+| +5 %/yr to | fossil at end | CO₂ at end | GMST | vs fitted top (1,687 ppm) |
+|---|---|---|---|---|
+| **2100** (old) | 395 GtC/yr | 3,516 ppm | +7.5 °C | **2.1×** |
+| **2150** (new) | 4,926 GtC/yr | 44,172 ppm | +17.7 °C | **26.2×** |
+
+⚠ **F5 did not create this** — the 2100 case was already outside the range and already warning. What F5 changes is the size, and 26× is past the point where a warning that goes to the **R console** is an honest way to handle it: a student reaches it by dragging one slider. The app's own stated principle (ui.R, on the "Known issues" tab) is that **a reader who finds a defect before the app admits to it has found a hidden defect**.
+
+⇒ `app_erf_range_note()` renders a caveat **only when a run actually leaves the range**, with every number read from the fitted module and the run: *"This pathway reaches 44,172 ppm. The curve turning CO₂ into warming was fitted between 278 and 1,687 ppm, so past that the temperature shown is an extrapolation — here it runs to 26 times the highest concentration the curve has ever seen. Read it as 'very large' rather than as a number."* Browser-verified firing on +5 %/yr and **silent on the SSPs** (1,137 ppm at 2150, inside the range). ⚠ **This is beyond F5's letter and is flagged as such** — it is one conditional `div`, trivially revertible if Marcus would rather the tab said nothing.
+
+### Gate
+`test-future-span.R`, **21 assertions, mutation-tested**: the two spans stay distinct and nested; a view selecting no years is **refused** rather than drawn as an empty panel; the y scale trains on visible years only (rejects `coord_cartesian`); and the caveat is silent inside the range, fires outside it, and **moves when the fitted range moves** — a hard-coded number would survive that mutation and does not.
+
+Suite `app|review|driver|growth|future|mechanisms|climate`: **322 / 0**.
+
+### ⚠ Flagged, not fixed
+Build-your-own's takeaway ends *"Note how little the temperature falls even when emissions stop"* — which is **false for the `rate` branch**, where emissions never stop and reach 4,926 GtC/yr. Pre-existing (equally wrong at 2100) and it is reader-facing copy, so it is Marcus's call, not a silent edit.
+
 ## 2026-09-24 (d) — ⭐ **F4 SHIPPED: the temperature/CO₂ radio now governs all three Futures modes.** ⭐⭐ **And building its gate found a REAL, PRE-EXISTING DEFECT: the pulse lab releases carbon BEFORE the year the slider says.** The artefact is acausal and confirmed; the numbers the tab quotes move by 0.05 percentage points, so they stand. **The fix is a methodological choice and is NOT taken here.**
 
 ### F4, and why one input rather than three

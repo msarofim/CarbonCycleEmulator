@@ -681,11 +681,23 @@ plot_d14c <- function(out, obs, yr_range) {
 # ---------------------------------------------------------------------
 # Tab 5: futures and pulses
 # ---------------------------------------------------------------------
-plot_future <- function(runs, yvar, ylab) {
+#' @param view two years, the window to CROP to (F5). Defaults to the whole
+#'   run; the app passes APP_FUTURE_VIEW. Cropping by filtering rather than by
+#'   coord_cartesian() on purpose -- see the note on APP_FUTURE_VIEW in
+#'   global.R: a zoom would leave the y scale trained on years 1750 onward and
+#'   silently widen the axis against a window that no longer contains them.
+plot_future <- function(runs, yvar, ylab, view = NULL) {
   d <- do.call(rbind, lapply(names(runs), function(n) {
     cl <- runs[[n]]$climate
     data.frame(year = cl$year, y = cl[[yvar]], who = n)
   }))
+  if (!is.null(view)) {
+    d <- d[d$year >= view[1] & d$year <= view[2], ]
+    # A view that selects nothing would draw an empty panel with axes, which
+    # reads as "the model is flat here" rather than as a mistake. Refuse.
+    if (!nrow(d))
+      stop(sprintf("view %d-%d selects no model years", view[1], view[2]))
+  }
   ggplot(d, aes(year, y, colour = who)) +
     geom_line(linewidth = 0.8) +
     labs(x = LAB_YEAR, y = ylab, caption = app_provenance_caption()) +
