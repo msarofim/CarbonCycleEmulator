@@ -185,20 +185,13 @@ function(input, output, session) {
                                     "year-to-year scatter."))
     scatter <- function(g) {
       g <- g[g$year >= yr[1] & g$year <= yr[2], ]
-      if (nrow(g) < 12) return(NA_real_)
+      if (nrow(g) < GROWTH_RESID_MIN_YEARS) return(NA_real_)
       stats::sd(stats::residuals(stats::lm(g ~ splines::ns(year, df = 3), data = g)))
     }
-    mod_g <- function(o) {
-      g <- ccx_global_co2(o)
-      a <- stats::aggregate(list(co2 = g), list(year = floor(o$t)), mean)
-      n <- stats::aggregate(list(n = g), list(year = floor(o$t)), length)
-      a <- a[n$n == 12, ]
-      data.frame(year = a$year[-1], g = diff(a$co2))
-    }
+    mod_g <- app_annual_growth      # ⛔ ONE definition, shared with the chart (F2)
     a  <- scatter(mod_g(APP_HIST$out))
     b  <- scatter(mod_g(cf_run()$out))
-    ob <- scatter(data.frame(year = APP_GCB$year,
-                             g = APP_GCB$atm_growth / ccx_const("GtC_PER_PPM")))
+    ob <- scatter(app_obs_growth(APP_GCB))
     if (is.na(a) || is.na(b) || is.na(ob)) return("")
     sprintf(paste("Over %d\u2013%d, the year-to-year scatter about the decadal trend is:",
                   "full model %.2f ppm/yr, without \u201c%s\u201d %.2f (%s),",
@@ -207,6 +200,43 @@ function(input, output, session) {
             if (b < a) sprintf("%.0f %% less", 100 * (1 - b / a))
             else sprintf("%.0f %% more", 100 * (b / a - 1)),
             ob)
+  })
+
+  # F2 (Marcus 2026-09-24): "full model minus measured" and "experiment minus
+  # measured" \u2014 as NUMBERS ON THIS PANEL, which is what he asked for and what
+  # keeps the tab at three charts. Each residual is the vertical gap between two
+  # lines already drawn above, so nothing here needs its own alignment.
+  #
+  # \u26d4 THE WINDOW IS COMPUTED ONCE, HERE, AND HANDED TO BOTH SENTENCES. The
+  # scatter note derives the same intersection; if these two ever computed it
+  # separately they could disagree about which years they describe while both
+  # printed a year range, which is worse than either being wrong alone.
+  output$c_growth_resid <- renderText({
+    m  <- CCX_MECHANISMS[[input$c_mech]]
+    yr <- c(max(input$c_years[1], min(APP_GCB$year)),
+            min(input$c_years[2], max(APP_GCB$year)))
+    r <- app_growth_residuals(APP_HIST$out, cf_run()$out, APP_GCB, yr)
+    if (is.null(r)) return("")
+    # \u26a0 THE WORST YEAR IS REPORTED BECAUSE A BIAS/RMS PAIR CANNOT SHOW AN
+    # EPISODIC ERROR. "Consistently 0.1 high" and "fine except 1992 and 1998"
+    # give nearly the same two numbers, and only the second is a story about
+    # volcanoes and El Nino \u2014 which is what this tab is for.
+    txt <- sprintf(paste("Against the measured record over the same %d years:",
+                         "the full model runs %+.2f ppm/yr on average (typical",
+                         "miss %.2f), and its single worst year is %d at %+.2f."),
+                   r$full$n, r$full$bias, r$full$rms, r$full$worst_year,
+                   r$full$worst)
+    if (!is.null(r$alt))
+      txt <- paste(txt,
+        sprintf(paste("Without \u201c%s\u201d the average becomes %+.2f and the",
+                      "typical miss %.2f \u2014 %s."),
+                m$label, r$alt$bias, r$alt$rms,
+                if (r$alt$rms < r$full$rms)
+                  sprintf("%.0f %% closer to the measurements", 100 * (1 - r$alt$rms / r$full$rms))
+                else if (r$alt$rms > r$full$rms)
+                  sprintf("%.0f %% further from them", 100 * (r$alt$rms / r$full$rms - 1))
+                else "no change"))
+    txt
   })
 
   # ---- F1 (Marcus 2026-09-24): the DRIVER panel ----------------------

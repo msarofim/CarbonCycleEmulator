@@ -2,6 +2,18 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (c) — ⭐ **F2 SHIPPED AS NUMBERS ON THE SECOND PANEL, which is what Marcus asked for and what keeps the tab at three charts: "can the F2 residual numbers be a part of the 2nd panel?" They can.** Also: his Substack draft is gitignored so `git add -A` stops staging it.
+
+### Why numbers on panel 2 rather than residual panels
+The growth chart already draws **all three series in the same units (ppm/yr) on one axis**, with the GCB observed series already on the model's annual grid. So "full model minus measured" and "experiment minus measured" are **the vertical gaps between lines already in front of the reader** — a separate residual panel would redraw the same information and make a fourth chart on a tab that F1 just took to three. ⇒ his own flagged complexity risk disappears rather than being managed.
+
+- **What it prints**: bias (mean ppm/yr), typical miss (RMS), and the single **worst year**, for the full model and for the counterfactual, plus whether the switch moved the model closer to or further from the measurements.
+- ⚠ **THE WORST YEAR IS NOT DECORATION.** A bias/RMS pair cannot tell "consistently 0.1 high" from "fine except 1992 and 1998", and only the second is a story about Pinatubo and El Niño — which is what this tab is for. It is the one statistic here that can reveal an EPISODIC error.
+- ⛔ **THE WINDOW IS COMPUTED ONCE AND HANDED TO BOTH SENTENCES.** The scatter note derives the same slider ∩ observed-record intersection; computing it twice would let them disagree about which years they describe **while both printed a year range**, which is worse than either being wrong alone.
+- ⭐ **`app_annual_growth()` EXTRACTED — IT WAS WRITTEN THREE TIMES** (`plot_growth_rate()`, `output$c_growth_note`, and the F3 diagnostic). The residual must be measured against exactly the series the panel DRAWS, and three hand-copies of an annualisation is how that quietly stops being true. One definition now, and `test-growth-residuals.R` pulls the chart's own series back out of the built ggplot to assert the two still agree.
+- **Gate**: `test-growth-residuals.R`, **15 assertions**, mutation-tested. It refuses a pre-observational window (1850–1900 has model years and no observed ones — the like-for-like trap this panel already had once), refuses a window under the stated floor, and checks the partial-year guard at both ends.
+- ⚠ **THE GATE CAUGHT ITS OWN FIRST DRAFT, and the lesson is about the model not the test**: "the ENSO knockout moves the residual" failed, correctly, because **`ccx_default_params()` has ALL FOUR ENSO gammas at 0** (table inits are 0.25/0.25/0/0) — on bare defaults the `enso` switch is a genuine no-op. `test-mechanisms.R` seeds `gamma_enso = 0.5` for exactly this reason; the new gate now matches it.
+
 ## 2026-09-24 (b) — ⭐⭐ **F1 SHIPPED (the driver panel), AND F3 IS ANSWERED BY MEASUREMENT: the ENSO temperature already inside the GMST driver carries 3.4 % of the model's CO₂ wobble against 22.8 % for the explicit `gamma_enso` term. ⇒ the double-count is REAL but ~7× smaller than the channel it duplicates, and no FaIR config can change that. F3 is a CAVEAT, not a refit.** Marcus's build order was F1 → F2 → F4; F1 is in, F2 and F4 are not started.
 
 ### F1 — the driver panel on "What if…?" (`R/mechanisms.R`, `app/R/plots.R`, `app/{global,ui,server}.R`, `tests/testthat/test-driver-panel.R`)

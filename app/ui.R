@@ -252,6 +252,11 @@ navbarPage(
           "where switching a mechanism off is actually visible."),
         plotOutput("c_growth", height = "300px"),
         textOutput("c_growth_note"),
+        # F2 (Marcus 2026-09-24): the residuals as NUMBERS on this panel rather
+        # than as panels of their own — "can the F2 residual numbers be a part
+        # of the 2nd panel?" They can: every series above is already in ppm/yr
+        # on one axis, so each residual is the gap between two drawn lines.
+        textOutput("c_growth_resid"),
         # F1 (Marcus 2026-09-24): "a third panel showing the driver itself --
         # volcanic AOD by year, the ENSO index by year, emissions by year."
         # Placed THIRD, after the level and the growth rate, because it reads

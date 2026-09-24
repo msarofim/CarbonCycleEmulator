@@ -349,19 +349,12 @@ ccx_global_co2 <- function(o) {
 #' @param label the legend label for `alt`
 plot_growth_rate <- function(base, alt = NULL, gcb = NULL, yr_range = c(1960, 2024),
                              label = "Mechanism off", show_obs = TRUE) {
-  ann <- function(o) {
-    g <- ccx_global_co2(o)
-    a <- stats::aggregate(list(co2 = g), list(year = floor(o$t)), mean)
-    n <- stats::aggregate(list(n = g), list(year = floor(o$t)), length)
-    a <- a[n$n == 12, ]                      # drop a partial first/last year
-    data.frame(year = a$year[-1], g = diff(a$co2))
-  }
+  ann <- app_annual_growth        # ⛔ ONE definition; see its header (F2)
   b <- ann(base); b$who <- "Full model"
   d <- b
   if (!is.null(alt)) { x <- ann(alt); x$who <- label; d <- rbind(d, x) }
   if (!is.null(gcb) && isTRUE(show_obs) && "atm_growth" %in% names(gcb)) {
-    o <- data.frame(year = gcb$year, g = gcb$atm_growth / ccx_const("GtC_PER_PPM"),
-                    who = LAB_GROWTH_OBS)
+    o <- app_obs_growth(gcb); o$who <- LAB_GROWTH_OBS
     d <- rbind(d, o)
   }
   d <- d[d$year >= yr_range[1] & d$year <= yr_range[2], ]
@@ -435,6 +428,76 @@ plot_driver <- function(drv, yr_range, label = "Mechanism off") {
                hjust = 0, vjust = 1.4, size = 3.1, colour = "grey40")
   g
 }
+
+#' The annual CO2 growth rate of a run, on the model's own calendar years
+#'
+#' \u26d4 EXTRACTED 2026-09-24 (F2) BECAUSE IT WAS WRITTEN THREE TIMES -- here,
+#' in `output$c_growth_note` (app/server.R) and in the F3 diagnostic. The
+#' residual numbers F2 adds must be measured against EXACTLY the series the
+#' panel draws, and three hand-copies of an annualisation is how that stops
+#' being true without anything failing. One definition, used by both.
+#'
+#' Partial first/last years are dropped (`n == 12`): a year with 7 months in it
+#' has a mean that is a seasonal phase, not an annual mean, and differencing it
+#' manufactures a growth-rate outlier at each end of every window.
+app_annual_growth <- function(o) {
+  g <- ccx_global_co2(o)
+  a <- stats::aggregate(list(co2 = g), list(year = floor(o$t)), mean)
+  n <- stats::aggregate(list(n = g), list(year = floor(o$t)), length)
+  a <- a[n$n == 12, ]
+  data.frame(year = a$year[-1], g = diff(a$co2))
+}
+
+#' The observed annual growth rate, from the Global Carbon Budget
+app_obs_growth <- function(gcb) {
+  data.frame(year = gcb$year, g = gcb$atm_growth / ccx_const("GtC_PER_PPM"))
+}
+
+#' F2 (Marcus 2026-09-24): "full model minus measured" and "experiment minus
+#' measured", AS NUMBERS ON THE SECOND PANEL rather than as panels of their own.
+#'
+#' \u2b50 WHY NUMBERS ON THIS PANEL AND NOT A NEW PANEL. The growth chart already
+#' draws all three series in the SAME UNITS on ONE axis, so each residual is
+#' just the vertical gap between two lines already in front of the reader. A
+#' separate residual panel would re-draw the same information a second time and
+#' add a third chart to a tab that now has three.
+#'
+#' \u26d4 THE WINDOW IS THE INTERSECTION OF THE SLIDER AND THE OBSERVED RECORD,
+#' and it is passed IN rather than recomputed, so it cannot drift from the
+#' scatter sentence beside it. The model runs from 1750 and GCB's atmospheric
+#' growth starts 1959; a window of 1850-2024 would give the model 174 years and
+#' the observation 66, which is the like-for-like bug this panel already fixed
+#' once (app/server.R, output$c_growth_note).
+#'
+#' \u26a0 WHAT NUMBERS CANNOT SHOW, and the caller should not pretend otherwise: a
+#' mean and an RMS cannot tell "consistently 0.1 high" from "fine except 1992
+#' and 1998". `worst_year` is returned for exactly that reason -- it is the one
+#' statistic here that reveals an EPISODIC error, and a bias/RMS pair alone
+#' would hide it.
+#'
+#' @return NULL when the window holds too few overlapping years, else a list
+#'   with the per-series bias, RMS and worst year.
+app_growth_residuals <- function(base, alt, gcb, yr) {
+  if (is.null(gcb) || !"atm_growth" %in% names(gcb)) return(NULL)
+  ob <- app_obs_growth(gcb)
+  one <- function(o) {
+    m <- app_annual_growth(o)
+    d <- merge(m, ob, by = "year", suffixes = c("_mod", "_obs"))
+    d <- d[d$year >= yr[1] & d$year <= yr[2], ]
+    if (nrow(d) < GROWTH_RESID_MIN_YEARS) return(NULL)
+    r <- d$g_mod - d$g_obs
+    list(bias = mean(r), rms = sqrt(mean(r^2)), n = nrow(d),
+         worst_year = d$year[which.max(abs(r))], worst = r[which.max(abs(r))])
+  }
+  a <- one(base); b <- if (is.null(alt)) NULL else one(alt)
+  if (is.null(a)) return(NULL)
+  list(full = a, alt = b)
+}
+
+# The floor below which a bias/RMS pair is noise rather than a measurement. Same
+# dozen-year bar the scatter sentence already uses, and named so the two cannot
+# drift apart.
+GROWTH_RESID_MIN_YEARS <- 12L
 
 #' Where the pulse carbon ends up: share in air, land and ocean over time
 #'
