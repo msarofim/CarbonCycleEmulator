@@ -35,16 +35,20 @@ measurement says what it should say; nobody has drafted it. Per the standing rul
 copy states the current fact and carries **no fix history**.
 
 ## 3. What is NEXT, in Marcus's order
-1. **F2 — residual panels**, "full model minus measured" and "experiment minus measured", on the
-   second panel. He flagged the complexity risk himself; the alignment machinery exists (Keeling
-   card 1's residual pair). ⚠ The new driver panel is now the THIRD panel on that tab — decide
-   whether F2's residual goes on the growth panel (his words: "the second panel") or becomes a
-   fourth. **That is a question for him, not a default.**
-2. **F4 — the temperature/CO₂ radio** on "Build your own" and "Pulse lab" (it exists on
+⭐ **F2 IS NOW DONE TOO** (`a398162`) — he ruled it: *"Can the F2 residual numbers be a part of the
+2nd panel?"* They can, and they are. **Bias, typical miss (RMS) and the single WORST YEAR** for
+both arms, printed under the growth chart, plus whether the switch moved the model closer to the
+measurements. No fourth panel; the tab stays at three. On the shipped default it reads **1991 at
++1.02 ppm/yr** — Pinatubo, the model's known biggest interannual miss, now COMPUTED on the page
+rather than asserted in a comment. ⛔ `app_annual_growth()` was extracted because the
+annualisation had been written THREE times; the gate pulls the chart's own series back out of the
+built ggplot to assert the number and the picture still agree.
+
+1. **F4 — the temperature/CO₂ radio** on "Build your own" and "Pulse lab" (it exists on
    Scenarios). Small, self-contained.
-3. **F5 — the 1900–2150 span** on Scenarios and Build-your-own. APPROVED, with the mid-frame
+2. **F5 — the 1900–2150 span** on Scenarios and Build-your-own. APPROVED, with the mid-frame
    splice accepted. ⚠ Re-check the splice caption reads correctly once the splice is mid-frame.
-4. **Q3 + Q1 as ONE investigation** — forest regrowth vs CO₂ fertilisation. ⭐ Still the only open
+3. **Q3 + Q1 as ONE investigation** — forest regrowth vs CO₂ fertilisation. ⭐ Still the only open
    item that could move a number, and the testable hypothesis is unchanged: the model crosses land
    source→sink in **1971** against the measured **1989**, and an over-strong single fertilisation
    term doing the work of both is exactly what makes the sink appear too early. ⛔ Costs a new pool
@@ -78,9 +82,9 @@ copy states the current fact and carries **no fix history**.
   main-content heuristic picks tab 1 whatever is selected. Use
   `javascript_tool: document.querySelector('.tab-pane.active').innerText` instead — that is how
   every copy check in this session was made.
-- ⛔ **`git add -A` STAGES `CarboTopeSubstack.docx`** — Marcus's untracked drafting in the repo
-  root. It was caught and unstaged this session. **It is still untracked and still unignored**, so
-  the next `git add -A` grabs it again. ⚠ **Ask him whether to gitignore it**; do not decide.
+- ✅ **`CarboTopeSubstack.docx` IS NOW GITIGNORED** (`8d93aad`, on his instruction). ⚠ The docx
+  review files he sends IN (`CarboTopecomments.*.docx`) stay TRACKED on purpose — the ignore names
+  only his draft.
 - ⚠ **`ccx_global_co2()` lives in `app/R/plots.R`, not `R/`**, so it is not on the path in a
   `calibration/` diagnostic. Inline it rather than sourcing plots.R into a numerical script.
 - ⚠ **MEMORY BUDGETS TIGHTENED BY THIS SESSION.** `INDEX_ccx_ref.md` is now **17,586 B** of its
