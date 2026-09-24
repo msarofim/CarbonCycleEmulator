@@ -252,6 +252,21 @@ navbarPage(
           "where switching a mechanism off is actually visible."),
         plotOutput("c_growth", height = "300px"),
         textOutput("c_growth_note"),
+        # F1 (Marcus 2026-09-24): "a third panel showing the driver itself --
+        # volcanic AOD by year, the ENSO index by year, emissions by year."
+        # Placed THIRD, after the level and the growth rate, because it reads
+        # backwards: here is what the model did, here is where the wobbles live,
+        # and here is the input those came from. Rendered through uiOutput
+        # because three of the seven switches have no driver to draw and get a
+        # sentence instead of an empty chart (server.R, output$c_driver_ui).
+        hr(),
+        h5("The driver behind the switch"),
+        p("The two charts above are what the model did. This one is what it was",
+          "told \u2014 the input series itself, drawn as the full model receives it",
+          "and as the counterfactual receives it. Some switches delete the input;",
+          "others leave it exactly as it is and remove only the model's response",
+          "to it."),
+        uiOutput("c_driver_ui"),
         # C5 (Marcus 2026-09-22): "exactly one reason" was true of the
         # SECULAR sink and false as written -- the seasonal cycle is driven by
         # a prescribed seasonal light and temperature shape, not by CO₂.

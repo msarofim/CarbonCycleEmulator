@@ -1,0 +1,5 @@
+"arm","growth_scatter_ppm_yr","pct_vs_full","beta_C_per_C","lead_months","provenance"
+"A_full",0.268792585655168,0,0.114490522117487,4,"hilda29l | mode_fit_pumpN.rds | logpost -1425.36 | spinup periodic | FaIR 2.2.4 (calib 1.6.0), 841 configs, baseline arm | window 1959-2024 | no RNG"
+"B_no_enso_in_T",0.259695322453948,-3.38449186723149,0.114490522117487,4,"hilda29l | mode_fit_pumpN.rds | logpost -1425.36 | spinup periodic | FaIR 2.2.4 (calib 1.6.0), 841 configs, baseline arm | window 1959-2024 | no RNG"
+"C_no_gamma_enso",0.207570012218842,-22.7768832563217,0.114490522117487,4,"hilda29l | mode_fit_pumpN.rds | logpost -1425.36 | spinup periodic | FaIR 2.2.4 (calib 1.6.0), 841 configs, baseline arm | window 1959-2024 | no RNG"
+"D_neither",0.21010896583561,-21.8323060052121,0.114490522117487,4,"hilda29l | mode_fit_pumpN.rds | logpost -1425.36 | spinup periodic | FaIR 2.2.4 (calib 1.6.0), 841 configs, baseline arm | window 1959-2024 | no RNG"

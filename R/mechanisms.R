@@ -23,8 +23,70 @@
 # Each entry: what the user sees, what it does, and the caveat it carries.
 # `apply` receives (p, F) -- parameters and the assembled forcing table -- and
 # returns both, so a switch can act on either.
+# =====================================================================
+# THE PRESCRIBED DRIVERS (2026-09-24, Marcus review F1: "a third panel
+# showing the driver itself -- volcanic AOD by year, the ENSO index by year,
+# emissions by year").
+#
+# These live here, beside the switches, for the reason the switches do: WHICH
+# driver a switch acts on is a statement about the MODEL, not about the
+# interface, and it needs testing. A panel drawing the wrong series under a
+# switch's name would be a plausible-looking lie of exactly the kind this file
+# exists to prevent.
+#
+# ⛔ THREE SWITCHES HAVE NO DRIVER, AND THAT IS NOT AN OMISSION. `fertilisation`,
+# `ocean_sink` and `revelle` change a PARAMETER -- how strongly the model
+# responds to carbon it already has. There is no prescribed input series behind
+# them, and putting atmospheric CO2 in that slot would be drawing a model OUTPUT
+# in a panel labelled "the driver". The app says so instead.
+#
+# ⛔ NOTHING HERE DECLARES WHETHER A SWITCH REMOVES ITS DRIVER, and that is
+# deliberate: it is MEASURED, by differencing the series either side of
+# ccx_apply_mechanisms() (ccx_driver_series()). It is also the interesting half
+# of the panel -- `volcanic` and `emissions` zero their INPUT, while `enso` and
+# `warming_feedback` leave the input untouched and remove the model's RESPONSE
+# to it. A declared flag would be a second copy of a fact the code already
+# holds, free to drift from it.
+#
+# ⚠ EVERY SERIES IS ZERO BEFORE ITS RECORD STARTS, WHICH IS COVERAGE AND NOT
+# PHYSICS, and the panel must say so: the Nino 3.4 index begins 1948
+# (FORC_ENSO_PRE1948), IGCC temperature 1850 (FORC_GMST_PRE1850) and the CMIP7
+# AOD series 1850 (ccx_aod_at). On the tab's default 1850-2024 window a reader
+# not told this sees a flat zero and reads it as "no El Nino happened".
+# =====================================================================
+CCX_DRIVERS <- list(
+  emissions = list(
+    label = "Emissions: fossil fuels, cement and land-use change",
+    unit  = "GtC per year",
+    # The emissions record covers the model's whole span, so there is no
+    # coverage zero to disclose. NA rather than a year, and the app branches on
+    # it rather than on a sentinel year that would print.
+    since = NA_integer_,
+    of    = function(F) F$e_foss_NH + F$e_foss_SH + F$e_luc_NH + F$e_luc_SH
+  ),
+  enso = list(
+    label = "El Ni\u00f1o / La Ni\u00f1a: the Ni\u00f1o 3.4 sea-surface temperature anomaly",
+    unit  = "\u00b0C",
+    since = 1948L,
+    of    = function(F) F$enso
+  ),
+  aod = list(
+    label = "Volcanic haze: stratospheric aerosol optical depth",
+    unit  = "AOD (dimensionless)",
+    since = 1850L,
+    of    = function(F) (F$aod_NH + F$aod_SH) / 2
+  ),
+  gmst = list(
+    label = "The observed global temperature record this model is driven by",
+    unit  = "\u00b0C above 1850\u20131900",
+    since = 1850L,
+    of    = function(F) F$gmst
+  )
+)
+
 CCX_MECHANISMS <- list(
   fertilisation = list(
+    driver = NULL,  # CCX_DRIVERS; NULL = acts on a parameter, not an input
     label = "CO₂ fertilisation (the land sink)",
     blurb = paste("Plants grow faster when there is more CO₂ in the air, and",
                   "that extra growth is what pulls carbon into the land. Switch",
@@ -41,6 +103,7 @@ CCX_MECHANISMS <- list(
     apply = function(p, F) { p$beta <- 0; p$beta_max <- 0; list(p = p, F = F) }
   ),
   warming_feedback = list(
+    driver = "gmst",  # CCX_DRIVERS; NULL = acts on a parameter, not an input
     label = "Warming's effect on the carbon cycle",
     blurb = paste("A warmer world respires soil carbon faster and holds less CO₂",
                   "in seawater, so warming pushes carbon back into the air.",
@@ -63,6 +126,7 @@ CCX_MECHANISMS <- list(
     }
   ),
   enso = list(
+    driver = "enso",  # CCX_DRIVERS; NULL = acts on a parameter, not an input
     label = "El Niño / La Niña",
     # ⛔ "SWITCH IT OFF AND THE WOBBLES GO" WAS WRONG, AND THE CHART ADDED FOR
     # Marcus's C2 is what exposed it -- which is the whole argument for adding
@@ -89,6 +153,7 @@ CCX_MECHANISMS <- list(
     apply = function(p, F) { p <- ccx_set_enso(p, list(gamma_enso = 0)); list(p = p, F = F) }
   ),
   volcanic = list(
+    driver = "aod",  # CCX_DRIVERS; NULL = acts on a parameter, not an input
     label = "Volcanic haze (the diffuse-light effect)",
     blurb = paste("A big eruption puts a haze of sulphate high in the",
                   "atmosphere. It scatters sunlight, which sounds bad for",
@@ -126,6 +191,7 @@ CCX_MECHANISMS <- list(
     }
   ),
   ocean_sink = list(
+    driver = NULL,  # CCX_DRIVERS; NULL = acts on a parameter, not an input
     label = "The ocean sink",
     blurb = paste("The ocean has absorbed roughly a quarter of all our CO₂.",
                   "Switch it off and that carbon stays in the air."),
@@ -142,6 +208,7 @@ CCX_MECHANISMS <- list(
     apply = function(p, F) { p$k_w <- OCEAN_OFF_K_W; list(p = p, F = F) }
   ),
   emissions = list(
+    driver = "emissions",  # CCX_DRIVERS; NULL = acts on a parameter, not an input
     label = "Our emissions",
     blurb = paste("Everything people put into the air: burning coal, oil and gas,",
                   "making cement, and clearing land. Switch it off and the model",
@@ -167,6 +234,7 @@ CCX_MECHANISMS <- list(
     }
   ),
   revelle = list(
+    driver = NULL,  # CCX_DRIVERS; NULL = acts on a parameter, not an input
     label = "Revelle buffering (ocean saturation)",
     blurb = paste("Seawater gets progressively worse at absorbing CO₂ the more",
                   "it has already absorbed. Freeze that at its 1750 value and",
@@ -197,6 +265,47 @@ ccx_apply_mechanisms <- function(p, F, off = character()) {
     cav <- c(cav, CCX_MECHANISMS[[nm]]$caveat)
   }
   list(p = p, F = F, caveats = cav)
+}
+
+#' The prescribed driver behind one switch, BEFORE and AFTER the switch acts
+#'
+#' Marcus review F1 (2026-09-24). Returns NULL for the three switches that act
+#' on a parameter rather than on an input -- the caller must handle that and say
+#' so, rather than substituting a model output.
+#'
+#' \u26d4 `removes_driver` IS MEASURED HERE, NOT DECLARED ANYWHERE. It is the
+#' comparison itself: `volcanic` and `emissions` zero their input column, so the
+#' two series separate; `enso` and `warming_feedback` zero a COEFFICIENT, so the
+#' two series lie exactly on top of one another and the panel's whole message is
+#' that the El Nino still happened and the model simply stopped listening. A
+#' hand-maintained flag would be a copy of that fact free to drift from it --
+#' and `enso` has already had one switch (fertilisation, 2026-08-14) silently
+#' become a no-op when the live parameter moved underneath it.
+#'
+#' @param nm one name from CCX_MECHANISMS
+#' @param F  an assembled forcing table (ccx_build_forcing())
+#' @param p  parameters; only needed because ccx_apply_mechanisms() takes them
+#' @param F_off the switched forcing, when the caller ALREADY HAS the one its
+#'   counterfactual actually ran with. The app passes it for that reason: a
+#'   panel that re-derived the input would be drawing a second forcing beside
+#'   the run instead of the run's own, which is the cross-tab-step failure
+#'   (CHANGELOG 09-22 (x)) in miniature. Omitted, it is derived here, and
+#'   test-driver-panel.R asserts the two paths agree.
+#' @return NULL, or list(key, label, unit, since, t, full, off, removes_driver)
+ccx_driver_series <- function(nm, F, p = ccx_default_params(), F_off = NULL) {
+  if (!nm %in% names(CCX_MECHANISMS))
+    stop("unknown mechanism: ", nm, call. = FALSE)
+  key <- CCX_MECHANISMS[[nm]]$driver
+  if (is.null(key)) return(NULL)
+  d <- CCX_DRIVERS[[key]]
+  if (is.null(d)) stop("mechanism ", nm, " names an unknown driver: ", key,
+                       call. = FALSE)
+  if (is.null(F_off)) F_off <- ccx_apply_mechanisms(p, F, nm)$F
+  full <- d$of(F)
+  off  <- d$of(F_off)
+  c(list(key = key), d[c("label", "unit", "since")],
+    list(t = F$t, full = full, off = off,
+         removes_driver = !isTRUE(all.equal(full, off))))
 }
 
 #' Named list of switch labels, for building UI controls

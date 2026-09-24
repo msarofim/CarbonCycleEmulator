@@ -209,6 +209,58 @@ function(input, output, session) {
             ob)
   })
 
+  # ---- F1 (Marcus 2026-09-24): the DRIVER panel ----------------------
+  # The two panels above draw what the model DID. This one draws what it was
+  # TOLD -- and draws it twice, before and after the switch, which is the only
+  # place in the app a reader can see that "El Nino off" and "volcanoes off" are
+  # two different KINDS of operation. See plot_driver()'s header.
+  #
+  # \u26d4 IT USES THE COUNTERFACTUAL'S OWN FORCING (`cf_run()$forcing`), not a
+  # freshly built one. Re-deriving would put a second forcing on the page beside
+  # the run, which is exactly how the futures and historical tabs came to draw
+  # different pasts (CHANGELOG 09-22 (x)).
+  c_driver <- reactive({
+    req(input$c_mech)
+    ccx_driver_series(input$c_mech, APP_HIST$forcing, APP_PARAMS,
+                      F_off = cf_run()$forcing)
+  })
+
+  output$c_driver_ui <- renderUI({
+    d <- c_driver()
+    if (is.null(d))
+      # \u26d4 THE THREE PARAMETER SWITCHES GET A SENTENCE, NOT A CHART. There is
+      # no prescribed series behind them, and CO2 in this slot would be a model
+      # OUTPUT under a heading that says "driver".
+      return(div(class = "caveat",
+                 tags$strong("This switch has no driver to show. "),
+                 paste("It does not remove an input \u2014 it changes how strongly",
+                       "the model responds to carbon it already has. The two",
+                       "charts above are where its effect shows up.")))
+    tagList(plotOutput("c_driver", height = "260px"),
+            textOutput("c_driver_note"))
+  })
+
+  output$c_driver <- renderPlot({
+    d <- c_driver(); req(d)
+    plot_driver(d, input$c_years,
+                paste("Without:", CCX_MECHANISMS[[input$c_mech]]$label))
+  })
+
+  # MEASURED, not asserted: whether the switch touched the input at all.
+  output$c_driver_note <- renderText({
+    d <- c_driver(); req(d)
+    m <- CCX_MECHANISMS[[input$c_mech]]
+    if (isTRUE(d$removes_driver))
+      sprintf(paste("Switching off \u201c%s\u201d removes this input: the purple line",
+                    "is the driver the counterfactual actually ran with."),
+              m$label)
+    else
+      sprintf(paste("Switching off \u201c%s\u201d does not touch this input \u2014 it is",
+                    "identical in both runs, so only one line is drawn. The model",
+                    "still receives it and simply stops responding to it."),
+              m$label)
+  })
+
   output$c_takeaway <- renderText({
     m <- CCX_MECHANISMS[[input$c_mech]]
     a <- APP_HIST$out; b <- cf_run()$out

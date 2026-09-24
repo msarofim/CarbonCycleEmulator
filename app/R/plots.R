@@ -376,6 +376,66 @@ plot_growth_rate <- function(base, alt = NULL, gcb = NULL, yr_range = c(1960, 20
     theme_ccx()
 }
 
+# ---------------------------------------------------------------------
+# Tab 3: the DRIVER panel (Marcus review F1, 2026-09-24)
+# ---------------------------------------------------------------------
+# "A third panel showing the driver itself -- volcanic AOD by year, the ENSO
+# index by year, emissions by year."
+#
+# \u2b50 WHAT MAKES THIS MORE THAN A THIRD CHART: it draws the driver BEFORE and
+# AFTER the switch, so the reader can see which KIND of switch they just threw.
+# Two of them (volcanic, emissions) delete the input -- the purple line drops to
+# zero. Two of them (El Nino, warming) leave the input untouched and remove the
+# model's RESPONSE to it: the El Nino still happens, the model just stops
+# listening. That distinction is the single most-confused thing about this tab,
+# it is what C5's "the world still warms either way" caveat is trying to say in
+# words, and it has never been drawn.
+#
+# \u26d4 THE COVERAGE ZERO IS DISCLOSED ON THE FACE OF THE CHART, not in a
+# footnote. The Nino 3.4 index is identically zero before 1948 and the AOD and
+# temperature series before 1850 (R/mechanisms.R CCX_DRIVERS, and the constants
+# it names). The tab's DEFAULT window is 1850-2024, so the ENSO driver opens
+# with 98 years of flat zero that a reader will otherwise take as a statement
+# about the climate rather than about the archive.
+#
+# \u26d4 NO SECOND Y-AXIS AND NO RESCALING. The four drivers carry four different
+# units and this panel draws exactly one of them at a time, labelled with its
+# own. Overlaying them on a shared axis -- the obvious "show all three at once"
+# reading of the comment -- would put GtC/yr, degrees C and a dimensionless
+# optical depth on one scale, where the only honest normalisation is z-scores
+# and those hide the thing the panel exists to show (a driver going to zero).
+DRIVER_KEPT_NOTE <- paste("This switch leaves the driver alone \u2014 the two lines are",
+                          "identical. What it removes is the model's RESPONSE to it.")
+
+plot_driver <- function(drv, yr_range, label = "Mechanism off") {
+  k <- drv$t >= yr_range[1] & drv$t <= yr_range[2]
+  d <- data.frame(t = drv$t[k], v = drv$full[k], who = "Full model")
+  if (isTRUE(drv$removes_driver))
+    d <- rbind(d, data.frame(t = drv$t[k], v = drv$off[k], who = label))
+  cols <- stats::setNames(c(PAL[["model"]], PAL[["off"]]), c("Full model", label))
+  extra <- if (isTRUE(drv$removes_driver)) NULL else DRIVER_KEPT_NOTE
+  # The coverage zero, marked where it is VISIBLE and stated where it is not.
+  gap <- !is.na(drv$since) && yr_range[1] < drv$since
+  if (gap)
+    extra <- paste(c(extra, sprintf(paste("This series is identically zero before %d,",
+                                          "which is where the observational record",
+                                          "begins \u2014 not a statement that nothing",
+                                          "happened earlier."), drv$since)),
+                   collapse = "  ")
+  g <- ggplot(d, aes(t, v, colour = who)) +
+    geom_hline(yintercept = 0, colour = "grey75", linewidth = 0.3) +
+    geom_line(linewidth = 0.7) +
+    scale_colour_manual(values = cols[names(cols) %in% unique(d$who)]) +
+    labs(x = LAB_YEAR, y = drv$unit, subtitle = drv$label,
+         caption = app_provenance_caption(extra)) +
+    theme_ccx()
+  if (gap)
+    g <- g + geom_vline(xintercept = drv$since, linetype = "22", colour = "grey55") +
+      annotate("text", x = drv$since, y = Inf, label = paste(" record begins", drv$since),
+               hjust = 0, vjust = 1.4, size = 3.1, colour = "grey40")
+  g
+}
+
 #' Where the pulse carbon ends up: share in air, land and ocean over time
 #'
 #' ⭐ ADDED 2026-09-22, Marcus review F2: "for the pulse lab, I would like a

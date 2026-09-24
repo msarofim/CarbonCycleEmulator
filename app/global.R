@@ -336,6 +336,7 @@ app_hist <- local({
   F <- app_build_forcing("historical", APP_HIST_YEARS, prod_c14 = APP_SPIN$prod_c14)
   r <- ccx_run_fast(APP_SPIN, F)
   r$out$co2_global <- (r$out$co2_NH + r$out$co2_SH) / 2
+  r$forcing <- F              # F1: the driver panel's unswitched line
   r
 })
 APP_HIST <- app_hist
@@ -428,6 +429,12 @@ app_run_mechanisms <- function(off = character(), years = APP_HIST_YEARS,
   r$out$co2_global <- (r$out$co2_NH + r$out$co2_SH) / 2
   r$caveats <- m$caveats
   r$spin <- sp
+  # THE FORCING GOES BACK WITH THE RUN (Marcus review F1, 2026-09-24). The
+  # driver panel draws the model's INPUT, and reassembling the forcing at the
+  # call site would build a SECOND one -- which is how two tabs end up drawing
+  # different histories of the same thing (the cross-tab step, CHANGELOG 09-22
+  # (x)). Same choke-point argument as app_run_coupled() above.
+  r$forcing <- F
   r
 }
 
