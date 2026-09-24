@@ -44,9 +44,15 @@ CCX_MECHANISMS <- list(
     label = "Warming's effect on the carbon cycle",
     blurb = paste("A warmer world respires soil carbon faster and holds less CO₂",
                   "in seawater, so warming pushes carbon back into the air.",
-                  "Switch it off and the carbon cycle stops noticing the warming."),
-    caveat = paste("The climate still warms — only the carbon cycle's RESPONSE",
-                   "to it is removed, so the two effects can be told apart."),
+                  "Switch it off and this amplifying feedback goes away."),
+    # C5 (Marcus 09-24): he doubts this is relevant, "we only care about
+    # warming because of its carbon cycle effects". Kept, because the reader who
+    # does not know the temperature is PRESCRIBED will read "switch off the
+    # warming feedback" as "switch off the warming". The "so the two effects can
+    # be told apart" tail IS pedantry and is dropped.
+    caveat = paste("The world still warms either way — this model is DRIVEN by",
+                   "the observed temperature record. What is switched off is",
+                   "only the carbon cycle's response to that warming."),
     apply = function(p, F) {
       p$q10 <- 1; p$sst_scale <- 0
       # sst_obs = 0, or the observed HadSST4 columns would carry real SST
@@ -90,7 +96,9 @@ CCX_MECHANISMS <- list(
                   "would otherwise sit in shade, so the world's vegetation",
                   "grows a little FASTER for a year or two and pulls extra",
                   "CO₂ out of the air. Switch it off and the dips after",
-                  "eruptions get shallower."),
+                  "eruptions get shallower. The clearest case is the 1991",
+                  "eruption of Mount Pinatubo, whose effect on the carbon",
+                  "cycle shows up most strongly in 1992."),
     # ⛔ THE CAVEAT IS NOT OPTIONAL AND MAY NOT BE SHORTENED TO "volcanoes off".
     # This switch removes the LIGHT path only. An eruption ALSO cools the planet,
     # and this model does not compute its own temperature -- it is DRIVEN by the
@@ -121,9 +129,16 @@ CCX_MECHANISMS <- list(
     label = "The ocean sink",
     blurb = paste("The ocean has absorbed roughly a quarter of all our CO₂.",
                   "Switch it off and that carbon stays in the air."),
-    caveat = paste("This closes the air-sea interface completely, which also stops",
-                   "the ocean exchanging ¹³C and ¹⁴C. The isotope panels are",
-                   "not meaningful with this switch on."),
+    # C6 (Marcus 09-24), MEASURED: `input$c_mech` drives only c_plot, c_growth,
+    # c_growth_note, c_blurb, c_takeaway and w_luc_note. The isotope panels render
+    # from APP_HIST$out, the fixed historical run, so this switch NEVER reaches
+    # them. The old wording ("the isotope panels are not meaningful with this
+    # switch on") implied a coupling that does not exist and invited the reader
+    # to go and look at a degradation they cannot see.
+    caveat = paste("This closes the air-sea interface completely, which would also",
+                   "stop the ocean exchanging ¹³C and ¹⁴C. That effect is not shown",
+                   "anywhere in the app: the isotope panels always draw the full",
+                   "historical run and do not respond to these switches."),
     apply = function(p, F) { p$k_w <- OCEAN_OFF_K_W; list(p = p, F = F) }
   ),
   emissions = list(

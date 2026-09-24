@@ -55,7 +55,13 @@ AC_CHECKS <- list(
   c("K1 no 'Nothing here was tuned'",    "Nothing here was tuned", NA),
   c("K2 driver list in takeaway",        NA, "an ENSO index and volcanic aerosol"),
   c("K4 see_card text",                  NA, "The solid one shows the"),
-  c("W4 airborne fraction reworded",     "the single most useful summary", "not a clean score for the sinks"),
+  # ⚠ W4 was SUPERSEDED 2026-09-24 by Marcus's C3, which replaced the 09-22
+  # wording wholesale. The ratchet still ratchets: the PRE-09-22 phrasing must
+  # still be absent, and the phrase asserted present is now C3's. Changed with
+  # the spec, NOT to make a red test green -- the 09-22 phrase it used to
+  # require ("not a clean score for the sinks") is gone on Marcus's own
+  # instruction, and requiring it would pin the app to a superseded round.
+  c("W4/C3 airborne fraction reworded",  "the single most useful summary", "should not be"),
   c("C4 dated clause gone",              "since 2026-09-01", NA),
   c("C4 ENSO blurb",                     NA, "out of the surface ocean, year by year"),
   c("C5 'exactly one reason' gone",      "for exactly one", "driven by sunlight and temperature"),

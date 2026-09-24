@@ -495,7 +495,7 @@ RV_CARDS <- list(
                               RV_REP_OBS_SOURCE)),
        ask = paste("The fit needs several times the station offset that is",
                    "actually measured. Is a stand-in of that size acceptable in a",
-                   "teaching model -- and if not, what would you constrain it with?")),
+                   "teaching model -- and if not, what do you suggest as possible ways to address this offset?")),
   list(id = 2, key = "gradient", class = "structural",
        title = "The north-south δ¹³C gradient is twice the observed one",
        plain = paste("Between Mauna Loa and the South Pole, the model's δ¹³C",

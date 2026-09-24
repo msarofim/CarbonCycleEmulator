@@ -187,11 +187,13 @@ navbarPage(
                  # equilibrium -- not only with how good the sinks are.
                  p("The ", gloss("airborne fraction",
                                  "the share of everything ever emitted that is still in the air"),
-                   " says how much of what we emitted stayed in the air. It is",
-                   "worth watching, but it is not a clean score for the sinks:",
-                   "it depends on how quickly emissions are changing and how far",
-                   "the land and ocean are from equilibrium, as well as on how",
-                   "much they take up."))
+                   " is the ratio of emissions to the rise in atmospheric",
+                   "concentration in a given year. It is a popular metric, but",
+                   "easily misunderstood: it depends both on how quickly emissions",
+                   "are changing and on the total sink (itself a reflection of how",
+                   "far the land and ocean are from equilibrium), so any change —",
+                   "or lack of change — in the airborne fraction should not be",
+                   "attributed to one factor alone."))
       ),
       mainPanel(
         width = 9,
@@ -428,7 +430,7 @@ navbarPage(
             # two different things -- see card 8's detail.
             h5("Stand-ins: fitted names that absorb a discrepancy"),
             tableOutput("rv_standins"),
-            h5("Held: names the calibration was not allowed to move"),
+            h5("Held: parameters the calibration was not allowed to move"),
             tableOutput("rv_shims"),
             uiOutput("rv_constants"))
       )
@@ -466,8 +468,7 @@ navbarPage(
         # boxes now, and the driver list is what the Keeling tab's takeaway
         # points at.
         h4("What drives the model"),
-        p(tags$small("Prescribed inputs. The model is told these; it does not",
-                     "work them out.")),
+        p(tags$small("Prescribed inputs.")),
         tableOutput("h_drivers"),
         h4("What it is fitted to"),
         p(tags$small("Observations the calibration scored the model against.")),

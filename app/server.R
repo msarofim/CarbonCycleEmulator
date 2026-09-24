@@ -52,11 +52,12 @@ function(input, output, session) {
     # against. The honest claim is narrower and still worth making: what the
     # model is not told is how the carbon DIVIDES between air, land and ocean.
     sprintf(paste("The model produces %.0f ppm in %d, rising to %.0f ppm today;",
-                  "the measured value is about %.0f ppm. It is not free of this",
-                  "record: the model is driven by emissions, global temperature,",
-                  "an ENSO index and volcanic aerosol, and the CO₂ level and",
-                  "seasonal cycle at both stations are among the things the",
-                  "calibration scored it against. What it is never told is how",
+                  "the measured value is about %.0f ppm. The model's inputs are",
+                  "emissions, global temperature, an ENSO index and volcanic aerosol,",
+                  "and its calibration data include the CO₂ level and",
+                  "seasonal cycle at both Mauna Loa and the South Pole. But it is",
+                  "not an abstract regression: it can only adjust quantities that",
+                  "stand for physical things. And what it is never told is how",
                   "the emitted carbon divides between air, land and ocean —",
                   "that comes out of the bookkeeping, and it is the next tab."),
             o$co2_NH[i0], floor(o$t[i0]), o$co2_NH[i1], last_obs)
@@ -118,10 +119,11 @@ function(input, output, session) {
     mod <- cross(a$year[-1], diff(a$g))
     obs <- cross(APP_GCB$year, APP_GCB$land_sink - APP_GCB$luc)
     paste(
-      sprintf(paste("Clearing land has ADDED carbon to the air in every year of",
-                    "this record \u2014 it has never been a net removal. What changed",
-                    "is the land as a whole: growth elsewhere eventually outweighed",
-                    "what clearing released.")),
+      sprintf(paste("Land-use change \u2014 agriculture, deforestation and the rest",
+                    "\u2014 has been an emission SOURCE for the whole of this record.",
+                    "What changed is the land as a whole: the natural land sink",
+                    "grew until it outweighed those emissions, through CO\u2082",
+                    "fertilisation and forest regrowth on former farmland.")),
       if (is.na(obs)) "" else
         sprintf(paste("In the measured budget the land crossed from a net source",
                       "to a net sink around %d (%d-year average)."), obs, k),
