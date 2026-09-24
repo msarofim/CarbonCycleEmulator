@@ -2,6 +2,52 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (g) — ⭐⭐ **THE CLIMATE MODULE IS REBUILT ON calib 1.6.0** (Marcus). It had been on **1.4.5, built 2026-08-10** — eighteen days before the project standard moved. **No refit: the objective never touches it.** ⛔ And the rebuild surfaced a unit-string defect in our own `calibration_v160` payload that breaks ANY multi-scenario FaIR driver reading it.
+
+> ⚠ **(f) IS NOT MISSING** — it is on branch `emissions-interp-constant` (the piecewise-constant emissions interpolation), which is deliberately not on `main`. The letters are kept globally unique so the two interleave on merge.
+
+### Why this needed no refit
+`ccx_climate_module()` appears **only** in `R/climate.R` and `app/global.R` — `grep` finds it nowhere in `calibrate.R` or `likelihood.R`. The objective runs 1750–2024 on **observed IGCC GMST** and never calls it. So this moves the Futures and Pulse tabs and nothing else, and it is independent of both the emissions-interpolation branch and Q3.
+
+| quantity | calib 1.4.5 | calib 1.6.0 | change |
+|---|---|---|---|
+| ECS-equivalent | 3.243 K | **3.060 K** | −0.183 |
+| 2×CO₂ ERF | 3.851 W/m² | **3.959** | +0.109 |
+| CO₂→ERF fit RMSE | 0.0291 | **0.0220** | −0.0071 (better) |
+| fitted CO₂ range, top | 1687 ppm | **1797 ppm** | +110 |
+| slowest IRF timescale | 261.4 yr | **194.9 yr** | −66.5 |
+| SSP table span | 1750–2501 | **1750–2301** | see below |
+
+ECS-equivalent 3.06 K sits inside AR6's likely range. Impulse-response fit vs FaIR: RMSE **0.010–0.017 °C** across the five SSPs.
+
+⚠ **The span truncation is the STANDING RULE, not a loss.** calib 1.6.0's volcanic/solar forcing ends at **2302** and the standing rule makes **2300 the end year for all our work**; the app's deepest use is `APP_PULSE_YEARS = c(1750, 2300)`. Running to 2501 would have silently extrapolated 200 years of solar cycle. `END_YEAR` is now **derived from the forcing file's own coverage**, capped at the standing year, rather than typed.
+⚠ `ccx_erf_nonco2()`'s docstring still said the record "runs 1750-2500" and justified its flat hold by the SSP extensions having gone constant by then. Both were stale. The hold now **WARNS** instead of being assumed correct.
+
+### ⛔ The methodological choice, flagged not buried: RCMIP emissions, not CMIP7
+calib 1.6.0 was conditioned jointly on CMIP7 inputs, and `calibration_v160/` ships `emissions_v160_cmip7_ssp245_harmonized.csv` — **for ssp245 only**. Measured both ways on ssp245/1.6.0:
+
+| | GMST 2024 | CO₂ 2024 |
+|---|---|---|
+| RCMIP emissions (shipped) | 1.232 °C | 410.8 ppm |
+| CMIP7 harmonized | 1.282 °C | 420.5 ppm |
+| *(calib 1.4.5, RCMIP)* | *1.333 °C* | *412.4 ppm* |
+
+⇒ the emissions leg carries **+0.050 K of the 0.101 K** offset vs 1.4.5; the rest is the posterior. That is the documented faithful-stack cost, **not** the retracted "1.6.0 doubles the cold bias". **RCMIP is kept for all five** because CMIP7-harmonized exists only for ssp245 and mixing bases across scenarios would be worse, and because it keeps this a clean single-axis change from the v145 product. ⚠ The level offset is largely absorbed anyway — `ccx_run_coupled()` splices observed GMST through 2024 and offsets the future to match, so what survives is the SHAPE: 2024→2100 warming is 1.408 K (1.4.5) vs **1.423 K** (1.6.0).
+
+### ⛔⛔ A DEFECT IN OUR OWN calibration_v160 PAYLOAD — it will bite other drivers
+`emissions_v160_cmip7harm_rffsp_central.csv` spells HFC-4310mee's unit **`kt HFC4310/yr`**, where v145, FaIR and RCMIP all spell it **`kt HFC4310mee/yr`**. FaIR does not know the compound `HFC4310`, so `fill_from_csv` takes its **novel-compound** branch (`fair/io/fill_from.py:95-101`) and **writes the MODULE-LEVEL tables**: `desired_emissions_units["HFC-4310mee"] = "kt HFC4310/yr"` and `compound_convert["HFC4310"] = {...}`. The **next** scenario's `fill_from_rcmip()` then evaluates `compound_convert["HFC4310mee"]["HFC4310"]` and dies with `KeyError: 'HFC4310'`.
+
+⚠ **THE TELL IS THAT SCENARIO 1 PASSES AND SCENARIO 2 FAILS.** A single-scenario validation run cannot see it — which is exactly how it reached here, since the ssp245 smoke test passed cleanly before the five-scenario run blew up.
+⚠ **No number changes**: the conversion factor is 1.0 under either spelling. This is purely global-state hygiene.
+⛔ **Root cause is the payload, not FaIR** — the fix belongs in `scripts/setup_calibration_v160.py`. **Not patched here**, because `calibration_v160/` is shared with other drivers (Ladrillo, the SPRM/EGU work) and any of them that loops over scenarios in one process is exposed. The exporter snapshots and restores FaIR's three unit tables around `fill_from_csv` so it is immune meanwhile.
+
+### The exporter is now calibration-parameterised
+`FaIRtoFrEDI/run_fair_ssps_for_ccx.py` takes `--calib {145,160}` (default **160**) and `--end-year`; every path, the output directory, the file prefix and the provenance string derive from it, so **a 1.4.5 result keeps its label and is never relabelled 1.6.0**. `data-raw/build_climate_module.R` takes the calibration as its first argument the same way.
+⭐ **The prescribed-forcing species are read from the forcing FILE, not typed.** v1.6.0 adds **Irrigation** beside Volcanic and Solar; a hard-coded `["Volcanic","Solar"]` would have left it at zero with its `forcing_scale[Irrigation]` column unused — a silent partial migration. A missing scale column is now an error, never a quiet skip. ⚠ `fill_from_rcmip()` cannot supply Irrigation (RCMIP has no such forcing), so the scratch emissions object is built **without** the prescribed-forcing species; their forcing comes from the calibration's own `volcanic_solar.csv`, which is where it should come from anyway.
+✅ Verified the migration is single-axis: the exporter run at `--calib 145` reproduces the archived v145 product **exactly** (ssp245 GMST 2024 +1.33, CO₂ 2100 530.3).
+
+Suite `climate|app|review|driver|growth|future|mechanisms`: **322 / 0**.
+
 ## 2026-09-24 (e) — ⭐ **F5 SHIPPED: Scenarios and Build-your-own span 1900–2150, and the splice caption re-checked mid-frame reads correctly.** ⭐⭐ **Extending the horizon took the stylised "+5 %/yr" case from 2.1× to 26× outside the fitted CO₂→forcing range, so the console-only warning is now a caveat the reader can see.**
 
 ### The run span and the view span are different things

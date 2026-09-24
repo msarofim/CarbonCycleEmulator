@@ -1,12 +1,21 @@
 # =====================================================================
-# build_climate_module.R -- turn the FaIR v1.4.5 SSP export into the two
-# fitted objects the emulator needs to compute its OWN temperature.
+# build_climate_module.R -- turn the FaIR SSP export into the two fitted
+# objects the emulator needs to compute its OWN temperature.
 #
-# Source: data-raw/downloads/fair_v145_ssp/fair_v145_<ssp>.csv, written by
-# FaIRtoFrEDI/run_fair_ssps_for_ccx.py (FaIR 2.2.4, calibration 1.4.5, 841
-# configs, ensemble mean, GMST relative to 1850-1900). Checksums in that
-# directory's MANIFEST.csv; re-stamped here so the emulator can verify the file
-# it actually read.
+# Source: data-raw/downloads/fair_<tag>_ssp/fair_<tag>_<ssp>.csv, written by
+# FaIRtoFrEDI/run_fair_ssps_for_ccx.py (FaIR 2.2.4, 841 configs, ensemble mean,
+# GMST relative to 1850-1900). Checksums in that directory's MANIFEST.csv;
+# re-stamped here so the emulator can verify the file it actually read.
+#
+# THE CALIBRATION IS AN ARGUMENT (2026-09-24). calib 1.6.0 has been the project
+# standard since 2026-08-28; this module was still on 1.4.5, built 2026-08-10,
+# eighteen days before the migration. ⭐ Rebuilding it needs NO REFIT: the
+# objective runs 1750-2024 on OBSERVED IGCC GMST and never calls
+# ccx_climate_module() -- grep says it appears only in R/climate.R and
+# app/global.R. So this moves the Futures and Pulse tabs and nothing else.
+#
+#     Rscript data-raw/build_climate_module.R           # calib 1.6.0
+#     Rscript data-raw/build_climate_module.R 145       # the superseded one
 #
 # WHY A FITTED MODULE AND NOT A PRESCRIBED GMST PATH. The app's Futures tab has
 # to answer "what if we emitted 100 GtC in 2050" and "what does a pulse do", on
@@ -51,18 +60,26 @@
 for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) source(f)
 
 CLIM_SSPS      <- c("ssp119", "ssp126", "ssp245", "ssp370", "ssp585")
-CLIM_SRC_DIR   <- ccx_path("data-raw", "downloads", "fair_v145_ssp")
+# ⚠ A 1.4.5 RESULT KEEPS ITS LABEL and is never relabelled 1.6.0 (standing
+# rule). Both the directory and the provenance string derive from the tag, so
+# a rebuilt module cannot claim a calibration it was not built from.
+CLIM_ARGS      <- commandArgs(trailingOnly = TRUE)
+CLIM_CALIB     <- if (length(CLIM_ARGS)) CLIM_ARGS[1] else "160"
+CLIM_VER       <- c("145" = "1.4.5", "160" = "1.6.0")[[CLIM_CALIB]]
+CLIM_TAG       <- paste0("v", CLIM_CALIB)
+CLIM_SRC_DIR   <- ccx_path("data-raw", "downloads", paste0("fair_", CLIM_TAG, "_ssp"))
 CLIM_OUT       <- ccx_path("data", "climate_module.rds")
 CLIM_SSP_OUT   <- ccx_path("data", "forcing_climate_ssp.rds")
 CLIM_N_BOX     <- 3L          # impulse-response timescales
 CLIM_BASE      <- c(1850, 1900)   # FaIR's GMST baseline; ours must match
-CLIM_PROVENANCE <- "FaIR 2.2.4 (calib1.4.5), RCMIP SSP emissions, 841 configs, ensemble mean"
+CLIM_PROVENANCE <- sprintf(
+  "FaIR 2.2.4 (calib%s), RCMIP SSP emissions, 841 configs, ensemble mean", CLIM_VER)
 
 # ---------------------------------------------------------------------
 # 1. read the export
 # ---------------------------------------------------------------------
 read_one <- function(ssp) {
-  p <- file.path(CLIM_SRC_DIR, paste0("fair_v145_", ssp, ".csv"))
+  p <- file.path(CLIM_SRC_DIR, paste0("fair_", CLIM_TAG, "_", ssp, ".csv"))
   if (!file.exists(p)) stop("missing FaIR export: ", p,
                             "\nRun FaIRtoFrEDI/run_fair_ssps_for_ccx.py first.")
   d <- utils::read.csv(p)
@@ -74,7 +91,7 @@ cat(sprintf("read %d scenarios, %d-%d\n", length(CLIM_SSPS),
             min(all$year), max(all$year)))
 
 sha <- vapply(CLIM_SSPS, function(s) {
-  p <- file.path(CLIM_SRC_DIR, paste0("fair_v145_", s, ".csv"))
+  p <- file.path(CLIM_SRC_DIR, paste0("fair_", CLIM_TAG, "_", s, ".csv"))
   if (requireNamespace("digest", quietly = TRUE))
     digest::digest(file = p, algo = "sha256") else NA_character_
 }, character(1))

@@ -102,9 +102,15 @@ ccx_temperature_from_erf <- function(erf, years, mod = ccx_climate_module(),
 #' Prescribed non-CO2 forcing for a background scenario, on a year grid
 #'
 #' Returns FaIR's erf_total - erf_co2 for that scenario, interpolated to `years`
-#' and held flat outside the FaIR record (which runs 1750-2500). Held flat is
-#' correct here in a way it was not for GMST: beyond 2500 the SSP extensions
-#' have themselves gone constant.
+#' and held flat outside the FaIR record. ⚠ THE RECORD'S SPAN IS A PROPERTY OF
+#' THE BUILD, NOT A CONSTANT: the calib-1.4.5 export ran to 2501, and the
+#' calib-1.6.0 one stops at 2301 because that calibration's volcanic/solar
+#' forcing ends at 2302 and the standing rule makes 2300 the end year for all
+#' our work. The old comment here said "1750-2500" and justified the flat hold
+#' by the SSP extensions having gone constant by then -- which is no longer the
+#' year being held at. The hold is therefore WARNED about rather than assumed
+#' correct, because a silent flat extrapolation of non-CO2 forcing is exactly
+#' the kind of thing that reads as a result.
 ccx_erf_nonco2 <- function(scenario, years) {
   p <- ccx_path("data", CLIMATE_SSP_FILE)
   if (!file.exists(p))
@@ -119,6 +125,12 @@ ccx_erf_nonco2 <- function(scenario, years) {
     d <- d[d$scenario == scenario, ]
     if (!nrow(d)) stop("no FaIR climate record for scenario '", scenario, "'")
   }
+  hi <- max(d$year)
+  if (max(years) > hi)
+    warning(sprintf(paste0("non-CO2 forcing is recorded only to %d; %d-%d will be ",
+                           "HELD FLAT at its %d value. Rebuild the climate module ",
+                           "from an export that covers the window, or shorten it."),
+                    hi, hi + 1L, max(years), hi), call. = FALSE)
   stats::approx(d$year, d$erf_nonco2, xout = years, rule = 2)$y
 }
 
