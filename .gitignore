@@ -27,3 +27,9 @@ tests/testthat/testthat-problems.rds
 
 # Word lock files -- transient, never content (2026-09-24)
 ~$*
+
+# Marcus's own drafting, kept in the repo root but NOT repo content
+# (2026-09-24, his instruction). `git add -A` was staging it; this stops that.
+# ⚠ The docx REVIEW files he sends IN are tracked on purpose
+# (CarboTopecomments.*.docx) -- this excludes only the draft he is writing.
+CarboTopeSubstack.docx
