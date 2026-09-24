@@ -1,5 +1,11 @@
 # Handoff — 2026-09-24. **Marcus's SECOND app review is triaged, its ten COPY items are shipped and browser-verified, and ALL FIVE RULINGS ARE NOW TAKEN. The next session builds F1 → F2 → F4, investigates F3 via FaIR, and opens Q3 — which is the one that could move a number.**
 
+> ⚠ **IF YOU ARE A FRESH SESSION: every path in this file is relative to
+> `~/Documents/2026/CodeProjects/CarbonCycleEmulator/`, which is NOT your cwd.** The standing rule
+> launches sessions from `FaIRtoFrEDI/` (the memory keyspace follows the launch cwd), so a bare
+> `notes/...` will NOT resolve and the handoff will look missing. This exact friction cost the
+> first two tool calls of the 09-24 session. Prefix with the absolute path above, or `cd` there.
+>
 > Self-contained. **Read first, in this order:** `notes/review_2026-09-24_marcus_app_comments.md`
 > (the triage) · CHANGELOG **09-24 (a)** · then **§3 below**, which is the only part containing
 > work not yet done.
@@ -137,6 +143,12 @@ consideration as F3.
   is still uncommitted in FaIRtoFrEDI and is NEWER than HEAD's (09-21 `2d40652`, 48 rows, 8 arms
   incl. `noegu50_zero2100` vs 09-20 `ff05175`, 42 rows, 7 arms). **The new memo versions will build
   off it; commit it before citing it.**
+- ⚠ **`INDEX_ccx_ref.md` is at 16,954 B of its 18,432 B HARD ceiling** (~1.5 KB headroom) after
+  this session's two additions — **the next split candidate**, and `INDEX_ccx.md` (15,716) and
+  `INDEX_diag.md` (15,402) are over their 14 KB soft targets too. Root `MEMORY.md` is 14,098 B of
+  CONTENT (strip the `<!-- -->` blocks first) against a 12 KB soft. ⛔ Per
+  [[memory_index_split_beats_trim]], **split rather than trim** — and Marcus asks for splits
+  explicitly, so do not restructure the tree unprompted.
 - **Memory updated this session:** `ccx_app_beta_blockers` (REWRITTEN — it was quoting a superseded
   era), `ccx_shiny_app` (three retractions marked incl. the "~20 s cold" that DEPLOY.md had already
   corrected), `ccx_ihde_declined` (new), `tolerance_scaled_to_spread_can_be_blind` (new),
