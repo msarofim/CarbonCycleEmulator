@@ -2,6 +2,28 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (k) — **Figure: land uptake vs GCB, 5-yr smooth** (Marcus asked). `calibration/fig_land_sink_vs_gcb.R` → `calibration/output/figures/fig_land_sink_vs_gcb.png`.
+
+**Both conventions drawn, neither chosen silently** — "land uptake" is ambiguous and conflating the two is this project's own 32 % bug ([[ccx_app_luc_budget_convention]]). Panel A = **residual sink** (LUC outside; what GCB publishes and gate 7 scores), panel B = **net land flux** (LUC inside; the one that crosses zero). Raw annual underneath, **5-yr centred** mean bold. ⚠ 5 yr is **Marcus's request, not the app's `APP_LUC_SMOOTH_YR` = 11**; named in `FG_SMOOTH_YR`, and a gate checks the smoother drops exactly the `(n−1)/2` edge years the caption claims. Anchored on gate 7 = 3.09 before drawing, because **a figure is an assertion** and a wrong parameter build makes a wrong picture that looks fine.
+
+⭐ **Panel A carries GCB's unclosed imbalance as a band** — the 09-24 (i) result is that the gap *is* that imbalance, and a difference against a budget that does not close cannot honestly be drawn without it. ⚠ The band is an **extreme attribution** (all unplaced carbon assigned to land) and is captioned as such.
+
+⛔ **And the band claim was converted to a NUMBER, which corrected the eyeball reading.** "CCX sits inside the band for most of the record" is too generous. Measured, by decade (CCX vs band):
+
+| decade | CCX | band | inside? |
+|---|---|---|---|
+| 1960s | 1.24 | 0.93–1.86 | yes |
+| 1970s | 1.58 | 1.59–2.05 | **no, by 0.01** |
+| 1980s | 1.91 | 1.39–1.71 | **no, by 0.20** |
+| 1990s | 2.12 | 1.95–2.63 | yes |
+| 2000s | 2.46 | 2.18–2.86 | yes |
+| 2010s | 2.84 | 2.54–2.97 | yes |
+| 2020–24 | 3.39 | 2.28–2.35 | **no, by 1.04** |
+
+⇒ **4 of 7 decades inside**; the 1970s miss is immaterial (0.01), the 1980s modest, and **2020–2024 is the one real excursion** — consistent with 09-24 (i)/(j), which already placed the recent window outside GCB's slack and declined to attribute it.
+
+⚠ **Colours are computed, not chosen.** The repo's model pink `#B03060` against ice blue `#1F4E79` scores OKLab ΔE **7.9 under protanopia** — below the 8 target. Re-stepped to `#C2185B` / `#12395C` (normal 31.3 / protan 13.5 / deutan 26.1 / tritan 31.7, all pass), keeping the repo's warm-model / cool-observation semantic. The `dataviz` skill's own validator needs `node`, which is not installed on this machine, so the OKLab + Viénot-Brettel dichromat check was reimplemented and run rather than skipped.
+
 ## 2026-09-24 (j) — ⭐⭐⭐ **THE GROWTH DEFICIT IS A ~1.6-se SIGNAL, AND WHAT THERE IS OF IT IS DECADAL, NOT THE KNOWN INTERANNUAL SHORTFALL.** ⛔ **The GATE V amplitude gap is quantitatively incapable of producing it — an order of magnitude too small, and the wrong sign.** ⛔⛔ **And the 1980s deficit of the same size is a DIFFERENT phenomenon, so it is not a precedent.**
 
 `calibration/diag_growth_deficit.R`. Three anchors, all reproduced before any arm was read: **gate 7 land 3.09**; **09-24 (i)'s window means −0.45 (2015–2023) / −0.91 (2020–2024)**, to 0.01, via a *second* construction of the model's growth (`dg_af_annual_model()` vs `dg_annual_sinks()` — two estimators of one quantity, gated to agree); and **GATE V** (model sd 0.548, obs 0.933, ratio 0.59, z −4.60, **FAIL** — reported, never chased, per Marcus 2026-09-04).
