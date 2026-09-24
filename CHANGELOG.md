@@ -2,6 +2,56 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (i) — ⭐⭐⭐ **THE LAND-SINK "BIAS" IS NOT A MODEL DEFECT: IT IS GCB's OWN UNCLOSED IMBALANCE, MINUS the fitted `luc_scale`.** An exact identity closes to **3×10⁻¹⁴** and leaves **nothing unexplained** over the full record. ⛔ **And the handoff's premise was backwards — GCB's land sink is NOT the residual; the IMBALANCE is.** What survives is a *different*, smaller question about the last decade.
+
+`calibration/diag_land_sink_bias_budget.R`. ⚠ **Anchored on gate 7 before any arm was read**: model land **3.09**, ocean **3.13** GtC/yr over 2015–2023 ([[ccx_diag_must_use_mode_base]]). Mode `hilda29l`, logpost −1425.36, periodic spinup, `luc_scale` **0.8214**.
+
+### The method is an IDENTITY, not a comparison
+Both budgets close, so the land difference is not a free-floating bias — it is the exact sum of the differences in every *other* term:
+
+    E_foss + E_luc = G + S_land + S_ocean                            (model, exact)
+    E_foss + E_luc = G + S_land + S_ocean + cement + IMBALANCE       (GCB)
+    ⇒ S_land(mdl) − S_land(GCB) = dE_foss + dE_luc − dG − dS_ocean + cement + IMBALANCE + num
+
+⭐ The decomposition **closes to 3.2×10⁻¹⁴ GtC/yr**, so every term below is exact, not attributed.
+
+### ⛔ GATE B overturns the handoff's step-1 premise
+The handoff said GCB's land sink "is a **residual** — it absorbs the budget imbalance". **Tested, not assumed:** the published identity closes to **3.4×10⁻¹⁴** only in the form `F + L − G − O − Land − cement − imbalance = 0`. ⇒ **the IMBALANCE is the residual**; GCB's land sink is an **independent (DGVM-ensemble) estimate** that carries its own error, and the imbalance is carbon the published budget **cannot place at all**. A "model too high vs a residual" framing was never available.
+
+### ⭐⭐ Where the +0.32 actually comes from (GtC/yr, model minus GCB)
+
+| window | **dLAND** | dFoss | dLuc | −dGrow | −dOcn | cement | **IMBAL** | num |
+|---|---|---|---|---|---|---|---|---|
+| **1959–2024** | **+0.32** | +0.00 | **−0.30** | +0.05 | −0.05 | +0.09 | **+0.54** | −0.006 |
+| 1959–1989 | +0.28 | +0.00 | −0.32 | +0.07 | −0.09 | +0.03 | **+0.59** | −0.006 |
+| 2015–2023 | +0.68 | +0.00 | −0.25 | **+0.45** | +0.07 | +0.21 | +0.21 | −0.004 |
+| 2020–2024 | +1.04 | +0.00 | −0.23 | **+0.91** | +0.21 | +0.22 | −0.07 | −0.007 |
+
+⇒ **Over the full record the excess is GCB's own imbalance (+0.54) plus the cement sink the model does not have (+0.09), less the fitted `luc_scale`'s down-scaling of LUC emissions (−0.30).** Growth and ocean contribute ±0.05. **There is no unexplained land-sink bias.**
+⚠ `luc_scale = 0.8214` means the model burns **0.30 GtC/yr less** land-use emission than GCB, and the residual-sink convention carries that straight into the difference. It is a **fitted name doing exactly what it was fitted to do**, not a hidden error — but it is *masking*, in the sense that the difference would be larger without it.
+
+### ⭐⭐ And the SIGN is the whole point
+The imbalance is **positive** (+0.54 mean, +0.59 early). A positive imbalance means GCB's sources exceed everything it can place: **its identified sinks are collectively too small to close its own budget.** A model sink **larger** than GCB's therefore moves **toward** closure. The model's excess is **60 % of the mean imbalance and of the same sign.**
+
+### What actually survives: the last decade, and it is a DIFFERENT fact
+In 2015–2023 the in-window imbalance is only **+0.21** (and **−0.07** for 2020–2024), so the recent excess is **not** GCB slack. It arrives through an **atmospheric-growth deficit**: model minus observed growth is **−0.45 GtC/yr (2015–2023)** and **−0.91 (2020–2024)**, median ≈ mean in both, so it is persistent rather than one outlier year. Total uptake is correspondingly **+0.61 / +0.83** too high, and the partition is off too — model land is **49.7 %** of total uptake vs GCB's **42.9 %** (2015–2023).
+
+⛔ **But it does not accumulate.** Cumulative drift against observed growth, in ppm from 1959: **+0.58 (1970), +0.90 (1980), −0.38 (1990), +0.49 (2000), +0.58 (2010), +1.46 (2015), +0.12 (2020), −1.52 (2024)**. The drift **oscillates inside ±1.6 ppm with no trend**, and the recent deficit is, in level terms, working off an earlier surplus. Model CO₂ at 2024 is **424.4 ppm**. ⇒ **the recent growth deficit is a flux-level discrepancy that the CO₂ record does not convert into a level error.**
+
+### ENSO is EXCLUDED, and the null has measured power
+Growth difference regressed on Niño3.4 with a year term, 1959–2024, n=66: slope **+0.110 GtC/yr per index unit (95 % CI −0.283…+0.503)**, partial r **+0.07**. ⛔ **A null is worthless until its power is measured** ([[no_power_null]]): mean Niño3.4 over 2015–2023 is **+0.15**, so ENSO would need a slope of **−2.98** to produce the −0.45 miss — **an order of magnitude outside the interval.** ⇒ ENSO is **excluded**, not merely unproven.
+
+### The numerical term is carried, not hidden in a tolerance
+The model's own budget closes to ~1e-6 GtC/yr in the 1750s and drifts to **0.029 by 2021** — *proportional to the flux*, i.e. discretisation, not a leak (the state has no fourth reservoir: `ccx_core.cpp` sums all four land pools into `land_C` and mixed layer + interior into `ocean_C`). It comes from `dg_annual_sinks()` interpolating **monthly-sampled stocks to January-1 boundaries** while emissions are calendar-year means. Rather than widen a tolerance until the identity "closes", it is printed in its own column at **−0.0062 GtC/yr = 1.9 % of the excess**, and **gated at 10 % of the quantity it would explain** ([[tolerance_scaled_to_spread]]). ⚠ 1750 carries a much larger **0.37** — the start-boundary linear extrapolation in `stock()`, outside this window and relied on nowhere.
+
+### Gates, all four MUTATION-TESTED
+Anchor (move gate 7's recorded 3.09 → 3.50: **fails**), GATE B (drop cement from the GCB identity: **fails**, 2.3e-1), GATE C (flip the sign of `num` in the reconstruction: **fails**, 5.7e-2), and the numerical-term cap (tighten 10 % → 0.1 %: **fails**). ⚠ The `num` sign error was a **real** one caught by GATE C on the first run, not a staged mutation.
+
+### ⇒ What this means for the next step
+⛔ **Do NOT refit for a full-record land-sink level error.** There is nothing there to fix: the "bias" is an artifact of comparing a budget that closes by construction against one that does not. Q1 and Q3 are **not** "one level error at two ends of the record" — the early end is accounting, the late end is a growth-deficit question that does not accumulate.
+⚠ **Convention:** this entire entry is in the **RESIDUAL SINK** convention (land-use emissions OUTSIDE the sink), which is what gate 7 scores and what the identity is written in. The NET land flux is not used here. Never mix them ([[ccx_app_luc_budget_convention]]).
+⚠ **Tried and not pursued:** a secular over-uptake reading of the recent decade (refuted by the non-accumulating drift) and an ENSO-amplitude reading (excluded with power). No third candidate is proposed here; nothing is blocking, and gate 7 still passes.
+
 ## 2026-09-24 (h) — ⭐⭐ **Q3/Q1 MEASURED FIRST, AND THE JUSTIFICATION DOES NOT SURVIVE.** The early source→sink crossing is real — and it is **fully explained by a constant land-sink bias**, so it is not evidence for a missing regrowth term. The discriminating test fails. ⛔ **A refit aimed at regrowth would be aimed at the wrong shape.**
 
 `calibration/diag_q3_regrowth_vs_fertilisation.R`. ⚠ **Anchored on gate 7 before any arm was read**: model land **3.09** GtC/yr over 2015–2023, exactly the gate's recorded value ([[ccx_diag_must_use_mode_base]]).
