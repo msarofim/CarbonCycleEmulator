@@ -183,7 +183,7 @@ renderer, wrong convention, the "extreme attribution" caption disappearing).
   flagged for Marcus, and the new panel's colours were chosen with margin (worst pair **10.9**) so
   nothing turns on it. ⇒ [[palette_check_unreproduced]]. **The imbalance panel will hit this same
   question** — pick with margin and score it.
-- ⚠ **FLAGGED, NOT CHANGED — existing copy.** `output$w_luc_note` credits the land's crossing to
+- ✅ **RESOLVED 09-24 (p) — existing copy (was flagged).** `output$w_luc_note` credits the land's crossing to
   "CO₂ fertilisation **and forest regrowth on former farmland**". With Tier 1 drawn directly below
   it, that is visibly imprecise: **regrowth is inside the LUC INPUT, not inside the natural land
   sink**, and fertilisation is the model's only long-term land-uptake term
@@ -203,7 +203,9 @@ renderer, wrong convention, the "extreme attribution" caption disappearing).
 1. ~~The imbalance-band panel~~ ✅ **DONE 09-24 (o)**, `8d59aef`. ⚠ It left ONE thing open:
    `app/R/plots.R`'s **axis labels, legend titles and `annotate("text")`** are the text slots that
    have NOT been checked for the clipping the subtitle fix addressed ([[subtitles_clip_too]]).
-2. The `w_luc_note` copy fix — one sentence, Marcus's call, blocks nothing.
+2. ~~The `w_luc_note` copy fix~~ ✅ **DONE 09-24 (p)**, `b1c39d8`. It was two corrections, not one:
+   the regrowth attribution AND "larger sink than GCB" left standing as an unqualified fault.
+   ⭐ **Adding a panel falsified copy two charts above it** — re-read the neighbours when a chart lands.
 3. Resolve the palette discrepancy: re-step `fig_land_sink_vs_gcb.R`'s pair with margin under the
    committed checker, or find a third implementation to break the tie. **Re-stepping is cheaper and
    removes an unreproducible claim from the record.**
