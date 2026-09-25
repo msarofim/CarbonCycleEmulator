@@ -196,6 +196,13 @@ function(input, output, session) {
   # check against the chart has to be produced by the same arithmetic the chart
   # is.
   imbalance_dec <- reactive(app_imbalance_decades(APP_HIST$out, APP_GCB, hist_F()))
+  # \u26d4 THE DECOMPOSITION IS COMPUTED, LIKE THE CONTAINMENT ABOVE IT
+  # (2026-09-25). The info box below used to TYPE "about 0.3 GtC" and name three
+  # of the five terms, on the panel whose own takeaway computes its numbers --
+  # and the typed value had already drifted from the +0.32 the decomposition
+  # gives. Same reactive inputs as the containment, so the box and the chart
+  # cannot describe different runs.
+  imbalance_id <- reactive(app_imbalance_identity(APP_HIST$out, APP_GCB, hist_F()))
 
   output$w_imbalance_ui <- renderUI({
     tagList(
@@ -208,11 +215,26 @@ function(input, output, session) {
                  "emitted. So a model that takes up more land carbon than the",
                  "budget reports is moving toward closing it, not away from it.",
                  "Running above the published line is not by itself a fault."),
-               p("Taking the whole gap apart gives no remainder at all. Against",
-                 "the measured budget this model's land sink runs about 0.3 GtC",
-                 "a year high, and that is exactly the budget's own leftover",
-                 "carbon, plus a cement sink this model does not have, less the",
-                 "fitted land-use scaling. Nothing is left unexplained."),
+               p(local({
+                 z <- imbalance_id()
+                 # \u26a0 THE WORD CARRIES THE SIGN, so the magnitudes print
+                 # unsigned after "plus"/"less" -- a signed "-0.30" after "less"
+                 # reads as a double negative. The two small terms keep their
+                 # signs because no word orders them.
+                 a <- function(v) sprintf("%.2f", abs(v))
+                 sprintf(paste("Taking the whole gap apart gives no remainder at all. Against",
+                               "the measured budget this model's land sink runs about %s GtC",
+                               "a year high over %d\u2013%d, and that is exactly the budget's own",
+                               "leftover carbon (%s), plus a cement sink this model does not",
+                               "have (%s), less the fitted land-use scaling (%s) \u2014 with the",
+                               "model's own growth and ocean differences adding %+.2f and %+.2f.",
+                               "Nothing is left unexplained: the terms close to %.3f GtC a year,",
+                               "about %.0f%% of the gap they account for."),
+                         a(z$d_land), z$window[1], z$window[2],
+                         a(z$imbal), a(z$cement), a(z$d_luc),
+                         -z$d_grow, -z$d_ocn,
+                         abs(z$closure), 100 * abs(z$closure / z$d_land))
+               })),
                p("The one place the model really does sit outside the band is",
                  "the last few years, and that is flagged rather than explained:",
                  "it is a handful of years at the end of the record, where every",

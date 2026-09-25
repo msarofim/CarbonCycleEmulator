@@ -615,9 +615,26 @@ IMB_BAND_NOTE <- paste("The band asks where the measured land sink would sit if 
 #'
 #' ⭐⭐ WHY THE BAND IS THE PANEL. The bars above this chart say the model takes
 #' up more land carbon than GCB reports, which reads as a defect. It is not one:
-#' 09-24 (i) decomposed the +0.32 GtC/yr difference as an EXACT identity (closing
-#' to 3e-14) into GCB's own unclosed imbalance +0.54, plus the cement sink the
-#' model lacks +0.09, less the fitted `luc_scale` -0.30. Nothing is unexplained.
+#' 09-24 (i) decomposed the +0.32 GtC/yr difference into GCB's own unclosed
+#' imbalance +0.54, plus the cement sink the model lacks +0.09, less the fitted
+#' `luc_scale` -0.30, plus the model-vs-GCB growth and ocean differences at
+#' +0.05 and -0.05. Nothing is left unexplained.
+#'
+#' ⚠ TWO CORRECTIONS TO WHAT THIS COMMENT USED TO SAY (2026-09-25), both found by
+#' recomputing it rather than re-reading it:
+#'   * It listed THREE terms. The decomposition has FIVE -- CHANGELOG 09-24 (i)'s
+#'     own table carries `-dGrow +0.05` and `-dOcn -0.05` columns, and the text
+#'     under it says "Growth and ocean contribute +/-0.05". Dropping them made a
+#'     5-term identity look like a 3-term one that happened to close.
+#'   * It claimed the decomposition closes "to 3e-14". That figure is the GCB
+#'     BUDGET IDENTITY's closure (`F + L - G - O - Land - cement - imbal = 0`,
+#'     3.2-3.4e-14, CHANGELOG 09-24 (i) lines 715/718) -- a different statement
+#'     about a different equation. THIS decomposition's closure is that table's
+#'     `num` column, -0.006 GtC/yr, about 2 % of the +0.32 it explains. Quoting
+#'     the neighbouring identity's exactness for this one overstated it by 12
+#'     orders of magnitude.
+#' ⇒ app_imbalance_identity() below COMPUTES all of it, and the panel's prose
+#' prints what it returns, so neither error can recur by retyping.
 #' Drawing a difference against a budget that does not close, without showing how
 #' much it fails to close by, is the thing this panel exists to stop.
 #'
@@ -679,6 +696,62 @@ plot_land_sink_imbalance <- function(out, gcb, F, smooth_yr = APP_LUC_SMOOTH_YR)
          # what a screenshot has to carry on its own.
          caption = app_provenance_caption(IMB_BAND_SHORT)) +
     theme_ccx()
+}
+
+#' The +0.32 decomposition, COMPUTED -- every term the panel's prose quotes
+#'
+#' \u26d4 THE DEFECT THIS REPLACES (2026-09-25). The info box under this chart
+#' TYPED "about 0.3 GtC a year high" and named three of the five terms, on the
+#' panel whose sibling takeaway computes its containment rather than describing
+#' it. A typed number on a computed panel is the one a reader has no way to
+#' check, and it had already drifted from the +0.32 the decomposition gives.
+#'
+#' Returns the five terms of CHANGELOG 09-24 (i)'s table, on the model-minus-GCB
+#' convention, plus the window they were taken over and the numerical closure:
+#'
+#'   d_land = imbal + cement + d_luc - d_grow - d_ocn   ( + closure )
+#'
+#' \u26a0 THE CLOSURE IS REPORTED, NOT ASSUMED. It is about -0.006 GtC/yr -- ~2 %
+#' of d_land -- and it is NOT the 3e-14 of the GCB budget identity. A caller that
+#' wants to assert exactness must assert against `closure`, which is why it is
+#' returned rather than dropped. test-imbalance-panel.R does exactly that.
+#'
+#' \u26a0 THE WINDOW IS THE FULL GCB OVERLAP, and it is RETURNED so the sentence
+#' can name it. The decomposition is strongly window-dependent -- 2020-2024 gives
+#' d_land +1.04 with the imbalance term at -0.07, the opposite sign -- so a
+#' sentence quoting these numbers without its window is not checkable.
+app_imbalance_identity <- function(out, gcb, F) {
+  ann <- app_sinks_annual(out, F)
+  el  <- ccx_forcing_eluc_annual(F)
+  # the model's atmospheric stock, on the SAME calendar-year boundaries
+  # app_sinks_annual() uses. \u26a0 CO2 is HEMISPHERIC (co2_NH/co2_SH) and there is
+  # no atmospheric-carbon column on a run -- see [[ccx_co2_global_not_a_column]].
+  tt <- out$t; n <- length(tt)
+  yrs <- sort(unique(floor(tt + 1e-9))); bnd <- c(yrs, max(yrs) + 1L)
+  atm_C <- (out$co2_NH + out$co2_SH) * (ccx_const("GtC_PER_PPM") / 2)
+  y  <- stats::approx(tt, atm_C, xout = bnd)$y
+  lo <- bnd < tt[1]; hi <- bnd > tt[n]
+  if (any(lo)) y[lo] <- atm_C[1] + (bnd[lo] - tt[1]) *
+                        (atm_C[2] - atm_C[1]) / (tt[2] - tt[1])
+  if (any(hi)) y[hi] <- atm_C[n] + (bnd[hi] - tt[n]) *
+                        (atm_C[n] - atm_C[n - 1]) / (tt[n] - tt[n - 1])
+  d <- merge(data.frame(year = yrs, m_land = ann$land_sink,
+                        m_ocn = ann$ocean_sink, m_grow = diff(y)),
+             gcb[, c("year", "luc", "atm_growth", "ocean_sink",
+                     "land_sink", "cement_carbonation", "imbalance")],
+             by = "year")
+  d$eluc <- el$eluc[match(d$year, el$year)]
+  d <- d[stats::complete.cases(d), ]
+  m <- function(v) mean(v)
+  z <- list(window = range(d$year), n = nrow(d),
+            d_land = m(d$m_land - d$land_sink),
+            imbal  = m(d$imbalance),
+            cement = m(d$cement_carbonation),
+            d_luc  = m(d$eluc  - d$luc),
+            d_grow = m(d$m_grow - d$atm_growth),
+            d_ocn  = m(d$m_ocn  - d$ocean_sink))
+  z$closure <- z$d_land - (z$imbal + z$cement + z$d_luc - z$d_grow - z$d_ocn)
+  z
 }
 
 #' Decade means of the same two series, and whether the model sits inside the band

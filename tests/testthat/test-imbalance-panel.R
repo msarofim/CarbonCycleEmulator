@@ -91,6 +91,64 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   expect_equal(nrow(s), 7L)
   expect_equal(sum(s$in_band), 4L)
   expect_equal(s$miss[nrow(s)], 1.04, tolerance = 0.02)
+
+  # ---- the +0.32 decomposition, recomputed (added 2026-09-25) --------------
+  # \u26d4 The info box used to TYPE "about 0.3 GtC" and name THREE terms. There
+  # are FIVE, and the panel's own roxygen also claimed the decomposition closes
+  # "to 3e-14" -- which is the GCB BUDGET IDENTITY's closure, a different
+  # equation. This reproduces CHANGELOG 09-24 (i)'s 1959-2024 row instead.
+  z <- .imb_env$app_imbalance_identity(r$out, gcb, r$F)
+  expect_equal(z$window, c(1959L, 2024L))
+  expect_equal(z$d_land, +0.32, tolerance = 0.005)
+  expect_equal(z$imbal,  +0.54, tolerance = 0.005)
+  expect_equal(z$cement, +0.09, tolerance = 0.005)
+  expect_equal(z$d_luc,  -0.30, tolerance = 0.005)
+  expect_equal(-z$d_grow, +0.05, tolerance = 0.005)
+  expect_equal(-z$d_ocn,  -0.05, tolerance = 0.005)
+  # \u26a0 THE CLOSURE IS ASSERTED AT ITS MEASURED SIZE, NOT AT ZERO. It is
+  # -0.006 GtC/yr (the table's `num` column), ~2 % of the d_land it explains.
+  # Asserting 3e-14 here would fail; asserting nothing would let the identity
+  # silently stop closing. The bound is the measured value with room, and the
+  # mutation below is a term DROPPED, which moves it by 0.05-0.54.
+  expect_lt(abs(z$closure), 0.02)
+  # MUTATION: drop the growth term -- the 3-term story the prose used to tell --
+  # and the closure must leave that bound. If it did not, naming five terms
+  # would be decoration.
+  expect_gt(abs(z$closure + z$d_grow), 0.02)
+  # ...and the same for the ocean term, which is the other one that was missing.
+  expect_gt(abs(z$closure + z$d_ocn), 0.02)
+})
+
+test_that("6. the info box COMPUTES its numbers instead of typing them", {
+  # \u26d4 [[gate_only_guards_what_it_lists]] in the small: this is the assertion
+  # that keeps the fix from being undone by someone editing the prose. The box
+  # sits three lines under a takeaway that computes, on a panel whose header
+  # insists the containment is computed and not described.
+  # \u26d4 STRIP COMMENTS FIRST, AND THE FIRST DRAFT DID NOT (2026-09-25). This
+  # assertion forbids the literal "about 0.3 GtC" in server.R -- and matched the
+  # COMMENT IN server.R THAT DOCUMENTS THE RETIRED LITERAL. Second time in one
+  # session: the ui.R year lint hit the identical trap. A text gate must read
+  # CODE; a file's own description of the defect contains the defect's text, so
+  # a gate that reads raw lines reports every repair as a relapse.
+  # \u26a0 Quote-aware, because a `#` inside a string is content.
+  .strip1 <- function(ln) {
+    ch <- strsplit(ln, "", fixed = TRUE)[[1]]
+    q <- 0L; cut <- length(ch) + 1L
+    for (j in seq_along(ch)) {
+      if (ch[j] == '"') q <- q + 1L
+      else if (ch[j] == "#" && q %% 2L == 0L) { cut <- j; break }
+    }
+    if (cut == 1L) "" else paste(ch[seq_len(cut - 1L)], collapse = "")
+  }
+  code <- vapply(.imb_srv, .strip1, character(1), USE.NAMES = FALSE)
+  blk <- paste(code, collapse = "\n")
+  expect_true(grepl("imbalance_id\\(\\)", blk))
+  # the retired literal must not come back
+  expect_false(grepl("about 0\\.3 GtC", blk))
+  # and no bare "N.N GtC" literal anywhere in the imbalance info box
+  box <- grep("Taking the whole gap apart", code)
+  expect_length(box, 1L)
+  expect_false(any(grepl("[0-9]\\.[0-9]+ GtC", code[box:(box + 12L)])))
 })
 
 test_that("2. a leading partial decade is dropped and a trailing one is kept", {
