@@ -43,11 +43,34 @@ FG_SMOOTH_YR  <- 5L                      # centred; NOT the app's 11-yr conventi
 FG_G7_RECORD  <- 3.09                    # gate 7's recorded land sink -- the anchor
 FG_G7_TOL     <- 0.02
 FG_W <- 11; FG_H <- 9; FG_DPI <- 160
-# ⭐ COLOURS ARE COMPUTED, NOT CHOSEN. The repo's model pink #B03060 against the
-# ice blue #1F4E79 scores OKLab dE 7.9 under PROTANOPIA -- below the 8 target.
-# Re-stepped within the same warm-model / cool-observation semantic to
-# normal 31.3 / protan 13.5 / deutan 26.1 / tritan 31.7, all passing.
-FG_COL        <- c(model = "#C2185B", gcb = "#12395C")
+# ⭐ COLOURS ARE COMPUTED, NOT CHOSEN -- AND THE TOOL IS NAMED, WHICH IS THE
+# POINT OF THE 2026-09-25 RE-STEP. The 09-24 (k) pair #C2185B / #12395C was
+# recorded here as "protan 13.5", from a throwaway dichromat implementation that
+# was never committed. `tools/palette_check.py` (committed 09-24 n; sRGB ->
+# linear -> LMS, Vienot-Brettel-Mollon projection, OKLab dE) reproduces that
+# pair's NORMAL dE exactly (31.3) and scores its protan at **7.4** -- BELOW the
+# 8 target. Two defensible implementations disagreeing by ~2x is the whole width
+# of the pass/fail decision, so the pair is re-stepped to clear the target under
+# the STRICTER of them rather than left resting on a number nothing can
+# reproduce ([[palette_check_unreproduced]]).
+#
+# MINIMAL CHANGE subject to a worst-case floor of 12 (1.5x the target): the new
+# pair sits dE 2.8 and 1.5 from its predecessor under normal vision, i.e. the
+# figure looks the same, and keeps the warm-model / cool-observation semantic.
+# ⚠ NEITHER COLOUR COULD BE KEPT FIXED -- a search holding one of them exactly
+# found no partner clearing the floor. The protan gap is a JOINT property of the
+# pair, not a defect in one of them.
+#
+# Reproduce:  python3 tools/palette_check.py '#C4315F' '#16345A'
+# ⛔ FG_COL_SCORES is not decoration: test-figure-palette.R re-runs that command,
+# parses these two colours out of THIS file, and fails if the numbers below stop
+# matching -- so a colour cannot be changed without the receipt moving with it.
+FG_COL        <- c(model = "#C4315F", gcb = "#16345A")
+FG_COL_SCORES <- c(normal = 32.1, protan = 12.6, deutan = 26.6, tritan = 40.8)
+FG_COL_TARGET <- 8      # the dataviz skill's OKLab dE floor
+# The band is FG_COL[["gcb"]] at alpha 0.16 over white = #DADFE5, which scores
+# 9.7 against the paper and 57.1 / 31.4 against the two lines -- checked, because
+# an alpha-composited fill is not covered by scoring the pair it came from.
 FG_LAB_MODEL  <- "CCX"
 FG_LAB_GCB    <- "Global Carbon Budget"
 FG_LAB_BAND   <- "GCB land sink + its unclosed imbalance"

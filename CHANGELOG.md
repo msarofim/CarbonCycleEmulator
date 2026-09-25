@@ -2,6 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-25 — **The figure's accessibility receipt was a number nothing could reproduce. Re-stepped, and the receipt is now a GATE rather than a comment.**
+
+09-24 (k) recorded `#C2185B` / `#12395C` as "normal 31.3 / protan **13.5** / deutan 26.1 / tritan 31.7, all passing", from a dichromat implementation written for that session and **never committed**. `tools/palette_check.py` (committed 09-24 n) reproduces that pair's **normal ΔE exactly (31.3)** and scores its protan at **7.4 — below the 8 target**. ⛔ **Two defensible implementations disagreeing by ~2× is the whole width of the pass/fail decision**, and the figure had been shipping on the side of it that cannot be reproduced.
+
+### Re-stepped to clear the target under the STRICTER implementation
+**`#C4315F` / `#16345A`** — normal **32.1** / protan **12.6** / deutan **26.6** / tritan **40.8**.
+
+⭐ **MINIMAL CHANGE, not a redesign.** Chosen by searching for the pair closest to its predecessor subject to a worst-case floor of **12** (1.5× the target): the new colours sit **ΔE 2.8 and 1.5** from the old ones under normal vision, keep the warm-model / cool-observation semantic, and the regenerated figure is indistinguishable in character.
+⚠ **NEITHER COLOUR COULD BE HELD FIXED.** A search pinning one of them found **no partner** clearing the floor. **The protan gap is a JOINT property of the pair**, not a defect in one of them — which is why "just darken the blue" was not available.
+
+⚠ **The alpha-composited band was checked too**, because scoring a pair says nothing about a fill derived from it: `#16345A` at alpha 0.16 over white is `#DADFE5`, scoring **9.7** against the paper and 57.1 / 31.4 against the two lines. The app panel's band (`#22313F` at 0.16 → `#DCDEE0`) was checked in the same pass and also clears: **9.9 / 58.7 / 37.3**.
+
+### ⭐⭐ The receipt is now `FG_COL_SCORES`, and `test-figure-palette.R` re-derives it
+The numbers are no longer prose next to the constant they describe. They are a **named constant**, and the test **parses both out of the figure script and re-runs the checker**:
+- **1.** the recorded scores must equal what the tool computes (the caption-sync bug class, applied to an accessibility claim);
+- **2.** the pair must clear `FG_COL_TARGET`, **with the superseded pair asserted to FAIL it** — so the gate is guarding something, and (k)'s one reproducible value (normal 31.3) is pinned as the reason the disagreement is about the *simulation*, not the ΔE;
+- **3.** the checker's own structural self-check: a colour against itself is 0, and **neutrals are invariant under all three dichromacies** — a projection with the wrong plane moves greys.
+⚠ The constants are read by **PARSING** the file, never by regex on the line — a regex would match the same text inside the comment block that explains the constant, which is exactly where the stale numbers lived.
+⚠ **Skips if `python3` is absent**; the skill's own validator needs `node`, which is not installed here, which is why the check was reimplemented at all.
+
+**Mutation-tested**: changing a recorded score without the colours fails 1; reverting to the superseded pair fails 2. Restored, 7/0.
+
+⛔ **Still unresolved, and deliberately**: which implementation is right. Nothing here arbitrates — the pair was moved so the answer no longer matters for this figure. ⇒ [[palette_check_unreproduced]].
+
+Figure regenerated (anchor gate 7 = 3.09 before drawing; every number unchanged, only the colours moved). Suite filter gains `figure`: **613 / 0** across 19 files.
+
 ## 2026-09-24 (p) — **The land-use caveat said the natural sink grew "through CO₂ fertilisation AND FOREST REGROWTH".** ⛔ **It names a mechanism this model does not contain, and since (n) drew regrowth two charts below it, the page contradicted itself.** Corrected, with the cross-references derived from shared constants and a regression gate.
 
 ### The two corrections, both of FACT
