@@ -93,8 +93,8 @@ I fixed the same ratchet for someone else's. Fixed the same way and not by widen
 the read moved into a new `ccx_mode_fit_stats()` resolver in `paths.R`, which is also where the
 Hessian's sign convention is now documented. ⚠ Test 6 CALLS both plot functions, because
 [[static_test_cannot_tell_you_it_runs]].
-Suite **4719 PASS / 3 FAIL** before this fix; after it, the two lint reds clear and the one
-remaining red is `test-mode-file.R:323`, NAMED RED BY RULING.
+Suite **4721 PASS / 1 FAIL** on the shipped tree — the cleanest it has been. The one red is
+`test-mode-file.R:323`, NAMED RED BY RULING.
 
 ## 2026-09-25 (d) — **THE SUITE'S FOUR REDS, TAKEN ONE AT A TIME. ⛔⛔ And converting the first one found a LIVE SILENT DEFAULT in two shipped resolvers: `$` on a list PARTIAL-MATCHES, so a half-split parameter set read the OTHER HEMISPHERE as its legacy scalar and a refusal written for exactly that shape was UNREACHABLE.**
 
