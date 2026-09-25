@@ -39,11 +39,16 @@ rv_guard <- function(x, f) if (rv_failed(x)) rv_plot_unavailable(x$msg) else f(x
 # ⚠ WRAP THE ASSEMBLED CAPTION, NOT THE EXTRA. app_provenance_caption() PREPENDS
 # ~78 characters of provenance, so wrapping only the extra leaves a first line of
 # prefix + full width that clips exactly where the numbers are.
-RV_CAP_WIDTH <- 95
-# app_provenance_caption() wraps on its own since 2026-09-22 (the teaching
-# panels needed it too), so the width is passed rather than re-wrapped here --
-# one wrap, at the card's narrower measure.
-rv_cap <- function(extra) app_provenance_caption(extra, width = RV_CAP_WIDTH)
+# ⛔⛔ THIS WAS A CHARACTER COUNT (`RV_CAP_WIDTH <- 95`) AND BROKE SILENTLY on
+# 2026-09-25 b, when app_provenance_caption() stopped taking `width` and started
+# taking a panel CLASS. Nothing caught it: the review cards render only when
+# their tab is opened, and `test-review-cards.R` reads ui.R as TEXT, so the whole
+# file can fail to call and the suite stays green. The fix that would have caught
+# it is in test-plot-text-fits.R, which now actually CALLS rv_cap().
+# ⚠ The cards are 514 px, measured -- their own panel class, narrower than a
+# full panel because the card has padding of its own.
+RV_PANEL <- "card"
+rv_cap <- function(extra) app_provenance_caption(extra, panel = RV_PANEL)
 
 # ---------------------------------------------------------------------
 # CARD 1 -- the residual against Mauna Loa, before and after the offset
@@ -246,7 +251,7 @@ rv_plot_irf <- function() rv_guard(rv_pulse(), function(x) {
                                                  c(lab_m, lab_j))) +
     labs(x = "Years after the pulse",
          y = "Fraction of the pulse still in the air",
-         caption = app_provenance_caption(paste0(
+         caption = rv_cap(paste0(
            paste(sprintf("At %d yr: %.3f vs %.3f.", x$horizons, x$read, x$joos),
                  collapse = "  "),
            "  A comparison, not a test — nothing from this source scores the model."))) +

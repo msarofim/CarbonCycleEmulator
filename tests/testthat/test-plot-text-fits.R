@@ -163,3 +163,62 @@ test_that("5. the half-width plots, and only those, narrow their captions", {
   }
   expect_setequal(got, e$APP_HALF_WIDTH_PLOTS)
 })
+
+test_that("6. the review cards' caption helper still CALLS -- it broke silently once", {
+  skip_if_no_plots(); skip_if(is.null(.pt_env), "plots.R did not load")
+  e <- .pt_env
+  rev <- file.path(.root, "app", "R", "plots_review.R")
+  skip_if(!file.exists(rev), "plots_review.R absent")
+  # ⛔⛔ THE INCIDENT. On 2026-09-25 (b) app_provenance_caption() stopped taking
+  # `width` and started taking a panel CLASS; `rv_cap()` in plots_review.R was
+  # still passing `width = RV_CAP_WIDTH`. Nothing caught it: the review cards
+  # render only when their tab is opened, and test-review-cards.R reads ui.R as
+  # TEXT. The whole file could fail to call and the suite stayed green.
+  # ⇒ this test CALLS it.
+  sys.source(rev, envir = e)
+  cap <- e$rv_cap("At 100 yr: 0.412 vs 0.407.")
+  expect_true(is.character(cap) && nzchar(cap))
+  pt_with_device(e$APP_PANEL_PX[[e$RV_PANEL]], {
+    expect_lte(pt_px(cap, e$CAPTION_PT), e$app_text_px(e$RV_PANEL))
+  })
+  # and no caller may pass the retired argument
+  for (f in c(.pt_plots, rev))
+    expect_false(any(grepl("app_provenance_caption\\(.*width *=", readLines(f, warn = FALSE))))
+})
+
+test_that("7. every renderPlotFit id is the output it is assigned to", {
+  srv <- file.path(.root, "app", "server.R")
+  skip_if(!file.exists(srv), "server.R absent")
+  # ⚠ A MISMATCHED ID IS SILENT: the plot renders, it just wraps its text to some
+  # OTHER panel's width. Same bug class as a caption that describes a different
+  # window than the one it is drawn from.
+  src <- readLines(srv, warn = FALSE)
+  m <- regmatches(src, regexec('output\\$([A-Za-z0-9_]+) +<- renderPlotFit\\("([A-Za-z0-9_]+)"', src))
+  m <- Filter(function(x) length(x) == 3L, m)
+  expect_gt(length(m), 10L)          # the conversion actually happened
+  for (x in m) expect_identical(x[2], x[3])
+  # the review cards route through rv_render(), which must forward an id too
+  rv <- regmatches(src, regexec('output\\$(rv_[a-z]+) +<- rv_render\\("([a-z_]+)"', src))
+  rv <- Filter(function(x) length(x) == 3L, rv)
+  expect_gt(length(rv), 5L)
+  for (x in rv) expect_identical(x[2], x[3])
+  # nothing may still use the bare renderPlot, or it silently loses the width
+  bare <- grep("output\\$[A-Za-z0-9_]+ +<- renderPlot\\(", src)
+  expect_length(bare, 0L)
+})
+
+test_that("8. a live width overrides the floor, and its absence restores it", {
+  skip_if_no_plots(); skip_if(is.null(.pt_env), "plots.R did not load")
+  e <- .pt_env
+  floor_full <- e$app_text_px("full")
+  e$app_set_panel_px(1056); on.exit(e$app_clear_panel_px(), add = TRUE)
+  expect_gt(e$app_text_px("full"), floor_full)          # a wide screen wraps wider
+  e$app_set_panel_px(264)
+  expect_lt(e$app_text_px("full"), floor_full)          # a narrow one wraps narrower
+  # ⚠ a width Shiny has not reported yet is NOT a width
+  for (bad in list(NULL, NA_real_, 0, -5, "600"))
+    { e$app_set_panel_px(bad); expect_equal(e$app_text_px("full"), floor_full) }
+  # and a pathologically narrow live width still leaves something to wrap into
+  e$app_set_panel_px(30)
+  expect_gte(e$app_text_px("full"), e$APP_MIN_TEXT_PX)
+})

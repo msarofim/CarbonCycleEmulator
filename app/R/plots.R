@@ -130,6 +130,8 @@ APP_PANEL_PX <- c(full = 552L, half = 264L, card = 514L, diagram = 424L)
 # narrowing its caption, or narrowing one that is not half, both fail.
 APP_HALF_WIDTH_PLOTS <- c("plot_airborne_fraction", "plot_gcb_bars")
 APP_PLOT_MARGIN_PX <- 16L   # theme_ccx()'s own margin: 10 pt right + 6 pt left at 72 dpi
+APP_MIN_TEXT_PX    <- 120   # floor on the budget itself: below this even a long word
+                            # cannot be placed, and a live width can be anything
 APP_TEXT_SAFETY    <- 0.94  # headroom: the deploy host's fonts are not this machine's,
                             # and a caption that clips there is invisible from here
 APP_CAP_WIDTH <- 150        # RETIRED as a wrap width; kept only as the character-count
@@ -148,12 +150,56 @@ SUBTITLE_PT <- local({
   if (is.numeric(e$size)) e$size else CCX_BASE_SIZE - 1
 })
 
-#' Text budget in px for a panel class, after the plot's own margins
+# ⭐⭐ RESPONSIVE WRAPPING (2026-09-25 c). The budgets above are the FLOOR -- the
+# narrowest layout the app supports -- so wrapping to them is correct everywhere
+# and needlessly tall on a wide screen. Shiny knows the width each plot was
+# actually given, in `session$clientData$output_<id>_width`, and re-runs a
+# renderPlot when its size changes. `renderPlotFit()` in server.R publishes that
+# width here for the duration of one render, so a caption wraps to the panel the
+# reader actually has.
+#
+# ⚠ WHY AN ENVIRONMENT AND NOT AN ARGUMENT. The alternative is threading a width
+# through all sixteen plot functions and every call site; this way the plot
+# functions keep their signatures and the width is set by the one wrapper that
+# knows it. The cost is a piece of render-scoped state, so it is CLEARED on exit
+# from every render, and its absence is a supported state rather than an error:
+# the figure scripts and the test suite call these functions with no device and
+# no session at all, and must get the floor.
+.CCX_RENDER <- new.env(parent = emptyenv())
+
+#' Publish the width this render's panel was actually given
+app_set_panel_px <- function(px) {
+  if (is.numeric(px) && length(px) == 1L && is.finite(px) && px > 0)
+    assign("panel_px", as.numeric(px), envir = .CCX_RENDER)
+  else app_clear_panel_px()      # a width Shiny has not reported yet is NOT a width
+  invisible(NULL)
+}
+app_clear_panel_px <- function() {
+  if (exists("panel_px", envir = .CCX_RENDER, inherits = FALSE))
+    rm("panel_px", envir = .CCX_RENDER)
+  invisible(NULL)
+}
+app_live_panel_px <- function() {
+  if (exists("panel_px", envir = .CCX_RENDER, inherits = FALSE))
+    get("panel_px", envir = .CCX_RENDER) else NULL
+}
+
+#' Text budget in px, after the plot's own margins
+#'
+#' Uses the LIVE width when a render has published one; otherwise the named
+#' panel class, which is the narrowest layout the app supports. ⚠ `panel` is
+#' therefore the FALLBACK, not dead weight -- it is what a static figure, a test,
+#' or the first render before clientData arrives will use.
 app_text_px <- function(panel = "full") {
-  if (!panel %in% names(APP_PANEL_PX))
-    stop("unknown panel class '", panel, "'; expected one of ",
-         paste(names(APP_PANEL_PX), collapse = ", "))
-  (APP_PANEL_PX[[panel]] - APP_PLOT_MARGIN_PX) * APP_TEXT_SAFETY
+  px <- app_live_panel_px()
+  if (is.null(px)) {
+    if (!panel %in% names(APP_PANEL_PX))
+      stop("unknown panel class '", panel, "'; expected one of ",
+           paste(names(APP_PANEL_PX), collapse = ", "))
+    px <- APP_PANEL_PX[[panel]]
+  }
+  # ⚠ never let a very narrow live width produce a budget nothing can wrap into
+  max((px - APP_PLOT_MARGIN_PX) * APP_TEXT_SAFETY, APP_MIN_TEXT_PX)
 }
 
 #' Wrap text to a PIXEL budget by measuring each line, not by counting characters

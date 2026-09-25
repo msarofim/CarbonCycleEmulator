@@ -2,6 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-25 (c) — **RESPONSIVE TEXT WRAPPING.** ⛔⛔ **And wiring it found that yesterday's caption change had broken `plots_review.R` silently — the review cards render only when their tab is opened, and their test reads `ui.R` as text, so the whole file could fail to call and the suite stayed green.**
+
+### The break, first, because it is the more useful half
+09-25 (b) changed `app_provenance_caption(extra, width =)` to `(extra, panel =)`. `rv_cap()` in `plots_review.R` was still passing `width = RV_CAP_WIDTH`. **Nothing caught it**: the eight review cards are lazy (they need model runs the app does not already have, so they render on first view of the tab), and `test-review-cards.R` is deliberately STATIC — it reads `ui.R` as text rather than starting the app. ⇒ a whole file could fail at call time with a green suite.
+Fixed: the cards use their own measured panel class (`RV_PANEL = "card"`). **And the gate that would have caught it now exists** — `test-plot-text-fits.R` test 6 *calls* `rv_cap()`, and refuses any caller still passing the retired `width =`.
+⭐ **Transferable: a test that reads a file as text cannot tell you the file still runs.** Both kinds are needed, and the static one is the one that feels like coverage.
+
+### The feature
+Captions and subtitles were wrapped to the **floor** — the narrowest layout the app supports — so they were correct everywhere and needlessly tall on a wide screen. Shiny knows the width each plot was actually given (`session$clientData$output_<id>_width`) and re-runs a `renderPlot` when its size changes, so the real width can be published for one render:
+
+- `renderPlotFit(id, expr)` in `server.R` sets the live width, clears it on exit, and wraps all **15** plots plus the 8 review cards through `rv_render()`.
+- `app_text_px()` uses the live width when a render has published one, else the named panel class. ⚠ The class is therefore the **fallback, not dead weight**: the figure scripts and the whole test suite call these functions with no session at all and must get the floor.
+- ⚠ `APP_MIN_TEXT_PX = 120` floors the budget itself — a live width can be anything, and below this even a long word cannot be placed.
+- ⚠ Reading `clientData` is **what makes it responsive**: it is reactive, so a resize re-runs the render and the text re-wraps.
+
+**Measured on screen, resizing without a reload**: 1440 → 768 px takes the imbalance subtitle from 2 lines to 3 and the half-width captions from 2 to 4. Nothing clips at either end.
+
+### ⛔ The id is passed explicitly, and gated
+`renderPlotFit("x", …)` assigned to `output$y` would render fine and wrap to **another panel's** width — the caption-sync bug class with a new face. Test 7 asserts every id equals its output, that `rv_render()` forwards one too, and that **no bare `renderPlot(` remains** (which would silently lose the width).
+
+### Gates
+`test-plot-text-fits.R` 39 → **77 assertions**. New: the review-card helper actually calls and fits; every `renderPlotFit` id matches its output; a live width overrides the floor and its absence restores it, with `NULL` / `NA` / `0` / negative / a *string* all falling back rather than being believed.
+**Mutation-tested**: an id pointing at another panel fails; one plot reverted to bare `renderPlot` fails; `rv_cap()` put back on `width =` fails.
+Suite: **690 / 0** across 20 files.
+⭐ **Browser-verified end to end**: all 10 tabs, **zero output errors**, and the eight review cards confirmed *rendered* (503 px, images present) rather than merely not-erroring — which is the check that would have caught the break above.
+
 ## 2026-09-25 (b) — **AUDITED EVERY TEXT SLOT IN `plots.R`.** ⛔⛔ **The slots I went to check were all fine; the one that was broken is the one the repo believed it had fixed twice — captions. `strwrap(width = 150)` counts CHARACTERS, and what clips is PIXELS.** Two half-width panels had been clipping at every viewport width since the constant was introduced.
 
 ### What the audit measured, and against what

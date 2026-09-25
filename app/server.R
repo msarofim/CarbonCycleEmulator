@@ -32,11 +32,35 @@ function(input, output, session) {
   # fmt_gtc() moved to app/R/plots.R (2026-09-08g): the diagram function needs it too
   fmt_pct <- function(x) sprintf("%.0f%%", 100 * x)
 
+  # ---- RESPONSIVE TEXT WRAPPING (2026-09-25 c) ----------------------
+  # ⭐⭐ Captions and subtitles are wrapped to a PIXEL budget, and until now that
+  # budget was the FLOOR -- the narrowest layout the app supports -- so they were
+  # correct everywhere and needlessly tall on a wide screen. Shiny knows the width
+  # each plot was actually given, and re-runs a renderPlot when its size changes,
+  # so the real width can be published for the duration of one render.
+  # ⚠ READING clientData IS WHAT MAKES IT RESPONSIVE: it is reactive, so a resize
+  # re-runs the render with the new width and the caption re-wraps.
+  # ⚠ The width is CLEARED on exit, so anything rendering outside a plot -- and
+  # the figure scripts and the test suite, which have no session at all -- falls
+  # back to the floor rather than inheriting whatever the last plot happened to be.
+  # ⛔ The id is passed EXPLICITLY and gated: `renderPlotFit("x", ...)` assigned to
+  # `output$y` would silently wrap to another panel's width, which is the
+  # caption-sync bug class with a new face. test-plot-text-fits.R asserts every id
+  # matches its output.
+  renderPlotFit <- function(id, expr, env = parent.frame(), quoted = FALSE) {
+    fn <- shiny::exprToFunction(expr, env, quoted)
+    shiny::renderPlot({
+      app_set_panel_px(session$clientData[[paste0("output_", id, "_width")]])
+      on.exit(app_clear_panel_px(), add = TRUE)
+      fn()
+    })
+  }
+
   # ---- 1. Keeling ----------------------------------------------------
-  output$k_plot <- renderPlot(
+  output$k_plot <- renderPlotFit("k_plot", 
     plot_keeling(APP_HIST$out, APP_OBS, input$k_years, input$k_hemi, input$k_obs))
 
-  output$k_seasonal <- renderPlot(plot_seasonal(APP_HIST$out, APP_OBS))
+  output$k_seasonal <- renderPlotFit("k_seasonal", plot_seasonal(APP_HIST$out, APP_OBS))
 
   output$k_takeaway <- renderText({
     o <- APP_HIST$out
@@ -69,9 +93,9 @@ function(input, output, session) {
   })
   partition <- reactive(partition_table(APP_HIST$out, hist_F()))
 
-  output$w_partition <- renderPlot(plot_partition(partition(), input$w_years))
-  output$w_af  <- renderPlot(plot_airborne_fraction(partition(), input$w_years))
-  output$w_gcb <- renderPlot(plot_gcb_bars(APP_HIST$out, APP_GCB, hist_F()))
+  output$w_partition <- renderPlotFit("w_partition", plot_partition(partition(), input$w_years))
+  output$w_af  <- renderPlotFit("w_af", plot_airborne_fraction(partition(), input$w_years))
+  output$w_gcb <- renderPlotFit("w_gcb", plot_gcb_bars(APP_HIST$out, APP_GCB, hist_F()))
 
   latest <- reactive({
     pt <- partition()
@@ -196,7 +220,7 @@ function(input, output, session) {
     )
   })
 
-  output$w_imbalance_plot <- renderPlot(
+  output$w_imbalance_plot <- renderPlotFit("w_imbalance_plot", 
     plot_land_sink_imbalance(APP_HIST$out, APP_GCB, hist_F()))
 
   output$w_imbalance_takeaway <- renderText({
@@ -256,7 +280,7 @@ function(input, output, session) {
     )
   })
 
-  output$w_regrowth_plot <- renderPlot(
+  output$w_regrowth_plot <- renderPlotFit("w_regrowth_plot", 
     plot_luc_gross_split(APP_LUC_SPLIT, input$w_years))
 
   # /!\ THE LAST SENTENCE IS MEASURED, NOT ASSERTED. Which half moved is the
@@ -292,7 +316,7 @@ function(input, output, session) {
     app_run_mechanisms(input$c_mech, APP_HIST_YEARS, "historical")
   })
 
-  output$c_plot <- renderPlot({
+  output$c_plot <- renderPlotFit("c_plot", {
     m <- CCX_MECHANISMS[[input$c_mech]]
     plot_counterfactual(APP_HIST$out, cf_run()$out, input$c_years,
                         paste("Without:", m$label))
@@ -311,7 +335,7 @@ function(input, output, session) {
 
   # C2 (Marcus 2026-09-22). The growth-rate panel, with observations (C1) --
   # the panel that makes the ENSO claim in the blurb checkable (C3).
-  output$c_growth <- renderPlot({
+  output$c_growth <- renderPlotFit("c_growth", {
     m <- CCX_MECHANISMS[[input$c_mech]]
     plot_growth_rate(APP_HIST$out, cf_run()$out, APP_GCB,
                      input$c_years, paste("Without:", m$label))
@@ -422,7 +446,7 @@ function(input, output, session) {
             textOutput("c_driver_note"))
   })
 
-  output$c_driver <- renderPlot({
+  output$c_driver <- renderPlotFit("c_driver", {
     d <- c_driver(); req(d)
     plot_driver(d, input$c_years,
                 paste("Without:", CCX_MECHANISMS[[input$c_mech]]$label))
@@ -458,10 +482,10 @@ function(input, output, session) {
   # I1 + the like-for-like fix: APP_REP_DC is the offset the likelihood applied,
   # so the solid line is the comparison that was scored (same argument as the
   # Keeling panel's two lines).
-  output$i_d13c <- renderPlot(
+  output$i_d13c <- renderPlotFit("i_d13c", 
     plot_d13c(APP_HIST$out, APP_OBS, input$i_years,
               input$i_hemi %||% "both", APP_REP_DC))
-  output$i_d14c <- renderPlot(plot_d14c(APP_HIST$out, APP_OBS, input$i_years))
+  output$i_d14c <- renderPlotFit("i_d14c", plot_d14c(APP_HIST$out, APP_OBS, input$i_years))
 
   output$i_takeaway <- renderText({
     o <- APP_HIST$out
@@ -521,7 +545,7 @@ function(input, output, session) {
       gtc = input$p_gtc, year = input$p_year)
   })
 
-  output$f_plot <- renderPlot({
+  output$f_plot <- renderPlotFit("f_plot", {
     if (identical(input$f_mode, "Pulse lab")) {
       pr <- pulse_runs()
       # F4: the same pair of runs, differenced two ways. Carbon is a SHARE of
@@ -601,7 +625,7 @@ function(input, output, session) {
   # F2 (Marcus 2026-09-22): the second pulse panel. Rendered only in the pulse
   # lab, and only after the user has run one -- pulse_runs() is an eventReactive
   # on the button, so it does not fire on tab entry.
-  output$f_partition <- renderPlot({
+  output$f_partition <- renderPlotFit("f_partition", {
     req(identical(input$f_mode, "Pulse lab"))
     pr <- pulse_runs()
     plot_pulse_partition(pr$base$out, pr$pulse$out, pr$gtc, pr$year)
@@ -638,7 +662,7 @@ function(input, output, session) {
   # are ~70 and ~95 GtC/yr while emissions are ~11 and the net imbalance ~5, and
   # an arrow without a number cannot say that. Numbers come from APP_FLUX_NOW
   # (R/fluxes.R), i.e. from the model's own tap, not from a table typed here.
-  output$h_diagram <- renderPlot(
+  output$h_diagram <- renderPlotFit("h_diagram", 
     plot_box_diagram(APP_FLUX_NOW, APP_HIST$out[nrow(APP_HIST$out), ], app_params$p))
 
   # THE LABEL TABLE IS GATED, NOT TYPED HERE (2026-09-22, Marcus review U1).
@@ -668,17 +692,17 @@ function(input, output, session) {
   # expensive cards (3-6, each needing a model run the app does not already
   # have) off the startup path. withProgress gives the first view of the tab a
   # reason for the wait instead of a blank panel.
-  rv_render <- function(f, label) renderPlot({
+  rv_render <- function(id, f, label) renderPlotFit(id, {
     withProgress(message = label, value = NULL, f())
   })
-  output$rv_repdc     <- rv_render(rv_plot_repdc,     "Comparing the model with Mauna Loa")
-  output$rv_gradient  <- rv_render(rv_plot_gradient,  "Measuring the north-south gradients")
-  output$rv_diseq     <- rv_render(rv_plot_diseq,     "Measuring the ocean's isotopic disequilibrium")
-  output$rv_variance  <- rv_render(rv_plot_variance,  "Measuring the year-to-year variability")
-  output$rv_enso      <- rv_render(rv_plot_enso,      "Running the model with its ENSO mechanisms off")
-  output$rv_irf       <- rv_render(rv_plot_irf,       "Releasing a pulse and following it")
-  output$rv_partition <- rv_render(rv_plot_partition, "Following the pulse for a thousand years")
-  output$rv_control   <- rv_render(rv_plot_control,   "Running the simpler control model")
+  output$rv_repdc     <- rv_render("rv_repdc", rv_plot_repdc,     "Comparing the model with Mauna Loa")
+  output$rv_gradient  <- rv_render("rv_gradient", rv_plot_gradient,  "Measuring the north-south gradients")
+  output$rv_diseq     <- rv_render("rv_diseq", rv_plot_diseq,     "Measuring the ocean's isotopic disequilibrium")
+  output$rv_variance  <- rv_render("rv_variance", rv_plot_variance,  "Measuring the year-to-year variability")
+  output$rv_enso      <- rv_render("rv_enso", rv_plot_enso,      "Running the model with its ENSO mechanisms off")
+  output$rv_irf       <- rv_render("rv_irf", rv_plot_irf,       "Releasing a pulse and following it")
+  output$rv_partition <- rv_render("rv_partition", rv_plot_partition, "Following the pulse for a thousand years")
+  output$rv_control   <- rv_render("rv_control", rv_plot_control,   "Running the simpler control model")
 
   # THE STAND-IN LIST IS GENERATED, NOT TYPED. Which names are held, and at what
   # value, is a property of the mode file the app is running; a hand-kept table
