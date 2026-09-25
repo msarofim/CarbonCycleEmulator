@@ -145,7 +145,22 @@ CCX_MECHANISMS <- list(
                   "largest reason the Keeling curve wobbles around its trend in",
                   "this model — switch it off and about a quarter of the wobble",
                   "goes with it."),
-    caveat = paste("Affects year-to-year variability, not the long-term trend.",
+    # ⛔ THE TEMPERATURE HALF KEEPS RUNNING, and this caveat may not be
+    # shortened to "El Nino off". Marcus 2026-09-25: "it does not flatten the
+    # ENSO temperature effect, so that still exists." MEASURED IN THIS FILE, not
+    # asserted: `apply` below sets gamma_enso to 0 and touches NOTHING ELSE, so
+    # the prescribed gmst and sst_anom drivers still carry every El Nino's
+    # temperature signature, and the carbon cycle's response to that warming
+    # (q10, sst_scale) runs on. It is structurally the SAME split as `volcanic`
+    # -- one pathway removed, the thermal one left alone -- and it names the same
+    # sibling switch, because that is the one that removes the other half.
+    caveat = paste("This removes the model's direct ENSO term only. El Niño's",
+                   "own temperature signature is still in the observed",
+                   "temperature record this model is DRIVEN by, so the carbon",
+                   "cycle's response to that warming keeps running whatever this",
+                   "switch says — use “Warming's effect on the carbon cycle”",
+                   "to remove the temperature pathway.",
+                   "Affects year-to-year variability, not the long-term trend.",
                    "And it is not the whole story: even with El Niño, the",
                    "warming response and the volcanic light effect ALL switched",
                    "off, more than half the model's wobble remains — it comes",
