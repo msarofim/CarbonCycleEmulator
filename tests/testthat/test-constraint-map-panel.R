@@ -139,3 +139,44 @@ test_that("6. the plot functions actually RUN on the real product", {
   # an OPPOSED pair by construction: one sign each, never both the same way
   expect_true(all(tn$up_pull > 0 & tn$down_pull < 0))
 })
+
+test_that("7. a row total never prints as a bare 0, and the prose uses the SAME formatter", {
+  # ⛔ THE DEFECT (2026-09-25). The chart label was `sprintf("(%.0f)")`, so the
+  # weakest row -- Δ¹⁴C pre-bomb at 0.196 -- printed "(0)" while the tab's prose
+  # called it 0.2 and divided by it ("about 133 times less"). A row labelled
+  # "(0)" also reads as "worth nothing", which is the misreading the tab's own
+  # third caveat exists to prevent. Both now go through fmt_cmap_total().
+  f <- file.path(.root, "data", "constraint_map.rds")
+  if (!file.exists(f)) skip("constraint map not built")
+  if (!requireNamespace("ggplot2", quietly = TRUE)) skip("ggplot2 not installed")
+  env <- new.env(parent = environment())
+  assign("APP_CMAP_NOTE", "note", envir = env)
+  assign("app_params", list(source = "posterior mode", status = "beta"), envir = env)
+  ok <- tryCatch({
+    local({ library(ggplot2); sys.source(file.path(.cmp_app, "R", "plots.R"), envir = env) })
+    TRUE }, error = function(e) FALSE)
+  skip_if(!ok, "app/R/plots.R did not load")
+  expect_true(is.function(env$fmt_cmap_total))
+
+  cm <- readRDS(f)
+  fam <- cm$family
+  M <- matrix(0, length(fam), ncol(cm$M), dimnames = list(names(fam), colnames(cm$M)))
+  for (a in seq_along(fam)) M[a, ] <- colSums(cm$M[fam[[a]], , drop = FALSE])
+  for (mat in list(M, cm$MC)) {
+    tot <- rowSums(mat)
+    lab <- env$fmt_cmap_total(tot)
+    # NO row may print as "0" -- every family carries SOME leverage, and a
+    # reader is told by the subtitle to read this number.
+    expect_false(any(lab == "0"))
+    # and the printed value must round-trip within ITS OWN precision, which is
+    # format-dependent: one decimal below 10 (tolerance 0.05), an integer at or
+    # above it (tolerance 0.5). A single tolerance here would either pass a
+    # wrong label or fail a right one -- the first draft used 0.05 throughout
+    # and failed on 18.203 -> "18", which is correct to its own precision.
+    tol <- ifelse(tot < 10, 0.05, 0.5) + 1e-9
+    expect_true(all(abs(as.numeric(lab) - tot) <= tol))
+  }
+  # MUTATION: the retired %.0f label must FAIL this, or the gate is decorative.
+  retired <- sprintf("%.0f", rowSums(cm$MC))
+  expect_true(any(retired == "0"))
+})

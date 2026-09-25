@@ -707,6 +707,14 @@ LAB_CMAP_FILL   <- "Log-likelihood units moved"
 LAB_CMAP_OBS    <- "What is measured"
 LAB_CMAP_PART   <- "Part of the model"
 LAB_CMAP_PULL   <- "Log-likelihood units the measurement gains by moving it"
+# ⛔ ONE formatter for a row total, used by the CHART LABEL here and by the
+# tab's PROSE in server.R, so the two cannot disagree about the same number.
+# The defect it retires (2026-09-25): the label was `sprintf("(%.0f)")`, so the
+# weakest row -- Δ¹⁴C pre-bomb at 0.196 -- printed "(0)" while the prose two
+# paragraphs below called it 0.2 and divided by it ("about 133 times less").
+# "(0)" also READS as "this measurement is worth nothing", which is exactly the
+# misreading the tab's third caveat exists to prevent.
+fmt_cmap_total <- function(x) ifelse(x < 10, sprintf("%.1f", x), sprintf("%.0f", x))
 KEY_CMAP_UP     <- "wants it HIGHER"
 KEY_CMAP_DOWN   <- "wants it LOWER"
 # ⛔ The sentence a screenshot of the heatmap has to carry on its own. It is the
@@ -748,7 +756,7 @@ plot_constraint_map <- function(cm, level = c("component", "parameter")) {
   # starts at the constraints that carry weight
   d$obs  <- factor(d$obs,  levels = names(sort(tot)))
   d$part <- factor(d$part, levels = colnames(M))
-  lab <- sprintf("%s  (%.0f)", levels(d$obs), tot[levels(d$obs)])
+  lab <- sprintf("%s  (%s)", levels(d$obs), fmt_cmap_total(tot[levels(d$obs)]))
   ggplot(d, aes(part, obs, fill = v)) +
     geom_tile(colour = "white", linewidth = 0.4) +
     geom_text(aes(label = ifelse(v >= 0.5, sprintf("%.0f", v), "")),

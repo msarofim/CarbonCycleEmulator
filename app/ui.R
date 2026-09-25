@@ -102,6 +102,17 @@ navbarPage(
   theme = bs_theme(version = 5, bootswatch = "flatly", base_font = font_google("Inter")),
   header = tagList(
     tags$head(tags$style(HTML("
+      /* NAVBAR, 2026-09-25. Measured: 1440px -> 1 row (42px); 1200/1024/992 ->
+         2 rows (100px); 960 and below -> EIGHT full-width rows (448px), i.e.
+         the whole first screen is navigation. Cause: navbarPage() emits the
+         Bootstrap 3 classes `navbar navbar-default navbar-static-top` with NO
+         `navbar-expand-*`, so bslib's BS5 shim applies `flex-direction: row`
+         only inside `@media (min-width: 992px)`; below it BS5's own default
+         `column` wins -- and there is no `.navbar-collapse` and no toggler for
+         it to collapse into. Keep the row and let it WRAP instead. Above 992px
+         this is a no-op (already row), so the rule cannot drift with the
+         breakpoint it was written for. */
+      .navbar .navbar-nav { flex-direction: row; flex-wrap: wrap; }
       .takeaway { font-size: 1.08rem; line-height: 1.5; background: #eef5fb;
                   border-left: 4px solid #1b6ca8; padding: 10px 14px;
                   margin-bottom: 14px; border-radius: 3px; }

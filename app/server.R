@@ -510,7 +510,13 @@ function(input, output, session) {
       names(APP_SSPS)[match(input$f_ssps, APP_SSPS)])
   })
 
+  # ⛔ THE PATHWAY THE LAST RUN USED, captured HERE and not read from the
+  # slider later. The readout below describes the executed run; reading
+  # `input$s_kind` at render time would let the sentence change while the two
+  # numbers beside it stayed on the previous pathway.
+  stylised_kind <- reactiveVal(NULL)
   stylised_run <- eventReactive(input$s_go, {
+    stylised_kind(input$s_kind)
     em <- app_stylised_emissions(input$s_kind, APP_FUTURE_YEARS,
                                  to_zero_year = input$s_zero_year,
                                  rate_pct = input$s_rate,
@@ -606,10 +612,23 @@ function(input, output, session) {
       }
     } else if (identical(input$f_mode, "Build your own")) {
       r <- stylised_run(); cl <- r$climate
-      sprintf(paste("Your pathway reaches %.0f ppm and %+.1f °C by %d. Note how",
-                    "little the temperature falls even when emissions stop —",
-                    "the CO₂ already up there does not come back down quickly."),
-              cl$co2_ppm[nrow(cl)], cl$gmst[nrow(cl)], max(cl$year))
+      # ⛔ THE SECOND CLAUSE IS CONDITIONAL ON THE BRANCH (2026-09-25). It used
+      # to read "even when emissions stop" for ALL THREE `s_kind` values, and
+      # emissions stop in only ONE of them (`to_zero`). On the DEFAULT branch
+      # (`constant`, hold at today's level) they never stop at all, so the
+      # sentence asserted a counterfactual the run did not perform, printed
+      # beside two numbers the run did produce. ⚠ The `to_zero` wording is
+      # Marcus's and is unchanged; the other branch's is a PLACEHOLDER for him.
+      tail_clause <- if (identical(stylised_kind(), "to_zero"))
+        paste("Note how little the temperature falls even when emissions stop —",
+              "the CO₂ already up there does not come back down quickly.")
+      else
+        paste("Fossil emissions never reach zero on this pathway — holding them",
+              "at today's level keeps them there, and a fixed rate only ever",
+              "approaches zero — so carbon keeps being added to what is already",
+              "up there, and that does not come back down quickly either.")
+      sprintf("Your pathway reaches %.0f ppm and %+.1f °C by %d. %s",
+              cl$co2_ppm[nrow(cl)], cl$gmst[nrow(cl)], max(cl$year), tail_clause)
     } else {
       rs <- future_runs()
       lo <- rs[[1]]$climate; hi <- rs[[length(rs)]]$climate
@@ -787,14 +806,15 @@ function(input, output, session) {
         " a SUM over the parameters in it, so the group holding a single",
         " parameter looks quiet however hard that parameter is pinned.",
         sprintf(paste(" ⚠ Read the row totals, not just the colours: the strongest",
-                      "row here is worth %.0f log-units and the weakest %.1f, so a",
+                      "row here is worth %s log-units and the weakest %s, so a",
                       "bright cell in a weak row is a large share of very little."),
-                max(tot), min(tot))),
+                fmt_cmap_total(max(tot)), fmt_cmap_total(min(tot)))),
       p(tags$strong("And the measurement with the least to say, which needs care. "),
-        sprintf(paste("%s is worth %.1f log-units against %s's %.0f \u2014 about %.0f",
+        sprintf(paste("%s is worth %s log-units against %s's %s \u2014 about %.0f",
                       "times less. \u26a0 That does NOT mean the record was not worth",
                       "having."),
-                names(which.min(tot)), min(tot), names(which.max(tot)), max(tot),
+                names(which.min(tot)), fmt_cmap_total(min(tot)),
+                names(which.max(tot)), fmt_cmap_total(max(tot)),
                 max(tot) / max(min(tot), 1e-6)),
         " Leverage is measured HERE, at the fitted values. A measurement that",
         " already agrees, and whose information is carried by a parameter that",

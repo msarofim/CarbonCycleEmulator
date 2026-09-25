@@ -2,6 +2,64 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-25 (h) — **Marcus's rulings on (g): the conditional step RATIFIED, and all three review defects fixed.** Each one verified in a running app, not asserted.
+
+### ⭐⭐ RULING: the CONDITIONAL Hessian sd is the constraint map's step
+Marcus ratified the substitution (2026-09-25). The marginal step stays **reported** — marginal ÷
+conditional (median **3.3**, max **92** for `beta_max` / `fert_k`) is the identifiability statement
+the tab rests on — but the **step** is conditional, `1/sqrt(diag(-H))`, 0.5 log-units for every
+coordinate by construction. `CM_STEP_KIND` unchanged, no rebuild, **objective #13 still FROZEN**.
+The ⛔⛔ open ruling that handoff (g) §1 carried is **CLOSED**.
+
+### 1. The navbar: the cause was a MISSING CLASS, not a width
+`navbarPage()` emits the Bootstrap **3** classes `navbar navbar-default navbar-static-top` with **no
+`navbar-expand-*`**, so bslib's BS5 shim applies `flex-direction: row` only inside
+`@media (min-width: 992px)`. Below it BS5's own default `column` wins — and there is **no
+`.navbar-collapse` and no toggler** for it to collapse into, so all eight tabs stack full-width.
+One rule (`.navbar .navbar-nav { flex-direction: row; flex-wrap: wrap; }`), a no-op above 992 px so
+it cannot drift with the breakpoint. **Measured in the running app, before → after:**
+
+| viewport | before | after |
+|---|---|---|
+| 1440 px | 1 row, 42 px | 1 row, 42 px (no-op ✓) |
+| 992 px | 2 rows, 100 px | 2 rows, 100 px |
+| **960 px** | **8 rows, 448 px** | **2 rows, 100 px** |
+| **800 / 768 px** | **8 rows, 448 px** | **2 rows, 100 px** |
+| ~697 px | 8 rows, 448 px | 4 rows, 216 px, no horizontal scroll |
+
+### 2. The row total that printed `(0)` — and ONE formatter for the chart and the prose
+`fmt_cmap_total()` (one decimal below 10, integer above) now serves **both** `plot_constraint_map()`'s
+y-axis label **and** the two prose sentences in `server.R` that quote the same numbers, so they cannot
+disagree again. Verified live: the weakest row now reads **Δ¹⁴C in the air (pre-bomb) (0.2)** against
+prose "worth 0.2 log-units … about 133 times less", and δ¹³C level & gradient **(26)**.
+Gated by `test-constraint-map-panel.R` test 7 — no row may print `"0"`, every label must round-trip
+**within its own precision**, and the retired `%.0f` must FAIL. ⚠ The gate's first draft used a
+single 0.05 tolerance and **failed on 18.203 → "18", which is correct to its own precision**: a
+round-trip tolerance is FORMAT-DEPENDENT, and one number for two formats either passes a wrong label
+or fails a right one.
+
+### 3. "even when emissions stop", and the desync the obvious fix would have introduced
+The clause is now conditional. ⛔ **But branching on `input$s_kind` at render time would have been a
+NEW bug**: the readout would change the moment the dropdown moved, while the two numbers beside it
+still described the last run. The pathway is captured in a `reactiveVal` **inside the
+`eventReactive`**, so the sentence always describes the run that executed. Verified live, same
+instance, both branches:
+- `constant` (the **default**) → *"reaches 609 ppm and +3.3 °C by 2150. Fossil emissions never reach
+  zero on this pathway — holding them at today's level keeps them there, and a fixed rate only ever
+  approaches zero — …"*
+- `to_zero` → *"reaches 376 ppm and +1.9 °C by 2150. Note how little the temperature falls even when
+  emissions stop …"* — **Marcus's wording, unchanged.**
+
+⭐ The non-`to_zero` wording is checkable, not merely plausible: the rate law is
+`e0 * (1 + rate/100)^n` and the slider spans **−5 … +5 %/yr**, which is **strictly positive over the
+whole range** — neither remaining branch can reach zero. ⚠ The new sentence is a **PLACEHOLDER** for
+Marcus; the pedagogy is his.
+
+**Suite:** 607 PASS / 0 FAIL / 0 ERR over constraint-map ×2, plot-text-fits, review-cards, the four
+panels, both lints, future ×2, seas-lag-split, enso-split. ⚠ `test-seas-lag-split.R` emits
+"NaNs produced" warnings; **I did not establish whether they predate today** — they are in code this
+work did not touch, and the file passes.
+
 ## 2026-09-25 (g) — **FULL APP REVIEW** (Marcus). Eight tabs driven in the browser plus a static pass. ⛔⛔ **The text-fit gate's own MUTATION assertion was measuring a string that does not exist** — and the navbar stacks to EIGHT ROWS below 992 px.
 
 ### ⛔⛔ The gate that named its own subject and then did not measure it
