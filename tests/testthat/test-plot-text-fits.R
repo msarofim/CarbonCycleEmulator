@@ -171,9 +171,32 @@ test_that("3a. the BOX DIAGRAM's two footnotes fit, and neither is hand-broken",
     budget <- e$app_text_px("diagram")
     for (nn in notes) {
       pt <- e$diagram_note_pt(nn$size)
+      # \u26a0 THIS ASSERTION HAS LITTLE POWER ON ITS OWN AND THAT IS STATED, NOT
+      # hidden. It wraps with app_wrap_px() and then measures the result against
+      # app_wrap_px()'s own budget, so it is close to true by construction --
+      # mutation-tested and confirmed: tripling DIAGRAM_NOTE_SIZE_BOLD to 4.6
+      # does NOT fail it, because the wrapper simply returns more lines. It
+      # catches only a broken wrapper or a single word wider than the panel.
+      # The load-bearing assertions here are the STATIC ones below, which is the
+      # opposite of where a reader would assume the strength lies.
+      # [[no_power_null]] -- measure a test's power before believing its null.
       expect_lte(pt_px(e$app_wrap_px(nn$txt, budget, pt), pt), budget)
+      # \u2b50 THE ONE WITH POWER: the PANEL CLASS is load-bearing, not cosmetic.
+      # Wrapped to the FULL-panel budget instead, the same text overflows the
+      # diagram panel -- so a call site that passed "full" (or omitted the panel
+      # and took the default) would ship a clipped footnote. Paired with the
+      # static check below that both call sites do pass "diagram".
+      wide <- e$app_wrap_px(nn$txt, e$app_text_px("full"), pt)
+      expect_gt(pt_px(wide, pt), budget)
     }
   })
+  # ...and BOTH annotate() calls are wrapped to the DIAGRAM budget. Without this,
+  # the check above proves only that "full" would be wrong, not that "diagram"
+  # is what the code says.
+  src0 <- readLines(.pt_plots, warn = FALSE)
+  d0 <- src0[grep("plot_box_diagram <- function", src0):length(src0)]
+  d0 <- d0[seq_len(min(140L, length(d0)))]
+  expect_length(grep('app_text_px\\("diagram"\\)', d0), 2L)
   # ...and the sizes annotate() is HANDED are those same constants, so the size
   # measured above and the size drawn cannot drift apart.
   src <- readLines(.pt_plots, warn = FALSE)
