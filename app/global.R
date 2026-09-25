@@ -417,7 +417,7 @@ APP_SSP_EMIS <- as.data.frame(
 # retypes it. ⛔ test-luc-regrowth-panel.R asserts ui.R uses the constants
 # rather than literals.
 APP_CMAP_TAB      <- "What pins down what?"
-APP_CMAP_HEADING  <- "Which part of the model does each measurement test?"
+APP_CMAP_HEADING  <- "Which parts of the model have the most influence on measured values?"
 APP_CMAP_TENSION_HEADING <- "Where the measurements disagree"
 APP_REGROWTH_HEADING  <- "Forest regrowth, on its own"
 APP_IMBALANCE_HEADING <- "Is the model's land sink too high?"
@@ -453,10 +453,6 @@ APP_CMAP_NOTE <- paste(
   "conditional Hessian standard deviation, which costs every parameter the same",
   "0.5 log-units. It says which measurements would NOTICE a change, not what a",
   "different model structure would do.")
-APP_CMAP_SD_NOTE <- paste(
-  "The step is a Laplace (Hessian) standard deviation at the mode, not a sampled",
-  "posterior — this model has no sampled posterior.")
-
 # Which family each parameter belongs to, as a lookup for the parameter-level view.
 APP_CMAP_OF_PAR <- if (is.null(APP_CMAP)) NULL else {
   stats::setNames(rep(names(APP_CMAP$component), lengths(APP_CMAP$component)),

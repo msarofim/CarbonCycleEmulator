@@ -44,20 +44,10 @@
 # \u26a0 QUOTE-AWARE, not a bare sub("#.*"): a `#` inside a string is content, and
 # app/ui.R carries hex colours ("#C4315F"). Cut at a `#` only where an EVEN number
 # of double quotes precedes it, i.e. where it is not inside a string literal.
-.uy_strip <- function(ln) {
-  out <- character(length(ln))
-  for (i in seq_along(ln)) {
-    chars <- strsplit(ln[i], "", fixed = TRUE)[[1]]
-    q <- 0L; cut <- length(chars) + 1L
-    for (j in seq_along(chars)) {
-      if (chars[j] == '"') q <- q + 1L
-      else if (chars[j] == "#" && q %% 2L == 0L) { cut <- j; break }
-    }
-    out[i] <- if (cut == 1L) "" else paste(chars[seq_len(cut - 1L)], collapse = "")
-  }
-  out
-}
-.uy_src <- .uy_strip(.uy_raw)
+# ⛔ THE STRIPPER MOVED to helper-code-lines.R on 2026-09-25, when a third gate
+# needed it. It was defined here and byte-alike in test-imbalance-panel.R; one
+# rule in three places is three chances for one copy to be fixed alone.
+.uy_src <- ccx_code_lines(.uy_raw)
 
 # the sliders this file is about, pinned. Adding one belongs in this vector.
 UY_YEAR_SLIDERS <- c("k_years", "w_years", "c_years", "i_years")

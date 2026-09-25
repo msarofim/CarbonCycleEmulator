@@ -738,10 +738,10 @@ function(input, output, session) {
       row <- APP_CMAP$MC[r, ]
       sprintf("%s (%.0f%%)", names(which.max(row)), 100 * max(row) / sum(row))
     }, character(1))
-    paste0("The measurements with the most to say about this model are ",
-           paste(sprintf("%s — mostly testing %s", top, who), collapse = "; "),
-           ". A measurement low on the chart is one this model could change a",
-           " good deal without contradicting.")
+    paste0("The metrics most sensitive to changes in this model are ",
+           paste(sprintf("%s — mostly influenced by %s", top, who), collapse = "; "),
+           ". A metric low on the chart is one this model could change a good",
+           " deal without moving.")
   })
 
   output$cm_pin_note <- renderText({
@@ -776,23 +776,23 @@ function(input, output, session) {
     tagList(
       p(tags$strong("The ocean's Δ¹⁴C is a ventilation measurement, not an uptake",
                     "measurement. "),
-        sprintf(paste("%.0f%% of everything the ocean's Δ¹⁴C can see is the mixed",
+        sprintf(paste("%.0f%% of the ocean's Δ¹⁴C sensitivity is to the mixed",
                       "layer and the vertical mixing below it."),
                 sh("Δ¹⁴C in the ocean", "Mixed layer & vertical mixing")),
         " That is the useful reading and also the limiting one: a change to the",
         " ocean's structure that leaves its ventilation rate alone would barely",
         " register in the radiocarbon profile at all."),
-      p(tags$strong("The interior chemistry is the only thing watching the",
+      p(tags$strong("The interior chemistry is the only thing influenced by the",
                     "biological pump. "),
-        sprintf(paste("%.0f%% of what the interior DIC, δ¹³C and alkalinity",
-                      "gradients can see is the pump, and the pump is nearly",
-                      "invisible everywhere else (%.0f%% of the atmospheric CO₂",
+        sprintf(paste("%.0f%% of the interior DIC, δ¹³C and alkalinity gradients'",
+                      "sensitivity is to the pump, and the pump has almost no",
+                      "influence anywhere else (%.0f%% of the atmospheric CO₂",
                       "level's sensitivity)."),
                 sh("Ocean interior chemistry", "Biological pump"),
                 sh("CO₂ level", "Biological pump")),
-        " So those bottle data are the one constraint that would notice the pump",
-        " being restructured — and they are also the only one, which is a thin",
-        " basis for a term the model leans on."),
+        " The pump is necessary for matching these bottle data, even though it",
+        " turns out that the pump has little influence on the rest of the",
+        " system."),
       p(tags$strong("The seasonal cycle is two constraints in tension, not one. "),
         sprintf(paste("The seasonal CO₂ cycle and the seasonal δ¹³C cycle account",
                       "for %.0f%% and %.0f%% of their own rows, so between them they",
@@ -818,9 +818,9 @@ function(input, output, session) {
         " CO₂ fertilisation is this model's only long-term land-uptake term, so",
         " the saturation shape — the part that decides the future — is exactly",
         " the part the present-day record does not separate."),
-      p(tags$strong("And what nothing much is watching. "),
-        sprintf(paste("The individual numbers the measurements can least see are",
-                      "%s. That is not a defect on its own — a number nothing",
+      p(tags$strong("And the numbers that influence nothing much. "),
+        sprintf(paste("The individual numbers that influence the measurements",
+                      "least are %s. That is not a defect on its own — a number nothing",
                       "measures may still be right — but it does mean the",
                       "observations cannot tell you whether it is."),
                 paste(quiet, collapse = ", ")),
@@ -831,7 +831,7 @@ function(input, output, session) {
                       "row here is worth %s log-units and the weakest %s, so a",
                       "bright cell in a weak row is a large share of very little."),
                 fmt_cmap_total(max(tot)), fmt_cmap_total(min(tot)))),
-      p(tags$strong("And the measurement with the least to say, which needs care. "),
+      p(tags$strong("And the measurement least sensitive to this model, which needs care. "),
         sprintf(paste("%s is worth %s log-units against %s's %s \u2014 about %.0f",
                       "times less. \u26a0 That does NOT mean the record was not worth",
                       "having."),

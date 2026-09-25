@@ -7,9 +7,16 @@
 #   2. A heading or caveat typed as a LITERAL in one file and as a constant in
 #      the other, so a rename orphans the prose silently.
 #   3. The sentence that keeps the chart honest disappearing: this map is a
-#      LOCAL statement at one parameter set, and the step is a Laplace sd and
-#      NOT a sampled posterior. Both claims are the app's, and the app cannot
-#      check either -- so the strings are asserted here.
+#      LOCAL statement at one parameter set, at an equal-cost step. That claim
+#      is the app's and the app cannot check it -- so the strings are asserted
+#      here.
+#      ⚠ A THIRD claim used to be asserted here and is GONE BY RULING (Marcus
+#      2026-09-25): APP_CMAP_SD_NOTE said the step was "a Laplace (Hessian)
+#      standard deviation at the mode, not a sampled posterior". He asked for it
+#      to be deleted, so the assertion goes with the string rather than passing
+#      on text the app no longer prints. THE FACT IS STILL TRUE -- the step is
+#      still a conditional Hessian sd (diag_constraint_map.R's `sd_kind` records
+#      it in the product) -- the app simply no longer says it.
 #   4. `renderPlotFit` given the wrong id: it renders fine and wraps its text to
 #      ANOTHER panel's width (09-25 c).
 #   5. The tension chart's direction keys swapping meaning, which inverts every
@@ -32,7 +39,7 @@ CMP_OUTPUTS   <- c("cm_map_ui", "cm_map", "cm_takeaway", "cm_pin_note",
 CMP_PLACED_UI <- c("cm_map_ui", "cm_takeaway", "cm_pin_note",
                    "cm_tension_ui", "cm_structure_ui")
 CMP_CONSTS    <- c("APP_CMAP_TAB", "APP_CMAP_HEADING", "APP_CMAP_TENSION_HEADING",
-                   "APP_CMAP_NOTE", "APP_CMAP_SD_NOTE")
+                   "APP_CMAP_NOTE")
 CMP_INPUT     <- "cm_level"
 
 test_that("1. every output is rendered, and every placed output exists", {
@@ -53,13 +60,34 @@ test_that("2. headings and caveats come from constants, never literals", {
     expect_true(any(grepl(sprintf("^%s\\s*<-", k), .cmp_glob)),
                 info = paste(k, "is not defined in global.R"))
   # ui.R must USE them
-  for (k in c("APP_CMAP_TAB", "APP_CMAP_HEADING", "APP_CMAP_TENSION_HEADING",
-              "APP_CMAP_SD_NOTE"))
+  for (k in c("APP_CMAP_TAB", "APP_CMAP_HEADING", "APP_CMAP_TENSION_HEADING"))
     expect_true(any(grepl(k, .cmp_ui, fixed = TRUE)),
                 info = paste("ui.R does not use", k))
-  # ...and must not ALSO retype the heading text
-  expect_false(any(grepl('h5\\("Which part of the model', .cmp_ui)))
-  expect_false(any(grepl('tabPanel\\(\\s*"What pins down what\\?"', .cmp_ui)))
+  # ...and must not ALSO retype their text.
+  # ⛔ THE LITERAL IS READ OUT OF global.R, NEVER TYPED HERE. Until 2026-09-25 this
+  # guard named the heading's text in its own pattern ('h5("Which part of the
+  # model'), so the moment Marcus reworded the heading the guard would have gone
+  # on passing while guarding nothing -- [[gate_only_guards_what_it_lists]], and
+  # the same shape as the text gates that matched their own comments in 09-25 (i).
+  # Deriving it means a reword re-keys the guard automatically.
+  .cmp_const_value <- function(k) {
+    ln <- grep(sprintf('^%s\\s*<-\\s*"', k), .cmp_glob, value = TRUE)
+    if (!length(ln)) return(NA_character_)
+    sub('^[^"]*"(.*)"\\s*$', '\\1', ln[[1]])
+  }
+  # \u26d4 AGAINST CODE, NOT RAW LINES. ui.R's own section comment is
+  # `# ---- 6. What pins down what? ...`, which contains APP_CMAP_TAB's text --
+  # so the raw-line form of this check FAILED THE MOMENT IT WAS WRITTEN, on the
+  # comment naming the section rather than on any retyped literal. That is
+  # [[text_gate_matches_its_own_comment]] for the third time in two sessions,
+  # which is why the stripper is now shared (helper-code-lines.R).
+  .cmp_ui_code <- ccx_code_lines(.cmp_ui)
+  for (k in c("APP_CMAP_TAB", "APP_CMAP_HEADING", "APP_CMAP_TENSION_HEADING")) {
+    v <- .cmp_const_value(k)
+    expect_false(is.na(v), info = paste(k, "is not a one-line string literal in global.R"))
+    expect_false(any(grepl(v, .cmp_ui_code, fixed = TRUE)),
+                 info = paste("ui.R retypes", k, "'s text instead of using the constant"))
+  }
 })
 
 test_that("3. the sentences that keep the chart honest are present", {
@@ -69,8 +97,8 @@ test_that("3. the sentences that keep the chart honest are present", {
   expect_match(glob, "would NOTICE a change", fixed = TRUE)
   # the equal-cost step, which is what makes rows comparable
   expect_match(glob, "conditional Hessian standard deviation", fixed = TRUE)
-  # NOT a sampled posterior
-  expect_match(glob, "not a sampled", fixed = TRUE)
+  # ⚠ The "not a sampled posterior" leg was retired 2026-09-25 with the string it
+  # asserted (see the header). Deliberately NOT replaced by a weaker match.
   # and the app must actually place the honesty caveat next to the chart
   expect_true(any(grepl("APP_CMAP_NOTE", .cmp_srv, fixed = TRUE)))
 })

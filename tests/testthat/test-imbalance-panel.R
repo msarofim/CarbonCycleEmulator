@@ -131,16 +131,9 @@ test_that("6. the info box COMPUTES its numbers instead of typing them", {
   # CODE; a file's own description of the defect contains the defect's text, so
   # a gate that reads raw lines reports every repair as a relapse.
   # \u26a0 Quote-aware, because a `#` inside a string is content.
-  .strip1 <- function(ln) {
-    ch <- strsplit(ln, "", fixed = TRUE)[[1]]
-    q <- 0L; cut <- length(ch) + 1L
-    for (j in seq_along(ch)) {
-      if (ch[j] == '"') q <- q + 1L
-      else if (ch[j] == "#" && q %% 2L == 0L) { cut <- j; break }
-    }
-    if (cut == 1L) "" else paste(ch[seq_len(cut - 1L)], collapse = "")
-  }
-  code <- vapply(.imb_srv, .strip1, character(1), USE.NAMES = FALSE)
+  # \u26d4 SHARED since 2026-09-25: helper-code-lines.R. This was one of two
+  # byte-alike copies when a third gate came to need it.
+  code <- ccx_code_lines(.imb_srv)
   blk <- paste(code, collapse = "\n")
   expect_true(grepl("imbalance_id\\(\\)", blk))
   # the retired literal must not come back
