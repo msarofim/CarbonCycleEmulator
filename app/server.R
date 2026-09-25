@@ -97,12 +97,31 @@ function(input, output, session) {
   })
 
   # W2 (Marcus 2026-09-22), COMPUTED. He asked for a note that deforestation
-  # added to emissions up to some date and was a net sink after. ⚠ IT NEVER IS:
+  # added to emissions up to some date and was a net sink after. /!\ IT NEVER IS:
   # land-use emissions are positive in every year of this driver. What crosses
   # is the LAND AS A WHOLE. Both crossings are computed here -- the model's and
   # the measured one -- because the difference between them is itself the
-  # honest disclosure (this model's land sink runs high against GCB, which is
-  # what gate 7 scores at z +1.36).
+  # honest disclosure.
+  #
+  # /!\ REWRITTEN 2026-09-24 (p), and both changes are CORRECTIONS OF FACT, not
+  # of style:
+  #
+  #   1. It used to credit the sink's growth to "CO2 fertilisation AND FOREST
+  #      REGROWTH on former farmland". In GCB's accounting -- and in this model
+  #      -- regrowth is netted INSIDE the land-use input, not inside the natural
+  #      sink, and CO2 fertilisation is this model's ONLY long-term land-uptake
+  #      term ([[ccx_land_sink_single_term]]). The old sentence attributed the
+  #      sink to a mechanism the model does not contain. It was harmless until
+  #      09-24 (n) drew regrowth on this very tab, at which point the page
+  #      contradicted itself.
+  #   2. Its last sentence left "runs a larger land sink than GCB" standing as
+  #      an unqualified fault, and the panel immediately below now says a larger
+  #      sink is the one that CLOSES GCB's budget (the imbalance is positive).
+  #      The clause that reconciles them points at that panel.
+  #
+  # /!\ Both cross-references quote a heading by NAME, from the SHARED constant
+  # in global.R -- never retyped here, or renaming a heading would silently
+  # leave this text pointing at nothing.
   output$w_luc_note <- renderText({
     k <- APP_LUC_SMOOTH_YR
     cross <- function(year, v) {
@@ -119,19 +138,25 @@ function(input, output, session) {
     mod <- cross(a$year[-1], diff(a$g))
     obs <- cross(APP_GCB$year, APP_GCB$land_sink - APP_GCB$luc)
     paste(
-      sprintf(paste("Land-use change \u2014 agriculture, deforestation and the rest",
-                    "\u2014 has been an emission SOURCE for the whole of this record.",
+      sprintf(paste("Land-use change — agriculture, deforestation and the rest",
+                    "— has been an emission SOURCE for the whole of this record.",
                     "What changed is the land as a whole: the natural land sink",
-                    "grew until it outweighed those emissions, through CO\u2082",
-                    "fertilisation and forest regrowth on former farmland.")),
+                    "grew until it outweighed those emissions. In this model that",
+                    "sink has a single cause — plants growing faster as CO₂ rises.",
+                    "Forests do grow back, but that carbon is counted inside the",
+                    "land-use number rather than in the sink; it is drawn on its",
+                    "own under “%s”."),
+              APP_REGROWTH_HEADING),
       if (is.na(obs)) "" else
         sprintf(paste("In the measured budget the land crossed from a net source",
                       "to a net sink around %d (%d-year average)."), obs, k),
       if (is.na(mod)) "" else
-        sprintf(paste("This model crosses around %d \u2014 %s than the measurements,",
+        sprintf(paste("This model crosses around %d — %s than the measurements,",
                       "which is one of the places it runs a larger land sink than",
-                      "the Global Carbon Budget does."),
-                mod, if (!is.na(obs) && mod < obs) "earlier" else "later"))
+                      "the Global Carbon Budget does, though a larger sink is not",
+                      "by itself a fault — see “%s” below."),
+                mod, if (!is.na(obs) && mod < obs) "earlier" else "later",
+                APP_IMBALANCE_HEADING))
   })
 
   # ---- THE IMBALANCE BAND (handoff 09-24 e item 3) ------------------

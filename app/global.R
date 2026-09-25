@@ -410,6 +410,15 @@ APP_SSP_EMIS <- as.data.frame(
 # ⚠ `luc_scale` is NOT baked into the product -- it is a FITTED name, so both
 # halves are multiplied here, together. Scaling one is the mutation the gate
 # checks for.
+# ---- SECTION HEADINGS THAT ARE CROSS-REFERENCED ---------------------
+# ⚠ These are h5() headings in ui.R AND quoted by name in server.R copy that
+# sends a reader to them. Two files, one string: exactly the caption-sync bug
+# class the project keeps hitting, so the string lives here and neither file
+# retypes it. ⛔ test-luc-regrowth-panel.R asserts ui.R uses the constants
+# rather than literals.
+APP_REGROWTH_HEADING  <- "Forest regrowth, on its own"
+APP_IMBALANCE_HEADING <- "Is the model's land sink too high?"
+
 # ---- UI helpers shared by ui.R AND server.R -------------------------
 # ⚠ These lived in ui.R until 2026-09-24. Both files use them now -- the
 # land-use regrowth section is assembled in server.R through uiOutput -- and a

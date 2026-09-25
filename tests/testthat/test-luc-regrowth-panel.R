@@ -40,6 +40,12 @@ LRP_RENDERED   <- c("w_regrowth_ui", "w_regrowth_plot",
 LRP_PLOT_FN    <- "plot_luc_gross_split"
 LRP_ASSERT_RX  <- "ASSERTED"
 LRP_SCALE_RX   <- "APP_LUC_SCALE"
+# the attribution retired 2026-09-24 (p): the land-use caveat used to credit the
+# natural sink's growth to "CO2 fertilisation AND forest regrowth", which names a
+# mechanism this model does not contain -- regrowth is netted inside the LUC
+# INPUT, and fertilisation is the only long-term land-uptake term.
+LRP_RETIRED_RX <- "fertilisation and forest regrowth"
+LRP_HEADINGS   <- c("APP_REGROWTH_HEADING", "APP_IMBALANCE_HEADING")
 
 has <- function(txt, rx) any(grepl(rx, txt, fixed = TRUE))
 
@@ -101,4 +107,35 @@ test_that("5. the observed window is READ from the product, never typed", {
   expect_true(grepl("APP_LUC_SPLIT$obs_window", blk, fixed = TRUE))
   expect_false(grepl('"1959', blk, fixed = TRUE))
   expect_true(grepl("split$obs_window", paste(.lrp_plots, collapse = "\n"), fixed = TRUE))
+})
+
+test_that("6. the land-use caveat no longer puts regrowth inside the natural sink", {
+  # \u26d4 A REGRESSION GUARD ON A CORRECTED FACT, not on a turn of phrase. The
+  # page drew regrowth on this tab from 09-24 (n); a caveat two charts above it
+  # saying the sink grew "through CO\u2082 fertilisation and forest regrowth" makes
+  # the page contradict itself, and nothing else in the suite would see it.
+  body <- paste(.lrp_server, collapse = " ")
+  expect_false(grepl(LRP_RETIRED_RX, body, fixed = TRUE))
+  # and the replacement must still say where regrowth IS counted
+  expect_true(grepl("counted inside the", body, fixed = TRUE))
+  # MUTATION: put the retired attribution back and the same check must reject it
+  broken <- paste(body, LRP_RETIRED_RX)
+  expect_true(grepl(LRP_RETIRED_RX, broken, fixed = TRUE))
+})
+
+test_that("7. cross-referenced headings come from ONE shared constant", {
+  # \u26a0 ui.R renders the heading, server.R quotes it by name in prose. Two
+  # files, one string: if either retypes it, renaming a heading leaves the prose
+  # pointing at a section that no longer exists, and the page still renders.
+  glb  <- paste(.lrp_global, collapse = "\n")
+  ui   <- paste(.lrp_ui, collapse = "\n")
+  body <- paste(.lrp_server, collapse = "\n")
+  for (nm in LRP_HEADINGS) {
+    expect_true(grepl(paste0(nm, " "), glb) || grepl(paste0(nm, "  "), glb))
+    expect_true(grepl(sprintf("h5(%s)", nm), ui, fixed = TRUE))
+    expect_true(grepl(nm, body, fixed = TRUE))
+  }
+  # the literals must NOT be retyped in ui.R or server.R
+  expect_false(grepl('h5("Forest regrowth, on its own")', ui, fixed = TRUE))
+  expect_false(grepl("h5(\"Is the model's land sink too high?\")", ui, fixed = TRUE))
 })

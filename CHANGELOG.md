@@ -2,6 +2,28 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (p) — **The land-use caveat said the natural sink grew "through CO₂ fertilisation AND FOREST REGROWTH".** ⛔ **It names a mechanism this model does not contain, and since (n) drew regrowth two charts below it, the page contradicted itself.** Corrected, with the cross-references derived from shared constants and a regression gate.
+
+### The two corrections, both of FACT
+1. ⛔ **Regrowth was put inside the natural sink.** In GCB's accounting *and* in this model, forest regrowth is netted **inside the land-use input**; CO₂ fertilisation is the model's **only** long-term land-uptake term ([[ccx_land_sink_single_term]]). The old sentence credited the sink's growth to a process the model has no representation of. It was merely imprecise until 09-24 (n) drew regrowth on this very tab — at which point a reader could see the contradiction.
+2. ⛔ **"Runs a larger land sink than GCB" was left standing as an unqualified fault**, while the panel immediately below now says a larger sink is the one that **closes** GCB's budget, because the imbalance is positive. Two sentences on one tab pulling opposite ways.
+
+Now: *"…the natural land sink grew until it outweighed those emissions. In this model that sink has a single cause — plants growing faster as CO₂ rises. Forests do grow back, but that carbon is counted inside the land-use number rather than in the sink; it is drawn on its own under "Forest regrowth, on its own"."* and *"…runs a larger land sink than the Global Carbon Budget does, though a larger sink is not by itself a fault — see "Is the model's land sink too high?" below."*
+
+⚠ Per [[drafted_text_no_fix_history]] the page states the current fact and carries **no correction history**; this entry is the record.
+
+### ⭐ The cross-references are CONSTANTS, not retyped strings
+`APP_REGROWTH_HEADING` and `APP_IMBALANCE_HEADING` live in `global.R`. `ui.R` renders them with `h5()`, `server.R` quotes them by name in the prose. **Two files, one string** — retype either and renaming a heading leaves the prose pointing at a section that no longer exists, **while the page still renders**. That is the caption-sync bug class, and it is now structurally impossible here.
+
+### Gates (`test-luc-regrowth-panel.R`, 38 assertions, was 27)
+- **6.** the retired attribution must not reappear, and the replacement must still say where regrowth IS counted. ⚠ A regression guard on a **corrected fact**, not on a turn of phrase — nothing else in the suite would see the page contradicting itself.
+- **7.** both headings resolve through the shared constant in all three files, and the literals are **not** retyped in `ui.R` or `server.R`.
+- **MUTATION-TESTED at the source**: restoring the retired attribution fails 1; retyping a heading literal in `ui.R` fails 2; restored, 38/0.
+
+Suite filter: **606 / 0** across 18 files (was 595), 25 warnings, all the pre-existing 1900-start transient.
+
+⚠ The caveat box is now six sentences. Every one carries a fact rather than a hedge, but it is longer than it was and that is a judgement Marcus may want to revisit.
+
 ## 2026-09-24 (o) — **THE IMBALANCE-BAND PANEL SHIPPED** (handoff (e) item 3). ⛔⛔ **And building it found the OTHER HALF of a defect fixed in the objective a month ago and never in the app: the app's land sink was on a HALF-YEAR OFFSET from gate 7's, silently.**
 
 ### ⛔⛔ The bug, found by refactoring rather than by looking for it

@@ -224,7 +224,7 @@ navbarPage(
         # exact identity, most of it the budget's OWN unclosed imbalance -- and
         # this is the panel that shows the slack the comparison has.
         hr(),
-        h5("Is the model's land sink too high?"),
+        h5(APP_IMBALANCE_HEADING),
         p("The bars above say this model takes up more land carbon than the",
           "measured budget reports, which looks like a fault. It mostly is not.",
           "The Global Carbon Budget does not balance: add its emissions up and",
@@ -241,7 +241,7 @@ navbarPage(
         # the one above it". The section is conditional on the product existing
         # so a checkout without data/forcing_luc_gross_split.rds still renders.
         hr(),
-        h5("Forest regrowth, on its own"),
+        h5(APP_REGROWTH_HEADING),
         p("The land-use line above is a ", tags$em("net"), " number: forests",
           "cleared for farmland release carbon, and forests growing back on land",
           "that was abandoned take it up again. Every budget reports the",
