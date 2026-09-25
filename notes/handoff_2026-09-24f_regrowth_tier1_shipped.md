@@ -211,7 +211,16 @@ renderer, wrong convention, the "extreme attribution" caption disappearing).
    `#16345A` (protan 12.6), the MINIMAL change clearing a floor of 12; the receipt is now a GATE
    (`test-figure-palette.R`). ⛔ **Which implementation is right is STILL UNKNOWN** — the pair was
    moved so the answer stops mattering for this figure. ⚠ Neither colour could be held fixed.
-4. ⛔⛔ **`b1889af` IS ONLY A CHANGELOG ENTRY** — checked 09-25, and this corrects handoff (e) §3
+4. ~~Cherry-pick `b1889af`~~ ✅ **UNTANGLED ONTO `main` 09-25**, FaIRtoFrEDI `c97055a`, pushed.
+   Three commits: port the v160 generators, the unit fix (builder hunk only), a `--self-test`.
+   ⚠ Done in a SEPARATE WORKTREE because Marcus's `egu_sprm_memo_draft.docx` is dirty in the main
+   checkout — never switch branches under a dirty deliverable. ⚠ `scripts/fair_units.py` NOT
+   ported (shared-module version on a 129-commit unmerged branch, serving builders also not on
+   main; adding a module nothing imports is worse than the duplication).
+   ⭐ The `--self-test` found ec495b6's claimed test was **VACUOUS**: FaIR wants `Mt SO2/yr` for
+   Sulfur, so "Mt SO2 → Mt S" returns on the `want == unit` line without reaching a warrant; the
+   case that exercises the guard is the reverse, priced at 1.998.
+   — the original finding, for the record: ⛔⛔ **`b1889af` IS ONLY A CHANGELOG ENTRY** — checked 09-25, and this corrects handoff (e) §3
    and §5 (and my own summary of them). The unit fix's CODE is in **`ec495b6`**, a commit titled
    *"Convert the Author Bio to third person"*, which carries 54 lines of
    `scripts/build_emissions_v160_ssp245.py` alongside the bio edit. **Cherry-picking `b1889af`
