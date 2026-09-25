@@ -1265,7 +1265,11 @@ ccx_migrate_par_set <- function(p) {
   # scalar means. Refuse when there is no legacy scalar to read.
   split_nm <- c("seas_lag_p_NH", "seas_lag_p_SH")
   if (any(split_nm %in% absent)) {
-    if (is.null(p$seas_lag_p))
+    # `[[` NOT `$` (fixed 2026-09-25): `$` partial-matches, so with exactly ONE
+    # half absent this refusal was UNREACHABLE -- `p$seas_lag_p` resolved to the
+    # surviving half and the migration mirrored it across instead of refusing.
+    # It fired only when BOTH were absent, i.e. when the prefix was ambiguous.
+    if (is.null(p[["seas_lag_p"]]))
       stop("ccx_migrate_par_set(): ", paste(intersect(split_nm, absent), collapse = ", "),
            " absent and no legacy `seas_lag_p` to migrate from. This list ",
            "carries no NPP lag at all; it is not a fitted ancestor.")
@@ -1298,7 +1302,8 @@ ccx_migrate_par_set <- function(p) {
     # ancestor. Filling an absent LAND coefficient from the named default would
     # be an invented coordinate wearing a fitted vector's name. The OCEAN pair
     # migrating to 0 is NOT such an invention -- 0 is what the ancestor RAN.
-    if (is.null(p$gamma_enso))
+    # `[[` NOT `$` -- same partial-matching fix as the lag branch above.
+    if (is.null(p[["gamma_enso"]]))
       stop("ccx_migrate_par_set(): ", paste(intersect(enso_nm, absent), collapse = ", "),
            " absent and no legacy `gamma_enso` to migrate from. This list ",
            "carries no ENSO response at all; it is not a fitted ancestor.")

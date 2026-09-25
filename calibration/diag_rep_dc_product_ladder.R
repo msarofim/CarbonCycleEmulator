@@ -37,12 +37,16 @@
 #               logpost. VECTOR fails on a 1-part-per-million nudge to a MODEL
 #               name (`k_w`, worst delta 1.9e-3) and to a NUISANCE (`bomb_total`,
 #               1.2e-4), and names the offender first in both cases.
-#               ⚠ ITS ONE MEASURED BLIND SPOT: deleting `ccx_set_enso()` from the
-#               reconstruction does NOT fail it -- at the canonical that call is
-#               a genuine no-op, because the overlay loop above already writes
-#               the two fitted land gammas and the two ocean gammas are PINNED at
-#               0 in `bp`. The call is kept because it stops being a no-op the
-#               moment a rung moves them; the gate simply cannot see that at u0.
+#               ⚠ ITS ONE MEASURED BLIND SPOT: the ENSO half of the overlay is
+#               INVISIBLE to it -- at the canonical, `ccx_set_enso()` is a genuine
+#               no-op, because the copy that precedes it already writes the two
+#               fitted land gammas and the two ocean gammas are PINNED at 0 in
+#               `bp`. Measured 2026-09-23 by deleting the call, which the gate did
+#               NOT catch. It stops being a no-op the moment a rung moves them,
+#               and the gate still cannot see that at u0. Since 2026-09-25 the
+#               call is reached through `ccx_overlay_par()`, whose own
+#               deleted-nothing assertion fires at EVERY rung -- which is the
+#               half a gate evaluated only at u0 can never cover.
 #   NOISE    -- and then the canonical rung is re-run from RPL_N_REP PERTURBED
 #               starts. The spread of each product across those replicates is
 #               the OPTIMISER-NOISE FLOOR. A product that moves less than its
@@ -118,6 +122,13 @@ IDX_FREE <- setdiff(seq_along(u0), IDX_REP)
 # The reconstruction: u -> the gate vector `v` that dg_run()/dg_gate*() want.
 # This mirrors ccx_make_logpost()'s own body (R/calibrate.R:2385) rather than
 # re-deriving it, and gate VECTOR below proves the mirror closes.
+# ⚠ THE MIRROR IS THROUGH `ccx_overlay_par()`, NOT THE OBJECTIVE'S LITERAL LOOP
+# (converted 2026-09-25, RULING B's convert-on-touch). The helper is that loop
+# plus `ccx_set_enso()` plus an assertion that the overlay DELETED NOTHING, so
+# the two coincide exactly whenever the fitted set carries every name -- which
+# `ccx_unc_to_par()` guarantees by construction, since it builds one value per
+# CCX_PARAM_NAMES. Gate VECTOR measures that coincidence at u0 (0.000e+00 over
+# 106 names) rather than leaving it argued.
 # ⚠ TWO PARAMETER LISTS ([[ccx_two_param_lists]]): `p` is the MODEL list and
 # carries none of the six nuisances; `pv` is the FITTED list and carries them.
 # ---------------------------------------------------------------------
@@ -125,8 +136,7 @@ IDX_FREE <- setdiff(seq_along(u0), IDX_REP)
 rpl_vector_at <- function(u) {
   pv <- ccx_unc_to_par(u)
   p  <- bp
-  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pv[[n]]
-  p  <- ccx_set_enso(p, pv)
+  p  <- ccx_overlay_par(p, pv)
   v  <- .v_template
   v$p            <- p
   v$bomb_total   <- pv$bomb_total

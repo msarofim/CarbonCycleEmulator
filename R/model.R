@@ -370,14 +370,21 @@ ccx_seas_lag_p <- function(p) {
   # would break test-seas-lag-split.R:47, which pins the partial case on purpose.
   # The ambiguous shape is the scalar beside a COMPLETE pair: nothing left to
   # fill, two answers on the list, and no way to tell which was meant.
-  if (!is.null(p$seas_lag_p) &&
+  # ⚠ `[[` NOT `$`, AND THAT IS A BUG FIX (2026-09-25). `$` on a list
+  # PARTIAL-MATCHES: with `seas_lag_p_NH` absent, `p$seas_lag_p` resolves to
+  # `seas_lag_p_SH` -- so a HALF-SPLIT list with no legacy scalar silently read
+  # the surviving hemisphere AS the legacy and mirrored it across, instead of
+  # falling to CCX_SEAS_LAG_P_DEFAULT. With a COMPLETE pair the prefix is
+  # ambiguous and `$` returns NULL, which is why this never bit the canonical.
+  # [[intersect_is_a_silent_default]]'s family: a name resolver inventing a value.
+  if (!is.null(p[["seas_lag_p"]]) &&
       !is.null(p$seas_lag_p_NH) && !is.null(p$seas_lag_p_SH))
     stop("ccx_seas_lag_p(): the parameter list carries BOTH the retired ",
          "`seas_lag_p` and the 2026-08-31 split fields. Which one is meant is ",
          "not for this function to guess. Set the split names directly, or ",
          "bring a stored ancestor forward with ccx_migrate_par_set(), which ",
          "fills the pair and drops the scalar.")
-  legacy <- if (is.null(p$seas_lag_p)) CCX_SEAS_LAG_P_DEFAULT else p$seas_lag_p
+  legacy <- if (is.null(p[["seas_lag_p"]])) CCX_SEAS_LAG_P_DEFAULT else p[["seas_lag_p"]]
   c(NH = if (is.null(p$seas_lag_p_NH)) legacy else p$seas_lag_p_NH,
     SH = if (is.null(p$seas_lag_p_SH)) legacy else p$seas_lag_p_SH)
 }
@@ -457,7 +464,9 @@ CCX_ENSO_PARAMS <- c("gamma_enso_land_NH", "gamma_enso_land_SH",
 #'                      did not have and should have.
 #'   neither         -> CCX_GAMMA_ENSO_DEFAULT throughout
 ccx_gamma_enso <- function(p) {
-  leg  <- p$gamma_enso
+  # `[[` NOT `$`: see ccx_seas_lag_p() above. `gamma_enso` is a prefix of all
+  # four split names, so `$` mis-resolves whenever EXACTLY ONE of them is present.
+  leg  <- p[["gamma_enso"]]
   # ⚠ BOTH AT ONCE IS AN ERROR, NOT A PRECEDENCE RULE. Splitting one name into
   # four turned the old one-name assignment -- written at ~70 diagnostic
   # call sites -- into a line that assigns a field NOTHING READS, on a list that

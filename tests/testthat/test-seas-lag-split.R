@@ -47,6 +47,57 @@ test_that("THE ABSENCE CONTRACT: a legacy scalar reaches BOTH hemispheres", {
   expect_equal(unname(ccx_seas_lag_p(lag_p(sh = 2.4, legacy = 1.9))), c(1.9, 2.4))
 })
 
+test_that("A HALF-SPLIT LIST WITH NO LEGACY SCALAR FALLS TO THE NAMED DEFAULT", {
+  # ⛔ THE DEFECT (2026-09-25). `$` on a list PARTIAL-MATCHES. With
+  # `seas_lag_p_NH` absent, `p$seas_lag_p` resolved to `seas_lag_p_SH` -- so the
+  # resolver read the SURVIVING HEMISPHERE as the legacy scalar and mirrored it
+  # across, and ccx_migrate_par_set()'s "no legacy to migrate from" refusal was
+  # UNREACHABLE in exactly the shape it was written for. It fired only when BOTH
+  # halves were absent, because two prefix matches are ambiguous and `$` then
+  # returns NULL -- which is why the canonical (a complete pair) never saw it.
+  # The fix is `[[` in both resolvers and in both migration branches.
+  #
+  # ⚠ WHAT THE RIGHT ANSWER IS. The absence contract (test above, line 45) says
+  # an absent field with no legacy takes CCX_SEAS_LAG_P_DEFAULT. A half-split
+  # list is that case for ONE hemisphere, so the other half must NOT supply it:
+  # the two hemispheres are separate coordinates with separate priors, and
+  # copying one into the other invents a fitted value.
+  expect_equal(unname(ccx_seas_lag_p(lag_p(sh = 2.4))),
+               c(CCX_SEAS_LAG_P_DEFAULT, 2.4))
+  expect_equal(unname(ccx_seas_lag_p(lag_p(nh = 1.6))),
+               c(1.6, CCX_SEAS_LAG_P_DEFAULT))
+  # and the migration REFUSES it rather than filling from the other half
+  expect_error(ccx_migrate_par_set(lag_p(sh = 2.4)),
+               "no legacy `seas_lag_p` to migrate from")
+  expect_error(ccx_migrate_par_set(lag_p(nh = 1.6)),
+               "no legacy `seas_lag_p` to migrate from")
+  # the EXACT legacy scalar still does its job beside a partial split (line 47's
+  # case), so the fix did not trade one silent default for a refusal
+  expect_equal(unname(ccx_seas_lag_p(lag_p(sh = 2.4, legacy = 1.9))), c(1.9, 2.4))
+
+  # MUTATION TEST, run rather than described: the partial-matching read is what
+  # these four assertions guard, so reproduce it here and require it to differ.
+  # `$` is what the code said until 2026-09-25; if this block ever stops
+  # differing from the assertions above, the fix has been reverted or the
+  # resolver no longer reads a legacy scalar at all.
+  half <- lag_p(sh = 2.4)
+  expect_null(half[["seas_lag_p"]])          # exact: absent
+  expect_equal(half$seas_lag_p, 2.4)         # `$`: the OTHER hemisphere
+  both <- lag_p(nh = 1.6, sh = 2.4)
+  expect_null(both$seas_lag_p)               # two prefix matches -> ambiguous -> NULL
+})
+
+test_that("the ENSO resolver reads its legacy scalar exactly too", {
+  # `gamma_enso` is a prefix of all four split names, so `$` mis-resolves when
+  # EXACTLY ONE is present -- the same defect, one name over.
+  p <- ccx_default_params()
+  for (n in CCX_ENSO_PARAMS) p[[n]] <- NULL
+  p[[CCX_ENSO_PARAMS[[1]]]] <- 0.5
+  expect_null(p[["gamma_enso"]])
+  expect_equal(p$gamma_enso, 0.5)            # the defect, reproduced
+  expect_error(ccx_migrate_par_set(p), "no legacy `gamma_enso` to migrate from")
+})
+
 test_that("a pre-split parameter list is BIT-IDENTICAL to the explicit equal pair", {
   skip_if_no_cpp()
   s_leg <- ccx_spinup(lag_p(legacy = 1.7677))
