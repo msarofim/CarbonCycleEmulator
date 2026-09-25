@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (n) — **REGROWTH TIER 1 IS BUILT AND SHIPPED IN THE APP.** Three rulings taken (Marcus), the split closes to machine precision against the burnt input, and the panel says in its own copy that the number is imported rather than measured. ⛔ **Two side findings: the `dataviz` colour receipts recorded in (k) DO NOT REPRODUCE, and a sentence of existing app copy attributes regrowth to the wrong term.**
+
+### The rulings
+| | ruling | why it was a choice |
+|---|---|---|
+| **R1** | convention = **GCB 2025's "forest regrowth (total)"** | OSCAR v3.1's `E_negative` is **3.15×** larger on the same model and the same years |
+| **R2** | pre-1959 = **OSCAR's share SHAPE rescaled to GCB's LEVEL** over the window adjacent to the join | the published split covers only 39 % of the land-use carbon the model burns |
+| **R3** | future = **prescribed exponential decay** | it does NOT fall out of the scenarios — net LUC goes negative in 4 of 5 SSPs |
+
+### `data-raw/build_luc_gross_split.R` → `data/forcing_luc_gross_split.rds`
+Closes to **4.4e-16** against the prescribed net in every year of 1750–2024, and `luc_scale ×` (gross + regrowth) rebuilds the burnt `E_luc`. ⚠ **Both halves must carry `luc_scale`** (0.8214); scaling one breaks the closure by **0.575 GtC/yr**, and that is a gated mutation. `k = 0.4938` over 1959–1988 against **0.5158** over the full overlap — **4.5 % apart, which is how much the construction is worth arguing about** — and the splice step in the share is **−0.043** on a share of ~0.3.
+
+Historical, GtC/yr: **1750–1849 net +0.42 / gross +0.67 / regrowth −0.25**; **1959–2024 +1.69 / +2.71 / −1.02**; **2015–2024 +1.37 / +2.67 / −1.30**. Cumulative 1750–2024 **gross +444.2, regrowth −154.9, net +289.3 GtC** — of that regrowth **43 % observed, 57 % R2's construction**, which is why every year carries a source label and the gate asserts the labels.
+
+### ⭐⭐ R3's timescale is FITTED, and its error bar is the whole story
+A one-pole kernel mapping the gross source onto GCB's observed regrowth gives **τ = 19.50 yr**, r = +0.967 raw and **+0.733 detrended** (2/√n = 0.246), with SSE **13.7× the minimum at τ = 5** and 2.1× at 60 — so τ **is** identified, not flat.
+⛔⛔ **But the naive interval is 5× too tight.** The fit residuals are almost perfectly red (**lag-1 ρ = 0.905 ⇒ n_eff = 3.3 of n = 66**), so SSE × (1+1/n) gives **19.00–20.25 yr** — a 1.25-yr precision on a 66-point record. Corrected: **17.25–23.75 yr**, and that is what is stored and quoted. ⚠ The detrended r alone peaks SHORTER (~10 yr); the level information pulls longer, which is why the bracket is ~17–24 rather than 19–20. ⚠ **`tau_wood` = 20 yr is a COINCIDENCE, not a validation** — this τ is fitted to GCB's bookkeeping models and says nothing about CCX's wood pool. ⚠ Nor is it independent of R2: the pre-1959 history it convolves came from OSCAR's share.
+
+### The panel — "Forest regrowth, on its own", on *Where does the carbon go?*
+Three readouts (2.19 / −1.07 / 1.13 GtC/yr, 2015–2024, `luc_scale` applied), a three-series chart with the pre-1959 years shaded as back-extended, and a takeaway whose **directional claim is measured, not typed**: over 1959–2024 the net flux moved **−0.05 GtC/yr per decade**, gross clearing **+0.01** and regrowth **+0.06**, ⇒ **it is the regrowth that moved, not the clearing.** Browser-verified, zero console errors.
+⚠ `takeaway()` and `info_box()` **moved from `ui.R` to `global.R`** — the section is assembled in `server.R` through `uiOutput`, and a helper defined at the top level of `ui.R` is not reliably in scope there.
+⭐ **Colours COMPUTED**: brown `#a6611a` / teal `#018571` / `obs` `#22313f`, worst pair **10.9** across normal / protan / deutan / tritan. The obvious pick from the existing palette (`pulse` orange against `land` green) scores **exactly 8.0** under deuteranopia — on the line — so it was not used.
+
+### ⛔ `tools/palette_check.py` — and it does NOT reproduce (k)'s dichromat numbers
+The handoff said to re-use the Python reimplementation rather than eyeball. It was never committed, so it is written properly here (sRGB → linear → LMS, Viénot-Brettel-Mollon projection, OKLab ΔE). It **self-checks**: the LMS matrices are exact inverses and neutrals are invariant under all three dichromacies. And it reproduces (k)'s **normal** ΔE for the shipped figure pair **exactly (31.3)** — but **not its dichromat values**:
+
+| `#C2185B` / `#12395C` | normal | protan | deutan | tritan |
+|---|---|---|---|---|
+| CHANGELOG (k) | 31.3 | **13.5** | **26.1** | **31.7** |
+| this implementation | 31.3 | **7.4** | **23.4** | **39.2** |
+
+⇒ **one of the two is wrong, and (k)'s claim that the shipped figure's pair passes the ≥ 8 target is not currently reproducible** (this implementation says 7.4, i.e. marginally under). The figure is NOT changed on the strength of an unreproduced disagreement; it is flagged. The new panel's colours were chosen with margin (10.9) so the verdict does not turn on which implementation is right.
+
+### ⚠ FLAGGED, NOT CHANGED — existing copy attributes regrowth to the wrong term
+`output$w_luc_note` tells the reader the land crossed to a net sink "through CO₂ fertilisation **and forest regrowth on former farmland**". With Tier 1 drawn directly above it, that is now visibly imprecise: in this model — and in GCB's accounting — **regrowth is inside the land-use input, not inside the natural land sink**, and CO₂ fertilisation is the *only* long-term land-uptake term the model has ([[ccx_land_sink_single_term]]). The sentence is Marcus's copy and is left alone; the suggested replacement is to end it at "CO₂ fertilisation" and let the new panel say where regrowth actually lives.
+
+### Gates
+`test-luc-gross-split.R` **28 assertions**, mutation-tested nine ways — including a **sign flip that leaves the closure intact** (caught by the sign test, not the closure one) and a decay **3× too slow**. `test-luc-regrowth-panel.R` **27 assertions**, static like `test-review-cards.R`, guarding the three ways the panel can be silently wrong: an orphaned renderer, `luc_scale` applied to one half, and the "ASSERTED" sentence disappearing.
+Suite `climate|app|review|driver|growth|future|mechanisms|luc|forcing|stability`: **573 / 0** (was 518; the delta is exactly the 55 new assertions), 25 warnings, all the pre-existing 1900-start transient. ⛔ Still not a green suite: `test-mode-file.R` (1) and `test-overlay-idiom-lint.R` (2) remain the recorded reds and were **checked to be unaffected** — the lint's `CCX_PARAM_NAMES` idiom appears in none of the new files. ⚠ `test-seas-lag-split.R` now passes **35/0**, so the handoff's "four known reds" is **three**.
+
 ## 2026-09-24 (m) — **REGROWTH TIER 1, STEP 1: the gross LUC split EXISTS, it closes against the model's own burnt input, and it is ASSERTED not measured.** ⛔⛔ **Two things the handoff did not know: "regrowth" is convention-dependent BY A FACTOR OF THREE, and the future decay does NOT fall out for free.**
 
 The handoff's §5 step 1 called acquisition "the risk — gross components are not in the repo". It is discharged: GCB 2025's **Land-Use Change Emissions** sheet carries the decomposition, on the same openclimatedata mirror as the three GCB files already in the manifest. `data-raw/download_gcb_luc_components.R` acquires four files (3-model mean + BLUE / OSCAR / LUCE) and **refuses to record a file whose own components do not reproduce its Net column**.

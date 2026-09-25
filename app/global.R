@@ -394,6 +394,57 @@ APP_SSP_EMIS <- as.data.frame(
   readRDS(file.path(CCX_ROOT, "data", "ssp_emissions.rds")))
 
 # ---------------------------------------------------------------------
+# FOREST REGROWTH, REPORTED (REGROWTH TIER 1; Marcus 2026-09-24)
+# ---------------------------------------------------------------------
+# ⭐⭐ The model already CONTAINS forest regrowth, netted invisibly: the
+# prescribed land-use series is GCB's NET bookkeeping flux, which the three
+# bookkeeping models compute as gross clearing MINUS gross regrowth before the
+# model sees a number. This product is that column split back apart
+# (data-raw/build_luc_gross_split.R). The two halves sum to the prescribed net
+# in every year, so NOTHING the model integrates changes.
+#
+# ⚠⚠ THE SPLIT IS ASSERTED FROM GCB's BOOKKEEPING MODELS, NOT MEASURED BY THIS
+# MODEL, and the panel says so in its own copy. The one thing this record cannot
+# do is see the split for itself (CHANGELOG 2026-09-24 h).
+#
+# ⚠ `luc_scale` is NOT baked into the product -- it is a FITTED name, so both
+# halves are multiplied here, together. Scaling one is the mutation the gate
+# checks for.
+# ---- UI helpers shared by ui.R AND server.R -------------------------
+# ⚠ These lived in ui.R until 2026-09-24. Both files use them now -- the
+# land-use regrowth section is assembled in server.R through uiOutput -- and a
+# function defined at the top level of ui.R is not reliably in scope inside the
+# server function. global.R is the one file both are guaranteed to see.
+takeaway <- function(...) div(class = "takeaway", ...)
+
+info_box <- function(title, ...) {
+  tags$details(class = "moreinfo", tags$summary(title), div(...))
+}
+
+APP_LUC_SPLIT <- local({
+  f <- file.path(CCX_ROOT, "data", "forcing_luc_gross_split.rds")
+  if (!file.exists(f)) return(NULL)
+  p <- readRDS(f)
+  for (nm in c("gross_GtC", "regrowth_GtC", "net_GtC")) {
+    p$historical[[nm]] <- p$historical[[nm]] * APP_LUC_SCALE
+    p$futures[[nm]]    <- p$futures[[nm]]    * APP_LUC_SCALE
+  }
+  p$luc_scale_applied <- APP_LUC_SCALE
+  p
+})
+# The window the split is OBSERVED over, read from the product rather than typed
+# -- the panel's own caption depends on it and a GCB update must move both.
+APP_LUC_SPLIT_OBS <- if (is.null(APP_LUC_SPLIT)) NULL else APP_LUC_SPLIT$obs_window
+APP_LUC_SPLIT_NOTE <- if (is.null(APP_LUC_SPLIT)) NULL else sprintf(paste(
+  "Split of the land-use input into gross clearing and forest regrowth, on the",
+  "Global Carbon Budget's own \u201cforest regrowth (total)\u201d convention and",
+  "ASSERTED from its three bookkeeping models \u2014 this model does not measure",
+  "the split. Observed %d\u2013%d; earlier years are back-extended from OSCAR's",
+  "share and later years are a prescribed decay (e-folding %.0f yr). Both halves",
+  "carry the fitted land-use scale %.3f and sum to the series the model burns."),
+  APP_LUC_SPLIT_OBS[1], APP_LUC_SPLIT_OBS[2], APP_LUC_SPLIT$tau_yr, APP_LUC_SCALE)
+
+# ---------------------------------------------------------------------
 # ONE PAST FOR EVERY TAB (2026-09-22, Marcus's ruling: splice + caption).
 # ---------------------------------------------------------------------
 # The observed budget runs out here; a scenario takes over after it. Read from

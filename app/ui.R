@@ -22,11 +22,9 @@ gloss <- function(term, meaning) {
             term)
 }
 
-takeaway <- function(...) div(class = "takeaway", ...)
-
-info_box <- function(title, ...) {
-  tags$details(class = "moreinfo", tags$summary(title), div(...))
-}
+# `takeaway()` and `info_box()` moved to global.R 2026-09-24: server.R needs them
+# too (the regrowth section renders through uiOutput), and a UI helper defined in
+# ui.R is not reliably in scope there.
 
 # The provenance banner. Deliberately not dismissible: what the model is fitted
 # to changes what every number on every tab means.
@@ -217,7 +215,23 @@ navbarPage(
           column(6, h5("Airborne fraction"), plotOutput("w_af", height = "260px")),
           column(6, h5("Does the model agree with the measured budget?"),
                  plotOutput("w_gcb", height = "260px"))
-        )
+        ),
+        # ---- REGROWTH TIER 1 (Marcus 2026-09-24) -----------------------
+        # "Adding forest regrowth as its own number would still be useful."
+        # It goes HERE, under the land-use caveat above, because the caveat is
+        # where the netting was already being discussed -- and because the honest
+        # framing is not "a new process" but "the number that was already inside
+        # the one above it". The section is conditional on the product existing
+        # so a checkout without data/forcing_luc_gross_split.rds still renders.
+        hr(),
+        h5("Forest regrowth, on its own"),
+        p("The land-use line above is a ", tags$em("net"), " number: forests",
+          "cleared for farmland release carbon, and forests growing back on land",
+          "that was abandoned take it up again. Every budget reports the",
+          "difference. This chart separates the two, so the regrowth that has",
+          "been in this model all along — folded invisibly into the land-use",
+          "input — can be read off."),
+        uiOutput("w_regrowth_ui")
       )
     )
   ),

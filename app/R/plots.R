@@ -16,7 +16,18 @@ PAL <- c(
   ocean     = "#2980b9",
   pulse     = "#d35400",
   off       = "#8e44ad",
-  grid      = "#e5e8e8"
+  grid      = "#e5e8e8",
+  # ⭐ THE LAND-USE SPLIT (REGROWTH TIER 1, 2026-09-24). COMPUTED, NOT CHOSEN.
+  # Brown = carbon leaving the land when it is cleared, teal = carbon returning
+  # as forest regrows; the net keeps the palette's `obs` ink because the net
+  # series IS the observational product the model is driven by. Scored with
+  # tools/palette_check.py (OKLab dE after a Vienot-Brettel dichromat
+  # projection): the worst pair over normal / protan / deutan / tritan is
+  # 10.9, against the skill's >= 8 target. The obvious pick from the existing
+  # palette -- `pulse` orange against `land` green -- sits at exactly 8.0 under
+  # deuteranopia, i.e. on the line, so it was not used.
+  luc_gross  = "#a6611a",
+  luc_regrow = "#018571"
 )
 
 LAB_CO2   <- "CO₂ (ppm)"
@@ -287,6 +298,67 @@ plot_gcb_bars <- function(out, gcb, F, window = c(2014, 2023)) {
          caption = app_provenance_caption(
            paste("Land sink on the Global Carbon Budget's convention: the",
                  "residual terrestrial sink, excluding land-use emissions."))) +
+    theme_ccx()
+}
+
+LAB_LUC_GROSS  <- "Cleared (gross land-use source)"
+LAB_LUC_REGROW <- "Forest regrowth (uptake)"
+LAB_LUC_NET    <- "Net land-use flux (what the model burns)"
+LAB_LUC_Y      <- "Land-use carbon flux (GtC per year)"
+LAB_LUC_CAPTION <- paste("The split into clearing and regrowth is ASSERTED from the Global",
+                         "Carbon Budget's three bookkeeping models; this model does not",
+                         "measure it. Both halves carry the fitted land-use scale and sum",
+                         "to the series the model burns.")
+
+#' The prescribed land-use flux, un-netted into clearing and forest regrowth
+#'
+#' ⭐⭐ WHAT THIS PANEL IS FOR. Asked whether the model has forest regrowth, the
+#' honest answer is that it has had it all along and could not show it: the
+#' land-use series it burns is a NET bookkeeping flux, gross clearing minus gross
+#' regrowth, netted by GCB's three bookkeeping models before the model sees a
+#' number. This draws the two halves that were being added together.
+#'
+#' ⚠⚠ AND THE SPLIT IS ASSERTED, NOT MEASURED. It is imported from those
+#' bookkeeping models; this model cannot see it (CHANGELOG 2026-09-24 h, where
+#' the discriminating test failed). The caption says so, and the shaded region
+#' marks the years where even the split's own source is a construction rather
+#' than an observation.
+#'
+#' ⛔ The three series are NOT independent: regrowth = net - gross by
+#' construction, which is the point -- a reader who adds the brown and teal
+#' areas must land on the black line, and `test-luc-regrowth-panel.R` asserts
+#' the drawn data does.
+plot_luc_gross_split <- function(split, window) {
+  h <- split$historical
+  k <- h$year >= window[1] & h$year <= window[2]
+  h <- h[k, ]
+  d <- rbind(
+    data.frame(year = h$year, gtc = h$gross_GtC,    who = LAB_LUC_GROSS),
+    data.frame(year = h$year, gtc = h$regrowth_GtC, who = LAB_LUC_REGROW),
+    data.frame(year = h$year, gtc = h$net_GtC,      who = LAB_LUC_NET))
+  d$who <- factor(d$who, levels = c(LAB_LUC_GROSS, LAB_LUC_REGROW, LAB_LUC_NET))
+  cols <- stats::setNames(c(PAL[["luc_gross"]], PAL[["luc_regrow"]], PAL[["obs"]]),
+                          c(LAB_LUC_GROSS, LAB_LUC_REGROW, LAB_LUC_NET))
+  obs <- split$obs_window
+  p <- ggplot(d, aes(year, gtc, colour = who))
+  # the ASSUMED years, marked before the lines so the lines sit on top
+  if (window[1] < obs[1])
+    p <- p + annotate("rect", xmin = window[1], xmax = min(obs[1], window[2]),
+                      ymin = -Inf, ymax = Inf, fill = "grey55", alpha = 0.13)
+  p +
+    geom_hline(yintercept = 0, colour = "grey45", linewidth = 0.4) +
+    geom_line(linewidth = 0.85) +
+    scale_colour_manual(values = cols) +
+    guides(colour = guide_legend(nrow = 2)) +
+    labs(x = LAB_YEAR, y = LAB_LUC_Y,
+         subtitle = if (window[1] < obs[1])
+           sprintf("Shaded: before %d, the split itself is back-extended, not observed", obs[1])
+         else NULL,
+         # /!\ SHORT, because the full note is in the caveat box directly
+         # under this chart and the first draft printed it twice. What stays
+         # here is the sentence a screenshot has to carry on its own: the
+         # split is imported, not measured.
+         caption = app_provenance_caption(LAB_LUC_CAPTION)) +
     theme_ccx()
 }
 

@@ -134,6 +134,80 @@ function(input, output, session) {
                 mod, if (!is.na(obs) && mod < obs) "earlier" else "later"))
   })
 
+  # ---- REGROWTH TIER 1 (Marcus 2026-09-24) --------------------------
+  # ⭐⭐ The whole section renders through uiOutput rather than plotOutput so a
+  # checkout without data/forcing_luc_gross_split.rds says what is missing
+  # instead of drawing an empty panel. ⛔ AND THE TWO SENTENCES THAT CANNOT BE
+  # DROPPED are both here: the split is ASSERTED from GCB's bookkeeping models
+  # and not measured by this model, and the future half of the curve is a
+  # prescribed decay. Those are not hedges, they are what the number IS.
+  output$w_regrowth_ui <- renderUI({
+    if (is.null(APP_LUC_SPLIT))
+      return(div(class = "caveat",
+                 "The land-use split is not built in this checkout — run",
+                 tags$code("Rscript data-raw/build_luc_gross_split.R"), "."))
+    h   <- APP_LUC_SPLIT$historical
+    obs <- APP_LUC_SPLIT$obs_window
+    now <- h[h$year >= obs[2] - 9 & h$year <= obs[2], ]
+    tagList(
+      fluidRow(
+        column(4, div(class = "readout-label", "Cleared, gross"),
+               div(class = "readout", sprintf("%.2f", mean(now$gross_GtC)))),
+        column(4, div(class = "readout-label", "Forest regrowth"),
+               div(class = "readout", sprintf("%.2f", mean(now$regrowth_GtC)))),
+        column(4, div(class = "readout-label", "Net, what the model burns"),
+               div(class = "readout", sprintf("%.2f", mean(now$net_GtC))))
+      ),
+      div(class = "readout-label",
+          sprintf("GtC per year, %d–%d average", min(now$year), max(now$year))),
+      br(),
+      takeaway(textOutput("w_regrowth_takeaway", inline = TRUE)),
+      plotOutput("w_regrowth_plot", height = "330px"),
+      div(class = "caveat", tags$strong("Where this number comes from: "),
+          textOutput("w_regrowth_caveat", inline = TRUE)),
+      info_box("Why splitting it changes nothing the model does",
+               p("The two halves add back to exactly the series the model was",
+                 "always given, so the model runs identically whether the split",
+                 "is drawn or not. Nothing here was re-fitted; this is the same",
+                 "number reported two ways."),
+               p("That also sets the limit of what it can tell you. Because the",
+                 "model only ever sees the total, it cannot check the split —",
+                 "the division between clearing and regrowth is taken on the",
+                 "bookkeeping models' authority, not tested against the",
+                 "atmospheric record here."))
+    )
+  })
+
+  output$w_regrowth_plot <- renderPlot(
+    plot_luc_gross_split(APP_LUC_SPLIT, input$w_years))
+
+  # /!\ THE LAST SENTENCE IS MEASURED, NOT ASSERTED. Which half moved is the
+  # interesting fact -- the net land-use flux has fallen while gross clearing
+  # has not -- but "clearing is flat and regrowth is rising" is a DIRECTIONAL
+  # claim, so it is read off the two trends rather than typed. A GCB revision
+  # that flips either one flips the sentence with it.
+  output$w_regrowth_takeaway <- renderText({
+    h   <- APP_LUC_SPLIT$historical
+    obs <- APP_LUC_SPLIT$obs_window
+    now <- h[h$year >= obs[2] - 9 & h$year <= obs[2], ]
+    all <- h[h$year >= obs[1] & h$year <= obs[2], ]
+    frac  <- function(d) -sum(d$regrowth_GtC) / sum(d$gross_GtC)
+    slope <- function(v) unname(stats::coef(stats::lm(v ~ all$year))[2]) * 10
+    s_gro <- slope(all$gross_GtC)
+    s_reg <- slope(-all$regrowth_GtC)
+    s_net <- slope(all$net_GtC)
+    sprintf(paste("Over the last ten years, forests regrowing took back %s of the",
+                  "carbon that clearing released — %.2f GtC a year against %.2f.",
+                  "Across %d–%d the share was %s. Over that record the net",
+                  "land-use flux changed by %+.2f GtC/yr per decade, gross clearing",
+                  "by %+.2f and regrowth by %+.2f — so it is the %s that moved."),
+            fmt_pct(frac(now)), -mean(now$regrowth_GtC), mean(now$gross_GtC),
+            obs[1], obs[2], fmt_pct(frac(all)), s_net, s_gro, s_reg,
+            if (abs(s_reg) > abs(s_gro)) "regrowth" else "clearing")
+  })
+
+  output$w_regrowth_caveat <- renderText(APP_LUC_SPLIT_NOTE)
+
   # ---- 3. Counterfactuals --------------------------------------------
   cf_run <- reactive({
     req(input$c_mech)
