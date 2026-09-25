@@ -429,6 +429,34 @@ APP_IMBALANCE_HEADING <- "Is the model's land sink too high?"
 # server function. global.R is the one file both are guaranteed to see.
 takeaway <- function(...) div(class = "takeaway", ...)
 
+# ---- NAMING A SET OF MECHANISM SWITCHES (Marcus 2026-09-25) ---------
+# The "What if...?" tab went multi-select, so every sentence and legend key that
+# used to interpolate ONE switch's label now has to name between zero and seven.
+# ⛔ TWO functions, not one, because the two jobs have opposite constraints:
+# a sentence wants every name spelled out, and a LEGEND KEY must stay short --
+# "Without: CO2 fertilisation (the land sink), El Niño / La Niña and volcanic
+# haze (the diffuse-light effect)" is 100+ characters into a legend that
+# app_text_px() has to fit, which is the clipping class this app has already
+# been bitten by twice ([[subtitles_clip_too]]).
+# ⚠ At n = 1 the key is byte-identical to what the tab printed before, so
+# the single-switch case is unchanged.
+
+#' The labels of a set of mechanism switches, as an English list
+app_mech_list <- function(off) {
+  if (!length(off)) return("")
+  lb <- vapply(off, function(n) CCX_MECHANISMS[[n]]$label, character(1),
+               USE.NAMES = FALSE)
+  if (length(lb) == 1L) return(lb)
+  paste(paste(utils::head(lb, -1L), collapse = ", "), "and", utils::tail(lb, 1L))
+}
+
+#' The legend key for the counterfactual line: short by construction
+app_mech_key <- function(off) {
+  if (!length(off)) return("Without: nothing")
+  if (length(off) == 1L) return(paste("Without:", CCX_MECHANISMS[[off]]$label))
+  sprintf("Without %d mechanisms", length(off))
+}
+
 info_box <- function(title, ...) {
   tags$details(class = "moreinfo", tags$summary(title), div(...))
 }

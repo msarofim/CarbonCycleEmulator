@@ -281,8 +281,17 @@ navbarPage(
     sidebarLayout(
       sidebarPanel(
         width = 3,
-        p(tags$strong("Switch a mechanism off"), " and the model reruns without it."),
-        radioButtons("c_mech", NULL, choices = ccx_mechanism_choices()),
+        # ⭐ CHECKBOXES, NOT RADIOS (Marcus 2026-09-25: "Can we add radio boxes
+        # so you can turn off multiple things simultaneously?"). The engine took
+        # a vector all along -- see the server's counterfactual block for why
+        # the order does not matter and why the per-switch claims must not be
+        # added up. `selected` keeps the tab's previous default, so an unchanged
+        # first impression.
+        p(tags$strong("Switch mechanisms off"), " and the model reruns without",
+          "them. Tick as many as you like — they are removed together, in one",
+          "run."),
+        checkboxGroupInput("c_mech", NULL, choices = ccx_mechanism_choices(),
+                           selected = names(CCX_MECHANISMS)[1]),
         sliderInput("c_years", "Years shown",
                     min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
                     value = c(1850, APP_HIST_YEARS[2]), step = 1, sep = ""),
@@ -306,6 +315,11 @@ navbarPage(
           "where switching a mechanism off is actually visible."),
         plotOutput("c_growth", height = "300px"),
         textOutput("c_growth_note"),
+        # ⭐ THE RESIDUAL STRIP (Marcus 2026-09-25): "Is the difference between
+        # observed and model added to the 2nd panel possible?" It sits directly
+        # under the growth chart, sharing its window, and is short on purpose --
+        # it is a companion to that panel, not a fourth chart competing with it.
+        plotOutput("c_resid", height = "200px"),
         # F2 (Marcus 2026-09-24): the residuals as NUMBERS on this panel rather
         # than as panels of their own — "can the F2 residual numbers be a part
         # of the 2nd panel?" They can: every series above is already in ppm/yr
@@ -461,7 +475,11 @@ navbarPage(
           "input.f_mode == 'Pulse lab'",
           hr(),
           h5("Where the extra carbon ends up"),
-          plotOutput("f_partition", height = "300px")),
+          plotOutput("f_partition", height = "300px"),
+          # Marcus 2026-09-25: "Add text for the pulse radio button about the
+          # relationship between cumulative carbon and temperature (e.g., each
+          # ton of CO2 emitted adds effectively permanent temperature)."
+          uiOutput("f_pulse_permanence")),
         uiOutput("f_notes"),
         # F1 (Marcus 2026-09-22): his reframing, used as supplied, and the
         # "honest reading" paragraph deleted as he asked.

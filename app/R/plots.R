@@ -902,16 +902,75 @@ plot_constraint_tension <- function(tn) {
     theme(panel.grid.major.y = element_blank(), legend.position = "top")
 }
 
-plot_counterfactual <- function(base, alt, yr_range, label) {
+#' @param alt a run with mechanisms removed, or NULL for "nothing switched off"
+#' \u26a0 `alt = NULL` became reachable with the 2026-09-25 multi-select: a
+#' checkbox group can be emptied, and that is a legitimate state (the full model
+#' against the measurements), not an error. plot_growth_rate() already took NULL.
+plot_counterfactual <- function(base, alt = NULL, yr_range, label) {
   k <- base$t >= yr_range[1] & base$t <= yr_range[2]
-  d <- rbind(
-    data.frame(t = base$t[k], co2 = base$co2_global[k], who = "Full model"),
-    data.frame(t = alt$t[k],  co2 = alt$co2_global[k],  who = label))
+  d <- data.frame(t = base$t[k], co2 = base$co2_global[k], who = "Full model")
+  if (!is.null(alt))
+    d <- rbind(d, data.frame(t = alt$t[k], co2 = alt$co2_global[k], who = label))
   ggplot(d, aes(t, co2, colour = who)) +
     geom_line(linewidth = 0.8) +
     scale_colour_manual(values = stats::setNames(c(PAL[["model"]], PAL[["off"]]),
                                                  c("Full model", label))) +
     labs(x = LAB_YEAR, y = LAB_CO2, caption = app_provenance_caption()) +
+    theme_ccx()
+}
+
+# ---------------------------------------------------------------------
+# The RESIDUAL STRIP under the growth-rate chart (Marcus 2026-09-25)
+# ---------------------------------------------------------------------
+# "Is the difference between observed and model added to the 2nd panel
+# possible?" It is, and it gets its own strip rather than the growth chart's
+# axes: the residuals run about +/-0.5 ppm/yr against a growth rate of 0-3, so
+# on a shared axis they are a flat squiggle along the bottom edge.
+#
+# ⛔ SAME ESTIMATORS AS THE PANEL ABOVE IT. app_annual_growth() and
+# app_obs_growth() are the ones plot_growth_rate() uses and the ones
+# app_growth_residuals() reports in words; a second definition here would be a
+# second observed growth rate under one name in one app -- the caption-sync bug
+# class this repo keeps hitting.
+#
+# ⛔ SIGN CONVENTION, STATED ON THE CHART: MODEL MINUS MEASURED, so positive
+# means the model grew faster than the record that year. The axis label says so,
+# because "difference" alone is exactly the kind of label a reader resolves the
+# wrong way round half the time.
+LAB_GROWTH_RESID <- "Model \u2212 measured (ppm/yr)"
+KEY_RESID_ZERO   <- "No difference"
+
+#' Model-minus-observed CO2 growth, for the full model and the counterfactual
+#' @param base the full model run
+#' @param alt  the counterfactual run, or NULL
+#' @param gcb  the GCB budget table
+#' @param yr_range the window, ALREADY intersected with the observed record
+#' @param label the legend key for `alt`
+plot_growth_resid <- function(base, alt = NULL, gcb = NULL,
+                              yr_range = c(1960, 2024), label = "Mechanism off") {
+  if (is.null(gcb) || !"atm_growth" %in% names(gcb)) return(NULL)
+  o <- app_obs_growth(gcb)
+  one <- function(run, who) {
+    m <- app_annual_growth(run)
+    j <- merge(m, o, by = "year", suffixes = c("", "_obs"))
+    if (!nrow(j)) return(NULL)
+    data.frame(year = j$year, r = j$g - j$g_obs, who = who)
+  }
+  d <- one(base, "Full model")
+  if (!is.null(alt)) d <- rbind(d, one(alt, label))
+  if (is.null(d) || !nrow(d)) return(NULL)
+  d <- d[d$year >= yr_range[1] & d$year <= yr_range[2], ]
+  if (!nrow(d)) return(NULL)
+  cols <- stats::setNames(c(PAL[["model"]], PAL[["off"]]), c("Full model", label))
+  ggplot(d, aes(year, r, colour = who)) +
+    geom_hline(yintercept = 0, linewidth = 0.4, colour = "grey45") +
+    geom_line(linewidth = 0.7) +
+    geom_point(size = 0.8) +
+    scale_colour_manual(values = cols[names(cols) %in% unique(d$who)]) +
+    labs(x = LAB_YEAR, y = LAB_GROWTH_RESID,
+         caption = app_provenance_caption(paste(
+           "Positive = the model grew faster than the measured record that year.",
+           "Same years and same estimators as the panel above."))) +
     theme_ccx()
 }
 

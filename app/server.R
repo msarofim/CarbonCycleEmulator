@@ -333,51 +333,107 @@ function(input, output, session) {
   output$w_regrowth_caveat <- renderText(APP_LUC_SPLIT_NOTE)
 
   # ---- 3. Counterfactuals --------------------------------------------
+  # ⭐⭐ MULTI-SELECT since 2026-09-25 (Marcus: "Can we add radio boxes so you can
+  # turn off multiple things simultaneously?"). THE ENGINE ALWAYS ALLOWED IT --
+  # ccx_apply_mechanisms() takes a VECTOR and folds the switches in order -- and
+  # the order does not matter, because the seven switches touch disjoint
+  # parameters (beta/beta_max, q10+sst_scale+sst_obs, gamma_enso, gamma_diff,
+  # k_w, revelle_frozen) and disjoint forcing columns (aod, the emissions
+  # columns). What changed here is the input control and the copy around it,
+  # not the model.
+  #
+  # ⛔⛔ NOTHING IN THIS BLOCK MAY ADD UP THE PER-SWITCH CLAIMS. Each blurb
+  # quotes its own switch's effect -- "switch it off and about a quarter of the
+  # wobble goes" -- and those DO NOT COMPOSE. Measured over 1959-2024 (the
+  # figures in R/mechanisms.R's enso entry): ENSO -23 %, temperature -22 %,
+  # volcanic light -8 %, but ALL THREE TOGETHER only -43 %, not -53 %. So every
+  # number printed below is COMPUTED FROM THE COMBINED RUN, the blurbs are shown
+  # labelled and separate so they cannot read as a running total, and with more
+  # than one ticked the scatter note says in words that they do not add.
+  #
+  # ⚠ ZERO SELECTED IS A LEGITIMATE STATE, not an error: it is the full model
+  # against the measurements, which is a thing a reader may well want to look at.
+  # Every output below handles it rather than req()-ing it away, because a
+  # checkbox group can be emptied and a blank tab reads as a broken one.
+  cf_off <- reactive(input$c_mech %||% character())
+
   cf_run <- reactive({
-    req(input$c_mech)
-    app_run_mechanisms(input$c_mech, APP_HIST_YEARS, "historical")
+    off <- cf_off()
+    if (!length(off)) return(NULL)
+    app_run_mechanisms(off, APP_HIST_YEARS, "historical")
   })
 
-  output$c_plot <- renderPlotFit("c_plot", {
-    m <- CCX_MECHANISMS[[input$c_mech]]
-    plot_counterfactual(APP_HIST$out, cf_run()$out, input$c_years,
-                        paste("Without:", m$label))
-  })
+  # The counterfactual's output table, or NULL when nothing is switched off.
+  # ⛔ ONE accessor, so no panel below can differ about what "no counterfactual"
+  # means -- plot_counterfactual() and plot_growth_rate() both take alt = NULL.
+  cf_alt <- reactive({ r <- cf_run(); if (is.null(r)) NULL else r$out })
 
+  output$c_plot <- renderPlotFit("c_plot",
+    plot_counterfactual(APP_HIST$out, cf_alt(), input$c_years,
+                        app_mech_key(cf_off())))
+
+  # One labelled block per ticked switch (Marcus's own fallback for the
+  # multi-select: "print more than 1 text box below"). Labelled and separated
+  # rather than concatenated -- see the non-additivity warning above.
   output$c_blurb <- renderUI({
-    m <- CCX_MECHANISMS[[input$c_mech]]
-    div(style = "margin-top:12px; font-size:0.93rem;", m$blurb)
+    off <- cf_off()
+    if (!length(off))
+      return(div(style = "margin-top:12px; font-size:0.93rem;",
+                 "Nothing is switched off, so the charts show the full model",
+                 "against the measurements. Tick one or more boxes to remove",
+                 "a mechanism; tick several to remove them together."))
+    div(style = "margin-top:12px; font-size:0.93rem;",
+        lapply(off, function(n) {
+          m <- CCX_MECHANISMS[[n]]
+          tags$p(tags$strong(m$label), tags$br(), m$blurb)
+        }))
   })
 
+  # ⚠ THE CAVEATS COME BACK FROM THE RUN, not from a second walk of
+  # CCX_MECHANISMS here: ccx_apply_mechanisms() appends one per switch in the
+  # order it was given them, so they line up with cf_off() BY CONSTRUCTION. The
+  # length check is there because that alignment is an assumption about another
+  # file, and an unlabelled list is better than a mislabelled one.
   output$c_caveat <- renderUI({
-    cav <- cf_run()$caveats
-    if (!length(cav)) return(NULL)
-    div(class = "caveat", tags$strong("Worth knowing: "), paste(cav, collapse = " "))
+    off <- cf_off(); r <- cf_run()
+    if (is.null(r) || !length(r$caveats)) return(NULL)
+    cav <- r$caveats
+    body <- if (length(cav) == length(off))
+      tags$ul(Map(function(n, cv)
+        tags$li(tags$strong(paste0(CCX_MECHANISMS[[n]]$label, ": ")), cv), off, cav))
+    else
+      paste(cav, collapse = " ")
+    div(class = "caveat", tags$strong("Worth knowing: "), body)
   })
 
   # C2 (Marcus 2026-09-22). The growth-rate panel, with observations (C1) --
   # the panel that makes the ENSO claim in the blurb checkable (C3).
-  output$c_growth <- renderPlotFit("c_growth", {
-    m <- CCX_MECHANISMS[[input$c_mech]]
-    plot_growth_rate(APP_HIST$out, cf_run()$out, APP_GCB,
-                     input$c_years, paste("Without:", m$label))
-  })
+  output$c_growth <- renderPlotFit("c_growth",
+    plot_growth_rate(APP_HIST$out, cf_alt(), APP_GCB,
+                     input$c_years, app_mech_key(cf_off())))
+
+  # ⛔ ONE WINDOW, COMPUTED ONCE, HANDED TO ALL THREE SENTENCES AND THE STRIP.
+  # The scatter note, the residual note and the residual chart all describe "the
+  # same years"; if they derived the intersection separately they could disagree
+  # about which years while all three printed a range, which is worse than any
+  # one of them being wrong alone.
+  cf_window <- reactive(c(max(input$c_years[1], min(APP_GCB$year)),
+                          min(input$c_years[2], max(APP_GCB$year))))
 
   # MEASURED, not asserted: the scatter each series carries about its own
   # decadal trend. A sentence claiming the wobbles shrink has to be a sentence
   # that would change if they did not.
   #
-  # ⛔ ALL THREE ARE MEASURED ON THE SAME YEARS, and the first version of this
+  # ⛔ ALL SERIES ARE MEASURED ON THE SAME YEARS, and the first version of this
   # was not. The model runs from 1750 but GCB's atmospheric growth starts 1959,
   # so a window of 1850-2024 gave the model 174 years and the observation 66 --
   # and the model's pre-1959 growth is small and nearly smooth, which deflated
-  # its scatter and flattered the comparison. The window is now the INTERSECTION
-  # of the slider and the observed record, and the sentence says which years it
+  # its scatter and flattered the comparison. The window is the INTERSECTION of
+  # the slider and the observed record, and the sentence says which years it
   # used. (The standing like-for-like rule, ~/.claude/CLAUDE.md.)
   output$c_growth_note <- renderText({
-    m <- CCX_MECHANISMS[[input$c_mech]]
-    yr <- c(max(input$c_years[1], min(APP_GCB$year)),
-            min(input$c_years[2], max(APP_GCB$year)))
+    off <- cf_off()
+    yr  <- cf_window()
     if (diff(yr) < 12) return(paste("Choose a window of at least a dozen years",
                                     "inside the measured record to compare the",
                                     "year-to-year scatter."))
@@ -388,37 +444,48 @@ function(input, output, session) {
     }
     mod_g <- app_annual_growth      # ⛔ ONE definition, shared with the chart (F2)
     a  <- scatter(mod_g(APP_HIST$out))
-    b  <- scatter(mod_g(cf_run()$out))
     ob <- scatter(app_obs_growth(APP_GCB))
-    if (is.na(a) || is.na(b) || is.na(ob)) return("")
-    sprintf(paste("Over %d\u2013%d, the year-to-year scatter about the decadal trend is:",
-                  "full model %.2f ppm/yr, without \u201c%s\u201d %.2f (%s),",
-                  "and the measured record %.2f."),
-            yr[1], yr[2], a, m$label, b,
-            if (b < a) sprintf("%.0f %% less", 100 * (1 - b / a))
-            else sprintf("%.0f %% more", 100 * (b / a - 1)),
-            ob)
+    if (is.na(a) || is.na(ob)) return("")
+    if (!length(off))
+      return(sprintf(paste("Over %d–%d, the year-to-year scatter about the",
+                           "decadal trend is %.2f ppm/yr in the full model",
+                           "against %.2f in the measured record."),
+                     yr[1], yr[2], a, ob))
+    b <- scatter(mod_g(cf_alt()))
+    if (is.na(b)) return("")
+    txt <- sprintf(paste("Over %d–%d, the year-to-year scatter about the decadal trend is:",
+                         "full model %.2f ppm/yr, without %s %.2f (%s),",
+                         "and the measured record %.2f."),
+                   yr[1], yr[2], a, app_mech_list(off), b,
+                   if (b < a) sprintf("%.0f %% less", 100 * (1 - b / a))
+                   else sprintf("%.0f %% more", 100 * (b / a - 1)),
+                   ob)
+    # ⛔⛔ THE NON-ADDITIVITY WARNING, IN WORDS AND WITHOUT AN INVENTED NUMBER.
+    # The per-switch blurbs in the sidebar each quote their own effect, and a
+    # reader with three ticked will otherwise add them up. No figure is given
+    # here because computing the individual effects would mean N more model runs
+    # on every click, and the measured example that IS available lives in
+    # R/mechanisms.R's enso entry rather than in this window.
+    if (length(off) > 1L)
+      txt <- paste(txt, sprintf(paste("⚠ These %d switches do NOT add up — they",
+                                      "interact, so the combined figure above is the",
+                                      "one to read, not the sum of the individual",
+                                      "claims beside each box."), length(off)))
+    txt
   })
 
   # F2 (Marcus 2026-09-24): "full model minus measured" and "experiment minus
-  # measured" \u2014 as NUMBERS ON THIS PANEL, which is what he asked for and what
-  # keeps the tab at three charts. Each residual is the vertical gap between two
-  # lines already drawn above, so nothing here needs its own alignment.
-  #
-  # \u26d4 THE WINDOW IS COMPUTED ONCE, HERE, AND HANDED TO BOTH SENTENCES. The
-  # scatter note derives the same intersection; if these two ever computed it
-  # separately they could disagree about which years they describe while both
-  # printed a year range, which is worse than either being wrong alone.
+  # measured" — as NUMBERS ON THIS PANEL. Each residual is the vertical gap
+  # between two lines already drawn above, so nothing here needs its own
+  # alignment. The same residuals are now DRAWN as well (output$c_resid).
   output$c_growth_resid <- renderText({
-    m  <- CCX_MECHANISMS[[input$c_mech]]
-    yr <- c(max(input$c_years[1], min(APP_GCB$year)),
-            min(input$c_years[2], max(APP_GCB$year)))
-    r <- app_growth_residuals(APP_HIST$out, cf_run()$out, APP_GCB, yr)
+    off <- cf_off()
+    r <- app_growth_residuals(APP_HIST$out, cf_alt(), APP_GCB, cf_window())
     if (is.null(r)) return("")
-    # \u26a0 THE WORST YEAR IS REPORTED BECAUSE A BIAS/RMS PAIR CANNOT SHOW AN
+    # ⚠ THE WORST YEAR IS REPORTED BECAUSE A BIAS/RMS PAIR CANNOT SHOW AN
     # EPISODIC ERROR. "Consistently 0.1 high" and "fine except 1992 and 1998"
     # give nearly the same two numbers, and only the second is a story about
-    # volcanoes and El Nino \u2014 which is what this tab is for.
+    # volcanoes and El Nino — which is what this tab is for.
     txt <- sprintf(paste("Against the measured record over the same %d years:",
                          "the full model runs %+.2f ppm/yr on average (typical",
                          "miss %.2f), and its single worst year is %d at %+.2f."),
@@ -426,9 +493,9 @@ function(input, output, session) {
                    r$full$worst)
     if (!is.null(r$alt))
       txt <- paste(txt,
-        sprintf(paste("Without \u201c%s\u201d the average becomes %+.2f and the",
-                      "typical miss %.2f \u2014 %s."),
-                m$label, r$alt$bias, r$alt$rms,
+        sprintf(paste("Without %s the average becomes %+.2f and the",
+                      "typical miss %.2f — %s."),
+                app_mech_list(off), r$alt$bias, r$alt$rms,
                 if (r$alt$rms < r$full$rms)
                   sprintf("%.0f %% closer to the measurements", 100 * (1 - r$alt$rms / r$full$rms))
                 else if (r$alt$rms > r$full$rms)
@@ -437,66 +504,108 @@ function(input, output, session) {
     txt
   })
 
+  # ---- THE RESIDUAL STRIP (Marcus 2026-09-25) ------------------------
+  # "Is the difference between observed and model added to the 2nd panel
+  # possible?" -- yes, and it goes in its OWN strip under the growth chart
+  # rather than on its axes. The residuals are roughly +/-0.5 ppm/yr against a
+  # growth rate that runs 0-3, so drawn on the shared axis they would be a flat
+  # squiggle along the bottom, colliding with the low end of the data.
+  # ⛔ IT SHARES THE GROWTH CHART'S x LIMITS AND ITS WINDOW, and takes the
+  # SAME app_annual_growth / app_obs_growth definitions, so the strip cannot
+  # come to describe different years or a different estimator from the panel it
+  # sits under.
+  output$c_resid <- renderPlotFit("c_resid",
+    plot_growth_resid(APP_HIST$out, cf_alt(), APP_GCB, cf_window(),
+                      app_mech_key(cf_off())))
+
   # ---- F1 (Marcus 2026-09-24): the DRIVER panel ----------------------
   # The two panels above draw what the model DID. This one draws what it was
   # TOLD -- and draws it twice, before and after the switch, which is the only
   # place in the app a reader can see that "El Nino off" and "volcanoes off" are
   # two different KINDS of operation. See plot_driver()'s header.
   #
-  # \u26d4 IT USES THE COUNTERFACTUAL'S OWN FORCING (`cf_run()$forcing`), not a
+  # ⛔ IT USES THE COUNTERFACTUAL'S OWN FORCING (`cf_run()$forcing`), not a
   # freshly built one. Re-deriving would put a second forcing on the page beside
   # the run, which is exactly how the futures and historical tabs came to draw
   # different pasts (CHANGELOG 09-22 (x)).
-  c_driver <- reactive({
-    req(input$c_mech)
-    ccx_driver_series(input$c_mech, APP_HIST$forcing, APP_PARAMS,
-                      F_off = cf_run()$forcing)
+  #
+  # ⭐ ONE CHART PER TICKED SWITCH since the multi-select. Each driver's
+  # column is touched by at most its OWN switch (volcanic -> aod, emissions ->
+  # the emissions columns; enso and warming zero a COEFFICIENT and touch no
+  # column at all), so handing every panel the combined forcing is not only safe
+  # but right: it is the input that run actually received.
+  #
+  # ⚠ The outputs are declared ONCE HERE, one per switch that has a driver,
+  # with the id and the output name the SAME EXPRESSION -- which is a stronger
+  # guarantee than the static `output$x <- renderPlotFit("x")` form that
+  # test-plot-text-fits.R test 7 greps for, because the two cannot drift apart.
+  # That gate cannot see this form; the id is checked here instead.
+  for (.nm in names(CCX_MECHANISMS)) local({
+    nm <- .nm
+    if (is.null(CCX_MECHANISMS[[nm]]$driver)) return(invisible(NULL))
+    id <- paste0("c_driver_", nm)
+    output[[id]] <- renderPlotFit(id, {
+      req(nm %in% cf_off())
+      d <- ccx_driver_series(nm, APP_HIST$forcing, APP_PARAMS,
+                             F_off = cf_run()$forcing)
+      req(!is.null(d))
+      plot_driver(d, input$c_years,
+                  paste("Without:", CCX_MECHANISMS[[nm]]$label))
+    })
   })
 
   output$c_driver_ui <- renderUI({
-    d <- c_driver()
-    if (is.null(d))
-      # \u26d4 THE THREE PARAMETER SWITCHES GET A SENTENCE, NOT A CHART. There is
-      # no prescribed series behind them, and CO2 in this slot would be a model
-      # OUTPUT under a heading that says "driver".
+    off <- cf_off()
+    if (!length(off))
       return(div(class = "caveat",
-                 tags$strong("This switch has no driver to show. "),
-                 paste("It does not remove an input \u2014 it changes how strongly",
-                       "the model responds to carbon it already has. The two",
-                       "charts above are where its effect shows up.")))
-    tagList(plotOutput("c_driver", height = "260px"),
-            textOutput("c_driver_note"))
-  })
-
-  output$c_driver <- renderPlotFit("c_driver", {
-    d <- c_driver(); req(d)
-    plot_driver(d, input$c_years,
-                paste("Without:", CCX_MECHANISMS[[input$c_mech]]$label))
-  })
-
-  # MEASURED, not asserted: whether the switch touched the input at all.
-  output$c_driver_note <- renderText({
-    d <- c_driver(); req(d)
-    m <- CCX_MECHANISMS[[input$c_mech]]
-    if (isTRUE(d$removes_driver))
-      sprintf(paste("Switching off \u201c%s\u201d removes this input: the purple line",
-                    "is the driver the counterfactual actually ran with."),
-              m$label)
-    else
-      sprintf(paste("Switching off \u201c%s\u201d does not touch this input \u2014 it is",
-                    "identical in both runs, so only one line is drawn. The model",
-                    "still receives it and simply stops responding to it."),
-              m$label)
+                 "Nothing is switched off, so there is no before-and-after",
+                 "input to draw."))
+    has_drv <- vapply(off, function(n) !is.null(CCX_MECHANISMS[[n]]$driver), logical(1))
+    withd <- off[has_drv]; nod <- off[!has_drv]
+    bits <- list()
+    if (length(withd)) {
+      fo <- cf_run()$forcing
+      bits <- c(bits, lapply(withd, function(n) {
+        d <- ccx_driver_series(n, APP_HIST$forcing, APP_PARAMS, F_off = fo)
+        # MEASURED, not asserted: whether the switch touched the input at all.
+        note <- if (isTRUE(d$removes_driver))
+          sprintf(paste("Switching off “%s” removes this input: the purple",
+                        "line is the driver the counterfactual actually ran with."),
+                  CCX_MECHANISMS[[n]]$label)
+        else
+          sprintf(paste("Switching off “%s” does not touch this input — it is",
+                        "identical in both runs, so only one line is drawn. The model",
+                        "still receives it and simply stops responding to it."),
+                  CCX_MECHANISMS[[n]]$label)
+        tagList(plotOutput(paste0("c_driver_", n), height = "260px"),
+                div(class = "caveat", note))
+      }))
+    }
+    # ⛔ THE PARAMETER SWITCHES GET A SENTENCE, NOT A CHART. There is no
+    # prescribed series behind them, and CO2 in this slot would be a model
+    # OUTPUT under a heading that says "driver".
+    if (length(nod))
+      bits <- c(bits, list(div(class = "caveat",
+        tags$strong(sprintf("%s %s no driver to show. ", app_mech_list(nod),
+                            if (length(nod) == 1L) "has" else "have")),
+        paste("Switches like this do not remove an input — they change how",
+              "strongly the model responds to carbon it already has. The two",
+              "charts above are where their effect shows up."))))
+    do.call(tagList, bits)
   })
 
   output$c_takeaway <- renderText({
-    m <- CCX_MECHANISMS[[input$c_mech]]
-    a <- APP_HIST$out; b <- cf_run()$out
-    i <- nrow(a)
+    off <- cf_off()
+    a <- APP_HIST$out; i <- nrow(a)
+    if (!length(off))
+      return(sprintf(paste("Nothing is switched off: this is the full model, at",
+                           "%.0f ppm today. Tick a mechanism to see what the",
+                           "model does without it."), a$co2_global[i]))
+    b <- cf_alt()
     d <- b$co2_global[i] - a$co2_global[i]
-    sprintf(paste("Without %s, CO₂ today would be %.0f ppm instead of %.0f —",
-                  "a difference of %s%.0f ppm."),
-            tolower(m$label), b$co2_global[i], a$co2_global[i],
+    sprintf(paste("With %s switched off, CO₂ today would be %.0f ppm instead of",
+                  "%.0f — a difference of %s%.0f ppm."),
+            app_mech_list(off), b$co2_global[i], a$co2_global[i],
             if (d > 0) "+" else "", d)
   })
 
@@ -670,6 +779,62 @@ function(input, output, session) {
     req(identical(input$f_mode, "Pulse lab"))
     pr <- pulse_runs()
     plot_pulse_partition(pr$base$out, pr$pulse$out, pr$gtc, pr$year)
+  })
+
+  # ---- CUMULATIVE CARBON AND TEMPERATURE (Marcus 2026-09-25) ---------
+  # "Add text for the pulse radio button about the relationship between
+  # cumulative carbon and temperature (e.g., each ton of CO2 emitted adds
+  # effectively permanent temperature)."
+  #
+  # \u26a0\u26a0 THE PROSE IS A PLACEHOLDER FOR MARCUS. The pedagogy on this tab is
+  # his; this is drafted so the slot is not empty and the numbers are real, and
+  # it is listed as owed copy in the handoff exactly as the "Build your own"
+  # sentence is. Rewording it does not touch the arithmetic.
+  #
+  # \u26d4 EVERY NUMBER IS MEASURED FROM THE RUN THE READER JUST TRIGGERED, not
+  # quoted from the literature. A textbook figure here would be a number this
+  # app cannot check, printed beside two panels drawn from a model that might
+  # disagree with it.
+  #
+  # \u26d4 AND IT IS NOT CALLED TCRE. TCRE is defined for cumulative emissions
+  # along a transient pathway; this is the warming from a PULSE laid on top of a
+  # scenario, which is the numerator of an AGTP, not the same quantity. Naming
+  # it TCRE would be a category error of exactly the kind the project's
+  # like-for-like rule exists to stop, so the copy says "warming per unit of
+  # extra carbon" and leaves the acronym out.
+  #
+  # \u26a0 PROPORTIONALITY IS STATED, NOT DEMONSTRATED HERE, and says so: showing
+  # it would need a second pulse size, i.e. a third model run on every click.
+  output$f_pulse_permanence <- renderUI({
+    req(identical(input$f_mode, "Pulse lab"))
+    pr <- pulse_runs()
+    b <- pr$base$climate; p <- pr$pulse$climate
+    d <- p$gmst - b$gmst
+    at <- function(y) d[which.min(abs(b$year - y))]
+    y100 <- pr$year + 100L; yend <- max(b$year)
+    peak <- max(d, na.rm = TRUE)
+    if (!is.finite(peak) || peak <= 0) return(NULL)
+    keep <- at(yend) / peak
+    per1000 <- at(y100) / pr$gtc * 1000
+    info_box("What this says about carbon and temperature",
+      p(sprintf(paste("This %d GtC pulse warms the world by %.3f \u00b0C a century",
+                      "later \u2014 %.2f \u00b0C per 1000 GtC \u2014 and by %s of its own peak",
+                      "warming still at %d, %d years after release."),
+                pr$gtc, at(y100), per1000, fmt_pct(keep), yend, yend - pr$year)),
+      p("Two things are worth separating here. The first is that the warming",
+        "barely decays: carbon released once keeps warming the world for as",
+        "long as this model runs, so on any human timescale the temperature a",
+        "tonne of CO\u2082 buys is permanent rather than borrowed."),
+      p("The second is that it is the",  tags$em("total"), "carbon emitted that",
+        "sets the warming, not the rate at which it was emitted. That is why a",
+        "per-tonne number is a meaningful thing to quote at all, and why the",
+        "chart above can be read as \u201cwhat one more tonne does\u201d regardless of",
+        "what else is happening in the background scenario."),
+      p(tags$em(sprintf(paste("Measured from the two runs behind this panel, at a",
+                              "%d GtC pulse released in %d. The proportionality in",
+                              "the paragraph above is stated, not shown:",
+                              "demonstrating it would take a second pulse size."),
+                        pr$gtc, pr$year))))
   })
 
   output$f_notes <- renderUI({
