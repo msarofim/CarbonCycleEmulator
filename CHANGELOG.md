@@ -2,6 +2,70 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-25 (g) — **FULL APP REVIEW** (Marcus). Eight tabs driven in the browser plus a static pass. ⛔⛔ **The text-fit gate's own MUTATION assertion was measuring a string that does not exist** — and the navbar stacks to EIGHT ROWS below 992 px.
+
+### ⛔⛔ The gate that named its own subject and then did not measure it
+`test-plot-text-fits.R` referenced **`e$LAB_LUC_CAPTION` twice. There has never been a
+`LAB_LUC_CAPTION` in `app/`** — the constant is `NOTE_LUC_SPLIT` (`plots.R:520`), which the same
+test file names correctly in a COMMENT at line 93. So `e$LAB_LUC_CAPTION` was `NULL`:
+
+- **line 65**, test 1's `extras` list carried `NULL` TWICE, so the land-use caption — the longest
+  in the app — was never measured at either width;
+- **line 145**, the assertion whose own comment reads *"the retired character-count wrap must FAIL
+  the same budget, or this gate is not guarding the thing that was wrong"*, wrapped
+  `app_provenance_caption(NULL)` = the bare prefix *"Model: posterior mode (beta). Not
+  peer-reviewed teaching software."* Measured: **399.5 px** against the **233.1 px** half budget,
+  so `expect_gt` passed — **on a string 2.2× smaller than its subject**. The caption it names is
+  **897.1 px**.
+
+Both now point at `NOTE_LUC_SPLIT`. ⭐ **And the repair was mutation-tested, which is what says how
+much was actually broken** — forcing the retired character-count path (`if (TRUE)` in
+`app_wrap_px`) gives **14 FAIL**; reverting restores **85 PASS / 0 FAIL**.
+⚠ **BUT THE SAME MUTATION ALSO GIVES 14 FAIL AGAINST THE PRE-REPAIR GATE.** The file was **not**
+blind to a broken wrapper — its other three captions caught it. What was broken is narrower and
+must be stated as such: **one caption unmeasured, and the file's SELF-DECLARED mutation check
+measuring the wrong string.** A gate can be weakened without being disabled, and the difference is
+only visible by mutating BOTH versions.
+
+### Browser findings, measured on the running app
+- ⛔ **The navbar stacks to EIGHT FULL-WIDTH ROWS below 992 px, with no toggle.** 1440 px → 1 row
+  (42 px); 1200 / 1024 / 992 px → 2 rows (100 px); **960 px and below → 8 rows, 448 px**, and
+  `.navbar-toggler` is ABSENT, so Bootstrap 5's collapse has nothing to collapse into. At ≤ 991 px
+  the whole first screen is navigation. ⚠ Handoff (g) called this *"wraps to a second row at
+  800 px"*; the second row starts at **1200** and the stack at **991**.
+- ⛔ **The constraint map prints its weakest row total as `(0)` while the tab's own prose calls it
+  `0.2`.** `plots.R:757` formats with `%.0f`. Exact family totals: Δ¹⁴C pre-bomb **0.196 → (0)**,
+  ENSO–sink covariance 1.494 → (1). The subtitle sends the reader to that number and the prose says
+  "about 133 times less" (25.981 / 0.196 = 132.6 ✓ on exact values). **A row labelled `(0)` is the
+  misreading the tab's third caveat exists to prevent.** ✅ Checked clean beside it: no cell clears
+  the `v >= 0.5` label threshold and then prints "0" (0 of 63 parameter-view, 0 of 37 component).
+- ⛔ **"Build your own" asserts emissions stop when they do not, ON THE DEFAULT SETTING.**
+  `server.R:608` prints *"how little the temperature falls even when emissions stop"* for all three
+  `s_kind` branches. Measured live at the default (`constant`, hold at today's level): *"Your
+  pathway reaches 609 ppm and +3.3 °C by 2150. Note how little the temperature falls even when
+  emissions stop."* True only for `to_zero`, **1 of 3**. ⚠ Memory had this as "false for the rate
+  branch"; it is also false for the DEFAULT branch. Copy is Marcus's — flagged, not touched.
+- The parameter-level view keeps the component-level headline (`cm_takeaway` always reads
+  `APP_CMAP$MC`) and the x-axis title `LAB_CMAP_PART` = "Part of the model" over an axis of
+  parameter names. Rows are families in both views, so "low on the chart" stays valid.
+- ✅ **Clean**: all 8 tabs render, 17 panel plots + 8 review-card plots all with real `<img>` and
+  non-zero dimensions, **zero** `shiny-output-error`, zero `NA`/`NaN`/`NULL` in rendered text;
+  `f_partition` empty at rest is CORRECT (`conditionalPanel("input.f_mode == 'Pulse lab'")`) and
+  renders 1044×300 after a run; *Under the hood* tables full at **38 / 6 / 8 rows, 0 empty cells**.
+
+### The static pass, verified rather than relayed
+Confirmed by re-grepping each one: four "Years shown" sliders hardcode `min = 1750, max = 2024`
+against `APP_HIST_YEARS` (`ui.R:136, 176, 264, 328`); `server.R:212` types **"about 0.3 GtC"** in
+prose where `plots.R:600` measures **+0.32**, on the panel whose own header insists the containment
+is COMPUTED; `theme_ccx(base_size = 13)` and `CCX_BASE_SIZE <- 13` are two copies of one number and
+`theme_minimal(base_size = CCX_BASE_SIZE) + theme_ccx()` lets **`theme_ccx()`'s own default win**,
+so moving `CCX_BASE_SIZE` alone would leave every pixel budget measured at the old font size; and
+the box diagram's SECOND footnote (`plots.R:1400`) still carries a literal `\n` **three lines below
+the comment documenting that exact incident on the first one**. `NOTE_CMAP` (`plots.R:715`) is dead
+under a comment describing a sync mechanism that does not exist.
+⚠ **`tests/testthat/Rplots.pdf` is TRACKED and not in `.gitignore`** — it churns on every test run
+that opens a device.
+
 ## 2026-09-25 (f) — The last non-print `$` read in `calibration/` converted, and **the handoff's count of them was WRONG: eleven remain, and FOUR are inside gates.**
 
 ### The conversion, with the receipt the fix is entitled to

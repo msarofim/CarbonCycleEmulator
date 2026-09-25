@@ -62,7 +62,11 @@ pt_with_device <- function(px, expr) {
 test_that("1. every caption fits the panel it is drawn in, at both widths", {
   skip_if_no_plots(); skip_if(is.null(.pt_env), "plots.R did not load")
   e <- .pt_env
-  extras <- list(NULL, e$LAB_LUC_CAPTION, e$IMB_BAND_SHORT, e$GROWTH_UNIT_NOTE,
+  # ⚠ `NOTE_LUC_SPLIT`, NOT `LAB_LUC_CAPTION` (2026-09-25). There has never
+  # been a `LAB_LUC_CAPTION` in app/; `e$LAB_LUC_CAPTION` was NULL, so this list
+  # carried NULL TWICE and the land-use caption -- the longest one in the app --
+  # was never measured at either width. [[gate_only_guards_what_it_lists]]
+  extras <- list(NULL, e$NOTE_LUC_SPLIT, e$IMB_BAND_SHORT, e$GROWTH_UNIT_NOTE,
                  e$PULSE_PARTITION_NOTE)
   for (panel in c("full", "half")) {
     budget <- e$app_text_px(panel)
@@ -142,7 +146,14 @@ test_that("4. the wrapper respects its budget on adversarial input", {
     }
     # MUTATION: the retired character-count wrap must FAIL the same budget, or
     # this gate is not guarding the thing that was wrong.
-    old <- paste(strwrap(e$app_provenance_caption(e$LAB_LUC_CAPTION), width = e$APP_CAP_WIDTH),
+    # ⚠ `NOTE_LUC_SPLIT`, NOT the non-existent `LAB_LUC_CAPTION`. Measured
+    # 2026-09-25: with NULL this line wrapped only the provenance PREFIX --
+    # "Model: posterior mode (beta). Not peer-reviewed teaching software." --
+    # at 399.5 px, which clears the 233.1 px half budget, so the assertion
+    # PASSED on a string 2.2x smaller than its subject and would have kept
+    # passing with the character-count wrap restored. The caption it is for
+    # measures 897.1 px. A gate that passes is not a gate that works.
+    old <- paste(strwrap(e$app_provenance_caption(e$NOTE_LUC_SPLIT), width = e$APP_CAP_WIDTH),
                  collapse = "\n")
     expect_gt(pt_px(old, e$CAPTION_PT), e$app_text_px("half"))
   })
