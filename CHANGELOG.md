@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-24 (o) — **THE IMBALANCE-BAND PANEL SHIPPED** (handoff (e) item 3). ⛔⛔ **And building it found the OTHER HALF of a defect fixed in the objective a month ago and never in the app: the app's land sink was on a HALF-YEAR OFFSET from gate 7's, silently.**
+
+### ⛔⛔ The bug, found by refactoring rather than by looking for it
+Putting the bars and the new panel on **one** definition of "the land sink" (`app_sinks_annual()`, so two panels on one tab cannot drift apart) meant comparing that definition against the gate's. They disagreed.
+
+`plot_gcb_bars()` diffed the **annual MEAN** of each stock — the flux over [mid-year y−1, mid-year y] — while `dg_annual_sinks()` and the objective interpolate stocks to **CALENDAR-YEAR boundaries** with linear end-extrapolation. That is the **second half of [[ccx_gcb_land]]**: the `eluc` half was fixed in the app on 09-22, the **alignment half was not**, and `304386a` had fixed it in the objective on **08-14**.
+
+⚠ **It was silent in the worst way**: both numbers are plausible, both are stable, the chart draws fine, and nothing said which convention was on screen. **Only an implementation-vs-implementation comparison could catch it** — a stored-number gate would have ratified whichever was there.
+
+**What moved.** The land bar **3.06 → 3.05**, the ocean bar **3.12 → 3.11** (2014–2023). And the decade table, which is the point:
+
+| decade | before (differenced means) | after (calendar boundaries) | CHANGELOG (k), which used the gate's |
+|---|---|---|---|
+| 1960s | 1.23 | **1.24** | 1.24 |
+| 1970s | 1.54 (miss 0.05) | **1.58 (miss 0.01)** | 1.58, 0.01 |
+| 1980s | 1.86 (miss 0.15) | **1.91 (miss 0.20)** | 1.91, 0.20 |
+| 2020–24 | 3.35 (miss 1.00) | **3.39 (miss 1.04)** | 3.39, 1.04 |
+
+⭐ **The fixed app reproduces (k)'s print-figure table EXACTLY**, row for row, which it did not before. `app_sinks_annual()` now equals `dg_annual_sinks()` to **0.00e+00**. ⚠ It also exposed a second, smaller thing: the app runs 1750–**2024** while the figure runs to 2025, so 2024's flux is an **end-extrapolated boundary** rather than an interior one and the app's 2020–24 mean is **3.375 vs 3.391**. 0.016 on a 1.02 miss — the verdict is robust, the third significant figure is not, and the code says so.
+
+### The panel — "Is the model's land sink too high?", directly under the two bars
+Placed there deliberately: **the bars are what raise the question.** Model and GCB residual land sink, 11-yr centred (the app's `APP_LUC_SMOOTH_YR`, **not** the print figure's 5-yr), with GCB's unclosed imbalance as a band, raw annual underneath.
+
+⛔⛔ **THE PANEL TURNS ON A SIGN, and it is stated rather than left to the reader.** GCB's imbalance is **POSITIVE**, so its own sinks are too small to close its budget and a **LARGER** model sink moves **TOWARD** closure. "Above GCB" is not "too high".
+
+⭐ **The containment is COMPUTED, and on DECADE MEANS rather than on the smoothed line** — so the verdict does not move when the smoother does, and the app's 11-yr window and the figure's 5-yr give the same table. **4 of 7 decades inside**; the takeaway names the worst row by finding it, not by having it typed.
+⚠ **The leading partial decade is dropped, the trailing one kept.** GCB starts 1959, so a plain decade bin makes a "1950s" row out of **one year** whose containment verdict is noise; the trailing bin is the record's only real excursion and is labelled by its actual span.
+
+### ⛔ SUBTITLES CLIP TOO — the caption rule was half a rule
+`APP_CAP_WIDTH` / `app_provenance_caption()` exist because **ggplot captions clip rather than wrap**, and the pulse-partition panel lost its honesty clause to exactly that on 09-22 (l). Every subtitle in the file happened to be short, so nothing said the same is true of subtitles. This panel's is not — it has to send the reader to the **thin annual line** for the recent years the bold line does not reach — and it clipped mid-word at `…and the recent years are on it. L`. Fixed once, for every panel: **`APP_SUB_WIDTH` + `app_subtitle()`**, applied here and to the regrowth panel.
+
+### Gates — `test-imbalance-panel.R`, 22 assertions
+⭐ **The load-bearing one compares two IMPLEMENTATIONS, not an implementation against a number**, because that is the only kind that could have caught this. Its own mutation reconstructs the pre-fix arithmetic inline and requires it to differ by > 0.01. Reverting the fix in the source fails **3 assertions**. Also gated: the leading-bin rule applied to the first row only (applying it to all rows would silently delete the 2020s — the row the takeaway names), the imbalance's **sign**, the "EXTREME attribution" wording in **both** places, and the wiring. Five static mutations were applied and all five rejected; the smoother-edge gate was exercised directly (`smooth_yr = 10` is refused, 11 and 5 pass).
+
+Suite `…|imbalance` added to the standing filter: **595 / 0** across 18 files (was 573), 25 warnings, all the pre-existing 1900-start transient. ⛔ Still not a green suite — `test-mode-file.R` (1) and `test-overlay-idiom-lint.R` (2) remain.
+
 ## 2026-09-24 (n) — **REGROWTH TIER 1 IS BUILT AND SHIPPED IN THE APP.** Three rulings taken (Marcus), the split closes to machine precision against the burnt input, and the panel says in its own copy that the number is imported rather than measured. ⛔ **Two side findings: the `dataviz` colour receipts recorded in (k) DO NOT REPRODUCE, and a sentence of existing app copy attributes regrowth to the wrong term.**
 
 ### The rulings

@@ -134,6 +134,59 @@ function(input, output, session) {
                 mod, if (!is.na(obs) && mod < obs) "earlier" else "later"))
   })
 
+  # ---- THE IMBALANCE BAND (handoff 09-24 e item 3) ------------------
+  # /!\ THE WHOLE PANEL TURNS ON A SIGN. GCB's imbalance is POSITIVE, which
+  # means its own sinks are too SMALL to close its budget -- so a LARGER model
+  # sink moves TOWARD closure, not away from it. "Above GCB" is not "too high",
+  # and the takeaway below states the direction rather than leaving a reader to
+  # assume the usual one.
+  #
+  # /!\ AND THE CONTAINMENT IS COMPUTED, NOT DESCRIBED. 09-24 (k) drew this for
+  # print and its first reading was "inside the band for most of the record",
+  # which the numbers corrected to 4 of 7 decades. A sentence a reader could
+  # check against the chart has to be produced by the same arithmetic the chart
+  # is.
+  imbalance_dec <- reactive(app_imbalance_decades(APP_HIST$out, APP_GCB, hist_F()))
+
+  output$w_imbalance_ui <- renderUI({
+    tagList(
+      takeaway(textOutput("w_imbalance_takeaway", inline = TRUE)),
+      plotOutput("w_imbalance_plot", height = "330px"),
+      div(class = "caveat", tags$strong("What the band is: "), IMB_BAND_NOTE),
+      info_box("Why a bigger sink can be the closer one",
+               p("The leftover carbon in the measured budget is POSITIVE: the",
+                 "budget's own sinks are too small to account for everything",
+                 "emitted. So a model that takes up more land carbon than the",
+                 "budget reports is moving toward closing it, not away from it.",
+                 "Running above the published line is not by itself a fault."),
+               p("Taking the whole gap apart gives no remainder at all. Against",
+                 "the measured budget this model's land sink runs about 0.3 GtC",
+                 "a year high, and that is exactly the budget's own leftover",
+                 "carbon, plus a cement sink this model does not have, less the",
+                 "fitted land-use scaling. Nothing is left unexplained."),
+               p("The one place the model really does sit outside the band is",
+                 "the last few years, and that is flagged rather than explained:",
+                 "it is a handful of years at the end of the record, where every",
+                 "estimate is least constrained."))
+    )
+  })
+
+  output$w_imbalance_plot <- renderPlot(
+    plot_land_sink_imbalance(APP_HIST$out, APP_GCB, hist_F()))
+
+  output$w_imbalance_takeaway <- renderText({
+    s <- imbalance_dec()
+    inb  <- sum(s$in_band); n <- nrow(s)
+    last <- s[n, ]
+    worst <- s[which.max(s$miss), ]
+    sprintf(paste("The model's land sink sits inside the band in %d of the %d decades",
+                  "on this chart. It runs above the measured line throughout — but the",
+                  "leftover carbon is positive, so a bigger sink is the one that closes",
+                  "the budget, not the one that breaks it. The real exception is",
+                  "%d–%d, which sits %.1f GtC a year above the top of the band."),
+            inb, n, worst$y0, worst$y1, worst$miss)
+  })
+
   # ---- REGROWTH TIER 1 (Marcus 2026-09-24) --------------------------
   # ⭐⭐ The whole section renders through uiOutput rather than plotOutput so a
   # checkout without data/forcing_luc_gross_split.rds says what is missing

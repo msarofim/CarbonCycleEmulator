@@ -85,6 +85,19 @@ app_provenance_caption <- function(extra = NULL, width = APP_CAP_WIDTH) {
   paste(strwrap(txt, width = width), collapse = "\n")
 }
 
+# \u26d4 SUBTITLES CLIP TOO, and the rule above did not say so because every
+# subtitle in this file used to be short. The imbalance panel's is not -- it has
+# to send the reader to the thin annual line for the recent years the bold line
+# does not reach -- and on 2026-09-24 (o) it lost that clause mid-word on a
+# 800 px panel. Same fix, one call, at the subtitle's own measure: it is set
+# larger than a caption, so it wraps narrower.
+APP_SUB_WIDTH <- 105   # characters; subtitles are set larger than captions
+
+#' Wrap a subtitle so it cannot be clipped mid-sentence
+app_subtitle <- function(txt, width = APP_SUB_WIDTH) {
+  paste(strwrap(txt, width = width), collapse = "\n")
+}
+
 # ---------------------------------------------------------------------
 # Tab 1: the Keeling curve
 # ---------------------------------------------------------------------
@@ -262,21 +275,51 @@ plot_airborne_fraction <- function(pt, yr_range) {
     theme_ccx()
 }
 
-plot_gcb_bars <- function(out, gcb, F, window = c(2014, 2023)) {
-  yr <- floor(out$t)
-  ann <- stats::aggregate(cbind(ocean_C, land_C) ~ yr, data = out, FUN = mean)
-  ann <- ann[order(ann$yr), ]
-  ann$ocean_sink <- c(NA, diff(ann$ocean_C))
-  # ⛔ THE GCB CONVENTION, as in partition_table() above and in the gate. GCB's
-  # "land sink" is the RESIDUAL terrestrial sink, EXCLUDING land-use emissions;
-  # the raw pool change includes the LUC outflow, so comparing it with GCB's
-  # number was not like-for-like and made the model's land bar low by roughly
-  # the LUC flux (~1 GtC/yr recently). GATE 7 scores land 3.09 against GCB and
-  # PASSES precisely because dg_annual_sinks() adds `eluc` back; this panel did
-  # not, so the app and the gate disagreed about the same quantity.
+#' The model's annual sinks on GCB's OWN convention
+#'
+#' ⛔ THE CONVENTION IS THE WHOLE POINT, and it is the project's own 32 % bug
+#' ([[ccx_app_luc_budget_convention]]). GCB's "land sink" is the RESIDUAL
+#' terrestrial sink, EXCLUDING land-use emissions; the raw pool change INCLUDES
+#' the LUC outflow, so comparing it with GCB's number was not like-for-like and
+#' made the model's land bar low by roughly the LUC flux (~1 GtC/yr recently).
+#' GATE 7 scores land 3.09 against GCB and PASSES precisely because
+#' dg_annual_sinks() adds `eluc` back.
+#'
+#' ⚠ FACTORED OUT 2026-09-24 (o) so the bars and the imbalance-band panel cannot
+#' drift apart. Two panels on one tab computing "the land sink" from two copies
+#' of this arithmetic is exactly how the convention bug got in the first time.
+#' ⚠ `eluc` is read off the FORCING, not from GCB: `luc_scale` is a fitted name,
+#' so the model's E_luc is not GCB's.
+app_sinks_annual <- function(out, F) {
+  # ⛔⛔ CALENDAR-YEAR BOUNDARIES, NOT DIFFERENCED ANNUAL MEANS (fixed
+  # 2026-09-24 o). Until now this diffed the annual MEAN of each stock, which is
+  # the flux over [mid-year y-1, mid-year y] -- a HALF-YEAR OFFSET against GCB's
+  # calendar-year flux. It is the second half of the defect recorded in
+  # [[ccx_gcb_land]]: the objective's copy was fixed in `304386a` (stocks
+  # interpolated to calendar-year boundaries with linear end-extrapolation), the
+  # app's copy was not, so the app and GATE 7 disagreed about the same quantity by
+  # 0.03-0.06 GtC/yr and the land bar read 3.06 where the gate reads 3.09.
+  # This is now dg_annual_sinks()'s construction, line for line, and
+  # test-imbalance-panel.R asserts the two agree to 1e-9 on one run.
+  o   <- out
+  yrs <- sort(unique(floor(o$t + 1e-9)))
+  bnd <- c(yrs, max(yrs) + 1L)
+  tt  <- o$t; n <- length(tt)
+  stock <- function(v) {
+    y  <- stats::approx(tt, v, xout = bnd)$y
+    lo <- bnd < tt[1]; hi <- bnd > tt[n]
+    if (any(lo)) y[lo] <- v[1] + (bnd[lo] - tt[1]) * (v[2] - v[1]) / (tt[2] - tt[1])
+    if (any(hi)) y[hi] <- v[n] + (bnd[hi] - tt[n]) * (v[n] - v[n - 1]) / (tt[n] - tt[n - 1])
+    diff(y)
+  }
   eluc <- ccx_forcing_eluc_annual(F)
-  ann$land_sink <- c(NA, diff(ann$land_C)) +
-    eluc$eluc[match(ann$yr, eluc$year)]
+  data.frame(yr = yrs,
+             ocean_sink = stock(o$ocean_C),
+             land_sink  = stock(o$land_C) + eluc$eluc[match(yrs, eluc$year)])
+}
+
+plot_gcb_bars <- function(out, gcb, F, window = c(2014, 2023)) {
+  ann <- app_sinks_annual(out, F)
   k <- ann$yr >= window[1] & ann$yr <= window[2]
   g <- gcb[gcb$year >= window[1] & gcb$year <= window[2], ]
   d <- rbind(
@@ -352,7 +395,8 @@ plot_luc_gross_split <- function(split, window) {
     guides(colour = guide_legend(nrow = 2)) +
     labs(x = LAB_YEAR, y = LAB_LUC_Y,
          subtitle = if (window[1] < obs[1])
-           sprintf("Shaded: before %d, the split itself is back-extended, not observed", obs[1])
+           app_subtitle(sprintf(
+             "Shaded: before %d, the split itself is back-extended, not observed", obs[1]))
          else NULL,
          # /!\ SHORT, because the full note is in the caveat box directly
          # under this chart and the first draft printed it twice. What stays
@@ -360,6 +404,130 @@ plot_luc_gross_split <- function(split, window) {
          # split is imported, not measured.
          caption = app_provenance_caption(LAB_LUC_CAPTION)) +
     theme_ccx()
+}
+
+LAB_IMB_MODEL <- "This model"
+LAB_IMB_GCB   <- "Global Carbon Budget"
+LAB_IMB_BAND  <- "GCB's land sink + all of its unclosed imbalance"
+LAB_IMB_Y     <- "Residual land sink (GtC per year)"
+# ⛔ The sentence that keeps the band honest. The band asks where GCB's land
+# sink would sit if ALL of the carbon its budget cannot place were land. The same
+# carbon could equally be an emissions, an ocean or a growth error, so the band is
+# an EXTREME attribution and never a confidence interval. Printed on the chart
+# AND asserted by test-imbalance-panel.R.
+IMB_DECADE_MIN_N <- 10L   # a LEADING bin shorter than this is dropped; see app_imbalance_decades()
+IMB_BAND_SHORT <- paste("The band is an EXTREME attribution \u2014 all of the budget's unplaced",
+                        "carbon assigned to land \u2014 not an uncertainty range.")
+IMB_BAND_NOTE <- paste("The band asks where the measured land sink would sit if ALL the carbon the",
+                       "Global Carbon Budget cannot place were land. That is an EXTREME attribution,",
+                       "not an uncertainty range \u2014 the same carbon could be an emissions, ocean or",
+                       "growth error.")
+
+#' The model's residual land sink against GCB's, with GCB's own unclosed imbalance
+#'
+#' ⭐⭐ WHY THE BAND IS THE PANEL. The bars above this chart say the model takes
+#' up more land carbon than GCB reports, which reads as a defect. It is not one:
+#' 09-24 (i) decomposed the +0.32 GtC/yr difference as an EXACT identity (closing
+#' to 3e-14) into GCB's own unclosed imbalance +0.54, plus the cement sink the
+#' model lacks +0.09, less the fitted `luc_scale` -0.30. Nothing is unexplained.
+#' Drawing a difference against a budget that does not close, without showing how
+#' much it fails to close by, is the thing this panel exists to stop.
+#'
+#' ⛔⛔ AND THE SIGN MATTERS. GCB's imbalance is POSITIVE, so GCB's own sinks are
+#' too small to close its budget and a LARGER model sink moves TOWARD closure.
+#' "Above GCB" is not "too high" — read the band before saying it is.
+#'
+#' ⛔ ONE CONVENTION ONLY: the RESIDUAL SINK, land-use emissions OUTSIDE it.
+#' That is what GCB publishes as "the land sink", what gate 7 scores, and what the
+#' bars above already show. The NET land flux (LUC inside) is a different
+#' quantity that crosses zero, and mixing the two is this project's 32 % bug.
+#'
+#' ⚠ The smooth is the app's own `APP_LUC_SMOOTH_YR`, NOT the 5-yr window
+#' `calibration/fig_land_sink_vs_gcb.R` uses at Marcus's request for print. An
+#' incomplete window yields NA rather than a short mean, so each bold line stops
+#' (n-1)/2 years short at both ends and the raw annual line is drawn underneath.
+plot_land_sink_imbalance <- function(out, gcb, F, smooth_yr = APP_LUC_SMOOTH_YR) {
+  ann <- app_sinks_annual(out, F)
+  d <- merge(data.frame(year = ann$yr, model = ann$land_sink),
+             data.frame(year = gcb$year, obs = gcb$land_sink, imbal = gcb$imbalance),
+             by = "year")
+  d <- d[stats::complete.cases(d), ]
+  sm <- function(v, n = smooth_yr) {
+    h <- (n - 1L) %/% 2L
+    vapply(seq_along(v), function(i) {
+      j <- max(1, i - h):min(length(v), i + h)
+      if (length(j) < n) NA_real_ else mean(v[j])
+    }, numeric(1))
+  }
+  for (v in c("model", "obs", "imbal")) d[[paste0("s_", v)]] <- sm(d[[v]])
+  # \u26d4 GATE: the smoother must drop exactly the edge years the subtitle claims.
+  # It matters more here than on most charts, because the excursion the takeaway
+  # names is at the RIGHT-HAND EDGE, in the years the bold line does not reach --
+  # so the subtitle has to send the reader to the thin annual line, and it can
+  # only do that if the number of missing years is the number it prints.
+  lost <- (smooth_yr - 1L) %/% 2L
+  if (sum(is.na(d$s_model)) != 2L * lost)
+    stop("the smoother drops a different number of years than its window implies; ",
+         "the subtitle would misdescribe the line")
+  cols <- stats::setNames(c(PAL[["model"]], PAL[["obs"]]), c(LAB_IMB_MODEL, LAB_IMB_GCB))
+  ggplot(d, aes(x = year)) +
+    geom_ribbon(aes(ymin = s_obs, ymax = s_obs + s_imbal, fill = LAB_IMB_BAND),
+                alpha = 0.16, colour = NA) +
+    scale_fill_manual(values = stats::setNames(PAL[["obs"]], LAB_IMB_BAND)) +
+    geom_line(aes(y = obs,   colour = LAB_IMB_GCB),   linewidth = 0.3, alpha = 0.32) +
+    geom_line(aes(y = model, colour = LAB_IMB_MODEL), linewidth = 0.3, alpha = 0.32) +
+    geom_line(aes(y = s_obs,   colour = LAB_IMB_GCB),   linewidth = 1.1) +
+    geom_line(aes(y = s_model, colour = LAB_IMB_MODEL), linewidth = 1.1) +
+    scale_colour_manual(values = cols) +
+    guides(colour = guide_legend(order = 1), fill = guide_legend(order = 2, nrow = 2)) +
+    labs(x = LAB_YEAR, y = LAB_IMB_Y,
+         subtitle = app_subtitle(sprintf(
+           paste("%d-yr centred mean, so each bold line stops %d yr short at both ends",
+                 "\u2014 the thin annual line does not, and the recent years are on it.",
+                 "Land-use emissions are OUTSIDE this sink, as GCB reports it."),
+           smooth_yr, lost)),
+         # \u26a0 SHORT. The full band note is in the caveat box directly under this
+         # chart; the first draft printed it in both places. What stays here is
+         # what a screenshot has to carry on its own.
+         caption = app_provenance_caption(IMB_BAND_SHORT)) +
+    theme_ccx()
+}
+
+#' Decade means of the same two series, and whether the model sits inside the band
+#'
+#' ⭐ MEASURED, NOT EYEBALLED. 09-24 (k) drew this figure and its first reading
+#' was "CCX sits inside the band for most of the record", which the numbers
+#' corrected to 4 of 7 decades. The takeaway on this panel therefore computes
+#' containment instead of describing it.
+#' ⚠ ON DECADE MEANS, NOT ON THE SMOOTHED LINE — so the verdict does not move
+#' when the smoother does, and the app's 11-yr window and the print figure's 5-yr
+#' one give the SAME containment table.
+app_imbalance_decades <- function(out, gcb, F) {
+  ann <- app_sinks_annual(out, F)
+  d <- merge(data.frame(year = ann$yr, model = ann$land_sink),
+             data.frame(year = gcb$year, obs = gcb$land_sink, imbal = gcb$imbalance),
+             by = "year")
+  d <- d[stats::complete.cases(d), ]
+  d$dec <- (d$year %/% 10L) * 10L
+  s <- stats::aggregate(cbind(model, obs, imbal) ~ dec, data = d, FUN = mean)
+  n  <- stats::aggregate(year ~ dec, data = d, FUN = length)
+  y0 <- stats::aggregate(year ~ dec, data = d, FUN = min)
+  y1 <- stats::aggregate(year ~ dec, data = d, FUN = max)
+  s$n  <- n$year[match(s$dec, n$dec)]
+  s$y0 <- y0$year[match(s$dec, y0$dec)]
+  s$y1 <- y1$year[match(s$dec, y1$dec)]
+  # ⚠ DROP A LEADING PARTIAL BIN, KEEP A TRAILING ONE. GCB's budget starts in
+  # 1959, so a plain decade bin makes a "1950s" row out of ONE year, whose mean is
+  # that year and whose containment verdict is noise. The trailing bin is kept
+  # because the current partial decade is the interesting one -- it is the record's
+  # only real excursion -- and it is labelled by its actual span, not "2020s".
+  # This is the binning CHANGELOG 2026-09-24 (k) used; it is made explicit here.
+  if (nrow(s) > 1L && s$n[1] < IMB_DECADE_MIN_N) s <- s[-1L, , drop = FALSE]
+  s$lo   <- pmin(s$obs, s$obs + s$imbal)
+  s$hi   <- pmax(s$obs, s$obs + s$imbal)
+  s$in_band <- s$model >= s$lo & s$model <= s$hi
+  s$miss <- ifelse(s$in_band, 0, pmin(abs(s$model - s$lo), abs(s$model - s$hi)))
+  s
 }
 
 # ---------------------------------------------------------------------

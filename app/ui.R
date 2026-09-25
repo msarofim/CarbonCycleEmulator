@@ -216,6 +216,23 @@ navbarPage(
           column(6, h5("Does the model agree with the measured budget?"),
                  plotOutput("w_gcb", height = "260px"))
         ),
+        # ---- THE IMBALANCE BAND (handoff 09-24 e item 3) ---------------
+        # It goes DIRECTLY under the two bars, because the bars are what raise
+        # the question: they say the model takes up more land carbon than the
+        # measured budget reports, and a reader stops there and concludes the
+        # model is wrong. 09-24 (i) showed it is not -- the difference is an
+        # exact identity, most of it the budget's OWN unclosed imbalance -- and
+        # this is the panel that shows the slack the comparison has.
+        hr(),
+        h5("Is the model's land sink too high?"),
+        p("The bars above say this model takes up more land carbon than the",
+          "measured budget reports, which looks like a fault. It mostly is not.",
+          "The Global Carbon Budget does not balance: add its emissions up and",
+          "subtract everything it can account for, and some carbon is left over",
+          "every year. The shaded band is that leftover carbon, all of it",
+          "assigned to the land."),
+        uiOutput("w_imbalance_ui"),
+
         # ---- REGROWTH TIER 1 (Marcus 2026-09-24) -----------------------
         # "Adding forest regrowth as its own number would still be useful."
         # It goes HERE, under the land-use caveat above, because the caveat is
