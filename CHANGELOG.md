@@ -2,6 +2,47 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-25 (f) — The last non-print `$` read in `calibration/` converted, and **the handoff's count of them was WRONG: eleven remain, and FOUR are inside gates.**
+
+### The conversion, with the receipt the fix is entitled to
+`calibration/lib_seas_limbs.R:117` (`sl_overlay`'s legacy-ENSO fallback) read `pv$gamma_enso` and
+`p$gamma_enso` with `$`, which PARTIAL-MATCHES on a list. Both reads now use `[[`. Measured at all
+three list shapes, which is what says the change is confined to the one that matters:
+
+| list carries | `$` returns | `[[` returns |
+|---|---|---|
+| ONE split half (`gamma_enso_land_NH`) | **0.85 — the half, read as the legacy scalar** | `NULL` |
+| a complete pair | `NULL` (ambiguous prefix) | `NULL` |
+| the legacy scalar only | 0.8512 | 0.8512 |
+
+So the fallback `p$gamma_enso <- 0` — whose whole premise is *"this vector carries no `gamma_enso`
+at all"* — was suppressed by a vector carrying half a split. ⚠ **Not live and no number moves**: no
+mode file on disk is half-split. Receipt: `test-gate-bounds.R` + `test-spo-constants-tie.R`, the two
+suite files that source this library, **270 PASS / 0 FAIL before and after** — identical, as a
+not-live fix must be. The assignment was left as `$` on purpose: `$<-` never partial-matches, so the
+diff says exactly what the bug class is.
+
+### ⛔⛔ And the handoff's characterisation of what is LEFT does not survive a grep
+Handoff (g) §3a called this site *"the one that is not a print statement"*. It is not. Classifying
+every remaining `$gamma_enso` / `$seas_lag_p` read in `calibration/`:
+
+- **FOUR are inside GATES** — `diag_price_the_lag.R:205` (`stopifnot(abs(pv$seas_lag_p - lag_val))`),
+  `diag_price_the_land_axis_on_support.R:91`, `diag_kz_bracket_on_the_sourced_target.R:227`
+  (both `stopifnot(identical(base$seas_lag_p_NH, p0$seas_lag_p))`), and the E2 verdict at
+  `diag_gamma_enso_profile.R:123`. ⭐ **A gate is the worst place for a resolver that can invent a
+  value**: it is the one read whose job is to refuse, and a partial match makes it agree instead.
+- **SEVEN carry a value into a computation** — `diag_split_lag_prediction.R:40`,
+  `diag_price_the_lag.R:67`, `diag_seasonal_tau_ex.R:59`, `diag_driver_audit.R:149`,
+  `diag_sst_seas_zeroing.R:103`, `diag_seas_npp_sh_power.R:176`, `diag_gamma_enso_profile.R:65`.
+
+⚠ **All eleven are still NOT live**, for a reason worth stating rather than assuming: each reads a
+**legacy 21-parameter ancestor**, which carries the scalar EXACTLY — and the table above measures
+that `$` and `[[` agree whenever the exact name is present. The exposure is a future half-split
+vector, not today's files. **Not converted here**: convert-on-touch is the standing policy, none of
+these are being touched, and changing four gates without running the diagnostics that own them would
+substitute an argument for a receipt. **The four gate reads are named as the subset that deserves a
+pass of its own.**
+
 ## 2026-09-25 (e) — **NEW TAB: "What pins down what?"** (Marcus). A MEASURED map of which part of the model each observation is actually testing, plus the half a leverage map cannot say — where two measurements pull the same number in opposite directions. ⛔⛔ **And the step Marcus ruled for was measured and REJECTED: one MARGINAL posterior sd, taken one parameter at a time, leaves the quadratic bowl entirely.**
 
 ### ⛔⛔ The ruled step did not survive contact, and the rejection is itself the result

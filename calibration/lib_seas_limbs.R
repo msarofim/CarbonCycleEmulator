@@ -114,8 +114,17 @@ sl_overlay <- function(pv, pump_mode, struct = "", seas_ml = NULL, pins = NULL) 
     # caller came back nonzero on those arms and said otherwise.) A vector from
     # BEFORE the coefficient was calibrated genuinely ran at that default
     # (`git show 11ff844:R/model.R`, line 870), and only that case lands here.
-    if (any(CCX_ENSO_PARAMS %in% miss) && is.null(pv$gamma_enso) &&
-        is.null(p$gamma_enso)) p$gamma_enso <- 0
+    # ⚠ `[[` NOT `$` ON THE TWO READS (2026-09-25), same bug class as the five
+    # READ sites fixed in R/model.R and R/calibrate.R the same day: `$` on a list
+    # PARTIAL-MATCHES, and `gamma_enso` is a prefix of all four split names. With
+    # exactly ONE of them present, `pv$gamma_enso` resolves to THAT HALF, so the
+    # test reads as "the legacy scalar is there" and this fallback never fires --
+    # on a vector whose whole point is that it carries no `gamma_enso` at all.
+    # Not live: no mode file on disk is half-split, and a COMPLETE pair makes the
+    # prefix ambiguous so `$` returns NULL. The assignment needs no change --
+    # `$<-` never partial-matches. [[dollar_partial_matches_on_lists]]
+    if (any(CCX_ENSO_PARAMS %in% miss) && is.null(pv[["gamma_enso"]]) &&
+        is.null(p[["gamma_enso"]])) p$gamma_enso <- 0
     p <- ccx_migrate_par_set(p)
   }
   p$pump_mode <- pump_mode
