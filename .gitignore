@@ -33,3 +33,13 @@ tests/testthat/testthat-problems.rds
 # ⚠ The docx REVIEW files he sends IN are tracked on purpose
 # (CarboTopecomments.*.docx) -- this excludes only the draft he is writing.
 CarboTopeSubstack.docx
+
+# ⛔ R's DEFAULT GRAPHICS DEVICE FILE, never repo content (2026-09-25).
+# Any code that draws without opening a device first -- a test, a driver, a
+# console session -- makes R open `Rplots.pdf` in the working directory. Both
+# copies were TRACKED, so every test run that touched a device showed up as a
+# modified binary in `git status` and in every diff, which is noise that trains
+# the eye to skip exactly the place a real change would appear. Nothing reads
+# them (grepped). Untracked here, not deleted from disk.
+Rplots.pdf
+tests/testthat/Rplots.pdf
