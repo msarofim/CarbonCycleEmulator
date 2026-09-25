@@ -206,8 +206,9 @@ renderer, wrong convention, the "extreme attribution" caption disappearing).
 2. ~~The `w_luc_note` copy fix~~ ✅ **DONE 09-24 (p)**, `b1c39d8`. It was two corrections, not one:
    the regrowth attribution AND "larger sink than GCB" left standing as an unqualified fault.
    ⭐ **Adding a panel falsified copy two charts above it** — re-read the neighbours when a chart lands.
-3. Resolve the palette discrepancy: re-step `fig_land_sink_vs_gcb.R`'s pair with margin under the
-   committed checker, or find a third implementation to break the tie. **Re-stepping is cheaper and
-   removes an unreproducible claim from the record.**
+3. ~~Resolve the palette discrepancy~~ ✅ **DONE 09-25**, `c55eaba`. Re-stepped to `#C4315F` /
+   `#16345A` (protan 12.6), the MINIMAL change clearing a floor of 12; the receipt is now a GATE
+   (`test-figure-palette.R`). ⛔ **Which implementation is right is STILL UNKNOWN** — the pair was
+   moved so the answer stops mattering for this figure. ⚠ Neither colour could be held fixed.
 4. Cherry-pick `b1889af` and consider merging `fair_units.py` to FaIRtoFrEDI `main` — trunk, so
    Marcus's call.
