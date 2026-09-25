@@ -112,7 +112,18 @@ than asserting it.
 
 ---
 
-## 4. ⭐⭐⭐ THE NEXT JOB: the GCB IMBALANCE-BAND PANEL
+## 4. ~~THE NEXT JOB~~ ✅ **DONE, SAME SESSION** — the GCB IMBALANCE-BAND PANEL
+
+> ✅ **SHIPPED 2026-09-24 (o), commit `8d59aef`, pushed.** See CHANGELOG (o). ⛔⛔ **Building it
+> found the unfixed half of [[ccx_gcb_land]]**: the app diffed stock ANNUAL MEANS where the
+> objective interpolates to CALENDAR-YEAR boundaries — a HALF-YEAR OFFSET, fixed in the objective
+> on 08-14 (`304386a`) and never in the app. Silent. The land bar moved **3.06 → 3.05** and the
+> decade table now reproduces (k)'s figure row for row. ⭐ **It was found by gating two
+> IMPLEMENTATIONS against each other** — a stored-number gate would have ratified either.
+> ⇒ [[app_sink_half_year_offset]], [[subtitles_clip_too]]. **Remaining work is §6 items 2–4.**
+> The section below is kept as the build record.
+
+## 4. (build record) THE GCB IMBALANCE-BAND PANEL
 
 Handoff (e) item 3, and the content is already measured — this is a drawing job on a settled
 result, not a new investigation.
@@ -189,7 +200,9 @@ renderer, wrong convention, the "extreme attribution" caption disappearing).
   plan's limits. W4's ratchet entry still unratified.
 
 ## 6. Recommended order for the next session
-1. **The imbalance-band panel** (§4). Content settled; it is a drawing + gating job.
+1. ~~The imbalance-band panel~~ ✅ **DONE 09-24 (o)**, `8d59aef`. ⚠ It left ONE thing open:
+   `app/R/plots.R`'s **axis labels, legend titles and `annotate("text")`** are the text slots that
+   have NOT been checked for the clipping the subtitle fix addressed ([[subtitles_clip_too]]).
 2. The `w_luc_note` copy fix — one sentence, Marcus's call, blocks nothing.
 3. Resolve the palette discrepancy: re-step `fig_land_sink_vs_gcb.R`'s pair with margin under the
    committed checker, or find a third implementation to break the tie. **Re-stepping is cheaper and
