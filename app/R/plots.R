@@ -1379,10 +1379,27 @@ plot_pulse_warming <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
 #' @param p the app's parameter list (for `hs_frac`)
 fmt_gtc <- function(x) sprintf("%s GtC", format(round(x), big.mark = ","))
 
-# Characters per line in the diagram's two footnotes. Named because the footnote
-# grows whenever a mechanism is added to the model, and the failure mode is a
-# line that runs off BOTH panel edges rather than an error.
-DIAGRAM_NOTE_WIDTH <- 118
+# ⛔⛔ THE DIAGRAM'S TWO FOOTNOTES WRAP BY MEASUREMENT (2026-09-25), and
+# until now NEITHER did. `DIAGRAM_NOTE_WIDTH <- 118` counted CHARACTERS, which is
+# the exact defect the 09-25 text audit found in `strwrap(150)` and fixed for
+# every caption and subtitle -- these two were missed because they are
+# `annotate("text")`, which that audit listed as still unchecked. MEASURED at the
+# 424 px diagram panel (budget 383.5 px):
+#   * footnote 1 at width 118 renders 480.0 px. OVER, by a quarter of the panel.
+#   * footnote 2 was hand-broken with a literal newline at 96 characters and
+#     renders 404.4 px. ALSO OVER -- the hand break was not stale, it never fitted.
+# Both now go through app_wrap_px(), the same greedy measured fill the captions
+# use, so a clause added to either cannot push it off the panel again.
+#
+# ⚠ THE TWO FOOTNOTES ARE DIFFERENT SIZES AND WEIGHTS, so one character budget
+# could never have served both: the second is BOLD and a size larger, and at any
+# given character count it renders WIDER. That is why these are SIZES and not
+# widths -- the wrap is computed from the size, and the size is what annotate()
+# is handed, so the measured thing and the drawn thing cannot disagree.
+DIAGRAM_NOTE_SIZE      <- 3.1   # ggplot `size` (mm) of the grey footnote
+DIAGRAM_NOTE_SIZE_BOLD <- 3.2   # ...and of the bold one beneath it
+# ggplot's `size` is mm; grid measures in points. `.pt` is ggplot's own factor.
+diagram_note_pt <- function(size) size * ggplot2::.pt
 
 plot_box_diagram <- function(fx, stock, p) {
   hs_on <- isTRUE(p$hs_frac > 0)
@@ -1486,8 +1503,9 @@ plot_box_diagram <- function(fx, stock, p) {
     # the second line past BOTH panel edges, because an annotate() label clips
     # exactly as a caption does. strwrap() at a named measure means the next
     # clause someone adds cannot do that again.
-    annotate("text", x = xmax / 2, y = 0.70, size = 3.1, colour = "grey35", lineheight = 1.05,
-             label = paste(strwrap(sprintf(paste0(
+    annotate("text", x = xmax / 2, y = 0.70, size = DIAGRAM_NOTE_SIZE,
+             colour = "grey35", lineheight = 1.05,
+             label = app_wrap_px(sprintf(paste0(
                "Arrows are flows in GtC per year (%d). Stocks today: ",
                "atmosphere %s, land %s, ocean %s. ",
                "Each box exists twice — once per hemisphere.%s"),
@@ -1496,11 +1514,19 @@ plot_box_diagram <- function(fx, stock, p) {
                fmt_gtc(stock$land_C), fmt_gtc(stock$ocean_C),
                paste0(
                  if (hs_on) " The cold boxes are the high-latitude ocean; the warm arrows exclude them." else "",
-                 luc_note)), width = DIAGRAM_NOTE_WIDTH), collapse = "\n")) +
-    annotate("text", x = xmax / 2, y = 0.18, size = 3.2, colour = "grey20", fontface = "bold", lineheight = 1.05,
-             label = sprintf(paste0("Photosynthesis and the sea move %.0f GtC a year in and out of the air, ",
-                                    "so an average CO₂ molecule\nstays only ~%.1f years. ",
-                                    "The ADDED carbon still takes centuries to go."),
-                             fx$atm_out, fx$tau_turn)) +
+                 luc_note)),
+               app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE))) +
+    # ⚠ WRAPPED, NOT HAND-BROKEN -- the SIBLING of the footnote above, and it
+    # kept its literal newline escape after that one lost its own, three lines
+    # under the comment recording the incident. Fixing one of a pair and not
+    # the other is its own failure mode; the pair is now ONE mechanism.
+    annotate("text", x = xmax / 2, y = 0.18, size = DIAGRAM_NOTE_SIZE_BOLD,
+             colour = "grey20", fontface = "bold", lineheight = 1.05,
+             label = app_wrap_px(
+               sprintf(paste0("Photosynthesis and the sea move %.0f GtC a year in and out of the air, ",
+                              "so an average CO₂ molecule stays only ~%.1f years. ",
+                              "The ADDED carbon still takes centuries to go."),
+                       fx$atm_out, fx$tau_turn),
+               app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE_BOLD))) +
     xlim(0.1, xmax) + ylim(0, 4.9) + theme_void()
 }

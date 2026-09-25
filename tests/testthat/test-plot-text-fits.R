@@ -143,6 +143,49 @@ test_that("3. axis titles fit the narrowest panel that carries one", {
   })
 })
 
+test_that("3a. the BOX DIAGRAM's two footnotes fit, and neither is hand-broken", {
+  skip_if_no_plots(); skip_if(is.null(.pt_env), "plots.R did not load")
+  e <- .pt_env
+  # \u26d4 THE SLOT THE 09-25 AUDIT LEFT OUT. That audit fixed every caption and
+  # subtitle and recorded that `annotate("text")` was still unchecked. Both
+  # diagram footnotes were over the panel when this was written: footnote 1 at
+  # DIAGRAM_NOTE_WIDTH = 118 characters rendered 480.0 px into a 383.5 px budget,
+  # and footnote 2 -- hand-broken with a literal newline at 96 characters --
+  # rendered 404.4 px. The hand break was not STALE; it never fitted.
+  # \u26a0 ONE CHARACTER BUDGET COULD NOT HAVE SERVED BOTH. The second is bold and
+  # a size larger, so at equal character counts it renders wider. The gate
+  # therefore measures each at ITS OWN size, taken from the constant the
+  # annotate() call is handed.
+  notes <- list(
+    list(txt = paste0("Arrows are flows in GtC per year (2024). Stocks today: atmosphere 891 GtC, ",
+                      "land 2,190 GtC, ocean 38,500 GtC. Each box exists twice \u2014 once per ",
+                      "hemisphere. The cold boxes are the high-latitude ocean; the warm arrows ",
+                      "exclude them. Land-use change takes carbon out of the land pools themselves ",
+                      "(61% soil, 39% plants), not out of thin air."),
+         size = e$DIAGRAM_NOTE_SIZE),
+    list(txt = paste0("Photosynthesis and the sea move 330 GtC a year in and out of the air, ",
+                      "so an average CO\u2082 molecule stays only ~4.0 years. ",
+                      "The ADDED carbon still takes centuries to go."),
+         size = e$DIAGRAM_NOTE_SIZE_BOLD))
+  pt_with_device(e$APP_PANEL_PX[["diagram"]], {
+    budget <- e$app_text_px("diagram")
+    for (nn in notes) {
+      pt <- e$diagram_note_pt(nn$size)
+      expect_lte(pt_px(e$app_wrap_px(nn$txt, budget, pt), pt), budget)
+    }
+  })
+  # ...and the sizes annotate() is HANDED are those same constants, so the size
+  # measured above and the size drawn cannot drift apart.
+  src <- readLines(.pt_plots, warn = FALSE)
+  diag <- src[grep("plot_box_diagram <- function", src):length(src)]
+  diag <- diag[seq_len(min(140L, length(diag)))]
+  ann <- grep('annotate\\("text"', diag, value = TRUE)
+  expect_length(grep("size = 3\\.[0-9]", ann), 0L)
+  expect_length(grep("size = DIAGRAM_NOTE_SIZE", ann), 2L)
+  # no hand-broken newline survives in either footnote's label
+  expect_length(grep("molecule\\\\nstays", diag), 0L)
+})
+
 test_that("3b. legend keys fit, as a ROW and not only one at a time", {
   skip_if_no_plots(); skip_if(is.null(.pt_env), "plots.R did not load")
   e <- .pt_env
