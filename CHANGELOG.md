@@ -2,6 +2,100 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-25 (d) — **THE SUITE'S FOUR REDS, TAKEN ONE AT A TIME. ⛔⛔ And converting the first one found a LIVE SILENT DEFAULT in two shipped resolvers: `$` on a list PARTIAL-MATCHES, so a half-split parameter set read the OTHER HEMISPHERE as its legacy scalar and a refusal written for exactly that shape was UNREACHABLE.**
+
+### Where the reds came from, because handoff (f) §5 had the count wrong
+It named "THREE, not four": `test-mode-file.R` (1) and `test-overlay-idiom-lint.R` (2). Measured on a
+clean full run: **4 FAIL / 4514 PASS**, and the third file was **`test-mode-struct-lint.R` (2)** —
+grown by (f)'s own Tier-1 commit. ⚠ **A ratchet lint breached by the commit that is reporting on
+itself is the one a handoff cannot see**; both lints were green when that session ran its FILTER, and
+the filter did not include them. ⭐ **"A green filter is not a green suite" was in the handoff and it
+was still not enough** — the filter has to include the lints, which name no topic and so match no
+topic keyword.
+
+### 1. `test-overlay-idiom-lint.R` (2 FAIL) — `diag_rep_dc_product_ladder.R` converted
+The ladder copied a fitted set with the bare `for (n in intersect(names(p), CCX_PARAM_NAMES))` loop,
+and it is a 09-23 file, so it had GROWN the ratchet 61 → 62. Converted to `ccx_overlay_par(p, pv)`
+per RULING B's convert-on-touch. **The receipt is the file's own VECTOR gate**: `gates` output is
+**byte-identical** before and after, worst |delta| **0.000e+00 over 106 names**, and all 21 products
+unchanged (`logpost` −1425.3620, `loglik` −1391.8051, `sink_land` 3.0905, …). Count back to **61**.
+⚠ **The ladder's header claim needed updating, not just the code**: it says it MIRRORS
+`ccx_make_logpost()`'s own body, and the objective still carries the literal loop (it is in
+`OI_BASELINE`, and it is FROZEN). The mirror now runs through the helper, which is that loop plus an
+assertion; the two coincide because `ccx_unc_to_par()` builds one value per `CCX_PARAM_NAMES`. Said
+so in the header rather than leaving a stale "mirrors" claim.
+
+### 2. ⛔⛔ AND THE MUTATION TEST OF THAT CONVERSION FOUND A REAL BUG, one layer down
+Asked what the converted call actually buys, i.e. what happens when the fitted set LACKS a name.
+Measured, on the canonical's own `bp`:
+
+| fitted set | OLD idiom | `ccx_overlay_par()` |
+|---|---|---|
+| intact | `seas_lag_p_NH` = 1.5788 | **1.5788** (identical) |
+| pre-split (both splits absent, legacy `seas_lag_p` = 1.7677) | **DELETED → named default 2.25** | **1.7677** — the file's own value |
+| both absent, no legacy | DELETED → 2.25 | **REFUSED by name** |
+| **`_NH` absent, `_SH` present, no legacy** | DELETED → 2.25 | **2.6501 — *the SH value*** |
+
+That last row is the defect. **`$` on an R list PARTIAL-MATCHES.** `seas_lag_p` is a prefix of both
+split names: with both present the match is ambiguous and `$` returns `NULL` (which is why the
+canonical never saw this), but with **exactly one** present it resolves to the survivor. So
+`ccx_seas_lag_p()` read the surviving hemisphere AS the legacy scalar and mirrored it across, instead
+of falling to `CCX_SEAS_LAG_P_DEFAULT`; and `ccx_migrate_par_set()`'s refusal —
+*"absent and no legacy `seas_lag_p` to migrate from"* — was **UNREACHABLE in the shape it was written
+for**, firing only when BOTH were absent. `gamma_enso` is a prefix of all four split ENSO names and
+has the identical exposure at exactly one present.
+
+**Fixed with `[[` at the five READ sites** (`R/model.R` ×3, `R/calibrate.R` ×2). ⚠ **Assignments were
+already safe** — `$<-` never partial-matches, so `p$seas_lag_p <- NULL` was always exact.
+⚠ **No number moves**: the canonical carries a complete pair, so `$` was already returning `NULL`
+there. Verified by the ladder's HARNESS gate (stored logpost reproduces) and the full suite.
+⚠ **NOT live today** — no mode file on disk is half-split. This is a latent silent default in the
+family of [[intersect_is_a_silent_default]]: a name resolver inventing a value.
+
+**Gated in `test-seas-lag-split.R`** (+2 tests, 35 → 55 assertions): a half-split list with no legacy
+takes the NAMED DEFAULT in the surviving hemisphere's absence, the migration REFUSES it, the EXACT
+legacy scalar still fills a partial split (the old line-47 contract), and the ENSO resolver is
+checked the same way. **The mutation test is IN the test**: it reproduces the `$` read beside the
+`[[` one and requires them to differ, so a revert cannot pass. Measured by actually reverting
+`R/model.R` + `R/calibrate.R`: **5 of the new assertions fail**.
+⚠ **Left alone, flagged**: ~20 `$gamma_enso` / `$seas_lag_p` reads in `calibration/` diagnostics and
+`calibration/lib_seas_limbs.R:117`. Same exposure, same not-live condition; converting one changes
+what it prints, so it is convert-on-touch, not a bulk commit.
+
+### 3. `test-mode-struct-lint.R` (2 FAIL) — and the fix was NOT to add them to the baseline
+`diag_luc_gross_split.R` and `test-luc-gross-split.R` read a mode file directly (32 → 34). Both want
+only **`luc_scale`**, a nuisance with no model slot, so nothing structural is being decoded — but the
+lint is **literal and file-level by design**. ⛔ **Two tempting non-fixes, both rejected**: calling
+`ccx_mode_base()` for a parameter list nobody uses is **gaming the gate**, and adding the files to
+`MS_BASELINE` is **ratcheting the wrong way** — the one thing the lint exists to prevent.
+**What was done instead**: `ccx_mode_params(CCX_MODE_CANONICAL)`, which already exists and does the
+`readRDS` **inside `paths.R`**, the one place the lint exempts. `ccx_migrate_par_set()` returns early
+when nothing is absent, so the `ccx_mode_absent()` guard goes too. **Receipt: the diagnostic's whole
+output is byte-identical** (all three gates and all three mutations), `luc_scale` **0.8214**
+unchanged. Count back to **32**.
+
+### 4. `test-seas-lag-split.R:256` (1 ERROR) — a fixture that named its own members
+It hand-seeded ONE unencodable name (`ent_seas_amp_SH`) and asserted the vector then encoded. That
+was right when written and went stale as the ocean structure entered the table: the 2026-08-30
+ancestor now has **TEN** migrated names the transforms cannot encode, so the assertion had been
+failing on the nine the line did not name. Seeds through **`ccx_seed_unencodable()`** now.
+⭐ **And what survives the seeder is the real finding**: it seeds what the MIGRATION filled (where the
+ancestor held no opinion) and leaves a name the ancestor DID hold, at a value now outside its bound —
+**`from90` carries `h_ml` = 35.2523 against a 42.5–200 logit bound, so the BOUND moved under a stored
+vector.** ⚠ **Measured per arm, not hardcoded**: `pin90` carries none, and the first draft of this
+repair asserted `h_ml` by name and failed on that arm. The test now prints the set per arm.
+
+### 5. `test-mode-file.R:323` — NOT touched, and must not be
+dAIC canonical − control **+4.18** is a **NAMED RED BY RULING**. A red that encodes a priced decision
+is not a red to fix.
+
+### Suite
+**4 FAIL / 4514 PASS** before → the three fixable reds cleared, **+22 assertions**, one deliberate red
+left. ⚠ **One process discipline broken and caught**: the first full run was launched and then R files
+were edited while it ran (`~/.claude/CLAUDE.md`'s "never edit a running script"), so its result was
+void and it was re-run clean. ⚠ And `pgrep -f run_tests.R` matched the watcher's own `bash -c` line
+exactly as [[pgrep_wait_loop_matches_itself]] says; the work process was confirmed separately.
+
 ## 2026-09-25 (c) — **RESPONSIVE TEXT WRAPPING.** ⛔⛔ **And wiring it found that yesterday's caption change had broken `plots_review.R` silently — the review cards render only when their tab is opened, and their test reads `ui.R` as text, so the whole file could fail to call and the suite stayed green.**
 
 ### The break, first, because it is the more useful half
