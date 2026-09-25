@@ -59,6 +59,37 @@ pt_with_device <- function(px, expr) {
   force(expr)
 }
 
+test_that("0. the size every budget is MEASURED at is the size that RENDERS", {
+  skip_if_no_plots(); skip_if(is.null(.pt_env), "plots.R did not load")
+  e <- .pt_env
+  # \u26d4 THE DEFECT THIS GUARDS (2026-09-25). Every assertion in this file
+  # computes a pixel width at a font size, so if the size the CHARTS render at
+  # ever stops being the size this file MEASURES at, the gate passes on strings
+  # that clip -- silently, and in the safe-looking direction.
+  # `theme_ccx()` is called BARE at all 31 call sites, so its signature default
+  # is the only number that renders. It used to be a literal 13, with a SECOND
+  # copy named CCX_BASE_SIZE beside the budgets; tests 3 and 3b measure axis
+  # labels at that copy. Moving the signature alone desynchronised them.
+  # \u26a0 MEASURED, and not the way the audit note put it: moving CCX_BASE_SIZE
+  # alone moved NOTHING (theme_ccx() is complete, so its explicit element sizes
+  # win over whatever it is added to). The exposure was the other direction.
+  expect_identical(formals(e$theme_ccx)[["base_size"]], quote(CCX_BASE_SIZE))
+  # ...and the budgets resolve FROM it, rather than agreeing by coincidence
+  expect_equal(e$CAPTION_PT,  e$CCX_BASE_SIZE - 3)
+  expect_equal(e$SUBTITLE_PT, e$CCX_BASE_SIZE - 1)
+  # \u2b50 THE DERIVATION IS LIVE, not a pair of constants that happen to match:
+  # build the theme at a size nothing uses and require the resolved slots to MOVE
+  # with it. Without this, two retyped 13s would satisfy everything above.
+  probe <- ggplot2::calc_element("plot.caption", e$theme_ccx(base_size = 20))
+  expect_equal(probe$size, 17)
+  probe2 <- ggplot2::calc_element("plot.subtitle", e$theme_ccx(base_size = 20))
+  expect_equal(probe2$size, 19)
+  # \u26a0 AND NO OTHER LITERAL base_size SURVIVES IN plots.R -- a third copy
+  # introduced anywhere in the file would pass every assertion above.
+  src <- readLines(.pt_plots, warn = FALSE)
+  expect_length(grep("base_size[[:space:]]*=[[:space:]]*[0-9]", src), 0L)
+})
+
 test_that("1. every caption fits the panel it is drawn in, at both widths", {
   skip_if_no_plots(); skip_if(is.null(.pt_env), "plots.R did not load")
   e <- .pt_env

@@ -73,7 +73,22 @@ GROWTH_UNIT_NOTE <- paste("Annual means differenced. Measured growth is the Glob
                           "Budget's atmospheric growth, converted GtC/yr ÷", 
                           "GtC per ppm. Review card 4 scores the same series in GtC/yr.")
 
-theme_ccx <- function(base_size = 13) {
+# ⭐ THE ONE FONT SIZE, and the ONLY place it is typed. `theme_ccx()` is called
+# BARE at all 31 sites, so this default is the only number that RENDERS -- and the
+# pixel budgets below, plus the gate in test-plot-text-fits.R, decide whether a
+# caption fits by computing a width AT it. Until 2026-09-25 it was typed TWICE: a
+# literal 13 in this signature, and again as `CCX_BASE_SIZE` beside the budgets.
+# ⚠ MEASURED, AND NOT THE WAY THE AUDIT NOTE DESCRIBED IT. Moving CCX_BASE_SIZE
+# alone moved NOTHING -- `theme_ccx()` is itself a complete theme and its explicit
+# element sizes win over whatever it is added to, so CAPTION_PT/SUBTITLE_PT were
+# already tracking this signature (13 and 20 on that term both give 10/12). The
+# live exposure was the other direction: move the SIGNATURE alone and every chart
+# re-renders at the new size while test-plot-text-fits.R keeps measuring axis
+# labels at the old one -- a gate passing on strings that clip.
+# ⇒ the signature DERIVES from the constant, so there is one number. The gate
+# asserts this default is still the SYMBOL and not a literal, so retyping it fails.
+CCX_BASE_SIZE <- 13
+theme_ccx <- function(base_size = CCX_BASE_SIZE) {
   theme_minimal(base_size = base_size) +
     theme(
       panel.grid.minor = element_blank(),
@@ -149,15 +164,19 @@ APP_CAP_WIDTH <- 150        # RETIRED as a wrap width; kept only as the characte
                             # fallback below, for when no graphics device is open
 
 # The font sizes theme_ccx() actually RESOLVES to, computed from the theme rather
-# than retyped -- the whole defect being audited here is a number that described
-# a rendering and then stopped matching it.
-CCX_BASE_SIZE <- 13
+# than retyped -- the whole defect being audited here is a number that described a
+# rendering and then stopped matching it. `CCX_BASE_SIZE` is declared beside
+# theme_ccx() itself (above), because that signature is what these resolve through.
+# ⚠ THE `theme_minimal(base_size = CCX_BASE_SIZE) +` TERM THAT STOOD HERE WAS INERT
+# and is gone (2026-09-25): theme_ccx() is complete, so the left operand could never
+# reach these numbers -- measured, 13 and 20 on it both give 10/12. It implied a
+# coupling that did not exist, which is the same defect class as the retyped constant.
 CAPTION_PT  <- local({
-  e <- ggplot2::calc_element("plot.caption", ggplot2::theme_minimal(base_size = CCX_BASE_SIZE) + theme_ccx())
+  e <- ggplot2::calc_element("plot.caption", theme_ccx())
   if (is.numeric(e$size)) e$size else CCX_BASE_SIZE - 3
 })
 SUBTITLE_PT <- local({
-  e <- ggplot2::calc_element("plot.subtitle", ggplot2::theme_minimal(base_size = CCX_BASE_SIZE) + theme_ccx())
+  e <- ggplot2::calc_element("plot.subtitle", theme_ccx())
   if (is.numeric(e$size)) e$size else CCX_BASE_SIZE - 1
 })
 
