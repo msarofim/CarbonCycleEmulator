@@ -92,7 +92,7 @@ test_that("3. the panel says the split is ASSERTED, not measured", {
 
 test_that("4. the plot function exists and names its three series", {
   expect_true(has(.lrp_plots, sprintf("%s <- function", LRP_PLOT_FN)))
-  for (lab in c("LAB_LUC_GROSS", "LAB_LUC_REGROW", "LAB_LUC_NET"))
+  for (lab in c("KEY_LUC_GROSS", "KEY_LUC_REGROW", "KEY_LUC_NET"))
     expect_true(has(.lrp_plots, sprintf("%s  ", lab)) || has(.lrp_plots, sprintf("%s ", lab)))
   # the colours are NAMED palette entries, not literals in the plot body
   expect_true(has(.lrp_plots, 'PAL[["luc_gross"]]'))

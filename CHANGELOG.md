@@ -2,6 +2,44 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-25 (b) — **AUDITED EVERY TEXT SLOT IN `plots.R`.** ⛔⛔ **The slots I went to check were all fine; the one that was broken is the one the repo believed it had fixed twice — captions. `strwrap(width = 150)` counts CHARACTERS, and what clips is PIXELS.** Two half-width panels had been clipping at every viewport width since the constant was introduced.
+
+### What the audit measured, and against what
+Panel widths **measured from the running app**, not inferred from `ui.R` (a regex over the nesting got it wrong and called five full-width plots half-width):
+
+| viewport | full | half | review card | diagram |
+|---|---|---|---|---|
+| 768 px | **552** | **264** | 514 | 424 |
+| 1024 | 744 | 360 | — | — |
+| 1440 | 1056 | 516 | — | — |
+
+⭐ The floor is **768 px** because that is Bootstrap's `md` breakpoint — the narrowest layout that still puts the sidebar *beside* the panel. Below it `sidebarLayout` STACKS and the panel gets **wider**, so 768 is the worst case rather than a small number someone liked.
+
+### ⛔⛔ Three findings, and the third is the one that had been shipping longest
+1. **150 characters is up to 683 px.** Every full-panel caption clipped below a ~1030 px viewport.
+2. **The 09-24 (o) subtitle clipped at 549 px against a 552 px panel** — the measurement had ignored the plot's own 16 px margin.
+3. ⛔⛔ **`w_af` and `w_gcb` are 264 px and were handed the same 150-character caption.** Those two have been clipping **at every viewport width** since `APP_CAP_WIDTH` was introduced on 09-22. Confirmed on screen, not merely computed: `"Model: posterior mode (single best fit). Not peer-"` is where it stopped.
+
+⚠ **The slots this item was opened to check were all fine**: axis titles (≤ 209 px), legend keys, and the in-panel annotations all fit with room. **The failure was concentrated in the family everyone believed was solved** — which is the lesson, not the pixels.
+
+### ⛔ AND THE FIRST FIX WAS STILL WRONG, because a caption is aligned to the PANEL
+Wrapping to a measured pixel budget still clipped `plot_airborne_fraction`'s caption. ggplot positions `plot.caption` against the **panel**, not the plot, so the y-axis title and tick labels eat ~50 px — a fifth of a 264 px panel. **The thing measured and the thing drawn were different widths.** `plot.title.position` and `plot.caption.position` are now both `"plot"`, which makes them the same width and incidentally left-aligns titles and captions to the plot edge.
+
+### The fix
+- `APP_PANEL_PX` (measured), `APP_PLOT_MARGIN_PX` (the theme's own 16 px), `APP_TEXT_SAFETY = 0.94` for a deploy host whose fonts are not this machine's.
+- **`app_wrap_px()` wraps by MEASURING each candidate line**, greedy fill, so the result depends on the actual glyphs rather than on an average character width no proportional font has. Falls back to a conservative character count when no device is open.
+- `app_provenance_caption(extra, panel=)` and `app_subtitle(txt, panel=)`; `plot_airborne_fraction` and `plot_gcb_bars` pass `panel = "half"`.
+- ⭐ **`plot_keeling` stopped wrapping twice** — it re-wrapped the assembled caption at 95 characters on top of the 150, because the provenance prefix counts toward line 1. The pixel budget already accounts for the assembled string.
+- ⭐⭐ **THE PREFIX NOW NAMES THE SLOT**: `LAB_*` axis title, `KEY_*` legend key, `NOTE_*` caption prose. The gate classifies by prefix; when everything was `LAB_`, its first draft measured `NOTE_LUC_SPLIT` (caption prose, **1,299 px**) and `KEY_LUC_NET` (a legend key) as though they were axis titles and reported two failures that were not failures. Renamed 8 constants.
+
+### `test-plot-text-fits.R`, 39 assertions
+Covers **every** slot, not the ones that happened to be wrong: captions at both panel classes, subtitles, axis titles, legend keys **as a row** (they draw side by side, so each one fitting is not the question), the wrapper against adversarial input, and — as a caption-sync guard on the audit itself — that the set of functions passing `panel = "half"` equals `APP_HALF_WIDTH_PLOTS`.
+**Mutation-tested**: reverting the caption wrap to 150 characters fails; dropping `panel = "half"` from `plot_gcb_bars` fails; an over-budget axis title fails. ⚠ A first mutation attempt at an axis title was **too short to exceed the budget** and passed — the gate was not blind, the mutation was weak, and the second one at 653 px caught it.
+
+⚠ **Captions are wrapped to the 768 px floor at every width**, so at 1440 px they are taller than they need to be. The alternative is responsive wrapping through `session$clientData$output_*_width`, which means plumbing the width into every plot call; not taken, and flagged.
+
+Suite filter gains `text`: **652 / 0** across 20 files.
+
 ## 2026-09-25 — **The figure's accessibility receipt was a number nothing could reproduce. Re-stepped, and the receipt is now a GATE rather than a comment.**
 
 09-24 (k) recorded `#C2185B` / `#12395C` as "normal 31.3 / protan **13.5** / deutan 26.1 / tritan 31.7, all passing", from a dichromat implementation written for that session and **never committed**. `tools/palette_check.py` (committed 09-24 n) reproduces that pair's **normal ΔE exactly (31.3)** and scores its protan at **7.4 — below the 8 target**. ⛔ **Two defensible implementations disagreeing by ~2× is the whole width of the pass/fail decision**, and the figure had been shipping on the side of it that cannot be reproduced.

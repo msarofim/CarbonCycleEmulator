@@ -30,6 +30,14 @@ PAL <- c(
   luc_regrow = "#018571"
 )
 
+# ⭐ THE PREFIX NAMES THE SLOT, and that is load-bearing rather than tidy.
+# test-plot-text-fits.R classifies every constant by its prefix to know which
+# font size to measure it at and which panel budget to measure it against; before
+# 2026-09-25 they were all `LAB_` and the gate measured a 1,299 px caption as
+# though it were an axis title.
+#   LAB_*   an AXIS TITLE       -- base size, must fit the narrowest panel it is in
+#   KEY_*   a LEGEND KEY label  -- legend size, several drawn side by side
+#   NOTE_*  CAPTION prose       -- caption size, goes through app_provenance_caption()
 LAB_CO2   <- "CO₂ (ppm)"
 LAB_YEAR  <- "Year"
 LAB_D13C  <- "δ¹³C (‰)"
@@ -44,7 +52,7 @@ LAB_PULSE_AIRBORNE <- "Share of the pulse still in the air"
 LAB_PULSE_WARMING  <- "Extra warming caused by the pulse (°C)"
 # Named because this series has TWO possible observational sources and the panel
 # must say which it drew -- see plot_growth_rate().
-LAB_GROWTH_OBS  <- "Measured (Global Carbon Budget)"
+KEY_GROWTH_OBS  <- "Measured (Global Carbon Budget)"
 # ⛔ The sentence that keeps plot_pulse_partition() honest. See its roxygen.
 PULSE_PARTITION_NOTE <- paste("This is how much EXTRA carbon each reservoir holds because of",
                               "the pulse \u2014 the difference between running with it and",
@@ -64,39 +72,136 @@ theme_ccx <- function(base_size = 13) {
       plot.caption  = element_text(colour = "grey45", size = base_size - 3, hjust = 0),
       legend.position = "top",
       legend.title = element_blank(),
+      # ⛔ ALIGN TITLES AND CAPTIONS TO THE PLOT, NOT THE PANEL (2026-09-25).
+      # ggplot's default positions both against the PANEL, so the y-axis title and
+      # its tick labels eat ~50 px of a caption's available width -- on a 264 px
+      # half panel that is a fifth of it. The measured wrap budget is a property of
+      # the PLOT width, so a caption measured to fit and then drawn in a narrower
+      # region clips anyway, which is exactly what happened to
+      # plot_airborne_fraction()'s "Dashed line at 50% for reference." Setting both
+      # to "plot" makes the thing measured and the thing drawn the same width.
+      plot.title.position = "plot",
+      plot.caption.position = "plot",
       plot.margin = margin(6, 10, 6, 6)
     )
 }
 
-# ⛔ ggplot CAPTIONS CLIP, THEY DO NOT WRAP -- a caption longer than the panel
-# is silently truncated mid-sentence, and the provenance prefix below counts
-# toward line 1's width. The review tab learned this on 2026-09-22 (l) and
-# wrapped its own captions (rv_cap()); the TEACHING panels did not, and on
-# 2026-09-22 the pulse-partition panel's caption lost the clause that keeps it
-# honest ("it is not a trace of where those molecules went") to exactly this.
-# Wrapping here fixes every panel at once and cannot be forgotten at a call site.
-APP_CAP_WIDTH <- 150   # characters; the teaching panels are wider than the cards
+# ⛔⛔ ggplot CAPTIONS AND SUBTITLES CLIP, THEY DO NOT WRAP -- a line wider than
+# the panel is silently truncated mid-word. The review tab learned this on
+# 2026-09-22 (l) and wrapped its own captions (rv_cap()); the TEACHING panels got
+# APP_CAP_WIDTH on the same day, and subtitles got app_subtitle() on 09-24 (o).
+#
+# ⛔⛔ AUDITED 2026-09-25, AND THE CHARACTER-COUNT FIX WAS NOT ONE. `strwrap(width
+# = 150)` is a count of CHARACTERS; what clips is PIXELS, and the two are only
+# related through a font size and a panel width that this file never knew. Every
+# text slot was measured against the panel it is actually drawn in:
+#
+#   * The 150-character caption produces lines up to 683 px. The FULL panel is
+#     552 px at the narrowest side-by-side layout, so every caption on every full
+#     panel clipped below a ~1030 px viewport.
+#   * `w_af` and `w_gcb` are 264 px -- HALF panels -- and were handed the SAME
+#     150-character caption. Those two have been clipping at EVERY viewport width
+#     since the constant was introduced. Confirmed on screen, not just measured:
+#     "Model: posterior mode (single best fit). Not peer-" is where it stopped.
+#   * The 09-24 (o) subtitle measured 549 px against a 552 px panel and clipped
+#     anyway, because the measurement ignored the plot's own 16 px margin.
+#
+# ⇒ the budget is a PIXEL budget, per panel class, and the wrap is done by
+# MEASURING each candidate line rather than counting its characters.
+#
+# PANEL WIDTHS ARE MEASURED, NOT ASSUMED (2026-09-25, from the running app):
+#     viewport   full   half   review card   diagram
+#        768 px   552    264       514         424
+#        820      591    284       --          --
+#       1024      744    360       --          --
+#       1440     1056    516       --          --
+# The floor is the 768 px viewport because that is Bootstrap's `md` breakpoint --
+# the narrowest layout that still puts the sidebar beside the panel. Below it
+# sidebarLayout STACKS and the panel gets WIDER, so 768 is the worst case and not
+# merely a small number someone liked.
+APP_PANEL_PX <- c(full = 552L, half = 264L, card = 514L, diagram = 424L)
+# ⛔ WHICH PLOT IS DRAWN AT WHICH WIDTH -- MEASURED FROM THE RUNNING APP
+# (2026-09-25, 768 px viewport), not inferred from ui.R's nesting. A regex over
+# ui.R gets this WRONG: `column(6, ...)` blocks do not nest the way a naive scan
+# assumes, and it reported five full-width plots as half-width. Only these two
+# are actually half.
+# ⚠ test-plot-text-fits.R asserts this list and the `panel = "half"` call sites
+# are the same set, in both directions -- so adding a half-width plot without
+# narrowing its caption, or narrowing one that is not half, both fail.
+APP_HALF_WIDTH_PLOTS <- c("plot_airborne_fraction", "plot_gcb_bars")
+APP_PLOT_MARGIN_PX <- 16L   # theme_ccx()'s own margin: 10 pt right + 6 pt left at 72 dpi
+APP_TEXT_SAFETY    <- 0.94  # headroom: the deploy host's fonts are not this machine's,
+                            # and a caption that clips there is invisible from here
+APP_CAP_WIDTH <- 150        # RETIRED as a wrap width; kept only as the character-count
+                            # fallback below, for when no graphics device is open
+
+# The font sizes theme_ccx() actually RESOLVES to, computed from the theme rather
+# than retyped -- the whole defect being audited here is a number that described
+# a rendering and then stopped matching it.
+CCX_BASE_SIZE <- 13
+CAPTION_PT  <- local({
+  e <- ggplot2::calc_element("plot.caption", ggplot2::theme_minimal(base_size = CCX_BASE_SIZE) + theme_ccx())
+  if (is.numeric(e$size)) e$size else CCX_BASE_SIZE - 3
+})
+SUBTITLE_PT <- local({
+  e <- ggplot2::calc_element("plot.subtitle", ggplot2::theme_minimal(base_size = CCX_BASE_SIZE) + theme_ccx())
+  if (is.numeric(e$size)) e$size else CCX_BASE_SIZE - 1
+})
+
+#' Text budget in px for a panel class, after the plot's own margins
+app_text_px <- function(panel = "full") {
+  if (!panel %in% names(APP_PANEL_PX))
+    stop("unknown panel class '", panel, "'; expected one of ",
+         paste(names(APP_PANEL_PX), collapse = ", "))
+  (APP_PANEL_PX[[panel]] - APP_PLOT_MARGIN_PX) * APP_TEXT_SAFETY
+}
+
+#' Wrap text to a PIXEL budget by measuring each line, not by counting characters
+#'
+#' ⭐ Greedy fill: words are added while the MEASURED width still fits, so the
+#' result depends on the actual glyphs rather than on an average character width
+#' that no proportional font has.
+#' ⚠ Measurement needs a graphics device. Inside renderPlot() there is always
+#' one; when there is not (a unit test building a plot object, say) it falls back
+#' to the character count, which is why APP_CAP_WIDTH still exists. The fallback
+#' is deliberately CONSERVATIVE -- scaled by the panel's share of a full one --
+#' so the no-device path cannot silently produce the 683 px lines that started
+#' this.
+app_wrap_px <- function(txt, px, pt) {
+  txt <- paste(txt, collapse = " ")
+  if (!nzchar(txt)) return(txt)
+  measure <- function(s) tryCatch(
+    grid::convertWidth(grid::grobWidth(grid::textGrob(s, gp = grid::gpar(fontsize = pt))),
+                       "in", valueOnly = TRUE) * 72,
+    error = function(e) NA_real_)
+  if (is.na(measure("M"))) {
+    chars <- max(20L, as.integer(APP_CAP_WIDTH * px / app_text_px("full")))
+    return(paste(strwrap(txt, width = chars), collapse = "\n"))
+  }
+  words <- unlist(strsplit(txt, "[ \t\n]+"))
+  lines <- character(0); cur <- ""
+  for (w in words) {
+    trial <- if (nzchar(cur)) paste(cur, w) else w
+    if (nzchar(cur) && measure(trial) > px) { lines <- c(lines, cur); cur <- w }
+    else cur <- trial
+  }
+  paste(c(lines, cur), collapse = "\n")
+}
 
 #' Standard annotation carried by every plot that uses model output
-app_provenance_caption <- function(extra = NULL, width = APP_CAP_WIDTH) {
+#'
+#' ⚠ `panel` is NOT optional in spirit: a half-width panel handed the full-width
+#' budget is exactly the defect audited on 2026-09-25. `test-plot-text-fits.R`
+#' measures every call site against the width its plot is really drawn at.
+app_provenance_caption <- function(extra = NULL, panel = "full") {
   base <- sprintf("Model: %s (%s). Not peer-reviewed teaching software.",
                   app_params$source, app_params$status)
   txt <- if (is.null(extra)) base else paste(base, extra, sep = "  ")
-  paste(strwrap(txt, width = width), collapse = "\n")
+  app_wrap_px(txt, app_text_px(panel), CAPTION_PT)
 }
-
-# \u26d4 SUBTITLES CLIP TOO, and the rule above did not say so because every
-# subtitle in this file used to be short. The imbalance panel's is not -- it has
-# to send the reader to the thin annual line for the recent years the bold line
-# does not reach -- and on 2026-09-24 (o) it lost that clause mid-word on a
-# 800 px panel. Same fix, one call, at the subtitle's own measure: it is set
-# larger than a caption, so it wraps narrower.
-APP_SUB_WIDTH <- 105   # characters; subtitles are set larger than captions
 
 #' Wrap a subtitle so it cannot be clipped mid-sentence
-app_subtitle <- function(txt, width = APP_SUB_WIDTH) {
-  paste(strwrap(txt, width = width), collapse = "\n")
-}
+app_subtitle <- function(txt, panel = "full") app_wrap_px(txt, app_text_px(panel), SUBTITLE_PT)
 
 # ---------------------------------------------------------------------
 # Tab 1: the Keeling curve
@@ -158,13 +263,15 @@ plot_keeling <- function(out, obs, yr_range, hemi = "both", show_obs = TRUE,
     guides(colour = guide_legend(nrow = 2, byrow = TRUE)) +
     labs(x = LAB_YEAR, y = LAB_CO2,
          caption = if (off != 0)
-           # wrap the ASSEMBLED caption: the provenance prefix is part of the
-           # first line's width (see rv_cap() in plots_review.R)
-           paste(strwrap(app_provenance_caption(sprintf(paste(
+           # ⚠ NO SECOND WRAP. This used to re-wrap the assembled caption at 95
+           # CHARACTERS on top of app_provenance_caption()'s own 150, because the
+           # provenance prefix is part of the first line's width. The pixel
+           # budget already accounts for the assembled string, so wrapping twice
+           # would only produce a narrower column than the panel needs.
+           app_provenance_caption(sprintf(paste(
              "Solid = what the calibration scored against these stations: the",
              "hemispheric box minus a fitted station offset of %.2f ppm. Faint =",
-             "the box itself. Card 1 of Known issues has the residuals."), off)),
-             width = 95), collapse = "\n")
+             "the box itself. Card 1 of Known issues has the residuals."), off))
            else app_provenance_caption()) +
     theme_ccx()
 }
@@ -270,8 +377,11 @@ plot_airborne_fraction <- function(pt, yr_range) {
     geom_line(colour = PAL[["model"]], linewidth = 0.8) +
     scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
     labs(x = LAB_YEAR, y = "Share of all emissions still in the air",
+         # ⚠ HALF-WIDTH PANEL (264 px). Measured 2026-09-25: this caption and
+         # plot_gcb_bars()'s had been clipping at EVERY viewport width on the
+         # full-panel budget.
          caption = app_provenance_caption(
-           "Dashed line at 50% for reference.")) +
+           "Dashed line at 50% for reference.", panel = "half")) +
     theme_ccx()
 }
 
@@ -338,17 +448,19 @@ plot_gcb_bars <- function(out, gcb, F, window = c(2014, 2023)) {
     scale_y_continuous(expand = expansion(mult = c(0.02, 0.14))) +
     labs(x = NULL, y = "Average uptake (GtC per year)",
          subtitle = sprintf("%d–%d average", window[1], window[2]),
+         # ⚠ HALF-WIDTH PANEL (264 px) -- see plot_airborne_fraction().
          caption = app_provenance_caption(
            paste("Land sink on the Global Carbon Budget's convention: the",
-                 "residual terrestrial sink, excluding land-use emissions."))) +
+                 "residual terrestrial sink, excluding land-use emissions."),
+           panel = "half")) +
     theme_ccx()
 }
 
-LAB_LUC_GROSS  <- "Cleared (gross land-use source)"
-LAB_LUC_REGROW <- "Forest regrowth (uptake)"
-LAB_LUC_NET    <- "Net land-use flux (what the model burns)"
+KEY_LUC_GROSS  <- "Cleared (gross land-use source)"
+KEY_LUC_REGROW <- "Forest regrowth (uptake)"
+KEY_LUC_NET    <- "Net land-use flux (what the model burns)"
 LAB_LUC_Y      <- "Land-use carbon flux (GtC per year)"
-LAB_LUC_CAPTION <- paste("The split into clearing and regrowth is ASSERTED from the Global",
+NOTE_LUC_SPLIT <- paste("The split into clearing and regrowth is ASSERTED from the Global",
                          "Carbon Budget's three bookkeeping models; this model does not",
                          "measure it. Both halves carry the fitted land-use scale and sum",
                          "to the series the model burns.")
@@ -376,12 +488,12 @@ plot_luc_gross_split <- function(split, window) {
   k <- h$year >= window[1] & h$year <= window[2]
   h <- h[k, ]
   d <- rbind(
-    data.frame(year = h$year, gtc = h$gross_GtC,    who = LAB_LUC_GROSS),
-    data.frame(year = h$year, gtc = h$regrowth_GtC, who = LAB_LUC_REGROW),
-    data.frame(year = h$year, gtc = h$net_GtC,      who = LAB_LUC_NET))
-  d$who <- factor(d$who, levels = c(LAB_LUC_GROSS, LAB_LUC_REGROW, LAB_LUC_NET))
+    data.frame(year = h$year, gtc = h$gross_GtC,    who = KEY_LUC_GROSS),
+    data.frame(year = h$year, gtc = h$regrowth_GtC, who = KEY_LUC_REGROW),
+    data.frame(year = h$year, gtc = h$net_GtC,      who = KEY_LUC_NET))
+  d$who <- factor(d$who, levels = c(KEY_LUC_GROSS, KEY_LUC_REGROW, KEY_LUC_NET))
   cols <- stats::setNames(c(PAL[["luc_gross"]], PAL[["luc_regrow"]], PAL[["obs"]]),
-                          c(LAB_LUC_GROSS, LAB_LUC_REGROW, LAB_LUC_NET))
+                          c(KEY_LUC_GROSS, KEY_LUC_REGROW, KEY_LUC_NET))
   obs <- split$obs_window
   p <- ggplot(d, aes(year, gtc, colour = who))
   # the ASSUMED years, marked before the lines so the lines sit on top
@@ -402,13 +514,13 @@ plot_luc_gross_split <- function(split, window) {
          # under this chart and the first draft printed it twice. What stays
          # here is the sentence a screenshot has to carry on its own: the
          # split is imported, not measured.
-         caption = app_provenance_caption(LAB_LUC_CAPTION)) +
+         caption = app_provenance_caption(NOTE_LUC_SPLIT)) +
     theme_ccx()
 }
 
-LAB_IMB_MODEL <- "This model"
-LAB_IMB_GCB   <- "Global Carbon Budget"
-LAB_IMB_BAND  <- "GCB's land sink + all of its unclosed imbalance"
+KEY_IMB_MODEL <- "This model"
+KEY_IMB_GCB   <- "Global Carbon Budget"
+KEY_IMB_BAND  <- "GCB's land sink + all of its unclosed imbalance"
 LAB_IMB_Y     <- "Residual land sink (GtC per year)"
 # ⛔ The sentence that keeps the band honest. The band asks where GCB's land
 # sink would sit if ALL of the carbon its budget cannot place were land. The same
@@ -469,15 +581,15 @@ plot_land_sink_imbalance <- function(out, gcb, F, smooth_yr = APP_LUC_SMOOTH_YR)
   if (sum(is.na(d$s_model)) != 2L * lost)
     stop("the smoother drops a different number of years than its window implies; ",
          "the subtitle would misdescribe the line")
-  cols <- stats::setNames(c(PAL[["model"]], PAL[["obs"]]), c(LAB_IMB_MODEL, LAB_IMB_GCB))
+  cols <- stats::setNames(c(PAL[["model"]], PAL[["obs"]]), c(KEY_IMB_MODEL, KEY_IMB_GCB))
   ggplot(d, aes(x = year)) +
-    geom_ribbon(aes(ymin = s_obs, ymax = s_obs + s_imbal, fill = LAB_IMB_BAND),
+    geom_ribbon(aes(ymin = s_obs, ymax = s_obs + s_imbal, fill = KEY_IMB_BAND),
                 alpha = 0.16, colour = NA) +
-    scale_fill_manual(values = stats::setNames(PAL[["obs"]], LAB_IMB_BAND)) +
-    geom_line(aes(y = obs,   colour = LAB_IMB_GCB),   linewidth = 0.3, alpha = 0.32) +
-    geom_line(aes(y = model, colour = LAB_IMB_MODEL), linewidth = 0.3, alpha = 0.32) +
-    geom_line(aes(y = s_obs,   colour = LAB_IMB_GCB),   linewidth = 1.1) +
-    geom_line(aes(y = s_model, colour = LAB_IMB_MODEL), linewidth = 1.1) +
+    scale_fill_manual(values = stats::setNames(PAL[["obs"]], KEY_IMB_BAND)) +
+    geom_line(aes(y = obs,   colour = KEY_IMB_GCB),   linewidth = 0.3, alpha = 0.32) +
+    geom_line(aes(y = model, colour = KEY_IMB_MODEL), linewidth = 0.3, alpha = 0.32) +
+    geom_line(aes(y = s_obs,   colour = KEY_IMB_GCB),   linewidth = 1.1) +
+    geom_line(aes(y = s_model, colour = KEY_IMB_MODEL), linewidth = 1.1) +
     scale_colour_manual(values = cols) +
     guides(colour = guide_legend(order = 1), fill = guide_legend(order = 2, nrow = 2)) +
     labs(x = LAB_YEAR, y = LAB_IMB_Y,
@@ -599,12 +711,12 @@ plot_growth_rate <- function(base, alt = NULL, gcb = NULL, yr_range = c(1960, 20
   d <- b
   if (!is.null(alt)) { x <- ann(alt); x$who <- label; d <- rbind(d, x) }
   if (!is.null(gcb) && isTRUE(show_obs) && "atm_growth" %in% names(gcb)) {
-    o <- app_obs_growth(gcb); o$who <- LAB_GROWTH_OBS
+    o <- app_obs_growth(gcb); o$who <- KEY_GROWTH_OBS
     d <- rbind(d, o)
   }
   d <- d[d$year >= yr_range[1] & d$year <= yr_range[2], ]
   cols <- stats::setNames(c(PAL[["model"]], PAL[["off"]], PAL[["obs"]]),
-                          c("Full model", label, LAB_GROWTH_OBS))
+                          c("Full model", label, KEY_GROWTH_OBS))
   ggplot(d, aes(year, g, colour = who)) +
     geom_line(linewidth = 0.7) +
     geom_point(size = 0.8) +
