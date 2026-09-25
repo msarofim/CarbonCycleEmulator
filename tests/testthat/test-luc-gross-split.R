@@ -59,9 +59,9 @@ test_that("2. the net being split is the model's OWN prescribed series", {
 test_that("3. luc_scale scales both halves or neither", {
   skip_if_no_split()
   p  <- readRDS(LGT_FILE); h <- p$historical
-  md <- readRDS(ccx_mode_file())
-  pm <- ccx_mode_par_with_pins(md)
-  if (length(ccx_mode_absent(md))) pm <- ccx_migrate_par_set(pm)
+  # `ccx_mode_params()` rather than a direct readRDS -- see the note in
+  # calibration/diag_luc_gross_split.R at the same read (2026-09-25).
+  pm <- ccx_migrate_par_set(ccx_mode_params(CCX_MODE_CANONICAL))
   ls <- pm$luc_scale
   F  <- suppressWarnings(ccx_build_forcing("historical", range(h$year),
                                            luc_scale = ls, emis_method = "constant"))

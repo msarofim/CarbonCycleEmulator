@@ -134,9 +134,15 @@ if (!(d1m > LG_IDENT_TOL)) stop("GATE 2 does not detect a perturbed input")
 # ⚠ The model does not burn GCB's E_LUC: `luc_scale` is a FITTED name. The halves
 # must therefore be scaled the same way, and the closure must be tested against
 # the forcing column the model actually integrates -- not against GCB.
-md <- readRDS(ccx_mode_file())
-pm <- ccx_mode_par_with_pins(md)
-if (length(ccx_mode_absent(md))) pm <- ccx_migrate_par_set(pm)
+# ⚠ `ccx_mode_params()`, NOT `readRDS(ccx_mode_file())` (2026-09-25): the read
+# belongs inside the ONE resolver in `paths.R`, which is what
+# test-mode-struct-lint.R's file-level rule enforces. `luc_scale` is a NUISANCE
+# with no model slot, so nothing structural is being decoded here -- but the
+# lint is literal by design, and satisfying it by ALSO calling ccx_mode_base()
+# for a list nobody uses would be gaming the gate rather than passing it.
+# `ccx_migrate_par_set()` returns early when nothing is absent, so it needs no
+# ccx_mode_absent() guard.
+pm <- ccx_migrate_par_set(ccx_mode_params(CCX_MODE_CANONICAL))
 LG_LUC_SCALE <- pm$luc_scale
 cat(sprintf("\n[GATE 3] mode %s, luc_scale = %.4f\n", CCX_MODE_CANONICAL, LG_LUC_SCALE))
 Fc <- suppressWarnings(ccx_build_forcing("historical", LG_MODEL_WIN,
