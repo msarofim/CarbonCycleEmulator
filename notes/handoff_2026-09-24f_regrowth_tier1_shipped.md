@@ -200,9 +200,10 @@ renderer, wrong convention, the "extreme attribution" caption disappearing).
   plan's limits. W4's ratchet entry still unratified.
 
 ## 6. Recommended order for the next session
-1. ~~The imbalance-band panel~~ ✅ **DONE 09-24 (o)**, `8d59aef`. ⚠ It left ONE thing open:
-   `app/R/plots.R`'s **axis labels, legend titles and `annotate("text")`** are the text slots that
-   have NOT been checked for the clipping the subtitle fix addressed ([[subtitles_clip_too]]).
+1. ~~The imbalance-band panel~~ ✅ **DONE 09-24 (o)**, `8d59aef`; its open text-slot item
+   ✅ **DONE 09-25 (b)**, `65595ef`. ⛔⛔ **The unchecked slots were FINE; the CAPTIONS were broken**
+   — `strwrap(150)` counts characters, clipping is pixels, and the two HALF-width panels had been
+   clipping at every viewport width. ([[subtitles_clip_too]])
 2. ~~The `w_luc_note` copy fix~~ ✅ **DONE 09-24 (p)**, `b1c39d8`. It was two corrections, not one:
    the regrowth attribution AND "larger sink than GCB" left standing as an unqualified fault.
    ⭐ **Adding a panel falsified copy two charts above it** — re-read the neighbours when a chart lands.
@@ -210,5 +211,11 @@ renderer, wrong convention, the "extreme attribution" caption disappearing).
    `#16345A` (protan 12.6), the MINIMAL change clearing a floor of 12; the receipt is now a GATE
    (`test-figure-palette.R`). ⛔ **Which implementation is right is STILL UNKNOWN** — the pair was
    moved so the answer stops mattering for this figure. ⚠ Neither colour could be held fixed.
-4. Cherry-pick `b1889af` and consider merging `fair_units.py` to FaIRtoFrEDI `main` — trunk, so
-   Marcus's call.
+4. ⛔⛔ **`b1889af` IS ONLY A CHANGELOG ENTRY** — checked 09-25, and this corrects handoff (e) §3
+   and §5 (and my own summary of them). The unit fix's CODE is in **`ec495b6`**, a commit titled
+   *"Convert the Author Bio to third person"*, which carries 54 lines of
+   `scripts/build_emissions_v160_ssp245.py` alongside the bio edit. **Cherry-picking `b1889af`
+   alone would move documentation for code that is not there.** And the builder does not exist on
+   `main` at all (315 lines, whole file new, from `ec046c2`). ⚠ `scripts/fair_units.py` is on
+   **`claude/calib160-migration`** only. ⇒ this is a 3-commit untangle on the trunk, not a
+   cherry-pick; Marcus's call.
