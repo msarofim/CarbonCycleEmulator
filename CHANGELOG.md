@@ -2,6 +2,142 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-25 (i) — **All four static findings from (g) §1(b) FIXED on Marcus's ruling, and three of the four were WORSE than the review recorded.** The NaN question is answered; both Rplots.pdf are untracked. ⚠ The §1(a) placeholder sentence is STILL Marcus's to write.
+
+### ⭐⭐ THE PATTERN OF THE SESSION: every finding grew when it was MEASURED rather than re-read
+Three of the four static findings were mis-stated in the review that raised them, and each
+mis-statement pointed the *wrong way* — the defect was real but its mechanism was not what was
+written down. Re-reading a note reproduces its errors; recomputing it does not.
+
+### 1. `CCX_BASE_SIZE` — the review had the direction BACKWARDS
+The review said moving `CCX_BASE_SIZE` alone would leave the pixel budgets at the old font size
+while the charts rendered at the new one. **Measured, it moves nothing at all.** `theme_ccx()` is a
+complete theme, so its explicit element sizes win over whatever it is added to, and
+`CAPTION_PT`/`SUBTITLE_PT` were already tracking the signature:
+
+| move | `CAPTION_PT` / `SUBTITLE_PT` |
+|---|---|
+| shipped (both 13) | 10 / 12 |
+| `CCX_BASE_SIZE` 13 → 20, signature stays | **10 / 12 — unchanged** |
+| signature 13 → 20, constant stays | 17 / 19 |
+
+The live exposure ran the **other** way: `theme_ccx()` is called BARE at all 31 sites, so its
+signature default is the only number that renders, while `test-plot-text-fits.R` tests 3/3b measure
+axis labels at the constant. Move the signature and the gate keeps measuring at the stale copy —
+passing on strings that clip, in the safe-looking direction.
+⇒ the signature now DERIVES (`function(base_size = CCX_BASE_SIZE)`); the inert
+`theme_minimal(base_size = CCX_BASE_SIZE) +` term is removed from both budgets, because it implied a
+coupling that did not exist. New gate (test 0): the default is still the **symbol**, the budgets
+equal `CCX_BASE_SIZE`−3/−1, **the derivation is LIVE** (built at 20 the slots must resolve to 17/19,
+so two matching literals cannot satisfy it), and no literal `base_size = <digits>` survives.
+**Mutation-tested three ways, each caught by a DIFFERENT assertion** — retyped signature (formals +
+literal scan), broken derivation (the probe), a third literal added elsewhere (the scan).
+
+### 2. The four "Years shown" sliders — nine literals, not eight
+`min = 1750, max = 2024` on all four, **and** the end year typed again as each `value` range's upper
+bound. A GCB update to 2025 would have moved the run span and silently capped four tabs, with no
+symptom but a slider that will not reach the last year of data — which reads as "the data stops in
+2024". All nine now derive from `APP_HIST_YEARS`. The START of each range stays a literal (1958
+Keeling, 1850, 1850, 1940 bomb spike): per-tab editorial choices, not the model's span.
+New `test-ui-year-bounds-lint.R` in the house ratchet idiom, **mutation-tested four ways**.
+
+### 3. "about 0.3 GtC" — the prose named THREE of FIVE terms, and the roxygen quoted the WRONG closure
+Recomputing the decomposition rather than re-reading it found two errors:
+- **It listed three terms; there are five.** CHANGELOG 09-24 (i)'s own table carries `-dGrow +0.05`
+  and `-dOcn -0.05`. As three terms it does **not** close: per-year residual sd **0.86 GtC/yr**,
+  range −1.8…+2.6, and the near-zero MEAN is an averaging coincidence — **−0.004 over 1959–2024 but
+  −0.044 one year earlier.** A one-year window shift moves it tenfold.
+- **The roxygen claimed it closes "to 3e-14".** That is the **GCB BUDGET IDENTITY's** closure
+  (`F + L − G − O − Land − cement − imbal = 0`, 3.2–3.4e-14, 09-24 (i) lines 715/718) — a different
+  statement about a different equation. This decomposition's closure is that table's `num` column,
+  **−0.006 GtC/yr**, ~2 % of the +0.32 it explains. **The neighbouring identity's exactness was
+  borrowed for this one, overstating it by twelve orders of magnitude.**
+
+`app_imbalance_identity()` now computes all five terms, the window and the closure, and the box
+prints what it returns through the SAME reactive inputs as the containment. Reproduces 09-24 (i)'s
+1959–2024 row term by term: **+0.3212 / +0.5398 / +0.0879 / −0.3026 / +0.0490 / −0.0467, closure
+−0.0062.** Gated at the closure's **MEASURED** size (|.| < 0.02 — asserting 3e-14 would fail;
+asserting nothing would let it stop closing), with two mutations that drop the growth and ocean
+terms. Verified in the running app.
+
+### 4. The diagram footnotes — the sibling was flagged, but NEITHER of them fitted
+The review flagged footnote 2's literal `\n`. Measuring before fixing showed the "already fixed"
+sibling was also over the panel. **At the 424 px diagram panel (budget 383.5 px):**
+
+| footnote | before | after |
+|---|---|---|
+| 1 (grey, `strwrap(118)`) | **480.0 px — OVER by a quarter of the panel** | 364.8 px |
+| 2 (bold, hand-broken at 96 chars) | **404.4 px — OVER; the hand break never fitted** | 367.2 px |
+
+This is the `strwrap(150)` character-vs-pixel defect the 09-25 audit fixed for every caption and
+subtitle. These two were missed because they are `annotate("text")` — which that audit **recorded as
+still unchecked**. ⭐ A known-unchecked slot is a finding waiting to be collected, not a clean one.
+⚠ **One character budget could never have served both**: footnote 2 is BOLD and a size larger, so at
+equal character counts it renders wider. `DIAGRAM_NOTE_WIDTH` is replaced by
+`DIAGRAM_NOTE_SIZE`/`_BOLD` — the wrap is computed FROM the size and the size is what `annotate()`
+is handed, so the measured thing and the drawn thing cannot disagree.
+
+### ⛔⛔ A GATE THAT PASSED FOR THE WRONG REASON, caught by mutation-testing it
+3a's pixel assertion **cannot fail**: it wraps with `app_wrap_px()` and measures the result against
+`app_wrap_px()`'s own budget. Tripling `DIAGRAM_NOTE_SIZE_BOLD` to 4.6 does **not** fail it — the
+wrapper just returns more lines. **Kept with its weakness STATED rather than deleted** (it still
+catches a broken wrapper, or a single word wider than the panel) and paired with two that bite: the
+panel class is load-bearing (at the FULL budget the same text overflows the diagram panel), and both
+call sites are asserted to pass `app_text_px("diagram")`. The second mutation confirms it.
+
+### ⛔⛔ TWICE IN ONE SESSION: A TEXT GATE MATCHED ITS OWN DOCUMENTATION
+The `ui.R` year lint forbids a literal year in a `min =`/`max =` — and matched the **comment in
+`ui.R` describing the old code**. The `server.R` gate forbids the literal `"about 0.3 GtC"` — and
+matched the **comment documenting the retired literal**. A file's own description of a defect
+contains the defect's text, so a gate reading raw lines reports **every repair as a relapse**.
+⚠ The tempting response — narrow the pattern until it goes quiet — narrows it past the case it
+exists to catch. Both strippers are **quote-aware** (`#` inside a string is content; `ui.R` carries
+hex colours), not `sub("#.*", "", x)`.
+
+### §1(c) ANSWERED — and the test the handoff proposed had NO POWER
+Handoff (h) asked whether `test-seas-lag-split.R`'s "NaNs produced" warnings predate today, and said
+to run the file at `0cbc1ac`. **That comparison was structurally guaranteed to return "identical":**
+the entire load path (`R/`, `setup.R`, the test file, `lib_run_inputs.R`) is byte-identical at
+`0cbc1ac` and HEAD — tree hash `a34b77aa` both. The commit that mattered was **`ee0958c`**, four
+earlier.
+
+| | `9973232` (= `ee0958c^`) | HEAD |
+|---|---|---|
+| NaN warnings | **6** — lines 251 (×3), 256 (×5) | **10** — 251 (×5), 263 (×4), 280 (×1) |
+| result | **ERROR** at :256 | PASS |
+
+⇒ **The warnings at line 251 predate `ee0958c`, so they predate every commit in handoff (h).** But
+they are not unchanged: `ee0958c` added the 263/280 sites earlier today, replacing hand-seeding of
+ONE name with `ccx_seed_unencodable()`, which exercises **ten** out-of-domain coordinates. More
+encode attempts, more warnings. ⚠ The 6→10 comparison is **not like-for-like** — the parent errored
+inside the first arm, so `pin90` never ran and its 6 is truncated. The direction is safe; the
+arithmetic is not.
+⭐ **They are the test's own subject, not a defect**: every site calls `ccx_par_to_unc()` on a vector
+the test asserts must REFUSE to encode, and `log`/`logit` of an out-of-domain value returns NaN with
+a base-R warning. Line 272 already wraps the one *diagnostic* call in `suppressWarnings`.
+⭐ **`ccx_require_run_inputs()` earned its keep**: the first worktree run reported "0 warnings",
+which was the setup gate refusing to start over a missing `data-raw/downloads/nuclear14c` — not an
+answer. A silent version would have handed back "0 vs 10: today introduced them", which is false.
+
+### Housekeeping
+- **Both `Rplots.pdf` untracked** (repo root *and* `tests/testthat/`) and gitignored, not deleted.
+  R opens it in the working directory whenever something draws without opening a device first, so
+  every test run touching a device showed two modified binaries in `git status` and in every diff.
+  Grepped first: nothing reads either as a fixture.
+- **Three stale app instances killed on Marcus's ruling** — PID 1755 (`:7791`, serving PRE-FIX code
+  and looking current), 61815 (`:7788`) and 96373 (`:7789`, both HTTP 500). Only `:7793` remains.
+
+### Verification
+App-facing suite **714 PASS / 0 FAIL / 0 ERR** (17 files; the 10 warnings are the seas-lag NaNs
+above). Running app at `:7793` on the fixed code: **zero `.shiny-output-error`**, all 8 plots on the
+touched tabs carry a real `<img>` with non-zero dimensions, the sliders render 1750–2024 unchanged,
+the info box prints its computed five terms, and both diagram footnotes render complete and
+unclipped. Cold start **~115 s** on a machine at load 2.5.
+
+### ⚠ STILL OWED, and still Marcus's
+`§1(a)`: the *Build your own* emissions clause on the non-`to_zero` branches is a **placeholder in
+my words**, live in the shipped app. The conditional structure survives any rewording.
+
 ## 2026-09-25 (h) — **Marcus's rulings on (g): the conditional step RATIFIED, and all three review defects fixed.** Each one verified in a running app, not asserted.
 
 ### ⭐⭐ RULING: the CONDITIONAL Hessian sd is the constraint map's step
