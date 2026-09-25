@@ -27,7 +27,18 @@ PAL <- c(
   # palette -- `pulse` orange against `land` green -- sits at exactly 8.0 under
   # deuteranopia, i.e. on the line, so it was not used.
   luc_gross  = "#a6611a",
-  luc_regrow = "#018571"
+  luc_regrow = "#018571",
+  # ⭐ THE CONSTRAINT MAP's DIRECTION PAIR (2026-09-25). "This measurement wants
+  # the parameter HIGHER" vs "LOWER" -- a DIRECTION, so a diverging pair, and a
+  # pair that carries no other meaning in this palette. ⚠ The obvious reuse was
+  # `luc_gross` / `luc_regrow`, which already scores 10.9; it was NOT used, because
+  # a reader who has just learned brown = clearing on the land-use chart would read
+  # brown = wants-higher here. Scored with tools/palette_check.py: minimum over
+  # normal / protan / deutan / tritan is 21.2 against the skill's >= 8 target, i.e.
+  # chosen with margin (memory `palette_check_unreproduced`: choose with margin and
+  # score it, rather than arbitrating a receipt after the fact).
+  pull_up    = "#b2182b",
+  pull_down  = "#2166ac"
 )
 
 # ⭐ THE PREFIX NAMES THE SLOT, and that is load-bearing rather than tidy.
@@ -691,6 +702,106 @@ app_imbalance_decades <- function(out, gcb, F) {
 # ---------------------------------------------------------------------
 # Tab 3: counterfactuals
 # ---------------------------------------------------------------------
+# ---- THE CONSTRAINT MAP (Marcus 2026-09-25) --------------------------------
+LAB_CMAP_FILL   <- "Log-likelihood units moved"
+LAB_CMAP_OBS    <- "What is measured"
+LAB_CMAP_PART   <- "Part of the model"
+LAB_CMAP_PULL   <- "Log-likelihood units the measurement gains by moving it"
+KEY_CMAP_UP     <- "wants it HIGHER"
+KEY_CMAP_DOWN   <- "wants it LOWER"
+# ⛔ The sentence a screenshot of the heatmap has to carry on its own. It is the
+# same string the tab's caveat uses, from `APP_CMAP_NOTE` in global.R, so the two
+# cannot drift -- the caption-sync bug class.
+NOTE_CMAP <- NULL   # set from APP_CMAP_NOTE at call time; see plot_constraint_map()
+
+#' Which part of the model each measurement tests
+#'
+#' ⭐ WHAT A CELL IS. The log-likelihood units one observation family moves when
+#' one part of the model moves by a step that costs EVERY part the same 0.5
+#' log-units (one conditional Hessian sd). Big = that measurement would notice;
+#' near zero = it would not.
+#'
+#' ⛔⛔ A SHARE OF A SMALL ROW IS NOT A FINDING, which is why this draws the
+#' MAGNITUDE and prints each row's total beside it rather than normalising rows to
+#' 100 %. `CO2 ice core` is 31.6 % "held by" the seasonal cycle and the whole row
+#' is worth ~11 log-units against `CO2 level`'s ~340; a row-share heatmap would
+#' have drawn those two the same colour.
+#'
+#' ⚠ SEQUENTIAL SINGLE HUE, deliberately. A magnitude with a meaningful zero and
+#' no meaningful midpoint takes a sequential ramp, and a single-hue ramp needs no
+#' dichromat receipt of its own -- it is monotone in lightness under every
+#' projection, which is the property `tools/palette_check.py` would be scoring.
+plot_constraint_map <- function(cm, level = c("component", "parameter")) {
+  level <- match.arg(level)
+  M <- if (identical(level, "component")) cm$MC else {
+    # parameters as columns, families as rows: aggregate the STREAMS only
+    out <- matrix(0, length(cm$family), ncol(cm$M),
+                  dimnames = list(names(cm$family), colnames(cm$M)))
+    for (a in seq_along(cm$family)) out[a, ] <- colSums(cm$M[cm$family[[a]], , drop = FALSE])
+    out
+  }
+  tot <- rowSums(M)
+  d <- data.frame(obs = rep(rownames(M), ncol(M)),
+                  part = rep(colnames(M), each = nrow(M)),
+                  v = as.vector(M), stringsAsFactors = FALSE)
+  # rows ordered by how much the measurement can see at all -- so the reader
+  # starts at the constraints that carry weight
+  d$obs  <- factor(d$obs,  levels = names(sort(tot)))
+  d$part <- factor(d$part, levels = colnames(M))
+  lab <- sprintf("%s  (%.0f)", levels(d$obs), tot[levels(d$obs)])
+  ggplot(d, aes(part, obs, fill = v)) +
+    geom_tile(colour = "white", linewidth = 0.4) +
+    geom_text(aes(label = ifelse(v >= 0.5, sprintf("%.0f", v), "")),
+              size = 3, colour = "white", fontface = "bold") +
+    scale_fill_gradient(low = "#f2f6f9", high = PAL[["obs"]], name = LAB_CMAP_FILL) +
+    scale_y_discrete(labels = lab) +
+    labs(x = LAB_CMAP_PART, y = LAB_CMAP_OBS,
+         subtitle = app_subtitle(paste(
+           "Darker = this measurement would notice if that part of the model",
+           "changed. The number after each measurement is its total, so a pale",
+           "row is a measurement that constrains little no matter how it splits.")),
+         caption = app_provenance_caption(APP_CMAP_NOTE)) +
+    theme_ccx() +
+    theme(axis.text.x = element_text(angle = 35, hjust = 1),
+          panel.grid = element_blank())
+}
+
+#' Where two measurements want the same parameter to go opposite ways
+#'
+#' ⭐⭐ THIS IS THE HALF THE HEATMAP CANNOT SAY. Leverage says a measurement
+#' would notice; it does not say which way it pulls. Where two families pull in
+#' OPPOSITE directions the fitted value is a compromise between them -- one degree
+#' of freedom being asked to satisfy two measurements -- and that is a statement
+#' about the model's STRUCTURE, not about its tuning.
+#'
+#' ⚠ Each bar is the family's own total log-likelihood slope, so a pair is shown
+#' only when both signs are real; a parameter every family agrees about is absent
+#' by construction rather than by a threshold.
+plot_constraint_tension <- function(tn) {
+  d <- rbind(
+    data.frame(par = tn$par, fam = tn$up,   v = tn$up_pull,   dir = KEY_CMAP_UP),
+    data.frame(par = tn$par, fam = tn$down, v = tn$down_pull, dir = KEY_CMAP_DOWN))
+  d$par <- factor(d$par, levels = rev(tn$par))
+  d$dir <- factor(d$dir, levels = c(KEY_CMAP_DOWN, KEY_CMAP_UP))
+  ggplot(d, aes(v, par, fill = dir)) +
+    geom_col(width = 0.62) +
+    geom_vline(xintercept = 0, colour = PAL[["obs"]], linewidth = 0.5) +
+    geom_text(aes(label = fam, hjust = ifelse(v > 0, -0.05, 1.05)), size = 3,
+              colour = PAL[["obs"]]) +
+    scale_fill_manual(values = stats::setNames(c(PAL[["pull_down"]], PAL[["pull_up"]]),
+                                              c(KEY_CMAP_DOWN, KEY_CMAP_UP)),
+                      name = NULL) +
+    scale_x_continuous(expand = expansion(mult = 0.35)) +
+    labs(x = LAB_CMAP_PULL, y = NULL,
+         subtitle = app_subtitle(paste(
+           "Two measurements, pulling the same knob opposite ways. The fitted",
+           "value sits between them, so neither is matched as well as it could",
+           "be on its own.")),
+         caption = app_provenance_caption(APP_CMAP_NOTE)) +
+    theme_ccx() +
+    theme(panel.grid.major.y = element_blank(), legend.position = "top")
+}
+
 plot_counterfactual <- function(base, alt, yr_range, label) {
   k <- base$t >= yr_range[1] & base$t <= yr_range[2]
   d <- rbind(

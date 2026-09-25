@@ -2,6 +2,100 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-25 (e) — **NEW TAB: "What pins down what?"** (Marcus). A MEASURED map of which part of the model each observation is actually testing, plus the half a leverage map cannot say — where two measurements pull the same number in opposite directions. ⛔⛔ **And the step Marcus ruled for was measured and REJECTED: one MARGINAL posterior sd, taken one parameter at a time, leaves the quadratic bowl entirely.**
+
+### ⛔⛔ The ruled step did not survive contact, and the rejection is itself the result
+Marcus ruled: at the canonical mode, **±1 posterior sd**, rows grouped by component. Built that
+way first. The land-uptake row came out at **8,739 log-units** for a single one-sd step, and
+**22 of 29 names** flagged outside the quadratic regime. That is not a bug — it is what the stored
+Hessian itself predicts (median **5.3** log-units, up to **4,235**) — and the reason is structural:
+
+**A MARGINAL sd already contains the compensation the other 28 parameters supply.** Moving one
+parameter that far ON ITS OWN is a completely different, and much harder, move. Measured
+marginal ÷ conditional: **median 3.3, max 92** (`fert_k` 0.5422 vs 0.0059, `beta_max` 0.4610 vs
+0.0055). The **conditional** sd, `1/sqrt(diag(-H))`, is instead an **equal-difficulty step** —
+0.5 log-units for every coordinate by construction — so a row of the map compares like with like.
+Rebuilt on it: measured drop ≈ 0.50 for every name (worst 1.52), **0 of 29 outside regime**.
+⭐ **And the rejected step is kept and reported**, because the ratio is the identifiability story:
+`beta_max` and `fert_k` are **92× freer jointly than alone**, i.e. the data pin their COMBINATION.
+
+⚠ **`md$hessian` is the Hessian of the LOG-posterior** — negative definite — so the precision
+matrix is its negation. The first attempt took `1/sqrt(diag(md$hessian))` and got NaN for all 29.
+Now stated ONCE, in a new `ccx_mode_fit_stats()` accessor, instead of being rediscovered.
+
+### What the map says, and it is not what a leverage number alone can say
+⭐ **Only 6.1 % of the leverage-weighted map is "pinning"** — a measurement sitting at its own
+optimum, so both directions are worse. **94 % is a PULL**: the measurement wants the parameter
+somewhere else. ⇒ the fitted values sit where opposing pulls cancel, and the informative cells are
+where two families pull OPPOSITE ways. Measured, the strongest:
+
+| parameter | wants it HIGHER | wants it LOWER | opposed |
+|---|---|---|---|
+| `seas_lag_p_NH` | CO₂ seasonal cycle | δ¹³C seasonal cycle | **2.34** |
+| `seas_T_amp_NH` | δ¹³C seasonal | CO₂ seasonal | 1.21 |
+| `q10` | δ¹³C seasonal | CO₂ seasonal | 1.13 |
+| `tau_ex` | CO₂ north–south gradient | δ¹³C level & gradient | 0.79 |
+| `k_w` | δ¹³C level & gradient | Δ¹⁴C in the air (bomb) | 0.66 |
+| `hs_asx_frac` | δ¹³C level & gradient | Δ¹⁴C in the air (bomb) | 0.63 |
+
+⚠ **`⛔ A CURVATURE STATISTIC WAS BUILT, SHIPPED AND REPLACED WITHIN THE HOUR.** The first
+version divided by `max|d|` and therefore fired at ratio ≈ 2 in exactly the HEALTHY case — a stream
+in a symmetric well — flagging 11 of 29 names as suspect when what it had found was curvature, the
+thing the map is FOR. **A statistic that cannot separate the healthy case from the defect is not a
+gate.** Replaced by the curvature FRACTION `|dhi+dlo| / (|dhi|+|dlo|)` in [0,1], which is the
+pins-vs-pulls axis above; the regime check is now the measured-vs-predicted drop.
+
+### The structural reading (Marcus asked for the judgment, not only the table)
+Each claim carries the number it rests on, **computed in the app from the product** so the prose
+cannot outlive the measurement:
+- **The ocean's Δ¹⁴C is a VENTILATION measurement, not an uptake measurement** — 82.5 % of what it
+  can see is the mixed layer and the mixing below it. A structural change that leaves ventilation
+  alone would barely register in the radiocarbon profile.
+- **The interior DIC/δ¹³C/alkalinity gradients are the ONLY thing watching the biological pump** —
+  74.9 % of that row, against 3.1 % of the atmospheric CO₂ level's. One constraint, on a term the
+  model leans on.
+- **The seasonal cycle is TWO constraints in tension, not one** — the CO₂ and δ¹³C seasonal cycles
+  own 63 %/67 % of their own rows and **4 of the strongest opposing pairs are seasonal parameters**.
+  The fitted phase is a compromise. (A judgment: that is what an under-parameterised seasonal scheme
+  looks like from outside.)
+- **The land's MAGNITUDE is pinned; its SHAPE is not** — 25 % of the CO₂ level and 24 % of the
+  measured budget, but `beta_max`/`fert_k` only as a combination. CO₂ fertilisation is the model's
+  only long-term land term ([[ccx_land_sink_single_term]]), so the saturation shape — the part that
+  decides the future — is the part the present-day record does not separate.
+- ⚠ **Δ¹⁴C in the air (pre-bomb) is worth 0.2 log-units against δ¹³C level's 26 — 133× less.** The
+  panel says explicitly that this CANNOT be read as "the record was not worth having": a measurement
+  that already agrees, whose information is now carried by a parameter something else holds, is flat
+  here for the same reason one that never said anything is.
+
+⛔⛔ **AND A PROSE BUG CAUGHT IN THE BROWSER, NOT BY A TEST.** The "what nothing is watching"
+sentence ranked **components**, whose bars are SUMS over their parameters — so **air-sea gas
+exchange**, a group of ONE, read as least-watched when its single parameter `k_w` has the
+**HIGHEST total leverage of all 29**. Now ranks parameters, and says why the group bars cannot be
+read that way. ⭐ *A sum is not a rate until you divide by the count.*
+
+### Built
+`calibration/diag_constraint_map.R` (4 gates: HARNESS reproduces the stored logpost, CLOSURE on the
+by-stream decomposition, COVER both ways, STEP incl. the sign convention) → `data/constraint_map.rds`;
+`plot_constraint_map()` / `plot_constraint_tension()`; the tab in `ui.R`/`server.R`; headings and the
+honesty caveat as constants in `global.R`. **58 evaluations, ~50 s.**
+⚠ **A new palette pair, scored not chosen**: `pull_up` `#b2182b` / `pull_down` `#2166ac`, minimum
+**21.2** over normal/protan/deutan/tritan against the ≥ 8 target. The obvious reuse — the land-use
+brown/teal, already scored 10.9 — was NOT used: a reader who has just learned brown = clearing two
+tabs away would read brown = wants-higher here.
+⚠ **The family names are typeset in the DIAGNOSTIC**, not mapped to pretty names in the app: a second
+naming table is the caption-sync bug class.
+
+### Gates, and the one that caught me
+`test-constraint-map.R` (143 assertions) and `test-constraint-map-panel.R` (45), mutation-tested —
+a renderPlotFit id pointed at another panel, the direction fill pair swapped, and the honesty caveat
+unplaced each FAIL. ⛔ **`test-mode-struct-lint.R` went red on my OWN new test file**, one hour after
+I fixed the same ratchet for someone else's. Fixed the same way and not by widening the baseline:
+the read moved into a new `ccx_mode_fit_stats()` resolver in `paths.R`, which is also where the
+Hessian's sign convention is now documented. ⚠ Test 6 CALLS both plot functions, because
+[[static_test_cannot_tell_you_it_runs]].
+Suite **4719 PASS / 3 FAIL** before this fix; after it, the two lint reds clear and the one
+remaining red is `test-mode-file.R:323`, NAMED RED BY RULING.
+
 ## 2026-09-25 (d) — **THE SUITE'S FOUR REDS, TAKEN ONE AT A TIME. ⛔⛔ And converting the first one found a LIVE SILENT DEFAULT in two shipped resolvers: `$` on a list PARTIAL-MATCHES, so a half-split parameter set read the OTHER HEMISPHERE as its legacy scalar and a refusal written for exactly that shape was UNREACHABLE.**
 
 ### Where the reds came from, because handoff (f) §5 had the count wrong

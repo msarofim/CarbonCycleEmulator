@@ -655,6 +655,155 @@ function(input, output, session) {
                           tags$strong("Outside the fitted range: "), note))
   })
 
+  # ---- 6. WHAT PINS DOWN WHAT? (Marcus 2026-09-25) -------------------
+  # ⚠ NOTHING IS RE-DERIVED HERE. Every number below is read or summed from
+  # data/constraint_map.rds, which calibration/diag_constraint_map.R gated. A
+  # second implementation of the same arithmetic in the app is how the land sink
+  # spent a month on a half-year offset (memory `app_sink_half_year_offset`).
+  cm_tensions <- reactive(app_cmap_tensions(APP_CMAP))
+
+  output$cm_map_ui <- renderUI({
+    if (is.null(APP_CMAP))
+      return(div(class = "caveat",
+                 "The constraint map is not built in this checkout — run",
+                 tags$code("Rscript calibration/diag_constraint_map.R"), "."))
+    tagList(
+      plotOutput("cm_map", height = "430px"),
+      div(class = "caveat", tags$strong("What this can and cannot say: "),
+          APP_CMAP_NOTE)
+    )
+  })
+
+  output$cm_map <- renderPlotFit("cm_map",
+    plot_constraint_map(APP_CMAP, input$cm_level))
+
+  output$cm_tension_ui <- renderUI({
+    tn <- cm_tensions()
+    if (is.null(tn)) return(div(class = "caveat",
+      "No opposing pair is present in this build of the map."))
+    plotOutput("cm_tension", height = "320px")
+  })
+
+  output$cm_tension <- renderPlotFit("cm_tension", plot_constraint_tension(cm_tensions()))
+
+  # The takeaway names the measurements that carry the most weight and says who
+  # holds them -- COMPUTED from the row totals and row shares, so a refit moves
+  # the sentence rather than leaving it asserting the old winner.
+  output$cm_takeaway <- renderText({
+    if (is.null(APP_CMAP)) return("")
+    tot <- sort(rowSums(APP_CMAP$MC), decreasing = TRUE)
+    top <- names(tot)[1:3]
+    who <- vapply(top, function(r) {
+      row <- APP_CMAP$MC[r, ]
+      sprintf("%s (%.0f%%)", names(which.max(row)), 100 * max(row) / sum(row))
+    }, character(1))
+    paste0("The measurements with the most to say about this model are ",
+           paste(sprintf("%s — mostly testing %s", top, who), collapse = "; "),
+           ". A measurement low on the chart is one this model could change a",
+           " good deal without contradicting.")
+  })
+
+  output$cm_pin_note <- renderText({
+    if (is.null(APP_CMAP)) return("")
+    sprintf(paste("Measured here: only %.0f%% of the sensitivity in this map is of",
+                  "the pinning kind. Almost everything is a pull, so the fitted",
+                  "numbers sit where opposing pulls cancel rather than where any",
+                  "one measurement would put them."),
+            100 * APP_CMAP$pin_share)
+  })
+
+  # ⭐⭐ THE STRUCTURAL READING (Marcus asked for the qualitative judgment, not
+  # only the parameter table). Each claim is a JUDGMENT about the model's shape,
+  # and each one carries the number it rests on, COMPUTED from the map here so
+  # the prose cannot outlive the measurement. ⚠ Where a claim is a judgment
+  # rather than a measurement, it says so in its own words.
+  output$cm_structure_ui <- renderUI({
+    if (is.null(APP_CMAP)) return(NULL)
+    MC <- APP_CMAP$MC
+    sh <- function(row, col) 100 * MC[row, col] / sum(MC[row, ])
+    tn <- cm_tensions()
+    seas <- if (is.null(tn)) NULL else tn[grepl("seasonal", tn$up) | grepl("seasonal", tn$down), ]
+    tot <- rowSums(MC)
+    # ⛔⛔ PER PARAMETER, NOT PER COMPONENT. A component's total is a SUM over its
+    # parameters, so a component holding ONE parameter looks "unwatched" beside
+    # one holding seven, however hard its parameter is pinned -- and the first
+    # draft of this sentence said exactly that about air-sea gas exchange, whose
+    # single parameter `k_w` has the HIGHEST total leverage of all 29. A sum is
+    # not a rate until you divide by the count.
+    par_tot <- sort(colSums(APP_CMAP$M))
+    quiet <- names(par_tot)[1:3]
+    tagList(
+      p(tags$strong("The ocean's Δ¹⁴C is a ventilation measurement, not an uptake",
+                    "measurement. "),
+        sprintf(paste("%.0f%% of everything the ocean's Δ¹⁴C can see is the mixed",
+                      "layer and the vertical mixing below it."),
+                sh("Δ¹⁴C in the ocean", "Mixed layer & vertical mixing")),
+        " That is the useful reading and also the limiting one: a change to the",
+        " ocean's structure that leaves its ventilation rate alone would barely",
+        " register in the radiocarbon profile at all."),
+      p(tags$strong("The interior chemistry is the only thing watching the",
+                    "biological pump. "),
+        sprintf(paste("%.0f%% of what the interior DIC, δ¹³C and alkalinity",
+                      "gradients can see is the pump, and the pump is nearly",
+                      "invisible everywhere else (%.0f%% of the atmospheric CO₂",
+                      "level's sensitivity)."),
+                sh("Ocean interior chemistry", "Biological pump"),
+                sh("CO₂ level", "Biological pump")),
+        " So those bottle data are the one constraint that would notice the pump",
+        " being restructured — and they are also the only one, which is a thin",
+        " basis for a term the model leans on."),
+      p(tags$strong("The seasonal cycle is two constraints in tension, not one. "),
+        sprintf(paste("The seasonal CO₂ cycle and the seasonal δ¹³C cycle account",
+                      "for %.0f%% and %.0f%% of their own rows, so between them they",
+                      "own the seasonal machinery — and they disagree about it:"),
+                sh("CO₂ seasonal cycle", "Seasonal cycle"),
+                sh("δ¹³C seasonal cycle", "Seasonal cycle")),
+        if (!is.null(seas) && nrow(seas))
+          sprintf(" %s of the strongest opposing pairs are seasonal parameters (%s).",
+                  nrow(seas), paste(seas$par, collapse = ", ")) else NULL,
+        " The fitted phase and amplitude are a compromise between the two tracers.",
+        " A judgment, not a measurement: that is what an under-parameterised",
+        " seasonal scheme looks like from the outside — one knob per hemisphere",
+        " where two tracers want two different answers."),
+      p(tags$strong("The land's magnitude is well constrained; its SHAPE is not. "),
+        sprintf(paste("Land uptake takes %.0f%% of the CO₂ level's sensitivity and",
+                      "%.0f%% of the measured budget's, so how much carbon the land",
+                      "takes up today is pinned hard."),
+                sh("CO₂ level", "Land uptake"), sh("Measured land & ocean sinks", "Land uptake")),
+        sprintf(paste(" But the two numbers that set it are only pinned as a",
+                      "COMBINATION: on their own each is about %.0fx tighter than",
+                      "the fit leaves the pair jointly."),
+                max(APP_CMAP$sd_ratio[c("beta_max", "fert_k")])),
+        " CO₂ fertilisation is this model's only long-term land-uptake term, so",
+        " the saturation shape — the part that decides the future — is exactly",
+        " the part the present-day record does not separate."),
+      p(tags$strong("And what nothing much is watching. "),
+        sprintf(paste("The individual numbers the measurements can least see are",
+                      "%s. That is not a defect on its own — a number nothing",
+                      "measures may still be right — but it does mean the",
+                      "observations cannot tell you whether it is."),
+                paste(quiet, collapse = ", ")),
+        " ⚠ Asked of the parameters, not of the eight groups: a group's bar is",
+        " a SUM over the parameters in it, so the group holding a single",
+        " parameter looks quiet however hard that parameter is pinned.",
+        sprintf(paste(" ⚠ Read the row totals, not just the colours: the strongest",
+                      "row here is worth %.0f log-units and the weakest %.1f, so a",
+                      "bright cell in a weak row is a large share of very little."),
+                max(tot), min(tot))),
+      p(tags$strong("And the measurement with the least to say, which needs care. "),
+        sprintf(paste("%s is worth %.1f log-units against %s's %.0f \u2014 about %.0f",
+                      "times less. \u26a0 That does NOT mean the record was not worth",
+                      "having."),
+                names(which.min(tot)), min(tot), names(which.max(tot)), max(tot),
+                max(tot) / max(min(tot), 1e-6)),
+        " Leverage is measured HERE, at the fitted values. A measurement that",
+        " already agrees, and whose information is carried by a parameter that",
+        " something else now holds, shows up flat \u2014 the same reading as a",
+        " measurement that never said anything. This map cannot tell those two",
+        " apart, and it is the one thing it should not be used to argue.")
+    )
+  })
+
   # ---- 6. Under the hood ---------------------------------------------
   # The box diagram. ARROWS CARRY THEIR FLUXES (2026-08-13): unlabelled arrows
   # were the single biggest pedagogical gap in the app -- the entire

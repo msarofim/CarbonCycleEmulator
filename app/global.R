@@ -416,6 +416,9 @@ APP_SSP_EMIS <- as.data.frame(
 # class the project keeps hitting, so the string lives here and neither file
 # retypes it. ⛔ test-luc-regrowth-panel.R asserts ui.R uses the constants
 # rather than literals.
+APP_CMAP_TAB      <- "What pins down what?"
+APP_CMAP_HEADING  <- "Which part of the model does each measurement test?"
+APP_CMAP_TENSION_HEADING <- "Where the measurements disagree"
 APP_REGROWTH_HEADING  <- "Forest regrowth, on its own"
 APP_IMBALANCE_HEADING <- "Is the model's land sink too high?"
 
@@ -428,6 +431,64 @@ takeaway <- function(...) div(class = "takeaway", ...)
 
 info_box <- function(title, ...) {
   tags$details(class = "moreinfo", tags$summary(title), div(...))
+}
+
+# ---- THE CONSTRAINT MAP (Marcus 2026-09-25) -------------------------
+# Built by calibration/diag_constraint_map.R, which is where every
+# methodological choice behind it is argued. Conditional on the file existing so
+# a checkout without it still renders, exactly as APP_LUC_SPLIT is.
+# ⚠ NOTHING IS RE-DERIVED HERE. The shares, the ordering and the tension pairs
+# below are read or summed from the product, so the app cannot disagree with the
+# diagnostic that produced it.
+APP_CMAP <- local({
+  f <- file.path(CCX_ROOT, "data", "constraint_map.rds")
+  if (!file.exists(f)) return(NULL)
+  readRDS(f)
+})
+
+# The sentence that keeps the map honest, printed on the chart AND asserted by
+# test-constraint-map-panel.R.
+APP_CMAP_NOTE <- paste(
+  "Leverage at ONE parameter set — the fitted mode — for a step of one",
+  "conditional Hessian standard deviation, which costs every parameter the same",
+  "0.5 log-units. It says which measurements would NOTICE a change, not what a",
+  "different model structure would do.")
+APP_CMAP_SD_NOTE <- paste(
+  "The step is a Laplace (Hessian) standard deviation at the mode, not a sampled",
+  "posterior — this model has no sampled posterior.")
+
+# Which family each parameter belongs to, as a lookup for the parameter-level view.
+APP_CMAP_OF_PAR <- if (is.null(APP_CMAP)) NULL else {
+  stats::setNames(rep(names(APP_CMAP$component), lengths(APP_CMAP$component)),
+                  unlist(APP_CMAP$component, use.names = FALSE))
+}
+
+#' The strongest opposing pair of observation families for each parameter
+#'
+#' ⭐ THIS IS THE "HOW" THE MAP ON ITS OWN CANNOT SAY. A leverage number says a
+#' measurement would notice a parameter move; it does not say WHICH WAY the
+#' measurement wants it. Where two families want opposite directions, the fitted
+#' value is a compromise between them, and that is a structural statement about
+#' the model: one degree of freedom is being asked to satisfy two measurements.
+#' ⚠ Uses the product's own signed central slope; nothing is re-simulated.
+app_cmap_tensions <- function(cm = APP_CMAP, n = 6L) {
+  if (is.null(cm)) return(NULL)
+  fam <- cm$family
+  # family-level signed slope: sum over the family's streams, which is the
+  # derivative of the family's own total log-likelihood
+  S <- vapply(fam, function(ss) colSums(cm$SLOPE[ss, , drop = FALSE]), numeric(ncol(cm$SLOPE)))
+  out <- do.call(rbind, lapply(rownames(S), function(par) {
+    v <- S[par, ]
+    hi <- names(which.max(v)); lo <- names(which.min(v))
+    # an OPPOSED pair only: both signs must be real, or there is no disagreement
+    if (v[[hi]] <= 0 || v[[lo]] >= 0) return(NULL)
+    data.frame(par = par, component = APP_CMAP_OF_PAR[[par]],
+               up = hi, up_pull = v[[hi]], down = lo, down_pull = v[[lo]],
+               opposed = min(v[[hi]], -v[[lo]]), stringsAsFactors = FALSE)
+  }))
+  if (is.null(out) || !nrow(out)) return(NULL)
+  out <- out[order(-out$opposed), , drop = FALSE]
+  utils::head(out, n)
 }
 
 APP_LUC_SPLIT <- local({

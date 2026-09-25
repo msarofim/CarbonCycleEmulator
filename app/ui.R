@@ -496,6 +496,60 @@ navbarPage(
     )
   ),
 
+  # ---- 6. What pins down what? (Marcus 2026-09-25) --------------------
+  # It goes immediately BEFORE "Under the hood", because that tab says what the
+  # model IS and the review tab says what is unsettled about it -- this one is
+  # the bridge: which of the model's parts each measurement is actually testing.
+  # ⚠ EVERY heading and caveat string comes from global.R, never a literal here:
+  # ui.R renders and server.R quotes, and a rename must not be able to orphan the
+  # prose silently (test-constraint-map-panel.R asserts the constants are used).
+  tabPanel(
+    APP_CMAP_TAB,
+    sidebarLayout(
+      sidebarPanel(
+        width = 3,
+        radioButtons("cm_level", "Show",
+                     choices = c("Parts of the model" = "component",
+                                 "Individual parameters" = "parameter"),
+                     selected = "component"),
+        info_box("How this is measured",
+                 p("Each of the model's adjustable numbers is nudged, and we record",
+                   "how much worse each measurement's fit becomes. A measurement",
+                   "that barely moves is not testing that part of the model."),
+                 p("Every nudge is the same SIZE in a meaningful sense: it costs",
+                   "the fit as a whole the same amount (half a log-likelihood",
+                   "unit). So the rows of the chart can be compared with each",
+                   "other rather than only read one at a time."),
+                 p(APP_CMAP_SD_NOTE)),
+        info_box("Pinned, or pulled?",
+                 p("A measurement can be sensitive to a parameter in two",
+                   "different ways. It can sit at its own best value, so moving",
+                   "the parameter either way makes it worse — that measurement is",
+                   tags$em("pinning"), "the parameter. Or it can want the",
+                   "parameter somewhere else entirely, so one direction improves",
+                   "it — that measurement is", tags$em("pulling"), "on it."),
+                 p(textOutput("cm_pin_note", inline = TRUE)))
+      ),
+      mainPanel(
+        width = 9,
+        h5(APP_CMAP_HEADING),
+        takeaway(textOutput("cm_takeaway", inline = TRUE)),
+        uiOutput("cm_map_ui"),
+        hr(),
+        h5(APP_CMAP_TENSION_HEADING),
+        p("Almost nothing here is pinned by a single measurement. The fitted",
+          "values sit where the pulls cancel, and the most informative thing the",
+          "map contains is where two measurements pull the same parameter in",
+          tags$em("opposite"), "directions — because then one number in the model",
+          "is being asked to satisfy two observations at once."),
+        uiOutput("cm_tension_ui"),
+        hr(),
+        h5("What this says about the model's structure"),
+        uiOutput("cm_structure_ui")
+      )
+    )
+  ),
+
   # ---- 6. Under the hood ---------------------------------------------
   tabPanel(
     "Under the hood",

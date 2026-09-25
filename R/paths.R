@@ -586,6 +586,36 @@ ccx_mode_pinned <- function(md) {
   any(!names(pins) %in% inert)
 }
 #' The pins a mode file was fitted under (NULL = a free arm). Read, never inferred.
+#' The file's FIT DIAGNOSTICS: the Hessian at the mode and what derives from it
+#'
+#' ⚠ THE SIGN CONVENTION IS THE POINT OF THIS ACCESSOR. `md$hessian` is the
+#' Hessian of the LOG-POSTERIOR, so it is NEGATIVE definite and the PRECISION
+#' matrix is its negation. Discovered by experiment on 2026-09-25 -- the first
+#' attempt at the constraint map took `1/sqrt(diag(md$hessian))` and got NaN for
+#' all 29 names -- and now stated once, here, rather than rediscovered.
+#'
+#' `sd` is the MARGINAL standard deviation, `sqrt(diag(solve(-H)))`, which is
+#' what the file already stores as `sd_unc`. ⛔ It is NOT the right step for a
+#' ONE-AT-A-TIME perturbation: it already contains the compensation the other
+#' parameters supply, so moving one parameter that far alone leaves the
+#' quadratic bowl (measured: marginal/conditional reaches 92, and the predicted
+#' drop 4235 log-units). For that, use `sd_conditional = 1/sqrt(diag(-H))`,
+#' which costs every coordinate the same 0.5 log-units.
+#'
+#' ⚠ Exists so that consumers which need the FIT's statistics -- and not a
+#' parameter list, so `ccx_mode_base()` would be meaningless to them -- do not
+#' have to `readRDS(ccx_mode_file())` by hand. That read is what
+#' test-mode-struct-lint.R ratchets down, and satisfying that lint by calling
+#' `ccx_mode_base()` for a list nobody uses would be gaming it.
+ccx_mode_fit_stats <- function(md = CCX_MODE_CANONICAL) {
+  if (is.character(md)) md <- readRDS(ccx_mode_file(md))
+  negH <- -md$hessian
+  list(hessian = md$hessian, precision = negH,
+       sd = md$sd_unc, sd_conditional = 1 / sqrt(diag(negH)),
+       cov = md$cov, pd = md$pd, eigen = md$eigen,
+       param_names = md$param_names, logpost = md$logpost)
+}
+
 ccx_mode_pins <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   md$pins
