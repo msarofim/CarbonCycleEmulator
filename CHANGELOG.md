@@ -2,6 +2,153 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-25 (j) — **Marcus's comment doc worked: 10 of 13 items shipped.** The "What if…?" tab goes MULTI-SELECT, the constraint-map page is reframed from *testing* to *influence*, and driving the new tab turned up a sentence that read "these switches did nothing" when they plainly did. ⚠ Two items still owed his copy; one item deliberately deleted a gate leg.
+
+Source: `carbotopecomments.9.25.26.docx` (body text, not tracked comments — no `word/comments.xml`).
+
+### 1. "What pins down what?" — one reframing in seven places (his paras 10–14)
+The page said measurements **test** the model; it now says which parts of the model **influence**
+the measured values. ⭐ **His framing is closer to the arithmetic than mine was**: the map nudges a
+parameter and re-scores each observable, which is a sensitivity of the metric to the model, not a
+test of the model by the metric.
+
+| was | is |
+|---|---|
+| "Which part of the model does each measurement test?" | "Which parts of the model have the most influence on measured values?" |
+| "The measurements with the most to say about this model are…" | "The metrics most sensitive to changes in this model are…" |
+| "…mostly testing High-latitude structure (22%)" | "…mostly influenced by High-latitude structure (22%)" |
+| "the only thing **watching** the biological pump" | "the only thing **influenced by** the biological pump" |
+| "…the one constraint that would notice the pump being restructured — and they are also the only one, which is a thin basis for a term the model leans on" | "The pump is necessary for matching these bottle data, even though it turns out that the pump has little influence on the rest of the system" |
+
+⚠ **The pump sentence drops a criticism.** Mine called a single constraint on a leaned-on term "a
+thin basis"; his does not. Used as supplied — it is his page — and recorded here because the
+retired clause was the only place that flag appeared.
+
+### 2. ⛔ A DELETION THAT TOOK A GATE LEG WITH IT (his para 16)
+`APP_CMAP_SD_NOTE` — *"The step is a Laplace (Hessian) standard deviation at the mode, not a sampled
+posterior"* — deleted on his instruction. It was **also** leg 4 of `test-constraint-map-panel.R`
+test 3, which exists because the app makes claims it cannot itself check. **The leg is retired with
+the string rather than left passing on text the app no longer prints**, and the test header says so.
+⭐ **The FACT is unchanged** — the step is still a conditional Hessian sd, recorded in the product's
+own `sd_kind` by `diag_constraint_map.R`. The app simply no longer says it out loud.
+
+### 3. ⛔⛔ A LITERAL GUARD THAT NAMED THE THING IT GUARDED, AND A THIRD SELF-MATCHING TEXT GATE
+The guard forbidding ui.R from retyping the heading spelled the **old heading's text** in its own
+pattern (`'h5\\("Which part of the model'`). Rewording the heading would have left it passing while
+guarding nothing — [[gate_only_guards_what_it_lists]]. It now **reads the literal out of `global.R`**,
+so a reword re-keys it automatically.
+
+⚠ **And the raw-line form of that derived guard failed the moment it was written** — on ui.R's own
+section comment `# ---- 6. What pins down what?`, which contains the tab's name. **Third instance in
+two sessions** of a text gate matching its own comment ([[text_gate_matches_its_own_comment]]).
+⇒ the quote-aware stripper is now **shared**: `tests/testthat/helper-code-lines.R`, with
+`test-ui-year-bounds-lint.R` and `test-imbalance-panel.R` rewired off their byte-alike copies. It
+carries its own test 0 (including the hex-colour case a naive `sub("#.*", "")` eats) and asserts its
+stated limitation — no escaped or single-quoted strings in the files it is pointed at.
+**Both mutations confirmed to fail**: retyping the heading in ui.R, and breaking the quote-awareness.
+
+### 4. The "What if…?" tab is MULTI-SELECT (his para 2)
+He asked whether it would work. **It already did** — `ccx_apply_mechanisms()` has always taken a
+vector and folded the switches in order, and the order cannot matter because the seven switches
+touch disjoint parameters and disjoint forcing columns. The change is `radioButtons` →
+`checkboxGroupInput` plus the nine server sites that indexed `CCX_MECHANISMS` by a scalar.
+
+Per **his own fallback** ("print more than 1 text box below"), each ticked switch gets its own
+**labelled** block rather than a tooltip — hover text would have hidden the caveats on touch devices,
+and the caveats are what stop misreadings.
+
+⛔⛔ **NOTHING ADDS THE PER-SWITCH CLAIMS UP.** Each blurb quotes its own effect and they do **not**
+compose: ENSO −23 %, temperature −22 %, volcanic light −8 %, but **all three together only −43 %**.
+Every printed number is computed from the **combined** run, and above one switch the scatter note
+says in words that they do not add. Measured live: fertilisation + ENSO + volcanic = **41 % less
+scatter**, not the sum.
+
+Also: zero selected is a legitimate state (the full model against the measurements), so
+`plot_counterfactual()` takes `alt = NULL` as `plot_growth_rate()` already did; **one driver chart
+per ticked switch that has one**, the parameter-only switches sharing a sentence. ⭐ Handing each
+driver panel the **combined** forcing is right, not merely safe — each driver's column is touched by
+at most its own switch.
+
+### 5. ⛔⛔ A ZERO *LEVEL* DIFFERENCE IS NOT A ZERO EFFECT — found by driving the new tab
+Tick El Niño and volcanic haze together and the takeaway read:
+
+> "CO₂ today would be 425 ppm instead of 425 — a difference of **+0 ppm**"
+
+which reads as *these switches did nothing*. **Measured in that exact state they plainly do
+something**: year-to-year scatter **0.27 → 0.15 ppm/yr (43 % less)**, the residual against the record
+**26 % worse**, worst year **1991 — Pinatubo**. Both switches are interannual *by construction*, so a
+level effect of ~0 is the **right answer under the wrong sentence**. The takeaway now names that case
+and points at the growth-rate panel that exists to show it.
+
+⚠ **The threshold is DERIVED FROM THE FORMAT, not picked**: `TAKEAWAY_PPM_RESOLUTION` is 0.5 ppm
+because the sentence's own `%.0f` prints "+0" below that — the point at which the numeric form stops
+saying anything. Change the format and the threshold moves with it.
+⚠ It **pre-dated** the multi-select (enso or volcanic alone did the same); a radio button made it a
+corner, a checkbox group makes it easy to land on.
+
+### 6. The residual strip (his para 3)
+"Is the difference between observed and model added to the 2nd panel possible?" — yes.
+**Its own strip under the growth chart, not on its axes**: residuals run about ±0.5 ppm/yr against a
+growth rate of 0–3 and would be a flat squiggle on a shared axis. Same window, same estimators
+(`app_annual_growth` / `app_obs_growth`) as the panel above it, so the two cannot come to describe
+different years. ⛔ **Sign convention is on the axis label** — *model − measured* — because
+"difference" alone is resolved the wrong way round half the time.
+
+### 7. The ENSO switch now says the temperature half keeps running (his para 4)
+**Measured in the file, not recalled**: `enso$apply` sets `gamma_enso` to 0 and touches nothing else,
+so the prescribed `gmst`/`sst_anom` drivers still carry every El Niño's temperature signature and the
+carbon cycle's response to it runs through the **separate** "Warming's effect on the carbon cycle"
+switch. ⭐ Structurally the same split `volcanic` already discloses, so it is written in the same
+shape and names the same sibling.
+
+### 8. The pulse-lab permanence box (his para 8)
+⚠ **THE PROSE IS A PLACEHOLDER FOR MARCUS** — listed as owed copy alongside the "Build your own"
+sentence. The **numbers are measured** from the two runs the reader just triggered: at the defaults
+**0.108 °C a century later from 100 GtC = 1.08 °C per 1000 GtC**, and **70 % of peak warming still
+present at 2300**.
+⛔ **Deliberately NOT called TCRE** — that is defined for cumulative emissions along a transient
+pathway, and this is a pulse laid on top of a scenario (the numerator of an AGTP). Naming it TCRE
+would be the like-for-like error the standing rule exists to stop.
+⚠ **Worth Marcus's eye**: 1.08 °C/1000 GtC is on the **low side**. My recollection of AR6's TCRE is
+a best estimate near 1.65 with a likely range 1.0–2.3 °C/1000 GtC — *recollection, not a citation* —
+which would put this at the bottom of the range. It is also not the same quantity, so the comparison
+is indicative only. **Not chased.**
+
+### 9. The imbalance band's premise, in his words (his para 6)
+"The shaded band **in the figure below** is that leftover carbon **under the assumption that all of
+it is assigned to land uptake**."
+
+**And the answer to the question he asked alongside it** — *what do we do in the calibration with the
+GCB data? Is it a prior on the land/ocean ratio, with uncertainty encompassing budget closure?*
+**No, on both counts.** `R/likelihood.R` scores **two independent Gaussian rows on the LEVELS**, year
+by year over 1959–2024:
+
+| row | compared against | sigma |
+|---|---|---|
+| `gcb_ocean_sink` | model calendar-year ocean flux | **0.4 GtC/yr** (`LIK_GCB_OCEAN_SD`) |
+| `gcb_land_sink` | model land flux **+ the model's own LUC emission** | **0.5 GtC/yr** (`LIK_GCB_LAND_SD` × `LIK_LAND_SINK_INFLATE` = 1.0) |
+| `gcb_ocean_enso_slope` | the ocean sink's ENSO regression slope | the observed slope's own s.e. (objective #13) |
+
+Both sigmas are **GCB 2025's own stated per-sink 1σ**, quoted from the file header. There is **no
+ratio term**, and **no term whose sigma encompasses the budget's unclosed imbalance** — that
+imbalance is a different quantity from the ±0.4/±0.5, which is exactly why the band needs its own
+panel. ⚠ `LIK_LAND_SINK_INFLATE` went **3.0 → 1.0** on 09-16 (d); the known consequence is the land
+sitting **+1.0 GtC/yr over GCB 2015–24, z = +2.0** at the bare sigma — the number the imbalance panel
+is about.
+
+### Still owed, both Marcus's
+1. **His copy for the "Build your own" placeholder** (unchanged from (i) §1a) **and now also for the
+   pulse-permanence box** — he ruled "I draft, you edit" on the second.
+2. **Whether to push.** CCX `main` is **12 commits ahead of `origin/main`**, tree clean.
+
+### Not done this session, and why
+- **`diag_app_params.R:52`'s third copy of the year span** — carried over from (i) §1(b)1.
+- **Axis labels and legend titles are still unmeasured** against their panels ((i) §1c). ⚠ The new
+  multi-select legend key was written short **because** of this — `app_mech_key()` returns
+  "Without *N* mechanisms" above one switch rather than concatenating labels, which would have been
+  100+ characters into a legend `app_text_px()` has to fit.
+- **`INDEX_ccx_app.md` is over its soft budget** (14,515 B of 14,336; hard 18,432).
+
 ## 2026-09-25 (i) — **All four static findings from (g) §1(b) FIXED on Marcus's ruling, and three of the four were WORSE than the review recorded.** The NaN question is answered; both Rplots.pdf are untracked. ⚠ The §1(a) placeholder sentence is STILL Marcus's to write.
 
 ### ⭐⭐ THE PATTERN OF THE SESSION: every finding grew when it was MEASURED rather than re-read
