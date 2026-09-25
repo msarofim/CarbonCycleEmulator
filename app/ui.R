@@ -144,8 +144,17 @@ navbarPage(
     sidebarLayout(
       sidebarPanel(
         width = 3,
-        sliderInput("k_years", "Years shown", min = 1750, max = 2024,
-                    value = c(1958, 2024), step = 1, sep = ""),
+        # ⛔ THE BOUNDS DERIVE FROM APP_HIST_YEARS, THEY ARE NOT TYPED (2026-09-25).
+        # All four "Years shown" sliders hardcoded min = 1750, max = 2024 against
+        # global.R's APP_HIST_YEARS -- whose own header says that changing a window
+        # "cannot leave a stale label behind". A GCB update to 2025 would have moved
+        # the run span and silently capped FOUR tabs at the old end year, with no
+        # error and no visible symptom beyond a slider that will not reach the last
+        # year of data. The START of each range stays a literal: those are per-tab
+        # editorial choices (Keeling 1958, the bomb spike 1940), not this fact.
+        sliderInput("k_years", "Years shown",
+                    min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
+                    value = c(1958, APP_HIST_YEARS[2]), step = 1, sep = ""),
         radioButtons("k_hemi", "Hemisphere",
                      c("Both" = "both", "Northern only" = "NH",
                        "Southern only" = "SH")),
@@ -184,8 +193,9 @@ navbarPage(
     sidebarLayout(
       sidebarPanel(
         width = 3,
-        sliderInput("w_years", "Years shown", min = 1750, max = 2024,
-                    value = c(1850, 2024), step = 1, sep = ""),
+        sliderInput("w_years", "Years shown",
+                    min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
+                    value = c(1850, APP_HIST_YEARS[2]), step = 1, sep = ""),
         info_box("What the numbers mean",
                  p(gloss("GtC", "gigatonnes of carbon: a billion tonnes"),
                    " is the unit. One GtC is about 3.7 billion tonnes of CO₂."),
@@ -272,8 +282,9 @@ navbarPage(
         width = 3,
         p(tags$strong("Switch a mechanism off"), " and the model reruns without it."),
         radioButtons("c_mech", NULL, choices = ccx_mechanism_choices()),
-        sliderInput("c_years", "Years shown", min = 1750, max = 2024,
-                    value = c(1850, 2024), step = 1, sep = ""),
+        sliderInput("c_years", "Years shown",
+                    min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
+                    value = c(1850, APP_HIST_YEARS[2]), step = 1, sep = ""),
         uiOutput("c_blurb")
       ),
       mainPanel(
@@ -336,8 +347,9 @@ navbarPage(
     sidebarLayout(
       sidebarPanel(
         width = 3,
-        sliderInput("i_years", "Years shown", min = 1750, max = 2024,
-                    value = c(1940, 2024), step = 1, sep = ""),
+        sliderInput("i_years", "Years shown",
+                    min = APP_HIST_YEARS[1], max = APP_HIST_YEARS[2],
+                    value = c(1940, APP_HIST_YEARS[2]), step = 1, sep = ""),
         # I1 (Marcus 2026-09-22): the same control the Keeling tab has. The
         # north-south difference is discussed on this tab and was never drawn.
         radioButtons("i_hemi", "Hemisphere (\u03b4\u00b9\u00b3C)",
