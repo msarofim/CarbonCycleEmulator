@@ -450,6 +450,12 @@ app_mech_list <- function(off) {
   paste(paste(utils::head(lb, -1L), collapse = ", "), "and", utils::tail(lb, 1L))
 }
 
+# The resolution of the "What if...?" takeaway's ppm sentence. ⚠ It is the
+# rounding of that sentence's OWN "%.0f", not a tolerance: below this the
+# numeric form prints "+0" and has to be replaced by words. Standing rule --
+# labels derive from named constants (~/.claude/CLAUDE.md).
+TAKEAWAY_PPM_RESOLUTION <- 0.5
+
 #' The legend key for the counterfactual line: short by construction
 app_mech_key <- function(off) {
   if (!length(off)) return("Without: nothing")

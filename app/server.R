@@ -603,6 +603,26 @@ function(input, output, session) {
                            "model does without it."), a$co2_global[i]))
     b <- cf_alt()
     d <- b$co2_global[i] - a$co2_global[i]
+    # ⛔⛔ A SWITCH WITH NO EFFECT ON THE LEVEL IS NOT A SWITCH WITH NO EFFECT,
+    # and until 2026-09-25 this sentence could not tell the reader apart from
+    # the other. Tick El Nino and volcanic haze together and it printed "CO2
+    # today would be 425 ppm instead of 425 — a difference of +0 ppm", which
+    # reads as "nothing happened". MEASURED in that state: the year-to-year
+    # scatter drops 0.27 -> 0.15 ppm/yr (43 % less) and the residual against the
+    # record worsens 26 %, with 1991 — Pinatubo — as the worst year. Both
+    # switches are interannual by construction, so a level of ~0 is the RIGHT
+    # answer and the wrong sentence.
+    #
+    # ⚠ THE THRESHOLD IS DERIVED FROM THE FORMAT, NOT PICKED. Below half a ppm
+    # the "%.0f" above prints "+0", so half a ppm is exactly the point at which
+    # the numeric sentence stops saying anything — no hand-chosen tolerance is
+    # involved, and changing the format changes the threshold with it.
+    if (abs(d) < TAKEAWAY_PPM_RESOLUTION)
+      return(sprintf(paste("With %s switched off, CO₂ today is unchanged to the",
+                           "nearest ppm — these are year-to-year mechanisms, and",
+                           "they move the wobble rather than the level. The",
+                           "growth-rate chart below is where they show up."),
+                     app_mech_list(off)))
     sprintf(paste("With %s switched off, CO₂ today would be %.0f ppm instead of",
                   "%.0f — a difference of %s%.0f ppm."),
             app_mech_list(off), b$co2_global[i], a$co2_global[i],
