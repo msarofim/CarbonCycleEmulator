@@ -249,10 +249,37 @@ test_that("the REAL 08-30 arm files MIGRATE, and REFUSE to encode", {
     # ...and the migrated vector is RUNNABLE but NOT ENCODABLE, by name.
     expect_identical(mig$ent_seas_amp_SH, 0)
     expect_error(ccx_par_to_unc(mig), "ent_seas_amp_SH")
-    # SEEDED at its table init, the same vector encodes finitely -- which is the
-    # separation `ccx_seed_unencodable()` exists to make: the migration says what
-    # the ancestor RAN, the seeder says where a SEARCH begins.
-    seeded <- mig; seeded$ent_seas_amp_SH <- CCX_PARAM_TABLE$ent_seas_amp_SH$init
+    # SEEDED, the same vector encodes finitely -- which is the separation
+    # `ccx_seed_unencodable()` exists to make: the migration says what the
+    # ancestor RAN, the seeder says where a SEARCH begins.
+    # ⚠ SEED THROUGH THE FUNCTION, NOT BY NAME (fixed 2026-09-25). Hand-seeding
+    # `ent_seas_amp_SH` alone was correct when written and went STALE as the ocean
+    # structure entered the table: this ancestor now has TEN migrated names the
+    # transforms cannot encode (kz_deep_frac, w_eq, gamma_eq, pump_export, w_vent,
+    # gamma_vent, w_thc, w_enso_l2, pump_hs_gcm2, ent_seas_amp_SH), so the
+    # assertion had been failing on the NINE the line did not name.
+    # [[stale_fixture_repair]]: a fixture that names its own members goes stale
+    # exactly when the set grows.
+    seeded <- ccx_seed_unencodable(mig, "test-seas-lag-split")
+    # ⭐ AND THE SEEDER DOES NOT NECESSARILY FINISH THE JOB, WHICH IS THE OTHER
+    # FINDING: it seeds what the MIGRATION filled (the ancestor held no opinion
+    # there). A name the ancestor DID hold an opinion about, at a value now
+    # outside its BOUND, is left exactly as stored -- `from90` carries one
+    # (`h_ml` = 35.2523 against a 42.5-200 logit bound), so the BOUND moved under
+    # a stored vector. ⚠ MEASURED PER ARM, NOT HARDCODED: `pin90` does not carry
+    # it, and naming h_ml here would fail on that arm -- the first draft of this
+    # repair did exactly that.
+    left <- Filter(function(n) !is.finite(suppressWarnings(
+                     .to_unc(seeded[[n]], CCX_PARAM_TABLE[[n]]))),
+                   intersect(CCX_PARAM_NAMES, names(seeded)))
+    cat(sprintf("  [%s] unencodable after seeding: %s\n", arm,
+                if (length(left)) paste(left, collapse = ", ") else "none"))
+    if (length(left)) {
+      # runnable and STILL not a point of the fitted space -- and the encoder must
+      # say which coordinate, not return a silent -Inf (the 09-03 hardening)
+      for (n in left) expect_error(ccx_par_to_unc(seeded), n, fixed = TRUE)
+      for (n in left) seeded[[n]] <- CCX_PARAM_TABLE[[n]]$init
+    }
     expect_true(all(is.finite(ccx_par_to_unc(seeded))))
   }
 })
