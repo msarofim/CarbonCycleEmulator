@@ -63,15 +63,24 @@ LAB_PULSE_AIRBORNE <- "Share of the pulse still in the air"
 LAB_PULSE_WARMING  <- "Extra warming caused by the pulse (°C)"
 # Named because this series has TWO possible observational sources and the panel
 # must say which it drew -- see plot_growth_rate().
-KEY_GROWTH_OBS  <- "Measured (Global Carbon Budget)"
+KEY_GROWTH_OBS  <- "Measured (NOAA global marine reference)"
 # ⛔ The sentence that keeps plot_pulse_partition() honest. See its roxygen.
 PULSE_PARTITION_NOTE <- paste("This is how much EXTRA carbon each reservoir holds because of",
                               "the pulse \u2014 the difference between running with it and",
                               "without. It is not a trace of where those particular molecules",
                               "went, which is a different question with a different answer.")
-GROWTH_UNIT_NOTE <- paste("Annual means differenced. Measured growth is the Global Carbon",
-                          "Budget's atmospheric growth, converted GtC/yr ÷", 
-                          "GtC per ppm. Review card 4 scores the same series in GtC/yr.")
+# \u26d4 THIS CAPTION USED TO BE FALSE OF HALF ITS OWN CHART. It said "annual
+# means differenced" while the MEASURED series was GCB's `atm_growth` -- NOAA's
+# published Jan-to-Jan `co2_gr_gl`, a different estimator. Fixed 2026-09-26; the
+# argument is in data-raw/build_mbl_global_growth.R.
+# \u26a0 STATES THE CURRENT METHOD, not its history (the standing rule on
+# reader-facing copy). It names the source because this series has two possible
+# ones and review card 4 uses the other -- that is a live disambiguation, not a
+# correction notice. The argument for the change is in the build script.
+GROWTH_UNIT_NOTE <- paste("Annual means differenced, model and measurement alike.",
+                          "Measured growth is the NOAA marine boundary layer global",
+                          "reference, which begins in 1979. Review card 4 scores the",
+                          "Global Carbon Budget's January-to-January rate instead.")
 
 # ⭐ THE ONE FONT SIZE, and the ONLY place it is typed. `theme_ccx()` is called
 # BARE at all 31 sites, so this default is the only number that RENDERS -- and the
@@ -943,13 +952,13 @@ KEY_RESID_ZERO   <- "No difference"
 #' Model-minus-observed CO2 growth, for the full model and the counterfactual
 #' @param base the full model run
 #' @param alt  the counterfactual run, or NULL
-#' @param gcb  the GCB budget table
+#' @param obs  the prepared observed growth (APP_OBS_GROWTH)
 #' @param yr_range the window, ALREADY intersected with the observed record
 #' @param label the legend key for `alt`
-plot_growth_resid <- function(base, alt = NULL, gcb = NULL,
+plot_growth_resid <- function(base, alt = NULL, obs = NULL,
                               yr_range = c(1960, 2024), label = "Mechanism off") {
-  if (is.null(gcb) || !"atm_growth" %in% names(gcb)) return(NULL)
-  o <- app_obs_growth(gcb)
+  o <- app_obs_growth(obs)
+  if (is.null(o)) return(NULL)
   one <- function(run, who) {
     m <- app_annual_growth(run)
     j <- merge(m, o, by = "year", suffixes = c("", "_obs"))
@@ -1018,17 +1027,17 @@ ccx_global_co2 <- function(o) {
 #'
 #' @param base model output (the full model)
 #' @param alt  model output with a mechanism removed, or NULL
-#' @param gcb  the GCB budget table (APP_GCB), or NULL to omit observations
+#' @param obs  the prepared observed growth (APP_OBS_GROWTH), or NULL to omit it
 #' @param label the legend label for `alt`
-plot_growth_rate <- function(base, alt = NULL, gcb = NULL, yr_range = c(1960, 2024),
+plot_growth_rate <- function(base, alt = NULL, obs = NULL, yr_range = c(1960, 2024),
                              label = "Mechanism off", show_obs = TRUE) {
   ann <- app_annual_growth        # ⛔ ONE definition; see its header (F2)
   b <- ann(base); b$who <- "Full model"
   d <- b
   if (!is.null(alt)) { x <- ann(alt); x$who <- label; d <- rbind(d, x) }
-  if (!is.null(gcb) && isTRUE(show_obs) && "atm_growth" %in% names(gcb)) {
-    o <- app_obs_growth(gcb); o$who <- KEY_GROWTH_OBS
-    d <- rbind(d, o)
+  if (!is.null(obs) && isTRUE(show_obs)) {
+    o <- app_obs_growth(obs)
+    if (!is.null(o)) { o$who <- KEY_GROWTH_OBS; d <- rbind(d, o) }
   }
   d <- d[d$year >= yr_range[1] & d$year <= yr_range[2], ]
   cols <- stats::setNames(c(PAL[["model"]], PAL[["off"]], PAL[["obs"]]),
@@ -1121,9 +1130,28 @@ app_annual_growth <- function(o) {
   data.frame(year = a$year[-1], g = diff(a$co2))
 }
 
-#' The observed annual growth rate, from the Global Carbon Budget
-app_obs_growth <- function(gcb) {
-  data.frame(year = gcb$year, g = gcb$atm_growth / ccx_const("GtC_PER_PPM"))
+#' The observed annual growth rate, ON THE MODEL'S OWN ESTIMATOR
+#'
+#' \u26d4\u26d4 IT IS NOT GCB's `atm_growth`, AND THAT IS THE WHOLE POINT. GCB's
+#' number is NOAA's published `co2_gr_gl`, a JAN-TO-JAN difference of the
+#' deseasonalised global series; `app_annual_growth()` differences ANNUAL MEANS.
+#' Comparing them is not like-for-like, and it is not a small effect: on NOAA's
+#' own two products of the same global CO2 the annual difference has sd 0.389
+#' ppm/yr and max 0.950. It does not bias the model's RMS (0.397 either way) --
+#' it RESHUFFLES WHICH YEAR LOOKS WORST, which on a teaching panel is worse.
+#' Full argument and the rejected alternative: data-raw/build_mbl_global_growth.R.
+#'
+#' @param obs the prepared NOAA MBL global growth (APP_OBS_GROWTH), already on
+#'   the annual-mean-difference estimator. Passed in, never reached for, so no
+#'   caller can quietly hand this function a differently-estimated series.
+app_obs_growth <- function(obs) {
+  # \u26a0 `[[` not `$`: exact matching. Handing this function the GCB budget
+  # table -- the retired wiring -- must return NULL, not partial-match its way
+  # onto some other column. (The repo's standing `$` partial-match exposure.)
+  if (is.null(obs)) return(NULL)
+  g <- if (is.list(obs)) obs[["growth"]] else NULL
+  if (is.null(g) || !all(c("year", "g") %in% names(g))) return(NULL)
+  g[, c("year", "g")]
 }
 
 #' F2 (Marcus 2026-09-24): "full model minus measured" and "experiment minus
@@ -1137,10 +1165,10 @@ app_obs_growth <- function(gcb) {
 #'
 #' \u26d4 THE WINDOW IS THE INTERSECTION OF THE SLIDER AND THE OBSERVED RECORD,
 #' and it is passed IN rather than recomputed, so it cannot drift from the
-#' scatter sentence beside it. The model runs from 1750 and GCB's atmospheric
-#' growth starts 1959; a window of 1850-2024 would give the model 174 years and
-#' the observation 66, which is the like-for-like bug this panel already fixed
-#' once (app/server.R, output$c_growth_note).
+#' scatter sentence beside it. The model runs from 1750 and the observed record
+#' starts 1980; a window of 1850-2024 would give the model 174 years and the
+#' observation 45, which is the like-for-like bug this panel already fixed once
+#' (app/server.R, output$c_growth_note).
 #'
 #' \u26a0 WHAT NUMBERS CANNOT SHOW, and the caller should not pretend otherwise: a
 #' mean and an RMS cannot tell "consistently 0.1 high" from "fine except 1992
@@ -1150,9 +1178,9 @@ app_obs_growth <- function(gcb) {
 #'
 #' @return NULL when the window holds too few overlapping years, else a list
 #'   with the per-series bias, RMS and worst year.
-app_growth_residuals <- function(base, alt, gcb, yr) {
-  if (is.null(gcb) || !"atm_growth" %in% names(gcb)) return(NULL)
-  ob <- app_obs_growth(gcb)
+app_growth_residuals <- function(base, alt, obs, yr) {
+  ob <- app_obs_growth(obs)
+  if (is.null(ob)) return(NULL)
   one <- function(o) {
     m <- app_annual_growth(o)
     d <- merge(m, ob, by = "year", suffixes = c("_mod", "_obs"))

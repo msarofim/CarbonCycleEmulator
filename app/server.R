@@ -409,7 +409,7 @@ function(input, output, session) {
   # C2 (Marcus 2026-09-22). The growth-rate panel, with observations (C1) --
   # the panel that makes the ENSO claim in the blurb checkable (C3).
   output$c_growth <- renderPlotFit("c_growth",
-    plot_growth_rate(APP_HIST$out, cf_alt(), APP_GCB,
+    plot_growth_rate(APP_HIST$out, cf_alt(), APP_OBS_GROWTH,
                      input$c_years, app_mech_key(cf_off())))
 
   # ⛔ ONE WINDOW, COMPUTED ONCE, HANDED TO ALL THREE SENTENCES AND THE STRIP.
@@ -417,8 +417,18 @@ function(input, output, session) {
   # same years"; if they derived the intersection separately they could disagree
   # about which years while all three printed a range, which is worse than any
   # one of them being wrong alone.
-  cf_window <- reactive(c(max(input$c_years[1], min(APP_GCB$year)),
-                          min(input$c_years[2], max(APP_GCB$year))))
+  # \u26d4 THE SPAN COMES FROM THE SERIES THAT IS ACTUALLY DRAWN. It read
+  # APP_GCB's 1959-2024 until 2026-09-26, while the observed growth is now the
+  # NOAA MBL reference starting 1980 -- a window claiming years the observation
+  # does not have is the same like-for-like bug one level up.
+  cf_obs_span <- reactive({
+    o <- app_obs_growth(APP_OBS_GROWTH)
+    if (is.null(o)) NULL else range(o$year)
+  })
+  cf_window <- reactive({
+    sp <- cf_obs_span(); if (is.null(sp)) return(input$c_years)
+    c(max(input$c_years[1], sp[1]), min(input$c_years[2], sp[2]))
+  })
 
   # MEASURED, not asserted: the scatter each series carries about its own
   # decadal trend. A sentence claiming the wobbles shrink has to be a sentence
@@ -444,7 +454,7 @@ function(input, output, session) {
     }
     mod_g <- app_annual_growth      # ⛔ ONE definition, shared with the chart (F2)
     a  <- scatter(mod_g(APP_HIST$out))
-    ob <- scatter(app_obs_growth(APP_GCB))
+    ob <- scatter(app_obs_growth(APP_OBS_GROWTH))
     if (is.na(a) || is.na(ob)) return("")
     if (!length(off))
       return(sprintf(paste("Over %d–%d, the year-to-year scatter about the",
@@ -480,7 +490,7 @@ function(input, output, session) {
   # alignment. The same residuals are now DRAWN as well (output$c_resid).
   output$c_growth_resid <- renderText({
     off <- cf_off()
-    r <- app_growth_residuals(APP_HIST$out, cf_alt(), APP_GCB, cf_window())
+    r <- app_growth_residuals(APP_HIST$out, cf_alt(), APP_OBS_GROWTH, cf_window())
     if (is.null(r)) return("")
     # ⚠ THE WORST YEAR IS REPORTED BECAUSE A BIAS/RMS PAIR CANNOT SHOW AN
     # EPISODIC ERROR. "Consistently 0.1 high" and "fine except 1992 and 1998"
@@ -515,7 +525,7 @@ function(input, output, session) {
   # come to describe different years or a different estimator from the panel it
   # sits under.
   output$c_resid <- renderPlotFit("c_resid",
-    plot_growth_resid(APP_HIST$out, cf_alt(), APP_GCB, cf_window(),
+    plot_growth_resid(APP_HIST$out, cf_alt(), APP_OBS_GROWTH, cf_window(),
                       app_mech_key(cf_off())))
 
   # ---- F1 (Marcus 2026-09-24): the DRIVER panel ----------------------

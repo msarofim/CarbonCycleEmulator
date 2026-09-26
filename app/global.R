@@ -388,6 +388,21 @@ APP_FLUX <- local({
 APP_FLUX_NOW <- APP_FLUX[nrow(APP_FLUX), ]
 
 APP_GCB <- as.data.frame(readRDS(file.path(CCX_ROOT, "data", "gcb_budget.rds"))$budget)
+
+# ---- THE OBSERVED GROWTH RATE, ON THE MODEL'S OWN ESTIMATOR (2026-09-26) ----
+# \u26d4\u26d4 DELIBERATELY NOT APP_GCB$atm_growth. That is NOAA's published
+# `co2_gr_gl`, a JAN-TO-JAN difference of the deseasonalised global series, while
+# app_annual_growth() differences ANNUAL MEANS -- two estimators of one quantity,
+# differing by sd 0.389 ppm/yr (max 0.950) on NOAA's own products. The panel's own
+# caption claimed "annual means differenced" while half its data was not.
+# This object is the NOAA MBL global reference put on the model's estimator; see
+# data-raw/build_mbl_global_growth.R for the measurement and the rejected
+# alternative. \u26a0 It starts 1980, where GCB's atm_growth starts 1959.
+APP_OBS_GROWTH <- local({
+  f <- file.path(CCX_ROOT, "data", "mbl_global_growth.rds")
+  if (!file.exists(f)) return(NULL)      # a checkout without it still renders
+  readRDS(f)
+})
 APP_EMIS_HIST <- as.data.frame(
   readRDS(file.path(CCX_ROOT, "data", "forcing_emissions_historical.rds")))
 APP_SSP_EMIS <- as.data.frame(
