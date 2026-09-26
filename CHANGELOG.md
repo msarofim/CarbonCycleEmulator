@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-26 (g) — **The FaIR overlay drew NOTHING, which looked like perfect agreement. Its own gate passed.** Found by restarting the app and looking at it.
+
+### The bug
+`future_runs()` names its elements with `names(APP_SSPS)` — the DISPLAY labels,
+*"SSP2-4.5  (middle of the road)"* — while `APP_FAIR$scenario` holds the ids, *"ssp245"*. The server
+passed `names(rs)`; nothing matched; `app_fair_overlay()` returned NULL; `plot_future()` drew the
+solid lines alone.
+
+⭐ **On screen that is indistinguishable from "FaIR agrees perfectly"** — the most flattering
+possible failure, and **the exact one this feature's gate was written to catch**.
+
+### ⛔⛔ Why the gate missed it: it tested the HELPER's contract, not the CALLER's
+`test-fair-overlay.R` asserted `app_fair_overlay(c("ssp126", …))` returns rows. True, and
+irrelevant — the app never calls it that way. **A gate that chooses its own inputs tests the
+function it is pointed at, not the feature.** Two tests close it, and both are needed:
+1. drive the **server's own expression**, `APP_SSPS[APP_SSPS %in% input]`, read out of `global.R`
+   rather than retyped, and assert the returned `who` equals the RUN NAMES (else ggplot gives the
+   dashed line its own colour and the pairing the chart depends on is lost);
+2. **read the call site** in `server.R` — (1) alone still passes if someone reverts the caller.
+
+Mutation-tested by restoring the original bug: **2 assertions fail**. 29 pass clean.
+
+### ⛔ And every headless check had passed
+The helper returned 1656 rows, `plot_future()` gained a second layer, `ggplot_build()` succeeded, and
+a rendered PNG looked right — **because all of them were fed the ids too**. ⚠ **The PNG is the subtle
+part: rendering the plot and inspecting it FEELS like looking at the thing and is not**, because it
+was driven from my own call, not the app's, so it reproduced the wrong assumption faithfully and in
+colour. **A picture built from the same wrong input is not independent evidence.** The defect
+surfaced in the first thirty seconds of the app actually running.
+
+### The fix, and the app
+The overlay now takes a **named slice of `APP_SSPS`** — values are the ids `APP_FAIR` is keyed on,
+names are the labels the runs are keyed on — so the two keyings travel together. Verified in the
+running app in both panels; the CO₂ axis rescales to fit FaIR's higher ssp585 (~1450 ppm at 2150
+against the emulator's ~1130), which is the carbon-cycle shortfall of 09-26 (e) in a second view.
+
+⭐ The app is now a **managed launch target** (`ccx-app`, port 7793, in `FaIRtoFrEDI/.claude/launch.json`
+with an absolute path, since sessions always start there). It had been a stray `nohup` from a previous
+session — 7 h old, on stale code, with nothing tracking it. Cold start 110–111 s.
+
 ## 2026-09-26 (e) — **The pulse lab checked against standard FaIR and the TCRE: the gap is the CARBON CYCLE, and it runs the conservative way.** ⛔ Also: the whole test suite had been dead for a day, and gate 12's only implementation measures a model nobody ships.
 
 Marcus: *"work on the placeholder texts"* and *"check the carbon cycle pulse analysis against both the

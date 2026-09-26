@@ -153,8 +153,19 @@ inside a `renderText`). Mutation-tested: the old clause fails **37 of 45**.
   driver has been run once.
 - **No refit, no objective change, no mode file written.** `emissions-interp-constant` (`35f38dc`)
   still rides with the next refit.
-- **The app was NOT driven this session.** The overlay was verified headlessly and by rendering the
-  plot to PNG (both look right); the running app on `:7793` is on OLD code.
+- ⭐ **The app WAS restarted on current code and driven** (`:7793`, cold start **110-111 s**, HTTP
+  200, no load errors). It is now a MANAGED launch target: `ccx-app` in
+  **`FaIRtoFrEDI/.claude/launch.json`** with an absolute path, because sessions always start from
+  FaIRtoFrEDI. It had been a stray `nohup` from a previous session, 7 h old and on stale code.
+- ⛔⛔ **AND DRIVING IT IMMEDIATELY FOUND A BUG THE WHOLE SUITE MISSED.** The FaIR overlay drew
+  **nothing** -- `future_runs()` names its runs with display LABELS and `APP_FAIR` is keyed on IDS --
+  which on screen is indistinguishable from "FaIR agrees perfectly". Its own 21-assertion gate,
+  written for exactly that failure, passed, **because it fed the helper ids while the app passed
+  labels: it tested the HELPER's contract, not the CALLER's.** Fixed (`1e962ff`) and the gate now
+  drives the server's own expression AND reads the call site (mutation: 2 fail).
+  ⚠ **The rendered PNG in the previous handoff was NOT independent evidence** -- it was built from my
+  own call with the ids, so it reproduced the wrong assumption faithfully and in colour
+  ⇒ [[gate_tested_the_helper_not_the_caller]].
 - **Unchanged deploy blockers, all Marcus's**: the two `SET-BEFORE-DEPLOY` URLs (⚠ update
   `test-review-cards.R`, don't delete it), the idle start-up re-time, the hosting plan's limits.
 - ⛔ **The CarbonCycleEmulator memory symlink is STILL UNVERIFIED against the harness** (owed since
