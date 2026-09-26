@@ -2,6 +2,88 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-26 (a) — **The growth panel was not like-for-like: a Δ-annual-mean model against a Jan-to-Jan observation.** Fixed on the observation side; the obvious alternative was measured and rejected. ⛔ This RETRACTS most of 09-25 (j)'s Pinatubo finding.
+
+Chased from Marcus's question — *why does the volcanic switch do nothing for 1991?* — through three rounds, each of which moved the answer.
+
+### 1. ⛔⛔ THE DEFECT: two estimators of one quantity, compared to each other
+`app_annual_growth()` differences **annual means**. GCB's `atm_growth` is NOAA's published
+`co2_gr_gl` (GCB's own header cites NOAA/ESRL for it) and is a **Jan-to-Jan** difference of the
+**deseasonalised** series. The panel put one against the other — and its caption said *"annual
+means differenced"* while half its data was not.
+
+⚠ **Not small, and not a bias.** On NOAA's own two products of the same global CO₂: annual
+differences **sd 0.389 ppm/yr, max 0.950**. The model's RMS is **0.397 either way**.
+
+| 1991 | model | obs | resid |
+|---|---|---|---|
+| mismatched (shipped) | 1.768 | 0.750 | **+1.018 — "worst year"** |
+| matched | 1.768 | **1.340** | **+0.428 — 1.1 σ** |
+
+⭐ **What it does is RESHUFFLE WHICH YEAR LOOKS WORST**, which on a teaching panel is worse than a
+bias. Matched, 1991 is ordinary and not in the worst six: **1997 +0.854, 1988 −0.803, 2016 −0.745,
+1999 −0.713, 2009 +0.658, 2024 −0.612**. The app now reports **1997 +0.86**.
+
+### 2. ⛔ WHAT THIS RETRACTS from 09-25 (j)
+- **"The 1991 residual IS GCB's unclosed imbalance" (+1.018 ≈ +1.000)** — a coincidence between an
+  artifact and the imbalance. Matched: **corr 0.482, slope 0.526 ± 0.146, R² 0.232**, against the
+  0.781 / 0.819 / 0.610 reported. The mechanism is real at about **half** the strength.
+- **"Mauna Loa runs 0.50 ppm/yr above the global in 1991"** — also the artifact. On one estimator
+  they agree: MLO **1.252**, SPO **1.332**, NOAA global **1.340**.
+- **SURVIVES**: every volcanic-timing number (AOD at background until mid-June 1991; knockout
+  +0.025 / +0.484 / +0.338; **52 %** of 1992; GMST showing no 1991 cooling; Niño3.4 **+0.758**
+  opposing **9:1**). Those are knockout differences *within* one estimator.
+
+### 3. ⭐ THE ALTERNATIVE WAS MEASURED AND REJECTED — and it was MY proposal
+I argued for fixing the **model** side instead: difference the stock at **calendar-year
+boundaries**, which is what the objective's `gcb_*_sink` rows and GATE 4's `dg_af_annual_model()`
+already do, and which would match GCB's convention. **Measured, it is worse**: RMS **0.397 → 0.491**,
+worst year **2024 at −1.600** (an end-extrapolation artefact, [[app_sink_half_year_offset]]),
+because it re-injects the model's seasonal-cycle error into an annual growth rate.
+⭐ **`app_annual_growth()`'s own header had already warned of exactly that** — "a December-to-December
+difference carries the seasonal cycle's own year-to-year wobble into what is supposed to be an
+ANNUAL growth rate". Marcus's instinct (keep the app's estimator, move the observation) was right.
+
+### 4. The fix
+`data-raw/build_mbl_global_growth.R` → `data/mbl_global_growth.rds`. **No new download**: NOAA's
+MBL global reference (90S–90N, 48/yr) was already in the repo, manifest key `mbl_zonal_gl`. The
+build verifies its **sha256 against the MANIFEST**, takes calendar-year means (≥48 samples) and
+differences them. ⭐ **Cross-checked** against NOAA's separately published `co2_annmean_gl`: levels
+agree to **−0.012 ppm (sd 0.019)**, growth to **sd 0.026 ppm/yr** — two NOAA products, one
+estimator, same answer.
+
+⚠ **THE COST, ON THE CHART**: the MBL reference starts 1979, so the comparison starts **1980** and
+the panel loses **1959–79**. GCB calls its own growth uncertainty *"variable … around 0.2 GtC/yr
+FROM 1980"*, so the lost years are the least certain — but they are lost. `cf_window()` now takes
+its span from the series actually drawn rather than from `APP_GCB`.
+
+### 5. Gates
+Signature change `gcb` → `obs` in three functions; every caller grepped **and the app driven**
+([[static_test_cannot_tell_you_it_runs]]). New block (d) in `test-growth-residuals.R`:
+- the observed series is **re-derived from the levels the object ships**, so the estimator is
+  checkable from the product rather than trusted from a provenance string;
+- the **retired wiring** (handing it the GCB table) must return NULL — `[[` not `$`, so it cannot
+  partial-match its way onto a column;
+- a **POWER test** requires the two estimators to stay far apart, or everything above it could pass
+  on a build where one had quietly become the other.
+
+**MUTATION-TESTED**: smuggling GCB's numbers into the product fails **6** assertions.
+⚠ **The suite's own counterfactual test was still passing the GCB table** — the new guard caught it.
+
+⚠ **And I mis-measured my own caption**: reported CLIPS at 800 px because I measured at the device
+default instead of `CAPTION_PT`. `app_provenance_caption()` wraps by pixels and it FITS
+(full 481/504, diagram 376/384, half 232/233). The caption was still trimmed — it had drifted into
+correction-voice, which the standing rule keeps off the page.
+
+### Not done, and why
+- **The global-growth OBJECTIVE ROW Marcus asked for is NOT built.** Its premise was "a big 1991
+  error the objective cannot see"; matched, there is no big 1991 error. Three further objections
+  stand and are his to rule on: it is **near-redundant** (growth = emissions − ocean − land, and
+  both sinks are already scored), it would be **very loud** (±0.07–0.12 ppm/yr against sink sigmas
+  of 0.4–0.5 GtC/yr, 45–66 points), and it would **fight a known shortfall** (model interannual
+  scatter 0.27 vs observed 0.44). **No refit run** — and a refit is the 24-start dispersed
+  multistart, which the driver's own header says is the case where **Torch wins**.
+
 ## 2026-09-25 (j) — **Marcus's comment doc worked: 10 of 13 items shipped.** The "What if…?" tab goes MULTI-SELECT, the constraint-map page is reframed from *testing* to *influence*, and driving the new tab turned up a sentence that read "these switches did nothing" when they plainly did. ⚠ Two items still owed his copy; one item deliberately deleted a gate leg.
 
 Source: `carbotopecomments.9.25.26.docx` (body text, not tracked comments — no `word/comments.xml`).
