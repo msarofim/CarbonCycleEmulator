@@ -637,22 +637,37 @@ APP_FAIR_NOTE <- paste(
 
 #' FaIR's own trajectories for the scenarios being shown, as plot_future() wants
 #'
-#' @param scenarios SSP names; anything absent from APP_FAIR is dropped, so a
-#'   user-built pathway simply contributes nothing rather than borrowing a line.
+#' @param scenarios the SSPs to draw, as a slice of `APP_SSPS`: VALUES are the
+#'   ids `APP_FAIR` is keyed on ("ssp245"), NAMES are the display labels the runs
+#'   are keyed on ("SSP2-4.5  (middle of the road)"). An unnamed vector is taken
+#'   as ids that are their own labels. Anything absent from `APP_FAIR` is
+#'   dropped, so a user-built pathway contributes nothing rather than borrowing
+#'   a line.
 #' @param yvar "gmst" or "co2_ppm", the app's own names
 #' @return data.frame(year, y, who) or NULL
+#'
+#' ⛔⛔ THE TWO KEYINGS ARE DIFFERENT AND THAT IS WHAT BROKE THIS ONCE (09-26).
+#' `future_runs()` names its elements with `names(APP_SSPS)` -- the DISPLAY
+#' labels -- while `APP_FAIR$scenario` holds the ids. Passing `names(runs)`
+#' straight in matched nothing, returned NULL, and drew no FaIR line at all --
+#' which on screen is indistinguishable from "FaIR agrees perfectly". The
+#' returned `who` therefore carries the LABEL, because `plot_future()` maps
+#' colour by `who` and the dashed line must inherit its solid partner's colour.
 app_fair_overlay <- function(scenarios, yvar) {
   if (is.null(APP_FAIR) || !length(scenarios)) return(NULL)
+  ids <- unname(scenarios)
+  labs <- if (is.null(names(scenarios))) ids else names(scenarios)
   # ⚠ THE COLUMN NAMES DIFFER BETWEEN THE TWO OBJECTS and the mapping is here,
   # once. `APP_FAIR` carries FaIR's own `gmst_C`; a run carries `gmst`. Reading
   # the wrong one would return NULL and silently draw no FaIR line at all --
   # which looks exactly like "FaIR agrees perfectly".
   col <- switch(yvar, gmst = "gmst_C", co2_ppm = "co2_ppm", NULL)
   if (is.null(col) || !col %in% names(APP_FAIR)) return(NULL)
-  keep <- APP_FAIR$scenario %in% scenarios
+  keep <- APP_FAIR$scenario %in% ids
   if (!any(keep)) return(NULL)
   d <- APP_FAIR[keep, , drop = FALSE]
-  out <- data.frame(year = d$year, y = d[[col]], who = d$scenario,
+  out <- data.frame(year = d$year, y = d[[col]],
+                    who = labs[match(d$scenario, ids)],
                     stringsAsFactors = FALSE)
   out[is.finite(out$y), , drop = FALSE]
 }

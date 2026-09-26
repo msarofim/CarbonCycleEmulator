@@ -739,15 +739,18 @@ function(input, output, session) {
                   view = APP_FUTURE_VIEW)
     } else {
       rs <- future_runs()
-      # ⭐ 2026-09-26: standard FaIR as a dashed reference, on request. The
-      # overlay is keyed on the RUN NAMES, which for this mode are the SSP names
-      # the user selected, so an SSP with no FaIR row contributes nothing rather
-      # than borrowing another scenario's line.
+      # ⭐ 2026-09-26: standard FaIR as a dashed reference, on request.
+      # ⛔ PASS THE SLICE OF APP_SSPS, NOT `names(rs)`. The runs are named with
+      # the DISPLAY labels and APP_FAIR is keyed on the ids; handing over the
+      # labels matched nothing and drew no line, which looks exactly like
+      # agreement. The named slice carries both, so the two keyings cannot
+      # drift apart again.
       plot_future(rs, input$f_yvar,
                   if (identical(input$f_yvar, "gmst")) LAB_TEMP else LAB_CO2,
                   view = APP_FUTURE_VIEW,
                   fair = if (isTRUE(input$f_fair))
-                    app_fair_overlay(names(rs), input$f_yvar))
+                    app_fair_overlay(APP_SSPS[APP_SSPS %in% input$f_ssps],
+                                     input$f_yvar))
     }
   })
 
