@@ -675,13 +675,20 @@ function(input, output, session) {
   # slider later. The readout below describes the executed run; reading
   # `input$s_kind` at render time would let the sentence change while the two
   # numbers beside it stayed on the previous pathway.
-  stylised_kind <- reactiveVal(NULL)
+  # ⭐ THE TAKEAWAY MUST DESCRIBE THE RUN THE USER PRESSED, not the sliders as
+  # they now sit. `s_kind` was captured this way on 09-25 for exactly that
+  # reason; 09-26 extends it to the RATE, the zero year and the emissions
+  # pathway itself, because the rewritten takeaway quotes numbers off them. A
+  # reader who drags the rate slider without pressing "Run it" would otherwise
+  # watch the sentence change underneath two numbers that did not move.
+  stylised_spec <- reactiveVal(NULL)
   stylised_run <- eventReactive(input$s_go, {
-    stylised_kind(input$s_kind)
     em <- app_stylised_emissions(input$s_kind, APP_FUTURE_YEARS,
                                  to_zero_year = input$s_zero_year,
                                  rate_pct = input$s_rate,
                                  background = input$s_bg)
+    stylised_spec(list(kind = input$s_kind, rate_pct = input$s_rate,
+                       to_zero_year = input$s_zero_year, emissions = em))
     app_run_coupled(APP_SPIN, input$s_bg, APP_FUTURE_YEARS,
                     nonco2_scenario = input$s_bg, emissions = em)
   })
@@ -772,22 +779,33 @@ function(input, output, session) {
               pr$gtc, pr$year, fmt_pct(f(y1)), fmt_pct(f(y2)), y2 - pr$year)
       }
     } else if (identical(input$f_mode, "Build your own")) {
-      r <- stylised_run(); cl <- r$climate
+      r <- stylised_run(); cl <- r$climate; sp <- stylised_spec()
       # ⛔ THE SECOND CLAUSE IS CONDITIONAL ON THE BRANCH (2026-09-25). It used
       # to read "even when emissions stop" for ALL THREE `s_kind` values, and
       # emissions stop in only ONE of them (`to_zero`). On the DEFAULT branch
       # (`constant`, hold at today's level) they never stop at all, so the
       # sentence asserted a counterfactual the run did not perform, printed
-      # beside two numbers the run did produce. ⚠ The `to_zero` wording is
-      # Marcus's and is unchanged; the other branch's is a PLACEHOLDER for him.
-      tail_clause <- if (identical(stylised_kind(), "to_zero"))
-        paste("Note how little the temperature falls even when emissions stop —",
-              "the CO₂ already up there does not come back down quickly.")
-      else
-        paste("Fossil emissions never reach zero on this pathway — holding them",
-              "at today's level keeps them there, and a fixed rate only ever",
-              "approaches zero — so carbon keeps being added to what is already",
-              "up there, and that does not come back down quickly either.")
+      # beside two numbers the run did produce.
+      #
+      # ⛔⛔ 2026-09-26: the replacement clause was itself WRONG on the app's
+      # own default. It read "a fixed rate only ever approaches zero" -- but
+      # `s_rate` spans -5 to +5 and DEFAULTS TO +1, so the default `rate`
+      # pathway GROWS exponentially and approaches nothing. One string was
+      # covering three pathways by disjunction, which is how it came to assert
+      # the opposite of what the run did. Now ONE BRANCH PER PATHWAY, on the
+      # SIGN of the rate as well as the kind, with the numbers read off the
+      # captured pathway rather than described in words.
+      # ⚠ The `to_zero` wording is Marcus's and is VERBATIM. Note that only
+      # FOSSIL emissions reach zero there -- `app_stylised_emissions()` always
+      # takes land use from the background scenario -- so "emissions stop" is
+      # fossil-only. Flagged for him rather than edited.
+      # ⭐ THE CLAUSE IS A PURE FUNCTION in global.R so that it can be GATED
+      # (test-stylised-takeaway.R). The bug it replaced -- "a fixed rate only
+      # ever approaches zero", on a slider that defaults to +1 %/yr -- was
+      # untestable precisely because it lived inside this renderText.
+      tail_clause <- app_stylised_tail_clause(
+        sp$kind, sp$rate_pct, sp$emissions,
+        APP_EMIS_HIST$fossil_GtC[APP_EMIS_HIST$year == max(APP_EMIS_HIST$year)])
       sprintf("Your pathway reaches %.0f ppm and %+.1f °C by %d. %s",
               cl$co2_ppm[nrow(cl)], cl$gmst[nrow(cl)], max(cl$year), tail_clause)
     } else {
@@ -860,11 +878,31 @@ function(input, output, session) {
         "per-tonne number is a meaningful thing to quote at all, and why the",
         "chart above can be read as \u201cwhat one more tonne does\u201d regardless of",
         "what else is happening in the background scenario."),
+      # ⭐ 2026-09-26: this caveat used to end "the proportionality above is
+      # stated, not shown: demonstrating it would take a second pulse size."
+      # It took five, and the claim now carries its measurement. The numbers
+      # come from named constants in global.R, gated against the driver's own
+      # CSV, so the sentence cannot outlive the measurement.
       p(tags$em(sprintf(paste("Measured from the two runs behind this panel, at a",
-                              "%d GtC pulse released in %d. The proportionality in",
-                              "the paragraph above is stated, not shown:",
-                              "demonstrating it would take a second pulse size."),
-                        pr$gtc, pr$year))))
+                              "%d GtC pulse released in %d. The proportionality is",
+                              "measured, not assumed: across pulses from %g to %g GtC",
+                              "the figure above moves by only %.1f %% (%s), so one",
+                              "tonne really does do the same work as the next."),
+                        pr$gtc, pr$year, APP_PULSE_LIN_SIZES[1], APP_PULSE_LIN_SIZES[2],
+                        APP_PULSE_LIN_SPREAD, APP_PULSE_LIN_SRC))),
+      # ⛔ THE HORIZON IS NOT A DETAIL, and the box did not used to say so. The
+      # per-1000 figure falls by a quarter between +20 yr and +200 yr, so a
+      # bare "degC per 1000 GtC" is underdetermined until the horizon is named.
+      p(tags$em(sprintf(paste("It is flat in pulse size but NOT in when you look:",
+                              "the same figure is %.2f at 20 years after release,",
+                              "%.2f at 50, %.2f at 100 and %.2f at 200. A warming",
+                              "\u201cper 1000 GtC\u201d only means something once the",
+                              "horizon is named \u2014 the one above is %d years."),
+                        APP_PULSE_PER1000_BY_HORIZON[["20"]],
+                        APP_PULSE_PER1000_BY_HORIZON[["50"]],
+                        APP_PULSE_PER1000_BY_HORIZON[["100"]],
+                        APP_PULSE_PER1000_BY_HORIZON[["200"]],
+                        APP_PULSE_LIN_HORIZON))))
   })
 
   output$f_notes <- renderUI({

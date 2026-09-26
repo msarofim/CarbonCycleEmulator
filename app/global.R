@@ -665,6 +665,75 @@ app_stylised_emissions <- function(kind, years, to_zero_year = 2060,
   data.frame(year = yrs, fossil_GtC = foss, luc_GtC = luc)
 }
 
+#' The "Build your own" takeaway's second clause, as a PURE function
+#'
+#' ⛔⛔ WHY THIS IS NOT INLINE IN `server.R`. It was, and it carried a statement
+#' that was FALSE ON THE APP'S OWN DEFAULT for a day: "a fixed rate only ever
+#' approaches zero", printed for a `rate` pathway whose slider defaults to
+#' **+1 %/yr** and therefore GROWS. One string was covering three pathways by
+#' disjunction. A sentence buried in a `renderText` cannot be tested, so nothing
+#' could have caught it; pulled out here it is gated by
+#' `test-stylised-takeaway.R`, which asserts the DEFAULT pathway does not claim
+#' emissions approach zero.
+#'
+#' @param kind one of "constant", "to_zero", "rate" (`s_kind`)
+#' @param rate_pct the percent-per-year rate, signed, for `kind = "rate"`
+#' @param emissions the pathway `app_stylised_emissions()` actually built
+#' @param e0 today's fossil rate, GtC/yr
+#' @return a single sentence, or Marcus's verbatim `to_zero` sentence
+# ---------------------------------------------------------------------
+# ⭐ THE PULSE LAB'S PROPORTIONALITY, MEASURED (2026-09-26)
+# ---------------------------------------------------------------------
+# The permanence box used to say the proportionality was "stated, not shown:
+# demonstrating it would take a second pulse size". It now takes five, and the
+# answer is here rather than in the prose so the sentence cannot drift from it.
+#
+# Measured by `calibration/diag_pulse_vs_tcre.R` at the app's own defaults
+# (background ssp245, release 2050, the p_gtc slider's full range), reading the
+# SAME app_run_coupled() the tab uses. dGMST per 1000 GtC at +100 yr:
+#     10 GtC 1.091 | 50 1.087 | 100 1.082 | 200 1.072 | 500 1.044
+# ⚠ These are LABELS FOR A MEASUREMENT MADE ELSEWHERE, which is a staleness risk
+# by construction. `test-pulse-linearity.R` re-reads the driver's own CSV and
+# fails if these drift from it, so the constant cannot rot silently.
+APP_PULSE_LIN_SIZES   <- c(10, 500)   # GtC, the range the claim covers
+APP_PULSE_LIN_SPREAD  <- 4.3          # per cent of the mean, across that range
+APP_PULSE_LIN_HORIZON <- 100L         # years after release
+APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-09-26"
+# ⚠ AND THE HORIZON DEPENDENCE, which the box did NOT previously admit: the same
+# per-1000 number is 1.41 at +20 yr, 1.22 at +50, 1.08 at +100 and 1.02 at +200
+# (100 GtC). It is flat in pulse SIZE and emphatically not flat in WHEN you look,
+# so "per 1000 GtC" is only meaningful once the horizon is named.
+APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.41, `50` = 1.22, `100` = 1.08, `200` = 1.02)
+
+app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0) {
+  y_end <- max(emissions$year)
+  e_end <- emissions$fossil_GtC[emissions$year == y_end]
+  # ⚠ Only FOSSIL emissions reach zero on `to_zero` -- land use always comes
+  # from the background scenario -- so "emissions stop" is fossil-only. Marcus's
+  # wording, kept VERBATIM and flagged rather than edited.
+  if (identical(kind, "to_zero"))
+    return(paste("Note how little the temperature falls even when emissions stop \u2014",
+                 "the CO\u2082 already up there does not come back down quickly."))
+  # rate == 0 IS the constant pathway: e0 * 1^n. Sharing the branch keeps the app
+  # from describing one pathway two different ways.
+  if (identical(kind, "constant") || isTRUE(rate_pct == 0))
+    return(sprintf(paste("Fossil emissions never stop on this pathway \u2014 they hold at",
+                         "today's %.1f GtC a year all the way to %d \u2014 so carbon keeps",
+                         "being added to what is already up there, and none of it",
+                         "comes back down quickly."), e0, y_end))
+  if (rate_pct > 0)
+    return(sprintf(paste("Fossil emissions never stop on this pathway \u2014 at %+.1f %% a",
+                         "year they grow, reaching %.1f GtC a year by %d, %.1f times",
+                         "today's rate. The warming above is what that compounding",
+                         "buys, and none of the carbon behind it comes back down",
+                         "quickly."), rate_pct, e_end, y_end, e_end / e0))
+  sprintf(paste("Fossil emissions fall on this pathway but never reach zero \u2014",
+                "a steady %+.1f %% a year only ever approaches it, and by %d",
+                "they are still %.2f GtC a year. So carbon is still being",
+                "added at the end of the run, on top of what does not come",
+                "back down quickly."), rate_pct, y_end, e_end)
+}
+
 # ---------------------------------------------------------------------
 # ⭐ WHEN A PATHWAY LEAVES THE RANGE THE FORCING CURVE WAS FITTED OVER
 # ---------------------------------------------------------------------
