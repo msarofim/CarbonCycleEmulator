@@ -2,6 +2,73 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-26 (d) — **The constraint map has a SECOND evaluation point. The headline survives it; two sentences of shipped app prose do not.** ⛔ The proposed arm was the wrong one, and measurement said so before anything was run.
+
+Marcus's ruling (09-26): add a second evaluation point, so the pins/pulls picture can be attributed
+to the MODEL rather than to THIS FIT. `CM4` makes the arm a parameter
+(`Rscript calibration/diag_constraint_map.R mode=<name>`); `calibration/diag_constraint_map_arms.R`
+compares. **~10 s per arm**, not the ~50 s estimated.
+
+### 1. ⛔⛔ THE ARM CHOICE WAS THE WHOLE METHOD
+The handoff proposed **`hilda31pe`, "the quarantined control"**. Both halves were wrong:
+- **Not quarantined** — it is the registered `CCX_MODE_SEASML0_CONTROL`, refit under objective #13
+  (its stored logpost reproduces exactly through the shipped objective).
+- ⛔ **Confounded for this question** — `seas_ml = 0` is a **different STRUCTURE**, and its names are
+  **not a superset**: it lacks `w_enso_l2`, so only **28 of 29** are shared. A difference between its
+  map and the canonical's could be the fit *or* the structure. It is the seas_ml ON/OFF control and
+  **licenses that comparison only** ([[iso_deep_control_licenses_one_comparison]]).
+
+⭐ **`hilda32f` is the like-for-like arm**: same structure, same periodic spinup, 32 names forming a
+**clean SUPERSET** of the canonical's 29 (it frees the three the canonical pins). Both were run —
+they are cheap — but only `hilda32f` answers the question, and the log labels which is which.
+
+### 2. ⭐ THE HEADLINE SURVIVES — it is the model, not the fit
+On the **shared** names (a pin share over 29 is not comparable to one over 32):
+
+| claim | canonical | `hilda32f` | `hilda31pe` |
+|---|---|---|---|
+| pins, leverage-weighted | **6.1 %** | 6.7 % | 5.6 % |
+| total-leverage ordering vs canonical | — | **Spearman 0.992** | 0.976 |
+| argmax of total leverage | `k_w` | `k_w` | `k_w` |
+| top opposed pair | `seas_lag_p_NH` **2.34** | 2.32 | 2.29 |
+| Δ¹⁴C ocean → mixed layer | 82.5 % | 84.1 % | 82.8 % |
+
+The **top four** opposed pairs are identical in name, order and magnitude. Ranks **5–6 swap**:
+`seas_lag_p_SH` (0.70) leaves the top six at both arms for `hs_asx_frac`.
+
+### 3. ⛔⛔ WHAT DID NOT SURVIVE, AND IT IS LIVE IN THE APP
+`output$cm_takeaway` names **ONE** component per row — *"mostly influenced by X"* — for the top three
+rows by total. **Two of the three are near-ties whose winner FLIPS between arms:**
+
+| row | canonical 1st vs 2nd | margin | other arms |
+|---|---|---|---|
+| δ¹³C level & gradient | High-lat 21.6 vs Input scalings 21.5 | ⛔ **0.1 pp** | **flips, both** |
+| Δ¹⁴C air (bomb) | High-lat 30.2 vs Input scalings 29.4 | ⛔ **0.8 pp** | **flips, both** |
+| CO₂ level | Land uptake 25.4 vs Mixed layer 22.3 | 3.0 pp | stable — fine |
+
+⭐ The app's own comment defends it on the wrong axis: *"COMPUTED … so a refit moves the sentence
+rather than leaving it asserting the old winner."* **Computing it makes the sentence move; it does
+not make the winner real.** ⛔ **An argmax is not a finding until you print the runner-up** — the
+sibling of the trap this tab already records ("a share of a small row is not a finding", which is
+why the row TOTAL sits beside every row). **NOT FIXED**: the copy is Marcus's, and the tie threshold
+must come from the measured cross-arm spread rather than an invented pp constant.
+
+⭐ **The second point earned its keep by FAILING something.** It confirmed what was asked and, in the
+same pass, found a defect a single point structurally could not expose: **one point cannot tell
+"robust" from "arbitrary", and the two look identical on screen.**
+
+### 4. Gates
+- **`GATE UNION`** (new). `CM_COMPONENT` is now a union over registered arms intersected per arm, so
+  the per-arm `COVER` gate could no longer catch a misspelling — it would be intersected away. UNION
+  requires every union entry absent from this arm to be a hand-declared name of another arm.
+  **Mutation-tested both ways**: a typo passes COVER and fails UNION; a dropped real name fails
+  COVER and passes UNION. The two gates are complementary, which is the point.
+- **`GATE ANCHOR`**: the comparison mirrors the app's `app_cmap_tensions`, so it must reproduce a
+  number the app prints (`seas_lag_p_NH` **2.341** vs the app's 2.34) **before any arm is read**
+  ([[ccx_diag_must_use_mode_base]]).
+- ⛔ **Only the canonical arm writes `data/constraint_map.rds`.** A control arm cannot re-point the
+  app's tab. Verified: that file is untouched by both runs.
+
 ## 2026-09-26 (a) — **The growth panel was not like-for-like: a Δ-annual-mean model against a Jan-to-Jan observation.** Fixed on the observation side; the obvious alternative was measured and rejected. ⛔ This RETRACTS most of 09-25 (j)'s Pinatubo finding.
 
 Chased from Marcus's question — *why does the volcanic switch do nothing for 1991?* — through three rounds, each of which moved the answer.
