@@ -1,0 +1,295 @@
+
+[constraint_map] mode hilda31pe, 31 fitted names, 26 streams, step = 1.00 Hessian sd
+=== GATE HARNESS === rebuilt -1425.0156 (shift +0.0000) vs stored -1425.0156 -> PASS
+=== GATE CLOSURE === |sum(streams) - loglik| = 0.000e+00 (tol 1.0e-09) -> PASS
+=== GATE COVER === 31 names in 8 components -> PASS ; 26 streams in 12 families -> PASS
+=== GATE UNION === union entries absent from this arm and NOT declared arm-only: 0 -> PASS
+=== GATE STEP === Hessian pd = TRUE, conditional sd finite and positive for 31/31 names, sqrt(diag(solve(-H))) reproduces md$sd_unc to 0.00e+00 -> PASS
+
+[constraint_map] mode hilda31pe, 31 fitted names, 26 streams, step = 1.00 Hessian sd
+=== GATE HARNESS === rebuilt -1425.0156 (shift +0.0000) vs stored -1425.0156 -> PASS
+=== GATE CLOSURE === |sum(streams) - loglik| = 0.000e+00 (tol 1.0e-09) -> PASS
+=== GATE COVER === 31 names in 8 components -> PASS ; 26 streams in 12 families -> PASS
+=== GATE UNION === union entries absent from this arm and NOT declared arm-only: 0 -> PASS
+=== GATE STEP === Hessian pd = TRUE, conditional sd finite and positive for 31/31 names, sqrt(diag(solve(-H))) reproduces md$sd_unc to 0.00e+00 -> PASS
+   1/31 beta_max             step +0.0056 u -> max |d logL|     1.25 | drop    0.50 vs  0.50 predicted
+   2/31 fert_k               step +0.0060 u -> max |d logL|     1.25 | drop    0.50 vs  0.50 predicted
+   3/31 q10                  step +0.0026 u -> max |d logL|     1.34 | drop    0.53 vs  0.50 predicted
+   4/31 k_w                  step +0.0052 u -> max |d logL|     2.23 | drop    0.51 vs  0.50 predicted
+   5/31 h_ml                 step +0.2478 u -> max |d logL|     0.56 | drop    0.99 vs  0.50 predicted
+   6/31 kz                   step +0.0271 u -> max |d logL|     1.13 | drop    0.51 vs  0.50 predicted
+   7/31 kz_deep_frac         step +0.6433 u -> max |d logL|     1.78 | drop    1.43 vs  0.50 predicted
+   8/31 hs_asx_frac          step +0.0386 u -> max |d logL|     2.62 | drop    0.63 vs  0.50 predicted
+   9/31 h_hs                 step +0.1825 u -> max |d logL|     1.14 | drop    0.78 vs  0.50 predicted
+  10/31 u_hs                 step +0.0408 u -> max |d logL|     1.20 | drop    0.56 vs  0.50 predicted
+  11/31 pump_hs_gcm2         step +0.1962 u -> max |d logL|     2.23 | drop    0.98 vs  0.50 predicted
+  12/31 pump_grad            step +0.0765 u -> max |d logL|     2.18 | drop    0.69 vs  0.50 predicted
+  13/31 tau_ex               step +0.0122 u -> max |d logL|     0.97 | drop    0.58 vs  0.50 predicted
+  14/31 npp_frac_NH          step +0.0385 u -> max |d logL|     0.76 | drop    0.54 vs  0.50 predicted
+  15/31 seas_T_amp_NH        step +0.0306 u -> max |d logL|     1.44 | drop    0.52 vs  0.50 predicted
+  16/31 seas_T_amp_SH        step +0.1168 u -> max |d logL|     0.46 | drop    0.77 vs  0.50 predicted
+  17/31 seas_lag_p_NH        step +0.0099 u -> max |d logL|     2.59 | drop    0.51 vs  0.50 predicted
+  18/31 seas_lag_p_SH        step +0.0388 u -> max |d logL|     1.15 | drop    0.53 vs  0.50 predicted
+  19/31 sst_seas_amp_NH      step +0.0871 u -> max |d logL|     0.47 | drop    0.85 vs  0.50 predicted
+  20/31 sst_seas_amp_SH      step +0.0367 u -> max |d logL|     0.69 | drop    0.51 vs  0.50 predicted
+  21/31 ent_seas_amp_SH      step +0.0289 u -> max |d logL|     0.76 | drop    0.60 vs  0.50 predicted
+  22/31 gamma_enso_land_NH   step +0.0760 u -> max |d logL|     0.92 | drop    0.51 vs  0.50 predicted
+  23/31 gamma_enso_land_SH   step +0.0744 u -> max |d logL|     0.90 | drop    0.50 vs  0.50 predicted
+  24/31 gamma_enso_ocn_NH    step +0.0386 u -> max |d logL|     0.74 | drop    0.50 vs  0.50 predicted
+  25/31 gamma_enso_ocn_SH    step +0.0413 u -> max |d logL|     0.73 | drop    0.50 vs  0.50 predicted
+  26/31 bomb_total           step +0.0026 u -> max |d logL|     2.20 | drop    0.54 vs  0.50 predicted
+  27/31 luc_scale            step +0.0025 u -> max |d logL|     1.20 | drop    0.51 vs  0.50 predicted
+  28/31 sigma_d14c           step +0.0974 u -> max |d logL|     0.25 | drop    0.51 vs  0.50 predicted
+  29/31 rep_dC               step +0.0689 u -> max |d logL|     2.12 | drop    0.74 vs  0.50 predicted
+  30/31 grad_off_co2         step +0.0454 u -> max |d logL|     0.53 | drop    0.53 vs  0.50 predicted
+  31/31 grad_off_d13c        step +0.0038 u -> max |d logL|     0.51 | drop    0.51 vs  0.50 predicted
+  62 evaluations in 8.3 s
+
+=== NONLINEARITY === measured drop > 5x the quadratic's prediction for 0 of 31 names
+=== PINS vs PULLS === leverage-weighted share of cells with curvature >= 0.50: 7.3 %
+    the 8 cells with most leverage, and which of the two they are:
+      d13c_level_MLO         x hs_asx_frac              2.62  curv 0.05  PULLS, prefers higher
+      co2_seasonal_MLO       x seas_lag_p_NH            2.59  curv 0.18  PULLS, prefers higher
+      d13c_seasonal_MLO      x seas_lag_p_NH            2.31  curv 0.04  PULLS, prefers lower
+      ocean_grad_d13c        x pump_hs_gcm2             2.23  curv 0.10  PULLS, prefers higher
+      d14c_SH                x k_w                      2.23  curv 0.08  PULLS, prefers lower
+      d13c_level_MLO         x k_w                      2.21  curv 0.04  PULLS, prefers higher
+      d14c_SH                x bomb_total               2.20  curv 0.12  PULLS, prefers higher
+      d13c_level_MLO         x pump_grad                2.18  curv 0.00  PULLS, prefers higher
+=== GATE AGGREGATE === sum(component map) - sum(parameter map) = 5.684e-14 -> PASS
+
+== the component map: log-units a family moves per one-Hessian-sd step ==
+                            Land uptake Air-sea gas exchange
+CO₂ level                           4.6                  0.2
+CO₂ seasonal cycle                  1.7                  0.0
+CO₂ north–south gradient            0.0                  0.0
+CO₂ in ice cores                    0.1                  0.0
+δ¹³C level & gradient               3.0                  3.7
+δ¹³C seasonal cycle                 1.3                  0.0
+Δ¹⁴C in the air (bomb)              0.1                  3.8
+Δ¹⁴C in the air (pre-bomb)          0.0                  0.0
+Δ¹⁴C in the ocean                   0.0                  0.0
+Ocean interior chemistry            0.1                  0.1
+Measured land & ocean sinks         1.2                  0.0
+ENSO–sink covariance                0.0                  0.0
+                            Mixed layer & vertical mixing
+CO₂ level                                             4.3
+CO₂ seasonal cycle                                    1.1
+CO₂ north–south gradient                              1.0
+CO₂ in ice cores                                      0.3
+δ¹³C level & gradient                                 4.3
+δ¹³C seasonal cycle                                   1.0
+Δ¹⁴C in the air (bomb)                                2.1
+Δ¹⁴C in the air (pre-bomb)                            0.0
+Δ¹⁴C in the ocean                                     2.2
+Ocean interior chemistry                              1.1
+Measured land & ocean sinks                           0.5
+ENSO–sink covariance                                  0.0
+                            High-latitude structure Biological pump
+CO₂ level                                       4.1             1.0
+CO₂ seasonal cycle                              0.1             0.0
+CO₂ north–south gradient                        0.0             0.0
+CO₂ in ice cores                                0.2             0.0
+δ¹³C level & gradient                           5.5             4.2
+δ¹³C seasonal cycle                             0.0             0.0
+Δ¹⁴C in the air (bomb)                          5.0             1.4
+Δ¹⁴C in the air (pre-bomb)                      0.1             0.0
+Δ¹⁴C in the ocean                               0.2             0.2
+Ocean interior chemistry                        1.1             6.4
+Measured land & ocean sinks                     0.5             0.1
+ENSO–sink covariance                            0.0             0.0
+                            Seasonal cycle ENSO response
+CO₂ level                              0.1           0.7
+CO₂ seasonal cycle                    10.2           1.1
+CO₂ north–south gradient               0.2           0.9
+CO₂ in ice cores                       1.0           0.7
+δ¹³C level & gradient                  0.4           1.7
+δ¹³C seasonal cycle                    5.8           0.3
+Δ¹⁴C in the air (bomb)                 0.2           0.3
+Δ¹⁴C in the air (pre-bomb)             0.0           0.0
+Δ¹⁴C in the ocean                      0.0           0.0
+Ocean interior chemistry               0.0           0.0
+Measured land & ocean sinks            0.1           2.7
+ENSO–sink covariance                   0.0           1.6
+                            Input scalings & reporting
+CO₂ level                                          3.6
+CO₂ seasonal cycle                                 0.0
+CO₂ north–south gradient                           0.5
+CO₂ in ice cores                                   0.4
+δ¹³C level & gradient                              5.6
+δ¹³C seasonal cycle                                0.0
+Δ¹⁴C in the air (bomb)                             5.0
+Δ¹⁴C in the air (pre-bomb)                         0.0
+Δ¹⁴C in the ocean                                  0.1
+Ocean interior chemistry                           0.0
+Measured land & ocean sinks                        0.1
+ENSO–sink covariance                               0.0
+
+== who holds each observation family (row share, %) ==
+                            Land uptake Air-sea gas exchange
+CO₂ level                          24.7                  1.3
+CO₂ seasonal cycle                 12.1                  0.2
+CO₂ north–south gradient            1.1                  0.1
+CO₂ in ice cores                    4.0                  0.6
+δ¹³C level & gradient              10.5                 12.9
+δ¹³C seasonal cycle                15.1                  0.4
+Δ¹⁴C in the air (bomb)              0.6                 21.2
+Δ¹⁴C in the air (pre-bomb)          3.8                 20.5
+Δ¹⁴C in the ocean                   0.3                  1.0
+Ocean interior chemistry            0.6                  0.9
+Measured land & ocean sinks        22.6                  0.9
+ENSO–sink covariance                0.1                  1.0
+                            Mixed layer & vertical mixing
+CO₂ level                                            23.0
+CO₂ seasonal cycle                                    7.5
+CO₂ north–south gradient                             37.0
+CO₂ in ice cores                                     10.5
+δ¹³C level & gradient                                15.2
+δ¹³C seasonal cycle                                  11.5
+Δ¹⁴C in the air (bomb)                               11.6
+Δ¹⁴C in the air (pre-bomb)                           24.1
+Δ¹⁴C in the ocean                                    82.8
+Ocean interior chemistry                             12.1
+Measured land & ocean sinks                           9.9
+ENSO–sink covariance                                  0.7
+                            High-latitude structure Biological pump
+CO₂ level                                      21.9             5.2
+CO₂ seasonal cycle                              0.5             0.3
+CO₂ north–south gradient                        0.8             0.2
+CO₂ in ice cores                                6.0             1.3
+δ¹³C level & gradient                          19.3            14.8
+δ¹³C seasonal cycle                             0.5             0.1
+Δ¹⁴C in the air (bomb)                         27.8             7.8
+Δ¹⁴C in the air (pre-bomb)                     28.3            12.0
+Δ¹⁴C in the ocean                               7.4             6.2
+Ocean interior chemistry                       12.5            73.3
+Measured land & ocean sinks                     9.4             2.5
+ENSO–sink covariance                            1.2             0.4
+                            Seasonal cycle ENSO response
+CO₂ level                              0.5           4.0
+CO₂ seasonal cycle                    71.6           7.6
+CO₂ north–south gradient               8.1          32.2
+CO₂ in ice cores                      35.6          26.2
+δ¹³C level & gradient                  1.5           6.1
+δ¹³C seasonal cycle                   68.3           3.7
+Δ¹⁴C in the air (bomb)                 1.1           1.6
+Δ¹⁴C in the air (pre-bomb)             4.9           0.0
+Δ¹⁴C in the ocean                      0.1           0.2
+Ocean interior chemistry               0.1           0.3
+Measured land & ocean sinks            1.7          51.1
+ENSO–sink covariance                   0.1          96.5
+                            Input scalings & reporting
+CO₂ level                                         19.4
+CO₂ seasonal cycle                                 0.1
+CO₂ north–south gradient                          20.3
+CO₂ in ice cores                                  15.9
+δ¹³C level & gradient                             19.7
+δ¹³C seasonal cycle                                0.4
+Δ¹⁴C in the air (bomb)                            28.2
+Δ¹⁴C in the air (pre-bomb)                         6.5
+Δ¹⁴C in the ocean                                  2.1
+Ocean interior chemistry                           0.3
+Measured land & ocean sinks                        1.8
+ENSO–sink covariance                               0.0
+
+== what holds each part of the model (column share, %) ==
+                            Land uptake Air-sea gas exchange
+CO₂ level                          38.1                  3.1
+CO₂ seasonal cycle                 14.2                  0.3
+CO₂ north–south gradient            0.2                  0.1
+CO₂ in ice cores                    0.9                  0.2
+δ¹³C level & gradient              24.6                 46.1
+δ¹³C seasonal cycle                10.6                  0.4
+Δ¹⁴C in the air (bomb)              0.9                 47.3
+Δ¹⁴C in the air (pre-bomb)          0.1                  0.5
+Δ¹⁴C in the ocean                   0.1                  0.3
+Ocean interior chemistry            0.4                  0.9
+Measured land & ocean sinks         9.9                  0.6
+ENSO–sink covariance                0.0                  0.2
+                            Mixed layer & vertical mixing
+CO₂ level                                            24.1
+CO₂ seasonal cycle                                    6.0
+CO₂ north–south gradient                              5.6
+CO₂ in ice cores                                      1.6
+δ¹³C level & gradient                                24.1
+δ¹³C seasonal cycle                                   5.5
+Δ¹⁴C in the air (bomb)                               11.5
+Δ¹⁴C in the air (pre-bomb)                            0.3
+Δ¹⁴C in the ocean                                    12.4
+Ocean interior chemistry                              5.9
+Measured land & ocean sinks                           3.0
+ENSO–sink covariance                                  0.1
+                            High-latitude structure Biological pump
+CO₂ level                                      24.6             7.3
+CO₂ seasonal cycle                              0.4             0.3
+CO₂ north–south gradient                        0.1             0.0
+CO₂ in ice cores                                1.0             0.3
+δ¹³C level & gradient                          32.8            31.5
+δ¹³C seasonal cycle                             0.2             0.1
+Δ¹⁴C in the air (bomb)                         29.6            10.4
+Δ¹⁴C in the air (pre-bomb)                      0.3             0.2
+Δ¹⁴C in the ocean                               1.2             1.2
+Ocean interior chemistry                        6.5            47.7
+Measured land & ocean sinks                     3.0             1.0
+ENSO–sink covariance                            0.1             0.0
+                            Seasonal cycle ENSO response
+CO₂ level                              0.5           7.4
+CO₂ seasonal cycle                    56.5          10.8
+CO₂ north–south gradient               1.2           8.6
+CO₂ in ice cores                       5.4           7.1
+δ¹³C level & gradient                  2.3          17.2
+δ¹³C seasonal cycle                   32.3           3.2
+Δ¹⁴C in the air (bomb)                 1.1           2.9
+Δ¹⁴C in the air (pre-bomb)             0.1           0.0
+Δ¹⁴C in the ocean                      0.0           0.0
+Ocean interior chemistry               0.0           0.2
+Measured land & ocean sinks            0.5          27.1
+ENSO–sink covariance                   0.0          15.6
+                            Input scalings & reporting
+CO₂ level                                         23.5
+CO₂ seasonal cycle                                 0.1
+CO₂ north–south gradient                           3.5
+CO₂ in ice cores                                   2.8
+δ¹³C level & gradient                             36.2
+δ¹³C seasonal cycle                                0.2
+Δ¹⁴C in the air (bomb)                            32.4
+Δ¹⁴C in the air (pre-bomb)                         0.1
+Δ¹⁴C in the ocean                                  0.4
+Ocean interior chemistry                           0.1
+Measured land & ocean sinks                        0.6
+ENSO–sink covariance                               0.0
+
+== parameters ordered by TOTAL leverage (least identified first) ==
+  sigma_d14c           total     0.51   strongest single stream: d14c_NH                    0.25
+  grad_off_d13c        total     0.51   strongest single stream: d13c_gradient              0.51
+  grad_off_co2         total     0.53   strongest single stream: co2_gradient               0.53
+  sst_seas_amp_NH      total     1.07   strongest single stream: co2_seasonal_MLO           0.47
+  ent_seas_amp_SH      total     1.16   strongest single stream: co2_seasonal_SPO           0.76
+  sst_seas_amp_SH      total     1.24   strongest single stream: co2_seasonal_SPO           0.69
+  seas_T_amp_SH        total     1.50   strongest single stream: co2_seasonal_SPO           0.46
+  gamma_enso_ocn_SH    total     1.62   strongest single stream: gcb_ocean_enso_slope       0.73
+  gamma_enso_ocn_NH    total     1.62   strongest single stream: gcb_ocean_enso_slope       0.74
+  seas_lag_p_SH        total     2.13   strongest single stream: co2_seasonal_SPO           1.15
+  npp_frac_NH          total     2.89   strongest single stream: co2_seasonal_MLO           0.76
+  seas_T_amp_NH        total     2.96   strongest single stream: co2_seasonal_MLO           1.44
+  gamma_enso_land_SH   total     3.18   strongest single stream: gcb_land_sink              0.90
+  q10                  total     3.21   strongest single stream: co2_seasonal_MLO           1.34
+  gamma_enso_land_NH   total     3.67   strongest single stream: gcb_land_sink              0.92
+  h_ml                 total     3.76   strongest single stream: d13c_level_MLO             0.56
+  luc_scale            total     3.90   strongest single stream: co2_level_SPO              1.20
+  kz_deep_frac         total     4.26   strongest single stream: d14c_profile_ab            1.78
+  u_hs                 total     4.31   strongest single stream: co2_level_SPO              1.20
+  bomb_total           total     4.38   strongest single stream: d14c_SH                    2.20
+  fert_k               total     4.45   strongest single stream: co2_level_SPO              1.25
+  beta_max             total     4.51   strongest single stream: co2_level_SPO              1.25
+  h_hs                 total     4.57   strongest single stream: co2_level_SPO              1.14
+  tau_ex               total     4.91   strongest single stream: co2_gradient               0.97
+  kz                   total     4.99   strongest single stream: co2_level_SPO              1.13
+  seas_lag_p_NH        total     5.11   strongest single stream: co2_seasonal_MLO           2.59
+  rep_dC               total     5.69   strongest single stream: d13c_level_MLO             2.12
+  pump_hs_gcm2         total     6.03   strongest single stream: ocean_grad_d13c            2.23
+  pump_grad            total     7.37   strongest single stream: d13c_level_MLO             2.18
+  hs_asx_frac          total     7.85   strongest single stream: d13c_level_MLO             2.62
+  k_w                  total     7.98   strongest single stream: d14c_SH                    2.23
+
+wrote outputs/diagnostics/constraint_map_hilda31pe.rds (26 streams x 31 names)

@@ -66,8 +66,34 @@ ccx_load_cpp()
 
 # ---- NAMED CONSTANTS: every label, filename and threshold derives from here ----
 CM_TAG        <- "constraint_map"
-CM_DATE       <- "20260925"
-CM_MODE       <- CCX_MODE_CANONICAL
+CM_DATE       <- "20260925"   # the SHIPPED canonical artifact's date; see CM4
+# ⛔⛔ CM4  THE ARM (2026-09-26). The map used to be canonical-only. A SECOND
+#       evaluation point answers a question one point cannot: is the pins/pulls
+#       picture a property of the MODEL, or only of THIS FIT?
+#       ⚠ A second arm is only like-for-like if it differs in the FIT and NOT in
+#       the STRUCTURE. Measured 09-26:
+#         hilda32f  seas_ml 1, periodic, names a clean SUPERSET of the canonical's
+#                   29 (adds the 3 the canonical PINS) -> the 29 shared names are
+#                   directly comparable. THE LIKE-FOR-LIKE ARM.
+#         hilda31pe seas_ml **0** -- a different STRUCTURE -- and NOT a superset:
+#                   it lacks `w_enso_l2` (28/29 shared). A difference between its
+#                   map and the canonical's cannot be attributed to the fit rather
+#                   than the structure. It is the seas_ml ON/OFF control and
+#                   licenses THAT comparison only
+#                   ([[iso_deep_control_licenses_one_comparison]]).
+#       ⭐ The step is one CONDITIONAL Hessian sd, an EQUAL-DIFFICULTY step
+#       (quadratic drop 0.5 log-units for every name BY CONSTRUCTION), which is
+#       what makes a cross-arm comparison of leverage meaningful at all.
+#   Usage:  Rscript calibration/diag_constraint_map.R mode=hilda32f
+CM_MODE <- local({
+  a <- grep("^mode=", commandArgs(trailingOnly = TRUE), value = TRUE)
+  if (length(a)) sub("^mode=", "", a[[1]]) else CCX_MODE_CANONICAL
+})
+CM_IS_CANONICAL <- identical(CM_MODE, CCX_MODE_CANONICAL)
+# ⛔ ONLY the canonical arm writes the file the APP reads. A control arm must never
+# be able to land in `data/constraint_map.rds` -- a second evaluation point that
+# overwrites the shipped one would silently re-point the app's whole tab.
+CM_SUFFIX <- if (CM_IS_CANONICAL) "" else paste0("_", CM_MODE)
 CM_STEP_SD    <- 1.0          # CM2: the step, in Hessian sds (unconstrained space)
 # "conditional" = 1/sqrt(diag(-H)), the equal-difficulty step this map uses.
 # "marginal" = sqrt(diag(cov)) = md$sd_unc, measured and rejected -- see CM2.
@@ -76,8 +102,13 @@ CM_STEP_KIND  <- "conditional"
 # MEASURED drop exceeds it by this factor -- the coordinate is then nonlinear on
 # the scale of its own uncertainty, which is a finding, not a failure.
 CM_NONLIN_FLAG<- 5.0
-CM_OUT        <- file.path("data", sprintf("%s.rds", CM_TAG))
-CM_LOG        <- file.path("outputs", "diagnostics", sprintf("%s_%s.log", CM_TAG, CM_DATE))
+CM_OUT        <- if (CM_IS_CANONICAL) file.path("data", sprintf("%s.rds", CM_TAG)) else
+                 file.path("outputs", "diagnostics", sprintf("%s%s.rds", CM_TAG, CM_SUFFIX))
+# A control arm's log carries the date it was actually RUN, not the shipped arm's.
+CM_LOG        <- file.path("outputs", "diagnostics",
+                           sprintf("%s_%s%s.log", CM_TAG,
+                                   if (CM_IS_CANONICAL) CM_DATE else format(Sys.Date(), "%Y%m%d"),
+                                   CM_SUFFIX))
 CM_HARNESS_TOL<- 1e-3         # the rebuilt objective must reproduce the stored logpost
 CM_CLOSE_TOL  <- 1e-9         # sum over streams must equal the total loglik
 # CURVATURE FRACTION, in [0, 1]: |dhi + dlo| / (|dhi| + |dlo|).
@@ -97,7 +128,15 @@ CM_PIN_CUT    <- 0.5          # curvature fraction above which we call it "pins"
 # CM3: the grouping. A judgment, printed so a reader can disagree with it.
 # ⚠ EVERY fitted name must appear exactly once -- gated below, so a parameter
 # added to the table cannot fall out of the map silently.
-CM_COMPONENT <- list(
+# ⚠ 09-26: this is now the UNION over REGISTERED ARMS, intersected down to the arm
+# actually being mapped (CM4). The per-arm COVER gate below stays exactly as strict
+# -- every fitted name of THIS arm exactly once -- and a SECOND gate requires every
+# union entry absent from this arm to be a name some other registered arm really
+# has. So a MISSPELLED or retired name cannot hide in the union, which is the
+# failure mode that widening a coverage table normally introduces
+# ([[retiring_an_arm_unlints_its_path]]: "is it covered?" and "does it still
+# EXIST?" are two questions and need two tests).
+CM_COMPONENT_ALL <- list(
   "Land uptake"            = c("beta_max", "fert_k", "q10"),
   "Air-sea gas exchange"   = c("k_w"),
   "Mixed layer & vertical mixing" = c("h_ml", "kz", "kz_deep_frac", "tau_ex"),
@@ -105,11 +144,18 @@ CM_COMPONENT <- list(
   "Biological pump"        = c("pump_hs_gcm2", "pump_grad"),
   "Seasonal cycle"         = c("npp_frac_NH", "seas_T_amp_NH", "seas_T_amp_SH",
                                "seas_lag_p_NH", "seas_lag_p_SH",
-                               "sst_seas_amp_NH", "sst_seas_amp_SH"),
-  "ENSO response"          = c("w_enso_l2", "gamma_enso_land_NH", "gamma_enso_land_SH"),
+                               "sst_seas_amp_NH", "sst_seas_amp_SH",
+                               "ent_seas_amp_SH"),
+  "ENSO response"          = c("w_enso_l2", "gamma_enso_land_NH", "gamma_enso_land_SH",
+                               "gamma_enso_ocn_NH", "gamma_enso_ocn_SH"),
   "Input scalings & reporting" = c("bomb_total", "luc_scale", "sigma_d14c",
                                    "rep_dC", "grad_off_co2", "grad_off_d13c")
 )
+# Names that a REGISTERED arm other than this one carries. Listed explicitly, by
+# hand, so the union cannot quietly absorb a typo. Gated below (GATE UNION).
+CM_ARM_ONLY_NAMES <- c("w_enso_l2",                                  # canonical / hilda32f
+                       "ent_seas_amp_SH",                            # hilda32f / hilda31pe
+                       "gamma_enso_ocn_NH", "gamma_enso_ocn_SH")     # hilda32f / hilda31pe
 
 # The observation families. ⚠ Same rule: every stream exactly once, gated.
 # ⚠ THESE STRINGS ARE READER-FACING: they are the app's own axis labels and
@@ -150,6 +196,8 @@ spin  <- ccx_spinup_from_label(ccx_mode_spinup(md))
 lp    <- ccx_make_logpost(base_params = bp, by_stream = TRUE, spinup_fn = spin)
 u0    <- st$u
 NAMES <- md$param_names
+# CM4: the arm's own component table = the union restricted to this arm's names.
+CM_COMPONENT <- Filter(length, lapply(CM_COMPONENT_ALL, function(v) intersect(v, NAMES)))
 # ⚠ `md$hessian` is the Hessian of the LOG-posterior, so it is NEGATIVE
 # definite and the precision matrix is its negation. Checked, not assumed:
 # sqrt(diag(solve(-H))) reproduces the stored `md$sd_unc` exactly.
@@ -204,6 +252,18 @@ cm_gates <- function(b) {
                   paste(setdiff(names(b$streams), fs), collapse = ", "),
                   paste(setdiff(fs, names(b$streams)), collapse = ", "))
   ok <- ok && p3 && p4
+
+  # UNION (09-26, CM4): the component table is a union over arms, so the per-arm
+  # COVER gate above can no longer catch a name that is simply WRONG -- it would
+  # just be intersected away. Require every union entry missing from THIS arm to be
+  # a hand-declared name of another registered arm.
+  stray <- setdiff(setdiff(unlist(CM_COMPONENT_ALL, use.names = FALSE), NAMES),
+                   CM_ARM_ONLY_NAMES)
+  p4b <- length(stray) == 0L
+  cm_say("=== GATE UNION === union entries absent from this arm and NOT declared arm-only: %d -> %s%s\n",
+         length(stray), if (p4b) "PASS" else "*** FAIL ***",
+         if (length(stray)) paste0(" {", paste(stray, collapse = ", "), "}") else "")
+  ok <- ok && p4b
 
   # SD: the step must exist and be usable for every name.
   # STEP: the sign convention is CHECKED, not assumed -- sqrt(diag(solve(-H)))
