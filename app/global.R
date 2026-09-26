@@ -766,12 +766,15 @@ APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.41, `50` = 1.22, `100` = 1.08, `200` 
 app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0) {
   y_end <- max(emissions$year)
   e_end <- emissions$fossil_GtC[emissions$year == y_end]
-  # ⚠ Only FOSSIL emissions reach zero on `to_zero` -- land use always comes
-  # from the background scenario -- so "emissions stop" is fossil-only. Marcus's
-  # wording, kept VERBATIM and flagged rather than edited.
+  # ⭐ "FOSSIL" ADDED 2026-09-26 on Marcus's instruction, to his own sentence.
+  # Only FOSSIL emissions reach zero on `to_zero`: `app_stylised_emissions()`
+  # always takes land use from the background scenario, so the pathway's total
+  # CO2 emissions never reach zero and "emissions stop" overstated what the run
+  # did. The slider the user moved is already labelled "Fossil emissions after
+  # today", so the sentence now matches the control that produced it.
   if (identical(kind, "to_zero"))
-    return(paste("Note how little the temperature falls even when emissions stop \u2014",
-                 "the CO\u2082 already up there does not come back down quickly."))
+    return(paste("Note how little the temperature falls even when fossil emissions",
+                 "stop \u2014 the CO\u2082 already up there does not come back down quickly."))
   # rate == 0 IS the constant pathway: e0 * 1^n. Sharing the branch keeps the app
   # from describing one pathway two different ways.
   if (identical(kind, "constant") || isTRUE(rate_pct == 0))

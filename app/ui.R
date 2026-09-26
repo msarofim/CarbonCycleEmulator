@@ -497,9 +497,14 @@ navbarPage(
         info_box("Where the future temperature comes from",
                  p("Future scenario temperatures are a result of feeding scenario",
                    "emissions through the FaIR model. The pulse lab and the",
-                   "build-your-own scenarios only allow changes to carbon",
-                   "emissions, not non-CO₂ greenhouse gases, aerosols, or ozone",
-                   "precursors."))
+                   # ⭐ "fossil" added 2026-09-26: both of those controls change
+                   # FOSSIL CO₂ only. Land-use emissions always come from the
+                   # background scenario (app_stylised_emissions), and the pulse
+                   # is added to the fossil series, so "carbon emissions" claimed
+                   # a wider reach than either control has.
+                   "build-your-own scenarios only allow changes to fossil carbon",
+                   "emissions, not land-use change, non-CO₂ greenhouse gases,",
+                   "aerosols, or ozone precursors."))
       )
     )
   ),

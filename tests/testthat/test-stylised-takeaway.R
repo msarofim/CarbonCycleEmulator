@@ -85,6 +85,20 @@ test_that("only the to_zero pathway says emissions stop", {
   expect_true(grepl(STOPS, clause("to_zero"), fixed = TRUE))
 })
 
+test_that("EVERY branch scopes its claim to FOSSIL emissions", {
+  # ⭐ 2026-09-26. The scope, not the wording: on every pathway the user's
+  # control is fossil-only -- `app_stylised_emissions()` always takes land use
+  # from the background scenario -- so no branch may claim something about
+  # "emissions" full stop. `to_zero` said "even when emissions stop", which
+  # overstated what the run did, because the pathway's TOTAL CO2 emissions never
+  # reach zero. This asserts the qualifier survives future edits to the prose.
+  for (k in list(c("to_zero", 0), c("constant", 0), c("rate", 2), c("rate", -2))) {
+    cl <- clause(k[[1]], rate_pct = as.numeric(k[[2]]))
+    expect_match(cl, "fossil emissions", ignore.case = TRUE,
+                 info = paste("branch", k[[1]], k[[2]], "does not scope to fossil"))
+  }
+})
+
 test_that("every claimed number is the one the PATHWAY actually has", {
   # A computed sentence is only better than an asserted one if the numbers in it
   # come from the object it describes.
