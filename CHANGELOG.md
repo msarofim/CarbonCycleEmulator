@@ -2,6 +2,75 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-26 (e) — **The pulse lab checked against standard FaIR and the TCRE: the gap is the CARBON CYCLE, and it runs the conservative way.** ⛔ Also: the whole test suite had been dead for a day, and gate 12's only implementation measures a model nobody ships.
+
+Marcus: *"work on the placeholder texts"* and *"check the carbon cycle pulse analysis against both the
+TCRE and against standard FaIR."*
+
+### 1. ⭐⭐ CCX vs FaIR — a DECOMPOSITION, not a validation
+CCX's climate module **IS** FaIR's 841-config ensemble mean (ERF law fitted to FaIR's
+Meinshausen-2020 CO₂ forcing, 3-timescale IRF fitted to FaIR's GMST; implied **ECS 3.06 °C**). So
+this cannot validate CCX — what it buys is a decomposition: with the climate half shared,
+ΔT ≈ ∝ ΔCO₂, so **compare ΔCO₂ first**.
+
+Matched, 100 GtC in 2050 on ssp245, FaIR 2.2.4 calib 1.6.0, 841 configs:
+
+| year | AF ccx | AF fair | ratio | K/1000 ccx | fair | ratio |
+|---|---|---|---|---|---|---|
+| 2080 (+30) | 0.5088 | 0.5468 | 0.931 | 1.339 | 1.366 | **0.981** |
+| **2150 (+100)** | **0.3141** | **0.4687** | **0.670** | **1.082** | **1.390** | **0.779** |
+| 2230 | 0.2539 | 0.4376 | 0.580 | 1.025 | 1.447 | 0.709 |
+| 2300 | 0.2249 | 0.4130 | 0.545 | 1.005 | 1.489 | 0.675 |
+
+⭐⭐ **The two ratio columns track each other ⇒ the temperature gap IS the airborne-fraction gap, and
+the climate half is exonerated.** ⛔ **Not a constant offset**: FaIR's per-1000 RISES with horizon
+while CCX's FALLS, so it is 2 % at +30 yr and a third by 2300.
+
+⭐⭐ **AND IT RUNS THE CONSERVATIVE WAY.** The app's lesson is that pulse warming is permanent rather
+than borrowed; **FaIR says it is MORE permanent than CCX shows** (still rising at 2300, vs CCX's 70 %
+of peak). The defect weakens the app's own argument rather than inflating it — the direction
+`diag_joos_irf.R` reported in August.
+
+**Against the TCRE**: 1.08 is 66 % of AR6's 1.65, inside the 1.0–2.3 likely range at its floor.
+⚠⚠ **That AR6 figure is a RECOLLECTION, not a citation** — one place, labelled, nothing gated on it.
+The tell that the quantities differ is that **FaIR's own 1.39 is also below 1.65**.
+
+⚠ **Like-for-like was not free**: the FaIR arm first ran the pulse in **2030** while the tab defaults
+to **2050**, which would have charged twenty years of background CO₂ to the carbon cycle. Re-run
+matched; the FaIR driver's pulse year is now a CLI argument and the filename carries it.
+
+### 2. The placeholder texts
+- **Build-your-own takeaway** — ⛔ the clause was **wrong on the app's own default**: *"a fixed rate
+  only ever approaches zero"*, where `s_rate` spans −5…+5 and **defaults to +1**, so the default
+  pathway grows. One string covered three pathways by disjunction. Now one branch per pathway on the
+  SIGN of the rate, numbers read off the captured pathway, extracted to a **pure function** so it can
+  be gated (`test-stylised-takeaway.R` sweeps the slider's whole domain; mutation-tested — the old
+  clause fails 37 of 45). ⚠ Marcus's `to_zero` sentence is verbatim; flagged that only FOSSIL
+  emissions reach zero there, land use continues.
+- **Pulse permanence box** — the box said the proportionality was *"stated, not shown: demonstrating
+  it would take a second pulse size."* It took five: across **10–500 GtC** the per-1000 figure moves
+  **4.3 %**. Also now admits what it previously did not — the figure is **1.41 / 1.22 / 1.08 / 1.02**
+  at +20/50/100/200 yr, so a bare "per 1000 GtC" is underdetermined until the horizon is named.
+  Numbers live in named constants gated against the driver's CSV.
+
+### 3. ⛔⛔ THE TEST SUITE HAD BEEN DEAD SINCE `a6ddf96`
+`Rscript tests/run_tests.R` aborted **during helper sourcing, before any test file ran**.
+`helper-code-lines.R`'s own "test 0" read `.root`, which every test FILE defines and no HELPER does,
+and helpers are sourced first. **The output read like one failing test** — a testthat backtrace
+ending "1 failure and 6 successes", which is also what this suite's ONE legitimate standing red looks
+like. Baselines: **4773 → zero tests reached → 4834**, same single documented red (the
+canonical-beats-the-control AIC gate, ruling 2 of 09-19). ⭐ **Read the PASS COUNT, not the verdict.**
+⚠ Introduced by a de-duplication: hoisting shared code moved it into a new **execution phase**.
+
+### 4. ⛔ Gate 12's only implementation measures a model nobody ships
+`diag_joos_irf.R` run with **no argument** uses `ccx_default_params()`. Pulse AF@100 on ssp245:
+**`defaults` 0.445** vs **`hilda32f` 0.304** vs the app's canonical **0.314** — a 42 % overstatement.
+And `mode=hilda29l` **errors outright** (`ccx_migrate_par_set`: the canonical pins the ocean ENSO shim
+and fits the `w_enso_l2` limb instead). ⭐ The script says *"absence must ASSERT"* two lines above
+`if (!length(a)) return(JOOS_ARM_DEFAULT)` — **the typo case was fixed and the missing case was
+not.** ⚠ **Not changed**: gate 12 is Marcus's ruled territory (09-04, a comparison not a gate), and
+moving the default changes what every past gate-12 number meant.
+
 ## 2026-09-26 (d) — **The constraint map has a SECOND evaluation point. The headline survives it; two sentences of shipped app prose do not.** ⛔ The proposed arm was the wrong one, and measurement said so before anything was run.
 
 Marcus's ruling (09-26): add a second evaluation point, so the pins/pulls picture can be attributed
