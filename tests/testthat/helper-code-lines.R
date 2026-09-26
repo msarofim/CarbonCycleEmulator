@@ -50,8 +50,30 @@ test_that("0. the shared comment stripper keeps code and drops comments", {
 
   # THE LIMITATION, ASSERTED rather than trusted: no escaped or single-quoted
   # strings in the files this helper is pointed at, or the quote count is wrong.
+  #
+  # ⛔⛔ THE ROOT IS RESOLVED HERE, NOT BORROWED FROM A TEST FILE (fixed
+  # 2026-09-26). This block used to read `.root`, which every TEST FILE defines
+  # but no HELPER does -- and testthat sources helpers BEFORE test files. So
+  # this `test_that` raised "object '.root' not found" during
+  # `source_test_helpers()`, which testthat turns into a FAILURE INSIDE
+  # source_dir() and then ABORTS THE WHOLE RUN. ⚠ The suite did not report a
+  # failing test; it reported nothing at all, for every test in the repo,
+  # because it never reached one. `Rscript tests/run_tests.R` had been dead
+  # since a6ddf96 (the commit that added this helper) -- the pre-helper baseline
+  # was pass 4773 / fail 1 / error 0. ⇒ [[broken_gate_reports_nothing]], and its
+  # sharper form: a BROKEN HARNESS is indistinguishable from a broken test in
+  # the output, and costs the whole suite rather than one gate.
+  # ⭐ A helper must be self-contained: it cannot depend on a name that only
+  # exists once test files start running.
+  .helper_root <- local({
+    d <- normalizePath(getwd(), mustWork = FALSE)
+    for (i in 1:8) { if (file.exists(file.path(d, "DESIGN.md"))) break; d <- dirname(d) }
+    d
+  })
+  expect_true(file.exists(file.path(.helper_root, "DESIGN.md")),
+              info = "the helper could not locate the repo root from getwd()")
   for (f in c("ui.R", "server.R", "global.R")) {
-    src <- readLines(file.path(.root, "app", f), warn = FALSE)
+    src <- readLines(file.path(.helper_root, "app", f), warn = FALSE)
     expect_false(any(grepl('\\\\"', src)),
                  info = paste(f, "carries an escaped quote; ccx_code_lines() cannot parse it"))
   }
