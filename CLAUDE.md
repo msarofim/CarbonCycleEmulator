@@ -5,6 +5,43 @@
 > paired pulse discipline) and `obs-model-comparisons` (canonical obs choices: IGCC
 > temperature, multi-year baselining). This file adds project specifics.
 
+## Memory: this repo SHARES the FaIRtoFrEDI keyspace (symlinked 2026-09-25)
+
+Claude Code keys its memory store by the **launch directory**, so a session started here
+would historically have had an EMPTY memory — no `MEMORY.md`, no `INDEX_ccx*.md`, none of
+the 800-odd files, all of which live under the `FaIRtoFrEDI` key because that is where
+sessions have always been launched from.
+
+**As of 2026-09-25 the two keys share ONE store**, via a symlink:
+
+```
+~/.claude/projects/-Users-…-CarbonCycleEmulator/memory
+  -> ~/.claude/projects/-Users-…-FaIRtoFrEDI/memory
+```
+
+Verified: same inode, 803 files readable through the link, and a write through this key
+lands in the shared store. Session transcripts are deliberately NOT shared — only `memory`
+and the `memory_backup_*` snapshots are linked.
+
+⚠ **UNVERIFIED AGAINST THE HARNESS.** Whether Claude Code itself follows the symlink when
+it loads `MEMORY.md` at session start has not been tested — only the filesystem has. Until
+a session launched from this directory is confirmed to have the memory, **keep launching
+from `FaIRtoFrEDI/`**. The one-line test: start a session here and ask what
+`INDEX_ccx.md` gives as the canonical mode; if it cannot answer without reading a file,
+the harness is not following the link.
+
+⛔ **The store is SHARED, not this repo's.** It also serves FaIR, FrEDI, SLR/BRICK and the
+vehicle / SC-CO₂ work, the root `MEMORY.md` routes to all of them, and the sub-index budgets
+(soft 14 KB, hard 18 KB, root soft 12 KB) are global. A CCX finding belongs in its own
+sub-index — `INDEX_ccx*.md` — never in the root. Read `MEMORY.md`'s own "READ FIRST" block
+for the routing, and `INDEX_conv.md` before editing the memory tree.
+
+⚠ **Two `CLAUDE.md` files do NOT both load.** Launched here, you get THIS file and
+`~/.claude/CLAUDE.md` — **not** `FaIRtoFrEDI/CLAUDE.md`, which carries the tiered
+memory-index rules, the FrEDI/FaIR environment notes and the cross-repo branch discipline.
+If you need those, read that file explicitly:
+`~/Documents/2026/CodeProjects/FaIRtoFrEDI/CLAUDE.md`.
+
 ## What this project is
 
 Simple calibrated global carbon cycle model (2 hemispheres, monthly, 4-pool land,
