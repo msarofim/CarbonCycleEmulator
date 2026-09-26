@@ -615,6 +615,49 @@ APP_FAIR <- tryCatch(
   error = function(e) NULL)
 
 # ---------------------------------------------------------------------
+# ⭐ STANDARD FaIR, AS A COMPARISON LINE ON THE FUTURES TAB (Marcus 2026-09-26)
+# ---------------------------------------------------------------------
+# The emulator's climate module IS FaIR's 841-config ensemble mean, so FaIR is
+# what it is trying to reproduce. Drawing it turns "this emulates FaIR" from a
+# claim in the provenance caption into something the reader can check.
+#
+# ⛔ ONLY WHERE FaIR WAS ACTUALLY RUN. `APP_FAIR` covers the five SSPs. It does
+# NOT cover a user-built pathway, and there is no honest way to draw one: FaIR
+# was never run on it. So the toggle is offered in the SCENARIOS mode and the
+# PULSE LAB and withheld from "Build your own" -- a greyed-out control the reader
+# can reason about beats a line that silently means something else.
+APP_FAIR_LAB  <- "standard FaIR (dashed)"
+APP_FAIR_NOTE <- paste(
+  "Dashed lines are standard FaIR 2.2.4 (calibration 1.6.0, 841-configuration",
+  "ensemble mean) for the same scenario \u2014 the model this emulator's climate",
+  "module was fitted to, so the gap between a solid line and its dashed partner",
+  "is this emulator's own error. \u26a0 Before 2024 they are not like-for-like:",
+  "the emulator's runs are spliced onto the observed carbon budget and FaIR's",
+  "are not, so a historical gap there is a difference of inputs, not of skill.")
+
+#' FaIR's own trajectories for the scenarios being shown, as plot_future() wants
+#'
+#' @param scenarios SSP names; anything absent from APP_FAIR is dropped, so a
+#'   user-built pathway simply contributes nothing rather than borrowing a line.
+#' @param yvar "gmst" or "co2_ppm", the app's own names
+#' @return data.frame(year, y, who) or NULL
+app_fair_overlay <- function(scenarios, yvar) {
+  if (is.null(APP_FAIR) || !length(scenarios)) return(NULL)
+  # ⚠ THE COLUMN NAMES DIFFER BETWEEN THE TWO OBJECTS and the mapping is here,
+  # once. `APP_FAIR` carries FaIR's own `gmst_C`; a run carries `gmst`. Reading
+  # the wrong one would return NULL and silently draw no FaIR line at all --
+  # which looks exactly like "FaIR agrees perfectly".
+  col <- switch(yvar, gmst = "gmst_C", co2_ppm = "co2_ppm", NULL)
+  if (is.null(col) || !col %in% names(APP_FAIR)) return(NULL)
+  keep <- APP_FAIR$scenario %in% scenarios
+  if (!any(keep)) return(NULL)
+  d <- APP_FAIR[keep, , drop = FALSE]
+  out <- data.frame(year = d$year, y = d[[col]], who = d$scenario,
+                    stringsAsFactors = FALSE)
+  out[is.finite(out$y), , drop = FALSE]
+}
+
+# ---------------------------------------------------------------------
 # Run helpers used by more than one tab
 # ---------------------------------------------------------------------
 

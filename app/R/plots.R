@@ -1382,20 +1382,44 @@ plot_d14c <- function(out, obs, yr_range) {
 #'   coord_cartesian() on purpose -- see the note on APP_FUTURE_VIEW in
 #'   global.R: a zoom would leave the y scale trained on years 1750 onward and
 #'   silently widen the axis against a window that no longer contains them.
-plot_future <- function(runs, yvar, ylab, view = NULL) {
+#' @param fair optional data.frame(year, y, who) of STANDARD FaIR's own
+#'   trajectories for the same scenarios, drawn DASHED (Marcus 2026-09-26).
+#'
+#' ⭐ WHY A FaIR LINE BELONGS HERE. This emulator's climate module is FITTED to
+#' FaIR (841-config ensemble mean), so FaIR is the thing it is trying to
+#' reproduce. Showing it makes the emulation error visible instead of asserted.
+#' ⛔ AND WHY IT IS DASHED AND SHARES THE SCENARIO'S COLOUR: the reader must be
+#' able to pair each emulator line with its reference at a glance and must never
+#' mistake one for the other. A separate colour per FaIR line would double the
+#' legend and break the pairing; a solid line would make them interchangeable.
+#' ⚠ THE TWO ARE NOT LIKE-FOR-LIKE BEFORE 2024: the emulator's runs are SPLICED
+#' onto the observed carbon budget (app_splice_history) and FaIR's are not, so a
+#' historical gap is a difference of INPUTS, not of emulation. The caller says so
+#' in the caption; this function does not invent the caveat.
+plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL) {
   d <- do.call(rbind, lapply(names(runs), function(n) {
     cl <- runs[[n]]$climate
     data.frame(year = cl$year, y = cl[[yvar]], who = n)
   }))
-  if (!is.null(view)) {
-    d <- d[d$year >= view[1] & d$year <= view[2], ]
-    # A view that selects nothing would draw an empty panel with axes, which
-    # reads as "the model is flat here" rather than as a mistake. Refuse.
-    if (!nrow(d))
-      stop(sprintf("view %d-%d selects no model years", view[1], view[2]))
+  crop <- function(x) {
+    if (is.null(view) || is.null(x)) return(x)
+    x[x$year >= view[1] & x$year <= view[2], , drop = FALSE]
   }
-  ggplot(d, aes(year, y, colour = who)) +
-    geom_line(linewidth = 0.8) +
+  d <- crop(d)
+  # A view that selects nothing would draw an empty panel with axes, which
+  # reads as "the model is flat here" rather than as a mistake. Refuse.
+  if (!nrow(d))
+    stop(sprintf("view %d-%d selects no model years", view[1], view[2]))
+  fair <- crop(fair)
+  g <- ggplot(d, aes(year, y, colour = who))
+  if (!is.null(fair) && nrow(fair)) {
+    # ⚠ The FaIR layer is drawn FIRST so the emulator sits on top of its own
+    # reference; and `show.legend = FALSE` because the linetype is explained in
+    # the caption rather than by a second legend that would repeat every label.
+    g <- g + geom_line(data = fair, linewidth = 0.55, linetype = "22",
+                       alpha = 0.9, show.legend = FALSE)
+  }
+  g + geom_line(linewidth = 0.8) +
     labs(x = LAB_YEAR, y = ylab, caption = app_provenance_caption()) +
     theme_ccx()
 }

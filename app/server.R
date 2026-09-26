@@ -738,10 +738,26 @@ function(input, output, session) {
                   if (identical(input$f_yvar, "gmst")) LAB_TEMP else LAB_CO2,
                   view = APP_FUTURE_VIEW)
     } else {
-      plot_future(future_runs(), input$f_yvar,
+      rs <- future_runs()
+      # ⭐ 2026-09-26: standard FaIR as a dashed reference, on request. The
+      # overlay is keyed on the RUN NAMES, which for this mode are the SSP names
+      # the user selected, so an SSP with no FaIR row contributes nothing rather
+      # than borrowing another scenario's line.
+      plot_future(rs, input$f_yvar,
                   if (identical(input$f_yvar, "gmst")) LAB_TEMP else LAB_CO2,
-                  view = APP_FUTURE_VIEW)
+                  view = APP_FUTURE_VIEW,
+                  fair = if (isTRUE(input$f_fair))
+                    app_fair_overlay(names(rs), input$f_yvar))
     }
+  })
+
+  # The FaIR comparison's caveat, shown only when the comparison is. ⚠ It says
+  # the two are NOT like-for-like before 2024 (the emulator splices the observed
+  # budget, FaIR does not), because a reader who spots that gap unaided has
+  # found a hidden defect rather than a documented one.
+  output$f_fair_note <- renderUI({
+    if (!isTRUE(input$f_fair) || identical(input$f_mode, "Build your own")) return(NULL)
+    div(class = "caveat", APP_FAIR_NOTE)
   })
 
   output$f_takeaway <- renderText({

@@ -6,17 +6,18 @@
 # THE NUMBER UNDER TEST. `output$f_pulse_permanence` prints
 #     per1000 = dT(pulse_year + 100) / pulse_GtC * 1000
 # and at the app's defaults that is ~1.08 degC per 1000 GtC. The copy flags it as
-# low-side against a RECOLLECTION of AR6 TCRE ~1.65, and deliberately never says
+# low-side against AR6's TCRE (1.65 degC/1000 GtC, VERIFIED), and deliberately never says
 # "TCRE" because it is not that quantity.
 #
 # ⛔⛔ THE TWO ARE DIFFERENT QUANTITIES AND MUST NOT BE COMPARED NAIVELY.
 #   TCRE  = dGMST per 1000 GtC of CUMULATIVE CO2 emission, measured AT the time
 #           cumulative emissions reach that level, under CONTINUOUS CO2-only
-#           emission. AR6 assesses 1.65 degC/1000 GtC, likely 1.0-2.3.
-#           ⚠ THE AR6 NUMBER HERE IS A RECOLLECTION, NOT A CITATION. It is
-#           carried as TCRE_AR6_* below so it can be corrected in ONE place, and
-#           every verdict that uses it says so. Do not harden it into a gate
-#           until someone reads AR6 WG1 and stamps the source.
+#           emission. AR6 assesses 0.45 [0.27-0.63] degC per 1000 GtCO2 =
+#           1.65 [0.99-2.31] per 1000 GtC. ⭐ VERIFIED 2026-09-26 against AR6
+#           WG1 SPM D.1.1 and Forster et al. 2026 (ESSD 18, 3889). The
+#           GtCO2 -> GtC conversion is done IN CODE below and GATED against
+#           AR6's own printed per-GtC range, because the factor is 3.664 --
+#           bigger than the gap under investigation.
 #   pulse = the MARGINAL dGMST from one extra increment, measured a century
 #           later, on a background scenario that keeps emitting.
 # They are close in theory -- that near-equality IS the cumulative-emissions
@@ -61,11 +62,32 @@ PT_SIZES <- c(10, 50, 100, 200, 500)     # the p_gtc slider's own range
 PT_REF   <- APP_PULSE_GtC_DEFAULT        # the size the app's copy quotes
 PT_HORIZ <- c(20L, 50L, 100L, 200L)      # years after release
 PT_GTC_PER_PPM <- ccx_const("GtC_PER_PPM")
-# ⚠ RECOLLECTION, NOT A CITATION (see header). One place, so one correction.
-TCRE_AR6_BEST <- 1.65
-TCRE_AR6_LO   <- 1.00
-TCRE_AR6_HI   <- 2.30
-TCRE_AR6_SRC  <- "AR6 WG1, per 1000 GtC -- RECOLLECTED, NOT VERIFIED"
+# ⭐ VERIFIED 2026-09-26. Carried as an unverified recollection for one session;
+# both halves now have a source and both agree with the recollection.
+#   IPCC AR6 WG1 SPM D.1.1: "Each 1000 GtCO2 of cumulative CO2 emissions is
+#   assessed to likely cause a 0.27 degC to 0.63 degC increase in global surface
+#   temperature with a best estimate of 0.45 degC. This quantity is referred to
+#   as the transient climate response to cumulative CO2 emissions (TCRE)."
+#   Corroborated in the primary literature, locally: Forster et al. 2026,
+#   Indicators of Global Climate Change 2025, ESSD 18, 3889 -- "a median TCRE
+#   estimate of 0.45 degC per 1000 GtCO2".
+#
+# ⛔⛔ AR6 STATES TCRE PER 1000 GtCO2; THIS MODEL WORKS IN GtC. The factor is
+# 3.664, so the two forms differ by more than the gap being investigated. The
+# conversion is therefore done HERE, IN CODE, from the AR6-NATIVE numbers: a
+# typed 1.65 cannot be checked against AR6 without the reader redoing the
+# arithmetic, and a units slip here would swamp the finding.
+TCRE_AR6_PER_GTCO2 <- c(lo = 0.27, best = 0.45, hi = 0.63)   # degC / 1000 GtCO2
+TCRE_GTCO2_PER_GTC <- 44.009 / 12.011                        # 3.664
+TCRE_AR6      <- TCRE_AR6_PER_GTCO2 * TCRE_GTCO2_PER_GTC      # degC / 1000 GtC
+TCRE_AR6_BEST <- unname(TCRE_AR6[["best"]])
+TCRE_AR6_LO   <- unname(TCRE_AR6[["lo"]])
+TCRE_AR6_HI   <- unname(TCRE_AR6[["hi"]])
+TCRE_AR6_SRC  <- paste("AR6 WG1 SPM D.1.1 (0.45 [0.27-0.63] degC/1000 GtCO2);",
+                       "corroborated Forster et al. 2026 ESSD 18:3889")
+# AR6's OWN printed per-GtC likely range. Gated against the conversion below, so
+# a wrong factor cannot pass silently under the verdict.
+TCRE_AR6_PER_GTC_PUBLISHED <- c(lo = 1.0, hi = 2.3)
 # Linearity: how far the per-1000 number may drift across a 50x size range
 # before "a per-tonne number is meaningful" stops being an honest claim. Derived
 # from the SPREAD the sizes themselves produce, and reported either way.
@@ -202,9 +224,17 @@ for (g in PT_SIZES) {
 # ---------------------------------------------------------------------
 # AGAINST THE AR6 TCRE -- stated as a RATIO, with the caveat attached.
 # ---------------------------------------------------------------------
-say("\n== against the AR6 TCRE (%s) ==\n", TCRE_AR6_SRC)
-say("   AR6 best %.2f, likely %.2f-%.2f degC/1000 GtC\n",
-    TCRE_AR6_BEST, TCRE_AR6_LO, TCRE_AR6_HI)
+say("\n== against the AR6 TCRE ==\n")
+say("   source: %s\n", TCRE_AR6_SRC)
+gu <- max(abs(c(TCRE_AR6_LO, TCRE_AR6_HI) - TCRE_AR6_PER_GTC_PUBLISHED)) < 0.05
+say("   === GATE UNITS === %.2f x %.4f -> %.2f-%.2f degC/1000 GtC vs AR6's printed %.1f-%.1f -> %s\n",
+    TCRE_AR6_PER_GTCO2[["best"]], TCRE_GTCO2_PER_GTC, TCRE_AR6_LO, TCRE_AR6_HI,
+    TCRE_AR6_PER_GTC_PUBLISHED[["lo"]], TCRE_AR6_PER_GTC_PUBLISHED[["hi"]],
+    if (gu) "PASS" else "*** FAIL: the GtCO2->GtC factor is wrong ***")
+if (!gu) stop("the TCRE unit conversion does not reproduce AR6's own per-GtC range")
+say("   AR6 best %.2f, likely %.2f-%.2f degC/1000 GtC (= %.2f [%.2f-%.2f] per 1000 GtCO2)\n",
+    TCRE_AR6_BEST, TCRE_AR6_LO, TCRE_AR6_HI,
+    TCRE_AR6_PER_GTCO2[["best"]], TCRE_AR6_PER_GTCO2[["lo"]], TCRE_AR6_PER_GTCO2[["hi"]])
 say("   CCX pulse, %d GtC at +100 yr: %.3f  = %.0f %% of the AR6 best estimate, %s its likely range\n",
     PT_REF, a$per1000, 100 * a$per1000 / TCRE_AR6_BEST,
     if (a$per1000 >= TCRE_AR6_LO && a$per1000 <= TCRE_AR6_HI) "INSIDE" else "OUTSIDE")

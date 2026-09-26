@@ -454,7 +454,17 @@ navbarPage(
         # would drift the moment one of the three grew a fourth choice.
         hr(),
         radioButtons("f_yvar", "Show", APP_FUTURE_YVARS,
-                     selected = APP_FUTURE_YVAR_DEFAULT)
+                     selected = APP_FUTURE_YVAR_DEFAULT),
+        # ⛔ NOT offered in "Build your own": FaIR was never run on a pathway the
+        # user invented, so there is no line to draw. Withholding the control is
+        # honest; drawing the background scenario's FaIR line beside the user's
+        # own pathway would be a different scenario wearing the same panel.
+        conditionalPanel(
+          "input.f_mode != 'Build your own'",
+          checkboxInput("f_fair", "Compare with standard FaIR", value = FALSE),
+          helpText(class = "small",
+                   "This emulator's climate module is fitted to FaIR, so the",
+                   "dashed line is what it is trying to reproduce."))
       ),
       mainPanel(
         width = 9,
@@ -468,6 +478,7 @@ navbarPage(
         # (app_splice_history); this says so, because a handover the reader
         # cannot see is the same problem one step further along.
         div(class = "caveat", APP_SPLICE_NOTE),
+        uiOutput("f_fair_note"),
         # F2 (Marcus 2026-09-22): only in the pulse lab, and only once a pulse
         # has been run. conditionalPanel keeps it out of the other two modes
         # rather than rendering an empty box there.
