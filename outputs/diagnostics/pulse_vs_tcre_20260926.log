@@ -1,0 +1,109 @@
+
+=== pulse_vs_tcre (20260926) ===
+climate module provenance: FaIR 2.2.4 (calib1.6.0), RCMIP SSP emissions, 841 configs, ensemble mean
+background ssp245, release year 2050, sizes {10, 50, 100, 200, 500} GtC, GtC/ppm 2.1240
+
+=== GATE ZERO-PULSE === max|dT| 0.000e+00, max|dCO2| 0.000e+00 -> PASS (bit-identical)
+   10 GtC: peak dT 0.0145 at 2063; dT(2300) 0.0101 = 70 % of peak
+   50 GtC: peak dT 0.0722 at 2063; dT(2300) 0.0505 = 70 % of peak
+  100 GtC: peak dT 0.1431 at 2063; dT(2300) 0.1005 = 70 % of peak
+  200 GtC: peak dT 0.2817 at 2064; dT(2300) 0.1993 = 71 % of peak
+  500 GtC: peak dT 0.6735 at 2066; dT(2300) 0.4852 = 72 % of peak
+
+=== GATE ANCHOR === at the app's defaults (100 GtC, +100 yr): dT 0.1082 degC, 1.082 degC/1000 GtC
+    the app's permanence box prints 0.108 degC and 1.08 degC/1000 GtC -> PASS, this script is reading the same model
+
+== dGMST per 1000 GtC, by pulse size and horizon ==
+      GtC       +20yr       +50yr      +100yr      +200yr
+       10       1.426       1.227       1.091       1.028
+       50       1.419       1.223       1.087       1.024
+      100       1.409       1.218       1.082       1.020
+      200       1.391       1.208       1.072       1.010
+      500       1.339       1.180       1.044       0.983
+   ⭐ READ DOWN a column for LINEARITY in pulse size (the app's copy says the
+     proportionality is "stated, not shown" -- this shows it). READ ACROSS a
+     row for how the marginal warming EVOLVES: TCRE's near-constancy in time
+     is the thing a pulse response is supposed to approximate.
+
+== LINEARITY across a 50x size range, at +100 yr ==
+   per-1000 ranges 1.044 to 1.091, spread 4.3 % of the mean -> within 10 %: quoting a per-tonne number is honest here
+
+== AIRBORNE FRACTION of the pulse (dCO2 in GtC / pulse GtC) ==
+      GtC       +20yr       +50yr      +100yr      +200yr
+       10      0.5696      0.4160      0.3129      0.2439
+       50      0.5725      0.4176      0.3135      0.2440
+      100      0.5762      0.4197      0.3141      0.2442
+      200      0.5834      0.4238      0.3154      0.2446
+      500      0.6041      0.4361      0.3191      0.2454
+
+== against the AR6 TCRE (AR6 WG1, per 1000 GtC -- RECOLLECTED, NOT VERIFIED) ==
+   AR6 best 1.65, likely 1.00-2.30 degC/1000 GtC
+   CCX pulse, 100 GtC at +100 yr: 1.082  = 66 % of the AR6 best estimate, INSIDE its likely range
+   ⚠ NOT LIKE-FOR-LIKE: a marginal pulse response on a scenario is not TCRE.
+     The ratio is a flag for a decomposition, not a verdict.
+
+wrote outputs/diagnostics/pulse_vs_tcre_20260926.csv and outputs/diagnostics/pulse_vs_tcre_20260926.log
+
+=== pulse_vs_tcre (20260926) ===
+climate module provenance: FaIR 2.2.4 (calib1.6.0), RCMIP SSP emissions, 841 configs, ensemble mean
+background ssp245, release year 2050, sizes {10, 50, 100, 200, 500} GtC, GtC/ppm 2.1240
+
+=== GATE ZERO-PULSE === max|dT| 0.000e+00, max|dCO2| 0.000e+00 -> PASS (bit-identical)
+   10 GtC: peak dT 0.0145 at 2063; dT(2300) 0.0101 = 70 % of peak
+   50 GtC: peak dT 0.0722 at 2063; dT(2300) 0.0505 = 70 % of peak
+  100 GtC: peak dT 0.1431 at 2063; dT(2300) 0.1005 = 70 % of peak
+  200 GtC: peak dT 0.2817 at 2064; dT(2300) 0.1993 = 71 % of peak
+  500 GtC: peak dT 0.6735 at 2066; dT(2300) 0.4852 = 72 % of peak
+
+=== GATE ANCHOR === at the app's defaults (100 GtC, +100 yr): dT 0.1082 degC, 1.082 degC/1000 GtC
+    the app's permanence box prints 0.108 degC and 1.08 degC/1000 GtC -> PASS, this script is reading the same model
+
+== dGMST per 1000 GtC, by pulse size and horizon ==
+      GtC       +20yr       +50yr      +100yr      +200yr
+       10       1.426       1.227       1.091       1.028
+       50       1.419       1.223       1.087       1.024
+      100       1.409       1.218       1.082       1.020
+      200       1.391       1.208       1.072       1.010
+      500       1.339       1.180       1.044       0.983
+   ⭐ READ DOWN a column for LINEARITY in pulse size (the app's copy says the
+     proportionality is "stated, not shown" -- this shows it). READ ACROSS a
+     row for how the marginal warming EVOLVES: TCRE's near-constancy in time
+     is the thing a pulse response is supposed to approximate.
+
+== LINEARITY across a 50x size range, at +100 yr ==
+   per-1000 ranges 1.044 to 1.091, spread 4.3 % of the mean -> within 10 %: quoting a per-tonne number is honest here
+
+== AIRBORNE FRACTION of the pulse (dCO2 in GtC / pulse GtC) ==
+      GtC       +20yr       +50yr      +100yr      +200yr
+       10      0.5696      0.4160      0.3129      0.2439
+       50      0.5725      0.4176      0.3135      0.2440
+      100      0.5762      0.4197      0.3141      0.2442
+      200      0.5834      0.4238      0.3154      0.2446
+      500      0.6041      0.4361      0.3191      0.2454
+
+== against the AR6 TCRE (AR6 WG1, per 1000 GtC -- RECOLLECTED, NOT VERIFIED) ==
+   AR6 best 1.65, likely 1.00-2.30 degC/1000 GtC
+   CCX pulse, 100 GtC at +100 yr: 1.082  = 66 % of the AR6 best estimate, INSIDE its likely range
+   ⚠ NOT LIKE-FOR-LIKE: a marginal pulse response on a scenario is not TCRE.
+     The ratio is a flag for a decomposition, not a verdict.
+
+== CCX vs STANDARD FaIR, matched: 100 GtC in 2050 on ssp245, FaIR 2.2.4 calib 1.6.0, 841 configs ==
+       yr |   AF ccx  AF fair   ratio | K/1000 ccx     fair   ratio
+     2080 |   0.5088   0.5468   0.931 |      1.339    1.366   0.981
+     2150 |   0.3141   0.4687   0.670 |      1.082    1.390   0.779
+     2230 |   0.2539   0.4376   0.580 |      1.025    1.447   0.709
+     2300 |   0.2249   0.4130   0.545 |      1.005    1.489   0.675
+   ⭐ READ THE TWO RATIO COLUMNS TOGETHER. If they track each other, the
+     temperature difference IS the airborne-fraction difference and the
+     climate half (shared with FaIR by construction) is exonerated.
+   ⚠ FaIR's per-1000 RISES with horizon while CCX's FALLS -- so the gap is
+     not a constant offset and quoting it at one horizon understates it.
+   ⚠ The FaIR arm is on RCMIP-native ssp245 emissions, not the CMIP7-
+     harmonised set the 1.6.0 posterior was jointly conditioned on. That is
+     what the CCX module itself was built from, so it is the matched choice
+     here; it is expected to largely cancel in a MARGINAL and was not measured.
+   ⚠ FaIR's per-config marginal is right-skewed: median(pulse-base) runs ~5 %
+     BELOW the mean. CCX has one ensemble-MEAN module, so the mean is the
+     matched statistic -- but the median would narrow this gap, not widen it.
+
+wrote outputs/diagnostics/pulse_vs_tcre_20260926.csv and outputs/diagnostics/pulse_vs_tcre_20260926.log
