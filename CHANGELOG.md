@@ -2,6 +2,62 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-27 (b) — **`diag_joos_irf.R` has no default arm any more, and `canonical` is an arm name that RESOLVES at run time.**
+
+### 1. Absence asserts
+```
+Rscript calibration/diag_joos_irf.R            -> ERROR, listing the arms
+Rscript calibration/diag_joos_irf.R canonical  -> the shipped model
+Rscript calibration/diag_joos_irf.R defaults   -> the uncalibrated table
+```
+A bare run used to mean `JOOS_ARM_DEFAULT = "defaults"`, the **uncalibrated table** — pulse AF@100
+**0.445** against the shipped model's **0.307** — with `JOOS_SRC` naming the truth 180 lines above
+the verdict. The 08-31f fix made an *unrecognised* argument an error and left the *absent* one
+silent, though its own comment already said **"absence must ASSERT"**. The error now prints the arm
+list built from `names(CCX_MODE_FILES)`, so it cannot go stale as arms are registered.
+
+### 2. ⛔⛔ Why NOT simply default to the canonical — the answer is MEASURED
+**`CCX_MODE_CANONICAL` changed ELEVEN times in the 25 days to 2026-09-20** — from90 → ent26 →
+hilda31 → hilda31p → hilda31s → hilda31s2 → hilda30c → hilda30h → hilda30e → hilda30s → hilda29l,
+**twice on 09-13 and twice on 09-20**. A bare command would then mean something different each month
+with nothing in the invocation recording which model was measured: **trading "reports a model nobody
+ships" for "reports a different model each month", which is HARDER to notice because the number stays
+plausible.** It would also still be a SILENT DEFAULT — this bug class waiting for the next structural
+change, exactly as the last one waited for `w_enso_l2` to replace the ENSO shim.
+
+⭐ **`canonical` resolves through the pointer at run time** — never a typed mode name, which would
+freeze the alias at today's arm — and the resolution is stamped into the output header:
+`posterior mode, arm hilda29l [asked for 'canonical', resolved 2026-09-27]`. Runs months apart are
+therefore distinguishable in their own logs. Verified: `canonical` and `hilda29l` give identical
+numbers (ssp245, 100 GtC in 2050: IRF@20/50/100 = **0.571 / 0.411 / 0.307**, integrated IRF **45.5**;
+§4's background protocol unchanged at PI **35.1** / PD **41.8**).
+
+### 3. ⚠ A correction to (a), now in the record
+(a) closed by saying that changing the default would "re-mean every past gate-12 number".
+**Overstated.** `JOOS_SRC` writes the arm into the log, so past runs were labelled — badly placed,
+but recorded. **Nothing retroactive was ever at stake**, and the ruling was therefore cheaper than
+it was presented as being.
+
+### 4. ⛔ THE GATE'S FIRST VERSION HAD NO POWER — third instance this arc
+The test written for this change **passed with the silent default restored**. It took
+`.src[i:(i+2)]` and asserted the window contained `stop(` — which it did, because the window ran on
+into the **unknown-arm** branch and found THAT branch's `stop()`. The mutant scored **zero** failures.
+
+⇒ **Scope a text gate to the BRANCH, not to "the next few lines", and assert what must NOT be there
+as well as what must.** Rewritten to bound the window by the next branch and to reject `return(`;
+re-mutated, it now fails **2** on the silent default and **1** on freezing the alias to a mode name.
+
+⚠ **Third time this arc that a gate passed while the defect it existed for was present** — the FaIR
+overlay (09-26, tested the helper not the caller), the constraint-map tie test's hardcoded share
+(09-26), and this. **Mutation-testing found all three; nothing else would have.**
+
+### 5. Not changed
+⭐ **No number, band or threshold moved. Joos and FaIR remain COMPARISONS, not targets to meet**
+(Marcus, reaffirmed 09-27). No refit, no objective change, no mode file written.
+Suite re-verified on this tree: **pass 4915 / fail 1 / error 0**, the one failure being the named
+standing red in `test-mode-file.R` (canonical-beats-the-control AIC gate, dAIC **+4.18**, ruling 2 of
+09-19) — documented in `paths.R`, **not to be "fixed"**.
+
 ## 2026-09-27 (a) — **Gate 12's diagnostic can read the shipped model at last (plumbing only, no new targets), and the constraint map reports its near-ties as ties.**
 
 ### 1. ⛔⛔ `par_mode` IS THE FREE SET — one wrong accessor, two failures, and the loud one hid the silent one
@@ -36,8 +92,10 @@ HOLDS**. ssp245, 100 GtC in 2050: IRF@20 0.571, @50 0.411, **@100 0.307** — ag
 **0.314** measured independently through the app's own path, which is the cross-check that this is
 the same model the app runs.
 
-⚠ The **default arm** is still `"defaults"`. Changing it re-means every past gate-12 number and
-remains Marcus's ruling.
+⚠ ~~The **default arm** is still `"defaults"`. Changing it re-means every past gate-12 number and
+remains Marcus's ruling.~~ **RETRACTED 2026-09-27 (b)**: the default arm was removed (absence is
+now an error) and the "re-means every past number" half was **overstated** — `JOOS_SRC` already
+wrote the arm into every log, so past runs were labelled. See (b) §1 and §3.
 
 ### 2. The constraint map's near-ties now read as ties
 Marcus: *"I like 'influenced about equally by X and Y'."*
