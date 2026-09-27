@@ -615,6 +615,48 @@ APP_FAIR <- tryCatch(
   error = function(e) NULL)
 
 # ---------------------------------------------------------------------
+# ⭐ WHEN THE CONSTRAINT MAP'S TOP HOLDER IS A TIE (Marcus 2026-09-27)
+# ---------------------------------------------------------------------
+# `cm_takeaway` names the component holding the largest share of each of the top
+# three rows -- "mostly influenced by X". ⛔ TWO OF THOSE THREE WERE COIN FLIPS:
+# measured at three arms (the canonical, the like-for-like `hilda32f`, and the
+# `hilda31pe` structure contrast), the winner of δ¹³C level & gradient and of
+# Δ¹⁴C bomb CHANGES with the arm. Computing the sentence makes it MOVE; it does
+# not make the winner REAL. An argmax is not a finding until you print the
+# runner-up ([[ccx_cmap_second_point]]).
+#
+# ⭐ THE THRESHOLD IS MEASURED, NOT INVENTED ([[threshold_from_obs_or_law]]).
+# Across all 12 rows the two behaviours separate cleanly and with a gap:
+#     winner FLIPS between arms : margins 0.13, 0.85 pp
+#     winner is STABLE          : margins 3.02, 4.94, 6.78, 6.94, 24.4, ... pp
+# Both endpoints are carried below so the cut can be re-derived rather than
+# trusted, and the cut is their GEOMETRIC mean -- equidistant in RATIO from the
+# largest flipper and the smallest stable row (1.9x either way), which is the
+# right centring for a separation that spans two orders of magnitude.
+# ⚠ IT RESTS ON THREE ARMS AND TWELVE ROWS. A fourth arm could put a row in the
+# gap; if one ever does, re-derive from the two endpoints rather than nudging
+# the cut. Re-measure with `calibration/diag_constraint_map_arms.R`.
+APP_CMAP_TIE_FLIP_MAX   <- 0.845   # pp, the largest margin that DID flip
+APP_CMAP_TIE_STABLE_MIN <- 3.018   # pp, the smallest margin that did NOT
+APP_CMAP_TIE_PP <- sqrt(APP_CMAP_TIE_FLIP_MAX * APP_CMAP_TIE_STABLE_MIN)  # ~1.60
+APP_CMAP_TIE_SRC <- "3 arms x 12 rows, calibration/diag_constraint_map_arms.R, 2026-09-26"
+
+#' How to describe who holds one row of the constraint map
+#'
+#' @param row one row of `MC` (named leverage per component)
+#' @param tie_pp margin, in percentage points, at or below which the top two are
+#'   reported as a tie rather than a winner
+#' @return a phrase; Marcus's wording (2026-09-27) for the tie case
+app_cmap_holder_phrase <- function(row, tie_pp = APP_CMAP_TIE_PP) {
+  sh <- 100 * row / sum(row)
+  o  <- sort(sh, decreasing = TRUE)
+  if (length(o) >= 2 && (o[[1]] - o[[2]]) <= tie_pp)
+    return(sprintf("influenced about equally by %s (%.0f%%) and %s (%.0f%%)",
+                   names(o)[1], o[[1]], names(o)[2], o[[2]]))
+  sprintf("mostly influenced by %s (%.0f%%)", names(o)[1], o[[1]])
+}
+
+# ---------------------------------------------------------------------
 # ⭐ STANDARD FaIR, AS A COMPARISON LINE ON THE FUTURES TAB (Marcus 2026-09-26)
 # ---------------------------------------------------------------------
 # The emulator's climate module IS FaIR's 841-config ensemble mean, so FaIR is

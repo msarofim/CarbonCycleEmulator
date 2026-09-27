@@ -986,12 +986,14 @@ function(input, output, session) {
     if (is.null(APP_CMAP)) return("")
     tot <- sort(rowSums(APP_CMAP$MC), decreasing = TRUE)
     top <- names(tot)[1:3]
-    who <- vapply(top, function(r) {
-      row <- APP_CMAP$MC[r, ]
-      sprintf("%s (%.0f%%)", names(which.max(row)), 100 * max(row) / sum(row))
-    }, character(1))
+    # ⛔ 2026-09-27: this used to say "mostly influenced by <argmax>" for all
+    # three rows, and two of the three are TIES whose winner changes with the
+    # arm (0.13 pp and 0.85 pp). The phrase is now a pure function in global.R
+    # so it can be gated, and it reports a tie as a tie.
+    who <- vapply(top, function(r) app_cmap_holder_phrase(APP_CMAP$MC[r, ]),
+                  character(1))
     paste0("The metrics most sensitive to changes in this model are ",
-           paste(sprintf("%s — mostly influenced by %s", top, who), collapse = "; "),
+           paste(sprintf("%s — %s", top, who), collapse = "; "),
            ". A metric low on the chart is one this model could change a good",
            " deal without moving.")
   })
