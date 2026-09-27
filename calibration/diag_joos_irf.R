@@ -173,10 +173,40 @@ if (JOOS_ARM != "defaults") {
   # reads the model's own absence contract and ERRORS on any name it cannot
   # supply; it never hand-fills. A migrated vector is a legitimate thing to
   # measure gate 12 at, and JOOS_SRC below names it as migrated.
-  .pm <- ccx_migrate_par_set(.md$par_mode)
+  # ⛔⛔ THE FULL PARAMETER SET, NOT THE FREE ONE (fixed 2026-09-27). This read
+  # `ccx_migrate_par_set(.md$par_mode)`, and `par_mode` is the FREE set: every
+  # PINNED name is absent from it by construction. That caused two failures at
+  # once, and the loud one hid the silent one.
+  #   1. LOUD -- the canonical `hilda29l` could not be read AT ALL. It pins the
+  #      ocean ENSO shim at 0 and fits the layer-3 limb `w_enso_l2` instead, so
+  #      the migrator saw `gamma_enso_ocn_*` absent, found no legacy
+  #      `gamma_enso`, and refused with "this list carries no ENSO response at
+  #      all". It carries one; the limb IS the response. Gate 12's only
+  #      implementation therefore could not measure the shipped model.
+  #   2. ⛔ SILENT, AND IT MOVED NUMBERS -- for the arms that DID run, the
+  #      overlay below assigned `.pm[[n]]` for every param name in `p0`, and for
+  #      a pinned name that value is NULL. **Assigning NULL to a list element
+  #      DELETES it** ([[intersect_is_a_silent_default]]), so every arm ran with
+  #      its pinned circulation parameters (`w_eq`, `gamma_eq`, `pump_export`,
+  #      `w_vent`, `gamma_vent`, `w_thc`, and for some arms `w_enso_l2`,
+  #      `ent_seas_amp_SH`, `gamma_enso_ocn_*`) STRIPPED OUT of the vector that
+  #      `ccx_mode_base()` had correctly supplied them in.
+  # `ccx_mode_par_with_pins()` is the app's own accessor for exactly this: it
+  # merges the file's pins into `par_mode` and ERRORS if the two disagree. With
+  # it, nothing is absent, so nothing migrates away and nothing is deleted.
+  .pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(.md))
   .mig <- attr(.pm, "migrated")
   p0 <- ccx_mode_base(.md)                      # the file's own structure (2026-09-08f)
-  for (n in intersect(names(p0), CCX_PARAM_NAMES)) p0[[n]] <- .pm[[n]]
+  # ⭐ ABSENCE MUST ASSERT, rather than silently deleting. Belt and braces: the
+  # line above should make this unreachable, and a gate that cannot fire is a
+  # gate that stops protecting the moment the line above changes.
+  for (n in intersect(names(p0), CCX_PARAM_NAMES)) {
+    if (is.null(.pm[[n]]))
+      stop("diag_joos_irf.R: `", n, "` is absent from the arm's parameter set, ",
+           "so the overlay would DELETE the value ccx_mode_base() supplied. ",
+           "Arm '", JOOS_ARM, "' is not usable here.")
+    p0[[n]] <- .pm[[n]]
+  }
   p0 <- ccx_set_enso(p0, .pm)
   p0$pump_mode  <- .md$pump_mode
   JOOS_LUC_SCALE  <- .pm$luc_scale
