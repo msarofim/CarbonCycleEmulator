@@ -2,6 +2,63 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-27 (a) — **Gate 12's diagnostic can read the shipped model at last (plumbing only, no new targets), and the constraint map reports its near-ties as ties.**
+
+### 1. ⛔⛔ `par_mode` IS THE FREE SET — one wrong accessor, two failures, and the loud one hid the silent one
+`diag_joos_irf.R` ran `ccx_migrate_par_set(.md$par_mode)`. A **pinned** name is absent from
+`par_mode` by construction.
+
+1. **LOUD** — the canonical `hilda29l` could not be read **at all**. It pins the ocean ENSO shim at 0
+   and fits the layer-3 limb `w_enso_l2` instead, so the migrator saw `gamma_enso_ocn_*` absent,
+   found no legacy `gamma_enso`, and refused with *"this list carries no ENSO response at all"*.
+   **It carries one — the limb IS the response.** The migrator's premise was written when the
+   coefficients were the only ENSO mechanism and was never revisited when the limb replaced them.
+2. ⛔ **SILENT, and it had been there all along** — the overlay assigned `.pm[[n]]` for every param
+   name in `p0`, and for a pinned name that is NULL. **Assigning NULL to a list element DELETES it**,
+   so every arm ran with its pinned parameters stripped out of the vector `ccx_mode_base()` had
+   correctly supplied them in. Same trap as `intersect_is_a_silent_default`, same codebase.
+
+⭐ **Blast radius, measured not assumed: no number moved.** `hilda32f` is byte-identical before and
+after. ⚠ Which is itself a finding — the pins genuinely differ from the defaults (`w_eq` **27 vs 0**,
+`gamma_eq` **1 vs 0**, `pump_export` **9.08 vs 0**), so **those three are inert under the shipped
+`hilda_csl3` structure.** Recorded, not chased.
+
+**The fix is an accessor, not a patch**: `ccx_mode_par_with_pins()` merges the file's pins into
+`par_mode` and errors if they disagree, so nothing is absent, nothing migrates and nothing is
+deleted — the canonical needs **no migration at all**. The overlay now also **errors** on an absent
+name rather than deleting it: absence must assert.
+
+⭐ **Marcus's constraint was honoured: nothing here scores anything.** No band, no threshold, no
+pass/fail; the script's "reported, not gated" framing is untouched. Gate 12's comparison **at the
+shipped model**, now obtainable for the first time: integrated IRF @TH100 **PI 35.1 yr, PD 41.8 yr**
+(Joos sec 4.4.1 across 10 models: PI 34–47, PD 45–62), and **the PI < PD ordering Joos requires
+HOLDS**. ssp245, 100 GtC in 2050: IRF@20 0.571, @50 0.411, **@100 0.307** — agreeing with the
+**0.314** measured independently through the app's own path, which is the cross-check that this is
+the same model the app runs.
+
+⚠ The **default arm** is still `"defaults"`. Changing it re-means every past gate-12 number and
+remains Marcus's ruling.
+
+### 2. The constraint map's near-ties now read as ties
+Marcus: *"I like 'influenced about equally by X and Y'."*
+
+| row | now reads |
+|---|---|
+| δ¹³C level & gradient | **influenced about equally by** High-latitude structure (22 %) **and** Input scalings & reporting (21 %) |
+| CO₂ level | mostly influenced by Land uptake (25 %) |
+| Δ¹⁴C in the air (bomb) | **influenced about equally by** High-latitude structure (30 %) **and** Input scalings & reporting (29 %) |
+
+⭐ **The threshold is MEASURED, not invented.** Across all 12 rows the behaviours separate with a gap
+and nothing in it — winner **FLIPS** at 0.13 / 0.85 pp, winner **STABLE** at 3.02 pp and above — and
+the cut is the **geometric mean of the two endpoints** (1.597 pp), equidistant in ratio, 1.9× either
+way. Both endpoints are stored beside it so the cut can be **re-derived** rather than trusted.
+⚠ It rests on 3 arms × 12 rows; if a fourth arm lands a row in the gap, re-derive from the endpoints
+rather than nudging the cut — and the gate asserts the gap is still a gap, so that is what fails.
+
+The phrase is a pure function so it can be gated, and the tests exercise the **caller** (one reads
+the call site and fails if the argmax formulation returns) — the lesson of the 09-26 FaIR-overlay
+bug. Mutation-tested: never reporting a tie fails 5; typing the threshold outside the gap fails 3.
+
 ## 2026-09-26 (g) — **The FaIR overlay drew NOTHING, which looked like perfect agreement. Its own gate passed.** Found by restarting the app and looking at it.
 
 ### The bug
