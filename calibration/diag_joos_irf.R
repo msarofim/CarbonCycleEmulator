@@ -141,8 +141,12 @@ JOOS_MARKS     <- c(20, 50, 100, 300)
 # quarantined -- ccx_mode_file() (R/paths.R) refuses them with the reason. The
 # post-fix arms are the names it knows; "defaults" stays a legal argument here
 # because gate 12's DESIGN status line is quoted at defaults as well as at a mode.
-JOOS_ARM_DEFAULT <- "defaults"
-JOOS_ARM_NAMES   <- c("defaults", names(CCX_MODE_FILES))
+# ⭐ "canonical" RESOLVES AT RUN TIME to CCX_MODE_CANONICAL (2026-09-27). It is
+# the short way to ask for the shipped model without a silent default, and the
+# resolved mode NAME is stamped into JOOS_SRC, so a run in September and a run in
+# October are distinguishable in their own output.
+JOOS_ARM_CANONICAL <- "canonical"
+JOOS_ARM_NAMES <- c("defaults", JOOS_ARM_CANONICAL, names(CCX_MODE_FILES))
 # ⛔ AN UNRECOGNISED ARGUMENT IS AN ERROR, NOT A DEFAULT (2026-08-31f). This
 # read `if (a[1] %in% JOOS_ARM_NAMES) a[1] else "defaults"`, so a typo -- or a
 # perfectly good PATH to a mode file, which `ccx_mode_file()` has accepted since
@@ -150,14 +154,40 @@ JOOS_ARM_NAMES   <- c("defaults", names(CCX_MODE_FILES))
 # what was asked for. `JOOS_SRC` printed the truth, one line, 180 lines above
 # the verdict. That is the silent-default class ([[intersect_is_a_silent_default]]):
 # absence must ASSERT. A path is now legal, and anything else stops.
+# ⛔⛔ ABSENCE IS AN ERROR (2026-09-27, Marcus). This returned JOOS_ARM_DEFAULT =
+# "defaults", the UNCALIBRATED table -- so a bare run reported a model nobody
+# ships (pulse AF@100 0.445 against the canonical's 0.307), with JOOS_SRC naming
+# the truth 180 lines above the verdict. The 08-31f fix made an UNRECOGNISED
+# argument an error and left the ABSENT one silent; its own comment already said
+# "absence must ASSERT". This is that sentence applied to the case it missed.
+#
+# ⚠ WHY NOT SIMPLY DEFAULT TO THE CANONICAL, which is at least the shipped
+# model: CCX_MODE_CANONICAL is a MOVING POINTER -- measured, it changed ELEVEN
+# times in the 25 days to 2026-09-20 (from90, ent26, hilda31, hilda31p,
+# hilda31s, hilda31s2, hilda30c, hilda30h, hilda30e, hilda30s, hilda29l; twice
+# on 09-13 and twice on 09-20). A bare command would then mean something
+# different each month, with nothing in the invocation recording which model was
+# measured -- trading "reports a model nobody ships" for "reports a different
+# model each month", which is harder to notice because the number stays
+# plausible. And it would still be a SILENT DEFAULT, i.e. this same bug class
+# waiting for the next structural change. `canonical` gives the short command
+# without the silence.
 JOOS_ARM <- local({
   a <- commandArgs(TRUE)
-  if (!length(a) || !nzchar(a[1])) return(JOOS_ARM_DEFAULT)
+  if (!length(a) || !nzchar(a[1]))
+    stop("diag_joos_irf.R needs an ARM; there is no default.\n",
+         "  Rscript calibration/diag_joos_irf.R canonical    # the shipped model\n",
+         "  Rscript calibration/diag_joos_irf.R defaults     # the uncalibrated table\n",
+         "  ...or one of: ", paste(sprintf("'%s'", names(CCX_MODE_FILES)), collapse = ", "),
+         ", or a path to a mode file.\n",
+         "  (Until 2026-09-27 absence silently meant 'defaults' -- an arm nobody ships.)")
   if (a[1] %in% JOOS_ARM_NAMES || file.exists(a[1])) return(a[1])
   stop("unknown arm '", a[1], "': expected a path to a mode file, or one of ",
-       paste(sprintf("'%s'", JOOS_ARM_NAMES), collapse = ", "),
-       ". (It used to fall back to '", JOOS_ARM_DEFAULT, "' silently.)")
+       paste(sprintf("'%s'", JOOS_ARM_NAMES), collapse = ", "), ".")
 })
+# Resolve the alias ONCE, and keep the label so the output says both.
+JOOS_ARM_ASKED <- JOOS_ARM
+if (identical(JOOS_ARM, JOOS_ARM_CANONICAL)) JOOS_ARM <- CCX_MODE_CANONICAL
 
 p0 <- ccx_default_params()
 JOOS_LUC_SCALE  <- 1
@@ -211,8 +241,12 @@ if (JOOS_ARM != "defaults") {
   p0$pump_mode  <- .md$pump_mode
   JOOS_LUC_SCALE  <- .pm$luc_scale
   JOOS_BOMB_TOTAL <- .pm$bomb_total
-  JOOS_SRC <- sprintf("posterior mode, arm %s (%s, logpost %.2f)%s",
-                      JOOS_ARM, basename(dirname(.arm_file)), .md$logpost,
+  JOOS_SRC <- sprintf("posterior mode, arm %s%s (%s, logpost %.2f)%s",
+                      JOOS_ARM,
+                      if (identical(JOOS_ARM_ASKED, JOOS_ARM_CANONICAL))
+                        sprintf(" [asked for '%s', resolved %s]",
+                                JOOS_ARM_CANONICAL, format(Sys.Date())) else "",
+                      basename(dirname(.arm_file)), .md$logpost,
                       if (length(.mig)) sprintf(" -- MIGRATED %d -> %d parameters, filled %s",
                                                 length(.md$param_names), length(CCX_PARAM_NAMES),
                                                 paste(.mig, collapse = ", ")) else "")
