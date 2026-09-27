@@ -23,12 +23,10 @@ Verified: same inode, 803 files readable through the link, and a write through t
 lands in the shared store. Session transcripts are deliberately NOT shared — only `memory`
 and the `memory_backup_*` snapshots are linked.
 
-⚠ **UNVERIFIED AGAINST THE HARNESS.** Whether Claude Code itself follows the symlink when
-it loads `MEMORY.md` at session start has not been tested — only the filesystem has. Until
-a session launched from this directory is confirmed to have the memory, **keep launching
-from `FaIRtoFrEDI/`**. The one-line test: start a session here and ask what
-`INDEX_ccx.md` gives as the canonical mode; if it cannot answer without reading a file,
-the harness is not following the link.
+⚠ **Launch from `FaIRtoFrEDI/`, then move here with the `change_directory` tool.** Whether
+the harness follows the symlink at session start was never verified, and the test was
+dropped (Marcus, 2026-09-27). Launch-then-move is verified to keep the root `MEMORY.md` and
+to load BOTH `CLAUDE.md` files — strictly more than a launch from here would get.
 
 ⛔ **The store is SHARED, not this repo's.** It also serves FaIR, FrEDI, SLR/BRICK and the
 vehicle / SC-CO₂ work, the root `MEMORY.md` routes to all of them, and the sub-index budgets

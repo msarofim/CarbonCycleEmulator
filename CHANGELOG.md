@@ -2,6 +2,24 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-27 (d) — **The memory-symlink harness test is DROPPED (Marcus).**
+
+Marcus: "get rid of the symlink test". Removed from `CLAUDE.md`, struck from
+`handoff_2026-09-27c_symlink_test.md` §0, and its answer key deleted from
+`FaIRtoFrEDI/notes/` (recoverable from FaIRtoFrEDI git, commit `789ea1b`).
+
+**Tried and abandoned, and why.** Two designs were written on 09-27. The first had no power: the
+canonical mode appears in 79 files in this repo. The second could not run in the session built
+for it. That session was **launched from FaIRtoFrEDI and then moved here**, so it had loaded the
+root memory regardless of what the symlink does. It also read the whole handoff, despite §0
+saying to stop there, because a plain Read returns the entire file.
+
+**What replaces it — verified in this session:** launch from `FaIRtoFrEDI/` and move with the
+`change_directory` tool. The session keeps the root `MEMORY.md`, loads **both** `CLAUDE.md`
+files (a launch from here gets only one), and picks up this repo's settings. So there is no
+reason to launch from here, and whether the harness follows the link no longer matters.
+The symlink itself stays; it is harmless and makes explicit reads through the CCX key work.
+
 ## 2026-09-27 (b) — **`diag_joos_irf.R` has no default arm any more, and `canonical` is an arm name that RESOLVES at run time.**
 
 ### 1. Absence asserts

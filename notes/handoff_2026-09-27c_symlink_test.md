@@ -1,5 +1,8 @@
 # Handoff — 2026-09-27 (c). **YOU ARE THE TEST. The memory-symlink check runs against THIS session, and the old version of it had no power. Everything else is discharged.**
 
+> ⛔ **§0 IS WITHDRAWN (Marcus, 2026-09-27): the symlink test is dropped.** Launch from `FaIRtoFrEDI/` and
+> move with `change_directory`; see CHANGELOG 2026-09-27 (d). §1–§5 remain current.
+
 > ⚠ **YOUR CWD IS `CarbonCycleEmulator/`** — this session was launched here deliberately, which is
 > the reverse of every earlier handoff's warning. Paths below are relative to this repo.
 > The FaIRtoFrEDI repo is at `~/Documents/2026/CodeProjects/FaIRtoFrEDI/`; use absolute paths for it.
