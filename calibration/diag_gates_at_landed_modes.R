@@ -66,8 +66,8 @@ irf_at <- function(file){
         prod_c14=spin$prod_c14, bomb_total_kmol=0, luc_scale=m$par_mode$luc_scale))
   for (cc in c("e_foss_NH","e_foss_SH","e_luc_NH","e_luc_SH","enso","c14_bomb","c14_nuclear")) Ff[[cc]] <- 0
   Ff$gmst <- Ff$gmst[1]
-  o <- ccx_irf(sp, ccx_hold_forcing(sp, Ff))
-  o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR); k <- o$t >= 0
+  o <- ccx_irf_pd(sp, ccx_hold_forcing(sp, Ff))
+  k <- o$t >= 0
   tt <- o$t[k]; vv <- o$irf[k]
   ig <- function(th){kk<-tt<=th; sum(diff(tt[kk])*(head(vv[kk],-1)+tail(vv[kk],-1))/2)}
   list(int=vapply(JOOS_T4$th, ig, numeric(1)), tail=joos_tail_ratio(tt,vv),

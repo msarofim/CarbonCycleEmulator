@@ -2,6 +2,68 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-27 (e) — **Why the pulse decays faster than Joos: the VEGETATION-CAPACITY LOOP (`npp_veg_frac`), plus a 5-year clock bug in every gate-12 caller.**
+
+Marcus: *"I don't want to make the carbon-cycle pulse decay a calibration target, but if you can
+figure out why my pulses decay faster than Joos or FaIR, that might guide our next improvement."*
+Nothing here is a target and nothing was refitted.
+
+### 1. The bug first: every PD100 IRF was read five years late
+`ccx_irf()` pulses at the first row of its forcing (2010). Eleven call sites then subtracted
+5 yr from the clock, meaning to put t = 0 at Joos's 2015 release, and **discarded the first five
+years after release** instead. The raw first-row IRF is 0.9995, which proves the pulse went in at
+2010. At hilda29l the integrated IRF (TH 20/50/100) goes from **11.41 / 23.51 / 39.15 to 13.04 /
+25.80 / 41.80**, from "at or below the floor" to **inside Joos's 5–95 % at all three**. The point
+IRF barely moves (IRF@100 0.284 → 0.289 vs Joos 0.409).
+Fixed once in `ccx_irf_pd()` (hold to 2015, then release), with `joos_release_check()` as the
+gate (first-row IRF within 0.02 of 1; the old series started at 0.718). A new `test-pulse.R`
+block mutation-tests it. Callers fixed: `app/R/review.R`, `test-pulse.R`, and 9 `calibration/`
+drivers. Pre-fix logs are in `outputs/quarantine/20260927_joos_release_shift/`, whose README
+lists the outputs left in place with an affected IRF column. The ssp245 future-background
+numbers (int IRF 45.5) never used the shift and are unchanged.
+
+### 2. The physics: the extra carbon goes to the LAND, and the vegetation loop puts it there
+`calibration/diag_pulse_land_attribution.R` → `outputs/diagnostics/pulse_land_attribution_20260927d.log`
+(byte-identical on two runs). PD100 at hilda29l, GtC of the 100 GtC pulse (atm / ocean / land):
+
+| | yr 20 | yr 100 | yr 1000 |
+|---|---|---|---|
+| shipped mode | 51.1 / 25.9 / 23.0 | 28.9 / 31.8 / **39.4** | 18.3 / 48.1 / **33.7** |
+| Joos 2013 §3.2 (mean ± sd) | 59.6 / 20±7 / 19±16 | 40.9 / 33±12 / 23±20 | 23.5 / 59±12 / 16±14 |
+
+**The ocean sits on Joos's mean at 100 yr, and the land runs about +16 GtC over.** The land
+keeps absorbing until about 300 yr (42.4), while Joos's land is flat to 100 yr and declines after.
+It holds that carbon in wood (21 GtC at 100 yr) and then in `soil_slow` (τ 500 yr: 25 GtC from
+300 yr on). Single knock-outs (frozen-vector, **an attribution, not a refit prediction**):
+
+- **C, `npp_veg_frac` 0.5 → 0: atm 40.4 at 100 yr, 22.6 at 1000.** This is ON the Joos IRF
+  (40.9, 23.5), with the split inside Joos's ranges (40.6 / 18.9 at 100 yr).
+- D, no litter to the slow soil: atm 34.0 at 100 yr (partial).
+- E, saturating fertilisation (`fert_k` 120 at a fixed present-day enhancement, 0.57× the slope):
+  36.3 (partial).
+- B, the pulse's own warming: ≤ 0.8 GtC, because q10 is 1.094. B2, a bound at q10 = 2: 1.5–7 GtC.
+
+**The mechanism.** `NPP = npp0 [(1−φ) + φ·veg/veg0] f(CO₂)`. Extra CO₂ grows vegetation, which
+raises NPP capacity, which grows more vegetation. At equilibrium that multiplies the land's CO₂
+response by 1/(1−φ) = **2×**, building on `tau_wood` (20 yr), which is why the land matches
+Joos at year 20 and diverges after it. The measured land ratio with the loop on vs off is
+2.08× at 100 yr and 2.14× at 300 yr, matching the analytic gain.
+
+φ was added so that **clearing a forest costs capacity** (LUC). Its side effect is an amplifier
+on CO₂ fertilisation. It is **unfitted**, and its default (0.5) carries a rationale but no
+citation. So is the land's residence structure (`litter_slow_frac` 0.05, `tau_soil_slow` 500).
+
+### 3. What this does NOT show
+- A refit with φ = 0 would re-fit `beta_max`/`fert_k` to the historical land sink. Whether the
+  pulse then stays near Joos is **unmeasured** (the fert-ridge lesson, 08-25).
+- FaIR is not decomposed. It has no land/ocean split, and the 09-26 finding that the
+  FaIR gap tracks the airborne fraction is consistent with this cause but does not test it.
+
+### Tried and abandoned
+- The first warming-feedback probe understated ΔT by about 2.7×: `ccx_temperature_from_erf()`
+  falls back to `T − T[1]`, so the first year's response was subtracted. The driver prepends a
+  zero year. The conclusion was unchanged at this q10.
+
 ## 2026-09-27 (d) — **The memory-symlink harness test is DROPPED (Marcus).**
 
 Marcus: "get rid of the symlink test". Removed from `CLAUDE.md`, struck from

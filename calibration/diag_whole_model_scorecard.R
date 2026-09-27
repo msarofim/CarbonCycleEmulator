@@ -131,7 +131,7 @@ irf_of <- function(v) { spin <- dg_spinup(v)
   F_fwd <- suppressWarnings(ccx_build_forcing("historical", c(JOOS_REF_YEAR, JOOS_REF_YEAR + SC_JOOS_HORIZON + 10), prod_c14 = spin$prod_c14, bomb_total_kmol = 0, luc_scale = v$luc_scale))
   for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso", "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
   F_fwd$gmst <- F_fwd$gmst[1]; F_hold <- ccx_hold_forcing(sp_ref, F_fwd, verbose = FALSE)
-  o <- ccx_irf(sp_ref, F_hold); o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR); k <- o$t >= 0; at <- function(y) o$irf[k][which.min(abs(o$t[k] - y))]
+  o <- ccx_irf_pd(sp_ref, F_hold); k <- o$t >= 0; at <- function(y) o$irf[k][which.min(abs(o$t[k] - y))]
   c(irf20 = at(20), irf100 = at(100), irf300 = at(300)) }
 IRF <- list(); for (a in an) { x <- try_or(irf_of(ARMS[[a]]), paste("IRF", a)); IRF[[a]] <- x
   if (!is.null(x)) cat(sprintf("  12 IRF   %-8s IRF(20) %.3f  IRF(100) %.3f  IRF(300) %.3f   (Joos 2013 multi-model: %.3f / %.3f / %.3f)\n", a, x["irf20"], x["irf100"], x["irf300"], joos_irf(20), joos_irf(100), joos_irf(300))) }

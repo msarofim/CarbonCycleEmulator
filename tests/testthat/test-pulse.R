@@ -167,8 +167,7 @@ pd100_irf <- function() {
                "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
   F_fwd <- ccx_hold_climate(F_fwd)   # gmst, enso AND observed-SST columns held
   F_hold <- ccx_hold_forcing(sp_ref, F_fwd)
-  o <- ccx_irf(sp_ref, F_hold)
-  o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR)
+  o <- ccx_irf_pd(sp_ref, F_hold)
   list(t = o$t, irf = o$irf, dev = attr(F_hold, "dev"),
        target = attr(F_hold, "target"))
 }
@@ -202,6 +201,22 @@ test_that("the pulse IRF obeys its own protocol and stays inside (0, 1), decayin
   message(sprintf("  [comparison, not a test] IRF %s | Joos %s",
                   paste(sprintf("%d yr %.3f", JOOS_TH, vapply(JOOS_TH, at, 0)), collapse = ", "),
                   paste(sprintf("%.3f", vapply(JOOS_TH, joos_irf, 0)), collapse = ", ")))
+})
+
+test_that("the PD100 pulse is RELEASED at t = 0, not read five years late", {
+  # ⛔ Regression for 2026-09-27 (d): eleven call sites pulsed at JOOS_REF_YEAR
+  # and then subtracted 5 yr from the clock, so t = 0 was really t = 5 and the
+  # integrated IRF lost its highest five years. Conservation fixes the answer at
+  # release: the atmosphere holds the whole pulse.
+  skip_if_no_cpp()
+  o <- pd100_irf()
+  expect_silent(joos_release_check(o))
+  expect_lt(abs(o$irf[1] - 1), JOOS_IRF0_TOL)
+  # MUTATION TEST: the old construction -- first row 5 yr after release, clock
+  # relabelled to 0 -- must be REJECTED, or this gate cannot fail.
+  k <- which(o$t >= 5)
+  shifted <- list(t = o$t[k] - 5, irf = o$irf[k])
+  expect_error(joos_release_check(shifted), "Is the clock shifted")
 })
 
 test_that("a pulse warms, and the warming outlives the century", {

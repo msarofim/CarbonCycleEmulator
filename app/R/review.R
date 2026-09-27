@@ -364,8 +364,7 @@ rv_pulse <- function() rv_memo("pulse", function() {
   for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                "enso", "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
   F_fwd$gmst <- F_fwd$gmst[1]
-  o <- ccx_irf(sp_ref, ccx_hold_forcing(sp_ref, F_fwd, verbose = FALSE))
-  o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR)
+  o <- ccx_irf_pd(sp_ref, ccx_hold_forcing(sp_ref, F_fwd, verbose = FALSE))
   k <- o$t >= 0
   at <- function(y) o$irf[k][which.min(abs(o$t[k] - y))]
   part <- dg_gateL_partition(v, horizon = RV_IRF_HORIZON)

@@ -31,6 +31,12 @@
 # tendency -- so the background really is constant. Part 4 measures what that
 # choice is worth, because it is not small.
 #
+# ⛔ EVERY PD100 NUMBER IN THIS HEADER PREDATES 2026-09-27 (e) AND WAS READ FIVE
+# YEARS LATE (the release-shift bug; see ccx_irf_pd() in R/joos_irf.R). Current
+# at hilda29l: IRF 0.511/0.366/0.289/0.207 at 20/50/100/300, TH 13.04/25.79/41.80
+# -- INSIDE all three. The "at the floor" readings below were the shift. The
+# remaining point-IRF gap is the land: calibration/diag_pulse_land_attribution.R.
+#
 # RESULT (default parameters, NOT the posterior mode). TWO ANSWERS, and they
 # point different ways, so both are reported and neither is buried:
 #
@@ -297,11 +303,12 @@ for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
 F_fwd$gmst <- F_fwd$gmst[1]          # climate held at the reference year
 
 F_hold <- ccx_hold_forcing(sp_ref, F_fwd, verbose = TRUE)
-o_pd   <- ccx_irf(sp_ref, F_hold)
 # Joos releases the pulse 5 yr after the reference year, on an already-settled
-# background; shift the clock so t = 0 is the release.
-shift  <- JOOS_PULSE_YR - JOOS_REF_YEAR
-o_pd$t <- o_pd$t - shift
+# background. ccx_irf_pd() does exactly that (R/joos_irf.R). ⛔ Until 2026-09-27
+# this line pulsed at 2010 and then SHIFTED the clock by 5 yr, which discarded
+# the first five years after release instead of waiting for them -- see the
+# block above ccx_irf_pd() for what that cost.
+o_pd   <- ccx_irf_pd(sp_ref, F_hold)
 keep   <- o_pd$t >= 0
 irf    <- o_pd$irf[keep]; irf_t <- o_pd$t[keep]
 

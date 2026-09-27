@@ -294,8 +294,7 @@ irf100_of <- function(p) {
   for (cc in c("e_foss_NH","e_foss_SH","e_luc_NH","e_luc_SH","enso",
                "c14_bomb","c14_nuclear")) Ff[[cc]] <- 0
   Ff$gmst <- Ff$gmst[1]
-  o <- ccx_irf(spr, ccx_hold_forcing(spr, Ff, verbose = FALSE))
-  o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR)
+  o <- ccx_irf_pd(spr, ccx_hold_forcing(spr, Ff, verbose = FALSE))
   o$irf[which.min(abs(o$t - 100))]
 }
 eval_of <- function(p) {

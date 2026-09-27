@@ -135,8 +135,8 @@ fr_irf <- function(p, spin) {
   for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
                "c14_bomb", "c14_nuclear")) Ff[[cc]] <- 0
   Ff$gmst <- Ff$gmst[1]
-  o <- ccx_irf(sp_ref, ccx_hold_forcing(sp_ref, Ff))
-  o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR); k <- o$t >= 0
+  o <- ccx_irf_pd(sp_ref, ccx_hold_forcing(sp_ref, Ff))
+  k <- o$t >= 0
   tt <- o$t[k]; vv <- o$irf[k]
   vapply(JOOS_T4$th, function(th) { kk <- tt <= th
     sum(diff(tt[kk]) * (utils::head(vv[kk], -1) + utils::tail(vv[kk], -1)) / 2) }, numeric(1))

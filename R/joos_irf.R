@@ -111,6 +111,42 @@ ccx_irf <- function(sp, F) {
 }
 
 # ---------------------------------------------------------------------
+# ⛔⛔ THE PD100 RELEASE, DONE ONCE (2026-09-27 d). Until today every caller did
+#   o <- ccx_irf(sp_ref, F_hold); o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR)
+# -- ELEVEN copies, the app's review panel and test-pulse.R among them. But
+# ccx_irf() adds the pulse at the FIRST row of F, i.e. at JOOS_REF_YEAR (2010),
+# not at JOOS_PULSE_YR (2015). The shift therefore did not move the clock to the
+# release; it DISCARDED the first five years after it, so every "IRF@20" was
+# IRF@25 and every integrated IRF ran from 5 to TH+5, dropping the years in
+# which the IRF is highest. Measured at hilda29l: TH 20/50/100 read
+# 11.41/23.51/39.15 where the truth is 13.04/25.80/41.82 -- "at the floor"
+# was the shift, not the model. The point IRF@100 barely moves (0.284 -> 0.288).
+# The raw run proves it: IRF at the first row is 0.9995, the whole pulse.
+#
+# This now does what the comment at every call site SAID it did: hold the
+# background to JOOS_PULSE_YR, then release, and measure t from the release.
+# ---------------------------------------------------------------------
+# A released pulse must read (almost) the WHOLE pulse at t = 0 -- conservation.
+# The first output row is within one month of release, and the model's own
+# one-month uptake is 1.25 % of the pulse (measured at hilda29l, 2026-09-27);
+# 2 % bounds that. The shifted series this replaces started at 0.718 -- 14x
+# outside. MUTATION-TESTED in test-pulse.R.
+JOOS_IRF0_TOL <- 0.02
+joos_release_check <- function(o) {
+  if (!length(o$irf) || abs(o$t[1]) > 1 / 12 + 1e-9 || abs(o$irf[1] - 1) > JOOS_IRF0_TOL)
+    stop(sprintf("PD100 release check: first row t = %.3f yr, IRF = %.4f; a pulse released at t = 0 must read ~1 (tol %.2f). Is the clock shifted?",
+                 o$t[1], o$irf[1], JOOS_IRF0_TOL))
+  invisible(o)
+}
+ccx_irf_pd <- function(sp_ref, F_hold) {
+  pre <- F_hold$t < JOOS_PULSE_YR
+  if (!any(pre) || all(pre)) stop("ccx_irf_pd: F_hold must span JOOS_PULSE_YR (", JOOS_PULSE_YR, ")")
+  sp_rel <- sp_ref
+  sp_rel$y <- ccx_run_fast(sp_ref, F_hold[pre, , drop = FALSE])$state
+  joos_release_check(ccx_irf(sp_rel, F_hold[!pre, , drop = FALSE]))
+}
+
+# ---------------------------------------------------------------------
 # WHAT JOOS SAYS -- protocol years, and the published reference values the
 # model is scored against. Promoted 2026-08-18 from the two diag_joos_*
 # scripts, where they were byte-identical duplicates.

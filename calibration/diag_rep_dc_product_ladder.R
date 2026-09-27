@@ -172,7 +172,7 @@ rpl_irf <- function(v) {
                "enso", "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
   F_fwd$gmst <- F_fwd$gmst[1]
   F_hold <- ccx_hold_forcing(sp_ref, F_fwd, verbose = FALSE)
-  o  <- ccx_irf(sp_ref, F_hold); o$t <- o$t - (JOOS_PULSE_YR - JOOS_REF_YEAR)
+  o  <- ccx_irf_pd(sp_ref, F_hold)
   k  <- o$t >= 0; at <- function(y) o$irf[k][which.min(abs(o$t[k] - y))]
   c(irf20 = at(20), irf100 = at(100), irf300 = at(300))
 }
