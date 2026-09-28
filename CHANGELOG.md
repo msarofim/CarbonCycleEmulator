@@ -2,6 +2,37 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-28 (a) — **A φ = 0 structure label, and what it costs before any refit.**
+
+Marcus ruled for **φ = 0 only** (not his CO₂-adjusted-equilibrium variant) and **no FACE term
+yet**. His variant was considered and set aside for two reasons. It halves the model's instant
+NPP response to a CO₂ step (to (1−φ)ε), which is what FACE measures. And its "clearing and
+regrowth cancel out" premise double-counts regrowth, because the model is driven by GCB **net**
+E_LUC and runs at `f_luc_perm` = 1.
+
+**`hilda_csl3v0`** = `hilda_csl3` + `npp_veg_frac = 0`, registered as a new structure label so the
+setting travels in every mode file and back through `ccx_mode_base()`. Every registered file
+stays bit-exact. `test-struct-v0.R` is new. The label-list locks in `test-tr-box.R` and
+`test-constants-batch.R` were extended, as for every earlier label.
+
+**Frozen-vector measurements** (`calibration/diag_fert_profile_phi.R` →
+`outputs/diagnostics/fert_profile_phi_20260928.log`; costs are UPPER BOUNDS):
+- hilda29l's vector under `hilda_csl3v0`: **−11,615**, almost all in `co2_level_MLO`/`SPO`. The
+  control re-scores `hilda_csl3` to the stored −1425.3620 exactly.
+- Re-fitting `beta_max` + `fert_k` only (Nelder-Mead, 53 evals): **−1432.63 (−7.27)** at
+  `beta_max` **2.889** (prior support [0, 3] — AT THE BOUND) and `fert_k` 1052. The slope at 396
+  ppm rises 1.8×, almost replacing the loop's 2×: the CO₂ record pins the land's net sensitivity
+  however it is built. PD100 IRF@100 **0.347** (shipped 0.289, Joos 0.409). Land 30.0 GtC at
+  100 yr, inside Joos's 23 ± 20.
+- `fert_k` profile: IRF@100 rises monotonically with saturation under both structures, and
+  reaches Joos only near `fert_k` 120–200 under φ = 0, at a frozen cost of −350 to −770. The
+  φ = 0 optimum's FACE-equivalent response is **24.4 %**, above the plantation-weighted 21.8 %
+  headline. φ = 0.5 at the mode gives 14.4 %.
+
+**Not yet done:** the refit itself, and port targets for the new label (`make_port_targets.R`
+under `CCX_MS_STRUCT=hilda_csl3v0`). A φ = 0 refit will press `beta_max`'s upper bound, so the
+bound needs a ruling before launch.
+
 ## 2026-09-27 (e) — **Why the pulse decays faster than Joos: the VEGETATION-CAPACITY LOOP (`npp_veg_frac`), plus a 5-year clock bug in every gate-12 caller.**
 
 Marcus: *"I don't want to make the carbon-cycle pulse decay a calibration target, but if you can
