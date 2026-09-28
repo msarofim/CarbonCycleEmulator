@@ -39,6 +39,7 @@ COPYFILE_DISABLE=1 tar czf "$OUT" \
   data-raw/downloads/nuclear14c \
   calibration/*.R calibration/torch calibration/mac \
   calibration/output/refit_20260920_hilda29l_obj13_hilda_csl3 \
+  calibration/output/refit_20260922_hilda32f_obj13_hilda_csl3_free_parent \
   calibration/output/quarantine/20260920_hilda29l_adopted \
   calibration/output/quarantine/20260920_hilda30s_adopted \
   calibration/output/refit_20260919_hilda31pe_obj13_hilda_c_seasml0 \
