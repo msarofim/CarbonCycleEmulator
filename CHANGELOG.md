@@ -2,6 +2,29 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-28 (d) — **The fert_k SHAPE prior is built from verified sources, and both arrays are on Torch.**
+
+Marcus: the shape comes from **Varney 2024, Walker 2021 and physiology, with CMIP6 as a
+comparison**; the size is left to the record; the prior is "moderate" (log-sd 0.35); φ = 0 only.
+
+- **Sources, read in this session:** Varney et al. 2024 §3.3 (β_NPP 2.37 → 1.44 PgC/ppm, 2× → 4×,
+  10 ESMs) → K 582.9. Walker et al. 2021 §II.1 (accepted MS, OSTI 1660527; canopy β 0.60 → 0.46)
+  → K 510.8. The leaf-level Farquhar bracket is PENDING: Bernacchi 2001's constants are paywalled.
+- **Prior:** lognormal, median 545.7 ppm (their geometric mean), log-sd 0.35.
+  `data-raw/build_fert_k_prior.R` → `data/prior_fert_k.rds`. It is live only under the new label
+  **`hilda_csl3v0k`** (= `hilda_csl3v0` + `fert_k_prior = 1`), through `fert_k`'s two-argument
+  table prior. The frozen objective re-scores `hilda29l` to −1425.3620 exactly. v0k − v0 is 0 in
+  log-lik and exactly the prior shift in logpost. The tests include a mutation check.
+- **Measured before launch:** the prior's full pull from 938 to 546 is only **+1.74 log units**, so
+  the arm measures the record's resistance to the evidence-based shape; it does not guarantee that
+  shape. Pre-registered in `notes/prereg_2026-09-28_fert_k_shape_prior.md`. P1 is exact by
+  optimality: the log-lik loss vs the free φ = 0 mode is ≤ 1.74.
+- **Torch:** the φ = 0 free array (job **18723994**, `/scratch/ms17839/ccx_20260928_phi0`) is running.
+  The v0k array (job **18729847**, `/scratch/ms17839/ccx_20260928_v0k`) is queued. Each has its own
+  fresh directory and frozen worktree (`~/ccx_frozen/20260928{a_phi0,b_v0k}`). Preflights
+  18723155 and 18729635 passed 8/8 port gates.
+- Fixed in passing: `make_bundle.sh` never shipped `hilda32f`'s directory (`c751e10`).
+
 ## 2026-09-28 (c) — **What CO₂-fertilisation saturation should look like: CCX's fit is at the log-like edge of the evidence.**
 
 Marcus: *"more research about what saturation should look like, maybe going beyond FACE to models
