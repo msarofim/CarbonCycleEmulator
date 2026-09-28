@@ -2,6 +2,37 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-28 (b) — **The φ = 0 refit: it fits the record as well as `hilda29l` (+0.73), and the pulse moves halfway to Joos.**
+
+One warm start (id 1, seeded at `hilda29l`), local, from a frozen worktree at `9c0350f`
+(`~/ccx_frozen/20260928a_phi0`), BLAS pinned to 1 thread. Label `hilda_csl3v0`, canonical pins,
+seas_ml 1, solved pump field, no FACE term, `beta_max` bound unchanged at 3. Port targets were
+generated for the new label in the frozen copy (archived beside the start, not over the canonical
+CSV). Port gate (a) passed at 1e-11. **CONVERGED**: −13040.15 → **−1424.6273** in 28,765 evals,
+118.9 min, and cycle 2 gained 0.0000. Archived at
+`calibration/output/multistart_20260928a_hilda_csl3v0_seasml1_canonpins/`. **Not registered and not
+adopted** — adoption is Marcus's call.
+
+- **Likelihood: −1424.63 vs `hilda29l` −1425.36, +0.73**, with the same 29 free parameters
+  (φ is structural, not fitted), so no AIC penalty either way. **The historical record cannot tell
+  φ = 0.5 from φ = 0.** The frozen 2-D shortcut had bounded it at −7.27; the full refit found the
+  remaining 8 log units.
+- **The fit gets there mainly through fertilisation:** `beta_max` 1.309 → **2.717** (bound 3, now
+  interior but close), `fert_k` 825 → 938. Every other parameter moves by 8 % or less
+  (`gamma_enso_land_NH` −8 %, `rep_dC` −6 %).
+- **FACE-equivalent (400 → 564 ppm): 14.4 % → 24.5 %**, above the plantation-weighted 21.8 %
+  headline. This is the cost the record does not see.
+- **Pulse, PD100** (`outputs/diagnostics/pulse_land_attribution_phi0_refit_20260928.log`): atm
+  **34.4 GtC at 100 yr** (shipped 28.9, Joos 40.9), 20.8 at 1000 yr (Joos 23.5). Land 30.5 at
+  100 yr, inside Joos's 23 ± 20. The frozen shortcut predicted 34.7, so it was right this time.
+- Row E at the refit (`fert_k` 120, same present-day enhancement): atm 40.5 at 100 yr, on Joos.
+  The lever for the rest of the gap is still SATURATION, as the 09-28 (a) profile showed.
+
+**What it means:** the vegetation loop is not demanded by the data, and removing it closes about
+half the gap to Joos, but only by making fertilisation stronger and more linear, which FACE
+argues against. A FACE upper limit, which Marcus accepted in principle, would force the trade
+toward saturation and is the natural next arm. The design of that limit is still unruled.
+
 ## 2026-09-28 (a) — **A φ = 0 structure label, and what it costs before any refit.**
 
 Marcus ruled for **φ = 0 only** (not his CO₂-adjusted-equilibrium variant) and **no FACE term
