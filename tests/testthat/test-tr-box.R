@@ -52,7 +52,7 @@ test_that("the box ships OFF, off means ABSENT, and the structure is READ from t
   expect_false(ccx_tr_on(p))
   expect_null(ccx_prepare(p)$idx$NH$tr)
   # the labels the objective knows, in ONE place
-  expect_identical(CCX_STRUCT_LABELS, c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", "hilda_cl2", "hilda_cl3", "hilda_csl3", "hilda_cs", "hilda_csl3v0"))   # + the veg-capacity loop OFF (2026-09-28)   # + the NH-flat seasonal ML (2026-09-19 l)   # + the constants batch (2026-09-14 h)
+  expect_identical(CCX_STRUCT_LABELS, c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", "hilda_cl2", "hilda_cl3", "hilda_csl3", "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k"))   # + the veg-capacity loop OFF (2026-09-28)   # + the NH-flat seasonal ML (2026-09-19 l)   # + the constants batch (2026-09-14 h)
   expect_error(ccx_apply_structure(ccx_default_params(), "hilda_xx"), "unknown structure label")
   o  <- ccx_tr_box_obs(); e <- ccx_eq_cell_obs()
   pt <- ccx_apply_structure(ccx_default_params(), "hilda_tr")

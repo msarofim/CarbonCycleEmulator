@@ -121,6 +121,18 @@ ccx_hs_asx_prior <- local({
     cache
   }
 })
+#' The SHAPE prior on fert_k (2026-09-28, Marcus): lognormal, median 545.7 ppm (the
+#' geometric mean of Walker 2021's canopy-physiology K 511 and Varney 2024's CMIP6-NPP
+#' K 583), log-sd 0.35 (a RULING). data-raw/build_fert_k_prior.R; the same lazy idiom as
+#' ccx_h_ml_prior(). LIVE ONLY where p$fert_k_prior == 1, i.e. under the structure label
+#' "hilda_csl3v0k"; everywhere else fert_k keeps its flat prior, bit-exact.
+ccx_fert_k_prior <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) cache <<- readRDS(ccx_path("data", "prior_fert_k.rds"))
+    cache
+  }
+})
 ccx_h_ml_prior <- local({
   cache <- NULL
   function() {
@@ -180,7 +192,14 @@ CCX_PARAM_TABLE <- list(
   # problem, so it is a real boundary rather than a scale. The lower end keeps
   # the pole (chi = chi0 - fert_k) far below any reachable CO2.
   fert_k      = list(tr = "logit", lo = 20,   hi = 2000, init = 120,
-                     prior = function(x) dunif(x, 20, 2000, log = TRUE)),
+                     # FLAT unless the arm's structure switches the SHAPE prior on
+                     # (p$fert_k_prior == 1, label "hilda_csl3v0k", 2026-09-28). The box
+                     # stays [20, 2000] either way; the lognormal lives inside it.
+                     prior = function(x, p = NULL) {
+                       if (!is.null(p) && isTRUE(p$fert_k_prior == 1)) {
+                         pr <- ccx_fert_k_prior()
+                         dlnorm(x, log(pr$median_ppm), pr$log_sd, log = TRUE)
+                       } else dunif(x, 20, 2000, log = TRUE) }),
   q10         = list(tr = "log",   init = 2.0,
                      prior = function(x) dlnorm(x, log(2.0), 0.25, log = TRUE)),
   k_w         = list(tr = "log",   init = 1500,
@@ -2143,7 +2162,17 @@ ccx_struct_hilda_csl3v0 <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0")
+#' THE "hilda_csl3v0k" STRUCTURE (2026-09-28; Marcus): hilda_csl3v0 (phi = 0) with the
+#' evidence-based SHAPE prior on fert_k switched on (ccx_fert_k_prior(); Varney 2024 +
+#' Walker 2021, CMIP6 as comparison). The SIZE of the response stays free for the record.
+#' The flag is read by fert_k's table prior only; the model never sees it.
+ccx_struct_hilda_csl3v0k <- function() {
+  blk <- ccx_struct_hilda_csl3v0()
+  blk$fert_k_prior <- 1L
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2156,6 +2185,7 @@ ccx_struct_block <- function(struct) {
     "hilda_csl3" = ccx_struct_hilda_cl("hilda_csl3"), # the limb (layer 3) on hilda_cs (2026-09-20 o, ruling 3)
     "hilda_cs"  = ccx_struct_hilda_cs(),           # hilda_c + the seasonal ML's NH cycle FLAT (2026-09-19 l)
     "hilda_csl3v0" = ccx_struct_hilda_csl3v0(),    # hilda_csl3 with the vegetation-capacity loop OFF (2026-09-28)
+    "hilda_csl3v0k" = ccx_struct_hilda_csl3v0k(),  # ... plus the fert_k SHAPE prior (2026-09-28)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2332,7 +2362,7 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "(the limb returning from layer 3, 2026-09-17l), \"hilda_cs\" (hilda_c with the ",
          "seasonal mixed layer's NH cycle FLAT, 2026-09-19l) and \"hilda_csl3\" (the limb from ",
          "layer 3 on hilda_cs, 2026-09-20o) and \"hilda_csl3v0\" (hilda_csl3 with npp_veg_frac = 0, ",
-         "2026-09-28).")
+         "2026-09-28) and \"hilda_csl3v0k\" (hilda_csl3v0 + the fert_k shape prior, 2026-09-28).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)
