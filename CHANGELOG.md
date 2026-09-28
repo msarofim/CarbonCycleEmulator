@@ -2,6 +2,30 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-28 (c) — **What CO₂-fertilisation saturation should look like: CCX's fit is at the log-like edge of the evidence.**
+
+Marcus: *"more research about what saturation should look like, maybe going beyond FACE to models
+which are effectively embodying the best science on saturation."* Survey filed as
+`notes/lit_2026-09-28_co2_fert_saturation.md` (18 sources, each marked verified / abstract /
+recollection / computed). Its CMIP6 extraction: CSVs in `notes/lit_2026-09-28_cmip6_gpp/`, Python
+kept outside this repo (`~/Documents/2026/ClaudeDocs/ccx_lit_scripts/20260928_cmip6_gpp/`).
+
+- **Shape metric R = gain(4×)/gain(2×) from preindustrial**: linear 3, log 2. For CCX's form,
+  **K = 3·C0·(R−1)/(3−R)**, so a log over 1×–4× equals K ≈ 834 ppm. **CCX's fitted `fert_k` 825–940 is
+  log-like (R 1.99–2.06).**
+- **CMIP6 1pctCO2-bgc GPP, 16 ESMs (computed here, not published):** R median **1.81** (range
+  1.11–2.15). **15 of 16 are below log.** MM beats log in all 16, with median K ≈ 580. N-cycle
+  models have a smaller amplitude but the SAME shape (1.79 vs 1.82). Varney et al. 2024's NPP
+  ratio of ≈1.82 agrees. Walker et al. 2021's theoretical canopy elasticity falls 0.60 → 0.46.
+- **Amplitude, 400 → 564 ppm:** CMIP6 GPP +16.9 ± 6.2 %; Walker theory +17 %; FACE biomass
+  +18–21 %. CCX's +14–25 % overlaps, but its upper half is above everything except no-N models.
+- **A single (β_max 1.34, K 580) reproduces the CMIP6 means at 2×, 4× and 400 → 564, and Walker's
+  elasticity decline.** The historic GPP constraint (Keenan 2023, +13.5 ± 3.5 %, abstract only)
+  leans toward the higher-amplitude end. Together: **β_max ≈ 1.3–2.0, K ≈ 500–750** — a hypothesis,
+  since most of the evidence is GPP and CCX scales NPP.
+- Checked in the main session: the identity, both CCX R values, median R → K 568, and all four
+  numbers of the (1.34, 580) row. Unverified items are listed in the note's §3.
+
 ## 2026-09-28 (b) — **The φ = 0 refit: it fits the record as well as `hilda29l` (+0.73), and the pulse moves halfway to Joos.**
 
 One warm start (id 1, seeded at `hilda29l`), local, from a frozen worktree at `9c0350f`
