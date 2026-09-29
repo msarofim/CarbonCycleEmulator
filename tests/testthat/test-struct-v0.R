@@ -33,7 +33,11 @@ test_that("fert_k's prior is FLAT unless the label switches it on", {
   flat <- dunif(x, 20, 2000, log = TRUE)
   expect_identical(vapply(x, function(v) .ccx_prior_eval(s, v, NULL), 0), flat)
   expect_identical(vapply(x, function(v) .ccx_prior_eval(s, v, ccx_default_params()), 0), flat)
-  for (lab in setdiff(CCX_STRUCT_LABELS, "hilda_csl3v0k")) {
+  # the labels that switch the prior ON: hilda_csl3v0k and the NPP option-4 arms built on it
+  # (A = hilda_csl3v0ka, B1 = hilda_csl3v0kan; 2026-09-29, extension authorised by Marcus)
+  PRIOR_ON <- c("hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan")
+  for (lab in PRIOR_ON) expect_identical(ccx_struct_block(lab)$fert_k_prior, 1L, info = lab)
+  for (lab in setdiff(CCX_STRUCT_LABELS, PRIOR_ON)) {
     p <- ccx_apply_structure(ccx_default_params(), lab, seas_ml = "0")
     expect_identical(vapply(x, function(v) .ccx_prior_eval(s, v, p), 0), flat, info = lab)
   }
