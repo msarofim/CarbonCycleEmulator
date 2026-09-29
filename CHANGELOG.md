@@ -2,6 +2,56 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (k) — **Two results. At φ = 0 the `rep_dC` lever on the future is ~4× weaker. And modern NPP is held at 70 by the NH BOMB ¹⁴C record, NOT by the seasonal cycle.**
+
+Marcus: *"Yes, extend the tests, and run option 1."* `test-constants-batch.R:14` now lists arms A and B1
+(`2b95d8f`), and it passes. The 38-parameter count tests are extended only when B2 exists.
+
+**1. The `rep_dC` ladder at φ = 0** (v0k; `outputs/diagnostics/rep_dc_product_ladder_v0k_20260929/`,
+futures `rep_dc_ladder_futures_v0k_20260929.*`; `2ad5a1b`).
+- **Run:** from the frozen worktree at `4471751`. All 10 converged, and the replicate returns to
+  −1424.7465 exactly.
+- **Identity:** the canonical rung gives SSP5-8.5 2300 = 1388.3 ppm (= 09-29 b `phi0_shape`).
+
+| to `rep_dC` 1.0 | `hilda29l` | v0k |
+|---|---|---|
+| Δlogpost | −42.8 | −37.2 |
+| vvH 2300 | +99 | +26 ppm |
+| SSP5-8.5 2300 | +271 | +63 ppm |
+| land ×PI | 2.27 → 1.93 | 1.63 → 1.57 |
+
+- **Most of `rep_dC`'s φ-like leverage WAS the φ loop** amplifying the fertilisation shift.
+- ⭐ **At the measured offset (0.776), φ = 0 fertilisation lands at `beta_max` 1.97 / `fert_k` 644** —
+  inside the 09-28 (c) literature band (β_max 1.3–2.0, K 500–750) — **for −45.0.**
+
+**2. The NPP₀ scan, option 1** (`calibration/diag_npp0_scan.R` → `outputs/diagnostics/npp0_scan_20260929.*`).
+- **Protocol:** arm A at the v0k vector, `NPP_GLOBAL_PI` ×0.75–1.05 by in-process constant override.
+  11 names re-optimised: fertilisation, `luc_scale`, the q10 ridge, the seasonal lags, `npp_frac_NH`,
+  `kz`, `rep_dC`. NM 3000; ×0.80 and ×0.90 hit maxit, so their costs are upper bounds.
+- **Cost of lowering modern NPP:**
+
+| scale | NPP | Δlogpost |
+|---|---|---|
+| 0.95 | 66.9 | −7.4 |
+| 0.90 | 64.0 | −23.9 |
+| 0.85 | 60.8 | −46.5 |
+| 0.80 | 58.2 | −81.0 |
+| 0.75 | 55.0 | −124.5 |
+
+  ×1.05 costs only −0.04, so the optimum sits flat at 1.0–1.05. Reaching the ruled target (56.06)
+  costs ~−110 to −125.
+- ⭐⭐ **WHO PAYS at ×0.75: `d14c_NH` −70.4** (57 % of the gross debit). Then `d13c_level_MLO` −8.4,
+  `gcb_land_sink` −8.2, `d14c_profile_ab` −7.0 and `d13c_level_SPO` −5.6. `co2_icecore` IMPROVES (+7.4).
+- ⛔ **The seasonal streams barely pay** (`co2_seasonal_MLO` −2.6). The 09-29 (e) audit reading, "the NPP
+  cost is mostly the seasonal MLO amplitude", was an artefact of its narrow rebalance (no seasonal
+  parameters free).
+- `rep_dC` rises 3.27 → 4.5 as NPP falls, and `kz` rises 14.7k → 17.3k: the ocean takes up ¹⁴C in the
+  land's place.
+- **Reading (hypothesis, not tested):** the NPP level is set by the LAND's share of bomb-¹⁴C uptake
+  (gross photosynthetic flux × disequilibrium). The land RESIDENCE times that shape that uptake are
+  UNFITTED, and the 09-29 (e) probe showed they also move `rep_dC`. A lower NPP may need a different
+  residence structure rather than a stronger row.
+
 ## 2026-09-29 (j) — **Option 4 is built for arms A and B1, and the power check says the row is DECORATIVE at σ 7.76. B1 moves modern NPP by −0.01 GtC/yr. Nothing has gone to Torch. B2 is blocked on test tripwires.**
 
 Marcus: *"Increase the spread because of the small n. Try both as separate arms, unless there's a strong
