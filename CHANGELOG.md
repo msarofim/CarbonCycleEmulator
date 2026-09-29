@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (t) — Handoff: `notes/handoff_2026-09-29_passive_soil.md` (the NPP₀ residence rescan and the passive-soil arc, m–s). Nothing running; no worktrees besides `main`.
+
 ## 2026-09-29 (s) — **T2, soil Δ¹⁴C against Shi 2020. The default τ 500 is TOO YOUNG on Shi's bulk (−19 ‰ vs −244 ± 48, z +4.7); a match needs τ ≈ 2000–5000 at fixed stock. BUT that reading assumes NO radiocarbon-free soil carbon. The two aOC-robust yardsticks have almost no POWER, so the verdict rests entirely on the Shi/He vs Copard dispute.**
 
 Marcus: *"run the soil Δ¹⁴C test against Shi 2020"*.
