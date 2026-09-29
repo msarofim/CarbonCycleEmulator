@@ -2,6 +2,44 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (p) — **The swap test settles (o)'s mechanism. The POOL ITSELF lowers 2300 CO₂ (τ alone: −48 to −70 ppm at SSP5-8.5), by retaining carbon longer. The rebalanced fertilisation works the OTHER way (+9 to +21 ppm), partly cancelling it. (o)'s candidate (1) had the wrong sign.**
+
+Marcus: *"run the fert_k swap test while the lit search finishes"*.
+- **Driver:** `calibration/diag_tau_soil_slow_swap.R` (`28209bf`, run from a frozen worktree) →
+  `outputs/diagnostics/tau_soil_slow_swap_20260929.{log,csv}`. It walks the τ-500 control vector to
+  each row one component at a time, in FORWARD and REVERSE order: τ; `fert_k` alone; `beta_max`
+  (with `fert_k`, the cor-0.998 pair); `luc_scale`; `kz`; the other 7 names. **Identities:** the control
+  and full-swap states reproduce (o)'s futures to 0.000 ppm.
+
+SSP5-8.5 2300 increments, ppm (forward / reverse):
+
+| component | τ 1000 | τ 1500 |
+|---|---|---|
+| τ alone (the pool) | −50.2 / −48.3 | −70.0 / −66.3 |
+| `fert_k` alone | +29.8 / +28.2 | +35.3 / +32.3 |
+| `beta_max` | −19.0 / −18.8 | −13.9 / −13.6 |
+| ⇒ fertilisation pair | **+10.8 / +9.4** | **+21.4 / +18.7** |
+| `luc_scale` | −2.5 / −3.4 | −3.1 / −4.8 |
+| `kz` | +5.9 / +6.3 | +10.5 / +11.3 |
+| other 7 | +4.4 / +4.4 | +1.5 / +1.5 |
+| **total** | **−31.6** | **−39.6** |
+
+- **It is ORDER-ROBUST:** every component agrees within 4 ppm across the two orders, so the
+  interactions are small.
+- ⭐ **The pool is the lever.** A longer passive residence keeps fertilised litter in the land
+  (τ alone adds +122 to +178 GtC of land uptake by 2300). The historical fit then pushes back:
+  a weaker effective fertilisation (the pair, +9 to +21 ppm) and a weaker ocean (`kz`, +6 to +11)
+  absorb the extra sink the record cannot accept. Net: −32 / −40.
+- ⛔ **(o)'s candidate (1) is WRONG in sign.** A higher `fert_k` WEAKENS fertilisation at every CO₂
+  below saturation. Alone it RAISES 2300 CO₂ (+28 to +35), and `beta_max` only partly restores it.
+- ⚠ The intermediate states are far off the historical fit (Δlogpost down to −377), as expected. Their
+  futures are an ATTRIBUTION of the endpoint difference, not scenarios. The vvH and vvL splits
+  have the same shape at smaller size (vvL: τ −5.6 to −8.1 ppm).
+- **Reading:** the passive-stock choice feeds the future mainly through RETENTION, which the
+  historical record only partly sees. That is why the fit is near-indifferent (+5.7) while the
+  futures move 30–40 ppm. The same ¹⁴C-weak, future-strong pattern appeared for φ (09-29 b) and
+  `rep_dC` (09-29 k), at a smaller scale here.
+
 ## 2026-09-29 (o) — **Futures at the 1000- and 1500-yr passive-soil rows: CO₂ in 2300 is LOWER by 32–40 ppm (SSP5-8.5), and absolute land uptake is HIGHER by 98–133 GtC. The "land ×PI" multiple FALLS from 1.63 to 1.29 only because its denominator grows, so the Koven benchmark comparison is stock-dependent.**
 
 Marcus: *"run the 2300 futures at the 1000 and 1500 yr rows, but also check … other sources of
@@ -22,7 +60,7 @@ evidence for the passive stock size"* (literature: separate note, in progress).
   ssp585 LUC emitted is 160.0 / 153.7 / 151.1 GtC, so the 1000/1500 rows emit 6.3 / 8.9 GtC less.
   For vvH it is 12 / 17 GtC less, history included. That is a few ppm at most, a small share of
   the −32/−40. **Most of the shift is the land taking up more** (+98 / +133 GtC).
-- **Mechanism: untested.** There are two candidates. (1) The rebalanced `fert_k` (868 → 984 → 1003)
+- **Mechanism: untested** (⚠ RESOLVED in (p): (2) is the lever; (1) has the OPPOSITE sign). There are two candidates. (1) The rebalanced `fert_k` (868 → 984 → 1003)
   saturates fertilisation later, so there is more NPP at high CO₂. (2) A longer passive residence
   RETAINS the extra litter input longer. `q10` stays at ~1.1, so this is NOT a respiration-feedback
   story. **Test:** swap `fert_k` alone between rows, or run the 1500-yr structure with the
