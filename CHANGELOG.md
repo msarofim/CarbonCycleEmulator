@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (n) — **The `tau_soil_slow`-only profile: the pull is REAL but WEAK. The record prefers 750–1500 yr by only +4.4 to +5.7 (likelihood), and it is flat to within ~6 log units from 500 to ~3000 yr. The runaway in (m) is a weakly identified direction, not a strong constraint.**
+
+Marcus: *"run the tau_soil_slow-only test"*.
+- **Driver:** `calibration/diag_tau_soil_slow_profile.R` (`38c518f`, run from a frozen worktree) →
+  `outputs/diagnostics/tau_soil_slow_profile_20260929.*`. Arm A at v0k basin 1, NPP₀ unscaled, and the
+  11 names from the 09-29 (k) scale-1 optimum. `tau_soil_slow` ∈ {250 … 5000} yr, with the other
+  four residence times at their defaults. Each value is scored frozen and then with the 11
+  re-optimised (NM 3000). Identity: the default row reproduces an independent rescore exactly.
+
+| τ_slow (yr) | PI passive stock (GtC) | Δ frozen | Δ rebalanced | Δ likelihood | modern NPP | conv |
+|---|---|---|---|---|---|---|
+| 250 | 750 | −403.2 | −16.8 | −16.0 | 66.7 | maxit |
+| 500 | 1500 | 0 | 0 | 0 | 70.0 | ok |
+| 750 | 2250 | −73.6 | +4.4 | +4.8 | 71.5 | ok |
+| 1000 | 3000 | −187.5 | +5.7 | +6.1 | 72.5 | maxit |
+| 1500 | 4500 | −377.5 | +5.5 | +5.5 | 73.4 | ok |
+| 2000 | 6000 | −513.2 | −1.8 | +1.3 | 73.7 | maxit |
+| 3000 | 9000 | −694.5 | −4.9 | −4.2 | 74.7 | maxit |
+| 5000 | 15000 | −909.9 | −26.9 | −25.5 | 75.3 | ok |
+
+- **The frozen cost is large and is almost all CO₂ LEVEL** (MLO −220 and SPO −156 at 2000 yr). A bigger
+  passive pool under `q10` releases more carbon as the 20th century warms. The rebalance absorbs
+  nearly all of it, mainly by cutting `luc_scale` (0.848 → 0.786 at 2000 yr) and `kz`
+  (14.7k → 12.5k), with `fert_k` rising (868 → 1033). **So the passive-stock size trades against the
+  LUC scale and the ocean**: they are nearly degenerate over the record.
+- **What buys the +5.7:** `d14c_NH` +6.0, `d14c_intcal` +3.8 and `d13c_level_MLO` +2.4. It is paid by
+  `d14c_SH` −3.5 and `co2_icecore` −3.6 (at 1500 yr). This is ¹⁴C, consistent with an older passive
+  pool returning more ¹⁴C-depleted carbon. The mechanism is my reading, not tested.
+- **It agrees with (m).** The residence-free optima put `tau_soil_slow` at 1000–1800 yr, the top of
+  this plateau. Freeing it alone buys about 5.7 of the +8.0 that (m) gained at scale 1.
+- ⚠ **4 of 8 rows hit maxit.** The 2000-yr row is non-smooth: its prior+Jacobian is −3.1, against
+  ≤ 1.4 elsewhere, and `seas_T_amp_NH` wanders to 25. So the right-hand side of the plateau is an
+  upper bound, and its edge is uncertain by a few units.
+- **Reading:** +5.7 log units is small next to the stock range it spans (a 2–3× passive pool). The
+  data do not constrain the passive stock; the 1.5k default is a design choice that the record
+  neither confirms nor rejects. **Releasing it is a prior question**: it needs a cited soil-stock
+  range (constants.R rule), not a fit. And because the stock trades against `luc_scale`, `kz` and
+  `fert_k`, it may be a futures lever via `q10` × stock. **Not run: 2300 futures at the
+  1000/1500-yr rows.**
+
 ## 2026-09-29 (m) — **With the land residence times free, the NH bomb-¹⁴C cost of a lower NPP COLLAPSES: ×0.75 costs ≤ −18 (was −125), d14c_NH −4 (was −70). The record pins the carbon in DECADAL pools, not NPP. But every optimum puts the passive soil at 2.6–5.6k GtC (default 1.5k).**
 
 Marcus: *"NPP₀ rescan, residence free"*, *"free, with the existing 11"* (no priors). The frozen
