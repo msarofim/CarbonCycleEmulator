@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (b) — **φ = 0 vs `hilda29l`: identical over the record, but they part company in the future. The gap reaches 500 ppm under SSP5-8.5 by 2300.**
+
+Marcus: *"I think phi = zero is the more physically sensible structure. Are there any large scale
+differences between the models? Did zero phi lead to longer pulse lifetime?"* Comparisons only;
+nothing adopted.
+
+- **Historical: no large-scale difference.** The scorecard with φ = 0 basin 1 as a fourth arm
+  (`CCX_SC_EXTRA_DIR`; `outputs/diagnostics/whole_model_scorecard_20260929_hilda29l_vs_phi0.log`)
+  gives every gate the same verdict at near-identical values. GATE 7 sinks are ocean 3.13 → 3.16 and
+  land 3.09 → 3.01 GtC/yr. GATE V, H, GL and D fail identically. Stream by stream, no difference
+  exceeds 4 log-lik units. Ice-core CO₂ is +3.9, δ¹³C levels −2.6, bomb Δ¹⁴C −1.7, GCB land −0.7;
+  the net is +1.34.
+- **Pulse: yes, longer-lived after the first decades, but shorter at first.** IRF(20/100/300):
+  0.509 / 0.288 / 0.207 → **0.493 / 0.342 / 0.250** (Joos 0.596 / 0.409 / 0.322). Partition at
+  1000 yr: land 34 → 24 %, ocean 48 → 56 %, air 18 → 21 % (Joos 16 / 59 / 25). The early drop is
+  the stronger instantaneous fertilisation; the loop needs ~20 yr (`tau_wood`) to build.
+- **Futures** (new `calibration/diag_phi0_futures.R` → `outputs/diagnostics/phi0_futures_20260929.{log,rds}`;
+  `ccx_run_coupled`, IGCC spliced, each SSP's own non-CO₂, 1750–2300). CO₂ difference, φ = 0 minus
+  `hilda29l`, at 2100 / 2300: SSP1-2.6 +15 / +8 ppm; SSP2-4.5 +21 / +35; SSP3-7.0 +32 / +226;
+  SSP5-8.5 **+45 / +499** (875 → 1374 ppm). Mass balance closes: cumulative uptake is identical
+  across arms to 0.01 GtC. Under SSP5-8.5 the land stock by 2300 is **2.27× preindustrial at
+  `hilda29l`** (2130 → 4830 GtC) vs **1.65× at φ = 0**. The 2× vegetation loop scales every future
+  fertilisation gain. The shape-prior arm tracks φ = 0 free within 15 ppm everywhere.
+- ⚠ **Caveat on levels, not on differences:** 2024 CO₂ from the SSP emissions runs 410–415 ppm
+  (spread across SSPs), below the historical fit. This applies equally to every arm; not chased.
+- The basin-1 promoted mode files are now kept beside their archives (`promoted_basin1/`), so the
+  driver's inputs are reproducible.
+
 ## 2026-09-29 (a) — Housekeeping: the one-start crash in `promote_multistart_mode.R` is fixed; the 09-28 frozen worktrees are removed.
 
 - **Fix.** Gate 3's runner-up line indexed `o[2:min(4, length(o))]`. With one finished start that is
