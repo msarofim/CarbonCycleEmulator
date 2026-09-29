@@ -95,10 +95,14 @@ cat(sprintf("best is id %d at %.6f\n", best$id, best$logpost))
 # starts agree to 4e-4, "the best" is a label on a tie, not a distinguished
 # point, and the file records that rather than implying a precision it lacks.
 o <- order(lp, decreasing = TRUE)
+# ⚠ With ONE finished start, `o[2:min(4, 1)]` is `o[2:1]` = c(NA, id) and the
+# vapply died on the NA (2026-09-28, promoting a single-basin scratch dir).
+# seq_len() gives the empty set instead, and the file says so rather than crashing.
+ru <- o[-1][seq_len(min(3L, length(o) - 1L))]
 cat(sprintf("runners-up: %s\n",
-            paste(sprintf("id %d %.6f", vapply(fin[o[2:min(4, length(o))]],
-                                               function(s) s$id, integer(1)),
-                          lp[o[2:min(4, length(o))]]), collapse = "; ")))
+            if (!length(ru)) "none (only one finished start)" else
+              paste(sprintf("id %d %.6f", vapply(fin[ru], function(s) s$id, integer(1)),
+                            lp[ru]), collapse = "; ")))
 tie <- sum(lp > max(lp) - best$cycle_tol)
 cat(sprintf("%d of %d finished starts lie within the optimiser's own convergence\n",
             tie, length(fin)))

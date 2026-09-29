@@ -2,6 +2,21 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (a) — Housekeeping: the one-start crash in `promote_multistart_mode.R` is fixed; the 09-28 frozen worktrees are removed.
+
+- **Fix.** Gate 3's runner-up line indexed `o[2:min(4, length(o))]`. With one finished start that is
+  `o[2:1]` = `c(NA, id)`, and the `vapply` died, as logged in 09-28 (e). It now takes
+  `o[-1][seq_len(min(3, n − 1))]` and prints "none (only one finished start)". Verified:
+  - The failing case (φ = 0 basin 2, `start_004` alone) now writes a mode file identical in
+    `par_mode`/`logpost` to the two-start build.
+  - The two-start build is bit-identical before and after the fix.
+  - For n ≥ 4 the indices are unchanged by construction.
+  - `test-enso-demean.R`, the one test naming the script, passes. No test runs the script end to end.
+- **Worktrees** `~/ccx_frozen/20260928{a_phi0,b_v0k}` were removed (Marcus), after checking that their
+  uncommitted state was already archived: both port-target CSVs byte-match the archived copies, and
+  `make_bundle.sh` matches `main`. The φ = 0 Mac start's `start_001_run1.{rds,log}` byte-matched the
+  archived `start_001.*`, so they were not kept.
+
 ## 2026-09-28 (f) — **The shape-prior arm: `fert_k` 938 → 865, the record wins, and nothing downstream moves. P1–P3 pass; the prereg's "stays > 850" clause is triggered.**
 
 Job **18729847** (`hilda_csl3v0k`, 24 starts), collected and archived with task and preflight
