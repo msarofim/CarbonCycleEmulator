@@ -1,0 +1,17 @@
+=== PROVENANCE === driver calibration/diag_npp_row_power.R, commit 39d2056, run 2026-09-29 10:04
+  mode v0k basin 1; free {beta_max, fert_k, luc_scale, q10, seas_T_amp_NH, seas_T_amp_SH, kz}; NM maxit 2000; target 56.056 +/- 7.755 GtC/yr over 2001-2023
+
+  A  gain  +0.445 (398 evals, conv 0) | modern NPP 70.00 -> 70.00 | beta_max 2.548 fert_k 866 luc_scale 0.848 q10 1.101
+  B1 gain  +0.447 (416 evals, conv 0) | modern NPP 70.00 -> 69.99 | beta_max 2.547 fert_k 866 luc_scale 0.848 q10 1.100
+
+  B1 - A modern NPP at optimum: -0.01 GtC/yr (= -0.00 target sigma)
+ arm          struct logpost_start logpost_opt    gain npp_start npp_opt
+   A  hilda_csl3v0ka       -1424.2     -1423.8 0.44543    70.005  70.004
+  B1 hilda_csl3v0kan       -1428.8     -1428.3 0.44688    70.005  69.994
+ npp_row evals conv beta_max fert_k luc_scale    q10 seas_T_amp_NH
+      NA   398    0   2.5482 866.23   0.84802 1.1007        15.812
+ -4.5826   416    0   2.5466 866.39   0.84766 1.1004        15.856
+ seas_T_amp_SH    kz
+        3.6266 14692
+        3.6322 14702
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/npp_row_power_20260929.{log,csv}

@@ -2,6 +2,50 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (j) — **Option 4 is built for arms A and B1, and the power check says the row is DECORATIVE at σ 7.76. B1 moves modern NPP by −0.01 GtC/yr. Nothing has gone to Torch. B2 is blocked on test tripwires.**
+
+Marcus: *"Increase the spread because of the small n. Try both as separate arms, unless there's a strong
+reason to prefer one of the other. Use your arm structure recommendation"* (A baseline; B1 = A + row,
+NPP0 fixed; B2 = A + row + fitted NPP0 scale).
+
+**Built (`39d2056`, `5f728d2`):**
+- **The NPP record, in both cores.** Per-hemisphere NPP (GPP − Ra, including the ENSO GPP term and
+  excluding the zero-mean seasonal NEP), read off each month's first RK4 stage.
+  - It is returned as a separate `$npp`, because `out`'s width is pinned by `test-tr-box.R`.
+  - `test-npp-record.R`: C++/R parity ≤ 1e-13; it equals the flux recorder's `gpp − ra`; the columns are
+    hemispheric and not transposed.
+  - The stale "gamma_diff defaults to 0" comment in the core is fixed.
+- **The target** (`data-raw/build_npp_modern_target.R` → `data/obs_npp_modern_target.rds`):
+  - Centre = the mean of MOD17 52.75 (read from data), Ito 56.2 and Haberl actual 59.22 = **56.06**.
+  - σ = the n = 3 sd's one-sided 84 % upper confidence bound, **3.24 × 2.40 = 7.76** GtC/yr (the 0.16
+    tail is a named choice).
+- **`ccx_loglik(npp =)`:** the `npp_modern` row. When absent it is not scored, so objective #13 is intact.
+- **Labels:** `hilda_csl3v0ka` (arm A: v0k + AOD anomaly) and `hilda_csl3v0kan` (arm B1: A + the row).
+  - Smoke test: v0k reproduces exactly; A − v0k = +0.5394 (the AOD price); B1 − A = the row, −4.585
+    (expected −4.584 at 70.0).
+
+**POWER CHECK** (`calibration/diag_npp_row_power.R` → `outputs/diagnostics/npp_row_power_20260929.*`):
+- **Protocol:** at the v0k vector, re-optimise `beta_max`, `fert_k`, `luc_scale`, `q10`,
+  `seas_T_amp_NH/SH` and `kz` under A and under B1 (NM 2000; both converged).
+- **Result:** modern NPP goes 70.00 → 70.00 under A and 70.00 → 69.99 under B1. **B1 − A = −0.01 GtC/yr.**
+  Every free name moves ≤ 0.1 %.
+- **Scale check:**
+  - The row's gradient at 70 is (70 − 56.06)/7.76² ≈ 0.23 per GtC/yr.
+  - The record's curvature, from the audit's NPP ×0.8 price (≈ −297 for ~12 GtC/yr at `hilda29l`,
+    beta_max/fert_k/kz rebalanced), is ≈ 4 per (GtC/yr)².
+  - So the expected shift is ~0.06 GtC/yr. This is an ORDER-OF-MAGNITUDE agreement from a different
+    mode and a different free set, not a measurement of B2.
+- **Reading:** at this σ the record, not the row, sets modern NPP. **A Torch B1 is not worth launching.**
+  B2 is expected to be similar unless a full refit finds a cheap seasonal-amplitude path.
+
+**Suite at `39d2056`:**
+- The named red.
+- The mode-struct lint on my new driver: fixed; the objective is bit-identical.
+- ⛔ **`test-constants-batch.R:14`**, which pins `CCX_STRUCT_LABELS` (11 → 13 with A and B1). **NOT edited:
+  Marcus's rule.** It is a registry tripwire that past label additions extended.
+- **B2** would add a 39th fitted name. Three tests pin the count at 38 (`test-ent-seas-fitted`,
+  `test-eq-cell`, `test-tr-box`), and the app's parameter table is gated. **Not started.**
+
 ## 2026-09-29 (i) — **`NPP_GLOBAL_PI`: option 1 is applied (cited, provisional); option 4 is ruled NEXT. The model's modern NPP, now measured, is 70 against MOD17's 52.7. The target of the option-4 row is RULED: the mean of the verified totals.**
 
 Marcus: *"1 and then 4"*; then, on the target: *"the mean of verified totals makes the most sense."*
