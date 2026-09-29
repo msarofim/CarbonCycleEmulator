@@ -57,6 +57,8 @@ PRIOR) stays ruled (09-23). This asks whether the shim carries the FUTURE.
   should TAR (2001, the oldest) be the lead citation? Draft citation text is in the note; the value
   is unchanged.
 
+- ⭐ **RULING (Marcus, same day):** *"The aod_mode = anomaly seems like the improved version."* ⇒ the next
+  refit label turns it ON. The default stays `legacy` until that label exists, so objective #13 is not touched.
 - Suite at `ee6d413` (`outputs/diagnostics/suite_20260929_postee6d413.log`): **only the named red**
   (`test-mode-file.R:323`). 5031 pass.
 
