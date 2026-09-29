@@ -2,8 +2,8 @@
 
 > Launch from `FaIRtoFrEDI/`, then `change_directory` here (CLAUDE.md). ⛔ **Never use a bare `cd` in a
 > Bash call**; use `git -C` or absolute paths.
-> **Read first:** this file, then CHANGELOG **2026-09-29 (e)–(k)**, then the memory via `INDEX_ccx_ref.md`
-> (or the φ-arc sub-index it points to, if the 09-29 split has landed):
+> **Read first:** this file, then CHANGELOG **2026-09-29 (e)–(k)**, then the memory via **`INDEX_ccx_phi.md`**
+> (NEW 09-29: the φ / land-feedback-future arc, split off `INDEX_ccx_ref.md`):
 > - `ccx_enso_detrend_priced_0929`
 > - `ccx_aod_mode_anomaly_ruled`
 > - `ccx_land_2300_esm_benchmark`
@@ -104,8 +104,12 @@ From there, five threads:
   force-removed. The subagent worktree `.claude/worktrees/agent-a3e4f3a2c943c47a8` is merged and can go too.
 - ⚠ **A git worktree lacks the gitignored `data-raw/downloads/*`.** Symlink them in, or the nuclear ¹⁴C
   source silently zeroes (logpost −1425.557 vs −1425.362).
-- **Suite at `39d2056`:** only the named red (`test-mode-file.R:323`) after the lint fix and the label
-  extension. The last full run predates `081bcbb`, but that file's own test passes.
+- **Suite at `c5c5d4e`** (`outputs/diagnostics/suite_20260929_postc5c5d4e.log`): **only the named red**
+  (`test-mode-file.R:323`), 5042 pass. ⚠ An earlier read at `39d2056` was taken from a PARTIAL log (4 fails
+  seen; the finished log had 7). The other six were all my new labels: the lint (driver fixed), two copies
+  of the label registry (`test-constants-batch`, `test-tr-box`) and `test-struct-v0`'s prior-on set. The
+  last three were extended with Marcus's authorisation; `test-struct-v0` now also ASSERTS that A and B1
+  carry the prior. **Always wait for the log's final line.**
 - **Two identity numbers** for re-running anything:
   - v0k basin-1 stored logpost is **−1424.746523**; arm A at the same vector is −1424.207126.
   - v0k SSP5-8.5 2300 is **1388.3 ppm**, land 1.63×; `hilda29l` is 875.0 ppm, 2.27×.
@@ -113,6 +117,12 @@ From there, five threads:
   in a session that then scores anything.
 - The `npp_modern` row is scored ONLY under `npp_row == 1` (label `hilda_csl3v0kan`). Compare B1 with A on
   likelihood minus that row.
-- **Memory:** `INDEX_ccx_ref.md` was over its 14 KB soft budget and is being split by a subagent. Check
-  `INDEX_conv` / `MEMORY.md` for where the φ-arc lines went.
+- **Memory (split done 09-29):**
+  - `INDEX_ccx_ref.md` went 14,068 → 12,046 B. The φ-arc lines are in the new `INDEX_ccx_phi.md` (3,430 B),
+    recorded in `memory_index_split_history.md`. Snapshot at `memory_backup_20260929b/`.
+  - ⚠ **Pending, for Marcus to approve:** list `INDEX_ccx_phi.md` in `FaIRtoFrEDI/CLAUDE.md`'s sub-index
+    list (after `INDEX_ccx_inputs.md`), as past splits did. It is a config file, so it was not edited.
+  - ⚠ **Root `MEMORY.md` is OVER its 12 KB soft budget** (13,097 B of content; pre-existing). It needs its
+    own trim pass.
+  - `INDEX_ccx_app.md` has 68 B left: split it on its next addition.
 - `carbotopecomment.9.26.26.docx` is untracked and belongs to Marcus. Leave it alone.

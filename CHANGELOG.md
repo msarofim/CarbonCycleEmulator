@@ -2,6 +2,20 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (l) — Housekeeping: the suite is clean at `c5c5d4e`; a partial-log misread is corrected; the memory split is done; the handoff is written.
+
+- ⚠ **Misread, corrected.** The 09-29 (j) suite reading at `39d2056` came from a PARTIAL log, and the finished
+  log had 7 failures, not 4. The six beyond the named red were all from the new A/B1 labels.
+  - The mode-struct lint: the driver was fixed.
+  - The label registry in `test-constants-batch` and `test-tr-box`: extended.
+  - `test-struct-v0`'s prior-on set: extended, and it now also asserts that A and B1 carry `fert_k_prior`.
+  - The test extensions were authorised by Marcus.
+  - **Full suite at `c5c5d4e`: only the named red, 5042 pass.**
+- **Memory:** `INDEX_ccx_ref` 14,068 → 12,046 B; the φ arc is now `INDEX_ccx_phi.md`.
+  - The `FaIRtoFrEDI/CLAUDE.md` sub-index list update is pending Marcus's approval.
+  - Root `MEMORY.md` is over its soft budget (pre-existing).
+- **Handoff:** `notes/handoff_2026-09-29_npp_repdc.md`.
+
 ## 2026-09-29 (k) — **Two results. At φ = 0 the `rep_dC` lever on the future is ~4× weaker. And modern NPP is held at 70 by the NH BOMB ¹⁴C record, NOT by the seasonal cycle.**
 
 Marcus: *"Yes, extend the tests, and run option 1."* `test-constants-batch.R:14` now lists arms A and B1
