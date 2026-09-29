@@ -102,7 +102,9 @@ d M_atm[h]/dt =
 ### 3.3 Land (per hemisphere)
 
 - **NPP with CO₂ fertilization:** NPP[h] = NPP₀[h] · (1 + β · ln(χ[h]/χ₀)), β [CAL].
-  NPP₀ global ≈ 60 GtC/yr [VERIFY], split N/S by land productivity share [VERIFY].
+  NPP₀ global ≈ 60 GtC/yr [PROVISIONAL, cited 2026-09-29 as PRESENT-DAY ~60 (IPCC TAR §3.2.1;
+  bracketed by Haberl 2007, Ito 2011, MOD17); no 1750 source exists — see R/constants.R. To be
+  FITTED against a modern-NPP prior (Marcus, option 4)], split N/S by land productivity share [VERIFY].
 - **Pools (v0 form, superseded — see §3.1):** dC_veg/dt = NPP − C_veg/τ_veg;
   dC_soil/dt = C_veg/τ_veg − R_het.
   **What the code integrates (four pools, since 2026-08-12; spec note added 2026-09-12):** NPP

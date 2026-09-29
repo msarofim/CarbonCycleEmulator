@@ -317,7 +317,24 @@ CCX_CONSTANTS <- list(
   NPP_GLOBAL_PI = list(
     value = 60, units = "GtC/yr",
     status = "provisional",
-    source = "Working value: preindustrial global NPP. NEEDS a cited source."),
+    # ⚠ PROVISIONAL BY RULING (Marcus 2026-09-29, option 1 of four), NOT for want of a
+    # search: notes/lit_2026-09-29_npp_global_pi.md opened every candidate and NONE gives
+    # a 1750 value. What the model means by it (R/model.R npp0): NPP at 1750 CO2 BEFORE
+    # clearing, i.e. close to POTENTIAL NPP at 278 ppm. Every cited number is PRESENT-DAY.
+    # ⚠ Known tension: at the phi = 0 mode the model's own modern NPP is ~60 x (1 - ~0.13
+    # cleared) x 1.31 (fertilisation at 395 ppm) ~ 68, above every verified modern total
+    # (52.7-59.2 actual). The follow-up is to FIT it against a modern-NPP prior (option 4).
+    source = paste("Global terrestrial NPP, total (above + below ground). Value from IPCC TAR",
+                   "WG1 Ch.3 (Prentice et al. 2001) sec. 3.2.1: 'about 60 PgC/yr through",
+                   "integration of field measurements'; Table 3.2 totals 59.9 (Atjay 1979/WBGU)",
+                   "and 62.6 (Mooney, Roy & Saugier 2001). Bracketed by Ito 2011 GCB 17:3161",
+                   "(doi:10.1111/j.1365-2486.2011.02450.x; abstract only) 56.2 +/- 14.3 (n=251,",
+                   "present day), Haberl et al. 2007 PNAS 104:12942 (doi:10.1073/pnas.0704243104)",
+                   "Table 1: actual 59.22, potential 65.51 (LPJ, yr-2000 CO2/climate), and",
+                   "MOD17A3HGF C6.1 52.7 (2001-2023, data/obs_npp_hemispheric.rds). SCOPE",
+                   "CAVEAT: all PRESENT-DAY; no opened source gives a 1750 value (AR5 Fig 6.1 /",
+                   "AR6 Fig 5.12 give preindustrial GPP only, 108.9 / 113). TAR is the OLDEST",
+                   "source. Used as NPP0 before model clearing. Cited 2026-09-29, value unchanged.")),
 
   # ---- the NH/SH split of terrestrial NPP (2026-08-20k) ----------------
   # npp_frac_NH was fitted under UNIFORM[0.4, 0.8] -- zero observational content
