@@ -1,5 +1,5 @@
 === PROVENANCE ===
-  driver calibration/diag_rep_dc_ladder_futures.R, commit 036155b, run 2026-09-29 08:33
+  driver calibration/diag_rep_dc_ladder_futures.R, commit ee6d413, run 2026-09-29 08:41
   vectors: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/rep_dc_product_ladder_20260923 (T1 ladder, mode hilda29l, all 28 other names re-optimised)
   scenarios vvH, vvL, ssp585; spliced TRUE/TRUE/FALSE; coupled, 1750-2300; ppm global mean, land GtC (model land_C)
 
@@ -13,7 +13,7 @@
   job11_rung_0.000   rep_dC +0.000  dlogpost   -84.72  beta_max 0.655 fert_k    337 | vvH 2300  868.5 ppm  ssp585 2300 1244.8 ppm, land x1.81
   job12_rung_-0.215  rep_dC -0.215  dlogpost   -95.71  beta_max 0.637 fert_k    324 | vvH 2300  876.0 ppm  ssp585 2300 1263.6 ppm, land x1.79
 
-  [identity] canonical ssp585 2300: 875.0 ppm, land 2.268x PI (09-29 b: 875, 2.27x)
+  [identity] canonical-rung ssp585 2300: 875.0 ppm, land 2.268x PI (hilda29l 09-29 b: 875, 2.27x)
 
 === FULL TABLE ===
                job rep_dC   d_logpost vvH_co2_2100 vvH_land_2100 vvH_co2_2300

@@ -22,15 +22,19 @@
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 
-RLF_DIR      <- ccx_path("outputs", "diagnostics", "rep_dc_product_ladder_20260923")
-RLF_JOBS     <- c("job01_canonical", sprintf("job%02d_rung_%s", 5:12,
-                  c("3.000", "2.500", "2.000", "1.500", "1.000", "0.776", "0.000", "-0.215")))
-RLF_MODE     <- "hilda29l"
+# Defaults = the 09-23 T1 ladder at hilda29l. RLF_DIR / RLF_MODE / RLF_TAG
+# (env) read another ladder -- the phi = 0 one (RPL_MODE_TAG v0k, 09-29).
+RLF_DIR      <- Sys.getenv("RLF_DIR", ccx_path("outputs", "diagnostics", "rep_dc_product_ladder_20260923"))
+RLF_MODE     <- Sys.getenv("RLF_MODE", "hilda29l")
+RLF_TAG      <- Sys.getenv("RLF_TAG", "")
+# every non-replicate job the ladder wrote, in id order
+RLF_JOBS     <- sub("\\.rds$", "", grep("replicate", sort(list.files(RLF_DIR, "^job.*\\.rds$")),
+                                        value = TRUE, invert = TRUE))
 RLF_SCEN     <- c("vvH", "vvL", "ssp585")
 RLF_SPLICE   <- c(vvH = TRUE, vvL = TRUE, ssp585 = FALSE)   # ssp585 as in 09-29 (b): unspliced
 RLF_YEARS    <- c(2100L, 2300L)
 RLF_END_YEAR <- 2300L
-RLF_OUT      <- ccx_path("outputs", "diagnostics", sprintf("rep_dc_ladder_futures_%s", format(Sys.Date(), "%Y%m%d")))
+RLF_OUT      <- ccx_path("outputs", "diagnostics", sprintf("rep_dc_ladder_futures%s_%s", if (nzchar(RLF_TAG)) paste0("_", RLF_TAG) else "", format(Sys.Date(), "%Y%m%d")))
 
 md <- readRDS(ccx_mode_file(RLF_MODE))
 hist_em <- as.data.frame(readRDS(ccx_path("data", "forcing_emissions_historical.rds")))[, c("year", "fossil_GtC", "luc_GtC")]
@@ -68,7 +72,9 @@ cat(sprintf("  scenarios %s; spliced %s; coupled, 1750-%d; ppm global mean, land
 rows <- list()
 for (j in RLF_JOBS) {
   x <- readRDS(file.path(RLF_DIR, paste0(j, ".rds")))
-  stopifnot(identical(x$provenance$mode, RLF_MODE), x$conv == 0L, identical(names(x$u), md$param_names))
+  stopifnot(identical(ccx_mode_file(x$provenance$mode_file), ccx_mode_file(RLF_MODE)) ||
+              identical(x$provenance$mode, RLF_MODE), identical(names(x$u), md$param_names))
+  if (x$conv != 0L) cat(sprintf("  ⚠ %s: optimiser conv %d (not converged) -- read as an upper bound\n", j, x$conv))
   v <- run_u(x$u)
   rows[[j]] <- data.frame(job = j, rep_dC = ccx_unc_to_par(x$u)$rep_dC,
                           d_logpost = x$opt_logpost - md$logpost, t(v), check.names = FALSE)
@@ -77,8 +83,9 @@ for (j in RLF_JOBS) {
               v[["vvH_co2_2300"]], v[["ssp585_co2_2300"]], v[["ssp585_land_2300"]] / v[["ssp585_land_1750"]]))
 }
 R <- do.call(rbind, rows); rownames(R) <- NULL
-# IDENTITY: the canonical row must reproduce the 09-29 (b) ssp585 hilda29l numbers (875 ppm, 2.27x)
-cat(sprintf("\n  [identity] canonical ssp585 2300: %.1f ppm, land %.3fx PI (09-29 b: 875, 2.27x)\n",
+# IDENTITY: at hilda29l the canonical row must reproduce 09-29 (b) ssp585 (875 ppm, 2.27x);
+# at another mode, compare by hand with that mode's row in phi0_futures_ssp_20260929.log
+cat(sprintf("\n  [identity] canonical-rung ssp585 2300: %.1f ppm, land %.3fx PI (hilda29l 09-29 b: 875, 2.27x)\n",
             R$ssp585_co2_2300[1], R$ssp585_land_2300[1] / R$ssp585_land_1750[1]))
 cat("\n=== FULL TABLE ===\n"); print(R, digits = 5, row.names = FALSE)
 utils::write.csv(R, paste0(RLF_OUT, ".csv"), row.names = FALSE)
