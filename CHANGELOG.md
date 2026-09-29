@@ -2,6 +2,35 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-28 (e) — **The φ = 0 Torch array reproduces the Mac start and finds no better basin; two near-degenerate basins differ only in `h_ml`.**
+
+Job **18723994** (24 starts, 300-min budget, `cs`), collected with `collect_dispersed_multistart.R`
+(`collect_20260928.log` beside the starts). Archived with the task logs (and preflight 18723155's)
+at `calibration/output/multistart_20260928b_hilda_csl3v0_seasml1_pin_…_sd1.0452/`, plus the port
+targets from the frozen worktree. **21 of 24 converged; 3 ran out of time** (ids 9, 11, 15, at
+−1427.3 to −1431.7). Nothing registered, nothing adopted.
+
+- **2 basins among the 21:** basin 1 at **−1424.6273** (9 starts, including the cold, incumbent and
+  new_basin references and 5 dispersed) is the 09-28 (b) Mac start to 4 dp. Basin 2 at
+  **−1424.7110** (12 starts) is 0.08 lower on log-posterior.
+- **They are the same land.** `beta_max` 2.7162 vs 2.7175 (bound 3), `fert_k` 938.1 vs 938.4,
+  `q10` 1.100 vs 1.093. They differ in the seasonal mixed layer (`h_ml` 57.4 vs 49.8, −13 %) and
+  `sst_seas_amp_SH` (−10 %). The pulse is basin-independent: PD100 atm at 100 yr is **34.3 GtC** in
+  basin 2 (`outputs/diagnostics/pulse_land_attribution_phi0_basin2_20260928.log`) vs 34.4 in
+  basin 1, Joos 40.9.
+- ⚠ **ON LIKELIHOOD THE ORDER FLIPS.** Sum of streams: basin 2 **−1389.4657**, basin 1
+  **−1390.4617** (+1.00 for basin 2). Basin 2's prior + Jacobian is −35.25 vs −34.17, from
+  `promote_multistart_mode.R` into scratch dirs; neither mode file is kept.
+- ⚠ **This bears on the prereg's P1.** The optimality bound is exact for the free arm's OBJECTIVE
+  (log-lik + every prior except `fert_k`'s), not for bare log-lik. The v0k mode's objective minus
+  its `fert_k` prior term is ≥ the free best logpost − 1.74. On bare log-lik the gate inherits the
+  1.08 prior difference between two near-degenerate basins. P1 will be reported both ways; the
+  wording change is Marcus's to rule.
+- Full suite at `8e10639` (`outputs/diagnostics/suite_20260928_post8e10639.log`): **one failure, the
+  known AIC failure** (`test-mode-file.R:323`, ΔAIC +4.18). No errors.
+- `promote_multistart_mode.R` crashes when the source directory holds exactly one start (Gate 3's
+  runner-up list indexes `o[2:1]`). Worked around by adding a same-basin second start; not fixed.
+
 ## 2026-09-28 (d) — **The fert_k SHAPE prior is built from verified sources, and both arrays are on Torch.**
 
 Marcus: the shape comes from **Varney 2024, Walker 2021 and physiology, with CMIP6 as a
