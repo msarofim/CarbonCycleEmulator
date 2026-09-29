@@ -2,6 +2,36 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (q) — **Literature on the passive-soil stock (subagent note): the independent evidence favours ~1500 GtC (roughly 1200–2000), NOT 3000–4500. And the "2200 PgC Naegler & Levin target" behind the default is their MODEL's setting, not an observation.**
+
+Note: `notes/lit_2026-09-29_passive_soil_stock.md`. Each row is marked by access level (FULL / ABS /
+SNIP) with its vintage. Scharlemann 2014, Trumbore 2000 and Ciais 2012 are search-summary only;
+He 2016 is abstract only.
+- **Inventories.** AR6 WG1 Fig. 5.12 (PI): vegetation 450, soils 1700 (outside permafrost),
+  permafrost 1200 PgC. ⚠ GCB 2024 Fig. 2 prints permafrost as 1400 while citing AR6. Soil by
+  depth: Jobbágy & Jackson 2000, 1502 / 2344 Pg (0–1 / 0–3 m); Jackson 2017, 2273 Pg (0–2 m).
+  A 3–4.5k passive pool (3.6–5.1k total land) would match or exceed ALL soil carbon to 3 m, and
+  would treat frozen permafrost carbon as exchanging with the atmosphere.
+- **Radiocarbon.** Shi 2020 Table 1 gives 1848 Pg to 1 m at Δ¹⁴C −244 ‰ (yr 2000), 24 % younger
+  than 1000 yr. He 2016 finds soil much older than ESMs (abstract). Copard 2025 (the newest) argues
+  much of it is radiocarbon-free, which would make the rest young; it is a single study and
+  method-dependent. The subagent's rough ¹⁴C-mass check (Σ C·F¹⁴C, robust to radiocarbon-free
+  carbon) lands the data at ~1200–1800 GtC and the model at τ ≈ 500–750. That arithmetic is the
+  subagent's own and unchecked here (yr-2000 data vs pre-bomb model).
+- ⚠ **Naegler & Levin 2006 (Table 4, FULL):** 21.7 / 18.9 kmol is confirmed. But 2200 PgC is their
+  model's configuration (soil 1238 PgC at τ 610 yr), not a measurement. The `R/model.R` ~1232
+  comment calls it a "target". The comment was NOT edited; that is flagged for Marcus.
+- **Older box models** put their slow soil at τ 100–150 yr (Siegenthaler & Oeschger 1987,
+  Joos 1996, Lassey 1996). That is much faster than CCX's 500, so they don't support a longer τ.
+- **Code check:** the spinup re-solves cosmogenic ¹⁴C production (`R/spinup.R:157`), so
+  `d14c_intcal` scores the 1750–1950 Suess decline, not the absolute level. No source was found
+  saying that decline needs old soil carbon.
+- ⭐ **Age ≠ stock.** The profile (n) raised the stock WITH τ because `litter_slow_frac` was held
+  fixed. The literature supports an OLD pool of modest SIZE. **Proposed T1:** profile τ with the
+  stock held at 1500 GtC (co-vary `litter_slow_frac`). If the +5.7 survives, AGE buys it; if it
+  vanishes, STOCK buys it, against the inventories. The swap (p) says the futures lever is
+  retention, so T1 also decides whether the −32/−40 ppm survives at an inventory-consistent stock.
+
 ## 2026-09-29 (p) — **The swap test settles (o)'s mechanism. The POOL ITSELF lowers 2300 CO₂ (τ alone: −48 to −70 ppm at SSP5-8.5), by retaining carbon longer. The rebalanced fertilisation works the OTHER way (+9 to +21 ppm), partly cancelling it. (o)'s candidate (1) had the wrong sign.**
 
 Marcus: *"run the fert_k swap test while the lit search finishes"*.
