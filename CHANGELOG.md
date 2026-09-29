@@ -2,6 +2,56 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (c) — **The app's scenario menu is now the seven van Vuuren (CMIP7 ScenarioMIP) markers, on the FaIRtoFrEDI splice method.**
+
+Marcus: *"use the FaIRtoFrEDI splice method. Go ahead to the scenario menu ... all seven marker
+scenarios."*
+
+**Why:** the RCMIP v5.1.0 SSP land-use history is **90 GtC short** of the GCB budget CCX is fitted
+to. Cumulative LUC 1750–2014 is 185.3 GtC vs GCB 275.6; van Vuuren's CMIP7 history is 244.0. The
+app already spliced GCB over every scenario's past (`app_splice_history`, 09-22), so the switch
+changes the menu's FUTURE: the current scenario set, with real published emissions to 2300.
+
+- **Method:** FaIRtoFrEDI's `"zenodo"` variant (the NCC publication basis): own history, then the
+  published Zenodo 20713982 v1.1.1 series VERBATIM, with no harmonisation. In CCX, "own history" is
+  GCB through `APP_SPLICE_YEAR` (2024), and the seam stays in `app_splice_history()`. The markers are
+  annual, so the old decadal ramp becomes a one-year step: **at most 0.5 GtC/yr** of total CO₂ (the
+  SSPs stepped up to 2.5). `APP_SPLICE_NOTE` now reads that number off the data.
+- **Emissions:** new `data-raw/build_vv_scenarios.R` → `data/vv_emissions.rds` (schema = `ssp_emissions.rds`,
+  keys `vvVL..vvH`). The pinned file is copied from FaIRtoFrEDI and its sha256 verified.
+- **Non-CO₂ forcing:** new `FaIRtoFrEDI/scripts/run_fair_vv_for_ccx.py` (FaIRtoFrEDI `5e956d4` on
+  `heat-ed-morbidity`, not pushed). FaIR 2.2.4 on `calibration_v160_prod` with each marker's OWN
+  land-use and irrigation forcing, and `spliced_ext_zenodo` emissions. Stochastic is left at the
+  posterior's value, as in the SSP-for-CCX export. Cross-check against the existing vV M cube:
+  **within 0.009 K through 2300**. → `data/forcing_climate_vv.rds`. The climate MODULE is not
+  refitted; it stays fitted to the SSP runs.
+- **Core:** `ccx_scenario_emissions()` (R/forcing.R) and `ccx_climate_table()` (R/climate.R) serve
+  both sets; a key in both files is an error. The SSPs remain available for diagnostics.
+- **App:** `APP_SSPS` → `APP_SCENARIOS` (seven markers under the paper's own names; the
+  parenthetical descriptors are drafts for Marcus). `APP_SSP_EMIS` → `APP_SCEN_EMIS`, input
+  `f_ssps` → `f_scen`. Defaults: compare L/M/H, background M. Added a one-line source note.
+- **Tests changed with the spec** (renames; every assertion kept): `test-fair-overlay.R`
+  (`APP_SSPS` → `APP_SCENARIOS`; ids → vvL/vvM/vvH, with the same 2100 ordering check) and
+  `test-stylised-takeaway.R` (stub renamed).
+- **The pulse lab's constants moved with the default background** (`diag_pulse_vs_tcre.R`, now
+  `PT_BG = "vvM"`). Per 1000 GtC at +20/50/100/200 yr: 1.41/1.22/1.08/1.02 → **1.43/1.20/1.03/0.97**;
+  spread 4.3 → 4.2 %. ⭐ The driver's ANCHOR gate FAILED against its typed 1.08 — the gate
+  working. It was re-anchored to a fresh reading off the running app (0.103 °C, 1.03), not to a
+  constant the driver feeds.
+- **Verified in the running app:** the menu renders, the three defaults run, the pulse lab (M
+  background) and build-your-own run, and there are no console errors. Two "figure margins too large"
+  server warnings came from a base-graphics plot in the 800×600 preview; I think that is viewport
+  size and unrelated, but it is unconfirmed.
+- **Not updated (historical SSP diagnostics):** `diag_pulse_spline_ringing.R` and
+  `diag_app_cross_tab_step.R` still name `APP_SSP_EMIS` with SSP keys. Rerun, they fail by name
+  rather than silently switching scenario set.
+- **φ comparison rerun on the markers, GCB-spliced** (`diag_phi0_futures.R`, now `vv` by default and
+  `ssp` for the 09-29 (b) run, whose outputs are renamed `phi0_futures_ssp_*`) →
+  `phi0_futures_vv_20260929.{log,rds}`. **2024 is now 424.4 ppm in every arm** (was 410–415). φ = 0 minus
+  `hilda29l` at 2100: **+14 to +28 ppm in every marker**. At 2300 it is +1 to +7 where CO₂ comes back
+  down (VL, LN, L, ML, HL), **+59 under M** and **+219 under H** (733 → 952 ppm). Mass balance closes to
+  1e-10 GtC across arms.
+
 ## 2026-09-29 (b) — **φ = 0 vs `hilda29l`: identical over the record, but they part company in the future. The gap reaches 500 ppm under SSP5-8.5 by 2300.**
 
 Marcus: *"I think phi = zero is the more physically sensible structure. Are there any large scale

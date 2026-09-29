@@ -113,13 +113,28 @@ APP_FEEDBACK_HOW <- paste("Comments are public on the post and I read all of",
 app_link_ok <- function(u) is.character(u) && length(u) == 1L &&
   nzchar(u) && !identical(u, "SET-BEFORE-DEPLOY")
 
-APP_SSPS <- c(
-  "SSP1-1.9  (very low emissions)"  = "ssp119",
-  "SSP1-2.6  (low emissions)"       = "ssp126",
-  "SSP2-4.5  (middle of the road)"  = "ssp245",
-  "SSP3-7.0  (high emissions)"      = "ssp370",
-  "SSP5-8.5  (very high emissions)" = "ssp585"
+# THE SCENARIO MENU IS VAN VUUREN (Marcus 2026-09-29): the seven CMIP7
+# ScenarioMIP marker pathways (van Vuuren et al. 2026, GMD 19:2627), emissions
+# from Zenodo 20713982 v1.1.1 (data-raw/build_vv_scenarios.R). They replaced the
+# five CMIP6 SSPs, whose land-use history ran 90 GtC short of the budget the
+# model is fitted to. The primary names are the paper's own, so a reader can look
+# them up; the parentheses describe each marker's NET CO2 path in the data
+# (fossil + land use, 2025-2100) and are drafts for Marcus's review.
+APP_SCENARIOS <- c(
+  "Very low (net zero by mid-century)"         = "vvVL",
+  "Low-to-negative (cuts, then net removal)"   = "vvLN",
+  "Low (net zero after mid-century)"           = "vvL",
+  "Medium-to-low (net zero around 2100)"       = "vvML",
+  "Medium (roughly flat to 2100)"              = "vvM",
+  "High-to-low (rises, then deep cuts)"        = "vvHL",
+  "High (rising to 2100)"                      = "vvH"
 )
+APP_SCENARIO_COMPARE <- c("vvL", "vvM", "vvH")   # the Futures tab's opening selection
+APP_SCENARIO_BG      <- "vvM"                    # default background: build-your-own + pulse lab
+APP_SCENARIO_SRC <- paste(
+  "Scenarios are the seven marker pathways of the CMIP7 ScenarioMIP set",
+  "(van Vuuren et al. 2026), the ones the next generation of climate models is",
+  "running.")
 
 # Pulse size. 100 GtC is roughly a decade of current fossil emissions -- large
 # enough that the response is visible against the background without a log axis,
@@ -405,8 +420,9 @@ APP_OBS_GROWTH <- local({
 })
 APP_EMIS_HIST <- as.data.frame(
   readRDS(file.path(CCX_ROOT, "data", "forcing_emissions_historical.rds")))
-APP_SSP_EMIS <- as.data.frame(
-  readRDS(file.path(CCX_ROOT, "data", "ssp_emissions.rds")))
+APP_SCEN_EMIS <- as.data.frame(
+  readRDS(file.path(CCX_ROOT, "data", "vv_emissions.rds")))
+stopifnot(setequal(unique(APP_SCEN_EMIS$scenario), APP_SCENARIOS))
 
 # ---------------------------------------------------------------------
 # FOREST REGROWTH, REPORTED (REGROWTH TIER 1; Marcus 2026-09-24)
@@ -566,12 +582,20 @@ APP_LUC_SPLIT_NOTE <- if (is.null(APP_LUC_SPLIT)) NULL else sprintf(paste(
 # the data rather than typed, so a GCB update moves the handover and every label
 # below with it.
 APP_SPLICE_YEAR <- max(APP_EMIS_HIST$year)
+# ⚠ REWORDED 2026-09-29 for van Vuuren. The SSPs reported DECADAL nodes, so the
+# handover was a ramp to the next node; the markers are ANNUAL, so it is a
+# one-year step, and its size is read off the data here rather than described.
+APP_SPLICE_STEP <- local({
+  h <- APP_EMIS_HIST[APP_EMIS_HIST$year == APP_SPLICE_YEAR, ]
+  s <- APP_SCEN_EMIS[APP_SCEN_EMIS$year == APP_SPLICE_YEAR + 1L, ]
+  max(abs((s$fossil_GtC + s$luc_GtC) - (h$fossil_GtC + h$luc_GtC)))
+})
 APP_SPLICE_NOTE <- sprintf(paste(
   "History is the observed carbon budget (GCB) through %d on every tab; the",
-  "scenario takes over after that. Scenarios were written before %d, so where",
-  "one starts above or below today's emissions the model ramps between the two",
-  "across the gap to the scenario's next reported year rather than stepping."),
-  APP_SPLICE_YEAR, APP_SPLICE_YEAR)
+  "scenario takes over from %d. The scenarios were harmonised to emissions a",
+  "couple of years earlier, so at the handover total CO\u2082 emissions step by",
+  "at most %.1f GtC a year."),
+  APP_SPLICE_YEAR, APP_SPLICE_YEAR + 1L, APP_SPLICE_STEP)
 
 #' Replace a scenario's historical segment with the observed budget
 #'
@@ -592,7 +616,7 @@ APP_SPLICE_NOTE <- sprintf(paste(
 app_splice_history <- function(em, scenario) {
   if (identical(scenario, "historical")) return(em)
   if (is.null(em)) {
-    ssp <- APP_SSP_EMIS[APP_SSP_EMIS$scenario == scenario, ]
+    ssp <- APP_SCEN_EMIS[APP_SCEN_EMIS$scenario == scenario, ]
     if (!nrow(ssp)) return(NULL)          # unknown scenario: let ccx_ handle it
     em <- data.frame(year = ssp$year, fossil_GtC = ssp$fossil_GtC,
                      luc_GtC = ssp$luc_GtC)
@@ -611,7 +635,7 @@ app_splice_history <- function(em, scenario) {
   out[order(out$year), ]
 }
 APP_FAIR <- tryCatch(
-  as.data.frame(readRDS(file.path(CCX_ROOT, "data", "forcing_climate_ssp.rds"))),
+  ccx_climate_table(),
   error = function(e) NULL)
 
 # ---------------------------------------------------------------------
@@ -663,7 +687,7 @@ app_cmap_holder_phrase <- function(row, tie_pp = APP_CMAP_TIE_PP) {
 # what it is trying to reproduce. Drawing it turns "this emulates FaIR" from a
 # claim in the provenance caption into something the reader can check.
 #
-# ⛔ ONLY WHERE FaIR WAS ACTUALLY RUN. `APP_FAIR` covers the five SSPs. It does
+# ⛔ ONLY WHERE FaIR WAS ACTUALLY RUN. `APP_FAIR` covers the seven van Vuuren markers (and the five SSPs, off the menu). It does
 # NOT cover a user-built pathway, and there is no honest way to draw one: FaIR
 # was never run on it. So the toggle is offered in the SCENARIOS mode and the
 # PULSE LAB and withheld from "Build your own" -- a greyed-out control the reader
@@ -679,8 +703,8 @@ APP_FAIR_NOTE <- paste(
 
 #' FaIR's own trajectories for the scenarios being shown, as plot_future() wants
 #'
-#' @param scenarios the SSPs to draw, as a slice of `APP_SSPS`: VALUES are the
-#'   ids `APP_FAIR` is keyed on ("ssp245"), NAMES are the display labels the runs
+#' @param scenarios the scenarios to draw, as a slice of `APP_SCENARIOS`: VALUES are the
+#'   ids `APP_FAIR` is keyed on ("vvM"), NAMES are the display labels the runs
 #'   are keyed on ("SSP2-4.5  (middle of the road)"). An unnamed vector is taken
 #'   as ids that are their own labels. Anything absent from `APP_FAIR` is
 #'   dropped, so a user-built pathway contributes nothing rather than borrowing
@@ -689,7 +713,7 @@ APP_FAIR_NOTE <- paste(
 #' @return data.frame(year, y, who) or NULL
 #'
 #' ⛔⛔ THE TWO KEYINGS ARE DIFFERENT AND THAT IS WHAT BROKE THIS ONCE (09-26).
-#' `future_runs()` names its elements with `names(APP_SSPS)` -- the DISPLAY
+#' `future_runs()` names its elements with `names(APP_SCENARIOS)` -- the DISPLAY
 #' labels -- while `APP_FAIR$scenario` holds the ids. Passing `names(runs)`
 #' straight in matched nothing, returned NULL, and drew no FaIR line at all --
 #' which on screen is indistinguishable from "FaIR agrees perfectly". The
@@ -746,10 +770,10 @@ app_run_mechanisms <- function(off = character(), years = APP_HIST_YEARS,
 #' stylised controls describe fossil-fuel policy and pretending they govern
 #' deforestation too would overstate what the user is choosing.
 app_stylised_emissions <- function(kind, years, to_zero_year = 2060,
-                                   rate_pct = 0, background = "ssp245") {
+                                   rate_pct = 0, background = APP_SCENARIO_BG) {
   yrs <- seq(years[1], years[2])
   hist <- APP_EMIS_HIST
-  bg <- APP_SSP_EMIS[APP_SSP_EMIS$scenario == background, ]
+  bg <- APP_SCEN_EMIS[APP_SCEN_EMIS$scenario == background, ]
   luc <- stats::approx(bg$year, bg$luc_GtC, xout = yrs, rule = 2)$y
   last_obs <- max(hist$year)
   foss <- stats::approx(hist$year, hist$fossil_GtC, xout = yrs, rule = 2)$y
@@ -789,21 +813,23 @@ app_stylised_emissions <- function(kind, years, to_zero_year = 2060,
 # answer is here rather than in the prose so the sentence cannot drift from it.
 #
 # Measured by `calibration/diag_pulse_vs_tcre.R` at the app's own defaults
-# (background ssp245, release 2050, the p_gtc slider's full range), reading the
-# SAME app_run_coupled() the tab uses. dGMST per 1000 GtC at +100 yr:
-#     10 GtC 1.091 | 50 1.087 | 100 1.082 | 200 1.072 | 500 1.044
+# (background APP_SCENARIO_BG = vvM since 2026-09-29, release 2050, the p_gtc
+# slider's full range), reading the SAME app_run_coupled() the tab uses. dGMST
+# per 1000 GtC at +100 yr:
+#     10 GtC 1.041 | 50 1.037 | 100 1.032 | 200 1.023 | 500 0.998
+# (On the old ssp245 background, 2026-09-26: 1.091 | 1.087 | 1.082 | 1.072 | 1.044.)
 # ⚠ These are LABELS FOR A MEASUREMENT MADE ELSEWHERE, which is a staleness risk
 # by construction. `test-pulse-linearity.R` re-reads the driver's own CSV and
 # fails if these drift from it, so the constant cannot rot silently.
 APP_PULSE_LIN_SIZES   <- c(10, 500)   # GtC, the range the claim covers
-APP_PULSE_LIN_SPREAD  <- 4.3          # per cent of the mean, across that range
+APP_PULSE_LIN_SPREAD  <- 4.2          # per cent of the mean, across that range
 APP_PULSE_LIN_HORIZON <- 100L         # years after release
-APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-09-26"
+APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-09-29 (vvM background)"
 # ⚠ AND THE HORIZON DEPENDENCE, which the box did NOT previously admit: the same
-# per-1000 number is 1.41 at +20 yr, 1.22 at +50, 1.08 at +100 and 1.02 at +200
+# per-1000 number is 1.43 at +20 yr, 1.20 at +50, 1.03 at +100 and 0.97 at +200
 # (100 GtC). It is flat in pulse SIZE and emphatically not flat in WHEN you look,
 # so "per 1000 GtC" is only meaningful once the horizon is named.
-APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.41, `50` = 1.22, `100` = 1.08, `200` = 1.02)
+APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.43, `50` = 1.20, `100` = 1.03, `200` = 0.97)
 
 app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0) {
   y_end <- max(emissions$year)

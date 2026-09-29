@@ -411,9 +411,36 @@ ccx_bomb_c14_annual_SUPERSEDED <- function(total_kmol = 102, years = 1945:1980) 
 }
 
 # ---------------------------------------------------------------------
+#' A scenario's own annual CO2 emissions, from whichever file carries it
+#'
+#' The SSPs (RCMIP v5.1.0) and the van Vuuren markers (Zenodo v1.1.1, 2026-09-29)
+#' live in two files with ONE schema. Both are stored UNSPLICED: the observed GCB
+#' history is put over a scenario's past by the caller (app_splice_history()), so
+#' the seam lives in one place. A key present in both files is an error.
+CCX_SCENARIO_EMIS_FILES <- c("RCMIP v5.1.0" = "ssp_emissions.rds",
+                             "van Vuuren 2026 (Zenodo v1.1.1)" = "vv_emissions.rds")
+ccx_scenario_emissions <- function(scenario) {
+  hit <- NULL
+  for (src in names(CCX_SCENARIO_EMIS_FILES)) {
+    p <- ccx_path("data", CCX_SCENARIO_EMIS_FILES[[src]])
+    if (!file.exists(p)) next
+    d <- as.data.frame(readRDS(p))
+    d <- d[d$scenario == scenario, ]
+    if (!nrow(d)) next
+    if (!is.null(hit)) stop("scenario '", scenario, "' is in more than one emissions file")
+    hit <- data.frame(year = d$year, fossil_GtC = d$fossil_GtC, luc_GtC = d$luc_GtC)
+    attr(hit, "source") <- src
+  }
+  if (is.null(hit)) stop("Unknown scenario '", scenario, "'")
+  hit
+}
+
+# ---------------------------------------------------------------------
 #' Assemble the full monthly forcing table
 #'
-#' @param scenario "historical", or one of the SSP names in data/ssp_emissions.rds
+#' @param scenario "historical", or a scenario key in CCX_SCENARIO_EMIS_FILES
+#'   (the SSP names in data/ssp_emissions.rds, the van Vuuren keys vvVL..vvH in
+#'   data/vv_emissions.rds)
 #' @param years    integer range c(first, last)
 #' @param prod_c14 cosmogenic 14C production (mol/yr) -- from ccx_spinup()
 #' @param bomb_total_kmol total bomb 14C production, 1945-1980
@@ -497,11 +524,8 @@ ccx_build_forcing <- function(scenario = "historical",
     e <- as.data.frame(e)
     src <- "GCB 2025 historical budget"
   } else {
-    ssp <- as.data.frame(readRDS(ccx_path("data", "ssp_emissions.rds")))
-    ssp <- ssp[ssp$scenario == scenario, ]
-    if (nrow(ssp) == 0) stop("Unknown scenario '", scenario, "'")
-    e <- data.frame(year = ssp$year, fossil_GtC = ssp$fossil_GtC, luc_GtC = ssp$luc_GtC)
-    src <- paste("RCMIP v5.1.0", scenario)
+    e <- ccx_scenario_emissions(scenario)
+    src <- paste(attr(e, "source"), scenario)
   }
   # NA GUARD (2026-08-13). ccx_annual_to_monthly() strips NAs and then
   # approx(rule = 2) holds the nearest value flat across the gap. That is the

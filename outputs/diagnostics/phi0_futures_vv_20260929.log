@@ -1,0 +1,160 @@
+=== PROVENANCE ===
+  driver calibration/diag_phi0_futures.R, commit ec4c514, run 2026-09-29 07:01
+  protocol: ccx_run_coupled, IGCC GMST spliced to the obs record's end, each scenario's own non-CO2, 1750-2300
+  scenarios: vv set, emissions GCB history spliced over each scenario's past (as the app)
+  units: ppm (global mean); GtC of uptake counted from 2024
+  arm hilda29l   refit_20260920_hilda29l_obj13_hilda_csl3 | logpost -1425.3620 | spinup periodic | npp_veg_frac 0.50 beta_max 1.3094 fert_k 824.6 q10 1.094
+  arm phi0_free  promoted_basin1 | logpost -1424.6273 | spinup periodic | npp_veg_frac 0.00 beta_max 2.7162 fert_k 938.1 q10 1.100
+  arm phi0_shape promoted_basin1 | logpost -1424.7465 | spinup periodic | npp_veg_frac 0.00 beta_max 2.5461 fert_k 864.6 q10 1.101
+Warning messages:
+1: CO2 reached 230-454 ppm, more than 5 ppm outside the 278-1797 ppm range the CO2->forcing curve was fitted over; forcing is extrapolated there. 
+2: CO2 reached 234-459 ppm, more than 5 ppm outside the 278-1797 ppm range the CO2->forcing curve was fitted over; forcing is extrapolated there. 
+3: CO2 reached 234-459 ppm, more than 5 ppm outside the 278-1797 ppm range the CO2->forcing curve was fitted over; forcing is extrapolated there. 
+
+=== 1. CO2 (ppm) and uptake since 2024 (GtC), per scenario ===
+
+  vvVL
+  year   arm              CO2      dAtm     dLand    dOcean      AF
+  2024   hilda29l       424.4       0.0       0.0       0.0      --
+  2024   phi0_free      424.6       0.0       0.0       0.0      --
+  2024   phi0_shape     424.7       0.0       0.0       0.0      --
+  2050   hilda29l       426.4       4.4      81.9      57.6   0.031
+  2050   phi0_free      432.5      16.8      66.1      61.1   0.117
+  2050   phi0_shape     432.6      16.8      66.0      61.1   0.117
+  2100   hilda29l       377.6     -99.4     167.1      69.2  -0.726
+  2100   phi0_free      391.5     -70.5     121.0      86.4  -0.515
+  2100   phi0_shape     391.3     -70.8     121.5      86.3  -0.517
+  2200   hilda29l       339.7    -179.8     170.6      55.4  -3.885
+  2200   phi0_free      349.1    -160.5     125.9      80.8  -3.468
+  2200   phi0_shape     348.9    -160.9     126.8      80.4  -3.477
+  2300   hilda29l       319.2    -223.5     139.0      35.3   4.537
+  2300   phi0_free      325.3    -211.1     101.4      60.5   4.286
+  2300   phi0_shape     325.1    -211.4     102.2      60.0   4.292
+
+  vvLN
+  year   arm              CO2      dAtm     dLand    dOcean      AF
+  2024   hilda29l       424.4       0.0       0.0       0.0      --
+  2024   phi0_free      424.6       0.0       0.0       0.0      --
+  2024   phi0_shape     424.6       0.0       0.0       0.0      --
+  2050   hilda29l       453.2      61.2      81.4      72.4   0.285
+  2050   phi0_free      458.5      71.9      67.6      75.4   0.335
+  2050   phi0_shape     458.6      72.1      67.4      75.5   0.335
+  2100   hilda29l       366.8    -122.2     137.9      82.8  -1.240
+  2100   phi0_free      384.7     -84.9      80.7     102.7  -0.861
+  2100   phi0_shape     384.6     -85.0      80.8     102.8  -0.863
+  2200   hilda29l       245.0    -380.9     -61.4    -110.3   0.689
+  2200   phi0_free      252.9    -364.8    -108.8     -79.1   0.660
+  2200   phi0_shape     253.1    -364.3    -109.5     -78.8   0.659
+  2300   hilda29l       242.4    -386.6    -186.3    -242.1   0.474
+  2300   phi0_free      243.0    -385.7    -208.0    -221.3   0.473
+  2300   phi0_shape     243.4    -385.0    -209.7    -220.2   0.472
+
+  vvL
+  year   arm              CO2      dAtm     dLand    dOcean      AF
+  2024   hilda29l       424.4       0.0       0.0       0.0      --
+  2024   phi0_free      424.6       0.0       0.0       0.0      --
+  2024   phi0_shape     424.7       0.0       0.0       0.0      --
+  2050   hilda29l       448.5      51.3      90.8      68.9   0.243
+  2050   phi0_free      453.8      61.9      77.1      71.9   0.293
+  2050   phi0_shape     453.8      62.0      77.0      72.0   0.294
+  2100   hilda29l       397.9     -56.2     227.1     103.3  -0.205
+  2100   phi0_free      414.2     -22.2     175.5     120.8  -0.081
+  2100   phi0_shape     414.0     -22.6     175.9     120.8  -0.082
+  2200   hilda29l       333.5    -193.0     203.2      59.0  -2.788
+  2200   phi0_free      344.1    -171.0     151.8      88.5  -2.471
+  2200   phi0_shape     343.9    -171.5     152.7      88.0  -2.477
+  2300   hilda29l       331.1    -198.1     182.4      55.4  -4.984
+  2300   phi0_free      337.1    -186.0     144.2      81.5  -4.680
+  2300   phi0_shape     336.9    -186.4     145.1      81.0  -4.691
+
+  vvML
+  year   arm              CO2      dAtm     dLand    dOcean      AF
+  2024   hilda29l       424.4       0.0       0.0       0.0      --
+  2024   phi0_free      424.6       0.0       0.0       0.0      --
+  2024   phi0_shape     424.7       0.0       0.0       0.0      --
+  2050   hilda29l       462.8      81.7      83.4      77.0   0.337
+  2050   phi0_free      467.8      91.8      70.5      79.9   0.379
+  2050   phi0_shape     468.0      92.0      70.2      80.0   0.380
+  2100   hilda29l       443.2      40.0     223.3     148.0   0.097
+  2100   phi0_free      462.4      80.1     165.4     165.8   0.195
+  2100   phi0_shape     462.4      80.2     165.1     166.0   0.195
+  2200   hilda29l       342.2    -174.6     210.2     108.9  -1.208
+  2200   phi0_free      358.4    -140.6     138.0     147.1  -0.973
+  2200   phi0_shape     358.3    -141.0     138.5     147.0  -0.975
+  2300   hilda29l       318.5    -224.8     119.0      51.0   4.105
+  2300   phi0_free      324.8    -212.1      72.8      84.6   3.874
+  2300   phi0_shape     324.7    -212.3      73.3      84.3   3.878
+
+  vvM
+  year   arm              CO2      dAtm     dLand    dOcean      AF
+  2024   hilda29l       424.4       0.0       0.0       0.0      --
+  2024   phi0_free      424.6       0.0       0.0       0.0      --
+  2024   phi0_shape     424.6       0.0       0.0       0.0      --
+  2050   hilda29l       473.2     103.8      79.2      81.3   0.393
+  2050   phi0_free      478.0     113.4      66.8      84.0   0.429
+  2050   phi0_shape     478.2     113.7      66.4      84.1   0.430
+  2100   hilda29l       537.6     240.4     256.7     214.6   0.338
+  2100   phi0_free      560.6     288.7     191.6     231.5   0.406
+  2100   phi0_shape     561.1     289.9     189.9     231.9   0.407
+  2200   hilda29l       554.0     275.3     572.3     391.9   0.222
+  2200   phi0_free      614.3     402.8     385.3     451.6   0.325
+  2200   phi0_shape     615.4     405.2     381.5     452.8   0.327
+  2300   hilda29l       498.6     157.7     660.4     446.7   0.125
+  2300   phi0_free      557.8     282.9     443.4     538.5   0.224
+  2300   phi0_shape     558.7     284.7     440.1     540.0   0.225
+
+  vvHL
+  year   arm              CO2      dAtm     dLand    dOcean      AF
+  2024   hilda29l       424.4       0.0       0.0       0.0      --
+  2024   phi0_free      424.6       0.0       0.0       0.0      --
+  2024   phi0_shape     424.7       0.0       0.0       0.0      --
+  2050   hilda29l       483.5     125.5      90.3      84.5   0.418
+  2050   phi0_free      487.8     134.2      79.2      87.1   0.447
+  2050   phi0_shape     488.0     134.5      78.8      87.2   0.448
+  2100   hilda29l       507.4     176.4     332.4     212.8   0.244
+  2100   phi0_free      532.9     229.9     260.8     230.8   0.319
+  2100   phi0_shape     533.3     230.8     259.5     231.3   0.320
+  2200   hilda29l       335.3    -189.2     285.0     139.5  -0.804
+  2200   phi0_free      357.1    -143.4     188.9     189.9  -0.610
+  2200   phi0_shape     357.0    -143.7     189.2     189.9  -0.611
+  2300   hilda29l       316.8    -228.6     158.3      65.2  44.497
+  2300   phi0_free      323.5    -214.8     104.1     105.6  41.825
+  2300   phi0_shape     323.4    -215.0     104.4     105.5  41.860
+
+  vvH
+  year   arm              CO2      dAtm     dLand    dOcean      AF
+  2024   hilda29l       424.4       0.0       0.0       0.0      --
+  2024   phi0_free      424.6       0.0       0.0       0.0      --
+  2024   phi0_shape     424.7       0.0       0.0       0.0      --
+  2050   hilda29l       486.3     131.6      78.5      86.9   0.443
+  2050   phi0_free      490.8     140.5      67.0      89.5   0.473
+  2050   phi0_shape     491.0     140.9      66.5      89.6   0.474
+  2100   hilda29l       610.6     395.6     301.1     262.9   0.412
+  2100   phi0_free      638.1     453.5     226.3     279.8   0.473
+  2100   phi0_shape     639.2     455.7     223.4     280.5   0.475
+  2200   hilda29l       819.0     838.1     980.9     595.3   0.347
+  2200   phi0_free      956.0    1128.6     615.6     670.2   0.467
+  2200   phi0_shape     960.7    1138.5     603.1     672.7   0.472
+  2300   hilda29l       732.9     655.3    1465.9     757.8   0.228
+  2300   phi0_free      952.1    1120.4     841.4     917.2   0.389
+  2300   phi0_shape     958.2    1133.3     824.2     921.6   0.394
+
+=== 2. phi0 arms minus hilda29l: CO2 (ppm) | land uptake (GtC) ===
+          arm                     2050            2100            2200            2300
+  vvVL    phi0_free      +6.1 |  -15.9  +13.9 |  -46.1   +9.4 |  -44.7   +6.1 |  -37.6
+  vvVL    phi0_shape     +6.1 |  -15.9  +13.7 |  -45.6   +9.2 |  -43.9   +6.0 |  -36.8
+  vvLN    phi0_free      +5.3 |  -13.8  +17.8 |  -57.2   +7.9 |  -47.4   +0.7 |  -21.7
+  vvLN    phi0_shape     +5.4 |  -14.0  +17.8 |  -57.1   +8.1 |  -48.1   +1.0 |  -23.5
+  vvL     phi0_free      +5.3 |  -13.7  +16.3 |  -51.5  +10.6 |  -51.4   +6.0 |  -38.2
+  vvL     phi0_shape     +5.3 |  -13.8  +16.1 |  -51.1  +10.4 |  -50.5   +5.8 |  -37.2
+  vvML    phi0_free      +5.0 |  -12.9  +19.2 |  -57.9  +16.2 |  -72.2   +6.2 |  -46.2
+  vvML    phi0_shape     +5.1 |  -13.2  +19.2 |  -58.2  +16.1 |  -71.7   +6.1 |  -45.7
+  vvM     phi0_free      +4.8 |  -12.4  +23.0 |  -65.2  +60.3 | -187.0  +59.2 | -217.0
+  vvM     phi0_shape     +5.0 |  -12.8  +23.6 |  -66.8  +61.4 | -190.8  +60.0 | -220.3
+  vvHL    phi0_free      +4.3 |  -11.2  +25.5 |  -71.6  +21.8 |  -96.1   +6.7 |  -54.2
+  vvHL    phi0_shape     +4.5 |  -11.6  +25.9 |  -72.9  +21.7 |  -95.8   +6.7 |  -53.9
+  vvH     phi0_free      +4.5 |  -11.5  +27.5 |  -74.8 +137.0 | -365.2 +219.2 | -624.4
+  vvH     phi0_shape     +4.7 |  -12.0  +28.6 |  -77.7 +141.7 | -377.8 +225.3 | -641.7
+
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/phi0_futures_vv_20260929.rds
+  ⛔ A comparison; nothing adopted.

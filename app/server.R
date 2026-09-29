@@ -664,11 +664,11 @@ function(input, output, session) {
 
   # ---- 5. Futures ----------------------------------------------------
   future_runs <- reactive({
-    req(input$f_ssps)
+    req(input$f_scen)
     stats::setNames(
-      lapply(input$f_ssps, function(s)
+      lapply(input$f_scen, function(s)
         app_run_coupled(APP_SPIN, s, APP_FUTURE_YEARS)),
-      names(APP_SSPS)[match(input$f_ssps, APP_SSPS)])
+      names(APP_SCENARIOS)[match(input$f_scen, APP_SCENARIOS)])
   })
 
   # ⛔ THE PATHWAY THE LAST RUN USED, captured HERE and not read from the
@@ -695,7 +695,7 @@ function(input, output, session) {
 
   pulse_runs <- eventReactive(input$p_go, {
     yrs <- APP_PULSE_YEARS
-    bg <- APP_SSP_EMIS[APP_SSP_EMIS$scenario == input$p_bg, ]
+    bg <- APP_SCEN_EMIS[APP_SCEN_EMIS$scenario == input$p_bg, ]
     y <- seq(yrs[1], yrs[2])
     base_em <- data.frame(
       year = y,
@@ -740,7 +740,7 @@ function(input, output, session) {
     } else {
       rs <- future_runs()
       # ⭐ 2026-09-26: standard FaIR as a dashed reference, on request.
-      # ⛔ PASS THE SLICE OF APP_SSPS, NOT `names(rs)`. The runs are named with
+      # ⛔ PASS THE SLICE OF APP_SCENARIOS, NOT `names(rs)`. The runs are named with
       # the DISPLAY labels and APP_FAIR is keyed on the ids; handing over the
       # labels matched nothing and drew no line, which looks exactly like
       # agreement. The named slice carries both, so the two keyings cannot
@@ -749,7 +749,7 @@ function(input, output, session) {
                   if (identical(input$f_yvar, "gmst")) LAB_TEMP else LAB_CO2,
                   view = APP_FUTURE_VIEW,
                   fair = if (isTRUE(input$f_fair))
-                    app_fair_overlay(APP_SSPS[APP_SSPS %in% input$f_ssps],
+                    app_fair_overlay(APP_SCENARIOS[APP_SCENARIOS %in% input$f_scen],
                                      input$f_yvar))
     }
   })

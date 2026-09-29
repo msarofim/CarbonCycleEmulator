@@ -46,7 +46,7 @@
 setwd(.root)
 
 # ⭐ THE APP'S OWN OBJECTS, NOT A REBUILD. `app/global.R` is sourced so that
-# APP_SPIN, APP_SSP_EMIS, APP_PULSE_* and app_run_coupled() are EXACTLY the ones
+# APP_SPIN, APP_SCEN_EMIS, APP_PULSE_* and app_run_coupled() are EXACTLY the ones
 # the tab uses. Rebuilding them from ccx_default_params() is the standing trap
 # [[ccx_diag_must_use_mode_base]]: every arm stays mutually consistent, the
 # script completes, and the numbers are not the app's.
@@ -56,7 +56,7 @@ PT_TAG   <- "pulse_vs_tcre"
 PT_DATE  <- format(Sys.Date(), "%Y%m%d")
 PT_LOG   <- file.path("outputs", "diagnostics", sprintf("%s_%s.log", PT_TAG, PT_DATE))
 PT_OUT   <- file.path("outputs", "diagnostics", sprintf("%s_%s.csv", PT_TAG, PT_DATE))
-PT_BG    <- "ssp245"                     # the app's default background
+PT_BG    <- "vvM"                        # the app's default background (APP_SCENARIO_BG; was ssp245 until 2026-09-29)
 PT_YEAR  <- APP_PULSE_YEAR_DEFAULT       # the app's default release year
 PT_SIZES <- c(10, 50, 100, 200, 500)     # the p_gtc slider's own range
 PT_REF   <- APP_PULSE_GtC_DEFAULT        # the size the app's copy quotes
@@ -106,7 +106,7 @@ say("background %s, release year %d, sizes {%s} GtC, GtC/ppm %.4f\n",
 # ---------------------------------------------------------------------
 pt_pulse <- function(gtc, year = PT_YEAR, bg = PT_BG) {
   yrs <- APP_PULSE_YEARS
-  b <- APP_SSP_EMIS[APP_SSP_EMIS$scenario == bg, ]
+  b <- APP_SCEN_EMIS[APP_SCEN_EMIS$scenario == bg, ]
   y <- seq(yrs[1], yrs[2])
   base_em <- data.frame(
     year = y,
@@ -173,8 +173,14 @@ write.csv(R, PT_OUT, row.names = FALSE)
 a <- R[R$gtc == PT_REF & R$horizon == 100L, ]
 say("\n=== GATE ANCHOR === at the app's defaults (%d GtC, +100 yr): dT %.4f degC, %.3f degC/1000 GtC\n",
     PT_REF, a$dT, a$per1000)
-say("    the app's permanence box prints 0.108 degC and 1.08 degC/1000 GtC -> %s\n",
-    if (abs(a$per1000 - 1.08) < 0.02) "PASS, this script is reading the same model"
+# The literal is a READING OFF THE RUNNING APP, not a constant this script feeds
+# (that would be self-reading). Re-read 2026-09-29 on the vvM default background:
+# the box printed 0.103 degC / 1.03 per 1000 GtC. (09-26, ssp245: 0.108 / 1.08 --
+# which this gate then FAILED against, proving it can.)
+PT_APP_SCREEN_PER1000 <- 1.03
+say("    the app's permanence box prints %.3f degC and %.2f degC/1000 GtC (read off the app 2026-09-29) -> %s\n",
+    PT_APP_SCREEN_PER1000 / 10, PT_APP_SCREEN_PER1000,
+    if (abs(a$per1000 - PT_APP_SCREEN_PER1000) < 0.02) "PASS, this script is reading the same model"
     else "*** MISMATCH -- resolve before reading anything below ***")
 
 say("\n== dGMST per 1000 GtC, by pulse size and horizon ==\n")

@@ -45,7 +45,7 @@ test_that("the SERVER passes IDS, not the run names", {
   call <- grep("app_fair_overlay\\(", .srv, value = TRUE)
   expect_gt(length(call), 0L)
   joined <- paste(call, collapse = " ")
-  expect_match(joined, "APP_SSPS", info = "the server must key the overlay on ids")
+  expect_match(joined, "APP_SCENARIOS", info = "the server must key the overlay on ids")
   expect_false(grepl("app_fair_overlay(names(", joined, fixed = TRUE),
                info = "server passes run NAMES (display labels) -- draws no line")
 })
@@ -67,19 +67,20 @@ test_that("the caveat names the splice, which is why the two differ pre-2024", {
 # line. The gate was written FOR the flattering-NULL failure and still missed
 # it, because it chose its own inputs instead of the ones the app supplies.
 # ⭐ A GATE MUST BE FED WHAT THE CALLER FEEDS. These tests now go through
-# APP_SSPS, the same object the server slices.
+# APP_SCENARIOS, the same object the server slices. (Renamed from APP_SSPS and
+# moved to the van Vuuren ids 2026-09-29, when the menu did; assertions unchanged.)
 test_that("the overlay works on WHAT THE SERVER ACTUALLY PASSES", {
   skip_if(is.null(.env$APP_FAIR <- tryCatch(
-    as.data.frame(readRDS(file.path(.root, "data", "forcing_climate_ssp.rds"))),
-    error = function(e) NULL)), "forcing_climate_ssp.rds not built")
-  # APP_SSPS, read out of global.R rather than retyped here
+    as.data.frame(readRDS(file.path(.root, "data", "forcing_climate_vv.rds"))),
+    error = function(e) NULL)), "forcing_climate_vv.rds not built")
+  # APP_SCENARIOS, read out of global.R rather than retyped here
   for (e in parse(file.path(.app, "global.R")))
     if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") &&
-        is.name(e[[2]]) && identical(as.character(e[[2]]), "APP_SSPS")) eval(e, .env)
-  expect_true(is.character(.env$APP_SSPS) && !is.null(names(.env$APP_SSPS)))
+        is.name(e[[2]]) && identical(as.character(e[[2]]), "APP_SCENARIOS")) eval(e, .env)
+  expect_true(is.character(.env$APP_SCENARIOS) && !is.null(names(.env$APP_SCENARIOS)))
   environment(.env$app_fair_overlay) <- .env
-  sel <- c("ssp126", "ssp245", "ssp585")
-  slice <- .env$APP_SSPS[.env$APP_SSPS %in% sel]        # exactly the server's expression
+  sel <- c("vvL", "vvM", "vvH")
+  slice <- .env$APP_SCENARIOS[.env$APP_SCENARIOS %in% sel]        # exactly the server's expression
   ov <- .env$app_fair_overlay(slice, "gmst")
   expect_false(is.null(ov), info = "overlay NULL on the server's own argument")
   expect_gt(nrow(ov), 100L)
@@ -92,31 +93,31 @@ test_that("the overlay works on WHAT THE SERVER ACTUALLY PASSES", {
                info = "who looks like an id; the server names runs by LABEL")
 })
 
-test_that("the overlay returns REAL ROWS for the SSPs, not a flattering NULL", {
+test_that("the overlay returns REAL ROWS for the menu scenarios, not a flattering NULL", {
   skip_if(is.null(.env$APP_FAIR <- tryCatch(
-    as.data.frame(readRDS(file.path(.root, "data", "forcing_climate_ssp.rds"))),
-    error = function(e) NULL)), "forcing_climate_ssp.rds not built")
+    as.data.frame(readRDS(file.path(.root, "data", "forcing_climate_vv.rds"))),
+    error = function(e) NULL)), "forcing_climate_vv.rds not built")
   environment(.env$app_fair_overlay) <- .env
   for (v in c("gmst", "co2_ppm")) {
-    ov <- .env$app_fair_overlay(c("ssp126", "ssp245", "ssp585"), v)  # unnamed: ids as labels
+    ov <- .env$app_fair_overlay(c("vvL", "vvM", "vvH"), v)  # unnamed: ids as labels
     expect_false(is.null(ov), info = paste("overlay NULL for", v))
     expect_gt(nrow(ov), 100L)
-    expect_setequal(unique(ov$who), c("ssp126", "ssp245", "ssp585"))
+    expect_setequal(unique(ov$who), c("vvL", "vvM", "vvH"))
     expect_true(all(is.finite(ov$y)))
   }
   # ⭐ the ORDERING is the substantive check: FaIR's own scenarios must rank
-  # ssp126 < ssp245 < ssp585 at 2100. A wrong column could still return rows.
-  ov <- .env$app_fair_overlay(c("ssp126", "ssp245", "ssp585"), "gmst")
-  at2100 <- vapply(c("ssp126", "ssp245", "ssp585"),
+  # vvL < vvM < vvH at 2100. A wrong column could still return rows.
+  ov <- .env$app_fair_overlay(c("vvL", "vvM", "vvH"), "gmst")
+  at2100 <- vapply(c("vvL", "vvM", "vvH"),
                    function(s) ov$y[ov$who == s & ov$year == 2100], numeric(1))
   expect_true(all(diff(at2100) > 0), info = paste(round(at2100, 2), collapse = " "))
 })
 
 test_that("a pathway FaIR never ran contributes NOTHING", {
-  skip_if(is.null(.env$APP_FAIR), "forcing_climate_ssp.rds not built")
+  skip_if(is.null(.env$APP_FAIR), "forcing_climate_vv.rds not built")
   environment(.env$app_fair_overlay) <- .env
   expect_null(.env$app_fair_overlay("Your scenario", "gmst"))
   expect_null(.env$app_fair_overlay(character(0), "gmst"))
   # a column name that does not exist must return NULL, not silently draw nothing
-  expect_null(.env$app_fair_overlay("ssp245", "not_a_column"))
+  expect_null(.env$app_fair_overlay("vvM", "not_a_column"))
 })

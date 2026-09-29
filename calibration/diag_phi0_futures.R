@@ -28,7 +28,15 @@ ccx_load_cpp()
 FUT_END_YEAR  <- 2300                      # standing end year for all work (Marcus 08-28)
 FUT_REF_YEAR  <- 2024                      # last observed year; uptake is counted from here
 FUT_MARKS     <- c(2050, 2100, 2200, 2300) # years printed
-FUT_SCENARIOS <- c("ssp119", "ssp126", "ssp245", "ssp370", "ssp585")
+# ⚠ 2026-09-29 (c): van Vuuren markers (the app's menu since that date), and the
+# GCB history SPLICED over each scenario's past exactly as app_splice_history()
+# does. The first run (09-29 b, SSPs, unspliced) started 2024 at 410-415 ppm
+# because RCMIP's land-use history is 90 GtC short of GCB; its DIFFERENCES held,
+# its levels did not. Pass "ssp" as the first argument to reproduce that run.
+FUT_SET <- if (length(commandArgs(TRUE)) && commandArgs(TRUE)[1] == "ssp") "ssp" else "vv"
+FUT_SCENARIOS <- if (FUT_SET == "ssp") c("ssp119", "ssp126", "ssp245", "ssp370", "ssp585") else
+  c("vvVL", "vvLN", "vvL", "vvML", "vvM", "vvHL", "vvH")
+FUT_SPLICE <- FUT_SET == "vv"
 FUT_PPM_TO_GTC <- ccx_const("GtC_PER_PPM")  # GtC per ppm, global atmosphere (R/constants.R, GCB value)
 FUT_ARMS <- c(
   hilda29l      = "hilda29l",
@@ -51,8 +59,10 @@ build_arm <- function(a) {
 cat(sprintf("=== PROVENANCE ===\n  driver calibration/diag_phi0_futures.R, commit %s, run %s\n",
             tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"),
             format(Sys.time(), "%Y-%m-%d %H:%M")))
-cat(sprintf("  protocol: ccx_run_coupled, IGCC GMST spliced to %s, each SSP's own non-CO2, 1750-%d\n",
-            "the obs record's end", FUT_END_YEAR))
+cat(sprintf("  protocol: ccx_run_coupled, IGCC GMST spliced to the obs record's end, each scenario's own non-CO2, 1750-%d\n",
+            FUT_END_YEAR))
+cat(sprintf("  scenarios: %s set, emissions %s\n", FUT_SET,
+            if (FUT_SPLICE) "GCB history spliced over each scenario's past (as the app)" else "scenario's own, UNSPLICED (the 09-29 b run)"))
 cat(sprintf("  units: ppm (global mean); GtC of uptake counted from %d\n", FUT_REF_YEAR))
 
 A <- lapply(FUT_ARMS, build_arm)
@@ -61,11 +71,20 @@ for (n in names(A)) with(A[[n]], cat(sprintf(
   n, basename(dirname(ccx_mode_file(FUT_ARMS[[n]]))), md$logpost, ccx_mode_spinup(md),
   p$npp_veg_frac, p$beta_max, p$fert_k, p$q10)))
 
+# Mirrors app_splice_history(): GCB through its last year, the scenario after.
+fut_emissions <- function(s) {
+  if (!FUT_SPLICE) return(NULL)
+  h <- as.data.frame(readRDS(ccx_path("data", "forcing_emissions_historical.rds")))
+  h <- h[, c("year", "fossil_GtC", "luc_GtC")]
+  e <- ccx_scenario_emissions(s)
+  rbind(h, e[e$year > max(h$year), c("year", "fossil_GtC", "luc_GtC")])
+}
 ann <- function(o, col) { v <- tapply(o[[col]], floor(o$t), mean); setNames(as.numeric(v), names(v)) }
 res <- list()
 for (s in FUT_SCENARIOS) for (n in names(A)) {
   a <- A[[n]]
   r <- ccx_run_coupled(a$sp, scenario = s, years = c(1750, FUT_END_YEAR),
+                       emissions = fut_emissions(s),
                        bomb_total_kmol = a$pm$bomb_total, luc_scale = a$pm$luc_scale)
   co2 <- (ann(r$out, "co2_NH") + ann(r$out, "co2_SH")) / 2
   lnd <- ann(r$out, "land_C"); ocn <- ann(r$out, "ocean_C")
@@ -100,7 +119,7 @@ for (s in FUT_SCENARIOS) for (n in setdiff(names(A), "hilda29l")) {
     sprintf("%+7.1f |%+7.1f", z$co2 - b$co2, z$d_land - b$d_land) }, "")
   cat(sprintf("  %-7s %-11s %s\n", s, n, paste(sprintf("%16s", d), collapse = "")))
 }
-out <- ccx_path("outputs", "diagnostics", sprintf("phi0_futures_%s.rds", format(Sys.Date(), "%Y%m%d")))
+out <- ccx_path("outputs", "diagnostics", sprintf("phi0_futures_%s_%s.rds", FUT_SET, format(Sys.Date(), "%Y%m%d")))
 saveRDS(list(table = R, arms = FUT_ARMS, end_year = FUT_END_YEAR, ref_year = FUT_REF_YEAR,
              commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")), out)
 cat(sprintf("\n  saved %s\n  ⛔ A comparison; nothing adopted.\n", out))

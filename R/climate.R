@@ -35,6 +35,25 @@
 
 CLIMATE_MODULE_FILE <- "climate_module.rds"
 CLIMATE_SSP_FILE    <- "forcing_climate_ssp.rds"
+# The seven van Vuuren ScenarioMIP-CMIP7 markers (2026-09-29; data-raw/build_vv_scenarios.R).
+# Same schema; each marker's prescribed non-CO2 ERF only -- the MODULE stays fitted to the SSPs.
+CLIMATE_VV_FILE     <- "forcing_climate_vv.rds"
+CLIMATE_SCENARIO_FILES <- c(CLIMATE_SSP_FILE, CLIMATE_VV_FILE)
+
+#' Every scenario's FaIR climate record, SSPs and van Vuuren markers together
+#'
+#' A scenario key must occur in exactly ONE file; a key in both would make the
+#' lookup depend on file order, so it is an error rather than a silent pick.
+ccx_climate_table <- function() {
+  ps <- ccx_path("data", CLIMATE_SCENARIO_FILES)
+  ps <- ps[file.exists(ps)]
+  if (!length(ps)) return(NULL)
+  ds <- lapply(ps, function(p) as.data.frame(readRDS(p)))
+  dup <- Reduce(intersect, lapply(ds, function(d) unique(d$scenario)))
+  if (length(ds) > 1L && length(dup))
+    stop("scenario key(s) in more than one climate file: ", paste(dup, collapse = ", "))
+  do.call(rbind, ds)
+}
 # Convergence of the outer loop, in degrees C of max |change| between passes.
 # 1e-4 C is far below anything the carbon cycle resolves and is reached in 2-4
 # passes; the cap exists so a pathological parameter set cannot spin forever.
@@ -116,7 +135,7 @@ ccx_erf_nonco2 <- function(scenario, years) {
   if (!file.exists(p))
     stop("SSP climate table missing: ", p,
          "\nRun: Rscript data-raw/build_climate_module.R")
-  d <- as.data.frame(readRDS(p))
+  d <- ccx_climate_table()
   if (identical(scenario, "historical")) {
     # The historical period is shared by every SSP by construction, so any of
     # them serves; ssp245 is used and the choice only matters after 2014.
@@ -136,9 +155,9 @@ ccx_erf_nonco2 <- function(scenario, years) {
 
 #' Scenarios the climate module can supply non-CO2 forcing for
 ccx_climate_scenarios <- function() {
-  p <- ccx_path("data", CLIMATE_SSP_FILE)
-  if (!file.exists(p)) return(character(0))
-  sort(unique(as.data.frame(readRDS(p))$scenario))
+  d <- ccx_climate_table()
+  if (is.null(d)) return(character(0))
+  sort(unique(d$scenario))
 }
 
 # ---------------------------------------------------------------------

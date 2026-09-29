@@ -43,7 +43,7 @@ YRS <- c(1850L, 2150L)
 E0  <- 10
 .env$APP_EMIS_HIST <- data.frame(year = 1850:2024,
                                  fossil_GtC = c(rep(1, 174), E0))
-.env$APP_SSP_EMIS  <- data.frame(scenario = "ssp245", year = c(1850L, 2150L),
+.env$APP_SCEN_EMIS <- data.frame(scenario = "ssp245", year = c(1850L, 2150L),
                                  fossil_GtC = c(0, 5), luc_GtC = c(1, 1))
 clause <- function(kind, rate_pct = 0, to_zero_year = 2060) {
   em <- .env$app_stylised_emissions(kind, YRS, to_zero_year = to_zero_year,

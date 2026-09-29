@@ -410,9 +410,10 @@ navbarPage(
           id = "f_mode", type = "pills",
           tabPanel(
             "Scenarios", br(),
-            checkboxGroupInput("f_ssps", "Compare scenarios",
-                               choices = APP_SSPS,
-                               selected = c("ssp126", "ssp245", "ssp585"))
+            checkboxGroupInput("f_scen", "Compare scenarios",
+                               choices = APP_SCENARIOS,
+                               selected = APP_SCENARIO_COMPARE),
+            helpText(APP_SCENARIO_SRC)
           ),
           tabPanel(
             "Build your own", br(),
@@ -426,14 +427,14 @@ navbarPage(
             conditionalPanel("input.s_kind == 'rate'",
                              sliderInput("s_rate", "Percent per year",
                                          -5, 5, 1, step = 0.5)),
-            selectInput("s_bg", "Everything else follows", APP_SSPS,
-                        selected = "ssp245"),
+            selectInput("s_bg", "Everything else follows", APP_SCENARIOS,
+                        selected = APP_SCENARIO_BG),
             actionButton("s_go", "Run it", class = "btn-primary btn-sm")
           ),
           tabPanel(
             "Pulse lab", br(),
-            selectInput("p_bg", "Background scenario", APP_SSPS,
-                        selected = "ssp245"),
+            selectInput("p_bg", "Background scenario", APP_SCENARIOS,
+                        selected = APP_SCENARIO_BG),
             sliderInput("p_gtc", "Pulse size (GtC)", 10, 500,
                         APP_PULSE_GtC_DEFAULT, step = 10),
             sliderInput("p_year", "Release it in", 2030, 2100,
