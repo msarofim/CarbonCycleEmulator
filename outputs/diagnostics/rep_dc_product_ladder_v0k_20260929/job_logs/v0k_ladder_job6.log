@@ -1,0 +1,8 @@
+=== GATE HARNESS === rebuilt -1424.7465 (shift +0.0000) vs stored -1424.7465 -> PASS
+=== GATE VECTOR === worst |delta| over 107 names: 0.000e+00 (tol 1.0e-10) -> PASS
+
+=== JOB 6: rung_1.500 (rep_dC pinned at 1.500, start = canonical) ===
+  logpost -1447.5234  conv 0  66.5 min -> outputs/diagnostics/rep_dc_product_ladder_v0k_20260929/job06_rung_1.500.rds
+Warning message:
+In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 1.771e-04

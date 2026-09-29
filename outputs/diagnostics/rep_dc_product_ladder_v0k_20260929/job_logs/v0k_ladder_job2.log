@@ -1,0 +1,12 @@
+=== GATE HARNESS === rebuilt -1424.7465 (shift +0.0000) vs stored -1424.7465 -> PASS
+=== GATE VECTOR === worst |delta| over 107 names: 0.000e+00 (tol 1.0e-10) -> PASS
+
+=== JOB 2: replicate1 (rep_dC pinned at 3.273, start = perturbed 1) ===
+  logpost -1424.7465  conv 0  68.5 min -> outputs/diagnostics/rep_dc_product_ladder_v0k_20260929/job02_replicate1.rds
+Warning messages:
+1: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 7.824e-08
+2: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 4.806e-09
+3: In ccx_c12_steady_conveyor(p0, aux, grid, chi0, y, zero_forc(0),  :
+  conveyor 12C spinup did not converge: |resid| = 1.756e-08

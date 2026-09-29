@@ -1,0 +1,69 @@
+=== PROVENANCE ===
+  driver calibration/diag_rep_dc_ladder_futures.R, commit 2b95d8f, run 2026-09-29 10:27
+  vectors: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/rep_dc_product_ladder_v0k_20260929 (T1 ladder, mode /Users/MarcusMarcus/ccx_frozen/20260929_repdc_v0k/calibration/output/multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452/promoted_basin1/mode_fit_pumpN.rds, all 28 other names re-optimised)
+  scenarios vvH, vvL, ssp585; spliced TRUE/TRUE/FALSE; coupled, 1750-2300; ppm global mean, land GtC (model land_C)
+
+  job01_canonical    rep_dC +3.273  dlogpost     0.00  beta_max 2.546 fert_k    865 | vvH 2300  958.2 ppm  ssp585 2300 1388.3 ppm, land x1.63
+  job03_rung_3.000   rep_dC +3.000  dlogpost    -0.54  beta_max 2.499 fert_k    847 | vvH 2300  960.9 ppm  ssp585 2300 1394.7 ppm, land x1.63
+  job04_rung_2.500   rep_dC +2.500  dlogpost    -4.32  beta_max 2.395 fert_k    809 | vvH 2300  966.2 ppm  ssp585 2300 1407.6 ppm, land x1.61
+  job05_rung_2.000   rep_dC +2.000  dlogpost   -11.71  beta_max 2.273 fert_k    763 | vvH 2300  972.1 ppm  ssp585 2300 1422.0 ppm, land x1.60
+  job06_rung_1.500   rep_dC +1.500  dlogpost   -22.78  beta_max 2.143 fert_k    713 | vvH 2300  978.6 ppm  ssp585 2300 1437.8 ppm, land x1.58
+  job07_rung_1.000   rep_dC +1.000  dlogpost   -37.15  beta_max 2.025 fert_k    666 | vvH 2300  983.7 ppm  ssp585 2300 1451.1 ppm, land x1.57
+  job08_rung_0.776   rep_dC +0.776  dlogpost   -44.96  beta_max 1.969 fert_k    644 | vvH 2300  987.1 ppm  ssp585 2300 1458.9 ppm, land x1.56
+  job09_rung_0.000   rep_dC +0.000  dlogpost   -78.01  beta_max 1.783 fert_k    569 | vvH 2300  999.7 ppm  ssp585 2300 1487.2 ppm, land x1.53
+  job10_rung_-0.215  rep_dC -0.215  dlogpost   -89.51  beta_max 1.726 fert_k    547 | vvH 2300 1005.0 ppm  ssp585 2300 1498.0 ppm, land x1.52
+
+  [identity] canonical-rung ssp585 2300: 1388.3 ppm, land 1.630x PI (hilda29l 09-29 b: 875, 2.27x)
+
+=== FULL TABLE ===
+               job rep_dC   d_logpost vvH_co2_2100 vvH_land_2100 vvH_co2_2300
+   job01_canonical  3.273  4.9713e-07       639.19        2316.8       958.22
+  job03_rung_3.000  3.000 -5.4061e-01       639.37        2318.2       960.89
+  job04_rung_2.500  2.500 -4.3168e+00       639.79        2319.7       966.23
+  job05_rung_2.000  2.000 -1.1707e+01       640.32        2319.9       972.12
+  job06_rung_1.500  1.500 -2.2777e+01       640.98        2319.4       978.64
+  job07_rung_1.000  1.000 -3.7153e+01       641.49        2320.3       983.71
+  job08_rung_0.776  0.776 -4.4964e+01       641.89        2320.0       987.10
+  job09_rung_0.000  0.000 -7.8012e+01       643.46        2318.5       999.69
+ job10_rung_-0.215 -0.215 -8.9510e+01       644.18        2316.7      1005.02
+ vvH_land_2300 vvH_land_1750 vvL_co2_2100 vvL_land_2100 vvL_co2_2300
+        2917.5        2128.7       414.03        2269.3       336.90
+        2915.6        2128.7       414.14        2270.6       336.97
+        2908.0        2128.7       414.26        2272.5       337.02
+        2895.8        2128.7       414.27        2273.9       336.97
+        2880.7        2128.7       414.21        2275.2       336.84
+        2869.0        2128.7       413.96        2277.4       336.49
+        2861.3        2128.7       413.93        2278.0       336.42
+        2833.1        2128.6       413.85        2280.6       336.13
+        2820.6        2128.6       413.96        2280.6       336.18
+ vvL_land_2300 vvL_land_1750 ssp585_co2_2100 ssp585_land_2100 ssp585_co2_2300
+        2238.5        2128.7          943.77           2622.6          1388.3
+        2240.0        2128.7          945.09           2621.3          1394.7
+        2242.2        2128.7          947.85           2616.9          1407.6
+        2244.1        2128.7          951.06           2610.4          1422.0
+        2245.9        2128.7          954.71           2602.6          1437.8
+        2248.4        2128.7          958.27           2596.7          1451.1
+        2249.4        2128.7          960.13           2592.9          1458.9
+        2252.9        2128.6          966.91           2579.1          1487.2
+        2253.5        2128.6          969.21           2573.0          1498.0
+ ssp585_land_2300 ssp585_land_1750 beta_max fert_k    q10 hs_asx_frac
+           3469.9           2128.8   2.5461 864.58 1.1006     0.76038
+           3460.5           2128.8   2.4993 847.19 1.1016     0.80402
+           3436.5           2128.8   2.3953 808.64 1.1031     0.89865
+           3404.7           2128.7   2.2734 762.83 1.1045     0.99795
+           3367.9           2128.7   2.1434 712.89 1.1061     1.09190
+           3336.5           2128.7   2.0252 666.14 1.1010     1.16359
+           3318.7           2128.7   1.9690 643.88 1.1018     1.20255
+           3255.0           2128.7   1.7833 569.49 1.1049     1.34208
+           3230.5           2128.6   1.7264 546.86 1.1109     1.39695
+ bomb_total
+     121.06
+     121.58
+     122.58
+     123.66
+     124.79
+     125.89
+     126.42
+     128.29
+     128.88
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/rep_dc_ladder_futures_v0k_20260929.{log,csv}

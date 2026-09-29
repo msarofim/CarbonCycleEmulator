@@ -1,0 +1,5 @@
+=== GATE HARNESS === rebuilt -1424.7465 (shift +0.0000) vs stored -1424.7465 -> PASS
+=== GATE VECTOR === worst |delta| over 107 names: 0.000e+00 (tol 1.0e-10) -> PASS
+
+=== JOB 9: rung_0.000 (rep_dC pinned at 0.000, start = canonical) ===
+  logpost -1502.7587  conv 0  47.2 min -> outputs/diagnostics/rep_dc_product_ladder_v0k_20260929/job09_rung_0.000.rds
