@@ -2,6 +2,61 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (d) — **A sweep for other φ-like parameters: no unfitted parameter behaves like φ. The two strongest candidates are FITTED: `q10` and the ENSO land channel.**
+
+Marcus: *"Sweep the rest of the model for anything like phi that might be a parameter that doesn't
+make physical sense."* Two halves: a code-and-provenance audit (subagent, read-only), and a
+quantitative screen. Nothing was refitted or adopted.
+
+**The φ signature, measured:** cheap in history once the fitted parameters compensate, large out
+of sample.
+
+**1. Screen of every unfitted scalar** (`calibration/diag_unfitted_screen.R` →
+`outputs/diagnostics/unfitted_screen_20260929.{log,csv}`). Protocol: ×0.5 and ×2, then re-optimise
+`beta_max` + `fert_k` + `kz`, then vvH / vvL to 2300 with GCB spliced.
+- **The power control PASSES:** φ 0.5 → 0 rebalances to −38 (an upper bound; the full refit gave
+  +1.3) and moves vvH 2300 by **+279 ppm**.
+- **No other parameter comes close.** The only other cheap ones are the land residence times
+  (`tau_soil_slow` ×2 −8, `tau_leaf` −6/−11, `litter_slow_frac` −39/−51, `tau_soil_slow` ×0.5 −32).
+  Their future effects are ≤ 37 ppm at 2300 under H, about a tenth of φ's.
+- Everything with a large future effect is strongly constrained: `seas_npp_amp_NH` ×2 +122 ppm at
+  −8551; `alpha_photo_eps` ×2 +94 at −733; `k_l2` ×2 +73 at −95; `kz_zscale` ±47–53 at −105/−368;
+  `sst_NH` ±40–57 at −242/−640; `f_luc_perm` 0.5 +50 at −62.
+- **INERT in the canonical** (exactly 0 cost, 0 future): `sst_scale`, `conv_sink`, `k_e1`, `k_e2`,
+  `k_thc`, `k_eq`, `kz_tr_frac`, `seas_amp_NH/SH`, `beta`.
+
+**2. `q10`** (fitted, 1.094, z −2.41), tested with the same protocol at 1.5 and 2 plus its seasonal
+ridge partners `seas_T_amp_NH/SH` (`calibration/diag_q10_ridge_futures.R` →
+`q10_ridge_futures_20260929.{log,csv}`).
+- q10 2 costs **−72.7 logpost** (the q10 prior improves by +2.3). `seas_T_amp_NH` falls 15.5 → 2.2
+  and fertilisation re-fits stronger (`beta_max` 1.31 → 2.15, `fert_k` 825 → 1302).
+- Futures after re-fitting: vvH 2300 **−45 ppm**. **Decomposition:** q10 2 ALONE gives **+49** (the
+  expected sign). The re-fitted fertilisation overshoots it: the record pins the land's NET
+  sensitivity and the SPLIT between fertilisation and respiration decides the future.
+- ⚠ **The concern is the coupling, not the cost.** q10 is identified only through `A_T·ln(q10)` on
+  the SEASONAL rows (R/model.R:213-216), and that value then sets the century-scale soil feedback.
+  q10 is driven by global-mean GMST, and the passive pool shares it by assertion.
+
+**3. The ENSO land channel** (NEW, from the audit; verified here). The Niño3.4 index is demeaned
+but not detrended: trend **+0.0082/yr (se 0.0028)**. Through `gamma_enso_land` (0.48 / 0.32) it
+puts a land SOURCE of −0.26 GtC/yr in the 1970s and **+0.31 GtC/yr in 2015–24** (about 10 % of
+the land sink). The index tapers to 0 after the record, so every projection drops that source.
+This is the φ pattern: a warming response carried by the variability channel during the fit, and
+absent out of sample. It may be part of why q10 sits at z −2.4. The 09-02 bake-off priced
+detrending at 5–7 log units (at an older mode). **There is no detrend switch in the code**; a test
+needs one plus a refit.
+
+**4. Also flagged by the audit, not yet tested:**
+- `NPP_GLOBAL_PI` 60 GtC/yr, uncited ([VERIFY]; R/constants.R:317). It scales the fertilisation
+  flux, the pools and the seasonal NPP.
+- `f_luc_wood` 0 (pro-rata LUC debit). 70 % of each LUC tonne comes from the 500-yr pool.
+- `kz_deep_frac` 0.0073, near its box floor; the code's comment gives HILDA's own ratio as 0.073.
+- `gamma_diff`: the AOD quiet background is treated as an anomaly, giving small NPP steps at 1850
+  and 2025. Stale comment at forcing.R:1160.
+- `rep_dC` +3.5σ may be absorbing a land-isotope disequilibrium set by the residence structure.
+- Cleared: `sst_scale` (inert), `ra_ratio` (isotopes only), `f_luc_perm` (mass-consistent),
+  measured or cited ocean geometry, and the inert pins.
+
 ## 2026-09-29 (c) — **The app's scenario menu is now the seven van Vuuren (CMIP7 ScenarioMIP) markers, on the FaIRtoFrEDI splice method.**
 
 Marcus: *"use the FaIRtoFrEDI splice method. Go ahead to the scenario menu ... all seven marker

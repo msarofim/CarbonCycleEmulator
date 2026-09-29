@@ -1,0 +1,22 @@
+=== PROVENANCE ===
+  commit 79b5751, 2026-09-29 07:40 | mode hilda29l logpost -1425.3620 (control reproduces)
+  q10 fixed at {1.5, 2}; re-optimised: seas_T_amp_NH, seas_T_amp_SH, beta_max, fert_k, kz (Nelder-Mead, maxit 400); futures vvH, vvL, GCB spliced
+
+  q10 1.50 done (402 evals)
+  q10 2.00 done (212 evals)
+
+=== q10 FIXED, ridge partners + sinks RE-OPTIMISED ===
+   q10 d_logpost d_prior_q10 seas_T_amp_NH seas_T_amp_SH beta_max fert_k    kz
+ 1.094      0.00       0.000        15.485        3.8403    1.309  824.6 14502
+ 1.500    -34.23       1.930         3.625        1.0079    1.639 1007.8 14452
+ 2.000    -72.69       2.305         2.170        0.6206    2.154 1301.6 14398
+ vvH_2100 vvH_2300 vvL_2100 vvL_2300
+    0.000     0.00   0.0000    0.000
+   -3.361   -21.77   0.4723    3.213
+   -7.679   -45.18   0.8235    6.286
+
+  DECOMPOSITION, q10 = 2 alone (nothing re-optimised): vvH_2100 +16.0, vvH_2300 +49.1, vvL_2100 +8.0, vvL_2300 +8.5
+
+  d_logpost includes the q10 prior's own change (d_prior_q10); the likelihood cost is d_logpost - d_prior_q10.
+  futures columns: CO2 change (ppm) vs the canonical; canonical vvH 2100 610.6, 2300 732.9
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/q10_ridge_futures_20260929.csv

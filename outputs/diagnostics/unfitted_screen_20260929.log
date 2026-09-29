@@ -1,0 +1,135 @@
+=== PROVENANCE ===
+  driver calibration/diag_unfitted_screen.R, commit 79b5751, 2026-09-29 07:19
+  mode hilda29l (struct hilda_csl3), stored logpost -1425.3620, re-scored -1425.3620 -> CONTROL REPRODUCES
+  rebalance: beta_max+fert_k+kz, Nelder-Mead maxit 120 | futures: vvH, vvL, GCB spliced, to 2300
+
+  tau_leaf                 1 -> 0.5      frozen     -66.55  rebal   -10.75 | vvH 2100  609.7 2300  723.4 | 0.7 min
+  tau_leaf                 1 -> 2        frozen    -202.52  rebal    -6.44 | vvH 2100  612.5 2300  750.9 | 0.9 min
+  npp_leaf_frac          0.6 -> 0.3      frozen   -6071.06  rebal  -415.30 | vvH 2100  608.6 2300  747.0 | 1.3 min
+  npp_leaf_frac          0.6 -> 0.95     frozen   -9895.02  rebal  -890.57 | vvH 2100  601.2 2300  653.6 | 1.7 min
+  tau_wood                20 -> 10       frozen   -1279.29  rebal  -125.06 | vvH 2100  613.5 2300  759.5 | 2.1 min
+  tau_wood                20 -> 40       frozen   -1534.60  rebal  -134.56 | vvH 2100  608.3 2300  695.8 | 2.4 min
+  litter_slow_frac      0.05 -> 0.025    frozen   -1317.04  rebal   -38.57 | vvH 2100  608.1 2300  728.6 | 2.8 min
+  litter_slow_frac      0.05 -> 0.1      frozen   -2871.41  rebal   -51.01 | vvH 2100  611.5 2300  712.0 | 3.2 min
+  tau_soil_fast            2 -> 1        frozen    -328.76  rebal   -38.25 | vvH 2100  608.9 2300  716.9 | 3.6 min
+  tau_soil_fast            2 -> 4        frozen   -1040.22  rebal   -87.05 | vvH 2100  614.1 2300  762.5 | 4.0 min
+  tau_soil_slow          500 -> 250      frozen    -322.68  rebal   -31.68 | vvH 2100  606.0 2300  713.8 | 4.3 min
+  tau_soil_slow          500 -> 1000     frozen    -152.51  rebal    -8.28 | vvH 2100  615.4 2300  754.6 | 4.7 min
+  f_luc_perm               1 -> 0.5      frozen   -2627.03  rebal   -62.38 | vvH 2100  622.9 2300  783.2 | 5.1 min
+  f_luc_perm               1 -> 0.95     frozen     -27.56  rebal    -0.72 | vvH 2100  609.1 2300  723.4 | 5.4 min
+  pump_carb_frac        0.23 -> 0.115    frozen      +3.54  rebal    +3.55 | vvH 2100  610.7 2300  733.1 | 5.6 min
+  pump_carb_frac        0.23 -> 0.46     frozen     -67.09  rebal   -67.08 | vvH 2100  610.5 2300  732.6 | 5.9 min
+  tau_q                  538 -> 269      frozen    -105.23  rebal   -33.52 | vvH 2100  607.6 2300  715.2 | 6.2 min
+  tau_q                  538 -> 1076     frozen   -2370.63  rebal -1376.89 | vvH 2100  608.7 2300  721.6 | 6.6 min
+  sst_hs                   2 -> 1        frozen      -3.19  rebal    -2.51 | vvH 2100  611.9 2300  738.9 | 6.9 min
+  sst_hs                   2 -> 4        frozen      -4.38  rebal    -2.01 | vvH 2100  608.3 2300  722.4 | 7.2 min
+  sst_scale              0.8 -> 0.4      frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 7.4 min
+  sst_scale              0.8 -> 1.6      frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 7.6 min
+  gamma_diff            0.25 -> 0.125    frozen      -1.44  rebal    +6.18 | vvH 2100  611.0 2300  738.4 | 8.0 min
+  gamma_diff            0.25 -> 0.5      frozen     -60.67  rebal   -29.20 | vvH 2100  606.7 2300  705.7 | 8.3 min
+  kz_zscale              253 -> 126.5    frozen   -1934.44  rebal  -105.44 | vvH 2100  621.9 2300  780.1 | 8.7 min
+  kz_zscale              253 -> 506      frozen   -2072.45  rebal  -368.28 | vvH 2100  599.4 2300  679.9 | 9.1 min
+  conv_sink                8 -> 4        frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 9.3 min
+  conv_sink                8 -> 16       frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 9.5 min
+  hs_frac             0.1284 -> 0.06421  frozen    -127.04  rebal   -56.95 | vvH 2100  610.2 2300  730.7 | 9.8 min
+  hs_frac             0.1284 -> 0.2568   frozen    -336.50  rebal   -52.89 | vvH 2100  613.9 2300  748.6 | 10.2 min
+  alpha_photo_eps       15.6 -> 7.8      frozen    -299.39  rebal  -298.58 | vvH 2100  608.9 2300  724.7 | 10.6 min
+  alpha_photo_eps       15.6 -> 31.2     frozen    -763.89  rebal  -733.03 | vvH 2100  627.0 2300  826.4 | 11.0 min
+  k_e1                     1 -> 0.5      frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 11.1 min
+  k_e1                     1 -> 2        frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 11.3 min
+  k_e2                     3 -> 1.5      frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 11.5 min
+  k_e2                     3 -> 6        frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 11.7 min
+  k_thc                    1 -> 0.5      frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 11.8 min
+  k_thc                    1 -> 2        frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 12.0 min
+  k_l2                     3 -> 1.5      frozen     -57.61  rebal   -56.68 | vvH 2100  606.6 2300  712.9 | 12.4 min
+  k_l2                     3 -> 6        frozen    -132.55  rebal   -94.80 | vvH 2100  622.5 2300  806.2 | 12.8 min
+  w0_l2                   27 -> 13.5     frozen      -1.21  rebal    -1.03 | vvH 2100  610.3 2300  731.9 | 13.0 min
+  w0_l2                   27 -> 54       frozen      -0.05  rebal    -0.05 | vvH 2100  610.7 2300  733.1 | 13.2 min
+  k_eq                     2 -> 1        frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 13.3 min
+  k_eq                     2 -> 4        frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 13.5 min
+  kz_tr_frac               1 -> 0.5      frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 13.7 min
+  kz_tr_frac               1 -> 0.95     frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 13.9 min
+  seas_npp_amp_NH     0.4969 -> 0.2485   frozen   -2332.30  rebal -2326.87 | vvH 2100  607.9 2300  719.7 | 14.2 min
+  seas_npp_amp_NH     0.4969 -> 0.9938   frozen   -9350.03  rebal -8551.06 | vvH 2100  633.2 2300  854.7 | 14.6 min
+  seas_npp_amp_SH     0.5027 -> 0.2514   frozen    -271.87  rebal  -271.30 | vvH 2100  610.3 2300  730.9 | 14.9 min
+  seas_npp_amp_SH     0.5027 -> 1.005    frozen   -1049.79  rebal -1047.34 | vvH 2100  612.3 2300  741.1 | 15.3 min
+  seas_amp_NH             12 -> 6        frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 15.5 min
+  seas_amp_NH             12 -> 24       frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 15.7 min
+  seas_amp_SH              2 -> 1        frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 15.8 min
+  seas_amp_SH              2 -> 4        frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 16.0 min
+  sst_NH               22.32 -> 11.16    frozen    -422.02  rebal  -241.52 | vvH 2100  623.4 2300  789.9 | 16.4 min
+  sst_NH               22.32 -> 44.64    frozen    -777.96  rebal  -639.51 | vvH 2100  598.3 2300  692.8 | 16.8 min
+  sst_SH               18.72 -> 9.362    frozen    -572.55  rebal  -327.52 | vvH 2100  613.4 2300  735.9 | 17.2 min
+  sst_SH               18.72 -> 37.45    frozen   -1183.59  rebal  -991.56 | vvH 2100  598.3 2300  695.7 | 17.6 min
+  beta                  0.75 -> 0.375    frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 17.8 min
+  beta                  0.75 -> 1.5      frozen      +0.00  rebal    +0.00 | vvH 2100  610.6 2300  732.9 | 18.0 min
+There were 50 or more warnings (use warnings() to see the first 50)
+
+=== SCREEN (frozen = everything else at the mode; rebal = beta_max+fert_k+kz re-fitted) ===
+param                  base     value   d_frozen   d_rebal |   H2100   H2300 |   L2100   L2300 | note
+(canonical)              NA        NA      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | 
+npp_veg_frac            0.5         0  -11614.79    -37.86 |   +41.5  +278.9 |   +19.4    +6.1 | 
+tau_leaf                  1       0.5     -66.55    -10.75 |    -0.9    -9.6 |    -1.3    -0.9 | 
+tau_leaf                  1         2    -202.52     -6.44 |    +1.9   +17.9 |    +2.1    +1.5 | 
+npp_leaf_frac           0.6       0.3   -6071.06   -415.30 |    -2.0   +14.1 |    -0.2    +4.1 | 
+npp_leaf_frac           0.6      0.95   -9895.02   -890.57 |    -9.4   -79.4 |    +1.2    -7.4 | 
+tau_wood                 20        10   -1279.29   -125.06 |    +2.9   +26.6 |    +7.5    -0.3 | 
+tau_wood                 20        40   -1534.60   -134.56 |    -2.3   -37.1 |   -10.3    -4.1 | 
+litter_slow_frac       0.05     0.025   -1317.04    -38.57 |    -2.6    -4.3 |    +3.6    +8.6 | 
+litter_slow_frac       0.05       0.1   -2871.41    -51.01 |    +0.9   -20.9 |    -7.5   -11.9 | 
+tau_soil_fast             2         1    -328.76    -38.25 |    -1.7   -16.0 |    -1.8    -1.7 | 
+tau_soil_fast             2         4   -1040.22    -87.05 |    +3.5   +29.5 |    +2.3    +2.4 | 
+tau_soil_slow           500       250    -322.68    -31.68 |    -4.6   -19.1 |    +0.3    +6.7 | 
+tau_soil_slow           500      1000    -152.51     -8.28 |    +4.8   +21.7 |    -0.0    -5.0 | 
+f_luc_perm                1       0.5   -2627.03    -62.38 |   +12.3   +50.3 |    +5.3    +0.2 | 
+f_luc_perm                1      0.95     -27.56     -0.72 |    -1.5    -9.5 |    +0.2    +0.1 | 
+pump_carb_frac         0.23     0.115      +3.54     +3.55 |    +0.1    +0.2 |    -0.0    -0.0 | 
+pump_carb_frac         0.23      0.46     -67.09    -67.08 |    -0.1    -0.3 |    +0.0    +0.0 | 
+tau_q                   538       269    -105.23    -33.52 |    -3.0   -17.8 |    -2.5    -4.0 | 
+tau_q                   538      1076   -2370.63  -1376.89 |    -1.9   -11.3 |    -1.2    +1.3 | 
+sst_hs                    2         1      -3.19     -2.51 |    +1.3    +6.0 |    +0.1    -0.0 | 
+sst_hs                    2         4      -4.38     -2.01 |    -2.3   -10.5 |    -0.3    -0.0 | 
+sst_scale               0.8       0.4      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+sst_scale               0.8       1.6      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+gamma_diff             0.25     0.125      -1.44     +6.18 |    +0.3    +5.4 |    -0.5    -0.4 | 
+gamma_diff             0.25       0.5     -60.67    -29.20 |    -3.9   -27.2 |    +0.5    +0.8 | 
+kz_zscale               253     126.5   -1934.44   -105.44 |   +11.3   +47.1 |    +3.8    +0.3 | 
+kz_zscale               253       506   -2072.45   -368.28 |   -11.2   -53.0 |    -5.9    -3.4 | 
+conv_sink                 8         4      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+conv_sink                 8        16      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+hs_frac              0.1284   0.06421    -127.04    -56.95 |    -0.4    -2.2 |    +1.4    +1.3 | 
+hs_frac              0.1284    0.2568    -336.50    -52.89 |    +3.3   +15.7 |    -2.9    -2.2 | 
+alpha_photo_eps        15.6       7.8    -299.39   -298.58 |    -1.7    -8.3 |    -0.1    +0.1 | 
+alpha_photo_eps        15.6      31.2    -763.89   -733.03 |   +16.4   +93.5 |    +3.2    +0.1 | 
+k_e1                      1       0.5      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+k_e1                      1         2      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+k_e2                      3       1.5      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+k_e2                      3         6      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+k_thc                     1       0.5      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+k_thc                     1         2      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+k_l2                      3       1.5     -57.61    -56.68 |    -4.0   -20.0 |    -0.7    +0.0 | 
+k_l2                      3         6    -132.55    -94.80 |   +11.9   +73.3 |    +1.3    -0.5 | 
+w0_l2                    27      13.5      -1.21     -1.03 |    -0.3    -1.0 |    -0.1    -0.1 | 
+w0_l2                    27        54      -0.05     -0.05 |    +0.0    +0.2 |    +0.0    +0.0 | 
+k_eq                      2         1      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+k_eq                      2         4      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+kz_tr_frac                1       0.5      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+kz_tr_frac                1      0.95      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+seas_npp_amp_NH      0.4969    0.2485   -2332.30  -2326.87 |    -2.7   -13.2 |    -1.0    -0.4 | 
+seas_npp_amp_NH      0.4969    0.9938   -9350.03  -8551.06 |   +22.6  +121.8 |    +9.5    +4.3 | 
+seas_npp_amp_SH      0.5027    0.2514    -271.87   -271.30 |    -0.4    -2.0 |    +0.1    +0.2 | 
+seas_npp_amp_SH      0.5027     1.005   -1049.79  -1047.34 |    +1.6    +8.2 |    +0.7    +0.3 | 
+seas_amp_NH              12         6      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+seas_amp_NH              12        24      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+seas_amp_SH               2         1      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+seas_amp_SH               2         4      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+sst_NH                22.32     11.16    -422.02   -241.52 |   +12.8   +57.0 |    +0.1    -1.7 | 
+sst_NH                22.32     44.64    -777.96   -639.51 |   -12.3   -40.1 |    -1.5    +0.6 | 
+sst_SH                18.72     9.362    -572.55   -327.52 |    +2.8    +3.0 |    -1.9    -1.8 | 
+sst_SH                18.72     37.45   -1183.59   -991.56 |   -12.4   -37.2 |    -1.5    +0.7 | 
+beta                   0.75     0.375      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+beta                   0.75       1.5      +0.00     +0.00 |    +0.0    +0.0 |    +0.0    +0.0 | INERT in canonical
+
+  columns H/L = CO2 change (ppm) vs the canonical under vvH / vvL; canonical 2024 424.4 ppm
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/unfitted_screen_20260929.csv
+  ⛔ A screen: candidates go to a full refit, nothing is adopted.
