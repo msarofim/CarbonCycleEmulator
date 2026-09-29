@@ -1,0 +1,6 @@
+=== PROVENANCE === driver calibration/diag_model_npp_modern.R, commit 7368ff8, run 2026-09-29 09:12
+  NPP = gpp - ra channels of ccx_run(fluxes = TRUE), GtC/yr; historical forcing 1750-2023; obs MOD17 2001-2023
+  obs object fields: by_year, nh_share, nh_share_mean, nh_share_sd, global_mean_PgC, years, bands, source, note
+  hilda29l NPP 1750 60.00 | 1850 60.04 | 2001-2023 mean 69.75 (GPP 69.8) GtC/yr | constant 60
+  v0k      NPP 1750 60.00 | 1850 60.15 | 2001-2023 mean 70.03 (GPP 70.0) GtC/yr | constant 60
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/model_npp_modern_20260929.{log,csv}

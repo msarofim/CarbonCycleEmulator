@@ -320,10 +320,12 @@ CCX_CONSTANTS <- list(
     # ⚠ PROVISIONAL BY RULING (Marcus 2026-09-29, option 1 of four), NOT for want of a
     # search: notes/lit_2026-09-29_npp_global_pi.md opened every candidate and NONE gives
     # a 1750 value. What the model means by it (R/model.R npp0): NPP at 1750 CO2 BEFORE
-    # clearing, i.e. close to POTENTIAL NPP at 278 ppm. Every cited number is PRESENT-DAY.
-    # ⚠ Known tension: at the phi = 0 mode the model's own modern NPP is ~60 x (1 - ~0.13
-    # cleared) x 1.31 (fertilisation at 395 ppm) ~ 68, above every verified modern total
-    # (52.7-59.2 actual). The follow-up is to FIT it against a modern-NPP prior (option 4).
+    # clearing. The model has NO pre-1750 clearing, so this IS its 1750 NPP (measured: 60.00
+    # at both modes). Every cited number is PRESENT-DAY.
+    # ⚠ MEASURED TENSION (calibration/diag_model_npp_modern.R, 2026-09-29): the model's own
+    # 2001-2023 NPP is 69.8 (hilda29l) / 70.0 (phi = 0 v0k) against MOD17 52.7 over the SAME
+    # years (+33 %) and Haberl's 59.2 actual. The follow-up is to FIT it against a
+    # modern-NPP likelihood row (option 4).
     source = paste("Global terrestrial NPP, total (above + below ground). Value from IPCC TAR",
                    "WG1 Ch.3 (Prentice et al. 2001) sec. 3.2.1: 'about 60 PgC/yr through",
                    "integration of field measurements'; Table 3.2 totals 59.9 (Atjay 1979/WBGU)",
