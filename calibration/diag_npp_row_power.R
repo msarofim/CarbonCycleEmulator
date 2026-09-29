@@ -22,7 +22,8 @@ PW_OUT   <- ccx_path("outputs", "diagnostics", sprintf("npp_row_power_%s", forma
 md <- readRDS(ccx_mode_file(PW_MODE)); invisible(ccx_apply_pins(md$pins))
 tg <- ccx_npp_modern_target()
 iF <- match(PW_FREE, md$param_names); stopifnot(!anyNA(iF))
-bp_of <- function(struct) { bp <- ccx_default_params(); bp$pump_mode <- md$pump_mode
+# the mode's OWN base (ccx_mode_base, per the mode-struct lint), then the arm's structure on top
+bp_of <- function(struct) { bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
   bp <- ccx_apply_structure(bp, struct, as.character(md$seas_ml), pump_field = md$pump_field)
   for (n in names(md$pins)) bp[[n]] <- md$pins[[n]]; bp }
 npp_modern <- function(u, bp) {
