@@ -2,6 +2,40 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (o) — **Futures at the 1000- and 1500-yr passive-soil rows: CO₂ in 2300 is LOWER by 32–40 ppm (SSP5-8.5), and absolute land uptake is HIGHER by 98–133 GtC. The "land ×PI" multiple FALLS from 1.63 to 1.29 only because its denominator grows, so the Koven benchmark comparison is stock-dependent.**
+
+Marcus: *"run the 2300 futures at the 1000 and 1500 yr rows, but also check … other sources of
+evidence for the passive stock size"* (literature: separate note, in progress).
+- **Driver:** `calibration/diag_tau_soil_slow_futures.R` (`a6d04cb`) →
+  `outputs/diagnostics/tau_soil_slow_futures_20260929.{log,csv}`. It runs the profile's REBALANCED
+  vectors, with the 500-yr row (the same rebalance at the default stock) as the like-for-like
+  control. Coupled run, 1750–2300; vvH/vvL spliced, ssp585 unspliced. **Identity:** the stored v0k
+  mode gives ssp585 2300 = 1388.28 ppm (handoff 1388.3).
+
+| τ_slow | Δ logpost | ssp585 2300 | vvH 2300 | vvL 2300 | vvH 2100 | land 1750 → 2300 (ssp585) | ×PI |
+|---|---|---|---|---|---|---|---|
+| 500 (control) | 0 | 1387.9 | 957.9 | 336.9 | 639.0 | 2129 → 3471 (+1342) | 1.63 |
+| 1000 | +5.7 | −31.6 | −26.3 | −3.5 | −3.1 | 3628 → 5068 (+1440) | 1.40 |
+| 1500 | +5.5 | −39.6 | −34.9 | −5.3 | −3.6 | 5127 → 6602 (+1475) | 1.29 |
+
+- **Like-for-like forcing check.** `luc_scale` also scales the scenario's own LUC. Cumulative
+  ssp585 LUC emitted is 160.0 / 153.7 / 151.1 GtC, so the 1000/1500 rows emit 6.3 / 8.9 GtC less.
+  For vvH it is 12 / 17 GtC less, history included. That is a few ppm at most, a small share of
+  the −32/−40. **Most of the shift is the land taking up more** (+98 / +133 GtC).
+- **Mechanism: untested.** There are two candidates. (1) The rebalanced `fert_k` (868 → 984 → 1003)
+  saturates fertilisation later, so there is more NPP at high CO₂. (2) A longer passive residence
+  RETAINS the extra litter input longer. `q10` stays at ~1.1, so this is NOT a respiration-feedback
+  story. **Test:** swap `fert_k` alone between rows, or run the 1500-yr structure with the
+  control's `fert_k`.
+- ⚠ **The land multiple is not comparable across stocks.** The 09-29 (g) Koven et al. 2022
+  benchmark is a multiple of PI land (0.89–1.28×). A larger PI passive pool moves CCX toward that
+  band (1.29× at 1500 yr) while its absolute uptake RISES. So "inside the band" would be an artefact
+  of the denominator. Any benchmark reading needs the absolute ΔC_land and a like-for-like PI
+  stock ([[ratio_needs_its_base]]).
+- **Reading:** the passive stock is a future lever, but a modest one: ≤ 40 ppm at SSP5-8.5 2300
+  and ≤ 5 ppm under vvL. That is about a sixth of `rep_dC`'s leverage at φ = 0 (+63 ppm, 09-29 k)
+  and far below φ's (~500 ppm).
+
 ## 2026-09-29 (n) — **The `tau_soil_slow`-only profile: the pull is REAL but WEAK. The record prefers 750–1500 yr by only +4.4 to +5.7 (likelihood), and it is flat to within ~6 log units from 500 to ~3000 yr. The runaway in (m) is a weakly identified direction, not a strong constraint.**
 
 Marcus: *"run the tau_soil_slow-only test"*.

@@ -1,0 +1,13 @@
+=== PROVENANCE === driver calibration/diag_tau_soil_slow_futures.R, commit a6d04cb, run 2026-09-29 14:20
+  vectors: tau_soil_slow_profile_20260929.rds rows {500, 1000, 1500} (500 = control); arm hilda_csl3v0ka; scenarios vvH, vvL, ssp585 (spliced TRUE/TRUE/FALSE); ppm global mean; land GtC (land_C)
+  [identity] stored v0k ssp585 2300 = 1388.28 ppm (handoff 1388.3; d -0.016)
+
+  tau  500  dlp +0.00 | ssp585 2300  1387.9 ppm land x1.63 | vvH 2300  957.9 | vvL 2300  336.9 | vvH 2100  639.0 | luc 0.848 kz 14694 fert_k  868 q10 1.102
+  tau 1000  dlp +5.68 | ssp585 2300  1356.2 ppm land x1.40 | vvH 2300  931.6 | vvL 2300  333.4 | vvH 2100  635.9 | luc 0.815 kz 13522 fert_k  984 q10 1.124
+  tau 1500  dlp +5.53 | ssp585 2300  1348.3 ppm land x1.29 | vvH 2300  923.0 | vvL 2300  331.6 | vvH 2100  635.5 | luc 0.801 kz 12644 fert_k 1003 q10 1.109
+
+  vs control (tau 500), ppm:
+    tau  500  ssp585 2300    +0.0  vvH 2300    +0.0  vvL 2300   +0.0  vvH 2100   +0.0
+    tau 1000  ssp585 2300   -31.6  vvH 2300   -26.3  vvL 2300   -3.5  vvH 2100   -3.1
+    tau 1500  ssp585 2300   -39.6  vvH 2300   -34.9  vvL 2300   -5.3  vvH 2100   -3.6
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/tau_soil_slow_futures_20260929.{log,csv}
