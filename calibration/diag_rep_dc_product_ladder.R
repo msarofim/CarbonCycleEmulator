@@ -69,8 +69,16 @@ source("calibration/lib_design_gates.R")
 ccx_load_cpp()
 
 # ---- NAMED CONSTANTS: every label, filename and column below derives from ----
-RPL_TAG        <- "rep_dc_product_ladder"
-RPL_DATE       <- "20260923"
+# ⭐ RPL_MODE (2026-09-29): the mode the ladder runs at. DEFAULT = the canonical,
+# which is the 09-23 T1 run unchanged. Set to a mode FILE PATH to ladder another
+# mode (the phi = 0 + shape-prior base, Marcus 09-29); the tag, date and top rung
+# then derive from it, so the two ladders can never share a directory.
+RPL_MODE       <- Sys.getenv("RPL_MODE", CCX_MODE_CANONICAL)
+RPL_MODE_TAG   <- Sys.getenv("RPL_MODE_TAG", "")      # short label for a non-canonical mode
+RPL_IS_CANON   <- identical(RPL_MODE, CCX_MODE_CANONICAL)
+if (!RPL_IS_CANON && !nzchar(RPL_MODE_TAG)) stop("RPL_MODE set: also set RPL_MODE_TAG")
+RPL_TAG        <- if (RPL_IS_CANON) "rep_dc_product_ladder" else paste0("rep_dc_product_ladder_", RPL_MODE_TAG)
+RPL_DATE       <- Sys.getenv("RPL_DATE", "20260923")
 # ⚠ RPL_OUTDIR is overridable ONLY so a reduced-budget SMOKE run cannot write
 # into the real run's directory and be collected as if it were one of its rungs.
 # A smoke job's artifact still stamps its own (smaller) budget, so the two could
@@ -83,10 +91,11 @@ RPL_MU_MEAS    <- 0.776    # MEASURED station-vs-hemisphere offset, MBL zonal (d
 RPL_MU_MASSW   <- -0.215   # MASS-WEIGHTED expectation for a whole-atmosphere box (diag_rep_dc_mass_weighting.R)
 # The rungs. The top is the canonical's own fitted value; the two named targets
 # are rungs, not endpoints; 0.0 is the shipped prior's centre.
-RPL_RUNGS      <- c(3.516, 3.000, 2.500, 2.000, 1.500, 1.000, RPL_MU_MEAS, 0.000, RPL_MU_MASSW)
+RPL_RUNGS      <- c(if (RPL_IS_CANON) 3.516 else round(readRDS(ccx_mode_file(RPL_MODE))$par_mode$rep_dC, 3),
+                    3.000, 2.500, 2.000, 1.500, 1.000, RPL_MU_MEAS, 0.000, RPL_MU_MASSW)
 RPL_CANON_RUNG <- 1L       # index into RPL_RUNGS of the canonical rung (the replicate anchor)
 
-RPL_N_REP      <- 3        # perturbed replicates AT the canonical rung -> the noise floor
+RPL_N_REP      <- as.integer(Sys.getenv("RPL_N_REP", "3"))        # perturbed replicates AT the canonical rung -> the noise floor
 RPL_REP_FRAC   <- 0.25     # perturbation size, in units of each name's posterior sd
 RPL_SEED       <- 20260923 # ⚠ STAMPED INTO EVERY ARTIFACT, not just set here
 
@@ -104,7 +113,7 @@ RPL_BFGS_MAXIT <- as.integer(Sys.getenv("RPL_BFGS_MAXIT", "100"))
 RPL_GATE_TOL   <- 1e-3     # harness must reproduce the stored logpost
 RPL_VEC_TOL    <- 1e-10    # the reconstructed gate vector must match dg_vector()
 
-md    <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
+md    <- readRDS(ccx_mode_file(RPL_MODE))
 pins  <- ccx_mode_pins(md)
 rmp   <- ccx_apply_pins(pins); on.exit(ccx_unpin_params(rmp), add = TRUE)
 bp    <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
@@ -132,7 +141,7 @@ IDX_FREE <- setdiff(seq_along(u0), IDX_REP)
 # ⚠ TWO PARAMETER LISTS ([[ccx_two_param_lists]]): `p` is the MODEL list and
 # carries none of the six nuisances; `pv` is the FITTED list and carries them.
 # ---------------------------------------------------------------------
-.v_template <- dg_vector(CCX_MODE_CANONICAL)
+.v_template <- dg_vector(RPL_MODE)
 rpl_vector_at <- function(u) {
   pv <- ccx_unc_to_par(u)
   p  <- bp
@@ -321,7 +330,7 @@ rpl_run_job <- function(k) {
               products = pr, minutes = el,
               provenance = list(
                 driver = "calibration/diag_rep_dc_product_ladder.R",
-                mode = CCX_MODE_CANONICAL, mode_file = ccx_mode_file(CCX_MODE_CANONICAL),
+                mode = if (RPL_IS_CANON) RPL_MODE else RPL_MODE_TAG, mode_file = ccx_mode_file(RPL_MODE),
                 spinup = ccx_mode_spinup(md), objective = "#13",
                 seed = RPL_SEED, seed_applied = "rpl_start(), immediately before rnorm()",
                 rep_frac = RPL_REP_FRAC, nm_maxit = RPL_NM_MAXIT,
