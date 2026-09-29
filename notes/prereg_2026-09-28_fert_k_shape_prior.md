@@ -41,3 +41,42 @@ how strongly the record resists the evidence-based shape**, not a guarantee of t
   (report the tension), tighten the prior (a ruling), or look for the missing process that makes a
   saturating shape fit the record (the frozen `fert_k`/`rep_dC` tie of 08-25 is the first suspect).
 - P1 violated: stop and debug before reading anything else.
+
+---
+
+## RESULTS (appended 2026-09-28 evening; predictions above are unedited)
+Torch job 18729847, 24 starts, collected → `calibration/output/multistart_20260928c_hilda_csl3v0k_…/`.
+7 of 24 CONVERGED by the collector's rule; 10 more ran out of wall time AT a basin value to 4 dp.
+Two basins, 0.088 apart, the same `h_ml` split (57.4 / 49.8 m) as the free φ = 0 array
+(18723994: basins −1424.6273 / −1424.7110). Likelihoods from `promote_multistart_mode.R` into
+scratch (sum of streams; prior + Jacobian gap < 1e-13).
+
+| | `hilda29l` (φ 0.5) | φ 0 free, basin 1 / 2 | φ 0 + shape, basin 1 / 2 |
+|---|---|---|---|
+| log-lik | −1391.81 | −1390.46 / −1389.47 | −1391.10 / −1390.11 |
+| `fert_k` (ppm) | 825 | 938.1 / 938.4 | **864.6 / 865.7** |
+| `beta_max` | 1.31 | 2.716 / 2.717 | 2.546 / 2.549 |
+| FACE-eq 400→564 | 14.4 % | 24.53 / 24.54 % | 24.19 / 24.20 % |
+| PD100 atm @ 100 yr (GtC) | 28.9 | 34.4 / 34.3 | 34.5 / 34.4 |
+| shape R = gain(4×)/gain(2×) | — | 2.06 | 2.02 |
+
+(R from MM: 3(K+278)/(K+834); log ≡ 2.0; evidence ~1.8.)
+
+- **P1 PASS, every form.** Exact optimality bound (the free arm's objective = logpost − lnN(`fert_k`)
+  + the flat density): margin **+0.20** (basin 1), +0.11 (basin 2). Same-basin log-lik loss
+  **0.64** / 0.64. Prereg wording (bare log-lik vs the free arm's best log-lik, which is basin 2):
+  basin 1 loses 1.64, basin 2 loses 0.64, both ≤ 1.74. ⚠ The cross-basin reading passes by 0.10
+  only because of an `h_ml` prior difference unrelated to `fert_k`; the exact form is the gate.
+- **P2 PASS, inside the lean (700–900): `fert_k` 865.** The record wins. The prior moved it 15 % of
+  the way to 546 in log space (log 938/865 = 0.081 of log 938/546 = 0.541). **The plan-change clause
+  "`fert_k` stays > 850" is TRIGGERED.**
+- **P3 PASS on all three, but P3's IRF clause passes on rounding:** `beta_max` 2.546 ≤ 2.72; FACE
+  24.19 ≤ 24.5 %; IRF@100 0.345 / 0.344 ≥ 0.344. The pulse did not move (+0.1 GtC).
+- **P4:** FACE-equivalent 24.2 % sits above FACE (+10–23 %) and above CMIP6 (+16.9 ± 6.2 %,
+  i.e. +1.2 sd). Shape R 2.02 vs CMIP6 median 1.81 / Varney 1.82. Joos IRF@100 0.409 vs 0.345.
+- **Price of the shape.** The record charged 0.64 log-lik for a 0.081 log-shift in `fert_k`. A
+  QUADRATIC extrapolation (my estimate, not measured) puts the full move to 546 at ~28 log-lik,
+  roughly half the frozen −54.
+- **Reading.** At log-sd 0.35 the prior barely changes anything: `beta_max` drops as `fert_k` falls, so
+  the present-day slope, the FACE-equivalent and the pulse stay put. The record pins the land's
+  sensitivity AND, weakly, its shape. The three options in "What would change the plan" are Marcus's.

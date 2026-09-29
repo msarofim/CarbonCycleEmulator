@@ -2,6 +2,31 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-28 (f) — **The shape-prior arm: `fert_k` 938 → 865, the record wins, and nothing downstream moves. P1–P3 pass; the prereg's "stays > 850" clause is triggered.**
+
+Job **18729847** (`hilda_csl3v0k`, 24 starts), collected and archived with task and preflight
+(18729635) logs and the frozen worktree's port targets at
+`calibration/output/multistart_20260928c_hilda_csl3v0k_…_sd1.0452/`. 7 starts converged by the
+collector's rule; 10 more ran out of time sitting at a basin value to 4 dp. **Two basins,
+−1424.7465 / −1424.8341**: the same `h_ml` split as the free arm. Full table and scoring are appended to
+`notes/prereg_2026-09-28_fert_k_shape_prior.md` (RESULTS). Attribution logs:
+`outputs/diagnostics/pulse_land_attribution_v0k_basin{1,2}_20260928.log`.
+
+- **P1 PASS** (exact form: margin +0.20; same-basin log-lik loss 0.64; prereg wording, cross-basin
+  1.64 ≤ 1.74). **P2 PASS, in the lean:** `fert_k` **865**, 15 % of the log distance to the prior's
+  546. **P3 PASS:** `beta_max` 2.55, FACE-eq 24.2 %, IRF@100 0.345 (≥ 0.344 by rounding).
+- **Nothing downstream moved:** `beta_max` falls to compensate, so the FACE-equivalent is
+  24.5 → 24.2 % and the pulse at 100 yr is 34.4 → 34.5 GtC (Joos 40.9). Shape R 2.06 → 2.02
+  (log 2.0, CMIP6 / Varney ~1.8).
+- **Three-way, on log-LIKELIHOOD, all with 29 free parameters:** `hilda29l` −1391.81; φ 0 free
+  −1390.46 / −1389.47; φ 0 + shape −1391.10 / −1390.11. All within 2.4 units: the record does not
+  discriminate between them.
+- The record charged 0.64 log-lik for the 0.081 log-shift. A quadratic extrapolation (not measured)
+  puts the full move to 546 at ~28.
+- Nothing registered or adopted; the canonical is still `hilda29l`. Next steps are Marcus's (prereg
+  options: report the tension / tighten the prior / look for the missing process, with the
+  `fert_k`–`rep_dC` tie first; `rep_dC` moved only 3.291 → 3.273 here).
+
 ## 2026-09-28 (e) — **The φ = 0 Torch array reproduces the Mac start and finds no better basin; two near-degenerate basins differ only in `h_ml`.**
 
 Job **18723994** (24 starts, 300-min budget, `cs`), collected with `collect_dispersed_multistart.R`

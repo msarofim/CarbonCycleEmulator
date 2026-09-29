@@ -1,0 +1,55 @@
+CCX_PROJ_DIR  /scratch/ms17839/ccx_20260928_v0k
+CCX_MS_OUTDIR /scratch/ms17839/ccx_20260928_v0k/calibration/output/multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+CCX_MS_STRUCT hilda_csl3v0k   CCX_MS_SEAS_ML 1   CCX_MS_PUMP_FIELD solved   CCX_MS_SPREAD 1.0452   CCX_MS_PIN 'ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0'
+host cs639.hpc.nyu.edu  task 23  2026-09-28T15:59:44-04:00
+PINNED (removed from the fitted set, held in the base): ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0 -> 29 free parameters
+run-time inputs present: 13/13. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+SEEDING w_enso_l2 for the new basin feasibility: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The file held it OFF; this arm fits it.
+SEEDING w_enso_l2 for the new basin start: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The file held it OFF; this arm fits it.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.1913017)
+
+======================================================================
+DISPERSED MULTI-START, id 23, arm N, 29 parameters
+  host cs639.hpc.nyu.edu   R 4.5.1   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.1913, pooled over the 29 coordinates at least one of
+    them FITTED; over all 29 it would be 0.1913, diluted by the 0 migrated in BOTH:
+    none)
+  out /scratch/ms17839/ccx_20260928_v0k/calibration/output/multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452/start_023.rds
+======================================================================
+  structure: 'hilda_csl3v0k' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6, ml_nh_cycle=0, k_l2=3, w0_l2=27, npp_veg_frac=0, fert_k_prior=1)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'solved' (the SOLVED GLODAP-shape field -- every registered file; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -3.883e+06 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: dispersed about the COLD init, sd 1.0452 (1 draw), log-post there = -388280.0797
+PORT GATE (a) at the new_basin reference point: here -13027.7006028685 vs MacBook-Pro-2.local@8e10639 -13027.7005992818,
+              |diff| 3.587e-06 (rel 2.75e-10)  [this task's own start is elsewhere]
+              roundoff floor here: max |delta lp| 1.109e-05 over 12 perturbations of u by 1e-12 (median 1.113e-06; 0 non-finite)
+              bound = max(1e-08 x |target| = 1.303e-04, 3 x floor = 3.327e-05) = 1.303e-04; ceiling 1e-06 x |target| = 1.303e-02
+PORT GATE (a) PASSED.
+measured 0.5890 s/eval (median of 5; range 0.5469-0.6457) => one 6000-eval restart
+  projects to 58.9 min; wall budget 300 min, of which 45.0 min is RESERVED for the
+  BFGS polish (100 iterations)
+[023] cycle 1 restart  1: log-post =   -2509.1086 (gain 385770.9711) evals 6002  58.4 min
+[023] cycle 1 restart  2: log-post =   -1676.2864 (gain   832.8222) evals 12004  115.3 min
+[023] cycle 1 restart  3: log-post =   -1623.4008 (gain    52.8856) evals 18006  173.9 min
+[023] cycle 1 polish: SHORTENED to maxit 145 by the wall budget
+[023] cycle 1 polish: log-post = -1457.6078 (gain 165.7930)
+[023] === cycle 1 total gain 386822.4719 (log-post -1457.6078, 26338 evals, 253.8 min) ===
+[023] === cycle 2 total gain 0.0000 (log-post -1457.6078, 26338 evals, 253.8 min) ===
+*** [023] WALL BUDGET 300 min REACHED -- checkpointed, NOT converged.
+
+[023] FINAL log-post -1457.6078  (OUT OF TIME, 3 restarts, 26338 evals, 253.9 min)
+[023] eval rate 0.3961 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[023] PORT GATE (b) ordering: final -1457.6078 >= start -388280.0797. OK
+======================================================================
+done 2026-09-28T20:13:59-04:00

@@ -1,0 +1,37 @@
+# diag_pulse_land_attribution.R on the SHAPE-PRIOR (hilda_csl3v0k) Torch array 18729847, BASIN 1 (starts 002+003, logpost -1424.7465), NOT a registered mode; scratch mode file built by promote_multistart_mode.R from calibration/output/multistart_20260928c_hilda_csl3v0k_.../
+=== PROVENANCE ===
+  arm /private/tmp/claude-501/-Users-MarcusMarcus-Documents-2026-CodeProjects-CarbonCycleEmulator/f52b2cbc-6800-4ada-893f-b2d5f63a1116/scratchpad/k1_mode/mode_fit_pumpN.rds [asked '/private/tmp/claude-501/-Users-MarcusMarcus-Documents-2026-CodeProjects-CarbonCycleEmulator/f52b2cbc-6800-4ada-893f-b2d5f63a1116/scratchpad/k1_mode/mode_fit_pumpN.rds', resolved 2026-09-28], logpost -1424.75, commit 7c7283f
+  protocol: Joos PD100 -- CO2 held from 2010, 100 GtC released 2015, GMST held unless stated
+  units: GtC of the pulse in each reservoir (pulse run minus its own paired base run)
+  split benchmark: Joos et al. 2013 ACP 13:2793, sec.3.2 pp.2806-2807, multi-model mean +/- 1 sd
+  land params at mode: beta_max 2.5461 fert_k 864.6 q10 1.101 | UNFITTED: npp_veg_frac 0.00 litter_slow_frac 0.050 tau_wood 20 tau_soil_slow 500
+
+=== 1. THE SPLIT, AND WHAT CARRIES THE GAP (atm ocean land, GtC) ===
+                                     |             yr 20 |            yr 100 |            yr 300 |           yr 1000
+A  shipped mode (GMST held)          |  49.6  24.9  25.5 |  34.5  35.2  30.4 |  25.2  43.2  31.6 |  20.8  55.6  23.6  hold 1.81 ppm
+A' null: npp_veg_frac re-set to itself |  49.6  24.9  25.5 |  34.5  35.2  30.4 |  25.2  43.2  31.6 |  20.8  55.6  23.6  hold 1.81 ppm
+B  + the pulse's own warming         |  49.7  25.0  25.3 |  34.7  35.3  30.0 |  25.6  43.6  30.9 |  21.1  56.3  22.6  hold 1.81 ppm
+B2 + warming, q10 = 2 (a BOUND)      |  50.9  25.4  23.7 |  36.2  36.5  27.3 |  27.8  46.3  25.9 |  23.2  61.4  15.4  hold 2.70 ppm
+C  vegetation-capacity loop OFF      |  49.6  24.9  25.5 |  34.5  35.2  30.4 |  25.2  43.2  31.6 |  20.8  55.6  23.6  hold 1.81 ppm
+D  no litter to the slow soil        |  51.0  25.3  23.6 |  39.1  38.2  22.7 |  32.2  51.5  16.3 |  25.2  68.1   6.7  hold 3.66 ppm
+E  fert_k 120, beta_max 0.619        |  57.3  27.9  14.8 |  40.4  40.7  18.9 |  29.7  50.4  20.0 |  22.8  62.6  14.6  hold 2.53 ppm
+   Joos 2013 multi-model mean        |  59.6  20.0  19.0 |  40.9  33.0  23.0 |  32.2             |  23.5  59.0  16.0
+   (+/- 1 sd)                        |           7    16 |          12    20 |                   |          12    14
+   (Joos atm = 100 x the Table 5 IRF fit; the split and the IRF are different
+    model subsets, so atm + ocean + land need not sum to 100 on that row)
+
+   B's warming, dT @ 20/100/300/1000 yr = 0.152 / 0.138 / 0.129 / 0.108 K (CCX's FaIR-fitted module)
+   E holds the NPP enhancement at the held 396.3 ppm fixed (0.3090); its slope there is 0.57x A's
+
+=== 2. WHERE THE LAND'S SHARE SITS, shipped mode (GtC) ===
+    yr       leaf      wood soil_fast soil_slow    total
+    20       1.62     16.62      4.74      2.49    25.45
+   100       1.07     15.62      3.57     10.07    30.32
+   300       0.69      9.82      2.27     18.76    31.54
+  1000       0.30      4.22      0.98     18.08    23.58
+
+=== 3. THE LOOP'S GAIN, from the model's own structure ===
+  NPP = npp0 [(1 - phi) + phi veg/veg0] f(CO2). At equilibrium veg ∝ NPP, so a
+  sustained fertilisation factor f = 1 + e gives dNPP/NPP0 = e / (1 - phi):
+  phi = 0.00  =>  the land's equilibrium CO2 response is x1.00 what fertilisation alone gives,
+  and it builds on the vegetation timescale (tau_wood = 20 yr).
