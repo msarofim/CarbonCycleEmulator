@@ -27,7 +27,9 @@ TF_MODE    <- ccx_path("calibration", "output",
   "multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452",
   "promoted_basin1", "mode_fit_pumpN.rds")
 TF_STRUCT  <- "hilda_csl3v0ka"
-TF_PROFILE <- ccx_path("outputs", "diagnostics", "tau_soil_slow_profile_20260929.rds")
+# TF_PROFILE_TAG (env) reads another profile, e.g. "tau_soil_slow_profile_fixedstock"
+TF_PROFILE_TAG <- Sys.getenv("TF_PROFILE_TAG", "tau_soil_slow_profile")
+TF_PROFILE <- ccx_path("outputs", "diagnostics", sprintf("%s_20260929.rds", TF_PROFILE_TAG))
 TF_PREV    <- ccx_path("outputs", "diagnostics", "npp0_scan_20260929.csv")
 TF_PARAM   <- "tau_soil_slow"
 TF_ROWS    <- c(500, 1000, 1500)          # 500 = like-for-like control
@@ -39,6 +41,7 @@ TF_YEARS   <- c(2100L, 2300L)
 TF_END_YEAR <- 2300L
 TF_ID_SSP585 <- 1388.3
 TF_ID_TOL  <- 0.05                          # ppm; the handoff value is printed to 0.1
+if (TF_PROFILE_TAG != "tau_soil_slow_profile") TF_TAG <- paste0(TF_TAG, sub("^tau_soil_slow_profile", "", TF_PROFILE_TAG))
 TF_OUT     <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", TF_TAG, TF_DATE))
 COMMIT     <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
 
@@ -82,15 +85,17 @@ for (v in TF_ROWS) {
   x <- prof[[which(pv == v)]]; u <- u0
   pu <- as.list(ccx_unc_to_par(u)); for (n in TF_FREE) pu[[n]] <- x$par[[n]]
   u <- ccx_par_to_unc(unlist(pu)[md$param_names])
-  b <- bp; b[[TF_PARAM]] <- v; pr <- ccx_unc_to_par(u); p <- ccx_overlay_par(b, pr)
+  ov <- if (!is.null(x$over)) x$over else setNames(list(v), TF_PARAM)   # older profile: tau only
+  b <- bp; for (n in names(ov)) b[[n]] <- ov[[n]]; pr <- ccx_unc_to_par(u); p <- ccx_overlay_par(b, pr)
   f <- futures(p, pr$bomb_total, pr$luc_scale)
-  rows[[as.character(v)]] <- data.frame(tau_soil_slow = v, d_logpost_profile = x$opt - prof[[which(pv == 500)]]$opt,
+  rows[[as.character(v)]] <- data.frame(tau_soil_slow = v, litter_slow_frac = b$litter_slow_frac, d_logpost_profile = x$opt - prof[[which(pv == 500)]]$opt,
     t(f), t(unlist(pr[TF_FREE])), check.names = FALSE)
 }
 R <- do.call(rbind, rows); rownames(R) <- NULL
 R$provenance <- sprintf("%s @%s; %s v0k basin1 + tau_soil_slow override; 11 rebalanced (profile NM 3000); coupled 1750-%d; ssp585 unspliced, vv spliced", TF_DRIVER, COMMIT, TF_STRUCT, TF_END_YEAR)
 sink(paste0(TF_OUT, ".log"), split = TRUE)
 cat(sprintf("=== PROVENANCE === driver %s, commit %s, run %s\n", TF_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
+cat(sprintf("  profile %s (litter_slow_frac per row: %s)\n", TF_PROFILE_TAG, paste(signif(R$litter_slow_frac, 3), collapse = ", ")))
 cat(sprintf("  vectors: %s rows {%s} (500 = control); arm %s; scenarios %s (spliced %s); ppm global mean; land GtC (land_C)\n",
   basename(TF_PROFILE), paste(TF_ROWS, collapse = ", "), TF_STRUCT, paste(TF_SCEN, collapse = ", "), paste(TF_SPLICE, collapse = "/")))
 cat(sprintf("  [identity] stored v0k ssp585 2300 = %.2f ppm (handoff %.1f; d %+.3f)\n\n", fid[["ssp585_co2_2300"]], TF_ID_SSP585, id_d))

@@ -1230,11 +1230,18 @@ ccx_default_params <- function() {
     q10       = 2.0,      # heterotrophic respiration temperature sensitivity
     # ---- land pool structure ------------------------------------------
     # Defaults chosen by diag_land_topology.R [3], the layout of lowest misfit
-    # against BOTH of Naegler & Levin's biosphere targets at once -- 2200 PgC of
-    # carbon and 21.7 / 18.9 kmol of bomb 14C at 1975 / 1995. It lands at
-    # 2130 GtC and 21.2 / 17.4 kmol, 5.2 % RMS, with pool sizes that are
-    # independently defensible: vegetation 516 GtC, responsive soil 114 GtC,
-    # passive soil 1500 GtC. The scan surface is FLAT (0.60/30/0.04 and
+    # against BOTH of Naegler & Levin's (2006, Table 4) biosphere numbers at once
+    # -- 2200 PgC of carbon and 21.7 / 18.9 kmol of bomb 14C at 1975 / 1995. It
+    # lands at 2130 GtC and 21.2 / 17.4 kmol, 5.2 % RMS.
+    # ⚠ Only the bomb-14C inventories are an observational target. The 2200 PgC
+    # is Naegler & Levin's OWN MODEL CONFIGURATION (their soil 1238 PgC at
+    # tau 610 yr), not a measurement (notes/lit_2026-09-29_passive_soil_stock.md;
+    # CHANGELOG 2026-09-29 q). The pool sizes are checked separately against
+    # the inventories: vegetation 516 GtC, responsive soil 114 GtC, passive soil
+    # 1500 GtC, against IPCC AR6 WG1 Fig. 5.12 (PI vegetation 450, soils 1700
+    # outside the permafrost region, permafrost 1200 PgC) and the soil-14C mass
+    # check in that note (~1200-1800 GtC). The record alone is near-indifferent
+    # between 1.5k and 3-4.5k passive GtC (CHANGELOG 2026-09-29 n). The scan surface is FLAT (0.60/30/0.04 and
     # 0.70/40/0.04 both sit near 6 %), so these are a defensible centre and not
     # a knife-edge optimum -- do not treat them as fitted values.
     npp_leaf_frac = 0.60, # share of NPP allocated to leaves and fine roots;

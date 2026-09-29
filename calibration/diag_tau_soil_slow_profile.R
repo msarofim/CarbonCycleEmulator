@@ -15,6 +15,12 @@
 # IDENTITY: the TS_DEFAULT row, frozen, reproduces the 09-29 (k) scale-1
 # optimum's logpost (|d| < TS_ID_TOL).
 # ⚠ A SCREEN: costs are upper bounds (NM on 11 of 29). No RNG.
+# FIXED-STOCK MODE (TS_FIXED_STOCK=1; CHANGELOG 09-29 q, "T1"): AGE vs STOCK.
+# litter_slow_frac is co-varied as TS_LSF_DEFAULT * TS_DEFAULT / tau, so the PI
+# passive stock stays at NPP0 * 0.05 * 500 = 1500 GtC at every tau. If the
+# +5.7 of the default mode survives, the pool's AGE buys it; if it vanishes,
+# its STOCK does (which the inventories contradict). ⚠ The responsive-soil
+# input (1 - litter_slow_frac) moves slightly with it (0.90-0.99 of NPP).
 # USAGE: Rscript calibration/diag_tau_soil_slow_profile.R  (frozen copy; BLAS
 #        pinned to 1 by the caller; TS_SMOKE=1 for a smoke)
 # =====================================================================
@@ -31,6 +37,10 @@ TS_PREV   <- ccx_path("outputs", "diagnostics", "npp0_scan_20260929.csv")
 TS_PARAM  <- "tau_soil_slow"
 TS_DEFAULT <- 500
 TS_VALUES <- c(250, 500, 750, 1000, 1500, 2000, 3000, 5000)   # yr
+TS_LSF_PARAM   <- "litter_slow_frac"
+TS_LSF_DEFAULT <- 0.05
+TS_FIXED_STOCK <- identical(Sys.getenv("TS_FIXED_STOCK"), "1")
+if (TS_FIXED_STOCK) TS_TAG <- paste0(TS_TAG, "_fixedstock")
 TS_FREE   <- c("beta_max", "fert_k", "luc_scale", "q10", "seas_T_amp_NH", "seas_T_amp_SH",
                "seas_lag_p_NH", "seas_lag_p_SH", "npp_frac_NH", "kz", "rep_dC")
 TS_MAXIT  <- 3000L
@@ -48,7 +58,12 @@ iF <- match(TS_FREE, md$param_names); stopifnot(!anyNA(iF))
 bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
 bp <- ccx_apply_structure(bp, TS_STRUCT, as.character(md$seas_ml), pump_field = md$pump_field)
 for (n in names(md$pins)) bp[[n]] <- md$pins[[n]]
-stopifnot(isTRUE(all.equal(bp[[TS_PARAM]], TS_DEFAULT)), TS_DEFAULT %in% TS_VALUES)
+stopifnot(isTRUE(all.equal(bp[[TS_PARAM]], TS_DEFAULT)), TS_DEFAULT %in% TS_VALUES,
+          isTRUE(all.equal(bp[[TS_LSF_PARAM]], TS_LSF_DEFAULT)))
+# base-parameter overrides for a profile value (recorded in the output so the
+# futures driver rebuilds EXACTLY the scored structure)
+over_of <- function(v) { o <- setNames(list(v), TS_PARAM)
+  if (TS_FIXED_STOCK) o[[TS_LSF_PARAM]] <- TS_LSF_DEFAULT * TS_DEFAULT / v; o }
 prev <- utils::read.csv(TS_PREV, check.names = FALSE); r1 <- prev[prev$scale == 1, ]
 p0 <- as.list(ccx_unc_to_par(md$u_mode)); for (n in TS_FREE) p0[[n]] <- r1[[n]]
 u0 <- ccx_par_to_unc(unlist(p0)[md$param_names])
@@ -62,13 +77,13 @@ npp_modern <- function(u, b) {
   mean(n$npp_NH[k] + n$npp_SH[k])
 }
 one <- function(v) {
-  b <- bp; b[[TS_PARAM]] <- v
+  b <- bp; ov <- over_of(v); for (n in names(ov)) b[[n]] <- ov[[n]]
   lp <- ccx_make_logpost(base_params = b, by_stream = TRUE)
   l0 <- lp(u0)
   f <- function(x) { u <- u0; u[iF] <- x; w <- lp(u); if (!is.finite(w)) 1e12 else -as.numeric(w) }
   o <- stats::optim(u0[iF], f, method = "Nelder-Mead", control = list(maxit = TS_MAXIT))
   u <- u0; u[iF] <- o$par; l1 <- lp(u)
-  list(value = v, frozen = as.numeric(l0), opt = as.numeric(l1), s0 = attr(l0, "streams"), s1 = attr(l1, "streams"),
+  list(value = v, over = ov, frozen = as.numeric(l0), opt = as.numeric(l1), s0 = attr(l0, "streams"), s1 = attr(l1, "streams"),
        stock = stock_slow(b), npp = npp_modern(u, b), par = unlist(ccx_unc_to_par(u)[TS_FREE]),
        evals = o$counts[["function"]], conv = o$convergence)
 }
@@ -86,6 +101,8 @@ cat(sprintf("  structure %s at v0k basin 1, 11 names at the %s scale-1 optimum; 
   TS_STRUCT, basename(TS_PREV), ccx_const("NPP_GLOBAL_PI")))
 cat(sprintf("  profile %s in {%s} yr (default %g); other residence times at defaults; rebal = NM maxit %d on {%s}\n",
   TS_PARAM, paste(TS_VALUES, collapse = ", "), TS_DEFAULT, TS_MAXIT, paste(TS_FREE, collapse = ", ")))
+cat(sprintf("  mode: %s\n", if (TS_FIXED_STOCK) sprintf("FIXED STOCK -- %s = %g * %g / tau (PI passive stock held)", TS_LSF_PARAM, TS_LSF_DEFAULT, TS_DEFAULT)
+  else sprintf("default -- %s fixed at %g (stock grows with tau)", TS_LSF_PARAM, TS_LSF_DEFAULT)))
 cat(sprintf("  logpost natural-log units; stock GtC (PI passive soil); NPP GtC/yr mean %d-%d; no RNG\n", tg$win[1], tg$win[2]))
 cat(sprintf("  [identity] default row frozen vs independent rescore: %.2e (tol %.0e)\n\n", id_d, TS_ID_TOL))
 cat(sprintf("  %8s %9s %9s %9s %8s %5s %6s\n", TS_PARAM, "stock", "d_frozen", "d_rebal", "NPPmod", "conv", "evals"))
