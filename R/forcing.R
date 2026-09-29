@@ -198,6 +198,24 @@ FORC_ENSO_DEMEAN_WIN <- c(1948, 2024) # the span the bake-off priced, = the
 # was built with a different index than its parameters name.
 CCX_ENSO_INDEX_CODES <- c(demean = 0L, detrend = 1L, relsst_lp = 2L)
 FORC_ENSO_RELSST_FILE <- file.path("data", "forcing_enso_relsst.rds")
+# ---- THE AOD BACKGROUND IS A SECOND FORCING AXIS (2026-09-29, Marcus: "apply
+# obvious fixes like the AOD background") ------------------------------------
+# The CMIP7 AOD series (1850-2024) carries a non-zero QUIET stratosphere, and
+# ccx_aod_at() returns 0 outside its coverage. The diffuse-light term
+# npp * (1 + gamma_diff * aod) therefore sees the background as an ANOMALY: a
+# step UP at 1850 (+0.031 GtC/yr) and DOWN at 2025 (-0.109 GtC/yr, the 2024
+# anomaly and the background together), and the spinup year (1750) sits at 0
+# while the record never does (audit-flag screen, CHANGELOG 09-29 e).
+#   "legacy"  -- as shipped. DEFAULT; bit-identical, so objective #13 and every
+#                registered mode are untouched.
+#   "anomaly" -- subtract each hemisphere's quiet background (the mean over
+#                FORC_AOD_BG_WIN, before the 1853 eruption; it equals the
+#                series' own 1st percentile, 0.00210 global) inside the record,
+#                0 before it, and past the record TAPER the last anomaly on the
+#                series' OWN decay time (ccx_aod_efold_yr(), the ENSO-taper
+#                precedent: measured, not typed).
+CCX_AOD_MODE_CODES <- c(legacy = 0L, anomaly = 1L)
+FORC_AOD_BG_WIN    <- c(1850, 1852)
 
 # ---------------------------------------------------------------------
 #' Sourced hemispheric monthly emission seasonality, cached.
@@ -502,6 +520,8 @@ ccx_scenario_emissions <- function(scenario) {
 #'   shipped RULING A index, default), "detrend" or "relsst_lp" -- see
 #'   CCX_ENSO_INDEX_CODES. Stamped as attr "enso_index". Callers running a
 #'   parameter set should pass `ccx_enso_index_of(params)`.
+#' @param aod_mode "legacy" (default) or "anomaly" -- see CCX_AOD_MODE_CODES.
+#'   Stamped as attr "aod_mode"; pass `ccx_aod_mode_of(params)`.
 #' @return data.frame, one row per month, with everything ccx_deriv() needs
 #' Which ENSO index a parameter list names (CCX_ENSO_INDEX_CODES; absent = "demean")
 ccx_enso_index_of <- function(p) {
@@ -563,7 +583,8 @@ ccx_build_forcing <- function(scenario = "historical",
                               sink_rate = CCX_ARTIFICIAL_SINK_RATE,
                               sink_mode = CCX_ARTIFICIAL_SINK_MODE,
                               emis_method = CCX_EMIS_METHOD_DEFAULT,
-                              enso_index = "demean") {
+                              enso_index = "demean",
+                              aod_mode = "legacy") {
   emis_method <- match.arg(emis_method, c("spline", "constant"))
 
   yrs <- seq(years[1], years[2])
@@ -926,7 +947,7 @@ ccx_build_forcing <- function(scenario = "historical",
     # series' coverage -- which means ZERO BEFORE 1850, so Laki 1783 and
     # TAMBORA 1815 are absent and any pre-1850 volcanic claim is unsupported.
     # See data-raw/build_volcanic_aod.R.
-    aod_NH = ccx_aod_at(t, "aod_NH"), aod_SH = ccx_aod_at(t, "aod_SH"),
+    aod_NH = ccx_aod_forcing(t, "aod_NH", aod_mode), aod_SH = ccx_aod_forcing(t, "aod_SH", aod_mode),
     # artificial mid-century OCEAN sink, GtC/yr, atmosphere -> mixed layer.
     # Identically zero unless CCX_SINK_RATE is set AND CCX_SINK_MODE == "ocean".
     sink_ocean = sink_ocean,
@@ -943,6 +964,7 @@ ccx_build_forcing <- function(scenario = "historical",
   # Same reason again: which ENSO index this table carries (CCX_ENSO_INDEX_CODES).
   # ccx_enso_index_check() reads it against the parameters at run time.
   attr(out, "enso_index") <- enso_index
+  attr(out, "aod_mode")   <- aod_mode
   # Same reason as luc_scale: a forcing built under an arm of the artificial
   # sink is a DIFFERENT INPUT and a table comparing arms must be able to say
   # which it holds rather than infer it from a filename.
@@ -1031,6 +1053,58 @@ ccx_aod_at <- local({
     v
   }
 })
+
+#' The AOD series' own decay time, in years: from the largest peak in the
+#' record, the time until the global anomaly (over the quiet background) first
+#' falls below 1/e of its peak. DERIVED FROM THE DATA, never typed
+#' ([[threshold_from_obs_or_law]]); the ENSO taper's precedent.
+ccx_aod_efold_yr <- function() {
+  a  <- readRDS(ccx_path("data", "forcing_volcanic_aod.rds"))
+  bg <- mean(a$aod_global[a$t >= FORC_AOD_BG_WIN[1] & a$t < FORC_AOD_BG_WIN[2] + 1])
+  an <- a$aod_global - bg
+  k  <- which.max(an)
+  j  <- which(seq_along(an) > k & an < an[k] / exp(1))[1]
+  if (is.na(j)) stop("ccx_aod_efold_yr(): the anomaly never decays below 1/e of its peak")
+  a$t[j] - a$t[k]
+}
+#' The AOD column a forcing carries, under `aod_mode` (CCX_AOD_MODE_CODES)
+ccx_aod_forcing <- function(t, col, aod_mode = "legacy") {
+  aod_mode <- match.arg(aod_mode, names(CCX_AOD_MODE_CODES))
+  v <- ccx_aod_at(t, col)
+  if (aod_mode == "legacy") return(v)
+  a  <- readRDS(ccx_path("data", "forcing_volcanic_aod.rds"))
+  bg <- mean(a[[col]][a$t >= FORC_AOD_BG_WIN[1] & a$t < FORC_AOD_BG_WIN[2] + 1])
+  inside <- t >= min(a$t) & t <= max(a$t)
+  v[inside] <- v[inside] - bg
+  v[t < min(a$t)] <- 0
+  post <- t > max(a$t)
+  if (any(post))
+    v[post] <- (a[[col]][which.max(a$t)] - bg) * exp(-(t[post] - max(a$t)) / ccx_aod_efold_yr())
+  v
+}
+#' Which AOD mode a parameter list names (absent = "legacy")
+ccx_aod_mode_of <- function(p) {
+  v <- p$aod_mode
+  if (is.null(v)) return("legacy")
+  nm <- names(CCX_AOD_MODE_CODES)[match(as.integer(v), CCX_AOD_MODE_CODES)]
+  if (length(nm) != 1 || is.na(nm))
+    stop("ccx_aod_mode_of(): aod_mode = ", paste(v, collapse = ","),
+         " is not one of ", paste(CCX_AOD_MODE_CODES, collapse = "/"))
+  nm
+}
+#' Refuse a params/forcing AOD-mode mismatch; same contract as
+#' ccx_enso_index_check() (unstamped = legacy; "none" = an AOD-free table).
+ccx_aod_mode_check <- function(p, F) {
+  want <- if (is.character(p)) p else ccx_aod_mode_of(p)
+  have <- attr(F, "aod_mode")
+  if (identical(have, "none")) return(invisible(TRUE))
+  if (is.null(have) && want == "legacy") return(invisible(TRUE))
+  if (!identical(have, want))
+    stop("AOD mode mismatch: the parameters name '", want, "' but the forcing carries '",
+         if (is.null(have)) "<unstamped>" else have,
+         "'. Build it with ccx_build_forcing(aod_mode = ccx_aod_mode_of(params)).")
+  invisible(TRUE)
+}
 
 #' Extract one month's forcing in the shape ccx_deriv() expects
 ccx_forcing_at <- function(F, i) {
@@ -1240,7 +1314,8 @@ ccx_hold_climate <- function(F, i = 1L, value = NULL) {
   # ⚠ CONSEQUENCE, AND IT IS REAL: once `gamma_diff` is non-zero, "climate held"
   # NO LONGER IMPLIES "no interannual variability" -- volcanic NPP pulses
   # survive this call. A diagnostic that needs a volcanically quiet run must
-  # zero aod_NH/aod_SH itself. Moot while gamma_diff defaults to 0.
+  # zero aod_NH/aod_SH itself. NOT moot: CCX_GAMMA_DIFF_DEFAULT is 0.25 (R/model.R)
+  # and every fitted mode carries a non-zero gamma_diff.
   for (cc in c("gmst", "enso", "sst_anom_NH", "sst_anom_SH")) {
     if (is.null(F[[cc]])) next
     F[[cc]] <- if (is.null(value)) F[[cc]][i] else value

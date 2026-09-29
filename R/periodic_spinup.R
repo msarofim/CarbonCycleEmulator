@@ -118,6 +118,10 @@ ps_year_forcing <- function(prod_c14, year0 = 1750, quiet = NULL) {
   # stamped "none" rather than rebuilt per index. Asserted, not assumed.
   if (any(F$enso != 0)) stop("ps_year_forcing(): the quiet year carries a nonzero ENSO column")
   attr(F, "enso_index") <- "none"
+  # likewise AOD: 1750 precedes the series, so both modes give 0 here
+  if (any(F$aod_NH != 0) || any(F$aod_SH != 0))
+    stop("ps_year_forcing(): the quiet year carries a nonzero AOD column")
+  attr(F, "aod_mode") <- "none"
   F$c14_bomb <- 0; F$c14_nuclear <- 0; F$c14_cosmo <- prod_c14
   F$aod_NH <- 0; F$aod_SH <- 0
   F

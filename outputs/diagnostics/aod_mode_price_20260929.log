@@ -1,0 +1,27 @@
+=== PROVENANCE ===
+  driver calibration/diag_aod_mode_price.R, commit 4471751, run 2026-09-29 08:39
+  mode hilda_csl3v0k basin 1 (scratch mode, 09-28 c)
+    /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452/promoted_basin1/mode_fit_pumpN.rds
+  stored logpost -1424.7465 | spinup periodic | BLAS threads pinned via env
+  B re-optimises {beta_max, fert_k, kz}; Nelder-Mead maxit 1200; AOD e-fold (measured) 1.417 yr; background window 1850-1852
+  futures: vvH, vvL, GCB spliced, coupled, 1750-2300; units ppm (global mean); logpost in log units
+
+  [gate] legacy reproduces the stored logpost: -1424.746523 vs -1424.746523
+  legacy   U   +0.000 | B   +0.000 (60 evals, conv 0) | B beta_max 2.5461 fert_k 864.6 | vvH 2300 U +0.00 B +0.00 ppm
+  anomaly  U   +0.539 | B   +0.971 (130 evals, conv 0) | B beta_max 2.5112 fert_k 848.8 | vvH 2300 U -0.00 B +1.01 ppm
+
+=== MODE VECTOR (legacy, no re-optimisation) futures: vvH_2100 639.2, vvH_2300 958.2, vvL_2100 414.0, vvL_2300 336.9 ===
+
+=== FULL TABLE (d_* logpost vs the stored mode; d_vv* ppm vs the mode vector's futures) ===
+   index    d_U    d_B B_evals B_conv B_beta_max B_fert_k  B_kz vvH_2100
+  legacy 0.0000 0.0000      60      0      2.546    864.6 14691    639.2
+ anomaly 0.5394 0.9706     130      0      2.511    848.8 14694    639.2
+ vvH_2300 vvL_2100 vvL_2300 dU_vvH_2100 dU_vvH_2300 dU_vvL_2100 dU_vvL_2300
+    958.2    414.0    336.9    0.000000    0.000000    0.000000    0.000000
+    959.2    413.9    336.8    0.005014   -0.002036    0.003614   -0.002318
+ dB_vvH_2100 dB_vvH_2300 dB_vvL_2100 dB_vvL_2300
+     0.00000       0.000      0.0000     0.00000
+     0.04952       1.015     -0.1067    -0.08564
+
+  NOTE: B is an upper bound on a full refit's cost; the Torch refit is the measurement.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/aod_mode_price_20260929.{log,csv}

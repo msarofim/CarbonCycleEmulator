@@ -1822,7 +1822,8 @@ ccx_scaled_forcing <- function(sp = NULL, years = c(1750, 2024), luc_scale = 1,
                                base = NULL) {
   F <- if (is.null(base))
     ccx_build_forcing(scenario, years, prod_c14 = 0, bomb_total_kmol = CCX_BOMB_REF,
-                      enso_index = if (is.null(sp)) "demean" else ccx_enso_index_of(sp$params))
+                      enso_index = if (is.null(sp)) "demean" else ccx_enso_index_of(sp$params),
+                      aod_mode = if (is.null(sp)) "legacy" else ccx_aod_mode_of(sp$params))
   else base
   if (!is.null(sp)) F$c14_cosmo <- sp$prod_c14
   F$c14_bomb <- F$c14_bomb * (bomb_total / CCX_BOMB_REF)
@@ -2419,7 +2420,8 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
   # records as having removed it (review C, 2026-09-12). Numerically identical.
   base_forcing <- ccx_build_forcing("historical", years, prod_c14 = 0,
                                     bomb_total_kmol = CCX_BOMB_REF,
-                                    enso_index = ccx_enso_index_of(base_params))
+                                    enso_index = ccx_enso_index_of(base_params),
+                                    aod_mode = ccx_aod_mode_of(base_params))
   # Land-use is rescaled per draw as a COLUMN multiply rather than by rebuilding
   # the forcing, which would cost more than the model run. Exact, because
   # ccx_build_forcing() applies luc_scale to the annual series and every
