@@ -2,6 +2,76 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (g) — **Two items. An ESM benchmark for land carbon at 2300: every verified model gains less land than either CCX arm. And the memory indexes are trimmed.**
+
+- **Benchmark** (subagent survey, `notes/lit_2026-09-29_land_c_2300_benchmark.md`, each source marked
+  verified / abstract / computed).
+  - **The matched row is Koven et al. 2022** (ESD 13:885, CMIP6 SSP5-8.5 extension, concentration-driven
+    at **2162 ppm** by 2300). Its land change over 1850–2300 is −253 to +508 PgC, **0.89–1.28× PI**
+    (computed on a proxy PI base). CCX's SSP5-8.5 land stock at 2300 (09-29 b) is **2.27×** (`hilda29l`)
+    and **1.65×** (φ 0), at LOWER CO₂ (875 / 1374 ppm, emission-driven, unspliced). Every Koven model
+    turns sink → source between about 2100 and 2220.
+  - ⚠ **Not fully like-for-like.** The forcing modes differ, the warming paths differ, and the PI base is
+    a proxy. The brief first named the wrong scenario (vvH); the note carries the correction.
+- **Memory:** `INDEX_ccx.md` 15,716 → 13,651 B and `INDEX_ccx_app.md` 16,200 → 13,932 B (soft 14 KB).
+  - Done by compression only. Every fact that lived only in an index line was moved into its memory
+    file first, and link integrity was checked (62 of 62 kept).
+  - Snapshot at `memory_backup_20260929/`.
+  - `INDEX_ccx_app` has about 400 B of headroom; the next app addition should split it.
+
+## 2026-09-29 (f) — **The ENSO index is now a structure axis (`enso_index`: demean / detrend / relsst_lp). Priced at φ = 0 + shape prior, detrending costs 1.3–2.9 log units, and moves `q10` by +0.006 and the futures by ≤ 1.4 ppm. The ENSO trend is NOT φ-like and is NOT what holds `q10` low.**
+
+Marcus (09-29): the refit should start from **φ = 0 + shape prior (`hilda_csl3v0k`)**. Build **both** detrend
+routes as switch values, price them, then pick one for Torch.
+
+**The switch (`e33ed24`, tests `6b33d41`):**
+- `ccx_build_forcing(enso_index =)` has three values:
+  - `"demean"`: the default. **`identical()` to the previous build.**
+  - `"detrend"`: a linear fit over `FORC_ENSO_DEMEAN_WIN`.
+  - `"relsst_lp"`: ERSST v6 Niño 3.4 minus the 21-yr low-passed 20S–20N mean, built by
+    `data-raw/build_enso_relsst.R` (sha256-checked against MANIFEST).
+- Every value keeps the 1948+ active span.
+- The integer param `enso_index` (absent = demean) carries the choice in a mode file. The forcing is
+  stamped with an `enso_index` attr, and `ccx_enso_index_check()` in `ccx_run_prepared` refuses a
+  params/forcing mismatch.
+- The guard is mutation-tested in both directions, on an unstamped table, and on the run path itself.
+- The periodic-spinup quiet year is stamped `"none"`, after asserting its ENSO column is zero.
+
+**Receipts for `relsst_lp`:**
+- The grid Niño 3.4 matches `nina34.data` at r 0.990, but with **9 % more amplitude** (slope 1.094).
+- Its trend over 1948–2024 is −0.0036/yr (the tropics warmed faster than the box), against +0.0082 for
+  the shipped index.
+
+**Pricing** (`calibration/diag_enso_index_price.R` → `outputs/diagnostics/enso_index_price_20260929.{log,csv}`):
+- **Mode:** v0k basin 1, the scratch mode from 09-28 (c).
+- **Identity gate:** demean reproduces −1424.746523 exactly.
+- **Arms:** U = unrefitted. E = the ENSO coordinates re-fit (`gamma_enso_land_NH/SH`, `w_enso_l2`),
+  which ranks the INDEX, not the amplitude. B = E plus `q10`, `seas_T_amp_NH/SH`, `beta_max`, `fert_k`
+  and `kz`.
+- **Reproducibility:** run twice; every value is identical (only print formatting differed, from the
+  CSV list-column fix).
+
+| index | U | E | B | B `q10` | B `beta_max` / `fert_k` | ΔvvH 2100 / 2300 ppm |
+|---|---|---|---|---|---|---|
+| demean (control) | 0 | 0 | 0 | 1.101 | 2.546 / 865 | 0 / 0 |
+| detrend | −1.72 | −1.70 | −1.31 | 1.105 | 2.533 / 863 | +0.4 / +1.4 |
+| relsst_lp | −2.92 | −2.37 | −1.85 | 1.107 | 2.560 / 874 | +0.3 / +0.5 |
+
+- **The switch reaches the model:** the U costs are nonzero. Under relsst the E land gammas fall
+  0.443 → 0.390, against the 0.405 expected from absorbing the 9 % amplitude.
+- **Convergence:** B converged for demean and detrend. For relsst_lp it hit maxit 1200 (an upper bound).
+  ⚠ The 09-29 (e) ridge caveat applies to the B futures, but the B points here barely leave the mode.
+- **Reading.**
+  - The record mildly prefers the demeaned index; the cost is at or below the 5–7 the 09-02 bake-off
+    priced at an older mode.
+  - The handoff's hypothesis that the ENSO trend holds `q10` low is **not supported** at the preview:
+    `q10` moves +0.004 / +0.006.
+  - The φ-like mechanism the audit feared, a trend-borne land source that vanishes in projections, is
+    real in the forcing, but its FUTURE consequence is ≤ 1.4 ppm.
+  - A Torch refit is the measurement; whether it is worth one is Marcus's call.
+- Suite at `6b33d41` (`outputs/diagnostics/suite_20260929_post6b33d41.log`): **only the named red**
+  (`test-mode-file.R:323`, AIC). 4992 pass.
+
 ## 2026-09-29 (e) — **Screen of the five untested 09-29 (d) audit flags. None is φ-like in cost; `rep_dC` is the one that moves the future.** (branch only; nothing adopted)
 
 `calibration/diag_audit_flags_screen.R` → `outputs/diagnostics/audit_flags_screen_20260929.{log,csv,rds}`

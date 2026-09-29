@@ -101,8 +101,9 @@ for (idx in EP_INDICES) {
   rows[[idx]] <- data.frame(index = idx,
     d_U = lu - md$logpost, d_E = E$lp - md$logpost, d_B = B$lp - md$logpost,
     E_evals = E$evals, E_conv = E$conv, B_evals = B$evals, B_conv = B$conv,
-    t(setNames(pE[EP_ENSO], paste0("E_", EP_ENSO))),
-    t(setNames(pB[EP_BROAD], paste0("B_", EP_BROAD))),
+    # unlist: ccx_unc_to_par() returns a LIST, and a list column cannot be written
+    t(setNames(unlist(pE[EP_ENSO]), paste0("E_", EP_ENSO))),
+    t(setNames(unlist(pB[EP_BROAD]), paste0("B_", EP_BROAD))),
     t(fB), t(setNames(fB - f0, paste0("d_", names(fB)))), check.names = FALSE)
   cat(sprintf("  %-9s U %+8.2f | E %+8.2f (%d evals, conv %d) | B %+8.2f (%d evals, conv %d) | B q10 %.3f beta_max %.3f fert_k %.0f\n",
               idx, lu - md$logpost, E$lp - md$logpost, E$evals, E$conv, B$lp - md$logpost, B$evals, B$conv,

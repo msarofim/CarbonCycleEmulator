@@ -1,0 +1,39 @@
+=== PROVENANCE ===
+  driver calibration/diag_enso_index_price.R, commit 6b33d41, run 2026-09-29 08:18
+  mode hilda_csl3v0k basin 1 (scratch mode, 09-28 c)
+    /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452/promoted_basin1/mode_fit_pumpN.rds
+  stored logpost -1424.7465 | spinup periodic | BLAS threads pinned via env
+  E re-optimises {gamma_enso_land_NH, gamma_enso_land_SH, w_enso_l2}; B re-optimises {gamma_enso_land_NH, gamma_enso_land_SH, w_enso_l2, q10, seas_T_amp_NH, seas_T_amp_SH, beta_max, fert_k, kz}; Nelder-Mead maxit E 400, B 1200
+  futures: vvH, vvL, GCB spliced, coupled, 1750-2300; units ppm (global mean); logpost in log units
+
+  [gate] demean reproduces the stored logpost: -1424.746523 vs -1424.746523
+  demean    U    +0.00 | E    +0.00 (54 evals, conv 0) | B    +0.00 (210 evals, conv 0) | B q10 1.101 beta_max 2.546 fert_k 865
+  detrend   U    -1.72 | E    -1.70 (54 evals, conv 0) | B    -1.31 (592 evals, conv 0) | B q10 1.105 beta_max 2.533 fert_k 863
+  relsst_lp U    -2.92 | E    -2.37 (62 evals, conv 0) | B    -1.85 (1202 evals, conv 1) | B q10 1.107 beta_max 2.560 fert_k 874
+
+=== MODE VECTOR (demean, no re-optimisation) futures: vvH_2100 639.2, vvH_2300 958.2, vvL_2100 414.0, vvL_2300 336.9 ===
+
+=== FULL TABLE (d_* logpost vs the stored mode; d_vv* ppm vs the mode vector's futures) ===
+     index    d_U    d_E    d_B E_evals E_conv B_evals B_conv
+    demean  0.000  0.000  0.000      54      0     210      0
+   detrend -1.718 -1.702 -1.311      54      0     592      0
+ relsst_lp -2.923 -2.374 -1.854      62      0    1202      1
+ E_gamma_enso_land_NH E_gamma_enso_land_SH E_w_enso_l2 B_gamma_enso_land_NH
+               0.4431               0.3126       13.53               0.4431
+               0.4280               0.3141       13.61               0.4339
+               0.3902               0.2776       13.35               0.4053
+ B_gamma_enso_land_SH B_w_enso_l2 B_q10 B_seas_T_amp_NH B_seas_T_amp_SH
+               0.3126       13.53 1.101           15.83           3.631
+               0.3132       13.66 1.105           15.16           3.527
+               0.2790       13.46 1.107           14.93           3.477
+ B_beta_max B_fert_k  B_kz vvH_2100 vvH_2300 vvL_2100 vvL_2300 d_vvH_2100
+      2.546    864.6 14691    639.2    958.2    414.0    336.9     0.0000
+      2.533    862.7 14766    639.6    959.7    414.2    337.0     0.4321
+      2.560    873.7 14819    639.4    958.7    414.3    337.1     0.2582
+ d_vvH_2300 d_vvL_2100 d_vvL_2300
+     0.0000     0.0000     0.0000
+     1.4418     0.2001     0.1308
+     0.5234     0.2184     0.1831
+
+  NOTE: B is an upper bound on a full refit's cost; the Torch refit is the measurement.
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/enso_index_price_20260929.{log,csv}
