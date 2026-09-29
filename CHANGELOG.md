@@ -2,6 +2,64 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (h) — **Follow-up on `rep_dC`, plus the obvious fixes. `rep_dC` IS φ-like: along the CONVERGED 09-23 ladder, taking it to 1σ moves SSP5-8.5 2300 by +271 ppm. The AOD background is now a switch that IMPROVES the fit. `NPP_GLOBAL_PI` is left for a ruling.**
+
+Marcus: *"Follow up on rep dC and apply any obvious fixes like the AOD background."* ⛔ R2 (the
+PRIOR) stays ruled (09-23). This asks whether the shim carries the FUTURE.
+
+**1. Futures along the converged T1 ladder** (`calibration/diag_rep_dc_ladder_futures.R` →
+`outputs/diagnostics/rep_dc_ladder_futures_20260929.{log,csv}`).
+- **Inputs:** the 09-23 ladder at `hilda29l`, with the other 28 names fully re-optimised at every rung
+  (NM 6000, replicates return to within 1.9e-3). That ladder never ran a future.
+- **Identity:** the canonical row reproduces 09-29 (b) exactly: 875.0 ppm and 2.27× under SSP5-8.5.
+- **Result:** smooth and monotone.
+
+| `rep_dC` | Δlogpost | `beta_max` / `fert_k` | vvH 2300 | SSP5-8.5 2300 | SSP5-8.5 land ×PI |
+|---|---|---|---|---|---|
+| 3.516 (fit) | 0 | 1.31 / 825 | 732.9 | 875.0 | 2.27 |
+| 2.0 | −15.6 | 0.91 / 524 | 792.4 | 1035.1 | 2.07 |
+| 1.0 (1σ) | −42.8 | 0.76 / 412 | 831.5 | 1146.3 | 1.93 |
+| 0.776 (measured offset) | −50.9 | 0.73 / 393 | 840.1 | 1170.0 | 1.90 |
+| 0.0 | −84.7 | 0.65 / 337 | 868.5 | 1244.8 | 1.81 |
+
+- **Confirms the 09-29 (e) screen's direction** on converged points (its partial rebalance: +121 at 1σ,
+  against +99 here).
+- **The mechanism is the fertilisation shape.** `fert_k` falls toward and below the literature's 500–750
+  as `rep_dC` falls; `q10` does not move (1.095–1.103).
+- **Down to ~2100 the effect is small:** vvH 2100 moves ≤ +17 ppm.
+- **The φ = 0 base** (`hilda_csl3v0k`) is being laddered LOCALLY from the frozen worktree
+  `~/ccx_frozen/20260929_repdc_v0k` (`4471751`). The driver's new `RPL_MODE` override (`RPL_MODE_TAG` v0k,
+  `RPL_N_REP` 1) keeps the default path unchanged.
+  - Top rung = the mode's 3.273. Both harness gates PASS (−1424.7465, vector 0).
+  - Torch verdict: ~2 h there vs ~3–4 h here. The laptop won because Torch needs Marcus's go-ahead
+    and a fresh auth.
+
+**2. AOD background: a switch, `aod_mode = "legacy"` (default) / `"anomaly"`** (`ee6d413`).
+- **What it does:** subtracts each hemisphere's 1850–52 quiet background, which equals the series' own
+  1st percentile (0.00210 global); sets zero before 1850; and past 2024 TAPERS the last anomaly.
+- **The taper** uses the series' own decay time: `ccx_aod_efold_yr()` measures Pinatubo's 1/e at
+  **1.42 yr**, following the ENSO-taper precedent.
+- **Legacy stays `identical()`** in every column, so objective #13 and every registered mode are
+  untouched.
+- **Mechanics and tests:** a param + attr stamp, `ccx_aod_mode_check()` in `ccx_run_prepared`, and
+  `test-aod-mode.R` with mutation tests.
+- **Stale comment fixed:** "moot while gamma_diff defaults to 0" was wrong; the default is 0.25.
+- **Priced at v0k** (`calibration/diag_aod_mode_price.R` → `outputs/diagnostics/aod_mode_price_20260929.*`):
+  **+0.54 unrefitted, +0.97** with `beta_max`/`fert_k`/`kz` rebalanced. Futures move ≤ 1 ppm. The fit
+  PREFERS the fix; turning it on belongs with the next refit's label.
+
+**3. `NPP_GLOBAL_PI` = 60: NOT an obvious fix** (subagent, `notes/lit_2026-09-29_npp_global_pi.md`).
+- 60 is inside the verified present-day range, 52.7 (MOD17) to 65.5 (Haberl 2007, potential). IPCC TAR
+  §3.2.1 says "about 60".
+- **No opened source gives a 1750 value.** The two most recent totals are below 60 (MOD17 52.7; Ito
+  2011 56.2, abstract only).
+- **Open for Marcus:** does the constant mean potential or actual NPP, `cited` or `provisional`, and
+  should TAR (2001, the oldest) be the lead citation? Draft citation text is in the note; the value
+  is unchanged.
+
+- Suite at `ee6d413` (`outputs/diagnostics/suite_20260929_postee6d413.log`): **only the named red**
+  (`test-mode-file.R:323`). 5031 pass.
+
 ## 2026-09-29 (g) — **Two items. An ESM benchmark for land carbon at 2300: every verified model gains less land than either CCX arm. And the memory indexes are trimmed.**
 
 - **Benchmark** (subagent survey, `notes/lit_2026-09-29_land_c_2300_benchmark.md`, each source marked
