@@ -114,6 +114,10 @@ ps_year_forcing <- function(prod_c14, year0 = 1750, quiet = NULL) {
   F$e_foss_NH <- 0; F$e_foss_SH <- 0; F$e_luc_NH <- 0; F$e_luc_SH <- 0
   F$cum_luc_NH <- 0; F$cum_luc_SH <- 0
   F <- ccx_hold_climate(F, value = 0)
+  # ENSO-free (1750 precedes the index): valid under every enso_index, so it is
+  # stamped "none" rather than rebuilt per index. Asserted, not assumed.
+  if (any(F$enso != 0)) stop("ps_year_forcing(): the quiet year carries a nonzero ENSO column")
+  attr(F, "enso_index") <- "none"
   F$c14_bomb <- 0; F$c14_nuclear <- 0; F$c14_cosmo <- prod_c14
   F$aod_NH <- 0; F$aod_SH <- 0
   F

@@ -211,7 +211,8 @@ ccx_run_coupled <- function(spin, scenario = "ssp245", years = c(1750, 2100),
                       emis_method = interp_method,
                       emissions = emissions,
                       bomb_total_kmol = bomb_total_kmol,
-                      luc_scale = luc_scale),
+                      luc_scale = luc_scale,
+                      enso_index = ccx_enso_index_of(spin$params)),
     warning = function(w) {
       if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning")
     })

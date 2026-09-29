@@ -175,6 +175,29 @@ FORC_ENSO_DEMEAN     <- TRUE          # ⛔ FALSE reproduces the pre-adoption
 FORC_ENSO_DEMEAN_WIN <- c(1948, 2024) # the span the bake-off priced, = the
                                       # ENSO-active record. Changing it changes
                                       # what was tested.
+# ---- THE ENSO INDEX IS A STRUCTURE AXIS (2026-09-29, Marcus) ------------
+# The audit (CHANGELOG 09-29 d, item 3): demeaned is not detrended. The shipped
+# index trends +0.0082 degC/yr over 1948-2024, which gamma_enso_land turns into
+# a land source rising -0.26 -> +0.31 GtC/yr that every projection drops (the
+# index tapers to 0). Marcus ruled "build both" detrend routes as values of one
+# switch, price each, then pick one for Torch:
+#   "demean"    -- RULING A, the shipped index. DEFAULT; bit-identical to before.
+#   "detrend"   -- a linear fit over FORC_ENSO_DEMEAN_WIN removed from the PSL
+#                  index (mean AND trend). Statistical.
+#   "relsst_lp" -- ERSST v6 grid Nino 3.4 minus the 21-yr low-passed tropical
+#                  mean (data-raw/build_enso_relsst.R), then demeaned over the
+#                  same window. Observational. ⚠ A DIFFERENT PRODUCT's Nino 3.4:
+#                  r 0.990 with nina34.data but 9 % more amplitude (slope 1.094),
+#                  so only a comparison that refits the gammas ranks INDEX
+#                  rather than AMPLITUDE (the 09-02 bake-off's rule).
+# Every value keeps the ENSO-active span of the shipped index (from 1948): a
+# relsst_lp that reached back to 1850 would add a century of ENSO constraint,
+# a different experiment.
+# It travels as the integer parameter `enso_index` (absent = "demean") so that
+# a mode file carries it; ccx_enso_index_check() refuses a run whose forcing
+# was built with a different index than its parameters name.
+CCX_ENSO_INDEX_CODES <- c(demean = 0L, detrend = 1L, relsst_lp = 2L)
+FORC_ENSO_RELSST_FILE <- file.path("data", "forcing_enso_relsst.rds")
 
 # ---------------------------------------------------------------------
 #' Sourced hemispheric monthly emission seasonality, cached.
@@ -475,7 +498,41 @@ ccx_scenario_emissions <- function(scenario) {
 #'   in-window cumulative AND the pre-window `luc_pre` all scale together --
 #'   which is what makes the equivalent post-hoc column rescale used inside
 #'   ccx_make_logpost() exact (gated by test-luc-scale.R).
+#' @param enso_index which ENSO index the `enso` column carries: "demean" (the
+#'   shipped RULING A index, default), "detrend" or "relsst_lp" -- see
+#'   CCX_ENSO_INDEX_CODES. Stamped as attr "enso_index". Callers running a
+#'   parameter set should pass `ccx_enso_index_of(params)`.
 #' @return data.frame, one row per month, with everything ccx_deriv() needs
+#' Which ENSO index a parameter list names (CCX_ENSO_INDEX_CODES; absent = "demean")
+ccx_enso_index_of <- function(p) {
+  v <- p$enso_index
+  if (is.null(v)) return("demean")
+  nm <- names(CCX_ENSO_INDEX_CODES)[match(as.integer(v), CCX_ENSO_INDEX_CODES)]
+  if (length(nm) != 1 || is.na(nm))
+    stop("ccx_enso_index_of(): enso_index = ", paste(v, collapse = ","),
+         " is not one of ", paste(CCX_ENSO_INDEX_CODES, collapse = "/"))
+  nm
+}
+#' Refuse a run whose forcing carries a different ENSO index than its parameters
+#' name. A table with no stamp is taken as "demean" only when the parameters ask
+#' for "demean": every pre-2026-09-29 caller keeps working, and a non-default arm
+#' fed a hand-assembled table fails loudly instead of silently running the
+#' shipped index ([[intersect_is_a_silent_default]]).
+#' `p` is a parameter list or an index name. A table stamped "none" carries no
+#' ENSO at all (its column is identically zero; ps_year_forcing() asserts that)
+#' and is valid under every index.
+ccx_enso_index_check <- function(p, F) {
+  want <- if (is.character(p)) p else ccx_enso_index_of(p)
+  have <- attr(F, "enso_index")
+  if (identical(have, "none")) return(invisible(TRUE))
+  if (is.null(have) && want == "demean") return(invisible(TRUE))
+  if (!identical(have, want))
+    stop("ENSO index mismatch: the parameters name '", want, "' but the forcing carries '",
+         if (is.null(have)) "<unstamped>" else have,
+         "'. Build it with ccx_build_forcing(enso_index = ccx_enso_index_of(params)).")
+  invisible(TRUE)
+}
+
 #' The Nino 3.4 anomaly's own e-folding time, in years, from its autocorrelation
 #'
 #' The lag at which the monthly ACF first falls below 1/e, linearly
@@ -505,7 +562,8 @@ ccx_build_forcing <- function(scenario = "historical",
                               luc_scale = 1,
                               sink_rate = CCX_ARTIFICIAL_SINK_RATE,
                               sink_mode = CCX_ARTIFICIAL_SINK_MODE,
-                              emis_method = CCX_EMIS_METHOD_DEFAULT) {
+                              emis_method = CCX_EMIS_METHOD_DEFAULT,
+                              enso_index = "demean") {
   emis_method <- match.arg(emis_method, c("spline", "constant"))
 
   yrs <- seq(years[1], years[2])
@@ -782,8 +840,18 @@ ccx_build_forcing <- function(scenario = "historical",
                     max(g$year), max(g$year) + 1L, max(yrs)), call. = FALSE)
 
   # ---- ENSO: Nino 3.4 anomaly, zero before 1948 ----------------------
+  enso_index <- match.arg(enso_index, names(CCX_ENSO_INDEX_CODES))
   en <- as.data.frame(readRDS(ccx_path("data", "forcing_enso.rds")))
   en <- en[!is.na(en$nino34_anom), ]
+  if (enso_index != "demean" && !FORC_ENSO_DEMEAN)
+    stop("ccx_build_forcing: enso_index '", enso_index, "' is defined on top of RULING A; ",
+         "FORC_ENSO_DEMEAN = FALSE is the pre-adoption reproduction path only.")
+  if (enso_index == "relsst_lp") {
+    # same ENSO-active span as the shipped index (see CCX_ENSO_INDEX_CODES)
+    rs <- readRDS(ccx_path(FORC_ENSO_RELSST_FILE))
+    rs <- rs[rs$year >= min(en$year), ]
+    en <- data.frame(year = rs$year, month = rs$month, nino34_anom = rs$nino34_relsst_lp)
+  }
   # RULING A -- see FORC_ENSO_DEMEAN above for what this is and what it is worth.
   if (FORC_ENSO_DEMEAN) {
     kb <- en$year >= FORC_ENSO_DEMEAN_WIN[1] & en$year <= FORC_ENSO_DEMEAN_WIN[2]
@@ -794,6 +862,18 @@ ccx_build_forcing <- function(scenario = "historical",
                    sum(kb), FORC_ENSO_DEMEAN_WIN[1], FORC_ENSO_DEMEAN_WIN[2],
                    min(en$year), max(en$year)))
     en$nino34_anom <- en$nino34_anom - mean(en$nino34_anom[kb])
+    if (enso_index == "detrend") {
+      # A linear fit is only valid inside its window (lib_enso_index.R,
+      # eix_detrend: extrapolated over 1854-1947 it fabricated +1.39 sd). The
+      # index runs past the window's end by a few months, not decades; refuse
+      # anything more.
+      if (mean(!kb) > 0.05)
+        stop(sprintf("ccx_build_forcing: %.0f%% of the ENSO index lies outside the %d-%d detrend window.",
+                     100 * mean(!kb), FORC_ENSO_DEMEAN_WIN[1], FORC_ENSO_DEMEAN_WIN[2]))
+      tt <- en$year + (en$month - 0.5) / 12
+      b  <- stats::coef(stats::lm(en$nino34_anom[kb] ~ tt[kb]))
+      en$nino34_anom <- en$nino34_anom - (b[[1]] + b[[2]] * tt)
+    }
   }
   en_t <- en$year + (en$month - 0.5) / 12
   enso <- stats::approx(en_t, en$nino34_anom, xout = t, rule = 2)$y
@@ -860,6 +940,9 @@ ccx_build_forcing <- function(scenario = "historical",
   # was scaled must not be scored against an unscaled one. Project convention --
   # emit the basis, do not make the caller remember it.
   attr(out, "luc_scale") <- luc_scale
+  # Same reason again: which ENSO index this table carries (CCX_ENSO_INDEX_CODES).
+  # ccx_enso_index_check() reads it against the parameters at run time.
+  attr(out, "enso_index") <- enso_index
   # Same reason as luc_scale: a forcing built under an arm of the artificial
   # sink is a DIFFERENT INPUT and a table comparing arms must be able to say
   # which it holds rather than infer it from a filename.

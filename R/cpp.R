@@ -463,12 +463,14 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
        box_names = ccx_box_names(spin$grid$nl, ccx_hs_on(spin$params), ccx_eq_on(spin$params),
                                  ccx_tr_on(spin$params)),
        hs_on = ccx_hs_on(spin$params), eq_on = ccx_eq_on(spin$params),
-       tr_on = ccx_tr_on(spin$params))
+       tr_on = ccx_tr_on(spin$params),
+       enso_index = ccx_enso_index_of(spin$params))
 }
 
 #' A forcing table marshalled ONCE for many `ccx_run_prepared()` calls
 ccx_cpp_forcing_prep <- function(F) {
-  structure(list(mat = ccx_cpp_forcing(F), t = F$t), class = "ccx_cpp_forcing")
+  structure(list(mat = ccx_cpp_forcing(F), t = F$t), class = "ccx_cpp_forcing",
+            enso_index = attr(F, "enso_index"))
 }
 
 #' Run the core from prepared arguments. Same return shape as `ccx_run_fast()`,
@@ -476,6 +478,8 @@ ccx_cpp_forcing_prep <- function(F) {
 #' the same guard columns. `F` is a forcing table or a `ccx_cpp_forcing_prep()`.
 ccx_run_prepared <- function(y, prep, F, retry_na = TRUE) {
   Fm <- if (inherits(F, "ccx_cpp_forcing")) F else ccx_cpp_forcing_prep(F)
+  # the forcing's ENSO index must be the one the parameters name (2026-09-29)
+  ccx_enso_index_check(if (is.null(prep$enso_index)) "demean" else prep$enso_index, Fm)
   ss <- prep$ss
   one <- function(nsub) {
     res <- .ccx_cpp_env$ccx_run_cpp(y, prep$par, Fm$mat, Fm$t, prep$aux, as.integer(nsub))
