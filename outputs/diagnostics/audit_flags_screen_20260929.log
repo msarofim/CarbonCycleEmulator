@@ -1,0 +1,126 @@
+=== PROVENANCE ===
+  driver calibration/diag_audit_flags_screen.R | commit 39b49e0 | run 2026-09-29 08:09 | no RNG used
+  mode hilda29l via ccx_mode_file() = calibration/output/refit_20260920_hilda29l_obj13_hilda_csl3/mode_fit_pumpN.rds
+  struct hilda_csl3, spinup periodic | stored logpost -1425.362014, re-scored -1425.362014 -> CONTROL REPRODUCES
+  rebalance beta_max+fert_k+kz (Nelder-Mead maxit 120) | futures vvH, vvL to 2300 | GCB historical emissions (data/forcing_emissions_historical.rds) spliced over each marker's past
+  units: logpost: natural-log units; CO2: ppm, mean of NH/SH boxes, annual mean
+
+  20 screen rows, 17 rep_dC probe rows, 4 flux runs, on 6 forks
+
+=== IDENTITY CHECKS (zero perturbation through each route) ===
+  identity: NPP route x1 (+rebalance floor)    d_frozen +0.000e+00  max|dCO2| 0.000e+00  -> PASS
+  identity: f_luc_wood override at base        d_frozen +0.000e+00  max|dCO2| 0.000e+00  -> PASS
+  identity: kz_deep_frac fixed at mode         d_frozen +0.000e+00  max|dCO2| 0.000e+00  -> PASS
+  identity: AOD table swapped, bg = 0          d_frozen +0.000e+00  max|dCO2| 0.000e+00  -> PASS
+  identity: rep_dC fixed at mode               d_frozen +0.000e+00  max|dCO2| 0.000e+00  -> PASS
+  rebalance floor from the mode (row 1): d_rebal +0.0000 after 52 evals
+
+=== SCREEN (d_* vs canonical; futures = CO2 change, ppm) ===
+flag row                                                    d_frozen   d_rebal  d_loglik   d_prior |   b_max   fert_k     kz |   H2100   H2300   L2100   L2300
+F1   NPP_GLOBAL_PI x0.80                                    -3033.01   -302.59   -302.52     -0.07 |   1.404    699.2  15937 |    -1.7   -21.4    -1.4    -0.6
+F1   NPP_GLOBAL_PI x1.25                                    -3664.13   -415.51   -415.52     +0.01 |   1.253    997.9  13107 |    +1.1   +13.5    +1.3    +0.6
+F2   f_luc_wood 0.3                                          -442.84    -26.91    -26.23     -0.68 |   2.227   1614.5  14602 |    -2.6   -26.3    +1.5    +2.7
+F2   f_luc_wood 0.6                                         -1766.55   -147.17   -147.19     +0.01 |   1.479   1196.6  15368 |   +15.0   +52.4    +6.4    +5.7
+F3   kz_deep_frac 0.073 (hilda_ratio)                        -131.48    -26.68    -29.96     +3.28 |   1.312    826.4  12320 |    -1.5    -7.6    -1.8    -1.9
+F3   kz_deep_frac 0.03207 (hilda_K0_product)                  -35.53    -14.80    -17.20     +2.40 |   1.293    806.6  13119 |    -0.5    -3.1    -0.9    -1.0
+F3   kz_deep_frac 0.005005 (box_floor)                         -5.65     -5.41     +0.74     -6.14 |   1.310    826.1  14701 |    +0.1    +0.7    +0.1    +0.1
+F4   AOD A: quiet background subtracted                        -0.09     +1.63     +1.66     -0.04 |   1.245    775.1  14500 |    +0.7    +5.8    -0.1    -0.2
+F4   AOD A frozen (no rebalance)                               -0.09     -0.09     -0.09     +0.00 |   1.309    824.6  14502 |    +0.0    -0.0    +0.0    -0.0
+F4   AOD B frozen: A + post-record relax e-fold 1 yr           -0.09     -0.09     -0.09     +0.00 |   1.309    824.6  14502 |    +0.0    -0.0    +0.0    -0.0
+F4   AOD canonical + post-record relax e-fold 1 yr (no bg change)      +0.00     +0.00     +0.00     +0.00 |   1.309    824.6  14502 |    -0.0    -0.0    -0.0    -0.0
+F5   rep_dC pinned 0.0 ppm, protocol rebalance              -1300.72   -389.48   -395.46     +5.97 |   1.110    605.8  15404 |   -10.6    -9.7    -7.0    -3.3
+F5   rep_dC pinned 0.0 ppm, WIDE rebalance                  -1300.72   -100.77    -81.55    -19.22 |   0.590    287.1  16115 |   +19.6  +161.9    -1.3    -3.4
+F5   rep_dC pinned 1.0 ppm, protocol rebalance               -665.95   -189.55   -194.72     +5.17 |   0.863    470.0  15455 |    +3.1   +54.5    -3.5    -2.7
+F5   rep_dC pinned 1.0 ppm, WIDE rebalance                   -665.95    -84.43    -78.44     -5.99 |   1.314    782.4  17186 |    -9.5   -18.7    -4.2    -1.4
+  futures to 3 decimals for the F4 rows (the AOD terms are small):
+   AOD A: quiet background subtracted                           H +0.735 +5.812  L -0.141 -0.191
+   AOD A frozen (no rebalance)                                  H +0.030 -0.003  L +0.020 -0.003
+   AOD B frozen: A + post-record relax e-fold 1 yr              H +0.028 -0.003  L +0.019 -0.003
+   AOD canonical + post-record relax e-fold 1 yr (no bg change) H -0.003 -0.000  L -0.002 -0.000
+
+  canonical: vvH 2024/2100/2300 424.4/610.6/732.9, vvL 424.4/397.9/331.1 ppm
+
+  top stream moves at the rebalanced point (loglik units):
+   NPP_GLOBAL_PI x0.80                                  co2_seasonal_MLO -135.55; d14c_NH -61.76; d13c_level_MLO -49.74
+   NPP_GLOBAL_PI x1.25                                  co2_seasonal_MLO -246.62; d14c_SH -73.76; d13c_level_SPO -49.02
+   f_luc_wood 0.3                                       d13c_level_MLO -11.74; co2_icecore -8.94; d14c_NH -6.72
+   f_luc_wood 0.6                                       d13c_level_MLO -40.42; co2_level_MLO -31.62; co2_icecore -27.74
+   kz_deep_frac 0.073 (hilda_ratio)                     d14c_profile_ab -22.97; d14c_profile_bd -8.65; d14c_SH +5.28
+   kz_deep_frac 0.03207 (hilda_K0_product)              d14c_profile_ab -16.03; d14c_SH +3.79; d14c_NH -1.83
+   kz_deep_frac 0.005005 (box_floor)                    d14c_profile_ab +1.04; d14c_SH -0.67; gcb_land_sink +0.30
+   AOD A: quiet background subtracted                   co2_icecore +1.51; d13c_level_SPO -0.25; co2_level_MLO +0.16
+   AOD A frozen (no rebalance)                          co2_level_SPO -2.53; co2_icecore +1.88; d13c_level_MLO -0.89
+   AOD B frozen: A + post-record relax e-fold 1 yr      co2_level_SPO -2.53; co2_icecore +1.88; d13c_level_MLO -0.89
+   AOD canonical + post-record relax e-fold 1 yr (no bg change) co2_level_MLO +0.00; co2_level_SPO +0.00; co2_seasonal_MLO +0.00
+   rep_dC pinned 0.0 ppm, protocol rebalance            d13c_level_MLO -215.71; d13c_level_SPO -69.04; co2_level_MLO -42.58
+   rep_dC pinned 0.0 ppm, WIDE rebalance                co2_icecore -38.26; d14c_SH -19.92; d13c_level_MLO -15.34
+   rep_dC pinned 1.0 ppm, protocol rebalance            d13c_level_MLO -130.91; d13c_level_SPO -22.43; co2_icecore -16.32
+   rep_dC pinned 1.0 ppm, WIDE rebalance                co2_level_MLO -23.65; co2_level_SPO -15.14; d13c_level_SPO +11.56
+
+  F3 deep diffusivity K_deep = kz_deep_frac * kz (m2/yr) at the rebalanced point:
+   identity: kz_deep_frac fixed at mode                 f 0.007333  kz 14502  K_deep 106
+   kz_deep_frac 0.073 (hilda_ratio)                     f 0.073  kz 12320  K_deep 899
+   kz_deep_frac 0.03207 (hilda_K0_product)              f 0.03207  kz 13119  K_deep 421
+   kz_deep_frac 0.005005 (box_floor)                    f 0.005005  kz 14701  K_deep 74
+
+=== F4: AOD background and the NPP steps ===
+  quiet background (mean 1850-1852): NH 0.00209  SH 0.00211  global 0.00210; gamma_diff 0.25
+  flux-run identity (bg = 0 table): NPP identical to canonical -> PASS
+  AOD-attributable NPP step at each seam, GtC/yr (month before -> month after), from a
+  difference of frozen flux runs against B, which has no step at either seam:
+   1850: canonical +0.0313  | fix A +0.0000 | canonical raw month-on-month +0.0070 | NPP 60.05
+   2025: canonical -0.1094  | fix A -0.0711 | canonical raw month-on-month -0.0593 | NPP 73.46
+  (A and B differ only after the record, so A's 1850 step is B's, ~0 by construction; A's
+  2025 step remains because 2024 AOD sits above the quiet background -- B relaxes it away.)
+
+=== F5: rep_dC ===
+  mode rep_dC 3.515 ppm = +3.52 prior sd (sd 1.0 ppm); Hessian sd_unc 0.267
+  Hessian correlation row (top 8 |cor|):
+  bomb_total  hs_asx_frac     beta_max       fert_k         u_hs    luc_scale 
+      -0.568       -0.356        0.252        0.249        0.218        0.180 
+pump_hs_gcm2           kz 
+       0.176       -0.175 
+  WIDE rebalance set: beta_max+fert_k+kz+bomb_total+hs_asx_frac+u_hs
+  (the land residence times are UNFITTED, so they have no Hessian row; the probe below
+   measures instead whether rep_dC's own optimum moves when they are perturbed)
+            param      class   base    value  d_frozen rep_dC_hat   d_rep_dC
+           (none)   identity   1.00    1.000     0.000     3.5154  1.981e-05
+         tau_leaf       land   1.00    0.500   -66.549     4.1644  6.490e-01
+         tau_leaf       land   1.00    2.000  -202.525     2.3071 -1.208e+00
+         tau_wood       land  20.00   10.000 -1279.291     6.4975  2.982e+00
+         tau_wood       land  20.00   40.000 -1534.596     0.3382 -3.177e+00
+    tau_soil_fast       land   2.00    1.000  -328.762     5.0243  1.509e+00
+    tau_soil_fast       land   2.00    4.000 -1040.224     0.8268 -2.688e+00
+    tau_soil_slow       land 500.00  250.000  -322.676     4.9607  1.445e+00
+    tau_soil_slow       land 500.00 1000.000  -152.509     2.5124 -1.003e+00
+ litter_slow_frac       land   0.05    0.025 -1317.042     6.5922  3.077e+00
+ litter_slow_frac       land   0.05    0.100 -2871.408    -0.9689 -4.484e+00
+   pump_carb_frac ocean_ctrl   0.23    0.115     3.544     3.5142 -1.151e-03
+   pump_carb_frac ocean_ctrl   0.23    0.460   -67.094     3.5177  2.361e-03
+        kz_zscale ocean_ctrl 253.00  126.500 -1934.440     6.8259  3.311e+00
+        kz_zscale ocean_ctrl 253.00  506.000 -2072.448     0.9832 -2.532e+00
+            tau_q ocean_ctrl 538.00  269.000  -105.233     2.8911 -6.242e-01
+            tau_q ocean_ctrl 538.00 1076.000 -2370.635     3.8579  3.426e-01
+    d_reopt
+  4.131e-08
+ -2.234e+01
+ -4.806e+01
+ -3.548e+02
+ -4.572e+02
+ -9.061e+01
+ -2.705e+02
+ -1.042e+02
+ -4.616e+01
+ -3.333e+02
+ -7.128e+02
+  3.544e+00
+ -6.709e+01
+ -7.963e+02
+ -1.390e+03
+ -6.411e+01
+ -2.358e+03
+
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/.claude/worktrees/agent-a3e4f3a2c943c47a8/outputs/diagnostics/audit_flags_screen_20260929.csv
+        /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/.claude/worktrees/agent-a3e4f3a2c943c47a8/outputs/diagnostics/audit_flags_screen_20260929.rds
+  total 4.4 min
+  ⛔ A screen: nothing adopted, nothing refitted.

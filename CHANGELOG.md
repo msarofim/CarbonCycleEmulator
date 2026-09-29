@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (e) — **Screen of the five untested 09-29 (d) audit flags. None is φ-like in cost; `rep_dC` is the one that moves the future.** (branch only; nothing adopted)
+
+`calibration/diag_audit_flags_screen.R` → `outputs/diagnostics/audit_flags_screen_20260929.{log,csv,rds}`
+(the 09-29 protocol: maxit 120) and `audit_flags_screen_converged_20260929.*` (`AF_CONV=1`: the same
+rows run to Nelder-Mead's tolerance with 2 restarts). Identity rows through every route reproduce
+the canonical logpost and futures EXACTLY (0.0, not 1e-9).
+- ⚠ **Most protocol rows hit maxit 120.** Converging barely changes the COST (≤ 20 units) but moves
+  the FUTURES by tens of ppm, because `beta_max`/`fert_k` sit on a cor 0.998 ridge and the rebalance
+  lands anywhere along it (NPP ×0.8: vvH 2300 −21 ppm at maxit 120, −70 converged). Futures in this
+  screen are ±tens of ppm at 2300; this also applies to the 09-29 (d) screen's numbers.
+- **NPP_GLOBAL_PI** ×0.8 / ×1.25: −297 / −408 (converged), mostly the seasonal CO₂ amplitude. Not φ-like.
+- **f_luc_wood** 0.3 / 0.6: −26 / −126. vvH 2300 −31 / +7.
+- **kz_deep_frac** 0.073: −30 loglik (Δ¹⁴C profile), futures ≤ 7 ppm. ⭐ At the box FLOOR the
+  LIKELIHOOD improves by +0.74 and only the logit Jacobian (−6.1) pays. The fitted 0.0073 sits where
+  the Jacobian puts it, not where the data do.
+- **gamma_diff AOD background** (quiet level 0.0021, the 1850–52 mean): NPP steps of +0.031 GtC/yr at
+  1850 and −0.109 at 2025. Frozen futures effect ≤ 0.03 ppm. Subtracting the background costs −0.09
+  frozen and gains +1.6 after rebalance (a ridge slide). Proposed fix, NOT adopted: subtract the
+  background and relax the post-record anomaly (1 yr e-fold, a choice). Also fix the stale "moot"
+  comment in `ccx_hold_climate`.
+- **rep_dC**: pinned at 0 / 1 σ with the wide rebalance (+`bomb_total`, `hs_asx_frac`, `u_hs`, its top
+  Hessian partners): −101 / −49, with **vvH 2300 +159 / +121 ppm** (`beta_max` 1.31 → 0.60–0.69;
+  `hs_asx_frac` 0.73 → 1.37–1.73). Its optimum moves monotonically with EVERY land residence time
+  (longer → lower, ±1–4.5 ppm), and also with `kz_zscale`, but not with `pump_carb_frac` or `tau_q`.
+- Worktree trap: a git worktree lacks the gitignored `data-raw/downloads/nuclear14c`, and
+  `ccx_nuclear_c14_annual()` then zeroes the source with only a warning (logpost −1425.557 vs
+  −1425.362). The control gate caught it. Symlinked from the main checkout; not committed.
+
 ## 2026-09-29 (d) — **A sweep for other φ-like parameters: no unfitted parameter behaves like φ. The two strongest candidates are FITTED: `q10` and the ENSO land channel.**
 
 Marcus: *"Sweep the rest of the model for anything like phi that might be a parameter that doesn't
