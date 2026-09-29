@@ -1,0 +1,71 @@
+=== PROVENANCE === driver calibration/diag_npp0_scan_resfree.R, commit 3ecf563, run 2026-09-29 11:58
+  structure hilda_csl3v0ka at v0k basin 1; warm start = npp0_scan_20260929.csv optimum per scale
+  free {beta_max, fert_k, luc_scale, q10, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, npp_frac_NH, kz, rep_dC} + residence {tau_leaf, tau_wood, tau_soil_fast, tau_soil_slow, litter_slow_frac} (log / logit[litter_slow_frac], UNBOUNDED, no prior); NM maxit 6000; control (residence fixed) maxit 3000
+  NPP_GLOBAL_PI x {0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05}; logpost natural-log units; NPP GtC/yr mean 2001-2023; no RNG
+  [identity a] warm-start profile vs 09-29 (k) d_opt: max |diff| 4.13e-07 (tol 1e-04)
+  [identity b] tau_wood x2 at scale-1 start moves logpost -5412.736 (REACHED)
+
+  Costs relative to scale 1.00's OWN arm. d_old = 09-29 (k) (11 free); d_ctrl = restart, residence fixed; d_new = residence free.
+  scale      d_old    d_ctrl     d_new   NPPold   NPPnew  conv  evals |   tau_leaf  tau_woodtau_soil_fasttau_soil_slowlitter_slow_frac
+  0.75     -124.51   -119.24    -18.32    55.01    55.52     1   6001 |      6.301     16.27     0.552      1019   0.06414
+  0.80      -80.95    -78.53    -18.67    58.18    61.42     1   6001 |      0.969     16.05     3.624      1617   0.03326
+  0.85      -46.51    -45.95     -4.79    60.80    64.31     0   4531 |      3.052     18.32     1.602      1823   0.04116
+  0.90      -23.89    -23.03     +1.24    63.99    66.25     1   6001 |      2.892     16.82     1.294      1200   0.07151
+  0.95       -7.44     -7.42     +5.28    66.92    72.23     0   4751 |     0.2534      13.8     2.747      1666   0.05907
+  1.00       +0.00     +0.00     +0.00    70.01    73.97     0   5695 |     0.9201      18.3      1.95      1563   0.04497
+  1.05       -0.04     +0.05     +8.31    73.01    78.68     0   4395 |       1.39     16.41      1.41      1713   0.03921
+  defaults tau_leaf=1, tau_wood=20, tau_soil_fast=2, tau_soil_slow=500, litter_slow_frac=0.05
+
+  within-scale gain from freeing residence (opt - start) and from NM restart alone (ctrl - start):
+  0.75    resfree  +114.23   ctrl    +5.27
+  0.80    resfree   +70.31   ctrl    +2.41
+  0.85    resfree   +49.77   ctrl    +0.56
+  0.90    resfree   +33.17   ctrl    +0.87
+  0.95    resfree   +20.75   ctrl    +0.02
+  1.00    resfree    +8.04   ctrl    +0.00
+  1.05    resfree   +16.39   ctrl    +0.10
+
+=== WHO PAYS (residence free): stream change vs scale 1.00 (10 largest |max|) ===
+      co2_icecore d13c_level_SPO d14c_profile_ab d13c_level_MLO
+x0.75        6.87          -8.32           -8.32           1.54
+x0.80        9.89           1.71           -6.49          -7.94
+x0.85        7.45           0.47           -3.54          -3.94
+x0.90        2.38           1.00           -1.74           1.75
+x0.95        5.82           0.03           -1.72          -2.18
+x1.00        0.00           0.00            0.00           0.00
+x1.05        3.90           0.65           -2.01          -0.86
+      co2_seasonal_MLO gcb_land_sink d14c_SH d14c_NH d13c_seasonal_MLO
+x0.75            -3.80          6.31   -6.23   -4.16              2.93
+x0.80            -7.63         -4.58   -1.61   -1.84              3.35
+x0.85            -2.52         -1.21   -5.53   -3.73              1.60
+x0.90             0.32          1.73   -3.36   -4.20              0.96
+x0.95            -3.34         -2.26   -1.13    0.35              1.89
+x1.00             0.00          0.00    0.00    0.00              0.00
+x1.05            -2.57         -1.67    1.23    2.65              2.07
+      gcb_ocean_sink
+x0.75          -2.81
+x0.80          -1.73
+x0.85          -0.81
+x0.90          -0.22
+x0.95          -0.19
+x1.00           0.00
+x1.05          -0.36
+
+=== 11 fitted names at the residence-free optimum ===
+     beta_max fert_k luc_scale    q10 seas_T_amp_NH seas_T_amp_SH seas_lag_p_NH
+[1,]    2.934  967.7    0.8492 0.9786         21.18         5.252         1.314
+[2,]    2.697  708.1    0.8965 1.0530         12.87         2.193         1.474
+[3,]    2.425  750.2    0.8598 1.0420         17.32         5.490         1.484
+[4,]    2.312  853.3    0.8247 1.0520         24.73         3.951         1.568
+[5,]    2.363  769.0    0.8477 1.1130         16.11         3.831         1.679
+[6,]    2.893 1063.0    0.8078 1.0910         23.59         4.462         1.710
+[7,]    2.778  946.7    0.8341 1.1670         14.73         3.059         1.727
+     seas_lag_p_SH npp_frac_NH    kz rep_dC
+[1,]         2.669      0.5888 17370  3.982
+[2,]         2.716      0.6073 16900  3.752
+[3,]         2.684      0.5830 15960  3.486
+[4,]         2.672      0.6069 15170  3.120
+[5,]         2.725      0.5865 15160  3.394
+[6,]         2.685      0.6050 13910  3.296
+[7,]         2.688      0.5985 15310  3.341
+  saved /Users/MarcusMarcus/ccx_frozen/20260929_npp0_resfree/outputs/diagnostics/npp0_scan_resfree_20260929.{log,csv,rds}

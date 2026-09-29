@@ -1,0 +1,33 @@
+=== PROVENANCE === driver calibration/diag_npp0_scan_resfree.R, commit 3ecf563, run 2026-09-29 11:18
+  structure hilda_csl3v0ka at v0k basin 1; warm start = npp0_scan_20260929.csv optimum per scale
+  free {beta_max, fert_k, luc_scale, q10, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, npp_frac_NH, kz, rep_dC} + residence {tau_leaf, tau_wood, tau_soil_fast, tau_soil_slow, litter_slow_frac} (log / logit[litter_slow_frac], UNBOUNDED, no prior); NM maxit 20; control (residence fixed) maxit 10
+  NPP_GLOBAL_PI x {0.75, 1}; logpost natural-log units; NPP GtC/yr mean 2001-2023; no RNG
+  [identity a] warm-start profile vs 09-29 (k) d_opt: max |diff| 1.86e-07 (tol 1e-04)
+  [identity b] tau_wood x2 at scale-1 start moves logpost -5412.736 (REACHED)
+
+  Costs relative to scale 1.00's OWN arm. d_old = 09-29 (k) (11 free); d_ctrl = restart, residence fixed; d_new = residence free.
+  scale      d_old    d_ctrl     d_new   NPPold   NPPnew  conv  evals |   tau_leaf  tau_woodtau_soil_fasttau_soil_slowlitter_slow_frac
+  0.75     -124.51   -121.51   -120.91    55.01    55.01     1     21 |          1        20         2       500      0.05
+  1.00       +0.00     +0.00     +0.00    70.01    70.01     1     21 |          1        20         2       500      0.05
+  defaults tau_leaf=1, tau_wood=20, tau_soil_fast=2, tau_soil_slow=500, litter_slow_frac=0.05
+
+  within-scale gain from freeing residence (opt - start) and from NM restart alone (ctrl - start):
+  0.75    resfree    +3.60   ctrl    +3.00
+  1.00    resfree    -0.00   ctrl    +0.00
+
+=== WHO PAYS (residence free): stream change vs scale 1.00 (10 largest |max|) ===
+      d14c_NH d14c_SH d13c_level_MLO gcb_land_sink co2_icecore d14c_profile_ab
+x0.75  -70.35  -14.18          -8.35         -8.22        7.48           -6.98
+x1.00    0.00    0.00           0.00          0.00        0.00            0.00
+      d13c_level_SPO gcb_ocean_sink co2_seasonal_MLO d13c_seasonal_MLO
+x0.75          -5.59          -2.78            -2.77             -2.06
+x1.00           0.00           0.00             0.00              0.00
+
+=== 11 fitted names at the residence-free optimum ===
+     beta_max fert_k luc_scale    q10 seas_T_amp_NH seas_T_amp_SH seas_lag_p_NH
+[1,]    2.680  581.4    0.9541 0.9744         17.29         3.526         1.315
+[2,]    2.553  867.7    0.8482 1.1020         15.62         3.609         1.619
+     seas_lag_p_SH npp_frac_NH    kz rep_dC
+[1,]         2.680      0.5962 17270  4.504
+[2,]         2.682      0.5932 14680  3.273
+  saved /Users/MarcusMarcus/ccx_frozen/20260929_npp0_resfree/outputs/diagnostics/npp0_scan_resfree_smoke_20260929.{log,csv,rds}

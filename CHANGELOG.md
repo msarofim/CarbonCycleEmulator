@@ -2,6 +2,55 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (m) — **With the land residence times free, the NH bomb-¹⁴C cost of a lower NPP COLLAPSES: ×0.75 costs ≤ −18 (was −125), d14c_NH −4 (was −70). The record pins the carbon in DECADAL pools, not NPP. But every optimum puts the passive soil at 2.6–5.6k GtC (default 1.5k).**
+
+Marcus: *"NPP₀ rescan, residence free"*, *"free, with the existing 11"* (no priors). The frozen
+worktree `20260929_repdc_v0k` and the merged subagent worktree (and its branch) were removed; their
+outputs were already archived.
+
+- **Driver:** `calibration/diag_npp0_scan_resfree.R` (`3ecf563`, run from a frozen worktree) →
+  `outputs/diagnostics/npp0_scan_resfree_20260929.*`. Arm A at v0k basin 1. At each NPP₀ scale it
+  warm-starts from the 09-29 (k) optimum, freeing `tau_leaf`, `tau_wood`, `tau_soil_fast`,
+  `tau_soil_slow` (log) and `litter_slow_frac` (logit) alongside the same 11 names, with no bounds and
+  no prior. NM maxit 6000.
+  - **Control arm:** the same restart with the residence times FIXED (maxit 3000).
+  - **Identities:** the warm-start profile reproduces 09-29 (k) to 4e-7. `tau_wood` ×2 moves the
+    frozen logpost by −5413, so the override is REACHED.
+
+| scale | NPP modern (k → m) | Δ (k) | Δ ctrl | Δ resfree | gain from residence |
+|---|---|---|---|---|---|
+| 0.75 | 55.0 → 55.5 | −124.5 | −119.2 | −18.3 | +114.2 |
+| 0.80 | 58.2 → 61.4 | −81.0 | −78.5 | −18.7 | +70.3 |
+| 0.85 | 60.8 → 64.3 | −46.5 | −46.0 | −4.8 | +49.8 |
+| 0.90 | 64.0 → 66.3 | −23.9 | −23.0 | +1.2 | +33.2 |
+| 0.95 | 66.9 → 72.2 | −7.4 | −7.4 | +5.3 | +20.8 |
+| 1.00 | 70.0 → 74.0 | 0 | 0 | 0 | +8.0 |
+| 1.05 | 73.0 → 78.7 | −0.0 | +0.1 | +8.3 | +16.4 |
+
+(Δ is relative to each arm's own scale-1.00 point. The control gains ≤ +5.3, so the gains are the
+residence times, not extra NM progress on the 11.)
+- ⭐⭐ **The hypothesis from (k) holds.** At ×0.75 the NH bomb-¹⁴C debit is −4.2 (was −70.4), and no
+  stream pays more than −8.3. The record constrains how much carbon sits in pools that turn over on
+  DECADAL timescales, not the NPP flux itself. Different scales buy that differently: ×0.75 uses
+  `tau_leaf` 6.3 yr (leaf pool 170 GtC); ×0.80 uses `tau_soil_fast` 3.6 yr. **A ridge, not a point.**
+- ⚠ **The profile is NOISY and UNCONVERGED.** It is non-monotone: ×0.90 +1.2, ×0.95 +5.3, ×1.05 +8.3,
+  and 3 of the 7 rows hit maxit. So the costs are upper bounds with roughly ±10 scatter. It is not
+  a measurement of where the NPP optimum sits. Taken at face value, freeing the residence times
+  RAISES modern NPP at the old scale-1 point (70 → 74).
+- ⛔ **Every optimum moves `tau_soil_slow` 500 → 1000–1800 yr** (all 7 independent forks) and
+  `tau_wood` 20 → 14–18. Implied PI passive soil: **2.6–5.6k GtC**, against the 1.5k the default
+  was chosen to hit (`R/model.R` comment); total PI land is 3.1–6.1k GtC. It is the same direction
+  at every scale, so this is NOT an NPP effect. At scale 1.00 the +8.0 from freeing the residence
+  times is bought by `d14c_NH` +6.6, `d14c_intcal` +4.1 (the pre-bomb ¹⁴C level, which an older
+  passive pool changes), `gcb_land_sink` +3.0 and `d13c_level_MLO` +2.8, and paid by
+  `d13c_seasonal_MLO` −1.8 and `co2_icecore` −1.3. This needs a one-parameter test (`tau_soil_slow`
+  alone) before any residence time is released for real.
+- **Row power, again:** at σ 7.76, moving 74 → 56 is worth ≈ +2.7 to the option-4 row, less than
+  even these upper-bound costs. So B2 would still not be pulled by the row at this σ; what it
+  would buy is the ridge.
+- **Not done (needs a ruling):** futures at these vectors. A 3–6k GtC passive soil under
+  `q10` respiration could move the 2300 land benchmark (09-29 g) substantially.
+
 ## 2026-09-29 (l) — Housekeeping: the suite is clean at `c5c5d4e`; a partial-log misread is corrected; the memory split is done; the handoff is written.
 
 - ⚠ **Misread, corrected.** The 09-29 (j) suite reading at `39d2056` came from a PARTIAL log, and the finished
