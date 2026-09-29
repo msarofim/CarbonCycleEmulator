@@ -430,10 +430,15 @@ inline double pco2_from_dic_cpp(double dic, double alk, double T,
 // off the FIRST RK4 stage of each month -- the same (y, t, f) the `out` row
 // records -- so the exported columns are the derivative's own numbers, not a
 // second estimator (twin of ccx_deriv(record = TRUE)'s pco2_* in R).
+// Slots 8..9 (2026-09-29, NPP_GLOBAL_PI option 4): the land's NET PRIMARY
+// PRODUCTION per hemisphere, [NH, SH], GtC/yr = GPP - Ra INCLUDING the ENSO GPP
+// modulation and EXCLUDING the zero-mean seasonal NEP -- exactly the recorder's
+// `gpp - ra` channels in R (R/fluxes.R), the quantity a modern-NPP row scores.
+static const int REC_N = 10;
 static void deriv(const double* y, double t, const Par& P, const double* f,
                   const Aux& A, double* dy, double* pco2_rec = nullptr) {
   for (int i = 0; i < NB * 3; ++i) dy[i] = 0.0;
-  if (pco2_rec) for (int i = 0; i < 8; ++i) pco2_rec[i] = NA_REAL;
+  if (pco2_rec) for (int i = 0; i < REC_N; ++i) pco2_rec[i] = NA_REAL;
 
   // flux helper: source-ratio transport, applied antisymmetrically
   // SEASONAL MIXED-LAYER SHAPE -- twin of ccx_mld_eval() in R/model.R, written
@@ -585,8 +590,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // (max 0.11 in the whole record). At large AOD the total-shortwave DIMMING
     // wins and the true response TURNS OVER; that turnover is NOT represented,
     // so do not drive this with a supervolcano.
-    // ⚠ gamma_diff DEFAULTS TO 0 -- the mechanism is OFF unless asked for, so
-    // every pre-2026-08-29 result is unchanged and remains comparable.
+    // gamma_diff defaults to CCX_GAMMA_DIFF_DEFAULT = 0.25 (R/model.R) since its
+    // 2026-08-30 adoption; the "defaults to 0" note that stood here was stale.
     const double npp = npp0_h * capacity * fert
                        * (1.0 + P.gamma_diff * aod_h_[hi]);
 
@@ -607,6 +612,7 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // anomaly, so the GPP modulation is its negative. Split by npp_leaf_frac
     // to keep each limb's FRACTIONAL perturbation equal. No new parameter.
     const double enso_gpp = -P.gamma_enso_land[hi] * enso;
+    if (pco2_rec) pco2_rec[8 + hi] = npp + enso_gpp;     // NPP record (see deriv's header)
     // alpha13_signed reason (a): one-way by construction (see R/model.R).
     // Since 2026-09-02 reason (a) also covers "gamma large enough to shut
     // photosynthesis off" -- a rejected state of the same class as npp < 0.
@@ -1361,7 +1367,11 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
   // than a final state because the gradient terms are scored at the
   // OBSERVATIONS' epoch (~2000, not the run's end year) -- Marcus 2026-08-16.
   NumericMatrix out(n, 39);   // 11 + 14 per hemisphere (CCX_OCEAN_BOX_COLS)
-  double pco2_rec[8];
+  double pco2_rec[REC_N];
+  // NPP per hemisphere per month, off the same first RK4 stage (slots 8..9).
+  // A SEPARATE matrix, not two more `out` columns: `out`'s width is part of the
+  // interface (test-tr-box.R pins it) and nothing that reads it needs NPP.
+  NumericMatrix nppm(n, 2);
   const double gpp = A.gtc_per_ppm_hemi;
 
   std::vector<double> f(N_FORCING);
@@ -1435,6 +1445,7 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
       if (s == 0)
         for (int hi = 0; hi < 2; ++hi)
           for (int b = 0; b < 4; ++b) out(i, 11 + 14 * hi + 10 + b) = pco2_rec[4 * hi + b];
+      if (s == 0) { nppm(i, 0) = pco2_rec[8]; nppm(i, 1) = pco2_rec[9]; }
       for (int q = 0; q < NS; ++q) tmp[q] = y[q] + h / 2.0 * k1[q];
       deriv(tmp.data(), tt + h / 2.0, P, f.data(), A, k2.data());
       for (int q = 0; q < NS; ++q) tmp[q] = y[q] + h / 2.0 * k2[q];
@@ -1449,5 +1460,5 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
 
   NumericMatrix yend(NB, 3);
   for (int i = 0; i < NS; ++i) yend[i] = y[i];
-  return List::create(_["state"] = yend, _["out"] = out);
+  return List::create(_["state"] = yend, _["out"] = out, _["npp"] = nppm);
 }

@@ -2023,6 +2023,9 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # equatorial cell, NA where the box does not exist. ccx_run() writes all
     # three into `out` (ml_pco2_ / hs_pco2_ / eq_pco2_) for the B1 row.
     .phs <- .peq <- .ptr <- stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS)
+    # ... and NPP per hemisphere (2026-09-29): GPP - Ra incl. the ENSO GPP
+    # modulation, excl. the zero-mean seasonal NEP. Twin of the C++ slots 8..9.
+    .nppr <- stats::setNames(rep(NA_real_, length(HEMIS)), HEMIS)
   }
   .rec <- function(from, to, F_C, lab) {
     cs <- ccx_flux_channel(from, to, lab, .cls, .atmN)
@@ -2398,6 +2401,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # before. The parameter count is unchanged at 25.
     .ge_land <- .ge[[paste0("land_", h)]]
     enso_gpp <- -.ge_land * forc$enso
+    if (record) .nppr[[h]] <- npp + enso_gpp
     # alpha13_signed, reason (a): ONE-WAY BY CONSTRUCTION. Photosynthesis only
     # ever runs atmosphere -> vegetation; these go negative only if `npp` does,
     # i.e. if a diverging stage has driven CO2 below zero. Declared so that such
@@ -3402,6 +3406,7 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   if (record) attr(dy, "fluxes") <- list(channels = .fx, boxnet = .net, edges = .edges,
                                          pump_edges = .pump, pco2_ml = .pml, sst_ml = .sstl,
                                          pco2_hs = .phs, pco2_eq = .peq, pco2_tr = .ptr,
+                                         npp = .nppr,
                                          edges14 = .edges14, pump_edges14 = .pump14,
                                          diff_edges14 = .diff14, edges13 = .edges13)
   dy

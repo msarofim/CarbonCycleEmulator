@@ -1908,8 +1908,19 @@ ccx_model_stats <- function(out, obs) {
 #' `by_stream` on 2026-08-14 and `deep` now sits after it. Every caller in the
 #' repo passes `by_stream =` by name, so nothing breaks -- but a positional 5th
 #' argument means `by_stream` and a positional 4th means `luc`. Name them.
+#' The modern-NPP target (data-raw/build_npp_modern_target.R), cached
+ccx_npp_modern_target <- local({
+  .c <- NULL
+  function() { if (is.null(.c)) .c <<- readRDS(ccx_path("data", "obs_npp_modern_target.rds")); .c }
+})
+#' `npp` (2026-09-29, NPP_GLOBAL_PI option 4): the core's per-hemisphere NPP
+#' record (`ccx_run_fast()$npp`). ABSENT = the row is not scored (every label
+#' before "hilda_csl3v0kan"), so objective #13 is untouched. Present = one row,
+#' `npp_modern`: the model's mean global NPP over the target's window against
+#' data/obs_npp_modern_target.rds (ccx_npp_modern_target()).
 ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
-                       ocean_grad = NULL, by_stream = FALSE, d14c_mid = NULL) {
+                       ocean_grad = NULL, by_stream = FALSE, d14c_mid = NULL,
+                       npp = NULL) {
   parts <- c()
   add <- function(name, v) parts[[name]] <<- (if (is.null(parts[[name]])) 0 else parts[[name]]) + v
   interp <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
@@ -2428,6 +2439,14 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
         add("gcb_ocean_enso_slope",
             stats::dnorm(obs$enso_slope[["slope"]], ms[["slope"]], obs$enso_slope[["se"]], log = TRUE))
     }
+  }
+  if (!is.null(npp)) {
+    tg <- ccx_npp_modern_target()
+    k  <- floor(npp$t) >= tg$win[1] & floor(npp$t) <= tg$win[2]
+    if (sum(k) < 12 * (tg$win[2] - tg$win[1] + 1))
+      stop("ccx_loglik(npp): the run does not cover the modern-NPP window ",
+           tg$win[1], "-", tg$win[2])
+    add("npp_modern", stats::dnorm(mean(npp$npp_NH[k] + npp$npp_SH[k]), tg$centre, tg$sd, log = TRUE))
   }
   if (by_stream) return(unlist(parts))
   ll <- sum(unlist(parts))

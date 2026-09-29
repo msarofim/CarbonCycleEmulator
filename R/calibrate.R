@@ -2174,7 +2174,25 @@ ccx_struct_hilda_csl3v0k <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k")
+#' ARM A of the NPP_GLOBAL_PI option-4 test (2026-09-29, Marcus): hilda_csl3v0k
+#' with the AOD background removed (aod_mode "anomaly", RULED the improved
+#' version the same day). The new BASELINE the NPP arms are compared against.
+ccx_struct_hilda_csl3v0ka <- function() {
+  blk <- ccx_struct_hilda_csl3v0k()
+  blk$aod_mode <- CCX_AOD_MODE_CODES[["anomaly"]]
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+#' ARM B1: arm A + the modern-NPP likelihood row (ccx_loglik(npp =)), NPP_GLOBAL_PI
+#' FIXED at 60 -- only fertilisation and clearing can answer the row. ⚠ AN
+#' OBJECTIVE CHANGE: compare with arm A on LIKELIHOOD minus the npp_modern row.
+ccx_struct_hilda_csl3v0kan <- function() {
+  blk <- ccx_struct_hilda_csl3v0ka()
+  blk$npp_row <- 1L
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2188,6 +2206,8 @@ ccx_struct_block <- function(struct) {
     "hilda_cs"  = ccx_struct_hilda_cs(),           # hilda_c + the seasonal ML's NH cycle FLAT (2026-09-19 l)
     "hilda_csl3v0" = ccx_struct_hilda_csl3v0(),    # hilda_csl3 with the vegetation-capacity loop OFF (2026-09-28)
     "hilda_csl3v0k" = ccx_struct_hilda_csl3v0k(),  # ... plus the fert_k SHAPE prior (2026-09-28)
+    "hilda_csl3v0ka" = ccx_struct_hilda_csl3v0ka(),  # ... plus aod_mode anomaly (2026-09-29; NPP arm A)
+    "hilda_csl3v0kan" = ccx_struct_hilda_csl3v0kan(), # ... plus the modern-NPP row (2026-09-29; NPP arm B1)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2364,7 +2384,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "(the limb returning from layer 3, 2026-09-17l), \"hilda_cs\" (hilda_c with the ",
          "seasonal mixed layer's NH cycle FLAT, 2026-09-19l) and \"hilda_csl3\" (the limb from ",
          "layer 3 on hilda_cs, 2026-09-20o) and \"hilda_csl3v0\" (hilda_csl3 with npp_veg_frac = 0, ",
-         "2026-09-28) and \"hilda_csl3v0k\" (hilda_csl3v0 + the fert_k shape prior, 2026-09-28).")
+         "2026-09-28) and \"hilda_csl3v0k\" (hilda_csl3v0 + the fert_k shape prior, 2026-09-28) ",
+         "and \"hilda_csl3v0ka\" / \"hilda_csl3v0kan\" (+ aod anomaly / + the modern-NPP row, 2026-09-29).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)
@@ -2557,6 +2578,7 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
                      deep = ccx_d14c_deep_read(sp),
                      ocean_grad = ccx_ocean_grad_scored(r$out, sp),
                      d14c_mid = ccx_model_d14c_slabs(sp),
+                     npp = if (isTRUE(p$npp_row == 1)) r$npp else NULL,
                      by_stream = by_stream)
     # With by_stream the SAME call returns the named vector; the objective is its
     # sum, and the breakdown rides as an attribute so the scalar contract holds.

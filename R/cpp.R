@@ -497,7 +497,8 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE) {
                     CCX_OCEAN_BOX_COLS)
     state <- res$state
     dimnames(state) <- list(prep$box_names, CCX_TRACERS)
-    list(state = state, out = cbind(t = Fm$t, out), substeps = as.integer(nsub),
+    npp <- data.frame(t = Fm$t, npp_NH = res$npp[, 1], npp_SH = res$npp[, 2])
+    list(state = state, out = cbind(t = Fm$t, out), npp = npp, substeps = as.integer(nsub),
          # ⚠ THE COUNT THE CALLER ASKED FOR (2026-09-16 d). A retry below runs
          # the transient at a HIGHER count than the spinup that produced `y`,
          # and the fixed point of the 4-step map is NOT on the 64-step orbit:

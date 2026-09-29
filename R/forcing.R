@@ -1198,6 +1198,7 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL) 
   # rather than inside the RK4 substeps. It is a diagnostic; the substep-mean
   # would differ only by within-month curvature, and paying for it on every
   # likelihood evaluation would be the wrong trade entirely.
+  nppm <- matrix(NA_real_, n, length(HEMIS), dimnames = list(NULL, paste0("npp_", HEMIS)))
   ystore <- if (fluxes) vector("list", n) else NULL
   etrace <- if (!is.null(edge_fn)) vector("list", n) else NULL
   for (i in seq_len(n)) {
@@ -1246,10 +1247,13 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL) 
       out[[paste0("hs_pco2_", h)]][i] <- .fl$pco2_hs[[h]]
       out[[paste0("eq_pco2_", h)]][i] <- .fl$pco2_eq[[h]]
       out[[paste0("tr_pco2_", h)]][i] <- .fl$pco2_tr[[h]]
+      nppm[i, paste0("npp_", h)] <- .fl$npp[[h]]
     }
     y <- ccx_step_rk4(y, F$t[i], 1 / 12, p, fi, grid, aux, substeps, k1 = k1)
   }
-  res <- list(state = y, out = out)
+  # NPP per hemisphere, GtC/yr, at each month's opening state (twin of the C++
+  # `npp` matrix; test-npp-record.R holds the two together).
+  res <- list(state = y, out = out, npp = data.frame(t = F$t, nppm))
   if (fluxes) res$fluxes <- ccx_flux_trace(ystore, F, p, grid, aux)
   if (!is.null(edge_fn)) res$edge_trace <- etrace
   res
