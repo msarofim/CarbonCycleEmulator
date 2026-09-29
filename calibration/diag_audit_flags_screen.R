@@ -94,6 +94,14 @@ AF_FRACTIONS    <- c("litter_slow_frac", "pump_carb_frac")
 # SMOKE mode (AF_SMOKE=1): the same code path at trivial size, written under a
 # _smoke tag -- for checking the driver end to end before the real run.
 AF_SMOKE <- identical(Sys.getenv("AF_SMOKE"), "1")
+# CONVERGED pass (AF_CONV=1): the protocol's maxit 120 is hit by most rows
+# (convergence code 1 in the protocol CSV). This pass runs the SAME rows to
+# Nelder-Mead's own tolerance with restarts, to show how loose the protocol's
+# upper bound is -- and, since beta_max/fert_k sit on a cor 0.998 ridge, how
+# much of each futures shift is an unfinished slide along it.
+AF_NM_RESTARTS <- 0L
+if (identical(Sys.getenv("AF_CONV"), "1")) { AF_TAG <- paste0(AF_TAG, "_converged")
+  AF_NM_MAXIT <- 3000; AF_NM_MAXIT_WIDE <- 6000; AF_NM_RESTARTS <- 2L }
 if (AF_SMOKE) { AF_TAG <- paste0(AF_TAG, "_smoke"); AF_NM_MAXIT <- 2; AF_NM_MAXIT_WIDE <- 2
   AF_REPDC_PROBE <- "tau_leaf"; AF_REPDC_CTRL <- "tau_q"; AF_REPDC_PROBE_FACTORS <- 2 }
 
@@ -155,8 +163,9 @@ cat(sprintf("  struct %s, spinup %s | stored logpost %.6f, re-scored %.6f -> %s\
             ccx_mode_spinup(md), md$logpost, LP0,
             if (abs(LP0 - md$logpost) < AF_ID_TOL) "CONTROL REPRODUCES" else "*** CONTROL FAILS ***"))
 if (abs(LP0 - md$logpost) >= AF_ID_TOL) stop("the unperturbed objective does not reproduce the mode")
-cat(sprintf("  rebalance %s (Nelder-Mead maxit %d) | futures %s to %d | %s\n  units: %s\n\n",
-            paste(AF_COMP, collapse = "+"), AF_NM_MAXIT, paste(AF_SCEN, collapse = ", "),
+cat(sprintf("  rebalance %s (Nelder-Mead maxit %d, wide %d, restarts %d) | futures %s to %d | %s\n  units: %s\n\n",
+            paste(AF_COMP, collapse = "+"), AF_NM_MAXIT, AF_NM_MAXIT_WIDE, AF_NM_RESTARTS,
+            paste(AF_SCEN, collapse = ", "),
             AF_END_YEAR, AF_SPLICE_NOTE, AF_UNITS))
 
 futures <- function(over, u) {
@@ -193,7 +202,13 @@ run_row <- function(spec) {
     ic <- match(spec$comp, md$param_names); stopifnot(!anyNA(ic))
     f <- function(x) { uu <- u0; uu[ic] <- x; v <- as.numeric(lp(uu)); if (!is.finite(v)) 1e12 else -v }
     o <- stats::optim(u0[ic], f, method = "Nelder-Mead", control = list(maxit = spec$maxit))
-    u[ic] <- o$par; conv <- o$convergence; nev <- o$counts[["function"]]
+    nev <- o$counts[["function"]]
+    for (k in seq_len(AF_NM_RESTARTS)) {       # fresh simplex from the last solution
+      o2 <- stats::optim(o$par, f, method = "Nelder-Mead", control = list(maxit = spec$maxit))
+      nev <- nev + o2$counts[["function"]]
+      if (o2$value <= o$value) o <- o2
+    }
+    u[ic] <- o$par; conv <- o$convergence
   }
   v1 <- lp(u); pr <- ccx_unc_to_par(u)
   fut <- if (isTRUE(spec$no_futures)) NULL else futures(spec$over, u)
