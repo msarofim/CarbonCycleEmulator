@@ -2,6 +2,52 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (r) — **T1, age vs stock: with the passive STOCK held at 1500 GtC, the +5.7 VANISHES. The record's pull was the STOCK, which the inventories contradict. The default τ 500 is the fixed-stock optimum. BUT at fixed stock an OLDER pool RAISES 2300 CO₂ (+68 / +112 ppm SSP5-8.5) for only −1.2 / −2.4: a near-free futures lever.**
+
+Marcus: *"Yes run it, and fix the model.R comment."*
+- **Comment fixed:** the `R/model.R` land-default block now says only the bomb-¹⁴C inventories are
+  observational. The 2200 PgC is Naegler & Levin's model setting, and the pool sizes are checked
+  against AR6 Fig. 5.12 and the soil-¹⁴C check (`06aec68`).
+- **Drivers:** `diag_tau_soil_slow_profile.R` gains `TS_FIXED_STOCK=1`, which sets
+  `litter_slow_frac` = 0.05 × 500 / τ and records the per-row overrides in the output.
+  `diag_tau_soil_slow_futures.R` gains `TF_PROFILE_TAG` and rebuilds from the recorded overrides.
+  **Regression:** the default-mode futures are byte-identical after the edit (identity 1388.28).
+  Outputs: `outputs/diagnostics/tau_soil_slow_{profile,futures}_fixedstock_20260929.*`.
+
+| τ_slow | `litter_slow_frac` | Δ frozen | Δ rebalanced | conv | ssp585 2300 | vvH 2300 | vvL 2300 |
+|---|---|---|---|---|---|---|---|
+| 250 | 0.100 | −1421 | −14.5 | maxit | | | |
+| **500** | 0.050 | 0 | **0** | ok | 1387.9 | 957.9 | 336.9 |
+| 750 | 0.033 | −238 | −1.3 | ok | | | |
+| 1000 | 0.025 | −568 | −1.2 | ok | **+67.7** | +39.9 | +5.4 |
+| 1500 | 0.0167 | −1071 | −2.4 | ok | **+112.4** | +65.9 | +8.8 |
+| 2000 | 0.0125 | −1397 | −3.8 | ok | | | |
+| 3000 | 0.0083 | −1778 | −6.4 | maxit | | | |
+| 5000 | 0.0050 | −2135 | −16.8 | ok | | | |
+
+- ⭐⭐ **AGE does not buy the +5.7; STOCK did.** At fixed stock the profile peaks at the default
+  and falls smoothly on both sides (6 of 8 rows converged). The ¹⁴C streams still gain
+  (`d14c_NH` +3.2, `d14c_intcal` +3.4 at 1500 yr), but `d13c_level_MLO` now pays −5.4. **Verdict on
+  (m)/(n):** the passive-soil runaway was the record buying STOCK. The inventories (q) say
+  ~1.2–2k GtC, so the runaway is rejected on outside evidence. The default (τ 500, 1500 GtC) stands.
+- ⭐⭐ **The futures REVERSE sign.** At fixed stock an older pool means LESS INPUT
+  (`litter_slow_frac` ½, ⅓), so less fertilised litter is retained, and 2300 CO₂ RISES.
+  **First-principles check:** the retention weight lsf·τ·(1 − e^(−550/τ)) is 16.7 / 10.6 / 7.7 for
+  τ 500 / 1000 / 1500, which halves by 1500 yr, consistent with the direction. This is the (p)
+  retention mechanism with the input share as the lever. **Like-for-like:** `luc_scale`
+  0.848 → 0.876 adds 5.3 GtC of ssp585 LUC, ~2 ppm of the +112.
+- ⛔ **The finding that matters:** at an inventory-consistent stock, the passive-pool AGE moves
+  SSP5-8.5 2300 by +112 ppm (vvH +66) for −2.4 log units. That is a weakly identified future
+  lever: cheaper than `rep_dC` at φ = 0 (+63 ppm for −37) and bigger. The literature (q) says soil
+  carbon is OLD (Shi 2020 mean age ~4800 yr to 1 m; He 2016 finds ESMs too young), which pushes
+  TOWARD the older, higher-CO₂ side. But how much of that old carbon exchanges on centuries,
+  versus being inert, is exactly what Copard 2025 disputes. **The age of the exchanging passive
+  pool is an uncited [VERIFY]-class choice** (CLAUDE.md hard rule 2; DESIGN.md number-provenance convention): τ 500 is a design default, and
+  the record does not pin it.
+- **Not done (needs a ruling):** a cited prior on τ at a fixed stock; the model's year-2000 bulk
+  soil Δ¹⁴C against Shi's −244 ‰ as a direct age test (T2, the one observation that could pin
+  it); whether the app's futures carry a τ-sensitivity note.
+
 ## 2026-09-29 (q) — **Literature on the passive-soil stock (subagent note): the independent evidence favours ~1500 GtC (roughly 1200–2000), NOT 3000–4500. And the "2200 PgC Naegler & Levin target" behind the default is their MODEL's setting, not an observation.**
 
 Note: `notes/lit_2026-09-29_passive_soil_stock.md`. Each row is marked by access level (FULL / ABS /

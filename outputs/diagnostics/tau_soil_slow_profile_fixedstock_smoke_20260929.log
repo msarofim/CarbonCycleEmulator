@@ -1,0 +1,35 @@
+=== PROVENANCE === driver calibration/diag_tau_soil_slow_profile.R, commit 06aec68, run 2026-09-29 16:00
+  structure hilda_csl3v0ka at v0k basin 1, 11 names at the npp0_scan_20260929.csv scale-1 optimum; NPP_GLOBAL_PI unscaled (60 GtC/yr)
+  profile tau_soil_slow in {500, 2000} yr (default 500); other residence times at defaults; rebal = NM maxit 10 on {beta_max, fert_k, luc_scale, q10, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, npp_frac_NH, kz, rep_dC}
+  mode: FIXED STOCK -- litter_slow_frac = 0.05 * 500 / tau (PI passive stock held)
+  logpost natural-log units; stock GtC (PI passive soil); NPP GtC/yr mean 2001-2023; no RNG
+  [identity] default row frozen vs independent rescore: 0.00e+00 (tol 1e-04)
+
+  tau_soil_slow     stock  d_frozen   d_rebal   NPPmod  conv  evals
+       500      1500     +0.00     +0.00    70.01     1     14
+      2000      1500  -1396.54   -812.68    71.30     1     14
+
+=== streams vs default, FROZEN (8 largest |max|) ===
+     co2_level_SPO co2_level_MLO d13c_level_MLO d13c_level_SPO gcb_land_sink
+500           0.00          0.00           0.00           0.00          0.00
+2000       -640.42       -604.87        -129.65         -26.74         15.23
+     co2_icecore d14c_intcal d14c_SH
+500         0.00        0.00     0.0
+2000      -14.74        4.23     3.4
+
+=== streams vs default, REBALANCED (8 largest |max|) ===
+     co2_level_SPO co2_level_MLO d13c_level_MLO gcb_land_sink d13c_level_SPO
+500           0.00          0.00           0.00          0.00            0.0
+2000       -373.45       -337.85         -98.07         13.19          -12.9
+     co2_icecore d14c_intcal d14c_SH
+500          0.0        0.00     0.0
+2000        -7.5        4.21     3.5
+
+=== 11 fitted names, rebalanced ===
+     beta_max fert_k luc_scale   q10 seas_T_amp_NH seas_T_amp_SH seas_lag_p_NH
+500     2.553  867.7    0.8482 1.102         15.62         3.609         1.619
+2000    2.664  867.7    0.8482 1.102         15.62         3.609         1.619
+     seas_lag_p_SH npp_frac_NH    kz rep_dC
+500          2.682      0.5932 14680  3.273
+2000         2.682      0.5932 14680  3.273
+  saved /Users/MarcusMarcus/ccx_frozen/20260929_tss_fixedstock/outputs/diagnostics/tau_soil_slow_profile_fixedstock_smoke_20260929.{log,csv,rds}

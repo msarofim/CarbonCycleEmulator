@@ -1,0 +1,14 @@
+=== PROVENANCE === driver calibration/diag_tau_soil_slow_futures.R, commit 06aec68, run 2026-09-29 16:14
+  profile tau_soil_slow_profile_fixedstock (litter_slow_frac per row: 0.05, 0.025, 0.0167)
+  vectors: tau_soil_slow_profile_fixedstock_20260929.rds rows {500, 1000, 1500} (500 = control); arm hilda_csl3v0ka; scenarios vvH, vvL, ssp585 (spliced TRUE/TRUE/FALSE); ppm global mean; land GtC (land_C)
+  [identity] stored v0k ssp585 2300 = 1388.28 ppm (handoff 1388.3; d -0.016)
+
+  tau  500  dlp +0.00 | ssp585 2300  1387.9 ppm land x1.63 | vvH 2300  957.9 | vvL 2300  336.9 | vvH 2100  639.0 | luc 0.848 kz 14694 fert_k  868 q10 1.102
+  tau 1000  dlp -1.15 | ssp585 2300  1455.6 ppm land x1.54 | vvH 2300  997.8 | vvL 2300  342.3 | vvH 2100  643.7 | luc 0.866 kz 15891 fert_k  807 q10 1.102
+  tau 1500  dlp -2.39 | ssp585 2300  1500.2 ppm land x1.49 | vvH 2300 1023.8 | vvL 2300  345.7 | vvH 2100  647.1 | luc 0.876 kz 15954 fert_k  738 q10 1.120
+
+  vs control (tau 500), ppm:
+    tau  500  ssp585 2300    +0.0  vvH 2300    +0.0  vvL 2300   +0.0  vvH 2100   +0.0
+    tau 1000  ssp585 2300   +67.7  vvH 2300   +39.9  vvL 2300   +5.4  vvH 2100   +4.6
+    tau 1500  ssp585 2300  +112.4  vvH 2300   +65.9  vvL 2300   +8.8  vvH 2100   +8.0
+  saved /Users/MarcusMarcus/ccx_frozen/20260929_tss_fixedstock/outputs/diagnostics/tau_soil_slow_futures_fixedstock_20260929.{log,csv}
