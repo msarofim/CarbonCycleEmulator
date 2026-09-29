@@ -2,6 +2,51 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (s) — **T2, soil Δ¹⁴C against Shi 2020. The default τ 500 is TOO YOUNG on Shi's bulk (−19 ‰ vs −244 ± 48, z +4.7); a match needs τ ≈ 2000–5000 at fixed stock. BUT that reading assumes NO radiocarbon-free soil carbon. The two aOC-robust yardsticks have almost no POWER, so the verdict rests entirely on the Shi/He vs Copard dispute.**
+
+Marcus: *"run the soil Δ¹⁴C test against Shi 2020"*.
+- **Driver:** `calibration/diag_soil_d14c_shi2020.R` (`789c1de`, run from a frozen worktree) →
+  `outputs/diagnostics/soil_d14c_shi2020_20260929.{log,csv}`. It runs each profile row's REBALANCED
+  vector 1750–2001 through `ccx_run()` and reads soil_fast + soil_slow (both hemispheres) monthly
+  via `edge_fn`, averaged over yr 2000.
+  **GATE (physical law):** the 1750 passive-pool Δ¹⁴C vs the analytic decay-in-series steady
+  state (leaf/wood litter → passive, true half-life); max |d| **0.093 ‰** (tol 2) → PASS.
+- **Yardsticks (lit note), with POWER measured by propagating the published errors:**
+  - **O1**, Shi 2020 Table 1 bulk 0–1 m: **−244 ± 48 ‰**. It includes any radiocarbon-free carbon.
+  - **O2**, the same with Copard 2025's aOC fractions removed (cross-study): **−75 ‰**. Propagating
+    Copard's own ±1σ on the fractions spans **−215 to +127 ‰**, so O2 has **no power**.
+  - **O3**, Σ C·F¹⁴C 0–1 m (robust to aOC): **1372 ± 398 GtC** from Shi's stock errors. It also has
+    **no power** across the profile (999–1555), and its stock base (1848 Pg) is not the model's
+    (~1500 GtC in yr 2000).
+
+| mode | τ | Δ logpost | soil C 2000 | soil Δ¹⁴C | z vs O1 | Σ C·F | passive Δ¹⁴C |
+|---|---|---|---|---|---|---|---|
+| fixed | 250 | −14.5 | 1519 | +23.5 | +5.6 | 1555 | +14.1 |
+| **fixed** | **500** | **0** | 1505 | **−18.7** | **+4.7** | 1477 | −32.7 |
+| fixed | 750 | −1.3 | 1499 | −48.6 | +4.1 | 1426 | −66.0 |
+| fixed | 1000 | −1.2 | 1494 | −74.2 | +3.5 | 1383 | −94.4 |
+| fixed | 1500 | −2.4 | 1490 | −119.0 | +2.6 | 1312 | −144.0 |
+| fixed | 2000 | −3.8 | 1487 | −158.2 | +1.8 | 1252 | −187.4 |
+| fixed | 3000 | −6.4 | 1486 | −225.0 | +0.4 | 1151 | −261.2 |
+| fixed | 5000 | −16.8 | 1484 | −327.1 | −1.7 | 999 | −373.9 |
+| default | 1000 | +5.7 | 2988 | −85.0 | +3.3 | 2734 | −95.0 |
+| default | 1500 | +5.5 | 4482 | −136.6 | +2.2 | 3870 | −144.8 |
+
+- **Reading, if Shi/He are right (no or little inert carbon):** the model's soil is far too young.
+  τ 500 misses by 4.7σ; O1 is matched only at τ ≈ 2000–5000 (fixed stock), where the ATMOSPHERIC
+  record charges −4 to −17. The atmosphere and the soil ¹⁴C then pull τ in opposite directions.
+  By (r) the futures move toward HIGHER CO₂ (τ 1000 already +68 ppm SSP5-8.5; 2000–3000 not run).
+- **Reading, if Copard is right:** no constraint. O2's ±1σ covers every row.
+- **Like-for-like caveats (all unresolved):** the model soil is not depth-resolved and has no
+  inert pool. Shi is 0–1 m mineral soil and excludes peat and organic layers. The model soil_fast
+  pool (τ 2 yr) sits at +138 ‰ in yr 2000 (bomb carbon), which lifts the bulk. The bulk is
+  therefore sensitive to the fast/slow split as well as τ_slow.
+- **Power lesson (CLAUDE.md "measure a test's power"):** the aOC-robust mass check (O3) looked like
+  the clean test. At Shi's own stock errors it cannot separate τ 250 from τ 5000.
+- **Not done (needs a ruling):** a prior on τ_slow at fixed stock (candidate: O1 with an inflated
+  σ covering the aOC dispute); futures at τ 2000–3000 (fixed stock); whether a depth-resolved or
+  inert soil pool is in scope for a pedagogical model.
+
 ## 2026-09-29 (r) — **T1, age vs stock: with the passive STOCK held at 1500 GtC, the +5.7 VANISHES. The record's pull was the STOCK, which the inventories contradict. The default τ 500 is the fixed-stock optimum. BUT at fixed stock an OLDER pool RAISES 2300 CO₂ (+68 / +112 ppm SSP5-8.5) for only −1.2 / −2.4: a near-free futures lever.**
 
 Marcus: *"Yes run it, and fix the model.R comment."*
