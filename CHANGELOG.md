@@ -2,6 +2,33 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (i) — **`NPP_GLOBAL_PI`: option 1 is applied (cited, provisional); option 4 is ruled NEXT. The model's modern NPP, now measured, is 70 against MOD17's 52.7. The target of the option-4 row is RULED: the mean of the verified totals.**
+
+Marcus: *"1 and then 4"*; then, on the target: *"the mean of verified totals makes the most sense."*
+
+- **Option 1** (`7368ff8`): the value stays 60 and the status stays `provisional`.
+  - Citation: IPCC TAR §3.2.1, "about 60", with Table 3.2 at 59.9 / 62.6. Brackets: Haberl 2007
+    (59.22 actual, 65.51 potential), Ito 2011 (56.2 ± 14.3, abstract only) and MOD17 (52.7).
+  - The scope caveat is recorded: every source is present-day. The DESIGN.md §3 marker is updated.
+    `test-constants` passes (roster unchanged).
+- **Measured** (`calibration/diag_model_npp_modern.R` → `outputs/diagnostics/model_npp_modern_20260929.*`,
+  GPP − Ra from the flux recorder):
+  - **1750 NPP is 60.00 at both modes.** The model has no pre-1750 clearing, so the constant IS its 1750
+    NPP, and the potential-vs-actual question is moot for the code.
+  - **2001–2023 NPP is 69.8 (`hilda29l`) and 70.0 (v0k)**, against MOD17 52.7 over the same years
+    (+33 %) and Haberl's 59.2 actual. This replaces the hand estimate of ~68.
+- **Option-4 target, RULED:** the mean of the verified modern actual totals — MOD17 52.7 (2001–23),
+  Ito 2011 56.2 and Haberl 2007 59.22 — gives a **centre of 56.04 GtC/yr**. Their spread is
+  **sd 3.26**; σ is not yet ruled (see below).
+  - ⚠ Ito is abstract-only, and the three cover different years (2001–23, a meta-analysis, 2000).
+  - ⚠ n = 3, so the sd itself is poorly determined.
+- **Still Marcus's to rule:**
+  1. Is σ the product spread (3.26) or something else?
+  2. What moves: a fitted NPP0 scale, the row alone with NPP0 fixed at 60, or both as arms?
+  3. How are the arms structured (baseline A = v0k + AOD anomaly, then B = A + row)?
+  - The prerequisite common to every choice is an NPP output column in the C++ core, with an R-parity
+    test. **Not started, pending the go-ahead.**
+
 ## 2026-09-29 (h) — **Follow-up on `rep_dC`, plus the obvious fixes. `rep_dC` IS φ-like: along the CONVERGED 09-23 ladder, taking it to 1σ moves SSP5-8.5 2300 by +271 ppm. The AOD background is now a switch that IMPROVES the fit. `NPP_GLOBAL_PI` is left for a ruling.**
 
 Marcus: *"Follow up on rep dC and apply any obvious fixes like the AOD background."* ⛔ R2 (the
