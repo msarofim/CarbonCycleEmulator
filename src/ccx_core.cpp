@@ -80,7 +80,9 @@ static const int C = 0, C13 = 1, C14 = 2;
 // disagreement in the column count is caught by ccx_cpp_forcing()'s name check;
 // a disagreement in the ceiling is NOT caught by anything, so if one moves the
 // other must move in the same commit.
-static const int N_FORCING = 17;   // +sst_anom_NH, +sst_anom_SH (2026-08-18),
+static const int N_FORCING = 19;   // +ndep_NH, +ndep_SH (2026-09-30, D2 (a)), LAST;
+                                   // "off" value 0 = no anthropogenic deposition.
+                                   // +sst_anom_NH, +sst_anom_SH (2026-08-18),
                                    // appended LAST; NaN = column absent, and
                                    // the deriv falls back to sst_scale * gmst
                                    // +sink_ocean (2026-08-23c), also LAST; its
@@ -279,6 +281,10 @@ struct Par {
   // carry a stale vector.
   double f_luc_wood;
   double sst_scale, gamma_diff;
+  // N-DEPOSITION NPP MULTIPLIER (D2 (a), 2026-09-30): NPP x (1 + gamma_ndep *
+  // ndep_h). ccx_cpp_par() guarantees the field, resolving absence to
+  // CCX_GAMMA_NDEP_DEFAULT -- the SAME constant the R deriv uses. No fallback here.
+  double gamma_ndep;
   // ENSO, FOUR COEFFICIENTS SINCE 2026-09-01 (Marcus's design). GtC/yr per unit
   // Nino3.4 index; [0] = NH, [1] = SH. The land pair drives soil_fast -> atm,
   // the ocean pair an air-sea anomaly carrying the air-sea fractionation of its
@@ -521,6 +527,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   // stratosphere, the same contract the sst columns carry.
   const double aod_h_[2] = { std::isfinite(f[15]) ? f[15] : 0.0,
                              std::isfinite(f[16]) ? f[16] : 0.0 };
+  // N DEPOSITION onto land, Tg N/yr above 1750, hemispheric (D2 (a), 2026-09-30).
+  // Absence = 0 = no anthropogenic deposition, the AOD columns' contract.
+  const double ndep_h_[2] = { std::isfinite(f[17]) ? f[17] : 0.0,
+                              std::isfinite(f[18]) ? f[18] : 0.0 };
   const double sink_asx_tot = A.asx[0] + A.asx[1];
 
   for (int hi = 0; hi < 2; ++hi) {
@@ -601,8 +611,11 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // so do not drive this with a supervolcano.
     // gamma_diff defaults to CCX_GAMMA_DIFF_DEFAULT = 0.25 (R/model.R) since its
     // 2026-08-30 adoption; the "defaults to 0" note that stood here was stale.
+    // N DEPOSITION (D2 (a), 2026-09-30) -- twin of the block in R/model.R. At
+    // gamma_ndep 0 the factor is exactly 1.0, so every registered file is bit-exact.
     const double npp = npp0_h * capacity * fert
-                       * (1.0 + P.gamma_diff * aod_h_[hi]);
+                       * (1.0 + P.gamma_diff * aod_h_[hi])
+                       * (1.0 + P.gamma_ndep * ndep_h_[hi]);
 
     const double npp_leaf = npp * P.npp_leaf_frac;
     const double npp_wood = npp * (1.0 - P.npp_leaf_frac);
@@ -1313,6 +1326,7 @@ static Par unpack_par(const List& p) {
   P.gamma_enso_ocn[0]  = p["gamma_enso_ocn_NH"];
   P.gamma_enso_ocn[1]  = p["gamma_enso_ocn_SH"];
   P.gamma_diff = p["gamma_diff"];
+  P.gamma_ndep = p["gamma_ndep"];                               // D2 (a), 2026-09-30
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];
   P.seas_drivers = (int) p["seas_drivers"];
@@ -1347,6 +1361,11 @@ static Par unpack_par(const List& p) {
 // ---- exported: single derivative (for parity testing) ---------------
 // [[Rcpp::export]]
 NumericMatrix ccx_deriv_cpp(NumericMatrix y, double t, List p, NumericVector f, List aux) {
+  // WIDTH GUARD (2026-09-30): f[] is read by POSITION up to N_FORCING - 1, so a
+  // short vector is an out-of-bounds read neither language reports. The R
+  // builder guards it too; this is the core refusing on its own account.
+  if (f.size() != N_FORCING)
+    Rcpp::stop("ccx_deriv_cpp(): forcing vector has %d element(s), N_FORCING is %d", (int) f.size(), N_FORCING);
   Aux A = unpack_aux(aux); Par P = unpack_par(p);
   NumericMatrix dy(NB, 3);
   deriv(y.begin(), t, P, f.begin(), A, dy.begin());
@@ -1359,6 +1378,10 @@ NumericMatrix ccx_deriv_cpp(NumericMatrix y, double t, List p, NumericVector f, 
 // [[Rcpp::export]]
 List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
                  NumericVector times, List aux, int substeps) {
+  // WIDTH GUARD (2026-09-30), same reason as ccx_deriv_cpp(): forcing(i, j) is
+  // read for j < N_FORCING with no bounds check.
+  if (forcing.ncol() != N_FORCING)
+    Rcpp::stop("ccx_run_cpp(): forcing matrix has %d column(s), N_FORCING is %d", forcing.ncol(), N_FORCING);
   Aux A = unpack_aux(aux); Par P = unpack_par(p);
   const int n = forcing.nrow();
   const int NS = NB * 3;

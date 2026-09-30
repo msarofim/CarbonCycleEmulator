@@ -240,6 +240,9 @@ ccx_cpp_par <- function(p) {
   # mechanism ON. That is the adoption, and it is why every vector fitted before
   # the adoption is non-comparable.
   if (is.null(p$gamma_diff)) p$gamma_diff <- CCX_GAMMA_DIFF_DEFAULT
+  # N-deposition NPP multiplier (D2 (a), 2026-09-30): the SAME named constant the
+  # R deriv falls back to, so absence cannot mean two things.
+  if (is.null(p$gamma_ndep)) p$gamma_ndep <- CCX_GAMMA_NDEP_DEFAULT
   # Land-structure parameters added 2026-08-12. Defaulted here as well as in
   # ccx_default_params() so that a hand-built or older parameter list cannot
   # reach the C++ with a missing name -- which unpacks as garbage, not an error.
@@ -398,7 +401,8 @@ ccx_cpp_par <- function(p) {
       "sst_seas_amp_NH", "sst_seas_amp_SH", "ent_seas_amp_SH",
       "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
       "revelle_frozen", "gamma_diff",
-      "tau_ex_seas_amp", "tau_ex_seas_phase")]
+      "tau_ex_seas_amp", "tau_ex_seas_phase",
+      "gamma_ndep")]
 }
 
 #' Forcing table -> the matrix the C++ expects, in its column order
@@ -428,7 +432,13 @@ CCX_FORCING_COLS <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
                       # emits it; a hand-built forcing without it reaches C++ as
                       # NaN and the core reads that as zero, same absence
                       # contract as the sst columns.
-                      "aod_NH", "aod_SH")
+                      "aod_NH", "aod_SH",
+                      # N DEPOSITION onto LAND, Tg N/yr above 1750, hemispheric
+                      # (D2 (a), 2026-09-30). Appended LAST for the fourth time,
+                      # same reason. "Off" is ZERO (no anthropogenic deposition);
+                      # ccx_build_forcing() always emits it, and an absent column
+                      # reaches C++ as NaN, which the core reads as zero.
+                      "ndep_NH", "ndep_SH")
 
 ccx_cpp_forcing <- function(F) {
   miss <- setdiff(CCX_FORCING_COLS, names(F))
@@ -479,13 +489,16 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
        hs_on = ccx_hs_on(spin$params), eq_on = ccx_eq_on(spin$params),
        tr_on = ccx_tr_on(spin$params),
        enso_index = ccx_enso_index_of(spin$params),
-       aod_mode = ccx_aod_mode_of(spin$params))
+       aod_mode = ccx_aod_mode_of(spin$params),
+       # D2 (a): a nonzero gamma must meet a forcing that CARRIES deposition
+       gamma_ndep = if (is.null(spin$params$gamma_ndep)) CCX_GAMMA_NDEP_DEFAULT else spin$params$gamma_ndep)
 }
 
 #' A forcing table marshalled ONCE for many `ccx_run_prepared()` calls
 ccx_cpp_forcing_prep <- function(F) {
   structure(list(mat = ccx_cpp_forcing(F), t = F$t), class = "ccx_cpp_forcing",
-            enso_index = attr(F, "enso_index"), aod_mode = attr(F, "aod_mode"))
+            enso_index = attr(F, "enso_index"), aod_mode = attr(F, "aod_mode"),
+            ndep_source = attr(F, "ndep_source"))
 }
 
 #' Run the core from prepared arguments. Same return shape as `ccx_run_fast()`,
@@ -496,6 +509,7 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE) {
   # the forcing's ENSO index must be the one the parameters name (2026-09-29)
   ccx_enso_index_check(if (is.null(prep$enso_index)) "demean" else prep$enso_index, Fm)
   ccx_aod_mode_check(if (is.null(prep$aod_mode)) "legacy" else prep$aod_mode, Fm)
+  ccx_ndep_check(prep$gamma_ndep, Fm)               # D2 (a), 2026-09-30
   ss <- prep$ss
   one <- function(nsub) {
     res <- .ccx_cpp_env$ccx_run_cpp(y, prep$par, Fm$mat, Fm$t, prep$aux, as.integer(nsub))
@@ -611,7 +625,10 @@ ccx_cpp_forcing_vec <- function(forc) {
          # forcing vector must be length(CCX_FORCING_COLS) BY CONSTRUCTION, not
          # by whoever last appended a column remembering this second site.
          if (is.null(forc$aod_NH)) NA_real_ else forc$aod_NH,
-         if (is.null(forc$aod_SH)) NA_real_ else forc$aod_SH)
+         if (is.null(forc$aod_SH)) NA_real_ else forc$aod_SH,
+         # N deposition (D2 (a), 2026-09-30): absent -> NaN -> the core reads zero.
+         if (is.null(forc$ndep_NH)) NA_real_ else forc$ndep_NH,
+         if (is.null(forc$ndep_SH)) NA_real_ else forc$ndep_SH)
   # STRUCTURAL GUARD, not a comment: the C++ indexes this vector by POSITION
   # against CCX_FORCING_COLS, so a short vector is an out-of-bounds read that
   # neither language reports.

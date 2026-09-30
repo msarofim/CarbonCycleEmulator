@@ -593,6 +593,7 @@ ccx_build_forcing <- function(scenario = "historical",
   yrs <- seq(years[1], years[2])
   n   <- length(yrs) * 12
   t   <- rep(yrs, each = 12) + (seq_len(12) - 0.5) / 12
+  ndep <- ccx_ndep_forcing(yrs, scenario)       # D2 (a), 2026-09-30
 
   # ---- emissions ----------------------------------------------------
   if (!is.null(emissions)) {
@@ -951,6 +952,10 @@ ccx_build_forcing <- function(scenario = "historical",
     # TAMBORA 1815 are absent and any pre-1850 volcanic claim is unsupported.
     # See data-raw/build_volcanic_aod.R.
     aod_NH = ccx_aod_forcing(t, "aod_NH", aod_mode), aod_SH = ccx_aod_forcing(t, "aod_SH", aod_mode),
+    # N DEPOSITION onto LAND, Tg N/yr above 1750 (D2 (a), 2026-09-30). ZEROS until
+    # data/forcing_ndep.rds carries this scenario; harmless at gamma_ndep 0 (the
+    # default) and REFUSED by ccx_run_prepared() otherwise (ccx_ndep_check()).
+    ndep_NH = ndep$NH, ndep_SH = ndep$SH,
     # artificial mid-century OCEAN sink, GtC/yr, atmosphere -> mixed layer.
     # Identically zero unless CCX_SINK_RATE is set AND CCX_SINK_MODE == "ocean".
     sink_ocean = sink_ocean,
@@ -968,6 +973,8 @@ ccx_build_forcing <- function(scenario = "historical",
   # ccx_enso_index_check() reads it against the parameters at run time.
   attr(out, "enso_index") <- enso_index
   attr(out, "aod_mode")   <- aod_mode
+  # which N-deposition series the ndep columns carry ("none" = zeros)
+  attr(out, "ndep_source") <- ndep$source
   # Same reason as luc_scale: a forcing built under an arm of the artificial
   # sink is a DIFFERENT INPUT and a table comparing arms must be able to say
   # which it holds rather than infer it from a filename.
@@ -1086,6 +1093,47 @@ ccx_aod_forcing <- function(t, col, aod_mode = "legacy") {
   v
 }
 #' Which AOD mode a parameter list names (absent = "legacy")
+# ---- N DEPOSITION (D2 (a), Marcus 2026-09-30) ------------------------------
+# data/forcing_ndep.rds, built by data-raw/build_ndep_forcing.R: one ANNUAL series
+# per scenario, columns scenario / year / ndep_NH / ndep_SH, in Tg N/yr of
+# ANTHROPOGENIC deposition onto each hemisphere's LAND above 1750.
+CCX_NDEP_FILE <- "forcing_ndep.rds"
+
+#' The N-deposition columns of a forcing: list(NH, SH, source), monthly on `years`
+#'
+#' ABSENT FILE or ABSENT SCENARIO = ZEROS stamped source "none". That is harmless
+#' while gamma_ndep is 0, the default, and ccx_ndep_check() REFUSES it otherwise,
+#' so a nonzero gamma can never run silently on no deposition.
+#' PIECEWISE CONSTANT within each year (ccx_annual_to_monthly "constant"): the
+#' annual means are exact and the series cannot undershoot below zero near 1750,
+#' where a spline through a series starting at 0 would.
+ccx_ndep_forcing <- function(years, scenario) {
+  n <- 12L * length(years)
+  none <- list(NH = rep(0, n), SH = rep(0, n), source = "none")
+  f <- ccx_path("data", CCX_NDEP_FILE)
+  if (!file.exists(f)) return(none)
+  d0 <- readRDS(f)
+  d <- as.data.frame(d0)[d0$scenario == scenario, ]
+  if (!nrow(d)) return(none)
+  if (min(d$year) > min(years) || max(d$year) < max(years))
+    stop(sprintf("ccx_ndep_forcing(): %s covers %d-%d, the run needs %d-%d.",
+                 scenario, min(d$year), max(d$year), min(years), max(years)))
+  src <- attr(d0, "source"); if (is.null(src)) src <- CCX_NDEP_FILE
+  list(NH = ccx_annual_to_monthly(d$year, d$ndep_NH, years, "constant"),
+       SH = ccx_annual_to_monthly(d$year, d$ndep_SH, years, "constant"),
+       source = paste0(src, " [", scenario, "]"))
+}
+
+#' Refuse a nonzero gamma_ndep on a forcing that carries no deposition series
+ccx_ndep_check <- function(gamma_ndep, F) {
+  src <- attr(F, "ndep_source")
+  if (isTRUE(gamma_ndep != 0) && (is.null(src) || identical(src, "none")))
+    stop("gamma_ndep = ", gamma_ndep, " but the forcing carries NO N-deposition series ",
+         "(ndep_source ", if (is.null(src)) "absent" else "'none'", "). Build ",
+         "data/forcing_ndep.rds for this scenario (data-raw/build_ndep_forcing.R).")
+  invisible(TRUE)
+}
+
 ccx_aod_mode_of <- function(p) {
   v <- p$aod_mode
   if (is.null(v)) return("legacy")
@@ -1127,7 +1175,9 @@ ccx_forcing_at <- function(F, i) {
        sink_ocean = F$sink_ocean[i],
        # volcanic AOD (2026-08-29); NULL on a forcing that predates the columns,
        # which ccx_deriv() reads as zero -- the same absence contract as above.
-       aod_NH = F$aod_NH[i], aod_SH = F$aod_SH[i])
+       aod_NH = F$aod_NH[i], aod_SH = F$aod_SH[i],
+       # N deposition (D2 (a), 2026-09-30); NULL on an older table = zero.
+       ndep_NH = F$ndep_NH[i], ndep_SH = F$ndep_SH[i])
 }
 
 # ---------------------------------------------------------------------

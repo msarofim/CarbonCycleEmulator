@@ -268,7 +268,11 @@ test_that("the single-step flat forcing vector is complete, and AOD reaches the 
     c(fa$e_foss$NH, fa$e_foss$SH, fa$e_luc$NH, fa$e_luc$SH, fa$gmst, fa$enso,
       fa$c14_bomb, fa$c14_nuclear, fa$c14_cosmo, ccx_forcing_d13c_foss(fa),
       cl$NH, cl$SH, fa$sst_anom_NH, fa$sst_anom_SH, fa$sink_ocean,
-      fa$aod_NH, fa$aod_SH)
+      fa$aod_NH, fa$aod_SH,
+      # + the N-deposition pair (2026-09-30, D2 (a)): this mirror is a LEDGER of
+      # the declared layout, extended when a column is appended -- which is the
+      # failure this block exists to force. The assertion below is unchanged.
+      fa$ndep_NH, fa$ndep_SH)
   })
   expect_identical(length(flat), length(CCX_FORCING_COLS))
 

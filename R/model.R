@@ -733,6 +733,17 @@ CCX_FERT_FORM_DEFAULT <- CCX_FERT_MM
 # still at the mature-forest end of the observed bracket.
 CCX_GAMMA_DIFF_DEFAULT <- 0.25
 
+# N-DEPOSITION NPP MULTIPLIER (D2 (a), Marcus 2026-09-30: "definitely add non-CO2
+# contributors to carbon"). NPP x (1 + gamma_ndep * ndep_h), ndep_h the
+# ANTHROPOGENIC N deposition onto hemisphere h's LAND in Tg N/yr ABOVE 1750 (the
+# forcing columns ndep_NH / ndep_SH; ccx_ndep_forcing()). Fractional NPP gain per
+# Tg N/yr. 0 = OFF and is the default: every registered file stays bit-exact,
+# since x * (1 + 0 * ndep) is x. BOTH cores resolve an ABSENT field to this same
+# constant (ccx_cpp_par() and the deriv) -- the gamma_diff lesson of 2026-08-30.
+# Its prior and centre come from the 2026-09-30 literature pass; nothing here
+# asserts a value.
+CCX_GAMMA_NDEP_DEFAULT <- 0
+
 #' The fertilisation multiplier on NPP0, as a function of atmospheric CO2.
 #'
 #' Factored out of ccx_deriv() so that diagnostics, the app and the design-target
@@ -2024,6 +2035,9 @@ ccx_default_params <- function() {
     # ⚠ ADOPTED AT 0.25 on 2026-08-29 -- see CCX_GAMMA_DIFF_DEFAULT. It is no
     # longer the behaviour-preserving value, and that is deliberate.
     gamma_diff = CCX_GAMMA_DIFF_DEFAULT,
+    # N-DEPOSITION NPP MULTIPLIER (D2 (a), 2026-09-30). 0 = OFF, bit-exact; see
+    # CCX_GAMMA_NDEP_DEFAULT.
+    gamma_ndep = CCX_GAMMA_NDEP_DEFAULT,
     # ---- mechanism switch, NOT a calibrated parameter -----------------
     # FROZEN REVELLE. 0 = normal carbonate chemistry. 1 = the ocean's buffer
     # factor is held at its preindustrial value instead of rising as the ocean
@@ -2417,8 +2431,15 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     aod_h <- forc[[paste0("aod_", h)]]          # h is "NH"/"SH", as aux$idx is
     if (is.null(aod_h) || !is.finite(aod_h)) aod_h <- 0
     gdiff <- if (is.null(p$gamma_diff)) CCX_GAMMA_DIFF_DEFAULT else p$gamma_diff
+    # N DEPOSITION (D2 (a), 2026-09-30) -- twin of the block in src/ccx_core.cpp.
+    # Same two absence contracts as the diffuse-light term above: a forcing
+    # without the column reads ZERO deposition, and a parameter list without the
+    # field reads CCX_GAMMA_NDEP_DEFAULT in BOTH cores.
+    ndep_h <- forc[[paste0("ndep_", h)]]
+    if (is.null(ndep_h) || !is.finite(ndep_h)) ndep_h <- 0
+    gndep <- if (is.null(p$gamma_ndep)) CCX_GAMMA_NDEP_DEFAULT else p$gamma_ndep
     npp <- npp0_h * capacity * ccx_fert_factor(chi, p, aux$chi0) *
-      (1 + gdiff * aod_h)
+      (1 + gdiff * aod_h) * (1 + gndep * ndep_h)
 
     # GROSS PHOTOSYNTHESIS AND AUTOTROPHIC RESPIRATION. `ra_ratio` is Ra/NPP, so
     # GPP = NPP * (1 + ra_ratio) down and Ra = NPP * ra_ratio back up. The NET
