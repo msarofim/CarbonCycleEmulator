@@ -118,8 +118,11 @@ FORC_GMST_PRE1850  <- 0      # IGCC starts 1850; earlier GMST anomaly set to 0
 FORC_LUC_PRE_WARN  <- 5      # GtC of pre-window land-use carbon above which a
                              # windowed run is warned that ccx_spinup()'s
                              # preindustrial land is no longer its fixed point.
-FORC_LAND0_NOMINAL <- 2130   # GtC, total preindustrial land carbon at the
-                             # default parameters (diag_land_topology.R [3]).
+FORC_LAND0_NOMINAL <- 2130   # GtC, preindustrial EXCHANGING land carbon at the
+                             # default parameters (diag_land_topology.R [3]) --
+                             # the land that land use can clear. With the inert
+                             # soil pool on (2026-09-30) total land is ~292 more;
+                             # the warning's denominator deliberately excludes it.
                              # PRESENTATIONAL -- used only to express the
                              # warning above as a percentage. aux$land0 is the
                              # value the model actually integrates.

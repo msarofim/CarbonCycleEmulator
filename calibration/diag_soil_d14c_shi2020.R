@@ -118,7 +118,14 @@ one <- function(j) {
   F_lit <- p$npp_leaf_frac / (1 + LAM * p$tau_leaf) + (1 - p$npp_leaf_frac) / (1 + LAM * p$tau_wood)
   gate_ana <- 1000 * (Fa * F_lit / (1 + LAM * p$tau_soil_slow) - 1)
   gate_mod <- d14(m0[["soil_slow_C"]], m0[["soil_slow_C14"]])
-  inert <- max(SD_PASSIVE_TOTAL - ccx_const("NPP_GLOBAL_PI") * p$litter_slow_frac * p$tau_soil_slow, 0)
+  # ⚠ FIXED 2026-09-30 (f): with the in-model inert pool ON (soil_inert_frac > 0,
+  # label hilda_csl3v0kai) litter_slow_frac is NOT scaled, so the proxy formula
+  # below returned 0 and z_O1_inert silently left the inert carbon out (found by
+  # the 09-30 stock-readout audit). The model's own box is read when it exists;
+  # the formula stays for the hand-scaled proxy rows (TS_STOCK_FRAC).
+  ii_inert <- ccx_inert_idx(sp$aux)
+  inert <- if (length(ii_inert)) sum(sp$y[ii_inert, "C"]) else
+    max(SD_PASSIVE_TOTAL - ccx_const("NPP_GLOBAL_PI") * p$litter_slow_frac * p$tau_soil_slow, 0)
   data.frame(mode = j$mode, tau = j$tau, litter_slow_frac = p$litter_slow_frac, d_logpost = j$d_logpost, opt = j$opt,
              inert_C = inert, soil_d14c_inert = (soilC * d14(soilC, soilC14) + inert * SD_INERT_D14C) / (soilC + inert),
              slow_C_1750 = m0[["soil_slow_C"]], soil_C = soilC, soil_d14c = d14(soilC, soilC14), soil_sumCF = soilC14,

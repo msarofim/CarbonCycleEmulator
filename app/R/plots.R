@@ -1516,7 +1516,10 @@ plot_box_diagram <- function(fx, stock, p) {
   hs_on <- isTRUE(p$hs_frac > 0)
   boxes <- data.frame(
     x = c(2, 1, 3, 5, 5), y = c(4, 2.4, 2.4, 3.0, 1.2),
-    lab = c("Atmosphere", "Vegetation\n(leaves + wood)", "Soil\n(fast + slow)",
+    lab = c("Atmosphere", "Vegetation\n(leaves + wood)",
+            # + the inert pool when the structure carries it (2026-09-30); the
+            # shipped app's mode has none, so its label is unchanged
+            if (ccx_inert_on(p)) "Soil\n(fast + slow + inert)" else "Soil\n(fast + slow)",
             "Ocean\nmixed layer", "Deep ocean\n(10 layers)"),
     col = c(PAL[["atm"]], PAL[["land"]], PAL[["land"]], PAL[["ocean"]], PAL[["ocean"]]))
   as_down <- fx$as_down - if (hs_on) fx$hs_as_down else 0

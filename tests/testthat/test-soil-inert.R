@@ -189,6 +189,25 @@ test_that("BOX: both cores count it as LAND, never ocean, and carry it unchanged
   expect_lt(max(abs(rR$state - rC$state)) / max(abs(rR$state)), 1e-13)
 })
 
+test_that("READOUT: ccx_stock_readout() covers every box once and matches the run columns", {
+  skip_if_no_cpp()
+  for (pp in list(p_off, p_on, local({ q <- p_on; q$hs_frac <- 0.1; q }))) {
+    sp <- ccx_spinup(pp); st <- ccx_stock_readout(sp$y, sp$aux)
+    expect_equal(st[["total"]], sum(sp$y[, "C"]), tolerance = 1e-12)
+    expect_equal(st[["soil_inert"]], sum(sp$y[ccx_inert_idx(sp$aux), "C"]))
+    F <- ccx_build_forcing("historical", c(1750, 1760), prod_c14 = sp$prod_c14)
+    r <- suppressWarnings(ccx_run_fast(sp, F)); se <- ccx_stock_readout(r$state, sp$aux)
+    # the end state's readout vs the run's own last-month columns (the out row is the
+    # month's OPENING state, so compare the readout of the state that produced it)
+    expect_equal(ccx_stock_readout(sp$y, sp$aux)[["land_total"]], r$out$land_C[1], tolerance = 1e-12)
+    expect_equal(ccx_stock_readout(sp$y, sp$aux)[["ocean_total"]], r$out$ocean_C[1], tolerance = 1e-12)
+    expect_equal(se[["soil_inert"]], st[["soil_inert"]])
+  }
+  # MUTATION: a box the map does not classify must be REFUSED, not dropped
+  sp <- ccx_spinup(p_on); aux <- sp$aux; aux$idx$NH[[CCX_LAND_INERT]] <- NULL
+  expect_error(ccx_stock_readout(sp$y, aux), "does not cover the state")
+})
+
 test_that("the structure label switches it on at the cited value, and only there", {
   expect_identical(ccx_struct_block("hilda_csl3v0kai")$soil_inert_frac, F_ON)
   a <- ccx_struct_block("hilda_csl3v0ka"); b <- ccx_struct_block("hilda_csl3v0kai")

@@ -479,6 +479,45 @@ ccx_spinup <- function(p = ccx_default_params(),
   )
 }
 
+#' EVERY carbon stock in a state, GtC, from the model's own index map (2026-09-30)
+#'
+#' The ONE stock readout for comparisons against inventories and ESMs
+#' (Marcus 2026-09-30: "make sure the stock readouts contain all the carbon pools
+#' to make it consistent with whatever comparisons we are doing"). Built from
+#' `aux$idx`, never from names or positions, so a box added later cannot be
+#' dropped silently: the reservoir sums must add up to the whole state, and the
+#' function STOPS if they do not.
+#'
+#' Rows: atmosphere; vegetation (leaf + wood); soil_fast (responsive); soil_slow
+#' (the EXCHANGING passive pool); soil_inert (radiocarbon-free, 0 when absent);
+#' soil_total (all three); land_total (vegetation + soil_total, = the out
+#' column land_C); ocean_surface (mixed layer + hs/eq/tr); ocean_interior
+#' (interior layers + hd); ocean_total (= ocean_C); total.
+#' ⚠ WHAT IT CANNOT HOLD: carbon the model does not represent at all -- permafrost
+#' (AR6 WG1 Fig. 5.12: ~1200 PgC), soil below the passive pool's 0-1 m scope,
+#' marine sediments, fossil reserves. A comparison against those needs them added
+#' on the OTHER side, not here.
+ccx_stock_readout <- function(y, aux) {
+  ix  <- function(nm) unlist(lapply(HEMIS, function(h) aux$idx[[h]][[nm]]), use.names = FALSE)
+  s   <- function(i) if (length(i)) sum(y[i, "C"]) else 0
+  atm <- s(ix("atm")); veg <- s(c(ix("leaf"), ix("wood")))
+  sf  <- s(ix("soil_fast")); ss <- s(ix("soil_slow")); si <- s(ix(CCX_LAND_INERT))
+  surf <- s(c(ix("ml"), ix("hs"), ix("eq"), ix("tr"))); intr <- s(c(ix("oc"), ix("hd")))
+  out <- c(atmosphere = atm, vegetation = veg, soil_fast = sf, soil_slow = ss, soil_inert = si,
+           soil_total = sf + ss + si, land_total = veg + sf + ss + si,
+           ocean_surface = surf, ocean_interior = intr, ocean_total = surf + intr,
+           total = atm + veg + sf + ss + si + surf + intr)
+  covered <- sort(c(ix("atm"), ix("leaf"), ix("wood"), ix("soil_fast"), ix("soil_slow"), ix(CCX_LAND_INERT),
+                    ix("ml"), ix("hs"), ix("eq"), ix("tr"), ix("oc"), ix("hd")))
+  if (!identical(covered, seq_len(nrow(y))))
+    stop("ccx_stock_readout(): the reservoir map does not cover the state exactly once -- ",
+         "a box was added without a readout class (boxes ", nrow(y), ", covered ", length(covered), ")")
+  land_idx <- unlist(lapply(HEMIS, function(h) aux$idx[[h]]$land), use.names = FALSE)
+  if (!isTRUE(all.equal(out[["land_total"]], sum(y[land_idx, "C"]), tolerance = 1e-12)))
+    stop("ccx_stock_readout(): land_total disagrees with aux$idx$land")
+  out
+}
+
 #' Pretty-print the spinup diagnostics
 ccx_report_spinup <- function(s) {
   d <- s$diagnostics
