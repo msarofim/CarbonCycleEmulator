@@ -31,6 +31,14 @@
 #   F_slow = F_atm * [f_leaf/(1+lambda tau_leaf) + (1-f_leaf)/(1+lambda tau_wood)] / (1+lambda tau_slow)
 # (litter into the passive pool drawn from leaf and wood in proportion to NPP
 # allocation). Tolerance SD_GATE_TOL permil.
+# CARVE-OUT ROWS (CHANGELOG 09-29 v): env SD_CARVE_TAGS = comma-separated
+# profile rds basenames (without .rds) from TS_STOCK_FRAC runs. Each row's
+# INERT mass is the part of the inventory-matched passive stock the carve-out
+# removed, SD_PASSIVE_TOTAL - NPP0 * litter_slow_frac * tau (0 for uncarved
+# rows), held at F14C = 0 (Delta = SD_INERT_D14C). soil_d14c_inert is the bulk
+# an in-model inert pool would show; z_O1_inert scores it against O1 directly
+# (the inert pool makes O1 like-for-like on the aOC axis; still not on depth).
+# Env SD_OUT_SUFFIX keeps an extended run from overwriting the shipped output.
 # No RNG. USAGE: Rscript calibration/diag_soil_d14c_shi2020.R  (~10 min)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
@@ -46,6 +54,11 @@ SD_PREV    <- ccx_path("outputs", "diagnostics", "npp0_scan_20260929.csv")
 SD_PROFILES <- c(fixedstock = "tau_soil_slow_profile_fixedstock_20260929.rds",
                  default    = "tau_soil_slow_profile_20260929.rds")
 SD_ROWS    <- list(fixedstock = c(250, 500, 750, 1000, 1500, 2000, 3000, 5000), default = c(1000, 1500))
+for (tg in strsplit(Sys.getenv("SD_CARVE_TAGS", ""), ",")[[1]]) if (nzchar(tg)) {
+  SD_PROFILES[[tg]] <- paste0(tg, ".rds")
+  SD_ROWS[[tg]] <- vapply(readRDS(ccx_path("outputs", "diagnostics", paste0(tg, ".rds"))), `[[`, numeric(1), "value") }
+SD_PASSIVE_TOTAL <- 1500    # GtC; the inventory-matched PI passive stock, NPP_GLOBAL_PI * 0.05 * 500 (CHANGELOG 09-29 r)
+SD_INERT_D14C    <- -1000   # permil; F14C = 0 (Copard 2025's aOC definition)
 SD_FREE    <- c("beta_max", "fert_k", "luc_scale", "q10", "seas_T_amp_NH", "seas_T_amp_SH",
                 "seas_lag_p_NH", "seas_lag_p_SH", "npp_frac_NH", "kz", "rep_dC")
 SD_POOLS   <- c("leaf", "wood", "soil_fast", "soil_slow")
@@ -63,7 +76,7 @@ F_of <- function(d) 1 + d / 1000
 O3_MASS  <- sum(SHI_STOCK * F_of(SHI_D14C))
 exch_C   <- SHI_STOCK * (1 - COPARD_AOC)
 O2_BULK  <- 1000 * (sum(SHI_STOCK * F_of(SHI_D14C)) / sum(exch_C) - 1)
-SD_OUT   <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", SD_TAG, SD_DATE))
+SD_OUT   <- ccx_path("outputs", "diagnostics", sprintf("%s%s_%s", SD_TAG, Sys.getenv("SD_OUT_SUFFIX", ""), SD_DATE))
 COMMIT   <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
 
 md <- readRDS(ccx_mode_file(SD_MODE)); invisible(ccx_apply_pins(md$pins))
@@ -79,7 +92,7 @@ for (m in names(SD_PROFILES)) { prof <- readRDS(ccx_path("outputs", "diagnostics
   pv <- vapply(prof, `[[`, numeric(1), "value")
   for (v in SD_ROWS[[m]]) { x <- prof[[which(pv == v)]]
     ov <- if (!is.null(x$over)) x$over else list(tau_soil_slow = v)
-    jobs[[length(jobs) + 1]] <- list(mode = m, tau = v, over = ov, par = x$par,
+    jobs[[length(jobs) + 1]] <- list(mode = m, tau = v, over = ov, par = x$par, opt = x$opt,
                                      d_logpost = x$opt - prof[[which(pv == 500)]]$opt) } }
 
 one <- function(j) {
@@ -105,7 +118,9 @@ one <- function(j) {
   F_lit <- p$npp_leaf_frac / (1 + LAM * p$tau_leaf) + (1 - p$npp_leaf_frac) / (1 + LAM * p$tau_wood)
   gate_ana <- 1000 * (Fa * F_lit / (1 + LAM * p$tau_soil_slow) - 1)
   gate_mod <- d14(m0[["soil_slow_C"]], m0[["soil_slow_C14"]])
-  data.frame(mode = j$mode, tau = j$tau, litter_slow_frac = p$litter_slow_frac, d_logpost = j$d_logpost,
+  inert <- max(SD_PASSIVE_TOTAL - ccx_const("NPP_GLOBAL_PI") * p$litter_slow_frac * p$tau_soil_slow, 0)
+  data.frame(mode = j$mode, tau = j$tau, litter_slow_frac = p$litter_slow_frac, d_logpost = j$d_logpost, opt = j$opt,
+             inert_C = inert, soil_d14c_inert = (soilC * d14(soilC, soilC14) + inert * SD_INERT_D14C) / (soilC + inert),
              slow_C_1750 = m0[["soil_slow_C"]], soil_C = soilC, soil_d14c = d14(soilC, soilC14), soil_sumCF = soilC14,
              fast_d14c = d14(m[["soil_fast_C"]], m[["soil_fast_C14"]]), slow_d14c = d14(m[["soil_slow_C"]], m[["soil_slow_C14"]]),
              atm_d14c = d14(m[["atmC"]], m[["atmC14"]]),
@@ -115,6 +130,7 @@ res <- parallel::mclapply(jobs, one, mc.cores = SD_CORES, mc.preschedule = FALSE
 bad <- vapply(res, inherits, logical(1), "try-error"); if (any(bad)) { print(res[bad]); stop("fork failure") }
 R <- do.call(rbind, res)
 R$z_O1 <- (R$soil_d14c - SHI_BULK) / SHI_BULK_SE
+R$z_O1_inert <- (R$soil_d14c_inert - SHI_BULK) / SHI_BULK_SE
 R$provenance <- sprintf("%s @%s; %s v0k basin1 + profile overrides; ccx_run %d-%d, yr %d mean; no RNG", SD_DRIVER, COMMIT, SD_STRUCT, SD_SPAN[1], SD_SPAN[2], SD_OBS_YEAR)
 gate_ok <- all(abs(R$gate_d) < SD_GATE_TOL)
 
@@ -131,6 +147,9 @@ cat(sprintf("  %-10s %5s %6s %7s | %6s %8s %8s %8s | %7s %7s %6s | %6s\n", "mode
   "fastD14", "slowD14", "atmD14", "slow1750"))
 for (i in seq_len(nrow(R))) with(R[i, ], cat(sprintf("  %-10s %5g %6.4f %+7.2f | %6.0f %8.1f %+8.2f %8.0f | %7.1f %7.1f %6.1f | %6.1f\n",
   mode, tau, litter_slow_frac, d_logpost, soil_C, soil_d14c, z_O1, soil_sumCF, fast_d14c, slow_d14c, atm_d14c, gate_model)))
+if (any(R$inert_C > 0)) { cat("\n  WITH AN IN-MODEL INERT POOL (carve-out rows; inert at F14C 0):\n")
+  cat(sprintf("  %-44s %5s %6s %8s %8s %8s\n", "mode", "tau", "inertC", "exchD14", "bulkD14", "z(O1)"))
+  for (i in which(R$inert_C > 0)) with(R[i, ], cat(sprintf("  %-44s %5g %6.0f %8.1f %8.1f %+8.2f\n", mode, tau, inert_C, soil_d14c, soil_d14c_inert, z_O1_inert))) }
 utils::write.csv(R, paste0(SD_OUT, ".csv"), row.names = FALSE)
 cat(sprintf("  saved %s.{log,csv}\n", SD_OUT)); sink()
 if (!gate_ok) stop("analytic steady-state gate FAILED -- read the gate columns before any interpretation")
