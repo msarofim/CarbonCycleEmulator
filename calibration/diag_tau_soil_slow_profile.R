@@ -21,6 +21,14 @@
 # +5.7 of the default mode survives, the pool's AGE buys it; if it vanishes,
 # its STOCK does (which the inventories contradict). ⚠ The responsive-soil
 # input (1 - litter_slow_frac) moves slightly with it (0.90-0.99 of NPP).
+# CARVE-OUT PROXY (TS_STOCK_FRAC=<f_ex>, requires TS_FIXED_STOCK=1; CHANGELOG
+# 09-29 v): an INERT soil pool carved out of the inventory-matched 1500 GtC
+# exchanges nothing, so dynamically it is a SMALLER exchanging passive pool.
+# litter_slow_frac is multiplied by f_ex = 1 - (inert fraction), holding the
+# exchanging passive stock at 1500 * f_ex. TS_VALUES (env, comma-separated)
+# overrides the tau grid. The identity check then compares against the stored
+# fixed-stock profile's default row (TS_ID_REF), because the carved default row
+# is not the (k) structure.
 # USAGE: Rscript calibration/diag_tau_soil_slow_profile.R  (frozen copy; BLAS
 #        pinned to 1 by the caller; TS_SMOKE=1 for a smoke)
 # =====================================================================
@@ -41,6 +49,11 @@ TS_LSF_PARAM   <- "litter_slow_frac"
 TS_LSF_DEFAULT <- 0.05
 TS_FIXED_STOCK <- identical(Sys.getenv("TS_FIXED_STOCK"), "1")
 if (TS_FIXED_STOCK) TS_TAG <- paste0(TS_TAG, "_fixedstock")
+TS_STOCK_FRAC <- as.numeric(Sys.getenv("TS_STOCK_FRAC", "1"))   # exchanging share of the passive stock
+stopifnot(TS_STOCK_FRAC > 0, TS_STOCK_FRAC <= 1, TS_STOCK_FRAC == 1 || TS_FIXED_STOCK)
+if (TS_STOCK_FRAC != 1) TS_TAG <- paste0(TS_TAG, sprintf("_stock%04d", round(1e4 * TS_STOCK_FRAC)))
+if (nzchar(Sys.getenv("TS_VALUES"))) TS_VALUES <- as.numeric(strsplit(Sys.getenv("TS_VALUES"), ",")[[1]])
+TS_ID_REF <- ccx_path("outputs", "diagnostics", "tau_soil_slow_profile_fixedstock_20260929.rds")
 TS_FREE   <- c("beta_max", "fert_k", "luc_scale", "q10", "seas_T_amp_NH", "seas_T_amp_SH",
                "seas_lag_p_NH", "seas_lag_p_SH", "npp_frac_NH", "kz", "rep_dC")
 TS_MAXIT  <- 3000L
@@ -63,7 +76,7 @@ stopifnot(isTRUE(all.equal(bp[[TS_PARAM]], TS_DEFAULT)), TS_DEFAULT %in% TS_VALU
 # base-parameter overrides for a profile value (recorded in the output so the
 # futures driver rebuilds EXACTLY the scored structure)
 over_of <- function(v) { o <- setNames(list(v), TS_PARAM)
-  if (TS_FIXED_STOCK) o[[TS_LSF_PARAM]] <- TS_LSF_DEFAULT * TS_DEFAULT / v; o }
+  if (TS_FIXED_STOCK) o[[TS_LSF_PARAM]] <- TS_LSF_DEFAULT * TS_DEFAULT / v * TS_STOCK_FRAC; o }
 prev <- utils::read.csv(TS_PREV, check.names = FALSE); r1 <- prev[prev$scale == 1, ]
 p0 <- as.list(ccx_unc_to_par(md$u_mode)); for (n in TS_FREE) p0[[n]] <- r1[[n]]
 u0 <- ccx_par_to_unc(unlist(p0)[md$param_names])
@@ -92,7 +105,9 @@ ok <- !vapply(res, inherits, logical(1), "try-error"); if (!all(ok)) { print(res
 ref <- res[[which(TS_VALUES == TS_DEFAULT)]]
 # identity: the 09-29 (k) scan's scale-1 optimum was scored under the same structure and vector
 lp_chk <- ccx_make_logpost(base_params = bp, by_stream = TRUE)
-id_d <- as.numeric(lp_chk(u0)) - ref$frozen
+id_ref <- if (TS_STOCK_FRAC == 1) ref$frozen else {
+  st <- readRDS(TS_ID_REF); st[[which(vapply(st, `[[`, numeric(1), "value") == TS_DEFAULT)]]$frozen }
+id_d <- as.numeric(lp_chk(u0)) - id_ref
 stopifnot(abs(id_d) < TS_ID_TOL)
 
 sink(paste0(TS_OUT, ".log"), split = TRUE)
@@ -103,6 +118,8 @@ cat(sprintf("  profile %s in {%s} yr (default %g); other residence times at defa
   TS_PARAM, paste(TS_VALUES, collapse = ", "), TS_DEFAULT, TS_MAXIT, paste(TS_FREE, collapse = ", ")))
 cat(sprintf("  mode: %s\n", if (TS_FIXED_STOCK) sprintf("FIXED STOCK -- %s = %g * %g / tau (PI passive stock held)", TS_LSF_PARAM, TS_LSF_DEFAULT, TS_DEFAULT)
   else sprintf("default -- %s fixed at %g (stock grows with tau)", TS_LSF_PARAM, TS_LSF_DEFAULT)))
+if (TS_STOCK_FRAC != 1) cat(sprintf("  CARVE-OUT PROXY: exchanging passive stock x%g (= %.0f GtC); identity vs %s default row frozen\n",
+  TS_STOCK_FRAC, stock_slow(bp) * TS_STOCK_FRAC, basename(TS_ID_REF)))
 cat(sprintf("  logpost natural-log units; stock GtC (PI passive soil); NPP GtC/yr mean %d-%d; no RNG\n", tg$win[1], tg$win[2]))
 cat(sprintf("  [identity] default row frozen vs independent rescore: %.2e (tol %.0e)\n\n", id_d, TS_ID_TOL))
 cat(sprintf("  %8s %9s %9s %9s %8s %5s %6s\n", TS_PARAM, "stock", "d_frozen", "d_rebal", "NPPmod", "conv", "evals"))
@@ -118,6 +135,6 @@ S1 <- do.call(rbind, lapply(res, function(r) r$s1 - ref$s1))
 R <- data.frame(value = TS_VALUES, stock = sapply(res, `[[`, "stock"), d_frozen = sapply(res, `[[`, "frozen") - ref$frozen,
                 d_rebal = sapply(res, `[[`, "opt") - ref$opt, npp_modern = sapply(res, `[[`, "npp"),
                 conv = sapply(res, `[[`, "conv"), P, S1, check.names = FALSE,
-                provenance = sprintf("%s @%s; %s v0k basin1; NPP unscaled; NM %d on 11; no RNG", TS_DRIVER, COMMIT, TS_STRUCT, TS_MAXIT))
+                provenance = sprintf("%s @%s; %s v0k basin1; NPP unscaled; fixed_stock %s; stock_frac %g; NM %d on 11; no RNG", TS_DRIVER, COMMIT, TS_STRUCT, TS_FIXED_STOCK, TS_STOCK_FRAC, TS_MAXIT))
 utils::write.csv(R, paste0(TS_OUT, ".csv"), row.names = FALSE); saveRDS(res, paste0(TS_OUT, ".rds"))
 cat(sprintf("  saved %s.{log,csv,rds}\n", TS_OUT)); sink()
