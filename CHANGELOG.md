@@ -2,6 +2,37 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (e) — **The K prior is NOT tightened: the science does not support a width that would matter. The ESM structural spread of K is log-sd 0.26–0.37, which brackets the ruled 0.35. Any width in that range moves the fitted K only 867 → ~840. Putting K in the band (≤ 750) needs log-sd ≤ 0.14–0.21, i.e. claiming K is known more tightly than the ESMs agree among themselves, above 560 ppm where nothing is observed.**
+
+Marcus: *"Tighten the K prior if that is consistent with the underlying science."*
+Driver: `diag_fert_k_prior_width.R` (`fert_k_prior_width_20260930.log`). No model runs.
+
+- **What the evidence says about width.**
+  - Neither source behind the prior gives a propagable uncertainty on K. Walker 2021's ± is unlabelled;
+    Varney 2024 gives a ratio of ensemble means.
+  - The one per-member spread on disk is our CMIP6 1pctCO2-bgc GPP extraction (16 ESMs). It was ruled a
+    comparison for the CENTRE, and is used here only for the WIDTH.
+  - Excluding IPSL (R 1.11, flagged as a probable artefact in the 09-28 note), MM-implied K has
+    geo-mean 578 and **log-sd 0.368 (MAD-based 0.260)**.
+  - Only 1 of 16 models (UKESM1, K 1146) is as log-like as our fitted 868.
+- **What a width would do.**
+  - The 09-30 (d) shape rows give the likelihood along K (a quadratic in ln K through (868, 0),
+    (625, −5.63), (500, −14.52)): optimum K 907, sd(ln K) 0.110.
+  - ⭐ **Validation: at the ruled 0.35 the posterior is K 867 against the fitted 867.6.**
+  - Posterior K at log-sd 0.37 / 0.35 / 0.30 / 0.26 / 0.20 / 0.14: **870 / 867 / 854 / 840 / 806 / 747**.
+    With a likelihood 1.5× flatter (the path's costs are upper bounds): 834 / 827 / 806 / 784 / 738 / 675.
+  - Reaching K 750 needs log-sd **0.143** (0.214 if 1.5× flatter). Reaching 625 needs 0.067 (0.100).
+- **Verdict: no change.**
+  - The ruled 0.35 IS consistent with the science; it sits inside the ESM spread.
+  - A science-consistent tightening (to ~0.26) would buy ~27 ppm of K, and per (d)'s futures only a few
+    ppm of 2300 CO₂. That is not worth an objective change or a restamp.
+  - A tightening that would work claims knowledge nobody has. The saturation shape above ~560 ppm is
+    observed by nothing (09-28 note), the ESMs disagree by ±30–45 %, and the transient-vs-instantaneous
+    caveat adds to the uncertainty rather than removing it.
+- ⇒ **The fertilisation question moves to item 6 (alignment), where the quantities the evidence DOES
+  pin can be tested:** the historic CO₂ effect (Keenan 2023), the 400→564 gain (FACE, CMIP6) and the
+  2× gain (CMIP6, Wenzel 2016).
+
 ## 2026-09-30 (d) — **Fertilisation profile: the record charges −5.6 / −14.5 to move the SHAPE into the band and −61 / −187 to cut the AMPLITUDE. The amplitude is held by the ATMOSPHERIC CO₂ record, not the land-sink data (`gcb_land_sink` IMPROVES as it falls). Every cut is partly undone by the other land knobs. For the FUTURE, the shape move at K 500 buys what the amplitude cut buys (+117 vs +115 ppm SSP5-8.5 2300) at a quarter of the price. No row flips to a source.**
 
 Marcus: *"Can we do anything to bring the fertilization rate down? I'm also worried that it seems like

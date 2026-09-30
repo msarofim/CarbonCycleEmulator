@@ -1,0 +1,21 @@
+=== PROVENANCE === calibration/diag_fert_k_prior_width.R @7f4ae08, run 2026-09-30 11:38; no RNG
+  prior: lognormal median 545.7 ppm (Walker 510.8, Varney 582.9), log-sd 0.35 (RULING Marcus 2026-09-28 ('moderate'), not derived)
+  profile: fert_profile_fixedstock_20260930.rds (shape rows hold enh(410 ppm); d_loglik rebalanced)
+
+(1) EVIDENCE SPREAD of K across CMIP6 ESMs (GPP, 1pctCO2-bgc, MM-implied K from R = gain4x/gain2x)
+  all 16: median 580, log-sd 0.704  |  excl IPSL-CM6A-LR (15): geo-mean 578, log-sd 0.368, MAD log-sd 0.260
+  models with K >= the fitted 868: 1 of 16
+
+(2) LIKELIHOOD along the shape path: points (K, d_loglik) = (868, +0.00) (625, -5.63) (500, -14.52) 
+  quadratic in ln K: likelihood optimum K 907, sd(ln K) 0.110
+  VALIDATION: posterior at the ruled log-sd 0.35 = K 867 vs fitted 867.6
+
+    log-sd    posterior K (likelihood x1.5 wider)
+      0.37            870                    834
+      0.35            867                    827
+      0.30            854                    806
+      0.26            840                    784
+      0.20            806                    738
+      0.14            747                    675
+  log-sd needed for posterior K = 750: 0.143 (likelihood x1.5 wider: 0.214)
+  log-sd needed for posterior K = 625: 0.067 (likelihood x1.5 wider: 0.100)
