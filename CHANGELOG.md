@@ -2,6 +2,48 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (i) — **D3 preview at the fixed alignment control. Today GCB's imbalance (+ cement, 0.63 GtC/yr) is already split land 56 % / E_LUC via `luc_scale` 37 % / ocean 12 % (growth −6 %). The new rows would pick land 0.45–0.65 and ocean 0.12–0.17 on a smoothed or constant imbalance, for +13 to +18 log-units at fixed parameters. The RAW imbalance lets year-to-year noise choose the share (64 % of its estimate). ⚠ D3 releases a row that pulls the land sink DOWN, so on its own it should not lower fertilisation.**
+
+Driver: `calibration/diag_imb_alloc_preview.R` (`imb_alloc_preview_20260930.{log,rds}`), at `b1675e6`. No fit, no RNG.
+- Control: `diag_alignment_screen.R`'s (label `hilda_csl3v0kai`, (v) D carve-out re-fit, τ 500).
+- Gates, all pass:
+  - G1: the control's logpost equals its stored optimum (d 4.9e-4).
+  - G2: the driver's own rebuild of `gcb_land_sink` / `gcb_ocean_sink` equals the objective's by-stream values (−2.6e-12 / 0).
+  - G3: the analytic constrained optimum equals a brute-force simplex grid.
+  - G4: the budget identity closes to −0.007 (2 % of d_land).
+- Form priced (handoff §3 step 3): targets GCB + s·I(t), with s_land, s_ocean ≥ 0 and s_land + s_ocean ≤ 1. Rows at objective #13's σ (0.5 / 0.4).
+
+**Where the imbalance goes at the control** (model − GCB, 1959–2024; `imbal + cement = d_land + d_ocn − d_luc + d_grow`):
+
+| window | d_land | imbal | cement | d_luc | d_grow | d_ocn |
+|---|---|---|---|---|---|---|
+| 1959–2024 | +0.353 | +0.540 | +0.088 | −0.232 | −0.039 | +0.075 |
+| 1960–1989 | +0.363 | +0.568 | +0.035 | −0.240 | −0.100 | +0.094 |
+| 1990–2009 | +0.250 | +0.675 | +0.090 | −0.235 | +0.197 | +0.077 |
+| 2010–2024 | +0.451 | +0.262 | +0.197 | −0.206 | −0.228 | +0.018 |
+
+- Of the 0.628 to be placed: **land 56 %, E_LUC (via `luc_scale` 0.863) 37 %, ocean 12 %, growth −6 %**.
+- ⇒ `luc_scale` is ALREADY an emissions share of the imbalance. A separate emissions share in D3 would be collinear with it.
+- ⚠ **Correction to 09-30 (c).** Its sentence "most of the land excess (0.26 of 0.35) is the fitted `luc_scale`" has the sign backwards. A smaller E_LUC means LESS residual sink is needed for the same CO₂, so `luc_scale` < 1 LOWERS the land excess, from ~0.60 to 0.35. The positive imbalance + cement is what makes the excess. (c)'s table is right; 09-24's identity has the sign right.
+
+**The shares the new rows would pick at the control:**
+
+| I(t) | s_land (se) | s_ocean (se) | rest | level share of Σ I² | Δll rows |
+|---|---|---|---|---|---|
+| RAW | 0.261 (0.068) | 0.077 (0.055) | 0.66 | 0.36 | +8.3 |
+| SMOOTH (11-yr, shrinking ends) | 0.467 (0.100) | 0.165 (0.080) | 0.37 | 0.79 | +12.9 |
+| CONST (1959–2024 mean) | 0.653 (0.114) | 0.139 (0.091) | 0.21 | 1.00 | +17.6 |
+| RAW + cement | 0.275 (0.065) | 0.074 (0.052) | 0.65 | 0.44 | +9.9 |
+| SMOOTH + cement | 0.452 (0.090) | 0.142 (0.072) | 0.41 | 0.86 | +14.5 |
+| CONST + cement | 0.562 (0.098) | 0.120 (0.078) | 0.32 | 1.00 | +17.6 |
+
+- ⭐ **RAW lets the noise decide.** Only 36 % of Σ I² is the imbalance's level; the rest is its interannual scatter (sd 0.72, lag-1 0.21). The RAW share is therefore mostly a regression of the model's IAV miss on GCB's IAV miss. That is GATE V's question (gain β 0.26, 09-24), not an allocation.
+- SMOOTH and CONST are about the systematic imbalance. Their land shares (0.45–0.65) bracket what the control already carries.
+- ⭐⭐ **Prediction for the refit, stated before any fit.**
+  - Today `gcb_land_sink` pulls the model's land sink DOWN toward GCB's DGVM value. In the 09-30 (d) profile, the row IMPROVED by +12.6 / +15.6 as fertilisation was cut.
+  - A free s_land removes that pull. D3 alone should therefore NOT lower fertilisation; it may let `luc_scale` or β rise.
+  - What can lower the land's required uptake is s_ocean > 0, if the ocean physics can take more, or D2's non-CO₂ drivers. D3's value is honesty about the target, not a fertilisation fix.
+
 ## 2026-09-30 (h) — Handoff: `notes/handoff_2026-09-30b_nonco2_imbalance.md`. **Rulings (Marcus): (D1) UNFREEZE the app; (D2) ADD all three non-CO₂ land-sink contributors (N deposition, climate greening, recovery from past disturbance); (D3) the calibration gets freedom to allocate GCB's budget imbalance where it fits best (objective #13 → #14), and the imbalance panel draws that fitted allocation; (D4) NPP 70 vs 56 stays a named tension if the fixes do not resolve it.** The arm-A refit still waits on D2/D3. Nothing is running.
 
 - Marcus, verbatim: *"1) unfreeze the app. 2) definitely add non-CO2 contributors to carbon as in item 2.

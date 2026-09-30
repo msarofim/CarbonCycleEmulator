@@ -1,0 +1,36 @@
+=== PROVENANCE === driver calibration/diag_imb_alloc_preview.R, commit b1675e6, run 2026-09-30 13:22; no RNG
+  structure hilda_csl3v0kai at v0k basin 1; control tau_soil_slow_profile_fixedstock_stock8053_20260929.rds value 500; G1 d 4.86e-04; G2 rows d -2.6e-12 / 0.0e+00
+  rows: land sigma 0.50, ocean sigma 0.40 GtC/yr (objective #13); GCB years 1959-2024 (n 66); luc_scale 0.8630
+
+=== THE BUDGET IDENTITY AT THE CONTROL (model minus GCB, GtC/yr) ===
+    d_land = imbal + cement + d_luc - d_grow - d_ocn  (+ closure)
+ win0 win1 d_land imbal cement  d_luc  d_grow  d_ocn  closure
+ 1959 2024  0.353 0.540 0.0879 -0.232 -0.0393 0.0751 -0.00718
+ 1960 1989  0.363 0.568 0.0347 -0.240 -0.1003 0.0935 -0.00597
+ 1990 2009  0.250 0.675 0.0898 -0.235  0.1969 0.0771 -0.00650
+ 2010 2024  0.451 0.262 0.1968 -0.206 -0.2276 0.0184 -0.01049
+
+  where (imbalance + cement) 0.628 GtC/yr goes at the control (1959-2024): land +0.353 (56 %), ocean +0.075 (12 %),
+  E_LUC via luc_scale +0.232 (37 %), growth -0.039 (-6 %), closure -0.0072
+  ⚠ luc_scale < 1 LOWERS the land excess: a smaller E_LUC means less residual sink is needed for the same CO2.
+
+=== SHARES THAT MAXIMISE THE TWO ROWS, AT THE FIXED CONTROL ===
+  s_* = constrained optimum on {>= 0, sum <= 1}; *_un = unconstrained; se = sigma / sqrt(sum I^2)
+  frac_level = share of sum(I^2) carried by the imbalance's MEAN (the rest is its year-to-year noise)
+  dll = row log-likelihood gain over s = 0 at FIXED parameters (a refit can do better)
+  RAW        s_land 0.261 (un 0.261, se 0.068)  s_ocean 0.077 (un +0.077, se 0.055)  rest 0.661 | frac_level 0.36 | dll land  +7.27 ocean +1.00 both  +8.27 (grid  +8.27)
+  SMOOTH     s_land 0.467 (un 0.467, se 0.100)  s_ocean 0.165 (un +0.165, se 0.080)  rest 0.369 | frac_level 0.79 | dll land +10.83 ocean +2.11 both +12.94 (grid +12.94)
+  CONST      s_land 0.653 (un 0.653, se 0.114)  s_ocean 0.139 (un +0.139, se 0.091)  rest 0.208 | frac_level 1.00 | dll land +16.41 ocean +1.16 both +17.57 (grid +17.57)
+  RAW_CEM    s_land 0.275 (un 0.275, se 0.065)  s_ocean 0.074 (un +0.074, se 0.052)  rest 0.651 | frac_level 0.44 | dll land  +8.89 ocean +1.01 both  +9.91 (grid  +9.91)
+  SMOOTH_CEM s_land 0.452 (un 0.452, se 0.090)  s_ocean 0.142 (un +0.142, se 0.072)  rest 0.406 | frac_level 0.86 | dll land +12.52 ocean +1.93 both +14.45 (grid +14.45)
+  CONST_CEM  s_land 0.562 (un 0.562, se 0.098)  s_ocean 0.120 (un +0.120, se 0.078)  rest 0.319 | frac_level 1.00 | dll land +16.41 ocean +1.16 both +17.57 (grid +17.57)
+
+  treatments:
+    RAW        annual imbalance as published
+    SMOOTH     11-yr centred running mean, window shrinks at the ends
+    CONST      full-period (1959-2024) mean, a pure level shift
+    RAW_CEM    annual imbalance + cement carbonation sink
+    SMOOTH_CEM 11-yr smooth of (imbalance + cement)
+    CONST_CEM  full-period mean of (imbalance + cement)
+
+  imbalance: mean +0.540, sd 0.724, lag-1 autocorrelation 0.21; smooth range -0.01..+1.29; 2024 raw -1.69
