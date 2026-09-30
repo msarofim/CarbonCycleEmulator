@@ -2,6 +2,82 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (g) — **Item 6, the alignment check. Scorecard: every land response is individually within ~2σ of the literature, all on the same side. The screen: soft literature constraints at the literature's own σ do not move the fit, NPP₀ left free goes UP, and q10 = 2 pushes fertilisation to its bound. Parametric alignment is a zero-sum trade under the historical sink; the remaining routes are structural. [G-arm results below]**
+
+Marcus: *"6) once 1-4 are implemented, do one more check to see how we can bring parameters and model
+responses into better alignment with what we understand the size of pools and fluxes and fertilization
+responses to be."*
+
+**Driver:** `diag_alignment_screen.R` (`alignment_screen_20260930.*`, `alignment_screen_q10_20260930.*`).
+- Label `hilda_csl3v0kai` (the inert state box).
+- Control: the (v) D carve-out re-fit, rescored under the label (Δ 4.9e-4).
+- Soft constraints (Gaussian log-penalties at the literature's own σ):
+  - **KEENAN:** CO₂-driven GPP gain 1981→2020, 13.5 ± 3.5 %. End-points are the control run's CO₂,
+    343.2 → 415.4 ppm.
+  - **G564:** 400→564 ppm gain, 16.9 ± 6.2 % (CMIP6 GPP; Walker theory and FACE agree).
+  - **NPP:** 56.1 ± 7.75 (the ruled option-4 row).
+- The 2× and 4× gains are out-of-sample checks. NM on the 11 rebalanced names, plus NPP₀ in
+  [0.7, 1.1]×60 where free. ⚠ GPP numbers are applied to the NPP factor.
+
+**Scorecard at the control** (z against the literature σ where one exists):
+
+| quantity | model | literature | z |
+|---|---|---|---|
+| vegetation (PI) | 516 | 450 (AR6 WG1 Fig. 5.12) | +15 % |
+| soil fast + slow + inert (PI) | 1614 (115 + 1207 + 292) | 1502 (J&J 0–1 m) / 1848 (Shi) / 1700 (AR6, non-permafrost) | within |
+| land total (PI) | 2130 | ~2150 (AR6 450 + 1700) | within |
+| NPP 2001–2023 | 69.6 | 56.1 ± 7.75 | **+1.75** |
+| GPP (PI) | 60 (no gross loop) | 113 (AR6, as recorded in `R/constants.R`) | **−47 %** |
+| residual land sink 1960–2023 | +0.34 vs GCB | (luc_scale −0.23; GCB imbalance) | — |
+| ocean sink 1960–2023 | +0.07 vs GCB | | on GCB |
+| bulk soil Δ¹⁴C 0–1 m, 2000 | −205.8 ‰ | −244 ± 48 (Shi 2020) | +0.8 |
+| Keenan gain 1981–2020 | 15.2 % | 13.5 ± 3.5 | +0.5 |
+| 400→564 gain | 25.4 % | 16.9 ± 6.2 | **+1.37** |
+| 2× gain (out of sample) | 66 % | 42.9 ± 16.2 | **+1.43** |
+| 4× gain (out of sample) | 134 % | 76.2 ± 31.0 | **+1.85** |
+| q10 | 1.11 | prior 2.0 (log-sd 0.25) | **−2.4** (prior z) |
+| SSP5-8.5 ΔL 2015–2100 / 2100–2200 / 2200–2300 | +486 / +569 / +220 | 264±172 / −29±264 / −178±251 (Koven 2022) | **+1.29 / +2.27 / +1.59** |
+
+- Pools and radiocarbon are in line.
+- Every forward-looking LAND RESPONSE is 1.3–1.9σ high, all on the same side, and the post-2100
+  futures are the largest misses.
+- GPP is the one flux-size miss the scorecard had not shown before: the model has no gross
+  photosynthesis loop (`ra_ratio` 0).
+
+**The screen** (record likelihood WITHOUT the NPP row, vs the control):
+
+| arm | constraint | Δll record | β_max / K | NPP₀ → NPP modern | q10 | luc_scale | SSP5-8.5 2300 | Koven z (2100–2200 / 2200–2300) |
+|---|---|---|---|---|---|---|---|---|
+| J1 | fert | +0.15 | 2.74 / 879 | 60 → 69.6 | 1.10 | 0.862 | 1405 | 2.27 / 1.59 |
+| J2 | fert + NPP | −0.15 | 2.69 / 860 | 60 → 69.5 | 1.10 | 0.862 | 1410 | 2.25 / 1.58 |
+| J3 | fert + NPP + NPP₀ free | +2.68 | 2.79 / 938 | **61.8** → 71.4 | 1.10 | 0.850 | 1397 | 2.34 / 1.61 |
+| J4 | NPP + NPP₀ free | +2.13 | 2.67 / 894 | **62.3** → 72.0 | 1.12 | 0.852 | 1407 | 2.28 / 1.59 |
+| J5 | fert + q10 = 2 | **−33.0** (maxit) | **3.00 (bound)** / 844 | 60 → 71.4 | 2.0 | 0.909 | **1481** | 1.97 / 1.23 |
+| J6 | fert + NPP + NPP₀ + q10 = 2 | **−21.4** | 2.92 / 895 | **64.2** → 75.8 | 2.0 | 0.881 | 1476 | 2.02 / 1.23 |
+
+- ⭐ **At the literature's own σ, the soft constraints do not move the fit (J1, J2).** The penalty
+  gradient is under ~1 log-unit, against the record's −5 to −187 for the same moves (09-30 d). The record
+  constrains these quantities far more tightly than the literature's uncertainties do.
+  ⇒ There is no cheap "Bayesian compromise": the fit already IS the compromise.
+- ⭐ **With NPP₀ free, the record pushes it UP (61.8 / 62.3), with the NPP row in the objective.**
+  The payers: d14c_NH improves +3.5 / +4.3 and d14c_SH pays −3.1 / −4.4. This is the NH bomb row again
+  (09-29 k).
+- ⭐⭐ **q10 = 2 is a zero-sum trade.**
+  - The record pays −21 to −33, mostly `gcb_land_sink` (−16 / −18) plus the seasonal rows in J5.
+  - The fit restores the historical sink with FERTILISATION: β_max goes to its HARD UPPER BOUND 3.0 in
+    J5, and `luc_scale` rises.
+  - The fertilisation responses get WORSE (400→564 z 1.37 → 1.70; 2× 1.43 → 1.93).
+  - The future improves (SSP5-8.5 2300 +74 ppm; Koven z 2.27 → 1.97 and 1.59 → 1.23), but it stays
+    above Koven's 1σ and never turns into a source.
+- ⇒ **Every land knob trades against the others under the fixed historical uptake the CO₂ record
+  demands** (the ocean is on GCB). Fixing any one moves another further from the literature. That is
+  the quantitative form of "several land-carbon issues all pushing in unphysical directions" (09-30 d).
+
+**R2 shape-fixed test** (`diag_r2_shape_fixed.R`, `r2_shape_fixed_20260930.log`). The pre-registered
+criterion FAILS: 9.7 vs 0.25 × 23.1 ppm. The arm did not reproduce the 28-name ladder (10 names:
+−198, K 859, future −23 ppm), so separability in the FUTURE is not established. The R2 note is
+corrected. The cost inequality (at least ~34 of the ladder's −40 is `rep_dC`'s own) stands.
+
 ## 2026-09-30 (f) — **The inert pool is now a real model component (a state box, RothC's IOM precedent). Every stock readout includes it through one audited function. And the R2 shelf is re-read at φ = 0: the `rep_dC` ladder turns out to be a pure fertilisation-SHAPE path.**
 
 Marcus: *"3) Make the inert pool an actual model-consistent component if that is scientifically
