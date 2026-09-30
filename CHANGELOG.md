@@ -2,7 +2,7 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
-## 2026-09-30 (g) — **Item 6, the alignment check. Scorecard: every land response is individually within ~2σ of the literature, all on the same side. The screen: soft literature constraints at the literature's own σ do not move the fit, NPP₀ left free goes UP, and q10 = 2 pushes fertilisation to its bound. Parametric alignment is a zero-sum trade under the historical sink; the remaining routes are structural. [G-arm results below]**
+## 2026-09-30 (g) — **Item 6, the alignment check. Scorecard: every land response is individually within ~2σ of the literature, all on the same side. The screen: soft literature constraints at the literature's own σ do not move the fit, NPP₀ left free goes UP, and q10 = 2 pushes fertilisation to its bound. Parametric alignment is a zero-sum trade under the historical sink. And a gross photosynthesis loop, the one structural lever available without new code, does NOT release NPP: the record wants it small (ra 0.08), and NPP stays at 70.**
 
 Marcus: *"6) once 1-4 are implemented, do one more check to see how we can bring parameters and model
 responses into better alignment with what we understand the size of pools and fluxes and fertilization
@@ -72,6 +72,49 @@ responses to be."*
 - ⇒ **Every land knob trades against the others under the fixed historical uptake the CO₂ record
   demands** (the ocean is on GCB). Fixing any one moves another further from the literature. That is
   the quantitative form of "several land-carbon issues all pushing in unphysical directions" (09-30 d).
+
+**The gross land loop** (G arms, `alignment_screen_gross_20260930.*`).
+- **Setup.** `ra_ratio` is FREE in [0, 113/NPP₀ − 1]; the AR6 PI GPP caps it (0.88 at NPP₀ 60).
+  Parity was checked first at 0.25 and 0.88: derivative 7e-15, trajectory 4e-17.
+- **Hypothesis (stated before the run):** the land's early bomb-¹⁴C uptake scales as
+  NPP × (1 + ra_ratio), so a gross loop would let NPP fall to ~56 cheaply.
+
+| arm | Δll record | ra_ratio | GPP₀ | NPP₀ → NPP modern | payers |
+|---|---|---|---|---|---|
+| G1 NPP row + NPP₀ + ra free | +3.23 | 0.086 | 65.1 | 60.0 → 69.4 | d14c_NH +6.4, d14c_SH −4.6 |
+| G2 record only (NPP₀ + ra free) | +3.33 | 0.081 | 65.0 | 60.1 → 69.6 | same |
+| G3 everything | +3.22 | 0.084 | 65.1 | 60.1 → 69.5 | same |
+
+- ⛔ **REFUTED.** The record wants a SMALL gross loop, ~8 % of NPP cycling through the vegetation
+  pools, which is consistent with Marcus's 08-12 framing that only the pool-cycling fraction of Ra
+  counts. It gains +3.2 through d14c_NH.
+- **But NPP does not move.** NPP₀ stays at 60 and modern NPP at 69.4, even with the NPP row in.
+  ⇒ **The record's NPP pull is not a pull on gross exchange.** The NH bomb row wants bomb ¹⁴C carried
+  through LITTER into the decadal soil pools, and only NPP does that. This is consistent with the
+  09-29 (m) residence ridge.
+- Futures, responses and pools are unchanged by the loop.
+- ⇒ `ra_ratio` ≈ 0.08 is a small, free improvement a refit could adopt, under the AR6 cap. It is
+  NOT the NPP fix. AR6's GPP 113 is not a like-for-like target for the model's gross exchange, because
+  most Ra is of fresh assimilate (a null loop for isotopes).
+
+**⇒ Item 6's answer: how the land could be brought into better alignment.**
+1. **By parameters: exhausted.** J1–J6 and G1–G3 all say the same thing. At the literature's own σ
+   nothing moves; forcing one quantity pushes another further out (q10 up pushes fertilisation to its
+   bound; NPP₀ left free goes up). Every response is individually within ~2σ, and the combination is
+   held by the record.
+2. **The root is the fixed historical uptake.** The CO₂ record demands it, the ocean is on GCB, and the
+   model has ONE mechanism that scales with CO₂ to supply it. Structural routes, in order:
+   - (a) a non-CO₂ contribution to the historical land sink (N deposition, climate greening, legacy
+     recovery). It would enter as a flux driver into the existing pools, not as a new pool. It is the
+     only route that supplies the historical uptake without committing to a CO₂-proportional future.
+     Walker 2021's apparent-vs-theory gap (β_app ≈ 1.2 vs 0.6; 09-28 note) says the observed apparent
+     response IS larger than the physiological one.
+   - (b) a separate century-scale q10. On its own it only trades against fertilisation (J5/J6);
+     together with (a) it could reach Koven's band (09-29 v B, frozen).
+   - (c) the target itself: the model's land absorbs GCB's positive imbalance. If part of that belongs
+     elsewhere (ocean, emissions), the land's required uptake falls. This is a question about the data,
+     not the model.
+   - (d) NPP stays a NAMED TENSION: held by the soil ¹⁴C sink, not the gross loop.
 
 **R2 shape-fixed test** (`diag_r2_shape_fixed.R`, `r2_shape_fixed_20260930.log`). The pre-registered
 criterion FAILS: 9.7 vs 0.25 × 23.1 ppm. The arm did not reproduce the 28-name ladder (10 names:

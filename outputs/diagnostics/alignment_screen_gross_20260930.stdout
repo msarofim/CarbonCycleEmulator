@@ -1,0 +1,72 @@
+=== PROVENANCE === driver calibration/diag_alignment_screen.R, commit 7001327, run 2026-09-30 12:34; no RNG
+  structure hilda_csl3v0kai (inert pool f 0.194684) at v0k basin 1; control = tau_soil_slow_profile_fixedstock_stock8053_20260929.rds value 500, rescored under the label: d 4.86e-04 (tol 1e-03)
+  NM maxit 3000 on {beta_max, fert_k, luc_scale, q10, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, npp_frac_NH, kz, rep_dC} (+ NPP_GLOBAL_PI scale in [0.70, 1.10] for J3/J4); costs are UPPER bounds
+  constraints: KEENAN 1981->2020 (CO2 343.2->415.4 ppm) +0.135 +/- 0.035; G564 +0.169 +/- 0.062; NPP 56.06 +/- 7.75 (2001-2023)
+
+=== THE ARMS: record cost (likelihood WITHOUT the NPP row), penalties, moves ===
+  arm        d_ll_rec  pen_fert   npp_row   beta      K     NPP0   NPPmod    q10    luc      kz   conv evals
+  control       +0.00         -         -  2.739    872     60.0    69.62  1.109  0.863   15531      -     -
+  G1            +3.23      3.30     -4.45  2.726    880     60.0    69.41  1.098  0.858   15951      0  1942
+  G2            +3.33      3.29         -  2.754    891     60.1    69.59  1.099  0.858   15879      0  2238
+  G3            +3.22      3.31     -4.48  2.719    879     60.1    69.53  1.097  0.858   15899      0  1606
+
+=== WHO PAYS (record streams vs control, 8 largest |max|) ===
+   d14c_NH d14c_SH gcb_land_sink d14c_profile_ab d13c_level_MLO co2_icecore
+G1    6.37   -4.62          2.02           -1.02           0.70       -0.67
+G2    6.29   -4.63          1.63           -0.83           0.92       -0.57
+G3    6.34   -4.67          1.86           -0.88           0.81       -0.66
+   co2_seasonal_MLO d13c_level_SPO
+G1             0.38          -0.25
+G2             0.27          -0.18
+G3             0.34          -0.31
+
+=== SCORECARD: pools (PI, GtC) ===
+        vegetation soil_fast soil_slow soil_inert soil_total land_total
+control      516.0     115.0    1207.0      292.0     1614.1     2130.1
+G1           515.7     115.0    1206.4      291.9     1613.3     2129.0
+G2           517.0     115.3    1209.4      292.6     1617.3     2134.3
+G3           516.6     115.2    1208.5      292.4     1616.1     2132.8
+        ocean_total atmosphere
+control     37658.8      588.3
+G1          37657.2      588.3
+G2          37657.4      588.3
+G3          37657.4      588.3
+  literature: vegetation 450 (AR6 WG1 Fig 5.12, PI); soil 0-1 m 1502 (Jobbagy & Jackson 2000) / 1848 (Shi 2020); AR6 soils outside permafrost 1700
+
+=== SCORECARD: fluxes and radiocarbon (z where the literature gives a sd) ===
+          npp0 npp_modern ra_ratio gpp_pi gpp_modern z_npp dLand_1960_2023
+control 60.000     69.620    0.000 60.000     69.620 1.749           0.343
+G1      59.968     69.413    0.086 65.148     75.409 1.722           0.321
+G2      60.118     69.593    0.081 65.017     75.264 1.746           0.325
+G3      60.074     69.529    0.084 65.107     75.354 1.737           0.322
+        dOcean_1960_2023 dEluc_1960_2023 dLand_2010_2023 dOcean_2010_2023
+control            0.073          -0.232           0.436            0.022
+G1                 0.086          -0.240           0.408            0.041
+G2                 0.083          -0.240           0.415            0.037
+G3                 0.084          -0.240           0.410            0.039
+        dEluc_2010_2023 soil_d14c_2000 z_shi
+control          -0.208       -205.833 0.795
+G1               -0.216       -205.642 0.799
+G2               -0.216       -205.625 0.799
+G3               -0.216       -205.623 0.800
+
+=== SCORECARD: fertilisation RESPONSES (GPP literature applied to NPP) and q10 ===
+        g_keenan g_400_564  g_2x  g_4x z_keenan z_564 z_2x_oos z_4x_oos   q10
+control    0.152     0.254 0.660 1.336    0.497 1.365    1.426    1.852 1.109
+G1         0.151     0.252 0.652 1.324    0.455 1.336    1.380    1.812 1.098
+G2         0.151     0.252 0.653 1.329    0.456 1.345    1.381    1.827 1.099
+G3         0.151     0.251 0.651 1.321    0.449 1.330    1.373    1.804 1.097
+
+=== SCORECARD: futures (SSP5-8.5 unspliced, vvH spliced; land-carbon windows GtC vs Koven 2022 +/- 1 sd) ===
+        ssp585_co2_2300 ssp585_dL1521 ssp585_dL2122 ssp585_dL2223
+control         1406.71        486.40        569.32        220.06
+G1              1406.56        482.94        567.50        219.96
+G2              1403.69        485.41        572.22        221.16
+G3              1406.61        483.17        567.62        220.15
+        ssp585_landxPI vvH_co2_2300 vvH_landxPI  zK1  zK2  zK3
+control            1.6       974.33        1.34 1.29 2.27 1.59
+G1                 1.6       974.07        1.34 1.27 2.26 1.59
+G2                 1.6       972.71        1.34 1.29 2.28 1.59
+G3                 1.6       974.02        1.34 1.27 2.26 1.59
+  (land x PI uses TOTAL land incl. the inert pool -- the ESM-style convention, CHANGELOG 09-30 f)
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/alignment_screen_gross_20260930.{log,csv,rds}
