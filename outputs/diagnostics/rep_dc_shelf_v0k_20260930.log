@@ -1,0 +1,30 @@
+=== PROVENANCE === calibration/diag_rep_dc_shelf_v0k.R @a84ba48, run 2026-09-30 11:41; ladder rep_dc_product_ladder_v0k_20260929 (mode v0k, spinup periodic, objective #13); no RNG
+  REST identity: 0.00e+00 (an identity, not evidence)
+  GATE SHAPE (counts of violations; 0 = PASS):
+       not_increasing not_concave
+loglik              0           0
+REST                0           0
+
+  the ladder: rung, d_loglik vs top, beta_max, fert_k, enh(410 ppm)
+ rep_dC d_loglik beta_max fert_k enh410
+ -0.215   -79.10    1.726  546.9 0.3380
+  0.000   -68.56    1.783  569.5 0.3379
+  0.776   -39.81    1.969  643.9 0.3374
+  1.000   -32.94    2.025  666.1 0.3373
+  1.500   -21.05    2.143  712.9 0.3373
+  2.000   -11.23    2.273  762.8 0.3378
+  2.500    -4.62    2.395  808.6 0.3386
+  3.000    -0.90    2.499  847.2 0.3394
+  3.273     0.00    2.546  864.6 0.3397
+
+  THE SHELF at phi = 0 (fitted rep_dC, d_loglik vs the canonical rung; READ LIKELIHOOD):
+ sigma     mu rep_dC d_loglik                    note
+   1.0  0.000     NA       NA ladder top: prior inert
+   0.5  0.000  2.696   -2.856                        
+   0.2  0.000  1.217  -27.423                        
+   1.0  0.776     NA       NA ladder top: prior inert
+   0.5  0.776  2.903   -1.451                        
+   0.2  0.776  1.740  -16.006                        
+   1.0 -0.215     NA       NA ladder top: prior inert
+   0.5 -0.215  2.646   -3.255                        
+   0.2 -0.215  1.070  -31.090                        
