@@ -162,7 +162,12 @@ test_that("the C++ forcing column contract is positional and complete", {
   # Updating the length here is the DELIBERATE edit the pin exists to force,
   # not a relaxation.
   expect_identical(CCX_FORCING_COLS[16:17], c("aod_NH", "aod_SH"))
-  expect_length(CCX_FORCING_COLS, 17L)
+  # ndep_NH/ndep_SH APPENDED 2026-09-30 (D2 (a), N deposition onto land, Tg N/yr
+  # above 1750), same discipline; "absent" is 0, no anthropogenic deposition.
+  # N_FORCING moved 17 -> 19 in the same commit. Again the DELIBERATE edit the pin
+  # exists to force.
+  expect_identical(CCX_FORCING_COLS[18:19], c("ndep_NH", "ndep_SH"))
+  expect_length(CCX_FORCING_COLS, 19L)
   F <- ccx_build_forcing("historical", c(1900, 1910), prod_c14 = 0)
   expect_identical(colnames(ccx_cpp_forcing(F)), CCX_FORCING_COLS)
   expect_error(ccx_cpp_forcing(F[, setdiff(names(F), "d13c_foss")]),

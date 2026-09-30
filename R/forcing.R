@@ -1373,6 +1373,13 @@ ccx_hold_climate <- function(F, i = 1L, value = NULL) {
   # survive this call. A diagnostic that needs a volcanically quiet run must
   # zero aod_NH/aod_SH itself. NOT moot: CCX_GAMMA_DIFF_DEFAULT is 0.25 (R/model.R)
   # and every fitted mode carries a non-zero gamma_diff.
+  #
+  # N DEPOSITION (ndep_NH/ndep_SH, 2026-09-30) is NOT held either, for the same
+  # kind of reason: it is an EMISSIONS-driven chemical input (NOx + NH3), like the
+  # CO2 emissions, not a climate state. Once gamma_ndep != 0, "climate held" does
+  # not mean "deposition held"; a run that needs deposition frozen must hold
+  # those two columns itself. (test-so-entrainment.R's inventory gate records the
+  # classification.)
   for (cc in c("gmst", "enso", "sst_anom_NH", "sst_anom_SH")) {
     if (is.null(F[[cc]])) next
     F[[cc]] <- if (is.null(value)) F[[cc]][i] else value
