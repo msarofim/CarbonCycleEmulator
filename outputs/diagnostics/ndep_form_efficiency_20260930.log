@@ -1,0 +1,8 @@
+=== PROVENANCE === calibration/diag_ndep_form_efficiency.R @74896c5, run 2026-09-30 15:49; hilda_csl3v0kai control (tau_soil_slow_profile_fixedstock_stock8053_20260929.rds tau 500); gamma centre 9.716e-05 per Tg N/yr; no RNG
+residual land sink and NPP differences vs gamma 0, by window (GtC/yr); deposition onto land (Tg N/yr)
+window          ndep d(ndep)/dt | k=1   dSink  dNPP  kgC/kgN | k=5   dSink  dNPP  kgC/kgN
+1950-1979    23.18     0.876 |    0.0162 0.058    0.70 |    0.0808 0.292    3.49
+1980-1999    40.73     0.545 |    0.0204 0.106    0.50 |    0.1016 0.529    2.50
+2000-2023    48.76     0.186 |    0.0183 0.134    0.37 |    0.0909 0.669    1.86
+1990-2023    47.22     0.268 |    0.0190 0.128    0.40 |    0.0945 0.640    2.00
+literature gate (land-mean sink per N): 0.6-8.7 kg C/kg N; central 3.9 (lit note sec. 2a(iv))
