@@ -2,6 +2,22 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (h) — Handoff: `notes/handoff_2026-09-30b_nonco2_imbalance.md`. **Rulings (Marcus): (D1) UNFREEZE the app; (D2) ADD all three non-CO₂ land-sink contributors (N deposition, climate greening, recovery from past disturbance); (D3) the calibration gets freedom to allocate GCB's budget imbalance where it fits best (objective #13 → #14), and the imbalance panel draws that fitted allocation; (D4) NPP 70 vs 56 stays a named tension if the fixes do not resolve it.** The arm-A refit still waits on D2/D3. Nothing is running.
+
+- Marcus, verbatim: *"1) unfreeze the app. 2) definitely add non-CO2 contributors to carbon as in item 2.
+  All 3 items seem defensible and relevant. 3) For the GCB budget imbalance: the calibration should have
+  freedom to move it where it helps the model solve best. Then could the display panel use that
+  calibration solution to assign it visually? 4) I still have hope that the NPP 70 vs. 56 might resolve
+  with our fixes, but if it doesn't, then we need to keep it as a named tension."*
+- **D3's question, answered: yes.**
+  - `plot_land_sink_imbalance()` already computes the 5-term identity, and today draws an EXTREME band
+    (all of the imbalance to land).
+  - With fitted shares it can draw GCB + s·Imb(t) as "this calibration's attribution".
+  - Design choices are listed in the handoff §3 step 3: raw vs smoothed imbalance; confounding with
+    `luc_scale`; the cement sink.
+- Memory: `ccx_rulings_0930_nonco2_imbalance_app.md`, indexed in `INDEX_ccx.md`, `INDEX_ccx_app.md` and
+  `INDEX_ccx_phi.md`.
+
 ## 2026-09-30 (g) — **Item 6, the alignment check. Scorecard: every land response is individually within ~2σ of the literature, all on the same side. The screen: soft literature constraints at the literature's own σ do not move the fit, NPP₀ left free goes UP, and q10 = 2 pushes fertilisation to its bound. Parametric alignment is a zero-sum trade under the historical sink. And a gross photosynthesis loop, the one structural lever available without new code, does NOT release NPP: the record wants it small (ra 0.08), and NPP stays at 70.**
 
 Marcus: *"6) once 1-4 are implemented, do one more check to see how we can bring parameters and model
