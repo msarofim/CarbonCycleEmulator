@@ -1,0 +1,62 @@
+=== PROVENANCE === driver calibration/diag_fert_profile.R, commit 31fccd7, run 2026-09-30 08:17
+  structure hilda_csl3v0ka at v0k basin 1 + control overrides {tau_soil_slow=500, litter_slow_frac=0.05}; control = tau_soil_slow_profile_fixedstock_20260929.rds value 500 (rebalanced 11)
+  (beta_max, fert_k) PINNED per row; rebal = NM maxit 3000 on the other 9 {luc_scale, q10, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, npp_frac_NH, kz, rep_dC}
+  shape rows hold enh(410 ppm) = control's 0.3394; CO2_PI 276.88; 2x/4x = 553.8/1107.5 ppm
+  logpost / loglik natural-log units (fert_k carries the shape prior: READ d_loglik); NPP GtC/yr mean 2001-2023; no RNG
+  [identity] control rescored vs stored $opt: 7.87e-09 (tol 1e-04)
+
+  row          beta_max  fert_k  enh_ref   enh_2x   enh_4x  d_ll_froz d_ll_rebal   NPPmod  conv  evals
+  control         2.552   867.6   0.3394   0.6173   1.2481      +0.00      +0.00    70.00     0      0
+  shape_K625      1.933   625.0   0.3394   0.5935   1.1031     -16.86      -5.63    69.97     0   1440
+  shape_K500      1.614   500.0   0.3394   0.5754   1.0078     -52.97     -14.52    69.94     0    914
+  amp_cmip6c      1.340   580.0   0.2501   0.4330   0.7890   -3772.96    -187.45    66.98     1   3002
+  amp_mid         1.650   625.0   0.2897   0.5066   0.9415   -1026.02     -60.81    68.31     0   1896
+
+=== streams vs control, FROZEN (10 largest |max|) ===
+           co2_level_SPO co2_level_MLO d13c_level_MLO d13c_level_SPO
+control             0.00          0.00           0.00           0.00
+shape_K625         -2.71         -8.95          -0.93          -2.83
+shape_K500        -14.43        -26.97          -1.89          -5.40
+amp_cmip6c      -1756.31      -1751.31        -170.51         -48.96
+amp_mid          -496.43       -459.57         -68.10          -3.60
+           co2_icecore gcb_land_sink gcb_ocean_sink d13c_seasonal_MLO
+control           0.00          0.00           0.00              0.00
+shape_K625       -3.86          1.45           0.19              0.23
+shape_K500       -8.36          2.43           0.32              0.41
+amp_cmip6c      -41.63         12.48          -8.46             -8.28
+amp_mid         -10.23         15.41          -2.97             -3.65
+           co2_seasonal_MLO d14c_NH
+control                0.00    0.00
+shape_K625             0.42   -0.40
+shape_K500             0.75   -0.76
+amp_cmip6c             0.04    2.24
+amp_mid                2.55    1.19
+
+=== streams vs control, REBALANCED (10 largest |max|) ===
+           co2_level_MLO co2_level_SPO co2_icecore d13c_level_MLO gcb_land_sink
+control             0.00          0.00        0.00           0.00          0.00
+shape_K625         -0.43         -1.52       -1.05          -3.45          1.33
+shape_K500         -2.17         -4.22       -2.34          -6.68          2.39
+amp_cmip6c        -63.37        -59.69      -30.69         -20.22         12.64
+amp_mid           -16.82        -18.95      -15.51         -13.21         15.62
+           d14c_SH d13c_level_SPO d14c_profile_ab d14c_NH gcb_ocean_sink
+control       0.00           0.00            0.00    0.00           0.00
+shape_K625   -1.14          -0.14           -0.38    0.16          -0.04
+shape_K500   -2.16          -0.49           -0.73    0.19          -0.16
+amp_cmip6c   -6.86          -6.64           -5.80   -5.50          -5.10
+amp_mid      -6.00          -0.42           -3.98   -2.80          -2.26
+
+=== 11 names (beta_max, fert_k pinned; 9 rebalanced) ===
+           beta_max fert_k luc_scale   q10 seas_T_amp_NH seas_T_amp_SH
+control       2.552  867.6    0.8480 1.102         15.64         3.600
+shape_K625    1.933  625.0    0.8588 1.097         16.27         3.758
+shape_K500    1.614  500.0    0.8680 1.099         15.70         3.706
+amp_cmip6c    1.340  580.0    0.7266 1.043         31.70         4.476
+amp_mid       1.650  625.0    0.7857 1.064         24.19         4.096
+           seas_lag_p_NH seas_lag_p_SH npp_frac_NH    kz rep_dC
+control            1.620         2.682      0.5934 14690  3.275
+shape_K625         1.618         2.687      0.5925 14930  3.240
+shape_K500         1.613         2.685      0.5915 15130  3.219
+amp_cmip6c         1.597         2.766      0.6029 16970  3.683
+amp_mid            1.616         2.711      0.6044 16440  3.347
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/fert_profile_fixedstock_20260930.{log,csv,rds}
