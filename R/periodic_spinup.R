@@ -196,6 +196,12 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
   # residual = Phi(y)_C - y_C, one row replaced by the ANNUAL-MEAN atmospheric
   # carbon pin. Both isotopes ride along untouched; 12C does not read them.
   F <- ccx_cpp_forcing_prep(ps_year_forcing(prod, quiet = Fq))
+  # the INERT soil boxes (2026-09-30): no fluxes, so Phi leaves them exactly
+  # where they are and their residual rows AND columns are zero -- pin them to
+  # their stock. Their Jacobian columns are then e_j exactly (nothing reads the
+  # box), so they are set, not finite-differenced: two fewer one-year runs.
+  ii      <- ccx_inert_idx(aux)
+  c_inert <- sp0$y[ii, "C"]
   ps_resid_C <- function(cv) {
     yy <- sp0$y; yy[, "C"] <- cv
     r  <- ps_phi(yy, p, aux, grid, F, prep)
@@ -204,6 +210,7 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
     # trajectory over the period just integrated.
     mean_atm_C <- mean(r$out$co2_NH + r$out$co2_SH) * aux$gtc_per_ppm_hemi
     res[iatmN] <- mean_atm_C - c_atm_target
+    if (length(ii)) res[ii] <- cv[ii] - c_inert
     res
   }
   cv <- sp0$y[, "C"]
@@ -214,6 +221,7 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
     if (nr < PS_TOL) break
     J <- matrix(0, nb, nb)
     for (j in seq_len(nb)) {
+      if (j %in% ii) { J[j, j] <- 1; next }      # the pinned inert row, exactly
       dh <- max(PS_FD_REL * abs(cv[j]), PS_FD_ABS)
       cp <- cv; cp[j] <- cp[j] + dh
       J[, j] <- (ps_resid_C(cp) - r0) / dh
@@ -258,7 +266,12 @@ ccx_periodic_spinup <- function(p = ccx_default_params(),
   A13 <- o13$M - diag(nb); rhs <- -o13$b
   target13 <- mean(o13$out0$co2_NH) * gpph * R13 * (1 + d13c0 / 1000)
   A13[iatmN, ] <- o13$Mbar; rhs[iatmN] <- target13 - o13$bbar
+  # the INERT soil boxes: 13C conserved and unexchanged, so M - I has a zero
+  # row there -- pin to 0 and assign the passive pool's ratio after the solve
+  # (exact: no box reads the inert box).
+  for (k in ii) { A13[k, ] <- 0; A13[k, k] <- 1; rhs[k] <- 0 }
   y[, "C13"] <- solve(A13, rhs)
+  y <- ccx_inert_c13(y, aux)
 
   # 14C: linear in production, so solve at unit production, run that periodic
   # orbit once, and scale production so its ANNUAL-MEAN total atmospheric 14C

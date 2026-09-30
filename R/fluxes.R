@@ -148,6 +148,9 @@ ccx_flux_boxclass <- function(aux, nb) {
     if (!is.null(ix$eq)) cls[ix$eq] <- "ml"
     # ... and the tropical surface box (2026-09-14f), likewise a SURFACE box.
     if (!is.null(ix$tr)) cls[ix$tr] <- "ml"
+    # The INERT soil box (2026-09-30) is soil. It has no fluxes, so it never
+    # appears on an edge; classifying it keeps the guard below meaningful.
+    if (!is.null(ix[[CCX_LAND_INERT]])) cls[ix[[CCX_LAND_INERT]]] <- "soil"
   }
   if (anyNA(cls)) stop("ccx_flux_boxclass: unclassified box(es) at ",
                        paste(which(is.na(cls)), collapse = ", "))

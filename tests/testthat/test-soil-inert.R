@@ -13,6 +13,10 @@
 #         land-use debit path, which reads the same share;
 #   CONSERVE closed-system carbon is conserved with it ON;
 #   STOCK exchanging + inert passive = the UNCARVED passive stock, per hemisphere.
+#   BOX   (2026-09-30 f) the inert pool is a STATE BOX `soil_inert`, appended last
+#         per hemisphere, ABSENT when off; pinned in all three spinup solves;
+#         C = aux$soil_inert, 13C at the passive pool's ratio, 14C = 0, zero
+#         derivative; counted in land_C (both cores), never in ocean_C.
 # =====================================================================
 
 F_ON <- ccx_const("SOIL_INERT_FRAC")
@@ -42,6 +46,10 @@ test_that("OFF: absent and 0 are bit-exact, in the share, the spinup and aux", {
   expect_identical(s0$y, sa$y)
   expect_identical(s0$aux$land0, sa$aux$land0)
   expect_identical(unlist(s0$aux$soil_inert), c(NH = 0, SH = 0))
+  # OFF means ABSENT: no box, the state is the pre-2026-09-30 layout
+  expect_length(ccx_inert_idx(s0$aux), 0L)
+  expect_false(any(grepl("soil_inert", rownames(s0$y))))
+  expect_identical(nrow(s0$y), length(ccx_box_names(N_INTERIOR)))
   # the C++ core receives the plain litter_slow_frac when off
   skip_if_no_cpp()
   expect_identical(ccx_cpp_par(p_off)[["litter_slow_frac"]], p_off$litter_slow_frac)
@@ -49,12 +57,15 @@ test_that("OFF: absent and 0 are bit-exact, in the share, the spinup and aux", {
 
 test_that("EQUIV: the carve-out IS the scaled-litter proxy, bit for bit", {
   sp_on <- ccx_spinup(p_on); sp_px <- ccx_spinup(p_prx)
-  expect_identical(sp_on$y, sp_px$y)
+  ii <- ccx_inert_idx(sp_on$aux)
+  expect_length(ii, 2L)
+  expect_identical(sp_on$y[-ii, ], sp_px$y)           # every EXCHANGING row, bit for bit
   expect_identical(sp_on$aux$land0, sp_px$aux$land0)
   expect_identical(ccx_luc_pool_shares(p_on), ccx_luc_pool_shares(p_prx))
   dR_on <- ccx_deriv(sp_on$y, 1980.5, p_on,  forc_open(sp_on), sp_on$grid, sp_on$aux)
   dR_px <- ccx_deriv(sp_px$y, 1980.5, p_prx, forc_open(sp_px), sp_px$grid, sp_px$aux)
-  expect_identical(dR_on, dR_px)
+  expect_identical(dR_on[-ii, ], dR_px)
+  expect_true(all(dR_on[ii, ] == 0))                  # no fluxes, and nothing to decay
   # POWER: the carve-out is a different model from OFF (else EQUIV passes vacuously)
   sp_off <- ccx_spinup(p_off)
   expect_gt(abs(sp_off$y[sp_off$aux$idx$NH$soil_slow, "C"] -
@@ -130,6 +141,52 @@ test_that("CONSERVE: closed-system carbon is conserved with the carve-out ON", {
     y <- ccx_step_rk4(y, t, 1 / 12, p, closed, sp$grid, sp$aux); t <- t + 1 / 12
   }
   expect_lt(abs(ccx_total(y) / tot0 - 1), 1e-10)
+})
+
+test_that("BOX: the inert box is pinned in the aseasonal spinup and carries C, 13C, 14C correctly", {
+  sp <- ccx_spinup(p_on); ii <- ccx_inert_idx(sp$aux)
+  expect_identical(rownames(sp$y)[ii], c("NH_soil_inert", "SH_soil_inert"))
+  # appended LAST in each hemisphere: every other box keeps its pool-off name order
+  expect_identical(rownames(sp$y)[-ii], ccx_box_names(N_INTERIOR))
+  expect_equal(unname(sp$y[ii, "C"]), unname(unlist(sp$aux$soil_inert)), tolerance = 1e-14)
+  expect_true(all(sp$y[ii, "C14"] == 0))
+  for (h in HEMIS) {
+    i <- sp$aux$idx[[h]]
+    expect_equal(sp$y[i$soil_inert, "C13"] / sp$y[i$soil_inert, "C"],
+                 sp$y[i$soil_slow, "C13"] / sp$y[i$soil_slow, "C"], tolerance = 1e-14, info = h)
+  }
+  d <- sp$diagnostics
+  expect_lt(max(d$max_abs_dCdt, d$max_abs_dC13dt, d$max_abs_dC14dt), 1e-9)
+  expect_equal(d$soil_inert_C_GtC, sum(sp$y[ii, "C"]))
+  expect_equal(d$land_C_GtC, sum(sp$y[unlist(lapply(HEMIS, function(h) sp$aux$idx[[h]]$land)), "C"]))
+  expect_true(all(ii %in% unlist(lapply(HEMIS, function(h) sp$aux$idx[[h]]$land))))
+})
+
+test_that("BOX: the periodic spinup pins it too, and its fixed point is the proxy's", {
+  skip_if_no_cpp()
+  ps_on <- ccx_periodic_spinup(p_on); ps_px <- ccx_periodic_spinup(p_prx)
+  ii <- ccx_inert_idx(ps_on$aux)
+  expect_equal(unname(ps_on$y[ii, "C"]), unname(unlist(ps_on$aux$soil_inert)), tolerance = 1e-12)
+  expect_true(all(ps_on$y[ii, "C14"] == 0))
+  expect_equal(ps_on$y[-ii, ], ps_px$y, tolerance = 1e-10)   # same orbit, solved independently
+  r <- ps_on$diagnostics
+  expect_lt(max(r$max_abs_dCdt, r$max_abs_dC13dt, r$max_abs_dC14dt), 1e-6)
+})
+
+test_that("BOX: both cores count it as LAND, never ocean, and carry it unchanged", {
+  skip_if_no_cpp()
+  sp <- ccx_spinup(p_on); ii <- ccx_inert_idx(sp$aux); inert <- sum(sp$y[ii, "C"])
+  F  <- ccx_build_forcing("historical", c(1900, 1950), prod_c14 = sp$prod_c14)
+  rR <- suppressWarnings(ccx_run(sp, F)); rC <- suppressWarnings(ccx_run_fast(sp, F))
+  sq <- ccx_spinup(p_prx); rq <- suppressWarnings(ccx_run_fast(sq, F))
+  for (r in list(rR, rC)) {
+    expect_equal(r$out$land_C, rq$out$land_C + inert, tolerance = 1e-13)
+    expect_equal(r$out$ocean_C, rq$out$ocean_C, tolerance = 1e-13)
+    expect_equal(r$out$land_C14, rq$out$land_C14, tolerance = 1e-13)
+    expect_identical(unname(r$state[ii, "C"]), unname(sp$y[ii, "C"]))
+    expect_true(all(r$state[ii, "C14"] == 0))
+  }
+  expect_lt(max(abs(rR$state - rC$state)) / max(abs(rR$state)), 1e-13)
 })
 
 test_that("the structure label switches it on at the cited value, and only there", {

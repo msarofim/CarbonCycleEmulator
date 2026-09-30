@@ -108,6 +108,11 @@ ccx_conveyor_geom <- function(p, grid) {
 #' count as a stride (src/ccx_core.cpp), so it is a structural constant, not a
 #' presentational one.
 CCX_LAND_POOLS <- c("leaf", "wood", "soil_fast", "soil_slow")
+# The INERT soil pool (2026-09-30): LAND carbon with NO fluxes, present only when
+# soil_inert_frac > 0 (ccx_inert_on()). Deliberately NOT in CCX_LAND_POOLS, which
+# means "the four pools with a turnover time" everywhere it is used (the flux
+# split, the pro-rata land-use shares, land0/veg0); it is in aux$idx[[h]]$land.
+CCX_LAND_INERT <- "soil_inert"
 
 #' Land-use permanence: the default, and the ceiling on how much land the model
 #' will let cumulative land-use change clear.
@@ -825,13 +830,61 @@ ccx_soil_inert_stock <- function(p, npp0) {
 #' hemisphere, appended AFTER `eq` (or wherever the count ends when the cell
 #' is off), so once more no existing index moves. 20 boxes per hemisphere with
 #' all three structures on, 40 total. Same absence contract (ccx_tr_on()).
-ccx_box_names <- function(nl = N_INTERIOR, hs = FALSE, eq = FALSE, tr = FALSE) {
+#'
+#' + THE INERT SOIL POOL (2026-09-30, `inert = TRUE`): one more box per
+#' hemisphere, `soil_inert`, appended LAST (after `tr`, or wherever the count
+#' ends), so once more no existing index moves. It is LAND, not ocean: it joins
+#' `aux$idx[[h]]$land`, and the C++ core's ocean sum stops before it. Same
+#' absence contract (ccx_inert_on()): off means ABSENT, so every registered
+#' file's state vector is literally unchanged.
+ccx_box_names <- function(nl = N_INTERIOR, hs = FALSE, eq = FALSE, tr = FALSE, inert = FALSE) {
   unlist(lapply(HEMIS, function(h)
     c(paste0(h, "_atm"), paste0(h, "_", CCX_LAND_POOLS),
       paste0(h, "_ml"), paste0(h, "_oc", seq_len(nl)),
       if (hs) c(paste0(h, "_hs"), paste0(h, "_hd")),
       if (eq) paste0(h, "_eq"),
-      if (tr) paste0(h, "_tr"))))
+      if (tr) paste0(h, "_tr"),
+      if (inert) paste0(h, "_", CCX_LAND_INERT))))
+}
+
+#' State indices of the inert soil boxes (both hemispheres), or integer(0).
+#'
+#' The spinup solvers PIN these rows: a box with no fluxes makes every
+#' steady-state operator singular (an all-zero row AND column), exactly the
+#' reason the hs/eq/tr boxes are absent rather than empty when off. Its carbon
+#' is pinned to aux$soil_inert, its 13C to the passive pool's ratio (assigned
+#' after the solve -- no box reads it), and its 14C needs no pin: decay keeps
+#' that row non-singular and the solution is exactly 0 (radiocarbon-free).
+ccx_inert_idx <- function(aux) {
+  unlist(lapply(HEMIS, function(h) aux$idx[[h]][[CCX_LAND_INERT]]), use.names = FALSE)
+}
+
+#' Set the inert boxes' 13C to their hemisphere's PASSIVE-pool 13C/C ratio.
+#'
+#' A MODELLING CHOICE, not a cited constant (2026-09-30): the inert pool is soil
+#' carbon that no longer exchanges, so it carries the passive pool's isotopic
+#' composition. It enters no flux, so it moves nothing but bulk land/soil 13C
+#' readouts. No-op when the pool is off.
+ccx_inert_c13 <- function(y, aux) {
+  for (h in HEMIS) {
+    ii <- aux$idx[[h]][[CCX_LAND_INERT]]
+    if (is.null(ii)) next
+    iss <- aux$idx[[h]]$soil_slow
+    y[ii, "C13"] <- y[ii, "C"] * (y[iss, "C13"] / y[iss, "C"])
+  }
+  y
+}
+
+#' Is the INERT SOIL POOL on for this parameter set? (2026-09-30)
+#'
+#' TRUE iff `soil_inert_frac` is present and > 0 (validated by
+#' ccx_litter_slow_eff(), which refuses anything outside [0, 1)). Absence and 0
+#' mean the same thing -- no box, and the carve-out is off -- so the flux split
+#' and the box can never disagree about whether the pool exists.
+ccx_inert_on <- function(p) {
+  if (is.null(p$soil_inert_frac)) return(FALSE)
+  ccx_litter_slow_eff(p)              # validates the fraction, by name
+  p$soil_inert_frac > 0
 }
 
 #' Is the TROPICAL SURFACE BOX on for this parameter set? (2026-09-14f)
@@ -891,8 +944,8 @@ ccx_hs_on <- function(p) {
 CCX_TRACERS <- c("C", "C13", "C14")
 
 #' Build an empty state: matrix [box x tracer]
-ccx_new_state <- function(nl = N_INTERIOR, hs = FALSE, eq = FALSE, tr = FALSE) {
-  bn <- ccx_box_names(nl, hs, eq, tr)
+ccx_new_state <- function(nl = N_INTERIOR, hs = FALSE, eq = FALSE, tr = FALSE, inert = FALSE) {
+  bn <- ccx_box_names(nl, hs, eq, tr, inert)
   matrix(0, nrow = length(bn), ncol = length(CCX_TRACERS),
          dimnames = list(bn, CCX_TRACERS))
 }
@@ -3654,6 +3707,7 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   hs_on <- ccx_hs_on(p)
   eq_on <- ccx_eq_on(p)
   tr_on <- ccx_tr_on(p)
+  inert_on <- ccx_inert_on(p)     # the inert soil pool (2026-09-30)
   # ⛔ D1 IS CLOSED ONLY FOR THE CELL'S OWN LIMBS (review 2026-09-14, before the
   # array). Under D1 the mixed layer covers a_ml = a_ls - a_eq while the interior
   # keeps a_ls; the cell's loop books every limb as a VOLUME x the source's
@@ -3686,7 +3740,7 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     stop("ccx_prepare(): q_conv > 0 cannot be combined with the HILDA boxes (hs_frac > 0): the ",
          "conveyor's legs are per a_oc while the boxes are a_ls / a_ml, so the declared Sv is ",
          "wrong by (1 - hs_frac). The conveyor is retired (DESIGN 3.4a D).")
-  bn  <- ccx_box_names(grid$nl, hs_on, eq_on, tr_on)
+  bn  <- ccx_box_names(grid$nl, hs_on, eq_on, tr_on, inert_on)
   idx <- lapply(HEMIS, function(h) {
     v <- list(
       atm  = which(bn == paste0(h, "_atm")),
@@ -3699,9 +3753,13 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     if (eq_on) v$eq <- which(bn == paste0(h, "_eq"))
     if (tr_on) v$tr <- which(bn == paste0(h, "_tr"))
     for (pool in CCX_LAND_POOLS) v[[pool]] <- which(bn == paste0(h, "_", pool))
+    if (inert_on) v[[CCX_LAND_INERT]] <- which(bn == paste0(h, "_", CCX_LAND_INERT))
     # every land index in state order, for the callers that want the land as a
-    # whole (spinup diagnostics, forcing.R's budget split)
-    v$land <- unlist(v[CCX_LAND_POOLS], use.names = FALSE)
+    # whole (spinup diagnostics, forcing.R's budget split). ⭐ INCLUDES the inert
+    # soil box when it exists (2026-09-30): land_C is then ALL land carbon, the
+    # quantity the inventories measure; differences of it are unchanged, because
+    # the box never changes.
+    v$land <- unlist(v[c(CCX_LAND_POOLS, if (inert_on) CCX_LAND_INERT)], use.names = FALSE)
     v
   })
   names(idx) <- HEMIS
@@ -4130,6 +4188,9 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # the cell's fields. `tr_q_share` splits `q_tr` by tr AREA (the cell's
     # W idiom: both boxes see the same exchange velocity).
     tr_on       = as.integer(tr_on),
+    # the inert soil pool (2026-09-30): the C++ core reads it FOURTH, because it
+    # sets the stride (one box per hemisphere, appended last).
+    inert_on    = as.integer(inert_on),
     # D1 IS LIVE (audit 2026-09-15 d): the ONE flag every a_ls/a_ml correction
     # reads -- the ML/layer-1 diffusion thickness, the seasonal excursion share,
     # entrainment. It is TRUE exactly when a_ml above was shrunk (eq_on ||

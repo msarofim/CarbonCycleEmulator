@@ -43,6 +43,10 @@ using namespace Rcpp;
 //                                         (2026-09-13g); IEQ is set at runtime
 //   19 tr  (after eq, or in its slot)   <- ONLY when the tropical surface box is
 //                                         on (2026-09-14f); ITR is set at runtime
+//   20 soil_inert (LAST, whatever the count) <- ONLY when the inert soil pool is on
+//                                         (2026-09-30); ISI is set at runtime. It is
+//                                         LAND: no fluxes, counted in land_C, and
+//                                         the out matrix's ocean sum stops before it.
 //
 // ⚠ THE STRIDE IS RUNTIME, NOT COMPILE-TIME, SINCE 2026-09-05. The
 // high-latitude boxes are ABSENT rather than empty when hs_frac = 0: carrying
@@ -63,6 +67,8 @@ static const int IHD = IHS + 1;        // high-latitude deep     (= 17), if pres
 static int IEQ = -1;                   // the equatorial cell, RUNTIME (2026-09-13g):
                                        // IHD + 1 with HILDA on, IHS's slot with it
                                        // off; -1 = absent. Set by unpack_aux().
+static int ISI = -1;                   // the INERT soil box, RUNTIME (2026-09-30):
+                                       // the last slot of each hemisphere; -1 = absent.
 static int ITR = -1;                   // the tropical surface box, RUNTIME
                                        // (2026-09-14f): the slot after eq (or eq's
                                        // slot with the cell off); -1 = absent.
@@ -181,6 +187,9 @@ struct Aux {
   // switches, sets the stride. `a_ml` above is now a_ls - a_eq - a_tr.
   int    tr_on;
   double a_tr[2], tr_mass_kg[2], asx_tr[2], tr_q_share[2];
+  // THE INERT SOIL BOX (2026-09-30): no fluxes, so it only sets the stride and
+  // moves one box per hemisphere from the out matrix's ocean sum to its land sum.
+  int    inert_on;
   // D1 IS LIVE (audit 2026-09-15 d): eq_on || tr_on -- the one flag every
   // a_ls/a_ml correction reads (twin of R's aux$d1_on, derived here from the
   // two marshalled switches rather than sent, so the two cannot disagree).
@@ -1168,6 +1177,10 @@ static Aux unpack_aux(const List& a) {
     ITR = A.tr_on ? after_eq : -1;
     NPH = after_eq + (A.tr_on ? 1 : 0);
   }
+  // FOURTH: the inert soil box (2026-09-30) takes the LAST slot of each hemisphere.
+  A.inert_on = a["inert_on"];
+  ISI = A.inert_on ? NPH : -1;
+  NPH += A.inert_on ? 1 : 0;
   A.d1_on = (A.eq_on || A.tr_on) ? 1 : 0;
   NB  = 2 * NPH;
   A.gtc_per_ppm_hemi = a["gtc_per_ppm_hemi"];
@@ -1390,7 +1403,12 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
         ld   += y[IX(base + kk, C)];
         ld14 += y[IX(base + kk, C14)];
       }
-      for (int kk = IML; kk < NPH; ++kk) {        // mixed layer + interior
+      if (ISI >= 0) {                             // + the inert soil box (2026-09-30)
+        ld   += y[IX(base + ISI, C)];
+        ld14 += y[IX(base + ISI, C14)];
+      }
+      const int oc_end = (ISI >= 0) ? ISI : NPH;  // the inert box is LAND, not ocean
+      for (int kk = IML; kk < oc_end; ++kk) {     // mixed layer + interior
         oc   += y[IX(base + kk, C)];
         oc14 += y[IX(base + kk, C14)];
       }

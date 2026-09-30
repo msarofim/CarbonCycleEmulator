@@ -80,6 +80,8 @@ ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
   # not pinned -- it is what has to move, and forbidding it is what left the
   # 0.1226 GtC/yr residual sitting in the two atmosphere boxes.
   c_atm_target <- chi0 * aux$gtc_per_ppm_hemi * length(atm)
+  ii      <- ccx_inert_idx(aux)
+  c_inert <- unlist(aux$soil_inert[HEMIS], use.names = FALSE)[seq_along(ii)]
 
   resid <- function(cv) {
     yy <- y; yy[, "C"] <- cv
@@ -88,6 +90,9 @@ ccx_c12_steady_conveyor <- function(p0, aux, grid, chi0, y, forc,
     # deficient by one. Trade one equation for the pin; the dropped row is then
     # implied by the other 31 plus conservation.
     r[atm[1]] <- sum(cv[atm]) - c_atm_target
+    # the INERT soil boxes (2026-09-30): no fluxes, so their rows and columns
+    # are zero and the Jacobian would be singular -- pin them to their stock.
+    if (length(ii)) r[ii] <- cv[ii] - c_inert
     r
   }
 
@@ -263,6 +268,9 @@ ccx_spinup_diagnostics <- function(y, prod, aux, grid, residuals, co2_ppm) {
                           c(aux$idx[[h]]$leaf, aux$idx[[h]]$wood))), "C"]),
     soil_slow_C_GtC   = sum(y[unlist(lapply(HEMIS, function(h)
                           aux$idx[[h]]$soil_slow)), "C"]),
+    # the INERT soil pool (2026-09-30), 0 when absent. `land_C_GtC` above
+    # already includes it (aux$idx$land does); this row names it.
+    soil_inert_C_GtC  = sum(y[ccx_inert_idx(aux), "C"]),
     prod_c14_mol_yr   = prod,
     prod_canonical    = P_canon,
     prod_ratio        = prod / P_canon
@@ -283,7 +291,7 @@ ccx_spinup <- function(p = ccx_default_params(),
 
   aux  <- ccx_prepare(p)
   grid <- aux$grid
-  y    <- ccx_new_state(grid$nl, ccx_hs_on(p), ccx_eq_on(p), ccx_tr_on(p))
+  y    <- ccx_new_state(grid$nl, ccx_hs_on(p), ccx_eq_on(p), ccx_tr_on(p), ccx_inert_on(p))
 
   # ---- 12C: analytic equilibrium -------------------------------------
   for (h in HEMIS) {
@@ -309,6 +317,8 @@ ccx_spinup <- function(p = ccx_default_params(),
     y[i$wood, "C"] <- npp0 * (1 - p$npp_leaf_frac) * p$tau_wood
     y[i$soil_fast, "C"] <- npp0 * (1 - lsf) * p$tau_soil_fast
     y[i$soil_slow, "C"] <- npp0 * lsf * p$tau_soil_slow
+    # the INERT soil box, when it exists: its stock is fixed, not solved
+    if (!is.null(i[[CCX_LAND_INERT]])) y[i[[CCX_LAND_INERT]], "C"] <- aux$soil_inert[[h]]
 
     # ocean: mixed layer in Henry equilibrium with the atmosphere; the interior
     # is at uniform CONCENTRATION, so C_k scales with layer thickness (this is
@@ -430,7 +440,12 @@ ccx_spinup <- function(p = ccx_default_params(),
   A13 <- op13$A; rhs <- -op13$b
   target13 <- y[iatmN, "C"] * ccx_const("R13_VPDB") * (1 + d13c0 / 1000)
   A13[iatmN, ] <- 0; A13[iatmN, iatmN] <- 1; rhs[iatmN] <- target13
+  # the INERT soil boxes: a zero row (13C conserved, no exchange) -- pin to 0,
+  # then give them the passive pool's ratio. Nothing reads them, so it is exact.
+  ii <- ccx_inert_idx(aux)
+  for (k in ii) { A13[k, ] <- 0; A13[k, k] <- 1; rhs[k] <- 0 }
   y[, "C13"] <- solve(A13, rhs)
+  y <- ccx_inert_c13(y, aux)
 
   # ---- 14C: solve for the production that hits the target Delta14C ----
   # c14 responds linearly to production, so solve once at unit production and
@@ -492,8 +507,9 @@ ccx_report_spinup <- function(s) {
                 (d$d14c_bottom_box - tg$target) / tg$sd))
   }
   cat(sprintf("  ocean carbon         %.0f GtC\n", d$ocean_C_GtC))
-  cat(sprintf("  land carbon          %.0f GtC  (vegetation %.0f, passive soil %.0f)\n",
-              d$land_C_GtC, d$veg_C_GtC, d$soil_slow_C_GtC))
+  cat(sprintf("  land carbon          %.0f GtC  (vegetation %.0f, passive soil %.0f, inert soil %.0f)\n",
+              d$land_C_GtC, d$veg_C_GtC, d$soil_slow_C_GtC,
+              if (is.null(d$soil_inert_C_GtC)) 0 else d$soil_inert_C_GtC))
   cat(sprintf("  natural 14C prod     %.0f mol/yr   vs canonical %.0f  (ratio %.2f)\n",
               d$prod_c14_mol_yr, d$prod_canonical, d$prod_ratio))
   invisible(d)

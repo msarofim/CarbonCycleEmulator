@@ -157,6 +157,11 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     # `tr_on` is read THIRD on the C++ side because it also sets the stride.
     tr_on = if (is.null(aux$tr_on))
       stop("aux lacks tr_on -- build it with ccx_prepare() (2026-09-14f)") else as.integer(aux$tr_on),
+    # THE INERT SOIL BOX (2026-09-30), read FOURTH on the C++ side: it sets the
+    # stride (one box per hemisphere, appended last) and moves that box from the
+    # ocean sum to the land sum in the out matrix. An aux that predates it is
+    # the pool-off model, which is what 0 means.
+    inert_on = if (is.null(aux$inert_on)) 0L else as.integer(aux$inert_on),
     a_tr = c(aux$a_tr$NH, aux$a_tr$SH),
     tr_mass_kg = c(aux$tr_mass_kg$NH, aux$tr_mass_kg$SH),
     asx_tr = c(aux$asx_tr$NH, aux$asx_tr$SH),
@@ -470,7 +475,7 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
        aux = ccx_cpp_aux(spin$aux, spin$grid),
        ss  = ccx_resolve_substeps(substeps, spin$params, spin$grid),
        box_names = ccx_box_names(spin$grid$nl, ccx_hs_on(spin$params), ccx_eq_on(spin$params),
-                                 ccx_tr_on(spin$params)),
+                                 ccx_tr_on(spin$params), ccx_inert_on(spin$params)),
        hs_on = ccx_hs_on(spin$params), eq_on = ccx_eq_on(spin$params),
        tr_on = ccx_tr_on(spin$params),
        enso_index = ccx_enso_index_of(spin$params),
