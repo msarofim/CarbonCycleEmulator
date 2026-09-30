@@ -82,7 +82,7 @@ AS_ID_TOL <- 1e-3                 # the label vs the proxy share differ by 2e-5 
 AS_CORES  <- 4L
 AS_SPLICE <- c(ssp585 = FALSE, vvH = TRUE)
 AS_SMOKE  <- identical(Sys.getenv("AS_SMOKE"), "1")
-if (AS_SMOKE) { AS_TAG <- paste0(AS_TAG, "_smoke"); AS_MAXIT <- 10L; AS_ARMS <- AS_ARMS["J3"] }
+if (AS_SMOKE) { AS_TAG <- paste0(AS_TAG, "_smoke"); AS_MAXIT <- 10L; AS_ARMS <- AS_ARMS[1] }
 AS_TAG    <- paste0(AS_TAG, Sys.getenv("AS_TAG_SUFFIX", ""))
 AS_OUT    <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", AS_TAG, AS_DATE))
 COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
