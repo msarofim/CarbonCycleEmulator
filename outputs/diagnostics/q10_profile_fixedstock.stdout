@@ -1,0 +1,53 @@
+=== PROVENANCE === driver calibration/diag_q10_profile.R, commit 965cc73, run 2026-09-29 20:49
+  structure hilda_csl3v0ka at v0k basin 1 + control overrides {tau_soil_slow=500, litter_slow_frac=0.05}; control = tau_soil_slow_profile_fixedstock_20260929.rds value 500 (rebalanced 11)
+  q10 fixed at {1.3, 1.5, 2}; rebal = NM maxit 3000 on the other 10 {beta_max, fert_k, luc_scale, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, npp_frac_NH, kz, rep_dC}
+  logpost / loglik natural-log units (q10 carries a prior: READ d_loglik); NPP GtC/yr mean 2001-2023; no RNG
+  [identity] control rescored vs stored $opt: 7.87e-09 (tol 1e-04)
+
+     q10  d_lp_froz d_lp_rebal  d_ll_froz d_ll_rebal   NPPmod  conv  evals
+   1.102      +0.00      +0.00      +0.00      +0.00    70.00     0      0
+   1.300   -1989.45     -13.88   -1990.81      -1.73    70.51     1   3001
+   1.500   -6514.24     -29.77   -6516.42      -6.14    71.03     0   1413
+   2.000  -20548.85     -81.61  -20551.70     -35.85    71.71     0   1979
+
+=== streams vs control, FROZEN (10 largest |max|) ===
+      co2_seasonal_MLO d13c_seasonal_MLO co2_seasonal_SPO co2_level_SPO
+1.102             0.00              0.00             0.00          0.00
+1.300         -1562.91           -232.48          -165.85        -17.18
+1.500         -5001.19           -846.76          -551.19        -48.61
+2.000        -15392.57          -2773.28         -1925.39       -157.73
+      d13c_seasonal_SPO co2_level_MLO d13c_level_MLO co2_icecore gcb_land_sink
+1.102              0.00          0.00           0.00        0.00          0.00
+1.300             -4.13         -6.49          -7.21       -2.07          4.49
+1.500            -29.41        -30.33         -14.49       -4.20          5.46
+2.000           -135.63       -128.67         -31.89       -9.66         -0.27
+      d13c_level_SPO
+1.102           0.00
+1.300           3.22
+1.500           4.85
+2.000           5.02
+
+=== streams vs control, REBALANCED (10 largest |max|) ===
+      gcb_land_sink d13c_level_SPO d13c_level_MLO co2_level_SPO co2_level_MLO
+1.102          0.00           0.00           0.00          0.00          0.00
+1.300         -1.39           1.11           0.71          0.17          0.26
+1.500         -5.56           0.99           1.39          0.05          0.58
+2.000        -13.02         -12.86           5.39         -4.93         -2.61
+      co2_seasonal_MLO d13c_seasonal_MLO co2_seasonal_SPO co2_icecore d14c_SH
+1.102             0.00              0.00             0.00        0.00    0.00
+1.300             0.21             -1.41            -0.39       -0.59   -0.17
+1.500            -0.11             -1.94            -0.81       -0.31   -0.38
+2.000            -1.99             -1.37            -1.77       -1.69   -1.28
+
+=== 11 names (q10 fixed, 10 rebalanced) ===
+                 beta_max fert_k luc_scale   q10 seas_T_amp_NH seas_T_amp_SH
+1.10158575702295    2.552  867.6    0.8480 1.102        15.640        3.6000
+1.3                 2.819  935.3    0.8538 1.300         6.504        1.4260
+1.5                 2.846  906.5    0.8670 1.500         4.344        1.0010
+2                   2.398  705.2    0.8914 2.000         2.272        0.7855
+                 seas_lag_p_NH seas_lag_p_SH npp_frac_NH    kz rep_dC
+1.10158575702295         1.620         2.682      0.5934 14690  3.275
+1.3                      1.653         2.680      0.6010 14670  3.241
+1.5                      1.663         2.679      0.6007 14600  3.240
+2                        1.627         2.657      0.5770 14610  3.704
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CCX_wt_cheap/outputs/diagnostics/q10_profile_fixedstock_20260929.{log,csv,rds}

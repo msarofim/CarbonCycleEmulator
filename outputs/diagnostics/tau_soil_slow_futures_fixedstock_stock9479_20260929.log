@@ -1,0 +1,10 @@
+=== PROVENANCE === driver calibration/diag_tau_soil_slow_futures.R, commit 5e262aa, run 2026-09-29 21:14
+  profile tau_soil_slow_profile_fixedstock_stock9479 (litter_slow_frac per row: 0.0474)
+  vectors: tau_soil_slow_profile_fixedstock_stock9479_20260929.rds rows {500} (500 = control); arm hilda_csl3v0ka; scenarios vvH, vvL, ssp585 (spliced TRUE/TRUE/FALSE); ppm global mean; land GtC (land_C)
+  [identity] stored v0k ssp585 2300 = 1388.28 ppm (handoff 1388.3; d -0.016)
+
+  tau  500  dlp +0.00 | ssp585 2300  1395.1 ppm land x1.64 | vvH 2300  963.2 | vvL 2300  337.6 | vvH 2100  639.8 | luc 0.848 kz 14929 fert_k  866 q10 1.098
+
+  vs control (tau 500), ppm:
+    tau  500  ssp585 2300    +0.0  vvH 2300    +0.0  vvL 2300   +0.0  vvH 2100   +0.0
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CCX_wt_cheap2/outputs/diagnostics/tau_soil_slow_futures_fixedstock_stock9479_20260929.{log,csv}

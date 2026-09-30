@@ -2,6 +2,101 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (v) — **The cheap measurements (A–D). (1) τ_slow does not reach the radiocarbon problems: the bomb partition barely moves. (2) A CARVE-OUT inert pool at Copard's central fraction makes Shi's bulk Δ¹⁴C match at τ 500 (z +0.8) for −4.4 and +19 ppm. (3) With q10 free, lower NPP gets cheap only through a q10 < 1 escape; the pinned rerun is below. (4) The land never turns source at the FITTED fertilisation; at literature-band fertilisation plus q10 2 it goes neutral by ~2275 and sits inside Koven's spread.**
+
+Marcus: *"Is carve-out the choice that makes sense given the purpose of the inert pool? And run all
+the cheap measurements to get more data."* Earlier in the same exchange: he prefers an inert pool
+IN the model over one applied only at the comparison step; the refit waits until items 1–4 are
+settled; R2 is to be revisited with a longer explanation.
+- **Carve-out vs add-on (answered, not ruled):** carve-out is the consistent choice. The inventories
+  that set the passive stock at ~1500 GtC weigh radiocarbon-free carbon too, and Copard's fraction
+  is a fraction of those same stocks, so an add-on counts it twice. ⚠ The DEPTH scope must match:
+  Copard's f is 0.195 to 1 m but 0.51 at 1–2 m. The pairing used here is 0–1 m: f = (77 + 216) /
+  (704 + 801) = 0.195 (lit note numbers), so the exchanging passive stock is 1208 GtC.
+- **Drivers** (all no-RNG screens, all from frozen worktrees, all committed before running):
+  `diag_tau_soil_slow_profile.R` (`TS_STOCK_FRAC`, `TS_VALUES`), `diag_npp0_scan_resfree.R`
+  (`RS_RES_FREE`, `RS_FIX_PASSIVE`, `RS_PIN_Q10`), `diag_q10_profile.R` (new),
+  `diag_land_sink_trajectory.R` (new), `diag_passive_bomb_partition.R` (new), and
+  `diag_soil_d14c_shi2020.R` (`SD_CARVE_TAGS`). Every identity and gate below passed.
+
+**A. Bomb-¹⁴C partition across the passive rows** (`passive_bomb_partition_20260929.*`; gate:
+passive-tracer linearity 5.5e-14). At N&L's input in 1995, across every fixed-stock τ (250–5000)
+and every carve-out: atmosphere 18.4–18.8 kmol (OBS 20.3–22.8), ocean 67.0–70.1 (OBS 55.5 ± 7.6),
+land 13.3–16.5 (N&L's MODEL 18.9; ⚠ **no observation exists for the land row**). τ and the carve-out
+move each reservoir by ≤ 1–2 kmol, so **the passive pool cannot reach the atmosphere shortfall or
+the ocean overshoot**. The land at τ 500 is 24 % below N&L's model (the 09-15 "−17 %" was the
+`hilda31` era).
+- With the fixed-stock profile (09-29 r), this answers "does τ_slow help the radiocarbon fits":
+  only `d14c_NH` / `d14c_intcal` gain ~+5 each, `d14c_SH` turns negative beyond 3000 yr, and
+  `d13c_level_MLO` pays −7 to −12.
+
+**B. Sink → source** (`land_sink_trajectory_full_20260929.{log,csv,_annual.csv}`; identities: v0k
+1388.28, control reproduces the ext run exactly). SSP5-8.5, cumulative land change (GtC) and onset:
+
+| vector | q10 | Δloglik | 2015–2100 | 2100–2200 | 2200–2300 | onset |
+|---|---|---|---|---|---|---|
+| control (fitted) | 1.10 | 0 | +486 | +593 | +255 | none |
+| frozen q10 2.0 | 2.0 | −20552 (seasonal) | +419 | +442 | +121 | none |
+| **re-fitted q10 2.0** | 2.0 | **−35.9** | +436 | +431 | +120 | none |
+| lit fertilisation (1.34, 580), frozen | 1.10 | — | +317 | +344 | +160 | none |
+| **lit fertilisation + q10 2.0**, frozen | 2.0 | — | +248 | +194 | **+19** | **2274** |
+| Koven 2022 (±1σ) | | | 264 ± 172 | −29 ± 264 | −178 ± 251 | ~2100–2220 |
+
+- **H1 vs H2:** H2 is favoured. The design CAN go neutral (at literature fertilisation plus q10 2,
+  both post-2100 windows sit inside Koven's ±1σ). At the fitted vector it cannot, and the reason is
+  **fertilisation more than q10**. NPP rises 60 → 137 GtC/yr by 2200 at the fitted (β_max 2.55,
+  K 868). **First-principles check:** a flip needs q10^(ΔT/10) > NPP/NPP0 ≈ 2.3 at ΔT ≈ 7.3 K, i.e.
+  q10 > ~3.1 at the fitted fertilisation, or q10 > ~2.4 at the literature band's NPP ratio of ~1.9.
+  That matches the runs.
+- **Why q10 is held at 1.10 (q10 profile, `q10_profile_fixedstock_20260929.*`):** likelihood cost
+  −1.7 / −6.1 / −35.9 at q10 1.3 / 1.5 / 2.0 (1.3 hit maxit). At 2.0 the payers are
+  `gcb_land_sink` −13.0 and `d13c_level_SPO` −12.9. The LOGPOST cost is larger (−81.6), and ~40 of
+  the extra ~46 are the **seasonal temperature-amplitude observation priors**. The model uses ONE
+  q10 for the seasonal cycle and for century-scale warming, and `seas_T_amp × ln q10` is what the
+  seasonal record identifies (1.52 → 1.58 along the profile), so a higher q10 forces the seasonal
+  amplitude down (NH 15.6 → 2.3 K). ⚠ The q10 prior itself is centred at 2.0 and favours the
+  higher value (+2.2).
+- **The re-fitted q10 2.0 keeps fertilisation strong** (β_max 2.40, K 705), so its future is
+  essentially the frozen one. q10 alone never produces a flip here.
+- vvL (CO₂ falling) turns into a small source after ~2128 in every arm. That is carbon returning
+  as CO₂ falls, not a warming-driven flip.
+
+**C. NPP with decadal residence times free, passive stock held at 1500** (`npp0_scan_resfree_leaf-
+wood-soil_fast_fixpassive_20260929.*`; identity a 4.1e-7, all 7 rows conv 0). ×0.80 (modern NPP
+56.8, ≈ the ruled 56.04) costs **−8.8** and ×0.75 costs −13.4, against −65 / −103 with residence
+fixed. ⛔ **BUT q10 goes below 1** at ×0.75 / ×0.80 (0.964 / 0.992): respiration FALLING with
+warming, with its seasonal term sign-flipped (seas_T_amp × ln q10: +1.46 → −0.95). This is the
+shared-q10 escape of memory `q10_recovery_is_escape`; the residence-fixed (k) scan already showed
+q10 0.974 at ×0.75. **Not accepted as an answer until the q10-pinned rerun (below) reports.**
+The residence times wander (τ_leaf 0.46–3.09 yr with no trend), so the ridge is not located.
+
+**D. Carve-out proxy** (`tau_soil_slow_profile_fixedstock_stock{9479,8053,6627}_20260929.*`,
+futures `tau_soil_slow_futures_fixedstock_stock*`, T2 `soil_d14c_shi2020_carve_20260929.*`). An inert
+pool exchanges nothing, so dynamically it is a smaller exchanging passive pool. `litter_slow_frac`
+is scaled by the exchanging fraction f_ex. f_ex brackets: Copard's layer sds propagated assuming
+full correlation across layers (0.10, 0.18 → 0.143) — ⚠ my propagation, and cross-study (Copard's
+fractions on Batjes stocks).
+
+| f_ex (inert GtC) | τ | Δlogpost vs control | bulk Δ¹⁴C (in-model inert) | z vs Shi | ssp585 2300 | vvH 2300 |
+|---|---|---|---|---|---|---|
+| 1 (0) | 500 | 0 | −19 ‰ | +4.7 | 1387.9 | 957.9 |
+| 0.948 (78) | 500 | −0.8 | −69 ‰ | +3.6 | +7.2 | +5.3 |
+| **0.805 (292)** | **500** | **−4.4** | **−206 ‰** | **+0.8** | **+18.8** | **+16.4** |
+| 0.805 (292) | 1000 | −8.6 | −251 ‰ | −0.1 | +92.1 | +57.4 |
+| 0.805 (292) | 2000 | −9.6 | −317 ‰ | −1.5 | +152.3 | +93.5 |
+| 0.663 (506) | 500 | −12.7 (maxit) | −342 ‰ | −2.0 | +53.7 | +38.9 |
+
+- ⭐ **With an in-model inert pool at Copard's central fraction, the DEFAULT τ 500 matches Shi's
+  bulk (z +0.8).** The whole Shi/He vs Copard dispute now sits in one number, f, whose ±1σ spans
+  z +3.6 to −2.0 at τ 500.
+- **The carve-out's cost is the record's, not the soil's:** −4.4 at f 0.195, mostly
+  `d13c_level_MLO` −2.6 and the ¹⁴C streams (`d14c_SH` +1.8, `d14c_NH` −1.5).
+- **Heuristic vs measured (checked, not rationalised):** the retention weight predicted ~+36 ppm
+  for f_ex 0.805; the re-fitted run gives +18.8. A FROZEN carve-out (control vector, only the stock
+  changed; scratch script) gives **+52.0 ppm** and +2.1 ppm already by 2024, which the record
+  charges. The re-fit restores 2024 and absorbs ~64 % of the future effect. ⇒ The heuristic brackets
+  the two, and its closeness on the τ rows (r/u) was partly luck.
+
 ## 2026-09-29 (u) — **Futures at τ 2000–5000, fixed stock (handoff item 2). Taking Shi 2020's soil Δ¹⁴C at face value (τ ≈ 2000–3000, z +1.8 / +0.4) raises SSP5-8.5 2300 by +137 / +153 ppm (vvH +81 / +92, vvL +11 / +14). The lever SATURATES, as the retention weight predicts.**
 
 Handoff item 2, run as a diagnostic (no ruling needed, nothing adopted).

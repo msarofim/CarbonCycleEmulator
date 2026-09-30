@@ -1,0 +1,39 @@
+=== PROVENANCE === driver calibration/diag_passive_bomb_partition.R, commit 5e262aa, run 2026-09-29 21:07
+  profiles {tau_soil_slow_profile_fixedstock_20260929, tau_soil_slow_profile_fixedstock_stock9479_20260929, tau_soil_slow_profile_fixedstock_stock8053_20260929, tau_soil_slow_profile_fixedstock_stock6627_20260929}; rebalanced vectors; excess 14C kmol, total minus 1940-1949 mean; atm framing C (x1.2686)
+  [GATE, linearity of a passive tracer] max |paired(fit)/paired(N&L) / input ratio - 1| = 5.5e-14 (tol 1e-06) -> PASS
+
+--- 1975, at N&L's input 102 kmol ---  N&L MODEL: atm 34.0 land 21.7 ocean 42.1  (land = model, NO obs)
+  OBS: troposphere x1.2686 = 33.0-35.5; ocean (objective row) 50.1 +- 7.9
+  profile                                        tau  stock    dlp |    atm   land  ocean  land% | land_fit ocn_fit
+  tau_soil_slow_profile_fixedstock_20260929      250   1500 -14.52 |  28.64  18.40  50.76  18.8% |   22.26   60.40
+  tau_soil_slow_profile_fixedstock_20260929      500   1500  +0.00 |  28.76  17.44  51.60  17.8% |   21.13   61.39
+  tau_soil_slow_profile_fixedstock_20260929      750   1500  -1.25 |  28.82  17.24  51.75  17.6% |   20.87   61.58
+  tau_soil_slow_profile_fixedstock_20260929     1000   1500  -1.15 |  28.85  17.17  51.78  17.6% |   20.77   61.63
+  tau_soil_slow_profile_fixedstock_20260929     1500   1500  -2.39 |  28.89  17.24  51.67  17.6% |   20.84   61.52
+  tau_soil_slow_profile_fixedstock_20260929     2000   1500  -3.75 |  28.91  17.38  51.51  17.8% |   20.97   61.36
+  tau_soil_slow_profile_fixedstock_20260929     3000   1500  -6.43 |  28.96  17.60  51.24  18.0% |   21.18   61.08
+  tau_soil_slow_profile_fixedstock_20260929     5000   1500 -16.78 |  29.01  18.03  50.76  18.4% |   21.62   60.57
+  tau_soil_slow_profile_fixedstock_stock9479_20260929   500   1422  -0.84 |  28.78  17.34  51.68  17.7% |   21.00   61.49
+  tau_soil_slow_profile_fixedstock_stock8053_20260929   500   1208  -4.38 |  28.84  17.05  51.91  17.4% |   20.66   61.76
+  tau_soil_slow_profile_fixedstock_stock8053_20260929  1000   1208  -8.57 |  28.93  16.94  51.93  17.3% |   20.50   61.81
+  tau_soil_slow_profile_fixedstock_stock8053_20260929  2000   1208  -9.55 |  28.95  17.14  51.72  17.5% |   20.69   61.60
+  tau_soil_slow_profile_fixedstock_stock6627_20260929   500    994 -12.72 |  28.88  16.77  52.16  17.1% |   20.33   62.04
+
+--- 1995, at N&L's input 102 kmol ---  N&L MODEL: atm 22.2 land 18.9 ocean 60.0  (land = model, NO obs)
+  OBS: troposphere x1.2686 = 20.3-22.8; ocean (objective row) 55.5 +- 7.6
+  profile                                        tau  stock    dlp |    atm   land  ocean  land% | land_fit ocn_fit
+  tau_soil_slow_profile_fixedstock_20260929      250   1500 -14.52 |  18.36  16.47  66.99  16.2% |   20.16   80.15
+  tau_soil_slow_profile_fixedstock_20260929      500   1500  +0.00 |  18.45  14.39  68.99  14.1% |   17.66   82.53
+  tau_soil_slow_profile_fixedstock_20260929      750   1500  -1.25 |  18.52  13.82  69.49  13.6% |   16.96   83.14
+  tau_soil_slow_profile_fixedstock_20260929     1000   1500  -1.15 |  18.56  13.60  69.66  13.4% |   16.68   83.37
+  tau_soil_slow_profile_fixedstock_20260929     1500   1500  -2.39 |  18.62  13.58  69.63  13.3% |   16.60   83.38
+  tau_soil_slow_profile_fixedstock_20260929     2000   1500  -3.75 |  18.65  13.72  69.46  13.5% |   16.71   83.22
+  tau_soil_slow_profile_fixedstock_20260929     3000   1500  -6.43 |  18.71  14.02  69.10  13.8% |   16.99   82.86
+  tau_soil_slow_profile_fixedstock_20260929     5000   1500 -16.78 |  18.78  14.67  68.38  14.4% |   17.64   82.12
+  tau_soil_slow_profile_fixedstock_stock9479_20260929   500   1422  -0.84 |  18.46  14.21  69.16  14.0% |   17.45   82.73
+  tau_soil_slow_profile_fixedstock_stock8053_20260929   500   1208  -4.38 |  18.48  13.73  69.62  13.5% |   16.88   83.27
+  tau_soil_slow_profile_fixedstock_stock8053_20260929  1000   1208  -8.57 |  18.59  13.28  69.96  13.0% |   16.28   83.73
+  tau_soil_slow_profile_fixedstock_stock8053_20260929  2000   1208  -9.55 |  18.64  13.39  69.80  13.1% |   16.33   83.61
+  tau_soil_slow_profile_fixedstock_stock6627_20260929   500    994 -12.72 |  18.47  13.27  70.08  13.0% |   16.33   83.83
+
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CCX_wt_cheap2/outputs/diagnostics/passive_bomb_partition_20260929.{log,csv}

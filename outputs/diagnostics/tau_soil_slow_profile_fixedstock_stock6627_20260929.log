@@ -1,0 +1,29 @@
+=== PROVENANCE === driver calibration/diag_tau_soil_slow_profile.R, commit 965cc73, run 2026-09-29 21:06
+  structure hilda_csl3v0ka at v0k basin 1, 11 names at the npp0_scan_20260929.csv scale-1 optimum; NPP_GLOBAL_PI unscaled (60 GtC/yr)
+  profile tau_soil_slow in {500} yr (default 500); other residence times at defaults; rebal = NM maxit 3000 on {beta_max, fert_k, luc_scale, q10, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, npp_frac_NH, kz, rep_dC}
+  mode: FIXED STOCK -- litter_slow_frac = 0.05 * 500 / tau (PI passive stock held)
+  CARVE-OUT PROXY: exchanging passive stock x0.6627 (= 994 GtC); identity vs tau_soil_slow_profile_fixedstock_20260929.rds default row frozen
+  logpost natural-log units; stock GtC (PI passive soil); NPP GtC/yr mean 2001-2023; no RNG
+  [identity] default row frozen vs independent rescore: 0.00e+00 (tol 1e-04)
+
+  tau_soil_slow     stock  d_frozen   d_rebal   NPPmod  conv  evals
+       500       994     +0.00     +0.00    69.33     1   3002
+
+=== streams vs default, FROZEN (8 largest |max|) ===
+    co2_level_MLO co2_level_SPO co2_seasonal_MLO co2_seasonal_SPO
+500             0             0                0                0
+    d13c_seasonal_MLO d13c_seasonal_SPO co2_icecore d13c_level_MLO
+500                 0                 0           0              0
+
+=== streams vs default, REBALANCED (8 largest |max|) ===
+    co2_level_MLO co2_level_SPO co2_seasonal_MLO co2_seasonal_SPO
+500             0             0                0                0
+    d13c_seasonal_MLO d13c_seasonal_SPO co2_icecore d13c_level_MLO
+500                 0                 0           0              0
+
+=== 11 fitted names, rebalanced ===
+    beta_max fert_k luc_scale   q10 seas_T_amp_NH seas_T_amp_SH seas_lag_p_NH
+500    2.633  760.8    0.8884 1.119          12.5         3.116         1.605
+    seas_lag_p_SH npp_frac_NH    kz rep_dC
+500         2.675      0.5937 16260  3.422
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CCX_wt_cheap/outputs/diagnostics/tau_soil_slow_profile_fixedstock_stock6627_20260929.{log,csv,rds}
