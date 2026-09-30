@@ -39,6 +39,12 @@
 #   its default. This asks the (m) question without the passive runaway the
 #   inventories reject. Identity (a) is still checked at the unmodified
 #   defaults; the optimisation and the control start from the fixed-stock ones.
+# q10 PIN (RS_PIN_Q10=<value>; CHANGELOG 09-29 v): the decadal-only run pushed
+#   q10 below 1 at x0.75/x0.80 (respiration falling with warming, its seasonal
+#   term sign-flipped) -- the shared-q10 escape of memory q10_recovery_is_escape.
+#   This pins q10 at <value> for the optimisation and the control (removed from
+#   the free names) so the escape is closed. Identity (a) still runs at the
+#   unpinned warm start.
 # USAGE: Rscript calibration/diag_npp0_scan_resfree.R  (from a FROZEN copy;
 #        BLAS threads pinned to 1 by the caller's env; RS_SMOKE=1 for a smoke)
 # =====================================================================
@@ -61,6 +67,9 @@ stopifnot(all(RS_RES %in% RS_RES_ALL))
 RS_FIX_PASSIVE <- identical(Sys.getenv("RS_FIX_PASSIVE"), "1")
 stopifnot(!RS_FIX_PASSIVE || !any(c("tau_soil_slow", "litter_slow_frac") %in% RS_RES))
 RS_LOGIT  <- "litter_slow_frac"
+RS_PIN_Q10 <- as.numeric(Sys.getenv("RS_PIN_Q10", "NA"))
+RS_FREE_ALL <- RS_FREE
+if (!is.na(RS_PIN_Q10)) RS_FREE <- setdiff(RS_FREE, "q10")
 RS_MAXIT  <- 6000L
 RS_CTRL_MAXIT <- 3000L
 RS_ID_TOL <- 1e-4
@@ -68,6 +77,7 @@ RS_REACH_FACTOR <- 2
 RS_CORES  <- 7L
 RS_SMOKE  <- identical(Sys.getenv("RS_SMOKE"), "1")
 if (RS_FIX_PASSIVE || !setequal(RS_RES, RS_RES_ALL)) RS_TAG <- paste0(RS_TAG, "_", paste(sub("^tau_", "", RS_RES), collapse = "-"), if (RS_FIX_PASSIVE) "_fixpassive" else "")
+if (!is.na(RS_PIN_Q10)) RS_TAG <- paste0(RS_TAG, sprintf("_q10pin%g", RS_PIN_Q10))
 if (RS_SMOKE) { RS_TAG <- paste0(RS_TAG, "_smoke"); RS_SCALES <- c(0.75, 1.00); RS_MAXIT <- 20L; RS_CTRL_MAXIT <- 10L }
 RS_OUT    <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", RS_TAG, RS_DATE))
 COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
@@ -90,7 +100,7 @@ x_to_res <- function(x) setNames(ifelse(RS_RES %in% RS_LOGIT, stats::plogis(x), 
 full_res <- function(s, x) { r <- fixed_of(s); r[RS_RES] <- x_to_res(x); r }
 u_from_prev <- function(s) {
   r <- prev[prev$scale == s, ]; p <- as.list(ccx_unc_to_par(md$u_mode))
-  for (n in RS_FREE) p[[n]] <- r[[n]]
+  for (n in RS_FREE_ALL) p[[n]] <- r[[n]]
   ccx_par_to_unc(unlist(p)[md$param_names])
 }
 CONST0 <- CCX_CONSTANTS
@@ -112,6 +122,7 @@ one <- function(s) {
   lp_at <- function(u, res) { E$base_params <- bp_with(res); on.exit(E$base_params <- bp); lp(u) }
   u0 <- u_from_prev(s)
   l_start <- lp_at(u0, RES0)                        # identity (a): unmodified defaults
+  if (!is.na(RS_PIN_Q10)) { pp <- as.list(ccx_unc_to_par(u0)); pp$q10 <- RS_PIN_Q10; u0 <- ccx_par_to_unc(unlist(pp)[md$param_names]) }
   RSs <- fixed_of(s); l_base <- lp_at(u0, RSs)      # the fixed-passive baseline (== l_start unless RS_FIX_PASSIVE)
   reach <- if (s == 1) as.numeric(lp_at(u0, replace(RES0, "tau_wood", RES0[["tau_wood"]] * RS_REACH_FACTOR))) - as.numeric(l_start) else NA_real_
   nF <- length(iF)
@@ -127,7 +138,7 @@ one <- function(s) {
   list(scale = s, start = as.numeric(l_start), base = as.numeric(l_base), opt = as.numeric(l1), ctrl = -oc$value,
        loglik = as.numeric(attr(l1, "loglik")), streams = attr(l1, "streams"), streams0 = attr(l_start, "streams"),
        npp = npp_modern(u, bp_with(rz)), npp_start = npp_modern(u0, bp), npp_base = npp_modern(u0, bp_with(RSs)), reach = reach,
-       par = unlist(ccx_unc_to_par(u)[RS_FREE]), res = rz,
+       par = unlist(ccx_unc_to_par(u)[RS_FREE_ALL]), res = rz,
        evals = o$counts[["function"]], conv = o$convergence, ctrl_conv = oc$convergence)
 }
 res <- parallel::mclapply(RS_SCALES, one, mc.cores = RS_CORES, mc.preschedule = FALSE)
