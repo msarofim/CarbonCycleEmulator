@@ -2,6 +2,98 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (f) — **The inert pool is now a real model component (a state box, RothC's IOM precedent). Every stock readout includes it through one audited function. And the R2 shelf is re-read at φ = 0: the `rep_dC` ladder turns out to be a pure fertilisation-SHAPE path.**
+
+Marcus: *"3) Make the inert pool an actual model-consistent component if that is scientifically
+appropriate. 4) Make sure the stock readouts contain all the carbon pools to make it consistent with
+whatever comparisons we are doing. 5) Do whichever steps are straightforward."*
+
+**Is it scientifically appropriate? Yes. RothC treats inert organic matter the same way.**
+- A subagent verified this against the RothC documentation (Coleman, Prout & Milne 2024, §1.3 p7,
+  §1.8 p16) and the official code (Rothamsted-Models/RothC_Code @03c7b3f):
+  - IOM is part of total SOC (SOC = DPM + RPM + BIO + HUM + IOM);
+  - it receives no inputs and does not decompose;
+  - its default radiocarbon age is 50,000 yr ("virtually no 14C").
+- The Falloon et al. 1998 relation (SBB 30:1207–1211, doi:10.1016/S0038-0717(97)00256-3) is
+  IOM = 0.049 · TOC^1.139 (t C/ha), which gives **6.7–10.2 %** of surface SOC. That is consistent with
+  Copard's 0–30 cm **11 ± 10 %**.
+  - ⚠ The Falloon paper itself is paywalled; its equation is verified only through the RothC docs.
+- Rethemeyer et al. 2007 (Radiocarbon 49:1079) measured 5–8 % in a soil without lignite.
+
+**The state box (`c187deb`).**
+- `soil_inert`, one box per hemisphere, is appended LAST and is ABSENT when off (the hs/eq/tr
+  idiom). ⇒ Every registered file's state vector is unchanged. Resolver: `ccx_inert_on()`.
+- It is in `aux$idx$land`, so `land_C` = ALL land carbon in both cores.
+- ⛔ **The trap the audit found: the C++ out matrix summed everything from the mixed layer to the end
+  of each hemisphere block as OCEAN.** An appended box would have been ocean in C++ and land in R. The
+  loop now stops before the box. Mutation-tested: reverting it fails PARITY and BOX.
+- **Spinup.** Zero fluxes would make every steady-state operator singular (the reason hs/eq/tr are
+  absent rather than empty). So the box is PINNED in:
+  - `ccx_c12_steady_conveyor()`'s Newton;
+  - the aseasonal ¹³C operator;
+  - the periodic Newton (its Jacobian column is set exactly, two fewer one-year runs);
+  - the periodic ¹³C monodromy.
+  - ¹⁴C needs no pin: decay keeps that row non-singular and the solution is exactly 0.
+- **Isotopes.** ¹³C/C is set to the passive pool's ratio after the solve. That is exact, because no
+  box reads the inert box, and it is a modelling choice, not a cited constant. ¹⁴C is 0.
+- The flux classifier gives the box class "soil"; its guard stopped the first smoke run, as designed.
+- **Tests** (`test-soil-inert.R`, now 12 tests / 103 expectations):
+  - off means absent;
+  - the exchanging rows are identical to the proxy;
+  - the box is pinned in both spinups, and the periodic fixed point equals the proxy's to 1e-10;
+  - C / ¹³C / ¹⁴C are correct;
+  - both cores count it as land and never ocean, and carry it unchanged;
+  - parity 1e-13;
+  - readout coverage.
+- **Layout-sensitive files all pass:** parity (89), conservation, hilda-boxes, eq-cell (189), tr-box
+  (264), fluxes, struct-v0, constants-batch, param-absent-ok, spinup, spinup-diagnostics,
+  plot-text-fits, app-review-copy.
+- **Arm A under the periodic spinup** (`inert_pool_build_check_v2_20260930.stdout`):
+  - I1 (off) 1387.8816, PASS;
+  - I2: 39 of 40 output columns BYTE-identical to the hand proxy, `land_C` = proxy + inert to 9e-13,
+    exchanging spinup rows identical, PASS;
+  - the box holds 173.3 + 118.7 GtC, with δ¹³C −21.96 ‰ (= passive, per hemisphere) and ¹⁴C 0,
+    unchanged 1750–2300;
+  - I3 is still +52.03 ppm.
+
+**Stock readouts (item 4)** (`2ff8918`), from a subagent audit of every absolute-stock readout:
+- ⭐ **`ccx_stock_readout(y, aux)`** returns every reservoir from `aux$idx`: atmosphere; vegetation;
+  soil fast / slow / inert / total; land total; ocean surface / interior / total; total.
+  - It STOPS if the map does not cover the state exactly once (mutation-tested).
+  - Its totals equal `land_C`, `ocean_C` and the state sum.
+  - ⚠ It cannot hold carbon the model does not represent (permafrost ~1200 PgC, soil below the 0–1 m
+    scope, sediments). Those go on the comparison side.
+- **Fixed:** `diag_soil_d14c_shi2020.R`'s inert-pool bulk read `1500 − NPP·lsf·τ`, which returns 0
+  when the pool is on. ⇒ z_O1_inert would have silently left the inert carbon out. It now reads the
+  box.
+- **App:** the box diagram's soil label names the inert pool when the structure carries it. The
+  shipped app's mode has none, so its label is unchanged. The one absolute readout (the "Stocks
+  today" footnote) uses `land_C` and so includes the pool automatically once the app runs a mode that
+  has it.
+- **Not edited, flagged for Marcus.** The app's "Under the hood" copy says "a two-pool land biosphere"
+  (`app/ui.R` ~623) and "Two land pools" (~664). That has been wrong since the 4-pool land
+  (2026-08-12), and it will need the inert pool too. It is reviewed copy of the frozen
+  `v1.0-hilda29l` product, so the wording is his.
+- **Conventions:**
+  - Land MULTIPLES (future/PI, Koven-style) use TOTAL land, i.e. `land_C` with the pool: ESM cLand
+    counts all its soil carbon.
+  - Comparisons against **Naegler & Levin's 2200 PgC** (their model's configuration, no inert pool) and
+    land-use Δ¹⁴C bookkeeping (`diag_excess_c14.R`) should subtract `soil_inert`.
+  - None of those drivers is run under the new label yet.
+  - `FORC_LAND0_NOMINAL`'s label now says "exchanging".
+
+**R2 shelf at φ = 0** (`diag_rep_dc_shelf_v0k.R` → `rep_dc_shelf_v0k_20260930.*`).
+- Re-read from the 09-29 (k) ladder with T4p's argument; no model run. The 09-23 shelf had expired
+  with φ = 0. REST identity 0; GATE SHAPE PASS on loglik and REST.
+- σ 1.0: prior inert at every centre. σ 0.5: 2.70 / 2.90 / 2.65 ppm for −2.9 / −1.5 / −3.3. **σ 0.2
+  centred on the measured 0.776: `rep_dC` 1.74 for −16.0** (centred 0: 1.22 for −27.4).
+- ⭐⭐ **The ladder is a pure fertilisation-SHAPE path.** enh(410 ppm) is fixed at **0.337–0.340** on
+  every rung, while K falls 865 → 644 (at 0.776) → 547 (at −0.215).
+  - The fertilisation profile's shape row at K 625 costs −5.6 with `rep_dC` FREE (3.24).
+  - ⇒ Nearly all of R2's −40 at the measured offset is `rep_dC`'s own cost (the ice anchor and bomb
+    ¹⁴C, 09-23 T2), not the shape's. **The R2 decision and the fertilisation-shape decision are
+    SEPARABLE.**
+
 ## 2026-09-30 (e) — **The K prior is NOT tightened: the science does not support a width that would matter. The ESM structural spread of K is log-sd 0.26–0.37, which brackets the ruled 0.35. Any width in that range moves the fitted K only 867 → ~840. Putting K in the band (≤ 750) needs log-sd ≤ 0.14–0.21, i.e. claiming K is known more tightly than the ESMs agree among themselves, above 560 ppm where nothing is observed.**
 
 Marcus: *"Tighten the K prior if that is consistent with the underlying science."*
