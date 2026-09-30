@@ -113,6 +113,8 @@ four named inputs.
 - **Mutation-tested:**
   - A C++ side that ignores the carve-out fails PARITY (9) plus EQUIV/STOCK.
   - An R flux block that ignores it fails EQUIV (1) and PARITY (9).
+- **Full suite at `d052e0e`** (`outputs/diagnostics/suite_20260930_postd052e0e.log`): **only the named red**
+  (`test-mode-file.R:323`), as on 09-29. `soil-inert`, `struct-v0`, `tr-box` and `constants-batch` all pass.
 - The label ledgers in `test-tr-box.R`, `test-constants-batch.R` and `test-struct-v0.R` (PRIOR_ON)
   were EXTENDED by the new label, the same pattern as the 09-29 arms. No assertion was weakened.
 
