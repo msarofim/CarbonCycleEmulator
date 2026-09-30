@@ -2,6 +2,58 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (n) — **The D2 screen on the RULED forms. The record WANTS an N-retention sink near the literature's central value (4–6 kg C/kg N) and spends it on fertilisation (−12 to −19 %) and NPP (−1.9 to −2.8 GtC/yr). Greening fits ≈ 0 again. N retention + D3 together move Koven's 2100–2200 window from z 2.27 to 1.93.**
+
+`alignment_screen_d2ret_20260930.*` (driver at `58cd91c` + frozen copy; `AS_ONLY=DN,DT,DNT,DNTb`).
+- Control and method are 09-30 (g)'s.
+- NM maxit 3000 on the 11 names, plus the D2 coordinates carrying their ruled priors, plus the D3 shares in
+  DNTb.
+- P-D2-1..5 were registered at `61fd1b3`, before any D2 run.
+
+| arm | Δll record | `ndep_ret` (σ from centre) | N sink 1990–2023 (kg C/kg N) | `npp_tsens` /K | enh(410) | β / K | NPP 2001–23 | q10 | `luc_scale` | Koven z 2100–2200 | SSP5-8.5 2300 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| control | 0 | — | — | — | 0.3627 | 2.739 / 872 | 69.62 | 1.109 | 0.863 | 2.27 | 1406.7 |
+| DN | **+5.34** | 5.92 (+0.62) | 0.192 (**4.07**) | — | **−12.3 %** | 2.606 / 958 | **67.73** | 1.078 | 0.841 | 2.21 | +15.0 |
+| DT | +0.48 | — | — | +0.0014 | −1.3 % | 2.773 / 898 | 69.54 | 1.100 | 0.859 | 2.32 | −9.8 |
+| DNT | **+7.37** | 9.13 (+1.27) | 0.300 (**6.36**) | +0.0009 | **−18.8 %** | 2.646 / 1063 | **66.80** | 1.085 | 0.826 | 2.23 | +14.6 |
+| DNTb (+D3) | COMMON **+5.62** (own +20.25) | 7.23 (+0.92) | 0.233 (**4.93**) | −0.0100 | −2.8 % | 2.470 / **799** | 68.11 | 1.078 | 0.890 | **1.93** | **+61.0** |
+
+(DNTb shares: s_land 0.543, s_ocean 0.118.)
+
+**Scored predictions.**
+- **P-D2-1** (enhancement falls): PASS in DN, DNT and DNTb.
+- **P-D2-2** (`ndep_ret` within 2σ AND sink/N within 0.6–8.7): PASS, all three.
+- **P-D2-3** (NPP rises < 1): PASS. NPP in fact FALLS.
+- **P-D2-5** (Koven z stays > 1.5 with (a) alone): PASS (2.21).
+- **P-D2-4** (σ_T > 0 AND q10 rises): **FAIL in every arm**. σ_T is −0.010 to +0.001 and q10 FALLS (1.078–1.100).
+- ⚠ **DNTb's P-D3-4 FAIL** (|Δ2300| 61 > 20) applies a D3-ALONE criterion to a combined arm. The 61 ppm is D2 and
+  D3 acting together, and is not attributable to either lever from the screen.
+
+**What it says.**
+- ⭐ **The retention flux is what the multiplier could not be.**
+  - At the same 11 names the record gains +5.3 (vs the multiplier's +1.8) at an `ndep_ret` within 1σ of the
+    literature's centre.
+  - The implied sink, 0.19–0.30 GtC/yr, is 8–12 % of GCB's 1990–2023 S_LAND, the literature's order.
+  - The fit spends it on fertilisation: DNT's enh(410) falls −19 %, the largest cut any screen has bought
+    without a large record cost.
+- ⭐ **NPP moves toward the observation**: 69.6 → 66.8–67.7 (z +1.75 → ~+1.4 against 56.1 ± 7.75).
+  **Not resolved.**
+- ⭐ **D2 + D3 is the only combination that moves the future toward Koven.**
+  - With D3 the fit reshapes fertilisation rather than only shrinking it: K 872 → **799**, more saturating.
+  - Koven z (2100–2200) 2.27 → 1.93; SSP5-8.5 2300 +61 ppm.
+  - Without D3 the future barely moves (+15 ppm).
+  - ⚠ These futures mix the fertilisation shape, `luc_scale` (which also scales scenario land-use) and
+    the ocean. Decompose at the refit before attributing them.
+- **Greening: the record and the literature agree there is none.** The sign-free term fits at ≈ 0 in every
+  arm, and q10 does not rise: the (v) B route to a century-scale q10 is not opened by (b).
+
+**For the refit (not started).**
+- The ruled configuration is N retention + greening (sign-free) + D3 (smooth + cement) on `hilda_csl3v0kai`.
+- It needs the four new names in the parameter table (`ndep_ret`, `npp_tsens`, `imb_share_land`,
+  `imb_share_ocean_rest`), a structure label, and PINS at 0 for every older label.
+- Costs from a screen are UPPER bounds (11 of 29 names); the futures are quoted only from a full refit (the
+  R2 lesson).
+
 ## 2026-09-30 (m) — **N deposition is re-formed as a RETENTION FLUX (Marcus: "Retention flux"). The NPP multiplier is gone: its sink tracked the RATE OF CHANGE of deposition, and could not give the literature's steady kg C per kg N.** Built in both cores, OFF by default, mutation-tested.
 
 **Why (the evidence is in (l)).** At its prior centre the multiplier's sink per N was 0.70 / 0.50 / 0.37 kg C/kg N
