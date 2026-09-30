@@ -2,6 +2,76 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (d) — **Fertilisation profile: the record charges −5.6 / −14.5 to move the SHAPE into the band and −61 / −187 to cut the AMPLITUDE. The amplitude is held by the ATMOSPHERIC CO₂ record, not the land-sink data (`gcb_land_sink` IMPROVES as it falls). Every cut is partly undone by the other land knobs. For the FUTURE, the shape move at K 500 buys what the amplitude cut buys (+117 vs +115 ppm SSP5-8.5 2300) at a quarter of the price. No row flips to a source.**
+
+Marcus: *"Can we do anything to bring the fertilization rate down? I'm also worried that it seems like
+we have several land-carbon issues that are all pushing in unphysical directions."*
+
+**Driver:** `diag_fert_profile.R` (`fert_profile_fixedstock_20260930.*`).
+- (β_max, fert_k) are PINNED per row. The other 9 of the 11 rebalanced names, q10 included, are
+  re-optimised: NM, maxit 3000, from the fixed-stock τ-500 control. Identity 7.9e-9.
+- Structure `hilda_csl3v0ka` (NOT the new `kai`), kept comparable with (u)/(v) and the q10 profile.
+- Enhancement is enh(C) = β_max·d/(K + d), with d = C − 276.88.
+- Two row kinds, pre-registered in the driver header before the run:
+  - **shape rows** hold enh(410 ppm) at the control's 0.3394;
+  - **amp rows** lower it.
+
+| row | β_max, K | enh 410 | enh 4× | Δloglik | NPP 2001–23 | luc_scale | q10 | kz |
+|---|---|---|---|---|---|---|---|---|
+| control | 2.552, 867.6 | 0.339 | 1.248 | 0 | 70.0 | 0.848 | 1.102 | 14690 |
+| shape K625 | 1.933, 625 | 0.339 | 1.103 | **−5.6** | 70.0 | 0.859 | 1.097 | 14930 |
+| shape K500 | 1.614, 500 | 0.339 | 1.008 | **−14.5** | 69.9 | 0.868 | 1.099 | 15130 |
+| amp mid | 1.65, 625 | 0.290 | 0.942 | **−60.8** | 68.3 | 0.786 | 1.064 | 16440 |
+| amp CMIP6-central | 1.34, 580 | 0.250 | 0.789 | **−187.5** (maxit, upper bound) | 67.0 | 0.727 | 1.043 | 16970 |
+
+**The pre-registered prediction, scored.**
+- "Shape rows cheap (|Δ| < ~5)": **roughly holds at K 625 (−5.6) and FAILS at K 500 (−14.5)**. The
+  record does constrain curvature, mostly through `d13c_level_MLO` (−6.7) and the CO₂ levels (−6.4).
+- "Amp rows expensive": **holds.**
+- "Paid by the historical-sink streams": **WRONG.** `gcb_land_sink` IMPROVES by +12.6 / +15.6.
+- The amp rows are paid by the ATMOSPHERIC CO₂ record:
+  - amp CMIP6-central: `co2_level_MLO` −63.4, `co2_level_SPO` −59.7, `co2_icecore` −30.7,
+    `d13c_level_MLO` −20.2;
+  - amp mid: −16.8 / −19.0 / −15.5 / −13.2.
+- `gcb_ocean_sink` pays −5.1 / −2.3, because kz rises to push carbon into the ocean.
+
+**⭐ The trade-off is the uniform-direction pattern happening in real time.**
+- When fertilisation is cut, the fit restores total uptake with EVERY other knob in reach:
+  - it emits less land-use carbon (`luc_scale` 0.848 → 0.786 → 0.727);
+  - it mixes the ocean harder (kz → 16970);
+  - it LOWERS q10 further (→ 1.04), with the seasonal amplitude compensating (NH `seas_T_amp`
+    15.6 → 31.7).
+- ⇒ The land issues are not independent defects. They are ONE constraint seen through several
+  knobs: the CO₂ level record needs a fixed total uptake, and only land knobs can supply it (the ocean
+  is on GCB; (c)).
+- Where GCB's own budget does not close (positive imbalance), the model's land takes up the slack.
+  **That the land-sink stream prefers LESS fertilisation is the direct evidence.**
+
+**Futures** (`land_sink_trajectory_fertprof_20260930.*`; identities: v0k 1388.28, control 1387.8816):
+
+| row | Δloglik | SSP5-8.5 2300 CO₂ | ΔL 2015–2100 / 2100–2200 / 2200–2300 (GtC) | vvH 2300 | source onset |
+|---|---|---|---|---|---|
+| control | 0 | 1388 | +486 / +593 / +255 | 958 | none |
+| shape K625 | −5.6 | **1457 (+69)** | +439 / +490 / +223 | 990 | none |
+| shape K500 | −14.5 | **1505 (+117)** | +404 / +422 / +199 | 1014 | none |
+| amp mid | −60.8 | 1503 (+115) | +385 / +430 / +201 | 1014 | none |
+| amp CMIP6-central | −187.5 | 1561 (+173) | +331 / +361 / +173 | 1045 | none |
+| frozen q10 2.0 (for scale) | frozen | 1531 | +419 / +442 / +121 | 1043 | none |
+| Koven 2022 (±1σ) | | | 264±172 / −29±264 / −178±251 | | ~2100–2220 |
+
+- ⭐ **For the FUTURE, shape is the efficient lever.** K 500 gives the same 2300 CO₂ as the amp-mid
+  row (+117 vs +115 ppm) for −14.5 instead of −60.8.
+- ⚠ **Correction to what I told Marcus in chat:** I said a shape move "barely changes the future",
+  reading only the 4× enhancement falling 1.25 → 1.10. The futures say +69 to +117 ppm at 2300. That
+  was a magnitude claim made without the computation.
+- **No row flips to a source** under SSP5-8.5. Every rebalanced row keeps q10 ≈ 1.04–1.10, and cutting
+  fertilisation pushes q10 DOWN.
+- Even CMIP6-central fertilisation leaves 2100–2200 and 2200–2300 above Koven's upper 1σ (+361 vs 235;
+  +173 vs 73). Only (v)'s FROZEN literature fertilisation + q10 2.0 reached Koven's band.
+  ⇒ **Fertilisation alone does not close the Koven gap. The q10 half is the seasonal-prior problem
+  ((v) B).**
+- vvL onsets move 2129 → 2130–2134. That is still carbon returning as CO₂ falls.
+
 ## 2026-09-30 (c) — **The inert soil pool is BUILT (label `hilda_csl3v0kai`), and it reproduces the (v) proxy byte for byte. Separately, arm A's OCEAN sink is on GCB (+0.05 GtC/yr, 1960–2023), so the land is not covering for the ocean.**
 
 Marcus: *"Go with 0–1 m; build the inert pool."*
