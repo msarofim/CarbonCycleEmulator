@@ -104,8 +104,8 @@ That cost only **−5.6**. So:
 |---|---|---|---|
 | (a) as ruled 09-23: N(0, 1) | 3.27 | 0 | nothing; stays a named shim |
 | (b) re-centre on 0.776, σ 1.0 | 3.27 | 0 | nothing (inert) |
-| (c) re-centre on 0.776, σ 0.2 | 1.74 | −16.0 | offset 2.2× the measured one instead of 4×; K ≈ 735 (from the ladder); a partial fertilisation-shape move |
-| (d) hard pin at 0.776 | 0.776 | −39.8 | offset = measurement; K 644; SSP5-8.5 2300 about +60 ppm |
+| (c) re-centre on 0.776, σ 0.2 | 1.74 | −16.0 | offset 2.2× the measured one instead of 4×; K ≈ 737 (PCHIP through the ladder); a partial fertilisation-shape move |
+| (d) hard pin at 0.776 | 0.776 | −39.8 | offset = measurement; K 644; SSP5-8.5 2300 about +63 to +69 ppm (between the ladder's rung 1.0 and the K 625 profile row) |
 | (e) fix the structure (IHDE) | — | — | declined 09-23 |
 
 **My reading, for you to rule on.** Because the future consequence of R2 runs through K, and K can be
