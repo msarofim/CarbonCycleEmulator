@@ -182,8 +182,10 @@ k1 <- full
 cat(sprintf("\n  where (imbalance + cement) %.3f GtC/yr goes at the control (%d-%d): land %+.3f (%.0f %%), ocean %+.3f (%.0f %%),\n",
             k1$imbal + k1$cement, k1$win0, k1$win1, k1$d_land, 100 * k1$d_land / (k1$imbal + k1$cement),
             k1$d_ocn, 100 * k1$d_ocn / (k1$imbal + k1$cement)))
+# imbal + cement = d_land + d_ocn - d_luc + d_grow (+ closure): the growth term enters with ITS OWN sign
+# (a model atmosphere growing SLOWER than observed, d_grow < 0, means the sinks took MORE)
 cat(sprintf("  E_LUC via luc_scale %+.3f (%.0f %%), growth %+.3f (%.0f %%), closure %+.4f\n",
-            -k1$d_luc, 100 * -k1$d_luc / (k1$imbal + k1$cement), -k1$d_grow, 100 * -k1$d_grow / (k1$imbal + k1$cement), k1$closure))
+            -k1$d_luc, 100 * -k1$d_luc / (k1$imbal + k1$cement), k1$d_grow, 100 * k1$d_grow / (k1$imbal + k1$cement), k1$closure))
 cat("  ⚠ luc_scale < 1 LOWERS the land excess: a smaller E_LUC means less residual sink is needed for the same CO2.\n\n")
 cat("=== SHARES THAT MAXIMISE THE TWO ROWS, AT THE FIXED CONTROL ===\n")
 cat("  s_* = constrained optimum on {>= 0, sum <= 1}; *_un = unconstrained; se = sigma / sqrt(sum I^2)\n")
