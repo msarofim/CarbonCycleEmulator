@@ -1,0 +1,142 @@
+# =====================================================================
+# The INERT SOIL CARVE-OUT (2026-09-30, Marcus: "Go with 0-1 m; build the inert
+# pool"). soil_inert_frac = f of the passive pool's stock is radiocarbon-free
+# and exchanges with nothing: the exchanging passive pool takes (1 - f) of its
+# litter share (ccx_litter_slow_eff()), and the inert remainder is the constant
+# aux$soil_inert. CHANGELOG 2026-09-30 (b)/(c).
+#
+# What must hold, and why each gate can fail:
+#   OFF   absent / 0 is BIT-EXACT to the pre-build model (every registered file);
+#   EQUIV the carve-out IS litter_slow_frac * (1 - f) -- the 09-29 (v) proxy --
+#         in the derivative, the spinup and aux$land0, so the (v) numbers carry;
+#   PARITY the two cores agree with it ON (hard rule 1), incl. the pro-rata
+#         land-use debit path, which reads the same share;
+#   CONSERVE closed-system carbon is conserved with it ON;
+#   STOCK exchanging + inert passive = the UNCARVED passive stock, per hemisphere.
+# =====================================================================
+
+F_ON <- ccx_const("SOIL_INERT_FRAC")
+
+p_off <- local({ p <- ccx_default_params(); ccx_set_enso(p, list(gamma_enso = 0.5)) })
+p_on  <- local({ p <- p_off; p$soil_inert_frac <- F_ON; p })
+p_prx <- local({ p <- p_off; p$litter_slow_frac <- p_off$litter_slow_frac * (1 - F_ON); p })
+
+forc_open <- function(sp) {
+  list(e_foss = list(NH = 8, SH = 0.4), e_luc = list(NH = 0.6, SH = 0.5),
+       cum_luc = list(NH = 120, SH = 80),
+       gmst = 1.1, enso = 0.7, c14_bomb = 1200, c14_nuclear = 40,
+       c14_cosmo = sp$prod_c14, d13c_foss = -27.6)
+}
+
+test_that("the constant derives from Copard's printed layer masses (0-1 m)", {
+  expect_identical(F_ON, (77 + 216) / (704 + 801))
+  expect_equal(F_ON, 0.1947, tolerance = 1e-4)
+  expect_identical(CCX_CONSTANTS$SOIL_INERT_FRAC$status, "cited")
+})
+
+test_that("OFF: absent and 0 are bit-exact, in the share, the spinup and aux", {
+  p_abs <- p_off; p_abs$soil_inert_frac <- NULL
+  expect_identical(ccx_litter_slow_eff(p_off), p_off$litter_slow_frac)
+  expect_identical(ccx_litter_slow_eff(p_abs), p_off$litter_slow_frac)
+  s0 <- ccx_spinup(p_off); sa <- ccx_spinup(p_abs)
+  expect_identical(s0$y, sa$y)
+  expect_identical(s0$aux$land0, sa$aux$land0)
+  expect_identical(unlist(s0$aux$soil_inert), c(NH = 0, SH = 0))
+  # the C++ core receives the plain litter_slow_frac when off
+  skip_if_no_cpp()
+  expect_identical(ccx_cpp_par(p_off)[["litter_slow_frac"]], p_off$litter_slow_frac)
+})
+
+test_that("EQUIV: the carve-out IS the scaled-litter proxy, bit for bit", {
+  sp_on <- ccx_spinup(p_on); sp_px <- ccx_spinup(p_prx)
+  expect_identical(sp_on$y, sp_px$y)
+  expect_identical(sp_on$aux$land0, sp_px$aux$land0)
+  expect_identical(ccx_luc_pool_shares(p_on), ccx_luc_pool_shares(p_prx))
+  dR_on <- ccx_deriv(sp_on$y, 1980.5, p_on,  forc_open(sp_on), sp_on$grid, sp_on$aux)
+  dR_px <- ccx_deriv(sp_px$y, 1980.5, p_prx, forc_open(sp_px), sp_px$grid, sp_px$aux)
+  expect_identical(dR_on, dR_px)
+  # POWER: the carve-out is a different model from OFF (else EQUIV passes vacuously)
+  sp_off <- ccx_spinup(p_off)
+  expect_gt(abs(sp_off$y[sp_off$aux$idx$NH$soil_slow, "C"] -
+                sp_on$y[sp_on$aux$idx$NH$soil_slow, "C"]), 1)
+})
+
+test_that("STOCK: exchanging + inert passive = the uncarved passive stock", {
+  sp_on <- ccx_spinup(p_on); sp_off <- ccx_spinup(p_off)
+  for (h in HEMIS) {
+    ex  <- sp_on$y[sp_on$aux$idx[[h]]$soil_slow, "C"]
+    unc <- sp_off$y[sp_off$aux$idx[[h]]$soil_slow, "C"]
+    expect_equal(ex + sp_on$aux$soil_inert[[h]], unc, tolerance = 1e-12, info = h)
+    expect_equal(sp_on$aux$soil_inert[[h]] / unc, F_ON, tolerance = 1e-12, info = h)
+  }
+  # the global inert mass at the defaults (NPP 60, 0.05, 500 yr): f * 1500
+  expect_equal(sum(unlist(sp_on$aux$soil_inert)),
+               F_ON * ccx_const("NPP_GLOBAL_PI") * p_on$litter_slow_frac * p_on$tau_soil_slow,
+               tolerance = 1e-12)
+  # NPP and total litter are unchanged: the vegetation pools agree to roundoff
+  # (measured: leaf differs by 1 ulp, 3.6e-15 on 21.6 GtC, from the spinup's
+  # own solve; wood is identical)
+  for (h in HEMIS) for (pool in c("leaf", "wood"))
+    expect_equal(sp_on$y[sp_on$aux$idx[[h]][[pool]], "C"],
+                 sp_off$y[sp_off$aux$idx[[h]][[pool]], "C"], tolerance = 1e-13, info = paste(h, pool))
+})
+
+test_that("refuses a fraction outside [0, 1)", {
+  for (bad in list(-0.1, 1, NA_real_, c(0.1, 0.2))) {
+    p <- p_off; p$soil_inert_frac <- bad
+    expect_error(ccx_litter_slow_eff(p), "soil_inert_frac", info = format(bad))
+  }
+})
+
+test_that("PARITY: derivative, pro-rata LUC debit and trajectories agree with f ON", {
+  skip_if_no_cpp()
+  for (fw in c(1, 0)) {                       # wood-only and the pro-rata debit path
+    p <- p_on; p$f_luc_wood <- fw
+    sp <- ccx_spinup(p)
+    dR <- ccx_deriv(sp$y, 1980.5, p, forc_open(sp), sp$grid, sp$aux)
+    dC <- ccx_deriv_fast(sp$y, 1980.5, p, forc_open(sp), sp$grid, sp$aux)
+    expect_lt(max(abs(dR - dC)) / max(abs(dR)), 5e-14)   # test-parity.R's PARITY_REL_TOL
+  }
+  sp <- ccx_spinup(p_on)
+  F  <- ccx_build_forcing("historical", c(1900, 1980), prod_c14 = sp$prod_c14)
+  rR <- suppressWarnings(ccx_run(sp, F)); rC <- suppressWarnings(ccx_run_fast(sp, F))
+  for (cc in c("co2_NH", "co2_SH", "land_C", "ocean_C", "land_C14"))
+    expect_lt(max(abs(rR$out[[cc]] - rC$out[[cc]])) / max(abs(rR$out[[cc]])), 1e-13, label = cc)
+  expect_lt(max(abs(rR$out$d14c_NH - rC$out$d14c_NH)), 1e-8)
+  expect_lt(max(abs(rR$state - rC$state)) / max(abs(rR$state)), 1e-13)
+  # MUTATION: a C++ core that ignored the carve-out would run the OFF model.
+  # The OFF trajectory must be far outside the parity tolerance of the ON one.
+  rOff <- suppressWarnings(ccx_run_fast(ccx_spinup(p_off), F))
+  expect_gt(max(abs(rOff$out$land_C - rC$out$land_C)) / max(abs(rC$out$land_C)), 1e-4)
+})
+
+test_that("CONSERVE: closed-system carbon is conserved with the carve-out ON", {
+  closed <- list(e_foss = list(NH = 0, SH = 0), e_luc = list(NH = 0, SH = 0),
+                 gmst = 0, enso = 0, c14_bomb = 0, c14_nuclear = 0, c14_cosmo = 0)
+  p <- ccx_set_enso(p_on, list(gamma_enso = 0))
+  sp <- ccx_spinup(p)
+  y <- sp$y
+  # push it OUT of balance, as test-conservation.R does: move 200 GtC of
+  # passive soil into the atmosphere
+  for (h in HEMIS) {
+    i <- sp$aux$idx[[h]]
+    y[i$soil_slow, ] <- y[i$soil_slow, ] - 100 * y[i$soil_slow, ] / y[i$soil_slow, "C"]
+    y[i$atm, ]       <- y[i$atm, ] + 100 * y[i$soil_slow, ] / y[i$soil_slow, "C"]
+  }
+  d <- ccx_deriv(y, 1900, p, closed, sp$grid, sp$aux)
+  expect_lt(abs(sum(d[, "C"])) / max(abs(d[, "C"])), 1e-12)
+  tot0 <- ccx_total(y); t <- 1900
+  for (m in seq_len(12 * 50)) {
+    y <- ccx_step_rk4(y, t, 1 / 12, p, closed, sp$grid, sp$aux); t <- t + 1 / 12
+  }
+  expect_lt(abs(ccx_total(y) / tot0 - 1), 1e-10)
+})
+
+test_that("the structure label switches it on at the cited value, and only there", {
+  expect_identical(ccx_struct_block("hilda_csl3v0kai")$soil_inert_frac, F_ON)
+  a <- ccx_struct_block("hilda_csl3v0ka"); b <- ccx_struct_block("hilda_csl3v0kai")
+  expect_identical(setdiff(names(b), names(a)), "soil_inert_frac")
+  expect_identical(b[names(a)], a)
+  for (lab in setdiff(CCX_STRUCT_LABELS, "hilda_csl3v0kai"))
+    expect_null(ccx_struct_block(lab)$soil_inert_frac, info = lab)
+})

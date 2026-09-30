@@ -36,6 +36,12 @@
                                    # the entrainment chain had re-typed it --
                                    # the very duplication the audit was for.
 
+# ---- inputs to the inert soil fraction (2026-09-30) ------------------
+# Copard et al. 2025 radiocarbon-free ("aOC") soil carbon, Gt, by layer, on the
+# global SOC stocks: 0-30 cm and 30-100 cm. SOIL_INERT_FRAC derives from these.
+.AOC_0_30_GT   <- 77;   .SOC_0_30_GT   <- 704
+.AOC_30_100_GT <- 216;  .SOC_30_100_GT <- 801
+
 # ---- inputs to the Southern-Ocean entrainment amplitude (2026-09-03) --
 # ⛔ NAMED HERE AND COMPUTED BELOW, NOT TYPED AS AN ANSWER. The entry that
 # replaced them carried `value = 30` with the arithmetic only in its prose
@@ -337,6 +343,29 @@ CCX_CONSTANTS <- list(
                    "CAVEAT: all PRESENT-DAY; no opened source gives a 1750 value (AR5 Fig 6.1 /",
                    "AR6 Fig 5.12 give preindustrial GPP only, 108.9 / 113). TAR is the OLDEST",
                    "source. Used as NPP0 before model clearing. Cited 2026-09-29, value unchanged.")),
+
+  # ---- INERT SOIL CARBON, 0-1 m (2026-09-30, Marcus: depth 0-1 m) -----
+  # The carve-out share of the PASSIVE pool (soil_inert_frac, R/model.R). 0-1 m
+  # because the passive pool's 1500 GtC IS the 0-1 m inventory (J&J 2000 1502;
+  # Copard's own 0-1 m denominator 1505); 0-2 m (f 0.313) would also need a
+  # ~2415 GtC passive stock. CHANGELOG 2026-09-30 (b).
+  SOIL_INERT_FRAC = list(
+    value = (.AOC_0_30_GT + .AOC_30_100_GT) / (.SOC_0_30_GT + .SOC_30_100_GT),
+    units = "fraction",
+    status = "cited",
+    source = paste("Radiocarbon-free (F14C = 0) share of global SOC, 0-1 m: (77 + 216) / (704 + 801)",
+                   "= 0.195. Copard et al. 2025, Global Change Biol. 31(9):e70482,",
+                   "doi:10.1111/gcb.70482 (PMC12405676): aOC ratios 0.11 +/- 0.10 (0-30 cm) and",
+                   "0.27 +/- 0.18 (30-100 cm) in Table 3 (313 profiles, 261 ISRaD + 52 LSCE); the",
+                   "layer masses 77 of 704 Gt and 216 of 801 Gt are PRINTED in sec. 3.1, on the",
+                   "Batjes 1996 / Jobbagy & Jackson 2000 stocks. The 0-1 m sum is OURS: the paper",
+                   "prints no 0-1 m fraction. Its +/- is unlabelled (a spread, not an SE).",
+                   "Verified against the PMC full text 2026-09-30.",
+                   "notes/lit_2026-09-29_passive_soil_stock.md. SINGLE-STUDY and method-dependent",
+                   "(a two-end-member mixing split); it contradicts the Shi 2020 / He 2016 reading",
+                   "of old bulk soil. A +/-1 sigma propagated with the layers fully correlated",
+                   "spans ~0.05-0.34 (CHANGELOG 2026-09-29 v; our propagation, not Copard's).",
+                   "Cited 2026-09-30.")),
 
   # ---- the NH/SH split of terrestrial NPP (2026-08-20k) ----------------
   # npp_frac_NH was fitted under UNIFORM[0.4, 0.8] -- zero observational content

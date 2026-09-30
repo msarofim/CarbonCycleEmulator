@@ -2192,7 +2192,19 @@ ccx_struct_hilda_csl3v0kan <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan")
+#' THE "hilda_csl3v0kai" STRUCTURE (2026-09-30, Marcus: "Go with 0-1 m; build the
+#' inert pool"): arm A with the INERT SOIL CARVE-OUT on. soil_inert_frac =
+#' SOIL_INERT_FRAC (Copard 2025, 0-1 m, 0.195) of the passive pool's stock is
+#' radiocarbon-free and exchanges with nothing (ccx_litter_slow_eff(),
+#' aux$soil_inert). No objective change: the likelihood reads no absolute soil
+#' stock. A NEW LABEL, not an edit: arm A and every registered file stay bit-exact.
+ccx_struct_hilda_csl3v0kai <- function() {
+  blk <- ccx_struct_hilda_csl3v0ka()
+  blk$soil_inert_frac <- ccx_const("SOIL_INERT_FRAC")
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2208,6 +2220,7 @@ ccx_struct_block <- function(struct) {
     "hilda_csl3v0k" = ccx_struct_hilda_csl3v0k(),  # ... plus the fert_k SHAPE prior (2026-09-28)
     "hilda_csl3v0ka" = ccx_struct_hilda_csl3v0ka(),  # ... plus aod_mode anomaly (2026-09-29; NPP arm A)
     "hilda_csl3v0kan" = ccx_struct_hilda_csl3v0kan(), # ... plus the modern-NPP row (2026-09-29; NPP arm B1)
+    "hilda_csl3v0kai" = ccx_struct_hilda_csl3v0kai(), # arm A + the inert soil carve-out, 0-1 m (2026-09-30)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2385,7 +2398,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "seasonal mixed layer's NH cycle FLAT, 2026-09-19l) and \"hilda_csl3\" (the limb from ",
          "layer 3 on hilda_cs, 2026-09-20o) and \"hilda_csl3v0\" (hilda_csl3 with npp_veg_frac = 0, ",
          "2026-09-28) and \"hilda_csl3v0k\" (hilda_csl3v0 + the fert_k shape prior, 2026-09-28) ",
-         "and \"hilda_csl3v0ka\" / \"hilda_csl3v0kan\" (+ aod anomaly / + the modern-NPP row, 2026-09-29).")
+         "and \"hilda_csl3v0ka\" / \"hilda_csl3v0kan\" (+ aod anomaly / + the modern-NPP row, 2026-09-29) ",
+         "and \"hilda_csl3v0kai\" (arm A + the inert soil carve-out, 2026-09-30).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)

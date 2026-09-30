@@ -361,6 +361,15 @@ ccx_cpp_par <- function(p) {
     stop("parameter list is missing the land structure: ",
          paste(miss, collapse = ", "), extra)
   }
+  # INERT SOIL CARVE-OUT (2026-09-30), RESOLVED HERE AND NOWHERE ELSE on the C++
+  # side, by the SAME function the R core calls: the core receives the
+  # EXCHANGING passive share under the name `litter_slow_frac` and never sees
+  # `soil_inert_frac`. Same rule as gamma_enso / seas_ml_on above -- one
+  # resolution, so the two cores cannot disagree -- and the C++ source is
+  # untouched. Its only other use, aux$land0, is marshalled from the R aux.
+  # After the land-structure check, so a list missing litter_slow_frac fails
+  # there by name. Absent or 0 passes litter_slow_frac through unchanged (bit-exact).
+  p$litter_slow_frac <- ccx_litter_slow_eff(p)
   p[c("beta", "fert_form", "beta_max", "fert_k",
       "q10", "k_w", "kz", "w_up", "w_out_NH", "w_out_SH", "tau_ex",
       "u_hs", "tau_q", "q_attach_from",   # HILDA HS/HD (2026-09-05, -05f)

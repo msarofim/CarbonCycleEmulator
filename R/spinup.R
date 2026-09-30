@@ -300,11 +300,15 @@ ccx_spinup <- function(p = ccx_default_params(),
     #   soil_slow litter_slow_frac * NPP,         drains in tau_soil_slow
     # aux$veg0 (model.R) must keep matching leaf + wood here EXACTLY, or the
     # capacity term makes this state stop being a fixed point of the derivative.
+    # The passive share is the EXCHANGING one (ccx_litter_slow_eff(), the inert
+    # carve-out of 2026-09-30); the inert stock is aux$soil_inert and has no
+    # fixed point to solve.
     npp0 <- aux$npp0[[h]]
+    lsf  <- ccx_litter_slow_eff(p)
     y[i$leaf, "C"] <- npp0 * p$npp_leaf_frac * p$tau_leaf
     y[i$wood, "C"] <- npp0 * (1 - p$npp_leaf_frac) * p$tau_wood
-    y[i$soil_fast, "C"] <- npp0 * (1 - p$litter_slow_frac) * p$tau_soil_fast
-    y[i$soil_slow, "C"] <- npp0 * p$litter_slow_frac * p$tau_soil_slow
+    y[i$soil_fast, "C"] <- npp0 * (1 - lsf) * p$tau_soil_fast
+    y[i$soil_slow, "C"] <- npp0 * lsf * p$tau_soil_slow
 
     # ocean: mixed layer in Henry equilibrium with the atmosphere; the interior
     # is at uniform CONCENTRATION, so C_k scales with layer thickness (this is

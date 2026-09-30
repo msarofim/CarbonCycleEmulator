@@ -763,11 +763,42 @@ ccx_fert_factor <- function(chi, p, chi0 = ccx_const("CO2_PI_PPM")) {
 #' land-structure change cannot leave a stale weight vector behind.
 #' Order: leaf, wood, soil_fast, soil_slow (= CCX_LAND_POOLS).
 ccx_luc_pool_shares <- function(p) {
+  lsf <- ccx_litter_slow_eff(p)
   w <- c(p$npp_leaf_frac * p$tau_leaf,
          (1 - p$npp_leaf_frac) * p$tau_wood,
-         (1 - p$litter_slow_frac) * p$tau_soil_fast,
-         p$litter_slow_frac * p$tau_soil_slow)
+         (1 - lsf) * p$tau_soil_fast,
+         lsf * p$tau_soil_slow)
   w / sum(w)
+}
+
+#' The share of litter that enters the EXCHANGING passive soil pool.
+#'
+#' `litter_slow_frac * (1 - soil_inert_frac)`: the inert carve-out (2026-09-30)
+#' takes its share of the passive pool OUT of the dynamics, and the litter that
+#' would have sustained it goes to the responsive pool, so NPP and total litter
+#' are unchanged. EVERY structural use of `litter_slow_frac` reads it through
+#' here -- the flux split, the spinup's fixed point, `aux$land0` and the LUC
+#' pro-rata shares -- and so does the C++ core, via ccx_cpp_par(), so the two
+#' cores cannot disagree about it. Absent or 0 returns `litter_slow_frac`
+#' itself (x * (1 - 0) is x exactly), which is the bit-exact contract.
+ccx_litter_slow_eff <- function(p) {
+  f <- p$soil_inert_frac
+  if (is.null(f)) return(p$litter_slow_frac)
+  if (length(f) != 1L || !is.finite(f) || f < 0 || f >= 1)
+    stop("soil_inert_frac must be a single number in [0, 1); got ", format(f))
+  p$litter_slow_frac * (1 - f)
+}
+
+#' The inert soil stock, GtC per hemisphere (list NH / SH), 0 when off.
+#'
+#' `f * npp0 * litter_slow_frac * tau_soil_slow` = f times the passive pool's
+#' UNCARVED preindustrial equilibrium, so exchanging + inert is the inventory-
+#' sized passive stock the pool was sized to. Constant for all time: no input,
+#' no respiration, no land-use debit, and no 14C (radiocarbon-free by
+#' definition, so it has nothing to decay).
+ccx_soil_inert_stock <- function(p, npp0) {
+  f <- if (is.null(p$soil_inert_frac)) 0 else p$soil_inert_frac
+  lapply(npp0, function(n) f * n * p$litter_slow_frac * p$tau_soil_slow)
 }
 
 #' Names of the boxes, in state order
@@ -1253,6 +1284,16 @@ ccx_default_params <- function() {
     tau_soil_fast = 2,    # yr, responsive soil turnover
     tau_soil_slow = 500,  # yr, passive soil turnover -- long enough that the
                           # pool holds carbon without seeing the bomb spike
+    # INERT SOIL CARBON (2026-09-30, Marcus: "build the inert pool", depth 0-1 m).
+    # The share of the passive pool's preindustrial stock NPP0 * litter_slow_frac
+    # * tau_soil_slow that is radiocarbon-free and exchanges with nothing: a
+    # CARVE-OUT, not an add-on, because the inventories that size the passive
+    # pool weigh this carbon too. The exchanging pool keeps (1 - f) of the
+    # litter (ccx_litter_slow_eff()); the inert remainder is a constant stock,
+    # aux$soil_inert, with no fluxes, no decay (F14C = 0) and no spinup. 0 = no
+    # inert pool, BIT-EXACT to every registered file. The value when on is
+    # ccx_const("SOIL_INERT_FRAC"); structure label "hilda_csl3v0kai".
+    soil_inert_frac = 0,
     npp_veg_frac = 0.5,   # phi: fraction of NPP that scales with the standing
                           # vegetation stock (the rest is stock-independent), so
                           # that clearing a forest costs capacity and not only
@@ -2430,12 +2471,14 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # litter_slow_frac. The split is applied to each source separately rather
     # than to a pooled total, because the two sources carry different 14C ratios
     # and pooling them first would average those ratios before the split.
+    # The passive share is the EXCHANGING one (the inert carve-out, 2026-09-30).
     lit_leaf <- y[ilef, "C"] / p$tau_leaf
     lit_wood <- y[iwod, "C"] / p$tau_wood
-    add_flux(ilef, isf, lit_leaf * (1 - p$litter_slow_frac))
-    add_flux(ilef, iss, lit_leaf * p$litter_slow_frac)
-    add_flux(iwod, isf, lit_wood * (1 - p$litter_slow_frac))
-    add_flux(iwod, iss, lit_wood * p$litter_slow_frac)
+    lsf <- ccx_litter_slow_eff(p)
+    add_flux(ilef, isf, lit_leaf * (1 - lsf))
+    add_flux(ilef, iss, lit_leaf * lsf)
+    add_flux(iwod, isf, lit_wood * (1 - lsf))
+    add_flux(iwod, iss, lit_wood * lsf)
 
     # HETEROTROPHIC RESPIRATION, both soil pools, same q10. The passive pool's
     # temperature sensitivity is not separately identified by anything the model
@@ -3912,11 +3955,18 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
     # equilibrium by only a quarter of what was taken and the land would
     # re-absorb the rest.
     # Must match ccx_spinup()'s land fixed point exactly, same as veg0.
+    # EXCHANGING carbon only: the inert carve-out (below) has no input for a
+    # cleared fraction to scale, so it cannot be part of this denominator.
     land0       = lapply(npp0, function(n)
                     n * (p$npp_leaf_frac * p$tau_leaf +
                          (1 - p$npp_leaf_frac) * p$tau_wood +
-                         (1 - p$litter_slow_frac) * p$tau_soil_fast +
-                         p$litter_slow_frac * p$tau_soil_slow)),
+                         (1 - ccx_litter_slow_eff(p)) * p$tau_soil_fast +
+                         ccx_litter_slow_eff(p) * p$tau_soil_slow)),
+    # INERT SOIL CARBON, GtC per hemisphere (2026-09-30): the constant stock
+    # the carve-out removed from the passive pool. Not a state and not a
+    # flux -- it is carried here so the model's soil stock and soil 14C are
+    # inventory-sized. Zero with soil_inert_frac absent or 0.
+    soil_inert  = ccx_soil_inert_stock(p, npp0),
     sst         = list(NH = p$sst_NH, SH = p$sst_SH),
     # `a_ml`, NOT `a_ls`, since the equatorial cell (2026-09-13g, choice D1):
     # the mixed layer's mass, its preindustrial carbon and its exchange area

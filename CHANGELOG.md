@@ -2,6 +2,28 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (b) — **Inert-pool depth scope RULED: 0–1 m, f 0.195 (Marcus: "Go with 0–1 m; build the inert pool"). The pairing follows from the stock the model already carries: the passive pool's 1500 GtC is the 0–1 m inventory.**
+
+The arithmetic behind the ruling (Copard et al. 2025, GCB 31:e70482, Table 3 fractions on the Batjes
+1996 / Jobbágy & Jackson 2000 stocks, as tabulated in `notes/lit_2026-09-29_passive_soil_stock.md`):
+
+| scope | SOC (Gt) | radiocarbon-free C (Gt) | f | exchanging (Gt) |
+|---|---|---|---|---|
+| **0–1 m** | 704 + 801 = **1505** | 77 + 216 = **293** | **0.195** | **1212** |
+| 0–2 m | 1505 + 910 = 2415 | 293 + 464 = 757 | 0.313 | 1658 |
+
+- The model's passive stock is **1500 GtC** (`R/model.R` land-default block; CHANGELOG 09-29 (q)).
+  Jobbágy & Jackson's 0–1 m total is 1502 and Copard's own 0–1 m denominator is 1505. So the passive
+  pool IS the 0–1 m inventory, and the 0–1 m f is the like-for-like fraction.
+- 0–1 m is also the only scope Shi 2020's bulk Δ¹⁴C (−244 ± 48 ‰, 0–1 m) can check.
+- **Why not 0–2 m:** a carve-out at 0–2 m must also raise the total passive stock to ~2415, so the
+  exchanging stock rises to ~1658, above today's 1500. That is a stock change, not only an age change.
+  It sits at the top of the (q) range (roughly 1200–2000), and Shi's 0–1 m bulk could no longer check it.
+- ⚠ **Carve-out applied to the PASSIVE pool, not total soil.** Copard's aOC is old carbon by
+  construction, so it comes out of the passive pool. Applying f to the passive pool's 1500 gives
+  an inert mass of 292 (exchanging 1208, the (v) numbers). Applying it to model soil 0–1 m (responsive
+  114 + passive 1500) would give 315. The difference is within Copard's ±1σ, but it is a choice.
+
 ## 2026-09-30 (a) — Handoff: `notes/handoff_2026-09-30_inert_pool_sink.md` (fixed-stock futures, cheap measurements A–D, inert pool, sink → source). Nothing running; no worktrees besides `main`. Refit WAITS on the open items (Marcus).
 
 ## 2026-09-29 (v) — **The cheap measurements (A–D). (1) τ_slow does not reach the radiocarbon problems: the bomb partition barely moves. (2) A CARVE-OUT inert pool at Copard's central fraction makes Shi's bulk Δ¹⁴C match at τ 500 (z +0.8) for −4.4 and +19 ppm. (3) Lower NPP looks cheap (−8.8 at ~57) only through a q10 < 1 escape; with q10 pinned it costs up to −40, paid by the seasonal cycle. (4) The land never turns source at the FITTED fertilisation; at literature-band fertilisation plus q10 2 it goes neutral by ~2275 and sits inside Koven's spread.**
