@@ -72,6 +72,11 @@ test_that("2. GATE: closed by default, opened only by the ledgered labels, undon
   kai <- ccx_struct_block("hilda_csl3v0kai"); dgb <- ccx_struct_block("hilda_csl3v0kaidgb")
   expect_identical(dgb[names(kai)], kai)
   expect_identical(setdiff(names(dgb), names(kai)), c(CCX_GATE_FLAG, "imb_treatment", "imb_with_cement"))
+  # the recorded I(t) is the RULED one ("Smooth + cement"), as a NUMERIC code decoded by name
+  expect_identical(names(LIK_IMB_TREATMENT_CODES), LIK_IMB_TREATMENTS)
+  expect_identical(names(LIK_IMB_TREATMENT_CODES)[match(dgb$imb_treatment, LIK_IMB_TREATMENT_CODES)], "smooth")
+  expect_identical(dgb$imb_with_cement, 1L)
+  expect_true(all(vapply(dgb, is.numeric, logical(1))))                # a model-list field is numeric
   # a holding label is a no-op; the open one appends the four, in order, and undoes exactly
   tab0 <- CCX_PARAM_TABLE; nm0 <- CCX_PARAM_NAMES
   expect_length(ccx_apply_gate("hilda_csl3v0kai"), 0L)

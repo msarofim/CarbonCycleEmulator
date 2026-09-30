@@ -2375,7 +2375,7 @@ ccx_struct_hilda_csl3v0kai <- function() {
 ccx_struct_hilda_csl3v0kaidgb <- function() {
   blk <- ccx_struct_hilda_csl3v0kai()
   blk[[CCX_GATE_FLAG]] <- 1L
-  blk$imb_treatment    <- "smooth"   # RULED 2026-09-30 (l): "Smooth + cement"
+  blk$imb_treatment    <- LIK_IMB_TREATMENT_CODES[["smooth"]]   # RULED 2026-09-30 (l): "Smooth + cement"
   blk$imb_with_cement  <- 1L
   stopifnot(!anyDuplicated(names(blk)))
   blk
@@ -2679,12 +2679,16 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
     # rows read the LIK_IMB_* globals at call time, so a draw under globals that disagree
     # would score a different objective under the same label. Refused per draw, before
     # the run (a screen may reassign the globals after this closure is built).
-    if (GATE_OPEN && (!identical(base_params$imb_treatment, LIK_IMB_TREATMENT) ||
-                      !identical(isTRUE(base_params$imb_with_cement == 1), isTRUE(LIK_IMB_WITH_CEMENT))))
-      stop("ccx_make_logpost(): the structure records I(t) = '", base_params$imb_treatment,
-           "', cement ", isTRUE(base_params$imb_with_cement == 1), ", but LIK_IMB_TREATMENT = '",
-           LIK_IMB_TREATMENT, "' and LIK_IMB_WITH_CEMENT = ", LIK_IMB_WITH_CEMENT,
-           ". A label means ONE objective; a different I(t) needs its own label.")
+    if (GATE_OPEN) {
+      .tr <- names(LIK_IMB_TREATMENT_CODES)[match(base_params$imb_treatment, LIK_IMB_TREATMENT_CODES)]
+      if (length(.tr) != 1L || is.na(.tr) || !identical(.tr, LIK_IMB_TREATMENT) ||
+          !identical(isTRUE(base_params$imb_with_cement == 1), isTRUE(LIK_IMB_WITH_CEMENT)))
+        stop("ccx_make_logpost(): the structure records I(t) = '", if (length(.tr)) .tr else "?",
+             "' (code ", paste(base_params$imb_treatment, collapse = ","), "), cement ",
+             isTRUE(base_params$imb_with_cement == 1), ", but LIK_IMB_TREATMENT = '",
+             LIK_IMB_TREATMENT, "' and LIK_IMB_WITH_CEMENT = ", LIK_IMB_WITH_CEMENT,
+             ". A label means ONE objective; a different I(t) needs its own label.")
+    }
     names(u) <- CCX_PARAM_NAMES
     pv <- ccx_unc_to_par(u)
 

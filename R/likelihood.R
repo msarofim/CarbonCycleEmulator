@@ -441,6 +441,12 @@ LIK_GCB_LAND_SD    <- 0.5            # GtC/yr, GCB 2025 stated land-sink 1 sigma
 # screen, and the forcing is untouched). The objective is not changed by these
 # until shares are supplied.
 LIK_IMB_TREATMENTS  <- c("raw", "smooth", "const")
+# The treatments as INTEGER CODES, for a structure block to RECORD one (2026-09-30; the
+# D2/D3 label). A block's fields become fields of the model list, which is numeric
+# throughout (the CCX_AOD_MODE_CODES / CCX_ENSO_INDEX_CODES precedent; a character field
+# broke the array driver's banner in the first smoke). Names = LIK_IMB_TREATMENTS
+# (test-gated-params.R); decoded only by name, never by position.
+LIK_IMB_TREATMENT_CODES <- c(raw = 1L, smooth = 2L, const = 3L)
 LIK_IMB_TREATMENT   <- "smooth"      # RULED 2026-09-30 (l)
 LIK_IMB_SMOOTH_YR   <- 11L           # = the app's APP_LUC_SMOOTH_YR (app/global.R)
 LIK_IMB_WITH_CEMENT <- TRUE          # RULED 2026-09-30 (l)
