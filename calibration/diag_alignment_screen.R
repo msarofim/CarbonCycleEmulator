@@ -74,6 +74,16 @@ AS_ARMS <- list(J1 = list(fert = TRUE,  npp = FALSE, npp0 = FALSE),
                 # combination on the record. q10 PINNED at its prior centre (2.0), not penalised.
                 J5 = list(fert = TRUE,  npp = FALSE, npp0 = FALSE, pin = c(q10 = 2.0)),
                 J6 = list(fert = TRUE,  npp = TRUE,  npp0 = TRUE,  pin = c(q10 = 2.0)))
+# + 09-30 (g), after J1-J4: the GROSS LAND LOOP. ra_ratio (Ra/NPP cycled THROUGH the
+# vegetation pool; 0 = no gross loop, the literature Ra/NPP is an UPPER BOUND -- Marcus
+# 2026-08-12, R/model.R) is FREE in [0, AS_GPP_PI / NPP0 - 1]: the AR6 preindustrial GPP
+# caps the gross loop. HYPOTHESIS: the land's early bomb-14C uptake scales ~ NPP x (1 +
+# ra_ratio), so the record's NPP pull (the NH bomb row, 09-29 k) is a pull on GROSS
+# exchange, and a gross loop lets NPP fall to the observed ~56 cheaply.
+AS_ARMS$G1 <- list(fert = FALSE, npp = TRUE,  npp0 = TRUE, ra = TRUE)   # NPP row + NPP0 + ra free
+AS_ARMS$G2 <- list(fert = FALSE, npp = FALSE, npp0 = TRUE, ra = TRUE)   # the record alone
+AS_ARMS$G3 <- list(fert = TRUE,  npp = TRUE,  npp0 = TRUE, ra = TRUE)   # everything
+AS_GPP_PI <- 113    # GtC/yr, AR6 WG1 Fig. 5.12 preindustrial GPP, as recorded in R/constants.R (NPP_GLOBAL_PI source)
 AS_ONLY   <- Sys.getenv("AS_ONLY", "J1,J2,J3,J4")          # which arms this process runs
 AS_ARMS   <- AS_ARMS[strsplit(AS_ONLY, ",")[[1]]]
 stopifnot(!anyNA(names(AS_ARMS)))
@@ -122,9 +132,10 @@ tg_npp <- ccx_npp_modern_target()
 hist_em <- as.data.frame(readRDS(ccx_path("data", "forcing_emissions_historical.rds")))[, c("year", "fossil_GtC", "luc_GtC")]
 emis <- function(s) { if (!AS_SPLICE[[s]]) return(NULL); e <- ccx_scenario_emissions(s)
   rbind(hist_em, e[e$year > max(hist_em$year), c("year", "fossil_GtC", "luc_GtC")]) }
-params_of <- function(u, npp0 = 1) { set_npp0(npp0); pv <- ccx_unc_to_par(u); list(p = ccx_overlay_par(bp0, pv), pv = pv) }
-score <- function(u, npp0 = 1, keen_c = NULL) {
-  q <- params_of(u, npp0); p <- q$p; pv <- q$pv
+params_of <- function(u, npp0 = 1, ra = 0) { set_npp0(npp0); pv <- ccx_unc_to_par(u)
+  p <- ccx_overlay_par(bp0, pv); p$ra_ratio <- ra; list(p = p, pv = pv) }
+score <- function(u, npp0 = 1, keen_c = NULL, ra = 0) {
+  q <- params_of(u, npp0, ra); p <- q$p; pv <- q$pv
   sp <- ccx_spinup_from_label(ccx_mode_spinup(md))(p)
   st <- ccx_stock_readout(sp$y, sp$aux)
   F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14, bomb_total_kmol = pv$bomb_total,
@@ -151,7 +162,9 @@ score <- function(u, npp0 = 1, keen_c = NULL) {
   b <- pv$beta_max; K <- pv$fert_k
   kc <- if (is.null(keen_c)) co2y[as.character(AS_KEENAN[c("y0", "y1")])] else keen_c
   set_npp0(1)
-  c(st, npp_modern = mean(n$npp_NH[kn] + n$npp_SH[kn]), npp0 = CONST0$NPP_GLOBAL_PI$value * npp0, sinks,
+  npp_mod <- mean(n$npp_NH[kn] + n$npp_SH[kn])
+  c(st, npp_modern = npp_mod, npp0 = CONST0$NPP_GLOBAL_PI$value * npp0, ra_ratio = ra,
+    gpp_pi = CONST0$NPP_GLOBAL_PI$value * npp0 * (1 + ra), gpp_modern = npp_mod * (1 + ra), sinks,
     soil_d14c_2000 = soil_d14, keenan_c0 = unname(kc[1]), keenan_c1 = unname(kc[2]),
     # unname(): gain() inherits the year names of its CO2 end-points (smoke 09-30)
     g_keenan = unname(gain(b, K, kc[[1]], kc[[2]])), g_400_564 = unname(gain(b, K, AS_G564[["c0"]], AS_G564[["c1"]])),
@@ -178,24 +191,32 @@ one <- function(nm) {
   if (!is.null(arm$pin)) { pv0 <- as.list(ccx_unc_to_par(u_ctrl)); for (n in names(arm$pin)) pv0[[n]] <- arm$pin[[n]]
     u_start <- ccx_par_to_unc(unlist(pv0)[md$param_names]) }
   iF <- match(setdiff(AS_FREE11, names(arm$pin)), md$param_names)
+  # extra coordinates after the free names: [NPP0 logit], [ra logit]
+  nF <- length(iF); k_n0 <- if (arm$npp0) nF + 1L else NA_integer_
+  k_ra <- if (isTRUE(arm$ra)) nF + as.integer(arm$npp0) + 1L else NA_integer_
+  s_of  <- function(x) if (arm$npp0) AS_NPP0_BOUNDS[1] + diff(AS_NPP0_BOUNDS) * stats::plogis(x[k_n0]) else 1
+  ra_of <- function(x, s) if (isTRUE(arm$ra)) (AS_GPP_PI / (CONST0$NPP_GLOBAL_PI$value * s) - 1) * stats::plogis(x[k_ra]) else 0
+  set_ra <- function(r) { e <- environment(lp); b <- get("base_params", envir = e); b$ra_ratio <- r
+    assign("base_params", b, envir = e) }
   obj <- function(x) {
     u <- u_start; u[iF] <- x[seq_along(iF)]
-    s <- if (arm$npp0) AS_NPP0_BOUNDS[1] + diff(AS_NPP0_BOUNDS) * stats::plogis(x[length(x)]) else 1
+    s <- s_of(x); set_ra(ra_of(x, s))
     set_npp0(s); w <- lp(u); set_npp0(1)
     if (!is.finite(w)) return(1e12)
     pen <- if (arm$fert) pen_fert(ccx_unc_to_par(u)) else 0
     -(as.numeric(w) + pen)
   }
-  x0 <- c(u_start[iF], if (arm$npp0) stats::qlogis((1 - AS_NPP0_BOUNDS[1]) / diff(AS_NPP0_BOUNDS)))
+  x0 <- c(u_start[iF], if (arm$npp0) stats::qlogis((1 - AS_NPP0_BOUNDS[1]) / diff(AS_NPP0_BOUNDS)),
+          if (isTRUE(arm$ra)) stats::qlogis(0.05))      # start the gross loop small, not at 0 (logit)
   o <- stats::optim(x0, obj, method = "Nelder-Mead", control = list(maxit = AS_MAXIT))
   u <- u_start; u[iF] <- o$par[seq_along(iF)]
-  s <- if (arm$npp0) AS_NPP0_BOUNDS[1] + diff(AS_NPP0_BOUNDS) * stats::plogis(o$par[length(o$par)]) else 1
+  s <- s_of(o$par); ra <- ra_of(o$par, s); set_ra(ra)
   set_npp0(s); l1 <- lp(u); set_npp0(1)
   st <- attr(l1, "streams"); rec <- as.numeric(attr(l1, "loglik")) - (if ("npp_modern" %in% names(st)) st[["npp_modern"]] else 0)
-  list(arm = nm, spec = arm, u = u, npp0 = s, conv = o$convergence, evals = o$counts[["function"]],
+  list(arm = nm, spec = arm, u = u, npp0 = s, ra_ratio = ra, conv = o$convergence, evals = o$counts[["function"]],
        loglik_record = rec, streams = st[setdiff(names(st), "npp_modern")],
        pen_fert = pen_fert(ccx_unc_to_par(u)), npp_row = if ("npp_modern" %in% names(st)) st[["npp_modern"]] else NA_real_,
-       score = score(u, s, KEEN_C))
+       score = score(u, s, KEEN_C, ra))
 }
 res <- parallel::mclapply(names(AS_ARMS), one, mc.cores = AS_CORES, mc.preschedule = FALSE)
 bad <- vapply(res, inherits, logical(1), "try-error"); if (any(bad)) { print(res[bad]); stop("fork failure") }
@@ -230,7 +251,7 @@ print(round(S[, c("vegetation", "soil_fast", "soil_slow", "soil_inert", "soil_to
 cat(sprintf("  literature: vegetation %g (AR6 WG1 Fig 5.12, PI); soil 0-1 m %g (Jobbagy & Jackson 2000) / %g (Shi 2020); AR6 soils outside permafrost %g\n",
             AS_LIT_POOLS[["vegetation_AR6"]], AS_LIT_POOLS[["soil_0_1m_JJ"]], AS_LIT_POOLS[["soil_0_1m_Shi"]], AS_LIT_POOLS[["soils_AR6_nonpf"]]))
 cat("\n=== SCORECARD: fluxes and radiocarbon (z where the literature gives a sd) ===\n")
-print(round(cbind(S[, c("npp0", "npp_modern")], z_npp = z(S[, "npp_modern"], tg_npp$centre, tg_npp$sd),
+print(round(cbind(S[, c("npp0", "npp_modern", "ra_ratio", "gpp_pi", "gpp_modern")], z_npp = z(S[, "npp_modern"], tg_npp$centre, tg_npp$sd),
                   S[, grep("^d(Land|Ocean|Eluc)_", colnames(S))], soil_d14c_2000 = S[, "soil_d14c_2000"],
                   z_shi = z(S[, "soil_d14c_2000"], AS_SHI[["mean"]], AS_SHI[["sd"]])), 3))
 cat("\n=== SCORECARD: fertilisation RESPONSES (GPP literature applied to NPP) and q10 ===\n")
