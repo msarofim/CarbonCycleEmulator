@@ -1,0 +1,84 @@
+=== PROVENANCE === driver calibration/diag_alignment_screen.R, commit d6cc3c3, run 2026-09-30 13:56; no RNG
+  structure hilda_csl3v0kai (inert pool f 0.194684) at v0k basin 1; control = tau_soil_slow_profile_fixedstock_stock8053_20260929.rds value 500, rescored under the label: d 4.86e-04 (tol 1e-03)
+  NM maxit 3000 on {beta_max, fert_k, luc_scale, q10, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, npp_frac_NH, kz, rep_dC} (+ NPP_GLOBAL_PI scale in [0.70, 1.10] for J3/J4); costs are UPPER bounds
+  constraints: KEENAN 1981->2020 (CO2 343.2->415.4 ppm) +0.135 +/- 0.035; G564 +0.169 +/- 0.062; NPP 56.06 +/- 7.75 (2001-2023)
+
+=== THE ARMS: record cost (likelihood WITHOUT the NPP row), penalties, moves ===
+  arm        d_ll_rec  pen_fert   npp_row   beta      K     NPP0   NPPmod    q10    luc      kz   conv evals
+  control       +0.00         -         -  2.739    872     60.0    69.62  1.109  0.863   15531      -     -
+  D3s          +14.19      3.09         -  2.819    880     60.0    69.83  1.100  0.875   15406      1  3002
+  D3c          +21.46      2.96         -  2.798    842     60.0    70.18  1.093  0.891   14947      1  3002
+  D3sc         +16.55      3.08         -  2.823    878     60.0    69.87  1.096  0.877   15337      0  2172
+
+=== D3 ARMS (imbalance allocation; predictions P-D3-1..4 registered at 40ca12d) ===
+  control: common-row loglik -1319.767; GCB rows -66.50 (land) -7.00 (ocean) under #13; enh(410) 0.3627; luc_scale 0.8630; SSP5-8.5 2300 1406.7 ppm
+  D3s   I(t) smooth cement FALSE | s_land 0.531 s_ocean 0.154 rest 0.315 | d_ll common   +2.86, own objective  +14.19, GCB rows +11.34
+        enh(410) 0.3704 (+2.1 %), beta 2.819 K 880, luc_scale 0.8754, q10 1.100, kz 15406; SSP5-8.5 2300 -11.4 ppm; conv 1 evals 3002
+        P-D3-1 GCB rows gain >= floor: PASS; P-D3-2 enh does not fall > tol: PASS; P-D3-3 s_ocean > min: PASS; P-D3-4 |d 2300 CO2| < tol: PASS
+  D3c   I(t) const  cement FALSE | s_land 0.889 s_ocean 0.111 rest 0.000 | d_ll common   +4.68, own objective  +21.46, GCB rows +16.78
+        enh(410) 0.3819 (+5.3 %), beta 2.798 K 842, luc_scale 0.8911, q10 1.093, kz 14947; SSP5-8.5 2300 -14.2 ppm; conv 1 evals 3002
+        P-D3-1 GCB rows gain >= floor: PASS; P-D3-2 enh does not fall > tol: PASS; P-D3-3 s_ocean > min: PASS; P-D3-4 |d 2300 CO2| < tol: PASS
+  D3sc  I(t) smooth cement TRUE  | s_land 0.509 s_ocean 0.121 rest 0.370 | d_ll common   +3.53, own objective  +16.55, GCB rows +13.02
+        enh(410) 0.3717 (+2.5 %), beta 2.823 K 878, luc_scale 0.8775, q10 1.096, kz 15337; SSP5-8.5 2300 -12.5 ppm; conv 0 evals 2172
+        P-D3-1 GCB rows gain >= floor: PASS; P-D3-2 enh does not fall > tol: PASS; P-D3-3 s_ocean > min: PASS; P-D3-4 |d 2300 CO2| < tol: PASS
+
+=== WHO PAYS (record streams vs control, 8 largest |max|) ===
+     gcb_land_sink co2_icecore d13c_level_MLO co2_level_MLO gcb_ocean_sink
+D3s           9.35        1.89           1.99         -0.61           1.99
+D3c          16.02        3.76           3.00         -2.13           0.76
+D3sc         11.29        2.21           2.76         -0.79           1.73
+     d13c_level_SPO d14c_profile_ab co2_seasonal_MLO
+D3s           -0.99            0.27            -0.21
+D3c           -0.62            1.14            -0.88
+D3sc          -1.20            0.41            -0.38
+
+=== SCORECARD: pools (PI, GtC) ===
+        vegetation soil_fast soil_slow soil_inert soil_total land_total
+control        516     115.0      1207        292     1614.1     2130.1
+D3s            516     115.1      1207        292     1614.1     2130.1
+D3c            516     115.0      1207        292     1614.0     2130.0
+D3sc           516     115.0      1207        292     1614.1     2130.1
+        ocean_total atmosphere
+control     37658.8      588.3
+D3s         37659.3      588.2
+D3c         37661.2      588.3
+D3sc        37659.6      588.3
+  literature: vegetation 450 (AR6 WG1 Fig 5.12, PI); soil 0-1 m 1502 (Jobbagy & Jackson 2000) / 1848 (Shi 2020); AR6 soils outside permafrost 1700
+
+=== SCORECARD: fluxes and radiocarbon (z where the literature gives a sd) ===
+        npp0 npp_modern ra_ratio gpp_pi gpp_modern z_npp dLand_1960_2023
+control   60     69.620        0     60     69.620 1.749           0.343
+D3s       60     69.827        0     60     69.827 1.776           0.383
+D3c       60     70.179        0     60     70.179 1.821           0.441
+D3sc      60     69.865        0     60     69.865 1.781           0.390
+        dOcean_1960_2023 dEluc_1960_2023 dLand_2010_2023 dOcean_2010_2023
+control            0.073          -0.232           0.436            0.022
+D3s                0.065          -0.211           0.490            0.008
+D3c                0.045          -0.184           0.561           -0.021
+D3sc               0.062          -0.207           0.500            0.004
+        dEluc_2010_2023 soil_d14c_2000 z_shi
+control          -0.208       -205.833 0.795
+D3s              -0.189       -205.854 0.795
+D3c              -0.166       -205.756 0.797
+D3sc             -0.186       -205.843 0.795
+
+=== SCORECARD: fertilisation RESPONSES (GPP literature applied to NPP) and q10 ===
+        g_keenan g_400_564  g_2x  g_4x z_keenan z_564 z_2x_oos z_4x_oos   q10
+control    0.152     0.254 0.660 1.336    0.497 1.365    1.426    1.852 1.109
+D3s        0.155     0.258 0.675 1.369    0.577 1.438    1.516    1.957 1.100
+D3c        0.159     0.261 0.692 1.389    0.674 1.488    1.625    2.023 1.093
+D3sc       0.156     0.259 0.677 1.372    0.589 1.446    1.529    1.969 1.096
+
+=== SCORECARD: futures (SSP5-8.5 unspliced, vvH spliced; land-carbon windows GtC vs Koven 2022 +/- 1 sd) ===
+        ssp585_co2_2300 ssp585_dL1521 ssp585_dL2122 ssp585_dL2223
+control         1406.71        486.40        569.32        220.06
+D3s             1395.29        496.64        584.31        225.61
+D3c             1392.52        503.89        587.07        228.30
+D3sc            1394.16        498.04        585.86        226.45
+        ssp585_landxPI vvH_co2_2300 vvH_landxPI  zK1  zK2  zK3
+control           1.60       974.33        1.34 1.29 2.27 1.59
+D3s               1.62       968.75        1.35 1.35 2.32 1.61
+D3c               1.62       966.93        1.36 1.39 2.33 1.62
+D3sc              1.62       968.18        1.35 1.36 2.33 1.61
+  (land x PI uses TOTAL land incl. the inert pool -- the ESM-style convention, CHANGELOG 09-30 f)
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/alignment_screen_d3_20260930.{log,csv,rds}

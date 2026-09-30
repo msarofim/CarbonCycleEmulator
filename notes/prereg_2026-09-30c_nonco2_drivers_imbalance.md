@@ -31,9 +31,56 @@ Standing: the arm-A refit HOLDS until D2 and D3 are built and screened.
   - **D2**: supply part of the historical sink with drivers whose FUTURE differs from CO₂'s;
   - **D3**: let the target itself move where GCB's own budget does not close.
 
-## 2. D2 design
+## 2. D2 design (after the literature pass, `notes/lit_2026-09-30_nonco2_land_sink_drivers.md`)
 
-*(the forms and priors are pending the literature pass; filled in §2a–2c)*
+### 2a. N deposition: BUILD (the plumbing is built, OFF, `c0ae37b`)
+- **Form.** NPP × (1 + γ_N · ndep_h).
+  - ndep_h is anthropogenic deposition onto hemisphere h's LAND, in Tg N/yr above 1750. It is carried
+    in the forcing columns `ndep_NH` and `ndep_SH`.
+  - It feeds the existing pools through the existing allocation.
+  - Precedents: MAGICC-CNit's exp(f1·AD), which is linear at these magnitudes, and the C4MIP ε metric
+    (lit N19, N22).
+  - The Janssens Rh channel stays out: whole-ecosystem C–N responses already contain it (lit §2a(i)).
+- **Prior.** γ_N is lognormal, centre **1.0e-4 per Tg N/yr**, log-sd **0.9**.
+  - r = 5.8 kg C of extra NPP per kg N on land: Du & de Vries 2018's 19.4 for forests × the forest
+    share 0.30.
+  - γ_N = r × 1e-3 / NPP₀ (C, lit §2a(ii)).
+  - 2σ reaches CLM4.5's 36.
+- **Gate.** The model's implied sink per unit ΔNdep must fall inside 0.6–8.7 kg C/kg N (land mean;
+  lit §2a(iv)).
+- **Forcing (choice §6.4).** Recommended: the emissions proxy.
+  - Deposition ≈ NOx-N + NH₃-N emissions to within 1–6 % (Galloway 2004, Lamarque 2013, Tan 2018).
+  - Land fraction 0.60 (0.55–0.65 across Galloway, Kanakidou and Tan). The land fraction is degenerate
+    with γ_N, so its uncertainty sits inside the log-sd.
+  - NH / SH split 0.83 / 0.17 (C, from Tan 2018 Table 5).
+  - It is the only source that covers every scenario the model runs, to 2300.
+  - Seam: the SSPs' CMIP6 history is 8.4 Tg N/yr above the CMIP7 history at 2014, so they are
+    harmonised at the seam (§6.5).
+- **Expected.** A sink of 0.1–0.2 GtC/yr, 7–9 % of S_LAND, falling after mid-century in every scenario.
+  NPP rises only 0.3–0.5 %.
+
+### 2b. Climate greening: the literature does NOT support a positive term (choice §6.6)
+- **Form, if built.** NPP × exp(σ_T · ΔT), on annual-mean GMST relative to the spinup year. This is
+  MAGICC6's per-flux exp(σΔT) and CNit's f_T.
+  - The seasonal NEP rides on NPP, so its amplitude scales with the term. No separate seasonal
+    temperature path.
+- **Prior, if built.** σ_T ~ N(0, 0.03) per K, SIGN-FREE: MAGICC6's C4MIP fits give median 0.00 and SD
+  0.029 (Meinshausen 2011, Table B4).
+  - The evidence leans negative: CMIP6 γ_NPP is negative in 8 of 10 ESMs (Varney 2024, verified
+    verbatim); CNit's median is −0.14 /K; GCB 2025's net climate effect is −0.8 ± 0.7.
+- **Role.** Not a historical sink. The record sees σ_T − ln(q10)/10, so σ_T is what could let q10 rise.
+- ⚠ A POSITIVE fitted σ_T raises post-2100 uptake, which widens the Koven gap.
+
+### 2c. Recovery from past disturbance: the evidence says NO (choice §6.7)
+- **(c-i) A 1750 deficit is contradicted.**
+  - Ice-core δ¹³C shows land stable or gaining to ~1700, then releasing (Bauska 2015).
+  - GCB's 1750–1850 E_LUC is a 30 ± 20 GtC source.
+  - The legacy of pre-industrial clearing is emission.
+- **(c-ii) Land-use regrowth is already inside GCB's net E_LUC** (GCB 2025 §2.2.1), so `f_luc_perm`
+  < 1 double counts.
+  - What remains outside it (natural-disturbance recovery; US fire suppression ~0.04 PgC/yr) is small,
+    and its magnitude is uncited.
+- **`luc_scale` ≈ 0.86 already acts as a 0.23–0.26 GtC/yr recovery-like sink.**
 
 ### 2.0 What is already on disk for an N-deposition forcing (C = computed here, 2026-09-30)
 Anthropic plus open-burning N emissions: NOx as NO₂ × 14.007/46.006, plus NH₃ × 14.007/17.031, as ΔN
@@ -127,11 +174,26 @@ relative to 1750 (Tg N/yr).
 - **P-D3-4.** The SSP5-8.5 2300 CO₂ moves by less than ±20 ppm. D3 is about the target, not the land's
   future.
 
-### 4.2 D2 (per driver; filled with the literature numbers in §2)
-- **P-D2-1.** The fertilisation amplitude falls: enh(410 ppm) below the control's 0.339.
-- **P-D2-2.** The post-2100 land sink falls toward Koven: z for 2100–2200 below +2.27.
-- **P-D2-3.** q10 can rise: the fitted q10 above 1.11.
-- **P-D2-4.** Modern NPP: (a) and (b) RAISE it; (c) does not. D4's hope rests on (c) and on P-D2-1.
+### 4.1b D3 alone: SCORED 2026-09-30 (k). All four PASS in all three arms (smooth, const, smooth + cement)
+- The rows gained +11 to +17.
+- enh(410) rose +2.1 to +5.3 %; `luc_scale` 0.863 → 0.875–0.891.
+- s_ocean 0.11–0.15.
+- SSP5-8.5 2300 moved −11 to −14 ppm.
+- CONST rails the remainder at 0.
+
+### 4.2 D2: predictions, updated with the literature magnitudes (§2), before any D2 fit
+- **P-D2-1 (a).** enh(410) falls below the control's, by 3–12 %. That is the (a) sink's 7–9 % share of
+  S_LAND, bracketed.
+  - FAILS if it does not fall.
+  - The size is a range, not a gate: the CO₂ record may reassign part of it elsewhere.
+- **P-D2-2 (a).** The fitted γ_N lands inside its prior's 2σ, 0.17e-4 to 6e-4 per Tg N/yr, AND the
+  implied sink per N lies inside 0.6–8.7 kg C/kg N (the §2a gate).
+- **P-D2-3 (a).** Modern NPP rises by less than 1 GtC/yr. (a) does NOT resolve D4.
+- **P-D2-4 (b), if built sign-free.** The fitted σ_T is positive and q10 rises. The future then moves
+  TOWARD Koven only if the q10 rise outweighs the σ_T gain at high warming.
+  - The direction is not predicted: that trade is exactly what the build would measure.
+- **P-D2-5 (all).** The post-2100 Koven z (2100–2200) stays above +1.5 with D2 (a) alone. A small sink
+  cannot close a gap of this size.
 
 ## 5. The screen (step 4), before the refit
 - `diag_alignment_screen.R` gains the D2 labels and the D3 shares, as extra coordinates (like NPP₀ and
@@ -147,15 +209,34 @@ relative to 1750 (Tg N/yr).
 
 ## 6. Choices for Marcus
 
-*(D3 choices below. The D2 choices are appended after the literature pass.)*
-
+**D3**
 1. **I(t) treatment:** RAW / SMOOTH (11-yr) / CONST.
    - Recommendation: **SMOOTH.** RAW lets the interannual noise choose the share (64 % of its
-     estimate). CONST ignores the imbalance's decline from +0.93 (1960s) to +0.02 (2015–2024).
+     estimate). CONST ignores the imbalance's decline from +0.93 (1960s) to +0.02 (2015–2024) and rails
+     the remainder at 0 in the screen.
 2. **Cement carbonation** (+0.09 mean, +0.21 recently; the model has no such sink):
-   - fold it into the allocated quantity (I = imbalance + cement); or
+   - fold it into the allocated quantity; or
    - leave it out; or
-   - net it from the fossil input, which is a forcing change and also needs a future path.
-   - Recommendation: **fold it in**. It is carbon the model must place like the imbalance, and it
-     keeps the forcing untouched.
-3. **Constant shares** (recommended) or time-varying (by epoch).
+   - net it from the fossil input, which is a forcing change and needs a future path.
+   - Recommendation: **fold it in**: +0.67 on the common rows in the screen, and the forcing is untouched.
+3. **Constant shares** (recommended) or time-varying.
+
+**D2**
+
+4. **(a) N-deposition forcing:**
+   - the emissions proxy (recommended; §2a);
+   - the CMIP7 FZJ-CMIP-nitrogen-2-0 gridded deposition for 1850–2022, then the proxy (a download;
+     4 of 7 scenarios, to 2100 only);
+   - the CMIP6 NCAR-CCMI-2-0 (TRENDY's forcing; 30–45 % below the observation-based 2010s totals).
+5. **The SSP seam for the proxy:** ratio-harmonise each SSP to the CMIP7 history at its last shared
+   year, converging by 2050 (recommended); or splice without harmonising, which gives an 8 Tg N/yr step.
+6. **(b) climate greening:**
+   - build it with a sign-free prior 0 ± 0.03 /K (recommended: the ruling's freedom, the literature's
+     centre);
+   - a hemispheric sign-constrained form (NH ≥ 0, SH ≤ 0): a suggestion with no literature numbers;
+   - drop it.
+7. **(c) recovery:**
+   - do not build it, and record `luc_scale` as the model's existing recovery-like freedom (recommended);
+   - a small prescribed decaying sink into wood, prior centre 0 with a half-normal 0.2 GtC/yr (a
+     judgement, not a receipt);
+   - (c-i) as a labelled sensitivity arm only.

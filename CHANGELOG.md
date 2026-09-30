@@ -2,6 +2,92 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (k) — **Two results. (1) The D3-alone screen: all four pre-registered predictions PASS. Freeing the imbalance shares RAISES fertilisation 2–5 %, moves `luc_scale` toward 1, and lowers SSP5-8.5 2300 CO₂ by 11–14 ppm. (2) The D2 literature pass: N deposition is supported but SMALL (7–9 % of the land sink). A POSITIVE climate-greening term is not supported. A 1750 land deficit is contradicted by ice-core δ¹³C, and land-use regrowth is already inside GCB's net E_LUC.**
+
+**(1) The D3-alone screen** (`diag_alignment_screen.R` at `d6cc3c3`, `AS_ONLY=D3s,D3c,D3sc`,
+`alignment_screen_d3_20260930.*`, 11 min on 3 cores; laptop, not Torch: three NM arms of ~1 h budget).
+- Control: 09-30 (g)'s, under `hilda_csl3v0kai`.
+- The shares are stick-broken extra coordinates, started at the preview optimum (09-30 i).
+- P-D3-1..4 were registered in `notes/prereg_2026-09-30c_nonco2_drivers_imbalance.md` at `40ca12d`,
+  BEFORE the run.
+
+| arm | I(t) | s_land | s_ocean | rest | Δll COMMON rows | Δll own objective | enh(410) | `luc_scale` | q10 | SSP5-8.5 2300 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| control | — | — | — | — | 0 | 0 | 0.3627 | 0.863 | 1.109 | 1406.7 |
+| D3s | smooth | 0.531 | 0.154 | 0.315 | **+2.86** | +14.19 | **+2.1 %** | 0.875 | 1.100 | **−11.4** |
+| D3c | const | 0.889 | 0.111 | **0.000** | **+4.68** | +21.46 | **+5.3 %** | 0.891 | 1.093 | **−14.2** |
+| D3sc | smooth + cement | 0.509 | 0.121 | 0.370 | **+3.53** | +16.55 | **+2.5 %** | 0.878 | 1.096 | **−12.5** |
+
+(COMMON = every row except the two GCB level rows whose targets D3 moves: the like-for-like
+comparison.)
+
+- **P-D3-1..4 PASS in all three arms.**
+  - The rows gain +11 to +17.
+  - Fertilisation does not fall; it RISES.
+  - s_ocean is 0.11–0.15.
+  - |Δ2300| is under 20 ppm.
+- ⭐ **The mechanism, confirmed.** Objective #13's `gcb_land_sink` row pulled the land sink DOWN.
+  Released, the fit raises fertilisation and `luc_scale`, and the land takes up MORE in the future (the
+  Koven gap widens by 11–14 ppm of CO₂). The common rows gain +2.9 to +4.7, mostly `co2_icecore` and
+  `d13c_level_MLO`: that is what the pull was costing the record.
+- ⚠ **CONST rails the remainder at 0.** It wants ALL the imbalance in the sinks (s_land + s_ocean = 1),
+  i.e. its level exceeds what the land row can use without borrowing from E_LUC. SMOOTH does not rail.
+- Cement folded in (D3sc) is +0.67 on the common rows over plain SMOOTH, with shares within 0.03.
+- ⇒ D3 alone is honest about the target and costs the land problem a little. It is not a
+  fertilisation fix; D2 has to be.
+
+**(2) The D2 literature pass** (subagent; `notes/lit_2026-09-30_nonco2_land_sink_drivers.md`,
+V/A/R/C-labelled).
+
+*Spot-checked by the main session:*
+- All of §2's arithmetic reproduced:
+  - land fractions 0.55 / 0.62 / 0.64;
+  - r = 19.4 × 0.30 = 5.8 kg C of NPP per kg N, so γ_N = 5.8e-3 / 60 ≈ 1.0e-4 per Tg N/yr;
+  - central sinks 3.9e-3 × {29.1, 42.7, 44.3} = 0.11 / 0.17 / 0.17 GtC/yr, i.e. 8.7 / 8.1 / 6.9 % of
+    S_LAND;
+  - `luc_scale`'s hidden sink 0.15 × {1.755, 1.714, 1.520};
+  - the GCB windows equal the arm-A budget log's.
+- Varney 2024 γ_NPP checked VERBATIM on the publisher page: −29.4 ± 40.1 → −35.3 ± 33.1 PgC/°C,
+  positive only in CanESM5 and MPI-ESM1-2-LR. ⚠ That is SOIL carbon per °C driven by NPP, not an NPP
+  flux per °C; the sign argument holds.
+- The GCB 2025 abstract confirms that climate reduced the land sink by 25 % in 2015–2024: the note's
+  −0.8 against a CO₂ + N effect of 3.2.
+
+**(a) N deposition: SUPPORTED, SMALL.**
+- Forest sink 0.25–0.72 PgC/yr, "~0.3 most likely" (Du & de Vries 2024; the ¹⁵N ceiling is Gurmesa
+  2022's 0.72).
+- In CCX terms, a central 0.11 / 0.17 / 0.17 GtC/yr: 7–9 % of S_LAND (range 1–19 %).
+- The extra NPP is 0.3–0.5 %, so (a) cannot move the NPP tension.
+- ⭐ Kou-Giesbrecht 2023 (A): land models without N "must exaggerate … CO2 fertilisation" to match
+  history. That is this model's diagnosis, from the outside.
+- Precedent: MAGICC-CNit (Tang 2025) is the first reduced-complexity model with N.
+
+**(b) Climate greening: a POSITIVE term is NOT supported.**
+- CMIP6 NPP–T is negative in 8 of 10 ESMs.
+- MAGICC6's C4MIP fits give σ_NPP median 0.00 (SD 0.029 /K).
+- CNit's median is −0.14 /K of land temperature.
+- GCB 2025's net climate effect is −0.8 ± 0.7 GtC/yr.
+- Zhu 2016's climate share of greening is 8.1 ± 20.6 % (± = SD across models).
+- ⚠ A positive σ_T raises post-2100 uptake, the WRONG direction for Koven.
+- σ_T and q10 are not jointly identifiable from history (ρ −0.89 across models, Huntzinger 2017).
+  Hector's history calibration uses q10 1.2 with no NPP–T term.
+
+**(c) Recovery: the evidence says no.**
+- **(c-i) A 1750 deficit** is contradicted:
+  - WAIS δ¹³C shows land carbon stable or GAINING over 755–1850, and releasing after ~1700 (Bauska 2015).
+  - GCB's 1750–1850 E_LUC is a 30 ± 20 GtC SOURCE.
+  - The legacy of pre-industrial clearing is continued EMISSION.
+  - No simple model starts from a deficit.
+- **(c-ii) Land-use regrowth** after harvest, abandonment and shifting cultivation is INSIDE net E_LUC
+  (GCB 2025 §2.2.1; gross regrowth −1.3 GtC/yr in 2015–24, which the repo already holds). So
+  `f_luc_perm` < 1 double counts. What remains outside E_LUC (natural-disturbance recovery; fire
+  suppression, ~0.04 PgC/yr in the US) is small and uncited in magnitude.
+- ⭐ `luc_scale` ≈ 0.86 ALREADY acts as a ~0.23–0.26 GtC/yr recovery-like sink.
+
+**Consequence.** Of the three drivers the rulings named, only (a) has receipts, and it is small. The D3
+imbalance (0.4–0.7 GtC/yr) is larger than any of them. The design choices this raises go to Marcus
+(prereg §6).
+
 ## 2026-09-30 (j) — **D3 machinery is BUILT and OFF: the two GCB sink rows can move their targets by a fitted share of GCB's imbalance. Absent shares are objective #13 bit for bit. Every guard and wire is mutation-tested; the suite shows only the named red.** Nothing adopted; the I(t) treatment and the cement choice await Marcus.
 
 Code (`512d8e8`):
