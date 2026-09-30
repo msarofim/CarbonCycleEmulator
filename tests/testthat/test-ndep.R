@@ -119,8 +119,21 @@ test_that("GUARD: a nonzero gamma on a forcing with NO deposition series is refu
   expect_silent(invisible(ccx_ndep_check(0.01, q)))
 })
 
-test_that("ACCESSOR: no data file or no scenario = zeros stamped 'none'", {
+test_that("ACCESSOR: no scenario, or partial coverage = zeros stamped 'none...'", {
   nd <- ccx_ndep_forcing(1750:1760, "no_such_scenario_xyz")
   expect_identical(nd$source, "none")
   expect_identical(nd$NH, rep(0, 12L * 11L)); expect_identical(nd$SH, rep(0, 12L * 11L))
+  skip_if(!file.exists(ccx_path("data", CCX_NDEP_FILE)), "data/forcing_ndep.rds not built")
+  # the historical series ends in 2024: a table past it is zeros, and REFUSED at gamma != 0
+  np <- ccx_ndep_forcing(2020:2030, "historical")
+  expect_match(np$source, "^none \\(historical covers")
+  expect_true(all(np$NH == 0))
+  F <- list(); attr(F, "ndep_source") <- np$source
+  expect_error(ccx_ndep_check(0.001, F), "NO N-deposition series")
+  expect_silent(invisible(ccx_ndep_check(0, F)))
+  # a covered scenario carries the series: zero at 1750, positive and NH-heavy by 2000
+  nh <- ccx_ndep_forcing(1750:2000, "historical")
+  expect_match(nh$source, "\\[historical\\]$")
+  expect_identical(nh$NH[1:12], rep(0, 12))
+  expect_gt(tail(nh$NH, 1), 30); expect_gt(tail(nh$NH, 1) / tail(nh$SH, 1), 4)
 })

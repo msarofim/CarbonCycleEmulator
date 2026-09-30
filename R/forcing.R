@@ -1115,9 +1115,14 @@ ccx_ndep_forcing <- function(years, scenario) {
   d0 <- readRDS(f)
   d <- as.data.frame(d0)[d0$scenario == scenario, ]
   if (!nrow(d)) return(none)
-  if (min(d$year) > min(years) || max(d$year) < max(years))
-    stop(sprintf("ccx_ndep_forcing(): %s covers %d-%d, the run needs %d-%d.",
-                 scenario, min(d$year), max(d$year), min(years), max(years)))
+  # PARTIAL COVERAGE (e.g. a "historical" table built past the last GCB year) is
+  # ZEROS stamped "none (...)": harmless at gamma_ndep 0, REFUSED otherwise. A
+  # stop() here would break every gamma-0 caller for a series it never reads.
+  if (min(d$year) > min(years) || max(d$year) < max(years)) {
+    none$source <- sprintf("none (%s covers %d-%d, the table needs %d-%d)", scenario,
+                           min(d$year), max(d$year), min(years), max(years))
+    return(none)
+  }
   src <- attr(d0, "source"); if (is.null(src)) src <- CCX_NDEP_FILE
   list(NH = ccx_annual_to_monthly(d$year, d$ndep_NH, years, "constant"),
        SH = ccx_annual_to_monthly(d$year, d$ndep_SH, years, "constant"),
@@ -1127,9 +1132,9 @@ ccx_ndep_forcing <- function(years, scenario) {
 #' Refuse a nonzero gamma_ndep on a forcing that carries no deposition series
 ccx_ndep_check <- function(gamma_ndep, F) {
   src <- attr(F, "ndep_source")
-  if (isTRUE(gamma_ndep != 0) && (is.null(src) || identical(src, "none")))
+  if (isTRUE(gamma_ndep != 0) && (is.null(src) || grepl("^none", src)))
     stop("gamma_ndep = ", gamma_ndep, " but the forcing carries NO N-deposition series ",
-         "(ndep_source ", if (is.null(src)) "absent" else "'none'", "). Build ",
+         "(ndep_source ", if (is.null(src)) "absent" else paste0("'", src, "'"), "). Build ",
          "data/forcing_ndep.rds for this scenario (data-raw/build_ndep_forcing.R).")
   invisible(TRUE)
 }
