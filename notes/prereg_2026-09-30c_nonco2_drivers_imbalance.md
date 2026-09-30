@@ -33,7 +33,20 @@ Standing: the arm-A refit HOLDS until D2 and D3 are built and screened.
 
 ## 2. D2 design (after the literature pass, `notes/lit_2026-09-30_nonco2_land_sink_drivers.md`)
 
-### 2a. N deposition: BUILD (the plumbing is built, OFF, `c0ae37b`)
+### 2a. N deposition: BUILD. ⚠ FORM RULED 2026-09-30 (m): a RETENTION FLUX, not the multiplier below
+> **Superseded form.** The multiplier described in this subsection was built (`c0ae37b`) and failed this note's
+> own P-D2-2 gate by construction. Its sink tracks d(ndep)/dt: 0.37–0.70 kg C/kg N at the prior centre
+> (`diag_ndep_form_efficiency.R`).
+>
+> **The ruled form** (`65bc714`):
+> - F_h = `ndep_ret` × 1e-3 × max(ndep_h, 0) GtC/yr, from the atmosphere into `soil_slow`, at `alpha_photo`.
+> - `ndep_ret` is lognormal: centre **3.9 kg C/kg N** (`NDEP_RET_PRIOR_CENTRE`), log-sd **0.67**
+>   (`NDEP_RET_PRIOR_LOGSD`).
+> - P-D2-2 now reads: `ndep_ret` inside its prior's 2σ AND the implied sink per N inside 0.6–8.7.
+>
+> The multiplier's screen (`alignment_screen_d2_20260930.*`) is its record. The text below is kept as
+> written before the runs.
+
 - **Form.** NPP × (1 + γ_N · ndep_h).
   - ndep_h is anthropogenic deposition onto hemisphere h's LAND, in Tg N/yr above 1750. It is carried
     in the forcing columns `ndep_NH` and `ndep_SH`.
@@ -180,6 +193,14 @@ relative to 1750 (Tg N/yr).
 - s_ocean 0.11–0.15.
 - SSP5-8.5 2300 moved −11 to −14 ppm.
 - CONST rails the remainder at 0.
+
+### 4.2b What the MULTIPLIER-form screen scored (09-30 l; the retired form's record)
+- **P-D2-1:** PASS in DN and DNT (enh −2.2 / −8.7 %); FAIL with D3 (DNTb +2.4 %).
+- **P-D2-2:** PASS, but only because the fit pushed γ to 2–5× its centre: 0.84–2.06 kg C/kg N. At the
+  centre the form gives 0.40.
+- **P-D2-3:** PASS.
+- **P-D2-4:** FAIL in every arm: σ_T ≈ 0 (+0.004 to −0.006 /K), and q10 does not rise.
+- **P-D2-5:** PASS.
 
 ### 4.2 D2: predictions, updated with the literature magnitudes (§2), before any D2 fit
 - **P-D2-1 (a).** enh(410) falls below the control's, by 3–12 %. That is the (a) sink's 7–9 % share of
