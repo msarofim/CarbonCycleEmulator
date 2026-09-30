@@ -84,6 +84,25 @@ AS_ARMS$G1 <- list(fert = FALSE, npp = TRUE,  npp0 = TRUE, ra = TRUE)   # NPP ro
 AS_ARMS$G2 <- list(fert = FALSE, npp = FALSE, npp0 = TRUE, ra = TRUE)   # the record alone
 AS_ARMS$G3 <- list(fert = TRUE,  npp = TRUE,  npp0 = TRUE, ra = TRUE)   # everything
 AS_GPP_PI <- 113    # GtC/yr, AR6 WG1 Fig. 5.12 preindustrial GPP, as recorded in R/constants.R (NPP_GLOBAL_PI source)
+# + 09-30 (k): D3 ALONE -- the GCB imbalance allocation (R/likelihood.R LIK_IMB_*; CHANGELOG
+# 09-30 i/j; predictions P-D3-1..4 registered in notes/prereg_2026-09-30c_nonco2_drivers_imbalance.md
+# at 40ca12d, BEFORE this arm ran). The two shares are EXTRA COORDINATES, stick-broken so the
+# simplex needs no bound: s_land = plogis(x1), s_ocean = (1 - s_land) * plogis(x2). The ruled prior
+# is FLAT on the simplex, so the arm maximises its own #14 likelihood over it (no Jacobian: a
+# flat-prior MAP on the natural scale is the ML). `imb` is the I(t) treatment, `cement` whether
+# GCB's cement sink is allocated with it -- both PENDING Marcus, so the screen PRICES them.
+# ⚠ Compare D3 arms with the control on the COMMON rows (everything except gcb_land_sink /
+# gcb_ocean_sink, whose targets the arm moves), never on the arm's own objective alone.
+AS_ARMS$D3s  <- list(fert = FALSE, npp = FALSE, npp0 = FALSE, imb = "smooth", cement = FALSE)
+AS_ARMS$D3c  <- list(fert = FALSE, npp = FALSE, npp0 = FALSE, imb = "const",  cement = FALSE)
+AS_ARMS$D3sc <- list(fert = FALSE, npp = FALSE, npp0 = FALSE, imb = "smooth", cement = TRUE)
+AS_IMB_ROWS    <- c("gcb_land_sink", "gcb_ocean_sink")
+AS_IMB_PREVIEW <- ccx_path("outputs", "diagnostics", "imb_alloc_preview_20260930.rds")   # start shares
+AS_ENH_C       <- 410      # ppm, the enhancement P-D3-2 reads (CHANGELOG 09-30 d's shape-row anchor)
+AS_PD3_ENH_TOL <- 0.05     # P-D3-2: enh(410) may not FALL by more than this fraction
+AS_PD3_OCN_MIN <- 0.05     # P-D3-3: s_ocean above this
+AS_PD3_FUT_TOL <- 20       # P-D3-4: |d SSP5-8.5 2300 CO2| below this (ppm)
+AS_PD3_ROW_MIN <- 8        # P-D3-1: the two GCB rows gain at least this (the fixed-vector floor)
 AS_ONLY   <- Sys.getenv("AS_ONLY", "J1,J2,J3,J4")          # which arms this process runs
 AS_ARMS   <- AS_ARMS[strsplit(AS_ONLY, ",")[[1]]]
 stopifnot(!anyNA(names(AS_ARMS)))
@@ -183,6 +202,14 @@ KEEN_C <- sc_ctrl[c("keenan_c0", "keenan_c1")]          # fixed for every arm's 
 pen_fert <- function(pv) stats::dnorm(gain(pv$beta_max, pv$fert_k, KEEN_C[[1]], KEEN_C[[2]]), AS_KEENAN[["mean"]], AS_KEENAN[["sd"]], log = TRUE) +
                          stats::dnorm(gain(pv$beta_max, pv$fert_k, AS_G564[["c0"]], AS_G564[["c1"]]), AS_G564[["mean"]], AS_G564[["sd"]], log = TRUE)
 
+# D3 start shares: the fixed-vector optimum of the preview for this arm's treatment (09-30 i)
+imb_start <- function(arm) {
+  pv <- readRDS(AS_IMB_PREVIEW)$shares
+  key <- paste0(toupper(arm$imb), if (isTRUE(arm$cement)) "_CEM" else "")
+  r <- pv[pv$treat == key, ]; stopifnot(nrow(r) == 1L)
+  sl <- min(max(r$s_land, 0.02), 0.98); rest <- min(max(r$s_ocean / (1 - sl), 0.02), 0.98)
+  c(sl, rest)
+}
 one <- function(nm) {
   arm <- AS_ARMS[[nm]]
   lp <- ccx_make_logpost(base_params = base_params(arm$npp), by_stream = TRUE)
@@ -191,29 +218,41 @@ one <- function(nm) {
   if (!is.null(arm$pin)) { pv0 <- as.list(ccx_unc_to_par(u_ctrl)); for (n in names(arm$pin)) pv0[[n]] <- arm$pin[[n]]
     u_start <- ccx_par_to_unc(unlist(pv0)[md$param_names]) }
   iF <- match(setdiff(AS_FREE11, names(arm$pin)), md$param_names)
-  # extra coordinates after the free names: [NPP0 logit], [ra logit]
+  # D3 arms: the I(t) treatment is a GLOBAL the likelihood reads at call time; this runs in
+  # a FORKED child (mclapply), so the assignment is this arm's alone.
+  if (!is.null(arm$imb)) { assign("LIK_IMB_TREATMENT", arm$imb, envir = globalenv())
+    assign("LIK_IMB_WITH_CEMENT", isTRUE(arm$cement), envir = globalenv()) }
+  # extra coordinates after the free names: [NPP0 logit], [ra logit], [s_land logit, rest logit]
   nF <- length(iF); k_n0 <- if (arm$npp0) nF + 1L else NA_integer_
   k_ra <- if (isTRUE(arm$ra)) nF + as.integer(arm$npp0) + 1L else NA_integer_
+  k_im <- if (!is.null(arm$imb)) nF + as.integer(arm$npp0) + as.integer(isTRUE(arm$ra)) + 1:2 else NA_integer_
+  im_of <- function(x) if (!is.null(arm$imb)) stats::plogis(x[k_im]) else NULL        # (s_land, rest)
+  set_im <- function(v) { e <- environment(lp); b <- get("base_params", envir = e)
+    b$imb_share_land <- v[1]; b$imb_share_ocean_rest <- v[2]; assign("base_params", b, envir = e) }
   s_of  <- function(x) if (arm$npp0) AS_NPP0_BOUNDS[1] + diff(AS_NPP0_BOUNDS) * stats::plogis(x[k_n0]) else 1
   ra_of <- function(x, s) if (isTRUE(arm$ra)) (AS_GPP_PI / (CONST0$NPP_GLOBAL_PI$value * s) - 1) * stats::plogis(x[k_ra]) else 0
   set_ra <- function(r) { e <- environment(lp); b <- get("base_params", envir = e); b$ra_ratio <- r
     assign("base_params", b, envir = e) }
   obj <- function(x) {
     u <- u_start; u[iF] <- x[seq_along(iF)]
-    s <- s_of(x); set_ra(ra_of(x, s))
+    s <- s_of(x); set_ra(ra_of(x, s)); if (!is.null(arm$imb)) set_im(im_of(x))
     set_npp0(s); w <- lp(u); set_npp0(1)
     if (!is.finite(w)) return(1e12)
     pen <- if (arm$fert) pen_fert(ccx_unc_to_par(u)) else 0
     -(as.numeric(w) + pen)
   }
   x0 <- c(u_start[iF], if (arm$npp0) stats::qlogis((1 - AS_NPP0_BOUNDS[1]) / diff(AS_NPP0_BOUNDS)),
-          if (isTRUE(arm$ra)) stats::qlogis(0.05))      # start the gross loop small, not at 0 (logit)
+          if (isTRUE(arm$ra)) stats::qlogis(0.05),      # start the gross loop small, not at 0 (logit)
+          if (!is.null(arm$imb)) stats::qlogis(imb_start(arm)))   # the fixed-vector optimum (09-30 i)
   o <- stats::optim(x0, obj, method = "Nelder-Mead", control = list(maxit = AS_MAXIT))
   u <- u_start; u[iF] <- o$par[seq_along(iF)]
   s <- s_of(o$par); ra <- ra_of(o$par, s); set_ra(ra)
+  im <- im_of(o$par); if (!is.null(im)) set_im(im)
   set_npp0(s); l1 <- lp(u); set_npp0(1)
   st <- attr(l1, "streams"); rec <- as.numeric(attr(l1, "loglik")) - (if ("npp_modern" %in% names(st)) st[["npp_modern"]] else 0)
   list(arm = nm, spec = arm, u = u, npp0 = s, ra_ratio = ra, conv = o$convergence, evals = o$counts[["function"]],
+       imb_share = if (is.null(im)) c(land = NA_real_, ocean = NA_real_) else c(land = im[1], ocean = (1 - im[1]) * im[2]),
+       loglik_common = sum(st[setdiff(names(st), c("npp_modern", AS_IMB_ROWS))]),
        loglik_record = rec, streams = st[setdiff(names(st), "npp_modern")],
        pen_fert = pen_fert(ccx_unc_to_par(u)), npp_row = if ("npp_modern" %in% names(st)) st[["npp_modern"]] else NA_real_,
        score = score(u, s, KEEN_C, ra))
@@ -243,6 +282,31 @@ cat(sprintf("  %-8s %+10.2f %9s %9s %6.3f %6.0f %8.1f %8.2f %6.3f %6.3f %7.0f %6
 for (r in res) cat(sprintf("  %-8s %+10.2f %9.2f %9s %6.3f %6.0f %8.1f %8.2f %6.3f %6.3f %7.0f %6d %5d\n", r$arm, r$loglik_record - ref_rec,
   r$pen_fert, if (is.na(r$npp_row)) "-" else sprintf("%.2f", r$npp_row), r$score[["beta_max"]], r$score[["fert_k"]], r$score[["npp0"]],
   r$score[["npp_modern"]], r$score[["q10"]], r$score[["luc_scale"]], ccx_unc_to_par(r$u)$kz, r$conv, r$evals))
+# ---- D3 arms: like-for-like on the COMMON rows, and the pre-registered predictions ----
+d3 <- Filter(function(r) !is.null(r$spec$imb), res)
+if (length(d3)) {
+  ref_common <- sum(ref_st[setdiff(names(ref_st), c("npp_modern", AS_IMB_ROWS))])
+  enh_c <- enh(sc_ctrl[["beta_max"]], sc_ctrl[["fert_k"]], AS_ENH_C)
+  cat("\n=== D3 ARMS (imbalance allocation; predictions P-D3-1..4 registered at 40ca12d) ===\n")
+  cat(sprintf("  control: common-row loglik %.3f; GCB rows %+.2f (land) %+.2f (ocean) under #13; enh(%d) %.4f; luc_scale %.4f; SSP5-8.5 2300 %.1f ppm\n",
+              ref_common, ref_st[["gcb_land_sink"]], ref_st[["gcb_ocean_sink"]], AS_ENH_C, enh_c, sc_ctrl[["luc_scale"]], sc_ctrl[["ssp585_co2_2300"]]))
+  for (r in d3) {
+    e_a  <- enh(r$score[["beta_max"]], r$score[["fert_k"]], AS_ENH_C)
+    rows <- sum(r$streams[AS_IMB_ROWS]) - sum(ref_st[AS_IMB_ROWS])
+    dfut <- r$score[["ssp585_co2_2300"]] - sc_ctrl[["ssp585_co2_2300"]]
+    cat(sprintf("  %-5s I(t) %-6s cement %-5s | s_land %.3f s_ocean %.3f rest %.3f | d_ll common %+7.2f, own objective %+7.2f, GCB rows %+6.2f\n",
+                r$arm, r$spec$imb, isTRUE(r$spec$cement), r$imb_share[["land"]], r$imb_share[["ocean"]], 1 - sum(r$imb_share),
+                r$loglik_common - ref_common, r$loglik_record - ref_rec, rows))
+    cat(sprintf("        enh(%d) %.4f (%+.1f %%), beta %.3f K %.0f, luc_scale %.4f, q10 %.3f, kz %.0f; SSP5-8.5 2300 %+.1f ppm; conv %d evals %d\n",
+                AS_ENH_C, e_a, 100 * (e_a / enh_c - 1), r$score[["beta_max"]], r$score[["fert_k"]], r$score[["luc_scale"]], r$score[["q10"]],
+                ccx_unc_to_par(r$u)$kz, dfut, r$conv, r$evals))
+    v <- c(`P-D3-1 GCB rows gain >= floor` = rows >= AS_PD3_ROW_MIN,
+           `P-D3-2 enh does not fall > tol` = e_a >= (1 - AS_PD3_ENH_TOL) * enh_c,
+           `P-D3-3 s_ocean > min`           = r$imb_share[["ocean"]] > AS_PD3_OCN_MIN,
+           `P-D3-4 |d 2300 CO2| < tol`      = abs(dfut) < AS_PD3_FUT_TOL)
+    cat(sprintf("        %s\n", paste(sprintf("%s: %s", names(v), ifelse(v, "PASS", "FAIL")), collapse = "; ")))
+  }
+}
 cat("\n=== WHO PAYS (record streams vs control, 8 largest |max|) ===\n")
 D <- do.call(rbind, lapply(res, function(r) r$streams - ref_st)); rownames(D) <- vapply(res, `[[`, "", "arm")
 big <- names(sort(apply(abs(D), 2, max), decreasing = TRUE))[1:min(8, ncol(D))]; print(round(D[, big, drop = FALSE], 2))
