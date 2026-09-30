@@ -2,6 +2,147 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (m) — **N deposition is re-formed as a RETENTION FLUX (Marcus: "Retention flux"). The NPP multiplier is gone: its sink tracked the RATE OF CHANGE of deposition, and could not give the literature's steady kg C per kg N.** Built in both cores, OFF by default, mutation-tested.
+
+**Why (the evidence is in (l)).** At its prior centre the multiplier's sink per N was 0.70 / 0.50 / 0.37 kg C/kg N
+in 1950–79 / 1980–99 / 2000–23. The literature's steady land-mean ratio is 0.6–8.7 (central 3.9); reaching
+it would need ~10× the prior centre, i.e. +1.4 GtC/yr of NPP.
+- The literature's number is a ratio of sink RATE to deposition RATE. N retained in wood and soil
+  organic matter binds carbon for as long as deposition continues.
+- A box model relaxing to a new NPP equilibrium cannot do that.
+- Put to Marcus with the numbers; ruled "Retention flux".
+
+**The form** (`65bc714`). F_h = `ndep_ret` × 1e-3 × max(ndep_h, 0) GtC/yr, from the atmosphere into
+`soil_slow`.
+- `ndep_ret` is in kg C per kg N (Tg C per Tg N).
+- The carbon is photosynthetic: it leaves at `alpha_photo` with the atmosphere's ¹⁴C, and the flux trace
+  counts it in `gpp`.
+- One pool, the passive one, where retained N and its carbon sit. A wood/soil split would need a cited
+  ¹⁵N-retention partition.
+- Clamped at zero deposition: the flux is one-way, and vV VL dips a hair below its 1750 emissions by 2300.
+- `add_flux` skips a zero flux in both cores, so OFF is bit-exact by construction.
+- ⚠ The model's `npp` readout does NOT include this flux (≤ 0.2 GtC/yr at the prior centre): immaterial for
+  D4's 70-vs-56.
+
+**Prior** (`R/constants.R`, derived from the lit note's inputs):
+- `NDEP_RET_PRIOR_CENTRE` = whole-forest ~13 kg C/kg N (Du & de Vries 2024 Tables 4.1–4.2; the note's
+  central) × forest share 0.30 = **3.9**. At this centre the implied sink is 0.11 / 0.17 / 0.17 GtC/yr.
+- `NDEP_RET_PRIOR_LOGSD` = log(8.7 / 0.6) / 4 = **0.67**: the literature range's log-width as ±2σ (the
+  ruled "2-sigma spanning 0.6–8.7").
+  - Centred on 3.9 rather than the range's geometric midpoint 2.3, so its 95 % interval is 1.0–15.
+  - The 0.6 floor is aboveground wood only, a lower bound on whole-ecosystem retention.
+- The multiplier's `GAMMA_NDEP_PRIOR_*` and their inputs are removed.
+
+**Tests** (`test-ndep.R` rewritten, 47):
+- OFF is bit-exact under a loud column.
+- EXACT: the derivative change is exactly the flux, only in atm and `soil_slow`, with the photosynthetic
+  ¹³C ratio, and zero under negative deposition.
+- PARITY: at 0 / 3.9 / 8.7, with the column absent and the parameter absent, and the C++ clamp.
+- TRAJ over 80 yr; CONSERVE over 30 yr, closed; GUARD; ACCESSOR.
+
+**Mutation table** (each caught):
+
+| mutation | FAIL |
+|---|---|
+| R1 flux into `soil_fast` | 11 |
+| R2 R not clamped | 1 |
+| R3 no photosynthetic fractionation | 3 |
+| R4 C++ ignores it | 8 |
+| R5 C++ unit ×10 | 7 |
+| R6 C++ not clamped | 1 |
+| R7 R absence default wrong | 2 |
+| R8 run-time check unwired | 2 |
+
+## 2026-09-30 (l) — **Rulings, then the D2 build. Marcus ruled all four design choices as recommended: D3 = SMOOTH + cement; (a) the EMISSIONS PROXY; (b) a SIGN-FREE greening prior; (c) NOT built. N deposition and greening were built OFF and mutation-tested. The pre-registered sink-per-N gate then caught a structural flaw in the NPP-multiplier form (fixed in (m)). The multiplier screen is recorded.**
+
+**Rulings** (Marcus, 2026-09-30, via the question tool; options as written in prereg §6):
+- D3 **"Smooth + cement"**: an 11-yr centred mean of (imbalance + cement), constant shares. The
+  `LIK_IMB_WITH_CEMENT` default is set at the next safe edit (the constant is still FALSE; the screen
+  arms set it explicitly).
+- (a) **"Emissions proxy"**: NOx+NH₃ N × land 0.60 × NH 0.83; SSPs ratio-harmonised to the CMIP7
+  history by 2050.
+- (b) **"Sign-free prior"**: NPP × exp(σ_T · GMST), σ_T ~ N(0, 0.029) /K.
+- (c) **"Don't build"**: `luc_scale` is the model's existing recovery-like freedom (~0.23–0.26 GtC/yr),
+  to be said in the assessment.
+
+**N-deposition forcing.**
+- Columns `ndep_NH` / `ndep_SH` appended LAST (`N_FORCING` 17 → 19); the C++ now refuses a
+  forcing of the wrong width at both entry points.
+- `ccx_ndep_forcing()` reads `data/forcing_ndep.rds`. No file, no scenario, or partial coverage gives
+  zeros stamped `none…`.
+- `ccx_ndep_check()` refuses a nonzero parameter on such a forcing. The periodic quiet year is stamped
+  zero by definition.
+- **Data** (`data-raw/build_ndep_forcing.R` → `data/forcing_ndep.rds`, provenance `@dc70f51`):
+  - Sources are sha-checked: the pinned vV v1.1.1 file and the MANIFEST's RCMIP v5.1.0.
+  - Every scenario carries the CMIP7 history.
+  - RCMIP's post-2015 waypoints are linearly interpolated.
+  - SSP ratios at 2023 (CMIP7 / SSP): NOx 0.76–1.00, NH₃ 0.96–1.06, released linearly by 2050.
+
+| Tg N/yr onto land above 1750 | 1950 | 1980 | 2000 | 2014 | 2023 | 2050 | 2100 | 2200 | 2300 |
+|---|---|---|---|---|---|---|---|---|---|
+| history | 12.4 | 36.6 | 45.3 | 49.7 | 50.6 | | | | |
+| SSP5-8.5 | | | | | | 62.7 | 51.5 | 37.6 | 30.6 |
+| vV H | | | | | | 50.1 | 63.9 | 9.7 | 0.2 |
+| vV VL | | | | | | 19.9 | 11.4 | 0.8 | −0.8 |
+
+  The 2010s history (≈ 50) sits between CMIP6 CCMI's 44 and the observation-based totals, as the
+  literature says it should.
+
+**Constants** (`R/constants.R`, all cited or derived):
+- CIAAW 2024 atomic weights (checked on ciaaw.org), for N/NO₂ and N/NH₃.
+- `NDEP_LAND_FRAC` 0.60 (Galloway / Kanakidou / Tan) and `NDEP_NH_SHARE` 0.83 (from Tan 2018 Table 5).
+- `NPP_TSENS_PRIOR_SD` = SD of MAGICC6's ten C4MIP σ_NPP. **Read from the Table B4 PDF by the main
+  session:** 0.01, 0.01, 0.04, 0.02, 0.00, −0.06, 0.00, −0.03, −0.03, −0.02 → SD **0.0291**, median 0.00.
+  Eq. A21 applies it to GLOBAL-MEAN temperature, so it transfers to a GMST term.
+
+**The greening term** (`d7f7538`): NPP × exp(`npp_tsens` · gmst), on the same GMST column as q10.
+- The seasonal NEP rides on NPP, so its amplitude scales with the term.
+- OFF is bit-exact (exp(0) is 1).
+- `test-npp-tsens.R` (23): OFF, PARITY at −0.06 / 0 / 0.029 / 0.06 and at absence, TRAJ, CONSERVE, SIGN.
+- Mutations caught: T1 R ignores it (7); T2 C++ ignores it (10); T3 C++ linear (7); T4 R absence default
+  (2); T5 C++ sign (9).
+
+**The multiplier** (`c0ae37b`, since replaced):
+- Mutations N1–N7 all caught (7 / 8 / 7 / 2 / 2 / 1 / 5 FAIL).
+- Ledgers extended as designed:
+  - `test-parity.R`'s flat-vector mirror;
+  - `test-forcing.R` pins 18:19 and length 19 ("the DELIBERATE edit the pin exists to force");
+  - `test-so-entrainment.R` classifies `ndep` **NON-CLIMATE**, emissions-driven like CO₂, so a
+    held-climate run keeps it moving. This classification is my decision, flagged for Marcus.
+- Suites:
+  - `suite_20260930_postc0ae37b.log`: FAIL 3 = the named red + those two ledgers, then fixed;
+  - `suite_20260930_postd7f7538.log`: **FAIL 1, only the named red**, PASS 5329.
+
+**The flaw the gate caught.** The D2 smoke read 0.40 kg C/kg N at the multiplier's prior centre, below the
+pre-registered P-D2-2 gate (0.6–8.7).
+- The hypothesis, stated in the driver before its run: the sink tracks d(ndep)/dt.
+- `diag_ndep_form_efficiency.R` (`ndep_form_efficiency_20260930.log`) confirmed it:
+
+| window | ndep | d(ndep)/dt | sink per N at 1× centre | at 5× centre |
+|---|---|---|---|---|
+| 1950–79 | 23.2 | 0.88 | 0.70 | 3.49 |
+| 1980–99 | 40.7 | 0.55 | 0.50 | 2.50 |
+| 2000–23 | 48.8 | 0.19 | **0.37** | 1.86 |
+
+⇒ The form was the problem (see (m)). The lit note's "a constant ΔNdep gives a sink that decays … the
+property the PI wants" conflated a DIFFERENT FUTURE (what D2 is for) with a DECAYING sink under constant
+deposition (what the literature says does not happen).
+
+**The multiplier-form D2 screen** (`alignment_screen_d2_20260930.*`, at `f09ef2e`; kept as the
+retired form's record):
+
+| arm | Δll | γ (× centre) | σ_T /K | enh(410) | q10 | sink/N | SSP5-8.5 2300 |
+|---|---|---|---|---|---|---|---|
+| DN | +1.84 | 2.1 | — | −2.2 % | 1.113 | 0.84 | +2.1 |
+| DT | +0.48 | — | +0.0014 | −1.3 % | 1.100 | — | −9.8 |
+| DNT | +3.91 | 4.7 | +0.0043 | **−8.7 %** | 1.105 | 1.86 | −7.1 |
+| DNTb (+D3) | common +7.14 | 5.2 | −0.0061 | +2.4 % | 1.103 | 2.06 | +22.2 |
+
+- The record pushes the N sink 2–5× above the multiplier's centre, i.e. it wants MORE N sink than that
+  form gives.
+- **Greening: the record leaves σ_T at ≈ 0** and q10 does not rise, so P-D2-4 FAILS in every arm. The
+  sign-free prior and the record agree that there is no historical greening term to find.
+
 ## 2026-09-30 (k) — **Two results. (1) The D3-alone screen: all four pre-registered predictions PASS. Freeing the imbalance shares RAISES fertilisation 2–5 %, moves `luc_scale` toward 1, and lowers SSP5-8.5 2300 CO₂ by 11–14 ppm. (2) The D2 literature pass: N deposition is supported but SMALL (7–9 % of the land sink). A POSITIVE climate-greening term is not supported. A 1750 land deficit is contradicted by ice-core δ¹³C, and land-use regrowth is already inside GCB's net E_LUC.**
 
 **(1) The D3-alone screen** (`diag_alignment_screen.R` at `d6cc3c3`, `AS_ONLY=D3s,D3c,D3sc`,
