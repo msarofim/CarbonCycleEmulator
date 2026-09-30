@@ -2,6 +2,50 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (q) — **Launch rulings (Marcus, via the question tool; the chosen labels verbatim): "Keep hilda_csl3v0kaidgb (Recommended)"; `npp_tsens` dispersed "At its prior sd (Recommended)"; "Registered set, as 09-28b/c (Recommended)"; "Mac, 8 parallel" (my verdict was Torch). The objective-#14 refit is RUNNING on the Mac: 24 starts, 8 at a time, launched 17:42 from a frozen worktree at `99f1161`.**
+
+**The dispersion override** (`99f1161`, `run_dispersed_multistart.R`).
+- `MS_SPREAD_OVERRIDE = c(npp_tsens = NPP_TSENS_PRIOR_SD)` (0.0291 /K, a u-space sd because `tr = "id"`,
+  asserted). It is applied only to names the run fits, i.e. with the gate open. Every other coordinate
+  keeps the shared 1.0452.
+- Printed in the banner and on the preflight line, which now shows the drawn value. Recorded per start
+  as `spread_by_name`.
+- **REQUIRED in the output directory's name** (`_sdby_npp_tsens=0.0291`), the seasml1 / `_martin`
+  precedent. The driver refuses an unlabelled directory before creating it (checked).
+- Preflight, all 24 ids LAUNCHABLE:
+  - the dispersed `npp_tsens` starts are −0.061 … +0.049, where the uniform spread gave ±1 /K;
+  - the dispersed starts' logposts are still −1.1e5 to −1.5e7, set by the other coordinates, as in 09-28c.
+
+**The launch** (the 09-28c recipe, on the Mac):
+- **Tree:** git worktree `~/ccx_frozen/20260930q_dgb_refit` at `99f1161`, with `nuclear14c` copied in.
+  Port targets were regenerated there (33 names: cold −62,902.74; `hilda29l` seeded −12,149.79;
+  `hilda31pe` seeded −12,163.01).
+- **Environment:**
+  - `CCX_MS_STRUCT=hilda_csl3v0kaidgb`, `CCX_MS_SEAS_ML=1`, `CCX_MS_SPREAD=1.0452`;
+  - `CCX_MS_PIN` = the canonical 9;
+  - `CCX_MS_WALL_MIN=300`, 3 restarts × 6 cycles × 6000 maxit;
+  - `CCX_MAC_NPAR=8`, tag `20260930q`.
+- **Outdir:** `calibration/output/multistart_20260930q_hilda_csl3v0kaidgb_seasml1_pin_…_sd1.0452_sdby_npp_tsens=0.0291`,
+  in the frozen tree (206 characters).
+- **Logs:** `logs/wave_20260930q.log`, and `logs/ccx_multistart_mac_20260930q_<id>.out` per task. The
+  preflight's logs are in `logs/preflight_20260930q/`.
+- **Seeds:** `2026 + id`, recorded in every start file.
+- ⚠ **The machine is an M4 with 4 performance and 6 efficiency cores**, and the background load was ~2.2
+  at launch. Eight tasks put about half on efficiency cores, which are slower per evaluation and so get
+  fewer evaluations in the same wall. The single-task preflight rate was 0.21–0.23 s/eval.
+- **Measured at the start (8 running, load 9.4): 0.29–0.53 s/eval per task** (single task 0.21–0.23).
+  That is about 34k–60k evaluations per task in the 300-min wall, against a Torch node's 0.59–1.08 s/eval
+  (the launcher's own note), i.e. more per task than 09-28c had. id 000 at 0.53 is probably on an
+  efficiency core.
+- **Expected:** 3 rounds of ≤ 5 h, ≈ 15 h, about 09:00 on 10-01 if every task uses its wall.
+
+**When it lands:**
+1. copy the outdir back into the repo's `calibration/output/`;
+2. `collect_dispersed_multistart.R`;
+3. `promote_multistart_mode.R` (GATES 1–5; smoke-tested under this label);
+4. `recompute_hessian.R --update`;
+5. then read the refit (handoff 09-30 d §3).
+
 ## 2026-09-30 (p) — **Refit infrastructure, step 1, BUILT. The four D2/D3 names enter the fitted set through a LABEL GATE, and the new label `hilda_csl3v0kaidgb` opens it (objective #14; the name awaits Marcus). Every registered mode is bit-exact, so nothing needs restamping. The refit path (driver, port targets, promoter, Hessian, restamp) is gate-aware and smoke-tested under the new label. Two launch questions remain for Marcus: how to disperse `npp_tsens`, and the reference set.**
 
 Commits `0a4daf6`, `7201852`, `8a5cdc2`, `b67f91c` (+ this entry). Plan: `notes/handoff_2026-09-30c_d2d3_built.md` §3 step 1.

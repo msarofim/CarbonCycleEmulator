@@ -1,11 +1,11 @@
-# Handoff 2026-09-30 (d): refit infrastructure BUILT (step 1). Next: Marcus's launch decisions, then Torch, then the refit
+# Handoff 2026-09-30 (d): refit infrastructure BUILT (step 1); the objective-#14 refit is RUNNING on the Mac
 
 > **Session start.** Launch from `FaIRtoFrEDI/`, then `change_directory` here (CLAUDE.md). ⛔ Never use
 > a bare `cd` in a Bash call; use `git -C` or absolute paths.
 >
 > **Read first:**
 > 1. this file;
-> 2. CHANGELOG **2026-09-30 (p)** (the build, the design, the verification, the smoke);
+> 2. CHANGELOG **2026-09-30 (p)** (the build, the design, the verification, the smoke) and **(q)** (the launch rulings and the running wave);
 > 3. memory: `ccx_refit_infra_gate_0930.md` (indexed in `INDEX_ccx_phi.md`), then
 >    `ccx_d2_d3_build_0930.md` and `ccx_rulings_0930_nonco2_imbalance_app.md`;
 > 4. the previous handoff, `notes/handoff_2026-09-30c_d2d3_built.md`. Its §3 step 1 is DONE here; its
@@ -30,43 +30,41 @@ All committed and pushed (`0a4daf6` .. the 09-30 (p) CHANGELOG commit).
 | Smoke (worktree `~/ccx_frozen/20260930p_dgb_smoke`) | Port targets (33 free); preflight ids 0–11 LAUNCHABLE; the promoter's GATES 1–5 on a synthetic open-label start; Hessian GATE 1 |
 | Suite | see §5 |
 
-## 2. Decisions for Marcus (NOT ruled; ask with the question tool before launching)
+## 2. Launch rulings (Marcus, 2026-09-30, via the question tool) and THE RUNNING WAVE
 
-1. **The label's name.** `hilda_csl3v0kaidgb` (d = N retention, g = greening, b = budget/D3) was the 09-30c
-   handoff's suggestion. A rename touches `R/calibrate.R` (one function, one dispatch line, the label
-   list and the error text), the four label ledgers and `test-gated-params.R`.
-2. **How to disperse `npp_tsens` in the multistart.**
-   - The driver disperses every coordinate at ONE u-space sd (1.0452 in the 09-28 arrays). For
-     `npp_tsens` (`tr = "id"`, prior sd 0.029 /K) that is 36 prior sds.
-   - At the DNTb vector, a 1-sd move in `npp_tsens` alone costs −4.5e5 / −8.9e5 log-units. That is about
-     10× the stiffest existing coordinate (`q10`: −5.6e4 / −4.6e4) and 12× `grad_off_d13c` (7 prior sds
-     at that spread).
-   - `ndep_ret` costs −230 / −1890; the shares cost −1 to −5.
-   - The dispersed starts still land in the 09-28c array's range (−2e5 to −1.4e7 vs −1.5e5 to −1.5e7).
-   - Options: keep the uniform spread (as every array so far); disperse `npp_tsens` at its prior sd; or
-     another per-coordinate cap. This is an ensemble-construction choice (CLAUDE.md: flag, don't resolve).
-3. **The reference set.**
-   - With the canonical's 9 pins, `ccx_ms_reference_set()` gives incumbent `hilda29l` (φ 0.5,
-     `hilda_csl3`) and new basin `hilda31pe` (hilda_c, seas_ml 0).
-   - Under the new label both are SEEDED starts: port targets −12,149.8 / −12,163.0, vs about −1,408 at
-     the DNTb screen vector. This is what 09-28b/c did, and there 7 of 24 starts converged inside a
-     5-h wall at 29 names.
-   - A closer φ = 0 incumbent (the 09-28c `promoted_basin1`, unregistered) would need registering
-     (`CCX_MODE_FILES`, `CCX_MODE_PINNED`, `make_bundle.sh`, the `test-mode-file` / `test-hml-floor`
-     ledgers) plus a reference-set branch. There is no env override.
-4. **Torch (standing rule: say the verdict out loud, ask first).**
-   - The verdict is Torch: 33 names; the 09-28c array took ~4.3 h per start with a 5-h wall and only
-     7/24 converged.
-   - Check the queue first (it was free on 09-26), then ask.
-   - Launch recipe (the 09-28 one, `handoff_2026-09-28_fert_shape.md` §4): `CCX_MS_STRUCT=hilda_csl3v0kaidgb`,
-     `CCX_MS_SEAS_ML=1`, `CCX_MS_PIN=<the canonical 9>`, `CCX_MS_SPREAD=1.0452`, WALL 300, partition `cs`.
-     Regenerate the port targets **in the frozen tree** (they write `calibration/torch/port_targets.csv`),
-     then run the preflight for every id.
+- Label: "Keep hilda_csl3v0kaidgb (Recommended)".
+- `npp_tsens` dispersion: "At its prior sd (Recommended)". Built as `MS_SPREAD_OVERRIDE` (`99f1161`); the
+  outdir must carry `_sdby_npp_tsens=0.0291`.
+- Reference set: "Registered set, as 09-28b/c (Recommended)". Incumbent `hilda29l`, new basin `hilda31pe`,
+  both seeded; no code change.
+- Where: **"Mac, 8 parallel"**. My verdict was Torch; Marcus chose the Mac.
 
-## 3. The plan after the decisions (the 09-30c handoff's steps 2–5)
+**⏳ THE WAVE IS RUNNING** (launched 2026-09-30 17:42 EDT, CHANGELOG 09-30 q):
+- **Tree:** `~/ccx_frozen/20260930q_dgb_refit`, a git WORKTREE at `99f1161`. ⛔ Do not touch it while the
+  wave runs.
+- **Launcher:** `calibration/mac/run_multistart_mac.sh` inside that tree; 24 ids, 8 at a time; WALL 300,
+  3 × 6 × 6000.
+- **Outdir (in the frozen tree):**
+  `calibration/output/multistart_20260930q_hilda_csl3v0kaidgb_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291`.
+- **Progress:**
+  - wave log `logs/wave_20260930q.log`; per-task logs `logs/ccx_multistart_mac_20260930q_<id>.out`;
+  - exit codes `logs/ccx_multistart_mac_20260930q_exit.txt`;
+  - check the tasks with `ps aux | grep '[r]un_dispersed_multistart'`: WAIT ON THE WORK PROCESS, never a
+    `pgrep -f` loop.
+- **Expected:** ≈ 15 h (3 rounds × ≤ 5 h), done around 09:00 on 2026-10-01. The Mac must stay on AC power:
+  `caffeinate -s` holds off sleep only while plugged in.
+- ⚠ **M4, 4 performance + 6 efficiency cores.** About half the tasks run on efficiency cores (slower per
+  evaluation), so compare per-task eval counts before reading "not converged" as a basin fact.
+- The machine checks at launch, and the rates about 5 min in, are in CHANGELOG 09-30 (q).
 
-1. **Launch** on Torch from a frozen worktree at the launch commit. Collect, promote (GATES 1–5), run
-   `recompute_hessian.R --update`.
+## 3. The plan (the 09-30c handoff's steps 2–5)
+
+1. **When the wave lands:**
+   - copy the outdir from the frozen tree into the repo's `calibration/output/`;
+   - `Rscript calibration/collect_dispersed_multistart.R --outdir=<it>`;
+   - `promote_multistart_mode.R --outdir=<it> --dest=calibration/output/refit_2026MMDD_<name>_obj14_hilda_csl3v0kaidgb`;
+   - `recompute_hessian.R <mode> --update`.
+   ⚠ The name of the promoted mode, and whether to register it, is Marcus's call.
 2. **Read the refit:**
    - D4 against 56.1 ± 7.75 (`data/obs_npp_modern_target.rds`); if unresolved, it is a NAMED TENSION;
    - score the prereg's predictions at the refit (`notes/prereg_2026-09-30c_nonco2_drivers_imbalance.md`);
@@ -120,10 +118,12 @@ All committed and pushed (`0a4daf6` .. the 09-30 (p) CHANGELOG commit).
 - **Outputs:**
   - `outputs/diagnostics/obj14_registered_bitexact_20260930.log`;
   - the suite log `suite_20260930_post7201852.log`.
-- **Frozen trees (disposable):**
-  - `~/ccx_frozen/suite_20260930p` (the suite copy);
-  - `~/ccx_frozen/20260930p_dgb_smoke`, a git WORKTREE: remove it with `git worktree remove --force`. It
-    holds the smoke port targets and a synthetic promoted file, neither a record.
+- **Frozen trees:**
+  - ⛔ `~/ccx_frozen/20260930q_dgb_refit` is the RUNNING WAVE's worktree. Keep it until its outdir is
+    copied back.
+  - Disposable: `~/ccx_frozen/suite_20260930p` (the suite copy) and `~/ccx_frozen/20260930p_dgb_smoke`, a
+    git WORKTREE (`git worktree remove --force`). It holds the smoke port targets and a synthetic
+    promoted file, neither a record.
 - `carbotopecomment.9.26.26.docx` is Marcus's. Leave it.
 - `outputs/diagnostics/smoke/` stays untracked by convention.
-- **Nothing is running.**
+- **RUNNING:** the 24-start wave (§2). Nothing else.
