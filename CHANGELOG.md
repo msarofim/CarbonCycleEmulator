@@ -2,6 +2,80 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (c) — **The inert soil pool is BUILT (label `hilda_csl3v0kai`), and it reproduces the (v) proxy byte for byte. Separately, arm A's OCEAN sink is on GCB (+0.05 GtC/yr, 1960–2023), so the land is not covering for the ocean.**
+
+Marcus: *"Go with 0–1 m; build the inert pool."*
+
+**Design: a carve-out, and no new state.**
+- `soil_inert_frac` (default 0) is the share of the passive pool's uncarved stock NPP₀ ·
+  `litter_slow_frac` · τ_slow that is radiocarbon-free.
+- `ccx_litter_slow_eff()` = `litter_slow_frac` · (1 − f) is the exchanging passive share. EVERY
+  structural use reads it: the litter split, the spinup's fixed point, `aux$land0` and the LUC
+  pro-rata shares.
+- The C++ core receives it through `ccx_cpp_par()` under the name `litter_slow_frac`. **`src/` is
+  untouched**, the same one-resolution rule as `gamma_enso` / `seas_ml_on`.
+- The inert stock is `aux$soil_inert` (GtC per hemisphere), a constant with no flux, decay, LUC debit
+  or spinup.
+- ⚠ **A constant, not an ODE state.** A zero-flux state is mathematically the same thing, but it
+  would have changed the state layout, the C++ indices and every positional reader for no dynamics.
+  If Marcus wants it as a state (e.g. for an app stock panel), that is a follow-up.
+- ⚠ `land_C` still means EXCHANGING land carbon, so the likelihood and every diagnostic are unchanged.
+  Consumers that want inventory-sized stocks (app stock readouts, the Shi bulk Δ¹⁴C, Koven multiples)
+  must add `aux$soil_inert`. They do not yet.
+
+**Constant.** `SOIL_INERT_FRAC` = (77 + 216) / (704 + 801) = 0.19468, derived in `R/constants.R` from
+four named inputs.
+- **Verified against the PMC full text today** (subagent): the ratios are in Table 3, and the layer
+  masses 77/704 and 216/801 Gt are PRINTED in §3.1.
+- The 0–1 m sum is ours; the paper prints no 0–1 m fraction.
+- n = 313 profiles = 261 ISRaD + 52 LSCE.
+- The ± is unlabelled (a spread, not an SE).
+- ⚠ Table 3 prints the topsoil aOC-removed age as "14 ± 570" where §3.2 says 140. The paper disagrees
+  with itself; that number is not used here.
+
+**Tests** (`tests/testthat/test-soil-inert.R`, 8 tests):
+- OFF is bit-exact (absent = 0; the spinup and `land0` are identical).
+- EQUIV: ON is identical to the hand proxy in the spinup, `land0`, the LUC shares and the derivative.
+- STOCK: exchanging + inert = uncarved, per hemisphere, to 1e-12.
+- R/C++ PARITY with f ON: the derivative on both LUC-debit paths, an 80-yr trajectory, and the state.
+- CONSERVE: out of balance, 50 yr.
+- LABEL: only `hilda_csl3v0kai` sets it.
+- **Mutation-tested:**
+  - A C++ side that ignores the carve-out fails PARITY (9) plus EQUIV/STOCK.
+  - An R flux block that ignores it fails EQUIV (1) and PARITY (9).
+- The label ledgers in `test-tr-box.R`, `test-constants-batch.R` and `test-struct-v0.R` (PRIOR_ON)
+  were EXTENDED by the new label, the same pattern as the 09-29 arms. No assertion was weakened.
+
+**Build check on arm A's real vector** (`diag_inert_pool_build_check.R`,
+`inert_pool_build_check_20260930.stdout`):
+- **I1:** OFF reproduces the (v) control 1387.8816. PASS.
+- **I2:** ON is BYTE-IDENTICAL to arm A with `litter_slow_frac` × (1 − f) by hand, in every output
+  column and the spinup state. PASS.
+- **I3:** ON − OFF, frozen: +2.10 / +11.8 / **+52.03 ppm** at 2024 / 2100 / 2300, against (v)'s
+  +2.10 / +52.0.
+  ⇒ Every (v) D number carries to the built label.
+- **Inert stock:** 173.3 (NH) + 118.7 (SH) = **292.0 GtC**. Exchanging passive 1207.1.
+  - ⚠ exchanging + inert − uncarved = +0.21 GtC. The inert pool is defined on the NOMINAL equilibrium
+    (1500), while arm A's periodic spinup puts the uncarved passive at 1498.9.
+  - That is a definitional 0.014 %, not a leak.
+  - The unit test's exact closure is on the plain `ccx_spinup()`.
+
+**Is the land covering for the ocean?** (`diag_budget_armA.R`, `budget_armA_20260930.log`)
+- Arm A's kz (14694) is ~2× the `hilda29l` value, so the 09-24 identity had to be re-measured here.
+- Model − GCB, GtC/yr:
+
+| window | ocean | residual land | E_LUC (model / GCB) |
+|---|---|---|---|
+| 1960–1989 | +0.071 | +0.357 | 1.488 / 1.755 |
+| 1990–2009 | +0.048 | +0.253 | 1.454 / 1.714 |
+| 2010–2023 | −0.015 | +0.452 | 1.289 / 1.520 |
+| 1960–2023 | +0.045 | +0.345 | 1.434 / 1.691 |
+
+- **The ocean sits on GCB in every window**, so the land is not making up an ocean shortfall.
+- Most of the land excess (0.26 of 0.35) is the fitted `luc_scale` 0.848: the model emits 15 % less
+  land-use carbon than GCB, and the residual-sink convention carries that into the difference.
+- The rest is GCB's own positive imbalance ([[ccx_land_sink_is_gcb_imbalance]]).
+
 ## 2026-09-30 (b) — **Inert-pool depth scope RULED: 0–1 m, f 0.195 (Marcus: "Go with 0–1 m; build the inert pool"). The pairing follows from the stock the model already carries: the passive pool's 1500 GtC is the 0–1 m inventory.**
 
 The arithmetic behind the ruling (Copard et al. 2025, GCB 31:e70482, Table 3 fractions on the Batjes

@@ -1,0 +1,7 @@
+arm A fixed-stock tau-500 control; kz 14694, luc_scale 0.8480, beta_max 2.552, fert_k 867.6, q10 1.102
+window        ocn_M   ocn_G    dOcn |   lnd_M   lnd_G    dLnd |   luc_M   luc_G
+1960-1989   1.708   1.638  +0.071 |   1.661   1.304  +0.357 |   1.488   1.755
+1990-2009   2.495   2.448  +0.048 |   2.320   2.067  +0.253 |   1.454   1.714
+2010-2023   3.089   3.105  -0.015 |   2.970   2.519  +0.452 |   1.289   1.520
+1960-2023   2.256   2.212  +0.045 |   2.153   1.808  +0.345 |   1.434   1.691
+provenance: calibration/diag_budget_armA.R @b16f99c; hilda_csl3v0ka v0k basin1 + fixed-stock tau500 control; historical 1750-2024; GtC/yr; GCB = data/gcb_budget.rds; no RNG

@@ -1,0 +1,6 @@
+SOIL_INERT_FRAC 0.194684  (Copard 2025, 0-1 m)
+I1 OFF (hilda_csl3v0ka) ssp585 2300 1387.8816   [(v) control 1387.8816]  PASS
+I2 ON == hand proxy lsf x (1 - f), every output column and the spinup state: PASS (byte-identical)
+I3 ON - OFF: 2024 +2.10  2100 +11.8  2300 +52.03 ppm   [(v) frozen x0.8053: +2.10 / +52.0]
+inert stock NH 173.3 SH 118.7 total 292.0 GtC; exchanging passive 1207.1; uncarved passive 1498.9; closure 2.13e-01
+provenance: mode multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452; FREE names from the fixed-stock tau-500 control (tau_soil_slow_profile_fixedstock_20260929.rds); forcing ssp585 1750-2300; commit 582456a
