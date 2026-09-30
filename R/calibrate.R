@@ -2571,6 +2571,12 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
                 # visibly, rather than silently, without them.
                 grad_off_co2 = pv$grad_off_co2,
                 grad_off_d13c = pv$grad_off_d13c)
+    # D3 (R/likelihood.R, LIK_IMB_*): GCB's imbalance shares. Read from `p_pr`
+    # -- the structure plus this draw's fitted values -- so a screen can carry
+    # them in base_params and a refit can fit them, through ONE resolver. Absent
+    # = NULL = objective #13's two sink rows, bit for bit.
+    .sh <- ccx_imb_shares(p_pr)
+    if (!is.null(.sh)) { err$imb_share_land <- .sh[["land"]]; err$imb_share_ocean <- .sh[["ocean"]] }
     # `luc` is the MODEL's own land-use flux, so the gross-sink reconstruction
     # in the gcb_land_sink term follows luc_scale instead of silently reverting
     # to GCB's unscaled column.

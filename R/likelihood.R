@@ -401,6 +401,111 @@ LIK_ICE_REP_ERR <- 4.0               # ppm, added in quadrature
 LIK_GCB_OCEAN_SD   <- 0.4            # GtC/yr, GCB 2025 stated ocean-sink 1 sigma
 LIK_GCB_LAND_SD    <- 0.5            # GtC/yr, GCB 2025 stated land-sink 1 sigma
 
+# ---- D3 (Marcus 2026-09-30): THE GCB IMBALANCE ALLOCATION -- candidate objective #14 ----
+# "For the GCB budget imbalance: the calibration should have freedom to move it
+# where it helps the model solve best."
+#
+# WHY. GCB's budget does not close: fossil + luc = growth + ocean + land + cement
+# + IMBALANCE, with the imbalance the RESIDUAL (+0.54 GtC/yr mean 1959-2024). The
+# model's budget closes by construction. So scoring the model's two sinks against
+# GCB's two sinks forces the fit to put the imbalance somewhere, and until now
+# the sigmas decided where ([[ccx_land_sink_is_gcb_imbalance]]). With D3 the
+# targets become
+#     land   GCB_land  + s_land  * I(t)
+#     ocean  GCB_ocean + s_ocean * I(t)
+# with FITTED shares on the simplex s_land, s_ocean >= 0, s_land + s_ocean <= 1.
+# The rest, 1 - s_land - s_ocean, is "not a sink error". In the model it can
+# only be carried by `luc_scale` (the model's growth is pinned by the CO2
+# record), which is why there is NO separate emissions share: it would be
+# collinear with `luc_scale` (CHANGELOG 2026-09-30 i: at the alignment control,
+# `luc_scale` 0.863 already carries 37 % of the imbalance + cement).
+#
+# ⚠ ABSENCE IS THE OBJECTIVE AS IT WAS. No shares in `err` = both rows exactly
+# as objective #13 scores them, bit for bit; shares (0, 0) are identical too
+# (x + 0 * I is x). Every registered file therefore rescores unchanged.
+#
+# ⚠ PENDING RULINGS (the preview, 09-30 i, prices each; nothing is adopted):
+#   LIK_IMB_TREATMENT   how I(t) is built from GCB's annual imbalance:
+#     "raw"    as published. 64 % of its sum of squares is interannual scatter, so
+#              the share it yields is mostly a regression of IAV on IAV (GATE V's
+#              question), not an allocation of the systematic imbalance.
+#     "smooth" a centred LIK_IMB_SMOOTH_YR-yr running mean, the window SHRINKING at
+#              the two ends (so every GCB year has a value; the app's smoother
+#              returns NA there instead).
+#     "const"  the mean over every GCB year: a pure level shift.
+#   LIK_IMB_WITH_CEMENT whether GCB's cement-carbonation sink (+0.09 mean, +0.21 in
+#     2015-2024), which the model lacks, is allocated together with the imbalance.
+# The values below are PLACEHOLDERS so the machinery has a definite default; the
+# objective is not changed by them until shares are supplied.
+LIK_IMB_TREATMENTS  <- c("raw", "smooth", "const")
+LIK_IMB_TREATMENT   <- "smooth"      # ⚠ PENDING Marcus's ruling (09-30 i)
+LIK_IMB_SMOOTH_YR   <- 11L           # = the app's APP_LUC_SMOOTH_YR (app/global.R)
+LIK_IMB_WITH_CEMENT <- FALSE         # ⚠ PENDING Marcus's ruling (09-30 i)
+
+#' GCB's imbalance as the D3 rows use it: data.frame(year, I), one row per GCB year
+#'
+#' Built over EVERY year of `gcb`, never over the years a run happens to overlap,
+#' so a short run and a long run see the same smoothed series.
+ccx_imb_series <- function(gcb, treatment = LIK_IMB_TREATMENT,
+                           with_cement = LIK_IMB_WITH_CEMENT, k = LIK_IMB_SMOOTH_YR) {
+  if (!treatment %in% LIK_IMB_TREATMENTS)
+    stop("ccx_imb_series(): treatment must be one of ",
+         paste(shQuote(LIK_IMB_TREATMENTS), collapse = ", "), "; got '", treatment, "'")
+  need <- c("year", "imbalance", if (isTRUE(with_cement)) "cement_carbonation")
+  miss <- setdiff(need, names(gcb))
+  if (length(miss)) stop("ccx_imb_series(): the GCB table lacks ", paste(miss, collapse = ", "))
+  k <- as.integer(k)
+  if (length(k) != 1L || is.na(k) || k < 1L || k %% 2L != 1L)
+    stop("ccx_imb_series(): the smoothing window must be a positive ODD integer (centred); got ", k)
+  gcb <- as.data.frame(gcb)[order(gcb$year), ]
+  v <- gcb$imbalance + (if (isTRUE(with_cement)) gcb$cement_carbonation else 0)
+  if (anyNA(v)) stop("ccx_imb_series(): the GCB imbalance series has missing years")
+  h <- (k - 1L) %/% 2L
+  I <- switch(treatment,
+    raw    = v,
+    smooth = vapply(seq_along(v), function(i) mean(v[max(1L, i - h):min(length(v), i + h)]), numeric(1)),
+    const  = rep(mean(v), length(v)))
+  data.frame(year = gcb$year, I = I)
+}
+
+#' The two D3 shares, validated: NULL (the objective as it was) or c(land =, ocean =)
+#'
+#' Both absent means no allocation. ONE absent is an error, not a zero: a caller
+#' that meant to allocate and dropped a name would otherwise score the rows at a
+#' half-built target with nothing to show for it.
+ccx_imb_shares_check <- function(land, ocean) {
+  if (is.null(land) && is.null(ocean)) return(NULL)
+  if (is.null(land) || is.null(ocean))
+    stop("ccx_loglik(): the D3 imbalance shares come as a PAIR; got only ",
+         if (is.null(land)) "`imb_share_ocean`" else "`imb_share_land`", ".")
+  s <- c(land = as.numeric(land), ocean = as.numeric(ocean))
+  if (length(s) != 2L || any(!is.finite(s)))
+    stop("ccx_loglik(): the D3 imbalance shares must be two finite numbers.")
+  if (any(s < 0) || sum(s) > 1 + 1e-12)
+    stop(sprintf("ccx_loglik(): the D3 shares must lie on the simplex (>= 0, sum <= 1); got land %.6g, ocean %.6g.",
+                 s[["land"]], s[["ocean"]]))
+  s
+}
+
+#' The D3 shares a PARAMETER list implies: NULL, or c(land =, ocean =)
+#'
+#' STICK-BREAKING, so the two coordinates can each carry an independent prior:
+#'   imb_share_land        s_land, in [0, 1]
+#'   imb_share_ocean_rest  the ocean's share of what the land leaves, in [0, 1]
+#'   s_ocean = (1 - s_land) * imb_share_ocean_rest
+#' The FLAT prior on the simplex (Dirichlet(1, 1, 1), "freedom to move it") is
+#' s_land ~ Beta(1, 2) and imb_share_ocean_rest ~ Uniform(0, 1): the Jacobian of
+#' the map is (1 - s_land), which Beta(1, 2)'s density 2 (1 - s_land) cancels.
+ccx_imb_shares <- function(p) {
+  sl <- p$imb_share_land; sr <- p$imb_share_ocean_rest
+  if (is.null(sl) && is.null(sr)) return(NULL)
+  if (is.null(sl) || is.null(sr))
+    stop("ccx_imb_shares(): `imb_share_land` and `imb_share_ocean_rest` come as a pair.")
+  if (!is.finite(sl) || !is.finite(sr) || sl < 0 || sl > 1 || sr < 0 || sr > 1)
+    stop("ccx_imb_shares(): both coordinates must lie in [0, 1].")
+  c(land = sl, ocean = (1 - sl) * sr)
+}
+
 # ---- OBJECTIVE CHANGE #13 (2026-09-18 e): THE GCB ENSO OCEAN-SLOPE ROW -------
 # `gcb_ocean_enso_slope`: the regression coefficient of the annual ocean sink on
 # the annual-mean Nino3.4 anomaly (year term; the 09-04g estimator that every ENSO
@@ -2421,10 +2526,21 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
                flux, by = "year")
     g <- merge(g, luc, by = "year")
     if (nrow(g) > 2) {
+      # D3 (see LIK_IMB_*): the targets move by the FITTED share of GCB's
+      # imbalance. No shares = the targets are GCB's own columns, untouched.
+      tgt_o <- g$ocean_sink; tgt_l <- g$land_sink
+      sh <- ccx_imb_shares_check(err$imb_share_land, err$imb_share_ocean)
+      if (!is.null(sh)) {
+        im <- ccx_imb_series(obs$gcb)
+        I  <- im$I[match(g$year, im$year)]
+        if (anyNA(I)) stop("ccx_loglik(): the D3 imbalance series does not cover every scored GCB year.")
+        tgt_o <- tgt_o + sh[["ocean"]] * I
+        tgt_l <- tgt_l + sh[["land"]]  * I
+      }
       add("gcb_ocean_sink",
-          sum(stats::dnorm(g$ocean_sink, g$ocean, LIK_GCB_OCEAN_SD, log = TRUE)))
+          sum(stats::dnorm(tgt_o, g$ocean, LIK_GCB_OCEAN_SD, log = TRUE)))
       add("gcb_land_sink",
-          sum(stats::dnorm(g$land_sink, g$land + g$eluc,
+          sum(stats::dnorm(tgt_l, g$land + g$eluc,
                            LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE, log = TRUE)))
     }
     # ---- the ENSO ocean slope (objective #13, 2026-09-18 e; see LIK_USE_GCB_ENSO_SLOPE) --
