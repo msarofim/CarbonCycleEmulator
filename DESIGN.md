@@ -113,6 +113,23 @@ d M_atm[h]/dt =
   500 yr); both soil pools respire to the atmosphere with the Q10 factor
   (`R/model.R`, `add_flux(isf/iss, iatm, C/τ · q10f)`). Steady-state pool sizes follow from
   NPP₀, the split and the turnover times exactly as for the two-pool form.
+- **Inert soil carbon (spec change 2026-09-30, Marcus: "Go with 0–1 m; build the inert pool").**
+  A share f = `soil_inert_frac` of the passive pool's inventory-sized stock
+  (NPP₀ · `litter_slow_frac` · τ_soil_slow) is radiocarbon-free and exchanges with nothing. It is a
+  **carve-out, not an add-on**, because the inventories that size the passive pool also weigh this
+  carbon. The exchanging passive pool takes `litter_slow_frac` · (1 − f) of the litter, and the rest
+  goes to `soil_fast`, so NPP and total litter are unchanged. The inert remainder is the constant
+  `aux$soil_inert`: no input, no respiration, no land-use debit, no ¹⁴C, and nothing to spin up.
+  `aux$land0` and the land-use pro-rata shares count exchanging carbon only.
+  - f = 0.195 = (77 + 216) / (704 + 801), from Copard et al. 2025's layer masses to **1 m**
+    (`SOIL_INERT_FRAC`, R/constants.R). 0–1 m because the passive pool's 1500 GtC is the 0–1 m
+    inventory (CHANGELOG 2026-09-30 b).
+  - It is on only under the structure label `hilda_csl3v0kai` (arm A + the carve-out). The default
+    is 0, and every registered file stays bit-exact.
+  - Both cores read the share through `ccx_litter_slow_eff()`; the C++ core receives it via
+    `ccx_cpp_par()`. Tests: `tests/testthat/test-soil-inert.R`.
+  - ⚠ Single-study and method-dependent: Copard contradicts the Shi 2020 / He 2016 reading of old
+    bulk soil.
 - **Heterotrophic respiration:** R_het = (C_soil/τ_soil) · Q10^(ΔT_GMST/10), Q10 [CAL].
   Preindustrial steady state (R_het = NPP₀) sets pool sizes: C_veg = NPP₀·τ_veg,
   C_soil = NPP₀·τ_soil. τ_veg, τ_soil fixed [VERIFY], chosen so effective stocks are
