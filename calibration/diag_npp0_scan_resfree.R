@@ -70,6 +70,7 @@ RS_LOGIT  <- "litter_slow_frac"
 RS_PIN_Q10 <- as.numeric(Sys.getenv("RS_PIN_Q10", "NA"))
 RS_FREE_ALL <- RS_FREE
 if (!is.na(RS_PIN_Q10)) RS_FREE <- setdiff(RS_FREE, "q10")
+RS_PIN_SEAS <- c("seas_T_amp_NH", "seas_T_amp_SH")   # reset to the scale-1 row when q10 is pinned
 RS_MAXIT  <- 6000L
 RS_CTRL_MAXIT <- 3000L
 RS_ID_TOL <- 1e-4
@@ -122,7 +123,10 @@ one <- function(s) {
   lp_at <- function(u, res) { E$base_params <- bp_with(res); on.exit(E$base_params <- bp); lp(u) }
   u0 <- u_from_prev(s)
   l_start <- lp_at(u0, RES0)                        # identity (a): unmodified defaults
-  if (!is.na(RS_PIN_Q10)) { pp <- as.list(ccx_unc_to_par(u0)); pp$q10 <- RS_PIN_Q10; u0 <- ccx_par_to_unc(unlist(pp)[md$param_names]) }
+  if (!is.na(RS_PIN_Q10)) { pp <- as.list(ccx_unc_to_par(u0)); pp$q10 <- RS_PIN_Q10
+    # the (k) seasonal amplitudes were set for that scale's q10 (< 1 at x0.75): start from scale 1's, set for q10 1.10
+    r1 <- prev[prev$scale == 1, ]; for (n in RS_PIN_SEAS) pp[[n]] <- r1[[n]]
+    u0 <- ccx_par_to_unc(unlist(pp)[md$param_names]) }
   RSs <- fixed_of(s); l_base <- lp_at(u0, RSs)      # the fixed-passive baseline (== l_start unless RS_FIX_PASSIVE)
   reach <- if (s == 1) as.numeric(lp_at(u0, replace(RES0, "tau_wood", RES0[["tau_wood"]] * RS_REACH_FACTOR))) - as.numeric(l_start) else NA_real_
   nF <- length(iF)
