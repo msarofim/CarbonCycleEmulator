@@ -213,6 +213,10 @@ test_that("the structure label switches it on at the cited value, and only there
   a <- ccx_struct_block("hilda_csl3v0ka"); b <- ccx_struct_block("hilda_csl3v0kai")
   expect_identical(setdiff(names(b), names(a)), "soil_inert_frac")
   expect_identical(b[names(a)], a)
-  for (lab in setdiff(CCX_STRUCT_LABELS, "hilda_csl3v0kai"))
+  # the labels that carry the carve-out: kai, and the D2 / D3 label chained from it
+  # (2026-10-01, objective #14; the 09-30c handoff's "extend the label ledgers deliberately")
+  INERT_ON <- c("hilda_csl3v0kai", "hilda_csl3v0kaidgb")
+  for (lab in INERT_ON) expect_identical(ccx_struct_block(lab)$soil_inert_frac, F_ON, info = lab)
+  for (lab in setdiff(CCX_STRUCT_LABELS, INERT_ON))
     expect_null(ccx_struct_block(lab)$soil_inert_frac, info = lab)
 })

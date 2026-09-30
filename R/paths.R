@@ -702,6 +702,7 @@ ccx_check_mode_decode <- function(md = CCX_MODE_CANONICAL, tol = 1e-8) {
   # name it does carry is in the table, so it decodes on its own names
   # ... and a file lacking only CCX_PARAM_ABSENT_OK names (2026-09-13i) decodes
   # on the names it carries; ccx_unc_to_par() honours a partial named u.
+  ccx_gate_require(md, "ccx_check_mode_decode()")
   if (!ccx_mode_carries_build(md))
     stop("this mode file was fitted on a DIFFERENT parameter set (",
          length(.nm), " names vs this build's ", length(CCX_PARAM_NAMES),
