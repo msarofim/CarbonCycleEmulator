@@ -26,6 +26,8 @@
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
+# the GATE first (2026-09-30), exactly as the driver: an open structure fits four more names
+PT_GATE <- ccx_apply_gate(Sys.getenv("CCX_MS_STRUCT", ""))
 PT_PINS <- ccx_parse_pins(Sys.getenv("CCX_MS_PIN", ""))   # same contract as the driver (2026-09-13)
 invisible(ccx_apply_pins(PT_PINS))
 source(ccx_path("calibration", "lib_run_inputs.R"))

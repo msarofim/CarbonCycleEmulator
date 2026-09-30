@@ -36,7 +36,7 @@ test_that("fert_k's prior is FLAT unless the label switches it on", {
   # the labels that switch the prior ON: hilda_csl3v0k and the NPP option-4 arms built on it
   # (A = hilda_csl3v0ka, B1 = hilda_csl3v0kan; 2026-09-29, extension authorised by Marcus)
   # + arm A's inert-pool label (hilda_csl3v0kai; 2026-09-30, extension authorised by Marcus)
-  # + the D2 / D3 label chained from it (hilda_csl3v0kaidgb; 2026-10-01, objective #14; the
+  # + the D2 / D3 label chained from it (hilda_csl3v0kaidgb; 2026-09-30, objective #14; the
   #   09-30c handoff's "extend the label ledgers deliberately")
   PRIOR_ON <- c("hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb")
   for (lab in PRIOR_ON) expect_identical(ccx_struct_block(lab)$fert_k_prior, 1L, info = lab)

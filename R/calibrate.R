@@ -1021,7 +1021,7 @@ CCX_PARAM_TABLE <- list(
 
 CCX_PARAM_NAMES <- names(CCX_PARAM_TABLE)
 
-# ---- LABEL-GATED FITTED NAMES (2026-10-01; OBJECTIVE #14) --------------
+# ---- LABEL-GATED FITTED NAMES (2026-09-30; OBJECTIVE #14) --------------
 # THE FOUR NAMES OF D2 AND D3 (Marcus 2026-09-30: the non-CO2 land-sink drivers and
 # the GCB imbalance allocation; CHANGELOG 09-30 h-n). They are FITTED under a
 # structure that OPENS the gate (its block carries `d2d3_free = 1`; the first is
@@ -1208,12 +1208,20 @@ CCX_PARAM_ABSENT_OK <- c("w_eq", "gamma_eq",
                          "w_thc",
                          # the layer-2 Nino3.4 limb (2026-09-17 k): reaches the model only
                          # under k_l2 > 0 ("hilda_cl2"); every registered file has k_l2 = 0
-                         "w_enso_l2",
-                         # the GATED names (2026-10-01): in the table only under a structure
-                         # that opens the gate, and HELD at 0 under every registered file's
-                         # structure -- so a file lacking them ran them OFF. Consulted only
-                         # when a gated table meets an older file: an open-label START.
-                         names(CCX_PARAM_GATED))
+                         "w_enso_l2")
+# ⚠ The GATED names (2026-09-30, CCX_PARAM_GATED) are NOT listed here: this set is
+# static and every name on it must be fitted (test-param-absent-ok.R), which a gated
+# name is only while a structure opens the gate. Their tolerance is DYNAMIC instead,
+# in ccx_param_absent_ok(): a file whose OWN structure holds the gate ran them OFF,
+# so it may lack them exactly when the process has the gate open (an open-label
+# START). A file whose own structure OPENS the gate must carry all four.
+#' The names a mode file may lack in THIS process: the static list, plus the gated
+#' names when the gate is open and the FILE's own structure holds it.
+ccx_param_absent_ok <- function(md) {
+  gated <- intersect(names(CCX_PARAM_GATED), CCX_PARAM_NAMES)
+  if (length(gated) && !ccx_gate_open(ccx_mode_struct(md))) c(CCX_PARAM_ABSENT_OK, gated)
+  else CCX_PARAM_ABSENT_OK
+}
 
 #' A mode file fitted under a structure that OPENS the gate carries the gated names in
 #' its `param_names`; read in a process where the gate is closed, it would look like a
@@ -1244,7 +1252,7 @@ ccx_mode_carries_build <- function(md) {
   # encoder ignores it (ccx_par_to_unc), so the comparison does too (test-pinned-arm)
   have   <- setdiff(md$param_names, names(CCX_PINS))
   absent <- setdiff(want, have)
-  identical(have, setdiff(want, absent)) && all(absent %in% CCX_PARAM_ABSENT_OK)
+  identical(have, setdiff(want, absent)) && all(absent %in% ccx_param_absent_ok(md))
 }
 
 #' A mode file as a START POINT of this build's space: migrated (what it RAN),
@@ -1263,7 +1271,7 @@ ccx_mode_start <- function(md = CCX_MODE_CANONICAL, who = "mode start") {
   if (!ccx_mode_carries_build(md))
     stop("ccx_mode_start(): this mode file was fitted on a different parameter set (",
          length(md$param_names), " names; this build fits ", length(CCX_PARAM_NAMES),
-         " and tolerates only ", paste(CCX_PARAM_ABSENT_OK, collapse = ", "), " absent).")
+         " and tolerates only ", paste(ccx_param_absent_ok(md), collapse = ", "), " absent).")
   pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))
   pm <- suppressWarnings(ccx_seed_unencodable(pm, who))
   u  <- ccx_par_to_unc(pm)
@@ -1543,7 +1551,7 @@ ccx_migrate_par_set <- function(p) {
   # 2026-09-17 k: w_enso_l2 entered the table (36 -> 37). Absent = 0 = OFF, and
   # under every registered file's structure (k_l2 = 0) the limb is absent anyway.
   if ("w_enso_l2" %in% absent) { p[["w_enso_l2"]] <- 0; filled <- c(filled, "w_enso_l2") }
-  # 2026-10-01: the GATED names (CCX_PARAM_GATED) are in the table only under a
+  # 2026-09-30: the GATED names (CCX_PARAM_GATED) are in the table only under a
   # structure that opens the gate. Every file fitted under any other structure HELD
   # them at their base value, 0 = OFF in the model's own contracts (ndep_ret,
   # npp_tsens) and in the likelihood's (shares (0, 0) = no allocation = objective
@@ -1814,6 +1822,7 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
   # THE BASE COMES FROM THE FILE'S OWN STRUCTURE (2026-09-08f): a hilda mode
   # overlaid on ccx_default_params() would run as a column, silently.
   if (is.null(base)) base <- ccx_mode_base(md)
+  ccx_gate_require(md, "ccx_load_mode()")   # an open-structure file needs the gate (2026-09-30)
   # a PINNED file (2026-09-13) carries this build's set MINUS its pins; the held
   # values come back through ccx_mode_par_with_pins() so the overlay below never
   # assigns NULL (which would DELETE the name and drop the model onto its absence
@@ -1844,21 +1853,26 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
          else "")
   pm <- ccx_mode_par_with_pins(md)
   if (length(ccx_mode_absent(md))) pm <- ccx_migrate_par_set(pm)   # 0 = what it RAN, never a seed
-  p  <- base
-  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
-  # THROUGH THE RESOLVER: a pre-2026-09-01 `par_mode` carries the retired
-  # scalar, and intersect() would drop it in silence.
-  p <- ccx_set_enso(p, pm)
+  # ccx_overlay_par(), converted on touch (2026-09-30; Ruling B, test-overlay-idiom-lint.R):
+  # the same copy and the same ENSO resolver as the bare loop it replaces (a pre-2026-09-01
+  # `par_mode` carries the retired scalar, which the resolver reads), plus the GATED model
+  # names by the file's structure and the deletion assertion. `pm` is migrated when anything
+  # is absent (above), so the overlay's own migration is a no-op.
+  p  <- ccx_overlay_par(base, pm)
   p$pump_mode  <- md$pump_mode
   # `hml_bound` IS CARRIED because the driver overrides CCX_PARAM_TABLE$h_ml
   # IN-PROCESS to [85, 120], and a logpost recomputed under the default band is
   # off by ~1.1 while `u_mode` stops decoding (max |u - u(par_mode)| = 1.7).
   # It is NULL on the older arm files, which did not record it -- callers that
   # recompute a logpost must assert on it rather than assume the band.
+  err <- list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
+              grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c)
+  # the D3 shares (2026-09-30, objective #14): an open-label file's fitted pair moves the
+  # two GCB rows; a caller feeding this `err` to ccx_loglik() must get them. Absent = #13.
+  .sh <- ccx_imb_shares(pm)
+  if (!is.null(.sh)) { err$imb_share_land <- .sh[["land"]]; err$imb_share_ocean <- .sh[["ocean"]] }
   list(p = p, luc_scale = pm$luc_scale, bomb_total = pm$bomb_total,
-       err = list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
-                  grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c),
-       hml_bound = md$hml_bound, md = md, file = f)
+       err = err, hml_bound = md$hml_bound, md = md, file = f)
 }
 
 #' A forcing with `luc_scale`/`bomb_total` applied, AND its matching annual E_LUC
@@ -2343,7 +2357,7 @@ ccx_struct_hilda_csl3v0kai <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-#' THE "hilda_csl3v0kaidgb" STRUCTURE (2026-10-01; OBJECTIVE #14): hilda_csl3v0kai with
+#' THE "hilda_csl3v0kaidgb" STRUCTURE (2026-09-30; OBJECTIVE #14): hilda_csl3v0kai with
 #' D2 and D3 FITTED (Marcus 2026-09-30: rulings D2 / D3 and the design sub-rulings of
 #' 09-30 l/m). d = the N-retention flux `ndep_ret`; g = the sign-free greening term
 #' `npp_tsens`; b = the budget-imbalance allocation, `imb_share_land` and
@@ -2383,7 +2397,7 @@ ccx_struct_block <- function(struct) {
     "hilda_csl3v0ka" = ccx_struct_hilda_csl3v0ka(),  # ... plus aod_mode anomaly (2026-09-29; NPP arm A)
     "hilda_csl3v0kan" = ccx_struct_hilda_csl3v0kan(), # ... plus the modern-NPP row (2026-09-29; NPP arm B1)
     "hilda_csl3v0kai" = ccx_struct_hilda_csl3v0kai(), # arm A + the inert soil carve-out, 0-1 m (2026-09-30)
-    "hilda_csl3v0kaidgb" = ccx_struct_hilda_csl3v0kaidgb(), # ... + D2 / D3 FITTED, the gate open (2026-10-01; objective #14)
+    "hilda_csl3v0kaidgb" = ccx_struct_hilda_csl3v0kaidgb(), # ... + D2 / D3 FITTED, the gate open (2026-09-30; objective #14)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2563,7 +2577,7 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "2026-09-28) and \"hilda_csl3v0k\" (hilda_csl3v0 + the fert_k shape prior, 2026-09-28) ",
          "and \"hilda_csl3v0ka\" / \"hilda_csl3v0kan\" (+ aod anomaly / + the modern-NPP row, 2026-09-29) ",
          "and \"hilda_csl3v0kai\" (arm A + the inert soil carve-out, 2026-09-30) ",
-         "and \"hilda_csl3v0kaidgb\" (+ D2 / D3 fitted, objective #14, 2026-10-01).")
+         "and \"hilda_csl3v0kaidgb\" (+ D2 / D3 fitted, objective #14, 2026-09-30).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)
@@ -2634,7 +2648,7 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
   ELUC_BASE  <- LUC_SCALER$eluc_tbl
   # the fitted names the MODEL has a slot for (computed once, not per draw)
   MODEL_SLOTS <- intersect(CCX_PARAM_NAMES, names(ccx_default_params()))
-  # THE GATE'S GUARD (2026-10-01; CCX_PARAM_GATED). The fitted set must match the
+  # THE GATE'S GUARD (2026-09-30; CCX_PARAM_GATED). The fitted set must match the
   # structure, both ways. An OPEN structure scored without the gate would run the four
   # names at their base value (OFF) and call it a D2/D3 fit; a HOLDING structure with
   # them fitted would be a new objective wearing an old label.

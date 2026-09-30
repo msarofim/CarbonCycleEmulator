@@ -42,7 +42,7 @@ OI_EXEMPT <- "model.R"
 
 # The baseline, as of 2026-09-02. Trim an entry when you convert its file.
 OI_BASELINE <- c(
-  "calibrate.R", "lib_design_gates.R",
+  "calibrate.R",   # lib_design_gates.R converted 2026-09-30 (dg_vector; the gate's silent drop)
   "diag_admissible_2x2_land_ocean.R", "diag_af_trend_levers.R",
   "diag_co2_level_swing.R", "diag_d13c_midcentury.R",
   "diag_design_gates_unscored.R", "diag_enso_gpp_margin.R",
@@ -68,7 +68,8 @@ OI_BASELINE <- c(
   "profile_kz_ventilation.R", "run_modefind_pump_arms.R",
   "run_modefind.R", "run_post_refit_adoption.R",
   "test-gate-bounds.R", "test-luc-scale.R")
-OI_BASELINE_N <- 61L    # live occurrences across OI_BASELINE, 2026-09-02
+OI_BASELINE_N <- 59L    # live occurrences across OI_BASELINE: 61 on 2026-09-02; 59 on 2026-09-30
+                        # (dg_vector and ccx_load_mode converted on touch -- the D2/D3 gate)
 
 # The copy loop, matched on the LITERAL wherever it is written -- a helper
 # nobody is forced to use would not stop this coming back. Same construction,

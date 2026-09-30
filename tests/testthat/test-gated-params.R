@@ -1,5 +1,5 @@
 # =====================================================================
-# test-gated-params.R -- the LABEL-GATED fitted names (2026-10-01; objective #14):
+# test-gated-params.R -- the LABEL-GATED fitted names (2026-09-30; objective #14):
 # D2's `ndep_ret` / `npp_tsens` and D3's `imb_share_land` / `imb_share_ocean_rest`
 # (R/calibrate.R, CCX_PARAM_GATED and the "hilda_csl3v0kaidgb" structure).
 #
@@ -22,7 +22,7 @@
 #      ARE the screen's (the table path wires the four names to the same model and
 #      rows as the screen's base_params path), and the logpost differs from the
 #      screen's objective by exactly the shares' prior + logit Jacobians.
-# Mutation-tested 2026-10-01 (CHANGELOG 10-01): each guard and wire broken in turn.
+# Mutation-tested 2026-09-30 (CHANGELOG 09-30 p): each guard and wire broken in turn.
 # =====================================================================
 
 # the ledger: the labels that OPEN the gate. Extending it is a DELIBERATE edit.
@@ -141,7 +141,10 @@ test_that("5. MIGRATION: an older file under an open gate fills 0 and seeds only
   expect_length(intersect(st0$absent, names(CCX_PARAM_GATED)), 0L)
   # gate OPEN: the four are absent, filled with 0 = what the file RAN
   h <- ccx_apply_gate("hilda_csl3v0kaidgb"); on.exit(.gp_restore(h), add = TRUE)
-  expect_true(ccx_mode_carries_build(md))                               # via CCX_PARAM_ABSENT_OK
+  expect_true(ccx_mode_carries_build(md))                               # via ccx_param_absent_ok()
+  # ... but a file whose OWN structure opens the gate must CARRY all four
+  md_bad <- md; md_bad$struct <- "hilda_csl3v0kaidgb"
+  expect_false(ccx_mode_carries_build(md_bad))
   pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))
   expect_identical(unlist(pm[names(CCX_PARAM_GATED)]), stats::setNames(rep(0, 4), names(CCX_PARAM_GATED)))
   expect_true(all(names(CCX_PARAM_GATED) %in% attr(pm, "migrated")))

@@ -104,6 +104,14 @@ ccx_load_cpp()
 # "" = a free arm. Applied before anything reads CCX_PARAM_NAMES. Recorded in every
 # checkpoint and start file, in the outdir name, and GATED against the port targets
 # (a CSV measured with other pins is another objective).
+# ---- THE GATE (2026-09-30; CCX_PARAM_GATED): a structure that OPENS it (the D2 / D3
+# label, "hilda_csl3v0kaidgb") fits four more names. Applied BEFORE the pins and before
+# anything reads CCX_PARAM_NAMES; a holding structure (every older label) is a no-op, so
+# every older array is byte-for-byte the run it was. Unset CCX_MS_STRUCT is "" here (a
+# no-op) and is refused below by .ms_env_required() with the driver's own message.
+MS_GATE <- ccx_apply_gate(Sys.getenv("CCX_MS_STRUCT", ""))
+if (length(MS_GATE)) cat(sprintf("GATE OPEN (structure '%s'): %s enter the fitted set\n",
+                                 Sys.getenv("CCX_MS_STRUCT"), paste(MS_GATE, collapse = ", ")))
 MS_PINS <- ccx_parse_pins(Sys.getenv("CCX_MS_PIN", ""))
 invisible(ccx_apply_pins(MS_PINS))
 if (length(MS_PINS)) cat(sprintf("PINNED (removed from the fitted set, held in the base): %s -> %d free parameters\n",

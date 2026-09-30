@@ -39,7 +39,9 @@ bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mod
 # + seeded, the encoding every gate 4 uses) -- the bare ccx_par_to_unc(par_mode)
 # refuses both. The seeding shift and the h_ml band term ride in the logpost
 # and are reported as prior drift below; the gate is on the STREAMS.
-rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
+# the GATE first (2026-09-30): an open-structure file fits four more names (a holding one: no-op)
+gt <- ccx_apply_gate(ccx_mode_struct(md))
+rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit({ ccx_unpin_params(rm); ccx_unapply_gate(gt) }, add = TRUE)
 invisible(utils::capture.output(st0 <- ccx_mode_start(md, "restamp"))); u <- st0$u
 v  <- ccx_make_logpost(base_params = bp, by_stream = TRUE,
                        spinup_fn = ccx_spinup_from_label(ccx_mode_spinup(md)))(u)

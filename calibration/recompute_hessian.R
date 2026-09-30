@@ -111,6 +111,9 @@ nm <- md$param_names
 # "p lacks parameters this build fits: <pinned name>". ccx_mode_base(md) carries
 # the held value. The Hessian is then (n - #pins) square, and `pins` is recorded
 # in the hess file so a reader knows which space it is in.
+# THE GATE FIRST (2026-09-30): a file fitted under a structure that OPENS it carries the
+# four gated names; the table must carry them too before the pins and the set check.
+HESS_GATE <- ccx_apply_gate(ccx_mode_struct(md))
 HESS_PINS <- ccx_mode_pins(md)
 invisible(ccx_apply_pins(HESS_PINS))
 ccx_require_param_set(md, "recompute_hessian.R")

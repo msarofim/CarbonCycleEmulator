@@ -60,6 +60,13 @@ S <- lapply(fs, readRDS)
 # PINS (2026-09-13): a pinned arm's starts record `pins`; apply them so that GATE 1
 # compares against the REDUCED set, and carry them into the mode file (ccx_mode_base
 # holds them in the base; ccx_mode_params does not fit them).
+# THE GATE FIRST (2026-09-30; CCX_PARAM_GATED): a structure that OPENS it fits four more
+# names, so GATE 1 must compare against the OPEN table. The starts' own recorded structure
+# decides it (a start that predates labels records none and cannot be open); a directory
+# whose starts disagree is refused at GATE 4 below.
+.gate_rec <- unique(vapply(S, function(s) if (is.null(s$struct)) NA_character_ else s$struct, character(1)))
+PMM_GATE <- if (length(.gate_rec) == 1L && !is.na(.gate_rec)) ccx_apply_gate(.gate_rec) else character(0)
+if (length(PMM_GATE)) cat(sprintf("GATE OPEN (structure '%s'): %s are fitted names\n", .gate_rec, paste(PMM_GATE, collapse = ", ")))
 pin_rec <- unique(vapply(S, function(s) ccx_pin_label(s$pins), ""))
 if (length(pin_rec) != 1L) stop("the starts disagree on their pins: ", paste(pin_rec, collapse = " | "))
 PMM_PINS <- S[[1]]$pins
@@ -191,8 +198,13 @@ streams <- local({
   # `ccx_make_logpost(by_stream = TRUE)` would make GATE 5 a SELF-COMPARISON
   # ⇒ [[gate_reads_its_own_output]]. Same state, different path.
   sp <- CCX_OBJECTIVE_SPINUP(p_mode)
+  # the forcing's ENSO index and AOD mode are the STRUCTURE's, as in the objective (2026-09-30):
+  # without them every aod_mode-"anomaly" label (hilda_csl3v0ka and every label chained from
+  # it) stopped here at ccx_run_prepared()'s AOD mismatch. The defaults ("demean", "legacy")
+  # are what every older label resolves to, so the older labels' forcing is unchanged.
   F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
-                         bomb_total_kmol = 102)
+                         bomb_total_kmol = 102,
+                         enso_index = ccx_enso_index_of(p_mode), aod_mode = ccx_aod_mode_of(p_mode))
   F$c14_cosmo <- sp$prod_c14
   F$c14_bomb  <- F$c14_bomb * (pm$bomb_total / 102)
   for (cc in c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH"))
@@ -200,10 +212,16 @@ streams <- local({
   attr(F, "luc_scale") <- pm$luc_scale
   el <- ccx_forcing_eluc_annual(F)
   r  <- ccx_run_fast(sp, F)
-  ccx_loglik(r$out, ccx_prepare_obs(),
-             list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
-                  grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c),
+  err <- list(sigma_d14c = pm$sigma_d14c, rep_dC = pm$rep_dC,
+              grad_off_co2 = pm$grad_off_co2, grad_off_d13c = pm$grad_off_d13c)
+  # the D3 shares (2026-09-30, objective #14): a fitted pair moves the two GCB sink rows'
+  # targets. Absent (every older label) = NULL = objective #13's rows, as before.
+  .sh <- ccx_imb_shares(pm)
+  if (!is.null(.sh)) { err$imb_share_land <- .sh[["land"]]; err$imb_share_ocean <- .sh[["ocean"]] }
+  ccx_loglik(r$out, ccx_prepare_obs(), err,
              luc = el, deep = ccx_d14c_deep_read(sp),
+             # the modern-NPP row, where the structure carries it (npp_row, 2026-09-29)
+             npp = if (isTRUE(p_mode$npp_row == 1)) r$npp else NULL,
              ocean_grad = ccx_ocean_grad_scored(r$out, sp), by_stream = TRUE,
              # the profile D14C bundle (#8/#9, 2026-09-06): its three rows REPLACE
              # the bottom-box row `d14c_deep_ocean` (23 -> 25 streams). Absent

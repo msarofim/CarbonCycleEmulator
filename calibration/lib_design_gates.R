@@ -684,8 +684,12 @@ dg_vector <- function(arm) {
   # the same value in `p`; `pm` here carries it too, so the two lists agree.
   pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))
   mig <- attr(pm, "migrated")
-  for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
-  p <- ccx_set_enso(p, pm)
+  # ccx_overlay_par(), converted on touch (2026-09-30; Ruling B, test-overlay-idiom-lint.R):
+  # `pm` is already migrated, so the copy is the bare loop's, number for number -- plus the
+  # GATED model names (ndep_ret, npp_tsens) by the FILE's structure, which the bare loop
+  # dropped in silence whenever the process's gate was closed, and the deletion assertion.
+  attr(pm, "migrated_done") <- TRUE
+  p <- ccx_overlay_par(p, pm)
   p$pump_mode  <- md$pump_mode
   # ⚠ TWO LISTS, NOT ONE ([[ccx_two_param_lists]]). `p` is the MODEL's list --
   # ccx_default_params() overlaid with the fitted names it has slots for -- and
@@ -731,9 +735,13 @@ dg_run <- function(v) {
   sp <- dg_spinup(v)
   # the final DG_YEARS year is forcing-held BY DESIGN (see DG_SINK_LAST); the
   # builder's "held FLAT" warning is muffled here and nowhere else.
+  # the forcing's ENSO index and AOD mode are the STRUCTURE's, as in the objective
+  # (2026-09-30): an aod_mode-"anomaly" label stopped at ccx_run_prepared() without them.
+  # Every older label resolves to the builder's own defaults, so its forcing is unchanged.
   F  <- withCallingHandlers(
     ccx_build_forcing("historical", DG_YEARS, prod_c14 = sp$prod_c14,
-                      bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale),
+                      bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale,
+                      enso_index = ccx_enso_index_of(v$p), aod_mode = ccx_aod_mode_of(v$p)),
     warning = function(w) if (grepl("held FLAT", conditionMessage(w))) invokeRestart("muffleWarning"))
   list(sp = sp, F = F, out = ccx_run_fast(sp, F)$out)
 }
@@ -1591,6 +1599,11 @@ dg_streams <- function(r, v, obs = ccx_prepare_obs()) {
   eluc <- ccx_forcing_eluc_annual(Fk)
   err <- list(sigma_d14c = v$sigma_d14c, rep_dC = v$rep_dC,
               grad_off_co2 = v$grad_off_co2, grad_off_d13c = v$grad_off_d13c)
+  # the D3 shares (2026-09-30, objective #14), from the FITTED list, as the objective reads
+  # them: without them an open-label vector's two GCB rows would be scored as #13's, in
+  # silence. Absent (every older file, and "defaults") = NULL = #13's rows.
+  .sh <- ccx_imb_shares(v$pm)
+  if (!is.null(.sh)) { err$imb_share_land <- .sh[["land"]]; err$imb_share_ocean <- .sh[["ocean"]] }
   ccx_loglik(o, obs, err, luc = eluc,
              deep = ccx_d14c_deep_read(r$sp),
              ocean_grad = ccx_ocean_grad_scored(o, r$sp), by_stream = TRUE,
