@@ -42,6 +42,33 @@
 .AOC_0_30_GT   <- 77;   .SOC_0_30_GT   <- 704
 .AOC_30_100_GT <- 216;  .SOC_30_100_GT <- 801
 
+# ---- inputs to the D2 non-CO2 land-sink drivers (2026-09-30) ----------
+# notes/lit_2026-09-30_nonco2_land_sink_drivers.md (subagent; spot-checked by the
+# main session 2026-09-30: every arithmetic item reproduced; MAGICC6 Table B4 and
+# Varney 2024 read in the primary text). Named here, derived below.
+# Standard atomic weights, g/mol: CIAAW abridged 2024 (ciaaw.org, read 2026-09-30):
+# H 1.0080(2), N 14.007(1), O 15.999(1). (.M_C above is the same table's 12.011.)
+.M_H <- 1.0080; .M_N <- 14.007; .M_O <- 15.999
+# Forest NPP response to N deposition: Du & de Vries 2018 (Env. Pollut. 242:1476,
+# doi:10.1016/j.envpol.2018.08.041; ABSTRACT) new NPP 0.41 PgC/yr from N deposition,
+# on 21.1 Tg N/yr of forest deposition (Du & de Vries 2024 book ch., Table 4.2,
+# doi:10.1016/B978-0-323-91140-5.00016-6; full text) => 19.4 kg C per kg N.
+.NDEP_FOREST_NPP_PGC <- 0.41; .NDEP_FOREST_DEP_TGN <- 21.1
+# Forest share of LAND deposition: 23.1 Tg N/yr on forests in 2010 (Schulte-Uebbing
+# et al. 2022, GCB 28:899, doi:10.1111/gcb.15960, Methods) over land deposition
+# 63.9 (Tian 2022 ESSD 14:4551 Table 2, CMIP6 CCMI 2010s) to 92.7 Tg N/yr (Zhu 2025
+# Nat. Commun. 16:46, 2020, obs) = 0.25-0.36; the central 0.30 is the note's.
+.NDEP_FOREST_SHARE <- 0.30
+# CLM4.5's NPP response (O'Sullivan et al. 2019, GBC 33:163, doi:10.1029/2018GB005922,
+# Table 3): +1.50 PgC/yr for NDEP, [2007-16] - [1901-10]; that interval's CCMI land
+# deposition change is 63.9 - 22.3 = 41.6 Tg N/yr (Tian 2022 Table 2, 2010s - 1910s).
+.NDEP_CLM45_NPP_PGC <- 1.50; .NDEP_CLM45_DDEP_TGN <- 63.9 - 22.3
+# MAGICC6 C4MIP emulations, sigma_NPP (K^-1 of GLOBAL-MEAN temperature, Eq. A21
+# F = F0 exp(sigma dT)): Meinshausen et al. 2011 ACP 11:1417, Table B4, ten models
+# (BERNcc, CSM1, CLIMBER2LPJ, FRCGC, HadCM3LC, IPSLCM2C, LLNL, MPI, UMD, UVIC27).
+# Read from the PDF by the main session 2026-09-30.
+.NPP_TSENS_C4MIP <- c(0.01, 0.01, 0.04, 0.02, 0.00, -0.06, 0.00, -0.03, -0.03, -0.02)
+
 # ---- inputs to the Southern-Ocean entrainment amplitude (2026-09-03) --
 # ⛔ NAMED HERE AND COMPUTED BELOW, NOT TYPED AS AN ANSWER. The entry that
 # replaced them carried `value = 30` with the arithmetic only in its prose
@@ -366,6 +393,73 @@ CCX_CONSTANTS <- list(
                    "of old bulk soil. A +/-1 sigma propagated with the layers fully correlated",
                    "spans ~0.05-0.34 (CHANGELOG 2026-09-29 v; our propagation, not Copard's).",
                    "Cited 2026-09-30.")),
+
+  # ---- D2: NON-CO2 LAND-SINK DRIVERS (Marcus 2026-09-30) -------------------
+  # Rulings 2026-09-30: (a) N deposition from the EMISSIONS PROXY; (b) climate greening
+  # with a SIGN-FREE prior; (c) recovery NOT built (the evidence contradicts a 1750
+  # deficit, and land-use regrowth is already inside GCB's net E_LUC). CHANGELOG 09-30 (k).
+  NDEP_N_PER_NO2 = list(
+    value = .M_N / (.M_N + 2 * .M_O), units = "g N per g NO2",
+    status = "derived",
+    source = paste("Mass fraction of N in NO2 from CIAAW 2024 abridged standard atomic weights",
+                   "(N 14.007, O 15.999). NOx emissions (CEDS / RCMIP / CMIP7 ScenarioMIP) are",
+                   "reported as NO2 mass: the van Vuuren v1.1.1 file states 'Mt NO2/yr';",
+                   "RCMIP's 'Mt NOx/yr' is on the same basis (C, 2026-09-30: the two",
+                   "histories agree to 10 % at 2014 only on an NO2 basis).")),
+  NDEP_N_PER_NH3 = list(
+    value = .M_N / (.M_N + 3 * .M_H), units = "g N per g NH3",
+    status = "derived",
+    source = paste("Mass fraction of N in NH3 from CIAAW 2024 abridged standard atomic weights",
+                   "(N 14.007, H 1.0080).")),
+  NDEP_LAND_FRAC = list(
+    value = 0.60, units = "fraction of global NOx-N + NH3-N emission deposited on land",
+    status = "cited",
+    source = paste("Land share of global inorganic N deposition. Galloway et al. 2004",
+                   "Biogeochem. 70:153 Table 1: 63.5 of 103 Tg N/yr, early 1990s (0.62; 1860",
+                   "0.55). Kanakidou et al. 2016 JAS 73:2039 Table 1: 58 of 99, 2005 (0.59).",
+                   "Tan et al. 2018 ACP 18:6847 Table 5 (HTAP II): 73.7 inland of 113.3, 2010",
+                   "(0.65; 0.80 with coastal cells). 0.60 is the value RULED with the proxy",
+                   "(Marcus 2026-09-30), inside the modern 0.59-0.65. Deposition ~= emission:",
+                   "dep/(NOx+NH3 emission) 0.94-0.99 (Galloway T1; Lamarque 2013; Tan T5), so",
+                   "no separate factor. DEGENERATE with gamma_ndep, whose prior width carries it.")),
+  NDEP_NH_SHARE = list(
+    value = 0.83, units = "fraction of land deposition in the NH",
+    status = "cited",
+    source = paste("NH share of LAND N deposition. No published hemispheric split (lit note",
+                   "sec. 1d); from Tan et al. 2018 ACP 18:6847 Table 5 regional inland",
+                   "deposition: SH = (1.0 + 7.3 + 0.5 x 8.1) / 73.7 = 0.17 (the equatorial",
+                   "region split half and half) -- OUR arithmetic on a verified table, and",
+                   "rough. Applied as a constant in time.")),
+  GAMMA_NDEP_PRIOR_R = list(
+    value = (.NDEP_FOREST_NPP_PGC * 1e3 / .NDEP_FOREST_DEP_TGN) * .NDEP_FOREST_SHARE,
+    units = "kg C of NPP per kg N deposited on land",
+    status = "derived",
+    source = paste("Centre of the gamma_ndep prior, as extra NPP per unit N: forest 0.41 PgC/yr",
+                   "on 21.1 Tg N/yr (Du & de Vries 2018, abstract; 2024 ch. Table 4.2) = 19.4",
+                   "kg C/kg N, times the forest share of land deposition 0.30 (Schulte-Uebbing",
+                   "2022 23.1 Tg N on forests over 63.9-92.7 Tg N on land) = 5.8. gamma_ndep =",
+                   "r x 1e-3 / NPP_GLOBAL_PI per Tg N/yr (ccx_gamma_ndep_prior()).",
+                   "Literature land-mean sink per N 0.6-8.7 kg C/kg N (lit note sec. 2a(iv)).")),
+  GAMMA_NDEP_PRIOR_LOGSD = list(
+    value = log((.NDEP_CLM45_NPP_PGC * 1e3 / .NDEP_CLM45_DDEP_TGN) /
+                ((.NDEP_FOREST_NPP_PGC * 1e3 / .NDEP_FOREST_DEP_TGN) * .NDEP_FOREST_SHARE)) / 2,
+    units = "log-sd",
+    status = "derived",
+    source = paste("Width of the gamma_ndep prior: +2 sigma reaches CLM4.5's NPP response,",
+                   "1.50 PgC/yr over a 41.6 Tg N/yr deposition change (O'Sullivan 2019 GBC",
+                   "33:163 Table 3; Tian 2022 Table 2) = 36 kg C/kg N, the largest model",
+                   "response in the lit note. log(36.1 / 5.8) / 2 = 0.91.")),
+  NPP_TSENS_PRIOR_SD = list(
+    value = stats::sd(.NPP_TSENS_C4MIP), units = "1/K (global-mean temperature)",
+    status = "derived",
+    source = paste("Width of the SIGN-FREE prior on the NPP temperature sensitivity (NPP x",
+                   "exp(npp_tsens x GMST)): SD of MAGICC6's sigma_NPP across its ten C4MIP",
+                   "emulations, Meinshausen et al. 2011 ACP 11:1417 Table B4 (median 0.00,",
+                   "mean -0.006, range -0.06..+0.04; Eq. A21 is on GLOBAL-MEAN temperature).",
+                   "Centre 0 (the median), ruled sign-free by Marcus 2026-09-30. The evidence",
+                   "leans negative: CMIP6 gamma_NPP < 0 in 8 of 10 ESMs (Varney 2024 BG 21:2759",
+                   "sec. 3.3, verified); GCB 2025 net climate effect on the land sink -0.8 +/- 0.7",
+                   "GtC/yr. Read from the Table B4 PDF by the main session 2026-09-30.")),
 
   # ---- the NH/SH split of terrestrial NPP (2026-08-20k) ----------------
   # npp_frac_NH was fitted under UNIFORM[0.4, 0.8] -- zero observational content
