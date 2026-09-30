@@ -2,6 +2,55 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (j) — **D3 machinery is BUILT and OFF: the two GCB sink rows can move their targets by a fitted share of GCB's imbalance. Absent shares are objective #13 bit for bit. Every guard and wire is mutation-tested; the suite shows only the named red.** Nothing adopted; the I(t) treatment and the cement choice await Marcus.
+
+Code (`512d8e8`):
+- `R/likelihood.R`:
+  - `LIK_IMB_*` constants. `LIK_IMB_TREATMENT` "smooth" and `LIK_IMB_WITH_CEMENT` FALSE are marked
+    **PENDING**: placeholders that change nothing until shares are supplied.
+  - `ccx_imb_series()`: raw / smooth (centred 11-yr, shrinking ends) / const, ± cement, built over
+    EVERY GCB year.
+  - `ccx_imb_shares_check()`: a pair or nothing; on the simplex.
+  - `ccx_imb_shares()`: the stick-breaking resolver. `imb_share_land` ~ Beta(1,2) and
+    `imb_share_ocean_rest` ~ U(0,1) give the FLAT Dirichlet(1,1,1).
+  - The rows' targets in `ccx_loglik()` become GCB + s·I(t).
+- `R/calibrate.R`: `ccx_make_logpost()` resolves the shares from `p_pr` (base + draw), so a screen can
+  carry them in `base_params` and a refit can fit them through one path.
+- No emissions share: it would be collinear with `luc_scale` (09-30 i).
+
+`tests/testthat/test-imb-alloc.R`, 5 tests / 74 expectations:
+- absent ≡ (0, 0) ≡ #13, `expect_identical`;
+- shares move ONLY the two GCB rows (every other stream identical), and the rows equal a hand-built sum
+  to 1e-10;
+- the series follows its treatment, and a shuffled table gives the same series;
+- the guards;
+- the flat-simplex density is constant (= 2);
+- the logpost carries the shares from `base_params`, bit-exact at (0, 0).
+
+**Mutation table** (each applied alone, the file re-run, then restored from git):
+
+| mutation | FAIL |
+|---|---|
+| M1 ocean share dropped in the row | 3 |
+| M2 land/ocean swapped | 1 |
+| M3 smoother not shrinking (NA ends) | 5 |
+| M4 simplex sum guard removed | 1 |
+| M5 half-pair guard → silent zero | 3 |
+| M6 logpost resolver not wired | 2 |
+| M7 resolver without stick-breaking | 1 |
+| M8 cement substituted, not added | 1 |
+
+**Full suite at `512d8e8`** (`outputs/diagnostics/suite_20260930_post512d8e8.log`, 12.5 min):
+[FAIL 1 | WARN 230 | SKIP 3 | PASS 5224].
+- The one failure is the named red, `test-mode-file.R:323` (dAIC +4.18, unchanged).
+- The warnings are the known start-up-transient notices.
+
+**Memory budgets, measured (carried items).**
+- `INDEX_ccx_app.md` is 14,131 B, UNDER its 14 KiB (14,336 B) soft budget. The 09-30b handoff's "just
+  over" read 1 KB as 1000 B; `INDEX_conv.md` uses KiB (18 KB hard = 18,432 B). No split is owed.
+- Root `MEMORY.md` content is 13,097 B (comments stripped): over its 12 KiB soft budget, under the
+  18 KiB hard one. It is shared across projects, so it is left for a housekeeping pass.
+
 ## 2026-09-30 (i) — **D3 preview at the fixed alignment control. Today GCB's imbalance (+ cement, 0.63 GtC/yr) is already split land 56 % / E_LUC via `luc_scale` 37 % / ocean 12 % (growth −6 %). The new rows would pick land 0.45–0.65 and ocean 0.12–0.17 on a smoothed or constant imbalance, for +13 to +18 log-units at fixed parameters. The RAW imbalance lets year-to-year noise choose the share (64 % of its estimate). ⚠ D3 releases a row that pulls the land sink DOWN, so on its own it should not lower fertilisation.**
 
 Driver: `calibration/diag_imb_alloc_preview.R` (`imb_alloc_preview_20260930.{log,rds}`), at `b1675e6`. No fit, no RNG.
