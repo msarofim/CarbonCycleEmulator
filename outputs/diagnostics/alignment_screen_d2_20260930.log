@@ -1,0 +1,107 @@
+=== PROVENANCE === driver calibration/diag_alignment_screen.R, commit f09ef2e, run 2026-09-30 16:03; no RNG
+  structure hilda_csl3v0kai (inert pool f 0.194684) at v0k basin 1; control = tau_soil_slow_profile_fixedstock_stock8053_20260929.rds value 500, rescored under the label: d 4.86e-04 (tol 1e-03)
+  NM maxit 3000 on {beta_max, fert_k, luc_scale, q10, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, npp_frac_NH, kz, rep_dC} (+ NPP_GLOBAL_PI scale in [0.70, 1.10] for J3/J4); costs are UPPER bounds
+  constraints: KEENAN 1981->2020 (CO2 343.2->415.4 ppm) +0.135 +/- 0.035; G564 +0.169 +/- 0.062; NPP 56.06 +/- 7.75 (2001-2023)
+
+=== THE ARMS: record cost (likelihood WITHOUT the NPP row), penalties, moves ===
+  arm        d_ll_rec  pen_fert   npp_row   beta      K     NPP0   NPPmod    q10    luc      kz   conv evals
+  control       +0.00         -         -  2.739    872     60.0    69.62  1.109  0.863   15531      -     -
+  DN            +1.84      3.33         -  2.741    895     60.0    69.61  1.113  0.865   15684      1  3001
+  DT            +0.48      3.27         -  2.773    898     60.0    69.54  1.100  0.859   15554      0  2431
+  DNT           +3.91      3.59         -  2.691    949     60.0    69.41  1.105  0.848   15537      1  3002
+  DNTb         +20.21      3.10         -  2.784    864     60.0    70.14  1.103  0.897   15104      1  3002
+
+=== D3 ARMS (imbalance allocation; predictions P-D3-1..4 registered at 40ca12d) ===
+  control: common-row loglik -1319.767; GCB rows -66.50 (land) -7.00 (ocean) under #13; enh(410) 0.3627; luc_scale 0.8630; SSP5-8.5 2300 1406.7 ppm
+  DNTb  I(t) smooth cement TRUE  | s_land 0.587 s_ocean 0.023 rest 0.390 | d_ll common   +7.14, own objective  +20.21, GCB rows +13.07
+        enh(410) 0.3715 (+2.4 %), beta 2.784 K 864, luc_scale 0.8967, q10 1.103, kz 15104; SSP5-8.5 2300 +22.2 ppm; conv 1 evals 3002
+        P-D3-1 GCB rows gain >= floor: PASS; P-D3-2 enh does not fall > tol: PASS; P-D3-3 s_ocean > min: FAIL; P-D3-4 |d 2300 CO2| < tol: FAIL
+
+=== D2 ARMS (non-CO2 land-sink drivers, as ruled; predictions P-D2-1..5 registered at 61fd1b3) ===
+  priors: gamma_ndep lognormal centre 9.72e-05 per Tg N/yr, log-sd 0.91; npp_tsens N(0, 0.0291) per K
+  control: enh(410) 0.3627, q10 1.109, NPP 2001-23 69.62, Koven z(2100-2200) 2.27, SSP5-8.5 2300 1406.7
+  DN    d_ll record   +1.84 | prior pen  -1.16 | gamma_ndep 0.000204 (0.82 sd from centre), npp_tsens -
+        enh(410) 0.3549 (-2.2 %), beta 2.741 K 895, q10 1.113, luc 0.8645, NPP 2001-23 69.61 (-0.01), Koven z(2100-2200) 2.26, SSP5-8.5 2300 +2.1 ppm; conv 1 evals 3001
+        N-dep sink 1990-2023: 0.040 GtC/yr on 47.2 Tg N/yr = 0.84 kg C/kg N (gate 0.6-8.7)
+        P-D2-1 enh(410) falls: PASS; P-D2-2 gamma in prior 2sd AND sink/N in gate: PASS; P-D2-3 NPP rises < 1 GtC/yr: PASS; P-D2-5 Koven z stays > 1.5: PASS
+  DT    d_ll record   +0.48 | prior pen  +2.62 | gamma_ndep -, npp_tsens +0.0014 /K (0.05 sd)
+        enh(410) 0.3579 (-1.3 %), beta 2.773 K 898, q10 1.100, luc 0.8587, NPP 2001-23 69.54 (-0.08), Koven z(2100-2200) 2.32, SSP5-8.5 2300 -9.8 ppm; conv 0 evals 2431
+        P-D2-4 tsens > 0 AND q10 rises: FAIL
+  DNT   d_ll record   +3.91 | prior pen  +0.35 | gamma_ndep 0.000454 (1.69 sd from centre), npp_tsens +0.0043 /K (0.15 sd)
+        enh(410) 0.3310 (-8.7 %), beta 2.691 K 949, q10 1.105, luc 0.8479, NPP 2001-23 69.41 (-0.21), Koven z(2100-2200) 2.32, SSP5-8.5 2300 -7.1 ppm; conv 1 evals 3002
+        N-dep sink 1990-2023: 0.088 GtC/yr on 47.2 Tg N/yr = 1.86 kg C/kg N (gate 0.6-8.7)
+        P-D2-1 enh(410) falls: PASS; P-D2-2 gamma in prior 2sd AND sink/N in gate: PASS; P-D2-3 NPP rises < 1 GtC/yr: PASS; P-D2-4 tsens > 0 AND q10 rises: FAIL
+  DNTb  d_ll COMMON   +7.14 (own  +20.21; s_land 0.587 s_ocean 0.023) | prior pen  +0.12 | gamma_ndep 0.000507 (1.81 sd from centre), npp_tsens -0.0061 /K (-0.21 sd)
+        enh(410) 0.3715 (+2.4 %), beta 2.784 K 864, q10 1.103, luc 0.8967, NPP 2001-23 70.14 (+0.52), Koven z(2100-2200) 2.14, SSP5-8.5 2300 +22.2 ppm; conv 1 evals 3002
+        N-dep sink 1990-2023: 0.097 GtC/yr on 47.2 Tg N/yr = 2.06 kg C/kg N (gate 0.6-8.7)
+        P-D2-1 enh(410) falls: FAIL; P-D2-2 gamma in prior 2sd AND sink/N in gate: PASS; P-D2-3 NPP rises < 1 GtC/yr: PASS; P-D2-4 tsens > 0 AND q10 rises: FAIL
+
+=== WHO PAYS (record streams vs control, 8 largest |max|) ===
+     gcb_land_sink co2_icecore d13c_level_SPO d13c_level_MLO co2_seasonal_MLO
+DN           -0.01        2.18          -0.78           0.55             0.41
+DT            0.47        0.14          -0.53           0.70            -0.06
+DNT           1.95        3.64          -1.47          -0.78             0.19
+DNTb         12.27        6.78          -1.90           1.44            -1.26
+     d13c_seasonal_MLO d14c_profile_ab co2_level_MLO
+DN               -0.38           -0.35          0.03
+DT                0.06           -0.05         -0.10
+DNT               0.05           -0.01         -0.10
+DNTb              1.02            0.86         -0.82
+
+=== SCORECARD: pools (PI, GtC) ===
+        vegetation soil_fast soil_slow soil_inert soil_total land_total
+control        516     115.0    1207.0        292     1614.1     2130.1
+DN             516     115.1    1207.1        292     1614.1     2130.1
+DT             516     115.1    1207.1        292     1614.1     2130.1
+DNT            516     115.1    1207.2        292     1614.3     2130.3
+DNTb           516     115.1    1207.0        292     1614.1     2130.1
+        ocean_total atmosphere
+control     37658.8      588.3
+DN          37658.2      588.3
+DT          37658.7      588.3
+DNT         37658.8      588.2
+DNTb        37660.6      588.3
+  literature: vegetation 450 (AR6 WG1 Fig 5.12, PI); soil 0-1 m 1502 (Jobbagy & Jackson 2000) / 1848 (Shi 2020); AR6 soils outside permafrost 1700
+
+=== SCORECARD: fluxes and radiocarbon (z where the literature gives a sd) ===
+        npp0 npp_modern ra_ratio gpp_pi gpp_modern z_npp dLand_1960_2023
+control   60     69.620        0     60     69.620 1.749           0.343
+DN        60     69.606        0     60     69.606 1.747           0.347
+DT        60     69.542        0     60     69.542 1.739           0.335
+DNT       60     69.410        0     60     69.410 1.722           0.321
+DNTb      60     70.141        0     60     70.141 1.816           0.444
+        dOcean_1960_2023 dEluc_1960_2023 dLand_2010_2023 dOcean_2010_2023
+control            0.073          -0.232           0.436            0.022
+DN                 0.075          -0.229           0.421            0.029
+DT                 0.074          -0.239           0.434            0.022
+DNT                0.070          -0.257           0.382            0.027
+DNTb               0.048          -0.175           0.492           -0.001
+        dEluc_2010_2023 soil_d14c_2000 z_shi
+control          -0.208       -205.833 0.795
+DN               -0.206       -205.908 0.794
+DT               -0.215       -205.831 0.795
+DNT              -0.231       -205.804 0.796
+DNTb             -0.157       -205.840 0.795
+
+=== SCORECARD: fertilisation RESPONSES (GPP literature applied to NPP) and q10 ===
+        g_keenan g_400_564  g_2x  g_4x z_keenan z_564 z_2x_oos z_4x_oos   q10
+control    0.152     0.254 0.660 1.336    0.497 1.365    1.426    1.852 1.109
+DN         0.150     0.251 0.648 1.319    0.427 1.324    1.349    1.798 1.113
+DT         0.151     0.253 0.653 1.332    0.459 1.353    1.385    1.839 1.100
+DNT        0.142     0.241 0.608 1.256    0.201 1.168    1.103    1.593 1.105
+DNTb       0.155     0.258 0.675 1.364    0.582 1.430    1.521    1.943 1.103
+
+=== SCORECARD: futures (SSP5-8.5 unspliced, vvH spliced; land-carbon windows GtC vs Koven 2022 +/- 1 sd) ===
+        ssp585_co2_2300 ssp585_dL1521 ssp585_dL2122 ssp585_dL2223
+control         1406.71        486.40        569.32        220.06
+DN              1408.77        484.27        566.75        217.22
+DT              1396.94        491.05        584.10        225.65
+DNT             1399.62        485.76        584.70        223.40
+DNTb            1428.96        482.04        536.94        204.41
+        ssp585_landxPI vvH_co2_2300 vvH_landxPI  zK1  zK2  zK3
+control           1.60       974.33        1.34 1.29 2.27 1.59
+DN                1.60       978.06        1.34 1.28 2.26 1.57
+DT                1.61       969.42        1.35 1.32 2.32 1.61
+DNT               1.61       975.94        1.34 1.29 2.32 1.60
+DNTb              1.58       992.66        1.32 1.27 2.14 1.52
+  (land x PI uses TOTAL land incl. the inert pool -- the ESM-style convention, CHANGELOG 09-30 f)
