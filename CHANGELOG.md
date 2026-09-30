@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (o) — Handoff: `notes/handoff_2026-09-30c_d2d3_built.md`. D2 (N retention, sign-free greening) and D3 (smooth + cement) are BUILT, OFF by default, and screened. (c) is not built, as ruled. **Next arc: the refit infrastructure** (four table names, pinned at 0 under every older label; a new structure label; objective #14 and a restamp), then Torch (ask first), then the refit. Nothing is running; all pushed.
+
 ## 2026-09-30 (n) — **The D2 screen on the RULED forms. The record WANTS an N-retention sink near the literature's central value (4–6 kg C/kg N) and spends it on fertilisation (−12 to −19 %) and NPP (−1.9 to −2.8 GtC/yr). Greening fits ≈ 0 again. N retention + D3 together move Koven's 2100–2200 window from z 2.27 to 1.93.**
 
 `alignment_screen_d2ret_20260930.*` (driver at `58cd91c` + frozen copy; `AS_ONLY=DN,DT,DNT,DNTb`).
