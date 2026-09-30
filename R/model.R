@@ -744,6 +744,17 @@ CCX_GAMMA_DIFF_DEFAULT <- 0.25
 # asserts a value.
 CCX_GAMMA_NDEP_DEFAULT <- 0
 
+# NPP TEMPERATURE SENSITIVITY (D2 (b), Marcus 2026-09-30, ruled SIGN-FREE): NPP x
+# exp(npp_tsens * gmst), per K of the annual-mean GMST column -- the SAME column
+# q10 reads, on the same baseline. MAGICC6's per-flux form F = F0 exp(sigma dT) on
+# global-mean temperature (Meinshausen 2011 Eq. A21). 0 = OFF and is the default:
+# exp(0) is exactly 1, so every registered file stays bit-exact. BOTH cores resolve
+# an ABSENT field to this constant. Prior N(0, NPP_TSENS_PRIOR_SD) -- the literature
+# leans NEGATIVE (R/constants.R); a POSITIVE value raises post-2100 uptake.
+# The seasonal NEP rides on npp, so its amplitude scales with this factor, as it
+# does with fertilisation; there is no separate seasonal-temperature path.
+CCX_NPP_TSENS_DEFAULT <- 0
+
 #' The fertilisation multiplier on NPP0, as a function of atmospheric CO2.
 #'
 #' Factored out of ccx_deriv() so that diagnostics, the app and the design-target
@@ -2038,6 +2049,9 @@ ccx_default_params <- function() {
     # N-DEPOSITION NPP MULTIPLIER (D2 (a), 2026-09-30). 0 = OFF, bit-exact; see
     # CCX_GAMMA_NDEP_DEFAULT.
     gamma_ndep = CCX_GAMMA_NDEP_DEFAULT,
+    # NPP TEMPERATURE SENSITIVITY (D2 (b), 2026-09-30). 0 = OFF, bit-exact; see
+    # CCX_NPP_TSENS_DEFAULT.
+    npp_tsens = CCX_NPP_TSENS_DEFAULT,
     # ---- mechanism switch, NOT a calibrated parameter -----------------
     # FROZEN REVELLE. 0 = normal carbonate chemistry. 1 = the ocean's buffer
     # factor is held at its preindustrial value instead of rising as the ocean
@@ -2438,8 +2452,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     ndep_h <- forc[[paste0("ndep_", h)]]
     if (is.null(ndep_h) || !is.finite(ndep_h)) ndep_h <- 0
     gndep <- if (is.null(p$gamma_ndep)) CCX_GAMMA_NDEP_DEFAULT else p$gamma_ndep
+    # NPP TEMPERATURE SENSITIVITY (D2 (b), 2026-09-30) -- twin of the C++ block.
+    # Absent parameter = CCX_NPP_TSENS_DEFAULT in BOTH cores.
+    tsens <- if (is.null(p$npp_tsens)) CCX_NPP_TSENS_DEFAULT else p$npp_tsens
     npp <- npp0_h * capacity * ccx_fert_factor(chi, p, aux$chi0) *
-      (1 + gdiff * aod_h) * (1 + gndep * ndep_h)
+      (1 + gdiff * aod_h) * (1 + gndep * ndep_h) * exp(tsens * forc$gmst)
 
     # GROSS PHOTOSYNTHESIS AND AUTOTROPHIC RESPIRATION. `ra_ratio` is Ra/NPP, so
     # GPP = NPP * (1 + ra_ratio) down and Ra = NPP * ra_ratio back up. The NET

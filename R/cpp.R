@@ -243,6 +243,8 @@ ccx_cpp_par <- function(p) {
   # N-deposition NPP multiplier (D2 (a), 2026-09-30): the SAME named constant the
   # R deriv falls back to, so absence cannot mean two things.
   if (is.null(p$gamma_ndep)) p$gamma_ndep <- CCX_GAMMA_NDEP_DEFAULT
+  # NPP temperature sensitivity (D2 (b), 2026-09-30): same rule, same constant.
+  if (is.null(p$npp_tsens)) p$npp_tsens <- CCX_NPP_TSENS_DEFAULT
   # Land-structure parameters added 2026-08-12. Defaulted here as well as in
   # ccx_default_params() so that a hand-built or older parameter list cannot
   # reach the C++ with a missing name -- which unpacks as garbage, not an error.
@@ -402,7 +404,7 @@ ccx_cpp_par <- function(p) {
       "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
       "revelle_frozen", "gamma_diff",
       "tau_ex_seas_amp", "tau_ex_seas_phase",
-      "gamma_ndep")]
+      "gamma_ndep", "npp_tsens")]
 }
 
 #' Forcing table -> the matrix the C++ expects, in its column order

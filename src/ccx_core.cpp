@@ -285,6 +285,10 @@ struct Par {
   // ndep_h). ccx_cpp_par() guarantees the field, resolving absence to
   // CCX_GAMMA_NDEP_DEFAULT -- the SAME constant the R deriv uses. No fallback here.
   double gamma_ndep;
+  // NPP TEMPERATURE SENSITIVITY (D2 (b), 2026-09-30): NPP x exp(npp_tsens * gmst),
+  // per K of the annual-mean GMST column. Resolved by ccx_cpp_par() to
+  // CCX_NPP_TSENS_DEFAULT when absent, the SAME constant the R deriv uses.
+  double npp_tsens;
   // ENSO, FOUR COEFFICIENTS SINCE 2026-09-01 (Marcus's design). GtC/yr per unit
   // Nino3.4 index; [0] = NH, [1] = SH. The land pair drives soil_fast -> atm,
   // the ocean pair an air-sea anomaly carrying the air-sea fractionation of its
@@ -615,7 +619,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // gamma_ndep 0 the factor is exactly 1.0, so every registered file is bit-exact.
     const double npp = npp0_h * capacity * fert
                        * (1.0 + P.gamma_diff * aod_h_[hi])
-                       * (1.0 + P.gamma_ndep * ndep_h_[hi]);
+                       * (1.0 + P.gamma_ndep * ndep_h_[hi])
+                       // NPP TEMPERATURE SENSITIVITY (D2 (b), 2026-09-30) -- twin
+                       // of R/model.R; exp(0) is exactly 1.0 at the default.
+                       * std::exp(P.npp_tsens * gmst);
 
     const double npp_leaf = npp * P.npp_leaf_frac;
     const double npp_wood = npp * (1.0 - P.npp_leaf_frac);
@@ -1327,6 +1334,7 @@ static Par unpack_par(const List& p) {
   P.gamma_enso_ocn[1]  = p["gamma_enso_ocn_SH"];
   P.gamma_diff = p["gamma_diff"];
   P.gamma_ndep = p["gamma_ndep"];                               // D2 (a), 2026-09-30
+  P.npp_tsens  = p["npp_tsens"];                                // D2 (b), 2026-09-30
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];
   P.seas_drivers = (int) p["seas_drivers"];
