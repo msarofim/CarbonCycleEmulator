@@ -1,0 +1,12 @@
+=== PROVENANCE === calibration/diag_r2_shape_fixed.R @b57132e, run 2026-09-30 12:19; hilda_csl3v0ka v0k basin1 + fixed-stock tau-500 control (identity 7.9e-09); rep_dC pinned 0.776; NM 3000; no RNG
+  control: SSP5-8.5 2300 CO2 1387.88 ppm; beta_max 2.552 fert_k 867.6 rep_dC 3.275
+  R_shape_fixed  pinned {rep_dC,beta_max,fert_k}: d_loglik  -200.85  beta_max 2.552 fert_k  867.6  SSP5-8.5 2300 1378.19 (-9.69 ppm)  conv 0 evals 1325
+  R_free         pinned {rep_dC}: d_loglik  -197.64  beta_max 2.636 fert_k  858.8  SSP5-8.5 2300 1364.81 (-23.08 ppm)  conv 0 evals 1531
+  HYPOTHESIS |dCO2(shape fixed)| < 0.25 x |dCO2(free)|: 9.69 vs 5.77 -> FAILS
+  streams vs control (8 largest):
+              d13c_level_MLO d13c_level_SPO co2_icecore co2_level_MLO
+R_shape_fixed        -134.93         -25.22      -23.36         -10.9
+R_free               -123.50         -20.51      -16.65         -18.6
+              co2_level_SPO gcb_land_sink d14c_NH d14c_SH
+R_shape_fixed         -2.33          1.75   -2.42   -2.13
+R_free                -6.69         -5.44   -1.41   -2.36

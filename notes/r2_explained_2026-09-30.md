@@ -95,8 +95,20 @@ That cost only **−5.6**. So:
   rows), not the cost of the shape.
 - **The shape can be decided on its own evidence.** That was item 1 (the K prior is already
   consistent with the science) and item 6 (the alignment screen).
-- ⚠ **Hypothesis, not yet tested:** with K held fixed, `rep_dC`'s remaining leverage on the future is
-  small. The test is `rep_dC` pinned at 0.776 with K pinned at its control value; one run.
+- ⚠ **Tested the same day (`calibration/diag_r2_shape_fixed.R`, `r2_shape_fixed_20260930.log`):
+  INCONCLUSIVE. Do not rely on separability for the FUTURE.** The claim was that, with K held fixed,
+  `rep_dC`'s remaining leverage on the future is small.
+  - The pre-registered criterion FAILS: |ΔCO₂ with the shape held| is 9.7 ppm, against 0.25 × 23.1 with
+    it free.
+  - But the test did not reproduce the ladder. With 10 names re-fitted (the ladder re-fitted 28):
+    - the free arm cost **−198** (mostly `d13c_level_MLO` −124), not −40;
+    - K stayed at 859 instead of falling to 644;
+    - the future moved **−23 ppm**, not the ladder's +63.
+  - A narrow re-fit finds a different re-organisation. **The direction of R2's effect on the future
+    depends on which names absorb the strain**, which is itself a reason to price R2 only at a full
+    refit.
+  - What still holds is the COST inequality above: the shape row's −5.6 is an upper bound, so at least
+    ~34 of the −40 is `rep_dC`'s own.
 
 ## 6. The decision menu
 
@@ -108,8 +120,10 @@ That cost only **−5.6**. So:
 | (d) hard pin at 0.776 | 0.776 | −39.8 | offset = measurement; K 644; SSP5-8.5 2300 about +63 to +69 ppm (between the ladder's rung 1.0 and the K 625 profile row) |
 | (e) fix the structure (IHDE) | — | — | declined 09-23 |
 
-**My reading, for you to rule on.** Because the future consequence of R2 runs through K, and K can be
-set on its own evidence, R2 is once again mostly a question of how honestly the offset is labelled.
+**My reading, for you to rule on.** R2's likelihood cost is mostly `rep_dC`'s own. Its effect on the
+future, though, is re-organisation-dependent (§5 test): at a full re-fit the ladder moves K and adds
+~+63 ppm, while a narrow re-fit moves the future the other way. So the future consequence of (c) or
+(d) should be quoted from a full refit, not from this menu. On labelling alone:
 If you want the offset to look like the representation term it is named for, (c) is the defensible
 version:
 - σ 0.2 is Francey et al. 2019's floor for such a term;

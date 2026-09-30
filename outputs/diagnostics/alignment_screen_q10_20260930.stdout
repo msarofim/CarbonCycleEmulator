@@ -1,0 +1,57 @@
+=== PROVENANCE === driver calibration/diag_alignment_screen.R, commit bee13a9, run 2026-09-30 12:24; no RNG
+  structure hilda_csl3v0kai (inert pool f 0.194684) at v0k basin 1; control = tau_soil_slow_profile_fixedstock_stock8053_20260929.rds value 500, rescored under the label: d 4.86e-04 (tol 1e-03)
+  NM maxit 3000 on {beta_max, fert_k, luc_scale, q10, seas_T_amp_NH, seas_T_amp_SH, seas_lag_p_NH, seas_lag_p_SH, npp_frac_NH, kz, rep_dC} (+ NPP_GLOBAL_PI scale in [0.70, 1.10] for J3/J4); costs are UPPER bounds
+  constraints: KEENAN 1981->2020 (CO2 343.2->415.4 ppm) +0.135 +/- 0.035; G564 +0.169 +/- 0.062; NPP 56.06 +/- 7.75 (2001-2023)
+
+=== THE ARMS: record cost (likelihood WITHOUT the NPP row), penalties, moves ===
+  arm        d_ll_rec  pen_fert   npp_row   beta      K     NPP0   NPPmod    q10    luc      kz   conv evals
+  control       +0.00         -         -  2.739    872     60.0    69.62  1.109  0.863   15531      -     -
+  J5           -33.00      2.40         -  2.999    844     60.0    71.35  2.000  0.909   15486      1  3001
+  J6           -21.41      2.92     -6.21  2.921    895     64.2    75.81  2.000  0.881   14908      0  2108
+
+=== WHO PAYS (record streams vs control, 8 largest |max|) ===
+   gcb_land_sink d14c_SH co2_seasonal_SPO d13c_seasonal_MLO d14c_NH
+J5        -15.92   -1.23            -8.62             -7.46    1.56
+J6        -18.32  -10.93            -1.12             -0.89    7.06
+   d13c_level_MLO d13c_level_SPO co2_icecore
+J5            6.7          -6.20        0.08
+J6            4.3           1.82       -3.37
+
+=== SCORECARD: pools (PI, GtC) ===
+        vegetation soil_fast soil_slow soil_inert soil_total land_total
+control      516.0     115.0    1207.0      292.0     1614.1     2130.1
+J5           516.1     115.0    1206.9      292.0     1613.9     2130.0
+J6           552.7     122.9    1292.1      312.7     1727.7     2280.4
+        ocean_total atmosphere
+control     37658.8      588.3
+J5          37659.0      588.2
+J6          37661.4      588.3
+  literature: vegetation 450 (AR6 WG1 Fig 5.12, PI); soil 0-1 m 1502 (Jobbagy & Jackson 2000) / 1848 (Shi 2020); AR6 soils outside permafrost 1700
+
+=== SCORECARD: fluxes and radiocarbon (z where the literature gives a sd) ===
+         npp0 npp_modern z_npp dLand_1960_2023 dOcean_1960_2023 dEluc_1960_2023
+control 60.00     69.620 1.749           0.343            0.073          -0.232
+J5      60.00     71.352 1.972           0.401            0.077          -0.155
+J6      64.24     75.807 2.547           0.397            0.048          -0.201
+        dLand_2010_2023 dOcean_2010_2023 dEluc_2010_2023 soil_d14c_2000 z_shi
+control           0.436            0.022          -0.208       -205.833 0.795
+J5                0.431            0.033          -0.139       -207.036 0.770
+J6                0.439           -0.002          -0.181       -206.270 0.786
+
+=== SCORECARD: fertilisation RESPONSES (GPP literature applied to NPP) and q10 ===
+        g_keenan g_400_564  g_2x  g_4x z_keenan z_564 z_2x_oos z_4x_oos   q10
+control    0.152     0.254 0.660 1.336    0.497 1.365    1.426    1.852 1.109
+J5         0.168     0.275 0.741 1.488    0.937 1.704    1.926    2.342 2.000
+J6         0.158     0.263 0.690 1.406    0.662 1.520    1.612    2.078 2.000
+
+=== SCORECARD: futures (SSP5-8.5 unspliced, vvH spliced; land-carbon windows GtC vs Koven 2022 +/- 1 sd) ===
+        ssp585_co2_2300 ssp585_dL1521 ssp585_dL2122 ssp585_dL2223
+control         1406.71        486.40        569.32        220.06
+J5              1480.98        471.03        491.32        129.52
+J6              1475.61        478.93        504.78        129.55
+        ssp585_landxPI vvH_co2_2300 vvH_landxPI  zK1  zK2  zK3
+control           1.60       974.33        1.34 1.29 2.27 1.59
+J5                1.52      1019.49        1.29 1.20 1.97 1.23
+J6                1.49      1014.79        1.28 1.25 2.02 1.23
+  (land x PI uses TOTAL land incl. the inert pool -- the ESM-style convention, CHANGELOG 09-30 f)
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/alignment_screen_q10_20260930.{log,csv,rds}
