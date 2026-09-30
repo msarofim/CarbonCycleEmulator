@@ -118,9 +118,25 @@ d M_atm[h]/dt =
   (NPP₀ · `litter_slow_frac` · τ_soil_slow) is radiocarbon-free and exchanges with nothing. It is a
   **carve-out, not an add-on**, because the inventories that size the passive pool also weigh this
   carbon. The exchanging passive pool takes `litter_slow_frac` · (1 − f) of the litter, and the rest
-  goes to `soil_fast`, so NPP and total litter are unchanged. The inert remainder is the constant
-  `aux$soil_inert`: no input, no respiration, no land-use debit, no ¹⁴C, and nothing to spin up.
-  `aux$land0` and the land-use pro-rata shares count exchanging carbon only.
+  goes to `soil_fast`, so NPP and total litter are unchanged. The inert remainder is a **state
+  box**, `soil_inert`, one per hemisphere (2026-09-30 f, Marcus: "make the inert pool an actual
+  model-consistent component if that is scientifically appropriate"). It has no input, respiration,
+  land-use debit or ¹⁴C, and its stock is `aux$soil_inert`.
+  - **Precedent:** RothC carries an inert organic matter (IOM) pool inside total SOC, with no inputs,
+    no decomposition and a radiocarbon age of 50,000 yr (Coleman, Prout & Milne 2024, *RothC Model
+    Description* §1.3, §1.8). The Falloon et al. 1998 estimate (SBB 30:1207) puts it at 7–10 % of
+    surface SOC, against Copard's 11 ± 10 % for 0–30 cm.
+  - **Layout:** it is appended LAST in each hemisphere's block, and is ABSENT when off (the hs/eq/tr
+    idiom).
+  - **Land, not ocean:** it is in `aux$idx$land`, so `land_C` is ALL land carbon in both cores. The
+    C++ ocean sum stops before it.
+  - **Spinup:** it is pinned in all three solves (aseasonal 12C Newton, isotope operators, periodic
+    Newton and monodromy). It has zero fluxes, so it would make each of them singular.
+  - **Isotopes:** its ¹³C/C is the passive pool's (a modelling choice, not a cited constant) and its
+    ¹⁴C is 0.
+  - `aux$land0` and the land-use pro-rata shares count exchanging carbon only.
+  - `ccx_stock_readout()` is the one readout of every reservoir, and it refuses a box without a
+    class.
   - f = 0.195 = (77 + 216) / (704 + 801), from Copard et al. 2025's layer masses to **1 m**
     (`SOIL_INERT_FRAC`, R/constants.R). 0–1 m because the passive pool's 1500 GtC is the 0–1 m
     inventory (CHANGELOG 2026-09-30 b).
