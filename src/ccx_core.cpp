@@ -281,10 +281,11 @@ struct Par {
   // carry a stale vector.
   double f_luc_wood;
   double sst_scale, gamma_diff;
-  // N-DEPOSITION NPP MULTIPLIER (D2 (a), 2026-09-30): NPP x (1 + gamma_ndep *
-  // ndep_h). ccx_cpp_par() guarantees the field, resolving absence to
-  // CCX_GAMMA_NDEP_DEFAULT -- the SAME constant the R deriv uses. No fallback here.
-  double gamma_ndep;
+  // N-DEPOSITION RETENTION FLUX (D2 (a), 2026-09-30): ndep_ret * 1e-3 * max(ndep_h, 0)
+  // GtC/yr, atmosphere -> soil_slow, at alpha_photo. kg C per kg N. ccx_cpp_par()
+  // guarantees the field, resolving absence to CCX_NDEP_RET_DEFAULT -- the SAME
+  // constant the R deriv uses. No fallback here. See R/model.R for the physics.
+  double ndep_ret;
   // NPP TEMPERATURE SENSITIVITY (D2 (b), 2026-09-30): NPP x exp(npp_tsens * gmst),
   // per K of the annual-mean GMST column. Resolved by ccx_cpp_par() to
   // CCX_NPP_TSENS_DEFAULT when absent, the SAME constant the R deriv uses.
@@ -615,11 +616,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // so do not drive this with a supervolcano.
     // gamma_diff defaults to CCX_GAMMA_DIFF_DEFAULT = 0.25 (R/model.R) since its
     // 2026-08-30 adoption; the "defaults to 0" note that stood here was stale.
-    // N DEPOSITION (D2 (a), 2026-09-30) -- twin of the block in R/model.R. At
-    // gamma_ndep 0 the factor is exactly 1.0, so every registered file is bit-exact.
     const double npp = npp0_h * capacity * fert
                        * (1.0 + P.gamma_diff * aod_h_[hi])
-                       * (1.0 + P.gamma_ndep * ndep_h_[hi])
                        // NPP TEMPERATURE SENSITIVITY (D2 (b), 2026-09-30) -- twin
                        // of R/model.R; exp(0) is exactly 1.0 at the default.
                        * std::exp(P.npp_tsens * gmst);
@@ -650,6 +648,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     add_flux(ilef, iatm, ra_leaf, 1.0);                        // Ra, at leaf's ratio
     add_flux(iatm, iwod, npp_wood + ra_wood + enso_gpp * (1.0 - P.npp_leaf_frac),
              A.alpha_photo, true);                             // GPP, wood
+    // N-DEPOSITION RETENTION (D2 (a), 2026-09-30) -- twin of R/model.R. One-way
+    // (deposition clamped at 0); add_flux skips a zero flux, so OFF is bit-exact.
+    if (P.ndep_ret != 0.0)
+      add_flux(iatm, iss, P.ndep_ret * 1e-3 * std::max(ndep_h_[hi], 0.0), A.alpha_photo);
     add_flux(iwod, iatm, ra_wood, 1.0);                        // Ra, at wood's ratio
 
     // litter, split per SOURCE pool (the two carry different 14C ratios, so
@@ -1333,7 +1335,7 @@ static Par unpack_par(const List& p) {
   P.gamma_enso_ocn[0]  = p["gamma_enso_ocn_NH"];
   P.gamma_enso_ocn[1]  = p["gamma_enso_ocn_SH"];
   P.gamma_diff = p["gamma_diff"];
-  P.gamma_ndep = p["gamma_ndep"];                               // D2 (a), 2026-09-30
+  P.ndep_ret   = p["ndep_ret"];                                 // D2 (a), 2026-09-30
   P.npp_tsens  = p["npp_tsens"];                                // D2 (b), 2026-09-30
   P.seas_amp[0] = p["seas_amp_NH"]; P.seas_amp[1] = p["seas_amp_SH"];
   P.seas_phase[0] = p["seas_phase_NH"]; P.seas_phase[1] = p["seas_phase_SH"];

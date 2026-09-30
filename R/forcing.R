@@ -953,7 +953,7 @@ ccx_build_forcing <- function(scenario = "historical",
     # See data-raw/build_volcanic_aod.R.
     aod_NH = ccx_aod_forcing(t, "aod_NH", aod_mode), aod_SH = ccx_aod_forcing(t, "aod_SH", aod_mode),
     # N DEPOSITION onto LAND, Tg N/yr above 1750 (D2 (a), 2026-09-30). ZEROS until
-    # data/forcing_ndep.rds carries this scenario; harmless at gamma_ndep 0 (the
+    # data/forcing_ndep.rds carries this scenario; harmless at ndep_ret 0 (the
     # default) and REFUSED by ccx_run_prepared() otherwise (ccx_ndep_check()).
     ndep_NH = ndep$NH, ndep_SH = ndep$SH,
     # artificial mid-century OCEAN sink, GtC/yr, atmosphere -> mixed layer.
@@ -1102,8 +1102,8 @@ CCX_NDEP_FILE <- "forcing_ndep.rds"
 #' The N-deposition columns of a forcing: list(NH, SH, source), monthly on `years`
 #'
 #' ABSENT FILE or ABSENT SCENARIO = ZEROS stamped source "none". That is harmless
-#' while gamma_ndep is 0, the default, and ccx_ndep_check() REFUSES it otherwise,
-#' so a nonzero gamma can never run silently on no deposition.
+#' while ndep_ret is 0, the default, and ccx_ndep_check() REFUSES it otherwise,
+#' so a nonzero retention can never run silently on no deposition.
 #' PIECEWISE CONSTANT within each year (ccx_annual_to_monthly "constant"): the
 #' annual means are exact and the series cannot undershoot below zero near 1750,
 #' where a spline through a series starting at 0 would.
@@ -1116,8 +1116,8 @@ ccx_ndep_forcing <- function(years, scenario) {
   d <- as.data.frame(d0)[d0$scenario == scenario, ]
   if (!nrow(d)) return(none)
   # PARTIAL COVERAGE (e.g. a "historical" table built past the last GCB year) is
-  # ZEROS stamped "none (...)": harmless at gamma_ndep 0, REFUSED otherwise. A
-  # stop() here would break every gamma-0 caller for a series it never reads.
+  # ZEROS stamped "none (...)": harmless at ndep_ret 0, REFUSED otherwise. A
+  # stop() here would break every retention-0 caller for a series it never reads.
   if (min(d$year) > min(years) || max(d$year) < max(years)) {
     none$source <- sprintf("none (%s covers %d-%d, the table needs %d-%d)", scenario,
                            min(d$year), max(d$year), min(years), max(years))
@@ -1129,11 +1129,11 @@ ccx_ndep_forcing <- function(years, scenario) {
        source = paste0(src, " [", scenario, "]"))
 }
 
-#' Refuse a nonzero gamma_ndep on a forcing that carries no deposition series
-ccx_ndep_check <- function(gamma_ndep, F) {
+#' Refuse a nonzero ndep_ret on a forcing that carries no deposition series
+ccx_ndep_check <- function(ndep_ret, F) {
   src <- attr(F, "ndep_source")
-  if (isTRUE(gamma_ndep != 0) && (is.null(src) || grepl("^none", src)))
-    stop("gamma_ndep = ", gamma_ndep, " but the forcing carries NO N-deposition series ",
+  if (isTRUE(ndep_ret != 0) && (is.null(src) || grepl("^none", src)))
+    stop("ndep_ret = ", ndep_ret, " but the forcing carries NO N-deposition series ",
          "(ndep_source ", if (is.null(src)) "absent" else paste0("'", src, "'"), "). Build ",
          "data/forcing_ndep.rds for this scenario (data-raw/build_ndep_forcing.R).")
   invisible(TRUE)
@@ -1381,7 +1381,7 @@ ccx_hold_climate <- function(F, i = 1L, value = NULL) {
   #
   # N DEPOSITION (ndep_NH/ndep_SH, 2026-09-30) is NOT held either, for the same
   # kind of reason: it is an EMISSIONS-driven chemical input (NOx + NH3), like the
-  # CO2 emissions, not a climate state. Once gamma_ndep != 0, "climate held" does
+  # CO2 emissions, not a climate state. Once ndep_ret != 0, "climate held" does
   # not mean "deposition held"; a run that needs deposition frozen must hold
   # those two columns itself. (test-so-entrainment.R's inventory gate records the
   # classification.)

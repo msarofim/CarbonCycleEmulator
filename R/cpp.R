@@ -240,9 +240,9 @@ ccx_cpp_par <- function(p) {
   # mechanism ON. That is the adoption, and it is why every vector fitted before
   # the adoption is non-comparable.
   if (is.null(p$gamma_diff)) p$gamma_diff <- CCX_GAMMA_DIFF_DEFAULT
-  # N-deposition NPP multiplier (D2 (a), 2026-09-30): the SAME named constant the
+  # N-deposition retention flux (D2 (a), 2026-09-30): the SAME named constant the
   # R deriv falls back to, so absence cannot mean two things.
-  if (is.null(p$gamma_ndep)) p$gamma_ndep <- CCX_GAMMA_NDEP_DEFAULT
+  if (is.null(p$ndep_ret)) p$ndep_ret <- CCX_NDEP_RET_DEFAULT
   # NPP temperature sensitivity (D2 (b), 2026-09-30): same rule, same constant.
   if (is.null(p$npp_tsens)) p$npp_tsens <- CCX_NPP_TSENS_DEFAULT
   # Land-structure parameters added 2026-08-12. Defaulted here as well as in
@@ -404,7 +404,7 @@ ccx_cpp_par <- function(p) {
       "sst_obs", "seas_npp_amp_NH", "seas_npp_amp_SH",
       "revelle_frozen", "gamma_diff",
       "tau_ex_seas_amp", "tau_ex_seas_phase",
-      "gamma_ndep", "npp_tsens")]
+      "ndep_ret", "npp_tsens")]
 }
 
 #' Forcing table -> the matrix the C++ expects, in its column order
@@ -492,8 +492,8 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
        tr_on = ccx_tr_on(spin$params),
        enso_index = ccx_enso_index_of(spin$params),
        aod_mode = ccx_aod_mode_of(spin$params),
-       # D2 (a): a nonzero gamma must meet a forcing that CARRIES deposition
-       gamma_ndep = if (is.null(spin$params$gamma_ndep)) CCX_GAMMA_NDEP_DEFAULT else spin$params$gamma_ndep)
+       # D2 (a): a nonzero retention must meet a forcing that CARRIES deposition
+       ndep_ret = if (is.null(spin$params$ndep_ret)) CCX_NDEP_RET_DEFAULT else spin$params$ndep_ret)
 }
 
 #' A forcing table marshalled ONCE for many `ccx_run_prepared()` calls
@@ -511,7 +511,7 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE) {
   # the forcing's ENSO index must be the one the parameters name (2026-09-29)
   ccx_enso_index_check(if (is.null(prep$enso_index)) "demean" else prep$enso_index, Fm)
   ccx_aod_mode_check(if (is.null(prep$aod_mode)) "legacy" else prep$aod_mode, Fm)
-  ccx_ndep_check(prep$gamma_ndep, Fm)               # D2 (a), 2026-09-30
+  ccx_ndep_check(prep$ndep_ret, Fm)                 # D2 (a), 2026-09-30
   ss <- prep$ss
   one <- function(nsub) {
     res <- .ccx_cpp_env$ccx_run_cpp(y, prep$par, Fm$mat, Fm$t, prep$aux, as.integer(nsub))

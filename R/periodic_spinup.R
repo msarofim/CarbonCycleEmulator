@@ -126,7 +126,7 @@ ps_year_forcing <- function(prod_c14, year0 = 1750, quiet = NULL) {
   F$aod_NH <- 0; F$aod_SH <- 0
   # N DEPOSITION (D2 (a), 2026-09-30): the columns are deposition ABOVE 1750, so
   # the quiet year's zeros are correct BY DEFINITION, not for want of data. Set
-  # and stamped explicitly, so ccx_ndep_check() accepts them under any gamma_ndep.
+  # and stamped explicitly, so ccx_ndep_check() accepts them under any ndep_ret.
   F$ndep_NH <- 0; F$ndep_SH <- 0
   attr(F, "ndep_source") <- "zero by definition (1750 quiet year)"
   F

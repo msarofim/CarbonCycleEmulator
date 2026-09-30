@@ -167,7 +167,7 @@ test_that("P0.3 -- ccx_hold_climate() holds every climate FORCING COLUMN", {
   # ndep_NH/ndep_SH: NON-CLIMATE (decided 2026-09-30, D2 (a); flagged to Marcus).
   # N deposition is an EMISSIONS-driven chemical input (NOx + NH3), like the CO2
   # emissions this list already holds, not a climate state; so a held-climate run
-  # keeps it moving with its scenario. Same consequence as AOD: once gamma_ndep != 0,
+  # keeps it moving with its scenario. Same consequence as AOD: once ndep_ret != 0,
   # "climate held" does NOT mean "deposition held".
   non_climate <- c("t", "year", "month", "e_foss_NH", "e_foss_SH",
                    "e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH",

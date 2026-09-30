@@ -733,16 +733,28 @@ CCX_FERT_FORM_DEFAULT <- CCX_FERT_MM
 # still at the mature-forest end of the observed bracket.
 CCX_GAMMA_DIFF_DEFAULT <- 0.25
 
-# N-DEPOSITION NPP MULTIPLIER (D2 (a), Marcus 2026-09-30: "definitely add non-CO2
-# contributors to carbon"). NPP x (1 + gamma_ndep * ndep_h), ndep_h the
-# ANTHROPOGENIC N deposition onto hemisphere h's LAND in Tg N/yr ABOVE 1750 (the
-# forcing columns ndep_NH / ndep_SH; ccx_ndep_forcing()). Fractional NPP gain per
-# Tg N/yr. 0 = OFF and is the default: every registered file stays bit-exact,
-# since x * (1 + 0 * ndep) is x. BOTH cores resolve an ABSENT field to this same
+# N-DEPOSITION RETENTION FLUX (D2 (a); Marcus 2026-09-30: "definitely add non-CO2
+# contributors to carbon", and the FORM ruled the same day: "Retention flux").
+#   F_h = ndep_ret * 1e-3 * max(ndep_h, 0)   GtC/yr, atmosphere -> PASSIVE soil
+# ndep_h is anthropogenic N deposition onto hemisphere h's LAND, Tg N/yr ABOVE 1750
+# (forcing columns ndep_NH / ndep_SH, data/forcing_ndep.rds); ndep_ret is the carbon
+# RETAINED per unit N, kg C per kg N (= Tg C per Tg N; x 1e-3 -> GtC per Tg N).
+# WHY A FLUX AND NOT AN NPP MULTIPLIER (CHANGELOG 2026-09-30 l/m): the literature's
+# kg C/kg N is a STEADY ratio of sink RATE to deposition RATE -- N retained in wood
+# and soil organic matter binds carbon for as long as deposition continues. The
+# multiplier made the sink track d(ndep)/dt instead (pools relax to a new
+# equilibrium) and gave 0.37-0.70 kg C/kg N at its prior centre, below the
+# literature's 0.6-8.7 (calibration/diag_ndep_form_efficiency.R).
+# THE CARBON IS PHOTOSYNTHETIC: it leaves the atmosphere at alpha_photo and the
+# atmosphere's 14C, like NPP, and the flux trace counts it in `gpp`.
+# INTO THE PASSIVE POOL (soil_slow): the long-lived store where retained N and its
+# carbon sit; one pool, a modelling choice (a wood/soil split would need a cited
+# 15N-retention partition). CLAMPED AT ZERO DEPOSITION: the flux is one-way, and the
+# strongest-mitigation markers dip a hair below their 1750 emissions by 2300.
+# 0 = OFF and is the default; both add_flux()es skip a zero flux, so every
+# registered file stays bit-exact. BOTH cores resolve an ABSENT field to this same
 # constant (ccx_cpp_par() and the deriv) -- the gamma_diff lesson of 2026-08-30.
-# Its prior and centre come from the 2026-09-30 literature pass; nothing here
-# asserts a value.
-CCX_GAMMA_NDEP_DEFAULT <- 0
+CCX_NDEP_RET_DEFAULT <- 0
 
 # NPP TEMPERATURE SENSITIVITY (D2 (b), Marcus 2026-09-30, ruled SIGN-FREE): NPP x
 # exp(npp_tsens * gmst), per K of the annual-mean GMST column -- the SAME column
@@ -2046,9 +2058,9 @@ ccx_default_params <- function() {
     # ⚠ ADOPTED AT 0.25 on 2026-08-29 -- see CCX_GAMMA_DIFF_DEFAULT. It is no
     # longer the behaviour-preserving value, and that is deliberate.
     gamma_diff = CCX_GAMMA_DIFF_DEFAULT,
-    # N-DEPOSITION NPP MULTIPLIER (D2 (a), 2026-09-30). 0 = OFF, bit-exact; see
-    # CCX_GAMMA_NDEP_DEFAULT.
-    gamma_ndep = CCX_GAMMA_NDEP_DEFAULT,
+    # N-DEPOSITION RETENTION FLUX (D2 (a), 2026-09-30), kg C per kg N. 0 = OFF,
+    # bit-exact; see CCX_NDEP_RET_DEFAULT.
+    ndep_ret = CCX_NDEP_RET_DEFAULT,
     # NPP TEMPERATURE SENSITIVITY (D2 (b), 2026-09-30). 0 = OFF, bit-exact; see
     # CCX_NPP_TSENS_DEFAULT.
     npp_tsens = CCX_NPP_TSENS_DEFAULT,
@@ -2445,18 +2457,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     aod_h <- forc[[paste0("aod_", h)]]          # h is "NH"/"SH", as aux$idx is
     if (is.null(aod_h) || !is.finite(aod_h)) aod_h <- 0
     gdiff <- if (is.null(p$gamma_diff)) CCX_GAMMA_DIFF_DEFAULT else p$gamma_diff
-    # N DEPOSITION (D2 (a), 2026-09-30) -- twin of the block in src/ccx_core.cpp.
-    # Same two absence contracts as the diffuse-light term above: a forcing
-    # without the column reads ZERO deposition, and a parameter list without the
-    # field reads CCX_GAMMA_NDEP_DEFAULT in BOTH cores.
-    ndep_h <- forc[[paste0("ndep_", h)]]
-    if (is.null(ndep_h) || !is.finite(ndep_h)) ndep_h <- 0
-    gndep <- if (is.null(p$gamma_ndep)) CCX_GAMMA_NDEP_DEFAULT else p$gamma_ndep
     # NPP TEMPERATURE SENSITIVITY (D2 (b), 2026-09-30) -- twin of the C++ block.
     # Absent parameter = CCX_NPP_TSENS_DEFAULT in BOTH cores.
     tsens <- if (is.null(p$npp_tsens)) CCX_NPP_TSENS_DEFAULT else p$npp_tsens
     npp <- npp0_h * capacity * ccx_fert_factor(chi, p, aux$chi0) *
-      (1 + gdiff * aod_h) * (1 + gndep * ndep_h) * exp(tsens * forc$gmst)
+      (1 + gdiff * aod_h) * exp(tsens * forc$gmst)
 
     # GROSS PHOTOSYNTHESIS AND AUTOTROPHIC RESPIRATION. `ra_ratio` is Ra/NPP, so
     # GPP = NPP * (1 + ra_ratio) down and Ra = NPP * ra_ratio back up. The NET
@@ -2557,6 +2562,15 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     add_flux(iatm, iwod, npp_wood + ra_wood + enso_gpp * (1 - p$npp_leaf_frac),
              alpha13 = aux$alpha_photo, alpha13_signed = TRUE)           # GPP, wood
     add_flux(iwod, iatm, ra_wood)                                        # Ra, at wood's ratio
+
+    # N-DEPOSITION RETENTION (D2 (a), 2026-09-30) -- twin of src/ccx_core.cpp; see
+    # CCX_NDEP_RET_DEFAULT. Two absence contracts: a forcing without the column is
+    # ZERO deposition; a parameter list without the field is the default (0).
+    ndep_h <- forc[[paste0("ndep_", h)]]
+    if (is.null(ndep_h) || !is.finite(ndep_h)) ndep_h <- 0
+    nret <- if (is.null(p$ndep_ret)) CCX_NDEP_RET_DEFAULT else p$ndep_ret
+    if (nret != 0)
+      add_flux(iatm, iss, nret * 1e-3 * max(ndep_h, 0), alpha13 = aux$alpha_photo, lab = "gpp")
 
     # LITTER. Both vegetation pools shed into the SAME two soil pools, split by
     # litter_slow_frac. The split is applied to each source separately rather

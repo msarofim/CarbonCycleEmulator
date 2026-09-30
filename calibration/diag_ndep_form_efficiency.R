@@ -2,6 +2,12 @@
 # diag_ndep_form_efficiency.R -- DOES THE NPP-MULTIPLIER FORM TURN N DEPOSITION INTO
 # THE SINK THE LITERATURE MEASURES? (2026-09-30 l)
 #
+# ⛔ A RECORD, NOT A LIVE DRIVER. It answered NO (0.37-0.70 kg C/kg N at the prior
+# centre, gate 0.6-8.7; ndep_form_efficiency_20260930.log), and Marcus ruled the
+# RETENTION FLUX the same day (CHANGELOG 09-30 m). `gamma_ndep` was then REMOVED from
+# both cores, so re-running this at a later commit would set a field nothing reads and
+# report ZERO effect -- the silent-gate shape. Run it only at 74896c5.
+#
 # The D2 (a) smoke (alignment_screen_smoke_d2) read 0.40 kg C per kg N at the gamma
 # prior centre, below the pre-registered gate 0.6-8.7 (P-D2-2). Hypothesis, stated
 # before this run: the multiplier NPP x (1 + gamma ndep) makes the sink track the

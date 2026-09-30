@@ -49,20 +49,23 @@
 # Standard atomic weights, g/mol: CIAAW abridged 2024 (ciaaw.org, read 2026-09-30):
 # H 1.0080(2), N 14.007(1), O 15.999(1). (.M_C above is the same table's 12.011.)
 .M_H <- 1.0080; .M_N <- 14.007; .M_O <- 15.999
-# Forest NPP response to N deposition: Du & de Vries 2018 (Env. Pollut. 242:1476,
-# doi:10.1016/j.envpol.2018.08.041; ABSTRACT) new NPP 0.41 PgC/yr from N deposition,
-# on 21.1 Tg N/yr of forest deposition (Du & de Vries 2024 book ch., Table 4.2,
-# doi:10.1016/B978-0-323-91140-5.00016-6; full text) => 19.4 kg C per kg N.
-.NDEP_FOREST_NPP_PGC <- 0.41; .NDEP_FOREST_DEP_TGN <- 21.1
+# N RETENTION (the ruled form, 2026-09-30): whole-FOREST carbon sequestered per unit
+# N deposited, kg C/kg N. Du & de Vries 2024 book ch. (doi:10.1016/B978-0-323-91140-5.
+# 00016-6; full text) Tables 4.1-4.2: boreal / temperate / tropical 40 / 31 / 12 (de
+# Vries 2014) and 24 / 10 / 6 (Du & de Vries 2018); the lit note's central "~13" is a
+# round central of those (the note's judgement, lit note sec. 2a(iv)).
+.NDEP_RET_FOREST_CENTRAL <- 13
+# The LAND-MEAN range, kg C/kg N (lit note sec. 2a(iv) table): 0.6 = aboveground wood
+# only (Schulte-Uebbing 2022 world 2 kg C/kg N x forest share 0.30) up to 8.7 = the
+# 15N-retention ceiling (Gurmesa 2022 Nat. Commun. 13:880, 0.72 PgC/yr as a forest
+# ceiling, x forest share). The floor is aboveground wood only, i.e. a LOWER bound on
+# whole-ecosystem retention; the ceiling is its authors' "likely ceiling".
+.NDEP_RET_LAND_RANGE <- c(0.6, 8.7)
 # Forest share of LAND deposition: 23.1 Tg N/yr on forests in 2010 (Schulte-Uebbing
 # et al. 2022, GCB 28:899, doi:10.1111/gcb.15960, Methods) over land deposition
 # 63.9 (Tian 2022 ESSD 14:4551 Table 2, CMIP6 CCMI 2010s) to 92.7 Tg N/yr (Zhu 2025
 # Nat. Commun. 16:46, 2020, obs) = 0.25-0.36; the central 0.30 is the note's.
 .NDEP_FOREST_SHARE <- 0.30
-# CLM4.5's NPP response (O'Sullivan et al. 2019, GBC 33:163, doi:10.1029/2018GB005922,
-# Table 3): +1.50 PgC/yr for NDEP, [2007-16] - [1901-10]; that interval's CCMI land
-# deposition change is 63.9 - 22.3 = 41.6 Tg N/yr (Tian 2022 Table 2, 2010s - 1910s).
-.NDEP_CLM45_NPP_PGC <- 1.50; .NDEP_CLM45_DDEP_TGN <- 63.9 - 22.3
 # MAGICC6 C4MIP emulations, sigma_NPP (K^-1 of GLOBAL-MEAN temperature, Eq. A21
 # F = F0 exp(sigma dT)): Meinshausen et al. 2011 ACP 11:1417, Table B4, ten models
 # (BERNcc, CSM1, CLIMBER2LPJ, FRCGC, HadCM3LC, IPSLCM2C, LLNL, MPI, UMD, UVIC27).
@@ -421,7 +424,7 @@ CCX_CONSTANTS <- list(
                    "(0.65; 0.80 with coastal cells). 0.60 is the value RULED with the proxy",
                    "(Marcus 2026-09-30), inside the modern 0.59-0.65. Deposition ~= emission:",
                    "dep/(NOx+NH3 emission) 0.94-0.99 (Galloway T1; Lamarque 2013; Tan T5), so",
-                   "no separate factor. DEGENERATE with gamma_ndep, whose prior width carries it.")),
+                   "no separate factor. DEGENERATE with ndep_ret, whose prior width carries it.")),
   NDEP_NH_SHARE = list(
     value = 0.83, units = "fraction of land deposition in the NH",
     status = "cited",
@@ -430,25 +433,29 @@ CCX_CONSTANTS <- list(
                    "deposition: SH = (1.0 + 7.3 + 0.5 x 8.1) / 73.7 = 0.17 (the equatorial",
                    "region split half and half) -- OUR arithmetic on a verified table, and",
                    "rough. Applied as a constant in time.")),
-  GAMMA_NDEP_PRIOR_R = list(
-    value = (.NDEP_FOREST_NPP_PGC * 1e3 / .NDEP_FOREST_DEP_TGN) * .NDEP_FOREST_SHARE,
-    units = "kg C of NPP per kg N deposited on land",
+  NDEP_RET_PRIOR_CENTRE = list(
+    value = .NDEP_RET_FOREST_CENTRAL * .NDEP_FOREST_SHARE,
+    units = "kg C retained per kg N deposited on land",
     status = "derived",
-    source = paste("Centre of the gamma_ndep prior, as extra NPP per unit N: forest 0.41 PgC/yr",
-                   "on 21.1 Tg N/yr (Du & de Vries 2018, abstract; 2024 ch. Table 4.2) = 19.4",
-                   "kg C/kg N, times the forest share of land deposition 0.30 (Schulte-Uebbing",
-                   "2022 23.1 Tg N on forests over 63.9-92.7 Tg N on land) = 5.8. gamma_ndep =",
-                   "r x 1e-3 / NPP_GLOBAL_PI per Tg N/yr (ccx_gamma_ndep_prior()).",
-                   "Literature land-mean sink per N 0.6-8.7 kg C/kg N (lit note sec. 2a(iv)).")),
-  GAMMA_NDEP_PRIOR_LOGSD = list(
-    value = log((.NDEP_CLM45_NPP_PGC * 1e3 / .NDEP_CLM45_DDEP_TGN) /
-                ((.NDEP_FOREST_NPP_PGC * 1e3 / .NDEP_FOREST_DEP_TGN) * .NDEP_FOREST_SHARE)) / 2,
+    source = paste("Centre of the ndep_ret prior (the N-retention flux, ruled 2026-09-30): the",
+                   "LAND-MEAN carbon sequestered per unit N deposited = whole-forest ~13 kg C/kg N",
+                   "(Du & de Vries 2024 Tables 4.1-4.2; the lit note's central) x the forest share",
+                   "of land deposition 0.30 (Schulte-Uebbing 2022 23.1 Tg N on forests over",
+                   "63.9-92.7 Tg N on land) = 3.9. At this centre the implied sink is 0.11 / 0.17 /",
+                   "0.17 GtC/yr for 1960-89 / 1990-2009 / 2010-23, 7-9 % of GCB 2025's S_LAND (lit",
+                   "note sec. 2a(iv); reproduced by the main session). Du & de Vries 2024's global",
+                   "forest estimate is '~0.3' PgC/yr (range 0.25-0.72).")),
+  NDEP_RET_PRIOR_LOGSD = list(
+    value = log(.NDEP_RET_LAND_RANGE[2] / .NDEP_RET_LAND_RANGE[1]) / 4,
     units = "log-sd",
     status = "derived",
-    source = paste("Width of the gamma_ndep prior: +2 sigma reaches CLM4.5's NPP response,",
-                   "1.50 PgC/yr over a 41.6 Tg N/yr deposition change (O'Sullivan 2019 GBC",
-                   "33:163 Table 3; Tian 2022 Table 2) = 36 kg C/kg N, the largest model",
-                   "response in the lit note. log(36.1 / 5.8) / 2 = 0.91.")),
+    source = paste("Width of the ndep_ret prior: the log-width of the literature's land-mean",
+                   "range 0.6-8.7 kg C/kg N (aboveground-wood floor to the 15N ceiling; lit note",
+                   "sec. 2a(iv)) taken as +/- 2 sigma, log(8.7 / 0.6) / 4 = 0.67, as ruled",
+                   "('2-sigma spanning 0.6-8.7'). Centred on the literature central 3.9 rather",
+                   "than the range's geometric midpoint 2.3, so the interval sits HIGH: 1.0-15.",
+                   "The floor (aboveground wood only) is a lower bound on whole-ecosystem",
+                   "retention, which is why the centre is not moved down to meet it.")),
   NPP_TSENS_PRIOR_SD = list(
     value = stats::sd(.NPP_TSENS_C4MIP), units = "1/K (global-mean temperature)",
     status = "derived",

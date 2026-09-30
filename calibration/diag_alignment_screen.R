@@ -103,20 +103,22 @@ AS_PD3_ENH_TOL <- 0.05     # P-D3-2: enh(410) may not FALL by more than this fra
 AS_PD3_OCN_MIN <- 0.05     # P-D3-3: s_ocean above this
 AS_PD3_FUT_TOL <- 20       # P-D3-4: |d SSP5-8.5 2300 CO2| below this (ppm)
 AS_PD3_ROW_MIN <- 8        # P-D3-1: the two GCB rows gain at least this (the fixed-vector floor)
-# + 09-30 (l): D2 -- the non-CO2 land-sink drivers as RULED 2026-09-30 (Marcus): (a) N
-# deposition from the emissions proxy (data/forcing_ndep.rds); (b) NPP temperature
-# sensitivity, SIGN-FREE prior; (c) not built. Predictions P-D2-1..5 registered in the
-# prereg (61fd1b3) BEFORE any D2 run. Both are EXTRA COORDINATES carrying their ruled
-# priors in the space the refit will fit them in: gamma_ndep on LOG scale, prior
-# N(log centre, GAMMA_NDEP_PRIOR_LOGSD) there (= a lognormal with its log-Jacobian);
-# npp_tsens on the identity scale, prior N(0, NPP_TSENS_PRIOR_SD).
+# + 09-30 (l/m): D2 -- the non-CO2 land-sink drivers as RULED 2026-09-30 (Marcus): (a) N
+# deposition from the emissions proxy (data/forcing_ndep.rds) as a RETENTION FLUX
+# (ruled 09-30 m; it replaced an NPP multiplier whose sink tracked d(ndep)/dt -- the
+# first D2 screen, alignment_screen_d2_*, ran THAT form and is its record); (b) NPP
+# temperature sensitivity, SIGN-FREE prior; (c) not built. Predictions P-D2-1..5
+# registered in the prereg (61fd1b3) BEFORE any D2 run. Both are EXTRA COORDINATES
+# carrying their ruled priors in the space the refit will fit them in: ndep_ret on LOG
+# scale, prior N(log centre, NDEP_RET_PRIOR_LOGSD) there (= a lognormal with its
+# log-Jacobian); npp_tsens on the identity scale, prior N(0, NPP_TSENS_PRIOR_SD).
 AS_ARMS$DN   <- list(fert = FALSE, npp = FALSE, npp0 = FALSE, ndep = TRUE)
 AS_ARMS$DT   <- list(fert = FALSE, npp = FALSE, npp0 = FALSE, tsens = TRUE)
 AS_ARMS$DNT  <- list(fert = FALSE, npp = FALSE, npp0 = FALSE, ndep = TRUE, tsens = TRUE)
 AS_ARMS$DNTb <- list(fert = FALSE, npp = FALSE, npp0 = FALSE, ndep = TRUE, tsens = TRUE,
                      imb = "smooth", cement = TRUE)          # + D3 as ruled (smooth + cement)
-AS_NDEP_CENTRE <- ccx_const("GAMMA_NDEP_PRIOR_R") * 1e-3 / ccx_const("NPP_GLOBAL_PI")   # per Tg N/yr
-AS_NDEP_LOGSD  <- ccx_const("GAMMA_NDEP_PRIOR_LOGSD")
+AS_NDEP_CENTRE <- ccx_const("NDEP_RET_PRIOR_CENTRE")        # kg C retained per kg N on land
+AS_NDEP_LOGSD  <- ccx_const("NDEP_RET_PRIOR_LOGSD")
 AS_TSENS_SD    <- ccx_const("NPP_TSENS_PRIOR_SD")
 AS_NDEP_WIN    <- c(1990L, 2023L)        # window for the implied sink per unit N
 AS_NDEP_GATE   <- c(0.6, 8.7)            # kg C per kg N, land mean (lit note sec. 2a(iv)); P-D2-2
@@ -172,7 +174,7 @@ emis <- function(s) { if (!AS_SPLICE[[s]]) return(NULL); e <- ccx_scenario_emiss
   rbind(hist_em, e[e$year > max(hist_em$year), c("year", "fossil_GtC", "luc_GtC")]) }
 params_of <- function(u, npp0 = 1, ra = 0, d2 = NULL) { set_npp0(npp0); pv <- ccx_unc_to_par(u)
   p <- ccx_overlay_par(bp0, pv); p$ra_ratio <- ra
-  for (n in names(d2)) p[[n]] <- d2[[n]]                     # D2: gamma_ndep, npp_tsens
+  for (n in names(d2)) p[[n]] <- d2[[n]]                     # D2: ndep_ret, npp_tsens
   list(p = p, pv = pv) }
 score <- function(u, npp0 = 1, keen_c = NULL, ra = 0, d2 = NULL) {
   q <- params_of(u, npp0, ra, d2); p <- q$p; pv <- q$pv
@@ -224,7 +226,7 @@ pen_fert <- function(pv) stats::dnorm(gain(pv$beta_max, pv$fert_k, KEEN_C[[1]], 
                          stats::dnorm(gain(pv$beta_max, pv$fert_k, AS_G564[["c0"]], AS_G564[["c1"]]), AS_G564[["mean"]], AS_G564[["sd"]], log = TRUE)
 
 # D2 (a): the model's N-deposition SINK per unit N over AS_NDEP_WIN -- the fitted vector's
-# residual land sink minus the SAME vector's with gamma_ndep 0, over the mean land deposition
+# residual land sink minus the SAME vector's with ndep_ret 0, over the mean land deposition
 # of the window (data/forcing_ndep.rds, "historical"). kg C per kg N = Tg C per Tg N.
 ndep_sink_per_n <- function(u, s, ra, d2) {
   run_land <- function(dd) {
@@ -232,7 +234,7 @@ ndep_sink_per_n <- function(u, s, ra, d2) {
     F <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14, bomb_total_kmol = q$pv$bomb_total,
                            luc_scale = q$pv$luc_scale, enso_index = ccx_enso_index_of(q$p), aod_mode = ccx_aod_mode_of(q$p))
     r <- ccx_run_fast(sp, F); r$F <- F; set_npp0(1); dg_annual_sinks(r) }
-  d0 <- d2; d0[["gamma_ndep"]] <- 0
+  d0 <- d2; d0[["ndep_ret"]] <- 0
   a1 <- run_land(d2); a0 <- run_land(d0)
   k  <- a1$year >= AS_NDEP_WIN[1] & a1$year <= AS_NDEP_WIN[2]
   nd <- readRDS(ccx_path("data", CCX_NDEP_FILE)); nd <- nd[nd$scenario == "historical" & nd$year >= AS_NDEP_WIN[1] & nd$year <= AS_NDEP_WIN[2], ]
@@ -264,11 +266,11 @@ one <- function(nm) {
   k_ra <- if (isTRUE(arm$ra)) nF + as.integer(arm$npp0) + 1L else NA_integer_
   k_im <- if (!is.null(arm$imb)) nF + as.integer(arm$npp0) + as.integer(isTRUE(arm$ra)) + 1:2 else NA_integer_
   im_of <- function(x) if (!is.null(arm$imb)) stats::plogis(x[k_im]) else NULL        # (s_land, rest)
-  # D2 coordinates after everything else: [log gamma_ndep], [npp_tsens]
+  # D2 coordinates after everything else: [log ndep_ret], [npp_tsens]
   k0_d2 <- nF + as.integer(arm$npp0) + as.integer(isTRUE(arm$ra)) + 2L * as.integer(!is.null(arm$imb))
   k_nd <- if (isTRUE(arm$ndep)) k0_d2 + 1L else NA_integer_
   k_ts <- if (isTRUE(arm$tsens)) k0_d2 + as.integer(isTRUE(arm$ndep)) + 1L else NA_integer_
-  d2_of <- function(x) c(if (isTRUE(arm$ndep)) c(gamma_ndep = exp(x[k_nd])),
+  d2_of <- function(x) c(if (isTRUE(arm$ndep)) c(ndep_ret = exp(x[k_nd])),
                          if (isTRUE(arm$tsens)) c(npp_tsens = x[k_ts]))
   pen_d2 <- function(x) (if (isTRUE(arm$ndep)) stats::dnorm(x[k_nd], log(AS_NDEP_CENTRE), AS_NDEP_LOGSD, log = TRUE) else 0) +
                         (if (isTRUE(arm$tsens)) stats::dnorm(x[k_ts], 0, AS_TSENS_SD, log = TRUE) else 0)
@@ -366,7 +368,7 @@ if (length(d2a)) {
   ref_common <- sum(ref_st[setdiff(names(ref_st), c("npp_modern", AS_IMB_ROWS))])
   zK2c <- (sc_ctrl[["ssp585_dL2122"]] - AS_KOVEN$mean[2]) / AS_KOVEN$sd[2]
   cat("\n=== D2 ARMS (non-CO2 land-sink drivers, as ruled; predictions P-D2-1..5 registered at 61fd1b3) ===\n")
-  cat(sprintf("  priors: gamma_ndep lognormal centre %.3g per Tg N/yr, log-sd %.2f; npp_tsens N(0, %.4f) per K\n",
+  cat(sprintf("  priors: ndep_ret lognormal centre %.2f kg C/kg N, log-sd %.2f; npp_tsens N(0, %.4f) per K\n",
               AS_NDEP_CENTRE, AS_NDEP_LOGSD, AS_TSENS_SD))
   cat(sprintf("  control: enh(%d) %.4f, q10 %.3f, NPP 2001-23 %.2f, Koven z(2100-2200) %.2f, SSP5-8.5 2300 %.1f\n",
               AS_ENH_C, enh_c, sc_ctrl[["q10"]], sc_ctrl[["npp_modern"]], zK2c, sc_ctrl[["ssp585_co2_2300"]]))
@@ -374,13 +376,13 @@ if (length(d2a)) {
     e_a <- enh(r$score[["beta_max"]], r$score[["fert_k"]], AS_ENH_C)
     zK2 <- (r$score[["ssp585_dL2122"]] - AS_KOVEN$mean[2]) / AS_KOVEN$sd[2]
     # `[[` on a named NUMERIC errors on a missing name (it does not return NULL)
-    gN  <- if ("gamma_ndep" %in% names(r$d2)) r$d2[["gamma_ndep"]] else NA_real_
+    gN  <- if ("ndep_ret" %in% names(r$d2)) r$d2[["ndep_ret"]] else NA_real_
     tS  <- if ("npp_tsens" %in% names(r$d2)) r$d2[["npp_tsens"]] else NA_real_
     cmp <- if (is.null(r$spec$imb)) sprintf("d_ll record %+7.2f", r$loglik_record - ref_rec)
            else sprintf("d_ll COMMON %+7.2f (own %+7.2f; s_land %.3f s_ocean %.3f)", r$loglik_common - ref_common,
                         r$loglik_record - ref_rec, r$imb_share[["land"]], r$imb_share[["ocean"]])
-    cat(sprintf("  %-5s %s | prior pen %+6.2f | gamma_ndep %s, npp_tsens %s\n", r$arm, cmp, r$pen_d2,
-                if (is.na(gN)) "-" else sprintf("%.3g (%.2f sd from centre)", gN, (log(gN) - log(AS_NDEP_CENTRE)) / AS_NDEP_LOGSD),
+    cat(sprintf("  %-5s %s | prior pen %+6.2f | ndep_ret %s, npp_tsens %s\n", r$arm, cmp, r$pen_d2,
+                if (is.na(gN)) "-" else sprintf("%.2f kg C/kg N (%.2f sd from centre)", gN, (log(gN) - log(AS_NDEP_CENTRE)) / AS_NDEP_LOGSD),
                 if (is.na(tS)) "-" else sprintf("%+.4f /K (%.2f sd)", tS, tS / AS_TSENS_SD)))
     cat(sprintf("        enh(%d) %.4f (%+.1f %%), beta %.3f K %.0f, q10 %.3f, luc %.4f, NPP 2001-23 %.2f (%+.2f), Koven z(2100-2200) %.2f, SSP5-8.5 2300 %+.1f ppm; conv %d evals %d\n",
                 AS_ENH_C, e_a, 100 * (e_a / enh_c - 1), r$score[["beta_max"]], r$score[["fert_k"]], r$score[["q10"]], r$score[["luc_scale"]],
@@ -392,7 +394,7 @@ if (length(d2a)) {
     v <- c()
     if (isTRUE(r$spec$ndep)) {
       v[["P-D2-1 enh(410) falls"]] <- e_a < enh_c
-      v[["P-D2-2 gamma in prior 2sd AND sink/N in gate"]] <- abs(log(gN) - log(AS_NDEP_CENTRE)) <= 2 * AS_NDEP_LOGSD &&
+      v[["P-D2-2 ndep_ret in prior 2sd AND sink/N in gate"]] <- abs(log(gN) - log(AS_NDEP_CENTRE)) <= 2 * AS_NDEP_LOGSD &&
         r$ndep_sink[["kgC_per_kgN"]] >= AS_NDEP_GATE[1] && r$ndep_sink[["kgC_per_kgN"]] <= AS_NDEP_GATE[2]
       v[["P-D2-3 NPP rises < 1 GtC/yr"]] <- (r$score[["npp_modern"]] - sc_ctrl[["npp_modern"]]) < AS_PD2_NPP_MAX
       if (!isTRUE(r$spec$tsens) && is.null(r$spec$imb)) v[["P-D2-5 Koven z stays > 1.5"]] <- zK2 > AS_PD2_KOVEN2
