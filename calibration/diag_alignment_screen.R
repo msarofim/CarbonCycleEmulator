@@ -68,13 +68,22 @@ AS_NPP0_BOUNDS <- c(0.70, 1.10)   # NPP_GLOBAL_PI scale box for J3/J4 (the 09-29
 AS_ARMS <- list(J1 = list(fert = TRUE,  npp = FALSE, npp0 = FALSE),
                 J2 = list(fert = TRUE,  npp = TRUE,  npp0 = FALSE),
                 J3 = list(fert = TRUE,  npp = TRUE,  npp0 = TRUE),
-                J4 = list(fert = FALSE, npp = TRUE,  npp0 = TRUE))
+                J4 = list(fert = FALSE, npp = TRUE,  npp0 = TRUE),
+                # + 09-30 (g), added while J1-J4 ran: the FUTURE only reached Koven's band with
+                # literature fertilisation AND q10 2.0 (09-29 v B, FROZEN); these price that
+                # combination on the record. q10 PINNED at its prior centre (2.0), not penalised.
+                J5 = list(fert = TRUE,  npp = FALSE, npp0 = FALSE, pin = c(q10 = 2.0)),
+                J6 = list(fert = TRUE,  npp = TRUE,  npp0 = TRUE,  pin = c(q10 = 2.0)))
+AS_ONLY   <- Sys.getenv("AS_ONLY", "J1,J2,J3,J4")          # which arms this process runs
+AS_ARMS   <- AS_ARMS[strsplit(AS_ONLY, ",")[[1]]]
+stopifnot(!anyNA(names(AS_ARMS)))
 AS_MAXIT  <- 3000L
 AS_ID_TOL <- 1e-3                 # the label vs the proxy share differ by 2e-5 in f; the (v) D cost of f 0 -> 0.195 was 4.4
 AS_CORES  <- 4L
 AS_SPLICE <- c(ssp585 = FALSE, vvH = TRUE)
 AS_SMOKE  <- identical(Sys.getenv("AS_SMOKE"), "1")
 if (AS_SMOKE) { AS_TAG <- paste0(AS_TAG, "_smoke"); AS_MAXIT <- 10L; AS_ARMS <- AS_ARMS["J3"] }
+AS_TAG    <- paste0(AS_TAG, Sys.getenv("AS_TAG_SUFFIX", ""))
 AS_OUT    <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", AS_TAG, AS_DATE))
 COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
 DIRTY     <- tryCatch(length(system("git status --porcelain -- R src data calibration", intern = TRUE)) > 0, error = function(e) NA)
@@ -164,17 +173,22 @@ pen_fert <- function(pv) stats::dnorm(gain(pv$beta_max, pv$fert_k, KEEN_C[[1]], 
 one <- function(nm) {
   arm <- AS_ARMS[[nm]]
   lp <- ccx_make_logpost(base_params = base_params(arm$npp), by_stream = TRUE)
+  # PINNED names (J5/J6): set in the start vector and removed from the free set
+  u_start <- u_ctrl
+  if (!is.null(arm$pin)) { pv0 <- as.list(ccx_unc_to_par(u_ctrl)); for (n in names(arm$pin)) pv0[[n]] <- arm$pin[[n]]
+    u_start <- ccx_par_to_unc(unlist(pv0)[md$param_names]) }
+  iF <- match(setdiff(AS_FREE11, names(arm$pin)), md$param_names)
   obj <- function(x) {
-    u <- u_ctrl; u[iF] <- x[seq_along(iF)]
+    u <- u_start; u[iF] <- x[seq_along(iF)]
     s <- if (arm$npp0) AS_NPP0_BOUNDS[1] + diff(AS_NPP0_BOUNDS) * stats::plogis(x[length(x)]) else 1
     set_npp0(s); w <- lp(u); set_npp0(1)
     if (!is.finite(w)) return(1e12)
     pen <- if (arm$fert) pen_fert(ccx_unc_to_par(u)) else 0
     -(as.numeric(w) + pen)
   }
-  x0 <- c(u_ctrl[iF], if (arm$npp0) stats::qlogis((1 - AS_NPP0_BOUNDS[1]) / diff(AS_NPP0_BOUNDS)))
+  x0 <- c(u_start[iF], if (arm$npp0) stats::qlogis((1 - AS_NPP0_BOUNDS[1]) / diff(AS_NPP0_BOUNDS)))
   o <- stats::optim(x0, obj, method = "Nelder-Mead", control = list(maxit = AS_MAXIT))
-  u <- u_ctrl; u[iF] <- o$par[seq_along(iF)]
+  u <- u_start; u[iF] <- o$par[seq_along(iF)]
   s <- if (arm$npp0) AS_NPP0_BOUNDS[1] + diff(AS_NPP0_BOUNDS) * stats::plogis(o$par[length(o$par)]) else 1
   set_npp0(s); l1 <- lp(u); set_npp0(1)
   st <- attr(l1, "streams"); rec <- as.numeric(attr(l1, "loglik")) - (if ("npp_modern" %in% names(st)) st[["npp_modern"]] else 0)
