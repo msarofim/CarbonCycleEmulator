@@ -2,6 +2,41 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-29 (u) — **Futures at τ 2000–5000, fixed stock (handoff item 2). Taking Shi 2020's soil Δ¹⁴C at face value (τ ≈ 2000–3000, z +1.8 / +0.4) raises SSP5-8.5 2300 by +137 / +153 ppm (vvH +81 / +92, vvL +11 / +14). The lever SATURATES, as the retention weight predicts.**
+
+Handoff item 2, run as a diagnostic (no ruling needed, nothing adopted).
+- **Driver:** `diag_tau_soil_slow_futures.R` gains `TF_ROWS` / `TF_OUT_SUFFIX` env overrides and a
+  `profile_conv` column (`1aa4dc2`; defaults unchanged). Run from a frozen worktree with
+  `TF_PROFILE_TAG=tau_soil_slow_profile_fixedstock TF_ROWS=500,1000,1500,2000,3000,5000
+  TF_OUT_SUFFIX=_ext` → `outputs/diagnostics/tau_soil_slow_futures_fixedstock_ext_20260929.{log,csv}`.
+- **Identity:** stored v0k ssp585 2300 = 1388.28 ppm. **Regression:** the 500/1000/1500 rows are
+  identical (all 29 shared numeric columns, max |d| 0) to the shipped `_fixedstock` CSV of (r).
+
+| τ_slow | Δ logpost | soil Δ¹⁴C z vs Shi (s) | ssp585 2300 | vvH 2300 | vvL 2300 | vvH 2100 | land ×PI (ssp585) |
+|---|---|---|---|---|---|---|---|
+| 500 | 0 | +4.7 | 1387.9 | 957.9 | 336.9 | 639.0 | 1.63 |
+| 1000 | −1.2 | +3.5 | +67.7 | +39.9 | +5.4 | +4.6 | 1.54 |
+| 1500 | −2.4 | +2.6 | +112.4 | +65.9 | +8.8 | +8.0 | 1.49 |
+| 2000 | −3.8 | +1.8 | **+137.4** | +80.7 | +10.9 | +9.8 | 1.46 |
+| 3000 | −6.4 (maxit) | +0.4 | **+153.0** | +91.5 | +13.6 | +10.8 | 1.45 |
+| 5000 | −16.8 | −1.7 | +182.3 | +109.2 | +16.2 | +13.4 | 1.42 |
+
+- **Pre-check (made before the run):** at fixed stock the retention weight is
+  25·(1 − e^(−550/τ)) = 16.7 / 10.6 / 7.7 / 6.0 / 4.2 / 2.6. Scaling the 1000/1500 slope
+  (~11–12.5 ppm per unit) predicted **~+130 / +155 / +175** at 2000 / 3000 / 5000. Measured
+  +137 / +153 / +182, so the result is within ~5 % and the mechanism is the (r) retention loss.
+  The lever **saturates**: half of the 5000-yr effect (+91) is already reached at τ ≈ 1250 (interpolated).
+- **Reading:** if soil ¹⁴C is taken at face value (Shi/He, little inert carbon), the future at
+  SSP5-8.5 2300 moves +140–150 ppm for −4 to −6 log units of atmospheric-record cost. That is
+  about 10 % of the 2300 level, and it lies mostly in the high scenarios (vvL ≤ +14 ppm; 2100 ≤ +11).
+  If Copard is right, there is no constraint and τ 500 is as good as any.
+- **The land ×PI multiple is at a MATCHED PI stock here** (the fixed-stock mode holds it), so
+  unlike (o) the 1.63 → 1.42 fall is a real reduction in relative uptake, not a denominator
+  effect. That is relevant to handoff item 5 (Koven).
+- ⚠ The τ 3000 profile row hit maxit, so its Δ logpost is an upper bound on the cost, and its
+  future inherits a not-fully-rebalanced vector.
+- **Still Marcus's call:** handoff items 1 (the τ_slow prior: a/b/c), 3 (structure), 4 (NPP) and 5.
+
 ## 2026-09-29 (t) — Handoff: `notes/handoff_2026-09-29_passive_soil.md` (the NPP₀ residence rescan and the passive-soil arc, m–s). Nothing running; no worktrees besides `main`.
 
 ## 2026-09-29 (s) — **T2, soil Δ¹⁴C against Shi 2020. The default τ 500 is TOO YOUNG on Shi's bulk (−19 ‰ vs −244 ± 48, z +4.7); a match needs τ ≈ 2000–5000 at fixed stock. BUT that reading assumes NO radiocarbon-free soil carbon. The two aOC-robust yardsticks have almost no POWER, so the verdict rests entirely on the Shi/He vs Copard dispute.**
