@@ -2,6 +2,157 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (p) — **Refit infrastructure, step 1, BUILT. The four D2/D3 names enter the fitted set through a LABEL GATE, and the new label `hilda_csl3v0kaidgb` opens it (objective #14; the name awaits Marcus). Every registered mode is bit-exact, so nothing needs restamping. The refit path (driver, port targets, promoter, Hessian, restamp) is gate-aware and smoke-tested under the new label. Two launch questions remain for Marcus: how to disperse `npp_tsens`, and the reference set.**
+
+Commits `0a4daf6`, `7201852`, `8a5cdc2`, `b67f91c` (+ this entry). Plan: `notes/handoff_2026-09-30c_d2d3_built.md` §3 step 1.
+
+**The design: a gate, not four table entries pinned under every older label.** The objective is the same
+either way: a held name has no prior term and no Jacobian, and the model reads its base value (0 = OFF).
+What differs is what every existing consumer sees.
+- As entries of `CCX_PARAM_TABLE`, every registered file would LACK them. The `w_eq` precedent (migrate 0,
+  then seed the unencodable value at init) would put `ndep_ret` at 3.9 and the shares at 1/3 and 1/2 IN
+  THE MODEL. Unlike `w_eq`'s cell, these four act under every label, so the seeded vector is a different
+  model and every "stored streams reproduce" test would move.
+- Pinning them under every older label instead would touch every registered-file scoring site (~15 test
+  files, ~24 `diag_*` scripts; a read-only survey this session),
+  every registered pin set, `ccx_ms_reference_set()`'s exact-match branches, and push outdir names to
+  ~245 of the 255-character limit.
+- So `CCX_PARAM_GATED` holds the four entries. `ccx_apply_gate(struct)` appends them to the table only for
+  a structure whose block carries `d2d3_free = 1`; `ccx_unapply_gate()` undoes it. **The default table is
+  today's 38 names, so every older objective, file, pin record, port target and output label is untouched
+  by construction.** This is the handoff's "every older label must PIN all four at 0", implemented as a
+  per-label hold.
+- ⛔ **The failure a gate invites** is an open label scored without the gate, which would run D2/D3 OFF and
+  call it a fit. Guards:
+  - `ccx_make_logpost()` refuses both mismatches by name, when built AND on every draw;
+  - `ccx_gate_require()` in `ccx_mode_start()`, `ccx_load_mode()`, `ccx_require_param_set()` and
+    `ccx_check_mode_decode()`;
+  - `ccx_overlay_par()` overlays the gated MODEL names by the BASE's structure, and refuses an open-label
+    vector on a holding base.
+- **Absent-name tolerance is DYNAMIC** (`ccx_param_absent_ok(md)`): only while the gate is open, and only
+  for a file whose own structure holds it (an open-label START from an older file: filled 0, then seeded
+  where 0 does not encode). `CCX_PARAM_ABSENT_OK` stays static, because `test-param-absent-ok.R`
+  requires every listed name to be fitted.
+
+**The table entries** (priors as ruled 09-30 l/m, read from `R/constants.R`; inits tied to their sources by test):
+
+| name | tr | prior | init |
+|---|---|---|---|
+| `ndep_ret` | log | lognormal, centre 3.9, log-sd 0.67 | 3.9 (the centre) |
+| `npp_tsens` | id | N(0, 0.0291) /K | 0 |
+| `imb_share_land` | logit [0, 1] | Beta(1, 2) | 1/3 |
+| `imb_share_ocean_rest` | logit [0, 1] | U(0, 1) | 1/2 |
+
+- The two share priors are the FLAT simplex through the stick-breaking map. The test reads the table,
+  not a restatement.
+- The inits are the flat simplex's centroid, not the screen's optimum.
+
+**The label** (`ccx_struct_hilda_csl3v0kaidgb()`) = kai's block + `d2d3_free = 1` + the ruled I(t)
+RECORDED as `imb_treatment` (a numeric code, `LIK_IMB_TREATMENT_CODES`) and `imb_with_cement = 1`.
+- The logpost refuses a draw whose `LIK_IMB_*` globals disagree with the label: a label means one objective.
+- **Objective #14** = #13 + the D3 rows' moved targets + the four priors (+ the shares' logit Jacobians),
+  and it exists only under this label.
+- ⚠ The name is the handoff's suggestion (d = N retention, g = greening, b = budget). It is Marcus's call.
+
+**Verification** (`test-gated-params.R`, 6 tests / 88):
+- **OFF-identity:** the open label with all four PINNED at 0 equals kai, bit for bit (streams and logpost).
+- **Screen identity:** at the D2/D3 screen's DNTb vector the label reproduces the screen's 26 streams
+  exactly (max |d| = 0; loglik −1373.015081). The logpost = the screen's objective + the shares' Beta(1,2)
+  × U prior and logit Jacobians (the screen maximised the shares' likelihood). The table path wires the
+  four names to the same model and rows as the screen's `base_params` path.
+- **Wiring is live:** at that vector, shares → 0 moves `gcb_land_sink` −53.5 → −73.2; `ndep_ret` → 0 moves
+  the likelihood by −551.
+- Migration and seeding for an open-label start; the gate round-trips the table exactly; a pinned gated
+  name returns to its place; the four label ledgers are extended (see below).
+- **Objective #14 moves no registered mode** (`diag_obj14_registered_bitexact.R`,
+  `obj14_registered_bitexact_20260930.log`):
+  - `hilda29l` / `hilda32f` / `hilda31s2` / `hilda31pe` re-scored by the restamp tool's own path;
+  - streams `identical()` 4/4, |d logpost| = 0 after the start shift;
+  - ⇒ **nothing to restamp.** Mutation: a 1e-4 /K `npp_tsens` in the objective fails it (0/4, 0.231).
+
+**Mutation table** (each applied alone to `R/calibrate.R`, `test-gated-params.R` re-run, restored from git):
+
+| mutation | FAIL |
+|---|---|
+| G1 guard: open branch off | 2 |
+| G2 guard: holding branch off | 2 |
+| G3 no per-draw check | 2 |
+| G4 gated names appended reversed | 4 |
+| G5 migration fills 1 | 3 |
+| G6 share prior Beta(1,1) | 2 |
+| G7 label without the flag | 18 + 4 errors |
+| G8 no I(t) check | 2 |
+| G9 `ndep_ret` log-sd 0.5 | 2 |
+| G10 `.CCX_PARAM_ORDER` without the gated names | 1 |
+| G11 unapply a no-op | 4 + 4 errors |
+| G12 no gate hint in `ccx_mode_start()` | 1 |
+| G13 (then) the static ABSENT_OK list without them | 1 + 2 errors |
+| G14 `npp_tsens` prior centre 0.01 | 3 |
+
+**The refit path, gate-aware** (the gate is applied from the structure BEFORE the pins, everywhere):
+- `run_dispersed_multistart.R` and `make_port_targets.R`, from `CCX_MS_STRUCT`. A holding label is a
+  no-op, so every older array is the run it was.
+- `promote_multistart_mode.R`, from the starts' recorded `struct`. ⚠ **GATE 5's hand-built streams were
+  missing three things, now fixed:**
+  - the structure's `enso_index` / `aod_mode` (a PRE-EXISTING defect: every aod-anomaly label, `ka` and
+    everything chained from it, would have STOPPED at promotion);
+  - the D3 shares;
+  - the `npp` row.
+- `recompute_hessian.R`, `restamp_mode_objective.R`: from the file's `struct`.
+- **Loaders:**
+  - `dg_vector` and `ccx_load_mode` are converted to `ccx_overlay_par()` on touch (Ruling B;
+    `OI_BASELINE_N` 61 → 59, `lib_design_gates.R` off the baseline);
+  - `dg_streams` and `ccx_load_mode`'s `err` carry the fitted shares;
+  - `dg_run`'s forcing carries the structure's enso/aod.
+
+**Run inputs:** `data/forcing_ndep.rds` joins `CCX_RUN_INPUTS` (absent, an `ndep_ret` ≠ 0 run would stop at
+its first draw, after the wall budget started).
+
+**Smoke under the new label** (worktree `~/ccx_frozen/20260930p_dgb_smoke` at `8a5cdc2`; canonical 9 pins; seas_ml 1):
+- **Port targets:** 33 free names. Cold −62,902.7; the incumbent `hilda29l` (seeded) −12,149.8; the new
+  basin `hilda31pe` −12,163.0.
+- **Preflight ids 0–11: all LAUNCHABLE**, port verified to ~1e-15. Dispersed starts at −2e5 to −1.4e7,
+  the same range as the 09-28c array's (−1.5e5 to −1.5e7).
+- **Promoter:** on a SYNTHETIC start (the DNTb vector in a real 09-28c start file; scratch, not a
+  record), GATES 1–5 pass. GATE 5's gap is 9.9e-14; without the shares fix it fails at 21.1.
+- **Hessian:** its GATE 1 passes (diff 0); stopped at 90 s by design.
+- The first smoke caught a character block field breaking the driver's banner ⇒ the numeric code above.
+
+**Found, and put to Marcus rather than resolved (launch design, step 2):**
+- ⚠ **`npp_tsens` dispersion.**
+  - The driver disperses EVERY coordinate at one u-space sd (1.0452 in the 09-28 arrays). For
+    `npp_tsens` that is 36 prior sds.
+  - At the DNTb vector, a 1-sd move in `npp_tsens` ALONE costs −4.5e5 / −8.9e5. That is ~10× the stiffest
+    existing coordinate (`q10` −5.6e4 / −4.6e4) and ~12× `grad_off_d13c` (−3.8e4). `ndep_ret` costs −230 /
+    −1890; the shares −1 to −5.
+- **The reference set.** With the canonical's pins, the new label starts from `hilda29l` (φ 0.5) and
+  `hilda31pe`, both seeded, as 09-28b/c did (there, 7 of 24 starts converged inside 5 h at 29 names). A
+  closer φ = 0 start (the 09-28c basin) would need registering, or a reference-set branch.
+- `dg_run` still cannot score a vector with `ndep_ret` ≠ 0:
+  - `DG_YEARS` runs to 2025 (RULED 09-12, the forcing-held year);
+  - the historical N-deposition series ends in 2024;
+  - `ccx_ndep_forcing()` refuses partial coverage BY DESIGN (`test-ndep.R` ACCESSOR).
+  It is loud, not silent. The fix (hold the last year flat, as GMST/emissions are) changes a pinned
+  contract, so it waits for the refit-reading step.
+
+**Full suite** at `7201852` on a frozen copy (`~/ccx_frozen/suite_20260930p`; `suite_20260930_post7201852.log`):
+**[FAIL 1 | WARN 230 | SKIP 5 | PASS 5414]**.
+- The one failure is the NAMED RED, `test-mode-file.R:323` (dAIC +4.18, unchanged).
+- The two skips beyond the usual three are the COPY's: it leaves out `data-raw/downloads` bar `nuclear14c`
+  (the OSCAR workbook, the GLODAP isotope subset). In the tree `test-luc-nh-share` (22) and
+  `test-sigma-inflation` (26) pass with no skip.
+- PASS 5336 → 5414 = the new file (84 at that commit) + the label-looping ledgers, less the skipped
+  expectations.
+- The later commits are narrow: the I(t) code, the diag, and `lib_run_inputs.R` (14/14 inputs). Re-run at
+  HEAD: gated-params 88, struct-v0, soil-inert, tr-box, constants-batch, app-params-table, mode-struct-lint,
+  imb-alloc, review-0916-fixes, all 0 failures.
+
+**Label ledgers extended** (the handoff's "extend the label ledgers deliberately"):
+- `test-constants-batch.R` and `test-tr-box.R` (`CCX_STRUCT_LABELS`);
+- `test-struct-v0.R` `PRIOR_ON`;
+- ⚠ AND `test-soil-inert.R`, which the handoff did not name: it asserted only kai carries the inert
+  carve-out, and the new label inherits it.
+
 ## 2026-09-30 (o) — Handoff: `notes/handoff_2026-09-30c_d2d3_built.md`. D2 (N retention, sign-free greening) and D3 (smooth + cement) are BUILT, OFF by default, and screened. (c) is not built, as ruled. **Next arc: the refit infrastructure** (four table names, pinned at 0 under every older label; a new structure label; objective #14 and a restamp), then Torch (ask first), then the refit. Nothing is running; all pushed.
 
 ## 2026-09-30 (n) — **The D2 screen on the RULED forms. The record WANTS an N-retention sink near the literature's central value (4–6 kg C/kg N) and spends it on fertilisation (−12 to −19 %) and NPP (−1.9 to −2.8 GtC/yr). Greening fits ≈ 0 again. N retention + D3 together move Koven's 2100–2200 window from z 2.27 to 1.93.**

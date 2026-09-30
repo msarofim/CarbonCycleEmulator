@@ -100,7 +100,14 @@ CCX_RUN_INPUTS <- list(
   list(path    = file.path("data", "forcing_volcanic_aod.rds"),
        kind    = "file", pattern = NULL,
        why     = "the stratospheric AOD forcing behind the diffuse-light fertilisation term (gamma_diff)",
-       symptom = "a quiet stratosphere: Pinatubo's growth anomaly disappears from the transient")
+       symptom = "a quiet stratosphere: Pinatubo's growth anomaly disappears from the transient"),
+  # 2026-09-30 (p): the D2/D3 label fits ndep_ret. Absent, ccx_ndep_forcing() gives zeros
+  # stamped "none" -- harmless at ndep_ret 0, REFUSED by ccx_ndep_check() otherwise, but only
+  # at the first draw, after the wall budget has started. Asserted here, by name, first.
+  list(path    = file.path("data", "forcing_ndep.rds"),
+       kind    = "file", pattern = NULL,
+       why     = "the land N-deposition forcing behind the D2 retention flux (ndep_ret; data-raw/build_ndep_forcing.R)",
+       symptom = "every forcing carries zero deposition stamped 'none'; any run with ndep_ret != 0 stops at ccx_ndep_check()")
 )
 
 #' Stop unless every run-time input is present, naming the one that is not
