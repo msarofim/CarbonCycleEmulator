@@ -32,7 +32,11 @@ TF_PROFILE_TAG <- Sys.getenv("TF_PROFILE_TAG", "tau_soil_slow_profile")
 TF_PROFILE <- ccx_path("outputs", "diagnostics", sprintf("%s_20260929.rds", TF_PROFILE_TAG))
 TF_PREV    <- ccx_path("outputs", "diagnostics", "npp0_scan_20260929.csv")
 TF_PARAM   <- "tau_soil_slow"
-TF_ROWS    <- c(500, 1000, 1500)          # 500 = like-for-like control
+# TF_ROWS (env, comma-separated) overrides the row set; 500 must stay in it (the control)
+TF_ROWS    <- as.numeric(strsplit(Sys.getenv("TF_ROWS", "500,1000,1500"), ",")[[1]])
+stopifnot(TF_ROWS[1] == 500)                # every "vs control" line reads row 1
+# TF_OUT_SUFFIX (env) keeps an extended run from overwriting a shipped output
+TF_OUT_SUFFIX <- Sys.getenv("TF_OUT_SUFFIX", "")
 TF_FREE    <- c("beta_max", "fert_k", "luc_scale", "q10", "seas_T_amp_NH", "seas_T_amp_SH",
                 "seas_lag_p_NH", "seas_lag_p_SH", "npp_frac_NH", "kz", "rep_dC")
 TF_SCEN    <- c("vvH", "vvL", "ssp585")
@@ -42,7 +46,7 @@ TF_END_YEAR <- 2300L
 TF_ID_SSP585 <- 1388.3
 TF_ID_TOL  <- 0.05                          # ppm; the handoff value is printed to 0.1
 if (TF_PROFILE_TAG != "tau_soil_slow_profile") TF_TAG <- paste0(TF_TAG, sub("^tau_soil_slow_profile", "", TF_PROFILE_TAG))
-TF_OUT     <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", TF_TAG, TF_DATE))
+TF_OUT     <- ccx_path("outputs", "diagnostics", sprintf("%s%s_%s", TF_TAG, TF_OUT_SUFFIX, TF_DATE))
 COMMIT     <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
 
 md <- readRDS(ccx_mode_file(TF_MODE)); invisible(ccx_apply_pins(md$pins))
@@ -51,6 +55,7 @@ bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
 bp <- ccx_apply_structure(bp, TF_STRUCT, as.character(md$seas_ml), pump_field = md$pump_field)
 for (n in names(md$pins)) bp[[n]] <- md$pins[[n]]
 prof <- readRDS(TF_PROFILE); pv <- vapply(prof, `[[`, numeric(1), "value"); stopifnot(all(TF_ROWS %in% pv))
+conv <- vapply(prof, function(x) if (is.null(x$conv)) NA_real_ else as.numeric(x$conv), numeric(1))
 prev <- utils::read.csv(TF_PREV, check.names = FALSE); r1 <- prev[prev$scale == 1, ]
 p0 <- as.list(ccx_unc_to_par(md$u_mode)); for (n in TF_FREE) p0[[n]] <- r1[[n]]
 u0 <- ccx_par_to_unc(unlist(p0)[md$param_names])
@@ -89,6 +94,7 @@ for (v in TF_ROWS) {
   b <- bp; for (n in names(ov)) b[[n]] <- ov[[n]]; pr <- ccx_unc_to_par(u); p <- ccx_overlay_par(b, pr)
   f <- futures(p, pr$bomb_total, pr$luc_scale)
   rows[[as.character(v)]] <- data.frame(tau_soil_slow = v, litter_slow_frac = b$litter_slow_frac, d_logpost_profile = x$opt - prof[[which(pv == 500)]]$opt,
+    profile_conv = conv[which(pv == v)],   # 1 = the profile optimiser hit maxit
     t(f), t(unlist(pr[TF_FREE])), check.names = FALSE)
 }
 R <- do.call(rbind, rows); rownames(R) <- NULL
@@ -100,8 +106,8 @@ cat(sprintf("  vectors: %s rows {%s} (500 = control); arm %s; scenarios %s (spli
   basename(TF_PROFILE), paste(TF_ROWS, collapse = ", "), TF_STRUCT, paste(TF_SCEN, collapse = ", "), paste(TF_SPLICE, collapse = "/")))
 cat(sprintf("  [identity] stored v0k ssp585 2300 = %.2f ppm (handoff %.1f; d %+.3f)\n\n", fid[["ssp585_co2_2300"]], TF_ID_SSP585, id_d))
 for (i in seq_len(nrow(R))) with(R[i, ], cat(sprintf(
-  "  tau %4g  dlp %+5.2f | ssp585 2300 %7.1f ppm land x%.2f | vvH 2300 %6.1f | vvL 2300 %6.1f | vvH 2100 %6.1f | luc %.3f kz %5.0f fert_k %4.0f q10 %.3f\n",
-  tau_soil_slow, d_logpost_profile, ssp585_co2_2300, ssp585_land_2300 / ssp585_land_1750, vvH_co2_2300, vvL_co2_2300, vvH_co2_2100,
+  "  tau %4g  dlp %+5.2f%s | ssp585 2300 %7.1f ppm land x%.2f | vvH 2300 %6.1f | vvL 2300 %6.1f | vvH 2100 %6.1f | luc %.3f kz %5.0f fert_k %4.0f q10 %.3f\n",
+  tau_soil_slow, d_logpost_profile, ifelse(isTRUE(profile_conv == 1), " MAXIT", ""), ssp585_co2_2300, ssp585_land_2300 / ssp585_land_1750, vvH_co2_2300, vvL_co2_2300, vvH_co2_2100,
   luc_scale, kz, fert_k, q10)))
 if ("ssp585_slow_1750" %in% names(R)) { cat("\n  passive pool 1750 -> 2300 (ssp585), GtC:\n")
   for (i in seq_len(nrow(R))) cat(sprintf("    tau %4g  %7.0f -> %7.0f  (%+.0f)\n", R$tau_soil_slow[i], R$ssp585_slow_1750[i], R$ssp585_slow_2300[i], R$ssp585_slow_2300[i] - R$ssp585_slow_1750[i])) }
