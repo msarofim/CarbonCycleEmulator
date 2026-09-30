@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-09-30 (a) — Handoff: `notes/handoff_2026-09-30_inert_pool_sink.md` (fixed-stock futures, cheap measurements A–D, inert pool, sink → source). Nothing running; no worktrees besides `main`. Refit WAITS on the open items (Marcus).
+
 ## 2026-09-29 (v) — **The cheap measurements (A–D). (1) τ_slow does not reach the radiocarbon problems: the bomb partition barely moves. (2) A CARVE-OUT inert pool at Copard's central fraction makes Shi's bulk Δ¹⁴C match at τ 500 (z +0.8) for −4.4 and +19 ppm. (3) Lower NPP looks cheap (−8.8 at ~57) only through a q10 < 1 escape; with q10 pinned it costs up to −40, paid by the seasonal cycle. (4) The land never turns source at the FITTED fertilisation; at literature-band fertilisation plus q10 2 it goes neutral by ~2275 and sits inside Koven's spread.**
 
 Marcus: *"Is carve-out the choice that makes sense given the purpose of the inert pool? And run all
