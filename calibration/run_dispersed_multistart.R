@@ -317,6 +317,21 @@ MS_ID <- local({
   n
 })
 
+# ---- PER-COORDINATE DISPERSION OVERRIDES (2026-09-30 p; Marcus: "At its prior sd") ----
+# The shared u-space sd (MS_SPREAD, below) is sized for coordinates whose u-scale is O(1)
+# against their prior. `npp_tsens` (the D2 greening term, tr = "id", prior sd
+# NPP_TSENS_PRIOR_SD = 0.029 /K) is not: at 1.0452 a dispersed start sits 36 prior sds out,
+# and at the D2/D3 screen's DNTb vector a 1-sd move in it ALONE costs 4.5e5-8.9e5
+# log-units, ~10x the stiffest other coordinate (q10, ~5e4; CHANGELOG 09-30 p). RULED:
+# disperse it at its PRIOR sd -- in u-space, which for tr = "id" is the natural sd
+# (asserted). Applied only to names this run FITS (the gate open); printed; recorded in
+# every start file (`spread_by_name`) and REQUIRED in the output directory's name.
+MS_SPREAD_OVERRIDE <- c(npp_tsens = ccx_const("NPP_TSENS_PRIOR_SD"))
+MS_SPREAD_OVERRIDE <- MS_SPREAD_OVERRIDE[names(MS_SPREAD_OVERRIDE) %in% CCX_PARAM_NAMES]
+if ("npp_tsens" %in% names(MS_SPREAD_OVERRIDE) && !identical(CCX_PARAM_TABLE$npp_tsens$tr, "id"))
+  stop("MS_SPREAD_OVERRIDE gives npp_tsens its prior sd as a u-space sd, which holds only under tr = \"id\".")
+MS_SPREAD_LABEL <- if (length(MS_SPREAD_OVERRIDE))
+  paste0("_sdby_", paste(sprintf("%s=%s", names(MS_SPREAD_OVERRIDE), formatC(MS_SPREAD_OVERRIDE, format = "g", digits = 3)), collapse = "_")) else ""
 MS_OUTDIR <- local({
   d <- Sys.getenv("CCX_MS_OUTDIR", NA_character_)
   # ⚠ THE DEFAULT NAMES THE PARAMETER SET, NOT JUST A DATE (2026-09-01k). It
@@ -337,9 +352,16 @@ MS_OUTDIR <- local({
                     if (identical(Sys.getenv("CCX_MS_SEAS_ML", "0"), "1")) "_seasml1" else "",
                     # 2026-09-14 h: the pump field changes the objective too; the directory says it.
                     if (identical(Sys.getenv("CCX_MS_PUMP_FIELD", "solved"), "martin")) "_martin" else "",
-                    ccx_pin_label(MS_PINS)))
+                    ccx_pin_label(MS_PINS),
+                    MS_SPREAD_LABEL))   # 2026-09-30 p: a per-coordinate dispersion override
   else d
 })
+# THE DIRECTORY MUST SAY IT (the seasml1 / _martin precedent): a dispersion that differs by
+# coordinate is a different survey of the same objective. Checked BEFORE the directory exists.
+if (nzchar(MS_SPREAD_LABEL) && !grepl(MS_SPREAD_LABEL, basename(MS_OUTDIR), fixed = TRUE))
+  stop("the dispersion OVERRIDES ", sub("^_sdby_", "", MS_SPREAD_LABEL), " (the D2/D3 gate is open) but the output ",
+       "directory '", basename(MS_OUTDIR), "' does not say so. Append '", MS_SPREAD_LABEL,
+       "' to CCX_MS_OUTDIR (the driver's own default carries it).")
 dir.create(MS_OUTDIR, recursive = TRUE, showWarnings = FALSE)
 MS_OUT  <- file.path(MS_OUTDIR, sprintf("start_%03d.rds", MS_ID))
 MS_CKPT <- file.path(MS_OUTDIR, sprintf("start_%03d_ckpt.rds", MS_ID))
@@ -412,6 +434,9 @@ MS_SPREAD_ALL      <- sqrt(mean((U_NEW - U_INC)^2))   # the diluted value, for t
 # ⚠ RENAMED from MS_SPREAD_ALL25 on 2026-09-03: the build fits 26 and a name
 # carrying a stale count is the label-drift bug the project rule exists to stop.
 MS_SPREAD <- .env_num("CCX_MS_SPREAD", MS_SPREAD_MEASURED)
+# the shared sd, with the per-coordinate overrides (MS_SPREAD_OVERRIDE, defined above MS_OUTDIR)
+MS_SPREAD_VEC <- stats::setNames(rep(MS_SPREAD, length(CCX_PARAM_NAMES)), CCX_PARAM_NAMES)
+MS_SPREAD_VEC[names(MS_SPREAD_OVERRIDE)] <- MS_SPREAD_OVERRIDE
 
 cat(sprintf("\n%s\nDISPERSED MULTI-START, id %d, arm %s, %d parameters\n",
             strrep("=", 70), MS_ID, MS_ARM, length(CCX_PARAM_NAMES)))
@@ -423,6 +448,9 @@ cat(sprintf("  dispersion sd %.4f in u-space (measured per-coordinate RMS betwee
             MS_SPREAD, MS_SPREAD_MEASURED, length(MS_SPREAD_POOL),
             length(CCX_PARAM_NAMES), MS_SPREAD_ALL, length(MS_SPREAD_SKIP),
             if (length(MS_SPREAD_SKIP)) paste(MS_SPREAD_SKIP, collapse = ", ") else "none"))
+if (length(MS_SPREAD_OVERRIDE))
+  cat(sprintf("  dispersion OVERRIDDEN per coordinate (u-space sd): %s\n",
+              paste(sprintf("%s = %.4g", names(MS_SPREAD_OVERRIDE), MS_SPREAD_OVERRIDE), collapse = ", ")))
 cat(sprintf("  out %s\n%s\n", MS_OUT, strrep("=", 70)))
 
 bp <- ccx_default_params(); bp$pump_mode <- MS_ARM
@@ -593,10 +621,12 @@ ms_start <- function(id) {
          "; add the missing one here or raise the floor.")
   set.seed(MS_SEED + id)
   for (k in seq_len(MS_DRAW_TRIES)) {
-    u <- U_COLD + MS_SPREAD * stats::rnorm(length(U_COLD))
+    stopifnot(identical(names(U_COLD), names(MS_SPREAD_VEC)))
+    u <- U_COLD + MS_SPREAD_VEC * stats::rnorm(length(U_COLD))
     names(u) <- CCX_PARAM_NAMES
     if (is.finite(lp_fun(u)))
-      return(list(u = u, kind = sprintf("dispersed about the COLD init, sd %.4f", MS_SPREAD),
+      return(list(u = u, kind = sprintf("dispersed about the COLD init, sd %.4f%s", MS_SPREAD,
+                                        if (length(MS_SPREAD_OVERRIDE)) sprintf(" (%s)", paste(sprintf("%s at %.4g", names(MS_SPREAD_OVERRIDE), MS_SPREAD_OVERRIDE), collapse = ", ")) else ""),
                   draws = k, ref = NA_real_))
   }
   # A dispersed start that cannot find a finite point is a fact about the
@@ -904,6 +934,9 @@ if (MS_PREFLIGHT) {
               if (isTRUE(MS_PORT$checked)) sprintf("VERIFIED rel %.1e (floor %.1e, bound %.1e)", MS_PORT$rel, MS_PORT$floor, MS_PORT$tol)
               else "NOT VERIFIED",
               MS_SEC_PER_EVAL, MS_MAXIT, MS_SEC_PER_EVAL * MS_MAXIT / 60, MS_WALL_MIN))
+  if (length(MS_SPREAD_OVERRIDE))
+    cat(sprintf("             start at the overridden coordinates: %s\n",
+                paste(sprintf("%s = %+.5f", names(MS_SPREAD_OVERRIDE), unlist(ccx_unc_to_par(st$u)[names(MS_SPREAD_OVERRIDE)])), collapse = ", ")))
   if (!isTRUE(MS_PORT$checked))
     stop("PREFLIGHT id ", MS_ID, ": the port is NOT verified, so this task would ",
          "spend its whole budget on an unchecked objective. Fix that before submitting.")
@@ -1098,6 +1131,7 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             # basin" for a difference of -0.0000 [[gate_bound_matches_its_claim]].
             restart_tol = MS_TOL, cycle_tol = MS_CYCLE_TOL,
             seed = MS_SEED + MS_ID, spread = MS_SPREAD,
+            spread_by_name = MS_SPREAD_OVERRIDE,   # the per-coordinate overrides (2026-09-30 p); empty = none
             spread_measured = MS_SPREAD_MEASURED, draws = st$draws,
             # RECORDED **AND** READ by collect_dispersed_multistart.R: which
             # kind of start this was, and what the dispersion was pooled over.
