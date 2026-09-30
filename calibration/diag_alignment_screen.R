@@ -144,9 +144,10 @@ score <- function(u, npp0 = 1, keen_c = NULL) {
   set_npp0(1)
   c(st, npp_modern = mean(n$npp_NH[kn] + n$npp_SH[kn]), npp0 = CONST0$NPP_GLOBAL_PI$value * npp0, sinks,
     soil_d14c_2000 = soil_d14, keenan_c0 = unname(kc[1]), keenan_c1 = unname(kc[2]),
-    g_keenan = gain(b, K, kc[1], kc[2]), g_400_564 = gain(b, K, AS_G564[["c0"]], AS_G564[["c1"]]),
-    g_2x = enh(b, K, 2 * ccx_const("CO2_PI_PPM")), g_4x = enh(b, K, 4 * ccx_const("CO2_PI_PPM")),
-    beta_max = b, fert_k = K, q10 = pv$q10, luc_scale = pv$luc_scale, unlist(fut))
+    # unname(): gain() inherits the year names of its CO2 end-points (smoke 09-30)
+    g_keenan = unname(gain(b, K, kc[[1]], kc[[2]])), g_400_564 = unname(gain(b, K, AS_G564[["c0"]], AS_G564[["c1"]])),
+    g_2x = unname(enh(b, K, 2 * ccx_const("CO2_PI_PPM"))), g_4x = unname(enh(b, K, 4 * ccx_const("CO2_PI_PPM"))),
+    beta_max = unname(b), fert_k = unname(K), q10 = unname(pv$q10), luc_scale = unname(pv$luc_scale), unlist(fut))
 }
 
 # ---- identity + the control's own scorecard ------------------------------------
