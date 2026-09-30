@@ -424,7 +424,9 @@ LIK_GCB_LAND_SD    <- 0.5            # GtC/yr, GCB 2025 stated land-sink 1 sigma
 # as objective #13 scores them, bit for bit; shares (0, 0) are identical too
 # (x + 0 * I is x). Every registered file therefore rescores unchanged.
 #
-# ⚠ PENDING RULINGS (the preview, 09-30 i, prices each; nothing is adopted):
+# RULED 2026-09-30 (l) (Marcus, "Smooth + cement"; the preview 09-30 i and the D3
+# screen 09-30 k priced each option). The shares are still absent from every
+# registered objective; they enter only where a caller supplies them:
 #   LIK_IMB_TREATMENT   how I(t) is built from GCB's annual imbalance:
 #     "raw"    as published. 64 % of its sum of squares is interannual scatter, so
 #              the share it yields is mostly a regression of IAV on IAV (GATE V's
@@ -435,12 +437,13 @@ LIK_GCB_LAND_SD    <- 0.5            # GtC/yr, GCB 2025 stated land-sink 1 sigma
 #     "const"  the mean over every GCB year: a pure level shift.
 #   LIK_IMB_WITH_CEMENT whether GCB's cement-carbonation sink (+0.09 mean, +0.21 in
 #     2015-2024), which the model lacks, is allocated together with the imbalance.
-# The values below are PLACEHOLDERS so the machinery has a definite default; the
-# objective is not changed by them until shares are supplied.
+# RULED: "smooth" WITH cement (+0.67 on the common rows over plain smooth in the D3
+# screen, and the forcing is untouched). The objective is not changed by these
+# until shares are supplied.
 LIK_IMB_TREATMENTS  <- c("raw", "smooth", "const")
-LIK_IMB_TREATMENT   <- "smooth"      # ⚠ PENDING Marcus's ruling (09-30 i)
+LIK_IMB_TREATMENT   <- "smooth"      # RULED 2026-09-30 (l)
 LIK_IMB_SMOOTH_YR   <- 11L           # = the app's APP_LUC_SMOOTH_YR (app/global.R)
-LIK_IMB_WITH_CEMENT <- FALSE         # ⚠ PENDING Marcus's ruling (09-30 i)
+LIK_IMB_WITH_CEMENT <- TRUE          # RULED 2026-09-30 (l)
 
 #' GCB's imbalance as the D3 rows use it: data.frame(year, I), one row per GCB year
 #'
