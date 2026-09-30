@@ -2,7 +2,7 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
-## 2026-09-29 (v) — **The cheap measurements (A–D). (1) τ_slow does not reach the radiocarbon problems: the bomb partition barely moves. (2) A CARVE-OUT inert pool at Copard's central fraction makes Shi's bulk Δ¹⁴C match at τ 500 (z +0.8) for −4.4 and +19 ppm. (3) With q10 free, lower NPP gets cheap only through a q10 < 1 escape; the pinned rerun is below. (4) The land never turns source at the FITTED fertilisation; at literature-band fertilisation plus q10 2 it goes neutral by ~2275 and sits inside Koven's spread.**
+## 2026-09-29 (v) — **The cheap measurements (A–D). (1) τ_slow does not reach the radiocarbon problems: the bomb partition barely moves. (2) A CARVE-OUT inert pool at Copard's central fraction makes Shi's bulk Δ¹⁴C match at τ 500 (z +0.8) for −4.4 and +19 ppm. (3) Lower NPP looks cheap (−8.8 at ~57) only through a q10 < 1 escape; with q10 pinned it costs up to −40, paid by the seasonal cycle. (4) The land never turns source at the FITTED fertilisation; at literature-band fertilisation plus q10 2 it goes neutral by ~2275 and sits inside Koven's spread.**
 
 Marcus: *"Is carve-out the choice that makes sense given the purpose of the inert pool? And run all
 the cheap measurements to get more data."* Earlier in the same exchange: he prefers an inert pool
@@ -69,6 +69,23 @@ warming, with its seasonal term sign-flipped (seas_T_amp × ln q10: +1.46 → �
 shared-q10 escape of memory `q10_recovery_is_escape`; the residence-fixed (k) scan already showed
 q10 0.974 at ×0.75. **Not accepted as an answer until the q10-pinned rerun (below) reports.**
 The residence times wander (τ_leaf 0.46–3.09 yr with no trend), so the ridge is not located.
+- **The q10-pinned rerun** (`..._fixpassive_q10pin1.10151_20260929.*`, `RS_PIN_Q10` = the scale-1
+  value 1.1015; seasonal amplitudes warm-started from the scale-1 row; identity a 4.1e-7; ×0.75–0.85
+  hit maxit, so those costs are UPPER bounds):
+
+| scale | modern NPP | residence fixed | residence free, q10 free | **residence free, q10 pinned** |
+|---|---|---|---|---|
+| 0.90 | 63.8 | −22.0 | −4.6 | **−9.9** |
+| 0.85 | 60.5 | −49.6 | −9.9 | **−22.9** (maxit) |
+| 0.80 | 57.0 | −84.8 | −8.8 | **−39.6** (maxit) |
+| 0.75 | 54.3 | −142.0 | −13.4 | **−77.4** (maxit) |
+
+  ⇒ **The decadal residence times roughly HALVE the cost of a lower NPP, but with q10 held
+  physical the ruled ~56 still costs up to ~−40**, and the payers are now the SEASONAL streams
+  (`co2_seasonal_SPO` −10.7, `d13c_seasonal_MLO` −8.2, `co2_seasonal_MLO` −1.2 at ×0.80). The
+  unpinned −8.8 was bought through the q10 escape. **Neither the passive pool (τ_slow raises NPP;
+  the inert pool exchanges nothing) nor the decadal residence times make the NPP target cheap.**
+  The "named tension" default stands on firmer ground; still Marcus's call.
 
 **D. Carve-out proxy** (`tau_soil_slow_profile_fixedstock_stock{9479,8053,6627}_20260929.*`,
 futures `tau_soil_slow_futures_fixedstock_stock*`, T2 `soil_d14c_shi2020_carve_20260929.*`). An inert
