@@ -23,6 +23,9 @@
 #       <= 2 can overcome (a flip needs q10^(dT/10) > NPP/NPP0). LS_FERT is the
 #       09-28 (c) literature-band point (1.34, 580; notes/lit_2026-09-28_co2_
 #       fert_saturation.md), a HYPOTHESIS from mostly-GPP evidence.
+#   B4  the fertilisation-profile rows ((beta_max, fert_k) pinned in the 09-28 c
+#       band, 9 names REBALANCED incl. q10; diag_fert_profile.R), if
+#       LS_FERT_PROFILE exists (added 2026-09-30).
 # If B2 at q10 2.0 does not flip by 2300, H1 holds for this structure AT THE
 # FITTED FERTILISATION; B2f says whether it holds at the literature's. B3 says
 # what the record charges for the q10 that would.
@@ -48,6 +51,7 @@ LS_CTRL_PROFILE <- ccx_path("outputs", "diagnostics", "tau_soil_slow_profile_fix
 LS_CTRL_VALUE   <- 500
 LS_CTRL_FUT     <- ccx_path("outputs", "diagnostics", "tau_soil_slow_futures_fixedstock_ext_20260929.csv")
 LS_Q10_PROFILE  <- Sys.getenv("LS_Q10_PROFILE", "")
+LS_FERT_PROFILE <- Sys.getenv("LS_FERT_PROFILE", "")
 LS_Q10    <- c(1.5, 2.0)
 LS_FERT   <- if (nzchar(Sys.getenv("LS_FERT"))) setNames(as.numeric(strsplit(Sys.getenv("LS_FERT"), ",")[[1]]), c("beta_max", "fert_k")) else NULL
 LS_FREE   <- c("beta_max", "fert_k", "luc_scale", "q10", "seas_T_amp_NH", "seas_T_amp_SH",
@@ -96,6 +100,10 @@ if (!is.null(LS_FERT)) for (q in c(ctrl$par[["q10"]], LS_Q10)) { pf <- ctrl$par;
 if (!is.null(qp)) { stopifnot(isTRUE(qp[[1]]$control))
   for (x in qp) if (!isTRUE(x$control)) { v <- vec_of(x$over, x$par)
     V[[sprintf("rebal_q10_%.1f", x$value)]] <- c(v, kind = "B3", q10 = x$value, dlp = x$ll1 - qp[[1]]$ll1) } }
+fp <- if (nzchar(LS_FERT_PROFILE)) readRDS(LS_FERT_PROFILE) else NULL
+if (!is.null(fp)) { stopifnot(isTRUE(fp[[1]]$control))
+  for (x in fp) if (!isTRUE(x$control)) { v <- vec_of(x$over, x$par)
+    V[[sprintf("rebal_fert_%s", x$value)]] <- c(v, kind = "B4", q10 = x$par[["q10"]], dlp = x$ll1 - fp[[1]]$ll1) } }
 
 one <- function(nm) {
   v <- V[[nm]]; sp <- ccx_spinup_from_label(ccx_mode_spinup(md))(v$p); out <- list()
@@ -145,6 +153,7 @@ cat(sprintf("  scenarios %s (spliced %s); GtC, ppm, K; net flux = d(land_C)/dt i
   paste(LS_SCEN, collapse = ", "), paste(LS_SPLICE, collapse = "/"), LS_ONSET_FROM, LS_RUNMEAN))
 cat(sprintf("  B2f fertilisation (beta_max, fert_k): %s\n", if (is.null(LS_FERT)) "(none)" else paste(LS_FERT, collapse = ", ")))
 cat(sprintf("  q10 profile: %s\n", if (nzchar(LS_Q10_PROFILE)) LS_Q10_PROFILE else "(none -- B3 not run)"))
+cat(sprintf("  fert profile: %s\n", if (nzchar(LS_FERT_PROFILE)) LS_FERT_PROFILE else "(none -- B4 not run)"))
 cat(sprintf("  [identity] v0k ssp585 2300 %.2f (handoff %.1f); control %.4f vs %s %.4f\n", id_v0k, LS_ID_V0K, id_ctrl, basename(LS_CTRL_FUT), id_ctrl_ref))
 cat("  Koven 2022 SSP5-8.5 (conc.-driven, 2162 ppm in 2300) cumulative land sink: 264+/-172 (2015-2100), -29+/-264 (2100-2200), -178+/-251 (2200-2300) PgC\n\n")
 for (s in LS_SCEN) { cat(sprintf("--- %s ---\n", s))
