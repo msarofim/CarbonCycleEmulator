@@ -115,7 +115,7 @@ harm_ratio <- list()
 for (s in NDEP_SSPS) {
   nox <- harm(rc_series(s, "NOx"), hist_of$NOx[, 1]); nh3 <- harm(rc_series(s, "NH3"), hist_of$NH3[, 1])
   i0 <- which(years_out == NDEP_HIST_LAST)
-  harm_ratio[[s]] <- c(NOx = hist_of$NOx[i0, 1] / rc_series(s, "NOx")[i0], NH3 = hist_of$NH3[i0, 1] / rc_series(s, "NH3")[i0])
+  harm_ratio[[s]] <- c(NOx = unname(hist_of$NOx[i0, 1]) / rc_series(s, "NOx")[i0], NH3 = unname(hist_of$NH3[i0, 1]) / rc_series(s, "NH3")[i0])
   emit[[s]] <- dN(nox, nh3)
 }
 
