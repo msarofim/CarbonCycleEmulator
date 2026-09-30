@@ -121,9 +121,9 @@ All committed and pushed (`0a4daf6` .. the 09-30 (p) CHANGELOG commit).
 - **Frozen trees:**
   - ⛔ `~/ccx_frozen/20260930q_dgb_refit` is the RUNNING WAVE's worktree. Keep it until its outdir is
     copied back.
-  - Disposable: `~/ccx_frozen/suite_20260930p` (the suite copy) and `~/ccx_frozen/20260930p_dgb_smoke`, a
-    git WORKTREE (`git worktree remove --force`). It holds the smoke port targets and a synthetic
-    promoted file, neither a record.
+  - Disposable: `~/ccx_frozen/suite_20260930p` (the suite copy, not a worktree). The smoke worktree
+    `20260930p_dgb_smoke` was removed at the end of the session (scratch only: the smoke port targets,
+    the synthetic promoted file).
 - `carbotopecomment.9.26.26.docx` is Marcus's. Leave it.
 - `outputs/diagnostics/smoke/` stays untracked by convention.
 - **RUNNING:** the 24-start wave (§2). Nothing else.
