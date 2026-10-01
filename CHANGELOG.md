@@ -2,6 +2,163 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (a) — **The objective-#14 refit (`hilda_csl3v0kaidgb`): 24/24 starts converged to one optimum (−1405.249). D4 is NOT resolved: modern NPP 69.6 → 67.7, z +1.50 against 56.1 ± 7.75, a NAMED TENSION as ruled. Fertilisation reshapes (K 872 → 740, β 2.74 → 2.20, enh(410) −7.3 %). SSP5-8.5 2300 CO₂ rises +85 ppm and Koven z(2100–2200) falls 2.27 → 1.85. Decomposed by parameter: the fertilisation shape +67 ppm, N retention −33, the fitted greening term +44, the ocean +11, q10 −4.**
+
+**The wave** (09-30 q). Finished 2026-10-01 02:33 (8 h 51 min). **24/24 CONVERGED in 147–197 min**, none
+at the 300-min wall, 0 non-zero exits. Copied into the repo with its per-task logs, the preflight logs, the
+port targets it ran against and `RUN_PROVENANCE.txt`:
+`calibration/output/multistart_20260930q_hilda_csl3v0kaidgb_…_sdby_npp_tsens=0.0291/`.
+
+**Collector** (`collect_20261001.log`): "2 DISTINCT BASINS" by its cluster radius (0.27 in u-space).
+- Basin 1: 17 starts at −1405.2490 (13 dispersed, the new-basin reference, 2 seeded).
+- Basin 2: 7 starts at −1405.5011 / −1405.5328 (the cold reference, the incumbent, 1 seeded, 4 dispersed).
+- ⚠ **They differ in `h_ml` (49.5 m vs 55.0 / 56.8 m) and in almost nothing else**: every other coordinate
+  is < 0.12 apart in u-space. This is the `h_ml` near-degeneracy the 09-28e φ = 0 array also found, at
+  0.25–0.28 log-units, inside the optimiser's 0.5 bound. It is not a structural second basin.
+- 18 dispersed starts reproduced, and did not beat, the best known basin.
+
+**Promoted** id 10 → `calibration/output/refit_20261001_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds`.
+- GATES 1–5 pass. GATE 4 diff −3.5e-10; GATE 5's independent reconstruction gap 0.000e+00.
+- Logpost −1405.249036; likelihood −1369.1761 on 26 rows; 0 `h_ml` kinks.
+- ⚠ **NOT named and NOT registered**: both are Marcus's call. ADOPTS NOTHING; the canonical is still `hilda29l`.
+
+**The reading** (`diag_obj14_refit_read.R`, `obj14_refit_read_20261001.{log,rds}`, `_decomposition.csv`). The
+control is 09-30 (g)'s alignment control: the 09-28c φ = 0 basin under kai, 11 land names re-fit, the
+reference every D2/D3 screen and prediction was stated against.
+- **Gates:** the screen's `score()`, copied as `score_p()`, reproduces the screen's STORED control
+  scorecard (43 fields) with max relative difference **0**, and its N-sink-per-N at DNTb, **0**.
+- ⚠ **The control → refit change is NOT "what D2/D3 did"**: the refit frees 33 names, the control
+  re-fit 11, and there is no full kai refit to separate them. The decomposition says which PARAMETERS
+  carry the change.
+
+| | control | refit |
+|---|---|---|
+| modern NPP 2001–23 (target 56.06 ± 7.75) | 69.62 (z +1.75) | **67.67 (z +1.50)** |
+| enh(410) | 0.3627 | 0.3362 (−7.3 %) |
+| β_max / K | 2.739 / 872 | **2.205 / 740** |
+| q10 | 1.109 | 1.086 |
+| `luc_scale` | 0.863 | 0.874 |
+| Keenan gain 1981–2020 (0.135 ± 0.035) | 0.152 (z +0.50) | 0.141 (z +0.17) |
+| G564 (0.169 ± 0.062) | 0.254 (z +1.36) | 0.230 (z +0.98) |
+| soil Δ¹⁴C 2000 vs Shi (−244 ± 48) | −206 (z +0.80) | −202 (z +0.88) |
+| land sink − GCB, 1960–2023 / 2010–23 | +0.34 / +0.44 | +0.46 / +0.49 |
+| ocean sink − GCB, 1960–2023 / 2010–23 | +0.07 / +0.02 | −0.01 / −0.07 |
+| SSP5-8.5 CO₂ 2300 | 1406.7 | **1491.6 (+84.9)** |
+| Koven z, 2015–2100 / 2100–2200 / 2200–2300 | +1.29 / +2.27 / +1.59 | +1.04 / **+1.85** / +1.44 |
+| land × PI at 2300 (SSP5-8.5) | 1.60 | 1.52 |
+| vvH CO₂ 2300 | 974.3 | 1024.3 (+49.9) |
+
+(The sink rows compare against GCB's raw columns; D3 moves the targets by s · I(t).)
+
+**The D2/D3 names at the refit:**
+- `ndep_ret` **10.19 kg C/kg N** (prior z +1.44): an implied sink of 0.332 GtC/yr over 1990–2023, **7.03 kg C
+  per kg N**, inside the literature's 0.6–8.7, upper half.
+- `npp_tsens` **−0.0079 /K** (z −0.27).
+- Shares: **s_land 0.593, s_ocean 0.085**, rest 0.322.
+- Prior |z| > 2: q10 −2.44, `kz_deep_frac` −2.79, `rep_dC` +3.29 (the named shim).
+
+**The record:** the COMMON rows gain **+11.17** over the control (`co2_icecore` +6.42, `d14c_NH` +3.28,
+`co2_seasonal_MLO` +2.79; `d13c_level_SPO` −2.72). The two GCB rows gain +12.93, their targets moved by D3.
+
+**Pre-registered predictions** (prereg §4.2, scored at the refit):
+
+| | verdict | value |
+|---|---|---|
+| P-D2-1 enh(410) falls (3–12 % the range) | **PASS** | −7.3 % |
+| P-D2-2 `ndep_ret` within 2σ AND sink/N within 0.6–8.7 | **PASS** | z +1.44; 7.03 |
+| P-D2-3 modern NPP rises < 1 | **PASS** | −1.95 (it FALLS) |
+| P-D2-4 `npp_tsens` > 0 AND q10 rises | **FAIL** | −0.0079; q10 1.109 → 1.086 |
+| P-D2-5 Koven z(2100–2200) > 1.5 (written for (a) ALONE) | PASS | +1.85 |
+
+P-D3-1..4 were written for D3-ALONE arms; reported, not scored: the GCB rows +12.9; enh −7.3 %; s_ocean
+0.085; Δ2300 +84.9 ppm.
+
+**The futures decomposition** (each group swapped both ways; columns SSP5-8.5 CO₂ 2300 ppm / SSP5-8.5 land-C
+2100–2200 GtC / vvH CO₂ 2300 ppm):
+
+| group | add-one | remove-one |
+|---|---|---|
+| FERT (β_max, fert_k) | +68.0 / −87.8 / +36.3 | +66.7 / −84.9 / +36.0 |
+| N retention (`ndep_ret`) | −32.1 / +26.5 / −16.5 | −35.1 / +28.4 / −18.5 |
+| greening (`npp_tsens`) | **+44.0 / −57.5 / +25.0** | +43.1 / −54.8 / +25.1 |
+| OCEAN (13 names) | +10.2 / +0.9 / +6.8 | +11.3 / +0.3 / +7.6 |
+| q10 | −4.0 / +4.5 / −2.4 | −4.4 / +4.6 / −2.7 |
+| `luc_scale` | +1.2 / −0.7 / +1.5 | +1.1 / −0.5 / +1.5 |
+| land seasonal (7) | 0.0 | 0.0 |
+| likelihood-only (7) | **0 exactly** (the check) | 0 |
+| **total** | +84.9 / −110.3 / +49.9 | |
+| sum of add-ones / of remove-ones | +87.2 / +82.7 | |
+
+- ⭐ **The future's move toward Koven is mostly the fertilisation SHAPE**: β falls and K falls (more
+  saturating), ~79 % of the 2300 CO₂ rise.
+- ⭐ **D2's two terms pull in opposite directions in the future.**
+  - N retention is a sink: −33 ppm.
+  - The fitted greening term, −0.0079 /K, is +44 ppm. A small negative NPP sensitivity compounds over
+    SSP5-8.5's warming (7.7 K by 2300 in the coupled run).
+- **The `npp_tsens` lever, measured at the refit** (the other names fixed):
+  - d(CO₂ 2300)/d(`npp_tsens`) ≈ **−55 ppm per +0.01 /K**, near-linear over ±0.029;
+  - the record CONDITIONALLY pins it hard: ±0.0145 costs −140 / −142 and ±0.029 −556 / −570 log-units;
+  - whether it is φ-like MARGINALLY, with β, K, q10 and `ndep_ret` free to compensate, is the Hessian's
+    marginal sd (below).
+- Interactions are small: the add-one and remove-one sums bracket the total within ±2.4 ppm.
+
+**The Hessian** (`recompute_hessian.R --update`, `hessian_20261001.log`, `mode_fit_pumpN_hess.rds`):
+- −H is POSITIVE-DEFINITE, condition number 1.7e6; no pair has |r| > 0.8.
+- Marginal sds:
+  - `npp_tsens` **0.0083 /K**: prior 0.029, conditional 0.00086;
+  - `ndep_ret` ± 5.0 (u-sd 0.49);
+  - `fert_k` ± 153; `beta_max` ± 0.39;
+  - `imb_share_land` ± 0.12;
+  - `imb_share_ocean_rest` ± 0.15 (u-sd 0.93, nearly prior-only, as a flat simplex predicts);
+  - `kz_deep_frac` u-sd 1.02.
+
+**The futures' Laplace spread** (section 6 of the reading). The covariance goes through the gradient of each
+future in u-space (central differences at 0.1 × each marginal sd; likelihood-only names have g = 0 exactly):
+- **SSP5-8.5 CO₂ 2300: 1491.6 ± 39.3 ppm**;
+- SSP5-8.5 land-C 2100–2200 ± 55.8 GtC ⇒ **Koven z(2100–2200) 1.85 ± 0.21** (the model's posterior only;
+  Koven's own sd is 264 GtC);
+- vvH CO₂ 2300 ± 21.8 ppm;
+- the control → refit move (+84.9 ppm) is ~2.2 of these sds.
+
+| name | marginal sd (u) | ridge 1σ on 2300 CO₂ | conditional 1σ | variance share |
+|---|---|---|---|---|
+| `beta_max` | 0.676 | −23.7 | −76.2 | 1.17 |
+| `fert_k` | 0.334 | −23.4 | +33.5 | −0.51 |
+| `npp_tsens` | 0.0083 | **−14.5** | −45.3 | 0.42 |
+| `ndep_ret` | 0.492 | +13.4 | −17.2 | −0.15 |
+| `rep_dC` | 0.266 | −11.0 | 0 | 0 |
+| `u_hs` | 0.241 | −7.3 | −11.4 | 0.05 |
+| `luc_scale` | 0.044 | +7.3 | +4.0 | 0.02 |
+
+(ridge 1σ = the future's move when the name moves one marginal sd and every other name follows its
+conditional expectation. Names with no direct effect, `rep_dC` and the shares, move it only through their
+correlations.)
+
+⭐ **`npp_tsens` is NOT φ-like.**
+- The record tightens it 3.5× against its prior.
+- Along its ridge it moves 2300 CO₂ by −14.5 ppm per sd, a third of its conditional lever, because β, K and
+  `ndep_ret` compensate.
+- The future's spread is led by the fertilisation pair, whose two ridges nearly cancel in the variance (shares
+  +1.17 / −0.51).
+- ⚠ LINEAR (Laplace) about the mode, not a sampled ribbon. Structural choices (the K prior, φ = 0, the forms of
+  D2) are not in it.
+
+**What it says.**
+- ⭐ **D4 stays a NAMED TENSION** (Marcus 09-30: "if it doesn't, then we need to keep it as a named
+  tension"). D2 + D3 move modern NPP by −1.95, from z +1.75 to +1.50.
+- ⭐ **The fit takes N retention at the literature's upper half** (7.0 kg C/kg N) and spends it on
+  fertilisation: β falls 20 %, and K falls to 740, inside the band (≤ 750) that 09-30 (e) found the prior
+  alone could not reach.
+- ⭐ **Greening comes out slightly NEGATIVE** (−0.0079 ± 0.0083 /K), within 1σ of zero. That matches the
+  literature's lean (8 of 10 CMIP6 ESMs negative). P-D2-4's prediction of a positive σ_T fails, as in every
+  screen.
+- The future moves toward Koven but stays above it: z(2100–2200) 1.85 ± 0.21.
+
+**Not done (Marcus's calls):**
+- naming / registering / adopting the mode (the canonical is still `hilda29l`);
+- the app (D1);
+- `dg_run`'s ndep 2025 hold-flat, so the design gates can score this mode.
+
 ## 2026-09-30 (q) — **Launch rulings (Marcus, via the question tool; the chosen labels verbatim): "Keep hilda_csl3v0kaidgb (Recommended)"; `npp_tsens` dispersed "At its prior sd (Recommended)"; "Registered set, as 09-28b/c (Recommended)"; "Mac, 8 parallel" (my verdict was Torch). The objective-#14 refit is RUNNING on the Mac: 24 starts, 8 at a time, launched 17:42 from a frozen worktree at `99f1161`.**
 
 **The dispersion override** (`99f1161`, `run_dispersed_multistart.R`).

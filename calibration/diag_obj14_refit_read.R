@@ -294,10 +294,53 @@ cat(sprintf("  d(SSP5-8.5 CO2 2300)/d(npp_tsens) = %.1f ppm per +0.01 /K (centra
             RD_LEVER * 0.01, lever[2, "loglik"] - lever[3, "loglik"], lever[4, "loglik"] - lever[3, "loglik"],
             lever[1, "loglik"] - lever[3, "loglik"], lever[5, "loglik"] - lever[3, "loglik"]))
 
+# ---- 6. THE FUTURES' LAPLACE SPREAD: the covariance through the gradient --------------
+# ⭐ WHY: section 5's lever is CONDITIONAL (every other name fixed), and the Hessian's marginal
+# sd of npp_tsens is ~10x its conditional sd -- other names compensate along a ridge, and
+# they move the future too. The linear (Laplace) answer is sd_F = sqrt(g' Sigma g), with g the
+# gradient of each future in u-space (central differences at RD_GRAD_FRAC x each name's
+# marginal sd, the Hessian's own step convention) and Sigma the mode file's u-space covariance.
+# Per name, two readings that need not agree:
+#   ridge_1sd = g' Sigma[, i] / sqrt(Sigma[i, i]): the future's move when name i moves one
+#               marginal sd and every other name follows its conditional expectation;
+#   var_share = g_i (Sigma g)_i / (g' Sigma g): a variance attribution that sums to 1 (it can
+#               be negative where a name's ridge OPPOSES the total).
+# The likelihood-only names have g = 0 EXACTLY (section 4's check) and are not re-run.
+# ⚠ LINEAR: a first-order spread around the mode, not a sampled posterior ribbon.
+cat("\n=== 6. THE FUTURES' LAPLACE POSTERIOR SPREAD (covariance through the gradient) ===\n")
+RD_GRAD_FRAC <- 0.1
+fs  <- ccx_mode_fit_stats(md)
+Sig <- fs$cov; nmS <- fs$param_names
+stopifnot(identical(nmS, names(uR)), isTRUE(md$pd))
+FK6 <- c("ssp585_co2_2300", "ssp585_dL2122", "vvH_co2_2300")
+fut_u <- function(u) { pv <- ccx_unc_to_par(u); p <- ccx_overlay_par(bpR, pv); futures_p(p, pv, spR)[FK6] }
+g <- matrix(0, length(nmS), length(FK6), dimnames = list(nmS, FK6))
+for (i in setdiff(nmS, GROUPS$NONMODEL)) {
+  h <- RD_GRAD_FRAC * sqrt(Sig[i, i]); up <- uR; dn <- uR; up[[i]] <- up[[i]] + h; dn[[i]] <- dn[[i]] - h
+  g[i, ] <- (fut_u(up) - fut_u(dn)) / (2 * h)
+}
+sdF <- sqrt(colSums(g * (Sig %*% g)))
+cat(sprintf("  Laplace posterior sd: SSP5-8.5 CO2 2300 +/- %.1f ppm; SSP5-8.5 land-C 2100-2200 +/- %.1f GtC (Koven sd 264); vvH CO2 2300 +/- %.1f ppm\n",
+            sdF[1], sdF[2], sdF[3]))
+cat(sprintf("  => Koven z(2100-2200) %.2f +/- %.2f (model posterior only)\n", zK(sc_R, 2), sdF[2] / AS_KOVEN$sd[2]))
+SG <- Sig %*% g
+ridge <- sweep(t(g) %*% Sig, 2, sqrt(diag(Sig)), "/")
+vshare <- sweep(g * SG, 2, sdF^2, "/")
+rk <- order(-abs(ridge[1, ]))
+tab6 <- data.frame(name = nmS[rk], marginal_sd_u = round(sqrt(diag(Sig))[rk], 4),
+                   ridge_1sd_co2_2300 = round(ridge[1, rk], 1), cond_1sd_co2_2300 = round(g[rk, 1] * sqrt(diag(Sig))[rk], 1),
+                   var_share_co2_2300 = round(vshare[rk, 1], 3), ridge_1sd_dL2122 = round(ridge[2, rk], 1))
+cat("  per name (ranked by |ridge_1sd| on SSP5-8.5 CO2 2300; cond_1sd = the gradient alone x the marginal sd):\n")
+print(utils::head(tab6, 14), row.names = FALSE)
+cat(sprintf("  npp_tsens: marginal sd %.4f /K (prior %.4f; conditional %.5f); its ridge moves SSP5-8.5 2300 by %+.1f ppm per marginal sd; %.0f %% of the 2300 variance\n",
+            sqrt(Sig["npp_tsens", "npp_tsens"]), ccx_const("NPP_TSENS_PRIOR_SD"), fs$sd_conditional[["npp_tsens"]],
+            ridge[1, "npp_tsens"], 100 * vshare["npp_tsens", 1]))
+
 sink()
 out <- list(control = list(score = sc_C), refit = list(score = sc_R, ndep_sink = ns_R, logpost = as.numeric(lpR), streams = stR,
             shares = sh, par_mode = pm), predictions = pr, decomposition = D, groups = GROUPS,
             tsens_lever = lever, tsens_lever_ppm_per_unit = RD_LEVER,
+            laplace = list(gradient = g, sd = sdF, ridge_1sd = ridge, var_share = vshare, table = tab6),
             provenance = sprintf("%s @%s; refit %s; control = diag_alignment_screen.R's (58cd91c); no RNG", RD_DRIVER, COMMIT, RD_REFIT))
 saveRDS(out, paste0(RD_OUT, ".rds"))
 utils::write.csv(cbind(D, provenance = out$provenance), paste0(RD_OUT, "_decomposition.csv"), row.names = FALSE)
