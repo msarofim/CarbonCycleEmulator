@@ -1396,7 +1396,11 @@ plot_d14c <- function(out, obs, yr_range) {
 #' onto the observed carbon budget (app_splice_history) and FaIR's are not, so a
 #' historical gap is a difference of INPUTS, not of emulation. The caller says so
 #' in the caption; this function does not invent the caveat.
-plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL) {
+#' @param bands optional data.frame(year, lo, hi, who): the Laplace ribbons
+#'   (Marcus 2026-10-01, B7), PRECOMPUTED by calibration/build_futures_ribbons.R
+#'   and subset by the caller; drawn UNDER the lines in each scenario's own hue.
+#' @param note optional caption sentence (the band's label, or why none is drawn)
+plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL, bands = NULL, note = NULL) {
   d <- do.call(rbind, lapply(names(runs), function(n) {
     cl <- runs[[n]]$climate
     data.frame(year = cl$year, y = cl[[yvar]], who = n)
@@ -1411,8 +1415,26 @@ plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL) {
   if (!nrow(d))
     stop(sprintf("view %d-%d selects no model years", view[1], view[2]))
   fair <- crop(fair)
+  bands <- crop(bands)
+  # ⚠ ONE LEVEL SET FOR LINE AND BAND: each band must wear its own scenario's hue,
+  # so `who` is a factor with the lines' levels in both frames and the colour and
+  # fill scales are ONE scale (aesthetics = both). A band whose label matched no
+  # line would otherwise train a hue of its own and repaint the survivors.
+  lev <- unique(d$who)
+  d$who <- factor(d$who, levels = lev)
   g <- ggplot(d, aes(year, y, colour = who))
+  if (!is.null(bands) && nrow(bands)) {
+    bands <- bands[bands$who %in% lev, , drop = FALSE]
+    bands$who <- factor(bands$who, levels = lev)
+    # drawn FIRST, faint, no outline: the line stays the thing the eye follows
+    g <- g + geom_ribbon(data = bands, aes(x = year, ymin = lo, ymax = hi, fill = who),
+                         inherit.aes = FALSE, alpha = FUTURE_BAND_ALPHA, colour = NA,
+                         show.legend = FALSE) +
+      scale_colour_hue(aesthetics = c("colour", "fill"))
+  }
   if (!is.null(fair) && nrow(fair)) {
+    # the lines' hues (see above); only when every label matches, so nothing can turn NA and vanish
+    if (!is.null(fair$who) && all(fair$who %in% lev)) fair$who <- factor(fair$who, levels = lev)
     # ⚠ The FaIR layer is drawn FIRST so the emulator sits on top of its own
     # reference; and `show.legend = FALSE` because the linetype is explained in
     # the caption rather than by a second legend that would repeat every label.
@@ -1420,9 +1442,12 @@ plot_future <- function(runs, yvar, ylab, view = NULL, fair = NULL) {
                        alpha = 0.9, show.legend = FALSE)
   }
   g + geom_line(linewidth = 0.8) +
-    labs(x = LAB_YEAR, y = ylab, caption = app_provenance_caption()) +
+    labs(x = LAB_YEAR, y = ylab, caption = app_provenance_caption(note)) +
     theme_ccx()
 }
+# The ribbons' opacity: faint enough that two overlapping scenarios' bands stay
+# readable as two, and that the line on top stays the dominant mark.
+FUTURE_BAND_ALPHA <- 0.18
 
 plot_pulse_decay <- function(base_cl, pulse_cl, pulse_year, pulse_gtc) {
   d <- data.frame(year = base_cl$year,

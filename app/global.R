@@ -274,16 +274,13 @@ app_params <- local({
     pm <- ccx_mode_par_with_pins(md)
     if (length(ccx_mode_absent(md))) pm <- ccx_migrate_par_set(pm)   # 0 = what it RAN (the cell is absent under "hilda")
     # THE FILE'S OWN STRUCTURE (2026-09-08f): the canonical is a HILDA mode.
-    p <- ccx_mode_base(md)
-    for (n in intersect(names(p), names(pm))) p[[n]] <- pm[[n]]
-    p <- ccx_set_enso(p, pm)
-    # `pump_mode` is a STRUCTURAL choice, not a fitted parameter, so it is not
-    # in par_mode and the loop above cannot carry it. It matches the default
-    # today (both "N"); setting it explicitly is what keeps that a fact rather
-    # than a coincidence if the default ever moves.
-    p$pump_mode <- md$pump_mode
-    bomb_total <- pm$bomb_total
-    luc_scale  <- pm$luc_scale
+    # ONE mapping (2026-10-01): ccx_mode_run_params() (R/paths.R) holds these
+    # lines -- base, overlay, ENSO block, pump mode, the two forcing parameters --
+    # so the Laplace ribbons' draws go through the same arithmetic as this line.
+    rp <- ccx_mode_run_params(md, pm)
+    p <- rp$p
+    bomb_total <- rp$bomb_total
+    luc_scale  <- rp$luc_scale
     rep_dC     <- if (is.null(pm$rep_dC)) 0 else pm$rep_dC
     # the GATED names this mode fits (2026-10-01; R/calibrate.R CCX_PARAM_GATED): the parameter
     # table lists them on top of CCX_PARAM_NAMES. The D3 shares ride along for the same table.
@@ -327,10 +324,12 @@ app_params <- local({
                      " sinks",
                      if (.n_pin) paste0(", with ", .n_pin,
                                         " further values held at stated numbers") else "",
-                     ". A single best fit, not yet a posterior — no",
-                     " uncertainty ranges are shown, and the fit constrains the",
-                     " shape of these curves more tightly than their absolute",
-                     " height.")
+                     # B7 (2026-10-01): "no uncertainty ranges are shown" went
+                     # when the Futures tab gained its Laplace ribbons, which
+                     # carry their own label (APP_RIBBON_NOTE).
+                     ". A single best fit, not yet a posterior, and the fit",
+                     " constrains the shape of these curves more tightly than",
+                     " their absolute height.")
     break
   }
   if (file.exists(post_file)) {
@@ -449,6 +448,55 @@ APP_EMIS_HIST <- as.data.frame(
 APP_SCEN_EMIS <- as.data.frame(
   readRDS(file.path(CCX_ROOT, "data", "vv_emissions.rds")))
 stopifnot(setequal(unique(APP_SCEN_EMIS$scenario), APP_SCENARIOS))
+
+# ---- THE FUTURES RIBBONS (Marcus 2026-10-01, review 10-01c B7: "Laplace first, MCMC as the check") ----
+# PRECOMPUTED by calibration/build_futures_ribbons.R and only READ here: the app
+# never runs draws. ccx_ribbons_problems() (R/paths.R) is the ONE validity check,
+# shared with test-futures-ribbons.R -- bands built at another parameter vector
+# are NOT drawn, and the caption says so, rather than shading the wrong
+# uncertainty around the right line. ⚠ NOT calibration/output/posterior_draws.rds:
+# that path would relabel the whole app "calibrated posterior" (app_params above),
+# and a Gaussian at the mode is not one.
+APP_RIBBONS_FILE <- file.path(CCX_ROOT, "data", "futures_ribbons.rds")
+APP_RIBBONS <- local({
+  if (!file.exists(APP_RIBBONS_FILE))
+    return(list(ok = FALSE, why = "this build has no ribbons file"))
+  r <- readRDS(APP_RIBBONS_FILE)
+  md <- tryCatch(readRDS(ccx_mode_file(CCX_MODE_CANONICAL)), error = function(e) NULL)
+  bad <- if (is.null(md)) "the canonical mode file is not in this build" else
+    ccx_ribbons_problems(r, md, APP_SCENARIOS, APP_FUTURE_YVARS)
+  if (length(bad)) {
+    message("app: futures ribbons NOT drawn: ", paste(bad, collapse = "; "))
+    return(list(ok = FALSE, why = bad[1]))
+  }
+  c(list(ok = TRUE), r)
+})
+# The caption sentence, from the artifact's own record (label, probabilities, draws).
+APP_RIBBON_NOTE <- if (isTRUE(APP_RIBBONS$ok)) with(APP_RIBBONS$provenance, sprintf(
+  "Shaded: the %g–%g %% range of %d model runs — a %s.",
+  100 * probs[1], 100 * probs[length(probs)], n_ok, label)) else
+  sprintf("No uncertainty band is drawn: %s.", APP_RIBBONS$why)
+# ⚠ THE TEMPERATURE BAND IS NARROW FOR A REASON THE READER MUST BE TOLD. The draws
+# vary the CARBON CYCLE's fitted parameters only; the climate module (fitted to
+# FaIR) and the non-CO2 forcing are fixed, so temperature moves only through the
+# CO2 it is handed -- sd ~0.01-0.04 degC at 2150 against ~2-8 ppm of CO2 (the
+# 2026-10-01 trial). A razor-thin band with no sentence would read as "the
+# warming is known this precisely".
+APP_RIBBON_NOTE_TEMP <- paste("It varies the carbon cycle only: how much the world",
+                              "warms for a given amount of CO₂ is held at the",
+                              "model's one fitted value.")
+app_ribbon_note <- function(yvar)
+  if (isTRUE(APP_RIBBONS$ok) && identical(yvar, "gmst")) paste(APP_RIBBON_NOTE, APP_RIBBON_NOTE_TEMP) else APP_RIBBON_NOTE
+#' The ribbons for the selected scenarios and y-variable, in plot_future()'s
+#' `bands` shape, labelled with the DISPLAY names the runs carry; NULL if none.
+app_future_bands <- function(scen_ids, yvar) {
+  if (!isTRUE(APP_RIBBONS$ok) || !length(scen_ids)) return(NULL)
+  b <- APP_RIBBONS$bands
+  b <- b[b$scenario %in% scen_ids & b$var == yvar, , drop = FALSE]
+  if (!nrow(b)) return(NULL)
+  data.frame(year = b$year, lo = b$q05, hi = b$q95,
+             who = names(APP_SCENARIOS)[match(b$scenario, APP_SCENARIOS)])
+}
 
 # ---------------------------------------------------------------------
 # FOREST REGROWTH, REPORTED (REGROWTH TIER 1; Marcus 2026-09-24)

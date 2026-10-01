@@ -687,6 +687,67 @@ ccx_mode_par_with_pins <- function(md) {
   pm
 }
 
+#' The model list a RUN uses, from a mode file and a PHYSICAL parameter vector
+#' (2026-10-01, for the Laplace ribbons).
+#'
+#' ⭐ ONE MAPPING for the app's central fit (app/global.R app_params()) and every
+#' draw of calibration/build_futures_ribbons.R, so a band and the line it
+#' surrounds cannot come from two copies of this arithmetic. The lines are
+#' app_params()'s own, moved here unchanged: the file's structure as the base
+#' (ccx_mode_base), every name the vector carries overlaid, the ENSO block set
+#' from the vector, the file's pump mode, and the two FORCING parameters
+#' `ccx_default_params()` has no slot for returned beside the list.
+#' @param md a loaded mode file
+#' @param pm a physical vector carrying the file's held values -- the caller's
+#'   ccx_mode_par_with_pins(md) (migrated if the file lacks a name), or a
+#'   decoded draw with the pins added
+#' @return list(p, bomb_total, luc_scale)
+ccx_mode_run_params <- function(md, pm) {
+  p <- ccx_mode_base(md)
+  for (n in intersect(names(p), names(pm))) p[[n]] <- pm[[n]]
+  p <- ccx_set_enso(p, pm)
+  # `pump_mode` is a STRUCTURAL choice, not a fitted parameter, so it is not
+  # in par_mode and the loop above cannot carry it. It matches the default
+  # today (both "N"); setting it explicitly is what keeps that a fact rather
+  # than a coincidence if the default ever moves.
+  p$pump_mode <- md$pump_mode
+  list(p = p, bomb_total = pm$bomb_total, luc_scale = pm$luc_scale)
+}
+
+#' Is a futures-ribbons artifact (calibration/build_futures_ribbons.R) valid for
+#' THIS fit? (2026-10-01, B7.)
+#'
+#' ONE check, shared by the app's loader (which then draws no band and says so)
+#' and test-futures-ribbons.R (which then fails): bands built at a different
+#' parameter vector would shade the wrong uncertainty around the right line,
+#' silently. The vector, not the mode NAME, is compared -- a refit that kept the
+#' name would otherwise pass.
+#' @param r the artifact (readRDS of data/futures_ribbons.rds)
+#' @param md the canonical's loaded mode file
+#' @param scenarios the scenario ids the tab offers; @param vars its y-variables
+#' @return character(0) if valid, else one string per problem
+ccx_ribbons_problems <- function(r, md, scenarios, vars) {
+  bad <- character(0)
+  pv <- r$provenance
+  if (is.null(pv) || is.null(r$bands)) return("not a ribbons artifact (no provenance or no bands)")
+  if (!identical(pv$mode, CCX_MODE_CANONICAL))
+    bad <- c(bad, sprintf("built for mode '%s', the canonical is '%s'", pv$mode, CCX_MODE_CANONICAL))
+  if (!identical(pv$par_mode, md$par_mode))
+    bad <- c(bad, "built at a different parameter vector from the canonical's par_mode")
+  if (is.null(pv$seed) || is.null(pv$rng_kind) || is.null(pv$seed_applied))
+    bad <- c(bad, "the seed, the RNG kind or where it is applied is not recorded")
+  miss <- setdiff(as.character(scenarios), unique(r$bands$scenario))
+  if (length(miss)) bad <- c(bad, sprintf("no bands for scenario(s) %s", paste(miss, collapse = ", ")))
+  missv <- setdiff(as.character(vars), unique(r$bands$var))
+  if (length(missv)) bad <- c(bad, sprintf("no bands for variable(s) %s", paste(missv, collapse = ", ")))
+  b <- r$bands
+  if (any(!is.finite(b$q05) | !is.finite(b$q95) | !is.finite(b$q50)))
+    bad <- c(bad, "non-finite quantiles")
+  else if (any(b$q05 > b$q50 | b$q50 > b$q95))
+    bad <- c(bad, "quantiles out of order (q05 <= q50 <= q95 fails)")
+  bad
+}
+
 ccx_mode_params <- function(md = CCX_MODE_CANONICAL) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
   # WITH the file's pins (2026-09-13): the vector the mode RAN at, held names

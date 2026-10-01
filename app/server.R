@@ -754,12 +754,18 @@ function(input, output, session) {
       # labels matched nothing and drew no line, which looks exactly like
       # agreement. The named slice carries both, so the two keyings cannot
       # drift apart again.
+      # B7 (Marcus 2026-10-01, "Laplace first, MCMC as the check"): the
+      # precomputed ribbons for the selected scenarios, and the caption sentence
+      # that labels them (or says why none is drawn). Only on the van Vuuren
+      # scenarios -- "Build your own" and the pulse lab have no ribbons.
       plot_future(rs, input$f_yvar,
                   if (identical(input$f_yvar, "gmst")) LAB_TEMP else LAB_CO2,
                   view = APP_FUTURE_VIEW,
                   fair = if (isTRUE(input$f_fair))
                     app_fair_overlay(APP_SCENARIOS[APP_SCENARIOS %in% input$f_scen],
-                                     input$f_yvar))
+                                     input$f_yvar),
+                  bands = app_future_bands(input$f_scen, input$f_yvar),
+                  note = app_ribbon_note(input$f_yvar))
     }
   })
 
