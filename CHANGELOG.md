@@ -2,7 +2,7 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
-## 2026-10-01 (g) — **Every git stamp now goes through ONE helper, `ccx_git_stamp()` in the new `R/provenance.R`. All 69 drivers that ran git for a stamp were converted, plus (f)'s two. A mutation-tested unit test covers the helper, and a lint fails on any new `system()`/`system2()` git call.** This is (f)'s "Open" item. No driver was re-run; nothing under `outputs/` or `data/` was touched. Before converting anything, 821ff3f ((f), on `claude/compassionate-leavitt-a7e631`) was merged into this branch as `4b0b802`: neither this branch nor `main` carried it.
+## 2026-10-01 (h) — **Every git stamp now goes through ONE helper, `ccx_git_stamp()` in the new `R/provenance.R`. All 69 drivers that ran git for a stamp were converted, plus (f)'s two. A mutation-tested unit test covers the helper, and a lint fails on any new `system()`/`system2()` git call.** This is (f)'s "Open" item. No driver was re-run; nothing under `outputs/` or `data/` was touched. Before converting anything, 821ff3f ((f), on `claude/compassionate-leavitt-a7e631`) was merged into this branch as `4b0b802`: neither this branch nor `main` carried it.
 
 **Marcus's rulings (asked before any conversion).** He took all four recommended options:
 1. A shared helper with a unit test, rather than an inline block per driver.
@@ -86,6 +86,74 @@ Three defaults were stated with the question and not objected to:
 - The two readers of `enso_gpp_margin_pre.rds` truncate its commit to 7 characters. A pre file written from now on would lose its marker in those two prints.
 - No existing output was audited for a stamp lost outside a checkout. A missing stamp loses provenance, not numbers.
 - (f)'s `test-constraint-map.R` test-6 item stands.
+
+## 2026-10-01 (g) — **The handoff's open items, swept and re-checked against hilda33d; two counterfactual switches fixed; one named red. The adoption repointed every consumer that follows `CCX_MODE_CANONICAL`, but much of what the APP SAYS was written about hilda29l, and some of it is now false. Worst cases: Known-issues card 6 prints its verdict backwards, and the pulse box contradicts its own headline. The full review list is `notes/review_2026-10-01c_open_decisions.md`.**
+
+**Fixed (`4fd433d`): two What-if switches were incomplete at the D2 canonical.** Both were complete until
+hilda33d made two D2 paths live. `test-mechanisms.R` ran at defaults, where those paths are 0, so it
+could not see either gap.
+- "Warming's effect on the carbon cycle" now also zeroes `npp_tsens`.
+  - It had left +1.52 ppm of the 2024 response on: the switch removed −5.26 of −6.78 ppm. That
+    contradicted its own caveat ("only the carbon cycle's response to that warming").
+  - With the fix, a +1 K shift of the whole climate record (gmst plus both observed-SST columns) moves
+    the canonical's carbon state by EXACTLY 0. Without it, 1.39 ppm. The other temperature paths were
+    already covered.
+- "Our emissions" now also zeroes `ndep_NH` / `ndep_SH`.
+  - Those columns are anthropogenic deposition built from NOx + NH₃ EMISSIONS (the ruled D2 (a)
+    emissions proxy), and `ccx_hold_climate()` already classes them as emissions-driven.
+  - Left on, "nature alone" kept 21 GtC on land by 2024 and read 277.0 ppm instead of 282.3. The N sink
+    cancelled the warming release that the switch's caveat promises.
+- Tests: the canonical is blind to its climate record under the warming switch, and blind to doubling every
+  human carbon input under the emissions switch. Each test carries a column inventory, the device of
+  `test-so-entrainment` P0.3.
+  - **Mutation-tested:** drop either fix and its test fails (4 and 8 failures).
+- Verified in the running app (What-if tab, 2024): warming off 418 vs 425 ppm, emissions off 282,
+  fertilisation off 483.
+- **Not changed:** the fertilisation switch. N retention keeps 30 GtC on land with it off (−9.4 ppm), so
+  its label "the land sink" is now false. Behaviour or text is Marcus's call (review note B5).
+- **Full suite at `4fd433d`** (frozen copy `~/ccx_frozen/suite_20261001f`, BLAS pinned;
+  `outputs/diagnostics/suite_20261001_post4fd433d_all.log`): **5482 passed, 0 failed, 0 errors, 5
+  skipped.** That is +29, all from the new tests.
+
+**The pulse box, re-measured at hilda33d** (`0823103`, `6bfc6cf`; `outputs/diagnostics/pulse_vs_tcre_20261001.{csv,log}`).
+- `diag_pulse_vs_tcre.R` now stamps the mode, the app's parameter source and the commit, in the log and
+  as CSV columns. The 09-26 / 09-29 outputs named neither.
+- Its anchor was re-read off the running app: 0.136 °C, 1.36 per 1000 GtC. The driver computes 1.359:
+  PASS. The 09-29 reading of 1.03 FAILED after the adoption, as it should.
+- Per 1000 GtC at +20 / +50 / +100 / +200 yr is now **1.44 / 1.38 / 1.36 / 1.41**. The box still types
+  hilda29l's 1.43 / 1.20 / 1.03 / 0.97. The size spread is **2.5 %**; the box types 4.2 %.
+- So the live box says "1.36 °C per 1000 GtC" and, three sentences later, "1.03 at 100".
+- ⚠ Its claim "flat in pulse size but NOT in when you look" no longer holds: ±3 %, rising after +100 yr.
+  IRF(100) went 0.288 → 0.360, and that now balances the thermal lag.
+- ⛔ **NAMED RED: `test-pulse-linearity.R`, 5 failures** (the spread and the four horizon values),
+  deliberately left.
+  - Its own comment says "THE DIRECTION IS THE CLAIM": re-pinning the numbers would leave its
+    falls-with-horizon assertion failing and the sentence false.
+  - The sentence is Marcus's. The constants and the assertion move with it.
+  - That test is the only reader of the new CSV, so it is the only red at HEAD.
+
+**Verified this session, not changed** (app text is Marcus's; the list is the review note's §A):
+- card 6's title and text, and its caption's sign;
+- card 4: `w_enso_l2` 11.91 ± 1.81 against Meinen's [14, 25], below even at +1σ;
+- card 5: ocean 60 % vs Joos 59 %, now LARGER;
+- four "fertilisation is the only long-term land sink" sentences;
+- "two-pool land" (four pools plus inert, already wrong at hilda29l);
+- the drivers list and table, which have no N deposition;
+- the version label. No test pins it; options in B2.
+
+**Swept from the handoffs since 09-22 (review note §C).**
+- ⚠ **One RULED change missed its refit:** `emissions-interp-constant` (`35f38dc`, "Marcus, option 1").
+  - It was marked "should ride with the next refit… merge this FIRST", and since 09-24 (l) it is the flip
+    of `CCX_EMIS_METHOD_DEFAULT`.
+  - It was carried to 09-27c, then dropped. The 09-28 arrays and the #14 refit both ran on "spline".
+  - It is small (−0.137 log-units, ≤ 0.02 ppm), but the ledger cost is a restamp. Options in B6.
+- **New in the review:** `CCX_MODE_PINNED_PARENT` is still `hilda32f`, hilda29l's free parent on #13.
+  hilda33d has none, and `test-mode-file` (b) now ranks #13 arms only (B3b).
+- **Measured for the ribbon decision (B7):**
+  - one draw (spin-up plus the seven vV futures to 2150) costs ≤ 2.8 s, so 1000 Laplace draws take about
+    6–8 min on 8 cores;
+  - one log-posterior evaluation costs about 0.2 s;
+  - the canonical's stored logpost reproduces exactly (−1405.249036) at `02f4b78`.
 
 ## 2026-10-01 (f) — **`diag_whole_model_scorecard.R` and `diag_constraint_map.R` now stamp their git commit, with a dirty-tree marker.** This closes the "Provenance" flag in (d). Neither driver was re-run, and no existing output was touched. The 10-01 scorecard and constraint map stay unstamped; per (d) they ran on the `fbb6400` and `01c05c3` trees.
 
