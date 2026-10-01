@@ -14,6 +14,10 @@
 # ⚠ CKPT 100, not the default 500 (2026-10-01 p): the proposal is refreshed only AT a
 # checkpoint inside [t0, adapt] = [adapt/3, adapt] = [100, 300], so at 500 the smoke
 # never adapts at all, and it prints only two progress lines to time the rate from.
+# ⛔ So the smoke's log-posterior is NOT a burn-in measurement (10-01 q): adapting from
+# 100 iterations (~25 accepted moves) SHRANK the proposal (to 0.19-0.26 x the Laplace sd
+# in places) and the smoke chains stalled at -1433 to -1447. With the SAME seeds and
+# starts, production (Laplace proposal to iteration 1000) reached -1416 to -1426 by 500.
 # Read, for all four: exit 0; the driver's port gate ("recomputed ... stored ...")
 # passed (it STOPS on a mismatch > 1e-5, so the logpost is the Mac's objective);
 # chain_<k>.rds written; the per-checkpoint s/iteration -- the RATE that sizes

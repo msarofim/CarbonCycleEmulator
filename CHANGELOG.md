@@ -2,6 +2,110 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (q) — **The Torch smoke PASSED. Production is STAGED on Marcus's ruling, and stage 1 (4 chains, an 8 h self-stop) is RUNNING as job 18969240. The smoke's stalled log-posteriors were an artifact of its own early adaptation, not slow burn-in. The R-hat / ESS reader is built and mutation-tested.**
+
+**The smoke** (job 18966349; `CCX_MC_N=600 CCX_MC_ADAPT=300 CCX_MC_CKPT=100`, commit `c631e50`). Every item of the
+handoff's gate passed:
+- 4/4 COMPLETED 0:0, in 5:09–5:51 each including the compile;
+- the port line in every log reads recomputed −1405.411447 against stored −1405.411447, diff −2.04e−8;
+- 600 iterations in every chain;
+- `chain_{1..4}.rds` written, with seeds 20261002–05 and the RNG state inside, no non-finite log-posteriors, and identical provenance
+  apart from host;
+- empty `.err` files;
+- MaxRSS 530–556 MB against `--mem=4G`. The job script's "213 MB" note is the older multistart's.
+
+**Rate:** 0.468–0.540 s/iteration between the iteration-100 and iteration-600 lines, so 1e5 iterations take 13.0–15.0 h.
+Chain 1 starts at −1947.859 on Torch, exactly as on the Mac (same seed).
+
+**The mode-start test** (`outputs/diagnostics/mcmc_modestart_20261001/`, recipe in its README). The smoke chains sat at
+−1433 to −1447 at iteration 600, below a Gaussian posterior's typical set: mode − χ²₃₃/2, median −1421.6, 95 % [−1430.8, −1414.9].
+- Two chains started AT the mode under the fixed Laplace proposal (no adaptation; the Mac, 3 min) settled at
+  −1420.7 and −1419.0 over iterations 301–1000.
+- Acceptance was 0.076–0.080. A Gaussian target would give ~0.23: the 10-01 (l) ridge seen from the sampler's side.
+- ⚠ I first read the smoke's stall as slow burn-in and told Marcus so. **Stage 1 refuted that.** With the SAME seeds and starts,
+  production reached −1416 to −1426 by iteration 500–1000, chain 2 included (it starts at −31185).
+  - The runs are identical through iteration 100. After that, the smoke adapted at 100, 200 and 300 from histories of ~25
+    accepted moves, which SHRANK its proposal (adapted sd 0.19–0.26× the Laplace in places).
+  - Production keeps the Laplace proposal to iteration 1000. **Burn-in takes ~500–1000 iterations**, well inside the
+    30k adaptation window.
+  - The job script's smoke note now says this.
+
+**Marcus's questions, verbatim.**
+1. Asked whether to submit production as designed, he answered: "In order to not burn Torch time, consider whether fewer chains total, or fewer chains at
+   one time, or shorter chains would be acceptable. Also, double check everything to make sure we don't launch runs that
+   will later need to be canceled for errors (out of time, out of memory, etc.)."
+2. **The check.**
+   - Time: 13–15 h against the 34 h self-stop and the 36 h limit. The wall is checked every 500 iterations.
+   - Memory: 556 MB against 4G.
+   - `cs`: MaxTime UNLIMITED, QoS N/A, **PreemptMode OFF**.
+   - `JobRequeue=0`, so a node failure needs a resubmit, which resumes from the last checkpoint.
+   - The fixed seeds give the smoke's four finite starts.
+   - Scratch is at 8 %.
+   - Nothing found would force a cancellation.
+3. **The efficiency** (the mode-start lp traces, the new `mcd_ess_*`): ~0.5–0.8 % per iteration under the Laplace proposal.
+   So whether 1e5 iterations is too many or too few can't be known in advance.
+4. **The options.** Fewer chains is the wrong saving: R-hat from 2 chains has little power against a chain stuck elsewhere on the
+   ridge. Staging costs nothing. `wall_min` is not part of the resume check, so a chain stopped by its wall continues
+   exactly when the same command is resubmitted.
+5. **Ruling: "Staged, 4 chains (Recommended)".**
+   - Stage 1:
+     `CCX_MC_COMMIT=c631e50 CCX_MC_WALL_MIN=480 sbatch --array=1-4 --time=08:30:00 calibration/torch/mcmc_check.sbatch`,
+     job **18969240**, started 14:35 on cs648 / cs662 / cs664 / cs667. Each chain reaches about 53–61k iterations, 23–31k of them after
+     adaptation, for ~34 CPU-h.
+   - Stage 2, ONLY on Marcus's go after the diagnostics: the same command without the wall override and WITHOUT `rm`.
+
+**The reader** (`calibration/read_mcmc_check.R` + `calibration/lib_mcmc_diag.R`).
+- **The diagnostics** are rank-normalised split-R-hat (bulk and folded), bulk-ESS and tail-ESS, written from Vehtari et al. 2021
+  (Bayesian Analysis 16:667). `posterior` is not installed here, so `tests/testthat/test-mcmc-diag.R` validates them
+  against ANALYTIC answers (22 expectations, 0.2 s), with every bound derived from 200-replicate measured spreads:
+  - the FFT autocovariance equals the direct sum to 2e−16;
+  - bulk-ESS is within 0.4–2 % of the AR(1) truth S(1−φ)/(1+φ) at φ = 0, 0.5, 0.9;
+  - tail-ESS is within 3–6 % of the analytic ESS of a Gaussian AR(1)'s 5 % indicator. That is 1.78–2.22× the mean's ESS,
+    because the indicator decorrelates faster;
+  - R-hat lands on its by-hand value for a planted shift (1.1006 vs 1.1010) and a shared trend (1.1233 vs 1.1237);
+  - only the folded half sees a ×3 scale (1.145, against bulk 1.000);
+  - the diagnostics are exactly invariant to `exp(3x)`.
+  - **Mutation-tested, seven mutants, each caught by exactly the test that names its part:** no split, no fold, no
+    zero-padding, tail-ESS replaced by bulk, no between-chain term, no rank-normalisation, no monotone step.
+    - The last two needed property tests. On Gaussian data the ranks are near-identity.
+    - Across seeds, the estimator's mean moves more (0.99–1.10) than the monotone step does (0.06–0.08). So that test
+      asserts the step's defining property, non-increasing pair sums, and asserts its inputs have raw pairs that rise.
+    - `mcd_rho_geyer()` was split out for this. The refactor reproduces the earlier seeded numbers digit for digit.
+- **The reader** reads every chain over ONE iteration window, (adapt + drop, the shortest chain's last kept iteration], so
+  stage 1's wall-stopped chains compare at equal lengths. It prints:
+  - per-chain status, flagging PARTIAL chains;
+  - block means of every iteration's log-posterior against the Gaussian typical set (the burn-in view);
+  - R-hat / ESS worst-first;
+  - the posterior's u-space sd and shift against the Laplace's.
+  - It writes a CSV and the pooled u-matrix for `build_futures_ribbons.R --draws=`, with its window, chain md5s and seeds
+    as an attribute.
+  - It REPORTS and does not rule. The thresholds printed are labelled as Vehtari et al.'s (R-hat < 1.01, ESS > 100 per
+    chain).
+  - **Guards, checked by breaking their inputs:**
+    - a chain cut at 500 gives the window (300, 500];
+    - a chain run at a different `thin` stops, naming it;
+    - `--drop` shifts the window;
+    - fewer than 4 samples per chain stops.
+    - The builder decodes against the CURRENT canonical, so no draws are written if any of four things has changed
+      since the chains ran. Each is named when it fires: the mode (`par_mode` moved by 1e−9 relative), the structure,
+      a pin moved by 1e−12, or the mode's name.
+  - On the smoke's 4 × 15 samples it reports R-hat 1.6–3.3, as it should at that length.
+- ⛔ **The mode-struct RATCHET caught the reader** (`test-mode-struct-lint.R`, 2 failures). The reader read the mode
+  file without `ccx_mode_base()`, so it was a new file and the 33rd occurrence against the 32 recorded.
+  - The ratchet was not edited. The reader now takes the canonical's structure and pins from `ccx_mode_base()`, the
+    one resolver, and checks them against the chains' record. That check is the struct / pins guard above, so the
+    call does real work.
+  - The six test files that scan `calibration/` pass: 263 expectations, 0 failures (luc-scale, mode-file,
+    overlay-idiom-lint, spo-constants-tie, mode-struct-lint, mcmc-diag).
+  - The rest of the suite was not re-run. `R/` and `app/` are untouched, and no other test file globs `calibration/`.
+
+**Stage 1, the early check (iteration 1000, the first adaptation refresh).**
+- All four chains passed iteration 1000 in 8.2–9.8 min, at 0.49–0.59 s/iteration.
+- Log-posteriors are −1415.5 to −1421.3, inside the Gaussian typical set.
+- `sstat` MaxRSS is 530–549 MB, and stderr is empty.
+- ⚠ Chain 2 (cs662) runs ~20 % slower. At the 8 h stop it will hold ~49k iterations against ~59k for the others. The
+  reader cuts every chain to the shortest, so stage 1's common window is about (30k, 49k], ~940 kept samples per chain.
+
 ## 2026-10-01 (p) — **Torch preflight for the MCMC smoke. Nothing is submitted yet. The driver gains an exact-resume check on `ckpt`/`t0` (mutation-tested) and a truthful provenance label. The smoke command gains `CCX_MC_CKPT=100`: at the handoff's default of 500, the smoke never adapts.**
 
 **Torch, read before touching anything.**
