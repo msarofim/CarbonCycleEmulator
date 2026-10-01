@@ -1,4 +1,4 @@
-calibration/diag_obj14_refit_read.R @d60074a, 2026-10-01 02:40
+calibration/diag_obj14_refit_read.R @a7d6855, 2026-10-01 02:43
 
 === GATE: the copied scorecard reproduces the screen's STORED control scorecard ===
   43 fields, max relative difference 0.000e+00 (tol 1e-08)
@@ -101,3 +101,12 @@ refit: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calib
        49.082
   CHECK: the likelihood-only group moves the futures by max |0| (must be 0)
   (columns: SSP5-8.5 CO2 at 2300 ppm; SSP5-8.5 land-C change 2100-2200 GtC (Koven's z window); land x PI 2300; vvH CO2 2300 ppm)
+
+=== 5. THE npp_tsens LEVER AT THE REFIT (every other name fixed: CONDITIONAL, not marginal) ===
+     npp_tsens  co2_2100 co2_2300 gmst_2100 gmst_2300    loglik   logpost
+[1,]   -0.0368 1007.3523 1644.808    4.7213    8.0771 -1925.642 -1962.478
+[2,]   -0.0223  985.2674 1569.750    4.6682    7.9000 -1509.009 -1545.339
+[3,]   -0.0078  962.7921 1491.602    4.6131    7.7067 -1369.176 -1405.249
+[4,]    0.0067  940.0105 1411.643    4.5559    7.4985 -1510.843 -1546.906
+[5,]    0.0212  917.0132 1331.364    4.4970    7.2777 -1938.686 -1974.986
+  d(SSP5-8.5 CO2 2300)/d(npp_tsens) = -54.5 ppm per +0.01 /K (central, +/-0.0145); the record at +/-0.0145: -139.8 / -141.7, at +/-0.029: -556.5 / -569.5 log-units

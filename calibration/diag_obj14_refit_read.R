@@ -276,9 +276,28 @@ cat(sprintf("  CHECK: the likelihood-only group moves the futures by max |%.3g| 
 if (max(abs(as.matrix(nm))) > 1e-9) stop("a likelihood-only name moved a future: the swap touches something it does not name")
 cat("  (columns: SSP5-8.5 CO2 at 2300 ppm; SSP5-8.5 land-C change 2100-2200 GtC (Koven's z window); land x PI 2300; vvH CO2 2300 ppm)\n")
 
+# ---- 5. the greening lever at the refit: the future per unit npp_tsens, and what the record charges ----
+cat("\n=== 5. THE npp_tsens LEVER AT THE REFIT (every other name fixed: CONDITIONAL, not marginal) ===\n")
+RD_TSENS_STEPS <- c(-0.029, -0.0145, 0, 0.0145, 0.029)     # = +/- 1 and 0.5 prior sd (NPP_TSENS_PRIOR_SD 0.029)
+lpR_fun <- ccx_make_logpost(base_params = bpR, by_stream = TRUE, spinup_fn = spR); uR <- ccx_par_to_unc(md$par_mode)
+lever <- t(vapply(md$par_mode$npp_tsens + RD_TSENS_STEPS, function(x) {
+  p <- R$p; p$npp_tsens <- x; sp <- spR(p)
+  rr <- suppressWarnings(ccx_run_coupled(sp, "ssp585", c(1750L, 2300L), bomb_total_kmol = R$pv$bomb_total, luc_scale = R$pv$luc_scale))
+  yr <- floor(rr$out$t); co2 <- tapply((rr$out$co2_NH + rr$out$co2_SH) / 2, yr, mean)
+  gm <- stats::setNames(rr$climate$gmst, rr$climate$year)
+  u <- uR; u[["npp_tsens"]] <- x; v <- lpR_fun(u)
+  c(npp_tsens = x, co2_2100 = co2[["2100"]], co2_2300 = co2[["2300"]], gmst_2100 = gm[["2100"]], gmst_2300 = gm[["2300"]],
+    loglik = sum(attr(v, "streams")), logpost = as.numeric(v)) }, numeric(7)))
+print(round(lever, 4), row.names = FALSE)
+RD_LEVER <- (lever[4, "co2_2300"] - lever[2, "co2_2300"]) / diff(RD_TSENS_STEPS[c(2, 4)])     # ppm per (1 /K)
+cat(sprintf("  d(SSP5-8.5 CO2 2300)/d(npp_tsens) = %.1f ppm per +0.01 /K (central, +/-0.0145); the record at +/-0.0145: %+.1f / %+.1f, at +/-0.029: %+.1f / %+.1f log-units\n",
+            RD_LEVER * 0.01, lever[2, "loglik"] - lever[3, "loglik"], lever[4, "loglik"] - lever[3, "loglik"],
+            lever[1, "loglik"] - lever[3, "loglik"], lever[5, "loglik"] - lever[3, "loglik"]))
+
 sink()
 out <- list(control = list(score = sc_C), refit = list(score = sc_R, ndep_sink = ns_R, logpost = as.numeric(lpR), streams = stR,
             shares = sh, par_mode = pm), predictions = pr, decomposition = D, groups = GROUPS,
+            tsens_lever = lever, tsens_lever_ppm_per_unit = RD_LEVER,
             provenance = sprintf("%s @%s; refit %s; control = diag_alignment_screen.R's (58cd91c); no RNG", RD_DRIVER, COMMIT, RD_REFIT))
 saveRDS(out, paste0(RD_OUT, ".rds"))
 utils::write.csv(cbind(D, provenance = out$provenance), paste0(RD_OUT, "_decomposition.csv"), row.names = FALSE)
