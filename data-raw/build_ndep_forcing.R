@@ -24,8 +24,12 @@
 #     "ssp_rcmip": the SSPs the model also carries. CMIP6 history to 2014; the
 #     scenario waypoints after 2015 (2020, 2030, ...) are LINEARLY interpolated.
 #
-# THE HISTORY IS CMIP7's FOR EVERY SCENARIO. The calibration's "historical" run is
-# CMIP7 1750-2023, plus 2024 = the seven-marker mean (they part only from 2024).
+# THE HISTORY IS CMIP7's FOR EVERY SCENARIO. The "historical" table is CMIP7 1750-2023,
+# then the SEVEN-MARKER MEAN for every later year it covers (the markers part from 2024):
+# 2024, the objective's last year, and since 2026-10-01 also 2025, the design gates' run end
+# (DG_YEARS, ruled 2026-09-12; Marcus 2026-10-01: "use the future van Vuuren scenarios for
+# 2025"). In 2025 the seven span -2.85 % .. +1.51 % about that mean (50.886 Tg N/yr on land,
+# 0.25 % below 2024's 51.016).
 # ⚠ SSP SEAM (ruled 2026-09-30, "SSPs ratio-harmonised to the CMIP7 history,
 # converging by 2050"): CMIP6's history sits 8.4 Tg N/yr ABOVE CMIP7's at 2014
 # (C, 2026-09-30). Per species, the SSP series after 2023 is multiplied by a ratio
@@ -49,7 +53,8 @@ NDEP_VV_MARKERS    <- c(vvVL = "VL", vvLN = "LN", vvL = "L", vvML = "ML", vvM = 
 NDEP_SSPS          <- c("ssp119", "ssp126", "ssp245", "ssp370", "ssp585")
 NDEP_BASE_YEAR     <- 1750L     # "above 1750": the model's preindustrial
 NDEP_HIST_LAST     <- 2023L     # last year the seven CMIP7 markers share
-NDEP_HIST_RUN_END  <- 2024L     # the calibration's historical run ends here
+NDEP_HIST_RUN_END  <- 2025L     # the historical table's last year: the design gates' run end (DG_YEARS);
+                                # the objective's run ends 2024. 2024 until 2026-10-01.
 NDEP_HARM_YEAR     <- 2050L     # the SSP ratio reaches 1 here (ruled)
 NDEP_END_YEAR      <- 2300L     # standing end year (Marcus 2026-08-28); sources run to 2500
 NDEP_UNITS_VV      <- c(NOx = "Mt NO2/yr", NH3 = "Mt NH3/yr")
@@ -96,10 +101,13 @@ emit <- list()
 # vV markers: their own series, 1750-2300
 for (key in names(NDEP_VV_MARKERS))
   emit[[key]] <- dN(hist_of$NOx[, key], hist_of$NH3[, key])
-# historical: CMIP7 to 2023, 2024 the marker mean, then nothing (the historical run ends in 2024)
+# historical: CMIP7 to 2023, then the seven-marker mean for each year to NDEP_HIST_RUN_END, then
+# nothing. apply(, 1, mean) per year, the same mean() as the one-year form it replaced, so the 2024
+# value is bit-identical to the 2024-only build.
 hist_nox <- hist_of$NOx[, 1]; hist_nh3 <- hist_of$NH3[, 1]
-i24 <- which(years_out == NDEP_HIST_RUN_END)
-hist_nox[i24] <- mean(hist_of$NOx[i24, ]); hist_nh3[i24] <- mean(hist_of$NH3[i24, ])
+i_ext <- which(years_out > NDEP_HIST_LAST & years_out <= NDEP_HIST_RUN_END)
+hist_nox[i_ext] <- apply(hist_of$NOx[i_ext, , drop = FALSE], 1, mean)
+hist_nh3[i_ext] <- apply(hist_of$NH3[i_ext, , drop = FALSE], 1, mean)
 keep_h <- years_out <= NDEP_HIST_RUN_END
 emit[["historical"]] <- dN(hist_nox, hist_nh3)[keep_h]
 # SSPs: CMIP7 history to 2023, then the RCMIP scenario ratio-harmonised to it, ratio -> 1 by 2050
