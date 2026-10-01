@@ -149,7 +149,80 @@ test_that("the warming switch removes only the carbon cycle's response", {
   m <- ccx_apply_mechanisms(p, F, "warming_feedback")
   expect_equal(m$p$q10, 1)
   expect_equal(m$p$sst_scale, 0)
+  expect_equal(m$p$npp_tsens, 0)
   expect_identical(m$F$gmst, F$gmst)
+})
+
+test_that("under the warming switch, the CANONICAL's run is blind to the temperature record", {
+  # THE PROPERTY, not a parameter list (2026-10-01). The test above checks the
+  # names the switch zeroes, and it runs at DEFAULTS, where every temperature
+  # path a refit can open (npp_tsens, from the D2 canonical) is already 0, so it
+  # could not see the switch leave one live. Here the canonical runs twice under
+  # the switch, once with the whole climate record (gmst + both observed-SST
+  # columns) 1 K warmer, and the carbon state must not move AT ALL.
+  # MUTATION-TESTED 2026-10-01: without `p$npp_tsens <- 0` in the switch,
+  # hilda33d moves CO2 by 1.39 ppm here and this fails; with it, the difference
+  # is exactly 0.
+  skip_if_no_cpp()
+  md <- readRDS(ccx_mode_file())
+  rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
+  bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
+  p <- ccx_overlay_par(bp, md$par_mode)
+  sp_fn <- ccx_spinup_from_label(ccx_mode_spinup(md))
+  F0 <- suppressWarnings(ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
+          bomb_total_kmol = md$par_mode$bomb_total, luc_scale = md$par_mode$luc_scale,
+          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
+  clim <- grep("^gmst$|^sst_anom_", names(F0), value = TRUE)
+  expect_true("gmst" %in% clim)
+  run <- function(F) {
+    m <- ccx_apply_mechanisms(p, F, "warming_feedback")
+    sp <- sp_fn(m$p); FF <- m$F; FF$c14_cosmo <- sp$prod_c14
+    ccx_run_fast(sp, FF)$out
+  }
+  F1 <- F0; for (cc in clim) F1[[cc]] <- F1[[cc]] + 1
+  a <- run(F0); b <- run(F1)
+  for (cc in c("co2_NH", "co2_SH", "land_C", "ocean_C"))
+    expect_identical(b[[cc]], a[[cc]],
+                     label = sprintf("%s under the warming switch with the climate record +1 K", cc))
+})
+
+test_that("under the emissions switch, the CANONICAL's carbon is blind to every human carbon input", {
+  # The emissions twin of the test above (2026-10-01). INVENTORY first: every
+  # forcing column is either a HUMAN CARBON INPUT, which "nature alone" must
+  # remove, or something else. A new column is a decision about this switch,
+  # and this is where it gets made (the same device as test-so-entrainment.R's
+  # P0.3 for ccx_hold_climate()). Bomb and nuclear 14C are human-made but move
+  # no carbon, and the isotope panels do not respond to switches (09-24 #19).
+  # MUTATION-TESTED 2026-10-01: with ndep_NH/ndep_SH dropped from the switch,
+  # hilda33d's state moves and this fails.
+  skip_if_no_cpp()
+  md <- readRDS(ccx_mode_file())
+  rm <- ccx_apply_pins(ccx_mode_pins(md)); on.exit(ccx_unpin_params(rm), add = TRUE)
+  bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
+  p <- ccx_overlay_par(bp, md$par_mode)
+  sp_fn <- ccx_spinup_from_label(ccx_mode_spinup(md))
+  F0 <- suppressWarnings(ccx_build_forcing("historical", c(1750, 2024), prod_c14 = 0,
+          bomb_total_kmol = md$par_mode$bomb_total, luc_scale = md$par_mode$luc_scale,
+          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
+  human_carbon <- c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
+                    "cum_luc_NH", "cum_luc_SH", "ndep_NH", "ndep_SH")
+  other <- c("t", "year", "month", "gmst", "enso", "sst_anom_NH", "sst_anom_SH",
+             "d13c_foss", "c14_bomb", "c14_nuclear", "c14_cosmo", "sink_ocean",
+             "aod_NH", "aod_SH")
+  expect_setequal(names(F0), c(human_carbon, other))
+  # the deposition is live at the canonical, or this test has no power on it
+  expect_gt(p$ndep_ret, 0); expect_gt(max(F0$ndep_NH), 0)
+  run <- function(F) {
+    m <- ccx_apply_mechanisms(p, F, "emissions")
+    for (cc in human_carbon) expect_true(all(m$F[[cc]] == 0), label = sprintf("%s zeroed", cc))
+    sp <- sp_fn(m$p); FF <- m$F; FF$c14_cosmo <- sp$prod_c14
+    ccx_run_fast(sp, FF)$out
+  }
+  F1 <- F0; for (cc in human_carbon) F1[[cc]] <- 2 * F1[[cc]] + 1
+  a <- run(F0); b <- run(F1)
+  for (cc in c("co2_NH", "co2_SH", "land_C", "ocean_C"))
+    expect_identical(b[[cc]], a[[cc]],
+                     label = sprintf("%s under the emissions switch with every human carbon input doubled", cc))
 })
 
 test_that("switches compose, and unknown names are refused", {

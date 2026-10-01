@@ -122,6 +122,15 @@ CCX_MECHANISMS <- list(
       # warming straight past the zeroed sst_scale and the switch would only
       # HALF-remove the response it claims to remove (2026-08-18).
       p$sst_obs <- 0
+      # npp_tsens = 0: NPP's own temperature response (D2's greening term,
+      # NPP x exp(npp_tsens x GMST)). The SAME failure as sst_obs, a second
+      # time: the term is 0 at defaults and in every #13 mode, so the switch
+      # was complete until the D2 canonical made it live (hilda33d, -0.0079 /K).
+      # Measured there (2026-10-01): it left +1.52 ppm of the 2024 response on,
+      # so the switch removed -5.26 of -6.78 ppm. test-mechanisms.R now asserts
+      # the canonical's run is BLIND to the temperature record under this switch,
+      # which catches the next temperature path a refit makes live as well.
+      p$npp_tsens <- 0
       list(p = p, F = F)
     }
   ),
@@ -242,9 +251,18 @@ CCX_MECHANISMS <- list(
     # biosphere we had already cleared", which would leave the land relaxing
     # toward a smaller equilibrium and release ~290 GtC that the counterfactual
     # never took. The switch says "nature alone", so the forest is standing.
+    #
+    # AND N DEPOSITION (2026-10-01). ndep_NH/ndep_SH are ANTHROPOGENIC
+    # deposition above 1750, built from NOx + NH3 EMISSIONS (D2 (a), the ruled
+    # "emissions proxy"), and ccx_hold_climate() already classes them as
+    # emissions-driven. Left on, "nature alone" kept a human-made land sink: at
+    # the D2 canonical (hilda33d, ndep_ret 10.2) it held 21 GtC on land by 2024
+    # and put CO2 at 277.0 ppm instead of 282.3, so the warming release the
+    # caveat below promises was almost exactly cancelled. A zero column is
+    # inert at ndep_ret 0, so every #13 mode is unchanged.
     apply = function(p, F) {
       for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
-                   "cum_luc_NH", "cum_luc_SH")) F[[cc]] <- 0
+                   "cum_luc_NH", "cum_luc_SH", "ndep_NH", "ndep_SH")) F[[cc]] <- 0
       list(p = p, F = F)
     }
   ),
