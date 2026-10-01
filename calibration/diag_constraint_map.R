@@ -66,7 +66,7 @@ ccx_load_cpp()
 
 # ---- NAMED CONSTANTS: every label, filename and threshold derives from here ----
 CM_TAG        <- "constraint_map"
-CM_DATE       <- "20260925"   # the SHIPPED canonical artifact's date; see CM4
+CM_DATE       <- "20261001"   # the SHIPPED canonical artifact's date (hilda33d, rebuilt 2026-10-01; was 20260925 at hilda29l); see CM4
 # ⛔⛔ CM4  THE ARM (2026-09-26). The map used to be canonical-only. A SECOND
 #       evaluation point answers a question one point cannot: is the pins/pulls
 #       picture a property of the MODEL, or only of THIS FIT?

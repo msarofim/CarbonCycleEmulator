@@ -38,7 +38,7 @@
   31/33 npp_tsens            step +0.0009 u -> max |d logL|     1.28 | drop    0.51 vs  0.50 predicted
   32/33 imb_share_land       step +0.3434 u -> max |d logL|     0.56 | drop    0.74 vs  0.50 predicted
   33/33 imb_share_ocean_rest step +0.8079 u -> max |d logL|     1.00 | drop    1.00 vs  0.50 predicted
-  66 evaluations in 13.0 s
+  66 evaluations in 12.9 s
 
 === NONLINEARITY === measured drop > 5x the quadratic's prediction for 0 of 33 names
 === PINS vs PULLS === leverage-weighted share of cells with curvature >= 0.50: 8.5 %
