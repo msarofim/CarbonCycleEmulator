@@ -140,10 +140,12 @@ edm_price <- function(md, spinups = c("periodic", "aseasonal")) {
   # THE FILE'S OWN STRUCTURE (2026-09-08f): on the column default the same
   # vector scores -2.3e7 and nothing below reproduces.
   bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
+  # by stream (2026-10-01 c): the scalar is the same sum; the streams are kept for the mutation guard
   sc <- function(dm, sf) { old <- FORC_ENSO_DEMEAN
     assign("FORC_ENSO_DEMEAN", dm, envir = globalenv())
     on.exit(assign("FORC_ENSO_DEMEAN", old, envir = globalenv()), add = TRUE)
-    ccx_make_logpost(obs = edm_obs(), base_params = bp, spinup_fn = sf)(u0) }
+    v <- ccx_make_logpost(obs = edm_obs(), base_params = bp, spinup_fn = sf, by_stream = TRUE)(u0)
+    list(lp = as.numeric(v), st = attr(v, "streams")) }
   # FOUR distinct scorings, not eight (review B4, 2026-09-12): `own`/`other` are
   # ALIASES of the periodic/aseasonal pair, resolved from the spinup the file
   # RECORDS, and a caller that reads one vintage asks for only that one.
@@ -151,8 +153,9 @@ edm_price <- function(md, spinups = c("periodic", "aseasonal")) {
   stopifnot(own %in% spinups)
   r <- list(u0 = u0, bp = bp)
   for (s in spinups) {
-    r[[paste0("on_",  s)]] <- sc(TRUE,  ccx_spinup_from_label(s))
-    r[[paste0("off_", s)]] <- sc(FALSE, ccx_spinup_from_label(s))
+    on <- sc(TRUE,  ccx_spinup_from_label(s)); off <- sc(FALSE, ccx_spinup_from_label(s))
+    r[[paste0("on_",  s)]] <- on$lp;  r[[paste0("off_", s)]] <- off$lp
+    r[[paste0("st_on_", s)]] <- on$st; r[[paste0("st_off_", s)]] <- off$st
   }
   r$on_own   <- r[[paste0("on_",  own)]];   r$off_own   <- r[[paste0("off_", own)]]
   r$on_other <- r[[paste0("on_",  other)]]; r$off_other <- r[[paste0("off_", other)]]
@@ -200,7 +203,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 9.0242 under the adopted objective (#13, hilda29l); 17.8469 at the seas_ml 0 control hilda31pe", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth 0.0364 under objective #14 at hilda33d (9.0242 under #13 at hilda29l); 17.8469 at the seas_ml 0 control hilda31pe", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -263,12 +266,20 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 9.0242 under t
   # ENSO COEFFICIENTS the forcing multiplies; the limb's response is clipped by its floor and enters the
   # ocean as a volume exchange, not a coefficient on the index, so the flag's price halves (PA6's finding,
   # l2_array_read_csl3_20260920). MEASURED at the promoted file.
-  expect_equal(r$on_periodic - r$off_periodic, 9.0242, tolerance = 1e-4, scale = 1)
+  # 2026-10-01 (c): the canonical is `hilda33d` (objective #14; D2/D3 fitted, phi = 0): 9.0242 -> 0.0364
+  # (0.036416). NOT inert: the ENSO column's mean is 0 on and -0.061 off, and the streams move by up to
+  # +-2.8 log-units (d13c_level_SPO +2.82, d13c_level_MLO -2.21, co2_icecore -1.06, co2_level_SPO -0.76,
+  # co2_level_MLO +0.62, ...) -- in OPPOSITE directions, netting +0.036 where hilda29l's moved together.
+  # MEASURED at the promoted file (re-pin approved by Marcus).
+  expect_equal(r$on_periodic - r$off_periodic, 0.0364, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
   expect_equal(r0$on_periodic - r0$off_periodic, 17.8469, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
-  expect_gt(r$on_periodic - r$off_periodic, 1)
+  # ⚠ RE-CUT 2026-10-01 (c): it read the NET price (> 1), which a canonical whose rows move in OPPOSITE
+  # directions cancels (above). The flag's action is the streams' total |change| -- ~9.1 at hilda33d --
+  # so that is what the guard reads now (approved by Marcus).
+  expect_gt(sum(abs(unlist(r$st_on_periodic) - unlist(r$st_off_periodic))), 1)
   # ... and the two vintages must genuinely DIFFER, or `spinup_fn` is inert here
   # (27.04 under the aseasonal spinup, a cross-vintage number of no standing --
   # reported by the gap, not asserted as a value).

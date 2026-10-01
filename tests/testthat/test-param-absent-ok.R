@@ -13,7 +13,9 @@ test_that("carries-build tolerates the listed names ONLY, order preserved, and r
   expect_true(ccx_mode_carries_build(md))
   expect_true(all(ccx_mode_absent(md) %in% CCX_PARAM_ABSENT_OK))
   # a file that CARRIES the pair is this build's set outright
-  full <- md; full$param_names <- setdiff(CCX_PARAM_NAMES, names(md$pins))
+  # 2026-10-01 (c): the full set FOR THE FILE'S OWN STRUCTURE -- the canonical hilda33d opens the gate, so its
+  # set includes the four gated names (ccx_build_names_for()); re-pin approved by Marcus
+  full <- md; full$param_names <- setdiff(ccx_build_names_for(md), names(md$pins))
   expect_true(ccx_mode_carries_build(full)); expect_length(ccx_mode_absent(full), 0L)
   # MUTATIONS: drop a name that is NOT tolerated; scramble the order; add a retired name
   m1 <- md; m1$param_names <- setdiff(md$param_names, "h_ml")

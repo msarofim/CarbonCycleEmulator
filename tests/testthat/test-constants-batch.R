@@ -42,7 +42,11 @@ test_that("alpha_photo_eps: absent = the ledger's 18 (bit-exact for every regist
   # file leaves it absent (= the ledger's 18). Either way the base says which structure it is.
   expect_identical(attr(bp, "struct"), ccx_mode_struct(md))
   # 2026-09-20 (o): every label built ON hilda_c (hilda_cs, the limb labels) carries the constant too
-  if (ccx_mode_struct(md) %in% c("hilda_c", "hilda_cs", names(CCX_L2_RETURN_LAYERS))) expect_identical(bp$alpha_photo_eps, 15.6) else expect_false("alpha_photo_eps" %in% names(bp))
+  # 2026-10-01 (c): + the v0 family (phi = 0 and its arms, built on hilda_csl3 -> hilda_c), which carries it too;
+  # the list predated them and first mattered when hilda33d (hilda_csl3v0kaidgb) became the canonical (re-pin
+  # approved by Marcus)
+  if (ccx_mode_struct(md) %in% c("hilda_c", "hilda_cs", names(CCX_L2_RETURN_LAYERS), "hilda_csl3v0", "hilda_csl3v0k",
+                                 "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb")) expect_identical(bp$alpha_photo_eps, 15.6) else expect_false("alpha_photo_eps" %in% names(bp))
 })
 
 test_that("the batch is LIVE: each item moves the PI state on its own, and all three together", {

@@ -63,9 +63,12 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   bp   <- ccx_set_enso(bp, pm)
   for (n in names(pins)) bp[[n]] <- pins[[n]]
   spin <- ccx_spinup_from_label(ccx_mode_spinup(md))(bp)
+  # the structure's ENSO index and AOD mode, as dg_run() builds it since 2026-10-01 (c): the canonical
+  # hilda33d runs aod "anomaly" (re-pin approved by Marcus)
   F <- suppressWarnings(ccx_build_forcing("historical", DG_YEARS, prod_c14 = spin$prod_c14,
                                           luc_scale = pm$luc_scale,
-                                          bomb_total_kmol = pm$bomb_total))
+                                          bomb_total_kmol = pm$bomb_total,
+                                          enso_index = ccx_enso_index_of(bp), aod_mode = ccx_aod_mode_of(bp)))
   r <- ccx_run_fast(spin, F); r$F <- F
 
   ann <- .imb_env$app_sinks_annual(r$out, r$F)
@@ -89,8 +92,10 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   gcb <- as.data.frame(readRDS(ccx_path("data", "gcb_budget.rds"))$budget)
   s <- .imb_env$app_imbalance_decades(r$out, gcb, r$F)
   expect_equal(nrow(s), 7L)
-  expect_equal(sum(s$in_band), 4L)
-  expect_equal(s$miss[nrow(s)], 1.04, tolerance = 0.02)
+  # 2026-10-01 (c): at the canonical hilda33d (D2/D3 fitted): 5 decades in the band, the last decade's miss
+  # 0.87 (4 and 1.04 at hilda29l). MEASURED; re-pin approved by Marcus.
+  expect_equal(sum(s$in_band), 5L)
+  expect_equal(s$miss[nrow(s)], 0.87, tolerance = 0.02)
 
   # ---- the +0.32 decomposition, recomputed (added 2026-09-25) --------------
   # \u26d4 The info box used to TYPE "about 0.3 GtC" and name THREE terms. There
@@ -99,12 +104,16 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   # equation. This reproduces CHANGELOG 09-24 (i)'s 1959-2024 row instead.
   z <- .imb_env$app_imbalance_identity(r$out, gcb, r$F)
   expect_equal(z$window, c(1959L, 2024L))
-  expect_equal(z$d_land, +0.32, tolerance = 0.005)
+  # 2026-10-01 (c): the canonical is hilda33d. d_land +0.32 -> +0.462, d_luc -0.30 -> -0.214, -d_ocn -0.05 ->
+  # +0.002: D3 puts 59 % of the imbalance on the land (its sink sits higher against GCB's raw column) and the
+  # ocean sink now matches GCB's to 0.002 GtC/yr. imbal / cement are GCB's own (unchanged). MEASURED; re-pin
+  # approved by Marcus.
+  expect_equal(z$d_land, +0.462, tolerance = 0.005)
   expect_equal(z$imbal,  +0.54, tolerance = 0.005)
   expect_equal(z$cement, +0.09, tolerance = 0.005)
-  expect_equal(z$d_luc,  -0.30, tolerance = 0.005)
+  expect_equal(z$d_luc,  -0.214, tolerance = 0.005)
   expect_equal(-z$d_grow, +0.05, tolerance = 0.005)
-  expect_equal(-z$d_ocn,  -0.05, tolerance = 0.005)
+  expect_equal(-z$d_ocn,  +0.002, tolerance = 0.005)
   # \u26a0 THE CLOSURE IS ASSERTED AT ITS MEASURED SIZE, NOT AT ZERO. It is
   # -0.006 GtC/yr (the table's `num` column), ~2 % of the d_land it explains.
   # Asserting 3e-14 here would fail; asserting nothing would let the identity
@@ -116,7 +125,14 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   # would be decoration.
   expect_gt(abs(z$closure + z$d_grow), 0.02)
   # ...and the same for the ocean term, which is the other one that was missing.
-  expect_gt(abs(z$closure + z$d_ocn), 0.02)
+  # ⚠ 2026-10-01 (c): read at hilda29l BY NAME. At the canonical hilda33d the ocean term is ~0 (-0.002), so
+  # dropping it cannot move the closure and the check would have no power there; at hilda29l the term is
+  # material (0.05) and the mutation still tests the IDENTITY's code (approved by Marcus).
+  v29 <- dg_vector("hilda29l"); r29 <- dg_run(v29)
+  z29 <- .imb_env$app_imbalance_identity(r29$out, gcb, r29$F)
+  expect_gt(abs(z29$d_ocn), 0.02)                    # the term is material at this file: the check has power
+  expect_lt(abs(z29$closure), 0.02)
+  expect_gt(abs(z29$closure + z29$d_ocn), 0.02)
 })
 
 test_that("6. the info box COMPUTES its numbers instead of typing them", {

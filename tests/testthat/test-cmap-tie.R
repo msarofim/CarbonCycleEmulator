@@ -89,6 +89,7 @@ test_that("ON THE REAL PRODUCT, the two known near-ties read as ties", {
     else
       expect_match(ph[[i]], "mostly influenced", fixed = TRUE, info = top[[i]])
   }
-  # and, as measured 09-26: exactly two of the top three are ties
-  expect_equal(sum(mgn <= .env$APP_CMAP_TIE_PP), 2L)
+  # and, as measured: exactly TWO of the top three were ties at hilda29l (09-26); ONE at the canonical
+  # hilda33d (2026-10-01 c: the map rebuilt at the D2/D3 canonical; re-pin approved by Marcus)
+  expect_equal(sum(mgn <= .env$APP_CMAP_TIE_PP), 1L)
 })

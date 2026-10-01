@@ -488,8 +488,10 @@ test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonic
   # structure -- the ML's NH cycle FLAT, the SH cycle on): whole limb 0.286 @ 8.98 PASS (the scorecard's
   # number; the SPO limb is later by half a month with h_ml 58 and sst_seas_amp_NH 1.68), the blind read
   # 0.767 @ 4.10 -- the thermal phase, as before.
+  # At hilda33d (2026-10-01 c, the D2/D3 canonical): whole limb 0.280 @ 8.83 PASS (the scorecard's number;
+  # re-pin approved by Marcus).
   expect_true(full$pass)
-  expect_equal(full$mo,  8.98, tolerance = 0.05, scale = 1)
+  expect_equal(full$mo,  8.83, tolerance = 0.05, scale = 1)
   expect_equal(blind$mo, 4.10, tolerance = 0.05, scale = 1)
   expect_false(dg_gateS_verdict(list(mo = blind$mo, amp = blind$amp))$pass)
 })

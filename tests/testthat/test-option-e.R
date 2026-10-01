@@ -13,7 +13,7 @@
 #                    under "martin"; MARTIN_B is the constant the library reads.
 #   P0f MUTATIONS    gamma sign, band depth, every guard by name.
 #   N-E1 (re-scoped) at the export that reproduces the canonical's PI gradient,
-#                    the ocean_grad_dic row is within 1 log-unit (deep d13C reported).
+#                    the ocean_grad_dic row moves about 1 log-unit (deep d13C reported).
 # =====================================================================
 e_par <- function(struct = "hilda", seas_ml = 0, w_vent = 20, gamma_vent = 0.5, export = 9.08) {
   p <- ccx_apply_structure(ccx_default_params(), struct, seas_ml = seas_ml, pump_field = "martin")
@@ -194,7 +194,7 @@ test_that("P0f MUTATIONS: the Nino3.4 sign, the band's depth, and every guard by
   expect_equal(ccx_e_loop_eigbound(q, sp$grid), 2 * ccx_e_loop_eigbound(p, sp$grid), tolerance = 1e-12)
 })
 
-test_that("N-E1 (re-scoped): at the export reproducing the canonical's PI bottom-minus-ML gradient the ocean_grad_dic row is within 1 log-unit; the shape and the deep d13C shift are REPORTED", {
+test_that("N-E1 (re-scoped): at the export reproducing the canonical's PI bottom-minus-ML gradient the ocean_grad_dic row moves about 1 log-unit; the shape and the deep d13C shift are REPORTED", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
@@ -227,7 +227,9 @@ test_that("N-E1 (re-scoped): at the export reproducing the canonical's PI bottom
   # provenance of the matched-export read, not a bound on a live candidate.
   # At hilda30s (09-20 (o), hilda_cs: the ML's NH cycle flat, pump_grad 330 / pump_hs_gcm2 81 / h_ml 58):
   # the same construction moves the row 0.43 -- back under 1, as at hilda30c. MEASURED, recorded.
-  expect_equal(abs(st1[["ocean_grad_dic"]] - st0[["ocean_grad_dic"]]), 0.43, tolerance = 0.15, scale = 1)
+  # At hilda33d (2026-10-01 c, the D2/D3 canonical): 1.05 -- just over 1. MEASURED, recorded (re-pin approved
+  # by Marcus); option E stays CLOSED, so this remains provenance, not a bound.
+  expect_equal(abs(st1[["ocean_grad_dic"]] - st0[["ocean_grad_dic"]]), 1.05, tolerance = 0.15, scale = 1)
   cat(sprintf("\n  N-E1: export matching the canonical's PI bottom-minus-ML gradient (%.1f umol/kg): %.2f GtC/yr (the solved field: %.1f);\n        ocean_grad_dic %+.2f, ocean_grad_d13c %+.2f log-units vs the canonical\n",
               g0, E_match, sum(ccx_prepare(p0)$pump$NH$org + ccx_prepare(p0)$pump$NH$carb + ccx_prepare(p0)$pump$SH$org + ccx_prepare(p0)$pump$SH$carb),
               st1[["ocean_grad_dic"]] - st0[["ocean_grad_dic"]], st1[["ocean_grad_d13c"]] - st0[["ocean_grad_d13c"]]))
