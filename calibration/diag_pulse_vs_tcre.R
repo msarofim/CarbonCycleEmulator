@@ -183,12 +183,14 @@ a <- R[R$gtc == PT_REF & R$horizon == 100L, ]
 say("\n=== GATE ANCHOR === at the app's defaults (%d GtC, +100 yr): dT %.4f degC, %.3f degC/1000 GtC\n",
     PT_REF, a$dT, a$per1000)
 # The literal is a READING OFF THE RUNNING APP, not a constant this script feeds
-# (that would be self-reading). Re-read 2026-09-29 on the vvM default background:
-# the box printed 0.103 degC / 1.03 per 1000 GtC. (09-26, ssp245: 0.108 / 1.08 --
-# which this gate then FAILED against, proving it can.)
-PT_APP_SCREEN_PER1000 <- 1.03
-say("    the app's permanence box prints %.3f degC and %.2f degC/1000 GtC (read off the app 2026-09-29) -> %s\n",
-    PT_APP_SCREEN_PER1000 / 10, PT_APP_SCREEN_PER1000,
+# (that would be self-reading). Re-read 2026-10-01 at hilda33d on the vvM default
+# background: the box printed 0.136 degC / 1.36 per 1000 GtC. (09-29, hilda29l: 0.103 /
+# 1.03, which this gate FAILED against at hilda33d, as it should; 09-26, ssp245:
+# 0.108 / 1.08.)
+PT_APP_SCREEN_PER1000 <- 1.36
+PT_APP_SCREEN_DATE    <- "2026-10-01"
+say("    the app's permanence box prints %.3f degC and %.2f degC/1000 GtC (read off the app %s) -> %s\n",
+    PT_APP_SCREEN_PER1000 / 10, PT_APP_SCREEN_PER1000, PT_APP_SCREEN_DATE,
     if (abs(a$per1000 - PT_APP_SCREEN_PER1000) < 0.02) "PASS, this script is reading the same model"
     else "*** MISMATCH -- resolve before reading anything below ***")
 
