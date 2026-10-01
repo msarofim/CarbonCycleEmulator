@@ -1286,11 +1286,13 @@ ccx_mode_carries_build <- function(md) {
 #'   -- the constant by which this build's logpost at `u` exceeds the file's own)
 ccx_mode_start <- function(md = CCX_MODE_CANONICAL, who = "mode start") {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))   # a mode NAME, as ccx_mode_params()
-  ccx_gate_require(md, "ccx_mode_start()")
+  # a malformed parameter set first (the file is wrong whatever the gate), then the gate (the file is
+  # fine, but this process cannot encode its gated names) -- 2026-10-01
   if (!ccx_mode_carries_build(md))
     stop("ccx_mode_start(): this mode file was fitted on a different parameter set (",
          length(md$param_names), " names; this build fits ", length(CCX_PARAM_NAMES),
          " and tolerates only ", paste(ccx_param_absent_ok(md), collapse = ", "), " absent).")
+  ccx_gate_require(md, "ccx_mode_start()")
   pm <- ccx_migrate_par_set(ccx_mode_par_with_pins(md))
   pm <- suppressWarnings(ccx_seed_unencodable(pm, who))
   u  <- ccx_par_to_unc(pm)
@@ -1844,7 +1846,8 @@ ccx_load_mode <- function(arm = CCX_MODE_CANONICAL, base = NULL) {
   # THE BASE COMES FROM THE FILE'S OWN STRUCTURE (2026-09-08f): a hilda mode
   # overlaid on ccx_default_params() would run as a column, silently.
   if (is.null(base)) base <- ccx_mode_base(md)
-  ccx_gate_require(md, "ccx_load_mode()")   # an open-structure file needs the gate (2026-09-30)
+  # NO gate requirement here (2026-10-01): this RUNS the file (overlay + err), it never encodes, and
+  # ccx_overlay_par() carries the gated model names and `err` the shares, gate open or not.
   # a PINNED file (2026-09-13) carries this build's set MINUS its pins; the held
   # values come back through ccx_mode_par_with_pins() so the overlay below never
   # assigns NULL (which would DELETE the name and drop the model onto its absence
