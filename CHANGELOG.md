@@ -2,6 +2,44 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (m) — **Ruling 12 (B8): the assessment record is DRAFTED (`notes/assessment_2026-10-01_hilda33d_DRAFT.md`), with Marcus's verdict and acts left as placeholders. The post-flip scorecard, the final suite, and two lint repairs. Handoff: `notes/handoff_2026-10-01d_rulings_applied.md`.**
+
+**The post-flip scorecard** (`outputs/diagnostics/whole_model_scorecard_20261001_hilda33d_emisconst.{log,rds}`).
+- It ran on a frozen `git archive` of `508b2bf`, so it stamps `@?`. The new `CCX_SC_TAG_SUFFIX` keeps it from
+  overwriting the adoption-time scorecard, a third collision shape: one day, one canonical, two objectives.
+- hilda33d reproduces its restamped streams (−1369.3386, diff 6e−12).
+- On the like-for-like shared rows it leads the control by +4.18, the same to 2 dp as before the flip.
+- The gates keep hilda29l's / the adoption's pattern:
+  - PASS: 5, G (z −0.064), Q (0.551), 7 (ocean 3.11, land 3.02), S (month 8.83) and P7;
+  - FAIL: V (0.59×, z −4.52), H, GL (z −8.31) and D (z −6.51).
+- ENSO slope 0.85×. IRF(20/100/300) 0.508 / 0.360 / 0.271. The 1000-yr split is 18 / 60 / 22.
+- ⚠ Gate G first failed in the frozen copy ("cannot open the connection"): it reads
+  `data-raw/downloads/glodap_c13c14_subset.csv`, which git ignores. With the file supplied, it PASSES. A frozen
+  suite or scorecard copy needs BOTH git-ignored inputs, `nuclear14c` and that subset.
+
+**Two lint failures in the final suite, fixed without loosening the lint.** `test-mode-struct-lint` flagged four
+of this session's files: the ribbons driver, the D4 readout, the app's ribbon loader and the ribbons test. Each
+contained `readRDS(ccx_mode_file` and no literal `ccx_mode_base(`, because the resolver had moved into
+`ccx_mode_run_params()`.
+- `ccx_ribbons_problems()` now takes the mode NAME and reads it inside `R/paths.R`, the resolver file. The check
+  needs the stored vector, not a parameter list.
+- `ccx_mode_run_params()` takes `base = ccx_mode_base(md)`, and the two drivers pass it explicitly. The ribbons
+  driver resolves it once.
+- Measured: `ccx_mode_base()` is identical before and after the gate, pins and bands, so resolving it early
+  changes nothing.
+- Lint 5/5, ribbons 21/21, overlay lint 8/8.
+- ⛔ Twice this session a scripted multi-line replacement (`x[i] <- c(...)`) put only its FIRST line into one slot.
+  The R warning was "number of items to replace". Both times it dropped a code line from `R/paths.R`, and both
+  times a parse plus a diff read caught it. Use `append()` or Edit for a multi-line insert.
+
+**The final suite** at `508b2bf` (frozen copy `~/ccx_frozen/final_508b2bf`, BLAS pinned, the two git-ignored inputs
+supplied): **5532 passed, 2 failed, 0 errors, 4 skipped** (one skip fewer than before: the GLODAP subset was supplied mid-run, so a gate-G test that had skipped now ran). Both of its failures are the mode-struct lint repaired above.
+
+**B8, the draft.** It follows the 09-21 template: what changed since 09-21, the gate table at hilda33d, the chain,
+the named tensions (D4 with its retained N flux; the held band), what stays out of the freeze (the σ items, the
+stand-ins, 11/70 provisional constants, §C), and what would re-open it. **§5 (VERDICT) and §7 (the acts) are
+placeholders for Marcus.**
+
 ## 2026-10-01 (l) — **Ruling 11 (B7; "Laplace first, MCMC as the check"): the Laplace ribbons were BUILT, then FAILED their own check, and are HELD on Marcus's ruling ("Hold the bands (Recommended)"). The Hessian is right at the mode, but the posterior is strongly non-Gaussian along the CO₂-fertilisation ridge. The MCMC check is built and smoke-tested for Torch (Marcus: "Torch (Recommended)") and NOT submitted. Submission needs his authentication.**
 
 **Built** (`calibration/build_futures_ribbons.R`, `c12af28`).

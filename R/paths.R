@@ -701,9 +701,11 @@ ccx_mode_par_with_pins <- function(md) {
 #' @param pm a physical vector carrying the file's held values -- the caller's
 #'   ccx_mode_par_with_pins(md) (migrated if the file lacks a name), or a
 #'   decoded draw with the pins added
+#' @param base the file's own structure, ccx_mode_base(md); a driver that maps many draws
+#'   resolves it ONCE and passes it (the mode-struct lint then sees the resolver it uses)
 #' @return list(p, bomb_total, luc_scale)
-ccx_mode_run_params <- function(md, pm) {
-  p <- ccx_mode_base(md)
+ccx_mode_run_params <- function(md, pm, base = ccx_mode_base(md)) {
+  p <- base
   for (n in intersect(names(p), names(pm))) p[[n]] <- pm[[n]]
   p <- ccx_set_enso(p, pm)
   # `pump_mode` is a STRUCTURAL choice, not a fitted parameter, so it is not
@@ -723,10 +725,13 @@ ccx_mode_run_params <- function(md, pm) {
 #' silently. The vector, not the mode NAME, is compared -- a refit that kept the
 #' name would otherwise pass.
 #' @param r the artifact (readRDS of data/futures_ribbons.rds)
-#' @param md the canonical's loaded mode file
+#' @param mode the mode the bands must describe (a name for ccx_mode_file())
 #' @param scenarios the scenario ids the tab offers; @param vars its y-variables
 #' @return character(0) if valid, else one string per problem
-ccx_ribbons_problems <- function(r, md, scenarios, vars) {
+ccx_ribbons_problems <- function(r, mode = CCX_MODE_CANONICAL, scenarios, vars) {
+  # the mode is read HERE, in the resolver file: the check needs the STORED vector, not a
+  # parameter list, and a caller that read it by hand would trip the mode-struct lint for no reason
+  md <- readRDS(ccx_mode_file(mode))
   bad <- character(0)
   pv <- r$provenance
   if (is.null(pv) || is.null(r[["bands"]])) return("not a ribbons artifact (no provenance or no bands)")

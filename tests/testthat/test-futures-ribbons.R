@@ -37,7 +37,7 @@ if (file.exists(.fr_global))
       eval(e, .fr_env)
 .fr_have <- file.exists(.fr_file)
 .fr <- if (.fr_have) readRDS(.fr_file) else NULL
-.fr_md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
+.fr_md <- CCX_MODE_CANONICAL   # by NAME: ccx_ribbons_problems() reads the file itself
 
 FR_N_RULED     <- 1000                       # the ruled draw count
 FR_PROBS_RULED <- c(0.05, 0.50, 0.95)        # the ruled band (+ the median)

@@ -31,7 +31,7 @@ D4_COMMIT <- tryCatch({
 
 md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
 pm <- ccx_mode_par_with_pins(md)
-rp <- ccx_mode_run_params(md, pm)            # the app's own mapping (R/paths.R)
+rp <- ccx_mode_run_params(md, pm, base = ccx_mode_base(md))   # the app's own mapping, the file's own structure
 sp <- ccx_spinup_from_label(ccx_mode_spinup(md))(rp$p)
 tg <- ccx_npp_modern_target()
 F  <- ccx_build_forcing("historical", c(1750, tg$win[2]), prod_c14 = sp$prod_c14,

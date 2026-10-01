@@ -97,6 +97,7 @@ cat(sprintf("=== %s @%s, run %s ===\n", RB_DRIVER, RB_COMMIT, format(RB_T0, "%Y-
 
 # ---- the mode, its fitted set, and its covariance -------------------------
 md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
+RB_BASE <- ccx_mode_base(md)                  # the file's OWN structure, resolved once for every draw
 RB_GATE <- ccx_apply_gate(ccx_mode_struct(md))
 RB_PINS <- ccx_mode_pins(md)
 invisible(ccx_apply_pins(RB_PINS))
@@ -126,7 +127,7 @@ cat(sprintf("emissions interpolation for the runs: \"%s\" (the covariance predat
 run_vector <- function(pv) {
   pm <- pv
   for (n in names(RB_PINS)) pm[[n]] <- RB_PINS[[n]]
-  rp <- ccx_mode_run_params(md, pm)
+  rp <- ccx_mode_run_params(md, pm, base = RB_BASE)
   sp <- app_spinup(rp$p)
   nwarn <- 0L
   res <- lapply(RB_SCEN, function(s) {

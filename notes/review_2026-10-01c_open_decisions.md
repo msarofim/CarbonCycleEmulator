@@ -1,5 +1,17 @@
 # REVIEW 2026-10-01 (c) — what is waiting on Marcus after the `hilda33d` adoption
 
+> ⭐ **RULED 2026-10-01 (Marcus), all of §A and §B — applied in CHANGELOG 10-01 (j), (k), (l), (m).**
+> Verbatim: "1) Retire card 6. 2) Say about 1.4 dC per 1000 GtC. 3) Delete the fertilisation sentence where it
+> appears. 4) Fix Card 4 and 5, and the land pools, and add N deposition as a driver. 5) update the version to BETA
+> v1.0 CarboTope. 6) Do the recommendation. 7) Follow recommendations. 8) If it is a gross rate, then name it that.
+> 9) Reword: is should be specifically about CO2 fertilization, with nitrogen effects a different arm (even though
+> they matter for CO2 fertilization limits). 10) I think apply it now: I don't expect another refit anytime soon.
+> 11) Laplace first, MCMC as the check. 12) Draft after 1-11 are done."
+> Mapping: 1 = A1, 2 = A2, 3 = A3, 4 = A4–A7, 5 = B2, 6 = B1, 7 = B3 + B3b, 8 = B4, 9 = B5, 10 = B6, 11 = B7,
+> 12 = B8. Follow-up answers: B6's test ledger "Approve all"; B5 "No, wording only"; B7 MCMC "Torch"; the Laplace
+> band failed its check and is HELD ("Hold the bands"). B8's draft is `notes/assessment_2026-10-01_hilda33d_DRAFT.md`.
+> **§C stays unruled.** Read the handoff `notes/handoff_2026-10-01d_rulings_applied.md`, not this list, for the state.
+
 Follows `notes/handoff_2026-10-01b_hilda33d_adopted.md` §2–§3. Two subagent sweeps fed it:
 - every user-visible app string, checked against hilda33d;
 - every handoff since 09-22, for decisions never ruled.

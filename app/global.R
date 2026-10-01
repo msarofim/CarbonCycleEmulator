@@ -472,9 +472,9 @@ APP_RIBBONS <- local({
   if (!file.exists(APP_RIBBONS_FILE))
     return(list(ok = FALSE, why = "this build has no ribbons file"))
   r <- readRDS(APP_RIBBONS_FILE)
-  md <- tryCatch(readRDS(ccx_mode_file(CCX_MODE_CANONICAL)), error = function(e) NULL)
-  bad <- if (is.null(md)) "the canonical mode file is not in this build" else
-    ccx_ribbons_problems(r, md, APP_SCENARIOS, APP_FUTURE_YVARS)
+  md_ok <- file.exists(ccx_mode_file(CCX_MODE_CANONICAL))
+  bad <- if (!md_ok) "the canonical mode file is not in this build" else
+    ccx_ribbons_problems(r, CCX_MODE_CANONICAL, APP_SCENARIOS, APP_FUTURE_YVARS)
   if (length(bad)) {
     message("app: futures ribbons NOT drawn: ", paste(bad, collapse = "; "))
     return(list(ok = FALSE, why = bad[1]))
