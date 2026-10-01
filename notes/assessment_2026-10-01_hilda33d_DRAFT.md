@@ -127,7 +127,7 @@ comparisons).
   via `ccx_mode_file()`). 33 fitted names and nine held. Likelihood −1369.3386 on 26 rows, logpost −1405.411447.
   Hessian PD (cond 1.7e6), right at the mode, and NOT a usable Gaussian along the fertilisation ridge (§4.3).
 - **The objective:** #14, with the constant emissions interpolation.
-- **The suite at the final state:** [fill from `~/ccx_frozen/final_508b2bf/suite_508b2bf_all.log`].
+- **The suite at the final state:** `ca14204`, **5534 passed, 0 failed, 0 errors, 4 skipped** (frozen `git archive` + the two git-ignored inputs; `outputs/diagnostics/suite_20261001_ca14204_all.log`).
 - **A version tag?** [Marcus.] The existing git tag `v1.0-hilda29l` marks the 09-22 freeze. The app's release name is
   now BETA v1.0 CarboTope on hilda33d.
 - **The product:**

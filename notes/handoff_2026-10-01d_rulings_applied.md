@@ -77,7 +77,7 @@
 
 ## 4. State
 
-- **Suite at the final state:** [filled in CHANGELOG 10-01 (m)]. Frozen copy `~/ccx_frozen/final_508b2bf`, which also
+- **Suite at the final state (`ca14204`): 5534 passed, 0 failed, 0 errors, 4 skipped.** Frozen copy `~/ccx_frozen/final_ca14204`, which also
   holds the two git-ignored inputs `nuclear14c` and `glodap_c13c14_subset.csv`.
   - At `4f5e5db` (flip + restamp, before the re-pins) it was 5497 / 10 / 0 / 5. The 10 were the approved ledger.
 - **Running:** nothing (the app preview was already stopped at session start).
@@ -88,5 +88,5 @@
   - the `emissions-interp-constant` branch is SUPERSEDED by 10-01 (k). It can be deleted with Marcus's OK.
 - **Disposable:** `~/ccx_frozen/{suite_20261001j, ribbons_trial_20261001, ribbons_c12af28, final_508b2bf}`.
 - `carbotopecomment.9.26.26.docx` is Marcus's; leave it. `outputs/diagnostics/smoke/` stays untracked.
-- ⚠ Memory: `INDEX_ccx_app.md` is 14.2 KB, over its 14 KB soft budget (it was 14.1 before this session). The root
+- Memory: `INDEX_ccx_app.md` 14,230 B and `INDEX_ccx.md` 14,049 B, both under the 14 KB (14,336 B) soft budget. The root
   `MEMORY.md` is still over its soft budget (pre-existing).

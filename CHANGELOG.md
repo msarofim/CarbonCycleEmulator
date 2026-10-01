@@ -36,6 +36,9 @@ contained `readRDS(ccx_mode_file` and no literal `ccx_mode_base(`, because the r
 supplied): **5532 passed, 2 failed, 0 errors, 4 skipped** (one skip fewer than before: the GLODAP subset was supplied mid-run, so a gate-G test that had skipped now ran). Both of its failures are the mode-struct lint repaired above.
 
 **B8, the draft.** It follows the 09-21 template: what changed since 09-21, the gate table at hilda33d, the chain,
+
+**The suite after the lint repair** (`ca14204`, frozen copy `~/ccx_frozen/final_ca14204`):
+**5534 passed, 0 failed, 0 errors, 4 skipped**. The log is `outputs/diagnostics/suite_20261001_ca14204_all.log`.
 the named tensions (D4 with its retained N flux; the held band), what stays out of the freeze (the σ items, the
 stand-ins, 11/70 provisional constants, §C), and what would re-open it. **§5 (VERDICT) and §7 (the acts) are
 placeholders for Marcus.**
