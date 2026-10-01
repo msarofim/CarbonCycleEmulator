@@ -182,7 +182,11 @@ app_validate_param_meta <- function(names, meta = APP_PARAM_META,
 #' likelihood-only parameter is still one of the numbers the calibration fits.
 #' ⚠ When the gate fails, the table says so IN PLACE OF the rows: a label table
 #' that has gone short is a defect the page should report, not paper over.
-app_param_table <- function(names, values, meta = APP_PARAM_META) {
+app_param_table <- function(names, values, meta = APP_PARAM_META, extra = character(0)) {
+  # `extra` (2026-10-01): the GATED names a mode fits on top of the table (R/calibrate.R
+  # CCX_PARAM_GATED; the D2/D3 canonical from hilda33d). The base set stays CCX_PARAM_NAMES --
+  # Marcus's U1 (09-22): every parameter the build carries has a row, the held ones included.
+  names <- c(names, setdiff(extra, names))
   problems <- app_validate_param_meta(names, meta)
   if (length(problems))
     return(data.frame(

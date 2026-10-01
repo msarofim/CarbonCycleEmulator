@@ -1536,8 +1536,10 @@ dg_gateG <- function(v, obs, r = NULL) {
   aux  <- sp$aux
   grid <- ccx_ocean_grid(v$p$h_ml)
   yr   <- round(obs$epoch_mean)
+  # the structure's enso/aod modes (2026-10-01), as dg_run(): the canonical hilda33d runs aod "anomaly"
   F  <- ccx_build_forcing("historical", c(DG_YEARS[1], yr), prod_c14 = sp$prod_c14,
-                          bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
+                          bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale,
+                          enso_index = ccx_enso_index_of(v$p), aod_mode = ccx_aod_mode_of(v$p))
   rs <- ccx_run_fast(sp, F); st <- rs$state
   out <- if (is.null(r)) rs$out else r$out     # the epoch year's rows are the same rows
   rho <- ccx_const("RHO_SEAWATER")

@@ -589,26 +589,15 @@ ccx_overlay_par <- function(p, pm) {
     pm <- ccx_migrate_par_set(pm)
     attr(pm, "migrated_done") <- TRUE
   }
-  # THE GATED MODEL NAMES (2026-09-30; CCX_PARAM_GATED in R/calibrate.R: ndep_ret,
-  # npp_tsens). The loop below overlays only the names fitted IN THIS PROCESS, so a
-  # vector fitted under a structure that OPENS the gate, read with the gate closed,
-  # would lose them silently and the model would run D2 OFF. They go by the BASE's
-  # structure instead: overlaid when it opens the gate, and REFUSED when it holds it
-  # (an open-label fit on an older structure is a mixed model, not a mode). Zero is
-  # what a holding structure runs, so a migrated older vector passes.
-  g_have <- intersect(intersect(names(CCX_PARAM_GATED), names(p)), names(pm))
-  if (length(g_have)) {
-    if (ccx_gate_open(p)) {
-      for (n in g_have) p[[n]] <- pm[[n]]
-    } else {
-      on <- g_have[vapply(g_have, function(n) !isTRUE(pm[[n]] == 0), logical(1))]
-      if (length(on))
-        stop("ccx_overlay_par(): the vector carries ", paste(sprintf("%s = %g", on, unlist(pm[on])), collapse = ", "),
-             " -- fitted under a structure that OPENS the gate -- but the base structure '",
-             if (is.null(attr(p, "struct"))) "?" else attr(p, "struct"), "' HOLDS them OFF. ",
-             "Build the base from the vector's own structure (ccx_mode_base()).")
-    }
-  }
+  # THE GATED MODEL NAMES (2026-09-30; CCX_PARAM_GATED in R/calibrate.R: ndep_ret, npp_tsens).
+  # The loop below overlays only the names fitted IN THIS PROCESS, so a vector fitted under a
+  # structure that OPENS the gate, read with the gate closed, would lose them silently and the
+  # model would run D2 OFF. So they are copied whenever the vector carries them, like every other
+  # fitted name the base has a slot for: the model runs the vector's own values. Matching the
+  # base's STRUCTURE to the vector's is the caller's business, as it always was for every other
+  # name (a first cut REFUSED a holding base here, 2026-10-01; test-gate-bounds overlays the
+  # canonical's vector on the default base on purpose, for an unrelated property).
+  for (n in intersect(intersect(names(CCX_PARAM_GATED), names(p)), names(pm))) p[[n]] <- pm[[n]]
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
   p <- ccx_set_enso(p, pm)
   # `gamma_enso` is dropped by ccx_set_enso() BY DESIGN -- the retired scalar must

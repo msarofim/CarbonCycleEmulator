@@ -246,9 +246,9 @@ app_params <- local({
   # the value. Defaults to the no-offset behaviour (zero = absent, the
   # likelihood's own absence contract).
   rep_dC <- 0
-  # the fitted set the parameter table lists, and the D3 imbalance shares (2026-10-01): the
-  # defaults' are this build's table and none; a mode file replaces both with its own (below)
-  fit_names  <- CCX_PARAM_NAMES
+  # the GATED names the mode fits on top of the table, and the D3 imbalance shares (2026-10-01):
+  # none for the defaults; a mode file under a structure that opens the gate sets both (below)
+  gated_fit  <- character(0)
   imb_shares <- list()
   for (mode_file in mode_files) {
     if (!file.exists(mode_file)) next
@@ -274,10 +274,9 @@ app_params <- local({
     bomb_total <- pm$bomb_total
     luc_scale  <- pm$luc_scale
     rep_dC     <- if (is.null(pm$rep_dC)) 0 else pm$rep_dC
-    # the mode's OWN fitted set, the gated names included when its structure opens the gate
-    # (2026-10-01; R/calibrate.R ccx_build_names_for()): the parameter table lists what the fit
-    # fitted, not this process's table. The D3 shares ride along for the same table.
-    fit_names  <- setdiff(ccx_build_names_for(md), names(md$pins))
+    # the GATED names this mode fits (2026-10-01; R/calibrate.R CCX_PARAM_GATED): the parameter
+    # table lists them on top of CCX_PARAM_NAMES. The D3 shares ride along for the same table.
+    gated_fit  <- if (ccx_gate_open(ccx_mode_struct(md))) names(CCX_PARAM_GATED) else character(0)
     imb_shares <- pm[intersect(c("imb_share_land", "imb_share_ocean_rest"), names(pm))]
     # THE FILE'S OWN SPINUP (2026-09-21 h). Every mode since 09-09x is fitted under
     # the PERIODIC spinup (a seasonal mixed layer spun to its own annual cycle);
@@ -330,7 +329,7 @@ app_params <- local({
   }
   list(p = p, source = src, status = status, detail = detail,
        bomb_total = bomb_total, luc_scale = luc_scale, rep_dC = rep_dC,
-       spinup_label = spinup_label, fit_names = fit_names, imb_shares = imb_shares,
+       spinup_label = spinup_label, gated_fit = gated_fit, imb_shares = imb_shares,
        has_posterior = file.exists(post_file))
 })
 
@@ -344,8 +343,8 @@ APP_REP_DC     <- app_params$rep_dC
 # The counterfactual reruns below go through the same function, so a switched-off
 # mechanism is compared against the same equilibrium the base run started from.
 APP_SPINUP_LABEL <- app_params$spinup_label
-# the parameter table's names and the D3 shares (2026-10-01): the mode's own fitted set
-APP_FIT_NAMES  <- app_params$fit_names
+# the gated names the mode fits and the D3 shares, for the parameter table (2026-10-01)
+APP_GATED_FIT  <- app_params$gated_fit
 APP_IMB_SHARES <- app_params$imb_shares
 app_spinup <- ccx_spinup_from_label(APP_SPINUP_LABEL)
 

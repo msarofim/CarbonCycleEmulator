@@ -51,6 +51,11 @@ if (nzchar(SC_EXTRA)) { fsC <- list.files(SC_EXTRA, pattern = "^start_[0-9]+[.]r
   pmC <- ccx_migrate_par_set(ccx_mode_par_with_pins(bC)); pC <- ccx_mode_base(bC); pC$pump_mode <- bC$pump_mode   # a start file records `pins` too (09-13)
   ARMS[[basename(SC_EXTRA)]] <- list(p = ccx_overlay_par(pC, pmC), pm = pmC, luc_scale = pmC$luc_scale, bomb_total = pmC$bomb_total, sigma_d14c = pmC$sigma_d14c, rep_dC = pmC$rep_dC, grad_off_co2 = pmC$grad_off_co2, grad_off_d13c = pmC$grad_off_d13c,
                                     spinup = CCX_OBJECTIVE_SPINUP, spinup_label = ccx_spinup_label(CCX_OBJECTIVE_SPINUP), md = bC, pins = bC$pins, src = sprintf("%s best id %d (start file; spinup = objective's%s)", basename(SC_EXTRA), bC$id, if (length(bC$pins)) paste0("; PINNED ", ccx_pin_label(bC$pins)) else "")) }
+# Optional extra arm from a MODE FILE (2026-10-01): CCX_SC_EXTRA_MODE=<registered name or path>, e.g.
+# the previous canonical for a before/after read. dg_vector() reads it under its own structure (gate-aware).
+SC_EXTRA_MODE <- Sys.getenv("CCX_SC_EXTRA_MODE", "")
+if (nzchar(SC_EXTRA_MODE)) { vX <- dg_vector(SC_EXTRA_MODE); vX$src <- sprintf("%s (extra arm, CCX_SC_EXTRA_MODE)", SC_EXTRA_MODE)
+  ARMS[[basename(SC_EXTRA_MODE)]] <- vX }
 obs <- ccx_prepare_obs()
 arm_struct <- function(v) { s <- ccx_mode_struct(v$md); if (!nzchar(s)) "column" else s }
 cat("ARMS (each spun up as its file records):\n")
@@ -78,6 +83,15 @@ for (g in names(G)) { x <- G[[g]]; if (x[["n"]] == 0) next
   cat(sprintf("  %-14s %s %+9.2f %+9.2f   %s\n", g, paste(sprintf("%10.2f", x[an]), collapse = ""), x[[an[2]]] - x[[an[1]]], x[[an[3]]] - x[[an[2]]], paste(grep(SC_GROUPS[[g]], common, value = TRUE), collapse = " "))) }
 tot <- vapply(ST, function(s) sum(s[common]), numeric(1))
 cat(sprintf("  %-14s %s %+9.2f %+9.2f\n", "TOTAL common", paste(sprintf("%10.2f", tot), collapse = ""), tot[[2]] - tot[[1]], tot[[3]] - tot[[2]]))
+# ⚠ OBJECTIVE #14 (2026-10-01): an arm whose structure opens the gate scores the two GCB level rows
+# against MOVED targets (GCB + s * I(t)), so those rows are not like-for-like across arms. The total
+# without them is the comparable one.
+.gated_arms <- names(ARMS)[vapply(ARMS, function(v) ccx_gate_open(ccx_mode_struct(v$md)), logical(1))]
+if (length(.gated_arms)) { .c14 <- setdiff(common, c("gcb_land_sink", "gcb_ocean_sink"))
+  tot14 <- vapply(ST, function(s) sum(s[.c14]), numeric(1))
+  cat(sprintf("  %-14s %s %+9.2f %+9.2f   <- WITHOUT the two GCB level rows (%s score them against #14's moved targets)\n",
+              "TOTAL shared", paste(sprintf("%10.2f", tot14), collapse = ""), tot14[[2]] - tot14[[1]], tot14[[3]] - tot14[[2]],
+              paste(.gated_arms, collapse = ", "))) }
 for (a in an) { extra <- setdiff(names(ST[[a]]), common); if (length(extra)) cat(sprintf("  %s-only rows: %s\n", a, paste(sprintf("%s %.2f", extra, ST[[a]][extra]), collapse = ", "))) }
 ncommon <- setdiff(Reduce(union, lapply(ST, names)), common)
 if (length(ncommon)) cat(sprintf("  rows not common to every arm: %s  (TOTAL incl. them: %s)\n", paste(ncommon, collapse = " "), paste(sprintf("%s %.2f", an, vapply(ST, sum, numeric(1))), collapse = ", ")))

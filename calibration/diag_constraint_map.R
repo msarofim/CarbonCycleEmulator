@@ -137,7 +137,8 @@ CM_PIN_CUT    <- 0.5          # curvature fraction above which we call it "pins"
 # ([[retiring_an_arm_unlints_its_path]]: "is it covered?" and "does it still
 # EXIST?" are two questions and need two tests).
 CM_COMPONENT_ALL <- list(
-  "Land uptake"            = c("beta_max", "fert_k", "q10"),
+  # + N retention and greening (D2; the gated names fitted from hilda33d, 2026-10-01)
+  "Land uptake"            = c("beta_max", "fert_k", "q10", "ndep_ret", "npp_tsens"),
   "Air-sea gas exchange"   = c("k_w"),
   "Mixed layer & vertical mixing" = c("h_ml", "kz", "kz_deep_frac", "tau_ex"),
   "High-latitude structure"= c("hs_asx_frac", "h_hs", "u_hs"),
@@ -148,14 +149,19 @@ CM_COMPONENT_ALL <- list(
                                "ent_seas_amp_SH"),
   "ENSO response"          = c("w_enso_l2", "gamma_enso_land_NH", "gamma_enso_land_SH",
                                "gamma_enso_ocn_NH", "gamma_enso_ocn_SH"),
+  # + the GCB-imbalance shares (D3, objective #14; from hilda33d, 2026-10-01): a target choice
   "Input scalings & reporting" = c("bomb_total", "luc_scale", "sigma_d14c",
-                                   "rep_dC", "grad_off_co2", "grad_off_d13c")
+                                   "rep_dC", "grad_off_co2", "grad_off_d13c",
+                                   "imb_share_land", "imb_share_ocean_rest")
 )
 # Names that a REGISTERED arm other than this one carries. Listed explicitly, by
 # hand, so the union cannot quietly absorb a typo. Gated below (GATE UNION).
 CM_ARM_ONLY_NAMES <- c("w_enso_l2",                                  # canonical / hilda32f
                        "ent_seas_amp_SH",                            # hilda32f / hilda31pe
-                       "gamma_enso_ocn_NH", "gamma_enso_ocn_SH")     # hilda32f / hilda31pe
+                       "gamma_enso_ocn_NH", "gamma_enso_ocn_SH",     # hilda32f / hilda31pe
+                       # the GATED names: only an arm whose structure opens the gate fits them
+                       # (the canonical hilda33d, 2026-10-01)
+                       "ndep_ret", "npp_tsens", "imb_share_land", "imb_share_ocean_rest")
 
 # The observation families. ⚠ Same rule: every stream exactly once, gated.
 # ⚠ THESE STRINGS ARE READER-FACING: they are the app's own axis labels and
