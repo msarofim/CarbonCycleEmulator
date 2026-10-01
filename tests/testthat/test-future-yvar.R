@@ -101,6 +101,10 @@ stopifnot(is.character(PULSE_METHOD), length(PULSE_METHOD) == 1L)
        pulse = run(pulse_em, PULSE_METHOD),
        base_default  = run(base_em,  CCX_EMIS_METHOD_DEFAULT),
        pulse_default = run(pulse_em, CCX_EMIS_METHOD_DEFAULT),
+       # the retired default, run by NAME (2026-10-01): (c3) needs it to show the
+       # flip removed a real defect rather than nothing
+       base_spline   = run(base_em,  "spline"),
+       pulse_spline  = run(pulse_em, "spline"),
        year = pyear, gtc = gtc)
 })
 
@@ -211,19 +215,29 @@ test_that("(c2) the COUPLED pair's pre-pulse residual VANISHES as the loop conve
   expect_lte(tight, loose)      # monotone: tightening never makes it worse
 })
 
-# ⛔ AND THE DEFAULT PATH IS STILL ACAUSAL, DELIBERATELY. The forcing path is
-# frozen (objective #13) and flipping its default re-baselines every stored
-# logpost -- that is `emissions-interp-constant`'s ledger to pay, not this fix's.
-# This arm exists so the untaken half cannot be forgotten, and so that anyone who
-# DOES flip the default is told by a failing test that the ledger is now due.
-test_that("(c3) the DEFAULT interpolation still rings, and the app does not use it", {
+# ⭐ THE DEFAULT PATH IS CAUSAL TOO, SINCE 2026-10-01: THE LEDGER IS PAID.
+# Until then this test asserted the opposite on purpose -- "the DEFAULT
+# interpolation still rings, and the app does not use it" -- so that whoever
+# flipped CCX_EMIS_METHOD_DEFAULT would be told by a failing test that the
+# `emissions-interp-constant` ledger was due. Marcus ruled the flip on 2026-10-01
+# (review 10-01c B6, "apply it now"), every registered mode was restamped at its
+# priced move (calibration/diag_emis_constant_price.R), and this now asserts the
+# paid state: the default IS the app's method, the default pair is causal to the
+# coupled loop's own bound ((c2)'s), and -- the power -- the retired spline, run
+# by name, still rings. Flip the default back and the first two fail.
+test_that("(c3) the DEFAULT interpolation is the causal one (ledger paid 2026-10-01); the spline still rings", {
   pre <- .f4$base_default$year < .f4$year
   ppm <- .f4$gtc / ccx_const("GtC_PER_PPM")
-  d <- .f4$pulse_default$co2_ppm[pre] - .f4$base_default$co2_ppm[pre]
-  expect_gt(max(abs(d)) / ppm, 0)          # the defect is real and unfixed there
-  expect_true(any(d > 0) && any(d < 0))    # a RINGING, not a one-signed leak
-  # The two methods must actually differ, or (c) passes for the wrong reason.
-  expect_false(identical(PULSE_METHOD, CCX_EMIS_METHOD_DEFAULT))
+  expect_identical(CCX_EMIS_METHOD_DEFAULT, PULSE_METHOD)
+  d_def <- .f4$pulse_default$co2_ppm[pre] - .f4$base_default$co2_ppm[pre]
+  expect_lt(max(abs(d_def)), 1e-4)         # (c2)'s bound at the shipped loop tolerance
+  # POWER: the method the flip retired, run by name, still leaks a ringing
+  # (2026-09-24: 4.70 ppm of uncoupled CO2 before a 2050 pulse)
+  pre_s <- .f4$base_spline$year < .f4$year
+  d_spl <- .f4$pulse_spline$co2_ppm[pre_s] - .f4$base_spline$co2_ppm[pre_s]
+  expect_gt(max(abs(d_spl)) / ppm, 0.01)    # at least 1 % of one pulse-ppm before the pulse
+  expect_true(any(d_spl > 0) && any(d_spl < 0))   # a RINGING, not a one-signed leak
+  expect_gt(max(abs(d_spl)), 100 * max(abs(d_def)))
 })
 
 # ---- (d) the takeaway's comparison clause is reachable ---------------

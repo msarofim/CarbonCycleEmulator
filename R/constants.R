@@ -1056,9 +1056,21 @@ CCX_BOMB_REF <- 102
 CCX_LUC_COLS <- c("e_luc_NH", "e_luc_SH", "cum_luc_NH", "cum_luc_SH")
 
 # ⭐ HOW ANNUAL EMISSIONS ARE SPREAD ACROSS THE MONTHS OF THEIR YEAR.
-# "spline" is the incumbent and is what every stored logpost was produced
-# under, so it stays the default until the `emissions-interp-constant` branch
-# pays that ledger deliberately. "constant" is piecewise-constant within the
-# year: exactly conserving, shape-preserving, and CAUSAL -- a one-year pulse
-# cannot ring backwards into the years before it.
-CCX_EMIS_METHOD_DEFAULT <- "spline"
+# "constant" is piecewise-constant within the year: exactly conserving,
+# shape-preserving, and CAUSAL -- a one-year pulse cannot ring backwards into
+# the years before it. "spline" (a natural spline, a GLOBAL interpolant) rang
+# 3.06 ppm into the 26 years before a 100 GtC pulse ([[ccx_pulse_spline_ringing]]).
+# ⭐⭐ FLIPPED "spline" -> "constant" 2026-10-01 (Marcus, review 10-01c B6: "I
+# think apply it now: I don't expect another refit anytime soon"). Ruled 09-24
+# ("option 1", branch `emissions-interp-constant`, 35f38dc) to ride with the
+# next refit; it missed the #14 refit and is applied WITHOUT one. The ledger is
+# paid by RESTAMPING every registered mode at its PRICED likelihood move
+# (calibration/diag_emis_constant_price.R, outputs/diagnostics/
+# emis_constant_price_20261001.*: hilda33d -0.1624, hilda29l -0.1367, hilda32f
+# -0.1567, hilda31s2 -0.0180, hilda31pe -0.1789; the 09-24 measurement at
+# hilda29l was -0.137). Every file keeps its pre-flip streams and logpost in
+# `objective_history`. ⚠ It moves the objective's fossil + LUC interpolation
+# AND ccx_run_coupled()'s default for both emissions and the GMST feedback, i.e.
+# every futures run that does not name a method. The app's pulse lab already
+# used "constant" (APP_PULSE_EMIS_METHOD) and is unchanged.
+CCX_EMIS_METHOD_DEFAULT <- "constant"
