@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (i) — Handoff: `notes/handoff_2026-10-01c_post_adoption_sweep.md`. ((h) is claimed by the unmerged git-stamp branch `claude/youthful-blackburn-fbc009`, so letters stay unique on merge.) The review list for Marcus is `notes/review_2026-10-01c_open_decisions.md`. `test-pulse-linearity` is a DELIBERATE named red until he rewords the pulse box (A2). Only the app preview is running.
+
 ## 2026-10-01 (g) — **The handoff's open items, swept and re-checked against hilda33d; two counterfactual switches fixed; one named red. The adoption repointed every consumer that follows `CCX_MODE_CANONICAL`, but much of what the APP SAYS was written about hilda29l, and some of it is now false. Worst cases: Known-issues card 6 prints its verdict backwards, and the pulse box contradicts its own headline. The full review list is `notes/review_2026-10-01c_open_decisions.md`.**
 
 **Fixed (`4fd433d`): two What-if switches were incomplete at the D2 canonical.** Both were complete until
