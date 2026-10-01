@@ -1,0 +1,12 @@
+=== calibration/diag_laplace_axes.R @46d96f3, run 2026-10-01 12:10; mode hilda33d logpost -1405.4114; Sigma eigenvalues (u-space var) 1.09 .. 6.39e-07 ===
+stored Hessian: hess_eps_frac 0.1; unstable steps: none
+drop = lp(u0 + s sd v) - lp0, against the quadratic's -s^2/2:
+axis 1 (sd 1.042; kz_deep_frac +0.93, imb_share_ocean_rest -0.30, kz -0.11): -2 sd -2.51 | -1 sd -0.50 | -0.5 sd -0.12 | +0.5 sd -0.15 | +1 sd -0.83 | +2 sd -8.40
+axis 2 (sd 0.966; imb_share_ocean_rest -0.89, kz_deep_frac -0.30, imb_share_land -0.21): -2 sd -9.16 | -1 sd -1.03 | -0.5 sd -0.16 | +0.5 sd -0.15 | +1 sd -1.10 | +2 sd -14.23
+axis 3 (sd 0.740; beta_max +0.89, fert_k +0.30, ndep_ret -0.28): -2 sd -938.45 | -1 sd -61.32 | -0.5 sd -3.79 | +0.5 sd -3.18 | +1 sd -43.57 | +2 sd -517.98
+axis 4 (sd 0.564; imb_share_land +0.63, h_hs -0.52, ndep_ret -0.40): -2 sd -67.63 | -1 sd -4.30 | -0.5 sd -0.35 | +0.5 sd -0.33 | +1 sd -3.75 | +2 sd -51.11
+axis 5 (sd 0.516; h_hs -0.80, ndep_ret +0.38, imb_share_land -0.23): -2 sd -16.75 | -1 sd -1.53 | -0.5 sd -0.19 | +0.5 sd -0.20 | +1 sd -1.84 | +2 sd -26.48
+axis 6 (sd 0.403; ndep_ret -0.55, imb_share_land -0.54, pump_hs_gcm2 +0.45): -2 sd -25.74 | -1 sd -1.78 | -0.5 sd -0.20 | +0.5 sd -0.18 | +1 sd -1.42 | +2 sd -15.34
+axis 7 (sd 0.355; seas_T_amp_SH -0.81, npp_frac_NH +0.48, pump_hs_gcm2 -0.20): -2 sd -2.32 | -1 sd -0.49 | -0.5 sd -0.12 | +0.5 sd -0.12 | +1 sd -0.49 | +2 sd -2.28
+axis 8 (sd 0.339; pump_hs_gcm2 -0.50, h_ml +0.45, imb_share_land -0.36): -2 sd -3.26 | -1 sd -0.55 | -0.5 sd -0.12 | +0.5 sd -0.14 | +1 sd -0.74 | +2 sd -3.29
+(quadratic: +-0.5 sd -0.125, +-1 sd -0.5, +-2 sd -2.0)

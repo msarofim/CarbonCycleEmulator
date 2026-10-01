@@ -37,6 +37,9 @@
 #
 # Usage (from the repo root):
 #   Rscript calibration/build_futures_ribbons.R [--n=1000] [--cores=8] [--out=data/futures_ribbons.rds]
+#   ... --draws=<rds of a u-space matrix, colnames = the fitted names> --out=<not data/>
+#   pushes SUPPLIED draws (the MCMC check's pooled posterior, calibration/run_mcmc_check.R)
+#   through the SAME machinery, so the two bands differ only in where the draws came from.
 # =====================================================================
 RB_ARGS <- commandArgs(trailingOnly = TRUE)
 rb_arg <- function(key, default) {
@@ -59,6 +62,9 @@ RB_DRIVER     <- "calibration/build_futures_ribbons.R"
 RB_N          <- as.integer(rb_arg("n", 1000L))
 RB_CORES      <- as.integer(rb_arg("cores", 8L))
 RB_OUT        <- file.path(RB_ROOT, rb_arg("out", file.path("data", "futures_ribbons.rds")))
+RB_DRAWS_FILE <- rb_arg("draws", "")           # supplied draws instead of the Gaussian (see Usage)
+if (nzchar(RB_DRAWS_FILE) && grepl("^data/", sub(paste0("^", RB_ROOT, "/"), "", RB_OUT)))
+  stop("--draws output must not land in data/: the app reads data/futures_ribbons.rds")
 RB_DATE       <- format(Sys.Date(), "%Y%m%d")
 # the log is named after the artifact, so a byte-identity rerun (--out elsewhere) logs apart
 RB_LOG        <- file.path(RB_ROOT, "outputs", "diagnostics",
@@ -147,13 +153,21 @@ cat(sprintf("decoded mode vs the app's APP_SPIN runs: max |diff| %.3g (tol %g) o
 if (!(dc < RB_CENTRAL_TOL)) stop("the draw machinery does not reproduce the app's central line")
 
 # ---- THE DRAWS (the only RNG in this driver) ------------------------------
-L <- chol(Sig)                                  # Sig = t(L) %*% L
-RNGkind(RB_RNG_KIND[1], RB_RNG_KIND[2], RB_RNG_KIND[3])
-set.seed(RB_SEED)                               # immediately before the one rnorm() call
-Z <- matrix(stats::rnorm(RB_N * k), RB_N, k)
-U <- sweep(Z %*% L, 2, u0, "+"); colnames(U) <- names(u0)
-cat(sprintf("\n--- %d draws (seed %d, %s), %d cores ---\n", RB_N, RB_SEED,
-            paste(RB_RNG_KIND, collapse = "/"), RB_CORES))
+if (nzchar(RB_DRAWS_FILE)) {
+  U <- readRDS(file.path(RB_ROOT, RB_DRAWS_FILE))
+  stopifnot(is.matrix(U), identical(colnames(U), names(u0)), all(is.finite(U)))
+  RB_N <- nrow(U)
+  RB_DRAWS_MD5 <- unname(tools::md5sum(file.path(RB_ROOT, RB_DRAWS_FILE)))
+} else {
+  L <- chol(Sig)                                  # Sig = t(L) %*% L
+  RNGkind(RB_RNG_KIND[1], RB_RNG_KIND[2], RB_RNG_KIND[3])
+  set.seed(RB_SEED)                               # immediately before the one rnorm() call
+  Z <- matrix(stats::rnorm(RB_N * k), RB_N, k)
+  U <- sweep(Z %*% L, 2, u0, "+"); colnames(U) <- names(u0)
+}
+cat(sprintf("\n--- %d draws (%s), %d cores ---\n", RB_N,
+            if (nzchar(RB_DRAWS_FILE)) paste("supplied:", RB_DRAWS_FILE) else
+              sprintf("seed %d, %s", RB_SEED, paste(RB_RNG_KIND, collapse = "/")), RB_CORES))
 t1 <- Sys.time()
 runs <- parallel::mclapply(seq_len(RB_N), function(i) tryCatch(
   run_vector(ccx_unc_to_par(U[i, ])), error = function(e) list(error = conditionMessage(e))),
@@ -228,7 +242,7 @@ out <- list(
     mode = CCX_MODE_CANONICAL, struct = ccx_mode_struct(md),
     mode_file = sub(paste0("^", RB_ROOT, "/"), "", ccx_mode_file(CCX_MODE_CANONICAL)),
     mode_logpost = md$logpost, par_mode = md$par_mode, u_center = u0,
-    method = paste("Laplace: multivariate normal in the unconstrained (u) space at the stored mode,",
+    method = if (nzchar(RB_DRAWS_FILE)) sprintf("SUPPLIED draws %s (md5 %s), each run like a Laplace draw", RB_DRAWS_FILE, RB_DRAWS_MD5) else paste("Laplace: multivariate normal in the unconstrained (u) space at the stored mode,",
                    "covariance = the mode file's stored inverse negative Hessian; each draw decoded",
                    "through the file's own transforms and bands (ccx_adopt_mode_band), the held",
                    "values added back, and run through the full nonlinear model (its own spin-up,",
@@ -239,8 +253,8 @@ out <- list(
     n_draws = RB_N, n_ok = sum(ok), n_failed = sum(!ok), n_warnings = nwarn,
     probs = RB_PROBS, scenarios = RB_SCEN, years = range(RB_YEAR), vars = RB_VARS,
     emis_method = CCX_EMIS_METHOD_DEFAULT,
-    seed = RB_SEED, rng_kind = RB_RNG_KIND,
-    seed_applied = paste("set.seed() immediately before the single rnorm(n_draws x n_names) call that",
+    seed = if (nzchar(RB_DRAWS_FILE)) NA_integer_ else RB_SEED, rng_kind = RB_RNG_KIND,
+    seed_applied = if (nzchar(RB_DRAWS_FILE)) "draws supplied: their seeds are recorded in their own source (e.g. each MCMC chain file)" else paste("set.seed() immediately before the single rnorm(n_draws x n_names) call that",
                          "draws the standard normals; the draw matrix is fixed before any model run,",
                          "so the forked runs consume no RNG"),
     central_check_max_abs = dc, central_check_tol = RB_CENTRAL_TOL))

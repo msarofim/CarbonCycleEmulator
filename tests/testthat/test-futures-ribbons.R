@@ -7,6 +7,13 @@
 # conditional on the nine held values". calibration/build_futures_ribbons.R
 # builds it; the app only reads it.
 #
+# ⛔ HELD (Marcus 2026-10-01: "Hold the bands (Recommended)"): the band FAILED its own
+# check (the draws a median 25 log-units below the Gaussian, importance ESS 8 / 1000;
+# calibration/diag_ribbons_linearity.R, diag_laplace_axes.R), so nothing ships in data/
+# and the app draws no band while APP_RIBBONS_HOLD is set. What is tested here is (i) the
+# hold itself and (ii) the machinery, on the HELD EVIDENCE artifact in outputs/diagnostics/
+# -- so the day the MCMC posterior goes through the same driver, its checks already exist.
+#
 # ⛔ WHAT THIS GUARDS. A band is a claim about the FIT it surrounds. Built at one
 # parameter vector and drawn around another's line, it would look exactly as
 # plausible and be wrong -- so the artifact must name the vector it was built
@@ -18,7 +25,7 @@
 # ⚠ MUTATION-TESTED below: each failure the check exists for is fed to it.
 # =====================================================================
 
-.fr_file   <- file.path(.root, "data", "futures_ribbons.rds")
+.fr_file   <- file.path(.root, "outputs", "diagnostics", "futures_ribbons_laplace_held_20261001.rds")
 .fr_global <- file.path(.root, "app", "global.R")
 # the tab's scenario ids and y-variables, PARSED out of global.R (pure literals;
 # sourcing it would compile the core and run a spin-up)
@@ -26,7 +33,7 @@
 if (file.exists(.fr_global))
   for (e in parse(.fr_global))
     if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") &&
-        is.name(e[[2]]) && as.character(e[[2]]) %in% c("APP_SCENARIOS", "APP_FUTURE_YVARS"))
+        is.name(e[[2]]) && as.character(e[[2]]) %in% c("APP_SCENARIOS", "APP_FUTURE_YVARS", "APP_RIBBONS_HOLD"))
       eval(e, .fr_env)
 .fr_have <- file.exists(.fr_file)
 .fr <- if (.fr_have) readRDS(.fr_file) else NULL
@@ -35,8 +42,20 @@ if (file.exists(.fr_global))
 FR_N_RULED     <- 1000                       # the ruled draw count
 FR_PROBS_RULED <- c(0.05, 0.50, 0.95)        # the ruled band (+ the median)
 
-test_that("the ribbons were built for THIS fit (the app's own validity check)", {
-  skip_if_not(.fr_have, "no data/futures_ribbons.rds: run calibration/build_futures_ribbons.R")
+test_that("the band is HELD: the app draws none, whatever sits in data/", {
+  skip_if_not(file.exists(.fr_global), "app/global.R is not present")
+  expect_true(is.character(.fr_env$APP_RIBBONS_HOLD) && nzchar(.fr_env$APP_RIBBONS_HOLD),
+              info = "APP_RIBBONS_HOLD was lifted: that needs a ruling (and the MCMC check)")
+  g <- paste(readLines(.fr_global, warn = FALSE), collapse = "\n")
+  # the loader returns before it reads any file while the hold is set
+  expect_true(grepl("if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE", g, fixed = TRUE))
+  # MUTATION: a loader without the guard is caught by the same match
+  g2 <- sub("if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE", "", g, fixed = TRUE)
+  expect_false(grepl("if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE", g2, fixed = TRUE))
+})
+
+test_that("the held evidence was built for THIS fit (the app's own validity check)", {
+  skip_if_not(.fr_have, "the held Laplace evidence artifact is absent")
   p <- ccx_ribbons_problems(.fr, .fr_md, .fr_env$APP_SCENARIOS, .fr_env$APP_FUTURE_YVARS)
   expect_equal(p, character(0), info = paste(p, collapse = " | "))
 })

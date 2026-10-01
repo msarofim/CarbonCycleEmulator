@@ -2,6 +2,100 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (l) — **Ruling 11 (B7; "Laplace first, MCMC as the check"): the Laplace ribbons were BUILT, then FAILED their own check, and are HELD on Marcus's ruling ("Hold the bands (Recommended)"). The Hessian is right at the mode, but the posterior is strongly non-Gaussian along the CO₂-fertilisation ridge. The MCMC check is built and smoke-tested for Torch (Marcus: "Torch (Recommended)") and NOT submitted. Submission needs his authentication.**
+
+**Built** (`calibration/build_futures_ribbons.R`, `c12af28`).
+- 1000 draws ~ MVN(u at the mode, the mode file's stored covariance). Each draw is decoded through the
+  file's own transforms and bands, the nine held values are added back, and it runs through the full
+  model (its own spin-up, then all seven vV scenarios to 2150) by the APP's own functions
+  (`shiny::loadSupport`).
+- The run used a frozen `git archive` copy (`~/ccx_frozen/ribbons_c12af28`), 8 cores, 8.4 min of draws.
+  0 draws failed and 1 warning was muffled.
+- The decoded mode reproduces the app's central runs exactly (max |diff| 0).
+- **Two runs are BYTE-IDENTICAL** (md5 `0bf57f5a…`). The seed, the RNG kind and where it is applied are
+  recorded in the artifact.
+- **T1:** draw 1, re-run from the recorded seed, reproduces the artifact IDENTICALLY.
+- One mapping, `ccx_mode_run_params()`, now serves both the app and the draws.
+- One validity check, `ccx_ribbons_problems()`, now serves both the app loader and the test.
+
+**The pre-check flagged it.** Sampled sd over linear (delta-method) sd: 1.62 (vvH CO₂ 2150), 2.02 (vvVL
+CO₂ 2150), 1.91 (vvM GMST 2100). All three cells agree, and a 1000-draw sd carries ~2 % error. The bands
+were also right-skewed (vvH 2150: 812–851 around a central 827, skew +1.16). Diagnosed, not
+rationalised (`calibration/diag_ribbons_linearity.R`, `outputs/diagnostics/ribbons_linearity_20261001.log`):
+- **T2:** the draws carry Σ: sd ratios 0.95–1.05, max standardised covariance error 0.099 over 561
+  entries.
+- **T3:** the delta method on the SAME draws gives 7.85 against √(g′Σg) 7.88. The arithmetic is right,
+  so the excess is the MODEL's.
+- **T4:** the residual tracks the SQUARE of `beta_max`'s displacement (corr +0.82 / +0.73 / +0.76),
+  then `fert_k`. The futures are convex along the fertilisation amplitude.
+- **T5, the decisive one:** every draw scored on the objective. Δ = lp − lp_quad has median **−25.5**,
+  5–95 % [−906, +0.34], min −7115. The **importance ESS is 8 of 1000** (largest weight 0.317).
+  - The reweighted cells are narrower: vvH 2150 818 / 831 / 837 against 812 / 828 / 851. With ESS 8
+    that is not a usable estimate.
+- **Hessian bug, or posterior shape?** Measured along Σ's own principal axes
+  (`calibration/diag_laplace_axes.R`; `outputs/diagnostics/laplace_axes_20261001.log`, plus a
+  small-step scratch run):
+  - axis 1 (`kz_deep_frac`): exactly quadratic, 1.0× the Hessian's curvature at 0.05–0.2 sd;
+  - **axis 3 (`beta_max` +0.89, `fert_k` +0.30, `ndep_ret` −0.28):** 1.4× at 0.05 sd, 2.2× at 0.1,
+    5.4× at 0.2, **~30× at 0.5 sd** (drops −3.8 / −3.2 where the quadratic says −0.125), and −938 /
+    −518 at ±2 sd;
+  - axes 4–6: 1.5–3× at 1 sd;
+  - axes 7–8: quadratic.
+  - ⇒ **The Hessian is right AT the mode; the posterior is non-Gaussian along the fertilisation ridge.**
+    The constraint map's conditional step on `beta_max` alone also matches (drop 0.52 vs 0.50). What
+    fails is the JOINT compensation the off-diagonal terms predict, which holds only very near the mode.
+  - Card 7's approved text had predicted exactly this ("the widest directions would be exactly the ones
+    that approximation handles worst").
+
+**Held** (Marcus 2026-10-01, "Hold the bands (Recommended)").
+- The artifact is EVIDENCE: `outputs/diagnostics/futures_ribbons_laplace_held_20261001.rds`. Nothing is
+  in `data/`.
+- `APP_RIBBONS_HOLD` makes the loader draw nothing, silently, whatever sits in `data/`. It is gated by
+  `test-futures-ribbons.R`, which also checks the machinery on the evidence artifact: 21 expectations,
+  mutation-tested.
+- Card 7's APPROVED text ("There are no uncertainty bands, anywhere") is true again and kept. ONE
+  sentence was added, a draft for Marcus's wording: the worry it states "has since been measured".
+- `app_params`' "no uncertainty ranges are shown" is restored.
+- The plot machinery stays: bands in each line's own hue, and a caption from the artifact's own label
+  that says, on the temperature view, that the band varies the carbon cycle only.
+- ⛔ **Found by its own mutation test:** `ccx_ribbons_problems()` read `pv$seed`. R's `$`
+  PARTIAL-MATCHES, so with `seed` removed it returned `seed_applied` and a missing seed passed. Fixed
+  with `[[ ]]`, with a comment at the site.
+
+**⚠ What else this touches.** Everything quoted from the stored covariance is a LOCAL (quadratic)
+quantity. That includes 10-01 (a)'s linear Laplace futures spread (±39 ppm on SSP5-8.5 2300), its
+Koven z ± sd, and the constraint map's marginal/conditional ratios. None is a posterior spread along the
+fertilisation ridge. Don't quote ±39 ppm as one.
+
+**The MCMC check, built for Torch and not submitted.**
+- `calibration/run_mcmc_check.R`: adaptive Metropolis (Haario et al. 2001) on the canonical's own
+  33-name space.
+  - The proposal starts as the Laplace covariance × 2.38²/d, adapts, then is FROZEN at `--adapt`.
+  - Starts are overdispersed (u0 + 2 × a Laplace draw).
+  - A port gate refuses to sample unless the objective reproduces the stored logpost to 1e-5.
+  - It checkpoints every 500 iterations with the RNG state, and is EXACTLY resumable. Local test: an
+    uninterrupted 400-iteration chain and the same chain stopped at its first checkpoint and resumed
+    have identical traces, samples and final positions.
+  - Its seed (20261001 + chain) is recorded in the output.
+- Why not `ccx_run_mcmc()`: it starts at the table inits, never applies the gate, pins or bands (it would
+  sample the 38-name table), and cannot checkpoint.
+- `calibration/torch/mcmc_check.sbatch`:
+  - one chain per array task, `cs` partition (no QoS wall), 36 h with the driver's own stop at 34 h;
+  - SMOKE FIRST into its own directory: `CCX_MC_N=600 CCX_MC_ADAPT=300 CCX_MC_OUT=outputs/mcmc_smoke`;
+  - then production: 4 chains × 1e5 iterations.
+- Sizing: Torch nodes measured 0.59–1.08 s/eval (09-10), so 16–30 h per chain. Locally the M4 ran
+  ~0.16–0.27 s per iteration; the 400-iteration smoke went from the overdispersed start at −1947.9 to
+  −1432.7, acceptance 0.31 (0.40 after adaptation).
+- `build_futures_ribbons.R --draws=` pushes SUPPLIED draws (the pooled chains) through the same
+  machinery, so the MCMC band and the held Laplace band differ only in where the draws came from.
+- **Owed:** the bundle (`make_bundle.sh` already ships `calibration/*.R` and `calibration/torch`), the
+  smoke on Torch, production, then an R-hat / ESS reader and the `--draws` run.
+
+**D4 re-read after the 10-01 (k) flip** (`calibration/diag_d4_readout.R`,
+`outputs/diagnostics/d4_readout_20261001.{log,csv}`; ruling 6): modern NPP **67.67 GtC/yr, z +1.50**
+(exclusive, as ruled). Beside it, **+0.50 GtC/yr retained via N deposition** (gross: 10.19 kg C/kg N ×
+48.9 Tg N/yr). The inclusive figure, not ruled, is 68.16 (z +1.56).
+
 ## 2026-10-01 (k) — **Ruling 10 applied (B6; Marcus: "I think apply it now: I don't expect another refit anytime soon"). The emissions interpolation is now piecewise-constant model-wide: priced on every registered mode, restamped at exactly the priced moves, no refit. The test ledger it left (10 stored-value expectations in 6 files) was re-pinned or re-expressed on Marcus's approval ("Approve all (Recommended)").**
 
 **The change.** `CCX_EMIS_METHOD_DEFAULT` "spline" → "constant" (`R/constants.R`; `3d38d56`).

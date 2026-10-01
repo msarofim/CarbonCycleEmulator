@@ -1,0 +1,22 @@
+=== calibration/diag_ribbons_linearity.R @46d96f3, run 2026-10-01 12:07; artifact c12af28 (frozen git-archive copy) (1000 draws, seed 20261001) ===
+T1 draw 1 re-run from the recorded seed: max |diff| vs the artifact = 0 -> IDENTICAL
+T2 sample covariance vs Sigma: max |diff| / (sd_i sd_j) = 0.099 (1000 draws: ~0.03 expected); sd ratio range 0.950-1.047
+
+vvH co2_ppm 2150: f(u0) 826.571 | sd sampled 12.749, sd of y_lin on the SAME draws 7.852, sqrt(g'Sg) 7.884 | skew 1.16
+   y on y_lin: slope 1.017, R2 0.393; residual sd 9.937 (mean +2.524 = the median shift a convex response makes)
+   residual vs each name's displacement (corr; top 6 by the SQUARE):  beta_max lin -0.03 sq +0.82; fert_k lin -0.12 sq +0.46; ndep_ret lin -0.14 sq -0.42; npp_tsens lin +0.03 sq +0.23; luc_scale lin +0.12 sq -0.23; imb_share_land lin +0.03 sq -0.09 
+
+vvVL co2_ppm 2150: f(u0) 367.205 | sd sampled 2.493, sd of y_lin on the SAME draws 1.281, sqrt(g'Sg) 1.237 | skew 0.03
+   y on y_lin: slope 0.845, R2 0.189; residual sd 2.254 (mean +0.058 = the median shift a convex response makes)
+   residual vs each name's displacement (corr; top 6 by the SQUARE):  beta_max lin -0.05 sq +0.73; ndep_ret lin -0.14 sq -0.52; luc_scale lin +0.11 sq -0.37; fert_k lin -0.13 sq +0.27; npp_tsens lin +0.05 sq +0.20; imb_share_land lin +0.02 sq -0.14 
+
+vvM gmst 2100: f(u0) 2.954 | sd sampled 0.020, sd of y_lin on the SAME draws 0.010, sqrt(g'Sg) 0.011 | skew 0.65
+   y on y_lin: slope 1.027, R2 0.277; residual sd 0.017 (mean +0.003 = the median shift a convex response makes)
+   residual vs each name's displacement (corr; top 6 by the SQUARE):  beta_max lin -0.03 sq +0.76; ndep_ret lin -0.16 sq -0.50; fert_k lin -0.13 sq +0.43; luc_scale lin +0.13 sq -0.26; npp_tsens lin +0.04 sq +0.22; imb_share_land lin +0.04 sq -0.09 
+
+T5 logpost at the mode -1405.4114 (stored -1405.4114); 1000 of 1000 draws finite
+   Delta = lp - lp_quad: median -25.54, 5-95 % [-906.15, +0.34], min -7115.4; corr with beta_max displacement +0.23, with its square -0.60
+   importance weights: ESS 8 of 1000; largest single weight 0.317
+   vvH co2_ppm 2150  plain 5/50/95 %: 812.18 / 828.21 / 851.04 | reweighted: 817.75 / 831.05 / 837.48
+   vvVL co2_ppm 2150  plain 5/50/95 %: 363.57 / 367.21 / 371.90 | reweighted: 366.38 / 368.18 / 368.41
+   vvM gmst 2100  plain 5/50/95 %: 2.93 / 2.96 / 2.99 | reweighted: 2.94 / 2.96 / 2.97

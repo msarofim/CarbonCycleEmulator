@@ -619,35 +619,38 @@ RV_CARDS <- list(
   # retired id leaves a hole rather than renumbering the cards after it, and is
   # never reused: a comment that leads with "card 6" must not land on a
   # different question.
-  # ⚠ DRAFTED 2026-10-01 FOR MARCUS'S WORDING (app copy is his). The card said
-  # "There are no uncertainty bands, anywhere" and argued against drawing a
-  # Gaussian band; his B7 ruling ("Laplace first, MCMC as the check") put one
-  # on the Futures tab, which made the old card false. This states what the
-  # band is and keeps the card's question -- is an approximate range acceptable
-  # -- now that the reader can see one. No count is typed: the held names are
-  # card 8's table, and the band's own caption carries its numbers.
+  # B7 (Marcus 2026-10-01, "Laplace first, MCMC as the check" -- then "Hold the bands"):
+  # a Laplace band WAS built (calibration/build_futures_ribbons.R, 1000 draws) and FAILED
+  # its own check: scored on the objective, the draws sat a median 25 log-units below
+  # the Gaussian, importance ESS 8 / 1000, the posterior strongly non-Gaussian along the
+  # fertilisation ridge (calibration/diag_ribbons_linearity.R, diag_laplace_axes.R). So
+  # the card's approved text is TRUE again and is kept; the one added sentence (drafted
+  # for Marcus's wording) records that the worry it states was MEASURED.
   list(id = 7, key = "bands", class = "gap",
-       title = "The uncertainty bands are an approximation, not a posterior",
-       plain = paste("The Futures tab shades a range around each scenario. It is a",
-                     "Gaussian approximation: parameters drawn from the curvature",
-                     "of the fit at its best point, each draw run through the full",
-                     "model, with the held parameters fixed. It is not a",
-                     "posterior, and every other line in this app is a single",
-                     "best fit with no range at all."),
+       title = "There are no uncertainty bands, anywhere",
+       plain = paste("Every line in this app is a single best fit. There is no",
+                     "posterior, so there are no ribbons, and no number here",
+                     "comes with a calibrated uncertainty."),
        detail = paste("The parameters were located by dispersed multistart",
                       "optimisation, and the curvature at the optimum is",
-                      "well-behaved enough to sample from -- but a Gaussian",
-                      "approximation at a mode is not a posterior, and at this",
-                      "model's conditioning the widest directions are exactly the",
-                      "ones that approximation handles worst: the depth of the",
-                      "seasonal mixed layer, and the trade between plant growth's",
-                      "response to warming and the rest of the land. A Markov-chain",
-                      "sampler is the check on the band and has not yet been run",
-                      "on this fit. The band also leaves out whatever the held",
-                      "parameters (card 8) would add."),
-       ask = paste("Is an approximate range, labelled as one, better than none for",
-                   "a teaching tool -- or would you rather see no band until the",
-                   "sampler has checked it?")),
+                      "well-behaved enough to quote individual standard errors --",
+                      "but a Gaussian approximation at a mode is not a posterior,",
+                      "and at this model's conditioning the widest directions",
+                      "would be exactly the ones that approximation handles worst.",
+                      "Drawing a band from it would put a number on the chart that",
+                      "reads as calibrated uncertainty and is not.",
+                      "That has since been measured: a Gaussian band was built and",
+                      "run through the full model, and along the direction that",
+                      "trades the strength of CO\u2082 fertilisation against its",
+                      "shape the real fit falls away far faster than the Gaussian",
+                      "assumes, so the band would have been too wide. Running a real",
+                      "sampler is planned for the final model, not this beta: the",
+                      "compute is affordable, but no sampler has yet converged on",
+                      "this posterior, and that is a research problem rather than",
+                      "a queue wait."),
+       ask = paste("Would you want the posterior before you trusted any of this,",
+                   "or is a single best fit acceptable for a teaching tool that",
+                   "says so on every tab?")),
   list(id = 8, key = "shims", class = "design",
        title = "Some parameters stand in for mechanisms, and some constants are unsourced",
        plain = paste("Several fitted parameters are stand-ins: they absorb a",

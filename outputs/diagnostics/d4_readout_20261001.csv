@@ -1,0 +1,2 @@
+"mode","emis_method","win0","win1","target","target_sd","npp_exclusive","z_exclusive","ndep_ret","ndep_TgN","retention_gross_GtC","npp_inclusive","z_inclusive","driver","commit"
+"hilda33d","constant",2001,2023,56.0562950491954,7.75452041313936,67.666459162161,1.49721239927272,10.1889650213632,48.9064733430565,0.498306346210634,68.1647655083717,1.56147251075122,"calibration/diag_d4_readout.R","46d96f3"

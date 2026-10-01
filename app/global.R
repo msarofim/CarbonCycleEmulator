@@ -324,12 +324,12 @@ app_params <- local({
                      " sinks",
                      if (.n_pin) paste0(", with ", .n_pin,
                                         " further values held at stated numbers") else "",
-                     # B7 (2026-10-01): "no uncertainty ranges are shown" went
-                     # when the Futures tab gained its Laplace ribbons, which
-                     # carry their own label (APP_RIBBON_NOTE).
-                     ". A single best fit, not yet a posterior, and the fit",
-                     " constrains the shape of these curves more tightly than",
-                     " their absolute height.")
+                     # B7 (2026-10-01): TRUE AGAIN under "Hold the bands" (APP_RIBBONS_HOLD
+                     # below). If a band ever ships, this clause must go with it.
+                     ". A single best fit, not yet a posterior — no",
+                     " uncertainty ranges are shown, and the fit constrains the",
+                     " shape of these curves more tightly than their absolute",
+                     " height.")
     break
   }
   if (file.exists(post_file)) {
@@ -458,7 +458,17 @@ stopifnot(setequal(unique(APP_SCEN_EMIS$scenario), APP_SCENARIOS))
 # that path would relabel the whole app "calibrated posterior" (app_params above),
 # and a Gaussian at the mode is not one.
 APP_RIBBONS_FILE <- file.path(CCX_ROOT, "data", "futures_ribbons.rds")
+# ⛔ HELD (Marcus 2026-10-01: "Hold the bands (Recommended)"). The Laplace band was
+# built and FAILED its own check -- scored on the objective, the 1000 draws sat a
+# median 25 log-units below the Gaussian (importance ESS 8 / 1000), the posterior
+# strongly non-Gaussian along the fertilisation ridge -- so no band is drawn until
+# the MCMC check (calibration/run_mcmc_check.R, Torch) replaces it. The evidence is
+# outputs/diagnostics/futures_ribbons_laplace_held_20261001.rds. While this is set
+# the loader draws NOTHING and says nothing, even if a ribbons file appears in
+# data/; test-futures-ribbons.R asserts it. Lift it (NULL) only with a ruling.
+APP_RIBBONS_HOLD <- "the Laplace band failed its own check (2026-10-01); held until the MCMC check"
 APP_RIBBONS <- local({
+  if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE, why = APP_RIBBONS_HOLD))
   if (!file.exists(APP_RIBBONS_FILE))
     return(list(ok = FALSE, why = "this build has no ribbons file"))
   r <- readRDS(APP_RIBBONS_FILE)
@@ -475,6 +485,7 @@ APP_RIBBONS <- local({
 APP_RIBBON_NOTE <- if (isTRUE(APP_RIBBONS$ok)) with(APP_RIBBONS$provenance, sprintf(
   "Shaded: the %g–%g %% range of %d model runs — a %s.",
   100 * probs[1], 100 * probs[length(probs)], n_ok, label)) else
+  if (isTRUE(APP_RIBBONS$held)) NULL else       # held: silent -- card 7 says why there is no band
   sprintf("No uncertainty band is drawn: %s.", APP_RIBBONS$why)
 # ⚠ THE TEMPERATURE BAND IS NARROW FOR A REASON THE READER MUST BE TOLD. The draws
 # vary the CARBON CYCLE's fitted parameters only; the climate module (fitted to

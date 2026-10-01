@@ -729,12 +729,14 @@ ccx_mode_run_params <- function(md, pm) {
 ccx_ribbons_problems <- function(r, md, scenarios, vars) {
   bad <- character(0)
   pv <- r$provenance
-  if (is.null(pv) || is.null(r$bands)) return("not a ribbons artifact (no provenance or no bands)")
-  if (!identical(pv$mode, CCX_MODE_CANONICAL))
-    bad <- c(bad, sprintf("built for mode '%s', the canonical is '%s'", pv$mode, CCX_MODE_CANONICAL))
-  if (!identical(pv$par_mode, md$par_mode))
+  if (is.null(pv) || is.null(r[["bands"]])) return("not a ribbons artifact (no provenance or no bands)")
+  # ⛔ [[ ]], NEVER $, on the provenance: `$` PARTIAL-MATCHES, so with `seed` removed `pv$seed`
+  # silently returned `seed_applied` and a missing seed passed (caught by the mutation test, 2026-10-01).
+  if (!identical(pv[["mode"]], CCX_MODE_CANONICAL))
+    bad <- c(bad, sprintf("built for mode '%s', the canonical is '%s'", pv[["mode"]], CCX_MODE_CANONICAL))
+  if (!identical(pv[["par_mode"]], md$par_mode))
     bad <- c(bad, "built at a different parameter vector from the canonical's par_mode")
-  if (is.null(pv$seed) || is.null(pv$rng_kind) || is.null(pv$seed_applied))
+  if (is.null(pv[["seed"]]) || is.null(pv[["rng_kind"]]) || is.null(pv[["seed_applied"]]))
     bad <- c(bad, "the seed, the RNG kind or where it is applied is not recorded")
   miss <- setdiff(as.character(scenarios), unique(r$bands$scenario))
   if (length(miss)) bad <- c(bad, sprintf("no bands for scenario(s) %s", paste(miss, collapse = ", ")))
