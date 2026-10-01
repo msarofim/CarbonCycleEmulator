@@ -204,7 +204,11 @@ test_that("6. SCREEN IDENTITY: the open label reproduces the D2/D3 screen's DNTb
   g_par <- list(ndep_ret = a$d2[["ndep_ret"]], npp_tsens = a$d2[["npp_tsens"]],
                 imb_share_land = sl, imb_share_ocean_rest = rest)
   u <- c(a$u, vapply(names(g_par), function(n) .to_unc(g_par[[n]], CCX_PARAM_GATED[[n]]), 0))
-  v <- ccx_make_logpost(base_params = bp, by_stream = TRUE)(u)
+  # ⚠ UNDER THE SCREEN'S OWN INTERPOLATION (2026-10-01): the screen ran under "spline", before the
+  # 10-01 (k) flip to "constant" (review 10-01c B6), so the method is an INPUT of the artifact this
+  # identity reproduces. Re-supplied, not re-pinned: under "constant" the streams move by up to 0.338
+  # (the seasonal rows) and the identity would have to become a pin on the code under test.
+  v <- ccx_with_emis_method("spline", ccx_make_logpost(base_params = bp, by_stream = TRUE)(u))
   st <- attr(v, "streams")
   expect_identical(names(st), names(a$streams))
   d <- unlist(st) - unlist(a$streams)

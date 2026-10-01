@@ -87,7 +87,12 @@ test_that("the switch OFF reproduces the pre-5c forcing exactly", {
   # test fails if the fallback branch ever silently changes
   e <- as.data.frame(readRDS(ccx_path("data", "forcing_emissions_historical.rds")))
   yrs <- seq(ES_YEARS[1], ES_YEARS[2])
-  foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs)
+  # ⛔ "constant" IS HARD-CODED, NOT CCX_EMIS_METHOD_DEFAULT, and that is the point (the wording of
+  # the 35f38dc branch, which designed this update): referencing the constant would make this track
+  # the choice instead of PINNING it, and the value of this assertion is that it went red when the
+  # emissions interpolant moved spline -> constant (2026-10-01, review 10-01c B6). Update the literal
+  # deliberately, the way you would update any ratchet.
+  foss <- ccx_annual_to_monthly(e$year, e$fossil_GtC, yrs, method = "constant")
   expect_equal(b$e_foss_NH, foss * FORC_FOSS_NH_SHARE, tolerance = 1e-12)
 })
 

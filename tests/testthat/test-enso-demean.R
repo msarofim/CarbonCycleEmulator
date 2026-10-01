@@ -203,7 +203,7 @@ edm_crosscheck <- function(md, r) {
   expect_true(is.finite(md$logpost))
 }
 
-test_that("PRICED at the CANONICAL mode: the demean flag is worth 0.0364 under objective #14 at hilda33d (9.0242 under #13 at hilda29l); 17.8469 at the seas_ml 0 control hilda31pe", {
+test_that("PRICED at the CANONICAL mode: the demean flag is worth -0.0053 under objective #14 with constant interpolation at hilda33d (0.0364 under spline; 9.0242 under #13 at hilda29l); 17.7499 at the seas_ml 0 control hilda31pe", {
   skip_if_no_cpp()
   md <- readRDS(ccx_mode_file())
   # the canonical is a PERIODIC-era file, and says so (stamped 09-10 after GATE 5
@@ -271,9 +271,14 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 0.0364 under o
   # +-2.8 log-units (d13c_level_SPO +2.82, d13c_level_MLO -2.21, co2_icecore -1.06, co2_level_SPO -0.76,
   # co2_level_MLO +0.62, ...) -- in OPPOSITE directions, netting +0.036 where hilda29l's moved together.
   # MEASURED at the promoted file (re-pin approved by Marcus).
-  expect_equal(r$on_periodic - r$off_periodic, 0.0364, tolerance = 1e-4, scale = 1)
+  # 2026-10-01 (k): the emissions interpolation spline -> constant (review 10-01c B6; no refit, the
+  # registered files restamped at their priced moves): 0.0364 -> -0.0053 (-0.005260). A near-
+  # cancellation either way: the streams' total |change| is 9.10 (was ~9.1), the net crosses zero.
+  # MEASURED at the restamped file (re-pin approved by Marcus).
+  expect_equal(r$on_periodic - r$off_periodic, -0.0053, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
-  expect_equal(r0$on_periodic - r0$off_periodic, 17.8469, tolerance = 1e-4, scale = 1)
+  # 2026-10-01 (k), the same flip: 17.8469 -> 17.7499 (17.749910) at the restamped control.
+  expect_equal(r0$on_periodic - r0$off_periodic, 17.7499, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
   # ⚠ RE-CUT 2026-10-01 (c): it read the NET price (> 1), which a canonical whose rows move in OPPOSITE
@@ -286,7 +291,7 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth 0.0364 under o
   expect_gt(abs((r$on_periodic - r$off_periodic) - (r$on_aseasonal - r$off_aseasonal)), 1)
 })
 
-test_that("RATIFICATION PIN at `hilda31` (retired, by path): 50.3262 aseasonal, and the 60.0184 artifact (#13)", {
+test_that("RATIFICATION PIN at `hilda31` (retired, by path): 50.1629 aseasonal, and the 59.8552 artifact (#13, constant interpolation)", {
   skip_if_no_cpp()
   md <- readRDS(ccx_path(CCX_MODE_HILDA31_QUARANTINED))
   expect_identical(ccx_mode_spinup(md), "aseasonal")   # unrecorded = pre-09-09x = a fact
@@ -305,8 +310,10 @@ test_that("RATIFICATION PIN at `hilda31` (retired, by path): 50.3262 aseasonal, 
   # 09-12 (d): +0.0023 each from review A12 (observed-month D14C edge years).
   # 09-16 (d): +6.5590 / +6.5633 from the hygiene batch (the land-sink sigma; file restamped -21.6168 on the likelihood).
   # 09-18 (e): -0.0672 / -0.0671 from objective #13's ENSO-slope row (file restamped +0.3630 on the likelihood).
-  expect_equal(r$on_aseasonal - r$off_aseasonal, 50.3262, tolerance = 1e-4, scale = 1)
-  expect_equal(r$on_periodic  - r$off_periodic,  60.0184, tolerance = 1e-4, scale = 1)
+  # 10-01 (k): -0.1633 / -0.1632 from the emissions-interpolation flip (spline -> constant; the file
+  # restamped -0.0378 on the likelihood, history kept): 50.3262 -> 50.1629, 60.0184 -> 59.8552.
+  expect_equal(r$on_aseasonal - r$off_aseasonal, 50.1629, tolerance = 1e-4, scale = 1)
+  expect_equal(r$on_periodic  - r$off_periodic,  59.8552, tolerance = 1e-4, scale = 1)
   expect_gt(r$on_aseasonal - r$off_aseasonal, 1)
   expect_gt(abs((r$on_periodic - r$off_periodic) - (r$on_aseasonal - r$off_aseasonal)), 1)
 })

@@ -78,7 +78,10 @@ test_that("(5) the label reproduces the session knock-out at the canonical's poi
   v$p <- ccx_apply_structure(v$p, "hilda_cs", seas_ml = "1", pump_field = ccx_mode_pump_field(v$md))
   v$p <- ccx_overlay_par(v$p, v$pm)                                   # the fitted values back over the re-labelled base (the lint-enforced idiom)
   for (n in names(ccx_mode_pins(v$md))) v$p[[n]] <- ccx_mode_pins(v$md)[[n]]
-  st <- dg_streams(dg_run(v), v, obs = obs)
+  # ⚠ UNDER THE RECORD'S OWN INTERPOLATION (2026-10-01): the 09-19 knock-out was measured under
+  # "spline", before the 10-01 (k) flip to "constant" (review 10-01c B6). Re-supplied, not re-pinned:
+  # under "constant" this point scores +1.6 against the record.
+  st <- ccx_with_emis_method("spline", dg_streams(dg_run(v), v, obs = obs))
   got <- sum(st[ko$common])
   expect_equal(got, target, tolerance = 1e-6)
   expect_lt(got, full - 10)                                   # the knock-out costs, as measured: the test has power

@@ -2,6 +2,68 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (k) — **Ruling 10 applied (B6; Marcus: "I think apply it now: I don't expect another refit anytime soon"). The emissions interpolation is now piecewise-constant model-wide: priced on every registered mode, restamped at exactly the priced moves, no refit. The test ledger it left (10 stored-value expectations in 6 files) was re-pinned or re-expressed on Marcus's approval ("Approve all (Recommended)").**
+
+**The change.** `CCX_EMIS_METHOD_DEFAULT` "spline" → "constant" (`R/constants.R`; `3d38d56`).
+- It moves the objective's fossil + LUC interpolation, and `ccx_run_coupled()`'s default for both the
+  emissions and the GMST feedback, i.e. every futures run that names no method.
+- The app's pulse lab already used "constant" (`APP_PULSE_EMIS_METHOD`) and is unchanged.
+
+**Priced first** (`calibration/diag_emis_constant_price.R`, new; `outputs/diagnostics/emis_constant_price_20261001.{log,csv,_rows.csv}`).
+Each registered file is scored the restamp tool's way under both methods. The spline pass reproduces every
+stored stream set IDENTICALLY.
+
+| mode | Δ likelihood | logpost after | rows moved |
+|---|---|---|---|
+| hilda33d (canonical) | −0.162412 | **−1405.411447** (was −1405.249036) | 22 / 26 |
+| hilda29l | −0.136688 | −1425.498702 | 22 / 26 |
+| hilda32f | −0.156702 | −1423.815092 | 22 / 26 |
+| hilda31s2 | −0.018006 | −1447.012269 | 22 / 26 |
+| hilda31pe | −0.178909 | −1425.194534 | 22 / 26 |
+| hilda31 (retired, by path; `--extra`) | −0.037783 | −1450.938637 | 22 / 26 |
+
+- **External anchor:** the 09-24 measurement at hilda29l was −0.137. This driver gives −0.1367.
+- **The rows** (hilda33d): the seasonal rows carry it, with MIXED signs. `d13c_seasonal_MLO` −0.336,
+  `co2_seasonal_MLO` +0.312, `co2_seasonal_SPO` −0.298, `d13c_seasonal_SPO` −0.132. The level rows move
+  +0.03 to +0.07 and Δ¹⁴C −0.03 / −0.02. Mixed signs and varying sizes across 22 rows: a real
+  interpolation change, not a uniform code-path artefact.
+- ⚠ **Any document quoting −1405.249 for hilda33d is pre-flip.** The like-for-like AIC comparison in
+  (j) (+4.6763, 24 rows) was measured at `2cee507`, before the flip.
+
+**Restamped** (`calibration/restamp_mode_objective.R`, whose gate refuses an unpriced move; `4f5e5db`;
+log `outputs/diagnostics/restamp_emis_constant_20261001.log`).
+- All six files matched their priced moves to 1e-6, with prior drift 0.000000.
+- The pre-flip streams and logposts are kept in each file's `objective_history`.
+- hilda31 is the retired ratification file `test-enso-demean` crosschecks. It has been restamped at every
+  objective change since 09-11, so it is restamped here too.
+
+**test-future-yvar (c3)**, which was written to FAIL when the default flipped ("the ledger is now due"), now
+asserts the PAID state:
+- the default is the app's causal method;
+- the default pair's pre-pulse residual is under (c2)'s bound;
+- the retired spline, run by name, still rings (that is the test's power).
+
+**The full suite at `4f5e5db`** (frozen `git archive` copy `~/ccx_frozen/suite_20261001j`, BLAS pinned):
+**5497 passed, 10 failed, 0 errors, 5 skipped.** All 104 files ran. Every failure is a value computed under
+"spline":
+
+| file | what failed | resolution (Marcus: "Approve all (Recommended)") |
+|---|---|---|
+| test-constraint-map 6 | the artifact's stored logpost −1405.249 vs the restamped −1405.411 | **artifact REBUILT** (`data/constraint_map.rds`, tag `CM_DATE` "20261001k"; every gate PASS; pins vs pulls 8.5 → 8.6 %) |
+| test-emission-seasonality | its incumbent construction used the function's spline default | the literal `method = "constant"`, the update the 35f38dc branch designed for exactly this |
+| test-enso-demean (canonical) | the demean flag's price at hilda33d 0.0364, at the control 17.8469 | re-pinned **−0.0053** (−0.005260) and **17.7499**; the price is a near-cancellation (streams' total abs change 9.10) |
+| test-enso-demean (hilda31) | crosscheck −0.0378; prices 50.3262 / 60.0184 | file restamped (crosscheck PASS); re-pinned **50.1629 / 59.8552** |
+| test-gated-params 6 | the D2/D3 screen identity: rows off by up to 0.338 | evaluated under **"spline"**, the method the screen ran with (new `ccx_with_emis_method()`, `R/forcing.R`) |
+| test-seas-ml-hemi (5) | the 09-19 knock-out: +1.6 | evaluated under **"spline"**, the method the record was measured with |
+
+- Every old value and its reason is recorded in the tests.
+- The two test titles that typed the old prices now type the new ones.
+- After the fixes the six files pass: 143 / 41 / 34 / 104 / 32 (and 52 for the constraint-map panel).
+
+**Tried and not done.** The two historical identities could have been re-pinned to their constant-method
+values. That would have turned an identity with an external record into a pin on the code under test, so
+the method is re-supplied instead (the option Marcus approved).
+
 ## 2026-10-01 (j) — **Marcus's rulings on the review list (`notes/review_2026-10-01c_open_decisions.md`), items 1–9: the app copy, the AIC gate's row set, the parent's documentation. The pulse box's named red is discharged by his sentence.** Verbatim: "Stop the app preview. 1) Retire card 6. 2) Say about 1.4 dC per 1000 GtC. 3) Delete the fertilisation sentence where it appears. 4) Fix Card 4 and 5, and the land pools, and add N deposition as a driver. 5) update the version to BETA v1.0 CarboTope. 6) Do the recommendation. 7) Follow recommendations. 8) If it is a gross rate, then name it that. 9) Reword: is should be specifically about CO2 fertilization, with nitrogen effects a different arm (even though they matter for CO2 fertilization limits). 10) I think apply it now: I don't expect another refit anytime soon. 11) Laplace first, MCMC as the check. 12) Draft after 1-11 are done."
 
 **The mapping** follows the handoff's §2 table: §A, then B1, B2, B3/B3b, B4–B8. So 1 = A1, 2 = A2, 3 = A3,

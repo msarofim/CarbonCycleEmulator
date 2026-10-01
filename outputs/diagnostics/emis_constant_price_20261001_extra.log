@@ -1,0 +1,8 @@
+=== PROVENANCE === calibration/diag_emis_constant_price.R @c12af28+dirty, run 2026-10-01 11:16; CCX_EMIS_METHOD_DEFAULT in R/constants.R at run time: "constant"
+  modes: hilda31 (calibration/output/quarantine/20260910_periodic_spinup_adopted/refit_20260908_hilda31/mode_fit_pumpN.rds); each under its own structure, pins and spin-up; no RNG
+
+hilda31    spline reproduces stored: TRUE  | likelihood -1409.058738 -> -1409.096521  (d -0.037783, restamp expects -0.0378) | logpost -0.037783 | rows moved 22/26
+             co2_seasonal_MLO +0.58900, d13c_seasonal_MLO -0.52792, co2_seasonal_SPO -0.29937, d13c_seasonal_SPO -0.12176, gcb_land_sink +0.09082, co2_level_MLO +0.06970, d13c_level_MLO +0.05205, d13c_level_SPO +0.05108, d13c_gradient +0.04683, co2_gradient +0.04228, co2_level_SPO +0.04034, d14c_NH -0.02847, d14c_SH -0.01985, gcb_ocean_enso_slope -0.01795, co2_icecore -0.01020, d14c_intcal +0.00440, gcb_ocean_sink +0.00075, hs_surf_d13c +0.00054, ocean_grad_d13c -0.00020, excess_c14_ocean +0.00006, ocean_grad_dic +0.00005, hs_surf_dic +0.00004 
+
+VERDICT: every registered file REPRODUCES under spline -> priceable; |d likelihood| max 0.0378 (hilda31)
+saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/emis_constant_price_20261001_extra.{log,csv} and /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/emis_constant_price_20261001_extra_rows.csv

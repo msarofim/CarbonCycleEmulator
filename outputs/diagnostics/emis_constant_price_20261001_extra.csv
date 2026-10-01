@@ -1,0 +1,2 @@
+"mode","struct","spline_reproduces_stored","lik_spline","lik_constant","d_lik","logpost_stored","logpost_spline","logpost_constant","d_logpost","n_rows","n_rows_moved","commit"
+"hilda31","hilda",TRUE,-1409.05873799251,-1409.09652052013,-0.0377825276236763,-1450.90085454215,-1450.90085454215,-1450.93863706977,-0.0377825276236763,26,22,"c12af28+dirty"

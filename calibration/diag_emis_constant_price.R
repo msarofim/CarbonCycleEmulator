@@ -22,13 +22,23 @@
 #
 # Output: outputs/diagnostics/emis_constant_price_<date>.{log,csv}, stamped with
 # the commit and a dirty marker. No RNG.
-# Usage: Rscript calibration/diag_emis_constant_price.R
+# Usage: Rscript calibration/diag_emis_constant_price.R [--extra=name=path,...]
+#   --extra prices ONLY the named BY-PATH files instead of the registry (a retired
+#   ratification file a test crosschecks, e.g. hilda31 = CCX_MODE_HILDA31_QUARANTINED;
+#   restamped at every objective change since 09-11, history kept), into
+#   emis_constant_price_<date>_extra.*. Run AFTER the flip, the registered files
+#   reproduce under "constant", not "spline" -- which is why they are not re-priced here.
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp()
 EP_DRIVER  <- "calibration/diag_emis_constant_price.R"
 EP_DATE    <- format(Sys.Date(), "%Y%m%d")
-EP_OUT     <- ccx_path("outputs", "diagnostics", sprintf("emis_constant_price_%s", EP_DATE))
+EP_ARGS    <- commandArgs(trailingOnly = TRUE)
+EP_EXTRA   <- local({ a <- sub("^--extra=", "", grep("^--extra=", EP_ARGS, value = TRUE))
+  if (!length(a)) return(NULL); kv <- strsplit(strsplit(a[1], ",", fixed = TRUE)[[1]], "=", fixed = TRUE)
+  stats::setNames(vapply(kv, `[`, "", 2L), vapply(kv, `[`, "", 1L)) })
+EP_OUT     <- ccx_path("outputs", "diagnostics", sprintf("emis_constant_price_%s%s", EP_DATE, if (is.null(EP_EXTRA)) "" else "_extra"))
+EP_MODES   <- if (is.null(EP_EXTRA)) stats::setNames(names(CCX_MODE_FILES), names(CCX_MODE_FILES)) else EP_EXTRA
 EP_METHODS <- c(before = "spline", after = "constant")
 EP_ROW_TOL <- 1e-9    # a row "moved" above this (identical() decides reproduction)
 EP_COMMIT  <- tryCatch({
@@ -54,11 +64,11 @@ score_with <- function(md, method) {
 sink(paste0(EP_OUT, ".log"), split = TRUE)
 cat(sprintf("=== PROVENANCE === %s @%s, run %s; CCX_EMIS_METHOD_DEFAULT in R/constants.R at run time: \"%s\"\n",
             EP_DRIVER, EP_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"), CCX_EMIS_METHOD_DEFAULT))
-cat(sprintf("  registered modes (R/paths.R CCX_MODE_FILES): %s; each under its own structure, pins and spin-up; no RNG\n\n",
-            paste(names(CCX_MODE_FILES), collapse = ", ")))
+  cat(sprintf("  modes: %s; each under its own structure, pins and spin-up; no RNG\n\n",
+            paste(sprintf("%s (%s)", names(EP_MODES), if (is.null(EP_EXTRA)) "registered, R/paths.R CCX_MODE_FILES" else EP_MODES), collapse = ", ")))
 rows <- list(); res <- list()
-for (a in names(CCX_MODE_FILES)) {
-  md <- readRDS(ccx_mode_file(a))
+for (a in names(EP_MODES)) {
+  md <- readRDS(if (is.null(EP_EXTRA)) ccx_mode_file(a) else ccx_path(EP_MODES[[a]]))
   s0 <- score_with(md, EP_METHODS[["before"]]); s1 <- score_with(md, EP_METHODS[["after"]])
   old <- unlist(md$streams); b <- unlist(s0$streams); n <- unlist(s1$streams)
   repro <- identical(names(b), names(old)) && identical(unname(b), unname(old))

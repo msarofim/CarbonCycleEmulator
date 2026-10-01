@@ -577,6 +577,26 @@ ccx_enso_efold_yr <- function(x) {
   lag / 12
 }
 
+#' Evaluate `expr` with the emissions interpolation's DEFAULT bound to `method`
+#' (2026-10-01, the flip to "constant", review 10-01c B6).
+#'
+#' ⭐ FOR A HISTORICAL IDENTITY. An artifact produced before the flip -- a screen,
+#' a session knock-out -- was produced under "spline", so its method is one of
+#' its INPUTS: reproducing it exactly means re-supplying that input, not
+#' re-pinning the artifact to today's numbers (which would turn an identity
+#' with an external record into a pin on the code under test). Every caller
+#' that builds a forcing without naming a method (the objective, the coupled
+#' runs) sees the bound value; the binding is restored on exit, error or not.
+#' The same idiom as test-enso-demean's FORC_ENSO_DEMEAN binding.
+ccx_with_emis_method <- function(method, expr) {
+  method <- match.arg(method, c("spline", "constant"))
+  env <- environment(ccx_build_forcing)
+  old <- get("CCX_EMIS_METHOD_DEFAULT", envir = env)
+  assign("CCX_EMIS_METHOD_DEFAULT", method, envir = env)
+  on.exit(assign("CCX_EMIS_METHOD_DEFAULT", old, envir = env), add = TRUE)
+  force(expr)
+}
+
 ccx_build_forcing <- function(scenario = "historical",
                               years = c(1750, 2024),
                               prod_c14 = NA_real_,
