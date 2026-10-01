@@ -38,7 +38,10 @@ SC_REPRO_TOL <- 1e-3    # log-units: an arm must reproduce its file's stored str
 # DATE + CANONICAL (2026-09-13 (d)): two scorecards on one day at two canonicals
 # (hilda31s2 in the morning, hilda30c after the repoint) collided on a date-only
 # tag and the second silently overwrote the first's .rds (restored from git).
-SC_TAG <- sprintf("%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL)
+# ... and a THIRD collision shape (2026-10-01 (m)): one day, one canonical, two OBJECTIVES -- the
+# adoption's scorecard (spline emissions interpolation) and the re-read after the 10-01 (k) flip to
+# constant. CCX_SC_TAG_SUFFIX (e.g. "_emisconst") keeps the second from overwriting the first.
+SC_TAG <- sprintf("%s_%s%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL, Sys.getenv("CCX_SC_TAG_SUFFIX", ""))
 SC_OUT <- ccx_path("outputs", "diagnostics", sprintf("whole_model_scorecard_%s.rds", SC_TAG))
 # PROVENANCE STAMP (2026-10-01 f): the commit, in the log's first line, the closing `provenance:` line
 # and the .rds `commit`. "+dirty" = a tracked edit or an untracked file under SC_GIT_PATHS (every
