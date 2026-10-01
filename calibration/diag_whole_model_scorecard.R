@@ -40,6 +40,27 @@ SC_REPRO_TOL <- 1e-3    # log-units: an arm must reproduce its file's stored str
 # tag and the second silently overwrote the first's .rds (restored from git).
 SC_TAG <- sprintf("%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL)
 SC_OUT <- ccx_path("outputs", "diagnostics", sprintf("whole_model_scorecard_%s.rds", SC_TAG))
+# PROVENANCE STAMP (2026-10-01 f): the commit, in the log's first line, the closing `provenance:` line
+# and the .rds `commit`. "+dirty" = a tracked edit or an untracked file under SC_GIT_PATHS (every
+# R/*.R is sourced, committed or not); on 2026-10-01 a diagnostic run on an uncommitted tree stamped
+# its parent commit. "+dirty?" = git gave no status, so the tree is NOT PROVEN clean -- kept distinct
+# from "+dirty" so a broken check cannot pass for a dirty tree. "?" = no commit could be read (a
+# frozen copy under ~/ccx_frozen/ is not a checkout). Ignored inputs (data-raw/downloads/) are
+# invisible to git status either way.
+# ⚠ NOT the bare tryCatch(system(...), error = ) idiom: outside a checkout git exits 128, system() only
+# WARNS and returns character(0), and sprintf() of that is character(0) -- the stamped line silently
+# vanishes (measured 2026-10-01). Args are shQuote()d: system2() hands them to sh UNQUOTED.
+SC_DRIVER    <- "calibration/diag_whole_model_scorecard.R"
+SC_GIT_PATHS <- c("R", "src", "calibration", "app", "data")
+SC_COMMIT    <- local({
+  git <- function(...) suppressWarnings(tryCatch(system2("git", shQuote(c(...)), stdout = TRUE),
+                                                 error = function(e) structure(character(0), status = NA_integer_)))
+  h <- git("rev-parse", "--short", "HEAD")
+  if (!is.null(attr(h, "status")) || length(h) != 1L || !nzchar(h)) return("?")
+  d <- git("status", "--porcelain", "--", SC_GIT_PATHS)
+  paste0(h, if (!is.null(attr(d, "status"))) "+dirty?" else if (length(d)) "+dirty" else "")
+})
+cat(sprintf("%s @%s, %s\n", SC_DRIVER, SC_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 vA <- dg_vector(SC_ARM_A); vA$src <- sprintf("%s (column control, quarantined)", SC_ARM_A_NAME)
 vB <- dg_vector(SC_ARM_B); vB$src <- sprintf("%s (seas_ml 0 control, CCX_MODE_SEASML0_CONTROL)", SC_ARM_B)
 vC <- dg_vector(SC_ARM_C); vC$src <- sprintf("%s (canonical, CCX_MODE_CANONICAL)", SC_ARM_C)
@@ -162,6 +183,8 @@ for (a in an) { v <- ARMS[[a]]; if (arm_struct(v) != "hilda") next
   cat(sprintf("  %-8s declared: hs_frac %.2f, u_hs %g m/yr (= %.1f Sv over %.3g m2), tau_q %g yr, sst_hs %g C; fitted h_hs %.0f, pump_hs %.1f gC/m2/yr (prior-z %+.2f), hs_asx_frac %.2f, h_ml %.1f, ent_seas_amp_SH %.2f, sst_seas_amp NH %.2f / SH %.2f\n", a,
               v$p$hs_frac, v$p$u_hs, v$p$u_hs * (ccx_const("OCEAN_AREA_NH") + ccx_const("OCEAN_AREA_SH")) * v$p$hs_frac / 3.156e13, (ccx_const("OCEAN_AREA_NH") + ccx_const("OCEAN_AREA_SH")) * v$p$hs_frac, v$p$tau_q, v$p$sst_hs, v$p$h_hs, v$p$pump_hs_gcm2,
               (log(v$p$pump_hs_gcm2) - log(hsp$centre_gcm2)) / hsp$log_sd, v$p$hs_asx_frac, v$p$h_ml, v$p$ent_seas_amp_SH, v$p$sst_seas_amp_NH, v$p$sst_seas_amp_SH)) }
-saveRDS(list(tag = SC_TAG, streams = ST, groups = G, repro = REPRO, verdicts = verd, gradients = GR, enso = ENSO, irf = IRF, partition = LP, prior_z = PZ,
+saveRDS(list(tag = SC_TAG, commit = SC_COMMIT, streams = ST, groups = G, repro = REPRO, verdicts = verd, gradients = GR, enso = ENSO, irf = IRF, partition = LP, prior_z = PZ,
              arms = lapply(ARMS, function(v) list(src = v$src, struct = arm_struct(v), seas_ml = ccx_mode_seas_ml(v$md), spinup = v$spinup_label, logpost = v$md$logpost, h_ml = v$p$h_ml))), SC_OUT)
 cat(sprintf("\n  saved %s\n  ⛔ Nothing adopted.\n", SC_OUT))
+cat(sprintf("provenance: %s @%s; canonical %s; arms (spinup) %s; no RNG\n", SC_DRIVER, SC_COMMIT, CCX_MODE_CANONICAL,
+            paste(sprintf("%s (%s)", names(ARMS), vapply(ARMS, `[[`, "", "spinup_label")), collapse = ", ")))
