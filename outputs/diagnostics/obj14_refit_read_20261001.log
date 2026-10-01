@@ -1,0 +1,103 @@
+calibration/diag_obj14_refit_read.R @d60074a, 2026-10-01 02:40
+
+=== GATE: the copied scorecard reproduces the screen's STORED control scorecard ===
+  43 fields, max relative difference 0.000e+00 (tol 1e-08)
+  N sink per N at the screen's DNTb vector: 4.925585 kg C/kg N (stored 4.925585), max rel diff 0.000e+00
+
+refit: /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261001_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds
+  logpost -1405.249036 (stored -1405.249036), loglik -1369.176145 on 26 rows; struct hilda_csl3v0kaidgb; 33 fitted names
+
+=== 1. SCORECARD (control = 09-30 g's alignment control under kai; refit = #14, 33 names) ===
+            field     control       refit      change
+       vegetation  516.010454  5.1596e+02   -0.053697
+       soil_total 1614.101741  1.6143e+03    0.170215
+       land_total 2130.112195  2.1302e+03    0.116518
+       npp_modern   69.619838  6.7666e+01   -1.953693
+  dLand_1960_2023    0.343393  4.5604e-01    0.112650
+ dOcean_1960_2023    0.072767 -6.1142e-03   -0.078881
+  dEluc_1960_2023   -0.231649 -2.1381e-01    0.017839
+  dLand_2010_2023    0.435815  4.9435e-01    0.058530
+ dOcean_2010_2023    0.022137 -6.7293e-02   -0.089430
+   soil_d14c_2000 -205.833209 -2.0199e+02    3.847748
+         g_keenan    0.152398  1.4083e-01   -0.011571
+        g_400_564    0.253621  2.2963e-01   -0.023988
+             g_2x    0.660044  6.0044e-01   -0.059604
+             g_4x    1.336144  1.1662e+00   -0.169975
+         beta_max    2.738919  2.2049e+00   -0.534035
+           fert_k  872.062010  7.3986e+02 -132.206244
+              q10    1.109043  1.0857e+00   -0.023319
+        luc_scale    0.862995  8.7355e-01    0.010551
+  ssp585_co2_2300 1406.707737  1.4916e+03   84.894065
+    ssp585_dL1521  486.402529  4.4352e+02  -42.878879
+    ssp585_dL2122  569.323251  4.5898e+02 -110.344731
+    ssp585_dL2223  220.056133  1.8220e+02  -37.857380
+   ssp585_landxPI    1.602305  1.5161e+00   -0.086175
+     vvH_co2_2300  974.331888  1.0243e+03   49.920847
+      vvH_landxPI    1.344768  1.2935e+00   -0.051288
+  enh(410 ppm): 0.3627 -> 0.3362 (-7.3 %)
+  Koven z (SSP5-8.5 land-C windows 2015-2100 / 2100-2200 / 2200-2300): control +1.29 / +2.27 / +1.59; refit +1.04 / +1.85 / +1.44
+  soil D14C 2000 vs Shi 2020 (-244 +/- 48): control z +0.80, refit z +0.88
+  Keenan gain 1981-2020 (0.135 +/- 0.035): control 0.1524 (z +0.50), refit 0.1408 (z +0.17); G564 (0.169 +/- 0.062): 0.2536 (z +1.36) -> 0.2296 (z +0.98)
+
+=== 2. D4: modern NPP (2001-2023) against the ruled target ===
+  target 56.06 +/- 7.75 GtC/yr; control 69.62 (z +1.75); refit 67.67 (z +1.50); change -1.95
+
+=== 3. THE D2/D3 NAMES AT THE REFIT, AND THE PRE-REGISTERED PREDICTIONS ===
+  ndep_ret 10.1890 kg C/kg N (prior z +1.44); implied sink 0.3317 GtC/yr over 1990-2023 = 7.025 kg C/kg N
+  npp_tsens -0.00785 /K (prior z -0.27)
+  shares: s_land 0.5934, s_ocean 0.0847, rest 0.3219 (imb_share_land 0.5934, ocean_rest 0.2083)
+  P-D2-1 enh(410) falls (3-12 % is the range, falling is the gate)   PASS  (-7.3 %)
+  P-D2-2 ndep_ret in its prior's 2 sd AND sink per N in 0.6-8.7      PASS  (z +1.44; 7.025 kg C/kg N)
+  P-D2-3 modern NPP rises by < 1 GtC/yr                              PASS  (-1.95)
+  P-D2-4 npp_tsens > 0 AND q10 rises                                 FAIL  (-0.0078 /K; q10 1.1090 -> 1.0857)
+  P-D2-5 Koven z(2100-2200) > 1.5 [written for (a) ALONE]            PASS  (+1.85)
+  -- written for D3-ALONE arms; REPORTED, not scored, at the combined refit:
+     P-D3-1 the two GCB rows gain >= +8: +12.93 (land +11.99, ocean +0.93)
+     P-D3-2 enh(410) not down > 5 %: -7.3 %; P-D3-3 s_ocean > 0.05: 0.0847; P-D3-4 |d SSP5-8.5 2300| < 20: +84.9 ppm
+  the record: the COMMON rows (all but the two GCB level rows) +11.17; the two GCB rows +12.93 (targets moved by D3)
+  largest common-row moves:  co2_icecore +6.42; d14c_NH +3.28; co2_seasonal_MLO +2.79; d13c_level_SPO -2.72; d14c_profile_ab +1.83; co2_level_MLO -1.52; d13c_level_MLO +0.90; d14c_SH -0.82 
+  prior |z| > 2 at the refit:  q10 -2.44; kz_deep_frac -2.79; rep_dC +3.29 
+
+=== 4. FUTURES DECOMPOSITION: which parameters carry the control -> refit change ===
+     group  n            what ssp585_co2_2300 ssp585_dL2122 ssp585_landxPI
+      FERT  2         add-one          67.994       -87.782         -0.083
+      FERT  2      remove-one          66.653       -84.887         -0.081
+       Q10  1         add-one          -4.048         4.476          0.005
+       Q10  1      remove-one          -4.361         4.632          0.005
+       LUC  1         add-one           1.152        -0.663         -0.002
+       LUC  1      remove-one           1.105        -0.537         -0.002
+      D2_N  1         add-one         -32.062        26.507          0.041
+      D2_N  1      remove-one         -35.132        28.428          0.044
+      D2_T  1         add-one          43.956       -57.460         -0.053
+      D2_T  1      remove-one          43.140       -54.763         -0.052
+     OCEAN 13         add-one          10.198         0.916          0.003
+     OCEAN 13      remove-one          11.263         0.285          0.002
+ LAND_SEAS  7         add-one          -0.002         0.023          0.000
+ LAND_SEAS  7      remove-one          -0.002         0.021          0.000
+  NONMODEL  7         add-one           0.000         0.000          0.000
+  NONMODEL  7      remove-one           0.000         0.000          0.000
+     TOTAL 33 refit - control          84.894      -110.345         -0.086
+       SUM NA     of add-ones          87.187      -113.983         -0.089
+       SUM NA  of remove-ones          82.667      -106.821         -0.083
+ vvH_co2_2300
+       36.295
+       36.047
+       -2.412
+       -2.651
+        1.539
+        1.537
+      -16.458
+      -18.476
+       25.003
+       25.076
+        6.779
+        7.550
+       -0.001
+       -0.001
+        0.000
+        0.000
+       49.921
+       50.745
+       49.082
+  CHECK: the likelihood-only group moves the futures by max |0| (must be 0)
+  (columns: SSP5-8.5 CO2 at 2300 ppm; SSP5-8.5 land-C change 2100-2200 GtC (Koven's z window); land x PI 2300; vvH CO2 2300 ppm)

@@ -1,0 +1,57 @@
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 24 starts under
+  calibration/output/multistart_20260930q_hilda_csl3v0kaidgb_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+==========================================================================
+  reference cold       id 0  logpost   -1405.5328  port VERIFIED (rel 4.6e-16)
+  reference incumbent  id 1  logpost   -1405.5011  port VERIFIED (rel 4.0e-15)
+  reference new_basin  id 2  logpost   -1405.2490  port VERIFIED (rel 1.5e-15)
+
+  24 of 24 starts CONVERGED, 0 ran out of wall time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.2747 = 0.25 x the measured inter-basin separation
+
+  ⇒ 2 DISTINCT BASINS among the 24 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min  kind
+      1     10     -1405.2490         0.0000        1    conv    173  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      2     16     -1405.2490        -0.0000        1    conv    189  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      3     11     -1405.2490        -0.0000        1    conv    178  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      4     20     -1405.2490        -0.0000        1    conv    187  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      5     23     -1405.2490        -0.0000        1    conv    165  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      6      2     -1405.2490        -0.0000        1    conv    158  reference: NEW BASIN = hilda31pe (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)
+      7     22     -1405.2491        -0.0000        1    conv    163  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      8     18     -1405.2491        -0.0000        1    conv    162  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      9     17     -1405.2491        -0.0000        1    conv    197  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     10     19     -1405.2491        -0.0000        1    conv    181  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     11      7     -1405.2491        -0.0000        1    conv    196  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     12      9     -1405.2491        -0.0000        1    conv    186  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     13     15     -1405.2491        -0.0000        1    conv    169  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     14      4     -1405.2491        -0.0000        1    conv    148  seeded: NEW BASIN with the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 14 Sv per index (the LOW edge of Meinen's bracket)
+     15      5     -1405.2491        -0.0000        1    conv    152  seeded: NEW BASIN + the OBSERVATION-implied partition (the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket); land x1.734)
+     16      8     -1405.2491        -0.0000        1    conv    169  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     17     13     -1405.2491        -0.0000        1    conv    194  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     18     21     -1405.5010        -0.2520        2    conv    175  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     19      6     -1405.5011        -0.2520        2    conv    172  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     20      1     -1405.5011        -0.2520        2    conv    153  reference: INCUMBENT = hilda29l (the canonical, under this array's pins; objective #12, periodic spinup, evaluated at seas_ml 1)
+     21      3     -1405.5011        -0.2520        2    conv    147  seeded: INCUMBENT with the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket)
+     22      0     -1405.5328        -0.2837        2    conv    174  reference: COLD hand-set init
+     23     14     -1405.5328        -0.2837        2    conv    163  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     24     12     -1405.5328        -0.2837        2    conv    159  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 10 at -1405.2490
+  TO BEAT         id 2 (reference: NEW BASIN = hilda31pe (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)) at -1405.2490
+  difference      +0.0000 log-units
+  BEST DISPERSED  id 10 at -1405.2490 (+0.0000 vs the benchmark), of 18 finished
+  VERDICT: 18 dispersed starts REPRODUCED, and did not beat, the best re-converged known
+           basin, at the optimiser's own convergence bound of 0.5 log-units.
+  ENSO seeding at the incumbent: -0.0000 log-units (-1405.5011 seeded vs -1405.5011 not)
+  ENSO seeding at the new_basin: -0.0000 log-units (-1405.2491 seeded vs -1405.2490 not)
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to calibration/output/multistart_20260930q_hilda_csl3v0kaidgb_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================
