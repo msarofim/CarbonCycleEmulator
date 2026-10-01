@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (o) — Handoff: `notes/handoff_2026-10-01e_torch_mcmc_smoke.md`. **The next session runs the MCMC SMOKE on Torch** (Marcus): the bundle, the transfer, the four-chain smoke, the gate to read and production on his go are written out step by step. Suite at `571b24b`: **5534 passed, 0 failed, 0 errors, 4 skipped** (`outputs/diagnostics/suite_20261001_571b24b_all.log`). A headless app build confirms cards 1–7 and the lead "Seven things". Nothing is running.
+
 ## 2026-10-01 (n) — **Marcus: "Delete the emissions-interp-constant branch and renumber the cards. Then write a handoff, with torch to run the smoke in the next session." The branch is deleted, the Known-issues cards now run 1–7, and the Torch smoke is readied: the job script, run from a freshly built bundle on the Mac, passes its port gate.**
 
 **The branch.** `emissions-interp-constant` is deleted.
