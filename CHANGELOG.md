@@ -2,6 +2,45 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (p) — **Torch preflight for the MCMC smoke. Nothing is submitted yet. The driver gains an exact-resume check on `ckpt`/`t0` (mutation-tested) and a truthful provenance label. The smoke command gains `CCX_MC_CKPT=100`: at the handoff's default of 500, the smoke never adapts.**
+
+**Torch, read before touching anything.**
+- The SSH master socket was live (`ssh -O check torch`), so no Duo prompt was needed. No jobs were queued.
+- Fairshare is **0.237**, below the skill's ~0.3 queueing line. Production may queue.
+- ⚠ **The handoff's "`/scratch/ms17839/Rlibs/4.5` has held Rcpp since 09-01" is wrong.** That directory is EMPTY, and its
+  mtime is 09-01 13:29, the moment `setup_torch.sh` created it.
+  - Rcpp 1.1.0 loads from the container's own site library, `/ext3/r/4.5.1/lib/R/library/Rcpp`. This was measured
+    with a login-node R script run from a file.
+  - So `setup_torch.sh` never needed to install anything. The 09-15 multistart (job 17839702, all 24 tasks COMPLETED 0:0) ran
+    with the same empty `R_LIBS_USER`.
+- The Torch tree is a 09-15 extract. Every bundle file was checksummed against it before shipping: 395 identical,
+  75 differ, 198 new.
+  - The 75 are code and docs that changed since 09-15.
+  - Two are mode files: `refit_20260912_hilda31_seasml1_round7/mode_fit_pumpN.rds` and
+    `quarantine/20260910_periodic_spinup_adopted/refit_20260908_hilda31/mode_fit_pumpN.rds`. Torch holds OLDER restamps,
+    identical to the committed versions at `9bc7031` and `7b5b03d`. So the extract overwrites nothing that git lacks.
+  - `R/` holds the same 15 names on both sides, so no stale file is sourced. The old `._*` AppleDouble files are hidden
+    from `list.files()`.
+
+**The driver (`calibration/run_mcmc_check.R`).**
+- **Exact resume now checks `t0` and `ckpt`** as well as `n` / `adapt` / `thin`. The proposal is refreshed AT
+  checkpoints inside [t0, adapt], so a resume under a different ckpt or t0 is a different chain. `ckpt`, `host` and
+  `r_version` are recorded in the provenance.
+- **A supplied `--commit` was labelled "(frozen git-archive copy)".** The Torch bundle is make_bundle.sh's tar of the
+  working tree, not a git archive. It now reads "(supplied by --commit: the running copy is not a checkout)".
+  `build_futures_ribbons.R` keeps its label, which is true there.
+- **Dry run of the job script from the freshly built bundle** (80 iterations, adapt 60, ckpt 20):
+  - the port gate passes with diff 0;
+  - an interrupted-then-resumed chain is `identical()` to the uninterrupted one;
+  - a resume with ckpt 40, or t0 25, STOPS and names the condition;
+  - **the mutant**, the driver with the two new conditions replaced by `TRUE`, resumes silently with exit 0. Its chain
+    DIVERGES from the uninterrupted one (u, lp, trace, samples, C, n_acc), and it still records ckpt 20. So the check has
+    power, and it guards a real failure.
+- **`CCX_MC_CKPT=100` for the smoke** (now in `mcmc_check.sbatch`'s header). T0 = adapt/3 = 100, and the proposal is
+  refreshed only at a checkpoint inside [100, 300]. At ckpt 500 the handoff's smoke would never adapt, and would print
+  only two progress lines to time the rate from. At 100 it adapts at 100, 200 and 300 and prints six lines. Production
+  keeps 500: its adapt window [1000, 30000] holds 59 refreshes.
+
 ## 2026-10-01 (o) — Handoff: `notes/handoff_2026-10-01e_torch_mcmc_smoke.md`. **The next session runs the MCMC SMOKE on Torch** (Marcus): the bundle, the transfer, the four-chain smoke, the gate to read and production on his go are written out step by step. Suite at `571b24b`: **5534 passed, 0 failed, 0 errors, 4 skipped** (`outputs/diagnostics/suite_20261001_571b24b_all.log`). A headless app build confirms cards 1–7 and the lead "Seven things". Nothing is running.
 
 ## 2026-10-01 (n) — **Marcus: "Delete the emissions-interp-constant branch and renumber the cards. Then write a handoff, with torch to run the smoke in the next session." The branch is deleted, the Known-issues cards now run 1–7, and the Torch smoke is readied: the job script, run from a freshly built bundle on the Mac, passes its port gate.**

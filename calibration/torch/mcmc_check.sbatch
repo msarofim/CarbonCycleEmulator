@@ -9,8 +9,11 @@
 #
 # ⛔ SMOKE FIRST (the nyu-torch-hpc test-before-you-scale gate), into its OWN
 # output dir so production never resumes a smoke checkpoint:
-#     CCX_MC_N=600 CCX_MC_ADAPT=300 CCX_MC_OUT=outputs/mcmc_smoke \
+#     CCX_MC_N=600 CCX_MC_ADAPT=300 CCX_MC_CKPT=100 CCX_MC_OUT=outputs/mcmc_smoke \
 #       sbatch --array=1-4 --time=00:45:00 calibration/torch/mcmc_check.sbatch
+# ⚠ CKPT 100, not the default 500 (2026-10-01 p): the proposal is refreshed only AT a
+# checkpoint inside [t0, adapt] = [adapt/3, adapt] = [100, 300], so at 500 the smoke
+# never adapts at all, and it prints only two progress lines to time the rate from.
 # Read, for all four: exit 0; the driver's port gate ("recomputed ... stored ...")
 # passed (it STOPS on a mismatch > 1e-5, so the logpost is the Mac's objective);
 # chain_<k>.rds written; the per-checkpoint s/iteration -- the RATE that sizes

@@ -56,7 +56,9 @@ MC_RNG_KIND   <- c("Mersenne-Twister", "Inversion", "Rejection")
 MC_OVERDISP   <- 2                                      # start = u0 + MC_OVERDISP x a Laplace draw
 MC_EPS        <- 1e-8                                   # Haario's regulariser, u-space units^2
 MC_LP_TOL     <- 1e-5                                   # the mode reproduces its stored logpost
-MC_COMMIT <- if (nzchar(mc_arg("commit", ""))) paste(mc_arg("commit", ""), "(frozen git-archive copy)") else
+# A copy that is not a checkout cannot stamp itself, so its commit is SUPPLIED, and labelled as
+# supplied: on Torch the copy is make_bundle.sh's tar of the working tree, not a git archive.
+MC_COMMIT <- if (nzchar(mc_arg("commit", ""))) paste(mc_arg("commit", ""), "(supplied by --commit: the running copy is not a checkout)") else
   tryCatch({
     h <- suppressWarnings(system("git rev-parse --short HEAD", intern = TRUE, ignore.stderr = TRUE))
     if (!length(h) || !nzchar(h[1])) "?" else {
@@ -94,8 +96,11 @@ if (!(abs(lp0 - md$logpost) < MC_LP_TOL)) stop("the objective does not reproduce
 sd_scale <- 2.38^2 / d
 if (file.exists(MC_FILE)) {
   S <- readRDS(MC_FILE)
+  # t0 and ckpt are checked too: the proposal is refreshed AT checkpoints inside [t0, adapt], so a
+  # resume under either one changed is not the uninterrupted chain
   stopifnot(identical(S$provenance$mode_par, md$par_mode), S$provenance$n == MC_N,
-            S$provenance$adapt == MC_ADAPT, S$provenance$thin == MC_THIN)
+            S$provenance$adapt == MC_ADAPT, S$provenance$thin == MC_THIN,
+            identical(S$provenance$t0, MC_T0), identical(S$provenance$ckpt, MC_CKPT))
   if (S$iter >= MC_N) { cat(sprintf("chain %d already complete (%d iterations)\n", MC_CHAIN, S$iter)); quit(save = "no") }
   RNGkind(MC_RNG_KIND[1], MC_RNG_KIND[2], MC_RNG_KIND[3])
   assign(".Random.seed", S$rng_state, envir = globalenv())
@@ -112,7 +117,8 @@ if (file.exists(MC_FILE)) {
             provenance = list(driver = MC_DRIVER, commit = MC_COMMIT, mode = CCX_MODE_CANONICAL,
               struct = ccx_mode_struct(md), mode_par = md$par_mode, mode_logpost = md$logpost,
               u0 = u0, laplace_cov = Sig, held = PINS, chain = MC_CHAIN, n = MC_N, adapt = MC_ADAPT,
-              t0 = MC_T0, thin = MC_THIN, overdispersion = MC_OVERDISP, eps = MC_EPS,
+              t0 = MC_T0, thin = MC_THIN, ckpt = MC_CKPT, overdispersion = MC_OVERDISP, eps = MC_EPS,
+              host = Sys.info()[["nodename"]], r_version = R.version.string,
               proposal = sprintf("adaptive Metropolis (Haario et al. 2001): N(u, %.4f x C), C = the Laplace covariance until iteration %d, then the chain's running covariance + eps I, FROZEN from iteration %d", sd_scale, MC_T0, MC_ADAPT),
               seed = MC_SEED_BASE + MC_CHAIN, rng_kind = MC_RNG_KIND,
               seed_applied = "set.seed() immediately before the start draw; the RNG state is carried through every checkpoint, so a resumed chain is the uninterrupted chain",
