@@ -2,6 +2,53 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (f) — **`diag_whole_model_scorecard.R` and `diag_constraint_map.R` now stamp their git commit, with a dirty-tree marker.** This closes the "Provenance" flag in (d). Neither driver was re-run, and no existing output was touched. The 10-01 scorecard and constraint map stay unstamped; per (d) they ran on the `fbb6400` and `01c05c3` trees.
+
+**Where the stamp appears.**
+
+| driver | log | saved object |
+|---|---|---|
+| scorecard | first line `<driver> @<stamp>, <time>`; closing `provenance:` line (canonical, each arm's spinup, no RNG) | `.rds` top-level `commit` |
+| constraint map | header before `[constraint_map] mode …`; closing `provenance:` line, also on a `gates`-only run | `provenance$commit` |
+
+**What the stamp means.**
+- `<hash>`: HEAD, and nothing under `R src calibration app data` differs from it.
+- `<hash>+dirty`: a tracked edit (staged or not) or an UNTRACKED file under those paths. Every `R/*.R` is sourced whether committed or not.
+- `<hash>+dirty?`: git gave no status, so the tree is not proven clean.
+- `?`: no commit could be read. A frozen copy under `~/ccx_frozen/` is not a checkout and will stamp `?`.
+- Ignored inputs (`data-raw/downloads/`) are invisible to `git status` either way.
+
+**Choices made in the code.**
+- **The constraint map EXCLUDES its own output `data/constraint_map.rds` from the dirty check.** That file is the script's product, never its input. Without the exclusion, a second build before the first is committed would stamp itself dirty (`gate_reads_its_own_output`). A control arm writes under `outputs/`, so nothing is excluded for it.
+- **Not the bare `tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = …)` idiom.** Measured outside a checkout: git exits 128 and `system()` only WARNS, so the `error =` handler never fires. The value is then `character(0)`, `sprintf()` of it is `character(0)`, and the stamped log line silently VANISHES; the rds would store `chr(0)`.
+- **Labels from named constants.** `CM_DRIVER`, `CM_STEP_LABEL`, `CM_UNITS` and `CM_SEED_NOTE` were hoisted from literals in the `saveRDS()` provenance list, so the log line and the artifact print the same strings. Each is `identical()` to the shipped artifact's value: a rebuild adds `commit` and changes nothing else.
+
+**Tried and abandoned: the first cut had NO POWER.** It passed the `:(exclude)` pathspec to `system2()` unquoted. `system2()` hands its args to `sh` UNQUOTED, so the parentheses were a shell syntax error and `git status` failed on every call. The fallback then read that failure as "+dirty": the stamp said dirty on a CLEAN tree.
+- Caught by the mutation test below.
+- Fixed: args are `shQuote()`d.
+- A failed status now gets its own `+dirty?` marker, so a broken check cannot pass for a dirty tree.
+
+**Verified.**
+- **The stamp, mutation-tested without running either driver.** The drivers' own `*_GIT_PATHS` / `*_COMMIT` assignments were parsed out and evaluated in scratch git repos. All 10 cases give the expected stamp, and every header line renders non-empty.
+
+  | case | scorecard | constraint map (canonical) | constraint map (control arm) |
+  |---|---|---|---|
+  | clean | `<hash>` | `<hash>` | `<hash>` |
+  | tracked edit; staged-only edit; untracked file in `data/`; untracked `R/*.R`; edit in `app/` | `+dirty` | `+dirty` | `+dirty` |
+  | only `data/constraint_map.rds` changed | `+dirty` | `<hash>` (own output excluded) | `+dirty` |
+  | edit outside the paths (`notes/`) | `<hash>` | `<hash>` | `<hash>` |
+  | `git status` fails (corrupt index) | `+dirty?` | `+dirty?` | `+dirty?` |
+  | not a git checkout | `?` | `?` | `?` |
+
+- **On this tree with the edit uncommitted, both stamps read `02f4b78+dirty`.** That is the 2026-10-01 incident's shape, where the old idiom stamped the parent commit.
+- **Tests, BLAS pinned, before and after the edit:** `test-constraint-map.R`, `test-mode-struct-lint.R`, `test-overlay-idiom-lint.R`, and `test-mode-file.R`'s two path lints. All four scan or read what changed.
+  - Both runs: 15 tests, 158 expectations, 0 failed, 0 skipped, 0 errored. The per-test tables are identical.
+  - This worktree lacked the gitignored `data-raw/downloads/nuclear14c/`, which `setup.R`'s `ccx_require_run_inputs()` asserts, so it was copied from the main checkout. It is environment, not repo content.
+
+**Open, not changed here:**
+- `test-constraint-map.R` test 6 could require `commit` in the provenance field list once the artifact is next rebuilt. Today's artifact predates the field and would fail it.
+- 69 other files (66 in `calibration/`, 3 in `data-raw/`) call git through `system()`/`system2()`. A crude grep finds no status or length guard in 51 of them, so they would likely lose their stamp the same way outside a checkout. Not audited one by one.
+
 ## 2026-10-01 (e) — Handoff: `notes/handoff_2026-10-01b_hilda33d_adopted.md`. `hilda33d` is the canonical; the suite is clean. Open for Marcus: D2 choice 4 (with the corrected flux), the app's version label (`APP_VERSION` is the literal "v1.0-hilda29l" while the app runs hilda33d), the AIC gate's row set under mixed objectives, and the drafted app labels. The app preview loads on hilda33d with no console errors. Nothing else is running.
 
 ## 2026-10-01 (d) — **The adoption's suite is CLEAN: the final uncapped run at `f9bffdf` has 5453 passed, 0 failed, 0 errors, 5 skipped. Getting there took two code passes and one round of value re-pins. The code passes fixed five real defects: four in the gate plumbing (one of them in the app) and a constraint map that had to be rebuilt. The re-pins were values that move with the canonical, each approved by Marcus ("Approve all 7 (Recommended)", plus "Re-pin; mutation on hilda29l (Recommended)" for the imbalance panel). No test was skipped or loosened to pass.**

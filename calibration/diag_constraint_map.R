@@ -98,6 +98,7 @@ CM_STEP_SD    <- 1.0          # CM2: the step, in Hessian sds (unconstrained spa
 # "conditional" = 1/sqrt(diag(-H)), the equal-difficulty step this map uses.
 # "marginal" = sqrt(diag(cov)) = md$sd_unc, measured and rejected -- see CM2.
 CM_STEP_KIND  <- "conditional"
+CM_STEP_LABEL <- sprintf("%.2f %s Hessian sd (unconstrained), symmetric", CM_STEP_SD, CM_STEP_KIND)
 # A step should cost about the quadratic's own prediction. Flag where the
 # MEASURED drop exceeds it by this factor -- the coordinate is then nonlinear on
 # the scale of its own uncertainty, which is a finding, not a failure.
@@ -109,6 +110,33 @@ CM_LOG        <- file.path("outputs", "diagnostics",
                            sprintf("%s_%s%s.log", CM_TAG,
                                    if (CM_IS_CANONICAL) CM_DATE else format(Sys.Date(), "%Y%m%d"),
                                    CM_SUFFIX))
+# PROVENANCE STAMP (2026-10-01 f): the commit, in the log header, the closing `provenance:` line
+# and the artifact's `provenance$commit`. "+dirty" = a tracked edit or an untracked file under
+# CM_GIT_PATHS; on 2026-10-01 a diagnostic run on an uncommitted tree stamped its parent commit.
+# "+dirty?" = git gave no status, so the tree is NOT PROVEN clean -- kept distinct from "+dirty" so a
+# broken check cannot pass for a dirty tree. "?" = no commit could be read (a frozen copy under
+# ~/ccx_frozen/ is not a checkout). Ignored inputs (data-raw/downloads/) are invisible to git status
+# either way.
+# ⚠ CM_OUT IS EXCLUDED: it is this script's own OUTPUT, never an input, so a second build before
+# the first is committed would otherwise stamp ITSELF dirty ([[gate_reads_its_own_output]]).
+# ⚠ NOT the bare tryCatch(system(...), error = ) idiom: outside a checkout git exits 128,
+# system() only WARNS and returns character(0), and sprintf() of that is character(0) -- the
+# stamped line silently vanishes (measured 2026-10-01).
+# ⚠ Args are shQuote()d: system2() hands them to sh UNQUOTED, and the `:(exclude)` pathspec is a sh
+# syntax error -- caught by mutation-testing this stamp, where it read "+dirty" on a CLEAN tree.
+CM_DRIVER     <- "calibration/diag_constraint_map.R"
+CM_GIT_PATHS  <- c("R", "src", "calibration", "app", "data")
+CM_COMMIT     <- local({
+  git <- function(...) suppressWarnings(tryCatch(system2("git", shQuote(c(...)), stdout = TRUE),
+                                                 error = function(e) structure(character(0), status = NA_integer_)))
+  h <- git("rev-parse", "--short", "HEAD")
+  if (!is.null(attr(h, "status")) || length(h) != 1L || !nzchar(h)) return("?")
+  d <- git("status", "--porcelain", "--", CM_GIT_PATHS, paste0(":(exclude)", CM_OUT))
+  paste0(h, if (!is.null(attr(d, "status"))) "+dirty?" else if (length(d)) "+dirty" else "")
+})
+# printed by the log's closing line AND stored in the artifact, so the two cannot disagree
+CM_UNITS      <- "log-likelihood units per stream"
+CM_SEED_NOTE  <- "deterministic: no RNG is used"
 CM_HARNESS_TOL<- 1e-3         # the rebuilt objective must reproduce the stored logpost
 CM_CLOSE_TOL  <- 1e-9         # sum over streams must equal the total loglik
 # CURVATURE FRACTION, in [0, 1]: |dhi + dlo| / (|dhi| + |dlo|).
@@ -187,6 +215,11 @@ CM_FAMILY <- list(
 
 dir.create(dirname(CM_LOG), showWarnings = FALSE, recursive = TRUE)
 cm_say <- function(...) { txt <- sprintf(...); cat(txt); cat(txt, file = CM_LOG, append = TRUE) }
+# the closing line of every run's section of the log -- a gates-only run's too
+cm_provenance <- function()
+  cm_say("provenance: %s @%s; mode %s, spinup %s, struct %s; step %s; %s; %s\n",
+         CM_DRIVER, CM_COMMIT, CM_MODE, ccx_mode_spinup(md), ccx_mode_struct(md),
+         CM_STEP_LABEL, CM_UNITS, CM_SEED_NOTE)
 
 # ---------------------------------------------------------------------
 # The harness, mirroring diag_rep_dc_product_ladder.R's: pins applied, the
@@ -289,11 +322,12 @@ cm_gates <- function(b) {
 
 # ---------------------------------------------------------------------
 base <- cm_streams(u0)
-cm_say("\n[%s] mode %s, %d fitted names, %d streams, step = %.2f Hessian sd\n",
+cm_say("\n%s @%s, %s\n", CM_DRIVER, CM_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"))
+cm_say("[%s] mode %s, %d fitted names, %d streams, step = %.2f Hessian sd\n",
        CM_TAG, CM_MODE, length(NAMES), length(base$streams), CM_STEP_SD)
 cm_gates(base)
 
-if (identical(commandArgs(trailingOnly = TRUE)[1], "gates")) quit(save = "no")
+if (identical(commandArgs(trailingOnly = TRUE)[1], "gates")) { cm_provenance(); quit(save = "no") }
 
 STREAMS <- names(base$streams)
 DHI <- DLO <- matrix(NA_real_, length(STREAMS), length(NAMES),
@@ -388,16 +422,16 @@ saveRDS(list(
   component = CM_COMPONENT, family = CM_FAMILY,
   provenance = list(
     tag = CM_TAG, built = format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z"),
-    driver = "calibration/diag_constraint_map.R",
+    driver = CM_DRIVER, commit = CM_COMMIT,
     mode = CM_MODE, mode_file = ccx_mode_file(CM_MODE),
     stored_logpost = md$logpost, spinup = ccx_mode_spinup(md),
     struct = md$struct, pump_field = ccx_mode_pump_field(md),
     pins = names(pins), n_eval = 2L * length(NAMES),
-    step = sprintf("%.2f %s Hessian sd (unconstrained), symmetric",
-                   CM_STEP_SD, CM_STEP_KIND),
+    step = CM_STEP_LABEL,
     sd_kind = paste("Laplace/Hessian at the mode -- NOT a sampled posterior;",
                     "conditional = 1/sqrt(diag(-H)), marginal = sqrt(diag(cov))"),
-    units = "log-likelihood units per stream",
-    seed = NA_integer_, seed_note = "deterministic: no RNG is used")
+    units = CM_UNITS,
+    seed = NA_integer_, seed_note = CM_SEED_NOTE)
 ), CM_OUT)
 cm_say("\nwrote %s (%d streams x %d names)\n", CM_OUT, nrow(M), ncol(M))
+cm_provenance()
