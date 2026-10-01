@@ -1,0 +1,176 @@
+
+GATE 1: the stored mode reproduces at the point this Hessian is taken
+---------------------------------------------------------------------
+mode file  calibration/output/refit_20261001_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds
+pump_mode  N
+pins       ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0   (33 free names)
+h_ml band  [42.5, 200] (from the file)
+log-post   -1405.249036   file -1405.249036   diff 0.000e+00
+(md$u_mode would have decoded h_ml to 49.512 m; par_mode says 49.512 m)
+NA = the step leaves the feasible region
+                          1e-05      3e-05      1e-04      3e-04      1e-03
+beta_max             -7.150e+03 -6.561e+03 -6.528e+03 -6.525e+03 -6.524e+03
+fert_k               -2.857e+04 -2.808e+04 -2.803e+04 -2.803e+04 -2.803e+04
+q10                  -1.399e+05 -1.395e+05 -1.395e+05 -1.395e+05 -1.395e+05
+k_w                  -3.765e+04 -3.714e+04 -3.709e+04 -3.708e+04 -3.708e+04
+h_ml                 -5.928e+02 -1.109e+02 -3.398e+01 -2.880e+01 -2.810e+01
+kz                   -2.070e+03 -1.476e+03 -1.421e+03 -1.417e+03 -1.416e+03
+kz_deep_frac         -5.387e+02 -6.218e+01 -7.146e+00 -2.847e+00 -2.171e+00
+hs_asx_frac          -8.625e+02 -5.706e+02 -5.419e+02 -5.381e+02 -5.375e+02
+h_hs                 -6.945e+02 -9.328e+01 -4.185e+01 -3.742e+01 -3.694e+01
+u_hs                 -1.111e+03 -6.574e+02 -6.121e+02 -6.074e+02 -6.071e+02
+w_enso_l2            -8.902e+01 -9.237e+01 -9.177e+01 -9.169e+01 -9.169e+01
+pump_hs_gcm2         -4.030e+02 -1.007e+02 -3.166e+01 -2.751e+01 -2.689e+01
+pump_grad            -1.657e+03 -1.155e+03 -1.099e+03 -1.094e+03 -1.094e+03
+tau_ex               -6.931e+03 -6.524e+03 -6.486e+03 -6.483e+03 -6.483e+03
+npp_frac_NH          -1.109e+03 -7.233e+02 -6.877e+02 -6.855e+02 -6.851e+02
+seas_T_amp_NH        -1.397e+03 -1.006e+03 -9.581e+02 -9.540e+02 -9.537e+02
+seas_T_amp_SH        -4.522e+02 -1.184e+02 -6.561e+01 -6.198e+01 -6.158e+01
+seas_lag_p_NH        -1.049e+04 -1.018e+04 -1.013e+04 -1.013e+04 -1.013e+04
+seas_lag_p_SH        -1.000e+03 -6.503e+02 -6.103e+02 -6.079e+02 -6.074e+02
+sst_seas_amp_NH      -5.621e+02 -1.738e+02 -1.352e+02 -1.316e+02 -1.311e+02
+sst_seas_amp_SH      -9.882e+02 -4.611e+02 -4.254e+02 -4.218e+02 -4.213e+02
+gamma_enso_land_NH   -1.499e+02 -1.507e+02 -1.521e+02 -1.521e+02 -1.521e+02
+gamma_enso_land_SH   -1.654e+02 -1.606e+02 -1.607e+02 -1.607e+02 -1.607e+02
+bomb_total           -1.438e+05 -1.438e+05 -1.438e+05 -1.438e+05 -1.438e+05
+luc_scale            -2.112e+05 -2.112e+05 -2.112e+05 -2.112e+05 -2.112e+05
+sigma_d14c           -1.041e+02 -1.041e+02 -1.041e+02 -1.041e+02 -1.041e+02
+rep_dC               -2.108e+02 -2.108e+02 -2.108e+02 -2.108e+02 -2.108e+02
+grad_off_co2         -4.856e+02 -4.856e+02 -4.856e+02 -4.856e+02 -4.856e+02
+grad_off_d13c        -6.884e+04 -6.884e+04 -6.884e+04 -6.884e+04 -6.884e+04
+ndep_ret             -2.277e+03 -2.289e+03 -2.289e+03 -2.289e+03 -2.289e+03
+npp_tsens            -1.340e+06 -1.340e+06 -1.340e+06 -1.340e+06 -1.340e+06
+imb_share_land       -8.483e+00 -8.486e+00 -8.486e+00 -8.486e+00 -8.486e+00
+imb_share_ocean_rest -1.530e+00 -1.531e+00 -1.531e+00 -1.531e+00 -1.531e+00
+                          3e-03      1e-02      3e-02      1e-01      3e-01
+beta_max             -6.524e+03 -6.524e+03 -6.525e+03 -6.532e+03 -6.590e+03
+fert_k               -2.803e+04 -2.803e+04 -2.803e+04 -2.805e+04 -2.822e+04
+q10                  -1.395e+05 -1.395e+05 -1.394e+05 -1.387e+05 -1.331e+05
+k_w                  -3.708e+04 -3.708e+04 -3.709e+04 -3.712e+04 -3.741e+04
+h_ml                 -2.806e+01 -2.805e+01 -2.809e+01 -3.043e+01 -2.597e+01
+kz                   -1.416e+03 -1.416e+03 -1.416e+03 -1.417e+03 -1.421e+03
+kz_deep_frac         -2.136e+00 -2.130e+00 -2.130e+00 -2.136e+00 -2.189e+00
+hs_asx_frac          -5.375e+02 -5.375e+02 -5.375e+02 -5.372e+02 -5.345e+02
+h_hs                 -3.688e+01 -3.688e+01 -3.687e+01 -3.681e+01 -3.631e+01
+u_hs                 -6.070e+02 -6.070e+02 -6.070e+02 -6.065e+02 -6.027e+02
+w_enso_l2            -9.169e+01 -9.161e+01 -9.216e+01 -9.325e+01 -9.240e+01
+pump_hs_gcm2         -2.684e+01 -2.684e+01 -2.683e+01 -2.681e+01 -2.656e+01
+pump_grad            -1.094e+03 -1.094e+03 -1.094e+03 -1.100e+03 -1.147e+03
+tau_ex               -6.483e+03 -6.483e+03 -6.485e+03 -6.505e+03 -6.682e+03
+npp_frac_NH          -6.851e+02 -6.851e+02 -6.850e+02 -6.840e+02 -6.750e+02
+seas_T_amp_NH        -9.537e+02 -9.537e+02 -9.541e+02 -9.589e+02 -1.001e+03
+seas_T_amp_SH        -6.154e+01 -6.154e+01 -6.156e+01 -6.183e+01 -6.425e+01
+seas_lag_p_NH        -1.013e+04 -1.013e+04 -1.013e+04 -1.012e+04 -1.006e+04
+seas_lag_p_SH        -6.073e+02 -6.073e+02 -6.073e+02 -6.070e+02 -6.049e+02
+sst_seas_amp_NH      -1.311e+02 -1.311e+02 -1.311e+02 -1.317e+02 -1.371e+02
+sst_seas_amp_SH      -4.213e+02 -4.213e+02 -4.215e+02 -4.236e+02 -4.427e+02
+gamma_enso_land_NH   -1.521e+02 -1.521e+02 -1.521e+02 -1.521e+02 -1.521e+02
+gamma_enso_land_SH   -1.607e+02 -1.607e+02 -1.607e+02 -1.607e+02 -1.607e+02
+bomb_total           -1.438e+05 -1.438e+05 -1.439e+05 -1.447e+05 -1.515e+05
+luc_scale            -2.112e+05 -2.112e+05 -2.114e+05 -2.129e+05 -2.265e+05
+sigma_d14c           -1.041e+02 -1.041e+02 -1.040e+02 -1.037e+02 -1.012e+02
+rep_dC               -2.108e+02 -2.108e+02 -2.108e+02 -2.108e+02 -2.108e+02
+grad_off_co2         -4.856e+02 -4.856e+02 -4.856e+02 -4.856e+02 -4.856e+02
+grad_off_d13c        -6.884e+04 -6.884e+04 -6.884e+04 -6.884e+04 -6.884e+04
+ndep_ret             -2.289e+03 -2.289e+03 -2.291e+03 -2.303e+03 -2.409e+03
+npp_tsens            -1.340e+06 -1.340e+06 -1.340e+06 -1.340e+06 -1.336e+06
+imb_share_land       -8.486e+00 -8.486e+00 -8.485e+00 -8.475e+00 -8.386e+00
+imb_share_ocean_rest -1.531e+00 -1.531e+00 -1.531e+00 -1.531e+00 -1.535e+00
+
+CHOSEN STEP, PER PARAMETER
+--------------------------
+eps = 0.10 x the direction's own posterior sd; verified at eps/3 and 3 eps
+d(logpost) over the step is 0.0050 in EVERY direction by construction
+parameter          sd (unc)    eps (u) reach (nat)   curvature eps/3-3eps
+(this mode file carries no producing-refit step -- the comparison column is
+ OMITTED, not blank: there is nothing to compare against.)
+beta_max            0.01238  1.238e-03   0.0007233     -6524.3     0.00%
+fert_k              0.00597  5.968e-04      0.2734      -28025     0.00%
+q10                 0.00268  2.677e-04   0.0002907 -1.3947e+05     0.00%
+k_w                 0.00519  5.189e-04      0.9967      -37083     0.00%
+h_ml                0.18879  1.888e-02      0.1265     -28.064     0.45%
+kz                  0.02657  2.657e-03        17.7     -1416.1     0.00%
+kz_deep_frac        0.68424  6.842e-02   0.0001762     -2.1329     1.15%
+hs_asx_frac         0.04311  4.311e-03    0.002027      -537.5     0.00%
+h_hs                0.16453  1.645e-02       1.961     -36.876     0.04%
+u_hs                0.04057  4.057e-03     0.05745     -607.01     0.00%
+w_enso_l2           0.10439  1.044e-02     0.09963     -91.583     0.69%
+pump_hs_gcm2        0.19302  1.930e-02        0.89     -26.835     0.03%
+pump_grad           0.03023  3.023e-03       1.077     -1093.7     0.00%
+tau_ex              0.01242  1.242e-03    0.001115       -6483     0.00%
+npp_frac_NH         0.03819  3.819e-03   0.0003811      -685.1     0.00%
+seas_T_amp_NH       0.03238  3.238e-03     0.04985     -953.66     0.00%
+seas_T_amp_SH       0.12743  1.274e-02     0.04804     -61.542     0.06%
+seas_lag_p_NH       0.00993  9.935e-04   0.0009935      -10127     0.00%
+seas_lag_p_SH       0.04056  4.056e-03    0.004056     -607.34     0.00%
+sst_seas_amp_NH     0.08733  8.733e-03     0.01494     -131.06     0.03%
+sst_seas_amp_SH     0.04869  4.869e-03    0.006369     -421.29     0.01%
+gamma_enso_land_NH    0.08147  8.147e-03    0.008147     -152.11     0.00%
+gamma_enso_land_SH    0.07890  7.890e-03     0.00789     -160.73     0.00%
+bomb_total          0.00264  2.637e-04     0.03172 -1.4383e+05     0.00%
+luc_scale           0.00218  2.176e-04   0.0001901  -2.112e+05     0.00%
+sigma_d14c          0.09803  9.803e-03     0.05686     -104.06     0.02%
+rep_dC              0.06887  6.887e-03    0.006887     -210.81     0.00%
+grad_off_co2        0.04538  4.538e-03    0.004538     -485.63     0.00%
+grad_off_d13c       0.00381  3.811e-04   0.0003811      -68844     0.00%
+ndep_ret            0.02090  2.090e-03      0.0213     -2289.3     0.00%
+npp_tsens           0.00086  8.638e-05   8.638e-05 -1.3401e+06     0.00%
+imb_share_land      0.34329  3.433e-02    0.008283     -8.4845     0.12%
+imb_share_ocean_rest    0.80826  8.083e-02     0.01333     -1.5313     0.16%
+
+FULL HESSIAN
+------------
+33x33 with per-direction steps, eps = 0.10 x each posterior sd
+
+eigenvalues (all < 0 at a clean interior maximum):
+ [1] -9.204e-01 -1.072e+00 -1.825e+00 -3.146e+00 -3.755e+00 -6.169e+00
+ [7] -7.945e+00 -8.699e+00 -1.023e+01 -1.260e+01 -1.550e+01 -1.738e+01
+[13] -3.939e+01 -4.317e+01 -5.293e+01 -6.292e+01 -6.403e+01 -8.017e+01
+[19] -1.067e+02 -1.234e+02 -1.640e+02 -1.953e+02 -2.417e+02 -4.951e+02
+[25] -1.628e+03 -3.418e+03 -5.033e+03 -1.123e+04 -3.133e+04 -7.007e+04
+[31] -1.452e+05 -1.678e+05 -1.564e+06
+
+-H IS positive-definite. condition number 1.7e+06
+log|-H| = 168.2844
+
+strongest parameter correlations (|r| > 0.8):
+  none
+
+posterior sd, unconstrained scale (and what it reaches in natural units):
+  grad_off_d13c      0.00591   +/- 0.0059118    around 0.065807
+  bomb_total         0.00787   +/- 0.94705      around 120.31
+  npp_tsens          0.00829   +/- 0.0082858    around -0.0078473
+  q10                0.02533   +/- 0.027501     around 1.0857
+  k_w                0.03048   +/- 58.556       around 1920.9
+  luc_scale          0.04410   +/- 0.038523     around 0.87355
+  tau_ex             0.04603   +/- 0.041337     around 0.89806
+  seas_lag_p_NH      0.05353   +/- 0.053535     around 1.5748
+  seas_lag_p_SH      0.07835   +/- 0.078345     around 2.6469
+  grad_off_co2       0.09005   +/- 0.090049     around 0.26448
+  gamma_enso_land_SH   0.10089   +/- 0.10089      around 0.33189
+  sigma_d14c         0.10292   +/- 0.59693      around 5.8
+  gamma_enso_land_NH   0.10509   +/- 0.10509      around 0.45095
+  pump_grad          0.11245   +/- 40.052       around 356.17
+  sst_seas_amp_SH    0.14285   +/- 0.18686      around 1.3081
+  sst_seas_amp_NH    0.15389   +/- 0.26333      around 1.7111
+  kz                 0.17668   +/- 1176.8       around 14618
+  w_enso_l2          0.18947   +/- 1.8084       around 11.908
+  seas_T_amp_NH      0.21785   +/- 3.3545       around 15.398
+  hs_asx_frac        0.21955   +/- 0.10325      around 0.78866
+  npp_frac_NH        0.22350   +/- 0.022301     around 0.59059
+  u_hs               0.24050   +/- 3.4054       around 20.904
+  rep_dC             0.26601   +/- 0.26601      around 3.2944
+  h_ml               0.31594   +/- 2.1169       around 49.512
+  seas_T_amp_SH      0.31620   +/- 1.192        around 3.7696
+  fert_k             0.33397   +/- 153.01       around 739.86
+  pump_hs_gcm2       0.33515   +/- 15.454       around 72.842
+  ndep_ret           0.49240   +/- 5.017        around 10.189
+  imb_share_land     0.50727   +/- 0.12239      around 0.59341
+  h_hs               0.51911   +/- 61.879       around 240.43
+  beta_max           0.67555   +/- 0.39477      around 2.2049
+  imb_share_ocean_rest   0.93213   +/- 0.15372      around 0.20831
+  kz_deep_frac       1.01504   +/- 0.0026145    around 0.0075824
+
+wrote calibration/output/refit_20261001_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN_hess.rds
+updated the second-order block of calibration/output/refit_20261001_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds (--update)
+exit 0
