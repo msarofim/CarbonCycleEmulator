@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (r) — Handoff: `notes/handoff_2026-10-01f_mcmc_stage1.md`. **MCMC stage 1 is RUNNING on Torch** (job 18969240, 4 chains, an 8 h self-stop, done ~22:35–22:45 10-01). At 42 min every chain sat in the typical set (lp −1416.7 to −1421.7) and stderr was empty. The next session reads it with `calibration/read_mcmc_check.R`. Stage 2 (resume to 1e5, command in the handoff, NO `rm`) and the band are Marcus's calls. Nothing runs on the Mac.
+
 ## 2026-10-01 (q) — **The Torch smoke PASSED. Production is STAGED on Marcus's ruling, and stage 1 (4 chains, an 8 h self-stop) is RUNNING as job 18969240. The smoke's stalled log-posteriors were an artifact of its own early adaptation, not slow burn-in. The R-hat / ESS reader is built and mutation-tested.**
 
 **The smoke** (job 18966349; `CCX_MC_N=600 CCX_MC_ADAPT=300 CCX_MC_CKPT=100`, commit `c631e50`). Every item of the
