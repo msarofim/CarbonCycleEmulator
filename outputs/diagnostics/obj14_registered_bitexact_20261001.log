@@ -1,4 +1,4 @@
-calibration/diag_obj14_registered_bitexact.R @7463347, 2026-10-01 06:16
+calibration/diag_obj14_registered_bitexact.R @f9bffdf, 2026-10-01 07:02
 fitted set with the gate CLOSED: 38 names; gated (held under every registered label): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest
 
       mode             struct gate_open n_rows streams_identical
@@ -15,4 +15,4 @@ fitted set with the gate CLOSED: 38 names; gated (held under every registered la
                 0                     0
 
 VERDICT: PASS (no registered file moves; nothing to restamp) -- 5 registered modes; streams identical 5/5; |d logpost| max 0 (tol 1e-09)
-provenance: calibration/diag_obj14_registered_bitexact.R @7463347; registered modes from R/paths.R CCX_MODE_FILES; each file's own spinup; no RNG
+provenance: calibration/diag_obj14_registered_bitexact.R @f9bffdf; registered modes from R/paths.R CCX_MODE_FILES; each file's own spinup; no RNG

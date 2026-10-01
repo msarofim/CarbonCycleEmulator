@@ -2,6 +2,195 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (d) — **The adoption's suite is CLEAN: the final uncapped run at `f9bffdf` has 5453 passed, 0 failed, 0 errors, 5 skipped. Getting there took two code passes and one round of value re-pins. The code passes fixed five real defects: four in the gate plumbing (one of them in the app) and a constraint map that had to be rebuilt. The re-pins were values that move with the canonical, each approved by Marcus ("Approve all 7 (Recommended)", plus "Re-pin; mutation on hilda29l (Recommended)" for the imbalance panel). No test was skipped or loosened to pass.**
+
+**The runs.** Each ran from a frozen copy whose code is identical to the named commit (`diff -rq` on R/, src/,
+tests/, calibration/, app/ and data/), with BLAS pinned. Logs are in `outputs/diagnostics/`:
+
+| commit | log | result |
+|---|---|---|
+| `1d754e8` (the adoption) | `suite_20261001_post1d754e8.log` | stopped at testthat's default 10 failures |
+| `fbb6400` (code pass 1) | `suite_20261001_postfbb6400_all.log` | 5396 passed, 9 failed, 2 errors (uncapped from here: `set_max_fails(Inf)`) |
+| `f9bffdf` (code pass 2 + re-pins) | `suite_20261001_postf9bffdf.log` | **5453 passed, 0 failed, 0 errors** |
+
+**Fixed in code: real defects.**
+- **The app's parameter table had dropped the 9 pinned rows** (`test-app-review-copy`, Marcus's U1).
+  - The base is `CCX_PARAM_NAMES` again; the gated names are extras.
+  - Fixed in `fbb6400`.
+- **`ccx_overlay_par()` refused an open-label vector on a holding base** (an error in `test-gate-bounds`).
+  - That refusal was the first cut's, and too strict.
+  - The function now copies the gated names whenever the vector carries them.
+  - Fixed in `fbb6400`.
+- **GATE G built its forcing without the structure's AOD mode** (`dg_gateG`; an "AOD mode mismatch" error
+  under the anomaly-AOD label).
+  - Fixed in `fbb6400`. GATE G passes at every arm.
+- **The constraint map** (`test-constraint-map`) is a data artifact, not a code defect.
+  - Rebuilt at hilda33d, with components for the four gated names: `ndep_ret` / `npp_tsens` → "Land
+    uptake"; the shares → "Input scalings & reporting".
+  - All six of its gates pass (`constraint_map_20261001.log`).
+  - Fixed in `fbb6400`. `01c05c3` set `CM_DATE` and restored the 09-25 log, which the rebuild had appended to.
+- **Two over-strict gate checks** (`test-param-absent-ok`).
+  - `ccx_load_mode()` no longer requires the gate: it runs a file, never encodes it.
+  - `ccx_mode_start()` reports a malformed parameter set before the missing gate.
+  - Fixed in `59906ef`.
+
+**Re-pinned with Marcus's approval** (`f9bffdf`). Every old value and its reason are recorded in the test:
+
+| test | old → new | why it moves |
+|---|---|---|
+| `test-cmap-tie` | near-ties among the top three 2 → **1** | the map is rebuilt at hilda33d |
+| `test-constants-batch` | the ledger gains the v0 family (built on `hilda_c`, `alpha_photo_eps` 15.6) | the canonical's label is in that family |
+| `test-enso-demean` | the demean flag's price 9.0242 → **0.0364** | see the note below |
+| `test-gate-bounds` | GATE S month 8.98 → **8.83** (PASS, bracket 7.41–10.41) | the canonical's ocean limb |
+| `test-option-e` | N-E1 \|Δ ocean_grad_dic\| 0.43 → **1.05** ("within 1" → "about 1" log-unit) | option E is CLOSED; provenance, not a bound |
+| `test-param-absent-ok` | the full-set fixture comes from `ccx_build_names_for()` | an open label adds the gated names |
+| `test-imbalance-panel` | see the note below | |
+
+- **`test-enso-demean`: the flag is not inert at hilda33d.** The streams move up to ±2.8 log-units in
+  OPPOSITE directions: `d13c_level_SPO` +2.82, `d13c_level_MLO` −2.21, `co2_icecore` −1.06. They net to
+  +0.036. Its mutation guard read the net price (> 1), which that cancellation defeats, so it was RE-CUT to
+  the streams' total |change| (~9.1 at hilda33d).
+- **`test-imbalance-panel`.** The forcing now carries the label's modes, and these values were re-pinned:
+
+  | value | old → new |
+  |---|---|
+  | in-band | 4 → 5 |
+  | miss | 1.04 → 0.87 |
+  | d_land | +0.32 → +0.462 |
+  | d_luc | −0.30 → −0.214 |
+  | −d_ocn | −0.05 → +0.002 |
+
+  The ocean-term mutation is read at hilda29l by name. The term is ~0 at hilda33d, where the mutation would
+  have no power.
+
+**Flagged for Marcus (not changed):**
+- **`test-mode-file`'s AIC gate (named red #2) now PASSES.**
+  - It compares on its 26 common rows, which include #14's two MOVED GCB rows. There the canonical leads the
+    control by +18.54 (ΔAIC −33.1).
+  - On the 24 like-for-like rows the lead is +4.68 (ΔAIC −5.35), so the verdict holds either way.
+  - The test's row set under mixed objectives is a methodological choice, and it is his.
+  - The test's comment block still calls the gate a standing red.
+- **Provenance.** `diag_whole_model_scorecard.R` and `diag_constraint_map.R` stamp NO commit in their outputs.
+  Their 10-01 runs used the `fbb6400` tree (the scorecard log is written 34 s after that commit) and the
+  `01c05c3` tree (the constraint map).
+
+## 2026-10-01 (c) — **Marcus's three-part request: "1) this seems like an improvement, correct? Are there any other low hanging improvements left? If yes (this is an improvement) and no (there aren't any other quick improvements), then name, register, and adopt. 2) Can we use the future van Vuuren scenarios for 2025? If not, hold constant for a year. 3) Repeat the four D2 choices". (1) It is an improvement and nothing quick remains, so the #14 refit is ADOPTED as `hilda33d`, the canonical. (2) Yes: 2025's N deposition is the seven-marker vV mean, 50.886 Tg N/yr on land. (3) D2 choices 1–3 are kept as recommended. Choice 4 drew "Pros/cons?", and the flux its question quoted was WRONG (corrected below).**
+
+**(1a) Is it an improvement?** YES, on the rows that compare like for like.
+
+⚠ #14 is not #13. D3 moves the two GCB sink rows' targets by s · I(t), so a #14 fit scores those two rows
+against different targets. The comparison therefore uses the 24 rows both objectives score identically:
+the scorecard's 22 "shared" rows plus `hs_surf_dic` and `hs_surf_d13c`.
+
+| arm | label / objective | fitted names | likelihood, 24 shared rows | hilda33d's lead | ΔAIC (hilda33d − arm) |
+|---|---|---|---|---|---|
+| **hilda33d** | `hilda_csl3v0kaidgb` / #14 | 33 | **−1308.60** | — | — |
+| hilda29l (the v1.0 canonical) | `hilda_csl3` / #13 | 29 | −1319.32 | +10.71 | −13.4 |
+| hilda32f (hilda29l's free parent) | `hilda_csl3` / #13 | 32 | −1314.81 | +6.21 | −10.4 |
+| hilda31pe (the seas_ml-0 control) | `hilda_c` / #13 | 31 | −1313.28 | +4.68 | −5.35 |
+
+(AIC = 2k − 2L, with k the arm's FITTED names; a pinned name is not fitted. Negative = hilda33d preferred.)
+
+**Where hilda33d gains on hilda29l**, by stream group (`whole_model_scorecard_20261001_hilda33d.log`):
+- CO₂ level +12.16;
+- CO₂ seasonal +3.38;
+- bomb Δ¹⁴C +0.96;
+- δ¹³C seasonal +0.76;
+- paid for by the δ¹³C level, −7.18.
+
+**Gates** (the same scorecard, with hilda29l as an extra arm):
+- hilda33d passes every gate hilda29l passes: 5, G, Q, 7, S and P7.
+- It fails the four that hilda29l fails:
+  - V: z −4.51 (hilda29l −4.60);
+  - H: contrast z +12.01 (+11.85), and R_co2 0.890 (0.911). ⚠ Slightly WORSE;
+  - GL: z −8.31 (−10.03);
+  - D: z −6.51 (−6.60).
+
+**Comparisons, not gates** (Marcus 09-08h):
+- IRF(100) 0.360 (hilda29l 0.288; Joos 2013 0.409).
+- IRF(300) 0.271 (0.207; 0.322).
+- The 1000-yr pulse partition is land 18 / ocean 60 / air 22 %. Every share is within 0.31σ of Joos 2013's
+  16 ± 14 / 59 ± 12 / 25 ± 9 (hilda29l's land is at +1.25σ).
+- ENSO ocean slope 0.85× GCB (hilda29l 0.89×).
+
+**Strained priors** (|z| > 2): q10 −2.44, `kz_deep_frac` −2.79, `rep_dC` +3.29. hilda29l has the same three,
+plus `pump_hs_gcm2` +2.06.
+
+**(1b) Any other low-hanging improvement?** NONE found.
+- `rep_dC` (R2): its options are relabelling at a price ((c) −16.0, (d) −39.8 log-units;
+  `notes/r2_explained_2026-09-30.md` §6). Neither fixes anything structural.
+- q10 and `kz_deep_frac` were already strained at hilda29l (−2.41, −2.83). Neither is new.
+- V, H, GL and D fail at every registered mode, and they are structural. A GATE V FAIL is not a blocker
+  (Marcus).
+- D4 is a named tension by ruling (09-30).
+- The three open σ-audit items are OBJECTIVE changes, not model improvements. Each needs a ruling, a restamp
+  and a refit:
+  - `gcb_ocean_sink`'s uninflated 0.4 GtC/yr σ;
+  - `excess_c14_ocean`'s target set;
+  - `CCX_ICE_DISCREPANCY`, defaulted OFF.
+- Nothing else on the open list is both quick and expected to raise the fit. Each item needs a ruling and a
+  refit (~9 h on the Mac).
+
+**(1c) Named, registered, ADOPTED** (`1d754e8`; the follow-ups the suite found are in (d)).
+- **Name and location.** The mode is `hilda33d`. Its refit directory was renamed from
+  `refit_20261001_obj14_hilda_csl3v0kaidgb` to `refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb`; 10-01 (a)
+  still names the old path.
+- **Registry** (`R/paths.R`): added to `CCX_MODE_FILES` and `CCX_MODE_PINNED`, and
+  `CCX_MODE_CANONICAL <- "hilda33d"`. hilda29l stays registered: it is the `v1.0-hilda29l` product's mode and
+  #13's limb canonical.
+- ⭐ **The gate rides with a mode file's pins.**
+  - `ccx_mode_pins()` attaches the file's structure whenever that structure opens the gate.
+  - `ccx_apply_pins()` applies the gate first, and `ccx_unpin_params()` undoes it last.
+  - So every consumer of "the canonical" opens the gate with no code of its own.
+  - `ccx_build_names_for()` makes the build checks structure-aware.
+- ⭐ **One Joos-protocol forcing builder**, `ccx_pulse_forcings()` (`R/joos_irf.R`).
+  - It carries the structure's ENSO and AOD modes, zeroes the emissions, ENSO and ¹⁴C sources, and holds
+    GMST.
+  - `ccx_pulse_hold_ndep()` holds N deposition at the reference year (zero for a preindustrial background)
+    and stamps that on the forcing.
+  - The gate-L partition, the scorecard IRF, the app's pulse card and `diag_joos_irf.R` each used to build
+    their own forcing; all four now call this builder.
+- **App.** The forcing carries ENSO and AOD, and the parameter table gains the four gated names.
+  ⚠ **Their labels are DRAFTS for Marcus's review** (app text is his).
+- **Docs and tests.**
+  - DESIGN.md §3.3 (D2), §3.6 (the N-deposition row) and §5.2 (objective #14 and the gate).
+  - A README note and `make_bundle.sh`.
+  - `test-gated-params.R` test 7 (the adoption idiom).
+- **Every registered mode still reproduces its stored streams BIT FOR BIT**
+  (`obj14_registered_bitexact_20261001.log`: 5/5 identical, |Δ logpost| 0).
+  - ⚠ The first run used the uncommitted adoption tree, so its header read `@7463347`.
+  - Re-run at `f9bffdf` on a clean tree: identical apart from the stamp.
+
+**(2) N deposition in 2025** (`be2ce36`, `7463347`). YES, the vV futures cover it.
+- `build_ndep_forcing.R`'s historical table now runs to 2025, the end of the design gates' `DG_YEARS`.
+- 2025 takes the per-year mean of the seven vV markers, the same rule that already made 2024.
+- 2025 = **50.886 Tg N/yr** onto land. The markers span 49.44–51.66, and the mean is 0.25 % below 2024's
+  51.016.
+- Holding 2024 constant would have given 51.016 instead. At the canonical's `ndep_ret` that is 0.0013 GtC/yr
+  of retention in one year: immaterial.
+- The 6887 existing rows are bit-identical. Every registered mode and the refit reproduce exactly, and
+  `test-ndep` / `test-forcing` pass.
+- `ccx_ndep_forcing()` still refuses partial coverage (the contract `test-ndep.R` pins is unchanged). It now
+  HAS coverage, so `dg_run` and the design gates score the canonical.
+
+**(3) The four D2 choices, repeated and ruled** (Marcus's answers verbatim):
+1. **Held-climate runs: "Keep it moving: non-climate (Recommended)".** `ccx_hold_climate()` leaves N deposition
+   on its scenario, as it does CO₂ emissions. This affects held-climate decompositions only, never the fit.
+2. **The `ndep_ret` prior: "Keep centre 3.9 (Recommended)".** The prior is dlnorm(3.9, 0.67), 95 % interval
+   1.0–15. The 0.6 floor of the literature's 0.6–8.7 is aboveground wood only.
+3. **The retention pool: "Keep soil_slow only (Recommended)".** A wood/soil split waits for a cited ¹⁵N
+   partition.
+4. **The NPP readout: "Pros/cons?"** Not yet ruled, so the readout stays EXCLUDED (the status quo) until it is.
+   - ⛔ **The question quoted the wrong flux.** It called the retention flux "0.33 GtC/yr at the refit", but
+     that is the IMPLIED NET SINK (7.03 kg C/kg N × 47.2 Tg N/yr, 1990–2023, after the model's feedbacks).
+   - The GROSS flux that an inclusive readout would add is `ndep_ret` × 1e-3 × deposition: **0.498 GtC/yr over
+     D4's window (2001–2023)**, and 0.481 over 1990–2023.
+   - So "include" reads **68.17 (z +1.56)**, not 68.0 (+1.54), and the app's modern NPP would move by +0.50,
+     not +0.33. "Exclude" stays 67.67 (z +1.50).
+   - Checked in the code: `.nppr` (`R/model.R`) is GPP − Ra plus the ENSO term, and the retention flux enters
+     separately through `add_flux(..., lab = "gpp")`.
+   - The pros and cons went to Marcus with the corrected numbers.
+
 ## 2026-10-01 (b) — Handoff: `notes/handoff_2026-10-01_obj14_refit.md`. The #14 refit has landed, been read, and is committed; the mode is promoted but NOT named, registered or adopted (Marcus). The launch worktree is removed after a byte-identical check of its copy. Nothing is running.
 
 ## 2026-10-01 (a) — **The objective-#14 refit (`hilda_csl3v0kaidgb`): 24/24 starts converged to one optimum (−1405.249). D4 is NOT resolved: modern NPP 69.6 → 67.7, z +1.50 against 56.1 ± 7.75, a NAMED TENSION as ruled. Fertilisation reshapes (K 872 → 740, β 2.74 → 2.20, enh(410) −7.3 %). SSP5-8.5 2300 CO₂ rises +85 ppm and Koven z(2100–2200) falls 2.27 → 1.85. Decomposed by parameter: the fertilisation shape +67 ppm, N retention −33, the fitted greening term +44, the ocean +11, q10 −4.**
