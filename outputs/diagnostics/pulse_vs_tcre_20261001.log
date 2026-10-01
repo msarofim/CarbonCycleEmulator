@@ -1,0 +1,50 @@
+
+=== pulse_vs_tcre (20261001) ===
+mode hilda33d (posterior mode, single best fit) @6bfc6cf
+climate module provenance: FaIR 2.2.4 (calib1.6.0), RCMIP SSP emissions, 841 configs, ensemble mean
+background vvM, release year 2050, sizes {10, 50, 100, 200, 500} GtC, GtC/ppm 2.1240
+
+=== GATE ZERO-PULSE === max|dT| 0.000e+00, max|dCO2| 0.000e+00 -> PASS (bit-identical)
+   10 GtC: peak dT 0.0146 at 2067; dT(2300) 0.0142 = 98 % of peak
+   50 GtC: peak dT 0.0726 at 2068; dT(2300) 0.0711 = 98 % of peak
+  100 GtC: peak dT 0.1442 at 2068; dT(2300) 0.1421 = 99 % of peak
+  200 GtC: peak dT 0.2848 at 2069; dT(2300) 0.2835 = 100 % of peak
+  500 GtC: peak dT 0.7034 at 2300; dT(2300) 0.7034 = 100 % of peak
+
+=== GATE ANCHOR === at the app's defaults (100 GtC, +100 yr): dT 0.1359 degC, 1.359 degC/1000 GtC
+    the app's permanence box prints 0.136 degC and 1.36 degC/1000 GtC (read off the app 2026-10-01) -> PASS, this script is reading the same model
+
+== dGMST per 1000 GtC, by pulse size and horizon ==
+      GtC       +20yr       +50yr      +100yr      +200yr
+       10       1.456       1.383       1.365       1.414
+       50       1.450       1.379       1.362       1.413
+      100       1.441       1.375       1.359       1.411
+      200       1.424       1.365       1.352       1.406
+      500       1.374       1.337       1.331       1.392
+   ⭐ READ DOWN a column for LINEARITY in pulse size (the app's copy says the
+     proportionality is "stated, not shown" -- this shows it). READ ACROSS a
+     row for how the marginal warming EVOLVES: TCRE's near-constancy in time
+     is the thing a pulse response is supposed to approximate.
+
+== LINEARITY across a 50x size range, at +100 yr ==
+   per-1000 ranges 1.331 to 1.365, spread 2.5 % of the mean -> within 10 %: quoting a per-tonne number is honest here
+
+== AIRBORNE FRACTION of the pulse (dCO2 in GtC / pulse GtC) ==
+      GtC       +20yr       +50yr      +100yr      +200yr
+       10      0.5915      0.5261      0.5005      0.4425
+       50      0.5951      0.5291      0.5032      0.4449
+      100      0.5994      0.5328      0.5065      0.4479
+      200      0.6080      0.5403      0.5130      0.4539
+      500      0.6325      0.5622      0.5325      0.4718
+
+== against the AR6 TCRE ==
+   source: AR6 WG1 SPM D.1.1 (0.45 [0.27-0.63] degC/1000 GtCO2); corroborated Forster et al. 2026 ESSD 18:3889
+   === GATE UNITS === 0.45 x 3.6641 -> 0.99-2.31 degC/1000 GtC vs AR6's printed 1.0-2.3 -> PASS
+   AR6 best 1.65, likely 0.99-2.31 degC/1000 GtC (= 0.45 [0.27-0.63] per 1000 GtCO2)
+   CCX pulse, 100 GtC at +100 yr: 1.359  = 82 % of the AR6 best estimate, INSIDE its likely range
+   ⚠ NOT LIKE-FOR-LIKE: a marginal pulse response on a scenario is not TCRE.
+     The ratio is a flag for a decomposition, not a verdict.
+
+[no FaIR comparison file at data-raw/downloads/fair_v160_pulse/fair_pulse_100GtC_2050_vvM_calib160.csv -- skipping the FaIR section]
+
+wrote outputs/diagnostics/pulse_vs_tcre_20261001.csv and outputs/diagnostics/pulse_vs_tcre_20261001.log
