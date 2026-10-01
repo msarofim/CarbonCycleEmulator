@@ -31,7 +31,7 @@ comparisons).
   - hilda33d's stored logpost is **−1405.411447**, and its likelihood −1369.3386 on 26 rows reproduces to 6e−12.
 - **The app** (10-01 j):
   - release **BETA v1.0 CarboTope**, gated against the mode it loads;
-  - card 6 retired (its AIC premise turned);
+  - the AIC card (card 6) retired (its premise turned), and the cards renumbered 1–7 (the app was never deployed);
   - the copy corrected wherever hilda33d had made it false.
 - **Uncertainty** (10-01 l): a Laplace band was built and **failed its own check**, so it is held. The MCMC check is
   built and not yet run (§4.3).
@@ -104,7 +104,7 @@ comparisons).
    - the `excess_c14_ocean` target set;
    - `CCX_ICE_DISCREPANCY`.
    Each would mean an objective change and a restamp.
-2. **The stand-ins.** The 09-16 review named five stand-ins over seven parameter names (card 8's list). At hilda33d
+2. **The stand-ins.** The 09-16 review named five stand-ins over seven parameter names (card 7's list). At hilda33d
    three of them are HELD at 0, not fitted: `ent_seas_amp_SH` and the ocean ENSO pair.
 3. **Eleven constants are still `provisional`** (of 70; `ccx_check_constants()`), the same eleven as 09-21: `OCEAN_DEPTH`,
    `ALK_SURFACE`, `ALPHA_PHOTO_EPS`, `PUMP_EPS13_ORG/CARB`, `NPP_GLOBAL_PI`, `NPP_FRAC_NH_ANCHOR_1750`, `ALPHA_AS_FCO3`,
@@ -133,7 +133,7 @@ comparisons).
 - **The product:**
   - the app runs the canonical live;
   - no bands (held);
-  - the Known-issues tab shows cards 1–5, 7 and 8, with card 7's text plus one drafted sentence;
+  - the Known-issues tab shows cards 1–7; the bands card (6) keeps its approved text plus one drafted sentence;
   - README and DEPLOY.md name the release.
 
 ## 8. What would re-open it

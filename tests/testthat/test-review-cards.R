@@ -91,18 +91,24 @@ test_that("the validator REJECTS a ledger with a duplicate id", {
   expect_true(any(grepl("duplicate card id", v(bad, NULL))))
 })
 
-test_that("the validator REJECTS a ledger that reuses a RETIRED id (card 6, 2026-10-01)", {
+test_that("the validator REJECTS a ledger that reuses a RETIRED id", {
   skip_if_no_review()
   v <- get("rv_validate_cards", envir = .rv_env)
   cards <- get("RV_CARDS", envir = .rv_env)
+  ids <- vapply(cards, function(c_) c_$id, 0)
   retired <- get("RV_RETIRED_IDS", envir = .rv_env)
-  expect_true(6L %in% retired)
-  # the shipped ledger leaves the hole...
-  expect_false(any(vapply(cards, function(c_) c_$id, 0) %in% retired))
-  # ...and a ledger that fills it is refused, so "card 6" cannot come to mean a
-  # different question from the one the retired card asked
-  bad <- cards; bad[[length(bad)]]$id <- retired[1]
-  expect_true(any(grepl("retired card id", v(bad, NULL), fixed = TRUE)))
+  # 2026-10-01: the AIC card (the old card 6) was retired and its hole CLOSED by renumbering
+  # (Marcus: "renumber the cards"; the app has never been deployed). So the shipped ledger
+  # retires nothing and runs 1..n -- and whatever it retires later, it must not reuse.
+  expect_false(any(ids %in% retired))
+  # POWER, on an injected retirement (the shipped set is empty): the same validator, its
+  # RV_RETIRED_IDS bound to a retired id, refuses a ledger that reuses it -- so after
+  # deployment "card N" cannot come to mean a different question -- and passes one that
+  # leaves the hole.
+  v_ret <- v; environment(v_ret) <- list2env(list(RV_RETIRED_IDS = max(ids) + 1L), parent = .rv_env)
+  bad <- cards; bad[[length(bad)]]$id <- max(ids) + 1L
+  expect_true(any(grepl("retired card id", v_ret(bad, NULL), fixed = TRUE)))
+  expect_equal(v_ret(cards, NULL), character(0))
 })
 
 test_that("the tab's lead counts the ledger, not a typed word", {
@@ -208,7 +214,7 @@ test_that("the arity check REJECTS a helper left at the bottom of server.R", {
 })
 
 # =====================================================================
-# THE STAND-IN LIST (card 8; Marcus 2026-09-22, review N12)
+# THE STAND-IN LIST (card 7 since the 2026-10-01 renumbering; card 8 at review N12, Marcus 2026-09-22)
 #
 # The card used to name the SHIMS in prose while the table under it listed the
 # PINS, and presented the two as one list -- Marcus asked how they related and

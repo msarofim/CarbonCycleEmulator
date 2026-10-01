@@ -297,5 +297,5 @@ rv_plot_partition <- function() rv_guard(rv_pulse(), function(x) {
 # CARD 6 -- RETIRED 2026-10-01 (Marcus: "Retire card 6"). Its panel,
 # rv_plot_control(), drew the canonical's and the seas_ml-0 control's northern
 # seasonal cycles and captioned the AIC difference "in the simpler version's
-# favour" whatever its sign. See the CARD 6 note in review.R.
+# favour" whatever its sign. See the note in review.R; id 6 is the bands card since the renumbering.
 # ---------------------------------------------------------------------

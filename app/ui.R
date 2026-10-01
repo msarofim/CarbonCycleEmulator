@@ -534,12 +534,12 @@ navbarPage(
         review_card(3, "rv_diseq",   "320px"),
         review_card(4, "rv_variance", "300px", "rv_enso", "320px"),
         review_card(5, "rv_irf",     "320px", "rv_partition", "300px"),
+        review_card(6, NULL),
         review_card(7, NULL),
-        review_card(8, NULL),
         div(class = "card-issue",
             h4("The stand-ins and the provisional constants, listed"),
             # N12 (Marcus 2026-09-22): two lists, labelled, because they are
-            # two different things -- see card 8's detail.
+            # two different things -- see card 7's detail (card 8 before the 10-01 renumbering).
             h5("Stand-ins: fitted names that absorb a discrepancy"),
             tableOutput("rv_standins"),
             h5("Held: parameters the calibration was not allowed to move"),

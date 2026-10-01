@@ -2,6 +2,36 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (n) — **Marcus: "Delete the emissions-interp-constant branch and renumber the cards. Then write a handoff, with torch to run the smoke in the next session." The branch is deleted, the Known-issues cards now run 1–7, and the Torch smoke is readied: the job script, run from a freshly built bundle on the Mac, passes its port gate.**
+
+**The branch.** `emissions-interp-constant` is deleted.
+- It held one commit, `35f38dc` ("Marcus, option 1", 09-24), never pushed and checked out nowhere.
+- 10-01 (k) superseded it: the default flip, and the seasonality-test literal that commit designed.
+- The hash stays recoverable from the reflog for its retention period.
+
+**The cards are renumbered 1–7.**
+- The bands card moved 7 → 6 and the stand-ins card 8 → 7, in the ledger and in `ui.R`.
+- The AIC card (the old 6) had been retired and first left a hole. The app has never been deployed, so no
+  comment can lead with an old number, and the hole is closed.
+- `RV_RETIRED_IDS` is now EMPTY. The mechanism stays for after deployment: from then on ids are stable, so a card
+  is retired into the set and the cards are never renumbered again.
+- `test-review-cards.R` keeps its power on an INJECTED retirement. Mutation-tested: drop the validator's
+  retired-id check and the reuse is no longer rejected.
+- Comments, the stand-in notes and the B8 draft now cite the new numbers. Handoff (d) is history and keeps the old
+  ones.
+- Tests: review-cards 43, copy ratchet 38, ribbons 21, plot text 101, ui lint 18, app version 10.
+
+**The Torch smoke, readied but NOT run.**
+- `calibration/torch/mcmc_check.sbatch` gained `multistart.sbatch`'s local dry-run idiom (`CCX_PROJ` points it at
+  an extracted bundle, `CCX_SKIP_MODULES=1` skips the module load) and a portable timestamp. `date -Is` is not
+  BSD date.
+- `calibration/torch/make_bundle.sh` rebuilt the bundle: 4.5 MB, its own membership gate passed. It carries
+  `run_mcmc_check.R`, the job script, the restamped canonical and `nuclear14c`.
+- **Dry run:** the job script, read from the EXTRACTED bundle, ran chain 1 for 60 iterations.
+  - The port gate recomputed −1405.411447 against the stored −1405.411447 (diff 0).
+  - The chain completed and wrote `chain_1.rds` with seed 20261002 and the RNG state.
+  - What the Mac cannot test is the module load and the R library on Torch. The smoke on Torch tests those.
+
 ## 2026-10-01 (m) — **Ruling 12 (B8): the assessment record is DRAFTED (`notes/assessment_2026-10-01_hilda33d_DRAFT.md`), with Marcus's verdict and acts left as placeholders. The post-flip scorecard, the final suite, and two lint repairs. Handoff: `notes/handoff_2026-10-01d_rulings_applied.md`.**
 
 **The post-flip scorecard** (`outputs/diagnostics/whole_model_scorecard_20261001_hilda33d_emisconst.{log,rds}`).

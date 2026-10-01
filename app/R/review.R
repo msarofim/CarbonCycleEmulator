@@ -16,7 +16,7 @@
 # not already have (a gate run to 2025, a knockout run, a 1000-year pulse pair).
 # Each is memoised in RV_CACHE and computed on FIRST VIEW, not at startup --
 # startup is already the app's worst number (APP_WARMUP_NOTE) and nobody should
-# pay for a tab they never open. (Card 6, the one that spun up a second mode,
+# pay for a tab they never open. (The old card 6, the one that spun up a second mode,
 # was RETIRED 2026-10-01; see the ledger.)
 #
 # ⚠ THE GATE LIB IS SOURCED LAZILY. It lives in calibration/, not R/, so the
@@ -43,7 +43,7 @@ RV_CLASS_GLOSS <- c(
   structural = paste("a consequence of the model's SHAPE -- each hemisphere has",
                      "its own ocean, and they exchange carbon only through the",
                      "air. Closing it means a different model, not a better fit."),
-  # `accounting` ("the fit prefers a simpler version ...") went with card 6, its
+  # `accounting` ("the fit prefers a simpler version ...") went with the old card 6, its
   # only user, when that card was retired (2026-10-01).
   shim       = paste("a fitted stand-in for a mechanism the model does not",
                      "carry. It is named rather than hidden."),
@@ -62,7 +62,7 @@ RV_SEAS_WINDOW   <- c(2000, 2024)   # the climatology window for the seasonal pa
 RV_GRAD_WINDOW   <- c(2000, 2024)   # where the MLO-SPO gradients are read
 
 # ---------------------------------------------------------------------
-# THE STAND-INS (card 8; Marcus 2026-09-22, review N12)
+# THE STAND-INS (card 7 since the 2026-10-01 renumbering; card 8 at review N12, Marcus 2026-09-22)
 #
 # ⚠ THIS IS A DIFFERENT LIST FROM THE PINS, and conflating them is the bug N12
 # caught. A PIN is generated -- it is a property of the mode file the app is
@@ -133,7 +133,7 @@ rv_validate_shims <- function(shims = RV_SHIMS, param_names) {
 # and carrying the script that produced them and the product's DOI.
 #
 # ⛔ NOT in R/constants.R deliberately: that registry is the MODEL's physical
-# constants, and `ccx_check_constants()` feeds card 8's "N of M provisional"
+# constants, and `ccx_check_constants()` feeds card 7's "N of M provisional"
 # readout. Adding two observational comparanda there would move a number on
 # another card for no reason.
 RV_REP_OBS_SOURCE <- paste("NOAA MBL zonal reference (Lan, Tans, Thoning & NOAA GML 2024,",
@@ -383,7 +383,8 @@ rv_pulse <- function() rv_memo("pulse", function() {
 })
 
 # ---------------------------------------------------------------------
-# CARD 6 -- RETIRED 2026-10-01 (Marcus, review 10-01c A1: "Retire card 6").
+# THE OLD CARD 6 (the AIC accounting) -- RETIRED 2026-10-01 (Marcus, review 10-01c A1:
+# "Retire card 6"). Its id was then REUSED by the renumbering: card 6 is the bands card.
 #
 # It said "a simpler version of the model fits the data better": the seas_ml-0
 # control beat the canonical on AIC. At hilda33d the canonical wins on the 24
@@ -395,7 +396,7 @@ rv_pulse <- function() rv_memo("pulse", function() {
 # ---------------------------------------------------------------------
 
 # ---------------------------------------------------------------------
-# CARD 8 -- the stand-ins and the provisional constants
+# CARD 7 (card 8 until the 2026-10-01 renumbering) -- the stand-ins and the provisional constants
 # ---------------------------------------------------------------------
 rv_stand_ins <- function() rv_memo("stand_ins", function() {
   v <- tryCatch(rv_arm(CCX_MODE_CANONICAL), error = function(e) NULL)
@@ -615,9 +616,12 @@ RV_CARDS <- list(
        ask = paste("The app teaches how long CO₂ lasts. Is a lifetime shorter",
                    "than the multi-model mean -- with the shape inside its band --",
                    "acceptable to teach, or does it undercut the lesson?")),
-  # ⛔ id 6 IS RETIRED, NOT FREE (2026-10-01; see the CARD 6 note above). A
-  # retired id leaves a hole rather than renumbering the cards after it, and is
-  # never reused: a comment that leads with "card 6" must not land on a
+  # ⭐ RENUMBERED 2026-10-01 (Marcus: "renumber the cards"). The AIC card (the old
+  # card 6) was retired the same day and first left a hole; the app has never been
+  # deployed, so no comment can lead with an old number, and the hole was closed:
+  # the bands card 7 -> 6, the stand-ins card 8 -> 7. ⛔ FROM DEPLOYMENT ON, ids are
+  # stable public references: retire into RV_RETIRED_IDS (a hole, never reused) and
+  # never renumber again -- a comment that leads with "card N" must not land on a
   # different question.
   # B7 (Marcus 2026-10-01, "Laplace first, MCMC as the check" -- then "Hold the bands"):
   # a Laplace band WAS built (calibration/build_futures_ribbons.R, 1000 draws) and FAILED
@@ -626,7 +630,7 @@ RV_CARDS <- list(
   # fertilisation ridge (calibration/diag_ribbons_linearity.R, diag_laplace_axes.R). So
   # the card's approved text is TRUE again and is kept; the one added sentence (drafted
   # for Marcus's wording) records that the worry it states was MEASURED.
-  list(id = 7, key = "bands", class = "gap",
+  list(id = 6, key = "bands", class = "gap",
        title = "There are no uncertainty bands, anywhere",
        plain = paste("Every line in this app is a single best fit. There is no",
                      "posterior, so there are no ribbons, and no number here",
@@ -651,7 +655,7 @@ RV_CARDS <- list(
        ask = paste("Would you want the posterior before you trusted any of this,",
                    "or is a single best fit acceptable for a teaching tool that",
                    "says so on every tab?")),
-  list(id = 8, key = "shims", class = "design",
+  list(id = 7, key = "shims", class = "design",
        title = "Some parameters stand in for mechanisms, and some constants are unsourced",
        plain = paste("Several fitted parameters are stand-ins: they absorb a",
                      "discrepancy rather than represent a process. Several",
@@ -678,7 +682,10 @@ RV_CARDS <- list(
        ask = paste("Which of these would you want carried by a real mechanism",
                    "before you would use the model to teach from?"))
 )
-RV_RETIRED_IDS <- 6L   # never reuse (2026-10-01)
+# Retired ids, never to be reused. EMPTY since the 2026-10-01 renumbering (pre-deployment);
+# the mechanism is for after deployment, and test-review-cards.R keeps its power on an
+# injected retirement.
+RV_RETIRED_IDS <- integer(0)
 
 # N2 (Marcus 2026-09-22): the "measured by the running model" sentence is cut
 # from the lead. It is true and it is why this tab cannot go stale, but it is

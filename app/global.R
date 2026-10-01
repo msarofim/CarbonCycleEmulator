@@ -485,7 +485,7 @@ APP_RIBBONS <- local({
 APP_RIBBON_NOTE <- if (isTRUE(APP_RIBBONS$ok)) with(APP_RIBBONS$provenance, sprintf(
   "Shaded: the %g–%g %% range of %d model runs — a %s.",
   100 * probs[1], 100 * probs[length(probs)], n_ok, label)) else
-  if (isTRUE(APP_RIBBONS$held)) NULL else       # held: silent -- card 7 says why there is no band
+  if (isTRUE(APP_RIBBONS$held)) NULL else       # held: silent -- card 6 (the bands card) says why there is no band
   sprintf("No uncertainty band is drawn: %s.", APP_RIBBONS$why)
 # ⚠ THE TEMPERATURE BAND IS NARROW FOR A REASON THE READER MUST BE TOLD. The draws
 # vary the CARBON CYCLE's fitted parameters only; the climate module (fitted to
