@@ -53,7 +53,10 @@ ac_copy_source <- function(root, files = AC_COPY_FILES) {
 AC_CHECKS <- list(
   c("K1 no 'Given only emissions'",      "Given only emissions", NA),
   c("K1 no 'Nothing here was tuned'",    "Nothing here was tuned", NA),
-  c("K2 driver list in takeaway",        NA, "an ENSO index and volcanic aerosol"),
+  # ⚠ K2 SUPERSEDED IN PART 2026-10-01 by Marcus's A7 ("add N deposition as a driver"): the list gained
+  # nitrogen deposition, so the phrase it requires is the list up to the volcanic term; A7's own check
+  # (AC_CHECKS_1001) requires the new term. Changed with the spec, not to turn a red test green.
+  c("K2 driver list in takeaway",        NA, "an ENSO index, volcanic aerosol"),
   c("K4 see_card text",                  NA, "The solid one shows the"),
   # ⚠ W4 was SUPERSEDED 2026-09-24 by Marcus's C3, which replaced the 09-22
   # wording wholesale. The ratchet still ratchets: the PRE-09-22 phrasing must
@@ -64,7 +67,10 @@ AC_CHECKS <- list(
   c("W4/C3 airborne fraction reworded",  "the single most useful summary", "should not be"),
   c("C4 dated clause gone",              "since 2026-09-01", NA),
   c("C4 ENSO blurb",                     NA, "out of the surface ocean, year by year"),
-  c("C5 'exactly one reason' gone",      "for exactly one", "driven by sunlight and temperature"),
+  # ⚠ C5 SUPERSEDED IN PART 2026-10-01 by Marcus's A3 ("Delete the fertilisation sentence where it
+  # appears"): the whole "no separate land sink switch" box went, and with it the seasonal sentence this
+  # used to require. The absent side still ratchets.
+  c("C5 'exactly one reason' gone",      "for exactly one", NA),
   c("F1 FaIR text",                      "So the honest reading is", "Future scenario temperatures are a result"),
   c("F3 confound sentence gone",         "confound it", NA),
   c("N1 acknowledgement wording",        NA, "any potential"),
@@ -72,7 +78,9 @@ AC_CHECKS <- list(
   c("N4 mechanism not carrier",          "What carrier would you expect", "What mechanism might help"),
   c("N8 volcanic mechanism",             "for which there is no mechanism", "Pinatubo"),
   c("N9 comparison gloss",               "not a gate. Nothing from this source", "long tail of carbon dioxide is robust"),
-  c("N10 physical mechanism",            "When a named mechanism loses", "When a physical mechanism loses"),
+  # ⚠ N10 SUPERSEDED IN PART 2026-10-01: its sentence was card 6's question, and card 6 was RETIRED (A1,
+  # "Retire card 6"). The absent side still ratchets.
+  c("N10 physical mechanism",            "When a named mechanism loses", NA),
   c("N11 'most that naming buys' gone",  "most that naming buys", NA),
   c("N12 two lists",                     NA, "rv_standins"),
   c("N12 shim gate",                     NA, "rv_validate_shims"),
@@ -88,6 +96,32 @@ AC_CHECKS <- list(
   # ENSO off removes 23 % of the scatter, not the wobble. See
   # [[ccx_wobble_is_mostly_emissions]].
   c("C2 wobble claim corrected",         "switch it off and the wobbles go", "about a quarter of the wobble")
+)
+
+# THE 2026-10-01 RULINGS (Marcus, review notes/review_2026-10-01c_open_decisions.md: "1) Retire card 6.
+# 2) Say about 1.4 dC per 1000 GtC. 3) Delete the fertilisation sentence where it appears. 4) Fix Card 4
+# and 5, and the land pools, and add N deposition as a driver. 5) update the version to BETA v1.0
+# CarboTope. ... 8) If it is a gross rate, then name it that. 9) Reword: it should be specifically about CO2
+# fertilization, with nitrogen effects a different arm"). Kept apart from the 09-22 list so each round
+# can be read, and superseded, on its own.
+AC_CHECKS_1001 <- list(
+  c("A1 card 6 retired (title)",          "A simpler version of the model fits the data better", NA),
+  c("A1 card 6 retired (caption)",        "in the simpler version's favour", NA),
+  c("A2 pulse box: one figure",           "NOT in when you look", "barely depends on when you look"),
+  c("A3/B5 '(the land sink)' label gone", "CO₂ fertilisation (the land sink)", NA),
+  c("A3/B5 'IS the land sink' gone",      "IS the land sink", NA),
+  c("A3 'single cause' gone",            "sink has a single cause", NA),
+  c("A3 'only long-term' gone",          "only long-term land-uptake term", NA),
+  c("A3 'no land sink' box gone",         "Why there is no separate 'no land sink' switch", NA),
+  c("A4 card 4 range claim",              "lands inside the observed range", "RV_ENSO_L2_VS_OBS"),
+  c("A5 card 5 partition",                "and the ocean a smaller one", "split between land, ocean and air is close to the"),
+  c("A6 land pools (structure)",          "two-pool land biosphere", "a land biosphere of four"),
+  c("A6 land pools (limits)",             "Two land pools", "Four land pools"),
+  c("A7 N deposition in the takeaway",    NA, "and nitrogen deposition, and its calibration data"),
+  c("A7 N deposition in the table",       NA, "Nitrogen deposition on land"),
+  c("B2 release name",                    "v1.0-hilda29l", "APP_RELEASE_NAME"),
+  c("B4 ndep_ret named gross",            "Carbon stored per unit of nitrogen", "Gross carbon uptake per unit of nitrogen"),
+  c("B5 CO2 fertilisation only",          "the land stops taking up carbon", "This switches off CO₂ fertilisation only")
 )
 
 ac_audit <- function(src, checks = AC_CHECKS) {
@@ -113,6 +147,16 @@ test_that("every copy file the review touched is present", {
 test_that("all 28 of Marcus's 2026-09-22 copy items are still applied", {
   problems <- ac_audit(.ac_src)
   expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("all of Marcus's 2026-10-01 copy rulings are still applied", {
+  problems <- ac_audit(.ac_src, AC_CHECKS_1001)
+  expect_equal(problems, character(0), info = paste(problems, collapse = " | "))
+})
+
+test_that("MUTATION: the 10-01 list fires when the deleted fertilisation sentence returns", {
+  mutated <- paste(.ac_src, '  caveat = paste("In this model CO₂ fertilisation IS the land sink")', sep = "\n")
+  expect_true(any(grepl("IS the land sink", ac_audit(mutated, AC_CHECKS_1001), fixed = TRUE)))
 })
 
 test_that("every check actually checks something", {

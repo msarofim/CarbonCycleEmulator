@@ -113,7 +113,11 @@ APP_PARAM_META <- list(
   # ---- the GATED names (2026-10-01): fitted only under a structure that opens the gate
   # (R/calibrate.R CCX_PARAM_GATED; the D2 / D3 label, the canonical from hilda33d). Labels
   # drafted 2026-10-01 for Marcus's review (app text is his).
-  ndep_ret             = list(desc = "Carbon stored per unit of nitrogen deposited on land",
+  # ndep_ret: Marcus 2026-10-01 (review 10-01c B4): "If it is a gross rate, then
+  # name it that." It is: the flux ndep_ret x deposition enters soil_slow and
+  # part of it is respired back, so the fitted 10.19 is GROSS while the realised
+  # NET is ~7.0 kg C/kg N (1990-2023). The draft's "stored" read as net.
+  ndep_ret             = list(desc = "Gross carbon uptake per unit of nitrogen deposited on land",
                               unit = "kg C per kg N"),
   npp_tsens            = list(desc = "Plant growth's response to warming", unit = "per °C"),
   imb_share_land       = list(desc = "Share of the carbon budget's unexplained gap assigned to the land",

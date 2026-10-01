@@ -39,8 +39,7 @@ gloss <- function(term, meaning) {
 provenance_banner <- function() {
   cls <- if (app_params$has_posterior) "prov prov-ok" else "prov prov-warn"
   div(class = cls,
-      tags$strong(sprintf("%s %s \u2014 %s.", toupper(APP_STAGE), APP_VERSION,
-                          app_params$status)),
+      tags$strong(sprintf("%s \u2014 %s.", APP_RELEASE_NAME, app_params$status)),
       " Teaching software \u2014 not peer-reviewed, not for citation.",
       " ", tags$em(sprintf("Reviewers: see the \u201c%s\u201d tab.", RV_TAB_TITLE)))
 }
@@ -339,19 +338,15 @@ navbarPage(
           "and as the counterfactual receives it. Some switches delete the input;",
           "others leave it exactly as it is and remove only the model's response",
           "to it."),
-        uiOutput("c_driver_ui"),
-        # C5 (Marcus 2026-09-22): "exactly one reason" was true of the
-        # SECULAR sink and false as written -- the seasonal cycle is driven by
-        # a prescribed seasonal light and temperature shape, not by CO₂.
-        info_box("Why there is no separate 'no land sink' switch",
-                 p("The land's long-term uptake in this model has one cause:",
-                   "plants grow faster when CO₂ is higher. There is no second",
-                   "long-term land-uptake mechanism to remove, so offering two",
-                   "switches would imply a distinction the model does not have."),
-                 p("The land does breathe in and out over the year as well, but",
-                   "that seasonal swing is driven by sunlight and temperature",
-                   "rather than by CO₂, and it very nearly cancels within each",
-                   "year. It is the seasonal cycle on the first tab."))
+        uiOutput("c_driver_ui")
+        # ⛔ DELETED 2026-10-01 (Marcus, review 10-01c A3: "Delete the
+        # fertilisation sentence where it appears"): the info box "Why there is
+        # no separate 'no land sink' switch". Its whole argument was that the
+        # land's long-term uptake "has one cause: plants grow faster when CO₂ is
+        # higher" -- false since hilda33d, where N-deposition retention is a
+        # second long-term land sink (30 GtC on land by 2024 with fertilisation
+        # off). Its seasonal-cycle paragraph continued that argument and went
+        # with it.
       )
     )
   ),
@@ -518,8 +513,8 @@ navbarPage(
     fluidRow(
       column(
         9, offset = 0,
-        h3(sprintf("What this model gets wrong \u2014 and a question for you (%s %s)",
-                   APP_STAGE, APP_VERSION)),
+        h3(sprintf("What this model gets wrong \u2014 and a question for you (%s)",
+                   APP_RELEASE_NAME)),
         p(RV_TAB_LEAD),
         review_ask_block(),
         div(class = "caveat", APP_FEEDBACK_HOW),
@@ -539,7 +534,6 @@ navbarPage(
         review_card(3, "rv_diseq",   "320px"),
         review_card(4, "rv_variance", "300px", "rv_enso", "320px"),
         review_card(5, "rv_irf",     "320px", "rv_partition", "300px"),
-        review_card(6, "rv_control", "330px"),
         review_card(7, NULL),
         review_card(8, NULL),
         div(class = "card-issue",
@@ -620,8 +614,13 @@ navbarPage(
           "and isotopic patterns, integrated into a pedagogical framework."),
         # U4 (Marcus 2026-09-22): "It carries all three carbon isotopes" became
         # "All exchanges include all three isotopes"; the trailing clause cut.
-        p("Two hemispheres, each with an atmosphere, a two-pool land biosphere,",
-          "and an ocean column of a mixed layer over ten diffusive layers, with",
+        # A6 (Marcus 2026-10-01, "Fix ... the land pools"): "a two-pool land
+        # biosphere" was wrong already at hilda29l. The land is CCX_LAND_POOLS
+        # (leaf, wood, soil_fast, soil_slow) plus the inert soil box
+        # (CCX_LAND_INERT, live since hilda33d's label).
+        p("Two hemispheres, each with an atmosphere, a land biosphere of four",
+          "pools (leaves, wood, fast soil and slow soil) beside a store of inert",
+          "soil carbon, and an ocean column of a mixed layer over ten diffusive layers, with",
           "a cold high-latitude surface box and a deep box alongside it.",
           "Monthly steps from 1750. All exchanges include all three carbon",
           "isotopes — ¹²C, ¹³C and ¹⁴C."),
@@ -661,8 +660,14 @@ navbarPage(
                         "to El Niño — but there is no deep exchange from one",
                         "hemisphere's ocean to the other's, and no tropical",
                         "ocean box between them.")),
-          tags$li(paste("Two land pools standing in for every ecosystem on",
-                        "Earth. No fire, no permafrost, no nutrient limitation.")),
+          # A6 (2026-10-01): "Two land pools" -> four; and "no nutrient
+          # limitation" was true but incomplete once N deposition became a
+          # driver (hilda33d) -- it adds a sink without limiting anything.
+          tags$li(paste("Four land pools standing in for every ecosystem on",
+                        "Earth. No fire, no permafrost, and no nutrient",
+                        "limitation: nitrogen deposition adds a small sink of",
+                        "its own, but nitrogen never caps how much extra growth",
+                        "CO₂ can buy.")),
           tags$li(paste("Two boxes of atmosphere. Nothing about where in a",
                         "hemisphere anything happens.")),
           tags$li("Teaching software. Not peer-reviewed, not for citation.")

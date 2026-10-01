@@ -229,11 +229,17 @@ rv_plot_enso <- function() rv_guard(rv_enso_slope(), function(x) {
     guides(colour = guide_legend(nrow = 2)) +
     labs(x = "Niño3.4 index (annual mean)",
          y = "Ocean uptake anomaly (GtC/yr)",
-         caption = rv_cap(sprintf(
+         caption = rv_cap(paste(sprintf(
            paste("Slope per index unit: budget %+.3f ± %.3f, model %+.3f ± %.3f",
                  "(%.2f×). With the ocean's ENSO mechanisms off the model gives",
                  "%+.3f — the wrong sign, which is why the mechanism matters."),
-           x$obs$slope, x$obs$se, x$full$slope, x$full$se, x$ratio, x$sol$slope))) +
+           x$obs$slope, x$obs$se, x$full$slope, x$full$se, x$ratio, x$sol$slope),
+           # A4 (2026-10-01): the numbers behind card 4's "a little below the
+           # range observed" -- live, from the mode file and the data product
+           if (is.null(x$w_obs) || !x$w_enso_l2 > 0) "" else sprintf(
+             paste("The upwelling limb's fitted strength is %.1f Sv per index unit;",
+                   "the observed range is %g–%g (Meinen et al. 2001)."),
+             x$w_enso_l2, x$w_obs[1], x$w_obs[2])))) +
     theme_ccx()
 })
 
@@ -288,57 +294,8 @@ rv_plot_partition <- function() rv_guard(rv_pulse(), function(x) {
 })
 
 # ---------------------------------------------------------------------
-# CARD 6 -- the seasonal cycle the extra mechanism buys, against its control
+# CARD 6 -- RETIRED 2026-10-01 (Marcus: "Retire card 6"). Its panel,
+# rv_plot_control(), drew the canonical's and the seas_ml-0 control's northern
+# seasonal cycles and captioned the AIC difference "in the simpler version's
+# favour" whatever its sign. See the CARD 6 note in review.R.
 # ---------------------------------------------------------------------
-rv_plot_control <- function() rv_guard(rv_control(), function(x) {
-  # THE AVERAGE SEASONAL CYCLE, not a time series of amplitudes: what the
-  # mechanism is FOR is the shape of the northern cycle, and the honest thing
-  # this panel shows is that the two arms are nearly indistinguishable on it.
-  # That IS the card -- the control is not visibly worse, it is numerically
-  # better, and the mechanism was kept on physical grounds rather than fit.
-  harm <- function(out, lab) {
-    ms <- ccx_model_year_stats(out, "co2_NH")
-    k <- ms$year >= RV_SEAS_WINDOW[1] & ms$year <= RV_SEAS_WINDOW[2]
-    phi <- seq(0, 1, length.out = 200)
-    data.frame(month = phi * 12,
-               co2 = mean(ms$a[k]) * sin(2 * pi * phi) +
-                     mean(ms$b[k]) * cos(2 * pi * phi),
-               who = lab)
-  }
-  lab_c <- sprintf("With the seasonal mixed layer (%s, %d parameters)",
-                   x$canonical$name, x$canonical$k)
-  lab_b <- sprintf("Without it, refitted (%s, %d parameters)",
-                   x$control$name, x$control$k)
-  lab_o <- "Measured, Mauna Loa"
-  oh <- ccx_year_harmonic(APP_OBS$co2$decimal_date[APP_OBS$co2$station == "MLO"],
-                          APP_OBS$co2$co2_ppm[APP_OBS$co2$station == "MLO"])
-  ko <- oh$year >= RV_SEAS_WINDOW[1] & oh$year <= RV_SEAS_WINDOW[2]
-  phi <- seq(0, 1, length.out = 200)
-  d <- rbind(harm(x$canonical$out, lab_c), harm(x$control$out, lab_b),
-             data.frame(month = phi * 12,
-                        co2 = mean(oh$a[ko]) * sin(2 * pi * phi) +
-                              mean(oh$b[ko]) * cos(2 * pi * phi),
-                        who = lab_o))
-  d$who <- factor(d$who, levels = c(lab_o, lab_c, lab_b))
-  ggplot(d, aes(month, co2, colour = who, linetype = who)) +
-    geom_hline(yintercept = 0, colour = "grey70", linewidth = 0.3) +
-    # ⚠ THE CONTROL IS DASHED ON PURPOSE. The two model arms lie on top of each
-    # other to within the line width -- which IS this card's point -- and two
-    # solid lines would read as one missing series rather than as agreement.
-    geom_line(linewidth = 0.85) +
-    scale_linetype_manual(values = stats::setNames(
-      c("solid", "solid", "22"), c(lab_o, lab_c, lab_b))) +
-    scale_x_continuous(breaks = seq(0, 12, 2),
-                       labels = c("Jan", "Mar", "May", "Jul", "Sep", "Nov", "Jan")) +
-    scale_colour_manual(values = stats::setNames(
-      c(RV_COL_MODEL(), RV_COL_ALT(), RV_COL_OBS()), c(lab_c, lab_b, lab_o))) +
-    guides(colour = guide_legend(nrow = 3), linetype = guide_legend(nrow = 3)) +
-    labs(x = NULL, y = "CO\u2082 above the annual mean (ppm)",
-         subtitle = sprintf("Average northern seasonal cycle, %d\u2013%d",
-                            RV_SEAS_WINDOW[1], RV_SEAS_WINDOW[2]),
-         caption = rv_cap(sprintf(
-           paste("Log-likelihood %.1f on %d rows against %.1f: \u0394AIC %+.2f in the",
-                 "simpler version's favour. The mechanism was kept anyway."),
-           x$canonical$lik, x$n_rows, x$control$lik, x$d_aic))) +
-    theme_ccx()
-})

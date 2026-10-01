@@ -183,7 +183,9 @@
 # ⚠ #14 IS NOT #13: compare on the 24 rows both objectives share (the two GCB sink rows' targets
 # move with the shares). There: -1308.60 vs hilda29l -1319.32 (+10.71 at 4 more names, dAIC
 # -13.4), vs the control hilda31pe -1313.28 (+4.68 at 2 more, dAIC -5.35: the AIC red, judged on
-# the shared rows, TURNS). D4 stays a NAMED TENSION (modern NPP 67.7 vs 56.1 +/- 7.75, z +1.50).
+# the shared rows, TURNS). D4 stays a NAMED TENSION (modern NPP 67.7 vs 56.1 +/- 7.75, z +1.50),
+# read EXCLUDING the N-retention flux (Marcus 10-01, review 10-01c B1: "Do the recommendation"),
+# with +0.50 GtC/yr retained via N deposition (gross, 2001-2023) quoted beside it.
 # Consumers: a mode file under this label opens the gate through its pins (ccx_mode_pins()).
 # hilda29l stays REGISTERED (the v1.0-hilda29l product's mode, and #13's limb canonical).
 CCX_MODE_CANONICAL <- "hilda33d"
@@ -332,7 +334,19 @@ CCX_MODE_PINNED <- c(hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31
 CCX_MODE_CANONICAL_PINS  <- c(ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08,
                               w_vent = 0, gamma_vent = 0, w_thc = 0,
                               gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0)
-CCX_MODE_PINNED_PARENT   <- "hilda32f"   # 2026-09-22 (k): the free parent on the canonical's own structure (was hilda31s2, 09-13 -> 09-22)
+# ⚠ RE-DOCUMENTED 2026-10-01 (Marcus, review 10-01c B3b: option (i), "follow recommendations").
+# `hilda32f` is the free parent of the v1.0 canonical, hilda29l (structure hilda_csl3,
+# objective #13). It is NOT a parent of the current canonical: hilda33d (objective #14, the
+# D2/D3 label hilda_csl3v0kaidgb) has NO registered free parent, and none is being fitted
+# (a #14 free-parent wave, ~36 names, would be option (ii), not ruled). What that means for
+# the readers of this constant:
+#   - test-mode-file's (b) ranks #13 arms only, and its printed "parent price" (5.70 at
+#     hilda29l) is a #13 number -- it does not price hilda33d's pins;
+#   - ccx_mode_free_name() returns it whenever the canonical is pinned, which is fine for
+#     fixtures (a 31-name vector encodable on the full table), not for a comparison;
+#   - ccx_ms_reference_set() would seed any FUTURE free wave from it: a #14 wave must name
+#     its own reference set.
+CCX_MODE_PINNED_PARENT   <- "hilda32f"   # 2026-09-22 (k): hilda29l's (v1.0's) free parent; the canonical hilda33d has none (10-01 B3b)
 # THE seas_ml-0 CONTROL AND ITS ARM (2026-09-17 j). The registered control `hilda31p`
 # has the shim FREE (18.69): the seasonal mixed layer is what REPLACED the shim, so
 # the canonical pins it and the control keeps it. Its arm is therefore the canonical's

@@ -2,6 +2,119 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (j) — **Marcus's rulings on the review list (`notes/review_2026-10-01c_open_decisions.md`), items 1–9: the app copy, the AIC gate's row set, the parent's documentation. The pulse box's named red is discharged by his sentence.** Verbatim: "Stop the app preview. 1) Retire card 6. 2) Say about 1.4 dC per 1000 GtC. 3) Delete the fertilisation sentence where it appears. 4) Fix Card 4 and 5, and the land pools, and add N deposition as a driver. 5) update the version to BETA v1.0 CarboTope. 6) Do the recommendation. 7) Follow recommendations. 8) If it is a gross rate, then name it that. 9) Reword: is should be specifically about CO2 fertilization, with nitrogen effects a different arm (even though they matter for CO2 fertilization limits). 10) I think apply it now: I don't expect another refit anytime soon. 11) Laplace first, MCMC as the check. 12) Draft after 1-11 are done."
+
+**The mapping** follows the handoff's §2 table: §A, then B1, B2, B3/B3b, B4–B8. So 1 = A1, 2 = A2, 3 = A3,
+4 = A4–A7, 5 = B2 (= A8), 6 = B1, 7 = B3 + B3b, 8 = B4, 9 = B5, 10 = B6, 11 = B7 and 12 = B8. Items 10–12
+are in later entries.
+
+**"Stop the app preview": nothing was running.** The machine had restarted (up 52 min at session start).
+There was no R process and no listener on port 7788.
+
+1. **Card 6 RETIRED (A1).**
+   - Gone: its ledger entry, its run `rv_control()`, its panel `rv_plot_control()`, its `review_card(6, …)`
+     call, its `output$rv_control`, and the `accounting` class gloss it alone used.
+   - Its id is a HOLE, never a slot. `RV_RETIRED_IDS` holds 6, and `rv_validate_cards()` now REFUSES a ledger
+     that reuses a retired id (mutation-tested in `test-review-cards.R`). The tab shows cards 1–5, 7 and 8.
+   - `RV_TAB_LEAD` said "Eight things" as a literal. It now counts the ledger (gated), so it reads "Seven".
+   - DEPLOY.md's row for the control's mode file is gone: the app no longer reads that file.
+2. **The pulse box says "about 1.4" (A2). The NAMED RED `test-pulse-linearity` is discharged, as the
+   10-01c handoff required: the sentence, the constants, the source and the assertion moved TOGETHER.**
+   - The horizon sentence reads "And it barely depends on when you look: about 1.4 °C per 1000 GtC whether
+     you read it 20, 50, 100 or 200 years after release." The figure comes from
+     `APP_PULSE_PER1000_ABOUT`, and the horizons are read off the table's names.
+   - Re-pinned to the 10-01 CSV:
+     - the size spread is 2.5 % (it was 4.2);
+     - the horizon table is 1.44 / **1.37** / 1.36 / 1.41;
+     - `APP_PULSE_LIN_SRC` names hilda33d.
+   - ⚠ The review note's "1.38" at +50 yr was a double rounding: the CSV has 1.37456.
+   - The test's old direction assertion ("must DECREASE with horizon") is replaced by the claim the new
+     sentence makes. Every horizon, and the 100 GtC headline at +100 yr, must round to 1.4 at one decimal.
+   - Mutation: with the figure set to 1.0 (hilda29l's +100 value), the file fails.
+   - The live headline is unchanged: it still prints the run's own number (1.36 at the defaults).
+3. **The fertilisation sentence is DELETED where it appeared (A3).** It was false at hilda33d, because
+   N-deposition retention is a second long-term land sink (30 GtC on land by 2024 with fertilisation off).
+   - The What-if info box "Why there is no separate 'no land sink' switch" went in full. Its whole argument
+     was that sentence, and its seasonal paragraph continued it.
+   - The "single cause" sentence went from the land-use takeaway (`server.R`).
+   - The constraint map's closing sentence went too ("CO₂ fertilisation is this model's only long-term
+     land-uptake term, so the saturation shape … does not separate"). ⚠ Its true second half went with it.
+     It can come back on its own if wanted.
+   - The fertilisation switch's text is item 9.
+4. **Cards 4 and 5, the land pools, and N deposition as a driver (A4–A7).**
+   - **Card 4.** "lands inside the observed range" was false: `w_enso_l2` is 11.91 against Meinen's 14–25
+     Sv per index unit.
+     - The text now says "sits a little below the range". The word is a named constant, `RV_ENSO_L2_VS_OBS`,
+       and the test recomputes it from the canonical's mode file and `data/obs_eq_cell.rds`.
+     - Card 4b's caption prints both numbers LIVE.
+   - **Card 5.** "the land holds a larger share … and the ocean a smaller one" described hilda29l's 1000-yr
+     split (34 / 48 / 18 %).
+     - At hilda33d the split is 18 / 60 / 22 against Joos's 16 / 59 / 25, with z +0.14 / +0.07 / −0.31.
+     - The new text puts the difference in the TIMING ("leaves the air faster … most of all in the first
+       few decades"; IRF(20) 0.508 vs 0.596), with the split "close to the multi-model mean on every term".
+   - **The land pools.** "a two-pool land biosphere" (wrong already at hilda29l) now reads "four pools
+     (leaves, wood, fast soil and slow soil) beside a store of inert soil carbon", following
+     `CCX_LAND_POOLS` + `CCX_LAND_INERT`.
+     - "Two land pools … no nutrient limitation" becomes "Four land pools … no nutrient limitation:
+       nitrogen deposition adds a small sink of its own, but nitrogen never caps how much extra growth
+       CO₂ can buy."
+   - **N deposition as a driver.**
+     - The Keeling takeaway's input list gains "and nitrogen deposition".
+     - The "What drives the model" table gains a row: 1750–2024, "Built from NOx and NH₃ emissions, CMIP7
+       ScenarioMIP (van Vuuren et al.)", per `data-raw/build_ndep_forcing.R`.
+5. **The release is "BETA v1.0 CarboTope" (B2).**
+   - `APP_RELEASE_NAME` is built from `APP_STAGE`, `APP_VERSION` ("v1.0") and `APP_TITLE`, and both the
+     banner and the Known-issues header print it.
+   - The name carries no mode, so `APP_RELEASE_MODE <- "hilda33d"` records the mode it was cut on. The new
+     `tests/testthat/test-app-version.R` requires that to be the mode the app LOADS, and that the app still
+     loads through `CCX_MODE_CANONICAL`. Both are mutation-tested, including the exact 10-01 drift
+     (label hilda29l, app hilda33d). The recommended "suffix = loaded mode" test, adapted to a name
+     without a suffix.
+   - `APP_STAGE_NOTE` lost "The model is frozen at this version" (stale since the 09-30 unfreeze; a freeze
+     verdict is B8's).
+   - DEPLOY.md now has the name and hilda33d's mode path in both places. README's status paragraph names
+     the release and says the `v1.0-hilda29l` tag marks the 09-22 freeze.
+6. **D4's readout stays EXCLUSIVE (B1),** so no code change. "+0.50 GtC/yr retained via N deposition
+   (gross, 2001–2023)" is quoted beside D4 in the registry comment (`R/paths.R`), and will be beside it in
+   the B8 record.
+7. **The AIC gate's row set (B3) and the parent's documentation (B3b).**
+   - New: `LIK_IMB_ROWS` and `ccx_comparable_rows()` (`R/likelihood.R`). They drop the two D3-moved GCB
+     rows exactly when the arms' D2/D3 gate states differ, read from the files' structures, and keep every
+     common row when the states agree.
+   - `test-mode-file` (c) uses the new rule. The canonical leads the control by **+4.6763 on 24 rows,
+     ΔAIC −5.35**; on 26 rows by name it was +18.54. The parent price, +6.2036, is recorded, not gated.
+   - New test: mixed objectives drop exactly the two rows, #14 vs #14 keeps all 26, and the name-only rule
+     it replaced is shown to differ.
+   - The stale red-#1 / red-#2 comment blocks and labels are rewritten. Red #1 was discharged 09-22 (k);
+     red #2 TURNED at hilda33d.
+   - B3b, option (i): `CCX_MODE_PINNED_PARENT` (hilda32f) is re-documented as hilda29l's free parent.
+     hilda33d has none. The note says what that means for (b)'s ranking, `ccx_mode_free_name()` and
+     `ccx_ms_reference_set()`.
+8. **`ndep_ret` is named gross (B4):** "Gross carbon uptake per unit of nitrogen deposited on land". The
+   fitted 10.19 is gross; the realised net is ~7.0 kg C/kg N.
+9. **The fertilisation switch is about CO₂ fertilisation only (B5, reworded; behaviour unchanged).**
+   - Label "CO₂ fertilisation". Blurb: "… Switch it off and plants no longer respond to the rising CO₂."
+   - Caveat: "This switches off CO₂ fertilisation only. Nitrogen deposition, from fuel burning and farming,
+     is a separate and smaller land sink in this model, and it stays on here — even though, in the real
+     world, nitrogen also limits how much extra growth CO₂ can buy."
+   - `R/mechanisms.R`'s header no longer claims the two are one switch. ⚠ There is still no N-deposition
+     switch of its own: "a different arm" was read as a description, not as option (c). Asked.
+
+**The copy ratchet (`test-app-review-copy.R`).** Three 09-22 checks required text these rulings removed or
+changed: K2 (the driver list), C5 (the deleted box's seasonal sentence) and N10 (card 6's question). Each
+check's PRESENT side was re-expressed or retired, with a comment naming the superseding ruling. Every
+ABSENT side still ratchets. A separate `AC_CHECKS_1001` list (17 checks plus a mutation) guards the
+10-01 rulings.
+
+**Verified.**
+- Run in isolation (`test_file`), all pass: `test-review-cards` 43, `test-pulse-linearity` 16 (was 8
+  passing, 5 failing), `test-app-version` 10, `test-app-review-copy`, and `test-mode-file`. The last one's
+  run printed "likelihood −1308.6010 on 24 common rows; parent hilda32f −1314.8047 (price +6.2036);
+  control hilda31pe −1313.2774 (+4.6763)".
+- The 14 app-facing files all pass: params table 18, constraint-map panel 52, driver panel 49, imbalance
+  panel 38, LUC regrowth 38, mechanisms 89, plot text 101, stylised takeaway 49, ui year lint 18, palette
+  7, 0916 fixes 22, gated params 104, param-absent-ok 114, future span 21.
+
 ## 2026-10-01 (i) — Handoff: `notes/handoff_2026-10-01c_post_adoption_sweep.md`. ((h) is claimed by the unmerged git-stamp branch `claude/youthful-blackburn-fbc009`, so letters stay unique on merge.) The review list for Marcus is `notes/review_2026-10-01c_open_decisions.md`. `test-pulse-linearity` is a DELIBERATE named red until he rewords the pulse box (A2). Only the app preview is running.
 
 ## 2026-10-01 (g) — **The handoff's open items, swept and re-checked against hilda33d; two counterfactual switches fixed; one named red. The adoption repointed every consumer that follows `CCX_MODE_CANONICAL`, but much of what the APP SAYS was written about hilda29l, and some of it is now false. Worst cases: Known-issues card 6 prints its verdict backwards, and the pulse box contradicts its own headline. The full review list is `notes/review_2026-10-01c_open_decisions.md`.**

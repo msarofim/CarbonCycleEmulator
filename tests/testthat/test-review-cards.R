@@ -91,6 +91,29 @@ test_that("the validator REJECTS a ledger with a duplicate id", {
   expect_true(any(grepl("duplicate card id", v(bad, NULL))))
 })
 
+test_that("the validator REJECTS a ledger that reuses a RETIRED id (card 6, 2026-10-01)", {
+  skip_if_no_review()
+  v <- get("rv_validate_cards", envir = .rv_env)
+  cards <- get("RV_CARDS", envir = .rv_env)
+  retired <- get("RV_RETIRED_IDS", envir = .rv_env)
+  expect_true(6L %in% retired)
+  # the shipped ledger leaves the hole...
+  expect_false(any(vapply(cards, function(c_) c_$id, 0) %in% retired))
+  # ...and a ledger that fills it is refused, so "card 6" cannot come to mean a
+  # different question from the one the retired card asked
+  bad <- cards; bad[[length(bad)]]$id <- retired[1]
+  expect_true(any(grepl("retired card id", v(bad, NULL), fixed = TRUE)))
+})
+
+test_that("the tab's lead counts the ledger, not a typed word", {
+  skip_if_no_review()
+  cards <- get("RV_CARDS", envir = .rv_env)
+  words <- get("RV_COUNT_WORDS", envir = .rv_env)
+  lead <- get("RV_TAB_LEAD", envir = .rv_env)
+  expect_true(startsWith(lead, paste(words[length(cards)], "things")),
+              info = sprintf("%d cards; lead begins '%s'", length(cards), substr(lead, 1, 20)))
+})
+
 test_that("the validator REJECTS a card ui.R never renders", {
   skip_if_no_review()
   v <- get("rv_validate_cards", envir = .rv_env)

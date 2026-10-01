@@ -29,7 +29,9 @@ write-up is credited in the acknowledgements.
 nine held). It is `hilda29l`'s structure with the vegetation-capacity loop off, the evidence-based
 shape prior on CO₂ fertilisation, the inert soil pool, nitrogen-deposition retention, a sign-free
 greening term, and a fitted allocation of the Global Carbon Budget's imbalance (CHANGELOG 2026-10-01).
-The public beta below (`v1.0-hilda29l`) is unchanged until the app is redeployed.
+The app runs `hilda33d` under the release name **BETA v1.0 CarboTope** (Marcus 2026-10-01;
+`APP_RELEASE_NAME` / `APP_RELEASE_MODE` in `app/global.R`). The `v1.0-hilda29l` git tag marks the
+09-22 freeze it replaces; the paragraphs below describe that freeze.
 
 **Product-ready as of 2026-09-21** (`notes/assessment_2026-09-21_product_ready.md`). Model core,
 calibration and app run end to end. The calibrated vector is **`hilda29l`**: a **29-parameter

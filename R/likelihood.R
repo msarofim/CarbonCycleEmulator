@@ -450,6 +450,32 @@ LIK_IMB_TREATMENT_CODES <- c(raw = 1L, smooth = 2L, const = 3L)
 LIK_IMB_TREATMENT   <- "smooth"      # RULED 2026-09-30 (l)
 LIK_IMB_SMOOTH_YR   <- 11L           # = the app's APP_LUC_SMOOTH_YR (app/global.R)
 LIK_IMB_WITH_CEMENT <- TRUE          # RULED 2026-09-30 (l)
+# THE ROWS WHOSE TARGETS D3 MOVES: GCB's two sink rows, scored against GCB's own
+# column PLUS the fitted share x I(t) once the shares are present (objective #14).
+LIK_IMB_ROWS <- c("gcb_ocean_sink", "gcb_land_sink")
+
+#' The stream rows a set of mode files can be COMPARED on (Marcus 2026-10-01,
+#' review 10-01c B3: "Follow recommendations").
+#'
+#' The rows every file carries -- minus LIK_IMB_ROWS when the files' structures
+#' DIFFER in the D2/D3 gate (ccx_gate_open()): one then scores the two sinks
+#' against targets its own fitted shares moved and the other against GCB's
+#' columns, so a likelihood summed over those rows rewards an arm for agreeing
+#' with a target it chose. At hilda33d vs the #13 control that was +18.54 on 26
+#' rows by name against +4.68 on the 24 like-for-like rows. Files in the SAME
+#' gate state keep every common row (two #14 arms run one objective, in which the
+#' shares are parameters like any other).
+#' @param rows a list of character vectors, each file's stream names
+#' @param structs the files' structure labels (ccx_mode_struct()), same order
+#' @return the comparable row names
+ccx_comparable_rows <- function(rows, structs) {
+  if (!is.list(rows) || length(rows) < 1L || length(rows) != length(structs))
+    stop("ccx_comparable_rows(): one row-name vector per structure label")
+  common <- Reduce(intersect, rows)
+  gates <- vapply(structs, ccx_gate_open, logical(1))
+  if (length(unique(gates)) > 1L) common <- setdiff(common, LIK_IMB_ROWS)
+  common
+}
 
 #' GCB's imbalance as the D3 rows use it: data.frame(year, I), one row per GCB year
 #'

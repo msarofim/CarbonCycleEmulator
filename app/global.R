@@ -74,10 +74,21 @@ APP_AUTHOR       <- "Marcus C. Sarofim"
 # "Known issues" tab asks that question card by card, so these constants are
 # what every label, banner and link in that tab derives from (project rule:
 # labels derive from named constants, never literals at the point of use).
-APP_VERSION      <- "v1.0-hilda29l"
+# ⭐ THE RELEASE NAME (Marcus 2026-10-01, review 10-01c B2: "update the version
+# to BETA v1.0 CarboTope"). It read "v1.0-hilda29l" -- a literal that kept
+# naming hilda29l after the adoption repointed the app at hilda33d, because no
+# test pinned it. The name now carries no mode, so the mode it was cut on is
+# recorded separately (APP_RELEASE_MODE) and test-app-version.R requires it to
+# equal the mode the app actually loads: adopting a new canonical fails the
+# suite until someone decides whether the release name moves too.
+APP_VERSION      <- "v1.0"
 APP_STAGE        <- "beta"
-APP_STAGE_NOTE   <- paste("Beta. The model is frozen at this version; what is",
-                          "under review is how much its remaining flaws matter.",
+APP_RELEASE_NAME <- paste(toupper(APP_STAGE), APP_VERSION, APP_TITLE)   # "BETA v1.0 CarboTope"
+APP_RELEASE_MODE <- "hilda33d"
+# "frozen at this version" was dropped 2026-10-01: stale since the 09-30
+# unfreeze, and a freeze verdict is Marcus's (the B8 assessment record).
+APP_STAGE_NOTE   <- paste("Beta. What is under review is how much the model's",
+                          "remaining flaws matter.",
                           "Teaching software — not peer-reviewed, not for citation.")
 # ⚠ STARTUP IS SLOW AND THE USER MUST BE TOLD BEFORE THEY WAIT. Measured on an
 # M4: 73 s idle, 116 s at load ~2.5 (2026-09-22), 2.8 min under load (four Julia
@@ -830,21 +841,33 @@ app_stylised_emissions <- function(kind, years, to_zero_year = 2060,
 # Measured by `calibration/diag_pulse_vs_tcre.R` at the app's own defaults
 # (background APP_SCENARIO_BG = vvM since 2026-09-29, release 2050, the p_gtc
 # slider's full range), reading the SAME app_run_coupled() the tab uses. dGMST
-# per 1000 GtC at +100 yr:
-#     10 GtC 1.041 | 50 1.037 | 100 1.032 | 200 1.023 | 500 0.998
-# (On the old ssp245 background, 2026-09-26: 1.091 | 1.087 | 1.082 | 1.072 | 1.044.)
+# per 1000 GtC at +100 yr, at hilda33d (2026-10-01):
+#     10 GtC 1.365 | 50 1.362 | 100 1.359 | 200 1.352 | 500 1.331
+# (hilda29l, 2026-09-29: 1.041 | 1.037 | 1.032 | 1.023 | 0.998; on the old
+# ssp245 background, 2026-09-26: 1.091 | 1.087 | 1.082 | 1.072 | 1.044.)
 # ⚠ These are LABELS FOR A MEASUREMENT MADE ELSEWHERE, which is a staleness risk
 # by construction. `test-pulse-linearity.R` re-reads the driver's own CSV and
 # fails if these drift from it, so the constant cannot rot silently.
 APP_PULSE_LIN_SIZES   <- c(10, 500)   # GtC, the range the claim covers
-APP_PULSE_LIN_SPREAD  <- 4.2          # per cent of the mean, across that range
+APP_PULSE_LIN_SPREAD  <- 2.5          # per cent of the mean, across that range (hilda29l: 4.2)
 APP_PULSE_LIN_HORIZON <- 100L         # years after release
-APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-09-29 (vvM background)"
-# ⚠ AND THE HORIZON DEPENDENCE, which the box did NOT previously admit: the same
-# per-1000 number is 1.43 at +20 yr, 1.20 at +50, 1.03 at +100 and 0.97 at +200
-# (100 GtC). It is flat in pulse SIZE and emphatically not flat in WHEN you look,
-# so "per 1000 GtC" is only meaningful once the horizon is named.
-APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.43, `50` = 1.20, `100` = 1.03, `200` = 0.97)
+APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-10-01 (vvM background, hilda33d)"
+# THE HORIZON DEPENDENCE (100 GtC). At hilda29l the per-1000 figure FELL with
+# horizon -- 1.43 at +20 yr, 1.20 at +50, 1.03 at +100, 0.97 at +200 -- and the
+# box said "flat in pulse size but NOT in when you look". At hilda33d it is
+# nearly FLAT: the slower pulse decay (IRF(100) 0.288 -> 0.360) now balances the
+# thermal lag, so it moves only about +-3 % and rises again after +100 yr.
+# ⚠ +50 yr is 1.37456 -> 1.37 (review 10-01c's table said 1.38, a double
+# rounding).
+APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.44, `50` = 1.37, `100` = 1.36, `200` = 1.41)
+# ⭐ THE BOX'S SENTENCE (Marcus 2026-10-01, review 10-01c A2: "Say about 1.4 dC
+# per 1000 GtC"). One figure for every horizon above, to one decimal.
+# test-pulse-linearity.R requires every horizon's measurement, and the 100 GtC
+# headline at +100 yr, to round to it -- the claim the sentence makes.
+APP_PULSE_PER1000_ABOUT <- 1.4
+#' "20, 50, 100 or 200": an English disjunction, for the horizon list above
+app_or_list <- function(x) if (length(x) < 2L) as.character(x) else
+  paste(paste(utils::head(x, -1L), collapse = ", "), "or", utils::tail(x, 1L))
 
 app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0) {
   y_end <- max(emissions$year)

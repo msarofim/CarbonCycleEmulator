@@ -285,12 +285,12 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
   lp_free <- vapply(rescored, as.numeric, numeric(1))
   expect_true(all(is.finite(lp_free)))
   best_free <- free[which.max(lp_free)]
-  # ⛔ NAMED RED #1 by ruling (Marcus 2026-09-19, ruling 2 = "b"): the best FREE arm is the seas_ml-0 CONTROL
-  # hilda31pe (its #13 refit on hilda_c, -1425.02), not the registered parent hilda31s2 (a `hilda` / #12 fit,
-  # restamped, never refit under hilda_c or #13; the free-parent #13 tree is staged). This expectation stays
-  # AS WRITTEN and RED until the seasonal-ML ruling (the hilda_cs refit) and a free-parent refit resolve it.
+  # (b) was NAMED RED #1 (ruling 2 = "b", 2026-09-19: the best free arm was the control hilda31pe, not the
+  # then-parent hilda31s2). DISCHARGED 2026-09-22 (k), when hilda32f -- hilda29l's own free parent -- was
+  # registered as CCX_MODE_PINNED_PARENT and is the best free arm. ⚠ Since the hilda33d adoption (10-01) this
+  # ranks #13 arms only: hilda33d (#14) has NO registered free parent (review 10-01c B3b, ruled (i); R/paths.R).
   expect_equal(best_free, if (canon_pinned) CCX_MODE_PINNED_PARENT else CCX_MODE_CANONICAL,
-               label = sprintf("best free arm %s (logposts: %s) -- NAMED RED by ruling 09-19 (b) while it is the control", best_free, paste(sprintf("%s %.4f", free, lp_free), collapse = ", ")))
+               label = sprintf("best free arm %s (logposts: %s)", best_free, paste(sprintf("%s %.4f", free, lp_free), collapse = ", ")))
 
   # (d) the canonical reproduces its stored logpost under ITS pins (applied, then
   # restored with the object ccx_apply_pins() returned -- CCX_PINS is process-global)
@@ -306,22 +306,32 @@ test_that("the canonical wins among FREE arms re-scored on today's objective, or
   # (c) LIKELIHOOD on the common rows: the canonical beats the seas_ml 0 control;
   # its price against the parent is recorded
   lik <- function(sc) attr(sc, "streams")
-  common <- Reduce(intersect, c(list(names(lik(sc_c))), lapply(rescored, function(r) names(lik(r)))))
+  # THE ROW SET (Marcus 2026-10-01, review 10-01c B3: "Follow recommendations"). It used to be the stream
+  # NAMES every arm carries (26 at hilda33d). Under objective #14 the two GCB sink rows score against targets
+  # the canonical's own fitted shares moved, while the #13 arms score them against GCB's columns -- so summing
+  # them rewards the canonical for agreeing with a target it chose (+18.54 vs the control on 26 rows, against
+  # +4.68 on the 24 like-for-like ones). ccx_comparable_rows() drops LIK_IMB_ROWS exactly when the arms' D2/D3
+  # gate states DIFFER (detected from the files' structures), and keeps every common row when they agree;
+  # both behaviours are mutation-checked in test_that("the comparable-row rule ...") below.
+  arm_structs <- c(vapply(free, function(a) ccx_mode_struct(readRDS(ccx_mode_file(a))), ""),
+                   ccx_mode_struct(md_c))
+  common <- ccx_comparable_rows(c(lapply(rescored, function(r) names(lik(r))), list(names(lik(sc_c)))),
+                                arm_structs)
   L <- c(vapply(rescored, function(r) sum(lik(r)[common]), numeric(1)),
          setNames(sum(lik(sc_c)[common]), CCX_MODE_CANONICAL))
-  # ⛔ NAMED RED #2 (ruling 2 = "b", 2026-09-19; the MARGIN re-cut to AIC on Marcus's 2026-09-20 ruling "I like
-  # using AIC margins rather than straight [likelihood] margins"). The comparison is AIC on the common rows:
-  # AIC = 2k - 2L with k = the FITTED names of each arm (a pinned name is not fitted), so the canonical may
-  # trail the control by ONE log-unit per name it does not fit and still pass. History: at hilda30e (ML ON in
-  # both hemispheres, 30 names) the control hilda31pe (ML OFF, shim free, 31) led by 10.21 -> dAIC +18.4 for the
-  # control; at hilda30s (hilda_cs, the ML's NH cycle flat) it leads by 2.56 -> dAIC = 2*1 - 2*2.56 = -3.1,
-  # STILL the control's by 1.56 log-units net. The gate stays RED as the open question (the mechanism's last
-  # 2.6 on d13c_seasonal_SPO / ocean_grad_alk / co2_seasonal_MLO); it is not re-cut again to pass.
+  # (c) was NAMED RED #2 (ruling 2 = "b", 2026-09-19; the MARGIN re-cut to AIC on Marcus's 2026-09-20 ruling "I
+  # like using AIC margins rather than straight [likelihood] margins"). The comparison is AIC on the comparable
+  # rows: AIC = 2k - 2L with k = the FITTED names of each arm (a pinned name is not fitted), so the canonical may
+  # trail the control by ONE log-unit per name it does not fit and still pass. History: hilda30e, control +10.21
+  # (dAIC +18.4 for the control); hilda30s +2.56 (-3.1 + 2 = control by 1.56 net); hilda29l +4.09 at two extra
+  # names (dAIC +4.18 for the control): RED throughout #13. ⭐ It TURNED at hilda33d (#14, 2026-10-01): the
+  # canonical leads by +4.68 on the 24 comparable rows, dAIC -5.35. Not re-cut to pass -- the row rule above was
+  # ruled on its own merits, and the verdict is PASS on either row set (26 rows: +18.54, dAIC -33.1).
   k_can <- length(readRDS(ccx_mode_file())$param_names); k_ctl <- length(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))$param_names)
   aic <- function(L, k) 2 * k - 2 * L
   d_aic <- aic(L[[CCX_MODE_CANONICAL]], k_can) - aic(L[[CCX_MODE_SEASML0_CONTROL]], k_ctl)   # < 0 = the canonical is preferred
   expect_lte(d_aic, 0,
-             label = sprintf("dAIC canonical minus control %+.2f (likelihood %.4f on %d names vs %.4f on %d, %d common rows; a positive value is the control's lead in AIC units) -- NAMED RED by ruling",
+             label = sprintf("dAIC canonical minus control %+.2f (likelihood %.4f on %d names vs %.4f on %d, %d comparable rows; a positive value is the control's lead in AIC units)",
                              d_aic, L[[CCX_MODE_CANONICAL]], k_can, L[[CCX_MODE_SEASML0_CONTROL]], k_ctl, length(common)))
   if (canon_pinned)
     cat(sprintf("\n  [test-mode-file] PINNED canonical %s: likelihood %.4f on %d common rows; parent %s %.4f (price %+.4f, RECORDED not gated); control %s %.4f (%+.4f)\n",
@@ -375,4 +385,30 @@ test_that("the free-vs-pinned comparison has POWER, or says that it does not", {
   n_free <- sum(!CCX_MODE_PINNED[names(CCX_MODE_FILES)])
   expect_true(n_free >= 2L || any(CCX_MODE_PINNED[names(CCX_MODE_FILES)]),
               info = "more than one arm, but only one is free and none is pinned -- nothing tests the trap")
+})
+
+test_that("the comparable-row rule drops the D3-moved rows exactly when the objectives differ (review 10-01c B3)", {
+  # Reads only the files' STORED stream names and structure labels: no model run.
+  md_c   <- readRDS(ccx_mode_file())
+  md_ctl <- readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL))
+  s_c <- ccx_mode_struct(md_c); s_ctl <- ccx_mode_struct(md_ctl)
+  r_c <- names(md_c$streams); r_ctl <- names(md_ctl$streams)
+  # the canonical runs #14 (the D2/D3 gate OPEN) and the control #13 (closed) -- the case the rule exists for
+  skip_if(identical(ccx_gate_open(s_c), ccx_gate_open(s_ctl)),
+          "the canonical and the control share a gate state: nothing to drop")
+  expect_true(all(LIK_IMB_ROWS %in% intersect(r_c, r_ctl)))
+  mixed <- ccx_comparable_rows(list(r_c, r_ctl), c(s_c, s_ctl))
+  # mixed objectives: exactly the two moved rows go, nothing else
+  expect_setequal(mixed, setdiff(intersect(r_c, r_ctl), LIK_IMB_ROWS))
+  expect_equal(length(intersect(r_c, r_ctl)) - length(mixed), length(LIK_IMB_ROWS))
+  # the SAME objective (#14 vs #14): every row is kept -- the shares are parameters there
+  same <- ccx_comparable_rows(list(r_c, r_c), c(s_c, s_c))
+  expect_setequal(same, r_c)
+  expect_true(all(LIK_IMB_ROWS %in% same))
+  # MUTATION: the status-quo rule (stream NAMES only) is what this replaced, and it must not pass as the rule
+  by_name <- Reduce(intersect, list(r_c, r_ctl))
+  expect_false(setequal(by_name, mixed),
+               info = "a name-only intersection would score #14's moved targets against #13's")
+  # MUTATION: unequal inputs are refused, not silently recycled
+  expect_error(ccx_comparable_rows(list(r_c), c(s_c, s_ctl)), "one row-name vector per structure")
 })

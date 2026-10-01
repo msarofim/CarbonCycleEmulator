@@ -12,11 +12,12 @@
 # (calibration/lib_design_gates.R), and a card whose kernel will not run says so
 # in place of its number rather than falling back to a literal.
 #
-# WHAT IS EXPENSIVE. Cards 3, 4, 5 and 6 each need a model run that the app does
-# not already have (a gate run to 2025, a knockout run, a 1000-year pulse pair,
-# and the control mode's own spin-up + run). Each is memoised in RV_CACHE and
-# computed on FIRST VIEW, not at startup -- startup is already the app's worst
-# number (APP_WARMUP_NOTE) and nobody should pay for a tab they never open.
+# WHAT IS EXPENSIVE. Cards 3, 4 and 5 each need a model run that the app does
+# not already have (a gate run to 2025, a knockout run, a 1000-year pulse pair).
+# Each is memoised in RV_CACHE and computed on FIRST VIEW, not at startup --
+# startup is already the app's worst number (APP_WARMUP_NOTE) and nobody should
+# pay for a tab they never open. (Card 6, the one that spun up a second mode,
+# was RETIRED 2026-10-01; see the ledger.)
 #
 # ⚠ THE GATE LIB IS SOURCED LAZILY. It lives in calibration/, not R/, so the
 # app does not load it at startup; it also reads data/*.rds of its own. If it is
@@ -27,13 +28,9 @@
 
 # ---- named constants: every label on the tab derives from these -----
 RV_TAB_TITLE  <- "Known issues"
-# N2 (Marcus 2026-09-22): the "measured by the running model" sentence is cut
-# from the lead. It is true and it is why this tab cannot go stale, but it is
-# inside baseball for a reader. The DESIGN is unchanged -- every number below is
-# still computed by a run this app makes.
-RV_TAB_LEAD   <- paste("Eight things this model gets wrong, or does not do, or",
-                       "does on purpose in a way you might disagree with. For",
-                       "each, I want to know the same thing:")
+# RV_TAB_LEAD is defined AFTER the ledger (below RV_CARDS): its count is the
+# ledger's length, not a typed word. It read "Eight things" as a literal and
+# would have kept saying eight when card 6 was retired (2026-10-01).
 RV_ASK        <- c("Deal-breaker", "Fixable", "Acceptable")
 RV_ASK_GLOSS  <- c(
   "Deal-breaker" = "this invalidates the lesson the model is built to teach",
@@ -46,8 +43,8 @@ RV_CLASS_GLOSS <- c(
   structural = paste("a consequence of the model's SHAPE -- each hemisphere has",
                      "its own ocean, and they exchange carbon only through the",
                      "air. Closing it means a different model, not a better fit."),
-  accounting = paste("the fit prefers a simpler version; a mechanism was kept",
-                     "over the fit, on a judgement that is open to challenge."),
+  # `accounting` ("the fit prefers a simpler version ...") went with card 6, its
+  # only user, when that card was retired (2026-10-01).
   shim       = paste("a fitted stand-in for a mechanism the model does not",
                      "carry. It is named rather than hidden."),
   # N9 (Marcus 2026-09-22): his wording, which is better than mine.
@@ -281,6 +278,18 @@ rv_gateD <- function() rv_memo("gateD", function() {
 # knockout that misses one reads the full model as its own control.
 # ---------------------------------------------------------------------
 RV_ENSO_WIN <- c(1959, 2024)
+# Where the canonical's fitted limb strength (`w_enso_l2`, Sv per index unit)
+# sits against the observed interannual bracket (data/obs_eq_cell.rds
+# w0_prior$interannual$per_index_sv: Meinen, McPhaden & Johnson 2001, 50 Sv
+# peak-to-peak over the 1997-99 Nino3.4 swing). One of "below" / "inside" /
+# "above", used in card 4's text; rv_enso_l2_relation() is what the test uses
+# to recompute it, so a refit that moves the value fails the suite instead of
+# leaving the sentence false. hilda33d: 11.91 vs [14, 25] -> "below".
+RV_ENSO_L2_VS_OBS <- "below"
+rv_enso_l2_relation <- function(w, bracket)
+  if (w < bracket[1]) "below" else if (w > bracket[2]) "above" else "inside"
+rv_enso_l2_bracket <- function()
+  readRDS(ccx_path("data", "obs_eq_cell.rds"))$w0_prior$interannual$per_index_sv
 
 rv_variability <- function() rv_memo("variability", function() {
   rv_need_gates()
@@ -341,7 +350,9 @@ rv_enso_slope <- function() rv_memo("enso_slope", function() {
   list(obs = obs, full = full, sol = sol,
        ratio = full$slope / obs$slope,
        w_enso_l2 = if (is.null(v2$p$w_enso_l2)) 0 else
-         rv_arm(CCX_MODE_CANONICAL)$p$w_enso_l2)
+         rv_arm(CCX_MODE_CANONICAL)$p$w_enso_l2,
+       # the observed bracket card 4's text compares it with (A4, 2026-10-01)
+       w_obs = tryCatch(rv_enso_l2_bracket(), error = function(e) NULL))
 })
 
 # ---------------------------------------------------------------------
@@ -372,33 +383,16 @@ rv_pulse <- function() rv_memo("pulse", function() {
 })
 
 # ---------------------------------------------------------------------
-# CARD 6 -- the seas_ml-0 control fits better (the AIC accounting)
+# CARD 6 -- RETIRED 2026-10-01 (Marcus, review 10-01c A1: "Retire card 6").
 #
-# The one card that needs a SECOND parameter set spun up and run. Both arms are
-# run here so the seasonal panels are like-for-like: same window, same
-# climatology estimator, each arm under the spin-up ITS OWN file records.
+# It said "a simpler version of the model fits the data better": the seas_ml-0
+# control beat the canonical on AIC. At hilda33d the canonical wins on the 24
+# rows the two objectives share (+4.68 log-units, dAIC -5.35), so the premise
+# had turned, and its caption printed "dAIC ... in the simpler version's
+# favour" whatever the sign. Its run (rv_control) and its panel
+# (rv_plot_control) went with it. The AIC comparison itself is still gated, in
+# tests/testthat/test-mode-file.R.
 # ---------------------------------------------------------------------
-rv_control <- function() rv_memo("control", function() {
-  rv_need_gates()
-  vC <- rv_arm(CCX_MODE_CANONICAL); vB <- rv_arm(CCX_MODE_SEASML0_CONTROL)
-  rC <- rv_run(CCX_MODE_CANONICAL); rB <- rv_run(CCX_MODE_SEASML0_CONTROL)
-  # THE LIKELIHOODS ARE THE FILES' OWN STORED STREAMS. They are properties of
-  # the FIT, not of a run, and recomputing them here would be a second
-  # implementation of the objective living inside the app -- the two-copies
-  # failure this project has a standing rule against. The scorecard's reproduction
-  # check is what guarantees they still describe the vector the app is running.
-  # ⚠ `streams` is a LIST of per-row values: unlist before summing.
-  lik <- function(v) if (is.null(v$md$streams)) NA_real_ else sum(unlist(v$md$streams))
-  nrows <- function(v) if (is.null(v$md$streams)) NA_integer_ else length(unlist(v$md$streams))
-  k <- function(v) length(v$md$param_names)
-  list(canonical = list(name = CCX_MODE_CANONICAL, lik = lik(vC), k = k(vC),
-                        out = rC$out, h_ml = vC$p$h_ml),
-       control   = list(name = CCX_MODE_SEASML0_CONTROL, lik = lik(vB), k = k(vB),
-                        out = rB$out),
-       n_rows = nrows(vC),
-       # positive = the control wins, which is the direction the card describes
-       d_aic = 2 * (k(vC) - k(vB)) - 2 * (lik(vC) - lik(vB)))
-})
 
 # ---------------------------------------------------------------------
 # CARD 8 -- the stand-ins and the provisional constants
@@ -536,10 +530,19 @@ RV_CARDS <- list(
                      "wobble in CO₂ growth is only about 60 % of the observed",
                      "one. The app's ENSO switch is a sensitivity, not a",
                      "reconstruction."),
+       # A4 (Marcus 2026-10-01, "Fix Card 4"): this said the fitted strength
+       # "lands inside the observed range". True at hilda29l (13.71, inside at
+       # 1 sd); at hilda33d w_enso_l2 is 11.91 against Meinen's 14-25 Sv per
+       # index unit, below the range even one sd up. The relation word is a
+       # named constant, RV_ENSO_L2_VS_OBS, which test-review-cards.R
+       # recomputes from the canonical's mode file and the data product; the
+       # numbers themselves are printed live in card 4b's caption.
        detail = paste("The sensitivity is carried by a physical mechanism -- a",
                       "layer-3 upwelling anomaly driven by the Niño3.4 index,",
-                      "whose fitted strength lands inside the observed range for",
-                      "equatorial transport variability. It replaced a pair of",
+                      sprintf("whose fitted strength sits a little %s the range",
+                              RV_ENSO_L2_VS_OBS),
+                      "observed for equatorial transport variability (the",
+                      "numbers are under the second chart). It replaced a pair of",
                       "fitted coefficients that had been overturning a",
                       "wrong-signed solubility response, which is why the",
                       "mechanism was adopted even though it costs fit. On its own",
@@ -596,33 +599,26 @@ RV_CARDS <- list(
                       "long perturbation lifetime is supposed to EMERGE from the",
                       "seasonal and isotopic constraints rather than be fitted",
                       "to. Reporting the difference and not tuning it away is the",
-                      "point. Where the difference sits is visible in the",
-                      "partition: the land holds a larger share here than the",
-                      "multi-model mean and the ocean a smaller one."),
+                      # A5 (Marcus 2026-10-01, "Fix Card ... 5"): this said "the
+                      # land holds a larger share here than the multi-model mean
+                      # and the ocean a smaller one" -- hilda29l's 1000-yr split
+                      # (34 / 48 / 18 %). At hilda33d it is 18 / 60 / 22 against
+                      # Joos's 16 / 59 / 25 (z +0.14 / +0.07 / -0.31; scorecard
+                      # 2026-10-01): the ocean is now LARGER too, and every term
+                      # sits within a third of the spread. The difference is in
+                      # the timing, largest early: IRF(20) 0.508 vs 0.596.
+                      "point. Where the difference sits is visible in the two",
+                      "charts: the pulse leaves the air faster here, most of all",
+                      "in the first few decades, but after a thousand years the",
+                      "split between land, ocean and air is close to the",
+                      "multi-model mean on every term."),
        ask = paste("The app teaches how long CO₂ lasts. Is a lifetime shorter",
                    "than the multi-model mean -- with the shape inside its band --",
                    "acceptable to teach, or does it undercut the lesson?")),
-  list(id = 6, key = "aic", class = "accounting",
-       title = "A simpler version of the model fits the data better",
-       plain = paste("Switching off the seasonal mixed layer and refitting gives a",
-                     "version with more free parameters that still scores better",
-                     "by AIC. The mechanism was kept anyway, on the judgement",
-                     "that it is a real process and the thing it replaced was a",
-                     "fitted stand-in."),
-       detail = paste("The seasonal mixed layer is an entrainment channel with a",
-                      "depth the fit puts in the observed range; what it replaced",
-                      "was a coefficient with no mechanism behind it. Holding it",
-                      "costs a measurable amount of likelihood, concentrated in",
-                      "the southern seasonal δ¹³C, the deep alkalinity gradient",
-                      "and the northern seasonal CO₂. A free refit of the same",
-                      "structure was run as a check: with the ENSO pair free, the",
-                      "upwelling limb halves and a seasonal coefficient takes up",
-                      "the slack -- one observable with two possible carriers,",
-                      "which is the whole argument for choosing on physicality",
-                      "rather than on fit."),
-       ask = paste("When a physical mechanism loses to a stand-in by a few AIC, is",
-                   "keeping the mechanism the right call -- in a model whose",
-                   "purpose is to teach mechanisms?")),
+  # ⛔ id 6 IS RETIRED, NOT FREE (2026-10-01; see the CARD 6 note above). A
+  # retired id leaves a hole rather than renumbering the cards after it, and is
+  # never reused: a comment that leads with "card 6" must not land on a
+  # different question.
   list(id = 7, key = "bands", class = "gap",
        title = "There are no uncertainty bands, anywhere",
        plain = paste("Every line in this app is a single best fit. There is no",
@@ -670,6 +666,20 @@ RV_CARDS <- list(
        ask = paste("Which of these would you want carried by a real mechanism",
                    "before you would use the model to teach from?"))
 )
+RV_RETIRED_IDS <- 6L   # never reuse (2026-10-01)
+
+# N2 (Marcus 2026-09-22): the "measured by the running model" sentence is cut
+# from the lead. It is true and it is why this tab cannot go stale, but it is
+# inside baseball for a reader. The DESIGN is unchanged -- every number below is
+# still computed by a run this app makes.
+# ⚠ THE COUNT IS THE LEDGER'S. It was the literal "Eight", which retiring card 6
+# (2026-10-01) would have left false; now it cannot drift from RV_CARDS.
+RV_COUNT_WORDS <- c("One", "Two", "Three", "Four", "Five", "Six", "Seven",
+                    "Eight", "Nine", "Ten", "Eleven", "Twelve")
+RV_TAB_LEAD   <- paste(RV_COUNT_WORDS[length(RV_CARDS)],
+                       "things this model gets wrong, or does not do, or",
+                       "does on purpose in a way you might disagree with. For",
+                       "each, I want to know the same thing:")
 
 #' VALIDATE THE CARD LEDGER. A function, not inline test expectations, so that
 #' tests/testthat/test-review-cards.R can MUTATION-TEST it: break a ledger and
@@ -689,6 +699,10 @@ rv_validate_cards <- function(cards = RV_CARDS, ui_text = NULL) {
                           paste(unique(ids[duplicated(ids)]), collapse = ", ")))
   keys <- vapply(cards, function(c_) as.character(c_$key %||% NA), "")
   if (anyDuplicated(keys)) bad <- c(bad, "duplicate card keys")
+  # a retired id is a hole, never a slot (2026-10-01)
+  reused <- intersect(ids[!is.na(ids)], RV_RETIRED_IDS)
+  if (length(reused))
+    bad <- c(bad, sprintf("retired card id(s) reused: %s", paste(reused, collapse = ", ")))
   for (c_ in cards) {
     lab <- sprintf("card %s", c_$id %||% "?")
     miss <- need[!need %in% names(c_)]

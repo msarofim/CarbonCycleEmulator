@@ -75,10 +75,14 @@ function(input, output, session) {
     # objective, so this curve is among the things the calibration was scored
     # against. The honest claim is narrower and still worth making: what the
     # model is not told is how the carbon DIVIDES between air, land and ocean.
+    # A7 (Marcus 2026-10-01, "add N deposition as a driver"): nitrogen
+    # deposition has been a prescribed input since hilda33d (data/forcing_ndep.rds,
+    # the NOx + NH3 emissions proxy); the list omitted it. The same driver is a
+    # row of the "What drives the model" table (output$h_drivers).
     sprintf(paste("The model produces %.0f ppm in %d, rising to %.0f ppm today;",
                   "the measured value is about %.0f ppm. The model's inputs are",
-                  "emissions, global temperature, an ENSO index and volcanic aerosol,",
-                  "and its calibration data include the CO₂ level and",
+                  "emissions, global temperature, an ENSO index, volcanic aerosol",
+                  "and nitrogen deposition, and its calibration data include the CO₂ level and",
                   "seasonal cycle at both Mauna Loa and the South Pole. But it is",
                   "not an abstract regression: it can only adjust quantities that",
                   "stand for physical things. And what it is never told is how",
@@ -134,7 +138,9 @@ function(input, output, session) {
   #      REGROWTH on former farmland". In GCB's accounting -- and in this model
   #      -- regrowth is netted INSIDE the land-use input, not inside the natural
   #      sink, and CO2 fertilisation is this model's ONLY long-term land-uptake
-  #      term ([[ccx_land_sink_single_term]]). The old sentence attributed the
+  #      term ([[ccx_land_sink_single_term]]) -- ⚠ true then, NOT since hilda33d
+  #      (2026-10-01), which adds N-deposition retention; the "single cause"
+  #      sentence below was deleted for that reason. The old sentence attributed the
   #      sink to a mechanism the model does not contain. It was harmless until
   #      09-24 (n) drew regrowth on this very tab, at which point the page
   #      contradicted itself.
@@ -165,8 +171,11 @@ function(input, output, session) {
       sprintf(paste("Land-use change — agriculture, deforestation and the rest",
                     "— has been an emission SOURCE for the whole of this record.",
                     "What changed is the land as a whole: the natural land sink",
-                    "grew until it outweighed those emissions. In this model that",
-                    "sink has a single cause — plants growing faster as CO₂ rises.",
+                    "grew until it outweighed those emissions.",
+                    # 2026-10-01 (Marcus, review 10-01c A3): "In this model that
+                    # sink has a single cause -- plants growing faster as CO2
+                    # rises" DELETED. False since hilda33d: N-deposition
+                    # retention is a second long-term land sink.
                     "Forests do grow back, but that carbon is counted inside the",
                     "land-use number rather than in the sink; it is drawn on its",
                     "own under “%s”."),
@@ -909,19 +918,17 @@ function(input, output, session) {
                               "tonne really does do the same work as the next."),
                         pr$gtc, pr$year, APP_PULSE_LIN_SIZES[1], APP_PULSE_LIN_SIZES[2],
                         APP_PULSE_LIN_SPREAD, APP_PULSE_LIN_SRC))),
-      # ⛔ THE HORIZON IS NOT A DETAIL, and the box did not used to say so. The
-      # per-1000 figure falls by a quarter between +20 yr and +200 yr, so a
-      # bare "degC per 1000 GtC" is underdetermined until the horizon is named.
-      p(tags$em(sprintf(paste("It is flat in pulse size but NOT in when you look:",
-                              "the same figure is %.2f at 20 years after release,",
-                              "%.2f at 50, %.2f at 100 and %.2f at 200. A warming",
-                              "\u201cper 1000 GtC\u201d only means something once the",
-                              "horizon is named \u2014 the one above is %d years."),
-                        APP_PULSE_PER1000_BY_HORIZON[["20"]],
-                        APP_PULSE_PER1000_BY_HORIZON[["50"]],
-                        APP_PULSE_PER1000_BY_HORIZON[["100"]],
-                        APP_PULSE_PER1000_BY_HORIZON[["200"]],
-                        APP_PULSE_LIN_HORIZON))))
+      # THE HORIZON (Marcus 2026-10-01, review 10-01c A2: "Say about 1.4 dC per
+      # 1000 GtC"). At hilda29l the per-1000 figure fell by a quarter between
+      # +20 and +200 yr and this sentence said "flat in pulse size but NOT in
+      # when you look"; at hilda33d it is nearly flat in horizon too (global.R,
+      # APP_PULSE_PER1000_BY_HORIZON), so the box now gives the one figure. The
+      # horizons named are the measured ones, read off the constant's names.
+      p(tags$em(sprintf(paste("And it barely depends on when you look: about %.1f",
+                              "°C per 1000 GtC whether you read it %s years",
+                              "after release."),
+                        APP_PULSE_PER1000_ABOUT,
+                        app_or_list(names(APP_PULSE_PER1000_BY_HORIZON))))))
   })
 
   output$f_notes <- renderUI({
@@ -1068,10 +1075,12 @@ function(input, output, session) {
         sprintf(paste(" But the two numbers that set it are only pinned as a",
                       "COMBINATION: on their own each is about %.0fx tighter than",
                       "the fit leaves the pair jointly."),
-                max(APP_CMAP$sd_ratio[c("beta_max", "fert_k")])),
-        " CO₂ fertilisation is this model's only long-term land-uptake term, so",
-        " the saturation shape — the part that decides the future — is exactly",
-        " the part the present-day record does not separate."),
+                max(APP_CMAP$sd_ratio[c("beta_max", "fert_k")]))),
+        # 2026-10-01 (Marcus, review 10-01c A3): " CO2 fertilisation is this
+        # model's only long-term land-uptake term, so the saturation shape --
+        # the part that decides the future -- is exactly the part the
+        # present-day record does not separate." DELETED. Its premise is false
+        # since hilda33d (N-deposition retention is a second long-term sink).
       p(tags$strong("And the numbers that influence nothing much. "),
         sprintf(paste("The individual numbers that influence the measurements",
                       "least are %s. That is not a defect on its own — a number nothing",
@@ -1151,7 +1160,6 @@ function(input, output, session) {
   output$rv_enso      <- rv_render("rv_enso", rv_plot_enso,      "Running the model with its ENSO mechanisms off")
   output$rv_irf       <- rv_render("rv_irf", rv_plot_irf,       "Releasing a pulse and following it")
   output$rv_partition <- rv_render("rv_partition", rv_plot_partition, "Following the pulse for a thousand years")
-  output$rv_control   <- rv_render("rv_control", rv_plot_control,   "Running the simpler control model")
 
   # THE STAND-IN LIST IS GENERATED, NOT TYPED. Which names are held, and at what
   # value, is a property of the mode file the app is running; a hand-kept table
@@ -1205,18 +1213,25 @@ function(input, output, session) {
   # model derives for itself. Historical land-use change is a driver too. The
   # split is also what makes the Keeling tab's corrected takeaway checkable --
   # a reader can see the driver list it refers to.
+  # A7 (Marcus 2026-10-01): N deposition added. Source per
+  # data-raw/build_ndep_forcing.R: a proxy built from NOx + NH3 emissions, the
+  # CMIP7 ScenarioMIP history (van Vuuren et al., Zenodo v1.1.1) to 2023 and the
+  # seven-marker mean for 2024.
   output$h_drivers <- renderTable({
     data.frame(
       Driver = c("Fossil CO\u2082 emissions", "Land-use change CO\u2082",
                  "Global mean temperature", "El Ni\u00f1o index (Ni\u00f1o 3.4)",
-                 "Volcanic aerosol", "Bomb and industrial \u00b9\u2074C"),
+                 "Volcanic aerosol", "Bomb and industrial \u00b9\u2074C",
+                 "Nitrogen deposition on land"),
       Covers = c("1750\u20132024", "1750\u20132024", "1850\u20132024",
-                 "1948\u2013present", "1850\u20132024", "1952\u20132023"),
+                 "1948\u2013present", "1850\u20132024", "1952\u20132023",
+                 "1750\u20132024"),
       Source = c("Global Carbon Budget 2025",
                  "Global Carbon Budget 2025 (OSCAR v3.1 before 1850)",
                  "IGCC", "NOAA PSL",
                  "NASA GISS, CMIP7 stratospheric aerosol",
-                 "Tans (1981) / Naegler & Levin (2006); Laemmel et al. 2025"),
+                 "Tans (1981) / Naegler & Levin (2006); Laemmel et al. 2025",
+                 "Built from NOx and NH\u2083 emissions, CMIP7 ScenarioMIP (van Vuuren et al.)"),
       check.names = FALSE)
   }, striped = TRUE, width = "100%")
 

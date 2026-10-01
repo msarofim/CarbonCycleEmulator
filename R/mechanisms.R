@@ -13,11 +13,15 @@
 # and it disappears. Without both halves the comparison is unmakeable.
 #
 # WHAT IS DELIBERATELY NOT HERE. DESIGN section 7 lists six toggles, including
-# "no CO2 fertilization" and "no land sink" as separate items. In THIS model they
-# are the same switch: the land takes up carbon because NPP rises with CO2
-# (beta), and there is no other land-uptake mechanism to remove. Offering them as
-# two controls would imply a distinction the model does not have. They are merged,
-# and the app says so.
+# "no CO2 fertilization" and "no land sink" as separate items. Until hilda33d
+# they were the same switch, because NPP rising with CO2 (beta) was the model's
+# only long-term land uptake. ⚠ THAT IS NO LONGER TRUE (2026-10-01): the D2
+# canonical also retains carbon from nitrogen deposition (`ndep_ret`), a second
+# long-term land sink. Marcus ruled (review 10-01c B5) that the fertilisation
+# switch stays SPECIFICALLY CO2 fertilisation, with nitrogen effects a different
+# arm "(even though they matter for CO2 fertilization limits)" -- so its words
+# changed, not its behaviour, and the app's "no separate land-sink switch" box
+# was deleted (A3). There is still no N-deposition switch of its own.
 # =====================================================================
 
 # Each entry: what the user sees, what it does, and the caveat it carries.
@@ -87,12 +91,23 @@ CCX_DRIVERS <- list(
 CCX_MECHANISMS <- list(
   fertilisation = list(
     driver = NULL,  # CCX_DRIVERS; NULL = acts on a parameter, not an input
-    label = "CO₂ fertilisation (the land sink)",
+    # 2026-10-01 (Marcus, review 10-01c B5 + A3): "Reword: it should be
+    # specifically about CO2 fertilization, with nitrogen effects a different
+    # arm (even though they matter for CO2 fertilization limits)." The label
+    # lost "(the land sink)", the blurb "the land stops taking up carbon", and
+    # the caveat "CO2 fertilisation IS the land sink -- there is no separate
+    # land-uptake mechanism". All three were false at hilda33d: with this switch
+    # on, N-deposition retention still holds ~30 GtC on land by 2024. The
+    # BEHAVIOUR is unchanged (beta / beta_max only; `ndep_ret` stays live).
+    label = "CO₂ fertilisation",
     blurb = paste("Plants grow faster when there is more CO₂ in the air, and",
-                  "that extra growth is what pulls carbon into the land. Switch",
-                  "it off and the land stops taking up carbon."),
-    caveat = paste("In this model CO₂ fertilisation IS the land sink — there",
-                   "is no separate land-uptake mechanism to remove."),
+                  "that extra growth pulls carbon into the land. Switch it off",
+                  "and plants no longer respond to the rising CO₂."),
+    caveat = paste("This switches off CO₂ fertilisation only. Nitrogen",
+                   "deposition, from fuel burning and farming, is a separate",
+                   "and smaller land sink in this model, and it stays on here",
+                   "— even though, in the real world, nitrogen also limits",
+                   "how much extra growth CO₂ can buy."),
     # MUST ZERO WHICHEVER PARAMETER IS LIVE. This read `p$beta <- 0` until
     # 2026-08-14, and the flip to CCX_FERT_MM turned it into a NO-OP -- the
     # switch moved CO2 at 2100 by exactly 0.00 ppm while still rendering as an

@@ -43,7 +43,8 @@ LRP_SCALE_RX   <- "APP_LUC_SCALE"
 # the attribution retired 2026-09-24 (p): the land-use caveat used to credit the
 # natural sink's growth to "CO2 fertilisation AND forest regrowth", which names a
 # mechanism this model does not contain -- regrowth is netted inside the LUC
-# INPUT, and fertilisation is the only long-term land-uptake term.
+# INPUT, and fertilisation was then the only long-term land-uptake term (not
+# since hilda33d, 2026-10-01, which adds N-deposition retention).
 LRP_RETIRED_RX <- "fertilisation and forest regrowth"
 LRP_HEADINGS   <- c("APP_REGROWTH_HEADING", "APP_IMBALANCE_HEADING")
 

@@ -21,7 +21,7 @@
 
 # the constants, parsed out of global.R (not sourced -- see test-stylised-takeaway.R)
 .env <- new.env(parent = globalenv())
-.want <- c("APP_PULSE_LIN_SIZES", "APP_PULSE_LIN_SPREAD", "APP_PULSE_LIN_HORIZON",
+.want <- c("APP_PULSE_LIN_SIZES", "APP_PULSE_LIN_SPREAD", "APP_PULSE_LIN_HORIZON", "APP_PULSE_PER1000_ABOUT",
            "APP_PULSE_PER1000_BY_HORIZON", "APP_PULSE_LIN_SRC")
 for (e in parse(file.path(.root, "app", "global.R")))
   if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") &&
@@ -52,7 +52,7 @@ test_that("APP_PULSE_LIN_* still describe the driver's own measurement", {
                               got, .env$APP_PULSE_LIN_SPREAD))
 })
 
-test_that("the HORIZON table still matches, and still falls with horizon", {
+test_that("the HORIZON table still matches, and every horizon is 'about' the box's one figure", {
   skip_if(is.null(.csv), "no pulse_vs_tcre CSV built")
   R <- utils::read.csv(.csv)
   tab <- .env$APP_PULSE_PER1000_BY_HORIZON
@@ -63,9 +63,21 @@ test_that("the HORIZON table still matches, and still falls with horizon", {
     expect_equal(round(v, 2), unname(tab[[nm]]), tolerance = 0.005,
                  info = sprintf("+%s yr: measured %.3f, constant %.2f", nm, v, tab[[nm]]))
   }
-  # ⭐ THE DIRECTION IS THE CLAIM, not just the values: the box tells the reader
-  # the figure is flat in size and NOT flat in horizon. If that ever reversed,
-  # the sentence would be backwards while every number still "matched".
-  expect_true(all(diff(unname(tab)) < 0),
-              info = "the per-1000 figure must DECREASE with horizon, as the copy says")
+  # ⭐ THE CLAIM IS THE SENTENCE, not just the values. Until 2026-10-01 the box said
+  # the figure was "flat in pulse size but NOT in when you look" and this asserted it
+  # FELL with horizon (hilda29l: 1.43 / 1.20 / 1.03 / 0.97). At hilda33d it is nearly
+  # flat (1.44 / 1.37 / 1.36 / 1.41) and Marcus ruled the box says "about 1.4 dC per
+  # 1000 GtC" (review 10-01c A2). So the assertion is now the one that sentence makes:
+  # EVERY measured horizon rounds, at one decimal, to APP_PULSE_PER1000_ABOUT -- and so
+  # does the box's own live headline at the defaults (100 GtC, +100 yr). If a refit
+  # brings the horizon dependence back, this fails and the sentence must change.
+  about <- .env$APP_PULSE_PER1000_ABOUT
+  v_all <- R$per1000[R$gtc == ref & R$horizon %in% as.integer(names(tab))]
+  expect_equal(length(v_all), length(tab))
+  expect_true(all(round(v_all, 1) == about),
+              info = sprintf("measured %s; the box says about %.1f",
+                             paste(sprintf("%.3f", v_all), collapse = " / "), about))
+  head100 <- R$per1000[R$gtc == ref & R$horizon == .env$APP_PULSE_LIN_HORIZON]
+  expect_equal(round(head100, 1), about,
+               info = sprintf("headline at +%d yr %.3f", .env$APP_PULSE_LIN_HORIZON, head100))
 })
