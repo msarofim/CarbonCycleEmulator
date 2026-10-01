@@ -139,7 +139,9 @@ test_that("4. OFF-IDENTITY: the open label with all four PINNED at 0 is the kai 
 })
 
 test_that("5. MIGRATION: an older file under an open gate fills 0 and seeds only what does not encode", {
-  md <- readRDS(ccx_mode_file(CCX_MODE_CANONICAL))
+  # the fixture is named for what it IS (an older, holding-label file), not "the canonical": the
+  # canonical became the open-label hilda33d on 2026-10-01 (the test-param-absent-ok lesson)
+  md <- readRDS(ccx_mode_file("hilda29l"))
   # gate CLOSED: the file carries this build, nothing is absent, nothing migrates
   rm0 <- ccx_apply_pins(ccx_mode_pins(md))
   st0 <- ccx_mode_start(md, "test"); ccx_unpin_params(rm0)
@@ -217,4 +219,35 @@ test_that("6. SCREEN IDENTITY: the open label reproduces the D2/D3 screen's DNTb
   extra <- stats::dbeta(sl, 1, 2, log = TRUE) + stats::dunif(rest, log = TRUE) +
            log(sl) + log(1 - sl) + log(rest) + log(1 - rest)
   expect_equal(as.numeric(v) - screen_obj, extra, tolerance = 1e-8)
+})
+
+test_that("7. a mode file under an open label carries its gate WITH ITS PINS (the adoption idiom)", {
+  skip_if_no_cpp()
+  md <- readRDS(ccx_mode_file("hilda33d"))
+  expect_true(ccx_gate_open(ccx_mode_struct(md)))
+  nm0 <- CCX_PARAM_NAMES; tab0 <- CCX_PARAM_TABLE
+  # the gate CLOSED: the file still carries this build FOR ITS STRUCTURE, and decodes
+  expect_true(ccx_mode_carries_build(md)); expect_length(ccx_mode_absent(md), 0L)
+  expect_silent(ccx_check_mode_decode(md))
+  pins <- ccx_mode_pins(md)
+  expect_identical(attr(pins, "gate_struct"), "hilda_csl3v0kaidgb")
+  expect_identical(ccx_pin_label(pins), ccx_pin_label(md$pins))     # names / values / label unchanged
+  # the idiom opens the gate, then pins: the table IS the file's fitted set
+  rm <- ccx_apply_pins(pins); on.exit(.gp_restore(pins = rm), add = TRUE)
+  expect_identical(CCX_PARAM_NAMES, md$param_names)
+  invisible(utils::capture.output(st <- ccx_mode_start(md, "test")))
+  expect_length(st$absent, 0L); expect_identical(st$logpost_shift, 0)
+  bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
+  v <- ccx_make_logpost(base_params = bp, by_stream = TRUE, spinup_fn = ccx_spinup_from_label(ccx_mode_spinup(md)))(st$u)
+  expect_identical(attr(v, "streams"), md$streams)                    # the stored streams reproduce
+  expect_equal(as.numeric(v), md$logpost, tolerance = 1e-10)
+  # unpinning closes the gate again, exactly
+  ccx_unpin_params(rm); rm <- list()
+  expect_identical(CCX_PARAM_NAMES, nm0); expect_identical(CCX_PARAM_TABLE, tab0)
+  # a gate ALREADY open (an open-label array) is left open by the file's pins
+  h <- ccx_apply_gate("hilda_csl3v0kaidgb"); on.exit(.gp_restore(h), add = TRUE)
+  r2 <- ccx_apply_pins(pins); expect_length(attr(r2, "gate"), 0L); ccx_unpin_params(r2)
+  expect_true(all(names(CCX_PARAM_GATED) %in% CCX_PARAM_NAMES))
+  # an OLDER file's pins carry no gate
+  expect_null(attr(ccx_mode_pins(readRDS(ccx_mode_file("hilda29l"))), "gate_struct"))
 })

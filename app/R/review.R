@@ -354,17 +354,12 @@ rv_pulse <- function() rv_memo("pulse", function() {
   rv_need_gates()
   v <- rv_arm(CCX_MODE_CANONICAL)
   spin <- dg_spinup(v)
-  F_hist <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR),
-                              prod_c14 = spin$prod_c14,
-                              bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
-  sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, F_hist)$state
-  F_fwd <- suppressWarnings(ccx_build_forcing(
-    "historical", c(JOOS_REF_YEAR, JOOS_REF_YEAR + max(RV_IRF_READ) + 10),
-    prod_c14 = spin$prod_c14, bomb_total_kmol = 0, luc_scale = v$luc_scale))
-  for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH",
-               "enso", "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
-  F_fwd$gmst <- F_fwd$gmst[1]
-  o <- ccx_irf_pd(sp_ref, ccx_hold_forcing(sp_ref, F_fwd, verbose = FALSE))
+  # the protocol's two forcings from ONE builder (R/joos_irf.R ccx_pulse_forcings, 2026-10-01):
+  # the structure's enso/aod modes, N deposition held at the reference year with GMST
+  pf <- ccx_pulse_forcings(spin, c(JOOS_REF_YEAR, JOOS_REF_YEAR + max(RV_IRF_READ) + 10),
+                           v$bomb_total, v$luc_scale)
+  sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, pf$F_hist)$state
+  o <- ccx_irf_pd(sp_ref, ccx_hold_forcing(sp_ref, pf$F_fwd, verbose = FALSE))
   k <- o$t >= 0
   at <- function(y) o$irf[k][which.min(abs(o$t[k] - y))]
   part <- dg_gateL_partition(v, horizon = RV_IRF_HORIZON)

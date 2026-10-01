@@ -48,7 +48,9 @@ res <- lapply(names(CCX_MODE_FILES), function(a) {
 })
 tab <- do.call(rbind, res)
 print(tab, row.names = FALSE)
-ok <- all(tab$streams_identical) && all(abs(tab$d_logpost_after_shift) < OB_LP_TOL) && !any(tab$gate_open)
+# `gate_open` is INFORMATION since 2026-10-01 (c): the canonical hilda33d is registered and opens
+# the gate, and what is checked for it is the same -- its OWN stored streams reproduce
+ok <- all(tab$streams_identical) && all(abs(tab$d_logpost_after_shift) < OB_LP_TOL)
 cat(sprintf("\nVERDICT: %s -- %d registered modes; streams identical %d/%d; |d logpost| max %.3g (tol %g)\n",
             if (ok) "PASS (no registered file moves; nothing to restamp)" else "FAIL",
             nrow(tab), sum(tab$streams_identical), nrow(tab), max(abs(tab$d_logpost_after_shift)), OB_LP_TOL))

@@ -35,7 +35,9 @@ source("calibration/lib_design_gates.R")          # dg_annual_sinks()
 RD_DRIVER <- "calibration/diag_obj14_refit_read.R"
 RD_DATE   <- format(Sys.Date(), "%Y%m%d")
 RD_OUT    <- ccx_path("outputs", "diagnostics", sprintf("obj14_refit_read_%s", RD_DATE))
-RD_REFIT  <- ccx_path("calibration", "output", "refit_20261001_obj14_hilda_csl3v0kaidgb", "mode_fit_pumpN.rds")
+# the refit, REGISTERED as `hilda33d` and adopted 2026-10-01 (c); its directory was renamed then from
+# refit_20261001_obj14_hilda_csl3v0kaidgb (the path the 10-01 (a) outputs record)
+RD_REFIT  <- ccx_mode_file("hilda33d")
 RD_SCREEN <- ccx_path("outputs", "diagnostics", "alignment_screen_d2ret_20260930.rds")
 RD_SCREEN_MODE <- ccx_path("calibration", "output",
   "multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452",

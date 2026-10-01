@@ -38,6 +38,7 @@ COPYFILE_DISABLE=1 tar czf "$OUT" \
   R src data tests \
   data-raw/downloads/nuclear14c \
   calibration/*.R calibration/torch calibration/mac \
+  calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb \
   calibration/output/refit_20260920_hilda29l_obj13_hilda_csl3 \
   calibration/output/refit_20260922_hilda32f_obj13_hilda_csl3_free_parent \
   calibration/output/quarantine/20260920_hilda29l_adopted \

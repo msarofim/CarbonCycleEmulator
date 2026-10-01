@@ -25,6 +25,12 @@ is a **deal-breaker, fixable, or acceptable** for a pedagogical model. Comments 
 the Substack post the app links to; anyone whose comment changes the model or the
 write-up is credited in the acknowledgements.
 
+**Main branch, 2026-10-01: the canonical is `hilda33d`** (objective #14; 33 fitted names, the same
+nine held). It is `hilda29l`'s structure with the vegetation-capacity loop off, the evidence-based
+shape prior on CO₂ fertilisation, the inert soil pool, nitrogen-deposition retention, a sign-free
+greening term, and a fitted allocation of the Global Carbon Budget's imbalance (CHANGELOG 2026-10-01).
+The public beta below (`v1.0-hilda29l`) is unchanged until the app is redeployed.
+
 **Product-ready as of 2026-09-21** (`notes/assessment_2026-09-21_product_ready.md`). Model core,
 calibration and app run end to end. The calibrated vector is **`hilda29l`**: a **29-parameter
 maximum-a-posteriori fit** (nine further names held at stated values) under the `hilda_csl3`

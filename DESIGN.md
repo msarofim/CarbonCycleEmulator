@@ -146,6 +146,22 @@ d M_atm[h]/dt =
     `ccx_cpp_par()`. Tests: `tests/testthat/test-soil-inert.R`.
   - ⚠ Single-study and method-dependent: Copard contradicts the Shi 2020 / He 2016 reading of old
     bulk soil.
+- **Non-CO₂ land-sink drivers, D2 (spec change 2026-09-30, Marcus's rulings D2 and the 09-30 l/m
+  sub-rulings; in the canonical from `hilda33d`, 2026-10-01).** Two flux drivers into the existing
+  pools, not new pools:
+  - **N retention** (`ndep_ret`, kg C retained per kg N deposited on land): F_h = `ndep_ret` · 1e-3 ·
+    max(ndep_h, 0) GtC/yr, atmosphere → `soil_slow`, at `alpha_photo` with the atmosphere's ¹⁴C.
+    A RETENTION FLUX ∝ the deposition LEVEL, not an NPP multiplier: the multiplier's sink tracked
+    d(ndep)/dt and failed the pre-registered sink-per-N gate (CHANGELOG 09-30 l/m). Prior lognormal,
+    centre 3.9 (whole-forest ~13 kg C/kg N × forest share 0.30), log-sd 0.67 (0.6–8.7 read as ±2σ);
+    `soil_slow` only (a wood/soil split needs a cited ¹⁵N partition; both kept, Marcus 10-01).
+  - **Greening** (`npp_tsens`): NPP × exp(`npp_tsens` · GMST), sign-free prior N(0, 0.029) /K
+    (SD of MAGICC6's C4MIP σ_NPP, Meinshausen 2011 Table B4).
+  - **Recovery from past disturbance: NOT built** (ruled): a 1750 deficit is contradicted by ice-core
+    δ¹³C and regrowth is inside GCB's net E_LUC; `luc_scale` is the model's recovery-like freedom.
+  - Both are 0 (OFF, bit-exact) by default and fitted only under a structure that opens the
+    calibration GATE (§5.2, the GCB-sinks bullet: objective #14). The NPP readout excludes the retention flux.
+  - Tests: `test-ndep.R`, `test-npp-tsens.R`, `test-gated-params.R`.
 - **Heterotrophic respiration:** R_het = (C_soil/τ_soil) · Q10^(ΔT_GMST/10), Q10 [CAL].
   Preindustrial steady state (R_het = NPP₀) sets pool sizes: C_veg = NPP₀·τ_veg,
   C_soil = NPP₀·τ_soil. τ_veg, τ_soil fixed [VERIFY], chosen so effective stocks are
@@ -448,6 +464,7 @@ A that the logL does not see, and it should be weighed explicitly.
 | MEI | MEIv2 1979+ spliced to extended MEI (1871–2005) | splice documented; overlap regression |
 | Bomb ¹⁴C | Yield-history shape × P_bomb [CAL] | via τ_strat kernel |
 | Cosmogenic ¹⁴C | Constant (spinup balance) | v2: solar modulation |
+| N deposition on land (2026-09-30) | NOx + NH₃ emissions above 1750 (CMIP7 vV v1.1.1; RCMIP SSPs ratio-harmonised to CMIP7 by 2050) × land 0.60 × NH 0.83 | `data/forcing_ndep.rds` (`data-raw/build_ndep_forcing.R`); "historical" = CMIP7 to 2023, then the seven-marker mean (2024, 2025); pulse experiments HOLD it at the reference year (`ccx_pulse_forcings()`) |
 | Future scenarios | SSP CO₂ emissions (fossil+LUC) from RCMIP-format CSVs (reuse FaIR-project inputs — flagged question Q3) + stylized generators | §7 |
 
 ### 3.7 Numerics
@@ -573,6 +590,17 @@ fractionation constants, ocean areas/depth/layering, SST-anomaly scaling of GMST
   CO₂ series, so GCB sink series add *partition* information, not growth information. Use
   GCB S_ocean at stated uncertainty; give S_land inflated uncertainty (soft constraint)
   (flagged question Q1).
+  - **Objective #14, the imbalance allocation, D3 (spec change 2026-09-30, Marcus: "the calibration
+    should have freedom to move it where it helps the model solve best"; canonical from `hilda33d`).**
+    GCB's budget imbalance I(t) (11-yr centred smooth of imbalance + cement carbonation, ruled) moves
+    the two sink rows' targets: land GCB_land + s_land · I(t), ocean GCB_ocean + s_ocean · I(t), with
+    FITTED shares on the simplex (stick-broken: `imb_share_land` ~ Beta(1, 2), `imb_share_ocean_rest`
+    ~ U(0, 1) = the flat Dirichlet). No emissions share: it would be collinear with `luc_scale`.
+  - **The gate.** The four D2/D3 names (`ndep_ret`, `npp_tsens` and the two shares) are fitted only
+    under a structure whose block opens the gate (`d2d3_free`, label `hilda_csl3v0kaidgb`) and are
+    HELD at 0 (OFF) under every other label, so every older objective and file is bit-exact. #14
+    exists only there; compare it with #13 on the 24 rows both share (`R/calibrate.R`
+    `CCX_PARAM_GATED`, CHANGELOG 09-30 p).
 - Optional single-number ocean bomb-¹⁴C inventory constraint at its epoch.
 
 ### 5.2a The DIC and δ¹³C gradient terms — measured properties (2026-08-16)

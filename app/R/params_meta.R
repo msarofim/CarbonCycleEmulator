@@ -110,6 +110,16 @@ APP_PARAM_META <- list(
   grad_off_d13c = list(desc = "Station-versus-box offset on the north-south δ¹³C gradient",
                        unit = "‰"),
 
+  # ---- the GATED names (2026-10-01): fitted only under a structure that opens the gate
+  # (R/calibrate.R CCX_PARAM_GATED; the D2 / D3 label, the canonical from hilda33d). Labels
+  # drafted 2026-10-01 for Marcus's review (app text is his).
+  ndep_ret             = list(desc = "Carbon stored per unit of nitrogen deposited on land",
+                              unit = "kg C per kg N"),
+  npp_tsens            = list(desc = "Plant growth's response to warming", unit = "per °C"),
+  imb_share_land       = list(desc = "Share of the carbon budget's unexplained gap assigned to the land",
+                              unit = "—"),
+  imb_share_ocean_rest = list(desc = "Ocean's share of the gap the land does not take", unit = "—"),
+
   # ---- RETIRED, label kept ------------------------------------------------
   # These left CCX_PARAM_NAMES but their labels stay so that a run against a
   # pre-retirement posterior still renders prose instead of NA. Any name here
@@ -146,7 +156,11 @@ app_validate_param_meta <- function(names, meta = APP_PARAM_META,
   if (length(missing))
     bad <- c(bad, sprintf("fitted parameter(s) with no label: %s",
                           paste(missing, collapse = ", ")))
-  extra <- setdiff(setdiff(base::names(meta), names), retired)
+  # the GATED names (2026-10-01) are this build's too, fitted only under a structure that opens
+  # the gate: their labels are not "extra" when `names` is a holding structure's set. Read at CALL
+  # time (this file is sourced before R/ in the app; see SOURCING ORDER above).
+  gated <- if (exists("CCX_PARAM_GATED")) base::names(get("CCX_PARAM_GATED")) else character(0)
+  extra <- setdiff(setdiff(base::names(meta), names), c(retired, gated))
   if (length(extra))
     bad <- c(bad, sprintf("label(s) for name(s) this build does not fit, and not declared retired: %s",
                           paste(extra, collapse = ", ")))

@@ -255,3 +255,44 @@ JOOS_TAIL_BAND <- JOOS_TAIL_REF * JOOS_TAIL_RELBAND
 JOOS_ONEBOX <- list(
   "Spencer 2023 (2.05 %/yr over 295 ppm)" = function(t) exp(-0.0205 * t),
   "Dengler & Reid 2023 (42-yr half-life)" = function(t) 0.5^(t / 42))
+
+
+#' Hold a pulse experiment's N DEPOSITION (2026-10-01). The Joos protocol holds the background
+#' (GMST at its reference value, emissions and ENSO zero), and N deposition is background too.
+#' A "historical" table built past the data's end carries NONE (ccx_ndep_forcing() returns zeros
+#' stamped "none ...", which ccx_ndep_check() refuses at ndep_ret != 0), so the hold is explicit:
+#' at `F_ref`'s LAST year (the reference year of a present-day run), or at zero when `F_ref` is
+#' NULL (a preindustrial run: deposition is defined as zero at 1750). Stamped, so the run reports
+#' what it held. At ndep_ret 0 nothing reads these columns (bit-exact for every older label).
+ccx_pulse_hold_ndep <- function(F, F_ref = NULL, label = "") {
+  if (is.null(F_ref)) { F$ndep_NH <- 0; F$ndep_SH <- 0
+    attr(F, "ndep_source") <- paste0("zero: the preindustrial pulse background", label)
+    return(F) }
+  last <- floor(F_ref$t) == max(floor(F_ref$t))
+  F$ndep_NH <- mean(F_ref$ndep_NH[last]); F$ndep_SH <- mean(F_ref$ndep_SH[last])
+  attr(F, "ndep_source") <- sprintf("%s, held at %d: the pulse background%s",
+                                    attr(F_ref, "ndep_source"), max(floor(F_ref$t)), label)
+  F
+}
+
+#' THE JOOS PULSE PROTOCOL'S TWO FORCINGS for a spun-up state (2026-10-01): the history to
+#' JOOS_REF_YEAR, and the forward window with the background HELD -- emissions, ENSO and the 14C
+#' sources zero; GMST and N deposition at their reference-year values. Both carry the STRUCTURE's
+#' ENSO index and AOD mode (spin$params, the objective's own reads), so an aod-"anomaly" label
+#' runs; before this, every pulse site built them bare and stopped at ccx_run_prepared()'s AOD
+#' check for any label from hilda_csl3v0ka on. F_fwd is NOT yet held at constant CO2:
+#' ccx_hold_forcing() does that, as before.
+#' @param years_fwd c(JOOS_REF_YEAR, end) of the forward window
+ccx_pulse_forcings <- function(spin, years_fwd, bomb_total_kmol, luc_scale) {
+  p <- spin$params
+  F_hist <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14 = spin$prod_c14,
+                              bomb_total_kmol = bomb_total_kmol, luc_scale = luc_scale,
+                              enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p))
+  F_fwd <- suppressWarnings(ccx_build_forcing("historical", years_fwd, prod_c14 = spin$prod_c14,
+                              bomb_total_kmol = 0, luc_scale = luc_scale,
+                              enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p)))
+  for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso", "c14_bomb", "c14_nuclear"))
+    F_fwd[[cc]] <- 0
+  F_fwd$gmst <- F_fwd$gmst[1]
+  list(F_hist = F_hist, F_fwd = ccx_pulse_hold_ndep(F_fwd, F_hist))
+}

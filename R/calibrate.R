@@ -1148,7 +1148,16 @@ ccx_unapply_gate <- function(added) {
 #' @param pins a named numeric: value per pinned parameter name
 #' @return invisibly, the removed table entries (what ccx_unpin_params needs)
 ccx_apply_pins <- function(pins) {
-  if (is.null(pins) || !length(pins)) return(invisible(list()))
+  # THE GATE RIDES WITH A MODE FILE'S PINS (2026-10-01). ccx_mode_pins() of a file fitted under a
+  # structure that OPENS the gate (CCX_PARAM_GATED) carries attr "gate_struct": the four gated
+  # names are part of that file's fitted set, so applying its pins applies the gate FIRST -- the
+  # idiom every consumer already writes, ccx_apply_pins(ccx_mode_pins(md)), then reads the file's
+  # own space with no second call to forget. The returned handle carries the gate, and
+  # ccx_unpin_params() undoes both. A gate some caller already applied is left to that caller.
+  gs <- attr(pins, "gate_struct")
+  gate <- if (!is.null(gs) && length(setdiff(names(CCX_PARAM_GATED), c(CCX_PARAM_NAMES, names(CCX_PINS)))))
+            ccx_apply_gate(gs) else character(0)
+  if (is.null(pins) || !length(pins)) return(invisible(structure(list(), gate = gate)))
   if (is.null(names(pins)) || any(!nzchar(names(pins))) || !is.numeric(pins))
     stop("ccx_apply_pins(): `pins` must be a NAMED numeric vector, e.g. c(ent_seas_amp_SH = 0).")
   env <- environment(ccx_apply_pins)
@@ -1163,11 +1172,12 @@ ccx_apply_pins <- function(pins) {
   assign("CCX_PARAM_TABLE", tab, envir = env)
   assign("CCX_PARAM_NAMES", names(tab), envir = env)
   assign("CCX_PINS", pins, envir = env)
-  invisible(removed)
+  invisible(structure(removed, gate = gate))
 }
 #' Restore the pinned names to the table, in their ORIGINAL order.
 ccx_unpin_params <- function(removed) {
-  if (!length(removed)) return(invisible(NULL))
+  gate <- attr(removed, "gate")              # the gate the pins applied (2026-10-01), undone LAST
+  if (!length(removed)) { if (length(gate)) ccx_unapply_gate(gate); return(invisible(NULL)) }
   env <- environment(ccx_apply_pins)
   tab <- get("CCX_PARAM_TABLE", envir = env)
   full <- c(tab, removed)
@@ -1177,6 +1187,7 @@ ccx_unpin_params <- function(removed) {
   assign("CCX_PARAM_TABLE", full[ord], envir = env)
   assign("CCX_PARAM_NAMES", ord, envir = env)
   assign("CCX_PINS", NULL, envir = env)
+  if (length(gate)) ccx_unapply_gate(gate)
   invisible(NULL)
 }
 # the table's definition order, then the gated names (appended by ccx_apply_gate(), so a
@@ -1238,16 +1249,24 @@ ccx_gate_require <- function(md, who) {
   invisible(TRUE)
 }
 
+#' THE BUILD'S FITTED SET FOR A FILE'S OWN STRUCTURE (2026-10-01): the live table, plus -- when
+#' the file's structure OPENS the gate and this process has not applied it -- the gated names, in
+#' the order ccx_apply_gate() appends them. "Does this file carry the build" is a question about
+#' the file's structure, not about whether some earlier caller happened to open the gate.
+ccx_build_names_for <- function(md) {
+  if (!ccx_gate_open(ccx_mode_struct(md))) return(CCX_PARAM_NAMES)
+  c(CCX_PARAM_NAMES, setdiff(names(CCX_PARAM_GATED), c(CCX_PARAM_NAMES, names(CCX_PINS))))
+}
 #' The names this build fits that a mode file lacks, pins excluded
 ccx_mode_absent <- function(md)
-  setdiff(setdiff(CCX_PARAM_NAMES, names(md$pins)), md$param_names)
+  setdiff(setdiff(ccx_build_names_for(md), names(md$pins)), md$param_names)
 
 #' Does a mode file carry THIS BUILD's parameter set? TRUE when its param_names
 #' equal the build's set minus its pins, or differ from it ONLY by names in
 #' CCX_PARAM_ABSENT_OK (order preserved). Every consumer that used to compare
 #' `identical(md$param_names, setdiff(CCX_PARAM_NAMES, names(md$pins)))` reads this.
 ccx_mode_carries_build <- function(md) {
-  want   <- setdiff(CCX_PARAM_NAMES, names(md$pins))
+  want   <- setdiff(ccx_build_names_for(md), names(md$pins))
   # a FREE file scored under pins applied IN-PROCESS carries the held name; the
   # encoder ignores it (ccx_par_to_unc), so the comparison does too (test-pinned-arm)
   have   <- setdiff(md$param_names, names(CCX_PINS))
@@ -1676,12 +1695,15 @@ ccx_require_param_set <- function(md, what) {
 ccx_unc_to_par <- function(u) {
   nm <- names(u)
   if (is.null(nm)) nm <- CCX_PARAM_NAMES
-  unknown <- setdiff(nm, CCX_PARAM_NAMES)
+  # a GATED name decodes by its own transform whether or not the gate is open in this process
+  # (2026-10-01): decoding a named vector needs each name's transform, not the live fitted set
+  spec <- function(n) if (!is.null(CCX_PARAM_TABLE[[n]])) CCX_PARAM_TABLE[[n]] else CCX_PARAM_GATED[[n]]
+  unknown <- setdiff(nm, c(CCX_PARAM_NAMES, names(CCX_PARAM_GATED)))
   if (length(unknown))
     stop("ccx_unc_to_par(): u carries names this build does not know: ",
          paste(unknown, collapse = ", "),
          ". It was encoded under a different parameter set.")
-  out <- lapply(nm, function(n) .from_unc(u[[n]], CCX_PARAM_TABLE[[n]]))
+  out <- lapply(nm, function(n) .from_unc(u[[n]], spec(n)))
   names(out) <- nm
   out
 }

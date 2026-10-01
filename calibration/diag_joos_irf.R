@@ -265,6 +265,9 @@ joos_build_forcing <- function(scenario, years, ...) {
   args <- list(...)
   if (is.null(args$bomb_total_kmol)) args$bomb_total_kmol <- JOOS_BOMB_TOTAL
   if (is.null(args$luc_scale))       args$luc_scale       <- JOOS_LUC_SCALE
+  # the STRUCTURE's ENSO index and AOD mode (2026-10-01): an aod-"anomaly" label stopped here
+  if (is.null(args$enso_index))      args$enso_index      <- ccx_enso_index_of(p0)
+  if (is.null(args$aod_mode))        args$aod_mode        <- ccx_aod_mode_of(p0)
   do.call(ccx_build_forcing, c(list(scenario, years), args))
 }
 joos_run_coupled <- function(spin, scenario, years, ...) {
@@ -301,6 +304,7 @@ F_fwd <- suppressWarnings(
 for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
              "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
 F_fwd$gmst <- F_fwd$gmst[1]          # climate held at the reference year
+F_fwd <- ccx_pulse_hold_ndep(F_fwd, F_hist)   # N deposition too (2026-10-01; R/joos_irf.R)
 
 F_hold <- ccx_hold_forcing(sp_ref, F_fwd, verbose = TRUE)
 # Joos releases the pulse 5 yr after the reference year, on an already-settled
@@ -412,6 +416,7 @@ F_pi <- suppressWarnings(joos_build_forcing("historical", c(1750, 1750 + JOOS_HO
 for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso",
              "c14_bomb", "c14_nuclear")) F_pi[[cc]] <- 0
 F_pi$gmst <- 0
+F_pi <- ccx_pulse_hold_ndep(F_pi, NULL)       # preindustrial: no deposition (2026-10-01)
 
 cases <- list(
   "PD, background HELD"     = list(sp = sp_ref, F = ccx_hold_forcing(sp_ref, F_fwd)),

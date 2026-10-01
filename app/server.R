@@ -1126,10 +1126,13 @@ function(input, output, session) {
   # likelihood-only names (the gradient offsets, sigma_d14c) genuinely are not
   # carried, and print "—" correctly.
   output$h_params <- renderTable(
-    app_param_table(CCX_PARAM_NAMES,
+    # the MODE's fitted set (2026-10-01): from hilda33d it includes the gated D2/D3 names, which
+    # this process's CCX_PARAM_NAMES does not (the gate is closed in the app); the D3 shares are
+    # likelihood-side and carried from the mode file like rep_dC
+    app_param_table(APP_FIT_NAMES,
                     c(APP_PARAMS, list(bomb_total = APP_BOMB_TOTAL,
                                        luc_scale  = APP_LUC_SCALE,
-                                       rep_dC     = APP_REP_DC))),
+                                       rep_dC     = APP_REP_DC), APP_IMB_SHARES)),
     striped = TRUE, width = "100%")
 
   # ---- 7. Known issues (the beta review) -----------------------------

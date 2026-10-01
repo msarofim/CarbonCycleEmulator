@@ -172,7 +172,21 @@
 # unphysical coefficients. hilda30s is retired to CCX_MODE_HILDA30S_QUARANTINED.
 # ⛔ THE AIC GATE: the control hilda31pe (31 names, -1387.7128) leads by 4.09 at two
 # extra names -> dAIC = 2*2 - 2*4.09 = -4.18 -> +4.18 for the control: STILL a NAMED RED.
-CCX_MODE_CANONICAL <- "hilda29l"
+# 2026-10-01 (c): `hilda33d` -- OBJECTIVE #14, D2 + D3 FITTED (Marcus 2026-10-01: "name,
+# register, and adopt", conditional on (1) an improvement and (2) no other quick improvement;
+# both assessed in CHANGELOG 10-01 c). Label hilda_csl3v0kaidgb = hilda_csl3 with the
+# vegetation-capacity loop OFF (phi = 0), the fert_k shape prior, aod_mode anomaly, the inert
+# soil carve-out (0-1 m), and the GATE OPEN: N retention (ndep_ret 10.19, 7.0 kg C per kg N),
+# greening (npp_tsens -0.0079 +/- 0.0083 /K) and the GCB-imbalance shares (land 0.593, ocean
+# 0.085) fitted. 33 names, the SAME 9 pins. 24/24 starts CONVERGED (multistart_20260930q, Mac);
+# best -1405.249036, likelihood -1369.1761 on 26 rows; Hessian PD cond 1.7e6.
+# ⚠ #14 IS NOT #13: compare on the 24 rows both objectives share (the two GCB sink rows' targets
+# move with the shares). There: -1308.60 vs hilda29l -1319.32 (+10.71 at 4 more names, dAIC
+# -13.4), vs the control hilda31pe -1313.28 (+4.68 at 2 more, dAIC -5.35: the AIC red, judged on
+# the shared rows, TURNS). D4 stays a NAMED TENSION (modern NPP 67.7 vs 56.1 +/- 7.75, z +1.50).
+# Consumers: a mode file under this label opens the gate through its pins (ccx_mode_pins()).
+# hilda29l stays REGISTERED (the v1.0-hilda29l product's mode, and #13's limb canonical).
+CCX_MODE_CANONICAL <- "hilda33d"
 # 2026-09-22 (k): `hilda32f` -- THE FREE PARENT OF THE LIMB CANONICAL (Marcus: "Repoint").
 # hilda29l's OWN structure (hilda_csl3, seas_ml 1) with only the six inert names held: the
 # seasonal shim ent_seas_amp_SH (8.24), the ocean ENSO pair (NH 0.240, SH 0.001) and the
@@ -188,6 +202,8 @@ CCX_MODE_CANONICAL <- "hilda29l"
 # named red #1 ("the parent is the best free arm") discharges here; red #2 (the AIC gate)
 # is untouched.
 CCX_MODE_FILES <- c(
+  hilda33d = file.path("calibration", "output", "refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb",
+                       "mode_fit_pumpN.rds"),
   hilda29l = file.path("calibration", "output", "refit_20260920_hilda29l_obj13_hilda_csl3",
                        "mode_fit_pumpN.rds"),
   hilda32f = file.path("calibration", "output", "refit_20260922_hilda32f_obj13_hilda_csl3_free_parent",
@@ -294,7 +310,7 @@ CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
-CCX_MODE_PINNED <- c(hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
+CCX_MODE_PINNED <- c(hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
 # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
 # and its free PARENT: the same space with the pinned names free, kept
@@ -618,7 +634,15 @@ ccx_mode_fit_stats <- function(md = CCX_MODE_CANONICAL) {
 
 ccx_mode_pins <- function(md) {
   if (is.character(md)) md <- readRDS(ccx_mode_file(md))
-  md$pins
+  p <- md$pins
+  # THE GATE RIDES WITH THE PINS (2026-10-01): a file fitted under a structure that OPENS it
+  # (R/calibrate.R CCX_PARAM_GATED) fits four more names, and ccx_apply_pins() of these pins applies
+  # the gate first. An attribute, so names / values / ccx_pin_label() are unchanged.
+  if (ccx_gate_open(ccx_mode_struct(md))) {
+    if (is.null(p)) p <- stats::setNames(numeric(0), character(0))
+    attr(p, "gate_struct") <- ccx_mode_struct(md)
+  }
+  p
 }
 #' The file's `par_mode` with its PINNED names filled in from `pins` (2026-09-13).
 #'
@@ -702,7 +726,6 @@ ccx_check_mode_decode <- function(md = CCX_MODE_CANONICAL, tol = 1e-8) {
   # name it does carry is in the table, so it decodes on its own names
   # ... and a file lacking only CCX_PARAM_ABSENT_OK names (2026-09-13i) decodes
   # on the names it carries; ccx_unc_to_par() honours a partial named u.
-  ccx_gate_require(md, "ccx_check_mode_decode()")
   if (!ccx_mode_carries_build(md))
     stop("this mode file was fitted on a DIFFERENT parameter set (",
          length(.nm), " names vs this build's ", length(CCX_PARAM_NAMES),

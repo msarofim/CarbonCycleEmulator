@@ -246,6 +246,10 @@ app_params <- local({
   # the value. Defaults to the no-offset behaviour (zero = absent, the
   # likelihood's own absence contract).
   rep_dC <- 0
+  # the fitted set the parameter table lists, and the D3 imbalance shares (2026-10-01): the
+  # defaults' are this build's table and none; a mode file replaces both with its own (below)
+  fit_names  <- CCX_PARAM_NAMES
+  imb_shares <- list()
   for (mode_file in mode_files) {
     if (!file.exists(mode_file)) next
     md <- tryCatch(readRDS(mode_file), error = function(e) NULL)
@@ -270,6 +274,11 @@ app_params <- local({
     bomb_total <- pm$bomb_total
     luc_scale  <- pm$luc_scale
     rep_dC     <- if (is.null(pm$rep_dC)) 0 else pm$rep_dC
+    # the mode's OWN fitted set, the gated names included when its structure opens the gate
+    # (2026-10-01; R/calibrate.R ccx_build_names_for()): the parameter table lists what the fit
+    # fitted, not this process's table. The D3 shares ride along for the same table.
+    fit_names  <- setdiff(ccx_build_names_for(md), names(md$pins))
+    imb_shares <- pm[intersect(c("imb_share_land", "imb_share_ocean_rest"), names(pm))]
     # THE FILE'S OWN SPINUP (2026-09-21 h). Every mode since 09-09x is fitted under
     # the PERIODIC spinup (a seasonal mixed layer spun to its own annual cycle);
     # started from the aseasonal equilibrium instead, the canonical hilda29l runs
@@ -321,7 +330,7 @@ app_params <- local({
   }
   list(p = p, source = src, status = status, detail = detail,
        bomb_total = bomb_total, luc_scale = luc_scale, rep_dC = rep_dC,
-       spinup_label = spinup_label,
+       spinup_label = spinup_label, fit_names = fit_names, imb_shares = imb_shares,
        has_posterior = file.exists(post_file))
 })
 
@@ -335,6 +344,9 @@ APP_REP_DC     <- app_params$rep_dC
 # The counterfactual reruns below go through the same function, so a switched-off
 # mechanism is compared against the same equilibrium the base run started from.
 APP_SPINUP_LABEL <- app_params$spinup_label
+# the parameter table's names and the D3 shares (2026-10-01): the mode's own fitted set
+APP_FIT_NAMES  <- app_params$fit_names
+APP_IMB_SHARES <- app_params$imb_shares
 app_spinup <- ccx_spinup_from_label(APP_SPINUP_LABEL)
 
 #' Build a forcing with THIS APP'S fitted forcing parameters applied
@@ -348,6 +360,10 @@ app_build_forcing <- function(scenario, years, ...) {
   args <- list(...)
   if (is.null(args$bomb_total_kmol)) args$bomb_total_kmol <- APP_BOMB_TOTAL
   if (is.null(args$luc_scale))       args$luc_scale       <- APP_LUC_SCALE
+  # the STRUCTURE's ENSO index and AOD mode (2026-10-01): the objective's own reads. From hilda33d
+  # on, the canonical runs aod_mode "anomaly", and a bare build stops at ccx_run_prepared()'s check.
+  if (is.null(args$enso_index))      args$enso_index      <- ccx_enso_index_of(APP_PARAMS)
+  if (is.null(args$aod_mode))        args$aod_mode        <- ccx_aod_mode_of(APP_PARAMS)
   do.call(ccx_build_forcing, c(list(scenario, years), args))
 }
 

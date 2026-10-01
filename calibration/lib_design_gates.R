@@ -1918,16 +1918,11 @@ DG_L_EXTRA_YR <- 10   # forcing built this far past the horizon so the read is i
 
 dg_gateL_partition <- function(v, horizon = DG_L_HORIZON, pulse = JOOS_PULSE) {
   spin <- dg_spinup(v)
-  F_hist <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14 = spin$prod_c14,
-                              bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
-  sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, F_hist)$state
-  F_fwd <- suppressWarnings(ccx_build_forcing("historical",
-             c(JOOS_REF_YEAR, JOOS_REF_YEAR + horizon + DG_L_EXTRA_YR),
-             prod_c14 = spin$prod_c14, bomb_total_kmol = 0, luc_scale = v$luc_scale))
-  for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso", "c14_bomb", "c14_nuclear"))
-    F_fwd[[cc]] <- 0
-  F_fwd$gmst <- F_fwd$gmst[1]
-  F_hold <- ccx_hold_forcing(sp_ref, F_fwd, verbose = FALSE)
+  # the protocol's two forcings from ONE builder (R/joos_irf.R, 2026-10-01): the structure's
+  # enso/aod modes, and N deposition held at the reference year with GMST
+  pf <- ccx_pulse_forcings(spin, c(JOOS_REF_YEAR, JOOS_REF_YEAR + horizon + DG_L_EXTRA_YR), v$bomb_total, v$luc_scale)
+  sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, pf$F_hist)$state
+  F_hold <- ccx_hold_forcing(sp_ref, pf$F_fwd, verbose = FALSE)
   b <- ccx_run_fast(sp_ref, F_hold)$out
   q <- ccx_run_fast(ccx_pulse_state(sp_ref, pulse), F_hold)$out
   gpp <- ccx_const("GtC_PER_PPM")

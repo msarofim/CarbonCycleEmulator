@@ -126,11 +126,10 @@ ENSO <- list(); for (a in an) { full <- enso_slope(R[[a]]); v2 <- ARMS[[a]]; v2$
 
 cat("\n=== 4. COMPARISONS, NOT GATES (Marcus 09-08h: nothing from Joos may score the model) ===\n")
 irf_of <- function(v) { spin <- dg_spinup(v)
-  F_hist <- ccx_build_forcing("historical", c(1750, JOOS_REF_YEAR), prod_c14 = spin$prod_c14, bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale)
-  sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, F_hist)$state
-  F_fwd <- suppressWarnings(ccx_build_forcing("historical", c(JOOS_REF_YEAR, JOOS_REF_YEAR + SC_JOOS_HORIZON + 10), prod_c14 = spin$prod_c14, bomb_total_kmol = 0, luc_scale = v$luc_scale))
-  for (cc in c("e_foss_NH", "e_foss_SH", "e_luc_NH", "e_luc_SH", "enso", "c14_bomb", "c14_nuclear")) F_fwd[[cc]] <- 0
-  F_fwd$gmst <- F_fwd$gmst[1]; F_hold <- ccx_hold_forcing(sp_ref, F_fwd, verbose = FALSE)
+  # ONE builder for the protocol (R/joos_irf.R ccx_pulse_forcings, 2026-10-01): enso/aod modes + held N deposition
+  pf <- ccx_pulse_forcings(spin, c(JOOS_REF_YEAR, JOOS_REF_YEAR + SC_JOOS_HORIZON + 10), v$bomb_total, v$luc_scale)
+  sp_ref <- spin; sp_ref$y <- ccx_run_fast(spin, pf$F_hist)$state
+  F_hold <- ccx_hold_forcing(sp_ref, pf$F_fwd, verbose = FALSE)
   o <- ccx_irf_pd(sp_ref, F_hold); k <- o$t >= 0; at <- function(y) o$irf[k][which.min(abs(o$t[k] - y))]
   c(irf20 = at(20), irf100 = at(100), irf300 = at(300)) }
 IRF <- list(); for (a in an) { x <- try_or(irf_of(ARMS[[a]]), paste("IRF", a)); IRF[[a]] <- x
