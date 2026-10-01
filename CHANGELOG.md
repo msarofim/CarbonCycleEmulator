@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (e) — Handoff: `notes/handoff_2026-10-01b_hilda33d_adopted.md`. `hilda33d` is the canonical; the suite is clean. Open for Marcus: D2 choice 4 (with the corrected flux), the app's version label (`APP_VERSION` is the literal "v1.0-hilda29l" while the app runs hilda33d), the AIC gate's row set under mixed objectives, and the drafted app labels. The app preview loads on hilda33d with no console errors. Nothing else is running.
+
 ## 2026-10-01 (d) — **The adoption's suite is CLEAN: the final uncapped run at `f9bffdf` has 5453 passed, 0 failed, 0 errors, 5 skipped. Getting there took two code passes and one round of value re-pins. The code passes fixed five real defects: four in the gate plumbing (one of them in the app) and a constraint map that had to be rebuilt. The re-pins were values that move with the canonical, each approved by Marcus ("Approve all 7 (Recommended)", plus "Re-pin; mutation on hilda29l (Recommended)" for the imbalance panel). No test was skipped or loosened to pass.**
 
 **The runs.** Each ran from a frozen copy whose code is identical to the named commit (`diff -rq` on R/, src/,
