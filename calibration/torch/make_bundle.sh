@@ -30,10 +30,12 @@ Rscript --vanilla -e 'for (f in list.files("R", pattern = "R$", full.names = TRU
 # /tmp can then be shipped (2026-09-13: the round-7 adoption moved a directory and this list
 # was not updated; caught because the incumbent's file was absent on Torch). The check below
 # asserts them from the registry rather than trusting this list.
-# COPYFILE_DISABLE: macOS tar otherwise stores com.apple.provenance xattrs, and GNU tar on
-# Torch prints "Ignoring unknown extended header keyword" ONCE PER FILE on extract -- 480
-# lines that buried the extract's real output on 2026-09-14 (i).
-COPYFILE_DISABLE=1 tar czf "$OUT" \
+# COPYFILE_DISABLE stops the `._*` AppleDouble files. It does NOT stop the com.apple.provenance
+# xattrs, which bsdtar writes as LIBARCHIVE.xattr pax headers, and GNU tar on Torch prints
+# "Ignoring unknown extended header keyword" ONCE PER FILE on extract. 480 such lines buried the
+# extract's real output on 2026-09-14 (i), and 696 more on 2026-10-01 (p), with COPYFILE_DISABLE
+# set. --no-xattrs is what stops them (measured: 17 headers -> 0 on the same members).
+COPYFILE_DISABLE=1 tar --no-xattrs -czf "$OUT" \
   DESIGN.md CLAUDE.md README.md DATA.md \
   R src data tests \
   data-raw/downloads/nuclear14c \
