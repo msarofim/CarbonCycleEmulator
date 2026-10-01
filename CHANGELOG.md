@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (b) — Handoff: `notes/handoff_2026-10-01_obj14_refit.md`. The #14 refit has landed, been read, and is committed; the mode is promoted but NOT named, registered or adopted (Marcus). The launch worktree is removed after a byte-identical check of its copy. Nothing is running.
+
 ## 2026-10-01 (a) — **The objective-#14 refit (`hilda_csl3v0kaidgb`): 24/24 starts converged to one optimum (−1405.249). D4 is NOT resolved: modern NPP 69.6 → 67.7, z +1.50 against 56.1 ± 7.75, a NAMED TENSION as ruled. Fertilisation reshapes (K 872 → 740, β 2.74 → 2.20, enh(410) −7.3 %). SSP5-8.5 2300 CO₂ rises +85 ppm and Koven z(2100–2200) falls 2.27 → 1.85. Decomposed by parameter: the fertilisation shape +67 ppm, N retention −33, the fitted greening term +44, the ocean +11, q10 −4.**
 
 **The wave** (09-30 q). Finished 2026-10-01 02:33 (8 h 51 min). **24/24 CONVERGED in 147–197 min**, none
