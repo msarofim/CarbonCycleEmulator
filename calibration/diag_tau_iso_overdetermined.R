@@ -53,8 +53,7 @@ if (TI_SMOKE) { TI_FAC <- c(0.85, 1.00, 1.15); TI_NM_MAXIT <- 20; TI_BFGS_MAXIT 
 TI_OUT     <- ccx_path("outputs", "diagnostics", sprintf("tau_iso_overdetermined_%s%s", format(Sys.Date(), "%Y%m%d"), if (TI_SMOKE) "_smoke" else ""))
 sink_log <- file(paste0(TI_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE)
 on.exit({ sink(); close(sink_log) }, add = TRUE)
-TI_COMMIT <- if (file.exists("FROZEN_FROM_COMMIT.txt")) substr(trimws(readLines("FROZEN_FROM_COMMIT.txt")[1]), 1, 7) else
-             tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+TI_COMMIT <- ccx_git_stamp()   # a frozen bundle stamps its FROZEN_FROM_COMMIT.txt as "<hash>+frozen?"
 cat(sprintf("== TAU_ISO OVER-DETERMINED? k_w x %s at %s -- commit %s, %s ==\n", paste(TI_FAC, collapse = "/"), TI_ARM, TI_COMMIT, format(Sys.time())))
 cat(sprintf("profile sets: %s\n\n", paste(sprintf("%s = {%s}", names(TI_SETS), vapply(TI_SETS, paste, "", collapse = ",")), collapse = "; ")))
 

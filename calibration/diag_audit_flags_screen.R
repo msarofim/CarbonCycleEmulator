@@ -107,9 +107,8 @@ if (AF_SMOKE) { AF_TAG <- paste0(AF_TAG, "_smoke"); AF_NM_MAXIT <- 2; AF_NM_MAXI
 
 OUT_CSV  <- ccx_path("outputs", "diagnostics", sprintf("%s_%s.csv", AF_TAG, AF_DATE))
 OUT_RDS  <- ccx_path("outputs", "diagnostics", sprintf("%s_%s.rds", AF_TAG, AF_DATE))
-COMMIT   <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
-DIRTY    <- tryCatch(length(system("git status --porcelain -- R src data", intern = TRUE)) > 0,
-                     error = function(e) NA)
+COMMIT   <- ccx_git_stamp()
+DIRTY    <- ccx_stamp_dirty(COMMIT)   # the rds keeps `dirty`: TRUE / FALSE / NA = git could not tell
 RUN_AT   <- format(Sys.time(), "%Y-%m-%d %H:%M")
 
 # ---- canonical ------------------------------------------------------
@@ -156,8 +155,7 @@ v_ctrl <- lp_ctrl_fn(md$u_mode)
 LP0 <- as.numeric(v_ctrl); ST0 <- attr(v_ctrl, "streams")
 LL0 <- attr(v_ctrl, "loglik"); PR0 <- attr(v_ctrl, "logprior")
 cat("=== PROVENANCE ===\n")
-cat(sprintf("  driver %s | commit %s%s | run %s | no RNG used\n", AF_DRIVER, COMMIT,
-            if (isTRUE(DIRTY)) " (R/src/data DIRTY)" else "", RUN_AT))
+cat(sprintf("  driver %s | commit %s | run %s | no RNG used\n", AF_DRIVER, COMMIT, RUN_AT))
 cat(sprintf("  mode %s via ccx_mode_file() = %s\n", AF_MODE, sub(".*/calibration/", "calibration/", ccx_mode_file(AF_MODE))))
 cat(sprintf("  struct %s, spinup %s | stored logpost %.6f, re-scored %.6f -> %s\n", md$struct,
             ccx_mode_spinup(md), md$logpost, LP0,

@@ -24,6 +24,7 @@
 #  09-17 l it is the LABEL, and the output name carries the label.)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+L2_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 L2_STRUCT   <- Sys.getenv("L2_STRUCT", "hilda_cl3")   # the limb's label; the layer is the label's (CCX_L2_RETURN_LAYERS)
 stopifnot(L2_STRUCT %in% names(CCX_L2_RETURN_LAYERS))
@@ -114,6 +115,6 @@ cat(sprintf("  N1 reproduces the 09-17 scan's solubility-only line: %s\n",
             if (abs(sol$slope - L2_REF_SOL[["slope"]]) < L2_REF_TOL[["slope"]]) "PASS" else "FAIL"))
 cat(sprintf("  the PRE-CHECK's prediction (the need at [29.7, 35.0]): measured %.1f\n", w_obs))
 saveRDS(list(rows = rows, canonical = list(st = st_can, slope = e_can, V = V_can), obs = c(slope = OBS_SLOPE, se = OBS_SE), fit = coef(fit), w_obs = w_obs,
-             linear = lin, grid = L2_GRID, struct = L2_STRUCT, blk = blk, arm = CCX_MODE_CANONICAL, commit = system("git rev-parse --short HEAD", intern = TRUE),
+             linear = lin, grid = L2_GRID, struct = L2_STRUCT, blk = blk, arm = CCX_MODE_CANONICAL, commit = L2_COMMIT,
              when = Sys.time()), L2_OUT)
 cat(sprintf("saved %s (%.1f min)\nEXIT 0\n", L2_OUT, as.numeric(difftime(Sys.time(), t0, units = "mins"))))

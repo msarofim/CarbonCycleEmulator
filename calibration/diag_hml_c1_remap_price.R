@@ -36,6 +36,7 @@
 # Usage:  Rscript calibration/diag_hml_c1_remap_price.R
 # =====================================================================
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
+COMMIT <- ccx_git_stamp()
 
 ## ---- named constants --------------------------------------------------
 BAND       <- c(CCX_PARAM_TABLE$h_ml$lo, CCX_PARAM_TABLE$h_ml$hi)
@@ -216,6 +217,6 @@ saveRDS(list(gateA = list(incumbent = kA[c("n","hit","ratio")], mid = kM[c("n","
                                            subbin_local = loc, pass = gateC),
              constants = list(band = BAND, probe_dz = PROBE_DZ, kink_mult = KINK_MULT, gl_n = GL_N),
              provenance = list(when = "2026-08-29",
-                               commit = system("git rev-parse --short HEAD", intern = TRUE))),
+                               commit = COMMIT)),
         OUT_RDS)
 cat(sprintf("\nWrote %s\n", OUT_RDS))

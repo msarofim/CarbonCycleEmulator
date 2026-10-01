@@ -16,6 +16,7 @@
 # NOTHING is adopted; no core is touched.
 # =====================================================================
 suppressMessages({ source("tests/testthat/setup.R", chdir = TRUE); source("calibration/lib_design_gates.R") })
+LV_COMMIT <- ccx_git_stamp()
 `%||%` <- function(a, b) if (is.null(a)) b else a
 LV_DIR   <- "calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452"
 LV_START <- "start_011.rds"            # the array's best (10 tasks at -1450.5178 to 4 dp; id 0 CONVERGED there)
@@ -95,5 +96,5 @@ cat(sprintf("\nREAD: at W0 = %g Sv the cell's excess is %+.0f uatm of which the 
             W0, RES$w0$b1$value, p$sst_eq, p$sst_NH, p$sst_SH, RES$w0$decomp["NH", "T_term"], RES$w0$decomp["SH", "T_term"],
             (RES$w0$b1$value - RES$cold4$b1$value) / LV_COLD[2], RES$k1$b1$value - RES$w0$b1$value, RES$k1cold2$b1$value - RES$w0$b1$value, RES$mlT$b1$value))
 saveRDS(list(res = RES, start = LV_START, dir = LV_DIR, W0 = W0, target = tg, obs_slope = OBS_SLOPE, sst_ml = c(NH = p$sst_NH, SH = p$sst_SH),
-             commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA), date = Sys.time()), paste0(LV_OUT, ".rds"))
+             commit = LV_COMMIT, date = Sys.time()), paste0(LV_OUT, ".rds"))
 cat("saved", paste0(LV_OUT, ".{log,rds}"), "\n")

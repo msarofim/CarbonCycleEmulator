@@ -9,6 +9,7 @@
 # Usage: Rscript calibration/diag_enso_slope_row_price.R   (~2 min, C++ core)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+PR_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 PR_OUT <- ccx_path("outputs", "diagnostics", sprintf("enso_slope_row_price_%s", format(Sys.Date(), "%Y%m%d")))
 PR_C1_DIR <- ccx_path("calibration", "output", "multistart_20260917_hilda_c_seasml0_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452"); PR_C1 <- 18L
@@ -46,5 +47,5 @@ cat(sprintf("\nRESTAMP deltas for the registered files (= the row): %s\n", paste
 cat(sprintf("the canonical beats the registered control under #13 by %+.2f (was %+.2f under #12); the refit control c1 beats the canonical by %+.2f under #13 (was %+.2f)\n",
             res[[CCX_MODE_CANONICAL]][["lik13"]] - res[[CCX_MODE_SEASML0_CONTROL]][["lik13"]], res[[CCX_MODE_CANONICAL]][["lik12"]] - res[[CCX_MODE_SEASML0_CONTROL]][["lik12"]],
             res$control_c1[["lik13"]] - res[[CCX_MODE_CANONICAL]][["lik13"]], res$control_c1[["lik12"]] - res[[CCX_MODE_CANONICAL]][["lik12"]]))
-saveRDS(list(obs_slope = obs$enso_slope, arms = res, built = format(Sys.time()), commit = system("git rev-parse --short HEAD", intern = TRUE)), paste0(PR_OUT, ".rds"))
+saveRDS(list(obs_slope = obs$enso_slope, arms = res, built = format(Sys.time()), commit = PR_COMMIT), paste0(PR_OUT, ".rds"))
 cat(sprintf("saved %s.{log,rds}\n", PR_OUT))

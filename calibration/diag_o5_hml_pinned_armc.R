@@ -16,6 +16,7 @@
 # Run from the repo root:  Rscript calibration/diag_o5_hml_pinned_armc.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+HP_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 HP_ARM    <- CCX_MODE_CANONICAL
 HP_EXPORT <- ccx_pump_export_prior()$centre_gtc
@@ -26,7 +27,7 @@ HP_NM_MAXIT <- 1500; HP_BFGS_MAXIT <- 100; HP_GATE_TOL <- 1e-4
 HP_FREE_GAIN <- 162.9; HP_RULE_SHARE <- 0.5
 HP_OUT <- ccx_path("outputs", "diagnostics", sprintf("o5_hml_pinned_armc_%s", format(Sys.Date(), "%Y%m%d")))
 sink_log <- file(paste0(HP_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE); on.exit({ sink(); close(sink_log) }, add = TRUE)
-cat(sprintf("== O5 arm C with h_ml PINNED at %s -- commit %s ==\n", HP_ARM, tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")))
+cat(sprintf("== O5 arm C with h_ml PINNED at %s -- commit %s ==\n", HP_ARM, HP_COMMIT))
 v0 <- dg_vector(HP_ARM); md <- v0$md; HP_PINS[["canonical"]] <- v0$p$h_ml
 obs <- ccx_prepare_obs(); o_spo <- obs$co2_seas$SPO
 harm <- function(h) c(amp = sqrt(h$a_mean^2 + h$b_mean^2), phase_mo = (atan2(h$b_mean, h$a_mean) / (2 * pi)) * 12)
@@ -81,5 +82,5 @@ for (pn in names(HP_PINS)) { g <- S[[paste(pn, 1)]]$dlik - S[[paste(pn, 0)]]$dli
   cat(sprintf("h_ml %s (%.1f m): amp 0 %+.1f -> amp 1 %+.1f, gain %+.1f = %.0f %% of the free gain -> %s; the thin ML bought %+.1f of O5's %+.1f at amp 1\n",
               pn, HP_PINS[[pn]], S[[paste(pn, 0)]]$dlik, S[[paste(pn, 1)]]$dlik, g, 100 * g / HP_FREE_GAIN, if (g >= HP_RULE_SHARE * HP_FREE_GAIN) "SURVIVES" else "DOES NOT SURVIVE",
               -125.7 - S[[paste(pn, 1)]]$dlik, -125.7)) }
-saveRDS(list(S = S, pins = HP_PINS, free = HP_FREE, free_gain = HP_FREE_GAIN, ref_st = ref_st, commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA), built = format(Sys.time())), paste0(HP_OUT, ".rds"))
+saveRDS(list(S = S, pins = HP_PINS, free = HP_FREE, free_gain = HP_FREE_GAIN, ref_st = ref_st, commit = HP_COMMIT, built = format(Sys.time())), paste0(HP_OUT, ".rds"))
 cat(sprintf("\nsaved %s.{log,rds}\n", HP_OUT))

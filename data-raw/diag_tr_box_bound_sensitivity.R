@@ -13,6 +13,7 @@
 # climatology; areas on each product's own grid. Nothing is written to data/.
 # =====================================================================
 suppressMessages({ library(ncdf4); source("tests/testthat/setup.R", chdir = TRUE) })
+COMMIT <- ccx_git_stamp()
 TR_ISO      <- c(25, 26, 27)            # candidate isotherms, degC (annual-mean climatology)
 TR_LAT_FIX  <- 20                       # the fixed-latitude control
 TR_CLIM     <- c(1991, 2020)            # the Nino3.4 base period (build_eq_cell_targets.R EQ_SST_BASE)
@@ -80,6 +81,6 @@ cat(sprintf("\nmodel today: sst_NH/SH 18 / 16 (typed), sst_hs 2, sst_eq 27.04 (t
 cat("the isotherm sensitivity, tr_frac and tr_sst, 25 -> 27 C:\n"); for (h in c("NH", "SH")) { z <- tab[tab$hemi == h & grepl("iso", tab$bound), ]
   cat(sprintf("  %s: tr_frac %s; tr_sst %s; residual ML SST %s\n", h, paste(sprintf("%.3f", z$tr_frac), collapse = " / "), paste(sprintf("%.2f", z$tr_sst), collapse = " / "), paste(sprintf("%.2f", z$resid_ml_sst), collapse = " / "))) }
 saveRDS(list(table = tab, iso = TR_ISO, lat_fix = TR_LAT_FIX, clim = TR_CLIM, ls_lat = TR_LS_LAT, hemi_area = hemi_A, files = FILES,
-             commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA), date = Sys.time()), paste0(OUT, ".rds"))
+             commit = COMMIT, date = Sys.time()), paste0(OUT, ".rds"))
 write.csv(tab, paste0(OUT, ".csv"), row.names = FALSE)
 cat("saved", paste0(OUT, ".{rds,csv}"), "\n")

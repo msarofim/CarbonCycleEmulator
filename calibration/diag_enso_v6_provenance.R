@@ -50,12 +50,11 @@ VP_BASE  <- EIX_CLIM_BASE            # 1991-2020, the WMO normal
 VP_REF_DEMEAN <- -1512.0151          # the ADOPTED convention, same vector
 VP_REF_ROLL   <- -1513.9226          # the CLIPPED rolling base, same vector
 VP_OUT   <- file.path("outputs", "diagnostics", "enso_v6_provenance.rds")
-VP_HEAD  <- tryCatch(system("git rev-parse HEAD", intern = TRUE)[[1]],
-                     error = function(e) NA_character_)
+VP_HEAD  <- ccx_git_stamp()
 
 cat(sprintf("\n%s\nERSST v6: THE VERSION CONTROL AND THE UNCLIPPED ROLLING BASE\n  arm %s, span %d-%d, base %d-%d, commit %s\n%s\n",
             strrep("=", 78), VP_ARM, VP_WIN[1], VP_WIN[2], VP_BASE[1], VP_BASE[2],
-            substr(VP_HEAD, 1, 7), strrep("=", 78)))
+            VP_HEAD, strrep("=", 78)))
 
 # ---------------------------------------------------------------------
 # GATE V-G: the two grids must be the SAME extraction problem

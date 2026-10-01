@@ -32,7 +32,7 @@ RS_FRAC   <- 0.25                    # hypothesis threshold, stated before the r
 RS_MAXIT  <- 3000L
 RS_ID_TOL <- 1e-4
 RS_OUT    <- ccx_path("outputs", "diagnostics", sprintf("r2_shape_fixed_%s", format(Sys.Date(), "%Y%m%d")))
-COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT    <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(RS_MODE)); invisible(ccx_apply_pins(md$pins))
 bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode

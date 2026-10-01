@@ -61,8 +61,7 @@ EG_BASIN    <- "calibration/output/multistart_20260901_enso25/start_000.rds"
 EG_WIN      <- c(1948, 2024)     # the ENSO-active record, as in the pre-check
 EG_STRESS   <- c(1, 2, 4, 8, 16) # gamma multipliers the margin is walked over
 EG_PRE_FILE <- file.path("outputs", "diagnostics", "enso_gpp_margin_pre.rds")
-EG_HEAD     <- tryCatch(system("git rev-parse HEAD", intern = TRUE)[[1]],
-                        error = function(e) NA_character_)
+EG_HEAD     <- ccx_git_stamp()
 # ⛔ THE COMMIT IS NOT THE IDENTITY OF THE CODE. The first run of this file
 # proved it: the `post` role ran with the model change UNCOMMITTED, so
 # `git rev-parse HEAD` returned the same hash as the `pre` worktree and the
@@ -73,7 +72,7 @@ EG_FP       <- paste(tools::md5sum(EG_SRC), collapse = "-")
 
 cat(sprintf("\n%s\nENSO -> GPP RESTRUCTURING: THE MARGIN AND THE PRICE  [role: %s]\n  arm %s, basin %s\n  commit %s\n%s\n",
             strrep("=", 78), EG_ROLE, EG_ARM, basename(dirname(EG_BASIN)),
-            substr(EG_HEAD, 1, 7), strrep("=", 78)))
+            EG_HEAD, strrep("=", 78)))
 cat(sprintf("  model source fingerprint %s\n", substr(EG_FP, 1, 12)))
 
 v  <- dg_vector(EG_ARM)
@@ -188,7 +187,7 @@ if (identical(EG_ROLE, "pre")) {
     stop("the `pre` measurement was taken at a different arm/basin.")
   cat(sprintf("\n  logpost, PRE  (%s, fp %s): %.4f\n", substr(pre$commit, 1, 7),
               substr(pre$fp, 1, 8), pre$logpost))
-  cat(sprintf("  logpost, POST (%s, fp %s): %.4f\n", substr(EG_HEAD, 1, 7),
+  cat(sprintf("  logpost, POST (%s, fp %s): %.4f\n", EG_HEAD,
               substr(EG_FP, 1, 8), v0))
   cat(sprintf("  => THE RESTRUCTURING COSTS %+.4f log-units at fixed parameters.\n",
               v0 - pre$logpost))

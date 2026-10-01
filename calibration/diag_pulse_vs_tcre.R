@@ -99,10 +99,7 @@ say <- function(...) { t <- sprintf(...); cat(t); cat(t, file = PT_LOG, append =
 # PROVENANCE (2026-10-01): the 09-26 / 09-29 outputs named neither the mode nor the
 # commit, so a CSV could not say which canonical it measured -- and the app's
 # constants were then re-pointed by the adoption without anything noticing.
-PT_COMMIT <- tryCatch(paste0(system("git rev-parse --short HEAD", intern = TRUE),
-                             if (length(system("git status --porcelain -- R src app calibration data",
-                                               intern = TRUE))) "-dirty" else ""),
-                      error = function(e) "?")
+PT_COMMIT <- ccx_git_stamp()
 say("\n=== %s (%s) ===\n", PT_TAG, PT_DATE)
 say("mode %s (%s, %s) @%s\n", CCX_MODE_CANONICAL, app_params$source, app_params$status, PT_COMMIT)
 say("climate module provenance: %s\n", ccx_climate_module()$provenance)

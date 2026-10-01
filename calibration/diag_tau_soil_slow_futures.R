@@ -47,7 +47,7 @@ TF_ID_SSP585 <- 1388.3
 TF_ID_TOL  <- 0.05                          # ppm; the handoff value is printed to 0.1
 if (TF_PROFILE_TAG != "tau_soil_slow_profile") TF_TAG <- paste0(TF_TAG, sub("^tau_soil_slow_profile", "", TF_PROFILE_TAG))
 TF_OUT     <- ccx_path("outputs", "diagnostics", sprintf("%s%s_%s", TF_TAG, TF_OUT_SUFFIX, TF_DATE))
-COMMIT     <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT     <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(TF_MODE)); invisible(ccx_apply_pins(md$pins))
 iF <- match(TF_FREE, md$param_names); stopifnot(!anyNA(iF))

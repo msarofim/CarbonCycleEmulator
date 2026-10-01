@@ -10,6 +10,7 @@
 # No RNG. USAGE: Rscript calibration/diag_budget_armA.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f); ccx_load_cpp()
+COMMIT <- ccx_git_stamp()
 source("calibration/lib_design_gates.R")
 MODE <- ccx_path("calibration","output","multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452","promoted_basin1","mode_fit_pumpN.rds")
 FREE <- c("beta_max","fert_k","luc_scale","q10","seas_T_amp_NH","seas_T_amp_SH","seas_lag_p_NH","seas_lag_p_SH","npp_frac_NH","kz","rep_dC")
@@ -34,4 +35,4 @@ cat(sprintf("%-11s %7s %7s %7s | %7s %7s %7s | %7s %7s\n", "window", "ocn_M", "o
 for (w in W) { k <- a$year >= w[1] & a$year <= w[2]; kg <- g$year >= w[1] & g$year <= w[2]; ke <- el$year >= w[1] & el$year <= w[2]
   cat(sprintf("%d-%d %7.3f %7.3f %+7.3f | %7.3f %7.3f %+7.3f | %7.3f %7.3f\n", w[1], w[2], mean(a$ocean[k]), mean(g$ocean_sink[kg]), mean(a$ocean[k]) - mean(g$ocean_sink[kg]),
     mean(a$land[k]), mean(g$land_sink[kg]), mean(a$land[k]) - mean(g$land_sink[kg]), mean(el$eluc[ke]), mean(g$luc[kg]))) }
-cat(sprintf("provenance: calibration/diag_budget_armA.R @%s; hilda_csl3v0ka v0k basin1 + fixed-stock tau500 control; historical 1750-2024; GtC/yr; GCB = data/gcb_budget.rds; no RNG\n", system("git rev-parse --short HEAD", intern = TRUE))); sink()
+cat(sprintf("provenance: calibration/diag_budget_armA.R @%s; hilda_csl3v0ka v0k basin1 + fixed-stock tau500 control; historical 1750-2024; GtC/yr; GCB = data/gcb_budget.rds; no RNG\n", COMMIT)); sink()

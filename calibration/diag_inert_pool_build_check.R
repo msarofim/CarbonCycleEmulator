@@ -15,6 +15,7 @@
 #   The periodic spinup (the objective's) solves with the pinned rows.
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f); ccx_load_cpp()
+COMMIT <- ccx_git_stamp()
 MODE <- ccx_path("calibration","output","multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452","promoted_basin1","mode_fit_pumpN.rds")
 FREE <- c("beta_max","fert_k","luc_scale","q10","seas_T_amp_NH","seas_T_amp_SH","seas_lag_p_NH","seas_lag_p_SH","npp_frac_NH","kz","rep_dC")
 F_IN <- ccx_const("SOIL_INERT_FRAC")
@@ -60,4 +61,4 @@ unc <- sapply(HEMIS, function(h) off$sp$y[off$sp$aux$idx[[h]]$soil_slow, "C"])
 cat(sprintf("inert stock NH %.1f SH %.1f total %.1f GtC; exchanging passive %.1f; uncarved passive %.1f; closure %.2e\n",
             on$inert[1], on$inert[2], sum(on$inert), sum(ex), sum(unc), sum(ex) + sum(on$inert) - sum(unc)))
 cat(sprintf("provenance: mode %s; FREE names from the fixed-stock tau-500 control (tau_soil_slow_profile_fixedstock_20260929.rds); forcing ssp585 1750-2300; commit %s\n",
-            basename(dirname(dirname(MODE))), system("git rev-parse --short HEAD", intern = TRUE)))
+            basename(dirname(dirname(MODE))), COMMIT))

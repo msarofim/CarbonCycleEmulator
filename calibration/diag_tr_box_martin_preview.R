@@ -15,6 +15,7 @@
 # Usage: Rscript calibration/diag_tr_box_martin_preview.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+MP_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R")); source(ccx_path("calibration", "lib_martin_shape.R"))
 `%||%` <- function(a, b) if (is.null(a)) b else a
 MP_DIR   <- "calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452"
@@ -82,5 +83,5 @@ g_tr <- RES[["glodap hilda_tr"]]; t_tr <- RES[["martin_tail hilda_tr"]]; f_tr <-
 cat(sprintf("hilda_tr B1: %+.1f | %+.1f | %+.1f; tr - global %+.1f | %+.1f | %+.1f (obs +7.6)\n", g_tr$b1$value, t_tr$b1$value, f_tr$b1$value, g_tr$pi[["tr"]], t_tr$pi[["tr"]], f_tr$pi[["tr"]]))
 cat(sprintf("verdict: at the no-pump limit (martin_full) B1 is %+.1f on hilda_eq -- %s\n", f_eq$b1$value,
             if (f_eq$b1$value < 70) "the pump field IS the root; D+E before any tropical column" else "the root is NOT the export field alone: the diffusive exchange itself (kz) sets the cell's source"))
-saveRDS(list(res = RES, vector = MP_START, w0 = W0, gamma = GM, commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA), date = Sys.time()), paste0(MP_OUT, ".rds"))
+saveRDS(list(res = RES, vector = MP_START, w0 = W0, gamma = GM, commit = MP_COMMIT, date = Sys.time()), paste0(MP_OUT, ".rds"))
 cat("saved", paste0(MP_OUT, ".{log,rds}"), "\n")

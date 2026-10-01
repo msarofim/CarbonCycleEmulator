@@ -60,6 +60,7 @@ NDEP_END_YEAR      <- 2300L     # standing end year (Marcus 2026-08-28); sources
 NDEP_UNITS_VV      <- c(NOx = "Mt NO2/yr", NH3 = "Mt NH3/yr")
 NDEP_UNITS_RCMIP   <- c(NOx = "Mt NOx/yr", NH3 = "Mt NH3/yr")   # NO2 basis: see NDEP_N_PER_NO2's source
 NDEP_OUT           <- ccx_path("data", CCX_NDEP_FILE)
+NDEP_COMMIT        <- ccx_git_stamp(exclude = NDEP_OUT)   # its own product is not an input
 N_NO2 <- ccx_const("NDEP_N_PER_NO2"); N_NH3 <- ccx_const("NDEP_N_PER_NH3")
 LAND  <- ccx_const("NDEP_LAND_FRAC"); NHS  <- ccx_const("NDEP_NH_SHARE")
 sha256 <- function(p) digest::digest(file = path.expand(p), algo = "sha256")
@@ -152,7 +153,7 @@ for (s in NDEP_SSPS) {                                                         #
 setattr(tab, "source", sprintf("NOx+NH3 emissions proxy x land %.2f, NH %.2f (CMIP7 vV v1.1.1 + RCMIP v5.1.0 SSPs harmonised to 2050)", LAND, NHS))
 setattr(tab, "provenance", sprintf(paste("data-raw/build_ndep_forcing.R @%s, built %s; vV sha256 %s; RCMIP sha256 %s;",
                                          "Tg N/yr of deposition onto LAND above %d; constants NDEP_* in R/constants.R"),
-                                   tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"),
+                                   NDEP_COMMIT,
                                    format(Sys.time(), "%Y-%m-%d %H:%M"), NDEP_VV_PINNED_SHA, NDEP_RCMIP_SHA, NDEP_BASE_YEAR))
 saveRDS(tab, NDEP_OUT)
 

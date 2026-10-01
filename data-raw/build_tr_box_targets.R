@@ -53,6 +53,7 @@ CITE <- list(
   enso = "NOAA CPC ersst5.nino.mth.91-20 Nino3.4 anomaly (data/forcing_enso.rds)",
   glodap = "Lauvset et al. (2024) GLODAPv2.2023 (ESSD 16:2047-2072); flag-2 bottle subsets in data-raw/downloads")
 OUT <- ccx_path("data", "obs_tr_box.rds")
+COMMIT <- ccx_git_stamp(exclude = OUT)   # its own product is not an input
 
 to360 <- function(x) x %% 360
 awt <- function(lat, dlat) abs(sin((lat + dlat / 2) * pi / 180) - sin((lat - dlat / 2) * pi / 180))
@@ -230,6 +231,6 @@ obs <- list(
   pco2 = c(pco2_tr, list(def = "SOM-FFN annual-mean pCO2 over the mask minus the global surface mean -- the B1 construction, a CHECK target (no likelihood row is ruled for it)", source = CITE$pco2)),
   alk_tr = alk_tr, dic_tr = c(dic_tr, list(def = "median surface DIC in the box (PT6's check), umol/kg", source = CITE$glodap)),
   files = FILES, cite = CITE, built = list(script = "data-raw/build_tr_box_targets.R", date = Sys.time(),
-                                           commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA)))
+                                           commit = COMMIT))
 saveRDS(obs, OUT)
 cat("\nwrote", OUT, "\n")

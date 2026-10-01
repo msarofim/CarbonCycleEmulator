@@ -26,6 +26,7 @@
 # Usage:  Rscript calibration/diag_face_check_gamma_diff.R
 # =====================================================================
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
+FACE_COMMIT <- ccx_git_stamp()
 
 ## ---- named constants (every label below derives from these) ----------
 FACE_CHI0     <- 276.88        # model preindustrial, R/model.R
@@ -148,6 +149,6 @@ saveRDS(list(points = pts, boxmax = boxmax, kcut = kcut,
                               bracket = c(FACE_MATURE_LO, FACE_MATURE_HI, FACE_SYNTH, FACE_YOUNG),
                               source = FACE_SRC, gamma_operating = GAMMA_OPERATING),
              provenance = list(price_rds = PRICE_RDS, when = "2026-08-29",
-                               commit = system("git rev-parse --short HEAD", intern = TRUE))),
+                               commit = FACE_COMMIT)),
         OUT_RDS)
 cat(sprintf("\nWrote %s\n", OUT_RDS))

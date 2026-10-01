@@ -23,6 +23,7 @@
 # USAGE: Rscript calibration/diag_enso_index_price.R   (~30 min, BLAS pinned)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+EP_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 
 EP_MODE <- ccx_path("calibration", "output",
@@ -76,7 +77,7 @@ nm_fit <- function(lp, idx_cols, maxit) {
 
 sink(paste0(EP_OUT, ".log"), split = TRUE)
 cat(sprintf("=== PROVENANCE ===\n  driver calibration/diag_enso_index_price.R, commit %s, run %s\n",
-            tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"),
+            EP_COMMIT,
             format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  mode %s\n    %s\n  stored logpost %.4f | spinup %s | BLAS threads pinned via env\n",
             EP_MODE_TAG, EP_MODE, md$logpost, ccx_mode_spinup(md)))

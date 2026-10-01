@@ -118,12 +118,11 @@ EI_PRE_FILE   <- file.path("outputs", "diagnostics", "enso_gpp_margin_pre.rds")
 EI_OUT        <- file.path("outputs", "diagnostics", "enso_index_baseline.rds")
 EI_TREATMENTS <- c("asis", "demean", "detrend", "roll")   # the shipped product
 EI_EXTEND     <- c("fix_v5", "roll_full")                 # priced ONLY if G-P passes
-EI_HEAD       <- tryCatch(system("git rev-parse HEAD", intern = TRUE)[[1]],
-                          error = function(e) NA_character_)
+EI_HEAD       <- ccx_git_stamp()
 
 cat(sprintf("\n%s\nRULING A: WHAT BASELINE CONVENTION DOES THE ENSO INDEX GET?\n  arm %s, basin %s, span %d-%d, commit %s\n%s\n",
             strrep("=", 78), EI_ARM, basename(dirname(EI_BASIN)),
-            EI_WIN[1], EI_WIN[2], substr(EI_HEAD, 1, 7), strrep("=", 78)))
+            EI_WIN[1], EI_WIN[2], EI_HEAD, strrep("=", 78)))
 
 # =====================================================================
 # 1. THE INDEX ITSELF -- mean, trend, and where they come from

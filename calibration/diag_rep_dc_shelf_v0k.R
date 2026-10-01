@@ -24,7 +24,7 @@ RS_MU_GRID  <- c(0, RS_MU_MEAS, RS_MU_MASSW)
 RS_SIG_GRID <- c(1.0, 0.5, 0.2)      # shipped / midpoint / Francey 2019 floor, as in T4p
 RS_GRID_N   <- 20001L
 RS_EDGE     <- 0.01
-COMMIT      <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT      <- ccx_git_stamp()
 
 lad  <- lapply(sort(list.files(RS_LADDER, pattern = "[.]rds$", full.names = TRUE)), readRDS)
 prof <- lad[vapply(lad, function(x) x$job$rep, 0L) == 0L]

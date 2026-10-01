@@ -62,8 +62,7 @@ TS_CORES  <- 8L
 TS_SMOKE  <- identical(Sys.getenv("TS_SMOKE"), "1")
 if (TS_SMOKE) { TS_TAG <- paste0(TS_TAG, "_smoke"); TS_VALUES <- c(500, 2000); TS_MAXIT <- 10L }
 TS_OUT    <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", TS_TAG, TS_DATE))
-COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
-DIRTY     <- tryCatch(length(system("git status --porcelain -- R src data calibration", intern = TRUE)) > 0, error = function(e) NA)
+COMMIT    <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(TS_MODE)); invisible(ccx_apply_pins(md$pins))
 tg <- ccx_npp_modern_target()
@@ -111,7 +110,7 @@ id_d <- as.numeric(lp_chk(u0)) - id_ref
 stopifnot(abs(id_d) < TS_ID_TOL)
 
 sink(paste0(TS_OUT, ".log"), split = TRUE)
-cat(sprintf("=== PROVENANCE === driver %s, commit %s%s, run %s\n", TS_DRIVER, COMMIT, if (isTRUE(DIRTY)) " (DIRTY)" else "", format(Sys.time(), "%Y-%m-%d %H:%M")))
+cat(sprintf("=== PROVENANCE === driver %s, commit %s, run %s\n", TS_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  structure %s at v0k basin 1, 11 names at the %s scale-1 optimum; NPP_GLOBAL_PI unscaled (%g GtC/yr)\n",
   TS_STRUCT, basename(TS_PREV), ccx_const("NPP_GLOBAL_PI")))
 cat(sprintf("  profile %s in {%s} yr (default %g); other residence times at defaults; rebal = NM maxit %d on {%s}\n",

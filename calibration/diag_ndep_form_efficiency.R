@@ -38,7 +38,7 @@ NF_K      <- c(0, 1, 5)                                   # multiples of the pri
 NF_WIN    <- list(c(1950L, 1979L), c(1980L, 1999L), c(2000L, 2023L), c(1990L, 2023L))
 NF_GATE   <- c(0.6, 8.7)                                  # kg C/kg N, land mean (lit note sec. 2a(iv))
 NF_CENTRE <- ccx_const("GAMMA_NDEP_PRIOR_R") * 1e-3 / ccx_const("NPP_GLOBAL_PI")
-COMMIT <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(NF_MODE)); invisible(ccx_apply_pins(md$pins))
 cp <- readRDS(NF_CTRL_PROFILE); ctrl <- cp[[which(vapply(cp, `[[`, numeric(1), "value") == NF_CTRL_VALUE)]]

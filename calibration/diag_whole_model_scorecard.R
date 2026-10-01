@@ -41,25 +41,12 @@ SC_REPRO_TOL <- 1e-3    # log-units: an arm must reproduce its file's stored str
 SC_TAG <- sprintf("%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL)
 SC_OUT <- ccx_path("outputs", "diagnostics", sprintf("whole_model_scorecard_%s.rds", SC_TAG))
 # PROVENANCE STAMP (2026-10-01 f): the commit, in the log's first line, the closing `provenance:` line
-# and the .rds `commit`. "+dirty" = a tracked edit or an untracked file under SC_GIT_PATHS (every
-# R/*.R is sourced, committed or not); on 2026-10-01 a diagnostic run on an uncommitted tree stamped
-# its parent commit. "+dirty?" = git gave no status, so the tree is NOT PROVEN clean -- kept distinct
-# from "+dirty" so a broken check cannot pass for a dirty tree. "?" = no commit could be read (a
-# frozen copy under ~/ccx_frozen/ is not a checkout). Ignored inputs (data-raw/downloads/) are
-# invisible to git status either way.
-# ⚠ NOT the bare tryCatch(system(...), error = ) idiom: outside a checkout git exits 128, system() only
-# WARNS and returns character(0), and sprintf() of that is character(0) -- the stamped line silently
-# vanishes (measured 2026-10-01). Args are shQuote()d: system2() hands them to sh UNQUOTED.
+# and the .rds `commit`. On 2026-10-01 a diagnostic run on an uncommitted tree stamped its parent
+# commit. The stamp's forms (<hash>, +dirty, +dirty?, +frozen?, ?) and why it is not the bare
+# system("git ...") idiom: R/provenance.R, where this driver's 10-01 (f) block now lives as
+# ccx_git_stamp() (10-01 g).
 SC_DRIVER    <- "calibration/diag_whole_model_scorecard.R"
-SC_GIT_PATHS <- c("R", "src", "calibration", "app", "data")
-SC_COMMIT    <- local({
-  git <- function(...) suppressWarnings(tryCatch(system2("git", shQuote(c(...)), stdout = TRUE),
-                                                 error = function(e) structure(character(0), status = NA_integer_)))
-  h <- git("rev-parse", "--short", "HEAD")
-  if (!is.null(attr(h, "status")) || length(h) != 1L || !nzchar(h)) return("?")
-  d <- git("status", "--porcelain", "--", SC_GIT_PATHS)
-  paste0(h, if (!is.null(attr(d, "status"))) "+dirty?" else if (length(d)) "+dirty" else "")
-})
+SC_COMMIT    <- ccx_git_stamp()
 cat(sprintf("%s @%s, %s\n", SC_DRIVER, SC_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 vA <- dg_vector(SC_ARM_A); vA$src <- sprintf("%s (column control, quarantined)", SC_ARM_A_NAME)
 vB <- dg_vector(SC_ARM_B); vB$src <- sprintf("%s (seas_ml 0 control, CCX_MODE_SEASML0_CONTROL)", SC_ARM_B)

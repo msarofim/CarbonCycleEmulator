@@ -36,6 +36,7 @@
 # Run from the repo root:  Rscript calibration/diag_kw_naegler_pin.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+KW_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 
 KW_ARM       <- CCX_MODE_CANONICAL
@@ -53,7 +54,7 @@ KW_GATE_TOL <- 1e-4
 KW_RULE_DROP <- 5; KW_RULE_COST <- 20    # kmol; log-units
 KW_OUT <- ccx_path("outputs", "diagnostics", sprintf("kw_naegler_pin_%s", format(Sys.Date(), "%Y%m%d")))
 sink_log <- file(paste0(KW_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE); on.exit({ sink(); close(sink_log) }, add = TRUE)
-cat(sprintf("== the k_w test at %s -- commit %s ==\n", KW_ARM, tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")))
+cat(sprintf("== the k_w test at %s -- commit %s ==\n", KW_ARM, KW_COMMIT))
 
 obs <- ccx_prepare_obs(); exc_obs <- obs$excess_c14; i95 <- which(exc_obs$year == 1995)
 v0 <- dg_vector(KW_ARM); md <- v0$md; kw0 <- v0$p$k_w
@@ -125,5 +126,5 @@ cat(sprintf("raw: drop %.1f kmol (cost %+.1f); armC kz held: drop %.1f kmol (cos
 lever <- drop_c >= KW_RULE_DROP && S$naegler$dlik >= -KW_RULE_COST
 cat(sprintf("VERDICT: k_w at Naegler's 16.5 cm/h is %s (armC drop %.1f kmol, cost %+.1f).\n", if (lever) "A LEVER on the 1995 inventory" else "NOT a lever on the 1995 inventory under this rule", drop_c, S$naegler$dlik))
 saveRDS(list(canonical = g0, profile = PR, elasticity = el, S = S, rule = c(drop_raw = drop_raw, drop_c = drop_c, drop_ckz = drop_ckz, lever = lever),
-             kw0 = kw0, naegler = KW_NAEGLER, ref = ref, ref_st = ref_st, commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA), built = format(Sys.time())), paste0(KW_OUT, ".rds"))
+             kw0 = kw0, naegler = KW_NAEGLER, ref = ref, ref_st = ref_st, commit = KW_COMMIT, built = format(Sys.time())), paste0(KW_OUT, ".rds"))
 cat(sprintf("\nsaved %s.{log,rds}\n", KW_OUT))

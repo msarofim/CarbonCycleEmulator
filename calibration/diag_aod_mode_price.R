@@ -12,6 +12,7 @@
 # USAGE: Rscript calibration/diag_aod_mode_price.R   (~10 min, BLAS pinned)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+AP_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 
 AP_MODE <- ccx_path("calibration", "output",
@@ -64,7 +65,7 @@ nm_fit <- function(lp, idx_cols, maxit) {
 
 sink(paste0(AP_OUT, ".log"), split = TRUE)
 cat(sprintf("=== PROVENANCE ===\n  driver calibration/diag_aod_mode_price.R, commit %s, run %s\n",
-            tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"),
+            AP_COMMIT,
             format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  mode %s\n    %s\n  stored logpost %.4f | spinup %s | BLAS threads pinned via env\n",
             AP_MODE_TAG, AP_MODE, md$logpost, ccx_mode_spinup(md)))

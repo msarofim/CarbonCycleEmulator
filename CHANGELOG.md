@@ -2,6 +2,91 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-01 (g) — **Every git stamp now goes through ONE helper, `ccx_git_stamp()` in the new `R/provenance.R`. All 69 drivers that ran git for a stamp were converted, plus (f)'s two. A mutation-tested unit test covers the helper, and a lint fails on any new `system()`/`system2()` git call.** This is (f)'s "Open" item. No driver was re-run; nothing under `outputs/` or `data/` was touched. Before converting anything, 821ff3f ((f), on `claude/compassionate-leavitt-a7e631`) was merged into this branch as `4b0b802`: neither this branch nor `main` carried it.
+
+**Marcus's rulings (asked before any conversion).** He took all four recommended options:
+1. A shared helper with a unit test, rather than an inline block per driver.
+2. A dirty marker on every driver, at the standard paths `R src calibration app data`, with each driver's own output excluded.
+3. Outside a checkout, read `FROZEN_FROM_COMMIT.txt` as `<hash>+frozen?`.
+4. A ratchet lint.
+
+Three defaults were stated with the question and not objected to:
+- The fallback is `"?"` everywhere.
+- A separate `" (DIRTY)"` print folds into the stamp, while `dirty` / `tree_dirty` RDS fields are kept (and now NA when git cannot tell).
+- The ENSO drivers store the short stamp instead of the full hash.
+
+**The audit: what each driver lost outside a checkout.** Measured by feeding `system()`'s value there (`chr(0)`, status 128, a warning, and the `error =` handler never fires) through every consumer shape the drivers used.
+
+| outside a checkout | files |
+|---|---|
+| **the run CRASHES at the save step**: `data.frame(…, provenance = sprintf(COMMIT))` → "arguments imply differing number of rows: 3, 0"; `R$provenance <-` / `R$commit <-` / `tg$commit <-` → "replacement has 0 rows"; `cbind(D, provenance =)`. The CSV is lost, usually the RDS too, after the whole computation | 13: `diag_alignment_screen`, `_audit_flags_screen`, `_fert_profile`, `_land_sink_trajectory`, `_npp0_scan_resfree`, `_obj14_refit_read` (RDS saved, CSV lost), `_passive_bomb_partition`, `_q10_profile`, `_soil_d14c_shi2020`, `_tau_soil_slow_{futures,profile,swap}`, `make_port_targets` |
+| **the whole figure caption is `""`**: one `sprintf()` built it, including the GCB source, units and smoothing note | 1: `fig_land_sink_vs_gcb` |
+| the log line VANISHES (`cat(sprintf())`) or prints blank (`say()`/`xt()`); the RDS field is `chr(0)`; `build_ndep_forcing`'s provenance attribute on its `data/` product is `chr(0)` | 51 |
+| **dirty checks with no power**: `length(system("git status …")) > 0` reads FALSE (CLEAN) when git cannot answer. There were 5 path sets: `R src data calibration` (6), `R src data` (1), `calibration R` (2), the whole tree (1), `R src app calibration data` (1) | 11, all among the above |
+| already safe: `run_post_refit_adoption.R`'s `git mv` (exit status checked, args quoted); the 3 ENSO drivers' `system(…)[[1]]`, where indexing `chr(0)` throws, so the handler fires and they print `NA` | 4 |
+| partly safe: `diag_tau_iso_overdetermined.R` read `FROZEN_FROM_COMMIT.txt` when present | 1 |
+
+- **70 files, not 69.** `diag_pulse_vs_tcre.R` (0823103) re-wrote the idiom hours after (f) measured it. Its `-dirty` check also read clean on a failed status.
+- `calibration/archive/` holds 3 more drivers with the idiom (`diag_gthc_martin_probe`, `diag_soc_martin_probe`, `diag_u_hs_sh_scan`). They are outside the audit grep and the lint, and were not changed.
+
+**The helper** (`R/provenance.R`). It returns ONE non-empty string: `<hash>`; `<hash>+dirty` (a tracked, staged or untracked change under `paths` other than `exclude`); `<hash>+dirty?` (git gave no status: not proven clean); `<hash>+frozen?` (not a checkout; line 1 of `FROZEN_FROM_COMMIT.txt`, shortened to 7, "?" because a bundle's own edits cannot be checked); or `?`. `ccx_stamp_dirty()` maps a stamp to TRUE / FALSE / NA. Choices made in the code:
+- `git -C root`. Root must BE the checkout's top level: `root/.git` exists AND `rev-parse --show-toplevel` agrees. Measured: a stray empty `.git` inside another repo makes git report the OUTER repo, which would have stamped a bundle with someone else's HEAD.
+- No `root/.git`, no git call. A bundle therefore prints no `fatal: not a git repository` on every start. None of the 29 dirs under `~/ccx_frozen/` is a checkout, and 25 carry `FROZEN_FROM_COMMIT.txt`.
+- `--untracked-files=normal` is explicit. A `status.showUntrackedFiles = no` config would otherwise hide an untracked `R/*.R`.
+- `git`'s own stderr passes through, so a corrupt index (`+dirty?`) or a dubious-ownership refusal (`?`) explains its stamp.
+
+**The conversion: 137 edits, all-or-nothing.** Every edit had to match its exact expected count in a dry run first; 71 files changed.
+- The stamp is a named constant set ONCE, right after `R/` is sourced. It describes the code that was loaded. Several drivers had called git again at save time, so a long run could have stamped its header and its RDS differently.
+- Existing variable names were kept (`COMMIT`, `TI_COMMIT`, `PT_COMMIT`, `EG_HEAD`, …). Inline calls became a prefixed constant (`AP_COMMIT`, `KS_COMMIT`, …).
+- Own-output exclusions, for writers under the stamped paths:
+  - the constraint map, as before
+  - `make_port_targets` (`calibration/torch/port_targets.csv`)
+  - `fig_land_sink_vs_gcb` (its PNG)
+  - `restamp_mode_objective` (the mode file)
+  - `repair_arm_streams` / `repair_canonical_streams` (the mode files, and their quarantine dirs)
+  - `build_ndep_forcing` / `build_tr_box_targets` (their `data/` products)
+
+**What NEW outputs will show** (old ones untouched):
+- a `+dirty` / `+dirty?` / `+frozen?` suffix on 58 drivers that never had a dirty check
+- `diag_pulse_vs_tcre`'s `-dirty` becomes `+dirty`
+- `diag_tau_iso_overdetermined` in a bundle: `c56c84f` becomes `c56c84f+frozen?`
+- the 11 existing checks move to the standard paths: broader for 9, unchanged for `diag_pulse_vs_tcre`, narrower for `diag_rep_dc_prior_profile` (whole tree before)
+- `" (DIRTY)"` / `" (R/src/data DIRTY)"` print suffixes are gone, because the stamp carries it
+- the RDS `commit` is `"?"` where it was `NA`, `NA_character_` or `"unknown"`, and short where the ENSO drivers stored 40 characters
+
+**Tried and abandoned.**
+- **Stripping the root prefix off absolute excludes.** Mutant M5 (removing that code) SURVIVED: git 2.50 resolves an absolute pathspec inside the work tree itself, both the `/var` and the `/private/var` form. The code was removed. The test keeps the absolute-path cases, so a git that stopped resolving them would fail it, and an exclude git cannot resolve fails the status (`+dirty?`, tested), never a false clean.
+- **The `.git` precheck first had no test.** M7 survived. A PATH shim (a recording `git` in front of the real one) now shows git is never run outside a checkout, and that the shim itself records calls in a checkout.
+- **Printing `diag_enso_gpp_margin`'s stored `pre$commit` whole.** Reverted: it reads a stored 09-02 artifact (a full hash), so it was out of scope, and `diag_enso_index_baseline` reads the same file with `substr(…, 1, 7)`.
+
+**Verified.**
+- **Unit test** `test-git-stamp.R`: 13 tests, 63 expectations. It uses real scratch repos under a directory whose name has a space and parentheses. Every one of 13 mutants of the helper fails it:
+
+  | mutant | failing tests |
+  |---|---|
+  | no `shQuote` | 9 |
+  | `ok()` always TRUE | 1 (no commit yet) |
+  | a failed status reads clean | 2 |
+  | a failed status reads `+dirty` | 2 |
+  | no exclude | 1 |
+  | no top-level check | 1 (nested bundle) |
+  | no `.git` precheck | 1 (PATH shim) |
+  | frozen file read before git | 2 |
+  | frozen without `+frozen?` | 3 |
+  | no `--untracked-files=normal` | 1 |
+  | frozen file unvalidated | 1 |
+  | `ccx_stamp_dirty` NA→FALSE | 1 |
+  | the bare idiom | 12 |
+- **Lint** `test-git-stamp-lint.R`: 3 tests. It matches code only, through `ccx_code_lines()`, and scans each file as one string, so a split call still matches. Before conversion it flagged exactly the 72 expected files (70 audited plus (f)'s 2; 92 calls). On a copied tree, all 5 must-fire mutants fail it, and the comment-only plant and the unmutated copy pass. The mutants: a bare call; a call split across lines; `paste0("git …")` in `app/R`; a second git helper in `R/`; the allowed `git mv` removed (stale).
+- **Static checks** on all 71 files: each parses; exactly one `ccx_git_stamp()`, at top level, defined before its first use; no `"git` string left; no dangling `DIRTY`; every stamp symbol defined.
+- **The source-scanning tests, BLAS pinned, before (`4b0b802`) vs after:** `test-mode-struct-lint`, `test-overlay-idiom-lint`, `test-mode-file`'s two path lints, `test-luc-scale`'s eluc lint and `test-constraint-map`. Both runs: 16 tests, 159 expectations, 0 failed / 0 skipped / 0 errored, `identical()` tables. With the two new files: 32 tests, 228 expectations, 0 failed.
+
+**Open, not changed here.**
+- `calibration/archive/`'s 3 drivers.
+- The two readers of `enso_gpp_margin_pre.rds` truncate its commit to 7 characters. A pre file written from now on would lose its marker in those two prints.
+- No existing output was audited for a stamp lost outside a checkout. A missing stamp loses provenance, not numbers.
+- (f)'s `test-constraint-map.R` test-6 item stands.
+
 ## 2026-10-01 (f) — **`diag_whole_model_scorecard.R` and `diag_constraint_map.R` now stamp their git commit, with a dirty-tree marker.** This closes the "Provenance" flag in (d). Neither driver was re-run, and no existing output was touched. The 10-01 scorecard and constraint map stay unstamped; per (d) they ran on the `fbb6400` and `01c05c3` trees.
 
 **Where the stamp appears.**

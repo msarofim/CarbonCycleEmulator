@@ -55,6 +55,7 @@
 # Usage:  Rscript calibration/diag_rep_dc_d13c_marine.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+MR_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 .root <- normalizePath(".")
 
@@ -103,8 +104,7 @@ say("=====================================================================")
 say("N5, MARINE ARM -- does excluding the continental flasks change it?")
 say("  run     %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
 say("  mode    %s", CCX_MODE_CANONICAL)
-say("  commit  %s", tryCatch(trimws(system2("git", c("rev-parse", "--short", "HEAD"),
-                                            stdout = TRUE)), error = function(e) "unknown"))
+say("  commit  %s", MR_COMMIT)
 say("  seed    %d, applied immediately before the block bootstrap (%d draws)",
     MR_SEED, MR_NBOOT)
 say("  sites   %d all / %d in NOAA's CO2 MBL selection", attr(hm, "n_sites"), attr(hm, "n_mbl"))

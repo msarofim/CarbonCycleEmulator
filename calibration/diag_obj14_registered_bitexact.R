@@ -22,7 +22,7 @@ OB_DRIVER <- "calibration/diag_obj14_registered_bitexact.R"
 OB_DATE   <- format(Sys.Date(), "%Y%m%d")
 OB_LOG    <- ccx_path("outputs", "diagnostics", sprintf("obj14_registered_bitexact_%s.log", OB_DATE))
 OB_LP_TOL <- 1e-9          # the logpost identity after the shift (sums of identical terms)
-COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT    <- ccx_git_stamp()
 
 sink(OB_LOG, split = TRUE)
 cat(sprintf("%s @%s, %s\n", OB_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))

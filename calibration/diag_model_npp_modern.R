@@ -8,6 +8,7 @@
 # USAGE: Rscript calibration/diag_model_npp_modern.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+NM_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 NM_ARMS <- c(hilda29l = "hilda29l",
   v0k = ccx_path("calibration", "output",
@@ -19,7 +20,7 @@ NM_OUT     <- ccx_path("outputs", "diagnostics", sprintf("model_npp_modern_%s", 
 obs <- readRDS(ccx_path("data", "obs_npp_hemispheric.rds"))
 sink(paste0(NM_OUT, ".log"), split = TRUE)
 cat(sprintf("=== PROVENANCE === driver calibration/diag_model_npp_modern.R, commit %s, run %s\n",
-            system("git rev-parse --short HEAD", intern = TRUE), format(Sys.time(), "%Y-%m-%d %H:%M")))
+            NM_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  NPP = gpp - ra channels of ccx_run(fluxes = TRUE), GtC/yr; historical forcing %d-%d; obs MOD17 %d-%d\n",
             NM_YEARS[1], NM_YEARS[2], NM_MOD_WIN[1], NM_MOD_WIN[2]))
 cat("  obs object fields: ", paste(names(obs), collapse = ", "), "\n", sep = "")

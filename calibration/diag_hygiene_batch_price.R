@@ -12,10 +12,11 @@
 # Usage: Rscript calibration/diag_hygiene_batch_price.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+HB_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 HB_OUT <- ccx_path("outputs", "diagnostics", sprintf("hygiene_batch_price_%s", format(Sys.Date(), "%Y%m%d")))
 sink_log <- file(paste0(HB_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE); on.exit({ sink(); close(sink_log) }, add = TRUE)
-cat(sprintf("== the hygiene batch, priced (commit %s) ==\n", tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")))
+cat(sprintf("== the hygiene batch, priced (commit %s) ==\n", HB_COMMIT))
 OLD <- list(LIK_D14C_EVERY_BOX = FALSE, LIK_LAND_SINK_INFLATE = 3.0, LIK_EXCESS_C14_UPTAKE_CORR = c(`1975` = 1, `1995` = 1), FORC_SST_PRE1850_MEAN = FALSE)
 NEW <- list(LIK_D14C_EVERY_BOX = TRUE,  LIK_LAND_SINK_INFLATE = 1.0, LIK_EXCESS_C14_UPTAKE_CORR = c(`1975` = 1.03, `1995` = 1.08), FORC_SST_PRE1850_MEAN = TRUE)
 ITEMS <- c(D14C = "LIK_D14C_EVERY_BOX", GCB = "LIK_LAND_SINK_INFLATE", EXC = "LIK_EXCESS_C14_UPTAKE_CORR", SST = "FORC_SST_PRE1850_MEAN")
@@ -46,5 +47,5 @@ for (m in names(CCX_MODE_FILES)) {
 set_all(NEW)
 cat("\n== RESTAMP DELTAS (likelihood, the number restamp_mode_objective.R is handed) ==\n")
 for (m in names(RES)) cat(sprintf("%-10s %+.4f\n", m, RES[[m]]$delta_lik))
-saveRDS(list(res = RES, old = OLD, new = NEW, commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA), built = format(Sys.time())), paste0(HB_OUT, ".rds"))
+saveRDS(list(res = RES, old = OLD, new = NEW, commit = HB_COMMIT, built = format(Sys.time())), paste0(HB_OUT, ".rds"))
 cat(sprintf("saved %s.{log,rds}\n", HB_OUT))

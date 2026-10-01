@@ -43,8 +43,7 @@ QP_CORES  <- 3L
 QP_SMOKE  <- identical(Sys.getenv("QP_SMOKE"), "1")
 if (QP_SMOKE) { QP_TAG <- paste0(QP_TAG, "_smoke"); QP_VALUES <- 2.0; QP_MAXIT <- 10L }
 QP_OUT    <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", QP_TAG, QP_DATE))
-COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
-DIRTY     <- tryCatch(length(system("git status --porcelain -- R src data calibration", intern = TRUE)) > 0, error = function(e) NA)
+COMMIT    <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(QP_MODE)); invisible(ccx_apply_pins(md$pins))
 tg <- ccx_npp_modern_target()
@@ -90,7 +89,7 @@ ref <- list(value = ctrl$par[[QP_PARAM]], over = ctrl$over, frozen = as.numeric(
 res <- c(list(ref), res)
 
 sink(paste0(QP_OUT, ".log"), split = TRUE)
-cat(sprintf("=== PROVENANCE === driver %s, commit %s%s, run %s\n", QP_DRIVER, COMMIT, if (isTRUE(DIRTY)) " (DIRTY)" else "", format(Sys.time(), "%Y-%m-%d %H:%M")))
+cat(sprintf("=== PROVENANCE === driver %s, commit %s, run %s\n", QP_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  structure %s at v0k basin 1 + control overrides {%s}; control = %s value %g (rebalanced 11)\n",
   QP_STRUCT, paste(sprintf("%s=%g", names(ctrl$over), unlist(ctrl$over)), collapse = ", "), basename(QP_CTRL_PROFILE), QP_CTRL_VALUE))
 cat(sprintf("  %s fixed at {%s}; rebal = NM maxit %d on the other 10 {%s}\n", QP_PARAM, paste(QP_VALUES, collapse = ", "), QP_MAXIT, paste(QP_FREE, collapse = ", ")))

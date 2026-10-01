@@ -51,6 +51,7 @@
 # Run from the repo root:  Rscript calibration/diag_o6_bomb_partition_hilda30c.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+O6_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 
 O6_ARM        <- "hilda30c"
@@ -67,7 +68,7 @@ O6_F_TROP <- (1 - o6_a) * (1 - O6_TROPOPAUSE_HPA[["extratropical"]] / O6_SURFACE
 O6_STRAT_TROP_MASS <- (1 - O6_F_TROP) / O6_F_TROP
 O6_OUT <- ccx_path("outputs", "diagnostics", sprintf("o6_bomb_partition_%s_%s", O6_ARM, format(Sys.Date(), "%Y%m%d")))
 sink_log <- file(paste0(O6_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE); on.exit({ sink(); close(sink_log) }, add = TRUE)
-cat(sprintf("== O6 bomb-14C partition at %s -- commit %s ==\n", O6_ARM, tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")))
+cat(sprintf("== O6 bomb-14C partition at %s -- commit %s ==\n", O6_ARM, O6_COMMIT))
 
 v0 <- dg_vector(O6_ARM)
 cat(sprintf("mode %s: fitted bomb_total %.2f kmol (N&L citable %.0f; prior bracket 99.3-104.9); migrated: %s\n",
@@ -128,5 +129,5 @@ cat(sprintf("  at N&L's input AND N&L's partition the ocean would be %.1f (z %+.
             m95$nl[["ocean"]], (m95$nl[["ocean"]] - oc_obs$centre[i95]) / oc_obs$half_width[i95],
             m95$model[["ocean"]], (m95$model[["ocean"]] - oc_obs$centre[i95]) / oc_obs$half_width[i95]))
 saveRDS(list(arm = O6_ARM, bomb_total_fit = v0$bomb_total, nl_total = O6_NL_TOTAL, res = res, strat_trop_mass = O6_STRAT_TROP_MASS,
-             commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")), paste0(O6_OUT, ".rds"))
+             commit = O6_COMMIT), paste0(O6_OUT, ".rds"))
 cat(sprintf("\nwritten %s.{log,rds}\n", O6_OUT))

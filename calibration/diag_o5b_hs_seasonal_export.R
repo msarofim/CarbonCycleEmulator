@@ -25,7 +25,7 @@ so <- readRDS(ccx_path("data", "obs_so_pco2_seas_amp.rds"))
 X2 <- ccx_path("outputs", "diagnostics", "o5_thc_2x2_20260916.rds")
 OB_OUT <- ccx_path("outputs", "diagnostics", sprintf("o5b_hs_seasonal_export_%s", format(Sys.Date(), "%Y%m%d")))
 sink_log <- file(paste0(OB_OUT, ".log"), open = "wt"); sink(sink_log, split = TRUE); on.exit({ sink(); close(sink_log) }, add = TRUE)
-commit <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+commit <- ccx_git_stamp()
 cat(sprintf("== O5b: the HS pump on the rectified bloom, at %s (prereg 2026-09-16 b) -- commit %s ==\nLS sine at the source: amp %.2f lag %+d; HS amp grid {%s} x lag {%s}; export %.2f; arm C h_ml band [%g, %g]\nSO pCO2 obs (%s): %.1f uatm @ month %.1f\n\n",
             OB_ARM, commit, OB_LS_AMP, OB_LS_LAG, paste(OB_HS_AMPS, collapse = ", "), paste(OB_HS_LAGS, collapse = ", "), OB_EXPORT, OB_HML_BAND[1], OB_HML_BAND[2], so$band_label, so$band_amp_uatm, so$band_peak_month))
 obs <- ccx_prepare_obs(); exc_obs <- obs$excess_c14; i95 <- which(exc_obs$year == 1995); tg <- ccx_ocean_gradient_target()

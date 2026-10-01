@@ -77,7 +77,7 @@ O3_MASS  <- sum(SHI_STOCK * F_of(SHI_D14C))
 exch_C   <- SHI_STOCK * (1 - COPARD_AOC)
 O2_BULK  <- 1000 * (sum(SHI_STOCK * F_of(SHI_D14C)) / sum(exch_C) - 1)
 SD_OUT   <- ccx_path("outputs", "diagnostics", sprintf("%s%s_%s", SD_TAG, Sys.getenv("SD_OUT_SUFFIX", ""), SD_DATE))
-COMMIT   <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT   <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(SD_MODE)); invisible(ccx_apply_pins(md$pins))
 bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode

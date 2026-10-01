@@ -29,6 +29,7 @@
 # USAGE: Rscript calibration/diag_unfitted_screen.R [param ...]   (~20-30 min for all)
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+SCR_COMMIT <- ccx_git_stamp()
 ccx_load_cpp()
 
 # ---- labels derive from constants (project rule) --------------------
@@ -71,7 +72,7 @@ mk_lp <- function(over) { bp <- base0; for (n in names(over)) bp[[n]] <- over[[n
 
 lp_ctrl <- mk_lp(list())(md$u_mode)
 cat(sprintf("=== PROVENANCE ===\n  driver calibration/diag_unfitted_screen.R, commit %s, %s\n",
-            tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?"), format(Sys.time(), "%Y-%m-%d %H:%M")))
+            SCR_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  mode %s (struct %s), stored logpost %.4f, re-scored %.4f -> %s\n", SCR_MODE, md$struct,
             md$logpost, lp_ctrl, if (abs(lp_ctrl - md$logpost) < 1e-6) "CONTROL REPRODUCES" else "*** CONTROL FAILS ***"))
 if (abs(lp_ctrl - md$logpost) > 1e-6) stop("the unperturbed objective does not reproduce the mode")

@@ -48,8 +48,7 @@ RS_DIR   <- ccx_path("calibration", "output", "pump_arms")
 RS_QUAR  <- ccx_path("calibration", "output", "quarantine",
                      "20260822_luc_scale_squared_streams")
 RS_DRY   <- "--dry-run" %in% commandArgs(TRUE)
-RS_COMMIT <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE),
-                      error = function(e) NA_character_)
+RS_COMMIT <- ccx_git_stamp(exclude = c(file.path(RS_DIR, sprintf("mode_fit_pump%s.rds", RS_ARMS)), RS_QUAR))   # what it re-writes or quarantines is its product
 RS_DATE  <- as.character(Sys.Date())
 
 if (!RS_DRY) dir.create(RS_QUAR, recursive = TRUE, showWarnings = FALSE)

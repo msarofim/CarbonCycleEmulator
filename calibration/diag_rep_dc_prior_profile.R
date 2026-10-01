@@ -56,6 +56,7 @@
 })
 setwd(.root)
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+RPP_COMMIT <- ccx_git_stamp()
 
 # ---- NAMED CONSTANTS: every label, filename and column below derives from ----
 RPP_TAG        <- "rep_dc_prior_profile"
@@ -318,7 +319,7 @@ saveRDS(list(cands = cands, dominance = dom, slope = slope, curv = curv, rungs =
                rng = "NONE -- this driver draws no random numbers",
                mu_grid = RPP_MU_GRID, sigma_grid = RPP_SIG_GRID, loo_k = RPP_LOO_K,
                units = "rep_dC ppm; partition %; loglik log-units",
-               commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA),
-               tree_dirty = tryCatch(length(system("git status --porcelain", intern = TRUE)) > 0, error = function(e) NA),
+               commit = RPP_COMMIT,
+               tree_dirty = ccx_stamp_dirty(RPP_COMMIT),
                built = format(Sys.time()))), RPP_RDS)
 cat(sprintf("\nsaved: %s\n", RPP_RDS))

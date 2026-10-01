@@ -55,6 +55,7 @@ withCallingHandlers(
     xt_warn <<- c(xt_warn, conditionMessage(w)); invokeRestart("muffleWarning")
   })
 
+XT_COMMIT <- ccx_git_stamp()
 xt_con <- file(XT_OUT, open = "wt")
 xt <- function(fmt, ...) {
   s <- if (length(list(...))) sprintf(fmt, ...) else fmt
@@ -75,9 +76,7 @@ xt("  mode      %s  (struct %s, %d fitted names, promoted %s)",
    as.character(xt_md$promoted_on))
 xt("  spinup    %s", APP_SPINUP_LABEL)
 xt("  params    %s", app_params$source)
-xt("  commit    %s", tryCatch(
-     trimws(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE)),
-     error = function(e) "unknown"))
+xt("  commit    %s", XT_COMMIT)
 xt("  read year %d; scenario %s; horizon %d", XT_READ_YEAR, XT_SCEN, XT_END_YEAR)
 xt("=====================================================================")
 

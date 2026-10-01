@@ -135,8 +135,7 @@ AS_SMOKE  <- identical(Sys.getenv("AS_SMOKE"), "1")
 if (AS_SMOKE) { AS_TAG <- paste0(AS_TAG, "_smoke"); AS_MAXIT <- 10L; AS_ARMS <- AS_ARMS[1] }
 AS_TAG    <- paste0(AS_TAG, Sys.getenv("AS_TAG_SUFFIX", ""))
 AS_OUT    <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", AS_TAG, AS_DATE))
-COMMIT    <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
-DIRTY     <- tryCatch(length(system("git status --porcelain -- R src data calibration", intern = TRUE)) > 0, error = function(e) NA)
+COMMIT    <- ccx_git_stamp()
 
 # ---- the objective's pieces ---------------------------------------------------
 md <- readRDS(ccx_mode_file(AS_MODE)); invisible(ccx_apply_pins(md$pins))
@@ -318,7 +317,7 @@ ref_rec <- as.numeric(attr(l_ctrl, "loglik")); ref_st <- attr(l_ctrl, "streams")
 # ---- report --------------------------------------------------------------------
 z <- function(x, m, s) (x - m) / s
 sink(paste0(AS_OUT, ".log"), split = TRUE)
-cat(sprintf("=== PROVENANCE === driver %s, commit %s%s, run %s; no RNG\n", AS_DRIVER, COMMIT, if (isTRUE(DIRTY)) " (DIRTY)" else "", format(Sys.time(), "%Y-%m-%d %H:%M")))
+cat(sprintf("=== PROVENANCE === driver %s, commit %s, run %s; no RNG\n", AS_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))
 cat(sprintf("  structure %s (inert pool f %.6f) at v0k basin 1; control = %s value %g, rescored under the label: d %.2e (tol %.0e)\n",
             AS_STRUCT, bp0$soil_inert_frac, basename(AS_CTRL_PROFILE), AS_CTRL_VALUE, id_d, AS_ID_TOL))
 cat(sprintf("  NM maxit %d on {%s} (+ NPP_GLOBAL_PI scale in [%.2f, %.2f] for J3/J4); costs are UPPER bounds\n",

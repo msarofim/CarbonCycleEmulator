@@ -39,6 +39,7 @@ source(file.path("calibration", "lib_design_gates.R"))
 # ---- labels derive from named constants (project rule) --------------
 FG_OUT        <- ccx_path("calibration", "output", "figures")
 FG_FILE       <- "fig_land_sink_vs_gcb.png"
+FG_COMMIT     <- ccx_git_stamp(exclude = file.path(FG_OUT, FG_FILE))   # the figure is its product, not an input
 FG_SMOOTH_YR  <- 5L                      # centred; NOT the app's 11-yr convention
 FG_G7_RECORD  <- 3.09                    # gate 7's recorded land sink -- the anchor
 FG_G7_TOL     <- 0.02
@@ -165,8 +166,6 @@ panel <- function(ycol_m, ycol_o, title, sub, band = FALSE) {
 pa <- panel("m_resid", "o_resid", FG_TITLE_A, FG_SUB_A, band = TRUE)
 pb <- panel("m_net",   "o_net",   FG_TITLE_B, FG_SUB_B, band = FALSE)
 
-commit <- tryCatch(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE),
-                   error = function(e) "unknown")
 cap <- paste(
   strwrap(sprintf(
     paste("CCX mode %s (logpost %.2f, %s spinup, luc_scale %.4f); FaIR-independent carbon module;",
@@ -175,7 +174,7 @@ cap <- paste(
           "stops %d yr short at each end; the thin annual line does not).",
           "The band asks where the land sink would sit if ALL of GCB's unclosed imbalance were land",
           "-- an EXTREME attribution: the same carbon could be an emissions, ocean or growth error."),
-    CCX_MODE_CANONICAL, md$logpost, ccx_mode_spinup(md), pm$luc_scale, commit,
+    CCX_MODE_CANONICAL, md$logpost, ccx_mode_spinup(md), pm$luc_scale, FG_COMMIT,
     format(Sys.Date()), FG_UNITS, FG_SMOOTH_YR, lost), width = 118),
   collapse = "\n")
 

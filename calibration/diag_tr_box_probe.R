@@ -22,6 +22,7 @@
 # Usage: Rscript calibration/diag_tr_box_probe.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+TB_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 `%||%` <- function(a, b) if (is.null(a)) b else a
 TB_DIR   <- "calibration/output/multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452"
@@ -156,6 +157,6 @@ cat(sprintf("tr - global at PI (CHECK, obs %+.1f): %s\n", obs_tr$pco2$both$minus
             paste(sprintf("%s %+.1f", names(best), sapply(best, function(x) x$pi[["tr"]])), collapse = "; ")))
 saveRDS(list(vector = file.path(TB_DIR, TB_START), w0 = W0, gamma = GM, target = tg, obs_slope = OBS_SLOPE, band = BAND, dic_target = DIC_T,
              arms = lapply(RES, function(x) x[setdiff(names(x), "p_changes")]), verdicts = list(PT1 = PT1, PT6 = PT6),
-             commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA), date = Sys.time()),
+             commit = TB_COMMIT, date = Sys.time()),
         paste0(TB_OUT, ".rds"))
 cat("\nsaved", paste0(TB_OUT, ".{log,rds}"), "\n")

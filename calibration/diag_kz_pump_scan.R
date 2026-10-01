@@ -18,6 +18,7 @@
 # Usage: Rscript calibration/diag_kz_pump_scan.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+KS_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 KS_ARM    <- CCX_MODE_CANONICAL
 KS_KZ_FAC <- c(0.35, 0.5, 0.7, 1, 1.4)            # kz multipliers (log-spaced about 1)
@@ -185,5 +186,5 @@ cat("\n-- PK-3 rows --\n"); print(round(t(DF), 2))
 saveRDS(list(arm = KS_ARM, kz_fac = KS_KZ_FAC, f_grid = KS_F_GRID, land = KS_LAND, ref_streams = ref_st, DA = DA, DB = DB, DF = DF,
              tabA = tabA, tabB = tabB, tabF = tabF, DC = DC, tabC = tabC, c_fac = KS_C_FAC, surf = KS_SURF, res = res,
              gate_pk2g = g2 < KS_GATE_TOL, gate_pk2g_C = gC < KS_GATE_TOL, md_logpost = md$logpost,
-             commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA)), paste0(KS_OUT, ".rds"))
+             commit = KS_COMMIT), paste0(KS_OUT, ".rds"))
 cat(sprintf("\nsaved %s.{log,rds}\n", KS_OUT))

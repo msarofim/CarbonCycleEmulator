@@ -31,6 +31,7 @@ ccx_load_cpp()
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) != 3L) stop("usage: restamp_mode_objective.R <mode_file> <expected_delta> \"<reason>\"")
 RS_FILE <- args[1]; RS_EXPECT <- as.numeric(args[2]); RS_REASON <- args[3]
+RS_COMMIT <- ccx_git_stamp(exclude = RS_FILE)   # the mode file it re-writes is its product, not an input
 RS_TOL  <- 1e-4                          # the priced delta is quoted to 4 dp
 md <- readRDS(RS_FILE)
 bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
@@ -66,7 +67,7 @@ cat("  rows that moved:", paste(sprintf("%s %+.4f", moved, unlist(st_new[moved])
 md$objective_history <- c(md$objective_history, list(list(
   date = format(Sys.Date()), reason = RS_REASON, logpost_before = md$logpost, logpost_after = lp_new,
   lik_before = lik_old, lik_after = lik_new, prior_drift_absorbed = d_lp - delta,
-  streams_before = md$streams, commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA_character_),
+  streams_before = md$streams, commit = RS_COMMIT,
   by = "calibration/restamp_mode_objective.R")))
 md$logpost <- lp_new; md$streams <- st_new
 saveRDS(md, RS_FILE)

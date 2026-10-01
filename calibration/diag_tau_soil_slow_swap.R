@@ -48,7 +48,7 @@ SW_END_YEAR <- 2300L
 SW_ID_TOL  <- 0.05
 SW_CORES   <- 4L
 SW_OUT     <- ccx_path("outputs", "diagnostics", sprintf("%s_%s", SW_TAG, SW_DATE))
-COMMIT     <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) "?")
+COMMIT     <- ccx_git_stamp()
 
 md <- readRDS(ccx_mode_file(SW_MODE)); invisible(ccx_apply_pins(md$pins))
 bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode

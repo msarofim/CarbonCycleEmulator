@@ -17,6 +17,7 @@
 # Usage: Rscript calibration/diag_kz_pump_pathways.R
 # =====================================================================
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+PK_COMMIT <- ccx_git_stamp()
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R"))
 PK_ARM    <- CCX_MODE_CANONICAL
 PK_YEARS  <- DG_YEARS                          # 1750-2025, the gate run's span
@@ -215,6 +216,6 @@ for (Y in PK_MARKS) cat(sprintf("  ocean excess 14C at end-%d: %.1f kmol\n", Y, 
 
 saveRDS(list(arm = PK_ARM, years = PK_YEARS, t0 = PK_T0, marks = PK_MARKS, gate = gate_rows, gate_ok = gate_ok,
              P1 = P1, P1b = P1b, layer_budget = LB, path_month = PM, t = tt, inv_int = inv_int, entryC = entryC, invC = invC,
-             src = v$src, commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA)),
+             src = v$src, commit = PK_COMMIT),
         paste0(PK_OUT, ".rds"))
 cat(sprintf("\nsaved %s.{log,rds}\n", PK_OUT))

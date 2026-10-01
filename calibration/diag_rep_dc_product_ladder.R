@@ -65,6 +65,7 @@
 })
 setwd(.root)
 for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
+RPL_COMMIT <- ccx_git_stamp()
 source("calibration/lib_design_gates.R")
 ccx_load_cpp()
 
@@ -336,16 +337,13 @@ rpl_run_job <- function(k) {
                 rep_frac = RPL_REP_FRAC, nm_maxit = RPL_NM_MAXIT,
                 rungs = RPL_RUNGS, mu_meas = RPL_MU_MEAS, mu_massw = RPL_MU_MASSW,
                 units = "rep_dC ppm; partition %; sinks GtC/yr; gradients ppm and permil",
-                commit = tryCatch(system("git rev-parse --short HEAD", intern = TRUE),
-                                  error = function(e) NA_character_),
+                commit = RPL_COMMIT,
                 # ⚠ A COMMIT ALONE IS NOT PROVENANCE IF THE TREE WAS DIRTY, and
                 # on the 09-23 run it WAS: the driver carried uncommitted edits
                 # (the RPL_OUTDIR override and the budget constant) through the
                 # whole wave, so its artifacts name a commit that does not fully
                 # describe the code that produced them. Recorded from here on.
-                tree_dirty = tryCatch(length(system("git status --porcelain -- calibration R",
-                                                    intern = TRUE)) > 0,
-                                      error = function(e) NA),
+                tree_dirty = ccx_stamp_dirty(RPL_COMMIT),
                 built = as.character(Sys.time())))
   saveRDS(out, file.path(RPL_OUTDIR, sprintf("job%02d_%s.rds", j$id, j$label)))
   cat(sprintf("  logpost %.4f  conv %d  %.1f min -> %s\n", o$value, o$conv, el,
