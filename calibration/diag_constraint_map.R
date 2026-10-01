@@ -114,7 +114,7 @@ CM_LOG        <- file.path("outputs", "diagnostics",
 # and the artifact's `provenance$commit`. On 2026-10-01 a diagnostic run on an uncommitted tree
 # stamped its parent commit. The stamp's forms (<hash>, +dirty, +dirty?, +frozen?, ?) and why it is
 # not the bare system("git ...") idiom: R/provenance.R, where this driver's 10-01 (f) block now
-# lives as ccx_git_stamp() (10-01 g).
+# lives as ccx_git_stamp() (10-01 h).
 # ⚠ CM_OUT IS EXCLUDED: it is this script's own OUTPUT, never an input, so a second build before
 # the first is committed would otherwise stamp ITSELF dirty ([[gate_reads_its_own_output]]).
 CM_DRIVER     <- "calibration/diag_constraint_map.R"

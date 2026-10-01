@@ -44,7 +44,7 @@ SC_OUT <- ccx_path("outputs", "diagnostics", sprintf("whole_model_scorecard_%s.r
 # and the .rds `commit`. On 2026-10-01 a diagnostic run on an uncommitted tree stamped its parent
 # commit. The stamp's forms (<hash>, +dirty, +dirty?, +frozen?, ?) and why it is not the bare
 # system("git ...") idiom: R/provenance.R, where this driver's 10-01 (f) block now lives as
-# ccx_git_stamp() (10-01 g).
+# ccx_git_stamp() (10-01 h).
 SC_DRIVER    <- "calibration/diag_whole_model_scorecard.R"
 SC_COMMIT    <- ccx_git_stamp()
 cat(sprintf("%s @%s, %s\n", SC_DRIVER, SC_COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M")))

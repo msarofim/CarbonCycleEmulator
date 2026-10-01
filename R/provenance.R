@@ -3,7 +3,7 @@
 # produced its output calls ccx_git_stamp(); nothing else in the repo runs git
 # for a stamp (tests/testthat/test-git-stamp-lint.R fails if anything does).
 #
-# THE DEFECT THIS REPLACES (2026-10-01 f/g). 69 drivers stamped their commit
+# THE DEFECT THIS REPLACES (2026-10-01 f/h). 69 drivers stamped their commit
 # with some form of
 #
 #     tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = ...)

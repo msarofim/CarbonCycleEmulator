@@ -2,7 +2,7 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
-## 2026-10-01 (h) — **Every git stamp now goes through ONE helper, `ccx_git_stamp()` in the new `R/provenance.R`. All 69 drivers that ran git for a stamp were converted, plus (f)'s two. A mutation-tested unit test covers the helper, and a lint fails on any new `system()`/`system2()` git call.** This is (f)'s "Open" item. No driver was re-run; nothing under `outputs/` or `data/` was touched. Before converting anything, 821ff3f ((f), on `claude/compassionate-leavitt-a7e631`) was merged into this branch as `4b0b802`: neither this branch nor `main` carried it.
+## 2026-10-01 (h) — **Every git stamp now goes through ONE helper, `ccx_git_stamp()` in the new `R/provenance.R`. All 69 drivers that ran git for a stamp were converted, plus (f)'s two. A mutation-tested unit test covers the helper, and a lint fails on any new `system()`/`system2()` git call.** This is (f)'s "Open" item. No driver was re-run; nothing under `outputs/` or `data/` was touched. Before converting anything, 821ff3f ((f), on `claude/compassionate-leavitt-a7e631`) was merged into this branch as `4b0b802`: neither this branch nor `main` carried it. `main` then moved during the work (its own (g), and `6bfc6cf`'s anchor re-read in `diag_pulse_vs_tcre.R`, which does not overlap the stamp hunk), so it was merged in as `4910031` and this entry was relabelled (h).
 
 **Marcus's rulings (asked before any conversion).** He took all four recommended options:
 1. A shared helper with a unit test, rather than an inline block per driver.
@@ -79,7 +79,12 @@ Three defaults were stated with the question and not objected to:
   | the bare idiom | 12 |
 - **Lint** `test-git-stamp-lint.R`: 3 tests. It matches code only, through `ccx_code_lines()`, and scans each file as one string, so a split call still matches. Before conversion it flagged exactly the 72 expected files (70 audited plus (f)'s 2; 92 calls). On a copied tree, all 5 must-fire mutants fail it, and the comment-only plant and the unmutated copy pass. The mutants: a bare call; a call split across lines; `paste0("git …")` in `app/R`; a second git helper in `R/`; the allowed `git mv` removed (stale).
 - **Static checks** on all 71 files: each parses; exactly one `ccx_git_stamp()`, at top level, defined before its first use; no `"git` string left; no dangling `DIRTY`; every stamp symbol defined.
-- **The source-scanning tests, BLAS pinned, before (`4b0b802`) vs after:** `test-mode-struct-lint`, `test-overlay-idiom-lint`, `test-mode-file`'s two path lints, `test-luc-scale`'s eluc lint and `test-constraint-map`. Both runs: 16 tests, 159 expectations, 0 failed / 0 skipped / 0 errored, `identical()` tables. With the two new files: 32 tests, 228 expectations, 0 failed.
+- **The source-scanning tests, BLAS pinned, before (`4b0b802`) vs after:** `test-mode-struct-lint`, `test-overlay-idiom-lint`, `test-mode-file`'s two path lints, `test-luc-scale`'s eluc lint and `test-constraint-map`. Both runs: 16 tests, 159 expectations, 0 failed / 0 skipped / 0 errored, `identical()` tables. With the two new files: 32 tests, 228 expectations, 0 failed. The same 32 again after merging `main` (`4910031`): 0 failed.
+- **Full suite at `45ccd21`**, BLAS pinned, on a frozen copy (`~/ccx_frozen/suite_20261001g`; log `outputs/diagnostics/suite_20261001_post45ccd21_all.log`): **5551 passed, 0 failed, 5 skipped, 0 errors.**
+  - Against `4fd433d`'s 5482: +69 is exactly the two new files' expectations.
+  - The 5 skips are the same tests with the same reasons, and the warning count is unchanged at 230.
+  - The log carries three git stderr lines from the deliberately broken fixtures (the out-of-repo exclude, the corrupt index, the repo with no commit). They are expected.
+- **The frozen path on a real bundle:** the suite copy stamped `45ccd21+frozen?`.
 
 **Open, not changed here.**
 - `calibration/archive/`'s 3 drivers.

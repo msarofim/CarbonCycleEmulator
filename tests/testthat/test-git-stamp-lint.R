@@ -1,7 +1,7 @@
 # =====================================================================
 # test-git-stamp-lint.R -- nothing outside R/provenance.R runs git for a stamp.
 #
-# THE DEFECT THIS GUARDS (2026-10-01 f/g; R/provenance.R's header has the
+# THE DEFECT THIS GUARDS (2026-10-01 f/h; R/provenance.R's header has the
 # measurements). 69 drivers carried a hand-rolled `system("git rev-parse ...")`
 # stamp that VANISHED, blanked, or CRASHED the save outside a checkout. They
 # were converted to ccx_git_stamp() in one pass, so there is no baseline to

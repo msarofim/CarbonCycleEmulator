@@ -3,7 +3,7 @@
 # scratch git repositories: every stamp form is built from a REAL tree state,
 # never asserted from the code that computes it.
 #
-# WHY (2026-10-01 g). The bare idiom this helper replaced returned character(0)
+# WHY (2026-10-01 h). The bare idiom this helper replaced returned character(0)
 # outside a checkout, and its consumers then dropped the stamped line, blanked
 # a figure caption, or crashed a data.frame() at the save step. The 10-01 (f)
 # stamp's own first cut read "+dirty" on a CLEAN tree (an unquoted `:(exclude)`
