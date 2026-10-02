@@ -15,6 +15,8 @@ Project log: what was done, what was tried and abandoned, and why.
 - DESIGN.md §3.3 (NPP₀ retired; `L_MEI` marked never-built and now ordered) and §4 (the two Law Dome rows).
 - Not yet built: the refit plan, with its open methodological choices, is in the plan note.
 - ⚠ Two `[VERIFY]` priors (`k_w`, `tau_ex`; audit C1) are being cited before the refit. If the cited values differ, that is an objective change and goes to Marcus.
+- Then: D1 **"Every version, as objective #15 (Recommended)"**; D2 **"Yes, run the control (Recommended)"**; **"Fresh session from the plan (Recommended)"**.
+  The handoff is `notes/handoff_2026-10-02h_obj15_build.md`.
 
 ## 2026-10-02 (y) — **DESIGN.md audited against the build, before Option 2 (Marcus: "scan for any other design.md definitions that weren't implemented first!"). Report: `notes/audit_2026-10-02_design_vs_build.md`. Nothing was changed.**
 

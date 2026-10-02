@@ -96,8 +96,8 @@
 
 | # | choice | my recommendation |
 |---|---|---|
-| D1 | Do W2/W3/W5 apply to **every label** (objective #15, the registry restamped at priced moves, old copies quarantined) or only to the new label? | **Every label.** These are data choices, not structure, and a like-for-like registry is what lets later comparisons stand. |
-| D2 | Run a **lag-0 control arm** (the new objective, lag gate closed) alongside the lag arm? | **Yes.** Otherwise the lag's gain is mixed with the objective change and with the first re-optimisation under the constant emissions interpolation. |
+| D1 | Do W2/W3/W5 apply to **every label** (objective #15, the registry restamped at priced moves, old copies quarantined) or only to the new label? | ✅ **RULED 10-02: "Every version, as objective #15".** Price each registered mode's move, restamp it, and quarantine the old copies (with a README). |
+| D2 | Run a **lag-0 control arm** (the new objective, lag gate closed) alongside the lag arm? | ✅ **RULED 10-02: "Yes, run the control".** |
 | D3 | **How the lag is identified.** The audit's conditional probe at hilda33d (not yet reproduced by me): with today's rows the fit prefers **2–3 months**, via the GCB land sink and the seasonal-coefficient rows; the growth rate's own timing says **5**. The growth-rate row was declined 09-26, to be re-proposed only "with a NEW reason". | **Measure first.** After W1–W3, profile the NEW objective over L, with the ENSO amplitude free, in a committed script; then decide whether timing needs its own row. |
 | D4 | The ice δ¹³C σ (W2) | Bring numbers before launch. |
 | D5 | **Compute.** Two arms × 24 starts: Mac, 8 at a time, ~9 h per arm ≈ 18 h; or Torch, 48 at once in a ~6 h partition. | **Torch** for two arms. Every sbatch needs Marcus's go. |
