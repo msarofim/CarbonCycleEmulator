@@ -48,7 +48,7 @@ Project log: what was done, what was tried and abandoned, and why.
 
 **Our World in Data.**
 - OWID says global deforestation (forest AREA, FAO / Williams 2006) peaked in the 1980s. The page is self-labelled outdated (2021).
-- The app plots GCB gross deforestation CARBON emissions, which are roughly level (2.3–2.5 GtC/yr by decade) and lowest in the 1980s.
+- The app plots GCB gross deforestation CARBON emissions, which are roughly level (2.3–2.5 GtC/yr by decade). Their lowest decades are the 1980s and the partial 2020s, within 0.1 % of each other: I first wrote "lowest in the 1980s", and the server comment said "±5 %". Both corrected on re-measuring.
 - Both say regrowth offsets about half: OWID by area, the app 49 % by carbon.
 - The takeaway now says "(in carbon terms; the area of forest cleared each year peaked in the 1980s)", sourced in a comment.
 
@@ -57,7 +57,7 @@ Project log: what was done, what was tried and abandoned, and why.
 - *Where does the carbon go?*
   - His land paragraph, with both crossing years computed (1989 GCB / 1969 model).
   - His imbalance intro, takeaway (both counts computed, 5 of 7 each) and band note.
-  - His regrowth intro and takeaway (38 % / 49 % / 1.13 vs 2.33 computed; "roughly level" said only within ±15 %, today ±5 %).
+  - His regrowth intro and takeaway (38 % / 49 % / 1.13 vs 2.33 computed; "roughly level" said only within ±15 %; today the decade means sit at most 6.4 % from their average, the 2010s).
   - "Why splitting it" box deleted.
   - Fixed as false: "the one place the model sits outside the band is the last few years". The 1980s are outside too.
 - *What if?*

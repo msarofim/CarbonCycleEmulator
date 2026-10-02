@@ -319,9 +319,10 @@ function(input, output, session) {
     s_reg <- unname(stats::coef(stats::lm(-all$regrowth_GtC ~ all$year))[2]) * 10
     # Marcus 2026-10-02 (carbotopecomment + "Do the roughly level recommended approach"): his
     # sentences, every number COMPUTED. "[YEAR]" became "roughly level" because the observed
-    # record has no single peak (highest in 1959, a second maximum ~2011, lowest decade the
-    # 1980s). "Roughly level" is only said while the decade means stay within
-    # REGROWTH_LEVEL_TOL of their average (+-5 % at hilda33d); the regrowth clause follows the
+    # record has no single peak (highest in 1959, a second maximum ~2011; the lowest decades are
+    # the 1980s and the partial 2020s, within 0.1 % of each other). "Roughly level" is only said
+    # while the decade means stay within REGROWTH_LEVEL_TOL of their average (at most 6.4 % off
+    # at hilda33d, the 2010s; measured 10-02 w); the regrowth clause follows the
     # sign of its trend. ⚠ Not Our World in Data's AREA series, which peaks in the 1980s:
     # these are the bookkeeping models' gross CARBON emissions (CHANGELOG 10-02 w).
     dec <- stats::aggregate(gross_GtC ~ I((year %/% 10) * 10), data = all, FUN = mean)
