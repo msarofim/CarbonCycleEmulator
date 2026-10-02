@@ -630,6 +630,9 @@ RV_CARDS <- list(
   # fertilisation ridge (calibration/diag_ribbons_linearity.R, diag_laplace_axes.R). So
   # the card's approved text is TRUE again and is kept; the one added sentence (drafted
   # for Marcus's wording) records that the worry it states was MEASURED.
+  # ⚠ 10-02 (CHANGELOG s-u): the MCMC check has since RUN, so three sentences below are out of date
+  # ("too wide", "individual standard errors", "a real sampler is planned"). The facts, for
+  # Marcus to word, are in notes/card6_facts_2026-10-02.md.
   list(id = 6, key = "bands", class = "gap",
        title = "There are no uncertainty bands, anywhere",
        plain = paste("Every line in this app is a single best fit. There is no",

@@ -2,6 +2,23 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (v) — **Marcus: "commit the stage-1 chains and pooled draws", then "Fix the hold reason and draft card 6 facts". The chains are committed (`acdd694`, with a README). The hold's reason now records the 10-02 ruling. Card 6's facts are drafted for his wording; the card's text is untouched.**
+- **The hold.** `APP_RIBBONS_HOLD` (`app/global.R`) is internal: while it is set the loader draws nothing and says nothing.
+  Its string and comment block said "held until the MCMC check". They now record the 10-01 and 10-02 rulings verbatim and
+  the MCMC result (band ~half the Laplace width; not converged on the ridge; no stage 2).
+  - All 14 test files that read `global.R` pass: 496 expectations, 0 failed.
+- **Card 6.** `notes/card6_facts_2026-10-02.md` holds FACTS, NOT COPY, each tied to the sentence it touches.
+  - F1: "too wide" is now measured, at about 2× (CO₂ 0.41×, GMST 0.58×).
+  - F2: the curvature's standard errors are off by 0.7–3× for some parameters (factor-level only: unconverged chains, fitting
+    coordinates).
+  - F3: a sampler HAS run and did not converge on the fertilisation ridge.
+  - Optional F4 and F5: the app's lines sit mid-band in all 5,614 cells, and even the sampled band is narrow because it is
+    parameter-only.
+  - A pointer sits in the card's comment block (`app/R/review.R`). review-cards, app-review-copy and futures-ribbons
+    re-ran: 102 expectations, 0 failed.
+- ⚠ My 10-02 answer to Marcus rounded two numbers. The sampled band widths at 2100–2150 are **3.6–22.1 ppm** (I said "4–22")
+  and **0.024–0.088 °C** (I said "0.03–0.08"). The facts note carries the exact figures, from the band-test CSV.
+
 ## 2026-10-02 (u) — **Ruling (Marcus): "Stop here; keep holding (Recommended)". The MCMC arc is CLOSED: no stage 2, and the app stays band-free (`APP_RIBBONS_HOLD`). Its finding: the Laplace band was ~2× too wide, and the carbon-cycle band is thin. Handoff: `notes/handoff_2026-10-02g_mcmc_closed.md`.**
 - **The reasoning put to him:** the scientific answer is in hand ((t)). Stage 2's ~26 CPU-h would only tighten the edges of a band the app does not draw, and the GMST band (±0.016 °C) would be invisible at the app's scale anyway.
 - **Kept for a change of mind.**

@@ -458,15 +458,20 @@ stopifnot(setequal(unique(APP_SCEN_EMIS$scenario), APP_SCENARIOS))
 # that path would relabel the whole app "calibrated posterior" (app_params above),
 # and a Gaussian at the mode is not one.
 APP_RIBBONS_FILE <- file.path(CCX_ROOT, "data", "futures_ribbons.rds")
-# ⛔ HELD (Marcus 2026-10-01: "Hold the bands (Recommended)"). The Laplace band was
-# built and FAILED its own check -- scored on the objective, the 1000 draws sat a
-# median 25 log-units below the Gaussian (importance ESS 8 / 1000), the posterior
-# strongly non-Gaussian along the fertilisation ridge -- so no band is drawn until
-# the MCMC check (calibration/run_mcmc_check.R, Torch) replaces it. The evidence is
-# outputs/diagnostics/futures_ribbons_laplace_held_20261001.rds. While this is set
-# the loader draws NOTHING and says nothing, even if a ribbons file appears in
-# data/; test-futures-ribbons.R asserts it. Lift it (NULL) only with a ruling.
-APP_RIBBONS_HOLD <- "the Laplace band failed its own check (2026-10-01); held until the MCMC check"
+# ⛔ HELD (Marcus 2026-10-01: "Hold the bands (Recommended)"), and KEPT after the MCMC
+# check (Marcus 2026-10-02: "Stop here; keep holding (Recommended)"; CHANGELOG 10-02 s-u).
+# - The Laplace band was built and FAILED its own check: scored on the objective, the 1000
+#   draws sat a median 25 log-units below the Gaussian (importance ESS 8 / 1000), the
+#   posterior strongly non-Gaussian along the fertilisation ridge.
+# - The MCMC check (calibration/run_mcmc_check.R, Torch stage 1) measured the band at about
+#   HALF the Laplace width (CO2 0.41x, GMST 0.58x), but did NOT converge on that ridge
+#   (beta_max R-hat 1.21); no stage 2 was run.
+# The evidence is outputs/diagnostics/futures_ribbons_laplace_held_20261001.rds and
+# futures_ribbons_mcmc_stage1_20261002.rds. While this is set the loader draws NOTHING and
+# says nothing, even if a ribbons file appears in data/; test-futures-ribbons.R asserts it.
+# Lift it (NULL) only with a ruling.
+APP_RIBBONS_HOLD <- paste("held by ruling (2026-10-02, after the MCMC check): the Laplace band failed its check,",
+                          "and the sampler did not converge on the fertilisation ridge")
 APP_RIBBONS <- local({
   if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE, why = APP_RIBBONS_HOLD))
   if (!file.exists(APP_RIBBONS_FILE))
