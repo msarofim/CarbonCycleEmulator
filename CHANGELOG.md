@@ -2,6 +2,41 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (x) — **Why switching ENSO off does not hurt the What-if fit: the model's land ENSO response arrives ~5 months EARLY. DESIGN.md's fitted lag `L_MEI` was never built. Diagnosis only; nothing in the model or app changed.**
+
+Marcus: *"ENSO doesn't seem to have much effect over the 1980-2024 period (turning it off actually improves the fit by 1%!). Why?"*
+
+`calibration/diag_enso_growth_fit.R` → `outputs/diagnostics/enso_growth_fit_20261002.{log,rds}`.
+- Estimator, window and mode are the readout's own. Gates: full model and switch reproduce `APP_HIST` and `app_growth_residuals()` to 0.
+- Seed 20261002 is recorded in the rds; it is used only by the block bootstrap.
+- The rds's `commit` field is the parent `5bce385`; the script is new in this commit.
+
+**Measurements.**
+- **The readout:** RMS 0.3980 (full) vs 0.3944 (ENSO off) ppm/yr, so +0.92 % "closer".
+- **The 1 % is noise.** 3-yr block bootstrap, 90 % interval [−4.3, +10.7] %. ENSO's term hurts in 24 of 45 years.
+- **The arithmetic.** The ENSO component adds wobble (sd 0.138 ppm/yr) but correlates only 0.14 with what the no-ENSO model misses. Breaking even needs 0.17. The least-squares amplitude is 0.42.
+- **TIMING** (monthly, centred 12-month growth, NOAA MBL global):
+  - observed growth peaks **5 months after** Niño 3.4 (r 0.50);
+  - the model's ENSO component peaks at **−2 months** (r 0.89);
+  - what the no-ENSO model misses peaks at +6 (r 0.52).
+- **Reading the whole index late** improves the fit steadily up to 7–8 months: RMS 0.351, +11 % vs off. At that timing the best amplitude is ~1.6× the fitted one.
+- **Not the amplitude.** At the current timing ×0.5 is best (+1.0 % vs off), and ×1.5 / ×2 / ×3 are −5 / −12 / −34 %. That is the mechanism behind the earlier finding that an 11× range of the ENSO coefficient leaves the correlation flat ("louder, not righter").
+- **Land vs ocean.**
+  - The land term alone breaks even: corr 0.275 against 0.271 needed.
+  - The ocean's ENSO channels lower growth during El Niño. That is physically right-signed (card 4's slope: +0.098 model vs +0.115 GCB), but they sit opposite the net signal (corr −0.43).
+  - The pre-10-02 land-only switch would have read **11 % further** from the data.
+- **At the OBSERVED 5-month lag**, taken from the correlation and not from the RMS search:
+  - whole index late: +9.1 % vs off, 90 % [−0.6, +13.7];
+  - **land term only late, ocean on time: +10.9 %, 90 % [+3.7, +14.8]**, by superposition, exact at lag 0 (gated).
+- **Example years** (growth above the no-ENSO model; the index peaks read from `data/forcing_enso.rds`).
+  - 1997–98 El Niño (index peak Jan 1998): the record's extra growth is +0.63 in 1998 and still +0.43 in 1999. The model's ENSO term adds +0.17 in 1998, then **−0.29 in 1999** as the index turns to La Niña.
+  - 2015–16 El Niño (index peak Nov 2015): the model spreads it evenly (+0.19 in 2015, +0.19 in 2016). The record puts it all in 2016 (+0.89; 2015 is −0.29).
+
+**Why there is no lag.**
+- DESIGN.md §2 specifies `F_ENSO = γ_MEI · MEI(t − L_MEI)` with `L_MEI` fitted, U(0, 12) months (§5.1).
+- The model core (`efa4495`, 08-10) and the first forcing builder (`b607e95`) read Niño 3.4 at t, and no entry here retires `L_MEI`.
+- ⚠ **A lag is a model-structure change with a refit and a restamp.** The ENSO coefficients were fitted without one, and the objective has no global-growth row (asked for 09-26, not built). Left for Marcus to decide.
+
 ## 2026-10-02 (w) — **Marcus's CarboTope comments (`carbotopecomment.9.26.26.docx`, his text, edited 10-02) are implemented, together with the similar changes he asked me to find. His eight questions are answered with measurements. He ruled on eight follow-ups, and a ninth item (a false sentence about the band) was fixed as a correction. 14 test re-pins were approved. The final pass of the 26 affected test files: 1163 expectations, 0 failed, 0 errors.**
 
 **His questions, answered by measurement** (`measure_comments*.R` in the session scratchpad; hilda33d):
