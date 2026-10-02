@@ -2,6 +2,15 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (u) — **Ruling (Marcus): "Stop here; keep holding (Recommended)". The MCMC arc is CLOSED: no stage 2, and the app stays band-free (`APP_RIBBONS_HOLD`). Its finding: the Laplace band was ~2× too wide, and the carbon-cycle band is thin. Handoff: `notes/handoff_2026-10-02g_mcmc_closed.md`.**
+- **The reasoning put to him:** the scientific answer is in hand ((t)). Stage 2's ~26 CPU-h would only tighten the edges of a band the app does not draw, and the GMST band (±0.016 °C) would be invisible at the app's scale anyway.
+- **Kept for a change of mind.**
+  - Stage 1's chains stay on Torch, resumable EXACTLY by the stage-2 command in handoff (f) §2.5.
+  - ⚠ Torch's /scratch IS flushed (`myquota`, 10-01: "Flushed? YES"), but the period was not checked. My recollection of
+    "60 days" is unverified, so don't count on the chains surviving months.
+  - ⚠ Don't re-ship a bundle there first (handoff f §3).
+- Card 6's drafted sentence ("That has since been measured: …") predates this. Citing the MCMC result in it is Marcus's copy.
+
 ## 2026-10-02 (t) — **The stage-1 band test (Marcus: "Band test on the Mac (Recommended)"). The MCMC band is about HALF the held Laplace band's width (CO₂ 0.41×, GMST 0.58×, medians). The four chains agree on it to ≤ 3.4 ppm / 0.014 °C, which is 15–30 % of its own narrow width. The band is NOT still widening. Its cells have R-hat 1.03–1.075, short of the 1.01 reference. Nothing is shipped (`APP_RIBBONS_HOLD` stands).**
 
 - **The run.** `build_futures_ribbons.R --draws=` used stage 1's 4,100 pooled draws (4 × 1,025, window (30000, 50500]), from a frozen
