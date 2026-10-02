@@ -488,7 +488,7 @@ APP_RIBBONS <- local({
 })
 # The caption sentence, from the artifact's own record (label, probabilities, draws).
 APP_RIBBON_NOTE <- if (isTRUE(APP_RIBBONS$ok)) with(APP_RIBBONS$provenance, sprintf(
-  "Shaded: the %g–%g %% range of %d model runs — a %s.",
+  "Shaded: the %g–%g%% range of %d model runs — a %s.",
   100 * probs[1], 100 * probs[length(probs)], n_ok, label)) else
   if (isTRUE(APP_RIBBONS$held)) NULL else       # held: silent -- card 6 (the bands card) says why there is no band
   sprintf("No uncertainty band is drawn: %s.", APP_RIBBONS$why)
@@ -541,6 +541,12 @@ APP_CMAP_TAB      <- "What pins down what?"
 APP_CMAP_HEADING  <- "Which parts of the model have the most influence on measured values?"
 APP_CMAP_TENSION_HEADING <- "Where the measurements disagree"
 APP_REGROWTH_HEADING  <- "Forest regrowth, on its own"
+# The regrowth takeaway's "roughly level" (Marcus 2026-10-02): said only while every decade's mean
+# gross deforestation emission is within 15 % of their average -- a WORDING rule, not a physical
+# gate, so it is a stated convention; at hilda33d the decades sit within +-5 %. A partial decade
+# of fewer than 5 years (GCB's 1959 alone) is not a decade.
+REGROWTH_LEVEL_TOL    <- 0.15
+REGROWTH_DECADE_MIN_N <- 5L
 APP_IMBALANCE_HEADING <- "Is the model's land sink too high?"
 
 # ---- UI helpers shared by ui.R AND server.R -------------------------
@@ -604,9 +610,9 @@ APP_CMAP <- local({
 # The sentence that keeps the map honest, printed on the chart AND asserted by
 # test-constraint-map-panel.R.
 APP_CMAP_NOTE <- paste(
-  "Leverage at ONE parameter set — the fitted mode — for a step of one",
+  "Leverage at one parameter set — the fitted mode — for a step of one",
   "conditional Hessian standard deviation, which costs every parameter the same",
-  "0.5 log-units. It says which measurements would NOTICE a change, not what a",
+  "0.5 log-units. It says which measurements would notice a change, not what a",
   "different model structure would do.")
 # Which family each parameter belongs to, as a lookup for the parameter-level view.
 APP_CMAP_OF_PAR <- if (is.null(APP_CMAP)) NULL else {
@@ -656,14 +662,16 @@ APP_LUC_SPLIT <- local({
 # The window the split is OBSERVED over, read from the product rather than typed
 # -- the panel's own caption depends on it and a GCB update must move both.
 APP_LUC_SPLIT_OBS <- if (is.null(APP_LUC_SPLIT)) NULL else APP_LUC_SPLIT$obs_window
+# 2026-10-02: Marcus deleted the chart's pre-1959 part (carbotopecomment), so the chart now
+# shows only the OBSERVED years and the back-extension / decay clause describes nothing on it.
+# "Gross clearing" follows his "deforestation".
 APP_LUC_SPLIT_NOTE <- if (is.null(APP_LUC_SPLIT)) NULL else sprintf(paste(
-  "Split of the land-use input into gross clearing and forest regrowth, on the",
+  "Split of the land-use input into deforestation and forest regrowth, on the",
   "Global Carbon Budget's own \u201cforest regrowth (total)\u201d convention and",
-  "ASSERTED from its three bookkeeping models \u2014 this model does not measure",
-  "the split. Observed %d\u2013%d; earlier years are back-extended from OSCAR's",
-  "share and later years are a prescribed decay (e-folding %.0f yr). Both halves",
-  "carry the fitted land-use scale %.3f and sum to the series the model burns."),
-  APP_LUC_SPLIT_OBS[1], APP_LUC_SPLIT_OBS[2], APP_LUC_SPLIT$tau_yr, APP_LUC_SCALE)
+  "asserted from its three bookkeeping models \u2014 this model does not measure",
+  "the split. Observed %d\u2013%d. Both halves carry the fitted land-use scale %.3f",
+  "and sum to the series the model burns."),
+  APP_LUC_SPLIT_OBS[1], APP_LUC_SPLIT_OBS[2], APP_LUC_SCALE)
 
 # ---------------------------------------------------------------------
 # ONE PAST FOR EVERY TAB (2026-09-22, Marcus's ruling: splice + caption).
@@ -783,13 +791,18 @@ app_cmap_holder_phrase <- function(row, tie_pp = APP_CMAP_TIE_PP) {
 # PULSE LAB and withheld from "Build your own" -- a greyed-out control the reader
 # can reason about beats a line that silently means something else.
 APP_FAIR_LAB  <- "standard FaIR (dashed)"
+# Marcus 2026-10-02 (carbotopecomment): his two sentences replace "the gap between a solid line
+# and its dashed partner is this emulator's own error", which was wrong for CO2 -- the CO2
+# lines come from this model's OWN carbon cycle (app_run_coupled -> ccx_run_coupled; checked
+# 2026-10-02: vvH 2150 826.6 ppm here vs FaIR's 832.7), and only the CO2 -> temperature step is
+# fitted to FaIR. The like-for-like warning about the historical splice is kept.
 APP_FAIR_NOTE <- paste(
-  "Dashed lines are standard FaIR 2.2.4 (calibration 1.6.0, 841-configuration",
-  "ensemble mean) for the same scenario \u2014 the model this emulator's climate",
-  "module was fitted to, so the gap between a solid line and its dashed partner",
-  "is this emulator's own error. \u26a0 Before 2024 they are not like-for-like:",
-  "the emulator's runs are spliced onto the observed carbon budget and FaIR's",
-  "are not, so a historical gap there is a difference of inputs, not of skill.")
+  "For CO\u2082, the solid line is this model's output, whereas the dashed lines are",
+  "standard FaIR 2.2.4 (calibration 1.6.0, 841-configuration ensemble mean). This is",
+  "the same for temperature, but this model's CO\u2082/temperature relationship is",
+  "fitted to FaIR, so they are not independent. \u26a0 Before 2024 they are not",
+  "like-for-like: this model's runs are spliced onto the observed carbon budget and",
+  "FaIR's are not, so a historical gap there is a difference of inputs, not of skill.")
 
 #' FaIR's own trajectories for the scenarios being shown, as plot_future() wants
 #'
@@ -852,6 +865,13 @@ app_run_mechanisms <- function(off = character(), years = APP_HIST_YEARS,
   r$forcing <- F
   r
 }
+
+# The tail clause's "flat" bands, DERIVED FROM THE FORMATS, not picked: the sentence prints the
+# temperature change as "%.1f", so below 0.05 degC it would print "0.0" and say nothing -- the same
+# rule as TAKEAWAY_PPM_RESOLUTION. Forcing is not printed; 0.05 W/m2 is the same half-unit of the
+# first decimal, i.e. "a change the run would report as one at 0.1 W/m2 resolution".
+TAIL_DT_FLAT  <- 0.05   # degC
+TAIL_ERF_FLAT <- 0.05   # W/m2
 
 #' Build an annual emissions table for a stylised pathway
 #'
@@ -933,7 +953,7 @@ APP_PULSE_PER1000_ABOUT <- 1.4
 app_or_list <- function(x) if (length(x) < 2L) as.character(x) else
   paste(paste(utils::head(x, -1L), collapse = ", "), "or", utils::tail(x, 1L))
 
-app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0) {
+app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0, climate = NULL) {
   y_end <- max(emissions$year)
   e_end <- emissions$fossil_GtC[emissions$year == y_end]
   # ⭐ "FOSSIL" ADDED 2026-09-26 on Marcus's instruction, to his own sentence.
@@ -942,27 +962,65 @@ app_stylised_tail_clause <- function(kind, rate_pct, emissions, e0) {
   # CO2 emissions never reach zero and "emissions stop" overstated what the run
   # did. The slider the user moved is already labelled "Fossil emissions after
   # today", so the sentence now matches the control that produced it.
-  if (identical(kind, "to_zero"))
-    return(paste("Note how little the temperature falls even when fossil emissions",
-                 "stop \u2014 the CO\u2082 already up there does not come back down quickly."))
+  #
+  # ⭐ 2026-10-02 (Marcus, carbotopecomment + "Say it keeps rising (Recommended)"). His CO2
+  # sentence, "fossil" kept per the 09-26 ruling above; it is true across the whole slider
+  # (MEASURED 10-02: by 2150 CO2 is back only 13-31 % of the way to 1750's 277 ppm, stop
+  # years 2100 .. 2030). His temperature sentence ("Temperatures drop even more slowly because
+  # of the inertia of heat uptake in the ocean") was CONTRADICTED by every run: temperature
+  # does not drop at all, it keeps RISING to 2150 (2030: 1.46 -> 2.15 degC; 2060: 1.98 -> 2.39;
+  # 2100: 2.52 -> 2.71), because total forcing stays ~flat -- CO2's falls 0.3-0.65 W/m2 while
+  # the background scenario's non-CO2 rises 0.2-1.1 -- and the ocean is still catching up. So
+  # the temperature clause is READ OFF THE RUN (`climate`), branch by measured direction, and
+  # the "other emissions" clause is only said when the run's non-CO2 forcing actually rises.
+  # Without `climate` (a caller that has no run) only the CO2 sentence is said.
+  if (identical(kind, "to_zero")) {
+    co2_txt <- paste("Note that even after fossil emissions stop, CO₂ only returns a small",
+                     "part of the way to preindustrial concentrations due to the persistence",
+                     "of CO₂.")
+    y_stop <- suppressWarnings(min(emissions$year[emissions$fossil_GtC <= 0]))
+    if (is.null(climate) || !is.finite(y_stop) || !any(climate$year == y_stop)) return(co2_txt)
+    at <- function(v, y) v[climate$year == y][1]
+    y_last <- max(climate$year)
+    dT  <- at(climate$gmst, y_last) - at(climate$gmst, y_stop)
+    dnc <- at(climate$erf_nonco2, y_last) - at(climate$erf_nonco2, y_stop)
+    t_txt <- if (dT > TAIL_DT_FLAT)
+      sprintf(paste("Temperatures, though, keep rising — by %.1f °C between %d and %d",
+                    "here — because the ocean is still catching up with heat already",
+                    "committed%s"), dT, y_stop, y_last,
+              if (dnc > TAIL_ERF_FLAT) paste(", and this scenario's other emissions add",
+                                             "warming as CO₂'s pull eases.") else ".")
+    else if (dT >= -TAIL_DT_FLAT)
+      sprintf(paste("Temperatures, though, hardly change between %d and %d, because the",
+                    "ocean is still catching up with heat already committed."), y_stop, y_last)
+    else
+      sprintf(paste("Temperatures drop even more slowly — by %.1f °C between %d and %d",
+                    "— because of the inertia of heat uptake in the ocean."),
+              -dT, y_stop, y_last)
+    return(paste(co2_txt, t_txt))
+  }
   # rate == 0 IS the constant pathway: e0 * 1^n. Sharing the branch keeps the app
   # from describing one pathway two different ways.
   if (identical(kind, "constant") || isTRUE(rate_pct == 0))
+    # Marcus 2026-10-02 (carbotopecomment): "none of it comes back down quickly" cut, his
+    # last sentence added (British spelling, as the app)
     return(sprintf(paste("Fossil emissions never stop on this pathway \u2014 they hold at",
                          "today's %.1f GtC a year all the way to %d \u2014 so carbon keeps",
-                         "being added to what is already up there, and none of it",
-                         "comes back down quickly."), e0, y_end))
+                         "being added to what is already up there. Carbon emissions have",
+                         # "near zero ... stay stable" (Marcus 2026-10-02, recommended): the app's
+                         # own -2 %/yr run has CO2 FALLING by 2150 with fossil emissions still ~0.8
+                         # GtC/yr, so "to zero to stabilise" was stronger than the model shows.
+                         "to drop to near zero for concentrations to stay stable."), e0, y_end))
   if (rate_pct > 0)
-    return(sprintf(paste("Fossil emissions never stop on this pathway \u2014 at %+.1f %% a",
+    # Marcus 2026-10-02: "The warming above is what that compounding buys ..." deleted
+    return(sprintf(paste("Fossil emissions never stop on this pathway \u2014 at %+.1f%% a",
                          "year they grow, reaching %.1f GtC a year by %d, %.1f times",
-                         "today's rate. The warming above is what that compounding",
-                         "buys, and none of the carbon behind it comes back down",
-                         "quickly."), rate_pct, e_end, y_end, e_end / e0))
+                         "today's rate."), rate_pct, e_end, y_end, e_end / e0))
+  # Marcus 2026-10-02: "on top of what does not come back down quickly" deleted
   sprintf(paste("Fossil emissions fall on this pathway but never reach zero \u2014",
-                "a steady %+.1f %% a year only ever approaches it, and by %d",
+                "a steady %+.1f%% a year only ever approaches it, and by %d",
                 "they are still %.2f GtC a year. So carbon is still being",
-                "added at the end of the run, on top of what does not come",
-                "back down quickly."), rate_pct, y_end, e_end)
+                "added at the end of the run."), rate_pct, y_end, e_end)
 }
 
 # ---------------------------------------------------------------------

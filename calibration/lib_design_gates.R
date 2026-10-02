@@ -1907,9 +1907,15 @@ dg_gateS_verdict <- function(g, lo = DG_S_LO, w = DG_S_LAG_MAX) {
 # stated here and in the ledger, for Marcus to ratify or move.
 # =====================================================================
 DG_L_HORIZON <- 1000
-DG_L_JOOS <- list(land  = c(mean = 16, sd = 14),
-                  ocean = c(mean = 59, sd = 12),
-                  air   = c(mean = 25, sd = 9),
+# ⛔ CORRECTED 2026-10-02 (Marcus: "Fix it (Recommended)"). Joos et al.'s abstract gives these as
+# 16 +- 14 / 59 +- 12 / 25 +- 9 %, and the paper's convention is that "the errors of the multi-model
+# mean represent +-two standard deviations" (Table 4 note; the text writes "mean +- 2 sdv", the
+# figure "multi-model mean +/- 2 sigma"). This list stored the +-2 s.d. half-widths AS `sd`, so every
+# z from dg_compareL() was HALF its true size and card 5b's "+-1 sd" bars were +-2 s.d. `sd` is now
+# the true one standard deviation; `pm2sd` keeps the published numbers. CHANGELOG 10-02 (w).
+DG_L_JOOS <- list(land  = c(mean = 16, sd = 7,   pm2sd = 14),
+                  ocean = c(mean = 59, sd = 6,   pm2sd = 12),
+                  air   = c(mean = 25, sd = 4.5, pm2sd = 9),
                   src = "Joos et al. 2013 ACP 13:2793, abstract (SOURCED, notes/assessment_2026-09-08_acceptable_state.md)")
 DG_L_NSD <- 1            # kept for the comparison's z-band label only
 DG_L_RES <- c("land", "ocean", "air")

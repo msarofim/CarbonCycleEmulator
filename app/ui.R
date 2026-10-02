@@ -245,13 +245,12 @@ navbarPage(
         # this is the panel that shows the slack the comparison has.
         hr(),
         h5(APP_IMBALANCE_HEADING),
-        p("The bars above say this model takes up more land carbon than the",
-          "measured budget reports, which looks like a fault. It mostly is not.",
-          "The Global Carbon Budget does not balance: add its emissions up and",
-          "subtract everything it can account for, and some carbon is left over",
-          "every year. The shaded band in the figure below is that leftover",
-          "carbon under the assumption that all of it is assigned to land",
-          "uptake."),
+        # Marcus 2026-10-02 (carbotopecomment), his paragraph; the band itself is now described
+        # under the chart (IMB_BAND_NOTE, his wording too).
+        p("The model takes up more land carbon than the GCB reports. This is not",
+          "necessarily a model error. The GCB budget is not balanced: when adding",
+          "together its estimates of ocean carbon, land carbon, and atmospheric",
+          "carbon, the total is less than estimated human emissions."),
         uiOutput("w_imbalance_ui"),
 
         # ---- REGROWTH TIER 1 (Marcus 2026-09-24) -----------------------
@@ -263,12 +262,9 @@ navbarPage(
         # so a checkout without data/forcing_luc_gross_split.rds still renders.
         hr(),
         h5(APP_REGROWTH_HEADING),
-        p("The land-use line above is a ", tags$em("net"), " number: forests",
-          "cleared for farmland release carbon, and forests growing back on land",
-          "that was abandoned take it up again. Every budget reports the",
-          "difference. This chart separates the two, so the regrowth that has",
-          "been in this model all along — folded invisibly into the land-use",
-          "input — can be read off."),
+        # Marcus 2026-10-02 (carbotopecomment), his two sentences
+        p("Human land-use emissions are a net of deforestation and forest regrowth",
+          "on abandoned land. The chart below separates these two estimates."),
         uiOutput("w_regrowth_ui")
       )
     )
@@ -333,11 +329,9 @@ navbarPage(
         # sentence instead of an empty chart (server.R, output$c_driver_ui).
         hr(),
         h5("The driver behind the switch"),
-        p("The two charts above are what the model did. This one is what it was",
-          "told \u2014 the input series itself, drawn as the full model receives it",
-          "and as the counterfactual receives it. Some switches delete the input;",
-          "others leave it exactly as it is and remove only the model's response",
-          "to it."),
+        # Marcus 2026-10-02 (carbotopecomment), his two sentences
+        p("The two charts above are what the model did. This chart shows the",
+          "input to the model."),
         uiOutput("c_driver_ui")
         # ⛔ DELETED 2026-10-01 (Marcus, review 10-01c A3: "Delete the
         # fertilisation sentence where it appears"): the info box "Why there is
@@ -458,9 +452,11 @@ navbarPage(
         conditionalPanel(
           "input.f_mode != 'Build your own'",
           checkboxInput("f_fair", "Compare with standard FaIR", value = FALSE),
+          # 2026-10-02: matched to Marcus's FaIR note -- the dashed CO2 line is NOT what this
+          # model "is trying to reproduce"; only its CO2 -> temperature step is fitted to FaIR.
           helpText(class = "small",
-                   "This emulator's climate module is fitted to FaIR, so the",
-                   "dashed line is what it is trying to reproduce."))
+                   "This model's carbon cycle is its own; only its CO₂-to-temperature",
+                   "step is fitted to FaIR."))
       ),
       mainPanel(
         width = 9,
@@ -540,7 +536,7 @@ navbarPage(
             h4("The stand-ins and the provisional constants, listed"),
             # N12 (Marcus 2026-09-22): two lists, labelled, because they are
             # two different things -- see card 7's detail (card 8 before the 10-01 renumbering).
-            h5("Stand-ins: fitted names that absorb a discrepancy"),
+            h5("Stand-ins: fitted parameters that absorb a discrepancy"),
             tableOutput("rv_standins"),
             h5("Held: parameters the calibration was not allowed to move"),
             tableOutput("rv_shims"),
@@ -589,11 +585,10 @@ navbarPage(
         uiOutput("cm_map_ui"),
         hr(),
         h5(APP_CMAP_TENSION_HEADING),
-        p("Almost nothing here is pinned by a single measurement. The fitted",
-          "values sit where the pulls cancel, and the most informative thing the",
-          "map contains is where two measurements pull the same parameter in",
-          tags$em("opposite"), "directions — because then one number in the model",
-          "is being asked to satisfy two observations at once."),
+        # Marcus 2026-10-02 (carbotopecomment), his sentence
+        p("Almost nothing here is pinned by a single measurement. Most numbers in",
+          "the model have to satisfy multiple observations, and are therefore",
+          "being pulled in opposite directions."),
         uiOutput("cm_tension_ui"),
         hr(),
         h5("What this says about the model's structure"),
@@ -666,8 +661,9 @@ navbarPage(
           tags$li(paste("Four land pools standing in for every ecosystem on",
                         "Earth. No fire, no permafrost, and no nutrient",
                         "limitation: nitrogen deposition adds a small sink of",
-                        "its own, but nitrogen never caps how much extra growth",
-                        "CO₂ can buy.")),
+                        # 2026-10-02: reworded to match Marcus's fertilisation caveat
+                        "its own, but a lack of nitrogen never limits the",
+                        "response to CO₂ fertilisation.")),
           tags$li(paste("Two boxes of atmosphere. Nothing about where in a",
                         "hemisphere anything happens.")),
           tags$li("Teaching software. Not peer-reviewed, not for citation.")

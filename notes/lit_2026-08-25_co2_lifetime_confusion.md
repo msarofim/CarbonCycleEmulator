@@ -1,5 +1,15 @@
 # Published examples of the CO₂ "lifetime" confusion — sweep, 2026-08-25
 
+> ⚠ **CORRECTION 2026-10-02** (found by a literature check for Marcus's CarboTope comments, CHANGELOG 10-02 w;
+> the text below is left as written). Two statements in this note overstate the permanence of CO₂:
+> - Line ~44 attributes "~25 % lasting essentially forever" to Archer et al. 2009. Archer et al. give **20–35 %
+>   left after ocean equilibration** (2–20 centuries), removed over **3–7 kyr** by CaCO₃ and longer by silicate
+>   weathering; "essentially forever" is not their claim.
+> - Line ~133 reads Joos's `a0 = 0.2173` as "~22 % that never leaves". Joos et al. 2013 (p. 2801): "the fits only
+>   apply for the period from 0 to 1000 yr"; and the fraction that remains for millennia "is only removed by
+>   ocean-sediment interactions and interactions with the weathering and burial cycle" (p. 2796). `a0` is a fit
+>   constant on 0–1000 yr, not a permanent fraction. ("Effectively permanent on a human timescale" is accurate.)
+
 **Why this file.** DESIGN §7 calls the app's "How long does it last?" tab *"the tab the project
 exists for"*: one model producing **turnover ~4.7 yr** ("how long an average molecule stays") beside
 **adjustment** ("how long the added amount stays" — ~26 % airborne at 100 yr). This is the

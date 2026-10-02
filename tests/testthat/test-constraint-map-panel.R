@@ -94,7 +94,7 @@ test_that("3. the sentences that keep the chart honest are present", {
   glob <- paste(.cmp_glob, collapse = " ")
   # LOCAL, at one parameter set -- not a statement about other structures
   expect_match(glob, "fitted mode", fixed = TRUE)
-  expect_match(glob, "would NOTICE a change", fixed = TRUE)
+  expect_match(glob, "would notice a change", fixed = TRUE)   # re-pinned 2026-10-02 (caps sweep, approved)
   # the equal-cost step, which is what makes rows comparable
   expect_match(glob, "conditional Hessian standard deviation", fixed = TRUE)
   # ⚠ The "not a sampled posterior" leg was retired 2026-09-25 with the string it
@@ -119,8 +119,8 @@ test_that("4. renderPlotFit ids match their outputs", {
 
 test_that("5. the direction keys say which way, and are not interchangeable", {
   pl <- paste(.cmp_plots, collapse = " ")
-  expect_match(pl, 'KEY_CMAP_UP\\s*<-\\s*"wants it HIGHER"')
-  expect_match(pl, 'KEY_CMAP_DOWN\\s*<-\\s*"wants it LOWER"')
+  expect_match(pl, 'KEY_CMAP_UP\\s*<-\\s*"wants it higher"')   # re-pinned 2026-10-02 (caps sweep, approved)
+  expect_match(pl, 'KEY_CMAP_DOWN\\s*<-\\s*"wants it lower"')
   # the fill mapping must pair DOWN with pull_down and UP with pull_up, in that
   # order -- swapping them inverts every bar with no other symptom
   expect_match(pl, paste0('setNames\\(c\\(PAL\\[\\["pull_down"\\]\\], ',

@@ -73,8 +73,13 @@ comparisons).
 4. **What emerges** (a comparison, not a gate):
    - IRF(20 / 100 / 300) **0.508 / 0.360 / 0.271** against Joos 2013's 0.596 / 0.409 / 0.322. The lifetime is still
      SHORTER than the multi-model mean, but the gap at 100 yr has halved since hilda29l (0.288).
-   - The 1000-yr partition is **land 18 / ocean 60 / air 22 %** against 16 ± 14 / 59 ± 12 / 25 ± 9, i.e. z +0.14 /
-     +0.07 / −0.31: close to the mean on every term. (hilda29l was 34 / 48 / 18.)
+   - The 1000-yr partition is **land 18 / ocean 60 / air 22 %** against 16 ± 14 / 59 ± 12 / 25 ± 9 (Joos's ±2 s.d.),
+     i.e. z **+0.28 / +0.15 / −0.63** in standard deviations: close to the mean on every term. (hilda29l was
+     34 / 48 / 18.) ⚠ Corrected 2026-10-02: this line first said z +0.14 / +0.07 / −0.31, which read Joos's ±2 s.d.
+     as ±1 s.d. (CHANGELOG 10-02 w).
+   - ⚠ Added 2026-10-02: on Joos's Table 4 (time-integrated IRF, the fit's 5–95 % ranges), the model sits INSIDE the range
+     at 20 / 50 / 100 yr (12.7 / 26.2 / 45.4 yr against 12.2–16.3 / 24.0–36.6 / 39.5–65.2), on the fast side of
+     the mean throughout.
    - The pulse box's warming per 1000 GtC is **about 1.4 °C** at +20 to +200 yr (1.44 / 1.37 / 1.36 / 1.41), 2.5 %
      across pulse sizes. That is nearly flat in horizon: the slower decay now balances the thermal lag.
 

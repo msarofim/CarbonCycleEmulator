@@ -65,7 +65,7 @@ LAB_PULSE_WARMING  <- "Extra warming caused by the pulse (°C)"
 # must say which it drew -- see plot_growth_rate().
 KEY_GROWTH_OBS  <- "Measured (NOAA global marine reference)"
 # ⛔ The sentence that keeps plot_pulse_partition() honest. See its roxygen.
-PULSE_PARTITION_NOTE <- paste("This is how much EXTRA carbon each reservoir holds because of",
+PULSE_PARTITION_NOTE <- paste("This is how much extra carbon each reservoir holds because of",
                               "the pulse \u2014 the difference between running with it and",
                               "without. It is not a trace of where those particular molecules",
                               "went, which is a different question with a different answer.")
@@ -545,7 +545,7 @@ KEY_LUC_GROSS  <- "Cleared (gross land-use source)"
 KEY_LUC_REGROW <- "Forest regrowth (uptake)"
 KEY_LUC_NET    <- "Net land-use flux (what the model burns)"
 LAB_LUC_Y      <- "Land-use carbon flux (GtC per year)"
-NOTE_LUC_SPLIT <- paste("The split into clearing and regrowth is ASSERTED from the Global",
+NOTE_LUC_SPLIT <- paste("The split into clearing and regrowth is asserted from the Global",
                          "Carbon Budget's three bookkeeping models; this model does not",
                          "measure it. Both halves carry the fitted land-use scale and sum",
                          "to the series the model burns.")
@@ -569,6 +569,10 @@ NOTE_LUC_SPLIT <- paste("The split into clearing and regrowth is ASSERTED from t
 #' areas must land on the black line, and `test-luc-regrowth-panel.R` asserts
 #' the drawn data does.
 plot_luc_gross_split <- function(split, window) {
+  # Marcus 2026-10-02 (carbotopecomment): "Delete the pre-1959 part of the chart" -- the chart
+  # starts where the bookkeeping split is OBSERVED, so the back-extended years (and the grey
+  # "assumed" shading below, which only drew for them) never appear.
+  window[1] <- max(window[1], split$obs_window[1])
   h <- split$historical
   k <- h$year >= window[1] & h$year <= window[2]
   h <- h[k, ]
@@ -613,12 +617,12 @@ LAB_IMB_Y     <- "Residual land sink (GtC per year)"
 # an EXTREME attribution and never a confidence interval. Printed on the chart
 # AND asserted by test-imbalance-panel.R.
 IMB_DECADE_MIN_N <- 10L   # a LEADING bin shorter than this is dropped; see app_imbalance_decades()
-IMB_BAND_SHORT <- paste("The band is an EXTREME attribution \u2014 all of the budget's unplaced",
+IMB_BAND_SHORT <- paste("The band is an extreme attribution \u2014 all of the budget's unplaced",
                         "carbon assigned to land \u2014 not an uncertainty range.")
-IMB_BAND_NOTE <- paste("The band asks where the measured land sink would sit if ALL the carbon the",
-                       "Global Carbon Budget cannot place were land. That is an EXTREME attribution,",
-                       "not an uncertainty range \u2014 the same carbon could be an emissions, ocean or",
-                       "growth error.")
+# Marcus 2026-10-02 (carbotopecomment), his two sentences (British "grey", as the app).
+IMB_BAND_NOTE <- paste("The grey band represents the GCB estimate plus the budget imbalance.",
+                       "Note that the budget imbalance could also be attributed to the ocean",
+                       "or to an error in emissions estimates.")
 
 #' The model's residual land sink against GCB's, with GCB's own unclosed imbalance
 #'
@@ -698,7 +702,7 @@ plot_land_sink_imbalance <- function(out, gcb, F, smooth_yr = APP_LUC_SMOOTH_YR)
          subtitle = app_subtitle(sprintf(
            paste("%d-yr centred mean, so each bold line stops %d yr short at both ends",
                  "\u2014 the thin annual line does not, and the recent years are on it.",
-                 "Land-use emissions are OUTSIDE this sink, as GCB reports it."),
+                 "Land-use emissions are outside this sink, as GCB reports it."),
            smooth_yr, lost)),
          # \u26a0 SHORT. The full band note is in the caveat box directly under this
          # chart; the first draft printed it in both places. What stays here is
@@ -816,8 +820,8 @@ LAB_CMAP_PULL   <- "Log-likelihood units the measurement gains by moving it"
 # "(0)" also READS as "this measurement is worth nothing", which is exactly the
 # misreading the tab's third caveat exists to prevent.
 fmt_cmap_total <- function(x) ifelse(x < 10, sprintf("%.1f", x), sprintf("%.0f", x))
-KEY_CMAP_UP     <- "wants it HIGHER"
-KEY_CMAP_DOWN   <- "wants it LOWER"
+KEY_CMAP_UP     <- "wants it higher"
+KEY_CMAP_DOWN   <- "wants it lower"
 # ⛔ The sentence a screenshot of the heatmap has to carry on its own. It is the
 # same string the tab's caveat uses, from `APP_CMAP_NOTE` in global.R, so the two
 # cannot drift -- the caption-sync bug class.
@@ -1080,7 +1084,7 @@ plot_growth_rate <- function(base, alt = NULL, obs = NULL, yr_range = c(1960, 20
 # optical depth on one scale, where the only honest normalisation is z-scores
 # and those hide the thing the panel exists to show (a driver going to zero).
 DRIVER_KEPT_NOTE <- paste("This switch leaves the driver alone \u2014 the two lines are",
-                          "identical. What it removes is the model's RESPONSE to it.")
+                          "identical. What it removes is the model's response to it.")
 
 plot_driver <- function(drv, yr_range, label = "Mechanism off") {
   k <- drv$t >= yr_range[1] & drv$t <= yr_range[2]
@@ -1274,10 +1278,11 @@ plot_pulse_partition <- function(base, pulse, pulse_gtc, pulse_year,
            PULSE_PARTITION_NOTE,
            if (is.na(resid))
              "The window is too short to check that the three shares add up."
-           else sprintf(paste("The three add to 100 %% of the pulse to within",
-                              "%.2f %% at every step after it is released \u2014",
+           else sprintf(paste("The three add to 100%% of the pulse to within",
+                              "%.2f%% at every step after it is released \u2014",
                               "carbon is conserved, so this is a partition and",
                               "not an estimate."), resid)))) +
+    expand_limits(y = c(0, 100)) +   # 2026-10-02: a pulse share runs 0-100 % (Marcus, card 5: "zero to 1")
     theme_ccx()
 }
 
@@ -1664,7 +1669,7 @@ plot_box_diagram <- function(fx, stock, p) {
              label = app_wrap_px(
                sprintf(paste0("Photosynthesis and the sea move %.0f GtC a year in and out of the air, ",
                               "so an average CO₂ molecule stays only ~%.1f years. ",
-                              "The ADDED carbon still takes centuries to go."),
+                              "The added carbon still takes centuries to go."),
                        fx$atm_out, fx$tau_turn),
                app_text_px("diagram"), diagram_note_pt(DIAGRAM_NOTE_SIZE_BOLD))) +
     xlim(0.1, xmax) + ylim(0, 4.9) + theme_void()

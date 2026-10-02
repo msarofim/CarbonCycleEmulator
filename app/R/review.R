@@ -40,7 +40,7 @@ RV_CLASS_GLOSS <- c(
   # U5/N6 (Marcus 2026-09-22): "one ocean column per hemisphere" read as "no
   # ocean circulation", which is false at hilda29l. The limitation that is real
   # is the INTERHEMISPHERIC one: the two oceans never touch.
-  structural = paste("a consequence of the model's SHAPE -- each hemisphere has",
+  structural = paste("a consequence of the model's shape -- each hemisphere has",
                      "its own ocean, and they exchange carbon only through the",
                      "air. Closing it means a different model, not a better fit."),
   # `accounting` ("the fit prefers a simpler version ...") went with the old card 6, its
@@ -450,20 +450,20 @@ RV_CARDS <- list(
                       # instead. A literal "3.515" here is the exact staleness
                       # this tab exists to avoid, and it was written and removed
                       # once already on 2026-09-22.
-                      sprintf(paste("\n\nAND THERE IS A MEASURED OFFSET TO COMPARE IT",
-                                    "AGAINST. Differencing the NOAA marine-boundary-layer",
+                      sprintf(paste("\n\nAnd there is a measured offset to compare it",
+                                    "against. Differencing the NOAA marine-boundary-layer",
                                     "reference against these same two stations, month by",
                                     "month, gives %+.2f ppm in the north and %+.2f ppm in",
                                     "the south -- positive in every year of the record. So",
-                                    "the model's SIGN is the physically expected one, and",
-                                    "its north-south ORDERING is right too. What is not",
-                                    "right is the SIZE, and the chart above shows the gap:",
+                                    "the model's sign is the physically expected one, and",
+                                    "its north-south ordering is right too. What is not",
+                                    "right is the size, and the chart above shows the gap:",
                                     "the fitted offset is the upper dashed line, the",
                                     "measured one the lower. Re-centring the prior on the",
                                     "measured value would relabel most of that gap rather",
                                     "than remove it."),
                               RV_REP_OBS_NH, RV_REP_OBS_SH),
-                      sprintf(paste("\n\nTHE SAME PARAMETER ALSO SETS A \u03b4\u00b9\u00b3C OFFSET,",
+                      sprintf(paste("\n\nThe same parameter also sets a \u03b4\u00b9\u00b3C offset,",
                                     "because one number is tied across both species by",
                                     "mass balance \u2014 and that side had never been checked",
                                     "against an observation at all. Built from the flask",
@@ -478,8 +478,8 @@ RV_CARDS <- list(
                                     "size, is doing work it cannot support."),
                               RV_REP_OBS_D13C_NH, RV_REP_OBS_D13C_SH),
                       sprintf(paste("\n\nSource: %s. One asymmetry worth knowing: that",
-                                    "reference EXCLUDES Mauna Loa, so the northern",
-                                    "comparison is independent, but it INCLUDES the South",
+                                    "reference excludes Mauna Loa, so the northern",
+                                    "comparison is independent, but it includes the South",
                                     "Pole, so the southern one is partly circular."),
                               RV_REP_OBS_SOURCE)),
        ask = paste("The fit needs several times the station offset that is",
@@ -495,8 +495,8 @@ RV_CARDS <- list(
                       "flux the model has no carrier for. Each hemisphere has its",
                       "own ocean and they exchange only through the air, so",
                       "nothing can carry an isotopic signal from one deep ocean",
-                      "to the other. Every lever tried moved the LEVELS of the two",
-                      "hemispheres and not the DIFFERENCE between them. That the",
+                      "to the other. Every lever tried moved the levels of the two",
+                      "hemispheres and not the difference between them. That the",
                       "CO₂ gradient is right while the isotopic one is not is the",
                       "diagnostic: the transport is not obviously wrong, the",
                       "isotopic loading of it is."),
@@ -514,7 +514,7 @@ RV_CARDS <- list(
                       "rather than atmospheric stations). The deficit is on the",
                       "northern side. There is a related quantitative tension",
                       "worth knowing: the model's air-sea isotopic exchange time",
-                      "is over-determined by roughly 15 % -- the surface bottles",
+                      "is over-determined by roughly 15% -- the surface bottles",
                       "want it longer, the atmospheric δ¹³C decline holds it where",
                       "it is -- so a fix that satisfies one moves away from the",
                       "other. Note also that the southern cold box equilibrates",
@@ -524,13 +524,14 @@ RV_CARDS <- list(
                    "observables. And: would an interhemispheric deep exchange be",
                    "worth building into a teaching model to close it?")),
   list(id = 4, key = "variance", class = "structural",
-       title = "Year-to-year variability is about 60 % of observed",
-       plain = paste("The model's ENSO SENSITIVITY is close to right -- push the",
+       title = "Year-to-year variability is about 60% of observed",
+       # Marcus 2026-10-02 (carbotopecomment): "The app's ENSO switch is a sensitivity, not a
+       # reconstruction." deleted. 60% still MEASURED 10-02: 0.268 vs 0.459 ppm/yr = 58%.
+       plain = paste("The model's ENSO sensitivity is close to right -- push the",
                      "index and the ocean sink responds by nearly the amount the",
                      "Global Carbon Budget shows. But the total year-to-year",
-                     "wobble in CO₂ growth is only about 60 % of the observed",
-                     "one. The app's ENSO switch is a sensitivity, not a",
-                     "reconstruction."),
+                     "wobble in CO₂ growth is only about 60% of the observed",
+                     "one."),
        # A4 (Marcus 2026-10-01, "Fix Card 4"): this said the fitted strength
        # "lands inside the observed range". True at hilda29l (13.71, inside at
        # 1 sd); at hilda33d w_enso_l2 is 11.91 against Meinen's 14-25 Sv per
@@ -548,7 +549,7 @@ RV_CARDS <- list(
                       "wrong-signed solubility response, which is why the",
                       "mechanism was adopted even though it costs fit. On its own",
                       "the solubility path still has the wrong sign. The variance",
-                      "the record carries BEYOND ENSO is where the shortfall is,",
+                      "the record carries beyond ENSO is where the shortfall is,",
                       # N8 (Marcus 2026-09-22): this card USED to say the
                       # volcanic and land-side variance had "no mechanism here",
                       # and that was my error -- `gamma_diff` = 0.25 is live in
@@ -572,8 +573,8 @@ RV_CARDS <- list(
                       # finding is the one in the chart caption. Qualitative here
                       # on purpose -- the numbers are model-dependent and belong
                       # where they are computed.
-                      "\n\nWE LOOKED FOR A PATTERN IN THE MISSES AND DID NOT FIND",
-                      "ONE. Year by year, the difference between the model's growth",
+                      "\n\nWe looked for a pattern in the misses and did not find",
+                      "one. Year by year, the difference between the model's growth",
                       "and the measured growth shows no usable association with the",
                       "El Ni\u00f1o index, with volcanic aerosol, or with the decade:",
                       "on sixty-six years none of the three reaches significance,",
@@ -583,7 +584,7 @@ RV_CARDS <- list(
                       "record does -- but 1983, the other big eruption, misses the",
                       "other way, so even that is not a rule. What the caption",
                       "above reports is the finding that survives: the model's",
-                      "variability is MORE El Ni\u00f1o-driven than the real record's,",
+                      "variability is more El Ni\u00f1o-driven than the real record's,",
                       "so the variance it lacks is of some other kind."),
        ask = paste("Is a model that gets the ENSO sensitivity right but only part",
                    "of the variance acceptable for teaching what makes CO₂ wobble?",
@@ -595,18 +596,18 @@ RV_CARDS <- list(
                      "at a century than the Joos et al. (2013) multi-model mean",
                      "does. The eventual split between land, ocean and air at a",
                      "thousand years is inside that study's range on every term."),
-       detail = paste("This is a COMPARISON and deliberately not a test: nothing",
+       detail = paste("This is a comparison and deliberately not a test: nothing",
                       "from that study is allowed to score this model, because a",
-                      "long perturbation lifetime is supposed to EMERGE from the",
+                      "long perturbation lifetime is supposed to emerge from the",
                       "seasonal and isotopic constraints rather than be fitted",
                       "to. Reporting the difference and not tuning it away is the",
                       # A5 (Marcus 2026-10-01, "Fix Card ... 5"): this said "the
                       # land holds a larger share here than the multi-model mean
                       # and the ocean a smaller one" -- hilda29l's 1000-yr split
                       # (34 / 48 / 18 %). At hilda33d it is 18 / 60 / 22 against
-                      # Joos's 16 / 59 / 25 (z +0.14 / +0.07 / -0.31; scorecard
+                      # Joos's 16 / 59 / 25 (z +0.28 / +0.15 / -0.63 in true s.d. since the 10-02 +-2 s.d. fix; scorecard
                       # 2026-10-01): the ocean is now LARGER too, and every term
-                      # sits within a third of the spread. The difference is in
+                      # sits within two-thirds of one s.d. (|z| <= 0.63). The difference is in
                       # the timing, largest early: IRF(20) 0.508 vs 0.596.
                       "point. Where the difference sits is visible in the two",
                       "charts: the pulse leaves the air faster here, most of all",
@@ -670,13 +671,14 @@ RV_CARDS <- list(
        # below listed the PINS, and the card presented them as one list. They
        # are two different things; both are now shown, labelled, with the
        # overlap COMPUTED rather than described (rv_stand_ins()).
-       detail = paste("Each is named in the code and listed below rather than",
-                      "quietly absorbed. The two lists below are different things",
-                      "and it is worth keeping them apart. A STAND-IN is fitted",
+       # Marcus 2026-10-02 (carbotopecomment): "rather than quietly absorbed" and "and it is
+       # worth keeping them apart" deleted; "parameter", not "name".
+       detail = paste("Each is named in the code and listed below. The two lists below",
+                      "are different things. A stand-in is fitted",
                       "freely and absorbs a discrepancy instead of representing a",
-                      "process; a HELD parameter is one the calibration is not",
+                      "process; a held parameter is one the calibration is not",
                       "allowed to move at all, carried at a stated number. Some",
-                      "names are in both -- a stand-in that was switched off by",
+                      "parameters are in both -- a stand-in that was switched off by",
                       "holding it at zero. The stand-ins that matter most for what",
                       "this app claims are the station offset (card 1), the",
                       "δ¹³C gradient offset (card 2 is scored net of it), and a",

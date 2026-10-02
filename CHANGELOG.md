@@ -2,6 +2,118 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (w) — **Marcus's CarboTope comments (`carbotopecomment.9.26.26.docx`, his text, edited 10-02) are implemented, together with the similar changes he asked me to find. His eight questions are answered with measurements. He ruled on eight follow-ups, and a ninth item (a false sentence about the band) was fixed as a correction. 14 test re-pins were approved. The final pass of the 26 affected test files: 1163 expectations, 0 failed, 0 errors.**
+
+**His questions, answered by measurement** (`measure_comments*.R` in the session scratchpad; hilda33d):
+- **"Is not responding to an input functionally equivalent to having the input zero out?"**
+  - Not for ENSO. The switch zeroed only the land's direct term (`gamma_enso_land` 0.45 / 0.33).
+  - The ocean kept reading the index through `w_enso_l2` (11.9), the equatorial cell (`gamma_eq` 1, `w_eq` 27) and the SST modulation.
+  - Switch vs switch + index zeroed: max |dCO₂| **0.47 ppm**. Index zeroed alone = index + coefficients zeroed: 0.
+  - So the yellow "simply stops responding to it" was false. The warming switch IS equivalent: 0 ppm.
+- **"I don't think the emission record would be the reason, because we use annual emissions data, right?"**
+  - Annual data still vary year to year, and the growth rate is annual.
+  - Smoothing the emissions record alone removes **12 %** of the model's wobble (app estimator, 1980–2024).
+  - So the record is part of the reason, not most of it.
+- **"Check to make sure that future CO2 is actually from this model, not from FaIR!"**
+  - It is this model's: `future_runs` → `app_run_coupled` → `ccx_run_coupled` on the canonical's spin-up.
+  - vvH 2150: 826.6 ppm here vs FaIR 832.7; vvM 2100: 564.8 vs 563.2.
+  - FaIR enters only as the dashed overlay and through the CO₂ → temperature step it was fitted to.
+- **Joos (card 5).**
+  - *Update?* None. IPCC AR6 WG1 Ch. 7 §7.6.1.1 says there has been no new quantification of the pulse response since Joos et al. 2013, and AR6's metrics reuse it. FaIR 2.2.4 (calib 1.6.0) still carries Joos's Table 5 coefficients. The nearest successor is Jeltsch-Thömmes et al. 2025 (ERL, doi:10.1088/1748-9326/add54b): one model, a 1000-member observation-constrained ensemble, 100 GtC at 425 ppm.
+  - *Long-term share:* ~25 ± 9 % at 1000 yr (Joos, **±2 s.d.**), 20–35 % (Archer 2009), 15–40 % (AR5 Box 6.1). AR6 made no new assessment. About 10–25 % remains at ~10 kyr and a few % by 100 kyr.
+  - *Uncertainty:* almost all published ranges are model or pulse-size spread, not formal uncertainty.
+  - (A background research agent did this; I verified the Joos statements against the PDF in ClaudeDocs/Papers.)
+  - *"Are we now close enough to Joos?"* By Joos's own Table 4, yes. The time-integrated IRF is **inside the fit's 5–95 % range at 20 / 50 / 100 yr** (12.7 / 26.2 / 45.4 against 12.2–16.3 / 24.0–36.6 / 39.5–65.2), but on the fast side of the mean throughout: IRF(20) 0.508 vs 0.596.
+- **"Why is there a negative slope when ENSO is off?"** The ocean sink's slope on Niño 3.4 is +0.115 GtC/yr per °C in GCB and +0.098 in the full model. With the ocean's ENSO mechanisms knocked out it is **−0.180**. El Niño's warm water holds less CO₂, which works against the weakened upwelling that dominates. So yes, the temperature path runs opposite to the direct one (card 4: "on its own the solubility path still has the wrong sign").
+- **Card 4's "negative slope", the to_zero sentence, the [YEAR] and OWID:** see the rulings.
+
+**Rulings (verbatim):**
+1. ENSO: **"Zero the index (Recommended)"**.
+2. To_zero temperature: **"Say it keeps rising (Recommended)"**.
+3. [YEAR]: **"Do the roughly level recommended approach - are we consistent with the Our World In Data description (https://ourworldindata.org/deforestation)?"**
+4. The 10 copy re-pins: **"Approve all (Recommended)"**.
+5. The 3 switch re-pins: **"Approve the 3 (Recommended)"**.
+6. Joos's spread: **"Fix it (Recommended)"**.
+7. OWID: **"Add a clause (Recommended)"**.
+8. Stabilisation: **"\"near zero ... for good\" (Recommended)"**.
+
+**Behaviour changes.**
+- **ENSO off now zeroes the index**, so every ENSO response goes, land and ocean.
+  - Re-measured: ENSO alone −28 % (the blurb's "about a quarter" holds). ENSO + warming + volcanic −67 % (it was −54 % with the old switch). So his caveat sentence says **"about a third"** remains, where his draft said "half".
+- **Warming off also zeroes `gmst`.** No number changes (the run was already blind to it).
+- Both driver charts draw his zero line. The "does not touch this input" text can no longer appear for any switch with a driver.
+- **To_zero's temperature sentence is read off the run.** Every app run kept warming to 2150: 2030 stop 1.46 → 2.15 °C, 2060 1.98 → 2.39, 2100 2.52 → 2.71. Total forcing is roughly flat: CO₂'s falls 0.3–0.65 W/m² while vvM's non-CO₂ rises 0.2–1.1. The clause says "keep rising, by X °C" (X computed). It adds the "other emissions" reason only when the run's non-CO₂ forcing rises, and falls back to his "drop even more slowly" if a run does fall.
+  - His CO₂ sentence holds across the whole slider: 13–31 % of the way back to 277 ppm by 2150.
+- **The regrowth chart starts at 1959** (the observed bookkeeping split).
+
+**Our World in Data.**
+- OWID says global deforestation (forest AREA, FAO / Williams 2006) peaked in the 1980s. The page is self-labelled outdated (2021).
+- The app plots GCB gross deforestation CARBON emissions, which are roughly level (2.3–2.5 GtC/yr by decade) and lowest in the 1980s.
+- Both say regrowth offsets about half: OWID by area, the app 49 % by carbon.
+- The takeaway now says "(in carbon terms; the area of forest cleared each year peaked in the 1980s)", sourced in a comment.
+
+**Text, tab by tab (his wording, the app's CO₂ / British spelling).**
+- *Keeling:* "volcanic aerosol light diffusion"; "what it is never told" deleted.
+- *Where does the carbon go?*
+  - His land paragraph, with both crossing years computed (1989 GCB / 1969 model).
+  - His imbalance intro, takeaway (both counts computed, 5 of 7 each) and band note.
+  - His regrowth intro and takeaway (38 % / 49 % / 1.13 vs 2.33 computed; "roughly level" said only within ±15 %, today ±5 %).
+  - "Why splitting it" box deleted.
+  - Fixed as false: "the one place the model sits outside the band is the last few years". The 1980s are outside too.
+- *What if?*
+  - His nitrogen sentence.
+  - "14% further from the data".
+  - The ENSO and volcanic "use Warming's effect…" pointers cut.
+  - DRIVEN, LIGHT, COOL, FASTER lower-cased.
+  - His wobble sentence.
+  - His driver-chart caption.
+- *Futures:*
+  - His Pulse lab sentence ("GHGs" spelled out).
+  - His FaIR note, keeping the pre-2024 like-for-like warning. The old note had called the CO₂ gap "this emulator's own error".
+  - His constant / growth / decline edits, plus "near zero … stay stable".
+- *Known issues:*
+  - Card 4's sentence deleted.
+  - Card 5a's y-axis 0–1.
+  - Card 7's two deletions and "parameter" for "name".
+  - Card 5b's ±2 s.d. fix.
+- *Pins:*
+  - "without results changing substantially".
+  - His tension sentence.
+  - "That is the useful reading…" deleted.
+  - The two numbers named (beta_max, fert_k).
+  - His "Some parameters have little influence…" (names computed).
+  - The row-totals sentence moved into the yellow box.
+  - The least-sensitive-measurement paragraph deleted.
+  - ⚠ **The seasonal "theory" is MY DRAFT, for his wording.** It is the structural mechanism measured 08-21 ([[ccx_sst_seas_veto]]): an ocean channel antiphase to the land one, with almost no ¹³C fingerprint, shrinks the CO₂ swing but not the δ¹³C swing. No current-fit direction is claimed.
+- *Isotopes:* his sentence.
+
+**Similar changes he asked me to find:**
+- 31 more emphasis capitals lower-cased (parser-scanned string literals only; acronyms kept).
+- 12 "N %" → "N%".
+- Under the hood's nitrogen sentence matched to his.
+- The FaIR checkbox help text (it had the same CO₂ error).
+- Three "names" → "parameters".
+- "Cleared" → "Deforestation".
+- The Pulse lab partition chart at 0–100 %.
+- The regrowth caveat's back-extension clause (now off the chart).
+
+**Joos ±2 s.d. (factual fix).** `DG_L_JOOS` stored Joos's ±2 s.d. half-widths as `sd`, and card 5b captioned them "±1 sd".
+- `sd` is now the true s.d. (7 / 6 / 4.5), and `pm2sd` keeps the published values.
+- z doubles to **+0.28 / +0.15 / −0.63** (read off the app's own caption; doubling the old rounded −0.31 would give −0.62, which I first wrote).
+- The "within a third of the spread" comment beside card 5's text was true only under the misreading. It now says |z| ≤ 0.63; the card's text ("inside that study's range on every term") stays true.
+- The bars show the published ±2 s.d. range.
+- The B8 draft and review.R are corrected.
+- Earlier diagnostic outputs that printed the old z's are not regenerated.
+
+**Record correction.** `notes/lit_2026-08-25_co2_lifetime_confusion.md` misattributed "~25 % essentially forever" (Archer) and "a0 ~22 % never leaves" (Joos). A banner now quotes Joos: the fits apply 0–1000 yr only, and the residual "is only removed by ocean-sediment interactions and … weathering".
+
+**Tests.**
+- 10 copy re-pins and 3 switch re-pins (approved), each keeping its intent.
+- `test-gate-bounds`' worked example moved to z = ±2 (approved with "Fix it").
+- ⛔ `test-luc-regrowth-panel`'s "ASSERTED" pin had gone **vacuous**: after the caps sweep it matched only two code comments. It is now "asserted from", which occurs only in the two captions.
+- 13 new expectation lines gate the computed to_zero clause. Mutants for "always rising", "always other emissions" and "ignores the run" are each caught.
+- Final pass of the 26 affected test files: 1163 / 0 / 0 / 0.
+
 ## 2026-10-02 (v) — **Marcus: "commit the stage-1 chains and pooled draws", then "Fix the hold reason and draft card 6 facts". The chains are committed (`acdd694`, with a README). The hold's reason now records the 10-02 ruling. Card 6's facts are drafted for his wording; the card's text is untouched.**
 - **The hold.** `APP_RIBBONS_HOLD` (`app/global.R`) is internal: while it is set the loader draws nothing and says nothing.
   Its string and comment block said "held until the MCMC check". They now record the 10-01 and 10-02 rulings verbatim and

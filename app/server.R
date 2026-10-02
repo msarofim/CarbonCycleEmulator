@@ -81,13 +81,13 @@ function(input, output, session) {
     # row of the "What drives the model" table (output$h_drivers).
     sprintf(paste("The model produces %.0f ppm in %d, rising to %.0f ppm today;",
                   "the measured value is about %.0f ppm. The model's inputs are",
+                  # Marcus 2026-10-02 (carbotopecomment): "volcanic aerosol light diffusion",
+                  # and the "what it is never told ... the next tab" sentence deleted.
                   "emissions, global temperature, an ENSO index, volcanic aerosol",
-                  "and nitrogen deposition, and its calibration data include the CO₂ level and",
+                  "light diffusion and nitrogen deposition, and its calibration data include the CO₂ level and",
                   "seasonal cycle at both Mauna Loa and the South Pole. But it is",
                   "not an abstract regression: it can only adjust quantities that",
-                  "stand for physical things. And what it is never told is how",
-                  "the emitted carbon divides between air, land and ocean —",
-                  "that comes out of the bookkeeping, and it is the next tab."),
+                  "stand for physical things."),
             o$co2_NH[i0], floor(o$t[i0]), o$co2_NH[i1], last_obs)
   })
 
@@ -167,29 +167,25 @@ function(input, output, session) {
     a <- stats::aggregate(list(g = pt$land_gross), list(year = floor(pt$t)), mean)
     mod <- cross(a$year[-1], diff(a$g))
     obs <- cross(APP_GCB$year, APP_GCB$land_sink - APP_GCB$luc)
-    paste(
-      sprintf(paste("Land-use change — agriculture, deforestation and the rest",
-                    "— has been an emission SOURCE for the whole of this record.",
-                    "What changed is the land as a whole: the natural land sink",
-                    "grew until it outweighed those emissions.",
-                    # 2026-10-01 (Marcus, review 10-01c A3): "In this model that
-                    # sink has a single cause -- plants growing faster as CO2
-                    # rises" DELETED. False since hilda33d: N-deposition
-                    # retention is a second long-term land sink.
-                    "Forests do grow back, but that carbon is counted inside the",
-                    "land-use number rather than in the sink; it is drawn on its",
-                    "own under “%s”."),
-              APP_REGROWTH_HEADING),
-      if (is.na(obs)) "" else
-        sprintf(paste("In the measured budget the land crossed from a net source",
-                      "to a net sink around %d (%d-year average)."), obs, k),
-      if (is.na(mod)) "" else
-        sprintf(paste("This model crosses around %d — %s than the measurements,",
-                      "which is one of the places it runs a larger land sink than",
-                      "the Global Carbon Budget does, though a larger sink is not",
-                      "by itself a fault — see “%s” below."),
-                mod, if (!is.na(obs) && mod < obs) "earlier" else "later",
-                APP_IMBALANCE_HEADING))
+    # Marcus 2026-10-02 (carbotopecomment), his paragraph. The two years stay COMPUTED, by the
+    # same 11-year rule as before (1989 GCB / 1969 model at hilda33d); a missing one drops its
+    # clause rather than printing NA. "Carbon fertilization" is written in the app's own term.
+    lead <- paste("Land-use change (agriculture, deforestation, and so forth) has been a net",
+                  "source to the atmosphere for the whole record. However, over time the",
+                  "natural land sink has been growing due to CO₂ fertilisation")
+    see <- sprintf("see “%s” below", APP_IMBALANCE_HEADING)
+    when <- if (!is.na(obs) && !is.na(mod))
+      sprintf(paste(", and so the total land contribution switched from a net source to a",
+                    "net sink around %d (based on the Global Carbon Budget, GCB) or in %d",
+                    "(based on our model — %s)."), obs, mod, see)
+    else if (!is.na(obs))
+      sprintf(paste(", and so the total land contribution switched from a net source to a",
+                    "net sink around %d (based on the Global Carbon Budget, GCB)."), obs)
+    else if (!is.na(mod))
+      sprintf(paste(", and so the total land contribution switched from a net source to a",
+                    "net sink in %d (based on our model — %s)."), mod, see)
+    else "."
+    paste0(lead, when)
   })
 
   # ---- THE IMBALANCE BAND (handoff 09-24 e item 3) ------------------
@@ -219,7 +215,7 @@ function(input, output, session) {
       plotOutput("w_imbalance_plot", height = "330px"),
       div(class = "caveat", tags$strong("What the band is: "), IMB_BAND_NOTE),
       info_box("Why a bigger sink can be the closer one",
-               p("The leftover carbon in the measured budget is POSITIVE: the",
+               p("The leftover carbon in the measured budget is positive: the",
                  "budget's own sinks are too small to account for everything",
                  "emitted. So a model that takes up more land carbon than the",
                  "budget reports is moving toward closing it, not away from it.",
@@ -243,11 +239,10 @@ function(input, output, session) {
                          a(z$imbal), a(z$cement), a(z$d_luc),
                          -z$d_grow, -z$d_ocn,
                          abs(z$closure), 100 * abs(z$closure / z$d_land))
-               })),
-               p("The one place the model really does sit outside the band is",
-                 "the last few years, and that is flagged rather than explained:",
-                 "it is a handful of years at the end of the record, where every",
-                 "estimate is least constrained."))
+               })))
+               # 2026-10-02: "The one place the model really does sit outside the band is the
+               # last few years" DELETED -- false at hilda33d, where the 1980s are outside too
+               # (model 2.13 vs band top 1.71 GtC/yr); the takeaway above now counts them.
     )
   })
 
@@ -257,14 +252,17 @@ function(input, output, session) {
   output$w_imbalance_takeaway <- renderText({
     s <- imbalance_dec()
     inb  <- sum(s$in_band); n <- nrow(s)
-    last <- s[n, ]
-    worst <- s[which.max(s$miss), ]
-    sprintf(paste("The model's land sink sits inside the band in %d of the %d decades",
-                  "on this chart. It runs above the measured line throughout — but the",
-                  "leftover carbon is positive, so a bigger sink is the one that closes",
-                  "the budget, not the one that breaks it. The real exception is",
-                  "%d–%d, which sits %.1f GtC a year above the top of the band."),
-            inb, n, worst$y0, worst$y1, worst$miss)
+    # Marcus 2026-10-02 (carbotopecomment), his three sentences. Both counts are COMPUTED and
+    # counted SEPARATELY ("inside the band" needs model >= GCB as well; at hilda33d they agree,
+    # 5 of 7), and "takes up more than the GCB estimate" is only asserted while it is true of
+    # every decade.
+    above   <- sum(s$model > s$obs)
+    exceeds <- sum(s$obs + s$imbal > s$model)
+    sprintf(paste("The model's land sink sits inside the band in %d of the %d decades on",
+                  "this chart. The model takes up more carbon than the GCB estimate%s.",
+                  "When the budget imbalance is added to the GCB estimate, it exceeds the",
+                  "model estimate in %d out of %d decades on this chart."),
+            inb, n, if (above == n) "" else sprintf(" in %d of them", above), exceeds, n)
   })
 
   # ---- REGROWTH TIER 1 (Marcus 2026-09-24) --------------------------
@@ -284,7 +282,7 @@ function(input, output, session) {
     now <- h[h$year >= obs[2] - 9 & h$year <= obs[2], ]
     tagList(
       fluidRow(
-        column(4, div(class = "readout-label", "Cleared, gross"),
+        column(4, div(class = "readout-label", "Deforestation, gross"),
                div(class = "readout", sprintf("%.2f", mean(now$gross_GtC)))),
         column(4, div(class = "readout-label", "Forest regrowth"),
                div(class = "readout", sprintf("%.2f", mean(now$regrowth_GtC)))),
@@ -297,17 +295,10 @@ function(input, output, session) {
       takeaway(textOutput("w_regrowth_takeaway", inline = TRUE)),
       plotOutput("w_regrowth_plot", height = "330px"),
       div(class = "caveat", tags$strong("Where this number comes from: "),
-          textOutput("w_regrowth_caveat", inline = TRUE)),
-      info_box("Why splitting it changes nothing the model does",
-               p("The two halves add back to exactly the series the model was",
-                 "always given, so the model runs identically whether the split",
-                 "is drawn or not. Nothing here was re-fitted; this is the same",
-                 "number reported two ways."),
-               p("That also sets the limit of what it can tell you. Because the",
-                 "model only ever sees the total, it cannot check the split —",
-                 "the division between clearing and regrowth is taken on the",
-                 "bookkeeping models' authority, not tested against the",
-                 "atmospheric record here."))
+          textOutput("w_regrowth_caveat", inline = TRUE))
+      # Marcus 2026-10-02 (carbotopecomment): the "Why splitting it changes nothing the model
+      # does" explainer DELETED. Its one load-bearing fact (the split is the bookkeeping
+      # models', not tested here) is still in APP_LUC_SPLIT_NOTE, the caveat just above.
     )
   })
 
@@ -325,18 +316,37 @@ function(input, output, session) {
     now <- h[h$year >= obs[2] - 9 & h$year <= obs[2], ]
     all <- h[h$year >= obs[1] & h$year <= obs[2], ]
     frac  <- function(d) -sum(d$regrowth_GtC) / sum(d$gross_GtC)
-    slope <- function(v) unname(stats::coef(stats::lm(v ~ all$year))[2]) * 10
-    s_gro <- slope(all$gross_GtC)
-    s_reg <- slope(-all$regrowth_GtC)
-    s_net <- slope(all$net_GtC)
-    sprintf(paste("Over the last ten years, forests regrowing took back %s of the",
-                  "carbon that clearing released — %.2f GtC a year against %.2f.",
-                  "Across %d–%d the share was %s. Over that record the net",
-                  "land-use flux changed by %+.2f GtC/yr per decade, gross clearing",
-                  "by %+.2f and regrowth by %+.2f — so it is the %s that moved."),
-            fmt_pct(frac(now)), -mean(now$regrowth_GtC), mean(now$gross_GtC),
-            obs[1], obs[2], fmt_pct(frac(all)), s_net, s_gro, s_reg,
-            if (abs(s_reg) > abs(s_gro)) "regrowth" else "clearing")
+    s_reg <- unname(stats::coef(stats::lm(-all$regrowth_GtC ~ all$year))[2]) * 10
+    # Marcus 2026-10-02 (carbotopecomment + "Do the roughly level recommended approach"): his
+    # sentences, every number COMPUTED. "[YEAR]" became "roughly level" because the observed
+    # record has no single peak (highest in 1959, a second maximum ~2011, lowest decade the
+    # 1980s). "Roughly level" is only said while the decade means stay within
+    # REGROWTH_LEVEL_TOL of their average (+-5 % at hilda33d); the regrowth clause follows the
+    # sign of its trend. ⚠ Not Our World in Data's AREA series, which peaks in the 1980s:
+    # these are the bookkeeping models' gross CARBON emissions (CHANGELOG 10-02 w).
+    dec <- stats::aggregate(gross_GtC ~ I((year %/% 10) * 10), data = all, FUN = mean)
+    n_d <- stats::aggregate(year ~ I((year %/% 10) * 10), data = all, FUN = length)
+    dm  <- dec$gross_GtC[n_d$year >= REGROWTH_DECADE_MIN_N]
+    level <- max(abs(dm / mean(dm) - 1)) <= REGROWTH_LEVEL_TOL
+    # ...and "Add a clause (Recommended)" (Marcus 2026-10-02): the AREA cleared each year peaked
+    # in the 1980s -- Our World in Data, "Deforestation and Forest Loss" (H. Ritchie, 2021, minor
+    # edits Nov 2024; accessed 2026-10-02): "Global deforestation peaked in the 1980s", from FAO and
+    # Williams (2006). A reader comparing that page with this chart would otherwise see a
+    # contradiction; the two measure different things (area vs the bookkeeping models' carbon).
+    area <- "(in carbon terms; the area of forest cleared each year peaked in the 1980s)"
+    lead <- if (level)
+      sprintf(paste("Deforestation emissions have stayed roughly level since %d, at about",
+                    "%.1f\u2013%.1f GtC a year by decade %s"), obs[1], min(dm), max(dm), area)
+    else
+      sprintf("Deforestation emissions have ranged from %.1f to %.1f GtC a year by decade since %d %s",
+              min(dm), max(dm), obs[1], area)
+    sprintf(paste("%s, whereas forest regrowth has %s over time. While over the %d to %d period,",
+                  "forest regrowth has compensated for %s of deforestation emissions, in the",
+                  "last decade it has compensated for %s (%.2f GtC absorbed/year versus %.2f",
+                  "GtC emitted/year)."),
+            lead, if (s_reg > 0) "gotten larger" else "not grown",
+            obs[1], obs[2], fmt_pct(frac(all)), fmt_pct(frac(now)),
+            -mean(now$regrowth_GtC), mean(now$gross_GtC))
   })
 
   output$w_regrowth_caveat <- renderText(APP_LUC_SPLIT_NOTE)
@@ -476,8 +486,8 @@ function(input, output, session) {
                          "full model %.2f ppm/yr, without %s %.2f (%s),",
                          "and the measured record %.2f."),
                    yr[1], yr[2], a, app_mech_list(off), b,
-                   if (b < a) sprintf("%.0f %% less", 100 * (1 - b / a))
-                   else sprintf("%.0f %% more", 100 * (b / a - 1)),
+                   if (b < a) sprintf("%.0f%% less", 100 * (1 - b / a))
+                   else sprintf("%.0f%% more", 100 * (b / a - 1)),
                    ob)
     # ⛔⛔ THE NON-ADDITIVITY WARNING, IN WORDS AND WITHOUT AN INVENTED NUMBER.
     # The per-switch blurbs in the sidebar each quote their own effect, and a
@@ -486,7 +496,7 @@ function(input, output, session) {
     # on every click, and the measured example that IS available lives in
     # R/mechanisms.R's enso entry rather than in this window.
     if (length(off) > 1L)
-      txt <- paste(txt, sprintf(paste("⚠ These %d switches do NOT add up — they",
+      txt <- paste(txt, sprintf(paste("⚠ These %d switches do not add up — they",
                                       "interact, so the combined figure above is the",
                                       "one to read, not the sum of the individual",
                                       "claims beside each box."), length(off)))
@@ -516,9 +526,10 @@ function(input, output, session) {
                       "typical miss %.2f — %s."),
                 app_mech_list(off), r$alt$bias, r$alt$rms,
                 if (r$alt$rms < r$full$rms)
-                  sprintf("%.0f %% closer to the measurements", 100 * (1 - r$alt$rms / r$full$rms))
+                  # Marcus 2026-10-02: "14% further from the data"; its twin matched
+                  sprintf("%.0f%% closer to the data", 100 * (1 - r$alt$rms / r$full$rms))
                 else if (r$alt$rms > r$full$rms)
-                  sprintf("%.0f %% further from them", 100 * (r$alt$rms / r$full$rms - 1))
+                  sprintf("%.0f%% further from the data", 100 * (r$alt$rms / r$full$rms - 1))
                 else "no change"))
     txt
   })
@@ -550,8 +561,8 @@ function(input, output, session) {
   #
   # ⭐ ONE CHART PER TICKED SWITCH since the multi-select. Each driver's
   # column is touched by at most its OWN switch (volcanic -> aod, emissions ->
-  # the emissions columns; enso and warming zero a COEFFICIENT and touch no
-  # column at all), so handing every panel the combined forcing is not only safe
+  # the emissions columns, enso -> enso, warming -> gmst; the last two since
+  # 2026-10-02, when Marcus ruled that "off" zeroes the index), so handing every panel the combined forcing is not only safe
   # but right: it is the input that run actually received.
   #
   # ⚠ The outputs are declared ONCE HERE, one per switch that has a driver,
@@ -664,8 +675,9 @@ function(input, output, session) {
     sprintf(paste("δ¹³C has fallen %.2f‰ since 1850 as fossil carbon diluted the",
                   "air — the fingerprint that the extra CO₂ is fossil. Δ¹⁴C tells",
                   "a different story: weapons testing nearly %s it by %d, and",
-                  "watching it drain away is how we measure the speed of the",
-                  "carbon cycle itself."),
+                  # Marcus 2026-10-02 (carbotopecomment), his wording
+                  "the rate at which it declines provides information about the",
+                  "speed of carbon exchange between pools."),
             o$d13c_NH[i0] - o$d13c_NH[i1],
             if (o$d14c_NH[ip] > 500) "doubled" else "spiked",
             floor(o$t[ip]))
@@ -806,10 +818,13 @@ function(input, output, session) {
                        "a century later, and %.2f °C warmer after %d years.%s"),
                 pr$gtc, pr$year, dT(y1), dT(y2), y2 - pr$year, tail)
       } else {
+      # Marcus 2026-10-02 (carbotopecomment), his wording ("GHGs" spelled out for the reader).
       sprintf(paste("Release %d GtC in %d and %s of it is still in the air a",
-                    "century later; %s after %d years. Carbon dioxide is not a",
-                    "pollutant that washes out — a large share of it is",
-                    "effectively permanent on any human timescale."),
+                    "century later; %s after %d years. Unlike other greenhouse gases",
+                    "(methane, nitrous oxide), which are chemically or photochemically",
+                    "destroyed, emitted carbon is not destroyed; it just moves between",
+                    "sinks. The result of this is that a share of carbon emissions is",
+                    "effectively permanent on a human timescale."),
               pr$gtc, pr$year, fmt_pct(f(y1)), fmt_pct(f(y2)), y2 - pr$year)
       }
     } else if (identical(input$f_mode, "Build your own")) {
@@ -839,7 +854,8 @@ function(input, output, session) {
       # untestable precisely because it lived inside this renderText.
       tail_clause <- app_stylised_tail_clause(
         sp$kind, sp$rate_pct, sp$emissions,
-        APP_EMIS_HIST$fossil_GtC[APP_EMIS_HIST$year == max(APP_EMIS_HIST$year)])
+        APP_EMIS_HIST$fossil_GtC[APP_EMIS_HIST$year == max(APP_EMIS_HIST$year)],
+        climate = cl)   # 2026-10-02: the to_zero temperature clause is read off the run
       sprintf("Your pathway reaches %.0f ppm and %+.1f °C by %d. %s",
               cl$co2_ppm[nrow(cl)], cl$gmst[nrow(cl)], max(cl$year), tail_clause)
     } else {
@@ -920,7 +936,7 @@ function(input, output, session) {
       p(tags$em(sprintf(paste("Measured from the two runs behind this panel, at a",
                               "%d GtC pulse released in %d. The proportionality is",
                               "measured, not assumed: across pulses from %g to %g GtC",
-                              "the figure above moves by only %.1f %% (%s), so one",
+                              "the figure above moves by only %.1f%% (%s), so one",
                               "tonne really does do the same work as the next."),
                         pr$gtc, pr$year, APP_PULSE_LIN_SIZES[1], APP_PULSE_LIN_SIZES[2],
                         APP_PULSE_LIN_SPREAD, APP_PULSE_LIN_SRC))),
@@ -976,7 +992,17 @@ function(input, output, session) {
     tagList(
       plotOutput("cm_map", height = "430px"),
       div(class = "caveat", tags$strong("What this can and cannot say: "),
-          APP_CMAP_NOTE)
+          APP_CMAP_NOTE,
+          # Marcus 2026-10-02 (carbotopecomment): "Move this up to the yellow box" -- from the
+          # structure section below. Appended to the box, NOT to APP_CMAP_NOTE, which is also
+          # printed on the chart and asserted verbatim by test-constraint-map-panel.R.
+          local({
+            tot <- rowSums(APP_CMAP$MC)
+            sprintf(paste(" Read the row totals, not just the colours: the strongest row",
+                          "here is worth %s log-units and the weakest %s, so a bright",
+                          "cell in a weak row is a large share of very little."),
+                    fmt_cmap_total(max(tot)), fmt_cmap_total(min(tot)))
+          }))
     )
   })
 
@@ -1008,7 +1034,7 @@ function(input, output, session) {
     paste0("The metrics most sensitive to changes in this model are ",
            paste(sprintf("%s — %s", top, who), collapse = "; "),
            ". A metric low on the chart is one this model could change a good",
-           " deal without moving.")
+           " deal without results changing substantially.")   # Marcus 2026-10-02
   })
 
   output$cm_pin_note <- renderText({
@@ -1031,7 +1057,6 @@ function(input, output, session) {
     sh <- function(row, col) 100 * MC[row, col] / sum(MC[row, ])
     tn <- cm_tensions()
     seas <- if (is.null(tn)) NULL else tn[grepl("seasonal", tn$up) | grepl("seasonal", tn$down), ]
-    tot <- rowSums(MC)
     # ⛔⛔ PER PARAMETER, NOT PER COMPONENT. A component's total is a SUM over its
     # parameters, so a component holding ONE parameter looks "unwatched" beside
     # one holding seven, however hard its parameter is pinned -- and the first
@@ -1046,9 +1071,9 @@ function(input, output, session) {
         sprintf(paste("%.0f%% of the ocean's Δ¹⁴C sensitivity is to the mixed",
                       "layer and the vertical mixing below it."),
                 sh("Δ¹⁴C in the ocean", "Mixed layer & vertical mixing")),
-        " That is the useful reading and also the limiting one: a change to the",
-        " ocean's structure that leaves its ventilation rate alone would barely",
-        " register in the radiocarbon profile at all."),
+        # Marcus 2026-10-02: "That is the useful reading and also the limiting one:" deleted
+        " A change to the ocean's structure that leaves its ventilation rate alone",
+        " would barely register in the radiocarbon profile at all."),
       p(tags$strong("The interior chemistry is the only thing influenced by the",
                     "biological pump. "),
         sprintf(paste("%.0f%% of the interior DIC, δ¹³C and alkalinity gradients'",
@@ -1070,48 +1095,48 @@ function(input, output, session) {
           sprintf(" %s of the strongest opposing pairs are seasonal parameters (%s).",
                   nrow(seas), paste(seas$par, collapse = ", ")) else NULL,
         " The fitted phase and amplitude are a compromise between the two tracers.",
-        " A judgment, not a measurement: that is what an under-parameterised",
-        " seasonal scheme looks like from the outside — one knob per hemisphere",
-        " where two tracers want two different answers."),
-      p(tags$strong("The land's magnitude is well constrained; its SHAPE is not. "),
+        # ⚠ CLAUDE'S DRAFT, FOR MARCUS'S WORDING (2026-10-02, carbotopecomment: "Can we change
+        # this to a theory about why the tracers seem to be inconsistent given our model
+        # structure?"). It replaces "A judgment, not a measurement: ... one knob per hemisphere
+        # where two tracers want two different answers." The theory is the one MEASURED in
+        # [[ccx_sst_seas_veto]] (2026-08-21): the ocean's seasonal channel is ANTIPHASE to the net
+        # cycle, so strengthening it SHRINKS the CO2 amplitude while the land's d13C swing stays,
+        # and the d13C rows veto it (72 % of the cost). Stated STRUCTURALLY on purpose: that
+        # note's numbers are from an older mode, so no direction-at-this-fit is claimed.
+        " A likely reason they disagree, given how this model is built: it makes its",
+        " seasonal cycle from two channels that run in opposite directions — plants on",
+        " land, which take up and release carbon with a strong ¹³C fingerprint, and the",
+        " surface ocean, which gives off CO₂ as it warms in summer and carries almost no",
+        " ¹³C fingerprint. The ocean channel shrinks the seasonal CO₂ swing without",
+        " shrinking the δ¹³C swing in step, so the two tracers respond differently to",
+        " the same seasonal settings — and with one seasonal setting per hemisphere,",
+        " the fit can only split the difference."),
+      p(tags$strong("The land's magnitude is well constrained; its shape is not. "),
         sprintf(paste("Land uptake takes %.0f%% of the CO₂ level's sensitivity and",
                       "%.0f%% of the measured budget's, so how much carbon the land",
                       "takes up today is pinned hard."),
                 sh("CO₂ level", "Land uptake"), sh("Measured land & ocean sinks", "Land uptake")),
-        sprintf(paste(" But the two numbers that set it are only pinned as a",
-                      "COMBINATION: on their own each is about %.0fx tighter than",
-                      "the fit leaves the pair jointly."),
+        # Marcus 2026-10-02: name the two numbers; the descriptions are params_meta.R's own
+        sprintf(paste(" But the two numbers that set it (the maximum boost CO₂",
+                      "fertilisation can give, beta_max, and the CO₂ level needed for",
+                      "half that boost, fert_k) are only pinned as a combination: on",
+                      "their own each is about %.0fx tighter than the fit leaves the",
+                      "pair jointly."),
                 max(APP_CMAP$sd_ratio[c("beta_max", "fert_k")]))),
         # 2026-10-01 (Marcus, review 10-01c A3): " CO2 fertilisation is this
         # model's only long-term land-uptake term, so the saturation shape --
         # the part that decides the future -- is exactly the part the
         # present-day record does not separate." DELETED. Its premise is false
         # since hilda33d (N-deposition retention is a second long-term sink).
-      p(tags$strong("And the numbers that influence nothing much. "),
-        sprintf(paste("The individual numbers that influence the measurements",
-                      "least are %s. That is not a defect on its own — a number nothing",
-                      "measures may still be right — but it does mean the",
-                      "observations cannot tell you whether it is."),
-                paste(quiet, collapse = ", ")),
-        " ⚠ Asked of the parameters, not of the eight groups: a group's bar is",
-        " a SUM over the parameters in it, so the group holding a single",
-        " parameter looks quiet however hard that parameter is pinned.",
-        sprintf(paste(" ⚠ Read the row totals, not just the colours: the strongest",
-                      "row here is worth %s log-units and the weakest %s, so a",
-                      "bright cell in a weak row is a large share of very little."),
-                fmt_cmap_total(max(tot)), fmt_cmap_total(min(tot)))),
-      p(tags$strong("And the measurement least sensitive to this model, which needs care. "),
-        sprintf(paste("%s is worth %s log-units against %s's %s \u2014 about %.0f",
-                      "times less. \u26a0 That does NOT mean the record was not worth",
-                      "having."),
-                names(which.min(tot)), fmt_cmap_total(min(tot)),
-                names(which.max(tot)), fmt_cmap_total(max(tot)),
-                max(tot) / max(min(tot), 1e-6)),
-        " Leverage is measured HERE, at the fitted values. A measurement that",
-        " already agrees, and whose information is carried by a parameter that",
-        " something else now holds, shows up flat \u2014 the same reading as a",
-        " measurement that never said anything. This map cannot tell those two",
-        " apart, and it is the one thing it should not be used to argue.")
+      # Marcus 2026-10-02 (carbotopecomment): his sentence replaces the paragraph; the three
+      # names stay COMPUTED (the per-PARAMETER totals above). Its "read the row totals" warning
+      # moved up into the map's own caveat box (output$cm_map_ui), and the paragraph on the
+      # least-sensitive measurement that followed it is DELETED.
+      p(tags$strong("Some parameters have little influence on the model, "),
+        sprintf("and are not well constrained by observations, such as %s.",
+                if (length(quiet) > 1L)
+                  paste0(paste(quiet[-length(quiet)], collapse = ", "), ", and ",
+                         quiet[length(quiet)]) else quiet))
     )
   })
 
@@ -1210,7 +1235,7 @@ function(input, output, session) {
       p(tags$code(paste(x$provisional, collapse = ", "))),
       if (!is.na(x$n_fitted))
         p(tags$small(sprintf(paste("The running fit has %d free parameters;",
-                                   "the held names are listed above."), x$n_fitted))))
+                                   "the held parameters are listed above."), x$n_fitted))))
   })
 
   # TWO TABLES, NOT ONE (Marcus 2026-09-22, review U2). IGCC temperature sat in

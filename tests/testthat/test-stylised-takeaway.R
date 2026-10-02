@@ -30,6 +30,13 @@ for (e in parse(file.path(.root, "app", "global.R"))) {
   if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") &&
       is.name(e[[2]]) && as.character(e[[2]]) %in% .want) eval(e, .env)
 }
+# 2026-10-02: the to_zero temperature clause's two "flat" bands are named constants in global.R,
+# parsed out the same way (a separate list, because the test below asserts .want are functions).
+.want_const <- c("TAIL_DT_FLAT", "TAIL_ERF_FLAT")
+for (e in parse(file.path(.root, "app", "global.R"))) {
+  if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") &&
+      is.name(e[[2]]) && as.character(e[[2]]) %in% .want_const) eval(e, .env)
+}
 test_that("both functions were found in global.R", {
   # ⚠ If a rename orphaned either name, every test below would silently test
   # NOTHING -- the loop above would simply never fire. Asserted, not assumed.
@@ -107,7 +114,7 @@ test_that("every claimed number is the one the PATHWAY actually has", {
     y_end <- max(em$year)
     e_end <- em$fossil_GtC[em$year == y_end]
     cl <- .env$app_stylised_tail_clause("rate", r, em, E0)
-    expect_true(grepl(sprintf("%+.1f %%", r), cl, fixed = TRUE),
+    expect_true(grepl(sprintf("%+.1f%%", r), cl, fixed = TRUE),   # re-pinned 2026-10-02: "14%" style (approved)
                 info = sprintf("rate %+.1f not quoted", r))
     expect_true(grepl(as.character(y_end), cl, fixed = TRUE))
     # the end-of-run rate, at whichever precision that branch prints
@@ -127,3 +134,47 @@ test_that("the sign of the rate decides the branch, at every slider step", {
     else             expect_true(grepl("hold at", cl, fixed = TRUE), info = paste("r =", r))
   }
 })
+
+# ---------------------------------------------------------------------
+# 2026-10-02 (Marcus, carbotopecomment + "Say it keeps rising (Recommended)"): the to_zero clause
+# now says what TEMPERATURE does after fossil emissions stop, READ OFF THE RUN. Every app run
+# measured that day kept warming to 2150, so his "temperatures drop even more slowly" was false
+# there -- but a different background could fall, so each DIRECTION is a branch and each branch
+# is gated here on a stub climate whose direction is known. Direction words and the computed
+# number are asserted, never the prose.
+# ---------------------------------------------------------------------
+test_that("the two flat bands were found in global.R", {
+  for (w in .want_const) expect_true(is.numeric(get0(w, envir = .env)), info = w)
+})
+clause_with <- function(dT, dnc, stop = 2060L) {
+  em <- .env$app_stylised_emissions("to_zero", YRS, to_zero_year = stop,
+                                    rate_pct = 0, background = "ssp245")
+  yrs <- seq(YRS[1], YRS[2])
+  ramp <- function(d) ifelse(yrs <= stop, 0, d * (yrs - stop) / (YRS[2] - stop))
+  cl <- data.frame(year = yrs, gmst = 1.5 + ramp(dT), erf_nonco2 = 1 + ramp(dnc))
+  .env$app_stylised_tail_clause("to_zero", 0, em, E0, climate = cl)
+}
+test_that("to_zero: temperature still rising after the stop is said, with the run's number", {
+  cl <- clause_with(dT = 0.4, dnc = 0.5)
+  expect_true(grepl("rising", cl, fixed = TRUE))
+  expect_true(grepl("0.4 \u00b0C", cl, fixed = TRUE))
+  expect_false(grepl("drop", cl, fixed = TRUE))
+  # the other-emissions reason only when the run's non-CO2 forcing actually rose
+  expect_true(grepl("other emissions", cl, fixed = TRUE))
+  expect_false(grepl("other emissions", clause_with(dT = 0.4, dnc = 0), fixed = TRUE))
+})
+test_that("to_zero: flat and falling temperatures get their own direction", {
+  flat <- clause_with(dT = 0.02, dnc = 0)
+  expect_true(grepl("hardly change", flat, fixed = TRUE))
+  expect_false(grepl("rising", flat, fixed = TRUE))
+  fall <- clause_with(dT = -0.3, dnc = 0)
+  expect_true(grepl("drop", fall, fixed = TRUE))
+  expect_true(grepl("0.3 \u00b0C", fall, fixed = TRUE))
+  expect_false(grepl("rising", fall, fixed = TRUE))
+})
+test_that("to_zero without a run makes no temperature claim at all", {
+  cl <- clause("to_zero")
+  expect_true(grepl(STOPS, cl, fixed = TRUE))
+  expect_false(grepl("Temperatures", cl, fixed = TRUE))
+})
+

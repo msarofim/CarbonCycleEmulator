@@ -72,11 +72,13 @@ test_that("the input-deleting and response-removing switches are told apart", {
   # emissions zeroes e_foss/e_luc; volcanic zeroes aod_NH/aod_SH.
   expect_true(removes[["emissions"]])
   expect_true(removes[["volcanic"]])
-  # enso zeroes gamma_enso, warming_feedback zeroes q10/sst_scale/sst_obs --
-  # PARAMETERS. The index and the temperature record are untouched, which is the
-  # sentence the panel prints and the point C5's caveat makes in words.
-  expect_false(removes[["enso"]])
-  expect_false(removes[["warming_feedback"]])
+  # Re-pinned 2026-10-02 (approved, Marcus: "Zero the index (Recommended)"). enso and
+  # warming_feedback used to change PARAMETERS only and leave their input untouched; enso's
+  # did not even remove every response (the ocean's upwelling path kept reading the index).
+  # Both now zero their input too, so the panel draws the zero line the run actually had.
+  # Still MEASURED by differencing, not declared.
+  expect_true(removes[["enso"]])
+  expect_true(removes[["warming_feedback"]])
 })
 
 test_that("removes_driver would flip if a switch started zeroing its input", {

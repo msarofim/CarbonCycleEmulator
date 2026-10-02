@@ -102,7 +102,7 @@ rv_plot_repdc <- function() rv_guard(rv_rep_dc(), function(x) {
            "Means over %d monthly observations: box %+.2f ppm, scored %+.2f ppm (RMS %.2f).",
            "The fitted offset is %.1fx the measured one, an excess of %+.2f ppm",
            "(about %.0f GtC of airborne carbon). The measured value is the NOAA",
-           "marine-boundary-layer reference minus these stations; it EXCLUDES Mauna",
+           "marine-boundary-layer reference minus these stations; it excludes Mauna",
            "Loa, so the northern half of it is independent of this comparison."),
            x$n, x$mean_box, x$mean_scored, x$rmse_scored,
            x$rep_dC / RV_REP_OBS_MEAN, x$rep_dC - RV_REP_OBS_MEAN,
@@ -199,7 +199,7 @@ rv_plot_variance <- function() rv_guard(rv_variability(), function(x) {
            if (is.null(x$enso)) "" else sprintf(
              paste("These anomalies track the El Niño index at r %+.2f for the model",
                    "and %+.2f for the measurements (n = %d) — the model is if anything",
-                   "MORE El Niño-driven than the record, so what is missing from its",
+                   "more El Niño-driven than the record, so what is missing from its",
                    "variance is not El Niño-shaped."),
              x$enso$r_model, x$enso$r_obs, x$enso$n)))) +
     theme_ccx()
@@ -261,6 +261,7 @@ rv_plot_irf <- function() rv_guard(rv_pulse(), function(x) {
            paste(sprintf("At %d yr: %.3f vs %.3f.", x$horizons, x$read, x$joos),
                  collapse = "  "),
            "  A comparison, not a test — nothing from this source scores the model."))) +
+    expand_limits(y = c(0, 1)) +   # Marcus 2026-10-02 (carbotopecomment): "the y axis should run zero to 1"
     theme_ccx()
 })
 
@@ -275,8 +276,9 @@ rv_plot_partition <- function() rv_guard(rv_pulse(), function(x) {
                value = as.numeric(cmp$share), lo = NA, hi = NA),
     data.frame(where = pretty[res], who = "Joos et al. 2013",
                value = vapply(res, function(k) cmp$joos[[k]][["mean"]], numeric(1)),
-               lo = vapply(res, function(k) cmp$joos[[k]][["mean"]] - cmp$joos[[k]][["sd"]], numeric(1)),
-               hi = vapply(res, function(k) cmp$joos[[k]][["mean"]] + cmp$joos[[k]][["sd"]], numeric(1))))
+               # 2026-10-02: Joos's PUBLISHED range, +-2 s.d. (it was drawn as "+-1 sd"; DG_L_JOOS)
+               lo = vapply(res, function(k) cmp$joos[[k]][["mean"]] - 2 * cmp$joos[[k]][["sd"]], numeric(1)),
+               hi = vapply(res, function(k) cmp$joos[[k]][["mean"]] + 2 * cmp$joos[[k]][["sd"]], numeric(1))))
   d$where <- factor(d$where, levels = unname(pretty[res]))
   d$who <- factor(d$who, levels = c("Joos et al. 2013", "This model"))
   ggplot(d, aes(where, value, fill = who)) +
@@ -288,7 +290,7 @@ rv_plot_partition <- function() rv_guard(rv_pulse(), function(x) {
     labs(x = NULL, y = sprintf("Share of the pulse at %d years (%%)", RV_IRF_HORIZON),
          caption = rv_cap(sprintf(
            paste("In the multi-model spread's own standard deviations: %s.",
-                 "Bars are ±1 sd of that spread."),
+                 "Bars are Joos et al.'s published \u00b12 sd range."),
            paste(sprintf("%s %+.2f", pretty[res], cmp$z), collapse = ", ")))) +
     theme_ccx()
 })

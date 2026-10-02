@@ -47,10 +47,14 @@
 # ⛔ NOTHING HERE DECLARES WHETHER A SWITCH REMOVES ITS DRIVER, and that is
 # deliberate: it is MEASURED, by differencing the series either side of
 # ccx_apply_mechanisms() (ccx_driver_series()). It is also the interesting half
-# of the panel -- `volcanic` and `emissions` zero their INPUT, while `enso` and
-# `warming_feedback` leave the input untouched and remove the model's RESPONSE
-# to it. A declared flag would be a second copy of a fact the code already
-# holds, free to drift from it.
+# of the panel. ⭐ SINCE 2026-10-02 EVERY DRIVER SWITCH ZEROES ITS INPUT (Marcus,
+# "Zero the index (Recommended)"): `enso` and `warming_feedback` used to leave the
+# input untouched and remove only a RESPONSE, and for `enso` that response was not
+# all of it -- the ocean's upwelling path (w_enso_l2) and the equatorial cell kept
+# reading the index, so "the model simply stops responding" was false (0.47 ppm).
+# `warming_feedback` was already exactly equivalent (0 ppm) and now zeroes gmst too,
+# so its chart draws the zero line it effectively had. A declared flag would be a
+# second copy of a fact the code already holds, free to drift from it.
 #
 # ⚠ EVERY SERIES IS ZERO BEFORE ITS RECORD STARTS, WHICH IS COVERAGE AND NOT
 # PHYSICS, and the panel must say so: the Nino 3.4 index begins 1948
@@ -106,8 +110,9 @@ CCX_MECHANISMS <- list(
     caveat = paste("This switches off CO₂ fertilisation only. Nitrogen",
                    "deposition, from fuel burning and farming, is a separate",
                    "and smaller land sink in this model, and it stays on here",
-                   "— even though, in the real world, nitrogen also limits",
-                   "how much extra growth CO₂ can buy."),
+                   # Marcus 2026-10-02 (carbotopecomment): his wording, in the app's CO₂ / -isation style
+                   "— even though, in the real world, lack of sufficient nitrogen",
+                   "can also limit the response to CO₂ fertilisation."),
     # MUST ZERO WHICHEVER PARAMETER IS LIVE. This read `p$beta <- 0` until
     # 2026-08-14, and the flip to CCX_FERT_MM turned it into a NO-OP -- the
     # switch moved CO2 at 2100 by exactly 0.00 ppm while still rendering as an
@@ -128,7 +133,7 @@ CCX_MECHANISMS <- list(
     # does not know the temperature is PRESCRIBED will read "switch off the
     # warming feedback" as "switch off the warming". The "so the two effects can
     # be told apart" tail IS pedantry and is dropped.
-    caveat = paste("The world still warms either way — this model is DRIVEN by",
+    caveat = paste("The world still warms either way — this model is driven by",
                    "the observed temperature record. What is switched off is",
                    "only the carbon cycle's response to that warming."),
     apply = function(p, F) {
@@ -146,6 +151,11 @@ CCX_MECHANISMS <- list(
       # the canonical's run is BLIND to the temperature record under this switch,
       # which catches the next temperature path a refit makes live as well.
       p$npp_tsens <- 0
+      # 2026-10-02: zero the INPUT as well (Marcus, with "Zero the index"). MEASURED: with the
+      # four parameters above zeroed the run is BLIND to gmst (max |dCO2| 0 against gmst = 0),
+      # so this changes no number -- it makes the driver chart draw the zero line the model
+      # effectively already ran with, instead of the false "the model still receives it".
+      if (!is.null(F$gmst)) F$gmst <- 0
       list(p = p, F = F)
     }
   ),
@@ -154,12 +164,11 @@ CCX_MECHANISMS <- list(
     label = "El Niño / La Niña",
     # ⛔ "SWITCH IT OFF AND THE WOBBLES GO" WAS WRONG, AND THE CHART ADDED FOR
     # Marcus's C2 is what exposed it -- which is the whole argument for adding
-    # it. MEASURED over 1959-2024, scatter about a 3-dof smooth of the annual
-    # growth rate: full model 0.269 ppm/yr against an observed 0.435 (62 %, the
-    # shortfall review card 4 reports). Knockouts: ENSO -23 %, temperature
-    # -22 %, volcanic light -8 %; ⚠ ALL THREE TOGETHER only -43 %, so most of
-    # this model's interannual wobble is not any of them -- it is the prescribed
-    # EMISSIONS record's own year-to-year structure (-19 % on its own).
+    # it. RE-MEASURED 2026-10-02 at hilda33d, app estimator, 1980-2024 (the observed
+    # NOAA MBL span): full model 0.268 ppm/yr against an observed 0.459 (58 %, card 4's
+    # "about 60%"). Knockouts: ENSO (index zeroed) -28 %, temperature -29 %, volcanic
+    # light -8 %; all three together -67 %; the emissions record smoothed, alone, -12 %.
+    # (1959-2024 under the older mode and the old land-only switch: -23 / -22 / -8, -43 %.)
     # ⚠ This estimator is NOT gate V's (which regresses growth on emissions with
     # a time-varying airborne fraction); the numbers are an app-level echo and
     # must not be quoted as the gate's decomposition. That is
@@ -171,25 +180,39 @@ CCX_MECHANISMS <- list(
                   "goes with it."),
     # ⛔ THE TEMPERATURE HALF KEEPS RUNNING, and this caveat may not be
     # shortened to "El Nino off". Marcus 2026-09-25: "it does not flatten the
-    # ENSO temperature effect, so that still exists." MEASURED IN THIS FILE, not
-    # asserted: `apply` below sets gamma_enso to 0 and touches NOTHING ELSE, so
-    # the prescribed gmst and sst_anom drivers still carry every El Nino's
-    # temperature signature, and the carbon cycle's response to that warming
-    # (q10, sst_scale) runs on. It is structurally the SAME split as `volcanic`
-    # -- one pathway removed, the thermal one left alone -- and it names the same
-    # sibling switch, because that is the one that removes the other half.
-    caveat = paste("This removes the model's direct ENSO term only. El Niño's",
-                   "own temperature signature is still in the observed",
-                   "temperature record this model is DRIVEN by, so the carbon",
+    # ENSO temperature effect, so that still exists." `apply` below zeroes the
+    # ENSO INDEX (2026-10-02) -- every response the model makes to it, land and
+    # ocean -- but the prescribed gmst and sst_anom drivers still carry every El
+    # Nino's temperature signature, and the carbon cycle's response to that
+    # warming (q10, sst_scale) runs on. Structurally the SAME split as `volcanic`:
+    # one pathway removed, the thermal one left alone.
+    # Marcus 2026-10-02 (carbotopecomment): the pointer to the warming switch is cut (warming
+    # mixes many things, so it does not isolate ENSO's own warming), and the last sentence is
+    # his. "About a third" is MEASURED on the app's estimator over 1980-2024 under the switch
+    # as it now is (index zeroed): ENSO + warming + volcanic light off together remove 67 % of
+    # the full model's scatter (0.268 -> 0.088 ppm/yr). Under the old land-only switch it was
+    # 54 % (46 % left), which is why his draft said "half". Smoothing the emissions record
+    # removes 12 % on its own (old switch). CHANGELOG 10-02 (w).
+    caveat = paste("This sets the El Niño index to zero, which removes every",
+                   "response the model makes to it, on land and in the ocean.",
+                   "El Niño's own temperature signature is still in the observed",
+                   "temperature record this model is driven by, so the carbon",
                    "cycle's response to that warming keeps running whatever this",
-                   "switch says — use “Warming's effect on the carbon cycle”",
-                   "to remove the temperature pathway.",
+                   "switch says.",
                    "Affects year-to-year variability, not the long-term trend.",
-                   "And it is not the whole story: even with El Niño, the",
-                   "warming response and the volcanic light effect ALL switched",
-                   "off, more than half the model's wobble remains — it comes",
-                   "from the year-to-year shape of the emissions record itself."),
-    apply = function(p, F) { p <- ccx_set_enso(p, list(gamma_enso = 0)); list(p = p, F = F) }
+                   "In the model, even accounting for El Niño, temperature, and",
+                   "aerosol light-diffusion effects, about a third of the wobble",
+                   "remains, so there must be other sources of variability."),
+    # 2026-10-02 (Marcus: "Zero the index (Recommended)"): the INDEX goes to zero, so EVERY
+    # path that reads it stops -- land and ocean direct terms, the layer-3 upwelling anomaly
+    # (w_enso_l2), the equatorial cell (gamma_eq) and the SST modulation. Zeroing the
+    # coefficients as well is belt and braces, as `volcanic` zeroes both AOD and gamma_diff:
+    # MEASURED, input-zeroed alone == input + coefficients zeroed, max |dCO2| 0.
+    apply = function(p, F) {
+      p <- ccx_set_enso(p, list(gamma_enso = 0))
+      if (!is.null(F$enso)) F$enso <- 0
+      list(p = p, F = F)
+    }
   ),
   volcanic = list(
     driver = "aod",  # CCX_DRIVERS; NULL = acts on a parameter, not an input
@@ -198,7 +221,7 @@ CCX_MECHANISMS <- list(
                   "atmosphere. It scatters sunlight, which sounds bad for",
                   "plants but is not: scattered light reaches leaves that",
                   "would otherwise sit in shade, so the world's vegetation",
-                  "grows a little FASTER for a year or two and pulls extra",
+                  "grows a little faster for a year or two and pulls extra",
                   "CO₂ out of the air. Switch it off and the dips after",
                   "eruptions get shallower. The clearest case is the 1991",
                   "eruption of Mount Pinatubo, whose effect on the carbon",
@@ -211,12 +234,13 @@ CCX_MECHANISMS <- list(
     # temperature, which this repo does not have. So the thermal half keeps
     # running no matter what this switch is set to, and the panel says so.
     # (Marcus review C6, 2026-09-22; spec 2026-08-29 §3a names both halves.)
-    caveat = paste("This removes the LIGHT effect only. Eruptions also COOL the",
+    # Marcus 2026-10-02 (carbotopecomment): lower-case, and the pointer to the warming switch
+    # cut -- "warming is a mix of so many different things, it doesn't distinguish any
+    # individual ENSO or volcanic warming effect out".
+    caveat = paste("This removes the light effect only. Eruptions also cool the",
                    "planet, and this model is driven by the observed temperature",
                    "record, which already contains that cooling — so the cooling",
-                   "half keeps running whatever this switch says. Use",
-                   "\u201cWarming's effect on the carbon cycle\u201d to remove the",
-                   "temperature pathway."),
+                   "half keeps running whatever this switch says."),
     apply = function(p, F) {
       # BOTH, deliberately. Zeroing the AOD columns is the physical statement
       # ("no volcanic aerosol") and would also catch a future consumer of them;

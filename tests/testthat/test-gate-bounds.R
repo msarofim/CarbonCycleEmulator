@@ -508,7 +508,10 @@ test_that("L is a COMPARISON, not a gate: the verdict errors by name and dg_comp
   cmp <- dg_compareL(list(share = c(land = 16, ocean = 59, air = 25)))
   expect_equal(unname(cmp$z), c(0, 0, 0)); expect_null(cmp$pass)
   cmp2 <- dg_compareL(list(share = c(land = 30, ocean = 47, air = 23)))
-  expect_equal(cmp2$z[["land"]], 1); expect_equal(cmp2$z[["ocean"]], -1)
+  # re-pinned 2026-10-02 (approved, "Fix it"): Joos's +-14 / +-12 are +-2 s.d., so a share at the
+  # published edge is z = +-2, not +-1. And the stored pair is consistent: pm2sd == 2 * sd.
+  expect_equal(cmp2$z[["land"]], 2); expect_equal(cmp2$z[["ocean"]], -2)
+  for (k in DG_L_RES) expect_equal(DG_L_JOOS[[k]][["pm2sd"]], 2 * DG_L_JOOS[[k]][["sd"]])
 })
 
 test_that("GATE GL bounds the d13C gradient LEVEL on the observation's own se, both ways, at H's strictness", {

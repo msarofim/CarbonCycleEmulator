@@ -38,7 +38,10 @@ LRP_UI_OUTPUT  <- "w_regrowth_ui"
 LRP_RENDERED   <- c("w_regrowth_ui", "w_regrowth_plot",
                     "w_regrowth_takeaway", "w_regrowth_caveat")
 LRP_PLOT_FN    <- "plot_luc_gross_split"
-LRP_ASSERT_RX  <- "ASSERTED"
+# 2026-10-02: "asserted from", lower-case. The copy was lower-cased with the app-wide caps sweep, after
+# which "ASSERTED" survived ONLY in two code comments and this check passed vacuously. "asserted from"
+# occurs only in the two reader-facing captions (plots.R NOTE_LUC_SPLIT, global.R APP_LUC_SPLIT_NOTE).
+LRP_ASSERT_RX  <- "asserted from"
 LRP_SCALE_RX   <- "APP_LUC_SCALE"
 # the attribution retired 2026-09-24 (p): the land-use caveat used to credit the
 # natural sink's growth to "CO2 fertilisation AND forest regrowth", which names a
@@ -86,9 +89,10 @@ test_that("3. the panel says the split is ASSERTED, not measured", {
   # in the plot's own caption (which a screenshot carries) AND in the page copy
   expect_true(has(.lrp_plots, LRP_ASSERT_RX))
   expect_true(has(.lrp_global, LRP_ASSERT_RX))
-  # and the server's info box must say the model cannot check it
-  body <- paste(.lrp_server, collapse = " ")
-  expect_true(grepl("cannot check the split", body, fixed = TRUE))
+  # and the page must say the model cannot check it. Re-pinned 2026-10-02 (approved): the server's
+  # "Why splitting it" box that said "cannot check the split" was deleted on Marcus's instruction; the
+  # caveat under the chart (APP_LUC_SPLIT_NOTE) carries the claim now.
+  expect_true(has(.lrp_global, "this model does not measure"))
 })
 
 test_that("4. the plot function exists and names its three series", {
@@ -117,8 +121,10 @@ test_that("6. the land-use caveat no longer puts regrowth inside the natural sin
   # the page contradict itself, and nothing else in the suite would see it.
   body <- paste(.lrp_server, collapse = " ")
   expect_false(grepl(LRP_RETIRED_RX, body, fixed = TRUE))
-  # and the replacement must still say where regrowth IS counted
-  expect_true(grepl("counted inside the", body, fixed = TRUE))
+  # and the page must still say where regrowth IS counted. Re-pinned 2026-10-02 (approved): Marcus's
+  # land paragraph no longer mentions regrowth; the regrowth section's intro (ui.R, his wording) says
+  # land-use emissions are a NET of it.
+  expect_true(grepl("a net of deforestation and forest regrowth", paste(.lrp_ui, collapse = " "), fixed = TRUE))
   # MUTATION: put the retired attribution back and the same check must reject it
   broken <- paste(body, LRP_RETIRED_RX)
   expect_true(grepl(LRP_RETIRED_RX, broken, fixed = TRUE))
@@ -134,8 +140,10 @@ test_that("7. cross-referenced headings come from ONE shared constant", {
   for (nm in LRP_HEADINGS) {
     expect_true(grepl(paste0(nm, " "), glb) || grepl(paste0(nm, "  "), glb))
     expect_true(grepl(sprintf("h5(%s)", nm), ui, fixed = TRUE))
-    expect_true(grepl(nm, body, fixed = TRUE))
   }
+  # the prose quotes a heading by its constant's NAME. Re-pinned 2026-10-02 (approved): Marcus's land
+  # paragraph points only at the imbalance heading now, so only that one is quoted.
+  expect_true(grepl("APP_IMBALANCE_HEADING", body, fixed = TRUE))
   # the literals must NOT be retyped in ui.R or server.R
   expect_false(grepl('h5("Forest regrowth, on its own")', ui, fixed = TRUE))
   expect_false(grepl("h5(\"Is the model's land sink too high?\")", ui, fixed = TRUE))

@@ -141,16 +141,20 @@ test_that("ENSO affects variability but not the trend", {
 
 test_that("the warming switch removes only the carbon cycle's response", {
   skip_if_no_cpp()
-  # It must act on q10 and sst_scale, and leave the temperature forcing itself
-  # untouched -- so the app can still show a warming world whose carbon cycle
-  # is not reacting to it.
+  # It must act on q10 and sst_scale (and npp_tsens). Until 2026-10-02 it also left the
+  # temperature forcing untouched; since then it zeroes it too (see the re-pin below), and
+  # the full run is what shows a warming world.
   p <- ccx_default_params()
   F <- suppressWarnings(ccx_build_forcing("ssp245", c(1750, 2100), prod_c14 = 0))
   m <- ccx_apply_mechanisms(p, F, "warming_feedback")
   expect_equal(m$p$q10, 1)
   expect_equal(m$p$sst_scale, 0)
   expect_equal(m$p$npp_tsens, 0)
-  expect_identical(m$F$gmst, F$gmst)
+  # Re-pinned 2026-10-02 (approved, with "Zero the index"): the temperature INPUT is zeroed
+  # as well, so the driver chart draws what the carbon cycle effectively saw. The world still
+  # warms in the full run; that this changes no number is the next test's job (the
+  # canonical's run is BLIND to the temperature record under this switch).
+  expect_true(all(m$F$gmst == 0))
 })
 
 test_that("under the warming switch, the CANONICAL's run is blind to the temperature record", {
