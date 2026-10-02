@@ -387,8 +387,11 @@ ccx_spinup <- function(p = ccx_default_params(),
 
   # ---- forcing at equilibrium: nothing external ----------------------
   zero_forc <- function(prod = 0) {
+    # `land_enso` (W1, 2026-10-02): a CONSTANT, ENSO-free forcing's lagged index is the
+    # index itself, 0. Without it a lagged parameter set is refused by ccx_deriv() --
+    # correctly for a bare point forcing, but this one is constant by construction.
     list(e_foss = list(NH = 0, SH = 0), e_luc = list(NH = 0, SH = 0),
-         gmst = 0, enso = 0, c14_bomb = 0, c14_nuclear = 0, c14_cosmo = prod)
+         gmst = 0, enso = 0, land_enso = 0, c14_bomb = 0, c14_nuclear = 0, c14_cosmo = prod)
   }
   p0 <- p; p0 <- ccx_set_enso(p0, list(gamma_enso = 0))
   # seasonal term integrates to zero over a year; evaluate the annual-mean state.

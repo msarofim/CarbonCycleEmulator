@@ -652,7 +652,8 @@ ccx_mode_pins <- function(md) {
   # THE GATE RIDES WITH THE PINS (2026-10-01): a file fitted under a structure that OPENS it
   # (R/calibrate.R CCX_PARAM_GATED) fits four more names, and ccx_apply_pins() of these pins applies
   # the gate first. An attribute, so names / values / ccx_pin_label() are unchanged.
-  if (ccx_gate_open(ccx_mode_struct(md))) {
+  # ANY gate since 2026-10-02 (CCX_PARAM_GATES: the lag gate too); ccx_apply_gate() opens them all.
+  if (length(ccx_gates_open(ccx_mode_struct(md)))) {
     if (is.null(p)) p <- stats::setNames(numeric(0), character(0))
     attr(p, "gate_struct") <- ccx_mode_struct(md)
   }

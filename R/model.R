@@ -549,6 +549,130 @@ ccx_set_enso <- function(p, src) {
   p
 }
 
+# ---------------------------------------------------------------------
+# THE LAND ENSO LAG, `lag_enso_land` (W1, 2026-10-02; DESIGN's L_MEI)
+# ---------------------------------------------------------------------
+# DESIGN specified the land ENSO anomaly as gamma x MEI(t - L_MEI), L_MEI FITTED on
+# U(0, 12) months. The core (efa4495, 08-10) read the index at t and nothing retired
+# the lag. Measured 10-02 (x): the model's land response arrives ~5 months EARLY
+# against the observed growth rate (calibration/diag_enso_growth_fit.R). Marcus
+# 10-02: "Do it right. Option 2" -- the lag, on the land term, fitted, then a refit.
+#
+# SEMANTICS. The LAND term reads the index at t - L; every OCEAN channel keeps reading
+# it at t. One lag for both hemispheres, as designed. L in MONTHS.
+# ABSENT = 0 = the index itself, bit for bit: ccx_enso_lagged() returns its input.
+#
+# WHERE IT IS COMPUTED. Once per RUN, in R (ccx_land_enso()), from the forcing table's
+# `enso` column, and handed to BOTH cores as one more series: the R runner puts it in
+# the point forcing as `land_enso`, the C++ runner passes it as a vector. The C++ never
+# sees L, so the interpolation has ONE implementation, and N_FORCING stays 19.
+# ⚠ The NAME `land_enso` is deliberate: a field spelled `enso_*` would be returned by
+# `forc$enso` on a forcing that lacked `enso` ([[dollar_partial_matches_on_lists]]).
+#
+# INTERPOLATION: a cubic Hermite whose node slopes are BACKWARD differences. It passes
+# through every monthly value (an integer L is an EXACT shift) and is C1 in L, so the
+# BFGS polish and the Hessian see no kink at integer lags, which linear interpolation
+# would put there. NOT Catmull-Rom, the plan's first choice: its central-difference
+# slopes reach one month FORWARD, so for 0 < L < 1 the land flux of month i would read
+# the index of month i + 1 -- acausal, and a run split at month i would then disagree
+# with the unsplit run. This stencil reads months k - 1, k, k + 1 with
+# k = floor(i - L), all <= i for every L > 0.
+#
+# HISTORY. The stencil reaches CCX_ENSO_HIST_N months before the table's first row. A
+# state that continues an earlier run carries them as `spin$enso_hist`
+# (ccx_enso_hist_after()); without it the first value is HELD back in time. That is
+# EXACT for every table this repo integrates from a spinup: the index is 0 before
+# 1948, the periodic spinup's year is ENSO-free, and the pulse protocols' forward
+# windows zero it. A table whose opening months VARY started mid-record, and a lagged
+# run of it with no history is REFUSED rather than held (ccx_land_enso()).
+CCX_ENSO_LAG_MAX <- 12      # months: the prior's upper end, DESIGN U(0, 12)
+CCX_ENSO_HIST_N  <- 13L     # months before row 1 the stencil reaches at L = CCX_ENSO_LAG_MAX
+
+#' The land ENSO lag of a parameter list, in months (absent = 0 = no lag)
+ccx_enso_lag_of <- function(p) {
+  v <- p[["lag_enso_land"]]                  # `[[`, not `$`: see the note above
+  if (is.null(v)) return(0)
+  if (length(v) != 1L || !is.finite(v) || v < 0 || v > CCX_ENSO_LAG_MAX)
+    stop("ccx_enso_lag_of(): lag_enso_land = ", paste(v, collapse = ","),
+         " is not one number in [0, ", CCX_ENSO_LAG_MAX, "] months.")
+  as.numeric(v)
+}
+
+#' A monthly series read L months late, at the fractional row i - L
+#'
+#' @param x    the monthly index, one value per forcing row
+#' @param L    the lag in months, in [0, CCX_ENSO_LAG_MAX]; 0 returns `x` itself
+#' @param hist the months BEFORE row 1, oldest first (any length; the last
+#'   CCX_ENSO_HIST_N are used, and a shorter one is padded with its first value).
+#'   NULL holds x[1] back in time.
+ccx_enso_lagged <- function(x, L, hist = NULL) {
+  if (L == 0) return(x)
+  H <- CCX_ENSO_HIST_N
+  if (is.null(hist)) hist <- rep(x[1], H)
+  if (length(hist) < H) hist <- c(rep(hist[1], H - length(hist)), hist)
+  z   <- c(utils::tail(as.numeric(hist), H), x)   # z[H + i] = x[i]
+  # The position of row i is H + i - L. Its fractional part is taken from L ONCE, not
+  # from H + i - L per row: in floating point the latter rounds differently at every
+  # row, so a run split at row k would weight its months differently from the unsplit
+  # run and the two would agree only to ~1e-15, not bit for bit (test-enso-lag SEGMENT).
+  Lf <- floor(L); r <- L - Lf
+  if (r == 0) { k <- H + seq_along(x) - Lf;      s <- 0 }
+  else        { k <- H + seq_along(x) - Lf - 1L; s <- 1 - r }
+  if (min(k) < 2L || max(k) + 1L > length(z))     # cannot happen for L in (0, LAG_MAX]
+    stop("ccx_enso_lagged(): L = ", L, " puts the stencil outside the history + series.")
+  if (s == 0) return(z[k])                        # an integer lag is an EXACT shift
+  P0 <- z[k - 1L]; P1 <- z[k]; P2 <- z[k + 1L]    # k + 1 <= H + i: causal for L > 0
+  m1 <- P1 - P0; m2 <- P2 - P1                    # BACKWARD-difference node slopes
+  s2 <- s * s; s3 <- s2 * s
+  (2 * s3 - 3 * s2 + 1) * P1 + (s3 - 2 * s2 + s) * m1 + (-2 * s3 + 3 * s2) * P2 + (s3 - s2) * m2
+}
+
+#' THE LAND ENSO INPUT of one run: the `enso` column read `L` months late
+#'
+#' Both runners call this, so the two cores integrate the same series. A table whose
+#' opening CCX_ENSO_HIST_N months VARY started mid-record: holding its first value
+#' back in time would invent a history, so a lagged run of it must be told the real
+#' one (`spin$enso_hist`, from ccx_enso_hist_after()) or be told to hold
+#' (`hist = "hold"`). An unlagged run needs neither and returns `enso` untouched.
+ccx_land_enso <- function(enso, L, hist = NULL) {
+  if (L == 0) return(enso)
+  if (identical(hist, "hold")) {
+    hist <- NULL
+  } else if (is.null(hist)) {
+    head_ <- enso[seq_len(min(CCX_ENSO_HIST_N, length(enso)))]
+    if (!isTRUE(all(head_ == enso[1])))
+      stop("ccx_land_enso(): the land ENSO term is lagged (", signif(L, 4), " months), and this ",
+           "forcing table OPENS MID-RECORD -- its first ", length(head_), " months of `enso` ",
+           "vary -- with no ENSO history. Continue the run that precedes it ",
+           "(spin$enso_hist <- ccx_enso_hist_after(F_prev$enso, spin_prev$enso_hist)), or ",
+           "pass hist = \"hold\" to hold the first value back in time on purpose.")
+  }
+  ccx_enso_lagged(enso, L, hist)
+}
+
+#' The ENSO history a run CONTINUING after a table with index `enso` needs: its last
+#' CCX_ENSO_HIST_N months, preceded by the history that table itself started from.
+ccx_enso_hist_after <- function(enso, hist = NULL) {
+  if (is.null(hist) || identical(hist, "hold")) hist <- rep(enso[1], CCX_ENSO_HIST_N)
+  utils::tail(c(as.numeric(hist), as.numeric(enso)), CCX_ENSO_HIST_N)
+}
+
+#' The land ENSO value of ONE point forcing, for a single derivative
+#'
+#' A runner sets `land_enso`; a point forcing without it reads the index itself, which
+#' is right only when nothing is lagged -- so under a lag it is REFUSED by name rather
+#' than integrated as lag 0.
+ccx_point_land_enso <- function(forc, p) {
+  v <- forc[["land_enso"]]
+  if (!is.null(v)) return(v)
+  if (ccx_enso_lag_of(p) != 0)
+    stop("ccx_deriv(): the land ENSO term is LAGGED under this parameter set (lag_enso_land = ",
+         signif(ccx_enso_lag_of(p), 6), " months), but the point forcing carries no `land_enso`. ",
+         "Run through ccx_run()/ccx_run_fast(), or set forc$land_enso from ",
+         "ccx_land_enso(F$enso, ccx_enso_lag_of(p), hist)[i].")
+  forc[["enso"]]
+}
+
 #' Overlay a fitted parameter set onto a model parameter list, SAFELY
 #'
 #' ⛔ THE BUG THIS EXISTS TO KILL, found 2026-09-02 by a diagnostic's own
@@ -597,7 +721,8 @@ ccx_overlay_par <- function(p, pm) {
   # base's STRUCTURE to the vector's is the caller's business, as it always was for every other
   # name (a first cut REFUSED a holding base here, 2026-10-01; test-gate-bounds overlays the
   # canonical's vector on the default base on purpose, for an unrelated property).
-  for (n in intersect(intersect(names(CCX_PARAM_GATED), names(p)), names(pm))) p[[n]] <- pm[[n]]
+  # (2026-10-02: every gate's names, CCX_PARAM_GATED_ALL -- the land ENSO lag rides the same way)
+  for (n in intersect(intersect(names(CCX_PARAM_GATED_ALL), names(p)), names(pm))) p[[n]] <- pm[[n]]
   for (n in intersect(names(p), CCX_PARAM_NAMES)) p[[n]] <- pm[[n]]
   p <- ccx_set_enso(p, pm)
   # `gamma_enso` is dropped by ccx_set_enso() BY DESIGN -- the retired scalar must
@@ -2058,6 +2183,13 @@ ccx_default_params <- function() {
     gamma_enso_land_SH = 0,
     gamma_enso_ocn_NH  = 0,
     gamma_enso_ocn_SH  = 0,
+    # THE LAND ENSO LAG, months (W1, 2026-10-02; see ccx_enso_lagged()). 0 = the index
+    # read at t, the model every result before it ran. ⚠ THE SLOT IS LOAD-BEARING:
+    # ccx_make_logpost() passes a fitted name to the model only if this list has a slot
+    # for it (MODEL_SLOTS), so without this line a fitted lag would never reach the
+    # model and nothing would error. FITTED only under a label that opens its gate
+    # (CCX_PARAM_GATES$enso_lag_free in R/calibrate.R), held at 0 under every other.
+    lag_enso_land = 0,
     # VOLCANIC DIFFUSE-LIGHT FERTILISATION (2026-08-29). Fractional NPP
     # enhancement per unit stratospheric AOD. 0 = OFF, and 0 is deliberate:
     # it makes every pre-2026-08-29 result bit-identical and keeps the
@@ -2329,6 +2461,10 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   # ccx_gamma_enso() for the absence contract. Named `.ge` because `ge` would
   # collide with nothing today and with something eventually.
   .ge <- ccx_gamma_enso(p)
+  # The LAND term's ENSO input (W1, 2026-10-02): the runner's lagged series, or the
+  # index itself when nothing is lagged; refused by name if a lag meets a bare point
+  # forcing (ccx_point_land_enso()).
+  .land_enso <- ccx_point_land_enso(forc, p)
 
   for (hi in seq_along(HEMIS)) {
     h    <- HEMIS[hi]
@@ -2552,8 +2688,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     # whole anomaly on the smaller of the two limbs.
     # NO NEW FITTED COORDINATE: one coefficient per hemisphere, exactly as
     # before. The parameter count is unchanged at 25.
+    # LAGGED (W1, 2026-10-02): the land term reads the index `lag_enso_land` months
+    # late (`.land_enso`, resolved once above the loop); every ocean read below
+    # keeps `forc$enso` at t. Absent lag = the index itself.
     .ge_land <- .ge[[paste0("land_", h)]]
-    enso_gpp <- -.ge_land * forc$enso
+    enso_gpp <- -.ge_land * .land_enso
     if (record) .nppr[[h]] <- npp + enso_gpp
     # alpha13_signed, reason (a): ONE-WAY BY CONSTRUCTION. Photosynthesis only
     # ever runs atmosphere -> vegetation; these go negative only if `npp` does,

@@ -11,7 +11,7 @@
 # =====================================================================
 
 test_that("hilda_c is a registered label, its block derives from the product, and hilda's block is untouched", {
-  expect_identical(CCX_STRUCT_LABELS, c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", "hilda_cl2", "hilda_cl3", "hilda_csl3", "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb"))   # + D2 / D3 fitted, the gate open (2026-09-30, objective #14; the 09-30c handoff's "extend the label ledgers deliberately")   # + the inert soil carve-out (2026-09-30; extension authorised by Marcus: "build the inert pool")   # + NPP option-4 arms A / B1 (2026-09-29; extension authorised by Marcus)   # + the veg-capacity loop OFF (2026-09-28)   # + the NH-flat seasonal ML (2026-09-19 l)   # + the layer-2 limb (2026-09-17 k)
+  expect_identical(CCX_STRUCT_LABELS, c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", "hilda_cl2", "hilda_cl3", "hilda_csl3", "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe"))   # + the land ENSO lag fitted (2026-10-02, objective #15; the 10-02 plan's "extend the four label ledgers")   # + D2 / D3 fitted, the gate open (2026-09-30, objective #14; the 09-30c handoff's "extend the label ledgers deliberately")   # + the inert soil carve-out (2026-09-30; extension authorised by Marcus: "build the inert pool")   # + NPP option-4 arms A / B1 (2026-09-29; extension authorised by Marcus)   # + the veg-capacity loop OFF (2026-09-28)   # + the NH-flat seasonal ML (2026-09-19 l)   # + the layer-2 limb (2026-09-17 k)
   blk <- ccx_struct_block("hilda_c"); o <- ccx_tr_box_obs(); g <- o$geom
   expect_identical(CCX_STRUCT_HILDA$hs_frac, 0.16)                         # the registered modes' base
   expect_identical(CCX_STRUCT_HILDA$sst_NH, NULL)                          # hilda declares no SST
@@ -46,7 +46,8 @@ test_that("alpha_photo_eps: absent = the ledger's 18 (bit-exact for every regist
   # the list predated them and first mattered when hilda33d (hilda_csl3v0kaidgb) became the canonical (re-pin
   # approved by Marcus)
   if (ccx_mode_struct(md) %in% c("hilda_c", "hilda_cs", names(CCX_L2_RETURN_LAYERS), "hilda_csl3v0", "hilda_csl3v0k",
-                                 "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb")) expect_identical(bp$alpha_photo_eps, 15.6) else expect_false("alpha_photo_eps" %in% names(bp))
+                                 "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb",
+                                 "hilda_csl3v0kaidgbe")) expect_identical(bp$alpha_photo_eps, 15.6) else expect_false("alpha_photo_eps" %in% names(bp))
 })
 
 test_that("the batch is LIVE: each item moves the PI state on its own, and all three together", {

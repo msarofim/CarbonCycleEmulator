@@ -123,6 +123,10 @@ APP_PARAM_META <- list(
   imb_share_land       = list(desc = "Share of the carbon budget's unexplained gap assigned to the land",
                               unit = "—"),
   imb_share_ocean_rest = list(desc = "Ocean's share of the gap the land does not take", unit = "—"),
+  # the land ENSO lag (2026-10-02, W1; R/calibrate.R CCX_PARAM_GATED_ENSO_LAG): fitted only under
+  # the label that opens the lag gate. Wording DRAFTED 2026-10-02 for Marcus's review.
+  lag_enso_land        = list(desc = "Delay between El Niño and the land's carbon response",
+                              unit = "months"),
 
   # ---- RETIRED, label kept ------------------------------------------------
   # These left CCX_PARAM_NAMES but their labels stay so that a run against a
@@ -163,7 +167,8 @@ app_validate_param_meta <- function(names, meta = APP_PARAM_META,
   # the GATED names (2026-10-01) are this build's too, fitted only under a structure that opens
   # the gate: their labels are not "extra" when `names` is a holding structure's set. Read at CALL
   # time (this file is sourced before R/ in the app; see SOURCING ORDER above).
-  gated <- if (exists("CCX_PARAM_GATED")) base::names(get("CCX_PARAM_GATED")) else character(0)
+  # (every gate's names since 2026-10-02, CCX_PARAM_GATED_ALL -- the land ENSO lag too)
+  gated <- if (exists("CCX_PARAM_GATED_ALL")) base::names(get("CCX_PARAM_GATED_ALL")) else character(0)
   extra <- setdiff(setdiff(base::names(meta), names), c(retired, gated))
   if (length(extra))
     bad <- c(bad, sprintf("label(s) for name(s) this build does not fit, and not declared retired: %s",

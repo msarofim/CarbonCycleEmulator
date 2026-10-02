@@ -2,6 +2,32 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (aa) — **W1 BUILT: the land ENSO lag `lag_enso_land` (DESIGN's never-built `L_MEI`), fitted only under a new label `hilda_csl3v0kaidgbe` through a SECOND label gate. Absent = 0 = bit-identical: all 5 registered modes re-score to `identical()` stored streams, Δ logpost 0. R ↔ C++ agree to 4e-16 with the lag on. Two deviations from the plan, both stated below. 19 mutations, all caught (one only after its test was fixed). Nothing is fitted yet; the objective is unchanged.**
+
+**What was built** (plan W1, `notes/plan_2026-10-02_obj15_lag_iced13c.md`).
+- **Semantics.** The land ENSO term reads Niño 3.4 at t − L; every ocean channel keeps reading it at t. L in months, one lag for both hemispheres. Absent or 0 = the index itself.
+- **Where it is computed.** Once per run, in R (`ccx_land_enso()`, R/model.R), from the forcing's `enso` column. The R runner writes it into the table as `land_enso` (read by `ccx_forcing_at()`, so the flux trace sees it); the C++ runner passes it as a vector (`ccx_run_cpp(..., land_enso)`, `deriv(..., land_enso, ...)`, `ccx_deriv_cpp(..., land_enso)`). **`N_FORCING` stays 19 and the core never sees L.** The name `land_enso` is deliberate: anything spelled `enso_*` would be returned by `$enso` partial matching.
+- **Interpolation: a cubic Hermite with BACKWARD-difference node slopes.** It passes through every monthly value (an integer L is an exact shift) and is C¹ in L.
+  - ⚠ **DEVIATION 1 — not Catmull-Rom** (the plan's choice, mine, "it can be overruled"). Catmull-Rom's central slopes read one month FORWARD, so for 0 < L < 1 month i's land flux would read month i + 1: acausal, and a split run would disagree with the unsplit one. Measured by mutation M3: Catmull-Rom breaks causality at L = 0.25, 0.5, 0.999 and is causal from 1.5.
+  - The fractional weight is taken from L ONCE, not per row. Per row (`H + i − L`) it rounds differently at every row, and a split run then matched the unsplit one only to ~1e-15 — caught by the SEGMENT test on its first run.
+- **History.** The stencil reaches 13 months before a table's first row. A continuing state carries them as `spin$enso_hist` (`ccx_enso_hist_after()`); without it the first value is held back in time, which is EXACT for every table integrated here from a spinup (the index is 0 before 1948; the periodic spinup's year is ENSO-free; the pulse protocols zero ENSO in their forward window). A lagged run of a table whose opening months VARY is REFUSED unless given its history or `"hold"`.
+- **Guards.** A bare point forcing under a lag is refused by name (`ccx_point_land_enso()`); so is a flattened nonzero index (`ccx_deriv_fast()`); the C++ checks the series' length.
+- **Registration.** `ccx_default_params()$lag_enso_land = 0` (load-bearing: `MODEL_SLOTS` passes a fitted name to the model only if the list has a slot for it). Prior U(0, 12) months (DESIGN) on a logit over (0, 12); **init 6, the prior midpoint**, not 10-02 (x)'s measured 5 (a start is never read off a screen). The app's label (`APP_PARAM_META`) is DRAFTED for Marcus's wording; the app's `gated_fit` follows the structure.
+  - ⚠ **DEVIATION 2:** the plan listed `ccx_cpp_par()` and the C++ `Par`/`unpack_par` as registration sites. Not needed: the core takes the series, never L.
+- **The gate, generalised.** `CCX_PARAM_GATES` maps each flag to its own set; `ccx_gates_open()` / `ccx_gated_names()` say what a structure opens and fits. `ccx_gate_open(p, flag)` keeps its 09-30 meaning (the D2/D3 gate) by default, which is what `ccx_comparable_rows()`, the I(t) check and the scorecard's moved-target note need. The logpost guard, `ccx_param_absent_ok()`, `ccx_gate_require()`, `ccx_build_names_for()`, `ccx_apply_gate()`, the pins' gate and the overlay are per gate. `CCX_PARAM_GATED` is UNCHANGED (the D2/D3 set) so its tests keep their meaning; `CCX_PARAM_GATED_ALL` is the union.
+- **The label `hilda_csl3v0kaidgbe`** = kaidgb + `enso_lag_free = 1`, nothing else (the name is Marcus's call, as kaidgb's was). **kaidgb, unchanged, is the lag-0 control arm** (ruled 10-02, D2). The four label ledgers and `GP_OPEN_LABELS` are extended deliberately; the lag gate's own ledger is in `test-enso-lag.R`.
+- **Found by the new tests and fixed:** the spinup's constant point forcing (`zero_forc`) carried no `land_enso`, so ANY spinup at a lagged parameter set was refused. It now carries `land_enso = 0`.
+- **Stale items fixed on the way:** the C++ forcing-layout comment (it omitted the ndep columns) and the "n x 10" comment; R/cpp.R's five "a missing name unpacks as garbage" comments — **measured: Rcpp throws `Index out of bounds: [index='q10']`**; CHANGELOG 09-30 (p)'s overlay refusal marked superseded.
+
+**Verification.**
+- **Bit-exact, registered modes:** `calibration/diag_obj14_registered_bitexact.R` (run from a scratch copy before this commit): 5/5 streams identical, |Δ logpost| max 0.
+- `tests/testthat/test-enso-lag.R`: 13 tests — INTERP (exact, through the nodes, C¹ with a linear control that fails it, causal), OFF, PARITY (one derivative and three trajectories; land reads `land_enso`, the ocean `enso`), EXACT (an integer lag IS a lag-0 run on the shifted index, both cores), SEGMENT (split mid-record and continued = unsplit, bit for bit, both cores; without history refused; held, different), SWITCH (the What-if ENSO switch makes the lag inert), TRACE, GUARDS, CONSERVE, GATE ×3 (ledger and spec; the per-gate logpost guard and that a fitted lag reaches the model; a kaidgb file under the open lag gate).
+- **Mutation-tested** on a scratch copy (control passes): M1 C++ reads `enso`; M2 R reads `forc$enso`; M3 Catmull-Rom; M4 linear; M5 C++ fed the unlagged column; M6 mid-record guard off; M7 history reversed; M8 history ignored; M9 gated names ignore the lag gate; M10 logpost guard D2/D3-only; M11 absent-ok gate-level; M12 no default slot; M13 spinup without `land_enso`; **M14 overlay copies only the D2/D3 names — SURVIVED the first cut**, which ran the overlay with the gate open (where the table loop copies the lag anyway); the test now runs it closed and catches it; M15 R runner skips the column; M16 point `land_enso` ignored; M17 flattened nonzero index accepted; M18 init off the midpoint. All 19 caught.
+- **Full suite** on a frozen copy of this commit's tree (BLAS pinned): **5770 passed, 0 failed, 0 errors, 4 skipped** (the 10-01 baseline's four), 13.2 min.
+  - A first run on a copy MISSING three inputs (`outputs/`, and two multistart dirs that `test-gated-params` and `test-gate-p7` read) showed 1 error and 13 extra skips, all of them the copy's.
+  - It also showed one REAL failure, fixed: `test-mode-struct-lint` caught `test-enso-lag.R` reading a mode file without `ccx_mode_base()`. The test now asserts the canonical's base opens the D2/D3 gate only, through that resolver.
+  - ⚠ For the next frozen copy: copy `outputs/` and the multistart dirs the tests name, or the suite under-reports.
+
 ## 2026-10-02 (z) — **RULINGS on the ENSO lag and the audit (Marcus): build `L_MEI` and refit; in the same refit add the ice-core δ¹³C row and cut ice-core CO₂ to pre-1958; retire DESIGN's fitted-NPP₀ line; repair gates 5, 6, 7, 11 and P7 before scoring. Plan: `notes/plan_2026-10-02_obj15_lag_iced13c.md`.**
 
 **Rulings (verbatim):**
@@ -1320,7 +1346,9 @@ What differs is what every existing consumer sees.
   - `ccx_gate_require()` in `ccx_mode_start()`, `ccx_load_mode()`, `ccx_require_param_set()` and
     `ccx_check_mode_decode()`;
   - `ccx_overlay_par()` overlays the gated MODEL names by the BASE's structure, and refuses an open-label
-    vector on a holding base.
+    vector on a holding base. ⚠ *[Superseded 10-01, noted 10-02: that refusal was the first cut's and was
+    removed; the function now copies the gated names whenever the vector carries them (10-01, "Fixed in
+    code").]*
 - **Absent-name tolerance is DYNAMIC** (`ccx_param_absent_ok(md)`): only while the gate is open, and only
   for a file whose own structure holds it (an open-label START from an older file: filled 0, then seeded
   where 0 does not encode). `CCX_PARAM_ABSENT_OK` stays static, because `test-param-absent-ok.R`

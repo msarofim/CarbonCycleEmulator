@@ -284,7 +284,8 @@ app_params <- local({
     rep_dC     <- if (is.null(pm$rep_dC)) 0 else pm$rep_dC
     # the GATED names this mode fits (2026-10-01; R/calibrate.R CCX_PARAM_GATED): the parameter
     # table lists them on top of CCX_PARAM_NAMES. The D3 shares ride along for the same table.
-    gated_fit  <- if (ccx_gate_open(ccx_mode_struct(md))) names(CCX_PARAM_GATED) else character(0)
+    # (every gate the structure opens since 2026-10-02 -- the land ENSO lag's too)
+    gated_fit  <- ccx_gated_names(ccx_mode_struct(md))
     imb_shares <- pm[intersect(c("imb_share_land", "imb_share_ocean_rest"), names(pm))]
     # THE FILE'S OWN SPINUP (2026-09-21 h). Every mode since 09-09x is fitted under
     # the PERIODIC spinup (a seasonal mixed layer spun to its own annual cycle);

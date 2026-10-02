@@ -472,6 +472,8 @@ ccx_comparable_rows <- function(rows, structs) {
   if (!is.list(rows) || length(rows) < 1L || length(rows) != length(structs))
     stop("ccx_comparable_rows(): one row-name vector per structure label")
   common <- Reduce(intersect, rows)
+  # the D2/D3 gate ONLY (ccx_gate_open()'s default flag): the lag gate (2026-10-02) moves no
+  # row's target, so two arms differing only in it still run one set of rows
   gates <- vapply(structs, ccx_gate_open, logical(1))
   if (length(unique(gates)) > 1L) common <- setdiff(common, LIK_IMB_ROWS)
   common

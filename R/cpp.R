@@ -247,10 +247,15 @@ ccx_cpp_par <- function(p) {
   if (is.null(p$npp_tsens)) p$npp_tsens <- CCX_NPP_TSENS_DEFAULT
   # Land-structure parameters added 2026-08-12. Defaulted here as well as in
   # ccx_default_params() so that a hand-built or older parameter list cannot
-  # reach the C++ with a missing name -- which unpacks as garbage, not an error.
+  # reach the C++ with a missing name.
+  # ⚠ CORRECTED 2026-10-02: a missing name does NOT "unpack as garbage", as this
+  # file said in five places -- Rcpp's List lookup THROWS ("Index out of bounds:
+  # [index='q10']", measured). The defaults below exist so an OLDER list runs as
+  # the model it was written for instead of stopping; the silent-garbage hazard is
+  # the forcing's POSITIONAL columns (CCX_FORCING_COLS), not the named parameters.
   # HILDA high-latitude boxes, added 2026-09-05. Defaulted here as well as in
   # ccx_default_params() so a parameter list built before that date cannot reach
-  # the core with a missing name -- which unpacks as garbage, not as an error.
+  # the core with a missing name (which would THROW -- see the correction above).
   # The behaviour-preserving values are the OFF ones: hs_frac = 0 (in the aux,
   # via ccx_hs_on()) means the boxes are absent, and these two are then inert.
   if (is.null(p$u_hs))  p$u_hs  <- 0
@@ -284,7 +289,7 @@ ccx_cpp_par <- function(p) {
   # parameter list built before today reaches the core as the model it was
   # written for. beta_max / fert_k are inert under FERT_LOG but must still be
   # present and finite: unpack_par reads them unconditionally, and a missing
-  # name unpacks as garbage rather than as an error.
+  # name would throw (see the 2026-10-02 correction above).
   if (is.null(p$fert_form)) p$fert_form <- CCX_FERT_FORM_DEFAULT
   p$fert_form <- as.integer(p$fert_form)
   if (is.null(p$beta_max)) p$beta_max <- 0
@@ -463,7 +468,10 @@ ccx_cpp_forcing <- function(F) {
 #'   caller's `anyNA` -> -Inf guard must not double as a prior bound.
 ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
   if (!inherits(F, "ccx_cpp_forcing")) F <- ccx_fill_prod_c14(F, spin)   # finding 6 (09-16 d); see R/forcing.R
-  ccx_run_prepared(spin$y, ccx_run_prepare(spin, substeps), F, retry_na = retry_na)
+  # `spin$enso_hist` (W1, 2026-10-02): the ENSO months before F's first row, when this
+  # state continues an earlier run; NULL for a spinup (see ccx_land_enso()).
+  ccx_run_prepared(spin$y, ccx_run_prepare(spin, substeps), F, retry_na = retry_na,
+                   enso_hist = spin$enso_hist)
 }
 
 #' The MARSHALLED arguments of `ccx_run_fast()`, built ONCE for many runs
@@ -493,7 +501,10 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
        enso_index = ccx_enso_index_of(spin$params),
        aod_mode = ccx_aod_mode_of(spin$params),
        # D2 (a): a nonzero retention must meet a forcing that CARRIES deposition
-       ndep_ret = if (is.null(spin$params$ndep_ret)) CCX_NDEP_RET_DEFAULT else spin$params$ndep_ret)
+       ndep_ret = if (is.null(spin$params$ndep_ret)) CCX_NDEP_RET_DEFAULT else spin$params$ndep_ret,
+       # W1 (2026-10-02): the land ENSO lag, months. The core never sees it -- the
+       # runner turns it into the lagged series ccx_run_cpp() takes (ccx_land_enso()).
+       enso_lag = ccx_enso_lag_of(spin$params))
 }
 
 #' A forcing table marshalled ONCE for many `ccx_run_prepared()` calls
@@ -506,15 +517,20 @@ ccx_cpp_forcing_prep <- function(F) {
 #' Run the core from prepared arguments. Same return shape as `ccx_run_fast()`,
 #' the SAME NA-retry semantics (doubling substeps up to CCX_SUBSTEPS_MAX), and
 #' the same guard columns. `F` is a forcing table or a `ccx_cpp_forcing_prep()`.
-ccx_run_prepared <- function(y, prep, F, retry_na = TRUE) {
+ccx_run_prepared <- function(y, prep, F, retry_na = TRUE, enso_hist = NULL) {
   Fm <- if (inherits(F, "ccx_cpp_forcing")) F else ccx_cpp_forcing_prep(F)
   # the forcing's ENSO index must be the one the parameters name (2026-09-29)
   ccx_enso_index_check(if (is.null(prep$enso_index)) "demean" else prep$enso_index, Fm)
   ccx_aod_mode_check(if (is.null(prep$aod_mode)) "legacy" else prep$aod_mode, Fm)
   ccx_ndep_check(prep$ndep_ret, Fm)                 # D2 (a), 2026-09-30
+  # THE LAND ENSO INPUT (W1, 2026-10-02): the SAME builder ccx_run() uses, so the two
+  # cores integrate one series. Unlagged, it IS the matrix's enso column.
+  land_enso <- unname(ccx_land_enso(Fm$mat[, "enso"],
+                                    if (is.null(prep$enso_lag)) 0 else prep$enso_lag, enso_hist))
   ss <- prep$ss
   one <- function(nsub) {
-    res <- .ccx_cpp_env$ccx_run_cpp(y, prep$par, Fm$mat, Fm$t, prep$aux, as.integer(nsub))
+    res <- .ccx_cpp_env$ccx_run_cpp(y, prep$par, Fm$mat, Fm$t, prep$aux, as.integer(nsub),
+                                    land_enso)
     out <- as.data.frame(res$out)
     # The C++ matrix width is a literal there; tie it to the R-side column
     # vector LOUDLY (a mismatch used to be a positional mis-naming, not an error).
@@ -591,11 +607,22 @@ ccx_deriv_prepare <- function(p, aux, grid) {
 ccx_deriv_fast <- function(y, t, p, forc, grid, aux, prep = NULL) {
   ccx_load_cpp()
   f <- if (is.numeric(forc)) forc else ccx_cpp_forcing_vec(forc)
+  # THE LAND ENSO INPUT (W1, 2026-10-02). A list point forcing resolves it exactly as
+  # ccx_deriv() does (ccx_point_land_enso(): the runner's `land_enso`, else the index,
+  # refused under a lag). A FLATTENED vector is the spinup's CONSTANT forcing, whose
+  # lagged index is the index itself -- but only a zero index makes that safe to
+  # assume without a history, so a nonzero one under a lag is refused here.
+  if (is.numeric(forc)) {
+    land_enso <- f[[match("enso", CCX_FORCING_COLS)]]
+    if (ccx_enso_lag_of(p) != 0 && isTRUE(land_enso != 0))
+      stop("ccx_deriv_fast(): a FLATTENED forcing with a nonzero ENSO index (", land_enso,
+           ") under a lagged land term. Pass the point forcing as a list carrying `land_enso`.")
+  } else land_enso <- ccx_point_land_enso(forc, p)
   if (is.null(prep)) {
     ccx_seas_ml_marshal_check(p, aux)
     prep <- list(par = ccx_cpp_par(p), aux = ccx_cpp_aux(aux, grid))
   }
-  d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, prep$par, f, prep$aux)
+  d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, prep$par, f, prep$aux, as.numeric(land_enso))
   dimnames(d) <- dimnames(y)
   d
 }

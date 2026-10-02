@@ -1202,7 +1202,11 @@ ccx_forcing_at <- function(F, i) {
        # which ccx_deriv() reads as zero -- the same absence contract as above.
        aod_NH = F$aod_NH[i], aod_SH = F$aod_SH[i],
        # N deposition (D2 (a), 2026-09-30); NULL on an older table = zero.
-       ndep_NH = F$ndep_NH[i], ndep_SH = F$ndep_SH[i])
+       ndep_NH = F$ndep_NH[i], ndep_SH = F$ndep_SH[i],
+       # the LAND term's lagged ENSO input (W1, 2026-10-02). A RUNNER writes the column
+       # (ccx_land_enso()); a table without it gives NULL, which ccx_deriv() reads as the
+       # index itself when nothing is lagged and REFUSES when something is.
+       land_enso = F[["land_enso"]][i])
 }
 
 # ---------------------------------------------------------------------
@@ -1238,6 +1242,12 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL) 
   y <- spin$y; aux <- spin$aux; grid <- spin$grid; p <- spin$params
   substeps <- ccx_resolve_substeps(substeps, p, grid)
   n <- nrow(F)
+  # THE LAND ENSO INPUT (W1, 2026-10-02): the index read lag_enso_land months late,
+  # from the SAME builder ccx_run_prepared() hands the C++ core. ALWAYS rewritten
+  # here, so a column a caller left on the table can never be a stale lag. The flux
+  # trace below reads it through ccx_forcing_at() off this same local table.
+  if (!is.null(F$enso))
+    F$land_enso <- ccx_land_enso(F$enso, ccx_enso_lag_of(p), spin$enso_hist)
   atmN <- aux$idx$NH$atm; atmS <- aux$idx$SH$atm
   # HS and HD ARE ocean carbon (as spinup.R and the C++ core count them);
   # `$hs`/`$hd` are NULL with the structure off and c() drops them. Audit

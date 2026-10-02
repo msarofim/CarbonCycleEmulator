@@ -1080,32 +1080,69 @@ CCX_PARAM_GATED <- list(
   imb_share_ocean_rest = list(tr = "logit", lo = 0, hi = 1, init = 1 / 2,
                               prior = function(x) dunif(x, 0, 1, log = TRUE))
 )
-#' The block field that OPENS the gate. ONE name, read only through ccx_gate_open().
+#' The block field that OPENS the D2/D3 gate. Read only through ccx_gate_open().
 CCX_GATE_FLAG <- "d2d3_free"
-#' Does a structure (a label, or a base parameter list carrying its block) OPEN the
-#' gate? A label is resolved through ccx_struct_block(), so an unknown label is an
-#' error by name rather than a quiet FALSE.
-ccx_gate_open <- function(p) {
+
+# ---- THE SECOND GATE: THE LAND ENSO LAG (W1, 2026-10-02; objective #15) ----
+# `lag_enso_land`, months (R/model.R ccx_enso_lagged()): DESIGN's L_MEI, never built
+# until today (CHANGELOG 10-02 x/z). Gated for the reason the D2/D3 names are, and more
+# so: absent = 0 = the model every registered file RAN, but 0 is the logit floor, so as
+# a table entry the migration would seed it at init (6 months) -- a different model
+# under every old label. Held under every label but the ones that open this gate.
+# ⚠ WHY A SECOND FLAG AND NOT A FIFTH D2/D3 NAME: the D2/D3 gate is one flag over ONE
+# all-or-nothing set, and `hilda33d`'s own label opens it. A fifth name there would make
+# every hilda33d consumer demand a lag it does not carry. So each gate has its own flag
+# and set (CCX_PARAM_GATES); a label opens any subset; "hilda_csl3v0kaidgbe" opens both.
+# PRIOR: U(0, CCX_ENSO_LAG_MAX = 12) months, DESIGN's, on a LOGIT transform over the same
+# interval; its Jacobian is part of the objective, as the shares' are. INIT: the prior
+# MIDPOINT, 6 months -- not 10-02 (x)'s measured 5, which would be a start taken from a
+# screen (see the D2/D3 note above). `lo`/`hi`/`init` are LITERALS (this file is sourced
+# before R/model.R defines CCX_ENSO_LAG_MAX); test-enso-lag.R ties them to it.
+CCX_PARAM_GATED_ENSO_LAG <- list(
+  lag_enso_land = list(tr = "logit", lo = 0, hi = 12, init = 6,
+                       prior = function(x) dunif(x, 0, CCX_ENSO_LAG_MAX, log = TRUE))
+)
+#' The block field that OPENS the lag gate.
+CCX_GATE_FLAG_ENSO_LAG <- "enso_lag_free"
+#' EVERY GATE, flag -> its set, in the order a label's names are appended. A label opens
+#' any subset; ccx_gated_names() is what a given structure fits.
+CCX_PARAM_GATES <- stats::setNames(list(CCX_PARAM_GATED, CCX_PARAM_GATED_ENSO_LAG),
+                                   c(CCX_GATE_FLAG, CCX_GATE_FLAG_ENSO_LAG))
+#' Every gated name's spec, whichever gate holds it (decode, migration, ordering).
+CCX_PARAM_GATED_ALL <- do.call(c, unname(CCX_PARAM_GATES))
+stopifnot(!anyDuplicated(names(CCX_PARAM_GATED_ALL)))
+
+#' The gate FLAGS a structure (a label, or a base parameter list carrying its block)
+#' opens. A label is resolved through ccx_struct_block(), so an unknown label is an
+#' error by name rather than a quiet "none".
+ccx_gates_open <- function(p) {
   if (is.character(p)) p <- ccx_struct_block(p)
-  isTRUE(p[[CCX_GATE_FLAG]] == 1)
+  names(CCX_PARAM_GATES)[vapply(names(CCX_PARAM_GATES), function(f) isTRUE(p[[f]] == 1), logical(1))]
 }
-#' Put the gated names into the fitted set, for a structure that opens the gate.
+#' Does a structure OPEN a gate? `flag` names which; the default is the D2/D3 gate, the
+#' meaning this function has had since 09-30 (likelihood.R reads it for the D3 rows).
+ccx_gate_open <- function(p, flag = CCX_GATE_FLAG) flag %in% ccx_gates_open(p)
+#' The gated names a structure FITS, in the order ccx_apply_gate() appends them.
+ccx_gated_names <- function(p)
+  unlist(lapply(CCX_PARAM_GATES[ccx_gates_open(p)], names), use.names = FALSE)
+#' Put the gated names into the fitted set, for every gate the structure opens.
 #' A holding structure is a no-op. The names go at the END of the table (the order
 #' of every older name, and of every stored `u`, is unchanged).
 #' @param struct a structure label, or a base parameter list
 #' @return invisibly, the names added (what ccx_unapply_gate() needs)
 ccx_apply_gate <- function(struct) {
-  if (!ccx_gate_open(struct)) return(invisible(character(0)))
+  add <- ccx_gated_names(struct)
+  if (!length(add)) return(invisible(character(0)))
   env <- environment(ccx_apply_pins)
   tab <- get("CCX_PARAM_TABLE", envir = env)
-  already <- intersect(names(CCX_PARAM_GATED), c(names(tab), names(get("CCX_PINS", envir = env))))
+  already <- intersect(add, c(names(tab), names(get("CCX_PINS", envir = env))))
   if (length(already))
     stop("ccx_apply_gate(): ", paste(already, collapse = ", "), " are already in the fitted set ",
          "(or pinned). The gate is applied ONCE per process; undo it with the handle it returned.")
-  tab <- c(tab, CCX_PARAM_GATED)
+  tab <- c(tab, CCX_PARAM_GATED_ALL[add])
   assign("CCX_PARAM_TABLE", tab, envir = env)
   assign("CCX_PARAM_NAMES", names(tab), envir = env)
-  invisible(names(CCX_PARAM_GATED))
+  invisible(add)
 }
 #' Take the gated names back out of the fitted set (the handle ccx_apply_gate() returned).
 #' Refuses while any of them is PINNED: the pin's restore would put it back under no gate.
@@ -1155,7 +1192,8 @@ ccx_apply_pins <- function(pins) {
   # own space with no second call to forget. The returned handle carries the gate, and
   # ccx_unpin_params() undoes both. A gate some caller already applied is left to that caller.
   gs <- attr(pins, "gate_struct")
-  gate <- if (!is.null(gs) && length(setdiff(names(CCX_PARAM_GATED), c(CCX_PARAM_NAMES, names(CCX_PINS)))))
+  # (2026-10-02: every gate the file's structure opens -- ccx_gated_names() -- not one set)
+  gate <- if (!is.null(gs) && length(setdiff(ccx_gated_names(gs), c(CCX_PARAM_NAMES, names(CCX_PINS)))))
             ccx_apply_gate(gs) else character(0)
   if (is.null(pins) || !length(pins)) return(invisible(structure(list(), gate = gate)))
   if (is.null(names(pins)) || any(!nzchar(names(pins))) || !is.numeric(pins))
@@ -1192,7 +1230,7 @@ ccx_unpin_params <- function(removed) {
 }
 # the table's definition order, then the gated names (appended by ccx_apply_gate(), so a
 # pinned gated name is restored to the same place)
-.CCX_PARAM_ORDER <- c(CCX_PARAM_NAMES, names(CCX_PARAM_GATED))
+.CCX_PARAM_ORDER <- c(CCX_PARAM_NAMES, names(CCX_PARAM_GATED_ALL))
 
 # ---- NAMES A REGISTERED FILE MAY LACK (2026-09-13i) -------------------
 #' `w_eq` / `gamma_eq` entered the table on 2026-09-13i, AFTER every registered
@@ -1229,9 +1267,11 @@ CCX_PARAM_ABSENT_OK <- c("w_eq", "gamma_eq",
 #' The names a mode file may lack in THIS process: the static list, plus the gated
 #' names when the gate is open and the FILE's own structure holds it.
 ccx_param_absent_ok <- function(md) {
-  gated <- intersect(names(CCX_PARAM_GATED), CCX_PARAM_NAMES)
-  if (length(gated) && !ccx_gate_open(ccx_mode_struct(md))) c(CCX_PARAM_ABSENT_OK, gated)
-  else CCX_PARAM_ABSENT_OK
+  # per GATE since 2026-10-02: the gated names fitted in this process that the FILE's own
+  # structure HELD (a kaidgb file read with the lag gate open lacks only the lag)
+  gated <- intersect(names(CCX_PARAM_GATED_ALL), CCX_PARAM_NAMES)
+  held  <- setdiff(gated, ccx_gated_names(ccx_mode_struct(md)))
+  if (length(held)) c(CCX_PARAM_ABSENT_OK, held) else CCX_PARAM_ABSENT_OK
 }
 
 #' A mode file fitted under a structure that OPENS the gate carries the gated names in
@@ -1240,11 +1280,11 @@ ccx_param_absent_ok <- function(md) {
 #' for the wrong reason. Say the right one. (An OLDER file read with the gate open is
 #' legitimate: that is an open-label START, and the migration fills what it ran.)
 ccx_gate_require <- function(md, who) {
-  if (!ccx_gate_open(ccx_mode_struct(md))) return(invisible(TRUE))
-  miss <- setdiff(names(CCX_PARAM_GATED), c(CCX_PARAM_NAMES, names(CCX_PINS)))
+  miss <- setdiff(ccx_gated_names(ccx_mode_struct(md)), c(CCX_PARAM_NAMES, names(CCX_PINS)))
   if (length(miss))
     stop(who, ": this mode file was fitted under '", ccx_mode_struct(md), "', which OPENS the ",
-         "gate, but ", paste(miss, collapse = ", "), " are not in this process's fitted set. ",
+         "gate (", paste(ccx_gates_open(ccx_mode_struct(md)), collapse = ", "), "), but ",
+         paste(miss, collapse = ", "), " are not in this process's fitted set. ",
          "Call ccx_apply_gate(ccx_mode_struct(md)) BEFORE applying its pins.")
   invisible(TRUE)
 }
@@ -1254,8 +1294,7 @@ ccx_gate_require <- function(md, who) {
 #' the order ccx_apply_gate() appends them. "Does this file carry the build" is a question about
 #' the file's structure, not about whether some earlier caller happened to open the gate.
 ccx_build_names_for <- function(md) {
-  if (!ccx_gate_open(ccx_mode_struct(md))) return(CCX_PARAM_NAMES)
-  c(CCX_PARAM_NAMES, setdiff(names(CCX_PARAM_GATED), c(CCX_PARAM_NAMES, names(CCX_PINS))))
+  c(CCX_PARAM_NAMES, setdiff(ccx_gated_names(ccx_mode_struct(md)), c(CCX_PARAM_NAMES, names(CCX_PINS))))
 }
 #' The names this build fits that a mode file lacks, pins excluded
 ccx_mode_absent <- function(md)
@@ -1581,7 +1620,9 @@ ccx_migrate_par_set <- function(p) {
   # encode under log / on the logit floor) to their table inits, and at an open label
   # the seeded vector is a DIFFERENT MODEL from the file's. It is a START, never a
   # reproduction; a reproduction scores the file under its OWN label, gate closed.
-  for (nm in names(CCX_PARAM_GATED)) if (nm %in% absent) {
+  # 2026-10-02: the LAG gate's `lag_enso_land` the same way -- 0 = the index read at t,
+  # what every file before objective #15 ran; 0 is its logit floor, so it seeds at init.
+  for (nm in names(CCX_PARAM_GATED_ALL)) if (nm %in% absent) {
     p[[nm]] <- 0
     filled <- c(filled, nm)
   }
@@ -1699,8 +1740,8 @@ ccx_unc_to_par <- function(u) {
   if (is.null(nm)) nm <- CCX_PARAM_NAMES
   # a GATED name decodes by its own transform whether or not the gate is open in this process
   # (2026-10-01): decoding a named vector needs each name's transform, not the live fitted set
-  spec <- function(n) if (!is.null(CCX_PARAM_TABLE[[n]])) CCX_PARAM_TABLE[[n]] else CCX_PARAM_GATED[[n]]
-  unknown <- setdiff(nm, c(CCX_PARAM_NAMES, names(CCX_PARAM_GATED)))
+  spec <- function(n) if (!is.null(CCX_PARAM_TABLE[[n]])) CCX_PARAM_TABLE[[n]] else CCX_PARAM_GATED_ALL[[n]]
+  unknown <- setdiff(nm, c(CCX_PARAM_NAMES, names(CCX_PARAM_GATED_ALL)))
   if (length(unknown))
     stop("ccx_unc_to_par(): u carries names this build does not know: ",
          paste(unknown, collapse = ", "),
@@ -2405,7 +2446,21 @@ ccx_struct_hilda_csl3v0kaidgb <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb")
+#' THE "hilda_csl3v0kaidgbe" STRUCTURE (W1, 2026-10-02; OBJECTIVE #15): hilda_csl3v0kaidgb
+#' with the LAND ENSO LAG FITTED (Marcus 10-02: "Do it right. Option 2"). e = `lag_enso_land`,
+#' DESIGN's L_MEI: the land term reads Nino3.4 L months late, the ocean channels at t
+#' (R/model.R ccx_enso_lagged()). The block changes NOTHING the model reads: it opens the
+#' SECOND gate (CCX_GATE_FLAG_ENSO_LAG) on top of kaidgb's, and the fitted lag does the
+#' rest. Under every other label the lag is held at 0, so kaidgb -- the lag-0 CONTROL arm
+#' of the #15 refit (ruled 10-02, D2) -- and every registered file stay bit-exact.
+#' ⚠ The NAME is mine and is Marcus's call, as kaidgb's was.
+ccx_struct_hilda_csl3v0kaidgbe <- function() {
+  blk <- ccx_struct_hilda_csl3v0kaidgb()
+  blk[[CCX_GATE_FLAG_ENSO_LAG]] <- 1L
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2423,6 +2478,7 @@ ccx_struct_block <- function(struct) {
     "hilda_csl3v0kan" = ccx_struct_hilda_csl3v0kan(), # ... plus the modern-NPP row (2026-09-29; NPP arm B1)
     "hilda_csl3v0kai" = ccx_struct_hilda_csl3v0kai(), # arm A + the inert soil carve-out, 0-1 m (2026-09-30)
     "hilda_csl3v0kaidgb" = ccx_struct_hilda_csl3v0kaidgb(), # ... + D2 / D3 FITTED, the gate open (2026-09-30; objective #14)
+    "hilda_csl3v0kaidgbe" = ccx_struct_hilda_csl3v0kaidgbe(), # ... + the land ENSO lag FITTED, the second gate (2026-10-02; objective #15)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2602,7 +2658,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "2026-09-28) and \"hilda_csl3v0k\" (hilda_csl3v0 + the fert_k shape prior, 2026-09-28) ",
          "and \"hilda_csl3v0ka\" / \"hilda_csl3v0kan\" (+ aod anomaly / + the modern-NPP row, 2026-09-29) ",
          "and \"hilda_csl3v0kai\" (arm A + the inert soil carve-out, 2026-09-30) ",
-         "and \"hilda_csl3v0kaidgb\" (+ D2 / D3 fitted, objective #14, 2026-09-30).")
+         "and \"hilda_csl3v0kaidgb\" (+ D2 / D3 fitted, objective #14, 2026-09-30) ",
+         "and \"hilda_csl3v0kaidgbe\" (+ the land ENSO lag fitted, objective #15, 2026-10-02).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)
@@ -2680,21 +2737,28 @@ ccx_make_logpost <- function(years = c(1750, 2024), obs = ccx_prepare_obs(),
   # Checked when the objective is built AND on every draw: the table is a global, and a
   # gate applied or undone after this closure exists would otherwise go unseen (the
   # check is a few set operations on ~40 names, against a model run).
-  GATE_OPEN <- ccx_gate_open(base_params)
+  # ⚠ PER GATE since 2026-10-02 (the lag gate, CCX_PARAM_GATES): each flag is checked
+  # against its OWN set, so a kaidgb draw with the lag fitted is refused exactly as a kai
+  # draw with ndep_ret fitted is. `GATE_OPEN` keeps its 09-30 meaning, the D2/D3 gate,
+  # because the I(t) check below is about the D3 rows only.
+  GATE_OPEN  <- ccx_gate_open(base_params)
+  GATES_OPEN <- ccx_gates_open(base_params)
   .gate_check <- function() {
-    g <- names(CCX_PARAM_GATED)
-    g_fit <- intersect(g, CCX_PARAM_NAMES); g_pin <- intersect(g, names(CCX_PINS))
-    if (GATE_OPEN) {
-      g_miss <- setdiff(g, c(g_fit, g_pin))
-      if (length(g_miss))
-        stop("ccx_make_logpost(): the structure OPENS the gate (", CCX_GATE_FLAG, " = 1) but ",
-             paste(g_miss, collapse = ", "), " are not in the fitted set. Call ",
-             "ccx_apply_gate(<struct>) first; scored as it stands, the objective would run ",
-             "them at their base value, OFF.")
-    } else if (length(c(g_fit, g_pin)))
-      stop("ccx_make_logpost(): ", paste(c(g_fit, g_pin), collapse = ", "), " are in the fitted ",
-           "set (or pinned) but the structure HOLDS them (no ", CCX_GATE_FLAG, "): undo the gate ",
-           "(ccx_unapply_gate()) before scoring a holding structure.")
+    for (fl in names(CCX_PARAM_GATES)) {
+      g <- names(CCX_PARAM_GATES[[fl]])
+      g_fit <- intersect(g, CCX_PARAM_NAMES); g_pin <- intersect(g, names(CCX_PINS))
+      if (fl %in% GATES_OPEN) {
+        g_miss <- setdiff(g, c(g_fit, g_pin))
+        if (length(g_miss))
+          stop("ccx_make_logpost(): the structure OPENS the gate (", fl, " = 1) but ",
+               paste(g_miss, collapse = ", "), " are not in the fitted set. Call ",
+               "ccx_apply_gate(<struct>) first; scored as it stands, the objective would run ",
+               "them at their base value, OFF.")
+      } else if (length(c(g_fit, g_pin)))
+        stop("ccx_make_logpost(): ", paste(c(g_fit, g_pin), collapse = ", "), " are in the fitted ",
+             "set (or pinned) but the structure HOLDS them (no ", fl, "): undo the gate ",
+             "(ccx_unapply_gate()) before scoring a holding structure.")
+    }
   }
   .gate_check()
 

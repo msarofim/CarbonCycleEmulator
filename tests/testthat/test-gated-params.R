@@ -26,7 +26,9 @@
 # =====================================================================
 
 # the ledger: the labels that OPEN the gate. Extending it is a DELIBERATE edit.
-GP_OPEN_LABELS <- c("hilda_csl3v0kaidgb")
+# + "hilda_csl3v0kaidgbe" (2026-10-02, W1; objective #15): it opens THIS gate and the lag gate
+#   (CCX_PARAM_GATES); the lag gate's own ledger is in test-enso-lag.R.
+GP_OPEN_LABELS <- c("hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe")
 
 .gp_restore <- function(gate = character(0), pins = list()) {
   ccx_unpin_params(pins); ccx_unapply_gate(gate)

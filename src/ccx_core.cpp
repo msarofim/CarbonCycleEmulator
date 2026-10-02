@@ -455,8 +455,12 @@ inline double pco2_from_dic_cpp(double dic, double alk, double T,
 // modulation and EXCLUDING the zero-mean seasonal NEP -- exactly the recorder's
 // `gpp - ra` channels in R (R/fluxes.R), the quantity a modern-NPP row scores.
 static const int REC_N = 10;
+// `land_enso` (W1, 2026-10-02): the LAND term's ENSO input -- the index read
+// lag_enso_land months late. It is computed ONCE per run in R (ccx_land_enso()) and
+// passed in, so the core never sees the lag and the interpolation has one
+// implementation; unlagged it IS f[5], bit for bit. Every OCEAN read keeps f[5].
 static void deriv(const double* y, double t, const Par& P, const double* f,
-                  const Aux& A, double* dy, double* pco2_rec = nullptr) {
+                  double land_enso, const Aux& A, double* dy, double* pco2_rec = nullptr) {
   for (int i = 0; i < NB * 3; ++i) dy[i] = 0.0;
   if (pco2_rec) for (int i = 0; i < REC_N; ++i) pco2_rec[i] = NA_REAL;
 
@@ -517,7 +521,9 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
   // forcing layout: e_foss_NH, e_foss_SH, e_luc_NH, e_luc_SH, gmst, enso,
   //                 c14_bomb, c14_nuclear, c14_cosmo, d13c_foss,
   //                 cum_luc_NH, cum_luc_SH, sst_anom_NH, sst_anom_SH,
-  //                 sink_ocean, aod_NH, aod_SH
+  //                 sink_ocean, aod_NH, aod_SH, ndep_NH, ndep_SH
+  //                 (N_FORCING = 19; the last two added 2026-09-30 and missing from
+  //                 this list until 2026-10-02)
   // Must stay in step with CCX_FORCING_COLS in R/cpp.R -- indexed by position,
   // so a mismatch is silent garbage. test-parity.R is the gate.
   const double gmst = f[4], enso = f[5], d13c_foss = f[9];
@@ -638,7 +644,8 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
     // path at all. Sign: P.gamma_enso_land[hi] * enso is the atmosphere-ward
     // anomaly, so the GPP modulation is its negative. Split by npp_leaf_frac
     // to keep each limb's FRACTIONAL perturbation equal. No new parameter.
-    const double enso_gpp = -P.gamma_enso_land[hi] * enso;
+    // LAGGED since 2026-10-02 (W1): `land_enso`, not `enso` -- see deriv()'s header.
+    const double enso_gpp = -P.gamma_enso_land[hi] * land_enso;
     if (pco2_rec) pco2_rec[8 + hi] = npp + enso_gpp;     // NPP record (see deriv's header)
     // alpha13_signed reason (a): one-way by construction (see R/model.R).
     // Since 2026-09-02 reason (a) also covers "gamma large enough to shut
@@ -1370,7 +1377,8 @@ static Par unpack_par(const List& p) {
 
 // ---- exported: single derivative (for parity testing) ---------------
 // [[Rcpp::export]]
-NumericMatrix ccx_deriv_cpp(NumericMatrix y, double t, List p, NumericVector f, List aux) {
+NumericMatrix ccx_deriv_cpp(NumericMatrix y, double t, List p, NumericVector f, List aux,
+                            double land_enso) {
   // WIDTH GUARD (2026-09-30): f[] is read by POSITION up to N_FORCING - 1, so a
   // short vector is an out-of-bounds read neither language reports. The R
   // builder guards it too; this is the core refusing on its own account.
@@ -1378,20 +1386,25 @@ NumericMatrix ccx_deriv_cpp(NumericMatrix y, double t, List p, NumericVector f, 
     Rcpp::stop("ccx_deriv_cpp(): forcing vector has %d element(s), N_FORCING is %d", (int) f.size(), N_FORCING);
   Aux A = unpack_aux(aux); Par P = unpack_par(p);
   NumericMatrix dy(NB, 3);
-  deriv(y.begin(), t, P, f.begin(), A, dy.begin());
+  deriv(y.begin(), t, P, f.begin(), land_enso, A, dy.begin());
   return dy;
 }
 
 // ---- exported: full integration -------------------------------------
-// forcing is an n x 10 matrix, one row per month, columns in the order given in
-// deriv() above.
+// forcing is an n x N_FORCING matrix, one row per month, columns in the order given
+// in deriv() above. `land_enso` (W1, 2026-10-02) is the LAND term's lagged ENSO
+// input, one value per row, built in R by ccx_land_enso(); unlagged it is the
+// matrix's enso column itself.
 // [[Rcpp::export]]
 List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
-                 NumericVector times, List aux, int substeps) {
+                 NumericVector times, List aux, int substeps, NumericVector land_enso) {
   // WIDTH GUARD (2026-09-30), same reason as ccx_deriv_cpp(): forcing(i, j) is
   // read for j < N_FORCING with no bounds check.
   if (forcing.ncol() != N_FORCING)
     Rcpp::stop("ccx_run_cpp(): forcing matrix has %d column(s), N_FORCING is %d", forcing.ncol(), N_FORCING);
+  // LENGTH GUARD (W1, 2026-10-02): land_enso[i] is read for every row, unchecked.
+  if (land_enso.size() != forcing.nrow())
+    Rcpp::stop("ccx_run_cpp(): land_enso has %d value(s) for %d forcing row(s)", (int) land_enso.size(), forcing.nrow());
   Aux A = unpack_aux(aux); Par P = unpack_par(p);
   const int n = forcing.nrow();
   const int NS = NB * 3;
@@ -1487,22 +1500,23 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
     }
 
     for (int j = 0; j < N_FORCING; ++j) f[j] = forcing(i, j);
+    const double le = land_enso[i];     // the month's lagged land ENSO input (W1)
 
     // RK4 with substeps, ordered exactly as ccx_step_rk4() in R
     double tt = times[i];
     const double h = (1.0 / 12.0) / substeps;
     for (int s = 0; s < substeps; ++s) {
-      deriv(y.data(), tt, P, f.data(), A, k1.data(), (s == 0) ? pco2_rec : nullptr);
+      deriv(y.data(), tt, P, f.data(), le, A, k1.data(), (s == 0) ? pco2_rec : nullptr);
       if (s == 0)
         for (int hi = 0; hi < 2; ++hi)
           for (int b = 0; b < 4; ++b) out(i, 11 + 14 * hi + 10 + b) = pco2_rec[4 * hi + b];
       if (s == 0) { nppm(i, 0) = pco2_rec[8]; nppm(i, 1) = pco2_rec[9]; }
       for (int q = 0; q < NS; ++q) tmp[q] = y[q] + h / 2.0 * k1[q];
-      deriv(tmp.data(), tt + h / 2.0, P, f.data(), A, k2.data());
+      deriv(tmp.data(), tt + h / 2.0, P, f.data(), le, A, k2.data());
       for (int q = 0; q < NS; ++q) tmp[q] = y[q] + h / 2.0 * k2[q];
-      deriv(tmp.data(), tt + h / 2.0, P, f.data(), A, k3.data());
+      deriv(tmp.data(), tt + h / 2.0, P, f.data(), le, A, k3.data());
       for (int q = 0; q < NS; ++q) tmp[q] = y[q] + h * k3[q];
-      deriv(tmp.data(), tt + h, P, f.data(), A, k4.data());
+      deriv(tmp.data(), tt + h, P, f.data(), le, A, k4.data());
       for (int q = 0; q < NS; ++q)
         y[q] = y[q] + h / 6.0 * (k1[q] + 2.0 * k2[q] + 2.0 * k3[q] + k4[q]);
       tt = tt + h;
