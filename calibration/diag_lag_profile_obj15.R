@@ -30,7 +30,7 @@ LABEL_LAG  <- "hilda_csl3v0kaidgbe"           # the lag arm's label
 LABEL_ZERO <- "hilda_csl3v0kaidgb"            # the lag-0 control's label (= the file's own)
 LAGS       <- c(0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 7, 8, 9, 10, 11)   # months
 AMP        <- c("gamma_enso_land_NH", "gamma_enso_land_SH")
-X
+NM_RELTOL  <- 1e-9;  NM_MAXIT <- 400L          # the amplitudes' Nelder-Mead, per L (1e-9 of ~1200 = ~1e-6 log-units)
 WIN        <- c(1980L, 2024L)                 # = 10-02 (x)'s window
 TREND_DF   <- 5L                              # = 10-02 (x)'s detrending spline
 XLAGS      <- -6:18                           # months; > 0 = Nino 3.4 LEADS growth
