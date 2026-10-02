@@ -2,6 +2,27 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (dd) — **D3 MEASURED: objective #15 prefers a land ENSO lag of ~2.5 MONTHS, not the 5 the growth timing shows. Conditionally, with only the two land ENSO amplitudes re-optimised, the likelihood gains +12.1 at 2.5 months over lag 0; at 5 months the gain is only +1.7. The pull comes from `gcb_land_sink` and the SPO seasonal rows. The model's growth then peaks 1 month after Niño 3.4 (observed 5). Nothing adopted; the D3 ruling is Marcus's.**
+
+`calibration/diag_lag_profile_obj15.R` → `outputs/diagnostics/lag_profile_obj15_20261002.{log,rds}`, run from a frozen copy of `c88c86b`.
+- Its "(+uncommitted)" marker is the frozen copy's own: every entry is a file excluded from the copy (`outputs/`, the `.docx`s, `.claude`, three tracked downloads). No code differs.
+- Method: at each L, hilda33d's restamped mode with the two LAND ENSO amplitudes re-optimised on the #15 logpost (the ocean pair is pinned at 0). L = 0 is scored exactly, under kaidgb, and reproduces the stored −1205.8211.
+- **This is a CONDITIONAL profile; the joint answer is the refit's.**
+
+| L (months) | 0 | 1 | 2 | **2.5** | 3 | 4 | 5 | 6 | 8 | 11 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Δ likelihood vs L = 0 | 0 | +7.66 | +11.65 | **+12.12** | +11.53 | +7.71 | +1.74 | −4.79 | −14.75 | −22.68 |
+| model growth peak lag (obs +5) | −2 | 0 | +1 | +1 | +2 | +3 | +4 | +6 | +8 | +11 |
+| corr(model, obs) detrended growth | 0.43 | 0.50 | 0.56 | 0.59 | 0.61 | 0.65 | **0.67** | 0.66 | 0.61 | 0.50 |
+
+- **What pulls toward 2.5:** `gcb_land_sink` +6.13, `co2_seasonal_SPO` +3.77, `co2_level_MLO` +0.95, `co2_seasonal_MLO` +0.61. The audit's unreproduced probe ("2–3 months, via the GCB land sink and the seasonal rows") is now REPRODUCED.
+- **What resists 5:** relative to L = 0, `co2_seasonal_MLO` −2.76, `gcb_ocean_enso_slope` −1.11 and the δ¹³C seasonal rows (−0.6 each); `gcb_land_sink` still gains +4.47 there.
+- ⚠ **Two cautions for the ruling.**
+  - GCB's S_LAND is a DGVM ensemble (model-derived), so its ENSO timing is the DGVMs' timing, not an observation of it.
+  - The per-year seasonal-harmonic rows see ENSO only where an anomaly projects onto a year's fit: real information, but second-order.
+  - The atmospheric observation of the timing (growth peaks 5 months after Niño 3.4, 10-02 x) is in NO row: the growth-rate row was declined 09-26 ([[ccx_growth_objective_declined]] in memory).
+- The amplitudes move with L: γ_land NH 0.44 → 0.45 at 2.5 → 0.35 at 5; SH 0.33 → 0.43 → 0.39.
+
 ## 2026-10-02 (cc) — **OBJECTIVE #15 PRICED AND RESTAMPED (D1: "Every version, as objective #15"). Six files moved — the five registered modes plus the `hilda31` ratification file — each at exactly its priced likelihood move; the pre-#15 copies are quarantined with a README. The test ledger (7 tests) was re-pinned or re-expressed on Marcus's approval ("Approve all"). The constraint map is a NAMED RED until the #15 adoption ("After #15 adoption"). ⛔ Every stored logpost from before today is on objective #14 or earlier and is NOT comparable with a #15 one.**
 
 **Priced** (`calibration/diag_obj15_price.R` @`f6049e2` → `outputs/diagnostics/obj15_price_20261002.{log,rds}`), each file under its own structure, gate, pins and spinup — the restamp tool's path:

@@ -1,0 +1,18 @@
+calibration/diag_obj14_registered_bitexact.R @9a958f7, 2026-10-02 19:20
+fitted set with the gate CLOSED: 38 names; gated (held under every registered label): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest
+
+      mode             struct gate_open n_rows streams_identical
+  hilda33d hilda_csl3v0kaidgb      TRUE     27              TRUE
+  hilda29l         hilda_csl3     FALSE     27              TRUE
+  hilda32f         hilda_csl3     FALSE     27              TRUE
+ hilda31s2              hilda     FALSE     27              TRUE
+ hilda31pe            hilda_c     FALSE     27              TRUE
+ max_abs_d_stream d_logpost_after_shift
+                0                     0
+                0                     0
+                0                     0
+                0                     0
+                0                     0
+
+VERDICT: PASS (no registered file moves; nothing to restamp) -- 5 registered modes; streams identical 5/5; |d logpost| max 0 (tol 1e-09)
+provenance: calibration/diag_obj14_registered_bitexact.R @9a958f7; registered modes from R/paths.R CCX_MODE_FILES; each file's own spinup; no RNG
