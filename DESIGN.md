@@ -103,8 +103,11 @@ d M_atm[h]/dt =
 
 - **NPP with CO₂ fertilization:** NPP[h] = NPP₀[h] · (1 + β · ln(χ[h]/χ₀)), β [CAL].
   NPP₀ global ≈ 60 GtC/yr [PROVISIONAL, cited 2026-09-29 as PRESENT-DAY ~60 (IPCC TAR §3.2.1;
-  bracketed by Haberl 2007, Ito 2011, MOD17); no 1750 source exists — see R/constants.R. To be
-  FITTED against a modern-NPP prior (Marcus, option 4)], split N/S by land productivity share [VERIFY].
+  bracketed by Haberl 2007, Ito 2011, MOD17); no 1750 source exists — see R/constants.R. ~~To be
+  FITTED against a modern-NPP prior (Marcus, option 4)~~ **RETIRED 2026-10-02 (Marcus: "Retire the
+  line"): ruling D4 (10-01 a) made modern NPP a NAMED TENSION instead; NPP₀ stays fixed. Found by
+  the 10-02 DESIGN audit (`notes/audit_2026-10-02_design_vs_build.md` C2; CHANGELOG 10-02 z).**],
+  split N/S by land productivity share [VERIFY].
 - **Pools (v0 form, superseded — see §3.1):** dC_veg/dt = NPP − C_veg/τ_veg;
   dC_soil/dt = C_veg/τ_veg − R_het.
   **What the code integrates (four pools, since 2026-08-12; spec note added 2026-09-12):** NPP
@@ -174,6 +177,11 @@ d M_atm[h]/dt =
 - **ENSO:** F_ENSO = γ_MEI · MEI(t − L_MEI), a land→atmosphere flux anomaly (El Niño →
   source), split between hemispheres by fixed tropical-land share [VERIFY]. γ_MEI, L_MEI
   [CAL]. Pinatubo 1992–93 is a *documented residual* in v1 (§10).
+  > ⚠ **2026-10-02: `L_MEI` WAS NEVER BUILT** — the code has read the index at t since its first commit
+  > (`efa4495`), and nothing retired the lag; the model's land response arrives ~5 months early
+  > (CHANGELOG 10-02 x). **Marcus: "Do it right. Option 2"** — build it on the LAND term as specified
+  > here (fitted, U(0, 12) months) and refit (CHANGELOG 10-02 z). Until that lands, this line describes the
+  > target, not the code. (The index is Niño 3.4, not MEI, since 08-09.)
 - **Land-use change:** prescribed GCB bookkeeping flux E_LUC(t) added to the atmosphere and
   decremented from C_wood (carries that pool's own isotopic signature — a transfer, not a
   source, so no ¹⁴C is created; Marcus 2026-08-12).
@@ -498,8 +506,8 @@ processed `.rds` in `data/`.
 | **South Pole monthly CO₂** | **1957–2024, n=711** | **dense SH target** | **Scripps merge** (`data-raw/manual/`) |
 | Mauna Loa / South Pole CO₂ | 1958–2026 / 1975–2025 | independent cross-checks | NOAA GML |
 | Mauna Loa flask CO₂ | 1960–2025, n=702 | cross-check on in-situ | Scripps (`data-raw/manual/`) |
-| Law Dome CO₂ spline + samples | 154–1996 CE | pre-1958 target, spinup anchor | Rubino et al. 2019 (NOAA/WDS 25830) |
-| Law Dome δ¹³C spline + samples | 1020–1993 CE | pre-1990 Suess target | Rubino et al. 2019 |
+| Law Dome CO₂ spline + samples | 154–1996 CE | pre-1958 target, spinup anchor ⚠ *the objective scores all in-run samples to 1996, 52 of them post-1958; **ruled 10-02: cut to pre-1958 in the next objective** (CHANGELOG 10-02 z)* | Rubino et al. 2019 (NOAA/WDS 25830) |
+| Law Dome δ¹³C spline + samples | 1020–1993 CE | pre-1990 Suess target ⚠ *never built as a likelihood row (audit 10-02 A2); **ruled 10-02: add it in the next objective** (CHANGELOG 10-02 z)* | Rubino et al. 2019 |
 | Zonal Δ¹⁴C, monthly, 5 zones | 1941.2–2019.4, n=4689 | bomb-era target, both hemispheres | Hua et al. 2022 via `SoilR::Hua2021` |
 | **MLO + SPO monthly δ¹³C** | **1980–2024 (n=532), 1977–2024 (n=528)** | **Suess partition target, one isotope scale** | **Scripps** (`data-raw/manual/`) |
 | δ¹³C flasks MLO + SPO | 1990–2014, 1993–2014 | cross-checks | NOAA GML / INSTAAR SIL |

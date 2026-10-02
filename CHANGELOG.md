@@ -2,6 +2,20 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (z) — **RULINGS on the ENSO lag and the audit (Marcus): build `L_MEI` and refit; in the same refit add the ice-core δ¹³C row and cut ice-core CO₂ to pre-1958; retire DESIGN's fitted-NPP₀ line; repair gates 5, 6, 7, 11 and P7 before scoring. Plan: `notes/plan_2026-10-02_obj15_lag_iced13c.md`.**
+
+**Rulings (verbatim):**
+1. On the three ENSO options (10-02 x): **"Do it right. Option 2."** Build DESIGN's fitted lag `L_MEI` on the LAND term and refit. Then: **"But scan for any other design.md definitions that weren't implemented first!"** (→ 10-02 y).
+2. Ice-core δ¹³C row (audit A2): **"Add it in this refit (Recommended)"**.
+3. Ice-core CO₂ post-1958 samples (C3): **"Cut to pre-1958 (Recommended)"**.
+4. NPP₀ fitted (C2): **"Retire the line (Recommended)"**. Done in DESIGN.md §3.3, citing ruling D4.
+5. Gates (B6, B7, C4, C5): **"Restore gates 6 and 11, Fix P7's comparison, Align gate 7's target, Restore gate 5's sub-checks"**, all before the new mode is scored.
+
+**Recorded where they apply.**
+- DESIGN.md §3.3 (NPP₀ retired; `L_MEI` marked never-built and now ordered) and §4 (the two Law Dome rows).
+- Not yet built: the refit plan, with its open methodological choices, is in the plan note.
+- ⚠ Two `[VERIFY]` priors (`k_w`, `tau_ex`; audit C1) are being cited before the refit. If the cited values differ, that is an objective change and goes to Marcus.
+
 ## 2026-10-02 (y) — **DESIGN.md audited against the build, before Option 2 (Marcus: "scan for any other design.md definitions that weren't implemented first!"). Report: `notes/audit_2026-10-02_design_vs_build.md`. Nothing was changed.**
 
 Marcus ruled "Do it right. Option 2" (build `L_MEI` on the land term and refit), then asked for the scan first.
