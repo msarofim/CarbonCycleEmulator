@@ -1,0 +1,62 @@
+calibration/diag_ice_d13c_sigma.R @0ae4d99, 2026-10-02 18:40 | arm hilda33d
+
+=== S1. Rubino et al. 2019 d13C samples (data/obs_icecore.rds) ===
+all 105 samples, 1019-1993; 11 before 1750 (outside the run); 19 firn-air samples
+  in-run, year < 1977 : n =  78 | stated err mean 0.048, median 0.040, max 0.190 permil
+  in-run, year < 1990 : n =  89 | stated err mean 0.045, median 0.030, max 0.190 permil
+  in-run, year < all  : n =  94 | stated err mean 0.044, median 0.030, max 0.190 permil
+  by era (in-run):
+   era(year)  n err_mean
+ [1750,1850) 13    0.045
+ [1850,1900) 16    0.038
+ [1900,1958) 36    0.051
+ [1958,1977) 13    0.054
+ [1977,1990) 11    0.027
+ [1990,2000)  5    0.024
+
+=== S2. Sample scatter about Rubino's own spline (a FLOOR on sample-level noise) ===
+   era.year. res_spline.n res_spline.mean res_spline.sd
+ [1750,1850)           13         0.00468        0.0372
+ [1850,1900)           16        -0.00117        0.0433
+ [1900,1958)           36        -0.00308        0.0470
+ [1958,1977)           13         0.00418        0.0746
+ [1977,1990)           11        -0.00384        0.0221
+ [1990,2000)            5         0.01120        0.0208
+  pooled sd: year < 1977 0.0497 | year < 1990 0.0471 permil (in-run)
+  stated-error RMS over the same samples: 0.0571 / 0.0546 -> excess (quadrature) 0.0000 / 0.0000
+
+=== S3. Ice vs the station records over their overlap (the same air, two methods) ===
+  ice - SPO annual level: n = 16 (1979-1993) | mean -0.0336, sd 0.0386, RMS 0.0503 permil
+  ice - MLO annual level: n = 14 (1983-1993) | mean -0.0019, sd 0.0399, RMS 0.0385 permil
+  (the CO2 analogue, likelihood.R: ice - SPO = -0.31 +- 0.15 ppm over 1962-96)
+
+=== S4. The canonical hilda33d: model SH box vs the samples (read as the CO2 ice row reads co2_SH) ===
+  vector: refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb (logpost -1405.41, PINNED ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0 -- logpost not comparable to a free arm) | spinup periodic | migrated: none
+   era.year. res_model.n res_model.mean res_model.sd res_model.rms
+ [1750,1850)          13        -0.0744       0.0734        0.1025
+ [1850,1900)          16        -0.1155       0.0570        0.1280
+ [1900,1958)          36        -0.0357       0.0501        0.0609
+ [1958,1977)          13         0.0472       0.0771        0.0878
+ [1977,1990)          11         0.0569       0.0299        0.0636
+ [1990,2000)           5         0.0711       0.0201        0.0734
+
+  the row under each candidate sigma (model at the canonical, nothing refitted):
+  sigma            end         n         logL     chi2/n    mean|z|
+  stated_only      < 1977     78      -202.59       9.79       2.31
+  stated_only      < 1990     89      -217.37       9.60       2.32
+  station_rep      < 1977     78        58.96       2.00       1.17
+  station_rep      < 1990     89        73.42       1.91       1.15
+  spline_scatter   < 1977     78        54.84       2.18       1.22
+  spline_scatter   < 1990     89        69.12       2.08       1.20
+  (for scale: the station d13C level rows score 45 + 44 annual points at sd 0.05 permil)
+
+=== S5. Circularity with the pre-industrial anchor D13C_PI ===
+  D13C_PI = -6.469 permil: Law Dome d13C spline (Rubino et al. 2019), 1745-1755 mean.
+  samples inside the anchor window 1745-1755: 2 (1746: -6.51, 1752: -6.41); in-run of those: 1
+  the model at 1750 (the spinup's pinned instant): -6.4626 permil
+
+=== S6. W3: the CO2 ice row at the canonical, all in-run samples vs year < 1958 ===
+  all in-run: n = 246, logL -665.18 | year < 1958: n = 194, logL -525.38 | the cut rows: n = 52, logL -139.80
+  the cut rows' residual (obs - model): mean -3.23, sd 1.30 ppm (sigma 4.16)
+
+provenance: calibration/diag_ice_d13c_sigma.R @0ae4d99; arm hilda33d (periodic spinup); data/obs_icecore.rds (Rubino et al. 2019); no RNG

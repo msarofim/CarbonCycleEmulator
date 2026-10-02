@@ -408,6 +408,20 @@ LIK_ICE_CO2_END <- 1958              # scored: sample year < this
 LIK_USE_ICE_D13C     <- TRUE
 LIK_ICE_D13C_END     <- 1977         # scored: sample year < this
 LIK_ICE_D13C_REP_ERR <- LIK_D13C_REP_ERR   # permil, added in quadrature (0.05)
+#' Evaluate `expr` under OBJECTIVE #14's two ice rows (no d13c_icecore, no pre-1958 cut).
+#'
+#' For a test or diagnostic that reproduces a RECORD MADE UNDER #14 -- the record's own objective
+#' re-supplied, not its number re-pinned (the ccx_with_emis_method() precedent of 10-01 k). The
+#' two #15 likelihood switches are restored however `expr` exits. ⚠ The W5 PRIORS are not touched:
+#' they move logposts, not streams, so a record of STREAMS is reproduced by this alone.
+ccx_with_obj14_ice <- function(expr) {
+  env <- environment(ccx_loglik)
+  old <- list(d = get("LIK_USE_ICE_D13C", envir = env), c = get("LIK_ICE_CO2_END", envir = env))
+  assign("LIK_USE_ICE_D13C", FALSE, envir = env); assign("LIK_ICE_CO2_END", Inf, envir = env)
+  on.exit({ assign("LIK_USE_ICE_D13C", old$d, envir = env)
+            assign("LIK_ICE_CO2_END", old$c, envir = env) }, add = TRUE)
+  force(expr)
+}
 # GCB 2025's OWN stated 1-sigma uncertainties, quoted verbatim from the header
 # of data-raw/downloads/gcb2025_global_budget.csv (MANIFEST.csv carries the URL,
 # access date and SHA-256; Friedlingstein et al. 2025, doi:10.18160/GCP-2025):

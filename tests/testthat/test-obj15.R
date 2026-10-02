@@ -70,14 +70,19 @@ test_that("W2 + W3: each row IS its hand computation on the same run; the switch
   expect_identical(setdiff(names(s15), names(s14)), "d13c_icecore")
   same <- setdiff(names(s14), "co2_icecore")
   expect_identical(s15[same], s14[same])
-  # the stored #14 streams are what the switches-off harness gives. NOT to the bit: dg_run() runs
-  # par_mode directly where the objective encodes and decodes it (~1 ulp), and the periodic
-  # spinup's tolerance-terminated iteration amplifies that to ~1e-8 relative on a row (CHANGELOG
-  # 09-19 m, test-gcb-enso-slope's tolerance and reason); the BIT identity of the objective's own
-  # path is calibration/diag_obj15_price.R's check
+  # the file's stored streams are #15's since the restamp (2026-10-02 cc), and the harness reproduces
+  # them. NOT to the bit: dg_run() runs par_mode directly where the objective encodes and decodes it
+  # (~1 ulp), and the periodic spinup's tolerance-terminated iteration amplifies that to ~1e-8
+  # relative on a row (CHANGELOG 09-19 m, test-gcb-enso-slope's tolerance and reason); the BIT
+  # identity of the objective's own path is diag_obj14_registered_bitexact.R's. ⚠ This compared #14's
+  # streams until the restamp, which was the state when the test was written (10-02 bb).
   st <- unlist(v$md$streams)
-  expect_identical(names(s14), names(st))
-  expect_equal(unname(s14), unname(st), tolerance = 1e-6)
+  expect_identical(names(s15), names(st))
+  expect_equal(unname(s15), unname(st), tolerance = 1e-6)
+  # and #14's streams are the restamp's own record of the file's previous state
+  h <- v$md$objective_history[[length(v$md$objective_history)]]
+  expect_match(h$reason, "objective #15")
+  expect_equal(unname(s14), unname(unlist(h$streams_before)[names(s14)]), tolerance = 1e-6)
 })
 
 test_that("W2: an obs bundle without the frame skips the row VISIBLY (absent, never zero)", {

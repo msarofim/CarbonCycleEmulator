@@ -1,0 +1,26 @@
+calibration/diag_obj15_price.R @f6049e2, 2026-10-02 18:41
+#15 = #14 + co2_icecore cut to year < 1958 + d13c_icecore (sd = sqrt(err^2 + 0.050^2), year < 1977, in-run)
+      + priors k_w lognormal(1500, 0.4) -> (1446, 0.2), tau_ex (1.3, 0.25) -> (0.8, 0.26)
+
+hilda33d   hilda_csl3v0kaidgb   #14 reproduces stored: TRUE  | co2_icecore  -665.1778 ->  -525.3755 | d13c_icecore (new)   58.9553 | lik -1369.338556 -> -1170.580958 (delta +198.7576) | rows that moved: co2_icecore,d13c_icecore
+                                k_w 1920.9, tau_ex 0.8981 -> prior move +0.8327 | logpost -1405.411447 -> -1205.821150 (+199.5903 = lik +198.7576 + prior +0.8327: identity holds)
+hilda29l   hilda_csl3           #14 reproduces stored: TRUE  | co2_icecore  -677.8433 ->  -539.0583 | d13c_icecore (new)   53.1167 | lik -1391.941799 -> -1200.040128 (delta +191.9017) | rows that moved: co2_icecore,d13c_icecore
+                                k_w 1912.3, tau_ex 0.8751 -> prior move +1.0548 | logpost -1425.498702 -> -1232.542199 (+192.9565 = lik +191.9017 + prior +1.0548: identity holds)
+hilda32f   hilda_csl3           #14 reproduces stored: TRUE  | co2_icecore  -676.8465 ->  -538.0580 | d13c_icecore (new)   54.6713 | lik -1386.258242 -> -1192.798419 (delta +193.4598) | rows that moved: co2_icecore,d13c_icecore
+                                k_w 1917.7, tau_ex 0.8777 -> prior move +1.0170 | logpost -1423.815092 -> -1229.338279 (+194.4768 = lik +193.4598 + prior +1.0170: identity holds)
+hilda31s2  hilda                #14 reproduces stored: TRUE  | co2_icecore  -661.6225 ->  -522.2662 | d13c_icecore (new)   72.8509 | lik -1411.261885 -> -1199.054655 (delta +212.2072) | rows that moved: co2_icecore,d13c_icecore
+                                k_w 1628.7, tau_ex 0.9252 -> prior move +1.2673 | logpost -1447.012269 -> -1233.537715 (+213.4746 = lik +212.2072 + prior +1.2673: identity holds)
+hilda31pe  hilda_c              #14 reproduces stored: TRUE  | co2_icecore  -675.5969 ->  -536.9840 | d13c_icecore (new)   54.4738 | lik -1387.891757 -> -1194.805019 (delta +193.0867) | rows that moved: co2_icecore,d13c_icecore
+                                k_w 1927.7, tau_ex 0.8726 -> prior move +1.0331 | logpost -1425.194534 -> -1231.074742 (+194.1198 = lik +193.0867 + prior +1.0331: identity holds)
+hilda31_ratification hilda                #14 reproduces stored: TRUE  | co2_icecore  -661.1747 ->  -521.7913 | d13c_icecore (new)   73.7246 | lik -1409.096521 -> -1195.988524 (delta +213.1080) | rows that moved: co2_icecore,d13c_icecore
+                                k_w 1661.2, tau_ex 0.9124 -> prior move +1.3208 | logpost -1450.938637 -> -1236.509831 (+214.4288 = lik +213.1080 + prior +1.3208: identity holds)
+
+VERDICT: PRICED -- 6 files (the registered modes + the hilda31 ratification file); #14 reproduced identical() 6/6; only co2_icecore + d13c_icecore moved: TRUE
+restamp commands (the delta to 4 dp is the gate restamp_mode_objective.R checks):
+  Rscript calibration/restamp_mode_objective.R /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds 198.7576 "objective #15 (2026-10-02): ..."
+  Rscript calibration/restamp_mode_objective.R /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20260920_hilda29l_obj13_hilda_csl3/mode_fit_pumpN.rds 191.9017 "objective #15 (2026-10-02): ..."
+  Rscript calibration/restamp_mode_objective.R /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20260922_hilda32f_obj13_hilda_csl3_free_parent/mode_fit_pumpN.rds 193.4598 "objective #15 (2026-10-02): ..."
+  Rscript calibration/restamp_mode_objective.R /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20260912_hilda31_seasml1_round7/mode_fit_pumpN.rds 212.2072 "objective #15 (2026-10-02): ..."
+  Rscript calibration/restamp_mode_objective.R /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20260919_hilda31pe_obj13_hilda_c_seasml0/mode_fit_pumpN.rds 193.0867 "objective #15 (2026-10-02): ..."
+  Rscript calibration/restamp_mode_objective.R /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/quarantine/20260910_periodic_spinup_adopted/refit_20260908_hilda31/mode_fit_pumpN.rds 213.1080 "objective #15 (2026-10-02): ..."
+provenance: calibration/diag_obj15_price.R @f6049e2; R/paths.R CCX_MODE_FILES + CCX_MODE_HILDA31_QUARANTINED; each file's own spinup; no RNG

@@ -48,7 +48,9 @@ ges_toggle <- function(on, f) { old <- LIK_USE_GCB_ENSO_SLOPE; assign("LIK_USE_G
 test_that("(3) ADDITIVE: the 25 pre-#13 rows are bit-identical; the row is absent OFF, absent without a target, one finite number ON", {
   st_on  <- ges_toggle(TRUE,  function() unlist(dg_streams(ges_r, ges_v, obs = ges_obs)))
   st_off <- ges_toggle(FALSE, function() unlist(dg_streams(ges_r, ges_v, obs = ges_obs)))
-  old <- setdiff(names(ges_v$md$streams), "gcb_ocean_enso_slope")   # the 25 pre-#13 rows (the file is #13-stamped since 09-18 e)
+  # the 25 pre-#13 rows (the file is #13-stamped since 09-18 e) -- and not objective #15's new row
+  # either (2026-10-02: the file is #15-stamped, 27 rows; approved by Marcus)
+  old <- setdiff(names(ges_v$md$streams), c("gcb_ocean_enso_slope", "d13c_icecore"))
   expect_length(old, 25L)
   expect_false("gcb_ocean_enso_slope" %in% names(st_off)); expect_true("gcb_ocean_enso_slope" %in% names(st_on))
   expect_identical(st_on[old], st_off[old])
@@ -59,7 +61,8 @@ test_that("(3) ADDITIVE: the 25 pre-#13 rows are bit-identical; the row is absen
   # claim of this test is st_on vs st_off (above); against the stored file the bound is the round trip's.
   expect_equal(unname(st_on[old]), unname(unlist(ges_v$md$streams[old])), tolerance = 1e-6)   # the canonical's stored 25
   expect_equal(st_on[["gcb_ocean_enso_slope"]], ges_v$md$streams[["gcb_ocean_enso_slope"]], tolerance = 1e-6)   # and its stored row
-  expect_true(is.finite(st_on[["gcb_ocean_enso_slope"]])); expect_identical(sum(!is.na(st_on)), length(old) + 1L)
+  expect_true(is.finite(st_on[["gcb_ocean_enso_slope"]]))
+  expect_identical(sum(!is.na(st_on)), length(old) + 2L)   # + the #13 row and #15's d13c_icecore (2026-10-02)
   o2 <- ges_obs; o2$enso_slope <- NULL
   st_no <- ges_toggle(TRUE, function() unlist(dg_streams(ges_r, ges_v, obs = o2)))
   expect_false("gcb_ocean_enso_slope" %in% names(st_no)); expect_identical(st_no[old], st_off[old])

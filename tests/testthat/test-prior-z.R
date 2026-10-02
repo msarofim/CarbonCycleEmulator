@@ -13,7 +13,8 @@ test_that("ccx_prior_z matches the analytic z for every lognormal prior", {
   cases <- list(
     list(n = "q10",             mu = log(2.0),   sd = 0.25,
          xs = c(1.0907, 2.0, 3.1)),
-    list(n = "k_w",             mu = log(1500),  sd = 0.40,
+    # 2026-10-02 (W5, objective #15; re-pin approved by Marcus): lognormal(1500, 0.40) -> (1446, 0.20)
+    list(n = "k_w",             mu = log(1446),  sd = 0.20,
          xs = c(600, 1500, 2024.4)),
     list(n = "sst_seas_amp_NH", mu = log(ccx_const("SST_SEAS_AMP_NH_OBS")), sd = 0.25,
          xs = c(0.46677, 2.23739)),

@@ -275,10 +275,14 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth -0.0053 under 
   # registered files restamped at their priced moves): 0.0364 -> -0.0053 (-0.005260). A near-
   # cancellation either way: the streams' total |change| is 9.10 (was ~9.1), the net crosses zero.
   # MEASURED at the restamped file (re-pin approved by Marcus).
-  expect_equal(r$on_periodic - r$off_periodic, -0.0053, tolerance = 1e-4, scale = 1)
+  # 2026-10-02 (objective #15: the ice d13C row reads 1948-77, where the index treatment acts; the
+  # pre-1958 ice-CO2 cut; the W5 priors move no stream): -0.0053 -> +0.4790 (0.478982) at the
+  # restamped file. MEASURED (re-pin approved by Marcus).
+  expect_equal(r$on_periodic - r$off_periodic, 0.4790, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
   # 2026-10-01 (k), the same flip: 17.8469 -> 17.7499 (17.749910) at the restamped control.
-  expect_equal(r0$on_periodic - r0$off_periodic, 17.7499, tolerance = 1e-4, scale = 1)
+  # 2026-10-02 (objective #15): 17.7499 -> 20.5487 (20.548668) at the restamped control (approved by Marcus).
+  expect_equal(r0$on_periodic - r0$off_periodic, 20.5487, tolerance = 1e-4, scale = 1)
   # MUTATION GUARD: the flag must actually do something, or the gap above could
   # be two identical scorings agreeing to any tolerance you like.
   # ⚠ RE-CUT 2026-10-01 (c): it read the NET price (> 1), which a canonical whose rows move in OPPOSITE
@@ -312,8 +316,10 @@ test_that("RATIFICATION PIN at `hilda31` (retired, by path): 50.1629 aseasonal, 
   # 09-18 (e): -0.0672 / -0.0671 from objective #13's ENSO-slope row (file restamped +0.3630 on the likelihood).
   # 10-01 (k): -0.1633 / -0.1632 from the emissions-interpolation flip (spline -> constant; the file
   # restamped -0.0378 on the likelihood, history kept): 50.3262 -> 50.1629, 60.0184 -> 59.8552.
-  expect_equal(r$on_aseasonal - r$off_aseasonal, 50.1629, tolerance = 1e-4, scale = 1)
-  expect_equal(r$on_periodic  - r$off_periodic,  59.8552, tolerance = 1e-4, scale = 1)
+  # 10-02 (objective #15): +2.7443 / +2.7289 (the file restamped +213.1080 on the likelihood, history
+  # kept): 50.1629 -> 52.9072, 59.8552 -> 62.5841 (re-pin approved by Marcus).
+  expect_equal(r$on_aseasonal - r$off_aseasonal, 52.9072, tolerance = 1e-4, scale = 1)
+  expect_equal(r$on_periodic  - r$off_periodic,  62.5841, tolerance = 1e-4, scale = 1)
   expect_gt(r$on_aseasonal - r$off_aseasonal, 1)
   expect_gt(abs((r$on_periodic - r$off_periodic) - (r$on_aseasonal - r$off_aseasonal)), 1)
 })

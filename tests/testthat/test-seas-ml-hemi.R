@@ -81,7 +81,9 @@ test_that("(5) the label reproduces the session knock-out at the canonical's poi
   # ⚠ UNDER THE RECORD'S OWN INTERPOLATION (2026-10-01): the 09-19 knock-out was measured under
   # "spline", before the 10-01 (k) flip to "constant" (review 10-01c B6). Re-supplied, not re-pinned:
   # under "constant" this point scores +1.6 against the record.
-  st <- ccx_with_emis_method("spline", dg_streams(dg_run(v), v, obs = obs))
+  # ... and under its own OBJECTIVE (2026-10-02): the record predates #15's ice rows, re-supplied the
+  # same way (ccx_with_obj14_ice(); approved by Marcus)
+  st <- ccx_with_obj14_ice(ccx_with_emis_method("spline", dg_streams(dg_run(v), v, obs = obs)))
   got <- sum(st[ko$common])
   expect_equal(got, target, tolerance = 1e-6)
   expect_lt(got, full - 10)                                   # the knock-out costs, as measured: the test has power

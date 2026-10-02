@@ -1,0 +1,25 @@
+=== hilda33d  calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds  expect 198.7576
+calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds: likelihood -1369.338556 -> -1170.580958 (delta +198.757599; expected +198.7576) | logpost -1405.411447 -> -1205.821150 (+199.590298, of which prior drift +0.832699)
+  rows that moved: co2_icecore +139.8023, NEW:d13c_icecore NA 
+restamped calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds (history entries: 2)
+=== hilda29l  calibration/output/refit_20260920_hilda29l_obj13_hilda_csl3/mode_fit_pumpN.rds  expect 191.9017
+calibration/output/refit_20260920_hilda29l_obj13_hilda_csl3/mode_fit_pumpN.rds: likelihood -1391.941799 -> -1200.040128 (delta +191.901671; expected +191.9017) | logpost -1425.498702 -> -1232.542199 (+192.956503, of which prior drift +1.054832)
+  rows that moved: co2_icecore +138.7850, NEW:d13c_icecore NA 
+restamped calibration/output/refit_20260920_hilda29l_obj13_hilda_csl3/mode_fit_pumpN.rds (history entries: 2)
+=== hilda32f  calibration/output/refit_20260922_hilda32f_obj13_hilda_csl3_free_parent/mode_fit_pumpN.rds  expect 193.4598
+calibration/output/refit_20260922_hilda32f_obj13_hilda_csl3_free_parent/mode_fit_pumpN.rds: likelihood -1386.258242 -> -1192.798419 (delta +193.459823; expected +193.4598) | logpost -1423.815092 -> -1229.338279 (+194.476813, of which prior drift +1.016990)
+  rows that moved: co2_icecore +138.7885, NEW:d13c_icecore NA 
+restamped calibration/output/refit_20260922_hilda32f_obj13_hilda_csl3_free_parent/mode_fit_pumpN.rds (history entries: 2)
+=== hilda31s2  calibration/output/refit_20260912_hilda31_seasml1_round7/mode_fit_pumpN.rds  expect 212.2072
+calibration/output/refit_20260912_hilda31_seasml1_round7/mode_fit_pumpN.rds: likelihood -1411.261885 -> -1199.054655 (delta +212.207230; expected +212.2072) | logpost -1447.012269 -> -1233.537715 (+213.474554, of which prior drift +1.267324)
+  rows that moved: co2_icecore +139.3563, NEW:d13c_icecore NA 
+restamped calibration/output/refit_20260912_hilda31_seasml1_round7/mode_fit_pumpN.rds (history entries: 4)
+=== hilda31pe  calibration/output/refit_20260919_hilda31pe_obj13_hilda_c_seasml0/mode_fit_pumpN.rds  expect 193.0867
+calibration/output/refit_20260919_hilda31pe_obj13_hilda_c_seasml0/mode_fit_pumpN.rds: likelihood -1387.891757 -> -1194.805019 (delta +193.086738; expected +193.0867) | logpost -1425.194534 -> -1231.074742 (+194.119792, of which prior drift +1.033054)
+  rows that moved: co2_icecore +138.6130, NEW:d13c_icecore NA 
+restamped calibration/output/refit_20260919_hilda31pe_obj13_hilda_c_seasml0/mode_fit_pumpN.rds (history entries: 3)
+=== hilda31_ratification  calibration/output/quarantine/20260910_periodic_spinup_adopted/refit_20260908_hilda31/mode_fit_pumpN.rds  expect 213.1080
+calibration/output/quarantine/20260910_periodic_spinup_adopted/refit_20260908_hilda31/mode_fit_pumpN.rds: likelihood -1409.096521 -> -1195.988524 (delta +213.107997; expected +213.1080) | logpost -1450.938637 -> -1236.509831 (+214.428806, of which prior drift +1.320810)
+  rows that moved: co2_icecore +139.3834, NEW:d13c_icecore NA 
+restamped calibration/output/quarantine/20260910_periodic_spinup_adopted/refit_20260908_hilda31/mode_fit_pumpN.rds (history entries: 7)
+ALL RESTAMPED

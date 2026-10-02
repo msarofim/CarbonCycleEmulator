@@ -210,7 +210,9 @@ test_that("6. SCREEN IDENTITY: the open label reproduces the D2/D3 screen's DNTb
   # 10-01 (k) flip to "constant" (review 10-01c B6), so the method is an INPUT of the artifact this
   # identity reproduces. Re-supplied, not re-pinned: under "constant" the streams move by up to 0.338
   # (the seasonal rows) and the identity would have to become a pin on the code under test.
-  v <- ccx_with_emis_method("spline", ccx_make_logpost(base_params = bp, by_stream = TRUE)(u))
+  # ... and UNDER ITS OWN OBJECTIVE (2026-10-02, objective #15): the screen predates the d13c_icecore
+  # row and the pre-1958 ice-CO2 cut, so #14's two ice rows are re-supplied the same way (approved by Marcus).
+  v <- ccx_with_obj14_ice(ccx_with_emis_method("spline", ccx_make_logpost(base_params = bp, by_stream = TRUE)(u)))
   st <- attr(v, "streams")
   expect_identical(names(st), names(a$streams))
   d <- unlist(st) - unlist(a$streams)

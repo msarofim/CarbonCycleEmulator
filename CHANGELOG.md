@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (cc) — **OBJECTIVE #15 PRICED AND RESTAMPED (D1: "Every version, as objective #15"). Six files moved — the five registered modes plus the `hilda31` ratification file — each at exactly its priced likelihood move; the pre-#15 copies are quarantined with a README. The test ledger (7 tests) was re-pinned or re-expressed on Marcus's approval ("Approve all"). The constraint map is a NAMED RED until the #15 adoption ("After #15 adoption"). ⛔ Every stored logpost from before today is on objective #14 or earlier and is NOT comparable with a #15 one.**
+
+**Priced** (`calibration/diag_obj15_price.R` @`f6049e2` → `outputs/diagnostics/obj15_price_20261002.{log,rds}`), each file under its own structure, gate, pins and spinup — the restamp tool's path:
+
+| file | likelihood #14 → #15 | Δ lik | of it: `co2_icecore` | `d13c_icecore` (new) | Δ prior (W5) | logpost #15 |
+|---|---|---|---|---|---|---|
+| hilda33d | −1369.3386 → −1170.5810 | **+198.7576** | −665.18 → −525.38 | +58.96 | +0.8327 | −1205.821150 |
+| hilda29l | −1391.9418 → −1200.0401 | +191.9017 | −677.84 → −539.06 | +53.12 | +1.0548 | −1232.542199 |
+| hilda32f | −1386.2582 → −1192.7984 | +193.4598 | −676.85 → −538.06 | +54.67 | +1.0170 | −1229.338279 |
+| hilda31s2 | −1411.2619 → −1199.0547 | +212.2072 | −661.62 → −522.27 | +72.85 | +1.2673 | −1233.537715 |
+| hilda31pe | −1387.8918 → −1194.8050 | +193.0867 | −675.60 → −536.98 | +54.47 | +1.0331 | −1231.074742 |
+| hilda31 (ratification) | −1409.0965 → −1195.9885 | +213.1080 | −661.17 → −521.79 | +73.72 | +1.3208 | −1236.509831 |
+
+- **Checks, all six:**
+  - the switches-off harness reproduces the stored #14 streams `identical()`;
+  - only `co2_icecore` and the new row move;
+  - logpost(#15) − stored = Δ likelihood + Δ prior, to 1e-8.
+- ⭐ **A pointer for the refit, not a finding.** The two files that fit `k_w` near 1630–1660 m/yr (hilda31s2, hilda31) read the new δ¹³C row ~14–20 log-units better than the four near 1912–1928. The row may pull `k_w` toward Naegler's 1446. Only the refit can say, and nothing here separates `k_w` from the other differences between those files.
+
+**Restamped** (`calibration/restamp_mode_objective.R`, whose gate refuses an unpriced move → `outputs/diagnostics/restamp_obj15_20261002.log`):
+- All six restamped at exactly the priced moves. Each printed "prior drift" equals the priced Δ prior. Each file keeps its #14 streams and logpost in `objective_history`.
+- **Quarantined:** `calibration/output/quarantine/20261002_obj15_restamp/` — six byte-identical (`cmp`) pre-#15 copies taken at `f6049e2`, with a README (what, why, the priced moves, how to reproduce a #14 number).
+- **Re-checked after the restamp:** `calibration/diag_obj14_registered_bitexact.R` (named for #14; it scores the CURRENT objective) — 5/5 streams identical, |Δ logpost| 0.
+
+**The test ledger** (Marcus: **"Approve all (Recommended)"**; each change's comment records it):
+- RE-PINS, measured on the restamped files:
+  - `test-enso-demean`: the canonical's demean price −0.0053 → **+0.4790**; the control's 17.7499 → **20.5487**; the hilda31 ratification pin 50.1629 / 59.8552 → **52.9072 / 62.5841**. The new ice δ¹³C row covers 1948–77, where the index treatment acts.
+  - `test-prior-z`: its independently transcribed `k_w` prior, (log 1500, 0.40) → (log 1446, 0.20).
+- RE-EXPRESSIONS, each record's own objective re-supplied (the 10-01 `ccx_with_emis_method()` precedent) through a NEW helper, **`ccx_with_obj14_ice()`** (R/likelihood.R; restores both switches however it exits):
+  - `test-gated-params` 6, the D2/D3 screen identity;
+  - `test-seas-ml-hemi` 5, the 09-19 knock-out record.
+  - `test-gcb-enso-slope` 3: its "25 pre-#13 rows" and its row count also exclude #15's new row.
+- MY OWN `test-obj15.R`: its stored-stream check compared #14's streams, which was the state when it was written (bb). It now compares #15's, and checks #14's against the restamp's own `objective_history` record.
+- ⛔ **NAMED RED — `test-constraint-map` 6, "the artifact stamps its own provenance"** (Marcus: **"After #15 adoption (Recommended)"**).
+  - Its guard fired correctly: `data/constraint_map.rds` (the app's "What pins down what?" tab) recorded #14's logpost.
+  - Its step is the stored Hessian's sd, and a restamp does not recompute the Hessian, so a rebuild now would mix #14 steps with #15 rows.
+  - It is rebuilt after the #15 refit is adopted and its Hessian recomputed. Until then the app shows the #14-era map, whose caption carries its provenance.
+
+**Full suite** on a frozen copy of this commit's tree (with `outputs/` and every `calibration/output` dir; BLAS pinned): **5835 passed, 1 failed (the named red above), 4 skipped (the baseline four), 0 errors**, 13.0 min.
+
 ## 2026-10-02 (bb) — **OBJECTIVE #15, the CODE: W3 (ice-core CO₂ cut to pre-1958), W2 (the Law Dome ice-core δ¹³C row `d13c_icecore`) and W5 (the `k_w` and `tau_ex` priors CITED and moved), all on Marcus's rulings below. ⚠ THE REGISTERED MODE FILES ARE NOT YET RESTAMPED: this commit's suite is red on the stored-value tests until the next commit prices and restamps them (D1, "Every version, as objective #15").**
 
 **Rulings (Marcus 10-02, verbatim, each on numbers put to him):**
