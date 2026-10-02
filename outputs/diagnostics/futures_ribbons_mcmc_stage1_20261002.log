@@ -1,0 +1,65 @@
+=== calibration/build_futures_ribbons.R @01f6df9 (frozen git-archive copy), run 2026-10-02 06:39 ===
+[ccx_adopt_mode_band] h_ml -> [42.5, 200] (mode 49.5124); kz -> [1161.6, 27808] (mode 14617.6797)
+mode hilda33d (hilda_csl3v0kaidgb); 33 fitted names, 9 held; logpost -1405.411447; covariance PD, cond 1.7e+06
+held: ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0
+emissions interpolation for the runs: "constant" (the covariance predates the 2026-10-01 flip)
+
+--- the central line ---
+decoded mode vs the app's APP_SPIN runs: max |diff| 0 (tol 1e-06) over 7 scenarios x 401 years x 2 vars
+
+--- 4100 draws (supplied: outputs/mcmc_check/pooled_u.rds), 8 cores ---
+4100 of 4100 draws ran (32.2 min); 0 failed; 0 warnings muffled across the good draws
+
+--- the bands at the key years (5 % / median / 95 %; central = the app's line) ---
+  vvVL  co2_ppm 2050    432.54    433.89    435.13   central   433.95  (sd 0.78)
+  vvVL  co2_ppm 2100    391.24    393.19    394.91   central   393.13  (sd 1.12)
+  vvVL  co2_ppm 2150    365.33    367.32    369.01   central   367.20  (sd 1.11)
+  vvVL  gmst    2050      1.84      1.84      1.85   central     1.84  (sd 0.00)
+  vvVL  gmst    2100      1.70      1.71      1.72   central     1.71  (sd 0.01)
+  vvVL  gmst    2150      1.52      1.54      1.55   central     1.54  (sd 0.01)
+  vvLN  co2_ppm 2050    458.27    459.41    460.47   central   459.48  (sd 0.68)
+  vvLN  co2_ppm 2100    380.51    383.33    386.09   central   383.20  (sd 1.70)
+  vvLN  co2_ppm 2150    298.80    304.69    309.29   central   304.12  (sd 3.23)
+  vvLN  gmst    2050      1.89      1.89      1.89   central     1.89  (sd 0.00)
+  vvLN  gmst    2100      1.72      1.73      1.75   central     1.73  (sd 0.01)
+  vvLN  gmst    2150      1.21      1.26      1.29   central     1.25  (sd 0.03)
+  vvL   co2_ppm 2050    453.29    454.42    455.49   central   454.50  (sd 0.66)
+  vvL   co2_ppm 2100    411.30    413.21    414.94   central   413.17  (sd 1.11)
+  vvL   co2_ppm 2150    365.90    368.20    370.70   central   368.09  (sd 1.47)
+  vvL   gmst    2050      1.84      1.85      1.85   central     1.85  (sd 0.00)
+  vvL   gmst    2100      1.86      1.87      1.89   central     1.87  (sd 0.01)
+  vvL   gmst    2150      1.66      1.67      1.69   central     1.67  (sd 0.01)
+  vvML  co2_ppm 2050    467.87    468.99    470.15   central   469.10  (sd 0.70)
+  vvML  co2_ppm 2100    461.96    464.15    466.02   central   464.14  (sd 1.26)
+  vvML  co2_ppm 2150    405.38    407.92    410.36   central   407.80  (sd 1.54)
+  vvML  gmst    2050      1.89      1.89      1.90   central     1.89  (sd 0.00)
+  vvML  gmst    2100      2.28      2.29      2.31   central     2.29  (sd 0.01)
+  vvML  gmst    2150      2.10      2.11      2.13   central     2.11  (sd 0.01)
+  vvM   co2_ppm 2050    478.23    479.41    480.63   central   479.52  (sd 0.74)
+  vvM   co2_ppm 2100    561.27    564.51    567.88   central   564.77  (sd 2.03)
+  vvM   co2_ppm 2150    613.54    619.19    625.30   central   619.57  (sd 3.55)
+  vvM   gmst    2050      1.97      1.98      1.98   central     1.98  (sd 0.00)
+  vvM   gmst    2100      2.94      2.95      2.97   central     2.95  (sd 0.01)
+  vvM   gmst    2150      3.61      3.64      3.67   central     3.64  (sd 0.02)
+  vvHL  co2_ppm 2050    488.13    489.45    490.87   central   489.59  (sd 0.84)
+  vvHL  co2_ppm 2100    536.19    540.65    545.49   central   541.08  (sd 2.83)
+  vvHL  co2_ppm 2150    438.07    441.95    445.99   central   442.06  (sd 2.38)
+  vvHL  gmst    2050      2.11      2.12      2.12   central     2.12  (sd 0.00)
+  vvHL  gmst    2100      2.90      2.92      2.95   central     2.92  (sd 0.01)
+  vvHL  gmst    2150      2.32      2.35      2.38   central     2.35  (sd 0.02)
+  vvH   co2_ppm 2050    491.36    492.65    494.09   central   492.80  (sd 0.84)
+  vvH   co2_ppm 2100    641.73    646.25    651.33   central   646.77  (sd 2.92)
+  vvH   co2_ppm 2150    814.98    825.47    837.07   central   826.57  (sd 6.65)
+  vvH   gmst    2050      2.07      2.08      2.08   central     2.08  (sd 0.00)
+  vvH   gmst    2100      3.36      3.38      3.40   central     3.38  (sd 0.01)
+  vvH   gmst    2150      4.58      4.62      4.66   central     4.62  (sd 0.02)
+the central line lies inside [5 %, 95 %] in 100.0 % of the 5614 cells
+
+--- pre-check: delta-method sd vs sampled sd ---
+              cell sd_linear sd_sampled  ratio
+  vvH co2_ppm 2150   7.88356   6.647923 0.8433
+ vvVL co2_ppm 2150   1.23706   1.114200 0.9007
+     vvM gmst 2100   0.01052   0.009605 0.9133
+names with an exactly-zero gradient (likelihood-only): bomb_total, sigma_d14c, rep_dC, grad_off_co2, grad_off_d13c, imb_share_land, imb_share_ocean_rest
+
+saved outputs/mcmc_check/futures_ribbons_mcmc_stage1.rds (5614 band rows); total 34.9 min

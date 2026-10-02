@@ -1,0 +1,32 @@
+=== calibration/diag_mcmc_band_by_chain.R @01f6df9, 2026-10-02 07:15 ===
+ribbons outputs/diagnostics/futures_ribbons_mcmc_stage1_20261002.rds
+draws   outputs/mcmc_check/pooled_u.rds
+laplace outputs/diagnostics/futures_ribbons_laplace_held_20261001.rds
+4 chains x 1025 draws (window (30000, 50500], drop 0); 4100 of 4100 draws ran, 0 failed
+
+--- the 10-01 (l) cells, chain by chain (5 / 50 / 95 %) ---
+vvH co2_ppm 2150 (ppm): pooled 815 / 825.5 / 837.1, width 22.09; Laplace 812.2 / 828.2 / 851, width 38.86; central 826.6
+   chains q05 815.7 817.4 814.5 814.3 | q50 825.7 827.1 825 823.7 | q95 837.4 838.3 836.3 836
+   between-chain range: q05 3.15, q50 3.42, q95 2.3 ppm (15 % of the width); R-hat 1.026, ESS bulk 199 / tail 455
+vvVL co2_ppm 2150 (ppm): pooled 365.3 / 367.3 / 369, width 3.672; Laplace 363.6 / 367.2 / 371.9, width 8.322; central 367.2
+   chains q05 366 365.1 365 365.6 | q50 367.8 367 367.3 367.2 | q95 369.4 368.8 368.8 368.7
+   between-chain range: q05 0.937, q50 0.772, q95 0.716 ppm (26 % of the width); R-hat 1.075, ESS bulk 55 / tail 170
+vvM gmst 2100 (degC): pooled 2.938 / 2.953 / 2.969, width 0.03137; Laplace 2.93 / 2.956 / 2.993, width 0.06305; central 2.954
+   chains q05 2.938 2.941 2.937 2.936 | q50 2.954 2.955 2.953 2.95 | q95 2.97 2.97 2.968 2.967
+   between-chain range: q05 0.00425, q50 0.00473, q95 0.0033 degC (15 % of the width); R-hat 1.033, ESS bulk 190 / tail 424
+
+--- co2_ppm, all scenarios at 2100 and 2150 ---
+between-chain range of a band edge or median: max 3.42 ppm (vvH co2_ppm 2150), median 1.31 ppm
+  ... as a share of the pooled band's width: max 29 %, median 19 %
+R-hat of the cell: max 1.075, median 1.038; ESS bulk min 55, tail min 158 [Vehtari et al. 2021's reference: R-hat < 1.01, ESS > 400]
+MCMC band width / Laplace band width: median 0.41, range 0.28-0.61
+still WIDENING? late-half / early-half band width: median 1.01, range 0.89-1.20; its own noise (1.82/sqrt(tail-ESS)) median 0.11, so median z +0.1
+
+--- gmst, all scenarios at 2100 and 2150 ---
+between-chain range of a band edge or median: max 0.014 degC (vvLN gmst 2150), median 0.00739 degC
+  ... as a share of the pooled band's width: max 30 %, median 20 %
+R-hat of the cell: max 1.071, median 1.040; ESS bulk min 60, tail min 160 [Vehtari et al. 2021's reference: R-hat < 1.01, ESS > 400]
+MCMC band width / Laplace band width: median 0.58, range 0.48-0.79
+still WIDENING? late-half / early-half band width: median 1.00, range 0.88-1.19; its own noise (1.82/sqrt(tail-ESS)) median 0.11, so median z -0.0
+
+wrote outputs/diagnostics/mcmc_band_by_chain_stage1_20261002.csv (42 cells)

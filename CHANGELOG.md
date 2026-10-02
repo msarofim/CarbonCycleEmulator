@@ -2,6 +2,43 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (t) — **The stage-1 band test (Marcus: "Band test on the Mac (Recommended)"). The MCMC band is about HALF the held Laplace band's width (CO₂ 0.41×, GMST 0.58×, medians). The four chains agree on it to ≤ 3.4 ppm / 0.014 °C, which is 15–30 % of its own narrow width. The band is NOT still widening. Its cells have R-hat 1.03–1.075, short of the 1.01 reference. Nothing is shipped (`APP_RIBBONS_HOLD` stands).**
+
+- **The run.** `build_futures_ribbons.R --draws=` used stage 1's 4,100 pooled draws (4 × 1,025, window (30000, 50500]), from a frozen
+  copy at `01f6df9` with `nuclear14c` copied in.
+  - 4100 / 4100 draws ran in 32.2 min (34.9 total), with 0 failed and 0 warnings. The decoded mode reproduces the app's
+    central runs (max |diff| 0), and the central line lies inside the 5–95 % band in 100 % of the 5,614 cells.
+  - Artifact: `outputs/diagnostics/futures_ribbons_mcmc_stage1_20261002.{rds,log}`.
+  - ⚠ **The FIRST launch was KILLED** by the Claude tool's background time limit, about 29 min in, mid-draws, with no output.
+    That limit is not in the tool's description. The relaunch ran in the app's Terminal panel, which the limit
+    doesn't reach, and a PID-based watcher waited on it ⇒ [[background_task_time_limit]].
+- **The test** (new: `calibration/diag_mcmc_band_by_chain.R`; `outputs/diagnostics/mcmc_band_by_chain_stage1_20261002.{log,csv}`).
+  Every key cell (7 scenarios × CO₂ / GMST × 2050 / 2100 / 2150) is read as four CHAINS of the deliverable, in its own units.
+  - **vvH CO₂ 2150:**
+    - pooled 815.0 / 825.5 / 837.1 ppm (width 22.1), central 826.6;
+    - Laplace 812.2 / 828.2 / 851.0 (width 38.9);
+    - chain medians 825.7 / 827.1 / 825.0 / 823.7. The between-chain range is ≤ 3.4 ppm (15 % of the width).
+    - R-hat 1.026, ESS bulk 199 / tail 455.
+  - **vvVL CO₂ 2150:** width 3.7 against the Laplace's 8.3. Range ≤ 0.94 ppm (26 %). R-hat 1.075, ESS 55 / 170.
+  - **vvM GMST 2100:** 2.938 / 2.953 / 2.969 °C (width 0.031) against the Laplace's 0.063. Range ≤ 0.0047 °C (15 %). R-hat 1.033.
+  - **All 2100 / 2150 cells:**
+    - between-chain range max 3.4 ppm (median 1.3) and 0.014 °C (median 0.007);
+    - that is 15–30 % of each band's width (median 19–20 %);
+    - R-hat max 1.075 (median 1.04); ESS bulk min 55, tail min 158;
+    - MCMC width / Laplace width: CO₂ median 0.41 (0.28–0.61), GMST median 0.58 (0.48–0.79).
+  - **Still widening?** The late-half / early-half band width has median 1.01 (CO₂) and 1.00 (GMST), range 0.88–1.20. Its own
+    noise, 1.82/√(tail-ESS), is ~0.11, so the median z is ≈ 0.
+    - ⚠ **POWER:** the test sees only a widening of ≳ 20 %, and it is blind to chains that share a region of the ridge
+      without drifting.
+    - No sign test was run across cells. Every cell comes from the same draws, so the cells are not independent votes
+      (written into the script).
+- **What it means, as numbers, not a ruling:**
+  - The unconverged `beta_max` direction (R-hat 1.21) moves the BAND much less than it moves `beta_max` itself (cells 1.03–1.075).
+  - The Laplace band roughly DOUBLED the carbon-cycle spread. That is 10-01 (l)'s ridge again, now measured in ppm.
+  - The GMST band is ±0.016 °C (5–95 %) at vvM 2100, because only the carbon cycle varies. It would be invisible at the
+    app's scale.
+  - **Stage 2** (~26 CPU-h) would take the cells' ESS up roughly 3.4× and their between-chain range down to ~10 % of the width.
+
 ## 2026-10-02 (s) — **MCMC stage 1 READ. It is NOT converged by Vehtari et al.'s reference: R-hat max 1.21 and bulk-ESS 14, both on `beta_max`. The log-posterior IS at the right level (R-hat 1.02; mean −1421.9, sd 4.11, against the Gaussian −1421.6 / 4.06). Extrapolated, finishing 1e5 (stage 2) brings `beta_max` to ESS ~50, not 400. The next step is Marcus's.**
 
 - **The job** (18969240): 4/4 COMPLETED 0:0 at the 8 h wall, 22:36–22:39 10-01.
