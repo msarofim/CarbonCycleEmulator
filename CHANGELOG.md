@@ -2,6 +2,41 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (s) — **MCMC stage 1 READ. It is NOT converged by Vehtari et al.'s reference: R-hat max 1.21 and bulk-ESS 14, both on `beta_max`. The log-posterior IS at the right level (R-hat 1.02; mean −1421.9, sd 4.11, against the Gaussian −1421.6 / 4.06). Extrapolated, finishing 1e5 (stage 2) brings `beta_max` to ESS ~50, not 400. The next step is Marcus's.**
+
+- **The job** (18969240): 4/4 COMPLETED 0:0 at the 8 h wall, 22:36–22:39 10-01.
+  - The chains reached 56,000 / 50,500 / 60,000 / 53,500 iterations, with post-adapt acceptance 0.075–0.089 and MaxRSS ≤ 549 MB.
+  - Chain files were checksummed home (Mac = Torch).
+- **Three failed periodic spin-ups:** chain 3 (residual 1.25e7) and chain 1 (1.1e9 and 1.05e12). Checked, and harmless:
+  - no value in any trace is above the mode;
+  - nothing is non-finite;
+  - no jump exceeds 30 after burn-in;
+  - the longest unchanged run is 132–174 iterations.
+- **The reader:** window (30000, 50500], 1025 kept samples per chain, 4100 pooled. Its outputs in `outputs/mcmc_check/` (the read log,
+  the diag CSV, `pooled_u.rds`) are untracked, as are the chains.
+  - **R-hat:** max 1.208 (`beta_max`), median 1.025. 25 of 34 quantities are below 1.05; none is below 1.01.
+  - **ESS:** bulk min 14 and tail min 15 (`beta_max`); median bulk 131.
+  - **The slowest quantities:** `beta_max`, then `h_ml` (R-hat 1.13, ESS 23), `npp_tsens` (1.12, 27),
+    `imb_share_ocean_rest` (1.11, 34) and `fert_k` (1.07, 52).
+  - **`beta_max` by chain** (natural units): 2.48, 2.20, 2.31, 2.33. The mode is 2.20.
+  - **The log-posterior:** R-hat 1.020, ESS 133, mean −1421.9 with sd 4.11. A Gaussian posterior gives −1421.6 and
+    4.06.
+  - **The lp blocks:**
+    - They drift down about 3 from the adaptation phase (−1419.0 over 5–10k) to the end (−1422.3 over 50–55k).
+    - Within the sampling window the drift is about 1 (≈2σ).
+    - So the chains are still spreading along the slow directions.
+  - **The posterior against the Laplace** (u-space, ESS-limited):
+    - narrower along the ridge: `beta_max` 0.74×, `fert_k` 0.77×, `ndep_ret` 0.73×. This is 10-01 (l)'s finding again;
+    - `h_ml` 2.98× wider, and shifted −1.30 Laplace sd;
+    - `kz_deep_frac` 1.31× wider, shifted −0.78;
+    - `imb_share_ocean_rest` 1.41× wider.
+- ⚠ **The 10-01 19:54 preliminary peek (3,000 iterations) is WITHDRAWN.** It said the slowest directions were seasonal, not the ridge.
+  Over 20,500 iterations the ridge's `beta_max` is the slowest. The peek was too short to rank anything.
+- **Extrapolation.** It is crude: it assumes stationarity, and the lp drift says the chains are not there yet.
+  - `beta_max` has ESS 14 over 82,000 post-adaptation iterations.
+  - Finishing 1e5 (280,000) gives ~46.
+  - Reaching 400 would take ~2.4M iterations, about 88 h per chain on this sampler.
+
 ## 2026-10-01 (r) — Handoff: `notes/handoff_2026-10-01f_mcmc_stage1.md`. **MCMC stage 1 is RUNNING on Torch** (job 18969240, 4 chains, an 8 h self-stop, done ~22:35–22:45 10-01). At 42 min every chain sat in the typical set (lp −1416.7 to −1421.7) and stderr was empty. The next session reads it with `calibration/read_mcmc_check.R`. Stage 2 (resume to 1e5, command in the handoff, NO `rm`) and the band are Marcus's calls. Nothing runs on the Mac.
 
 ## 2026-10-01 (q) — **The Torch smoke PASSED. Production is STAGED on Marcus's ruling, and stage 1 (4 chains, an 8 h self-stop) is RUNNING as job 18969240. The smoke's stalled log-posteriors were an artifact of its own early adaptation, not slow burn-in. The R-hat / ESS reader is built and mutation-tested.**
