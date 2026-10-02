@@ -2,6 +2,39 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (bb) — **OBJECTIVE #15, the CODE: W3 (ice-core CO₂ cut to pre-1958), W2 (the Law Dome ice-core δ¹³C row `d13c_icecore`) and W5 (the `k_w` and `tau_ex` priors CITED and moved), all on Marcus's rulings below. ⚠ THE REGISTERED MODE FILES ARE NOT YET RESTAMPED: this commit's suite is red on the stored-value tests until the next commit prices and restamps them (D1, "Every version, as objective #15").**
+
+**Rulings (Marcus 10-02, verbatim, each on numbers put to him):**
+- D4, the ice δ¹³C row's σ: **"Stated ⊕ 0.05‰ (Recommended)"** — σᵢ = √(errᵢ² + 0.05²), 0.05 ‰ being the SPO station row's own floor (`LIK_D13C_REP_ERR`; Law Dome reads the same SH box).
+- D4, its end year: **"Before 1977 (Recommended)"** — SPO's δ¹³C record starts 1977.2 and `d13c_level_SPO` scores that air, the CO₂ cut's own logic. Not DESIGN's 1990 (that would score 11 samples twice).
+- D4, the pre-industrial anchor: **"Keep from 1750 (Recommended)"** — every in-run sample, the CO₂ row's rule, though `D13C_PI` is the Law Dome spline's 1745–1755 mean (one sample, 1752, sits in that window).
+- W5, `k_w`: **"1446, log-sd 0.2 (Recommended)"**.
+- W5, `tau_ex`: **"Mass basis 0.8 / 0.26 (Recommended)"**.
+- The new comment doc `carbotopecomments.10.2.26.docx`: **"After the #15 build (Recommended)"** — unread, untouched.
+
+**D4's numbers** (`calibration/diag_ice_d13c_sigma.R` → `outputs/diagnostics/ice_d13c_sigma_20261002.{log,rds}`, at hilda33d):
+- 105 Rubino et al. 2019 samples; 78 in-run before 1977, stated errors mean 0.048 ‰.
+- Scatter about Rubino's own spline 0.047–0.050 ‰ — BELOW the stated-error RMS (0.055–0.057), so no excess sample noise to model. Ice − SPO station δ¹³C over 1979–93: mean −0.034, sd 0.039 ‰ (n 16); ice − MLO: −0.002, sd 0.040 (n 14).
+- The canonical's residual (obs − model): −0.07 ‰ (1750–1850), −0.12 (1850–1900), −0.04 (1900–58), +0.05 (1958–77). ⇒ **the model's Suess decline is too shallow early and too deep late; the new row pulls on its SHAPE.**
+- The row at hilda33d: σ as ruled χ²/n 2.00, logL +58.96 (n 78); stated errors alone would read χ²/n 9.8.
+- W3 at hilda33d: the 52 cut rows sum to logL −139.80; the model sits 3.23 ± 1.30 ppm ABOVE the ice there (σ 4.16).
+
+**W5's numbers** (a literature subagent, sources read 10-02; the citations live in `R/constants.R`):
+- `k_w`: Naegler (2009) Tellus B 61:372 — **16.5 ± 3.2 cm/h = 1446 m/yr**, the corrected four-study mean, unnormalised (the model has no Schmidt term). Wanninkhof et al. 2013: 15.95 cm/h; Wanninkhof 2014: ±20 %. ⚠ **A correction to the 09-15 (f) record:** its "four-study average 15.9 ± 3.2" is Naegler's average of the UNCORRECTED originals; his recommended value is the corrected 16.5.
+  - ⭐ **hilda33d fits `k_w` = 1921 m/yr = 21.9 cm/h, 33 % above the literature, pinned by the data at ±3 %** — +1.5σ under the new prior (+0.6σ under the old). (The 09-15 record's "+13 %" was hilda30c's 1637; every mode from hilda29l on fits ~1912–1928.) Caveats carried in the constant: the literature mean is ice-free with no water-vapour term, so the model-equivalent value is ~3–10 % LOWER — the excess is larger, not smaller.
+- `tau_ex`: the boxes are whole hemispheric masses, so the prior is on the MASS basis: Denning et al. 1999 TransCom-2 models 0.55–1.26 yr (median 0.785), Patra et al. 2009 ACTM 0.70. ⚠ **Model-derived, and the constant says so.** The observed STATION-pair SF₆ value is ~1.34 (Geller 1997 1.3 ± 0.1; Denning 1999 obs 1.34; Patra 2009 1.33 ± 0.18; Patra 2011 1.39 ± 0.18; Yang 2019 ~1.4); the models' mass/station ratio is ~0.6.
+  - **hilda33d fits `tau_ex` = 0.898 yr**: +0.44σ under the new prior, −1.48σ under the old 1.3.
+- **My choice, stated:** the two `init`s move to the new centres (1446, 0.8), the table's convention (init = prior median) for both before today.
+
+**What was built.**
+- `R/likelihood.R`: `LIK_ICE_CO2_END` (1958; Inf = #14); `LIK_USE_ICE_D13C`, `LIK_ICE_D13C_END` (1977), `LIK_ICE_D13C_REP_ERR` (= `LIK_D13C_REP_ERR`); `ccx_prepare_obs()` builds `obs$ice_d13c` from Rubino's samples; `ccx_loglik()` scores `d13c_icecore` against the SH box, read exactly as the CO₂ row reads `co2_SH`, no `rep_dC` (the CO₂ ice row carries none either). The stream is ABSENT, never zero, when the frame is missing.
+- `R/constants.R`: `KW_PRIOR_CENTRE` / `_LOGSD`, `TAU_EX_PRIOR_CENTRE` / `_LOGSD`, with sources; `R/calibrate.R` reads them. The audit's C1 is discharged.
+- `DESIGN.md`: the two `[VERIFY]` priors, `L_MEI` and both Law Dome rows marked at their lines.
+- The scorecard's δ¹³C-level group takes `d13c_icecore` (as the CO₂-level group takes `co2_icecore`).
+- The plan asked to "remove the comment block that defends the 52 post-1958 rows". It records WHY the row reads the SH box (08-22); it is annotated instead, since the history still holds.
+- `calibration/diag_obj15_price.R`: prices #15 at every registered mode through the restamp tool's own path; checks that the switches-off harness reproduces the stored #14 streams `identical()`, that only `co2_icecore` and the new row move, and the identity logpost(#15) − stored = likelihood move + the two priors' move.
+- `tests/testthat/test-obj15.R`: the rulings as constants; each row equals its hand computation on the same run (the SH box, with an NH control that differs); the switches give #14's rows (the new one ABSENT); a bundle without the frame skips the row visibly; the priors read their constants, the inits are the centres, the #14 priors are gone. **Mutation-tested** (control passes): O1 W3 cut ignored, O2 the NH box, O3 the end year ignored, O4 stated errors only, O5 the switch ignored, O6 the old `k_w` prior, O7 the old `tau_ex` init, O8 pre-run samples scored, O9 the old centre in the constant — **all 9 caught.**
+
 ## 2026-10-02 (aa) — **W1 BUILT: the land ENSO lag `lag_enso_land` (DESIGN's never-built `L_MEI`), fitted only under a new label `hilda_csl3v0kaidgbe` through a SECOND label gate. Absent = 0 = bit-identical: all 5 registered modes re-score to `identical()` stored streams, Δ logpost 0. R ↔ C++ agree to 4e-16 with the lag on. Two deviations from the plan, both stated below. 19 mutations, all caught (one only after its test was fixed). Nothing is fitted yet; the objective is unchanged.**
 
 **What was built** (plan W1, `notes/plan_2026-10-02_obj15_lag_iced13c.md`).

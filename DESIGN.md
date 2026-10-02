@@ -98,6 +98,11 @@ d M_atm[h]/dt =
   + F_ENSO[h] + F_seas[h]          (ENSO anomaly and seasonal NEP, §3.3)
   + (M_atm[h′] − M_atm[h]) / τ_ex  (interhemispheric exchange, τ_ex [CAL],
                                     prior centered on the SF₆-derived ≈1.3 yr [VERIFY])
+  > ✅ **CITED 2026-10-02 (W5; objective #15; Marcus: "Mass basis 0.8 / 0.26").** The prior is
+  > lognormal(0.8 yr, 0.26) on the HEMISPHERIC-MASS basis, because the boxes are whole hemispheric
+  > masses; the SF₆ ≈1.3 yr is a surface-STATION-pair value (observed 1.33–1.39). ⚠ The mass basis is
+  > model-derived (Denning et al. 1999 TransCom 2; Patra et al. 2009 ACTM). `R/constants.R`
+  > `TAU_EX_PRIOR_CENTRE` / `_LOGSD` carry the sources.
 
 ### 3.3 Land (per hemisphere)
 
@@ -182,6 +187,9 @@ d M_atm[h]/dt =
   > (CHANGELOG 10-02 x). **Marcus: "Do it right. Option 2"** — build it on the LAND term as specified
   > here (fitted, U(0, 12) months) and refit (CHANGELOG 10-02 z). Until that lands, this line describes the
   > target, not the code. (The index is Niño 3.4, not MEI, since 08-09.)
+  > ✅ **BUILT 2026-10-02 (W1, `fa4636f`; CHANGELOG 10-02 aa)** as `lag_enso_land`, one lag for both
+  > hemispheres, land only, fitted under the label `hilda_csl3v0kaidgbe` (a second label gate). Absent
+  > = 0 = the index at t, bit for bit. NOT yet fitted: the #15 refit is pending.
 - **Land-use change:** prescribed GCB bookkeeping flux E_LUC(t) added to the atmosphere and
   decremented from C_wood (carries that pool's own isotopic signature — a transfer, not a
   source, so no ¹⁴C is created; Marcus 2026-08-12).
@@ -211,6 +219,9 @@ d M_atm[h]/dt =
 - **Air–sea exchange:** F_as = k_g · A_oc[h] · (pCO₂_atm[h] − pCO₂_ml[h]). Gas-transfer
   coefficient k_g [CAL], prior centered on the Wanninkhof global-mean CO₂ transfer velocity
   [VERIFY]. Ocean areas A_oc[N] < A_oc[S] [VERIFY — SH is ocean-dominated].
+  > ✅ **k_g (`k_w`) CITED 2026-10-02 (W5; objective #15; Marcus: "1446, log-sd 0.2"):** lognormal(1446
+  > m/yr, 0.2) = Naegler (2009)'s corrected four-study mean, 16.5 cm/h, ± ~20 % (Wanninkhof 2014).
+  > `R/constants.R` `KW_PRIOR_CENTRE` / `_LOGSD` carry the sources and the ice-free / water-vapour caveats.
 - **Mixed-layer carbonate chemistry:** pCO₂_ml = f(DIC_ml, T) via the Joos et al. (1996)
   polynomial perturbation fit [VERIFY exact coefficients], times the temperature factor
   exp(0.0423 · ΔSST) (≈4.23 %/°C, Takahashi [VERIFY]). ΔSST = scaled IGCC GMST anomaly.
@@ -506,8 +517,8 @@ processed `.rds` in `data/`.
 | **South Pole monthly CO₂** | **1957–2024, n=711** | **dense SH target** | **Scripps merge** (`data-raw/manual/`) |
 | Mauna Loa / South Pole CO₂ | 1958–2026 / 1975–2025 | independent cross-checks | NOAA GML |
 | Mauna Loa flask CO₂ | 1960–2025, n=702 | cross-check on in-situ | Scripps (`data-raw/manual/`) |
-| Law Dome CO₂ spline + samples | 154–1996 CE | pre-1958 target, spinup anchor ⚠ *the objective scores all in-run samples to 1996, 52 of them post-1958; **ruled 10-02: cut to pre-1958 in the next objective** (CHANGELOG 10-02 z)* | Rubino et al. 2019 (NOAA/WDS 25830) |
-| Law Dome δ¹³C spline + samples | 1020–1993 CE | pre-1990 Suess target ⚠ *never built as a likelihood row (audit 10-02 A2); **ruled 10-02: add it in the next objective** (CHANGELOG 10-02 z)* | Rubino et al. 2019 |
+| Law Dome CO₂ spline + samples | 154–1996 CE | pre-1958 target, spinup anchor ⚠ *the objective scored all in-run samples to 1996, 52 of them post-1958; **ruled 10-02: cut to pre-1958** (CHANGELOG 10-02 z)* ✅ *BUILT in objective #15 (`LIK_ICE_CO2_END`, 10-02 bb): 194 in-run samples* | Rubino et al. 2019 (NOAA/WDS 25830) |
+| Law Dome δ¹³C spline + samples | 1020–1993 CE | pre-1990 Suess target ⚠ *never built as a likelihood row (audit 10-02 A2); **ruled 10-02: add it in the next objective** (CHANGELOG 10-02 z)* ✅ *BUILT in objective #15 as `d13c_icecore` (10-02 bb), on the D4 rulings: σ = √(stated² + 0.05²) ‰, samples **before 1977** (not 1990: SPO's δ¹³C record starts 1977.2 and already scores that air), every in-run sample from 1750; 78 samples* | Rubino et al. 2019 |
 | Zonal Δ¹⁴C, monthly, 5 zones | 1941.2–2019.4, n=4689 | bomb-era target, both hemispheres | Hua et al. 2022 via `SoilR::Hua2021` |
 | **MLO + SPO monthly δ¹³C** | **1980–2024 (n=532), 1977–2024 (n=528)** | **Suess partition target, one isotope scale** | **Scripps** (`data-raw/manual/`) |
 | δ¹³C flasks MLO + SPO | 1990–2014, 1993–2014 | cross-checks | NOAA GML / INSTAAR SIL |
@@ -557,12 +568,12 @@ model (§5.2), not ignored.
 | Q10 | het. respiration T sensitivity | logN, median 2, 90 % CI ~(1.4, 2.9) |
 | K_z | ocean interior diffusivity | logN spanning classic box-diffusion values [VERIFY] |
 | h_ml | mixed-layer depth | U(50, 120) m |
-| k_g | gas-transfer coefficient | logN centered on Wanninkhof global mean [VERIFY] |
-| τ_ex | interhemispheric exchange | N(1.3, 0.3) yr [VERIFY] |
+| k_g | gas-transfer coefficient | logN centered on Wanninkhof global mean [VERIFY] ✅ *10-02: logN(1446 m/yr, 0.2), Naegler 2009* |
+| τ_ex | interhemispheric exchange | N(1.3, 0.3) yr [VERIFY] ✅ *10-02: logN(0.8 yr, 0.26), hemispheric-mass basis (model-derived)* |
 | τ_strat | bomb-injection delay | U(0.5, 4) yr |
 | P_bomb | total bomb ¹⁴C production | N centered on Naegler & Levin [VERIFY] |
 | γ_MEI | ENSO land-flux coefficient | N(0, wide), sign-free |
-| L_MEI | ENSO lag | U(0, 12) months |
+| L_MEI | ENSO lag | U(0, 12) months ✅ *built 10-02 as `lag_enso_land` (logit on (0, 12), init 6)* |
 | A_N, A_S, φ_N, φ_S (+ a₂ terms) | seasonal NEP harmonics | weak / possibly pre-fit (Q2) |
 | σ_add, ρ | error model (per data stream) | weak |
 

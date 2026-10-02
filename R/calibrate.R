@@ -202,8 +202,14 @@ CCX_PARAM_TABLE <- list(
                        } else dunif(x, 20, 2000, log = TRUE) }),
   q10         = list(tr = "log",   init = 2.0,
                      prior = function(x) dlnorm(x, log(2.0), 0.25, log = TRUE)),
-  k_w         = list(tr = "log",   init = 1500,
-                     prior = function(x) dlnorm(x, log(1500), 0.4, log = TRUE)),
+  # k_w: CITED 2026-10-02 (W5; objective #15; Marcus: "1446, log-sd 0.2"). Was lognormal(1500,
+  # 0.4), "Wanninkhof global mean", uncited from 08-09. Naegler (2009)'s corrected four-study mean,
+  # 16.5 cm/h -- R/constants.R KW_PRIOR_CENTRE / KW_PRIOR_LOGSD carry the sources and the ice /
+  # water-vapour caveats. `init` is a LITERAL (the pump_grad idiom: this table is built before
+  # R/constants.R is sourced); test-enso-lag.R ties it to the constant.
+  k_w         = list(tr = "log",   init = 1446,
+                     prior = function(x) dlnorm(x, log(ccx_const("KW_PRIOR_CENTRE")),
+                                                ccx_const("KW_PRIOR_LOGSD"), log = TRUE)),
   # h_ml: OBSERVATION PRIOR since 2026-09-08d (Marcus). The box [30, 200] stays;
   # the flat density inside it is replaced by a lognormal whose 16 % / 84 %
   # points WERE the two defensible readings of the Holte 2017 Argo climatology
@@ -640,8 +646,13 @@ CCX_PARAM_TABLE <- list(
   pump_grad   = list(tr = "log",   init = 233.109378176267,
                      prior = function(x) dlnorm(x, log(ccx_const("PUMP_GRAD_OBS")),
                                                 0.25, log = TRUE)),
-  tau_ex      = list(tr = "log",   init = 1.3,
-                     prior = function(x) dlnorm(x, log(1.3), 0.25, log = TRUE)),
+  # tau_ex: CITED 2026-10-02 (W5; objective #15; Marcus: "Mass basis 0.8 / 0.26"). Was
+  # lognormal(1.3, 0.25), "SF6-derived", uncited -- a STATION-pair value for boxes that are whole
+  # hemispheric masses. ⚠ The mass basis rests on transport MODELS (Denning et al. 1999 TransCom 2;
+  # Patra et al. 2009 ACTM): R/constants.R TAU_EX_PRIOR_CENTRE says so and names them.
+  tau_ex      = list(tr = "log",   init = 0.8,
+                     prior = function(x) dlnorm(x, log(ccx_const("TAU_EX_PRIOR_CENTRE")),
+                                                ccx_const("TAU_EX_PRIOR_LOGSD"), log = TRUE)),
   # RE-ANCHORED ON MOD17 2026-08-20k (Marcus). Was UNIFORM[0.4, 0.8] -- zero
   # observational content, and the fit used the freedom: 0.4662, i.e. 53 % of
   # global NPP on the hemisphere holding 19 % of the land.

@@ -383,6 +383,31 @@ LIK_BOMB_EXCLUDE    <- c(1950, 1975)   # window dropped when the switch is FALSE
 # uninflated, 255 ice samples at ~9 sigma each contributed -14,551 -- 8 % of the
 # total from the sparsest, least direct record in the set.
 LIK_ICE_REP_ERR <- 4.0               # ppm, added in quadrature
+
+# ---- OBJECTIVE #15 (2026-10-02; CHANGELOG 10-02 z and the D4 rulings) --------
+# W3 -- THE ICE-CORE CO2 ROW ENDS BEFORE 1958 (Marcus 10-02: "Cut to pre-1958"). DESIGN
+# sec. 4 always called Law Dome CO2 a "pre-1958 target"; the objective scored every in-run
+# sample to 1996, 52 of them after the station record starts (SPO from 1957.5, MLO from
+# 1958.2), i.e. the same air twice. Inf reproduces objective #14's row exactly.
+LIK_ICE_CO2_END <- 1958              # scored: sample year < this
+# W2 -- THE LAW DOME ICE-CORE d13C ROW (Marcus 10-02: "Add it in this refit"; DESIGN
+# sec. 4's "pre-1990 Suess target", never built until today -- audit 10-02 A2: the pre-1977
+# Suess decline was scored nowhere). Rubino et al. 2019's samples (data/obs_icecore.rds,
+# the file the CO2 row reads), against the SH box, read exactly as the CO2 row reads co2_SH.
+# The three D4 rulings (Marcus 10-02), each on the numbers in
+# outputs/diagnostics/ice_d13c_sigma_20261002.log (calibration/diag_ice_d13c_sigma.R):
+#   SIGMA "Stated + 0.05 permil": sigma_i = sqrt(err_i^2 + LIK_ICE_D13C_REP_ERR^2), the rep
+#     floor being the SPO station row's own (LIK_D13C_REP_ERR): Law Dome reads the same SH
+#     box. Receipts: samples scatter 0.047-0.050 permil about Rubino's spline (below their
+#     stated errors) and differ from SPO's record by sd 0.039 permil over 1979-93 (n 16).
+#   END "Before 1977": SPO's d13C record starts 1977.2 and d13c_level_SPO scores that air --
+#     the CO2 cut's own logic. 78 in-run samples.
+#   START "Keep from 1750": every in-run sample, the CO2 row's rule, although D13C_PI is the
+#     Law Dome SPLINE's 1745-1755 mean (one sample, 1752, sits in that window).
+# FALSE reproduces objective #14's row set exactly.
+LIK_USE_ICE_D13C     <- TRUE
+LIK_ICE_D13C_END     <- 1977         # scored: sample year < this
+LIK_ICE_D13C_REP_ERR <- LIK_D13C_REP_ERR   # permil, added in quadrature (0.05)
 # GCB 2025's OWN stated 1-sigma uncertainties, quoted verbatim from the header
 # of data-raw/downloads/gcb2025_global_budget.csv (MANIFEST.csv carries the URL,
 # access date and SHA-256; Friedlingstein et al. 2025, doi:10.18160/GCP-2025):
@@ -1877,6 +1902,15 @@ ccx_prepare_obs <- function() {
   # 1700 is a plotting window, not the scoring cut.
   ico <- ico[!is.na(ico$year) & !is.na(ico$CO2ppm) & ico$year >= 1700, ]
   ico$sd <- sqrt(pmax(ico$CO2err, 0.5)^2 + LIK_ICE_REP_ERR^2)
+  # ice-core d13C (objective #15, W2; see LIK_USE_ICE_D13C): the RAW samples with their
+  # stated errors, kept from 1700 like the CO2 frame -- ccx_loglik() scores only the in-run
+  # samples before LIK_ICE_D13C_END. No floor on the stated error: the smallest is 0.01
+  # permil and the 0.05 rep term dominates it (the CO2 row's 0.5 ppm floor has no
+  # d13C counterpart in the D4 ruling).
+  icd <- as.data.frame(ice$d13c_samples)
+  icd <- data.frame(year = icd$age_CO2, d13c = icd$d13CO2, err = icd$d13CO2err)
+  icd <- icd[!is.na(icd$year) & !is.na(icd$d13c) & icd$year >= 1700, ]
+  icd$sd <- sqrt(icd$err^2 + LIK_ICE_D13C_REP_ERR^2)
 
   # ---- ANNUAL REDUCTION (2026-08-11; see design notes 1, 1b, 1c) -----
   # Everything below is what the likelihood actually scores. The monthly frames
@@ -1932,7 +1966,7 @@ ccx_prepare_obs <- function() {
   enso_slope <- ccx_enso_slope(gcb$year, gcb$ocean_sink, enso_idx)
 
   list(co2 = co2, d13 = d13, d14_nh = d14_nh, d14_sh = d14_sh,
-       ice = ico, gcb = gcb, intcal = ic20, weights = w,
+       ice = ico, ice_d13c = icd, gcb = gcb, intcal = ic20, weights = w,
        enso_idx = enso_idx, enso_slope = enso_slope,
        co2_ann = co2_ann, d13_ann = d13_ann, co2_seas = co2_seas,
        d13_seas = d13_seas,
@@ -2139,6 +2173,9 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # rows and fails progressively after: 159 of 255 rows are post-1900 and 52 are
   # post-1958, where the model's own NH-SH gradient over the scored years runs
   # +0.61 (1900-1940) -> +0.82 (1940-1958) -> +1.75 ppm (1958-1997).
+  # ⚠ SINCE OBJECTIVE #15 (2026-10-02) THOSE 52 POST-1958 ROWS ARE NOT SCORED
+  # (LIK_ICE_CO2_END, below): the stations score that air. The counts above are the
+  # 08-22 record of why the SH box was chosen, and they stand as that.
   #
   # diag_co2_level_swing.R:66 already used co2_SH, with the same reasoning, so
   # the OBJECTIVE and the DIAGNOSTIC that produced the sec.4 GATE D swing table
@@ -2212,10 +2249,27 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # itself the 1745-1755 mean. The cut is the run's OWN first calendar year,
   # read from `out`, never a typed 1750. Moved the objective by ~-0.0009 at the
   # 09-11 modes (measured, CHANGELOG 2026-09-12).
-  in_run <- obs$ice$year >= floor(min(out$t) + 1e-9)
+  # ⭐ OBJECTIVE #15 (2026-10-02, W3): and only BEFORE LIK_ICE_CO2_END (1958), where the
+  # station rows take over the same air (Marcus 10-02: "Cut to pre-1958").
+  in_run <- obs$ice$year >= floor(min(out$t) + 1e-9) & obs$ice$year < LIK_ICE_CO2_END
   mod <- interp("co2_SH", obs$ice$year[in_run])
   add("co2_icecore", sum(stats::dnorm(obs$ice$CO2ppm[in_run], mod, ice_sd[in_run],
                                       log = TRUE)))
+
+  # ---- ice-core d13C (OBJECTIVE #15, 2026-10-02, W2; see LIK_USE_ICE_D13C) ----
+  # Law Dome's Suess record, against the SH box read EXACTLY as the CO2 row reads co2_SH
+  # (approx on the monthly series at the sample's year), in-run samples only, before
+  # LIK_ICE_D13C_END (1977, where SPO's d13C record starts). No rep_dC: that is a station-
+  # versus-box correction for the FLASK rows, and the CO2 ice row carries none either.
+  # Skips VISIBLY (the stream is absent under by_stream) when the frame is missing -- an
+  # obs bundle prepared before the row existed -- same contract as everything else here.
+  icd <- obs[["ice_d13c"]]
+  if (LIK_USE_ICE_D13C && !is.null(icd)) {
+    k <- icd$year >= floor(min(out$t) + 1e-9) & icd$year < LIK_ICE_D13C_END
+    if (any(k))
+      add("d13c_icecore", sum(stats::dnorm(icd$d13c[k], interp("d13c_SH", icd$year[k]), icd$sd[k],
+                                           log = TRUE)))
+  }
 
   # ---- d13C annual level ---------------------------------------------
   # Level here; the SEASONAL cycle is scored by its own term since 2026-08-18

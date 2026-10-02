@@ -29,7 +29,7 @@ for (f in list.files("R", pattern = "R$", full.names = TRUE)) source(f)
 ccx_load_cpp(); source(ccx_path("calibration", "lib_design_gates.R")); source(ccx_path("calibration", "lib_glodap_obs.R"))
 SC_ARM_A <- CCX_MODE_COLUMN_CONTROL; SC_ARM_B <- CCX_MODE_SEASML0_CONTROL; SC_ARM_C <- CCX_MODE_CANONICAL
 SC_ARM_A_NAME <- "ent26"
-SC_GROUPS <- list(co2_level = "^co2_level_|^co2_icecore", co2_seasonal = "^co2_seasonal_", d13c_level = "^d13c_level_", d13c_seasonal = "^d13c_seasonal_",
+SC_GROUPS <- list(co2_level = "^co2_level_|^co2_icecore", co2_seasonal = "^co2_seasonal_", d13c_level = "^d13c_level_|^d13c_icecore", d13c_seasonal = "^d13c_seasonal_",
                   gradients = "gradient", bomb_d14c = "^d14c_(NH|SH)$", d14c_profile = "^d14c_profile_", excess_c14 = "excess", gcb_sinks = "^gcb_", ocean_deep = "^ocean_grad_", hs_surface = "^hs_surf_")
 SC_PRIOR_STRAIN <- 2; SC_ENSO_WIN <- c(1959, 2024)
 SC_JOOS_HORIZON <- 300   # yr followed, as calibration/diag_joos_irf.R (JOOS_HORIZON lives there, not in R/joos_irf.R)

@@ -433,6 +433,54 @@ CCX_CONSTANTS <- list(
                    "deposition: SH = (1.0 + 7.3 + 0.5 x 8.1) / 73.7 = 0.17 (the equatorial",
                    "region split half and half) -- OUR arithmetic on a verified table, and",
                    "rough. Applied as a constant in time.")),
+  # ---- the k_w and tau_ex PRIORS, cited at last (W5, RULED 2026-10-02; objective #15) ----
+  # Both were bare [VERIFY] literals in CCX_PARAM_TABLE from 08-09 to 10-02 (k_w lognormal
+  # 1500 m/yr / 0.4, "Wanninkhof global mean"; tau_ex 1.3 yr / 0.25, "SF6-derived"); the
+  # 10-02 audit (C1) found neither had a citation. Sources read 10-02 by a literature
+  # subagent (full text unless marked), numbers verified against the ruling question.
+  KW_PRIOR_CENTRE = list(
+    value = 1446, units = "m/yr",
+    status = "cited",
+    source = paste("Centre of the k_w prior (Marcus 2026-10-02: '1446, log-sd 0.2'). Naegler (2009)",
+                   "Tellus B 61:372, doi:10.1111/j.1600-0889.2008.00408.x, abstract + Table 2: the",
+                   "global-mean CO2 piston velocity <k> = 16.5 cm/h, the mean of four bomb-14C /",
+                   "inversion studies after his corrections (range 15.1-18.2), UNNORMALISED (in situ",
+                   "Schmidt number) -- the right comparison for a model with no Schmidt term; x 87.66",
+                   "m/yr per cm/h = 1446. Wanninkhof et al. (2013) Biogeosciences 10:1983 eq. 4:",
+                   "15.95 cm/h (1398). CAVEATS: the literature mean is over the ICE-FREE ocean with no",
+                   "water-vapour term; the model applies k_w over the whole ocean area and takes",
+                   "pCO2 = xCO2, so its equivalent is ~3-10 % lower (1309-1446). NOT the 15.9 +- 3.2",
+                   "an earlier record quotes: that is Naegler's average of the UNcorrected originals.")),
+  KW_PRIOR_LOGSD = list(
+    value = 0.2, units = "log-sd",
+    status = "derived",
+    source = paste("Width of the k_w prior (ruled 2026-10-02): Naegler (2009)'s +-3.2 cm/h on 16.5",
+                   "(CV 0.194, sqrt(log(1 + 0.194^2)) = 0.19) and Wanninkhof (2014) L&O Methods",
+                   "12:351, doi:10.4319/lom.2014.12.351, abstract, +-20 % (0.198); 0.2. Replaces 0.4,",
+                   "2.1x the literature's width, which had no recorded reason.")),
+  TAU_EX_PRIOR_CENTRE = list(
+    value = 0.8, units = "yr",
+    status = "cited",
+    source = paste("Centre of the tau_ex prior on the HEMISPHERIC-MASS basis (Marcus 2026-10-02:",
+                   "'Mass basis 0.8 / 0.26'): the model's two atmosphere boxes are whole hemispheric",
+                   "air masses (GtC_PER_PPM / 2 each), so the matching quantity is the MASS-based",
+                   "two-box exchange time, not a surface-station one. ⚠ MODEL-DERIVED (the hierarchy's",
+                   "last resort, named here as the rule requires): Denning et al. (1999) Tellus B",
+                   "51:266, doi:10.3402/tellusb.v51i2.16286, Table 4, TransCom-2 models' true",
+                   "hemispheric-mass tau 0.55-1.26 yr, median 0.785; Patra et al. (2009) ACP 9:1209,",
+                   "doi:10.5194/acp-9-1209-2009, ACTM tropospheric mass 0.70 +- 0.01. The OBSERVED",
+                   "station-pair SF6 value is ~1.34 yr (Geller et al. 1997 GRL 24:675 1.3 +- 0.1,",
+                   "abstract; Denning 1999 obs 1.34; Patra 2009 BRW+MLO vs SMO+SPO 1.33 +- 0.18;",
+                   "Patra et al. 2011 ACP 11:12813 1.39 +- 0.18; Yang et al. 2019 GRL ~1.4); the models'",
+                   "mass/station ratio is ~0.6 (Denning 1999 Table 4: 0.42-0.79), surface stations",
+                   "seeing vertically trapped air. The canonical hilda33d fitted 0.898 yr.")),
+  TAU_EX_PRIOR_LOGSD = list(
+    value = 0.26, units = "log-sd",
+    status = "derived",
+    source = paste("Width of the tau_ex prior (ruled 2026-10-02): the log-sd of the TransCom-2",
+                   "models' mass-based exchange times (Denning et al. 1999 Table 4), 0.26. Replaces",
+                   "0.25, uncited.")),
+
   NDEP_RET_PRIOR_CENTRE = list(
     value = .NDEP_RET_FOREST_CENTRAL * .NDEP_FOREST_SHARE,
     units = "kg C retained per kg N deposited on land",
