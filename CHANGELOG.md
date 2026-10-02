@@ -2,6 +2,39 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (y) — **DESIGN.md audited against the build, before Option 2 (Marcus: "scan for any other design.md definitions that weren't implemented first!"). Report: `notes/audit_2026-10-02_design_vs_build.md`. Nothing was changed.**
+
+Marcus ruled "Do it right. Option 2" (build `L_MEI` on the land term and refit), then asked for the scan first.
+- Four read-only audits covered §1–4, §5, §6 and §7–9; §10 is v2 and was excluded.
+- I re-checked every ⛔/⚠ claim, or marked it as the audit's.
+
+**Findings.**
+- **Nine items never built and never retired.** The three model/objective ones:
+  - `L_MEI` (already contradiction 7 of the 09-16 review, never ruled on);
+  - **the Law Dome ice-core δ¹³C row, DESIGN's "pre-1990 Suess target"**: no row, so the pre-1977 Suess decline is scored nowhere;
+  - **the calibration report.**
+  
+  The other six are in the app, including two whole tabs ("How long does it last?", which DESIGN calls "the tab the project exists for", and "What drives CO₂?"), §7a, the Revelle readout, and the tooltip / takeaway rules.
+- **Eight items changed silently:**
+  - the app runs the posterior mode, not DESIGN's median;
+  - **nuclear-industry ¹⁴C is read from git-ignored raw downloads, with no MANIFEST row and no `data/*.rds`** (hard rule 3);
+  - `download_data.R` overwrites the MANIFEST;
+  - **gates 6 and 11 left the maintained set after 09-04 without retirement**;
+  - **P7's two arms are different models**;
+  - the repository link renders its placeholder live, despite a comment saying it is guarded;
+  - `data-raw/constants.R` does not exist;
+  - two smaller app items.
+- **Eight items need a ruling.** Among them:
+  - the never-cited `[VERIFY]` priors on `k_w` and `tau_ex`;
+  - NPP₀-fitted (option 4);
+  - 52 post-1958 ice-core CO₂ rows overlapping MLO;
+  - gate 5's sub-checks;
+  - gate 7 judging against bare GCB under objective #14.
+- **Marcus's parked 08-29 app spec** has decided items never built, most relevantly the ENSO/volcano switches removing their temperature effect through a Foster–Rahmstorf GMST decomposition.
+- **One piece of his own app text is inverted**: the airborne-fraction box says emissions ÷ rise.
+
+⭐ The report's §G lists what should be settled **before** the lag refit, so that one refit covers it: the ice δ¹³C row, the `[VERIFY]` priors, NPP₀, the post-1958 ice rows, how the lag is identified (the objective prefers 2–3 months, the growth timing says 5), and the gate fixes needed to score the new mode.
+
 ## 2026-10-02 (x) — **Why switching ENSO off does not hurt the What-if fit: the model's land ENSO response arrives ~5 months EARLY. DESIGN.md's fitted lag `L_MEI` was never built. Diagnosis only; nothing in the model or app changed.**
 
 Marcus: *"ENSO doesn't seem to have much effect over the 1980-2024 period (turning it off actually improves the fit by 1%!). Why?"*
