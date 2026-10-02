@@ -5,7 +5,9 @@
 # d13C row `d13c_icecore`, LIK_USE_ICE_D13C; the D4 rulings of 10-02: sigma = stated + 0.05
 # permil, samples before 1977, every in-run sample from 1750). R/likelihood.R carries both.
 #
-# For every file in CCX_MODE_FILES it re-scores the file under its OWN structure, gate, pins
+# For every file in CCX_MODE_FILES -- PLUS the retired `hilda31` that test-enso-demean's
+# ratification pin cross-checks (CCX_MODE_HILDA31_QUARANTINED), restamped at every objective change
+# since 09-11 (CHANGELOG 10-01 k) -- it re-scores the file under its OWN structure, gate, pins
 # and spinup -- restamp_mode_objective.R's own path (gate, pins, ccx_mode_start(), the
 # objective by stream) -- twice, with the two #15 switches flipped IN-PROCESS:
 #   #14  LIK_USE_ICE_D13C = FALSE, LIK_ICE_CO2_END = Inf -> must reproduce the STORED streams
@@ -56,8 +58,10 @@ cat(sprintf("#15 = #14 + co2_icecore cut to year < %g + d13c_icecore (sd = sqrt(
 cat(sprintf("      + priors k_w lognormal(%g, %g) -> (%g, %g), tau_ex (%g, %g) -> (%g, %g)\n\n",
             PR_PRIOR14$k_w[1], PR_PRIOR14$k_w[2], PR_PRIOR15$k_w[1], PR_PRIOR15$k_w[2],
             PR_PRIOR14$tau_ex[1], PR_PRIOR14$tau_ex[2], PR_PRIOR15$tau_ex[1], PR_PRIOR15$tau_ex[2]))
-res <- lapply(names(CCX_MODE_FILES), function(a) {
-  md <- readRDS(ccx_mode_file(a))
+PR_FILES <- c(vapply(stats::setNames(names(CCX_MODE_FILES), names(CCX_MODE_FILES)), ccx_mode_file, ""),
+              hilda31_ratification = ccx_path(CCX_MODE_HILDA31_QUARANTINED))
+res <- lapply(names(PR_FILES), function(a) {
+  md <- readRDS(PR_FILES[[a]])
   gt <- ccx_apply_gate(ccx_mode_struct(md))
   rm <- ccx_apply_pins(ccx_mode_pins(md))
   on.exit({ ccx_unpin_params(rm); ccx_unapply_gate(gt) }, add = TRUE)
@@ -81,7 +85,7 @@ res <- lapply(names(CCX_MODE_FILES), function(a) {
   cat(sprintf("%-31s k_w %.1f, tau_ex %.4f -> prior move %+.4f | logpost %.6f -> %.6f (%+.4f = lik %+.4f + prior %+.4f: %s)\n",
               "", md$par_mode$k_w, md$par_mode$tau_ex, d_pr, md$logpost, lp15, lp15 - md$logpost, d_lik, d_pr,
               if (ident) "identity holds" else "IDENTITY FAILS"))
-  data.frame(mode = a, struct = ccx_mode_struct(md), file = ccx_mode_file(a), n14 = length(s14), n15 = length(s15),
+  data.frame(mode = a, struct = ccx_mode_struct(md), file = PR_FILES[[a]], n14 = length(s14), n15 = length(s15),
              repro14 = repro, co2_ice_14 = s14[["co2_icecore"]], co2_ice_15 = s15[["co2_icecore"]],
              d13c_ice_15 = s15[["d13c_icecore"]], lik14 = sum(s14), lik15 = sum(s15), delta = d_lik,
              only_touched_rows_moved = all(moved %in% PR_ROWS), d_prior = d_pr, logpost_stored = md$logpost,
@@ -89,7 +93,7 @@ res <- lapply(names(CCX_MODE_FILES), function(a) {
 })
 tab <- do.call(rbind, res)
 ok <- all(tab$repro14) && all(tab$only_touched_rows_moved) && all(tab$identity)
-cat(sprintf("\nVERDICT: %s -- %d registered modes; #14 reproduced identical() %d/%d; only %s moved: %s\n",
+cat(sprintf("\nVERDICT: %s -- %d files (the registered modes + the hilda31 ratification file); #14 reproduced identical() %d/%d; only %s moved: %s\n",
             if (ok) "PRICED" else "FAIL", nrow(tab), sum(tab$repro14), nrow(tab),
             paste(PR_ROWS, collapse = " + "), all(tab$only_touched_rows_moved)))
 cat("restamp commands (the delta to 4 dp is the gate restamp_mode_objective.R checks):\n")
@@ -101,7 +105,7 @@ saveRDS(list(table = tab, provenance = list(driver = PR_DRIVER, commit = COMMIT,
                                             d13c_rep = LIK_ICE_D13C_REP_ERR, rng = "none",
                                             date = format(Sys.time(), "%Y-%m-%d %H:%M"))),
         paste0(PR_OUT, ".rds"))
-cat(sprintf("provenance: %s @%s%s; registered modes from R/paths.R CCX_MODE_FILES; each file's own spinup; no RNG\n",
+cat(sprintf("provenance: %s @%s%s; R/paths.R CCX_MODE_FILES + CCX_MODE_HILDA31_QUARANTINED; each file's own spinup; no RNG\n",
             PR_DRIVER, COMMIT, if (isTRUE(DIRTY)) " (+uncommitted)" else ""))
 sink()
 if (!ok) stop("objective #15 pricing FAILED its own checks")
