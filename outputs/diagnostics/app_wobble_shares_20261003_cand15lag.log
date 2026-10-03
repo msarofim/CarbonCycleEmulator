@@ -1,0 +1,14 @@
+calibration/diag_app_wobble_shares.R | commit cf7cb6c (+uncommitted) | canonical cand15lag (refit_20261003_obj15_hilda_csl3v0kaidgbe) | 2026-10-03 15:05
+gate: the no-switch run vs APP_HIST, max |d growth| 0.0e+00 ppm/yr
+
+window 1980-2024 (the slider's default 1850-2024 inside the observed record 1980-2025); n = 45 years
+observed scatter 0.459 ppm/yr; full model 0.276 (60 % of observed)
+       arm                       switched_off scatter share_removed remaining
+      full                                     0.2756        0.0000    1.0000
+      enso                               enso  0.1654        0.3997    0.6003
+   warming                   warming_feedback  0.2240        0.1872    0.8128
+  volcanic                           volcanic  0.2680        0.0275    0.9725
+ all_three enso + warming_feedback + volcanic  0.0885        0.6789    0.3211
+
+the copy's typed claims: ENSO off "about a quarter of the wobble goes" -> measured 40 % removed; all three off "about a third of the wobble remains" -> measured 32 % remains
+(no reproduction gate: the recorded values are hilda33d's; this tree's canonical is cand15lag)

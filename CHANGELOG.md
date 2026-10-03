@@ -2,6 +2,25 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-03 (f) — **The What-if blurb's typed wobble shares, MEASURED at both modes by a new committed driver. At the #15 lag arm "switch ENSO off and about a quarter of the wobble goes" becomes FALSE: it is 40 %. "About a third remains" with all three switches off still holds (32 %). Another adoption item, and the copy is Marcus's. Nothing adopted.**
+
+- **Why a driver.** `R/mechanisms.R`'s `enso` entry types two measured claims into the copy. They were measured at hilda33d on 10-02 (CHANGELOG 10-02 w) by a run that was never committed. `test-app-review-copy` pins the WORDS, not the numbers, so a new canonical could falsify them in silence.
+- NEW `calibration/diag_app_wobble_shares.R`: `app/server.R`'s `c_growth_note` estimator replicated line for line. It is the sd of annual growth (`app_annual_growth`) about `ns(year, df = 3)`, over the slider's default window intersected with the observed record's span (1980–2024, n 45), with arms from `app_run_mechanisms(off)`.
+  - Gates: the no-switch arm IS `APP_HIST` (max |d| 0); and at hilda33d it must reproduce 10-02 (w)'s recorded values to their printed digits, or it stops.
+
+| arm (switched off) | hilda33d (registered) | the lag arm (preview worktree) |
+|---|---|---|
+| full model scatter (observed 0.459 ppm/yr) | 0.268 (58 %) | 0.276 (60 %) |
+| ENSO | **−28.4 %** ("about a quarter" ✓) | **−40.0 %** ("about a quarter" ✗) |
+| warming feedback | −28.7 % | −18.7 % |
+| volcanic light | −8.1 % | −2.8 % |
+| all three (what remains) | −67.2 % (32.8 % remains, "about a third" ✓) | −67.9 % (32.1 % remains ✓) |
+
+- The reproduction gate at hilda33d: |d| full 0.0000, ENSO share 0.0038, all-three 0.0022 → **REPRODUCES**.
+- The lag arm runs in the 10-03 (d) preview worktree (`cf7cb6c` + the three registry lines; `outputs/diagnostics/adoption_preview_cand15lag_worktree.diff`).
+- Outputs: `outputs/diagnostics/app_wobble_shares_20261003_{hilda33d,cand15lag}.{log,rds}`.
+- ⭐ The lag makes ENSO the clearly dominant single switch: its share rises 28 → 40 % while the warming feedback's falls 29 → 19 %. Consistent with the What-if fit (10-03 b): the land term now lands nearer the observed timing, so it carries more of the observed wobble itself.
+
 ## 2026-10-03 (e) — **Start 017 settled: a STUCK start on a non-smooth edge of the objective, not a second basin.** Resumed from its own checkpoint, it ran OUT OF TIME again at −1306.89, 124 below the mode. At that point three directions are NON-SMOOTH. A 0.1-conditional-sd step moves `co2_seasonal_SPO` by ~−250 along `kz` and `kz_deep_frac`, and along `h_ml` it sends `d13c_seasonal_SPO` to −2.0e37. A simplex stalls at such an edge. The defect is far from the mode (the mode's Hessian is step-stable) and is filed as a separate task. Nothing adopted.
 
 - **The resume** (`resume_017.sh`: same driver, the frozen lag tree at 3fc5dca, the arm's own checkpoint, a fresh 300-min wall, `nice -n 10`; 08:07 → 12:18). Copied with its logs and `RUN_PROVENANCE.txt` → `calibration/output/resume017_20261003_hilda_csl3v0kaidgbe_…_sdby_npp_tsens=0.0291/`.
@@ -37,6 +56,7 @@ Project log: what was done, what was tried and abandoned, and why.
 | `test-gate-bounds:497` | gate S's month at the canonical | 8.83 → 8.50 (still inside [7.41, 10.41]) | re-pin |
 | `test-imbalance-panel:98–116` (×5) | the app's imbalance panel | miss 0.870 → 0.923; d_land +0.462 → +0.443; d_luc −0.214 → −0.208; −d_grow +0.050 → +0.058; −d_ocn +0.002 → −0.029 | re-pin |
 | `test-option-e:232` (N-E1) | the row move at the export matching the canonical's gradient | 1.05 → **0.378** | **re-express**: the test's name says "about 1 log-unit" |
+| (no test: (f)) | `R/mechanisms.R` enso blurb "about a quarter of the wobble" | 28 % → **40 %** | **Marcus's wording** |
 
 - Not in the ledger: `test-enso-lag`'s "the canonical's base opens the D2/D3 gate only". It passes because it names hilda33d, not the canonical. It stays true of hilda33d.
 - The preview does not cover `make_bundle.sh`'s list, the app's labels for `lag_enso_land` (drafted for Marcus's wording), or the memory. Those are adoption steps no test sees.
