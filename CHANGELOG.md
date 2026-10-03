@@ -2,6 +2,105 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-03 (b) — **THE LAG ARM HAS LANDED: 24/24 exit 0, 21 converged, ONE basin up to the known `h_ml` ridge; promoted id 4 at −1182.991369 (likelihood −1143.2508 on 27 rows); Hessian PD. The lag is 2.64 ± 0.39 months. At this mode ENSO HELPS the What-if fit: switching it off is −11.0 % (it was +0.9 % at hilda33d). The control arm is RUNNING (started 08:05). Every comparison below is against hilda33d, NOT the control: lag versus the #15 re-fit is not separated until the control lands. Nothing adopted.**
+
+**The wave** (10-02 ee). The lag arm finished 08:05:23 10-03 (10 h 36 min); the chain started the control arm at once.
+- 24 exits, all 0. **21 CONVERGED** (147–236 min); **3 OUT OF TIME** (006, 008, 017).
+- Copied into the repo **byte-identical** (`diff -r`), with the per-task logs, the preflight logs, the port targets (`port_targets_hilda_csl3v0kaidgbe.csv`, `cmp`-identical) and `RUN_PROVENANCE.txt`: `calibration/output/multistart_20261002ee_hilda_csl3v0kaidgbe_…_sdby_npp_tsens=0.0291/`.
+
+**The collector** (`collect_20261003.log`): "2 DISTINCT BASINS" at its radius 0.6346. **Both are the `h_ml` ridge** (the 09-28e near-degeneracy; #14's second "basin" was the same):
+
+| level | starts | what separates it from id 4 (marginal Laplace sds) |
+|---|---|---|
+| −1182.9914 | 3 (004, 016, 023) | — (`h_ml` 49.6 m) |
+| −1183.147 | 17 | `h_ml` +2.1 sd (55.1 m), `sst_seas_amp_SH` +0.5 |
+| −1185.8249 (the collector's basin 2) | 1 (021) | `h_ml` +5.5 sd (73.0 m), `sst_seas_amp_SH` +1.9, `w_enso_l2` +1.2 |
+| −1185.33 (OOT) | 006 | `h_ml` +2.2, `fert_k` +2.0 (1100), `beta_max` +1.7 (2.42): the fertilisation ridge, unfinished |
+| −1319.64 (OOT) | 017 | `npp_tsens` +14.1 sd (0.135 /K), `q10` +9.7, `luc_scale` −7.5; loses `gcb_land_sink` −40, `d13c_icecore` −19 |
+
+- **017 was still gaining when its wall ran out** (+51 in cycle 2, +1.2 in a truncated cycle 3, at 0.78 s/eval under contention). It is RESUMING from its own checkpoint, with the same driver, code (the frozen lag tree at 3fc5dca) and settings, a fresh 300-min wall, `nice -n 10`, into `…/calibration/output/resume017_20261003_…` in the frozen tree. The arm's own directory is untouched. Verdict to follow. Compute verdict, said out loud: **Mac**. It is one single-core task; a Torch bundle for it costs more than it saves.
+
+**Promoted** (`promote_multistart_mode.R --name=obj15_hilda_csl3v0kaidgbe`) → `calibration/output/refit_20261003_obj15_hilda_csl3v0kaidgbe/`:
+- GATE 3 derives **id 4** (−1182.991369; ids 23 and 16 within 8e-6).
+- GATE 4 diff **−7.674e-07**, not #14's −3.5e-10. **The frozen tree at 3fc5dca gives the same −7.674e-07**, so it is not code drift between 3fc5dca and HEAD. It sits inside the objective's own roundoff floor (~4e-6, the port gate's measurement).
+- GATE 5 gap −7.7e-07; 0 `h_ml` kinks.
+- ⛔ **NOT named, NOT registered, NOT adopted.**
+
+**The Hessian** (`recompute_hessian.R --update`, `hessian_20261003.log`): −H positive-definite, condition 1.59e6, no |r| > 0.8, every direction step-stable (largest `h_ml` 1.25 %).
+
+| name | hilda33d (#14 mode, restamped #15) | lag arm ± marginal sd | shift (lag sds) |
+|---|---|---|---|
+| `lag_enso_land` (months) | — (0) | **2.644 ± 0.387** | |
+| `k_w` (m/yr) | 1921 | 1903 ± 54 | −0.33 |
+| `tau_ex` (yr) | 0.898 | 0.882 ± 0.040 | −0.41 |
+| `gamma_enso_land_NH` / `_SH` | 0.451 / 0.332 | 0.536 ± 0.099 / 0.512 ± 0.094 | +0.86 / +1.91 |
+| `rep_dC` (ppm = prior z) | 3.29 | **4.17** ± 0.25 | **+3.57** |
+| `npp_tsens` (/K) | −0.0078 | +0.0089 ± 0.0089 | +1.87 |
+| `beta_max` / `fert_k` | 2.205 / 740 | 1.831 ± 0.41 / 727 ± 172 | −1.01 / −0.08 |
+| `ndep_ret` (kg C/kg N) | 10.19 | 13.94 ± 5.03 | +0.87 |
+| `bomb_total` | 120.3 | 118.9 ± 0.9 | −1.58 |
+
+- The lag is well identified: its largest posterior correlation is 0.13 (`gamma_enso_land_NH`); ±2 sd is [1.9, 3.5] months. D3's conditional profile said ~2.5.
+- ⚠ `rep_dC` (the named shim) and the `npp_tsens` sign may be #15's doing (the ice-core CO₂ cut frees the modern box level), not the lag's. The control arm says which.
+
+**The read, INTERIM** (`calibration/diag_obj15_refit_read.R` with `CCX_RD15_CTL=hilda33d` → `outputs/diagnostics/obj15_refit_read_20261003_INTERIM.{log,rds}`; every header says the control is a stand-in):
+- Each vector reproduces its stored logpost exactly. The lag's flat prior + logit Jacobian is −1.7615 (hand: −log 12 + log(12 p(1−p)) at p = 2.644/12).
+- **Against hilda33d: +27.33 on the likelihood.** By row: `co2_icecore` +17.0, `d13c_icecore` +6.7, `gcb_land_sink` +4.9, `co2_seasonal_SPO` +4.1, `d14c_SH` +2.8, `d13c_level_SPO` −7.1.
+  - D3's conditional profile had the LAG's share of `co2_icecore` at +0.04, so the +17 is the #15 re-fit using its cut ice row. **The lag's AIC worth needs the control; the interim's −52.7 is against a stand-in and says so.**
+- **The timing** (D3's P3 estimator): the modelled growth peaks **+1 month** after Niño 3.4 (hilda33d −2; observed +5), and the detrended growth's correlation with the observed rises **0.434 → 0.573**.
+- **Futures** (CO₂ ppm, lag − hilda33d): vvL 2100 −3.1, vvM 2100 −3.9, vvH 2100 −3.9; vvH 2300 −22.0, **SSP5-8.5 2300 −43.0** (1491.6 → 1448.6). Not attributed yet.
+
+**Why `k_w` stayed high** (section 5 of the read; Naegler 2009: 1446 m/yr):
+- At the lag mode `k_w` = 1903 ± 2.8 % (marginal), ± 0.50 % conditional. 1446 lies **9.7 marginal sds** below it (Laplace cost ~47 log-units; conditional, every other name held, 1784).
+- **THE PULL**, d(row)/d(log `k_w`) per +10 % in `k_w`, at the half-step 0.1 × the conditional sd (`recompute_hessian.R`'s own convention):
+
+| | lag arm | hilda33d under #15 |
+|---|---|---|
+| NH-box rows (MLO, `d14c_NH`, `d14c_intcal`) | **+63.1** (`d13c_level_MLO` +35.8, `d14c_NH` +29.0) | +63.3 |
+| SH-box rows (SPO, `d14c_SH`, both ice rows) | **−61.8** (`d14c_SH` −36.9, `d13c_level_SPO` −28.1) | −67.8 |
+| of which `d13c_icecore` (the new row) | +0.8 | **−4.3** |
+| every other row | −0.7 | −1.1 |
+| prior + Jacobian | −0.65 | −0.68 |
+| ⇒ the conditional optimum lies | **0.000 conditional sd away (a mode)** | 0.34 sd away (not a #15 mode) |
+
+- ⭐ **`k_w` is a balance between the hemispheres, not a level the new row can move.** The NH-box rows want faster exchange and the SH-box rows slower, ±60 per 10 % each. The new ice δ¹³C row pulls DOWN at hilda33d (−4.3), the hint of 10-02 (cc). It is ~15× weaker than either side, and at the refit it has turned (+0.8) as other names absorbed it. The refit moved `k_w` 1921 → 1903 (−1 %).
+- Directions CHECKED against the conditional profile: each big row's profile peaks on the side its pull points to (e.g. `d14c_SH` +5.8 at 1850 vs −34.6 at 2000).
+- The ridge: `k_w` trades with `hs_asx_frac` (r −0.79), `bomb_total` (+0.55; the 09-21 (g) degeneracy) and `u_hs` (+0.53).
+- ⚠ These are CONDITIONAL slopes and a LINEAR ridge. The marginal price of 1446 would need a re-fit at fixed `k_w` (not run; available on request).
+- ⚠ A first cut of the read used a fixed 1 % step, which is 2 conditional sds. It read the lag arm's net slope as +0.12 per 10 %, i.e. "not a mode" by a typed tolerance. At the derived step it is −0.002. The tolerance is now the conditional optimum's distance in conditional sds (< 0.1), scaled to each arm's own curvature.
+
+**The What-if question that started this** (`calibration/diag_enso_growth_fit.R` at the candidate → `outputs/diagnostics/enso_growth_fit_20261003_cand15lag.{log,rds}`):
+- Run from a scratch git worktree at 0cfa8af with the candidate REGISTERED under a placeholder key `cand15lag`. The `(+uncommitted)` is in full in `enso_growth_fit_20261003_cand15lag_worktree.diff`.
+- **The worktree reproduces the 10-02 record at hilda33d line for line** (`enso_growth_fit_20261003_hilda33d_worktree_repro.log`; only the header differs).
+
+| | hilda33d (10-02) | lag arm |
+|---|---|---|
+| RMS, ENSO on / off (ppm/yr) | 0.398 / 0.394 | **0.377 / 0.418** |
+| readout (+ = OFF closer) | +0.92 % | **−11.01 %** |
+| block bootstrap, 90 % (seed 20261002) | median +3.2, [−4.3, +10.7] | median −8.1, **[−19.7, +4.5]** |
+| model growth peak after Niño 3.4 (obs 5) | −2 months | **+1** |
+| land term a further k months late (T7), best | +11.0 % at 6 | +15.4 % at 3 (i.e. ~5.6 months in all) |
+
+- ENSO now helps the app's fit, but the 90 % interval still just includes zero. The growth record still wants more lag than the likelihood rows give (the 10-02 dd tension: DGVM-based `gcb_land_sink` and the seasonal rows say ~2.5 months, the atmosphere 5).
+
+**The scorecard** (repaired gates; `CCX_SC_EXTRA_MODE=lag15=…` → `outputs/diagnostics/whole_model_scorecard_20261003_hilda33d_obj15lag.{log,rds}`; under a minute):
+- The lag arm reproduces its 27 streams (+7.7e-7).
+- Common rows +27.37 over hilda33d: CO₂ level +14.46, CO₂ seasonal +5.70, GCB sinks +4.93, bomb Δ¹⁴C +3.54, δ¹³C level −2.14.
+- **PASS:** G, Q (0.40), 7 (ocean −0.26, land +0.86), S (0.210 ppm @ 8.50), 6 (z −0.34), P7 (0.08×, now scored at the lag arm too).
+- **FAIL:** V z −4.60 (hilda33d −4.52: the lag does not add interannual variance), H +12.02, GL −7.15 (from −8.31), D −6.74, 5 (`sh_v` +10.58 from +11.20, `nh_efold` −7.32).
+- Gate 11 flags nothing. IRF(100) 0.374 (Joos 0.409). Pulse at 1000 yr: land 15 / ocean 62 / air 23 % (Joos 16 / 59 / 25).
+- Strained priors: q10 −2.54, `kz_deep_frac` −2.75, **`pump_hs_gcm2` +2.13 (new)**, **`rep_dC` +4.17**.
+
+**Tools.**
+- NEW `calibration/diag_obj15_refit_read.R`: the handoff's read list (surveys and every level, the lag, the arms on LIKELIHOOD and ΔAIC, rows bought vs D3, `k_w`'s pull/profile/ridge, timing, futures). `CCX_RD15_CTL` runs it INTERIM, labelled. It is run for real when the control lands.
+- `calibration/diag_whole_model_scorecard.R`: `CCX_SC_EXTRA_MODE` takes `name=path[,name=path]`. Every promoted file is `mode_fit_pumpN.rds`, so two unnamed paths would collide on one arm name. P7 is scored at every extra arm fitted with the mixed layer on. A bare path still works.
+- `calibration/diag_enso_growth_fit.R`: the output stem is date + the mode the app loaded. The typed `…_20261002` would have overwritten the hilda33d record.
+- Load: every analysis job of mine runs `nice -n 10` while the control arm's 8 tasks run. The first control round measures 0.36–0.63 s/eval, median 0.39 (the lag arm's first round 0.32–0.51, median 0.34), and a slowed task risks its 300-min wall.
+
+**Found, not fixed.** `run_dispersed_multistart.R`'s incumbent reference label TYPES "objective #12". It is in every start file's `kind` and every collector table, while these arms ran #15. A label that derives needs an objective-number constant, and none exists. The fix is small but touches the driver's provenance text, so it is noted rather than made mid-refit.
+
+**Open (Marcus):** the label name `hilda_csl3v0kaidgbe` and the registered name (the convention would make it `hilda34b`); the interpolation deviation (backward-difference cubic Hermite, not Catmull-Rom: 10-02 aa); the adoption, after the control arm.
+
 ## 2026-10-03 (a) — Handoff: `notes/handoff_2026-10-03_obj15_refit.md` (supersedes 10-02 i). **At 07:43 the refit's lag arm had 22 of 24 starts finished, every exit 0. The control arm starts automatically after it.**
 
 **PRELIMINARY, read straight from the start files** (not collected, not promoted):

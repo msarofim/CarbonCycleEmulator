@@ -77,9 +77,17 @@ if (nzchar(SC_EXTRA)) { fsC <- list.files(SC_EXTRA, pattern = "^start_[0-9]+[.]r
                                     spinup = CCX_OBJECTIVE_SPINUP, spinup_label = ccx_spinup_label(CCX_OBJECTIVE_SPINUP), md = bC, pins = bC$pins, src = sprintf("%s best id %d (start file; spinup = objective's%s)", basename(SC_EXTRA), bC$id, if (length(bC$pins)) paste0("; PINNED ", ccx_pin_label(bC$pins)) else "")) }
 # Optional extra arm from a MODE FILE (2026-10-01): CCX_SC_EXTRA_MODE=<registered name or path>, e.g.
 # the previous canonical for a before/after read. dg_vector() reads it under its own structure (gate-aware).
+# SEVERAL since 2026-10-03 (the objective-#15 refit's two arms, unregistered): "name=path[,name=path]".
+# A path's basename is "mode_fit_pumpN.rds" for every promoted file, so two unnamed paths would collide
+# on one arm name; the explicit name is what the tables print. A bare name or path still works as before.
 SC_EXTRA_MODE <- Sys.getenv("CCX_SC_EXTRA_MODE", "")
-if (nzchar(SC_EXTRA_MODE)) { vX <- dg_vector(SC_EXTRA_MODE); vX$src <- sprintf("%s (extra arm, CCX_SC_EXTRA_MODE)", SC_EXTRA_MODE)
-  ARMS[[basename(SC_EXTRA_MODE)]] <- vX }
+SC_EXTRA_ARMS <- character(0)
+if (nzchar(SC_EXTRA_MODE)) for (x in strsplit(SC_EXTRA_MODE, ",", fixed = TRUE)[[1]]) {
+  kv <- strsplit(x, "=", fixed = TRUE)[[1]]
+  nm <- if (length(kv) == 2L) kv[1] else basename(x); src <- if (length(kv) == 2L) kv[2] else x
+  if (nm %in% names(ARMS)) stop("CCX_SC_EXTRA_MODE: arm name '", nm, "' is already taken")
+  vX <- dg_vector(src); vX$src <- sprintf("%s (extra arm, CCX_SC_EXTRA_MODE)", src)
+  ARMS[[nm]] <- vX; SC_EXTRA_ARMS <- c(SC_EXTRA_ARMS, nm) }
 obs <- ccx_prepare_obs()
 arm_struct <- function(v) { s <- ccx_mode_struct(v$md); if (!nzchar(s)) "column" else s }
 cat("ARMS (each spun up as its file records):\n")
@@ -159,10 +167,13 @@ tgP <- ccx_ocean_gradient_target()
 # ⭐ WITHIN ONE VECTOR since 2026-10-02 (W4; audit B7): the canonical's own fitted vector with its seasonal
 # mixed layer ON (as fitted) and OFF (relabelled seas_ml 0) -- dg_gateP7_same_vector(). Until then this line
 # compared arm B's FILE with arm C's, two different models, so the 10-01 "P7 PASS" was not the mixed layer's effect.
-P7g <- dg_gateP7_same_vector(ARMS[[SC_ARM_C]])
-P7 <- dg_gateP7_verdict(P7g$off, P7g$on); verd[[SC_ARM_C]]$P7 <- P7
+# (2026-10-03) also at every EXTRA mode arm fitted with the mixed layer ON, so a candidate canonical is
+# judged on the gate the canonical is judged on.
+for (a in c(SC_ARM_C, SC_EXTRA_ARMS[vapply(SC_EXTRA_ARMS, function(a) ccx_mode_seas_ml(ARMS[[a]]$md) == 1L, logical(1))])) {
+P7g <- dg_gateP7_same_vector(ARMS[[a]])
+P7 <- dg_gateP7_verdict(P7g$off, P7g$on); verd[[a]]$P7 <- P7
 cat(sprintf("  GATE P7 %-8s modern surface-deep d13C gradient, ONE VECTOR: seas_ml OFF %.3f -> ON %.3f: move %+.3f vs bound (OFF sd_eff) %.3f = %.2fx, target %.3f; DIC %.1f -> %.1f (%+.1f, %.2fx its sd_eff %.1f; reported)  -> %s\n",
-            SC_ARM_C, P7$d13c_off, P7$d13c_on, P7$move_d13c, P7$sd_eff_d13c, P7$ratio_d13c, tgP$d13c$target, P7$dic_off, P7$dic_on, P7$move_dic, P7$ratio_dic, P7$sd_eff_dic, if (P7$pass) "PASS" else "FAIL"))
+            a, P7$d13c_off, P7$d13c_on, P7$move_d13c, P7$sd_eff_d13c, P7$ratio_d13c, tgP$d13c$target, P7$dic_off, P7$dic_on, P7$move_dic, P7$ratio_dic, P7$sd_eff_dic, if (P7$pass) "PASS" else "FAIL")) }
 for (a in an) cat(sprintf("  (gradient rows) %-8s d13C %.3f (target %.3f, sd_eff %.3f)  DIC %.1f (target %.1f, sd_eff %.1f)  ALK %.1f\n", a, GR[[a]]$d13c, tgP$d13c$target, GR[[a]]$sd_eff[["d13c"]], GR[[a]]$dic, tgP$dic$target, GR[[a]]$sd_eff[["dic"]], GR[[a]]$alk))
 
 cat("\n=== 3. THE ENSO OCEAN RESPONSE (09-04g estimator: annual ocean uptake ~ year + Nino3.4) ===\n")

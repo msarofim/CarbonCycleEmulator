@@ -1,0 +1,49 @@
+# The '(+uncommitted)' in enso_growth_fit_20261003_cand15lag.log, in full: a scratch git worktree at 0cfa8af
+# with the objective-#15 lag arm REGISTERED under the placeholder key cand15lag (NOT adopted) and the driver's
+# OUT_STEM change (committed with this file). data-raw/downloads was symlinked from the repo (git-ignored).
+diff --git a/R/paths.R b/R/paths.R
+index 5699f3f..b3000eb 100644
+--- a/R/paths.R
++++ b/R/paths.R
+@@ -188,7 +188,7 @@
+ # with +0.50 GtC/yr retained via N deposition (gross, 2001-2023) quoted beside it.
+ # Consumers: a mode file under this label opens the gate through its pins (ccx_mode_pins()).
+ # hilda29l stays REGISTERED (the v1.0-hilda29l product's mode, and #13's limb canonical).
+-CCX_MODE_CANONICAL <- "hilda33d"
++CCX_MODE_CANONICAL <- "cand15lag"   # ⚠ SCRATCH WORKTREE ONLY (2026-10-03): the #15 lag arm, NOT adopted
+ # 2026-09-22 (k): `hilda32f` -- THE FREE PARENT OF THE LIMB CANONICAL (Marcus: "Repoint").
+ # hilda29l's OWN structure (hilda_csl3, seas_ml 1) with only the six inert names held: the
+ # seasonal shim ent_seas_amp_SH (8.24), the ocean ENSO pair (NH 0.240, SH 0.001) and the
+@@ -204,6 +204,7 @@ CCX_MODE_CANONICAL <- "hilda33d"
+ # named red #1 ("the parent is the best free arm") discharges here; red #2 (the AIC gate)
+ # is untouched.
+ CCX_MODE_FILES <- c(
++  cand15lag = file.path("calibration", "output", "refit_20261003_obj15_hilda_csl3v0kaidgbe", "mode_fit_pumpN.rds"),
+   hilda33d = file.path("calibration", "output", "refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb",
+                        "mode_fit_pumpN.rds"),
+   hilda29l = file.path("calibration", "output", "refit_20260920_hilda29l_obj13_hilda_csl3",
+@@ -312,7 +313,7 @@ CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine"
+ # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
+ # the free-vs-pinned comparison it exists to express had no power
+ # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
+-CCX_MODE_PINNED <- c(hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
++CCX_MODE_PINNED <- c(cand15lag = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
+ # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
+ # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
+ # and its free PARENT: the same space with the pinned names free, kept
+diff --git a/calibration/diag_enso_growth_fit.R b/calibration/diag_enso_growth_fit.R
+index 2989928..b83708f 100644
+--- a/calibration/diag_enso_growth_fit.R
++++ b/calibration/diag_enso_growth_fit.R
+@@ -42,7 +42,10 @@ BOOT_N     <- 2000L            # T5 resamples
+ BOOT_BLOCK <- 3L               # years per block (ENSO's ~3-7 yr quasi-period keeps neighbours dependent)
+ SEED       <- 20261002L        # T5 only; set IMMEDIATELY before the bootstrap's sample.int calls
+ OBS_WEEKLY <- file.path("data-raw", "downloads", "mbl_zonal_co2_GL.txt")
+-OUT_STEM   <- file.path("outputs", "diagnostics", "enso_growth_fit_20261002")
++# the date AND the mode the app loaded (2026-10-03): the 10-02 run's stem was a typed date, so a re-run
++# at another mode -- the objective-#15 candidate, read before adoption -- would have overwritten it.
++# The 10-02 outputs keep their name (enso_growth_fit_20261002.*, at hilda33d).
++OUT_STEM   <- file.path("outputs", "diagnostics", sprintf("enso_growth_fit_%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL))
+ 
+ commit <- tryCatch(system2("git", c("-C", ROOT, "rev-parse", "--short", "HEAD"), stdout = TRUE),
+                    error = function(e) NA_character_)

@@ -42,7 +42,10 @@ BOOT_N     <- 2000L            # T5 resamples
 BOOT_BLOCK <- 3L               # years per block (ENSO's ~3-7 yr quasi-period keeps neighbours dependent)
 SEED       <- 20261002L        # T5 only; set IMMEDIATELY before the bootstrap's sample.int calls
 OBS_WEEKLY <- file.path("data-raw", "downloads", "mbl_zonal_co2_GL.txt")
-OUT_STEM   <- file.path("outputs", "diagnostics", "enso_growth_fit_20261002")
+# the date AND the mode the app loaded (2026-10-03): the 10-02 run's stem was a typed date, so a re-run
+# at another mode -- the objective-#15 candidate, read before adoption -- would have overwritten it.
+# The 10-02 outputs keep their name (enso_growth_fit_20261002.*, at hilda33d).
+OUT_STEM   <- file.path("outputs", "diagnostics", sprintf("enso_growth_fit_%s_%s", format(Sys.Date(), "%Y%m%d"), CCX_MODE_CANONICAL))
 
 commit <- tryCatch(system2("git", c("-C", ROOT, "rev-parse", "--short", "HEAD"), stdout = TRUE),
                    error = function(e) NA_character_)

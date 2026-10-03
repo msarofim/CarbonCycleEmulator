@@ -1,0 +1,92 @@
+task 8  2026-10-03T00:06:42-0400
+GATE OPEN (structure 'hilda_csl3v0kaidgbe'): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest, lag_enso_land enter the fitted set
+PINNED (removed from the fitted set, held in the base): ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_vent = 0, gamma_vent = 0, w_thc = 0, gamma_enso_ocn_NH = 0, gamma_enso_ocn_SH = 0 -> 34 free parameters
+run-time inputs present: 14/14. OK
+OVERRIDE CCX_MS_RESTARTS = 3 (default 3)
+OVERRIDE CCX_MS_CYCLES = 6 (default 6)
+OVERRIDE CCX_MS_MAXIT = 6000 (default 6000)
+OVERRIDE CCX_MS_WALL_MIN = 300 (default 180)
+SEEDING lag_enso_land for the incumbent feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 6.
+     The ancestor held no opinion about this coordinate.
+SEEDING ndep_ret for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 3.9.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_land for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.333333.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_ocean_rest for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING lag_enso_land for the new basin feasibility: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 6.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the new basin feasibility: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The file held it OFF; this arm fits it.
+SEEDING lag_enso_land for the incumbent start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 6.
+     The ancestor held no opinion about this coordinate.
+SEEDING ndep_ret for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "log" cannot encode. Starting at the table init 3.9.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_land for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.333333.
+     The ancestor held no opinion about this coordinate.
+SEEDING imb_share_ocean_rest for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 0.5.
+     The ancestor held no opinion about this coordinate.
+SEEDING lag_enso_land for the new basin start: the migration filled 0 -- the state the ancestor RAN --
+     which tr = "logit" cannot encode. Starting at the table init 6.
+     The ancestor held no opinion about this coordinate.
+SEEDING w_enso_l2 for the new basin start: the file HELD it at 0 (a pin of the file, not of this arm) --
+     which tr = "logit" cannot encode. Starting at the table init 18.7.
+     The file held it OFF; this arm fits it.
+OVERRIDE CCX_MS_SPREAD = 1.0452 (default 0.4353348)
+
+======================================================================
+DISPERSED MULTI-START, id 8, arm N, 34 parameters
+  host MacBook-Pro-2.local   R 4.5.3   seed 2026 + id
+  budget: 3 restarts x 6000 maxit x 6 cycles, wall 300 min
+  dispersion sd 1.0452 in u-space (measured per-coordinate RMS between
+    the two known basins = 0.4353, pooled over the 33 coordinates at least one of
+    them FITTED; over all 34 it would be 0.4289, diluted by the 1 migrated in BOTH:
+    lag_enso_land)
+  dispersion OVERRIDDEN per coordinate (u-space sd): npp_tsens = 0.02914
+  out /Users/MarcusMarcus/ccx_frozen/20261002ee_obj15_lag/calibration/output/multistart_20261002ee_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291/start_008.rds
+======================================================================
+  structure: 'hilda_csl3v0kaidgbe' (hs_frac=0.12841, tau_q=538, sst_hs=2, q_attach_from=1, kz_zscale=253, sst_NH=22.321, sst_SH=18.724, alpha_photo_eps=15.6, ml_nh_cycle=0, k_l2=3, w0_l2=27, npp_veg_frac=0, fert_k_prior=1, aod_mode=1, soil_inert_frac=0.19468, d2d3_free=1, imb_treatment=2, imb_with_cement=1, enso_lag_free=1)
+  seasonal mixed layer: seas_ml = 1 (ON -- round 6; from CCX_MS_SEAS_ML, RECORDED in every start file and GATED against the port targets)
+  pump field: 'solved' (the SOLVED GLODAP-shape field -- every registered file; from CCX_MS_PUMP_FIELD, RECORDED in every start file and GATED against the port targets)
+infeasible-step penalty: log-post -4.193e+07 (= max(1e+06, 10 x |start|)); the start beats it by construction
+start point: dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914) (1 draw), log-post there = -4192726.8430
+PORT GATE (a) at the new_basin reference point: here -11808.3351534567 vs MacBook-Pro-2.local@3fc5dca -11808.3351534567,
+              |diff| 9.095e-12 (rel 7.70e-16)  [this task's own start is elsewhere]
+              roundoff floor here: max |delta lp| 3.990e-06 over 12 perturbations of u by 1e-12 (median 9.296e-07; 0 non-finite)
+              bound = max(1e-08 x |target| = 1.181e-04, 3 x floor = 1.197e-05) = 1.181e-04; ceiling 1e-06 x |target| = 1.181e-02
+PORT GATE (a) PASSED.
+measured 0.3400 s/eval (median of 5; range 0.3283-0.3500) => one 6000-eval restart
+  projects to 34.0 min; wall budget 300 min, of which 45.0 min is RESERVED for the
+  BFGS polish (100 iterations)
+[008] cycle 1 restart  1: log-post =   -1722.5802 (gain 4191004.2628) evals 6001  35.0 min
+[008] cycle 1 restart  2: log-post =   -1249.8003 (gain   472.7799) evals 12002  67.2 min
+[008] cycle 1 restart  3: log-post =   -1238.1399 (gain    11.6605) evals 18003  101.3 min
+[008] cycle 1 polish: SHORTENED to maxit 338 by the wall budget
+[008] cycle 1 polish: log-post = -1191.2220 (gain 46.9179)
+[008] === cycle 1 total gain 4191535.6211 (log-post -1191.2220, 22096 evals, 139.1 min) ===
+[008] cycle 2 restart  1: log-post =   -1190.8037 (gain     0.4182) evals 26425  178.4 min
+[008] cycle 2 restart  2: log-post =   -1189.3799 (gain     1.4239) evals 32426  235.3 min
+[008] cycle 2 restart  3: SHORTENED to maxit 1387 by the wall budget
+[008] cycle 2 restart  3: log-post =   -1189.0643 (gain     0.3156) evals 33815  248.4 min
+[008] cycle 2 polish: SHORTENED to maxit 88 by the wall budget
+[008] cycle 2 polish: log-post = -1183.1709 (gain 5.8935)
+[008] === cycle 2 total gain 8.0511 (log-post -1183.1709, 40117 evals, 287.1 min) ===
+[008] === cycle 3 total gain 0.0000 (log-post -1183.1709, 40117 evals, 287.1 min) ===
+There were 11 warnings (use warnings() to see them)
+*** [008] WALL BUDGET 300 min REACHED -- checkpointed, NOT converged.
+
+[008] FINAL log-post -1183.1709  (OUT OF TIME, 6 restarts, 40117 evals, 287.2 min)
+[008] eval rate 0.3801 s/eval in the optimiser -- SIZE THE ARRAY ON THIS
+[008] PORT GATE (b) ordering: final -1183.1709 >= start -4192726.8430. OK
+======================================================================
+done 2026-10-03T04:54:03-0400 exit 0

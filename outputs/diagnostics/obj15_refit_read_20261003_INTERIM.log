@@ -1,0 +1,178 @@
+calibration/diag_obj15_refit_read.R @0cfa8af+dirty, 2026-10-03 08:32
+  lag arm  calibration/output/refit_20261003_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds
+  control  hilda33d   ⚠ INTERIM: a STAND-IN for the control arm, which has not landed
+  incumbent hilda33d (/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds)
+
+=== 0. EACH VECTOR REPRODUCES ITS STORED LOGPOST (tol 1e-06) ===
+  lag       hilda_csl3v0kaidgbe  34 free  logpost -1182.991369 (stored -1182.991369, diff +0.0e+00)  likelihood -1143.2508 on 27 rows  prior+Jacobian -39.7406 (of it the lag's flat prior + logit Jacobian -1.7615)
+  control   hilda_csl3v0kaidgb   33 free  logpost -1205.821150 (stored -1205.821150, diff +0.0e+00)  likelihood -1170.5810 on 27 rows  prior+Jacobian -35.2402
+  incumbent hilda_csl3v0kaidgb   33 free  logpost -1205.821150 (stored -1205.821150, diff +0.0e+00)  likelihood -1170.5810 on 27 rows  prior+Jacobian -35.2402
+  the three vectors score the SAME 27 rows
+
+=== 1. THE SURVEYS (start files; the collector's own verdict is in each wave's collect log) ===
+  lag      24 starts, 21 CONVERGED, 3 OUT OF TIME; best converged -1182.9914; within the cycle tol (0.5) of it: 21; within 0.01: 3; within 0.2: 21
+           the rest: 006 -2.33 (OOT), 017 -136.65 (OOT), 021 -2.83
+  control  (no wave read: INTERIM)
+  LAG converged levels (logpost to 0.01): -1182.99 x3, -1183.15 x17, -1185.82 x1
+    id 000 (-1183.1473, converged; -0.1559 vs id 004): h_ml +2.1 sd, sst_seas_amp_SH +0.5 sd, w_enso_l2 +0.3 sd, npp_frac_NH +0.2 sd, seas_lag_p_NH +0.2 sd, q10 +0.2 sd
+      natural: h_ml 49.65 -> 55.08; sst_seas_amp_SH 1.334 -> 1.434; w_enso_l2 12.93 -> 13.44
+    id 021 (-1185.8249, converged; -2.8336 vs id 004): h_ml +5.5 sd, sst_seas_amp_SH +1.9 sd, w_enso_l2 +1.2 sd, npp_frac_NH +0.8 sd, seas_lag_p_NH +0.8 sd, q10 +0.8 sd
+      natural: h_ml 49.65 -> 73; sst_seas_amp_SH 1.334 -> 1.736; w_enso_l2 12.93 -> 15.38
+    id 006 (-1185.3250, OUT OF TIME; -2.3336 vs id 004): h_ml +2.2 sd, fert_k +2.0 sd, beta_max +1.7 sd, sst_seas_amp_SH +0.7 sd, luc_scale -0.7 sd, seas_lag_p_NH -0.6 sd
+      natural: h_ml 49.65 -> 55.63; fert_k 726.8 -> 1100; beta_max 1.831 -> 2.422
+    id 008 (-1183.1709, OUT OF TIME; -0.1795 vs id 004): h_ml +2.6 sd, sst_seas_amp_SH +0.7 sd, seas_lag_p_NH +0.4 sd, w_enso_l2 +0.4 sd, q10 +0.4 sd, npp_frac_NH +0.3 sd
+      natural: h_ml 49.65 -> 57.03; sst_seas_amp_SH 1.334 -> 1.472; seas_lag_p_NH 1.517 -> 1.539
+    id 017 (-1319.6433, OUT OF TIME; -136.6519 vs id 004): npp_tsens +14.1 sd, q10 +9.7 sd, luc_scale -7.5 sd, imb_share_land -6.3 sd, sst_seas_amp_SH +6.1 sd, h_ml +5.7 sd
+      natural: npp_tsens 0.008854 -> 0.1346; q10 1.06 -> 1.33; luc_scale 0.8773 -> 0.6324
+
+  START 017: NOT converged, OUT OF TIME after 252 min (28122 evals, 0.36 s/eval); logpost -1319.6433 = 136.65 below the mode (likelihood -102.59, prior+Jacobian -34.06)
+    its gains, step by step: c1/r1 +226960.80, c1/r2 +357.28, c1/r3 +66.50, c2/r1 +31.02, c2/r2 +13.56, c2/r3 +6.47, c3/r1 +1.21
+    furthest coordinates from the mode (marginal sds): npp_tsens +14.1, q10 +9.7, luc_scale -7.5, imb_share_land -6.3, sst_seas_amp_SH +6.1, h_ml +5.7, seas_T_amp_NH -4.9, beta_max -4.8, gamma_enso_land_NH +3.4, seas_T_amp_SH -3.2
+    rows it loses most: gcb_land_sink -40.22, d13c_icecore -18.79, co2_level_MLO -14.02, co2_level_SPO -10.05, co2_icecore -6.75, d13c_seasonal_MLO -5.02, d14c_SH -2.85, gcb_ocean_sink -2.44
+
+=== 2. THE LAG AND THE LAND ENSO AMPLITUDES ===
+  lag_enso_land = 2.644 months; Laplace sd 0.387 (marginal) / 0.377 (conditional) months; prior U(0, 12) on a logit; D3's conditional profile best 2.5
+  ±2 marginal sd: [1.87, 3.42] months (linear on the natural scale; the logit's own interval is [1.95, 3.50])
+  its largest posterior correlations: gamma_enso_land_NH -0.13, npp_tsens +0.09, beta_max -0.05, w_enso_l2 +0.04, luc_scale -0.04, imb_share_land -0.04
+                      lag control incumbent
+gamma_enso_land_NH 0.5362  0.4510    0.4510
+gamma_enso_land_SH 0.5118  0.3319    0.3319
+  marginal sd of the amplitudes at the lag arm: NH 0.0993, SH 0.0941 (u = natural, tr id)
+
+=== 3. THE ARMS ON LIKELIHOOD (same rows; never the stored logposts) ===
+  likelihood: lag -1143.2508, control -1170.5810, incumbent -1170.5810
+  lag - control = +27.3302 at 1 more name(s) => dAIC (lag vs control) = 2*1 - 2*(+27.3302) = -52.66 (⚠ INTERIM: against a STAND-IN that was not re-fitted on #15 -- NOT the lag's AIC worth)
+  control - incumbent = +0.0000 (re-fitting on #15 at the same 33 names); lag - incumbent = +27.3302
+  (stored logposts, NOT comparable, shown for the record: lag -1182.9914, control -1205.8211, incumbent -1205.8211)
+
+=== 4. WHICH ROWS THE LAG BUYS (lag - control), beside D3's conditional move at L = 2.5 ===
+                  row lag_minus_control control_minus_incumbent d3_conditional
+          co2_icecore            17.029                       0          0.037
+       d13c_level_SPO            -7.084                       0          0.483
+         d13c_icecore             6.691                       0          0.115
+        gcb_land_sink             4.861                       0          6.126
+     co2_seasonal_SPO             4.053                       0          3.771
+              d14c_SH             2.841                       0          0.021
+       d13c_level_MLO            -1.742                       0         -0.096
+     co2_seasonal_MLO             1.647                       0          0.610
+        co2_level_SPO            -1.489                       0          0.393
+    d13c_seasonal_MLO             1.176                       0          0.051
+        co2_level_MLO            -1.083                       0          0.948
+       ocean_grad_alk             1.012                       0          0.000
+         co2_gradient            -0.916                       0          0.313
+              d14c_NH             0.704                       0         -0.027
+          d14c_intcal             0.468                       0          0.000
+      ocean_grad_d13c            -0.457                       0         -0.013
+        d13c_gradient            -0.417                       0         -0.242
+    d13c_seasonal_SPO            -0.289                       0          0.163
+       ocean_grad_dic             0.260                       0          0.003
+   d14c_profile_level            -0.218                       0          0.000
+     excess_c14_ocean             0.197                       0          0.001
+          hs_surf_dic            -0.061                       0          0.000
+      d14c_profile_ab             0.048                       0          0.000
+       gcb_ocean_sink             0.044                       0         -0.261
+ gcb_ocean_enso_slope             0.029                       0         -0.280
+         hs_surf_d13c             0.026                       0          0.002
+      d14c_profile_bd            -0.001                       0          0.000
+  (D3's column is CONDITIONAL: hilda33d with only the two land amplitudes re-optimised, at L = 2.5 vs L = 0)
+
+=== 5. WHY k_w STAYED HIGH (Naegler 2009: 1446 m/yr) ===
+  lag       k_w 1902.7 m/yr (21.7 cm/h) = +31.6 % vs 1446; prior z +1.37; Laplace sd 2.83 % marginal / 0.50 % conditional => 1446 is 9.7 MARGINAL sds away (Laplace cost 0.5 z^2 = 46.9 log-units)
+  control   k_w 1920.9 m/yr (21.9 cm/h) = +32.8 % vs 1446; prior z +1.42; Laplace sd 3.05 % marginal / 0.52 % conditional => 1446 is 9.3 MARGINAL sds away (Laplace cost 0.5 z^2 = 43.4 log-units)
+  incumbent k_w 1920.9 m/yr (21.9 cm/h) = +32.8 % vs 1446; prior z +1.42; Laplace sd 3.05 % marginal / 0.52 % conditional => 1446 is 9.3 MARGINAL sds away (Laplace cost 0.5 z^2 = 43.4 log-units) [its Hessian is #14's: a restamp recomputes no Hessian]
+
+  (a) THE PULL at each mode: d(row)/d(log k_w), printed per +10 % in k_w (x 0.0953); > 0 = the row wants FASTER exchange
+                         lag control incumbent
+d14c_SH              -36.912 -39.479   -39.479
+d13c_level_MLO        35.847  38.743    38.743
+d14c_NH               29.028  26.751    26.751
+d13c_level_SPO       -28.088 -24.775   -24.775
+co2_level_SPO          3.790   2.332     2.332
+co2_level_MLO         -1.637  -2.094    -2.094
+co2_icecore           -1.403  -1.701    -1.701
+ocean_grad_d13c       -1.004  -0.947    -0.947
+d13c_icecore           0.817  -4.287    -4.287
+d14c_intcal           -0.712  -0.772    -0.772
+d14c_profile_level     0.567   0.069     0.069
+d13c_seasonal_MLO      0.527   0.558     0.558
+co2_seasonal_SPO       0.286   0.290     0.290
+d13c_seasonal_SPO     -0.258  -0.166    -0.166
+hs_surf_d13c          -0.244  -0.248    -0.248
+excess_c14_ocean      -0.237  -0.250    -0.250
+gcb_ocean_sink        -0.216  -0.117    -0.117
+gcb_ocean_enso_slope   0.211   0.225     0.225
+d14c_profile_ab        0.133   0.115     0.115
+co2_seasonal_MLO       0.088   0.072     0.072
+gcb_land_sink          0.079   0.112     0.112
+ocean_grad_dic        -0.042  -0.026    -0.026
+d13c_gradient          0.031   0.030     0.030
+co2_gradient          -0.028  -0.029    -0.029
+hs_surf_dic            0.027   0.015     0.015
+d14c_profile_bd        0.000   0.000     0.000
+ocean_grad_alk         0.000   0.000     0.000
+  prior + Jacobian: lag -0.654, control -0.677, incumbent -0.677
+  rows + prior, per 10 % (half-steps 5e-04 / 0.000519 / 0.000519 in log k_w): lag -0.0019, control -6.2562, incumbent -6.2562
+  => the conditional optimum along k_w lies lag 0.000, control 0.341, incumbent 0.341 CONDITIONAL sd from each point (a mode: < 0.1)
+  the pulls BY HEMISPHERIC BOX (per +10 % in k_w):
+                    lag control incumbent
+NH-box rows       63.14   63.26     63.26
+SH-box rows      -61.77  -67.79    -67.79
+every other row   -0.72   -1.05     -1.05
+prior + Jacobian  -0.65   -0.68     -0.68
+  rows pulling UP (lag arm): +71.43 in all; DOWN: -70.78; the prior: -0.65
+
+  (b) CONDITIONAL profile at the LAG mode (every other name held), d vs the mode, rows with |d| > 1 anywhere:
+  k_w    d_lik d_prior co2_level_MLO co2_level_SPO co2_seasonal_MLO
+ 1446 -1783.67    0.94        -16.94        -33.46            -3.53
+ 1550  -955.49    0.88         -7.78        -19.97            -2.08
+ 1650  -444.70    0.72         -2.70        -11.07            -1.07
+ 1750  -148.02    0.49         -0.24         -5.09            -0.41
+ 1850   -16.25    0.18          0.30         -1.31            -0.06
+ 2000   -47.68   -0.37         -1.38          1.42            -0.08
+ 2100  -181.30   -0.80         -3.65          1.83            -0.40
+ co2_seasonal_SPO d13c_seasonal_MLO co2_icecore d13c_icecore d13c_level_MLO
+            -1.09             -1.42        4.24       -25.14        -393.12
+            -0.78             -1.08        3.14       -13.99        -233.10
+            -0.51             -0.76        2.16        -6.93        -126.48
+            -0.28             -0.45        1.25        -2.62         -55.79
+            -0.09             -0.15        0.42        -0.45         -13.23
+             0.14              0.28       -0.73        -0.20          10.74
+             0.25              0.56       -1.42        -1.53           6.62
+ d13c_level_SPO d14c_NH d14c_SH d14c_intcal d14c_profile_level ocean_grad_d13c
+        -189.56 -649.59 -461.91        1.50             -16.52            2.50
+         -84.75 -366.04 -225.29        1.24              -7.45            1.95
+         -25.67 -184.75  -86.60        0.93              -3.15            1.40
+           2.12  -72.47  -14.72        0.58              -1.11            0.85
+           5.82  -13.68    5.76        0.20              -0.22            0.29
+         -22.08   -0.11  -34.63       -0.39               0.18           -0.54
+         -57.12  -27.88  -96.18       -0.79               0.23           -1.08
+  (c) THE RIDGE at the lag mode: each name's move when k_w moves +1 marginal sd and the rest follow their conditional expectation
+           name   corr   move_u move_in_own_marginal_sds
+    hs_asx_frac -0.794 -0.14000                    -0.79
+     bomb_total  0.549  0.00414                     0.55
+           u_hs  0.533  0.14100                     0.53
+           h_hs -0.428 -0.25900                    -0.43
+   pump_hs_gcm2  0.353  0.12800                     0.35
+      w_enso_l2 -0.250 -0.04930                    -0.25
+ imb_share_land -0.240 -0.12000                    -0.24
+       ndep_ret  0.197  0.07110                     0.20
+      luc_scale -0.175 -0.00764                    -0.18
+         rep_dC -0.155 -0.03810                    -0.16
+
+=== 6. GROWTH TIMING against Nino 3.4 (D3's P3 estimator: centred 12-month difference, ns(df 5) detrended, 1980-2024) ===
+    vector  lag peak_mod r_mod peak_obs r_obs r_mod_obs
+       lag 2.64        1 0.704        5 0.505     0.573
+   control 0.00       -2 0.619        5 0.505     0.434
+ incumbent 0.00       -2 0.619        5 0.505     0.434
+
+=== 7. FUTURES: global CO2 (ppm), vV scenarios history-spliced (as the app), SSP5-8.5 unspliced (= 10-01 a) ===
+          vvL_2100 vvL_2300 vvM_2100 vvM_2300 vvH_2100 vvH_2300 ssp585_2100
+lag          410.1    335.7    560.9    570.8    642.8   1002.2       957.6
+control      413.2    338.3    564.8    580.3    646.8   1024.3       962.8
+incumbent    413.2    338.3    564.8    580.3    646.8   1024.3       962.8
+          ssp585_2300
+lag            1448.6
+control        1491.6
+incumbent      1491.6
+  lag - control: vvL_2100 -3.1, vvL_2300 -2.6, vvM_2100 -3.9, vvM_2300 -9.6, vvH_2100 -3.9, vvH_2300 -22.0, ssp585_2100 -5.2, ssp585_2300 -43.0
+  lag - incumbent: vvL_2100 -3.1, vvL_2300 -2.6, vvM_2100 -3.9, vvM_2300 -9.6, vvH_2100 -3.9, vvH_2300 -22.0, ssp585_2100 -5.2, ssp585_2300 -43.0
