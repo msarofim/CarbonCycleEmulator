@@ -2,6 +2,67 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-03 (g) — **THE CONTROL ARM HAS LANDED, AND THE REFIT IS READ ON LIKELIHOOD. The lag EARNS its parameter: lag − control = +14.92 on the same 27 rows, ΔAIC −27.8. Re-fitting on #15 alone (control − hilda33d) is +12.41, almost all on the two ice rows. Every What-if gain is the LAG's: the control's ENSO readout is +0.89 % (hilda33d +0.92 %), the lag arm's −11.0 %. The lag's own effect on the futures is nil; the lag arm's futures move (−27.6 ppm at SSP5-8.5 2300) is a re-arrangement along the greening–fertilisation ridge. Nothing adopted; the ruling is Marcus's.**
+
+**The control wave.** The chain printed "ALL ARMS DONE" at 18:42:39 (the control arm took 10 h 37 min).
+- 24 exits, all 0; **23 CONVERGED** (162–227 min); **1 OUT OF TIME** (021 at −1295.55, a far start like the lag arm's 017: `q10` +9.9 sd, `npp_tsens` +8.7, `kz` −7.7).
+- **ONE basin** by the collector (`collect_20261003.log`): all 23 within 0.087 log-units, in three levels (−1196.10 × 13, −1196.16 × 9, −1196.19 × 1) that differ in `h_ml` (49.7 / 57.2 / 55.2 m). 18 dispersed starts reproduced the reference basin and did not beat it.
+- Copied byte-identical with logs, port targets and provenance → `calibration/output/multistart_20261002ee_hilda_csl3v0kaidgb_…_sdby_npp_tsens=0.0291/`.
+- Promoted **id 6** (−1196.101711; GATE 4 −5.7e-07, the objective's floor; GATE 5 closes) → `calibration/output/refit_20261003_obj15_hilda_csl3v0kaidgb/`.
+- Hessian: −H positive-definite, condition 1.58e6, no |r| > 0.8. **`h_ml` is step-UNSTABLE at 4.2 %** (the `h_ml` ridge; 49.69 ± 1.95 m). Recorded, not gated: the 09-10 / 09-17 (i) precedent.
+
+**The read** (`calibration/diag_obj15_refit_read.R` @`fea4230`+ → `outputs/diagnostics/obj15_refit_read_20261003.{log,rds}`; every vector reproduces its stored logpost exactly):
+
+| | hilda33d (#14 mode, #15 rows) | control (#15 refit, lag 0) | **lag arm** |
+|---|---|---|---|
+| likelihood, 27 rows | −1170.581 | −1158.168 | **−1143.251** |
+| free names | 33 | 33 | 34 |
+| `lag_enso_land` (months) | 0 | 0 | **2.64 ± 0.39** |
+| γ_land NH / SH | 0.451 / 0.332 | 0.467 / 0.364 | 0.536 / 0.512 |
+| `k_w` (m/yr) | 1921 | 1897 | 1903 |
+| `rep_dC` (ppm = prior z) | 3.29 | **4.14** | 4.17 |
+| `npp_tsens` (/K) | −0.0078 | −0.0079 | **+0.0089** |
+| `beta_max` | 2.205 | 2.225 | **1.831** |
+
+- **The lag's AIC worth:** +14.92 at one name ⇒ **ΔAIC −27.8**, it earns its parameter (the < 2 convention).
+- **What re-fitting on #15 did** (control − hilda33d, +12.41): `co2_icecore` +14.12, `d13c_icecore` +6.31, `d14c_SH` +2.79, against `d13c_level_SPO` −6.89 and `d13c_level_MLO` −1.70. It raised `rep_dC` 3.29 → 4.14: the ice-CO₂ cut frees the modern box level, and the named shim takes up the station offset.
+- **What the lag buys** (lag − control), beside D3's CONDITIONAL prediction at 2.5 months: `gcb_land_sink` **+6.45** (D3 +6.13), `co2_seasonal_SPO` **+4.43** (D3 +3.77), `co2_icecore` +2.91 (D3 +0.04), `co2_seasonal_MLO` +1.08 (D3 +0.61). D3's pull held up in the joint refit.
+- **Timing** (D3's P3 estimator): growth peaks −2 / −2 / **+1** months after Niño 3.4 (observed +5). The detrended correlation with the observed growth is 0.434 / 0.433 / **0.573**.
+- **`k_w`:** the control is also an exact mode along it (0.000 conditional sd), with the same balance: NH-box rows +63.4, SH-box rows −62.0 per +10 %. Three vectors now ⇒ memory `ccx_kw_hemispheric_balance`.
+
+**The What-if and the wobble shares at all three** (control run in a scratch worktree of `fea4230` with it registered as `cand15ctl`; `outputs/diagnostics/control15_worktree.diff`):
+
+| | hilda33d | control | lag arm |
+|---|---|---|---|
+| What-if readout (+ = ENSO off closer) | +0.92 % | +0.89 % | **−11.01 %** |
+| bootstrap 90 % | [−4.3, +10.7] | [−4.9, +11.8] | [−19.7, +4.5] |
+| ENSO share of the wobble (copy: "about a quarter") | 28 % | 31 % | **40 %** |
+| what remains with all three off (copy: "about a third") | 33 % | 32 % | 32 % |
+
+**The scorecard, both arms** (`CCX_SC_EXTRA_MODE=lag15=…,ctl15=…` → `outputs/diagnostics/whole_model_scorecard_20261003_hilda33d_obj15arms.{log,rds}`):
+- Both arms reproduce. Common rows: lag − control **+14.93** (CO₂ seasonal +5.51, GCB sinks +5.93, CO₂ level +2.64).
+- The gates' verdicts are identical between the arms: G, Q, 7, S, 6, P7 PASS; H, GL, D, 5 FAIL by the same margins.
+- **Gate V is slightly WORSE with the lag**: z −4.60 vs −4.34 (sd 0.548 vs 0.569 ppm/yr). ⇒ The lag fixes ENSO's TIMING, not the missing interannual AMPLITUDE.
+- IRF(100): lag 0.374, control 0.360. A first look read the control's IRF as identical to hilda33d's; at full precision they differ in the 4th decimal (0.359925 vs 0.360132), because the land and ocean shares trade 0.5 pp each. Not a stale vector.
+
+**Futures, and why they move** (section 8, new: #14's add-one / remove-one swap between the two arms; CO₂ at 2300):
+
+| group | SSP5-8.5 (add / remove) | vvH (add / remove) |
+|---|---|---|
+| the lag + land ENSO amplitudes | **0.00 / 0.00** | 0.00 / 0.00 |
+| greening (`npp_tsens`) | −90.7 / −88.2 | −52.2 / −52.0 |
+| fertilisation (`beta_max`, `fert_k`) | +70.9 / +73.2 | +43.9 / +43.9 |
+| N retention / q10 / land use / the rest | −5.9 / −1.7 / −3.7 / +1.1 | −3.1 / −1.0 / −5.1 / +0.7 |
+| **lag − control** | **−27.6** | **−16.7** |
+
+- The likelihood-only group moves the futures by exactly 0 (the swap's check).
+- POWER-CHECKED, the lag group's 0.00: the swap moves historical CO₂ by up to 0.24 ppm (1977) and 2025 by +0.16, which relaxes to −0.0015 ppm by 2100 and −0.005 by 2300.
+- ⭐ **Adding the lag re-arranged the land's long-term response.** `npp_tsens` flips sign (−0.0079 → +0.0089 /K) and `beta_max` falls (2.23 → 1.83). Each moves 2300 CO₂ by 70–90 ppm, and they nearly cancel.
+  - A reading, not yet tested: without the lag, a slightly negative greening term (warm year ⇒ less NPP, with GMST trailing Niño 3.4 by ~4 months) mimicked a LATE El Niño source and patched the too-early ENSO response. With the timing fixed, it is no longer needed.
+  - The −27.6 ppm is ~0.7 of #14's Laplace futures sd (±39 ppm). Futures vs hilda33d: SSP5-8.5 2300 −43.0, vvH −22.0, vvM −9.6; every 2100 value within 4 ppm.
+
+**For the adoption ruling (Marcus):** the lag arm, the control, or hilda33d. Then: the label name (`hilda_csl3v0kaidgbe` is a placeholder) and the registered mode name (the existing names carry the free-name count, hilda29l … hilda33d, so `hilda34` + a letter; what the letter encodes is not recorded), the interpolation deviation (10-02 aa), the release name, and the ENSO blurb's "about a quarter" (40 % at the lag arm). The test ledger is in (d).
+
 ## 2026-10-03 (f) — **The What-if blurb's typed wobble shares, MEASURED at both modes by a new committed driver. At the #15 lag arm "switch ENSO off and about a quarter of the wobble goes" becomes FALSE: it is 40 %. "About a third remains" with all three switches off still holds (32 %). Another adoption item, and the copy is Marcus's. Nothing adopted.**
 
 - **Why a driver.** `R/mechanisms.R`'s `enso` entry types two measured claims into the copy. They were measured at hilda33d on 10-02 (CHANGELOG 10-02 w) by a run that was never committed. `test-app-review-copy` pins the WORDS, not the numbers, so a new canonical could falsify them in silence.
@@ -160,7 +221,7 @@ Project log: what was done, what was tried and abandoned, and why.
 
 **Found, not fixed (FIXED in (c)).** `run_dispersed_multistart.R`'s incumbent reference label TYPES "objective #12". It is in every start file's `kind` and every collector table, while these arms ran #15. A label that derives needs an objective-number constant, and none exists. The fix is small but touches the driver's provenance text, so it is noted rather than made mid-refit.
 
-**Open (Marcus):** the label name `hilda_csl3v0kaidgbe` and the registered name (the convention would make it `hilda34b`); the interpolation deviation (backward-difference cubic Hermite, not Catmull-Rom: 10-02 aa); the adoption, after the control arm.
+**Open (Marcus):** the label name `hilda_csl3v0kaidgbe` and the registered name (`hilda34` + a letter, by the free-name count; corrected in (g): the letter's meaning is not recorded); the interpolation deviation (backward-difference cubic Hermite, not Catmull-Rom: 10-02 aa); the adoption, after the control arm.
 
 ## 2026-10-03 (a) — Handoff: `notes/handoff_2026-10-03_obj15_refit.md` (supersedes 10-02 i). **At 07:43 the refit's lag arm had 22 of 24 starts finished, every exit 0. The control arm starts automatically after it.**
 

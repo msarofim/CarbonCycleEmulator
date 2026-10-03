@@ -1,0 +1,1 @@
+FROZEN_FROM_COMMIT 3fc5dca; worktree /Users/MarcusMarcus/ccx_frozen/20261002ee_obj15_ctl; Mac 8-parallel (CCX_MAC_NPAR=8), WALL 300 min, 3 restarts x 6 cycles x 6000 maxit; launched 2026-10-03T08:05:23-0400, finished 2026-10-03T18:42:39-0400 rc 0

@@ -1,0 +1,31 @@
+# The '(+uncommitted)' in enso_growth_fit_20261003_cand15ctl.log and app_wobble_shares_20261003_cand15ctl.log, in full: a scratch git worktree of fea4230 with the objective-#15 lag-0 CONTROL arm (refit_20261003_obj15_hilda_csl3v0kaidgb, copied in before it was committed) REGISTERED as canonical under the provisional key cand15ctl (NOT adopted). data-raw/downloads symlinked from the repo.
+diff --git a/R/paths.R b/R/paths.R
+index 5699f3f..df471ff 100644
+--- a/R/paths.R
++++ b/R/paths.R
+@@ -188,7 +188,7 @@
+ # with +0.50 GtC/yr retained via N deposition (gross, 2001-2023) quoted beside it.
+ # Consumers: a mode file under this label opens the gate through its pins (ccx_mode_pins()).
+ # hilda29l stays REGISTERED (the v1.0-hilda29l product's mode, and #13's limb canonical).
+-CCX_MODE_CANONICAL <- "hilda33d"
++CCX_MODE_CANONICAL <- "cand15ctl"   # ⚠ SCRATCH WORKTREE ONLY (2026-10-03): the #15 lag-0 CONTROL arm, NOT adopted
+ # 2026-09-22 (k): `hilda32f` -- THE FREE PARENT OF THE LIMB CANONICAL (Marcus: "Repoint").
+ # hilda29l's OWN structure (hilda_csl3, seas_ml 1) with only the six inert names held: the
+ # seasonal shim ent_seas_amp_SH (8.24), the ocean ENSO pair (NH 0.240, SH 0.001) and the
+@@ -204,6 +204,7 @@ CCX_MODE_CANONICAL <- "hilda33d"
+ # named red #1 ("the parent is the best free arm") discharges here; red #2 (the AIC gate)
+ # is untouched.
+ CCX_MODE_FILES <- c(
++  cand15ctl = file.path("calibration", "output", "refit_20261003_obj15_hilda_csl3v0kaidgb", "mode_fit_pumpN.rds"),
+   hilda33d = file.path("calibration", "output", "refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb",
+                        "mode_fit_pumpN.rds"),
+   hilda29l = file.path("calibration", "output", "refit_20260920_hilda29l_obj13_hilda_csl3",
+@@ -312,7 +313,7 @@ CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine"
+ # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
+ # the free-vs-pinned comparison it exists to express had no power
+ # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
+-CCX_MODE_PINNED <- c(hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
++CCX_MODE_PINNED <- c(cand15ctl = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
+ # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
+ # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
+ # and its free PARENT: the same space with the pinned names free, kept

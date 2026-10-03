@@ -33,6 +33,10 @@
 #      verbatim (observed: growth peaks 5 months after the index, 10-02 x).
 #   7. THE FUTURES the app would show: van Vuuren L / M / H CO2 at 2100 and 2300 (history spliced
 #      in, as app_run_coupled() does), and SSP5-8.5 at 2300 unspliced (= 10-01 a's convention).
+#   8. WHICH PARAMETERS carry the lag - control futures move (added 2026-10-03 g): every fitted name in
+#      exactly one group, each group SWAPPED both ways between the two arms (control + the lag's group =
+#      add-one; lag - the group = remove-one), diag_obj14_refit_read.R's method; the likelihood-only group
+#      must move the futures by EXACTLY 0.
 # ⛔ ADOPTS NOTHING. No RNG.
 # Usage: Rscript calibration/diag_obj15_refit_read.R
 #   CCX_RD15_CTL=<mode path or name> replaces the control -- an INTERIM read before the control arm
@@ -413,13 +417,53 @@ print(round(FUT, 1))
 cat(sprintf("  lag - control: %s\n", paste(sprintf("%s %+.1f", colnames(FUT), FUT["lag", ] - FUT["control", ]), collapse = ", ")))
 cat(sprintf("  lag - incumbent: %s\n", paste(sprintf("%s %+.1f", colnames(FUT), FUT["lag", ] - FUT["incumbent", ]), collapse = ", ")))
 
+# ---- 8. which parameters carry the lag - control futures move ----------------------------------------------
+cat("\n=== 8. FUTURES DECOMPOSITION, lag - control: each group swapped both ways (diag_obj14_refit_read.R's method) ===\n")
+RD_FUT8 <- c("ssp585", "vvH")
+GROUPS8 <- list(LAG = c(RD_LAG, RD_AMP), GREEN = "npp_tsens", FERT = c("beta_max", "fert_k"), NDEP = "ndep_ret", Q10 = "q10",
+                LUC = "luc_scale", NONMODEL = c("bomb_total", "sigma_d14c", "rep_dC", "grad_off_co2", "grad_off_d13c",
+                                               "imb_share_land", "imb_share_ocean_rest"))
+GROUPS8$REST <- setdiff(names(E$lag$u), unlist(GROUPS8))
+stopifnot(setequal(unlist(GROUPS8), names(E$lag$u)), !anyDuplicated(unlist(GROUPS8)))
+fut8 <- function(v) { sp <- dg_spinup(v)
+  vapply(RD_FUT8, function(sc) { rr <- suppressWarnings(ccx_run_coupled(sp, sc, c(1750L, max(RD_FUT_YEARS)), emissions = emis(sc),
+                                                                        bomb_total_kmol = v$bomb_total, luc_scale = v$luc_scale))
+    co2 <- tapply((rr$out$co2_NH + rr$out$co2_SH) / 2, floor(rr$out$t), mean); co2[[as.character(max(RD_FUT_YEARS))]] }, 0) }
+# a swap copies the group's MODEL fields and FITTED values (the control's lag is its base value, 0 = OFF), then
+# re-sets the ENSO block from the fitted list (the 10-01 a swap(), verbatim in kind)
+swap8 <- function(to, from, names) {
+  v <- to
+  for (n in names) {
+    if (n %in% names(v$p)) v$p[[n]] <- if (n %in% names(from$p)) from$p[[n]] else 0
+    v$pm[[n]] <- if (!is.null(from$pm[[n]])) from$pm[[n]] else if (n %in% names(from$p)) from$p[[n]] else NULL
+  }
+  v$p <- ccx_set_enso(v$p, v$pm)
+  if ("bomb_total" %in% names) v$bomb_total <- v$pm$bomb_total
+  if ("luc_scale" %in% names) v$luc_scale <- v$pm$luc_scale
+  v
+}
+f_L <- fut8(V$lag); f_C <- fut8(V$control)
+dec8 <- do.call(rbind, lapply(names(GROUPS8), function(g) {
+  add <- fut8(swap8(V$control, V$lag, GROUPS8[[g]])) - f_C
+  rem <- f_L - fut8(swap8(V$lag, V$control, GROUPS8[[g]]))
+  data.frame(group = g, n = length(GROUPS8[[g]]), what = c("add-one", "remove-one"), rbind(add, rem), check.names = FALSE) }))
+tot8 <- data.frame(group = "TOTAL", n = length(E$lag$u), what = "lag - control", t(f_L - f_C), check.names = FALSE)
+D8 <- rbind(dec8, tot8); D8[RD_FUT8] <- round(D8[RD_FUT8], 2)
+print(D8, row.names = FALSE)
+cat(sprintf("  (columns: CO2 at %d, ppm; SSP5-8.5 unspliced, vvH spliced; the arms' own values reproduce section 7: lag %s, control %s)\n",
+            max(RD_FUT_YEARS), paste(round(f_L, 1), collapse = " / "), paste(round(f_C, 1), collapse = " / ")))
+nm8 <- as.matrix(dec8[dec8$group == "NONMODEL", RD_FUT8])
+cat(sprintf("  CHECK: the likelihood-only group moves the futures by max |%.3g| (must be 0)\n", max(abs(nm8))))
+if (max(abs(nm8)) > 1e-9) stop("a likelihood-only name moved a future: the swap touches something it does not name")
+stopifnot(isTRUE(all.equal(unname(f_L), unname(FUT["lag", sprintf("%s_%d", RD_FUT8, max(RD_FUT_YEARS))]), tolerance = 1e-10)))
+
 sink()
 out <- list(evals = lapply(E, function(e) e[c("logpost", "lik", "prior", "lag_term", "streams", "par", "prior_z")]),
             surveys = SURV, levels = LEVELS, stuck = STUCK, lag = list(value = L, sd = sdL, sd_conditional = sdLc, cor = corL, amplitudes = amp),
             arms = list(lik = lk, d_lag_control = dLC, d_aic = 2 * RD_AIC_K - 2 * dLC), rows = tab4,
             k_w = list(pull = PULL, pull_prior = pp, total = tot, mode_offset_sd = off, by_box = gp, profile = KW$lag$profile, ridge = rt,
                        half_step = vapply(KW, `[[`, 0, "h")),
-            timing = TT, futures = FUT,
+            timing = TT, futures = FUT, futures_decomposition = D8, groups8 = GROUPS8,
             provenance = sprintf("%s @%s; lag %s; control %s%s; incumbent %s; objective #15; no RNG", RD_DRIVER, COMMIT,
                                  RD_LAG_MODE, RD_CTL_MODE, if (RD_INTERIM) " (INTERIM STAND-IN)" else "", RD_INC))
 saveRDS(out, paste0(RD_OUT, ".rds"))

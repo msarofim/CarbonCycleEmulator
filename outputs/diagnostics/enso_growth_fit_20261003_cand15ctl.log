@@ -1,0 +1,88 @@
+diag_enso_growth_fit | commit fea4230 (+uncommitted) | mode refit_20261003_obj15_hilda_csl3v0kaidgb | window 1980-2024
+gates: full vs APP_HIST 0.0e+00; index-zeroed vs app switch 0.0e+00 ppm/yr
+
+READOUT: full RMS 0.3997, ENSO off 0.3961 ppm/yr => +0.89% (positive = OFF is closer)
+         bias full -0.0364, off -0.0436; n = 45 years
+
+T1/T3: does each ENSO component fill the gap the no-ENSO model leaves?
+       (it lowers the RMS only if corr > corr_needed; a* = best amplitude, 1 = as modelled)
+           component   sd_x sd_gap   corr corr_needed a_star
+ ENSO (index zeroed) 0.1521  0.398  0.162       0.191  0.437
+      land term only 0.2286  0.398  0.280       0.287  0.500
+ ocean channels only 0.0906  0.398 -0.434       0.114 -1.936
+pre-10-02 switch (land term only off): RMS 0.4435 => -10.96% vs full
+
+T2(a): the index read k months LATE (k > 0). pct_vs_off > 0 = better than ENSO off
+ shift_months   rms pct_vs_off corr_x_gap a_star
+           -6 0.471    -18.947     -0.420 -1.173
+           -3 0.434     -9.585     -0.123 -0.337
+            0 0.400     -0.901      0.162  0.437
+            2 0.380      4.002      0.292  0.761
+            3 0.371      6.213      0.346  0.911
+            4 0.364      8.172      0.395  1.060
+            5 0.357      9.800      0.437  1.207
+            6 0.353     11.004      0.470  1.340
+            7 0.350     11.667      0.491  1.435
+            8 0.350     11.718      0.495  1.464
+           10 0.356     10.153      0.452  1.300
+           12 0.367      7.230      0.374  1.020
+
+T2(b): corr with Nino 3.4 LEADING by L months (monthly, centred 12-mo growth, 1980-2024)
+ lag observed model_full enso_component gap_left_by_off
+  -3    0.027      0.630         0.8704          -0.052
+   0    0.288      0.621         0.8556           0.247
+   2    0.431      0.533         0.7200           0.417
+   3    0.472      0.466         0.6205           0.470
+   4    0.494      0.389         0.5055           0.503
+   5    0.501      0.302         0.3801           0.520
+   6    0.493      0.210         0.2490           0.522
+   7    0.474      0.116         0.1170           0.511
+   8    0.442      0.026        -0.0036           0.488
+  10    0.350     -0.132        -0.2025           0.411
+  12    0.212     -0.260        -0.3392           0.283
+peak lag (months): observed 5 (r 0.50); model_full -2 (r 0.64); enso_component -2 (r 0.89); gap_left_by_off 6 (r 0.52) 
+
+T4: the index scaled by s (1 = as fitted). pct_vs_off > 0 = better than ENSO off
+ scale   rms pct_vs_off
+   0.0 0.396      0.000
+   0.5 0.391      1.358
+   1.0 0.400     -0.901
+   1.5 0.419     -5.811
+   2.0 0.452    -14.096
+   3.0 0.556    -40.360
+
+T6/T7: the observed lag from T2(b) is 5 months.
+T6 whole index 5 months late: RMS 0.3573 (+9.8% vs off, +10.6% vs full)
+T7 LAND term late by k months, ocean on time (superposition):
+ land_lag_months   rms pct_vs_off
+               0 0.400     -0.901
+               3 0.362      8.619
+               4 0.354     10.599
+               5 0.350     11.719
+               6 0.349     11.859
+               7 0.353     10.930
+               8 0.361      8.985
+T6 vs ENSO off, % closer: median +8.3, 90% [-1.0, +14.8]
+T7 vs ENSO off, % closer: median +11.1, 90% [+3.4, +16.0]
+
+T5: % closer with ENSO off, 3-yr block bootstrap (2000 draws, seed 20261002): median +3.4, 90% [-4.9, +11.8]
+years where ENSO HURTS most (d_sq > 0 = full model further from the data):
+ year   nino   obs  full  off e_full  e_off  d_sq
+ 1999 -0.942 2.110 1.366 1.68 -0.744 -0.431 0.367
+ 1984 -0.589 1.540 0.974 1.18 -0.566 -0.358 0.192
+ 2015  1.459 2.290 2.776 2.57  0.486  0.279 0.158
+ 1989 -0.641 1.632 1.222 1.52 -0.410 -0.109 0.157
+ 1992  0.672 0.688 1.160 0.97  0.472  0.282 0.143
+ 2008 -0.608 2.125 1.757 2.00 -0.368 -0.126 0.119
+years where ENSO HELPS most:
+ year    nino  obs full  off e_full  e_off   d_sq
+ 2011 -0.6284 1.89 2.09 2.31  0.201  0.418 -0.134
+ 2003  0.4425 2.56 2.12 1.95 -0.436 -0.611 -0.182
+ 1983  0.3008 1.67 1.26 1.06 -0.407 -0.608 -0.204
+ 1998  0.0366 2.65 2.20 2.01 -0.449 -0.641 -0.209
+ 2016  0.6375 3.42 2.75 2.52 -0.675 -0.902 -0.357
+ 2024  0.5958 3.55 2.98 2.71 -0.572 -0.841 -0.380
+sum d_sq +0.128; hurts in 24 of 45 years
+
+saved outputs/diagnostics/enso_growth_fit_20261003_cand15ctl.rds | 2.2 min
+DONE

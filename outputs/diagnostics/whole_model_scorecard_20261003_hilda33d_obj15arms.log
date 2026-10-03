@@ -1,0 +1,131 @@
+calibration/diag_whole_model_scorecard.R @fea4230+dirty, 2026-10-03 18:54
+ARMS (each spun up as its file records):
+  ent26    ent26 (column control, quarantined)   struct column, seas_ml 0, spinup aseasonal, 38 par, h_ml 134.1
+  hilda31pe hilda31pe (seas_ml 0 control, CCX_MODE_SEASML0_CONTROL)   struct hilda_c, seas_ml 0, spinup periodic, 31 par + 7 PINNED (w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,w_enso_l2=0), h_ml 49.5
+  hilda33d hilda33d (canonical, CCX_MODE_CANONICAL)   struct hilda_csl3v0kaidgb, seas_ml 1, spinup periodic, 33 par + 9 PINNED (ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0), h_ml 49.5
+  lag15    calibration/output/refit_20261003_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds (extra arm, CCX_SC_EXTRA_MODE)   struct hilda_csl3v0kaidgbe, seas_ml 1, spinup periodic, 34 par + 9 PINNED (ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0), h_ml 49.6
+  ctl15    calibration/output/refit_20261003_obj15_hilda_csl3v0kaidgb/mode_fit_pumpN.rds (extra arm, CCX_SC_EXTRA_MODE)   struct hilda_csl3v0kaidgb, seas_ml 1, spinup periodic, 33 par + 9 PINNED (ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0), h_ml 49.7
+
+=== 0. EACH ARM REPRODUCES ITS OWN STORED STREAMS (tol 0.001; the like-for-like guard) ===
+  ent26    stored -1410.9591  recomputed -1234.3400  diff +1.77e+02 over 20 rows  -> MIGRATED file: its stored streams are PROVENANCE (restamp_mode_objective.R cannot encode a pre-migration vector); not gated
+           rows not in both (excluded from the sum): d14c_deep_ocean d13c_icecore d14c_profile_level d14c_profile_ab d14c_profile_bd gcb_ocean_enso_slope
+  hilda31pe stored -1194.8050  recomputed -1194.8050  diff -6.71e-07 over 27 rows  -> REPRODUCES
+  hilda33d stored -1170.5810  recomputed -1170.5810  diff +1.36e-12 over 27 rows  -> REPRODUCES
+  lag15    stored -1143.2508  recomputed -1143.2508  diff +7.67e-07 over 27 rows  -> REPRODUCES
+  ctl15    stored -1158.1675  recomputed -1158.1674  diff +5.73e-07 over 27 rows  -> REPRODUCES
+
+=== 1. LIKELIHOOD BY STREAM GROUP (common rows; rows absent from an arm shown after) ===
+  group               ent26 hilda31pe  hilda33d     lag15     ctl15       B-A       C-B   rows
+  co2_level         -651.41   -668.51   -658.58   -644.12   -646.76    -17.10     +9.93   co2_level_MLO co2_level_SPO co2_icecore
+  co2_seasonal        67.99     68.80     72.27     77.97     72.46     +0.80     +3.47   co2_seasonal_MLO co2_seasonal_SPO
+  d13c_level         217.75    189.76    186.82    184.68    184.53    -27.99     -2.94   d13c_icecore d13c_level_MLO d13c_level_SPO
+  d13c_seasonal      463.31    458.76    457.94    458.82    458.08     -4.56     -0.82   d13c_seasonal_MLO d13c_seasonal_SPO
+  gradients           92.09     92.28     91.97     90.63     90.62     +0.19     -0.31   co2_gradient d13c_gradient
+  bomb_d14c         -571.09   -581.29   -579.32   -575.78   -575.78    -10.20     +1.97   d14c_NH d14c_SH
+  d14c_profile      -241.61     -8.50     -8.55     -8.72     -8.72   +233.11     -0.05   d14c_profile_level d14c_profile_ab d14c_profile_bd
+  excess_c14          -9.17     -9.85     -9.84     -9.64     -9.64     -0.68     +0.01   excess_c14_ocean
+  gcb_sinks         -121.47    -71.64    -57.99    -53.06    -58.99    +49.83    +13.65   gcb_ocean_sink gcb_land_sink gcb_ocean_enso_slope
+  ocean_deep          -7.35    -16.33    -17.50    -16.69    -16.70     -8.98     -1.17   ocean_grad_dic ocean_grad_d13c ocean_grad_alk
+  TOTAL common     -1401.38  -1187.66  -1163.94  -1136.57  -1151.50   +213.72    +23.73
+  TOTAL shared     -1280.23  -1113.28  -1103.43  -1080.97  -1089.98   +166.94     +9.85   <- WITHOUT the two GCB level rows (hilda33d, lag15, ctl15 score them against #14's moved targets)
+  hilda31pe-only rows: hs_surf_dic -4.27, hs_surf_d13c -2.87
+  hilda33d-only rows: hs_surf_dic -4.18, hs_surf_d13c -2.46
+  lag15-only rows: hs_surf_dic -4.24, hs_surf_d13c -2.43
+  ctl15-only rows: hs_surf_dic -4.24, hs_surf_d13c -2.42
+  rows not common to every arm: hs_surf_dic hs_surf_d13c  (TOTAL incl. them: ent26 -1401.38, hilda31pe -1194.81, hilda33d -1170.58, lag15 -1143.25, ctl15 -1158.17)
+
+=== 2. GATES (the ledger, INDEX_ccx_gates) ===
+  GATE V  ent26    sd 0.720 vs obs 0.933 ± 0.084  ratio 0.77  z -2.54  -> FAIL (too smooth)
+  GATE V  hilda31pe sd 0.528 vs obs 0.933 ± 0.084  ratio 0.57  z -4.84  -> FAIL (too smooth)
+  GATE V  hilda33d sd 0.555 vs obs 0.933 ± 0.084  ratio 0.59  z -4.52  -> FAIL (too smooth)
+  GATE V  lag15    sd 0.548 vs obs 0.933 ± 0.084  ratio 0.59  z -4.60  -> FAIL (too smooth)
+  GATE V  ctl15    sd 0.569 vs obs 0.933 ± 0.084  ratio 0.61  z -4.34  -> FAIL (too smooth)
+  GATE H  ent26    R_co2 0.913 (z_level -3.60) R_d13c 1.969 (z_level -21.70)  contrast z +11.65  -> FAIL
+  GATE H  hilda31pe R_co2 0.911 (z_level -3.67) R_d13c 2.006 (z_level -22.53)  contrast z +11.87  -> FAIL
+  GATE H  hilda33d R_co2 0.890 (z_level -4.54) R_d13c 1.986 (z_level -22.09)  contrast z +12.01  -> FAIL
+  GATE H  lag15    R_co2 0.874 (z_level -5.19) R_d13c 1.953 (z_level -21.34)  contrast z +12.02  -> FAIL
+  GATE H  ctl15    R_co2 0.876 (z_level -5.11) R_d13c 1.955 (z_level -21.40)  contrast z +12.01  -> FAIL
+  GATE GL ent26    d13C gradient -0.1314 vs obs -0.0668 ± 0.0030 (ratio 1.97); rep_frac 0.087 (derived from R_co2 0.913) -> se 0.0065, z -9.90 (bare z -21.70)  -> FAIL
+  GATE GL hilda31pe d13C gradient -0.1339 vs obs -0.0668 ± 0.0030 (ratio 2.01); rep_frac 0.089 (derived from R_co2 0.911) -> se 0.0066, z -10.12 (bare z -22.53)  -> FAIL
+  GATE GL hilda33d d13C gradient -0.1326 vs obs -0.0668 ± 0.0030 (ratio 1.99); rep_frac 0.110 (derived from R_co2 0.890) -> se 0.0079, z -8.31 (bare z -22.09)  -> FAIL
+  GATE GL lag15    d13C gradient -0.1304 vs obs -0.0668 ± 0.0030 (ratio 1.95); rep_frac 0.126 (derived from R_co2 0.874) -> se 0.0089, z -7.15 (bare z -21.34)  -> FAIL
+  GATE GL ctl15    d13C gradient -0.1305 vs obs -0.0668 ± 0.0030 (ratio 1.96); rep_frac 0.124 (derived from R_co2 0.876) -> se 0.0088, z -7.27 (bare z -21.40)  -> FAIL
+  GATE 5  ent26    nh_drop z -1.79, sh_t z +1.42, lag z +1.66, nh_efold z -7.49, nh_v z +0.08, sh_v z +8.35; orderings sh_after_nh ok nh_peak_higher ok  -> FAIL
+  GATE 5  hilda31pe nh_drop z -1.78, sh_t z +1.38, lag z +1.61, nh_efold z -7.49, nh_v z +0.39, sh_v z +12.35; orderings sh_after_nh ok nh_peak_higher ok  -> FAIL
+  GATE 5  hilda33d nh_drop z -1.78, sh_t z +1.44, lag z +1.67, nh_efold z -7.57, nh_v z +0.37, sh_v z +11.20; orderings sh_after_nh ok nh_peak_higher ok  -> FAIL
+  GATE 5  lag15    nh_drop z -1.83, sh_t z +1.45, lag z +1.69, nh_efold z -7.32, nh_v z +0.22, sh_v z +10.58; orderings sh_after_nh ok nh_peak_higher ok  -> FAIL
+  GATE 5  ctl15    nh_drop z -1.83, sh_t z +1.45, lag z +1.69, nh_efold z -7.23, nh_v z +0.21, sh_v z +10.53; orderings sh_after_nh ok nh_peak_higher ok  -> FAIL
+  GATE G  ent26    se 17.1, z -0.0837, n_eff 20, d_umol -1.43, inv_d -79.2, inv_pct -0.214, uptake 155  -> PASS
+  GATE G  hilda31pe se 18.6, z 0.0165, n_eff 20, d_umol 0.307, inv_d 581, inv_pct 1.8, uptake 129  -> PASS
+  GATE G  hilda33d se 18.6, z -0.0637, n_eff 20, d_umol -1.18, inv_d 728, inv_pct 2.26, uptake 128  -> PASS
+  GATE G  lag15    se 18.6, z -0.0239, n_eff 20, d_umol -0.445, inv_d 629, inv_pct 1.95, uptake 130  -> PASS
+  GATE G  ctl15    se 18.6, z -0.0256, n_eff 20, d_umol -0.475, inv_d 630, inv_pct 1.95, uptake 130  -> PASS
+  GATE Q  ent26    air-sea d13C diseq k-weighted +0.755 vs 0.60 ± 0.10 (bottles k +0.545)  n_sd 1.55  -> PASS   [ml/hs NH +0.80/+0.00 SH +0.73/+0.00; area-all +0.758 vs bottles +0.846; old ML-area +0.757]
+  GATE Q  hilda31pe air-sea d13C diseq k-weighted +0.558 vs 0.60 ± 0.10 (bottles k +0.545)  n_sd 0.42  -> PASS   [ml/hs NH +0.96/-0.07 SH +0.84/+0.05; area-all +0.754 vs bottles +0.846; old ML-area +0.893]
+  GATE Q  hilda33d air-sea d13C diseq k-weighted +0.551 vs 0.60 ± 0.10 (bottles k +0.545)  n_sd 0.49  -> PASS   [ml/hs NH +0.99/-0.12 SH +0.86/-0.00; area-all +0.763 vs bottles +0.846; old ML-area +0.913]
+  GATE Q  lag15    air-sea d13C diseq k-weighted +0.560 vs 0.60 ± 0.10 (bottles k +0.545)  n_sd 0.40  -> PASS   [ml/hs NH +0.99/-0.12 SH +0.86/+0.02; area-all +0.769 vs bottles +0.846; old ML-area +0.918]
+  GATE Q  ctl15    air-sea d13C diseq k-weighted +0.555 vs 0.60 ± 0.10 (bottles k +0.545)  n_sd 0.45  -> PASS   [ml/hs NH +0.99/-0.12 SH +0.86/+0.01; area-all +0.766 vs bottles +0.846; old ML-area +0.915]
+  GATE D  ent26    hemispheric diseq NH +0.843 SH +0.779 (ml/hs NH +0.84/NA SH +0.78/NA; obs +1.28/-0.48 +1.05/-1.06) asym +0.063 vs obs +0.286 ± 0.029  z -7.67  -> FAIL
+  GATE D  hilda31pe hemispheric diseq NH +0.886 SH +0.796 (ml/hs NH +1.01/+0.07 SH +0.89/+0.17; obs +1.28/-0.48 +1.05/-1.06) asym +0.090 vs obs +0.286 ± 0.029  z -6.76  -> FAIL
+  GATE D  hilda33d hemispheric diseq NH +0.904 SH +0.807 (ml/hs NH +1.04/+0.01 SH +0.91/+0.11; obs +1.28/-0.48 +1.05/-1.06) asym +0.097 vs obs +0.286 ± 0.029  z -6.51  -> FAIL
+  GATE D  lag15    hemispheric diseq NH +0.903 SH +0.813 (ml/hs NH +1.03/+0.03 SH +0.91/+0.14; obs +1.28/-0.48 +1.05/-1.06) asym +0.090 vs obs +0.286 ± 0.029  z -6.74  -> FAIL
+  GATE D  ctl15    hemispheric diseq NH +0.906 SH +0.814 (ml/hs NH +1.04/+0.02 SH +0.91/+0.14; obs +1.28/-0.48 +1.05/-1.06) asym +0.092 vs obs +0.286 ± 0.029  z -6.69  -> FAIL
+  GATE 7  ent26    ocean 3.07 (z -0.32) land 3.29 (z +1.77) GtC/yr  -> PASS
+  GATE 7  hilda31pe ocean 3.12 (z -0.22) land 3.12 (z +1.42) GtC/yr  -> PASS
+  GATE 7  hilda33d ocean 3.11 (z -0.31) land 3.02 (z +0.76) GtC/yr  -> PASS
+  GATE 7  lag15    ocean 3.14 (z -0.26) land 3.06 (z +0.86) GtC/yr  -> PASS
+  GATE 7  ctl15    ocean 3.15 (z -0.24) land 3.06 (z +0.80) GtC/yr  -> PASS
+  GATE S  ent26    SPO ocean limb 0.437 ppm @ month 8.87, bracket [7.41, 10.41]  -> PASS
+  GATE S  hilda31pe SPO ocean limb 0.311 ppm @ month 8.70, bracket [7.41, 10.41]  -> PASS
+  GATE S  hilda33d SPO ocean limb 0.280 ppm @ month 8.83, bracket [7.41, 10.41]  -> PASS
+  GATE S  lag15    SPO ocean limb 0.210 ppm @ month 8.50, bracket [7.41, 10.41]  -> PASS
+  GATE S  ctl15    SPO ocean limb 0.215 ppm @ month 8.53, bracket [7.41, 10.41]  -> PASS
+  GATE 6  ent26    MLO seasonal-amplitude growth 1960s -> 2010s: +19.40 % vs obs +15.57 % (se 3.44 pp; boot 2000, seed 20261002)  z +1.11  -> PASS
+  GATE 6  hilda31pe MLO seasonal-amplitude growth 1960s -> 2010s: +18.00 % vs obs +15.57 % (se 3.44 pp; boot 2000, seed 20261002)  z +0.70  -> PASS
+  GATE 6  hilda33d MLO seasonal-amplitude growth 1960s -> 2010s: +15.81 % vs obs +15.57 % (se 3.44 pp; boot 2000, seed 20261002)  z +0.07  -> PASS
+  GATE 6  lag15    MLO seasonal-amplitude growth 1960s -> 2010s: +14.42 % vs obs +15.57 % (se 3.44 pp; boot 2000, seed 20261002)  z -0.34  -> PASS
+  GATE 6  ctl15    MLO seasonal-amplitude growth 1960s -> 2010s: +15.14 % vs obs +15.57 % (se 3.44 pp; boot 2000, seed 20261002)  z -0.12  -> PASS
+  GATE 11 ent26    screen: 21 series screened, 4 listed (n < 20); no flags; uncaptured (non-Gaussian rows): excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd
+  GATE 11 hilda31pe screen: 21 series screened, 6 listed (n < 20); no flags; uncaptured (non-Gaussian rows): excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd
+  GATE 11 hilda33d screen: 21 series screened, 6 listed (n < 20); no flags; uncaptured (non-Gaussian rows): excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd
+  GATE 11 lag15    screen: 21 series screened, 6 listed (n < 20); no flags; uncaptured (non-Gaussian rows): excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd
+  GATE 11 ctl15    screen: 21 series screened, 6 listed (n < 20); no flags; uncaptured (non-Gaussian rows): excess_c14_ocean, d14c_profile_level, d14c_profile_ab, d14c_profile_bd
+  GATE P7 hilda33d modern surface-deep d13C gradient, ONE VECTOR: seas_ml OFF -0.392 -> ON -0.378: move +0.014 vs bound (OFF sd_eff) 0.160 = 0.09x, target -0.861; DIC 309.7 -> 307.5 (-2.2, 0.07x its sd_eff 32.0; reported)  -> PASS
+  GATE P7 lag15    modern surface-deep d13C gradient, ONE VECTOR: seas_ml OFF -0.368 -> ON -0.355: move +0.013 vs bound (OFF sd_eff) 0.160 = 0.08x, target -0.861; DIC 305.6 -> 303.6 (-2.0, 0.06x its sd_eff 31.9; reported)  -> PASS
+  GATE P7 ctl15    modern surface-deep d13C gradient, ONE VECTOR: seas_ml OFF -0.370 -> ON -0.357: move +0.013 vs bound (OFF sd_eff) 0.160 = 0.08x, target -0.861; DIC 305.4 -> 303.4 (-2.0, 0.06x its sd_eff 31.9; reported)  -> PASS
+  (gradient rows) ent26    d13C -0.879 (target -0.861, sd_eff 0.118)  DIC 220.4 (target 233.1, sd_eff 26.4)  ALK 95.1
+  (gradient rows) hilda31pe d13C -0.334 (target -0.861, sd_eff 0.160)  DIC 309.2 (target 233.1, sd_eff 32.0)  ALK 102.7
+  (gradient rows) hilda33d d13C -0.378 (target -0.861, sd_eff 0.160)  DIC 307.5 (target 233.1, sd_eff 32.0)  ALK 126.3
+  (gradient rows) lag15    d13C -0.355 (target -0.861, sd_eff 0.160)  DIC 303.6 (target 233.1, sd_eff 31.9)  ALK 117.1
+  (gradient rows) ctl15    d13C -0.357 (target -0.861, sd_eff 0.160)  DIC 303.4 (target 233.1, sd_eff 31.9)  ALK 117.7
+
+=== 3. THE ENSO OCEAN RESPONSE (09-04g estimator: annual ocean uptake ~ year + Nino3.4) ===
+  GCB observed: slope +0.1153 ± 0.0246 GtC/yr per index, r +0.488 (n 66)
+  ent26    full model slope +0.0548 ± 0.0313 (r +0.207) = 0.48x obs;  solubility-only -0.1741 (r -0.523)  [gamma_enso_ocn NH +0.262 SH +0.094; w_enso_l2 0.00]
+  hilda31pe full model slope +0.1082 ± 0.0323 (r +0.373) = 0.94x obs;  solubility-only -0.1789 (r -0.569)  [gamma_enso_ocn NH +0.422 SH +0.063; w_enso_l2 0.00]
+  hilda33d full model slope +0.0979 ± 0.0408 (r +0.278) = 0.85x obs;  solubility-only -0.1799 (r -0.563)  [gamma_enso_ocn NH +0.000 SH +0.000; w_enso_l2 11.91]
+  lag15    full model slope +0.0988 ± 0.0426 (r +0.269) = 0.86x obs;  solubility-only -0.1826 (r -0.558)  [gamma_enso_ocn NH +0.000 SH +0.000; w_enso_l2 12.93]
+  ctl15    full model slope +0.0984 ± 0.0406 (r +0.281) = 0.85x obs;  solubility-only -0.1755 (r -0.554)  [gamma_enso_ocn NH +0.000 SH +0.000; w_enso_l2 12.58]
+
+=== 4. COMPARISONS, NOT GATES (Marcus 09-08h: nothing from Joos may score the model) ===
+  12 IRF   ent26    IRF(20) 0.523  IRF(100) 0.281  IRF(300) 0.197   (Joos 2013 multi-model: 0.596 / 0.409 / 0.322)
+  12 IRF   hilda31pe IRF(20) 0.508  IRF(100) 0.285  IRF(300) 0.204   (Joos 2013 multi-model: 0.596 / 0.409 / 0.322)
+  12 IRF   hilda33d IRF(20) 0.508  IRF(100) 0.360  IRF(300) 0.271   (Joos 2013 multi-model: 0.596 / 0.409 / 0.322)
+  12 IRF   lag15    IRF(20) 0.528  IRF(100) 0.374  IRF(300) 0.280   (Joos 2013 multi-model: 0.596 / 0.409 / 0.322)
+  12 IRF   ctl15    IRF(20) 0.508  IRF(100) 0.360  IRF(300) 0.271   (Joos 2013 multi-model: 0.596 / 0.409 / 0.322)
+  L split  ent26    @100 yr land 39 / ocean 33 / air 28 %;  @1000 yr land 30 / ocean 52 / air 18 %   (Joos 2013 at 1000 yr: land 16 ± 7 / ocean 59 ± 6 / air 25 ± 4.5 %; z at 1000: land +1.96 ocean -1.10 air -1.58; closure 1.0000)
+  L split  hilda31pe @100 yr land 39 / ocean 32 / air 28 %;  @1000 yr land 33 / ocean 49 / air 18 %   (Joos 2013 at 1000 yr: land 16 ± 7 / ocean 59 ± 6 / air 25 ± 4.5 %; z at 1000: land +2.49 ocean -1.74 air -1.55; closure 1.0000)
+  L split  hilda33d @100 yr land 28 / ocean 36 / air 36 %;  @1000 yr land 18 / ocean 60 / air 22 %   (Joos 2013 at 1000 yr: land 16 ± 7 / ocean 59 ± 6 / air 25 ± 4.5 %; z at 1000: land +0.28 ocean +0.15 air -0.63; closure 1.0000)
+  L split  lag15    @100 yr land 25 / ocean 38 / air 37 %;  @1000 yr land 15 / ocean 62 / air 23 %   (Joos 2013 at 1000 yr: land 16 ± 7 / ocean 59 ± 6 / air 25 ± 4.5 %; z at 1000: land -0.08 ocean +0.50 air -0.54; closure 1.0000)
+  L split  ctl15    @100 yr land 27 / ocean 37 / air 36 %;  @1000 yr land 17 / ocean 61 / air 22 %   (Joos 2013 at 1000 yr: land 16 ± 7 / ocean 59 ± 6 / air 25 ± 4.5 %; z at 1000: land +0.13 ocean +0.30 air -0.61; closure 1.0000)
+
+=== 5. STRAINED PRIORS (|z| > 2) and the declared structure ===
+  ent26    q10 -2.24, sst_seas_amp_NH -3.91, rep_dC +3.39
+  hilda31pe q10 -2.43, kz_deep_frac -2.74, pump_hs_gcm2 +2.29, ent_seas_amp_SH +2.03, rep_dC +3.51
+  hilda33d q10 -2.44, kz_deep_frac -2.79, rep_dC +3.29
+  lag15    q10 -2.54, kz_deep_frac -2.75, pump_hs_gcm2 +2.13, rep_dC +4.17
+  ctl15    q10 -2.51, kz_deep_frac -2.77, pump_hs_gcm2 +2.13, rep_dC +4.14
+
+  saved /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/outputs/diagnostics/whole_model_scorecard_20261003_hilda33d_obj15arms.rds
+  ⛔ Nothing adopted.
+provenance: calibration/diag_whole_model_scorecard.R @fea4230+dirty; canonical hilda33d; arms (spinup) ent26 (aseasonal), hilda31pe (periodic), hilda33d (periodic), lag15 (periodic), ctl15 (periodic); no RNG

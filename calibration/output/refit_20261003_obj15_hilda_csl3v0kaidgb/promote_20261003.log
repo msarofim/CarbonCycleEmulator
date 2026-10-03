@@ -1,0 +1,67 @@
+
+==== PROMOTE a obj15_hilda_csl3v0kaidgb multistart start to a mode file ====
+source  calibration/output/multistart_20261002ee_hilda_csl3v0kaidgb_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+dest    calibration/output/refit_20261003_obj15_hilda_csl3v0kaidgb/mode_fit_pumpN.rds
+GATE OPEN (structure 'hilda_csl3v0kaidgb'): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest are fitted names
+PINNED arm: _pin_ent_seas_amp_SH=0.00_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_gamma_enso_ocn_NH=0.00_gamma_enso_ocn_SH=0.00 (33 free parameters)
+
+GATE 1: every start in this directory is on THIS build's parameter set
+----------------------------------------------------------------------
+build fits 33 parameters; 24 of 24 starts match
+
+GATE 2: one arm, one objective -- or a ranking across them is meaningless
+-------------------------------------------------------------------------
+pump arms present: N
+
+GATE 3: the start to promote is COMPUTED from the directory
+-----------------------------------------------------------
+23 of 24 starts CONVERGED in time
+best is id 6 at -1196.101711
+runners-up: id 17 -1196.101715; id 23 -1196.101717; id 2 -1196.101719
+23 of 23 finished starts lie within the optimiser's own convergence
+bound of 0.50 log-units, spanning 8.66e-02 log-units
+
+GATE 4: the point reproduces its own logpost, under the band it RECORDS
+-----------------------------------------------------------------------
+structure RECORDED in the starts: 'hilda_csl3v0kaidgb'
+seas_ml RECORDED in the starts: 1 (the seasonal mixed layer ON -- round 6)
+pump_field RECORDED in the starts: 'solved'
+h_ml band  [42.5, 200] (from the start file)
+log-post   -1196.101712   file -1196.101711   diff -5.725e-07
+
+the per-stream decomposition at the mode
+----------------------------------------
+27 streams, total -1158.1674
+         d14c_intcal          co2_icecore              d14c_NH 
+            -640.610             -511.260             -288.409 
+             d14c_SH        co2_level_MLO        co2_level_SPO 
+            -287.367              -71.656              -63.842 
+       gcb_land_sink         co2_gradient     excess_c14_ocean 
+             -56.036              -15.388               -9.636 
+      ocean_grad_dic       ocean_grad_alk       gcb_ocean_sink 
+              -6.813               -5.853               -5.483 
+         hs_surf_dic      ocean_grad_d13c   d14c_profile_level 
+              -4.242               -4.035               -3.304 
+     d14c_profile_ab         hs_surf_d13c      d14c_profile_bd 
+              -3.231               -2.423               -2.187 
+gcb_ocean_enso_slope     co2_seasonal_MLO       d13c_level_SPO 
+               2.528                3.913               56.008 
+      d13c_level_MLO         d13c_icecore     co2_seasonal_SPO 
+              63.262               65.262               68.547 
+       d13c_gradient    d13c_seasonal_MLO    d13c_seasonal_SPO 
+             106.012              208.773              249.302 
+
+GATE 5: the streams sum to the likelihood half of the logpost
+-------------------------------------------------------------
+sum(streams) -1158.167450 ; logpost -1196.101712 ; implied prior+jacobian -37.934262 ; recomputed prior+jacobian -37.934262 ; gap -5.725e-07 (tol 1e-05)
+
+the h_ml KINK MAP -- derived from the shape function, not typed
+---------------------------------------------------------------
+0 kink(s) in [42.5, 200] -- as expected post-C1-remap
+
+writing the mode file
+---------------------
+wrote calibration/output/refit_20261003_obj15_hilda_csl3v0kaidgb/mode_fit_pumpN.rds
+
+⛔ ADOPTS NOTHING. CCX_MODE_CANONICAL is still 'hilda33d'.
+   Next: recompute_hessian.R --update, then the repoint.
