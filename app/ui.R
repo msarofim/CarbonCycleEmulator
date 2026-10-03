@@ -449,8 +449,13 @@ navbarPage(
         # user invented, so there is no line to draw. Withholding the control is
         # honest; drawing the background scenario's FaIR line beside the user's
         # own pathway would be a different scenario wearing the same panel.
+        # ⛔ NOR IN THE PULSE LAB (2026-10-02, Marcus, carbotopecomments.10.2.26: "still there for
+        # the pulse lab, but doesn't seem to do anything"). It did nothing there -- the pulse
+        # branch never read input$f_fair, and FaIR was never run on this model's pulse -- so the
+        # control is withheld for the same reason as above. A FaIR pulse comparison would be a
+        # new feature, not a fix.
         conditionalPanel(
-          "input.f_mode != 'Build your own'",
+          "input.f_mode != 'Build your own' && input.f_mode != 'Pulse lab'",
           checkboxInput("f_fair", "Compare with standard FaIR", value = FALSE),
           # 2026-10-02: matched to Marcus's FaIR note -- the dashed CO2 line is NOT what this
           # model "is trying to reproduce"; only its CO2 -> temperature step is fitted to FaIR.

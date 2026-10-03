@@ -276,9 +276,10 @@ CCX_MECHANISMS <- list(
     blurb = paste("Everything people put into the air: burning coal, oil and gas,",
                   "making cement, and clearing land. Switch it off and the model",
                   "runs the same 270 years with nature alone."),
-    caveat = paste("Nature's own carbon cycle keeps running, including its",
-                   "response to the observed warming \u2014 so what is left is",
-                   "what temperature and El Ni\u00f1o do on their own."),
+    # 2026-10-02 (carbotopecomments.10.2.26, Marcus): "Change to" -- his wording, verbatim.
+    caveat = paste("While the direct effect of our emissions disappears, the indirect",
+                   "effect through temperature still remains. ENSO and volcanoes also",
+                   "continue to have an effect."),
     # Zeroing the forcing columns rather than a parameter: emissions are
     # PRESCRIBED, so there is no coefficient to set to zero. LUC goes too --
     # it is an emission (a wood -> atmosphere transfer), not a natural flux.

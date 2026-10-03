@@ -298,7 +298,8 @@ function(input, output, session) {
           textOutput("w_regrowth_caveat", inline = TRUE))
       # Marcus 2026-10-02 (carbotopecomment): the "Why splitting it changes nothing the model
       # does" explainer DELETED. Its one load-bearing fact (the split is the bookkeeping
-      # models', not tested here) is still in APP_LUC_SPLIT_NOTE, the caveat just above.
+      # models') is still in APP_LUC_SPLIT_NOTE, the caveat just above -- in Marcus's own
+      # wording since 2026-10-02 (carbotopecomments.10.2.26).
     )
   })
 
@@ -787,7 +788,7 @@ function(input, output, session) {
   # budget, FaIR does not), because a reader who spots that gap unaided has
   # found a hidden defect rather than a documented one.
   output$f_fair_note <- renderUI({
-    if (!isTRUE(input$f_fair) || identical(input$f_mode, "Build your own")) return(NULL)
+    if (!isTRUE(input$f_fair) || input$f_mode %in% c("Build your own", "Pulse lab")) return(NULL)   # 10-02: withheld in the pulse lab too
     div(class = "caveat", APP_FAIR_NOTE)
   })
 

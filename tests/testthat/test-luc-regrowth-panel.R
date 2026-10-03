@@ -88,11 +88,10 @@ test_that("2. global.R scales BOTH halves and the net by luc_scale", {
 test_that("3. the panel says the split is ASSERTED, not measured", {
   # in the plot's own caption (which a screenshot carries) AND in the page copy
   expect_true(has(.lrp_plots, LRP_ASSERT_RX))
-  expect_true(has(.lrp_global, LRP_ASSERT_RX))
-  # and the page must say the model cannot check it. Re-pinned 2026-10-02 (approved): the server's
-  # "Why splitting it" box that said "cannot check the split" was deleted on Marcus's instruction; the
-  # caveat under the chart (APP_LUC_SPLIT_NOTE) carries the claim now.
-  expect_true(has(.lrp_global, "this model does not measure"))
+  # Re-pinned 2026-10-02 (b), approved by Marcus: his own wording for the page caveat
+  # (carbotopecomments.10.2.26) drops "asserted ... does not measure"; the chart's CAPTION above still
+  # carries that claim, and the page copy must still NAME the source of the split.
+  expect_true(has(.lrp_global, "bookkeeping models from the Global Carbon Budget"))
 })
 
 test_that("4. the plot function exists and names its three series", {

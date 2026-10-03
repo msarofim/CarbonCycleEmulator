@@ -2,6 +2,27 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (gg) — **Marcus's `carbotopecomments.10.2.26.docx` worked through ("After the #15 build"): both of his wordings in verbatim, and the pulse lab's "Compare with standard FaIR" box withheld there (it did nothing). One test re-pin, approved. Verified in the running app. Plus the W4 scorecard record and suite.**
+
+**His three items** (the document was read from a copy; it stays untracked and untouched):
+1. **The land-use split's "Where this number comes from"** (`APP_LUC_SPLIT_NOTE`, app/global.R) is now his sentence. The observed window and the fitted land-use scale left the sentence with it. The chart's own caption (`NOTE_LUC_SPLIT`) still says the split is "asserted" from the bookkeeping models.
+2. **The "Our emissions" caveat** (R/mechanisms.R) is now his sentence: "While the direct effect of our emissions disappears, the indirect effect through temperature still remains. ENSO and volcanoes also continue to have an effect."
+3. **"Compare with standard FaIR" in the pulse lab** "doesn't seem to do anything". Measured: it did nothing — the pulse branch of `output$f_plot` never read `input$f_fair`, and FaIR was never run on this model's pulse. It is now WITHHELD there (the `conditionalPanel` and the note), for the reason it was already withheld in "Build your own". A FaIR pulse comparison would be a new feature, not a fix.
+
+**Re-pin** (Marcus: **"Approve (Recommended)"**): `test-luc-regrowth-panel` 3. It keeps requiring "asserted" in the chart CAPTION, and the page copy must now name "bookkeeping models from the Global Carbon Budget".
+
+**Verified in the app** (`ccx-app`, localhost:7788, the current tree):
+- the land-use caveat reads exactly his sentence, and so does the emissions caveat (with the switch off); the old text is absent;
+- the FaIR box is `display: contents` under Scenarios and `none` in the Pulse lab;
+- no console errors. The switch I toggled was restored.
+- All 12 app-facing test files pass.
+
+**The W4 scorecard record** (`calibration/diag_whole_model_scorecard.R` @`e47e9c9` → `outputs/diagnostics/whole_model_scorecard_20261002w4.log` and `_hilda33d.rds`). This is the pre-refit baseline under objective #15 with the repaired gates, at hilda33d:
+- **FAIL:** V (z −4.52), H (+12.01), GL (−8.31), D (−6.51), 5 (sh_v +11.20, nh_efold −7.57).
+- **PASS:** G, Q (0.49), 7 (ocean −0.31, land +0.76, on its D3-moved targets), S, 6 (+0.07), P7 (0.09×).
+- **Gate 11:** 21 series screened, NO flags.
+- **Full suite at `e47e9c9`** (frozen copy): **5999 passed, 1 failed (the named red, `test-constraint-map` 6), 4 skipped, 0 errors**, 21.4 min while the refit ran.
+
 ## 2026-10-02 (ff) — **W4 BUILT: the gate repairs ruled before the #15 mode is scored (audit B6, B7, C4, C5). Gate 5 now FAILS at every registered mode, as ruled. Its restored e-fold and SH peak height miss by 7–12 leave-one-zone-out spreads.**
 
 **What each repair does.**

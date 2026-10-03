@@ -666,13 +666,12 @@ APP_LUC_SPLIT_OBS <- if (is.null(APP_LUC_SPLIT)) NULL else APP_LUC_SPLIT$obs_win
 # 2026-10-02: Marcus deleted the chart's pre-1959 part (carbotopecomment), so the chart now
 # shows only the OBSERVED years and the back-extension / decay clause describes nothing on it.
 # "Gross clearing" follows his "deforestation".
-APP_LUC_SPLIT_NOTE <- if (is.null(APP_LUC_SPLIT)) NULL else sprintf(paste(
-  "Split of the land-use input into deforestation and forest regrowth, on the",
-  "Global Carbon Budget's own \u201cforest regrowth (total)\u201d convention and",
-  "asserted from its three bookkeeping models \u2014 this model does not measure",
-  "the split. Observed %d\u2013%d. Both halves carry the fitted land-use scale %.3f",
-  "and sum to the series the model burns."),
-  APP_LUC_SPLIT_OBS[1], APP_LUC_SPLIT_OBS[2], APP_LUC_SCALE)
+# 2026-10-02 (carbotopecomments.10.2.26, Marcus): "Change to" -- his wording, verbatim. The
+# observed window and the fitted land-use scale left the sentence with it; both are still on the
+# chart's own axis and in its legend respectively.
+APP_LUC_SPLIT_NOTE <- if (is.null(APP_LUC_SPLIT)) NULL else paste(
+  "The split of the land-use input into deforestation and forest regrowth is based on the",
+  "\u201cforest regrowth (total)\u201d and three bookkeeping models from the Global Carbon Budget.")
 
 # ---------------------------------------------------------------------
 # ONE PAST FOR EVERY TAB (2026-09-22, Marcus's ruling: splice + caption).
