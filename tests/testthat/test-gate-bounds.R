@@ -160,8 +160,11 @@ test_that("GATE 5 fails a shifted peak and an inverted ordering, and passes the 
                  vnh = ob$NH[["v"]], vsh = ob$SH[["v"]])
     list(pk = list(NH = c(t = ob$NH[["t"]] + dnh, v = vnh,
                           drop = ob$NH[["drop"]] + ddrop,
-                          p1_t = ob$NH[["p1_t"]]),
-                   SH = c(t = ob$SH[["t"]] + dsh, v = vsh)),
+                          p1_t = ob$NH[["p1_t"]],
+                          # 2026-10-02 (W4): the e-fold is JUDGED since gate 5's sub-checks were
+                          # restored, so the truth carries it (approved by Marcus)
+                          efold = ob$NH[["efold"]]),
+                   SH = c(t = ob$SH[["t"]] + dsh, v = vsh, efold = ob$SH[["efold"]])),
          # the lag is on the FIRST-PEAK time (ruled 2026-09-12), as dg_gate5()
          lag = (ob$SH[["t"]] + dsh) - ob$NH[["p1_t"]])
   expect_true(dg_gate5_verdict(mk(), ob, sp)$pass)

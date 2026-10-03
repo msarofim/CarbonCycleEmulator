@@ -1,4 +1,11 @@
 # =====================================================================
+# ⛔ SUPERSEDED 2026-10-02 (W4; audit 10-02 B6, Marcus: "Restore gates 6 and 11"). Gates 6 and 11
+# live in calibration/lib_design_gates.R now (dg_gate6*, dg_gate11*) and run in the scorecard on
+# each arm's OWN vector, structure and spinup -- this driver builds the model from DEFAULTS with the
+# aseasonal spinup and cannot score a canonical. Gate 6's bound is now two-sided on the observed
+# ratio's bootstrap se, and gate 11 screens the objective's own residuals (every row). Kept, unrun,
+# as the 08-28 record; do not run it for a verdict.
+# =====================================================================
 # diag_design_gates_unscored.R -- THE FOUR DESIGN sec.6 GATES THAT NO
 #                                 DIAGNOSTIC HAS EVER MEASURED.
 #

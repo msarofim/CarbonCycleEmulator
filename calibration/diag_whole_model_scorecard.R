@@ -19,7 +19,7 @@
 # dg_gateH, dg_gateS (base arm) and dg_gateG (spinup + surface reads) through
 # their `r =` argument; only the knockout arms (gate S, the ENSO patch-off) and
 # gate G's end-of-epoch state still run. Logs diffed bit-identical at the change.
-# Every gate the ledger keeps (V, H, 5, G, Q, 7, S, GL, P7), the two
+# Every gate the ledger keeps (V, H, 5, G, Q, 7, S, GL, P7; + 6 and the gate-11 screen since 2026-10-02), the two
 # COMPARISONS (12 = the Joos IRF, L = the pulse partition), the ENSO ocean slope
 # (full and solubility-only, the 09-04g estimator), the likelihood by stream
 # GROUP, and the strained priors. Adopts nothing.
@@ -139,15 +139,30 @@ for (a in an) { q <- dg_gateQ(R[[a]], ARMS[[a]]); verd[[a]]$Q <- q
               q$region[["NH_ml"]], q$region[["NH_hs"]], q$region[["SH_ml"]], q$region[["SH_hs"]], q$mean_area_all, q$obs_area_all, q$mean_area_ml)) }
 DO <- try_or(dg_gateD_obs(), "gate D obs"); if (!is.null(DO)) for (a in an) { vd <- try_or(dg_gateD_verdict(dg_gateD(R[[a]], ARMS[[a]], DO), DO), paste("gate D", a)); verd[[a]]$D <- vd   # 2026-09-20 t
   if (!is.null(vd)) cat(sprintf("  GATE D  %-8s hemispheric diseq NH %+.3f SH %+.3f (ml/hs NH %+.2f/%+.2f SH %+.2f/%+.2f; obs %+.2f/%+.2f %+.2f/%+.2f) asym %+.3f vs obs %+.3f ± %.3f  z %+.2f  -> %s\n", a, vd$hemi[["NH"]], vd$hemi[["SH"]], vd$region[["NH_ml"]], vd$region[["NH_hs"]], vd$region[["SH_ml"]], vd$region[["SH_hs"]], vd$obs_region[["NH_ml"]], vd$obs_region[["NH_hs"]], vd$obs_region[["SH_ml"]], vd$obs_region[["SH_hs"]], vd$asym, vd$obs_asym, vd$se, vd$z, if (vd$pass) "PASS" else "FAIL")) }
-tg7 <- dg_gcb_target(DG_SINK_WIN); for (a in an) { g7 <- dg_gate7(R[[a]]); vd <- dg_gate7_verdict(g7, tg7); verd[[a]]$G7 <- vd
+# gate 7's target is PER ARM since 2026-10-02 (W4): GCB moved by the arm's OWN D3 shares, as its objective scores it
+for (a in an) { tg7 <- dg_gcb_target(DG_SINK_WIN, shares = ccx_imb_shares(ARMS[[a]]$pm)); g7 <- dg_gate7(R[[a]]); vd <- dg_gate7_verdict(g7, tg7); verd[[a]]$G7 <- vd
   cat(sprintf("  GATE 7  %-8s ocean %.2f (z %+.2f) land %.2f (z %+.2f) GtC/yr  -> %s\n", a, g7$ocean, vd$z_ocean, g7$land, vd$z_land, if (isTRUE(vd$pass)) "PASS" else "FAIL")) }
 for (a in an) { vd <- try_or({ g <- dg_gateS(ARMS[[a]], obs, r = R[[a]]); dg_gateS_verdict(g) }, paste("gate S", a)); verd[[a]]$S <- vd
   if (!is.null(vd)) cat(sprintf("  GATE S  %-8s SPO ocean limb %.3f ppm @ month %.2f, bracket [%.2f, %.2f]  -> %s\n", a, vd$amp, vd$mo, vd$lo, vd$hi, if (vd$pass) "PASS" else sprintf("FAIL (%+.2f mo)", vd$d_mo))) }
+# GATE 6 (W4, 2026-10-02): MLO seasonal-amplitude growth, two-sided on the OBSERVED ratio's bootstrap se (seed recorded)
+O6 <- dg_gate6_obs(obs); for (a in an) { g6 <- dg_gate6(R[[a]]); vd <- dg_gate6_verdict(g6, O6); verd[[a]]$G6 <- vd
+  cat(sprintf("  GATE 6  %-8s MLO seasonal-amplitude growth %s: %+.2f %% vs obs %+.2f %% (se %.2f pp; boot %d, seed %d)  z %+.2f  -> %s\n",
+              a, paste(names(DG_G6_DECADES), collapse = " -> "), 100 * vd$growth_model, 100 * vd$growth_obs, 100 * vd$se,
+              O6$boot, O6$seed, vd$z, if (vd$pass) "PASS" else "FAIL")) }
+# GATE 11 (W4, 2026-10-02): the uniformity SCREEN on every scored residual series -- flags, never a verdict
+for (a in an) { g11 <- dg_gate11(R[[a]], ARMS[[a]], obs); vd <- dg_gate11_verdict(g11); verd[[a]]$G11 <- vd
+  cat(sprintf("  GATE 11 %-8s screen: %d series screened, %d listed (n < %d); %s%s\n", a, vd$n_screened, vd$n_listed, DG_G11_MINN,
+              if (vd$clean) "no flags" else paste("FLAGS:", paste(vd$flagged, collapse = ", ")),
+              if (length(vd$uncaptured)) paste0("; uncaptured (non-Gaussian rows): ", paste(vd$uncaptured, collapse = ", ")) else "")) }
 # GATE P7: the seasonal mixed layer (ON = arm C) must not be a vertical-gradient lever against its OFF control (arm B).
 tgP <- ccx_ocean_gradient_target()
-P7 <- dg_gateP7_verdict(GR[[SC_ARM_B]], GR[[SC_ARM_C]]); verd[[SC_ARM_C]]$P7 <- P7
-cat(sprintf("  GATE P7 %-8s modern surface-deep d13C gradient OFF (%s) %.3f -> ON (%s) %.3f: move %+.3f vs bound (OFF sd_eff) %.3f = %.2fx, target %.3f; DIC %.1f -> %.1f (%+.1f, %.2fx its sd_eff %.1f; reported)  -> %s\n",
-            SC_ARM_C, SC_ARM_B, P7$d13c_off, SC_ARM_C, P7$d13c_on, P7$move_d13c, P7$sd_eff_d13c, P7$ratio_d13c, tgP$d13c$target, P7$dic_off, P7$dic_on, P7$move_dic, P7$ratio_dic, P7$sd_eff_dic, if (P7$pass) "PASS" else "FAIL"))
+# ⭐ WITHIN ONE VECTOR since 2026-10-02 (W4; audit B7): the canonical's own fitted vector with its seasonal
+# mixed layer ON (as fitted) and OFF (relabelled seas_ml 0) -- dg_gateP7_same_vector(). Until then this line
+# compared arm B's FILE with arm C's, two different models, so the 10-01 "P7 PASS" was not the mixed layer's effect.
+P7g <- dg_gateP7_same_vector(ARMS[[SC_ARM_C]])
+P7 <- dg_gateP7_verdict(P7g$off, P7g$on); verd[[SC_ARM_C]]$P7 <- P7
+cat(sprintf("  GATE P7 %-8s modern surface-deep d13C gradient, ONE VECTOR: seas_ml OFF %.3f -> ON %.3f: move %+.3f vs bound (OFF sd_eff) %.3f = %.2fx, target %.3f; DIC %.1f -> %.1f (%+.1f, %.2fx its sd_eff %.1f; reported)  -> %s\n",
+            SC_ARM_C, P7$d13c_off, P7$d13c_on, P7$move_d13c, P7$sd_eff_d13c, P7$ratio_d13c, tgP$d13c$target, P7$dic_off, P7$dic_on, P7$move_dic, P7$ratio_dic, P7$sd_eff_dic, if (P7$pass) "PASS" else "FAIL"))
 for (a in an) cat(sprintf("  (gradient rows) %-8s d13C %.3f (target %.3f, sd_eff %.3f)  DIC %.1f (target %.1f, sd_eff %.1f)  ALK %.1f\n", a, GR[[a]]$d13c, tgP$d13c$target, GR[[a]]$sd_eff[["d13c"]], GR[[a]]$dic, tgP$dic$target, GR[[a]]$sd_eff[["dic"]], GR[[a]]$alk))
 
 cat("\n=== 3. THE ENSO OCEAN RESPONSE (09-04g estimator: annual ocean uptake ~ year + Nino3.4) ===\n")

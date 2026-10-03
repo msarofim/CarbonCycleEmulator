@@ -2,6 +2,51 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (ff) — **W4 BUILT: the gate repairs ruled before the #15 mode is scored (audit B6, B7, C4, C5). Gate 5 now FAILS at every registered mode, as ruled. Its restored e-fold and SH peak height miss by 7–12 leave-one-zone-out spreads.**
+
+**What each repair does.**
+- **Gate 7** judges against GCB + the arm's OWN D3 shares × I(t), the objective's own moved targets, built with `ccx_imb_series()`. An arm with no shares still gets bare GCB.
+- **P7** is ONE vector: the canonical with its seasonal mixed layer ON (as fitted) against OFF (relabelled `seas_ml` 0).
+- **Gate 5** has the NH post-peak e-folding and both peak heights in its verdict, on their leave-one-zone-out spreads.
+- **Gate 6** is restored on each arm's own vector: two-sided on the observed ratio's seeded bootstrap se.
+- **Gate 11** screens every scored residual series, through a capture in `ccx_loglik()`; streams are bit-identical with it on or off.
+- `DG_LEDGER` gains rows for 6, 11 and D; gate 7's stale "1.50" text is corrected (0.50 since #12).
+
+**Rulings (Marcus, verbatim):**
+- gate 5: **"Gate on LOO spreads (Recommended)"**;
+- gate 6: **"Two-sided, bootstrap se (Recommended)"**;
+- gate 11: **"Capture in ccx_loglik (Recommended)"**;
+- the one fixture change (below): **"Approve (Recommended)"**.
+
+**The numbers** (pre-refit, at the #15-restamped files):
+
+| | hilda33d | hilda29l | hilda31s2 | observed | spread (LOO / bootstrap) |
+|---|---|---|---|---|---|
+| gate 5, SH peak height (‰) | 704.3, **z +11.2** | 708.5, z +12.3 | 697.4, z +9.5 | 659.8 | 3.97 (2 SH zones) |
+| gate 5, NH e-fold (yr) | 15.09, **z −7.6** | 15.08, z −7.8 | 15.13, z −7.0 | 15.52 | 0.056 |
+| gate 5, NH peak height (‰) | 874.9, z +0.37 | 875.3, z +0.38 | 865.2, z +0.19 | 855.3 | 52.9 |
+| gate 6, MLO amplitude growth 1960s→2010s | +15.81 %, **z +0.07** | +18.02 %, z +0.71 | +20.92 %, z +1.55 | +15.57 % | 3.44 pp (2000 resamples, seed 20261002) |
+
+- Gate 5 reading: the NH−SH peak contrast is 171 ‰ in the model against 196 ‰ observed. The SH overshoot is consistent with an interhemispheric exchange that is too fast. The leave-one-zone-out spreads are an "order of magnitude" by the gate's own caveat; even 3× them leaves the SH height at ~3.7σ.
+- **P7 at hilda33d, one vector:** OFF −0.392 → ON −0.378 ‰, move +0.014 against a bound of 0.160 (0.09×), **PASS**. The old two-file comparison read −0.044 (0.27×): also a pass, but not the mechanism's own effect.
+- **Gate 11's capture:** 23 of 27 rows. The four uncaptured rows (`excess_c14_ocean` and the three Δ¹⁴C-profile rows) are non-Gaussian, and the screen lists them by name.
+
+**Code.**
+- `calibration/lib_design_gates.R`:
+  - `dg_gcb_target(win, shares)`, `dg_gateP7_same_vector()`, the gate-5 sub-checks;
+  - `dg_gate6_obs()` / `dg_gate6()` / `dg_gate6_verdict()`;
+  - `dg_g11_screen()` / `dg_gate11()` / `dg_gate11_verdict()`;
+  - `dg_streams(residuals =)`, the ledger rows.
+- `R/likelihood.R`: `ccx_loglik(residuals = FALSE)`. Every Gaussian row scores through `dn`, which IS `stats::dnorm` when the capture is off.
+- The scorecard: a per-arm gate-7 target, P7 on one vector, gates 6 and 11 printed.
+- `diag_design_gates_unscored.R` is marked SUPERSEDED.
+
+**Verification.**
+- Registered bit-exactness with the capture code in place (capture off): 5/5 identical, Δ logpost 0. With the capture ON the streams are `identical()`, and the ice-CO₂ residuals equal their hand computation.
+- `tests/testthat/test-gates-w4.R` covers gate 7, P7, gate 5, gate 6 (including byte-identical reruns via the seed) and gate 11 (the screen's power on synthetic series), plus the ledger.
+- **Mutation-tested:** 12 of 13 caught. G4 (the P7 OFF arm without the re-overlay) SURVIVED as an EQUIVALENT mutant: `dg_vector()`'s list already carries the fitted values and relabelling resets none today, so the re-overlay is a guard.
+- **The one previously passing test changed, on approval:** `test-gate-bounds`' gate-5 "truth" fixture now carries the e-folds, which are judged now. Without them the verdict errors, never skips. 16/16.
+
 ## 2026-10-02 (ee) — **THE OBJECTIVE-#15 REFIT IS RUNNING ON THE MAC: the lag arm (`hilda_csl3v0kaidgbe`, 34 free) and then the lag-0 control (`hilda_csl3v0kaidgb`, 33 free), 24 starts each, 8 at a time. Rulings (Marcus, verbatim): D3 "Fit it free (Recommended)"; D5 "Mac" (my verdict was Torch, ~6 h vs ~18 h); "Keep going here".**
 
 **Trees.** Two git worktrees at `3fc5dca`: `~/ccx_frozen/20261002ee_obj15_lag` and `~/ccx_frozen/20261002ee_obj15_ctl`.

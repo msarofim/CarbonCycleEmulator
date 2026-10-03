@@ -1,6 +1,8 @@
 # =====================================================================
 # lib_design_gates.R -- the DESIGN sec.6 GATE KERNELS, in one place.
-#   LIVE gates (DG_LEDGER, 2026-09-12): V, H, GL, 5, G, Q, 7, S, P7.
+#   LIVE gates (DG_LEDGER, 2026-09-12): V, H, GL, 5, G, Q, 7, S, P7; + 6, 11 (a screen) and a
+#   row for D, 2026-10-02 (W4), which also restored gate 5's sub-checks, put gate 7 on the
+#   arm's own D3 targets and gave P7 one vector.
 #   COMPARISONS, not gates: 12 (the Joos IRF) and L (the pulse partition).
 #   RETIRED: 4 (2026-09-04; dg_gate4_verdict() errors by name, the AF is still
 #   printed). The 'gate 4 / 5 / 7' this header named until 09-12 is the 08-31f
@@ -117,6 +119,8 @@ DG_SINK_WIN  <- c(2015, 2023)
 DG_GCB_LAND_SD  <- LIK_GCB_LAND_SD
 DG_GCB_OCEAN_SD <- LIK_GCB_OCEAN_SD
 # ⭐ RULED 2026-09-02 (Marcus): GATE 7 NOW JUDGES AT THE OBJECTIVE'S OWN SIGMAS.
+# (The 1.50 below is the 09-02 value; LIK_LAND_SINK_INFLATE has been 1.0 since objective #12, so the
+# judging land sigma is 0.50 today -- noted 2026-10-02, audit 10-02 E. The PRINTS compute it.)
 # The 09-02 ledger found its standing FAIL was a STRICTNESS MISMATCH, not a model
 # defect: the likelihood scores the land sink at LIK_GCB_LAND_SD *
 # LIK_LAND_SINK_INFLATE = 1.50 GtC/yr and this gate judged the SAME stream on the
@@ -131,7 +135,8 @@ DG_GCB_OCEAN_SD <- LIK_GCB_OCEAN_SD
 # ⚠ DG_GCB_*_SD STAY GCB's STATED sigmas: they are what the report PRINTS beside
 # the target, and printing 1.50 as "GCB's stated 1 sigma" would be false. The
 # gate's judging sigmas are the DG_G7_*_SD pair below, and both are shown.
-DG_G7_LAND_SD  <- LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE   # 0.5 x 3.0 = 1.50
+DG_G7_LAND_SD  <- LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE   # 0.5 x 1.0 = 0.50 since objective #12 (09-16 e);
+                                                             # it was 0.5 x 3.0 = 1.50 when the line was written
 DG_G7_OCEAN_SD <- LIK_GCB_OCEAN_SD                          # 0.40, uninflated
 DG_G7_NSD <- 2      # how many of the OBJECTIVE's sigma gate 7 allows.
                     # ⭐ 1 -> 2 on 2026-09-02 (Marcus), harmonising with GATE Q's
@@ -179,7 +184,8 @@ DG_GtC_PER_PPM <- ccx_const("GtC_PER_PPM")
 #     restates a scored stream or rests on another model.
 #   * GATE 7 IS NOT AN INDEPENDENT TEST AND ITS STANDING FAILURE WAS A SIGMA
 #     MISMATCH, not a model defect. The likelihood scores the land sink at
-#     LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE = 0.5 * 3.0 = 1.5 GtC/yr; the gate
+#     LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE = 0.5 * 3.0 = 1.5 GtC/yr [0.5 since objective #12,
+#     the inflate 3.0 -> 1.0, 09-16 e -- noted 2026-10-02]; the gate
 #     judged the SAME stream against the SAME data at 0.5. ✅ ALIGNED 2026-09-02
 #     (Marcus): it now judges at the objective's own sigmas. It is STILL not an
 #     independent test -- aligning a sigma cannot make a restatement out-of-sample
@@ -348,7 +354,15 @@ DG_LEDGER <- list(
          "
             33.8 on 111.3 is a 30 % tolerance from 4 draws, an ORDER OF",
          "
-            MAGNITUDE, not a calibrated standard error."),
+            MAGNITUDE, not a calibrated standard error.",
+         "
+            ⭐ RESTORED 2026-10-02 (W4; Marcus: 'Gate on LOO spreads'): the NH",
+         "
+            post-peak E-FOLDING and the two PEAK HEIGHTS, each |z| <= DG_G5_NSD",
+         "
+            on its own leave-one-zone-out spread. They FAIL at every registered",
+         "
+            mode: SH height z +9 to +12, NH e-fold z -7 to -8."),
        scored = "STREAM yes, FUNCTIONAL no (likelihood scores levels)",
        power  = paste("MODERATE, and the best-sourced gate here: a different",
          "
@@ -362,9 +376,13 @@ DG_LEDGER <- list(
             budget, so this is not a clean observation."),
        bound = paste("|z| <= DG_G7_NSD (2 since 2026-09-02), against the",
          "
-            OBJECTIVE'S OWN sigmas: land 1.50 = LIK_GCB_LAND_SD x",
+            OBJECTIVE'S OWN sigmas: land", sprintf("%.2f", DG_G7_LAND_SD), "= LIK_GCB_LAND_SD x",
          "
-            LIK_LAND_SINK_INFLATE, ocean 0.40 uninflated. ⚠ Until",
+            LIK_LAND_SINK_INFLATE (1.50 until objective #12 set the inflate to 1.0),",
+         "
+            ocean", sprintf("%.2f", DG_G7_OCEAN_SD), "uninflated. ⭐ TARGET = GCB + the arm's",
+         "
+            own D3 shares x I(t) since 2026-10-02, as the objective scores it. ⚠ Until",
          "
             2026-09-02 it judged land at 0.50, three times stricter than",
          "
@@ -607,8 +625,79 @@ DG_LEDGER <- list(
          "
             reported. Any future re-test of seas_ml passes this gate or does",
          "
-            not ship. Mutation-tested on the kernel."))
+            not ship. Mutation-tested on the kernel.")),
+  # ---- RESTORED / ADDED 2026-10-02 (W4; audit 10-02 B6 + "a DG_LEDGER row for gate D") ----
+  list(id = "6", what = "MLO seasonal-amplitude GROWTH, 1960s -> 2010s (restored 2026-10-02)",
+       class = "OBSERVATION", src = "Scripps MLO monthly CO2 (obs$co2); the model's NH box, same estimator",
+       bound = paste("TWO-SIDED |z| <= DG_G6_NSD (2) on the OBSERVED growth ratio's own",
+         "
+            sampling error, a block bootstrap over years within each decade",
+         "
+            (DG_G6_BOOT, seed DG_G6_SEED, recorded in dg_gate6_obs()). Ruled",
+         "
+            10-02 ('Two-sided, bootstrap se'); replaces DESIGN's typed one-sided",
+         "
+            '>= 15 %', which the observation itself clears by 0.6 pp."),
+       scored = paste("PARTLY: co2_seasonal_MLO scores each YEAR's harmonic",
+         "
+            coefficients, so the growth is a derived statistic of a scored stream."),
+       power  = paste("LIMITED by that: on 10-02 hilda33d +15.81 % vs observed +15.57 %",
+         "
+            (se 3.44 pp, z +0.07); hilda31s2 +20.9 % (z +1.55). Left the",
+         "
+            maintained set after 09-04 without a retirement; restored as ruled.")),
+  list(id = "11", what = "SUSPICIOUS-UNIFORMITY SCREEN on all residual series (restored 2026-10-02)",
+       class = "SCREEN (no bound)", src = "the objective's own residuals, as scored: ccx_loglik(residuals = TRUE)",
+       bound = paste("NONE -- a SCREEN. Flags at typed thresholds (same-sign >= DG_G11_SIGN,",
+         "
+            R2 on the index >= DG_G11_R2, n >= DG_G11_MINN); no null was derived",
+         "
+            for autocorrelated residuals, so a flag is a signal to investigate."),
+       scored = "YES, by construction: it reads the scored residuals (23 of 27 rows; the non-Gaussian ones are listed as uncaptured)",
+       power  = paste("A BUG SCREEN, not a model test. Ruled 10-02 ('Capture in",
+         "
+            ccx_loglik'), so every present and future row is covered without a",
+         "
+            second copy of its construction.")),
+  list(id = "D", what = "HEMISPHERIC air-sea d13C disequilibrium asymmetry D_NH - D_SH (since 2026-09-20 t; ledger row added 2026-10-02)",
+       class = "OBSERVATION", src = paste("GLODAPv2.2023 surface bottles on Quay 2003's definition",
+         "
+            (data/obs_hemi_diseq.rds, data-raw/build_hemi_diseq_targets.R); its",
+         "
+            global area x k mean reproduces Quay's 0.60 (0.545)."),
+       bound = paste("|z| <= DG_D_NSD (2) on the observation's own cluster-bootstrap se of",
+         "
+            the AREA-weighted asymmetry; the four regional levels and the",
+         "
+            k-weighted asymmetry are REPORTED, not bounded."),
+       scored = "NO -- the d13C gradient row carries a fitted offset; this scores the isoflux driver directly",
+       power  = paste("REAL: it FAILED at z -6.6 when the d13C gradient arc closed (09-21; the",
+         "
+            arc ended as two named reds). The scorecard prints the LIVE z."))
 )
+
+#' GATE P7's two arms FROM ONE VECTOR (W4, 2026-10-02; audit 10-02 B7, ruled "Fix P7's comparison").
+#'
+#' The ledger's bound says "same vector, same spinup, the objective's own scorer", and since 10-01
+#' the scorecard had compared TWO DIFFERENT MODELS instead -- the seas_ml-0 control file (arm B)
+#' against the canonical (arm C), which differ in structure, objective and parameter count -- so its
+#' "P7 PASS" was not the mixed layer's own effect. This builds the OFF arm from the SAME fitted vector:
+#' the file's own structure relabelled seas_ml = 0, its fitted values and pins put back, its own
+#' spinup, and both read through ccx_ocean_grad_scored().
+#' @param v a dg_vector() of a seas_ml = 1 file
+#' @return list(off, on, v_off): the two gradient lists dg_gateP7_verdict() takes, and the OFF vector
+dg_gateP7_same_vector <- function(v) {
+  if (!identical(ccx_mode_seas_ml(v$md), 1L))
+    stop("dg_gateP7_same_vector(): the vector's file runs seas_ml ", ccx_mode_seas_ml(v$md),
+         "; P7 tests the seasonal mixed layer, so its ON arm must be the file itself (seas_ml 1).")
+  v0 <- v
+  v0$p <- ccx_apply_structure(v$p, ccx_mode_struct(v$md), seas_ml = "0", pump_field = ccx_mode_pump_field(v$md))
+  v0$p <- ccx_overlay_par(v0$p, v$pm)                       # the fitted values back over the relabelled base
+  for (n in names(ccx_mode_pins(v$md))) v0$p[[n]] <- ccx_mode_pins(v$md)[[n]]
+  stopifnot(identical(v0$p$seas_ml, 0L) || identical(v0$p$seas_ml, 0))
+  g <- function(vv) { r <- dg_run(vv); ccx_ocean_grad_scored(r$out, r$sp) }
+  list(off = g(v0), on = g(v), v_off = v0)        # v_off: so a test can prove it IS the same vector
+}
 
 #' GATE P7 -- the verdict kernel. `g_off` / `g_on` are the scored gradient lists
 #' from ccx_ocean_grad_scored() at the mechanism-OFF and mechanism-ON arms of the
@@ -1419,6 +1508,16 @@ dg_gate5_verdict <- function(g5, ob, sp) {
   z <- c(nh_drop = (g5$pk$NH[["drop"]] - ob$NH[["drop"]]) / sp$sd[["nh_drop"]],
          sh_t    = (g5$pk$SH[["t"]]    - ob$SH[["t"]])    / sp$sd[["sh_t"]],
          lag     = (g5$lag - lag_obs)                     / sp$sd[["lag"]])
+  # ⭐ RESTORED 2026-10-02 (W4; audit C4; Marcus: "Gate on LOO spreads"): DESIGN sec.6 gate 5's two
+  # sub-checks, computed and printed since 08-27 but in no verdict -- the post-peak E-FOLDING (NH,
+  # the one DESIGN names) and the two PEAK HEIGHTS, each against its own leave-one-zone-out spread,
+  # the construction the three above already use (and its caveat: few zones, an ORDER OF MAGNITUDE).
+  # Measured 10-02 at every registered mode: the SH height FAILS (z +9 to +12; 704 vs 660 permil at
+  # hilda33d, NH-SH 171 vs 196) and the NH e-fold FAILS (z -7 to -8; 15.09 vs 15.52 yr); the NH
+  # height passes. A fixture without these fields is an ERROR, never a silent skip.
+  z <- c(z, nh_efold = (g5$pk$NH[["efold"]] - ob$NH[["efold"]]) / sp$sd[["nh_efold"]],
+            nh_v     = (g5$pk$NH[["v"]]     - ob$NH[["v"]])     / sp$sd[["nh_v"]],
+            sh_v     = (g5$pk$SH[["v"]]     - ob$SH[["v"]])     / sp$sd[["sh_v"]])
   # REPORTED, NOT GATED (ruling 1's second half). The first-peak time is the
   # timing statistic that survives the bimodality; the argmax is kept beside it
   # only so a reader of an older handoff can see which lump each curve chose.
@@ -1435,10 +1534,24 @@ dg_gate5_verdict <- function(g5, ob, sp) {
 }
 
 # ---- the gate-7 TARGETS, recomputed on DG_SINK_WIN from the obs series -------
-dg_gcb_target <- function(win) {
+#' GATE 7's target over `win`: GCB's two sink columns -- MOVED by the arm's own D3 shares, as
+#' the objective's gcb_* rows move them (W4, 2026-10-02; audit 10-02 C5, ruled "Align gate 7's
+#' target"). Until today the gate judged every arm against BARE GCB while objective #14+ scores an
+#' open-label arm against GCB + s * I(t) (R/likelihood.R ccx_loglik(); I(t) from ccx_imb_series(),
+#' over EVERY GCB year, the objective's own construction). `shares` = ccx_imb_shares(v$pm): NULL for
+#' every file that fits no shares, which is bare GCB, unchanged.
+dg_gcb_target <- function(win, shares = NULL) {
   g <- as.data.frame(ccx_prepare_obs()$gcb)
   k <- g$year >= win[1] & g$year <= win[2]
-  list(land = mean(g$land_sink[k]), ocean = mean(g$ocean_sink[k]), n = sum(k))
+  land <- g$land_sink[k]; ocean <- g$ocean_sink[k]
+  if (!is.null(shares)) {
+    sh <- ccx_imb_shares_check(shares[["land"]], shares[["ocean"]])
+    im <- ccx_imb_series(g)
+    I  <- im$I[match(g$year[k], im$year)]
+    if (anyNA(I)) stop("dg_gcb_target(): the D3 imbalance series does not cover the gate's window.")
+    land <- land + sh[["land"]] * I; ocean <- ocean + sh[["ocean"]] * I
+  }
+  list(land = mean(land), ocean = mean(ocean), n = sum(k), shares = shares)
 }
 
 # =====================================================================
@@ -1589,7 +1702,7 @@ dg_gateG_verdict <- function(g, obs, n_eff = DG_GD_NEFF) {
 # product for a property of the producer. par_mode is band-safe.
 #' @param obs the obs bundle. The default re-reads it (cached); a caller that
 #'   holds several arms passes its own once (2026-09-12, review B5).
-dg_streams <- function(r, v, obs = ccx_prepare_obs()) {
+dg_streams <- function(r, v, obs = ccx_prepare_obs(), residuals = FALSE) {
   # ⛔ SCORE THE OBJECTIVE'S OWN SPAN. DG_YEARS runs one forcing-held year past
   # the record (2026-09-12) so the annual readers' final boundary is interior;
   # the objective was fitted to DG_SINK_LAST, and scoring the held year with it
@@ -1609,7 +1722,113 @@ dg_streams <- function(r, v, obs = ccx_prepare_obs()) {
   ccx_loglik(o, obs, err, luc = eluc,
              deep = ccx_d14c_deep_read(r$sp),
              ocean_grad = ccx_ocean_grad_scored(o, r$sp), by_stream = TRUE,
-             d14c_mid = ccx_model_d14c_slabs(r$sp))
+             d14c_mid = ccx_model_d14c_slabs(r$sp),
+             residuals = residuals)           # gate 11's capture (W4, 2026-10-02); OFF = untouched
+}
+
+# =====================================================================
+# GATE 11 -- THE SUSPICIOUS-UNIFORMITY SCREEN ON ALL RESIDUAL SERIES (W4, 2026-10-02)
+# DESIGN sec.6 gate 11: "all residual series (all-same-sign or exactly-linear residuals = bug
+# signal, per standing discipline)". Restored from calibration/diag_design_gates_unscored.R
+# (last run 09-04; four station series, raw model - obs, a stale model build), on Marcus's
+# ruling "Capture in ccx_loglik": the series ARE the objective's own residuals, as scored,
+# offsets and moved targets included (ccx_loglik(residuals = TRUE)), so every row that exists or
+# is added later is screened with no second copy of its construction. Each dn() call is its own
+# series (a seasonal row's a- and b-coefficients are screened apart).
+# ⚠ A SCREEN, NOT A VERDICT: a flag is a signal to investigate. The two thresholds are TYPED
+# (08-28, carried over unchanged): for autocorrelated residuals no null distribution was derived,
+# so they are not bounds and gate nothing. DESIGN's own 08-28 table flagged all four station
+# series ALL-SAME-SIGN on raw residuals -- the known LEVEL biases rep_dC and the gradient offsets
+# now absorb, which is exactly why the screen reads the scored residuals.
+DG_G11_SIGN <- 0.95     # flag: fraction of one sign >= this (typed, 08-28)
+DG_G11_R2   <- 0.90     # flag: R^2 of the de-meaned residual on its index >= this (typed, 08-28)
+DG_G11_MINN <- 20L      # series shorter than this are listed, not screened
+#' The screen on ONE residual series: fraction of one sign, R^2 of the de-meaned series on its index,
+#' and the flag string ("" = none). NA statistics below DG_G11_MINN points.
+dg_g11_screen <- function(x) {
+  x <- as.numeric(x); n <- length(x)
+  if (n < DG_G11_MINN) return(list(n = n, frac_same = NA_real_, r2 = NA_real_, flag = "", screened = FALSE))
+  fs <- max(mean(x > 0), mean(x < 0)); i <- seq_len(n)
+  # an EXACTLY linear series is the very signature this flag exists for, so lm()'s "essentially
+  # perfect fit" warning is expected there and silenced; nothing else is
+  r2 <- withCallingHandlers(summary(stats::lm(I(x - mean(x)) ~ i))$r.squared, warning = function(w)
+    if (grepl("essentially perfect fit", conditionMessage(w))) invokeRestart("muffleWarning"))
+  list(n = n, frac_same = fs, r2 = r2, screened = TRUE,
+       flag = paste(c(if (fs >= DG_G11_SIGN) "ALL-SAME-SIGN", if (r2 >= DG_G11_R2) "LINEAR"), collapse = "+"))
+}
+dg_gate11 <- function(r, v, obs = ccx_prepare_obs()) {
+  st  <- dg_streams(r, v, obs = obs, residuals = TRUE)
+  res <- attr(st, "residuals")
+  rows <- do.call(rbind, lapply(names(res), function(nm) do.call(rbind, lapply(seq_along(res[[nm]]), function(j) {
+    x <- as.numeric(res[[nm]][[j]]); sc <- dg_g11_screen(x)
+    id <- if (length(res[[nm]]) > 1L) sprintf("%s[%d]", nm, j) else nm
+    data.frame(series = id, n = sc$n, mean = mean(x), frac_same = sc$frac_same, r2 = sc$r2,
+               flag = sc$flag, screened = sc$screened, stringsAsFactors = FALSE)
+  }))))
+  list(table = rows, uncaptured = setdiff(names(st), names(res)))
+}
+#' Gate 11's summary: which screened series flag. Never a pass/fail -- `clean` is a description.
+dg_gate11_verdict <- function(g11) {
+  t <- g11$table; sc <- t[t$screened, ]
+  list(flagged = sc$series[nzchar(sc$flag)], n_screened = nrow(sc), n_listed = nrow(t) - nrow(sc),
+       clean = !any(nzchar(sc$flag)), uncaptured = g11$uncaptured)
+}
+
+# =====================================================================
+# GATE 6 -- MLO SEASONAL-AMPLITUDE GROWTH, PRODUCED NOT PRESCRIBED (W4, 2026-10-02)
+# DESIGN sec.6 gate 6: the MLO peak-to-trough of the mean seasonal cycle grows ~15 % across the
+# record, "a fertilization signature the model must produce". Restored from
+# calibration/diag_design_gates_unscored.R onto the arm's OWN vector, structure and spinup (that
+# driver built the model from defaults with the aseasonal spinup and could not score a canonical).
+# ESTIMATOR, identical on both sides (the 08-28 'route B'): a centred 12-month moving average as
+# the trend, the series minus it as the seasonal, the decade's monthly climatology, peak minus
+# trough. The observation is Scripps MLO (obs$co2), the model its NH box (co2_NH): a constant
+# station-vs-box factor cancels in the RATIO, which is the claim.
+# ⭐ BOUND, ruled 2026-10-02 (Marcus: "Two-sided, bootstrap se"): |z| <= DG_G6_NSD against the
+# OBSERVED ratio's own sampling error, from a block bootstrap over YEARS within each decade (the
+# climatology is rebuilt from the resampled years). It replaces DESIGN's typed one-sided ">= 15 %",
+# which the observation itself clears by only 0.6 pp ([[threshold_from_obs_or_law]]). The seed and
+# the resample count are recorded in the returned list ([[seed_recorded_in_the_artifact]]).
+DG_G6_DECADES <- list("1960s" = c(1960L, 1969L), "2010s" = c(2010L, 2019L))   # the growth's two ends
+DG_G6_NSD  <- 2L        # harmonised with DG_Q_NSD across the family
+DG_G6_BOOT <- 2000L     # bootstrap resamples
+DG_G6_SEED <- 20261002L # set IMMEDIATELY before the resampling, and recorded
+dg_g6_seasonal <- function(t, x) {
+  o <- order(t); t <- t[o]; x <- x[o]; n <- length(x); tr <- rep(NA_real_, n)
+  for (i in 7:(n - 6)) tr[i] <- (sum(x[(i - 5):(i + 5)]) + 0.5 * (x[i - 6] + x[i + 6])) / 12
+  data.frame(yr = floor(t + 1e-9), mo = floor((t %% 1) * 12 + 1e-9) + 1L, s = x - tr)
+}
+dg_g6_ptt <- function(d, dec, yrs = NULL) {
+  k <- is.finite(d$s) & d$yr >= dec[1] & d$yr <= dec[2]; dd <- d[k, ]
+  if (!is.null(yrs)) dd <- do.call(rbind, lapply(yrs, function(y) dd[dd$yr == y, ]))
+  cl <- tapply(dd$s, dd$mo, mean)
+  if (length(cl) < 12L) return(NA_real_)
+  max(cl) - min(cl)
+}
+#' The observed growth ratio and its bootstrap se (the seed and the resample count travel with it)
+dg_gate6_obs <- function(obs = ccx_prepare_obs()) {
+  m <- obs$co2[obs$co2$station == "MLO", ]
+  d <- dg_g6_seasonal(m$decimal_date, m$co2_ppm)
+  a <- vapply(DG_G6_DECADES, function(dec) dg_g6_ptt(d, dec), 0)
+  set.seed(DG_G6_SEED)
+  bs <- replicate(DG_G6_BOOT, {
+    y1 <- sample(DG_G6_DECADES[[1]][1]:DG_G6_DECADES[[1]][2], replace = TRUE)
+    y2 <- sample(DG_G6_DECADES[[2]][1]:DG_G6_DECADES[[2]][2], replace = TRUE)
+    dg_g6_ptt(d, DG_G6_DECADES[[2]], y2) / dg_g6_ptt(d, DG_G6_DECADES[[1]], y1) })
+  list(ptt = a, ratio = a[[2]] / a[[1]], se = stats::sd(bs), boot = DG_G6_BOOT, seed = DG_G6_SEED,
+       note = "seed set immediately before the year resampling in dg_gate6_obs()")
+}
+dg_gate6 <- function(r) {
+  d <- dg_g6_seasonal(r$out$t, r$out$co2_NH)
+  a <- vapply(DG_G6_DECADES, function(dec) dg_g6_ptt(d, dec), 0)
+  list(ptt = a, ratio = a[[2]] / a[[1]])
+}
+dg_gate6_verdict <- function(g6, o6) {
+  z <- (g6$ratio - o6$ratio) / o6$se
+  list(growth_model = g6$ratio - 1, growth_obs = o6$ratio - 1, se = o6$se, z = z,
+       pass = is.finite(z) && abs(z) <= DG_G6_NSD,
+       # the retired typed one-sided check, REPORTED so a reader of DESIGN's 15 % can see it
+       typed15 = (g6$ratio - 1) >= 0.15)
 }
 
 # =====================================================================

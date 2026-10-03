@@ -2110,9 +2110,28 @@ ccx_npp_modern_target <- local({
 #' data/obs_npp_modern_target.rds (ccx_npp_modern_target()).
 ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
                        ocean_grad = NULL, by_stream = FALSE, d14c_mid = NULL,
-                       npp = NULL) {
+                       npp = NULL, residuals = FALSE) {
   parts <- c()
-  add <- function(name, v) parts[[name]] <<- (if (is.null(parts[[name]])) 0 else parts[[name]]) + v
+  # GATE 11's RESIDUAL CAPTURE (W4, 2026-10-02; Marcus: "Capture in ccx_loglik"). DESIGN's gate 11
+  # screens "all residual series"; the only complete source is the objective itself, so every row
+  # below scores its Gaussian through `dn`, and with `residuals = TRUE` each call's (x - mean) is
+  # recorded under the row's name when the row is add()ed -- the residuals AS SCORED, offsets and
+  # moved targets included, for every row that exists or ever will. OFF (the default), `dn` IS
+  # stats::dnorm, the same function object, so the objective is untouched by construction
+  # (test-gates-w4.R holds it to identical() streams). The sign convention is each row's own (x is
+  # the first argument, sometimes the observation and sometimes the model): a uniformity screen
+  # does not care. Non-Gaussian rows (none use dn) are simply absent from the capture.
+  if (isTRUE(residuals) && !isTRUE(by_stream))
+    stop("ccx_loglik(): `residuals = TRUE` needs `by_stream = TRUE` (the capture is per row).")
+  .res <- list(); .pend <- list()
+  dn <- if (isTRUE(residuals)) function(x, mean = 0, sd = 1, log = FALSE) {
+    .pend[[length(.pend) + 1L]] <<- x - mean
+    stats::dnorm(x, mean, sd, log = log)
+  } else stats::dnorm
+  add <- function(name, v) {
+    parts[[name]] <<- (if (is.null(parts[[name]])) 0 else parts[[name]]) + v
+    if (length(.pend)) { .res[[name]] <<- c(.res[[name]], .pend); .pend <<- list() }
+  }
   interp <- function(col, tt) stats::approx(out$t, out[[col]], xout = tt, rule = 2)$y
   ms <- ccx_model_stats(out, obs)
 
@@ -2151,7 +2170,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     # station = box - rep_dC  (see the LIK_REP_SOURCE_D13C block)
     pred <- m$level[k[good]] - (if (is.null(err$rep_dC)) 0 else err$rep_dC)
     add(paste0("co2_level_", st),
-        sum(stats::dnorm(o$level[good], pred, sd, log = TRUE)))
+        sum(dn(o$level[good], pred, sd, log = TRUE)))
   }
 
   # ---- CO2 seasonal cycle: per-year harmonic coefficients ------------
@@ -2163,8 +2182,8 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     if (is.null(o) || is.null(m)) next
     k <- match(o$year, m$year); good <- !is.na(k)
     add(paste0("co2_seasonal_", st),
-        sum(stats::dnorm(o$a[good], m$a[k[good]], o$sd_a, log = TRUE)) +
-        sum(stats::dnorm(o$b[good], m$b[k[good]], o$sd_b, log = TRUE)))
+        sum(dn(o$a[good], m$a[k[good]], o$sd_a, log = TRUE)) +
+        sum(dn(o$b[good], m$b[k[good]], o$sd_b, log = TRUE)))
   }
 
   # ---- d13C seasonal cycle (2026-08-18; see LIK_USE_D13C_SEAS) -------
@@ -2176,8 +2195,8 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     if (is.null(o) || is.null(m)) next
     k <- match(o$year, m$year); good <- !is.na(k)
     add(paste0("d13c_seasonal_", st),
-        sum(stats::dnorm(o$a[good], m$a[k[good]], o$sd_a, log = TRUE)) +
-        sum(stats::dnorm(o$b[good], m$b[k[good]], o$sd_b, log = TRUE)))
+        sum(dn(o$a[good], m$a[k[good]], o$sd_a, log = TRUE)) +
+        sum(dn(o$b[good], m$b[k[good]], o$sd_b, log = TRUE)))
   }
 
   # ---- ice-core CO2, independent ------------------------------------
@@ -2267,7 +2286,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   # station rows take over the same air (Marcus 10-02: "Cut to pre-1958").
   in_run <- obs$ice$year >= floor(min(out$t) + 1e-9) & obs$ice$year < LIK_ICE_CO2_END
   mod <- interp("co2_SH", obs$ice$year[in_run])
-  add("co2_icecore", sum(stats::dnorm(obs$ice$CO2ppm[in_run], mod, ice_sd[in_run],
+  add("co2_icecore", sum(dn(obs$ice$CO2ppm[in_run], mod, ice_sd[in_run],
                                       log = TRUE)))
 
   # ---- ice-core d13C (OBJECTIVE #15, 2026-10-02, W2; see LIK_USE_ICE_D13C) ----
@@ -2281,7 +2300,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
   if (LIK_USE_ICE_D13C && !is.null(icd)) {
     k <- icd$year >= floor(min(out$t) + 1e-9) & icd$year < LIK_ICE_D13C_END
     if (any(k))
-      add("d13c_icecore", sum(stats::dnorm(icd$d13c[k], interp("d13c_SH", icd$year[k]), icd$sd[k],
+      add("d13c_icecore", sum(dn(icd$d13c[k], interp("d13c_SH", icd$year[k]), icd$sd[k],
                                            log = TRUE)))
   }
 
@@ -2328,7 +2347,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
       pred <- pred - err$rep_dC * conv
     }
     add(paste0("d13c_level_", st),
-        sum(stats::dnorm(o$level[good], pred, sd, log = TRUE)))
+        sum(dn(o$level[good], pred, sd, log = TRUE)))
   }
 
   # ---- INTERHEMISPHERIC GRADIENT (2026-08-15, review item 5) ---------
@@ -2379,7 +2398,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
       good <- is.finite(mg)
       if (!any(good)) next
       add(paste0(sp$nm, "_gradient"),
-          sum(stats::dnorm(sp$obs_g$grad[good], mg[good] + sp$off, sp$sd,
+          sum(dn(sp$obs_g$grad[good], mg[good] + sp$off, sp$sd,
                            log = TRUE)))
     }
   }
@@ -2419,7 +2438,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
       }
     }
     add(paste0("d14c_", hh),
-        sum(stats::dnorm(o$value[good], pred, sd, log = TRUE)))
+        sum(dn(o$value[good], pred, sd, log = TRUE)))
   }
 
   # ---- IntCal20 pre-bomb Suess decline -------------------------------
@@ -2433,7 +2452,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     ic_end <- if (!is.null(obs$d14_nh_ann)) min(obs$d14_nh_ann$year) else 1950
     ic <- obs$intcal[obs$intcal$year >= 1750 & obs$intcal$year < ic_end, ]
     mod <- interp("d14c_NH", ic$year + 0.5)
-    add("d14c_intcal", sum(stats::dnorm(ic$d14c, mod,
+    add("d14c_intcal", sum(dn(ic$d14c, mod,
                            sqrt(ic$err^2 + LIK_D14C_REP_OTHER^2), log = TRUE)))
   }
 
@@ -2485,7 +2504,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     tg <- ccx_deep_d14c_target()
     if (!is.null(tg))
       add("d14c_deep_ocean",
-          stats::dnorm(tg$target, deep, tg$sd, log = TRUE))
+          dn(tg$target, deep, tg$sd, log = TRUE))
   }
 
   # ---- INTERMEDIATE D14C slabs, GLODAPv2 (see LIK_USE_D14C_MID) --------
@@ -2496,7 +2515,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     if (!is.null(tg)) for (i in seq_len(nrow(tg$slabs))) {
       m <- d14c_mid[[tg$slabs$name[i]]]
       if (!is.null(m) && is.finite(m))
-        add(tg$slabs$stream[i], stats::dnorm(tg$slabs$target[i], m, tg$slabs$sd[i], log = TRUE))
+        add(tg$slabs$stream[i], dn(tg$slabs$target[i], m, tg$slabs$sd[i], log = TRUE))
     }
   }
 
@@ -2542,7 +2561,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
         # logical(0), which is an error in `if` rather than FALSE.
         v <- ocean_grad[[k[1]]]
         if (!is.null(tg[[k[1]]]) && length(v) == 1L && is.finite(v))
-          add(k[2], stats::dnorm(tg[[k[1]]]$target, v,
+          add(k[2], dn(tg[[k[1]]]$target, v,
                                  ocean_grad$sd_eff[[k[1]]], log = TRUE))
       }
   }
@@ -2559,7 +2578,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
       for (k in list(c("dic", "hs_surf_dic"), c("d13c", "hs_surf_d13c"))) {
         v <- hs[[k[1]]]
         if (length(v) == 1L && is.finite(v))
-          add(k[2], stats::dnorm(tgh[[k[1]]]$target, v, hs$sd_eff[[k[1]]], log = TRUE))
+          add(k[2], dn(tgh[[k[1]]]$target, v, hs$sd_eff[[k[1]]], log = TRUE))
       }
   }
 
@@ -2574,7 +2593,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
            "ccx_ocean_grad_scored(out, spin) / ccx_eq_b1_scored(); a hand-built list ",
            "would score at an undefined sigma.")
     if (!is.null(tgb) && length(eb$value) == 1L && is.finite(eb$value))
-      add("eq_b1", stats::dnorm(tgb$target, eb$value, eb$sd_eff, log = TRUE))
+      add("eq_b1", dn(tgb$target, eb$value, eb$sd_eff, log = TRUE))
   }
 
   # ---- GCB sinks: PARTITION only -------------------------------------
@@ -2643,9 +2662,9 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
         tgt_l <- tgt_l + sh[["land"]]  * I
       }
       add("gcb_ocean_sink",
-          sum(stats::dnorm(tgt_o, g$ocean, LIK_GCB_OCEAN_SD, log = TRUE)))
+          sum(dn(tgt_o, g$ocean, LIK_GCB_OCEAN_SD, log = TRUE)))
       add("gcb_land_sink",
-          sum(stats::dnorm(tgt_l, g$land + g$eluc,
+          sum(dn(tgt_l, g$land + g$eluc,
                            LIK_GCB_LAND_SD * LIK_LAND_SINK_INFLATE, log = TRUE)))
     }
     # ---- the ENSO ocean slope (objective #13, 2026-09-18 e; see LIK_USE_GCB_ENSO_SLOPE) --
@@ -2658,7 +2677,7 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
       ms <- ccx_enso_slope(flux$year, flux$ocean, obs$enso_idx)
       if (is.finite(ms[["slope"]]))
         add("gcb_ocean_enso_slope",
-            stats::dnorm(obs$enso_slope[["slope"]], ms[["slope"]], obs$enso_slope[["se"]], log = TRUE))
+            dn(obs$enso_slope[["slope"]], ms[["slope"]], obs$enso_slope[["se"]], log = TRUE))
     }
   }
   if (!is.null(npp)) {
@@ -2667,9 +2686,16 @@ ccx_loglik <- function(out, obs, err, luc = NULL, deep = NULL,
     if (sum(k) < 12 * (tg$win[2] - tg$win[1] + 1))
       stop("ccx_loglik(npp): the run does not cover the modern-NPP window ",
            tg$win[1], "-", tg$win[2])
-    add("npp_modern", stats::dnorm(mean(npp$npp_NH[k] + npp$npp_SH[k]), tg$centre, tg$sd, log = TRUE))
+    add("npp_modern", dn(mean(npp$npp_NH[k] + npp$npp_SH[k]), tg$centre, tg$sd, log = TRUE))
   }
-  if (by_stream) return(unlist(parts))
+  if (by_stream) {
+    st <- unlist(parts)
+    if (isTRUE(residuals)) {
+      if (length(.pend)) stop("ccx_loglik(): ", length(.pend), " captured residual vector(s) were never add()ed to a row.")
+      attr(st, "residuals") <- .res
+    }
+    return(st)
+  }
   ll <- sum(unlist(parts))
   if (!is.finite(ll)) return(-Inf)
   ll
