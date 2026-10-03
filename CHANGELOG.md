@@ -2,6 +2,38 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (ee) — **THE OBJECTIVE-#15 REFIT IS RUNNING ON THE MAC: the lag arm (`hilda_csl3v0kaidgbe`, 34 free) and then the lag-0 control (`hilda_csl3v0kaidgb`, 33 free), 24 starts each, 8 at a time. Rulings (Marcus, verbatim): D3 "Fit it free (Recommended)"; D5 "Mac" (my verdict was Torch, ~6 h vs ~18 h); "Keep going here".**
+
+**Trees.** Two git worktrees at `3fc5dca`: `~/ccx_frozen/20261002ee_obj15_lag` and `~/ccx_frozen/20261002ee_obj15_ctl`.
+- Each has `nuclear14c` copied in; `ccx_require_run_inputs()` reports 14/14 in both.
+- Port targets were regenerated in each, under its own label and the canonical's 9 pins:
+
+| arm | free | cold | incumbent (hilda33d) | new basin (hilda31pe) |
+|---|---|---|---|---|
+| lag | 34 | −60292.15 | −1213.5667 (lag seeded at its init, 6 months: −7.75 vs the stored −1205.8211, consistent with D3) | −11808.34 |
+| control | 33 | −60284.26 | **−1205.8211 = the restamped file, offset +0.0000** | −11812.73 |
+
+**Preflight** (`CCX_MS_PREFLIGHT=1`, all 24 ids, 8 at once): **24/24 LAUNCHABLE in each arm.**
+- Lag arm: the gate line names all five gated names (the D2/D3 four + `lag_enso_land`); port VERIFIED rel 3.6e-16.
+- Control arm: the D2/D3 four only; port rel 8.1e-15.
+- Preflight logs: each tree's `logs/preflight_20261002ee/`.
+
+**The launch:** 21:29 EDT, `~/ccx_frozen/20261002ee_obj15_launch.sh` under `nohup`, PID 3559 in `~/ccx_frozen/20261002ee_obj15_launch.pid`. It runs the two arms in sequence through `calibration/mac/run_multistart_mac.sh`:
+- environment: `CCX_MS_SEAS_ML=1`, `CCX_MS_SPREAD=1.0452`, the 9 pins, tag `20261002ee`, `CCX_MAC_NPAR=8`, WALL 300 min, 3 restarts × 6 cycles × 6000 maxit;
+- output directories set EXPLICITLY, with the required `_sdby_npp_tsens=0.0291` suffix: `calibration/output/multistart_20261002ee_<label>_seasml1_pin_…_sd1.0452_sdby_npp_tsens=0.0291`, inside each tree;
+- logs: each tree's `logs/wave_20261002ee.log` and `logs/ccx_multistart_mac_20261002ee_<id>.out`; chain status in `~/ccx_frozen/20261002ee_obj15_launch.out`;
+- seeds `2026 + id`, recorded in every start file.
+- **Measured at the start** (8 running, load 11.4): **0.32–0.51 s/eval per task**, so one 6000-eval restart takes 32–51 min. That matches #14's 0.29–0.53.
+- **Expected:** each arm ≤ 3 rounds of ≤ 5 h. #14's one arm took ~9 h, so both arms land around mid-day 10-03 (worst case ~06:00 10-04).
+- ⚠ A `pgrep -f "Rscript --vanilla …"` wait-loop I started could never succeed. Rscript re-execs as `R --file=…`, so the pattern never matches a task, and the loop's own command line carries it. It was stopped; check `ps` for `run_dispersed_multistart` instead.
+
+**When it lands** (per arm):
+1. copy the outdir back into the repo's `calibration/output/`;
+2. `CCX_MS_OUTDIR=<dir> Rscript calibration/collect_dispersed_multistart.R`;
+3. `promote_multistart_mode.R` (GATES 1–5), then `recompute_hessian.R <mode> --update`;
+4. score with the scorecard on the REPAIRED gates (W4, which is not yet built), comparing the arms on LIKELIHOOD (same rows; the lag arm adds one prior);
+5. then adoption: register, the app, re-run `diag_enso_growth_fit.R`, and rebuild the constraint map, which clears the named red.
+
 ## 2026-10-02 (dd) — **D3 MEASURED: objective #15 prefers a land ENSO lag of ~2.5 MONTHS, not the 5 the growth timing shows. Conditionally, with only the two land ENSO amplitudes re-optimised, the likelihood gains +12.1 at 2.5 months over lag 0; at 5 months the gain is only +1.7. The pull comes from `gcb_land_sink` and the SPO seasonal rows. The model's growth then peaks 1 month after Niño 3.4 (observed 5). Nothing adopted; the D3 ruling is Marcus's.**
 
 `calibration/diag_lag_profile_obj15.R` → `outputs/diagnostics/lag_profile_obj15_20261002.{log,rds}`, run from a frozen copy of `c88c86b`.
