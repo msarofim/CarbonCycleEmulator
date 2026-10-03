@@ -185,8 +185,13 @@ if (is.null(MS_REF_NEW)) stop("MS_REF_NEW: '", MS_REF_NEW_NAME, "' is no longer 
                               "re-rule the reference set (see MS_REF_NEW_LABEL).")
 # The labels read the run's own CCX_MS_SEAS_ML: until 09-17 (j) they TYPED "seas_ml 1",
 # true of every array to date and false of the control refit.
-MS_REF_INC_LABEL <- sprintf("INCUMBENT = %s (%s; objective #12, periodic spinup, evaluated at seas_ml %s)",
-                            MS_REF_INC_NAME, .ms_ref$why, Sys.getenv("CCX_MS_SEAS_ML", "UNSET"))
+# ...and until 2026-10-03 (c) this one TYPED "objective #12, periodic spinup": every start file of
+# the #14 and #15 refits says #12 in its `kind`. No objective-number constant exists, so the label
+# now says what is TRUE of every run -- the point is scored under THIS build's objective -- and
+# derives the spinup from the objective's own (CCX_OBJECTIVE_SPINUP).
+MS_REF_INC_LABEL <- sprintf("INCUMBENT = %s (%s; scored under this build's objective, %s spinup, evaluated at seas_ml %s)",
+                            MS_REF_INC_NAME, .ms_ref$why, ccx_spinup_label(CCX_OBJECTIVE_SPINUP),
+                            Sys.getenv("CCX_MS_SEAS_ML", "UNSET"))
 MS_REF_NEW_LABEL <- sprintf("NEW BASIN = %s (%s; registered, evaluated at seas_ml %s)", MS_REF_NEW_NAME,
                             if (identical(MS_REF_NEW_NAME, CCX_MODE_SEASML0_CONTROL)) "seas_ml 0 control, periodic spinup"
                             else "the free parent, the other h_ml basin",

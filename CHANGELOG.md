@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-03 (c) — **The multistart driver's incumbent label no longer types "objective #12"** (found in (b)). It now reads "scored under this build's objective, <spinup> spinup", with the spinup derived from `CCX_OBJECTIVE_SPINUP`. That is true of every run, and no objective-number constant exists to derive a number from. Every start file of the #14 and #15 refits keeps its old `kind` text as written; only future starts change. The running control arm executes the frozen tree's own copy, so it is unaffected. No test pins the text (checked). The rendered label: "INCUMBENT = hilda33d (the canonical, under this array's pins; scored under this build's objective, periodic spinup, evaluated at seas_ml 1)".
+
 ## 2026-10-03 (b) — **THE LAG ARM HAS LANDED: 24/24 exit 0, 21 converged, ONE basin up to the known `h_ml` ridge; promoted id 4 at −1182.991369 (likelihood −1143.2508 on 27 rows); Hessian PD. The lag is 2.64 ± 0.39 months. At this mode ENSO HELPS the What-if fit: switching it off is −11.0 % (it was +0.9 % at hilda33d). The control arm is RUNNING (started 08:05). Every comparison below is against hilda33d, NOT the control: lag versus the #15 re-fit is not separated until the control lands. Nothing adopted.**
 
 **The wave** (10-02 ee). The lag arm finished 08:05:23 10-03 (10 h 36 min); the chain started the control arm at once.
@@ -97,7 +99,7 @@ Project log: what was done, what was tried and abandoned, and why.
 - `calibration/diag_enso_growth_fit.R`: the output stem is date + the mode the app loaded. The typed `…_20261002` would have overwritten the hilda33d record.
 - Load: every analysis job of mine runs `nice -n 10` while the control arm's 8 tasks run. The first control round measures 0.36–0.63 s/eval, median 0.39 (the lag arm's first round 0.32–0.51, median 0.34), and a slowed task risks its 300-min wall.
 
-**Found, not fixed.** `run_dispersed_multistart.R`'s incumbent reference label TYPES "objective #12". It is in every start file's `kind` and every collector table, while these arms ran #15. A label that derives needs an objective-number constant, and none exists. The fix is small but touches the driver's provenance text, so it is noted rather than made mid-refit.
+**Found, not fixed (FIXED in (c)).** `run_dispersed_multistart.R`'s incumbent reference label TYPES "objective #12". It is in every start file's `kind` and every collector table, while these arms ran #15. A label that derives needs an objective-number constant, and none exists. The fix is small but touches the driver's provenance text, so it is noted rather than made mid-refit.
 
 **Open (Marcus):** the label name `hilda_csl3v0kaidgbe` and the registered name (the convention would make it `hilda34b`); the interpolation deviation (backward-difference cubic Hermite, not Catmull-Rom: 10-02 aa); the adoption, after the control arm.
 
