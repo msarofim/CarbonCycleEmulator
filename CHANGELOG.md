@@ -2,6 +2,15 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-03 (a) — Handoff: `notes/handoff_2026-10-03_obj15_refit.md` (supersedes 10-02 i). **At 07:43 the refit's lag arm had 22 of 24 starts finished, every exit 0. The control arm starts automatically after it.**
+
+**PRELIMINARY, read straight from the start files** (not collected, not promoted):
+- the best logpost is −1182.99 (3 starts), with 17 more within 0.16;
+- at the best starts: **lag 2.644 months** (D3's conditional profile said ~2.5), **`k_w` ~1900 m/yr** (not toward Naegler's 1446), `tau_ex` 0.88 yr, land ENSO amplitudes NH 0.536 / SH 0.51;
+- one start (017) is far off, at −1319.6.
+
+The lag arm's logpost includes its prior and Jacobian, so the arms are compared on LIKELIHOOD. Nothing else changed.
+
 ## 2026-10-02 (hh) — Handoff: `notes/handoff_2026-10-02i_obj15_refit_running.md`. **The two-arm objective-#15 refit is RUNNING on the Mac** (launched 21:29 EDT 10-02; ~mid-day 10-03 expected). The handoff gives the landing steps (collect, promote, Hessian, a committed refit read on LIKELIHOOD, the W4 scorecard) and the adoption checklist, which clears the named red. Everything else is committed and pushed. The app preview runs on localhost:7788 on the current tree.
 
 ## 2026-10-02 (gg) — **Marcus's `carbotopecomments.10.2.26.docx` worked through ("After the #15 build"): both of his wordings in verbatim, and the pulse lab's "Compare with standard FaIR" box withheld there (it did nothing). One test re-pin, approved. Verified in the running app. Plus the W4 scorecard record and suite.**
