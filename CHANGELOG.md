@@ -2,6 +2,24 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-03 (d) — **Two suite records, both from scratch git worktrees of `cf7cb6c` (BLAS pinned, `nice -n 10`, while the control arm ran; 25 min each). (1) BASELINE, unmodified: 6001 passed, 1 failed (the named red), 3 skipped, 0 errors. (2) ADOPTION PREVIEW, the lag arm registered as canonical under the provisional key `cand15lag` (the three `R/paths.R` registry lines, nothing else): 6006 / 12 / 3 / 0. Its 12 failures are the adoption's to-do list. All are values tied to the canonical; none is a defect. Nothing adopted.**
+
+- **The baseline vs `e47e9c9`'s 5999 / 1 / 4 / 0.** One skip fewer: `test-luc-nh-share.R:172` (the OSCAR regional sheet) RAN, because the worktree symlinks every download. Two more passes. The only failure is `test-constraint-map` 6, the named red. → `outputs/diagnostics/suite_20261003_cf7cb6c_all.log`.
+- **The preview ledger** → `outputs/diagnostics/suite_20261003_cf7cb6c_preview_cand15lag.log`. The summary reporter prints 10 failure details; the last two were re-run by file and are appended.
+
+| test | what it pins | hilda33d → the lag arm | at adoption |
+|---|---|---|---|
+| `test-app-version:55` | `APP_RELEASE_MODE` = the mode the app loads | 'hilda33d' vs the candidate | **a ruling**: does "BETA v1.0 CarboTope" move with the mode? |
+| `test-constraint-map` 6 (×2) | the map's mode and logpost = the canonical's | #14's map | the NAMED RED; the planned rebuild clears it |
+| `test-futures-ribbons:60` | the HELD Laplace bands' evidence was built for this fit | built for hilda33d (mode and vector) | rebuild the evidence, or re-express while the bands stay held |
+| `test-enso-demean:281` | the canonical's demean price | 0.479 → 0.567 | re-pin |
+| `test-gate-bounds:497` | gate S's month at the canonical | 8.83 → 8.50 (still inside [7.41, 10.41]) | re-pin |
+| `test-imbalance-panel:98–116` (×5) | the app's imbalance panel | miss 0.870 → 0.923; d_land +0.462 → +0.443; d_luc −0.214 → −0.208; −d_grow +0.050 → +0.058; −d_ocn +0.002 → −0.029 | re-pin |
+| `test-option-e:232` (N-E1) | the row move at the export matching the canonical's gradient | 1.05 → **0.378** | **re-express**: the test's name says "about 1 log-unit" |
+
+- Not in the ledger: `test-enso-lag`'s "the canonical's base opens the D2/D3 gate only". It passes because it names hilda33d, not the canonical. It stays true of hilda33d.
+- The preview does not cover `make_bundle.sh`'s list, the app's labels for `lag_enso_land` (drafted for Marcus's wording), or the memory. Those are adoption steps no test sees.
+
 ## 2026-10-03 (c) — **The multistart driver's incumbent label no longer types "objective #12"** (found in (b)). It now reads "scored under this build's objective, <spinup> spinup", with the spinup derived from `CCX_OBJECTIVE_SPINUP`. That is true of every run, and no objective-number constant exists to derive a number from. Every start file of the #14 and #15 refits keeps its old `kind` text as written; only future starts change. The running control arm executes the frozen tree's own copy, so it is unaffected. No test pins the text (checked). The rendered label: "INCUMBENT = hilda33d (the canonical, under this array's pins; scored under this build's objective, periodic spinup, evaluated at seas_ml 1)".
 
 ## 2026-10-03 (b) — **THE LAG ARM HAS LANDED: 24/24 exit 0, 21 converged, ONE basin up to the known `h_ml` ridge; promoted id 4 at −1182.991369 (likelihood −1143.2508 on 27 rows); Hessian PD. The lag is 2.64 ± 0.39 months. At this mode ENSO HELPS the What-if fit: switching it off is −11.0 % (it was +0.9 % at hilda33d). The control arm is RUNNING (started 08:05). Every comparison below is against hilda33d, NOT the control: lag versus the #15 re-fit is not separated until the control lands. Nothing adopted.**
