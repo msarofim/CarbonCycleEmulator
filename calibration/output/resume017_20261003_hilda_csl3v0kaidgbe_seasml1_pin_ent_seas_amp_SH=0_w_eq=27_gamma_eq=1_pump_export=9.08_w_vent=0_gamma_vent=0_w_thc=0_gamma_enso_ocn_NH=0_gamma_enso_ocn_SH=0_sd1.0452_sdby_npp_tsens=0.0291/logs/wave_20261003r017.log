@@ -1,0 +1,21 @@
+CCX_PROJ_DIR  /Users/MarcusMarcus/ccx_frozen/20261002ee_obj15_lag
+CCX_MS_OUTDIR /Users/MarcusMarcus/ccx_frozen/20261002ee_obj15_lag/calibration/output/resume017_20261003_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+CCX_MS_STRUCT hilda_csl3v0kaidgbe   CCX_MS_SEAS_ML 1   CCX_MS_PUMP_FIELD solved   CCX_MS_SPREAD 1.0452   CCX_MS_PIN 'ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0'
+WALL_MIN 300  RESTARTS 3  CYCLES 6  MAXIT 6000   mode wave   ids [17]   1 at once
+host MacBook-Pro-2.local  started 2026-10-03T08:07:09-0400  uptime:  8:07  up 1 day, 22:32, 4 users, load averages: 31.69 13.78 7.99
+already running at launch (>20% CPU), so a slow eval rate is read as CONTENTION first:
+    84.4       01:46 /Library/Frameworks/R.framework/Resources/bin/exec/R --no-echo --no-restore --vanilla --file=calibration/run_dispersed_multistart.R
+    84.0       01:46 /Library/Frameworks/R.framework/Resources/bin/exec/R --no-echo --no-restore --vanilla --file=calibration/run_dispersed_multistart.R
+    81.7       01:46 /Library/Frameworks/R.framework/Resources/bin/exec/R --no-echo --no-restore --vanilla --file=calibration/run_dispersed_multistart.R
+    81.7       01:46 /Library/Frameworks/R.framework/Resources/bin/exec/R --no-echo --no-restore --vanilla --file=calibration/run_dispersed_multistart.R
+    81.3       01:46 /Library/Frameworks/R.framework/Resources/bin/exec/R --no-echo --no-restore --vanilla --file=calibration/run_dispersed_multistart.R
+    80.8       01:01 /Library/Frameworks/R.framework/Resources/bin/exec/R --no-echo --no-restore --file=calibration/recompute_hessian.R --args calibration/output/r
+    80.8       01:46 /Library/Frameworks/R.framework/Resources/bin/exec/R --no-echo --no-restore --vanilla --file=calibration/run_dispersed_multistart.R
+    80.7       01:46 /Library/Frameworks/R.framework/Resources/bin/exec/R --no-echo --no-restore --vanilla --file=calibration/run_dispersed_multistart.R
+    78.3       01:46 /Library/Frameworks/R.framework/Resources/bin/exec/R --no-echo --no-restore --vanilla --file=calibration/run_dispersed_multistart.R
+    41.8 01-22:25:55 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer -daemon
+    27.8 01-22:09:49 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.58/Helpers/Google Chrome Helper (Ren
+all tasks finished 2026-10-03T12:18:25-0400
+exit codes (id rc):
+17 0
+non-zero exits: 0

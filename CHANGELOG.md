@@ -2,6 +2,27 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-03 (e) — **Start 017 settled: a STUCK start on a non-smooth edge of the objective, not a second basin.** Resumed from its own checkpoint, it ran OUT OF TIME again at −1306.89, 124 below the mode. At that point three directions are NON-SMOOTH. A 0.1-conditional-sd step moves `co2_seasonal_SPO` by ~−250 along `kz` and `kz_deep_frac`, and along `h_ml` it sends `d13c_seasonal_SPO` to −2.0e37. A simplex stalls at such an edge. The defect is far from the mode (the mode's Hessian is step-stable) and is filed as a separate task. Nothing adopted.
+
+- **The resume** (`resume_017.sh`: same driver, the frozen lag tree at 3fc5dca, the arm's own checkpoint, a fresh 300-min wall, `nice -n 10`; 08:07 → 12:18). Copied with its logs and `RUN_PROVENANCE.txt` → `calibration/output/resume017_20261003_hilda_csl3v0kaidgbe_…_sdby_npp_tsens=0.0291/`.
+  - Gains by restart: cycle 4 +8.86, +2.22, +1.35 (shortened); the BFGS polish (shortened to 46 iterations) +0.00; cycle 5 +0.32, +0.0006 (both shortened).
+  - −1319.64 → −1306.89 at 1.32 s/eval (nice'd under the control arm). Truncated cycles are rightly never counted as converged.
+- **The two tests** (`diag_obj15_refit_read.R` section 1, now run at the RESUMED point):
+  - (1) THE STRAIGHT LINE to the mode: −1306.9 → −2498.8 at t = 0.4 → −1183.0. A 1213 log-unit "barrier", but straight lines between points 14 marginal sds apart cut through a curved valley, so this is not decisive alone.
+  - (2) SMOOTHNESS: a step of 0.1 conditional sd each way. On a smooth bowl the pair sums to −0.01; the flag is |sum| > 1.
+
+| direction | step up | step down | the row that jumps |
+|---|---|---|---|
+| `h_ml` | **−2.998e37** | −274.5 | `d13c_seasonal_SPO` −2.03e37 |
+| `kz_deep_frac` | −251.0 | +0.02 | `co2_seasonal_SPO` −250.3 |
+| `kz` | −249.4 | −1.26 | `co2_seasonal_SPO` −248.8 |
+
+  - On the other 31 directions the point is near-stationary (the largest slope × conditional sd is 1.73, `sst_seas_amp_SH`).
+  - The point's own values: `h_ml` 74.4 m, `sst_seas_amp_SH` 3.18 (mode 1.33), `npp_tsens` 0.136, `q10` 1.28.
+- **Verdict:** 017 is a STUCK start, on an edge where the SH seasonal rows jump. The survey's answer is unchanged: no start beat the best basin (−1182.9914), and every converged start sits on its `h_ml` ridge.
+- ⚠ **A robustness defect, filed as a background task ("Diagnose the SPO seasonal-row cliff near start 017").** The objective returns −3e37 within 0.02 u of a feasible point. Candidates (untested): the seasonal mixed layer's SH depth crossing a clip at large `sst_seas_amp_SH` × `h_ml`; a δ¹³C ratio over a near-empty box; a spinup cycle switch. It does not touch the mode, but a far-tail MCMC draw or a dispersed start can meet it. A fix that moved a stored logpost would be an objective change, Marcus's to rule.
+- **The read's first gradient test** was a raw central difference. It printed −1.5e38 for `h_ml` here, which is the wrong instrument at an edge. It is replaced by the smoothness test above, which names the jumping row. The interim read is re-run: `outputs/diagnostics/obj15_refit_read_20261003_INTERIM.{log,rds}` (sections 2–7 unchanged).
+
 ## 2026-10-03 (d) — **Two suite records, both from scratch git worktrees of `cf7cb6c` (BLAS pinned, `nice -n 10`, while the control arm ran; 25 min each). (1) BASELINE, unmodified: 6001 passed, 1 failed (the named red), 3 skipped, 0 errors. (2) ADOPTION PREVIEW, the lag arm registered as canonical under the provisional key `cand15lag` (the three `R/paths.R` registry lines, nothing else): 6006 / 12 / 3 / 0. Its 12 failures are the adoption's to-do list. All are values tied to the canonical; none is a defect. Nothing adopted.**
 
 - **The baseline vs `e47e9c9`'s 5999 / 1 / 4 / 0.** One skip fewer: `test-luc-nh-share.R:172` (the OSCAR regional sheet) RAN, because the worktree symlinks every download. Two more passes. The only failure is `test-constraint-map` 6, the named red. → `outputs/diagnostics/suite_20261003_cf7cb6c_all.log`.

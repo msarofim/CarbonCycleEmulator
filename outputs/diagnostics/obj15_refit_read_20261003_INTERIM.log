@@ -1,4 +1,4 @@
-calibration/diag_obj15_refit_read.R @0cfa8af+dirty, 2026-10-03 08:32
+calibration/diag_obj15_refit_read.R @42dd88c+dirty, 2026-10-03 12:24
   lag arm  calibration/output/refit_20261003_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds
   control  hilda33d   ⚠ INTERIM: a STAND-IN for the control arm, which has not landed
   incumbent hilda33d (/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds)
@@ -25,10 +25,19 @@ calibration/diag_obj15_refit_read.R @0cfa8af+dirty, 2026-10-03 08:32
     id 017 (-1319.6433, OUT OF TIME; -136.6519 vs id 004): npp_tsens +14.1 sd, q10 +9.7 sd, luc_scale -7.5 sd, imb_share_land -6.3 sd, sst_seas_amp_SH +6.1 sd, h_ml +5.7 sd
       natural: npp_tsens 0.008854 -> 0.1346; q10 1.06 -> 1.33; luc_scale 0.8773 -> 0.6324
 
-  START 017: NOT converged, OUT OF TIME after 252 min (28122 evals, 0.36 s/eval); logpost -1319.6433 = 136.65 below the mode (likelihood -102.59, prior+Jacobian -34.06)
-    its gains, step by step: c1/r1 +226960.80, c1/r2 +357.28, c1/r3 +66.50, c2/r1 +31.02, c2/r2 +13.56, c2/r3 +6.47, c3/r1 +1.21
-    furthest coordinates from the mode (marginal sds): npp_tsens +14.1, q10 +9.7, luc_scale -7.5, imb_share_land -6.3, sst_seas_amp_SH +6.1, h_ml +5.7, seas_T_amp_NH -4.9, beta_max -4.8, gamma_enso_land_NH +3.4, seas_T_amp_SH -3.2
-    rows it loses most: gcb_land_sink -40.22, d13c_icecore -18.79, co2_level_MLO -14.02, co2_level_SPO -10.05, co2_icecore -6.75, d13c_seasonal_MLO -5.02, d14c_SH -2.85, gcb_ocean_sink -2.44
+  START 017 was RESUMED (calibration/output/resume017_20261003_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291): -1319.6433 -> -1306.8904, OUT OF TIME again after 251 more min (18371 evals in all, 0.95 s/eval)
+
+  START 017: NOT converged, OUT OF TIME after 251 min (18371 evals, 0.95 s/eval); logpost -1306.8904 = 123.90 below the mode (likelihood -92.58, prior+Jacobian -31.32)
+    its gains, step by step: c1/r1 +226960.80, c1/r2 +357.28, c1/r3 +66.50, c2/r1 +31.02, c2/r2 +13.56, c2/r3 +6.47, c3/r1 +1.21, c4/r1 +8.86, c4/r2 +2.22, c4/r3 +1.35, c5/r1 +0.32, c5/r2 +0.00
+    furthest coordinates from the mode (marginal sds): npp_tsens +14.2, q10 +8.1, luc_scale -6.7, sst_seas_amp_SH +6.2, imb_share_land -6.0, h_ml +5.7, beta_max -5.0, seas_T_amp_NH -4.5, gamma_enso_land_NH +3.7, seas_T_amp_SH -2.6
+    rows it loses most: gcb_land_sink -44.09, co2_level_MLO -15.09, d13c_icecore -12.41, co2_level_SPO -10.64, d13c_seasonal_MLO -3.48, gcb_ocean_sink -2.32, d14c_profile_ab -1.88, d13c_level_MLO -1.78
+    (1) the straight line to the mode (t = 0 the stuck point, 1 the mode), logpost: -1306.89 -1657.97 -1963.79 -2297.23 -2498.84 -2482.38 -1894.35 -1182.99
+        largest dip below the start 1212.7990; a BARRIER on the line: consistent with a SEPARATE basin
+    (2) smoothness, 0.1 conditional sd each way: 3 of 34 directions NON-SMOOTH (|d_up + d_dn| > 1; a smooth bowl gives -0.01)
+        h_ml             up -2.998e+37  down -274.5   the row that jumps: d13c_seasonal_SPO -2.034e+37
+        kz_deep_frac     up -251  down 0.02216   the row that jumps: co2_seasonal_SPO -250.3
+        kz               up -249.4  down -1.264   the row that jumps: co2_seasonal_SPO -248.8
+        on the 31 smooth directions, slope x conditional sd: largest sst_seas_amp_SH -1.73, npp_tsens -1.31, pump_grad +0.46, luc_scale +0.35
 
 === 2. THE LAG AND THE LAND ENSO AMPLITUDES ===
   lag_enso_land = 2.644 months; Laplace sd 0.387 (marginal) / 0.377 (conditional) months; prior U(0, 12) on a logit; D3's conditional profile best 2.5

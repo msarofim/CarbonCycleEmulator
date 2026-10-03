@@ -75,6 +75,15 @@ RD_CMH_TO_MYR <- 0.01 * 8766                    # 1 cm/h = 87.66 m/yr (Naegler's
 RD_REPRO_TOL <- 1e-6                            # log-units: a mode reproduces its stored logpost
 RD_AIC_K     <- 1L                              # the lag arm fits one more name than the control
 RD_STUCK_ID  <- 17L                             # the lag arm's far start (handoff §4)
+# ...and its RESUME (2026-10-03 c-d): the same driver continued from its own checkpoint, fresh wall, nice'd
+RD_STUCK_RESUME <- file.path("calibration", "output", paste0("resume017_20261003_", RD_LABEL_LAG, RD_WAVE_TAIL), "start_017.rds")
+RD_LINE_T    <- seq(0, 1, by = 0.05)            # the straight line from the stuck point (t = 0) to the mode (t = 1)
+RD_LINE_TOL  <- 1e-3                            # log-units: a dip below the start counts as a BARRIER past this (the
+                                                #   objective's roundoff floor is ~4e-6; 250x it)
+RD_GRAD_FRAC <- 0.1                             # smoothness probe: a step of 0.1 x each name's CONDITIONAL sd at the mode
+RD_SMOOTH_TOL <- 1                              # log-units: |d_up + d_dn| past this flags a NON-SMOOTH direction. On a
+                                                #   smooth bowl the pair sums to -RD_GRAD_FRAC^2 = -0.01 at the mode's own
+                                                #   curvature, so the tolerance is 100x the smooth expectation
 RD_TOP_N     <- 10L
 RD_D3_FILE   <- file.path("outputs", "diagnostics", "lag_profile_obj15_20261002.rds")
 RD_D3_LAG    <- 2.5                             # D3's best L on the likelihood (10-02 dd)
@@ -198,10 +207,19 @@ for (a in names(W)) {
   }
 }
 
-# start 017: where it is, and which rows it loses
+# start 017: where it is, and which rows it loses -- at its RESUMED final point when the resume exists
 STUCK <- NULL
 if (!is.null(W$lag) && sprintf("%03d", RD_STUCK_ID) %in% names(W$lag)) {
   s17 <- W$lag[[sprintf("%03d", RD_STUCK_ID)]]
+  if (file.exists(RD_STUCK_RESUME)) {
+    s17r <- readRDS(RD_STUCK_RESUME)
+    stopifnot(identical(s17r$param_names, s17$param_names), isTRUE(s17r$resumed))
+    cat(sprintf("\n  START %03d was RESUMED (%s): %.4f -> %.4f, %s after %.0f more min (%d evals in all, %.2f s/eval)\n",
+                RD_STUCK_ID, dirname(RD_STUCK_RESUME), s17$logpost, s17r$logpost,
+                if (isTRUE(s17r$converged)) "CONVERGED" else if (isTRUE(s17r$out_of_time)) "OUT OF TIME again" else "stopped",
+                s17r$minutes, s17r$n_eval, s17r$sec_per_eval))
+    s17 <- s17r
+  }
   d17 <- sep_by_coord(s17$u_mode, E$lag$u, fsL$sd)
   e17 <- in_arm(MD$lag, function(lp, u, bp) { stopifnot(identical(names(s17$u_mode), names(u))); ev(lp, s17$u_mode) })
   dr  <- e17$streams[rows] - E$lag$streams[rows]; dr <- dr[order(dr)]
@@ -213,7 +231,47 @@ if (!is.null(W$lag) && sprintf("%03d", RD_STUCK_ID) %in% names(W$lag)) {
   cat(sprintf("    its gains, step by step: %s\n", paste(sprintf("%s %+.2f", lab, g17), collapse = ", ")))
   cat(sprintf("    furthest coordinates from the mode (marginal sds): %s\n", paste(sprintf("%s %+.1f", names(d17), d17)[1:RD_TOP_N], collapse = ", ")))
   cat(sprintf("    rows it loses most: %s\n", paste(sprintf("%s %+.2f", names(dr), dr)[1:8], collapse = ", ")))
-  STUCK <- list(id = RD_STUCK_ID, logpost = e17$logpost, lik = e17$lik, d_coord = d17, d_rows = dr, trace = tr)
+  # IS IT A BASIN? Two cheap tests on the objective itself (no optimiser):
+  #  (1) the STRAIGHT LINE to the mode: a dip below the start (past RD_LINE_TOL) is a barrier on that
+  #      line -- consistent with a separate basin (a curved path could still avoid it); a monotone
+  #      rise says the point is on the main basin's slope and the optimiser was merely slow;
+  #  (2) SMOOTHNESS at the point: a step of RD_GRAD_FRAC conditional sds along each name, both ways. On a
+  #      smooth surface the two moves nearly cancel (d_up + d_dn = -RD_GRAD_FRAC^2 at the mode's own curvature);
+  #      |d_up + d_dn| > RD_SMOOTH_TOL flags a NON-SMOOTH direction -- a regime edge or a numerical singularity,
+  #      where a simplex stalls. (A raw central gradient is the wrong instrument there: at 017 it read -1.5e38.)
+  lt <- in_arm(MD$lag, function(lp, u, bp) {
+    u0 <- s17$u_mode; u1 <- u
+    line <- t(vapply(RD_LINE_T, function(t) { e <- tryCatch(ev(lp, u0 + t * (u1 - u0)), error = function(x) list(logpost = NA_real_, lik = NA_real_))
+      c(t = t, logpost = e$logpost, lik = e$lik) }, numeric(3)))
+    sdc <- fsL$sd_conditional[names(u0)]; e0 <- ev(lp, u0)
+    sm <- lapply(names(u0), function(n) { h <- RD_GRAD_FRAC * sdc[[n]]; up <- u0; dn <- u0; up[[n]] <- up[[n]] + h; dn[[n]] <- dn[[n]] - h
+      bad <- list(logpost = -Inf, streams = e0$streams * NA, lik = NA_real_)       # an evaluation that ERRORS
+      eu <- tryCatch(ev(lp, up), error = function(x) bad); ed <- tryCatch(ev(lp, dn), error = function(x) bad)
+      jump <- if (abs(eu$logpost - e0$logpost) >= abs(ed$logpost - e0$logpost)) eu$streams - e0$streams else ed$streams - e0$streams
+      list(d_up = eu$logpost - e0$logpost, d_dn = ed$logpost - e0$logpost, row = names(jump)[which.max(abs(jump))], row_d = jump[which.max(abs(jump))]) })
+    names(sm) <- names(u0)
+    list(line = line, smooth = sm)
+  })
+  ln <- lt$line; dip <- ln[1, "logpost"] - min(ln[, "logpost"], na.rm = TRUE)
+  mono <- all(diff(ln[, "logpost"]) >= -RD_LINE_TOL, na.rm = TRUE)
+  cat(sprintf("    (1) the straight line to the mode (t = 0 the stuck point, 1 the mode), logpost: %s\n",
+              paste(sprintf("%.2f", ln[c(1, 3, 5, 7, 9, 11, 15, 21), "logpost"]), collapse = " ")))
+  cat(sprintf("        largest dip below the start %.4f; %s\n", max(0, dip),
+              if (mono) "MONOTONE RISE: the point is on the main basin's slope -- a STUCK start, not a second basin"
+              else if (dip > RD_LINE_TOL) "a BARRIER on the line: consistent with a SEPARATE basin" else "not monotone, but no dip below the start"))
+  smt <- data.frame(name = names(lt$smooth), d_up = vapply(lt$smooth, `[[`, 0, "d_up"), d_dn = vapply(lt$smooth, `[[`, 0, "d_dn"),
+                    row = vapply(lt$smooth, `[[`, "", "row"), row_d = vapply(lt$smooth, function(x) unname(x$row_d), 0))
+  smt$pair_sum <- smt$d_up + smt$d_dn; smt$slope_x_sd <- (smt$d_up - smt$d_dn) / (2 * RD_GRAD_FRAC)
+  rough <- smt[abs(smt$pair_sum) > RD_SMOOTH_TOL, ]; rough <- rough[order(-abs(rough$pair_sum)), ]
+  cat(sprintf("    (2) smoothness, %g conditional sd each way: %d of %d directions NON-SMOOTH (|d_up + d_dn| > %g; a smooth bowl gives %.2f)\n",
+              RD_GRAD_FRAC, nrow(rough), nrow(smt), RD_SMOOTH_TOL, -RD_GRAD_FRAC^2))
+  if (nrow(rough)) for (i in seq_len(min(6L, nrow(rough)))) with(rough[i, ], cat(sprintf(
+    "        %-16s up %s  down %s   the row that jumps: %s %s\n", name, format(d_up, digits = 4), format(d_dn, digits = 4), row, format(row_d, digits = 4))))
+  smooth_ok <- smt[abs(smt$pair_sum) <= RD_SMOOTH_TOL, ]
+  cat(sprintf("        on the %d smooth directions, slope x conditional sd: largest %s\n", nrow(smooth_ok),
+              paste(sprintf("%s %+.2f", smooth_ok$name, smooth_ok$slope_x_sd)[order(-abs(smooth_ok$slope_x_sd))][1:4], collapse = ", ")))
+  STUCK <- list(id = RD_STUCK_ID, logpost = e17$logpost, lik = e17$lik, d_coord = d17, d_rows = dr, trace = tr,
+                resumed = file.exists(RD_STUCK_RESUME), line = ln, line_dip = dip, line_monotone = mono, smoothness = smt)
 }
 
 # ---- 2. the lag -----------------------------------------------------------------------------------

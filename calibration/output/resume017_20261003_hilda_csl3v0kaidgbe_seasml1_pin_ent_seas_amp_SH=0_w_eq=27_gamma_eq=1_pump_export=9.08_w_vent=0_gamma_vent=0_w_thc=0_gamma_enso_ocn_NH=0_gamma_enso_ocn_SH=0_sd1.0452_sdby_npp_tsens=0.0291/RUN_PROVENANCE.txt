@@ -1,0 +1,1 @@
+FROZEN_FROM_COMMIT 3fc5dca; worktree /Users/MarcusMarcus/ccx_frozen/20261002ee_obj15_lag; start 017 of the lag arm RESUMED from its own checkpoint (start_017_ckpt.rds, cmp-identical to the arm's) with the same driver/settings, a fresh 300-min wall, nice -n 10 (resume_017.sh); 2026-10-03 08:07:09 -> 12:18:25
