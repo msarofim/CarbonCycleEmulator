@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-02 (hh) — Handoff: `notes/handoff_2026-10-02i_obj15_refit_running.md`. **The two-arm objective-#15 refit is RUNNING on the Mac** (launched 21:29 EDT 10-02; ~mid-day 10-03 expected). The handoff gives the landing steps (collect, promote, Hessian, a committed refit read on LIKELIHOOD, the W4 scorecard) and the adoption checklist, which clears the named red. Everything else is committed and pushed. The app preview runs on localhost:7788 on the current tree.
+
 ## 2026-10-02 (gg) — **Marcus's `carbotopecomments.10.2.26.docx` worked through ("After the #15 build"): both of his wordings in verbatim, and the pulse lab's "Compare with standard FaIR" box withheld there (it did nothing). One test re-pin, approved. Verified in the running app. Plus the W4 scorecard record and suite.**
 
 **His three items** (the document was read from a copy; it stays untracked and untouched):
