@@ -20,7 +20,10 @@ Project log: what was done, what was tried and abandoned, and why.
   - (2) 2 cm short of the wall it stops ("CCX_SUBSTEPS_MAX"); past the wall it errors ("P8").
   - (3) At 017's h_ml, doubling the auto count moves SH CO₂ by < 1e-6 relative and Δ¹⁴C by < 1e-3 ‰. That is the bar of the existing "accurate, not merely stable" test, reused rather than tuned.
   - Each carries its MUTATION: `ss_pre_20261004()`, the old bound, must break it. **Verified directly:** with HEAD's `ccx_substeps_for()` put back (in a throwaway test dir, since removed), the five old tests pass and the three new ones fail (1, 2 and 2 expectations).
-- **The suite:** run from a scratch git worktree of this commit; the counts are recorded below when it lands.
+- **The full suite at `a7eab97` is CLEAN: 6039 passed, 0 failed, 3 skipped (the standing three), 0 errors.**
+  - That is `e2f611b`'s 6030 / 0 / 3 / 0 plus exactly the nine new expectations, so no other test moved.
+  - Run conditions: a scratch git worktree of `a7eab97` with downloads symlinked, BLAS pinned, `nice -n 10`, 21 min; the scratch tree has since been removed.
+  - Runner: the 10-01 `run_suite_all.R`. Log: `outputs/diagnostics/suite_20261004_a7eab97_all.log`.
 
 ## 2026-10-03 (j) — **Start 017's "non-smooth edge" is the INTEGRATOR, not the objective. Near the P8 wall the RK4 substep controller under-resolves the SH winter mixed-layer peak, so the integration is UNSTABLE for ~10 days a year and what the objective returns there is integrator artefact. At 017 the artefact is +273.2: its converged logpost is −1580.05, 397 below the mode (10-03 (e) read 124). Every registered mode is far from it (4 substeps, z ≤ 1.19), and the proposed fix leaves all six bit-identical. Nothing in `R/` changed; the fix is Marcus's to rule.** This answers the background task (e) filed ("Diagnose the SPO seasonal-row cliff near start 017").
 
