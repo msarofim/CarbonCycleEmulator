@@ -89,6 +89,10 @@ Self-contained.
 3. **The ocean climate-effect benchmark:** verify GCB 2025's GOBM protocol (which "normal year"; when run A starts),
    then build a like-for-like comparison. CCX's existing −0.43 GtC/yr may or may not be too strong; per K it is
    −0.32.
+   - Checked 10-04: the MAIN TEXT (ESSD 18:3211, the sim A–D paragraph and p. 3242) defines the effect as sim A
+     minus sim C, "normal year climate forcing". It is "the combined effect of change and variability in all
+     atmospheric forcing fields", winds included.
+   - The main text does NOT say which year: read the supplement's GOBM table.
 4. **Card 4 wording** (`notes/draft_2026-10-04_card4_enso_timing.md`).
 5. **The hilda34g assessment's verdict** (`notes/assessment_2026-10-04_hilda34g_DRAFT.md` §5, §7).
 6. **The multistart wall budget vs the new substep controller** (§3, the slow starts) before any Torch run.
