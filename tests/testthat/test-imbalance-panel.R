@@ -94,8 +94,10 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   expect_equal(nrow(s), 7L)
   # 2026-10-01 (c): at the canonical hilda33d (D2/D3 fitted): 5 decades in the band, the last decade's miss
   # 0.87 (4 and 1.04 at hilda29l). MEASURED; re-pin approved by Marcus.
+  # 2026-10-03 (h): at the canonical hilda34g, still 5 decades in the band; the last decade's miss 0.87 ->
+  # 0.92 (0.9235). MEASURED (Marcus 2026-10-03: "Approve all (Recommended)").
   expect_equal(sum(s$in_band), 5L)
-  expect_equal(s$miss[nrow(s)], 0.87, tolerance = 0.02)
+  expect_equal(s$miss[nrow(s)], 0.92, tolerance = 0.02)
 
   # ---- the +0.32 decomposition, recomputed (added 2026-09-25) --------------
   # \u26d4 The info box used to TYPE "about 0.3 GtC" and name THREE terms. There
@@ -108,12 +110,16 @@ test_that("1. the app's land sink IS the gate's, not a second implementation", {
   # +0.002: D3 puts 59 % of the imbalance on the land (its sink sits higher against GCB's raw column) and the
   # ocean sink now matches GCB's to 0.002 GtC/yr. imbal / cement are GCB's own (unchanged). MEASURED; re-pin
   # approved by Marcus.
-  expect_equal(z$d_land, +0.462, tolerance = 0.005)
+  # 2026-10-03 (h): the canonical is hilda34g. d_land +0.462 -> +0.443 (0.4429), d_luc -0.214 -> -0.208
+  # (-0.2079), -d_grow +0.05 -> +0.058 (0.0583), -d_ocn +0.002 -> -0.029 (-0.0290: the ocean sink now sits
+  # 0.03 GtC/yr ABOVE GCB's raw column). imbal 0.540 / cement 0.088 unchanged within tolerance. MEASURED
+  # (Marcus 2026-10-03: "Approve all (Recommended)").
+  expect_equal(z$d_land, +0.443, tolerance = 0.005)
   expect_equal(z$imbal,  +0.54, tolerance = 0.005)
   expect_equal(z$cement, +0.09, tolerance = 0.005)
-  expect_equal(z$d_luc,  -0.214, tolerance = 0.005)
-  expect_equal(-z$d_grow, +0.05, tolerance = 0.005)
-  expect_equal(-z$d_ocn,  +0.002, tolerance = 0.005)
+  expect_equal(z$d_luc,  -0.208, tolerance = 0.005)
+  expect_equal(-z$d_grow, +0.058, tolerance = 0.005)
+  expect_equal(-z$d_ocn,  -0.029, tolerance = 0.005)
   # \u26a0 THE CLOSURE IS ASSERTED AT ITS MEASURED SIZE, NOT AT ZERO. It is
   # -0.006 GtC/yr (the table's `num` column), ~2 % of the d_land it explains.
   # Asserting 3e-14 here would fail; asserting nothing would let the identity

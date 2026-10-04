@@ -33,7 +33,7 @@ anyone has shared — so set the account/app name at the FIRST deploy, not after
 
 ## ⚠ BEFORE THE PUBLIC BETA GOES OUT
 
-The app ships as **BETA v1.0 CarboTope** (`APP_RELEASE_NAME`; cut on mode `hilda33d`, `APP_RELEASE_MODE`, which `tests/testthat/test-app-version.R` requires to be the mode the app loads), and its seventh tab ("Known issues")
+The app ships as **BETA v1.0 CarboTope** (`APP_RELEASE_NAME`; cut on mode `hilda34g` since 2026-10-03, `hilda33d` before, `APP_RELEASE_MODE`, which `tests/testthat/test-app-version.R` requires to be the mode the app loads), and its seventh tab ("Known issues")
 is the point of the release: it puts each remaining flaw to the reader and asks
 whether it is a deal-breaker, fixable or acceptable. Three things must be true
 before the link is posted.

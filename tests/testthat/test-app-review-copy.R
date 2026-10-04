@@ -95,7 +95,10 @@ AC_CHECKS <- list(
   # C2 (09-22 r): the chart measured the claim next to it and falsified it --
   # ENSO off removes 23 % of the scatter, not the wobble. See
   # [[ccx_wobble_is_mostly_emissions]].
-  c("C2 wobble claim corrected",         "switch it off and the wobbles go", "about a quarter of the wobble")
+  # 2026-10-03 (h): at hilda34g ENSO off removes 40 % (calibration/diag_app_wobble_shares.R; 28 % at
+  # hilda33d), and the blurb says "about 40 %" (Marcus: "\"about 40 %\" (Recommended)"; this re-pin:
+  # "Approve all (Recommended)").
+  c("C2 wobble claim corrected",         "switch it off and the wobbles go", "about 40 % of the wobble")
 )
 
 # THE 2026-10-01 RULINGS (Marcus, review notes/review_2026-10-01c_open_decisions.md: "1) Retire card 6.

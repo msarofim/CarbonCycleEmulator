@@ -493,8 +493,10 @@ test_that("GATE S has POWER against its own blind spot: at a seas_ml = 1 canonic
   # 0.767 @ 4.10 -- the thermal phase, as before.
   # At hilda33d (2026-10-01 c, the D2/D3 canonical): whole limb 0.280 @ 8.83 PASS (the scorecard's number;
   # re-pin approved by Marcus).
+  # At hilda34g (2026-10-03 h, the land ENSO lag fitted): whole limb 0.210 @ 8.50 PASS (8.5037; the
+  # scorecard's number); the blind read 4.08, within its tolerance (Marcus 2026-10-03: "Approve all (Recommended)").
   expect_true(full$pass)
-  expect_equal(full$mo,  8.83, tolerance = 0.05, scale = 1)
+  expect_equal(full$mo,  8.50, tolerance = 0.05, scale = 1)
   expect_equal(blind$mo, 4.10, tolerance = 0.05, scale = 1)
   expect_false(dg_gateS_verdict(list(mo = blind$mo, amp = blind$amp))$pass)
 })

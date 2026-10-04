@@ -84,7 +84,7 @@ APP_AUTHOR       <- "Marcus C. Sarofim"
 APP_VERSION      <- "v1.0"
 APP_STAGE        <- "beta"
 APP_RELEASE_NAME <- paste(toupper(APP_STAGE), APP_VERSION, APP_TITLE)   # "BETA v1.0 CarboTope"
-APP_RELEASE_MODE <- "hilda33d"
+APP_RELEASE_MODE <- "hilda34g"   # Marcus 2026-10-03: "Move v1.0 to hilda34g (Recommended)" (cut on hilda33d 10-01)
 # "frozen at this version" was dropped 2026-10-01: stale since the 09-30
 # unfreeze, and a freeze verdict is Marcus's (the B8 assessment record).
 APP_STAGE_NOTE   <- paste("Beta. What is under review is how much the model's",
@@ -954,6 +954,11 @@ APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.46, `50` = 1.39, `100` = 1.36, `200` 
 # test-pulse-linearity.R requires every horizon's measurement, and the 100 GtC
 # headline at +100 yr, to round to it -- the claim the sentence makes.
 APP_PULSE_PER1000_ABOUT <- 1.4
+# WHAT "ABOUT" MEANS (Marcus 2026-10-03: "Keep 'about 1.4'; about = within 0.1 (Recommended)"). At
+# hilda34g the +20 yr figure is 1.458 -- 1.5 at one decimal -- so the one-decimal rule the test used
+# would have changed his sentence; the ruled meaning is every horizon within 0.1 of the figure. The
+# 100 GtC +100 yr headline must still ROUND to it (1.361).
+APP_PULSE_PER1000_ABOUT_TOL <- 0.1
 #' "20, 50, 100 or 200": an English disjunction, for the horizon list above
 app_or_list <- function(x) if (length(x) < 2L) as.character(x) else
   paste(paste(utils::head(x, -1L), collapse = ", "), "or", utils::tail(x, 1L))

@@ -37,7 +37,12 @@ if (file.exists(.fr_global))
       eval(e, .fr_env)
 .fr_have <- file.exists(.fr_file)
 .fr <- if (.fr_have) readRDS(.fr_file) else NULL
-.fr_md <- CCX_MODE_CANONICAL   # by NAME: ccx_ribbons_problems() reads the file itself
+# THE MODE THE HELD EVIDENCE WAS BUILT AT, named, not read back from the artifact (a check of the artifact
+# against its own label would pass whatever it said). RE-EXPRESSED 2026-10-03 (h) (Marcus: "Approve all
+# (Recommended)"): until then this was CCX_MODE_CANONICAL; the bands stay HELD (10-02 u) and the evidence
+# is never rebuilt for a new canonical, so once hilda34g was adopted the evidence is the record of the check
+# that failed at hilda33d, and the canonical is the mode the app's check must REFUSE it for.
+.fr_md <- "hilda33d"   # by NAME: ccx_ribbons_problems() reads the file itself
 
 FR_N_RULED     <- 1000                       # the ruled draw count
 FR_PROBS_RULED <- c(0.05, 0.50, 0.95)        # the ruled band (+ the median)
@@ -54,10 +59,18 @@ test_that("the band is HELD: the app draws none, whatever sits in data/", {
   expect_false(grepl("if (!is.null(APP_RIBBONS_HOLD)) return(list(ok = FALSE, held = TRUE", g2, fixed = TRUE))
 })
 
-test_that("the held evidence was built for THIS fit (the app's own validity check)", {
+test_that("the held evidence was built for the fit it names, and the app's own check REFUSES it at any other", {
   skip_if_not(.fr_have, "the held Laplace evidence artifact is absent")
   p <- ccx_ribbons_problems(.fr, .fr_md, .fr_env$APP_SCENARIOS, .fr_env$APP_FUTURE_YVARS)
   expect_equal(p, character(0), info = paste(p, collapse = " | "))
+  # the guard's POWER: at the canonical (another fit since 2026-10-03) the app's own call must refuse it,
+  # on BOTH counts -- the name and the vector
+  if (!identical(.fr_md, CCX_MODE_CANONICAL)) {
+    pc <- ccx_ribbons_problems(.fr, CCX_MODE_CANONICAL, .fr_env$APP_SCENARIOS, .fr_env$APP_FUTURE_YVARS)
+    expect_true(any(grepl(sprintf("built for mode '%s', the canonical is '%s'", .fr_md, CCX_MODE_CANONICAL), pc, fixed = TRUE)),
+                info = paste(pc, collapse = " | "))
+    expect_true(any(grepl("different parameter vector", pc, fixed = TRUE)), info = paste(pc, collapse = " | "))
+  }
 })
 
 test_that("the artifact records the ruled method and what reproducing it needs", {

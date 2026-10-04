@@ -278,7 +278,9 @@ test_that("PRICED at the CANONICAL mode: the demean flag is worth -0.0053 under 
   # 2026-10-02 (objective #15: the ice d13C row reads 1948-77, where the index treatment acts; the
   # pre-1958 ice-CO2 cut; the W5 priors move no stream): -0.0053 -> +0.4790 (0.478982) at the
   # restamped file. MEASURED (re-pin approved by Marcus).
-  expect_equal(r$on_periodic - r$off_periodic, 0.4790, tolerance = 1e-4, scale = 1)
+  # 2026-10-03 (h): the canonical is hilda34g (objective #15, the land ENSO lag fitted, 2.64 months):
+  # +0.4790 -> +0.5673 (0.567266). MEASURED at the promoted file (Marcus 2026-10-03: "Approve all (Recommended)").
+  expect_equal(r$on_periodic - r$off_periodic, 0.5673, tolerance = 1e-4, scale = 1)
   r0 <- edm_price(readRDS(ccx_mode_file(CCX_MODE_SEASML0_CONTROL)), spinups = "periodic")   # only its periodic pair is read
   # 2026-10-01 (k), the same flip: 17.8469 -> 17.7499 (17.749910) at the restamped control.
   # 2026-10-02 (objective #15): 17.7499 -> 20.5487 (20.548668) at the restamped control (approved by Marcus).

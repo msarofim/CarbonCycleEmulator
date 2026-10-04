@@ -32,8 +32,8 @@ a sign-free greening term, and a fitted allocation of the Global Carbon Budget's
 delay of 2.6 months between El Niño and the land's carbon response, refit on objective #15 (the ice-core
 CO₂ row cut to pre-1958, the Law Dome ice-core δ¹³C row added, the gas-exchange and interhemispheric
 exchange priors cited). CHANGELOG 2026-10-03. The app's release name is **BETA v1.0 CarboTope**
-(`APP_RELEASE_NAME` in `app/global.R`); it was cut on `hilda33d` (`APP_RELEASE_MODE`), and whether the
-release moves with the new canonical is Marcus's call (pending 2026-10-03). The `v1.0-hilda29l` git tag
+(`APP_RELEASE_NAME` in `app/global.R`), now cut on `hilda34g` (`APP_RELEASE_MODE`; Marcus 2026-10-03:
+"Move v1.0 to hilda34g"). The `v1.0-hilda29l` git tag
 marks the 09-22 freeze; the paragraphs below describe that freeze.
 
 **Product-ready as of 2026-09-21** (`notes/assessment_2026-09-21_product_ready.md`). Model core,

@@ -755,8 +755,12 @@ ccx_ribbons_problems <- function(r, mode = CCX_MODE_CANONICAL, scenarios, vars) 
   if (is.null(pv) || is.null(r[["bands"]])) return("not a ribbons artifact (no provenance or no bands)")
   # ⛔ [[ ]], NEVER $, on the provenance: `$` PARTIAL-MATCHES, so with `seed` removed `pv$seed`
   # silently returned `seed_applied` and a missing seed passed (caught by the mutation test, 2026-10-01).
-  if (!identical(pv[["mode"]], CCX_MODE_CANONICAL))
-    bad <- c(bad, sprintf("built for mode '%s', the canonical is '%s'", pv[["mode"]], CCX_MODE_CANONICAL))
+  # the NAME is checked against the `mode` argument, as the vector below always was (2026-10-03 h: it
+  # read CCX_MODE_CANONICAL, so the check could not be asked about any other mode -- the held evidence,
+  # built at hilda33d, could not be validated once hilda34g was adopted). The app passes the canonical.
+  if (!identical(pv[["mode"]], mode))
+    bad <- c(bad, sprintf("built for mode '%s', %s '%s'", pv[["mode"]],
+                          if (identical(mode, CCX_MODE_CANONICAL)) "the canonical is" else "checked against", mode))
   if (!identical(pv[["par_mode"]], md$par_mode))
     bad <- c(bad, "built at a different parameter vector from the canonical's par_mode")
   if (is.null(pv[["seed"]]) || is.null(pv[["rng_kind"]]) || is.null(pv[["seed_applied"]]))

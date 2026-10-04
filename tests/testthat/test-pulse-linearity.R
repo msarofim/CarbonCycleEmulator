@@ -22,7 +22,7 @@
 # the constants, parsed out of global.R (not sourced -- see test-stylised-takeaway.R)
 .env <- new.env(parent = globalenv())
 .want <- c("APP_PULSE_LIN_SIZES", "APP_PULSE_LIN_SPREAD", "APP_PULSE_LIN_HORIZON", "APP_PULSE_PER1000_ABOUT",
-           "APP_PULSE_PER1000_BY_HORIZON", "APP_PULSE_LIN_SRC")
+           "APP_PULSE_PER1000_BY_HORIZON", "APP_PULSE_LIN_SRC", "APP_PULSE_PER1000_ABOUT_TOL")
 for (e in parse(file.path(.root, "app", "global.R")))
   if (is.call(e) && length(e) >= 3L && identical(as.character(e[[1]]), "<-") &&
       is.name(e[[2]]) && as.character(e[[2]]) %in% .want) eval(e, .env)
@@ -74,9 +74,15 @@ test_that("the HORIZON table still matches, and every horizon is 'about' the box
   about <- .env$APP_PULSE_PER1000_ABOUT
   v_all <- R$per1000[R$gtc == ref & R$horizon %in% as.integer(names(tab))]
   expect_equal(length(v_all), length(tab))
-  expect_true(all(round(v_all, 1) == about),
-              info = sprintf("measured %s; the box says about %.1f",
-                             paste(sprintf("%.3f", v_all), collapse = " / "), about))
+  # RE-EXPRESSED 2026-10-03 (Marcus: "Keep 'about 1.4'; about = within 0.1 (Recommended)"): at hilda34g
+  # the +20 yr figure is 1.458, which ROUNDS to 1.5, and "rounds to the figure" would have rewritten his
+  # sentence. The claim is now what he ruled "about" means: every horizon within APP_PULSE_PER1000_ABOUT_TOL.
+  tol <- .env$APP_PULSE_PER1000_ABOUT_TOL
+  expect_true(is.numeric(tol) && length(tol) == 1L && tol > 0 && tol <= 0.1,
+              info = "the ruled meaning of 'about' is within 0.1; a wider tolerance needs a new ruling")
+  expect_true(all(abs(v_all - about) <= tol),
+              info = sprintf("measured %s; the box says about %.1f (within %.2f)",
+                             paste(sprintf("%.3f", v_all), collapse = " / "), about, tol))
   head100 <- R$per1000[R$gtc == ref & R$horizon == .env$APP_PULSE_LIN_HORIZON]
   expect_equal(round(head100, 1), about,
                info = sprintf("headline at +%d yr %.3f", .env$APP_PULSE_LIN_HORIZON, head100))
