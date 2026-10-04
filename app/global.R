@@ -925,17 +925,18 @@ app_stylised_emissions <- function(kind, years, to_zero_year = 2060,
 # Measured by `calibration/diag_pulse_vs_tcre.R` at the app's own defaults
 # (background APP_SCENARIO_BG = vvM since 2026-09-29, release 2050, the p_gtc
 # slider's full range), reading the SAME app_run_coupled() the tab uses. dGMST
-# per 1000 GtC at +100 yr, at hilda33d (2026-10-01):
-#     10 GtC 1.365 | 50 1.362 | 100 1.359 | 200 1.352 | 500 1.331
+# per 1000 GtC at +100 yr, at hilda34g (2026-10-03, pulse_vs_tcre_20261003.csv @1d84a03):
+#     10 GtC 1.368 | 50 1.365 | 100 1.361 | 200 1.354 | 500 1.331
+# (hilda33d, 2026-10-01: 1.365 | 1.362 | 1.359 | 1.352 | 1.331.)
 # (hilda29l, 2026-09-29: 1.041 | 1.037 | 1.032 | 1.023 | 0.998; on the old
 # ssp245 background, 2026-09-26: 1.091 | 1.087 | 1.082 | 1.072 | 1.044.)
 # ⚠ These are LABELS FOR A MEASUREMENT MADE ELSEWHERE, which is a staleness risk
 # by construction. `test-pulse-linearity.R` re-reads the driver's own CSV and
 # fails if these drift from it, so the constant cannot rot silently.
 APP_PULSE_LIN_SIZES   <- c(10, 500)   # GtC, the range the claim covers
-APP_PULSE_LIN_SPREAD  <- 2.5          # per cent of the mean, across that range (hilda29l: 4.2)
+APP_PULSE_LIN_SPREAD  <- 2.7          # per cent of the mean, across that range (hilda33d 2.5; hilda29l 4.2)
 APP_PULSE_LIN_HORIZON <- 100L         # years after release
-APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-10-01 (vvM background, hilda33d)"
+APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-10-03 (vvM background, hilda34g)"
 # THE HORIZON DEPENDENCE (100 GtC). At hilda29l the per-1000 figure FELL with
 # horizon -- 1.43 at +20 yr, 1.20 at +50, 1.03 at +100, 0.97 at +200 -- and the
 # box said "flat in pulse size but NOT in when you look". At hilda33d it is
@@ -943,7 +944,11 @@ APP_PULSE_LIN_SRC     <- "calibration/diag_pulse_vs_tcre.R, 2026-10-01 (vvM back
 # thermal lag, so it moves only about +-3 % and rises again after +100 yr.
 # ⚠ +50 yr is 1.37456 -> 1.37 (review 10-01c's table said 1.38, a double
 # rounding).
-APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.44, `50` = 1.37, `100` = 1.36, `200` = 1.41)
+# hilda34g (2026-10-03): 1.458 / 1.386 / 1.361 / 1.401. ⚠ +20 yr now rounds to 1.5 at one
+# decimal, so "about 1.4 ... whether you read it 20, 50, 100 or 200 years after release"
+# no longer holds by the test's rounding rule -- the sentence is Marcus's (10-01c A2) and the
+# change is his to rule (hilda33d: 1.44 / 1.37 / 1.36 / 1.41).
+APP_PULSE_PER1000_BY_HORIZON <- c(`20` = 1.46, `50` = 1.39, `100` = 1.36, `200` = 1.40)
 # ⭐ THE BOX'S SENTENCE (Marcus 2026-10-01, review 10-01c A2: "Say about 1.4 dC
 # per 1000 GtC"). One figure for every horizon above, to one decimal.
 # test-pulse-linearity.R requires every horizon's measurement, and the 100 GtC
