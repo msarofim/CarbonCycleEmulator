@@ -364,9 +364,10 @@ function(input, output, session) {
   # not the model.
   #
   # ⛔⛔ NOTHING IN THIS BLOCK MAY ADD UP THE PER-SWITCH CLAIMS. Each blurb
-  # quotes its own switch's effect -- "switch it off and about a quarter of the
-  # wobble goes" -- and those DO NOT COMPOSE. Measured over 1959-2024 (the
-  # figures in R/mechanisms.R's enso entry): ENSO -23 %, temperature -22 %,
+  # quotes its own switch's effect -- "switch it off and about 40 % of the
+  # wobble goes" (hilda34g; "about a quarter" until 2026-10-03) -- and those DO NOT
+  # COMPOSE. Measured over 1959-2024 (the figures in R/mechanisms.R's enso entry,
+  # at an older mode): ENSO -23 %, temperature -22 %,
   # volcanic light -8 %, but ALL THREE TOGETHER only -43 %, not -53 %. So every
   # number printed below is COMPUTED FROM THE COMBINED RUN, the blurbs are shown
   # labelled and separate so they cannot read as a running total, and with more

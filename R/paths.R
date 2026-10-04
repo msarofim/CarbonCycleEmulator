@@ -188,7 +188,19 @@
 # with +0.50 GtC/yr retained via N deposition (gross, 2001-2023) quoted beside it.
 # Consumers: a mode file under this label opens the gate through its pins (ccx_mode_pins()).
 # hilda29l stays REGISTERED (the v1.0-hilda29l product's mode, and #13's limb canonical).
-CCX_MODE_CANONICAL <- "hilda33d"
+# 2026-10-03 (h): `hilda34g` -- OBJECTIVE #15 WITH THE LAND ENSO LAG FITTED (Marcus 2026-10-03:
+# "Adopt the lag arm (Recommended)", "Keep label; mode hilda34g (Recommended)", "Keep
+# backward-difference Hermite (Recommended)"). Label hilda_csl3v0kaidgbe = hilda_csl3v0kaidgb +
+# the lag gate (enso_lag_free = 1): lag_enso_land = DESIGN's L_MEI, 2.644 +/- 0.387 months; the
+# land ENSO term reads Nino 3.4 that much later, the ocean stays on time. Objective #15 = #14 +
+# ice-core CO2 cut to pre-1958 + the Law Dome ice d13C row + the cited k_w / tau_ex priors. 34
+# names, the SAME 9 pins. The 10-02 ee Mac wave: 21/24 CONVERGED, one basin up to the h_ml ridge;
+# best id 4, logpost -1182.991369, likelihood -1143.2508 on 27 rows; Hessian PD cond 1.6e6.
+# ⭐ ON LIKELIHOOD vs the lag-0 control refit on #15 (refit_20261003_obj15_hilda_csl3v0kaidgb,
+# NOT registered): +14.92 at one more name, dAIC -27.8. Every What-if gain is the lag's (ENSO
+# off: -11.0 % here, +0.89 % at the control); gate V slightly worse (-4.60 vs -4.34). CHANGELOG
+# 10-03 (b)-(h). hilda33d stays REGISTERED (the #14 canonical, restamped #15; the D2/D3 parent).
+CCX_MODE_CANONICAL <- "hilda34g"
 # 2026-09-22 (k): `hilda32f` -- THE FREE PARENT OF THE LIMB CANONICAL (Marcus: "Repoint").
 # hilda29l's OWN structure (hilda_csl3, seas_ml 1) with only the six inert names held: the
 # seasonal shim ent_seas_amp_SH (8.24), the ocean ENSO pair (NH 0.240, SH 0.001) and the
@@ -204,6 +216,8 @@ CCX_MODE_CANONICAL <- "hilda33d"
 # named red #1 ("the parent is the best free arm") discharges here; red #2 (the AIC gate)
 # is untouched.
 CCX_MODE_FILES <- c(
+  hilda34g = file.path("calibration", "output", "refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe",
+                       "mode_fit_pumpN.rds"),
   hilda33d = file.path("calibration", "output", "refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb",
                        "mode_fit_pumpN.rds"),
   hilda29l = file.path("calibration", "output", "refit_20260920_hilda29l_obj13_hilda_csl3",
@@ -312,7 +326,7 @@ CCX_MODE_HILDA30S_QUARANTINED <- file.path("calibration", "output", "quarantine"
 # 2026-09-04 -> 2026-09-11 (8) this registry held one arm, then two free arms;
 # the free-vs-pinned comparison it exists to express had no power
 # ([[no_power_null]]). It has power from 09-13 (d): the canonical is PINNED.
-CCX_MODE_PINNED <- c(hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
+CCX_MODE_PINNED <- c(hilda34g = TRUE, hilda33d = TRUE, hilda29l = TRUE, hilda32f = FALSE, hilda31s2 = FALSE, hilda31pe = FALSE)
 # A PINNED CANONICAL (2026-09-13). When the canonical is a pinned arm, the
 # registry names WHAT it pins (the file's own `pins` must agree -- test-mode-file)
 # and its free PARENT: the same space with the pinned names free, kept
@@ -346,7 +360,10 @@ CCX_MODE_CANONICAL_PINS  <- c(ent_seas_amp_SH = 0, w_eq = 27, gamma_eq = 1, pump
 #     fixtures (a 31-name vector encodable on the full table), not for a comparison;
 #   - ccx_ms_reference_set() would seed any FUTURE free wave from it: a #14 wave must name
 #     its own reference set.
-CCX_MODE_PINNED_PARENT   <- "hilda32f"   # 2026-09-22 (k): hilda29l's (v1.0's) free parent; the canonical hilda33d has none (10-01 B3b)
+# 2026-10-03 (h): the same holds for the canonical hilda34g (objective #15, the lag label
+# hilda_csl3v0kaidgbe): no registered free parent; its comparison arm is the lag-0 control
+# refit on #15 (unregistered), read in calibration/diag_obj15_refit_read.R.
+CCX_MODE_PINNED_PARENT   <- "hilda32f"   # 2026-09-22 (k): hilda29l's (v1.0's) free parent; the canonicals hilda33d / hilda34g have none (10-01 B3b; 10-03 h)
 # THE seas_ml-0 CONTROL AND ITS ARM (2026-09-17 j). The registered control `hilda31p`
 # has the shim FREE (18.69): the seasonal mixed layer is what REPLACED the shim, so
 # the canonical pins it and the control keeps it. Its arm is therefore the canonical's

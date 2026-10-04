@@ -84,7 +84,7 @@ The app reads from the repository root, so deploy the whole tree, not just `app/
 | `R/` | the model |
 | `src/ccx_core.cpp` | compiled at startup |
 | `data/*.rds` | observations, forcings, the FaIR climate module |
-| `calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds` | **the parameter set the app runs on.** This is the canonical mode, resolved by `ccx_mode_file()` (`R/paths.R`), which is the ONE place its path is named — take the path from there rather than from this table. It moved here 2026-08-27; the old `pump_arms/mode_fit_pumpN.rds` was fitted before the seasonal-NEP isotope fix changed the objective and is quarantined. `mode_fit.rds` has never existed. Omit the file and the app falls back to uncalibrated defaults SILENTLY (the banner is the only report) |
+| `calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds` | **the parameter set the app runs on.** This is the canonical mode, resolved by `ccx_mode_file()` (`R/paths.R`), which is the ONE place its path is named — take the path from there rather than from this table. It moved here 2026-08-27; the old `pump_arms/mode_fit_pumpN.rds` was fitted before the seasonal-NEP isotope fix changed the objective and is quarantined. `mode_fit.rds` has never existed. Omit the file and the app falls back to uncalibrated defaults SILENTLY (the banner is the only report) |
 | `DESIGN.md` | `.find_root()` locates the repo by looking for this file |
 | `calibration/lib_design_gates.R` (+ `lib_seas_limbs.R`, `lib_glodap_obs.R`) | **the gate kernels the "Known issues" tab measures itself with.** Sourced lazily on first view of that tab, never at start-up. Omit them and the cards that need them render their reason in place of their number — a visible degradation, not a silent one, but the review tab is then half-useless |
 
@@ -97,7 +97,7 @@ at the top of every tab reports which one it landed on:
 
 1. `calibration/output/posterior_draws.rds` → "calibrated posterior"
 2. the first of `ccx_mode_file(CCX_MODE_CANONICAL)` (today
-   `calibration/output/refit_20261001_hilda33d_obj14_hilda_csl3v0kaidgb/mode_fit_pumpN.rds`), then
+   `calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds`), then
    `calibration/output/mode_fit.rds`, that exists AND carries this build's
    parameter set (`ccx_mode_carries_build()`; a pinned canonical's held names
    come back through `ccx_mode_par_with_pins()`) → "posterior mode" (so a stale

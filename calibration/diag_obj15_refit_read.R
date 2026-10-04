@@ -54,7 +54,9 @@ RD_WAVE_TAIL <- paste0("_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_e
                        "_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291")
 RD_LAG_WAVE  <- file.path("calibration", "output", paste0("multistart_20261002ee_", RD_LABEL_LAG, RD_WAVE_TAIL))
 RD_CTL_WAVE  <- file.path("calibration", "output", paste0("multistart_20261002ee_", RD_LABEL_CTL, RD_WAVE_TAIL))
-RD_LAG_MODE  <- file.path("calibration", "output", "refit_20261003_obj15_hilda_csl3v0kaidgbe", "mode_fit_pumpN.rds")
+# the lag arm, REGISTERED as `hilda34g` and adopted 2026-10-03 (h); its directory was renamed then from
+# refit_20261003_obj15_hilda_csl3v0kaidgbe (the path the 10-03 (b)-(g) outputs record)
+RD_LAG_MODE  <- ccx_mode_file("hilda34g")
 RD_CTL_MODE_FINAL <- file.path("calibration", "output", "refit_20261003_obj15_hilda_csl3v0kaidgb", "mode_fit_pumpN.rds")
 RD_CTL_MODE  <- local({ v <- Sys.getenv("CCX_RD15_CTL", ""); if (nzchar(v)) v else RD_CTL_MODE_FINAL })
 RD_INTERIM   <- !identical(RD_CTL_MODE, RD_CTL_MODE_FINAL)

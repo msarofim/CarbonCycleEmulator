@@ -169,6 +169,12 @@ CCX_MECHANISMS <- list(
     # "about 60%"). Knockouts: ENSO (index zeroed) -28 %, temperature -29 %, volcanic
     # light -8 %; all three together -67 %; the emissions record smoothed, alone, -12 %.
     # (1959-2024 under the older mode and the old land-only switch: -23 / -22 / -8, -43 %.)
+    # ⭐ RE-MEASURED 2026-10-03 at hilda34g (the land ENSO lag fitted) by a COMMITTED driver,
+    # calibration/diag_app_wobble_shares.R (outputs/diagnostics/app_wobble_shares_20261003_*):
+    # full 0.276 ppm/yr (60 % of 0.459); ENSO -40 %, warming -19 %, volcanic light -3 %, all
+    # three -68 % (32 % remains). "About a quarter" became FALSE and the blurb says "about 40 %"
+    # (Marcus 2026-10-03: "\"about 40 %\" (Recommended)"); "about a third" in the caveat holds.
+    # ⚠ The numbers are the canonical's: re-run the driver at every adoption.
     # ⚠ This estimator is NOT gate V's (which regresses growth on emissions with
     # a time-varying airborne fraction); the numbers are an app-level echo and
     # must not be quoted as the gate's decomposition. That is
@@ -176,7 +182,7 @@ CCX_MECHANISMS <- list(
     blurb = paste("ENSO moves carbon in and out of tropical land, and in and",
                   "out of the surface ocean, year by year. It is the single",
                   "largest reason the Keeling curve wobbles around its trend in",
-                  "this model — switch it off and about a quarter of the wobble",
+                  "this model — switch it off and about 40 % of the wobble",
                   "goes with it."),
     # ⛔ THE TEMPERATURE HALF KEEPS RUNNING, and this caveat may not be
     # shortened to "El Nino off". Marcus 2026-09-25: "it does not flatten the

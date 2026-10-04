@@ -189,7 +189,13 @@ d M_atm[h]/dt =
   > target, not the code. (The index is Niño 3.4, not MEI, since 08-09.)
   > ✅ **BUILT 2026-10-02 (W1, `fa4636f`; CHANGELOG 10-02 aa)** as `lag_enso_land`, one lag for both
   > hemispheres, land only, fitted under the label `hilda_csl3v0kaidgbe` (a second label gate). Absent
-  > = 0 = the index at t, bit for bit. NOT yet fitted: the #15 refit is pending.
+  > = 0 = the index at t, bit for bit.
+  > ✅ **FITTED and ADOPTED 2026-10-03 (`hilda34g`; CHANGELOG 10-03 b–h): L_MEI = 2.64 ± 0.39 months**
+  > (Laplace, marginal). On likelihood it beats the lag-0 control refit on the same objective (#15) by
+  > +14.92 at one parameter (ΔAIC −27.8). The model's growth now peaks +1 month after Niño 3.4 (observed
+  > +5; the likelihood rows that set L, chiefly GCB's DGVM-based land sink and the SPO seasonal rows,
+  > prefer ~2.5 months). Sub-month interpolation: a backward-difference cubic Hermite (causal), ruled 10-03
+  > over the planned Catmull-Rom.
 - **Land-use change:** prescribed GCB bookkeeping flux E_LUC(t) added to the atmosphere and
   decremented from C_wood (carries that pool's own isotopic signature — a transfer, not a
   source, so no ¹⁴C is created; Marcus 2026-08-12).
@@ -573,7 +579,7 @@ model (§5.2), not ignored.
 | τ_strat | bomb-injection delay | U(0.5, 4) yr |
 | P_bomb | total bomb ¹⁴C production | N centered on Naegler & Levin [VERIFY] |
 | γ_MEI | ENSO land-flux coefficient | N(0, wide), sign-free |
-| L_MEI | ENSO lag | U(0, 12) months ✅ *built 10-02 as `lag_enso_land` (logit on (0, 12), init 6)* |
+| L_MEI | ENSO lag | U(0, 12) months ✅ *built 10-02 as `lag_enso_land` (logit on (0, 12), init 6); fitted 2.64 ± 0.39 in `hilda34g` (10-03)* |
 | A_N, A_S, φ_N, φ_S (+ a₂ terms) | seasonal NEP harmonics | weak / possibly pre-fit (Q2) |
 | σ_add, ρ | error model (per data stream) | weak |
 
