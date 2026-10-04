@@ -66,7 +66,7 @@ ccx_load_cpp()
 
 # ---- NAMED CONSTANTS: every label, filename and threshold derives from here ----
 CM_TAG        <- "constraint_map"
-CM_DATE       <- "20261001k"  # the SHIPPED canonical artifact's tag: hilda33d rebuilt after the 10-01 (k) emissions-interpolation flip and restamp (was 20261001 for the adoption build, 20260925 at hilda29l); see CM4
+CM_DATE       <- "20261003h"  # the SHIPPED canonical artifact's tag: hilda34g at its adoption (10-03 h; was 20261001k = hilda33d after the 10-01 (k) flip, 20261001 for that adoption build, 20260925 at hilda29l); see CM4. ⚠ MOVE IT AT EVERY ADOPTION: the canonical's log is named by it, so a stale tag overwrites the previous canonical's record (it did, 10-03, and was restored from git)
 # ⛔⛔ CM4  THE ARM (2026-09-26). The map used to be canonical-only. A SECOND
 #       evaluation point answers a question one point cannot: is the pins/pulls
 #       picture a property of the MODEL, or only of THIS FIT?
@@ -175,8 +175,9 @@ CM_COMPONENT_ALL <- list(
                                "seas_lag_p_NH", "seas_lag_p_SH",
                                "sst_seas_amp_NH", "sst_seas_amp_SH",
                                "ent_seas_amp_SH"),
+  # + the land ENSO lag (DESIGN's L_MEI; the lag label, fitted from hilda34g, 2026-10-03)
   "ENSO response"          = c("w_enso_l2", "gamma_enso_land_NH", "gamma_enso_land_SH",
-                               "gamma_enso_ocn_NH", "gamma_enso_ocn_SH"),
+                               "gamma_enso_ocn_NH", "gamma_enso_ocn_SH", "lag_enso_land"),
   # + the GCB-imbalance shares (D3, objective #14; from hilda33d, 2026-10-01): a target choice
   "Input scalings & reporting" = c("bomb_total", "luc_scale", "sigma_d14c",
                                    "rep_dC", "grad_off_co2", "grad_off_d13c",
@@ -189,7 +190,9 @@ CM_ARM_ONLY_NAMES <- c("w_enso_l2",                                  # canonical
                        "gamma_enso_ocn_NH", "gamma_enso_ocn_SH",     # hilda32f / hilda31pe
                        # the GATED names: only an arm whose structure opens the gate fits them
                        # (the canonical hilda33d, 2026-10-01)
-                       "ndep_ret", "npp_tsens", "imb_share_land", "imb_share_ocean_rest")
+                       "ndep_ret", "npp_tsens", "imb_share_land", "imb_share_ocean_rest",
+                       # the LAG gate's name: only the lag label fits it (the canonical hilda34g, 2026-10-03)
+                       "lag_enso_land")
 
 # The observation families. ⚠ Same rule: every stream exactly once, gated.
 # ⚠ THESE STRINGS ARE READER-FACING: they are the app's own axis labels and
@@ -201,6 +204,8 @@ CM_FAMILY <- list(
   "CO₂ seasonal cycle"        = c("co2_seasonal_MLO", "co2_seasonal_SPO"),
   "CO₂ north–south gradient"  = c("co2_gradient"),
   "CO₂ in ice cores"           = c("co2_icecore"),
+  # objective #15's Law Dome ice-core d13C row (2026-10-02 bb): its own family, parallel to the CO2 one
+  "δ¹³C in ice cores"          = c("d13c_icecore"),
   "δ¹³C level & gradient"     = c("d13c_level_MLO", "d13c_level_SPO", "d13c_gradient"),
   "δ¹³C seasonal cycle"       = c("d13c_seasonal_MLO", "d13c_seasonal_SPO"),
   "Δ¹⁴C in the air (bomb)"    = c("d14c_NH", "d14c_SH"),
