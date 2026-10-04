@@ -436,6 +436,64 @@ anchoring `kz` becomes the *near-surface* diffusivity — the quantity NATRE act
 iso-sink solution FAILS by an even wider margin** (6404 vs 536, i.e. 12×). That is a cost of
 A that the logL does not see, and it should be weighed explicitly.
 
+**S. Thermocline mixing weakens with warming: the STRATIFICATION FEEDBACK.** **RULED 2026-10-04 (Marcus); being
+built.** Proposal and literature: `notes/proposal_2026-10-04_warming_weakens_mixing.md`; CHANGELOG 10-04 (m).
+*For the app:* "warming is strongest at the surface, so the upper ocean becomes more layered and mixes less, and the
+carbon we add is carried down into the deep ocean more slowly."
+- **The rulings:** thermocline mixing only; the strength from an observation × a law, FIXED (not fitted); the key is
+  GMST minus a lagged deep-ocean temperature; it acts in the history AND the futures, and enters objective #16.
+- **The equations.**
+  - K(z, t) = kz·[f + (1−f)·g(t)·e^(−(z−h_ml)/z_K)] = K_int(z) − (1 − g(t))·K_up(z), with
+    K_up(z) = kz·(1−f)·e^(−(z−h_ml)/z_K).
+    - K_up is A's exponential ("upper") part on the HELD annual-mean grid, the same convention as `aux$kz_int`.
+    - The abyssal floor f·kz (tidally driven deep mixing) is untouched.
+    - At hilda34g, K_up is 99 % of K at the mixed-layer base, 48 % at 1.3 km and 0.5 % at 2.6 km.
+  - g(t) = (1 + s·T_key(t))^(−q/2), with T_key = max(0, T(t) − T_deep(t)) and dT_deep/dt = (T − T_deep)/τ_d.
+    - T is the run's GMST column: IGCC in history, the coupled climate in futures.
+    - T_deep is that column lagged; it starts at 0 at the run's start (1750), where the spinup's climate is held at 0.
+  - **The solved export is rescaled with g:** S(t) = S_full − (1 − g(t))·S_up, with S_up solved by
+    `ccx_pump_export()` against K_up alone.
+    - The export is LINEAR in K, so this is exact. The natural DIC gradient stays where the pump holds it, and only the
+      perturbation (anthropogenic carbon, bomb ¹⁴C, the Suess effect) feels the slowdown.
+    - Physically, export mode "N" is nutrient-limited, and mixing delivers the nutrients.
+    - ⛔ Without the rescaling, a falling K under a fixed export sharpens the natural gradient. The mixed layer would
+      lose natural carbon at ~(1−g) × 59 GtC/yr (hilda34g): a spurious, wrong-signed sink the size of the modern
+      ocean sink.
+- **The constants** (`R/constants.R`, each with its source):
+  - **s = 0.0522 K⁻¹ (derived).** Cheng et al. 2025 (Nat. Rev. Earth Environ. 6:637, abstract and Table 1): N² over
+    0–2,000 m rising 0.8 ± 0.1 %/decade since the 1960s. Divided by the KEY's 1960–2024 trend, 0.1533 K/decade (IGCC
+    GMST 0.1816 minus T_deep 0.0284). Bounds 0.0457–0.0587. Li et al. 2020's 0.90 %/decade (1960–2018) is the
+    cross-check.
+  - **q = 1 (cited).** Gargett 1984 (J. Mar. Res. 42:359, eq. 25, p. 381): K ∝ N^−q with q of order 1; basin budgets
+    0.8–1.2 (pp. 364–367).
+    - q = 2 (Osborn 1980 at fixed dissipation, as restated by Gargett & Holloway 1984 eq. 21) and q = ½ (Garrett–Munk)
+      bound the app's range.
+  - **τ_d = 194.94 yr (MODEL-DERIVED, named as the rules require).** The slow timescale of CCX's own climate module
+    (`data/climate_module.rds` `irf_d[3]`; FaIR 2.2.4 calib 1.6.0, ensemble-mean fit, built 2026-09-24).
+- **Two hard constraints.**
+  - g(0) = 1 exactly: the spinup, the pump solve and every registered spinup are untouched.
+  - g ≤ 1 always: the max(0, ·). IGCC dips to −0.24 K in 1904, and a K above the held value would break
+    `ccx_substeps_for()`'s bound.
+- **Not touched:** the HS pump, the high-latitude exchange (`u_hs`, `tau_q`), entrainment and the layer-3 limb (the
+  ruling: thermocline mixing only). The tropical box's `kz_tr` refuses the mechanism by name.
+- **Numerics.**
+  - T_deep is built once per run from the forcing's monthly GMST by the exact exponential update.
+  - It reaches C++ as a per-run series (the `land_enso` precedent), so `N_FORCING` is unchanged.
+  - g is held across a month's RK4 substeps like every forcing term.
+  - In coupled futures the key is rebuilt at each climate iteration, so the feedback (CO₂ → T → K → uptake → CO₂)
+    closes in the existing loop.
+- **What it leaves out, disclosed:**
+  1. CCX's K is an EFFECTIVE ventilation coefficient (~27× NATRE's diapycnal 536 m²/yr at hilda34g). Applying the
+     N-law to all of it assumes ventilation weakens in proportion.
+  2. The biological pump's REGENERATED carbon is held fixed. CMIP6 has slower circulation storing +12.3 PgC/°C more
+     against −16.4 of lost ventilation (Arora 2020 Biogeosciences 17:4173, p. 4195), so CCX overstates the NET
+     circulation feedback against CMIP6.
+  3. Wind-driven variability (the Southern Ocean's 1990s–2000s swing) is absent.
+- **Benchmarks for the built model** (checks, not calibration):
+  - GCB 2025's ocean climate effect, −0.20 ± 0.05 GtC/yr over 2015–2024 (ESSD 18:3211 p. 3242; its baseline is a
+    "normal year", not 1850);
+  - CMIP6 γ_O, −17.2 ± 5.0 PgC/°C (Arora 2020; model-derived).
+
 ### 3.5 Isotopes
 
 - **¹²C** is the bulk tracer (¹²C+¹³C treated as total C for mass budget; ¹³C tracked as
