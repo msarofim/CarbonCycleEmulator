@@ -1,0 +1,11 @@
+calibration/diag_net_climate_co2_feedback.R @da77513+dirty, 2026-10-04 14:49 | mode hilda34g | window 2015-2024 vs 1901-1920 climate held
+             q10 net_interactive dco2_ppm  bump_k bump_dco2 land_per_ppm
+canonical 1.0603          0.1176  -1.2638 -0.0963   -1.2547       0.0182
+high      1.4000         -0.0751   0.5195  0.0396    0.5163       0.0181
+          feedback net_like_for_like
+canonical  -0.0229            0.1405
+high        0.0094           -0.0845
+
+  GCB 2025 TRENDY S2 - S1: -0.8 +/- 0.7 GtC/yr
+  canonical q10 1.060: interactive +0.118, of it the CO2 feedback -0.023 (dCO2 -1.26 ppm x 0.0182 GtC/yr per ppm) => like-for-like +0.141 GtC/yr (z +1.34 vs GCB)
+  high      q10 1.400: interactive -0.075, of it the CO2 feedback +0.009 (dCO2 +0.52 ppm x 0.0181 GtC/yr per ppm) => like-for-like -0.084 GtC/yr (z +1.02 vs GCB)

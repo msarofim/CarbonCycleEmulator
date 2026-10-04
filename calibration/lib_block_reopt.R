@@ -31,7 +31,10 @@ br_u_of_par <- function(md, nm) vapply(nm, function(n) .to_unc(md$par_mode[[n]],
 #' every other name at the base, `hold` (named natural values) overriding held names. Starts from the
 #' base's own block, or from `start_par` (a named natural list for the free names). Whitened by the
 #' base's stored block precision; BFGS + Nelder-Mead rounds until the slope check passes.
-br_cell <- function(b, L, free, hold = NULL, start_par = NULL, max_rounds = BR_ROUNDS) {
+#' `extra` (2026-10-04, the P3 preview): an optional function of the NATURAL parameter list returning a
+#' log-likelihood term ADDED to the objective (a candidate row priced before it is built). NULL = the
+#' objective alone, exactly as before.
+br_cell <- function(b, L, free, hold = NULL, start_par = NULL, max_rounds = BR_ROUNDS, extra = NULL) {
   md <- BR_MD[[b]]
   label <- if (L == 0) BR_LABEL_ZERO else BR_LABEL_LAG
   g <- ccx_apply_gate(label); r <- ccx_apply_pins(BR_PINS)
@@ -50,7 +53,8 @@ br_cell <- function(b, L, free, hold = NULL, start_par = NULL, max_rounds = BR_R
   u_at <- function(z) { uu <- u_st; uu[free] <- u0 + backsolve(U, z); uu }
   n_eval <- 0L; n_bad <- 0L
   f <- function(z) { n_eval <<- n_eval + 1L
-    v <- tryCatch(as.numeric(lp(u_at(z))), error = function(e) -Inf)
+    v <- tryCatch({ uu <- u_at(z); as.numeric(lp(uu)) + if (is.null(extra)) 0 else extra(ccx_unc_to_par(uu)) },
+                  error = function(e) -Inf)
     if (is.finite(v)) -v else { n_bad <<- n_bad + 1L; 1e10 } }
   slope <- function(z) vapply(seq_along(z), function(i) { e <- rep(0, length(z)); e[i] <- BR_PULL_H
     (f(z + e) - f(z - e)) / (2 * BR_PULL_H) }, 0)
@@ -64,9 +68,10 @@ br_cell <- function(b, L, free, hold = NULL, start_par = NULL, max_rounds = BR_R
     z <- zc + o2$par; s <- slope(z)
   }
   v <- lp(u_at(z)); uu <- u_at(z); par <- ccx_unc_to_par(uu)
+  ex <- if (is.null(extra)) 0 else extra(par)
   blk <- unique(c(free, names(hold)))
   list(base = b, L = L, free = free, hold = hold, label = label, z = z, u = uu, block = unlist(par[blk]),
-       logpost = as.numeric(v), streams = unlist(attr(v, "streams")), lik = sum(unlist(attr(v, "streams"))),
+       logpost = as.numeric(v), streams = unlist(attr(v, "streams")), lik = sum(unlist(attr(v, "streams"))), extra = ex,
        slope = s, converged = max(abs(s)) < BR_MODE_TOL, rounds = rounds, n_eval = n_eval, n_bad = n_bad,
        minutes = as.numeric(difftime(Sys.time(), t0, units = "mins")))
 }
@@ -114,9 +119,11 @@ br_futures <- function(v, sp) {
 #' THE NET CLIMATE EFFECT on the land sink, on GCB 2025's TRENDY definition (S2 - S1: climate varying vs
 #' 1901-20 climate held), over `win`: the model's mean land-carbon gain with the GMST column as observed,
 #' minus with GMST HELD at its `clim` mean from clim[1] on. E_LUC is prescribed and identical in both, so
-#' it cancels from S_LAND = d(land_C)/dt + E_LUC. ⚠ CO2 is INTERACTIVE here and prescribed in TRENDY: the
-#' held run's lower CO2 (less respiration and outgassing) feeds back on fertilisation -- a second-order
-#' difference, stated, not corrected. GMST also drives the ocean's T terms; only the LAND sink is read.
+#' it cancels from S_LAND = d(land_C)/dt + E_LUC. ⚠ CO2 is INTERACTIVE here and prescribed in TRENDY: the two
+#' runs' CO2 differs and feeds back on fertilisation. MEASURED (calibration/diag_net_climate_co2_feedback.R,
+#' 2026-10-04): at hilda34g the warm run has 1.26 ppm LESS CO2 (its land gains with warming), a -0.023 GtC/yr
+#' bias (like-for-like +0.141 vs +0.118 here); at q10 1.4, +0.009. Small against GCB's sigma 0.7; not corrected.
+#' GMST also drives the ocean's T terms; only the LAND sink is read.
 br_net_climate <- function(v, win = c(2015L, 2024L), clim = c(1901L, 1920L)) {
   sp <- dg_spinup(v)
   F <- withCallingHandlers(

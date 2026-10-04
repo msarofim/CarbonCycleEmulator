@@ -2,6 +2,38 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (j) — **Marcus's rulings on the two proposals: no timing row (a card-4 disclosure instead), and P3 PREVIEWED with `q10` freed before any objective change.** Verbatim: "No row; draft card-4 text (Recommended)", "Preview P3 with q10 freed (Recommended)".
+
+- **Card 4: drafted, not applied** (`notes/draft_2026-10-04_card4_enso_timing.md`). The precedent is 10-02 (v): the facts are drafted for his wording, and `app/R/review.R` is untouched.
+  - The facts, each sourced: the model's growth peaks ~1 month after Niño 3.4 against the record's ~5; the land term's fitted lag is 2.64 months, set by GCB's DGVM-based land sink and the seasonal rows; an honestly weighted growth row would move it only to ~3.
+  - It carries one candidate sentence for `plain` and one paragraph for `detail`.
+- **The P3 preview:** `calibration/diag_p3_netclimate_preview.R`.
+  - It adds the GCB net-climate row (−0.8 ± 0.7 GtC/yr, 2015–24, TRENDY definition) to the #15 objective and
+    re-optimises the land block + `q10` at hilda34g's lag.
+  - Cells: from the mode (R1), from a literature start (`q10` 1.4, ν −0.006; R2), and with `q10` held (RH, checking the
+    analytic +0.0066).
+  - `calibration/lib_block_reopt.R` gains an optional `extra` log-likelihood term in `br_cell()`. With it unset the
+    objective is exactly as before, so the committed preview stays reproducible.
+  - Results are added below when the run lands.
+- **Checked before the P3 run: is the model's net climate effect like-for-like with TRENDY?** (`calibration/diag_net_climate_co2_feedback.R` → `outputs/diagnostics/net_climate_co2_feedback_20261004.*`)
+  - **The trigger:** raising `q10` 1.06 → 1.4 moved the net effect only +0.118 → −0.075 GtC/yr, where a crude estimate
+    said ~−1.5.
+  - **The suspect:** CO₂ is interactive in the model but prescribed in TRENDY, and `br_net_climate()` had called that
+    difference "second-order" without measuring it.
+  - **Measured:** the full-vs-held CO₂ difference times the model's own held-climate land response to CO₂ (0.018 GtC/yr
+    per ppm, from an emissions bump shaped like the warming).
+  - At hilda34g the warm run has **1.26 ppm LESS CO₂** (its land gains with warming), so the bias is **−0.023**. The
+    like-for-like net effect is **+0.141 GtC/yr (z +1.34 vs GCB)**; at `q10` 1.4 it is −0.084 (bias +0.009).
+  - ⇒ **The "wrong sign" in 10-04 (i) STANDS**, now with the caveat measured. My hypothesis that the feedback might flip
+    it is refuted.
+  - The weak `q10` response remains. A quasi-equilibrium soil estimate (~−0.8 GtC/yr) is ~4× the model's −0.225;
+    slow pools lagging equilibrium is a plausible reading, not tested here.
+- **Corrected in the P3 driver before the run.** The held-`q10` cell built its row from the 8-name block, which would
+  have silently used the base's `q10` rather than the held one. Every cell now builds the row from all nine names.
+- **The literature-start cell is replaced by a `q10` PROFILE** (held at 1.25 and 1.40). A smoke showed the 1.4 start
+  ~100 whitened units out, at −4347 on the #15 likelihood with the rest held; the profile answers the same question for
+  far less.
+
 ## 2026-10-04 (i) — **The two objective-#16 PROPOSALS are drafted for Marcus's ruling, on a committed preview. Both find the same thing: the HONESTLY-WEIGHTED version does almost nothing.** The timing row at its measured weight moves the lag 2.64 → 2.75–2.90 months. No literature-centred greening prior moves `npp_tsens`'s sign. Recommendations: no timing row, but a card-4 disclosure; for the greening, P3 (a GCB net-climate row with `q10` freed, previewed first) or P4 (pin at 0). Nothing adopted.
 
 - **The preview:** `calibration/diag_obj16_preview.R` + `calibration/lib_block_reopt.R` (`e39de1e`).
