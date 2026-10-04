@@ -67,7 +67,13 @@ GS_SMOKE      <- identical(Sys.getenv("CCX_GS_SMOKE", ""), "1")
 if (GS_SMOKE) { GS_BFGS_MAXIT <- 2L; GS_NM_MAXIT <- 10L; GS_ROUNDS <- 1L }
 # FROM CELLS (CCX_GS_FROM_CELLS=<path>): re-read a finished run's checkpointed cells instead of recomputing them
 GS_FROM_CELLS <- Sys.getenv("CCX_GS_FROM_CELLS", "")
-GS_TAG  <- paste0(format(Sys.Date(), "%Y%m%d"), if (GS_SMOKE) "_SMOKE" else "")
+# POST-HOC (CCX_GS_POSTHOC=1, with CCX_GS_FROM_CELLS): sections 3b and 3c, added AFTER the 2026-10-04 run and NOT
+# pre-registered -- 3b reads each cell that failed the slope gate by its LOCAL curvature; 3c profiles npp_tsens at
+# the two cross cells. Their outputs carry "_posthoc".
+GS_POSTHOC    <- identical(Sys.getenv("CCX_GS_POSTHOC", ""), "1")
+if (GS_POSTHOC && !nzchar(GS_FROM_CELLS)) stop("CCX_GS_POSTHOC reads a finished run's cells: set CCX_GS_FROM_CELLS too")
+GS_PROF_DELTA <- 0.003                                    # 3c: npp_tsens held at nu* -/+ this (/K; ~0.36 marginal sd)
+GS_TAG  <- paste0(format(Sys.Date(), "%Y%m%d"), if (GS_SMOKE) "_SMOKE" else "", if (GS_POSTHOC) "_posthoc" else "")
 GS_OUT  <- file.path("outputs", "diagnostics", sprintf("greening_lag_swap_%s", GS_TAG))
 GS_PROG <- paste0(GS_OUT, "_progress.txt")
 COMMIT  <- local({
@@ -117,7 +123,7 @@ for (b in names(MD)) {
 # ---- one cell: the block's conditional optimum at lag L, from a start ---------------------
 # `free` = the names optimised (the block, or the block minus npp_tsens for B's HELD cells); the held
 # npp_tsens stays at the BASE's value. Runs inside its own gate state and restores it.
-cell_opt <- function(b, L, start, free, max_rounds = GS_ROUNDS) {
+cell_opt <- function(b, L, start, free, max_rounds = GS_ROUNDS, hold = NULL) {
   md <- MD[[b]]
   label <- if (L == 0) GS_LABEL_ZERO else GS_LABEL_LAG
   g <- ccx_apply_gate(label); r <- ccx_apply_pins(GS_PINS)
@@ -130,6 +136,7 @@ cell_opt <- function(b, L, start, free, max_rounds = GS_ROUNDS) {
   pm[[GS_LAGNAME]] <- if (L > 0) L else NULL
   src <- if (identical(start, "own")) b else GS_OTHER[[b]]
   for (n in free) pm[[n]] <- MD[[src]]$par_mode[[n]]
+  for (n in names(hold)) { stopifnot(!n %in% free); pm[[n]] <- hold[[n]] }   # 3c only (post-hoc)
   u_st <- ccx_par_to_unc(pm)
   stopifnot(identical(names(u_st), CCX_PARAM_NAMES), (L > 0) == (GS_LAGNAME %in% names(u_st)))
   u0 <- u_of_par(md, free)                               # the frame's origin: the BASE's own values
@@ -285,6 +292,91 @@ for (b in names(MD)) for (L in GS_LAGS) {
               cand[[1]]$block[[GS_GREEN]], cand[[2]]$block[[GS_GREEN]], if (dz <= agree_tol) "ONE point" else "⚠ TWO POINTS (the better is used)"))
 }
 
+# ---- 3b. POST-HOC (NOT pre-registered; added after the 2026-10-04 run) ------------------------------
+# The slope gate reads |whitened slope| < 0.1 as "the optimum lies < 0.1 conditional sd away". That holds
+# where the curvature is the BASE's (the whitened Hessian = I); away from the base the gate is
+# CURVATURE-BLIND. Here each cell that failed it gets its LOCAL Hessian in the same whitened frame
+# (central differences, half-step GS_PULL_H), the Newton step that Hessian implies, and the objective
+# evaluated AT the step: the distance and the gain the gate was meant to bound, and the npp_tsens the
+# step would move to. A cell sits at its optimum within the gate's intent if the step is < GS_MODE_TOL
+# per axis (|step| < GS_MODE_TOL x sqrt(k)) and the real gain is below the objective's own spread
+# between the two starts (read off the table above, not typed).
+A_NU <- NULL; A_PROF <- NULL
+if (GS_POSTHOC) {
+  cat("\n=== 3b. POST-HOC (not pre-registered): the cells that failed the slope gate, read by their LOCAL curvature ===\n")
+  newton_cell <- function(o) {
+    while (sink.number() > 0L) sink()
+    b <- o$base; md <- MD[[b]]; L <- o$L; free <- o$free
+    label <- if (L == 0) GS_LABEL_ZERO else GS_LABEL_LAG
+    g0 <- ccx_apply_gate(label); r <- ccx_apply_pins(GS_PINS)
+    on.exit({ ccx_unpin_params(r); ccx_unapply_gate(g0) }, add = TRUE)
+    bp <- ccx_mode_base(md); bp$pump_mode <- md$pump_mode
+    bp[[CCX_GATE_FLAG_ENSO_LAG]] <- if (L > 0) 1L else NULL
+    lp <- ccx_make_logpost(base_params = bp, by_stream = TRUE, spinup_fn = SPF[[b]], obs = OBS)
+    stopifnot(identical(names(o$u), CCX_PARAM_NAMES))
+    u0 <- u_of_par(md, free); U <- chol(prec(md, free))      # the SAME frame as cell_opt()
+    u_at <- function(z) { uu <- o$u; uu[free] <- u0 + backsolve(U, z); uu }
+    f <- function(z) { v <- tryCatch(as.numeric(lp(u_at(z))), error = function(e) -Inf); if (is.finite(v)) -v else Inf }
+    z <- o$z; k <- length(z); h <- GS_PULL_H; f0 <- f(z)
+    if (abs(-f0 - o$logpost) > GS_REPRO_TOL) stop("the cell does not reproduce its logpost")
+    E <- diag(h, k)
+    fp <- vapply(seq_len(k), function(i) f(z + E[, i]), 0); fm <- vapply(seq_len(k), function(i) f(z - E[, i]), 0)
+    g <- (fp - fm) / (2 * h); H <- diag((fp - 2 * f0 + fm) / h^2, k)
+    for (i in 1:(k - 1)) for (j in (i + 1):k)
+      H[i, j] <- H[j, i] <- (f(z + E[, i] + E[, j]) - f(z + E[, i] - E[, j]) - f(z - E[, i] + E[, j]) + f(z - E[, i] - E[, j])) / (4 * h^2)
+    ev <- eigen(H, symmetric = TRUE)$values
+    step <- -solve(H, g); f1 <- f(z + step)
+    nu <- function(zz) ccx_unc_to_par(u_at(zz))[[GS_GREEN]]
+    list(base = b, L = L, start = o$start, kind = o$kind, max_slope = max(abs(g)), eig_min = min(ev), eig_max = max(ev),
+         newton_dist = sqrt(sum(step^2)), max_step = max(abs(step)), pred_gain = 0.5 * sum(g * solve(H, g)), real_gain = f0 - f1,
+         nu = nu(z), nu_newton = nu(z + step))
+  }
+  todo <- Filter(function(o) !isTRUE(o$converged), ALL)
+  flush(LOGCON)
+  NW <- parallel::mclapply(todo, newton_cell, mc.cores = GS_WORKERS, mc.preschedule = FALSE)
+  if (any(vapply(NW, function(x) inherits(x, "try-error") || !is.list(x), TRUE))) stop("a Newton check FAILED")
+  NWT <- do.call(rbind, lapply(NW, as.data.frame))
+  spread <- max(vapply(split(tab[tab$kind == "A", ], paste(tab$base[tab$kind == "A"], tab$L[tab$kind == "A"])),
+                       function(d) diff(range(d$logpost)), 0))
+  NWT$reading <- ifelse(NWT$real_gain > spread, "NOT AT OPTIMUM (the step found a better point)",
+                 ifelse(NWT$real_gain < 0, "QUADRATIC INVALID (the step WORSENS the objective)",
+                 ifelse(NWT$max_step < GS_MODE_TOL, "AT OPTIMUM", "flat (gain below the start spread)")))
+  print(NWT, digits = 4, row.names = FALSE)
+  cat(sprintf("  (k = %d; the gain threshold = the largest logpost spread between two starts of one cell, %.2e)\n", length(GS_BLOCK), spread))
+  cat(sprintf("  => %s. ⚠ A step that WORSENS the objective says the local quadratic fails over it; its npp_tsens is not an estimate of anything.\n",
+              paste(sprintf("%d %s", as.integer(table(NWT$reading)), names(table(NWT$reading))), collapse = "; ")))
+  A_NU <- NWT
+
+  # ---- 3c. POST-HOC (NOT pre-registered): npp_tsens PROFILED at the two cross cells --------------------
+  # At each cross cell npp_tsens is HELD at nu* - delta, nu* + delta and at the value where f_B = 1/2 (the
+  # pre-registered ordering's boundary), the other 7 block names re-optimised (cell_opt's `hold`), and
+  # compared with the free optimum. If nu* is the profile's maximum, both -/+ delta points lie below it; the
+  # boundary's deficit is how much worse "the lag carries only half the flip" fits, conditionally.
+  cat(sprintf("\n=== 3c. POST-HOC (not pre-registered): npp_tsens PROFILED at the two cross cells (held at nu* -/+ %g and at f = 1/2; the other %d names re-optimised) ===\n",
+              GS_PROF_DELTA, length(GS_BLOCK) - 1L))
+  nu_star <- c(LAG = best_of("LAG", 0)$block[[GS_GREEN]], CTL = best_of("CTL", L_LAG)$block[[GS_GREEN]])
+  nu_half <- c(LAG = best_of("LAG", L_LAG)$block[[GS_GREEN]] - FLIP / 2, CTL = best_of("CTL", 0)$block[[GS_GREEN]] + FLIP / 2)
+  PJ <- list()
+  for (b in names(nu_star)) { L <- if (b == "LAG") 0 else L_LAG
+    for (w in c("minus", "plus", "half")) PJ[[length(PJ) + 1L]] <- list(b = b, L = L, which = w,
+      nu = switch(w, minus = nu_star[[b]] - GS_PROF_DELTA, plus = nu_star[[b]] + GS_PROF_DELTA, half = nu_half[[b]])) }
+  flush(LOGCON)
+  PR <- parallel::mclapply(PJ, function(pj) { while (sink.number() > 0L) sink()
+    o <- cell_opt(pj$b, pj$L, "own", setdiff(GS_BLOCK, GS_GREEN), hold = stats::setNames(pj$nu, GS_GREEN))
+    list(b = pj$b, L = pj$L, which = pj$which, nu = pj$nu, logpost = o$logpost, lik = o$lik, conv = o$converged,
+         max_slope = max(abs(o$slope)), evals = o$n_eval) }, mc.cores = GS_WORKERS, mc.preschedule = FALSE)
+  if (any(vapply(PR, function(x) inherits(x, "try-error") || !is.list(x), TRUE))) stop("a profile point FAILED")
+  PRT <- do.call(rbind, lapply(PR, as.data.frame))
+  PRT$d_logpost <- PRT$logpost - vapply(PRT$b, function(b) best_of(b, if (b == "LAG") 0 else L_LAG)$logpost, 0)
+  PRT$d_lik <- PRT$lik - vapply(PRT$b, function(b) best_of(b, if (b == "LAG") 0 else L_LAG)$lik, 0)
+  print(PRT, digits = 5, row.names = FALSE)
+  for (b in names(nu_star)) { d <- PRT[PRT$b == b, ]
+    cat(sprintf("  %s (L %.3f): nu* %+.5f is the profile maximum within -/+ %g: %s; f = 1/2 (nu %+.5f) fits %.3f logpost / %.3f likelihood WORSE\n",
+                b, d$L[1], nu_star[[b]], GS_PROF_DELTA, if (all(d$d_logpost[d$which != "half"] < 0)) "YES" else "NO",
+                nu_half[[b]], -d$d_logpost[d$which == "half"], -d$d_lik[d$which == "half"])) }
+  A_PROF <- PRT
+}
+
 # ---- A. the lag's share of the flip ----------------------------------------------------------
 cat(sprintf("\n=== A. THE LAG'S SHARE OF THE FLIP: f_B = [nu*(B, %.3f) - nu*(B, 0)] / %+.5f (the ordering: > or < %g) ===\n",
             L_LAG, FLIP, GS_SHARE_CUT))
@@ -356,7 +448,7 @@ for (b in names(MD)) { o5 <- best_of(b, GS_LAG_OBS); oL <- best_of(b, L_LAG)
 sink(); close(LOGCON)
 out <- list(cells = tab, all = lapply(ALL, function(o) o[c("base", "L", "kind", "start", "free", "label", "z", "block", "logpost", "lik",
                                                              "streams", "slope", "converged", "rounds", "n_eval", "n_bad", "minutes", "runs")]),
-            identity = ID, A = A, verdict_A = verdict_A, B = B, C = C, premise = c(later = c1, positive = c2),
+            identity = ID, A = A, verdict_A = verdict_A, B = B, C = C, premise = c(later = c1, positive = c2), newton = A_NU, profile = A_PROF,
             provenance = sprintf(paste0("%s @%s; prereg %s; bases LAG %s, CTL %s; block %s; lags %s; whitened by each base's stored ",
                                         "Hessian; BFGS + Nelder-Mead, slope gate %g; objective #15; no RNG; %s"),
                                  GS_DRIVER, COMMIT, GS_PREREG, GS_BASES[["LAG"]], GS_BASES[["CTL"]], paste(GS_BLOCK, collapse = ","),

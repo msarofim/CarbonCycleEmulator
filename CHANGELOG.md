@@ -2,6 +2,73 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (e) — **THE GREENING READING TESTED (the handoff's open item 3; pre-registered). The land ENSO lag SETS the sign of `npp_tsens`.** The other 26 names were held and the 8-name land block re-optimised. Moving the lag 0 → 2.644 months then carries **92 %** (lag-arm base) and **89 %** (control base) of the refit's −0.0079 → +0.0089 /K flip. In both bases the sign follows the lag, and two opposite starts reach one point in every cell. **But the sign itself is weakly held:** at either lag ν sits within about one sd of zero. Nothing adopted.
+
+**The test** (`notes/prereg_2026-10-04_greening_lag_swap.md`, committed in `6b64424` before the run; `calibration/diag_greening_lag_swap.R`).
+- Run from a frozen copy of `6b64424`, 6 forked workers, BLAS pinned, `nice -n 10`; 14 cells in 26.4 min. Torch verdict: Mac (≈ 4–5 CPU-hours; a bundle round trip is not worth it for a diagnostic).
+- Outputs: `outputs/diagnostics/greening_lag_swap_20261004.{log,rds}`, the cells' checkpoint `…_cells.rds`, `…_progress.txt`.
+- **Design.**
+  - Two bases (`hilda34g`; the lag-0 control refit) × lags {0, 2.644, 5}.
+  - The block: `npp_tsens`, `beta_max`, `fert_k`, the two land ENSO amplitudes, `luc_scale`, `imb_share_land`, `ndep_ret`.
+  - It is re-optimised on the #15 logpost in coordinates whitened by each base's stored Hessian (BFGS + Nelder–Mead), from the base's own block and from the other arm's.
+- **Power, measured before the design was fixed.** This block frees `npp_tsens` to 0.93 / 0.94 of its marginal sd. The obvious 5-name block reaches only 0.77–0.78, and its "follows the base" answer would have been a null with no power.
+- **Identity gates pass:**
+  - both bases reproduce their stored logposts (diff 0);
+  - each mode is the block's optimum (whitened slope 0.0024 / 0.0025);
+  - the runs reproduce the refit read's timing and 2300 CO₂ exactly;
+  - from the other arm's block, each base at its own lag returns to its own mode.
+
+**A (primary). The lag's share of the flip:**
+
+| base | ν* at L = 0 | ν* at L = 2.644 | f (the ordering: > ½) | sign follows the lag |
+|---|---|---|---|---|
+| lag arm | −0.00658 | +0.00887 | **0.92** | yes |
+| control | −0.00789 | +0.00710 | **0.89** | yes |
+
+- VERDICT (pre-registered): **the lag sets the sign, H1 or H3.**
+- The lag and the land block alone also recover:
+  - **93 %** of the lag arm's likelihood gain over the control (control base at L = 2.644: −1144.21, against −1143.25 and −1158.17);
+  - **its whole futures move:** SSP5-8.5 2300 1449.3–1449.6 ppm (lag arm 1448.6, control 1476.2). In reverse, the lag arm with the lag removed reads 1476.3.
+- **This completes the refit read's section 8, it does not contradict it.** Swapping the lag alone, with the land names fixed, moves the futures by < 0.01 ppm. Letting the land block respond to the lag moves them by the full ~27 ppm.
+
+**B. Which rows carry the move: two forces, one per cross cell.** The gain from freeing `npp_tsens` against holding it at the base's value:
+- **Lag arm at L = 0** (ν → −0.0066; +2.64 likelihood):
+  - GCB +3.12 (`gcb_land_sink` +3.07) and the level rows +1.28 (`co2_level_MLO` +0.66, `co2_level_SPO` +0.62) buy the NEGATIVE term;
+  - against them, the ice-core CO₂ row (−1.60) and the seasonal rows (−0.46).
+  - The pre-registered ordering names **GCB: H1's interannual channel.**
+- **Control at L = 2.644** (ν → +0.0071; +0.98 likelihood):
+  - GCB is ≈ 0 (−0.05). The ice-core CO₂ row (+1.63) and the seasonal rows (+0.66) buy the POSITIVE term, against the level rows (−1.01).
+  - The ordering names **ICE**, a channel the pre-registration did not name.
+- **The reading:** without the lag, the GCB land sink and the CO₂ levels pull the greening term negative. The lag removes that pull. What is left, a long-term preference of the pre-1958 ice-core CO₂ row and the seasonal rows, sets the sign positive.
+- H3 (the seasonal channel as the driver) is not supported: the seasonal rows are the minority group in both cells.
+
+**C. The mechanism's premise holds** (both pre-registered orderings; seen in the smoke before the commit, as the prereg's status says).
+- At the control, the greening term's own growth signal peaks **+6 months** after Niño 3.4 (r +0.57 at ν < 0). The land ENSO term's peaks at 0.
+- Its amplitude is 8–9 % of the ENSO term's (sd 0.022 vs 0.242 ppm/yr).
+
+**D. The L = 5 column, for open item 2** (descriptive; a conditional slice):
+- Both bases agree.
+- The likelihood is **−12.2** against L = 2.644, with the land block re-optimised. D3's amplitudes-only slice put L = 5 about 10.4 below L = 2.5 (10-02 dd).
+- The growth peak moves +1 → **+4** months (observed +5), and the correlation with observed growth rises 0.57 → **0.67**.
+- `npp_tsens` stays positive (+0.0056 / +0.0037), `beta_max` 1.90 / 1.95.
+- SSP5-8.5 2300 **+7 ppm**, vvH 2300 +4 ppm.
+
+**The convergence gate, and two post-hoc checks** (NOT pre-registered; `CCX_GS_POSTHOC=1` re-reads the checkpoint → `…_posthoc.{log,rds}`, which reproduces the run's sections A–D byte for byte).
+- 8 of the 14 cells failed the pre-registered slope gate (max whitened slope 0.12–1.61), though the two starts agree in every cell to ≤ 0.17 whitened units and ≤ 1.1e-4 logpost.
+- **3b, the local Newton step: NOT a usable instrument here.**
+  - Every step WORSENS the objective (−0.006 to −279), so the local quadratic fails over it.
+  - The local Hessian's eigenvalues run 0.004–349 in the base's frame: a curved, flat-bottomed valley. The large slopes sit on stiff directions, where they imply moves of ~0.005.
+  - ⚠ A first version of 3b printed "0 of 8 cells sit at their optimum … 94.7 % of the flip", a reading the negative real gains refute. It was never committed (set aside in the scratchpad). The committed 3b classes such a step "QUADRATIC INVALID".
+- **3c, `npp_tsens` profiled at the two cross cells: ν* IS the profile maximum.**
+  - Held at ν* ± 0.003 (the other 7 names re-optimised), both sides fall 0.065–0.077 logpost, symmetrically. That implies a profile sd of ≈ 0.008 /K, about the Laplace marginal sd (0.0080–0.0089).
+  - **f = ½ fits only 0.42 (lag base) / 0.33 (control base) logpost worse** (0.79 / 0.08 in likelihood).
+- ⇒ **The lag moves ν by ~1.9 sd, but at either lag ν is within ~1 sd of zero.** The ~27 ppm SSP5-8.5 2300 difference between the arms rides on a sign the record barely fixes.
+- That positive sign runs against the literature's lean recorded in `R/constants.R` `NPP_TSENS_PRIOR_SD`: CMIP6 γ_NPP < 0 in 8 of 10 ESMs (Varney 2024 BG 21:2759), and GCB 2025's net climate effect on the land sink −0.8 ± 0.7 GtC/yr. The prior itself is sign-free by Marcus's 09-30 ruling.
+
+**What it means (the ruling is Marcus's).**
+- At lag 0, the negative greening term WAS an ENSO-timing patch working through the GCB land sink: a match by cancellation, in the sense of his 09-03 standard ("pedagogical, not an emulator"). The lag removed it.
+- The positive sign that replaced it is a weak long-term preference, not an ENSO effect.
+
 ## 2026-10-04 (d) — **MERGED: branch `claude/pensive-burnell-a9bf40` (the start-017 substep-controller fix, on Marcus's ruling "Apply A+B+C (Recommended)") is in `main`.** This was open item 1 of the 10-04 handoff ("Read its result and merge its branch") and step 1 of the branch's own handoff. No registered mode moves.
 
 - **What came in**, four commits:

@@ -1,0 +1,173 @@
+calibration/diag_greening_lag_swap.R @6b64424+dirty, 2026-10-04 10:16 | prereg notes/prereg_2026-10-04_greening_lag_swap.md | 6 workers
+  bases: LAG /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds (L 2.6438, npp_tsens +0.00885, beta_max 1.8307)
+         CTL calibration/output/refit_20261003_obj15_hilda_csl3v0kaidgb/mode_fit_pumpN.rds (L 0, npp_tsens -0.00789, beta_max 2.2252)
+  the flip: npp_tsens +0.01675 /K
+
+=== 0. POWER: sd of npp_tsens with the block free and every other name held, as a fraction of its MARGINAL sd ===
+  LAG: marginal sd 0.00893 /K; the 8-name block frees 0.93 of it; the 5-name block 0.78; npp_tsens alone 0.10; the flip is 1.88 marginal sds
+  CTL: marginal sd 0.00795 /K; the 8-name block frees 0.94 of it; the 5-name block 0.77; npp_tsens alone 0.11; the flip is 2.11 marginal sds
+
+=== 1. IDENTITY GATES (each base at its own lag, its own block) ===
+  LAG at L 2.6438: logpost -1182.991369 (stored -1182.991369, diff +0.0e+00); likelihood -1143.2508; max |whitened slope| 0.0024 (gate < 0.1)
+    runs: growth peak +1 months (refit read +1), r_mod_obs 0.573457 (0.573457); ssp585_2300 1448.647 (1448.647), vvH_2300 1002.225 (1002.225)
+  CTL at L 0.0000: logpost -1196.101712 (stored -1196.101712, diff +0.0e+00); likelihood -1158.1675; max |whitened slope| 0.0025 (gate < 0.1)
+    runs: growth peak -2 months (refit read -2), r_mod_obs 0.432580 (0.432580); ssp585_2300 1476.206 (1476.206), vvH_2300 1018.915 (1018.915)
+
+=== 2. 14 CELLS on 6 forked workers (progress: outputs/diagnostics/greening_lag_swap_20261004_posthoc_progress.txt) ===
+  the cells RE-READ from outputs/diagnostics/greening_lag_swap_20261004_cells.rds (run @6b64424)
+  the cells took 0.0 min
+
+=== 3. EVERY CELL (block re-optimised on the #15 logpost; kind B = npp_tsens HELD at the base) ===
+ base      L kind start logpost     lik  npp_tsens beta_max fert_k    g_NH
+  CTL 0.0000    A other -1196.1 -1158.2 -0.0078889   2.2240 756.76 0.46742
+  CTL 0.0000    A   own -1196.1 -1158.2 -0.0078928   2.2252 757.29 0.46743
+  CTL 2.6438    A other -1183.3 -1144.2  0.0070960   1.8727 687.32 0.52936
+  CTL 2.6438    A   own -1183.3 -1144.2  0.0070713   1.8766 688.98 0.52940
+  CTL 5.0000    A other -1195.1 -1156.5  0.0037500   1.9461 701.62 0.40672
+  CTL 5.0000    A   own -1195.1 -1156.5  0.0037247   1.9482 702.51 0.40659
+  LAG 0.0000    A other -1196.4 -1157.9 -0.0065755   2.1850 796.51 0.47216
+  LAG 0.0000    A   own -1196.4 -1157.9 -0.0065715   2.1848 796.44 0.47212
+  LAG 2.6438    A other -1183.0 -1143.3  0.0088708   1.8295 726.29 0.53629
+  LAG 2.6438    A   own -1183.0 -1143.3  0.0088541   1.8307 726.83 0.53623
+  LAG 5.0000    A other -1194.8 -1155.5  0.0056365   1.8985 739.67 0.41564
+  LAG 5.0000    A   own -1194.8 -1155.5  0.0056390   1.8984 739.64 0.41562
+  CTL 2.6438    B   own -1185.0 -1145.2 -0.0078928   2.2438 761.33 0.47777
+  CTL 5.0000    B   own -1196.1 -1156.9 -0.0078928   2.2335 757.71 0.36647
+  LAG 0.0000    B   own -1198.4 -1160.5  0.0088541   1.8067 721.08 0.51499
+  LAG 5.0000    B   own -1194.9 -1155.7  0.0088541   1.8205 722.65 0.42657
+    g_SH luc_scale imb_land ndep_ret max_slope  conv evals bad peak   r_obs
+ 0.36362   0.91285  0.63919   12.215 0.0053192  TRUE  1507   0   -2 0.43257
+ 0.36357   0.91279  0.63908   12.214 0.0025146  TRUE    16   0   -2 0.43258
+ 0.50691   0.89419  0.59594   12.049 1.6105952 FALSE  2763   0    1 0.57736
+ 0.50703   0.89407  0.59573   12.045 1.5857884 FALSE  3156   0    1 0.57740
+ 0.44354   0.89538  0.59671   11.685 1.2693412 FALSE  2964   0    4 0.67144
+ 0.44351   0.89533  0.59673   11.687 1.2499201 FALSE  3099   0    4 0.67145
+ 0.36540   0.89692  0.60413   14.101 0.5279210 FALSE  2933   0   -2 0.42456
+ 0.36540   0.89691  0.60406   14.100 0.5316131 FALSE  2961   0   -2 0.42454
+ 0.51185   0.87731  0.55666   13.943 0.0025251  TRUE  1450   0    1 0.57343
+ 0.51180   0.87728  0.55664   13.943 0.0024437  TRUE    16   0    1 0.57346
+ 0.44851   0.87841  0.55719   13.581 0.1229200 FALSE  2976   0    4 0.67132
+ 0.44854   0.87841  0.55721   13.581 0.1226914 FALSE  2765   0    4 0.67132
+ 0.46447   0.91551  0.64470   12.312 0.0144584  TRUE   902   0    2 0.59861
+ 0.41147   0.91216  0.63523   11.908 0.0069851  TRUE   884   0    4 0.67111
+ 0.39901   0.87388  0.54903   13.877 0.0070464  TRUE   943   0   -2 0.37071
+ 0.45727   0.87392  0.54620   13.544 0.0031110  TRUE   869   0    4 0.67032
+ ssp585    vvH
+ 1476.3 1019.0
+ 1476.2 1018.9
+ 1449.6 1001.4
+ 1449.3 1001.3
+ 1456.7 1005.6
+ 1456.6 1005.6
+ 1476.3 1020.3
+ 1476.3 1020.3
+ 1448.7 1002.2
+ 1448.6 1002.2
+ 1455.6 1006.3
+ 1455.6 1006.3
+ 1473.5 1017.6
+ 1475.7 1018.5
+ 1452.4 1004.1
+ 1450.9 1003.1
+  ⚠ 8 cell(s) did NOT pass the slope check in 3 rounds: read them as points, not optima
+
+  START AGREEMENT (two starts reach one point if their whitened distance <= 0.57 = 2 x 0.1 x sqrt(8)):
+    LAG L 0.000: whitened distance 0.010, d logpost -0.0000, npp_tsens -0.00657 vs -0.00658 => ONE point
+    LAG L 2.644: whitened distance 0.004, d logpost -0.0000, npp_tsens +0.00885 vs +0.00887 => ONE point
+    LAG L 5.000: whitened distance 0.001, d logpost -0.0000, npp_tsens +0.00564 vs +0.00564 => ONE point
+    CTL L 0.000: whitened distance 0.004, d logpost -0.0000, npp_tsens -0.00789 vs -0.00789 => ONE point
+    CTL L 2.644: whitened distance 0.169, d logpost -0.0001, npp_tsens +0.00707 vs +0.00710 => ONE point
+    CTL L 5.000: whitened distance 0.076, d logpost -0.0001, npp_tsens +0.00372 vs +0.00375 => ONE point
+
+=== 3b. POST-HOC (not pre-registered): the cells that failed the slope gate, read by their LOCAL curvature ===
+ base     L start kind max_slope  eig_min eig_max newton_dist max_step
+  LAG 0.000   own    A    0.5316 0.003947 224.136      5.6851   5.5346
+  LAG 0.000 other    A    0.5279 0.003930 224.358      5.7128   5.5616
+  LAG 5.000   own    A    0.1227 0.142652   9.382      0.2372   0.2118
+  LAG 5.000 other    A    0.1229 0.142297   9.399      0.2385   0.2130
+  CTL 2.644   own    A    1.5858 0.004412 342.040     30.4687  29.4325
+  CTL 2.644 other    A    1.6106 0.004341 349.041     31.2917  30.2329
+  CTL 5.000   own    A    1.2499 0.007018 224.671     17.6982  17.0312
+  CTL 5.000 other    A    1.2693 0.006957 227.886     17.9898  17.3137
+ pred_gain  real_gain        nu nu_newton
+  0.095905 -5.115e-01 -0.006571 -0.005123
+  0.096473 -5.194e-01 -0.006576 -0.005122
+  0.005832 -5.817e-03  0.005639  0.006075
+  0.005873 -5.840e-03  0.005636  0.006075
+  2.323483 -2.597e+02  0.007071 -0.008414
+  2.408988 -2.786e+02  0.007096 -0.008766
+  1.288397 -7.875e+01  0.003725 -0.007005
+  1.319860 -8.186e+01  0.003750 -0.007143
+                                            reading
+ QUADRATIC INVALID (the step WORSENS the objective)
+ QUADRATIC INVALID (the step WORSENS the objective)
+ QUADRATIC INVALID (the step WORSENS the objective)
+ QUADRATIC INVALID (the step WORSENS the objective)
+ QUADRATIC INVALID (the step WORSENS the objective)
+ QUADRATIC INVALID (the step WORSENS the objective)
+ QUADRATIC INVALID (the step WORSENS the objective)
+ QUADRATIC INVALID (the step WORSENS the objective)
+  (k = 8; the gain threshold = the largest logpost spread between two starts of one cell, 1.12e-04)
+  => 8 QUADRATIC INVALID (the step WORSENS the objective). ⚠ A step that WORSENS the objective says the local quadratic fails over it; its npp_tsens is not an estimate of anything.
+
+=== 3c. POST-HOC (not pre-registered): npp_tsens PROFILED at the two cross cells (held at nu* -/+ 0.003 and at f = 1/2; the other 7 names re-optimised) ===
+   b      L which          nu logpost     lik  conv max_slope evals d_logpost
+ LAG 0.0000 minus -0.00957552 -1196.5 -1157.7  TRUE  0.076594  1317 -0.076545
+ LAG 0.0000  plus -0.00357552 -1196.5 -1158.1  TRUE  0.062837  1295 -0.076399
+ LAG 0.0000  half  0.00049739 -1196.8 -1158.6  TRUE  0.044761  1201 -0.421530
+ CTL 2.6438 minus  0.00409596 -1183.4 -1144.2 FALSE  0.264142  2273 -0.067957
+ CTL 2.6438  plus  0.01009596 -1183.4 -1144.4 FALSE  0.406554  2955 -0.064981
+ CTL 2.6438  half  0.00048456 -1183.6 -1144.3 FALSE  0.176181  2406 -0.327598
+     d_lik
+  0.113962
+ -0.245797
+ -0.789946
+  0.029478
+ -0.139116
+ -0.082604
+  LAG (L 0.000): nu* -0.00658 is the profile maximum within -/+ 0.003: YES; f = 1/2 (nu +0.00050) fits 0.422 logpost / 0.790 likelihood WORSE
+  CTL (L 2.644): nu* +0.00710 is the profile maximum within -/+ 0.003: YES; f = 1/2 (nu +0.00048) fits 0.328 logpost / 0.083 likelihood WORSE
+
+=== A. THE LAG'S SHARE OF THE FLIP: f_B = [nu*(B, 2.644) - nu*(B, 0)] / +0.01675 (the ordering: > or < 0.5) ===
+       nu_L0 nu_Llag       f sign_follows
+LAG -0.00658 0.00887 0.92234            1
+CTL -0.00789 0.00710 0.89478            1
+  VERDICT A (pre-registered): THE LAG SETS THE SIGN (H1 or H3; B decides which)
+  the rest of the block alongside (natural units; L = 0 vs the lag arm's lag):
+    LAG: npp_tsens -0.006576 -> 0.008871; beta_max 2.185 -> 1.829; fert_k 796.5 -> 726.3; gamma_enso_land_NH 0.4722 -> 0.5363; gamma_enso_land_SH 0.3654 -> 0.5118; luc_scale 0.8969 -> 0.8773; imb_share_land 0.6041 -> 0.5567; ndep_ret 14.1 -> 13.94
+    CTL: npp_tsens -0.007889 -> 0.007096; beta_max 2.224 -> 1.873; fert_k 756.8 -> 687.3; gamma_enso_land_NH 0.4674 -> 0.5294; gamma_enso_land_SH 0.3636 -> 0.5069; luc_scale 0.9128 -> 0.8942; imb_share_land 0.6392 -> 0.5959; ndep_ret 12.21 -> 12.05
+
+=== B. WHICH ROWS CARRY THE npp_tsens MOVE: streams(block free) - streams(npp_tsens HELD at the base), per cell where the lag moved ===
+  LAG L 0.000: npp_tsens -0.00658 free vs +0.00885 held; freeing it buys +2.643 likelihood (+1.986 logpost)
+    by group: GCB +3.120, ICE -1.348, LEVEL +1.281, REST +0.048, SEASONAL -0.459
+    largest rows: gcb_land_sink +3.074, co2_icecore -1.597, co2_seasonal_MLO -0.705, co2_level_MLO +0.661, d14c_NH +0.628, co2_level_SPO +0.621
+    the channel by the pre-registered ordering (the largest positive group): GCB
+  LAG L 5.000: npp_tsens +0.00564 free vs +0.00885 held; freeing it buys +0.167 likelihood (+0.073 logpost)
+    by group: GCB +0.275, ICE -0.300, LEVEL +0.257, REST +0.019, SEASONAL -0.084
+    largest rows: co2_icecore -0.357, gcb_land_sink +0.255, co2_level_MLO +0.140, d14c_NH +0.127, co2_level_SPO +0.124, co2_seasonal_MLO -0.123
+    the channel by the pre-registered ordering (the largest positive group): GCB
+  CTL L 2.644: npp_tsens +0.00710 free vs -0.00789 held; freeing it buys +0.984 likelihood (+1.691 logpost)
+    by group: GCB -0.050, ICE +1.473, LEVEL -1.011, REST -0.088, SEASONAL +0.659
+    largest rows: co2_icecore +1.628, co2_seasonal_MLO +0.606, d14c_NH -0.597, co2_level_MLO -0.563, co2_level_SPO -0.529, d14c_SH +0.510
+    the channel by the pre-registered ordering (the largest positive group): ICE
+  CTL L 5.000: npp_tsens +0.00375 free vs -0.00789 held; freeing it buys +0.409 likelihood (+0.995 logpost)
+    by group: GCB -0.285, ICE +1.091, LEVEL -0.608, REST -0.069, SEASONAL +0.279
+    largest rows: co2_icecore +1.241, d14c_NH -0.467, d14c_SH +0.401, co2_level_MLO -0.398, d13c_level_SPO +0.390, co2_seasonal_MLO +0.386
+    the channel by the pre-registered ordering (the largest positive group): ICE
+
+=== C. THE GREENING TERM'S OWN GROWTH SIGNAL vs THE LAND ENSO TERM'S, against Nino 3.4 (section 6's estimator) ===
+  LAG (npp_tsens +0.00885, L 2.644):
+          peak r_at_peak sd_ppm_yr
+greening     6   -0.5693    0.0240
+enso_term    2    0.9111    0.3053
+    amplitude ratio sd(greening) / sd(ENSO term) = 0.079
+  CTL (npp_tsens -0.00789, L 0.000):
+          peak r_at_peak sd_ppm_yr
+greening     6    0.5680    0.0217
+enso_term    0    0.9107    0.2419
+    amplitude ratio sd(greening) / sd(ENSO term) = 0.090
+  PREMISE (pre-registered orderings at the control): (i) the greening signal peaks LATER than the ENSO term: YES (+6 vs +0 months); (ii) at npp_tsens < 0 its correlation at the peak is POSITIVE: YES (+0.568)
+
+=== D. THE L = 5 COLUMN (descriptive; a conditional slice, not a refit) ===
+  LAG: likelihood at L 5 minus at L 2.644 = -12.232; npp_tsens +0.00564 (at 2.644: +0.00887); beta_max 1.8985 (1.8295); growth peak +4 months (+1; observed +5); r with observed growth 0.671 (0.573); ssp585_2300 1455.6 ppm (1448.7); vvH_2300 1006.3 (1002.2)
+  CTL: likelihood at L 5 minus at L 2.644 = -12.235; npp_tsens +0.00375 (at 2.644: +0.00710); beta_max 1.9461 (1.8727); growth peak +4 months (+1; observed +5); r with observed growth 0.671 (0.577); ssp585_2300 1456.7 ppm (1449.6); vvH_2300 1005.6 (1001.4)
