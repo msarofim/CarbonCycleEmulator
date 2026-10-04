@@ -2,6 +2,62 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (o) — **THE STRATIFICATION FEEDBACK PREVIEWED** (`calibration/diag_mix_preview.R` @`1be5504` → `outputs/diagnostics/mix_preview_20261004.{log,rds}`; from a frozen copy, md5-identical, `nice 10`). On every registered mode it costs 1.5–1.9 in likelihood, unrefitted. Its futures effect is SMALL: SSP5-8.5 +2.5 ppm at 2100 and +5.5 at 2300 (range +2.7 to +11.0 over q ½–2). The record mildly disfavours it, monotonically in s. Nothing adopted.
+
+- **A. Price at every registered mode,** each under its own structure, gate, pins and spinup. All 6 reproduce their
+  stored streams `identical()` OFF, and none refuses the feedback (the refusal is read on the FITTED vector).
+
+| mode | structure | Δ likelihood ON |
+|---|---|---|
+| hilda34g | hilda_csl3v0kaidgbe | −1.77 |
+| hilda33d | hilda_csl3v0kaidgb | −1.89 |
+| hilda29l | hilda_csl3 | −1.79 |
+| hilda32f | hilda_csl3 | −1.63 |
+| hilda31s2 | hilda | −1.79 |
+| hilda31pe | hilda_c | −1.48 |
+
+  - The same rows move on every mode: `d13c_level_MLO` −1.3 to −1.9 and `co2_level_SPO` −0.3 to −0.9, against
+    `co2_level_MLO` +0.4 to +0.8 and `d13c_level_SPO` +0.5 to +0.7.
+- **B. Futures at hilda34g, ON (q = 1) vs OFF,** CO₂ in ppm:
+
+| scenario | 2100 | 2300 | 2300 at q ½ / 2 | ocean uptake 2024–2300 |
+|---|---|---|---|---|
+| SSP5-8.5 | +2.45 | **+5.49** | +2.75 / +10.96 | −13.5 GtC (−1.1 %) |
+| vvH | +1.04 | +2.87 | +1.44 / +5.74 | −7.4 GtC |
+| vvM | +0.71 | +0.66 | | |
+| SSP2-4.5 | +0.61 | +0.29 | | |
+| SSP1-2.6 | +0.20 | +0.02 | | |
+| vvLN | +0.17 | +0.02 | | |
+
+  - The SSP5-8.5 2300 GMST moves +0.016 K: the loop through the climate is closed and tiny.
+  - The size is what the 10-04 (n) elasticity predicted (+3–7 ppm at 2300). It is ~1/5 of the greening term's ~27 ppm.
+- **C. Power at hilda34g** (Δ likelihood vs s):
+
+| s × | 0.5 | 1 | 2 | 4 |
+|---|---|---|---|---|
+| every name held | −0.78 | −1.77 | −4.33 | −11.54 |
+| kz re-optimised | −0.69 | −1.40 | −2.92 | −6.25 |
+
+  - With kz re-optimised it moves 14,224 → 14,366 / 14,505 / 14,775 m²/yr.
+  - The record mildly prefers no feedback. At the cited s the cost after kz is 1.4. The refit will show the price with
+    every name free.
+  - The ruling fixed s from observation × law, so this is information, not a reason to fit s.
+- **D. The ocean's climate effect, 2015–24** (warm vs climate, GMST AND SST, held at its 1901–20 mean from 1901):
+  - OFF **−0.431 GtC/yr**; ON −0.446. The feedback's own share is **−0.015**.
+  - Against GCB 2025's −0.20 ± 0.05 that is z −4.6 / −4.9, but **NOT like-for-like, and not read as a finding:**
+    - GCB's baseline is a repeated "normal year" climate, whose year is UNVERIFIED here. Over 1901–20 → 2015–24 CCX
+      warms 1.325 K, i.e. −0.32 GtC/yr per K. If GCB's normal year were ~1990 (a recollection, unverified), its −0.20
+      would be about the same per K.
+    - GOBMs carry winds, which CCX lacks.
+    - CO₂ is interactive here: the warm run's CO₂ is +4.2 ppm higher, which biases CCX's effect toward zero.
+  - ⚠ OPEN: verify GCB 2025's GOBM protocol (which normal year, when run A starts), then build the like-for-like
+    comparison. CCX's existing ocean climate effect is the solubility term carried down its ventilated column; this
+    feedback is a small addition to it.
+- **What it means (the decision is Marcus's):**
+  - The ruled feedback is built, tested, bit-exact OFF and cheap. Its futures effect is a few ppm.
+  - It enters the canonical only through objective #16's refit, with the greening decision (P0 vs P4).
+  - Whether to launch that refit now, after the `k_w` arm lands, or to batch it with anything else is his call.
+
 ## 2026-10-04 (n) — **THE STRATIFICATION FEEDBACK IS BUILT** (DESIGN §3.4a S, specified first in `8f6e001`; Marcus's 10-04 rulings). Both cores, a new label `hilda_csl3v0kaidgbem` (the name is Marcus's call), 78 new tests, and six mutations caught. OFF is bit-exact: hilda34g's stored logpost reproduces with a difference of exactly 0. At the unrefitted canonical, ON costs 1.77 in likelihood and trims the 2015–24 ocean sink by 0.015 GtC/yr. Nothing adopted.
 
 - **The code** (none of it read when the feedback is off):

@@ -1,0 +1,43 @@
+calibration/diag_mix_preview.R @1be5504, 2026-10-04 19:09 | the feedback: s 0.052198 /K, q 1 (app range 0.5-2), tau_d 194.939 yr (label hilda_csl3v0kaidgbem)
+
+=== A. PRICE: every registered mode under its own structure, OFF (must reproduce) and ON ===
+hilda34g   hilda_csl3v0kaidgbe    OFF reproduces stored: TRUE  | ON: likelihood -1.7668 | largest rows: d13c_level_MLO -1.86, co2_level_SPO -0.82, co2_level_MLO +0.75, d13c_level_SPO +0.58
+hilda33d   hilda_csl3v0kaidgb     OFF reproduces stored: TRUE  | ON: likelihood -1.8912 | largest rows: d13c_level_MLO -1.85, co2_level_SPO -0.84, co2_level_MLO +0.76, d13c_level_SPO +0.54
+hilda29l   hilda_csl3             OFF reproduces stored: TRUE  | ON: likelihood -1.7871 | largest rows: d13c_level_MLO -1.75, co2_level_SPO -0.91, d13c_level_SPO +0.64, co2_level_MLO +0.53
+hilda32f   hilda_csl3             OFF reproduces stored: TRUE  | ON: likelihood -1.6309 | largest rows: d13c_level_MLO -1.85, d13c_level_SPO +0.65, co2_level_SPO -0.57, co2_level_MLO +0.40
+hilda31s2  hilda                  OFF reproduces stored: TRUE  | ON: likelihood -1.7925 | largest rows: d13c_level_MLO -1.29, d13c_level_SPO +0.71, co2_level_SPO -0.63, co2_level_MLO +0.55
+hilda31pe  hilda_c                OFF reproduces stored: TRUE  | ON: likelihood -1.4761 | largest rows: d13c_level_MLO -1.92, d13c_level_SPO +0.67, d14c_SH +0.43, co2_level_SPO -0.29
+
+=== B. FUTURES at hilda34g: OFF vs ON (q = 1 central; 0.5 / 2 bounds) ===
+ssp126  ON_qcentral CO2 2100   402.4 (+0.20)  2300   346.3 ( +0.02) ppm | GMST 2300  1.62 (-0.000) K | ocean uptake 2024-2300   116.1 (  +0.2) GtC
+ssp126  ON_qlo      CO2 2100   402.3 (+0.10)  2300   346.3 ( +0.01) ppm | GMST 2300  1.62 (-0.000) K | ocean uptake 2024-2300   116.0 (  +0.1) GtC
+ssp126  ON_qhi      CO2 2100   402.6 (+0.41)  2300   346.3 ( +0.03) ppm | GMST 2300  1.62 (-0.000) K | ocean uptake 2024-2300   116.3 (  +0.5) GtC
+ssp245  ON_qcentral CO2 2100   523.9 (+0.61)  2300   477.6 ( +0.29) ppm | GMST 2300  3.02 (+0.002) K | ocean uptake 2024-2300   432.2 (  -0.9) GtC
+ssp245  ON_qlo      CO2 2100   523.6 (+0.31)  2300   477.4 ( +0.15) ppm | GMST 2300  3.02 (+0.001) K | ocean uptake 2024-2300   432.6 (  -0.4) GtC
+ssp245  ON_qhi      CO2 2100   524.6 (+1.22)  2300   477.9 ( +0.58) ppm | GMST 2300  3.02 (+0.005) K | ocean uptake 2024-2300   431.3 (  -1.7) GtC
+ssp585  ON_qcentral CO2 2100   960.0 (+2.45)  2300  1454.1 ( +5.49) ppm | GMST 2300  7.61 (+0.016) K | ocean uptake 2024-2300  1278.4 ( -13.5) GtC
+ssp585  ON_qlo      CO2 2100   958.8 (+1.23)  2300  1451.4 ( +2.75) ppm | GMST 2300  7.60 (+0.008) K | ocean uptake 2024-2300  1285.1 (  -6.8) GtC
+ssp585  ON_qhi      CO2 2100   962.5 (+4.88)  2300  1459.6 (+10.96) ppm | GMST 2300  7.62 (+0.032) K | ocean uptake 2024-2300  1264.9 ( -27.0) GtC
+vvLN    ON_qcentral CO2 2100   379.7 (+0.17)  2300   236.2 ( +0.02) ppm | GMST 2300  0.12 (-0.000) K | ocean uptake 2024-2300  -251.2 (  +0.3) GtC
+vvLN    ON_qlo      CO2 2100   379.7 (+0.09)  2300   236.2 ( +0.01) ppm | GMST 2300  0.12 (-0.000) K | ocean uptake 2024-2300  -251.4 (  +0.1) GtC
+vvLN    ON_qhi      CO2 2100   379.9 (+0.34)  2300   236.3 ( +0.04) ppm | GMST 2300  0.12 (-0.000) K | ocean uptake 2024-2300  -251.0 (  +0.5) GtC
+vvM     ON_qcentral CO2 2100   561.6 (+0.71)  2300   571.4 ( +0.66) ppm | GMST 2300  4.16 (+0.004) K | ocean uptake 2024-2300   552.1 (  -1.9) GtC
+vvM     ON_qlo      CO2 2100   561.2 (+0.35)  2300   571.1 ( +0.33) ppm | GMST 2300  4.16 (+0.002) K | ocean uptake 2024-2300   553.0 (  -1.0) GtC
+vvM     ON_qhi      CO2 2100   562.3 (+1.41)  2300   572.1 ( +1.32) ppm | GMST 2300  4.17 (+0.009) K | ocean uptake 2024-2300   550.2 (  -3.8) GtC
+vvH     ON_qcentral CO2 2100   643.9 (+1.04)  2300  1005.1 ( +2.87) ppm | GMST 2300  6.43 (+0.011) K | ocean uptake 2024-2300   942.1 (  -7.4) GtC
+vvH     ON_qlo      CO2 2100   643.4 (+0.52)  2300  1003.7 ( +1.44) ppm | GMST 2300  6.42 (+0.006) K | ocean uptake 2024-2300   945.8 (  -3.7) GtC
+vvH     ON_qhi      CO2 2100   644.9 (+2.08)  2300  1008.0 ( +5.74) ppm | GMST 2300  6.44 (+0.022) K | ocean uptake 2024-2300   934.7 ( -14.8) GtC
+
+=== C. POWER at hilda34g: likelihood vs s (x 0.052198), every name held | and with kz re-optimised (1-D, +/- 0.3 in u) ===
+  s x 0    (0.0000 /K): held  d_lik  +0.0000 | kz re-optimised ->  14223.7 m2/yr: d_lik  +0.0000, d_logpost  +0.0000
+  s x 0.5  (0.0261 /K): held  d_lik  -0.7785 | kz re-optimised ->  14295.4 m2/yr: d_lik  -0.6863, d_logpost  -0.6861
+  s x 1    (0.0522 /K): held  d_lik  -1.7668 | kz re-optimised ->  14366.2 m2/yr: d_lik  -1.4035, d_logpost  -1.4032
+  s x 2    (0.1044 /K): held  d_lik  -4.3303 | kz re-optimised ->  14505.3 m2/yr: d_lik  -2.9222, d_logpost  -2.9219
+  s x 4    (0.2088 /K): held  d_lik -11.5448 | kz re-optimised ->  14774.5 m2/yr: d_lik  -6.2480, d_logpost  -6.2481
+
+=== D. THE OCEAN'S CLIMATE EFFECT, 2015-2024: warm vs climate (GMST + SST) held at its 1901-1920 mean from 1901 ===
+  OFF: ocean sink 3.1637 (warm) vs 3.5942 (held) -> climate effect -0.4305 GtC/yr (z -4.61 vs GCB -0.20 +/- 0.05); warm-run CO2 +4.18 ppm above held
+  ON : ocean sink 3.1485 (warm) vs 3.5942 (held) -> climate effect -0.4457 GtC/yr (z -4.91 vs GCB -0.20 +/- 0.05); warm-run CO2 +4.31 ppm above held
+  the feedback's own share of the effect: -0.0152 GtC/yr
+  ⚠ NOT like-for-like with GCB: its baseline is a repeated 'normal year', not 1901-20; its ocean models carry WINDS
+    (in one model ~2/3 of the effect; Bunsen 2024) that CCX lacks; and CO2 is interactive here (the warm run's CO2 differs).
