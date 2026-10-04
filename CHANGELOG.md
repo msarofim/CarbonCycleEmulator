@@ -2,6 +2,14 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (a) — Handoff: `notes/handoff_2026-10-04_hilda34g_adopted.md` (supersedes 10-03's). **The objective-#15 arc is closed: `hilda34g` is the canonical and the suite is clean. The frozen refit trees are REMOVED** (Marcus: "Remove the frozen refit trees and write the handoff note").
+
+- Both git worktrees `~/ccx_frozen/20261002ee_obj15_{lag,ctl}` are removed (`git worktree remove --force`, then `prune`). This follows the 10-01 precedent: removed after a byte-identical check of the copy.
+- **The check, re-run right before removal: 0 mismatches.** It covered each arm's outdir (`diff -r`, excluding the repo copy's own additions), all 26 logs per arm (`cmp`), the preflight logs, the regenerated port targets, and 017's resume directory with its 3 logs. Every item is tracked in git and pushed (103 + 103 + 7 files).
+- No process had a file open in either tree (`lsof +D`). The two `ps` "hits" were the checking command matching its own text, the `pgrep_wait_loop_matches_itself` trap.
+- The chain's three launch files `~/ccx_frozen/20261002ee_obj15_launch.{sh,out,pid}` stay. They are outside the trees, and their content is in `RUN_PROVENANCE.txt` and CHANGELOG 10-02 (ee).
+- The background task "Diagnose the SPO seasonal-row cliff near start 017" runs in its own session (worktree `.claude/worktrees/pensive-burnell-a9bf40`); its result is the handoff's open item 1.
+
 ## 2026-10-03 (i) — **The adoption's ledger is applied on Marcus's rulings, and the full suite at `e2f611b` is CLEAN: 6030 passed, 0 failed, 3 skipped (the standing three), 0 errors. No named red remains.** Verbatim: "Move v1.0 to hilda34g (Recommended)", "Keep 'about 1.4'; about = within 0.1 (Recommended)", "Approve all (Recommended)".
 
 - **The release:** `APP_RELEASE_MODE <- "hilda34g"`. "BETA v1.0 CarboTope" is now cut on hilda34g (`test-app-version` passes as written); DEPLOY and README updated.
