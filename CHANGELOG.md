@@ -2,6 +2,30 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-03 (i) — **The adoption's ledger is applied on Marcus's rulings, and the full suite at `e2f611b` is CLEAN: 6030 passed, 0 failed, 3 skipped (the standing three), 0 errors. No named red remains.** Verbatim: "Move v1.0 to hilda34g (Recommended)", "Keep 'about 1.4'; about = within 0.1 (Recommended)", "Approve all (Recommended)".
+
+- **The release:** `APP_RELEASE_MODE <- "hilda34g"`. "BETA v1.0 CarboTope" is now cut on hilda34g (`test-app-version` passes as written); DEPLOY and README updated.
+- **The pulse box:** `APP_PULSE_PER1000_ABOUT_TOL <- 0.1`, the ruled meaning of "about". `test-pulse-linearity` now checks every horizon within it (+20 yr 1.458 passes), and asserts the tolerance itself is ≤ 0.1, so a wider one needs a new ruling. The 100 GtC +100 yr headline (1.361) must still ROUND to 1.4.
+- **The re-pins**, each measured at hilda34g by printing the exact quantity from a scratch copy of its test (the failure messages' three figures were not enough for a 1e-4 tolerance):
+  - `test-enso-demean` 0.4790 → **0.5673** (0.567266);
+  - `test-gate-bounds` gate S month 8.83 → **8.50** (8.5037; the blind read 4.08 still within its pin);
+  - `test-imbalance-panel`: miss 0.87 → **0.92**, d_land +0.462 → **+0.443**, d_luc −0.214 → **−0.208**, −d_grow +0.05 → **+0.058**, −d_ocn +0.002 → **−0.029**;
+  - `test-option-e` N-E1 1.05 → **0.38** (0.3777), its name now "at most about 1 log-unit";
+  - `test-app-review-copy` pins the ruled "about 40 % of the wobble".
+- **The ribbons re-expression** (`test-futures-ribbons`). The HELD Laplace evidence is named at hilda33d, where it was built — named, not read back from the artifact, which would check it against its own label. The app's own check must REFUSE it at the canonical on both counts (name and vector).
+  - This needed a fix in `R/paths.R`: `ccx_ribbons_problems()` compared the NAME with `CCX_MODE_CANONICAL` while it compared the VECTOR with its `mode` argument, so it could not be asked about any other mode. It now uses the argument for both. The app passes the canonical, so it is unchanged.
+- **Mutation-tested**, both changed assertions (controls pass): the tolerance at 0.05 (caught) and at 0.2 (caught by the ≤ 0.1 guard); the function reverted to the canonical name check (caught); the vector check dropped (caught, twice).
+- **Suites today:**
+
+| tree | passed / failed / skipped / errors | what |
+|---|---|---|
+| `cf7cb6c` | 6001 / 1 / 3 / 0 | baseline; the named red only |
+| `cf7cb6c` + the lag arm registered | 6006 / 12 / 3 / 0 | the adoption PREVIEW (d) |
+| `115dc22` | 6014 / 12 / 3 / 0 | adopted; the constraint map rebuilt (the named red CLEARED) |
+| **`e2f611b`** | **6030 / 0 / 3 / 0** | the ledger applied → `outputs/diagnostics/suite_20261003_e2f611b_all.log` |
+
+- **Memory:** `ccx_hilda34g_adopted` (new); `INDEX_ccx.md`'s live state and the root `MEMORY.md`'s routing line repointed (the root kept byte-neutral, at 13.4 KB of content against a 12 KB soft budget, over before today).
+
 ## 2026-10-03 (h) — **ADOPTED: `hilda34g` is the canonical** (the objective-#15 lag arm). Marcus, verbatim: "Adopt the lag arm (Recommended)", "Keep label; mode hilda34g (Recommended)", "Keep backward-difference Hermite (Recommended)", "\"about 40 %\" (Recommended)". **The constraint map is rebuilt and the named red is CLEARED. The full suite at `115dc22`: 6014 passed, 12 failed, 3 skipped, 0 errors. All 12 are the adoption's own ledger, awaiting Marcus: one release ruling, one copy-claim ruling, 8 value re-pins, the ruled copy pin, and two re-expressions. Verified in the running app.**
 
 **The adoption** (`4df7038`, on the 10-01 (c) hilda33d precedent):
