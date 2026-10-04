@@ -1,5 +1,10 @@
 # PROPOSAL 2026-10-04 — revisiting the `npp_tsens` (greening) prior (objective #16 candidate) — FOR MARCUS'S RULING
 
+> **RULED 2026-10-04 (Marcus): "Preview P3 with q10 freed (Recommended)".** The preview
+> (`calibration/diag_p3_netclimate_preview.R`) is running; §5's choice between P3 and P4 waits on it. Checked first: the
+> interactive-CO₂ bias in the net-climate comparison is measured small (−0.023 GtC/yr; like-for-like +0.141, z +1.34;
+> `calibration/diag_net_climate_co2_feedback.R`), so §3's "wrong sign" stands.
+
 > **Status.** Drafted on Marcus's ruling "Revisit the npp_tsens prior" (2026-10-04). It re-opens the 09-30 ruling,
 > which made the prior sign-free, N(0, 0.029).
 > - Nothing is built and no objective is changed.

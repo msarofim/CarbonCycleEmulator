@@ -5,14 +5,14 @@
 
 **Start here.**
 1. Read this note.
-2. Then CHANGELOG 2026-10-04 (d)–(i), newest at the top of `CHANGELOG.md`.
+2. Then CHANGELOG 2026-10-04 (d)–(j), newest at the top of `CHANGELOG.md`.
 3. Then memory `ccx_greening_sign_set_by_lag` and `ccx_kw_hemispheric_balance` (its status line), both routed from
    `INDEX_ccx_phi.md` / `INDEX_ccx.md`.
 
 ✅ A session launched from `CarbonCycleEmulator/` loads the shared memory store (verified 10-04 h). It does NOT load
 `FaIRtoFrEDI/CLAUDE.md`.
 
-## 1. What was done (10-04 d → i)
+## 1. What was done (10-04 d → j)
 - **(d)** The substep-controller fix (branch `claude/pensive-burnell-a9bf40`, Marcus: "Apply A+B+C") is **merged into
   `main`** (`11dda49`).
   - Its code is byte-identical to `a7eab97`, whose suite was 6039 / 0 / 3 / 0.
@@ -43,6 +43,13 @@
     - **Recommended: P3 (a GCB net-climate row, `q10` freed, previewed first) or P4 (pin at 0: −0.26 likelihood,
       +13.5 ppm at SSP5-8.5 2300).**
 
+- **(j)** Marcus's rulings on the proposals (below).
+  - **Card 4's ENSO-timing text is DRAFTED for his wording** (`notes/draft_2026-10-04_card4_enso_timing.md`); the card
+    is untouched.
+  - **The P3 preview is RUNNING** (§3b).
+  - Checked first: the net-climate comparison's interactive-CO₂ bias is MEASURED small (−0.023 GtC/yr at hilda34g;
+    like-for-like +0.141, z +1.34 vs GCB). The "wrong sign" stands.
+
 ## 2. Rulings (Marcus, 2026-10-04, verbatim labels)
 - "Draft a timing-row proposal" (the lag vs the atmosphere's 5-month timing)
   → `notes/proposal_2026-10-04_enso_timing_row.md`.
@@ -51,6 +58,8 @@
 - "k_w refit at 1446, hilda34g assessment, Memory trim, Remove merged worktree" (all done or running).
 - "Canonical incumbent, Mac (Recommended)" (the `k_w` refit's reference set and machine).
 - "Archive session, then remove (Recommended)" (the merged worktree: done; the remote branch stays).
+- "No row; draft card-4 text (Recommended)" (the timing row): drafted, awaiting his wording.
+- "Preview P3 with q10 freed (Recommended)" (the greening prior): running (§3b).
 
 ## 3. THE RUNNING JOB: the `k_w` = 1446 price arm
 - Frozen worktree `~/ccx_frozen/20261004f_kw1446` at `773f8f2`, `nuclear14c` copied in.
@@ -77,19 +86,31 @@
    - Name what absorbs `k_w`: the ridge partners `hs_asx_frac`, `bomb_total`, `u_hs` (memory `ccx_kw_hemispheric_balance`).
 5. Nothing is adopted: this is a price, not a candidate canonical.
 
+## 3b. THE OTHER RUNNING JOB: the P3 preview (started 14:50 EDT 10-04)
+- `calibration/diag_p3_netclimate_preview.R` @`c6e3873`, from a frozen copy in the session scratchpad, `nice 19`, 4 workers.
+- It adds the GCB net-climate row (−0.8 ± 0.7 GtC/yr, 2015–24, TRENDY definition) to the #15 objective at hilda34g's
+  lag. Cells:
+  - R1: the land block + `q10` free;
+  - RH: `q10` held;
+  - Q1.25 and Q1.4: `q10` held there, the land block re-optimised.
+- Outputs: `outputs/diagnostics/obj16_p3_preview_20261004.{log,rds}` (+ `_cells.rds`). Each evaluation costs ~3× an
+  ordinary one; expect ~2–3 h under the `k_w` arm's load.
+- **What to read:**
+  - does freeing `q10` move anything? The smoke suggests not: the row is worth ≤ 0.5 log-units in total;
+  - the PRICE of matching GCB along the `q10` profile;
+  - then finish the greening proposal's §5 with the result and ask Marcus to choose between P3 and P4.
+- If it is not finished when the session starts, check with `ps` for `frozen_p3`, or for the R processes.
+
 ## 4. Open items, in order (each is Marcus's to prioritise)
 1. **Land the `k_w` price arm** (§3).
-2. **Marcus's rulings on the two proposals** (`notes/proposal_2026-10-04_enso_timing_row.md`,
-   `notes/proposal_2026-10-04_npp_tsens_prior.md`).
-   - If he takes P3, preview it first: the land block + `q10`, with the net-climate row computed INSIDE the objective
-     (~3× the evaluation cost; `br_net_climate()` in the library already computes the row's quantity).
-   - Any objective change is packaged as ONE objective #16 (priced on every registered mode and restamped, the D1
-     precedent), then a refit.
-   - If he takes the card-4 disclosure, draft the sentence for HIS wording.
-3. **The assessment's verdict** (`notes/assessment_2026-10-04_hilda34g_DRAFT.md` §5, §7).
-4. Optional, needs a ruling: extend the substep fix's held-K rule to `ccx_tr_box_eigbound()` (an objective change for
+2. **The greening decision:** read the P3 preview (§3b), then Marcus chooses P3 or P4. Either is an objective change:
+   ONE objective #16, priced on every registered mode and restamped (the D1 precedent), then a refit.
+3. **Card 4:** apply Marcus's wording of `notes/draft_2026-10-04_card4_enso_timing.md` to `app/R/review.R`, with a
+   `test-app-review-copy` pin. The timing row is ruled OUT.
+4. **The assessment's verdict** (`notes/assessment_2026-10-04_hilda34g_DRAFT.md` §5, §7).
+5. Optional, needs a ruling: extend the substep fix's held-K rule to `ccx_tr_box_eigbound()` (an objective change for
    tr-box structures only).
-5. Housekeeping:
+6. Housekeeping:
    - the remote branch `claude/pensive-burnell-a9bf40` is merged and could be deleted on GitHub (Marcus's call);
    - the two older worktrees (`compassionate-leavitt…`, `youthful-blackburn…`) are still Marcus's to remove.
 

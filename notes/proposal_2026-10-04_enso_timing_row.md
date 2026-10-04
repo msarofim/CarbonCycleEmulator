@@ -1,4 +1,7 @@
-# PROPOSAL 2026-10-04 — a GROWTH-SHAPE row for the land ENSO timing (objective #16 candidate) — FOR MARCUS'S RULING
+# PROPOSAL 2026-10-04 — a GROWTH-SHAPE row for the land ENSO timing (objective #16 candidate)
+
+> **⛔ RULED 2026-10-04 (Marcus): "No row; draft card-4 text (Recommended)".** The row is NOT built. The card-4 sentence
+> is drafted for his wording in `notes/draft_2026-10-04_card4_enso_timing.md`. This note stands as the record of why.
 
 > **Status.** Drafted on Marcus's ruling "Draft a timing-row proposal" (2026-10-04; the 10-04 handoff's item 2).
 > - Nothing is built and no objective is changed.
