@@ -2,6 +2,46 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-03 (h) — **ADOPTED: `hilda34g` is the canonical** (the objective-#15 lag arm). Marcus, verbatim: "Adopt the lag arm (Recommended)", "Keep label; mode hilda34g (Recommended)", "Keep backward-difference Hermite (Recommended)", "\"about 40 %\" (Recommended)". **The constraint map is rebuilt and the named red is CLEARED. The full suite at `115dc22`: 6014 passed, 12 failed, 3 skipped, 0 errors. All 12 are the adoption's own ledger, awaiting Marcus: one release ruling, one copy-claim ruling, 8 value re-pins, the ruled copy pin, and two re-expressions. Verified in the running app.**
+
+**The adoption** (`4df7038`, on the 10-01 (c) hilda33d precedent):
+- The refit directory is renamed (`git mv`) `refit_20261003_obj15_hilda_csl3v0kaidgbe` → `refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe`. The (b)–(g) outputs record the old path.
+- `R/paths.R`: `CCX_MODE_FILES` + hilda34g, `CCX_MODE_CANONICAL <- "hilda34g"`, `CCX_MODE_PINNED`, and the block documenting it. hilda33d stays registered (the #14 canonical). No free parent, as for hilda33d.
+- `make_bundle.sh` ships the new directory. `diag_obj15_refit_read.R` reads it by name.
+- `R/mechanisms.R`: the ENSO blurb says **"about 40 %"** (ruled), and the comment cites `diag_app_wobble_shares.R`. The caveat's "about a third" holds (32 %). `app/server.R`'s comment quoting the old blurb is updated.
+- README, `app/DEPLOY.md` and DESIGN (`L_MEI` FITTED, 2.64 ± 0.39) are updated.
+- ⚠ **A mis-staged first commit, caught and amended before the push.** The `git add` listed the old directory, which no longer existed after `git mv`, so it failed. The commit on the next line still ran (the `multiline_shell_keeps_going` lesson) and held only the rename. Found by `git show --stat` and amended locally; nothing wrong was pushed.
+
+**The constraint map** (`diag_constraint_map.R`, `e0a0693` + `1d84a03`). The first build stopped at its COVER gate, rightly: `lag_enso_land` had no component and `d13c_icecore` (#15's row) no family.
+- `lag_enso_land` joins "ENSO response" (and the arm-only list).
+- The ice-core δ¹³C row gets its own family, **"δ¹³C in ice cores"**, parallel to "CO₂ in ice cores". ⚠ This is a reader-facing label in the app's "What pins down what?" tab, and my choice. Folding it into "δ¹³C level & gradient" is one line.
+- ⚠ **The failed first build OVERWROTE `constraint_map_20261001k.log`.** The canonical's log is named by a fixed tag, `CM_DATE`. It was restored from git, and the tag now carries a comment: move it at every adoption.
+- Rebuilt at hilda34g on a clean tree: every gate PASSES (34 names in 8 components, 27 streams in 13 families) → `data/constraint_map.rds`, `outputs/diagnostics/constraint_map_20261003h.log`.
+
+**The pulse box re-measured** (`diag_pulse_vs_tcre.R` @`1d84a03` → `pulse_vs_tcre_20261003.{csv,log}`).
+- Per 1000 GtC at +100 yr: 1.368 / 1.365 / 1.361 / 1.354 / 1.331 for 10–500 GtC (hilda33d 1.365 … 1.331).
+- The printed spread moves 2.5 → **2.7 %**. The horizon table (100 GtC) is 1.46 / 1.39 / 1.36 / 1.40 at +20/50/100/200 yr (hilda33d 1.44 / 1.37 / 1.36 / 1.41). The app constants are updated (`115dc22`).
+- ⚠ **+20 yr now rounds to 1.5**, so "about 1.4 °C per 1000 GtC whether you read it 20, 50, 100 or 200 years after release" (Marcus 10-01c A2) fails `test-pulse-linearity`'s one-decimal rule. `APP_PULSE_PER1000_ABOUT` is untouched: the wording is Marcus's.
+
+**The full suite** at `115dc22` (frozen worktree; 13 min) → `outputs/diagnostics/suite_20261003_115dc22_adoption.log`: **6014 / 12 / 3 / 0.**
+- ⭐ **`test-constraint-map` 6, the named red since 10-02 (cc), now PASSES.**
+- The 12 failures, all canonical-tied, as the (d) preview predicted plus the two this adoption introduced:
+
+| test | hilda33d → hilda34g | at adoption |
+|---|---|---|
+| `test-app-version:55` | `APP_RELEASE_MODE` 'hilda33d' vs the loaded 'hilda34g' | **ruling**: does "BETA v1.0 CarboTope" move? |
+| `test-pulse-linearity:77` | every horizon must round to "about 1.4"; +20 yr is 1.458 | **ruling** on Marcus's sentence |
+| `test-app-review-copy:149` | pins "about a quarter of the wobble" | re-pin to the RULED "about 40 % of the wobble" |
+| `test-enso-demean:281` | the canonical's demean price 0.479 → 0.567 | re-pin |
+| `test-gate-bounds:497` | gate S month 8.83 → 8.50 | re-pin |
+| `test-imbalance-panel:98–116` (×5) | miss 0.870 → 0.923; d_land +0.462 → +0.443; d_luc −0.214 → −0.208; −d_grow +0.050 → +0.058; −d_ocn +0.002 → −0.029 | re-pin |
+| `test-option-e:232` (N-E1) | 1.05 → 0.378 (recorded at every adoption: 3.1, 0.43, 1.05) | re-pin; the name's "about 1 log-unit" → "at most about 1" |
+| `test-futures-ribbons:60` | the HELD Laplace evidence was built for hilda33d | re-express: pin it to hilda33d, and assert the app's check REFUSES it at hilda34g |
+
+**Verified in the running app** (`ccx-app` restarted on the adopted tree; localhost:7788):
+- The banner reads "Maximum-a-posteriori fit of **34** parameters … with 9 further values held". No console errors.
+- The What-if tab with El Niño off: the blurb reads "about 40 % of the wobble"; the live scatter is 0.28 → 0.17 ppm/yr ("40% less"); the typical miss is 0.38 → 0.42, **"11% further" from the measured record**. The question that started the arc (10-02 x), answered in the app itself. The switches were restored to the default.
+
 ## 2026-10-03 (g) — **THE CONTROL ARM HAS LANDED, AND THE REFIT IS READ ON LIKELIHOOD. The lag EARNS its parameter: lag − control = +14.92 on the same 27 rows, ΔAIC −27.8. Re-fitting on #15 alone (control − hilda33d) is +12.41, almost all on the two ice rows. Every What-if gain is the LAG's: the control's ENSO readout is +0.89 % (hilda33d +0.92 %), the lag arm's −11.0 %. The lag's own effect on the futures is nil; the lag arm's futures move (−27.6 ppm at SSP5-8.5 2300) is a re-arrangement along the greening–fertilisation ridge. Nothing adopted; the ruling is Marcus's.**
 
 **The control wave.** The chain printed "ALL ARMS DONE" at 18:42:39 (the control arm took 10 h 37 min).
