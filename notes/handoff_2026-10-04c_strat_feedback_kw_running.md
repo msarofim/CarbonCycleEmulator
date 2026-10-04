@@ -1,7 +1,7 @@
 # HANDOFF 2026-10-04 (c) — the stratification feedback is BUILT and PREVIEWED; P3 ≈ P0 (the choice is P0 vs P4); MAGICC reviewed; the `k_w` price arm is still RUNNING
 
 **Supersedes** `notes/handoff_2026-10-04b_kw_price_obj16_proposals.md`. Its open items are closed or carried here (§4).
-Self-contained.
+Self-contained. **Last updated 2026-10-04 19:50** (Marcus: "write a handoff"). The `k_w` status in §3 is as of 19:46.
 
 **Start here.**
 1. Read this note.
@@ -13,6 +13,7 @@ Self-contained.
    - `ccx_greening_sign_set_by_lag` (its P3 section)
    - `magicc_ocean_no_hemispheric_carbon`
    - `ccx_kw_hemispheric_balance`
+   - `ccx_substep_fix_slows_nearwall_starts` (routed from `INDEX_infra.md`)
 
 ## 1. What was done (10-04 k → o)
 - **(k) The P3 preview had NO POWER on `q10`.**
@@ -58,10 +59,25 @@ Self-contained.
 ## 3. THE RUNNING JOB: the `k_w` = 1446 price arm (unchanged since 10-04b §3)
 - Frozen tree `~/ccx_frozen/20261004f_kw1446` @`773f8f2`. Launch script `~/ccx_frozen/20261004f_kw1446_launch.sh`
   (PID in `…_launch.pid`, chain status in `…_launch.out`). 24 starts, 8 at a time, started 12:39 10-04.
-- **At 19:12: 11 of 24 done.** Ten converged in TWO basins: −1206.613 (ids 0, 5, 8, 9, 10) and −1206.837 (ids 1–4,
-  6). Id 7 stopped at its wall budget, NOT converged (−1297.04).
-  - First look at what absorbs `k_w`: `u_hs` ≈ 15.3 (hilda34g 23.3), `kz` ≈ 17,000 (14,224). The ridge partners in
-    memory `ccx_kw_hemispheric_balance`.
+- **At 19:46: 13 of 24 done (ids 0–11 and 13; 21 launched); expected to end ~00:00–01:00 10-05.** Two basins:
+
+| basin (logpost) | ids | h_ml (m) | `u_hs` (m/yr) | `kz` (m²/yr) |
+|---|---|---|---|---|
+| **−1206.613** | 0, 5, 8, 9, 10, 13, and 11 | 57.7 | 15.2 | ~16,810 |
+| −1206.837 | 1–4, 6 | 49.9 | 15.3 | ~17,087 |
+| (id 7, stranded at the wall) | 7 | 75.39 | 16.6 | 11,236 |
+
+  - Id 11 is flagged NOT converged (its wall budget ran out after the slow first restart) but sits in the best basin.
+  - Id 7 is NOT converged at −1297.04.
+  - The two basins are 0.22 apart and differ in h_ml. Read the price on the best, and report both.
+  - What absorbs `k_w`: `u_hs` 23.3 → 15.2 and `kz` 14,224 → ~16,800 at hilda34g. These are the ridge partners
+    memory `ccx_kw_hemispheric_balance` names.
+- ⚠ **CHECK IT IS ALIVE** with `kill -0 $(cat ~/ccx_frozen/20261004f_kw1446_launch.pid)` (chain PID 64558) or
+  `ps -axo pid,etime,command | grep run_dispersed_multistart`.
+  - Never use a `pgrep -f` loop on the script name.
+  - The exit codes collect in the tree's `logs/ccx_multistart_mac_20261004f_exit.txt` (24 lines when done).
+  - "k_w price arm end" appears in `~/ccx_frozen/20261004f_kw1446_launch.out`.
+  - The in-session watcher that would have landed it dies with this session.
 - ⚠ **SLOW STARTS: a finding about the 10-04 (a) substep fix.**
   - Start 7's second restart took 250 min for 6,002 evaluations, 7.6× the normal rate. It ended at `h_ml` 75.39 m,
     ~0.1 m from the P8 wall (75.50 m), where the fixed controller needs 150–300 substeps instead of 4. Start 11 was
@@ -81,11 +97,49 @@ Self-contained.
      (~47). Run the scorecard with `CCX_SC_EXTRA_MODE=kw1446=<mode path>`, and name what absorbs `k_w`.
   5. Nothing is adopted.
 
+## 3b. Files touched this session (all committed and pushed; last commit at writing `6795502`)
+- **Model code (the stratification feedback, `8567ef3`):**
+  - `R/model.R`: helpers `ccx_mix_on()`, `ccx_kz_upper()`, `ccx_mix_g_series()`, `ccx_mix_tdeep_after()`,
+    `ccx_point_mix_g()`; `ccx_pump_export(…, kz_override)`; `ccx_prepare()` builds aux `mix_on` / `kz_up` /
+    `pump_up`; `ccx_deriv()` applies both substitutions.
+  - `R/forcing.R` (`ccx_forcing_at()`, the runner) and `R/cpp.R` (marshalling, `ccx_run_prepared(…, tdeep0)`,
+    `ccx_deriv_fast`).
+  - `src/ccx_core.cpp` (`Aux`, `deriv()`, `ccx_deriv_cpp()`, `ccx_run_cpp()`).
+  - `R/constants.R` (`MIX_STRAT_S`, `_Q`, `_Q_LO`, `_Q_HI`, `MIX_TDEEP_TAU`).
+  - `R/calibrate.R` (the label `hilda_csl3v0kaidgbem`).
+  - `R/mechanisms.R` (`warming_feedback` zeroes `mix_strat_s`).
+- **Spec:** `DESIGN.md` §3.4a S (`8f6e001`).
+- **Tests:** NEW `tests/testthat/test-mixing-strat.R`. Label ledgers extended in `test-constants-batch`, `test-tr-box`,
+  `test-gated-params`, `test-enso-lag`, `test-soil-inert` and `test-struct-v0`.
+- **Drivers:** NEW `calibration/diag_p3_powered_step.R` (`b44e20b`) and `calibration/diag_mix_preview.R` (`1be5504`).
+- **Outputs:**
+  - `outputs/diagnostics/p3_powered_step_20261004.{log,rds}`;
+  - `outputs/diagnostics/mix_preview_20261004.{log,rds}`;
+  - QUARANTINED `outputs/quarantine/20261004_p3_q10_no_power/` (README + the P3 preview's three files).
+- **Notes:**
+  - NEW `notes/proposal_2026-10-04_warming_weakens_mixing.md` (rulings recorded at its top);
+  - `notes/proposal_2026-10-04_npp_tsens_prior.md` (§5 revised: P0 vs P4);
+  - this handoff.
+- **CHANGELOG:** 10-04 (k) through (o).
+- **Memory** (the shared store), NEW:
+  - `block_power_is_per_name`
+  - `magicc_ocean_no_hemispheric_carbon`
+  - `ccx_strat_feedback_built`
+  - `ccx_substep_fix_slows_nearwall_starts`
+- **Memory**, updated: `ccx_greening_sign_set_by_lag`.
+- **Memory**, pointers added in: `INDEX_ccx_phi`, `INDEX_diag_bound`, `INDEX_ccx_ocean_circ`, `INDEX_cmp_magicc`,
+  `INDEX_ccx_ocean_struct` (14,255 B, just under its 14 KB soft budget) and `INDEX_infra`.
+- **Pending:** nothing uncommitted. The full suite has not been re-run (§4 item 8).
+
 ## 4. Open items, in order (each is Marcus's to prioritise)
 1. **Land the `k_w` price arm** (§3).
-2. **Objective #16:** the greening decision (P0 vs P4; `notes/proposal_2026-10-04_npp_tsens_prior.md` §5) plus the
-   stratification feedback (label name to confirm). The feedback is already priced on every registered mode
-   (CHANGELOG 10-04 o). Then ONE refit; its timing is Marcus's.
+2. **Objective #16:** the greening decision plus the stratification feedback, then ONE refit (the D1 precedent). It
+   waits on THREE rulings from Marcus:
+   - (a) greening **P0 or P4** (`notes/proposal_2026-10-04_npp_tsens_prior.md` §5; P3 ≈ P0);
+   - (b) the label name **`hilda_csl3v0kaidgbem`**;
+   - (c) the refit's TIMING: after the `k_w` arm lands, ideally in a fresh session.
+   - The feedback is already priced on every registered mode (CHANGELOG 10-04 o). The P0 / P4 choice would be priced
+     the same way if it touches the objective (P4 is a pin).
 3. **The ocean climate-effect benchmark:** verify GCB 2025's GOBM protocol (which "normal year"; when run A starts),
    then build a like-for-like comparison. CCX's existing −0.43 GtC/yr may or may not be too strong; per K it is
    −0.32.
