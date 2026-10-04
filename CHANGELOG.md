@@ -2,6 +2,26 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (a) — **APPLIED, on Marcus's ruling "Apply A+B+C (Recommended)": under the seasonal mixed layer `ccx_substeps_for()` now bounds the stiffness the integrator actually meets.** (A) It reads the MLD interpolant's continuous extremes; (B) it uses the held `kz_int` profile; (C) it STOPS past `CCX_SUBSTEPS_MAX` instead of silently clamping. **No registered mode moves:** all six stay at 4 substeps with bit-identical logposts, as priced in 10-03 (j). Three new tests in `test-stability.R` are each mutation-proven.
+
+- **The change** (`R/model.R`, `ccx_substeps_for()`; DESIGN §3.7 gains the rule):
+  - (A) `.fs` reads `$f_min` / `$f_max` (the guard's), not the pooled `f_month` samples.
+  - (B) `K_held <- max(ccx_kz_profile(p, grid))` on the annual-mean grid, not re-evaluated on each extreme's grid.
+  - (C) `need > CCX_SUBSTEPS_MAX` → `stop()`, which the objective's tryCatch reads as −Inf. Past the P8 wall a direct call now errors by name instead of taking eigenvalues of a negative thickness.
+  - `seas_ml` = 0 is untouched by construction (one grid, the same K).
+  - ⚠ `ccx_tr_box_eigbound()` still re-evaluates its own K on the moved grid ((B)'s class). It was left out of the ruling because the box is off at every registered mode; a comment says so.
+- **What it does to counts.**
+  - Every registered mode stays at 4 (re-checked through `ccx_load_mode()`).
+  - At start 017's h_ml on the canonical's column the count is 29, up from 15. Doubling it moves SH CO₂ by 1.7e-7 relative; at the old 15 the same doubling moves it 6.3e-3 (2.8 ppm).
+  - The P8 wall on that column is h_ml 75.504 m. The bound needs 103 substeps 0.3 m short of it and 155 at 0.2 m, and stops by 0.1 m short (308 needed).
+  - The old bound handed back 27–39 substeps across that whole band.
+- **The tests** (`tests/testthat/test-stability.R`). Every earlier test there runs at `seas_ml` = 0, so none had power here.
+  - (1) Along the canonical's column, from its own h_ml to 0.3 m short of the wall, the count keeps the integrator's own stiffness inside the SAFETY target, not merely RK4's limit. The stiffness is its C++ Jacobian with held K at the continuous extremes.
+  - (2) 2 cm short of the wall it stops ("CCX_SUBSTEPS_MAX"); past the wall it errors ("P8").
+  - (3) At 017's h_ml, doubling the auto count moves SH CO₂ by < 1e-6 relative and Δ¹⁴C by < 1e-3 ‰. That is the bar of the existing "accurate, not merely stable" test, reused rather than tuned.
+  - Each carries its MUTATION: `ss_pre_20261004()`, the old bound, must break it. **Verified directly:** with HEAD's `ccx_substeps_for()` put back (in a throwaway test dir, since removed), the five old tests pass and the three new ones fail (1, 2 and 2 expectations).
+- **The suite:** run from a scratch git worktree of this commit; the counts are recorded below when it lands.
+
 ## 2026-10-03 (j) — **Start 017's "non-smooth edge" is the INTEGRATOR, not the objective. Near the P8 wall the RK4 substep controller under-resolves the SH winter mixed-layer peak, so the integration is UNSTABLE for ~10 days a year and what the objective returns there is integrator artefact. At 017 the artefact is +273.2: its converged logpost is −1580.05, 397 below the mode (10-03 (e) read 124). Every registered mode is far from it (4 substeps, z ≤ 1.19), and the proposed fix leaves all six bit-identical. Nothing in `R/` changed; the fix is Marcus's to rule.** This answers the background task (e) filed ("Diagnose the SPO seasonal-row cliff near start 017").
 
 - **The test.** `calibration/diag_seasml_substep_controller.R` (new) → `outputs/diagnostics/seasml_substep_controller_20261003.{log,rds}`.

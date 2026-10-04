@@ -1182,7 +1182,9 @@ ccx_mld_fourier <- function(h_m) {
   # OVERSHOOTS the samples between them by ~0.6 % (SH max 1.6876 against the
   # sampled 1.6779), so the integrated mixed layer is thinner in summer and
   # deeper in winter than `f_month` says. A guard that reads the samples reads
-  # a bound the integration exceeds; ccx_seas_ml_guard() reads these instead.
+  # a bound the integration exceeds; ccx_seas_ml_guard() reads these instead,
+  # and so does the substep bound since 2026-10-04 (ccx_substeps_for(), where
+  # the samples' shortfall had made RK4 unstable near the P8 wall).
   tt <- (seq_len(CCX_MLD_FINE_GRID) - 0.5) / CCX_MLD_FINE_GRID
   ff <- vapply(tt, function(t) ccx_mld_eval(co, t)$f, numeric(1))
   co$f_min <- min(ff); co$f_max <- max(ff)
@@ -4741,25 +4743,48 @@ ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
   # the under-resolved integration then diverged -- caught by test-parity.R,
   # because near-singular arithmetic amplifies roundoff differently in the two
   # cores. ⛔ A stability bound that looks at one end of a cycle is not a bound.
+  #
+  # ⛔⛔ AND THE BOUND MUST BE THE ONE THE INTEGRATOR MEETS -- RULED 2026-10-04 (Marcus:
+  # "Apply A+B+C (Recommended)"; CHANGELOG 10-03 j and 10-04 a;
+  # calibration/diag_seasml_substep_controller.R). Until then this read (A) the 12
+  # SAMPLED monthly values and (B) the K profile re-evaluated on the MOVED grid.
+  # Near the P8 wall layer 1's winter thickness is a small DIFFERENCE (base - h_ml f),
+  # so both mattered: at start 017 of the objective-#15 wave (h_ml 74.44) the bound
+  # read 426/yr where the integrator's own Jacobian is 730/yr, RK4 ran at z = 4.06
+  # against its 2.785 limit for ~10 days around the SH winter peak every year, and
+  # the objective there was integrator artefact (+273.2; 2x the count converges it).
+  # No registered mode moves (all at CCX_SUBSTEPS_MIN, z <= 1.19).
   .grids <- list(grid)
   if (ccx_seas_ml_ls_on(p)) {
     .sh <- ccx_mld_shape("ls")
-    # ⚠ DELIBERATELY the 12 SAMPLED extremes, not the interpolant's continuous
-    # ones (`$f_min`/`$f_max`, ~0.6 % beyond the samples: SH max 1.6876 vs
-    # 1.6779; review A16, 2026-09-12). Reading the continuous extremes here
-    # could change the substep count, and a substep change alters EVERY
-    # trajectory and moves the objective -- so it is a RULING, not a tidy-up,
-    # and is left as shipped. The GUARD (ccx_seas_ml_guard) does read them.
-    .fs <- c(min(vapply(HEMIS, function(h) min(.sh[[h]]$f_month), numeric(1))),
-             max(vapply(HEMIS, function(h) max(.sh[[h]]$f_month), numeric(1))))
+    # (A) the interpolant's CONTINUOUS extremes -- the `$f_min`/`$f_max` the
+    # integrator actually reaches and ccx_seas_ml_guard() reads (review A16,
+    # 09-12) -- not the 12 monthly samples, whose pooled max (1.6817, the NH's)
+    # falls 0.35 % short of the SH interpolant's 1.6876: at h_ml 74.44 that is
+    # layer 1 at 1.19 m against the 0.75 m the integrator meets.
+    .fs <- c(min(vapply(HEMIS, function(h) .sh[[h]]$f_min, numeric(1))),
+             max(vapply(HEMIS, function(h) .sh[[h]]$f_max, numeric(1))))
     .grids <- lapply(.fs, function(f) ccx_grid_at_h_ml(grid, grid$h_ml * f))
+    # Past the P8 wall layer 1 has no thickness to bound. ccx_seas_ml_guard()
+    # stops every run before it gets here; this only names a direct call's error.
+    if (any(vapply(.grids, function(g) any(g$dz <= 0), logical(1))))
+      stop(sprintf(paste0("ccx_substeps_for: at h_ml = %.3f the winter mixed layer reaches ",
+                          "layer 1's base (prereg P8; see ccx_seas_ml_guard()) -- there is no ",
+                          "stability bound to take."), grid$h_ml))
   }
-  # The bound is taken at the LARGEST interface K, which is kz itself at the
-  # ML base for every admissible kz_deep_frac -- conservative for the rest.
+  # (B) K is the HELD profile: ccx_kz_profile() on the ANNUAL-MEAN grid, which is
+  # what ccx_prepare() hands the integrator as `kz_int` and holds through the
+  # cycle. Re-evaluated on the moved grid, the deepened ML base read 0.82 x kz at
+  # h_ml 74 where the integrator holds kz itself. The bound is taken at the
+  # LARGEST held interface K -- kz at the ML base for every admissible
+  # kz_deep_frac -- conservative for the rest.
+  K_held <- max(ccx_kz_profile(p, grid))
   # + the TROPICAL BOX's rates (2026-09-14f) at each extreme -- its interface
   # with layer 1 sees layer 1's thickness NOW; exactly 0 with the box off.
+  # ⚠ ccx_tr_box_eigbound() still re-evaluates ITS K on `g` -- (B)'s class, left
+  # out of the 10-04 ruling because the box is off at every registered mode.
   lam <- max(vapply(.grids, function(g)
-    ccx_diffusion_eigmax(max(ccx_kz_profile(p, g)), g) +
+    ccx_diffusion_eigmax(K_held, g) +
       ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), g, p) +
       ccx_tr_box_eigbound(p, g) +
       ccx_e_loop_eigbound(p, g) +                # the ventilation loop (2026-09-14 h); 0 at w_vent = 0
@@ -4770,7 +4795,17 @@ ccx_substeps_for <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
   # the substep count -- and with it every trajectory -- is unchanged there.
   lam <- lam + ccx_eq_cell_eigbound(p)
   need <- dt * lam / (CCX_STAB_SAFETY * CCX_RK4_STAB_LIMIT)
-  as.integer(min(max(CCX_SUBSTEPS_MIN, ceiling(need)), CCX_SUBSTEPS_MAX))
+  # (C) PAST THE CAP IT STOPS (2026-10-04, the same ruling). The clamp that stood
+  # here ran a count its own bound called unstable, silently. Under (A) the need
+  # grows like 1/(layer-1 thickness) towards the P8 wall and passes
+  # CCX_SUBSTEPS_MAX only within ~7 cm of it at the canonical's values; the
+  # objective reads the stop as -Inf, as it reads the guard's. Still a backstop
+  # against a pathological draw hanging -- it now refuses instead of clamping.
+  if (need > CCX_SUBSTEPS_MAX)
+    stop(sprintf(paste0("ccx_substeps_for: the stability bound needs %.1f substeps, past ",
+                        "CCX_SUBSTEPS_MAX = %d (h_ml %.3f, kz %.1f) -- refusing to run a count ",
+                        "the bound itself calls unstable."), need, CCX_SUBSTEPS_MAX, grid$h_ml, p$kz))
+  as.integer(max(CCX_SUBSTEPS_MIN, ceiling(need)))
 }
 
 #' Resolve a user-supplied `substeps` argument, which may be the string "auto"
