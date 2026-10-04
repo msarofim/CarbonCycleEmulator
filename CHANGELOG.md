@@ -2,6 +2,57 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (k) — **The P3 preview had NO POWER on `q10`; a powered repair says P3 still does almost nothing, and now says why.** The running preview frees `q10` to only 0.15 of its marginal sd, so its "q10 freed" null was structurally guaranteed, and its held-`q10` cells price the SEASONAL RIDGE, not the GCB row. With real power (0.87–1.00), the GCB row moves `q10` by < 0.04 sd. The reason is the land's own structure: 96 % of heterotrophic respiration passes through a 2-yr soil pool, so `q10` barely moves the net climate effect. Nothing adopted.
+
+- **The power defect** (measured from hilda34g's stored covariance, the 10-04 (e) power convention):
+  - `calibration/diag_p3_netclimate_preview.R` frees `q10` inside the 8-name land block, every other name held. That
+    block frees `q10` to **0.15** of its marginal sd (`npp_tsens`: 0.93).
+  - `q10`'s posterior partners sit outside it: `seas_lag_p_NH` (r +0.80), `npp_frac_NH` (+0.68), `seas_T_amp_SH`
+    (−0.59), `tau_ex` (+0.47).
+  - The mechanism: the seasonal respiration is q10^(A_T sin/10), so the seasonal rows fix A_T · ln(q10) (`R/model.R`,
+    the `CCX_SEAS_PHI_EFF` block). With `seas_T_amp` held, `q10` cannot move.
+  - **The probe** (scratch, 4 evaluations): `q10` = 1.25 costs **−1708** on the #15 likelihood with `seas_T_amp`
+    held, and **−22.5** with `seas_T_amp` rescaled along A_T · ln(q10) = const (−4688 vs −64 at 1.4). The seasonal
+    rows carry it: `co2_seasonal_MLO` −1317 → −0.1.
+  - So **98.7 % of what the preview's Q1.25 / Q1.4 cells will report is the seasonal ridge.** The preview is still
+    running (§3b of the 10-04 b handoff); its output is to be quarantined with a README when it lands.
+  - ⚠ On the ridge `seas_T_amp_NH` falls 15.5 → 4.1 °C (`q10` 1.25) or 2.7 °C (1.4) against its observation prior
+    (`SEAS_T_AMP_NH_OBS`). That prior, through the seasonal cycle, is what holds `q10` at 1.06.
+- **The repair:** `calibration/diag_p3_powered_step.R` (`b44e20b`) → `outputs/diagnostics/p3_powered_step_20261004.{log,rds}`.
+  - At the mode, one Newton step with the row added: Δu_B = (P_BB + J_B J_Bᵀ/σ²)⁻¹ J_B (μ − net₀)/σ². J is by central
+    differences; each step is EVALUATED.
+  - Identity: logpost −1182.991369 (stored, exact); likelihood −1143.2508; net +0.1176 GtC/yr.
+
+| block | q10 power | `q10` | `npp_tsens` | net (GtC/yr) | gain predicted / EVALUATED | SSP5-8.5 2300 |
+|---|---|---|---|---|---|---|
+| 8 names (`q10` held) | 0 | 1.0603 | 0.00885 → **0.00663** | +0.078 | +0.037 / +0.024 | — |
+| 9 (the preview's) | 0.15 | +0.002 sd | → 0.00663 | +0.078 | +0.037 / +0.024 | — |
+| 17 (powered: + seasonal names, `npp_frac_NH`, `tau_ex`) | 0.87 | +0.018 sd | → 0.00655 | +0.076 | +0.039 / +0.023 | 1451.7 |
+| all 34 (the P3 mode) | 1.00 | 1.0603 → 1.0612 (+0.037 sd) | → 0.00631 | +0.072 | +0.043 / +0.028 | **1451.9** (+3.3) |
+
+  - The 8-name step reproduces the 10-04 (i) analytic P3 (+0.0066), a check of the machinery.
+  - **The leverage on the net climate effect, per marginal sd:** `npp_tsens` +0.160 GtC/yr, `q10` **−0.016**,
+    `fert_k` −0.003; everything else ≤ 0.002. `q10` moves it a tenth as much as the greening term per sd.
+- **Why `q10` is weak: the soil structure, measured. No bug.**
+  - At hilda34g, `litter_slow_frac` 0.05 with the inert carve-out (0.195) sends **4.0 %** of litter to the 500-yr pool.
+  - So **96 % of heterotrophic respiration passes through the 2-yr pool** (1750: 57.6 vs 2.4 GtC/yr). That pool
+    re-equilibrates within a few years of any change in its rate.
+  - First-principles estimate per unit ln q10:
+    - the 2-yr pool's lag: 57.6 × 2 yr × 0.0025 K/yr ≈ 0.29 GtC/yr;
+    - the 500-yr pool, not depleted: 2.4 × 1.325 K / 10 ≈ 0.32;
+    - total **≈ 0.61**, against the measured **0.69** (12 %).
+  - This closes the 10-04 (j) open reading ("~4× weaker than a quasi-equilibrium estimate"): that estimate assumed
+    the respiring carbon does not deplete, which a 2-yr pool does.
+  - The soil constants are a scan's "defensible centre … do not treat them as fitted values" (`R/model.R`
+    `ccx_default_params()`).
+- **What it means for the ruling (Marcus's):**
+  - P3 with `q10` genuinely freed is ≈ P0: `npp_tsens` +0.0089 → +0.0063, still positive, and the net climate
+    effect still the WRONG SIGN (+0.07 vs −0.8 ± 0.7). +3.3 ppm at SSP5-8.5 2300.
+  - The model's land cannot make GCB's net climate effect through respiration. `q10` is held by the seasonal
+    ridge + `seas_T_amp`'s prior, and the soil routes almost nothing through a pool slow enough to keep responding.
+  - The live choice is therefore P0/P3 (no material change) vs P4 (pin at 0: −0.26 likelihood, +13.5 ppm). A soil
+    structure with a decadal pool would be a different, larger question.
+
 ## 2026-10-04 (j) — **Marcus's rulings on the two proposals: no timing row (a card-4 disclosure instead), and P3 PREVIEWED with `q10` freed before any objective change.** Verbatim: "No row; draft card-4 text (Recommended)", "Preview P3 with q10 freed (Recommended)".
 
 - **Card 4: drafted, not applied** (`notes/draft_2026-10-04_card4_enso_timing.md`). The precedent is 10-02 (v): the facts are drafted for his wording, and `app/R/review.R` is untouched.

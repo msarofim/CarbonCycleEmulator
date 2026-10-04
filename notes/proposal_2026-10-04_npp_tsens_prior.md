@@ -5,6 +5,19 @@
 > interactive-CO₂ bias in the net-climate comparison is measured small (−0.023 GtC/yr; like-for-like +0.141, z +1.34;
 > `calibration/diag_net_climate_co2_feedback.R`), so §3's "wrong sign" stands.
 
+> **THE P3 PREVIEW, READ (10-04 k; CHANGELOG 10-04 k). §5's choice is now P0/P3 vs P4.**
+> - The running preview had **no power on `q10`**. Its block frees `q10` to 0.15 of its marginal sd, because the
+>   seasonal rows fix A_T · ln(q10) and `seas_T_amp` was held. Its held-`q10` cells price that seasonal ridge
+>   (98.7 % of their cost), not the GCB row. Its output is to be quarantined when it lands.
+> - **Repaired** (`calibration/diag_p3_powered_step.R`: a Newton step from the mode, evaluated, at power 0.87–1.00).
+>   **P3 with `q10` truly freed moves `q10` by < 0.04 sd (1.060 → 1.061).** `npp_tsens` goes +0.0089 → +0.0063 and
+>   the net climate effect +0.12 → +0.07 GtC/yr, still the wrong sign. SSP5-8.5 2300: +3.3 ppm. The objective gains
+>   +0.03.
+> - **Why:** 96 % of the model's heterotrophic respiration passes through its 2-yr soil pool, which re-equilibrates
+>   within years. So `q10` moves the net climate effect only −0.016 GtC/yr per sd (`npp_tsens`: +0.160). A
+>   first-principles estimate from the pool split (0.61 per unit ln q10) matches the measured 0.69.
+> - **So P3 ≈ P0.** The real choice is P0/P3 (no material change) vs P4 (pin at 0).
+
 > **Status.** Drafted on Marcus's ruling "Revisit the npp_tsens prior" (2026-10-04). It re-opens the 09-30 ruling,
 > which made the prior sign-free, N(0, 0.029).
 > - Nothing is built and no objective is changed.
@@ -93,6 +106,22 @@ At hilda34g's lag, with `npp_tsens` HELD and the other 7 land-block names re-opt
   not fitted. It costs 0.26 on the likelihood and adds 13.5 ppm to SSP5-8.5 2300.
 
 My lean is P3, previewed first, because it also addresses `q10`.
+
+**UPDATE 10-04 (k), after the preview:** the lean above rested on P3 "also addressing `q10`". It does not.
+- With power, the GCB row moves `q10` by 0.04 sd. The seasonal ridge and `seas_T_amp`'s observation prior hold it,
+  and the soil structure gives it almost no leverage on the net climate effect.
+- P3's whole effect is ~30 % of the way from P0 to P4 on `npp_tsens` (+0.0063 vs +0.0089 / 0), +3.3 ppm.
+- **Revised recommendation: decide between P0 and P4 on what the app should SAY:**
+  - **P0 (status quo)** keeps a weakly-identified positive greening term (≈ 1 sd from zero) and a net climate effect
+    of the wrong sign, disclosed.
+  - **P4** fits no term the record cannot sign, at −0.26 likelihood and +13.5 ppm at SSP5-8.5 2300. The net climate
+    effect is still ≈ 0 (−0.04), not GCB's −0.8: P4 removes the wrong sign but does not create the right one.
+  - P3 is defensible only as documentation (the GCB comparison inside the objective). It moves the futures 3 ppm,
+    and every stored logpost would move by its term.
+- **The structural point, for the record (not a proposal):** neither option can reach GCB's −0.8 GtC/yr.
+  - The model routes 4 % of litter to its slow soil pool, so it has almost no soil carbon that keeps responding to
+    warming on decades.
+  - That would be a soil-structure question (a decadal pool), larger than objective #16.
 
 **What needs ruling:**
 1. Which option (P0–P4), or a combination (e.g. P1 with P3).

@@ -1,0 +1,65 @@
+calibration/diag_p3_powered_step.R @b44e20b, 2026-10-04 16:19 | mode hilda34g | the row N(-0.8, 0.7) GtC/yr on the net climate effect, 2015-2024 vs 1901-1920 climate held
+
+=== ID. the frame ===
+  logpost -1182.991369 (stored -1182.991369); likelihood -1143.2508; net climate effect +0.1176 GtC/yr -> the row -1.4214 (z +1.31)
+  P = -(stored Hessian): max |S P - I| = 1.0e-10
+
+=== J. d(net climate effect)/du by central differences, step 0.10 x the marginal sd ===
+  the leverage (GtC/yr per marginal sd), the ten largest:
+    npp_tsens            +0.1603
+    q10                  -0.0162
+    fert_k               -0.0027
+    beta_max             +0.0019
+    ndep_ret             -0.0010
+    luc_scale            -0.0003
+    u_hs                 -0.0001
+    kz                   -0.0001
+    gamma_enso_land_NH   +0.0001
+    gamma_enso_land_SH   +0.0000
+
+=== STEPS. du_B = (P_BB + J_B J_B'/s^2)^-1 J_B (mu - net0)/s^2; (mu - net0)/s^2 = -1.8726 ===
+
+  B8_q10_held (8 names; frees q10 to 0.00 and npp_tsens to 0.93 of their marginal sds)
+    net climate effect +0.1176 -> +0.0777 predicted, +0.0777 evaluated (GtC/yr)
+    objective + row: gain +0.0373 predicted, +0.0241 EVALUATED (logpost -0.0489, likelihood +0.0187, row +0.0730)
+    npp_tsens       0.00885 -> 0.00663  (-0.249 marginal sd)
+    beta_max        1.83067 -> 1.88548  (+0.136 marginal sd)
+
+  B9_preview (9 names; frees q10 to 0.15 and npp_tsens to 0.93 of their marginal sds)
+    net climate effect +0.1176 -> +0.0776 predicted, +0.0776 evaluated (GtC/yr)
+    objective + row: gain +0.0374 predicted, +0.0240 EVALUATED (logpost -0.0492, likelihood +0.0131, row +0.0732)
+    q10             1.06032 -> 1.06037  (+0.002 marginal sd)
+    npp_tsens       0.00885 -> 0.00663  (-0.249 marginal sd)
+    beta_max        1.83067 -> 1.88582  (+0.137 marginal sd)
+
+  B17_powered (17 names; frees q10 to 0.87 and npp_tsens to 0.95 of their marginal sds)
+    net climate effect +0.1176 -> +0.0760 predicted, +0.0760 evaluated (GtC/yr)
+    objective + row: gain +0.0389 predicted, +0.0226 EVALUATED (logpost -0.0535, likelihood -0.0257, row +0.0761)
+    q10             1.06032 -> 1.06076  (+0.018 marginal sd)
+    npp_tsens       0.00885 -> 0.00655  (-0.258 marginal sd)
+    beta_max        1.83067 -> 1.89008  (+0.148 marginal sd)
+    seas_T_amp_NH   15.50326 -> 15.53215  (+0.008 marginal sd)
+    seas_T_amp_SH   3.91230 -> 3.91059  (-0.001 marginal sd)
+    seas_lag_p_NH   1.51701 -> 1.51855  (+0.028 marginal sd)
+    npp_frac_NH     0.57481 -> 0.57490  (+0.004 marginal sd)
+    tau_ex          0.88157 -> 0.88152  (-0.001 marginal sd)
+
+  ALL (34 names; frees q10 to 1.00 and npp_tsens to 1.00 of their marginal sds)
+    net climate effect +0.1176 -> +0.0715 predicted, +0.0715 evaluated (GtC/yr)
+    objective + row: gain +0.0431 predicted, +0.0283 EVALUATED (logpost -0.0557, likelihood -0.1089, row +0.0841)
+    q10             1.06032 -> 1.06124  (+0.037 marginal sd)
+    npp_tsens       0.00885 -> 0.00631  (-0.285 marginal sd)
+    beta_max        1.83067 -> 1.89470  (+0.159 marginal sd)
+    seas_T_amp_NH   15.50326 -> 15.54983  (+0.014 marginal sd)
+    seas_T_amp_SH   3.91230 -> 3.90128  (-0.008 marginal sd)
+    seas_lag_p_NH   1.51701 -> 1.52001  (+0.055 marginal sd)
+    npp_frac_NH     0.57481 -> 0.57498  (+0.008 marginal sd)
+    tau_ex          0.88157 -> 0.88116  (-0.010 marginal sd)
+
+=== FUTURES (CO2 ppm in 2300) ===
+         ssp585_2300 vvH_2300
+mode          1448.6   1002.2
+ALL_step      1451.9   1004.3
+B17_step      1451.7   1004.3
+  ⚠ SECOND ORDER from the mode: the step is exact for a quadratic objective and a linear net effect; the evaluated
+    gain is the check. CO2 is interactive here and prescribed in TRENDY (bias measured -0.023 GtC/yr at hilda34g).
