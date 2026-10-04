@@ -2,6 +2,8 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (b) — Handoff: `notes/handoff_2026-10-04_substep_controller.md`. **The start-017 defect is found (10-03 j), ruled and fixed (10-04 a), and the suite at `a7eab97` is clean (6039 / 0 / 3 / 0). The work sits on branch `claude/pensive-burnell-a9bf40` and is NOT merged into `main`; the merge is Marcus's call. Nothing is running.**
+
 ## 2026-10-04 (a) — **APPLIED, on Marcus's ruling "Apply A+B+C (Recommended)": under the seasonal mixed layer `ccx_substeps_for()` now bounds the stiffness the integrator actually meets.** (A) It reads the MLD interpolant's continuous extremes; (B) it uses the held `kz_int` profile; (C) it STOPS past `CCX_SUBSTEPS_MAX` instead of silently clamping. **No registered mode moves:** all six stay at 4 substeps with bit-identical logposts, as priced in 10-03 (j). Three new tests in `test-stability.R` are each mutation-proven.
 
 - **The change** (`R/model.R`, `ccx_substeps_for()`; DESIGN §3.7 gains the rule):
