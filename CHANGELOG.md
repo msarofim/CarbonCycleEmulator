@@ -2,6 +2,21 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (h) — **The hilda34g assessment is DRAFTED (`notes/assessment_2026-10-04_hilda34g_DRAFT.md`, the handoff's item 6), with Marcus's verdict (§5) and acts (§7) left as placeholders. The root memory index is back under its soft budget (item 7).**
+
+- **The evidence, re-measured at hilda34g as the canonical:**
+  - the scorecard → `outputs/diagnostics/whole_model_scorecard_20261004_hilda34g.{log,rds}`. Both arms reproduce their stored streams (hilda34g +7.7e-7 on 27 rows). Its "+dirty" is the two untracked preview files, which the scorecard does not read.
+  - D4 → `outputs/diagnostics/d4_readout_20261004.{log,csv}`: **modern NPP 66.31 GtC/yr, z +1.32** (hilda33d 67.67, z +1.50), and +0.68 GtC/yr retained via N deposition.
+- **Gates at hilda34g:**
+  - PASS: G, Q, 7, S, 6 (MLO amplitude growth +14.42 % vs +15.57 %, z −0.34) and P7;
+  - FAIL: V (0.59×), H/GL (1.95×), D (z −6.74) and 5 (`sh_v` +10.58, `nh_efold` −7.32), all structural as before;
+  - the AIC gate passes in the suite; on the scorecard's shared rows the canonical leads the seas_ml-0 control by +32.31.
+- **What emerges** (a comparison): IRF(100) 0.374 against Joos 0.409; the gap has narrowed from 0.121 (hilda29l) to 0.049 (hilda33d) to **0.035**. The 1000-yr partition is 15 / 62 / 23 % (z −0.08 / +0.50 / −0.54).
+- The draft names the three live tensions with the rulings now in progress: the lag vs the atmosphere's timing, the weak greening sign, and the running `k_w` price arm.
+- **The root memory index** (the shared store's `MEMORY.md`): content **13,435 → 12,117 B** against its 12,288 soft budget.
+  - The AIS and Greenland routing bullets' numbers were demoted to the memory files they already link. Each fact was checked present there first, and no link was dropped.
+  - ✅ **Newly verified, and recorded in `memory_keyspace_follows_launch_cwd`:** this session was launched from `CarbonCycleEmulator/` and loaded the shared store through the 09-25 symlink. The harness DOES follow it at session start; the test the CCX `CLAUDE.md` calls "dropped" is settled by observation. That `CLAUDE.md` text is Marcus's file and is not edited.
+
 ## 2026-10-04 (g) — **THE `k_w` = 1446 PRICE ARM IS RUNNING ON THE MAC** (the handoff's item 4; Marcus: "Canonical incumbent, Mac (Recommended)"). It is a 24-start refit of the canonical's objective with `k_w` held at Naegler's 1446 m/yr: the profile price of the literature value, read on LIKELIHOOD against hilda34g. Launched 12:39 EDT; expected ~00:00–01:00 10-05 (three rounds of ≤ 5 h, as the #15 arms took).
 
 - **Torch verdict: Mac.** I cannot authenticate on Torch (memory `consider_torch_first`), the 10-02 D5 ruling chose the Mac for the same recipe, and the Mac was idle. Torch would have cut the wall time to ~7 h, with Marcus submitting.
