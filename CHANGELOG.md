@@ -2,6 +2,35 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (g) — **THE `k_w` = 1446 PRICE ARM IS RUNNING ON THE MAC** (the handoff's item 4; Marcus: "Canonical incumbent, Mac (Recommended)"). It is a 24-start refit of the canonical's objective with `k_w` held at Naegler's 1446 m/yr: the profile price of the literature value, read on LIKELIHOOD against hilda34g. Launched 12:39 EDT; expected ~00:00–01:00 10-05 (three rounds of ≤ 5 h, as the #15 arms took).
+
+- **Torch verdict: Mac.** I cannot authenticate on Torch (memory `consider_torch_first`), the 10-02 D5 ruling chose the Mac for the same recipe, and the Mac was idle. Torch would have cut the wall time to ~7 h, with Marcus submitting.
+- **The tree:** a git worktree at `773f8f2` (the price-arm rule, (f)), `~/ccx_frozen/20261004f_kw1446`, with `nuclear14c` copied in (`diff -rq` clean). `ccx_require_run_inputs()` reports 14/14.
+- **The arm:** label `hilda_csl3v0kaidgbe` (the canonical's), `seas_ml` 1, the canonical's 9 pins + `k_w=1446`, so 33 free names.
+- **Port targets**, regenerated in the tree under that pin set:
+
+| point | logpost | the file's stored | offset |
+|---|---|---|---|
+| cold | −60177.60 | — | — |
+| incumbent: hilda34g seeded at `k_w` 1446 | **−2966.41** | −1182.99 | −1783.42 |
+| new basin: `hilda31pe` | −16770.55 | −1231.07 | −15539.47 |
+
+  The incumbent's offset reproduces the handoff's "conditional price 1784" (every other name held at the canonical).
+- **Preflight** (all 24 ids, 8 at once): **24/24 exit 0, every port VERIFIED** (rel ≤ 6.3e-15).
+  - The gate line names the five gated names (the D2/D3 four + `lag_enso_land`).
+  - Id 1 reads "INCUMBENT = hilda34g (a PRICE arm: the canonical's pins plus k_w held at 1446 …)".
+  - Logs: `~/ccx_frozen/20261004f_kw1446/logs/preflight_20261004f/`. Its empty output directory was removed before the launch.
+- **The launch:** `~/ccx_frozen/20261004f_kw1446_launch.sh` under `nohup` (PID in `…_launch.pid`, chain status in `…_launch.out`).
+  - Tag `20261004f`, `CCX_MAC_NPAR=8`, WALL 300 min, 3 restarts × 6 cycles × 6000 maxit, spread 1.0452 with the `_sdby_npp_tsens=0.0291` suffix.
+  - Seeds `2026 + id`, recorded in every start file.
+  - Logs: the tree's `logs/wave_20261004f.log` and `logs/ccx_multistart_mac_20261004f_<id>.out`.
+- **When it lands:**
+  1. copy the outdir back into the repo's `calibration/output/`;
+  2. `CCX_MS_OUTDIR=<dir> Rscript calibration/collect_dispersed_multistart.R`;
+  3. promote and recompute the Hessian;
+  4. read the PRICE on likelihood: hilda34g's −1143.2508 on the 27 rows minus the arm's best. A pinned arm's logpost carries no `k_w` prior, so its logpost is not comparable. The `k_w` prior's own term at 1446 vs 1903 is reported beside it.
+  5. Set it against the conditional price (1783) and the Laplace one (~47).
+
 ## 2026-10-04 (f) — **Marcus's rulings on the handoff's open items, and the first of them applied: a PRICE-ARM rule in the multistart reference set, so the `k_w` = 1446 refit can launch.** Verbatim: "Draft a timing-row proposal" (item 2); "Revisit the npp_tsens prior" (the greening sign, 10-04 e); "Keep the family (Recommended)" (item 5); "k_w refit at 1446, hilda34g assessment, Memory trim, Remove merged worktree" (what next); "Canonical incumbent, Mac (Recommended)" (the `k_w` refit); "Archive session, then remove (Recommended)" (the worktree).
 
 - **Item 5 is closed with no change:** "δ¹³C in ice cores" stays its own family in the app's "What pins down what?" tab.
