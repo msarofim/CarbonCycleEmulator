@@ -1,0 +1,30 @@
+calibration/diag_p3_netclimate_preview.R @c6e3873, 2026-10-04 14:50 | 4 workers
+  the row: net climate effect on S_LAND, 2015-2024 vs 1901-1920 climate held, N(-0.8, 0.7) GtC/yr (GCB 2025 TRENDY)
+
+=== ID. the 9-name block (land block + q10), NO row: a slope check AT the mode ===
+  logpost -1182.991369 (stored -1182.991369); max |whitened slope| 0.0024; q10 1.0603 (prior z -2.54); npp_tsens +0.00885; net climate effect +0.118 GtC/yr -> the row -1.421 (z +1.31)
+
+=== cells: 4 on 4 forked workers ===
+
+=== THE READ (likelihood = the #15 rows; the row's own term shown apart; d = vs the canonical) ===
+               cell npp_tsens    q10   q10_z beta_max      net     row
+ canonical (no row) 0.0088541 1.0603 -2.5383  1.83067 0.117559 -1.4214
+                 R1 0.0066687 1.0604 -2.5381  1.88330 0.078366 -1.3495
+                 RH 0.0066726 1.0603 -2.5383  1.88300 0.078468 -1.3497
+              Q1.25 0.0338604 1.2500 -1.8800  1.19862 0.514575 -2.3256
+               Q1.4 0.0624676 1.4000 -1.4267  0.93063 0.944900 -3.6691
+       d_lik   d_logpost ssp585     vvH  conv evals
+  0.0000e+00  0.0000e+00 1448.6 1002.22  TRUE    18
+  1.9690e-02 -3.5278e-02 1451.8 1004.42  TRUE  1269
+  2.5827e-02 -3.5225e-02 1451.9 1004.45  TRUE  1094
+ -1.5572e+03 -1.5630e+03 1458.8 1002.89 FALSE  4629
+ -4.5892e+03 -4.5888e+03 1387.8  958.07 FALSE  3360
+  R1: the row, q10 free, from the mode
+  RH: the row, q10 HELD at the canonical's
+  Q1.25: the row, q10 HELD at 1.25
+  Q1.4: the row, q10 HELD at 1.4
+  P3 with q10 free: the objective + row gains +0.037 over the canonical (the row +0.072, the #15 likelihood +0.020, the priors -0.055)
+  npp_tsens +0.00885 -> +0.00667; q10 1.060 -> 1.060 (prior z -2.54 -> -2.54); net climate effect +0.118 -> +0.078 GtC/yr; SSP5-8.5 2300 1448.6 -> 1451.8 ppm
+  the q10 PROFILE with the row (objective + row, d vs R1): q10 1.060: +0.000 (net +0.078 GtC/yr, #15 likelihood +0.000); q10 1.060: -0.000 (net +0.078 GtC/yr, #15 likelihood +0.006); q10 1.250: -1563.922 (net +0.515 GtC/yr, #15 likelihood -1557.211); q10 1.400: -4591.072 (net +0.945 GtC/yr, #15 likelihood -4589.258)
+  ⚠ CONDITIONAL: 25 names held. CO2 is interactive here and prescribed in TRENDY; the bias that makes is MEASURED small
+     (diag_net_climate_co2_feedback.R: -0.023 GtC/yr at hilda34g, +0.009 at q10 1.4).

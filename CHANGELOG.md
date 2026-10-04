@@ -2,6 +2,31 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (m) — **A NEW MECHANISM RULED: ocean mixing weakens as the climate warms** (Marcus: *"follows pretty directly from physical understanding, so I would be interested in incorporating that into the model"*). The proposal is `notes/proposal_2026-10-04_warming_weakens_mixing.md` (`f794719`). The P3 preview has landed and is QUARANTINED.
+
+- **The rulings, verbatim:** "Thermocline mixing only (Recommended)"; "Obs × law, fixed (Recommended)"; "GMST minus lagged
+  deep ocean (Recommended)"; "History + futures, one #16 refit (Recommended)".
+- **What will be built** (DESIGN first, then both cores, then tests, then a preview; nothing adopted until the refit):
+  - g(t) = (1 + s·T_key)^(−q/2) multiplies the upper (exponential) part of K(z); abyssal mixing is unchanged.
+    - s comes from the observed stratification trend (Cheng 2025: N² +0.8 ± 0.1 %/decade, upper 2,000 m, since the
+      1960s), re-derived against the ruled key.
+    - q = 1 is Gargett 1984's K ∝ N⁻¹ (basin budgets: 0.8–1.2).
+    - T_key = max(0, GMST − T_deep), with T_deep an exponential lag of GMST at the climate module's slow timescale.
+  - The solved export is rescaled with the same g, so the natural DIC gradient stays fixed and only the perturbation
+    (anthropogenic, bomb ¹⁴C, Suess) feels the slowdown. A fixed export under falling K would add a spurious,
+    wrong-signed sink of ~(1−g) × 59 GtC/yr.
+  - g(0) = 1 and g ≤ 1, so the spinup and the substep bound are untouched.
+- **Literature, read by a subagent and spot-checked in the papers' own text:**
+  - Li 2020 "5.3 % [5.0, 5.8] … 0.90 % per decade";
+  - Cheng 2025 "0.8 ± 0.1 % dec⁻¹".
+  - Model precedents and benchmarks (MAGICC6, OSCAR, CMIP6 AMOC, Arora 2020 γ_O −17.2 with ventilation −16.4 and
+    regenerated +12.3, GCB 2025's ocean climate effect −0.20 ± 0.05 GtC/yr) are in the proposal's §4.
+- **The P3 preview LANDED** (14:50 → 17:42) and is quarantined at `outputs/quarantine/20261004_p3_q10_no_power/`
+  (README):
+  - its held-`q10` cells priced the seasonal ridge (−1557 / −4589, unconverged), as 10-04 (k) predicted;
+  - its from-the-mode cells cross-check the powered Newton step with a real optimiser: `npp_tsens` 0.00667 vs 0.00663,
+    net climate effect +0.078 vs +0.078 GtC/yr, SSP5-8.5 2300 1451.8 vs 1451.7–1451.9 ppm.
+
 ## 2026-10-04 (l) — **MAGICC's ocean reviewed for an NH-sink / SH-upwelling idea (Marcus's question): it has none for carbon, and CCX's record already goes further.** No code change.
 
 - **The question** (Marcus, verbatim): *"consider the ocean structure in the MAGICC model … are there any insights from

@@ -1,5 +1,17 @@
 # PROPOSAL 2026-10-04 — ocean mixing weakens as the climate warms (a new mechanism) — FOR MARCUS'S RULING
 
+> **RULED 2026-10-04 (Marcus), verbatim labels:**
+> - Q1: "Thermocline mixing only (Recommended)".
+> - Q2: "Obs × law, fixed (Recommended)".
+> - Q3: "GMST minus lagged deep ocean (Recommended)".
+> - Q4: "History + futures, one #16 refit (Recommended)".
+> - Q5 (the pump) was not asked, so constraint 2 stands as written and the regenerated-carbon omission is disclosed.
+>
+> **⇒ To BUILD:** g = (1 + s·T_key)^(−q/2) on the upper part of K(z), with q = 1 and s re-derived against the ruled key
+> (§4's 4.4 %/K is per K of GMST). T_key = max(0, GMST − T_deep), where T_deep is GMST lagged exponentially with the
+> climate module's slow timescale. The export is rescaled with g. It is fixed (structural, not fitted) and on in
+> history and futures; it is priced on every registered mode and enters objective #16 with the greening decision.
+
 > **Status.** Drafted on Marcus's direction (2026-10-04): *"The 'ocean mixing slows as the ocean warms' follows pretty
 > directly from physical understanding, so I would be interested in incorporating that into the model."*
 > - Nothing is built and no objective is changed. The rulings asked for are in §7.
