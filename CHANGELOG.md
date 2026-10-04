@@ -2,6 +2,35 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (l) — **MAGICC's ocean reviewed for an NH-sink / SH-upwelling idea (Marcus's question): it has none for carbon, and CCX's record already goes further.** No code change.
+
+- **The question** (Marcus, verbatim): *"consider the ocean structure in the MAGICC model … are there any insights from
+  that model that could prove useful in our own ocean? I'm particularly interested in whether there's an overturning
+  circulation/conveyer belt/hemispheric ocean exchange/northern hemisphere sink southern hemisphere upwelling kind of
+  mechanism that might be better than what we've already tried."*
+- **Read:** the MAGICC v7.5.3 source on this machine. ⛔ It is restricted-access (`MAGICC/DO_NOT_MAKE_PUBLIC.md`); no
+  source or restricted parameter values are reproduced here. The structure is cited to Meinshausen, Raper & Wigley
+  2011 (ACP 11:1417, open access; "M11").
+- **What MAGICC has** (M11 §3, §A4; source-verified):
+  - two hemispheric upwelling–diffusion–entrainment columns for HEAT. Each is a closed loop inside its own
+    hemisphere: a polar pipe carries a damped surface anomaly (β = 0.2), entrains into every layer in proportion to the
+    area lost with depth, and upwells uniformly (M11: w₀ = 4 m/yr, weakening 30 % by 8 K);
+  - one shared parameter set for both hemispheres;
+  - NH↔SH coupling through a diffusive HEAT exchange between the mixed layers only;
+  - ocean CARBON as one global mixed-layer impulse-response function against one global CO₂, with no circulation, no
+    hemispheres and no isotopes.
+- **Against CCX's record:**
+  - CCX has built two carbon + isotope interhemispheric loops: the conveyor (08-13) and `w_gthc` (09-20 v, closed as a
+    class). MAGICC has none.
+  - MAGICC's damped pipe (β) is a heat shortcut. Its conserved-tracer version is the route through the high-latitude
+    cold box, already in the canonical.
+  - MAGICC's mixing was fitted to heat only, never to ¹⁴C. Hector's lesson applies.
+- **Untried here, for Marcus to weigh:**
+  - (a) a warming-dependent kz / overturning, for the futures or a What-if, not the gates;
+  - (b) a MAGICC-style diffusive NH↔SH ocean exchange: low value, since gate D's deficit is NH-surface;
+  - (c) per-hemisphere ocean area vs depth: small, and it must come from public bathymetry.
+- Memory: `magicc_ocean_no_hemispheric_carbon` (routed from `INDEX_ccx_ocean_circ`, `INDEX_cmp_magicc`).
+
 ## 2026-10-04 (k) — **The P3 preview had NO POWER on `q10`; a powered repair says P3 still does almost nothing, and now says why.** The running preview frees `q10` to only 0.15 of its marginal sd, so its "q10 freed" null was structurally guaranteed, and its held-`q10` cells price the SEASONAL RIDGE, not the GCB row. With real power (0.87–1.00), the GCB row moves `q10` by < 0.04 sd. The reason is the land's own structure: 96 % of heterotrophic respiration passes through a 2-yr soil pool, so `q10` barely moves the net climate effect. Nothing adopted.
 
 - **The power defect** (measured from hilda34g's stored covariance, the 10-04 (e) power convention):
