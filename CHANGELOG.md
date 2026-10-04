@@ -2,6 +2,24 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (f) — **Marcus's rulings on the handoff's open items, and the first of them applied: a PRICE-ARM rule in the multistart reference set, so the `k_w` = 1446 refit can launch.** Verbatim: "Draft a timing-row proposal" (item 2); "Revisit the npp_tsens prior" (the greening sign, 10-04 e); "Keep the family (Recommended)" (item 5); "k_w refit at 1446, hilda34g assessment, Memory trim, Remove merged worktree" (what next); "Canonical incumbent, Mac (Recommended)" (the `k_w` refit); "Archive session, then remove (Recommended)" (the worktree).
+
+- **Item 5 is closed with no change:** "δ¹³C in ice cores" stays its own family in the app's "What pins down what?" tab.
+- **The merged worktree is removed.**
+  - Its session ("Diagnose the SPO seasonal-row cliff near start 017") was archived first, on the ruling.
+  - Its one extra file was the gitignored `nuclear14c` copy, identical to the main checkout's (`diff -rq`).
+  - Then `git worktree remove --force` and `git branch -d claude/pensive-burnell-a9bf40` (merged; a safe delete). The remote branch stays.
+- **The price-arm rule** (`R/calibrate.R`).
+  - `ccx_ms_reference_set()` stopped on the `k_w` pin set: extra pins had to be names the structure never reads, and `k_w` is read.
+  - The new branch: the canonical's 9 pins EXACTLY, plus ONE ruled name the structure reads, held at a value. That takes the canonical (seeded at the pin: a start, not a mode) as incumbent and the control as new basin, at `seas_ml` 1 only.
+  - ⚠ **A first, general version** (any one read name) **failed a previously passing test**: `test-ms-reference-set.R:51` refuses the canonical's pins extended by `pump_grad` under the solved field, a guard since 09-14 (h). Per the standing rule the test was NOT touched. The rule was narrowed instead: the name must be in a ruled list, `CCX_MS_PRICE_ARM_NAMES <- c("k_w")`, and each later price arm's name enters that list by a ruling.
+  - **Test (10)** added. 75 expectations pass in the file, the old guard included.
+  - **Mutation-tested**, each restored from a backup (md5 checked):
+    - dropping the `seas_ml` refusal: caught (1 failure);
+    - dropping the ruled-name list: caught (3);
+    - dropping the canonical-values check: caught (1);
+    - the branch never firing: caught (1 error).
+
 ## 2026-10-04 (e) — **THE GREENING READING TESTED (the handoff's open item 3; pre-registered). The land ENSO lag SETS the sign of `npp_tsens`.** The other 26 names were held and the 8-name land block re-optimised. Moving the lag 0 → 2.644 months then carries **92 %** (lag-arm base) and **89 %** (control base) of the refit's −0.0079 → +0.0089 /K flip. In both bases the sign follows the lag, and two opposite starts reach one point in every cell. **But the sign itself is weakly held:** at either lag ν sits within about one sd of zero. Nothing adopted.
 
 **The test** (`notes/prereg_2026-10-04_greening_lag_swap.md`, committed in `6b64424` before the run; `calibration/diag_greening_lag_swap.R`).

@@ -16,6 +16,11 @@
 #       under a structure WITH the limb at seas_ml 1 -> the canonical / the
 #       control; MUTATION: refused under a structure WITHOUT the limb (the shim
 #       off and nothing in its place) and at seas_ml 0
+#   (10) a PRICE arm (2026-10-04, Marcus: "Canonical incumbent, Mac (Recommended)"):
+#       the canonical's pins + ONE RULED name the structure READS (CCX_MS_PRICE_ARM_NAMES),
+#       held -> the canonical (seeded at the pin) / the control; MUTATION: refused at
+#       seas_ml 0, for an UNRULED read name (q10; (2)'s pump_grad stays refused), with
+#       two held names, and with a canonical pin moved
 # =====================================================================
 ms_cp <- CCX_MODE_CANONICAL_PINS
 ms_ctl <- CCX_MODE_CONTROL_PINS
@@ -124,4 +129,34 @@ test_that("(9) the FREE PARENT of the limb canonical (2026-09-21 g): the six ine
   # MUTATION: one inert pin moved is a foreign set
   moved <- fp; moved[["w_eq"]] <- 30
   expect_error(ccx_ms_reference_set(moved, "1", struct = "hilda_csl3"), "no registered incumbent")
+})
+
+test_that("(10) a PRICE arm (2026-10-04): the canonical's pins + ONE read name held -> the canonical (seeded) / the control; refused at seas_ml 0, with two held names, a moved canonical pin, or a non-parameter", {
+  withr::local_envvar(CCX_MS_STRUCT = ccx_mode_struct(readRDS(ccx_mode_file())), CCX_MS_PUMP_FIELD = "solved")
+  kw <- c(ms_cp, k_w = ccx_const("KW_PRIOR_CENTRE"))           # the first use: Naegler 2009's 1446 m/yr
+  expect_false(ccx_pins_extend_canonical(kw, "solved"), info = "k_w is READ: not an inert extension")
+  expect_true(ccx_pins_price_canonical(kw, "solved"))
+  r10 <- ccx_ms_reference_set(kw, "1")
+  expect_identical(r10$incumbent, CCX_MODE_CANONICAL); expect_identical(r10$new_basin, CCX_MODE_SEASML0_CONTROL)
+  expect_match(r10$why, "PRICE arm.*k_w held at 1446")
+  # MUTATION: only on the canonical's own objective (seas_ml 1)
+  expect_error(ccx_ms_reference_set(kw, "0"), "PRICE arm")
+  # MUTATION: an UNRULED read name is not a price arm (each name is added by a ruling)
+  expect_false("q10" %in% CCX_MS_PRICE_ARM_NAMES)
+  expect_false(ccx_pins_price_canonical(c(ms_cp, q10 = 2), "solved"))
+  expect_error(ccx_ms_reference_set(c(ms_cp, q10 = 2), "1"), "no registered incumbent")
+  # MUTATION: two held READ names price no single value
+  expect_false(ccx_pins_price_canonical(c(kw, q10 = 2), "solved"))
+  expect_error(ccx_ms_reference_set(c(kw, q10 = 2), "1"), "no registered incumbent")
+  # MUTATION: a canonical pin moved is another objective
+  moved <- kw; moved[["w_eq"]] <- 30
+  expect_error(ccx_ms_reference_set(moved, "1"), "no registered incumbent")
+  # MUTATION: a name that is no parameter of the build
+  expect_false(ccx_pins_price_canonical(c(ms_cp, not_a_parameter = 1), "solved"))
+  # an INERT extension still takes the first branch, as before
+  inert1 <- setdiff(ccx_inert_names("solved", Sys.getenv("CCX_MS_STRUCT")), names(ms_cp))
+  if (length(inert1)) {
+    ri <- ccx_ms_reference_set(c(ms_cp, stats::setNames(0, inert1[1])), "1")
+    expect_identical(ri$why, "the canonical, under this array's pins")
+  }
 })

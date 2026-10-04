@@ -2529,6 +2529,25 @@ ccx_pump_field_inert <- function(pump_field) {
 ccx_pins_extend_canonical <- function(pins, pump_field, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
   ccx_pins_extend(pins, CCX_MODE_CANONICAL_PINS, pump_field, struct)
 }
+#' Is a pin set a PRICE arm (2026-10-04, Marcus: "Canonical incumbent, Mac (Recommended)")? The
+#' canonical's pins EXACTLY, plus ONE more name that the structure READS (not inert), held at a
+#' value: a refit there is the PROFILE PRICE of that value (first use: k_w at Naegler's 1446 m/yr,
+#' handoff 2026-10-04 item 4). Unlike an inert extension the held name MOVES the objective, so the
+#' canonical is a START of such an arm (seeded at the pin), not a mode of it -- the layer-2 arm's
+#' case. Two or more extra READ names are not a price of one value and stay unruled.
+#' ⚠ THE NAME ITSELF IS RULED: it must be in CCX_MS_PRICE_ARM_NAMES. Any read name would do
+#' arithmetically, but test-ms-reference-set.R has refused an extension by a READ name since
+#' 09-14 (h) (`pump_grad` under the solved field: a structural pin, not a price), and that guard
+#' stands; each price arm's name is added here by a ruling, never by a launch.
+CCX_MS_PRICE_ARM_NAMES <- c("k_w")    # 2026-10-04 (Marcus): the k_w = 1446 price arm
+ccx_pins_price_canonical <- function(pins, pump_field, struct = Sys.getenv("CCX_MS_STRUCT", "")) {
+  base <- CCX_MODE_CANONICAL_PINS
+  if (is.null(pins) || is.null(base) || !all(names(base) %in% names(pins))) return(FALSE)
+  if (!isTRUE(all.equal(unname(pins[names(base)]), unname(base)))) return(FALSE)
+  extra <- setdiff(names(pins), names(base))
+  length(extra) == 1L && extra %in% CCX_MS_PRICE_ARM_NAMES && extra %in% .CCX_PARAM_ORDER &&
+    !extra %in% ccx_inert_names(pump_field, struct)
+}
 #' Does `pins` equal `base` PLUS names that are INERT under this field / structure?
 #' (2026-09-18: generalised from the canonical-only form so the CONTROL's arm can
 #' carry `w_enso_l2 = 0` under a limb-less structure -- the name entered the table
@@ -2587,6 +2606,16 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
   res <- if (same(pins, CCX_MODE_CANONICAL_PINS) || ccx_pins_extend_canonical(pins, pump_field, struct)) {
     list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = "the canonical, under this array's pins")
+  } else if (ccx_pins_price_canonical(pins, pump_field, struct)) {
+    # a PRICE arm (2026-10-04): the canonical's objective with one READ name held -- the canonical
+    # is its start, seeded at the pin. Only on the canonical's own seasonal mixed layer.
+    held <- setdiff(names(pins), names(CCX_MODE_CANONICAL_PINS))
+    if (seas_ml != 1L)
+      stop("ccx_ms_reference_set(): a PRICE arm (the canonical's pins + ", held, ") prices a value on the ",
+           "CANONICAL's objective, at seas_ml 1; seas_ml ", seas_ml, " is not a ruled arm.")
+    list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
+         why = sprintf(paste0("a PRICE arm: the canonical's pins plus %s held at %s (the canonical, seeded ",
+                              "at the pin: a start, not a mode of this arm)"), held, format(pins[[held]])))
   } else if (is.null(pins)) {
     list(incumbent = if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT,
          new_basin = CCX_MODE_SEASML0_CONTROL,
