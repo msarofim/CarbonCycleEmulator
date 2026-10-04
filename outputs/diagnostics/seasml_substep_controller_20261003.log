@@ -1,0 +1,551 @@
+calibration/diag_seasml_substep_controller.R @4593043+dirty, 2026-10-03 23:48 EDT on MacBook-Pro-2.local (BLAS threads 1)
+
+=== 0. BOTH VECTORS REPRODUCE THEIR STORED LOGPOSTS (tol 1e-06) ===
+  mode  logpost -1182.991369 (stored -1182.991369, diff +0.0e+00) at 4 substeps
+  s17   logpost -1306.890375 (stored -1306.890375, diff +0.0e+00) at 15 substeps
+
+=== 1. THE OBJECTIVE UNDER SUBSTEP REFINEMENT (x 1, 2, 4, 8, 16 the controller's count, spinup AND transient) ===
+  point                    x1          x2          x4          x8         x16 | integration error at the controller's count (x1 - x16) | refinement residue (x8 - x16)
+  mode              -1182.991   -1182.993   -1182.993   -1182.993   -1182.993 |        +0.0014 | -1.03e-05
+                         ss 4        ss 8       ss 16       ss 32       ss 64
+  s017              -1306.890   -1580.052   -1580.051   -1580.050   -1580.051 |      +273.1602 | +2.08e-04
+                        ss 15       ss 30       ss 60      ss 120      ss 240
+  h_ml+          -29975359652839033989297844649052864512.000   -1577.222   -1577.221   -1577.222   -1577.222 | -29975359652839033989297844649052864512.0000 | -5.90e-05
+                        ss 21       ss 42       ss 84      ss 168      ss 336
+  h_ml-             -1581.385   -1583.076   -1583.077   -1583.077   -1583.077 |        +1.6918 | -9.28e-05
+                        ss 12       ss 24       ss 48       ss 96      ss 192
+  kz+               -1556.329   -1579.932   -1579.934   -1579.934   -1579.934 |       +23.6049 | +8.52e-05
+                        ss 16       ss 32       ss 64      ss 128      ss 256
+  kz-               -1308.155   -1580.183   -1580.182   -1580.182   -1580.182 |      +272.0273 | +1.99e-04
+                        ss 15       ss 30       ss 60      ss 120      ss 240
+  kz_deep_frac+     -1557.853   -1580.098   -1580.100   -1580.100   -1580.100 |       +22.2463 | +4.40e-05
+                        ss 16       ss 32       ss 64      ss 128      ss 256
+  kz_deep_frac-     -1306.868   -1580.013   -1580.012   -1580.012   -1580.012 |      +273.1439 | +2.34e-04
+                        ss 15       ss 30       ss 60      ss 120      ss 240
+  ✓ every point CONVERGED: |x8 - x16| < 0.01 at all 8
+  the row the controller's count gets wrong at 017: co2_seasonal_SPO 72.552 at x1 vs -199.763 at x16 (+272.315); d13c_seasonal_SPO 248.8270 vs 248.9911
+  smoothness at 017, 0.1 conditional sd each way (a smooth bowl gives -0.01; flag |pair| > 1):
+    h_ml          controller's count: up -2.9975e+37 dn -274.5 pair -2.9975e+37   |   converged (x16): up +2.829 dn -3.027 pair -0.198
+    kz            controller's count: up -249.44 dn -1.2645 pair -250.7   |   converged (x16): up +0.117 dn -0.132 pair -0.015
+    kz_deep_frac  controller's count: up -250.96 dn 0.022163 pair -250.94   |   converged (x16): up -0.049 dn +0.038 pair -0.011
+  ✓ the flag FIRES at the controller's count in all three directions and CLEARS on the converged objective
+
+=== 2. THE STIFFNESS THE INTEGRATOR MEETS vs WHAT THE CONTROLLER ASSUMED (SH winter peak) ===
+  mode           h_ml 49.645: layer 1 at the SH peak 18.151 m (controller's sampled peak: 18.445 m); need 1.10790 -> 4 substeps
+      rho 32.8/yr vs the controller's lambda 31.5 (A: 31.9, A+B: 36.5); K on the moved grid 0.875 x held; z 0.684 vs limit 2.785 -> UNSTABLE 0.0 days/yr, peak at t = 0.646 yr
+  s017           h_ml 74.438: layer 1 at the SH peak 0.748 m (controller's sampled peak: 1.189 m); need 14.99997 -> 15 substeps
+      rho 730.2/yr vs the controller's lambda 426.1 (A: 676.4, A+B: 826.8); K on the moved grid 0.818 x held; z 4.057 vs limit 2.785 -> UNSTABLE 10.3 days/yr, peak at t = 0.646 yr
+  h_ml+          h_ml 74.914: layer 1 at the SH peak 0.415 m (controller's sampled peak: 0.858 m); need 20.74600 -> 21 substeps
+      rho 1316.7/yr vs the controller's lambda 589.4 (A: 1218.5, A+B: 1491.4); K on the moved grid 0.817 x held; z 5.225 vs limit 2.785 -> UNSTABLE 10.3 days/yr, peak at t = 0.646 yr
+  h_ml-          h_ml 73.968: layer 1 at the SH peak 1.078 m (controller's sampled peak: 1.516 m); need 11.78432 -> 12 substeps
+      rho 507.1/yr vs the controller's lambda 334.8 (A: 470.3, A+B: 574.1); K on the moved grid 0.819 x held; z 3.522 vs limit 2.785 -> UNSTABLE 9.1 days/yr, peak at t = 0.646 yr
+  kz+            h_ml 74.438: layer 1 at the SH peak 0.748 m (controller's sampled peak: 1.189 m); need 15.01743 -> 16 substeps
+      rho 731.0/yr vs the controller's lambda 426.6 (A: 677.2, A+B: 827.8); K on the moved grid 0.818 x held; z 3.807 vs limit 2.785 -> UNSTABLE 9.1 days/yr, peak at t = 0.646 yr
+  kz-            h_ml 74.438: layer 1 at the SH peak 0.748 m (controller's sampled peak: 1.189 m); need 14.98252 -> 15 substeps
+      rho 729.3/yr vs the controller's lambda 425.7 (A: 675.6, A+B: 825.9); K on the moved grid 0.818 x held; z 4.052 vs limit 2.785 -> UNSTABLE 10.3 days/yr, peak at t = 0.646 yr
+  kz_deep_frac+  h_ml 74.438: layer 1 at the SH peak 0.748 m (controller's sampled peak: 1.189 m); need 15.00037 -> 16 substeps
+      rho 730.2/yr vs the controller's lambda 426.2 (A: 676.4, A+B: 826.8); K on the moved grid 0.818 x held; z 3.803 vs limit 2.785 -> UNSTABLE 9.1 days/yr, peak at t = 0.646 yr
+  kz_deep_frac-  h_ml 74.438: layer 1 at the SH peak 0.748 m (controller's sampled peak: 1.189 m); need 14.99960 -> 15 substeps
+      rho 730.2/yr vs the controller's lambda 426.1 (A: 676.4, A+B: 826.8); K on the moved grid 0.818 x held; z 4.056 vs limit 2.785 -> UNSTABLE 10.3 days/yr, peak at t = 0.646 yr
+  ✓ the two-extremes shortcut equals the full-year maximum at all 8 points (used in sections 3-4)
+  017 sits 2.61e-05 substeps BELOW the 15 -> 16 switch: kz 14296.7544 -> 14296.7792 flips it, 1.50e-04 conditional sd in u
+  the h_ml+ blow-up: SH mixed-layer carbon -17.8 GtC at the first month (017: 172.4), MIN over the run -96.8 GtC (017: 172.4); |d13c_SH| max 1.36e+17 permil, past 100 from 1781
+  the periodic spinup CONVERGED at every point (resid_carbon <= 4.5e-10, 6-8 iterations): it finds the fixed point of the discrete map whether or not that map is stable
+
+=== 3. THE EDGE ALONG h_ml (the other values held) ===
+  other values at the MODE:
+       h_ml P8 margin   ss now     z now   ss fix    z fix need fix
+      60.00    10.883        4     1.082        4    1.082      2.1
+      61.00    10.181        4     1.153        4    1.153      2.2
+      62.00     9.479        4     1.234        4    1.234      2.3
+      63.00     8.777        4     1.328        4    1.328      2.5
+      64.00     8.075        4     1.438        4    1.438      2.7
+      65.00     7.373        4     1.570        4    1.570      3.0
+      66.00     6.671        4     1.730        4    1.730      3.3
+      67.00     5.969        4     1.928        4    1.928      3.7
+      68.00     5.267        4     2.180        5    1.744      4.2
+      69.00     4.565        4     2.508        5    2.007      4.8
+      70.00     3.864        5     2.366        6    1.971      5.6
+      71.00     3.162        6     2.404        7    2.060      6.9
+      72.00     2.460        7     2.643        9    2.056      8.8
+      72.50     2.109        8     2.695       11    1.960     10.3
+      72.75     1.933        8     2.938       12    1.959     11.2  <- UNSTABLE now
+      73.00     1.758        9     2.871       13    1.987     12.3  <- UNSTABLE now
+      73.25     1.582        9     3.188       14    2.049     13.7  <- UNSTABLE now
+      73.50     1.407       10     3.225       16    2.016     15.4  <- UNSTABLE now
+      73.75     1.231       11     3.348       18    2.046     17.6  <- UNSTABLE now
+      74.00     1.056       12     3.578       21    2.044     20.5  <- UNSTABLE now
+      74.25     0.880       14     3.676       25    2.059     24.6  <- UNSTABLE now
+      74.50     0.705       16     4.016       31    2.073     30.7  <- UNSTABLE now
+      74.75     0.529       19     4.501       41    2.086     40.9  <- UNSTABLE now
+      75.00     0.354       23     5.559       62    2.062     61.2  <- UNSTABLE now
+      75.10     0.284       25     6.378       77    2.071     76.3  <- UNSTABLE now
+      75.20     0.214       27     7.845      102    2.077    101.3  <- UNSTABLE now
+      75.30     0.143       31    10.177      151    2.089    150.9  <- UNSTABLE now
+      75.40     0.073       35    17.656      256    2.414    295.7  <- UNSTABLE now
+      75.50     0.003       40   378.041      256   59.069   7235.1  <- UNSTABLE now
+    first UNSTABLE h_ml on the scan: 72.75 m (the last stable one 72.50 m) = 5.50 marginal sds of u(h_ml) above the mode's 49.65 m
+    under the fix, z <= 2.089 wherever it runs (target 2.367, limit 2.785); it STOPS (needs more than CCX_SUBSTEPS_MAX = 256) only from h_ml 75.40 (P8 margin 0.073 m)
+  other values at the S017:
+       h_ml P8 margin   ss now     z now   ss fix    z fix need fix
+      60.00    10.883        4     1.088        4    1.088      2.1
+      61.00    10.181        4     1.158        4    1.158      2.2
+      62.00     9.479        4     1.240        4    1.240      2.4
+      63.00     8.777        4     1.334        4    1.334      2.5
+      64.00     8.075        4     1.445        4    1.445      2.7
+      65.00     7.373        4     1.578        4    1.578      3.0
+      66.00     6.671        4     1.739        4    1.739      3.3
+      67.00     5.969        4     1.938        4    1.938      3.7
+      68.00     5.267        4     2.190        5    1.752      4.2
+      69.00     4.565        4     2.521        5    2.017      4.8
+      70.00     3.864        5     2.378        6    1.981      5.7
+      71.00     3.162        6     2.416        7    2.071      6.9
+      72.00     2.460        7     2.656        9    2.066      8.9
+      72.50     2.109        8     2.708       11    1.970     10.4
+      72.75     1.933        8     2.952       12    1.968     11.3  <- UNSTABLE now
+      73.00     1.758        9     2.885       13    1.997     12.4  <- UNSTABLE now
+      73.25     1.582        9     3.203       14    2.059     13.8  <- UNSTABLE now
+      73.50     1.407       10     3.241       16    2.026     15.5  <- UNSTABLE now
+      73.75     1.231       11     3.365       18    2.056     17.7  <- UNSTABLE now
+      74.00     1.056       12     3.596       21    2.055     20.6  <- UNSTABLE now
+      74.25     0.880       14     3.695       25    2.069     24.7  <- UNSTABLE now
+      74.50     0.705       16     4.036       31    2.083     30.9  <- UNSTABLE now
+      74.75     0.529       19     4.523       42    2.046     41.1  <- UNSTABLE now
+      75.00     0.354       23     5.587       62    2.072     61.5  <- UNSTABLE now
+      75.10     0.284       25     6.410       77    2.081     76.7  <- UNSTABLE now
+      75.20     0.214       27     7.885      102    2.087    101.9  <- UNSTABLE now
+      75.30     0.143       31    10.228      152    2.086    151.7  <- UNSTABLE now
+      75.40     0.073       35    17.745      256    2.426    297.2  <- UNSTABLE now
+      75.50     0.003       40   379.928      256   59.364   7272.3  <- UNSTABLE now
+    first UNSTABLE h_ml on the scan: 72.75 m (the last stable one 72.50 m) = 5.50 marginal sds of u(h_ml) above the mode's 49.65 m
+    under the fix, z <= 2.087 wherever it runs (target 2.367, limit 2.785); it STOPS (needs more than CCX_SUBSTEPS_MAX = 256) only from h_ml 75.40 (P8 margin 0.073 m)
+
+=== 4. WHO IS IN THE UNSTABLE REGION ===
+  (a) the registered modes:
+      mode              struct seas_ml  h_ml    kz p8_margin ss_shipped
+  hilda34g hilda_csl3v0kaidgbe       1 49.65 14224     18.15          4
+  hilda33d  hilda_csl3v0kaidgb       1 49.51 14618     18.24          4
+  hilda29l          hilda_csl3       1 57.30 14502     12.78          4
+  hilda32f          hilda_csl3       1 49.42 14598     18.31          4
+ hilda31s2               hilda       1 64.82 10982      7.50          4
+ hilda31pe             hilda_c       0 49.49 14540        NA          4
+ z_shipped ss_fix  z_fix
+    0.6838      4 0.6838
+    0.6997      4 0.6997
+    0.9504      4 0.9504
+    0.6969      4 0.6969
+    1.1932      4 1.1932
+        NA      4     NA
+  (b) start files, seas_ml = 1, every wave: 434 read (434 assessed, 20 waves); final point UNSTABLE under the shipped controller: 51; count moved by the fix: 77
+      the unstable ones:
+                                                                                                                                                                                                             wave
+                                                                                                                                                                      multistart_20260910_round6_seasml1_sd1.0452
+                                                                                                                                                                     multistart_20260911_round6b_seasml1_sd1.0452
+                                                                                                                                                                     multistart_20260911_round6b_seasml1_sd1.0452
+                                                                                                                                                                     multistart_20260911_round6b_seasml1_sd1.0452
+                                                                                                                                                                     multistart_20260911_round6b_seasml1_sd1.0452
+                                                                                                                                                                      multistart_20260912_round7_seasml1_sd1.0452
+                                                                                                                                                                      multistart_20260912_round7_seasml1_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                      multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                      multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                      multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                      multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                             multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                                                                             multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                                                                             multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                                                                             multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                                   multistart_20260918_hilda_c_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                                   multistart_20260918_hilda_c_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                                   multistart_20260918_hilda_c_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                   multistart_20260918_hilda_cl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                   multistart_20260918_hilda_cl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                multistart_20260919_hilda_cs_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                multistart_20260919_hilda_cs_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                  multistart_20260920_hilda_csl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                  multistart_20260920_hilda_csl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                                            multistart_20260921_hilda_csl3_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                               multistart_20260928b_hilda_csl3v0_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                               multistart_20260928b_hilda_csl3v0_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                               multistart_20260928b_hilda_csl3v0_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                              multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                              multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+  multistart_20261002ee_hilda_csl3v0kaidgb_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+ multistart_20261002ee_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+ multistart_20261002ee_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+    resume017_20261003_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+ id logpost        gap converged out_of_time   h_ml p8_margin ss_shipped
+ 20 -1632.6 1.4045e+02     FALSE        TRUE 74.804   0.49188          9
+  6 -1532.8 5.7325e+01     FALSE        TRUE 73.596   1.33955         10
+ 11 -1620.1 1.4462e+02     FALSE        TRUE 74.321   0.83088         13
+ 16 -1477.1 1.6071e+00     FALSE        TRUE 73.994   1.06011         10
+ 20 -1537.0 6.1584e+01     FALSE        TRUE 74.663   0.59028          6
+  6 -1423.8 2.4051e-01      TRUE       FALSE 71.986   2.46953          5
+ 11 -2084.6 6.6102e+02     FALSE        TRUE 74.580   0.64854         10
+  5 -1426.0 0.0000e+00     FALSE        TRUE 72.835   1.87370          6
+  7 -1426.1 4.6590e-02     FALSE        TRUE 73.710   1.25910          9
+  8 -1435.4 9.3673e+00     FALSE        TRUE 73.902   1.12483          8
+ 10 -1426.0 5.6879e-05     FALSE        TRUE 72.830   1.87732          6
+ 11 -1897.2 4.7113e+02     FALSE        TRUE 74.963   0.38024          4
+ 12 -1493.4 6.7310e+01     FALSE        TRUE 74.393   0.78003         11
+ 19 -1426.3 3.0488e-01     FALSE        TRUE 74.001   1.05523         10
+ 20 -1426.1 4.8822e-02     FALSE        TRUE 73.980   1.06974         10
+ 21 -1504.9 7.8834e+01     FALSE        TRUE 74.877   0.44051          6
+ 22 -1768.5 3.4242e+02     FALSE        TRUE 74.485   0.71577         19
+ 23 -1426.3 2.9106e-01     FALSE        TRUE 74.038   1.02932         10
+  1 -1488.0 7.5294e+00     FALSE        TRUE 74.791   0.50056         10
+  3 -1490.9 1.0444e+01     FALSE        TRUE 74.781   0.50769         10
+ 19 -1836.6 3.5612e+02     FALSE        TRUE 74.633   0.61179         12
+ 21 -1497.0 1.6484e+01     FALSE        TRUE 74.712   0.55635         11
+  7 -1435.3 5.8220e-01      TRUE       FALSE 74.264   0.87050         14
+ 11 -1435.2 4.8244e-01      TRUE       FALSE 73.397   1.47904         10
+ 18 -1435.3 5.5339e-01     FALSE        TRUE 74.123   0.96948         13
+ 23 -1465.6 3.0890e+01      TRUE       FALSE 74.401   0.77462         16
+  6 -1433.0 5.8707e-01      TRUE       FALSE 74.215   0.90504         14
+  7 -1432.9 5.4618e-01     FALSE        TRUE 74.119   0.97243         13
+  8 -1432.9 5.2527e-01      TRUE       FALSE 73.904   1.12333         12
+ 14 -1434.9 2.5358e+00      TRUE       FALSE 74.072   1.00557         13
+ 19 -1433.0 5.8568e-01     FALSE        TRUE 74.274   0.86328         14
+ 22 -1494.0 6.1623e+01     FALSE        TRUE 74.739   0.53702         14
+ 11 -1798.9 3.6778e+02     FALSE        TRUE 74.462   0.73155         13
+ 14 -1490.2 5.9070e+01      TRUE       FALSE 74.126   0.96738         13
+ 20 -1433.7 2.5311e+00     FALSE        TRUE 74.055   1.01716         13
+ 15 -1436.4 2.0683e+00      TRUE       FALSE 74.187   0.92476         14
+ 17 -1435.6 1.2619e+00      TRUE       FALSE 74.032   1.03341         13
+ 11 -1541.2 1.1617e+02     FALSE        TRUE 75.053   0.31649          6
+ 22 -1553.2 1.2811e+02     FALSE        TRUE 74.612   0.62614         15
+  6 -1427.8 2.4496e+00      TRUE       FALSE 73.825   1.17895         12
+  7 -1449.7 2.4326e+01     FALSE        TRUE 74.365   0.79983         13
+  8 -1426.5 2.8467e+00      TRUE       FALSE 73.303   1.54495         10
+  9 -1431.7 7.0284e+00     FALSE        TRUE 74.425   0.75771         13
+ 11 -1429.0 4.3925e+00     FALSE        TRUE 73.918   1.11345         13
+ 15 -1427.3 2.6398e+00     FALSE        TRUE 74.191   0.92180         13
+  7 -1792.2 3.6743e+02     FALSE        TRUE 74.545   0.67367         12
+ 20 -1944.3 5.1953e+02     FALSE        TRUE 73.966   1.07982         19
+ 21 -1295.6 9.9452e+01     FALSE        TRUE 74.740   0.53624          9
+ 17 -1319.6 1.3665e+02     FALSE        TRUE 74.454   0.73741         15
+ 21 -1185.8 2.8336e+00      TRUE       FALSE 73.004   1.75525          9
+ 17 -1306.9 0.0000e+00     FALSE        TRUE 74.438   0.74814         15
+ z_shipped ss_fix
+    4.1878     17
+    3.1269     15
+    3.8425     24
+    3.2552     16
+    4.1941     12
+    2.8149      7
+    4.0756     20
+    3.1034      9
+    3.0758     14
+    3.2041     13
+    3.0979      9
+    5.4721     11
+    3.8708     21
+    3.2737     16
+    3.2473     16
+    4.9290     14
+    4.0040     37
+    3.3201     16
+    4.4113     23
+    4.3707     22
+    4.3218     25
+    4.1881     23
+    3.5659     24
+    2.9656     15
+    3.4616     22
+    3.9231     31
+    3.5194     24
+    3.4538     22
+    3.2475     19
+    3.3863     22
+    3.6036     25
+    4.3313     29
+    4.0118     25
+    3.4225     22
+    3.4021     22
+    3.5317     24
+    3.3528     21
+    5.5671     16
+    4.2212     31
+    3.2100     19
+    3.9145     25
+    2.9396     15
+    3.7748     24
+    3.3018     21
+    3.7193     24
+    4.2168     25
+    3.3970     31
+    4.5479     19
+    4.0745     30
+    2.8190     13
+    4.0565     30
+      every start whose count the fix moves (its stored logpost would move):
+                                                                                                                                                                                                             wave
+                                                                                                                                                                      multistart_20260910_round6_seasml1_sd1.0452
+                                                                                                                                                                     multistart_20260911_round6b_seasml1_sd1.0452
+                                                                                                                                                                     multistart_20260911_round6b_seasml1_sd1.0452
+                                                                                                                                                                     multistart_20260911_round6b_seasml1_sd1.0452
+                                                                                                                                                                     multistart_20260911_round6b_seasml1_sd1.0452
+                                                                                                                                                                      multistart_20260912_round7_seasml1_sd1.0452
+                                                                                                                                                                      multistart_20260912_round7_seasml1_sd1.0452
+                                                                                                                                                                      multistart_20260912_round7_seasml1_sd1.0452
+                                                                                                                                                                      multistart_20260912_round7_seasml1_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                                multistart_20260913_cprime_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                      multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                      multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                      multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                      multistart_20260913_eqcell_hilda_c_seasml1_martin_pin_ent_seas_amp_SH=0_pump_grad=314.1031_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                                                                                       multistart_20260913_eqcell_hilda_eq_seasml1_pin_ent_seas_amp_SH=0_sd1.0452
+                                                                             multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                                                                             multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                                                                             multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                                                                             multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                                                                             multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                 multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                                   multistart_20260918_hilda_c_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                                   multistart_20260918_hilda_c_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                                   multistart_20260918_hilda_c_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                   multistart_20260918_hilda_cl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                   multistart_20260918_hilda_cl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                   multistart_20260918_hilda_cl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                multistart_20260919_hilda_cs_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                                                multistart_20260919_hilda_cs_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_w_enso_l2=0_sd1.0452
+                                  multistart_20260920_hilda_csl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                  multistart_20260920_hilda_csl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                  multistart_20260920_hilda_csl3_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                                                                                            multistart_20260921_hilda_csl3_seasml1_pin_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_sd1.0452
+                               multistart_20260928b_hilda_csl3v0_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                               multistart_20260928b_hilda_csl3v0_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                               multistart_20260928b_hilda_csl3v0_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                              multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+                              multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452
+  multistart_20261002ee_hilda_csl3v0kaidgb_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+ multistart_20261002ee_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+ multistart_20261002ee_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+    resume017_20261003_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_sd1.0452_sdby_npp_tsens=0.0291
+ id logpost        gap converged   h_ml ss_shipped ss_fix z_shipped    z_fix
+ 20 -1632.6 1.4045e+02     FALSE 74.804          9     17   4.18776 2.217051
+  6 -1532.8 5.7325e+01     FALSE 73.596         10     15   3.12687 2.084581
+ 11 -1620.1 1.4462e+02     FALSE 74.321         13     24   3.84247 2.081338
+ 16 -1477.1 1.6071e+00     FALSE 73.994         10     16   3.25523 2.034519
+ 20 -1537.0 6.1584e+01     FALSE 74.663          6     12   4.19412 2.097062
+  6 -1423.8 2.4051e-01      TRUE 71.986          5      7   2.81487 2.010620
+ 11 -2084.6 6.6102e+02     FALSE 74.580         10     20   4.07560 2.037798
+ 13 -1424.0 4.3693e-01     FALSE 72.488          6      8   2.78476 2.088570
+ 21 -1427.3 3.7509e+00     FALSE 71.099          4      6   2.73459 1.823060
+  5 -1426.0 0.0000e+00     FALSE 72.835          6      9   3.10344 2.068963
+  7 -1426.1 4.6590e-02     FALSE 73.710          9     14   3.07582 1.977314
+  8 -1435.4 9.3673e+00     FALSE 73.902          8     13   3.20407 1.971735
+  9 -1426.1 5.5713e-02     FALSE 69.985          4      5   2.26834 1.814670
+ 10 -1426.0 5.6879e-05     FALSE 72.830          6      9   3.09791 2.065273
+ 11 -1897.2 4.7113e+02     FALSE 74.963          4     11   5.47207 1.989843
+ 12 -1493.4 6.7310e+01     FALSE 74.393         11     21   3.87082 2.027573
+ 14 -1430.6 4.5369e+00     FALSE 69.305          4      5   2.15179 1.721432
+ 18 -1426.1 5.5713e-02     FALSE 69.985          4      5   2.26840 1.814719
+ 19 -1426.3 3.0488e-01     FALSE 74.001         10     16   3.27366 2.046039
+ 20 -1426.1 4.8822e-02     FALSE 73.980         10     16   3.24731 2.029567
+ 21 -1504.9 7.8834e+01     FALSE 74.877          6     14   4.92900 2.112427
+ 22 -1768.5 3.4242e+02     FALSE 74.485         19     37   4.00397 2.056092
+ 23 -1426.3 2.9106e-01     FALSE 74.038         10     16   3.32006 2.075040
+  1 -1488.0 7.5294e+00     FALSE 74.791         10     23   4.41132 1.917966
+  3 -1490.9 1.0444e+01     FALSE 74.781         10     22   4.37070 1.986681
+ 19 -1836.6 3.5612e+02     FALSE 74.633         12     25   4.32184 2.074482
+ 21 -1497.0 1.6484e+01     FALSE 74.712         11     23   4.18813 2.003017
+  0 -1450.5 9.2173e-05      TRUE 73.892         10     16   1.06600 0.666252
+  4 -1450.7 1.6596e-01      TRUE 70.199          4      5   1.53640 1.229116
+  5 -1450.5 1.4785e-05     FALSE 73.889         10     16   1.06636 0.666474
+  8 -1467.3 1.6746e+01     FALSE 75.264         26    113   0.62485 0.143771
+ 10 -1450.5 2.5668e-05     FALSE 73.893         10     16   1.06713 0.666954
+ 11 -1450.5 0.0000e+00     FALSE 73.886         10     16   1.06572 0.666075
+ 12 -1451.9 1.3995e+00     FALSE 74.092         11     18   1.03227 0.630833
+ 13 -1450.5 1.6472e-04     FALSE 73.890         10     16   1.06664 0.666650
+ 14 -1492.1 4.1557e+01     FALSE 75.483         21    256   0.49157 0.040324
+ 15 -1450.5 2.1583e-05     FALSE 73.876         10     16   1.06367 0.664792
+ 17 -1450.5 2.2377e-05     FALSE 73.887         10     16   1.06593 0.666208
+ 18 -1450.5 4.0870e-05     FALSE 73.892         10     16   1.06680 0.666752
+ 19 -1450.5 1.2426e-05     FALSE 73.892         10     16   1.06676 0.666725
+ 20 -1458.8 8.3020e+00     FALSE 75.504         36    256   0.49332 0.069373
+ 21 -1450.6 8.4525e-02     FALSE 72.208          6      8   1.34952 1.012141
+ 22 -1450.5 4.2246e-04     FALSE 73.884         10     16   1.06512 0.665702
+ 23 -1462.7 1.2229e+01     FALSE 75.503         40    256   0.49512 0.077362
+  7 -1435.3 5.8220e-01      TRUE 74.264         14     24   3.56594 2.080134
+ 11 -1435.2 4.8244e-01      TRUE 73.397         10     15   2.96555 1.977035
+ 15 -1435.0 2.9121e-01      TRUE 69.823          5      6   2.23110 1.859251
+ 18 -1435.3 5.5339e-01     FALSE 74.123         13     22   3.46158 2.045481
+ 23 -1465.6 3.0890e+01      TRUE 74.401         16     31   3.92311 2.024830
+  6 -1433.0 5.8707e-01      TRUE 74.215         14     24   3.51935 2.052956
+  7 -1432.9 5.4618e-01     FALSE 74.119         13     22   3.45377 2.040866
+  8 -1432.9 5.2527e-01      TRUE 73.904         12     19   3.24745 2.051023
+ 13 -1432.7 2.8673e-01      TRUE 69.808          5      6   2.23045 1.858705
+ 14 -1434.9 2.5358e+00      TRUE 74.072         13     22   3.38633 2.001015
+ 19 -1433.0 5.8568e-01     FALSE 74.274         14     25   3.60365 2.018042
+ 22 -1494.0 6.1623e+01     FALSE 74.739         14     29   4.33125 2.090950
+ 11 -1798.9 3.6778e+02     FALSE 74.462         13     25   4.01177 2.086121
+ 14 -1490.2 5.9070e+01      TRUE 74.126         13     22   3.42248 2.022374
+ 20 -1433.7 2.5311e+00     FALSE 74.055         13     22   3.40205 2.010304
+ 15 -1436.4 2.0683e+00      TRUE 74.187         14     24   3.53166 2.060132
+ 17 -1435.6 1.2619e+00      TRUE 74.032         13     21   3.35277 2.075527
+ 23 -1434.9 6.0939e-01      TRUE 69.784          5      6   2.22937 1.857810
+ 11 -1541.2 1.1617e+02     FALSE 75.053          6     16   5.56714 2.087676
+ 22 -1553.2 1.2811e+02     FALSE 74.612         15     31   4.22121 2.042521
+  2 -1426.9 1.4905e+00      TRUE 69.545          5      6   2.21937 1.849478
+  6 -1427.8 2.4496e+00      TRUE 73.825         12     19   3.21001 2.027375
+  7 -1449.7 2.4326e+01     FALSE 74.365         13     25   3.91455 2.035564
+  8 -1426.5 2.8467e+00      TRUE 73.303         10     15   2.93962 1.959748
+  9 -1431.7 7.0284e+00     FALSE 74.425         13     24   3.77481 2.044688
+ 11 -1429.0 4.3925e+00     FALSE 73.918         13     21   3.30178 2.043962
+ 15 -1427.3 2.6398e+00     FALSE 74.191         13     24   3.71933 2.014636
+  7 -1792.2 3.6743e+02     FALSE 74.545         12     25   4.21681 2.024068
+ 20 -1944.3 5.1953e+02     FALSE 73.966         19     31   3.39704 2.082057
+ 21 -1295.6 9.9452e+01     FALSE 74.740          9     19   4.54789 2.154262
+ 17 -1319.6 1.3665e+02     FALSE 74.454         15     30   4.07452 2.037259
+ 21 -1185.8 2.8336e+00      TRUE 73.004          9     13   2.81904 1.951646
+ 17 -1306.9 0.0000e+00     FALSE 74.438         15     30   4.05652 2.028261
+      highest h_ml among CONVERGED final points: 74.40 m (P8 margin 0.77 m, z 3.923)
+  (c) MCMC stage 1 (hilda33d, 4100 pooled draws): h_ml median 47.75, 99% 64.92, 99.9% 69.46, max 73.34 m; min P8 margin 1.52 m; max z 3.060 (limit 2.785); max substeps 10; UNSTABLE draws: 2 (1 distinct point)
+  (d) Laplace about hilda34g, 1 x sd, 20000 draws (seed 20261003): h_ml median 49.66, 99.9% 59.21, max 64.21 m; past the P8 wall 0; min P8 margin 7.93 m; max z 1.569; count above the floor 0.000%; UNSTABLE: 0
+  (d) Laplace about hilda34g, 2 x sd, 20000 draws (seed 20261003): h_ml median 49.67, 99.9% 78.52, max 97.59 m; past the P8 wall 34; min P8 margin 0.25 m; max z 7.076; count above the floor 0.461%; UNSTABLE: 43
+      ⚠ the Laplace puts h_ml's 99.9% at 59.2 m where the MCMC's is 69.5 m: along h_ml the posterior is a RIDGE the local curvature does not see, so (c) is the answer to "can a draw reach it"
+  (e) the artefact (controller's count - x8, today's objective), 78 points scored, 1 SKIPPED (param set), refinement residue |x4 - x8| max 8.1e-03:
+      UNSTABLE   n  50 (0 not finite at both counts): artefact median -0.002, range [-1.686, +981.836]; |artefact| > 1 at 17; converged among them 13 (their artefact: +0.02, -0.01, +0.00, +27.55, -0.01, -0.01, -0.01, -0.01, -0.00, -0.01, -0.01, +0.00, -0.01)
+      near limit n   9 (0 not finite at both counts): artefact median +0.008, range [-0.002, +0.050]; |artefact| > 1 at 0; converged among them 4 (their artefact: +0.01, +0.01, +0.00, +0.01)
+      wave best  n  19 (0 not finite at both counts): artefact median +0.008, range [+0.000, +273.160]; |artefact| > 1 at 1; converged among them 15 (their artefact: +0.00, +0.00, +0.01, +0.01, +0.01, +0.01, +0.01, +0.01, +0.00, +0.01, +0.01, +0.01, +0.01, +0.00, +0.00)
+      SKIPPED: a natural value lies outside today's bounds: 1 point(s)
+      every unstable point, worst first:
+        multistart_20260913_cprime_seasml1_pin_ent_seas_amp_ id  22      z 4.00 h_ml 74.48: ctrl -1961.994  x8 -2943.83  artefact 981.8  (stored -1768.46, another objective)
+        multistart_20260919_hilda_cs_seasml1_pin_ent_seas_am id  22      z 4.22 h_ml 74.61: ctrl -1388.454  x8 -2341.48  artefact 953  (stored -1553.17, another objective)
+        multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp id  22      z 4.33 h_ml 74.74: ctrl -1313.658  x8 -1730.37  artefact 416.7  (stored -1494.02, another objective)
+        multistart_20261002ee_hilda_csl3v0kaidgbe_seasml1_pi id  17      z 4.07 h_ml 74.45: ctrl -1319.643  x8 -1639.96  artefact 320.3
+        multistart_20260913_eqcell_hilda_c_seasml1_martin_pi id  19      z 4.32 h_ml 74.63: ctrl -2178.795  x8 -2443.67  artefact 264.9  (stored -1836.59, another objective)
+        multistart_20260919_hilda_cs_seasml1_pin_ent_seas_am id  11      z 5.57 h_ml 75.05: ctrl -1351.638  x8 -1610.40  artefact 258.8  (stored -1541.23, another objective)
+        multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_s id   7      z 4.22 h_ml 74.54: ctrl -1653.823  x8 -1803.93  artefact 150.1  (stored -1792.18, another objective)
+        multistart_20260913_cprime_seasml1_pin_ent_seas_amp_ id  11      z 5.47 h_ml 74.96: ctrl -3450.212  x8 -3556.17  artefact 106  (stored -1897.17, another objective)
+        multistart_20261002ee_hilda_csl3v0kaidgb_seasml1_pin id  21      z 4.55 h_ml 74.74: ctrl -1295.554  x8 -1365.48  artefact 69.92  (stored -1295.55, another objective)
+        multistart_20260913_eqcell_hilda_c_seasml1_martin_pi id   1      z 4.41 h_ml 74.79: ctrl -1289.536  x8 -1328.25  artefact 38.72  (stored -1488.00, another objective)
+        multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp id  23 CONV z 3.92 h_ml 74.40: ctrl -1277.264  x8 -1304.81  artefact 27.55  (stored -1465.62, another objective)
+        multistart_20260913_cprime_seasml1_pin_ent_seas_amp_ id  21      z 4.93 h_ml 74.88: ctrl -1413.916  x8 -1440.63  artefact 26.72  (stored -1504.88, another objective)
+        multistart_20260913_eqcell_hilda_c_seasml1_martin_pi id   3      z 4.37 h_ml 74.78: ctrl -1295.603  x8 -1320.53  artefact 24.93  (stored -1490.92, another objective)
+        multistart_20260918_hilda_c_seasml1_pin_w_eq=27_gamm id  11      z 4.01 h_ml 74.46: ctrl -1616.157  x8 -1626.00  artefact 9.841  (stored -1798.93, another objective)
+        multistart_20260913_eqcell_hilda_c_seasml1_martin_pi id  21      z 4.19 h_ml 74.71: ctrl -1344.368  x8 -1351.37  artefact 7.001  (stored -1496.96, another objective)
+        multistart_20260920_hilda_csl3_seasml1_pin_ent_seas_ id   7      z 3.91 h_ml 74.36: ctrl -1255.957  x8 -1258.13  artefact 2.175  (stored -1449.69, another objective)
+        multistart_20260911_round6b_seasml1_sd1.0452         id  11      z 3.84 h_ml 74.32: ctrl -1733.479  x8 -1731.79  artefact -1.686  (stored -1620.08, another objective)
+        multistart_20260912_round7_seasml1_sd1.0452          id  11      z 4.08 h_ml 74.58: ctrl -4562.133  x8 -4561.66  artefact -0.4745  (stored -2084.59, another objective)
+        multistart_20260913_cprime_seasml1_pin_ent_seas_amp_ id  12      z 3.87 h_ml 74.39: ctrl -1482.718  x8 -1482.42  artefact -0.296  (stored -1493.35, another objective)
+        multistart_20260910_round6_seasml1_sd1.0452          id  20      z 4.19 h_ml 74.80: ctrl -1449.345  x8 -1449.15  artefact -0.1946  (stored -1632.61, another objective)
+        multistart_20260928b_hilda_csl3v0_seasml1_pin_ent_se id   9      z 3.77 h_ml 74.42: ctrl -1239.413  x8 -1239.27  artefact -0.1463  (stored -1431.66, another objective)
+        multistart_20260913_cprime_seasml1_pin_ent_seas_amp_ id   8      z 3.20 h_ml 73.90: ctrl -1234.604  x8 -1234.56  artefact -0.04436  (stored -1435.41, another objective)
+        multistart_20260928c_hilda_csl3v0k_seasml1_pin_ent_s id  20      z 3.40 h_ml 73.97: ctrl -1770.226  x8 -1770.19  artefact -0.03451  (stored -1944.28, another objective)
+        multistart_20260913_cprime_seasml1_pin_ent_seas_amp_ id  10      z 3.10 h_ml 72.83: ctrl -1236.593  x8 -1236.63  artefact 0.03303  (stored -1426.04, another objective)
+        multistart_20260928b_hilda_csl3v0_seasml1_pin_ent_se id  15      z 3.72 h_ml 74.19: ctrl -1235.07  x8 -1235.04  artefact -0.02919  (stored -1427.27, another objective)
+        multistart_20260912_round7_seasml1_sd1.0452          id   6 CONV z 2.81 h_ml 71.99: ctrl -1233.623  x8 -1233.64  artefact 0.01572  (stored -1423.81, another objective)
+        multistart_20260920_hilda_csl3_seasml1_pin_ent_seas_ id   6 CONV z 3.21 h_ml 73.82: ctrl -1234.711  x8 -1234.70  artefact -0.01163  (stored -1427.81, another objective)
+        multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp id  19      z 3.60 h_ml 74.27: ctrl -1237.975  x8 -1237.96  artefact -0.01089  (stored -1432.98, another objective)
+        multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp id   8 CONV z 3.25 h_ml 73.90: ctrl -1237.969  x8 -1237.96  artefact -0.01047  (stored -1432.92, another objective)
+        multistart_20260911_round6b_seasml1_sd1.0452         id  20      z 4.19 h_ml 74.66: ctrl -1302.026  x8 -1302.02  artefact -0.009614  (stored -1537.04, another objective)
+        multistart_20260918_hilda_cl3_seasml1_pin_ent_seas_a id  17 CONV z 3.35 h_ml 74.03: ctrl -1250.588  x8 -1250.58  artefact -0.009377  (stored -1435.59, another objective)
+        multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp id  18      z 3.46 h_ml 74.12: ctrl -1242.184  x8 -1242.17  artefact -0.009344  (stored -1435.28, another objective)
+        multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp id   7      z 3.45 h_ml 74.12: ctrl -1237.995  x8 -1237.99  artefact -0.009268  (stored -1432.94, another objective)
+        multistart_20260918_hilda_c_seasml1_pin_w_eq=27_gamm id  20      z 3.40 h_ml 74.06: ctrl -1239.632  x8 -1239.62  artefact -0.008988  (stored -1433.68, another objective)
+        multistart_20260918_hilda_c_seasml1_pin_w_eq=27_gamm id  14 CONV z 3.42 h_ml 74.13: ctrl -1293.503  x8 -1293.50  artefact -0.007878  (stored -1490.22, another objective)
+        multistart_20260928b_hilda_csl3v0_seasml1_pin_ent_se id  11      z 3.30 h_ml 73.92: ctrl -1238.869  x8 -1238.86  artefact -0.007819  (stored -1429.02, another objective)
+        multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp id   7 CONV z 3.57 h_ml 74.26: ctrl -1242.194  x8 -1242.19  artefact -0.00765  (stored -1435.31, another objective)
+        multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp id   6 CONV z 3.52 h_ml 74.21: ctrl -1238.015  x8 -1238.01  artefact -0.006967  (stored -1432.98, another objective)
+        multistart_20260918_hilda_c_seasml1_pin_ent_seas_amp id  14 CONV z 3.39 h_ml 74.07: ctrl -1240.767  x8 -1240.76  artefact -0.005929  (stored -1434.93, another objective)
+        multistart_20261002ee_hilda_csl3v0kaidgbe_seasml1_pi id  21 CONV z 2.82 h_ml 73.00: ctrl -1185.825  x8 -1185.82  artefact -0.005804  (stored -1185.82, another objective)
+        multistart_20260913_cprime_seasml1_pin_ent_seas_amp_ id   7      z 3.08 h_ml 73.71: ctrl -1236.662  x8 -1236.66  artefact -0.004912  (stored -1426.09, another objective)
+        multistart_20260918_hilda_cl3_seasml1_pin_ent_seas_a id  15 CONV z 3.53 h_ml 74.19: ctrl -1250.983  x8 -1250.98  artefact -0.004556  (stored -1436.40, another objective)
+        mcmc stage 1 (hilda33d)                              id 829      z 3.06 h_ml 73.34: ctrl -1222.954  x8 -1222.96  artefact 0.004168
+        multistart_20260911_round6b_seasml1_sd1.0452         id   6      z 3.13 h_ml 73.60: ctrl -1495.414  x8 -1495.41  artefact -0.004074  (stored -1532.78, another objective)
+        multistart_20260916_hilda_c_seasml1_pin_ent_seas_amp id  11 CONV z 2.97 h_ml 73.40: ctrl -1242.14  x8 -1242.14  artefact 0.00204  (stored -1435.21, another objective)
+        multistart_20260913_cprime_seasml1_pin_ent_seas_amp_ id  20      z 3.25 h_ml 73.98: ctrl -1236.465  x8 -1236.47  artefact 0.001236  (stored -1426.09, another objective)
+        multistart_20260913_cprime_seasml1_pin_ent_seas_amp_ id  19      z 3.27 h_ml 74.00: ctrl -1232.228  x8 -1232.23  artefact 0.001023  (stored -1426.35, another objective)
+        multistart_20260921_hilda_csl3_seasml1_pin_w_eq=27_g id   8 CONV z 2.94 h_ml 73.30: ctrl -1232.112  x8 -1232.11  artefact 0.0005783  (stored -1426.51, another objective)
+        multistart_20260911_round6b_seasml1_sd1.0452         id  16      z 3.26 h_ml 73.99: ctrl -1242.325  x8 -1242.32  artefact -0.0003783  (stored -1477.07, another objective)
+        multistart_20260913_cprime_seasml1_pin_ent_seas_amp_ id  23      z 3.32 h_ml 74.04: ctrl -1233.083  x8 -1233.08  artefact 9.745e-05  (stored -1426.33, another objective)
+      refinement check: 0 of 78 scored points have |x4 - x8| >= 0.01 (their x8 is not yet a converged value)
+
+=== 5. THE CANDIDATE FIX, PRICED (in-process; R/ untouched) ===
+      mode       stored        shift      shipped          fix d ss_shipped
+  hilda34g -1182.991369  0.000000000 -1182.991369 -1182.991369 0          4
+  hilda33d -1205.821150  0.000000000 -1205.821150 -1205.821150 0          4
+  hilda29l -1232.542199  0.000000000 -1232.542199 -1232.542199 0          4
+  hilda32f -1229.338279  0.000000000 -1229.338279 -1229.338279 0          4
+ hilda31s2 -1233.537715 -5.495030238 -1239.032746 -1239.032746 0          4
+ hilda31pe -1231.074742  0.000000000 -1231.074742 -1231.074742 0          4
+ ss_fix identical_streams
+      4              TRUE
+      4              TRUE
+      4              TRUE
+      4              TRUE
+      4              TRUE
+      4              TRUE
+  registered modes whose count the fix moves: 0 of 6; whose logpost it moves: 0 (largest |d| 0.0e+00)
+         point          fix ss_fix    converged   d_vs_converged
+          mode -1182.991369      4 -1182.992733  1.363488780e-03
+          s017 -1580.051814     30 -1580.050579 -1.235183173e-03
+         h_ml+ -1577.221873     53 -1577.221741 -1.312977161e-04
+         h_ml- -1583.077226     21 -1583.077166 -6.058548115e-05
+           kz+ -1579.935175     30 -1579.933969 -1.205854042e-03
+           kz- -1580.183424     30 -1580.182167 -1.257061679e-03
+ kz_deep_frac+ -1580.100995     30 -1580.099774 -1.220392915e-03
+ kz_deep_frac- -1580.013386     30 -1580.012151 -1.235393759e-03
+  under the fix the three pair sums are h_ml -0.195, kz -0.015, kz_deep_frac -0.011 (flag > 1) and every point agrees with its converged value to 1.4e-03
+  the proposed gate on the edge scan: fix PASS, shipped FAIL (must be PASS / FAIL)
+
+=== 6. THE STRAIGHT LINE 017 -> MODE at x4 (10-03 e read it at the controller's count) ===
+  t:             0.00     0.05     0.10     0.15     0.20     0.25     0.30     0.35     0.40     0.45     0.50     0.55     0.60     0.65     0.70     0.75     0.80     0.85     0.90     0.95     1.00
+  ctrl:       -1306.9  -1577.3  -1658.0  -1795.1  -1963.8  -2138.4  -2297.2  -2422.0  -2498.8  -2519.7  -2482.4  -2390.5  -2252.9  -2082.3  -1894.4  -1705.3  -1530.6  -1383.3  -1273.0  -1205.4  -1183.0
+  x4:         -1580.1  -1577.5  -1658.3  -1795.9  -1964.2  -2138.6  -2297.3  -2422.0  -2498.8  -2519.6  -2482.2  -2390.4  -2252.8  -2082.2  -1894.2  -1705.2  -1530.5  -1383.2  -1272.9  -1205.4  -1183.0
+  converged: start -1580.05, min -2519.58 (dip 939.53 below the start), end -1182.99; not monotone
+
+wrote outputs/diagnostics/seasml_substep_controller_20261003.{log,rds}
