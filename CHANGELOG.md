@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (i) — **The two objective-#16 PROPOSALS are drafted for Marcus's ruling, on a committed preview. Both find the same thing: the HONESTLY-WEIGHTED version does almost nothing.** The timing row at its measured weight moves the lag 2.64 → 2.75–2.90 months. No literature-centred greening prior moves `npp_tsens`'s sign. Recommendations: no timing row, but a card-4 disclosure; for the greening, P3 (a GCB net-climate row with `q10` freed, previewed first) or P4 (pin at 0). Nothing adopted.
+
+- **The preview:** `calibration/diag_obj16_preview.R` + `calibration/lib_block_reopt.R` (`e39de1e`).
+  - Run from a frozen copy at `nice 19` beside the `k_w` arm, 3 workers, 12:51 → 14:28.
+  - Outputs: `outputs/diagnostics/obj16_preview_20261004.{log,rds}` and `…_cells.rds`.
+  - Its identity gate reproduces hilda34g's logpost exactly, and the 10-04 (e) identity cell's timing and futures to 1e-6.
+  - A first smoke tripped that gate on the wrong comparison row (the other start's optimum, not the identity cell); it
+    was fixed before the run.
+- **Timing** (`notes/proposal_2026-10-04_enso_timing_row.md`). The lag profile with the land block re-optimised:
+
+| lag (months) | 0 | 1 | 2 | 2.644 | 3 | 4 | 5 | 6 | 8 |
+|---|---|---|---|---|---|---|---|---|---|
+| Δ likelihood | −14.60 | −5.87 | −0.77 | 0 | −0.59 | −5.09 | −12.23 | −19.86 | −30.79 |
+| growth peak (obs +5) | −2 | −1 | +1 | +1 | +2 | +3 | +4 | +6 | +8 |
+| r monthly / annual | 0.42 / 0.54 | 0.48 / 0.56 | 0.53 / 0.60 | 0.57 / 0.63 | 0.59 / 0.64 | 0.64 / 0.69 | 0.67 / 0.72 | 0.67 / 0.72 | 0.61 / 0.67 |
+
+  - n_eff (Bretherton 1999 eq. 31) is **22.7** monthly (of 540) and **44.8** annual.
+  - The candidate row is −(n_eff/2)·log(1 − r²), amplitude-free. At its measured weight it puts the lag at **2.75**
+    (monthly) / **2.90** (annual), costing the existing rows 0.10 / 0.35.
+  - Reaching ~5 months needs ~5× the annual n_eff or > 10× the monthly one: the 09-26 "loud" objection in another form.
+- **Greening** (`notes/proposal_2026-10-04_npp_tsens_prior.md`). `npp_tsens` held at the lag (the other 7 names
+  re-optimised; all converged):
+
+| `npp_tsens` | −0.012 | −0.006 | 0 | +0.0089 (hilda34g) |
+|---|---|---|---|---|
+| Δ likelihood | −2.20 | −0.99 | −0.26 | 0 |
+| SSP5-8.5 2300 (ppm) | 1483.8 | 1472.3 | 1462.2 | 1448.6 |
+| net climate effect on S_LAND, 2015–24 (GtC/yr) | −0.25 | −0.15 | −0.04 | **+0.12** |
+
+  - The profile is quadratic: optimum +0.0095, sd 0.0085, residual 0.003. **Zero is 1.1 sd away.**
+  - The posterior modes: P0 (status quo) +0.0087; P1, the C4MIP mean N(−0.006, 0.029), +0.0083; P2, my CMIP6 conversion,
+    +0.0058; P3, the GCB net-climate row with `q10` held, +0.0066.
+  - ⚠ **The model's net climate effect on the land sink is POSITIVE at every option**, against GCB 2025's TRENDY −0.8 ±
+    0.7 (z +1.31 at hilda34g). `q10` = 1.06 (z −2.54) is the held other half.
+- **The handoff:** `notes/handoff_2026-10-04b_kw_price_obj16_proposals.md` (supersedes 10-04's).
+
 ## 2026-10-04 (h) — **The hilda34g assessment is DRAFTED (`notes/assessment_2026-10-04_hilda34g_DRAFT.md`, the handoff's item 6), with Marcus's verdict (§5) and acts (§7) left as placeholders. The root memory index is back under its soft budget (item 7).**
 
 - **The evidence, re-measured at hilda34g as the canonical:**

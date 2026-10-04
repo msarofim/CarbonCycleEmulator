@@ -1,0 +1,68 @@
+calibration/diag_obj16_preview.R @e39de1e, 2026-10-04 12:51 | 3 workers
+
+=== 0. IDENTITY ===
+  LAG at L 2.6438: logpost -1182.991369 (stored -1182.991369); max |whitened slope| 0.0024
+  runs: growth peak +1 (10-04 e +1), r_mod_obs 0.573457 (0.573457), ssp585 2300 1448.6467 (1448.6467)
+
+=== cells: 9 on 3 forked workers ===
+
+=== T. THE LAG PROFILE at the lag arm's base (the 8-name land block re-optimised) and the candidate growth-shape row ===
+      L     lik     d_lik  npp_tsens beta_max peak r_monthly r_annual ssp585
+ 0.0000 -1157.9 -14.59763 -0.0065755   2.1850   -2   0.42456  0.53642 1476.3
+ 1.0000 -1149.1  -5.87144  0.0011092   2.0098   -1   0.47545  0.56473 1461.6
+ 2.0000 -1144.0  -0.76934  0.0068432   1.8765    1   0.53435  0.60063 1451.8
+ 2.6438 -1143.3   0.00000  0.0088708   1.8295    1   0.57343  0.62810 1448.7
+ 3.0000 -1143.8  -0.58576  0.0093678   1.8175    2   0.59391  0.64391 1448.1
+ 4.0000 -1148.3  -5.08545  0.0086671   1.8315    3   0.64364  0.68718 1449.9
+ 5.0000 -1155.5 -12.23206  0.0056365   1.8985    4   0.67132  0.71768 1455.6
+ 6.0000 -1163.1 -19.85706  0.0015387   1.9913    6   0.67097  0.72306 1463.3
+ 8.0000 -1174.0 -30.79027 -0.0064860   2.1735    8   0.61468  0.67120 1478.8
+    vvH  conv
+ 1020.3 FALSE
+ 1010.9 FALSE
+ 1004.4  TRUE
+ 1002.2  TRUE
+ 1001.8  TRUE
+ 1002.7  TRUE
+ 1006.3 FALSE
+ 1011.2 FALSE
+ 1021.1 FALSE
+  n_eff at the base (Bretherton 1999 eq. 31): monthly 22.7 of 540 points (lag-1 r: model 0.990, obs 0.929); annual 44.8 of 45 (0.210, 0.010)
+  where the row would put the lag (a conditional preview: the land block was optimised WITHOUT the row):
+ estimator             weight L_star lik_cost row_gain ssp585 npp_tsens
+   monthly   1 x n_eff = 22.7   2.75  -0.1018   0.1218   1448  0.009065
+   monthly   2 x n_eff = 45.4   2.95  -0.4640   0.7065   1448  0.009324
+   monthly  5 x n_eff = 113.5   3.75  -3.6374   6.3999   1449  0.009102
+   monthly 10 x n_eff = 226.9   4.55  -8.8161  20.2533   1453  0.007212
+    annual   1 x n_eff = 44.8   2.90  -0.3542   0.5387   1448  0.009272
+    annual   2 x n_eff = 89.6   3.55  -2.6190   4.0446   1448  0.009332
+    annual  5 x n_eff = 224.1   4.85 -11.0703  23.8300   1455  0.006192
+    annual 10 x n_eff = 448.1   5.25 -14.1933  52.3632   1457  0.004660
+  (L_star = the lag maximising [existing rows + the row]; lik_cost = what the existing rows lose vs L 2.644; observed timing 5 months)
+
+=== G. THE GREENING PRIOR: npp_tsens held at the lag arm's lag (the other 7 names re-optimised) ===
+   npp_tsens beta_max  logpost      lik  ssp585     vvH net_climate conv
+ -0.01200000  2.33096 -1186.22 -1145.45 1483.81 1025.73  -0.2520762 TRUE
+ -0.00600000  2.19188 -1184.62 -1144.24 1472.34 1018.27  -0.1466301 TRUE
+  0.00000000  2.04619 -1183.57 -1143.51 1462.15 1011.47  -0.0404739 TRUE
+  0.00885408  1.83067 -1182.99 -1143.25 1448.65 1002.22   0.1175588 TRUE
+ lik_plus_rest
+      -1188.76
+      -1187.22
+      -1186.18
+      -1185.56
+  the net climate effect on the land sink, 2015-2024 vs 1901-1920 climate held (GCB 2025 TRENDY: -0.8 +/- 0.7 GtC/yr): lag arm +0.118, control -0.187 GtC/yr
+  the profile WITHOUT npp_tsens's prior, quadratic through 4 points: optimum +0.00948 /K, sd 0.00850 (max |residual| 0.003 log-units)
+  each candidate's posterior mode (analytic on the quadratic profile; futures and net effect interpolated from the 4 points):
+                                  prior     mean      sd  nu_mode    nu_sd
+                           P0_sign_free  0.00000 0.02914 0.008738 0.008158
+                          P1_c4mip_mean -0.00600 0.02914 0.008267 0.008158
+                          P2_cmip6_conv -0.01485 0.02025 0.005839 0.007836
+ P3_gcb_net_row (+ the sign-free prior)       NA      NA 0.006610       NA
+ ssp585_2300 net_climate
+        1449     0.11548
+        1450     0.10706
+        1453     0.06363
+        1452     0.07742
+  ⚠ P2 is MY conversion of Varney 2024's gamma_NPP (Pg C/K) with tau0 = C/NPP ~ 33 yr and NPP0 = 60; not a published number.
+  ⚠ P3 attributes the whole net effect to npp_tsens with q10 HELD at the canonical's: q10 is its partner (lit note G15, rho -0.89).
