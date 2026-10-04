@@ -2,13 +2,113 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
-## 2026-10-04 (a) — Handoff: `notes/handoff_2026-10-04_hilda34g_adopted.md` (supersedes 10-03's). **The objective-#15 arc is closed: `hilda34g` is the canonical and the suite is clean. The frozen refit trees are REMOVED** (Marcus: "Remove the frozen refit trees and write the handoff note").
+## 2026-10-04 (d) — **MERGED: branch `claude/pensive-burnell-a9bf40` (the start-017 substep-controller fix, on Marcus's ruling "Apply A+B+C (Recommended)") is in `main`.** This was open item 1 of the 10-04 handoff ("Read its result and merge its branch") and step 1 of the branch's own handoff. No registered mode moves.
+
+- **What came in**, four commits:
+  - `57a1e97`: the diagnosis, 10-03 (j);
+  - `a7eab97`: the fix, 10-04 (a);
+  - `7b80b21`: its suite record;
+  - `653e477`: its handoff, 10-04 (b), `notes/handoff_2026-10-04_substep_controller.md`.
+- **The one conflict was this file's top.** Both sides had written a 10-04 (a).
+  - Main's handoff entry was written later (09:21, against the branch's 07:50) and only its own note cites it.
+  - The branch's (a) is cited in `R/model.R`, `DESIGN.md` and `test-stability.R`.
+  - So main's entry becomes **(c)**, and its note's three self-citations follow. `d01d2a3`'s commit message keeps "(a)".
+- **The full suite was NOT re-run, because the code under test did not change.**
+  - Every code path of the merge (`R/`, `tests/`, `calibration/`, `app/`, `data/`, `data-raw/`, `DESIGN.md`, `README.md`, `make_bundle.sh`) is byte-identical to `a7eab97` (`git diff --cached --stat a7eab97` is empty).
+  - `a7eab97`'s full suite was 6039 / 0 / 3 / 0 (`outputs/diagnostics/suite_20261004_a7eab97_all.log`).
+  - Main's two commits since the branch point touched only `CHANGELOG.md` and its handoff note.
+- **Checked directly on the merged checkout:** `test-stability.R` alone, 8 tests and 43 expectations, 0 failed, 0 errors, including the three new `seas_ml` = 1 tests (2 + 4 + 3 expectations) → `outputs/diagnostics/test_stability_20261004_merge.log`.
+- **The app preview** (`ccx-app`, localhost:7788) was restarted on the merged tree.
+  - It shows the 34-parameter banner, with no console or server errors.
+  - The What-if tab's live run (CO₂ fertilisation off, its default) reads 476 ppm today against 426.
+  - No app control can reach the controller's new STOP: its sliders set years, the scenario and the pulse, never a parameter. The canonical runs at 4 substeps under either controller.
+
+## 2026-10-04 (c) — Handoff: `notes/handoff_2026-10-04_hilda34g_adopted.md` (supersedes 10-03's). (Lettered (a) in its commit `d01d2a3`; re-lettered at the merge, 10-04 (d), because the branch's 10-04 (a) and (b) were written first and code comments cite its (a).) **The objective-#15 arc is closed: `hilda34g` is the canonical and the suite is clean. The frozen refit trees are REMOVED** (Marcus: "Remove the frozen refit trees and write the handoff note").
 
 - Both git worktrees `~/ccx_frozen/20261002ee_obj15_{lag,ctl}` are removed (`git worktree remove --force`, then `prune`). This follows the 10-01 precedent: removed after a byte-identical check of the copy.
 - **The check, re-run right before removal: 0 mismatches.** It covered each arm's outdir (`diff -r`, excluding the repo copy's own additions), all 26 logs per arm (`cmp`), the preflight logs, the regenerated port targets, and 017's resume directory with its 3 logs. Every item is tracked in git and pushed (103 + 103 + 7 files).
 - No process had a file open in either tree (`lsof +D`). The two `ps` "hits" were the checking command matching its own text, the `pgrep_wait_loop_matches_itself` trap.
 - The chain's three launch files `~/ccx_frozen/20261002ee_obj15_launch.{sh,out,pid}` stay. They are outside the trees, and their content is in `RUN_PROVENANCE.txt` and CHANGELOG 10-02 (ee).
 - The background task "Diagnose the SPO seasonal-row cliff near start 017" runs in its own session (worktree `.claude/worktrees/pensive-burnell-a9bf40`); its result is the handoff's open item 1.
+
+## 2026-10-04 (b) — Handoff: `notes/handoff_2026-10-04_substep_controller.md`. **The start-017 defect is found (10-03 j), ruled and fixed (10-04 a), and the suite at `a7eab97` is clean (6039 / 0 / 3 / 0). The work sits on branch `claude/pensive-burnell-a9bf40` and is NOT merged into `main`; the merge is Marcus's call. Nothing is running.**
+
+## 2026-10-04 (a) — **APPLIED, on Marcus's ruling "Apply A+B+C (Recommended)": under the seasonal mixed layer `ccx_substeps_for()` now bounds the stiffness the integrator actually meets.** (A) It reads the MLD interpolant's continuous extremes; (B) it uses the held `kz_int` profile; (C) it STOPS past `CCX_SUBSTEPS_MAX` instead of silently clamping. **No registered mode moves:** all six stay at 4 substeps with bit-identical logposts, as priced in 10-03 (j). Three new tests in `test-stability.R` are each mutation-proven.
+
+- **The change** (`R/model.R`, `ccx_substeps_for()`; DESIGN §3.7 gains the rule):
+  - (A) `.fs` reads `$f_min` / `$f_max` (the guard's), not the pooled `f_month` samples.
+  - (B) `K_held <- max(ccx_kz_profile(p, grid))` on the annual-mean grid, not re-evaluated on each extreme's grid.
+  - (C) `need > CCX_SUBSTEPS_MAX` → `stop()`, which the objective's tryCatch reads as −Inf. Past the P8 wall a direct call now errors by name instead of taking eigenvalues of a negative thickness.
+  - `seas_ml` = 0 is untouched by construction (one grid, the same K).
+  - ⚠ `ccx_tr_box_eigbound()` still re-evaluates its own K on the moved grid ((B)'s class). It was left out of the ruling because the box is off at every registered mode; a comment says so.
+- **What it does to counts.**
+  - Every registered mode stays at 4 (re-checked through `ccx_load_mode()`).
+  - At start 017's h_ml on the canonical's column the count is 29, up from 15. Doubling it moves SH CO₂ by 1.7e-7 relative; at the old 15 the same doubling moves it 6.3e-3 (2.8 ppm).
+  - The P8 wall on that column is h_ml 75.504 m. The bound needs 103 substeps 0.3 m short of it and 155 at 0.2 m, and stops by 0.1 m short (308 needed).
+  - The old bound handed back 27–39 substeps across that whole band.
+- **The tests** (`tests/testthat/test-stability.R`). Every earlier test there runs at `seas_ml` = 0, so none had power here.
+  - (1) Along the canonical's column, from its own h_ml to 0.3 m short of the wall, the count keeps the integrator's own stiffness inside the SAFETY target, not merely RK4's limit. The stiffness is its C++ Jacobian with held K at the continuous extremes.
+  - (2) 2 cm short of the wall it stops ("CCX_SUBSTEPS_MAX"); past the wall it errors ("P8").
+  - (3) At 017's h_ml, doubling the auto count moves SH CO₂ by < 1e-6 relative and Δ¹⁴C by < 1e-3 ‰. That is the bar of the existing "accurate, not merely stable" test, reused rather than tuned.
+  - Each carries its MUTATION: `ss_pre_20261004()`, the old bound, must break it. **Verified directly:** with HEAD's `ccx_substeps_for()` put back (in a throwaway test dir, since removed), the five old tests pass and the three new ones fail (1, 2 and 2 expectations).
+- **The full suite at `a7eab97` is CLEAN: 6039 passed, 0 failed, 3 skipped (the standing three), 0 errors.**
+  - That is `e2f611b`'s 6030 / 0 / 3 / 0 plus exactly the nine new expectations, so no other test moved.
+  - Run conditions: a scratch git worktree of `a7eab97` with downloads symlinked, BLAS pinned, `nice -n 10`, 21 min; the scratch tree has since been removed.
+  - Runner: the 10-01 `run_suite_all.R`. Log: `outputs/diagnostics/suite_20261004_a7eab97_all.log`.
+
+## 2026-10-03 (j) — **Start 017's "non-smooth edge" is the INTEGRATOR, not the objective. Near the P8 wall the RK4 substep controller under-resolves the SH winter mixed-layer peak, so the integration is UNSTABLE for ~10 days a year and what the objective returns there is integrator artefact. At 017 the artefact is +273.2: its converged logpost is −1580.05, 397 below the mode (10-03 (e) read 124). Every registered mode is far from it (4 substeps, z ≤ 1.19), and the proposed fix leaves all six bit-identical. Nothing in `R/` changed; the fix is Marcus's to rule.** This answers the background task (e) filed ("Diagnose the SPO seasonal-row cliff near start 017").
+
+- **The test.** `calibration/diag_seasml_substep_controller.R` (new) → `outputs/diagnostics/seasml_substep_controller_20261003.{log,rds}`.
+  - Run conditions: from a frozen copy (md5 `e3ab3b34`, identical to the committed file), BLAS pinned, `nice -n 10`, 37 min.
+  - What it evaluates: the objective at 017, its six ±0.1-conditional-sd steps and the mode, with the substep count forced to 1, 2, 4, 8 and 16 × the controller's own. The count is forced through `ccx_substeps_for()`, so the periodic spinup and the transient run at one count and the 09-16 d mixed-count trap cannot arise.
+  - **From 2× on, every point converges** (|×8 − ×16| ≤ 2.3e-4) **and the surface is SMOOTH.** The pair sums are h_ml −0.198, kz −0.015, kz_deep_frac −0.011 (flag 1). At the controller's count they are −3.0e37, −250.7 and −250.9.
+  - 017: −1306.890 at 15 substeps, −1580.051 converged. The row is `co2_seasonal_SPO`: +72.55 at 15 substeps against −199.76 converged.
+  - The mode: −1182.991369 at 4 substeps, −1182.992733 converged (a 1.4e-3 difference).
+- **The mechanism.**
+  - The geometry: with `seas_ml` = 1 the SH mixed layer follows h_ml × f(t), and layer 1 absorbs the excursion. At the SH winter peak (t = 0.646 yr, late August) layer 1 is therefore 0.748 m thick at 017, whose P8 margin is 0.75 m.
+  - The stiffness: interior diffusion is explicit RK4. `ccx_substeps_for()` sizes the step from a stiffest eigenvalue of 426/yr. The integrator's own Jacobian there is 730/yr (the dzl/dzml of `src/ccx_core.cpp`, with the held `aux$kz_int`).
+  - The gap comes from two departures, both in the controller:
+    - **(A) Sampled, not continuous, extremes.** The controller reads the 12 SAMPLED monthly values, pooled over both hemispheres' production shapes. Their deepest is 1.6817, the NH's, and the NH is flat in the integration under this label. The SH interpolant the integrator follows peaks at 1.6876, which `ccx_seas_ml_guard()` already reads (review A16, 09-12). That 0.35 % is layer 1 at 1.19 m against 0.75 m, and it raises the bound from 426 to 676/yr.
+    - **(B) A re-evaluated K.** The controller re-evaluates the K profile on the MOVED grid, giving 0.818 × kz at the ML base. The integrator holds kz there (`aux$kz_int`, on the annual-mean grid). Correcting this raises the bound from 676 to 827/yr, which bounds the true 730 (0.88 of it).
+  - At 15 substeps z = 4.06 against RK4's 2.785, so the step is UNSTABLE for 10.3 days around the peak every year.
+- **What switches: the four candidates (e) named.**
+  - **The substep count: YES, the proximate trigger.**
+    - 017's `need` is 14.99997, 2.6e-5 below the 15 → 16 switch. Raising kz from 14296.7544 to 14296.7792 flips it, a step of 1.5e-4 conditional sd. The simplex climbed into the artefact and parked on the switch.
+    - The steps' "jumps" are 017's own +273 collapsing. kz+ and kz_deep_frac+ cross to 16 substeps (z 3.81), where +23.6 / +22.2 of artefact remains. h_ml− drops to 12 (z 3.52, +1.7). h_ml+ rises to 21 substeps, but z rises to 5.23.
+  - **A δ¹³C ratio over a near-empty box: YES for the −2e37's size, but the box is emptied by the instability.** At h_ml+ the periodic orbit's SH mixed layer holds −17.8 GtC in January 1750 and −96.8 GtC at its minimum (017: 172.4). |δ¹³C_SH| reaches 1.4e17 ‰, and passes 100 ‰ in 1781.
+  - **The periodic spinup: converged at every point, but that convergence has no power here.** At every point resid_carbon ≤ 4.5e-10 after 6–8 iterations, so this is not a cycle switch. The Newton finds the fixed point of the DISCRETE one-year map whether or not that map is stable. At h_ml+ it returned an "orbit" with negative carbon.
+  - **A clip: none.** No clip sits in the path, and the P8 guard is not crossed: 0.75 m to spare at 017, 0.41 m at h_ml+.
+- **Where the edge is.** At the mode's other values the first unstable h_ml is 72.75 m (72.50 m is stable). That is 5.50 marginal sds of u(h_ml) above the mode's 49.65 m. The P8 wall is at ~75.5 m.
+- **Who is in it.**
+  - **The registered modes: none.** All six sit at 4 substeps (the floor), with z ≤ 1.19 (`hilda31s2`) and P8 margins ≥ 7.5 m. None of the 21 `seas_ml` = 1 mode files under `calibration/output` (registered or quarantined) has an h_ml above 65.23 m.
+  - **Start files of every `seas_ml` = 1 wave (434 in 20 waves): 51 final points are unstable, 13 of them converged.** Re-scored on today's objective, 78 points were scored and one skipped (outside today's h_ml bound).
+    - A material artefact (|ctrl − ×8| > 1) needs z ≥ 3.84. There are 17 such points, all but one unconverged.
+    - 16 of the 17 are POSITIVE (+2.2 to +982); the 17th is −1.7. The optimiser climbs INTO the artefact.
+    - Below z 3.84 every point is within 0.15.
+    - 12 of the 13 converged unstable starts carry ≤ 0.02. The exception is 09-16 `hilda_c` id 23 (z 3.92, +27.6).
+    - Every wave's best is clean (≤ 0.033, the 09-13 cprime best at z 3.10), except the single-file resume of 017.
+    - ⚠ A wave older than 09-16 must be encoded from its NATURAL values: h_ml's lower bound moved 30 → 42.5 m on 09-16, so its stored u decodes 13–31 % off. The driver's first run reused u and scored those waves at the wrong h_ml. The repair is in the committed driver.
+  - **MCMC stage 1 (`hilda33d`, 4100 pooled draws) reached it ONCE.** h_ml median 47.75, 99.9 % 69.46, max 73.34 m. The one excursion is 2 draws at one point (z 3.06), with an artefact of +0.004.
+  - **The Laplace about `hilda34g` does not see it.** 0 of 20,000 draws are unstable at 1× sd and 43 at 2× (34 of them past the P8 wall). It puts h_ml's 99.9 % at 59.2 m where the MCMC's is 69.5 m: along h_ml the posterior is a ridge the local curvature misses.
+- **The straight line 017 → mode, converged (×4).** −1580.1 → −2519.6 at t = 0.45 → −1183.0.
+  - The dip is real: 939.5 below the start. 10-03 (e) read 1212.8, off the artefact at t = 0.
+  - From t = 0.05 on, the controller's count and ×4 agree. 017's +273 is a spike less than 5 % of the way wide.
+- **THE PROPOSED FIX, priced in-process (`R/` untouched).** Three changes in `ccx_substeps_for()`:
+  - (A) use the interpolant's CONTINUOUS extremes (`$f_min` / `$f_max`, what the guard reads);
+  - (B) use the HELD K profile (`ccx_kz_profile(p, grid)` on the annual-mean grid);
+  - (C) STOP (→ −Inf) where the bound needs more than CCX_SUBSTEPS_MAX = 256, instead of silently clamping to a count the bound itself calls unstable.
+  - Its price:
+    - **Registered modes: 0 of 6 counts move, and every logpost and stream is IDENTICAL** (d = 0 exactly). `hilda31s2` is scored with its known −5.495 seed shift, as `test-mode-file.R` scores it.
+    - At 017 and its steps the fix agrees with the converged values to 1.4e-3 (017 runs at 30 substeps), and the pair sums are −0.195 / −0.015 / −0.011.
+    - z ≤ 2.09 wherever it runs (target 2.367). It stops only from h_ml 75.40 at the mode's values, 7 cm from the P8 wall.
+    - It moves the count at 77 of the 434 start-file final points, so their stored logposts would move.
+    - Cost: up to 256 substeps near the wall (64× the mode's evaluation); 017's point needs 30.
+  - **The gate it would ship with, mutation-proven:** "the controller's count keeps the integrator's own stiffness inside the RK4 limit", checked along the h_ml scan to the wall. It PASSES under the fix and FAILS under the shipped controller. `test-stability.R` runs only at `seas_ml` = 0, so its "accurate, not merely stable" test has no power here.
+- ⚠ **Why it is a ruling, not a tidy-up.** A16 (09-12) saw the sampled-vs-continuous gap and left the controller on the samples, because a count change "moves the objective" (the comment in `ccx_substeps_for()`). Measured now, it moves no registered mode. It still changes the objective wherever a count moves, so the D1 precedent (10-02 cc) applies.
+- **Not done.**
+  - The waves' survey verdicts (the "h_ml ridge" readings) are not re-read against 4(e). Among converged points only 09-16 id 23 is materially off.
+  - The tropical box's bound re-evaluates K on the moved grid the same way (B's class). The box is off at every registered mode.
+- **Environment note.** The worktree needed `data-raw/downloads/nuclear14c` (gitignored) copied in, as the frozen suite trees do. Without it 017 scores −1307.53, not −1306.89.
 
 ## 2026-10-03 (i) — **The adoption's ledger is applied on Marcus's rulings, and the full suite at `e2f611b` is CLEAN: 6030 passed, 0 failed, 3 skipped (the standing three), 0 errors. No named red remains.** Verbatim: "Move v1.0 to hilda34g (Recommended)", "Keep 'about 1.4'; about = within 0.1 (Recommended)", "Approve all (Recommended)".
 

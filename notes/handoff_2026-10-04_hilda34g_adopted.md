@@ -4,7 +4,8 @@
 
 **Start here.**
 1. Read this note.
-2. Then CHANGELOG 2026-10-03 (b)–(i) and 2026-10-04 (a), newest at the top of `CHANGELOG.md`.
+2. Then CHANGELOG 2026-10-03 (b)–(i) and 2026-10-04 (c), newest at the top of `CHANGELOG.md`. (Lettered (a) until the
+   merge of the substep-fix branch, 10-04 (d), whose own 10-04 (a) and (b) came first.)
 3. Then memory `ccx_hilda34g_adopted` (routed from the root `MEMORY.md` and `INDEX_ccx.md`'s live state), and
    `ccx_kw_hemispheric_balance`.
 
@@ -46,9 +47,9 @@
   (Recommended)" (the ENSO blurb).
 - 10-03 (i): "Move v1.0 to hilda34g (Recommended)" (`APP_RELEASE_MODE`); "Keep 'about 1.4'; about = within 0.1
   (Recommended)" (the pulse box, `APP_PULSE_PER1000_ABOUT_TOL`); "Approve all (Recommended)" (the test ledger).
-- 10-04 (a): "Remove the frozen refit trees and write the handoff note" (done; this note).
+- 10-04 (c), lettered (a) before the merge: "Remove the frozen refit trees and write the handoff note" (done; this note).
 
-## 3. Files (all committed and pushed; HEAD at the 10-04 (a) commit)
+## 3. Files (all committed and pushed; HEAD at the 10-04 (c) commit, `d01d2a3`)
 - **Mode:** `calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe/` (renamed at adoption from
   `refit_20261003_obj15_…`; the 10-03 (b)–(g) outputs record the old path). The control:
   `calibration/output/refit_20261003_obj15_hilda_csl3v0kaidgb/`.

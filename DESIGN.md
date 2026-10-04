@@ -500,6 +500,13 @@ A that the logL does not see, and it should be weighed explicitly.
   either way the **conservation test is a hard gate**: with zero emissions and zero decay,
   total model carbon constant to ~1e-10 relative per century; with decay, ¹⁴C budget closes
   to the same tolerance.
+- **The substep count bounds the stiffness the integrator ACTUALLY meets (2026-10-04, Marcus:
+  "Apply A+B+C (Recommended)").** Under the seasonal mixed layer, `ccx_substeps_for()` takes the
+  RK4 bound at the MLD interpolant's continuous extremes, using the held `kz_int` profile. It
+  STOPS (−Inf in the objective) where that bound needs more than `CCX_SUBSTEPS_MAX`, i.e. within
+  ~0.1–0.2 m of h_ml from the P8 wall, rather than clamp. The sampled-extreme bound it replaced let
+  RK4 run unstable near the wall, and the objective there was integrator artefact (CHANGELOG
+  10-03 j, 10-04 a).
 - Spinup: analytic/iterative steady state at 1750 (χ₀ ≈ 277–278 ppm from Law Dome
   [VERIFY]), Δ¹⁴C_atm ≡ 0 ‰ by construction, δ¹³C_atm at its preindustrial value.
 - Performance target: one 1750–2100 monthly run in **≤50 ms** so MCMC (10⁵–10⁶ evals) and

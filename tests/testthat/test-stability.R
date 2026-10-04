@@ -103,3 +103,111 @@ test_that("the auto substep count is accurate, not merely stable", {
     expect_lt(max(abs(a$d14c_NH - b$d14c_NH)), 1e-3)
   }
 })
+
+# =====================================================================
+# THE SEASONAL MIXED LAYER (2026-10-04; Marcus: "Apply A+B+C (Recommended)").
+#
+# Every test above runs at seas_ml = 0, so none of them could see what broke at
+# seas_ml = 1. Near the P8 wall layer 1's winter thickness is a small difference
+# (base - h_ml f). The controller read (A) the 12 SAMPLED monthly MLD values and
+# (B) the K profile re-evaluated on the moved grid. Together these under-read the
+# stiffness the integrator meets: at the #15 wave's start 017 (h_ml 74.44) 426/yr
+# against 730/yr. RK4 ran at z = 4.06 against its 2.785 limit for ~10 days a
+# year, and the objective there was integrator artefact (+273.2; CHANGELOG
+# 10-03 j and 10-04 a, calibration/diag_seasml_substep_controller.R). Each test
+# below holds the fix with a MUTATION: `ss_pre_20261004()` puts the old bound back
+# and must fail. The thresholds are this file's own accuracy bar (the test above)
+# and RK4's limit; neither is tuned to the fix.
+# =====================================================================
+
+# the canonical's model list with h_ml moved: the geometry is a function of h_ml
+# alone, so this walks the canonical's own column towards its P8 wall
+seasml_at <- function(hm) { p <- ccx_load_mode()$p; p$h_ml <- hm; p }
+
+# The stiffness the INTEGRATOR meets: its own diffusion Jacobian as
+# src/ccx_core.cpp builds it (dzl, dzml; layer 1 at its effective thickness on
+# the ML interface under D1; the HELD kz_int), at each carried shape's continuous
+# extremes, where it peaks (diag_seasml_substep_controller.R section 2 checks the
+# extremes against a 1200-point year).
+true_stiffness <- function(p) {
+  grid <- ccx_ocean_grid(p$h_ml); aux <- ccx_prepare(p, grid); K <- aux$kz_int
+  rho <- function(h, f) {
+    sh <- aux$a_ml[[h]] / aux$a_ls[[h]]; ht <- grid$h_ml * f; dzl <- grid$dz
+    dzl[2] <- dzl[2] + (dzl[1] - ht) * sh; dzl[1] <- ht
+    n <- length(dzl); dzm <- (dzl[-n] + dzl[-1]) / 2; A <- matrix(0, n, n)
+    for (k in seq_len(n - 1)) {
+      dzb <- if (k == 1 && isTRUE(aux$d1_on == 1L)) dzl[2] / sh else dzl[k + 1]
+      ra <- K[k] / (dzl[k] * dzm[k]); rb <- K[k] / (dzb * dzm[k])
+      A[k, k] <- A[k, k] - ra; A[k, k + 1] <- A[k, k + 1] + rb
+      A[k + 1, k] <- A[k + 1, k] + ra; A[k + 1, k + 1] <- A[k + 1, k + 1] - rb
+    }
+    max(Mod(eigen(A, only.values = TRUE)$values))
+  }
+  max(vapply(HEMIS, function(h) max(rho(h, aux$mld_coef[[h]]$f_max), rho(h, aux$mld_coef[[h]]$f_min)), 0))
+}
+
+# THE MUTATION: the bound as it stood before 2026-10-04 -- sampled extremes, K
+# re-evaluated on the moved grid, a silent clamp at the cap
+ss_pre_20261004 <- function(p, grid = ccx_ocean_grid(p$h_ml), dt = 1 / 12) {
+  .sh <- ccx_mld_shape("ls")
+  .fs <- c(min(vapply(HEMIS, function(h) min(.sh[[h]]$f_month), 0)),
+           max(vapply(HEMIS, function(h) max(.sh[[h]]$f_month), 0)))
+  lam <- max(vapply(.fs, function(f) { g <- ccx_grid_at_h_ml(grid, grid$h_ml * f)
+    ccx_diffusion_eigmax(max(ccx_kz_profile(p, g)), g) +
+      ccx_advection_eigbound(c(p$w_up, p$w_out_NH, p$w_out_SH), g, p) +
+      ccx_tr_box_eigbound(p, g) + ccx_e_loop_eigbound(p, g) + ccx_thc_eigbound(p, g) }, 0)) +
+    ccx_eq_cell_eigbound(p)
+  as.integer(min(max(CCX_SUBSTEPS_MIN, ceiling(dt * lam / (CCX_STAB_SAFETY * CCX_RK4_STAB_LIMIT))),
+                 CCX_SUBSTEPS_MAX))
+}
+
+# the canonical column's P8 wall: where the continuous winter maximum reaches layer 1's base
+p8_wall <- function() {
+  fmax <- max(vapply(HEMIS, function(h) ccx_mld_shape("ls")[[h]]$f_max, 0))
+  stats::uniroot(function(h) cumsum(ccx_ocean_grid(h)$dz)[2] - h * fmax, c(60, 100), tol = 1e-10)$root
+}
+
+test_that("seas_ml = 1: the count keeps the integrator's own stiffness inside RK4's limit up to the P8 wall (MUTATION: the pre-10-04 bound breaks it)", {
+  p0 <- seasml_at(75); skip_if_not(ccx_seas_ml_ls_on(p0), "the canonical does not run the LS seasonal mixed layer")
+  # from the canonical's own h_ml to 0.3 m short of its wall (the bound's stop
+  # sits closer; see the next test)
+  hs <- c(ccx_load_mode()$p$h_ml, 60, 70, 72, 72.75, 73, 74, 74.4384, 75, p8_wall() - 0.3)
+  z_now <- z_old <- numeric(length(hs))
+  for (i in seq_along(hs)) {
+    p <- seasml_at(hs[i]); r <- true_stiffness(p)
+    z_now[i] <- r / 12 / ccx_substeps_for(p); z_old[i] <- r / 12 / ss_pre_20261004(p)
+  }
+  lab <- paste(sprintf("h_ml %.2f: z %.3f (pre-10-04 %.3f)", hs, z_now, z_old), collapse = "; ")
+  # inside the SAFETY target, not merely the limit: with the held K the bound is conservative
+  expect_true(all(z_now <= CCX_STAB_SAFETY * CCX_RK4_STAB_LIMIT), info = lab)
+  expect_true(any(z_old > CCX_RK4_STAB_LIMIT), info = lab)       # the mutation: power on this very scan
+})
+
+test_that("seas_ml = 1: near the P8 wall the count STOPS rather than clamp, and past it there is no bound", {
+  w <- seasml_at(75); skip_if_not(ccx_seas_ml_ls_on(w), "the canonical does not run the LS seasonal mixed layer")
+  wall <- p8_wall()
+  p <- seasml_at(wall - 0.02)                                   # 2 cm (of h_ml) short of the wall
+  expect_error(ccx_substeps_for(p), "CCX_SUBSTEPS_MAX")
+  # MUTATION: the old bound handed back an ordinary count there, past RK4's limit
+  expect_lt(ss_pre_20261004(p), CCX_SUBSTEPS_MAX)
+  expect_gt(true_stiffness(p) / 12 / ss_pre_20261004(p), CCX_RK4_STAB_LIMIT)
+  expect_error(ccx_substeps_for(seasml_at(wall + 0.01)), "P8")
+})
+
+test_that("seas_ml = 1: near the P8 wall the auto count is ACCURATE, and the pre-10-04 count was not (MUTATION)", {
+  skip_if_no_cpp()
+  p <- seasml_at(74.4384)                         # start 017's h_ml on the canonical's column
+  skip_if_not(ccx_seas_ml_ls_on(p), "the canonical does not run the LS seasonal mixed layer")
+  sp <- ccx_spinup(p)                             # a state to integrate from; the orbit is not under test
+  F  <- ccx_build_forcing("historical", c(1750, 2024), prod_c14 = sp$prod_c14,
+                          enso_index = ccx_enso_index_of(p), aod_mode = ccx_aod_mode_of(p))
+  run <- function(ss) ccx_run_fast(sp, F, substeps = ss, retry_na = FALSE)$out
+  moved <- function(ss) { a <- run(ss); b <- run(2L * ss)
+    c(co2 = max(abs(a$co2_SH - b$co2_SH)) / max(a$co2_SH), d14c = max(abs(a$d14c_SH - b$d14c_SH))) }
+  # the same bar as "the auto substep count is accurate, not merely stable" above
+  m <- moved(ccx_substeps_for(p))
+  expect_lt(m[["co2"]], 1e-6, label = "SH CO2 relative change on doubling the auto count")
+  expect_lt(m[["d14c"]], 1e-3, label = "SH D14C change on doubling the auto count")
+  m0 <- moved(ss_pre_20261004(p))
+  expect_gt(m0[["co2"]], 1e-6, label = "MUTATION: the pre-10-04 count's SH CO2 change on doubling")
+})

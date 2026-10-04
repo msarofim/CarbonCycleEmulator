@@ -1,0 +1,45 @@
+# test-stability.R alone, on the main checkout during the merge of claude/pensive-burnell-a9bf40 into main (CHANGELOG 10-04 (d)); code paths byte-identical to a7eab97. testthat::test_file(reporter = 'summary'), BLAS pinned to 1 thread, nice -n 10. 2026-10-04.
+Test passed with 10 successes 🎉.
+run-time inputs present: 14/14. OK
+stability: ..........W.W.W.W.W...W...W...W...W...WWW.WW..WW...........
+
+══ Warnings ════════════════════════════════════════════════════════════════════
+1. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:62:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+2. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:64:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+3. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:62:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+4. the criterion predicts where the OLD fixed-substep scheme broke ('test-stability.R:64:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+5. no NAs anywhere in or far beyond the prior's support ('test-stability.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+6. no NAs anywhere in or far beyond the prior's support ('test-stability.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+7. no NAs anywhere in or far beyond the prior's support ('test-stability.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+8. no NAs anywhere in or far beyond the prior's support ('test-stability.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+9. no NAs anywhere in or far beyond the prior's support ('test-stability.R:73:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+10. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:86:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+11. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:86:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+12. MUTATION: with the controller disabled, the same cases DO fail ('test-stability.R:86:19') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+13. the auto substep count is accurate, not merely stable ('test-stability.R:99:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+14. the auto substep count is accurate, not merely stable ('test-stability.R:100:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+15. the auto substep count is accurate, not merely stable ('test-stability.R:99:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+16. the auto substep count is accurate, not merely stable ('test-stability.R:100:5') - window starts at 1900 with 88.0 GtC of land-use carbon already emitted, so the land's equilibrium is 4.1 % below preindustrial at the first step while ccx_spinup() supplies preindustrial stocks. Expect a start-up transient. Start at the beginning of the emissions record, or spin up against the cleared land yourself.
+
+══ DONE ════════════════════════════════════════════════════════════════════════
+
+RESULT passed=43 failed=0 skipped=0 errors=0
+
+real	0m5.777s
+user	0m4.620s
+sys	0m0.399s
