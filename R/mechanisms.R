@@ -151,6 +151,10 @@ CCX_MECHANISMS <- list(
       # the canonical's run is BLIND to the temperature record under this switch,
       # which catches the next temperature path a refit makes live as well.
       p$npp_tsens <- 0
+      # the stratification feedback (DESIGN §3.4a S, 2026-10-04): the THIRD time the lesson above
+      # applies. Zeroing gmst below already holds its key at 0 (g = 1), but the switch names
+      # every temperature path explicitly, so a run that bypassed the input would still be blind.
+      p$mix_strat_s <- 0
       # 2026-10-02: zero the INPUT as well (Marcus, with "Zero the index"). MEASURED: with the
       # four parameters above zeroed the run is BLIND to gmst (max |dCO2| 0 against gmst = 0),
       # so this changes no number -- it makes the driver chart draw the zero line the model

@@ -84,6 +84,15 @@ ccx_cpp_aux <- function(aux, grid, carb_iter = 6L) {
     pump_carb = if (is.null(aux$pump)) numeric(2 * grid$nl) else
       c(aux$pump$NH$carb, aux$pump$SH$carb),
     ml_C0 = c(aux$ml_C0$NH, aux$ml_C0$SH),
+    # THE STRATIFICATION FEEDBACK (DESIGN §3.4a S, 2026-10-04): the upper part of K and the export
+    # solved against it. Sent UNCONDITIONALLY and ZERO-FILLED when off (the pump_org precedent);
+    # `mix_on` is what gates both substitutions, on both sides.
+    mix_on = as.integer(isTRUE(aux$mix_on == 1L)),
+    kz_up = if (is.null(aux$kz_up)) numeric(grid$nl) else aux$kz_up,
+    pump_up_org = if (is.null(aux$pump_up)) numeric(2 * grid$nl) else
+      c(aux$pump_up$NH$org, aux$pump_up$SH$org),
+    pump_up_carb = if (is.null(aux$pump_up)) numeric(2 * grid$nl) else
+      c(aux$pump_up$NH$carb, aux$pump_up$SH$carb),
     alpha_pump_org  = 1 + ccx_const("PUMP_EPS13_ORG") / 1000,
     alpha_pump_carb = 1 + ccx_const("PUMP_EPS13_CARB") / 1000,
     # THE HIGH-LATITUDE BOXES (HILDA HS/HD, 2026-09-05). Sent UNCONDITIONALLY,
@@ -471,7 +480,7 @@ ccx_run_fast <- function(spin, F, substeps = "auto", retry_na = TRUE) {
   # `spin$enso_hist` (W1, 2026-10-02): the ENSO months before F's first row, when this
   # state continues an earlier run; NULL for a spinup (see ccx_land_enso()).
   ccx_run_prepared(spin$y, ccx_run_prepare(spin, substeps), F, retry_na = retry_na,
-                   enso_hist = spin$enso_hist)
+                   enso_hist = spin$enso_hist, tdeep0 = spin$tdeep0)
 }
 
 #' The MARSHALLED arguments of `ccx_run_fast()`, built ONCE for many runs
@@ -504,7 +513,10 @@ ccx_run_prepare <- function(spin, substeps = "auto") {
        ndep_ret = if (is.null(spin$params$ndep_ret)) CCX_NDEP_RET_DEFAULT else spin$params$ndep_ret,
        # W1 (2026-10-02): the land ENSO lag, months. The core never sees it -- the
        # runner turns it into the lagged series ccx_run_cpp() takes (ccx_land_enso()).
-       enso_lag = ccx_enso_lag_of(spin$params))
+       enso_lag = ccx_enso_lag_of(spin$params),
+       # THE STRATIFICATION FEEDBACK (DESIGN §3.4a S, 2026-10-04): its three constants, which
+       # the runner turns into the g series ccx_run_cpp() takes (ccx_mix_g_series()). NULL = OFF.
+       mix_p = if (ccx_mix_on(spin$params)) spin$params[c("mix_strat_s", "mix_strat_q", "mix_strat_tau")] else NULL)
 }
 
 #' A forcing table marshalled ONCE for many `ccx_run_prepared()` calls
@@ -517,7 +529,7 @@ ccx_cpp_forcing_prep <- function(F) {
 #' Run the core from prepared arguments. Same return shape as `ccx_run_fast()`,
 #' the SAME NA-retry semantics (doubling substeps up to CCX_SUBSTEPS_MAX), and
 #' the same guard columns. `F` is a forcing table or a `ccx_cpp_forcing_prep()`.
-ccx_run_prepared <- function(y, prep, F, retry_na = TRUE, enso_hist = NULL) {
+ccx_run_prepared <- function(y, prep, F, retry_na = TRUE, enso_hist = NULL, tdeep0 = NULL) {
   Fm <- if (inherits(F, "ccx_cpp_forcing")) F else ccx_cpp_forcing_prep(F)
   # the forcing's ENSO index must be the one the parameters name (2026-09-29)
   ccx_enso_index_check(if (is.null(prep$enso_index)) "demean" else prep$enso_index, Fm)
@@ -527,10 +539,14 @@ ccx_run_prepared <- function(y, prep, F, retry_na = TRUE, enso_hist = NULL) {
   # cores integrate one series. Unlagged, it IS the matrix's enso column.
   land_enso <- unname(ccx_land_enso(Fm$mat[, "enso"],
                                     if (is.null(prep$enso_lag)) 0 else prep$enso_lag, enso_hist))
+  # THE STRATIFICATION FEEDBACK's g (DESIGN §3.4a S): the SAME builder ccx_run() uses, so the
+  # two cores integrate one series. All ones when off (the core then never reads it).
+  mix_g <- if (is.null(prep$mix_p)) rep(1, nrow(Fm$mat)) else
+    as.numeric(ccx_mix_g_series(unname(Fm$mat[, "gmst"]), Fm$t, prep$mix_p, tdeep0))
   ss <- prep$ss
   one <- function(nsub) {
     res <- .ccx_cpp_env$ccx_run_cpp(y, prep$par, Fm$mat, Fm$t, prep$aux, as.integer(nsub),
-                                    land_enso)
+                                    land_enso, mix_g)
     out <- as.data.frame(res$out)
     # The C++ matrix width is a literal there; tie it to the R-side column
     # vector LOUDLY (a mismatch used to be a positional mis-naming, not an error).
@@ -618,11 +634,20 @@ ccx_deriv_fast <- function(y, t, p, forc, grid, aux, prep = NULL) {
       stop("ccx_deriv_fast(): a FLATTENED forcing with a nonzero ENSO index (", land_enso,
            ") under a lagged land term. Pass the point forcing as a list carrying `land_enso`.")
   } else land_enso <- ccx_point_land_enso(forc, p)
+  # THE STRATIFICATION FEEDBACK's g (DESIGN §3.4a S). A FLATTENED vector is the spinup's
+  # constant forcing: exact as g = 1 only at GMST <= 0 (T_deep = 0), refused otherwise.
+  mix_g <- if (!ccx_mix_on(p)) 1 else if (is.numeric(forc)) {
+    T0 <- f[[match("gmst", CCX_FORCING_COLS)]]
+    if (isTRUE(T0 > 0))
+      stop("ccx_deriv_fast(): a FLATTENED forcing with GMST ", T0, " under the stratification ",
+           "feedback. Pass the point forcing as a list carrying `mix_g`.")
+    1
+  } else ccx_point_mix_g(forc, p)
   if (is.null(prep)) {
     ccx_seas_ml_marshal_check(p, aux)
     prep <- list(par = ccx_cpp_par(p), aux = ccx_cpp_aux(aux, grid))
   }
-  d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, prep$par, f, prep$aux, as.numeric(land_enso))
+  d <- .ccx_cpp_env$ccx_deriv_cpp(y, t, prep$par, f, prep$aux, as.numeric(land_enso), as.numeric(mix_g))
   dimnames(d) <- dimnames(y)
   d
 }

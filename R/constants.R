@@ -481,6 +481,52 @@ CCX_CONSTANTS <- list(
                    "models' mass-based exchange times (Denning et al. 1999 Table 4), 0.26. Replaces",
                    "0.25, uncited.")),
 
+  # ---- THE STRATIFICATION FEEDBACK (DESIGN §3.4a S; RULED 2026-10-04, Marcus) ----
+  # g(t) = (1 + s * T_key)^(-q/2) multiplies the UPPER part of K(z); T_key = max(0, T - T_deep),
+  # T_deep = T lagged exponentially at MIX_TDEEP_TAU. Rulings (verbatim): "Thermocline mixing
+  # only", "Obs x law, fixed", "GMST minus lagged deep ocean", "History + futures, one #16 refit".
+  # Proposal + literature: notes/proposal_2026-10-04_warming_weakens_mixing.md. All three are
+  # STRUCTURAL (set by a label block, never fitted); test-mixing-strat.R ties MIX_STRAT_S to its
+  # derivation from data/forcing_gmst.rds and MIX_TDEEP_TAU to data/climate_module.rds.
+  MIX_STRAT_S = list(
+    value = 0.052198, units = "1/K (fractional change in N^2 per K of T_key)",
+    status = "derived",
+    source = paste("Observed stratification trend over the ruled key's trend. Cheng et al. 2025,",
+                   "Nat. Rev. Earth Environ. 6:637-655, doi:10.1038/s43017-025-00715-5, abstract +",
+                   "Table 1: global 0-2,000 m N^2 rising 0.8 +/- 0.1 %/decade (90 % CI, three-dataset",
+                   "ensemble, 1960-2024, % of the 2005-2020 climatology). Divided by the 1960-2024 OLS",
+                   "trend of T_key = max(0, GMST - T_deep): 0.153264 K/decade (IGCC 2024 GMST,",
+                   "data/forcing_gmst.rds, 0 before 1850; T_deep its annual exponential lag at",
+                   "MIX_TDEEP_TAU from 0 in 1750). 0.008 / 0.153264 = 0.052198; the CI gives",
+                   "0.045673-0.058722. Cross-check: Li et al. 2020, Nat. Clim. Change 10:1116,",
+                   "doi:10.1038/s41558-020-00918-2, 0.90 %/decade (1960-2018, IAP). Both verified in",
+                   "the papers' own text 2026-10-04. CAVEAT: N^2 trends are relative to a modern",
+                   "climatology, not preindustrial -- a second-order difference.")),
+  MIX_STRAT_Q = list(
+    value = 1, units = "exponent q in K ~ N^-q",
+    status = "cited",
+    source = paste("Gargett 1984, J. Mar. Res. 42:359-393, doi:10.1357/002224084788502756, eq. 25",
+                   "(p. 381): Kv = a0 N^-q with q of order 1; basin budgets give q = 0.8-1.2",
+                   "(pp. 364-367; ELA lakes 0.88 +/- 0.16, fjords 1.2). Bounds for the app's range:",
+                   "q = 2 (Osborn 1980 at fixed dissipation, as restated by Gargett & Holloway 1984,",
+                   "J. Mar. Res. 42:15, eq. 21) and q = 1/2 (Garrett-Munk broadband, Gargett &",
+                   "Holloway 1984 p. 25). Read in full (Yale EliScholar, open access) 2026-10-04.")),
+  MIX_STRAT_Q_LO = list(value = 0.5, units = "exponent", status = "cited",
+    source = "The Garrett-Munk broadband case, K ~ N^-0.5 (Gargett & Holloway 1984 p. 25); the app's low end."),
+  MIX_STRAT_Q_HI = list(value = 2, units = "exponent", status = "cited",
+    source = "Osborn 1980 at fixed dissipation, K = Gamma eps / N^2 (Gargett & Holloway 1984 eq. 21); the app's high end."),
+  MIX_TDEEP_TAU = list(
+    value = 194.938955, units = "yr",
+    status = "derived",
+    source = paste("MODEL-DERIVED (named, as the threshold rule requires): the SLOW timescale of",
+                   "CCX's own climate module, data/climate_module.rds irf_d[3] -- a 3-timescale",
+                   "impulse response fitted to FaIR 2.2.4 (calib 1.6.0), 841 configs, ensemble mean,",
+                   "built 2026-09-24. Used as the deep ocean's lag behind the surface: stratification",
+                   "is a surface-minus-deep contrast and relaxes as the deep ocean catches up (CMIP6",
+                   "SSP1-2.6 0-200 m stratification FALLS after 2050 at near-flat GMST; Cheng et al.",
+                   "2025 Table 1). No observation fixes this lag; a two-layer model's deep relaxation",
+                   "time is shorter than its slow mode, so this is the slow end.")),
+
   NDEP_RET_PRIOR_CENTRE = list(
     value = .NDEP_RET_FOREST_CENTRAL * .NDEP_FOREST_SHARE,
     units = "kg C retained per kg N deposited on land",

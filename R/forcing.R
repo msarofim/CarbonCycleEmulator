@@ -1206,7 +1206,11 @@ ccx_forcing_at <- function(F, i) {
        # the LAND term's lagged ENSO input (W1, 2026-10-02). A RUNNER writes the column
        # (ccx_land_enso()); a table without it gives NULL, which ccx_deriv() reads as the
        # index itself when nothing is lagged and REFUSES when something is.
-       land_enso = F[["land_enso"]][i])
+       land_enso = F[["land_enso"]][i],
+       # the stratification feedback's factor g (DESIGN §3.4a S, 2026-10-04). A RUNNER writes
+       # the column (ccx_mix_g_series()); NULL is read as g = 1 when the feedback is off, and
+       # refused by ccx_point_mix_g() when it is on (except at GMST <= 0 from a spinup).
+       mix_g = F[["mix_g"]][i])
 }
 
 # ---------------------------------------------------------------------
@@ -1248,6 +1252,9 @@ ccx_run <- function(spin, F, substeps = "auto", fluxes = FALSE, edge_fn = NULL) 
   # trace below reads it through ccx_forcing_at() off this same local table.
   if (!is.null(F$enso))
     F$land_enso <- ccx_land_enso(F$enso, ccx_enso_lag_of(p), spin$enso_hist)
+  # THE STRATIFICATION FEEDBACK's g (DESIGN §3.4a S, 2026-10-04): the SAME builder
+  # ccx_run_prepared() uses, ALWAYS rewritten (a stale column is dropped when it is off).
+  F[["mix_g"]] <- if (ccx_mix_on(p)) as.numeric(ccx_mix_g_series(F$gmst, F$t, p, spin$tdeep0)) else NULL
   atmN <- aux$idx$NH$atm; atmS <- aux$idx$SH$atm
   # HS and HD ARE ocean carbon (as spinup.R and the C++ core count them);
   # `$hs`/`$hd` are NULL with the structure off and c() drops them. Audit

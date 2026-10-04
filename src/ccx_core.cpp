@@ -163,6 +163,12 @@ struct Aux {
   double a_ls[2], a_hs[2], hs_mass_kg[2], asx_hs[2];
   int pump_on;
   double pump_org[2][NL], pump_carb[2][NL];
+  // THE STRATIFICATION FEEDBACK (DESIGN §3.4a S, 2026-10-04): the upper part of K and the
+  // export solved against it, sent ZERO-FILLED when off; `mix_on` gates both substitutions.
+  // Twin of R's aux$mix_on / kz_up / pump_up (ccx_prepare()).
+  int    mix_on;
+  double kz_up[NL];
+  double pump_up_org[2][NL], pump_up_carb[2][NL];
   double ml_C0[2];                  // preindustrial ML carbon, DIC-limited mode
   double alpha_pump_org, alpha_pump_carb;   // 13C fractionation, per limb
   // THE HS PUMP (2026-09-07d): HS -> HD export per hemisphere, GtC/yr, SOLVED in
@@ -460,7 +466,7 @@ static const int REC_N = 10;
 // passed in, so the core never sees the lag and the interpolation has one
 // implementation; unlagged it IS f[5], bit for bit. Every OCEAN read keeps f[5].
 static void deriv(const double* y, double t, const Par& P, const double* f,
-                  double land_enso, const Aux& A, double* dy, double* pco2_rec = nullptr) {
+                  double land_enso, double mix_g, const Aux& A, double* dy, double* pco2_rec = nullptr) {
   for (int i = 0; i < NB * 3; ++i) dy[i] = 0.0;
   if (pco2_rec) for (int i = 0; i < REC_N; ++i) pco2_rec[i] = NA_REAL;
 
@@ -772,7 +778,10 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
       const int b = base + IML + kk + 1;
       const double dzb = (kk == 0) ? dz1_eff : dzl[kk + 1];
       for (int tr = 0; tr < 3; ++tr) {
-        const double Ft = A.kz_int[kk] * (y[IX(a, tr)] / dzl[kk] - y[IX(b, tr)] / dzb)
+        // the stratification feedback weakens the UPPER part of K (DESIGN §3.4a S): the same
+        // association as R's K_int - (1 - g) K_up; OFF reads the held value itself.
+        const double Kk = A.mix_on ? A.kz_int[kk] - (1.0 - mix_g) * A.kz_up[kk] : A.kz_int[kk];
+        const double Ft = Kk * (y[IX(a, tr)] / dzl[kk] - y[IX(b, tr)] / dzb)
                           / dzml[kk];
         dy[IX(a, tr)] -= Ft;
         dy[IX(b, tr)] += Ft;
@@ -836,8 +845,13 @@ static void deriv(const double* y, double t, const Par& P, const double* f,
           // alpha13_signed: grandfathered 2026-08-25e, behaviour unchanged and
           // OPEN -- pump_org/pump_carb are a flux DIVERGENCE and are negative by
           // construction in some layers. See R/model.R for the full note.
-          add_flux(iml, b, A.pump_org[hi][kk] * sc, A.alpha_pump_org, true);
-          add_flux(iml, b, A.pump_carb[hi][kk] * sc, A.alpha_pump_carb, true);
+          // the stratification feedback rescales the solved export with g (DESIGN §3.4a S):
+          // S - (1 - g) S_up, twin of R's vectorised expression. The tr branch above never
+          // meets it: ccx_prepare() refuses the feedback with the tropical box on.
+          const double po = A.mix_on ? A.pump_org[hi][kk] - (1.0 - mix_g) * A.pump_up_org[hi][kk] : A.pump_org[hi][kk];
+          const double pc = A.mix_on ? A.pump_carb[hi][kk] - (1.0 - mix_g) * A.pump_up_carb[hi][kk] : A.pump_carb[hi][kk];
+          add_flux(iml, b, po * sc, A.alpha_pump_org, true);
+          add_flux(iml, b, pc * sc, A.alpha_pump_carb, true);
         }
       }
     }
@@ -1257,6 +1271,12 @@ static Aux unpack_aux(const List& a) {
   for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_org[h][k] = v[h * NL + k];
   v = a["pump_carb"];
   for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_carb[h][k] = v[h * NL + k];
+  A.mix_on = a["mix_on"];                                     // DESIGN §3.4a S (2026-10-04)
+  v = a["kz_up"];        for (int k = 0; k < NL; ++k) A.kz_up[k] = v[k];
+  v = a["pump_up_org"];
+  for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_up_org[h][k] = v[h * NL + k];
+  v = a["pump_up_carb"];
+  for (int h = 0; h < 2; ++h) for (int k = 0; k < NL; ++k) A.pump_up_carb[h][k] = v[h * NL + k];
   A.hs_frac = a["hs_frac"]; A.h_hs = a["h_hs"];
   A.dz_hd = a["dz_hd"]; A.sst_hs = a["sst_hs"];
   v = a["thick_hs"]; A.thick_hs[0] = v[0]; A.thick_hs[1] = v[1];    // per-hemisphere thickness (2026-09-21 e)
@@ -1378,7 +1398,7 @@ static Par unpack_par(const List& p) {
 // ---- exported: single derivative (for parity testing) ---------------
 // [[Rcpp::export]]
 NumericMatrix ccx_deriv_cpp(NumericMatrix y, double t, List p, NumericVector f, List aux,
-                            double land_enso) {
+                            double land_enso, double mix_g) {
   // WIDTH GUARD (2026-09-30): f[] is read by POSITION up to N_FORCING - 1, so a
   // short vector is an out-of-bounds read neither language reports. The R
   // builder guards it too; this is the core refusing on its own account.
@@ -1386,7 +1406,7 @@ NumericMatrix ccx_deriv_cpp(NumericMatrix y, double t, List p, NumericVector f, 
     Rcpp::stop("ccx_deriv_cpp(): forcing vector has %d element(s), N_FORCING is %d", (int) f.size(), N_FORCING);
   Aux A = unpack_aux(aux); Par P = unpack_par(p);
   NumericMatrix dy(NB, 3);
-  deriv(y.begin(), t, P, f.begin(), land_enso, A, dy.begin());
+  deriv(y.begin(), t, P, f.begin(), land_enso, mix_g, A, dy.begin());
   return dy;
 }
 
@@ -1397,7 +1417,8 @@ NumericMatrix ccx_deriv_cpp(NumericMatrix y, double t, List p, NumericVector f, 
 // matrix's enso column itself.
 // [[Rcpp::export]]
 List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
-                 NumericVector times, List aux, int substeps, NumericVector land_enso) {
+                 NumericVector times, List aux, int substeps, NumericVector land_enso,
+                 NumericVector mix_g) {
   // WIDTH GUARD (2026-09-30), same reason as ccx_deriv_cpp(): forcing(i, j) is
   // read for j < N_FORCING with no bounds check.
   if (forcing.ncol() != N_FORCING)
@@ -1405,6 +1426,9 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
   // LENGTH GUARD (W1, 2026-10-02): land_enso[i] is read for every row, unchecked.
   if (land_enso.size() != forcing.nrow())
     Rcpp::stop("ccx_run_cpp(): land_enso has %d value(s) for %d forcing row(s)", (int) land_enso.size(), forcing.nrow());
+  // the stratification feedback's g (DESIGN §3.4a S, 2026-10-04): one value per row, unchecked below
+  if (mix_g.size() != forcing.nrow())
+    Rcpp::stop("ccx_run_cpp(): mix_g has %d value(s) for %d forcing row(s)", (int) mix_g.size(), forcing.nrow());
   Aux A = unpack_aux(aux); Par P = unpack_par(p);
   const int n = forcing.nrow();
   const int NS = NB * 3;
@@ -1501,22 +1525,23 @@ List ccx_run_cpp(NumericMatrix y0, List p, NumericMatrix forcing,
 
     for (int j = 0; j < N_FORCING; ++j) f[j] = forcing(i, j);
     const double le = land_enso[i];     // the month's lagged land ENSO input (W1)
+    const double mg = mix_g[i];         // the month's stratification factor g (DESIGN §3.4a S)
 
     // RK4 with substeps, ordered exactly as ccx_step_rk4() in R
     double tt = times[i];
     const double h = (1.0 / 12.0) / substeps;
     for (int s = 0; s < substeps; ++s) {
-      deriv(y.data(), tt, P, f.data(), le, A, k1.data(), (s == 0) ? pco2_rec : nullptr);
+      deriv(y.data(), tt, P, f.data(), le, mg, A, k1.data(), (s == 0) ? pco2_rec : nullptr);
       if (s == 0)
         for (int hi = 0; hi < 2; ++hi)
           for (int b = 0; b < 4; ++b) out(i, 11 + 14 * hi + 10 + b) = pco2_rec[4 * hi + b];
       if (s == 0) { nppm(i, 0) = pco2_rec[8]; nppm(i, 1) = pco2_rec[9]; }
       for (int q = 0; q < NS; ++q) tmp[q] = y[q] + h / 2.0 * k1[q];
-      deriv(tmp.data(), tt + h / 2.0, P, f.data(), le, A, k2.data());
+      deriv(tmp.data(), tt + h / 2.0, P, f.data(), le, mg, A, k2.data());
       for (int q = 0; q < NS; ++q) tmp[q] = y[q] + h / 2.0 * k2[q];
-      deriv(tmp.data(), tt + h / 2.0, P, f.data(), le, A, k3.data());
+      deriv(tmp.data(), tt + h / 2.0, P, f.data(), le, mg, A, k3.data());
       for (int q = 0; q < NS; ++q) tmp[q] = y[q] + h * k3[q];
-      deriv(tmp.data(), tt + h, P, f.data(), le, A, k4.data());
+      deriv(tmp.data(), tt + h, P, f.data(), le, mg, A, k4.data());
       for (int q = 0; q < NS; ++q)
         y[q] = y[q] + h / 6.0 * (k1[q] + 2.0 * k2[q] + 2.0 * k3[q] + k4[q]);
       tt = tt + h;

@@ -2,6 +2,68 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-04 (n) — **THE STRATIFICATION FEEDBACK IS BUILT** (DESIGN §3.4a S, specified first in `8f6e001`; Marcus's 10-04 rulings). Both cores, a new label `hilda_csl3v0kaidgbem` (the name is Marcus's call), 78 new tests, and six mutations caught. OFF is bit-exact: hilda34g's stored logpost reproduces with a difference of exactly 0. At the unrefitted canonical, ON costs 1.77 in likelihood and trims the 2015–24 ocean sink by 0.015 GtC/yr. Nothing adopted.
+
+- **The code** (none of it read when the feedback is off):
+  - `R/constants.R`: `MIX_STRAT_S` 0.052198 /K (Cheng 2025's 0.8 %/decade over the key's 1960–2024 trend,
+    0.153264 K/decade), `MIX_STRAT_Q` 1 (Gargett 1984), `_Q_LO` / `_Q_HI` ½ / 2, and `MIX_TDEEP_TAU` 194.938955 yr
+    (the climate module's slow mode; model-derived, named).
+  - `R/model.R`:
+    - new helpers `ccx_mix_on()`, `ccx_kz_upper()` (computed directly, not as K_int − f·kz, which cancels
+      catastrophically at depth), `ccx_mix_g_series()`, `ccx_mix_tdeep_after()` and `ccx_point_mix_g()`;
+    - `ccx_pump_export(…, kz_override)` (solved field only);
+    - `ccx_prepare()` builds `aux$mix_on` / `kz_up` / `pump_up` and refuses the tropical box and the martin field by
+      name;
+    - `ccx_deriv()` computes K_int − (1−g)·K_up and S − (1−g)·S_up.
+  - `R/forcing.R` and `R/cpp.R`: the per-run `mix_g` series, built by the same builder in both runners (the
+    `land_enso` precedent, so `N_FORCING` is unchanged), with `spin$tdeep0` for continuations.
+  - `src/ccx_core.cpp`: `Aux` gains `mix_on`, `kz_up` and `pump_up_*`; `deriv()` / `ccx_deriv_cpp()` /
+    `ccx_run_cpp()` gain `mix_g`, with the same association as R.
+  - `R/calibrate.R`: the label (kaidgbe's block plus exactly the three constants; gates unchanged).
+  - `R/mechanisms.R`: `warming_feedback` also zeroes `mix_strat_s`.
+- **Measured at the canonical** (the three constants on its vector, nothing re-fitted):
+  - g in 2024 is 0.9675 (T_deep 0.215 K).
+  - Likelihood **−1.77**: `d13c_level_MLO` −1.87, `co2_level_SPO` −0.82, `gcb_ocean_sink` −0.25 against
+    `co2_level_MLO` +0.75, `d13c_level_SPO` +0.58, `d14c_SH` +0.42.
+  - 2015–24 ocean sink **3.147 → 3.133 GtC/yr** (−0.47 %); ocean C in 2024 −0.43 GtC.
+- **⚠ Implausible-by-3.4× checked before anything else:** a √K diffusion estimate predicted −1.6 % for this cut.
+  - A STATIC kz × 0.9675 (spinup re-spun, pump re-solved) gives −0.49 %, the same as the ramp's −0.47 %.
+  - CCX's own elasticity d ln(sink)/d ln(kz) is **0.149** (identical at × 0.9675 and × 0.90), not a pure column's 0.5.
+  - So the mechanism is NOT under-responding: CCX's uptake is mostly not kz-limited (the HILDA cold-box exchange,
+    air-sea resistance).
+  - The proposal's §5 futures estimate is corrected by that factor (≈ +1 ppm at 2100, +3–7 at 2300, SSP5-8.5) until
+    the preview measures it.
+- **Parity unchanged by the mechanism:** suite metric 2.37e-14 ON vs 2.39e-14 OFF at 1990, and 8.5e-16 vs 8.3e-16 at
+  2020 (tolerance 5e-14).
+- **Tests.**
+  - `tests/testthat/test-mixing-strat.R` (new): S1–S8, 78 expectations, 0 failed.
+  - The six label ledgers extended deliberately, each citing the ruling: the two exact label lists in
+    `test-constants-batch` / `test-tr-box`, plus `GP_OPEN_LABELS`, `EL_LAG_OPEN_LABELS`, `INERT_ON` and `PRIOR_ON`.
+  - **Regression set: 1441 expectations over 16 files, 0 failed, 0 errors, 1 skipped.** Files: the six ledger files,
+    parity, kz-profile, pump, stability, conservation, mechanisms, l2-enso-limb, npp-tsens, mode-file, hilda-boxes.
+  - `test-mechanisms` re-run after the switch change: 89 / 0.
+- **Mutations, each caught by its own gate** (applied to the real files and restored md5-identical;
+  `scratchpad/mutate.py`):
+
+| mutation | caught by |
+|---|---|
+| M1, no pump rescaling | S6 and S7 (12 failures) |
+| M2, no cap | S2 |
+| M3, the floor weakened too | S4's new floor check and S8 |
+| M4, g(0) ≠ 1 | S2 and S4/S5 |
+| M5, C++ skips the factor | parity, S6, S7 |
+| M6, the sign flipped in BOTH cores | S6 and S7 (parity passes, as it should: the direction gate has its own power) |
+
+- **Noted, not fixed:** coupled futures hold the 1850 GMST (−0.052 K) back to 1750, where the objective uses 0
+  (`approx(rule = 2)` in `ccx_run_coupled()`). Under the max(0, ·) key that is nothing before 1850 and ~0.02 K of key
+  after it, in coupled runs only. It is pre-existing: `q10` and `npp_tsens` already see it.
+- **Next:** the preview.
+  - Price on every registered mode.
+  - The futures, ON vs OFF.
+  - The record's power on s.
+  - The ocean climate effect against GCB 2025 and CMIP6.
+  - Then objective #16 with the greening decision.
+
 ## 2026-10-04 (m) — **A NEW MECHANISM RULED: ocean mixing weakens as the climate warms** (Marcus: *"follows pretty directly from physical understanding, so I would be interested in incorporating that into the model"*). The proposal is `notes/proposal_2026-10-04_warming_weakens_mixing.md` (`f794719`). The P3 preview has landed and is QUARANTINED.
 
 - **The rulings, verbatim:** "Thermocline mixing only (Recommended)"; "Obs × law, fixed (Recommended)"; "GMST minus lagged

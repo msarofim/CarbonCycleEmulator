@@ -2471,7 +2471,22 @@ ccx_struct_hilda_csl3v0kaidgbe <- function() {
   stopifnot(!anyDuplicated(names(blk)))
   blk
 }
-CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe")
+#' THE "hilda_csl3v0kaidgbem" STRUCTURE (DESIGN §3.4a S, RULED 2026-10-04): hilda_csl3v0kaidgbe
+#' with the STRATIFICATION FEEDBACK on -- the upper part of K(z) weakens as the surface warms
+#' faster than the deep ocean, g = (1 + s T_key)^(-q/2), and the solved export is rescaled with
+#' it (R/model.R ccx_mix_on() / ccx_mix_g_series()). The three constants are STRUCTURAL (Marcus:
+#' "Obs x law, fixed"), from R/constants.R. Every other label leaves them absent = OFF, so every
+#' registered file stays bit-exact. The gates are kaidgbe's, untouched: m opens nothing.
+#' ⚠ The NAME (m = mixing) is mine and is Marcus's call, as kaidgb's and kaidgbe's were.
+ccx_struct_hilda_csl3v0kaidgbem <- function() {
+  blk <- ccx_struct_hilda_csl3v0kaidgbe()
+  blk$mix_strat_s   <- ccx_const("MIX_STRAT_S")
+  blk$mix_strat_q   <- ccx_const("MIX_STRAT_Q")
+  blk$mix_strat_tau <- ccx_const("MIX_TDEEP_TAU")
+  stopifnot(!anyDuplicated(names(blk)))
+  blk
+}
+CCX_STRUCT_LABELS <- c("", "hilda", "hilda_eq", "hilda_tr", "hilda_c", names(CCX_L2_RETURN_LAYERS), "hilda_cs", "hilda_csl3v0", "hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb", "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem")
 ccx_struct_block <- function(struct) {
   if (identical(struct, "")) return(list())        # the column: nothing declared
   switch(struct,
@@ -2490,6 +2505,7 @@ ccx_struct_block <- function(struct) {
     "hilda_csl3v0kai" = ccx_struct_hilda_csl3v0kai(), # arm A + the inert soil carve-out, 0-1 m (2026-09-30)
     "hilda_csl3v0kaidgb" = ccx_struct_hilda_csl3v0kaidgb(), # ... + D2 / D3 FITTED, the gate open (2026-09-30; objective #14)
     "hilda_csl3v0kaidgbe" = ccx_struct_hilda_csl3v0kaidgbe(), # ... + the land ENSO lag FITTED, the second gate (2026-10-02; objective #15)
+    "hilda_csl3v0kaidgbem" = ccx_struct_hilda_csl3v0kaidgbem(), # ... + the stratification feedback (2026-10-04; DESIGN §3.4a S)
     stop("ccx_struct_block(): unknown structure label '", struct, "'"))
 }
 #' The pump field's construction is the THIRD structure axis (option D + E,
@@ -2699,7 +2715,8 @@ ccx_apply_structure <- function(p, struct = Sys.getenv("CCX_MS_STRUCT", ""),
          "and \"hilda_csl3v0ka\" / \"hilda_csl3v0kan\" (+ aod anomaly / + the modern-NPP row, 2026-09-29) ",
          "and \"hilda_csl3v0kai\" (arm A + the inert soil carve-out, 2026-09-30) ",
          "and \"hilda_csl3v0kaidgb\" (+ D2 / D3 fitted, objective #14, 2026-09-30) ",
-         "and \"hilda_csl3v0kaidgbe\" (+ the land ENSO lag fitted, objective #15, 2026-10-02).")
+         "and \"hilda_csl3v0kaidgbe\" (+ the land ENSO lag fitted, objective #15, 2026-10-02) ",
+         "and \"hilda_csl3v0kaidgbem\" (+ the stratification feedback, DESIGN §3.4a S, 2026-10-04).")
   blk <- ccx_struct_block(struct)
   for (n in names(blk)) p[[n]] <- blk[[n]]
   structure(p, struct = struct, seas_ml = seas_ml, pump_field = pump_field)

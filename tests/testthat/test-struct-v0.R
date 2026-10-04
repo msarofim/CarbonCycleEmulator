@@ -41,7 +41,7 @@ test_that("fert_k's prior is FLAT unless the label switches it on", {
   # + the land ENSO lag label chained from THAT (hilda_csl3v0kaidgbe; 2026-10-02, objective #15;
   #   the 10-02 plan's "extend the four label ledgers")
   PRIOR_ON <- c("hilda_csl3v0k", "hilda_csl3v0ka", "hilda_csl3v0kan", "hilda_csl3v0kai", "hilda_csl3v0kaidgb",
-                "hilda_csl3v0kaidgbe")
+                "hilda_csl3v0kaidgbe", "hilda_csl3v0kaidgbem")  # + the stratification feedback (2026-10-04; DESIGN §3.4a S; extension authorised by Marcus's ruling "History + futures, one #16 refit")
   for (lab in PRIOR_ON) expect_identical(ccx_struct_block(lab)$fert_k_prior, 1L, info = lab)
   for (lab in setdiff(CCX_STRUCT_LABELS, PRIOR_ON)) {
     p <- ccx_apply_structure(ccx_default_params(), lab, seas_ml = "0")

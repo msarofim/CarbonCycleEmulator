@@ -2467,6 +2467,11 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
   # index itself when nothing is lagged; refused by name if a lag meets a bare point
   # forcing (ccx_point_land_enso()).
   .land_enso <- ccx_point_land_enso(forc, p)
+  # THE STRATIFICATION FEEDBACK (DESIGN §3.4a S, 2026-10-04): the month's factor g, from the
+  # runner's series (ccx_point_mix_g()). Only read when aux$mix_on is 1, so OFF evaluates
+  # nothing and every flux below takes the old expression -- bit-exact.
+  .mix_on <- isTRUE(aux$mix_on == 1L)
+  .mix_g  <- if (.mix_on) ccx_point_mix_g(forc, p) else 1
 
   for (hi in seq_along(HEMIS)) {
     h    <- HEMIS[hi]
@@ -2975,9 +2980,12 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     col <- c(iml, ioc)
     .r1 <- if (aux$d1_on == 1L) aux$a_ls[[h]] / aux$a_ml[[h]] else 1
     for (kk in seq_len(grid$nl)) {
+      # the stratification feedback weakens the UPPER part of K: K_int - (1 - g) K_up (same
+      # association as the C++ twin). OFF: the held value itself.
+      Kk <- if (.mix_on) aux$kz_int[kk] - (1 - .mix_g) * aux$kz_up[kk] else aux$kz_int[kk]
       add_diffusion(col[kk], col[kk + 1], gr$dz[kk],
                     if (kk == 1L && aux$d1_on == 1L) gr$dz[2] * .r1 else gr$dz[kk + 1],
-                    dzm[kk], aux$kz_int[kk])
+                    dzm[kk], Kk)
     }
 
     # ---- SEASONAL ENTRAINMENT / DETRAINMENT (round 6, option A) -------
@@ -3048,6 +3056,13 @@ ccx_deriv <- function(y, t, p, forc, grid, aux, record = FALSE) {
     } else 1
     if (!is.null(aux$pump)) {
       pf <- aux$pump[[h]]
+      # THE STRATIFICATION FEEDBACK rescales the solved export with the same g (DESIGN §3.4a S):
+      # S - (1 - g) S_up, the export that holds the natural gradient against the weakened K.
+      # ⛔ Dropping this leaves a fixed export under a falling K: a spurious, wrong-signed sink.
+      if (.mix_on && !is.null(aux$pump_up)) {
+        pu <- aux$pump_up[[h]]
+        pf <- list(org = pf$org - (1 - .mix_g) * pu$org, carb = pf$carb - (1 - .mix_g) * pu$carb)
+      }
       # NUTRIENT-LIMITED ("N"): export mass fixed, the standard steady-pump
       # assumption. DIC-LIMITED ("D"): export scales with the mixed layer's
       # carbon, the ONLY channel through which the pump touches uptake.
@@ -3818,7 +3833,13 @@ ccx_pump_shape <- local({
 #'   ccx_deriv() emit no flux at all, so the pure-diffusion model is bit-
 #'   reproduced rather than reproduced to within an epsilon. Otherwise
 #'   list(NH = list(org =, carb =), SH = ...).
-ccx_pump_export <- function(p, aux, grid) {
+ccx_pump_export <- function(p, aux, grid, kz_override = NULL) {
+  # `kz_override` (2026-10-04, DESIGN §3.4a S): solve the SOLVED field against another K
+  # vector -- the stratification feedback's S_up, solved against the upper part of K alone.
+  # The field is linear in K, so S(K_int) - (1 - g) S(K_up) is the field of the weakened K.
+  # Meaningless for the prescribed (martin) field, which does not read K: refused there.
+  if (!is.null(kz_override) && identical(p$pump_field, "martin"))
+    stop("ccx_pump_export(): kz_override is defined for the SOLVED field only")
   # THE PRESCRIBED FIELD (option D, 2026-09-14 h; ruling E1): `pump_export`
   # GtC/yr over the LS column, split by a_ls share (Nowicki 2022's own LS
   # split is 0.431 / 0.569 against the model's 0.429 / 0.571 -- the per-area
@@ -3872,7 +3893,8 @@ ccx_pump_export <- function(p, aux, grid) {
     # export that holds the observed gradient is solved against the profile
     # the model actually mixes with (2026-09-06b). A caller that built `aux`
     # by hand before that date carries no kz_int and gets the uniform kz.
-    kzv <- if (is.null(aux$kz_int)) rep(p$kz, grid$nl) else aux$kz_int
+    kzv <- if (!is.null(kz_override)) kz_override else
+           if (is.null(aux$kz_int)) rep(p$kz, grid$nl) else aux$kz_int
     Fi <- kzv * (cc[-length(cc)] - cc[-1]) / aux$dz_mid      # nl interfaces
     S <- numeric(grid$nl)
     for (k in seq_len(grid$nl))
@@ -3903,6 +3925,101 @@ ccx_kz_profile <- function(p, grid) {
          format(zs))
   z <- cumsum(grid$dz)[seq_len(grid$nl)]           # interface depths, z_1 = h_ml
   p$kz * (f + (1 - f) * exp(-(z - grid$h_ml) / zs))
+}
+
+# ---- THE STRATIFICATION FEEDBACK (DESIGN §3.4a S; RULED 2026-10-04) ----------------------
+# K(z, t) = K_int(z) - (1 - g(t)) * K_up(z): the UPPER (exponential) part of the profile above
+# weakens with warming, the abyssal floor f * kz does not. g = (1 + s T_key)^(-q/2), T_key =
+# max(0, T - T_deep), T_deep = T lagged at tau. The solved export is rescaled by the SAME g
+# (S = S_full - (1 - g) S_up; exact, the export is linear in K), so the natural DIC gradient
+# stays where the pump holds it and only the PERTURBATION feels the slowdown. ⛔ Without that,
+# a falling K under a fixed export sharpens the natural gradient and the mixed layer loses
+# natural carbon at ~(1 - g) x the export: a spurious, wrong-signed sink.
+# ABSENT or mix_strat_s = 0 is OFF, bit for bit: nothing below is evaluated, `aux$mix_on` is
+# 0 and both cores take the old branch. Read with `[[`, never `$`
+# ([[dollar_partial_matches_on_lists]]).
+
+#' Is the stratification feedback on? Validates the three structural constants.
+ccx_mix_on <- function(p) {
+  s <- p[["mix_strat_s"]]
+  if (is.null(s) || identical(s, 0) || isTRUE(s == 0)) return(FALSE)
+  q <- p[["mix_strat_q"]]; tau <- p[["mix_strat_tau"]]
+  if (length(s) != 1L || !is.finite(s) || s < 0)
+    stop("mix_strat_s must be one number >= 0 (1/K); got ", paste(s, collapse = ","))
+  if (is.null(q) || length(q) != 1L || !is.finite(q) || q <= 0)
+    stop("mix_strat_q must be one positive exponent when mix_strat_s > 0; got ", paste(q, collapse = ","))
+  if (is.null(tau) || length(tau) != 1L || !is.finite(tau) || tau <= 0)
+    stop("mix_strat_tau must be one positive lag in years when mix_strat_s > 0; got ", paste(tau, collapse = ","))
+  TRUE
+}
+
+#' The UPPER part of K(z): kz (1 - f) exp(-(z - h_ml) / z_K) at each interface, on the grid
+#' given (the HELD annual-mean grid, like aux$kz_int). ⛔ REFUSED when there is no upper part
+#' (f = 1 or absent): a feedback with nothing to act on would report "no effect" identically
+#' to one measured.
+ccx_kz_upper <- function(p, grid) {
+  f <- p$kz_deep_frac
+  if (is.null(f) || isTRUE(f == 1))
+    stop("the stratification feedback (mix_strat_s > 0) needs kz_deep_frac < 1: with a uniform ",
+         "K there is no upper part to weaken (DESIGN §3.4a S)")
+  ccx_kz_profile(p, grid)                          # validates f and kz_zscale by name
+  z <- cumsum(grid$dz)[seq_len(grid$nl)]
+  # computed DIRECTLY, not as K_int - f kz: at depth that difference cancels catastrophically
+  p$kz * (1 - f) * exp(-(z - grid$h_ml) / p$kz_zscale)
+}
+
+#' THE FACTOR g OF ONE RUN, one value per forcing row
+#'
+#' @param gmst the run's GMST column (K above 1850-1900), one value per row
+#' @param t    the rows' times (yr); the lag's step is each row's own dt
+#' @param p    the parameter list (mix_strat_s / _q / _tau)
+#' @param tdeep0 T_deep at the table's first row. NULL = 0, which is EXACT for every table
+#'   this repo integrates from a spinup (its climate is held at 0 and GMST is 0 before 1850).
+#'   A table whose opening months VARY started mid-record and is REFUSED without it (the
+#'   ccx_land_enso() precedent): a run continuing another must carry its T_deep.
+#' T_deep[i] = a_i T_deep[i-1] + (1 - a_i) T[i], a_i = exp(-dt_i / tau): the exact response of
+#' the lag to a row-wise constant T, sampled at the row's end. Row 1 uses the median dt.
+ccx_mix_g_series <- function(gmst, t, p, tdeep0 = NULL) {
+  n <- length(gmst)
+  if (!ccx_mix_on(p)) return(rep(1, n))
+  if (length(t) != n) stop("ccx_mix_g_series(): ", length(t), " times for ", n, " GMST values")
+  if (is.null(tdeep0)) {
+    head_ <- gmst[seq_len(min(13L, n))]
+    if (!isTRUE(all(head_ == gmst[1])))
+      stop("ccx_mix_g_series(): the stratification feedback is on and this forcing table OPENS ",
+           "MID-RECORD (its first ", length(head_), " GMST values vary) with no T_deep history. ",
+           "Continue the run that precedes it (spin$tdeep0 <- ccx_mix_tdeep_after(...)).")
+    tdeep0 <- 0
+  }
+  s <- p[["mix_strat_s"]]; q <- p[["mix_strat_q"]]; tau <- p[["mix_strat_tau"]]
+  dt <- diff(t); dt <- c(if (n > 1L) stats::median(dt) else 1 / 12, dt)
+  a  <- exp(-dt / tau)
+  Td <- numeric(n); prev <- tdeep0
+  for (i in seq_len(n)) { prev <- a[i] * prev + (1 - a[i]) * gmst[i]; Td[i] <- prev }
+  key <- pmax(0, gmst - Td)
+  g <- (1 + s * key)^(-q / 2)
+  attr(g, "tdeep") <- Td
+  g
+}
+
+#' T_deep at the END of a run with GMST column `gmst` and times `t` (for a continuation).
+ccx_mix_tdeep_after <- function(gmst, t, p, tdeep0 = NULL) {
+  g <- ccx_mix_g_series(gmst, t, p, tdeep0)
+  td <- attr(g, "tdeep"); if (is.null(td)) 0 else td[length(td)]
+}
+
+#' The factor g of ONE point forcing, for a single derivative. A runner sets `mix_g`; a point
+#' forcing without it is exact only at GMST <= 0 from a spinup (T_deep = 0, so the key is 0
+#' and g = 1), and is REFUSED otherwise rather than integrated as g = 1.
+ccx_point_mix_g <- function(forc, p) {
+  v <- forc[["mix_g"]]
+  if (!is.null(v)) return(v)
+  if (!ccx_mix_on(p)) return(1)
+  T <- forc[["gmst"]]
+  if (!is.null(T) && isTRUE(T <= 0)) return(1)
+  stop("ccx_deriv(): the stratification feedback is on (mix_strat_s = ", signif(p[["mix_strat_s"]], 6),
+       ") but the point forcing carries no `mix_g` and its GMST is ", format(T),
+       ". Pass the runner's series (ccx_mix_g_series()).")
 }
 
 ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
@@ -4491,6 +4608,21 @@ ccx_prepare <- function(p, grid = ccx_ocean_grid(p$h_ml)) {
   # emitted unless p$pump_hs_seas_amp > 0). NULL when the HS pump is off, and
   # packed as zeros for the C++ -- the mld_coef precedent.
   aux$hs_export_seas_coef <- if (is.null(aux$pump_hs)) NULL else ccx_export_hs_seas_shape()
+  # THE STRATIFICATION FEEDBACK (DESIGN §3.4a S, 2026-10-04): the upper part of K and the
+  # export solved against it, both on the held annual-mean grid. OFF leaves mix_on 0 and both
+  # NULL; the C++ is sent zeros and gated by mix_on (the pump_org precedent).
+  aux$mix_on <- 0L; aux$kz_up <- NULL; aux$pump_up <- NULL
+  if (ccx_mix_on(p)) {
+    if (isTRUE(aux$tr_on == 1L))
+      stop("the stratification feedback is not defined with the tropical box on (its kz_tr ",
+           "is not weakened; DESIGN §3.4a S)")
+    if (identical(p$pump_field, "martin"))
+      stop("the stratification feedback is specified for the SOLVED pump field only: the ",
+           "prescribed export does not read K (DESIGN §3.4a S)")
+    aux$mix_on  <- 1L
+    aux$kz_up   <- ccx_kz_upper(p, grid)
+    aux$pump_up <- if (is.null(aux$pump)) NULL else ccx_pump_export(p, aux, grid, kz_override = aux$kz_up)
+  }
   aux
 }
 

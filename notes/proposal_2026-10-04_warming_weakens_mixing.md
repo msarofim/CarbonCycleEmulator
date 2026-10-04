@@ -147,6 +147,14 @@ FaIR non-CO₂ forcing), iterated to 1e-4 °C (`R/climate.R:192-292`). A K(T) fe
   - An independent anchor: Bern2.5D's circulation change costs 4.5 % of its 1765–2100 uptake (§4), the same order.
 - ⚠ An UPPER estimate: the √K scaling is for a purely diffusive column. Part of CCX's uptake goes through the HILDA
   high-latitude route (`u_hs`, `tau_q`), which a K-only factor does not touch.
+- **MEASURED 10-04 (the built mechanism; CHANGELOG 10-04 n): the √K scaling OVERSTATES CCX by ~3.4×.**
+  - CCX's own elasticity, d ln(ocean sink 2015–24) / d ln(kz), is **0.149**, the same at kz × 0.9675 and × 0.90
+    (static runs, spinup re-spun, pump re-solved). A pure diffusive column would give 0.5.
+  - The built mechanism at the canonical (g 2024 = 0.9675) cuts the 2015–24 sink by 0.0149 GtC/yr (−0.47 %).
+    The static cut of the same size cuts it by 0.0154 (−0.49 %): the ramp costs almost nothing.
+  - **⇒ the §5 futures numbers above should be divided by ~3.4 until the preview measures them directly:** roughly
+    +1 ppm at 2100 and +3–7 ppm at 2300 at SSP5-8.5, at the central law. That is smaller than the greening term, not
+    comparable to it.
 - The historical effect is small (T ≤ 1.5 K). Every stored logpost still moves, which the preview will price.
 - ⚠ This is the order of magnitude to check the preview against. A preview result 3× off it is a bug until shown
   otherwise.
