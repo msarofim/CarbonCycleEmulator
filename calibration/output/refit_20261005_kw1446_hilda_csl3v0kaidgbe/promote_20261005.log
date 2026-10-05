@@ -1,0 +1,67 @@
+
+==== PROMOTE a kw1446_hilda_csl3v0kaidgbe multistart start to a mode file ====
+source  /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261004f_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_k_w=1446_sd1.0452_sdby_npp_tsens=0.0291
+dest    /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261005_kw1446_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds
+GATE OPEN (structure 'hilda_csl3v0kaidgbe'): ndep_ret, npp_tsens, imb_share_land, imb_share_ocean_rest, lag_enso_land are fitted names
+PINNED arm: _pin_ent_seas_amp_SH=0.00_w_eq=27.00_gamma_eq=1.00_pump_export=9.08_w_vent=0.00_gamma_vent=0.00_w_thc=0.00_gamma_enso_ocn_NH=0.00_gamma_enso_ocn_SH=0.00_k_w=1446.00 (33 free parameters)
+
+GATE 1: every start in this directory is on THIS build's parameter set
+----------------------------------------------------------------------
+build fits 33 parameters; 24 of 24 starts match
+
+GATE 2: one arm, one objective -- or a ranking across them is meaningless
+-------------------------------------------------------------------------
+pump arms present: N
+
+GATE 3: the start to promote is COMPUTED from the directory
+-----------------------------------------------------------
+18 of 24 starts CONVERGED in time
+best is id 23 at -1206.612614
+runners-up: id 16 -1206.612625; id 13 -1206.612628; id 18 -1206.612649
+18 of 18 finished starts lie within the optimiser's own convergence
+bound of 0.50 log-units, spanning 2.24e-01 log-units
+
+GATE 4: the point reproduces its own logpost, under the band it RECORDS
+-----------------------------------------------------------------------
+structure RECORDED in the starts: 'hilda_csl3v0kaidgbe'
+seas_ml RECORDED in the starts: 1 (the seasonal mixed layer ON -- round 6)
+pump_field RECORDED in the starts: 'solved'
+h_ml band  [42.5, 200] (from the start file)
+log-post   -1206.612614   file -1206.612614   diff 0.000e+00
+
+the per-stream decomposition at the mode
+----------------------------------------
+27 streams, total -1140.4967
+         d14c_intcal          co2_icecore              d14c_NH 
+            -640.374             -507.810             -284.224 
+             d14c_SH        co2_level_MLO        co2_level_SPO 
+            -283.759              -71.450              -63.720 
+       gcb_land_sink         co2_gradient     excess_c14_ocean 
+             -50.352              -15.042               -9.097 
+      ocean_grad_dic       gcb_ocean_sink       ocean_grad_alk 
+              -6.972               -6.712               -5.744 
+         hs_surf_dic      d14c_profile_ab      ocean_grad_d13c 
+              -4.129               -3.940               -3.701 
+        hs_surf_d13c   d14c_profile_level      d14c_profile_bd 
+              -3.214               -3.097               -2.191 
+gcb_ocean_enso_slope     co2_seasonal_MLO       d13c_level_SPO 
+               2.391                3.961               55.497 
+      d13c_level_MLO         d13c_icecore     co2_seasonal_SPO 
+              62.015               65.309               73.007 
+       d13c_gradient    d13c_seasonal_MLO    d13c_seasonal_SPO 
+             105.739              207.485              249.629 
+
+GATE 5: the streams sum to the likelihood half of the logpost
+-------------------------------------------------------------
+sum(streams) -1140.496711 ; logpost -1206.612614 ; implied prior+jacobian -66.115903 ; recomputed prior+jacobian -66.115903 ; gap -2.842e-14 (tol 1e-05)
+
+the h_ml KINK MAP -- derived from the shape function, not typed
+---------------------------------------------------------------
+0 kink(s) in [42.5, 200] -- as expected post-C1-remap
+
+writing the mode file
+---------------------
+wrote /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261005_kw1446_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds
+
+⛔ ADOPTS NOTHING. CCX_MODE_CANONICAL is still 'hilda34g'.
+   Next: recompute_hessian.R --update, then the repoint.

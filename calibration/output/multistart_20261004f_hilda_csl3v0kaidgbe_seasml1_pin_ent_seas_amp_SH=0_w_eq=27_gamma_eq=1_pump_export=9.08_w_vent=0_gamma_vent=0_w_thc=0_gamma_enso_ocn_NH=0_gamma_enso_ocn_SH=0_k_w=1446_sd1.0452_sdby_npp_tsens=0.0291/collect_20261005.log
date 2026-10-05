@@ -1,0 +1,57 @@
+
+==========================================================================
+DISPERSED MULTI-START SURVEY -- 24 starts under
+  /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261004f_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_k_w=1446_sd1.0452_sdby_npp_tsens=0.0291
+==========================================================================
+  reference cold       id 0  logpost   -1206.6131  port VERIFIED (rel 6.0e-16)
+  reference incumbent  id 1  logpost   -1206.8367  port VERIFIED (rel 6.3e-15)
+  reference new_basin  id 2  logpost   -1206.8367  port VERIFIED (rel 1.7e-15)
+
+  18 of 24 starts CONVERGED, 6 ran out of wall time (excluded from the
+  basin count, kept in the table), 0 spent their restart budget.
+  cluster radius 0.6431 = 0.25 x the measured inter-basin separation
+
+  ⇒ 2 DISTINCT BASINS among the 18 finished starts.
+
+   rank     id        logpost        vs best    basin  status    min  kind
+      1     23     -1206.6126         0.0000        1    conv    125  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      2     16     -1206.6126        -0.0000        1    conv    198  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      3     13     -1206.6126        -0.0000        1    conv    207  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      4     11     -1206.6126        -0.0000       --    TIME    254  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      5     18     -1206.6126        -0.0000        1    conv    169  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      6     10     -1206.6127        -0.0000        1    conv    190  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      7      9     -1206.6127        -0.0001        1    conv    206  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+      8      5     -1206.6128        -0.0002        1    conv    203  seeded: NEW BASIN + the OBSERVATION-implied partition (the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket); land x1.734)
+      9      0     -1206.6131        -0.0005        1    conv    196  reference: COLD hand-set init
+     10      8     -1206.6133        -0.0007        1    conv    205  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     11     17     -1206.6154        -0.0028        1    conv    186  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     12     19     -1206.8367        -0.2241        2    conv    169  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     13      2     -1206.8367        -0.2241        2    conv    172  reference: NEW BASIN = hilda31pe (seas_ml 0 control, periodic spinup; registered, evaluated at seas_ml 1)
+     14      4     -1206.8367        -0.2241        2    conv    168  seeded: NEW BASIN with the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 14 Sv per index (the LOW edge of Meinen's bracket)
+     15      1     -1206.8367        -0.2241        2    conv    161  reference: INCUMBENT = hilda34g (a PRICE arm: the canonical's pins plus k_w held at 1446 (the canonical, seeded at the pin: a start, not a mode of this arm); scored under this build's objective, periodic spinup, evaluated at seas_ml 1)
+     16      6     -1206.8367        -0.2241        2    conv    224  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     17     22     -1206.8367        -0.2241        2    conv    147  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     18      3     -1206.8367        -0.2241        2    conv    171  seeded: INCUMBENT with the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket)
+     19     20     -1206.8367        -0.2241        2    conv    178  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     20     15     -1214.0993        -7.4866       --    TIME    273  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     21     21     -1285.5398       -78.9272       --    TIME    363  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     22      7     -1297.0436       -90.4310       --    TIME    286  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     23     12     -6699.9154     -5493.3028       --    TIME    263  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+     24     14     -7504.0519     -6297.4392       --    TIME    254  dispersed about the COLD init, sd 1.0452 (npp_tsens at 0.02914)
+
+--------------------------------------------------------------------------
+  BEST FOUND      id 23 at -1206.6126
+  TO BEAT         id 5 (seeded: NEW BASIN + the OBSERVATION-implied partition (the ocean ENSO pair PINNED; the limb's w_enso_l2 SET to 25 Sv per index (the HIGH edge of Meinen's bracket); land x1.734)) at -1206.6128
+  difference      +0.0002 log-units
+  BEST DISPERSED  id 23 at -1206.6126 (+0.0002 vs the benchmark), of 18 finished
+  VERDICT: 18 dispersed starts REPRODUCED, and did not beat, the best re-converged known
+           basin, at the optimiser's own convergence bound of 0.5 log-units.
+  ENSO seeding at the incumbent: -0.0000 log-units (-1206.8367 seeded vs -1206.8367 not)
+  ENSO seeding at the new_basin: -0.0000 log-units (-1206.8367 seeded vs -1206.8367 not)
+  ⚠ A survey bounds what N starts at ONE dispersion found. It is not a
+    proof that no better basin exists ([[no_power_null]]: measure the
+    test's power before believing its null).
+
+  summary written to /Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/multistart_20261004f_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_k_w=1446_sd1.0452_sdby_npp_tsens=0.0291/summary.csv
+⛔ NOTHING IS ADOPTED.
+==========================================================================
