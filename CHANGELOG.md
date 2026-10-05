@@ -2,6 +2,19 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (l) — **My end-of-run waiter matched ITSELF (the pgrep self-match, again), and the standing remedy for it was wrong.** Caught before it mattered: the end-line check was unaffected, but the dead-job check was blind.
+
+- **What happened.** The waiter's dead-job check used `pgrep -f 'R.*--file=calibration/run_dispersed_multistart.R'`.
+  - Run inside a `bash -c` that quotes that text, the regex matches its OWN literal text, so it counted 9 = 8 workers + itself.
+  - The Claude Bash tool's wrapper (`bash -c 'source <snapshot>; eval …'`) carries the whole command, so any `pgrep` in a tool command sees it too.
+  - A dead job would never have tripped the check.
+- **The remedy on record was WRONG.** Memory `pgrep_wait_loop_matches_itself` and `~/.claude/CLAUDE.md` both say to match "interpreter+script" (`Rscript.*foo`), claiming the watcher's line has no `Rscript`. It does: the pattern text is in the line.
+- **The fix: the BRACKET trick**, `…multistar[t].R`. It counted exactly the 8 R workers in an uncontaminated test.
+  - The waiter was re-armed with it.
+  - Both of its exits were tested on stand-ins: no end line and no workers ⇒ "DEAD?" after 3 checks; an end line ⇒ exit 0.
+  - The landing helper (`~/ccx_frozen/20261005f_obj16_land.sh`) was switched to it as defence in depth. It was safe already, because its own command line never quotes the pattern. It still refuses on exactly the 8 live workers.
+- **The memory file now carries a dated correction.** `~/.claude/CLAUDE.md` is Marcus's, so its wording is his to change; flagged to him.
+
 ## 2026-10-05 (k) — Handoff: `notes/handoff_2026-10-05c_obj16_landing_ready.md` (Marcus: "Handoff now, then land tonight (Recommended)"). It supersedes 10-05b, which now points to it.
 - Its §5 is the landing as nine commands, each dry-run tested in (j). Its §6 is the one-start preview. Its §7 carries the open items, with two new ones: the unmerged git-stamp branch, and the post-landing housekeeping.
 - **At 12:56, 5 of 24 starts had finished, all CONVERGED at −1187.4518, agreeing to 5e-6.** They are the incumbent, the NEW BASIN (from −11908.92) and the three seeded starts: one basin so far.

@@ -157,6 +157,9 @@ them runs.
   - Never copy either into the repo.
 - **This session's background waiters** look for the end line and are re-armed every ≤ 2 h. If the session dies, the run continues under `nohup`, and a fresh session lands it with §5.
 - **Waiter globs:** match `start_[0-9][0-9][0-9].rds`, never `start_*.rds`, which also matches the checkpoints.
+- **`pgrep` for the work processes:** use the BRACKET form, `pgrep -f 'R.*--file=calibration/run_dispersed_multistar[t].R'`.
+  - The plain pattern matches its own text inside any `bash -c` that quotes it, including the Claude Bash tool's wrapper. It counted 9 = 8 workers + itself on 10-05 (CHANGELOG 10-05 l; memory `pgrep_wait_loop_matches_itself`, corrected).
+  - The landing helper uses the bracket form.
 - **Untracked in the repo, and not this session's:** `carbotopecomment.9.26.26.docx`, `carbotopecomments.10.2.26.docx`, `outputs/diagnostics/smoke/`, `outputs/mcmc_smoke/`.
 - **Carried from 10-05b §7:**
   - the pin bookkeeping;
