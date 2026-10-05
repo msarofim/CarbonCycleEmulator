@@ -1,5 +1,8 @@
 # HANDOFF 2026-10-05c — #16's LANDING CHAIN is BUILT and DRY-RUN TESTED; the refit is still RUNNING; this session will land it tonight if it stays open
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-05d_obj16_cpu_budget.md`.** It reproduces §5 here as its §4 and adds the CPU-time budget
+> build (its §5). This note stays the record of the landing tools and the dry run.
+
 **Supersedes** `notes/handoff_2026-10-05b_obj16_running.md`.
 - That note's §1–§4 and §7 remain the record of the launch.
 - §5 here REPLACES its §5 (the landing), and §7 here replaces its §6 (the open items).

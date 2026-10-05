@@ -2,6 +2,17 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (n) — Handoff: `notes/handoff_2026-10-05d_obj16_cpu_budget.md`. Marcus, verbatim: "Can you write a handoff that includes budgeting by CPU time instead of clock time." It supersedes 10-05c, which now points to it.
+- **Its §4** is the dry-run-tested landing, plus the ruled sleep statement.
+- **Its §5 SPECIFIES the next build:** a multistart start's budget measured in CPU time instead of wall-clock time.
+  - **The code map:** every wall-clock site, at `calibration/run_dispersed_multistart.R` 308 / 911 / 918–919 / 960 / 973–981 / 996 / 999 / 1003 / 1034 / 1043 / 1136–1137 and `calibration/lib_ms_deadline.R:39`.
+  - **The design:** one `ms_clock()` selected by `CCX_MS_CLOCK`, the start file recording `clock` + both minutes, and labels that name the clock. It also corrects `run_multistart_mac.sh:39`'s "must not … lid-sleep".
+  - **Five decisions for Marcus:** the clock per platform, the wall stretch, comparability with the wall-budgeted runs, a wall ceiling, and the "awake wall clock" alternative.
+  - **Five tests,** each mutation-tested.
+  - **Not before #16 lands.**
+- **The measurement behind it:** a probe R process `kill -STOP`ped for 5 s inside an 8-s window advanced 8.2 s of WALL time and **0.00 s of CPU time** (`proc.time()` user + sys). During its busy part, CPU/wall was 0.91 under the refit's load, so a CPU budget would stretch a run's wall time by ~10 %.
+- **#16 at 19:28:** 16/24 finished, all exit 0, 8 running. Expected end ~23:10. The session cron `dc08080d` lands it if the session stays open.
+
 ## 2026-10-05 (m) — **The Mac SLEPT ~3 h during #16's refit, and the wall budget counted it. RULED: "Land as is, state it (Recommended)".** The run itself is unharmed (rc 0 on all 16 finished tasks).
 
 - **The sleep** (`pmset -g log`). The lid was closed on battery: "Entering Sleep state due to 'Clamshell Sleep'".
