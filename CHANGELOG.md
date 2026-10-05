@@ -2,6 +2,38 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (h) — **Landing prep: the like-for-like ocean diagnostic can now read objective #16, under a RULED GMST rule.** Marcus ruled, verbatim: "Held + spun-up lag, both shown (Recommended)". Under #16 the ocean also reads GMST, through the stratification feedback, and `calibration/diag_ocean_climate_gobm.R` could not run on #16 as it stood. On the default mode the change is BIT-IDENTICAL.
+
+- **Why a rule was needed.** The handoff's landing step 6 ("the ocean's climate effect, like-for-like") assumed the diagnostic would run on #16. It would not:
+  - its mode was hard-coded;
+  - R0's identity gate is hilda34g's stored §D value;
+  - CHECK 0 FAILS under the feedback. With GMST historical and zero emissions, the ocean leaves the orbit at 2.4e-3 GtC/yr, 11× the tolerance.
+- **Tried and abandoned: my prediction that CHECK 0 would be BLIND to the feedback.** The feedback rescales the solved export by the same g as the mixing, so I reasoned that with no anthropogenic perturbation it could not move the ocean, and the gate would pass while the protocol silently dropped the feedback. Measured: it does move the ocean, and the gate catches it. The diagnostic would have stopped loudly, not misled.
+- **The options, measured first** (a scratch test, not committed, built on the diagnostic's own `match_co2`; FESOM protocol, CO₂ prescribed; hilda34g + #16's feedback + `npp_tsens` 0, UNREFITTED):
+
+| GMST rule | effect, GtC/yr |
+|---|---|
+| (a) historical in A and C (the feedback acts alike in both) | −0.34955 |
+| (b) held in C, T_deep starting at 0 in 1750 | −0.37236 |
+| (c) held in C, T_deep initialised at the normal year's GMST (an ocean spun up under it, as the GOBMs are) | −0.37270 |
+
+  - The feedback's own part is −0.0228 (b) or −0.0232 (c).
+  - The CONTROL, hilda34g with the feedback off: (a), (b) and (c) agree to 1e-5 (−0.35539 / −0.35538 / −0.35538). With the feedback off, the ocean does not read GMST.
+- **The change** (`calibration/diag_ocean_climate_gobm.R`):
+  - `CCX_OC_MODE="<name>=<path>"` or a registered name reads another mode. This is the scorecard's convention.
+  - Outputs are tagged `_<name>`. R0's identity gate applies only to `OC_MODE_DEFAULT` (hilda34g).
+  - Under `ccx_mix_on()`, GMST joins `OC_OCEAN_COLS`. Each protocol run's T_deep starts at its own spec's mean GMST (the `tdeep0` attribute that `run()` reads). That is the RULED headline, (c).
+  - The GMST-HISTORICAL twin, (a), is printed beside every protocol, in the ensemble, in the annual series and in CHECK 3.
+  - CHECK 0 gains a second mutation, "GMST not held", which must fail.
+  - The labels derive from the held set.
+- **Tested from a frozen worktree** (`~/ccx_frozen/20261005g_ocgobm`, at `a5d6afa` plus the edited file):
+  - **(1) The default path is BIT-IDENTICAL** to the committed `ocean_climate_gobm_20261004.rds`. All 16 numeric fields are `identical()`, and the log matches line for line below its stamp.
+  - **(2) The feedback path** ran on a SCRATCH mode file: hilda34g relabelled with #16's structure and ten pins. It is NOT a fit and exists only in the frozen tree.
+    - Its FESOM row, −0.3727 / twin −0.3495 / feedback −0.0231, equals the independent scratch test's (c), (a) and (c − a).
+    - CHECK 0 passes (−2.52e-6). Both mutations fail as they must: ENSO +9.56e-2, GMST +2.41e-3, against a tolerance of 2.20e-4.
+    - That UNREFITTED vector's ensemble: headline −0.3735 ± 0.0281 (1.87× GCB's −0.20); GMST-historical −0.3530 ± 0.0268 (1.77×); the feedback −0.0205. These test the code; they are not #16's read.
+- **Nothing adopted; no mode moves.**
+
 ## 2026-10-05 (g) — **Housekeeping, on Marcus's OK; and objective #16 confirmed RUNNING at pickup.** He ruled "Landing prep only (Recommended)" for the wait, approved all four handoff §6.8 items, and ruled "Remove worktree, keep branch (Recommended)" and then "Archive both sessions (Recommended)" for the two `.claude/worktrees/`. Every target was checked before it was touched. Nothing in `R/`, `src/`, `tests/` or `data/` changed.
 
 - **#16 at pickup (09:15):**

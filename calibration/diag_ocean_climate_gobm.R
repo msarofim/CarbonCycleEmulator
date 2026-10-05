@@ -58,6 +58,19 @@
 #   CCX_OC_HS_FRAC=<f> sets the HS box's share of the SST anomaly (DESIGN §3.4a T; the H1 test, Marcus 2026-10-05
 #   "Yes, test") on the canonical, UNREFITTED; the outputs are tagged _hsfrac<f>, R0's identity gate applies only at
 #   f = 1, and a section R prints the record's opinion (the canonical's likelihood at f, unrefitted).
+#   CCX_OC_MODE="<name>=<path>" (or a registered mode name) reads ANOTHER mode (2026-10-05 g, for objective #16's
+#   landing; the scorecard's CCX_SC_EXTRA_MODE convention, since every promoted file is "mode_fit_pumpN.rds"). The
+#   outputs are tagged _<name>, and R0's identity gate applies only to OC_MODE_DEFAULT: §D's stored value is its.
+#   ⭐ UNDER THE STRATIFICATION FEEDBACK (DESIGN §3.4a S; ccx_mix_on()) THE OCEAN ALSO READS GMST, so GMST joins
+#   OC_OCEAN_COLS. CHECK 0 measured the need: at the unrefitted #16 incumbent, with GMST historical and zero
+#   emissions, the ocean leaves the orbit at 2.4e-3 GtC/yr, 11x the gate's tolerance.
+#   ⭐ RULED (Marcus 2026-10-05: "Held + spun-up lag, both shown"):
+#   - THE HEADLINE holds GMST in C, because a GOBM's climate-held run has no climate-driven stratification change.
+#   - T_deep is INITIALISED at each run's own pre-transient GMST (the spec's mean): an ocean spun up under its
+#     normal year, as the GOBMs are. The naive hold (T_deep from 0 at 1750) differed by 0.0003 GtC/yr at FESOM.
+#   - The GMST-HISTORICAL TWIN is printed beside every protocol and in the ensemble. There the feedback acts alike
+#     in A and C, so it measures SST + ENSO in a weakened ocean: the definition every OFF mode's number has.
+#   With the feedback OFF nothing here changes; the ocean does not read GMST (CHECK 0 holds as before).
 # =====================================================================
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 source(file.path("calibration", "lib_design_gates.R"))
@@ -65,7 +78,15 @@ ccx_load_cpp()
 
 # ---- named constants (every label below derives from these) -------------------------
 OC_DRIVER   <- "calibration/diag_ocean_climate_gobm.R"
-OC_MODE     <- "hilda34g"
+OC_MODE_DEFAULT <- "hilda34g"                          # §D's mode: R0's identity gate is its stored value
+OC_MODE_ARG <- Sys.getenv("CCX_OC_MODE", "")           # "<name>=<path>" or a registered name; unset = the default
+OC_MODE_KV  <- strsplit(OC_MODE_ARG, "=", fixed = TRUE)[[1]]
+OC_MODE      <- if (!nzchar(OC_MODE_ARG)) OC_MODE_DEFAULT else if (length(OC_MODE_KV) == 2L) OC_MODE_KV[2] else OC_MODE_ARG
+OC_MODE_NAME <- if (!nzchar(OC_MODE_ARG)) OC_MODE_DEFAULT else if (length(OC_MODE_KV) == 2L) OC_MODE_KV[1] else OC_MODE_ARG
+OC_MODE_SET  <- !identical(OC_MODE_NAME, OC_MODE_DEFAULT)
+if (nzchar(OC_MODE_ARG) && length(OC_MODE_KV) != 2L && !(OC_MODE_ARG %in% names(CCX_MODE_FILES)))
+  stop("CCX_OC_MODE: give '<name>=<path>' or a registered mode name (", paste(names(CCX_MODE_FILES), collapse = ", "),
+       "); got '", OC_MODE_ARG, "'")
 OC_WIN      <- c(2015L, 2024L)
 OC_GCB      <- c(mean = -0.20, sd = 0.05)              # GCB 2025 p. 3242, 2015-24; 1 sigma over the 10 GOBMs
 OC_GCB_PCT  <- c(mean = -7.1, lo = -10.7, hi = -4.2)   # the same sentence: % of (C - B), and the model range
@@ -74,6 +95,9 @@ OC_D_CLIM   <- c(1901L, 1920L)                         # §D's held window (diag
 OC_D_RDS    <- ccx_path("outputs", "diagnostics", "mix_preview_20261004.rds")   # §D's stored value: R0's gate
 OC_SST      <- c(NH = "sst_anom_NH", SH = "sst_anom_SH")
 OC_OCEAN_COLS   <- c(OC_SST, enso = "enso")            # every climate column the ocean reads at OC_MODE (CHECK 0)
+OC_GMST_COL     <- c(gmst = "gmst")                    # read by the ocean ONLY under the stratification feedback: appended once V is read
+OC_COL_LAB      <- c(sst_anom_NH = "SST", sst_anom_SH = "SST", enso = "ENSO", gmst = "GMST")   # labels derive from the held set
+cols_lab        <- function(cols) paste(unique(OC_COL_LAB[unname(cols)]), collapse = " + ")
 OC_MONTHLY_COLS <- "enso"                              # real monthly data: repeated month by month
 OC_MATCH_TOL   <- 1e-4                                 # ppm, each hemisphere, every month
 OC_MATCH_MAXIT <- 80L
@@ -91,7 +115,8 @@ OC_PATH_ARMS    <- c(list(base = list()), unlist(lapply(OC_PATH_NAMES, function(
                      setNames(list(setNames(list(0.5), n), setNames(list(2), n)), paste0(n, c("_half", "_double")))), recursive = FALSE))
 OC_HS_FRAC  <- suppressWarnings(as.numeric(Sys.getenv("CCX_OC_HS_FRAC", "")))   # NA = unset = the shipped model
 OC_HS_SET   <- is.finite(OC_HS_FRAC)
-OC_OUT <- ccx_path("outputs", "diagnostics", sprintf("ocean_climate_gobm_%s%s", format(Sys.Date(), "%Y%m%d"),
+OC_OUT <- ccx_path("outputs", "diagnostics", sprintf("ocean_climate_gobm_%s%s%s", format(Sys.Date(), "%Y%m%d"),
+                                                     if (OC_MODE_SET) paste0("_", OC_MODE_NAME) else "",
                                                      if (OC_HS_SET) sprintf("_hsfrac%g", OC_HS_FRAC) else ""))
 
 # climate specs: a single repeated year, a loop of years (calendar-aligned), a climatology, a month window
@@ -142,7 +167,7 @@ MODE_FILE <- ccx_mode_file(OC_MODE)
 MODE_MD5  <- unname(tools::md5sum(MODE_FILE))
 LOGCON <- file(paste0(OC_OUT, ".log"), open = "wt"); sink(LOGCON, split = TRUE)
 cat(sprintf("%s @%s, %s | mode %s (%s, md5 %s) | window %d-%d | GCB 2025 %+.2f +/- %.2f GtC/yr (%+.1f %%, range %+.1f to %+.1f %%)\n",
-            OC_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"), OC_MODE, MODE_FILE, MODE_MD5, OC_WIN[1], OC_WIN[2],
+            OC_DRIVER, COMMIT, format(Sys.time(), "%Y-%m-%d %H:%M"), OC_MODE_NAME, MODE_FILE, MODE_MD5, OC_WIN[1], OC_WIN[2],
             OC_GCB[["mean"]], OC_GCB[["sd"]], OC_GCB_PCT[["mean"]], OC_GCB_PCT[["lo"]], OC_GCB_PCT[["hi"]]))
 
 # ---- the canonical, its spinup and its historical forcing (§D's construction) ----------------
@@ -150,6 +175,15 @@ V <- dg_vector(OC_MODE)
 if (OC_HS_SET) { V$p$hs_sst_anom_frac <- OC_HS_FRAC
   cat(sprintf("⚠ H1 ARM: hs_sst_anom_frac = %g on %s, UNREFITTED (DESIGN §3.4a T); the HS box feels %g of its hemisphere's SST anomaly\n",
               OC_HS_FRAC, OC_MODE, OC_HS_FRAC)) }
+# THE STRATIFICATION FEEDBACK (2026-10-05 g): under it the ocean reads GMST, so GMST joins the held set. The RULED
+# headline holds it in C with T_deep spun up at each spec's mean GMST (proto_forcings() below; see the header).
+OC_MIX <- ccx_mix_on(V$p)
+if (OC_MIX) {
+  OC_OCEAN_COLS <- c(OC_OCEAN_COLS, OC_GMST_COL)
+  cat(sprintf(paste0("⭐ STRATIFICATION FEEDBACK ON (s %g /K, q %g, tau_d %g yr): the ocean reads GMST, so it is held with %s; T_deep ",
+                     "starts at each run's own pre-transient GMST (RULED 2026-10-05); the GMST-historical twin is printed beside\n"),
+              V$p[["mix_strat_s"]], V$p[["mix_strat_q"]], V$p[["mix_strat_tau"]], cols_lab(setdiff(OC_OCEAN_COLS, "gmst"))))
+}
 SP <- dg_spinup(V)
 F  <- withCallingHandlers(ccx_build_forcing("historical", DG_YEARS, prod_c14 = SP$prod_c14, bomb_total_kmol = V$bomb_total,
                                             luc_scale = V$luc_scale, enso_index = ccx_enso_index_of(V$p), aod_mode = ccx_aod_mode_of(V$p)),
@@ -159,7 +193,10 @@ cat(sprintf("forcing %d-%d, %d monthly rows; spinup %s; the ocean's climate colu
 
 # A forcing whose ENSO varies from its first row carries the CCX_ENSO_HIST_N months before it as the attribute
 # "enso_hist" (the land ENSO term is lagged; R/model.R ccx_land_enso() refuses a varying opening with no history).
-run  <- function(Fx) { sp <- SP; h <- attr(Fx, "enso_hist"); if (!is.null(h)) sp$enso_hist <- h; ccx_run_fast(sp, Fx)$out }
+# A protocol forcing that holds GMST under the stratification feedback carries "tdeep0", T_deep at its first row
+# (the spun-up lag, RULED 2026-10-05; proto_forcings()). Absent = the spinup's 0, every other run.
+run  <- function(Fx) { sp <- SP; h <- attr(Fx, "enso_hist"); if (!is.null(h)) sp$enso_hist <- h
+  td <- attr(Fx, "tdeep0"); if (!is.null(td)) sp$tdeep0 <- td; ccx_run_fast(sp, Fx)$out }
 at_t <- function(out, col, t) stats::approx(out$t, out[[col]], xout = t)$y
 sink_win <- function(out) (at_t(out, "ocean_C", OC_WIN[2] + 1) - at_t(out, "ocean_C", OC_WIN[1])) / (OC_WIN[2] + 1 - OC_WIN[1])
 sink_ann <- function(out, yrs) at_t(out, "ocean_C", yrs + 1) - at_t(out, "ocean_C", yrs)
@@ -196,6 +233,13 @@ spec_month <- function(spec, col, y, m) { x <- F[[col]]
     window = { k <- F$t >= spec$t[1] & F$t < spec$t[2] & F$month == m; stopifnot(sum(k) == 1L); x[k] }) }
 clim_hist <- function(spec, col) {
   vapply(CCX_ENSO_HIST_N:1, function(j) { mm <- -j; spec_month(spec, col, DG_YEARS[1] + floor(mm / 12), mm %% 12 + 1) }, 0) }
+# an ANNUAL column's own mean under a spec (a loop or a climatology over its years; a window over its 12 months):
+# the GMST an ocean spun up under that spec has equilibrated its T_deep to -- the spun-up lag, RULED 2026-10-05
+spec_mean <- function(spec, col) { a <- tapply(F[[col]], F$year, mean); ay <- as.integer(names(a))
+  switch(spec$kind,
+    year   = a[[as.character(spec$y)]],
+    loop   = , mean = mean(a[ay >= spec$y[1] & ay <= spec$y[2]]),
+    window = { k <- F$t >= spec$t[1] & F$t < spec$t[2]; stopifnot(sum(k) == 12L); mean(F[[col]][k]) }) }
 
 # extra fossil emissions per hemisphere, iterated until both hemispheres' CO2 equal `target`'s every month.
 # TIMING (measured: a one-month pulse first shows at the NEXT row): an output row is the state at the START
@@ -250,6 +294,8 @@ proto_forcings <- function(p, cols = OC_OCEAN_COLS) {
   FA <- F; FC <- F; pre <- F$year < p$t_r
   for (cc in cols) { FA[[cc]][pre] <- clim_series(p$PA, cc)[pre]; FC[[cc]] <- clim_series(p$N, cc) }
   if ("enso" %in% cols) { attr(FA, "enso_hist") <- clim_hist(p$PA, "enso"); attr(FC, "enso_hist") <- clim_hist(p$N, "enso") }
+  # GMST held (only under the feedback): each run's T_deep starts at its own pre-transient GMST (RULED 2026-10-05)
+  if ("gmst" %in% cols) { attr(FA, "tdeep0") <- spec_mean(p$PA, "gmst"); attr(FC, "tdeep0") <- spec_mean(p$N, "gmst") }
   list(FA = FA, FC = FC)
 }
 
@@ -262,38 +308,48 @@ R0 <- sink_win(o_full) - sink_win(o_R0)
 D_STORED <- readRDS(OC_D_RDS)$bench["OFF", "effect"]
 cat(sprintf("  R0 GMST + SST held, CO2 interactive: effect %+.6f GtC/yr | §D stored %+.6f (%s) -> %s\n", R0, D_STORED, basename(OC_D_RDS),
             if (identical(R0, D_STORED)) "IDENTICAL" else sprintf("DIFFERS by %.3g", R0 - D_STORED)))
-if (!OC_HS_SET || OC_HS_FRAC == 1) {
+# R0's identity gate holds only where §D's stored value is the SAME object: OC_MODE_DEFAULT at frac 1
+R0_WHY <- c(if (OC_MODE_SET) sprintf("the mode is %s, not §D's %s", OC_MODE_NAME, OC_MODE_DEFAULT),
+            if (OC_HS_SET && OC_HS_FRAC != 1) sprintf("the HS box feels %g of the anomaly; the gate applies at 1", OC_HS_FRAC))
+if (!length(R0_WHY)) {
   if (!identical(R0, D_STORED)) stop("R0 does not reproduce §D: the harness differs from the preview's, so nothing below is comparable with it")
-} else cat(sprintf("  (R0 differs from §D BY CONSTRUCTION here: the HS box feels %g of the anomaly; the gate applies at 1)\n", OC_HS_FRAC))
+} else cat(sprintf("  (R0 differs from §D BY CONSTRUCTION here: %s)\n", paste(R0_WHY, collapse = "; ")))
 TR_S  <- triple(F, held_from(OC_SST))
 TR_SE <- triple(F, held_from(OC_OCEAN_COLS))
 cat(sprintf("  R1 SST only held, CO2 interactive:  effect %+.4f GtC/yr (warm-run CO2 %+.2f ppm)\n", TR_S$row[["effect_interactive"]], TR_S$row[["dco2_interactive"]]))
 cat(sprintf("  R2 SST only held, CO2 PRESCRIBED:   effect %+.4f GtC/yr = %+.2f %% of the CO2 effect; %+.3f per K of SST (dSST %+.3f K); match %d iters, max |dCO2| %.1e ppm\n",
             TR_S$row[["effect"]], TR_S$row[["pct"]], TR_S$row[["per_K_sst"]], TR_S$row[["dsst"]], TR_S$row[["iters_C"]], TR_S$row[["maxres_C"]]))
-cat(sprintf("  R3 SST + ENSO held, CO2 PRESCRIBED: effect %+.4f GtC/yr = %+.2f %% (the ENSO limb's share %+.4f; the index's %d-%d mean is %.3f, 0 before 1948)\n",
-            TR_SE$row[["effect"]], TR_SE$row[["pct"]], TR_SE$row[["effect"]] - TR_S$row[["effect"]], OC_D_CLIM[1], OC_D_CLIM[2],
+cat(sprintf("  R3 %s held, CO2 PRESCRIBED: effect %+.4f GtC/yr = %+.2f %% (%s share %+.4f; the index's %d-%d mean is %.3f, 0 before 1948)\n",
+            cols_lab(OC_OCEAN_COLS), TR_SE$row[["effect"]], TR_SE$row[["pct"]],
+            if (OC_MIX) "the ENSO limb's + the feedback's (GMST, T_deep continuing its history)" else "the ENSO limb's",
+            TR_SE$row[["effect"]] - TR_S$row[["effect"]], OC_D_CLIM[1], OC_D_CLIM[2],
             mean(F$enso[F$year >= OC_D_CLIM[1] & F$year <= OC_D_CLIM[2]])))
 S_OCEAN_CO2 <- (TR_S$row[["effect_interactive"]] - TR_S$row[["effect"]]) / TR_S$row[["dco2_interactive"]]   # GtC/yr per ppm
-DECOMP <- c(R0_gmst_sst_interactive = R0, R1_sst_interactive = TR_S$row[["effect_interactive"]],
-            R2_sst_prescribed = TR_S$row[["effect"]], R3_sst_enso_prescribed = TR_SE$row[["effect"]])
+DECOMP <- stats::setNames(c(R0, TR_S$row[["effect_interactive"]], TR_S$row[["effect"]], TR_SE$row[["effect"]]),
+                          c("R0_gmst_sst_interactive", "R1_sst_interactive", "R2_sst_prescribed",
+                            paste0("R3_", gsub(" + ", "_", tolower(cols_lab(OC_OCEAN_COLS)), fixed = TRUE), "_prescribed")))
 
 # ---- CHECK 0: is OC_OCEAN_COLS everything the ocean reads? ---------------------------------------
-# Every listed column held at row 1, zero emissions, EVERY OTHER column historical (GMST, AOD, ndep), CO2
-# matched to the orbit: an ocean that reads nothing else stays on the orbit. Allowed: OC_GATE_MARGIN x the
-# matching tolerance x the ocean's own CO2 sensitivity (measured above from R1/R2). The MUTATION drops the
-# ENSO index from the held set (the first version's premise) and must FAIL.
+# Every listed column held at row 1, zero emissions, EVERY OTHER column historical (AOD, ndep, and GMST unless the
+# feedback put it on the list), CO2 matched to the orbit: an ocean that reads nothing else stays on the orbit.
+# Allowed: OC_GATE_MARGIN x the matching tolerance x the ocean's own CO2 sensitivity (measured above from R1/R2).
+# The MUTATION drops the ENSO index from the held set (the first version's premise) and must FAIL. Under the
+# feedback a SECOND mutation drops GMST and must fail too (2026-10-05 g: the measurement that put it on the list).
 cat(sprintf("\n=== CHECK 0. COMPLETENESS: %s held, everything else historical, CO2 matched to the orbit ===\n", paste(OC_OCEAN_COLS, collapse = " + ")))
 gate_sink <- function(cols) { Fg <- zero_em(F); for (cc in cols) Fg[[cc]] <- rep(F_ORBIT[[cc]][1], nrow(F))
   m <- match_co2(Fg, ORBIT); c(sink = sink_win(m$out), max_dC = max(abs(m$out$ocean_C - ORBIT$ocean_C))) }
 GATE_TOL <- OC_GATE_MARGIN * OC_MATCH_TOL * S_OCEAN_CO2
-G0 <- gate_sink(OC_OCEAN_COLS); G0m <- gate_sink(OC_SST)
+G0 <- gate_sink(OC_OCEAN_COLS); G0m <- gate_sink(setdiff(OC_OCEAN_COLS, "enso"))
+G0g <- if (OC_MIX) gate_sink(setdiff(OC_OCEAN_COLS, "gmst")) else NULL
 cat(sprintf("  the ocean's CO2 sensitivity %.4f GtC/yr per ppm -> allowed |sink| %.2e GtC/yr\n", S_OCEAN_CO2, GATE_TOL))
 cat(sprintf("  listed columns held:      sink %+.2e GtC/yr, max |ocean_C - orbit| %.2e GtC -> %s\n", G0[["sink"]], G0[["max_dC"]],
             if (abs(G0[["sink"]]) <= GATE_TOL) "PASS" else "FAIL"))
-cat(sprintf("  MUTATION (ENSO not held): sink %+.2e GtC/yr, max |ocean_C - orbit| %.2e GtC -> %s\n", G0m[["sink"]], G0m[["max_dC"]],
-            if (abs(G0m[["sink"]]) > GATE_TOL) "the gate FAILS it, as it must" else "the gate PASSES it: the gate has no power"))
+for (mu in Filter(Negate(is.null), list(list("ENSO", G0m), if (OC_MIX) list("GMST", G0g))))
+  cat(sprintf("  MUTATION (%s not held): sink %+.2e GtC/yr, max |ocean_C - orbit| %.2e GtC -> %s\n", mu[[1]], mu[[2]][["sink"]], mu[[2]][["max_dC"]],
+              if (abs(mu[[2]][["sink"]]) > GATE_TOL) "the gate FAILS it, as it must" else "the gate PASSES it: the gate has no power"))
 if (abs(G0[["sink"]]) > GATE_TOL) stop("CHECK 0 FAILED: the ocean reads a climate column the emulation does not vary")
 if (abs(G0m[["sink"]]) <= GATE_TOL) stop("CHECK 0's mutation passed: the gate cannot see a missing column")
+if (OC_MIX && abs(G0g[["sink"]]) <= GATE_TOL) stop("CHECK 0's GMST mutation passed: the gate cannot see the feedback's column")
 
 # ---- THE TEN PROTOCOLS ------------------------------------------------------------------------
 cat(sprintf("\n=== THE TEN GCB 2025 GOBM PROTOCOLS, emulated (A: pre-transient climate to t_r, historical after; C: the normal year from %d; CO2 prescribed) ===\n", DG_YEARS[1]))
@@ -302,8 +358,15 @@ one_proto <- function(nm, p) {
   fs <- proto_forcings(p, OC_SST); ts <- triple(fs$FA, fs$FC)
   tr$row <- c(tr$row, effect_sst_only = ts$row[["effect"]], pct_sst_only = ts$row[["pct"]])
   tr$series_sst_only <- ts$series
-  cat(sprintf("  %-17s N %-26s PA %-15s t_r %d | effect %+.4f GtC/yr (%+.2f %%) = SST %+.4f + ENSO %+.4f | dSST %+.3f K | interactive %+.4f (dCO2 %+.2f ppm) | match %d/%d\n",
-              nm, spec_lab(p$N), spec_lab(p$PA), p$t_r, tr$row[["effect"]], tr$row[["pct"]], ts$row[["effect"]], tr$row[["effect"]] - ts$row[["effect"]],
+  # under the feedback, the GMST-HISTORICAL twin (the feedback alike in A and C; "both shown", RULED 2026-10-05)
+  if (OC_MIX) { fh <- proto_forcings(p, setdiff(OC_OCEAN_COLS, "gmst")); th <- triple(fh$FA, fh$FC)
+    tr$row <- c(tr$row, effect_gmst_historical = th$row[["effect"]], pct_gmst_historical = th$row[["pct"]])
+    tr$series_gmst_historical <- th$series }
+  parts <- if (OC_MIX) sprintf("SST %+.4f + ENSO %+.4f + GMST %+.4f", ts$row[["effect"]], th$row[["effect"]] - ts$row[["effect"]],
+                               tr$row[["effect"]] - th$row[["effect"]]) else
+             sprintf("SST %+.4f + ENSO %+.4f", ts$row[["effect"]], tr$row[["effect"]] - ts$row[["effect"]])
+  cat(sprintf("  %-17s N %-26s PA %-15s t_r %d | effect %+.4f GtC/yr (%+.2f %%) = %s | dSST %+.3f K | interactive %+.4f (dCO2 %+.2f ppm) | match %d/%d\n",
+              nm, spec_lab(p$N), spec_lab(p$PA), p$t_r, tr$row[["effect"]], tr$row[["pct"]], parts,
               tr$row[["dsst"]], tr$row[["effect_interactive"]], tr$row[["dco2_interactive"]], tr$row[["iters_C"]], tr$row[["iters_B"]]))
   tr
 }
@@ -318,8 +381,18 @@ cat(sprintf("\n  ENSEMBLE (unweighted, as GCB): effect %+.4f +/- %.4f GtC/yr (1 
 cat(sprintf("    vs GCB 2025 %+.2f +/- %.2f: difference %+.4f = %+.2f GCB sigmas; ratio %.2f | as %% of the CO2 effect: %+.2f %% (range %+.2f to %+.2f) vs GCB %+.1f %% (range %+.1f to %+.1f)\n",
             OC_GCB[["mean"]], OC_GCB[["sd"]], ENS[["mean"]] - OC_GCB[["mean"]], (ENS[["mean"]] - OC_GCB[["mean"]]) / OC_GCB[["sd"]], ENS[["mean"]] / OC_GCB[["mean"]],
             ENSP[["mean"]], ENSP[["min"]], ENSP[["max"]], OC_GCB_PCT[["mean"]], OC_GCB_PCT[["lo"]], OC_GCB_PCT[["hi"]]))
-cat(sprintf("    of it SST (the thermal part) %+.4f +/- %.4f, the ENSO limb %+.4f; the interactive twins' mean %+.4f (CO2 interactivity's share %+.4f)\n",
-            ENSS[["mean"]], ENSS[["sd"]], ENS[["mean"]] - ENSS[["mean"]], mean(TAB[, "effect_interactive"]), ENS[["mean"]] - mean(TAB[, "effect_interactive"])))
+ENSH <- ENSHP <- NULL
+if (!OC_MIX) {
+  cat(sprintf("    of it SST (the thermal part) %+.4f +/- %.4f, the ENSO limb %+.4f; the interactive twins' mean %+.4f (CO2 interactivity's share %+.4f)\n",
+              ENSS[["mean"]], ENSS[["sd"]], ENS[["mean"]] - ENSS[["mean"]], mean(TAB[, "effect_interactive"]), ENS[["mean"]] - mean(TAB[, "effect_interactive"])))
+} else {
+  ENSH <- ens(TAB[, "effect_gmst_historical"]); ENSHP <- ens(TAB[, "pct_gmst_historical"])
+  cat(sprintf("    of it SST (the thermal part) %+.4f +/- %.4f, the ENSO limb %+.4f, the STRATIFICATION FEEDBACK (GMST held, T_deep spun up) %+.4f; the interactive twins' mean %+.4f (CO2 interactivity's share %+.4f)\n",
+              ENSS[["mean"]], ENSS[["sd"]], ENSH[["mean"]] - ENSS[["mean"]], ENS[["mean"]] - ENSH[["mean"]], mean(TAB[, "effect_interactive"]),
+              ENS[["mean"]] - mean(TAB[, "effect_interactive"])))
+  cat(sprintf("  GMST HISTORICAL in A and C (the feedback alike in both: %s in a weakened ocean, every OFF mode's definition): %+.4f +/- %.4f GtC/yr (range %+.4f to %+.4f); ratio %.2f to GCB; %+.2f %% of the CO2 effect\n",
+              cols_lab(setdiff(OC_OCEAN_COLS, "gmst")), ENSH[["mean"]], ENSH[["sd"]], ENSH[["min"]], ENSH[["max"]], ENSH[["mean"]] / OC_GCB[["mean"]], ENSHP[["mean"]]))
+}
 
 # ---- the interpretation sensitivity --------------------------------------------------------------
 cat("\n=== SENSITIVITY (not in the ensemble) ===\n")
@@ -328,14 +401,16 @@ d_sens <- (SENS[[1]]$row[["effect"]] - TAB["CESM_ETHZ", "effect"]) / length(OC_P
 cat(sprintf("  swapping it in moves the ensemble mean by %+.4f GtC/yr\n", d_sens))
 
 # ---- the annual series (GCB Fig. S10's red curve is the GOBMs' version) ------------------------------
-cat("\n=== THE ANNUAL A - C SERIES, prescribed CO2, ensemble mean by decade (GtC/yr): SST + ENSO | SST only ===\n")
-ens_ser <- rowMeans(SER); ens_sers <- rowMeans(SERS)
+SERH <- if (OC_MIX) { s <- do.call(cbind, lapply(RES, `[[`, "series_gmst_historical")); rownames(s) <- OC_SERIES_YRS; s } else NULL
+cat(sprintf("\n=== THE ANNUAL A - C SERIES, prescribed CO2, ensemble mean by decade (GtC/yr): %s | SST only%s ===\n",
+            cols_lab(OC_OCEAN_COLS), if (OC_MIX) " | GMST historical" else ""))
+ens_ser <- rowMeans(SER); ens_sers <- rowMeans(SERS); ens_serh <- if (OC_MIX) rowMeans(SERH) else NULL
 for (d0 in OC_DECADES) { k <- OC_SERIES_YRS >= d0 & OC_SERIES_YRS <= d0 + 9L
-  cat(sprintf("  %ds: %+.4f (protocol range %+.4f to %+.4f) | %+.4f\n", d0, mean(ens_ser[k]), min(colMeans(SER[k, , drop = FALSE])),
-              max(colMeans(SER[k, , drop = FALSE])), mean(ens_sers[k]))) }
+  cat(sprintf("  %ds: %+.4f (protocol range %+.4f to %+.4f) | %+.4f%s\n", d0, mean(ens_ser[k]), min(colMeans(SER[k, , drop = FALSE])),
+              max(colMeans(SER[k, , drop = FALSE])), mean(ens_sers[k]), if (OC_MIX) sprintf(" | %+.4f", mean(ens_serh[k])) else "")) }
 k <- OC_SERIES_YRS >= OC_WIN[1] & OC_SERIES_YRS <= OC_WIN[2]
-cat(sprintf("  %d-%d: %+.4f | %+.4f (the window's annual means; the table's rate uses year-boundary interpolation)\n", OC_WIN[1], OC_WIN[2],
-            mean(ens_ser[k]), mean(ens_sers[k])))
+cat(sprintf("  %d-%d: %+.4f | %+.4f%s (the window's annual means; the table's rate uses year-boundary interpolation)\n", OC_WIN[1], OC_WIN[2],
+            mean(ens_ser[k]), mean(ens_sers[k]), if (OC_MIX) sprintf(" | %+.4f", mean(ens_serh[k])) else ""))
 
 # ---- CHECKS 1-4: is a 2x gap an implementation artefact? ------------------------------------------------
 cat("\n=== CHECK 1. CHEMISTRY: d ln pCO2 / dT at fixed DIC and ALK (Takahashi 1993's 0.0423 /K) ===\n")
@@ -353,12 +428,15 @@ for (nm in rownames(LIN)) cat(sprintf("  %-11s literal %+.4f | shared history %+
 cat(sprintf("\n=== CHECK 3. ONE GOBM's OWN SPLIT (Bunsen 2024 GRL, FESOM1.4-REcoM2, repeat year 1961; %d-%d: total %.2f, warming %.2f, wind %.2f PgC/yr less uptake) ===\n",
             OC_BUNSEN_WIN[1], OC_BUNSEN_WIN[2], OC_BUNSEN[["total"]], OC_BUNSEN[["warming"]], OC_BUNSEN[["wind"]]))
 kb <- OC_SERIES_YRS >= OC_BUNSEN_WIN[1] & OC_SERIES_YRS <= OC_BUNSEN_WIN[2]
-BUN <- c(sst_only = mean(SERS[kb, "FESOM"]), sst_enso = mean(SER[kb, "FESOM"]))
-cat(sprintf("  CCX under the FESOM protocol, %d-%d annual means: SST only %+.4f GtC/yr = %.1f x his WARMING part | SST + ENSO %+.4f = %.1f x his TOTAL\n",
-            OC_BUNSEN_WIN[1], OC_BUNSEN_WIN[2], BUN[["sst_only"]], -BUN[["sst_only"]] / OC_BUNSEN[["warming"]], BUN[["sst_enso"]],
-            -BUN[["sst_enso"]] / OC_BUNSEN[["total"]]))
+BUN <- c(sst_only = mean(SERS[kb, "FESOM"]), sst_enso = mean(SER[kb, "FESOM"]),
+         if (OC_MIX) c(gmst_historical = mean(SERH[kb, "FESOM"])))
+cat(sprintf("  CCX under the FESOM protocol, %d-%d annual means: SST only %+.4f GtC/yr = %.1f x his WARMING part | %s %+.4f = %.1f x his TOTAL%s\n",
+            OC_BUNSEN_WIN[1], OC_BUNSEN_WIN[2], BUN[["sst_only"]], -BUN[["sst_only"]] / OC_BUNSEN[["warming"]], cols_lab(OC_OCEAN_COLS), BUN[["sst_enso"]],
+            -BUN[["sst_enso"]] / OC_BUNSEN[["total"]],
+            if (OC_MIX) sprintf(" | GMST historical %+.4f = %.1f x his TOTAL", BUN[["gmst_historical"]], -BUN[["gmst_historical"]] / OC_BUNSEN[["total"]]) else ""))
 
-cat(sprintf("\n=== CHECK 4. PATHWAYS: the effect (SST + ENSO) off the canonical, one name scaled at a time (spinup and orbit re-run; NOT a refit), %s protocol ===\n", OC_PATH_PROTO))
+cat(sprintf("\n=== CHECK 4. PATHWAYS: the effect (%s) off the %s, one name scaled at a time (spinup and orbit re-run; NOT a refit), %s protocol ===\n",
+            cols_lab(OC_OCEAN_COLS), if (OC_MODE_SET) paste("mode", OC_MODE_NAME) else "canonical", OC_PATH_PROTO))
 V0 <- V; SP0 <- SP; ORBIT0 <- ORBIT
 PATH <- do.call(rbind, lapply(names(OC_PATH_ARMS), function(a) {
   arm <- OC_PATH_ARMS[[a]]; V <<- V0
@@ -393,13 +471,17 @@ if (OC_HS_SET) {
 sink(); close(LOGCON)
 saveRDS(list(table = TAB, ensemble = ENS, ensemble_sst_only = ENSS, ensemble_pct = ENSP, decomposition = DECOMP,
              sensitivity = lapply(SENS, `[[`, "row"), series = SER, series_sst_only = SERS, protocols = OC_PROTO,
-             gate = rbind(listed = G0, mutation_enso_free = G0m), gate_tol = GATE_TOL, ocean_co2_sensitivity = S_OCEAN_CO2,
+             gate = rbind(listed = G0, mutation_enso_free = G0m, mutation_gmst_free = G0g), gate_tol = GATE_TOL, ocean_co2_sensitivity = S_OCEAN_CO2,
              chemistry = CHEM, linearity = LIN, bunsen_window = BUN, pathways = PATH, hs_sst_anom_frac = OC_HS_FRAC, record = REC,
+             mode_name = OC_MODE_NAME, mix_on = OC_MIX, ensemble_gmst_historical = ENSH, ensemble_pct_gmst_historical = ENSHP,
+             series_gmst_historical = SERH,
              provenance = sprintf(paste("%s @%s; mode %s (%s, md5 %s), spinup %s; forcing %d-%d historical; window %d-%d; ocean climate columns %s;",
-                                        if (OC_HS_SET) sprintf("H1 ARM hs_sst_anom_frac = %g, unrefitted;", OC_HS_FRAC) else "hs_sst_anom_frac absent;",
+                                        paste0(if (OC_HS_SET) sprintf("H1 ARM hs_sst_anom_frac = %g, unrefitted;", OC_HS_FRAC) else "hs_sst_anom_frac absent;",
+                                               if (OC_MIX) paste(" stratification feedback ON: GMST held in C with T_deep spun up at each spec's mean GMST",
+                                                                 "(RULED 2026-10-05), GMST-historical twins beside;") else ""),
                                         "GCB 2025 ESSD 18:3211 p. 3242 (%+.2f +/- %.2f, 1 sigma) + Supplement Table S2 (PDF md5 %s);",
                                         "CO2 prescribed by matching to %.0e ppm; sink = window-mean d(ocean_C)/dt; no RNG; %s"),
-                                  OC_DRIVER, COMMIT, OC_MODE, MODE_FILE, MODE_MD5, V$spinup_label, DG_YEARS[1], DG_YEARS[2], OC_WIN[1], OC_WIN[2],
+                                  OC_DRIVER, COMMIT, OC_MODE_NAME, MODE_FILE, MODE_MD5, V$spinup_label, DG_YEARS[1], DG_YEARS[2], OC_WIN[1], OC_WIN[2],
                                   paste(OC_OCEAN_COLS, collapse = "+"), OC_GCB[["mean"]], OC_GCB[["sd"]], OC_SUPP_MD5, OC_MATCH_TOL,
                                   format(Sys.time(), "%Y-%m-%d %H:%M"))),
         paste0(OC_OUT, ".rds"))
