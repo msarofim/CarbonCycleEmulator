@@ -2,6 +2,35 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (j) — **THE LANDING CHAIN DRY-RUN PASSED, end to end, on #16's first finished start.** That start is id 1 (the incumbent seed): CONVERGED in time at logpost −1187.451842 after 2 cycles and 199.6 min. The handoff's "a NEW label with a READ name pinned: check every registry step" is DISCHARGED. Everything ran in the frozen worktree `~/ccx_frozen/20261005g_ocgobm` (at `f35ca59`, plus the read script `af7cb36`), never in the repo. It is ONE start of 24, so the numbers below preview the landing; they are not its read.
+
+- **Each step, on a scratch copy of the start file** (logs in the tree's `DRYRUN_logs/`):
+
+| step | result |
+|---|---|
+| collect | rc 0. Flags the missing reference ids; the incumbent's port VERIFIED (rel 3.9e-14); 1 basin |
+| promote | GATE OPEN: the five gated names, incl. `npp_tsens`. PINNED: the ten, 33 free. GATE 1 33/33; GATE 2 arm N; GATE 3 id 1; GATE 4 diff 0.000e+00; GATE 5 gap 8.5e-14; 0 kinks |
+| Hessian (`--update`, 25 min at `nice 19`) | GATE 1 diff 0; −H positive-definite, condition 2.7e5 (hilda34g's 1.6e6); no direction unstable |
+| read (`diag_obj16_refit_read.R`) | sections 0–5 all ran. Both vectors reproduce (diff 0); the rows match; the ledger closes to 6.8e-14 |
+| ocean (`CCX_OC_MODE`) | CHECK 0 passes; both mutations fail (GMST +2.73e-3 against ~2.2e-4) |
+| scorecard (`CCX_SC_EXTRA_MODE`) | the arm reproduces its streams (6e-11) |
+
+- **The preview numbers (one start; the incumbent's basin):**
+  - **Likelihood −1.7667 vs hilda34g** on the 27 rows. CO₂ −1.44 (`co2_icecore` −1.10), GCB −0.32, δ¹³C +0.14.
+  - Logpost −4.4605 = likelihood −1.7667 + the other priors +0.0640 + their Jacobians −0.1871 − `npp_tsens`'s own term 2.5707.
+  - **The futures** (SSP5-8.5 / vvH, 2300): +12.80 / +7.77 ppm. Of it, the feedback's direct part at #16 is +5.52 / +2.87; the pin and the refit's re-arrangement are +7.29 / +4.90.
+  - **The land's net climate effect:** −0.038 GtC/yr (z +1.09 against GCB's −0.8 ± 0.7; hilda34g +0.118).
+  - **The moves:** `beta_max` 1.831 → 2.078 (+0.64 sd), `luc_scale` +0.59 sd, `k_w` 1902.7 → 1894.7 (−0.15 sd).
+  - **The ocean, like-for-like:** headline −0.3749 ± 0.028 (1.87× GCB); GMST-historical twin −0.3549; the feedback −0.020.
+  - **The scorecard:** no gate verdict flips. GATE V z −4.39 against hilda34g's −4.60, still too smooth.
+- **A coincidence, TESTED.** The likelihood difference −1.7667 matched the feedback's UNREFITTED cost at hilda34g (−1.7668) to 1e-4, between two different points.
+  - Under the suspicious-uniformity rule, two readings were tested: "the refit recovered the pin and left the feedback alone", or a shared code path.
+  - The 27-row likelihood was evaluated at #16's vector with the feedback ON and OFF, in #16's own space. The two totals decompose differently:
+    - #16: the pin + the refit −0.8408, the feedback at #16 −0.9259;
+    - hilda34g + the feedback, unrefitted: pin 0, feedback −1.7668.
+  - The refit HALVED the feedback's cost by moving elsewhere. The full digits are distinct (−1145.01747496 vs −1145.01762532, 1.5e-4 apart), so it is not one evaluation read twice. It is a coincidence of totals, not a mechanism.
+- **A slip in my own dry-run script:** its first pass copied 0 files. Its one-minute settle guard (never read a file mid-write) skipped a start written 40 s earlier, and promote stopped on "no start file". It was re-run once the file had aged.
+
 ## 2026-10-05 (i) — **Landing prep, continued: #16's READ script (a draft) and the LANDING HELPER, both tested as far as they can be before a start file exists.** This is still under Marcus's "Landing prep only (Recommended)". Nothing adopted; no mode moves.
 
 - **`calibration/diag_obj16_refit_read.R`** (DRAFT until the dry run), on the model of `diag_kw1446_price_read.R`. It covers handoff 10-05b §5 step 5 and the land and futures halves of step 6.
