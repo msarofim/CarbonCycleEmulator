@@ -21,6 +21,10 @@
 #       held -> the canonical (seeded at the pin) / the control; MUTATION: refused at
 #       seas_ml 0, for an UNRULED read name (q10; (2)'s pump_grad stays refused), with
 #       two held names, and with a canonical pin moved
+#   (11) OBJECTIVE #16's pins (2026-10-05, Marcus: "p4"): the canonical's + npp_tsens held
+#       at 0, under #16's label at seas_ml 1 -> the canonical (seeded) / the control; the
+#       launch string resolves the same; MUTATION: refused under the canonical's own label,
+#       at seas_ml 0, with npp_tsens off 0, with a canonical pin moved or dropped
 # =====================================================================
 ms_cp <- CCX_MODE_CANONICAL_PINS
 ms_ctl <- CCX_MODE_CONTROL_PINS
@@ -159,4 +163,38 @@ test_that("(10) a PRICE arm (2026-10-04): the canonical's pins + ONE read name h
     ri <- ccx_ms_reference_set(c(ms_cp, stats::setNames(0, inert1[1])), "1")
     expect_identical(ri$why, "the canonical, under this array's pins")
   }
+})
+
+test_that("(11) OBJECTIVE #16's pins (2026-10-05, Marcus: \"p4\"): the canonical's + npp_tsens at 0, under #16's label at seas_ml 1 -> the canonical (seeded) / the control; refused under another label, at seas_ml 0, off 0, or with a canonical pin moved or dropped", {
+  withr::local_envvar(CCX_MS_STRUCT = CCX_MODE_OBJ16_STRUCT, CCX_MS_PUMP_FIELD = "solved")
+  p16 <- CCX_MODE_OBJ16_PINS
+  expect_identical(names(p16), c(names(ms_cp), "npp_tsens"))
+  expect_identical(p16[["npp_tsens"]], 0)
+  expect_identical(p16[["npp_tsens"]], CCX_NPP_TSENS_DEFAULT, info = "the pin IS the term's absent default")
+  expect_equal(unname(p16[names(ms_cp)]), unname(ms_cp))
+  expect_true(CCX_MODE_OBJ16_STRUCT %in% CCX_STRUCT_LABELS)
+  expect_false(ccx_pins_extend_canonical(p16, "solved"), info = "npp_tsens is READ under #16's gate: not an inert extension")
+  expect_false(ccx_pins_price_canonical(p16, "solved"), info = "#16 is an objective, not a price arm")
+  r11 <- ccx_ms_reference_set(p16, "1")
+  expect_identical(r11$incumbent, CCX_MODE_CANONICAL); expect_identical(r11$new_basin, CCX_MODE_SEASML0_CONTROL)
+  expect_match(r11$why, "OBJECTIVE #16.*npp_tsens held at 0")
+  # the LAUNCH STRING, through the driver's own parser, resolves to the same branch
+  launch <- paste0("ent_seas_amp_SH=0,w_eq=27,gamma_eq=1,pump_export=9.08,w_vent=0,gamma_vent=0,w_thc=0,",
+                   "gamma_enso_ocn_NH=0,gamma_enso_ocn_SH=0,npp_tsens=0")
+  expect_identical(ccx_ms_reference_set(ccx_parse_pins(launch), "1"), r11)
+  # MUTATION: under another label (the canonical's own, #15's) the set is not a ruled arm
+  expect_error(ccx_ms_reference_set(p16, "1", struct = ccx_mode_struct(readRDS(ccx_mode_file()))), "ruled under")
+  # MUTATION: only at seas_ml 1
+  expect_error(ccx_ms_reference_set(p16, "0"), "OBJECTIVE #16")
+  # MUTATION: npp_tsens held OFF 0 is not the ruled pin
+  off <- p16; off[["npp_tsens"]] <- 0.004
+  expect_error(ccx_ms_reference_set(off, "1"), "no registered incumbent")
+  off2 <- p16; off2[["npp_tsens"]] <- 0.0089                 # hilda34g's own value, held
+  expect_error(ccx_ms_reference_set(off2, "1"), "no registered incumbent")
+  # MUTATION: a canonical pin moved, or dropped
+  moved <- p16; moved[["w_eq"]] <- 30
+  expect_error(ccx_ms_reference_set(moved, "1"), "no registered incumbent")
+  expect_error(ccx_ms_reference_set(p16[setdiff(names(p16), "w_thc")], "1"), "no registered incumbent")
+  # the canonical's own nine under #16's label still take the first branch (P0's set: unchanged)
+  expect_identical(ccx_ms_reference_set(ms_cp, "1")$why, "the canonical, under this array's pins")
 })

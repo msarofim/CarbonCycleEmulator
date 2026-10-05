@@ -2614,6 +2614,10 @@ ccx_l2_on <- function(p) {
 #'   WITH the limb, seas_ml 1 (2026-09-17 k)
 #'                          -> incumbent the canonical; new basin the control
 #'                             (each at its point, shim zeroed, w_enso_l2 seeded)
+#'   OBJECTIVE #16's pins (the canonical's + npp_tsens = 0; 2026-10-05, Marcus:
+#'   "p4"), under #16's label at seas_ml 1
+#'                          -> incumbent the canonical (seeded at the pin: a start);
+#'                             new basin the control
 #'   anything else          -> stop: a new objective with no incumbent on disk.
 ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_PUMP_FIELD", "solved"),
                                  struct = Sys.getenv("CCX_MS_STRUCT", "")) {
@@ -2632,6 +2636,20 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
     list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
          why = sprintf(paste0("a PRICE arm: the canonical's pins plus %s held at %s (the canonical, seeded ",
                               "at the pin: a start, not a mode of this arm)"), held, format(pins[[held]])))
+  } else if (same(pins, CCX_MODE_OBJ16_PINS)) {
+    # OBJECTIVE #16 (2026-10-05, Marcus: "p4"): the canonical's pins + npp_tsens held at 0, a READ name,
+    # so the canonical is a START here (seeded at the pin), as in the price and limb arms. Ruled only
+    # under #16's own label and on the canonical's seasonal mixed layer.
+    if (!identical(struct, CCX_MODE_OBJ16_STRUCT))
+      stop("ccx_ms_reference_set(): objective #16's pins '", ccx_pin_label(pins), "' are ruled under ",
+           CCX_MODE_OBJ16_STRUCT, " (the stratification feedback) only; struct '", struct,
+           "' is not a ruled arm.")
+    if (seas_ml != 1L)
+      stop("ccx_ms_reference_set(): OBJECTIVE #16 is ruled at seas_ml 1 (the canonical's seasonal mixed ",
+           "layer); seas_ml ", seas_ml, " is not a ruled arm.")
+    list(incumbent = CCX_MODE_CANONICAL, new_basin = CCX_MODE_SEASML0_CONTROL,
+         why = paste0("OBJECTIVE #16 (P4, Marcus 2026-10-05): the canonical's pins plus npp_tsens held at 0 ",
+                      "(the canonical, seeded at the pin: a start, not a mode of this objective)"))
   } else if (is.null(pins)) {
     list(incumbent = if (is.null(CCX_MODE_PINNED_PARENT)) CCX_MODE_CANONICAL else CCX_MODE_PINNED_PARENT,
          new_basin = CCX_MODE_SEASML0_CONTROL,
@@ -2677,6 +2695,7 @@ ccx_ms_reference_set <- function(pins, seas_ml, pump_field = Sys.getenv("CCX_MS_
               "' at seas_ml ", seas_ml, " (the canonical's are '", ccx_pin_label(CCX_MODE_CANONICAL_PINS),
               "', the control's '", ccx_pin_label(CCX_MODE_CONTROL_PINS),
               "', the layer-2 limb's '", ccx_pin_label(CCX_MODE_L2_ARM_PINS),
+              "', objective #16's '", ccx_pin_label(CCX_MODE_OBJ16_PINS),
               "'); rule the reference set for this pin before launching.")
   # 2026-09-20 (r): the canonical FITS w_enso_l2, so its pin set under a structure WITHOUT the limb
   # would leave a name the structure never reads FREE -- the driver refuses such a name, and so

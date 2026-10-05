@@ -2,6 +2,40 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (e) — **Marcus's launch rulings for #16 ("Mac, today (Recommended)"; "Neither: launch as ruled (Recommended)"), and the ONE code change P4 did need: a ruled reference-set branch for #16's pin set.** (d) said P4 needed no new code. That was wrong: `ccx_ms_reference_set()` STOPS on the ten pins ("no registered incumbent … rule the reference set for this pin before launching"). The canonical's nine pass; the nine plus the READ name `npp_tsens` match no branch, and `npp_tsens` is not on the price-arm list. Found by a dry call before any launch.
+
+- **The rulings, verbatim:**
+  - "Mac, today (Recommended)": 8 parallel, the 10-04 (g) recipe, launched once the suite passes and the prep is done.
+  - "Neither: launch as ruled (Recommended)": `hs_asx_frac`'s width is kept, so `k_w` ≈ 1900 is a disclosed prior compromise. H2 is deferred.
+  - **The Torch verdict, said out loud: Mac.**
+    - The 08-20 probe measured the Mac ~2× faster per evaluation, so a wall-bounded start converges further.
+    - The Mac is like-for-like with the hilda34g and `k_w` refits.
+    - Torch would need a fresh bundle, a port gate, Marcus's login, and about double the wall.
+- **The branch** (`R/calibrate.R` `ccx_ms_reference_set()`; the set is `R/paths.R`'s `CCX_MODE_OBJ16_PINS` = the canonical's nine + `npp_tsens = 0`, with `CCX_MODE_OBJ16_STRUCT` = `hilda_csl3v0kaidgbem`):
+  - Incumbent: the canonical, seeded at the pin (a START, as in the price and limb arms). New basin: the control.
+  - It is ruled ONLY under #16's label and at seas_ml 1, and refuses anything else by name.
+  - The `why` names it as OBJECTIVE #16, so the start files' provenance cannot read it as a price arm. Adding `npp_tsens` to `CCX_MS_PRICE_ARM_NAMES` would have passed the launch with exactly that mislabel.
+  - Every other pin set resolves as before: the new branch is reached only by the set that used to stop.
+- **Test (11)** in `tests/testthat/test-ms-reference-set.R`: 18 new expectations; the file now passes 93 with 0 failed (75 before).
+  - What it checks: the set's names and values, and that the pin equals `CCX_NPP_TSENS_DEFAULT`. That it is neither an inert extension nor a price arm. The branch's pair and `why`. That the LAUNCH STRING, through `ccx_parse_pins()`, resolves identically. That the canonical's nine under #16's label still take the first branch.
+  - What it refuses: the canonical's own label, seas_ml 0, `npp_tsens` at 0.004 and at 0.0089, and a canonical pin moved or dropped.
+- **Mutations, each caught** (both files restored md5-identical):
+
+| mutation | result |
+|---|---|
+| M1, the label check dropped | 1 failure |
+| M2, the seas_ml check dropped | 1 failure |
+| M3, the set matched on NAMES only | 3 failures |
+| M4, the branch never fires | 1 error |
+| M5, the constant's `npp_tsens` set to 0.001 | 2 failures, 1 error |
+
+- **Tried and abandoned: a by-VALUE match.**
+  - The first version compared values, on my premise that `ccx_pin_label()` prints 2 decimals. One printed label read `npp_tsens=0.00`, and I took that as the format: 0 and ±0.004 would share a label.
+  - Its own mutation (back to label matching) passed all 93, and the formatter shows why. It is `format(pins, trim = TRUE)`, which picks the decimals for the whole vector, so 0.004 prints `0.004`.
+  - The helper and its comments were removed, and the branch matches by label like every other.
+- **The 777877b suite re-run PASSED:** **6216 passed, 0 failed, 0 errors, 3 skipped (the standing three)**, rc 0, 17.8 min (`outputs/diagnostics/suite_20261005_777877b_rerun.log`). That is 27d435b's 6156 plus exactly 60: 36 option-A tests and 24 H1 tests.
+- **Next:** the full suite at this commit (frozen, `nohup`); the launch tree at this commit with its inputs; port targets regenerated there under the label and ten pins; the preflight; the launch.
+
 ## 2026-10-05 (d) — **Marcus's ruling: P4. `npp_tsens` is PINNED AT 0 in objective #16's refit** (verbatim: "p4", given after the P0-vs-P4 explanation of handoff §4). A term whose sign the record cannot fix is not fitted. The pin needs no new code, because `CCX_MS_PIN` carries it. **Separately, the 777877b suite never finished.** It died at ~07:27, most likely with the session that launched it, and was re-launched under `nohup`. Nothing else adopted.
 
 - **What #16 now is:**
@@ -14,6 +48,7 @@ Project log: what was done, what was tried and abandoned, and why.
   - The prior N(0, 0.029) and its 09-30 sign-free ruling stay in `R/constants.R` for any arm that frees the name. Under #16 its prior term drops out, so #16 is compared with hilda34g on LIKELIHOOD.
   - It is the first LAND-side pin. The nine are all ocean names: `ent_seas_amp_SH`, `w_eq`, `gamma_eq`, `pump_export`, `w_vent`, `gamma_vent`, `w_thc`, `gamma_enso_ocn_NH/SH`.
   - Zero is the median of MAGICC6's ten C4MIP σ_NPP values in this functional form (`.NPP_TSENS_C4MIP`, `R/constants.R:73`). Their mean is −0.006.
+- ⚠ **CORRECTED in (e):** the reference set DID refuse this pin set, so P4 needed one ruled code branch.
 - **How the driver takes it (read, not changed):**
   - `calibration/run_dispersed_multistart.R` applies the gate (`CCX_MS_STRUCT`) BEFORE the pins (`CCX_MS_PIN`), so a gated name can be pinned. The pinned value lives in the base.
   - The 09-30 (p) dispersion override for `npp_tsens` is filtered to FITTED names. Under the pin it drops out, so the output directory loses its `_sdby_npp_tsens=0.0291` suffix by construction. The pin label gains `_npp_tsens=0.00`.

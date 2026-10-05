@@ -401,6 +401,15 @@ CCX_MODE_FREE_PARENT_PINS <- c(w_eq = 27, gamma_eq = 1, pump_export = 9.08, w_ve
 # (2026-09-20 r: the limb's arm IS the canonical's now; kept as a name so the 09-17/18/20 array
 # records and ccx_ms_reference_set()'s limb branch read unchanged -- identical to CANONICAL_PINS.)
 CCX_MODE_L2_ARM_PINS     <- CCX_MODE_CANONICAL_PINS
+# OBJECTIVE #16's PINS (2026-10-05, Marcus: "p4"; notes/proposal_2026-10-04_npp_tsens_prior.md, CHANGELOG
+# 10-05 d): the canonical's nine PLUS the greening term `npp_tsens` held at 0. A term whose sign the record
+# cannot fix is not fitted. It is a READ name under #16's gate, so the canonical is a START of this
+# objective (seeded at the pin), not a mode of it -- the price and limb arms' case. Ruled ONLY under #16's
+# label (the stratification feedback, DESIGN §3.4a S; the label KEPT 10-05 a) at seas_ml 1. At 0 the factor
+# is exp(0 * GMST) = 1, the term's absent default (CCX_NPP_TSENS_DEFAULT), so the pinned model is the
+# no-greening model bit for bit.
+CCX_MODE_OBJ16_PINS      <- c(CCX_MODE_CANONICAL_PINS, npp_tsens = 0)
+CCX_MODE_OBJ16_STRUCT    <- "hilda_csl3v0kaidgbem"
 #' The registered FREE mode nearest the canonical: the canonical itself when it
 #' is free, its parent when it is pinned. For a consumer that needs a vector
 #' ENCODABLE on the full table (an ancestor constructed by dropping names, a
