@@ -2,6 +2,42 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (i) — **Landing prep, continued: #16's READ script (a draft) and the LANDING HELPER, both tested as far as they can be before a start file exists.** This is still under Marcus's "Landing prep only (Recommended)". Nothing adopted; no mode moves.
+
+- **`calibration/diag_obj16_refit_read.R`** (DRAFT until the dry run), on the model of `diag_kw1446_price_read.R`. It covers handoff 10-05b §5 step 5 and the land and futures halves of step 6.
+  - **0.** Each vector reproduces its stored logpost in its own space, and the promoted id must be the wave's best.
+  - **1.** The fit on LIKELIHOOD, row by row, on the same rows (refused otherwise), beside the previews (P4 −0.26, the feedback −1.77).
+  - **2.** The prior ledger, which must close to 1e-6.
+  - **3.** The moves, in hilda34g's marginal sd, with `beta_max`, `k_w`, `fert_k` and `q10` always shown.
+  - **4.** The futures at FIVE vectors: hilda34g; + the pin; + the feedback (both unrefitted); #16; #16 with the feedback OFF. So #16's move splits into the feedback's direct part and the rest.
+  - **5.** The land's net climate effect (`br_net_climate()`).
+  - It prints the ocean and scorecard commands, and its paths come from unique globs with overrides (`CCX_O16_MODE`, `CCX_O16_WAVE`, `CCX_O16_TAG`).
+- **Sections 4–5 reproduce the previews EXACTLY** (a scratch run of the same calls on hilda34g's three vectors):
+  - SSP5-8.5 2300: 1448.65 ppm (10-05 d: 1448.6);
+  - the feedback: +5.49 (10-04 o: +5.5);
+  - the net climate effect: +0.1176 GtC/yr (10-04: +0.118).
+  - ⚠ **The pin UNREFITTED costs +46.97 ppm at SSP5-8.5 2300** (vvH +27.52), against the P4 slice's +13.5 with the 7 land names re-optimised. So #16's futures depend mostly on how far the refit re-arranges the land, and section 4's split exists to show that.
+- **`~/ccx_frozen/20261005f_obj16_land.sh`** (outside the repo, beside the launch script). It carries out handoff §5 steps 1–2:
+  - it checks the end line, that NO work process is left (`pgrep` on the `--file=` argument, which this script's own command line cannot match), and 24 exit codes;
+  - it copies the outdir, the task logs, the exit file, the wave log, the port-target log, the preflight folder, `launch.{sh,out}` and the port targets;
+  - it verifies with `diff -rq` / `cmp`, and only then writes `RUN_PROVENANCE.txt` from facts it reads (the `k_w` template);
+  - it refuses to overwrite.
+  - **Six mock tests** (a tree built from the `k_w` arm's landed files, renamed to #16's tag):
+
+| test | result |
+|---|---|
+| no end line | refused |
+| the REAL #16 workers alive | refused (8) |
+| the full path | 48 files, 27 logs, 26 preflight files, provenance written |
+| re-run onto an existing outdir | refused |
+| one copied start file corrupted | verification FAILED, no provenance |
+| one copied task log corrupted | verification FAILED, no provenance |
+
+  - Two `pipefail` traps were fixed before the tests: a `pgrep` / `grep` that finds nothing would have killed the script under `set -e`.
+- **Found and fixed in my own tooling:** my first background waiter's glob `start_*.rds` also matched a CHECKPOINT (`start_003_ckpt.rds`, written 11:29), so it fired with no start finished. It was re-armed on `start_[0-9][0-9][0-9].rds`, the pattern the dry-run script already used.
+- **The run at 11:35:** all 8 round-1 tasks are in cycle 1's polish. Ids 1 (the incumbent) and 3 both reached logpost −1187.4518. That is early, not a convergence verdict. The rate is ~0.40 s/eval, ~15 % slower than the preflight, under desktop load (Firefox's GPU helper at ~1.1 cores).
+- **The handoff 10-05b** gains a status block at its top pointing to these tools.
+
 ## 2026-10-05 (h) — **Landing prep: the like-for-like ocean diagnostic can now read objective #16, under a RULED GMST rule.** Marcus ruled, verbatim: "Held + spun-up lag, both shown (Recommended)". Under #16 the ocean also reads GMST, through the stratification feedback, and `calibration/diag_ocean_climate_gobm.R` could not run on #16 as it stood. On the default mode the change is BIT-IDENTICAL.
 
 - **Why a rule was needed.** The handoff's landing step 6 ("the ocean's climate effect, like-for-like") assumed the diagnostic would run on #16. It would not:

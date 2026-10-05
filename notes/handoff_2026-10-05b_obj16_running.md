@@ -7,6 +7,22 @@ Self-contained.
 **As of 2026-10-05 09:07:** round 1 of 3 is running, with 8 work processes (ids 0–7). No start files yet: a start
 file lands when its task finishes.
 
+> ⭐ **STATUS 2026-10-05 11:35 (the next session, CHANGELOG 10-05 g/h/i).** The run is healthy at round 1. After cycle
+> 1's polish, ids 1 and 3 both sit at −1187.4518. The landing tools are BUILT; use them in place of §5's hand steps 1–2
+> and the step-6 drivers:
+> - **Steps 1–2:** `bash ~/ccx_frozen/20261005f_obj16_land.sh`.
+>   - It checks the end line, that NO work process is left, and the 24 exit codes.
+>   - It copies, `cmp`s every file, and only then writes `RUN_PROVENANCE.txt`.
+>   - It refuses to overwrite. It passed 6 mock tests, including 2 corruptions.
+> - **Step 5 and part of 6:** `Rscript calibration/diag_obj16_refit_read.R`. It reads on LIKELIHOOD, then the ledger,
+>   the moves, the futures at five vectors and the land's net climate effect. Its futures and land sections reproduce
+>   the previews exactly.
+> - **Step 6, the ocean:** `CCX_OC_MODE="obj16=<mode file>" Rscript calibration/diag_ocean_climate_gobm.R`. Under
+>   #16 the ocean reads GMST. The RULED headline holds GMST with a spun-up lag, and the GMST-historical twin is printed
+>   beside it (CHANGELOG 10-05 h).
+> - **Step 6, the scorecard:** `CCX_SC_EXTRA_MODE="obj16=<mode file>" CCX_SC_TAG_SUFFIX=_obj16 Rscript calibration/diag_whole_model_scorecard.R`.
+> - The §6.8 housekeeping is DONE (10-05 g). `youthful-blackburn` was NOT stale: its branch is unmerged and KEPT.
+
 **Start here.**
 1. Read this note.
 2. Then CHANGELOG 2026-10-05 (f), (e) and (d), newest at the top of `CHANGELOG.md`.
