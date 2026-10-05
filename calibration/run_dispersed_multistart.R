@@ -117,6 +117,7 @@ invisible(ccx_apply_pins(MS_PINS))
 if (length(MS_PINS)) cat(sprintf("PINNED (removed from the fitted set, held in the base): %s -> %d free parameters\n",
                                  paste(sprintf("%s = %s", names(MS_PINS), MS_PINS), collapse = ", "), length(CCX_PARAM_NAMES)))
 source(ccx_path("calibration", "lib_run_inputs.R"))
+source(ccx_path("calibration", "lib_ms_deadline.R"))   # the in-restart deadline (option A, 2026-10-05)
 ccx_require_run_inputs()   # BEFORE the wall budget, and before any target is written
 
 # ---- named constants ------------------------------------------------
@@ -535,11 +536,18 @@ cat(sprintf("  pump field: '%s' (%s; from CCX_MS_PUMP_FIELD, RECORDED in every s
 stopifnot(identical(bp$pump_field, MS_PUMP_FIELD))
 lp_fun <- ccx_make_logpost(base_params = bp)
 n_eval <- 0L
+# ⭐ THE IN-RESTART DEADLINE (option A; Marcus 2026-10-05 on notes/proposal_2026-10-04_multistart_inrestart_wall.md;
+# calibration/lib_ms_deadline.R). The wrapper checks the CURRENT step's deadline before each evaluation and
+# tracks the best point the step has evaluated; ms_run_step() returns that point when the deadline passes.
+# Outside a step (the rate measurement, the start, the dead-task check call lp_fun directly) there is none.
+MS_STEP <- ms_step_state()
 neg_lp <- function(u) {
+  ms_check_deadline(MS_STEP)
   n_eval <<- n_eval + 1L
   v <- lp_fun(u)
-  if (!is.finite(v)) return(MS_PENALTY)
-  -v
+  val <- if (!is.finite(v)) MS_PENALTY else -v
+  ms_track_best(MS_STEP, u, val)
+  val
 }
 
 # ---- the start point for THIS id ------------------------------------
@@ -973,6 +981,7 @@ maxit_for_budget <- function() {
   if (n < MS_MAXIT_FLOOR) 0L else as.integer(min(n, MS_MAXIT))
 }
 converged <- FALSE; out_of_time <- FALSE
+deadline_stops <- 0L   # steps ended by the in-restart deadline (RECORDED in the start file)
 
 restarts_done <- 0L
 for (cyc in seq(cyc0, MS_CYCLES)) {
@@ -984,18 +993,26 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
     if (mx < MS_MAXIT)
       cat(sprintf("[%03d] cycle %d restart %2d: SHORTENED to maxit %d by the wall budget\n",
                   MS_ID, cyc, i, mx))
-    .r0 <- Sys.time()
-    fit <- optim(u, neg_lp, method = "Nelder-Mead",
-                 control = list(maxit = mx, reltol = 1e-12))
+    .r0 <- Sys.time(); .n0 <- n_eval
+    # the restart's deadline leaves the polish its reserved slice, as maxit_for_budget() does
+    fit <- ms_run_step(MS_STEP, u, best, neg_lp, "Nelder-Mead", list(maxit = mx, reltol = 1e-12),
+                       deadline = as.numeric(t0) + 60 * (MS_WALL_MIN - polish_reserve_min()))
     # NORMALISED to a FULL restart, because a shortened one is not comparable and
-    # feeding it back raw would make the projection shrink every cycle.
-    restart_min <- c(restart_min,
-                     as.numeric(difftime(Sys.time(), .r0, units = "mins")) * MS_MAXIT / mx)
+    # feeding it back raw would make the projection shrink every cycle -- by the
+    # evaluations it ACTUALLY made (option A, proposal §3), not the planned maxit.
+    restart_min <- c(restart_min, ms_restart_minutes(as.numeric(difftime(Sys.time(), .r0, units = "mins")),
+                                                     MS_MAXIT, n_eval - .n0))
     cyc_restarts <- cyc_restarts + 1L; restarts_done <- restarts_done + 1L
+    if (isTRUE(fit$deadline)) {
+      deadline_stops <- deadline_stops + 1L
+      cat(sprintf("[%03d] cycle %d restart %2d: STOPPED AT THE DEADLINE after %d evals; the best EVALUATED point is kept\n",
+                  MS_ID, cyc, i, n_eval - .n0))
+    }
     gain <- best - fit$value; u <- fit$par; best <- fit$value
     cat(sprintf("[%03d] cycle %d restart %2d: log-post = %12.4f (gain %10.4f) evals %d  %.1f min\n",
                 MS_ID, cyc, i, -best, gain, n_eval, elapsed_min()))
     trace <- rbind(trace, data.frame(cycle = cyc, restart = i, logpost = -best, evals = n_eval))
+    if (isTRUE(fit$deadline)) break     # no further restart fits; the polish keeps its reserved slice
     if (i > 1 && gain < MS_TOL) break
   }
   # ⛔ THE POLISH IS SHORTENED TO FIT, NOT VETOED -- AND WITHOUT THIS IT NEVER RAN
@@ -1012,18 +1029,24 @@ for (cyc in seq(cyc0, MS_CYCLES)) {
   # and can rank two basins the wrong way round.
   # Same idiom as maxit_for_budget(): size the step to the budget, and skip only
   # when even the floor does not fit.
-  mx_pol <- local({
-    per <- MS_PROJ_SAFETY * (2 * length(u) + 1) * MS_SEC_PER_EVAL / 60
-    n <- floor((MS_WALL_MIN - elapsed_min()) / per)
-    if (n < MS_POLISH_FLOOR) 0L else as.integer(min(n, MS_POLISH_MAXIT))
-  })
+  # ⚠ AT THE OBSERVED RATE since option A (proposal §3): this used the START point's measured rate, so a task
+  # whose restarts had slowed near the h_ml wall sized its polish as if they had not.
+  mx_pol <- ms_polish_maxit(MS_WALL_MIN - elapsed_min(), length(u), MS_SEC_PER_EVAL, restart_min, MS_MAXIT,
+                            MS_PROJ_SAFETY, MS_POLISH_FLOOR, MS_POLISH_MAXIT)
   if (!out_of_time && mx_pol > 0L) {
     if (mx_pol < MS_POLISH_MAXIT)
       cat(sprintf("[%03d] cycle %d polish: SHORTENED to maxit %d by the wall budget\n",
                   MS_ID, cyc, mx_pol))
-    pc <- tryCatch(optim(u, neg_lp, method = "BFGS",
-                         control = list(maxit = mx_pol, reltol = 1e-14)),
+    .n0 <- n_eval
+    # the deadline returns the best EVALUATED point; any OTHER error still discards the polish, as before
+    pc <- tryCatch(ms_run_step(MS_STEP, u, best, neg_lp, "BFGS", list(maxit = mx_pol, reltol = 1e-14),
+                               deadline = as.numeric(t0) + 60 * MS_WALL_MIN),
                    error = function(e) NULL)
+    if (!is.null(pc) && isTRUE(pc$deadline)) {
+      deadline_stops <- deadline_stops + 1L; out_of_time <- TRUE
+      cat(sprintf("[%03d] cycle %d polish: STOPPED AT THE DEADLINE after %d evals; the best EVALUATED point is kept\n",
+                  MS_ID, cyc, n_eval - .n0))
+    }
     if (!is.null(pc) && pc$value < best) {
       cat(sprintf("[%03d] cycle %d polish: log-post = %.4f (gain %.4f)\n",
                   MS_ID, cyc, -pc$value, best - pc$value))
@@ -1109,7 +1132,7 @@ res <- list(id = MS_ID, kind = st$kind, u_mode = u, par_mode = pm, logpost = -be
             logpost_start = trace$logpost[1], converged = converged, dead = dead,
             final_lp_check = .final_lp,
             out_of_time = out_of_time, cycles = if (exists("cyc")) cyc else 0L,
-            restarts_done = restarts_done,
+            restarts_done = restarts_done, deadline_stops = deadline_stops,
             trace = trace, n_eval = n_eval, minutes = elapsed_min(),
             sec_per_eval = MS_SEC_PER_EVAL, restart_min = restart_min,
             prior_z = zs, param_names = CCX_PARAM_NAMES, pump_mode = MS_ARM,
