@@ -2,6 +2,48 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (f) — **OBJECTIVE #16's REFIT IS RUNNING ON THE MAC** (Marcus: "Mac, today (Recommended)"; "Neither: launch as ruled (Recommended)"). It runs under the label `hilda_csl3v0kaidgbem` (the stratification feedback), with the canonical's 9 pins + `npp_tsens = 0` (P4): 33 free names, `k_w` among them. Launched 09:01 EDT from a frozen tree at `aa76fb5`. Expected ~23:00–00:30 (three rounds of ≤ 5 h; the `k_w` arm took 13.7 h at the same eval rate).
+
+- **The suite at `aa76fb5`** (frozen, under `nohup`; `outputs/diagnostics/suite_20261005_aa76fb5.log`): **6234 passed, 0 failed, 0 errors, 3 skipped (the standing three)**, rc 0, 17.5 min. That is the re-run's 6216 plus exactly test (11)'s 18.
+- **The tree:** a git worktree at `aa76fb5`, `~/ccx_frozen/20261005f_obj16`.
+  - `nuclear14c` copied in (`diff -rq` clean, 9 files).
+  - `ccx_require_run_inputs()` reports 14/14.
+- **Port targets**, regenerated in the tree under the label and the ten pins (`logs/port_targets_20261005f.log`):
+
+| point | logpost | the file's stored | offset |
+|---|---|---|---|
+| cold | −60581.58 | — | — |
+| incumbent: hilda34g seeded at `npp_tsens` 0, under #16's label | **−1249.45** | −1182.99 | −66.46 |
+| new basin: `hilda31pe` | −11908.92 | −1231.07 | −10677.84 |
+
+- **The incumbent's offset, decomposed independently.** I evaluated hilda34g's point four ways (label × pin) through `make_port_targets.R`'s own evaluation path. This was a scratch check, not committed.
+  - **The parts:**
+    - the greening pin alone: **−53.93** in likelihood, against the Hessian's prediction of −54.14;
+    - the feedback alone: −1.7668, equal to 10-04 (o)'s;
+    - their **interaction: −8.19**. Both raise CO₂ over the record, so a quadratic likelihood adds them super-linearly;
+    - the pinned prior's log-density, removed: −2.57.
+  - **Reproductions:** the canonical's own evaluation reproduces its stored logpost exactly, and the four-way path reproduces the port target exactly.
+  - **Why it matters:** a seeding that ignored the pin would read ≈ −1187.3, so the start is at `npp_tsens` 0.
+  - **These costs are UNREFITTED.** The 10-04 slice, re-optimising 7 land names, recovered all but 0.26 of the greening part.
+- **Preflight** (24 ids, 8 at once, 45 s): **24/24 exit 0, all LAUNCHABLE, every port VERIFIED (rel ≤ 3.9e-14).**
+  - The pins line reads the ten, with 33 free. The gate line names the five gated names.
+  - Id 1 reads "INCUMBENT = hilda34g (OBJECTIVE #16 (P4, Marcus 2026-10-05): …)".
+  - There is no dispersion override. Seeds are `2026 + id`.
+  - Rates are 0.23–0.41 s/eval (cold 1.23), so a 6000-eval restart projects to 23–41 min of the 300-min wall. The `k_w` arm ran at 0.34.
+  - Logs are in the tree's `logs/preflight_20261005f/`. The preflight's empty outdir was removed before the launch.
+- **The launch:** `~/ccx_frozen/20261005f_obj16_launch.sh` under `nohup`. The PID is in `…_launch.pid` and the chain status in `…_launch.out`.
+  - Tag `20261005f`, `CCX_MAC_NPAR=8`, WALL 300 min, 3 restarts × 6 cycles × 6000 maxit, spread 1.0452 (no `_sdby_` suffix).
+  - Logs: the tree's `logs/wave_20261005f.log` and `logs/ccx_multistart_mac_20261005f_<id>.out`.
+  - 8 work processes were confirmed at launch, not just the launcher.
+  - ⚠ Keep the Mac on AC power: `caffeinate -s` holds off sleep only while it is plugged in.
+- **When it lands:**
+  1. Copy the outdir into the repo's `calibration/output/` (cmp every file).
+  2. Run `CCX_MS_OUTDIR=<dir> Rscript calibration/collect_dispersed_multistart.R`.
+  3. Promote and recompute the Hessian. The `k_w` arm's promotion handled a ten-pin set with a read name, but this one also has a NEW label, so check every registry step rather than assume it.
+  4. Read on LIKELIHOOD against hilda34g's −1143.2508 on the 27 rows. The pin removes a prior term, so the logposts are not comparable.
+  5. Read the futures (SSP5-8.5 and vvH 2300; P4's +13.5 and the feedback's +5.5 were both previews), the land's net climate effect (the preview gave −0.04), the ocean's climate effect, and the scorecard.
+  6. Adoption is Marcus's call.
+
 ## 2026-10-05 (e) — **Marcus's launch rulings for #16 ("Mac, today (Recommended)"; "Neither: launch as ruled (Recommended)"), and the ONE code change P4 did need: a ruled reference-set branch for #16's pin set.** (d) said P4 needed no new code. That was wrong: `ccx_ms_reference_set()` STOPS on the ten pins ("no registered incumbent … rule the reference set for this pin before launching"). The canonical's nine pass; the nine plus the READ name `npp_tsens` match no branch, and `npp_tsens` is not on the price-arm list. Found by a dry call before any launch.
 
 - **The rulings, verbatim:**

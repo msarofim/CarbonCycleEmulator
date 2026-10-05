@@ -139,8 +139,11 @@ handoff"). Self-contained.
 
 ## 5. Open items, in order (each is Marcus's to prioritise)
 1. **Objective #16.** ~~It waits ONLY on (a), P0 vs P4 (§4).~~ **(a) RULED P4 (10-05)**: the ten pins are the nine
-   plus `npp_tsens=0`, leaving 33 free names (checked with the driver's own pin functions). Now it waits on where
-   to run it and on the two fold-in questions below.
+   plus `npp_tsens=0`, leaving 33 free names.
+   - ⭐ **LAUNCHED 10-05 09:01 on the Mac** ("Mac, today"; "Neither: launch as ruled"). The tree is
+     `~/ccx_frozen/20261005f_obj16`, at `aa76fb5`, with the reference-set rule P4 needed (10-05 e).
+   - Expected ~23:00–00:30. The landing steps are in CHANGELOG 10-05 (f).
+   - The fold-ins below were both declined: the width is kept and H2 is deferred.
    - (b) The label is KEPT.
    - (c) Timing: the `k_w` arm has landed, so it can go. Ideally in a fresh session, on Torch or the Mac (say the
      verdict out loud).
