@@ -55,6 +55,9 @@
 # limb. In Bunsen 2024's model wind is 0.17 of a 0.25 PgC/yr effect (2000-2019), warming 0.09.
 # No RNG. Output: outputs/diagnostics/ocean_climate_gobm_<date>.{log,rds}.
 # Usage: Rscript calibration/diag_ocean_climate_gobm.R
+#   CCX_OC_HS_FRAC=<f> sets the HS box's share of the SST anomaly (DESIGN §3.4a T; the H1 test, Marcus 2026-10-05
+#   "Yes, test") on the canonical, UNREFITTED; the outputs are tagged _hsfrac<f>, R0's identity gate applies only at
+#   f = 1, and a section R prints the record's opinion (the canonical's likelihood at f, unrefitted).
 # =====================================================================
 for (f in list.files("R", pattern = "[.]R$", full.names = TRUE)) source(f)
 source(file.path("calibration", "lib_design_gates.R"))
@@ -86,7 +89,10 @@ OC_PATH_PROTO   <- "CNRM"
 OC_PATH_NAMES   <- c("kz", "u_hs", "w_enso_l2")
 OC_PATH_ARMS    <- c(list(base = list()), unlist(lapply(OC_PATH_NAMES, function(n)
                      setNames(list(setNames(list(0.5), n), setNames(list(2), n)), paste0(n, c("_half", "_double")))), recursive = FALSE))
-OC_OUT <- ccx_path("outputs", "diagnostics", sprintf("ocean_climate_gobm_%s", format(Sys.Date(), "%Y%m%d")))
+OC_HS_FRAC  <- suppressWarnings(as.numeric(Sys.getenv("CCX_OC_HS_FRAC", "")))   # NA = unset = the shipped model
+OC_HS_SET   <- is.finite(OC_HS_FRAC)
+OC_OUT <- ccx_path("outputs", "diagnostics", sprintf("ocean_climate_gobm_%s%s", format(Sys.Date(), "%Y%m%d"),
+                                                     if (OC_HS_SET) sprintf("_hsfrac%g", OC_HS_FRAC) else ""))
 
 # climate specs: a single repeated year, a loop of years (calendar-aligned), a climatology, a month window
 yr    <- function(y) list(kind = "year", y = as.integer(y))
@@ -141,6 +147,9 @@ cat(sprintf("%s @%s, %s | mode %s (%s, md5 %s) | window %d-%d | GCB 2025 %+.2f +
 
 # ---- the canonical, its spinup and its historical forcing (§D's construction) ----------------
 V <- dg_vector(OC_MODE)
+if (OC_HS_SET) { V$p$hs_sst_anom_frac <- OC_HS_FRAC
+  cat(sprintf("⚠ H1 ARM: hs_sst_anom_frac = %g on %s, UNREFITTED (DESIGN §3.4a T); the HS box feels %g of its hemisphere's SST anomaly\n",
+              OC_HS_FRAC, OC_MODE, OC_HS_FRAC)) }
 SP <- dg_spinup(V)
 F  <- withCallingHandlers(ccx_build_forcing("historical", DG_YEARS, prod_c14 = SP$prod_c14, bomb_total_kmol = V$bomb_total,
                                             luc_scale = V$luc_scale, enso_index = ccx_enso_index_of(V$p), aod_mode = ccx_aod_mode_of(V$p)),
@@ -253,7 +262,9 @@ R0 <- sink_win(o_full) - sink_win(o_R0)
 D_STORED <- readRDS(OC_D_RDS)$bench["OFF", "effect"]
 cat(sprintf("  R0 GMST + SST held, CO2 interactive: effect %+.6f GtC/yr | §D stored %+.6f (%s) -> %s\n", R0, D_STORED, basename(OC_D_RDS),
             if (identical(R0, D_STORED)) "IDENTICAL" else sprintf("DIFFERS by %.3g", R0 - D_STORED)))
-if (!identical(R0, D_STORED)) stop("R0 does not reproduce §D: the harness differs from the preview's, so nothing below is comparable with it")
+if (!OC_HS_SET || OC_HS_FRAC == 1) {
+  if (!identical(R0, D_STORED)) stop("R0 does not reproduce §D: the harness differs from the preview's, so nothing below is comparable with it")
+} else cat(sprintf("  (R0 differs from §D BY CONSTRUCTION here: the HS box feels %g of the anomaly; the gate applies at 1)\n", OC_HS_FRAC))
 TR_S  <- triple(F, held_from(OC_SST))
 TR_SE <- triple(F, held_from(OC_OCEAN_COLS))
 cat(sprintf("  R1 SST only held, CO2 interactive:  effect %+.4f GtC/yr (warm-run CO2 %+.2f ppm)\n", TR_S$row[["effect_interactive"]], TR_S$row[["dco2_interactive"]]))
@@ -361,12 +372,31 @@ el <- function(nm) { lo <- PATH[PATH$arm == paste0(nm, "_half"), ]; hi <- PATH[P
   c(effect = log(hi$effect / lo$effect) / log(4), sink = log(hi$sink_A / lo$sink_A) / log(4)) }
 for (nm in OC_PATH_NAMES) { e <- el(nm); cat(sprintf("  elasticity to %-9s: effect %.3f, sink %.3f\n", nm, e[["effect"]], e[["sink"]])) }
 
+# ---- R. THE RECORD'S OPINION of the H1 arm (unrefitted; only when CCX_OC_HS_FRAC is set) -------------------
+REC <- NULL
+if (OC_HS_SET) {
+  cat(sprintf("\n=== R. THE RECORD'S OPINION: the canonical's likelihood with hs_sst_anom_frac = %g vs absent, UNREFITTED ===\n", OC_HS_FRAC))
+  md <- V$md; bp <- ccx_mode_base(md); if (!is.null(md$pump_mode)) bp$pump_mode <- md$pump_mode
+  g <- ccx_apply_gate(ccx_mode_struct(md)); rp <- ccx_apply_pins(ccx_mode_pins(md))
+  u <- ccx_par_to_unc(ccx_mode_par_with_pins(md))
+  spf <- ccx_spinup_from_label(ccx_mode_spinup(md))
+  sc <- lapply(list(absent = bp, h1 = within(bp, hs_sst_anom_frac <- OC_HS_FRAC)), function(b) {
+    v <- ccx_make_logpost(base_params = b, by_stream = TRUE, spinup_fn = spf)(u); unlist(attr(v, "streams")) })
+  ccx_unpin_params(rp); ccx_unapply_gate(g)
+  stopifnot(identical(sc$absent[names(md$streams)], md$streams))       # the absent arm IS the canonical
+  d <- sc$h1 - sc$absent; d <- d[order(-abs(d))]
+  REC <- list(d_lik = sum(sc$h1) - sum(sc$absent), by_row = d)
+  cat(sprintf("  likelihood %+.4f on %d rows; the rows that move most: %s\n", REC$d_lik, length(d),
+              paste(sprintf("%s %+.3f", names(d)[1:6], d[1:6]), collapse = ", ")))
+}
+
 sink(); close(LOGCON)
 saveRDS(list(table = TAB, ensemble = ENS, ensemble_sst_only = ENSS, ensemble_pct = ENSP, decomposition = DECOMP,
              sensitivity = lapply(SENS, `[[`, "row"), series = SER, series_sst_only = SERS, protocols = OC_PROTO,
              gate = rbind(listed = G0, mutation_enso_free = G0m), gate_tol = GATE_TOL, ocean_co2_sensitivity = S_OCEAN_CO2,
-             chemistry = CHEM, linearity = LIN, bunsen_window = BUN, pathways = PATH,
+             chemistry = CHEM, linearity = LIN, bunsen_window = BUN, pathways = PATH, hs_sst_anom_frac = OC_HS_FRAC, record = REC,
              provenance = sprintf(paste("%s @%s; mode %s (%s, md5 %s), spinup %s; forcing %d-%d historical; window %d-%d; ocean climate columns %s;",
+                                        if (OC_HS_SET) sprintf("H1 ARM hs_sst_anom_frac = %g, unrefitted;", OC_HS_FRAC) else "hs_sst_anom_frac absent;",
                                         "GCB 2025 ESSD 18:3211 p. 3242 (%+.2f +/- %.2f, 1 sigma) + Supplement Table S2 (PDF md5 %s);",
                                         "CO2 prescribed by matching to %.0e ppm; sink = window-mean d(ocean_C)/dt; no RNG; %s"),
                                   OC_DRIVER, COMMIT, OC_MODE, MODE_FILE, MODE_MD5, V$spinup_label, DG_YEARS[1], DG_YEARS[2], OC_WIN[1], OC_WIN[2],
