@@ -1,0 +1,81 @@
+calibration/diag_kw1446_price_read.R @a7b17fc, 2026-10-05 06:54
+  canonical hilda34g (/Users/MarcusMarcus/Documents/2026/CodeProjects/CarbonCycleEmulator/calibration/output/refit_20261003_hilda34g_obj15_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds)
+  price arm calibration/output/refit_20261005_kw1446_hilda_csl3v0kaidgbe/mode_fit_pumpN.rds
+  survey    calibration/output/multistart_20261004f_hilda_csl3v0kaidgbe_seasml1_pin_ent_seas_amp_SH=0_w_eq=27_gamma_eq=1_pump_export=9.08_w_vent=0_gamma_vent=0_w_thc=0_gamma_enso_ocn_NH=0_gamma_enso_ocn_SH=0_k_w=1446_sd1.0452_sdby_npp_tsens=0.0291
+
+=== 0. EACH VECTOR REPRODUCES ITS STORED LOGPOST (tol 1e-05) ===
+  survey: 18 converged of 24; basin 1 = 10 starts within 0.05 of -1206.612614; basin 2's best = id 019 at -1206.836667
+  canonical                    logpost -1182.991369 (stored -1182.991369, diff +0.0e+00)  likelihood -1143.2508 on 27 rows  prior+Jacobian -39.7406
+  price arm, basin 1           logpost -1206.612614 (stored -1206.612614, diff +0.0e+00)  likelihood -1140.4967 on 27 rows  prior+Jacobian -66.1159
+  price arm, basin 2 (id 019)  logpost -1206.836667 (stored -1206.836667, diff +0.0e+00)  likelihood -1139.5526 on 27 rows  prior+Jacobian -67.2841
+
+=== 1. THE PRICE OF k_w = 1446 ON LIKELIHOOD (the same 27 rows; > 0 = the price arm fits BETTER) ===
+  d14c_NH                canonical   -288.467 | basin 1   +4.243 | basin 2   +4.160
+  d14c_SH                canonical   -287.312 | basin 1   +3.553 | basin 2   +3.530
+  d13c_seasonal_MLO      canonical    209.256 | basin 1   -1.772 | basin 2   -1.484
+  d13c_level_MLO         canonical     63.221 | basin 1   -1.206 | basin 2   -1.115
+  co2_seasonal_MLO       canonical      4.994 | basin 1   -1.033 | basin 2   -0.951
+  hs_surf_d13c           canonical     -2.434 | basin 1   -0.781 | basin 2   -0.736
+  gcb_land_sink          canonical    -49.589 | basin 1   -0.763 | basin 2   -0.924
+  d14c_profile_ab        canonical     -3.199 | basin 1   -0.742 | basin 2   -0.656
+  gcb_ocean_sink         canonical     -6.009 | basin 1   -0.703 | basin 2   -0.388
+  excess_c14_ocean       canonical     -9.641 | basin 1   +0.543 | basin 2   +0.563
+  co2_icecore            canonical   -508.347 | basin 1   +0.537 | basin 2   +0.448
+  co2_level_SPO          canonical    -64.104 | basin 1   +0.384 | basin 2   +0.422
+  ocean_grad_d13c        canonical     -4.072 | basin 1   +0.371 | basin 2   +0.663
+  d13c_icecore           canonical     65.646 | basin 1   -0.337 | basin 2   -0.303
+  d13c_level_SPO         canonical     55.815 | basin 1   -0.318 | basin 2   -0.347
+  d14c_intcal            canonical   -640.676 | basin 1   +0.302 | basin 2   +0.302
+  d14c_profile_level     canonical     -3.330 | basin 1   +0.233 | basin 2   +0.233
+  co2_level_MLO          canonical    -71.671 | basin 1   +0.222 | basin 2   +0.273
+  ocean_grad_dic         canonical     -6.821 | basin 1   -0.151 | basin 2   +0.259
+  gcb_ocean_enso_slope   canonical      2.542 | basin 1   -0.150 | basin 2   -0.067
+  co2_gradient           canonical    -15.168 | basin 1   +0.126 | basin 2   +0.093
+  hs_surf_dic            canonical     -4.245 | basin 1   +0.115 | basin 2   +0.118
+  d13c_seasonal_SPO      canonical    249.566 | basin 1   +0.063 | basin 2   -0.322
+  d13c_gradient          canonical    105.801 | basin 1   -0.061 | basin 2   -0.064
+  ocean_grad_alk         canonical     -5.796 | basin 1   +0.051 | basin 2   -0.070
+  co2_seasonal_SPO       canonical     72.976 | basin 1   +0.032 | basin 2   +0.065
+  d14c_profile_bd        canonical     -2.188 | basin 1   -0.004 | basin 2   -0.006
+  TOTAL: basin 1 +2.7541, basin 2 +3.6982 (canonical -1143.2508)
+  basin 1 by family: CO2 +0.267 | d13C -3.631 | atm_d14C +8.098 | ocean_14C +0.032 | GCB -1.617 | ocean_grad_surface -0.395
+
+=== 2. THE PRIOR LEDGER (natural-scale prior log-density + log-Jacobian, the objective's own terms) ===
+  name                  canonical      basin 1   z canon      z b1   d prior     d jac
+  hs_asx_frac              0.6852       1.7228      0.32      6.47   -21.786    -0.617
+  h_hs                     286.57       472.63      1.19      2.76    -2.580    -1.524
+  u_hs                     23.339        15.24     -0.64     -2.40    -2.249    -0.521
+  pump_hs_gcm2             81.764       58.514      2.13      1.57    +1.363    -0.158
+  ndep_ret                 13.943        9.844      1.91      1.38    +1.205    -0.348
+  rep_dC                   4.1697       4.4356      4.17      4.44    -1.144    +0.000
+  bomb_total               118.89       116.35      1.53      1.32    +0.329    -0.022
+  sst_seas_amp_SH          1.3337        1.552     -1.08     -0.47    +0.318    +0.152
+  sst_seas_amp_NH          1.7183       1.8775     -1.06     -0.70    +0.223    +0.089
+  fert_k                   726.83       690.24      0.82      0.67    +0.162    -0.025
+  q10                      1.0603       1.0724     -2.54     -2.49    +0.103    +0.011
+  imb_share_land          0.55664      0.59444      0.85      0.98    -0.089    -0.023
+  k_w's own term at the canonical: prior -7.8023 at 1902.7 vs -6.5861 at 1446 (difference -1.2163); Jacobian 7.5510 vs 7.2766
+  logpost difference -23.6212 = likelihood +2.7541 + the other names' priors -23.9851 + their Jacobians -2.6415 - k_w's own term at the canonical (-0.2513)  [check -1.8e-14]
+  ⇒ on the NATURAL scale (no Jacobians): likelihood +2.7541, the other names' priors -23.9851, k_w's prior +1.2163 => the posterior price of 1446 is -20.0148
+
+=== 3. WHAT ABSORBS k_w: each name's move from the canonical, in the canonical's MARGINAL Laplace sd (u-space) ===
+  k_w itself: 1902.7 -> 1446 = -9.69 marginal sd
+  hs_asx_frac              0.6852 ->       1.7228  +14.19 sd   (basin 2       1.7274, +14.30 sd)
+  h_hs                     286.57 ->       472.63   +4.28 sd   (basin 2       473.82,  +4.35 sd)
+  bomb_total               118.89 ->       116.35   -2.86 sd   (basin 2       116.29,  -2.93 sd)
+  h_ml                     49.645 ->       57.653   +2.76 sd   (basin 2       49.862,  +0.11 sd)
+  u_hs                     23.339 ->        15.24   -2.43 sd   (basin 2       15.337,  -2.40 sd)
+  kz                        14224 ->        16811   +2.27 sd   (basin 2        17086,  +2.52 sd)
+  w_enso_l2                12.931 ->       18.017   +2.26 sd   (basin 2       17.309,  +1.98 sd)
+  pump_hs_gcm2             81.764 ->       58.514   -1.43 sd   (basin 2       57.249,  -1.51 sd)
+  rep_dC                   4.1697 ->       4.4356   +1.08 sd   (basin 2       4.4152,  +1.00 sd)
+  sst_seas_amp_SH          1.3337 ->        1.552   +1.08 sd   (basin 2       1.4086,  +0.39 sd)
+  ndep_ret                 13.943 ->        9.844   -0.97 sd   (basin 2       10.063,  -0.90 sd)
+  luc_scale               0.87728 ->      0.90541   +0.72 sd   (basin 2      0.90379,  +0.68 sd)
+  basin 2 vs basin 1 (the two are -0.2241 apart on logpost, 0.9442 on likelihood): h_ml -2.65 sd, sst_seas_amp_SH -0.69 sd, npp_frac_NH -0.33 sd, seas_lag_p_NH -0.29 sd, w_enso_l2 -0.29 sd, q10 -0.28 sd
+
+=== 4. THE SAME PRICE, THREE WAYS (log-units; < 0 = 1446 costs) ===
+  conditional profile, every other name held (10-03 b)  -1783
+  Laplace marginal, 0.5 z^2 (10-03 b)                    -47
+  PROFILE (this arm), likelihood                         +2.7541
+  PROFILE, posterior on the natural scale                -20.0148

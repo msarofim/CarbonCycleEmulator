@@ -2,6 +2,141 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (c) — **H1 TESTED: the high-latitude box carries only ~18 % of CCX's ocean thermal effect.** The switch is `hs_sst_anom_frac` (DESIGN §3.4a T; `777877b`; Marcus: "Yes, test"). Holding the HS box at its climatology (frac 0, unrefitted) moves the thermal part only −0.453 → −0.371 GtC/yr, still 2.8× one GOBM's warming part, and the record pushes back (−18.2 likelihood). The excess lives in the low-latitude column, which leaves H2 (kz's strong vertical exchange). Nothing adopted.
+
+- **The switch** (both cores):
+  - SST_hs = sst_hs + frac × (the hemisphere's anomaly), on both branches: HadSST4 and the `sst_scale × gmst`
+    fallback.
+  - One resolver, `ccx_hs_sst_frac()`, in `R/model.R`. `R/cpp.R` marshals the resolved value and
+    `src/ccx_core.cpp`'s `Par` gains the field.
+  - A base parameter: NOT fitted, in no label. ABSENT = 1 = the shipped model, bit for bit. The low-latitude boxes are
+    untouched.
+- **`tests/testthat/test-hs-sst-frac.R`** (new): 24 expectations, 0 failed.
+  - T1: absent = 1 is bit-identical in both cores, and the canonical's stored likelihood reproduces row by row (absent
+    and at 1).
+  - T2: the spinup is bit-identical at 0 and 1.
+  - T3: R vs C++ parity at ½ (derivative 5e-14, transient 1e-12), and the name is live.
+  - T4: direction. At frac 0 the HS pCO₂ is lower and uptake is higher, monotonically; the mixed layer's derivative
+    is untouched.
+  - T5: refusals.
+- **Mutations, each caught by its own test** (both files restored md5-identical):
+
+| mutation | caught by |
+|---|---|
+| M1, the R core ignores the switch | T3 |
+| M2, the C++ core ignores it | T3, T4 |
+| M3, absent means 0 | T1 |
+| M4, 1 − frac | T1, T4 |
+| M5, applied to the mixed layer too | T4 |
+
+- **The arms** (`calibration/diag_ocean_climate_gobm.R` with `CCX_OC_HS_FRAC`, `ca1db22`; outputs
+  `outputs/diagnostics/ocean_climate_gobm_20261005_hsfrac{0.5,0}.{log,rds}`; CHECK 0 passes in both):
+
+| frac | ensemble effect | % of CO₂ effect | thermal part | Bunsen window, thermal | likelihood, unrefitted |
+|---|---|---|---|---|---|
+| 1 (canonical, 10-04 p) | −0.357 ± 0.027 | −10.0 | −0.453 | −0.304 (3.4×) | 0 |
+| ½ | −0.316 ± 0.023 | −8.9 | −0.412 | −0.276 (3.1×) | −4.61 |
+| 0 | −0.275 ± 0.020 | −7.8 | −0.371 | −0.248 (2.8×) | −18.16 |
+
+  - The rows that resist frac 0: `co2_level_MLO` −13.0 and `d13c_level_MLO` −8.3, against `d13c_level_SPO` +3.1
+    and `gcb_ocean_sink` +1.2.
+- **What it means:**
+  - The HS box's share of the thermal effect is ~0.08 of −0.45. The other ~0.37 comes from the low-latitude mixed
+    layer and its column.
+  - That supports H2: CCX's effective kz, ~27× diapycnal, returns DIC equilibrated under the colder surface to a
+    uniformly warmed mixed layer, the damping Bunsen 2024 describes missing. Check 4 of 10-04 (p) showed the effect
+    leaning on kz 2.4× as hard as the uptake does.
+  - Frac 0 brings the TOTAL inside GCB's model range (−7.8 %), but by removing a real response, not by adding the
+    missing damping.
+- **Not done:**
+  - An OBSERVED high-latitude/hemispheric SST ratio arm. It needs gridded SST (HadSST4 or HadISST1), which the repo
+    does not hold, so it is a data-download decision for Marcus.
+  - Any refit at frac < 1.
+
+## 2026-10-05 (b) — **OPTION A BUILT** (Marcus: "Option A"; `92b5756`): the multistart's IN-RESTART DEADLINE (`notes/proposal_2026-10-04_multistart_inrestart_wall.md`). The Nelder-Mead restarts AND the BFGS polish now end at a wall-derived deadline with their best EVALUATED point, instead of overrunning. Behaviour-preserving when no deadline is reached. A smoke run of the committed driver passes end to end.
+
+- **`calibration/lib_ms_deadline.R`** (new):
+  - the step state (deadline + best evaluated point);
+  - `ms_check_deadline()` / `ms_track_best()`, called by the objective wrapper before and after each evaluation;
+  - `ms_run_step()`, which wraps `optim()` and, on a classed `ms_deadline` condition, returns the tracked best (any
+    other error propagates);
+  - the two sizing helpers `ms_restart_minutes()` and `ms_polish_maxit()`.
+- **`calibration/run_dispersed_multistart.R`:**
+  - `neg_lp` checks and tracks;
+  - the restarts run with deadline = wall − the polish's reserve, the polish with deadline = the wall;
+  - a stop logs "STOPPED AT THE DEADLINE" and is recorded as `deadline_stops` in the start file;
+  - after a restart stops, the polish keeps its reserved slice; a polish stop sets `out_of_time`.
+- **Two DELIBERATE sizing changes, ruled with A (proposal §3):**
+  - `restart_min` is normalised by the evaluations a restart actually made, not the planned maxit;
+  - the polish is sized at the OBSERVED rate (`max(restart_min)`), not the start point's 5-sample rate.
+  - Both can change maxit choices relative to the old code. The deadline itself cannot.
+- **`tests/testthat/test-ms-deadline.R`** (new): D1–D8, 36 expectations, 0 failed.
+  - D2 asserts `identical()` to plain `optim()` for both methods when no deadline is set.
+  - D7 lints the driver: both steps go through the stepper, no unguarded `optim(u, neg_lp`.
+- **Mutations M1–M7, each caught by its own test.**
+  - ⭐ M2/M3 first showed as ERRORS, not failures, which exposed a REAL hazard: R evaluates arguments lazily, so a
+    `val0` passed as `fn(u0)` was evaluated inside the deadline handler and re-signalled an uncaught `ms_deadline`.
+  - Fixed with `force(val0)` at entry. D8 now guards it (M7).
+  - The driver passes a plain variable (`best`), so it was never hit there.
+- **Smoke run** (a scratch worktree at `92b5756`, the `k_w` tree's port targets, id 1, wall 6 min):
+  - port gate PASSED;
+  - the NM restart went through the stepper (152 evals);
+  - the polish was sized at the observed rate (shortened to 14 iterations) and gained +387;
+  - the start file records `deadline_stops` 0 and `restart_min` normalised by actual evals.
+  - A deadline cannot be forced in a real run without a slowdown; D1 covers that path with a scripted one.
+- The `k_w` arm ran a frozen tree and is unaffected.
+
+## 2026-10-05 (a) — **Marcus's rulings, and THE `k_w` = 1446 PRICE ARM LANDED AND READ.** Rulings, verbatim: "1) Yes, test. 2) give me pros and cons. 3) Keep. 4) Option A. Then write a handoff." That is: test H1 (→ c); pros and cons for P0 vs P4 (in the handoff); KEEP the label `hilda_csl3v0kaidgbem`; option A (→ b). **The arm's verdict: on LIKELIHOOD, Naegler's 1446 fits BETTER (+2.75). Its whole −20 posterior price is ONE prior, `hs_asx_frac`'s, at z +6.5, whose width is a stated JUDGEMENT. The canonical's `k_w` ≈ 1903 is a prior compromise, not a data verdict.** Nothing adopted.
+
+- **The landing** (handoff 10-04c §3, steps 1–3):
+  - 24/24 exit 0 (02:22 10-05), copied byte-identical with logs, preflight, launch script, port targets and
+    `RUN_PROVENANCE.txt` → `calibration/output/multistart_20261004f_…_k_w=1446_…/`.
+  - Collected: 18 converged, TWO basins 0.224 apart (−1206.6126 ×10, −1206.8367 ×8; they differ in `h_ml`, 57.7 vs
+    49.9 m); 6 out of time.
+  - Promoted id 23 (GATES 1–5; logpost reproduced to 0) → `refit_20261005_kw1446_hilda_csl3v0kaidgbe/`.
+  - Hessian PD (condition 1.74e6) but 9 directions step-unstable: `h_hs` at 777 %, sitting at 472.6 of its
+    [20, 500] bracket; the other 8 at 2.0–3.5 % against the 2 % tolerance. ⚠ This mode's own Laplace sds are not
+    usable. Its likelihood is.
+- **The read** (`calibration/diag_kw1446_price_read.R` @`a7b17fc` → `outputs/diagnostics/kw1446_price_read_20261005.{log,rds}`;
+  all three vectors reproduce their stored logposts exactly; two runs identical):
+  - **Likelihood:** basin 1 +2.754, basin 2 +3.698 vs hilda34g's −1143.2508.
+  - By family: atmospheric Δ¹⁴C +8.10 (`d14c_NH` +4.24, `d14c_SH` +3.55), δ¹³C −3.63, the GCB sinks −1.62, CO₂
+    +0.27.
+  - **The prior ledger:**
+    - `hs_asx_frac` 0.685 → 1.723 (z 0.32 → 6.47): **−21.79**;
+    - `h_hs` 287 → 473 m: −2.58;
+    - `u_hs` 23.3 → 15.2: −2.25;
+    - partly offset by `pump_hs_gcm2` +1.36 and `ndep_ret` +1.21;
+    - `k_w`'s own prior favours 1446 by +1.22.
+  - The split is exact: logpost −23.621 = likelihood +2.754 + other priors −23.985 + their Jacobians −2.642 −
+    `k_w`'s term at the canonical (−0.251).
+  - **Posterior price on the natural scale: −20.0.**
+  - **What absorbs `k_w`** (canonical marginal sd): `hs_asx_frac` +14.2, `h_hs` +4.3, `bomb_total` −2.9, `h_ml` +2.8
+    (basin 1 only), `u_hs` −2.4, `kz` +2.3, `w_enso_l2` +2.3. `k_w` itself is −9.7 sd.
+  - **The same price three ways:**
+    - conditional (others held, 10-03 b): −1783;
+    - Laplace (0.5 z², 10-03 b): −47;
+    - the PROFILE: likelihood +2.75, posterior −20.0.
+    - The linear and held estimates overstated the cost by 2–90×.
+- **Why `hs_asx_frac` is the hinge** (`data-raw/build_hs_asx_prior.R`):
+  - It is an observation prior (ice × wind × Schmidt, centre 0.653), but its width (log-sd 0.15) is a stated
+    JUDGEMENT, ~2.5× the measured component spread.
+  - It excludes the hemispheric spread (NH 0.32 / SH 0.78, log-sd 0.44) as representation error. At 0.44 the arm's
+    1.72 would be z 2.2, not 6.5.
+  - The arm reproduces round 4's compensator (`u_hs` ~15, `hs_asx_frac` ~1.8), which the round-5 prior was built to
+    exclude.
+  - So Naegler's `k_w` and that width cannot both hold, and the data do not choose between them.
+- **The scorecard** (`CCX_SC_EXTRA_MODE=kw1446`, `outputs/diagnostics/whole_model_scorecard_20261005_kw1446.log`):
+  - no gate verdict flips;
+  - gate D z −5.51 (hilda34g −6.74) and gate 6 z +0.05 (−0.34) improve;
+  - gate Q n_sd 1.72 (0.40) and gate 5's `nh_efold` −9.15 (−7.32) worsen;
+  - IRF(100) 0.367 (0.374);
+  - new strained priors: `hs_asx_frac` +6.47, `h_hs` +2.76, `u_hs` −2.40.
+- **What it means (the decision is Marcus's; none is owed now):**
+  - CCX's `k_w` is not data-determined against 1446. It is set by `hs_asx_frac`'s judgement width.
+  - Adopting the literature `k_w` means widening that prior. It would also put `h_hs` near its 500-m ceiling and
+    `u_hs` at z −2.4.
+
 ## 2026-10-04 (p) — **THE OCEAN'S CLIMATE EFFECT, LIKE-FOR-LIKE WITH GCB 2025's OCEAN MODELS** (the handoff's item 3; `calibration/diag_ocean_climate_gobm.R` @`d006ba9` → `outputs/diagnostics/ocean_climate_gobm_20261004.{log,rds}`). GCB's protocol is verified: there is NO single normal year. Emulated on CCX's own record with CO₂ prescribed, CCX's effect is **−0.357 ± 0.027 GtC/yr**, against GCB's −0.20 ± 0.05 (1.8×, z −3.2). As a share of the CO₂ effect it is −10.0 %, against GCB's −7.1 % (model range −4.2 to −10.7 %). The like-for-like build closes a third of 10-04 (o)'s gap, but the composition is wrong. CCX's THERMAL part alone is −0.45: 3.4× one GOBM's warming part under the same protocol. Its ENSO limb offsets +0.10, and it has no wind term. Nothing adopted.
 
 - **GCB 2025's protocol, verified** (ESSD 18:3211, main text p. 3242; Supplement S.3.2 and Table S2, printed pp. 14,
