@@ -43,7 +43,13 @@ handoff"). Self-contained.
   - The excess lives in the low-latitude column (H2).
 - **Suites:**
   - at `27d435b`: **6156 passed, 0 failed, 3 skipped**, the first since the stratification build;
-  - at `777877b` (the switch): RUNNING when this was written (started 07:14, frozen worktree `~/ccx_frozen/20261005_suite_777877b`, log `outputs/diagnostics/suite_20261005_777877b.log`). Its result goes into CHANGELOG 10-05 (d) and this line when it lands.
+  - at `777877b` (the switch): ⚠ **it did NOT finish.** It started at 07:14 in the frozen worktree
+    `~/ccx_frozen/20261005_suite_777877b`. Its process died at ~07:27 inside `test-pump-seas.R` (file 88 of 112),
+    with no summary line and 0 failures or errors so far, most likely with the session that launched it. The
+    partial log is kept at `outputs/diagnostics/suite_20261005_777877b.log`.
+    - **Re-launched** at 08:15 under `nohup` (`~/ccx_frozen/20261005_suite_777877b_rerun_launch.sh`), logging to
+      `…_777877b_rerun.log`.
+    - Its result goes into CHANGELOG 10-05 (d) and this line.
 
 ## 2. Rulings (Marcus, verbatim)
 - 10-05: "1) Yes, test. 2) give me pros and cons. 3) Keep. 4) Option A. Then write a handoff."
@@ -85,6 +91,10 @@ handoff"). Self-contained.
   - pointers in `INDEX_ccx_ocean`, `INDEX_ccx_ocean_circ`, `INDEX_infra`, `INDEX_diag_bound`.
 
 ## 4. P0 vs P4 — the pros and cons Marcus asked for (the decision is his)
+> ⛔ **RULED 2026-10-05 (Marcus): "p4".** `npp_tsens` is pinned at 0 in #16 (CHANGELOG 10-05 d).
+> ⚠ The "MASKS" bullet under "Against P0" overstates it, because in GtC the total's error (0.76) is larger than
+> the ocean's (0.16). The accurate statement: the ocean's excess hides the land's SIGN.
+
 **The choice.**
 - P0 keeps `npp_tsens` (NPP × exp(σ·GMST)) free under its sign-free prior: +0.0089 /K at hilda34g, about 1 sd
   from zero.
@@ -128,7 +138,9 @@ handoff"). Self-contained.
 - It discards even a weak signal that a later structure might firm up.
 
 ## 5. Open items, in order (each is Marcus's to prioritise)
-1. **Objective #16.** It waits ONLY on (a), P0 vs P4 (§4).
+1. **Objective #16.** ~~It waits ONLY on (a), P0 vs P4 (§4).~~ **(a) RULED P4 (10-05)**: the ten pins are the nine
+   plus `npp_tsens=0`, leaving 33 free names (checked with the driver's own pin functions). Now it waits on where
+   to run it and on the two fold-in questions below.
    - (b) The label is KEPT.
    - (c) Timing: the `k_w` arm has landed, so it can go. Ideally in a fresh session, on Torch or the Mac (say the
      verdict out loud).

@@ -2,6 +2,49 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (d) — **Marcus's ruling: P4. `npp_tsens` is PINNED AT 0 in objective #16's refit** (verbatim: "p4", given after the P0-vs-P4 explanation of handoff §4). A term whose sign the record cannot fix is not fitted. The pin needs no new code, because `CCX_MS_PIN` carries it. **Separately, the 777877b suite never finished.** It died at ~07:27, most likely with the session that launched it, and was re-launched under `nohup`. Nothing else adopted.
+
+- **What #16 now is:**
+  - the stratification feedback, under the label `hilda_csl3v0kaidgbem` (KEPT, 10-05 a);
+  - the nine ruled pins plus `npp_tsens = 0`.
+  - That leaves **33 free names**: hilda34g's 34 less `npp_tsens`. Checked with the driver's own `ccx_apply_gate()` / `ccx_parse_pins()` / `ccx_apply_pins()`, no run. The label opens the same gate as hilda34g's and adds no fitted name.
+  - `k_w` stays free, unless `hs_asx_frac`'s judgement width is folded in (open, below).
+- **What the pin is:**
+  - At 0 the factor is exp(0 · GMST) = 1 exactly, which is the term's absent default (`CCX_NPP_TSENS_DEFAULT`). So the pinned model is the no-greening model, bit for bit.
+  - The prior N(0, 0.029) and its 09-30 sign-free ruling stay in `R/constants.R` for any arm that frees the name. Under #16 its prior term drops out, so #16 is compared with hilda34g on LIKELIHOOD.
+  - It is the first LAND-side pin. The nine are all ocean names: `ent_seas_amp_SH`, `w_eq`, `gamma_eq`, `pump_export`, `w_vent`, `gamma_vent`, `w_thc`, `gamma_enso_ocn_NH/SH`.
+  - Zero is the median of MAGICC6's ten C4MIP σ_NPP values in this functional form (`.NPP_TSENS_C4MIP`, `R/constants.R:73`). Their mean is −0.006.
+- **How the driver takes it (read, not changed):**
+  - `calibration/run_dispersed_multistart.R` applies the gate (`CCX_MS_STRUCT`) BEFORE the pins (`CCX_MS_PIN`), so a gated name can be pinned. The pinned value lives in the base.
+  - The 09-30 (p) dispersion override for `npp_tsens` is filtered to FITTED names. Under the pin it drops out, so the output directory loses its `_sdby_npp_tsens=0.0291` suffix by construction. The pin label gains `_npp_tsens=0.00`.
+  - ⚠ The port targets must be regenerated under the new pin set: the driver refuses targets measured under other pins.
+- **What it costs.** These come from the conditional slice at hilda34g (`outputs/diagnostics/obj16_preview_20261004.log` §G, with the 7 land names re-optimised). With every name free, the pin can only be cheaper on that objective.
+  - **Fit:** likelihood −0.26. Logpost −0.58, which is −0.26 − 0.36 (the compensating names' priors; `beta_max` goes 1.83 → 2.05) + 0.05 (`npp_tsens`'s own prior, which favours 0).
+  - **Futures:** SSP5-8.5 2300 goes up 13.5 ppm (1448.6 → 1462.2); vvH goes up 9.3. For scale, the stratification feedback itself adds +5.5 (unrefitted, 10-04 o).
+  - **The land's net climate effect, 2015–24** (TRENDY S2 − S1): +0.12 → −0.04 GtC/yr, against GCB's −0.8 ± 0.7 (z +1.31 → +1.09).
+  - P4 fixes the SIGN. Nothing in the current structure reaches −0.8: that is the decadal-soil-pool question, outside #16.
+- **New in the explanation.** Computed from the hilda34g mode, `data/forcing_gmst.rds`, and `mix_preview_20261004`'s 7.61 K at SSP5-8.5 2300:
+  - **P0's greening factor** is ×1.011 over 2015–24 but ×1.070 at 2300. The futures applied a term 6× the size the record saw.
+  - **The fertilisation it trades against** is Michaelis–Menten with `fert_k` 727 ppm. It is at 15.5 % of its asymptote at 410 ppm and 61.7 % at 1449 ppm. Its marginal slope at 2300 is 0.21 of today's.
+  - That is my reading of why the pin raises 2300 CO₂. No decomposition was run.
+  - **Identification:** the Hessian correlation of `npp_tsens` with `beta_max` is −0.55. The full Laplace sd is 0.0089, so zero is 0.99 sd from the mode.
+- **A correction to handoff §4** ("Against P0"):
+  - "The total looks less wrong than either part" overstated it. In GtC the total's error (0.76) is larger than the ocean's (0.16).
+  - The accurate direction is the memory file's: **the ocean's excess hides the land's SIGN.** With the ocean at GCB's −0.20, the P0 total would be −0.08.
+  - Under P4 the cancellation remains (land −0.04, ocean −0.36, total −0.40, against GCB's ≈ −1.0), but it no longer involves a sign error.
+- **The 777877b suite DID NOT FINISH.**
+  - By 07:31 its R process was gone. The log, `outputs/diagnostics/suite_20261005_777877b.log` (KEPT), stops at 07:27 inside `test-pump-seas.R` (file 88 of 112) with no summary line.
+  - It reached 0 failures and 0 errors before stopping.
+  - Most likely it was killed when the session that launched it as a background task ended: the handoff was committed at 07:24, and the next session started at 07:27.
+  - **Re-launched** at 08:15 in the same frozen worktree, under `nohup`: `~/ccx_frozen/20261005_suite_777877b_rerun_launch.sh`, with the PID and chain status beside it. Output → `outputs/diagnostics/suite_20261005_777877b_rerun.log`.
+  - `R/ src/ tests/ data/ data-raw/ app/` are identical between 777877b and HEAD, so the run covers HEAD's code. Result to follow in this entry.
+- **Next, for #16** (each is Marcus's call):
+  - where to run it, Torch or the Mac, with the verdict said out loud;
+  - whether to fold in `hs_asx_frac`'s judgement width, which decides `k_w`;
+  - H2 is not built, so it is deferred unless he says otherwise.
+  - Before launch: a frozen worktree at the launch commit, port targets regenerated there under the label and the ten pins, then the preflight.
+- **App:** nothing changes until #16 is adopted. After that, `app/R/params_meta.R`'s `npp_tsens` row ("Plant growth's response to warming") shows a pinned 0, and the greening wording is Marcus's to write.
+
 ## 2026-10-05 (c) — **H1 TESTED: the high-latitude box carries only ~18 % of CCX's ocean thermal effect.** The switch is `hs_sst_anom_frac` (DESIGN §3.4a T; `777877b`; Marcus: "Yes, test"). Holding the HS box at its climatology (frac 0, unrefitted) moves the thermal part only −0.453 → −0.371 GtC/yr, still 2.8× one GOBM's warming part, and the record pushes back (−18.2 likelihood). The excess lives in the low-latitude column, which leaves H2 (kz's strong vertical exchange). Nothing adopted.
 
 - **The switch** (both cores):

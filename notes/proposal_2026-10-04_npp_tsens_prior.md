@@ -1,5 +1,10 @@
 # PROPOSAL 2026-10-04 — revisiting the `npp_tsens` (greening) prior (objective #16 candidate) — FOR MARCUS'S RULING
 
+> ⛔ **RULED 2026-10-05 (Marcus): "p4".** `npp_tsens` is PINNED AT 0 in objective #16's refit, alongside the nine
+> ruled pins: 33 free names, compared with hilda34g on likelihood. The choice was made on handoff
+> `notes/handoff_2026-10-05_kw_landed_optA_h1.md` §4 and its explanation; CHANGELOG 2026-10-05 (d) carries both,
+> plus a correction to §4's "masks" wording. Everything below is the record of how the choice was reached.
+
 > **RULED 2026-10-04 (Marcus): "Preview P3 with q10 freed (Recommended)".** The preview
 > (`calibration/diag_p3_netclimate_preview.R`) is running; §5's choice between P3 and P4 waits on it. Checked first: the
 > interactive-CO₂ bias in the net-climate comparison is measured small (−0.023 GtC/yr; like-for-like +0.141, z +1.34;

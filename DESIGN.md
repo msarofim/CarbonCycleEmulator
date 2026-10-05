@@ -165,6 +165,11 @@ d M_atm[h]/dt =
     `soil_slow` only (a wood/soil split needs a cited ¹⁵N partition; both kept, Marcus 10-01).
   - **Greening** (`npp_tsens`): NPP × exp(`npp_tsens` · GMST), sign-free prior N(0, 0.029) /K
     (SD of MAGICC6's C4MIP σ_NPP, Meinshausen 2011 Table B4).
+    > ⛔ **PINNED AT 0 from objective #16 (P4; Marcus 2026-10-05, "p4").** The record cannot fix its sign: the
+    > profile is +0.0095 ± 0.0085 /K, and the sign set at hilda34g came from the land ENSO lag. Zero is the
+    > C4MIP median for this form. Pinned via `CCX_MS_PIN`, it is the term's absent default, bit for bit. The
+    > prior stays for any arm that frees it. Proposal: `notes/proposal_2026-10-04_npp_tsens_prior.md`;
+    > CHANGELOG 10-05 (d).
   - **Recovery from past disturbance: NOT built** (ruled): a 1750 deficit is contradicted by ice-core
     δ¹³C and regrowth is inside GCB's net E_LUC; `luc_scale` is the model's recovery-like freedom.
   - Both are 0 (OFF, bit-exact) by default and fitted only under a structure that opens the
