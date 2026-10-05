@@ -155,7 +155,10 @@ them runs.
   - `SCRATCH_obj16like_NOT_A_FIT` is hilda34g relabelled with #16's structure and pins. Its logpost and streams are hilda34g's.
   - The `DRYRUN_*` dirs come from a COPY of start 001.
   - Never copy either into the repo.
-- **This session's background waiters** look for the end line and are re-armed every ≤ 2 h. If the session dies, the run continues under `nohup`, and a fresh session lands it with §5.
+- **The end-of-run watch.** The background waiter hit the 2-h limit for background commands at 15:00 and was NOT restarted.
+  - It was replaced by a session-only scheduled check, cron job `3843b92c`, at `7 19-23,0-2 * * *`. On its first fire after the end line it lands the run with §5, then deletes itself.
+  - At 15:00 round 1 was done: 8/24, all converged. Six sit at −1187.452; ids 0 and 6 sit at −1187.636 / −1187.643, a possible second basin 0.19 below.
+  - If the session dies, the run continues under `nohup`, and a fresh session lands it with §5.
 - **Waiter globs:** match `start_[0-9][0-9][0-9].rds`, never `start_*.rds`, which also matches the checkpoints.
 - **`pgrep` for the work processes:** use the BRACKET form, `pgrep -f 'R.*--file=calibration/run_dispersed_multistar[t].R'`.
   - The plain pattern matches its own text inside any `bash -c` that quotes it, including the Claude Bash tool's wrapper. It counted 9 = 8 workers + itself on 10-05 (CHANGELOG 10-05 l; memory `pgrep_wait_loop_matches_itself`, corrected).
