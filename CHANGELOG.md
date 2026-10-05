@@ -2,6 +2,11 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (k) — Handoff: `notes/handoff_2026-10-05c_obj16_landing_ready.md` (Marcus: "Handoff now, then land tonight (Recommended)"). It supersedes 10-05b, which now points to it.
+- Its §5 is the landing as nine commands, each dry-run tested in (j). Its §6 is the one-start preview. Its §7 carries the open items, with two new ones: the unmerged git-stamp branch, and the post-landing housekeeping.
+- **At 12:56, 5 of 24 starts had finished, all CONVERGED at −1187.4518, agreeing to 5e-6.** They are the incumbent, the NEW BASIN (from −11908.92) and the three seeded starts: one basin so far.
+- This session keeps a waiter armed for the end line and lands the run tonight if it stays open.
+
 ## 2026-10-05 (j) — **THE LANDING CHAIN DRY-RUN PASSED, end to end, on #16's first finished start.** That start is id 1 (the incumbent seed): CONVERGED in time at logpost −1187.451842 after 2 cycles and 199.6 min. The handoff's "a NEW label with a READ name pinned: check every registry step" is DISCHARGED. Everything ran in the frozen worktree `~/ccx_frozen/20261005g_ocgobm` (at `f35ca59`, plus the read script `af7cb36`), never in the repo. It is ONE start of 24, so the numbers below preview the landing; they are not its read.
 
 - **Each step, on a scratch copy of the start file** (logs in the tree's `DRYRUN_logs/`):

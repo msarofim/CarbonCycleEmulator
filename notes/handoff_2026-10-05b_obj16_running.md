@@ -1,5 +1,8 @@
 # HANDOFF 2026-10-05b — P4 RULED; objective #16's refit is RUNNING on the Mac (launched 09:01); its LANDING is the next session's job
 
+> ⛔ **SUPERSEDED by `notes/handoff_2026-10-05c_obj16_landing_ready.md`.** Its §5 (the landing, dry-run tested) replaces §5
+> here, and its §7 replaces §6. §1–§4 and §7 here stay the record of the launch.
+
 **Supersedes** `notes/handoff_2026-10-05_kw_landed_optA_h1.md`. That note remains the record for everything before
 the P4 ruling, and its open items 2–7 carry over in §6 below. Written on Marcus's request ("yes, write the handoff").
 Self-contained.
