@@ -2,6 +2,26 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (m) — **The Mac SLEPT ~3 h during #16's refit, and the wall budget counted it. RULED: "Land as is, state it (Recommended)".** The run itself is unharmed (rc 0 on all 16 finished tasks).
+
+- **The sleep** (`pmset -g log`). The lid was closed on battery: "Entering Sleep state due to 'Clamshell Sleep'".
+  - Asleep 13:50:45 → 14:34:01 (43 min).
+  - Asleep 16:48:20 → 19:10:43 (2 h 22 min), with 45-s DarkWakes at 18:05 and 18:49. AC and a full wake came at 19:10.
+  - The launch's `caffeinate -i -s` could not hold it: `man caffeinate` says `-s` "is valid only when system is running on AC power", and `-i` blocks only IDLE sleep.
+- **The effect.** The multistart's 300-min WALL budget is WALL-CLOCK, so the sleep counted against every start alive across it.
+  - **Ids 012–015** started 12:35–13:04, and their deadlines fell inside the second sleep. At the 18:05 DarkWake each kept its best evaluated point and exited OUT OF TIME:
+    - 012 at −1187.643 (basin B's value, mid-polish);
+    - 014 at −1187.646 and 015 at −1187.559 (polish skipped);
+    - 013 at −2354.908 (a genuinely slow start: 1 restart in its budget).
+  - **Ids 016–019** keep only ~155 of their 300 min, and **020–023** ~236.
+- **The 12 converged starts** (ids 0–11) were all in time, in TWO basins (the `k_w` arm also had two, 0.224 apart):
+  - A at **−1187.452 × 7**: the incumbent 1, the NEW-BASIN start 2, and 3, 4, 5, 7, 10;
+  - B at **−1187.636 / −1187.643 × 5**: 0, 6, 8, 9, 11.
+  - No out-of-time point is above A.
+- **The ruling.** The landing proceeds as built. Its CHANGELOG entry and provenance note must state the sleep windows, the out-of-time ids, and the reduced survey power. Resuming those starts stays an option for later.
+- **The watch** was re-timed to cron `dc08080d` (`22 19-23,0-2 * * *`) so a ~23:10 end lands at 23:22, not 00:07. It carries the ruling.
+- **Memory:** `mac_sleep_eats_wall_budget` (new, with an `INDEX_infra` pointer). A sleep-proof budget (CPU time rather than wall time) would be a driver change; it needs a ruling and is not built.
+
 ## 2026-10-05 (l) — **My end-of-run waiter matched ITSELF (the pgrep self-match, again), and the standing remedy for it was wrong.** Caught before it mattered: the end-line check was unaffected, but the dead-job check was blind.
 
 - **What happened.** The waiter's dead-job check used `pgrep -f 'R.*--file=calibration/run_dispersed_multistart.R'`.

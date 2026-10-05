@@ -156,7 +156,10 @@ them runs.
   - The `DRYRUN_*` dirs come from a COPY of start 001.
   - Never copy either into the repo.
 - **The end-of-run watch.** The background waiter hit the 2-h limit for background commands at 15:00 and was NOT restarted.
-  - It was replaced by a session-only scheduled check, cron job `3843b92c`, at `7 19-23,0-2 * * *`. On its first fire after the end line it lands the run with §5, then deletes itself.
+  - It was replaced by a session-only scheduled check. Since 19:15 this is cron job `dc08080d`, at `22 19-23,0-2 * * *` (it replaced `3843b92c`). On its first fire after the end line it lands the run with §5, then deletes itself.
+  - ⚠ **THE MAC SLEPT 13:50–14:34 and 16:48–19:10** (lid closed on battery; CHANGELOG 10-05 m). The wall budget counted it: ids 012–015 ran OUT OF TIME, and 016–019 keep ~155 of their 300 min.
+    - RULED "Land as is, state it": the landing states the sleep, the out-of-time ids, and the reduced survey power.
+    - Keep the Mac on AC with the lid OPEN until the end (~23:10).
   - At 15:00 round 1 was done: 8/24, all converged. Six sit at −1187.452; ids 0 and 6 sit at −1187.636 / −1187.643, a possible second basin 0.19 below.
   - If the session dies, the run continues under `nohup`, and a fresh session lands it with §5.
 - **Waiter globs:** match `start_[0-9][0-9][0-9].rds`, never `start_*.rds`, which also matches the checkpoints.
