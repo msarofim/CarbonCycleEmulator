@@ -2,6 +2,34 @@
 
 Project log: what was done, what was tried and abandoned, and why.
 
+## 2026-10-05 (g) — **Housekeeping, on Marcus's OK; and objective #16 confirmed RUNNING at pickup.** He ruled "Landing prep only (Recommended)" for the wait, approved all four handoff §6.8 items, and ruled "Remove worktree, keep branch (Recommended)" and then "Archive both sessions (Recommended)" for the two `.claude/worktrees/`. Every target was checked before it was touched. Nothing in `R/`, `src/`, `tests/` or `data/` changed.
+
+- **#16 at pickup (09:15):**
+  - The 8 WORK processes exist, at ~84 % CPU each. The launcher is re-parented to launchd (ppid 1).
+  - The measured rates are 0.33–0.38 s/eval; the cold start is 1.22. That matches the preflight and the `k_w` arm.
+  - In the `k_w` arm the fastest converged starts took 125–170 min, so the first start files are expected ~11:30–12:00.
+- **`~/ccx_frozen/20261004f_kw1446`: REMOVED** (`git worktree remove --force`). Every uncommitted file in it was first matched byte-for-byte (`cmp` / `diff -rq`) against the repo:
+  - the outdir's 48 files;
+  - 24 task logs and the exit file;
+  - the wave log;
+  - the 26 preflight files;
+  - the regenerated `port_targets.csv`;
+  - the ignored `nuclear14c` input copy;
+  - the launch script and its `.out`, which are in the repo copy's `logs/`.
+  - The three `_launch.{sh,out,pid}` files beside the tree were left in place.
+- **The two suite worktrees (`~/ccx_frozen/20261005_suite_777877b`, `…_aa76fb5`): REMOVED.**
+  - All four suite logs are committed.
+  - Each tree's `data-raw/downloads/` held 74 per-file SYMLINKS into the repo's downloads. Those were unlinked first (`find -type l -delete`, which never follows a link), then the trees were removed.
+  - The repo's `data-raw/downloads/` was checked before and after: 536 entries, 5.6 GB, with identical names, sizes and mtimes.
+- **`origin/claude/pensive-burnell-a9bf40`: DELETED.** Its tip `653e477` was re-verified as an ancestor of `main`. No local branch of that name exists.
+- **The two `.claude/worktrees/`: their app sessions ARCHIVED.** The sessions are "Stamp commit in scorecard and constraint-map outputs" and "Harden git commit stamps in 69 other drivers".
+  - Both sessions were unarchived and owned the folders, so a bare `git worktree remove` would have left them pointing at nothing. That is why 10-04 (f)'s rule applied: archive, then remove.
+  - The app detached both checkouts and moved them into its reuse pool (2 folders, 163 MB), which it "reuses or reaps on its own". They are left to it.
+  - Both branches are kept: `claude/compassionate-leavitt-a7e631` at `4be643b` (merged), and `claude/youthful-blackburn-fbc009` at `6c87138`, local and origin.
+  - ⚠ **`youthful-blackburn` was NOT stale.** `git cherry main` shows its two commits have no equivalent in `main`. It is the UNMERGED `ccx_git_stamp()` refactor: one stamp for 71 drivers, with a test and a lint (CHANGELOG 10-01 h; handoff 10-01c §4 said "NOT merged").
+    - From 10-02 on, the handoffs drifted to "two stale git worktrees". The 10-05 handoff listed it for removal as an "old" worktree.
+    - `main` is now 94 commits past its merge base, and 94 drivers on `main` carry an inline `git rev-parse` stamp that its lint would flag. Merging it is a separate decision.
+
 ## 2026-10-05 (f) — **OBJECTIVE #16's REFIT IS RUNNING ON THE MAC** (Marcus: "Mac, today (Recommended)"; "Neither: launch as ruled (Recommended)"). It runs under the label `hilda_csl3v0kaidgbem` (the stratification feedback), with the canonical's 9 pins + `npp_tsens = 0` (P4): 33 free names, `k_w` among them. Launched 09:01 EDT from a frozen tree at `aa76fb5`. Expected ~23:00–00:30 (three rounds of ≤ 5 h; the `k_w` arm took 13.7 h at the same eval rate).
 
 - **The suite at `aa76fb5`** (frozen, under `nohup`; `outputs/diagnostics/suite_20261005_aa76fb5.log`): **6234 passed, 0 failed, 0 errors, 3 skipped (the standing three)**, rc 0, 17.5 min. That is the re-run's 6216 plus exactly test (11)'s 18.

@@ -196,6 +196,9 @@ file lands when its task finishes.
    - delete the remote branch `claude/pensive-burnell-a9bf40`;
    - remove the two old `.claude/worktrees/` (`compassionate-leavitt-a7e631`, `youthful-blackburn-fbc009`).
    - ⛔ **Never** delete `~/ccx_frozen/20261005f_obj16` before its outdir is in the repo, byte-identical.
+   - ✅ **DONE 2026-10-05 (g)**, all four on Marcus's OK, each target verified first (CHANGELOG 10-05 g).
+     ⚠ **`youthful-blackburn` was NOT stale.** Its branch holds the UNMERGED `ccx_git_stamp()` refactor
+     (CHANGELOG 10-01 h). Its session was ARCHIVED and the branch KEPT, local and origin at `6c87138`.
 
 ## 7. Non-obvious state
 - **The pin bookkeeping:**
